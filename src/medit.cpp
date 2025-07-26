@@ -178,10 +178,8 @@ void medit_save_to_disk(zone_vnum foo) {
 }
 
 void medit_setup_new(struct descriptor_data *d) {
-    struct char_data *mob = new char_data();
+    auto mob = new npc_proto_data();
     init_mobile(mob);
-
-    GET_MOB_RNUM(mob) = NOBODY;
     /*
      * Set up some default strings.
      */
@@ -189,9 +187,6 @@ void medit_setup_new(struct descriptor_data *d) {
     GET_SDESC(mob) = strdup("the unfinished mob");
     GET_LDESC(mob) = strdup("An unfinished mob stands here.\r\n");
     GET_DDESC(mob) = strdup("It looks unfinished.\r\n");
-    mob->race = Race::human;
-    SCRIPT(mob) = nullptr;
-    mob->proto_script.clear();
     OLC_SCRIPT(d).clear();
 
     OLC_MOB(d) = mob;
@@ -203,14 +198,11 @@ void medit_setup_new(struct descriptor_data *d) {
 /*-------------------------------------------------------------------*/
 
 void medit_setup_existing(struct descriptor_data *d, int rmob_num) {
-    struct char_data *mob;
-
     /*
      * Allocate a scratch mobile structure.
      */
-    mob = new char_data();
-
-    copy_mobile(mob, &mob_proto[rmob_num]);
+    auto mob = new npc_proto_data();
+    *mob = mob_proto.at(rmob_num);
 
     OLC_MOB(d) = mob;
     OLC_ITEM_TYPE(d) = MOB_TRIGGER;
@@ -229,7 +221,7 @@ void medit_setup_existing(struct descriptor_data *d, int rmob_num) {
  * Ideally, this function should be in db.c, but I'll put it here for
  * portability.
  */
-void init_mobile(struct char_data *mob) {
+void init_mobile(struct npc_proto_data *mob) {
     GET_NDD(mob) = 0;
 
     mob->setBaseStat("weight", rand_number(100, 200));
@@ -256,13 +248,7 @@ void medit_save_internally(struct descriptor_data *d) {
         return;
     }
 
-
-
     /* Update triggers */
-    /* Free old proto list  */
-    if (mob_proto[new_rnum].proto_script != OLC_SCRIPT(d))
-        free_proto_script(&mob_proto[new_rnum], MOB_TRIGGER);
-
     mob_proto[new_rnum].proto_script = OLC_SCRIPT(d);
 
     /* this takes care of the mobs currently in-game */
@@ -270,36 +256,9 @@ void medit_save_internally(struct descriptor_data *d) {
     for (auto mob : filter_raw(mobs)) {
         /* remove any old scripts */
         extract_script(mob, MOB_TRIGGER);
-
-        free_proto_script(mob, MOB_TRIGGER);
-        copy_proto_script(&mob_proto[new_rnum], mob, MOB_TRIGGER);
         assign_triggers(mob, MOB_TRIGGER);
     }
     /* end trigger update */
-
-    if (!i)    /* Only renumber on new mobiles. */
-        return;
-
-    /*
-     * Update keepers in shops being edited and other mobs being edited.
-     */
-    for (dsc = descriptor_list; dsc; dsc = dsc->next) {
-        if (STATE(dsc) == CON_SEDIT)
-            S_KEEPER(OLC_SHOP(dsc)) += (S_KEEPER(OLC_SHOP(dsc)) != NOTHING && S_KEEPER(OLC_SHOP(dsc)) >= new_rnum);
-        else if (STATE(dsc) == CON_MEDIT)
-            GET_MOB_RNUM(OLC_MOB(dsc)) += (GET_MOB_RNUM(OLC_MOB(dsc)) != NOTHING &&
-                                           GET_MOB_RNUM(OLC_MOB(dsc)) >= new_rnum);
-    }
-
-    /*
-     * Update other people in zedit too. From: C.Raehl 4/27/99
-     */
-    for (dsc = descriptor_list; dsc; dsc = dsc->next)
-        if (STATE(dsc) == CON_ZEDIT)
-            for (i = 0; OLC_ZONE(dsc)->cmd[i].command != 'S'; i++)
-                if (OLC_ZONE(dsc)->cmd[i].command == 'M')
-                    if (OLC_ZONE(dsc)->cmd[i].arg1 >= new_rnum)
-                        OLC_ZONE(dsc)->cmd[i].arg1++;
 }
 
 /**************************************************************************
@@ -445,7 +404,7 @@ void medit_disp_size(struct descriptor_data *d) {
  * Display main menu.
  */
 void medit_disp_menu(struct descriptor_data *d) {
-    struct char_data *mob;
+    struct npc_proto_data *mob;
     char flags[MAX_STRING_LENGTH], flag2[MAX_STRING_LENGTH];
 
     mob = OLC_MOB(d);
@@ -466,8 +425,8 @@ void medit_disp_menu(struct descriptor_data *d) {
                     OLC_NUM(d), genders[(int) GET_SEX(mob)], GET_ALIAS(mob),
                     GET_SDESC(mob), GET_LDESC(mob), GET_DDESC(mob), GET_LEVEL(mob),
                     GET_ALIGNMENT(mob), GET_FISHD(mob), GET_DAMAGE_MOD(mob),
-                    GET_NDD(mob), GET_SDD(mob), GET_HIT(mob), (mob->getCurKI()),
-                    (mob->getCurST()), GET_ARMOR(mob), GET_EXP(mob), GET_GOLD(mob)
+                    GET_NDD(mob), GET_SDD(mob), mob->getBaseStat<int64_t>("powerlevel"), mob->getBaseStat<int64_t>("ki"),
+                    mob->getBaseStat<int64_t>("stamina"), mob->getBaseStat<int>("powerlevel"), mob->getBaseStat<int>("experience"), GET_GOLD(mob)
     );
     sprintbitarray(mob->mob_flags.getAll(), action_bits, AF_ARRAY_MAX, flags);
     sprintbitarray(mob->affect_flags.getAll(), affected_bits, AF_ARRAY_MAX, flag2);
@@ -489,7 +448,7 @@ void medit_disp_menu(struct descriptor_data *d) {
                     npc_personality[GET_PERSONALITY(mob)],
                     flags, flag2, sensei::getName(mob->sensei).c_str(),
                     race::getName(mob->race).c_str(),
-                    !OLC_SCRIPT(d).empty() ? "Set." : "Not Set.", size_names[get_size(mob)]
+                    !OLC_SCRIPT(d).empty() ? "Set." : "Not Set.", size_names[static_cast<int>(mob->size)]
     );
 
     OLC_MODE(d) = MEDIT_MAIN_MENU;
@@ -836,7 +795,7 @@ void medit_parse(struct descriptor_data *d, char *arg) {
             break;
 
         case MEDIT_EXP:
-            OLC_MOB(d)->setExperience(LIMIT(i, 0, MAX_MOB_EXP));
+            OLC_MOB(d)->setBaseStat("experience", LIMIT(i, 0, MAX_MOB_EXP));
             OLC_MOB(d)->mob_flags.set(MOB_AUTOBALANCE, false);
             break;
 
@@ -887,7 +846,7 @@ void medit_parse(struct descriptor_data *d, char *arg) {
 
         case MEDIT_DELETE:
             if (*arg == 'y' || *arg == 'Y') {
-                if (delete_mobile(GET_MOB_RNUM(OLC_MOB(d))) != NOBODY)
+                if (delete_mobile(OLC_MOB(d)->vn) != NOBODY)
                     write_to_output(d, "Mobile deleted.\r\n");
                 else
                     write_to_output(d, "Couldn't delete the mobile!\r\n");
@@ -910,12 +869,12 @@ void medit_parse(struct descriptor_data *d, char *arg) {
             }
             OLC_MOB(d)->race = chosen_race;
             /*  Change racial size based on race choice. */
-            OLC_MOB(d)->setSize(race::getSize(OLC_MOB(d)->race));
+            OLC_MOB(d)->size = static_cast<Size>(race::getSize(OLC_MOB(d)->race));
         }
             break;
 
         case MEDIT_SIZE:
-            OLC_MOB(d)->setSize(LIMIT(i, -1, NUM_SIZES - 1));
+            OLC_MOB(d)->size = static_cast<Size>(LIMIT(i, -1, NUM_SIZES - 1));
             break;
 
 /*-------------------------------------------------------------------*/

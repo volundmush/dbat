@@ -128,6 +128,18 @@ static void convert_room(room_data& r) {
     }
 }
 
+static void convert_character(npc_proto_data *c) {
+    c->character_flags.set(CharacterFlag::is_npc, true);
+    c->character_flags.set(CharacterFlag::tail, race::hasTail(c->race));
+
+    if(c->mob_flags.get(31)) {
+        c->subrace = SubRace::android_model_absorb;
+    }
+    if(c->mob_flags.get(32)) {
+        c->subrace = SubRace::android_model_repair;
+    }
+}
+
 static void convert_character(char_data *c) {
     auto npc = c->mob_flags.get(static_cast<MobFlag>(3)) || c->character_flags.get(CharacterFlag::is_npc);
     if(npc) {
@@ -739,59 +751,6 @@ static int check_bitvector_names(bitvector_t bits, size_t namecount, const char 
     return (error);
 }
 
-static int check_object(struct obj_data *obj) {
-    char objname[MAX_INPUT_LENGTH + 32];
-    int error = false, y;
-
-    obj->zone = real_zone_by_thing(GET_OBJ_VNUM(obj));
-
-    if (GET_OBJ_WEIGHT(obj) < 0 && (error = true))
-        basic_mud_log("SYSERR: Object #%d (%s) has negative weight (%" I64T ").",
-            GET_OBJ_VNUM(obj), obj->short_description, GET_OBJ_WEIGHT(obj));
-
-    if (GET_OBJ_RENT(obj) < 0 && (error = true))
-        basic_mud_log("SYSERR: Object #%d (%s) has negative cost/day (%d).",
-            GET_OBJ_VNUM(obj), obj->short_description, GET_OBJ_RENT(obj));
-
-    snprintf(objname, sizeof(objname), "Object #%d (%s)", GET_OBJ_VNUM(obj), obj->short_description);
-
-    switch (GET_OBJ_TYPE(obj)) {
-        case ITEM_DRINKCON: {
-            char onealias[MAX_INPUT_LENGTH], *space = strrchr(obj->name, ' ');
-
-            strlcpy(onealias, space ? space + 1 : obj->name, sizeof(onealias));
-            if (search_block(onealias, drinknames, true) < 0 && (error = true)) {
-                //log("SYSERR: Object #%d (%s) doesn't have drink type as last alias. (%s)", GET_OBJ_VNUM(obj), obj->short_description, obj->name);
-            }
-        }
-            /* Fall through. */
-        case ITEM_FOUNTAIN:
-            if ((GET_OBJ_VAL(obj, VAL_FOUNTAIN_CAPACITY) > 0) && (GET_OBJ_VAL(obj, VAL_FOUNTAIN_HOWFULL) > GET_OBJ_VAL(obj, VAL_FOUNTAIN_CAPACITY) && (error = true)))
-                basic_mud_log("SYSERR: Object #%d (%s) contains (%d) more than maximum (%d).",
-                    GET_OBJ_VNUM(obj), obj->short_description,
-                    GET_OBJ_VAL(obj, VAL_FOUNTAIN_HOWFULL), GET_OBJ_VAL(obj, VAL_FOUNTAIN_CAPACITY));
-            break;
-        case ITEM_SCROLL:
-        case ITEM_POTION:
-            error |= check_object_level(obj, VAL_SCROLL_LEVEL);
-            error |= check_object_spell_number(obj, VAL_SCROLL_SPELL1);
-            error |= check_object_spell_number(obj, VAL_SCROLL_SPELL2);
-            error |= check_object_spell_number(obj, VAL_SCROLL_SPELL3);
-            break;
-        case ITEM_WAND:
-        case ITEM_STAFF:
-            error |= check_object_level(obj, VAL_SCROLL_LEVEL);
-            error |= check_object_spell_number(obj, VAL_STAFF_SPELL);
-            if (GET_OBJ_VAL(obj, VAL_WAND_CHARGES) > GET_OBJ_VAL(obj, VAL_WAND_MAXCHARGES) && (error = true))
-                basic_mud_log("SYSERR: Object #%d (%s) has more charges (%d) than maximum (%d).",
-                    GET_OBJ_VNUM(obj), obj->short_description,
-                    GET_OBJ_VAL(obj, VAL_WAND_CHARGES), GET_OBJ_VAL(obj, VAL_WAND_MAXCHARGES));
-            break;
-    }
-
-    return (error);
-}
-
 int load_inv_backup(struct char_data *ch) {
     if (GET_LEVEL(ch) < 2)
         return (-1);
@@ -1008,7 +967,6 @@ static void parse_room(FILE *fl, room_vnum virtual_nr) {
     z.rooms.insert(virtual_nr);
 
     r->zone = zone;
-    r->vn = virtual_nr;
     r->id = virtual_nr;
     r->name = fread_string(fl, buf2);
     r->look_description = fread_string(fl, buf2);
@@ -1104,11 +1062,11 @@ static void parse_room(FILE *fl, room_vnum virtual_nr) {
  * NOTE 2: Assumes sizeof(room_rnum) >= (sizeof(mob_rnum) and sizeof(obj_rnum))
  */
 
-static void mob_autobalance(struct char_data *ch) {
+static void mob_autobalance(struct npc_proto_data *ch) {
 
 }
 
-static int parse_simple_mob(FILE *mob_f, struct char_data *ch, mob_vnum nr) {
+static int parse_simple_mob(FILE *mob_f, struct npc_proto_data *ch, mob_vnum nr) {
     int j, t[10];
     char line[READ_SIZE];
 
@@ -1176,7 +1134,7 @@ static int parse_simple_mob(FILE *mob_f, struct char_data *ch, mob_vnum nr) {
     GET_DEFAULT_POS(ch) = t[1];
     ch->sex = static_cast<Sex>(t[2]);
 
-    set_height_and_weight_by_race(ch);
+    //set_height_and_weight_by_race(ch);
 
     if (MOB_FLAGGED(ch, MOB_AUTOBALANCE)) {
         mob_autobalance(ch);
@@ -1205,7 +1163,7 @@ static int parse_simple_mob(FILE *mob_f, struct char_data *ch, mob_vnum nr) {
 #define RANGE(low, high)    \
     (num_arg = MAX((low), MIN((high), (num_arg))))
 
-static void interpret_espec(const char *keyword, const char *value, struct char_data *ch, mob_vnum nr) {
+static void interpret_espec(const char *keyword, const char *value, struct npc_proto_data *ch, mob_vnum nr) {
     int num_arg = 0, matched = false;
     int num, num2, num3, num4, num5, num6;
     struct affected_type af;
@@ -1224,7 +1182,7 @@ static void interpret_espec(const char *keyword, const char *value, struct char_
 
     CASE("Size") {
         RANGE(SIZE_UNDEFINED, NUM_SIZES - 1);
-        ch->setSize(num_arg);
+        ch->size = static_cast<Size>(num_arg);
     }
 
     CASE("Str") {
@@ -1234,7 +1192,7 @@ static void interpret_espec(const char *keyword, const char *value, struct char_
 
     CASE("StrAdd") {
         basic_mud_log("mob #%d trying to set StrAdd, rebalance its strength.",
-            GET_MOB_VNUM(ch));
+            ch->vn);
     }
 
     CASE("Int") {
@@ -1277,34 +1235,6 @@ static void interpret_espec(const char *keyword, const char *value, struct char_
         //GET_MOVE(ch) = num_arg;
     }
 
-    CASE("Affect") {
-        num = num2 = num3 = num4 = num5 = num6 = 0;
-        sscanf(value, "%d %d %d %d %d %d", &num, &num2, &num3, &num4, &num5, &num6);
-        if (num > 0) {
-            af.type = num;
-            af.duration = num2;
-            af.modifier = num3;
-            af.location = num4;
-            af.bitvector = num5;
-            af.specific = num6;
-            affect_to_char(ch, &af);
-        }
-    }
-
-    CASE("AffectV") {
-        num = num2 = num3 = num4 = num5 = num6 = 0;
-        sscanf(value, "%d %d %d %d %d %d", &num, &num2, &num3, &num4, &num5, &num6);
-        if (num > 0) {
-            af.type = num;
-            af.duration = num2;
-            af.modifier = num3;
-            af.location = num4;
-            af.bitvector = num5;
-            af.specific = num6;
-            affectv_to_char(ch, &af);
-        }
-    }
-
     CASE("Feat") {
         sscanf(value, "%d %d", &num, &num2);
         //HAS_FEAT(ch, num) = num2;
@@ -1312,12 +1242,12 @@ static void interpret_espec(const char *keyword, const char *value, struct char_
 
     CASE("Skill") {
         sscanf(value, "%d %d", &num, &num2);
-        SET_SKILL(ch, num, num2);
+        //SET_SKILL(ch, num, num2);
     }
 
     CASE("SkillMod") {
         sscanf(value, "%d %d", &num, &num2);
-        SET_SKILL_BONUS(ch, num, num2);
+        //SET_SKILL_BONUS(ch, num, num2);
     }
 
     if (!matched) {
@@ -1330,7 +1260,7 @@ static void interpret_espec(const char *keyword, const char *value, struct char_
 #undef BOOL_CASE
 #undef RANGE
 
-static void parse_espec(char *buf, struct char_data *ch, mob_vnum nr) {
+static void parse_espec(char *buf, struct npc_proto_data *ch, mob_vnum nr) {
     char *ptr;
 
     if ((ptr = strchr(buf, ':')) != nullptr) {
@@ -1341,7 +1271,7 @@ static void parse_espec(char *buf, struct char_data *ch, mob_vnum nr) {
     interpret_espec(buf, ptr, ch, nr);
 }
 
-static void mob_stats(struct char_data *mob) {
+static void mob_stats(struct npc_proto_data *mob) {
     int start = GET_LEVEL(mob) * 0.5, finish = GET_LEVEL(mob);
 
     if (finish < 20)
@@ -1419,7 +1349,7 @@ static void mob_stats(struct char_data *mob) {
     }
 }
 
-static int parse_enhanced_mob(FILE *mob_f, struct char_data *ch, mob_vnum nr) {
+static int parse_enhanced_mob(FILE *mob_f, struct npc_proto_data *ch, mob_vnum nr) {
     char line[READ_SIZE];
 
     parse_simple_mob(mob_f, ch, nr);
@@ -1438,15 +1368,13 @@ static int parse_enhanced_mob(FILE *mob_f, struct char_data *ch, mob_vnum nr) {
     return 0;
 }
 
-static int parse_mobile_from_file(FILE *mob_f, struct char_data *ch) {
+static int parse_mobile_from_file(FILE *mob_f, struct npc_proto_data *ch, vnum nr) {
     int j, t[10], retval;
     char line[READ_SIZE], *tmpptr, letter;
     char f1[128], f2[128], f3[128], f4[128], f5[128], f6[128];
     char f7[128], f8[128], buf2[128];
-    mob_vnum nr = ch->vn;
     auto &z = zone_table[real_zone_by_thing(nr)];
     z.mobiles.insert(nr);
-    ch->zone = z.number;
 
     /*
    * Mobiles should NEVER use anything in the 'player_specials' structure.
@@ -1537,9 +1465,6 @@ static int parse_mobile_from_file(FILE *mob_f, struct char_data *ch) {
         ungetc(letter, mob_f);
     }
 
-    for (j = 0; j < NUM_WEARS; j++)
-        ch->equipment[j] = nullptr;
-
     /* Uncomment to force all mob files to be rewritten. Good for initial AUTOBALANCE setup.
    * if (bitsavetodisk) {
    *   add_to_save_list(zone_table[real_zone_by_thing(nr)].number, 0);
@@ -1558,154 +1483,152 @@ static void parse_mobile(FILE *mob_f, mob_vnum nr) {
 
     auto &m = mob_proto[nr];
 
-    m.vn = nr;
-    m.desc = nullptr;
-
-    if (parse_mobile_from_file(mob_f, &m)) {
+    if (parse_mobile_from_file(mob_f, &m, nr)) {
 
     } else { /* We used to exit in the file reading code, but now we do it here */
         exit(1);
     }
 }
-
-static void obj_values(obj_data* obj, int64_t old_value[]) {
+template<typename T>
+static void obj_values(T* obj, int64_t old_value[]) {
     // the basic shared values...
-    if(old_value[4]) obj->value[VAL_ALL_HEALTH] = old_value[4];
-    if(old_value[5]) obj->value[VAL_ALL_MAXHEALTH] = old_value[5];
-    if(old_value[7]) obj->value[VAL_ALL_MATERIAL] = old_value[7];
+    if(old_value[4]) obj->setBaseStat(VAL_ALL_HEALTH, old_value[4]);
+    if(old_value[5]) obj->setBaseStat(VAL_ALL_MAXHEALTH, old_value[5]);
+    if(old_value[7]) obj->setBaseStat(VAL_ALL_MATERIAL, old_value[7]);
 
     switch(static_cast<int>(obj->type_flag)) {
         case ITEM_LIGHT:
-            if(old_value[0]) obj->value[VAL_LIGHT_TIME] = old_value[0];
-            if(old_value[2]) obj->value[VAL_LIGHT_HOURS] = old_value[2];
+            if(old_value[0]) obj->setBaseStat(VAL_LIGHT_TIME, old_value[0]);
+            if(old_value[2]) obj->setBaseStat(VAL_LIGHT_HOURS, old_value[2]);
             break;
         case ITEM_SCROLL:
         case ITEM_WAND:
         case ITEM_POTION:
-            if(old_value[0]) obj->value[VAL_SCROLL_LEVEL] = old_value[0];
-            if(old_value[1]) obj->value[VAL_SCROLL_SPELL1] = old_value[1];
-            if(old_value[2]) obj->value[VAL_SCROLL_SPELL2] = old_value[2];
-            if(old_value[3]) obj->value[VAL_SCROLL_SPELL3] = old_value[3];
+            if(old_value[0]) obj->setBaseStat(VAL_SCROLL_LEVEL, old_value[0]);
+            if(old_value[1]) obj->setBaseStat(VAL_SCROLL_SPELL1, old_value[1]);
+            if(old_value[2]) obj->setBaseStat(VAL_SCROLL_SPELL2, old_value[2]);
+            if(old_value[3]) obj->setBaseStat(VAL_SCROLL_SPELL3, old_value[3]);
             break;
         case ITEM_STAFF:
-            if(old_value[0]) obj->value[VAL_STAFF_LEVEL] = old_value[0];
-            if(old_value[1]) obj->value[VAL_STAFF_MAXCHARGES] = old_value[1];
-            if(old_value[2]) obj->value[VAL_STAFF_CHARGES] = old_value[2];
-            if(old_value[3]) obj->value[VAL_STAFF_SPELL] = old_value[3];
+            if(old_value[0]) obj->setBaseStat(VAL_STAFF_LEVEL, old_value[0]);
+            if(old_value[1]) obj->setBaseStat(VAL_STAFF_MAXCHARGES, old_value[1]);
+            if(old_value[2]) obj->setBaseStat(VAL_STAFF_CHARGES, old_value[2]);
+            if(old_value[3]) obj->setBaseStat(VAL_STAFF_SPELL, old_value[3]);
             break;
         case ITEM_WEAPON:
-            if(old_value[0]) obj->value[VAL_WEAPON_SKILL] = old_value[0];
-            if(old_value[1]) obj->value[VAL_WEAPON_DAMDICE] = old_value[1];
-            if(old_value[2]) obj->value[VAL_WEAPON_DAMSIZE] = old_value[2];
-            if(old_value[3]) obj->value[VAL_WEAPON_DAMTYPE] = old_value[3];
-            if(old_value[6]) obj->value[VAL_WEAPON_CRITTYPE] = old_value[6];
-            if(old_value[8]) obj->value[VAL_WEAPON_CRITRANGE] = old_value[8];
-            if(old_value[9]) obj->value[VAL_WEAPON_LEVEL] = old_value[9];
+            if(old_value[0]) obj->setBaseStat(VAL_WEAPON_SKILL, old_value[0]);
+            if(old_value[1]) obj->setBaseStat(VAL_WEAPON_DAMDICE, old_value[1]);
+            if(old_value[2]) obj->setBaseStat(VAL_WEAPON_DAMSIZE, old_value[2]);
+            if(old_value[3]) obj->setBaseStat(VAL_WEAPON_DAMTYPE, old_value[3]);
+            if(old_value[6]) obj->setBaseStat(VAL_WEAPON_CRITTYPE, old_value[6]);
+            if(old_value[8]) obj->setBaseStat(VAL_WEAPON_CRITRANGE, old_value[8]);
+            if(old_value[9]) obj->setBaseStat(VAL_WEAPON_LEVEL, old_value[9]);
             break;
         case ITEM_ARMOR:
-            if(old_value[0]) obj->value[VAL_ARMOR_APPLYAC] = old_value[0];
-            if(old_value[1]) obj->value[VAL_ARMOR_SKILL] = old_value[1];
-            if(old_value[2]) obj->value[VAL_ARMOR_MAXDEXMOD] = old_value[2];
-            if(old_value[3]) obj->value[VAL_ARMOR_CHECK] = old_value[3];
-            if(old_value[6]) obj->value[VAL_ARMOR_SPELLFAIL] = old_value[6];
+            if(old_value[0]) obj->setBaseStat(VAL_ARMOR_APPLYAC, old_value[0]);
+            if(old_value[1]) obj->setBaseStat(VAL_ARMOR_SKILL, old_value[1]);
+            if(old_value[2]) obj->setBaseStat(VAL_ARMOR_MAXDEXMOD, old_value[2]);
+            if(old_value[3]) obj->setBaseStat(VAL_ARMOR_CHECK, old_value[3]);
+            if(old_value[6]) obj->setBaseStat(VAL_ARMOR_SPELLFAIL, old_value[6]);
+            break;
         case ITEM_WORN:
-            if(old_value[15]) obj->value[VAL_WORN_SCOUTER] = old_value[15];
+            if(old_value[15]) obj->setBaseStat(VAL_WORN_SCOUTER, old_value[15]);
             break;
         case ITEM_OTHER:
-            if(old_value[6]) obj->value[VAL_OTHER_SERAF] = old_value[6];
-            if(old_value[8]) obj->value[VAL_OTHER_SOILQUALITY] = old_value[8];
+            if(old_value[6]) obj->setBaseStat(VAL_OTHER_SERAF, old_value[6]);
+            if(old_value[8]) obj->setBaseStat(VAL_OTHER_SOILQUALITY, old_value[8]);
             break;
         case ITEM_TRAP:
-            if(old_value[0]) obj->value[VAL_TRAP_SPELL] = old_value[0];
-            if(old_value[1]) obj->value[VAL_TRAP_HITPOINTS] = old_value[1];
+            if(old_value[0]) obj->setBaseStat(VAL_TRAP_SPELL, old_value[0]);
+            if(old_value[1]) obj->setBaseStat(VAL_TRAP_HITPOINTS, old_value[1]);
             break;
         case ITEM_CONTAINER:
-            if(old_value[0]) obj->value[VAL_CONTAINER_CAPACITY] = old_value[0];
-            if(old_value[1]) obj->value[VAL_CONTAINER_FLAGS] = old_value[1];
-            if(old_value[2]) obj->value[VAL_CONTAINER_KEY] = old_value[2];
-            if(old_value[3]) obj->value[VAL_CONTAINER_CORPSE] = old_value[3];
-            if(old_value[8]) obj->value[VAL_CONTAINER_OWNER] = old_value[8];
+            if(old_value[0]) obj->setBaseStat(VAL_CONTAINER_CAPACITY, old_value[0]);
+            if(old_value[1]) obj->setBaseStat(VAL_CONTAINER_FLAGS, old_value[1]);
+            if(old_value[2]) obj->setBaseStat(VAL_CONTAINER_KEY, old_value[2]);
+            if(old_value[3]) obj->setBaseStat(VAL_CONTAINER_CORPSE, old_value[3]);
+            if(old_value[8]) obj->setBaseStat(VAL_CONTAINER_OWNER, old_value[8]);
             break;
         case ITEM_NOTE:
-            if(old_value[0]) obj->value[VAL_NOTE_LANGUAGE] = old_value[0];
+            if(old_value[0]) obj->setBaseStat(VAL_NOTE_LANGUAGE, old_value[0]);
             break;
         case ITEM_DRINKCON:
         case ITEM_FOUNTAIN:
-            if(old_value[0]) obj->value[VAL_DRINKCON_CAPACITY] = old_value[0];
-            if(old_value[1]) obj->value[VAL_DRINKCON_HOWFULL] = old_value[1];
-            if(old_value[2]) obj->value[VAL_DRINKCON_LIQUID] = old_value[2];
-            if(old_value[3]) obj->value[VAL_DRINKCON_POISON] = old_value[3];
+            if(old_value[0]) obj->setBaseStat(VAL_DRINKCON_CAPACITY, old_value[0]);
+            if(old_value[1]) obj->setBaseStat(VAL_DRINKCON_HOWFULL, old_value[1]);
+            if(old_value[2]) obj->setBaseStat(VAL_DRINKCON_LIQUID, old_value[2]);
+            if(old_value[3]) obj->setBaseStat(VAL_DRINKCON_POISON, old_value[3]);
             break;
         case ITEM_KEY:
-            if(old_value[2]) obj->value[VAL_KEY_KEYCODE] = old_value[2];
+            if(old_value[2]) obj->setBaseStat(VAL_KEY_KEYCODE, old_value[2]);
             break;
         case ITEM_FOOD:
-            if(old_value[0]) obj->value[VAL_FOOD_FOODVAL] = old_value[0];
-            if(old_value[1]) obj->value[VAL_FOOD_MAXFOODVAL] = old_value[1];
-            if(old_value[2]) obj->value[VAL_FOOD_PSBONUS] = old_value[2];
-            if(old_value[3]) obj->value[VAL_FOOD_POISON] = old_value[3];
-            if(old_value[6]) obj->value[VAL_FOOD_EXPBONUS] = old_value[6];
-            if(old_value[8]) obj->value[VAL_FOOD_CANDY_PL] = old_value[8];
-            if(old_value[9]) obj->value[VAL_FOOD_CANDY_KI] = old_value[9];
-            if(old_value[10]) obj->value[VAL_FOOD_CANDY_ST] = old_value[10];
-            if(old_value[11]) obj->value[VAL_FOOD_WHICHATTR] = old_value[11];
-            if(old_value[12]) obj->value[VAL_FOOD_ATTRCHANCE] = old_value[12];
+            if(old_value[0]) obj->setBaseStat(VAL_FOOD_FOODVAL, old_value[0]);
+            if(old_value[1]) obj->setBaseStat(VAL_FOOD_MAXFOODVAL, old_value[1]);
+            if(old_value[2]) obj->setBaseStat(VAL_FOOD_PSBONUS, old_value[2]);
+            if(old_value[3]) obj->setBaseStat(VAL_FOOD_POISON, old_value[3]);
+            if(old_value[6]) obj->setBaseStat(VAL_FOOD_EXPBONUS, old_value[6]);
+            if(old_value[8]) obj->setBaseStat(VAL_FOOD_CANDY_PL, old_value[8]);
+            if(old_value[9]) obj->setBaseStat(VAL_FOOD_CANDY_KI, old_value[9]);
+            if(old_value[10]) obj->setBaseStat(VAL_FOOD_CANDY_ST, old_value[10]);
+            if(old_value[11]) obj->setBaseStat(VAL_FOOD_WHICHATTR, old_value[11]);
+            if(old_value[12]) obj->setBaseStat(VAL_FOOD_ATTRCHANCE, old_value[12]);
             break;
         case ITEM_MONEY:
-            if(old_value[0]) obj->value[VAL_MONEY_SIZE] = old_value[0];
+            if(old_value[0]) obj->setBaseStat(VAL_MONEY_SIZE, old_value[0]);
             break;
         case ITEM_VEHICLE:
-            if(old_value[0]) obj->value[VAL_VEHICLE_DEST] = old_value[0];
-            if(old_value[1]) obj->value[VAL_VEHICLE_FLAGS] = old_value[1];
-            if(old_value[2]) obj->value[VAL_VEHICLE_FUEL] = old_value[2];
-            if(old_value[3]) obj->value[VAL_VEHICLE_FUELCOUNT] = old_value[3];
+            if(old_value[0]) obj->setBaseStat(VAL_VEHICLE_DEST, old_value[0]);
+            if(old_value[1]) obj->setBaseStat(VAL_VEHICLE_FLAGS, old_value[1]);
+            if(old_value[2]) obj->setBaseStat(VAL_VEHICLE_FUEL, old_value[2]);
+            if(old_value[3]) obj->setBaseStat(VAL_VEHICLE_FUELCOUNT, old_value[3]);
             break;
         case ITEM_HATCH:
-            if(old_value[0]) obj->value[VAL_HATCH_DEST] = old_value[0];
-            if(old_value[1]) obj->value[VAL_HATCH_FLAGS] = old_value[1];
-            if(old_value[2]) obj->value[VAL_HATCH_DCSKILL] = old_value[2];
-            if(old_value[3]) obj->value[VAL_HATCH_EXTROOM] = old_value[3];
-            if(old_value[6]) obj->value[VAL_HATCH_LOCATION] = old_value[6];
-            if(old_value[8]) obj->value[VAL_HATCH_DCLOCK] = old_value[8];
-            if(old_value[9]) obj->value[VAL_HATCH_DCHIDE] = old_value[9];
+            if(old_value[0]) obj->setBaseStat(VAL_HATCH_DEST, old_value[0]);
+            if(old_value[1]) obj->setBaseStat(VAL_HATCH_FLAGS, old_value[1]);
+            if(old_value[2]) obj->setBaseStat(VAL_HATCH_DCSKILL, old_value[2]);
+            if(old_value[3]) obj->setBaseStat(VAL_HATCH_EXTROOM, old_value[3]);
+            if(old_value[6]) obj->setBaseStat(VAL_HATCH_LOCATION, old_value[6]);
+            if(old_value[8]) obj->setBaseStat(VAL_HATCH_DCLOCK, old_value[8]);
+            if(old_value[9]) obj->setBaseStat(VAL_HATCH_DCHIDE, old_value[9]);
             break;
         case ITEM_WINDOW:
-            if(old_value[0]) obj->value[VAL_WINDOW_VIEWPORT] = old_value[0];
-            if(old_value[1]) obj->value[VAL_WINDOW_FLAGS] = old_value[1];
-            if(old_value[3]) obj->value[VAL_WINDOW_DEFAULT_ROOM] = old_value[3];
+            if(old_value[0]) obj->setBaseStat(VAL_WINDOW_VIEWPORT, old_value[0]);
+            if(old_value[1]) obj->setBaseStat(VAL_WINDOW_FLAGS, old_value[1]);
+            if(old_value[3]) obj->setBaseStat(VAL_WINDOW_DEFAULT_ROOM, old_value[3]);
             break;
         case ITEM_CONTROL:
-            if(old_value[0]) obj->value[VAL_CONTROL_VEHICLE_VNUM] = old_value[0];
-            if(old_value[1]) obj->value[VAL_CONTROL_SPEED] = old_value[1];
-            if(old_value[2]) obj->value[VAL_CONTROL_FUEL] = old_value[2];
-            if(old_value[3]) obj->value[VAL_CONTROL_FUELCOUNT] = old_value[3];
+            if(old_value[0]) obj->setBaseStat(VAL_CONTROL_VEHICLE_VNUM, old_value[0]);
+            if(old_value[1]) obj->setBaseStat(VAL_CONTROL_SPEED, old_value[1]);
+            if(old_value[2]) obj->setBaseStat(VAL_CONTROL_FUEL, old_value[2]);
+            if(old_value[3]) obj->setBaseStat(VAL_CONTROL_FUELCOUNT, old_value[3]);
             break;
         case ITEM_PORTAL:
-            if(old_value[0]) obj->value[VAL_PORTAL_DEST] = old_value[0];
-            if(old_value[1]) obj->value[VAL_PORTAL_FLAGS] = old_value[1];
-            if(old_value[2]) obj->value[VAL_PORTAL_DCMOVE] = old_value[2];
-            if(old_value[3]) obj->value[VAL_PORTAL_APPEAR] = old_value[3];
-            if(old_value[8]) obj->value[VAL_PORTAL_DCLOCK] = old_value[8];
-            if(old_value[9]) obj->value[VAL_PORTAL_DCHIDE] = old_value[9];
+            if(old_value[0]) obj->setBaseStat(VAL_PORTAL_DEST, old_value[0]);
+            if(old_value[1]) obj->setBaseStat(VAL_PORTAL_FLAGS, old_value[1]);
+            if(old_value[2]) obj->setBaseStat(VAL_PORTAL_DCMOVE, old_value[2]);
+            if(old_value[3]) obj->setBaseStat(VAL_PORTAL_APPEAR, old_value[3]);
+            if(old_value[8]) obj->setBaseStat(VAL_PORTAL_DCLOCK, old_value[8]);
+            if(old_value[9]) obj->setBaseStat(VAL_PORTAL_DCHIDE, old_value[9]);
             break;
         case ITEM_BOARD:
-            if(old_value[0]) obj->value[VAL_BOARD_READ] = old_value[0];
-            if(old_value[1]) obj->value[VAL_BOARD_WRITE] = old_value[1];
-            if(old_value[2]) obj->value[VAL_BOARD_ERASE] = old_value[2];
+            if(old_value[0]) obj->setBaseStat(VAL_BOARD_READ, old_value[0]);
+            if(old_value[1]) obj->setBaseStat(VAL_BOARD_WRITE, old_value[1]);
+            if(old_value[2]) obj->setBaseStat(VAL_BOARD_ERASE, old_value[2]);
             break;
         case ITEM_BED:
-            if(old_value[8]) obj->value[VAL_BED_LEVEL] = old_value[8];
-            if(old_value[9]) obj->value[VAL_BED_HTANK_CHARGE] = old_value[9];
+            if(old_value[8]) obj->setBaseStat(VAL_BED_LEVEL, old_value[8]);
+            if(old_value[9]) obj->setBaseStat(VAL_BED_HTANK_CHARGE, old_value[9]);
             break;
         case ITEM_PLANT:
-            if(old_value[0]) obj->value[VAL_PLANT_SOILQUALITY] = old_value[0];
-            if(old_value[1]) obj->value[VAL_PLANT_MATGOAL] = old_value[1];
-            if(old_value[2]) obj->value[VAL_PLANT_MATURITY] = old_value[2];
-            if(old_value[3]) obj->value[VAL_PLANT_MAXMATURE] = old_value[3];
-            if(old_value[6]) obj->value[VAL_PLANT_WATERLEVEL] = old_value[6];
+            if(old_value[0]) obj->setBaseStat(VAL_PLANT_SOILQUALITY, old_value[0]);
+            if(old_value[1]) obj->setBaseStat(VAL_PLANT_MATGOAL, old_value[1]);
+            if(old_value[2]) obj->setBaseStat(VAL_PLANT_MATURITY, old_value[2]);
+            if(old_value[3]) obj->setBaseStat(VAL_PLANT_MAXMATURE, old_value[3]);
+            if(old_value[6]) obj->setBaseStat(VAL_PLANT_WATERLEVEL, old_value[6]);
             break;
         case ITEM_FISHPOLE:
-            if(old_value[0]) obj->value[VAL_FISHPOLE_BAIT] = old_value[0];
+            if(old_value[0]) obj->setBaseStat(VAL_FISHPOLE_BAIT, old_value[0]);
             break;
     }
 
@@ -1834,20 +1757,20 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
             exit(1);
         }
     }
-    GET_OBJ_WEIGHT(&o) = t[0];
-    GET_OBJ_COST(&o) = t[1];
-    GET_OBJ_RENT(&o) = t[2];
-    GET_OBJ_LEVEL(&o) = t[3];
+    o.setBaseStat<weight_t>("weight", t[0]);
+    o.setBaseStat("cost", t[1]);
+    o.setBaseStat("cost_per_day", t[2]);
+    o.setBaseStat("level", t[3]);
 
     /* check to make sure that weight of containers exceeds curr. quantity */
     if (GET_OBJ_TYPE(&o) == ITEM_DRINKCON ||
         GET_OBJ_TYPE(&o) == ITEM_FOUNTAIN) {
         if (GET_OBJ_WEIGHT(&o) < GET_OBJ_VAL(&o, VAL_CONTAINER_FLAGS))
-            GET_OBJ_WEIGHT(&o) = GET_OBJ_VAL(&o, VAL_CONTAINER_FLAGS) + 5;
+            o.setBaseStat<weight_t>("weight", GET_OBJ_VAL(&o, VAL_CONTAINER_FLAGS) + 5);
     }
     /* *** make sure portal objects have their timer set correctly *** */
     if (GET_OBJ_TYPE(&o) == ITEM_PORTAL) {
-        GET_OBJ_TIMER(&o) = -1;
+        o.setBaseStat("timer", -1);
     }
 
     /* *** extra descriptions and affect fields *** */
@@ -1918,11 +1841,7 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
                         "...offending line: '%s'", buf2, retval, line);
                     exit(1);
                 }
-                if (!o.sbinfo) {
-                    CREATE(o.sbinfo, struct obj_spellbook_spell, SPELLBOOK_SIZE);
-                }
-                o.sbinfo[j].spellname = t[0];
-                o.sbinfo[j].pages = t[1];
+
                 j++;
                 break;
             case 'T':  /* DG triggers */
@@ -1945,11 +1864,7 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
             case '$':
             case '#':
                 /* Objects that set CHARM on players are bad. */
-                if (OBJAFF_FLAGGED(&o, AFF_CHARM)) {
-                    basic_mud_log("SYSERR: Object #%d has reserved bit AFF_CHARM set.", nr);
-                    o.affect_flags.set(AFF_CHARM, false);
-                }
-                check_object(&o);
+                o.affect_flags.set(AFF_CHARM, false);
                 return (line);
             default:
                 basic_mud_log("SYSERR: Format error in (%c): %s", *line, buf2);
@@ -2704,7 +2619,7 @@ static int load_char(const char *name, struct char_data *ch) {
                     break;
 
                 case 'N':
-                    if (!strcmp(tag, "Name")) GET_PC_NAME(ch) = strdup(line);
+                    if (!strcmp(tag, "Name")) ch->name = strdup(line);
                     break;
 
                 case 'O':
@@ -2913,7 +2828,6 @@ int House_load(room_vnum rvnum) {
             /* we have the number, check it, load obj. */
             if (nr == NOTHING) {   /* then it is unique */
                 temp = create_obj();
-                temp->vn = NOTHING;
             } else if (nr < 0) {
                 continue;
             } else {
@@ -2943,9 +2857,6 @@ int House_load(room_vnum rvnum) {
             ex[3] = asciiflag_conv(f4);
             for(auto i = 0; i < 128; i++) temp->item_flags.set(i, IS_SET_AR(ex, i));
 
-            GET_OBJ_POSTED(temp) = nullptr;
-            GET_OBJ_POSTTYPE(temp) = 0;
-
             get_line(fl, line);
             /* read line check for xap. */
             if (!strcmp("XAP", line)) {  /* then this is a Xap Obj, requires
@@ -2966,6 +2877,27 @@ int House_load(room_vnum rvnum) {
                     temp->look_description = nullptr;
                 }
 
+                if(temp->proto) {
+                    if(temp->proto->name && temp->name && !strcmp(temp->name, temp->proto->name)) {
+                        free(temp->name);
+                        temp->name = nullptr;
+                    }
+                    if(temp->proto->short_description && temp->short_description &&
+                       !strcmp(temp->short_description, temp->proto->short_description)) {
+                        free(temp->short_description);
+                        temp->short_description = nullptr;
+                    }
+                    if(temp->proto->room_description && temp->room_description &&
+                       !strcmp(temp->room_description, temp->proto->room_description)) {
+                        free(temp->room_description);
+                        temp->room_description = nullptr;
+                    }
+                    if(temp->proto->look_description && temp->look_description &&
+                       !strcmp(temp->look_description, temp->proto->look_description)) {
+                        free(temp->look_description);
+                        temp->look_description = nullptr;
+                    }
+                }
 
                 if (!get_line(fl, line) ||
                     (sscanf(line, "%ld %ld %ld %ld %ld %ld %ld %ld", t, t + 1, t + 2, t + 3, t + 4, t + 5, t + 6, t + 7) !=
@@ -2990,12 +2922,6 @@ int House_load(room_vnum rvnum) {
                 /*add_unique_id(temp);*/
                 /* we're clearing these for good luck */
 
-                for (j = 0; j < MAX_OBJ_AFFECT; j++) {
-                    temp->affected[j].location = APPLY_NONE;
-                    temp->affected[j].modifier = 0;
-                    temp->affected[j].specific = 0;
-                }
-
                 temp->ex_description = nullptr;
 
                 get_line(fl, line);
@@ -3003,11 +2929,8 @@ int House_load(room_vnum rvnum) {
                 for (k = j = zwei = 0; !zwei && !feof(fl);) {
                     switch (*line) {
                         case 'E':
-                            new_descr = new extra_descr_data();
-                            new_descr->keyword = fread_string(fl, buf2);
-                            new_descr->description = fread_string(fl, buf2);
-                            new_descr->next = temp->ex_description;
-                            temp->ex_description = new_descr;
+                            fread_string(fl, buf2);
+                            fread_string(fl, buf2);
                             get_line(fl, line);
                             break;
                         case 'A':
@@ -3042,11 +2965,6 @@ int House_load(room_vnum rvnum) {
                             get_line(fl, line);
                             sscanf(line, "%ld %ld", t, t + 1);
 
-                            if (!temp->sbinfo) {
-                                CREATE(temp->sbinfo, struct obj_spellbook_spell, SPELLBOOK_SIZE);
-                            }
-                            temp->sbinfo[j].spellname = t[0];
-                            temp->sbinfo[j].pages = t[1];
                             j++;
                             get_line(fl, line);
                             break;
@@ -3591,7 +3509,8 @@ static void migrate_aff(affect_t *aff) {
     }
 }
 
-static void migrate_char_data(char_data *c) {
+template<typename T>
+static void migrate_char_data(T* c) {
     // convert affected
     for(auto aff = c->affected; aff; aff = aff->next) {
         migrate_aff(aff);
@@ -3604,8 +3523,8 @@ static void migrate_char_data(char_data *c) {
 
     // convert affectedv
 }
-
-static void migrate_obj_data(obj_data *o) {
+template<typename T>
+static void migrate_obj_data(T* o) {
     // Convert obj_affects
 
     for(auto &aff : o->affected) {
@@ -3767,23 +3686,23 @@ static void migrate_obj_data(obj_data *o) {
             case 62:
                 break;
             case 63: // ITEM_BSCOUTER
-                o->value[VAL_WORN_SCOUTER] = 500000;
+                o->setBaseStat(VAL_WORN_SCOUTER, 500000);
                 break;
             case 64: // ITEM_MSCOUTER
-                o->value[VAL_WORN_SCOUTER] = 10000000;
+                o->setBaseStat(VAL_WORN_SCOUTER, 10000000);
                 break;
             case 65: // ITEM_ASCOUTER
-                o->value[VAL_WORN_SCOUTER] = 150000000;
+                o->setBaseStat(VAL_WORN_SCOUTER, 150000000);
                 break;
             case 66: // ITEM_USCOUTER
-                o->value[VAL_WORN_SCOUTER] = std::numeric_limits<int64_t>::max();
+                o->setBaseStat(VAL_WORN_SCOUTER, std::numeric_limits<int64_t>::max());
                 break;
             case 67: // ITEM_WEAPLVL1...
             case 68:
             case 69:
             case 70:
             case 71:
-                o->value[VAL_WEAPON_LEVEL] = i - 66;
+                o->setBaseStat(VAL_WEAPON_LEVEL, i - 66);
                 break;
             default:
                 resetFlag = false;
@@ -4008,7 +3927,7 @@ void migrate_data() {
     }
 
     for(auto &[id, ent] : mob_proto) {
-        migrate_char_data(&ent);
+        //migrate_char_data(&ent);
     }
 
     for(auto &[id, ent] : uniqueCharacters) {

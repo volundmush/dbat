@@ -99,7 +99,7 @@ struct board_info *create_new_board(obj_vnum board_vnum) {
     char buf[512];
     FILE *fl;
     struct board_info *temp = nullptr, *backup;
-    struct obj_data *obj = nullptr;
+    struct item_proto_data *obj = nullptr;
 
     /* object exists, but no board file (yet) */
 
@@ -129,7 +129,7 @@ struct board_info *create_new_board(obj_vnum board_vnum) {
         WRITE_LVL(temp) = CONFIG_LEVEL_CAP;
         REMOVE_LVL(temp) = CONFIG_LEVEL_CAP;
     } else {
-        obj = &(obj_proto[real_object(board_vnum)]);
+        obj = &(obj_proto.at(board_vnum));
         READ_LVL(temp) = GET_OBJ_VAL(obj, VAL_BOARD_READ);
         WRITE_LVL(temp) = GET_OBJ_VAL(obj, VAL_BOARD_WRITE);
         REMOVE_LVL(temp) = GET_OBJ_VAL(obj, VAL_BOARD_ERASE);
@@ -197,7 +197,7 @@ int save_board(struct board_info *ts) {
 struct board_info *load_board(obj_vnum board_vnum) {
     struct board_info *temp_board = nullptr;
     struct board_msg *bmsg = nullptr;
-    struct obj_data *obj = nullptr;
+    struct item_proto_data *obj = nullptr;
     struct stat st{};
     struct board_memory *memboard = nullptr, *list = nullptr;
     int t[10], mnum, poster = 0, timestamp = 0, msg_num = 0, retval = 0;
@@ -259,7 +259,7 @@ struct board_info *load_board(obj_vnum board_vnum) {
         BOARD_VERSION(temp_board) = t[4];
         basic_mud_log("Board vnum %d, Version %d", BOARD_VNUM(temp_board), BOARD_VERSION(temp_board));
     } else {
-        obj = &(obj_proto[real_object(board_vnum)]);
+        obj = &(obj_proto.at(board_vnum));
         /* double check one or two things */
         if (t[0] != GET_OBJ_VAL(obj, VAL_BOARD_READ) ||
             t[1] != GET_OBJ_VAL(obj, VAL_BOARD_WRITE) ||

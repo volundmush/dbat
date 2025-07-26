@@ -19,24 +19,26 @@
 static int copy_object_main(struct obj_data *to, struct obj_data *from, int free_object);
 
 
-obj_rnum add_object(struct obj_data *newobj, obj_vnum ovnum) {
+obj_rnum add_object(struct item_proto_data *newobj, obj_vnum ovnum) {
     int found = NOTHING;
-    zone_rnum rznum = real_zone_by_thing(ovnum);
-
+    
     /*
      * Write object to internal tables.
      */
-    if ((newobj->vn = real_object(ovnum)) != NOTHING) {
-        copy_object(&obj_proto[newobj->vn], newobj);
-        update_objects(&obj_proto[newobj->vn]);
-        return newobj->vn;
+    bool exists = obj_proto.contains(ovnum);
+    auto &obj = obj_proto[ovnum];
+    obj = *newobj;
+    if (exists) {
+        basic_mud_log("GenOLC: add_object: Updated existing object #%d (%s).", ovnum, obj.short_description);
+        update_objects(&obj);
+    } else {
+        basic_mud_log("GenOLC: add_object: Added object #%d (%s).", ovnum, obj.short_description);
+        zone_rnum rznum = real_zone_by_thing(ovnum);
+        auto &z = zone_table[rznum];
+        z.objects.insert(ovnum);
     }
 
-    found = insert_object(newobj, ovnum);
-
-    auto &z = zone_table[rznum];
-    z.objects.insert(ovnum);
-    return found;
+    return ovnum;
 }
 
 /* ------------------------------------------------------------------------------------------------------------------------------ */
@@ -48,7 +50,7 @@ obj_rnum add_object(struct obj_data *newobj, obj_vnum ovnum) {
  * if object is pointing to this prototype, then we need to replace it
  * with the new one.
  */
-int update_objects(struct obj_data *refobj) {
+int update_objects(struct item_proto_data *refobj) {
     int count = 0;
 
     auto objects = objectSubscriptions.all(fmt::format("vnum_{}", refobj->vn));
@@ -60,26 +62,6 @@ int update_objects(struct obj_data *refobj) {
     return count;
 }
 
-/* ------------------------------------------------------------------------------------------------------------------------------ */
-
-/* ------------------------------------------------------------------------------------------------------------------------------ */
-
-/*
- * Function handle the insertion of an object within the prototype framework.  Note that this does not adjust internal values
- * of other objects, use add_object() for that.
- */
-obj_rnum insert_object(struct obj_data *obj, obj_vnum ovnum) {
-
-    auto exists = obj_proto.count(ovnum);
-    auto &o = obj_proto[ovnum];
-    o = *obj;
-
-    /* Not found, place at 0. */
-    return false;
-}
-
-
-/* ------------------------------------------------------------------------------------------------------------------------------ */
 
 int save_objects(zone_rnum zone_num) {
     return true;
@@ -97,57 +79,17 @@ void free_object_strings(struct obj_data *obj) {
         free(obj->short_description);
     if (obj->look_description)
         free(obj->look_description);
-    if (obj->ex_description)
-        free_ex_descriptions(obj->ex_description);
 }
 
 /*
  * For object instances that are not the prototype.
  */
-void free_object_strings_proto(struct obj_data *obj) {
-    int robj_num = GET_OBJ_RNUM(obj);
-
-    if (obj->name && obj->name != obj_proto[robj_num].name)
-        free(obj->name);
-    if (obj->room_description && obj->room_description != obj_proto[robj_num].room_description)
-        free(obj->room_description);
-    if (obj->short_description && obj->short_description != obj_proto[robj_num].short_description)
-        free(obj->short_description);
-    if (obj->look_description && obj->look_description != obj_proto[robj_num].look_description)
-        free(obj->look_description);
-    if (obj->ex_description) {
-        struct extra_descr_data *thised, *plist, *next_one; /* O(horrible) */
-        int ok_key, ok_desc, ok_item;
-        for (thised = obj->ex_description; thised; thised = next_one) {
-            next_one = thised->next;
-            for (ok_item = ok_key = ok_desc = 1, plist = obj_proto[robj_num].ex_description; plist; plist = plist->next) {
-                if (plist->keyword == thised->keyword)
-                    ok_key = 0;
-                if (plist->description == thised->description)
-                    ok_desc = 0;
-                if (plist == thised)
-                    ok_item = 0;
-            }
-            if (thised->keyword && ok_key)
-                free(thised->keyword);
-            if (thised->description && ok_desc)
-                free(thised->description);
-            if (ok_item)
-                free(thised);
-        }
-    }
-}
 
 void copy_object_strings(struct obj_data *to, struct obj_data *from) {
     to->name = from->name ? strdup(from->name) : nullptr;
     to->room_description = from->room_description ? strdup(from->room_description) : nullptr;
     to->short_description = from->short_description ? strdup(from->short_description) : nullptr;
     to->look_description = from->look_description ? strdup(from->look_description) : nullptr;
-
-    if (from->ex_description)
-        copy_ex_descriptions(&to->ex_description, from->ex_description);
-    else
-        to->ex_description = nullptr;
 }
 
 int copy_object(struct obj_data *to, struct obj_data *from) {
@@ -168,18 +110,18 @@ static int copy_object_main(struct obj_data *to, struct obj_data *from, int free
 int delete_object(obj_rnum rnum) {
     obj_rnum i;
     zone_rnum zrnum;
-    struct obj_data *obj, *tmp;
+    struct obj_data *tmp;
     int shop, j, zone, cmd_no;
 
     if (!obj_proto.count(rnum))
         return NOTHING;
 
-    obj = &obj_proto[rnum];
+    auto obj = &obj_proto.at(rnum);
 
     zrnum = real_zone_by_thing(rnum);
 
     /* This is something you might want to read about in the logs. */
-    basic_mud_log("GenOLC: delete_object: Deleting object #%d (%s).", GET_OBJ_VNUM(obj), obj->short_description);
+    basic_mud_log("GenOLC: delete_object: Deleting object #%d (%s).", obj->vn, obj->short_description);
     auto allobj = objectSubscriptions.all(fmt::format("vnum_{}", obj->vn));
     for (auto tmp : filter_raw(allobj)) {
 
@@ -229,6 +171,7 @@ void obj_data::activate() {
     active = true;
     std::unordered_set<std::string> services;
 
+    auto vn = getVnum();
     if(obj_proto.contains(vn)) {
         services.insert(fmt::format("vnum_{}", vn));
     }
@@ -464,4 +407,56 @@ void obj_data::clearLocation() {
     else if(carried_by) obj_from_char(this);
     else if(worn_by) unequip_char(worn_by, worn_on);
     else if(room) obj_from_room(this);
+}
+
+vnum obj_data::getVnum() const {
+    return proto ? proto->vn : NOTHING;
+}
+
+
+
+char* obj_data::getName() {
+    if(name) return name;
+    if(proto && proto->name) return proto->name;
+    return nullptr;
+}
+
+char* obj_data::getRoomDescription() {
+    if(room_description) return room_description;
+    if(proto && proto->room_description) return proto->room_description;
+    return nullptr;
+}
+
+char* obj_data::getLookDescription() {
+    if(look_description) return look_description;
+    if(proto && proto->look_description) return proto->look_description;
+    return nullptr;
+}
+
+char* obj_data::getShortDescription() {
+    if(short_description) return short_description;
+    if(proto && proto->short_description) return proto->short_description;
+    return nullptr;
+}
+
+extra_descr_data* obj_data::getExtraDescription() {
+    if(proto && proto->ex_description) return proto->ex_description;
+    return nullptr;
+}
+
+obj_data::~obj_data() {
+    if(auctname) free(auctname);
+    if(sbinfo) free(sbinfo);
+}
+
+std::vector<trig_vnum> obj_data::getProtoScript() const {
+    return proto ? proto->proto_script : std::vector<trig_vnum>{};
+}
+
+std::string obj_data::scriptString() const {
+    std::vector<std::string> vnums;
+    auto proto_script = getProtoScript();
+    for(auto p : proto_script) vnums.emplace_back(std::move(std::to_string(p)));
+
+    return fmt::format("@D[@wT{}@D]@n", fmt::join(vnums, ","));
 }

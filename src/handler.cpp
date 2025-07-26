@@ -426,7 +426,7 @@ void char_to_room(struct char_data *ch, struct room_data* room) {
     int i;
 
     room->characters.push_front(ch->shared());
-    IN_ROOM(ch) = room->vn;
+    IN_ROOM(ch) = room->getVnum();
     ch->room = room;
 
     auto &z = zone_table[room->zone];
@@ -664,12 +664,12 @@ void obj_to_room(struct obj_data *object, struct room_data *room) {
             objectSubscriptions.subscribe("growingPlants", object);
         }
     }
-    if (room->vn == real_room(80)) {
+    if (room->getVnum() == real_room(80)) {
         auc_load(object);
     }
 
     room->objects.push_front(object->shared());
-    IN_ROOM(object) = room->vn;
+    IN_ROOM(object) = room->getVnum();
     object->room = room;
     object->carried_by = nullptr;
     object->holder = room;
@@ -865,12 +865,10 @@ void extract_obj(struct obj_data *obj) {
 
     obj->deactivate();
 
-    if (GET_OBJ_RNUM(obj) != NOTHING)
-        (obj_index[GET_OBJ_RNUM(obj)].vn)--;
+    auto id = obj->id;
 
-    extract_script(obj, OBJ_TRIGGER);
-
-    free_obj(obj);
+    units.erase(id);
+    uniqueObjects.erase(id);
 }
 
 
@@ -879,7 +877,7 @@ static void update_object(struct obj_data *obj, int use) {
         return;
     /* dont update objects with a timer trigger */
     if (!SCRIPT_CHECK(obj, OTRIG_TIMER) && (GET_OBJ_TIMER(obj) > 0))
-        GET_OBJ_TIMER(obj) -= use;
+        obj->modBaseStat("timer", -use);
     auto con = obj->getObjects();
     for(auto o : filter_raw(con)) {
         update_object(o, use);
@@ -1078,12 +1076,6 @@ void extract_char_final(struct char_data *ch) {
 
     char_from_room(ch);
 
-    if (IS_NPC(ch)) {
-        extract_script(ch, MOB_TRIGGER);
-        if (SCRIPT_MEM(ch))
-            extract_script_mem(SCRIPT_MEM(ch));
-    }
-
     /* If there's a descriptor, they're in the menu now. */
     if(ch->desc) {
         ch->desc->connected = CON_QUITGAME;
@@ -1091,7 +1083,9 @@ void extract_char_final(struct char_data *ch) {
 
     ch->deactivate();
     if (IS_NPC(ch)) {
-        free_char(ch);
+        auto id = ch->id;
+        units.erase(id);
+        uniqueCharacters.erase(id);
     }
 }
 
@@ -1523,8 +1517,7 @@ struct obj_data *create_money(int amount) {
     SET_OBJ_VAL(obj, VAL_ALL_HEALTH, 100);
     obj->wear_flags.set(ITEM_WEAR_TAKE, true);
     SET_OBJ_VAL(obj, VAL_MONEY_SIZE, amount);
-    GET_OBJ_COST(obj) = amount;
-    obj->vn = NOTHING;
+    obj->setBaseStat("cost", amount);
 
     return (obj);
 }

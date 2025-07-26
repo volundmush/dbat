@@ -127,9 +127,9 @@ ACMD(do_restring) {
     *theshort = '\0';
     *thelong = '\0';
 
-    sprintf(thename, "%s", obj->name);
-    sprintf(theshort, "%s", obj->short_description);
-    sprintf(thelong, "%s", obj->room_description);
+    sprintf(thename, "%s", obj->getName());
+    sprintf(theshort, "%s", obj->getShortDescription());
+    sprintf(thelong, "%s", obj->getRoomDescription());
 
     ch->desc->obj_name = strdup(thename);
     ch->desc->obj_was = strdup(theshort);
@@ -1629,24 +1629,24 @@ static void catch_fish(struct char_data *ch, int quality) {
         case 2:
         case 3:
             weight = rand_number(3, 4);
-            GET_OBJ_COST(fish) += GET_OBJ_COST(fish) * 0.20;
+            fish->modBaseStat("cost", fish->getBaseStat("cost") * 0.20);
             MOD_OBJ_VAL(fish, VAL_FOOD_FOODVAL, 1);
             break;
         case 4:
         case 5:
         case 6:
             weight = rand_number(5, 9);
-            GET_OBJ_COST(fish) += GET_OBJ_COST(fish) * 0.5;
+            fish->modBaseStat("cost", fish->getBaseStat("cost") * 0.5);
             MOD_OBJ_VAL(fish, VAL_FOOD_FOODVAL, 3);
             break;
         default:
             weight = rand_number(10, 15);
-            GET_OBJ_COST(fish) += GET_OBJ_COST(fish) * 2;
+            fish->modBaseStat("cost", fish->getBaseStat("cost") * 2);
             MOD_OBJ_VAL(fish, VAL_FOOD_FOODVAL, 5);
             break;
     }
 
-    GET_OBJ_WEIGHT(fish) += weight;
+    fish->modBaseStat<weight_t>("weight", weight);
 
     SET_OBJ_VAL(pole, VAL_FISHPOLE_BAIT, 0);
     obj_to_room(fish, IN_ROOM(ch));
@@ -2381,8 +2381,8 @@ ACMD(do_ashcloud) {
     ashcloud = read_object(1306, VIRTUAL);
     obj_to_room(ashcloud, IN_ROOM(ch));
     extract_obj(ash);
-    GET_OBJ_TIMER(ashcloud) = otimer;
-    GET_OBJ_COST(ashcloud) = ocost;
+    ashcloud->setBaseStat("timer", otimer);
+    ashcloud->setBaseStat("cost", ocost);
 
     switch(level) {
         case 3:
@@ -3676,7 +3676,7 @@ ACMD(do_silk) {
                     }
                     weaved->affected[0].location = 17;
                     weaved->affected[0].modifier = armor;
-                    GET_OBJ_COST(weaved) *= price;
+                    weaved->modBaseStat<int>("cost", GET_OBJ_COST(weaved) * (price - 1));
                     //SET_OBJ_VAL(weaved, VAL_WORN_UNUSED1, olevel);
                     weaved->level = olevel;
                     if (str > 0) {
@@ -3740,7 +3740,7 @@ ACMD(do_silk) {
                     }
                     weaved->affected[0].location = 17;
                     weaved->affected[0].modifier = armor;
-                    GET_OBJ_COST(weaved) *= price;
+                    weaved->modBaseStat<int>("cost", GET_OBJ_COST(weaved) * (price - 1));
                     //SET_OBJ_VAL(weaved, VAL_WORN_UNUSED1, olevel);
                     weaved->level = olevel;
                     if (str > 0) {
@@ -3804,7 +3804,7 @@ ACMD(do_silk) {
                     }
                     weaved->affected[0].location = 17;
                     weaved->affected[0].modifier = armor;
-                    GET_OBJ_COST(weaved) *= price;
+                    weaved->modBaseStat<int>("cost", GET_OBJ_COST(weaved) * (price - 1));
                     //SET_OBJ_VAL(weaved, VAL_WORN_UNUSED1, olevel);
                     weaved->level = olevel;
                     if (str > 0) {
@@ -4153,7 +4153,7 @@ void handle_rpp_store(struct char_data *ch, int choice) {
                 break;
             case 8: {
                 auto &o = obj_proto[1126];
-                if (!ch->canCarryWeight(o.weight)) {
+                if (!ch->canCarryWeight(o.getBaseStat("weight"))) {
                     send_to_char(ch, "You can not carry that much weight at this moment.\r\n");
                 } else if (IS_CARRYING_N(ch) + 1 > CAN_CARRY_N(ch)) {
                     send_to_char(ch, "You have too many items on you to carry anymore at this moment.\r\n");
@@ -5309,7 +5309,7 @@ ACMD(do_obstruct) {
         return;
     }
     struct obj_data *obj;
-    int newroom = dest->vn;
+    int newroom = dest->getVnum();
 
     if (ROOM_FLAGGED(newroom, ROOM_PEACEFUL)) {
         send_to_char(ch, "You can not block off a peaceful area.\r\n");
@@ -5360,10 +5360,10 @@ ACMD(do_obstruct) {
         strength = GET_MAX_HIT(ch) + (strength / 2);
     }
 
-    GET_OBJ_COST(obj2) = dir2;
-    GET_OBJ_WEIGHT(obj2) = strength;
-    GET_OBJ_COST(obj3) = dir;
-    GET_OBJ_WEIGHT(obj3) = strength;
+    obj2->setBaseStat<int>("cost", dir2);
+    obj2->setBaseStat<weight_t>("weight", strength);
+    obj3->setBaseStat<int>("cost", dir);
+    obj3->setBaseStat<weight_t>("weight", strength);
     GET_FELLOW_WALL(obj2) = obj3;
     GET_FELLOW_WALL(obj3) = obj2;
     act("@CYou concentrate and channel your ki. A wall of water starts to form in such a way to block off the direction of your choice. As the wall becomes complete it freezes solid by your will!@n",
@@ -5585,7 +5585,7 @@ ACMD(do_spoil) {
     *buf3 = '\0';
 
     body_part = create_obj();
-    body_part->vn = NOTHING;
+    body_part->getVnum();
     IN_ROOM(body_part) = NOWHERE;
 
     std::string part = obj->name;
@@ -5607,8 +5607,8 @@ ACMD(do_spoil) {
     body_part->item_flags.set(ITEM_UNIQUE_SAVE, true);
     SET_OBJ_VAL(body_part, VAL_ALL_HEALTH, 1);
     SET_OBJ_VAL(body_part, VAL_ALL_MAXHEALTH, 1);
-    GET_OBJ_WEIGHT(body_part) = rand_number(4, 10);
-    GET_OBJ_RENT(body_part) = 0;
+    body_part->setBaseStat<weight_t>("weight", rand_number(4, 10));
+    body_part->setBaseStat<int>("cost_per_day", 0);
     obj_to_room(body_part, IN_ROOM(ch));
     obj_from_room(body_part);
     obj_to_char(body_part, ch);

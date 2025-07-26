@@ -94,7 +94,7 @@ bool check_mob_in_room(mob_vnum mob, room_vnum room) {
     if(auto r = get_room(room); r) {
         auto p = r->getPeople();
         for(auto ch : filter_raw(p))
-            if(ch->vn == mob) return true;
+            if(ch->getVnum() == mob) return true;
     }
     return false;
 }
@@ -165,7 +165,7 @@ SPECIAL(gauntlet_room)  /* Jamdog - 13th Feb 2006 */
 
     /* give player credit for making it this far */
     for (i = 0; gauntlet_info[i][0] != -1; i++) {
-        if ((!IS_NPC(ch)) && (ch->getRoom()->vn == gauntlet_info[i][1])) {
+        if ((!IS_NPC(ch)) && (ch->getRoom()->getVnum() == gauntlet_info[i][1])) {
             /* Check not overwriting gauntlet rank with lower value (Jamdog - 20th July 2006) */
             if (GET_GAUNTLET(ch) < (gauntlet_info[i][0])) {
                 //set player's gauntlet rank
@@ -711,7 +711,7 @@ SPECIAL(healtank) {
                 send_to_char(ch, "A healing tank will have no effect on you.\r\n");
                 return (true);
             }
-            if (htank->dvalue["energy"] <= 0.0) {
+            if (htank->getBaseStat("energy") <= 0.0) {
                 send_to_char(ch, "That healing tank needs to recharge, wait a while.\r\n");
                 return (true);
             }
@@ -758,7 +758,7 @@ SPECIAL(healtank) {
         } // End of Exit argument
 
         else if (!strcasecmp("check", arg)) {
-            int en = std::floor(htank->dvalue["energy"]);
+            int en = std::floor(htank->getBaseStat("energy"));
             if (en < 200 && en > 0) {
                 send_to_char(ch, "The healing tank has %d bars of energy displayed on its meter.\r\n", en);
             } else if (en <= 0) {

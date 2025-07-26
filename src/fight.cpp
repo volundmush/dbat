@@ -691,7 +691,6 @@ void remove_limb(struct char_data *vict, int num) {
     char buf2[1000];
 
     body_part = create_obj();
-    body_part->vn = NOTHING;
     IN_ROOM(body_part) = NOWHERE;
     
     switch(num) {
@@ -756,8 +755,7 @@ void remove_limb(struct char_data *vict, int num) {
     for(const auto &v : {VAL_ALL_HEALTH, VAL_ALL_MAXHEALTH}) {
         SET_OBJ_VAL(body_part, v, 100);
     }
-    GET_OBJ_WEIGHT(body_part) = rand_number(4, 10);
-    GET_OBJ_RENT(body_part) = 0;
+    body_part->setBaseStat<weight_t>("weight", rand_number(4, 10));
     obj_to_room(body_part, IN_ROOM(vict));
 }
 
@@ -1436,11 +1434,8 @@ static void make_pcorpse(struct char_data *ch) {
     struct obj_data *money;
     int x, y;
 
-
     corpse = create_obj();
 
-    corpse->vn = NOTHING;
-    IN_ROOM(corpse) = NOWHERE;
     objectSubscriptions.subscribe("corpseRotService", corpse);
 
     /* This handles how the corpse is viewed - Iovan */
@@ -1464,9 +1459,9 @@ static void make_pcorpse(struct char_data *ch) {
     SET_OBJ_VAL(corpse, VAL_CONTAINER_CAPACITY, 0);      /* You can't store stuff in a corpse */
     SET_OBJ_VAL(corpse, VAL_CONTAINER_CORPSE, 1);        /* corpse identifier */
     SET_OBJ_VAL(corpse, VAL_CONTAINER_OWNER, ch->id);  /* corpse identifier */
-    GET_OBJ_WEIGHT(corpse) = ch->getBaseStat("weight_total");
-    GET_OBJ_RENT(corpse) = 100000;
-    GET_OBJ_TIMER(corpse) = CONFIG_MAX_PC_CORPSE_TIME;
+    corpse->setBaseStat<weight_t>("weight", ch->getBaseStat("weight_total"));
+    corpse->setBaseStat<int>("cost_per_day", 100000);
+    corpse->setBaseStat<int>("timer", CONFIG_MAX_PC_CORPSE_TIME);
 
 
 
@@ -1610,9 +1605,6 @@ static void make_corpse(struct char_data *ch, struct char_data *tch) {
     int i, x, y;
 
     corpse = create_obj();
-
-    corpse->vn = NOTHING;
-    IN_ROOM(corpse) = NOWHERE;
     objectSubscriptions.subscribe("corpseRotService", corpse);
 
     /* This handles how the corpse is viewed - Iovan */
@@ -1699,12 +1691,12 @@ static void make_corpse(struct char_data *ch, struct char_data *tch) {
     SET_OBJ_VAL(corpse, VAL_CONTAINER_CAPACITY, 0);    /* You can't store stuff in a corpse */
     SET_OBJ_VAL(corpse, VAL_CONTAINER_CORPSE, 1);    /* corpse identifier */
     SET_OBJ_VAL(corpse, VAL_CONTAINER_OWNER, -1);    /* corpse identifier */
-    GET_OBJ_WEIGHT(corpse) = ch->getBaseStat("weight_total");
-    GET_OBJ_RENT(corpse) = 100000;
+    corpse->setBaseStat<weight_t>("weight", ch->getBaseStat("weight_total"));
+    corpse->setBaseStat<int>("cost_per_day", 100000);
     if (IS_NPC(ch))
-        GET_OBJ_TIMER(corpse) = CONFIG_MAX_NPC_CORPSE_TIME;
+        corpse->setBaseStat<int>("timer", CONFIG_MAX_NPC_CORPSE_TIME);
     else
-        GET_OBJ_TIMER(corpse) = rand_number(CONFIG_MAX_PC_CORPSE_TIME / 2, CONFIG_MAX_PC_CORPSE_TIME);
+        corpse->setBaseStat<int>("timer", rand_number(CONFIG_MAX_PC_CORPSE_TIME / 2, CONFIG_MAX_PC_CORPSE_TIME));
 
     if (MOB_FLAGGED(ch, MOB_HUSK)) {
         auto con = ch->getObjects();

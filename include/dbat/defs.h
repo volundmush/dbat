@@ -2243,7 +2243,7 @@ constexpr const char* VAL_LIGHT_TIME = "time"; // 0
 constexpr const char* VAL_LIGHT_HOURS = "hours"; // 2
 
 // ITEM_SCROLL type (2)
-constexpr const char* VAL_SCROLL_LEVEL = "level"; // 0
+constexpr const char* VAL_SCROLL_LEVEL = "scroll_level"; // 0
 constexpr const char* VAL_SCROLL_SPELL1 = "spell1"; // 1
 constexpr const char* VAL_SCROLL_SPELL2 = "spell2"; // 2
 constexpr const char* VAL_SCROLL_SPELL3 = "spell3"; // 3
@@ -2267,7 +2267,7 @@ constexpr const char* VAL_WEAPON_DAMSIZE = "damage_size"; // 2
 constexpr const char* VAL_WEAPON_DAMTYPE = "damage_type"; // 3
 constexpr const char* VAL_WEAPON_CRITTYPE = "critical_type"; // 6
 constexpr const char* VAL_WEAPON_CRITRANGE = "critical_range"; // 8
-constexpr const char* VAL_WEAPON_LEVEL = "level"; // 9
+constexpr const char* VAL_WEAPON_LEVEL = VAL_SCROLL_LEVEL; // 9
 
 // ITEM_FIREWEAPON type (6)
 // no values
@@ -2280,7 +2280,7 @@ constexpr const char* VAL_WEAPON_LEVEL = "level"; // 9
 
 // ITEM_ARMOR type (9)
 constexpr const char* VAL_ARMOR_APPLYAC = "apply_ac"; // 0
-constexpr const char* VAL_ARMOR_SKILL = "skill"; // 1
+constexpr const char* VAL_ARMOR_SKILL = VAL_WEAPON_SKILL; // 1
 constexpr const char* VAL_ARMOR_MAXDEXMOD = "max_dex_mod"; // 2
 constexpr const char* VAL_ARMOR_CHECK = "check"; // 3
 constexpr const char* VAL_ARMOR_SPELLFAIL = "spell_fail"; // 6
@@ -2303,8 +2303,8 @@ constexpr const char* VAL_OTHER_SOILQUALITY = "soil_quality"; // 8
 // no values
 
 // ITEM_TRAP type (14)
-constexpr const char* VAL_TRAP_SPELL = "spell"; // 0
-constexpr const char* VAL_TRAP_HITPOINTS = "hit_points"; // 1 -- why not use health?
+constexpr const char* VAL_TRAP_SPELL = VAL_WAND_SPELL; // 0
+constexpr const char* VAL_TRAP_HITPOINTS = VAL_ALL_HEALTH; // 1 -- why not use health?
 
 
 // ITEM_CONTAINER type (15)
@@ -2325,7 +2325,7 @@ constexpr const char* VAL_CORPSE_LLEG = "left_leg"; // 12
 constexpr const char* VAL_NOTE_LANGUAGE = "language"; // 0
 
 // ITEM_DRINKCON type (17)
-constexpr const char* VAL_DRINKCON_CAPACITY = "capacity"; // 0
+constexpr const char* VAL_DRINKCON_CAPACITY = VAL_CONTAINER_CAPACITY; // 0
 constexpr const char* VAL_DRINKCON_HOWFULL = "how_full"; // 1
 constexpr const char* VAL_DRINKCON_LIQUID = "liquid"; // 2
 constexpr const char* VAL_DRINKCON_POISON = "poison"; // 3
@@ -2407,11 +2407,11 @@ constexpr const char* VAL_BOARD_WRITE = "write"; // 1
 constexpr const char* VAL_BOARD_ERASE = "erase"; // 2
 
  // ITEM_BED type (32)
- constexpr const char* VAL_BED_LEVEL = "level"; // 8
+ constexpr const char* VAL_BED_LEVEL = "comfort_level"; // 8
  constexpr const char* VAL_BED_HTANK_CHARGE = "htank_charge"; // 9
 
 // ITEM_PLANT type (34)
-constexpr const char* VAL_PLANT_SOILQUALITY = "soil_quality"; // 0
+constexpr const char* VAL_PLANT_SOILQUALITY = VAL_OTHER_SOILQUALITY; // 0
 constexpr const char* VAL_PLANT_MATGOAL = "mat_goal"; // 1
 constexpr const char* VAL_PLANT_MATURITY = "maturity"; // 2
 constexpr const char* VAL_PLANT_MAXMATURE = "max_mature"; // 3

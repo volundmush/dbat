@@ -25,8 +25,8 @@ extern obj_rnum insert_object(struct obj_data *obj, obj_vnum ovnum);
 
 extern obj_rnum index_object(struct obj_data *obj, obj_vnum ovnum, obj_rnum ornum);
 
-extern int update_objects(struct obj_data *refobj);
+extern int update_objects(struct item_proto_data* refobj);
 
-extern obj_rnum add_object(struct obj_data *, obj_vnum ovnum);
+extern obj_rnum add_object(struct item_proto_data*, obj_vnum ovnum);
 
 extern int delete_object(obj_rnum);

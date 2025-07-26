@@ -126,7 +126,7 @@ static void drive_outof_vehicle(struct char_data *ch, struct obj_data *vehicle) 
 
     sprintf(buf, "%s @wexits %s.\r\n", vehicle->short_description,
             vehicle_in_out->short_description);
-    send_to_room(room->vn, buf);
+    send_to_room(room->getVnum(), buf);
 
     obj_from_room(vehicle);
     obj_to_room(vehicle, IN_ROOM(vehicle_in_out));
@@ -146,7 +146,7 @@ static void drive_outof_vehicle(struct char_data *ch, struct obj_data *vehicle) 
         if(!dest) continue;
         if(!IS_SET(e->exit_info, EX_CLOSED)) continue;
 
-        send_to_room(dest->vn, "@wThe @De@Wn@wg@Di@wn@We@Ds@w of the ship @rr@Ro@ra@Rr@w as it moves.\r\n");
+        send_to_room(dest->getVnum(), "@wThe @De@Wn@wg@Di@wn@We@Ds@w of the ship @rr@Ro@ra@Rr@w as it moves.\r\n");
     }
     sprintf(buf, "%s @wflies out of %s.\r\n", vehicle->short_description,
             vehicle_in_out->short_description);
@@ -189,7 +189,7 @@ void drive_in_direction(struct char_data *ch, struct obj_data *vehicle, int dir)
     send_to_room(IN_ROOM(vehicle), buf);
 
     obj_from_room(vehicle);
-    obj_to_room(vehicle, dest->vn);
+    obj_to_room(vehicle, dest->getVnum());
     struct obj_data *controls;
     if ((controls = find_control(ch))) {
         if (GET_FUELCOUNT(controls) < 5) {
@@ -234,7 +234,7 @@ void drive_in_direction(struct char_data *ch, struct obj_data *vehicle, int dir)
         if(!dest) continue;
         if(!IS_SET(e->exit_info, EX_CLOSED)) continue;
 
-        send_to_room(dest->vn, "@wThe @De@Wn@wg@Di@wn@We@Ds@w of the ship @rr@Ro@ra@Rr@w as it moves.\r\n");
+        send_to_room(dest->getVnum(), "@wThe @De@Wn@wg@Di@wn@We@Ds@w of the ship @rr@Ro@ra@Rr@w as it moves.\r\n");
     }
     sprintf(buf, "%s @wflies in from the %s.\r\n",
             vehicle->short_description, dirs[rev_dir[dir]]);
@@ -572,7 +572,7 @@ static void handle_drive_land(struct char_data *ch, struct obj_data *vehicle, co
 
 static void handle_drive_launch(struct char_data *ch, struct obj_data *vehicle, struct obj_data *controls) {
     auto room = vehicle->getRoom();
-    auto planet = getPlanet(room->vn);
+    auto planet = getPlanet(room->getVnum());
     if (!planet) {
         send_to_char(ch, "@wYou are not on a planet.@n\r\n");
         return;

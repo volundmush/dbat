@@ -726,57 +726,23 @@ void from_json(const json& j, struct extra_descr_data& e) {
 
 // unit_data serialize/deserialize...
 void to_json(json& j, const unit_data& u) {
-    if(u.vn != NOTHING) j["vn"] = u.vn;
-    if(u.id != NOTHING) {
-        // an instance or room.
-        j["id"] = u.id;
-        j["generation"] = u.generation;
-    }
-    if(u.zone != NOTHING) j["zone"] = u.zone;
+    j["id"] = u.id;
+    j["generation"] = u.generation;
 
-    if(u.proto) {
-        if(u.name && u.name != u.proto->name) j["name"] = u.name;
-        if(u.room_description && u.room_description != u.proto->room_description) j["room_description"] = u.room_description;
-        if(u.look_description && u.look_description != u.proto->look_description) j["look_description"] = u.look_description;
-        if(u.short_description && u.short_description != u.proto->short_description) j["short_description"] = u.short_description;
-    } else {
-        if(u.name && strlen(u.name)) j["name"] = u.name;
-        if(u.room_description && strlen(u.room_description)) j["room_description"] = u.room_description;
-        if(u.look_description && strlen(u.look_description)) j["look_description"] = u.look_description;
-        if(u.short_description && strlen(u.short_description)) j["short_description"] = u.short_description;
-        for(auto ex = u.ex_description; ex; ex = ex->next) {
-            if(ex->keyword && strlen(ex->keyword) && ex->description && strlen(ex->description)) {
-                j["ex_description"].push_back(*ex);
-            }
+    if(u.name && strlen(u.name)) j["name"] = u.name;
+    if(u.room_description && strlen(u.room_description)) j["room_description"] = u.room_description;
+    if(u.look_description && strlen(u.look_description)) j["look_description"] = u.look_description;
+    if(u.short_description && strlen(u.short_description)) j["short_description"] = u.short_description;
+    for(auto ex = u.ex_description; ex; ex = ex->next) {
+        if(ex->keyword && strlen(ex->keyword) && ex->description && strlen(ex->description)) {
+            j["ex_description"].push_back(*ex);
         }
     }
 }
 
 void from_json(const json& j, unit_data& u) {
-    if(j.contains("vn")) u.vn = j["vn"];
     if(j.contains("id")) u.id = j["id"];
     if(j.contains("generation")) u.generation = j["generation"];
-    if(j.contains("zone")) u.zone = j["zone"];
-
-    if(u.vn != NOTHING && u.id != NOTHING)
-        switch(u.getType()) {
-            case 0:
-                break;
-            case 1:
-                u.proto = &(obj_proto.at(u.vn));
-                break;
-            case 2:
-                u.proto = &(mob_proto.at(u.vn));
-                break;
-        }
-
-    if(u.proto) {
-        u.name = u.proto->name;
-        u.room_description = u.proto->room_description;
-        u.look_description = u.proto->look_description;
-        u.short_description = u.proto->short_description;
-        u.ex_description = u.proto->ex_description;
-    }
 
     if(j.contains("name")) {
         u.name = strdup(j["name"].get<std::string>().c_str());
@@ -799,6 +765,52 @@ void from_json(const json& j, unit_data& u) {
             new_ex->next = u.ex_description;
             u.ex_description = new_ex;
         }
+    }
+}
+
+void to_json(json& j, const proto_data& u) {
+    j["vn"] = u.vn;
+    if(u.name && strlen(u.name)) j["name"] = u.name;
+    if(u.room_description && strlen(u.room_description)) j["room_description"] = u.room_description;
+    if(u.look_description && strlen(u.look_description)) j["look_description"] = u.look_description;
+    if(u.short_description && strlen(u.short_description)) j["short_description"] = u.short_description;
+    for(auto ex = u.ex_description; ex; ex = ex->next) {
+        if(ex->keyword && strlen(ex->keyword) && ex->description && strlen(ex->description)) {
+            j["ex_description"].push_back(*ex);
+        }
+    }
+    if(!u.proto_script.empty()) j["proto_script"] = u.proto_script;
+    if(!u.stats.empty()) j["stats"] = u.stats;
+    if(u.affect_flags) j["affect_flags"] = u.affect_flags;
+}
+
+void from_json(const json& j, proto_data& u) {
+    u.vn = j["vn"].get<int>();
+    if(j.contains("name")) u.name = strdup(j["name"].get<std::string>().c_str());
+    if(j.contains("room_description")) u.room_description = strdup(j["room_description"].get<std::string>().c_str());
+    if(j.contains("look_description")) u.look_description = strdup(j["look_description"].get<std::string>().c_str());
+    if(j.contains("short_description")) u.short_description = strdup(j["short_description"].get<std::string>().c_str());
+
+    if(j.contains("ex_description")) {
+        auto &e = j["ex_description"];
+        for(auto ex = e.rbegin(); ex != e.rend(); ex++) {
+            auto new_ex = new extra_descr_data();
+            ex->get_to(*new_ex);
+            new_ex->next = u.ex_description;
+            u.ex_description = new_ex;
+        }
+    }
+
+    if(j.contains("proto_script")) {
+        for(auto p : j["proto_script"]) {
+            u.proto_script.emplace_back(p.get<trig_vnum>());
+        }
+    }
+
+    if(j.contains("stats")) u.stats = j["stats"];
+
+    if(j.contains("affect_flags")) {
+        u.affect_flags = j["affect_flags"].get<FlagHandler<AffectFlag>>();
     }
 }
 
@@ -846,6 +858,7 @@ void from_json(const json& j, room_direction_data &e) {
 void to_json(json& j, const room_data& r) {
     // we need to call the to_json for unit_data...
     to_json(j, static_cast<const unit_data&>(r));
+    j["zone"] = r.zone;
     
     j["sector_type"] = r.sector_type;
 
@@ -859,6 +872,8 @@ void to_json(json& j, const room_data& r) {
 void from_json(const json& j, room_data& r) {
     // call the from_json of unit_data...
     from_json(j, static_cast<unit_data&>(r));
+
+    if(j.contains("zone")) r.zone = j["zone"];
 
     if(j.contains("sector_type")) r.sector_type = j["sector_type"];
 
@@ -939,30 +954,42 @@ static void dump_rooms(const std::filesystem::path &loc) {
 void to_json(json& j, const thing_data& t) {
     to_json(j, static_cast<const unit_data&>(t));
 
+    if(!t.stats.empty()) j["stats"] = t.stats;
     if(t.affect_flags) j["affect_flags"] = t.affect_flags;
 }
 
 void from_json(const json& j, thing_data& t) {
     from_json(j, static_cast<unit_data&>(t));
 
+    if(j.contains("stats")) t.stats = j["stats"];
     if(j.contains("affect_flags")) t.affect_flags = j["affect_flags"].get<FlagHandler<AffectFlag>>();
 }
 
 // obj_data serialize/deserialize...
 
+void to_json(json& j, const item_proto_data& o) {
+    to_json(j, static_cast<const proto_data&>(o));
+    to_json(j, static_cast<const picky_data&>(o));
+
+    j["type_flag"] = o.type_flag;
+    if(o.wear_flags) j["wear_flags"] = o.wear_flags;
+    if(o.item_flags) j["item_flags"] = o.item_flags;
+
+    for(auto & i : o.affected) {
+        if(i.location == APPLY_NONE) continue;
+        j["affected"].push_back(i);
+    }
+
+};
+
 void to_json(json& j, const obj_data& o) {
     to_json(j, static_cast<const picky_data&>(o));
     to_json(j, static_cast<const thing_data&>(o));
-
-    if(!o.value.empty()) j["value"] = o.value;
 
     j["type_flag"] = o.type_flag;
     if(o.level) j["level"] = o.level;
     if(o.wear_flags) j["wear_flags"] = o.wear_flags;
     if(o.item_flags) j["item_flags"] = o.item_flags;
-    
-    if(!o.only_race.empty()) j["onlyRace"] = o.only_race;
-    if(!o.not_race.empty()) j["antiRace"] = o.not_race;
 
     if(o.weight != 0.0) j["weight"] = o.weight;
     if(o.cost) j["cost"] = o.cost;
@@ -973,27 +1000,53 @@ void to_json(json& j, const obj_data& o) {
         j["affected"].push_back(i);
     }
 
-    if(o.id != NOTHING) {
-        // this is an instance.
-        if(o.global_vars) {
-            j["dgvariables"] = serializeVars(o.global_vars);
-        }
-    
-        if(get_room(o.room_loaded)) j["room_loaded"] = o.room_loaded;
+    if(o.global_vars) {
+        j["dgvariables"] = serializeVars(o.global_vars);
+    }
 
-    } else {
-        // this is a prototype.
-        for(auto p : o.proto_script) {
-            if(trig_index.contains(p)) j["proto_script"].push_back(p);
+    if(get_room(o.room_loaded)) j["room_loaded"] = o.room_loaded;
+}
+
+void from_json(const json& j, item_proto_data& o) {
+    from_json(j, static_cast<picky_data&>(o));
+    from_json(j, static_cast<proto_data&>(o));
+
+    if(j.contains("type_flag")) o.type_flag = j["type_flag"];
+    if(j.contains("wear_flags")) o.wear_flags = j["wear_flags"].get<FlagHandler<WearFlag>>();
+    if(j.contains("item_flags")) o.item_flags = j["item_flags"].get<FlagHandler<ItemFlag>>();
+
+    if(j.contains("affected")) {
+        int counter = 0;
+        for(auto & i : j["affected"]) {
+            i.get_to(o.affected[counter]);
+            counter++;
         }
     }
+
+    if ((GET_OBJ_TYPE(&o) == ITEM_PORTAL || \
+        GET_OBJ_TYPE(&o) == ITEM_HATCH) && \
+        (!GET_OBJ_VAL(&o, VAL_DOOR_DCLOCK) || \
+            !GET_OBJ_VAL(&o, VAL_DOOR_DCHIDE))) {
+                for(const auto v : {VAL_DOOR_DCLOCK, VAL_DOOR_DCHIDE}) {
+                    SET_OBJ_VAL(&o, v, 20);
+                }
+        }
+
+    /* check to make sure that weight of containers exceeds curr. quantity */
+        if (GET_OBJ_TYPE(&o) == ITEM_DRINKCON ||
+            GET_OBJ_TYPE(&o) == ITEM_FOUNTAIN) {
+            if (GET_OBJ_WEIGHT(&o) < GET_OBJ_VAL(&o, VAL_FOUNTAIN_HOWFULL))
+                o.setBaseStat<weight_t>("weight", GET_OBJ_VAL(&o, VAL_FOUNTAIN_HOWFULL) + 5);
+        }
+        /* *** make sure portal objects have their timer set correctly *** */
+        if (GET_OBJ_TYPE(&o) == ITEM_PORTAL) {
+            o.setBaseStat<int>("timer", -1);
+        }
 }
 
 void from_json(const json& j, obj_data& o) {
     from_json(j, static_cast<picky_data&>(o));
     from_json(j, static_cast<thing_data&>(o));
-
-    if(j.contains("value")) o.value = j["value"].get<std::unordered_map<std::string, int64_t>>();
 
     if(j.contains("type_flag")) o.type_flag = j["type_flag"];
     if(j.contains("level")) o.level = j["level"];
@@ -1014,48 +1067,25 @@ void from_json(const json& j, obj_data& o) {
         }
     }
 
-    if(o.id != NOTHING) {
-        // this is an instance.
-        if(j.contains("generation")) o.generation = j["generation"];
+    // this is an instance.
+    if(j.contains("generation")) o.generation = j["generation"];
 
-        if(j.contains("dgvariables")) {
-            deserializeVars(&o.global_vars, j["dgvariables"]);
-        }
+    if(j.contains("dgvariables")) {
+        deserializeVars(&o.global_vars, j["dgvariables"]);
+    }
 
-        if(j.contains("room_loaded")) o.room_loaded = j["room_loaded"];
+    if(j.contains("room_loaded")) o.room_loaded = j["room_loaded"];
 
-        auto proto = obj_proto.find(o.vn);
-        if(proto != obj_proto.end()) {
-            o.proto_script = proto->second.proto_script;
-        }
-    } else {
-        // this is a prototype.
-        if(j.contains("proto_script")) {
-            for(auto p : j["proto_script"]) o.proto_script.emplace_back(p.get<trig_vnum>());
-        }
-
-            if ((GET_OBJ_TYPE(&o) == ITEM_PORTAL || \
-        GET_OBJ_TYPE(&o) == ITEM_HATCH) && \
-        (!GET_OBJ_VAL(&o, VAL_DOOR_DCLOCK) || \
-            !GET_OBJ_VAL(&o, VAL_DOOR_DCHIDE))) {
-                for(const auto v : {VAL_DOOR_DCLOCK, VAL_DOOR_DCHIDE}) {
-                    SET_OBJ_VAL(&o, v, 20);
-                }
-        }
-
-        o.size = Size::medium;
-
-    /* check to make sure that weight of containers exceeds curr. quantity */
-        if (GET_OBJ_TYPE(&o) == ITEM_DRINKCON ||
-            GET_OBJ_TYPE(&o) == ITEM_FOUNTAIN) {
-            if (GET_OBJ_WEIGHT(&o) < GET_OBJ_VAL(&o, VAL_FOUNTAIN_HOWFULL))
-                GET_OBJ_WEIGHT(&o) = GET_OBJ_VAL(&o, VAL_FOUNTAIN_HOWFULL) + 5;
-        }
-        /* *** make sure portal objects have their timer set correctly *** */
-        if (GET_OBJ_TYPE(&o) == ITEM_PORTAL) {
-            GET_OBJ_TIMER(&o) = -1;
+    if(j.contains("proto")) {
+        auto protoID = j["proto"].get<int64_t>();
+        auto protoFind = obj_proto.find(protoID);
+        if(protoFind != obj_proto.end()) {
+            o.proto = &protoFind->second;
+        } else {
+            basic_mud_log("Warning: Object %s (%ld) has a proto that does not exist: %ld", o.getName() ? o.getName() : "Unknown", o.id, protoID);
         }
     }
+
 }
 
 void load_item_prototypes(const std::filesystem::path& loc) {
@@ -1063,10 +1093,9 @@ void load_item_prototypes(const std::filesystem::path& loc) {
         auto id = j["vn"].get<int64_t>();
         auto p = obj_proto.emplace(id, j);
         auto zone = real_zone_by_thing(id);
-        p.first->second.zone = zone;
         auto &i = obj_index[id];
         i.vn = id;
-
+        
         auto &z = zone_table[zone];
         z.objects.insert(id);
     }
@@ -1183,11 +1212,40 @@ void from_json(const json& j, affected_type& a) {
     if(j.contains("bitvector")) a.bitvector = j["bitvector"];
 }
 
+void to_json(json& j, const npc_proto_data& c) {
+    to_json(j, static_cast<const proto_data&>(c));
+    j["sex"] = c.sex;
+    if(c.character_flags) j["character_flags"] = c.character_flags;
+    if(c.mob_flags) j["mob_flags"] = c.mob_flags;
+    j["race"] = c.race;
+    j["sensei"] = c.sensei;
+    json ms;
+    to_json(ms, c.mob_specials);
+    if(!ms.empty()) j["mob_specials"] = ms;
+}
+
+void from_json(const json& j, npc_proto_data& c) {
+    from_json(j, static_cast<proto_data&>(c));
+    if(j.contains("sex")) c.sex = j["sex"];
+    if(j.contains("character_flags")) c.character_flags = j["character_flags"];
+    if(j.contains("mob_flags")) c.mob_flags = j["mob_flags"];
+    if(j.contains("race")) c.race = j["race"];
+    if(j.contains("sensei")) c.sensei = j["sensei"];
+    if(j.contains("mob_specials")) from_json(j["mob_specials"], c.mob_specials);
+
+    if(j.contains("proto_script")) c.proto_script = j["proto_script"].get<std::vector<trig_vnum>>();
+
+    if (c.race != Race::human)
+        c.affect_flags.set(AFF_INFRAVISION, true);
+
+    c.mob_flags.set(MOB_NOTDEADYET, false);
+
+}
+
 void to_json(json& j, const char_data& c) {
     to_json(j, static_cast<const thing_data&>(c));
 
     j["sex"] = c.sex;
-    j["stats"] = c.stats;
     if(!c.appearances.empty()) j["appearances"] = c.appearances;
 
     if(c.character_flags) j["character_flags"] = c.character_flags;
@@ -1205,87 +1263,77 @@ void to_json(json& j, const char_data& c) {
     j["race"] = c.race;
     j["sensei"] = c.sensei;
 
-    if(c.id != NOTHING) {
-        // this is an instance...
-        if(c.admin_flags) j["admin_flags"] = c.admin_flags;
+    if(c.admin_flags) j["admin_flags"] = c.admin_flags;
 
-        json td;
-        to_json(td, c.time);
-        if(!td.empty()) j["time"] = td;
+    if(c.proto) j["proto"] = c.proto->vn;
 
-        for(auto i = 0; i < 4; i++) {
-            if(c.limb_condition[i]) {
-                j["limb_condition"].push_back(std::make_pair(i, c.limb_condition[i]));
-            }
+    json td;
+    to_json(td, c.time);
+    if(!td.empty()) j["time"] = td;
+
+    for(auto i = 0; i < 4; i++) {
+        if(c.limb_condition[i]) {
+            j["limb_condition"].push_back(std::make_pair(i, c.limb_condition[i]));
         }
-
-        if(!c.damages.empty()) j["damages"] = c.damages;
-
-        for(auto i = 0; i < NUM_CONDITIONS; i++) {
-            if(c.conditions[i]) j["conditions"].push_back(std::make_pair(i, c.conditions[i]));
-        }
-
-        for(auto i = 0; i < c.gravAcclim.size() ; i++) {
-            if(c.gravAcclim[i]) j["gravAcclim"].push_back(std::make_pair(i, c.gravAcclim[i]));
-        }
-
-        auto ch = (char_data*)&c;
-        
-        std::erase_if(ch->skill, [](const auto &s) { return s.second.level == 0 && s.second.perfs == 0; });
-        if(!c.skill.empty()) j["skill"] = c.skill;
-
-        for(auto a = c.affected; a; a = a->next) {
-            if(a->type) {
-                j["affected"].push_back(*a);
-            }
-        }
-
-        for(auto a = c.affectedv; a; a = a->next) {
-            if(a->type) j["affectedv"].push_back(*a);
-        }
-
-        for(auto i = 0; i < 5; i++) {
-            if(c.lboard[i]) j["lboard"].push_back(std::make_pair(i, c.lboard[i]));
-        }
-
-        if(c.clan && strlen(c.clan)) j["clan"] = c.clan;
-        if(c.mutations) j["mutations"] = c.mutations;
-        if(c.bio_genomes) j["bio_genomes"] = c.bio_genomes;
-
-        if(c.mimic) j["mimic"] = c.mimic.value();
-        j["form"] = c.form;
-
-        if(c.rdisplay) j["rdisplay"] = c.rdisplay;
-        if(c.feature) j["feature"] = c.feature;
-
-        if(c.voice && strlen(c.voice)) j["voice"] = c.voice;
-
-        if(c.global_vars) {
-            j["dgvariables"] = serializeVars(c.global_vars);
-        }
-
-        if (c.poofin && strlen(c.poofin)) j["poofin"] = c.poofin;
-        if (c.poofout && strlen(c.poofout)) j["poofout"] = c.poofout;
-
-        if(!c.transforms.empty()) j["transforms"] = c.transforms;
-
-        if(!c.permForms.empty()) j["permForms"] = c.permForms;
-
-    } else {
-        // this is a prototype...
-        json ms;
-        to_json(ms, c.mob_specials);
-        if(!ms.empty()) j["mob_specials"] = ms;
-
-        if(!c.proto_script.empty()) j["proto_script"] = c.proto_script;
     }
+
+    if(!c.damages.empty()) j["damages"] = c.damages;
+
+    for(auto i = 0; i < NUM_CONDITIONS; i++) {
+        if(c.conditions[i]) j["conditions"].push_back(std::make_pair(i, c.conditions[i]));
+    }
+
+    for(auto i = 0; i < c.gravAcclim.size() ; i++) {
+        if(c.gravAcclim[i]) j["gravAcclim"].push_back(std::make_pair(i, c.gravAcclim[i]));
+    }
+
+    auto ch = (char_data*)&c;
+    
+    std::erase_if(ch->skill, [](const auto &s) { return s.second.level == 0 && s.second.perfs == 0; });
+    if(!c.skill.empty()) j["skill"] = c.skill;
+
+    for(auto a = c.affected; a; a = a->next) {
+        if(a->type) {
+            j["affected"].push_back(*a);
+        }
+    }
+
+    for(auto a = c.affectedv; a; a = a->next) {
+        if(a->type) j["affectedv"].push_back(*a);
+    }
+
+    for(auto i = 0; i < 5; i++) {
+        if(c.lboard[i]) j["lboard"].push_back(std::make_pair(i, c.lboard[i]));
+    }
+
+    if(c.clan && strlen(c.clan)) j["clan"] = c.clan;
+    if(c.mutations) j["mutations"] = c.mutations;
+    if(c.bio_genomes) j["bio_genomes"] = c.bio_genomes;
+
+    if(c.mimic) j["mimic"] = c.mimic.value();
+    j["form"] = c.form;
+
+    if(c.rdisplay) j["rdisplay"] = c.rdisplay;
+    if(c.feature) j["feature"] = c.feature;
+
+    if(c.voice && strlen(c.voice)) j["voice"] = c.voice;
+
+    if(c.global_vars) {
+        j["dgvariables"] = serializeVars(c.global_vars);
+    }
+
+    if (c.poofin && strlen(c.poofin)) j["poofin"] = c.poofin;
+    if (c.poofout && strlen(c.poofout)) j["poofout"] = c.poofout;
+
+    if(!c.transforms.empty()) j["transforms"] = c.transforms;
+
+    if(!c.permForms.empty()) j["permForms"] = c.permForms;
 
 }
 
 void from_json(const json& j, char_data& c) {
     from_json(j, static_cast<thing_data&>(c));
 
-    if(j.contains("stats")) c.stats = j["stats"];
     if(j.contains("sex")) c.sex = j["sex"];
     if(j.contains("appearances")) c.appearances = j["appearances"];
 
@@ -1303,107 +1351,97 @@ void from_json(const json& j, char_data& c) {
     if(j.contains("pref_flags")) c.pref_flags = j["pref_flags"].get<FlagHandler<PrefFlag>>();
     if(j.contains("bodyparts")) for(auto &i : j["bodyparts"]) c.bodyparts.set(i.get<int>());
 
-    if(c.id != NOTHING) {
-        // this is an instance.
-        if(j.contains("admin_flags")) c.admin_flags = j["admin_flags"].get<FlagHandler<AdminFlag>>();;
+    if(j.contains("admin_flags")) c.admin_flags = j["admin_flags"].get<FlagHandler<AdminFlag>>();;
 
-        if(j.contains("time")) {
-            j["time"].get_to(c.time);
-        }
-
-        if(j.contains("limb_condition")) {
-            for(auto &i : j["limb_condition"]) {
-                c.limb_condition[i[0].get<int>()] = i[1];
-            }
-        }
-
-        if(j.contains("damages")) c.damages = j["damages"];
-
-        if(j.contains("skill")) c.skill = j["skill"].get<std::map<Skill, skill_data>>();
-
-        if(j.contains("affected")) {
-            auto ja = j["affected"];
-            // reverse iterate using .rbegin() and .rend() while filling out
-            // the linked list.
-            for(auto it = ja.rbegin(); it != ja.rend(); ++it) {
-                auto a = new affected_type(*it);
-                a->next = c.affected;
-                c.affected = a;
-            }
-        }
-
-        if(j.contains("affectedv")) {
-            auto ja = j["affectedv"];
-            // reverse iterate using .rbegin() and .rend() while filling out
-            // the linked list.
-            for(auto it = ja.rbegin(); it != ja.rend(); ++it) {
-                auto a = new affected_type(*it);
-                a->next = c.affectedv;
-                c.affectedv = a;
-            }
-        }
-
-
-        if(j.contains("lboard")) {
-            for(auto &i : j["lboard"]) {
-                c.lboard[i[0].get<int>()] = i[1];
-            }
-        }
-
-        if(j.contains("clan")) c.clan = strdup(j["clan"].get<std::string>().c_str());
-        if(j.contains("crank")) c.crank = j["crank"];
-
-        if(j.contains("conditions")) {
-            for(auto &i : j["conditions"]) {
-                c.conditions[i[0].get<int>()] = i[1];
-            }
-        }
-
-        if(j.contains("gravAcclim")) {
-            for(auto &i : j["gravAcclim"]) {
-                c.gravAcclim[i[0].get<int>()] = i[1];
-            }
-        }
-
-        if(j.contains("bio_genomes")) c.bio_genomes = j["bio_genomes"];
-        if(j.contains("mutations")) c.mutations = j["mutations"];
-
-        if(j.contains("mimic")) c.mimic = j["mimic"].get<Race>();
-        if(j.contains("rdisplay")) c.rdisplay = strdup(j["rdisplay"].get<std::string>().c_str());
-        if(j.contains("feature")) c.feature = strdup(j["feature"].get<std::string>().c_str());
-
-        if(j.contains("voice")) c.voice = strdup(j["voice"].get<std::string>().c_str());
-
-        if(!c.proto_script.empty()) {
-            assign_triggers(&c, OBJ_TRIGGER);
-        }
-
-        if(j.contains("dgvariables")) {
-            deserializeVars(&c.global_vars, j["dgvariables"]);
-        }
-
-        auto proto = mob_proto.find(c.vn);
-        if(proto != mob_proto.end()) {
-            c.proto_script = proto->second.proto_script;
-        }
-
-        if(j.contains("form")) c.form = j["form"];
-        if(j.contains("transforms")) c.transforms = j["transforms"];
-        if(j.contains("permForms")) c.permForms = j["permForms"].get<std::unordered_set<Form>>();
-        
-    } else {
-        // this is a prototype.
-        if(j.contains("proto_script")) c.proto_script = j["proto_script"].get<std::vector<trig_vnum>>();
-
-        if (!IS_HUMAN(&c))
-            c.affect_flags.set(AFF_INFRAVISION, true);
-
-        set_height_and_weight_by_race(&c);
-
-        c.mob_flags.set(MOB_NOTDEADYET, false);
-
-        c.player_flags.set(PLR_NOTDEADYET, false);
+    if(j.contains("time")) {
+        j["time"].get_to(c.time);
     }
+
+    if(j.contains("limb_condition")) {
+        for(auto &i : j["limb_condition"]) {
+            c.limb_condition[i[0].get<int>()] = i[1];
+        }
+    }
+
+    if(j.contains("damages")) c.damages = j["damages"];
+
+    if(j.contains("skill")) c.skill = j["skill"].get<std::map<Skill, skill_data>>();
+
+    if(j.contains("affected")) {
+        auto ja = j["affected"];
+        // reverse iterate using .rbegin() and .rend() while filling out
+        // the linked list.
+        for(auto it = ja.rbegin(); it != ja.rend(); ++it) {
+            auto a = new affected_type(*it);
+            a->next = c.affected;
+            c.affected = a;
+        }
+    }
+
+    if(j.contains("affectedv")) {
+        auto ja = j["affectedv"];
+        // reverse iterate using .rbegin() and .rend() while filling out
+        // the linked list.
+        for(auto it = ja.rbegin(); it != ja.rend(); ++it) {
+            auto a = new affected_type(*it);
+            a->next = c.affectedv;
+            c.affectedv = a;
+        }
+    }
+
+
+    if(j.contains("lboard")) {
+        for(auto &i : j["lboard"]) {
+            c.lboard[i[0].get<int>()] = i[1];
+        }
+    }
+
+    if(j.contains("clan")) c.clan = strdup(j["clan"].get<std::string>().c_str());
+    if(j.contains("crank")) c.crank = j["crank"];
+
+    if(j.contains("conditions")) {
+        for(auto &i : j["conditions"]) {
+            c.conditions[i[0].get<int>()] = i[1];
+        }
+    }
+
+    if(j.contains("gravAcclim")) {
+        for(auto &i : j["gravAcclim"]) {
+            c.gravAcclim[i[0].get<int>()] = i[1];
+        }
+    }
+
+    if(j.contains("bio_genomes")) c.bio_genomes = j["bio_genomes"];
+    if(j.contains("mutations")) c.mutations = j["mutations"];
+
+    if(j.contains("mimic")) c.mimic = j["mimic"].get<Race>();
+    if(j.contains("rdisplay")) c.rdisplay = strdup(j["rdisplay"].get<std::string>().c_str());
+    if(j.contains("feature")) c.feature = strdup(j["feature"].get<std::string>().c_str());
+
+    if(j.contains("voice")) c.voice = strdup(j["voice"].get<std::string>().c_str());
+
+    if(j.contains("dgvariables")) {
+        deserializeVars(&c.global_vars, j["dgvariables"]);
+    }
+
+    if(j.contains("proto")) {
+        auto protoID = j["proto"].get<int64_t>();
+        auto protoFind = mob_proto.find(protoID);
+        if(protoFind != mob_proto.end()) {
+            c.proto = &protoFind->second;
+        } else {
+            basic_mud_log("Warning: Character %s (%ld) has a proto that does not exist: %ld", c.name ? c.name : "Unknown", c.id, protoID);
+        }
+    }
+
+    if(j.contains("form")) c.form = j["form"];
+    if(j.contains("transforms")) c.transforms = j["transforms"];
+    if(j.contains("permForms")) c.permForms = j["permForms"].get<std::unordered_set<Form>>();
+    
+    if(c.proto && !c.proto->proto_script.empty()) {
+        assign_triggers(&c, MOB_TRIGGER);
+    }
+
 }
 
 static json serialize_char_location(char_data* ch) {
@@ -1488,7 +1526,6 @@ void load_npc_prototypes(const std::filesystem::path& loc) {
         auto id = j["vn"].get<int64_t>();
         auto p = mob_proto.emplace(id, j);
         auto zone = real_zone_by_thing(id);
-        p.first->second.zone = zone;
         auto &i = mob_index[id];
         i.vn = id;
         auto &z = zone_table[zone];

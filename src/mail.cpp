@@ -593,12 +593,11 @@ void postmaster_receive_mail(struct char_data *ch, struct char_data *mailman,
     }
     while (has_mail(GET_IDNUM(ch))) {
         obj = create_obj();
-        obj->vn = NOTHING;
         obj->type_flag = ItemType::note;
         for(auto f : {ITEM_WEAR_TAKE, ITEM_WEAR_HOLD}) obj->wear_flags.set(f);
-        GET_OBJ_WEIGHT(obj) = 1;
-        GET_OBJ_COST(obj) = 30;
-        GET_OBJ_RENT(obj) = 10;
+        obj->setBaseStat<weight_t>("weight", 1);
+        obj->setBaseStat("cost", 0);
+        obj->setBaseStat("cost_per_day", 0);
         obj->look_description = read_delete(GET_IDNUM(ch), &from);
         char bla[256], blm[256];
         sprintf(bla, "@WA piece of mail@n");

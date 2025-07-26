@@ -7,6 +7,8 @@
 StatHandler<struct char_data> charStats;
 StatHandler<struct obj_data> itemStats;
 StatHandler<struct room_data> roomStats;
+StatHandler<struct npc_proto_data> npcProtoStats;
+StatHandler<struct item_proto_data> itemProtoStats;
 
 static void init_char_stats_attributes() {
     // attributes...
@@ -33,6 +35,8 @@ static void init_char_stats_attributes() {
             .setSpecific(specific)
             .addTag("attribute")
             ;
+        
+        npcProtoStats.addStat(name);
 
         auto train_name = fmt::format("train_{}", name);
 
@@ -63,6 +67,8 @@ static void init_char_stats_physics() {
             .setApplyPostMultiplier(APPLY_CDIM_POST)
             .addTag("physics")
             ;
+        
+        npcProtoStats.addStat(name);
     }
 
     // Add more physics stats as needed...
@@ -84,6 +90,8 @@ static void init_char_stats_money() {
             .addTag("money")
             ;
     }
+
+    npcProtoStats.addStat("money_carried");
 }
 
 static void init_char_stats_advancement() {
@@ -119,6 +127,12 @@ static void init_char_stats_alignment() {
             .setMaxBaseValue(1000.0)
             .addTag("alignment")
             ;
+        npcProtoStats.addStat(s)
+            .setInitFunc(0.0)
+            .setMinBaseValue(-1000.0)
+            .setMaxBaseValue(1000.0)
+            .addTag("alignment")
+            ;
     }
 }
 
@@ -141,6 +155,11 @@ static void init_char_stats_vitals() {
             .setApplyBase(APPLY_CVIT_BASE)
             .setApplyMultiplier(APPLY_CVIT_MULT)
             .setApplyPostMultiplier(APPLY_CVIT_POST)
+            .addTag("vital")
+            ;
+        npcProtoStats.addStat(name)
+            .setInitFunc(100.0)
+            .setMinBaseValue(0.0)
             .addTag("vital")
             ;
     }
@@ -278,6 +297,8 @@ static void init_char_stats_combat() {
             *total += target->getBaseStat("armor_wishes") * 5000.0;
         })
         ;
+
+    npcProtoStats.addStat("armor");
         
 }
 
@@ -295,6 +316,7 @@ static void init_char_stats_misc() {
         charStats.addStat(s)
         .addTag("misc")
         ;
+        npcProtoStats.addStat(s);
     }
 
     charStats.addStat("waitTime")
@@ -434,7 +456,48 @@ static void init_char_stats() {
 }
 
 static void init_item_stats() {
+    for(const auto& s : {"health", "max_health", "material", "dc_lock", "dc_hide", "dc_move", "dc_skill",
+    "time", "hours", "scroll_level", "spell1", "spell2", "spell3", "max_charges", "charges", "spell",
+    "skill", "damage_dice", "damage_size", "damage_type", "critical_type", "critical_range",
+"apply_ac", "max_dex_mod", "check", "spell_fail", "scouter_level", "seraf_ink",
+"soil_quality", "hit_points", "capacity", "flags", "key", "corpse", "owner",
+"head", "right_arm", "left_arm", "right_leg", "left_leg", "language", "how_full", "liquid", "poison",
+"foodval", "max_foodval", "psbonus", "poison", "expbonus", "candy_pl", "candy_ki",
+"candy_st", "whichattr", "attrchance", "size", "destination_room", "fuel", "fuelcount",
+"external_room", "location", "viewport", "default_room", "vehicle_vnum", "speed",
+"appear", "read", "write", "erase", "comfort_level", "htank_charge", "mat_goal",
+"maturity", "max_mature", "water_level", "bait", "level", "weight", "cost", "cost_per_day"}) {
+        itemStats.addStat(s)
+        .addTag("item")
+        ;
+        itemProtoStats.addStat(s)
+        .addTag("item")
+        ;
+    }
 
+    for(const auto& s : {"scoutfreq", "lload", "kicharge", "kitype", "distance", "foob", "aucter", "curBidder", "aucTime", "bid", "startbid", "posttype"}) {
+        itemStats.addStat(s)
+        .addTag("item")
+        ;
+        itemProtoStats.addStat(s)
+        .addTag("item")
+        ;
+    }
+
+    itemStats.addStat("timer")
+        .setInitFunc([] (struct obj_data* target, const std::string& stat_name) {
+            if(target->type_flag == ItemType::portal) {
+                return -1.0;
+            }
+            return 0.0;
+        });
+    itemProtoStats.addStat("timer")
+        .setInitFunc([] (struct item_proto_data* target, const std::string& stat_name) {
+            if(target->type_flag == ItemType::portal) {
+                return -1.0;
+            }
+            return 0.0;
+        });
 }
 
 static void init_room_stats() {

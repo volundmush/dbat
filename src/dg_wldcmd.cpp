@@ -75,7 +75,7 @@ void wld_log(room_data *room, const char *format, ...) {
     va_list args;
     char output[MAX_STRING_LENGTH];
 
-    snprintf(output, sizeof(output), "Room %d :: %s", room->vn, format);
+    snprintf(output, sizeof(output), "Room %d :: %s", room->getVnum(), format);
 
     va_start(args, format);
     script_vlog(output, args);
@@ -156,7 +156,7 @@ WCMD(do_wasound) {
     for (door = 0; door < NUM_OF_DIRS; door++) {
         auto ex = room->dir_option[door];
         if(!ex) continue;
-        if(ex->to_room == room->vn) continue;
+        if(ex->to_room == room->getVnum()) continue;
         auto dest = get_room(ex->to_room);
         if(!dest) continue;
         send_to_room(dest, "%s", argument);
@@ -350,7 +350,7 @@ WCMD(do_wteleport) {
         wld_log(room, "wteleport target is an invalid room");
 
     else if (!strcasecmp(arg1, "all")) {
-        if (nr == room->vn) {
+        if (nr == room->getVnum()) {
             wld_log(room, "wteleport all target is itself");
             return;
         }
@@ -478,7 +478,7 @@ WCMD(do_wload) {
     if (is_abbrev(arg1, "mob")) {
         room_rnum rnum;
         if (!target || !*target) {
-            rnum = real_room(room->vn);
+            rnum = real_room(room->getVnum());
         } else {
             if (!isdigit(*target) || (rnum = real_room(atoi(target))) == NOWHERE) {
                 wld_log(room, "wload: room target vnum doesn't exist (loading mob vnum %d to room %s)", number, target);
@@ -501,7 +501,7 @@ WCMD(do_wload) {
         }
         /* special handling to make objects able to load on a person/in a container/worn etc. */
         if (!target || !*target) {
-            obj_to_room(object, real_room(room->vn));
+            obj_to_room(object, real_room(room->getVnum()));
             if (SCRIPT(room)) { /* It _should_ have, but it might be detached. */
                 add_var(&(SCRIPT(room)->global_vars), "lastloaded", object->getUID().c_str(), 0);
             }
@@ -531,7 +531,7 @@ WCMD(do_wload) {
             return;
         }
         /* neither char nor container found - just dump it in room */
-        obj_to_room(object, real_room(room->vn));
+        obj_to_room(object, real_room(room->getVnum()));
         load_otrigger(object);
         return;
     } else

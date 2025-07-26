@@ -499,7 +499,7 @@ in the vault (vnum: 453) now and then. you can just use
 
                     switch (type) {
                         case WLD_TRIGGER:
-                            in_room = real_room(((struct room_data *) go)->vn);
+                            in_room = real_room(((struct room_data *) go)->getVnum());
                             break;
                         case OBJ_TRIGGER:
                             in_room = obj_room((struct obj_data *) go);
@@ -954,13 +954,13 @@ in the vault (vnum: 453) now and then. you can just use
                     if (!strcasecmp(field, "cost")) {
                         if (subfield && *subfield) {
                             int addition = atof(subfield);
-                            GET_OBJ_COST(o) = std::max<int>(0, addition + GET_OBJ_COST(o));
+                            o->setBaseStat<int>("cost", std::max<int>(0, addition + GET_OBJ_COST(o)));
                         }
                         snprintf(str, slen, "%d", GET_OBJ_COST(o));
                     } else if (!strcasecmp(field, "cost_per_day")) {
                         if (subfield && *subfield) {
                             int addition = atof(subfield);
-                            GET_OBJ_RENT(o) = std::max<int>(0, addition + GET_OBJ_RENT(o));
+                            o->setBaseStat<int>("cost_per_day", std::max<int>(0, addition + GET_OBJ_RENT(o)));
                         }
                         snprintf(str, slen, "%d", GET_OBJ_RENT(o));
                     } else if (!strcasecmp(field, "carried_by")) {
@@ -1139,9 +1139,9 @@ in the vault (vnum: 453) now and then. you can just use
                         if (subfield && *subfield) {
                             auto addition = atof(subfield);
                             if (addition < 0 || addition > 0) {
-                                GET_OBJ_WEIGHT(o) = std::max<double>(0, addition + GET_OBJ_WEIGHT(o));
+                                o->setBaseStat<weight_t>("weight", std::max<double>(0, addition + GET_OBJ_WEIGHT(o)));
                             } else {
-                                GET_OBJ_WEIGHT(o) = 0;
+                                o->setBaseStat<weight_t>("weight", 0);
                             }
                         }
                         snprintf(str, slen, "%s", fmt::format("{}", GET_OBJ_WEIGHT(o)).c_str());
@@ -1179,7 +1179,7 @@ in the vault (vnum: 453) now and then. you can just use
             }
 
             /* special handling of the void, as it stores all 'full global' variables */
-            if (r->vn == 0) {
+            if (r->getVnum() == 0) {
                 for (vd = r->global_vars; vd; vd = vd->next)
                         if (!strcasecmp(vd->name, field))
                             break;
@@ -1198,9 +1198,9 @@ in the vault (vnum: 453) now and then. you can just use
 
             else if (!strcasecmp(field, "vnum")) {
                 if (subfield && *subfield) {
-                    snprintf(str, slen, "%d", (int) (r->vn == atof(subfield)));
+                    snprintf(str, slen, "%d", (int) (r->getVnum() == atof(subfield)));
                 } else {
-                    snprintf(str, slen, "%d", r->vn);
+                    snprintf(str, slen, "%d", r->getVnum());
                 }
             } else if (!strcasecmp(field, "contents")) {
                 if (subfield && *subfield) {
@@ -1234,7 +1234,7 @@ in the vault (vnum: 453) now and then. you can just use
                 *str = '\0';
                 return;
             } else if (!strcasecmp(field, "id")) {
-                if (r->vn != NOWHERE)
+                if (r->getVnum() != NOWHERE)
                     snprintf(str, slen, "%s", r->getUID(true).c_str());
                 else
                     *str = '\0';

@@ -1266,7 +1266,7 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
      * hide objects starting with . from non-holylighted people
      * Idea from Elaseth of TBA
      */
-            if (*obj->room_description == '.' && (IS_NPC(ch) || !PRF_FLAGGED(ch, PRF_HOLYLIGHT)))
+            if (*obj->getRoomDescription() == '.' && (IS_NPC(ch) || !PRF_FLAGGED(ch, PRF_HOLYLIGHT)))
                 return;
             if (GET_OBJ_TYPE(obj) == ITEM_VEHICLE && ch->getRoomVnum() == GET_OBJ_VAL(obj, VAL_VEHICLE_DEST)) {
                 return;
@@ -1325,12 +1325,12 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
                 if (!IS_NPC(ch) && PRF_FLAGGED(ch, PRF_ROOMFLAGS)) {
                     if (GET_OBJ_POSTED(obj) == nullptr) {
                         send_to_char(ch, "@D[@G%d@D]@w ", GET_OBJ_VNUM(obj));
-                        if (!obj->proto_script.empty())
+                        if (!obj->getProtoScript().empty())
                             send_to_char(ch, "%s ", obj->scriptString().c_str());
                     } else {
                         if (GET_OBJ_POSTTYPE(obj) <= 0) {
                             send_to_char(ch, "@D[@G%d@D]@w ", GET_OBJ_VNUM(obj));
-                            if (!obj->proto_script.empty())
+                            if (!obj->getProtoScript().empty())
                                 send_to_char(ch, "%s ", obj->scriptString().c_str());
                         }
                     }
@@ -1340,11 +1340,11 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
                     if (GET_OBJ_POSTED(obj)) {
                         return;
                     } else {
-                        send_to_char(ch, "%s@w, has been posted here.@n", obj->short_description);
+                        send_to_char(ch, "%s@w, has been posted here.@n", obj->getShortDescription());
                     }
                 } else {
                     if (!OBJ_FLAGGED(obj, ITEM_BURIED)) {
-                        send_to_char(ch, "%s@n", obj->room_description);
+                        send_to_char(ch, "%s@n", obj->getRoomDescription());
                     }
                 }
 
@@ -1381,7 +1381,7 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
         case SHOW_OBJ_SHORT:
             if (!IS_NPC(ch) && PRF_FLAGGED(ch, PRF_ROOMFLAGS)) {
                 send_to_char(ch, "[%d] ", GET_OBJ_VNUM(obj));
-                if (!obj->proto_script.empty())
+                if (!obj->getProtoScript().empty())
                     send_to_char(ch, "%s ", obj->scriptString().c_str());
             }
 
@@ -1742,9 +1742,9 @@ static int show_obj_modifiers(struct obj_data *obj, struct char_data *ch) {
 }
 
 static bool can_stack_objects(struct obj_data *a, struct obj_data *b) {
-    if (strcasecmp(a->short_description, b->short_description) != 0 ||
-        strcasecmp(a->room_description, b->room_description) != 0 ||
-        a->vn != b->vn) return false;
+    if (strcasecmp(a->getShortDescription(), b->getShortDescription()) != 0 ||
+        strcasecmp(a->getRoomDescription(), b->getRoomDescription()) != 0 ||
+        a->getVnum() != b->getVnum()) return false;
 
     if (OBJ_FLAGGED(a, ITEM_BROKEN) != OBJ_FLAGGED(b, ITEM_BROKEN)) return false;
 
@@ -1777,7 +1777,7 @@ static void list_obj_to_char(const std::vector<std::weak_ptr<obj_data>>& list, s
     int num;
 
     for (auto i : filter_raw(list)) {
-        if (i->room_description == nullptr || strcasecmp(i->room_description, "undefined") == 0)
+        if (i->getRoomDescription() == nullptr || strcasecmp(i->getRoomDescription(), "undefined") == 0)
             continue;
 
         num = 0;
@@ -1799,7 +1799,7 @@ static void list_obj_to_char(const std::vector<std::weak_ptr<obj_data>>& list, s
         }
 
         if (CAN_SEE_OBJ(ch, d) &&
-            ((*d->room_description != '.' && *d->short_description != '.') || PRF_FLAGGED(ch, PRF_HOLYLIGHT)) ||
+            ((*d->getRoomDescription() != '.' && *d->getShortDescription() != '.') || PRF_FLAGGED(ch, PRF_HOLYLIGHT)) ||
             (GET_OBJ_TYPE(d) == ITEM_LIGHT)) {
             show_obj_to_char(d, ch, mode);
             found = true;
@@ -2113,12 +2113,12 @@ static void list_one_char(struct char_data *i, struct char_data *ch) {
     };
 
     if (!IS_NPC(ch) && PRF_FLAGGED(ch, PRF_ROOMFLAGS) && IS_NPC(i)) {
-        auto sString = !i->proto_script.empty() ? fmt::format("{} ", i->scriptString()) : "";
+        auto sString = !i->getProtoScript().empty() ? fmt::format("{} ", i->scriptString()) : "";
         send_to_char(ch, "@D[@G%d@D]@w %s", GET_MOB_VNUM(i), sString.c_str());
     }
 
-    if (IS_NPC(i) && i->room_description && GET_POS(i) == GET_DEFAULT_POS(i) && !FIGHTING(i)) {
-        send_to_char(ch, "%s", i->room_description);
+    if (IS_NPC(i) && i->getRoomDescription() && GET_POS(i) == GET_DEFAULT_POS(i) && !FIGHTING(i)) {
+        send_to_char(ch, "%s", i->getRoomDescription());
 
         if (IS_NPC(i) && GET_HIT(i) >= (i->getMaxPL()) * .9 && GET_HIT(i) != (i->getMaxPL()))
             act("@R...Some slight wounds on $s body.@w", true, i, nullptr, ch, TO_VICT);
@@ -2468,7 +2468,7 @@ static void add_hidden_char(struct hide_node **hideinfo, struct char_data *ch) {
 }
 
 static bool can_stack_char(struct char_data *a, struct char_data *b) {
-    return (a->vn == b->vn) &&
+    return (a->getVnum() == b->getVnum()) &&
            (GET_POS(a) == GET_POS(b)) &&
            (AFF_FLAGS(a) == AFF_FLAGS(b)) &&
            (!FIGHTING(a) && !FIGHTING(b)) &&
@@ -2501,7 +2501,7 @@ static void list_char_to_char(const std::vector<std::weak_ptr<char_data>>& list,
 
     for (auto i :filter_raw(list)) {
         if (ch == i || (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_HOLYLIGHT) && IS_NPC(i) &&
-                        i->room_description && *i->room_description == '.')) {
+                        i->getRoomDescription() && *i->getRoomDescription() == '.')) {
             continue;
         }
 
@@ -2549,7 +2549,7 @@ static void do_auto_exits(struct room_data *room, struct char_data *ch, int exit
     const char *mapKey[MAX_DIRS] = {"dlist1", "dlist2", "dlist3", "dlist4", "dlist5", "dlist6", "dlist7", "dlist8", "dlist9", "dlist10", "dlist11", "dlist12"};
     std::map<int, std::string> exitStrings;
 
-    bool space = (room->sector_type == SectorType::space && room->vn >= 20000);
+    bool space = (room->sector_type == SectorType::space && room->getVnum() >= 20000);
     bool has_light = ch->isProvidingLight();
     bool admVision = ADM_FLAGGED(ch, ADM_SEESECRET) || GET_ADMLEVEL(ch) > 4;
 
@@ -2557,7 +2557,7 @@ static void do_auto_exits(struct room_data *room, struct char_data *ch, int exit
         send_to_char(ch, "@D------------------------------------------------------------------------@n\r\n");
     }
 
-    if (exit_mode == EXIT_NORMAL && !space && IN_ROOM(ch) == room->vn) {
+    if (exit_mode == EXIT_NORMAL && !space && IN_ROOM(ch) == room->getVnum()) {
         send_to_char(ch, "@D------------------------------------------------------------------------@n\r\n");
         send_to_char(ch, "@w      Compass           Auto-Map            Map Key\r\n");
         send_to_char(ch, "@R     ---------         ----------   -----------------------------\r\n");
@@ -2567,12 +2567,12 @@ static void do_auto_exits(struct room_data *room, struct char_data *ch, int exit
 
     if (exit_mode == EXIT_NORMAL && space) {
         send_to_char(ch, "@D------------------------------[@CRadar@D]---------------------------------@n\r\n");
-        printmap(room->vn, ch, 1, -1);
+        printmap(room->getVnum(), ch, 1, -1);
         send_to_char(ch, "     @D[@wTurn autoexit complete on for directions instead of radar@D]@n\r\n");
         send_to_char(ch, "@D------------------------------------------------------------------------@n\r\n");
     }
 
-    if (exit_mode == EXIT_COMPLETE || (exit_mode == EXIT_NORMAL && !space && IN_ROOM(ch) != room->vn)) {
+    if (exit_mode == EXIT_COMPLETE || (exit_mode == EXIT_NORMAL && !space && IN_ROOM(ch) != room->getVnum())) {
         send_to_char(ch, "@D----------------------------[@gObvious Exits@D]-----------------------------@n\r\n");
 
         if (IS_AFFECTED(ch, AFF_BLIND)) {
@@ -2597,9 +2597,9 @@ static void do_auto_exits(struct room_data *room, struct char_data *ch, int exit
                 direction[0] = toupper(direction[0]);
 
                 if (admVision) {
-                    exitStr = fmt::format("@c{} @D- [@Y{}@D]@w {}.\r\n", direction, dest->vn, dest->name);
+                    exitStr = fmt::format("@c{} @D- [@Y{}@D]@w {}.\r\n", direction, dest->getVnum(), dest->name);
                 } else {
-                    exitStr = fmt::format("@c{} @D-@w {}.\r\n", direction, (IS_DARK(dest->vn) && !CAN_SEE_IN_DARK(ch) && !has_light) ? "@bToo dark to tell.@w" : dest->name);
+                    exitStr = fmt::format("@c{} @D-@w {}.\r\n", direction, (IS_DARK(dest->getVnum()) && !CAN_SEE_IN_DARK(ch) && !has_light) ? "@bToo dark to tell.@w" : dest->name);
                 }
 
                 if (IS_SET(d->exit_info, EX_ISDOOR) || IS_SET(d->exit_info, EX_SECRET)) {
@@ -2648,18 +2648,18 @@ static void do_auto_exits(struct room_data *room, struct char_data *ch, int exit
             }
         }
 
-        if (GET_RADAR1(ch) == room->vn && GET_RADAR2(ch) == room->vn && GET_RADAR3(ch) != room->vn) {
+        if (GET_RADAR1(ch) == room->getVnum() && GET_RADAR2(ch) == room->getVnum() && GET_RADAR3(ch) != room->getVnum()) {
             send_to_char(ch, "@CTwo of your buoys are floating here.@n\r\n");
-        } else if ((GET_RADAR1(ch) == room->vn && GET_RADAR2(ch) != room->vn && GET_RADAR3(ch) == room->vn) ||
-                   (GET_RADAR1(ch) != room->vn && GET_RADAR2(ch) == room->vn && GET_RADAR3(ch) == room->vn)) {
+        } else if ((GET_RADAR1(ch) == room->getVnum() && GET_RADAR2(ch) != room->getVnum() && GET_RADAR3(ch) == room->getVnum()) ||
+                   (GET_RADAR1(ch) != room->getVnum() && GET_RADAR2(ch) == room->getVnum() && GET_RADAR3(ch) == room->getVnum())) {
             send_to_char(ch, "@CTwo of your buoys are floating here.@n\r\n");
-        } else if (GET_RADAR1(ch) == room->vn && GET_RADAR2(ch) == room->vn && GET_RADAR3(ch) == room->vn) {
+        } else if (GET_RADAR1(ch) == room->getVnum() && GET_RADAR2(ch) == room->getVnum() && GET_RADAR3(ch) == room->getVnum()) {
             send_to_char(ch, "@CAll three of your buoys are floating here. Why?@n\r\n");
-        } else if (GET_RADAR1(ch) == room->vn) {
+        } else if (GET_RADAR1(ch) == room->getVnum()) {
             send_to_char(ch, "@CYour @cBuoy #1@C is floating here.@n\r\n");
-        } else if (GET_RADAR2(ch) == room->vn) {
+        } else if (GET_RADAR2(ch) == room->getVnum()) {
             send_to_char(ch, "@CYour @cBuoy #2@C is floating here.@n\r\n");
-        } else if (GET_RADAR3(ch) == room->vn) {
+        } else if (GET_RADAR3(ch) == room->getVnum()) {
             send_to_char(ch, "@CYour @cBuoy #3@C is floating here.@n\r\n");
         }
     }
@@ -2811,7 +2811,7 @@ static void display_room_flags(struct room_data *rm, struct char_data *ch) {
 
     double grav = rm->getEnvironment(ENV_GRAVITY);
     auto g = fmt::format("{}", grav);
-    snprintf(buf3, sizeof(buf3), "@D[ @G%s@D] @wSector: @D[ @G%s @D] @wVnum: @D[@G%5d@D]@n Gravity: @D[@G%sx@D]@n", buf, buf2, rm->vn, g.c_str());
+    snprintf(buf3, sizeof(buf3), "@D[ @G%s@D] @wSector: @D[ @G%s @D] @wVnum: @D[@G%5d@D]@n Gravity: @D[@G%sx@D]@n", buf, buf2, rm->getVnum(), g.c_str());
     send_to_char(ch, "@wFlags: %-70s@w\r\n", buf3);
 
     if (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_NODEC)) {
@@ -2954,7 +2954,7 @@ void look_at_room(struct room_data *rm, struct char_data *ch, int ignore_brief) 
     if (!ch->desc)
         return;
 
-    if (IS_DARK(rm->vn) && !CAN_SEE_IN_DARK(ch) && !PLR_FLAGGED(ch, PLR_AURALIGHT)) {
+    if (IS_DARK(rm->getVnum()) && !CAN_SEE_IN_DARK(ch) && !PLR_FLAGGED(ch, PLR_AURALIGHT)) {
         send_to_char(ch, "It's too dark to make out much detail...\r\n");
         return;
     } 
@@ -3425,7 +3425,7 @@ static void look_out_window(struct char_data *ch, char *arg) {
                 auto dest = e->getDestination();
                 if(!dest) continue;
                 if(!dest->room_flags.get(ROOM_INDOORS)) {
-                    target_room = dest->vn;
+                    target_room = dest->getVnum();
                     break;
                 }
             }
@@ -3672,7 +3672,7 @@ ACMD(do_look) {
 
     auto room = ch->getRoom();
 
-    if(IS_DARK(room->vn) && !CAN_SEE_IN_DARK(ch)) {
+    if(IS_DARK(room->getVnum()) && !CAN_SEE_IN_DARK(ch)) {
         send_to_char(ch, "It is pitch black...\r\n");
         list_char_to_char(room->getPeople(), ch);    /* glowing red eyes */
         return;
@@ -5334,7 +5334,7 @@ static void print_object_location(int num, struct obj_data *obj, struct char_dat
     else
         send_to_char(ch, "%33s", " - ");
 
-    if (!obj->proto_script.empty())
+    if (!obj->getProtoScript().empty())
         send_to_char(ch, "%s", obj->scriptString().c_str());
 
     if (IN_ROOM(obj) != NOWHERE)
@@ -6086,7 +6086,7 @@ ACMD(do_scan) {
         if(!dest2) continue;
         if(IS_SET(d2->exit_info, EX_CLOSED)) continue;
 
-        if (!IS_DARK(dest2->vn)) {
+        if (!IS_DARK(dest2->getVnum())) {
             send_to_char(ch, "@w-----------------------------------------@n\r\n");
             send_to_char(ch, "          %sFar %s: %s %s\r\n", CCCYN(ch, C_NRM), dirnames[i],
                          dest2->name ? dest2->name

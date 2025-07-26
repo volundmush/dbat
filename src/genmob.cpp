@@ -31,63 +31,32 @@ void check_mobile_string(mob_vnum i, char **string, const char *dscr);
 
 int copy_mobile_strings(struct char_data *t, struct char_data *f);
 
-#if CONFIG_GENOLC_MOBPROG
-int write_mobile_mobprog(mob_vnum mvnum, struct char_data *mob, FILE *fd);
-#endif
-
 /* local functions */
 void extract_mobile_all(mob_vnum vnum);
 
-int add_mobile(struct char_data *mob, mob_vnum vnum) {
+int add_mobile(struct npc_proto_data *mob, mob_vnum vnum) {
     mob_vnum rnum, found = false;
     struct char_data *live_mob;
 
-    if ((rnum = real_mobile(vnum)) != NOBODY) {
+    bool exists = mob_proto.contains(vnum);
+
+    if (exists) {
         /* Copy over the mobile and free() the old strings. */
-        copy_mobile(&mob_proto[rnum], mob);
-
-        /* Now re-point all existing mobile strings to here. */
-        auto mobs = characterSubscriptions.all(fmt::format("vnum_{}", vnum));
-        for (auto live_mob : filter_raw(mobs)) {
-            update_mobile_strings(live_mob, &mob_proto[rnum]);
-        }
-
+        mob_proto.at(rnum) = *mob;
         basic_mud_log("GenOLC: add_mobile: Updated existing mobile #%d.", vnum);
-        return rnum;
+    } else {
+        mob_proto[vnum] = *mob;
+        auto &ix = mob_index[vnum];
+        ix.vn = vnum;
+        auto zvnum = real_zone_by_thing(vnum);
+        auto &z = zone_table[zvnum];
+        z.mobiles.insert(vnum);
+        basic_mud_log("GenOLC: add_mobile: Added mobile %d.", vnum);
     }
 
-    auto &m = mob_proto[vnum];
-    m = *mob;
-
-    m.vn = 0;
-    copy_mobile_strings(&m, mob);
-    auto &ix = mob_index[vnum];
-    ix.vn = vnum;
-
-    basic_mud_log("GenOLC: add_mobile: Added mobile %d.", vnum);
-
-#if CONFIG_GENOLC_MOBPROG
-    GET_MPROG(OLC_MOB(d)) = OLC_MPROGL(d);
-    GET_MPROG_TYPE(OLC_MOB(d)) = (OLC_MPROGL(d) ? OLC_MPROGL(d)->type : 0);
-    while (OLC_MPROGL(d)) {
-      GET_MPROG_TYPE(OLC_MOB(d)) |= OLC_MPROGL(d)->type;
-      OLC_MPROGL(d) = OLC_MPROGL(d)->next;
-    }
-#endif
-
-    auto zvnum = real_zone_by_thing(vnum);
-    auto &z = zone_table[zvnum];
-    z.mobiles.insert(vnum);
-    return found;
+    return vnum;
 }
 
-int copy_mobile(struct char_data *to, struct char_data *from) {
-    free_mobile_strings(to);
-    *to = *from;
-    check_mobile_strings(from);
-    copy_mobile_strings(to, from);
-    return true;
-}
 
 void extract_mobile_all(mob_vnum vnum) {
     auto mobs = characterSubscriptions.all(fmt::format("vnum_{}", vnum));
@@ -194,22 +163,7 @@ int free_mobile(struct char_data *mob) {
         return false;
 
     /* Non-prototyped mobile.  Also known as new mobiles.  */
-    if ((i = GET_MOB_RNUM(mob)) == NOBODY) {
-        free_mobile_strings(mob);
-        /* free script proto list */
-        free_proto_script(mob, MOB_TRIGGER);
-    } else {    /* Prototyped mobile. */
-        if (mob->name && mob->name != mob_proto[i].name)
-            free(mob->name);
-        if (mob->title && mob->title != mob_proto[i].title)
-            free(mob->title);
-        if (mob->short_description && mob->short_description != mob_proto[i].short_description)
-            free(mob->short_description);
-        if (mob->room_description && mob->room_description != mob_proto[i].room_description)
-            free(mob->room_description);
-        if (mob->look_description && mob->look_description != mob_proto[i].look_description)
-            free(mob->look_description);
-    }
+    free_mobile_strings(mob);
     while (mob->affected)
         affect_remove(mob, mob->affected);
 
@@ -249,7 +203,7 @@ int write_mobile_mobprog(mob_vnum mvnum, struct char_data *mob, FILE *fd)
 
 
 void check_mobile_strings(struct char_data *mob) {
-    mob_vnum mvnum = mob_index[mob->vn].vn;
+    mob_vnum mvnum = mob_index[mob->getVnum()].vn;
     check_mobile_string(mvnum, &GET_LDESC(mob), "long description");
     check_mobile_string(mvnum, &GET_DDESC(mob), "detailed description");
     check_mobile_string(mvnum, &GET_ALIAS(mob), "alias list");
@@ -281,7 +235,7 @@ void char_data::activate() {
     std::unordered_set<std::string> services;
     auto sh = shared_from_this();
 
-    if(mob_proto.contains(vn)) {
+    if(auto vn = getVnum(); mob_proto.contains(vn)) {
         services.insert(fmt::format("vnum_{}", vn));
     }
 
@@ -408,4 +362,62 @@ void char_data::ageBy(double addedTime) {
 
 void char_data::setAge(double newAge) {
     this->time.seconds_aged = newAge * SECS_PER_GAME_YEAR;
+}
+
+vnum char_data::getVnum() const {
+    return proto ? proto->vn : NOTHING;
+}
+
+char* char_data::getName() {
+    if(name) return name;
+    if(proto && proto->name) return proto->name;
+    return nullptr;
+}
+
+char* char_data::getRoomDescription() {
+    if(room_description) return room_description;
+    if(proto && proto->room_description) return proto->room_description;
+    return nullptr;
+}
+
+char* char_data::getLookDescription() {
+    if(look_description) return look_description;
+    if(proto && proto->look_description) return proto->look_description;
+    return nullptr;
+}
+
+char* char_data::getShortDescription() {
+    if(short_description) return short_description;
+    if(proto && proto->short_description) return proto->short_description;
+    return nullptr;
+}
+
+extra_descr_data* char_data::getExtraDescription() {
+    if(proto && proto->ex_description) return proto->ex_description;
+    return nullptr;
+}
+
+char_data::~char_data() {
+    if(title) free(title);
+
+    while (affected)
+        affect_remove(this, affected);
+
+    free_followers(followers);
+
+    if (desc)
+        desc->character = nullptr;
+
+}
+
+std::vector<trig_vnum> char_data::getProtoScript() const {
+    return proto ? proto->proto_script : std::vector<trig_vnum>{};
+}
+
+std::string char_data::scriptString() const {
+    std::vector<std::string> vnums;
+    auto proto_script = getProtoScript();
+    for(auto p : proto_script) vnums.emplace_back(std::move(std::to_string(p)));
+
+    return fmt::format("@D[@wT{}@D]@n", fmt::join(vnums, ","));
 }

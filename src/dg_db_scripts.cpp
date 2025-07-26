@@ -37,7 +37,6 @@ void parse_trigger(FILE *trig_f, trig_vnum nr) {
     auto trig = new trig_data();
 
     idx.proto = trig;
-    trig->vn = nr;
     auto &z = zone_table[real_zone_by_thing(nr)];
     z.triggers.insert(nr);
 
@@ -95,8 +94,7 @@ trig_data* read_trigger(int nr) {
 }
 
 
-void trig_data_init(trig_data *this_data) {
-    this_data->vn = NOTHING;
+void trig_data_init(trig_data *this_data) {;
     this_data->data_type = 0;
     this_data->name = nullptr;
     this_data->trigger_type = 0;
@@ -152,6 +150,11 @@ void dg_read_trigger(FILE *fp, struct unit_data *proto, int type) {
     rnum = real_trigger(vnum);
     if (rnum == NOTHING) {
         switch (type) {
+            case OBJ_TRIGGER:
+                mudlog(BRF, ADMLVL_BUILDER, true,
+                       "SYSERR: dg_read_trigger: Trigger vnum #%d asked for but non-existant! (object: %s - %d)",
+                       vnum, proto->getName(), proto->getVnum());
+                break;
             case MOB_TRIGGER:
                 mudlog(BRF, ADMLVL_BUILDER, true,
                        "SYSERR: dg_read_trigger: Trigger vnum #%d asked for but non-existant! (mob: %s - %d)",
@@ -160,7 +163,7 @@ void dg_read_trigger(FILE *fp, struct unit_data *proto, int type) {
             case WLD_TRIGGER:
                 mudlog(BRF, ADMLVL_BUILDER, true,
                        "SYSERR: dg_read_trigger: Trigger vnum #%d asked for but non-existant! (room:%d)",
-                       vnum, GET_ROOM_VNUM(((room_data *) proto)->vn));
+                       vnum, GET_ROOM_VNUM(((room_data *) proto)->getVnum()));
                 break;
             default:
                 mudlog(BRF, ADMLVL_BUILDER, true,
@@ -170,10 +173,70 @@ void dg_read_trigger(FILE *fp, struct unit_data *proto, int type) {
         return;
     }
 
-    proto->proto_script.push_back(rnum);
+    switch(type) {
+        case OBJ_TRIGGER:
+            if(!obj_proto.contains(proto->getVnum())) {
+                mudlog(BRF, ADMLVL_BUILDER, true,
+                       "SYSERR: dg_read_trigger: Trigger vnum #%d asked for but non-existant! (object: %s - %d)",
+                       vnum, proto->getName(), proto->getVnum());
+                return;
+            }
+            obj_proto[proto->getVnum()].proto_script.push_back(rnum);
+            break;
+        case MOB_TRIGGER:
+            if(!mob_proto.contains(proto->getVnum())) {
+                mudlog(BRF, ADMLVL_BUILDER, true,
+                       "SYSERR: dg_read_trigger: Trigger vnum #%d asked for but non-existant! (mob: %s - %d)",
+                       vnum, GET_NAME((char_data *) proto), GET_MOB_VNUM((char_data *) proto));
+                return;
+            }
+            mob_proto[proto->getVnum()].proto_script.push_back(rnum);
+            break;
+        case WLD_TRIGGER:
+            if(!world.contains(proto->getVnum())) {
+                mudlog(BRF, ADMLVL_BUILDER, true,
+                       "SYSERR: dg_read_trigger: Trigger vnum #%d asked for but non-existant! (room:%d)",
+                       vnum, GET_ROOM_VNUM(((room_data *) proto)->getVnum()));
+                return;
+            }
+            world[proto->getVnum()]->proto_script.push_back(rnum);
+            break;
+        default:
+            mudlog(BRF, ADMLVL_BUILDER, true,
+                   "SYSERR: dg_read_trigger: Trigger vnum #%d asked for but non-existant! (?)", vnum);
+            break;
+    }
 }
 
-void dg_obj_trigger(char *line, struct obj_data *obj) {
+void dg_read_trigger(FILE *fp, struct proto_data *proto, int type) {
+    char line[READ_SIZE];
+    char junk[8];
+    int vnum, rnum, count;
+    char_data *mob;
+    room_data *room;
+    struct trig_proto_list *trg_proto, *new_trg;
+
+    get_line(fp, line);
+    count = sscanf(line, "%7s %d", junk, &vnum);
+
+    if (count != 2) {
+        mudlog(BRF, ADMLVL_BUILDER, true,
+               "SYSERR: Error assigning trigger! - Line was\n  %s", line);
+        return;
+    }
+
+    rnum = real_trigger(vnum);
+    if (rnum == NOTHING) {
+        mudlog(BRF, ADMLVL_BUILDER, true,
+                       "SYSERR: dg_read_trigger: Trigger vnum #%d asked for but non-existant! (?)", vnum);
+        return;
+    }
+
+    proto->proto_script.push_back(rnum);
+
+}
+
+void dg_obj_trigger(char *line, struct item_proto_data *obj) {
     char junk[8];
     int vnum, rnum, count;
     struct trig_proto_list *trg_proto, *new_trg;
@@ -190,7 +253,7 @@ void dg_obj_trigger(char *line, struct obj_data *obj) {
     if (rnum == NOTHING) {
         mudlog(BRF, ADMLVL_BUILDER, true,
                "SYSERR: Trigger vnum #%d asked for but non-existant! (Object: %s - %d)",
-               vnum, obj->short_description, GET_OBJ_VNUM(obj));
+               vnum, obj->short_description, obj->vn);
         return;
     }
 
@@ -201,10 +264,11 @@ void assign_triggers(struct unit_data *i, int type) {
 
     // remove all duplicates from i->proto_script but do not change its order otherwise.
     std::unordered_set<trig_vnum> alreadySeen;
-    auto it = i->proto_script.begin();
-    while(it != i->proto_script.end()) {
+    auto ps = i->getProtoScript();
+    auto it = ps.begin();
+    while(it != ps.end()) {
         if(alreadySeen.contains(*it)) {
-            it = i->proto_script.erase(it);
+            it = ps.erase(it);
         } else {
             alreadySeen.insert(*it);
             ++it;
@@ -214,7 +278,7 @@ void assign_triggers(struct unit_data *i, int type) {
     std::unordered_set<trig_vnum> existVnums;
     for(auto t = i->trig_list; t; t = t->next) existVnums.insert(t->vn);
 
-    for(auto p : i->proto_script) {
+    for(auto p : ps) {
         // only add if they don't already have one...
         if(!existVnums.contains(p)) {
             add_trigger(i, read_trigger(p), -1);

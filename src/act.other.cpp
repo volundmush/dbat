@@ -444,9 +444,9 @@ ACMD(do_rpp) {
                 *theshort = '\0';
                 *thelong = '\0';
 
-                sprintf(thename, "%s", obj->name);
-                sprintf(theshort, "%s", obj->short_description);
-                sprintf(thelong, "%s", obj->room_description);
+                sprintf(thename, "%s", obj->getName());
+                sprintf(theshort, "%s", obj->getShortDescription());
+                sprintf(thelong, "%s", obj->getRoomDescription());
 
                 ch->desc->obj_name = strdup(thename);
                 ch->desc->obj_was = strdup(theshort);
@@ -2078,9 +2078,9 @@ ACMD(do_candy) {
     snprintf(newsh, MAX_STRING_LENGTH, "%s@n (of %s@n)", obj->short_description, vict->short_description);
     obj->short_description = strdup(newsh);
     obj_to_char(obj, ch);
-    obj->value[VAL_FOOD_CANDY_PL] = vict->getBaseStat("powerlevel");
-    obj->value[VAL_FOOD_CANDY_KI] = vict->getBaseStat("ki");
-    obj->value[VAL_FOOD_CANDY_ST] = vict->getBaseStat("stamina");
+    obj->setBaseStat<int64_t>(VAL_FOOD_CANDY_PL, vict->getBaseStat("powerlevel"));
+    obj->setBaseStat<int64_t>(VAL_FOOD_CANDY_KI, vict->getBaseStat("ki"));
+    obj->setBaseStat<int64_t>(VAL_FOOD_CANDY_ST, vict->getBaseStat("stamina"));
 
     vict->mob_flags.set(MOB_HUSK, false);
     die(vict, ch);
@@ -3245,7 +3245,7 @@ static void boost_obj(struct obj_data *obj, struct char_data *ch, int type) {
     switch (type) { /* Main switch of boost_obj */
         case 0: /* This object is a piece of worn equipment, not a weapon. */
             if (boost != 0) { /* Change it if it qualifies */
-                GET_OBJ_LEVEL(obj) = boost;
+                obj->setBaseStat<int>("level", boost);
                 obj->affected[0].location = 17;
                 obj->affected[0].modifier += (boost * GET_DEX(ch));
                 if (GET_OBJ_VNUM(obj) == 91) {
@@ -3260,27 +3260,27 @@ static void boost_obj(struct obj_data *obj, struct char_data *ch, int type) {
         case 1: /* This object is a weapon. */
             switch (boost) {
                 case 30:
-                    obj->value[VAL_WEAPON_LEVEL] = 2;
+                    obj->setBaseStat<int64_t>(VAL_WEAPON_LEVEL, 2);
                     break;
                 case 40:
                 case 50:
-                    obj->value[VAL_WEAPON_LEVEL] = 3;
+                    obj->setBaseStat<int64_t>(VAL_WEAPON_LEVEL, 3);
                     break;
                 case 60:
                 case 70:
                 case 80:
                 case 90:
-                    obj->value[VAL_WEAPON_LEVEL] = 4;
+                    obj->setBaseStat<int64_t>(VAL_WEAPON_LEVEL, 4);
                     break;
                 case 100:
-                    obj->value[VAL_WEAPON_LEVEL] = 5;
+                    obj->setBaseStat<int64_t>(VAL_WEAPON_LEVEL, 5);
                     break;
                 default:
-                    obj->value[VAL_WEAPON_LEVEL] = 1;
+                    obj->setBaseStat<int64_t>(VAL_WEAPON_LEVEL, 1);
                     break;
             }
             if (boost != 0) {
-                GET_OBJ_LEVEL(obj) = boost;
+                obj->setBaseStat<int>("level", boost);
                 obj->affected[0].location = 1;
                 obj->affected[0].modifier = (boost / 20);
             }
@@ -6194,7 +6194,7 @@ ACMD(do_forgery) {
 
     /* Set Object Variables */
     obj3->item_flags.set(ITEM_FORGED, true);
-    GET_OBJ_WEIGHT(obj3) = rand_number(GET_OBJ_WEIGHT(obj3) / 2, GET_OBJ_WEIGHT(obj3));
+    obj3->setBaseStat<weight_t>("weight", rand_number(GET_OBJ_WEIGHT(obj3) / 2, GET_OBJ_WEIGHT(obj3)));
 
     obj_from_char(obj4);
     extract_obj(obj4);
@@ -6261,7 +6261,7 @@ ACMD(do_appraise) {
     send_to_char(ch, "%s is worth: %s\r\nMin Lvl: %d\r\n", obj->short_description, add_commas(GET_OBJ_COST(obj)).c_str(),
                  displevel);
     if (GET_OBJ_TYPE(obj) == ITEM_WEAPON) {
-        auto wlvl = obj->value[VAL_WEAPON_LEVEL];
+        auto wlvl = obj->getBaseStat<int64_t>(VAL_WEAPON_LEVEL);
         int dambon = 0;
         switch(wlvl) {
             case 1:
@@ -7248,7 +7248,7 @@ ACMD(do_summon) {
         true, ch, nullptr, nullptr, TO_ROOM);
     SHENRON = true;
     DRAGONC = 300;
-    DRAGONR = room->vn;
+    DRAGONR = room->getVnum();
     DRAGONZ = room->zone;
     send_to_imm("Shenron summoned to room: %d\r\n", DRAGONR);
 
@@ -8556,7 +8556,7 @@ ACMD(do_scouter) {
 
                 auto blah = sense_location(i->character);
                 auto cpl = i->character->getPL();
-                if (cpl > obj->value[VAL_WORN_SCOUTER]) {
+                if (cpl > obj->getBaseStat<int64_t>(VAL_WORN_SCOUTER)) {
                     send_to_char(ch, "@D<@GPowerlevel Detected@D:@w ?????????@D> @w---> @C%s@n\r\n",
                                  same == true ? pathway : blah);
                 } else {
@@ -8611,7 +8611,7 @@ ACMD(do_scouter) {
     send_to_char(ch, "@D|@1                                  @n@D|@n\r\n");
     send_to_char(ch, "@D|@1@RReading target...                 @n@D|@n\r\n");
     send_to_char(ch, "@D|@1                                  @n@D|@n\r\n");
-    if(obj->value[VAL_WORN_SCOUTER] <= vpl)
+    if(obj->getBaseStat<int64_t>(VAL_WORN_SCOUTER) <= vpl)
         send_to_char(ch, "@D|@1@RP@r@1o@Rw@r@1e@1@Rr L@r@1e@Rv@r@1e@1@Rl@1@D: @Y%21s@n@D|@n\r\n",
                      add_commas(vpl).c_str());
     else

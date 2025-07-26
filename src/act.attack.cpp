@@ -319,8 +319,8 @@ ACMD(do_throw) {
             if (GET_PREFERENCE(ch) == PREFERENCE_THROWING) {
                 chance -= chance * 0.25;
             }
-            wlvl = obj->value[VAL_WEAPON_LEVEL];
-            switch(obj->value[VAL_WEAPON_LEVEL]) {
+            wlvl = obj->getBaseStat<int64_t>(VAL_WEAPON_LEVEL);
+            switch(obj->getBaseStat<int64_t>(VAL_WEAPON_LEVEL)) {
                 case 1:
                     damage += damage * 0.1;
                     break;

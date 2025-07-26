@@ -157,7 +157,7 @@ ACMD(do_oasis_links) {
             }
 
             send_to_char(ch, "%3d %-30s at %5d (%-5s) ---> %5d\r\n",
-                         z2->first,z2->second.name,nr, dirs[j], dest->vn);
+                         z2->first,z2->second.name,nr, dirs[j], dest->getVnum());
         }
     }
 }
@@ -206,7 +206,7 @@ void list_rooms(struct char_data *ch, zone_rnum rnum, zone_vnum vmin, zone_vnum 
                 if(!dest) continue;
 
                 if (dest->zone != r->zone)
-                    send_to_char(ch, "(@y%d@n)", dest->vn);
+                    send_to_char(ch, "(@y%d@n)", dest->getVnum());
 
             }
 

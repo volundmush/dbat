@@ -119,6 +119,8 @@ This will first compile the C++ code and then run setup.py to ensure the Cython 
 # How do you run it?
 A proper launcher is pending.
 
+a `launch.json` has been included for VS Code.
+
 However, make sure the cwd is the root `dbat` folder and the virtualenv is active, and then:
 `python -m mudforge.portal`
 `python -m mudforge.game`

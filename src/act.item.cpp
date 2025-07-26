@@ -681,8 +681,8 @@ static bool has_housekey(struct char_data *ch, struct obj_data *obj) {
     if(OBJ_FLAGGED(obj, ITEM_DUPLICATE)) return false;
 
     auto isHouseKey = [&](struct obj_data *obj2) -> bool {
-        if(obj2->vn == 18800 && obj->vn == 18802) return true;
-        if(obj2->vn == obj->vn -1) return true;
+        if(obj2->getVnum() == 18800 && obj->getVnum() == 18802) return true;
+        if(obj2->getVnum() == obj->getVnum() -1) return true;
         return false;
     };
 
@@ -837,7 +837,7 @@ ACMD(do_deploy) {
 
 
     if (!*arg) {
-        auto iscapsule = [](const auto& o) {return o->vn == 4 || o->vn == 5 || o->vn == 6;};
+        auto iscapsule = [](const auto& o) {return o->getVnum() == 4 || o->getVnum() == 5 || o->getVnum() == 6;};
         if(obj = ch->findObject(iscapsule)) {
             capsule = true;
         }
@@ -1445,7 +1445,7 @@ ACMD(do_bid) {
                 search_replace(bits, "TAKE", "");
                 send_to_char(ch, "@GWear Loc.   @W:@w%s\n", bits);
                 if (GET_OBJ_TYPE(obj2) == ITEM_WEAPON) {
-                    auto wlvl = obj2->value[VAL_WEAPON_LEVEL];
+                    auto wlvl = obj2->getBaseStat<int64_t>(VAL_WEAPON_LEVEL);
                     if (wlvl == 1) {
                         send_to_char(ch, "@GWeapon Level@W: @D[@C1@D]\n@GDamage Bonus@W: @D[@w5%s@D]@n\r\n", "%");
                     } else if (wlvl == 2) {
@@ -1767,7 +1767,7 @@ ACMD(do_assemble) {
 
     } else {
         obj_to_room(pObject, IN_ROOM(ch));
-        GET_OBJ_TIMER(pObject) = (GET_SKILL(ch, SKILL_SURVIVAL) * 0.12);
+        pObject->setBaseStat<int>("timer", (GET_SKILL(ch, SKILL_SURVIVAL) * 0.12));
     }
 }
 
@@ -2812,14 +2812,14 @@ void weight_change_object(struct obj_data *obj, int weight) {
     struct char_data *tmp_ch;
 
     if (IN_ROOM(obj) != NOWHERE) {
-        GET_OBJ_WEIGHT(obj) += weight;
+        obj->modBaseStat<weight_t>("weight", weight);
     } else if ((tmp_ch = obj->carried_by)) {
         obj_from_char(obj);
-        GET_OBJ_WEIGHT(obj) += weight;
+        obj->modBaseStat<weight_t>("weight", weight);
         obj_to_char(obj, tmp_ch);
     } else if ((tmp_obj = obj->in_obj)) {
         obj_from_obj(obj);
-        GET_OBJ_WEIGHT(obj) += weight;
+        obj->modBaseStat<weight_t>("weight", weight);
         obj_to_obj(obj, tmp_obj);
     } else {
         basic_mud_log("SYSERR: Unknown attempt to subtract weight from an object.");
@@ -3272,7 +3272,7 @@ ACMD(do_eat) {
 
     std::unordered_set<obj_vnum> candies = {53, 93, 94, 95};
 
-    if(candies.contains(food->vn)) {
+    if(candies.contains(food->getVnum())) {
         if(IS_MAJIN(ch)) foob = GET_OBJ_VAL(food, VAL_FOOD_FOODVAL);
         majin_gain(ch, food, foob);
     }
@@ -3318,7 +3318,7 @@ static void majin_gain(struct char_data *ch, struct obj_data *food, int foob) {
 
 
 
-    int64_t st = food->value[VAL_FOOD_CANDY_ST], ki = food->value[VAL_FOOD_CANDY_KI], pl = food->value[VAL_FOOD_CANDY_PL];
+    int64_t st = food->getBaseStat<int64_t>(VAL_FOOD_CANDY_ST), ki = food->getBaseStat<int64_t>(VAL_FOOD_CANDY_KI), pl = food->getBaseStat<int64_t>(VAL_FOOD_CANDY_PL);
 
     st *= 0.05;
     ki *= 0.05;

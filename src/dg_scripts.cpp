@@ -995,7 +995,7 @@ ACMD(do_attach) {
         add_trigger(room, trig, loc);
 
         send_to_char(ch, "Trigger %d (%s) attached to room %d.\r\n",
-                     tn, GET_TRIG_NAME(trig), get_room(rnum)->vn);
+                     tn, GET_TRIG_NAME(trig), get_room(rnum)->getVnum());
     } else
         send_to_char(ch, "Please specify 'mob', 'obj', or 'room'.\r\n");
 }
@@ -2293,7 +2293,7 @@ static int true_script_driver(unit_data *go_adress, trig_data *trig, int type, i
                 break;
             case WLD_TRIGGER:
                 script_log("It was attached to %s [%d]",
-                           ((room_data *) go)->name, ((room_data *) go)->vn);
+                           ((room_data *) go)->name, ((room_data *) go)->getVnum());
                 break;
         }
 

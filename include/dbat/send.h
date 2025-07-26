@@ -85,6 +85,8 @@ template<typename... Args>
 void send_to_room(struct room_data *room, fmt::string_view format, Args&&... args) {
     if(!room) return;
 
+    auto vn = room->getVnum();
+
     try {
         std::string formatted_string = fmt::sprintf(format, std::forward<Args>(args)...);
         if(formatted_string.empty()) return;
@@ -99,14 +101,14 @@ void send_to_room(struct room_data *room, fmt::string_view format, Args&&... arg
                 continue;
 
             if (PRF_FLAGGED(d->character, PRF_ARENAWATCH)) {
-                if (arena_watch(d->character) == room->vn) {
+                if (arena_watch(d->character) == vn) {
                     d->output += "@c-----@CArena@c-----@n\r\n%s\r\n@c-----@CArena@c-----@n\r\n";
                     d->output += formatted_string;
                 }
             }
             if (auto eaves = GET_EAVESDROP(d->character); eaves > 0) {
                 int roll = rand_number(1, 101);
-                if (eaves == room->vn && GET_SKILL(d->character, SKILL_EAVESDROP) > roll) {
+                if (eaves == vn && GET_SKILL(d->character, SKILL_EAVESDROP) > roll) {
                     d->output += "@c-----Eavesdrop-----@n\r\n%s\r\n@c-----Eavesdrop-----@n\r\n";
                     d->output += formatted_string;
                 }

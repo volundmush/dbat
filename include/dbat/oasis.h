@@ -98,9 +98,9 @@ struct oasis_olc_data {
     room_vnum number;              /* vnum of subject          */
     int value;                     /* mostly 'has changed' flag*/
     char *storage;                 /* used for 'tedit'         */
-    struct char_data *mob;         /* used for 'medit'         */
+    struct npc_proto_data *mob;    /* used for 'medit'         */
     struct room_data *room;        /* used for 'redit'         */
-    struct obj_data *obj;          /* used for 'oedit'         */
+    struct item_proto_data *obj;   /* used for 'oedit'         */
     struct obj_data *iobj;         /* used for 'iedit'         */
     struct zone_data *zone;        /* used for 'zedit'         */
     struct shop_data *shop;        /* used for 'sedit'         */
@@ -504,13 +504,13 @@ extern ACMD(do_oasis_list);
 
 extern ACMD(do_oasis_links);
 
-extern void medit_free_mobile(struct char_data *mob);
+extern void medit_free_mobile(struct npc_proto_data *mob);
 
 extern void medit_setup_new(struct descriptor_data *d);
 
 extern void medit_setup_existing(struct descriptor_data *d, int rmob_num);
 
-extern void init_mobile(struct char_data *mob);
+extern void init_mobile(struct npc_proto_data *mob);
 
 extern void medit_save_internally(struct descriptor_data *d);
 
@@ -591,10 +591,6 @@ extern void oedit_parse(struct descriptor_data *d, char *arg);
 extern void oedit_disp_perm_menu(struct descriptor_data *d);
 
 extern void oedit_string_cleanup(struct descriptor_data *d, int terminator);
-
-extern void oedit_disp_prompt_spellbook_menu(struct descriptor_data *d);
-
-extern void oedit_disp_spellbook_menu(struct descriptor_data *d);
 
 extern ACMD(do_oasis_oedit);
 

@@ -1176,7 +1176,7 @@ ACMD(do_flee) {
             }
             was_fighting = FIGHTING(ch);
 
-            auto isWall = [&](const auto&o) {return o->vn == 79 && GET_OBJ_COST(o) == attempt;};
+            auto isWall = [&](obj_data*o) {return o->getVnum() == 79 && GET_OBJ_COST(o) == attempt;};
             if(auto wall = ch->getRoom()->findObject(isWall); wall) {
                 send_to_char(ch, "That direction has a glacial wall blocking it.\r\n");
                 return;

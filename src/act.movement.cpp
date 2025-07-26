@@ -630,7 +630,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
     }
     ch->affect_flags.set(AFF_PURSUIT, true);
     char_from_room(ch);
-    char_to_room(ch, dest->vn);
+    char_to_room(ch, dest->getVnum());
     if ((ch->getRoom()->zone != get_room(was_in)->zone) && !IS_NPC(ch) && !IS_ANDROID(ch)) {
         send_to_sense(0, "You sense someone", ch);
         sprintf(buf3, "@D[@GBlip@D]@Y %s\r\n@RSomeone has entered your scouter detection range@n.",

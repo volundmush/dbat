@@ -10,6 +10,8 @@ struct command_info;
 struct descriptor_data;
 struct account_data;
 struct player_data;
+struct npc_proto_data;
+struct item_proto_data;
 
 typedef unit_data script_data;
 

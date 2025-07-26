@@ -1422,7 +1422,7 @@ void corpseRotService(uint64_t heartPulse, double deltaTime) {
 
         /* timer count down */
         if (GET_OBJ_TIMER(j) > 0)
-            GET_OBJ_TIMER(j)--;
+            j->modBaseStat("timer", -1);
         auto room = j->getRoom();
         if (!strstr(j->name, "android") && !strstr(j->name, "Android") && !OBJ_FLAGGED(j, ITEM_BURIED)) {
             if (GET_OBJ_TIMER(j) == 5) {
@@ -1530,7 +1530,7 @@ void healTankService(uint64_t heartPulse, double deltaTime) {
     auto subs = objectSubscriptions.all("healTankService");
     for(auto o : filter_raw(subs)) {
 
-        auto en = o->dvalue["energy"];
+        auto en = o->getBaseStat("energy");
 
         if(auto ch = SITTING(o); ch) {
             // the heal tank is occupied.
@@ -1565,7 +1565,7 @@ void healTankService(uint64_t heartPulse, double deltaTime) {
         } else {
             // the heal tank has no occupant.
             if(en < 200.0) {
-                o->dvalue["energy"] = std::min(200.0, en + deltaTime);
+                o->setBaseStat("energy", std::min(200.0, en + deltaTime));
             } else {
                 // No need to update it further.
                 objectSubscriptions.unsubscribe("healTankService", o);
@@ -1888,8 +1888,7 @@ void point_update(uint64_t heartPulse, double deltaTime)
                 if (GET_OBJ_TYPE(j) == ITEM_PORTAL)
                 {
                     if (GET_OBJ_TIMER(j) > 0)
-                        GET_OBJ_TIMER(j)
-                    --;
+                        j->modBaseStat("timer", -1);
 
                     if (GET_OBJ_TIMER(j) == 0)
                     {
@@ -1900,8 +1899,7 @@ void point_update(uint64_t heartPulse, double deltaTime)
                 else if (GET_OBJ_VNUM(j) == 1306)
                 {
                     if (GET_OBJ_TIMER(j) > 0)
-                        GET_OBJ_TIMER(j)
-                    --;
+                        j->modBaseStat("timer", -1);
 
                     if (GET_OBJ_TIMER(j) == 0)
                     {
@@ -1920,7 +1918,7 @@ void point_update(uint64_t heartPulse, double deltaTime)
                             j->modLocationGroundEffect(-1);
                             if (GET_OBJ_WEIGHT(j) - (5 + (GET_OBJ_WEIGHT(j) * 0.025)) > 0)
                             {
-                                GET_OBJ_WEIGHT(j) -= 5 + (GET_OBJ_WEIGHT(j) * 0.025);
+                                j->modBaseStat<weight_t>("weight", -(5 + (GET_OBJ_WEIGHT(j) * 0.025)));
                             }
                             else
                             {
@@ -1932,7 +1930,7 @@ void point_update(uint64_t heartPulse, double deltaTime)
                         }
                         else if (GET_OBJ_WEIGHT(j) - (5 + (GET_OBJ_WEIGHT(j) * 0.025)) > 0)
                         {
-                            GET_OBJ_WEIGHT(j) -= 5 + (GET_OBJ_WEIGHT(j) * 0.025);
+                            j->modBaseStat<weight_t>("weight", -(5 + (GET_OBJ_WEIGHT(j) * 0.025)));
                             send_to_room(IN_ROOM(j), "The glacial wall blocking off the %s direction melts some what.\r\n",
                                          dirs[GET_OBJ_COST(j)]);
                         }
@@ -1951,7 +1949,7 @@ void point_update(uint64_t heartPulse, double deltaTime)
                             int melt = 5 + (GET_OBJ_WEIGHT(j) * 0.02);
                             if (GET_OBJ_WEIGHT(j) - (5 + (GET_OBJ_WEIGHT(j) * 0.02)) > 0)
                             {
-                                GET_OBJ_WEIGHT(j) -= melt;
+                                j->modBaseStat<weight_t>("weight", -melt);
                                 send_to_char(j->carried_by, "%s @wmelts a little.\r\n", j->short_description);
                             }
                             else
@@ -1965,7 +1963,7 @@ void point_update(uint64_t heartPulse, double deltaTime)
                         {
                             if (GET_OBJ_WEIGHT(j) - (5 + (GET_OBJ_WEIGHT(j) * 0.02)) > 0)
                             {
-                                GET_OBJ_WEIGHT(j) -= 5 + (GET_OBJ_WEIGHT(j) * 0.02);
+                                j->modBaseStat<weight_t>("weight", -(5 + (GET_OBJ_WEIGHT(j) * 0.02)));
                                 send_to_room(IN_ROOM(j), "%s @wmelts a little.\r\n", j->short_description);
                             }
                             else
@@ -1981,7 +1979,7 @@ void point_update(uint64_t heartPulse, double deltaTime)
                 /* note to .rej hand-patchers: make this last in your point-update() */
                 else if (GET_OBJ_TIMER(j) > 0)
                 {
-                    GET_OBJ_TIMER(j)--;
+                    j->modBaseStat("timer", -1);
                     if (!GET_OBJ_TIMER(j))
                         timer_otrigger(j);
                 }

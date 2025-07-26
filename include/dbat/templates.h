@@ -350,8 +350,10 @@ class StatHandler {
 
 
 extern StatHandler<struct char_data> charStats;
-extern StatHandler<struct obj_data> itemStats;
 extern StatHandler<struct room_data> roomStats;
+extern StatHandler<struct obj_data> itemStats;
+extern StatHandler<struct npc_proto_data> npcProtoStats;
+extern StatHandler<struct item_proto_data> itemProtoStats;
 
 extern void init_stat_handlers();
 

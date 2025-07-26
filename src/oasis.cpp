@@ -182,7 +182,7 @@ void cleanup_olc(struct descriptor_data *d, int8_t cleanup_type) {
         switch (cleanup_type) {
             case CLEANUP_ALL:
                 /* free(OLC_SCRIPT(d)) equivalent */
-                free_proto_script(OLC_ROOM(d), WLD_TRIGGER);
+                OLC_ROOM(d)->proto_script.clear();
                 free_room(OLC_ROOM(d));
                 break;
             case CLEANUP_STRUCTS:
@@ -203,8 +203,7 @@ void cleanup_olc(struct descriptor_data *d, int8_t cleanup_type) {
      * with strdup().
      */
     if (OLC_OBJ(d)) {
-        free_object_strings(OLC_OBJ(d));
-        free(OLC_OBJ(d));
+        delete OLC_OBJ(d);
     }
 
     /*
@@ -212,7 +211,7 @@ void cleanup_olc(struct descriptor_data *d, int8_t cleanup_type) {
      * the prototype.
      */
     if (OLC_MOB(d))
-        free_mobile(OLC_MOB(d));
+        delete OLC_MOB(d);
 
     /*
      * Check for a zone.  cleanup_type is irrelevant here, free() everything.

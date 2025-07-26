@@ -678,7 +678,7 @@ int read_sense_memory(struct char_data *ch, struct char_data *vict) {
     auto &p = players[ch->id];
 
     if(IS_NPC(vict)) {
-        return p.sense_memory.contains(vict->vn);
+        return p.sense_memory.contains(vict->getVnum());
     } else {
         return p.sense_player.contains(vict->id);
     }
@@ -694,7 +694,7 @@ void sense_memory_write(struct char_data *ch, struct char_data *vict) {
     auto &p = players[ch->id];
 
     if(IS_NPC(vict)) {
-        p.sense_memory.insert(vict->vn);
+        p.sense_memory.insert(vict->getVnum());
     } else {
         p.sense_player.insert(vict->id);
     }
@@ -763,21 +763,7 @@ int roll_pursue(struct char_data *ch, struct char_data *vict) {
 
 }
 
-int64_t GET_OBJ_VAL(struct obj_data* obj, const std::string& val) {
-    if(auto find = obj->value.find(val); find != obj->value.end()) {
-        return find->second;
-    }
-    return 0;
-}
 
-int64_t SET_OBJ_VAL(struct obj_data* obj, const std::string& val, int value) {
-    obj->value[val] = value;
-    return value;
-}
-
-int64_t MOD_OBJ_VAL(struct obj_data* obj, const std::string& val, int value) {
-    return SET_OBJ_VAL(obj, val, GET_OBJ_VAL(obj, val) + value);
-}
 
 /* This updates the malfunctioning of certain objects that are damaged. */
 void broken_update(uint64_t heartPulse, double deltaTime) {
@@ -811,7 +797,7 @@ void broken_update(uint64_t heartPulse, double deltaTime) {
         }
         if (grav_change == true) {
             k->gravity = rand_gravity[grav_roll];
-            GET_OBJ_WEIGHT(k) = rand_gravity[grav_roll];
+            k->setBaseStat<weight_t>("weight", rand_gravity[grav_roll]);
             send_to_room(IN_ROOM(k), "@RThe gravity generator malfunctions! The gravity level has changed!@n\r\n");
         }
         dice = rand_number(2, 12); // Reset the dice
@@ -1966,7 +1952,7 @@ int planet_check(struct char_data *ch, struct char_data *vict) {
 
 void purge_homing(struct char_data *ch) {
 
-    auto isHoming = [&](const auto& o) {return (o->vn == 80 || o->vn == 81) && (TARGET(o) == ch || USER(o) == ch);};
+    auto isHoming = [&](const auto& o) {return (o->getVnum() == 80 || o->getVnum() == 81) && (TARGET(o) == ch || USER(o) == ch);};
     auto gather = ch->getRoom()->gatherObjects(isHoming);
     for(auto obj : gather) {
         act("$p @wloses its target and flies off into the distance.@n", true, nullptr, obj, nullptr, TO_ROOM);
@@ -2664,7 +2650,7 @@ int cook_element(room_rnum room) {
     for(auto obj : filter_raw(con)) {
         if(GET_OBJ_TYPE(obj) == ITEM_CAMPFIRE) {
             found = 1;
-        } else if(obj->vn == 19093) return 2;
+        } else if(obj->getVnum() == 19093) return 2;
     }
 
     return found;
@@ -3003,10 +2989,6 @@ void SET_SKILL_PERF(struct char_data *ch, uint16_t skill, int16_t val) {
     s.perfs = val;
 }
 
-bool OBJWEAR_FLAGGED(struct obj_data *obj, int flag) {
-    return obj->wear_flags.get(static_cast<WearFlag>(flag));
-}
-
 bool OBJ_FLAGGED(struct obj_data *obj, int flag) {
     return obj->item_flags.get(flag);
 }
@@ -3047,12 +3029,12 @@ bool PRF_FLAGGED(struct char_data *ch, int flag) {
     return ch->pref_flags.get(flag);
 }
 
-bool MOB_FLAGGED(struct char_data *ch, int flag) {
-    return ch->mob_flags.get(flag);
-}
-
 bool PLR_FLAGGED(struct char_data *ch, int flag) {
     return ch->player_flags.get(flag);
+}
+
+bool AFF_FLAGGED(struct npc_proto_data *ch, int flag) {
+    return ch->affect_flags.get(flag);
 }
 
 bool AFF_FLAGGED(struct char_data *ch, int flag) {

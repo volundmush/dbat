@@ -183,23 +183,25 @@ struct picky_data {
 };
 
 struct unit_data {
-    virtual ~unit_data() = default;
-    vnum vn{NOTHING}; /* Where in database? Not used by all things. */
-    zone_vnum zone{NOTHING};
+    virtual ~unit_data();
+
+    virtual vnum getVnum() const = 0; // Returns the vnum of the unit.
     
     virtual int getType() const = 0; // 0 is room, 1 is object, 2 is character.
 
-    struct unit_data *proto{};
+    virtual char* getName() = 0;
+    virtual char* getRoomDescription() = 0;
+    virtual char* getLookDescription() = 0;
+    virtual char* getShortDescription() = 0;
+    virtual struct extra_descr_data* getExtraDescription() = 0; // Returns the extra description data.
 
     char *name{};
     char *room_description{};      /* When thing is listed in room */
     char *look_description{};      /* what to show when looked at */
     char *short_description{};     /* when displayed in list or action message. */
-
     struct extra_descr_data *ex_description{}; /* extra descriptions     */
-
     // for DGscripts data.
-    std::vector<trig_vnum> proto_script; /* list of default triggers  */
+    
     long trigger_types{};                /* bitvector of trigger types */
     struct trig_data *trig_list{};            /* list of triggers           */
     struct trig_var_data *global_vars{};    /* list of global variables   */
@@ -220,7 +222,8 @@ struct unit_data {
     void activateContents();
     void deactivateContents();
 
-    std::string scriptString();
+    virtual std::vector<trig_vnum> getProtoScript() const = 0;
+    virtual std::string scriptString() const = 0;
 
     std::string getUID(bool active = false);
     virtual bool isActive() = 0;
@@ -277,22 +280,81 @@ struct thing_data : public unit_data {
 
     SpecialFunc getLocationSpecialFunc() const;
 
+    std::unordered_map<std::string, double> stats;
+
+};
+
+// base struct for both npc_proto_data and item_proto_data
+struct proto_data {
+    virtual ~proto_data();
+    vnum vn{NOTHING};
+    char *name{};
+    char *room_description{};      /* When thing is listed in room */
+    char *look_description{};      /* what to show when looked at */
+    char *short_description{};     /* when displayed in list or action message. */
+    struct extra_descr_data *ex_description{}; /* extra descriptions     */
+    std::vector<trig_vnum> proto_script; /* list of default triggers  */
+    FlagHandler<AffectFlag> affect_flags{}; /* To set affect bits          */
+    std::unordered_map<std::string, double> stats;
+
+    std::string scriptString() const;
+
+    proto_data& operator=(const proto_data& other);
+};
+
+struct item_proto_data : public proto_data, public picky_data {
+    item_proto_data() = default;
+    item_proto_data(obj_data& other);
+    
+    item_proto_data& operator=(obj_data& other);
+    item_proto_data& operator=(item_proto_data& other);
+
+    ItemType type_flag{ItemType::unknown};      /* Type of item                        */
+    std::array<affected_type, MAX_OBJ_AFFECT> affected;  /* affects */
+    FlagHandler<WearFlag> wear_flags{}; /* Where you can wear it     */
+    FlagHandler<ItemFlag> item_flags{}; /* If it hums, glows, etc.  */
+    Size size{Size::medium};           /* Size class of object                */
+    
+    template<typename R = double>
+    R getBaseStat(const std::string& stat) {
+        return itemProtoStats.getBase<R>(this, stat);
+    }
+
+    template<typename R = double>
+    R setBaseStat(const std::string& stat, double val) {
+        return itemProtoStats.setBase<R>(this, stat, val);
+    }
+
+    template<typename R = double>
+    R modBaseStat(const std::string& stat, double val) {
+        return itemProtoStats.modBase<R>(this, stat, val);
+    }
 };
 
 /* ================== Memory Structure for Objects ================== */
 struct obj_data : public thing_data, public picky_data, std::enable_shared_from_this<obj_data> {
+    ~obj_data() override;
+    obj_data& operator=(item_proto_data& proto);
     //~obj_data() override = default;
     int getType() const override { return 1; }
-
+    vnum getVnum() const override;
+    std::vector<trig_vnum> getProtoScript() const override;
+    std::string scriptString() const override;
     std::string serializeLocation();
-
     void deserializeLocation(const std::string& txt, int16_t slot);
-
     void activate();
-
     void deactivate();
-
     double getAffectModifier(uint64_t location, uint64_t specific) override;
+
+    struct item_proto_data *proto{};
+
+    void commit_iedit(const item_proto_data &proto);
+
+    char* getName() override;
+    char* getRoomDescription() override;
+    char* getLookDescription() override;
+    char* getShortDescription() override;
+    extra_descr_data* getExtraDescription() override;
 
     bool active{false};
     bool isActive() override;
@@ -305,11 +367,7 @@ struct obj_data : public thing_data, public picky_data, std::enable_shared_from_
 
     room_vnum room_loaded{NOWHERE};    /* Room loaded in, for room_max checks	*/
 
-    /* legacy Values of the item (see VAL_ list in defs.h)    */
-    std::unordered_map<std::string, int64_t> value;
-
     /* arbitrary named doubles */
-    std::unordered_map<std::string, double> dvalue;
     ItemType type_flag{ItemType::unknown};      /* Type of item                        */
     int level{}; /* Minimum level of object.            */
     
@@ -358,9 +416,60 @@ struct obj_data : public thing_data, public picky_data, std::enable_shared_from_
 
     bool isProvidingLight();
     double currentGravity();
+
+    template<typename R = double>
+    R getBaseStat(const std::string& stat) {
+        return itemStats.getBase<R>(this, stat);
+    }
+
+    template<typename R = double>
+    R setBaseStat(const std::string& stat, double val) {
+        return itemStats.setBase<R>(this, stat, val);
+    }
+
+    template<typename R = double>
+    R modBaseStat(const std::string& stat, double val) {
+        return itemStats.modBase<R>(this, stat, val);
+    }
+
+    template<typename R = double>
+    R gainBaseStat(const std::string& stat, double val, bool applyBonuses = true) {
+        return itemStats.gainBase<R>(this, stat, val, applyBonuses);
+    }
+
+    template<typename R = double>
+    R gainBaseStatPercent(const std::string& stat, double percent, bool applyBonuses = true) {
+        return itemStats.gainBasePercent<R>(this, stat, percent, applyBonuses);
+    }
+
+    template<typename R = double>
+    R getEffectiveStat(const std::string& stat) {
+        return itemStats.getEffective<R>(this, stat);
+    }
 };
 /* ======================================================================= */
 
+struct item_proto : public proto_data, public picky_data {
+    /* legacy Values of the item (see VAL_ list in defs.h)    */
+    std::unordered_map<std::string, int64_t> value;
+
+    /* arbitrary named doubles */
+    std::unordered_map<std::string, double> dvalue;
+    ItemType type_flag{ItemType::unknown};      /* Type of item                        */
+    int level{}; /* Minimum level of object.            */
+    
+    FlagHandler<WearFlag> wear_flags{}; /* Where you can wear it     */
+    FlagHandler<ItemFlag> item_flags{}; /* If it hums, glows, etc.  */
+    weight_t weight{};         /* Weight what else                     */
+
+    int cost{};           /* Value when sold (gp.)               */
+    int cost_per_day{};   /* Cost to keep pr. real day           */
+    int timer{};          /* Timer for object                    */
+    
+    Size size{Size::medium};           /* Size class of object                */
+
+    std::array<affected_type, MAX_OBJ_AFFECT> affected;  /* affects */
+};
 
 /* room-related structures ************************************************/
 
@@ -389,11 +498,24 @@ struct room_direction_data {
 struct room_data : public unit_data, std::enable_shared_from_this<room_data> {
     ~room_data() override;
     int getType() const override { return 0; }
+    zone_vnum zone{NOTHING};
+    vnum getVnum() const override;
+    std::vector<trig_vnum> getProtoScript() const override;
+    std::string scriptString() const override;
     SectorType sector_type{SectorType::inside};            /* sector type (move/hide)            */
     std::array<room_direction_data*, NUM_OF_DIRS> dir_option{}; /* Directions */
     FlagHandler<RoomFlag> room_flags{};   /* DEATH,DARK ... etc */
     FlagHandler<WhereFlag> where_flags{};
     SpecialFunc func{};
+
+    std::vector<trig_vnum> proto_script; /* list of default triggers  */
+    
+
+    char* getName() override;
+    char* getRoomDescription() override;
+    char* getLookDescription() override;
+    char* getShortDescription() override;
+    extra_descr_data* getExtraDescription() override; // Returns the extra description data.
 
     std::list<std::weak_ptr<char_data>> characters;    /* List of characters in room          */
 
@@ -411,7 +533,6 @@ struct room_data : public unit_data, std::enable_shared_from_this<room_data> {
     bool isActive() override;
 
     std::shared_ptr<room_data> shared();
-
 
     std::optional<room_vnum> getLaunchDestination();
 
@@ -458,16 +579,6 @@ struct time_data {
 };
 
 
-/* The pclean_criteria_data is set up in config.c and used in db.c to
-   determine the conditions which will cause a player character to be
-   deleted from disk if the automagic pwipe system is enabled (see config.c).
-*/
-struct pclean_criteria_data {
-    int level;        /* max level for this time limit	*/
-    int days;        /* time limit in days			*/
-};
-
-
 /*
  * Specials needed only by PCs, not NPCs.  Space for this structure is
  * not allocated in memory for NPCs, but it is for PCs. This structure
@@ -477,19 +588,6 @@ struct alias_data {
     std::string name;
     std::string replacement;
     int type{};
-};
-
-/* this can be used for skills that can be used per-day */
-struct memorize_node {
-    int timer;            /* how many ticks till memorized */
-    int spell;            /* the spell number */
-    struct memorize_node *next;    /* link to the next node */
-};
-
-struct innate_node {
-    int timer;
-    int spellnum;
-    struct innate_node *next;
 };
 
 /* Specials used by NPCs, not PCs */
@@ -607,13 +705,53 @@ struct craftTask {
     int improvementRounds = 0;
 };
 
+struct npc_proto_data : public proto_data {
+    Race race{Race::human};
+    std::optional<SubRace> subrace{};
+    Sensei sensei{Sensei::commoner};
+    Sex sex{Sex::male};
+    struct mob_special_data mob_specials{};
+    Size size{Size::undefined};
+    FlagHandler<CharacterFlag> character_flags{};
+    FlagHandler<MobFlag> mob_flags{};
+    FlagHandler<Race> bio_genomes{};
+    FlagHandler<Mutation> mutations{};
+    char *clan{};
+    int crank{}; // clan rank
+
+    template<typename R = double>
+    R getBaseStat(const std::string& stat) {
+        return npcProtoStats.getBase<R>(this, stat);
+    }
+
+    template<typename R = double>
+    R setBaseStat(const std::string& stat, double val) {
+        return npcProtoStats.setBase<R>(this, stat, val);
+    }
+
+    template<typename R = double>
+    R modBaseStat(const std::string& stat, double val) {
+        return npcProtoStats.modBase<R>(this, stat, val);
+    }
+};
 
 /* ================== Structure for player/non-player ===================== */
 struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
     char_data() = default;
+    ~char_data() override;
     // this constructor below is to be used only for the mob_proto map.
     int getType() const override { return 2; }
+    vnum getVnum() const override;
+    char* getName() override;
+    char* getRoomDescription() override;
+    char* getLookDescription() override;
+    char* getShortDescription() override;
+    extra_descr_data* getExtraDescription() override;
+    std::string scriptString() const override;
+    struct npc_proto_data *proto{}; /* For NPCs, this is the prototype data. */
+    char_data& operator=(npc_proto_data& proto);
 
+    std::vector<trig_vnum> getProtoScript() const override;
     void activate();
     void deactivate();
 
@@ -642,8 +780,6 @@ struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
     Sex sex{Sex::male};
 
     // Base stats for this unit.
-    std::unordered_map<std::string, double> stats;
-
     std::unordered_map<Appearance, std::string> appearances;
     std::string getAppearance(Appearance type, bool withTransform = true);
     const char* getAppearanceStr(Appearance type);

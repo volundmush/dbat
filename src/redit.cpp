@@ -181,7 +181,6 @@ void redit_setup_new(struct descriptor_data *d) {
 
     OLC_ROOM(d)->name = strdup("An unfinished room");
     OLC_ROOM(d)->look_description = strdup("You are in an unfinished room.\r\n");
-    OLC_ROOM(d)->vn = NOWHERE;
     OLC_ITEM_TYPE(d) = WLD_TRIGGER;
     OLC_SCRIPT(d).clear();
 
@@ -264,10 +263,10 @@ void redit_save_internally(struct descriptor_data *d) {
     int j, room_num, new_room = false;
     struct descriptor_data *dsc;
 
-    if (OLC_ROOM(d)->vn == NOWHERE) {
+    if (OLC_ROOM(d)->getVnum() == NOWHERE) {
         new_room = true;
     }
-    OLC_ROOM(d)->vn = OLC_NUM(d);
+    OLC_ROOM(d)->id = OLC_NUM(d);
     /* FIXME: Why is this not set elsewhere? */
     OLC_ROOM(d)->zone = OLC_ZNUM(d);
 
@@ -279,8 +278,6 @@ void redit_save_internally(struct descriptor_data *d) {
 
     /* Update triggers */
     /* Free old proto list */
-    if (get_room(room_num)->proto_script != OLC_SCRIPT(d))
-        free_proto_script(get_room(room_num), WLD_TRIGGER);
 
     get_room(room_num)->proto_script = OLC_SCRIPT(d);
     assign_triggers(get_room(room_num), WLD_TRIGGER);
@@ -334,7 +331,7 @@ void free_room(struct room_data *room) {
     free_room_strings(room);
 
     extract_script(room, WLD_TRIGGER);
-    free_proto_script(room, WLD_TRIGGER);
+    room->proto_script.clear();
 
     /* Free the room. */
     free(room);    /* XXX ? */
@@ -1060,7 +1057,7 @@ void redit_parse(struct descriptor_data *d, char *arg) {
 
         case REDIT_DELETE:
             if (*arg == 'y' || *arg == 'Y') {
-                if (delete_room(real_room(OLC_ROOM(d)->vn)))
+                if (delete_room(real_room(OLC_ROOM(d)->getVnum())))
                     write_to_output(d, "Room deleted.\r\n");
                 else
                     write_to_output(d, "Couldn't delete the room!\r\n");

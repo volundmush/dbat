@@ -134,7 +134,8 @@ void deletePlayerCharacter(std::weak_ptr<char_data> ref) {
     }), acc->characters.end());
 
     // Let the destructor take it from here, and pray.
-    free_char(ch.get());
+    units.erase(ch->id);
+    uniqueCharacters.erase(ch->id);
 }
 
 bool account_data::canBeDeleted() {

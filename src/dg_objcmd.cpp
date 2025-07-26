@@ -276,7 +276,7 @@ OCMD(do_otimer) {
     else if (!isdigit(*arg))
         obj_log(obj, "otimer: bad argument");
     else
-        GET_OBJ_TIMER(obj) = atoi(arg);
+        obj->setBaseStat("timer", atoi(arg));
 }
 
 
@@ -288,6 +288,9 @@ OCMD(do_otransform) {
     obj_data *o, tmpobj;
     struct char_data *wearer = nullptr;
     int pos = 0;
+
+    obj_log(obj, "otransform: currently disabled");
+    return;
 
     one_argument(argument, arg);
 
@@ -309,15 +312,6 @@ OCMD(do_otransform) {
         }
 
         /* move new obj info over to old object and delete new obj */
-        memcpy(&tmpobj, o, sizeof(*o));
-        IN_ROOM(&tmpobj) = IN_ROOM(obj);
-        tmpobj.carried_by = obj->carried_by;
-        tmpobj.worn_by = obj->worn_by;
-        tmpobj.worn_on = obj->worn_on;
-        tmpobj.in_obj = obj->in_obj;
-        tmpobj.id = obj->id;
-        tmpobj.proto_script = obj->proto_script;
-        memcpy(obj, &tmpobj, sizeof(*obj));
 
         if (wearer) {
             equip_char(wearer, obj, pos);

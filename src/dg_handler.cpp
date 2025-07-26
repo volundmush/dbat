@@ -101,16 +101,18 @@ void extract_script(unit_data *thing, int type) {
     script_data *sc = thing;
     struct trig_data *trig, *next_trig;
 
-    if(!thing->trig_list) return;
-
-    for (trig = TRIGGERS(sc); trig; trig = next_trig) {
-        next_trig = trig->next;
-        extract_trigger(trig);
+    if(thing->trig_list) {
+        for (trig = TRIGGERS(sc); trig; trig = next_trig) {
+            next_trig = trig->next;
+            extract_trigger(trig);
+        }
+        TRIGGERS(sc) = nullptr;
     }
-    TRIGGERS(sc) = nullptr;
+    if (thing->global_vars) {
+        free_varlist(thing->global_vars);
+        thing->global_vars = nullptr;
+    }
 
-    /* Thanks to James Long for tracking down this memory leak */
-    free_varlist(sc->global_vars);
 }
 
 /* erase the script memory of a mob */
@@ -124,11 +126,4 @@ void extract_script_mem(struct script_memory *sc) {
     }
 }
 
-void free_proto_script(struct unit_data *thing, int type) {
-    thing->proto_script.clear();
-}
-
-void copy_proto_script(struct unit_data *source, struct unit_data *dest, int type) {
-    dest->proto_script = source->proto_script;
-}
 

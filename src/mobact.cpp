@@ -80,7 +80,7 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
                     basic_mud_log("SYSERR: %s (#%d): Attempting to call non-existing mob function.",
                                   GET_NAME(ch), GET_MOB_VNUM(ch));
                     ch->mob_flags.set(MOB_SPEC, false);
-                    auto &mp = mob_proto[ch->vn];
+                    auto &mp = mob_proto[ch->getVnum()];
                     mp.mob_flags.set(MOB_SPEC, false);
                 } else {
                     char actbuf[MAX_INPUT_LENGTH] = "";

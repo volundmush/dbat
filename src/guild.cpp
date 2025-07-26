@@ -1149,7 +1149,7 @@ SPECIAL(guild) {
     };
 
     for (auto &[vn, g] : guild_index)
-        if (g.keeper == keeper->vn) {
+        if (g.keeper == keeper->getVnum()) {
             guild_nr = vn;
             break;
         }

@@ -475,7 +475,7 @@ int shop_producing(struct obj_data *item, vnum shop_nr) {
     auto &shop = shop_index[shop_nr];
 
     auto find = std::ranges::find_if(shop.producing, [&](const auto &product) {
-        return (product == item->vn);
+        return (product == item->getVnum());
     });
     return (find != shop.producing.end());
 }
@@ -621,7 +621,7 @@ static int buy_price(struct obj_data *obj, vnum shop_nr, struct char_data *keepe
 
     double adjust = 1.0;
 
-    adjust -= 0.00025 * objectSubscriptions.count(fmt::format("vnum_{}", obj->vn));
+    adjust -= 0.00025 * objectSubscriptions.count(fmt::format("vnum_{}", obj->getVnum()));
 
     if (adjust < 0.015) {
         adjust = 0.5;
@@ -658,7 +658,7 @@ static int sell_price(struct obj_data *obj, vnum shop_nr, struct char_data *keep
         sell_cost_modifier = buy_cost_modifier;
 
     double adjust = 1.0;
-    adjust -= 0.00025 * objectSubscriptions.count(fmt::format("vnum_{}", obj->vn));
+    adjust -= 0.00025 * objectSubscriptions.count(fmt::format("vnum_{}", obj->getVnum()));
 
     if (adjust < 0.15) {
         adjust = 0.15;
@@ -758,7 +758,7 @@ static void shopping_app(char *arg, struct char_data *ch, struct char_data *keep
         search_replace(bits, "TAKE", "");
         send_to_char(ch, "@GWear Loc.   @W:@w%s\n", bits);
         if (GET_OBJ_TYPE(obj) == ITEM_WEAPON) {
-            auto wlvl = obj->value[VAL_WEAPON_LEVEL];
+            auto wlvl = obj->getBaseStat<int64_t>(VAL_WEAPON_LEVEL);
             if (wlvl == 1) {
                 send_to_char(ch, "@GWeapon Level@W: @D[@C1@D]\n@GDamage Bonus@W: @D[@w5%s@D]@n\r\n", "%");
             } else if (wlvl == 2) {
@@ -978,7 +978,7 @@ static obj_data* slide_obj(obj_data* obj, char_data* keeper, int shop_nr)
     if (shop_producing(obj, shop_nr)) {
         int temp = GET_OBJ_RNUM(obj);
         extract_obj(obj);
-        return &obj_proto[temp];
+        return nullptr;
     }
 
     // step 3: increment sort
@@ -1067,9 +1067,9 @@ static void sort_keeper_objs(struct char_data *keeper, vnum shop_nr)
             continue; // skip null
         }
 
-        // Check if shop_producing(sp.get(), shop_nr) and keeper doesn't have sp->vn
-        // We'll rely on sp->vn or sp->obj_vnum or similar
-        if (shop_producing(sp.get(), shop_nr) && !keeper->findObjectVnum(sp->vn)) {
+        // Check if shop_producing(sp.get(), shop_nr) and keeper doesn't have sp->getVnum()
+        // We'll rely on sp->getVnum() or sp->obj_vnum or similar
+        if (shop_producing(sp.get(), shop_nr) && !keeper->findObjectVnum(sp->getVnum())) {
             // The old code does obj_to_char(temp, keeper)
             // We'll store sp in keeper->objects
             obj_to_char(sp.get(), keeper);
@@ -1315,7 +1315,7 @@ SPECIAL(shop_keeper) {
     vnum shop_nr = NOTHING;
 
     for (auto &[nr, sh] : shop_index) {
-        if (sh.keeper == keeper->vn) {
+        if (sh.keeper == keeper->getVnum()) {
             shop_nr = nr;
             break;
         }
@@ -1574,7 +1574,7 @@ static void list_detailed_shop(struct char_data *ch, vnum shop_nr) {
     send_to_char(ch, "\r\nShopkeeper: ");
     if (sh.keeper != NOBODY) {
         send_to_char(ch, "%s (#%d), Special Function: %s\r\n",
-                     GET_NAME(&mob_proto[SHOP_KEEPER(shop_nr)]),
+                     mob_proto[SHOP_KEEPER(shop_nr)].short_description,
                      sh.keeper,
                      YESNO(SHOP_FUNC(shop_nr)));
 
@@ -1723,7 +1723,7 @@ void shop_data::runPurge() {
     for(auto keeper : filter_raw(keepers)) {
         auto con = keeper->getObjects();
         for (auto sobj : filter_raw(con)) {
-            if(isProducing(sobj->vn)) {
+            if(isProducing(sobj->getVnum())) {
                 keeper->modBaseStat("money_carried", GET_OBJ_COST(sobj));
                 extract_obj(sobj);
             }

@@ -36,17 +36,17 @@ room_rnum add_room(struct room_data *room) {
     if (!room)
         return NOWHERE;
 
-    if (world.contains(room->vn)) {
-        auto ro = world.at(room->vn).get();
+    if (world.contains(room->getVnum())) {
+        auto ro = world.at(room->getVnum()).get();
         extract_script(ro, WLD_TRIGGER);
         copy_room(ro, room);
-        basic_mud_log("GenOLC: add_room: Updated existing room #%d.", room->vn);
+        basic_mud_log("GenOLC: add_room: Updated existing room #%d.", room->getVnum());
         return i;
     }
     auto sh = std::shared_ptr<room_data>(room);
-    world[room->vn] = sh;
-    units[room->vn] = sh;
-    basic_mud_log("GenOLC: add_room: Added room %d.", room->vn);
+    world[room->getVnum()] = sh;
+    units[room->getVnum()] = sh;
+    basic_mud_log("GenOLC: add_room: Added room %d.", room->getVnum());
 
     /*
      * Return what array entry we placed the new room in.
@@ -69,7 +69,7 @@ int delete_room(room_rnum rnum) {
     room = get_room(rnum);
 
     /* This is something you might want to read about in the logs. */
-    basic_mud_log("GenOLC: delete_room: Deleting room #%d (%s).", room->vn, room->name);
+    basic_mud_log("GenOLC: delete_room: Deleting room #%d (%s).", room->getVnum(), room->name);
 
     if (r_mortal_start_room == rnum) {
         basic_mud_log("WARNING: GenOLC: delete_room: Deleting mortal start room!");
@@ -101,7 +101,7 @@ int delete_room(room_rnum rnum) {
     }
 
     extract_script(room, WLD_TRIGGER);
-    free_proto_script(room, WLD_TRIGGER);
+    room->proto_script.clear();
 
     /*
      * Change any exit going to this room to go the void.
@@ -246,7 +246,7 @@ room_data::~room_data() {
 }
 
 bool room_data::isActive() {
-    return world.contains(vn);
+    return world.contains(id);
 }
 
 
@@ -383,7 +383,7 @@ static const std::vector<std::pair<std::pair<room_vnum, room_vnum>, double>> gra
 };
 
 double room_data::getEnvironment(int type) {
-    auto planet = getPlanet(vn);
+    auto planet = getPlanet(getVnum());
     switch(type) {
         case ENV_GRAVITY: {
             // check for a gravity generator...
@@ -394,7 +394,7 @@ double room_data::getEnvironment(int type) {
 
             // check gravityRanges
             for(const auto& [range, grav] : gravityRanges) {
-                if(vn >= range.first && vn <= range.second) {
+                if(id >= range.first && id <= range.second) {
                     return grav;
                 }
             }
@@ -437,4 +437,45 @@ double room_data::getEnvironment(int type) {
     }
     if(environment.contains(type)) return environment[type];
     return 0.0;
+}
+
+vnum room_data::getVnum() const {
+    return id;
+}
+
+char* room_data::getName() {
+    if(name) return name;
+    return nullptr;
+}
+
+char* room_data::getRoomDescription() {
+    if(room_description) return room_description;
+    return nullptr;
+}
+
+char* room_data::getLookDescription() {
+    if(look_description) return look_description;
+    return nullptr;
+}
+
+char* room_data::getShortDescription() {
+    if(short_description) return short_description;
+    return nullptr;
+}
+
+extra_descr_data* room_data::getExtraDescription() {
+    if(ex_description) return ex_description;
+    return nullptr;
+}
+
+std::vector<trig_vnum> room_data::getProtoScript() const {
+    return proto_script;
+}
+
+std::string room_data::scriptString() const {
+    std::vector<std::string> vnums;
+    auto proto_script = getProtoScript();
+    for(auto p : proto_script) vnums.emplace_back(std::move(std::to_string(p)));
+
+    return fmt::format("@D[@wT{}@D]@n", fmt::join(vnums, ","));
 }

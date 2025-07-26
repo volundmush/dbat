@@ -423,20 +423,33 @@ constexpr double SECS_PER_GAME_YEAR = (SECS_PER_MONTH*MONTHS_PER_YEAR);
 #define IS_NPC(ch)    ((ch)->character_flags.get(CharacterFlag::is_npc))
 #define IS_MOB(ch)    (IS_NPC(ch) && mob_proto.count(GET_MOB_RNUM(ch)))
 
-extern bool MOB_FLAGGED(struct char_data *ch, int flag);
-extern bool PLR_FLAGGED(struct char_data *ch, int flag);
+template<typename T>
+bool MOB_FLAGGED(T* ch, int flag) {
+    return ch->mob_flags.get(flag);
+};
+
+
 extern bool AFF_FLAGGED(struct char_data *ch, int flag);
+extern bool AFF_FLAGGED(struct npc_proto_data *ch, int flag);
+
+extern bool PLR_FLAGGED(struct char_data *ch, int flag);
 extern bool PRF_FLAGGED(struct char_data *ch, int flag);
 extern bool ADM_FLAGGED(struct char_data *ch, int flag);
+
 bool WHERE_FLAGGED(room_vnum loc, WhereFlag flag);
 bool WHERE_FLAGGED(struct room_data *loc, WhereFlag flag);
 bool ROOM_FLAGGED(room_vnum loc, int flag);
 bool ROOM_FLAGGED(struct room_data *loc, int flag);
 
+template<typename T>
+bool OBJWEAR_FLAGGED(T *obj, int flag) {
+    return obj->wear_flags.get(static_cast<WearFlag>(flag));
+}
+
 #define EXIT_FLAGGED(exit, flag) (IS_SET((exit)->exit_info, (flag)))
 extern bool OBJAFF_FLAGGED(struct obj_data *obj, int flag);
 #define OBJVAL_FLAGGED(obj, flag) (IS_SET(GET_OBJ_VAL((obj), VAL_CONTAINER_FLAGS), (flag)))
-extern bool OBJWEAR_FLAGGED(struct obj_data *obj, int flag);
+
 extern bool OBJ_FLAGGED(struct obj_data *obj, int flag);
 #define BODY_FLAGGED(ch, flag) ((ch)->bodyparts.test(flag))
 #define ZONE_FLAGGED(rnum, flag)   (zone_table[(rnum)].zone_flags.get((flag)))
@@ -466,8 +479,8 @@ extern bool OBJ_FLAGGED(struct obj_data *obj, int flag);
 #define IS_DARK(room)    room_is_dark((room))
 #define IS_LIGHT(room)  (!IS_DARK(room))
 
-#define VALID_ROOM_RNUM(rnum)    (world.count(rnum) > 0 && rnum != NOWHERE)
-#define GET_ROOM_VNUM(rnum) (VALID_ROOM_RNUM(rnum) ? get_room((rnum))->vn : NOWHERE)
+#define VALID_ROOM_RNUM(rnum)    (world.contains(rnum) > 0 && rnum != NOWHERE)
+#define GET_ROOM_VNUM(rnum) (VALID_ROOM_RNUM(rnum) ? (rnum) : NOWHERE)
 #define GET_ROOM_SPEC(room) \
     (VALID_ROOM_RNUM(room) ? get_room((room))->func : nullptr)
 
@@ -483,9 +496,9 @@ extern bool OBJ_FLAGGED(struct obj_data *obj, int flag);
 #define GET_WAS_IN(ch)    ((ch)->getBaseStat<room_vnum>("was_in_room"))
 #define GET_AGE(ch)     ((ch)->time.currentAge())
 
-#define GET_PC_NAME(ch)    ((ch)->name)
+#define GET_PC_NAME(ch)    ((ch)->getName())
 #define GET_NAME(ch)    (IS_NPC(ch) ? \
-             (ch)->short_description : GET_PC_NAME(ch))
+             (ch)->getShortDescription() : GET_PC_NAME(ch))
 #define GET_TITLE(ch)   ((ch)->desc ? ((ch)->desc->title ? (ch)->desc->title : "[Unset Title]") : "@D[@GNew User@D]")
 #define GET_USER_TITLE(d) ((d)->title)
 #define GET_PHASE(ch)   ((ch)->getBaseStat<int>("starphase"))
@@ -547,7 +560,7 @@ extern int GET_SPEEDI(struct char_data *ch);
 #define IS_WEIGHTED(ch) ((ch)->getBaseStat("speednar") < 1.0)
 
 
-#define GET_EXP(ch)      ((ch)->getExperience())
+#define GET_EXP(ch)      ((ch)->getBaseStat("experience"))
 /*
  * Changed GET_AC to GET_ARMOR so that code with GET_AC will need to be
  * looked at to see if it needs to change before being converted to use
@@ -688,9 +701,9 @@ void SET_SKILL_PERF(struct char_data *ch, uint16_t skill, int16_t val);
 
 #define GET_EQ(ch, i)        ((ch)->equipment[i])
 
-#define GET_MOB_SPEC(ch)    (IS_MOB(ch) ? mob_index[(ch)->vn].func : 0)
-#define GET_MOB_RNUM(mob)    ((mob)->vn)
-#define GET_MOB_VNUM(mob)    (IS_MOB(mob) ? (mob_index.count((mob)->vn) ? (mob)->vn : NOBODY) : NOBODY)
+#define GET_MOB_SPEC(ch)    (IS_MOB(ch) ? mob_index[(ch)->getVnum()].func : 0)
+#define GET_MOB_RNUM(mob)    ((mob)->getVnum())
+#define GET_MOB_VNUM(mob)    ((mob)->getVnum())
 
 #define GET_DEFAULT_POS(ch)    ((ch)->mob_specials.default_pos)
 #define MEMORY(ch)        ((ch)->mob_specials.memory)
@@ -757,20 +770,29 @@ extern void WAIT_STATE(struct char_data *ch, double timeToWait);
  */
 #define VALID_OBJ_RNUM(obj)    (obj_proto.contains(GET_OBJ_RNUM(obj)))
 
-int64_t GET_OBJ_VAL(struct obj_data* obj, const std::string& val);
-int64_t SET_OBJ_VAL(struct obj_data* obj, const std::string& val, int newval);
-int64_t MOD_OBJ_VAL(struct obj_data* obj, const std::string& val, int mod);
+template<typename T>
+int64_t GET_OBJ_VAL(T* obj, const std::string& val) {
+    return obj->getBaseStat(val);
+}
+template<typename T>
+int64_t SET_OBJ_VAL(T* obj, const std::string& val, int newval) {
+    return obj->setBaseStat(val, newval);
+}
+template<typename T>
+int64_t MOD_OBJ_VAL(T* obj, const std::string& val, int mod) {
+    return obj->modBaseStat(val, mod);
+}
 
-#define GET_OBJ_LEVEL(obj)      ((obj)->level)
+#define GET_OBJ_LEVEL(obj)      ((obj)->getBaseStat<int>("level"))
 #define GET_OBJ_PERM(obj)       ((obj)->affect_flags)
 #define GET_OBJ_TYPE(obj)    (static_cast<int>((obj)->type_flag))
-#define GET_OBJ_COST(obj)    ((obj)->cost)
-#define GET_OBJ_RENT(obj)    ((obj)->cost_per_day)
+#define GET_OBJ_COST(obj)    ((obj)->getBaseStat<int>("cost"))
+#define GET_OBJ_RENT(obj)    ((obj)->getBaseStat<int>("cost_per_day"))
 #define GET_OBJ_EXTRA(obj)    ((obj)->item_flags)
 #define GET_OBJ_EXTRA_AR(obj, i)   ((obj)->item_flags.get((i)))
 #define GET_OBJ_WEAR(obj)    ((obj)->wear_flags)
-#define GET_OBJ_WEIGHT(obj)    ((obj)->weight)
-#define GET_OBJ_TIMER(obj)    ((obj)->timer)
+#define GET_OBJ_WEIGHT(obj)    ((obj)->getBaseStat<weight_t>("weight"))
+#define GET_OBJ_TIMER(obj)    ((obj)->getBaseStat<int>("timer"))
 #define SITTING(obj)            ((obj)->sitting.lock().get())
 #define GET_OBJ_POSTTYPE(obj)   ((obj)->posttype)
 #define GET_OBJ_POSTED(obj)     ((obj)->posted_to)
@@ -793,9 +815,8 @@ int64_t MOD_OBJ_VAL(struct obj_data* obj, const std::string& val, int mod);
 #define HCHARGE(obj)            (GET_OBJ_VAL((obj), VAL_BED_HTANK_CHARGE))
 #define GET_LAST_LOAD(obj)      ((obj)->lload)
 #define GET_OBJ_SIZE(obj)    (static_cast<int>((obj)->size))
-#define GET_OBJ_RNUM(obj)    ((obj)->vn)
-#define GET_OBJ_VNUM(obj)    (VALID_OBJ_RNUM(obj) ? \
-                GET_OBJ_RNUM(obj) : NOTHING)
+#define GET_OBJ_RNUM(obj)    ((obj)->getVnum())
+#define GET_OBJ_VNUM(obj)    ((obj)->getVnum())
 #define GET_OBJ_SPEC(obj)    (VALID_OBJ_RNUM(obj) ? \
                 obj_index[GET_OBJ_RNUM(obj)].func : 0)
 #define GET_FUEL(obj)           (GET_OBJ_VAL((obj), VAL_VEHICLE_FUEL))
@@ -806,7 +827,7 @@ int64_t MOD_OBJ_VAL(struct obj_data* obj, const std::string& val, int mod);
 
 #define CAN_WEAR(obj, part)    OBJWEAR_FLAGGED((obj), (part))
 #define GET_OBJ_MATERIAL(obj)   (GET_OBJ_VAL((obj), VAL_ALL_MATERIAL))
-#define GET_OBJ_SHORT(obj)    ((obj)->short_description)
+#define GET_OBJ_SHORT(obj)    ((obj)->getShortDescription())
 
 /* compound utilities and other macros **********************************/
 
@@ -822,8 +843,8 @@ int64_t MOD_OBJ_VAL(struct obj_data* obj, const std::string& val, int mod);
 #define HMHR(ch) (GET_SEX(ch) != Sex::neutral ? (GET_SEX(ch)==SEX_MALE ? "him": (GET_SEX(ch)==SEX_FEMALE ? "her" : "their")) : "it")
 #define MAFE(ch) (GET_SEX(ch) != Sex::neutral ? (GET_SEX(ch)==SEX_MALE ? "male": (GET_SEX(ch)==SEX_FEMALE ? "female" : "androgynous")) : "questionably gendered")
 
-#define ANA(obj) (strchr("aeiouAEIOU", *(obj)->name) ? "An" : "A")
-#define SANA(obj) (strchr("aeiouAEIOU", *(obj)->name) ? "an" : "a")
+#define ANA(obj) (strchr("aeiouAEIOU", *(obj)->getName()) ? "An" : "A")
+#define SANA(obj) (strchr("aeiouAEIOU", *(obj)->getName()) ? "an" : "a")
 
 
 /* Various macros building up to CAN_SEE */
@@ -873,10 +894,10 @@ int64_t MOD_OBJ_VAL(struct obj_data* obj, const std::string& val, int mod);
                         race::getName((ch)->race).c_str()))
 
 #define OBJS(obj, vict) (CAN_SEE_OBJ((vict), (obj)) ? \
-    (obj)->short_description  : "something")
+    (obj)->getShortDescription()  : "something")
 
 #define OBJN(obj, vict) (CAN_SEE_OBJ((vict), (obj)) ? \
-    fname((obj)->name) : "something")
+    fname((obj)->getName()) : "something")
 
 
 #define EXIT(ch, door)  ((ch)->getRoom()->dir_option[door])

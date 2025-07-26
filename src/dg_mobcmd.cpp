@@ -990,7 +990,7 @@ ACMD(do_mtransform) {
 
     /* Thanks to Russell Ryan for this fix. RRfon we need to copy the
     the strings so we don't end up free'ing the prototypes later */
-    ch->vn = m->vn;
+    ch->proto = m->proto;
     if (m->name) {
         if(ch->name) free(ch->name);
         ch->name = strdup(m->name);
@@ -1011,7 +1011,6 @@ ACMD(do_mtransform) {
         if(ch->look_description) free(ch->look_description);
         ch->look_description = strdup(m->look_description);
     }
-    ch->proto_script = m->proto_script;
     ch->appearances = m->appearances;
     ch->mob_specials = m->mob_specials;
     ch->stats = m->stats;
@@ -1020,7 +1019,6 @@ ACMD(do_mtransform) {
     ch->sensei = m->sensei;
     ch->race = m->race;
     ch->affect_flags = m->affect_flags;
-    ch->zone = m->zone;
     ch->ex_description = m->ex_description;
 
     extract_char(m);

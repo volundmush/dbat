@@ -6,7 +6,7 @@ struct room_data* thing_data::getRoom() const {
 }
 
 room_vnum thing_data::getRoomVnum() const {
-    return room ? room->vn : NOWHERE;
+    return room ? room->getVnum() : NOWHERE;
 }
 
 std::string thing_data::getLocationName() const {

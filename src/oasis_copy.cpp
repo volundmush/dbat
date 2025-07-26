@@ -292,7 +292,6 @@ ACMD(do_dig) {
         /* Copy the room's description.*/
         OLC_ROOM(d)->look_description = strdup("You are in an unfinished room.\r\n");
         OLC_ROOM(d)->zone = OLC_ZNUM(d);
-        OLC_ROOM(d)->vn = NOWHERE;
 
         /*
          * Save the new room to memory.
@@ -464,7 +463,6 @@ int buildwalk(struct char_data *ch, int dir) {
             sprintf(buf, "This unfinished room was created by %s.\r\n", GET_NAME(ch));
             OLC_ROOM(d)->look_description = strdup(buf);
             OLC_ROOM(d)->zone = OLC_ZNUM(d);
-            OLC_ROOM(d)->vn = NOWHERE;
 
             /*
              * Save the new room to memory.

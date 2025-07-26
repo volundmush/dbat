@@ -347,8 +347,9 @@ trig_data* read_trigger(int nr);
 extern void trig_data_copy(trig_data *this_data, const trig_data *trg);
 
 extern void dg_read_trigger(FILE *fp, struct unit_data *proto, int type);
+extern void dg_read_trigger(FILE *fp, struct proto_data *proto, int type);
 
-extern void dg_obj_trigger(char *line, struct obj_data *obj);
+extern void dg_obj_trigger(char *line, struct item_proto_data *obj);
 
 extern void assign_triggers(struct unit_data *i, int type);
 
@@ -386,10 +387,6 @@ extern void extract_trigger(struct trig_data *trig);
 extern void extract_script(unit_data *thing, int type);
 
 extern void extract_script_mem(struct script_memory *sc);
-
-extern void free_proto_script(struct unit_data *thing, int type);
-
-extern void copy_proto_script(struct unit_data *source, struct unit_data *dest, int type);
 
 /* from dg_comm.c */
 extern char *any_one_name(char *argument, char *first_arg);

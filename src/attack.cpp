@@ -2367,7 +2367,7 @@ namespace atk {
 
     void TwinSlash::attackPreprocess() {
         auto wobj = GET_EQ(user, WEAR_WIELD1);
-        int wlvl = wobj->value[VAL_WEAPON_LEVEL];
+        int wlvl = wobj->getBaseStat<int64_t>(VAL_WEAPON_LEVEL);
 
         if (initSkill >= 100) {
             calcDamage += (calcDamage * 0.05) * wlvl;
@@ -4625,7 +4625,7 @@ namespace atk {
 
     void WeaponAttack::calculateDamage() {
         calcDamage = damtype(user, -1, initSkill, attPerc);
-        auto wlvl = weap->value[VAL_WEAPON_LEVEL];
+        auto wlvl = weap->getBaseStat<int64_t>(VAL_WEAPON_LEVEL);
         switch(wlvl) {
             case 1:
                 calcDamage += calcDamage * 0.05;
@@ -4908,7 +4908,7 @@ namespace atk {
             weap = GET_EQ(user, WEAR_WIELD2);
         }
 
-        switch(weap->value[VAL_WEAPON_LEVEL]) {
+        switch(weap->getBaseStat<int64_t>(VAL_WEAPON_LEVEL)) {
             case 2:
                 guncost = 2;
                 break;

@@ -73,10 +73,10 @@ std::unordered_map<int, std::shared_ptr<trig_data>> uniqueScripts;
 struct char_data *affect_list = nullptr; /* global linked list of chars with affects */
 struct char_data *affectv_list = nullptr; /* global linked list of chars with round-based affects */
 std::map<mob_vnum, struct index_data> mob_index;    /* index table for mobile file	 */
-std::map<mob_vnum, struct char_data> mob_proto;    /* prototypes for mobs		 */
+std::map<mob_vnum, struct npc_proto_data> mob_proto;    /* prototypes for mobs		 */
 
 std::map<obj_vnum, struct index_data> obj_index;    /* index table for object file	 */
-std::map<obj_vnum, struct obj_data> obj_proto;    /* prototypes for objs		 */
+std::map<obj_vnum, struct item_proto_data> obj_proto;    /* prototypes for objs		 */
 
 std::map<zone_vnum, struct zone_data> zone_table;    /* zone table			 */
 
@@ -783,7 +783,7 @@ int vnum_material(char *searchname, struct char_data *ch) {
     int found = 0;
 
     for (auto &o : obj_proto)
-        if (isname(searchname, material_names[o.second.value[VAL_ALL_MATERIAL]])) {
+        if (isname(searchname, material_names[o.second.getBaseStat<int>(VAL_ALL_MATERIAL)])) {
             send_to_char(ch, "%3d. [%5d] %-40s %s\r\n",
                          ++found, o.first, o.second.short_description,
                          !o.second.proto_script.empty() ? o.second.scriptString().c_str() : "");
@@ -798,7 +798,7 @@ int vnum_weapontype(char *searchname, struct char_data *ch) {
 
     for (auto &o : obj_proto)
         if (o.second.type_flag == ItemType::weapon) {
-            if (isname(searchname, weapon_type[o.second.value[VAL_WEAPON_SKILL]])) {
+            if (isname(searchname, weapon_type[o.second.getBaseStat<int>(VAL_WEAPON_SKILL)])) {
                 send_to_char(ch, "%3d. [%5d] %-40s %s\r\n",
                              ++found, o.first, o.second.short_description,
                              !o.second.proto_script.empty() ? o.second.scriptString().c_str() : "");
@@ -814,7 +814,7 @@ int vnum_armortype(char *searchname, struct char_data *ch) {
 
     for (auto &o : obj_proto)
         if (o.second.type_flag == ItemType::armor) {
-            if (isname(searchname, armor_type[o.second.value[VAL_ARMOR_SKILL]])) {
+            if (isname(searchname, armor_type[o.second.getBaseStat<int>(VAL_ARMOR_SKILL)])) {
                 send_to_char(ch, "%3d. [%5d] %-40s %s\r\n",
                              ++found, o.first, o.second.short_description,
                              !o.second.proto_script.empty() ? o.second.scriptString().c_str() : "");
@@ -838,7 +838,6 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
     auto mob = sh.get();
 
     *mob = proto->second;
-    mob->proto = &(proto->second);
     mob->id = getNextUnitID();
     mob->generation = time(nullptr);
     uniqueCharacters.emplace(mob->id, sh);
@@ -1364,7 +1363,6 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
     mob->setBaseStat("position", mob->mob_specials.default_pos);
     for(const auto& i : {0, 1, 2, 3}) mob->limb_condition[i] = 100;
 
-    copy_proto_script(&proto->second, mob, MOB_TRIGGER);
     assign_triggers(mob, MOB_TRIGGER);
     racial_body_parts(mob);
 
@@ -1407,24 +1405,17 @@ struct obj_data *read_object(obj_vnum nr, int type) /* and obj_rnum */
     }
     auto sh = std::make_shared<obj_data>();
     auto obj = sh.get();
+    // the operator= will copy the prototype data into the new object.
     *obj = proto->second;
-    obj->proto = &(proto->second);
+
     OBJ_LOADROOM(obj) = NOWHERE;
     obj->id = getNextUnitID();
     obj->generation = time(nullptr);
     uniqueObjects.emplace(obj->id, sh);
     units.emplace(obj->id, sh);
 
-    if (proto->second.sbinfo) {
-        CREATE(obj->sbinfo, struct obj_spellbook_spell, SPELLBOOK_SIZE);
-        for (j = 0; j < SPELLBOOK_SIZE; j++) {
-            obj->sbinfo[j].spellname = proto->second.sbinfo[j].spellname;
-            obj->sbinfo[j].pages = proto->second.sbinfo[j].pages;
-        }
-    }
-    copy_proto_script(&proto->second, obj, OBJ_TRIGGER);
     assign_triggers(obj, OBJ_TRIGGER);
-    if (GET_OBJ_VNUM(obj) == 65) {
+    if (nr == 65) {
         SET_OBJ_VAL(obj, VAL_BED_HTANK_CHARGE, 20);
     }
     if (GET_OBJ_TYPE(obj) == ITEM_FOOD) {
@@ -2003,94 +1994,6 @@ void free_followers(struct follow_type *k) {
 
     k->follower = nullptr;
     free(k);
-}
-
-
-/* release memory allocated for a char struct */
-void free_char(struct char_data *ch) {
-    int i;
-
-    if(ch->vn == NOBODY) {
-        if (GET_NAME(ch))
-            free(GET_NAME(ch));
-        if (GET_VOICE(ch))
-            free(GET_VOICE(ch));
-        if (GET_CLAN(ch))
-            free(GET_CLAN(ch));
-        if (ch->title)
-            free(ch->title);
-        if (ch->short_description)
-            free(ch->short_description);
-        if (ch->room_description)
-            free(ch->room_description);
-        if (ch->look_description)
-            free(ch->look_description);
-
-    } else {
-        auto &m = mob_proto[ch->vn];
-        if (ch->name && ch->name != m.name)
-            free(ch->name);
-        if (ch->title && ch->title != m.title)
-            free(ch->title);
-        if (ch->short_description && ch->short_description != m.short_description)
-            free(ch->short_description);
-        if (ch->room_description && ch->room_description != m.room_description)
-            free(ch->room_description);
-        if (ch->look_description && ch->look_description != m.look_description)
-            free(ch->look_description);
-    }
-
-    while (ch->affected)
-        affect_remove(ch, ch->affected);
-
-    /* free any assigned scripts */
-
-    extract_script(ch, MOB_TRIGGER);
-
-    /* new version of free_followers take the followers pointer as arg */
-    free_followers(ch->followers);
-
-    if (ch->desc)
-        ch->desc->character = nullptr;
-
-    /* find_char helper */
-    /*
-  * when free_char is called with a blank character struct, ID is set
-  * to 0, and has not yet been added to the lookup table.
-  */
-    if(ch->id != NOTHING) {
-        units.erase(ch->id);
-        uniqueCharacters.erase(ch->id);
-    }
-}
-
-
-/* release memory allocated for an obj struct */
-void free_obj(struct obj_data *obj) {
-
-    if (GET_OBJ_RNUM(obj) == NOWHERE) {
-        free_object_strings(obj);
-    } else {
-        free_object_strings_proto(obj);
-    }
-
-    /* Let's make sure that we free up this memory */
-    if (obj->auctname) {
-        free(obj->auctname);
-    }
-
-    /* free any assigned scripts */
-    extract_script(obj, OBJ_TRIGGER);
-
-    if (obj->sbinfo)
-        free(obj->sbinfo);
-
-    if(obj->id != NOTHING) {
-        units.erase(obj->id);
-        uniqueObjects.erase(obj->id);
-    }
-
-    // the shared pointer in uniqueObjects should be the last one, so the destructor is now called.
 }
 
 /*

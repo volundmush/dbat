@@ -629,7 +629,7 @@ void combine_attacks(struct char_data *ch, struct char_data *vict) {
 
 int check_ruby(struct char_data *ch) {
 
-    auto isHotRuby = [](const auto&o) {return o->vn == 6600 && OBJ_FLAGGED(o, ITEM_HOT);};
+    auto isHotRuby = [](const auto&o) {return o->getVnum() == 6600 && OBJ_FLAGGED(o, ITEM_HOT);};
     auto ruby = ch->findObject(isHotRuby);
 
     if (ruby) {
@@ -4924,10 +4924,10 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                 send_to_char(ch, "@D[@GDamage@W: @R%s@D]@n", add_commas(dmg).c_str());
                 send_to_char(vict, "@D[@rDamage@W: @R%s@D]@n\r\n", add_commas(dmg).c_str());
                 //int64_t healhp = GET_HIT(vict) * 0.12;
-                if (auto scouter = GET_EQ(ch, WEAR_EYE); scouter && scouter->value[VAL_WORN_SCOUTER] && vict && !PRF_FLAGGED(ch, PRF_NODEC)) {
+                if (auto scouter = GET_EQ(ch, WEAR_EYE); scouter && scouter->getBaseStat<int64_t>(VAL_WORN_SCOUTER) && vict && !PRF_FLAGGED(ch, PRF_NODEC)) {
                     if (IS_ANDROID(vict)) {
                         send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
-                    } else if (vict->getPL() >= scouter->value[VAL_WORN_SCOUTER]) {
+                    } else if (vict->getPL() >= scouter->getBaseStat<int64_t>(VAL_WORN_SCOUTER)) {
                         send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
                     } else {
                         send_to_char(ch, " @D<@YProcessing@D: @c%s - @r%s%%@D>@n\r\n", add_commas(vict->getPL()).c_str(), std::to_string((int) ((1.0 - vict->getCurVitalDam(CharVital::powerlevel)) * 100)));
@@ -4939,9 +4939,9 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                 if (dmg <= 1 && suppresso == false && !PRF_FLAGGED(ch, PRF_NODEC)) {
                     send_to_char(ch, "@D[@GDamage@W: @BPitiful...@D]@n");
                     send_to_char(vict, "@D[@rDamage@W: @BPitiful...@D]@n\r\n");
-                    if (auto scouter = GET_EQ(ch, WEAR_EYE); scouter && scouter->value[VAL_WORN_SCOUTER] && vict && !PRF_FLAGGED(ch, PRF_NODEC)) {
+                    if (auto scouter = GET_EQ(ch, WEAR_EYE); scouter && scouter->getBaseStat<int64_t>(VAL_WORN_SCOUTER) && vict && !PRF_FLAGGED(ch, PRF_NODEC)) {
                         auto vpl = vict->getPL();
-                        if (IS_ANDROID(vict) || vpl > scouter->value[VAL_WORN_SCOUTER]) {
+                        if (IS_ANDROID(vict) || vpl > scouter->getBaseStat<int64_t>(VAL_WORN_SCOUTER)) {
                             send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
                         } else {
                             send_to_char(ch, " @D<@YProcessing@D: @c%s - @r%s%%@D>@n\r\n", add_commas(vpl).c_str(), std::to_string((int) ((1.0 - vict->getCurVitalDam(CharVital::powerlevel)) * 100)));
@@ -4960,9 +4960,9 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                     
                     vict->decCurHealth(calcdamage);
 
-                    if (auto scouter = GET_EQ(ch, WEAR_EYE); scouter && scouter->value[VAL_WORN_SCOUTER] && vict && !PRF_FLAGGED(ch, PRF_NODEC)) {
+                    if (auto scouter = GET_EQ(ch, WEAR_EYE); scouter && scouter->getBaseStat<int64_t>(VAL_WORN_SCOUTER) && vict && !PRF_FLAGGED(ch, PRF_NODEC)) {
                         auto vpl = vict->getPL();
-                        if (IS_ANDROID(vict) || vpl >= scouter->value[VAL_WORN_SCOUTER]) {
+                        if (IS_ANDROID(vict) || vpl >= scouter->getBaseStat<int64_t>(VAL_WORN_SCOUTER)) {
                             send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
                         } else {
                             send_to_char(ch, " @D<@YProcessing@D: @c%s - @r%s%%@D>@n\r\n", add_commas(vpl).c_str(), std::to_string((int) ((1.0 - vict->getCurVitalDam(CharVital::powerlevel)) * 100)));
@@ -4972,9 +4972,9 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                     }
                 } else if (dmg <= 1 && suppresso == true && !PRF_FLAGGED(ch, PRF_NODEC)) {
                     send_to_char(ch, "@D[@GDamage@W: @BPitiful...@D]@n");
-                    if (auto scouter = GET_EQ(ch, WEAR_EYE); scouter && scouter->value[VAL_WORN_SCOUTER] && vict && !PRF_FLAGGED(ch, PRF_NODEC)) {
+                    if (auto scouter = GET_EQ(ch, WEAR_EYE); scouter && scouter->getBaseStat<int64_t>(VAL_WORN_SCOUTER) && vict && !PRF_FLAGGED(ch, PRF_NODEC)) {
                         auto vpl = vict->getPL();
-                        if (IS_ANDROID(vict) || vpl >= scouter->value[VAL_WORN_SCOUTER]) {
+                        if (IS_ANDROID(vict) || vpl >= scouter->getBaseStat<int64_t>(VAL_WORN_SCOUTER)) {
                             send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
                         } else {
                             send_to_char(ch, " @D<@YProcessing@D: @c%s - @r%s%%@D>@n\r\n", add_commas(vpl).c_str(), std::to_string((int) ((1.0 - vict->getCurVitalDam(CharVital::powerlevel)) * 100)));
@@ -5059,11 +5059,11 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                         dmg *= 10;
                     act("$p@w cracks some.@n", true, ch, obj, nullptr, TO_CHAR);
                     act("$p@w cracks some.@n", true, ch, obj, nullptr, TO_ROOM);
-                    GET_OBJ_WEIGHT(obj) -= dmg;
+                    obj->modBaseStat<weight_t>("weight", -dmg);
                     if (GET_FELLOW_WALL(obj)) {
                         struct obj_data *wall;
                         wall = GET_FELLOW_WALL(obj);
-                        GET_OBJ_WEIGHT(wall) -= dmg;
+                        wall->modBaseStat<weight_t>("weight", -dmg);
                         act("$p@w cracks some. A humanoid shadow can be seen moving on the other side.@n", true,
                             nullptr, obj, nullptr, TO_ROOM);
                     }
@@ -5071,11 +5071,11 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                     dmg *= 30;
                     act("$p@w melts some.@n", true, ch, obj, nullptr, TO_CHAR);
                     act("$p@w melts some.@n", true, ch, obj, nullptr, TO_ROOM);
-                    GET_OBJ_WEIGHT(obj) -= dmg;
+                    obj->modBaseStat<weight_t>("weight", -dmg);
                     if (GET_FELLOW_WALL(obj)) {
                         struct obj_data *wall;
                         wall = GET_FELLOW_WALL(obj);
-                        GET_OBJ_WEIGHT(wall) -= dmg;
+                        wall->modBaseStat<weight_t>("weight", -dmg);
                         act("$p@w melts some.@n", true, ch, obj, nullptr, TO_ROOM);
                     }
                 }

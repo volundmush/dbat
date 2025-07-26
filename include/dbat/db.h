@@ -185,7 +185,7 @@ extern void free_extra_descriptions(struct extra_descr_data *edesc);
 
 extern void free_text_files();
 
-extern void free_player_index();
+extern void free_followers(struct follow_type *k);
 
 extern void load_disabled();
 
@@ -215,31 +215,11 @@ extern int vnum_mobile(char *searchname, struct char_data *ch);
 
 extern void reset_char(struct char_data *ch);
 
-extern void free_char(struct char_data *ch);
-
-extern void save_player_index();
-
-extern long get_ptable_by_name(const char *name);
-
-extern void read_level_data(struct char_data *ch, FILE *fl);
-
-extern void write_level_data(struct char_data *ch, FILE *fl);
-
 struct obj_data *create_obj();
-
-extern void free_obj(struct obj_data *obj);
 
 struct obj_data *read_object(obj_vnum nr, int type);
 
 extern int vnum_object(char *searchname, struct char_data *ch);
-
-extern void add_unique_id(struct obj_data *obj);
-
-extern void check_unique_id(struct obj_data *obj);
-
-extern void add_unique_id(struct char_data *ch);
-
-extern void check_unique_id(struct char_data *ch);
 
 extern char *sprintuniques(int low, int high);
 
@@ -285,14 +265,13 @@ extern struct descriptor_data *descriptor_list;
 extern std::map<int64_t, struct descriptor_data*> sessions;
 
 extern std::map<mob_vnum, struct index_data> mob_index;
-extern std::map<mob_vnum, struct char_data> mob_proto;
+extern std::map<mob_vnum, struct npc_proto_data> mob_proto;
 
 extern std::unordered_map<int, std::shared_ptr<char_data>> uniqueCharacters;
 extern std::vector<std::weak_ptr<char_data>> getAllCharacters();
 
-
 extern std::map<obj_vnum, struct index_data> obj_index;
-extern std::map<obj_vnum, struct obj_data> obj_proto;
+extern std::map<obj_vnum, struct item_proto_data> obj_proto;
 
 extern std::unordered_map<int, std::shared_ptr<obj_data>> uniqueObjects;
 extern std::vector<std::weak_ptr<obj_data>> getAllObjects();

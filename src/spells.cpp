@@ -454,7 +454,7 @@ ASPELL(spell_portal) {
     SET_OBJ_VAL(portal, VAL_PORTAL_DEST, victim->getRoomVnum());
     SET_OBJ_VAL(portal, VAL_ALL_HEALTH, 100);
     SET_OBJ_VAL(portal, VAL_ALL_MAXHEALTH, 100);
-    GET_OBJ_TIMER(portal) = (int) (level / 10);
+    portal->setBaseStat<int>("timer", level / 10);
     obj_to_room(portal, IN_ROOM(ch));
     act("$n opens a portal in thin air.",
         true, ch, nullptr, nullptr, TO_ROOM);
@@ -465,7 +465,7 @@ ASPELL(spell_portal) {
     SET_OBJ_VAL(tportal, VAL_PORTAL_DEST, ch->getRoomVnum());
     SET_OBJ_VAL(tportal, VAL_ALL_HEALTH, 100);
     SET_OBJ_VAL(tportal, VAL_ALL_MAXHEALTH, 100);
-    GET_OBJ_TIMER(tportal) = (int) (level / 10);
+    tportal->setBaseStat<int>("timer", level / 10);
     obj_to_room(tportal, IN_ROOM(victim));
     act("A shimmering portal appears out of thin air.",
         true, victim, nullptr, nullptr, TO_ROOM);

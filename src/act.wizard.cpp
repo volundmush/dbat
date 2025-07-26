@@ -621,14 +621,23 @@ ACMD(do_finddoor) {
     char buf[MAX_STRING_LENGTH] = {0};
     struct char_data *tmp_char;
     struct obj_data *obj;
+    char *sdesc;
 
     one_argument(argument, arg);
 
     if (!*arg) {
         send_to_char(ch, "Format: finddoor <obj/vnum>\r\n");
-    } else if (is_number(arg)) {
+        return;
+    }
+    
+    if (is_number(arg)) {
         vnum = atoi(arg);
-        obj = &obj_proto[real_object(vnum)];
+        if(!obj_proto.contains(vnum)) {
+            send_to_char(ch, "There is no object with that vnum.\r\n");
+            return;
+        }
+        auto o = obj_proto.at(vnum);
+        sdesc = o.short_description;
     } else {
         generic_find(arg,
                      FIND_OBJ_INV | FIND_OBJ_ROOM | FIND_OBJ_WORLD | FIND_OBJ_EQUIP,
@@ -637,10 +646,12 @@ ACMD(do_finddoor) {
             send_to_char(ch, "What key do you want to find a door for?\r\n");
         else
             vnum = GET_OBJ_VNUM(obj);
+            sdesc = obj->getShortDescription();
     }
+
     if (vnum != NOTHING) {
         len = snprintf(buf, sizeof(buf), "Doors unlocked by key [%d] %s are:\r\n",
-                       vnum, GET_OBJ_SHORT(obj));
+                       vnum, sdesc);
         for (auto &[vn, r] : world) {
             for (d = 0; d < NUM_OF_DIRS; d++) {
                 auto &e = r->dir_option[d];
@@ -661,7 +672,7 @@ ACMD(do_finddoor) {
         }
         else
             send_to_char(ch, "No doors were found for key [%d] %s.\r\n",
-                         vnum, GET_OBJ_SHORT(obj));
+                         vnum, sdesc);
     }
 }
 
@@ -1222,8 +1233,8 @@ static void do_stat_room(struct char_data *ch) {
 
     sprinttype(static_cast<int>(rm->sector_type), sector_types, buf2, sizeof(buf2));
     send_to_char(ch, "Zone: [%3d], VNum: [@g%5d@n], RNum: [%5d], IDNum: [%5ld], Type: %s\r\n",
-                 zone_table[rm->zone].number, rm->vn, IN_ROOM(ch),
-                 (long) rm->vn, buf2);
+                 zone_table[rm->zone].number, rm->getVnum(), IN_ROOM(ch),
+                 (long) rm->getVnum(), buf2);
 
     sprintbitarray(rm->room_flags.getAll(), room_bits, RF_ARRAY_MAX, buf2);
     send_to_char(ch, "Room Damage: %d, Room Effect: %d\r\n", rm->getDamage(), rm->ground_effect);
@@ -1309,7 +1320,7 @@ static void do_stat_room(struct char_data *ch) {
     /* check the room for a script */
     do_sstat(ch, rm);
 
-    list_zone_commands_room(ch, rm->vn);
+    list_zone_commands_room(ch, rm->getVnum());
 }
 
 
@@ -1459,9 +1470,9 @@ static void do_stat_object(struct char_data *ch, struct obj_data *j) {
             send_to_char(ch, "Coins: %d\r\n", GET_OBJ_VAL(j, VAL_MONEY_SIZE));
             break;
         default: {
-            std::vector<std::string> value(j->value.size());
-            for(auto &[nm, val] : j->value) value.emplace_back(fmt::format("[{}:{}]", nm, val));
-            send_to_char(ch, "%s", fmt::format("Values 0-{}:\r\n{}\r\n", j->value.size()-1, fmt::join(value, " ")));
+            std::vector<std::string> value(j->stats.size());
+            for(auto &[nm, val] : j->stats) value.emplace_back(fmt::format("[{}:{}]", nm, val));
+            send_to_char(ch, "%s", fmt::format("Values 0-{}:\r\n{}\r\n", j->stats.size()-1, fmt::join(value, " ")));
         }
             break;
     }
@@ -1549,7 +1560,7 @@ static void do_stat_character(struct char_data *ch, struct char_data *k) {
 
         send_to_char(ch, "Title: %s\r\n", k->title ? k->title : "<None>");
 
-    send_to_char(ch, "L-Des: %s@n", k->room_description ? k->room_description : "<None>\r\n");
+    send_to_char(ch, "L-Des: %s@n", k->getRoomDescription() ? k->getRoomDescription() : "<None>\r\n");
     snprintf(buf, sizeof(buf), "%s", sensei::getName(k->sensei).c_str());
     snprintf(buf2, sizeof(buf2), "%s", race::getName(k->race).c_str());
     send_to_char(ch, "Class: %s, Race: %s, Lev: [@y%2d@n], XP: [@y%" I64T "@n]\r\n",
@@ -3320,7 +3331,6 @@ ACMD(do_show) {
             vict = findPlayer(value);
             if (!vict) {
                 send_to_char(ch, "There is no such player.\r\n");
-                free_char(vict);
                 return;
             }
             send_to_char(ch, "Player: %-12s (%s) [%2d %s %s]\r\n", GET_NAME(vict),
@@ -4438,8 +4448,6 @@ constexpr int MAX_COLOUMN_WIDTH = 80;       /* at most 80 chars per line */
 
 ACMD (do_zcheck) {
     zone_rnum zrnum;
-    struct obj_data *obj;
-    struct char_data *mob = nullptr;
     room_vnum exroom = 0;
     int ac = 0;
     int affs = 0, tohit, todam, value;
@@ -4467,9 +4475,9 @@ ACMD (do_zcheck) {
 
     send_to_char(ch, "Checking Mobs for limits...\r\n");
     /*check mobs first*/
-    for (auto &m : mob_proto) {
+    for (auto &[vn, mo] : mob_proto) {
         if (real_zone_by_thing(mob_index[i].vn) == zrnum) {  /*is mob in this zone?*/
-            mob = &mob_proto[i];
+            auto mob = &mo;
             if (!strcmp(mob->name, "mob unfinished") && (found = 1))
                 len += snprintf(buf + len, sizeof(buf) - len,
                                 "- Alias hasn't been set.\r\n");
@@ -4550,8 +4558,8 @@ ACMD (do_zcheck) {
             if (found) {
                 send_to_char(ch,
                              "%s[%5d]%s %-30s: %s\r\n%s",
-                             CCCYN(ch, C_NRM), GET_MOB_VNUM(mob),
-                             CCYEL(ch, C_NRM), GET_NAME(mob),
+                             CCCYN(ch, C_NRM), vn,
+                             CCYEL(ch, C_NRM), mob->short_description,
                              CCNRM(ch, C_NRM), buf);
             }
             /* reset buffers and found flag */
@@ -4563,9 +4571,9 @@ ACMD (do_zcheck) {
 
     /************** Check objects *****************/
     send_to_char(ch, "\r\nChecking Objects for limits...\r\n");
-    for (auto &o : obj_proto) {
-        if (real_zone_by_thing(o.first) == zrnum) { /*is object in this zone?*/
-            obj = &o.second;
+    for (auto &[vn, ob] : obj_proto) {
+        if (real_zone_by_thing(vn) == zrnum) { /*is object in this zone?*/
+            auto obj = &ob;
             switch (GET_OBJ_TYPE(obj)) {
                 case ITEM_WEAPON:
                     if (GET_OBJ_VAL(obj, VAL_WEAPON_DAMTYPE) >= NUM_ATTACK_TYPES && (found = 1))
@@ -4663,7 +4671,7 @@ ACMD (do_zcheck) {
                                 "- has unformatted extra description\r\n");
             /*****ADDITIONAL OBJ CHECKS HERE*****/
             if (found) {
-                send_to_char(ch, "[%5d] %-30s: \r\n%s", GET_OBJ_VNUM(obj), obj->short_description, buf);
+                send_to_char(ch, "[%5d] %-30s: \r\n%s", vn, obj->short_description, buf);
             }
             strcpy(buf, "");
             len = 0;
@@ -4690,7 +4698,7 @@ ACMD (do_zcheck) {
                     if (ex->zone == real_zone(offlimit_zones[k]) && (found = 1))
                         len += snprintf(buf + len, sizeof(buf) - len,
                                         "- Exit %s cannot connect to %d (zone off limits).\r\n",
-                                        dirs[j], ex->vn);
+                                        dirs[j], ex->getVnum());
                 } /* for (k.. */
             } /* cycle directions */
 
@@ -4777,7 +4785,7 @@ static void mob_checkload(struct char_data *ch, mob_vnum mvnum) {
                              "ERROR");
             } else {
                 send_to_char(ch, "  [%5d] %s (%d MaxW, %d MaxW)\r\n",
-                             room->vn,
+                             room->getVnum(),
                              room->name,
                              c.arg2, c.arg4);
             }
@@ -4826,7 +4834,7 @@ static void obj_checkload(struct char_data *ch, obj_vnum ovnum) {
                     if (c.arg1 == ovnum) {
                         if(lastroom) {
                             send_to_char(ch, "  [%5d] %s (%d MaxR, %d MaxW)\r\n",
-                                         lastroom->vn,
+                                         lastroom->getVnum(),
                                          lastroom->name,
                                          c.arg2, c.arg4);
                         } else {
@@ -4842,7 +4850,7 @@ static void obj_checkload(struct char_data *ch, obj_vnum ovnum) {
                     if (c.arg1 == ovnum) {
                         if(lastroom && lastobj != obj_proto.end()) {
                             send_to_char(ch, "  [%5d] %s (Put in another object [%d Max])\r\n",
-                                         lastroom->vn,
+                                         lastroom->getVnum(),
                                          lastroom->name,
                                          c.arg2);
                         } else {

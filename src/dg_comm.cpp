@@ -395,7 +395,7 @@ void send_to_scouter(const char *messg, struct char_data *ch, int num, int type)
         if (!obj) continue;
         if (IN_ROOM(ch) == IN_ROOM(tch)) continue;
 
-        auto scoutVal = obj->value[VAL_WORN_SCOUTER];
+        auto scoutVal = obj->getBaseStat<int64_t>(VAL_WORN_SCOUTER);
         if (type == 0) {
             if (num == 1) {
                 if (pl >= scoutVal) {

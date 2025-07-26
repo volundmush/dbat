@@ -518,7 +518,7 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg) {
                                 SET_OBJ_VAL(obj, VAL_WEAPON_DAMTYPE, TYPE_POUND - TYPE_HIT);
                                 break;
                         }
-                        GET_OBJ_LEVEL(obj) = 20;
+                        obj->setBaseStat("level", 20);
                     }
                     for(auto f : {ITEM_SLOT2, ITEM_CUSTOM}) obj->item_flags.set(f, true);
                     d->obj_editflag = EDIT_NONE;
