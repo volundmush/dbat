@@ -222,7 +222,7 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg) {
                     obj->item_flags.set(ITEM_RESTRING, true);
                     write_to_output(d, "Purchase complete.");
                     send_to_imm("Restring Eq: %s has bought: %s, which was %s.", GET_NAME(d->character),
-                                obj->short_description, d->obj_was);
+                                obj->getShortDescription(), d->obj_was);
                     STATE(d) = CON_PLAYING;
                 } else if (!strcasecmp(arg, "No") || !strcasecmp(arg, "no") || !strcasecmp(arg, "n") ||
                            !strcasecmp(arg, "N")) {
@@ -525,8 +525,8 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg) {
                     d->obj_editval = EDIT_NONE;
                     d->character->modRPP(-20);
                     obj->size = static_cast<Size>(get_size(d->character));
-                    send_to_imm("Custom Eq: %s has bought: %s.", GET_NAME(d->character), obj->short_description);
-                    d->account->customs.emplace_back(obj->short_description);
+                    send_to_imm("Custom Eq: %s has bought: %s.", GET_NAME(d->character), obj->getShortDescription());
+                    d->account->customs.emplace_back(obj->getShortDescription());
                     log_custom(d, obj);
                 } else if (!strcasecmp(arg, "n") || !strcasecmp(arg, "N")) {
                     write_to_output(d, "Canceling purchase at no cost.\r\n");

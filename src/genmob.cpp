@@ -23,13 +23,9 @@
 #include "dbat/filter.h"
 
 /* From db.c */
-int update_mobile_strings(struct char_data *t, struct char_data *f);
-
 void check_mobile_strings(struct char_data *mob);
 
 void check_mobile_string(mob_vnum i, char **string, const char *dscr);
-
-int copy_mobile_strings(struct char_data *t, struct char_data *f);
 
 /* local functions */
 void extract_mobile_all(mob_vnum vnum);
@@ -111,68 +107,9 @@ int delete_mobile(mob_rnum refpt) {
     return refpt;
 }
 
-int copy_mobile_strings(struct char_data *t, struct char_data *f) {
-    if (f->name)
-        t->name = strdup(f->name);
-    if (f->title)
-        t->title = strdup(f->title);
-    if (f->short_description)
-        t->short_description = strdup(f->short_description);
-    if (f->room_description)
-        t->room_description = strdup(f->room_description);
-    if (f->look_description)
-        t->look_description = strdup(f->look_description);
-    return true;
-}
-
-int update_mobile_strings(struct char_data *t, struct char_data *f) {
-    if (f->name)
-        t->name = f->name;
-    if (f->title)
-        t->title = f->title;
-    if (f->short_description)
-        t->short_description = f->short_description;
-    if (f->room_description)
-        t->room_description = f->room_description;
-    if (f->look_description)
-        t->look_description = f->look_description;
-    return true;
-}
-
-int free_mobile_strings(struct char_data *mob) {
-    if (mob->name)
-        free(mob->name);
-    if (mob->title)
-        free(mob->title);
-    if (mob->short_description)
-        free(mob->short_description);
-    if (mob->room_description)
-        free(mob->room_description);
-    if (mob->look_description)
-        free(mob->look_description);
-    return true;
-}
 
 
-/* Free a mobile structure that has been edited. Take care of existing mobiles 
- * and their mob_proto!  */
-int free_mobile(struct char_data *mob) {
-    mob_rnum i;
 
-    if (mob == nullptr)
-        return false;
-
-    /* Non-prototyped mobile.  Also known as new mobiles.  */
-    free_mobile_strings(mob);
-    while (mob->affected)
-        affect_remove(mob, mob->affected);
-
-    /* free any assigned scripts */
-    extract_script(mob, MOB_TRIGGER);
-
-    free(mob);
-    return true;
-}
 
 int save_mobiles(zone_rnum zone_num) {
     return true;
@@ -297,6 +234,15 @@ void char_data::deactivate() {
     active = false;
     char_data *temp = nullptr;
 
+    if(trig_list) {
+        struct trig_data *next_trig;
+        for (auto trig = trig_list; trig; trig = next_trig) {
+            next_trig = trig->next;
+            extract_trigger(trig);
+        }
+        trig_list = nullptr;
+    }
+
     auto sh = shared_from_this();
     characterSubscriptions.unsubscribeFromAll(sh);
     deactivateContents();
@@ -399,10 +345,14 @@ extra_descr_data* char_data::getExtraDescription() {
 
 char_data::~char_data() {
     if(title) free(title);
+    struct affected_type *cmtemp;
 
     while (affected)
-        affect_remove(this, affected);
+        REMOVE_FROM_LIST(affected, this->affected, next, cmtemp);
 
+    while (affectedv)
+        REMOVE_FROM_LIST(affectedv, this->affectedv, next, cmtemp);
+    
     free_followers(followers);
 
     if (desc)

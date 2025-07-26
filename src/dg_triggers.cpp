@@ -132,13 +132,12 @@ void random_mtrigger(char_data *ch) {
 }
 
 void bribe_mtrigger(char_data *ch, char_data *actor, int amount) {
-    trig_data *t;
     char buf[MAX_INPUT_LENGTH];
 
     if (!SCRIPT_CHECK(ch, MTRIG_BRIBE) || AFF_FLAGGED(ch, AFF_CHARM))
         return;
 
-    for (t = TRIGGERS(SCRIPT(ch)); t; t = t->next) {
+    for (auto t = TRIGGERS(SCRIPT(ch)); t; t = t->next) {
         if (TRIGGER_CHECK(t, MTRIG_BRIBE) && (amount >= GET_TRIG_NARG(t))) {
             snprintf(buf, sizeof(buf), "%d", amount);
             add_var(&GET_TRIG_VARS(t), "amount", buf, 0);

@@ -35,6 +35,7 @@ void parse_trigger(FILE *trig_f, trig_vnum nr) {
     idx.vn = nr;
 
     auto trig = new trig_data();
+    trig->vn = nr;
 
     idx.proto = trig;
     auto &z = zone_table[real_zone_by_thing(nr)];

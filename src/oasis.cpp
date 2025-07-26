@@ -287,7 +287,7 @@ void cleanup_olc(struct descriptor_data *d, int8_t cleanup_type) {
      * Either way, we need to get rid of this.
      */
     if (OLC_TRIG(d)) {
-        free_trigger(OLC_TRIG(d));
+        delete OLC_TRIG(d);
         OLC_TRIG(d) = nullptr;
     }
     /*

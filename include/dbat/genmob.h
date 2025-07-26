@@ -7,16 +7,9 @@
 
 #include "structs.h"
 
-
 extern int delete_mobile(mob_rnum);
 
 extern int add_mobile(struct npc_proto_data *, mob_vnum);
-
-extern int copy_mob_strings(struct char_data *to, struct char_data *from);
-
-extern int free_mobile_strings(struct char_data *mob);
-
-extern int free_mobile(struct char_data *mob);
 
 extern int save_mobiles(zone_rnum rznum);
 

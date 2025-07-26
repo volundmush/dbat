@@ -115,10 +115,19 @@ cdef extern from "dbat/structs.h":
         trig_data *next_in_world
         shared_ptr[trig_data] shared()
 
+    cdef cppclass proto_data:
+        int vn
+
+        char* name
+        char* room_description
+        char* look_description
+        char* short_description
+        extra_descr_data *ex_description
+        vector[int] proto_script
+        unordered_map[string, double] stats
 
     cdef cppclass unit_data:
-        int vn
-        int zone
+        int getVnum() const
         int getType() const
         unit_data* proto
 
@@ -130,7 +139,7 @@ cdef extern from "dbat/structs.h":
 
         extra_descr_data *ex_description
         # dgscripts data
-        vector[int] proto_script
+        
         long trigger_types
         long script_context
 
@@ -179,6 +188,9 @@ cdef extern from "dbat/structs.h":
         int getLocationGroundEffect() const
         int setLocationGroundEffect(int val) const
         int modLocationGroundEffect(int val)
+    
+    cdef cppclass item_proto_data(proto_data):
+        pass
 
     cdef cppclass obj_data(thing_data):
         bool active
@@ -254,6 +266,8 @@ cdef extern from "dbat/structs.h":
         room_data* getDestination()
 
     cdef cppclass room_data(unit_data):
+        int zone
+        vector[int] proto_script
         int sector_type
         list[weak_ptr[char_data]] characters
         int timed
@@ -320,6 +334,9 @@ cdef extern from "dbat/structs.h":
         bool unLocked
         double vars[5]
         double blutz
+
+    cdef cppclass npc_proto_data(proto_data):
+        pass
 
     cdef cppclass char_data(thing_data):
         shared_ptr[char_data] shared()

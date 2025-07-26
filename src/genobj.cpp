@@ -67,45 +67,12 @@ int save_objects(zone_rnum zone_num) {
     return true;
 }
 
-/*
- * Free all, unconditionally.
- */
-void free_object_strings(struct obj_data *obj) {
-    if (obj->name)
-        free(obj->name);
-    if (obj->room_description)
-        free(obj->room_description);
-    if (obj->short_description)
-        free(obj->short_description);
-    if (obj->look_description)
-        free(obj->look_description);
-}
 
 /*
  * For object instances that are not the prototype.
  */
 
-void copy_object_strings(struct obj_data *to, struct obj_data *from) {
-    to->name = from->name ? strdup(from->name) : nullptr;
-    to->room_description = from->room_description ? strdup(from->room_description) : nullptr;
-    to->short_description = from->short_description ? strdup(from->short_description) : nullptr;
-    to->look_description = from->look_description ? strdup(from->look_description) : nullptr;
-}
 
-int copy_object(struct obj_data *to, struct obj_data *from) {
-    free_object_strings(to);
-    return copy_object_main(to, from, true);
-}
-
-int copy_object_preserve(struct obj_data *to, struct obj_data *from) {
-    return copy_object_main(to, from, false);
-}
-
-static int copy_object_main(struct obj_data *to, struct obj_data *from, int free_object) {
-    *to = *from;
-    copy_object_strings(to, from);
-    return true;
-}
 
 int delete_object(obj_rnum rnum) {
     obj_rnum i;

@@ -318,7 +318,7 @@ ACMD(do_dig) {
     e->keyword = nullptr;
     e->to_room = rrnum;
     send_to_char(ch, "You make an exit %s to room %d (%s).\r\n",
-                 dirs[dir], rvnum, get_room(rrnum)->name);
+                 dirs[dir], rvnum, get_room(rrnum)->getName());
 
     /*
      * check if we can dig from there to here.

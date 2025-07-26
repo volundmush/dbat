@@ -131,7 +131,7 @@ void do_dg_cast(void *go, script_data *sc, trig_data *trig,
         /* set the caster's name to that of the object, or the gods.... */
         if (type == OBJ_TRIGGER)
             caster->short_description =
-                    strdup(((struct obj_data *) go)->short_description);
+                    strdup(((struct obj_data *) go)->getShortDescription());
         else if (type == WLD_TRIGGER)
             caster->short_description = strdup("The gods");
         char_to_room(caster, caster_room);
@@ -304,7 +304,7 @@ void script_damage(struct char_data *vict, int dam) {
     if (GET_POS(vict) == POS_DEAD) {
         if (!IS_NPC(vict))
             mudlog(BRF, 0, true, "%s killed by script at %s",
-                   GET_NAME(vict), vict->getRoom()->name);
+                   GET_NAME(vict), vict->getRoom()->getName());
         die(vict, nullptr);
     }
 }

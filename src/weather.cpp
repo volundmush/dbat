@@ -30,9 +30,9 @@ static void grow_plants() {
         if (k->getRoomFlag(ROOM_GARDEN1) || k->getRoomFlag(ROOM_GARDEN2)) {
             if (GET_OBJ_VAL(k, VAL_PLANT_WATERLEVEL) < 0 && GET_OBJ_VAL(k, VAL_PLANT_WATERLEVEL) > -10) {
                 if (MOD_OBJ_VAL(k, VAL_PLANT_WATERLEVEL, -1) > -10) {
-                    k->broadcastAtLocation(fmt::format("{}@y withers a bit.\r\n", k->short_description));
+                    k->broadcastAtLocation(fmt::format("{}@y withers a bit.\r\n", k->getShortDescription()));
                 } else {
-                    k->broadcastAtLocation(fmt::format("{}@y has withered to a dried up dead husk.\r\n", k->short_description));
+                    k->broadcastAtLocation(fmt::format("{}@y has withered to a dried up dead husk.\r\n", k->getShortDescription()));
                 }
             } else if (GET_OBJ_VAL(k, VAL_PLANT_WATERLEVEL) >= 0) {
                 
@@ -44,7 +44,7 @@ static void grow_plants() {
                         MOD_OBJ_VAL(k, VAL_PLANT_MATURITY, 1);
                     }
                     if (GET_OBJ_VAL(k, VAL_PLANT_MATURITY) >= GET_OBJ_VAL(k, VAL_PLANT_MAXMATURE)) {
-                        k->broadcastAtLocation(fmt::format("{}@G is now fully grown!@n\r\n", k->short_description));
+                        k->broadcastAtLocation(fmt::format("{}@G is now fully grown!@n\r\n", k->getShortDescription()));
                     }
                 }
             }

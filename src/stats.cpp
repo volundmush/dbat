@@ -466,7 +466,7 @@ static void init_item_stats() {
 "candy_st", "whichattr", "attrchance", "size", "destination_room", "fuel", "fuelcount",
 "external_room", "location", "viewport", "default_room", "vehicle_vnum", "speed",
 "appear", "read", "write", "erase", "comfort_level", "htank_charge", "mat_goal",
-"maturity", "max_mature", "water_level", "bait", "level", "weight", "cost", "cost_per_day"}) {
+"maturity", "max_mature", "water_level", "bait", "level", "weight", "cost", "cost_per_day", "energy", "keycode"}) {
         itemStats.addStat(s)
         .addTag("item")
         ;

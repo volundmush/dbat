@@ -232,9 +232,9 @@ static void generate_multiform(struct char_data *ch, int count) {
         return;
     }
 
-    auto clone_name = fmt::format("{}'s Clone", ch->name);
-    auto clone_sdesc = fmt::format("{}'s @CClone@n", ch->name);
-    auto clone_ldesc = fmt::format("{}'s @CClone@w is standing here.@n\n", ch->name);
+    auto clone_name = fmt::format("{}'s Clone", ch->getName());
+    auto clone_sdesc = fmt::format("{}'s @CClone@n", ch->getName());
+    auto clone_ldesc = fmt::format("{}'s @CClone@w is standing here.@n\n", ch->getName());
 
     for (int i = 0; i < count; i++) {
         char_data *clone = nullptr;
@@ -5588,7 +5588,7 @@ ACMD(do_spoil) {
     body_part->getVnum();
     IN_ROOM(body_part) = NOWHERE;
 
-    std::string part = obj->name;
+    std::string part = obj->getName();
     for(const auto& word : {"headless", "corpse", "half", "burnt", "chunks", "beaten", "bloody"}) {
         part.replace(part.find(word), strlen(word), "");
     }

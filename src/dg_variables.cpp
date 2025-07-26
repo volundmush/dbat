@@ -114,7 +114,7 @@ int item_in_list(char *item, const std::vector<std::weak_ptr<obj_data>>& list) {
         }
     } else {
         for (auto i : filter_raw(list)) {
-            if (isname(item, i->name))
+            if (isname(item, i->getName()))
                 count++;
             if (GET_OBJ_TYPE(i) == ITEM_CONTAINER)
                 count += item_in_list(item, i->getObjects());
@@ -1047,10 +1047,10 @@ in the vault (vnum: 453) now and then. you can just use
                 case 'n':
                     if (!strcasecmp(field, "name")) {
                         if (!subfield || !*subfield)
-                            snprintf(str, slen, "%s", o->name);
+                            snprintf(str, slen, "%s", o->getName());
                         else {
                             char blah[500];
-                            sprintf(blah, "%s %s", o->name, subfield);
+                            sprintf(blah, "%s %s", o->getName(), subfield);
                             o->name = strdup(blah);
                         }
                     } else if (!strcasecmp(field, "next_in_list")) {
@@ -1083,10 +1083,10 @@ in the vault (vnum: 453) now and then. you can just use
                 case 's':
                     if (!strcasecmp(field, "shortdesc")) {
                         if (!subfield || !*subfield)
-                            snprintf(str, slen, "%s", o->short_description);
+                            snprintf(str, slen, "%s", o->getShortDescription());
                         else {
                             char blah[500];
-                            sprintf(blah, "%s @wnicknamed @D(@C%s@D)@n", o->short_description, subfield);
+                            sprintf(blah, "%s @wnicknamed @D(@C%s@D)@n", o->getShortDescription(), subfield);
                             o->short_description = strdup(blah);
                         }
                     } else if (!strcasecmp(field, "setaffects")) {
@@ -1188,7 +1188,7 @@ in the vault (vnum: 453) now and then. you can just use
                     else
                         *str = '\0';
             } else if (!strcasecmp(field, "name"))
-                snprintf(str, slen, "%s", r->name);
+                snprintf(str, slen, "%s", r->getName());
 
             else if (!strcasecmp(field, "sector"))
                 sprinttype(static_cast<int>(r->sector_type), sector_types, str, slen);

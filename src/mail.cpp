@@ -615,8 +615,7 @@ void postmaster_receive_mail(struct char_data *ch, struct char_data *mailman,
         SET_OBJ_VAL(obj, VAL_ALL_MAXHEALTH, 100);
 
         if (obj->look_description == nullptr)
-            obj->look_description =
-                    strdup("Mail system error - please report.  Error #11.\r\n");
+            obj->look_description = strdup("Mail system error - please report.  Error #11.\r\n");
 
         /* so it saves */
         obj->item_flags.set(ITEM_UNIQUE_SAVE, true);

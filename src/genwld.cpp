@@ -69,7 +69,7 @@ int delete_room(room_rnum rnum) {
     room = get_room(rnum);
 
     /* This is something you might want to read about in the logs. */
-    basic_mud_log("GenOLC: delete_room: Deleting room #%d (%s).", room->getVnum(), room->name);
+    basic_mud_log("GenOLC: delete_room: Deleting room #%d (%s).", room->getVnum(), room->getName());
 
     if (r_mortal_start_room == rnum) {
         basic_mud_log("WARNING: GenOLC: delete_room: Deleting mortal start room!");

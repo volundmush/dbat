@@ -896,16 +896,15 @@ void from_json(const json& j, room_data& r) {
 
 void load_rooms(const std::filesystem::path& loc) {
     for(auto j : load_from_file(loc, "rooms.json")) {
-        auto id = j["vn"].get<int64_t>();
+        auto id = j["id"].get<int64_t>();
         auto r = std::make_shared<room_data>();
         j.get_to(*r);
         r->id = id;
         units.emplace(id, r);
         world.emplace(id, r);
-        auto zone = real_zone_by_thing(id);
+        auto zone = r->zone;
         auto &z = zone_table[zone];
         z.rooms.insert(id);
-        r->zone = zone;
         r->activate();
     }
 }
@@ -994,6 +993,8 @@ void to_json(json& j, const obj_data& o) {
     if(o.weight != 0.0) j["weight"] = o.weight;
     if(o.cost) j["cost"] = o.cost;
     if(o.cost_per_day) j["cost_per_day"] = o.cost_per_day;
+
+    if(o.proto) j["proto"] = o.proto->vn;
 
     for(auto & i : o.affected) {
         if(i.location == APPLY_NONE) continue;
@@ -1167,6 +1168,7 @@ static void dump_items(const std::filesystem::path &loc) {
 static void dump_item_prototypes(const std::filesystem::path &loc) {
     json j;
     for(auto &[v, o] : obj_proto) {
+        if(v == NOTHING) continue;
         j.push_back(o);
     }
     dump_to_file(loc, "itemPrototypes.json", j);
@@ -1480,6 +1482,7 @@ static void dump_npc_prototypes(const std::filesystem::path &loc) {
     json j;
 
     for(auto &[v, n] : mob_proto) {
+        if(v == NOTHING) continue;
         j.push_back(n);
     }
     dump_to_file(loc, "npcPrototypes.json", j);

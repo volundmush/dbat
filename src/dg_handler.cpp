@@ -79,27 +79,40 @@ void free_trigger(struct trig_data *trig) {
         free(trig->arglist);
         trig->arglist = nullptr;
     }
+
     if (trig->var_list) {
         free_varlist(trig->var_list);
         trig->var_list = nullptr;
     }
 
-    uniqueScripts.erase(trig->id);
+    
+}
+
+trig_data::~trig_data() {
+    free(name);
+    name = nullptr;
+    if (arglist) {
+        free(arglist);
+        arglist = nullptr;
+    }
+    if (var_list) {
+        free_varlist(var_list);
+        var_list = nullptr;
+    }
 }
 
 
 /* remove a single trigger from a mob/obj/room */
-void extract_trigger(struct trig_data *trig) {
+void extract_trigger(trig_data *trig) {
 
     trig->deactivate();
-
-    free_trigger(trig);
+    uniqueScripts.erase(trig->id);
 }
 
 /* remove all triggers from a mob/obj/room */
 void extract_script(unit_data *thing, int type) {
     script_data *sc = thing;
-    struct trig_data *trig, *next_trig;
+    trig_data *trig, *next_trig;
 
     if(thing->trig_list) {
         for (trig = TRIGGERS(sc); trig; trig = next_trig) {

@@ -385,7 +385,7 @@ static int evaluate_expression(struct obj_data *obj, char *expr) {
                         break;
                     }
                 if (*extra_bits[eindex] == '\n')
-                    push(&vals, isname(name, obj->name));
+                    push(&vals, isname(name, obj->getName()));
             } else {
                 if (temp != OPER_OPEN_PAREN)
                     while (top(&ops) > temp)
@@ -504,7 +504,7 @@ static char *times_message(struct obj_data *obj, char *name, int num) {
     char *ptr;
 
     if (obj)
-        len = strlcpy(buf, obj->short_description, sizeof(buf));
+        len = strlcpy(buf, obj->getShortDescription(), sizeof(buf));
     else {
         if ((ptr = strchr(name, '.')) == nullptr)
             ptr = name;
@@ -532,7 +532,7 @@ static struct obj_data *get_slide_obj_vis(struct char_data *ch, char *name,
         return (nullptr);
 
     for (auto i : filter_raw(list))
-        if (isname(tmp, i->name))
+        if (isname(tmp, i->getName()))
             if (CAN_SEE_OBJ(ch, i) && !same_obj(last_match, i)) {
                 if (j == number)
                     return (i);
@@ -716,7 +716,7 @@ static void shopping_app(char *arg, struct char_data *ch, struct char_data *keep
     }
     improve_skill(ch, SKILL_APPRAISE, 1);
     if (GET_SKILL(ch, SKILL_APPRAISE) < rand_number(1, 101)) {
-        send_to_char(ch, "@wYou were completely stumped about the worth of %s@n\r\n", obj->short_description);
+        send_to_char(ch, "@wYou were completely stumped about the worth of %s@n\r\n", obj->getShortDescription());
         WAIT_STATE(ch, PULSE_2SEC);
         return;
     } else {
@@ -726,7 +726,7 @@ static void shopping_app(char *arg, struct char_data *ch, struct char_data *keep
             displevel = 20;
 
         send_to_char(ch, "@c---------------------------------------------------------------@n\n");
-        send_to_char(ch, "@GItem Name   @W: @w%s@n\n", obj->short_description);
+        send_to_char(ch, "@GItem Name   @W: @w%s@n\n", obj->getShortDescription());
         send_to_char(ch, "@GTrue Value  @W: @Y%s@n\n", add_commas(GET_OBJ_COST(obj)).c_str());
         send_to_char(ch, "@GItem Min LVL@W: @w%d@n\n", displevel);
         if (GET_OBJ_VAL(obj, VAL_ALL_HEALTH) >= 100) {
@@ -844,11 +844,11 @@ static void shopping_buy(char *arg, struct char_data *ch, struct char_data *keep
         }
     }
     if (IS_CARRYING_N(ch) + 1 > CAN_CARRY_N(ch)) {
-        send_to_char(ch, "%s: You can't carry any more items.\r\n", fname(obj->name));
+        send_to_char(ch, "%s: You can't carry any more items.\r\n", fname(obj->getName()));
         return;
     }
     if (!ch->canCarryWeight(obj)) {
-        send_to_char(ch, "%s: You can't carry that much weight.\r\n", fname(obj->name));
+        send_to_char(ch, "%s: You can't carry that much weight.\r\n", fname(obj->getName()));
         return;
     }
     while (obj && (GET_GOLD(ch) >= buy_price(obj, shop_nr, keeper, ch) || ADM_FLAGGED(ch, ADM_MONEY))
@@ -874,8 +874,8 @@ static void shopping_buy(char *arg, struct char_data *ch, struct char_data *keep
         if (!ADM_FLAGGED(ch, ADM_MONEY))
             ch->modBaseStat("money_carried", -charged);
         else {
-            send_to_imm("IMM PURCHASE: %s has purchased %s for free.", GET_NAME(ch), obj->short_description);
-            log_imm_action("IMM PURCHASE: %s has purchased %s for free.", GET_NAME(ch), obj->short_description);
+            send_to_imm("IMM PURCHASE: %s has purchased %s for free.", GET_NAME(ch), obj->getShortDescription());
+            log_imm_action("IMM PURCHASE: %s has purchased %s for free.", GET_NAME(ch), obj->getShortDescription());
         }
 
         last_obj = obj;
@@ -1210,20 +1210,20 @@ list_object(struct obj_data *obj, int cnt, int aindex, vnum shop_nr, struct char
     switch (GET_OBJ_TYPE(obj)) {
         case ITEM_DRINKCON:
             if (GET_OBJ_VAL(obj, VAL_DRINKCON_HOWFULL))
-                snprintf(itemname, sizeof(itemname), "%s", obj->short_description);
+                snprintf(itemname, sizeof(itemname), "%s", obj->getShortDescription());
             else
-                strlcpy(itemname, obj->short_description, sizeof(itemname));
+                strlcpy(itemname, obj->getShortDescription(), sizeof(itemname));
             break;
 
         case ITEM_WAND:
         case ITEM_STAFF:
-            snprintf(itemname, sizeof(itemname), "%s%s", obj->short_description,
+            snprintf(itemname, sizeof(itemname), "%s%s", obj->getShortDescription(),
                      GET_OBJ_VAL(obj, VAL_WAND_CHARGES) < GET_OBJ_VAL(obj, VAL_WAND_MAXCHARGES) ? " (partially used)"
                                                                                                 : "");
             break;
 
         default:
-            strlcpy(itemname, obj->short_description, sizeof(itemname));
+            strlcpy(itemname, obj->getShortDescription(), sizeof(itemname));
             break;
     }
     if (OBJ_FLAGGED(obj, ITEM_BROKEN)) {
@@ -1271,7 +1271,7 @@ static void shopping_list(char *arg, struct char_data *ch, struct char_data *kee
                     cnt++;
                 else {
                     lindex++;
-                    if (!*name || isname(name, last_obj->name)) {
+                    if (!*name || isname(name, last_obj->getName())) {
                         strncat(buf, list_object(last_obj, cnt, lindex, shop_nr, keeper, ch),
                                 sizeof(buf) - len - 1);    /* strncat: OK */
                         len = strlen(buf);
@@ -1290,7 +1290,7 @@ static void shopping_list(char *arg, struct char_data *ch, struct char_data *kee
         send_to_char(ch, "Presently, none of those are for sale.\r\n");
     else {
         char zen[80];
-        if (!*name || isname(name, last_obj->name))    /* show last obj */
+        if (!*name || isname(name, last_obj->getName()))    /* show last obj */
             if (len < sizeof(buf)) {
                 strncat(buf, list_object(last_obj, cnt, lindex, shop_nr, keeper, ch),
                         sizeof(buf) - len - 1);    /* strncat: OK */
@@ -1553,7 +1553,7 @@ static void list_detailed_shop(struct char_data *ch, vnum shop_nr) {
         }
         auto room = get_room(r);
         if(room) {
-            linelen = snprintf(buf1, sizeof(buf1), "%s (#%d)", room->name, r);
+            linelen = snprintf(buf1, sizeof(buf1), "%s (#%d)", room->getName(), r);
         } else {
             linelen = snprintf(buf1, sizeof(buf1), "<UNKNOWN> (#%d)", r);
         }

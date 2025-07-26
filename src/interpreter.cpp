@@ -1370,7 +1370,7 @@ void fingerUser(struct char_data *ch, struct account_data *account) {
         for(auto ref : account->characters) {
             auto p = players.find(ref);
             if(p == players.end()) continue;
-            send_to_char(ch, "@D[@gCh. Slot %d @D: @w%-30s@D]@n\r\n", ++counter, p->second.character->name);
+            send_to_char(ch, "@D[@gCh. Slot %d @D: @w%-30s@D]@n\r\n", ++counter, p->second.character->getName());
         }
         send_to_char(ch, "\n");
     }

@@ -1424,32 +1424,32 @@ void corpseRotService(uint64_t heartPulse, double deltaTime) {
         if (GET_OBJ_TIMER(j) > 0)
             j->modBaseStat("timer", -1);
         auto room = j->getRoom();
-        if (!strstr(j->name, "android") && !strstr(j->name, "Android") && !OBJ_FLAGGED(j, ITEM_BURIED)) {
+        if (!strstr(j->getName(), "android") && !strstr(j->getName(), "Android") && !OBJ_FLAGGED(j, ITEM_BURIED)) {
             if (GET_OBJ_TIMER(j) == 5) {
                 if (room) {
-                    send_to_room(room, "@DFlies start to gather around $p@D.@n\r\n", j->short_description);
+                    send_to_room(room, "@DFlies start to gather around $p@D.@n\r\n", j->getShortDescription());
                 }
             }
             if (GET_OBJ_TIMER(j) == 3) {
                 if (room) {
-                    send_to_room(room, "@DA cloud of flies has formed over %s@D.@n\r\n", j->short_description);
+                    send_to_room(room, "@DA cloud of flies has formed over %s@D.@n\r\n", j->getShortDescription());
                 }
             }
             if (GET_OBJ_TIMER(j) == 2) {
                 if (room) {
-                    send_to_room(room, "@DMaggots can be seen crawling all over %s@D.@n\r\n", j->short_description);
+                    send_to_room(room, "@DMaggots can be seen crawling all over %s@D.@n\r\n", j->getShortDescription());
                 }
             }
             if (GET_OBJ_TIMER(j) == 1) {
                 if (room) {
-                    send_to_room(room, "@DMaggots have nearly stripped %s of all its flesh@D.@n\r\n", j->short_description);
+                    send_to_room(room, "@DMaggots have nearly stripped %s of all its flesh@D.@n\r\n", j->getShortDescription());
                 }
             }
         }
         if (!GET_OBJ_TIMER(j)) {
 
             if (j->carried_by) {
-                if (!strstr(j->name, "android")) {
+                if (!strstr(j->getName(), "android")) {
                     act("$p decays in your hands.", false, j->carried_by, j, nullptr, TO_CHAR);
                 } else {
                     act("$p decays in your hands.", false, j->carried_by, j, nullptr, TO_CHAR);
@@ -1872,7 +1872,7 @@ void point_update(uint64_t heartPulse, double deltaTime)
                     diff = time(nullptr) - GET_LAST_LOAD(j);
                     if (diff > 240 && GET_LAST_LOAD(j) > 0)
                     {
-                        basic_mud_log("No rent object (%s) extracted from room (%d)", j->short_description, j->getRoomVnum());
+                        basic_mud_log("No rent object (%s) extracted from room (%d)", j->getShortDescription(), j->getRoomVnum());
                         extract_obj(j);
                     }
                 }
@@ -1903,7 +1903,7 @@ void point_update(uint64_t heartPulse, double deltaTime)
 
                     if (GET_OBJ_TIMER(j) == 0)
                     {
-                        send_to_room(j->getRoom(), "The %s@n settles to the ground and goes out.\r\n", j->short_description);
+                        send_to_room(j->getRoom(), "The %s@n settles to the ground and goes out.\r\n", j->getShortDescription());
                         extract_obj(j);
                     }
                 }
@@ -1950,11 +1950,11 @@ void point_update(uint64_t heartPulse, double deltaTime)
                             if (GET_OBJ_WEIGHT(j) - (5 + (GET_OBJ_WEIGHT(j) * 0.02)) > 0)
                             {
                                 j->modBaseStat<weight_t>("weight", -melt);
-                                send_to_char(j->carried_by, "%s @wmelts a little.\r\n", j->short_description);
+                                send_to_char(j->carried_by, "%s @wmelts a little.\r\n", j->getShortDescription());
                             }
                             else
                             {
-                                send_to_char(j->carried_by, "%s @wmelts completely away.\r\n", j->short_description);
+                                send_to_char(j->carried_by, "%s @wmelts completely away.\r\n", j->getShortDescription());
                                 int remainder = melt - GET_OBJ_WEIGHT(j);
                                 extract_obj(j);
                             }
@@ -1964,11 +1964,11 @@ void point_update(uint64_t heartPulse, double deltaTime)
                             if (GET_OBJ_WEIGHT(j) - (5 + (GET_OBJ_WEIGHT(j) * 0.02)) > 0)
                             {
                                 j->modBaseStat<weight_t>("weight", -(5 + (GET_OBJ_WEIGHT(j) * 0.02)));
-                                send_to_room(IN_ROOM(j), "%s @wmelts a little.\r\n", j->short_description);
+                                send_to_room(IN_ROOM(j), "%s @wmelts a little.\r\n", j->getShortDescription());
                             }
                             else
                             {
-                                send_to_room(IN_ROOM(j), "%s @wmelts completely away.\r\n", j->short_description);
+                                send_to_room(IN_ROOM(j), "%s @wmelts completely away.\r\n", j->getShortDescription());
                                 extract_obj(j);
                             }
                         }

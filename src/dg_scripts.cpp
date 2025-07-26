@@ -148,7 +148,7 @@ obj_data *get_obj_in_list(char *name, const std::vector<std::weak_ptr<obj_data>>
             if(i == obj) return obj;
     } else {
         for (auto i : filter_raw(list))
-            if (isname(name, i->name))
+            if (isname(name, i->getName()))
                 return i;
     }
 
@@ -185,7 +185,7 @@ obj_data *get_object_in_equip(char_data *ch, char *name) {
 
         for (j = 0; (j < NUM_WEARS) && (n <= number); j++)
             if ((obj = GET_EQ(ch, j)))
-                if (isname(tmp, obj->name))
+                if (isname(tmp, obj->getName()))
                     if (++n == number)
                         return (obj);
     }
@@ -303,7 +303,7 @@ char_data *get_char(char *name) {
         for (const auto& r : getAllCharacters()) {
             i = r.lock().get();
             if(!i) continue;
-            if (isname(name, i->name) &&
+            if (isname(name, i->getName()) &&
                 valid_dg_target(i, DG_ALLOW_GODS))
                 return i;
         }
@@ -330,7 +330,7 @@ char_data *get_char_near_obj(obj_data *obj, char *name) {
         if ((num = obj_room(obj)) != NOWHERE) {
             auto people = get_room(num)->getPeople();
             for (auto ch : filter_raw(people))
-                if (isname(name, ch->name) &&
+                if (isname(name, ch->getName()) &&
                     valid_dg_target(ch, DG_ALLOW_GODS))
                     return ch;
         }
@@ -358,7 +358,7 @@ char_data *get_char_in_room(room_data *room, char *name) {
     } else {
         auto people = room->getPeople();
         for (auto ch : filter_raw(people))
-            if (isname(name, ch->name) &&
+            if (isname(name, ch->getName()) &&
                 valid_dg_target(ch, DG_ALLOW_GODS))
                 return ch;
     }
@@ -388,7 +388,7 @@ obj_data *get_obj_near_obj(obj_data *obj, char *name) {
             auto o = std::dynamic_pointer_cast<obj_data>(uidResult).get();
             if(!o) return nullptr;
             if(o == obj->in_obj) return o;
-        } else if (isname(name, obj->in_obj->name))
+        } else if (isname(name, obj->in_obj->getName()))
             return obj->in_obj;
     }
         /* or worn ?*/
@@ -423,7 +423,7 @@ obj_data *get_obj(char *name) {
     else {
         auto ao = objectSubscriptions.all("active");
         for (auto obj : filter_raw(ao)) {
-            if (isname(name, obj->name))
+            if (isname(name, obj->getName()))
                 return obj;
         }
     }
@@ -461,18 +461,18 @@ char_data *get_char_by_obj(obj_data *obj, char *name) {
             return ch;
     } else {
         if (obj->carried_by &&
-            isname(name, obj->carried_by->name) &&
+            isname(name, obj->carried_by->getName()) &&
             valid_dg_target(obj->carried_by, DG_ALLOW_GODS))
             return obj->carried_by;
 
         if (obj->worn_by &&
-            isname(name, obj->worn_by->name) &&
+            isname(name, obj->worn_by->getName()) &&
             valid_dg_target(obj->worn_by, DG_ALLOW_GODS))
             return obj->worn_by;
         
         auto ac = characterSubscriptions.all("active");
         for (auto ch : filter_raw(ac)) {
-            if (isname(name, ch->name) &&
+            if (isname(name, ch->getName()) &&
                 valid_dg_target(ch, DG_ALLOW_GODS))
                 return ch;
         }
@@ -498,13 +498,13 @@ char_data *get_char_by_room(room_data *room, char *name) {
     } else {
         auto people = room->getPeople();
         for (auto ch : filter_raw(people))
-            if (isname(name, ch->name) &&
+            if (isname(name, ch->getName()) &&
                 valid_dg_target(ch, DG_ALLOW_GODS))
                 return ch;
 
         auto ac = characterSubscriptions.all("active");
         for (auto ch : filter_raw(ac)) {
-            if (isname(name, ch->name) &&
+            if (isname(name, ch->getName()) &&
                 valid_dg_target(ch, DG_ALLOW_GODS))
                 return ch;
         }
@@ -533,7 +533,7 @@ obj_data *get_obj_by_obj(obj_data *obj, char *name) {
     if (i = get_obj_in_list(name, obj->getObjects()))
         return i;
 
-    if (obj->in_obj && isname(name, obj->in_obj->name))
+    if (obj->in_obj && isname(name, obj->in_obj->getName()))
         return obj->in_obj;
 
     if (obj->worn_by && (i = get_object_in_equip(obj->worn_by, name)))
@@ -566,7 +566,7 @@ obj_data *get_obj_in_room(room_data *room, char *name) {
     } else {
         auto con = room->getObjects();
         for (auto obj : filter_raw(con))
-            if (isname(name, obj->name))
+            if (isname(name, obj->getName()))
                 return obj;
     }
 
@@ -583,12 +583,12 @@ obj_data *get_obj_by_room(room_data *room, char *name) {
 
     auto con = room->getObjects();
     for (auto obj : filter_raw(con))
-        if (isname(name, obj->name))
+        if (isname(name, obj->getName()))
             return obj;
 
     auto ao = objectSubscriptions.all("active");
     for (auto obj : filter_raw(ao)) {
-        if (isname(name, obj->name))
+        if (isname(name, obj->getName()))
             return obj;
     }
 
@@ -745,9 +745,9 @@ void find_uid_name(char *uid, char *name, size_t nlen) {
     obj_data *obj;
 
     if ((ch = get_char(uid)))
-        snprintf(name, nlen, "%s", ch->name);
+        snprintf(name, nlen, "%s", ch->getName());
     else if ((obj = get_obj(uid)))
-        snprintf(name, nlen, "%s", obj->name);
+        snprintf(name, nlen, "%s", obj->getName());
     else
         snprintf(name, nlen, "uid = %s, (not found)", uid + 1);
 }
@@ -769,7 +769,7 @@ void script_stat(char_data *ch, script_data *sc) {
         if (*(tv->value) == UID_CHAR) {
             auto uidResult = resolveUID(tv->value);
             if(uidResult) {
-                std::string n = uidResult->name;
+                std::string n = uidResult->getName();
                 send_to_char(ch, "    %15s:  %s\r\n", tv->context ? namebuf : tv->name, n.c_str());
             } else {
                 send_to_char(ch, "   -BAD UID: %s", tv->value);
@@ -808,7 +808,7 @@ void script_stat(char_data *ch, script_data *sc) {
                 if (*(tv->value) == UID_CHAR) {
                     auto uidResult = resolveUID(tv->value);
                     if(uidResult) {
-                        std::string n = uidResult->name;
+                        std::string n = uidResult->getName();
                         send_to_char(ch, "    %15s:  %s\r\n", tv->name, n.c_str());
                     } else {
                         send_to_char(ch, "   -BAD UID: %s", tv->value);
@@ -963,8 +963,8 @@ ACMD(do_attach) {
 
         send_to_char(ch, "Trigger %d (%s) attached to %s [%d].\r\n",
                      tn, GET_TRIG_NAME(trig),
-                     (object->short_description ?
-                      object->short_description : object->name),
+                     (object->getShortDescription() ?
+                      object->getShortDescription() : object->getName()),
                      GET_OBJ_VNUM(object));
     } else if (is_abbrev(arg, "room") || is_abbrev(arg, "wtr")) {
         if (strchr(targ_name, '.'))
@@ -1181,8 +1181,8 @@ ACMD(do_detach) {
             } else if (trigger && !strcasecmp(trigger, "all")) {
                 extract_script(object, OBJ_TRIGGER);
                 send_to_char(ch, "All triggers removed from %s.\r\n",
-                             object->short_description ? object->short_description :
-                             object->name);
+                             object->getShortDescription() ? object->getShortDescription() :
+                             object->getName());
             } else if (remove_trigger(SCRIPT(object), trigger)) {
                 send_to_char(ch, "Trigger removed.\r\n");
                 if (!TRIGGERS(SCRIPT(object))) {
@@ -2289,11 +2289,11 @@ static int true_script_driver(unit_data *go_adress, trig_data *trig, int type, i
                 break;
             case OBJ_TRIGGER:
                 script_log("It was attached to %s [%d]",
-                           ((obj_data *) go)->short_description, GET_OBJ_VNUM((obj_data *) go));
+                           ((obj_data *) go)->getShortDescription(), GET_OBJ_VNUM((obj_data *) go));
                 break;
             case WLD_TRIGGER:
                 script_log("It was attached to %s [%d]",
-                           ((room_data *) go)->name, ((room_data *) go)->getVnum());
+                           ((room_data *) go)->getName(), ((room_data *) go)->getVnum());
                 break;
         }
 
@@ -2812,9 +2812,10 @@ void trig_data::deactivate() {
         return;
     }
     active = false;
+    auto sh = shared();
     struct trig_data *temp;
-    auto sh = shared_from_this();
-    triggerSubscriptions.unsubscribeFromAll(sh);
     REMOVE_FROM_LIST(this, trigger_list, next_in_world, temp);
+    triggerSubscriptions.unsubscribeFromAll(sh);
+    
 
 }

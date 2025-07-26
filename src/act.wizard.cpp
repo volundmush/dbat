@@ -1229,7 +1229,7 @@ static void do_stat_room(struct char_data *ch) {
     struct obj_data *j;
     struct char_data *k;
 
-    send_to_char(ch, "Room name: @c%s@n\r\n", rm->name);
+    send_to_char(ch, "Room name: @c%s@n\r\n", rm->getName());
 
     sprinttype(static_cast<int>(rm->sector_type), sector_types, buf2, sizeof(buf2));
     send_to_char(ch, "Zone: [%3d], VNum: [@g%5d@n], RNum: [%5d], IDNum: [%5ld], Type: %s\r\n",
@@ -1240,11 +1240,11 @@ static void do_stat_room(struct char_data *ch) {
     send_to_char(ch, "Room Damage: %d, Room Effect: %d\r\n", rm->getDamage(), rm->ground_effect);
     send_to_char(ch, "SpecProc: %s, Flags: %s\r\n", rm->func == nullptr ? "None" : "Exists", buf2);
 
-    send_to_char(ch, "Description:\r\n%s", rm->look_description ? rm->look_description : "  None.\r\n");
+    send_to_char(ch, "Description:\r\n%s", rm->getLookDescription() ? rm->getLookDescription() : "  None.\r\n");
 
-    if (rm->ex_description) {
+    if (auto ex = rm->getExtraDescription(); ex) {
         send_to_char(ch, "Extra descs:");
-        for (desc = rm->ex_description; desc; desc = desc->next)
+        for (desc = ex; desc; desc = desc->next)
             send_to_char(ch, " [@c%s@n]", desc->keyword);
         send_to_char(ch, "\r\n");
     }
@@ -1282,7 +1282,7 @@ static void do_stat_room(struct char_data *ch) {
             if (!CAN_SEE_OBJ(ch, j))
                 continue;
 
-            column += send_to_char(ch, "%s %s", found++ ? "," : "", j->short_description);
+            column += send_to_char(ch, "%s %s", found++ ? "," : "", j->getShortDescription());
             if (column >= 62) {
                 send_to_char(ch, "%s\r\n", i2 < sz ? "," : "");
                 found = false;
@@ -1343,7 +1343,7 @@ static void do_stat_object(struct char_data *ch, struct obj_data *j) {
         send_to_char(ch, "Healing Tank Charge Level: [%d]\r\n", HCHARGE(j));
     }
     send_to_char(ch, "Name: '%s', Keywords: %s, Size: %s\r\n",
-                 j->short_description ? j->short_description : "<None>", j->name,
+                 j->getShortDescription() ? j->getShortDescription() : "<None>", j->getName(),
                  size_names[static_cast<int>(GET_OBJ_SIZE(j))]);
 
     sprinttype(GET_OBJ_TYPE(j), item_types, buf, sizeof(buf));
@@ -1367,9 +1367,9 @@ static void do_stat_object(struct char_data *ch, struct obj_data *j) {
         send_to_char(ch, "HOLDING: %s\r\n", GET_NAME(sitter));
     }
 
-    if (j->ex_description) {
+    if (auto ex = j->getExtraDescription(); ex) {
         send_to_char(ch, "Extra descs:");
-        for (desc = j->ex_description; desc; desc = desc->next)
+        for (desc = ex; desc; desc = desc->next)
             send_to_char(ch, " [@g%s@n]", desc->keyword);
         send_to_char(ch, "\r\n");
     }
@@ -1388,13 +1388,13 @@ static void do_stat_object(struct char_data *ch, struct obj_data *j) {
                  wString.c_str(), GET_OBJ_COST(j), GET_OBJ_RENT(j), GET_OBJ_TIMER(j), GET_OBJ_LEVEL(j));
 
     send_to_char(ch, "In room: %d (%s), ", j->getRoomVnum(),
-                 IN_ROOM(j) == NOWHERE ? "Nowhere" : j->getRoom()->name);
+                 IN_ROOM(j) == NOWHERE ? "Nowhere" : j->getRoom()->getName());
 
     /*
    * NOTE: In order to make it this far, we must already be able to see the
    *       character holding the object. Therefore, we do not need CAN_SEE().
    */
-    send_to_char(ch, "In object: %s, ", j->in_obj ? j->in_obj->short_description : "None");
+    send_to_char(ch, "In object: %s, ", j->in_obj ? j->in_obj->getShortDescription() : "None");
     send_to_char(ch, "Carried by: %s, ", j->carried_by ? GET_NAME(j->carried_by) : "Nobody");
     send_to_char(ch, "Worn by: %s\r\n", j->worn_by ? GET_NAME(j->worn_by) : "Nobody");
 
@@ -1491,7 +1491,7 @@ static void do_stat_object(struct char_data *ch, struct obj_data *j) {
         auto sz = con.size();
         auto count = 0;
         for (auto j2 : filter_raw(con)) {
-            column += send_to_char(ch, "%s %s", found++ ? "," : "", j2->short_description);
+            column += send_to_char(ch, "%s %s", found++ ? "," : "", j2->getShortDescription());
             count++;
             if (column >= 62) {
                 send_to_char(ch, "%s\r\n", count < sz ? "," : "");
@@ -1554,7 +1554,7 @@ static void do_stat_character(struct char_data *ch, struct char_data *k) {
             sprintf(buf, ", Master: %s", get_name_by_id(mas));
         else
             buf[0] = 0;
-        send_to_char(ch, "Keyword: %s, VNum: [%5d], RNum: [%5d]%s\r\n", k->name,
+        send_to_char(ch, "Keyword: %s, VNum: [%5d], RNum: [%5d]%s\r\n", k->getName(),
                      GET_MOB_VNUM(k), GET_MOB_RNUM(k), buf);
     } else
 
@@ -1697,7 +1697,7 @@ static void do_stat_character(struct char_data *ch, struct char_data *k) {
 
     if (SITS(k)) {
         chair = SITS(k);
-        send_to_char(ch, "Is on: %s@n\r\n", chair->short_description);
+        send_to_char(ch, "Is on: %s@n\r\n", chair->getShortDescription());
     }
 
     /* Showing the bitvector */
@@ -1810,7 +1810,7 @@ ACMD(do_varstat) {
                 if (tv->value && *(tv->value) == UID_CHAR) {
                     auto uidResult = resolveUID(tv->value);
                     if(uidResult) {
-                        send_to_char(ch, "    %10s:  [UID]: %s\r\n", tv->name, uidResult->name);
+                        send_to_char(ch, "    %10s:  [UID]: %s\r\n", tv->name, uidResult->getName());
                     } else {
                         send_to_char(ch, "   -BAD UID: %s", tv->value);
                     }
@@ -2128,8 +2128,8 @@ ACMD(do_load) {
         for (i = 0; i < n; i++) {
             obj = read_object(r_num, REAL);
             if (GET_ADMLEVEL(ch) > 0) {
-                send_to_imm("LOAD: %s has loaded a %s", GET_NAME(ch), obj->short_description);
-                log_imm_action("LOAD: %s has loaded a %s", GET_NAME(ch), obj->short_description);
+                send_to_imm("LOAD: %s has loaded a %s", GET_NAME(ch), obj->getShortDescription());
+                log_imm_action("LOAD: %s has loaded a %s", GET_NAME(ch), obj->getShortDescription());
             }
             if (CONFIG_LOAD_INVENTORY)
                 obj_to_char(obj, ch);
@@ -2211,7 +2211,7 @@ ACMD(do_pgrant) {
     if(strForm == "growth") {
         if (vict) {
             vict->modBaseStat("internalGrowth", 500);
-            send_to_char(ch, "Given 500 growth to %s\r\n", vict->name);
+            send_to_char(ch, "Given 500 growth to %s\r\n", vict->getName());
         } else {
             ch->modBaseStat("internalGrowth", 500);
             send_to_char(ch, "500 growth has been given to you.\r\n");
@@ -2284,7 +2284,7 @@ ACMD(do_rpreward) {
     vict->gainBaseStatPercent("ki", vitalsGain * (1.0 / boundKI));
     vict->gainBaseStatPercent("stamina", vitalsGain * (1.0 / boundST));
 
-    send_to_char(ch, "Granted RP rewards to %s", vict->name);
+    send_to_char(ch, "Granted RP rewards to %s", vict->getName());
     log_imm_action("RP Reward: %s granted %s an RP reward!", ch, vict);
 }
 
@@ -3410,7 +3410,7 @@ ACMD(do_show) {
                         continue;
                     if (e->to_room == 0) {
                         nlen = snprintf(buf + len, sizeof(buf) - len, "%2d: (void   ) [%5d] %-*s%s (%s)\r\n", ++k,
-                                        vn, count_color_chars(r->name) + 40, r->name, QNRM,
+                                        vn, count_color_chars(r->getName()) + 40, r->getName(), QNRM,
                                         dirs[j]);
                         if (len + nlen >= sizeof(buf) || nlen < 0)
                             break;
@@ -3418,7 +3418,7 @@ ACMD(do_show) {
                     }
                     if (e->to_room == NOWHERE && !e->general_description) {
                         nlen = snprintf(buf + len, sizeof(buf) - len, "%2d: (Nowhere) [%5d] %-*s%s (%s)\r\n", ++k,
-                                        vn, count_color_chars(r->name) + 40, r->name, QNRM,
+                                        vn, count_color_chars(r->getName()) + 40, r->getName(), QNRM,
                                         dirs[j]);
                         if (len + nlen >= sizeof(buf) || nlen < 0)
                             break;
@@ -3437,7 +3437,7 @@ ACMD(do_show) {
             for (auto &[vn, r] : world)
                 if (ROOM_FLAGGED(r.get(), ROOM_GODROOM)) {
                     nlen = snprintf(buf + len, sizeof(buf) - len, "%2d: [%5d] %s\r\n", ++j, vn,
-                                    r->name);
+                                    r->getName());
                     if (len + nlen >= sizeof(buf) || nlen < 0)
                         break;
                     len += nlen;
@@ -4326,7 +4326,7 @@ ACMD(do_chown) {
     else {
         for (i = 0; i < NUM_WEARS; i++) {
             if (GET_EQ(victim, i) && CAN_SEE_OBJ(ch, GET_EQ(victim, i)) &&
-                isname(buf2, GET_EQ(victim, i)->name)) {
+                isname(buf2, GET_EQ(victim, i)->getName())) {
                 obj_to_char(unequip_char(victim, i), victim);
                 k = 1;
             }
@@ -4709,17 +4709,17 @@ ACMD (do_zcheck) {
                                 ROOM_FLAGGED(i, ROOM_HOUSE) ? "HOUSE" : "",
                                 ROOM_FLAGGED(i, ROOM_OLC) ? "OLC" : "");
 
-            if ((MIN_ROOM_DESC_LENGTH) && strlen(r->look_description) < MIN_ROOM_DESC_LENGTH && (found = 1))
+            if ((MIN_ROOM_DESC_LENGTH) && strlen(r->getLookDescription()) < MIN_ROOM_DESC_LENGTH && (found = 1))
                 len += snprintf(buf + len, sizeof(buf) - len,
                                 "- Room description is too short. (%4.4" SZT" of min. %d characters).\r\n",
-                                strlen(r->look_description), MIN_ROOM_DESC_LENGTH);
+                                strlen(r->getLookDescription()), MIN_ROOM_DESC_LENGTH);
 
-            if (strncmp(r->look_description, "   ", 3) && (found = 1))
+            if (strncmp(r->getLookDescription(), "   ", 3) && (found = 1))
                 len += snprintf(buf + len, sizeof(buf) - len,
                                 "- Room description not formatted with indent (/fi in the editor).\r\n");
 
             /* strcspan = size of text in first arg before any character in second arg */
-            if ((strcspn(r->look_description, "\r\n") > MAX_COLOUMN_WIDTH) && (found = 1))
+            if ((strcspn(r->getLookDescription(), "\r\n") > MAX_COLOUMN_WIDTH) && (found = 1))
                 len += snprintf(buf + len, sizeof(buf) - len,
                                 "- Room description not wrapped at %d chars (/fi in the editor).\r\n",
                                 MAX_COLOUMN_WIDTH);
@@ -4734,7 +4734,7 @@ ACMD (do_zcheck) {
 
             if (found) {
                 send_to_char(ch, "[%5d] %-30s: \r\n%s",
-                             i, r->name ? r->name : "An unnamed room", buf);
+                             i, r->getName() ? r->getName() : "An unnamed room", buf);
                 strcpy(buf, "");
                 len = 0;
                 found = 0;
@@ -4786,7 +4786,7 @@ static void mob_checkload(struct char_data *ch, mob_vnum mvnum) {
             } else {
                 send_to_char(ch, "  [%5d] %s (%d MaxW, %d MaxW)\r\n",
                              room->getVnum(),
-                             room->name,
+                             room->getName(),
                              c.arg2, c.arg4);
             }
             count += 1;
@@ -4835,7 +4835,7 @@ static void obj_checkload(struct char_data *ch, obj_vnum ovnum) {
                         if(lastroom) {
                             send_to_char(ch, "  [%5d] %s (%d MaxR, %d MaxW)\r\n",
                                          lastroom->getVnum(),
-                                         lastroom->name,
+                                         lastroom->getName(),
                                          c.arg2, c.arg4);
                         } else {
                             send_to_char(ch, "  [%5d] %s (room does not exist)\r\n",
@@ -4851,7 +4851,7 @@ static void obj_checkload(struct char_data *ch, obj_vnum ovnum) {
                         if(lastroom && lastobj != obj_proto.end()) {
                             send_to_char(ch, "  [%5d] %s (Put in another object [%d Max])\r\n",
                                          lastroom->getVnum(),
-                                         lastroom->name,
+                                         lastroom->getName(),
                                          c.arg2);
                         } else {
                             if(!lastroom && lastobj == obj_proto.end()) {
@@ -4877,7 +4877,7 @@ static void obj_checkload(struct char_data *ch, obj_vnum ovnum) {
                         if(lastroom && lastmob != mob_proto.end()) {
                             send_to_char(ch, "  [%5d] %s (Given to %s [%d][%d Max])\r\n",
                                          lastroom_v,
-                                         lastroom->name,
+                                         lastroom->getName(),
                                          lastmob->second.short_description,
                                          lastmob->first,
                                          c.arg2);
@@ -4900,7 +4900,7 @@ static void obj_checkload(struct char_data *ch, obj_vnum ovnum) {
                         if(lastmob != mob_proto.end()) {
                             send_to_char(ch, "  [%5d] %s (Equipped to %s [%d] at %s [%d Max])\r\n",
                                          lastroom_v,
-                                         lastroom->name,
+                                         lastroom->getName(),
                                          lastmob->second.short_description,
                                          lastmob->first,
                                          equipment_types[c.arg3],
@@ -4908,7 +4908,7 @@ static void obj_checkload(struct char_data *ch, obj_vnum ovnum) {
                         } else {
                             send_to_char(ch, "  [%5d] %s (Equipped to ??? [%d] at %s [%d Max])\r\n",
                                          lastroom_v,
-                                         lastroom->name,
+                                         lastroom->getName(),
                                          c.arg1,
                                          equipment_types[c.arg3],
                                          c.arg2);
@@ -4924,7 +4924,7 @@ static void obj_checkload(struct char_data *ch, obj_vnum ovnum) {
                         if(lastroom) {
                             send_to_char(ch, "  [%5d] %s (Removed from room)\r\n",
                                          lastroom_v,
-                                         lastroom->name);
+                                         lastroom->getName());
                         } else {
                             send_to_char(ch, "  [%5d] %s (room does not exist)\r\n",
                                          c.arg1,
@@ -5027,7 +5027,7 @@ static void trg_checkload(struct char_data *ch, trig_vnum tvnum) {
                         if(lastroom) {
                             send_to_char(ch, "room [%5d] %-60s (zedit)\r\n",
                                          lastroom_v,
-                                         lastroom->name);
+                                         lastroom->getName());
                         } else {
                             send_to_char(ch, "room [%5d] %-60s (zedit)\r\n",
                                          lastroom_v,
@@ -5060,7 +5060,7 @@ static void trg_checkload(struct char_data *ch, trig_vnum tvnum) {
         auto find = std::find(r->proto_script.begin(), r->proto_script.end(), tvnum);
         if (find == r->proto_script.end())
             continue;
-        send_to_char(ch, "room[%5d] %s\r\n", vn, r->name);
+        send_to_char(ch, "room[%5d] %s\r\n", vn, r->getName());
         found = 1;
     }
 

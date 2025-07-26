@@ -81,7 +81,7 @@ std::map<obj_vnum, struct item_proto_data> obj_proto;    /* prototypes for objs	
 std::map<zone_vnum, struct zone_data> zone_table;    /* zone table			 */
 
 std::map<trig_vnum, struct index_data> trig_index; /* index table for triggers      */
-struct trig_data *trigger_list = nullptr;  /* all attached triggers */
+trig_data* trigger_list = nullptr;  /* all attached triggers */
 
 std::map<int64_t, player_data> players;
 
@@ -114,6 +114,29 @@ room_data* get_room(room_vnum vn) {
 }
 
 int dg_owner_purged;            /* For control of scripts */
+
+void destroy_db() {
+    for(auto &[id, ent] : uniqueCharacters) {
+        if(ent) ent->deactivate();
+    }
+    uniqueCharacters.clear();
+    for(auto &[id, ent] : uniqueObjects) {
+        if(ent) ent->deactivate();
+    }
+    uniqueObjects.clear();
+
+    for(auto &[id, ent] : world) {
+        if(ent) ent->deactivate();
+    }
+    world.clear();
+
+    for(auto &[id, ent] : uniqueScripts) {
+        if(ent)
+            ent->deactivate();
+    }
+    uniqueScripts.clear();
+    
+}
 
 int no_mail = 0;        /* mail disabled?		 */
 int mini_mud = 0;        /* mini-mud mode?		 */
@@ -756,11 +779,11 @@ void free_help_table() {
 int vnum_mobile(char *searchname, struct char_data *ch) {
     int found = 0;
 
-    for (auto &m : mob_proto)
-        if (isname(searchname, m.second.name))
+    for (auto &[vn, m] : mob_proto)
+        if (isname(searchname, m.name))
             send_to_char(ch, "%3d. [%5d] %-40s %s\r\n",
-                         ++found, m.first, m.second.short_description,
-                         !m.second.proto_script.empty() ? m.second.scriptString().c_str() : "");
+                         ++found, vn, m.short_description,
+                         !m.proto_script.empty() ? m.scriptString().c_str() : "");
 
     return (found);
 }
@@ -2616,9 +2639,9 @@ int create_join_session(int account_id, int character_id, int64_t connection_id,
         if(sess->conns.empty()) {
             // the character is currently active, but link dead.
             sess->timeoutCounter = 0.0;
-            send_to_char(ch.get(), "You have reconnected to %s from %s.\r\n", ch->name, ip);
+            send_to_char(ch.get(), "You have reconnected to %s from %s.\r\n", ch->getName(), ip);
         } else {
-            send_to_char(ch.get(), "Another connection is now linked to %s, from %s.\r\n", ch->name, ip);
+            send_to_char(ch.get(), "Another connection is now linked to %s, from %s.\r\n", ch->getName(), ip);
         }
         sess->conns.emplace(connection_id, ip);
         acc.descriptors.insert(sess);
@@ -2647,7 +2670,7 @@ int create_join_session(int account_id, int character_id, int64_t connection_id,
         sessions.emplace(character_id, desc);
         desc->next = descriptor_list;
         descriptor_list = desc;
-        send_to_char(ch.get(), "You have connected to %s from %s.\r\n", ch->name, ip);
+        send_to_char(ch.get(), "You have connected to %s from %s.\r\n", ch->getName(), ip);
         return 1;
     }
 }

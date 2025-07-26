@@ -123,12 +123,12 @@ ASPELL(spell_summon) {
             send_to_char(victim, "%s just tried to summon you to: %s.\r\n"
                                  "%s failed because you have summon protection on.\r\n"
                                  "Type NOSUMMON to allow other players to summon you.\r\n",
-                         GET_NAME(ch), ch->getRoom()->name,
+                         GET_NAME(ch), ch->getRoom()->getName(),
                          HSSH(ch));
 
             send_to_char(ch, "You failed because %s has summon protection on.\r\n", GET_NAME(victim));
             mudlog(BRF, ADMLVL_IMMORT, true, "%s failed summoning %s to %s.", GET_NAME(ch), GET_NAME(victim),
-                   ch->getRoom()->name);
+                   ch->getRoom()->getName());
             return;
         }
     }
@@ -170,22 +170,22 @@ ASPELL(spell_locate_object) {
         return;
     }
 
-    strlcpy(name, fname(obj->name), sizeof(name));
+    strlcpy(name, fname(obj->getName()), sizeof(name));
     j = level / 2;
 
     auto ao = objectSubscriptions.all("active");
     for (auto i : filter_raw(ao)) {
-        if (!isname(name, i->name))
+        if (!isname(name, i->getName()))
             continue;
 
-        send_to_char(ch, "%c%s", UPPER(*i->short_description), (i->short_description) + 1);
+        send_to_char(ch, "%c%s", UPPER(*i->getShortDescription()), (i->getShortDescription()) + 1);
 
         if (i->carried_by)
             send_to_char(ch, " is being carried by %s.\r\n", PERS(i->carried_by, ch));
         else if (IN_ROOM(i) != NOWHERE)
-            send_to_char(ch, " is in %s.\r\n", i->getRoom()->name);
+            send_to_char(ch, " is in %s.\r\n", i->getRoom()->getName());
         else if (i->in_obj)
-            send_to_char(ch, " is in %s.\r\n", i->in_obj->short_description);
+            send_to_char(ch, " is in %s.\r\n", i->in_obj->getShortDescription());
         else if (i->worn_by)
             send_to_char(ch, " is being worn by %s.\r\n", PERS(i->worn_by, ch));
         else
@@ -261,7 +261,7 @@ ASPELL(spell_identify) {
         char buf2[MAX_STRING_LENGTH];
 
         sprinttype(GET_OBJ_TYPE(obj), item_types, bitbuf, sizeof(bitbuf));
-        send_to_char(ch, "You feel informed:\r\nObject '%s', Item type: %s\r\n", obj->short_description, bitbuf);
+        send_to_char(ch, "You feel informed:\r\nObject '%s', Item type: %s\r\n", obj->getShortDescription(), bitbuf);
 
         if (obj->affect_flags) {
             sprintbitarray(obj->affect_flags.getAll(), affected_bits, AF_ARRAY_MAX, bitbuf);

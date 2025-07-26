@@ -547,7 +547,7 @@ void equip_char(struct char_data *ch, struct obj_data *obj, int pos) {
 
     if (GET_EQ(ch, pos)) {
         basic_mud_log("SYSERR: Char is already equipped: %s, %s", GET_NAME(ch),
-            obj->short_description);
+            obj->getShortDescription());
         return;
     }
     if (obj->carried_by) {
@@ -635,7 +635,7 @@ struct char_data *get_char_room(char *name, int *number, room_rnum room) {
 
     auto people = get_room(room)->getPeople();
     for (auto i : filter_raw(people)) {
-        if (isname(name, i->name))
+        if (isname(name, i->getName()))
             if (--(*number) == 0)
                 return (i);
     }
@@ -657,7 +657,7 @@ void obj_to_room(struct obj_data *object, struct room_data *room) {
         if (GET_OBJ_TYPE(object) != ITEM_PLANT) {
             send_to_room(room,
                          "%s @wDisappears in a puff of smoke! It seems the room was designed to vaporize anything not plant related. Strange...@n\r\n",
-                         object->short_description);
+                         object->getShortDescription());
             extract_obj(object);
             return;
         } else {
@@ -704,18 +704,18 @@ void obj_to_room(struct obj_data *object, struct room_data *room) {
                         basic_mud_log("SYSERR: Vehicle %d not found for hatch %d", GET_OBJ_VAL(object, VAL_HATCH_DEST), GET_OBJ_VNUM(object));
                     }
                     obj_to_room(vehicle, real_room(GET_OBJ_VAL(object, VAL_HATCH_EXTROOM)));
-                    if (object->look_description) {
-                        if (strlen(object->look_description)) {
+                    if (auto ld = object->getLookDescription(); ld) {
+                        if (strlen(ld)) {
                             char nick[MAX_INPUT_LENGTH], nick2[MAX_INPUT_LENGTH], nick3[MAX_INPUT_LENGTH];
                             if (GET_OBJ_VNUM(vehicle) <= 46099 && GET_OBJ_VNUM(vehicle) >= 46000) {
-                                snprintf(nick, sizeof(nick), "Saiyan Pod %s", object->look_description);
+                                snprintf(nick, sizeof(nick), "Saiyan Pod %s", ld);
                                 snprintf(nick2, sizeof(nick2), "@wA @Ys@ya@Yi@yy@Ya@yn @Dp@Wo@Dd@w named @D(@C%s@D)@w",
-                                        object->look_description);
+                                        ld);
                             } else if (GET_OBJ_VNUM(vehicle) >= 46100 && GET_OBJ_VNUM(vehicle) <= 46199) {
-                                snprintf(nick, sizeof(nick), "EDI Xenofighter MK. II %s", object->look_description);
+                                snprintf(nick, sizeof(nick), "EDI Xenofighter MK. II %s", ld);
                                 snprintf(nick2, sizeof(nick2), 
                                         "@wAn @YE@yD@YI @CX@ce@Wn@Do@Cf@ci@Wg@Dh@Wt@ce@Cr @RMK. II @wnamed @D(@C%s@D)@w",
-                                        object->look_description);
+                                        ld);
                             }
                             snprintf(nick3, sizeof(nick3), "%s is resting here@w", nick2);
                             vehicle->name = strdup(nick);
@@ -777,11 +777,11 @@ void obj_from_room(struct obj_data *object) {
     if (GET_OBJ_POSTED(object) && object->in_obj == nullptr) {
         struct obj_data *obj = GET_OBJ_POSTED(object);
         if (GET_OBJ_POSTTYPE(object) <= 0) {
-            send_to_room(IN_ROOM(obj), "%s@W shakes loose from %s@W.@n\r\n", obj->short_description,
-                         object->short_description);
+            send_to_room(IN_ROOM(obj), "%s@W shakes loose from %s@W.@n\r\n", obj->getShortDescription(),
+                         object->getShortDescription());
         } else {
-            send_to_room(IN_ROOM(obj), "%s@W comes loose from %s@W.@n\r\n", object->short_description,
-                         obj->short_description);
+            send_to_room(IN_ROOM(obj), "%s@W comes loose from %s@W.@n\r\n", object->getShortDescription(),
+                         obj->getShortDescription());
         }
         GET_OBJ_POSTED(obj) = nullptr;
         GET_OBJ_POSTTYPE(obj) = 0;
@@ -1187,7 +1187,7 @@ struct char_data *get_player_vis(struct char_data *ch, char *name, int *number, 
             }
         }
         if ((GET_ADMLEVEL(ch) >= 1 || GET_ADMLEVEL(i) >= 1 || IS_NPC(ch) || IS_NPC(i))) {
-            if (strcasecmp(i->name, name) && !strstr(i->name, name)) {
+            if (strcasecmp(i->getName(), name) && !strstr(i->getName(), name)) {
                 if (strcasecmp(RACE(i), name) && !strstr(RACE(i), name)) {
                     if (!IS_NPC(ch) && !IS_NPC(i) && readIntro(ch, i) == 1) {
                         if (strcasecmp(get_i_name(ch, i), name) && !strstr(get_i_name(ch, i), name)) {
@@ -1232,12 +1232,12 @@ struct char_data *get_char_room_vis(struct char_data *ch, char *name, int *numbe
             if (CAN_SEE(ch, i))
                 if (--(*number) == 0)
                     return (i);
-        } else if (isname(name, i->name) && (IS_NPC(i) || IS_NPC(ch) || GET_ADMLEVEL(i) > 0 || GET_ADMLEVEL(ch) > 0) &&
+        } else if (isname(name, i->getName()) && (IS_NPC(i) || IS_NPC(ch) || GET_ADMLEVEL(i) > 0 || GET_ADMLEVEL(ch) > 0) &&
                    i != ch) {
             if (CAN_SEE(ch, i))
                 if (--(*number) == 0)
                     return (i);
-        } else if (isname(name, i->name) && i == ch) {
+        } else if (isname(name, i->getName()) && i == ch) {
             if (CAN_SEE(ch, i))
                 if (--(*number) == 0)
                     return (i);
@@ -1302,7 +1302,7 @@ struct char_data *get_char_world_vis(struct char_data *ch, char *name, int *numb
             }
         }
         if ((GET_ADMLEVEL(ch) >= 1 || GET_ADMLEVEL(i) >= 1 || IS_NPC(ch) || IS_NPC(i))) {
-            if (strcasecmp(i->name, name) && !strstr(i->name, name)) {
+            if (strcasecmp(i->getName(), name) && !strstr(i->getName(), name)) {
                 if (strcasecmp(RACE(i), name) && !strstr(RACE(i), name)) {
                     if (!IS_NPC(ch) && !IS_NPC(i) && readIntro(ch, i) == 1) {
                         if (strcasecmp(get_i_name(ch, i), name) && !strstr(get_i_name(ch, i), name)) {
@@ -1348,7 +1348,7 @@ struct obj_data *get_obj_in_list_vis(struct char_data *ch, const char *name, int
         return nullptr;
 
     for (auto i : filter_raw(list)) {
-        if (isname(name, i->name))
+        if (isname(name, i->getName()))
             if (CAN_SEE_OBJ(ch, i) || (GET_OBJ_TYPE(i) == ITEM_LIGHT))
                 if (--(*number) == 0)
                     return i;
@@ -1382,7 +1382,7 @@ struct obj_data *get_obj_vis(struct char_data *ch, char *name, int *number) {
     /* ok.. no luck yet. scan the entire obj list   */
     auto ao = objectSubscriptions.all("active");
     for (auto i : filter_raw(ao)) {
-        if (isname(name, i->name))
+        if (isname(name, i->getName()))
             if (CAN_SEE_OBJ(ch, i))
                 if (--(*number) == 0)
                     return (i);
@@ -1404,7 +1404,7 @@ struct obj_data *get_obj_in_equip_vis(struct char_data *ch, char *arg, int *numb
         return (nullptr);
 
     for (j = 0; j < NUM_WEARS; j++)
-        if (equipment[j] && CAN_SEE_OBJ(ch, equipment[j]) && isname(arg, equipment[j]->name))
+        if (equipment[j] && CAN_SEE_OBJ(ch, equipment[j]) && isname(arg, equipment[j]->getName()))
             if (--(*number) == 0)
                 return (equipment[j]);
 
@@ -1424,7 +1424,7 @@ int get_obj_pos_in_equip_vis(struct char_data *ch, char *arg, int *number, struc
         return (-1);
 
     for (j = 0; j < NUM_WEARS; j++)
-        if (equipment[j] && CAN_SEE_OBJ(ch, equipment[j]) && isname(arg, equipment[j]->name))
+        if (equipment[j] && CAN_SEE_OBJ(ch, equipment[j]) && isname(arg, equipment[j]->getName()))
             if (--(*number) == 0)
                 return (j);
 
@@ -1567,7 +1567,7 @@ int generic_find(char *arg, bitvector_t bitvector, struct char_data *ch,
 
     if (IS_SET(bitvector, FIND_OBJ_EQUIP)) {
         for (found = false, i = 0; i < NUM_WEARS && !found; i++)
-            if (GET_EQ(ch, i) && isname(name, GET_EQ(ch, i)->name) && --number == 0) {
+            if (GET_EQ(ch, i) && isname(name, GET_EQ(ch, i)->getName()) && --number == 0) {
                 *tar_obj = GET_EQ(ch, i);
                 found = true;
             }

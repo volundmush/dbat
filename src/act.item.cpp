@@ -232,7 +232,7 @@ static void harvest_plant(struct char_data *ch, struct obj_data *plant) {
                 obj_to_char(fruit, ch);
                 count -= 1;
             }
-            send_to_char(ch, "@YYou harvest @D[@G%d@D]@Y @g%s@Y!@n\r\n", reward, fruit->short_description);
+            send_to_char(ch, "@YYou harvest @D[@G%d@D]@Y @g%s@Y!@n\r\n", reward, fruit->getShortDescription());
             extract = false;
             break;
         case 1129:
@@ -241,7 +241,7 @@ static void harvest_plant(struct char_data *ch, struct obj_data *plant) {
                 obj_to_char(fruit, ch);
                 count -= 1;
             }
-            send_to_char(ch, "@YYou harvest @D[@G%d@D]@Y @g%s@Y!@n\r\n", reward, fruit->short_description);
+            send_to_char(ch, "@YYou harvest @D[@G%d@D]@Y @g%s@Y!@n\r\n", reward, fruit->getShortDescription());
             extract = true;
             break;
         case 17210:
@@ -252,7 +252,7 @@ static void harvest_plant(struct char_data *ch, struct obj_data *plant) {
                 obj_to_char(fruit, ch);
                 count -= 1;
             }
-            send_to_char(ch, "@YYou harvest @D[@G%d@D]@Y @g%s@Y!@n\r\n", reward, fruit->short_description);
+            send_to_char(ch, "@YYou harvest @D[@G%d@D]@Y @g%s@Y!@n\r\n", reward, fruit->getShortDescription());
             extract = true;
             break;
         case 17211:
@@ -263,7 +263,7 @@ static void harvest_plant(struct char_data *ch, struct obj_data *plant) {
                 obj_to_char(fruit, ch);
                 count -= 1;
             }
-            send_to_char(ch, "@YYou harvest @D[@G%d@D]@Y @g%s@Y!@n\r\n", reward, fruit->short_description);
+            send_to_char(ch, "@YYou harvest @D[@G%d@D]@Y @g%s@Y!@n\r\n", reward, fruit->getShortDescription());
             extract = true;
             break;
         case 17214:
@@ -274,7 +274,7 @@ static void harvest_plant(struct char_data *ch, struct obj_data *plant) {
                 obj_to_char(fruit, ch);
                 count -= 1;
             }
-            send_to_char(ch, "@YYou harvest @D[@G%d@D]@Y @g%s@Y!@n\r\n", reward, fruit->short_description);
+            send_to_char(ch, "@YYou harvest @D[@G%d@D]@Y @g%s@Y!@n\r\n", reward, fruit->getShortDescription());
             extract = true;
             break;
         case 17216:
@@ -283,7 +283,7 @@ static void harvest_plant(struct char_data *ch, struct obj_data *plant) {
                 obj_to_char(fruit, ch);
                 count -= 1;
             }
-            send_to_char(ch, "@YYou harvest @D[@G%d@D]@Y @g%s@Y!@n\r\n", reward, fruit->short_description);
+            send_to_char(ch, "@YYou harvest @D[@G%d@D]@Y @g%s@Y!@n\r\n", reward, fruit->getShortDescription());
             extract = true;
             break;
         case 17218:
@@ -294,7 +294,7 @@ static void harvest_plant(struct char_data *ch, struct obj_data *plant) {
                 obj_to_char(fruit, ch);
                 count -= 1;
             }
-            send_to_char(ch, "@YYou harvest @D[@G%d@D]@Y @g%s@Y!@n\r\n", reward, fruit->short_description);
+            send_to_char(ch, "@YYou harvest @D[@G%d@D]@Y @g%s@Y!@n\r\n", reward, fruit->getShortDescription());
             extract = true;
             break;
         case 17220:
@@ -305,7 +305,7 @@ static void harvest_plant(struct char_data *ch, struct obj_data *plant) {
                 obj_to_char(fruit, ch);
                 count -= 1;
             }
-            send_to_char(ch, "@YYou harvest @D[@G%d@D]@Y @g%s@Y!@n\r\n", reward, fruit->short_description);
+            send_to_char(ch, "@YYou harvest @D[@G%d@D]@Y @g%s@Y!@n\r\n", reward, fruit->getShortDescription());
             extract = true;
             break;
         case 17222:
@@ -316,7 +316,7 @@ static void harvest_plant(struct char_data *ch, struct obj_data *plant) {
                 obj_to_char(fruit, ch);
                 count -= 1;
             }
-            send_to_char(ch, "@YYou harvest @D[@G%d@D]@Y @g%s@Y!@n\r\n", reward, fruit->short_description);
+            send_to_char(ch, "@YYou harvest @D[@G%d@D]@Y @g%s@Y!@n\r\n", reward, fruit->getShortDescription());
             extract = true;
             break;
         case 17224:
@@ -327,7 +327,7 @@ static void harvest_plant(struct char_data *ch, struct obj_data *plant) {
                 obj_to_char(fruit, ch);
                 count -= 1;
             }
-            send_to_char(ch, "@YYou harvest @D[@G%d@D]@Y @g%s@Y!@n\r\n", reward, fruit->short_description);
+            send_to_char(ch, "@YYou harvest @D[@G%d@D]@Y @g%s@Y!@n\r\n", reward, fruit->getShortDescription());
             extract = true;
             break;
         case 17226:
@@ -340,7 +340,7 @@ static void harvest_plant(struct char_data *ch, struct obj_data *plant) {
                 obj_to_char(fruit, ch);
                 count -= 1;
             }
-            send_to_char(ch, "@YYou harvest @D[@G%d@D]@Y @g%s@Y!@n\r\n", reward, fruit->short_description);
+            send_to_char(ch, "@YYou harvest @D[@G%d@D]@Y @g%s@Y!@n\r\n", reward, fruit->getShortDescription());
             extract = true;
             break;
         case 3702:
@@ -351,7 +351,7 @@ static void harvest_plant(struct char_data *ch, struct obj_data *plant) {
                 obj_to_char(fruit, ch);
                 count -= 1;
             }
-            send_to_char(ch, "@YYou harvest @D[@G%d@D]@Y @g%s@Y!@n\r\n", reward, fruit->short_description);
+            send_to_char(ch, "@YYou harvest @D[@G%d@D]@Y @g%s@Y!@n\r\n", reward, fruit->getShortDescription());
             extract = true;
             break;
         default:
@@ -1008,7 +1008,7 @@ static void start_auction(struct char_data *ch, struct obj_data *obj, int bid) {
     curbid = bid;
 
     /* Tell th character where his item went */
-    sprintf(buf, "%s magicly flies away from your hands to be auctioned!\r\n", obj_selling->short_description);
+    sprintf(buf, "%s magicly flies away from your hands to be auctioned!\r\n", obj_selling->getShortDescription());
     CAP(buf);
     send_to_char(ch_selling, buf);
 
@@ -1094,7 +1094,7 @@ void check_auction(uint64_t heartPulse, double deltaTime) {
                 CAP(buf);
                 auc_send_to_all(buf, false);
 
-                sprintf(buf, "%s flies out the sky and into your hands.\r\n", obj_selling->short_description);
+                sprintf(buf, "%s flies out the sky and into your hands.\r\n", obj_selling->getShortDescription());
                 CAP(buf);
                 send_to_char(ch_selling, buf);
                 obj_to_char(obj_selling, ch_selling);
@@ -1118,7 +1118,7 @@ void check_auction(uint64_t heartPulse, double deltaTime) {
                 CAP(buf);
                 send_to_char(ch_buying, buf);
 
-                sprintf(buf, "Congrats! You have sold %s for @Y%d@W zenni!\r\n", obj_selling->short_description,
+                sprintf(buf, "Congrats! You have sold %s for @Y%d@W zenni!\r\n", obj_selling->getShortDescription(),
                         curbid);
                 send_to_char(ch_selling, buf);
 
@@ -1209,7 +1209,7 @@ void dball_load(uint64_t heartPulse, double deltaTime) {
             if (vnum >= 20 && vnum <= 26) {
                 foundFlags[vnum - 20] = true;
             } else if (IN_ROOM(k) != NOWHERE && k->getLocationGroundEffect() == 6 && !OBJ_FLAGGED(k, ITEM_UNBREAKABLE)) {
-                send_to_room(IN_ROOM(k), "@R%s@r melts in the lava!@n\r\n", k->short_description);
+                send_to_room(IN_ROOM(k), "@R%s@r melts in the lava!@n\r\n", k->getShortDescription());
                 extract_obj(k);
             }
         }
@@ -1284,7 +1284,7 @@ ACMD(do_auction) {
         return;
     } else if (aucstat != AUC_NULL_STATE) {
         sprintf(buf, "Sorry, but %s is already auctioning %s at @Y%d@W zenni!\r\n", GET_NAME(ch_selling),
-                obj_selling->short_description, bid);
+                obj_selling->getShortDescription(), bid);
         send_to_char(ch, buf);
         return;
     } else if (OBJ_FLAGGED(obj, ITEM_NOSELL)) {
@@ -1352,14 +1352,14 @@ ACMD(do_bid) {
                              "@D[@R#@W%3d@D][@mOwner@W: @w%10s@D][@GItem Name@W: @w%-*s@D][@GCost@W: @Y%s@D]@n\r\n",
                              list, get_name_by_id(GET_AUCTER(obj)) ? CAP(get_name_by_id(GET_AUCTER(obj)))
                                                                               : "Nobody",
-                             count_color_chars(obj->short_description) + 30, obj->short_description,
+                             count_color_chars(obj->getShortDescription()) + 30, obj->getShortDescription(),
                              add_commas(GET_BID(obj)).c_str());
             } else if (GET_AUCTIME(obj) + 86400 > time(nullptr) && GET_CURBID(obj) > -1) {
                 send_to_char(ch,
                              "@D[@R#@W%3d@D][@mOwner@W: @w%10s@D][@GItem Name@W: @w%-*s@D][@RTop Bid@W: %s @Y%s@D]@n\r\n",
                              list, get_name_by_id(GET_AUCTER(obj)) ? CAP(get_name_by_id(GET_AUCTER(obj)))
                                                                               : "Nobody",
-                             count_color_chars(obj->short_description) + 30, obj->short_description,
+                             count_color_chars(obj->getShortDescription()) + 30, obj->getShortDescription(),
                              get_name_by_id(GET_CURBID(obj)) ? CAP(get_name_by_id(GET_CURBID(obj)))
                                                                         : "Nobody", add_commas(GET_BID(obj)).c_str());
             } else if (GET_AUCTIME(obj) + 86400 < time(nullptr) && GET_CURBID(obj) > -1) {
@@ -1367,14 +1367,14 @@ ACMD(do_bid) {
                              "@D[@R#@W%3d@D][@mOwner@W: @w%10s@D][@GItem Name@W: @w%-*s@D][@RBid Winner@W: %s @Y%s@D]@n\r\n",
                              list, get_name_by_id(GET_AUCTER(obj)) ? CAP(get_name_by_id(GET_AUCTER(obj)))
                                                                               : "Nobody",
-                             count_color_chars(obj->short_description) + 30, obj->short_description,
+                             count_color_chars(obj->getShortDescription()) + 30, obj->getShortDescription(),
                              get_name_by_id(GET_CURBID(obj)) ? CAP(get_name_by_id(GET_CURBID(obj)))
                                                                         : "Nobody", add_commas(GET_BID(obj)).c_str());
             } else {
                 send_to_char(ch, "@D[@R#@W%3d@D][@mOwner@W: @w%10s@D][@GItem Name@W: @w%-*s@D][@RClosed@D]@n\r\n",
                              list, get_name_by_id(GET_AUCTER(obj)) ? CAP(get_name_by_id(GET_AUCTER(obj)))
                                                                               : "Nobody",
-                             count_color_chars(obj->short_description) + 30, obj->short_description);
+                             count_color_chars(obj->getShortDescription()) + 30, obj->getShortDescription());
             }
             found = true;
         }
@@ -1414,7 +1414,7 @@ ACMD(do_bid) {
             improve_skill(ch, SKILL_APPRAISE, 1);
             if (GET_SKILL(ch, SKILL_APPRAISE) < rand_number(1, 101)) {
                 send_to_char(ch, "You look at the images for %s and fail to perceive its worth..\r\n",
-                             obj2->short_description);
+                             obj2->getShortDescription());
                 act("@c$n@w looks stumped about something they viewed on their scouter screen.@n", true, ch, nullptr,
                     nullptr, TO_ROOM);
                 WAIT_STATE(ch, PULSE_2SEC);
@@ -1426,7 +1426,7 @@ ACMD(do_bid) {
                 send_to_char(ch, "@GOwner       @W: @w%s@n\n",
                              get_name_by_id(GET_AUCTER(obj2)) ? CAP(get_name_by_id(GET_AUCTER(obj2)))
                                                                          : "Nobody");
-                send_to_char(ch, "@GItem Name   @W: @w%s@n\n", obj2->short_description);
+                send_to_char(ch, "@GItem Name   @W: @w%s@n\n", obj2->getShortDescription());
                 send_to_char(ch, "@GCurrent Bid @W: @Y%s@n\n", add_commas(GET_BID(obj2)).c_str());
                 send_to_char(ch, "@GStore Value @W: @Y%s@n\n", add_commas(GET_OBJ_COST(obj2)).c_str());
                 send_to_char(ch, "@GItem Min LVL@W: @w%d@n\n", GET_OBJ_LEVEL(obj2));
@@ -1533,14 +1533,14 @@ ACMD(do_bid) {
             auc_save();
             struct descriptor_data *d;
             int bid = atoi(arg2);
-            basic_mud_log("AUCTION: %s has bid %s on %s", GET_NAME(ch), obj2->short_description, add_commas(bid).c_str());
+            basic_mud_log("AUCTION: %s has bid %s on %s", GET_NAME(ch), obj2->getShortDescription(), add_commas(bid).c_str());
             for (d = descriptor_list; d; d = d->next) {
                 if (STATE(d) != CON_PLAYING || IS_NPC(d->character))
                     continue;
                 if (d->character == ch) {
                     if (GET_EQ(d->character, WEAR_EYE)) {
                         send_to_char(d->character, "@RScouter Auction News@D: @GYou have bid @Y%s@G on @w%s@G@n\r\n",
-                                     add_commas(GET_BID(obj2)).c_str(), obj2->short_description);
+                                     add_commas(GET_BID(obj2)).c_str(), obj2->getShortDescription());
                     }
                     continue;
                 }
@@ -1594,12 +1594,12 @@ void stop_auction(int type, struct char_data *ch) {
 
 
     if (type != AUC_WIZ_CANCEL) {
-        sprintf(buf, "%s flies out the sky and into your hands.\r\n", obj_selling->short_description);
+        sprintf(buf, "%s flies out the sky and into your hands.\r\n", obj_selling->getShortDescription());
         CAP(buf);
         send_to_char(ch_selling, buf);
         obj_to_char(obj_selling, ch_selling);
     } else {
-        sprintf(buf, "%s flies out the sky and into your hands.\r\n", obj_selling->short_description);
+        sprintf(buf, "%s flies out the sky and into your hands.\r\n", obj_selling->getShortDescription());
         CAP(buf);
         send_to_char(ch, buf);
         obj_to_char(obj_selling, ch);
@@ -1759,7 +1759,7 @@ ACMD(do_assemble) {
         ch->craftingDeck.initDeck(ch);
         ch->task=Task::crafting;
 
-        send_to_char(ch, "You start crafting a %s\r\n", pObject->name);
+        send_to_char(ch, "You start crafting a %s\r\n", pObject->getName());
         act("$n starts to work on creating something.\r\n", true, ch, nullptr, nullptr, TO_ROOM);
 
         WAIT_STATE(ch, PULSE_5SEC * 4);
@@ -1914,7 +1914,7 @@ ACMD(do_put) {
                 auto con = ch->getObjects();
                 int transferred = 0;
                 for(auto obj : filter_raw(con)) {
-                    if ((CAN_SEE_OBJ(ch, obj) || GET_OBJ_TYPE(obj) == ITEM_LIGHT) && isname(theobj, obj->name)) {
+                    if ((CAN_SEE_OBJ(ch, obj) || GET_OBJ_TYPE(obj) == ITEM_LIGHT) && isname(theobj, obj->getName())) {
                         if (obj == cont) {
                             send_to_char(ch, "You attempt to fold it into itself, but fail.\r\n");
                             continue;
@@ -1931,7 +1931,7 @@ ACMD(do_put) {
             } else {
                 auto con = ch->getObjects();
                 for (auto obj : filter_raw(con)) {
-                    if (obj != cont && CAN_SEE_OBJ(ch, obj) && (obj_dotmode == FIND_ALL || isname(theobj, obj->name))) {
+                    if (obj != cont && CAN_SEE_OBJ(ch, obj) && (obj_dotmode == FIND_ALL || isname(theobj, obj->getName()))) {
                         found = 1;
                         perform_put(ch, obj, cont);
                     }
@@ -2050,7 +2050,7 @@ static void get_from_container(struct char_data *ch, struct obj_data *cont,
         auto con = cont->getObjects();
         int transferred = 0;
         for(auto obj : filter_raw(con)) {
-            if (CAN_SEE_OBJ(ch, obj) && isname(arg, obj->name)) {
+            if (CAN_SEE_OBJ(ch, obj) && isname(arg, obj->getName())) {
                 if (transferred >= howmany)
                     break;
                 transferred++;
@@ -2069,7 +2069,7 @@ static void get_from_container(struct char_data *ch, struct obj_data *cont,
         }
         auto con = cont->getObjects();
         for (auto obj : filter_raw(con)) {
-            if (CAN_SEE_OBJ(ch, obj) && (obj_dotmode == FIND_ALL || isname(arg, obj->name))) {
+            if (CAN_SEE_OBJ(ch, obj) && (obj_dotmode == FIND_ALL || isname(arg, obj->getName()))) {
                 found = 1;
                 perform_get_from_container(ch, obj, cont, mode);
             }
@@ -2146,7 +2146,7 @@ static void get_from_room(struct char_data *ch, char *arg, int howmany) {
     char *descword;
 
     /* Are they trying to take something in a room extra description? */
-    if (find_exdesc(arg, ch->getRoom()->ex_description)) {
+    if (find_exdesc(arg, ch->getRoom()->getExtraDescription())) {
         send_to_char(ch, "You can't take %s %s.\r\n", AN(arg), arg);
         return;
     }
@@ -2154,14 +2154,14 @@ static void get_from_room(struct char_data *ch, char *arg, int howmany) {
     dotmode = find_all_dots(arg);
 
     if (dotmode == FIND_INDIV) {
-        if ((descword = find_exdesc_keywords(arg, ch->getRoom()->ex_description))) {
+        if ((descword = find_exdesc_keywords(arg, ch->getRoom()->getExtraDescription()))) {
             send_to_char(ch, "%s: you can't take that!\r\n", fname(descword));
             return;
         }
         auto con = ch->getLocationObjects();
         int transferred = 0;
         for(auto obj : filter_raw(con)) {
-            if (CAN_SEE_OBJ(ch, obj) && isname(arg, obj->name)) {
+            if (CAN_SEE_OBJ(ch, obj) && isname(arg, obj->getName())) {
                 if (transferred >= howmany)
                     break;
                 transferred++;
@@ -2178,7 +2178,7 @@ static void get_from_room(struct char_data *ch, char *arg, int howmany) {
         }
         auto loco = ch->getLocationObjects();
         for (auto obj : filter_raw(loco)) {
-            if (CAN_SEE_OBJ(ch, obj) && (dotmode == FIND_ALL || isname(arg, obj->name))) {
+            if (CAN_SEE_OBJ(ch, obj) && (dotmode == FIND_ALL || isname(arg, obj->getName()))) {
                 found = 1;
                 perform_get_from_room(ch, obj);
             }
@@ -2241,7 +2241,7 @@ ACMD(do_get) {
             auto con = ch->getObjects();
             for (auto cont : filter_raw(con))
                 if (CAN_SEE_OBJ(ch, cont) &&
-                    (cont_dotmode == FIND_ALL || isname(arg2, cont->name))) {
+                    (cont_dotmode == FIND_ALL || isname(arg2, cont->getName()))) {
                     if (GET_OBJ_TYPE(cont) == ITEM_CONTAINER) {
                         found = 1;
                         get_from_container(ch, cont, arg1, FIND_OBJ_INV, amount);
@@ -2253,7 +2253,7 @@ ACMD(do_get) {
             auto loco = ch->getLocationObjects();
             for (auto cont : filter_raw(loco))
                 if (CAN_SEE_OBJ(ch, cont) &&
-                    (cont_dotmode == FIND_ALL || isname(arg2, cont->name))) {
+                    (cont_dotmode == FIND_ALL || isname(arg2, cont->getName()))) {
                     if (GET_OBJ_TYPE(cont) == ITEM_CONTAINER) {
                         get_from_container(ch, cont, arg1, FIND_OBJ_ROOM, amount);
                         found = 1;
@@ -2309,9 +2309,9 @@ static void perform_drop_gold(struct char_data *ch, int amount,
                 send_to_char(ch, "You drop some zenni.\r\n");
                 obj_to_room(obj, IN_ROOM(ch));
                 if (GET_ADMLEVEL(ch) > 0) {
-                    send_to_imm("IMM DROP: %s dropped %s in room [%d]", GET_NAME(ch), obj->short_description,
+                    send_to_imm("IMM DROP: %s dropped %s in room [%d]", GET_NAME(ch), obj->getShortDescription(),
                                 obj->getRoomVnum());
-                    log_imm_action("IMM DROP: %s dropped %s in room [%d]", GET_NAME(ch), obj->short_description,
+                    log_imm_action("IMM DROP: %s dropped %s in room [%d]", GET_NAME(ch), obj->getShortDescription(),
                                    obj->getRoomVnum());
                     if (check_insidebag(obj, 0.0) > 1) {
                         send_to_imm("IMM DROP: Object contains %d other items.", check_insidebag(obj, 0.0));
@@ -2415,17 +2415,17 @@ static int perform_drop(struct char_data *ch, struct obj_data *obj,
                 act("$p plops down on some cooled lava!", false, ch, obj, nullptr, TO_ROOM);
                 obj_to_room(obj, IN_ROOM(ch));
                 if (GET_ADMLEVEL(ch) > 0) {
-                    send_to_imm("IMM DROP: %s dropped %s in room [%d]", GET_NAME(ch), obj->short_description,
+                    send_to_imm("IMM DROP: %s dropped %s in room [%d]", GET_NAME(ch), obj->getShortDescription(),
                                 obj->getRoomVnum());
-                    log_imm_action("IMM DROP: %s dropped %s in room [%d]", GET_NAME(ch), obj->short_description,
+                    log_imm_action("IMM DROP: %s dropped %s in room [%d]", GET_NAME(ch), obj->getShortDescription(),
                                    obj->getRoomVnum());
                 }
             } else {
                 obj_to_room(obj, IN_ROOM(ch));
                 if (GET_ADMLEVEL(ch) > 0) {
-                    send_to_imm("IMM DROP: %s dropped %s in room [%d]", GET_NAME(ch), obj->short_description,
+                    send_to_imm("IMM DROP: %s dropped %s in room [%d]", GET_NAME(ch), obj->getShortDescription(),
                                 obj->getRoomVnum());
-                    log_imm_action("IMM DROP: %s dropped %s in room [%d]", GET_NAME(ch), obj->short_description,
+                    log_imm_action("IMM DROP: %s dropped %s in room [%d]", GET_NAME(ch), obj->getShortDescription(),
                                    obj->getRoomVnum());
                 }
             }
@@ -2523,7 +2523,7 @@ ACMD(do_drop) {
         else {
             auto con = ch->getObjects();
             for(auto obj : filter_raw(con)) {
-                if (CAN_SEE_OBJ(ch, obj) && isname(arg, obj->name)) {
+                if (CAN_SEE_OBJ(ch, obj) && isname(arg, obj->getName())) {
                     amount += perform_drop(ch, obj, mode, sname, RDR);
                     if (--multi <= 0)
                         break;
@@ -2561,7 +2561,7 @@ ACMD(do_drop) {
             }
             auto con = ch->getObjects();
             for(auto obj : filter_raw(con)) {
-                if (isname(arg, obj->name))
+                if (isname(arg, obj->getName()))
                     if (CAN_SEE_OBJ(ch, obj) || (GET_OBJ_TYPE(obj) == ITEM_LIGHT)) {
                         amount += perform_drop(ch, obj, mode, sname, RDR);
                     }
@@ -2746,12 +2746,12 @@ ACMD(do_give) {
         auto con = ch->getObjects();
         int given = 0;
         for(auto obj : filter_raw(con)) {
-            if (CAN_SEE_OBJ(ch, obj) || GET_OBJ_TYPE(obj) == ITEM_LIGHT && isname(arg, obj->name)) {
+            if (CAN_SEE_OBJ(ch, obj) || GET_OBJ_TYPE(obj) == ITEM_LIGHT && isname(arg, obj->getName())) {
                 perform_give(ch, vict, obj);
                 if (GET_ADMLEVEL(ch) > 0 && !IS_NPC(vict)) {
-                    send_to_imm("IMM GIVE: %s has given %s to %s.", GET_NAME(ch), obj->short_description,
+                    send_to_imm("IMM GIVE: %s has given %s to %s.", GET_NAME(ch), obj->getShortDescription(),
                                 GET_NAME(vict));
-                    log_imm_action("IMM GIVE: %s has given %s to %s.", GET_NAME(ch), obj->short_description,
+                    log_imm_action("IMM GIVE: %s has given %s to %s.", GET_NAME(ch), obj->getShortDescription(),
                                    GET_NAME(vict));
                 }
                 given++;
@@ -2775,9 +2775,9 @@ ACMD(do_give) {
             else {
                 perform_give(ch, vict, obj);
                 if (GET_ADMLEVEL(ch) > 0 && !IS_NPC(vict)) {
-                    send_to_imm("IMM GIVE: %s has given %s to %s.", GET_NAME(ch), obj->short_description,
+                    send_to_imm("IMM GIVE: %s has given %s to %s.", GET_NAME(ch), obj->getShortDescription(),
                                 GET_NAME(vict));
-                    log_imm_action("IMM GIVE: %s has given %s to %s.", GET_NAME(ch), obj->short_description,
+                    log_imm_action("IMM GIVE: %s has given %s to %s.", GET_NAME(ch), obj->getShortDescription(),
                                    GET_NAME(vict));
                 }
             }
@@ -2792,12 +2792,12 @@ ACMD(do_give) {
             else {
                 for (auto obj : filter_raw(con)) {
                     if (CAN_SEE_OBJ(ch, obj) &&
-                        ((dotmode == FIND_ALL || isname(arg, obj->name)))) {
+                        ((dotmode == FIND_ALL || isname(arg, obj->getName())))) {
                         perform_give(ch, vict, obj);
                         if (GET_ADMLEVEL(ch) > 0 && !IS_NPC(vict)) {
-                            send_to_imm("IMM GIVE: %s has given %s to %s.", GET_NAME(ch), obj->short_description,
+                            send_to_imm("IMM GIVE: %s has given %s to %s.", GET_NAME(ch), obj->getShortDescription(),
                                         GET_NAME(vict));
-                            log_imm_action("IMM GIVE: %s has given %s to %s.", GET_NAME(ch), obj->short_description,
+                            log_imm_action("IMM GIVE: %s has given %s to %s.", GET_NAME(ch), obj->getShortDescription(),
                                            GET_NAME(vict));
                         }
                     }
@@ -2839,7 +2839,7 @@ void name_from_drinkcon(struct obj_data *obj) {
         return;
 
     liqname = drinknames[GET_OBJ_VAL(obj, VAL_DRINKCON_LIQUID)];
-    if (!isname(liqname, obj->name)) {
+    if (!isname(liqname, obj->getName())) {
         /*log("SYSERR: Can't remove liquid '%s' from '%s' (%d) item.", liqname, obj->name, obj->item_number);*/
         /*  SYSERR_DESC:
      *  From name_from_drinkcon(), this error comes about if the object
@@ -2850,9 +2850,9 @@ void name_from_drinkcon(struct obj_data *obj) {
     }
 
     liqlen = strlen(liqname);
-    CREATE(new_name, char, strlen(obj->name) - strlen(liqname)); /* +1 for NUL, -1 for space */
+    CREATE(new_name, char, strlen(obj->getName()) - strlen(liqname)); /* +1 for NUL, -1 for space */
 
-    for (cur_name = obj->name; cur_name; cur_name = next) {
+    for (cur_name = obj->getName(); cur_name; cur_name = next) {
         if (*cur_name == ' ')
             cur_name++;
 
@@ -3023,8 +3023,8 @@ ACMD(do_drink) {
         act(buf, true, ch, temp, nullptr, TO_ROOM);
 
         send_to_char(ch, "You drink the %s.\r\n", drinks[GET_OBJ_VAL(temp, VAL_DRINKCON_LIQUID)]);
-        if (temp->look_description)
-            act(temp->look_description, true, ch, temp, nullptr, TO_CHAR);
+        if (auto ld = temp->getLookDescription(); ld)
+            act(ld, true, ch, temp, nullptr, TO_CHAR);
 
         /* if (drink_aff[GET_OBJ_VAL(temp, VAL_DRINKCON_LIQUID)][DRUNK] > 0)
       amount = (25 - GET_COND(ch, THIRST)) / drink_aff[GET_OBJ_VAL(temp, VAL_DRINKCON_LIQUID)][DRUNK];
@@ -3166,8 +3166,8 @@ ACMD(do_eat) {
 
     if (subcmd == SCMD_EAT) {
         act("You eat some of $p.", false, ch, food, nullptr, TO_CHAR);
-        if (food->look_description)
-            act(food->look_description, false, ch, food, nullptr, TO_CHAR);
+        if (auto ld = food->getLookDescription(); ld)
+            act(ld, false, ch, food, nullptr, TO_CHAR);
         act("$n eats some of $p.", true, ch, food, nullptr, TO_ROOM);
     } else {
         act("You nibble a little bit of $p.", false, ch, food, nullptr, TO_CHAR);
@@ -3818,7 +3818,7 @@ ACMD(do_wear) {
         auto con = ch->getObjects();
         int found = 0;
         for(auto obj : filter_raw(con)) {
-            if(!(CAN_SEE_OBJ(ch, obj) && isname(arg1, obj->name))) continue;
+            if(!(CAN_SEE_OBJ(ch, obj) && isname(arg1, obj->getName()))) continue;
             found++;
             if(GET_WIS(ch) < GET_OBJ_LEVEL(obj)) {
                 send_to_char(ch, "You are not experienced enough to use that.\r\n");
@@ -4008,7 +4008,7 @@ ACMD(do_remove) {
             found = 0;
             for (i = 0; i < NUM_WEARS; i++) {
                 if (GET_EQ(ch, i) && CAN_SEE_OBJ(ch, GET_EQ(ch, i)) &&
-                    isname(arg, GET_EQ(ch, i)->name)) {
+                    isname(arg, GET_EQ(ch, i)->getName())) {
                     perform_remove(ch, i);
                     found = 1;
                 }

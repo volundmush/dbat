@@ -293,7 +293,7 @@ ACMD(do_mjunk) {
     } else {
         auto con = ch->getObjects();
         for (auto obj : filter_raw(con)) {
-            if (arg[3] == '\0' || isname(arg + 4, obj->name)) {
+            if (arg[3] == '\0' || isname(arg + 4, obj->getName())) {
                 extract_obj(obj);
             }
         }

@@ -1294,10 +1294,10 @@ ACMD(do_write) {
         char *backstr = nullptr;
 
         /* Something on it, display it as that's in input buffer. */
-        if (paper->look_description) {
-            backstr = strdup(paper->look_description);
+        if (auto ld = paper->getLookDescription(); ld) {
+            backstr = strdup(ld);
             send_to_char(ch, "There's something written on it already:\r\n");
-            send_to_char(ch, "%s", paper->look_description);
+            send_to_char(ch, "%s", ld);
         }
 
         /* we can write - hooray! */

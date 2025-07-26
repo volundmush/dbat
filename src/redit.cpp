@@ -495,8 +495,8 @@ void redit_disp_menu(struct descriptor_data *d) {
                         "@gQ@n) Quit\r\n"
                         "Enter choice : ",
 
-                        OLC_NUM(d), zone_table[OLC_ZNUM(d)].number, room->name,
-                        room->look_description, buf1, buf2,
+                        OLC_NUM(d), zone_table[OLC_ZNUM(d)].number, room->getName(),
+                        room->getLookDescription(), buf1, buf2,
                         room->dir_option[NORTH] && room->dir_option[NORTH]->to_room != NOWHERE ?
                         room->dir_option[NORTH]->to_room : -1,
                         room->dir_option[NORTHWEST] && room->dir_option[NORTHWEST]->to_room != NOWHERE ?
@@ -532,8 +532,8 @@ void redit_disp_menu(struct descriptor_data *d) {
                         "@gQ@n) Quit\r\n"
                         "Enter choice : ",
 
-                        OLC_NUM(d), zone_table[OLC_ZNUM(d)].number, room->name,
-                        room->look_description);
+                        OLC_NUM(d), zone_table[OLC_ZNUM(d)].number, room->getName(),
+                        room->getLookDescription());
     }
 
     OLC_MODE(d) = REDIT_MAIN_MENU;
@@ -621,9 +621,9 @@ void redit_parse(struct descriptor_data *d, char *arg) {
                         write_to_output(d, "Enter room description:\r\n\r\n");
                     }
 
-                    if (OLC_ROOM(d)->look_description) {
-                        write_to_output(d, "%s", OLC_ROOM(d)->look_description);
-                        oldtext = strdup(OLC_ROOM(d)->look_description);
+                    if (auto ld = OLC_ROOM(d)->getLookDescription(); ld) {
+                        write_to_output(d, "%s", ld);
+                        oldtext = strdup(ld);
                     }
                     string_write(d, &OLC_ROOM(d)->look_description, MAX_ROOM_DESC, 0, oldtext);
                     OLC_VAL(d) = 1;

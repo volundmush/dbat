@@ -23,8 +23,8 @@ cdef extern from "dbat/db.h":
     structs.room_data* get_room(int vn)
 
     map[int, structs.zone_data] zone_table
-    map[int, structs.char_data] mob_proto
-    map[int, structs.obj_data] obj_proto
+    map[int, structs.npc_proto_data] mob_proto
+    map[int, structs.item_proto_data] obj_proto
 
     unordered_map[int, shared_ptr[structs.char_data]] uniqueCharacters
     vector[weak_ptr[structs.char_data]] getAllCharacters()

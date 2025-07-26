@@ -199,6 +199,8 @@ extern void auc_save();
 
 extern void load_config();
 
+extern void destroy_db();
+
 extern zone_rnum real_zone(zone_vnum vnum);
 
 extern room_rnum real_room(room_vnum vnum);

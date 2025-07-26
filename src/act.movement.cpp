@@ -1252,7 +1252,7 @@ static void do_doorcmd(struct char_data *ch, struct obj_data *obj, int door, int
                         act("@wYou open @c$p@w.", true, ch, obj, 0, TO_CHAR);
                         act("@C$n@w opens @c$p@w.", true, ch, obj, 0, TO_ROOM);
                         send_to_room(IN_ROOM(vehicle), "@wThe door to %s@w is opened from the other side.\r\n",
-                                     vehicle->short_description);
+                                     vehicle->getShortDescription());
                     }
                     vehicle = nullptr;
                 }
@@ -1282,7 +1282,7 @@ static void do_doorcmd(struct char_data *ch, struct obj_data *obj, int door, int
                 send_to_char(ch, "You open the %s that leads %s.\r\n",
                              EXIT(ch, door)->keyword ? EXIT(ch, door)->keyword : "door", dirs[door]);
             } else if (GET_OBJ_TYPE(obj) != ITEM_VEHICLE && GET_OBJ_TYPE(obj) != ITEM_HATCH) {
-                send_to_char(ch, "You open %s.\r\n", obj->short_description);
+                send_to_char(ch, "You open %s.\r\n", obj->getShortDescription());
             }
             break;
 
@@ -1302,7 +1302,7 @@ static void do_doorcmd(struct char_data *ch, struct obj_data *obj, int door, int
                         act("@wYou close @c$p@w.", true, ch, obj, 0, TO_CHAR);
                         act("@C$n@w closes @c$p@w.", true, ch, obj, 0, TO_ROOM);
                         send_to_room(IN_ROOM(vehicle), "@wThe door to %s@w is closed from the other side.\r\n",
-                                     vehicle->short_description);
+                                     vehicle->getShortDescription());
                     }
                     vehicle = NULL;
                 }
@@ -1321,7 +1321,7 @@ static void do_doorcmd(struct char_data *ch, struct obj_data *obj, int door, int
                         act("@wYou close @c$p@w.", true, ch, obj, 0, TO_CHAR);
                         act("@C$n@w closes @c$p@w.", true, ch, obj, 0, TO_ROOM);
                         send_to_room(IN_ROOM(hatch), "@wThe door to %s@w is closed from the other side.\r\n",
-                                     hatch->short_description);
+                                     hatch->getShortDescription());
                     }
                     hatch = NULL;
                 }
@@ -1334,7 +1334,7 @@ static void do_doorcmd(struct char_data *ch, struct obj_data *obj, int door, int
                 send_to_char(ch, "You close the %s that leads %s.\r\n",
                              EXIT(ch, door)->keyword ? EXIT(ch, door)->keyword : "door", dirs[door]);
             } else if (GET_OBJ_TYPE(obj) != ITEM_VEHICLE && GET_OBJ_TYPE(obj) != ITEM_HATCH) {
-                send_to_char(ch, "You close %s.\r\n", obj->short_description);
+                send_to_char(ch, "You close %s.\r\n", obj->getShortDescription());
             }
             break;
 
@@ -1359,7 +1359,7 @@ static void do_doorcmd(struct char_data *ch, struct obj_data *obj, int door, int
                 send_to_char(ch, "You lock the %s that leads %s.\r\n",
                              EXIT(ch, door)->keyword ? EXIT(ch, door)->keyword : "door", dirs[door]);
             } else {
-                send_to_char(ch, "You lock %s.\r\n", obj->short_description);
+                send_to_char(ch, "You lock %s.\r\n", obj->getShortDescription());
             }
             break;
 
@@ -1384,7 +1384,7 @@ static void do_doorcmd(struct char_data *ch, struct obj_data *obj, int door, int
                 send_to_char(ch, "You unlock the %s that leads %s.\r\n",
                              EXIT(ch, door)->keyword ? EXIT(ch, door)->keyword : "door", dirs[door]);
             } else {
-                send_to_char(ch, "You unlock %s.\r\n", obj->short_description);
+                send_to_char(ch, "You unlock %s.\r\n", obj->getShortDescription());
             }
             break;
 
@@ -1892,7 +1892,7 @@ static int do_simple_leave(struct char_data *ch, struct obj_data *obj, int need_
     send_to_scouter(buf3, ch, 0, 0);
 
     if (ch->desc) {
-        act(obj->look_description, true, ch, obj, nullptr, TO_CHAR);
+        act(obj->getLookDescription(), true, ch, obj, nullptr, TO_CHAR);
         look_at_room(IN_ROOM(ch), ch, 0);
     }
 
@@ -2584,7 +2584,7 @@ ACMD(do_sleep) {
         if (SITS(ch)) {
             chair = SITS(ch);
             if (GET_OBJ_TYPE(chair) != ITEM_BED) {
-                send_to_char(ch, "You can't sleep on %s.\r\n", chair->short_description);
+                send_to_char(ch, "You can't sleep on %s.\r\n", chair->getShortDescription());
                 return;
             }
         }

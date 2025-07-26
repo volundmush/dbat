@@ -153,13 +153,6 @@ constexpr int SCRIPT_ERROR_CODE = -9999999;   /* this shouldn't happen too often
 /* one line of the trigger */
 
 
-/* typedefs that the dg functions rely on */
-typedef struct index_data index_data;
-typedef struct room_data room_data;
-typedef struct obj_data obj_data;
-typedef struct trig_data trig_data;
-typedef struct char_data char_data;
-
 /* used for actor memory triggers */
 struct script_memory {
     int64_t id{};                /* id of who to remember */
@@ -382,7 +375,7 @@ extern int remove_var(struct trig_var_data **var_list, char *name);
 
 extern void free_trigger(trig_data *trig);
 
-extern void extract_trigger(struct trig_data *trig);
+extern void extract_trigger(trig_data *trig);
 
 extern void extract_script(unit_data *thing, int type);
 

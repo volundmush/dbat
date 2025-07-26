@@ -168,7 +168,7 @@ ACMD(do_evolve) {
 
 static void see_plant(struct obj_data *obj, struct char_data *ch) {
     int water = GET_OBJ_VAL(obj, VAL_PLANT_WATERLEVEL);
-    const char* description = obj->short_description;
+    const char* description = obj->getShortDescription();
 
     if (water >= 0) {
         const char* maturity_stage;
@@ -444,9 +444,9 @@ ACMD(do_table) {
     }
 
     char buf[200];
-    sprintf(buf, "$n looks at %s on %s.\r\n", obj2->short_description, obj->short_description);
+    sprintf(buf, "$n looks at %s on %s.\r\n", obj2->getShortDescription(), obj->getShortDescription());
     act(buf, true, ch, nullptr, nullptr, TO_ROOM);
-    send_to_char(ch, "%s", obj2->look_description);
+    send_to_char(ch, "%s", obj2->getLookDescription());
 }
 
 ACMD(do_draw) {
@@ -480,7 +480,7 @@ ACMD(do_draw) {
         return;
     } else {
         act("$n draws a card from $s $p.\r\n", true, ch, obj, nullptr, TO_ROOM);
-        send_to_char(ch, "You draw a card.\r\n%s\r\n", obj3->look_description);
+        send_to_char(ch, "You draw a card.\r\n%s\r\n", obj3->getLookDescription());
         return;
     }
 
@@ -567,7 +567,7 @@ ACMD(do_hand) {
             }
             if (obj) {
                 count += 1;
-                send_to_char(ch, "%s\r\n", obj->short_description);
+                send_to_char(ch, "%s\r\n", obj->getShortDescription());
             }
         }
         act("$n looks at $s hand.", true, ch, nullptr, nullptr, TO_ROOM);
@@ -667,8 +667,8 @@ ACMD(do_post) {
     }
 
     char buf[MAX_STRING_LENGTH];
-    sprintf(buf, "@C$n@W posts %s@W on %s@W.@n", obj->short_description, obj2->short_description);
-    send_to_char(ch, "@WYou post %s@W on %s@W.@n\r\n", obj->short_description, obj2->short_description);
+    sprintf(buf, "@C$n@W posts %s@W on %s@W.@n", obj->getShortDescription(), obj2->getShortDescription());
+    send_to_char(ch, "@WYou post %s@W on %s@W.@n\r\n", obj->getShortDescription(), obj2->getShortDescription());
     act(buf, true, ch, nullptr, nullptr, TO_ROOM);
     obj_from_char(obj);
     obj_to_room(obj, IN_ROOM(ch));
@@ -774,20 +774,22 @@ ACMD(do_nickname) {
         return;
     }
 
-    if (strstr(obj->short_description, "nicknamed")) {
-        send_to_char(ch, "%s@w has already been nicknamed.@n\r\n", obj->short_description);
+    auto sdesc = obj->getShortDescription();
+
+    if (strstr(sdesc, "nicknamed")) {
+        send_to_char(ch, "%s@w has already been nicknamed.@n\r\n", sdesc);
         return;
     }
     
-    if (strstr(obj->name, "corpse")) {
-        send_to_char(ch, "%s@w is a corpse!@n\r\n", obj->short_description);
+    if (strstr(obj->getName(), "corpse")) {
+        send_to_char(ch, "%s@w is a corpse!@n\r\n", sdesc);
         return;
     }
-    
-    send_to_char(ch, "@wYou nickname %s@w as '@C%s@w'.@n\r\n", obj->short_description, arg2);
+
+    send_to_char(ch, "@wYou nickname %s@w as '@C%s@w'.@n\r\n", sdesc, arg2);
     char nick[MAX_INPUT_LENGTH], nick2[MAX_INPUT_LENGTH];
-    sprintf(nick, "%s @wnicknamed @D(@C%s@D)@n", obj->short_description, CAP(arg2));
-    sprintf(nick2, "%s %s", obj->name, arg2);
+    sprintf(nick, "%s @wnicknamed @D(@C%s@D)@n", sdesc, CAP(arg2));
+    sprintf(nick2, "%s %s", obj->getName(), arg2);
     obj->short_description = strdup(nick);
     obj->name = strdup(nick2);
 }
@@ -1388,7 +1390,7 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
             if (PRF_FLAGGED(ch, PRF_IHEALTH)) {
                 send_to_char(ch, "@D<@gH@D: @C%d@D>@w %s", GET_OBJ_VAL(obj, VAL_ALL_HEALTH), obj->short_description);
             } else {
-                send_to_char(ch, "%s", obj->short_description);
+                send_to_char(ch, "%s", obj->getShortDescription());
             }
             if (GET_OBJ_TYPE(obj) == ITEM_FOOD) {
                 if (GET_OBJ_VAL(obj, VAL_FOOD_FOODVAL) < FOOB(obj)) {
@@ -1477,11 +1479,11 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
         case SHOW_OBJ_ACTION:
             switch (GET_OBJ_TYPE(obj)) {
                 case ITEM_NOTE:
-                    if (obj->look_description) {
+                    if (auto ld = obj->getLookDescription(); ld) {
                         char notebuf[MAX_NOTE_LENGTH];
 
                         snprintf(notebuf, sizeof(notebuf), "There is something written on it:\r\n\r\n%s",
-                                 obj->look_description);
+                                 ld);
                         write_to_output(ch->desc, notebuf);
                     } else
                         send_to_char(ch, "There appears to be nothing written on it.\r\n");
@@ -1569,7 +1571,7 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
                     break;
 
                 case ITEM_WINDOW:
-                    look_out_window(ch, obj->name);
+                    look_out_window(ch, obj->getName());
                     return;
                     break;
 
@@ -1705,7 +1707,7 @@ static int show_obj_modifiers(struct obj_data *obj, struct char_data *ch) {
         send_to_char(ch, " @D(@YCUSTOM@D)@n");
     }
     if (OBJ_FLAGGED(obj, ITEM_RESTRING)) {
-        send_to_char(ch, " @D(@R%s@D)@n", GET_ADMLEVEL(ch) > 0 ? obj->name : "*");
+        send_to_char(ch, " @D(@R%s@D)@n", GET_ADMLEVEL(ch) > 0 ? obj->getName() : "*");
     }
     if (OBJ_FLAGGED(obj, ITEM_BROKEN)) {
         if (GET_OBJ_VAL(obj, VAL_ALL_MATERIAL) == MATERIAL_STEEL ||
@@ -1733,7 +1735,7 @@ static int show_obj_modifiers(struct obj_data *obj, struct char_data *ch) {
                 *dvnum = '\0';
                 sprintf(dvnum, "@D[@G%d@D] @w", GET_OBJ_VNUM(obj2));
                 send_to_char(ch, "\n...%s%s has been posted to it.", PRF_FLAGGED(ch, PRF_ROOMFLAGS) ? dvnum : "",
-                             obj2->short_description);
+                             obj2->getShortDescription());
             }
         }
         found++;
@@ -1924,8 +1926,8 @@ static void look_at_char(struct char_data *i, struct char_data *ch) {
         return;
     }
     if(i->form == Form::base || i->transforms[i->form].description == nullptr || i->transforms[i->form].description == "") {
-        if (i->look_description) {
-            send_to_char(ch, "%s", i->look_description);
+        if (auto ld = i->getLookDescription(); ld) {
+            send_to_char(ch, "%s", ld);
         }
     } else {
         send_to_char(ch, "%s", i->transforms[i->form].description);
@@ -2179,48 +2181,48 @@ static void list_one_char(struct char_data *i, struct char_data *ch) {
     }
 
     if (IS_NPC(i) && !FIGHTING(i) && GET_POS(i) != POS_SITTING && GET_POS(i) != POS_SLEEPING)
-            send_to_char(ch, "@w%c%s", UPPER(*i->short_description), i->short_description + 1);
+            send_to_char(ch, "@w%c%s", UPPER(*i->getShortDescription()), i->getShortDescription() + 1);
     else if (IS_NPC(i) && GRAPPLED(i) && GRAPPLED(i) == ch)
-        send_to_char(ch, "@w%c%s is being grappled with by YOU!", UPPER(*i->short_description), i->short_description + 1);
+        send_to_char(ch, "@w%c%s is being grappled with by YOU!", UPPER(*i->getShortDescription()), i->getShortDescription() + 1);
     else if (IS_NPC(i) && GRAPPLED(i) && GRAPPLED(i) != ch)
-        send_to_char(ch, "@w%c%s is being absorbed from by %s!", UPPER(*i->short_description), i->short_description + 1,
+        send_to_char(ch, "@w%c%s is being absorbed from by %s!", UPPER(*i->getShortDescription()), i->getShortDescription() + 1,
                      readIntro(ch, GRAPPLED(i)) == 1 ? get_i_name(ch, GRAPPLED(i)) : AN(RACE(GRAPPLED(i))));
     else if (IS_NPC(i) && ABSORBBY(i) && ABSORBBY(i) == ch)
-        send_to_char(ch, "@w%c%s is being absorbed from by YOU!", UPPER(*i->short_description), i->short_description + 1);
+        send_to_char(ch, "@w%c%s is being absorbed from by YOU!", UPPER(*i->getShortDescription()), i->getShortDescription() + 1);
     else if (IS_NPC(i) && ABSORBBY(i) && ABSORBBY(i) != ch)
-        send_to_char(ch, "@w%c%s is being absorbed from by %s!", UPPER(*i->short_description), i->short_description + 1,
+        send_to_char(ch, "@w%c%s is being absorbed from by %s!", UPPER(*i->getShortDescription()), i->getShortDescription() + 1,
                      readIntro(ch, ABSORBBY(i)) == 1 ? get_i_name(ch, ABSORBBY(i)) : AN(RACE(ABSORBBY(i))));
     else if (IS_NPC(i) && FIGHTING(i) && FIGHTING(i) != ch && GET_POS(i) != POS_SITTING && GET_POS(i) != POS_SLEEPING &&
              is_sparring(i))
-        send_to_char(ch, "@w%c%s is sparring with %s!", UPPER(*i->short_description), i->short_description + 1,
+        send_to_char(ch, "@w%c%s is sparring with %s!", UPPER(*i->getShortDescription()), i->getShortDescription() + 1,
                      GET_ADMLEVEL(ch) ? GET_NAME(FIGHTING(i)) : (readIntro(ch, FIGHTING(i)) == 1 ? get_i_name(ch,
                                                                                                               FIGHTING(
                                                                                                                       i))
                                                                                                  : LRACE(FIGHTING(i))));
     else if (IS_NPC(i) && FIGHTING(i) && is_sparring(i) && FIGHTING(i) == ch && GET_POS(i) != POS_SITTING &&
              GET_POS(i) != POS_SLEEPING)
-        send_to_char(ch, "@w%c%s is sparring with you!", UPPER(*i->short_description), i->short_description + 1);
+        send_to_char(ch, "@w%c%s is sparring with you!", UPPER(*i->getShortDescription()), i->getShortDescription() + 1);
     else if (IS_NPC(i) && FIGHTING(i) && FIGHTING(i) != ch && GET_POS(i) != POS_SITTING && GET_POS(i) != POS_SLEEPING)
-        send_to_char(ch, "@w%c%s is fighting %s!", UPPER(*i->short_description), i->short_description + 1,
+        send_to_char(ch, "@w%c%s is fighting %s!", UPPER(*i->getShortDescription()), i->getShortDescription() + 1,
                      GET_ADMLEVEL(ch) ? GET_NAME(FIGHTING(i)) : (readIntro(ch, FIGHTING(i)) == 1 ? get_i_name(ch,
                                                                                                               FIGHTING(
                                                                                                                       i))
                                                                                                  : LRACE(FIGHTING(i))));
     else if (IS_NPC(i) && FIGHTING(i) && FIGHTING(i) == ch && GET_POS(i) != POS_SITTING && GET_POS(i) != POS_SLEEPING)
-        send_to_char(ch, "@w%c%s is fighting YOU!", UPPER(*i->short_description), i->short_description + 1);
+        send_to_char(ch, "@w%c%s is fighting YOU!", UPPER(*i->getShortDescription()), i->getShortDescription() + 1);
     else if (IS_NPC(i) && FIGHTING(i) && GET_POS(i) == POS_SITTING)
-        send_to_char(ch, "@w%c%s is sitting here.", UPPER(*i->short_description), i->short_description + 1);
+        send_to_char(ch, "@w%c%s is sitting here.", UPPER(*i->getShortDescription()), i->getShortDescription() + 1);
     else if (IS_NPC(i) && FIGHTING(i) && GET_POS(i) == POS_SLEEPING)
-        send_to_char(ch, "@w%c%s is sleeping here.", UPPER(*i->short_description), i->short_description + 1);
+        send_to_char(ch, "@w%c%s is sleeping here.", UPPER(*i->getShortDescription()), i->getShortDescription() + 1);
     else if (IS_NPC(i))
-        send_to_char(ch, "@w%c%s", UPPER(*i->short_description), i->short_description + 1);
+        send_to_char(ch, "@w%c%s", UPPER(*i->getShortDescription()), i->getShortDescription() + 1);
     else if (!IS_NPC(i)) {
         if (IS_MAJIN(i) && AFF_FLAGGED(i, AFF_LIQUEFIED)) {
             send_to_char(ch, "@wSeveral blobs of %s colored goo spread out here.@n\n", GET_SKIN(i));
             return;
         }
         if ((GET_ADMLEVEL(ch) > 0 || GET_ADMLEVEL(i) > 0) || IS_NPC(ch)) {
-            send_to_char(ch, "@w%s", i->name);
+            send_to_char(ch, "@w%s", i->getName());
         } else if ((!PLR_FLAGGED(i, PLR_DISGUISED) && readIntro(ch, i) == 1)) {
             send_to_char(ch, "@w%s", get_i_name(ch, i));
         } else if (!PLR_FLAGGED(i, PLR_DISGUISED) && readIntro(ch, i) != 1) {
@@ -2326,9 +2328,9 @@ static void list_one_char(struct char_data *i, struct char_data *ch) {
         if (PLR_FLAGGED(i, PLR_HEALT)) {
             send_to_char(ch, "@w is floating inside a healing tank.");
         } else if (count == true) {
-            send_to_char(ch, ",@w and%s on %s.", positions[(int) GET_POS(i)], chair->short_description);
+            send_to_char(ch, ",@w and%s on %s.", positions[(int) GET_POS(i)], chair->getShortDescription());
         } else if (count == false) {
-            send_to_char(ch, "@w%s on %s.", positions[(int) GET_POS(i)], chair->short_description);
+            send_to_char(ch, "@w%s on %s.", positions[(int) GET_POS(i)], chair->getShortDescription());
         }
     } else if (!PLR_FLAGGED(i, PLR_PILOTING) && !SITS(i) && (!IS_NPC(i) || !FIGHTING(i))) {
         if (count == true) {
@@ -2597,9 +2599,9 @@ static void do_auto_exits(struct room_data *room, struct char_data *ch, int exit
                 direction[0] = toupper(direction[0]);
 
                 if (admVision) {
-                    exitStr = fmt::format("@c{} @D- [@Y{}@D]@w {}.\r\n", direction, dest->getVnum(), dest->name);
+                    exitStr = fmt::format("@c{} @D- [@Y{}@D]@w {}.\r\n", direction, dest->getVnum(), dest->getName());
                 } else {
-                    exitStr = fmt::format("@c{} @D-@w {}.\r\n", direction, (IS_DARK(dest->getVnum()) && !CAN_SEE_IN_DARK(ch) && !has_light) ? "@bToo dark to tell.@w" : dest->name);
+                    exitStr = fmt::format("@c{} @D-@w {}.\r\n", direction, (IS_DARK(dest->getVnum()) && !CAN_SEE_IN_DARK(ch) && !has_light) ? "@bToo dark to tell.@w" : dest->getName());
                 }
 
                 if (IS_SET(d->exit_info, EX_ISDOOR) || IS_SET(d->exit_info, EX_SECRET)) {
@@ -2767,7 +2769,7 @@ static void display_room_info(struct room_data *rm, struct char_data *ch) {
         send_to_char(ch, "@wO----------------------------------------------------------------------O@n\r\n");
     }
 
-    send_to_char(ch, "@wLocation: %-70s@n\r\n", rm->name);
+    send_to_char(ch, "@wLocation: %-70s@n\r\n", rm->getName());
 
     if (auto planet = getPlanet(ch->in_room); planet) {
         send_to_char(ch, "@wPlanet: @G%s@n\r\n", getPlanetColorName(planet.value()).c_str());
@@ -2800,7 +2802,7 @@ static void display_room_flags(struct room_data *rm, struct char_data *ch) {
         send_to_char(ch, "\r\n@wO----------------------------------------------------------------------O@n\r\n");
     }
 
-    send_to_char(ch, "@wLocation: @G%-70s@w\r\n", rm->name);
+    send_to_char(ch, "@wLocation: @G%-70s@w\r\n", rm->getName());
 
     if (rm->trig_list) {
         send_to_char(ch, "@D[@GTriggers");
@@ -2900,7 +2902,7 @@ static void display_room_damage_description(struct room_data *rm, struct char_da
 
     if ((!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_BRIEF)) || rm->room_flags.get(ROOM_DEATH)) {
         if (dmg <= 99 || (dmg == 100 && (sect == SECT_WATER_SWIM || sunk || sect == SECT_FLYING || sect == SECT_SHOP || sect == SECT_IMPORTANT))) {
-            send_to_char(ch, "@w%s@n", rm->look_description);
+            send_to_char(ch, "@w%s@n", rm->getLookDescription());
         }
 
         if (dmg > 0) {
@@ -3041,7 +3043,7 @@ static void handle_portal(struct char_data *ch, struct obj_data *obj) {
             if (portal_dest == NOWHERE || (IS_DARK(portal_dest) && !CAN_SEE_IN_DARK(ch) && !PLR_FLAGGED(ch, PLR_AURALIGHT))) {
                 send_to_char(ch, "You see nothing but infinite darkness...\r\n");
             } else {
-                send_to_char(ch, "After seconds of concentration you see the image of %s.\r\n", get_room(portal_dest)->name);
+                send_to_char(ch, "After seconds of concentration you see the image of %s.\r\n", get_room(portal_dest)->getName());
             }
         } else if (portal_appear < MAX_PORTAL_TYPES) {
             send_to_char(ch, "%s\r\n", portal_appearance[portal_appear]);
@@ -3072,7 +3074,7 @@ static void handle_container(struct char_data *ch, struct obj_data *obj, int bit
     if (OBJVAL_FLAGGED(obj, CONT_CLOSED)) {
         send_to_char(ch, "It is closed.\r\n");
     } else {
-        send_to_char(ch, "%s", obj->short_description);
+        send_to_char(ch, "%s", obj->getShortDescription());
         switch (bits) {
             case FIND_OBJ_INV:
                 send_to_char(ch, " (carried): \r\n");
@@ -3147,7 +3149,7 @@ static void look_in_obj(struct char_data *ch, char *arg) {
         return;
     }
 
-    if (find_exdesc(arg, obj->ex_description) && !bits) {
+    if (find_exdesc(arg, obj->getExtraDescription()) && !bits) {
         send_to_char(ch, "There's nothing inside that!\r\n");
         return;
     }
@@ -3206,7 +3208,7 @@ char *find_exdesc(char *word, struct extra_descr_data *list) {
  * suggested fix to this problem.
  */
 static void examine_equipped_item(struct char_data *ch, struct obj_data *obj, const char *arg) {
-    if (isname(arg, obj->name)) {
+    if (isname(arg, obj->getName())) {
         if (GET_OBJ_TYPE(obj) == ITEM_WEAPON) {
             send_to_char(ch, "The weapon type of %s is a %s.\r\n",
                          GET_OBJ_SHORT(obj), weapon_type[(int) GET_OBJ_VAL(obj, VAL_WEAPON_SKILL)]);
@@ -3224,7 +3226,7 @@ static void examine_equipped_item(struct char_data *ch, struct obj_data *obj, co
 }
 
 static void examine_item(struct char_data *ch, struct obj_data *obj, const char *arg) {
-    if (isname(arg, obj->name)) {
+    if (isname(arg, obj->getName())) {
         if (GET_OBJ_TYPE(obj) == ITEM_WEAPON) {
             send_to_char(ch, "The weapon type of %s is a %s.\r\n",
                          GET_OBJ_SHORT(obj), weapon_type[(int) GET_OBJ_VAL(obj, VAL_WEAPON_SKILL)]);
@@ -3248,7 +3250,7 @@ static void examine_item(struct char_data *ch, struct obj_data *obj, const char 
             send_to_char(ch, "@YSyntax@D: @CUnlock hatch\r\n");
             send_to_char(ch, "@YSyntax@D: @CLeave@n\r\n");
         } else if (GET_OBJ_TYPE(obj) == ITEM_WINDOW) {
-            look_out_window(ch, obj->name);
+            look_out_window(ch, obj->getName());
         }
         if (GET_OBJ_TYPE(obj) == ITEM_CONTROL) {
             send_to_char(ch, "@RFUEL@D: %s%s@n\r\n",
@@ -3275,7 +3277,7 @@ static void handle_board_read(struct char_data *ch, char *arg) {
 
     if (!*number) {
         send_to_char(ch, "Read what?\r\n");
-    } else if (isname(number, obj->name)) {
+    } else if (isname(number, obj->getName())) {
         show_board(GET_OBJ_VNUM(obj), ch);
     } else if (!isdigit(*number) || strchr(number, '.')) {
         char new_arg[MAX_STRING_LENGTH];
@@ -3307,21 +3309,21 @@ static void handle_look_in_inventory(struct char_data *ch, char *arg) {
 
     for (int j = 0; j < NUM_WEARS; j++) {
         struct obj_data *eq = GET_EQ(ch, j);
-        if (eq && CAN_SEE_OBJ(ch, eq) && handle_exdesc_look(ch, arg, eq->ex_description, eq)) {
+        if (eq && CAN_SEE_OBJ(ch, eq) && handle_exdesc_look(ch, arg, eq->getExtraDescription(), eq)) {
             examine_equipped_item(ch, eq, arg);
             return;
         }
     }
     auto con = ch->getObjects();
     for (auto obj : filter_raw(con)) {
-        if (CAN_SEE_OBJ(ch, obj) && handle_exdesc_look(ch, arg, obj->ex_description, obj)) {
+        if (CAN_SEE_OBJ(ch, obj) && handle_exdesc_look(ch, arg, obj->getExtraDescription(), obj)) {
             examine_item(ch, obj, arg);
             return;
         }
     }
     auto loco = ch->getLocationObjects();
     for (auto obj : filter_raw(loco)) {
-        if (CAN_SEE_OBJ(ch, obj) && handle_exdesc_look(ch, arg, obj->ex_description, obj)) {
+        if (CAN_SEE_OBJ(ch, obj) && handle_exdesc_look(ch, arg, obj->getExtraDescription(), obj)) {
             examine_item(ch, obj, arg);
             return;
         }
@@ -3342,7 +3344,7 @@ static void handle_look(struct char_data *ch, char *arg) {
         return;
     }
 
-    if (!handle_exdesc_look(ch, arg, ch->getRoom()->ex_description, nullptr)) {
+    if (!handle_exdesc_look(ch, arg, ch->getRoom()->getExtraDescription(), nullptr)) {
         handle_look_in_inventory(ch, arg);
     }
 
@@ -3402,7 +3404,7 @@ static void look_out_window(struct char_data *ch, char *arg) {
         return;
     }
     /* Look for any old window in the room */
-    viewport = ch->getRoom()->findObject([&](auto obj) {return GET_OBJ_TYPE(obj) == ITEM_WINDOW && isname("window", obj->name);});
+    viewport = ch->getRoom()->findObject([&](auto obj) {return GET_OBJ_TYPE(obj) == ITEM_WINDOW && isname("window", obj->getName());});
 
     if (!viewport) {
         /* Nothing suitable to look through */
@@ -3441,8 +3443,8 @@ static void look_out_window(struct char_data *ch, char *arg) {
         send_to_char(ch, "You don't seem to be able to see outside.\r\n");
         return;
     }
-    if (viewport->look_description)
-        act(viewport->look_description, true, ch, viewport, nullptr, TO_CHAR);
+    if (auto ld = viewport->getLookDescription(); ld)
+        act(ld, true, ch, viewport, nullptr, TO_CHAR);
     else
         act("$n looks out the window.", true, ch, nullptr, nullptr, TO_ROOM);
     send_to_char(ch, "You look outside and see:\r\n");
@@ -3777,7 +3779,7 @@ ACMD(do_look) {
         struct extra_descr_data *i;
         int found = 0;
 
-        for (i = ch->getRoom()->ex_description; i; i = i->next) {
+        for (i = ch->getRoom()->getExtraDescription(); i; i = i->next) {
             if (*i->keyword != '.') {
                 send_to_char(ch, "%s%s:\r\n%s",
                              (found ? "\r\n" : ""), i->keyword, i->description);
@@ -3789,7 +3791,7 @@ ACMD(do_look) {
         return;
     }
     
-    if (find_exdesc(arg, ch->getRoom()->ex_description)) {
+    if (find_exdesc(arg, ch->getRoom()->getExtraDescription())) {
         look_at_target(ch, arg, 0);
         return;
     }
@@ -5195,8 +5197,8 @@ ACMD(do_users) {
             strcpy(idletime, "");
 
         sprintf(line, "%3d %-20s %-20s %-14s %-3s %-8s %1s ", -1,
-                d->original && d->original->name ? d->original->name :
-                d->character && d->character->name ? d->character->name :
+                d->original && d->original->getName() ? d->original->getName() :
+                d->character && d->character->getName() ? d->character->getName() :
                 "UNDEFINED", d->account ? d->account->name.c_str() : "UNKNOWN", state, idletime, timeptr,
                 "N");
 
@@ -5308,7 +5310,7 @@ static void perform_mortal_where(struct char_data *ch, char *arg) {
                 continue;
             if (ch->getRoom()->zone != room->zone)
                 continue;
-            send_to_char(ch, "%-20s - %s\r\n", GET_NAME(i), room->name);
+            send_to_char(ch, "%-20s - %s\r\n", GET_NAME(i), room->getName());
         }
     } else {            /* print only FIRST char, not all. */
         auto ac = characterSubscriptions.all("active");
@@ -5318,9 +5320,9 @@ static void perform_mortal_where(struct char_data *ch, char *arg) {
                 continue;
             if (!CAN_SEE(ch, i) || room->zone != ch->getRoom()->zone)
                 continue;
-            if (!isname(arg, i->name))
+            if (!isname(arg, i->getName()))
                 continue;
-            send_to_char(ch, "%-25s - %s\r\n", GET_NAME(i), room->name);
+            send_to_char(ch, "%-25s - %s\r\n", GET_NAME(i), room->getName());
             return;
         }
         send_to_char(ch, "Nobody around by that name.\r\n");
@@ -5330,7 +5332,7 @@ static void perform_mortal_where(struct char_data *ch, char *arg) {
 static void print_object_location(int num, struct obj_data *obj, struct char_data *ch,
                                   int recur) {
     if (num > 0)
-        send_to_char(ch, "O%3d. %-25s - ", num, obj->short_description);
+        send_to_char(ch, "O%3d. %-25s - ", num, obj->getShortDescription());
     else
         send_to_char(ch, "%33s", " - ");
 
@@ -5338,14 +5340,14 @@ static void print_object_location(int num, struct obj_data *obj, struct char_dat
         send_to_char(ch, "%s", obj->scriptString().c_str());
 
     if (IN_ROOM(obj) != NOWHERE)
-        send_to_char(ch, "[%5d] %s\r\n", obj->getRoomVnum(), obj->getRoom()->name);
+        send_to_char(ch, "[%5d] %s\r\n", obj->getRoomVnum(), obj->getRoom()->getName());
     else if (obj->carried_by)
         send_to_char(ch, "carried by %s in room [%d]\r\n", PERS(obj->carried_by, ch),
                      obj->carried_by->getRoomVnum());
     else if (obj->worn_by)
         send_to_char(ch, "worn by %s in room [%d]\r\n", PERS(obj->worn_by, ch), obj->worn_by->getRoomVnum());
     else if (obj->in_obj) {
-        send_to_char(ch, "inside %s%s\r\n", obj->in_obj->short_description, (recur ? ", which is" : " "));
+        send_to_char(ch, "inside %s%s\r\n", obj->in_obj->getShortDescription(), (recur ? ", which is" : " "));
         if (recur)
             print_object_location(0, obj->in_obj, ch, recur);
     } else
@@ -5376,11 +5378,11 @@ static void perform_immort_where(struct char_data *ch, char *arg) {
                     if (d->original)
                         send_to_char(ch, "%-20s - [%5d]   %s (in %s)\r\n",
                                      GET_NAME(i), d->character->getRoomVnum(),
-                                     d->character->getRoom()->name, GET_NAME(d->character));
+                                     d->character->getRoom()->getName(), GET_NAME(d->character));
                     else {
                         std::string locName = getPlanetName(planet.value());
                         send_to_char(ch, "%-20s - [%5d]   %-14s %s\r\n", GET_NAME(i), i->getRoomVnum(),
-                                     locName.c_str(), i->getRoom()->name);
+                                     locName.c_str(), i->getRoom()->getName());
                     }
 
                 }
@@ -5390,10 +5392,10 @@ static void perform_immort_where(struct char_data *ch, char *arg) {
                GET_NAME(ch), arg);
         auto ac = characterSubscriptions.all("active");
         for (auto i : filter_raw(ac)) {
-            if (CAN_SEE(ch, i) && IN_ROOM(i) != NOWHERE && isname(arg, i->name)) {
+            if (CAN_SEE(ch, i) && IN_ROOM(i) != NOWHERE && isname(arg, i->getName())) {
                 found = 1;
                 send_to_char(ch, "M%3d. %-25s - [%5d] %-25s", ++num, GET_NAME(i),
-                             i->getRoomVnum(), i->getRoom()->name);
+                             i->getRoomVnum(), i->getRoom()->getName());
                 if (IS_NPC(i) && SCRIPT(i) && SCRIPT(i)->trig_list) {
                     auto t = i->scriptString();
                     send_to_char(ch, "%s ", t.c_str());
@@ -5403,7 +5405,7 @@ static void perform_immort_where(struct char_data *ch, char *arg) {
         }
         auto ao = objectSubscriptions.all("active");
         for (auto k : filter_raw(ao)) {
-            if (CAN_SEE_OBJ(ch, k) && isname(arg, k->name)) {
+            if (CAN_SEE_OBJ(ch, k) && isname(arg, k->getName())) {
                 found = 1;
                 print_object_location(++num, k, ch, true);
             }
@@ -6066,7 +6068,7 @@ ACMD(do_scan) {
 
         send_to_char(ch, "@w-----------------------------------------@n\r\n");
         send_to_char(ch, "          %s%s: %s %s\r\n", CCCYN(ch, C_NRM), dirnames[i],
-                     dest->name ? dest->name : "You don't think you saw what you just saw.",
+                     dest->getName() ? dest->getName() : "You don't think you saw what you just saw.",
                      CCNRM(ch, C_NRM));
         send_to_char(ch, "@W          -----------------          @n\r\n");
 
@@ -6089,7 +6091,7 @@ ACMD(do_scan) {
         if (!IS_DARK(dest2->getVnum())) {
             send_to_char(ch, "@w-----------------------------------------@n\r\n");
             send_to_char(ch, "          %sFar %s: %s %s\r\n", CCCYN(ch, C_NRM), dirnames[i],
-                         dest2->name ? dest2->name
+                         dest2->getName() ? dest2->getName()
                                              : "You don't think you saw what you just saw.",
                          CCNRM(ch, C_NRM));
             send_to_char(ch, "@W          -----------------          @n\r\n");
@@ -6421,7 +6423,7 @@ ACMD(do_desc) {
         return;
     }
     if(ch->form == Form::base) {
-        write_to_output(d, "Current description:\r\n%s\r\n", ch->look_description);
+        write_to_output(d, "Current description:\r\n%s\r\n", ch->getLookDescription());
         write_to_output(d, "Enter the new text you'd like others to see when they look at you.\r\n");
         string_write(d, &ch->look_description, EXDSCR_LENGTH, 0, nullptr);
         STATE(d) = CON_EXDESC;

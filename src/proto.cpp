@@ -36,7 +36,7 @@ proto_data& proto_data::operator=(const proto_data& other) {
     return *this;
 }
 
-item_proto_data& item_proto_data::operator=(item_proto_data& other) {
+item_proto_data& item_proto_data::operator=(const item_proto_data& other) {
     // basic proto data fields
     proto_data::operator=(other);
     type_flag = other.type_flag;

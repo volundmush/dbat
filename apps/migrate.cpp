@@ -695,7 +695,7 @@ static int check_object_spell_number(struct obj_data *obj, const char* val) {
         error = true;
     if (error)
         basic_mud_log("SYSERR: Object #%d (%s) has out of range spell #%d.",
-            GET_OBJ_VNUM(obj), obj->short_description, GET_OBJ_VAL(obj, val));
+            GET_OBJ_VNUM(obj), obj->getShortDescription(), GET_OBJ_VAL(obj, val));
 
     /*
    * This bug has been fixed, but if you don't like the special behavior...
@@ -717,7 +717,7 @@ static int check_object_spell_number(struct obj_data *obj, const char* val) {
 
     if ((spellname == unused_spellname || !strcasecmp("UNDEFINED", spellname)) && (error = true))
         basic_mud_log("SYSERR: Object #%d (%s) uses '%s' spell #%d.",
-            GET_OBJ_VNUM(obj), obj->short_description, spellname,
+            GET_OBJ_VNUM(obj), obj->getShortDescription(), spellname,
             GET_OBJ_VAL(obj, val));
 
     return (error);
@@ -728,7 +728,7 @@ static int check_object_level(struct obj_data *obj, const char* val) {
 
     if ((GET_OBJ_VAL(obj, val) < 0) && (error = true))
         basic_mud_log("SYSERR: Object #%d (%s) has out of range level #%d.",
-            GET_OBJ_VNUM(obj), obj->short_description, GET_OBJ_VAL(obj, val));
+            GET_OBJ_VNUM(obj), obj->getShortDescription(), GET_OBJ_VAL(obj, val));
 
     return (error);
 }
@@ -780,7 +780,7 @@ int load_inv_backup(struct char_data *ch) {
     }
 
     sprintf(source_file, "plrobjs" SLASH"%s" SLASH"%s.copy",
-            alpha, ch->name);
+            alpha, ch->getName());
     if (!get_filename(buf2, sizeof(buf2), NEW_OBJ_FILES, GET_NAME(ch)))
         return -1;
     sprintf(target_file, "%s", buf2);
@@ -834,7 +834,7 @@ static int inv_backup(struct char_data *ch) {
     }
 
     sprintf(buf, "plrobjs" SLASH"%s" SLASH"%s.copy", alpha,
-            ch->name);
+            ch->getName());
 
     if (!(backup = fopen(buf, "r")))
         return -1;
@@ -1130,7 +1130,6 @@ static int parse_simple_mob(FILE *mob_f, struct npc_proto_data *ch, mob_vnum nr)
         return 0;
     }
 
-    ch->setBaseStat<int>("position", t[0]);
     GET_DEFAULT_POS(ch) = t[1];
     ch->sex = static_cast<Sex>(t[2]);
 
@@ -1375,6 +1374,7 @@ static int parse_mobile_from_file(FILE *mob_f, struct npc_proto_data *ch, vnum n
     char f7[128], f8[128], buf2[128];
     auto &z = zone_table[real_zone_by_thing(nr)];
     z.mobiles.insert(nr);
+    ch->vn = nr;
 
     /*
    * Mobiles should NEVER use anything in the 'player_specials' structure.
@@ -3958,6 +3958,7 @@ void run_migration() {
     chdir("lib");
     migrate_db();
     runSave();
+    destroy_db();
 }
 
 int main(int argc, char **argv) {

@@ -144,6 +144,7 @@ struct wait_event_data {
 
 /* structure for triggers */
 struct trig_data : std::enable_shared_from_this<trig_data> {
+    ~trig_data();
     trig_vnum vn{NOTHING};                    /* trigger's rnum                  */
     int8_t attach_type{};            /* mob/obj/wld intentions          */
     int8_t data_type{};                /* type of game_data for trig      */
@@ -169,9 +170,9 @@ struct trig_data : std::enable_shared_from_this<trig_data> {
     int64_t id{NOTHING};
     time_t generation{};
 
-    struct trig_data *next{};
-    struct trig_data *next_in_world{};    /* next in the global trigger list */
-    
+    trig_data* next{};
+    trig_data* next_in_world{};    /* next in the global trigger list */
+
     std::shared_ptr<trig_data> shared();
 };
 
@@ -203,7 +204,7 @@ struct unit_data {
     // for DGscripts data.
     
     long trigger_types{};                /* bitvector of trigger types */
-    struct trig_data *trig_list{};            /* list of triggers           */
+    trig_data* trig_list{};            /* list of triggers           */
     struct trig_var_data *global_vars{};    /* list of global variables   */
     long script_context{};                /* current context for statics */
 
@@ -307,7 +308,7 @@ struct item_proto_data : public proto_data, public picky_data {
     item_proto_data(obj_data& other);
     
     item_proto_data& operator=(obj_data& other);
-    item_proto_data& operator=(item_proto_data& other);
+    item_proto_data& operator=(const item_proto_data& other);
 
     ItemType type_flag{ItemType::unknown};      /* Type of item                        */
     std::array<affected_type, MAX_OBJ_AFFECT> affected;  /* affects */
@@ -448,28 +449,6 @@ struct obj_data : public thing_data, public picky_data, std::enable_shared_from_
     }
 };
 /* ======================================================================= */
-
-struct item_proto : public proto_data, public picky_data {
-    /* legacy Values of the item (see VAL_ list in defs.h)    */
-    std::unordered_map<std::string, int64_t> value;
-
-    /* arbitrary named doubles */
-    std::unordered_map<std::string, double> dvalue;
-    ItemType type_flag{ItemType::unknown};      /* Type of item                        */
-    int level{}; /* Minimum level of object.            */
-    
-    FlagHandler<WearFlag> wear_flags{}; /* Where you can wear it     */
-    FlagHandler<ItemFlag> item_flags{}; /* If it hums, glows, etc.  */
-    weight_t weight{};         /* Weight what else                     */
-
-    int cost{};           /* Value when sold (gp.)               */
-    int cost_per_day{};   /* Cost to keep pr. real day           */
-    int timer{};          /* Timer for object                    */
-    
-    Size size{Size::medium};           /* Size class of object                */
-
-    std::array<affected_type, MAX_OBJ_AFFECT> affected;  /* affects */
-};
 
 /* room-related structures ************************************************/
 

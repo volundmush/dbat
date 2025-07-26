@@ -202,7 +202,7 @@ static int pick_n_throw(struct char_data *ch, char *buf) {
     }
 
     if (auto cont = ch->getRoom()->findObject([ch](const auto& o) { return ch->canCarryWeight(o);}); cont) {
-        snprintf(buf2, sizeof(buf2), "%s", cont->name);
+        snprintf(buf2, sizeof(buf2), "%s", cont->getName());
         do_get(ch, buf2, 0, 0);
         snprintf(buf3, sizeof(buf3), "%s %s", buf2, buf);
         do_throw(ch, buf3, 0, 0);
@@ -1671,7 +1671,7 @@ static void make_corpse(struct char_data *ch, struct char_data *tch) {
                     obj_to_char(meat, ch);
                     char nick[MAX_INPUT_LENGTH], nick2[MAX_INPUT_LENGTH], nick3[MAX_INPUT_LENGTH];
                     sprintf(nick, "@RRaw %s@R Steak@n", GET_NAME(ch));
-                    sprintf(nick2, "Raw %s Steak", ch->name);
+                    sprintf(nick2, "Raw %s Steak", ch->getName());
                     sprintf(nick3, "@wA @Rraw %s@R steak@w is lying here@n", GET_NAME(ch));
                     meat->short_description = strdup(nick);
                     meat->name = strdup(nick2);

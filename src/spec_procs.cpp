@@ -456,12 +456,12 @@ SPECIAL(pet_shops) {
         pet->affect_flags.set(AFF_CHARM, true);
 
         if (*pet_name) {
-            snprintf(buf, sizeof(buf), "%s %s", pet->name, pet_name);
+            snprintf(buf, sizeof(buf), "%s %s", pet->getName(), pet_name);
             /* free(pet->name); don't free the prototype! */
             pet->name = strdup(buf);
 
             snprintf(buf, sizeof(buf), "%sA small sign on a chain around the neck says 'My name is %s'\r\n",
-                     pet->look_description, pet_name);
+                     pet->getLookDescription(), pet_name);
             /* free(pet->description); don't free the prototype! */
             pet->look_description = strdup(buf);
         }
@@ -507,7 +507,7 @@ SPECIAL(auction) {
                 }
 
                 send_to_char(ch, "@wYou cancel the auction of %s@w and it is returned to you.@n\r\n",
-                             obj2->short_description);
+                             obj2->getShortDescription());
                 struct descriptor_data *d;
 
                 for (d = descriptor_list; d; d = d->next) {
@@ -518,7 +518,7 @@ SPECIAL(auction) {
                     if (GET_EQ(d->character, WEAR_EYE)) {
                         send_to_char(d->character,
                                      "@RScouter Auction News@D: @GThe auction of @w%s@G has been canceled.\r\n",
-                                     obj2->short_description);
+                                     obj2->getShortDescription());
                     }
                 }
 
@@ -548,7 +548,7 @@ SPECIAL(auction) {
 
                 if (GET_BID(obj2) > GET_GOLD(ch)) {
                     send_to_char(ch, "Unable to purchase %s, you don't have enough money on hand.\r\n",
-                                 obj2->short_description);
+                                 obj2->getShortDescription());
                     continue;
                 }
 
@@ -558,7 +558,7 @@ SPECIAL(auction) {
                     int minu = (int) ((remain % 3600) / 60);
                     send_to_char(ch,
                                  "Unable to purchase %s, minimum time to bid is 24 hours. %d hour%s and %d minute%s remain.\r\n",
-                                 obj2->short_description, hour, hour > 1 ? "s" : "", minu, minu > 1 ? "s" : "");
+                                 obj2->getShortDescription(), hour, hour > 1 ? "s" : "", minu, minu > 1 ? "s" : "");
                     continue;
                 }
 
@@ -579,12 +579,12 @@ SPECIAL(auction) {
                         if (GET_EQ(d->character, WEAR_EYE)) {
                             send_to_char(d->character,
                                          "@RScouter Auction News@D: @GSomeone has purchased your @w%s@G and you had the money put in your bank account.\r\n",
-                                         obj2->short_description);
+                                         obj2->getShortDescription());
                         }
                     } else if (GET_EQ(d->character, WEAR_EYE)) {
                         send_to_char(d->character,
                                      "@RScouter Auction News@D: @GSomeone has purchased the @w%s@G that was on auction.\r\n",
-                                     obj2->short_description);
+                                     obj2->getShortDescription());
                     }
                 }
 
@@ -653,9 +653,9 @@ SPECIAL(auction) {
         obj_from_char(obj2);
         obj_to_room(obj2, auct_room);
         auc_save();
-        send_to_char(ch, "You place %s on auction for %s zenni.\r\n", obj2->short_description,
+        send_to_char(ch, "You place %s on auction for %s zenni.\r\n", obj2->getShortDescription(),
                      add_commas(GET_BID(obj2)).c_str());
-        basic_mud_log("AUCTION: %s places %s on auction for %s", GET_NAME(ch), obj2->short_description,
+        basic_mud_log("AUCTION: %s places %s on auction for %s", GET_NAME(ch), obj2->getShortDescription(),
             add_commas(GET_BID(obj2)).c_str());
 
         for (d = descriptor_list; d; d = d->next) {
@@ -666,7 +666,7 @@ SPECIAL(auction) {
             if (GET_EQ(d->character, WEAR_EYE)) {
                 send_to_char(d->character,
                              "@RScouter Auction News@D: @GThe item, @w%s@G, has been placed on auction for @Y%s@G zenni.@n\r\n",
-                             obj2->short_description, add_commas(GET_BID(obj2)).c_str());
+                             obj2->getShortDescription(), add_commas(GET_BID(obj2)).c_str());
             }
         }
         return (true);

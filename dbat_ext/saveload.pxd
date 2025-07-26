@@ -31,6 +31,15 @@ cdef extern from "dbat/saveload.h":
 
     void to_json(json& j, const structs.help_index_element& h)
     void from_json(const json& j, structs.help_index_element& m)
+
+    void to_json(json& j, const structs.proto_data& h)
+    void from_json(const json& j, structs.proto_data& m)
+
+    void to_json(json& j, const structs.item_proto_data& h)
+    void from_json(const json& j, structs.item_proto_data& m)
+
+    void to_json(json& j, const structs.npc_proto_data& h)
+    void from_json(const json& j, structs.npc_proto_data& m)
     
     void to_json(json& j, const structs.mob_special_data& m)
     void from_json(const json& j, structs.mob_special_data& m)

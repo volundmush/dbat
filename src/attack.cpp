@@ -387,12 +387,12 @@ namespace atk {
             int vicDivine = GET_SKILL(victim, (int16_t) Skill::divine_halo);
             if(isKiAttack() && divine > 0 && divine >= axion_dice(0)) {
                 send_to_char(user, "You feel your Halo intensify, purging the impurity of your attack.\n");
-                send_to_room(user->getRoom(), "%s's halo flares, leaving their attack shimmering as it moves.\n", user->name);
+                send_to_room(user->getRoom(), "%s's halo flares, leaving their attack shimmering as it moves.\n", user->getName());
                 calcDamage *= divine / 2;
             }
             if(isKiAttack() && vicDivine > 0 && vicDivine >= axion_dice(0)) {
                 send_to_char(user, "You feel your Halo intensify, burning away at your opponents attack.\n");
-                send_to_room(user->getRoom(), "%s's halo flares, burning away part of the blast coming for them.\n", user->name);
+                send_to_room(user->getRoom(), "%s's halo flares, burning away part of the blast coming for them.\n", user->getName());
                 calcDamage /= (vicDivine / 50);
             }
 

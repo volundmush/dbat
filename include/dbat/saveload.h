@@ -196,6 +196,15 @@ void from_json(const json& j, room_data& r);
 void to_json(json& j, const obj_data& o);
 void from_json(const json& j, obj_data& o);
 
+void to_json(json& j, const proto_data& o);
+void from_json(const json& j, proto_data& o);
+
+void to_json(json& j, const item_proto_data& o);
+void from_json(const json& j, item_proto_data& o);
+
+void to_json(json& j, const npc_proto_data& o);
+void from_json(const json& j, npc_proto_data& o);
+
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(skill_data, level, perfs)
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(alias_data, name, replacement, type)
 
