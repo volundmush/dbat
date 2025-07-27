@@ -302,8 +302,8 @@ ACMD(do_reboot) {
 static void db_load_activate_entities() {
     // activate all items which ended up "in the world".
     for(auto &[id, r] : world) {
-        if(r->trig_list) r->activateScripts();
         assign_triggers(r.get(), WLD_TRIGGER);
+        if(r->trig_list) r->activateScripts();
         r->activateContents();
         auto people = r->getPeople();
         for(auto c : filter_raw(people)) {

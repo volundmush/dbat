@@ -35,18 +35,20 @@ room_rnum add_room(struct room_data *room) {
 
     if (!room)
         return NOWHERE;
+    
+    auto vn = room->getVnum();
 
-    if (world.contains(room->getVnum())) {
-        auto ro = world.at(room->getVnum()).get();
+    if (world.contains(vn)) {
+        auto ro = world.at(vn).get();
         extract_script(ro, WLD_TRIGGER);
         copy_room(ro, room);
-        basic_mud_log("GenOLC: add_room: Updated existing room #%d.", room->getVnum());
+        basic_mud_log("GenOLC: add_room: Updated existing room #%d.", vn);
         return i;
     }
     auto sh = std::shared_ptr<room_data>(room);
-    world.emplace(room->getVnum(), sh);
-    units.emplace(room->getVnum(), sh);
-    basic_mud_log("GenOLC: add_room: Added room %d.", room->getVnum());
+    world.emplace(vn, sh);
+    units.emplace(vn, sh);
+    basic_mud_log("GenOLC: add_room: Added room %d.", vn);
 
     /*
      * Return what array entry we placed the new room in.
@@ -65,6 +67,11 @@ int delete_room(room_rnum rnum) {
 
     if (!world.count(rnum))    /* Can't delete void yet. */
         return false;
+    
+    if(rnum <= 0) {
+        basic_mud_log("SYSERR: GenOLC: delete_room: Attempt to delete room with vnum <= 0.");
+        return false;
+    }
 
     room = get_room(rnum);
 
