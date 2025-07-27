@@ -138,7 +138,7 @@ ACMD(do_oasis_oedit) {
     /** Everyone but IMPLs can only edit zones they have been assigned.        **/
     /****************************************************************************/
     if (!can_edit_zone(ch, OLC_ZNUM(d))) {
-        send_cannot_edit(ch, zone_table[OLC_ZNUM(d)].number);
+        send_cannot_edit(ch, zone_table.at(OLC_ZNUM(d)).number);
 
         /**************************************************************************/
         /** Free the descriptor's OLC structure.                                 **/
@@ -152,11 +152,12 @@ ACMD(do_oasis_oedit) {
     /** If we need to save, save the objects.                                  **/
     /****************************************************************************/
     if (save) {
+        auto& z = zone_table.at(OLC_ZNUM(d));
         send_to_char(ch, "Saving all objects in zone %d.\r\n",
-                     zone_table[OLC_ZNUM(d)].number);
+                     z.number);
         mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), true,
                "OLC: %s saves object info for zone %d.", GET_NAME(ch),
-               zone_table[OLC_ZNUM(d)].number);
+               z.number);
 
         /**************************************************************************/
         /** Save the objects in this zone.                                       **/
@@ -195,7 +196,7 @@ ACMD(do_oasis_oedit) {
     /** Log the OLC message.                                                   **/
     /****************************************************************************/
     mudlog(BRF, ADMLVL_IMMORT, true, "OLC: %s starts editing zone %d allowed zone %d",
-           GET_NAME(ch), zone_table[OLC_ZNUM(d)].number, GET_OLC_ZONE(ch));
+           GET_NAME(ch), zone_table.at(OLC_ZNUM(d)).number, GET_OLC_ZONE(ch));
 }
 
 void oedit_setup_new(struct descriptor_data *d) {
@@ -251,8 +252,9 @@ void oedit_save_internally(struct descriptor_data *d) {
 
     /* Update triggers : */
     /* Free old proto list  */
-    if (obj_proto[robj_num].proto_script != OLC_SCRIPT(d))
-        obj_proto[robj_num].proto_script = OLC_SCRIPT(d);
+    auto& op = obj_proto.at(robj_num);
+    if (op.proto_script != OLC_SCRIPT(d))
+        op.proto_script = OLC_SCRIPT(d);
 
     /* this takes care of the objects currently in-game */
     auto objects = objectSubscriptions.all(fmt::format("vnum_{}", robj_num));

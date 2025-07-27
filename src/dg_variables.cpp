@@ -1256,9 +1256,9 @@ in the vault (vnum: 453) now and then. you can just use
                 else
                     snprintf(str, slen, "0");
             } else if (!strcasecmp(field, "zonenumber"))
-                snprintf(str, slen, "%d", zone_table[r->zone].number);
+                snprintf(str, slen, "%d", zone_table.at(r->zone).number);
             else if (!strcasecmp(field, "zonename"))
-                snprintf(str, slen, "%s", zone_table[r->zone].name);
+                snprintf(str, slen, "%s", zone_table.at(r->zone).name);
             else if (!strcasecmp(field, "roomflag")) {
                 if (subfield && *subfield) {
                     if (check_flags_by_name_ar(r->room_flags.getAll(), NUM_ROOM_FLAGS, subfield, room_bits) > 0)

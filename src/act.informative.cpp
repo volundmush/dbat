@@ -851,14 +851,14 @@ int readIntro(struct char_data *ch, struct char_data *vict) {
         return 1;
     }
 
-    auto &p = players[ch->id];
+    auto& p = players.at(ch->id);
 
     return p.dub_names.contains(vict->id);
 }
 
 void introWrite(struct char_data *ch, struct char_data *vict, char *name) {
     std::string n(name);
-    auto &p = players[ch->id];
+    auto& p = players.at(ch->id);
     p.dub_names[vict->id] = n;
 }
 
@@ -5950,7 +5950,7 @@ ACMD(do_history) {
     one_argument(argument, arg);
     if(IS_NPC(ch)) return;
 
-    auto &p = players[ch->id];
+    auto& p = players.at(ch->id);
 
     type = search_block(arg, history_types, false);
     if (!*arg || type < 0) {
@@ -5989,7 +5989,7 @@ void add_history(struct char_data *ch, char *str, int type) {
     if (IS_NPC(ch))
         return;
 
-    auto &p = players[ch->id];
+    auto& p = players.at(ch->id);
 
     tmp = p.comm_hist[type];
     ct = time(nullptr);

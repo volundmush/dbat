@@ -177,8 +177,9 @@ void list_rooms(struct char_data *ch, zone_rnum rnum, zone_vnum vmin, zone_vnum 
      */
 
     if (rnum != NOWHERE) {
-        bottom = zone_table[rnum].bot;
-        top = zone_table[rnum].top;
+        auto& z = zone_table.at(rnum);
+        bottom = z.bot;
+        top = z.top;
     } else {
         bottom = vmin;
         top = vmax;
@@ -226,8 +227,9 @@ void list_mobiles(struct char_data *ch, zone_rnum rnum, zone_vnum vmin, zone_vnu
     mob_vnum i, bottom, top, counter = 0, admg;
 
     if (rnum != NOWHERE) {
-        bottom = zone_table[rnum].bot;
-        top = zone_table[rnum].top;
+        auto& z = zone_table.at(rnum);
+        bottom = z.bot;
+        top = z.top;
     } else {
         bottom = vmin;
         top = vmax;
@@ -261,8 +263,9 @@ void list_objects(struct char_data *ch, zone_rnum rnum, room_vnum vmin, room_vnu
     obj_vnum i, bottom, top, counter = 0;
 
     if (rnum != NOWHERE) {
-        bottom = zone_table[rnum].bot;
-        top = zone_table[rnum].top;
+        auto& z = zone_table.at(rnum);
+        bottom = z.bot;
+        top = z.top;
     } else {
         bottom = vmin;
         top = vmax;
@@ -296,8 +299,9 @@ void list_shops(struct char_data *ch, zone_rnum rnum, shop_vnum vmin, shop_vnum 
     int i, j, bottom, top, counter = 0;
 
     if (rnum != NOWHERE) {
-        bottom = zone_table[rnum].bot;
-        top = zone_table[rnum].top;
+        auto& z = zone_table.at(rnum);
+        bottom = z.bot;
+        top = z.top;
     } else {
         bottom = vmin;
         top = vmax;
@@ -365,7 +369,7 @@ void print_zone(struct char_data *ch, zone_vnum vnum) {
         send_to_char(ch, "Zone #%d does not exist in the database.\r\n", vnum);
         return;
     }
-    auto &z = zone_table[vnum];
+    auto& z = zone_table.at(vnum);
     sprintbitarray(z.zone_flags.getAll(), zone_bits, ZF_ARRAY_MAX, bits);
     size_rooms = z.rooms.size();
     size_objects = z.objects.size();
@@ -413,8 +417,9 @@ void list_triggers(struct char_data *ch, zone_rnum rnum, trig_vnum vmin, trig_vn
 
     /** Expect a minimum / maximum number if the rnum for the zone is NOWHERE. **/
     if (rnum != NOWHERE) {
-        bottom = zone_table[rnum].bot;
-        top = zone_table[rnum].top;
+        auto& z = zone_table.at(rnum);
+        bottom = z.bot;
+        top = z.top;
     } else {
         bottom = vmin;
         top = vmax;

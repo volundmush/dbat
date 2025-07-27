@@ -212,15 +212,7 @@ SPECIAL(gauntlet_room)  /* Jamdog - 13th Feb 2006 */
     if (GET_ADMLEVEL(ch) >= ADMLVL_IMMORT) /* Imms can walk through the gauntlet unhindered */
         return false;
 
-    /* Only Avatars may pass the 11th room
-    if ((world[ch->in_room].number == gauntlet_info[GAUNTLET_AV][1] ) && (cmd == gauntlet_info[GAUNTLET_AV][2]))
-    {
-      if (GET_CLASS(ch) != CLASS_AVATAR)
-      {
-        send_to_char (ch, "Only Avatars may proceed further!\r\n");
-        return TRUE;
-      }
-    } */
+
     for (i = 0; gauntlet_info[i][0] != -1; i++) {
         if (ch->getRoomVnum() == gauntlet_info[i][1]) {
             if (cmd == gauntlet_info[i][2]) {

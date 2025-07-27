@@ -10,17 +10,17 @@
 
 
 
-#define GM_NUM(i)  (guild_index[i].vnum)
-#define GM_TRAINER(i) (guild_index[i].keeper)
-#define GM_OPEN(i) (guild_index[i].open)
-#define GM_CLOSE(i) (guild_index[i].close)
-#define GM_CHARGE(i) (guild_index[i].charge)
-#define GM_MINLVL(i) (guild_index[i].minlvl)
-#define GM_WITH_WHO(i) (guild_index[i].with_who)
-#define GM_NO_SKILL(i)     (guild_index[i].no_such_skill)
-#define GM_NO_GOLD(i)     (guild_index[i].not_enough_gold)
+#define GM_NUM(i)  (guild_index.at((i)).vnum)
+#define GM_TRAINER(i) (guild_index.at((i)).keeper)
+#define GM_OPEN(i) (guild_index.at((i)).open)
+#define GM_CLOSE(i) (guild_index.at((i)).close)
+#define GM_CHARGE(i) (guild_index.at((i)).charge)
+#define GM_MINLVL(i) (guild_index.at((i)).minlvl)
+#define GM_WITH_WHO(i) (guild_index.at((i)).with_who)
+#define GM_NO_SKILL(i)     (guild_index.at((i)).no_such_skill)
+#define GM_NO_GOLD(i)     (guild_index.at((i)).not_enough_gold)
 #define GM_COST(i, j, k) (int) (GM_CHARGE(i)*spell_info[j].min_level[(int)GET_CLASS(k)])
-#define GM_FUNC(i) (guild_index[i].func)
+#define GM_FUNC(i) (guild_index.at((i)).func)
 
 #define NOTRAIN_GOOD(i)        (IS_SET_AR((GM_WITH_WHO(i)),TRADE_NOGOOD))
 #define NOTRAIN_EVIL(i)        (IS_SET_AR((GM_WITH_WHO(i)),TRADE_NOEVIL))

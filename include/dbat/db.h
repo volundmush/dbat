@@ -253,39 +253,39 @@ extern struct config_data config_info;
 
 
 // world data...
-extern std::map<room_vnum, std::shared_ptr<room_data>> world;
+extern NegativeKeyGuardMap<room_vnum, std::shared_ptr<room_data>> world;
 extern struct time_info_data time_info;/* the infomation about the time    */
 extern struct time_info_data era_uptime;/* the infomation about the time    */
 extern struct weather_data weather_info;    /* the infomation about the weather */
 
-extern std::unordered_map<int, std::shared_ptr<struct unit_data>> units;
+extern NegativeKeyGuardUnorderedMap<int, std::shared_ptr<struct unit_data>> units;
 
-extern std::map<room_vnum, std::shared_ptr<room_data>> world;
-extern std::map<zone_vnum, struct zone_data> zone_table;
+extern NegativeKeyGuardMap<room_vnum, std::shared_ptr<room_data>> world;
+extern NegativeKeyGuardMap<zone_vnum, struct zone_data> zone_table;
 
 extern struct descriptor_data *descriptor_list;
-extern std::map<int64_t, struct descriptor_data*> sessions;
+extern NegativeKeyGuardMap<int64_t, struct descriptor_data*> sessions;
 
-extern std::map<mob_vnum, struct index_data> mob_index;
-extern std::map<mob_vnum, struct npc_proto_data> mob_proto;
+extern NegativeKeyGuardMap<mob_vnum, struct index_data> mob_index;
+extern NegativeKeyGuardMap<mob_vnum, struct npc_proto_data> mob_proto;
 
-extern std::unordered_map<int, std::shared_ptr<char_data>> uniqueCharacters;
+extern NegativeKeyGuardUnorderedMap<int, std::shared_ptr<char_data>> uniqueCharacters;
 extern std::vector<std::weak_ptr<char_data>> getAllCharacters();
 
-extern std::map<obj_vnum, struct index_data> obj_index;
-extern std::map<obj_vnum, struct item_proto_data> obj_proto;
+extern NegativeKeyGuardMap<obj_vnum, struct index_data> obj_index;
+extern NegativeKeyGuardMap<obj_vnum, struct item_proto_data> obj_proto;
 
-extern std::unordered_map<int, std::shared_ptr<obj_data>> uniqueObjects;
+extern NegativeKeyGuardUnorderedMap<int, std::shared_ptr<obj_data>> uniqueObjects;
 extern std::vector<std::weak_ptr<obj_data>> getAllObjects();
 
-extern std::map<trig_vnum, struct index_data> trig_index;
-extern std::unordered_map<int, std::shared_ptr<trig_data>> uniqueScripts;
+extern NegativeKeyGuardMap<trig_vnum, struct index_data> trig_index;
+extern NegativeKeyGuardUnorderedMap<int, std::shared_ptr<trig_data>> uniqueScripts;
 
-extern std::map<vnum, account_data> accounts;
-extern std::map<shop_vnum, struct shop_data> shop_index;
-extern std::map<guild_vnum, struct guild_data> guild_index;
+extern NegativeKeyGuardMap<vnum, account_data> accounts;
+extern NegativeKeyGuardMap<shop_vnum, struct shop_data> shop_index;
+extern NegativeKeyGuardMap<guild_vnum, struct guild_data> guild_index;
 
-extern std::map<int64_t, player_data> players;
+extern NegativeKeyGuardMap<int64_t, player_data> players;
 
 int getNextUnitID();
 int getNextAccountID();

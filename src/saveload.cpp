@@ -472,7 +472,7 @@ void load_dgscript_prototypes(const std::filesystem::path& loc) {
         t.proto = new trig_data();
         j.get_to(*t.proto);
         auto zone = real_zone_by_thing(id);
-        auto &z = zone_table[zone];
+        auto& z = zone_table.at(zone);
         z.triggers.insert(id);
     }
 }
@@ -624,7 +624,7 @@ void load_shops(const std::filesystem::path& loc) {
         auto id = j["vnum"].get<int64_t>();
         shop_index.emplace(id, j);
         auto zone = real_zone_by_thing(id);
-        auto &z = zone_table[zone];
+        auto& z = zone_table.at(zone);
         z.shops.insert(id);
     }
 }
@@ -640,7 +640,7 @@ static void dump_shops(const std::filesystem::path &loc) {
 // guilds serialize/deserialize...
 void to_json(json& j, const guild_data& g) {
     to_json(j, static_cast<org_data>(g));
-    if(!g.skills.count()) j["skills"] = g.skills;
+    if(g.skills) j["skills"] = g.skills;
     if(!g.feats.empty()) j["feats"] = g.feats;
     if(g.charge != 1.0) j["charge"] = g.charge;
     if(!g.no_such_skill.empty()) j["no_such_skill"] = g.no_such_skill;
@@ -675,7 +675,7 @@ void load_guilds(const std::filesystem::path& loc) {
         auto id = j["vnum"].get<int64_t>();
         guild_index.emplace(id, j);
         auto zone = real_zone_by_thing(id);
-        auto &z = zone_table[zone];
+        auto& z = zone_table.at(zone);
         z.guilds.insert(id);
     }
 }
@@ -903,7 +903,7 @@ void load_rooms(const std::filesystem::path& loc) {
         units.emplace(id, r);
         world.emplace(id, r);
         auto zone = r->zone;
-        auto &z = zone_table[zone];
+        auto& z = zone_table.at(zone);
         z.rooms.insert(id);
         r->activate();
     }
@@ -1092,12 +1092,15 @@ void from_json(const json& j, obj_data& o) {
 void load_item_prototypes(const std::filesystem::path& loc) {
     for(auto j : load_from_file(loc, "itemPrototypes.json")) {
         auto id = j["vn"].get<int64_t>();
+        if(id <= 0) {
+            throw std::runtime_error("Invalid item prototype vnum: " + std::to_string(id));
+        }
         auto p = obj_proto.emplace(id, j);
         auto zone = real_zone_by_thing(id);
         auto &i = obj_index[id];
         i.vn = id;
         
-        auto &z = zone_table[zone];
+        auto& z = zone_table.at(zone);
         z.objects.insert(id);
     }
 }
@@ -1168,7 +1171,8 @@ static void dump_items(const std::filesystem::path &loc) {
 static void dump_item_prototypes(const std::filesystem::path &loc) {
     json j;
     for(auto &[v, o] : obj_proto) {
-        if(v == NOTHING) continue;
+        if(v <= 0) throw std::runtime_error("Invalid item prototype vnum: " + std::to_string(v));
+        if(o.vn <= 0) throw std::runtime_error("Invalid item prototype vn: " + std::to_string(o.vn));
         j.push_back(o);
     }
     dump_to_file(loc, "itemPrototypes.json", j);
@@ -1439,10 +1443,6 @@ void from_json(const json& j, char_data& c) {
     if(j.contains("form")) c.form = j["form"];
     if(j.contains("transforms")) c.transforms = j["transforms"];
     if(j.contains("permForms")) c.permForms = j["permForms"].get<std::unordered_set<Form>>();
-    
-    if(c.proto && !c.proto->proto_script.empty()) {
-        assign_triggers(&c, MOB_TRIGGER);
-    }
 
 }
 
@@ -1482,7 +1482,8 @@ static void dump_npc_prototypes(const std::filesystem::path &loc) {
     json j;
 
     for(auto &[v, n] : mob_proto) {
-        if(v == NOTHING) continue;
+        if(v <= 0) throw std::runtime_error("Invalid NPC prototype vnum: " + std::to_string(v));
+        if(n.vn <= 0) throw std::runtime_error("Invalid NPC prototype vn: " + std::to_string(n.vn));
         j.push_back(n);
     }
     dump_to_file(loc, "npcPrototypes.json", j);
@@ -1527,11 +1528,14 @@ void load_characters_finish(const std::filesystem::path& loc) {
 void load_npc_prototypes(const std::filesystem::path& loc) {
     for(auto j : load_from_file(loc, "npcPrototypes.json")) {
         auto id = j["vn"].get<int64_t>();
+        if(id <= 0) {
+            throw std::runtime_error("Invalid NPC prototype vnum: " + std::to_string(id));
+        }
         auto p = mob_proto.emplace(id, j);
         auto zone = real_zone_by_thing(id);
         auto &i = mob_index[id];
         i.vn = id;
-        auto &z = zone_table[zone];
+        auto& z = zone_table.at(zone);
         z.mobiles.insert(id);
     }
 }

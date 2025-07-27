@@ -290,7 +290,7 @@ ACMD(do_alias) {
     if (IS_NPC(ch))
         return;
 
-    auto &p = players[ch->id];
+    auto& p = players.at(ch->id);
 
     repl = any_one_arg(argument, arg);
 
@@ -429,7 +429,7 @@ void perform_alias(struct descriptor_data *d, char *orig) {
         d->input_queue.emplace_back(orig);
         return;
     }
-    auto &p = players[d->character->id];
+    auto& p = players.at(d->character->id);
     auto &aliases = p.aliases;
 
     /* bail out immediately if the guy doesn't have any aliases */

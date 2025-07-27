@@ -2580,14 +2580,14 @@ namespace trans {
 
     void onAttack(char_data *ch, atk::Attack& outgoing, Form form) {
         if(trans_on_attack.contains(form)) {
-            auto on_trans_attk = trans_on_attack.at(form);
+            auto& on_trans_attk = trans_on_attack.at(form);
             on_trans_attk(ch, outgoing);
         }
     }
 
     void onAttacked(char_data *ch, atk::Attack& incoming, Form form) {
         if(trans_on_attacked.contains(form)) {
-            auto on_trans_attkd = trans_on_attacked.at(form);
+            auto& on_trans_attkd = trans_on_attacked.at(form);
             on_trans_attkd(ch, incoming);
         }
     }
@@ -2598,7 +2598,7 @@ namespace trans {
         handleEchoTransform(ch, form);
         
         if(trans_on_transform.contains(form)) {
-            auto on_trans = trans_on_transform.at(form);
+            auto& on_trans = trans_on_transform.at(form);
             on_trans(ch);
         }
     }

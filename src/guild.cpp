@@ -26,7 +26,7 @@
 /* Local variables */
 int spell_sort_info[SKILL_TABLE_SIZE + 1];
 guild_vnum top_guild = NOTHING;
-std::map<guild_vnum, struct guild_data> guild_index;
+NegativeKeyGuardMap<guild_vnum, struct guild_data> guild_index;
 
 char *guild_customer_string(int guild_nr, int detailed);
 
@@ -455,7 +455,7 @@ int is_guild_ok_char(struct char_data *keeper, struct char_data *ch, int guild_n
         return (false);
     }
 
-    auto &g = guild_index[guild_nr];
+    auto& g = guild_index.at(guild_nr);
 
     
     if ((IS_GOOD(ch) && g.not_alignment.contains(MoralAlign::good)) ||
@@ -513,11 +513,11 @@ int is_guild_ok(struct char_data *keeper, struct char_data *ch, int guild_nr) {
 
 
 int does_guild_know(int guild_nr, int i) {
-    return guild_index[guild_nr].skills.get(i);
+    return guild_index.at(guild_nr).skills.get(i);
 }
 
 int does_guild_know_feat(int guild_nr, int i) {
-    return guild_index[guild_nr].feats.count(i);
+    return guild_index.at(guild_nr).feats.count(i);
 }
 
 
@@ -794,7 +794,7 @@ void handle_grand(struct char_data *keeper, int guild_nr, struct char_data *ch, 
     char buf[MAX_STRING_LENGTH];
 
     if (!(does_guild_know(guild_nr, skill_num))) {
-        snprintf(buf, sizeof(buf), guild_index[guild_nr].no_such_skill.c_str(), GET_NAME(ch));
+        snprintf(buf, sizeof(buf), guild_index.at(guild_nr).no_such_skill.c_str(), GET_NAME(ch));
         do_tell(keeper, buf, cmd_tell, 0);
         return;
     }
@@ -862,7 +862,7 @@ void handle_practice(struct char_data *keeper, int guild_nr, struct char_data *c
 
     /****  Does the GM know the skill the player wants to learn?  ****/
     if (!(does_guild_know(guild_nr, skill_num))) {
-        snprintf(buf, sizeof(buf), guild_index[guild_nr].no_such_skill.c_str(), GET_NAME(ch));
+        snprintf(buf, sizeof(buf), guild_index.at(guild_nr).no_such_skill.c_str(), GET_NAME(ch));
         do_tell(keeper, buf, cmd_tell, 0);
         return;
     }
@@ -874,7 +874,7 @@ void handle_practice(struct char_data *keeper, int guild_nr, struct char_data *c
                 learntype = spell_info[skill_num].can_learn_skill[i];
         switch (learntype) {
             case SKLEARN_CANT:
-                snprintf(buf, sizeof(buf), guild_index[guild_nr].no_such_skill.c_str(), GET_NAME(ch));
+                snprintf(buf, sizeof(buf), guild_index.at(guild_nr).no_such_skill.c_str(), GET_NAME(ch));
                 do_tell(keeper, buf, cmd_tell, 0);
                 return;
             case SKLEARN_CROSSCLASS:
@@ -1017,7 +1017,7 @@ void handle_practice(struct char_data *keeper, int guild_nr, struct char_data *c
                          pointcost, (pointcost == 1) ? "" : "s");
         }
     } else {
-        snprintf(buf, sizeof(buf), guild_index[guild_nr].no_such_skill.c_str(), GET_NAME(ch));
+        snprintf(buf, sizeof(buf), guild_index.at(guild_nr).no_such_skill.c_str(), GET_NAME(ch));
         do_tell(keeper, buf, cmd_tell, 0);
     }
 }
@@ -1193,11 +1193,13 @@ void assign_the_guilds() {
     cmd_tell = find_command("tell");
 
     for (auto &[vn, g] : guild_index) {
-        if (g.keeper == NOBODY)
+        if(!mob_proto.contains(g.keeper)) {
+            basic_mud_log("Guild %d has an invalid keeper vnum %d.", vn, g.keeper);
             continue;
+        }
 
-        auto &gm = mob_index[g.keeper];
-        auto &p = mob_proto[g.keeper];
+        auto& gm = mob_index.at(g.keeper);
+        auto& p = mob_proto.at(g.keeper);
 
         if (gm.func && gm.func != guild)
             g.func = gm.func;
@@ -1208,8 +1210,8 @@ void assign_the_guilds() {
 
 char *guild_customer_string(int guild_nr, int detailed) {
     static char buf[MAX_STRING_LENGTH];
-    auto &sh = guild_index[guild_nr];
-    
+    auto& sh = guild_index.at(guild_nr);
+
 
     snprintf(buf, sizeof(buf), "%s", sh.customerString().c_str());
 
@@ -1260,7 +1262,7 @@ void list_detailed_guild(struct char_data *ch, int gm_nr) {
     if (GM_TRAINER(gm_nr) < NOBODY)
         strcpy(buf1, "<NONE>");
     else
-        snprintf(buf1, sizeof(buf1), "%6d   ", mob_index[GM_TRAINER(gm_nr)].vn);
+        snprintf(buf1, sizeof(buf1), "%6d   ", GM_TRAINER(gm_nr));
 
     snprintf(buf, sizeof(buf), " Guild Master: %s\r\n", buf1);
     snprintf(buf, sizeof(buf), "%s Hours: %4d to %4d,  Surcharge: %5.2f\r\n", buf,
@@ -1320,8 +1322,8 @@ void list_guilds(struct char_data *ch, zone_rnum rnum, guild_vnum vmin, guild_vn
         send_to_char(ch, " @c[@y%d@c]@y %s@n",
                      (g.keeper == NOBODY) ?
                      -1 : g.keeper,
-                     (g.keeper == NOBODY) ?
-                     "" : mob_proto[g.keeper].short_description);
+                     (mob_proto.contains(g.keeper)) ?
+                     "" : mob_proto.at(g.keeper).short_description);
 
         send_to_char(ch, "\r\n");
     };
@@ -1331,9 +1333,9 @@ void list_guilds(struct char_data *ch, zone_rnum rnum, guild_vnum vmin, guild_vn
                  "----- ------- ---------------------------------------------\r\n");
 
     if (rnum != NOWHERE) {
-        auto &z = zone_table[rnum];
+        auto& z = zone_table.at(rnum);
         for(auto vn : z.guilds) {
-            auto &g = guild_index[vn];
+            auto& g = guild_index.at(vn);
             glist(g);
         }
     } else {

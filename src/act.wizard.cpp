@@ -636,7 +636,7 @@ ACMD(do_finddoor) {
             send_to_char(ch, "There is no object with that vnum.\r\n");
             return;
         }
-        auto o = obj_proto.at(vnum);
+        auto& o = obj_proto.at(vnum);
         sdesc = o.short_description;
     } else {
         generic_find(arg,
@@ -1099,7 +1099,7 @@ ACMD(do_vnum) {
 
 }
 
-#define ZOCMD zone_table[zrnum].cmd[subcmd]
+#define ZOCMD zone_table.at(zrnum).cmd[subcmd]
 
 void list_zone_commands_room(struct char_data *ch, room_vnum rvnum) {
     zone_rnum zrnum = real_zone_by_thing(rvnum);
@@ -1112,7 +1112,7 @@ void list_zone_commands_room(struct char_data *ch, room_vnum rvnum) {
     }
 
     send_to_char(ch, "Zone commands in this room:@y\r\n");
-    for(int i; i < zone_table[zrnum].cmd.size(); i++) {
+    for(int i; i < zone_table.at(zrnum).cmd.size(); i++) {
         switch (ZOCMD.command) {
             case 'M':
             case 'O':
@@ -1130,81 +1130,82 @@ void list_zone_commands_room(struct char_data *ch, room_vnum rvnum) {
         if (cmd_room == rrnum) {
             count++;
             /* start listing */
-            switch (ZOCMD.command) {
+            auto zc = ZOCMD;
+            switch (zc.command) {
                 case 'M':
                     send_to_char(ch, "%sLoad %s@y [@c%d@y], MaxMud : %d, MaxR : %d, Chance : %d\r\n",
-                                 ZOCMD.if_flag ? " then " : "",
-                                 mob_proto[ZOCMD.arg1].short_description,
-                                 mob_index[ZOCMD.arg1].vn, ZOCMD.arg2,
-                                 ZOCMD.arg4, ZOCMD.arg5
+                                 zc.if_flag ? " then " : "",
+                                 mob_proto.at(zc.arg1).short_description,
+                                 zc.arg1, zc.arg2,
+                                 zc.arg4, zc.arg5
                     );
                     break;
                 case 'G':
                     send_to_char(ch, "%sGive it %s@y [@c%d@y], Max : %d, Chance : %d\r\n",
-                                 ZOCMD.if_flag ? " then " : "",
-                                 obj_proto[ZOCMD.arg1].short_description,
-                                 obj_index[ZOCMD.arg1].vn,
-                                 ZOCMD.arg2, ZOCMD.arg5
+                                 zc.if_flag ? " then " : "",
+                                 obj_proto.at(zc.arg1).short_description,
+                                 zc.arg1,
+                                 zc.arg2, zc.arg5
                     );
                     break;
                 case 'O':
                     send_to_char(ch, "%sLoad %s@y [@c%d@y], Max : %d, MaxR : %d, Chance : %d\r\n",
-                                 ZOCMD.if_flag ? " then " : "",
-                                 obj_proto[ZOCMD.arg1].short_description,
-                                 obj_index[ZOCMD.arg1].vn,
-                                 ZOCMD.arg2, ZOCMD.arg4, ZOCMD.arg5
+                                 zc.if_flag ? " then " : "",
+                                 obj_proto.at(zc.arg1).short_description,
+                                 zc.arg1,
+                                 zc.arg2, zc.arg4, zc.arg5
                     );
                     break;
                 case 'E':
                     send_to_char(ch, "%sEquip with %s@y [@c%d@y], %s, Max : %d, Chance : %d\r\n",
-                                 ZOCMD.if_flag ? " then " : "",
-                                 obj_proto[ZOCMD.arg1].short_description,
-                                 obj_index[ZOCMD.arg1].vn,
-                                 equipment_types[ZOCMD.arg3],
-                                 ZOCMD.arg2, ZOCMD.arg5
+                                 zc.if_flag ? " then " : "",
+                                 obj_proto.at(zc.arg1).short_description,
+                                 zc.arg1,
+                                 equipment_types[zc.arg3],
+                                 zc.arg2, zc.arg5
                     );
                     break;
                 case 'P':
                     send_to_char(ch, "%sPut %s@y [@c%d@y] in %s@y [@c%d@y], Max : %d, Chance : %d\r\n",
-                                 ZOCMD.if_flag ? " then " : "",
-                                 obj_proto[ZOCMD.arg1].short_description,
-                                 obj_index[ZOCMD.arg1].vn,
-                                 obj_proto[ZOCMD.arg3].short_description,
-                                 obj_index[ZOCMD.arg3].vn,
-                                 ZOCMD.arg2, ZOCMD.arg5
+                                 zc.if_flag ? " then " : "",
+                                 obj_proto.at(zc.arg1).short_description,
+                                 zc.arg1,
+                                 obj_proto.at(zc.arg3).short_description,
+                                 zc.arg3,
+                                 zc.arg2, zc.arg5
                     );
                     break;
                 case 'R':
                     send_to_char(ch, "%sRemove %s@y [@c%d@y] from room.\r\n",
-                                 ZOCMD.if_flag ? " then " : "",
-                                 obj_proto[ZOCMD.arg2].short_description,
-                                 obj_index[ZOCMD.arg2].vn
+                                 zc.if_flag ? " then " : "",
+                                 obj_proto.at(zc.arg2).short_description,
+                                 zc.arg2
                     );
                     break;
                 case 'D':
                     send_to_char(ch, "%sSet door %s as %s.\r\n",
-                                 ZOCMD.if_flag ? " then " : "",
-                                 dirs[ZOCMD.arg2],
-                                 ZOCMD.arg3 ? ((ZOCMD.arg3 == 1) ? "closed" : "locked") : "open"
+                                 zc.if_flag ? " then " : "",
+                                 dirs[zc.arg2],
+                                 zc.arg3 ? ((zc.arg3 == 1) ? "closed" : "locked") : "open"
                     );
                     break;
                 case 'T':
                     send_to_char(ch, "%sAttach trigger @c%s@y [@c%d@y] to %s\r\n",
-                                 ZOCMD.if_flag ? " then " : "",
-                                 trig_index[ZOCMD.arg2].proto->name,
-                                 trig_index[ZOCMD.arg2].vn,
-                                 ((ZOCMD.arg1 == MOB_TRIGGER) ? "mobile" :
-                                  ((ZOCMD.arg1 == OBJ_TRIGGER) ? "object" :
-                                   ((ZOCMD.arg1 == WLD_TRIGGER) ? "room" : "????"))));
+                                 zc.if_flag ? " then " : "",
+                                 trig_index.at(zc.arg2).proto->name,
+                                 zc.arg2,
+                                 ((zc.arg1 == MOB_TRIGGER) ? "mobile" :
+                                  ((zc.arg1 == OBJ_TRIGGER) ? "object" :
+                                   ((zc.arg1 == WLD_TRIGGER) ? "room" : "????"))));
                     break;
                 case 'V':
                     send_to_char(ch, "%sAssign global %s:%d to %s = %s\r\n",
-                                 ZOCMD.if_flag ? " then " : "",
-                                 ZOCMD.sarg1.c_str(), ZOCMD.arg2,
-                                 ((ZOCMD.arg1 == MOB_TRIGGER) ? "mobile" :
-                                  ((ZOCMD.arg1 == OBJ_TRIGGER) ? "object" :
-                                   ((ZOCMD.arg1 == WLD_TRIGGER) ? "room" : "????"))),
-                                 ZOCMD.sarg2.c_str());
+                                 zc.if_flag ? " then " : "",
+                                 zc.sarg1.c_str(), zc.arg2,
+                                 ((zc.arg1 == MOB_TRIGGER) ? "mobile" :
+                                  ((zc.arg1 == OBJ_TRIGGER) ? "object" :
+                                   ((zc.arg1 == WLD_TRIGGER) ? "room" : "????"))),
+                                 zc.sarg2.c_str());
                     break;
                 default:
                     send_to_char(ch, "<Unknown Command>\r\n");
@@ -1233,7 +1234,7 @@ static void do_stat_room(struct char_data *ch) {
 
     sprinttype(static_cast<int>(rm->sector_type), sector_types, buf2, sizeof(buf2));
     send_to_char(ch, "Zone: [%3d], VNum: [@g%5d@n], RNum: [%5d], IDNum: [%5ld], Type: %s\r\n",
-                 zone_table[rm->zone].number, rm->getVnum(), IN_ROOM(ch),
+                 zone_table.at(rm->zone).number, rm->getVnum(), IN_ROOM(ch),
                  (long) rm->getVnum(), buf2);
 
     sprintbitarray(rm->room_flags.getAll(), room_bits, RF_ARRAY_MAX, buf2);
@@ -1647,7 +1648,7 @@ static void do_stat_character(struct char_data *ch, struct char_data *k) {
 
     if (IS_MOB(k)) {
         send_to_char(ch, "Mob Spec-Proc: %s, NPC Bare Hand Dam: %dd%d\r\n",
-                     (mob_index[GET_MOB_RNUM(k)].func ? "Exists" : "None"),
+                     (mob_index.at(GET_MOB_RNUM(k)).func ? "Exists" : "None"),
                      k->mob_specials.damnodice, k->mob_specials.damsizedice);
         send_to_char(ch, "Average damage per round %.1f (%.1f [BHD] + %d [STR MOD] + %d [DMG MOD])\r\n",
                      (((k->mob_specials.damsizedice) + 1) / 2.0) * (k->mob_specials.damnodice) +
@@ -3075,7 +3076,7 @@ ACMD(do_zreset) {
         send_to_char(ch, "You do not have permission to reset this zone. Try %d.\r\n", GET_OLC_ZONE(ch));
         return;
     }
-    auto &z = zone_table[i];
+    auto& z = zone_table.at(i);
     reset_zone(z.number);
     send_to_char(ch, "Reset zone #%d: %s.\r\n", z.number, z.name);
     mudlog(NRM, MAX(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), true, "(GC) %s reset zone %d (%s)", GET_NAME(ch),
@@ -3197,7 +3198,7 @@ ACMD(do_wizutil) {
 /* FIXME: overflow possible */
 static size_t print_zone_to_buf(char *bufptr, size_t left, zone_rnum zone, int listall) {
     size_t tmp;
-    auto &z = zone_table[zone];
+    auto& z = zone_table.at(zone);
     if (listall) {
 
         tmp = snprintf(bufptr, left,
@@ -4356,14 +4357,14 @@ ACMD(do_zpurge) {
 
     one_argument(argument, arg);
 
-    zone = !*arg ? zone_table[ch->getRoom()->zone].number : atol(arg);
+    zone = !*arg ? zone_table.at(ch->getRoom()->zone).number : atol(arg);
 
     if (!zone_table.count(zone) || !can_edit_zone(ch, zone)) {
         send_to_char(ch, "You cannot purge that zone. Try %d.\r\n", GET_OLC_ZONE(ch));
         return;
     }
 
-    auto &z = zone_table[zone];
+    auto& z = zone_table.at(zone);
 
     for (auto room = z.bot; room <= z.top; room++) {
         if (auto rm = get_room(room); rm) {
@@ -4397,7 +4398,7 @@ constexpr int MAX_LEVEL_ALLOWED = 100;
 /* arbitrary limit for per round dam */
 constexpr int MAX_MOB_DAM_ALLOWED = 500;
 
-#define ZCMD2 zone_table[zone].cmd[cmd_no]  /*from DB.C*/
+#define ZCMD2 zone_table.at(zone).cmd[cmd_no]  /*from DB.C*/
 
 /*item limits*/
 constexpr int MAX_DAM_ALLOWED = 50;    /* for weapons  - avg. dam*/
@@ -4463,7 +4464,7 @@ ACMD (do_zcheck) {
     else
         zrnum = real_zone(atoi(buf));
 
-    auto &z = zone_table[zrnum];
+    auto& z = zone_table.at(zrnum);
 
     if (zrnum == NOWHERE) {
         send_to_char(ch, "Check what zone ?\r\n");
@@ -4476,7 +4477,7 @@ ACMD (do_zcheck) {
     send_to_char(ch, "Checking Mobs for limits...\r\n");
     /*check mobs first*/
     for (auto &[vn, mo] : mob_proto) {
-        if (real_zone_by_thing(mob_index[i].vn) == zrnum) {  /*is mob in this zone?*/
+        if (real_zone_by_thing(vn) == zrnum) {  /*is mob in this zone?*/
             auto mob = &mo;
             if (!strcmp(mob->name, "mob unfinished") && (found = 1))
                 len += snprintf(buf + len, sizeof(buf) - len,

@@ -41,10 +41,10 @@ void assemblyListToChar(struct char_data *pCharacter, int type) {
             send_to_char(pCharacter, "[-----] ***RESERVED***\r\n");
             basic_mud_log("SYSERR: assemblyListToChar(): Invalid vnum #%ld in assembly table.", g_pAssemblyTable[i].lVnum);
         } else {
-            if(type == 0 || type == static_cast<int>(obj_proto[lRnum].type_flag)) {
+            if(type == 0 || type == static_cast<int>(obj_proto.at(lRnum).type_flag)) {
                 sprinttype(g_pAssemblyTable[i].uchAssemblyType, AssemblyTypes, szAssmType, sizeof(szAssmType));
                 sprintf(szBuffer, "[%5ld] %s (%s)\r\n", g_pAssemblyTable[i].lVnum,
-                        obj_proto[lRnum].short_description, szAssmType);
+                        obj_proto.at(lRnum).short_description, szAssmType);
                 send_to_char(pCharacter, szBuffer);
 
                 if(GET_ADMLEVEL(pCharacter) > 0) {
@@ -56,7 +56,7 @@ void assemblyListToChar(struct char_data *pCharacter, int type) {
                         } else {
                             sprintf(szBuffer, " %5ld: %-20.20s Extract=%-3.3s InRoom=%-3.3s\r\n",
                                     +g_pAssemblyTable[i].pComponents[j].lVnum,
-                                    obj_proto[lRnum].short_description,
+                                    obj_proto.at(lRnum).short_description,
                                     (g_pAssemblyTable[i].pComponents[j].bExtract ? "Yes" : "No"),
                                     (g_pAssemblyTable[i].pComponents[j].bInRoom ? "Yes" : "No"));
                             send_to_char(pCharacter, szBuffer);
@@ -345,7 +345,7 @@ long assemblyFindAssembly(const char *pszAssemblyName) {
     for (i = 0; i < g_lNumAssemblies; i++) {
         if ((lRnum = real_object(g_pAssemblyTable[i].lVnum)) < 0)
             basic_mud_log("SYSERR: assemblyFindAssembly(): Invalid vnum #%ld in assembly table.", g_pAssemblyTable[i].lVnum);
-        else if (isname(pszAssemblyName, obj_proto[lRnum].name))
+        else if (isname(pszAssemblyName, obj_proto.at(lRnum).name))
             return (g_pAssemblyTable[i].lVnum);
     }
 

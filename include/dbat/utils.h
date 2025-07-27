@@ -408,11 +408,11 @@ constexpr double SECS_PER_GAME_YEAR = (SECS_PER_MONTH*MONTHS_PER_YEAR);
 #define PRF_FLAGS(ch)    ((ch)->pref)
 #define AFF_FLAGS(ch)    ((ch)->affect_flags)
 #define ADM_FLAGS(ch)    ((ch)->admflags)
-#define ROOM_FLAGS(loc)    (world[(loc)].room_flags)
+#define ROOM_FLAGS(loc)    (world.at((loc)).room_flags)
 #define SPELL_ROUTINES(spl)    (spell_info[spl].routines)
-#define ZONE_FLAGS(rnum)       (zone_table[(rnum)].zone_flags)
-#define ZONE_MINLVL(rnum)      (zone_table[(rnum)].min_level)
-#define ZONE_MAXLVL(rnum)      (zone_table[(rnum)].max_level)
+#define ZONE_FLAGS(rnum)       (zone_table.at((rnum)).zone_flags)
+#define ZONE_MINLVL(rnum)      (zone_table.at((rnum)).min_level)
+#define ZONE_MAXLVL(rnum)      (zone_table.at((rnum)).max_level)
 /* Return the gauntlet highest room for ch */
 #define GET_GAUNTLET(ch)    ((ch)->getBaseStat<int>("gauntlet"))
 
@@ -452,7 +452,7 @@ extern bool OBJAFF_FLAGGED(struct obj_data *obj, int flag);
 
 extern bool OBJ_FLAGGED(struct obj_data *obj, int flag);
 #define BODY_FLAGGED(ch, flag) ((ch)->bodyparts.test(flag))
-#define ZONE_FLAGGED(rnum, flag)   (zone_table[(rnum)].zone_flags.get((flag)))
+#define ZONE_FLAGGED(rnum, flag)   (zone_table.at((rnum)).zone_flags.get((flag)))
 #define HAS_SPELL_ROUTINE(spl, flag) (IS_SET(SPELL_ROUTINES(spl), (flag)))
 
 /* IS_AFFECTED for backwards compatibility */
@@ -492,7 +492,7 @@ extern bool OBJ_FLAGGED(struct obj_data *obj, int flag);
 
 
 #define IN_ROOM(ch)    ((ch)->in_room)
-#define IN_ZONE(ch)   (zone_table[((ch)->getRoom()->zone)].number)
+#define IN_ZONE(ch)   (zone_table.at(((ch)->getRoom()->zone)).number)
 #define GET_WAS_IN(ch)    ((ch)->getBaseStat<room_vnum>("was_in_room"))
 #define GET_AGE(ch)     ((ch)->time.currentAge())
 
@@ -701,7 +701,7 @@ void SET_SKILL_PERF(struct char_data *ch, uint16_t skill, int16_t val);
 
 #define GET_EQ(ch, i)        ((ch)->equipment[i])
 
-#define GET_MOB_SPEC(ch)    (IS_MOB(ch) ? mob_index[(ch)->getVnum()].func : 0)
+#define GET_MOB_SPEC(ch)    (IS_MOB(ch) ? mob_index.at((ch)->getVnum()).func : 0)
 #define GET_MOB_RNUM(mob)    ((mob)->getVnum())
 #define GET_MOB_VNUM(mob)    ((mob)->getVnum())
 
@@ -818,7 +818,7 @@ int64_t MOD_OBJ_VAL(T* obj, const std::string& val, int mod) {
 #define GET_OBJ_RNUM(obj)    ((obj)->getVnum())
 #define GET_OBJ_VNUM(obj)    ((obj)->getVnum())
 #define GET_OBJ_SPEC(obj)    (VALID_OBJ_RNUM(obj) ? \
-                obj_index[GET_OBJ_RNUM(obj)].func : 0)
+                obj_index.at(GET_OBJ_RNUM(obj)).func : 0)
 #define GET_FUEL(obj)           (GET_OBJ_VAL((obj), VAL_VEHICLE_FUEL))
 #define GET_FUELCOUNT(obj)      (GET_OBJ_VAL((obj), VAL_VEHICLE_FUELCOUNT))
 

@@ -944,7 +944,7 @@ int char_data::getRPP() {
         return 0;
     }
 
-    auto &p = players[id];
+    auto& p = players.at(id);
 
     return p.account->rpp;
 
@@ -962,7 +962,7 @@ void char_data::modRPP(int amt) {
         return;
     }
 
-    auto &p = players[id];
+    auto& p = players.at(id);
 
     p.account->modRPP(amt);
 }

@@ -54,9 +54,9 @@ int add_guild(struct guild_data *ngld) {
     guild_rnum rguild = G_NUM(ngld);
     zone_rnum rznum = real_zone_by_thing(rguild);
     auto exists = guild_index.contains(rguild);
-    auto &g = guild_index[rguild];
+    auto& g = guild_index.at(rguild);
 
-    auto &z = zone_table[rznum];
+    auto& z = zone_table.at(rznum);
     z.guilds.insert(rguild);
 
     if(!exists) mudlog(BRF, ADMLVL_BUILDER, true, "SYSERR: GenOLC: Creating new guild.");

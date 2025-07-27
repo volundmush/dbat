@@ -119,7 +119,7 @@ ACMD(do_oasis_medit) {
     /** Everyone but IMPLs can only edit zones they have been assigned.        **/
     /****************************************************************************/
     if (!can_edit_zone(ch, OLC_ZNUM(d))) {
-        send_cannot_edit(ch, zone_table[OLC_ZNUM(d)].number);
+        send_cannot_edit(ch, zone_table.at(OLC_ZNUM(d)).number);
         free(d->olc);
         d->olc = nullptr;
         return;
@@ -129,11 +129,12 @@ ACMD(do_oasis_medit) {
     /** If save is TRUE, save the mobiles.                                     **/
     /****************************************************************************/
     if (save) {
+        auto& z = zone_table.at(OLC_ZNUM(d));
         send_to_char(ch, "Saving all mobiles in zone %d.\r\n",
-                     zone_table[OLC_ZNUM(d)].number);
+                     z.number);
         mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), true,
                "OLC: %s saves mobile info for zone %d.",
-               GET_NAME(ch), zone_table[OLC_ZNUM(d)].number);
+               GET_NAME(ch), z.number);
 
         /**************************************************************************/
         /** Save the mobiles.                                                    **/
@@ -170,7 +171,7 @@ ACMD(do_oasis_medit) {
     ch->player_flags.set(PLR_WRITING, true);
 
     mudlog(BRF, ADMLVL_IMMORT, true, "OLC: %s starts editing zone %d allowed zone %d",
-           GET_NAME(ch), zone_table[OLC_ZNUM(d)].number, GET_OLC_ZONE(ch));
+           GET_NAME(ch), zone_table.at(OLC_ZNUM(d)).number, GET_OLC_ZONE(ch));
 }
 
 void medit_save_to_disk(zone_vnum foo) {
@@ -249,7 +250,7 @@ void medit_save_internally(struct descriptor_data *d) {
     }
 
     /* Update triggers */
-    mob_proto[new_rnum].proto_script = OLC_SCRIPT(d);
+    mob_proto.at(new_rnum).proto_script = OLC_SCRIPT(d);
 
     /* this takes care of the mobs currently in-game */
     auto mobs = characterSubscriptions.all(fmt::format("vnum_{}", new_rnum));
@@ -490,7 +491,7 @@ void medit_parse(struct descriptor_data *d, char *arg) {
                     mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(d->character)), true,
                            "OLC: %s edits mob %d", GET_NAME(d->character), OLC_NUM(d));
                     if (CONFIG_OLC_SAVE) {
-                        medit_save_to_disk(zone_table[real_zone_by_thing(OLC_NUM(d))].number);
+                        medit_save_to_disk(zone_table.at(real_zone_by_thing(OLC_NUM(d))).number);
                         write_to_output(d, "Mobile saved to disk.\r\n");
                     } else
                         write_to_output(d, "Mobile saved to memory.\r\n");

@@ -45,6 +45,8 @@
 //#include <iostream>
 #include <bitset>
 #include <functional>
+#include <stdexcept>
+#include <type_traits>
 
 
 #define FMT_HEADER_ONLY
@@ -113,3 +115,55 @@ template<typename T = bool>
 using OpResult = std::pair<T, std::optional<std::string>>;
 
 extern bool isMigrating;
+
+template<typename Key, typename T, typename... Args>
+class NegativeKeyGuardMap : public std::map<Key, T, Args...> {
+    static_assert(std::is_arithmetic<Key>::value, "Key must be numeric");
+
+public:
+    using Base = std::map<Key, T, Args...>;
+
+    T& operator[](const Key& key) {
+        if (key < 0)
+            throw std::invalid_argument("Negative keys not allowed in NegativeKeyGuardMap");
+        return Base::operator[](key);
+    }
+
+    std::pair<typename Base::iterator, bool> insert(const std::pair<Key, T>& value) {
+        if (value.first < 0)
+            throw std::invalid_argument("Negative keys not allowed in NegativeKeyGuardMap");
+        return Base::insert(value);
+    }
+
+    typename Base::iterator insert(typename Base::const_iterator hint, const std::pair<Key, T>& value) {
+        if (value.first < 0)
+            throw std::invalid_argument("Negative keys not allowed in NegativeKeyGuardMap");
+        return Base::insert(hint, value);
+    }
+};
+
+template<typename Key, typename T, typename... Args>
+class NegativeKeyGuardUnorderedMap : public std::unordered_map<Key, T, Args...> {
+    static_assert(std::is_arithmetic<Key>::value, "Key must be numeric");
+
+public:
+    using Base = std::unordered_map<Key, T, Args...>;
+
+    T& operator[](const Key& key) {
+        if (key < 0)
+            throw std::invalid_argument("Negative keys not allowed in NegativeKeyGuardUnorderedMap");
+        return Base::operator[](key);
+    }
+
+    std::pair<typename Base::iterator, bool> insert(const std::pair<Key, T>& value) {
+        if (value.first < 0)
+            throw std::invalid_argument("Negative keys not allowed in NegativeKeyGuardUnorderedMap");
+        return Base::insert(value);
+    }
+
+    typename Base::iterator insert(typename Base::const_iterator hint, const std::pair<Key, T>& value) {
+        if (value.first < 0)
+            throw std::invalid_argument("Negative keys not allowed in NegativeKeyGuardUnorderedMap");
+        return Base::insert(hint, value);
+    }
+};

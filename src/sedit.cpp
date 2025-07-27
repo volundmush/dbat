@@ -120,11 +120,13 @@ ACMD(do_oasis_sedit) {
         return;
     }
 
+    auto& z = zone_table.at(OLC_ZNUM(d));
+
     /****************************************************************************/
     /** Everyone but IMPLs can only edit zones they have been assigned.        **/
     /****************************************************************************/
     if (!can_edit_zone(ch, OLC_ZNUM(d))) {
-        send_cannot_edit(ch, zone_table[OLC_ZNUM(d)].number);
+        send_cannot_edit(ch, z.number);
 
         /**************************************************************************/
         /** Free the OLC structure.                                              **/
@@ -136,10 +138,10 @@ ACMD(do_oasis_sedit) {
 
     if (save) {
         send_to_char(ch, "Saving all shops in zone %d.\r\n",
-                     zone_table[OLC_ZNUM(d)].number);
+                     z.number);
         mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), true,
                "OLC: %s saves shop info for zone %d.",
-               GET_NAME(ch), zone_table[OLC_ZNUM(d)].number);
+               GET_NAME(ch), z.number);
 
         /**************************************************************************/
         /** Save the shops to the shop file.                                     **/
@@ -168,7 +170,7 @@ ACMD(do_oasis_sedit) {
     ch->player_flags.set(PLR_WRITING, true);
 
     mudlog(BRF, ADMLVL_IMMORT, true, "OLC: %s starts editing zone %d allowed zone %d",
-           GET_NAME(ch), zone_table[OLC_ZNUM(d)].number, GET_OLC_ZONE(ch));
+           GET_NAME(ch), z.number, GET_OLC_ZONE(ch));
 }
 
 void sedit_setup_new(struct descriptor_data *d) {
@@ -214,7 +216,7 @@ void sedit_setup_existing(struct descriptor_data *d, vnum rshop_num) {
     OLC_SHOP(d) = new shop_data();
 
     /* don't waste time trying to free nullptr strings -- Welcor */
-    copy_shop(OLC_SHOP(d), &shop_index[rshop_num], false);
+    copy_shop(OLC_SHOP(d), &shop_index.at(rshop_num), false);
 }
 
 /**************************************************************************
@@ -231,7 +233,7 @@ void sedit_products_menu(struct descriptor_data *d) {
     for (auto i : shop->producing) {
         write_to_output(d, "%2d - [@c%5d@n] - @y%s@n\r\n", i,
                         i,
-                        obj_proto[i].short_description);
+                        obj_proto.at(i).short_description);
     }
     write_to_output(d, "\r\n"
                        "@gA@n) Add a new product.\r\n"
@@ -406,8 +408,8 @@ void sedit_disp_menu(struct descriptor_data *d) {
                     "Enter Choice : ",
 
                     OLC_NUM(d),
-                    S_KEEPER(shop) == NOBODY ? -1 : mob_index[S_KEEPER(shop)].vn,
-                    S_KEEPER(shop) == NOBODY ? "None" : mob_proto[S_KEEPER(shop)].short_description,
+                    S_KEEPER(shop) == NOBODY ? -1 : S_KEEPER(shop),
+                    S_KEEPER(shop) == NOBODY ? "None" : mob_proto.at(S_KEEPER(shop)).short_description,
                     S_OPEN1(shop),
                     S_CLOSE1(shop),
                     S_OPEN2(shop),
@@ -698,8 +700,8 @@ void sedit_parse(struct descriptor_data *d, char *arg) {
             /*
              * Fiddle with special procs.
              */
-            S_FUNC(OLC_SHOP(d)) = mob_index[i].func != shop_keeper ? mob_index[i].func : nullptr;
-            mob_index[i].func = shop_keeper;
+            S_FUNC(OLC_SHOP(d)) = mob_index.at(i).func != shop_keeper ? mob_index.at(i).func : nullptr;
+            mob_index.at(i).func = shop_keeper;
             break;
         case SEDIT_OPEN1:
             S_OPEN1(OLC_SHOP(d)) = LIMIT(atoi(arg), 0, 28);

@@ -135,7 +135,7 @@ ACMD(do_olc) {
             if ((rnum = real_mobile(vnum)) == NOBODY)
                 send_to_char(ch, "No such mobile vnum.\r\n");
             else
-                olc_targ = (void *) &(mob_proto[rnum]);
+                olc_targ = (void *) &(mob_proto.at(rnum));
             break;
         case OLC_OBJ:
             argument = one_argument(argument, arg);
@@ -147,7 +147,7 @@ ACMD(do_olc) {
             if ((rnum = real_object(vnum)) == NOTHING)
                 send_to_char(ch, "No object with vnum %d.\r\n", vnum);
             else
-                olc_targ = (void *) &(obj_proto[rnum]);
+                olc_targ = (void *) &(obj_proto.at(rnum));
             break;
         default:
             send_to_char(ch, "Usage: olc {.|set|show|obj|mob|room} [args]\r\n");

@@ -149,7 +149,7 @@ zone_rnum create_new_zone(zone_vnum vzone_num, room_vnum bottom, room_vnum top, 
      * through top_of_zone (top_of_zone_table + 1 items) and a new one which
      * makes it top_of_zone_table + 2 elements large.
      */
-    auto &z = zone_table[vzone_num];
+    auto& z = zone_table.at(vzone_num);
     z.number = vzone_num;
     
     /*

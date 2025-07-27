@@ -137,19 +137,19 @@ ACMD(do_oasis_redit) {
         d->olc = nullptr;
         return;
     }
-
+    auto& z = zone_table.at(OLC_ZNUM(d));
     /* Make sure the builder is allowed to modify this zone. */
     if (!can_edit_zone(ch, OLC_ZNUM(d)) && remodeling == false) {
-        send_cannot_edit(ch, zone_table[OLC_ZNUM(d)].number);
+        send_cannot_edit(ch, z.number);
         free(d->olc);
         d->olc = nullptr;
         return;
     }
 
     if (save) {
-        send_to_char(ch, "Saving all rooms in zone %d.\r\n", zone_table[OLC_ZNUM(d)].number);
+        send_to_char(ch, "Saving all rooms in zone %d.\r\n", z.number);
         mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), true, "OLC: %s saves room info for zone %d.", GET_NAME(ch),
-               zone_table[OLC_ZNUM(d)].number);
+              z.number);
 
         /* Save the rooms. */
         save_rooms(OLC_ZNUM(d));
@@ -173,7 +173,7 @@ ACMD(do_oasis_redit) {
     ch->player_flags.set(PLR_WRITING, true);
 
     mudlog(BRF, ADMLVL_IMMORT, true, "OLC: %s starts editing zone %d allowed zone %d",
-           GET_NAME(ch), zone_table[OLC_ZNUM(d)].number, GET_OLC_ZONE(ch));
+           GET_NAME(ch), z.number, GET_OLC_ZONE(ch));
 }
 
 void redit_setup_new(struct descriptor_data *d) {
@@ -474,6 +474,7 @@ void redit_disp_menu(struct descriptor_data *d) {
 
     sprintbitarray(room->room_flags.getAll(), room_bits, RF_ARRAY_MAX, buf1);
     sprinttype(static_cast<int>(room->sector_type), sector_types, buf2, sizeof(buf2));
+    auto& z = zone_table.at(OLC_ZNUM(d));
     if (GET_ADMLEVEL(d->character) > 0) {
         write_to_output(d,
                         "-- Room number : [@c%d@n]  	Room zone: [@c%d@n]\r\n"
@@ -495,7 +496,7 @@ void redit_disp_menu(struct descriptor_data *d) {
                         "@gQ@n) Quit\r\n"
                         "Enter choice : ",
 
-                        OLC_NUM(d), zone_table[OLC_ZNUM(d)].number, room->getName(),
+                        OLC_NUM(d), z.number, room->getName(),
                         room->getLookDescription(), buf1, buf2,
                         room->dir_option[NORTH] && room->dir_option[NORTH]->to_room != NOWHERE ?
                         room->dir_option[NORTH]->to_room : -1,
@@ -532,7 +533,7 @@ void redit_disp_menu(struct descriptor_data *d) {
                         "@gQ@n) Quit\r\n"
                         "Enter choice : ",
 
-                        OLC_NUM(d), zone_table[OLC_ZNUM(d)].number, room->getName(),
+                        OLC_NUM(d), z.number, room->getName(),
                         room->getLookDescription());
     }
 

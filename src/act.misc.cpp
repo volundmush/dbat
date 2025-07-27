@@ -4152,7 +4152,7 @@ void handle_rpp_store(struct char_data *ch, int choice) {
                 }
                 break;
             case 8: {
-                auto &o = obj_proto[1126];
+                auto& o = obj_proto.at(1126);
                 if (!ch->canCarryWeight(o.getBaseStat("weight"))) {
                     send_to_char(ch, "You can not carry that much weight at this moment.\r\n");
                 } else if (IS_CARRYING_N(ch) + 1 > CAN_CARRY_N(ch)) {

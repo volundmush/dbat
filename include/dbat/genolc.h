@@ -52,8 +52,6 @@ constexpr int SL_GLD = 6;
 #define SL_ACT  SL_MAX + 1 /* must be above MAX */
 #define SL_HLP  SL_MAX + 2 /* must be above MAX */
 
-#define ZCMD(zon, cmds)    zone_table[(zon)].cmd[(cmds)]
-
 #define LIMIT(var, low, high)    std::clamp<int64_t>(var, low, high)
 
 extern room_vnum genolc_zone_bottom(zone_rnum rznum);

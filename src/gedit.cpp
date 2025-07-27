@@ -127,7 +127,7 @@ ACMD(do_oasis_gedit) {
     /** Everyone but IMPLs can only edit zones they have been assigned.        **/
     /****************************************************************************/
     if (!can_edit_zone(ch, OLC_ZNUM(d))) {
-        send_cannot_edit(ch, zone_table[OLC_ZNUM(d)].number);
+        send_cannot_edit(ch, zone_table.at(OLC_ZNUM(d)).number);
 
         /**************************************************************************/
         /** Free the OLC structure.                                              **/
@@ -139,10 +139,10 @@ ACMD(do_oasis_gedit) {
 
     if (save) {
         send_to_char(ch, "Saving all guilds in zone %d.\r\n",
-                     zone_table[OLC_ZNUM(d)].number);
+                     zone_table.at(OLC_ZNUM(d)).number);
         mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), true,
                "OLC: %s saves guild info for zone %d.",
-               GET_NAME(ch), zone_table[OLC_ZNUM(d)].number);
+               GET_NAME(ch), zone_table.at(OLC_ZNUM(d)).number);
 
         /**************************************************************************/
         /** Save the guild to the guild file.                                    **/
@@ -170,7 +170,7 @@ ACMD(do_oasis_gedit) {
     ch->player_flags.set(PLR_WRITING, true);
 
     mudlog(BRF, ADMLVL_IMMORT, true, "OLC: %s starts editing zone %d allowed zone %d",
-           GET_NAME(ch), zone_table[OLC_ZNUM(d)].number, GET_OLC_ZONE(ch));
+           GET_NAME(ch), zone_table.at(OLC_ZNUM(d)).number, GET_OLC_ZONE(ch));
 }
 
 void gedit_setup_new(struct descriptor_data *d) {
@@ -189,7 +189,7 @@ void gedit_setup_new(struct descriptor_data *d) {
 void gedit_setup_existing(struct descriptor_data *d, int rgm_num) {
     /*. Alloc some guild shaped space . */
     OLC_GUILD(d) = new guild_data();
-    copy_guild(OLC_GUILD(d), &guild_index[rgm_num]);
+    copy_guild(OLC_GUILD(d), &guild_index.at(rgm_num));
     gedit_disp_menu(d);
 }
 
@@ -386,8 +386,8 @@ void gedit_disp_menu(struct descriptor_data *d) {
                     "Enter Choice : ",
 
                     OLC_NUM(d),
-                    G_TRAINER(guilddata) == NOBODY ? -1 : mob_index[G_TRAINER(guilddata)].vn,
-                    G_TRAINER(guilddata) == NOBODY ? "None" : mob_proto[G_TRAINER(guilddata)].short_description,
+                    G_TRAINER(guilddata) == NOBODY ? -1 : mob_index.at(G_TRAINER(guilddata)).vn,
+                    G_TRAINER(guilddata) == NOBODY ? "None" : mob_proto.at(G_TRAINER(guilddata)).short_description,
                     G_NO_SKILL(guilddata).c_str(),
                     G_NO_GOLD(guilddata).c_str(),
                     G_OPEN(guilddata),
@@ -542,8 +542,8 @@ void gedit_parse(struct descriptor_data *d, char *arg) {
                 if (i == -1)
                     break;
                 /*. Fiddle with special procs . */
-                G_FUNC(OLC_GUILD(d)) = mob_index[i].func != guild ? mob_index[i].func : nullptr;
-                mob_index[i].func = guild;
+                G_FUNC(OLC_GUILD(d)) = mob_index.at(i).func != guild ? mob_index.at(i).func : nullptr;
+                mob_index.at(i).func = guild;
                 break;
             } else {
                 write_to_output(d, "Invalid response.\r\n");

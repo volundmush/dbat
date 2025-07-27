@@ -5,7 +5,7 @@
 #include "dbat/db.h"
 #include "dbat/utils.h"
 
-std::map<vnum, account_data> accounts;
+NegativeKeyGuardMap<vnum, account_data> accounts;
 
 struct account_data *findAccount(const std::string &name) {
     for (auto &[aid, account] : accounts) {

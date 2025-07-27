@@ -75,12 +75,12 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
 
             /* Examine call for special procedure */
             if (MOB_FLAGGED(ch, MOB_SPEC) && !no_specials) {
-                auto func = mob_index[GET_MOB_RNUM(ch)].func;
+                auto& func = mob_index.at(GET_MOB_RNUM(ch)).func;
                 if (func == nullptr) {
                     basic_mud_log("SYSERR: %s (#%d): Attempting to call non-existing mob function.",
                                   GET_NAME(ch), GET_MOB_VNUM(ch));
                     ch->mob_flags.set(MOB_SPEC, false);
-                    auto &mp = mob_proto[ch->getVnum()];
+                    auto& mp = mob_proto.at(ch->getVnum());
                     mp.mob_flags.set(MOB_SPEC, false);
                 } else {
                     char actbuf[MAX_INPUT_LENGTH] = "";

@@ -151,11 +151,13 @@ ACMD(do_oasis_zedit) {
         return;
     }
 
+    auto& z = zone_table.at(OLC_ZNUM(d));
+
     /****************************************************************************/
     /** Everyone but IMPLs can only edit zones they have been assigned.        **/
     /****************************************************************************/
     if (!can_edit_zone(ch, OLC_ZNUM(d))) {
-        send_cannot_edit(ch, zone_table[OLC_ZNUM(d)].number);
+        send_cannot_edit(ch, z.number);
         free(d->olc);
         d->olc = nullptr;
         return;
@@ -166,10 +168,10 @@ ACMD(do_oasis_zedit) {
     /****************************************************************************/
     if (save) {
         send_to_char(ch, "Saving all zone information for zone %d.\r\n",
-                     zone_table[OLC_ZNUM(d)].number);
+                     z.number);
         mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), true,
                "OLC: %s saves zone information for zone %d.", GET_NAME(ch),
-               zone_table[OLC_ZNUM(d)].number);
+               z.number);
 
         /**************************************************************************/
         /** Save the zone information to the zone file.                          **/
@@ -204,7 +206,7 @@ ACMD(do_oasis_zedit) {
     ch->player_flags.set(PLR_WRITING, true);
 
     mudlog(CMP, ADMLVL_IMMORT, true, "OLC: %s starts editing zone %d allowed zone %d",
-           GET_NAME(ch), zone_table[OLC_ZNUM(d)].number, GET_OLC_ZONE(ch));
+           GET_NAME(ch), z.number, GET_OLC_ZONE(ch));
 }
 
 void zedit_setup(struct descriptor_data *d, int room_num) {
@@ -214,7 +216,7 @@ void zedit_setup(struct descriptor_data *d, int room_num) {
      * Allocate one scratch zone structure.
      */
 
-    auto &z = zone_table[OLC_ZNUM(d)];
+    auto& z = zone_table.at(OLC_ZNUM(d));
     auto zd = OLC_ZONE(d) = new zone_data();
     /*
      * Copy all the zone header information over.
@@ -343,7 +345,7 @@ void zedit_save_internally(struct descriptor_data *d) {
     
     auto zd = OLC_ZONE(d);
 
-    auto &z = zone_table[OLC_ZNUM(d)];
+    auto& z = zone_table.at(OLC_ZNUM(d));
     z.remove_room_commands(room_num);
 
     for (auto cm : zd->cmd) {
@@ -437,7 +439,7 @@ void zedit_disp_menu(struct descriptor_data *d) {
     clear_screen(d);
     room = real_room(OLC_NUM(d));
     sprintbitarray(OLC_ZONE(d)->zone_flags.getAll(), zone_bits, ZF_ARRAY_MAX, buf1);
-    auto &z = zone_table[OLC_ZNUM(d)];
+    auto& z = zone_table.at(OLC_ZNUM(d));
     /*
      * Menu header
      */
@@ -479,31 +481,31 @@ void zedit_disp_menu(struct descriptor_data *d) {
             case 'M':
                 write_to_output(d, "%sLoad %s@y [@c%d@y], Max : %d, MaxR %d, Chance %d",
                                 c.if_flag ? " then " : "",
-                                mob_proto[c.arg1].short_description,
-                                mob_index[c.arg1].vn, c.arg2, c.arg4, c.arg5
+                                mob_proto.at(c.arg1).short_description,
+                                c.arg1, c.arg2, c.arg4, c.arg5
                 );
                 break;
             case 'G':
                 write_to_output(d, "%sGive it %s@y [@c%d@y], Max : %d, Chance %d",
                                 c.if_flag ? " then " : "",
-                                obj_proto[c.arg1].short_description,
-                                obj_index[c.arg1].vn,
+                                obj_proto.at(c.arg1).short_description,
+                                c.arg1,
                                 c.arg2, c.arg5
                 );
                 break;
             case 'O':
                 write_to_output(d, "%sLoad %s@y [@c%d@y], Max : %d, MaxR %d, Chance %d",
                                 c.if_flag ? " then " : "",
-                                obj_proto[c.arg1].short_description,
-                                obj_index[c.arg1].vn,
+                                obj_proto.at(c.arg1).short_description,
+                                c.arg1,
                                 c.arg2, c.arg4, c.arg5
                 );
                 break;
             case 'E':
                 write_to_output(d, "%sEquip with %s@y [@c%d@n], %s, Max : %d, Chance %d",
                                 c.if_flag ? " then " : "",
-                                obj_proto[c.arg1].short_description,
-                                obj_index[c.arg1].vn,
+                                obj_proto.at(c.arg1).short_description,
+                                c.arg1,
                                 equipment_types[c.arg3],
                                 c.arg2, c.arg5
                 );
@@ -511,18 +513,18 @@ void zedit_disp_menu(struct descriptor_data *d) {
             case 'P':
                 write_to_output(d, "%sPut %s@y [@c%d@n] in %s [@c%d@n], Max : %d, %% Chance %d",
                                 c.if_flag ? " then " : "",
-                                obj_proto[c.arg1].short_description,
-                                obj_index[c.arg1].vn,
-                                obj_proto[c.arg3].short_description,
-                                obj_index[c.arg3].vn,
+                                obj_proto.at(c.arg1).short_description,
+                                c.arg1,
+                                obj_proto.at(c.arg3).short_description,
+                                c.arg3,
                                 c.arg2, c.arg5
                 );
                 break;
             case 'R':
                 write_to_output(d, "%sRemove %s@y [@c%d@n] from room.",
                                 c.if_flag ? " then " : "",
-                                obj_proto[c.arg2].short_description,
-                                obj_index[c.arg2].vn
+                                obj_proto.at(c.arg2).short_description,
+                                c.arg2
                 );
                 break;
             case 'D':
@@ -535,8 +537,8 @@ void zedit_disp_menu(struct descriptor_data *d) {
             case 'T':
                 write_to_output(d, "%sAttach trigger @c%s@y [@c%d@y] to %s, %% Chance %d",
                                 c.if_flag ? " then " : "",
-                                trig_index[c.arg2].proto->name,
-                                trig_index[c.arg2].vn,
+                                trig_index.at(c.arg2).proto->name,
+                                c.arg2,
                                 ((c.arg1 == MOB_TRIGGER) ? "mobile" :
                                  ((c.arg1 == OBJ_TRIGGER) ? "object" :
                                   ((c.arg1 == WLD_TRIGGER) ? "room" : "????"))), c.arg5);
@@ -1403,7 +1405,7 @@ void zedit_parse(struct descriptor_data *d, char *arg) {
             if (OLC_ZNUM(d) == 0)
                 OLC_ZONE(d)->bot = LIMIT(atoi(arg), 0, OLC_ZONE(d)->top);
             else
-                OLC_ZONE(d)->bot = LIMIT(atoi(arg), zone_table[OLC_ZNUM(d) - 1].top + 1, OLC_ZONE(d)->top);
+                OLC_ZONE(d)->bot = LIMIT(atoi(arg), zone_table.at(OLC_ZNUM(d) - 1).top + 1, OLC_ZONE(d)->top);
             OLC_ZONE(d)->number = 1;
             zedit_disp_menu(d);
             break;

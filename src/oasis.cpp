@@ -310,7 +310,7 @@ void cleanup_olc(struct descriptor_data *d, int8_t cleanup_type) {
             mudlog(CMP, ADMLVL_IMMORT, true, "OLC: %s stops editing help files.", GET_NAME(d->character));
         else
             mudlog(BRF, ADMLVL_IMMORT, true, "OLC: %s stops editing zone %d allowed zone %d", GET_NAME(d->character),
-                   zone_table[OLC_ZNUM(d)].number, GET_OLC_ZONE(d->character));
+                   zone_table.at(OLC_ZNUM(d)).number, GET_OLC_ZONE(d->character));
 
         STATE(d) = CON_PLAYING;
     }
@@ -387,7 +387,7 @@ int can_edit_zone(struct char_data *ch, zone_rnum rnum) {
         return (true);
 
     /* always access if a player helped build the zone in the first place */
-    if (is_name(GET_NAME(ch), zone_table[rnum].builders))
+    if (is_name(GET_NAME(ch), zone_table.at(rnum).builders))
         return (true);
 
     /* no access if you haven't been assigned a zone */

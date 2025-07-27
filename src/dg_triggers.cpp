@@ -513,8 +513,8 @@ void load_mtrigger(char_data *ch) {
     if (result == SCRIPT_ERROR_CODE) {
         /* we have recursed beyond reasonable depth */
         /* make sure this mob is the last one in the load chain */
-        if (GET_MOB_RNUM(ch) != NOBODY) {
-            mob_proto[GET_MOB_RNUM(ch)].proto_script.clear();
+        if (auto vn = GET_MOB_RNUM(ch); vn != NOBODY) {
+            mob_proto.at(vn).proto_script.clear();
         }
     }
 }
@@ -878,7 +878,7 @@ void load_otrigger(obj_data *obj) {
         /* make sure this mob is the last one in the load chain */
         auto vn = GET_OBJ_RNUM(obj);
         if (vn != NOTHING) {
-            obj_proto[vn].proto_script.clear();
+            obj_proto.at(vn).proto_script.clear();
         }
     }
 }

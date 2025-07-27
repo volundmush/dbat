@@ -867,11 +867,10 @@ void add_trigger(script_data *sc, trig_data *t, int loc) {
     }
 
     SCRIPT_TYPES(sc) |= GET_TRIG_TYPE(t);
-    t->activate();
-
-    auto ow = units.at(sc->id);
+    auto& ow = units.at(sc->id);
 
     t->owner = ow;
+    t->activate();
     
 
     int order = 0;
@@ -1040,7 +1039,7 @@ int remove_trigger(script_data *sc, char *name) {
             /* is found. originally the number was position-only */
         else if (++n >= num)
             break;
-        else if (trig_index[i->vn].vn == num)
+        else if (i->vn == num)
             break;
     }
 
@@ -2512,7 +2511,7 @@ ACMD(do_tstat) {
             return;
         }
 
-        do_stat_trigger(ch, trig_index[rnum].proto);
+        do_stat_trigger(ch, trig_index.at(rnum).proto);
     } else
         send_to_char(ch, "Usage: tstat <vnum>\r\n");
 }

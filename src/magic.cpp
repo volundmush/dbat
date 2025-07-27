@@ -899,7 +899,7 @@ void mag_summons(int level, struct char_data *ch, struct obj_data *obj, int spel
                         mob_num = monsum_list[i][j][count];
                         if (real_mobile(mob_num) == NOBODY)
                             mob_num = NOBODY;
-                        else if (!is_name(buf2, mob_proto[real_mobile(mob_num)].name))
+                        else if (!is_name(buf2, mob_proto.at(real_mobile(mob_num)).name))
                             mob_num = NOBODY;
                         else
                             break;

@@ -675,7 +675,7 @@ int read_sense_memory(struct char_data *ch, struct char_data *vict) {
 
     if(IS_NPC(ch)) return 0;
 
-    auto &p = players[ch->id];
+    auto& p = players.at(ch->id);
 
     if(IS_NPC(vict)) {
         return p.sense_memory.contains(vict->getVnum());
@@ -691,7 +691,7 @@ void sense_memory_write(struct char_data *ch, struct char_data *vict) {
     }
 
     if(IS_NPC(ch)) return;
-    auto &p = players[ch->id];
+    auto& p = players.at(ch->id);
 
     if(IS_NPC(vict)) {
         p.sense_memory.insert(vict->getVnum());

@@ -44,8 +44,8 @@ room_rnum add_room(struct room_data *room) {
         return i;
     }
     auto sh = std::shared_ptr<room_data>(room);
-    world[room->getVnum()] = sh;
-    units[room->getVnum()] = sh;
+    world.emplace(room->getVnum(), sh);
+    units.emplace(room->getVnum(), sh);
     basic_mud_log("GenOLC: add_room: Added room %d.", room->getVnum());
 
     /*
@@ -255,6 +255,8 @@ int room_data::getDamage() {
 }
 
 void room_data::activate() {
+    assign_triggers(this, WLD_TRIGGER);
+    
     if(trig_list) {
         if(SCRIPT_TYPES(this) & OTRIG_RANDOM)
             roomSubscriptions.subscribe("randomTriggers", shared_from_this());

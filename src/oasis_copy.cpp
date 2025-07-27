@@ -153,7 +153,7 @@ ACMD(do_oasis_copy) {
 
     /* Make sure the builder is allowed to modify the target zone. */
     if (!can_edit_zone(ch, OLC_ZNUM(d))) {
-        send_cannot_edit(ch, zone_table[OLC_ZNUM(d)].number);
+        send_cannot_edit(ch, zone_table.at(OLC_ZNUM(d)).number);
         free(d->olc);
         d->olc = nullptr;
         return;
@@ -424,7 +424,7 @@ ACMD(do_rcopy) {
 
 /* For buildwalk. Finds the next free vnum in the zone */
 room_vnum redit_find_new_vnum(zone_rnum zone) {
-    auto &z = zone_table[zone];
+    auto& z = zone_table.at(zone);
     for(auto i = z.bot; i < z.top; i++) {
         if(!world.count(i)) return i;
     }

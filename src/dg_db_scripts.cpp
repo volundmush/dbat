@@ -38,7 +38,7 @@ void parse_trigger(FILE *trig_f, trig_vnum nr) {
     trig->vn = nr;
 
     idx.proto = trig;
-    auto &z = zone_table[real_zone_by_thing(nr)];
+    auto& z = zone_table.at(real_zone_by_thing(nr));
     z.triggers.insert(nr);
 
     snprintf(errors, sizeof(errors), "trig vnum %d", nr);
@@ -182,7 +182,7 @@ void dg_read_trigger(FILE *fp, struct unit_data *proto, int type) {
                        vnum, proto->getName(), proto->getVnum());
                 return;
             }
-            obj_proto[proto->getVnum()].proto_script.push_back(rnum);
+            obj_proto.at(proto->getVnum()).proto_script.push_back(rnum);
             break;
         case MOB_TRIGGER:
             if(!mob_proto.contains(proto->getVnum())) {
@@ -191,7 +191,7 @@ void dg_read_trigger(FILE *fp, struct unit_data *proto, int type) {
                        vnum, GET_NAME((char_data *) proto), GET_MOB_VNUM((char_data *) proto));
                 return;
             }
-            mob_proto[proto->getVnum()].proto_script.push_back(rnum);
+            mob_proto.at(proto->getVnum()).proto_script.push_back(rnum);
             break;
         case WLD_TRIGGER:
             if(!world.contains(proto->getVnum())) {
@@ -200,7 +200,7 @@ void dg_read_trigger(FILE *fp, struct unit_data *proto, int type) {
                        vnum, GET_ROOM_VNUM(((room_data *) proto)->getVnum()));
                 return;
             }
-            world[proto->getVnum()]->proto_script.push_back(rnum);
+            world.at(proto->getVnum())->proto_script.push_back(rnum);
             break;
         default:
             mudlog(BRF, ADMLVL_BUILDER, true,

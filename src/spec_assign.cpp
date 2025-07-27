@@ -28,7 +28,7 @@ void ASSIGNMOB(mob_vnum mob, SPECIAL(fname)) {
     mob_rnum rnum;
 
     if ((rnum = real_mobile(mob)) != NOBODY)
-        mob_index[rnum].func = fname;
+        mob_index.at(rnum).func = fname;
     else if (!mini_mud)
         basic_mud_log("SYSERR: Attempt to assign spec to non-existant mob #%d", mob);
 }
@@ -37,7 +37,7 @@ void ASSIGNOBJ(obj_vnum obj, SPECIAL(fname)) {
     obj_rnum rnum;
 
     if ((rnum = real_object(obj)) != NOTHING)
-        obj_index[rnum].func = fname;
+        obj_index.at(rnum).func = fname;
     else if (!mini_mud)
         basic_mud_log("SYSERR: Attempt to assign spec to non-existant obj #%d", obj);
 }

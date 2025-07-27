@@ -66,7 +66,7 @@ const char *get_i_name(struct char_data *ch, struct char_data *vict) {
         return (RACE(vict));
     }
 
-    auto &p = players[ch->id];
+    auto& p = players.at(ch->id);
 
     auto found = p.dub_names.find(vict->id);
     if(found == p.dub_names.end()) return RACE(vict);
@@ -407,7 +407,7 @@ void char_from_room(struct char_data *ch) {
     if (AFF_FLAGGED(ch, AFF_PURSUIT) && FIGHTING(ch) == nullptr)
         ch->affect_flags.set(AFF_PURSUIT, false);
 
-    auto &z = zone_table[r->zone];
+    auto& z = zone_table.at(r->zone);
     auto shared = ch->shared();
     if(IS_NPC(ch)) {
         z.npcsInZone.remove_if([shared](auto& npc) { return npc.expired() || npc.lock() == shared; });
@@ -429,7 +429,7 @@ void char_to_room(struct char_data *ch, struct room_data* room) {
     IN_ROOM(ch) = room->getVnum();
     ch->room = room;
 
-    auto &z = zone_table[room->zone];
+    auto& z = zone_table.at(room->zone);
     if(IS_NPC(ch)) {
         z.npcsInZone.push_back(ch->shared());
     } else {
@@ -675,7 +675,7 @@ void obj_to_room(struct obj_data *object, struct room_data *room) {
     object->holder = room;
     GET_LAST_LOAD(object) = time(nullptr);
 
-    auto &z = zone_table[room->zone];
+    auto& z = zone_table.at(room->zone);
     z.objectsInZone.push_back(object->shared());
 
     if (GET_OBJ_TYPE(object) == ITEM_VEHICLE && !OBJ_FLAGGED(object, ITEM_UNBREAKABLE) &&
@@ -789,7 +789,7 @@ void obj_from_room(struct obj_data *object) {
         GET_OBJ_POSTTYPE(object) = 0;
     }
 
-    auto &z = zone_table[r->zone];
+    auto& z = zone_table.at(r->zone);
     auto shared = object->shared();
     z.objectsInZone.remove_if([shared](auto& obj) { return obj.expired() || obj.lock() == shared; });
     object->room->objects.remove_if([shared](auto& obj) { return obj.expired() || obj.lock() == shared; });
@@ -1694,7 +1694,7 @@ int is_better(struct obj_data *object, struct obj_data *object2) {
 void item_check(struct obj_data *object, struct char_data *ch) {
     int where = 0;
 
-    if (IS_HUMANOID(ch) && !(mob_index[GET_MOB_RNUM(ch)].func == shop_keeper)) {
+    if (IS_HUMANOID(ch) && !(mob_index.at(GET_MOB_RNUM(ch)).func == shop_keeper)) {
         if (invalid_align(ch, object) || invalid_class(ch, object))
             return;
 

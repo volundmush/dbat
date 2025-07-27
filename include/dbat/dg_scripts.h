@@ -414,7 +414,7 @@ extern room_rnum obj_room(obj_data *obj);
 #define UID_CHAR   '#'
 #define GET_TRIG_NAME(t)          ((t)->name)
 #define GET_TRIG_RNUM(t)          ((t)->vn)
-#define GET_TRIG_VNUM(t)      (trig_index[(t)->vn].vn)
+#define GET_TRIG_VNUM(t)      (trig_index.at((t)->vn).vn)
 #define GET_TRIG_TYPE(t)          ((t)->trigger_type)
 #define GET_TRIG_NARG(t)          ((t)->narg)
 #define GET_TRIG_ARG(t)           ((t)->arglist)

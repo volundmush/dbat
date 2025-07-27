@@ -146,7 +146,7 @@ room_vnum genolc_zonep_bottom(struct zone_data *zone) {
 }
 
 zone_vnum genolc_zone_bottom(zone_rnum rznum) {
-    return zone_table[rznum].bot;
+    return zone_table.at(rznum).bot;
 }
 
 int sprintascii(char *out, bitvector_t bits) {

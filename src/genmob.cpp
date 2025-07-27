@@ -45,7 +45,7 @@ int add_mobile(struct npc_proto_data *mob, mob_vnum vnum) {
         auto &ix = mob_index[vnum];
         ix.vn = vnum;
         auto zvnum = real_zone_by_thing(vnum);
-        auto &z = zone_table[zvnum];
+        auto& z = zone_table.at(zvnum);
         z.mobiles.insert(vnum);
         basic_mud_log("GenOLC: add_mobile: Added mobile %d.", vnum);
     }
@@ -72,9 +72,9 @@ int delete_mobile(mob_rnum refpt) {
         return NOBODY;
     }
 
-    vnum = mob_index[refpt].vn;
+    vnum = refpt;
     extract_mobile_all(vnum);
-    auto &z = zone_table[real_zone_by_thing(refpt)];
+    auto& z = zone_table.at(real_zone_by_thing(refpt));
     z.mobiles.erase(refpt);
 
     /* Update zone table.  */
@@ -140,7 +140,7 @@ int write_mobile_mobprog(mob_vnum mvnum, struct char_data *mob, FILE *fd)
 
 
 void check_mobile_strings(struct char_data *mob) {
-    mob_vnum mvnum = mob_index[mob->getVnum()].vn;
+    mob_vnum mvnum = mob->getVnum();
     check_mobile_string(mvnum, &GET_LDESC(mob), "long description");
     check_mobile_string(mvnum, &GET_DDESC(mob), "detailed description");
     check_mobile_string(mvnum, &GET_ALIAS(mob), "alias list");
@@ -175,6 +175,8 @@ void char_data::activate() {
     if(auto vn = getVnum(); mob_proto.contains(vn)) {
         services.insert(fmt::format("vnum_{}", vn));
     }
+
+    assign_triggers(this, MOB_TRIGGER);
 
     if(trig_list) {
         activateScripts();

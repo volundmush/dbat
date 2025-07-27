@@ -86,7 +86,7 @@ ACMD(do_oasis_trigedit) {
      * Everyone but IMPLs can only edit zones they have been assigned.
      */
     if (!can_edit_zone(ch, OLC_ZNUM(d))) {
-        send_cannot_edit(ch, zone_table[OLC_ZNUM(d)].number);
+        send_cannot_edit(ch, zone_table.at(OLC_ZNUM(d)).number);
         free(d->olc);
         d->olc = nullptr;
         return;
@@ -112,7 +112,7 @@ ACMD(do_oasis_trigedit) {
     ch->player_flags.set(PLR_WRITING, true);
 
     mudlog(CMP, ADMLVL_IMMORT, true, "OLC: %s starts editing zone %d [trigger](allowed zone %d)",
-           GET_NAME(ch), zone_table[OLC_ZNUM(d)].number, GET_OLC_ZONE(ch));
+           GET_NAME(ch), zone_table.at(OLC_ZNUM(d)).number, GET_OLC_ZONE(ch));
 }
 
 void trigedit_setup_new(struct descriptor_data *d) {
@@ -144,7 +144,7 @@ void trigedit_setup_existing(struct descriptor_data *d, int rtrg_num) {
      */
     CREATE(trig, struct trig_data, 1);
 
-    trig_data_copy(trig, trig_index[rtrg_num].proto);
+    trig_data_copy(trig, trig_index.at(rtrg_num).proto);
 
     /* convert cmdlist to a char string */
     c = trig->cmdlist;

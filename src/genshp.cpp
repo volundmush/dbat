@@ -272,10 +272,10 @@ void modify_string(char **str, char *new_s) {
 int add_shop(struct shop_data *nshp) {
     shop_rnum rshop;
     zone_rnum rznum = real_zone_by_thing(S_NUM(nshp));
-    auto &z = zone_table[rznum];
+    auto& z = zone_table.at(rznum);
     z.shops.insert(S_NUM(nshp));
-    auto &sh = shop_index[S_NUM(nshp)];
-    copy_shop(&shop_index[rshop], nshp, false);
+    auto& sh = shop_index.at(S_NUM(nshp));
+    copy_shop(&shop_index.at(rshop), nshp, false);
     return S_NUM(nshp);
 }
 

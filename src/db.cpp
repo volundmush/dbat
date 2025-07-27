@@ -64,28 +64,28 @@ bool isMigrating = false;
 struct config_data config_info; /* Game configuration list.    */
 
 // The global database of entities.
-std::unordered_map<int, std::shared_ptr<unit_data>> units;
-std::map<room_vnum, std::shared_ptr<room_data>> world;
-std::unordered_map<int, std::shared_ptr<char_data>> uniqueCharacters;
-std::unordered_map<int, std::shared_ptr<obj_data>> uniqueObjects;
-std::unordered_map<int, std::shared_ptr<trig_data>> uniqueScripts;
+NegativeKeyGuardUnorderedMap<int, std::shared_ptr<unit_data>> units;
+NegativeKeyGuardMap<room_vnum, std::shared_ptr<room_data>> world;
+NegativeKeyGuardUnorderedMap<int, std::shared_ptr<char_data>> uniqueCharacters;
+NegativeKeyGuardUnorderedMap<int, std::shared_ptr<obj_data>> uniqueObjects;
+NegativeKeyGuardUnorderedMap<int, std::shared_ptr<trig_data>> uniqueScripts;
 
 struct char_data *affect_list = nullptr; /* global linked list of chars with affects */
 struct char_data *affectv_list = nullptr; /* global linked list of chars with round-based affects */
-std::map<mob_vnum, struct index_data> mob_index;    /* index table for mobile file	 */
-std::map<mob_vnum, struct npc_proto_data> mob_proto;    /* prototypes for mobs		 */
+NegativeKeyGuardMap<mob_vnum, struct index_data> mob_index;    /* index table for mobile file	 */
+NegativeKeyGuardMap<mob_vnum, struct npc_proto_data> mob_proto;    /* prototypes for mobs		 */
 
-std::map<obj_vnum, struct index_data> obj_index;    /* index table for object file	 */
-std::map<obj_vnum, struct item_proto_data> obj_proto;    /* prototypes for objs		 */
+NegativeKeyGuardMap<obj_vnum, struct index_data> obj_index;    /* index table for object file	 */
+NegativeKeyGuardMap<obj_vnum, struct item_proto_data> obj_proto;    /* prototypes for objs		 */
 
-std::map<zone_vnum, struct zone_data> zone_table;    /* zone table			 */
+NegativeKeyGuardMap<zone_vnum, struct zone_data> zone_table;    /* zone table			 */
 
-std::map<trig_vnum, struct index_data> trig_index; /* index table for triggers      */
+NegativeKeyGuardMap<trig_vnum, struct index_data> trig_index; /* index table for triggers      */
 trig_data* trigger_list = nullptr;  /* all attached triggers */
 
-std::map<int64_t, player_data> players;
+NegativeKeyGuardMap<int64_t, player_data> players;
 
-std::map<int64_t, struct descriptor_data*> sessions;
+NegativeKeyGuardMap<int64_t, struct descriptor_data*> sessions;
 
 std::vector<std::weak_ptr<char_data>> getAllCharacters() {
     std::vector<std::weak_ptr<char_data>> out;
@@ -1495,7 +1495,7 @@ void zone_update(uint64_t heartPulse, double deltaTime) {
     // Stagger zone updates so they don't all happen in the exact same heartbeat.
     while(!zonesToUpdate.empty()) {
         auto vn = zonesToUpdate.front();
-        auto &z = zone_table[vn];
+        auto& z = zone_table.at(vn);
         reset_zone(vn);
         mudlog(CMP, ADMLVL_GOD, false, "Auto zone reset: %s (Zone %d)",
                z.name, vn);
@@ -1505,11 +1505,11 @@ void zone_update(uint64_t heartPulse, double deltaTime) {
 
 }
 
-#define ZCMD2 zone_table[zone].cmd[cmd_no]
+#define ZCMD2 zone_table.at(zone).cmd[cmd_no]
 static void log_zone_error(zone_rnum zone, int cmd_no, const char *message) {
     mudlog(NRM, ADMLVL_GOD, true, "SYSERR: zone file: %s", message);
     mudlog(NRM, ADMLVL_GOD, true, "SYSERR: ...offending cmd: '%c' cmd in zone #%d, line %d",
-           ZCMD2.command, zone_table[zone].number, ZCMD2.line);
+           ZCMD2.command, zone_table.at(zone).number, ZCMD2.line);
 }
 
 #define ZONE_ERROR(message) \
@@ -1885,7 +1885,7 @@ static void do_reset_rooms(zone_data &z) {
 /* execute the reset command table of a given zone */
 void reset_zone(zone_rnum zone)
 {
-    auto &z = zone_table[zone];
+    auto& z = zone_table.at(zone);
     z.age = 0;
 
     if (!pre_reset(z.number))

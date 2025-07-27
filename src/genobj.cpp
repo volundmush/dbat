@@ -26,7 +26,7 @@ obj_rnum add_object(struct item_proto_data *newobj, obj_vnum ovnum) {
      * Write object to internal tables.
      */
     bool exists = obj_proto.contains(ovnum);
-    auto &obj = obj_proto[ovnum];
+    auto& obj = obj_proto.at(ovnum);
     obj = *newobj;
     if (exists) {
         basic_mud_log("GenOLC: add_object: Updated existing object #%d (%s).", ovnum, obj.short_description);
@@ -34,7 +34,7 @@ obj_rnum add_object(struct item_proto_data *newobj, obj_vnum ovnum) {
     } else {
         basic_mud_log("GenOLC: add_object: Added object #%d (%s).", ovnum, obj.short_description);
         zone_rnum rznum = real_zone_by_thing(ovnum);
-        auto &z = zone_table[rznum];
+        auto& z = zone_table.at(rznum);
         z.objects.insert(ovnum);
     }
 
@@ -142,6 +142,8 @@ void obj_data::activate() {
     if(obj_proto.contains(vn)) {
         services.insert(fmt::format("vnum_{}", vn));
     }
+
+    assign_triggers(this, OBJ_TRIGGER);
 
     if(trig_list) {
         activateScripts();

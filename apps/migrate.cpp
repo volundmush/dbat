@@ -528,7 +528,6 @@ static void boot_the_guilds(FILE *gm_f, char *filename, int rec_count) {
             read_guild_line(gm_f, "%d", &g.minlvl, "GM_MINLVL");
             read_guild_line(gm_f, "%d", &g.keeper, "GM_TRAINER");
 
-            g.keeper = real_mobile(g.keeper);
             bitvector_t with_who[4];
             read_guild_line(gm_f, "%d", &with_who[0], "GM_WITH_WHO");
 
@@ -622,12 +621,10 @@ static void boot_the_shops(FILE *shop_f, char *filename, int rec_count) {
                 }
             }
 
-
             read_line(shop_f, "%hd", &SHOP_KEEPER(top_shop));
 
             bitvector_t with_who[SW_ARRAY_MAX];
 
-            SHOP_KEEPER(top_shop) = real_mobile(SHOP_KEEPER(top_shop));
             CREATE(buf, char, READ_SIZE);
             get_line(shop_f, buf);
             p = buf;
