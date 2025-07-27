@@ -305,7 +305,7 @@ extern void find_uid_name(char *uid, char *name, size_t nlen);
 
 extern void do_sstat(struct char_data *ch, struct unit_data *ud);
 
-extern void add_trigger(script_data *sc, trig_data* t, int loc);
+extern void add_trigger(script_data *sc,  const std::shared_ptr<trig_data> t, int loc);
 
 extern void script_vlog(const char *format, va_list args);
 
@@ -335,7 +335,7 @@ extern void remove_from_lookup_table(long uid);
 /* from dg_db_scripts.c */
 extern void parse_trigger(FILE *trig_f, trig_vnum nr);
 
-trig_data* read_trigger(int nr);
+std::shared_ptr<trig_data> read_trigger(int nr);
 
 extern void trig_data_copy(trig_data *this_data, const trig_data *trg);
 
@@ -374,8 +374,6 @@ extern void free_varlist(struct trig_var_data *vd);
 extern int remove_var(struct trig_var_data **var_list, char *name);
 
 extern void free_trigger(trig_data *trig);
-
-extern void extract_trigger(trig_data *trig);
 
 extern void extract_script(unit_data *thing, int type);
 

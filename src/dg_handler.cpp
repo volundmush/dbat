@@ -102,25 +102,13 @@ trig_data::~trig_data() {
 }
 
 
-/* remove a single trigger from a mob/obj/room */
-void extract_trigger(trig_data *trig) {
-
-    trig->deactivate();
-    uniqueScripts.erase(trig->id);
-}
-
 /* remove all triggers from a mob/obj/room */
 void extract_script(unit_data *thing, int type) {
-    script_data *sc = thing;
-    trig_data *trig, *next_trig;
-
-    if(thing->trig_list) {
-        for (trig = TRIGGERS(sc); trig; trig = next_trig) {
-            next_trig = trig->next;
-            extract_trigger(trig);
-        }
-        TRIGGERS(sc) = nullptr;
+    
+    for(auto &[vn, sc] : thing->scripts) {
+        sc->deactivate();
     }
+
     if (thing->global_vars) {
         free_varlist(thing->global_vars);
         thing->global_vars = nullptr;

@@ -166,11 +166,7 @@ void remove_from_int_list(IDXTYPE **list, IDXTYPE num) {
      */
     for (i = 0; (*list)[i] != NOTHING; i++);
 
-#if CIRCLE_UNSIGNED_INDEX
-    if (num >= i)
-#else
-        if (num < 0 || num >= i)
-#endif
+    if (num < 0 || num >= i)
         return;
     num_items = i;
 

@@ -68,7 +68,6 @@ NegativeKeyGuardUnorderedMap<int, std::shared_ptr<unit_data>> units;
 NegativeKeyGuardMap<room_vnum, std::shared_ptr<room_data>> world;
 NegativeKeyGuardUnorderedMap<int, std::shared_ptr<char_data>> uniqueCharacters;
 NegativeKeyGuardUnorderedMap<int, std::shared_ptr<obj_data>> uniqueObjects;
-NegativeKeyGuardUnorderedMap<int, std::shared_ptr<trig_data>> uniqueScripts;
 
 struct char_data *affect_list = nullptr; /* global linked list of chars with affects */
 struct char_data *affectv_list = nullptr; /* global linked list of chars with round-based affects */
@@ -81,7 +80,6 @@ NegativeKeyGuardMap<obj_vnum, struct item_proto_data> obj_proto;    /* prototype
 NegativeKeyGuardMap<zone_vnum, struct zone_data> zone_table;    /* zone table			 */
 
 NegativeKeyGuardMap<trig_vnum, struct index_data> trig_index; /* index table for triggers      */
-trig_data* trigger_list = nullptr;  /* all attached triggers */
 
 NegativeKeyGuardMap<int64_t, player_data> players;
 
@@ -130,11 +128,7 @@ void destroy_db() {
     }
     world.clear();
 
-    for(auto &[id, ent] : uniqueScripts) {
-        if(ent)
-            ent->deactivate();
-    }
-    uniqueScripts.clear();
+    units.clear();
     
 }
 
@@ -303,7 +297,7 @@ static void db_load_activate_entities() {
     // activate all items which ended up "in the world".
     for(auto &[id, r] : world) {
         assign_triggers(r.get(), WLD_TRIGGER);
-        if(r->trig_list) r->activateScripts();
+        r->activateScripts();
         r->activateContents();
         auto people = r->getPeople();
         for(auto c : filter_raw(people)) {
@@ -384,9 +378,6 @@ void boot_db_world() {
     basic_mud_log("Loading items initial...");
     load_items_initial(latest);
 
-    basic_mud_log("Loading dgscript initial...");
-    load_dgscripts_initial(latest);
-
     // Now that all of the game entities have been spawned, we can finish loading
     // relations between them.
 
@@ -396,8 +387,8 @@ void boot_db_world() {
     basic_mud_log("Loading items finish...");
     load_items_finish(latest);
 
-    basic_mud_log("Loading dgscript finish...");
-    load_dgscripts_finish(latest);
+    basic_mud_log("Loading dgscript instances...");
+    load_dgscripts(latest);
 
     basic_mud_log("Running activation of entities...");
     db_load_activate_entities();
@@ -865,9 +856,8 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
     mob->generation = time(nullptr);
     uniqueCharacters.emplace(mob->id, sh);
     units.emplace(mob->id, sh);
+
     mob->activate();
-
-
 
     if (!(IS_HOSHIJIN(mob) && GET_SEX(mob) == SEX_MALE)) {
         //setNumsTo[CharAppearance::hair_length] = rand_number(0, 4);
@@ -1437,7 +1427,7 @@ struct obj_data *read_object(obj_vnum nr, int type) /* and obj_rnum */
     uniqueObjects.emplace(obj->id, sh);
     units.emplace(obj->id, sh);
 
-    assign_triggers(obj, OBJ_TRIGGER);
+    
     if (nr == 65) {
         SET_OBJ_VAL(obj, VAL_BED_HTANK_CHARGE, 20);
     }

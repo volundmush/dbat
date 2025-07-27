@@ -2,8 +2,6 @@
 //#include "conf.h"
 #include "typestubs.h"
 
-#define CIRCLE_GNU_LIBC_MEMORY_TRACK 0    /* 0 = off, 1 = on */
-
 // Some C libraires
 #include <cstdio>
 #include <cctype>
@@ -17,10 +15,6 @@
 #include <cassert>
 #include <sys/stat.h>
 
-#ifndef _WIN32
-// #include <strings.h>
-// #include <bsd/string.h>
-#endif
 #include "dbat/stringutils.h"
 
 #ifndef SIGUSR1
@@ -56,25 +50,11 @@
 //#include "magic_enum/magic_enum_all.hpp"
 
 /* Basic system dependencies *******************************************/
-#if CIRCLE_GNU_LIBC_MEMORY_TRACK && !defined(HAVE_MCHECK_H)
-#error "Cannot use GNU C library memory tracking without <mcheck.h>"
-#endif
-
-#define HAS_RLIMIT
-
-#define CIRCLE_UNSIGNED_INDEX 0    /* 0 = signed, 1 = unsigned */
-
-#if CIRCLE_UNSIGNED_INDEX
-#define IDXTYPE    uint32_t
-#define NOWHERE    ((IDXTYPE)~0)
-#else
 #define IDXTYPE	int
 #define NOWHERE -1	/* nil reference for rooms	*/
-#endif
-
-#define NOTHING    NOWHERE
-#define NOBODY    NOWHERE
-#define NOFLAG  NOWHERE
+#define NOTHING NOWHERE
+#define NOBODY NOWHERE
+#define NOFLAG NOWHERE
 
 #define I64T "ld"
 #define SZT "ld"
@@ -106,10 +86,10 @@ typedef uint32_t bitvector_t;
 
 typedef void(*CommandFunc)(struct char_data *ch, char *argument, int cmd, int subcmd);
 
-typedef int(*SpecialFunc)(struct char_data *ch, void *me, int cmd, char *argument);
+typedef int(*SpecialFunc)(struct char_data *ch, unit_data *me, int cmd, char *argument);
 
 #define ACMD(name) void (name)(struct char_data *ch, char *argument, int cmd, int subcmd)
-#define SPECIAL(name) int (name)(struct char_data *ch, void *me, int cmd, char *argument)
+#define SPECIAL(name) int (name)(struct char_data *ch, unit_data *me, int cmd, char *argument)
 
 template<typename T = bool>
 using OpResult = std::pair<T, std::optional<std::string>>;

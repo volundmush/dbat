@@ -255,8 +255,7 @@ void medit_save_internally(struct descriptor_data *d) {
     /* this takes care of the mobs currently in-game */
     auto mobs = characterSubscriptions.all(fmt::format("vnum_{}", new_rnum));
     for (auto mob : filter_raw(mobs)) {
-        /* remove any old scripts */
-        extract_script(mob, MOB_TRIGGER);
+        /* refresh scripts for those using their defaults */
         assign_triggers(mob, MOB_TRIGGER);
     }
     /* end trigger update */

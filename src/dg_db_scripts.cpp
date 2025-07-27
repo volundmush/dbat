@@ -68,30 +68,20 @@ void parse_trigger(FILE *trig_f, trig_vnum nr) {
     free(cmds);
 }
 
-int64_t nextTrigID() {
-    static int64_t id = 0;
-    while(uniqueScripts.contains(id)) id++;
-    return id;
-}
-
 /*
  * create a new trigger from a prototype.
  * nr is the real number of the trigger.
  */
-trig_data* read_trigger(int nr) {
+std::shared_ptr<trig_data> read_trigger(int nr) {
 
     auto idx = trig_index.find(nr);
     if(idx == trig_index.end()) return nullptr;
 
     auto sh = std::make_shared<trig_data>();
 
-    sh->id = nextTrigID();
-    sh->generation = time(nullptr);
-    uniqueScripts.emplace(sh->id, sh);
-
     trig_data_copy(sh.get(), idx->second.proto);
 
-    return sh.get();
+    return sh;
 }
 
 
@@ -108,7 +98,6 @@ void trig_data_init(trig_data *this_data) {;
     this_data->purged = false;
     this_data->var_list = nullptr;
 
-    this_data->next = nullptr;
 }
 
 
@@ -263,27 +252,35 @@ void dg_obj_trigger(char *line, struct item_proto_data *obj) {
 
 void assign_triggers(struct unit_data *i, int type) {
 
-    // remove all duplicates from i->proto_script but do not change its order otherwise.
-    std::unordered_set<trig_vnum> alreadySeen;
+    if(i->running_scripts.has_value()) {
+        // If this value is set, then scripts have been manually assigned via attach or detach.
+        // We do not want to overwrite this.
+        return;
+    }
+
     auto ps = i->getProtoScript();
-    auto it = ps.begin();
-    while(it != ps.end()) {
-        if(alreadySeen.contains(*it)) {
-            it = ps.erase(it);
-        } else {
-            alreadySeen.insert(*it);
-            ++it;
+
+    std::unordered_set<trig_vnum> to_remove;
+    // step 1: iterate through i->scripts and add any vnums not in ps to to_remove.
+    for (const auto &[tvn, t] : i->scripts) {
+        if (std::find(ps.begin(), ps.end(), tvn) == ps.end()) {
+            to_remove.insert(tvn);
         }
     }
 
-    std::unordered_set<trig_vnum> existVnums;
-    for(auto t = i->trig_list; t; t = t->next) existVnums.insert(t->vn);
-
-    for(auto p : ps) {
-        // only add if they don't already have one...
-        if(!existVnums.contains(p)) {
-            add_trigger(i, read_trigger(p), -1);
-            existVnums.insert(p);
-        }
+    // step 2: remove any triggers in to_remove from i->scripts.
+    for(auto tvn : to_remove) {
+        i->scripts.erase(tvn);
     }
+
+    // Step 3: iterate through ps and add any vnums not in i->scripts.
+   for(auto &tvn : ps) {
+       if(i->scripts.find(tvn) == i->scripts.end()) {
+            auto t = read_trigger(tvn);
+            SCRIPT_TYPES(i) |= GET_TRIG_TYPE(t);
+            i->scripts.emplace(t->vn, t);
+            t->owner = units.at(i->id).get();
+            t->activate();
+       }
+   }
 }

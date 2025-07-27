@@ -75,11 +75,7 @@ bool assemblyAddComponent(long lVnum, long lComponentVnum, bool bExtract, bool b
         basic_mud_log("SYSERR: assemblyAddComponent(): Invalid 'lVnum' #%ld.", lVnum);
         return (false);
     }
-#if CIRCLE_UNSIGNED_INDEX
-    else if (real_object(lComponentVnum) == NOTHING)
-#else
-        else if( real_object( lComponentVnum ) <= NOTHING )
-#endif
+    else if( real_object( lComponentVnum ) <= NOTHING )
     {
         basic_mud_log("SYSERR: assemblyAddComponent(): Invalid 'lComponentVnum' #%ld.",
             lComponentVnum);

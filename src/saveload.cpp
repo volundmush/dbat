@@ -362,13 +362,10 @@ void deserializeVars(struct trig_var_data **vd, const json &j) {
 }
 
 void to_json(json& j, const trig_data& t) {
-    if(t.id != NOTHING) {
+    if(t.owner) {
         // we're serializing an instance.
         j["vn"] = t.vn;
-
-        j["id"] = t.id;
-        j["generation"] = t.generation;
-        j["order"] = t.order;
+        j["instance"] = true;
 
         if(t.depth) j["depth"] = t.depth;
         if(t.loops) j["loops"] = t.loops;
@@ -397,7 +394,7 @@ void to_json(json& j, const trig_data& t) {
 }
 
 void from_json(const json& j, trig_data& t) {
-    if(j.contains("id")) {
+    if(j.contains("instance")) {
         // we're deserializing an instance.
         t.vn = j["vn"].get<int>();
         auto &tp = trig_index[t.vn];
@@ -411,10 +408,6 @@ void from_json(const json& j, trig_data& t) {
 
         t.cmdlist = p->cmdlist;
         t.curr_state = p->cmdlist;
-
-        if(j.contains("id")) t.id = j["id"].get<long>();
-        if(j.contains("generation")) t.generation = j["generation"].get<time_t>();
-        if(j.contains("order")) t.order = j["order"].get<long>();
 
         if(j.contains("waiting")) t.waiting = j["waiting"].get<double>();
         if(j.contains("depth")) t.depth = j["depth"].get<int>();
@@ -486,33 +479,19 @@ static void dump_dgscript_prototypes(const std::filesystem::path &loc) {
     dump_to_file(loc, "dgScriptPrototypes.json", j);
 }
 
-void load_dgscripts_initial(const std::filesystem::path& loc) {
+void load_dgscripts(const std::filesystem::path& loc) {
     for(auto j : load_from_file(loc, "dgscripts.json")) {
         auto id = j["id"].get<int64_t>();
-        auto generation = j["generation"].get<int>();
-        auto t = std::make_shared<trig_data>();
-        j["data"].get_to(*t);
-        uniqueScripts.emplace(id, t);
-    }
-}
 
-void load_dgscripts_finish(const std::filesystem::path& loc) {
-    // Iterating through DgSCripts in reverse to ensure they're added in proper order.
-    auto json_array = load_from_file(loc, "dgscripts.json");
+        auto u = units.at(id);
 
-    for (auto it = json_array.rbegin(); it != json_array.rend(); ++it) {
-        auto& j = *it;
-        auto id = j["id"].get<int64_t>();
-        auto generation = j["generation"].get<int>();
-        auto location = j["location"].get<std::string>();
-
-        if (auto cf = uniqueScripts.find(id); cf != uniqueScripts.end()) {
-            if (auto t = cf->second) {
-                auto o = t->owner = resolveUID(location);
-                t->next = o->trig_list;
-                o->trig_list = t.get();
-                t->owner->trigger_types |= GET_TRIG_TYPE(t);
-            }
+        for(auto d : j["scripts"]) {
+            auto vn = d["vn"].get<int>();
+            auto r = std::make_shared<trig_data>();
+            d["data"].get_to(*r);
+            u->scripts.emplace(vn, r);
+            r->owner = u.get();
+            u->trigger_types |= GET_TRIG_TYPE(r);
         }
     }
 }
@@ -520,13 +499,16 @@ void load_dgscripts_finish(const std::filesystem::path& loc) {
 static void dump_dgscripts(const std::filesystem::path &loc) {
     json j;
 
-    for(auto &[v, r] : uniqueScripts) {
+    for(auto &[id, u] : units) {
+        if(u->scripts.empty()) continue; // Skip units without scripts
         json j2;
-        j2["id"] = v;
-        j2["generation"] = r->generation;
-        j2["data"] = *r;
-        j2["location"] = r->owner->getUID();
-        j2["order"] = r->order;
+        j2["id"] = id;
+        for(auto &[vn, r] : u->scripts) {
+            json j3;
+            j3["vn"] = vn;
+            j3["data"] = *r;
+            j2["scripts"].push_back(j3);
+        }
         j.push_back(j2);
     }
     dump_to_file(loc, "dgscripts.json", j);
@@ -738,6 +720,10 @@ void to_json(json& j, const unit_data& u) {
             j["ex_description"].push_back(*ex);
         }
     }
+
+    if(u.running_scripts.has_value()) {
+        j["running_scripts"] = u.running_scripts.value();
+    }
 }
 
 void from_json(const json& j, unit_data& u) {
@@ -765,6 +751,10 @@ void from_json(const json& j, unit_data& u) {
             new_ex->next = u.ex_description;
             u.ex_description = new_ex;
         }
+    }
+
+    if(j.contains("running_scripts")) {
+        u.running_scripts = j["running_scripts"].get<std::vector<trig_vnum>>();
     }
 }
 
@@ -1811,7 +1801,12 @@ void runSave() {
                           dump_guilds, dump_zones,
                           dump_dgscript_prototypes}) {
             threads.emplace_back([func, &tempPath]() {
-                func(tempPath);
+                try {
+                    func(tempPath);
+                } catch (const std::exception& e) {
+                    basic_mud_log("Error during dump: %s", e.what());
+                    throw;
+                }
             });
         }
 

@@ -279,7 +279,6 @@ extern NegativeKeyGuardUnorderedMap<int, std::shared_ptr<obj_data>> uniqueObject
 extern std::vector<std::weak_ptr<obj_data>> getAllObjects();
 
 extern NegativeKeyGuardMap<trig_vnum, struct index_data> trig_index;
-extern NegativeKeyGuardUnorderedMap<int, std::shared_ptr<trig_data>> uniqueScripts;
 
 extern NegativeKeyGuardMap<vnum, account_data> accounts;
 extern NegativeKeyGuardMap<shop_vnum, struct shop_data> shop_index;
@@ -304,8 +303,6 @@ extern int create_join_session(int account_id, int character_id, int64_t connect
 
 extern struct social_messg *soc_mess_list;
 extern int top_of_socialt;
-
-extern struct trig_data *trigger_list;
 
 extern int dg_owner_purged;
 

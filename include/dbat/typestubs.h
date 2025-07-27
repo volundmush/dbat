@@ -4,12 +4,14 @@ struct zone_data;
 struct reset_com;
 struct char_data;
 struct obj_data;
+struct thing_data;
 struct room_data;
 struct shop_buy_data;
 struct command_info;
 struct descriptor_data;
 struct account_data;
 struct player_data;
+struct proto_data;
 struct npc_proto_data;
 struct item_proto_data;
 

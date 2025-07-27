@@ -43,6 +43,7 @@ room_rnum add_room(struct room_data *room) {
         extract_script(ro, WLD_TRIGGER);
         copy_room(ro, room);
         basic_mud_log("GenOLC: add_room: Updated existing room #%d.", vn);
+        assign_triggers(ro, WLD_TRIGGER);
         return i;
     }
     auto sh = std::shared_ptr<room_data>(room);
@@ -264,7 +265,7 @@ int room_data::getDamage() {
 void room_data::activate() {
     assign_triggers(this, WLD_TRIGGER);
     
-    if(trig_list) {
+    if(!scripts.empty()) {
         if(SCRIPT_TYPES(this) & OTRIG_RANDOM)
             roomSubscriptions.subscribe("randomTriggers", shared_from_this());
         if(SCRIPT_TYPES(this) & OTRIG_TIME)

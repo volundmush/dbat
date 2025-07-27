@@ -274,13 +274,8 @@ void assedit_parse(struct descriptor_data *d, char *arg) {
         case ASSEDIT_ADD_COMPONENT:              /* add a new component */
             if (isdigit(*arg)) {
                 pos = atoi(arg);
-#if CIRCLE_UNSIGNED_INDEX
-                if ((real_object(pos)) == NOTHING)    /* does the object exist? */
-                    break;
-#else
                 if ((real_object(pos)) <= NOTHING)    /* does the object exist? */
                     break;
-#endif
 
                 for (i = 0; i < OLC_ASSEDIT(d)->lNumComponents; i++) {
                     if (OLC_ASSEDIT(d)->pComponents[i].lVnum == pos)

@@ -17,13 +17,13 @@ std::string unit_data::getUID(bool active) {
 }
 
 void unit_data::activateScripts() {
-    for(auto t = trig_list; t; t = t->next) {
+    for(auto &[vn, t] : scripts) {
         t->activate();
     }
 }
 
 void unit_data::deactivateScripts() {
-    for(auto t = trig_list; t; t = t->next) {
+    for(auto &[vn, t] : scripts) {
         t->deactivate();
     }
 }
@@ -103,3 +103,25 @@ unit_data::~unit_data() {
     if(ex_description) free_ex_descriptions(ex_description);
     extract_script(this, 0);
 }
+
+std::vector<trig_vnum> unit_data::getScriptOrder() {
+    if(running_scripts.has_value()) {
+        return *running_scripts;
+    }
+    return getProtoScript();
+}
+
+std::vector<std::shared_ptr<trig_data>> unit_data::getScripts() {
+    std::vector<std::shared_ptr<trig_data>> out;
+    auto proto = getScriptOrder();
+    out.reserve(scripts.size() + proto.size());
+    for(const auto &v : proto) {
+        if(auto it = scripts.find(v); it != scripts.end()) {
+            out.push_back(it->second);
+        } else {
+            basic_mud_log("Warning: script vnum %d not found in scripts map for %s", v, getName());
+        }
+    }
+    return out;
+}
+

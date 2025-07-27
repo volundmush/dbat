@@ -560,7 +560,7 @@ extern int GET_SPEEDI(struct char_data *ch);
 #define IS_WEIGHTED(ch) ((ch)->getBaseStat("speednar") < 1.0)
 
 
-#define GET_EXP(ch)      ((ch)->getBaseStat("experience"))
+#define GET_EXP(ch)      ((ch)->getBaseStat<int64_t>("experience"))
 /*
  * Changed GET_AC to GET_ARMOR so that code with GET_AC will need to be
  * looked at to see if it needs to change before being converted to use

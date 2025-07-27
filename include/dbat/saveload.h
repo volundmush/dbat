@@ -20,8 +20,7 @@ void load_zones(const std::filesystem::path& loc);
 void load_accounts(const std::filesystem::path& loc);
 void load_dgscript_prototypes(const std::filesystem::path& loc);
 
-void load_dgscripts_initial(const std::filesystem::path& loc);
-void load_dgscripts_finish(const std::filesystem::path& loc);
+void load_dgscripts(const std::filesystem::path& loc);
 
 void load_globaldata(const std::filesystem::path& loc);
 

@@ -584,7 +584,7 @@ static void boot_the_shops(FILE *shop_f, char *filename, int rec_count) {
             auto &sh = shop_index[temp];
             free(buf);        /* Plug memory leak! */
             sh.vnum = temp;
-            auto &z = zone_table[real_zone_by_thing(sh.vnum)];
+            auto &z = zone_table.at(real_zone_by_thing(sh.vnum));
             z.shops.insert(sh.vnum);
             top_shop = temp;
             while(true) {
@@ -621,7 +621,7 @@ static void boot_the_shops(FILE *shop_f, char *filename, int rec_count) {
                 }
             }
 
-            read_line(shop_f, "%hd", &SHOP_KEEPER(top_shop));
+            read_line(shop_f, "%d", &SHOP_KEEPER(top_shop));
 
             bitvector_t with_who[SW_ARRAY_MAX];
 

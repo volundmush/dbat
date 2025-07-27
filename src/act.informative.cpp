@@ -2804,9 +2804,9 @@ static void display_room_flags(struct room_data *rm, struct char_data *ch) {
 
     send_to_char(ch, "@wLocation: @G%-70s@w\r\n", rm->getName());
 
-    if (rm->trig_list) {
+    if (auto sc = rm->getScripts(); !sc.empty()) {
         send_to_char(ch, "@D[@GTriggers");
-        for (auto t = rm->trig_list; t; t = t->next)
+        for (auto t : sc)
             send_to_char(ch, " %d", GET_TRIG_VNUM(t));
         send_to_char(ch, "@D] ");
     }
@@ -5396,7 +5396,7 @@ static void perform_immort_where(struct char_data *ch, char *arg) {
                 found = 1;
                 send_to_char(ch, "M%3d. %-25s - [%5d] %-25s", ++num, GET_NAME(i),
                              i->getRoomVnum(), i->getRoom()->getName());
-                if (IS_NPC(i) && SCRIPT(i) && SCRIPT(i)->trig_list) {
+                if (IS_NPC(i) && !i->scripts.empty()) {
                     auto t = i->scriptString();
                     send_to_char(ch, "%s ", t.c_str());
                 }

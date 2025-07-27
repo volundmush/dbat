@@ -27,11 +27,7 @@ zone_rnum create_new_zone(zone_vnum vzone_num, room_vnum bottom, room_vnum top, 
     zone_rnum rznum;
     char buf[MAX_STRING_LENGTH];
 
-#if CIRCLE_UNSIGNED_INDEX
-    if (vzone_num == NOWHERE)
-#else
-        if (vzone_num < 0)
-#endif
+    if (vzone_num < 0)
     {
         *error = "You can't make negative zones.\r\n";
         return NOWHERE;

@@ -967,116 +967,54 @@ get_selling_obj(struct char_data *ch, char *name, struct char_data *keeper, vnum
     return (nullptr);
 }
 
-static obj_data* slide_obj(obj_data* obj, char_data* keeper, int shop_nr)
+static void sort_keeper_objs(struct char_data *keeper, int shop_nr)
 {
-    // step 1: possibly sort
-    if (SHOP_SORT(shop_nr) < IS_CARRYING_N(keeper)) {
-        sort_keeper_objs(keeper, shop_nr);
+    std::unordered_set<int> already_produced; // Track vnums we've already added
+    std::list<std::shared_ptr<obj_data>> active_objects;
+
+    auto &sh = shop_index.at(shop_nr);
+    // 1. Promote all valid weak_ptrs to shared_ptr and collect into a working list
+    for (auto &wptr : keeper->objects) {
+        if (auto sptr = wptr.lock()) {
+            active_objects.push_back(sptr);
+        }
     }
 
-    // step 2: if shop produces it, remove and return proto
-    if (shop_producing(obj, shop_nr)) {
-        int temp = GET_OBJ_RNUM(obj);
-        extract_obj(obj);
-        return nullptr;
-    }
+    // 2. Clear the original list (we'll rebuild it in proper order)
+    keeper->objects.clear();
+    sh.lastsort = 0;
 
-    // step 3: increment sort
-    SHOP_SORT(shop_nr)++;
-
-    // step 4: put object into keeper's list
-    // (which pushes a weak_ptr<obj_data> into keeper->objects)
-    obj_to_char(obj, keeper);
-
-    // We want to find that newly inserted item
-    // (the newly inserted weak_ptr referencing 'obj').
-    // We'll get 'obj->shared()' and find it.
-    auto newSP = obj->shared();  // the newly inserted shared_ptr
-    if (!newSP) {
-        // if something's very wrong (obj had no shared control?), just bail
-        return obj;
-    }
-
-    // Let's locate the iterator for newSP in keeper->objects.
-    // We'll do a reverse search or find_if from the end:
-    auto insertedIt = keeper->objects.end();
-    for (auto it = keeper->objects.begin(); it != keeper->objects.end(); ++it) {
-        if (auto sp = it->lock()) {
-            if (sp == newSP) {
-                insertedIt = it;
-                break;
+    // 3. First, insert at most one of each shop-produced item
+    for (auto it = active_objects.begin(); it != active_objects.end(); ) {
+        auto &obj = *it;
+        if (shop_producing(obj.get(), shop_nr)) {
+            int vnum = GET_OBJ_RNUM(obj);
+            if (already_produced.insert(vnum).second) {
+                keeper->objects.push_back(obj);
+                sh.lastsort++;
+                it = active_objects.erase(it); // Remove from working list
+                continue;
             }
         }
-    }
-    // If we didn't find it, something's off, but let's proceed
-    if (insertedIt == keeper->objects.end()) {
-        return obj;  // no repositioning needed
+        ++it;
     }
 
-    // step 6: look for a "duplicate" to group with
-    // We'll do a separate loop for the "existing items" in the list
-    // If we find same_obj(sp.get(), obj), we want to splice insertedIt after that element.
-    for (auto it = keeper->objects.begin(); it != keeper->objects.end(); ++it) {
-        // skip expired or newly inserted itself
-        if (it == insertedIt) 
-            continue;
+    // 4. For remaining items, group identicals (same_obj) next to each other
+    while (!active_objects.empty()) {
+        auto obj = active_objects.front();
+        active_objects.pop_front();
 
-        if (auto sp = it->lock()) {
-            if (same_obj(sp.get(), obj)) {
-                // We want to move the newly inserted item after 'it' in the list
-                // In a std::list, we can do:
-                auto nextIt = std::next(it);
-                // splice 'insertedIt' out of the entire list, and reinsert after 'it'
-                keeper->objects.splice(nextIt, keeper->objects, insertedIt);
-                // Once spliced, we can break or return
-                return obj;
+        // Insert `obj` and group any identicals directly after it
+        keeper->objects.push_back(obj);
+        sh.lastsort++;
+
+        for (auto it = active_objects.begin(); it != active_objects.end(); ) {
+            if (same_obj(obj.get(), it->get())) {
+                keeper->objects.push_back(*it);
+                it = active_objects.erase(it);
+            } else {
+                ++it;
             }
-        }
-    }
-
-    // step 7: if no duplicates found, we do nothing
-    // The item remains at its insertion position (likely the end).
-    return obj;
-}
-
-static void sort_keeper_objs(struct char_data *keeper, vnum shop_nr)
-{
-    // This local list will hold the "un-sorted" items we temporarily remove from keeper->objects
-    std::list<std::shared_ptr<obj_data>> tempList;
-
-    // While the shop says "not sorted yet" < inventory count, peel off an item from keeper->objects
-    while (SHOP_SORT(shop_nr) < IS_CARRYING_N(keeper)) {
-        // 1) remove front item from keeper->objects
-        //    in the old code, it was always the front: keeper->contents
-        //    We'll assume we define some function pop_front_object(keeper) returning shared_ptr
-        auto sp = keeper->objects.front().lock(); 
-        if (!sp) {
-            // if there's nothing to remove, break
-            break;
-        }
-        // accumulate it in tempList
-        tempList.push_front(sp);
-    }
-
-    // Now we process each item from tempList
-    // replicating the old code's "while (list)"
-    while (!tempList.empty()) {
-        auto sp = tempList.front();
-        tempList.pop_front();
-        if (!sp) {
-            continue; // skip null
-        }
-
-        // Check if shop_producing(sp.get(), shop_nr) and keeper doesn't have sp->getVnum()
-        // We'll rely on sp->getVnum() or sp->obj_vnum or similar
-        if (shop_producing(sp.get(), shop_nr) && !keeper->findObjectVnum(sp->getVnum())) {
-            // The old code does obj_to_char(temp, keeper)
-            // We'll store sp in keeper->objects
-            obj_to_char(sp.get(), keeper);
-            SHOP_SORT(shop_nr)++;
-        } else {
-            // "slide_obj" now expects a raw pointer, but uses shared internally
-            slide_obj(sp.get(), keeper, shop_nr);
         }
     }
 }
@@ -1129,10 +1067,8 @@ static void shopping_sell(char *arg, struct char_data *ch, struct char_data *kee
 
         goldamt += charged;
         keeper->modBaseStat("money_carried", -charged);
-
         sold++;
         obj_from_char(obj);
-        slide_obj(obj, keeper, shop_nr);    /* Seems we don't use return value. */
         obj = get_selling_obj(ch, name, keeper, shop_nr, false);
     }
 
@@ -1170,6 +1106,8 @@ static void shopping_sell(char *arg, struct char_data *ch, struct char_data *kee
         SHOP_BANK(shop_nr) -= goldamt;
         keeper->modBaseStat("money_carried", goldamt);
     }
+    
+    sort_keeper_objs(keeper, shop_nr);
 }
 
 static void shopping_value(char *arg, struct char_data *ch, struct char_data *keeper, vnum shop_nr) {

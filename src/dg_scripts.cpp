@@ -756,7 +756,6 @@ void find_uid_name(char *uid, char *name, size_t nlen) {
 /* general function to display stats on script sc */
 void script_stat(char_data *ch, script_data *sc) {
     struct trig_var_data *tv;
-    trig_data *t;
     char name[MAX_INPUT_LENGTH];
     char namebuf[512];
     char buf1[MAX_STRING_LENGTH];
@@ -778,7 +777,7 @@ void script_stat(char_data *ch, script_data *sc) {
             send_to_char(ch, "    %15s:  %s\r\n", tv->context ? namebuf : tv->name, tv->value);
     }
 
-    for (t = TRIGGERS(sc); t; t = t->next) {
+    for (const auto& t : sc->getScripts()) {
         send_to_char(ch, "\r\n  Trigger: @y%s@n, VNum: [@y%5d@n], RNum: [%5d]\r\n",
                      GET_TRIG_NAME(t), GET_TRIG_VNUM(t), GET_TRIG_RNUM(t));
 
@@ -839,45 +838,34 @@ void do_sstat(struct char_data *ch, struct unit_data *ud) {
  * adds the trigger t to script sc in in location loc.  loc = -1 means
  * add to the end, loc = 0 means add before all other triggers.
  */
-void add_trigger(script_data *sc, trig_data *t, int loc) {
+void add_trigger(script_data *sc, const std::shared_ptr<trig_data> t, int loc) {
 
-    // Gather up all existing triggers from the manual linked list...
-    std::list<trig_data*> triggers;
-    for(auto t2 = TRIGGERS(sc); t2; t2 = t2->next) {
-        triggers.push_back(t2);
+    // if the sc (unit_data) isn't already using running_scripts...
+    if(!sc->running_scripts.has_value()) {
+        sc->running_scripts.emplace(sc->getProtoScript());
     }
+
+    auto &scr = sc->running_scripts.value();
 
     // Now insert t in the right spot...
     if(loc == -1) {
-        triggers.push_back(t);
+        scr.emplace_back(t->vn);
     } else if(loc == 0) {
-        triggers.push_front(t);
+        // Insert at the beginning
+        scr.insert(scr.begin(), t->vn);
+    } else if(loc > 0 && loc <= scr.size()) {
+        // Insert at the specified location
+        scr.insert(scr.begin() + loc - 1, t->vn);
     } else {
-        auto it = triggers.begin();
-        std::advance(it, loc);
-        triggers.insert(it, t);
-    }
-
-    sc->trig_list = nullptr;
-    // Reverse iterate through triggers to rebuild sc->trig_list...
-    for(auto it = triggers.rbegin(); it != triggers.rend(); it++) {
-        auto t2 = *it;
-        t2->next = sc->trig_list;
-        sc->trig_list = t2;
+        // If loc is invalid, just append it
+        scr.emplace_back(t->vn);
     }
 
     SCRIPT_TYPES(sc) |= GET_TRIG_TYPE(t);
-    auto& ow = units.at(sc->id);
 
-    t->owner = ow;
+    sc->scripts.emplace(t->vn, t);
+    t->owner = units.at(sc->id).get();
     t->activate();
-    
-
-    int order = 0;
-    for(auto t2 = TRIGGERS(sc); t2; t2 = t2->next) {
-        t2->order = order++;
-    }
-
 }
 
 
@@ -885,7 +873,7 @@ ACMD(do_attach) {
     char_data *victim;
     obj_data *object;
     room_data *room;
-    trig_data *trig;
+    std::shared_ptr<trig_data> trig;
     char targ_name[MAX_INPUT_LENGTH], trig_name[MAX_INPUT_LENGTH];
     char loc_name[MAX_INPUT_LENGTH], arg[MAX_INPUT_LENGTH];
     int loc, tn, rn, num_arg;
@@ -1009,10 +997,9 @@ ACMD(do_attach) {
  *  this function returns, in order to remove the script.
  */
 int remove_trigger(script_data *sc, char *name) {
-    trig_data *i, *j;
+    std::shared_ptr<trig_data> j;
     int num = 0, string = false, n;
     char *cname;
-
 
     if (!sc)
         return 0;
@@ -1027,42 +1014,46 @@ int remove_trigger(script_data *sc, char *name) {
     } else
         num = atoi(name);
 
-    for (n = 0, j = nullptr, i = TRIGGERS(sc); i; j = i, i = i->next) {
+    n = 0;
+    j = nullptr;
+    for (auto i : sc->getScripts()) {
         if (string) {
             if (isname(name, GET_TRIG_NAME(i)))
-                if (++n >= num)
+                if (++n >= num) {
+                    j = i;
                     break;
+                }
         }
 
             /* this isn't clean... */
             /* a numeric value will match if it's position OR vnum */
             /* is found. originally the number was position-only */
-        else if (++n >= num)
+        else if (++n >= num) {
+            j = i;
             break;
-        else if (i->vn == num)
+        }
+        else if (i->vn == num) {
+            j = i;
             break;
+        }
     }
 
-    if (i) {
-        if (j) {
-            j->next = i->next;
-            extract_trigger(i);
+    if (j) {
+        j->deactivate();
+        if(sc->running_scripts.has_value()) {
+            auto &scr = sc->running_scripts.value();
+            scr.erase(std::remove(scr.begin(), scr.end(), j->vn), scr.end());
         }
-
-            /* this was the first trigger */
-        else {
-            TRIGGERS(sc) = i->next;
-            extract_trigger(i);
-        }
+        sc->scripts.erase(j->vn);
 
         /* update the script type bitvector */
         SCRIPT_TYPES(sc) = 0;
-        for (i = TRIGGERS(sc); i; i = i->next)
+        for (auto i : sc->getScripts())
             SCRIPT_TYPES(sc) |= GET_TRIG_TYPE(i);
 
         return 1;
-    } else
-        return 0;
+    }
+    return 0;
 }
 
 ACMD(do_detach) {
@@ -1098,7 +1089,7 @@ ACMD(do_detach) {
             send_to_char(ch, "All triggers removed from room.\r\n");
         } else if (remove_trigger(SCRIPT(room), arg2)) {
             send_to_char(ch, "Trigger removed.\r\n");
-            if (!TRIGGERS(SCRIPT(room))) {
+            if (room->getScripts().empty()) {
                 extract_script(room, WLD_TRIGGER);
             }
         } else
@@ -1165,7 +1156,7 @@ ACMD(do_detach) {
                 send_to_char(ch, "All triggers removed from %s.\r\n", GET_SHORT(victim));
             } else if (trigger && remove_trigger(SCRIPT(victim), trigger)) {
                 send_to_char(ch, "Trigger removed.\r\n");
-                if (!TRIGGERS(SCRIPT(victim))) {
+                if (victim->getScripts().empty()) {
                     extract_script(victim, MOB_TRIGGER);
                 }
             } else
@@ -1184,7 +1175,7 @@ ACMD(do_detach) {
                              object->getName());
             } else if (remove_trigger(SCRIPT(object), trigger)) {
                 send_to_char(ch, "Trigger removed.\r\n");
-                if (!TRIGGERS(SCRIPT(object))) {
+                if (object->getScripts().empty()) {
                     extract_script(object, OBJ_TRIGGER);
                 }
             } else
@@ -1703,7 +1694,7 @@ void process_attach(unit_data *go, script_data *sc, trig_data *trig,
                     int type, char *cmd) {
     char arg[MAX_INPUT_LENGTH], trignum_s[MAX_INPUT_LENGTH];
     char result[MAX_INPUT_LENGTH], *id_p;
-    trig_data *newtrig;
+    std::shared_ptr<trig_data> newtrig;
     char_data *c = nullptr;
     obj_data *o = nullptr;
     room_data *r = nullptr;
@@ -1820,7 +1811,7 @@ void process_detach(unit_data *go, script_data *sc, trig_data *trig,
             return;
         }
         if (remove_trigger(SCRIPT(c), trignum_s)) {
-            if (!TRIGGERS(SCRIPT(c))) {
+            if (c->getScripts().empty()) {
                 extract_script(c, MOB_TRIGGER);
             }
         }
@@ -1833,7 +1824,7 @@ void process_detach(unit_data *go, script_data *sc, trig_data *trig,
             return;
         }
         if (remove_trigger(SCRIPT(o), trignum_s)) {
-            if (!TRIGGERS(SCRIPT(o))) {
+            if (o->getScripts().empty()) {
                 extract_script(o, OBJ_TRIGGER);
             }
         }
@@ -1846,7 +1837,7 @@ void process_detach(unit_data *go, script_data *sc, trig_data *trig,
             return;
         }
         if (remove_trigger(SCRIPT(r), trignum_s)) {
-            if (!TRIGGERS(SCRIPT(r))) {
+            if (r->getScripts().empty()) {
                 extract_script(r, WLD_TRIGGER);
             }
         }
@@ -2796,8 +2787,6 @@ void trig_data::activate() {
     std::unordered_set<std::string> services;
     services.insert("active");
     services.insert(fmt::format("vnum_{}", vn));
-    next_in_world = trigger_list;
-    trigger_list = this;
     if(waiting != 0.0) {
         services.insert("waiting");
     }
@@ -2811,10 +2800,6 @@ void trig_data::deactivate() {
         return;
     }
     active = false;
-    auto sh = shared();
-    struct trig_data *temp;
-    REMOVE_FROM_LIST(this, trigger_list, next_in_world, temp);
+    auto sh = shared_from_this();
     triggerSubscriptions.unsubscribeFromAll(sh);
-    
-
 }

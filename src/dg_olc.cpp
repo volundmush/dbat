@@ -381,7 +381,6 @@ void trigedit_save(struct descriptor_data *d) {
     char *s;
     trig_data *proto;
     trig_data *trig = OLC_TRIG(d);
-    trig_data *live_trig;
     struct cmdlist_element *cmd, *next_cmd;
     struct index_data **new_index;
     struct descriptor_data *dsc;
@@ -429,8 +428,11 @@ void trigedit_save(struct descriptor_data *d) {
         trig_data_copy(proto, trig);
 
         /* go through the mud and replace existing triggers         */
-        for (live_trig = trigger_list; live_trig; live_trig = live_trig->next_in_world) {
-            if(live_trig->vn != rnum) continue;
+        for (auto &[uvn, u] : units) {
+            auto live_trig_find = u->scripts.find(rnum);
+            if (live_trig_find == u->scripts.end()) continue;
+            auto live_trig = live_trig_find->second;
+            
             if (live_trig->arglist) {
                 free(live_trig->arglist);
                 live_trig->arglist = nullptr;

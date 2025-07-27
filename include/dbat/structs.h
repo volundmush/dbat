@@ -159,19 +159,12 @@ struct trig_data : std::enable_shared_from_this<trig_data> {
     double waiting{0.0};    /* event to pause the trigger      */
     bool purged{};            /* trigger is set to be purged     */
     struct trig_var_data *var_list{};    /* list of local vars for trigger  */
-    std::shared_ptr<unit_data> owner{};
-    int order{0};
+    unit_data* owner{};
     int countLine(struct cmdlist_element *c) const;
 
     bool active{false};
     void activate();
     void deactivate();
-
-    int64_t id{NOTHING};
-    time_t generation{};
-
-    trig_data* next{};
-    trig_data* next_in_world{};    /* next in the global trigger list */
 
     std::shared_ptr<trig_data> shared();
 };
@@ -204,12 +197,15 @@ struct unit_data {
     // for DGscripts data.
     
     long trigger_types{};                /* bitvector of trigger types */
-    trig_data* trig_list{};            /* list of triggers           */
+    std::optional<std::vector<vnum>> running_scripts; /* list of attached scripts. the order matters. Only used if differs from proto scripts.*/
+    std::unordered_map<trig_vnum, std::shared_ptr<trig_data>> scripts; /* list of attached triggers. accessed in order of running_scripts */
     struct trig_var_data *global_vars{};    /* list of global variables   */
     long script_context{};                /* current context for statics */
 
     void activateScripts();
     void deactivateScripts();
+    std::vector<trig_vnum> getScriptOrder(); /* this will return running_scripts if said, or the results of getProtoScripts() */
+    std::vector<std::shared_ptr<trig_data>> getScripts();
 
     weight_t getInventoryWeight();
     int64_t getInventoryCount();

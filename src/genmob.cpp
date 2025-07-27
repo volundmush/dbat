@@ -178,7 +178,7 @@ void char_data::activate() {
 
     assign_triggers(this, MOB_TRIGGER);
 
-    if(trig_list) {
+    if(!scripts.empty()) {
         activateScripts();
 
         if(SCRIPT_TYPES(this) & MTRIG_RANDOM)
@@ -236,13 +236,8 @@ void char_data::deactivate() {
     active = false;
     char_data *temp = nullptr;
 
-    if(trig_list) {
-        struct trig_data *next_trig;
-        for (auto trig = trig_list; trig; trig = next_trig) {
-            next_trig = trig->next;
-            extract_trigger(trig);
-        }
-        trig_list = nullptr;
+    for(auto &[vn, sc] : scripts) {
+        sc->deactivate();
     }
 
     auto sh = shared_from_this();
