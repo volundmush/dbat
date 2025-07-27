@@ -2766,6 +2766,8 @@ size_t countColors(const std::string &txt) {
  * Inside and City rooms are always lit.
  * Outside rooms are dark at sunset and night.  */
 int room_is_dark(room_rnum room) {
+    return false; // This function is effectively disabled.
+
     if (!VALID_ROOM_RNUM(room)) {
         basic_mud_log("room_is_dark: Invalid room rnum %d.", room);
         return (false);

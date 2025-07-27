@@ -2956,10 +2956,12 @@ void look_at_room(struct room_data *rm, struct char_data *ch, int ignore_brief) 
     if (!ch->desc)
         return;
 
+    /*
     if (IS_DARK(rm->getVnum()) && !CAN_SEE_IN_DARK(ch) && !PLR_FLAGGED(ch, PLR_AURALIGHT)) {
         send_to_char(ch, "It's too dark to make out much detail...\r\n");
         return;
     } 
+    */
 
     if (AFF_FLAGGED(ch, AFF_BLIND)) {
         send_to_char(ch, "You see nothing but infinite darkness...\r\n");
