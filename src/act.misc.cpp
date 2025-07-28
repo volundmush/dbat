@@ -5584,8 +5584,6 @@ ACMD(do_spoil) {
     *buf3 = '\0';
 
     body_part = create_obj();
-    body_part->getVnum();
-    IN_ROOM(body_part) = NOWHERE;
 
     std::string part = obj->getName();
     for(const auto& word : {"headless", "corpse", "half", "burnt", "chunks", "beaten", "bloody"}) {

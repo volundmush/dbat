@@ -3068,7 +3068,7 @@ ACMD(do_zreset) {
             return;
         }
     } else if (*arg == '.' || !*arg)
-        i = real_zone_by_thing(ch->in_room);
+        i = real_zone_by_thing(ch->getRoomVnum());
     else {
         i = atol(arg);
     }

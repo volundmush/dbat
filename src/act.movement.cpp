@@ -2042,7 +2042,7 @@ static void handle_fly_space(char_data *ch) {
         return;
     }
 
-    auto planet = getPlanet(ch->in_room);
+    auto planet = getPlanet(ch->getRoomVnum());
     if(!planet) {
         send_to_char(ch, "You can't fly to space from here!");
         return;

@@ -1436,13 +1436,13 @@ static json serialize_char_location(char_data* ch) {
     auto j = json::object();
 
     if(IS_NPC(ch)) {
-        j["in_room"] = ch->in_room;
+        j["in_room"] = ch->getRoomVnum();
     } else {
-        auto room = ch->in_room != NOWHERE ? ch->in_room : ch->getBaseStat<room_vnum>("was_in_room");
+        auto r = ch->getRoomVnum() != NOWHERE ? ch->getRoomVnum() : ch->getBaseStat<room_vnum>("was_in_room");
         if(!ch->desc) {
-            room = ch->getBaseStat<room_vnum>("load_room");
+            r = ch->getBaseStat<room_vnum>("load_room");
         }
-        j["load_room"] = ch->normalizeLoadRoom(room);
+        j["load_room"] = ch->normalizeLoadRoom(r);
     }
 
     return j;

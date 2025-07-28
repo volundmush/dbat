@@ -1729,11 +1729,11 @@ static void do_reset_cmds(zone_data &z) {
                     else
                     {
                         obj = read_object(c.arg1, REAL);
-                        IN_ROOM(obj) = IN_ROOM(mob);
+                        obj->room = mob->room;
                         load_otrigger(obj);
                         if (wear_otrigger(obj, mob, c.arg3))
                         {
-                            IN_ROOM(obj) = NOWHERE;
+                            obj->room = nullptr;
                             equip_char(mob, obj, c.arg3);
                         }
                         else
@@ -2065,7 +2065,6 @@ void reset_char(struct char_data *ch) {
 
     ch->followers = nullptr;
     ch->master = nullptr;
-    IN_ROOM(ch) = NOWHERE;
     FIGHTING(ch) = nullptr;
     ch->setBaseStat("position", POS_STANDING);
     ch->mob_specials.default_pos = POS_STANDING;

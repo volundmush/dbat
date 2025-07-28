@@ -117,7 +117,6 @@ void mob_log(char_data *mob, const char *format, ...) {
 
 /* prints the argument to all the rooms aroud the mobile */
 ACMD(do_masound) {
-    room_rnum was_in_room;
     int door;
 
     if (!MOB_OR_IMPL(ch)) {
@@ -135,18 +134,18 @@ ACMD(do_masound) {
 
     skip_spaces(&argument);
 
-    was_in_room = IN_ROOM(ch);
+    auto was_in_room = ch->getRoom();
     for (door = 0; door < NUM_OF_DIRS; door++) {
         struct room_direction_data *newexit;
 
-        if (((newexit = get_room(was_in_room)->dir_option[door])) &&
-            newexit->to_room != NOWHERE && newexit->to_room != was_in_room) {
-            IN_ROOM(ch) = newexit->to_room;
+        if (((newexit = was_in_room->dir_option[door])) &&
+            newexit->to_room != NOWHERE && newexit->getDestination() != was_in_room) {
+            ch->room = newexit->getDestination();
             sub_write(argument, ch, true, TO_ROOM);
         }
     }
 
-    IN_ROOM(ch) = was_in_room;
+    ch->room = was_in_room;
 }
 
 /* Heals a stat of the mob */

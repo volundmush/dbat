@@ -491,8 +491,8 @@ extern bool OBJ_FLAGGED(struct obj_data *obj, int flag);
 /* char utils ************************************************************/
 
 
-#define IN_ROOM(ch)    ((ch)->in_room)
-#define IN_ZONE(ch)   (zone_table.at(((ch)->getRoom()->zone)).number)
+#define IN_ROOM(ch)    ((ch)->getRoomVnum())
+#define IN_ZONE(ch)   ((ch)->getRoom()->zone)
 #define GET_WAS_IN(ch)    ((ch)->getBaseStat<room_vnum>("was_in_room"))
 #define GET_AGE(ch)     ((ch)->time.currentAge())
 

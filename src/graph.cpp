@@ -172,7 +172,7 @@ ACMD(do_sradar) {
 
     if (!*arg) {
         if (GET_ADMLEVEL(ch) >= 1 && noship == true) {
-            printmap(ch->in_room, ch, 0, -1);
+            printmap(ch->getRoomVnum(), ch, 0, -1);
         } else {
             printmap(IN_ROOM(vehicle), ch, 0, GET_OBJ_VNUM(vehicle));
         }

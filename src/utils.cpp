@@ -1947,7 +1947,7 @@ int planet_check(struct char_data *ch, struct char_data *vict) {
         return false;
     }
 
-    return getPlanet(ch->in_room) == getPlanet(vict->in_room);
+    return getPlanet(ch->getRoomVnum()) == getPlanet(vict->getRoomVnum());
 }
 
 void purge_homing(struct char_data *ch) {

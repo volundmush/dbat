@@ -236,8 +236,6 @@ struct unit_data {
 struct room_direction_data;
 
 struct thing_data : public unit_data {
-    room_rnum in_room{NOWHERE};        /* In what room -1 when conta/carr	*/
-
     struct room_data* room;
     struct room_data* getRoom() const;
     room_vnum getRoomVnum() const;
@@ -857,7 +855,7 @@ struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
     struct char_data *poisonby{};
     std::list<std::weak_ptr<char_data>> poisoned;
     struct char_data *original{};
-    
+
     std::list<std::weak_ptr<char_data>> clones{};
     std::map<Skill, skill_data> skill;
 

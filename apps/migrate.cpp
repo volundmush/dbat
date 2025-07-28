@@ -3235,7 +3235,6 @@ void migrate_characters() {
         a.admin_level = std::max(a.admin_level, GET_ADMLEVEL(ch));
         a.characters.emplace_back(ch->id);
         auto lroom = ch->getBaseStat<room_vnum>("load_room");
-        ch->in_room = lroom;
         ch->setBaseStat<room_vnum>("was_in_room", lroom);
         uniqueCharacters.emplace(id, sh);
         units.emplace(id, sh);

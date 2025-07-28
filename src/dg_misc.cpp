@@ -135,7 +135,6 @@ void do_dg_cast(void *go, script_data *sc, trig_data *trig,
         else if (type == WLD_TRIGGER)
             caster->short_description = strdup("The gods");
         char_to_room(caster, caster_room);
-        IN_ROOM(caster) = real_room(caster_room->getVnum());
         call_magic(caster, tch, tobj, spellnum, DG_SPELL_LEVEL, CAST_SPELL, t);
         extract_char(caster);
     } else

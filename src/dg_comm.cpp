@@ -210,7 +210,7 @@ void fly_planet(room_vnum roomVnum, const char *messg, struct char_data *ch) {
     if (!messg || !*messg)
         return;
 
-    auto planet = getPlanet(ch->in_room);
+    auto planet = getPlanet(ch->getRoomVnum());
 
     if(!planet) {
         return;
@@ -223,7 +223,7 @@ void fly_planet(room_vnum roomVnum, const char *messg, struct char_data *ch) {
         if(IN_ROOM(i->character) == NOWHERE) continue;
         if(!OUTSIDE(i->character)) continue;
 
-        if(planet != getPlanet(i->character->in_room)) continue;
+        if(planet != getPlanet(i->character->getRoomVnum())) continue;
 
         if (PLR_FLAGGED(i->character, PLR_DISGUISED)) {
             write_to_output(i, "A disguised figure %s", messg);
@@ -257,7 +257,7 @@ void send_to_sense(int type, const char *messg, struct char_data *ch) {
     if (!messg || !*messg)
         return;
 
-    auto planet = getPlanet(ch->in_room);
+    auto planet = getPlanet(ch->getRoomVnum());
     if(!planet && type == 0) {
         return;
     }
@@ -276,7 +276,7 @@ void send_to_sense(int type, const char *messg, struct char_data *ch) {
         if (!GET_SKILL(tch, SKILL_SENSE)) {
             continue;
         }
-        if(auto p = getPlanet(tch->in_room); type == 0) {
+        if(auto p = getPlanet(tch->getRoomVnum()); type == 0) {
             if (!p) {
                 continue;
             }
@@ -364,7 +364,7 @@ void send_to_scouter(const char *messg, struct char_data *ch, int num, int type)
     if (!messg || !*messg)
         return;
 
-    auto planet = getPlanet(ch->in_room);
+    auto planet = getPlanet(ch->getRoomVnum());
     if(!planet && type == 0) {
         return;
     }
@@ -381,7 +381,7 @@ void send_to_scouter(const char *messg, struct char_data *ch, int num, int type)
         if (tch == ch) continue;
         if(!AWAKE(tch)) continue;
 
-        if(auto p = getPlanet(tch->in_room); type == 0) {
+        if(auto p = getPlanet(tch->getRoomVnum()); type == 0) {
             if (!p) {
                 continue;
             }
@@ -446,14 +446,14 @@ void send_to_worlds(struct char_data *ch) {
         return;
     }
 
-    auto p = getPlanet(ch->in_room);
+    auto p = getPlanet(ch->getRoomVnum());
     if(!p) return;
 
     for (auto i = descriptor_list; i; i = i->next) {
         if (STATE(i) != CON_PLAYING) {
             continue;
         }
-        if(p != getPlanet(i->character->in_room)) continue;
+        if(p != getPlanet(i->character->getRoomVnum())) continue;
         send_to_char(i->character, "%s", message);
     }
 }

@@ -691,7 +691,6 @@ void remove_limb(struct char_data *vict, int num) {
     char buf2[1000];
 
     body_part = create_obj();
-    IN_ROOM(body_part) = NOWHERE;
     
     switch(num) {
         case 1:

@@ -1114,7 +1114,7 @@ static void gen_map(struct char_data *ch, int num) {
 
     initialize_map(map);
     auto room = ch->getRoom();
-    map_draw_room(map, 4, 4, ch->in_room, ch);
+    map_draw_room(map, 4, 4, ch->getRoomVnum(), ch);
 
     for (int door = 0; door < NUM_OF_DIRS; door++) {
         auto d = room->dir_option[door];
@@ -2771,7 +2771,7 @@ static void display_room_info(struct room_data *rm, struct char_data *ch) {
 
     send_to_char(ch, "@wLocation: %-70s@n\r\n", rm->getName());
 
-    if (auto planet = getPlanet(ch->in_room); planet) {
+    if (auto planet = getPlanet(ch->getRoomVnum()); planet) {
         send_to_char(ch, "@wPlanet: @G%s@n\r\n", getPlanetColorName(planet.value()).c_str());
     } else {
         display_dimension_info(rm, ch);
@@ -5371,7 +5371,7 @@ static void perform_immort_where(struct char_data *ch, char *arg) {
         for (d = descriptor_list; d; d = d->next)
             if (IS_PLAYING(d)) {
                 if (IN_ROOM(d->character) != NOWHERE) {
-                    planet = getPlanet(d->character->in_room);
+                    planet = getPlanet(d->character->getRoomVnum());
                 } else {
                     planet = {};
                 }
@@ -6052,7 +6052,7 @@ ACMD(do_scan) {
         return;
     }
 
-    auto darkHere = IS_DARK(ch->in_room);
+    auto darkHere = IS_DARK(ch->getRoomVnum());
 
     for (i = 0; i < 10; i++) {
         auto d = room->dir_option[i];

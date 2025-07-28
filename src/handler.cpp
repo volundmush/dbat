@@ -416,7 +416,6 @@ void char_from_room(struct char_data *ch) {
     }
     auto sh = ch->shared();
     r->characters.remove_if([sh](auto& c) { return c.expired() || c.lock() == sh; });
-    IN_ROOM(ch) = NOWHERE;
     ch->room = nullptr;
 
 }
@@ -426,7 +425,6 @@ void char_to_room(struct char_data *ch, struct room_data* room) {
     int i;
 
     room->characters.push_front(ch->shared());
-    IN_ROOM(ch) = room->getVnum();
     ch->room = room;
 
     auto& z = zone_table.at(room->zone);
@@ -469,7 +467,6 @@ void obj_to_char(struct obj_data *object, struct char_data *ch) {
     object->carried_by = ch;
     object->holder = ch;
     object->room = nullptr;
-    IN_ROOM(object) = NOWHERE;
 
 }
 
@@ -669,7 +666,6 @@ void obj_to_room(struct obj_data *object, struct room_data *room) {
     }
 
     room->objects.push_front(object->shared());
-    IN_ROOM(object) = room->getVnum();
     object->room = room;
     object->carried_by = nullptr;
     object->holder = room;
@@ -794,7 +790,6 @@ void obj_from_room(struct obj_data *object) {
     z.objectsInZone.remove_if([shared](auto& obj) { return obj.expired() || obj.lock() == shared; });
     object->room->objects.remove_if([shared](auto& obj) { return obj.expired() || obj.lock() == shared; });
 
-    IN_ROOM(object) = NOWHERE;
     object->room = nullptr;
     object->holder = nullptr;
 
