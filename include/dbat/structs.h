@@ -857,6 +857,7 @@ struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
     struct char_data *poisonby{};
     std::list<std::weak_ptr<char_data>> poisoned;
     struct char_data *original{};
+    
     std::list<std::weak_ptr<char_data>> clones{};
     std::map<Skill, skill_data> skill;
 
@@ -953,74 +954,24 @@ struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
 
     // Stats stuff
 
-    std::unordered_map<CharVital, double> damages;
     double modCurVitalDam(CharVital type, double dam);
     double setCurVitalDam(CharVital type, double dam);
     double getCurVitalDam(CharVital type);
+    double getCurVitalMeterPercent(CharVital type);
+    int64_t getCurVitalPercent(CharVital type, double amt);
+    int64_t getMaxVitalPercent(CharVital type, double amt);
+    int64_t getMaxVital(CharVital type);
+    int64_t getCurVital(CharVital type);
+    int64_t setCurVital(CharVital type, int64_t amt);
+    int64_t modCurVital(CharVital type, int64_t amt);
+    bool isFullVital(CharVital type);
+    bool isFullVitals();
+    void restoreVital(CharVital type);
 
-    int64_t getCurHealth();
-    int64_t getMaxHealth();
-    double getCurHealthPercent();
-    int64_t getPercentOfCurHealth(double amt);
-    int64_t getPercentOfMaxHealth(double amt);
-    bool isFullHealth();
-    int64_t setCurHealth(int64_t amt);
-    int64_t setCurHealthPercent(double amt);
-    int64_t incCurHealth(int64_t amt, bool limit_max = true);
-    int64_t decCurHealth(int64_t amt, int64_t floor = 0);
-    int64_t incCurHealthPercent(double amt, bool limit_max = true);
-    int64_t decCurHealthPercent(double amt, int64_t floor = 0);
     void restoreHealth(bool announce = true);
 
-    int64_t getPL();
-    int64_t getMaxPLTrans();
-    int64_t getCurPL();
-    int64_t getUnsuppressedPL();
-    int64_t getBasePL();
-    int64_t getEffBasePL();
-    double getCurPLPercent();
-    int64_t getPercentOfCurPL(double amt);
-    int64_t getPercentOfMaxPL(double amt);
-    bool isFullPL();
-    int64_t getCurKI();
-    int64_t getMaxKI();
-    int64_t getBaseKI();
-    int64_t getEffBaseKI();
-    double getCurKIPercent();
-    int64_t getPercentOfCurKI(double amt);
-    int64_t getPercentOfMaxKI(double amt);
-    bool isFullKI();
-    int64_t setCurKI(int64_t amt);
-    int64_t setCurKIPercent(double amt);
-    int64_t incCurKI(int64_t amt, bool limit_max = true);
-    int64_t decCurKI(int64_t amt, int64_t floor = 0);
-    int64_t incCurKIPercent(double amt, bool limit_max = true);
-    int64_t decCurKIPercent(double amt, int64_t floor = 0);
-    void restoreKI(bool announce = true);
-    int64_t getCurST();
-    int64_t getMaxST();
-    int64_t getBaseST();
-    int64_t getEffBaseST();
-    double getCurSTPercent();
-    int64_t getPercentOfCurST(double amt);
-    int64_t getPercentOfMaxST(double amt);
-    bool isFullST();
-    int64_t setCurST(int64_t amt);
-    int64_t setCurSTPercent(double amt);
-    int64_t incCurST(int64_t amt, bool limit_max = true);
-    int64_t decCurST(int64_t amt, int64_t floor = 0);
-    int64_t incCurSTPercent(double amt, bool limit_max = true);
-    int64_t decCurSTPercent(double amt, int64_t floor = 0);
-    void restoreST(bool announce = true);
-    int64_t getCurLF();
-    int64_t getMaxLF();
-    bool isFullLF();
-    int64_t incCurLF(int64_t amt, bool limit_max = true);
-    int64_t decCurLF(int64_t amt, int64_t floor = 0);
-    int64_t incCurLFPercent(double amt, bool limit_max = true);
-    int64_t decCurLFPercent(double amt, int64_t floor = 0);
-    void restoreLF(bool announce = true);
-    bool isFullVitals();
+    int64_t getPL(bool suppressed = true);
+    
     void restoreVitals(bool announce = true);
     void restoreStatus(bool announce = true);
     void restoreLimbs(bool announce = true);
@@ -1033,7 +984,6 @@ struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
     void setStatusKnockedOut();
 
     // stats refactor stuff
-    int64_t getMaxPL();
     void apply_kaioken(int times, bool announce);
     void remove_kaioken(int8_t announce);
     int getRPP();

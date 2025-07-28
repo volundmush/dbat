@@ -1096,9 +1096,9 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
     }
 
     mob->setBaseStat("last_played", time(nullptr));
-    bool autoset = mob->getBaseStat("powerlevel") <= 1;
+    bool autoset = mob->getBaseStat("health") <= 1;
     if(autoset) {
-        for(auto c : {"powerlevel", "ki", "stamina"}) {
+        for(auto c : {"health", "ki", "stamina"}) {
             vital_t base = GET_LEVEL(mob) * mult;
             if (GET_LEVEL(mob) > 140) {
                 base *= 8;
@@ -1114,7 +1114,7 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
     }
 
     if (GET_MOB_VNUM(mob) == 2245) {
-        for(auto c : {"powerlevel", "ki", "stamina"}) {
+        for(auto c : {"health", "ki", "stamina"}) {
             mob->setBaseStat(c, rand_number(1, 4));
         }
     }

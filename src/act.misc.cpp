@@ -194,11 +194,11 @@ ACMD(do_multiform) {
 
     cost *= (GET_SKILL(ch, SKILL_MULTIFORM) * 0.2);
 
-    if ((ch->getCurKI()) < cost) {
+    if ((ch->getCurVital(CharVital::ki)) < cost) {
         send_to_char(ch, "You do not have enough ki to split!\r\n");
         return;
     }
-    if ((ch->getCurST()) < cost) {
+    if ((ch->getCurVital(CharVital::stamina)) < cost) {
         send_to_char(ch, "You do not have enough stamina to split!\r\n");
         return;
     }
@@ -210,8 +210,8 @@ ACMD(do_multiform) {
             true, ch, nullptr, nullptr, TO_CHAR);
         act("@y$n@Y seems to concentrate really hard for a moment, before relaxing.@n", true, ch, nullptr, nullptr,
             TO_ROOM);
-        ch->decCurST(cost);
-        ch->decCurKI(cost);
+        ch->modCurVital(CharVital::stamina, -cost);
+        ch->modCurVital(CharVital::ki, -cost);
         return;
     }
     act("@YYou focus your ki into your body while concentrating on the image of your body splitting into two. Another you splits out of your body!@n",
@@ -365,8 +365,8 @@ static void resolve_song(struct char_data *ch) {
                                     act("@CYour skillfully playing of the Song of Safety has an effect on your own body@C.@n",
                                         true, ch, nullptr, vict, TO_CHAR);
                                 }
-                                vict->incCurHealth(restore);
-                                vict->incCurST(restore * .5);
+                                vict->modCurVital(CharVital::health, restore);
+                                vict->modCurVital(CharVital::stamina, restore * .5);
 
                                 if (GET_LIMBCOND(vict, 0) < 100) {
                                     GET_LIMBCOND(vict, 0) += 1 + (skill * 0.1);
@@ -402,12 +402,12 @@ static void resolve_song(struct char_data *ch) {
                                 }
                                 act("@c$n@C continues playing $s ocarina!@n", true, ch, nullptr, vict, TO_NOTVICT);
                                 improve_skill(ch, SKILL_MYSTICMUSIC, 2);
-                                ch->decCurKI((ch->getMaxKI() * .0003) + skill);
+                                ch->modCurVital(CharVital::ki, -((ch->getEffectiveStat("ki") * .0003) + skill));
                             }
                         }
                     }
                 }
-                if ((ch->getCurKI()) <= 0) {
+                if ((ch->getCurVital(CharVital::ki)) <= 0) {
                     send_to_char(ch, "You no longer have the ki necessary to play your song.\r\n");
                     act("@c$n@C stops playing $s song.@n", true, ch, nullptr, nullptr, TO_ROOM);
                     ch->setBaseStat<int>("mystic_melody", 0);
@@ -416,7 +416,7 @@ static void resolve_song(struct char_data *ch) {
                 break;
             case SONG_SHADOW_STITCH: {
                 auto applyShadow = [skill](struct char_data *user, struct char_data *target) {
-                    user->decCurKI(user->getPercentOfMaxKI(.001) + skill);
+                    user->modCurVital(CharVital::ki, -(user->getMaxVitalPercent(CharVital::ki, .001) + skill));
                     if (!IS_NPC(target)) {
                         WAIT_STATE(target, PULSE_2SEC);
                     } else {
@@ -456,7 +456,7 @@ static void resolve_song(struct char_data *ch) {
                         true, ch, nullptr, vict, TO_NOTVICT);
                     applyShadow(ch, vict);
                 }
-                if ((ch->getCurKI()) <= 0) {
+                if ((ch->getCurVital(CharVital::ki)) <= 0) {
                     send_to_char(ch, "You no longer have the ki necessary to play your song.\r\n");
                     act("@c$n@C stops playing $s song.@n", true, ch, nullptr, nullptr, TO_ROOM);
                     ch->setBaseStat<int>("mystic_melody", 0);
@@ -629,11 +629,11 @@ static void resolve_song(struct char_data *ch) {
                                 vict->setBaseStat<int64_t>("barrier", GET_MAX_MANA(vict) * 0.75);
                             }
                             vict->affect_flags.set(AFF_SANCTUARY, true);
-                            ch->incCurKI(ch->getPercentOfMaxKI(.02) + skill);
+                            ch->modCurVital(CharVital::ki, ch->getMaxVitalPercent(CharVital::ki, .02) + skill);
                         }
                     }
                 }
-                if ((ch->getCurKI()) <= 0) {
+                if ((ch->getCurVital(CharVital::ki)) <= 0) {
                     send_to_char(ch, "You no longer have the ki necessary to play your song.\r\n");
                     act("@c$n@C stops playing $s song.@n", true, ch, nullptr, nullptr, TO_ROOM);
                     ch->setBaseStat<int>("mystic_melody", 0);
@@ -771,7 +771,7 @@ ACMD(do_song) {
         return;
     }
     
-    if (modifier == 3 && (ch->getCurKI()) < cost) {
+    if (modifier == 3 && (ch->getCurVital(CharVital::ki)) < cost) {
         send_to_char(ch, "@wYou do not have enough ki to power the instrument for that song!@n\r\n");
         return;
     }
@@ -782,10 +782,10 @@ ACMD(do_song) {
         act("@c$n@C begins to play a song on $s ocarina. The music seems to be some sort of lullaby.@n", true,
             ch, nullptr, nullptr, TO_ROOM);
         ch->setBaseStat<int>("mystic_melody", SONG_SAFETY);
-        ch->decCurKI(cost);
+        ch->modCurVital(CharVital::ki, -cost);
         return;
     }
-    if (modifier == 8 && (ch->getCurKI()) < cost) {
+    if (modifier == 8 && (ch->getCurVital(CharVital::ki)) < cost) {
         send_to_char(ch, "@wYou do not have enough ki to power the instrument for that song!@n\r\n");
         return;
     }
@@ -800,11 +800,11 @@ ACMD(do_song) {
         act("@c$n@C begins to play a song on $s ocarina. Depressing low toned music issues forth from the ocarina.@n",
             true, ch, nullptr, nullptr, TO_ROOM);
         ch->setBaseStat<int>("mystic_melody", SONG_SHADOW_STITCH);
-        ch->decCurKI(cost);
+        ch->modCurVital(CharVital::ki, -cost);
         return;
     }
     
-    if (modifier == 50 && (ch->getCurKI()) < cost) {
+    if (modifier == 50 && (ch->getCurVital(CharVital::ki)) < cost) {
         send_to_char(ch, "@wYou do not have enough ki to power the instrument for that song!@n\r\n");
         return;
     }
@@ -850,10 +850,10 @@ ACMD(do_song) {
             true, ch, nullptr, nullptr, TO_CHAR);
         act("@c$n@C begins to play a song on $s ocarina. A light hearted melody can be heard sounding from the ocarina as it is played.@n",
             true, ch, nullptr, nullptr, TO_ROOM);
-        ch->decCurKI(cost);
+        ch->modCurVital(CharVital::ki, -cost);
         return;
     }
-    if (modifier == 20 && (ch->getCurKI()) < cost) {
+    if (modifier == 20 && (ch->getCurVital(CharVital::ki)) < cost) {
         send_to_char(ch, "@wYou do not have enough ki to power the instrument for that song!@n\r\n");
         return;
     }
@@ -867,7 +867,7 @@ ACMD(do_song) {
         act("@c$n@C begins to play a song on $s ocarina. A triumphant song full of soaring sounds from the ocarina as it is played.@n",
             true, ch, nullptr, nullptr, TO_ROOM);
         ch->setBaseStat<int>("mystic_melody", SONG_SHIELDING);
-        ch->decCurKI(cost);
+        ch->modCurVital(CharVital::ki, -cost);
         return;
     }
 }
@@ -936,14 +936,14 @@ ACMD(do_moondust) {
         return;
     }
 
-    cost += (ch->getMaxLF()) * 0.02;
+    cost += (ch->getEffectiveStat("lifeforce")) * 0.02;
     heal = cost * 3;
 
-    if (GET_HIT(ch) >= (ch->getMaxPL()) * 0.8) {
+    if (GET_HIT(ch) >= (ch->getEffectiveStat("health")) * 0.8) {
         cost = cost * 0.5;
     }
 
-    if ((ch->getCurST()) < cost) {
+    if ((ch->getCurVital(CharVital::stamina)) < cost) {
         send_to_char(ch, "You do not have enough stamina to perform this technique.\r\n");
         return;
     }
@@ -955,12 +955,12 @@ ACMD(do_moondust) {
             true, ch, nullptr, nullptr, TO_CHAR);
         act("@g$n@G spreads $s wings and seems to concentrate for a moment. Suddenly $s wings begin to glow a soft sea green color. This soft glow grows brighter for a second before fading completely.@n",
             true, ch, nullptr, nullptr, TO_ROOM);
-        ch->decCurST(cost);
+        ch->modCurVital(CharVital::stamina, -cost);
         WAIT_STATE(ch, PULSE_1SEC);
         return;
     }
-    ch->incCurHealth(heal);
-    ch->decCurST(cost);
+    ch->modCurVital(CharVital::health, heal);
+    ch->modCurVital(CharVital::stamina, -cost);
     WAIT_STATE(ch, PULSE_1SEC);
 
     act("@GYou spread your wings and begin to concentrate. Your wings begin to glow a soft sea green color. As your wings grow brighter you focus your charged bio energy in a shockwave the unleashes a cloud of glowing green dust. You breath in the dust and feel it rejuvinate your body's cells!@n",
@@ -978,7 +978,7 @@ ACMD(do_moondust) {
         }
         if (AFF_FLAGGED(vict, AFF_GROUP)) {
             if (ch->master == vict->master || vict->master == ch || ch->master == vict) {
-                vict->incCurHealth(heal);
+                vict->modCurVital(CharVital::health, heal);
                 act("@CYou breathe in the dust and are healed by it somewhat!@n", true, vict, nullptr, nullptr,
                     TO_CHAR);
                 act("@c$n@C breathes in the dust and is healed somewhat!@n", true, vict, nullptr, nullptr, TO_ROOM);
@@ -1008,7 +1008,7 @@ ACMD(do_shell) {
         return;
     }
 
-    if ((ch->getCurST()) < GET_MAX_MOVE(ch) * 0.2) {
+    if ((ch->getCurVital(CharVital::stamina)) < GET_MAX_MOVE(ch) * 0.2) {
         send_to_char(ch, "You do not have enough stamina to grow your armored carapace.@n\r\n");
         return;
     }
@@ -1024,7 +1024,7 @@ ACMD(do_shell) {
         true, ch, nullptr, nullptr, TO_CHAR);
     act("@M$n@m crouches down and after a few moments of straining $s body's carapace armor starts to grow thicker and extends to cover all parts of $s body!@n",
         true, ch, nullptr, nullptr, TO_ROOM);
-    ch->decCurSTPercent(.2);
+    ch->modCurVitalDam(CharVital::stamina, .2);
     ch->affect_flags.set(AFF_SHELL, true);
 }
 
@@ -1059,7 +1059,7 @@ ACMD(do_liquefy) {
         return;
     }
 
-    if ((ch->getCurKI()) < (GET_MAX_MANA(ch) * 0.002) + 150) {
+    if ((ch->getCurVital(CharVital::ki)) < (GET_MAX_MANA(ch) * 0.002) + 150) {
         send_to_char(ch, "You do not have enough ki to manage this level of body control!\r\n");
         return;
     }
@@ -1082,7 +1082,7 @@ ACMD(do_liquefy) {
                 true, ch, nullptr, nullptr, TO_CHAR);
             act("@m$n@M's body starts to become loose and sag, but $e seems to return normal a moment later.@n", true,
                 ch, nullptr, nullptr, TO_ROOM);
-            ch->decCurKI((GET_MAX_MANA(ch) * .002) + 150);
+            ch->modCurVital(CharVital::ki, -((GET_MAX_MANA(ch) * .002) + 150));
 
             return;
         }
@@ -1090,7 +1090,7 @@ ACMD(do_liquefy) {
             true, ch, nullptr, nullptr, TO_CHAR);
         act("@m$n@M's body starts to become loose and sag. Much of $s body begins to pour down and scatter around as pools of goo.@n",
             true, ch, nullptr, nullptr, TO_ROOM);
-        ch->decCurKI((GET_MAX_MANA(ch) * .002) + 150);
+        ch->modCurVital(CharVital::ki, -((GET_MAX_MANA(ch) * .002) + 150));
         ch->affect_flags.set(AFF_LIQUEFIED, true);
         ch->affect_flags.set(AFF_HIDE, true);
         return;
@@ -1111,7 +1111,7 @@ ACMD(do_liquefy) {
         if (!*arg2) {
             send_to_char(ch, "Syntax: liquefy hide\nSyntax: liquefy explode (target)\r\n");
             return;
-        } else if ((ch->getCurKI()) < (GET_MAX_MANA(ch) * 0.10) + 150) {
+        } else if ((ch->getCurVital(CharVital::ki)) < (GET_MAX_MANA(ch) * 0.10) + 150) {
             send_to_char(ch, "You do not have enough ki for that action!@n\r\n");
             return;
         } else if (!(vict = get_char_vis(ch, arg2, nullptr, FIND_CHAR_ROOM))) {
@@ -1125,7 +1125,7 @@ ACMD(do_liquefy) {
                 true, ch, nullptr, nullptr, TO_CHAR);
             act("@m$n@M's body starts to become loose and sag, but $e seems to return normal a moment later.@n", true,
                 ch, nullptr, nullptr, TO_ROOM);
-            ch->decCurKI((GET_MAX_MANA(ch) * .002) + 150);
+            ch->modCurVital(CharVital::ki, -((GET_MAX_MANA(ch) * .002) + 150));
             WAIT_STATE(ch, PULSE_3SEC);
             return;
         } else if (GET_SPEEDI(ch) < GET_SPEEDI(vict)) {
@@ -1135,7 +1135,7 @@ ACMD(do_liquefy) {
                 true, ch, nullptr, vict, TO_VICT);
             act("@m$n@M's body rapidly turns into liquid and flies for @R$N's@M open mouth! However $E easily dodges and avoids @m$n's@M attempt!@n",
                 true, ch, nullptr, vict, TO_NOTVICT);
-            ch->decCurKI((GET_MAX_MANA(ch) * .002) + 150);
+            ch->modCurVital(CharVital::ki, -((GET_MAX_MANA(ch) * .002) + 150));
             if (!FIGHTING(ch)) {
                 set_fighting(ch, vict);
             }
@@ -1152,7 +1152,7 @@ ACMD(do_liquefy) {
                 true, ch, nullptr, vict, TO_VICT);
             act("@m$n@M's body rapidly turns into liquid and flies for @R$N's@M open mouth! However as $e forces $mself in through @R$N's@M mouth $E manages to resist and force @m$n@M back out!@n",
                 true, ch, nullptr, vict, TO_NOTVICT);
-            ch->decCurKI((GET_MAX_MANA(ch) * .002) + 150);
+            ch->modCurVital(CharVital::ki, -((GET_MAX_MANA(ch) * .002) + 150));
             int64_t dmg = GET_MAX_HIT(ch) * 0.08;
             hurt(0, 0, ch, vict, nullptr, dmg, 0);
             WAIT_STATE(ch, PULSE_3SEC);
@@ -1164,7 +1164,7 @@ ACMD(do_liquefy) {
                 true, ch, nullptr, vict, TO_VICT);
             act("@m$n@M's body rapidly turns into liquid and flies for @R$N's@M open mouth! As $e forces $mself in through @R$N's@M mouth $S body begins to expand until it can't take the strain any longer and explodes!@n",
                 true, ch, nullptr, vict, TO_NOTVICT);
-            ch->decCurKI((GET_MAX_MANA(ch) * .002) + 150);
+            ch->modCurVital(CharVital::ki, -((GET_MAX_MANA(ch) * .002) + 150));
             if (AFF_FLAGGED(ch, AFF_GROUP)) {
                 group_gain(ch, vict);
             } else {
@@ -1753,11 +1753,11 @@ ACMD(do_extract) {
 
             cost += extra;
 
-            if ((ch->getCurKI()) < cost) {
+            if ((ch->getCurVital(CharVital::ki)) < cost) {
                 send_to_char(ch, "You do not have enough ki! @D[@rNeeded@D: @R%s@D]@n\r\n", add_commas(cost).c_str());
                 return;
             } else if (skill < chance) {
-                ch->decCurKI(cost);
+                ch->modCurVital(CharVital::ki, -cost);
                 act("@WWith your ki flowing carefully into your hands you take a hold of the @G$p@W and begin to strip it of its leaves. Once it has been stripped you go to squeeze the ink carefully from the leaves into the bottle, but unfortunately the ink explodes into a mess instead!@n",
                     true, ch, obj, nullptr, TO_CHAR);
                 act("@C$n@W takes a hold of the @G$p@W and begins to strip it of its leaves. Once it has been stripped $e bundles up the leaves in $s hands and begins to squeeze. A nasty explosion of a mess is all that follows!@n",
@@ -1767,7 +1767,7 @@ ACMD(do_extract) {
                 WAIT_STATE(ch, PULSE_3SEC);
                 return;
             } else {
-                ch->decCurKI(cost);
+                ch->modCurVital(CharVital::ki, -cost);
                 act("@WWith your ki flowing carefully into your hands you take a hold of the @G$p@W and begin to strip it of its leaves. Once it has been stripped you go to squeeze the ink carefully from the leaves into the bottle, and manage to get every last drop of ink into it.@n",
                     true, ch, obj, nullptr, TO_CHAR);
                 act("@C$n@W takes a hold of the @G$p@W and begins to strip it of its leaves. Once it has been stripped $e bundles up the leaves in $s hands and begins to squeeze ink carefully from the leaves into a bottle.@n",
@@ -1779,7 +1779,6 @@ ACMD(do_extract) {
                     extract_obj(bottle);
                     SET_OBJ_VAL(filled, VAL_OTHER_SERAF, 24);
                     obj_to_char(filled, ch);
-                    ch->decCurKI(0);
                     act("@GAs the last of the ink fills the bottle you infuse a final burst of ki into the bottle.@n",
                         true, ch, filled, nullptr, TO_CHAR);
                     act("@GAs the last of the ink fills the bottle @g$n@G infuses a final burst of ki into the bottle.@n ",
@@ -1853,7 +1852,7 @@ ACMD(do_runic) {
     if (!(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM))) {
         send_to_char(ch, "You can't seem to find that person.\r\n");
         return;
-    } else if ((ch->getCurKI()) < cost) {
+    } else if ((ch->getCurVital(CharVital::ki)) < cost) {
         send_to_char(ch, "You do not have enough ki to write runes.\r\n");
         return;
     } else if (skill + bonus < axion_dice(0) && rand_number(1, 5) == 5) {
@@ -1863,11 +1862,11 @@ ACMD(do_runic) {
             true, ch, nullptr, nullptr, TO_ROOM);
         extract_obj(bottle);
         improve_skill(ch, SKILL_RUNIC, 1);
-        ch->decCurKI(cost);
+        ch->modCurVital(CharVital::ki, -cost);
         WAIT_STATE(ch, PULSE_3SEC);
         return;
     } else if (skill + bonus < axion_dice(0)) {
-        ch->decCurKI(cost);
+        ch->modCurVital(CharVital::ki, -cost);
         act("@BYou dip your brush into the ink, but as you infuse your ki you balance the flow wrong and end up evaporating some ink!@n",
             true, ch, nullptr, nullptr, TO_CHAR);
         act("@b$n@B dips $s runic brush into a bottle filled with shimmering ink. @b$n@B appears to concentrate for a moment before some ink evaporates. Strange...@n",
@@ -1880,7 +1879,7 @@ ACMD(do_runic) {
     } else if (!strcasecmp(arg2, "kenaz") || !strcasecmp(arg2, "Kenaz")) {
         inkcost += 1;
         if (vict == ch) {
-            ch->decCurKI(cost);
+            ch->modCurVital(CharVital::ki, -cost);
             act("@BYou dip your brush into the ink and infuse your ki skillfully into it. You pull the brush out and paint the @D'@CKenaz@D'@B rune on your skin!@n",
                 true, ch, nullptr, nullptr, TO_CHAR);
             act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@CKenaz@D'@B rune on $s skin.@n",
@@ -1897,7 +1896,7 @@ ACMD(do_runic) {
                 obj_to_char(empty, ch);
             }
         } else {
-            ch->decCurKI(cost);
+            ch->modCurVital(CharVital::ki, -cost);
             act("@BYou dip your brush into the ink and infuse your ki skillfully into it. You pull the brush out and paint the @D'@CKenaz@D'@B rune on @b$N's@B skin!@n",
                 true, ch, nullptr, vict, TO_CHAR);
             act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@CKenaz@D'@B rune on @RYOUR@B skin.@n",
@@ -1925,7 +1924,7 @@ ACMD(do_runic) {
             send_to_char(ch, "You do not have a bottle with enough ink. @D[@bInkcost@D: @R%d@D]@n\r\n", inkcost);
             return;
         } else if (vict == ch) {
-            ch->decCurKI(cost);
+            ch->modCurVital(CharVital::ki, -cost);
             act("@BYou dip your brush into the ink and infuse your ki skillfully into it. You pull the brush out and paint the @D'@CAlgiz@D'@B rune on your skin!@n",
                 true, ch, nullptr, nullptr, TO_CHAR);
             act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@CAlgiz@D'@B rune on $s skin.@n",
@@ -1942,7 +1941,7 @@ ACMD(do_runic) {
                 obj_to_char(empty, ch);
             }
         } else {
-            ch->decCurKI(cost);
+            ch->modCurVital(CharVital::ki, -cost);
             act("@BYou dip your brush into the ink and infuse your ki skillfully into it. You pull the brush out and paint the @D'@CAlgiz@D'@B rune on @b$N's@B skin!@n",
                 true, ch, nullptr, vict, TO_CHAR);
             act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@CAlgiz@D'@B rune on @RYOUR@B skin.@n",
@@ -1970,7 +1969,7 @@ ACMD(do_runic) {
             send_to_char(ch, "You do not have a bottle with enough ink. @D[@bInkcost@D: @R%d@D]@n\r\n", inkcost);
             return;
         } else if (vict == ch) {
-            ch->decCurKI(cost);
+            ch->modCurVital(CharVital::ki, -cost);
             act("@BYou dip your brush into the ink and infuse your ki skillfully into it. You pull the brush out and paint the @D'@COagaz@D'@B rune on your skin!@n",
                 true, ch, nullptr, nullptr, TO_CHAR);
             act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@COagaz@D'@B rune on $s skin.@n",
@@ -1993,7 +1992,7 @@ ACMD(do_runic) {
             send_to_char(ch, "You do not have a bottle with enough ink. @D[@bInkcost@D: @R%d@D]@n\r\n", inkcost);
             return;
         } else if (vict == ch) {
-            ch->decCurKI(cost);
+            ch->modCurVital(CharVital::ki, -cost);
             act("@BYou dip your brush into the ink and infuse your ki skillfully into it. You pull the brush out and paint the @D'@CLaguz@D'@B rune on your skin!@n",
                 true, ch, nullptr, nullptr, TO_CHAR);
             act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@CLaguz@D'@B rune on $s skin.@n",
@@ -2010,7 +2009,7 @@ ACMD(do_runic) {
                 obj_to_char(empty, ch);
             }
         } else {
-            ch->decCurKI(cost);
+            ch->modCurVital(CharVital::ki, -cost);
             act("@BYou dip your brush into the ink and infuse your ki skillfully into it. You pull the brush out and paint the @D'@COagaz@D'@B rune on @b$N's@B skin!@n",
                 true, ch, nullptr, vict, TO_CHAR);
             act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@COagaz@D'@B rune on @RYOUR@B skin.@n",
@@ -2038,7 +2037,7 @@ ACMD(do_runic) {
             send_to_char(ch, "You do not have a bottle with enough ink. @D[@bInkcost@D: @R%d@D]@n\r\n", inkcost);
             return;
         } else if (vict == ch) {
-            ch->decCurKI(cost);
+            ch->modCurVital(CharVital::ki, -cost);
             act("@BYou dip your brush into the ink and infuse your ki skillfully into it. You pull the brush out and paint the @D'@CWunjo@D'@B rune on your skin!@n",
                 true, ch, nullptr, nullptr, TO_CHAR);
             act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@CWunjo@D'@B rune on $s skin.@n",
@@ -2057,7 +2056,7 @@ ACMD(do_runic) {
                 obj_to_char(empty, ch);
             }
         } else {
-            ch->decCurKI(cost);
+            ch->modCurVital(CharVital::ki, -cost);
             act("@BYou dip your brush into the ink and infuse your ki skillfully into it. You pull the brush out and paint the @D'@CWunjo@D'@B rune on @b$N's@B skin!@n",
                 true, ch, nullptr, vict, TO_CHAR);
             act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@CWunjo@D'@B rune on @RYOUR@B skin.@n",
@@ -2087,7 +2086,7 @@ ACMD(do_runic) {
             send_to_char(ch, "You do not have a bottle with enough ink. @D[@bInkcost@D: @R%d@D]@n\r\n", inkcost);
             return;
         } else if (vict == ch) {
-            ch->decCurKI(cost);
+            ch->modCurVital(CharVital::ki, -cost);
             act("@BYou dip your brush into the ink and infuse your ki skillfully into it. You pull the brush out and paint the @D'@CPurisaz@D'@B rune on your skin!@n",
                 true, ch, nullptr, nullptr, TO_CHAR);
             act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@CPurisaz@D'@B rune on $s skin.@n",
@@ -2105,7 +2104,7 @@ ACMD(do_runic) {
                 obj_to_char(empty, ch);
             }
         } else {
-            ch->decCurKI(cost);
+            ch->modCurVital(CharVital::ki, -cost);
             act("@BYou dip your brush into the ink and infuse your ki skillfully into it. You pull the brush out and paint the @D'@CPurisaz@D'@B rune on @b$N's@B skin!@n",
                 true, ch, nullptr, vict, TO_CHAR);
             act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@CPurisaz@D'@B rune on @RYOUR@B skin.@n",
@@ -2134,7 +2133,7 @@ ACMD(do_runic) {
             send_to_char(ch, "You do not have a bottle with enough ink. @D[@bInkcost@D: @R%d@D]@n\r\n", inkcost);
             return;
         } else if (vict == ch) {
-            ch->decCurKI(cost);
+            ch->modCurVital(CharVital::ki, -cost);
             act("@BYou dip your brush into the ink and infuse your ki skillfully into it. You pull the brush out and paint the @D'@CGebo@D'@B rune on your skin! The rune flashes out of existence immediately!@n",
                 true, ch, nullptr, nullptr, TO_CHAR);
             act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@CGebo@D'@B rune on $s skin. The rune flashes out of existence immediately!@n",
@@ -2149,7 +2148,7 @@ ACMD(do_runic) {
                 obj_to_char(empty, ch);
             }
         } else {
-            ch->decCurKI(cost);
+            ch->modCurVital(CharVital::ki, -cost);
             act("@BYou dip your brush into the ink and infuse your ki skillfully into it. You pull the brush out and paint the @D'@CGebo@D'@B rune on @b$N's@B skin! The rune flashes out of existence immediately!@n",
                 true, ch, nullptr, vict, TO_CHAR);
             act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@CGebo@D'@B rune on @RYOUR@B skin. The rune flashes out of existence immediately!@n",
@@ -2227,7 +2226,7 @@ ACMD(do_scry) {
             TO_NOTVICT);
         int64_t boost = GET_INT(ch) * 0.5;
 
-        vict->gainBaseStat("powerlevel", (vict->getBaseStat("powerlevel") * .01) * boost);
+        vict->gainBaseStat("health", (vict->getBaseStat("health") * .01) * boost);
         vict->gainBaseStat("ki", (vict->getBaseStat("ki") * .01) * boost);
         vict->gainBaseStat("stamina", (vict->getBaseStat("stamina") * .01) * boost);
 
@@ -2236,7 +2235,7 @@ ACMD(do_scry) {
         vict->modBaseStat("intelligence", 2);
         vict->modBaseStat("wisdom", 2);
         ch->modPractices(-2000);
-        for(const auto& s : { "powerlevel", "ki", "stamina" }) {
+        for(const auto& s : { "health", "ki", "stamina" }) {
             vict->gainBaseStatPercent(s, .025);
         }
         send_to_char(ch, "Your Powerlevel, Ki, and Stamina have improved!\r\n");
@@ -2258,7 +2257,7 @@ void ash_burn(struct char_data *ch) {
 
     if(!IS_ICER(ch)) {
         reveal_hiding(ch, 0);
-        ch->decCurST(((GET_MAX_MOVE(ch) * 0.005) + 20) * GET_OBJ_COST(ash));
+        ch->modCurVital(CharVital::stamina, -(((GET_MAX_MOVE(ch) * 0.005) + 20) * GET_OBJ_COST(ash)));
         act("@RYou choke on the the burning hot @Da@Ws@wh@Dc@Wl@wo@Du@Wd@R!@n", true, ch, nullptr,
             nullptr, TO_CHAR);
         act("@r$n@R chokes on the burning hot @Da@Ws@wh@Dc@Wl@wo@Du@Wd@R!@n", true, ch, nullptr,
@@ -2344,7 +2343,7 @@ ACMD(do_ashcloud) {
 
     int64_t cost = (GET_MAX_MANA(ch) * initial) + (GET_INT(ch) * mult);
 
-    if ((ch->getCurKI()) < cost) {
+    if ((ch->getCurVital(CharVital::ki)) < cost) {
         send_to_char(ch, "You do not have enough ki!\r\n");
         return;
     }
@@ -2366,14 +2365,14 @@ ACMD(do_ashcloud) {
         act("@r$n@R takes a handful of ashes from $s belongings and blows it out of $s hands with a strong gust of air. @YStrange.@n",
             true, ch, nullptr, nullptr, TO_ROOM);
         extract_obj(ash);
-        ch->decCurKI(cost);
+        ch->modCurVital(CharVital::ki, -cost);
         return;
     }
 
     struct obj_data *ashcloud;
     reveal_hiding(ch, 0);
 
-    ch->decCurKI(cost);
+    ch->modCurVital(CharVital::ki, -cost);
     act("@RYou take a handful of ashes and you create a fierce heat within your lungs. With the heat ready you breathe ki infused flames at the pile of ashes! The flames and ashes mix and fill the surrounding area with a hot burning ash!@n",
         true, ch, nullptr, nullptr, TO_CHAR);
     act("@r$n@R takes a handful of ashes and $e breathes ki infused flames at the pile of ashes! The flames and ashes mix and fill the surrounding area with a hot burning ash!@n",
@@ -2424,7 +2423,7 @@ ACMD(do_resize) {
                 send_to_char(ch, "That is not equipment! You can only resize equipment.\r\n");
                 return;
             } else {
-                if ((ch->getCurST()) < GET_OBJ_WEIGHT(obj) + (GET_MAX_MOVE(ch) / 40)) {
+                if ((ch->getCurVital(CharVital::stamina)) < GET_OBJ_WEIGHT(obj) + (GET_MAX_MOVE(ch) / 40)) {
                     send_to_char(ch, "You do not have enough stamina to resize this object at this time.\r\n");
                     return;
                 } else if (!strcasecmp(arg2, "small")) {
@@ -2435,7 +2434,7 @@ ACMD(do_resize) {
                         act("@WYou carefully adjust the size of @c$p@W.@n", true, ch, obj, nullptr, TO_CHAR);
                         act("@C$n@W carefully adjusts the size of @c$p@W.@n", true, ch, obj, nullptr, TO_ROOM);
                         obj->size = Size::small;
-                        ch->decCurST(GET_OBJ_WEIGHT(obj) + (GET_MAX_MOVE(ch) / 40));
+                        ch->modCurVital(CharVital::stamina, -(GET_OBJ_WEIGHT(obj) + (GET_MAX_MOVE(ch) / 40)));
                     }
                 } else if (!strcasecmp(arg2, "medium")) {
                     if (GET_OBJ_SIZE(obj) == SIZE_MEDIUM) {
@@ -2445,7 +2444,7 @@ ACMD(do_resize) {
                         act("@WYou carefully adjust the size of @c$p@W.@n", true, ch, obj, nullptr, TO_CHAR);
                         act("@C$n@W carefully adjusts the size of @c$p@W.@n", true, ch, obj, nullptr, TO_ROOM);
                         obj->size = Size::medium;
-                        ch->decCurST(GET_OBJ_WEIGHT(obj) + (GET_MAX_MOVE(ch) / 40));
+                        ch->modCurVital(CharVital::stamina, -(GET_OBJ_WEIGHT(obj) + (GET_MAX_MOVE(ch) / 40)));
                     }
                 } else {
                     send_to_char(ch, "Syntax: resize (obj) (small | medium)\r\n");
@@ -2495,7 +2494,7 @@ ACMD(do_healglow) {
 
     int64_t cost = GET_MAX_MANA(ch) * 0.5;
 
-    if ((ch->getCurKI()) < cost) {
+    if ((ch->getCurVital(CharVital::ki)) < cost) {
         send_to_char(ch, "You do not have enough ki. It requires at least 50%s of your ki in cost.\r\n", "%");
         return;
     } else {
@@ -2509,7 +2508,7 @@ ACMD(do_healglow) {
             if (duration <= 0)
                 duration = 1;
             assign_affect(ch, AFF_HEALGLOW, SKILL_HEALGLOW, duration, 0, 0, 0, 0, 0, 0);
-            ch->decCurKI(cost);
+            ch->modCurVital(CharVital::ki, -cost);
         } else {
             act("@CPlacing your hands on @c$N's@C body you begin to focus your energies. Slowly a strong blue glow glistens and shines across $S skin!@n",
                 true, ch, nullptr, vict, TO_CHAR);
@@ -2522,7 +2521,7 @@ ACMD(do_healglow) {
             if (duration <= 0)
                 duration = 1;
             assign_affect(ch, AFF_HEALGLOW, SKILL_HEALGLOW, duration, 0, 0, 0, 0, 0, 0);
-            ch->decCurKI(cost);
+            ch->modCurVital(CharVital::ki, -cost);
         }
     }
 }
@@ -2560,7 +2559,7 @@ ACMD(do_amnisiac) {
 
     int chance = axion_dice(0), perc = 10 + GET_INT(ch), cost = GET_MAX_MANA(ch) * 0.18;
 
-    if (cost > (ch->getCurKI())) {
+    if (cost > (ch->getCurVital(CharVital::ki))) {
         send_to_char(ch, "You do not have enough ki!\r\n");
         return;
     } else if (perc < chance) {
@@ -2569,7 +2568,7 @@ ACMD(do_amnisiac) {
             nullptr, vict, TO_VICT);
         act("@M$n@W attempts to grab @C$N@W and leans in with puckered lips, but $E manages to evade!@n", true, ch,
             nullptr, vict, TO_NOTVICT);
-        ch->decCurKI(cost);
+        ch->modCurVital(CharVital::ki, -cost);
         return;
     } else {
         act("@WYou reach out quickly, grabbing @C$N@W and pulling them in close to you. Just as quick, you pull their head forcefully towards yours, planting a deep and heavy kiss. The fool wobbles a bit, shocked.  It is unlikely that @c$E@W will be able to focus very well on that skill, not with the thought of your lips on their mind.",
@@ -2578,7 +2577,7 @@ ACMD(do_amnisiac) {
             true, ch, nullptr, vict, TO_VICT);
         act("@WYou see @C$n@W quickly grab @C$N@W, pulling them into a deep, almost passionate kiss. @C$N@W seems shocked, and wobbles a bit, grabbing at @c$s@W head once @C$n@W lets go.",
             true, ch, nullptr, vict, TO_NOTVICT);
-        ch->decCurKI(cost);
+        ch->modCurVital(CharVital::ki, -cost);
         vict->setBaseStat("stupidkiss", skill);
         return;
     }
@@ -2622,7 +2621,7 @@ ACMD(do_shimmer) {
 
     cost = GET_MAX_MANA(ch) / 40;
 
-    if ((ch->getCurKI()) - cost < 0) {
+    if ((ch->getCurVital(CharVital::ki)) - cost < 0) {
         send_to_char(ch, "You do not have enough ki to instantaneously move.\r\n");
         return;
     }
@@ -2656,7 +2655,7 @@ ACMD(do_shimmer) {
             if (tar != ch) {
                 send_to_char(ch,
                              "You prepare to move instantly but mess up the process and waste some of your ki!\r\n");
-                ch->decCurKI(cost);
+                ch->modCurVital(CharVital::ki, -cost);
                 WAIT_STATE(ch, PULSE_2SEC);
                 return;
             } else {
@@ -2666,7 +2665,7 @@ ACMD(do_shimmer) {
             }
         } else {
             send_to_char(ch, "You prepare to move instantly but mess up the process and waste some of your ki!\r\n");
-            ch->decCurKI(cost);
+            ch->modCurVital(CharVital::ki, -cost);
             WAIT_STATE(ch, PULSE_2SEC);
             return;
         }
@@ -2699,7 +2698,7 @@ ACMD(do_shimmer) {
             return;
         }
 
-        ch->decCurKI(cost);
+        ch->modCurVital(CharVital::ki, -cost);
         act("@wYour body begins to fade away almost appearing ghost like, before a ripple passes through your image and your are gone in an instant!@n",
             true, ch, nullptr, tar, TO_CHAR);
         act("@w$n@w appears in an instant out of nowhere right next to you!@n", true, ch, nullptr, tar, TO_VICT);
@@ -2708,7 +2707,7 @@ ACMD(do_shimmer) {
         ch->player_flags.set(PLR_TRANSMISSION, true);
         handle_teleport(ch, tar, 0);
     } else {
-        ch->decCurKI(cost);
+        ch->modCurVital(CharVital::ki, -cost);
         act("@wYour body begins to fade away almost appearing ghost like, before a ripple passes through your image and your are gone in an instant!@n",
             true, ch, nullptr, tar, TO_CHAR);
         act("@w$n@w body begins to fade away almost appearing ghost like, before a ripple passes through $s image and $e is gone in an instant!@n",
@@ -2734,7 +2733,7 @@ ACMD(do_channel) {
 
     int chance = axion_dice(0), skill = GET_SKILL(ch, SKILL_STYLE);
 
-    if (cost > (ch->getCurKI())) {
+    if (cost > (ch->getCurVital(CharVital::ki))) {
         send_to_char(ch, "You do not have enough ki to channel with!\r\n");
         return;
     }
@@ -2771,7 +2770,7 @@ ACMD(do_channel) {
             ch->setLocationGroundEffect(0);
             ruby->item_flags.set(ITEM_HOT, true);
         }
-        ch->decCurKI(cost);
+        ch->modCurVital(CharVital::ki, -cost);
         WAIT_STATE(ch, PULSE_1SEC);
     }
 
@@ -2800,7 +2799,7 @@ ACMD(do_hydromancy) {
     if (cost <= 0)
         cost = 100;
 
-    if ((ch->getCurKI()) < cost) {
+    if ((ch->getCurVital(CharVital::ki)) < cost) {
         send_to_char(ch, "You do not have enough ki to manipulate any water around you.\r\n");
         return;
     }
@@ -2829,13 +2828,13 @@ ACMD(do_hydromancy) {
 
         cost = 100 + (GET_SKILL(ch, SKILL_STYLE) / (1 + (GET_MAX_MANA(ch) * 0.5)));
 
-        if ((ch->getCurKI()) < cost) {
+        if ((ch->getCurVital(CharVital::ki)) < cost) {
             send_to_char(ch, "You do not have enough ki to form an ice spike.\r\n");
             return;
         }
 
         if (skill < chance) {
-            ch->decCurKI(cost);
+            ch->modCurVital(CharVital::ki, -cost);
             act("@CYou press your palms together in front of your body but you fail to produce the proper control to form the spike!@n",
                 true, ch, nullptr, nullptr, TO_CHAR);
             act("@c$n@C presses $s palms together and then slowly pulls them apart. Nothing important appears to have happened.",
@@ -2852,7 +2851,7 @@ ACMD(do_hydromancy) {
             obj = read_object(19056, VIRTUAL);
         }
 
-        ch->decCurKI(cost);
+        ch->modCurVital(CharVital::ki, -cost);
         act("@CYou press your palms together in front of your body and focusing ki you force water up along your body. That water pools between your palms and as pull your palms apart a @c$p@C forms!@n",
             true, ch, obj, nullptr, TO_CHAR);
         act("@c$n@C presses $s palms together in front of $s body and water begins to flow up $s body and pools between $s palms. Slowly pulling them apart reveals a @c$p@C as it forms between them!@n",
@@ -2901,10 +2900,10 @@ ACMD(do_hydromancy) {
                 TO_CHAR);
             act("@b$n@B seems to attempt to create water with $s ki! @RHowever, $e fails!@n", true, ch, nullptr,
                 nullptr, TO_ROOM);
-            ch->decCurKI(cost);
+            ch->modCurVital(CharVital::ki, -cost);
             WAIT_STATE(ch, PULSE_2SEC);
         } else {
-            ch->decCurKI(cost);
+            ch->modCurVital(CharVital::ki, -cost);
             sprintf(bun, "@BUsing your ki you create a rush of water flooding away toward the @C%s@B!@n",
                     dirs[attempt]);
             sprintf(bunn, "@B$n@B uses $s ki to create a rush of water flooding away toward the @C%s@B!@n",
@@ -2993,7 +2992,7 @@ ACMD(do_kanso) {
     if (GET_WIS(ch) > axion_dice(-5))
         dam += 1;
 
-    if ((ch->getCurKI()) < cost) { /* Not enough ki */
+    if ((ch->getCurVital(CharVital::ki)) < cost) { /* Not enough ki */
         send_to_char(ch, "You do not have enough ki.\r\n");
         return;
     }
@@ -3005,7 +3004,7 @@ ACMD(do_kanso) {
             true, ch, nullptr, vict, TO_VICT); /* Message Vict $N Sees */
         act("$n closes $s eyes and bounds toward $N. Smirking, $e puts $m hands on $N's chest but nothing seems to happen.\r\n",
             true, ch, nullptr, vict, TO_NOTVICT); /* Message everyone else sees */
-        ch->decCurKI(cost);
+        ch->modCurVital(CharVital::ki, -cost);
         WAIT_STATE(ch, PULSE_2SEC); /* 2 second lag for the technique */
         return;
     } else { /* Success! */
@@ -3018,7 +3017,7 @@ ACMD(do_kanso) {
             true, ch, nullptr, vict, TO_NOTVICT); /* Message everyone else sees */
         /* End Main Messages */
 
-        ch->decCurKI(cost);
+        ch->modCurVital(CharVital::ki, -cost);
 
         /* Handle the thirst aspect */
         if (GET_COND(vict, THIRST) - dam >= 0)
@@ -3031,7 +3030,7 @@ ACMD(do_kanso) {
             GET_COND(ch, THIRST) = 48;
 
         /* Heal the user */
-        ch->incCurHealth((ch->getMaxPL() * .01) * dam);
+        ch->modCurVital(CharVital::health, (ch->getEffectiveStat("health") * .01) * dam);
 
         WAIT_STATE(ch, PULSE_2SEC); /* 2 second lag for the technique */
 
@@ -3247,11 +3246,11 @@ ACMD(do_hayasa) {
         duration = 2;
     }
 
-    if ((ch->getCurKI()) < cost) {
+    if ((ch->getCurVital(CharVital::ki)) < cost) {
         send_to_char(ch, "You do not have enough ki.\r\n");
         return;
     } else if (skill < prob) {
-        ch->decCurKI(cost);
+        ch->modCurVital(CharVital::ki, -cost);
         act("@CYou close your eyes for a brief moment and focus your ki around your body as a soft blue glow. The glow disappears though as you fail to maintain the effect...@n",
             true, ch, nullptr, nullptr, TO_CHAR);
         act("@c$n@C closes $s eyes for a brief moment and a soft blue glow begins to form around $s body. The glow disappears a second later though and $e frowns.@n",
@@ -3261,7 +3260,7 @@ ACMD(do_hayasa) {
     } else {
         struct affected_type af;
 
-        ch->decCurKI(cost);
+        ch->modCurVital(CharVital::ki, -cost);
         af.type = SPELL_HAYASA;
         af.duration = duration;
         af.modifier = 0;
@@ -3833,7 +3832,7 @@ ACMD(do_silk) {
     } else if (!strcasecmp(arg, "bundle")) {
         int64_t cost = ((GET_MAX_MANA(ch) * 0.01) * (prob * 0.20)) + (GET_INT(ch) * GET_WIS(ch));
 
-        if ((ch->getCurKI()) < cost) {
+        if ((ch->getCurVital(CharVital::ki)) < cost) {
             send_to_char(ch, "You do not have enough ki to weave any bundles of silk.\r\n");
             return;
         } else {
@@ -3862,7 +3861,7 @@ ACMD(do_silk) {
                 send_to_char(ch, "@YIt's SUPER grand!@n\r\n");
                 act("@C$n@W seems to concentrate for a moment before spitting out a golden colored silk from $s mouth. Gently $e weaves the silk and in no time at all $e has a $p@W piled at $s feet!@n",
                     true, ch, obj, nullptr, TO_ROOM);
-                ch->decCurKI(cost);
+                ch->modCurVital(CharVital::ki, -cost);
             } else if (prob > perc && prob >= 100) { /* Second Best Quality */
                 obj = read_object(16700, VIRTUAL);
                 obj_to_room(obj, IN_ROOM(ch));
@@ -3870,7 +3869,7 @@ ACMD(do_silk) {
                     true, ch, obj, nullptr, TO_CHAR);
                 act("@C$n@W seems to concentrate for a moment before spitting out a golden colored silk from $s mouth. Gently $e weaves the silk and in no time at all $e has a $p@W piled at $s feet!@n",
                     true, ch, obj, nullptr, TO_ROOM);
-                ch->decCurKI(cost);
+                ch->modCurVital(CharVital::ki, -cost);
             } else if (prob > perc && prob >= 90) { /* Great Quality */
                 obj = read_object(16701, VIRTUAL);
                 obj_to_room(obj, IN_ROOM(ch));
@@ -3878,7 +3877,7 @@ ACMD(do_silk) {
                     true, ch, obj, nullptr, TO_CHAR);
                 act("@C$n@W seems to concentrate for a moment before spitting out a golden colored silk from $s mouth. Gently $e weaves the silk and in no time at all $e has a $p@W piled at $s feet!@n",
                     true, ch, obj, nullptr, TO_ROOM);
-                ch->decCurKI(cost);
+                ch->modCurVital(CharVital::ki, -cost);
             } else if (prob > perc && prob >= 80) { /* Good Quality */
                 obj = read_object(16702, VIRTUAL);
                 obj_to_room(obj, IN_ROOM(ch));
@@ -3886,7 +3885,7 @@ ACMD(do_silk) {
                     true, ch, obj, nullptr, TO_CHAR);
                 act("@C$n@W seems to concentrate for a moment before spitting out a golden colored silk from $s mouth. Gently $e weaves the silk and in no time at all $e has a $p@W piled at $s feet!@n",
                     true, ch, obj, nullptr, TO_ROOM);
-                ch->decCurKI(cost);
+                ch->modCurVital(CharVital::ki, -cost);
             } else if (prob > perc && prob >= 50) { /* Decent Quality */
                 obj = read_object(16703, VIRTUAL);
                 obj_to_room(obj, IN_ROOM(ch));
@@ -3894,7 +3893,7 @@ ACMD(do_silk) {
                     true, ch, obj, nullptr, TO_CHAR);
                 act("@C$n@W seems to concentrate for a moment before spitting out a golden colored silk from $s mouth. Gently $e weaves the silk and in no time at all $e has a $p@W piled at $s feet!@n",
                     true, ch, obj, nullptr, TO_ROOM);
-                ch->decCurKI(cost);
+                ch->modCurVital(CharVital::ki, -cost);
             } else if (prob > perc) { /* Bad Quality */
                 obj = read_object(16704, VIRTUAL);
                 obj_to_room(obj, IN_ROOM(ch));
@@ -3902,13 +3901,13 @@ ACMD(do_silk) {
                     true, ch, obj, nullptr, TO_CHAR);
                 act("@C$n@W seems to concentrate for a moment before spitting out a golden colored silk from $s mouth. Gently $e weaves the silk and in no time at all $e has a $p@W piled at $s feet!@n",
                     true, ch, obj, nullptr, TO_ROOM);
-                ch->decCurKI(cost);
+                ch->modCurVital(CharVital::ki, -cost);
             } else {
                 act("@WYou concentrate your ki into your silk sacs and begin to spit silk out of your mouth. You end up making a poorly formed puddle of goo...@n",
                     true, ch, obj, nullptr, TO_CHAR);
                 act("@C$n@W seems to concentrate for a moment before spitting out a poorly formed puddle of goo...@n",
                     true, ch, obj, nullptr, TO_ROOM);
-                ch->decCurKI(cost);
+                ch->modCurVital(CharVital::ki, -cost);
                 improve_skill(ch, SKILL_SILK, 1);
             }
         }
@@ -3940,32 +3939,32 @@ ACMD(do_adrenaline) {
 
             double percent = atoi(arg2) * 0.01;
 
-            if ((ch->getCurST() - (ch->getBasePL() * percent)) < 0) {
+            if ((ch->getCurVital(CharVital::stamina) - (ch->getBaseStat("health") * percent)) < 0) {
                 send_to_char(ch, "You do not have enough stamina to trade for adrenaline!\r\n");
                 return;
             }
 
-            int64_t trade = ch->getBaseST() * percent;
+            int64_t trade = ch->getBaseStat("stamina") * percent;
 
             if (!strcasecmp(arg, "pl")) {
                 act("@GYou focus your mind and begin to overwork your powerful adrenal glands and your wounds begin to heal!@n",
                     true, ch, nullptr, nullptr, TO_CHAR);
                 act("@g$n@G seems to concentrate and $s wounds begin to heal!@n", true, ch, nullptr, nullptr, TO_ROOM);
 
-                if (GET_HIT(ch) + trade > (ch->getMaxPL()))
+                if (GET_HIT(ch) + trade > (ch->getEffectiveStat("health")))
                     send_to_char(ch, "Some of your stamina was wasted because your powerlevel maxed out.\r\n");
-                ch->incCurHealth(trade);
-                ch->decCurST(trade);
+                ch->modCurVital(CharVital::health, trade);
+                ch->modCurVital(CharVital::stamina, -trade);
 
             } else if (!strcasecmp(arg, "ki")) {
                 act("@GYou focus your mind and begin to overwork your powerful adrenal glands and you feel your ki replenish!@n",
                     true, ch, nullptr, nullptr, TO_CHAR);
                 act("@g$n@G seems to concentrate and $e appears energized!@n", true, ch, nullptr, nullptr, TO_ROOM);
 
-                if ((ch->getCurKI()) + trade > GET_MAX_MANA(ch))
+                if ((ch->getCurVital(CharVital::ki)) + trade > GET_MAX_MANA(ch))
                     send_to_char(ch, "Some of your stamina was wasted because your ki maxed out.\r\n");
-                ch->incCurKI(trade);
-                ch->decCurST(trade);
+                ch->modCurVital(CharVital::ki, trade);
+                ch->modCurVital(CharVital::stamina, -trade);
             }
         } /* End inner else */
 
@@ -5026,7 +5025,7 @@ ACMD(do_fireshield) {
 
     int64_t cost = GET_MAX_MANA(ch) * 0.03;
 
-    if ((ch->getCurKI()) < cost) {
+    if ((ch->getCurVital(CharVital::ki)) < cost) {
         send_to_char(ch, "You do not have enough ki!\r\n");
         return;
     }
@@ -5039,7 +5038,7 @@ ACMD(do_fireshield) {
         act("@c$n@W holds $s hands up in front of $m on either side and tries to summon defensive @rf@Rl@Ya@rm@Re@Ys@W to cover $s body. Yet $e seems to screw up and the technique fails!@n",
             true, ch, nullptr, nullptr, TO_ROOM);
         improve_skill(ch, SKILL_FIRESHIELD, 0);
-        ch->decCurKI(cost);
+        ch->modCurVital(CharVital::ki, -cost);
         return;
     } else {
         act("@WYou hold your hands up in front of you on either side and try to summon defensive @rf@Rl@Ya@rm@Re@ys@W to cover your body. The ki you have gathered pours out of your body and creates intense black @rf@Rl@Ya@rm@Re@Ys@W that cover your entire body in a protective layer!",
@@ -5047,7 +5046,7 @@ ACMD(do_fireshield) {
         act("@c$n@W holds $s hands up in front of $m on either side and tries to summon defensive @rf@Rl@Ya@rm@Re@ys@W to cover $s body. The ki $e has gathered pours out of $s body and creates intense black @rf@Rl@Ya@rm@Re@Ys@W that cover $s entire body in a protective layer!",
             true, ch, nullptr, nullptr, TO_ROOM);
         improve_skill(ch, SKILL_FIRESHIELD, 0);
-        ch->decCurKI(cost);
+        ch->modCurVital(CharVital::ki, -cost);
         ch->affect_flags.set(AFF_FIRESHIELD, true);
         return;
     }
@@ -5090,7 +5089,7 @@ ACMD(do_warppool) {
         return;
     }
 
-    if ((ch->getCurKI()) < cost) {
+    if ((ch->getCurVital(CharVital::ki)) < cost) {
         send_to_char(ch, "You do not have enough ki to perform the technique.\r\n");
         return;
     }
@@ -5135,7 +5134,7 @@ ACMD(do_warppool) {
                 true, ch, nullptr, nullptr, TO_CHAR);
             act("@c$n@C reaches $s hand out and begins to swirl nearby water with it. The water that is being swirled begins to glow @wbright@B blue@C and has a distinct separation from the rest of the waters. Suddenly a puzzled look comes across @c$n's @Cface and the water returns to normal.@n",
                 true, ch, nullptr, nullptr, TO_ROOM);
-            ch->decCurKI(cost);
+            ch->modCurVital(CharVital::ki, -cost);
             improve_skill(ch, SKILL_WARP, 1);
         } else {
             act("@CYou reach your hand out and begin to swirl nearby water with it. At the same time you release ki into the water and focus your mind on sensing out the distant body of water you wish to travel to. As you complete the ritual you connect the water you disturbed with the water you envisioned and warp between the two points!@n",
@@ -5147,7 +5146,7 @@ ACMD(do_warppool) {
             char_to_room(ch, real_room(850));
             act("@CSuddenly a large whirlpool of flashing water begins to form nearby. After a few seconds @c$n@C pops out of the center of the pool! The water then return to normal a moment laterr...@n",
                 true, ch, nullptr, nullptr, TO_ROOM);
-            ch->decCurKI(cost);
+            ch->modCurVital(CharVital::ki, -cost);
         }
     } else if (!strcasecmp("frigid", arg)) {
         if (prob > perc) {
@@ -5155,7 +5154,7 @@ ACMD(do_warppool) {
                 true, ch, nullptr, nullptr, TO_CHAR);
             act("@c$n@C reaches $s hand out and begins to swirl nearby water with it. The water that is being swirled begins to glow @wbright@B blue@C and has a distinct separation from the rest of the waters. Suddenly a puzzled look comes across @c$n's @Cface and the water returns to normal.@n",
                 true, ch, nullptr, nullptr, TO_ROOM);
-            ch->decCurKI(cost);
+            ch->modCurVital(CharVital::ki, -cost);
             improve_skill(ch, SKILL_WARP, 1);
         } else {
             act("@CYou reach your hand out and begin to swirl nearby water with it. At the same time you release ki into the water and focus your mind on sensing out the distant body of water you wish to travel to. As you complete the ritual you connect the water you disturbed with the water you envisioned and warp between the two points!@n",
@@ -5167,7 +5166,7 @@ ACMD(do_warppool) {
             char_to_room(ch, real_room(4609));
             act("@CSuddenly a large whirlpool of flashing water begins to form nearby. After a few seconds @c$n@C pops out of the center of the pool! The water then return to normal a moment laterr...@n",
                 true, ch, nullptr, nullptr, TO_ROOM);
-            ch->decCurKI(cost);
+            ch->modCurVital(CharVital::ki, -cost);
         }
     } else if (!strcasecmp("namek", arg)) {
         if (prob > perc) {
@@ -5175,7 +5174,7 @@ ACMD(do_warppool) {
                 true, ch, nullptr, nullptr, TO_CHAR);
             act("@c$n@C reaches $s hand out and begins to swirl nearby water with it. The water that is being swirled begins to glow @wbright@B blue@C and has a distinct separation from the rest of the waters. Suddenly a puzzled look comes across @c$n's @Cface and the water returns to normal.@n",
                 true, ch, nullptr, nullptr, TO_ROOM);
-            ch->decCurKI(cost);
+            ch->modCurVital(CharVital::ki, -cost);
             improve_skill(ch, SKILL_WARP, 1);
         } else {
             act("@CYou reach your hand out and begin to swirl nearby water with it. At the same time you release ki into the water and focus your mind on sensing out the distant body of water you wish to travel to. As you complete the ritual you connect the water you disturbed with the water you envisioned and warp between the two points!@n",
@@ -5187,7 +5186,7 @@ ACMD(do_warppool) {
             char_to_room(ch, real_room(10904));
             act("@CSuddenly a large whirlpool of flashing water begins to form nearby. After a few seconds @c$n@C pops out of the center of the pool! The water then return to normal a moment laterr...@n",
                 true, ch, nullptr, nullptr, TO_ROOM);
-            ch->decCurKI(cost);
+            ch->modCurVital(CharVital::ki, -cost);
         }
     } else if (!strcasecmp("kanassa", arg)) {
         if (prob > perc) {
@@ -5195,7 +5194,7 @@ ACMD(do_warppool) {
                 true, ch, nullptr, nullptr, TO_CHAR);
             act("@c$n@C reaches $s hand out and begins to swirl nearby water with it. The water that is being swirled begins to glow @wbright@B blue@C and has a distinct separation from the rest of the waters. Suddenly a puzzled look comes across @c$n's @Cface and the water returns to normal.@n",
                 true, ch, nullptr, nullptr, TO_ROOM);
-            ch->decCurKI(cost);
+            ch->modCurVital(CharVital::ki, -cost);
             improve_skill(ch, SKILL_WARP, 1);
         } else {
             act("@CYou reach your hand out and begin to swirl nearby water with it. At the same time you release ki into the water and focus your mind on sensing out the distant body of water you wish to travel to. As you complete the ritual you connect the water you disturbed with the water you envisioned and warp between the two points!@n",
@@ -5207,7 +5206,7 @@ ACMD(do_warppool) {
             char_to_room(ch, real_room(15100));
             act("@CSuddenly a large whirlpool of flashing water begins to form nearby. After a few seconds @c$n@C pops out of the center of the pool! The water then return to normal a moment laterr...@n",
                 true, ch, nullptr, nullptr, TO_ROOM);
-            ch->decCurKI(cost);
+            ch->modCurVital(CharVital::ki, -cost);
         }
     } else if (!strcasecmp("aether", arg)) {
         if (prob > perc) {
@@ -5215,7 +5214,7 @@ ACMD(do_warppool) {
                 true, ch, nullptr, nullptr, TO_CHAR);
             act("@c$n@C reaches $s hand out and begins to swirl nearby water with it. The water that is being swirled begins to glow @wbright@B blue@C and has a distinct separation from the rest of the waters. Suddenly a puzzled look comes across @c$n's @Cface and the water returns to normal.@n",
                 true, ch, nullptr, nullptr, TO_ROOM);
-            ch->decCurKI(cost);
+            ch->modCurVital(CharVital::ki, -cost);
             improve_skill(ch, SKILL_WARP, 1);
         } else {
             act("@CYou reach your hand out and begin to swirl nearby water with it. At the same time you release ki into the water and focus your mind on sensing out the distant body of water you wish to travel to. As you complete the ritual you connect the water you disturbed with the water you envisioned and warp between the two points!@n",
@@ -5227,7 +5226,7 @@ ACMD(do_warppool) {
             char_to_room(ch, real_room(12252));
             act("@CSuddenly a large whirlpool of flashing water begins to form nearby. After a few seconds @c$n@C pops out of the center of the pool! The water then return to normal a moment laterr...@n",
                 true, ch, nullptr, nullptr, TO_ROOM);
-            ch->decCurKI(cost);
+            ch->modCurVital(CharVital::ki, -cost);
         }
     } else {
         send_to_char(ch,
@@ -5275,7 +5274,7 @@ ACMD(do_obstruct) {
         return;
     }
 
-    if ((ch->getCurKI()) < cost) {
+    if ((ch->getCurVital(CharVital::ki)) < cost) {
         send_to_char(ch, "You do not have enough ki to perform the technique.\r\n");
         return;
     }
@@ -5304,7 +5303,7 @@ ACMD(do_obstruct) {
             true, ch, nullptr, nullptr, TO_CHAR);
         act("@c$n@C channels $s ki and starts to create a wall of water, but loses $s concentration and the water promptly disappears.@n",
             true, ch, nullptr, nullptr, TO_ROOM);
-        ch->decCurKI(cost);
+        ch->modCurVital(CharVital::ki, -cost);
         improve_skill(ch, SKILL_HYOGA_KABE, 0);
         return;
     }
@@ -5325,13 +5324,13 @@ ACMD(do_obstruct) {
                         true, ch, nullptr, nullptr, TO_CHAR);
                     act("@c$n@C places $s hands on the glacial wall and concentrates. Nothing happens...@n", true,
                         ch, nullptr, nullptr, TO_ROOM);
-                    ch->decCurKI(cost / 2);
+                    ch->modCurVital(CharVital::ki, -cost / 2);
                 } else {
                     act("@CYou place your hands on the glacial wall and concentrate. You unfreeze the wall and evaporate the water effortlessly.@n",
                         true, ch, nullptr, nullptr, TO_CHAR);
                     act("@c$n@C places $s hands on the glacial wall and concentrates. Suddenly the wall melts and then evaporates!@n",
                         true, ch, nullptr, nullptr, TO_ROOM);
-                    ch->decCurKI(cost / 2);
+                    ch->modCurVital(CharVital::ki, -cost / 2);
                     extract_obj(obj);
                 }
                 return;
@@ -5374,7 +5373,7 @@ ACMD(do_obstruct) {
                  "@cA wall of water forms slowly upward blocking off the %s direction. This wall of water then freezes instantly once it stops growing.@n\r\n",
                  dirs[dir2]);
     improve_skill(ch, SKILL_HYOGA_KABE, 0);
-    ch->decCurKI(cost);
+    ch->modCurVital(CharVital::ki, -cost);
 }
 
 /* This allows a player to flood a room. */
@@ -5405,7 +5404,7 @@ ACMD(do_dimizu) {
     } else if (tile == SECT_SPACE || ch->getWhereFlag(WhereFlag::space)) {
         send_to_char(ch, "You can't flood space!\r\n");
         return;
-    } else if ((ch->getCurKI()) < GET_MAX_MANA(ch) / 12) {
+    } else if ((ch->getCurVital(CharVital::ki)) < GET_MAX_MANA(ch) / 12) {
         send_to_char(ch, "You do not have enough ki to perform the technique.\r\n");
         return;
     } else if (skill < prob) {
@@ -5413,7 +5412,7 @@ ACMD(do_dimizu) {
             true, ch, nullptr, nullptr, TO_CHAR);
         act("@c$n@C gathers $s ki and concentrates on creating water from it. Water begins to flow upward around the entire area, but $e loses $s concentration and all the water goes flooding away!@n",
             true, ch, nullptr, nullptr, TO_ROOM);
-        ch->decCurKI(ch->getMaxKI() / 12);
+        ch->modCurVitalDam(CharVital::ki, 0.12);
         improve_skill(ch, SKILL_DIMIZU, 0);
         return;
     } else {
@@ -5421,7 +5420,7 @@ ACMD(do_dimizu) {
             true, ch, nullptr, nullptr, TO_CHAR);
         act("@c$n@C gathers $s ki and concentrates on creating water from it. Water begins to flow upward around the entire area. @c$n@C forms the water into a perfect cube with barely any ripples in its walls. It appears the water will maintain this form for a while.@n",
             true, ch, nullptr, nullptr, TO_ROOM);
-        ch->decCurKI(ch->getMaxKI() / 12);
+        ch->modCurVitalDam(CharVital::ki, 0.12);
         ch->modLocationGroundEffect(-3);
         improve_skill(ch, SKILL_DIMIZU, 0);
         return;

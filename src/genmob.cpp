@@ -199,9 +199,9 @@ void char_data::activate() {
         services.insert("androidAbsorbSystem");
     if(character_flags.get(CharacterFlag::powering_up))
         services.insert("powerupService");
-    if(!damages.empty())
+    if(!isFullVitals())
         services.insert("characterVitalsRecovery");
-    if(!IS_ANDROID(this) && GET_LIFEPERC(this) > 0 && getCurHealthPercent() < GET_LIFEPERC(this))
+    if(!IS_ANDROID(this) && GET_LIFEPERC(this) > 0 && getCurVitalMeterPercent(CharVital::health) < GET_LIFEPERC(this))
         services.insert("lifeforceSystem");
     if(GET_CHARGE(this) || PLR_FLAGGED(this, PLR_CHARGE))
         services.insert("kiChargeSystem");

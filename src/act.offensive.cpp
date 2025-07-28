@@ -279,8 +279,8 @@ ACMD(do_genki) {
         }
         if (AFF_FLAGGED(friend_char, AFF_GROUP) &&
             (friend_char->master == ch || ch->master == friend_char || friend_char->master == ch->master)) {
-            ch->modBaseStat<int64_t>("charge", (ch->getCurKI()) / 10);
-            ch->decCurKI(ch->getCurKI() / 20);
+            ch->modBaseStat<int64_t>("charge", ch->getCurVitalPercent(CharVital::ki, 0.1));
+            ch->modCurVitalDam(CharVital::ki, 0.05);
         }
     }
 
@@ -485,7 +485,7 @@ ACMD(do_blessedhammer) {
         }
 
         if (prob < perc - 20) {
-            if ((vict->getCurST()) > 0) {
+            if ((vict->getCurVital(CharVital::stamina)) > 0) {
                 if (blk > axion_dice(10)) {
                     act("@C$N@W moves quickly and blocks your @WB@Dl@We@Ds@Ws@De@Wd @DH@Wa@Dm@Wm@De@Wr@n!@n", false, ch,
                         nullptr, vict, TO_CHAR);
@@ -827,7 +827,7 @@ ACMD(do_charge) {
                 act("$n@w's aura disappears.@n", true, ch, nullptr, nullptr, TO_ROOM);
                 break;
         }
-        ch->incCurKI(GET_CHARGE(ch));
+        ch->modCurVital(CharVital::ki, GET_CHARGE(ch));
         ch->setBaseStat<int64_t>("charge", 0);
         ch->setBaseStat<int64_t>("chargeto", 0);
         ch->player_flags.set(PLR_CHARGE, false);
@@ -850,7 +850,7 @@ ACMD(do_charge) {
                 act("$n@w's aura disappears.@n", true, ch, nullptr, nullptr, TO_ROOM);
                 break;
         }
-        ch->incCurKI(GET_CHARGE(ch));
+        ch->modCurVital(CharVital::ki, GET_CHARGE(ch));
         ch->setBaseStat<int64_t>("charge", 0);
         ch->setBaseStat<int64_t>("chargeto", 0);
         characterSubscriptions.unsubscribe("chargeMoreKi", ch);
@@ -879,7 +879,7 @@ ACMD(do_charge) {
     } else if (!strcasecmp("cancel", arg) && !PLR_FLAGGED(ch, PLR_CHARGE)) {
         send_to_char(ch, "You are not even charging!\r\n");
         return;
-    } else if ((ch->getCurKI()) < GET_MAX_MANA(ch) / 100) {
+    } else if ((ch->getCurVital(CharVital::ki)) < GET_MAX_MANA(ch) / 100) {
         send_to_char(ch, "You don't even have enough ki!\r\n");
         return;
     } else if ((amt = atoi(arg)) > 0) {
@@ -888,8 +888,8 @@ ACMD(do_charge) {
             return;
         } else if (AFF_FLAGGED(ch, AFF_SPIRITCONTROL)) {
             int64_t diff = 0;
-            if ((ch->getCurKI()) < ((GET_MAX_MANA(ch) * 0.01) * amt) + 1) {
-                diff = (((GET_MAX_MANA(ch) * 0.01) * amt) + 1) - (ch->getCurKI());
+            if ((ch->getCurVital(CharVital::ki)) < ((GET_MAX_MANA(ch) * 0.01) * amt) + 1) {
+                diff = (((GET_MAX_MANA(ch) * 0.01) * amt) + 1) - (ch->getCurVital(CharVital::ki));
             }
             int chance = 15;
             chance -= GET_SKILL(ch, SKILL_SPIRITCONTROL) / 10;
@@ -918,7 +918,7 @@ ACMD(do_charge) {
                 act(bloom, true, ch, nullptr, nullptr, TO_ROOM);
                 characterSubscriptions.unsubscribe("kiLeakingSystem", ch);
                 ch->setBaseStat<int64_t>("charge", (((GET_MAX_MANA(ch) * 0.01) * amt) + 1) - diff);
-                ch->decCurKI((((GET_MAX_MANA(ch) * 0.01) * amt) + 1) - diff + spiritcost);
+                ch->modCurVital(CharVital::ki, -((((GET_MAX_MANA(ch) * 0.01) * amt) + 1) - diff + spiritcost));
             }
         } else {
             reveal_hiding(ch, 0);
@@ -974,13 +974,13 @@ ACMD(do_powerup) {
         send_to_char(ch, "@WYou are already at max!@n");
         return;
     }
-    if ((ch->getCurKI()) < GET_MAX_MANA(ch) / 20) {
+    if ((ch->getCurVital(CharVital::ki)) < GET_MAX_MANA(ch) / 20) {
         send_to_char(ch, "@WYou do not have enough ki to powerup!@n");
         return;
     }
     reveal_hiding(ch, 0);
 
-    auto curPL = ch->getCurPL();
+    auto curPL = ch->getCurVital(CharVital::health);
 
     for(const auto& [threshold, messages] : startPowerUpMessages) {
         if(curPL < threshold) {

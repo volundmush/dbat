@@ -144,19 +144,19 @@ const char *report_party_health(struct char_data *ch) {
                     else
                         plc1 = 0;
 
-                    if ((party1->getCurST()) >= GET_MAX_MOVE(party1)) {
+                    if ((party1->getCurVital(CharVital::stamina)) >= GET_MAX_MOVE(party1)) {
                         stam1 = 7;
-                    } else if ((party1->getCurST()) >= GET_MAX_MOVE(party1) * .9) {
+                    } else if ((party1->getCurVital(CharVital::stamina)) >= GET_MAX_MOVE(party1) * .9) {
                         stam1 = 6;
-                    } else if ((party1->getCurST()) >= GET_MAX_MOVE(party1) * .8) {
+                    } else if ((party1->getCurVital(CharVital::stamina)) >= GET_MAX_MOVE(party1) * .8) {
                         stam1 = 5;
-                    } else if ((party1->getCurST()) >= GET_MAX_MOVE(party1) * .7) {
+                    } else if ((party1->getCurVital(CharVital::stamina)) >= GET_MAX_MOVE(party1) * .7) {
                         stam1 = 4;
-                    } else if ((party1->getCurST()) >= GET_MAX_MOVE(party1) * .5) {
+                    } else if ((party1->getCurVital(CharVital::stamina)) >= GET_MAX_MOVE(party1) * .5) {
                         stam1 = 3;
-                    } else if ((party1->getCurST()) >= GET_MAX_MOVE(party1) * .4) {
+                    } else if ((party1->getCurVital(CharVital::stamina)) >= GET_MAX_MOVE(party1) * .4) {
                         stam1 = 2;
-                    } else if ((party1->getCurST()) >= GET_MAX_MOVE(party1) * .2) {
+                    } else if ((party1->getCurVital(CharVital::stamina)) >= GET_MAX_MOVE(party1) * .2) {
                         stam1 = 1;
                     } else {
                         stam1 = 0;
@@ -175,19 +175,19 @@ const char *report_party_health(struct char_data *ch) {
                     else
                         plc2 = 0;
 
-                    if ((party2->getCurST()) >= GET_MAX_MOVE(party2)) {
+                    if ((party2->getCurVital(CharVital::stamina)) >= GET_MAX_MOVE(party2)) {
                         stam2 = 7;
-                    } else if ((party2->getCurST()) >= GET_MAX_MOVE(party2) * .9) {
+                    } else if ((party2->getCurVital(CharVital::stamina)) >= GET_MAX_MOVE(party2) * .9) {
                         stam2 = 6;
-                    } else if ((party2->getCurST()) >= GET_MAX_MOVE(party2) * .8) {
+                    } else if ((party2->getCurVital(CharVital::stamina)) >= GET_MAX_MOVE(party2) * .8) {
                         stam2 = 5;
-                    } else if ((party2->getCurST()) >= GET_MAX_MOVE(party2) * .7) {
+                    } else if ((party2->getCurVital(CharVital::stamina)) >= GET_MAX_MOVE(party2) * .7) {
                         stam2 = 4;
-                    } else if ((party2->getCurST()) >= GET_MAX_MOVE(party2) * .5) {
+                    } else if ((party2->getCurVital(CharVital::stamina)) >= GET_MAX_MOVE(party2) * .5) {
                         stam2 = 3;
-                    } else if ((party2->getCurST()) >= GET_MAX_MOVE(party2) * .4) {
+                    } else if ((party2->getCurVital(CharVital::stamina)) >= GET_MAX_MOVE(party2) * .4) {
                         stam2 = 2;
-                    } else if ((party2->getCurST()) >= GET_MAX_MOVE(party2) * .2) {
+                    } else if ((party2->getCurVital(CharVital::stamina)) >= GET_MAX_MOVE(party2) * .2) {
                         stam2 = 1;
                     } else {
                         stam2 = 0;
@@ -206,19 +206,19 @@ const char *report_party_health(struct char_data *ch) {
                     else
                         plc3 = 0;
 
-                    if ((party3->getCurST()) >= GET_MAX_MOVE(party3)) {
+                    if ((party3->getCurVital(CharVital::stamina)) >= GET_MAX_MOVE(party3)) {
                         stam3 = 7;
-                    } else if ((party3->getCurST()) >= GET_MAX_MOVE(party3) * .9) {
+                    } else if ((party3->getCurVital(CharVital::stamina)) >= GET_MAX_MOVE(party3) * .9) {
                         stam3 = 6;
-                    } else if ((party3->getCurST()) >= GET_MAX_MOVE(party3) * .8) {
+                    } else if ((party3->getCurVital(CharVital::stamina)) >= GET_MAX_MOVE(party3) * .8) {
                         stam3 = 5;
-                    } else if ((party3->getCurST()) >= GET_MAX_MOVE(party3) * .7) {
+                    } else if ((party3->getCurVital(CharVital::stamina)) >= GET_MAX_MOVE(party3) * .7) {
                         stam3 = 4;
-                    } else if ((party3->getCurST()) >= GET_MAX_MOVE(party3) * .5) {
+                    } else if ((party3->getCurVital(CharVital::stamina)) >= GET_MAX_MOVE(party3) * .5) {
                         stam3 = 3;
-                    } else if ((party3->getCurST()) >= GET_MAX_MOVE(party3) * .4) {
+                    } else if ((party3->getCurVital(CharVital::stamina)) >= GET_MAX_MOVE(party3) * .4) {
                         stam3 = 2;
-                    } else if ((party3->getCurST()) >= GET_MAX_MOVE(party3) * .2) {
+                    } else if ((party3->getCurVital(CharVital::stamina)) >= GET_MAX_MOVE(party3) * .2) {
                         stam3 = 1;
                     } else {
                         stam3 = 0;
@@ -237,19 +237,19 @@ const char *report_party_health(struct char_data *ch) {
                     else
                         plc4 = 0;
 
-                    if ((party4->getCurST()) >= GET_MAX_MOVE(party4)) {
+                    if ((party4->getCurVital(CharVital::stamina)) >= GET_MAX_MOVE(party4)) {
                         stam4 = 7;
-                    } else if ((party4->getCurST()) >= GET_MAX_MOVE(party4) * .9) {
+                    } else if ((party4->getCurVital(CharVital::stamina)) >= GET_MAX_MOVE(party4) * .9) {
                         stam4 = 6;
-                    } else if ((party4->getCurST()) >= GET_MAX_MOVE(party4) * .8) {
+                    } else if ((party4->getCurVital(CharVital::stamina)) >= GET_MAX_MOVE(party4) * .8) {
                         stam4 = 5;
-                    } else if ((party4->getCurST()) >= GET_MAX_MOVE(party4) * .7) {
+                    } else if ((party4->getCurVital(CharVital::stamina)) >= GET_MAX_MOVE(party4) * .7) {
                         stam4 = 4;
-                    } else if ((party4->getCurST()) >= GET_MAX_MOVE(party4) * .5) {
+                    } else if ((party4->getCurVital(CharVital::stamina)) >= GET_MAX_MOVE(party4) * .5) {
                         stam4 = 3;
-                    } else if ((party4->getCurST()) >= GET_MAX_MOVE(party4) * .4) {
+                    } else if ((party4->getCurVital(CharVital::stamina)) >= GET_MAX_MOVE(party4) * .4) {
                         stam4 = 2;
-                    } else if ((party4->getCurST()) >= GET_MAX_MOVE(party4) * .2) {
+                    } else if ((party4->getCurVital(CharVital::stamina)) >= GET_MAX_MOVE(party4) * .2) {
                         stam4 = 1;
                     } else {
                         stam4 = 0;
@@ -290,19 +290,19 @@ const char *report_party_health(struct char_data *ch) {
         else
             plc1 = 0;
 
-        if ((party1->getCurST()) >= GET_MAX_MOVE(party1)) {
+        if ((party1->getCurVital(CharVital::stamina)) >= GET_MAX_MOVE(party1)) {
             stam1 = 7;
-        } else if ((party1->getCurST()) >= GET_MAX_MOVE(party1) * .9) {
+        } else if ((party1->getCurVital(CharVital::stamina)) >= GET_MAX_MOVE(party1) * .9) {
             stam1 = 6;
-        } else if ((party1->getCurST()) >= GET_MAX_MOVE(party1) * .8) {
+        } else if ((party1->getCurVital(CharVital::stamina)) >= GET_MAX_MOVE(party1) * .8) {
             stam1 = 5;
-        } else if ((party1->getCurST()) >= GET_MAX_MOVE(party1) * .7) {
+        } else if ((party1->getCurVital(CharVital::stamina)) >= GET_MAX_MOVE(party1) * .7) {
             stam1 = 4;
-        } else if ((party1->getCurST()) >= GET_MAX_MOVE(party1) * .5) {
+        } else if ((party1->getCurVital(CharVital::stamina)) >= GET_MAX_MOVE(party1) * .5) {
             stam1 = 3;
-        } else if ((party1->getCurST()) >= GET_MAX_MOVE(party1) * .4) {
+        } else if ((party1->getCurVital(CharVital::stamina)) >= GET_MAX_MOVE(party1) * .4) {
             stam1 = 2;
-        } else if ((party1->getCurST()) >= GET_MAX_MOVE(party1) * .2) {
+        } else if ((party1->getCurVital(CharVital::stamina)) >= GET_MAX_MOVE(party1) * .2) {
             stam1 = 1;
         } else {
             stam1 = 0;
@@ -329,19 +329,19 @@ const char *report_party_health(struct char_data *ch) {
                     else
                         plc2 = 0;
 
-                    if ((party2->getCurST()) >= GET_MAX_MOVE(party2)) {
+                    if ((party2->getCurVital(CharVital::stamina)) >= GET_MAX_MOVE(party2)) {
                         stam2 = 7;
-                    } else if ((party2->getCurST()) >= GET_MAX_MOVE(party2) * .9) {
+                    } else if ((party2->getCurVital(CharVital::stamina)) >= GET_MAX_MOVE(party2) * .9) {
                         stam2 = 6;
-                    } else if ((party2->getCurST()) >= GET_MAX_MOVE(party2) * .8) {
+                    } else if ((party2->getCurVital(CharVital::stamina)) >= GET_MAX_MOVE(party2) * .8) {
                         stam2 = 5;
-                    } else if ((party2->getCurST()) >= GET_MAX_MOVE(party2) * .7) {
+                    } else if ((party2->getCurVital(CharVital::stamina)) >= GET_MAX_MOVE(party2) * .7) {
                         stam2 = 4;
-                    } else if ((party2->getCurST()) >= GET_MAX_MOVE(party2) * .5) {
+                    } else if ((party2->getCurVital(CharVital::stamina)) >= GET_MAX_MOVE(party2) * .5) {
                         stam2 = 3;
-                    } else if ((party2->getCurST()) >= GET_MAX_MOVE(party2) * .4) {
+                    } else if ((party2->getCurVital(CharVital::stamina)) >= GET_MAX_MOVE(party2) * .4) {
                         stam2 = 2;
-                    } else if ((party2->getCurST()) >= GET_MAX_MOVE(party2) * .2) {
+                    } else if ((party2->getCurVital(CharVital::stamina)) >= GET_MAX_MOVE(party2) * .2) {
                         stam2 = 1;
                     } else {
                         stam2 = 0;
@@ -360,19 +360,19 @@ const char *report_party_health(struct char_data *ch) {
                     else
                         plc3 = 0;
 
-                    if ((party3->getCurST()) >= GET_MAX_MOVE(party3)) {
+                    if ((party3->getCurVital(CharVital::stamina)) >= GET_MAX_MOVE(party3)) {
                         stam3 = 7;
-                    } else if ((party3->getCurST()) >= GET_MAX_MOVE(party3) * .9) {
+                    } else if ((party3->getCurVital(CharVital::stamina)) >= GET_MAX_MOVE(party3) * .9) {
                         stam3 = 6;
-                    } else if ((party3->getCurST()) >= GET_MAX_MOVE(party3) * .8) {
+                    } else if ((party3->getCurVital(CharVital::stamina)) >= GET_MAX_MOVE(party3) * .8) {
                         stam3 = 5;
-                    } else if ((party3->getCurST()) >= GET_MAX_MOVE(party3) * .7) {
+                    } else if ((party3->getCurVital(CharVital::stamina)) >= GET_MAX_MOVE(party3) * .7) {
                         stam3 = 4;
-                    } else if ((party3->getCurST()) >= GET_MAX_MOVE(party3) * .5) {
+                    } else if ((party3->getCurVital(CharVital::stamina)) >= GET_MAX_MOVE(party3) * .5) {
                         stam3 = 3;
-                    } else if ((party3->getCurST()) >= GET_MAX_MOVE(party3) * .4) {
+                    } else if ((party3->getCurVital(CharVital::stamina)) >= GET_MAX_MOVE(party3) * .4) {
                         stam3 = 2;
-                    } else if ((party3->getCurST()) >= GET_MAX_MOVE(party3) * .2) {
+                    } else if ((party3->getCurVital(CharVital::stamina)) >= GET_MAX_MOVE(party3) * .2) {
                         stam3 = 1;
                     } else {
                         stam3 = 0;
@@ -391,19 +391,19 @@ const char *report_party_health(struct char_data *ch) {
                     else
                         plc4 = 0;
 
-                    if ((party4->getCurST()) >= GET_MAX_MOVE(party4)) {
+                    if ((party4->getCurVital(CharVital::stamina)) >= GET_MAX_MOVE(party4)) {
                         stam4 = 7;
-                    } else if ((party4->getCurST()) >= GET_MAX_MOVE(party4) * .9) {
+                    } else if ((party4->getCurVital(CharVital::stamina)) >= GET_MAX_MOVE(party4) * .9) {
                         stam4 = 6;
-                    } else if ((party4->getCurST()) >= GET_MAX_MOVE(party4) * .8) {
+                    } else if ((party4->getCurVital(CharVital::stamina)) >= GET_MAX_MOVE(party4) * .8) {
                         stam4 = 5;
-                    } else if ((party4->getCurST()) >= GET_MAX_MOVE(party4) * .7) {
+                    } else if ((party4->getCurVital(CharVital::stamina)) >= GET_MAX_MOVE(party4) * .7) {
                         stam4 = 4;
-                    } else if ((party4->getCurST()) >= GET_MAX_MOVE(party4) * .5) {
+                    } else if ((party4->getCurVital(CharVital::stamina)) >= GET_MAX_MOVE(party4) * .5) {
                         stam4 = 3;
-                    } else if ((party4->getCurST()) >= GET_MAX_MOVE(party4) * .4) {
+                    } else if ((party4->getCurVital(CharVital::stamina)) >= GET_MAX_MOVE(party4) * .4) {
                         stam4 = 2;
-                    } else if ((party4->getCurST()) >= GET_MAX_MOVE(party4) * .2) {
+                    } else if ((party4->getCurVital(CharVital::stamina)) >= GET_MAX_MOVE(party4) * .2) {
                         stam4 = 1;
                     } else {
                         stam4 = 0;
@@ -1444,19 +1444,19 @@ int64_t molt_threshold(struct char_data *ch) {
     if (!IS_ARLIAN(ch))
         return (0);
     else if (GET_MOLT_LEVEL(ch) < 100) {
-        threshold = (((GET_MOLT_LEVEL(ch) + 1) * (ch->getBasePL() * 0.02)) * GET_CON(ch)) / 4;
+        threshold = (((GET_MOLT_LEVEL(ch) + 1) * (ch->getBaseStat("health") * 0.02)) * GET_CON(ch)) / 4;
         threshold = threshold * 0.25;
     } else if (GET_MOLT_LEVEL(ch) < 200) {
-        threshold = (((GET_MOLT_LEVEL(ch) + 1) * (ch->getBasePL() * 0.02)) * GET_CON(ch)) / 2;
+        threshold = (((GET_MOLT_LEVEL(ch) + 1) * (ch->getBaseStat("health") * 0.02)) * GET_CON(ch)) / 2;
         threshold = threshold * 0.20;
     } else if (GET_MOLT_LEVEL(ch) < 400) {
-        threshold = (((GET_MOLT_LEVEL(ch) + 1) * (ch->getBasePL() * 0.02)) * GET_CON(ch));
+        threshold = (((GET_MOLT_LEVEL(ch) + 1) * (ch->getBaseStat("health") * 0.02)) * GET_CON(ch));
         threshold = threshold * 0.17;
     } else if (GET_MOLT_LEVEL(ch) < 800) {
-        threshold = (((GET_MOLT_LEVEL(ch) + 1) * (ch->getBasePL() * 0.02)) * GET_CON(ch)) * 2;
+        threshold = (((GET_MOLT_LEVEL(ch) + 1) * (ch->getBaseStat("health") * 0.02)) * GET_CON(ch)) * 2;
         threshold = threshold * 0.15;
     } else {
-        threshold = (((GET_MOLT_LEVEL(ch) + 1) * (ch->getBasePL() * 0.02)) * GET_CON(ch)) * 4;
+        threshold = (((GET_MOLT_LEVEL(ch) + 1) * (ch->getBaseStat("health") * 0.02)) * GET_CON(ch)) * 4;
         threshold = threshold * 0.12;
     }
 
@@ -1531,8 +1531,8 @@ void handle_evolution(struct char_data *ch, int64_t dmg) {
                 ch->modBaseStat("armor_innate", armorgain);
 
 
-            double baseHl = ch->getBasePL();
-            double baseSt = ch->getBaseST();
+            double baseHl = ch->getBaseStat("health");
+            double baseSt = ch->getBaseStat("stamina");
             double attrBonus = (1 + (GET_CON(ch) / 20));
 
             int64_t bonusHl = 0;
@@ -1556,10 +1556,10 @@ void handle_evolution(struct char_data *ch, int64_t dmg) {
             bonusSt = start_bonusSt * diminishing_returnsSt * 16;
 
 
-            if(bonusHl > (ch->getBasePL() / 10)) bonusHl = ch->getBasePL() / 10;
-            if(bonusSt > (ch->getBaseST() / 10)) bonusSt = ch->getBaseST() / 10;
+            if(bonusHl > (ch->getBaseStat("health") / 10)) bonusHl = ch->getBaseStat("health") / 10;
+            if(bonusSt > (ch->getBaseStat("stamina") / 10)) bonusSt = ch->getBaseStat("stamina") / 10;
 
-            bonusHl *= (1 + ch->getAffectModifier(APPLY_CVIT_GAIN_MULT, static_cast<int>(CharVital::powerlevel)));
+            bonusHl *= (1 + ch->getAffectModifier(APPLY_CVIT_GAIN_MULT, static_cast<int>(CharVital::health)));
             bonusSt *= (1 + ch->getAffectModifier(APPLY_CVIT_GAIN_MULT, static_cast<int>(CharVital::stamina)));
 
             act("@gYour @De@Wx@wo@Ds@Wk@we@Dl@We@wt@Do@Wn@g begins to crack. You quickly shed it and reveal a stronger version that was growing beneath it! At the same time you feel your adrenal sacs to be more efficient@n",
@@ -1582,9 +1582,9 @@ void demon_refill_lf(struct char_data *ch, int64_t num) {
     for (auto tch : filter_raw(pe)) {
         if (!IS_DEMON(tch))
             continue;
-        if ((tch->getCurLF()) >= (tch->getMaxLF()))
+        if ((tch->getCurVital(CharVital::lifeforce)) >= (tch->getEffectiveStat("lifeforce")))
             continue;
-        tch->incCurLF(num);
+        tch->modCurVital(CharVital::lifeforce, num);
         act("@CYou feel the life energy from @c$N@C's cursed body flow out and you draw it into yourself!@n", true,
             tch, nullptr, ch, TO_CHAR);
     }

@@ -539,8 +539,8 @@ char *make_prompt(struct descriptor_data *d) {
                 if (count >= 0)
                     len += count;
             }
-            if ((ch->getCurST()) << 2 < GET_MAX_MOVE(ch) && len < sizeof(prompt)) {
-                count = snprintf(prompt + len, sizeof(prompt) - len, "STA: %" I64T " ", (ch->getCurST()));
+            if ((ch->getCurVital(CharVital::stamina)) << 2 < GET_MAX_MOVE(ch) && len < sizeof(prompt)) {
+                count = snprintf(prompt + len, sizeof(prompt) - len, "STA: %" I64T " ", (ch->getCurVital(CharVital::stamina)));
                 if (count >= 0)
                     len += count;
             }
@@ -1008,31 +1008,33 @@ char *make_prompt(struct descriptor_data *d) {
                 if (PRF_FLAGGED(d->character, PRF_DISPHP) && len < sizeof(prompt)) {
                     auto col = "n";
                     auto ch = d->character;
-                    if (ch->getMaxPL() > ch->getMaxPLTrans())
+                    // TODO: fix this.
+                    auto cvp = ch->getCurVitalMeterPercent(CharVital::health);
+                    if (ch->getEffectiveStat("health") > ch->getBaseStat("health"))
                         col = "g";
-                    else if (ch->getCurHealthPercent() > .5)
+                    else if (cvp > .5)
                         col = "c";
-                    else if (ch->getCurHealthPercent() > .1)
+                    else if (cvp > .1)
                         col = "y";
-                    else if (ch->getCurHealthPercent() <= .1)
+                    else if (cvp <= .1)
                         col = "r";
 
                     if ((count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@RHL@n@Y: @%s%s@D]@n", col,
-                                          add_commas(ch->getCurPL()).c_str())) > 0)
+                                          add_commas(ch->getCurVital(CharVital::health)).c_str())) > 0)
                         len += count;
                 }
             } else if (PRF_FLAGGED(d->character, PRF_DISPHP)) {
 
                 auto ch = d->character;
-                auto perc = ((double) ch->getCurHealth() / (double) ch->getMaxPLTrans()) * 100;
+                auto perc = ch->getCurVitalMeterPercent(CharVital::health);
                 auto col = "n";
-                if (perc > 100)
+                if (perc >= 1.0)
                     col = "g";
-                else if (perc >= 70)
+                else if (perc >= .70)
                     col = "c";
-                else if (perc >= 51)
+                else if (perc >= .51)
                     col = "Y";
-                else if (perc >= 20)
+                else if (perc >= .20)
                     col = "y";
                 else
                     col = "r";
@@ -1043,26 +1045,26 @@ char *make_prompt(struct descriptor_data *d) {
             }
             if (!PRF_FLAGGED(d->character, PRF_DISPERC)) {
                 if (PRF_FLAGGED(d->character, PRF_DISPKI) && len < sizeof(prompt) &&
-                    (d->character->getCurKI()) > GET_MAX_MANA(d->character) / 2) {
+                    (d->character->getCurVital(CharVital::ki)) > GET_MAX_MANA(d->character) / 2) {
                     count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@CKI@Y: @c%s@D]@n", add_commas(
-                            (d->character->getCurKI())).c_str());
+                            (d->character->getCurVital(CharVital::ki))).c_str());
                     if (count >= 0)
                         len += count;
                 } else if (PRF_FLAGGED(d->character, PRF_DISPKI) && len < sizeof(prompt) &&
-                           (d->character->getCurKI()) > GET_MAX_MANA(d->character) / 10) {
+                           (d->character->getCurVital(CharVital::ki)) > GET_MAX_MANA(d->character) / 10) {
                     count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@CKI@Y: @y%s@D]@n", add_commas(
-                            (d->character->getCurKI())).c_str());
+                            (d->character->getCurVital(CharVital::ki))).c_str());
                     if (count >= 0)
                         len += count;
                 } else if (PRF_FLAGGED(d->character, PRF_DISPKI) && len < sizeof(prompt) &&
-                           (d->character->getCurKI()) <= GET_MAX_MANA(d->character) / 10) {
+                           (d->character->getCurVital(CharVital::ki)) <= GET_MAX_MANA(d->character) / 10) {
                     count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@CKI@Y: @r%s@D]@n", add_commas(
-                            (d->character->getCurKI())).c_str());
+                            (d->character->getCurVital(CharVital::ki))).c_str());
                     if (count >= 0)
                         len += count;
                 }
             } else if (PRF_FLAGGED(d->character, PRF_DISPKI)) {
-                int64_t power = (d->character->getCurKI()), maxpower = GET_MAX_MANA(d->character);
+                int64_t power = (d->character->getCurVital(CharVital::ki)), maxpower = GET_MAX_MANA(d->character);
                 int perc = 0;
                 if (power <= 0) {
                     power = 1;
@@ -1095,26 +1097,26 @@ char *make_prompt(struct descriptor_data *d) {
             }
             if (!PRF_FLAGGED(d->character, PRF_DISPERC)) {
                 if (PRF_FLAGGED(d->character, PRF_DISPMOVE) && len < sizeof(prompt) &&
-                    (d->character->getCurST()) > GET_MAX_MOVE(d->character) / 2) {
+                    (d->character->getCurVital(CharVital::stamina)) > GET_MAX_MOVE(d->character) / 2) {
                     count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@GSTA@Y: @c%s@D]@n", add_commas(
-                            (d->character->getCurST())).c_str());
+                            (d->character->getCurVital(CharVital::stamina))).c_str());
                     if (count >= 0)
                         len += count;
                 } else if (PRF_FLAGGED(d->character, PRF_DISPMOVE) && len < sizeof(prompt) &&
-                           (d->character->getCurST()) > GET_MAX_MOVE(d->character) / 10) {
+                           (d->character->getCurVital(CharVital::stamina)) > GET_MAX_MOVE(d->character) / 10) {
                     count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@GSTA@Y: @y%s@D]@n", add_commas(
-                            (d->character->getCurST())).c_str());
+                            (d->character->getCurVital(CharVital::stamina))).c_str());
                     if (count >= 0)
                         len += count;
                 } else if (PRF_FLAGGED(d->character, PRF_DISPMOVE) && len < sizeof(prompt) &&
-                           (d->character->getCurST()) <= GET_MAX_MOVE(d->character) / 10) {
+                           (d->character->getCurVital(CharVital::stamina)) <= GET_MAX_MOVE(d->character) / 10) {
                     count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@GSTA@Y: @r%s@D]@n", add_commas(
-                            (d->character->getCurST())).c_str());
+                            (d->character->getCurVital(CharVital::stamina))).c_str());
                     if (count >= 0)
                         len += count;
                 }
             } else if (PRF_FLAGGED(d->character, PRF_DISPMOVE)) {
-                int64_t power = (d->character->getCurST()), maxpower = GET_MAX_MOVE(d->character);
+                int64_t power = (d->character->getCurVital(CharVital::stamina)), maxpower = GET_MAX_MOVE(d->character);
                 int perc = 0;
                 if (power <= 0) {
                     power = 1;

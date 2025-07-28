@@ -172,11 +172,11 @@ ACMD(do_mheal) {
     amount = GET_MAX_HIT(ch) * perc;
 
     if (!strcasecmp(arg, "pl")) {
-        ch->incCurHealthPercent(num);
+        ch->modCurVitalDam(CharVital::health, -num);
     } else if (!strcasecmp(arg, "ki")) {
-        ch->incCurKIPercent(num);
+        ch->modCurVitalDam(CharVital::ki, -num);
     } else if (!strcasecmp(arg, "st")) {
-        ch->incCurSTPercent(num);
+        ch->modCurVitalDam(CharVital::stamina, -num);
     } else {
         mob_log(ch, "mheal called with wrong argument [pl | ki | st]");
         return;

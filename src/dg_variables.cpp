@@ -667,9 +667,9 @@ in the vault (vnum: 453) now and then. you can just use
                         if (subfield && *subfield) {
                             int64_t addition = atof(subfield);
                             if (addition > 0) {
-                                c->incCurHealth(addition);
+                                c->modCurVital(CharVital::health, addition);
                             } else {
-                                c->decCurHealth(addition);
+                                c->modCurVital(CharVital::health, -addition);
                             }
 
                             update_pos(c);
@@ -721,12 +721,12 @@ in the vault (vnum: 453) now and then. you can just use
                         if (subfield && *subfield) {
                             int64_t addition = atof(subfield);
                             if (addition > 0) {
-                                c->incCurKI(addition);
+                                c->modCurVital(CharVital::ki, addition);
                             } else {
-                                c->decCurKI(addition);
+                                c->modCurVital(CharVital::ki, -addition);
                             }
                         }
-                        snprintf(str, slen, "%" I64T "", (c->getCurKI()));
+                        snprintf(str, slen, "%" I64T "", (c->getCurVital(CharVital::ki)));
                     } else if (!strcasecmp(field, "maxmana")) {
                         if (subfield && *subfield) {
                             int64_t addition = atof(subfield);
@@ -737,13 +737,13 @@ in the vault (vnum: 453) now and then. you can just use
                         if (subfield && *subfield) {
                             int64_t addition = atof(subfield);
                             if (addition > 0) {
-                                c->incCurST(addition);
+                                c->modCurVital(CharVital::stamina, addition);
                             } else {
-                                c->decCurST(addition);
+                                c->modCurVital(CharVital::stamina, -addition);
                             }
 
                         }
-                        snprintf(str, slen, "%" I64T "", (c->getCurST()));
+                        snprintf(str, slen, "%" I64T "", (c->getCurVital(CharVital::stamina)));
                     } else if (!strcasecmp(field, "maxmove")) {
                         if (subfield && *subfield) {
                             int64_t addition = atof(subfield);

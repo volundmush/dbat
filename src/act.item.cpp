@@ -467,7 +467,7 @@ ACMD(do_garden) {
     int64_t cost = (GET_MAX_MOVE(ch) * 0.005) + rand_number(50, 150);
     int skill = GET_SKILL(ch, SKILL_GARDENING);
 
-    if ((ch->getCurST()) < cost) {
+    if ((ch->getCurVital(CharVital::stamina)) < cost) {
         send_to_char(ch, "@WYou need at least @G%s@W stamina to garden.\r\n", add_commas(cost).c_str());
         return;
     } else {
@@ -490,7 +490,7 @@ ACMD(do_garden) {
                 act("@g$n@G takes a bottle of grow water and sloshes some of it on @g$p@G.@n", true, ch, obj, nullptr,
                     TO_ROOM);
 
-                ch->decCurST(cost);
+                ch->modCurVital(CharVital::stamina, -cost);
                 if (MOD_OBJ_VAL(obj, VAL_PLANT_WATERLEVEL, 40) > 500) {
                     SET_OBJ_VAL(obj, VAL_PLANT_WATERLEVEL, 500);
                     send_to_char(ch, "@YThe plant is now at full water level.@n\r\n");
@@ -502,7 +502,7 @@ ACMD(do_garden) {
             } else {
                 act("@GYou calmly and expertly pour the grow water on @g$p@G.@n", true, ch, obj, nullptr, TO_CHAR);
                 act("@g$n@G calmly and expertly pours some grow water on @g$p@G.@n", true, ch, obj, nullptr, TO_ROOM);
-                ch->decCurST(cost);
+                ch->modCurVital(CharVital::stamina, -cost);
                 if (MOD_OBJ_VAL(obj, VAL_PLANT_WATERLEVEL, 225) >= 500) {
                     SET_OBJ_VAL(obj, VAL_PLANT_WATERLEVEL, 500);
                     send_to_char(ch, "@YThe plant is now at full water level.@n\r\n");
@@ -533,7 +533,7 @@ ACMD(do_garden) {
                     TO_CHAR);
                 act("@g$n@G attempts to harvest @g$p@G with $s clippers, but accidently cuts the plant in half!@n",
                     true, ch, obj, nullptr, TO_ROOM);
-                ch->decCurST(cost);
+                ch->modCurVital(CharVital::stamina, -cost);
                 extract_obj(obj);
                 WAIT_STATE(ch, PULSE_3SEC);
                 improve_skill(ch, SKILL_GARDENING, 0);
@@ -541,7 +541,7 @@ ACMD(do_garden) {
             } else {
                 act("@GYou calmly and expertly harvest @g$p@G.@n", true, ch, obj, nullptr, TO_CHAR);
                 act("@g$n@G calmly and expertly harvests @g$p@G.@n", true, ch, obj, nullptr, TO_ROOM);
-                ch->decCurST(cost);
+                ch->modCurVital(CharVital::stamina, -cost);
                 if (MOD_OBJ_VAL(clippers, VAL_ALL_HEALTH, -1) <= 0) {
                     send_to_char(ch, "The clippers are now too dull to use.\r\n");
                     return;
@@ -561,7 +561,7 @@ ACMD(do_garden) {
             } else {
                 act("@GYou calmly dig up @g$p@G.@n", true, ch, obj, nullptr, TO_CHAR);
                 act("@g$n@G calmly digs up @g$p@G.@n", true, ch, obj, nullptr, TO_ROOM);
-                ch->decCurST(cost);
+                ch->modCurVital(CharVital::stamina, -cost);
                 obj_from_room(obj);
                 obj_to_char(obj, ch);
                 SET_OBJ_VAL(obj, VAL_OTHER_SOILQUALITY, 0);
@@ -597,7 +597,7 @@ ACMD(do_garden) {
                     nullptr, TO_CHAR);
                 act("@g$n@G digs a very shallow hole in one of the planters and then realizes @g$p@G won't fit in it.@n",
                     true, ch, obj, nullptr, TO_ROOM);
-                ch->decCurST(cost);
+                ch->modCurVital(CharVital::stamina, -cost);
                 WAIT_STATE(ch, PULSE_3SEC);
                 improve_skill(ch, SKILL_GARDENING, 0);
                 return;
@@ -607,7 +607,7 @@ ACMD(do_garden) {
                     TO_ROOM);
                 obj_from_char(obj);
                 obj_to_room(obj, IN_ROOM(ch));
-                ch->decCurST(cost);
+                ch->modCurVital(CharVital::stamina, -cost);
                 SET_OBJ_VAL(obj, VAL_PLANT_MAXMATURE, 6);
                 SET_OBJ_VAL(obj, VAL_PLANT_MATGOAL, 200);
                 SET_OBJ_VAL(obj, VAL_OTHER_SOILQUALITY, GET_OBJ_VAL(soil, VAL_PLANT_SOILQUALITY));
@@ -663,7 +663,7 @@ ACMD(do_garden) {
                     TO_ROOM);
                 obj_from_room(obj);
                 obj_to_char(obj, ch);
-                ch->decCurST(cost);
+                ch->modCurVital(CharVital::stamina, -cost);
                 WAIT_STATE(ch, PULSE_3SEC);
                 improve_skill(ch, SKILL_GARDENING, 0);
                 return;
@@ -2019,9 +2019,9 @@ static void perform_get_from_container(struct char_data *ch, struct obj_data *ob
             }
             if (OBJ_FLAGGED(obj, ITEM_HOT)) {
                 if (GET_BONUS(ch, BONUS_FIREPROOF) <= 0 && !IS_DEMON(ch)) {
-                    ch->decCurHealthPercent(.25);
+                    ch->modCurVitalDam(CharVital::health, .25);
                     if (GET_BONUS(ch, BONUS_FIREPRONE) > 0)
-                        ch->decCurHealthPercent(1, 1);
+                        ch->modCurVitalDam(CharVital::health, 1);
 
                     ch->affect_flags.set(AFF_BURNED, true);
                     act("@RYou are burned by it!@n", true, ch, nullptr, nullptr, TO_CHAR);
@@ -2113,9 +2113,9 @@ int perform_get_from_room(struct char_data *ch, struct obj_data *obj) {
 
         if (OBJ_FLAGGED(obj, ITEM_HOT)) {
             if (GET_BONUS(ch, BONUS_FIREPROOF) <= 0 && !IS_DEMON(ch)) {
-                ch->decCurHealthPercent(.25, 1);
+                ch->modCurVitalDam(CharVital::health, .25);
                 if (GET_BONUS(ch, BONUS_FIREPRONE) > 0)
-                    ch->decCurHealthPercent(1, 1);
+                    ch->modCurVitalDam(CharVital::health, 1);
 
                 ch->affect_flags.set(AFF_BURNED, true);
                 act("@RYou are burned by it!@n", true, ch, nullptr, nullptr, TO_CHAR);
@@ -2642,9 +2642,9 @@ static void perform_give(struct char_data *ch, struct char_data *vict,
 
     if (OBJ_FLAGGED(obj, ITEM_HOT)) {
         if (GET_BONUS(vict, BONUS_FIREPROOF) <= 0 && !IS_DEMON(vict)) {
-            ch->decCurHealthPercent(.25, 1);
+            ch->modCurVitalDam(CharVital::health, .25);
             if (GET_BONUS(vict, BONUS_FIREPRONE) > 0)
-                ch->decCurHealthPercent(1, 1);
+                ch->modCurVitalDam(CharVital::health, 1);
 
 
             vict->affect_flags.set(AFF_BURNED, true);
@@ -2923,10 +2923,10 @@ ACMD(do_drink) {
                 act(buf, true, ch, nullptr, nullptr, TO_ROOM);
                 send_to_char(ch, "You take a refreshing drink from the surrounding water.\r\n");
                 gain_condition(ch, THIRST, 1);
-                if (GET_SKILL(ch, SKILL_WELLSPRING) && (ch->getCurKI()) < GET_MAX_MANA(ch) && wasthirsty <= 30 &&
+                if (GET_SKILL(ch, SKILL_WELLSPRING) && (ch->getCurVital(CharVital::ki)) < GET_MAX_MANA(ch) && wasthirsty <= 30 &&
                     subcmd != SCMD_SIP) {
 
-                    ch->incCurKI(((GET_MAX_MANA(ch) * 0.005) + (GET_WIS(ch) * rand_number(80, 100))) *
+                    ch->modCurVital(CharVital::ki, ((GET_MAX_MANA(ch) * 0.005) + (GET_WIS(ch) * rand_number(80, 100))) *
                                  GET_SKILL(ch, SKILL_WELLSPRING));
 
                     send_to_char(ch, "You feel your ki return to full strength.\r\n");
@@ -2943,9 +2943,9 @@ ACMD(do_drink) {
                     act(buf, true, ch, nullptr, nullptr, TO_ROOM);
                     send_to_char(ch, "You take a refreshing drink from the surrounding water.\r\n");
                     gain_condition(ch, THIRST, 1);
-                    if (GET_SKILL(ch, SKILL_WELLSPRING) && !ch->isFullKI() && wasthirsty <= 30 && subcmd != SCMD_SIP) {
-                        if (ch->incCurKI(((GET_MAX_MANA(ch) * 0.005) + (GET_WIS(ch) * rand_number(80, 100))) *
-                                         GET_SKILL(ch, SKILL_WELLSPRING)) == ch->getMaxKI()) {
+                    if (GET_SKILL(ch, SKILL_WELLSPRING) && !ch->isFullVital(CharVital::ki) && wasthirsty <= 30 && subcmd != SCMD_SIP) {
+                        if (ch->modCurVital(CharVital::ki, ((GET_MAX_MANA(ch) * 0.005) + (GET_WIS(ch) * rand_number(80, 100))) *
+                                         GET_SKILL(ch, SKILL_WELLSPRING)) == ch->getEffectiveStat("ki")) {
                             send_to_char(ch, "You feel your ki return to full strength.\r\n");
                         } else {
                             send_to_char(ch, "You feel your ki has rejuvenated.\r\n");
@@ -2973,7 +2973,7 @@ ACMD(do_drink) {
                 nullptr, TO_ROOM);
             obj_from_char(temp);
             extract_obj(temp);
-            ch->restoreKI();
+            ch->restoreVital(CharVital::ki);
             GET_COND(ch, THIRST) += 8;
             return;
         } else if (GET_OBJ_VNUM(temp) == 86 && on_ground == 1) {
@@ -3058,17 +3058,17 @@ ACMD(do_drink) {
     gain_condition(ch, HUNGER, drink_aff[GET_OBJ_VAL(temp, VAL_DRINKCON_LIQUID)][HUNGER] * amount);
     gain_condition(ch, THIRST, drink_aff[GET_OBJ_VAL(temp, VAL_DRINKCON_LIQUID)][THIRST] * amount);
     if (GET_FOODR(ch) == 0 && subcmd != SCMD_SIP) {
-        ch->incCurST((ch->getMaxST() / 100) * amount);
+        ch->modCurVital(CharVital::stamina, (ch->getEffectiveStat("stamina") / 100) * amount);
         ch->setBaseStat("food_rejuvenation", 2);
         send_to_char(ch, "You feel rejuvinated by it.\r\n");
     }
-    if (GET_SKILL(ch, SKILL_WELLSPRING) && (ch->getCurKI()) < GET_MAX_MANA(ch) && wasthirsty <= 30 &&
+    if (GET_SKILL(ch, SKILL_WELLSPRING) && (ch->getCurVital(CharVital::ki)) < GET_MAX_MANA(ch) && wasthirsty <= 30 &&
         subcmd != SCMD_SIP) {
         if (GET_OBJ_VAL(temp, VAL_DRINKCON_LIQUID) == 0 || GET_OBJ_VAL(temp, VAL_DRINKCON_LIQUID) == 14 ||
             GET_OBJ_VAL(temp, VAL_DRINKCON_LIQUID) == 15) {
 
-            if (ch->incCurKI(((GET_MAX_MANA(ch) * 0.005) + (GET_WIS(ch) * rand_number(80, 100))) *
-                             GET_SKILL(ch, SKILL_WELLSPRING)) == ch->getMaxKI()) {
+            if (ch->modCurVital(CharVital::ki, ((GET_MAX_MANA(ch) * 0.005) + (GET_WIS(ch) * rand_number(80, 100))) *
+                             GET_SKILL(ch, SKILL_WELLSPRING)) == ch->getEffectiveStat("ki")) {
                 send_to_char(ch, "You feel your ki return to full strength.\r\n");
             } else {
                 send_to_char(ch, "You feel your ki has rejuvenated.\r\n");
@@ -3184,7 +3184,7 @@ ACMD(do_eat) {
 
     gain_condition(ch, HUNGER, amount);
     if (GET_FOODR(ch) == 0 && subcmd != SCMD_TASTE) {
-        ch->incCurST((ch->getMaxST() / 100) * amount);
+        ch->modCurVital(CharVital::stamina, (ch->getEffectiveStat("stamina") / 100) * amount);
         ch->setBaseStat("food_rejuvenation", 2);
         send_to_char(ch, "You feel rejuvinated by it.\r\n");
     }
@@ -3245,12 +3245,12 @@ ACMD(do_eat) {
                 send_to_char(ch, "Practice Sessions capped for food at 1000 PS.\r\n");
         }
         //Good food can heal you
-        if (!GET_OBJ_VAL(food, VAL_FOOD_POISON) && GET_HIT(ch) < (ch->getMaxPL()) && subcmd != SCMD_TASTE) {
-            int64_t suppress = ((ch->getMaxPL()) * 0.01) * GET_SUPPRESS(ch);
+        if (!GET_OBJ_VAL(food, VAL_FOOD_POISON) && GET_HIT(ch) < (ch->getEffectiveStat("health")) && subcmd != SCMD_TASTE) {
+            int64_t suppress = ((ch->getEffectiveStat("health")) * 0.01) * GET_SUPPRESS(ch);
             if (food->getWeight() < 6) {
-                ch->incCurHealthPercent(.05);
+                ch->modCurVitalDam(CharVital::health, -.05);
             } else {
-                ch->incCurHealthPercent(.1);
+                ch->modCurVitalDam(CharVital::health, -.1);
             }
 
             send_to_char(ch, "@MYou feel some of your strength return!@n\r\n");
@@ -3298,7 +3298,7 @@ static void majin_gain(struct char_data *ch, struct obj_data *food, int foob) {
     }
 
     auto soft_cap = ch->calc_soft_cap();
-    auto current = (ch->getBasePL() + ch->getBaseKI() + ch->getBaseST());
+    auto current = (ch->getBaseStat("health") + ch->getBaseStat("ki") + ch->getBaseStat("stamina"));
 
     auto available = soft_cap - current;
 
@@ -3336,27 +3336,27 @@ static void majin_gain(struct char_data *ch, struct obj_data *food, int foob) {
     for(auto &t : toAdd) {
         switch(t) {
             case 0:
-                addPL = std::min(pl, available);
-                addPL = std::min(addPL, (int64_t) max);
+                addPL = std::min<int64_t>(pl, available);
+                addPL = std::min<int64_t>(addPL, (int64_t) max);
                 available -= addPL;
                 if(addPL <= 0) addPL = 1;
                 break;
             case 1:
-                addKI = std::min(ki, available);
-                addKI = std::min(addKI, (int64_t) max);
+                addKI = std::min<int64_t>(ki, available);
+                addKI = std::min<int64_t>(addKI, (int64_t) max);
                 available -= addKI;
                 if(addKI <= 0) addKI = 1;
                 break;
             case 2:
-                addST = std::min(st, available);
-                addST = std::min(addST, (int64_t) max);
+                addST = std::min<int64_t>(st, available);
+                addST = std::min<int64_t>(addST, (int64_t) max);
                 available -= addST;
                 if(addST <= 0) addST = 1;
                 break;
         }
     }
 
-    ch->gainBaseStat("powerlevel", addPL);
+    ch->gainBaseStat("health", addPL);
     ch->gainBaseStat("ki", addKI);
     ch->gainBaseStat("stamina", addST);
 

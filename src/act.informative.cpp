@@ -114,9 +114,9 @@ ACMD(do_evolve) {
 
     // Define evolution costs
     std::vector<EvolutionCost> evolutionCosts = {
-        {(int64_t)(GET_LEVEL(ch) + (molt_threshold(ch) * 0.65) + (ch->getBasePL() * 0.15)), "powerlevel", GET_CON(ch)},
-        {(int64_t)(GET_LEVEL(ch) + (molt_threshold(ch) * 0.50) + (ch->getBaseKI() * 0.22)), "ki", GET_WIS(ch)},
-        {(int64_t)(GET_LEVEL(ch) + (molt_threshold(ch) * 0.50) + (ch->getBaseST() * 0.15)), "stamina", GET_CON(ch)},
+        {(int64_t)(GET_LEVEL(ch) + (molt_threshold(ch) * 0.65) + (ch->getBaseStat("health") * 0.15)), "health", GET_CON(ch)},
+        {(int64_t)(GET_LEVEL(ch) + (molt_threshold(ch) * 0.50) + (ch->getBaseStat("ki") * 0.22)), "ki", GET_WIS(ch)},
+        {(int64_t)(GET_LEVEL(ch) + (molt_threshold(ch) * 0.50) + (ch->getBaseStat("stamina") * 0.15)), "stamina", GET_CON(ch)},
     };
 
     if (!*arg) {
@@ -130,7 +130,7 @@ ACMD(do_evolve) {
     }
 
     auto findCost = [&arg](const EvolutionCost& cost) {
-        return !strcasecmp(arg, cost.name) || (!strcasecmp(arg, "pl") && !strcasecmp(cost.name, "powerlevel")) || 
+        return !strcasecmp(arg, cost.name) || (!strcasecmp(arg, "hp") && !strcasecmp(cost.name, "health")) || 
                (!strcasecmp(arg, "st") && !strcasecmp(cost.name, "stamina"));
     };
 
@@ -158,7 +158,7 @@ ACMD(do_evolve) {
     double diminishingReturns = std::max<double>((softCap - baseVal) / softCap, 0.05);
     int64_t bonusVal = static_cast<int64_t>(startBonus * diminishingReturns * 20);
 
-    bonusVal = std::min(bonusVal, ch->getBaseST() / 10);
+    bonusVal = std::min<int64_t>(bonusVal, ch->getBaseStat("stamina") / 10);
     ch->gainBaseStat(it->name, bonusVal);
     ch->modBaseStat<int64_t>("molt_experience", -it->cost);
     send_to_char(ch,
@@ -242,7 +242,7 @@ static void search_room(struct char_data *ch) {
     int prob = 0, found = 0;
     double bonus = 1.0, terrain = 1.0;
 
-    if ((ch->getCurST()) < GET_MAX_MOVE(ch) * 0.001) {
+    if ((ch->getCurVital(CharVital::stamina)) < GET_MAX_MOVE(ch) * 0.001) {
         send_to_char(ch, "You do not have enough stamina.\r\n");
         return;
     }
@@ -292,7 +292,7 @@ static void search_room(struct char_data *ch) {
             found++;
         }
     }
-    ch->decCurSTPercent(.001);
+    ch->modCurVitalDam(CharVital::stamina, .001);
 
 
     if (found == 0) {
@@ -376,11 +376,11 @@ ACMD(do_mimic) {
     if (race == ch->mimic) {
         send_to_char(ch, "You are already mimicing that race. To stop enter 'mimic stop'\r\n");
         return;
-    } else if (ch->getCurKI() < cost) {
+    } else if (ch->getCurVital(CharVital::ki) < cost) {
         send_to_char(ch, "You do not have enough ki to perform the technique.\r\n");
         return;
     } else if (prob < perc) {
-        ch->decCurKI(cost);
+        ch->modCurVital(CharVital::ki, -cost);
         act("@mYou concentrate and attempt to create an illusion to obscure your racial features. However you frown as you realize you have failed.@n",
             true, ch, nullptr, nullptr, TO_CHAR);
         act("@M$n@m concentrates and the light around them seems to shift and blur. It stops a moment later and $e frowns.@n",
@@ -389,7 +389,7 @@ ACMD(do_mimic) {
     } else {
         char buf[MAX_STRING_LENGTH];
         ch->mimic = race;
-        ch->decCurKI(cost);
+        ch->modCurVital(CharVital::ki, -cost);
         sprintf(buf,
                 "@M$n@m concentrates for a moment and $s features start to blur as light bends around $m. Now $e appears to be %s @M%s!@n",
                 AN(RACE(ch)), LRACE(ch));
@@ -1862,7 +1862,7 @@ static void diag_char_to_char(struct char_data *i, struct char_data *ch) {
     };
     int percent, ar_index;
 
-    int64_t hit = GET_HIT(i), max = (i->getMaxPL());
+    int64_t hit = GET_HIT(i), max = (i->getEffectiveStat("health"));
 
     int64_t total = max;
 
@@ -2122,25 +2122,25 @@ static void list_one_char(struct char_data *i, struct char_data *ch) {
     if (IS_NPC(i) && i->getRoomDescription() && GET_POS(i) == GET_DEFAULT_POS(i) && !FIGHTING(i)) {
         send_to_char(ch, "%s", i->getRoomDescription());
 
-        if (IS_NPC(i) && GET_HIT(i) >= (i->getMaxPL()) * .9 && GET_HIT(i) != (i->getMaxPL()))
+        if (IS_NPC(i) && GET_HIT(i) >= (i->getEffectiveStat("health")) * .9 && GET_HIT(i) != (i->getEffectiveStat("health")))
             act("@R...Some slight wounds on $s body.@w", true, i, nullptr, ch, TO_VICT);
-        else if (IS_NPC(i) && GET_HIT(i) >= (i->getMaxPL()) * .8 && GET_HIT(i) < (i->getMaxPL()) * .9)
+        else if (IS_NPC(i) && GET_HIT(i) >= (i->getEffectiveStat("health")) * .8 && GET_HIT(i) < (i->getEffectiveStat("health")) * .9)
             act("@R...A few wounds on $s body.@w", true, i, nullptr, ch, TO_VICT);
-        else if (IS_NPC(i) && GET_HIT(i) >= (i->getMaxPL()) * .7 && GET_HIT(i) < (i->getMaxPL()) * .8)
+        else if (IS_NPC(i) && GET_HIT(i) >= (i->getEffectiveStat("health")) * .7 && GET_HIT(i) < (i->getEffectiveStat("health")) * .8)
             act("@R...Many wounds on $s body.@w", true, i, nullptr, ch, TO_VICT);
-        else if (IS_NPC(i) && GET_HIT(i) >= (i->getMaxPL()) * .6 && GET_HIT(i) < (i->getMaxPL()) * .7)
+        else if (IS_NPC(i) && GET_HIT(i) >= (i->getEffectiveStat("health")) * .6 && GET_HIT(i) < (i->getEffectiveStat("health")) * .7)
             act("@R...Quite a few wounds on $s body.@w", true, i, nullptr, ch, TO_VICT);
-        else if (IS_NPC(i) && GET_HIT(i) >= (i->getMaxPL()) * .5 && GET_HIT(i) < (i->getMaxPL()) * .6)
+        else if (IS_NPC(i) && GET_HIT(i) >= (i->getEffectiveStat("health")) * .5 && GET_HIT(i) < (i->getEffectiveStat("health")) * .6)
             act("@R...Horrible wounds on $s body.@w", true, i, nullptr, ch, TO_VICT);
-        else if (IS_NPC(i) && GET_HIT(i) >= (i->getMaxPL()) * .4 && GET_HIT(i) < (i->getMaxPL()) * .5)
+        else if (IS_NPC(i) && GET_HIT(i) >= (i->getEffectiveStat("health")) * .4 && GET_HIT(i) < (i->getEffectiveStat("health")) * .5)
             act("@R...Blood is seeping from the wounds on $s body.@w", true, i, nullptr, ch, TO_VICT);
-        else if (IS_NPC(i) && GET_HIT(i) >= (i->getMaxPL()) * .3 && GET_HIT(i) < (i->getMaxPL()) * .4)
+        else if (IS_NPC(i) && GET_HIT(i) >= (i->getEffectiveStat("health")) * .3 && GET_HIT(i) < (i->getEffectiveStat("health")) * .4)
             act("@R...$s body is in terrible shape.@w", true, i, nullptr, ch, TO_VICT);
-        else if (IS_NPC(i) && GET_HIT(i) >= (i->getMaxPL()) * .2 && GET_HIT(i) < (i->getMaxPL()) * .3)
+        else if (IS_NPC(i) && GET_HIT(i) >= (i->getEffectiveStat("health")) * .2 && GET_HIT(i) < (i->getEffectiveStat("health")) * .3)
             act("@R...Is absolutely covered in wounds.@w", true, i, nullptr, ch, TO_VICT);
-        else if (IS_NPC(i) && GET_HIT(i) >= (i->getMaxPL()) * .1 && GET_HIT(i) < (i->getMaxPL()) * .2)
+        else if (IS_NPC(i) && GET_HIT(i) >= (i->getEffectiveStat("health")) * .1 && GET_HIT(i) < (i->getEffectiveStat("health")) * .2)
             act("@R...Is on $s last leg.@w", true, i, nullptr, ch, TO_VICT);
-        else if (IS_NPC(i) && GET_HIT(i) < (i->getMaxPL()) * .1)
+        else if (IS_NPC(i) && GET_HIT(i) < (i->getEffectiveStat("health")) * .1)
             act("@R...Should be DEAD soon.@w", true, i, nullptr, ch, TO_VICT);
 
 
@@ -3924,21 +3924,21 @@ ACMD(do_score) {
                      "  @cO@D-----------------------------@D[   @cHealth   @D]-----------------------------@cO@n\n");
         send_to_char(ch, "                          @D<@rPowerlevel@D>     [@B%s@D]             @n\n\n", add_commas(ch->getPL()).c_str());
         send_to_char(ch, "                 @D<@rHealth@D>              <@BKi@D>             <@GStamina@D>@n\n");
-        send_to_char(ch, "    @wCurrent   @D-[@R%-16s@D]-[@R%-16s@D]-[@R%-16s@D]@n\n", add_commas(ch->getCurPL()).c_str(),
+        send_to_char(ch, "    @wCurrent   @D-[@R%-16s@D]-[@R%-16s@D]-[@R%-16s@D]@n\n", add_commas(ch->getCurVital(CharVital::health)).c_str(),
                      add_commas(
-                             ch->getCurKI()).c_str(), add_commas(ch->getCurST()).c_str());
-        send_to_char(ch, "    @wMaximum   @D-[@r%-16s@D]-[@r%-16s@D]-[@r%-16s@D]@n\n", add_commas(ch->getMaxPL()).c_str(),
+                             ch->getCurVital(CharVital::ki)).c_str(), add_commas(ch->getCurVital(CharVital::stamina)).c_str());
+        send_to_char(ch, "    @wMaximum   @D-[@r%-16s@D]-[@r%-16s@D]-[@r%-16s@D]@n\n", add_commas(ch->getEffectiveStat("health")).c_str(),
                      add_commas(GET_MAX_MANA(ch)).c_str(), add_commas(GET_MAX_MOVE(ch)).c_str());
-        send_to_char(ch, "    @wBase      @D-[@m%-16s@D]-[@m%-16s@D]-[@m%-16s@D]@n\n", add_commas(ch->getEffBasePL()).c_str(),
+        send_to_char(ch, "    @wBase      @D-[@m%-16s@D]-[@m%-16s@D]-[@m%-16s@D]@n\n", add_commas(ch->getBaseStat("health")).c_str(),
                      add_commas(
-                             ch->getEffBaseKI()).c_str(), add_commas(ch->getEffBaseST()).c_str());
-        if (!IS_ANDROID(ch) && (ch->getCurLF()) > 0) {
+                             ch->getBaseStat("ki")).c_str(), add_commas(ch->getBaseStat("stamina")).c_str());
+        if (!IS_ANDROID(ch) && (ch->getCurVital(CharVital::lifeforce)) > 0) {
             send_to_char(ch, "    @wLife Force@D-[@C%16s@D%s@c%16s@D]- @wLife Percent@D-[@Y%3d%s@D]@n\n", add_commas(
-                    ch->getCurLF()).c_str(), "/", add_commas(ch->getMaxLF()).c_str(), GET_LIFEPERC(ch), "%");
+                    ch->getCurVital(CharVital::lifeforce)).c_str(), "/", add_commas(ch->getEffectiveStat("lifeforce")).c_str(), GET_LIFEPERC(ch), "%");
         } else if (!IS_ANDROID(ch)) {
             send_to_char(ch, "    @wLife Force@D-[@C%16s@D%s@c%16s@D]- @wLife Percent@D-[@Y%3d%s@D]@n\n", add_commas(0).c_str(),
                          "/", add_commas(
-                            ch->getMaxLF()).c_str(), GET_LIFEPERC(ch), "%");
+                            ch->getEffectiveStat("lifeforce")).c_str(), GET_LIFEPERC(ch), "%");
         }
     }
     std::string grav = "x1";

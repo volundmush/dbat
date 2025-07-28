@@ -418,7 +418,7 @@ void do_start(struct char_data *ch) {
 
     if (IS_ANDROID(ch) && ch->subrace == SubRace::android_model_sense) {
         SET_SKILL(ch, SKILL_SENSE, 100);
-        for(const auto& s : {"powerlevel", "ki", "stamina"}) {
+        for(const auto& s : {"health", "ki", "stamina"}) {
             ch->gainBaseStat(s, rand_number(400, 500));
         }
     }
@@ -632,12 +632,12 @@ void advance_level(struct char_data *ch) {
         }
 
         if (!IS_HUMAN(ch)) {
-            add_hp = ((ch->getBasePL()) * 0.01) * pl_percent;
+            add_hp = ((ch->getBaseStat("health")) * 0.01) * pl_percent;
         } else if (IS_HUMAN(ch)) {
-            add_hp = (((ch->getBasePL()) * 0.01) * pl_percent) * 0.8;
+            add_hp = (((ch->getBaseStat("health")) * 0.01) * pl_percent) * 0.8;
         }
-        add_mana = ((ch->getBaseKI()) * 0.01) * ki_percent;
-        add_move = ((ch->getBaseST()) * 0.01) * st_percent;
+        add_mana = ((ch->getBaseStat("ki")) * 0.01) * ki_percent;
+        add_move = ((ch->getBaseStat("stamina")) * 0.01) * st_percent;
         add_prac = prac_reward + GET_INT(ch);
     }
     if (add_hp >= 300000 && add_hp < 600000) {
@@ -788,9 +788,9 @@ void advance_level(struct char_data *ch) {
     if (lvl > 1) {
         /* blah */
     } else {
-        ch->gainBaseStat("powerlevel", rand_number(1, 20));
+        ch->gainBaseStat("health", rand_number(1, 20));
 
-        for(auto c : {"powerlevel", "ki", "stamina"}) {
+        for(auto c : {"health", "ki", "stamina"}) {
             if(ch->getBaseStat(c) < 250) ch->setBaseStat(c, 250);
         }
 
@@ -829,7 +829,7 @@ void advance_level(struct char_data *ch) {
         add_move *= 1.25;
     }
     ch->modPractices(add_prac);
-    ch->gainBaseStat("powerlevel", add_hp);
+    ch->gainBaseStat("health", add_hp);
     ch->gainBaseStat("ki", add_mana);
     ch->gainBaseStat("stamina", add_move);
     int nhp = add_hp;

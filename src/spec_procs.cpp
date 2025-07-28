@@ -199,7 +199,7 @@ SPECIAL(gauntlet_room)  /* Jamdog - 13th Feb 2006 */
             act("You are returned to the start of the Gauntlet", false, ch, nullptr, ch, TO_VICT);
 
             /* Hit point penalty for surrendering */
-            ch->decCurHealth(2000);
+            ch->modCurVital(CharVital::health, -2000);
 
             look_at_room(IN_ROOM(ch), ch, 0);
             return true;

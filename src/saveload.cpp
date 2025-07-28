@@ -1273,8 +1273,6 @@ void to_json(json& j, const char_data& c) {
         }
     }
 
-    if(!c.damages.empty()) j["damages"] = c.damages;
-
     for(auto i = 0; i < NUM_CONDITIONS; i++) {
         if(c.conditions[i]) j["conditions"].push_back(std::make_pair(i, c.conditions[i]));
     }
@@ -1358,8 +1356,6 @@ void from_json(const json& j, char_data& c) {
             c.limb_condition[i[0].get<int>()] = i[1];
         }
     }
-
-    if(j.contains("damages")) c.damages = j["damages"];
 
     if(j.contains("skill")) c.skill = j["skill"].get<std::map<Skill, skill_data>>();
 

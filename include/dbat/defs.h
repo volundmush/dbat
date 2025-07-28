@@ -2476,7 +2476,7 @@ enum class CharMoney : uint8_t {
 
 using vital_t = int64_t;
 enum class CharVital : uint8_t {
- powerlevel = 1 << 0,
+ health = 1 << 0,
  ki = 1 << 1,
  stamina = 1 << 2,
  lifeforce = 1 << 3

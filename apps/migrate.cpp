@@ -1082,7 +1082,7 @@ static int parse_simple_mob(FILE *mob_f, struct npc_proto_data *ch, mob_vnum nr)
     ch->setBaseStat("level", t[0]);
 
     /* max hit = 0 is a flag that H, M, V is xdy+z */
-    ch->setBaseStat("powerlevel", t[3]);
+    ch->setBaseStat("health", t[3]);
     ch->setBaseStat("ki", t[4]);
     ch->setBaseStat("stamina", t[5]);
 
@@ -2393,7 +2393,7 @@ static void load_BASE(struct char_data *ch, const char *line, int mode) {
 
     switch (mode) {
         case LOAD_HIT:
-            ch->setBaseStat("powerlevel", num);
+            ch->setBaseStat("health", num);
             break;
 
         case LOAD_MANA:
@@ -3431,7 +3431,7 @@ static void migrate_aff(affect_t *aff) {
             break;
         case 13: // old hit
             aff->location = APPLY_CVIT_BASE;
-            aff->specific = static_cast<int>(CharVital::powerlevel);
+            aff->specific = static_cast<int>(CharVital::health);
             break;
         case 14: // old stamina
             aff->location = APPLY_CVIT_BASE;
@@ -3439,7 +3439,7 @@ static void migrate_aff(affect_t *aff) {
             break;
         case 25: // old apply pl mult
             aff->location = APPLY_CVIT_MULT;
-            aff->specific = static_cast<int>(CharVital::powerlevel);
+            aff->specific = static_cast<int>(CharVital::health);
             break;
         case 26: // old apply ki mult
             aff->location = APPLY_CVIT_MULT;

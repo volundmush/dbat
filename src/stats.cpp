@@ -140,7 +140,7 @@ static void init_char_stats_vitals() {
     // vitals...
 
     static const std::vector<std::tuple<std::string, int>> vitals = {
-        {"powerlevel", 1 << 0},
+        {"health", 1 << 0},
         {"ki", 1 << 1},
         {"stamina", 1 << 2},
         {"lifeforce", 1 << 3}
@@ -156,13 +156,65 @@ static void init_char_stats_vitals() {
             .setApplyMultiplier(APPLY_CVIT_MULT)
             .setApplyPostMultiplier(APPLY_CVIT_POST)
             .addTag("vital")
+        
             ;
+        charStats.addStat(fmt::format("{}_damage", name))
+            .setInitFunc(0.0)
+            .setMinBaseValue(0.0)
+            //.setMaxBaseValue(100.0)
+            //.setSpecific(specific)
+            .addTag("vital_damage")
+            
+            ;
+
         npcProtoStats.addStat(name)
             .setInitFunc(100.0)
             .setMinBaseValue(0.0)
             .addTag("vital")
             ;
     }
+
+    charStats.addStat("lifeforce")
+        .setSetterFunc(nullptr)
+        .setGetterFunc([](struct char_data* target, const std::string& stat_name) {
+            auto lb = GET_LIFEBONUSES(target);
+
+            return (IS_DEMON(target) ? (((GET_MAX_MANA(target) * 0.5) + (GET_MAX_MOVE(target) * 0.5)) * 0.75) + lb
+                    : (IS_KONATSU(target) ? (((GET_MAX_MANA(target) * 0.5) + (GET_MAX_MOVE(target) * 0.5)) * 0.85) +
+                lb : (GET_MAX_MANA(target) * 0.5) +
+                                                                        (GET_MAX_MOVE(target) * 0.5) +
+                lb));
+        })
+        ;
+
+    for(const auto &s : {"health", "ki", "stamina"}) {
+        charStats.addStat(fmt::format("{}_damage", s))
+        .setOnChangeFunc([](struct char_data* target, const std::string& stat_name, double old_value, double new_value) {
+            // Handle vital changes here if needed
+            auto sh = target->shared();
+            if(new_value >= 0.0 && old_value < 0.0) {
+                characterSubscriptions.subscribe("characterVitalsRecovery", sh);
+            } else if(new_value <= 0.0 && old_value > 0.0) {
+                characterSubscriptions.unsubscribe("characterVitalsRecovery", sh);
+            }
+        })
+        ;
+    }
+    charStats.addStat("lifeforce_damage")
+        .setOnChangeFunc([](struct char_data* target, const std::string& stat_name, double old_value, double new_value) {
+            // Handle lifeforce changes here if needed
+            if(IS_ANDROID(target)) {
+                // Androids don't use lifeforce, so we skip this.
+                return;
+            }
+            auto sh = target->shared();
+            if(new_value >= 0.0 && old_value < 0.0) {
+                characterSubscriptions.subscribe("lifeforceSystem", sh);
+            } else if(new_value <= 0.0 && old_value > 0.0) {
+                characterSubscriptions.unsubscribe("lifeforceSystem", sh);
+            }
+        })
+        ;
 }
 
 static void init_char_stats_derived() {
@@ -179,7 +231,7 @@ static void init_char_stats_derived() {
             // Example derived stat calculation
             double out = target->getEffectiveStat("weight") + 100.0;
             out += target->getEffectiveStat("strength") * 50.0;
-            out += target->getEffectiveStat("powerlevel") / 200.0;
+            out += target->getEffectiveStat("health") / 200.0;
             return out;
         })
         .setSetterFunc(nullptr)

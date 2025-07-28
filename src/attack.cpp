@@ -100,7 +100,7 @@ namespace atk {
             return false;
         }
         currentStaminaCost = calculateStaminaCost();
-        if(user->getCurST() < currentStaminaCost) {
+        if(user->getCurVital(CharVital::stamina) < currentStaminaCost) {
             send_to_char(user, "You don't have enough stamina to do that!\r\n");
             return false;
         }
@@ -239,7 +239,7 @@ namespace atk {
             }
 
 
-            if(victim->getCurST() > 0) {
+            if(victim->getCurVital(CharVital::stamina) > 0) {
                 return calculateDefense();
             }
 
@@ -335,7 +335,7 @@ namespace atk {
         // Anything less than a clean hit costs half stamina.
         currentStaminaCost /= 2;
 
-        if(victim->getCurST() > 0) {
+        if(victim->getCurVital(CharVital::stamina) > 0) {
             if(canParry() && calculateDeflect()) return handleParry();
             if(canDodge() && currentDodgeCheck > axion_dice(10)) return handleDodge();
             if(canBlock() && currentBlockCheck > axion_dice(10)) return handleBlock();
@@ -581,14 +581,14 @@ namespace atk {
         double incomingDamage = calcDamage * (1 + victim->getAffectModifier(APPLY_COMBAT_MULT, static_cast<int>(ComStat::perfect_dodge)));
 
 
-        if(victim->getCurKI() > 0) {
+        if(victim->getCurVital(CharVital::ki) > 0) {
             if (currentDodgeCheck > axion_dice(10))
                 incomingDamage /= 10;
-            if(incomingDamage > victim->getMaxKI() / 5 && !incomingDamage > victim->getMaxKI() * 5)
-                incomingDamage = victim->getMaxKI() / 5;
+            if(incomingDamage > victim->getEffectiveStat("ki") / 5 && !incomingDamage > victim->getEffectiveStat("ki") * 5)
+                incomingDamage = victim->getEffectiveStat("ki") / 5;
 
-            
-            victim->decCurKI(incomingDamage);
+
+            victim->modCurVital(CharVital::ki, -incomingDamage);
 
             int instinct = GET_SKILL(user, (int16_t) Skill::instinctual_combat);
             if(instinct >= axion_dice(20)) {
@@ -599,7 +599,7 @@ namespace atk {
                 hurt(targetLimb, limbhurtChance(), victim, user, obj, (calcDamage / 2) * (instinct / 100), isKiAttack());
             }
         } else {
-            victim->decCurST(1.5 * incomingDamage);
+            victim->modCurVital(CharVital::stamina, -(1.5 * incomingDamage));
             actVictim("@WContinuing to dodge without Ki takes a heavy toll.@n");
         }
 
@@ -1544,14 +1544,14 @@ namespace atk {
         double incomingDamage = calcDamage * (1 + victim->getAffectModifier(APPLY_COMBAT_MULT, static_cast<int>(ComStat::perfect_dodge)));
 
 
-        if(victim->getCurKI() > 0) {
+        if(victim->getCurVital(CharVital::ki) > 0) {
             if (currentDodgeCheck > axion_dice(10))
                 incomingDamage /= 10;
-            if(incomingDamage > victim->getMaxKI() / 5 && !incomingDamage > victim->getMaxKI() * 5)
-                incomingDamage = victim->getMaxKI() / 5;
+            if(incomingDamage > victim->getEffectiveStat("ki") / 5 && !incomingDamage > victim->getEffectiveStat("ki") * 5)
+                incomingDamage = victim->getEffectiveStat("ki") / 5;
 
             
-            victim->decCurKI(incomingDamage);
+            victim->modCurVital(CharVital::ki, -incomingDamage);
 
             int instinct = GET_SKILL(user, (int16_t) Skill::instinctual_combat);
             if(instinct >= axion_dice(20)) {
@@ -1562,7 +1562,7 @@ namespace atk {
                 hurt(targetLimb, limbhurtChance(), victim, user, obj, (calcDamage / 2) * (instinct / 100), isKiAttack());
             }
         } else {
-            victim->decCurST(1.5 * incomingDamage);
+            victim->modCurVital(CharVital::stamina, -(1.5 * incomingDamage));
             actVictim("@WContinuing to dodge without Ki takes a heavy toll.@n");
         }
 
@@ -1714,7 +1714,7 @@ namespace atk {
             master_pass = true;
 
         if (master_pass == true && record > GET_HIT(victim) &&
-            (record - GET_HIT(victim) > (victim->getMaxPL()) * 0.025)) {
+            (record - GET_HIT(victim) > (victim->getEffectiveStat("health")) * 0.025)) {
             if (!AFF_FLAGGED(victim, AFF_KNOCKED) && !AFF_FLAGGED(victim, AFF_SANCTUARY)) {
                 act("@C$N@W is knocked out!@n", true, user, nullptr, victim, TO_CHAR);
                 act("@WYou are knocked out!@n", true, user, nullptr, victim, TO_VICT);
@@ -1877,7 +1877,7 @@ namespace atk {
             master_pass = true;
 
         if (master_pass == true) {
-            victim->decCurST(calcDamage);
+            victim->modCurVital(CharVital::stamina, -calcDamage);
             act("@CYour tsuihidan hits a vital spot and seems to sap some of @c$N's@C stamina!@n", true, user,
                 nullptr, victim, TO_CHAR);
             act("@C$n's@C tsuihidan hits a vital spot and saps some of your stamina!@n", true, user, nullptr, victim,
@@ -2102,11 +2102,11 @@ namespace atk {
 
     void Kamehameha::postProcess() {
         if (GET_SKILL(user, getSkill()) >= 100) {
-            user->incCurKI((GET_MAX_MANA(user) * attPerc) * 0.25);
+            user->modCurVital(CharVital::ki, (GET_MAX_MANA(user) * attPerc) * 0.25);
         } else if (GET_SKILL(user, getSkill()) >= 60) {
-            user->incCurKI((GET_MAX_MANA(user) * attPerc) * 0.1);
+            user->modCurVital(CharVital::ki, (GET_MAX_MANA(user) * attPerc) * 0.1);
         } else if (GET_SKILL(user, getSkill()) >= 40) {
-            user->incCurKI((GET_MAX_MANA(user) * attPerc) * 0.05);
+            user->modCurVital(CharVital::ki, (GET_MAX_MANA(user) * attPerc) * 0.05);
         }
     }
 
@@ -2195,7 +2195,7 @@ namespace atk {
     // Dodonpa
     void Dodonpa::attackPostprocess() {
         if (rand_number(1, 3) == 2) {
-            victim->decCurKI(calcDamage / 4);
+            victim->modCurVital(CharVital::ki, -(calcDamage / 4));
             send_to_char(victim, "@RYou feel some of your ki drained away by the attack!@n\r\n");
         }
     }
@@ -2266,11 +2266,11 @@ namespace atk {
 
     void DeathBeam::attackPostprocess() {
         if (initSkill >= 100 && GET_HIT(victim) >= 2) {
-            victim->decCurLF(calcDamage * .4, -1);
+            victim->modCurVital(CharVital::lifeforce, -(calcDamage * .4));
         } else if (initSkill >= 60 && GET_HIT(victim) >= 2) {
-            victim->decCurLF(calcDamage * .2, -1);
+            victim->modCurVital(CharVital::lifeforce, -(calcDamage * .2, -1));
         } else if (initSkill >= 40 && GET_HIT(victim) >= 2) {
-            victim->decCurLF(calcDamage * .05, -1);
+            victim->modCurVital(CharVital::lifeforce, -(calcDamage * .05, -1));
         }
     }
 
@@ -2303,11 +2303,11 @@ namespace atk {
     // EraserCannon
     void EraserCannon::postProcess() {
         if (initSkill >= 100) {
-            user->decCurKI((GET_MAX_MANA(user) * attPerc) * 0.15);
+            user->modCurVital(CharVital::ki, -((GET_MAX_MANA(user) * attPerc) * 0.15));
         } else if (initSkill >= 60) {
-            user->decCurKI((GET_MAX_MANA(user) * attPerc) * 0.1);
+            user->modCurVital(CharVital::ki, -((GET_MAX_MANA(user) * attPerc) * 0.1));
         } else if (initSkill >= 40) {
-            user->decCurKI((GET_MAX_MANA(user) * attPerc) * 0.05);
+            user->modCurVital(CharVital::ki, -((GET_MAX_MANA(user) * attPerc) * 0.05));
         }
     }
 
@@ -2776,11 +2776,11 @@ namespace atk {
     // Tribeam
     void Tribeam::attackPreprocess() {
         if (initSkill >= 100) {
-            calcDamage += (user->getMaxLF()) * 0.20;
+            calcDamage += (user->getEffectiveStat("lifeforce")) * 0.20;
         } else if (initSkill >= 60) {
-            calcDamage += (user->getMaxLF()) * 0.10;
+            calcDamage += (user->getEffectiveStat("lifeforce")) * 0.10;
         } else if (initSkill >= 40) {
-            calcDamage += (user->getMaxLF()) * 0.05;
+            calcDamage += (user->getEffectiveStat("lifeforce")) * 0.05;
         }
     }
 
@@ -3595,8 +3595,8 @@ namespace atk {
             reduction = reduction - GET_HIT(victim);
 
             if ((!IS_NPC(victim) && !AFF_FLAGGED(victim, AFF_SPIRIT)) || (IS_NPC(victim) && GET_HIT(victim) > 0)) {
-                victim->decCurKI(reduction);
-                victim->decCurST(reduction);
+                victim->modCurVital(CharVital::ki, -reduction);
+                victim->modCurVital(CharVital::stamina, -reduction);
             }
         }
     }
@@ -3659,11 +3659,11 @@ namespace atk {
 
     void WaterSpike::postProcess() {
         if (initSkill >= 100) {
-            user->incCurKI((user->getMaxKI() * attPerc) * .3);
+            user->modCurVital(CharVital::ki, (user->getEffectiveStat("ki") * attPerc) * .3);
         } else if (initSkill >= 60) {
-            user->incCurKI((user->getMaxKI() * attPerc) * .1);
+            user->modCurVital(CharVital::ki, (user->getEffectiveStat("ki") * attPerc) * .1);
         } else if (initSkill >= 40) {
-            user->incCurKI((user->getMaxKI() * attPerc) * .05);
+            user->modCurVital(CharVital::ki, (user->getEffectiveStat("ki") * attPerc) * .05);
         }
     }
 
@@ -4083,7 +4083,7 @@ namespace atk {
                 assign_affect(victim, AFF_POISON, SKILL_POISON, duration, 0, 0, 0, 0, 0, 0);
             }
         }
-        if((user->form == Form::lycanthrope && victim->getCurHealthPercent() <= 0.2) || user->form == Form::alpha_lycanthrope) {
+        if((user->form == Form::lycanthrope && victim->getCurVitalMeterPercent(CharVital::health) <= .2) || user->form == Form::alpha_lycanthrope) {
             if(!victim->transforms.contains(Form::lycanthrope) && axion_dice(0) <= 30) {
                 victim->addTransform(Form::lycanthrope);
                 send_to_char(victim, "@rYour heart races, you feel like something is about to tear free of you.@n\n");
@@ -4741,7 +4741,7 @@ namespace atk {
     }
 
     void Slash::attackPostprocess() {
-        if (beforepl - GET_HIT(victim) >= (victim->getMaxPL()) * 0.025) {
+        if (beforepl - GET_HIT(victim) >= (victim->getEffectiveStat("health")) * 0.025) {
             cut_limb(user, victim, wlvl, hitspot);
         }
     }

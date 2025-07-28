@@ -155,11 +155,11 @@ namespace trans {
 
             // Demon
             case Form::dark_king:
-                if(ch->getBasePL() >= 600000000)
+                if(ch->getBaseStat("health") >= 600000000)
                     return "@bDark @rKing@n";
-                else if (ch->getBasePL() >= 50000000)
+                else if (ch->getBaseStat("health") >= 50000000)
                     return "@bDark @yLord@n";
-                else if (ch->getBasePL() >= 2000000)
+                else if (ch->getBaseStat("health") >= 2000000)
                     return "@bDark @yCourtier@n";
                 else
                     return "@bDark @ySeed@n";
@@ -1111,7 +1111,7 @@ namespace trans {
             Form::dark_king, {
                 {APPLY_CVIT_MULT,   0.0, ~0,                    [](struct char_data *ch) {
                     double base;
-                    auto bpl = ch->getBasePL();
+                    auto bpl = ch->getBaseStat("health");
                     if(bpl < 2000000)
                         base = 1.0;
                     else if(bpl < 50000000)
@@ -1125,8 +1125,8 @@ namespace trans {
                     }},
                 {APPLY_COMBAT_MULT, 0.0, static_cast<int>(ComStat::damage), [](struct char_data *ch) {
                     double base;
-                    if(ch->getCurLF() > 0) {
-                        auto bpl = ch->getBasePL();
+                    if(ch->getCurVital(CharVital::lifeforce) > 0) {
+                        auto bpl = ch->getBaseStat("health");
 
                         if(bpl < 2000000) {
                             base = 0.4;
@@ -1143,16 +1143,16 @@ namespace trans {
 
                         send_to_char(ch, "@MYour tainted lifeforce infuses your attack with a sickly purple hue!@n");
 
-                        base = base * ch->decCurLFPercent(0.05);
+                        base = base * ch->modCurVitalDam(CharVital::lifeforce, 0.05);
                     }
 
                     return base + ((base/10) * getMasteryTier(ch, Form::dark_king));
                 }},
                 {APPLY_COMBAT_MULT, 0.0, static_cast<int>(ComStat::defense), [](struct char_data *ch) {
                     double base = 0.0;
-                    if(ch->getCurLF() > 0) {
+                    if(ch->getCurVital(CharVital::lifeforce) > 0) {
                         int chance = 30;
-                        auto bpl = ch->getBasePL();
+                        auto bpl = ch->getBaseStat("health");
 
                         if(bpl < 2000000) {
                             chance = 30;
@@ -1172,13 +1172,13 @@ namespace trans {
                         }
 
                         if(axion_dice(0) <= chance && GET_BARRIER(ch) <= 0) {
-                            ch->setBaseStat("barrier", ch->getCurLF() / 5);
+                            ch->setBaseStat("barrier", ch->getCurVital(CharVital::lifeforce) / 5);
                             send_to_char(ch, "@MThe mantle of your tainted life flares out, creating a barrier.@n");
                         }
                         else
                             send_to_char(ch, "@MYour tainted lifeforce saps the strength of your opponents attack!@n");
 
-                        ch->decCurLFPercent(0.05);
+                        ch->modCurVitalDam(CharVital::lifeforce, 0.05);
                     } else {
                         send_to_char(ch, "@MYou feel far too exhausted to strengthen yourself!@n");
                     }
@@ -1253,7 +1253,7 @@ namespace trans {
                 {APPLY_CVIT_MULT,   0.0, ~0,                    [](struct char_data *ch) {return 0.5 + (0.1 * getMasteryTier(ch, Form::lesser_lycanthrope));}},
                 {APPLY_DTYPE_BON,   0.0, static_cast<int>(DamType::physical),            [](struct char_data *ch) {return 0.2 * 1.0 + (0.10 * getMasteryTier(ch, Form::lesser_lycanthrope));}},
                 {APPLY_COMBAT_MULT,      0.0, static_cast<int>(ComStat::parry),                    [](struct char_data *ch) {return 0.2 * 1.0 + (0.10 * getMasteryTier(ch, Form::lesser_lycanthrope));}},
-                {APPLY_CVIT_REGEN_MULT, 0.0, static_cast<int>(CharVital::powerlevel), [](struct char_data *ch) {return 0.1 * 1.0 + (0.10 * getMasteryTier(ch, Form::lesser_lycanthrope));}},
+                {APPLY_CVIT_REGEN_MULT, 0.0, static_cast<int>(CharVital::health), [](struct char_data *ch) {return 0.1 * 1.0 + (0.10 * getMasteryTier(ch, Form::lesser_lycanthrope));}},
                 {APPLY_DTYPE_RES, 0.0, static_cast<int>(DamType::physical), [](struct char_data *ch) {return 0.3 * 1.0 + (0.10 * getMasteryTier(ch, Form::lesser_lycanthrope));}},
                 {APPLY_DTYPE_RES, 0.0, static_cast<int>(DamType::physical), [](struct char_data *ch) {return 0.2 * 1.0 + (0.10 * getMasteryTier(ch, Form::lesser_lycanthrope));}},
             }
@@ -1263,7 +1263,7 @@ namespace trans {
                 {APPLY_CVIT_MULT,   0.0, ~0,                    [](struct char_data *ch) {return 1.0 + (0.1 * getMasteryTier(ch, Form::lycanthrope));}},
                 {APPLY_DTYPE_BON,   0.0, static_cast<int>(DamType::physical),            [](struct char_data *ch) {return 0.4 * 1.0 + (0.10 * getMasteryTier(ch, Form::lycanthrope));}},
                 {APPLY_COMBAT_MULT,      0.0, static_cast<int>(ComStat::parry),                    [](struct char_data *ch) {return 0.3 * 1.0 + (0.10 * getMasteryTier(ch, Form::lycanthrope));}},
-                {APPLY_CVIT_REGEN_MULT, 0.0, static_cast<int>(CharVital::powerlevel), [](struct char_data *ch) {return 0.2 * 1.0 + (0.10 * getMasteryTier(ch, Form::lycanthrope));}},
+                {APPLY_CVIT_REGEN_MULT, 0.0, static_cast<int>(CharVital::health), [](struct char_data *ch) {return 0.2 * 1.0 + (0.10 * getMasteryTier(ch, Form::lycanthrope));}},
                 {APPLY_DTYPE_RES, 0.0, static_cast<int>(DamType::physical), [](struct char_data *ch) {return 0.5 * 1.0 + (0.10 * getMasteryTier(ch, Form::lycanthrope));}},
                 {APPLY_DTYPE_RES, 0.0, static_cast<int>(DamType::physical), [](struct char_data *ch) {return 0.25 * 1.0 + (0.10 * getMasteryTier(ch, Form::lycanthrope));}},
             }
@@ -1273,7 +1273,7 @@ namespace trans {
                 {APPLY_CVIT_MULT,   0.0, ~0,                    [](struct char_data *ch) {return 1.4 + (0.1 * getMasteryTier(ch, Form::alpha_lycanthrope));}},
                 {APPLY_DTYPE_BON,   0.0, static_cast<int>(DamType::physical),            [](struct char_data *ch) {return 0.7 * 1.0 + (0.10 * getMasteryTier(ch, Form::alpha_lycanthrope));}},
                 {APPLY_COMBAT_MULT,      0.0, static_cast<int>(ComStat::parry),                    [](struct char_data *ch) {return 0.4 * 1.0 + (0.10 * getMasteryTier(ch, Form::alpha_lycanthrope));}},
-                {APPLY_CVIT_REGEN_MULT, 0.0, static_cast<int>(CharVital::powerlevel), [](struct char_data *ch) {return 0.4 * 1.0 + (0.10 * getMasteryTier(ch, Form::alpha_lycanthrope));}},
+                {APPLY_CVIT_REGEN_MULT, 0.0, static_cast<int>(CharVital::health), [](struct char_data *ch) {return 0.4 * 1.0 + (0.10 * getMasteryTier(ch, Form::alpha_lycanthrope));}},
                 {APPLY_DTYPE_RES, 0.0, static_cast<int>(DamType::physical), [](struct char_data *ch) {return 0.8 * 1.0 + (0.10 * getMasteryTier(ch, Form::alpha_lycanthrope));}},
                 {APPLY_DTYPE_RES, 0.0, static_cast<int>(DamType::ki), [](struct char_data *ch) {return 0.4 * 1.0 + (0.10 * getMasteryTier(ch, Form::alpha_lycanthrope));}},
             }
@@ -1297,14 +1297,14 @@ namespace trans {
         {
             Form::evil_aura, {
                 {APPLY_CVIT_MULT,   0.0, ~0,                    [](struct char_data *ch) { return 2.0 + (0.2 * getMasteryTier(ch, Form::evil_aura));}},
-                {APPLY_CVIT_MULT,     0.0, static_cast<int>(CharVital::powerlevel), [](struct char_data *ch) {
-	                double healthBoost = ch->getCurVitalDam(CharVital::powerlevel) * 5.0;
+                {APPLY_CVIT_MULT,     0.0, static_cast<int>(CharVital::health), [](struct char_data *ch) {
+	                double healthBoost = ch->getCurVitalDam(CharVital::health) * 5.0;
 	                return healthBoost + (0.2 * getMasteryTier(ch, Form::evil_aura));
                 }},
                 {APPLY_CVIT_BASE,        0.0, ~0,                        [](struct char_data *ch) { return 1300000 * 1.0 + (0.2 * getMasteryTier(ch, Form::evil_aura));}},
                 {APPLY_COMBAT_MULT, 0.0, static_cast<int>(ComStat::damage), [](struct char_data *ch) {
                     double healthBoost = 0.1;
-                    auto chealth = 1.0 - ch->getCurVitalDam(CharVital::powerlevel);
+                    auto chealth = 1.0 - ch->getCurVitalDam(CharVital::health);
                     if(chealth < 0.75) {
                         healthBoost = (1 - chealth) * (4 + (0.2 * getMasteryTier(ch, Form::evil_aura)));
 
@@ -1359,7 +1359,7 @@ namespace trans {
         // Techniques
         {
             Form::kaioken, {
-                {APPLY_CVIT_MULT,   0.0, static_cast<int>(CharVital::powerlevel), [](struct char_data *ch) {return 0.1 * (ch->transforms[Form::kaioken].grade);}},
+                {APPLY_CVIT_MULT,   0.0, static_cast<int>(CharVital::health), [](struct char_data *ch) {return 0.1 * (ch->transforms[Form::kaioken].grade);}},
                 {APPLY_COMBAT_MULT,     0.0, static_cast<int>(ComStat::damage),            [](struct char_data *ch) {
                     double mult = (1 + (0.05 * getMasteryTier(ch, Form::kaioken)));
                     if (axion_dice(0) <= (GET_SKILL(ch, (int)Skill::kaioken) * mult)) {
@@ -1369,13 +1369,13 @@ namespace trans {
                         return (0.06 * ch->transforms[Form::kaioken].grade) * mult;
                     }
                     return 0.03 * (ch->transforms[Form::kaioken].grade);}},
-                {APPLY_CVIT_REGEN_MULT, 0.0, static_cast<int>(CharVital::powerlevel), [](struct char_data *ch) {return -0.05 * (ch->transforms[Form::kaioken].grade) + (0.01 * getMasteryTier(ch, Form::kaioken));}},
+                {APPLY_CVIT_REGEN_MULT, 0.0, static_cast<int>(CharVital::health), [](struct char_data *ch) {return -0.05 * (ch->transforms[Form::kaioken].grade) + (0.01 * getMasteryTier(ch, Form::kaioken));}},
                 {APPLY_CVIT_REGEN_MULT, 0.0, static_cast<int>(CharVital::ki),         [](struct char_data *ch) {return -0.05 * (ch->transforms[Form::kaioken].grade) + (0.01 * getMasteryTier(ch, Form::kaioken));}},
             }
         },
         {
             Form::dark_metamorphosis, {
-                {APPLY_CVIT_MULT,   0.0, static_cast<int>(CharVital::powerlevel), [](struct char_data *ch) {return 0.6 * (ch->transforms[Form::dark_metamorphosis].grade) + (0.05 * getMasteryTier(ch, Form::dark_metamorphosis));}},
+                {APPLY_CVIT_MULT,   0.0, static_cast<int>(CharVital::health), [](struct char_data *ch) {return 0.6 * (ch->transforms[Form::dark_metamorphosis].grade) + (0.05 * getMasteryTier(ch, Form::dark_metamorphosis));}},
                 {APPLY_DTYPE_BON,   0.0, static_cast<int>(DamType::ki),                    [](struct char_data *ch) {
                     double mult = (1 + (0.05 * getMasteryTier(ch, Form::dark_metamorphosis)));
 
@@ -1652,9 +1652,9 @@ namespace trans {
             double kigain = getModifierHelper(ch, form, APPLY_CVIT_REGEN_MULT,
                                               static_cast<int>(CharVital::ki));
             double plgain = getModifierHelper(ch, form, APPLY_CVIT_REGEN_MULT,
-                                              -static_cast<int>(CharVital::powerlevel));
-            ch->incCurHealthPercent(plgain);
-            ch->incCurKIPercent(kigain);
+                                              -static_cast<int>(CharVital::health));
+            ch->modCurVitalDam(CharVital::health, -plgain);
+            ch->modCurVitalDam(CharVital::ki, -kigain);
 
             // Notify at thresholds
             if(form != Form::base) {
@@ -1681,7 +1681,7 @@ namespace trans {
 
             // Check stamina drain.
             if (auto drain = (getStaminaDrain(ch, ch->form, true) + getStaminaDrain(ch, ch->technique, true)) * deltaTime; drain > 0) {
-                if(ch->decCurSTPercent(drain) == 0) {
+                if(ch->modCurVitalDam(CharVital::stamina, drain) == 0) {
                     act("@mExhausted of stamina, your body forcibly reverts from its form.@n\r\n", true, ch, nullptr,
                         nullptr, TO_CHAR);
                     act("@C$n @wbreathing heavily, reverts from $s form, returning to normal.@n\r\n", true, ch, nullptr,
@@ -2609,7 +2609,7 @@ namespace trans {
     }
 
     void revert(char_data *ch) {
-        int64_t beforeKi = ch->getMaxKI();
+        int64_t beforeKi = ch->getEffectiveStat("ki");
         if(ch->form != Form::base) {
             onRevert(ch, ch->form);
             ch->form = Form::base;
@@ -2620,7 +2620,7 @@ namespace trans {
             ch->technique = Form::base;
             if(ch->form == Form::base) characterSubscriptions.unsubscribe("transforms", ch);
         }
-        int64_t afterKi = ch->getMaxKI();
+        int64_t afterKi = ch->getEffectiveStat("ki");
 
         if (beforeKi > afterKi && GET_BARRIER(ch) > 0) {
             int64_t barrier = GET_BARRIER(ch);
@@ -2632,7 +2632,7 @@ namespace trans {
     }
 
     void transform(char_data *ch, Form form, int grade) {
-        int64_t beforeKi = ch->getMaxKI();
+        int64_t beforeKi = ch->getEffectiveStat("ki");
         if (grade > getMaxGrade(ch, form)) {
             grade = getMaxGrade(ch, form);
             send_to_char(ch, "The max grade of this form is %s!\r\nSetting to max.\r\n", std::to_string(grade));
@@ -2659,7 +2659,7 @@ namespace trans {
         characterSubscriptions.subscribe("transforms", ch);
         onTransform(ch, form);
 
-        int64_t afterKi = ch->getMaxKI();
+        int64_t afterKi = ch->getEffectiveStat("ki");
 
         if (beforeKi > afterKi && GET_BARRIER(ch) > 0) {
             int64_t barrier = GET_BARRIER(ch);

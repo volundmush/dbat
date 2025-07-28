@@ -87,7 +87,7 @@ static card basicTrain = {"Basic Enhancement (Training)",
         switch(rand) {
             case 0:
                 bonus = APPLY_CVIT_GAIN_MULT;
-                specific = static_cast<int>(CharVital::powerlevel);
+                specific = static_cast<int>(CharVital::health);
                 break;
             case 1:
                 bonus = APPLY_CVIT_GAIN_MULT;
@@ -148,7 +148,7 @@ static card improvedTrain = {"Improved Enhancement (Training)",
         switch(rand) {
             case 0:
                 bonus = APPLY_CVIT_GAIN_MULT;
-                specific = static_cast<int>(CharVital::powerlevel);
+                specific = static_cast<int>(CharVital::health);
                 break;
             case 1:
                 bonus = APPLY_CVIT_GAIN_MULT;
@@ -208,7 +208,7 @@ static card expertTrain = {"Expert Enhancement (Training)",
         switch(rand) {
             case 0:
                 bonus = APPLY_CVIT_GAIN_MULT;
-                specific = static_cast<int>(CharVital::powerlevel);
+                specific = static_cast<int>(CharVital::health);
                 break;
             case 1:
                 bonus = APPLY_CVIT_GAIN_MULT;
@@ -255,7 +255,7 @@ static card tuffleArtisany = {"Tuffle Artisany",
                 break;
             case 3:
                 bonus = APPLY_CVIT_MULT;
-                specific = static_cast<int>(CharVital::powerlevel);
+                specific = static_cast<int>(CharVital::health);
                 break;
             case 4:
                 bonus = APPLY_CVIT_MULT;
@@ -307,7 +307,7 @@ static card tuffleIngenuity = {"Tuffle Ingenuity",
                 break;
             case 3:
                 bonus = APPLY_CVIT_MULT;
-                specific = static_cast<int>(CharVital::powerlevel);
+                specific = static_cast<int>(CharVital::health);
                 break;
             case 4:
                 bonus = APPLY_CVIT_MULT;
@@ -370,16 +370,16 @@ static card comprehension = {   "Comprehension",
         int64_t ki = (GET_WIS(ch) / 2) * Random::get<double>(0.8, 1.2) * ch->getPotential();
         int64_t st = (GET_CON(ch) / 2) * Random::get<double>(0.8, 1.2) * ch->getPotential();
 
-        pl *= (1 + ch->getAffectModifier(APPLY_CVIT_MULT, static_cast<int>(CharVital::powerlevel)));
+        pl *= (1 + ch->getAffectModifier(APPLY_CVIT_MULT, static_cast<int>(CharVital::health)));
         ki *= (1 + ch->getAffectModifier(APPLY_CVIT_MULT, static_cast<int>(CharVital::ki)));
         st *= (1 + ch->getAffectModifier(APPLY_CVIT_MULT, static_cast<int>(CharVital::stamina)));
 
-        if(pl > (ch->getBasePL() / 10)) pl = ch->getBasePL() / 10;
-        if(ki > (ch->getBaseKI() / 10)) ki = ch->getBaseKI() / 10;
-        if(st > (ch->getBaseST() / 10)) st = ch->getBaseST() / 10;
+        if(pl > (ch->getBaseStat("health") / 10)) pl = ch->getBaseStat("health") / 10;
+        if(ki > (ch->getBaseStat("ki") / 10)) ki = ch->getBaseStat("ki") / 10;
+        if(st > (ch->getBaseStat("stamina") / 10)) st = ch->getBaseStat("stamina") / 10;
 
         send_to_char(ch, "@D[@Y+ @R%s @rPL@D]@n\r\n", add_commas(pl).c_str());
-        ch->gainBaseStat("powerlevel", pl);
+        ch->gainBaseStat("health", pl);
         send_to_char(ch, "@D[@Y+ @B%s @bKI@D]@n\r\n", add_commas(ki).c_str());
         ch->gainBaseStat("ki", ki);
         send_to_char(ch, "@D[@Y+ @G%s @gST@D]@n\r\n", add_commas(st).c_str());

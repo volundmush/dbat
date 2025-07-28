@@ -298,7 +298,7 @@ ACMD(do_throw) {
             return;
         }
 
-        if ((ch->getCurST()) < ((GET_MAX_HIT(ch) / 200) + GET_OBJ_WEIGHT(obj))) {
+        if ((ch->getCurVital(CharVital::stamina)) < ((GET_MAX_HIT(ch) / 200) + GET_OBJ_WEIGHT(obj))) {
             send_to_char(ch, "You do not have enough stamina to do it...\r\n");
             return;
         }
@@ -439,7 +439,7 @@ ACMD(do_throw) {
                     act("You throw $p at $N@n, but it melts before touching $M!", true, ch, obj, vict, TO_CHAR);
                     act("$n@n throws $p at $N@n, but it melts before touching $M!", true, ch, obj, vict, TO_NOTVICT);
                     act("$n@n throws $p at you, but it melts before touching you!", true, ch, obj, vict, TO_VICT);
-                    ch->decCurST(((GET_MAX_HIT(ch) / 100) + GET_OBJ_WEIGHT(obj)));
+                    ch->modCurVital(CharVital::stamina, -((GET_MAX_HIT(ch) / 100) + GET_OBJ_WEIGHT(obj)));
                     extract_obj(obj);
                     return;
                 }
@@ -452,7 +452,7 @@ ACMD(do_throw) {
                     act("$n@n throws $p at $N@n, but unfortunatly misses!", true, ch, obj, vict, TO_NOTVICT);
                     act("$n@n throws $p at you, but thankfully misses you.", true, ch, obj, vict, TO_VICT);
                 }
-                ch->decCurST(((GET_MAX_HIT(ch) / 100) + GET_OBJ_WEIGHT(obj)));
+                ch->modCurVital(CharVital::stamina, -((GET_MAX_HIT(ch) / 100) + GET_OBJ_WEIGHT(obj)));
                 if (!OBJ_FLAGGED(obj, ITEM_UNBREAKABLE)) {
                     MOD_OBJ_VAL(obj, VAL_ALL_HEALTH, -odam / 2);
                 }
@@ -460,7 +460,7 @@ ACMD(do_throw) {
                 hurt(0, 0, ch, vict, nullptr, 0, 0);
                 obj_from_char(obj);
                 obj_to_room(obj, IN_ROOM(vict));
-                ch->decCurST(((GET_MAX_HIT(ch) / 200) + GET_OBJ_WEIGHT(obj)));
+                ch->modCurVital(CharVital::stamina, -((GET_MAX_HIT(ch) / 200) + GET_OBJ_WEIGHT(obj)));
                 if (!GET_EQ(ch, WEAR_WIELD1) && !GET_EQ(ch, WEAR_WIELD2))
                     perc += 20;
                 if (perc + GET_CHA(ch) >= chance + penalty && multithrow == true && GET_HIT(vict) > 1 &&
@@ -479,7 +479,7 @@ ACMD(do_throw) {
             } else if (perc - (perc2 / 10) > prob) {
                 miss = false;
             }
-            if (!IS_NPC(ch) && PRF_FLAGGED(ch, PRF_ENERGIZE) && (ch->getCurKI()) >= GET_MAX_MANA(ch) * 0.02) {
+            if (!IS_NPC(ch) && PRF_FLAGGED(ch, PRF_ENERGIZE) && (ch->getCurVital(CharVital::ki)) >= GET_MAX_MANA(ch) * 0.02) {
                 damage += (damage * (0.0016 * GET_SKILL(ch, SKILL_ENERGIZE)));
                 act("You charge $p with the energy in your fingertips! As it begins to @Yglow a bright hot @Rred@n you throw $p at $N@n full speed, and watch it smash into $M!",
                     true, ch, obj, vict, TO_CHAR);
@@ -488,9 +488,9 @@ ACMD(do_throw) {
                 act("$n@n charges $p with the energy in $s fingertips! As it begins to @Yglow a bright hot @Rred@n $e throws $p at YOU@n full speed, and watches it smash into YOU!!",
                     true, ch, obj, vict, TO_VICT);
                 if (GET_MAX_MANA(ch) * 0.02 > 0) {
-                    ch->decCurKI(ch->getMaxKI() * .02);
+                    ch->modCurVital(CharVital::ki, -(ch->getEffectiveStat("ki") * .02));
                 } else {
-                    ch->decCurKI(1);
+                    ch->modCurVital(CharVital::ki, -1);
                 }
                 improve_skill(ch, SKILL_ENERGIZE, 0);
             } else if (wtype == 0) {
@@ -552,7 +552,7 @@ ACMD(do_throw) {
                 }
                 if (OBJ_FLAGGED(obj, ITEM_ICE)) {
                     if (!IS_ANDROID(vict) && !IS_ICER(vict)) {
-                        vict->decCurST((vict->getMaxST() * .005) + GET_OBJ_WEIGHT(obj));
+                        vict->modCurVital(CharVital::stamina, -((vict->getEffectiveStat("stamina") * .005) + GET_OBJ_WEIGHT(obj)));
                         act("@mYou lose some stamina to the @ccold@m!@n", true, ch, nullptr, vict, TO_VICT);
                         act("@C$N@m loses some stamina to the @ccold@m!@n", true, ch, nullptr, vict, TO_CHAR);
                         act("@C$N@m loses some stamina to the @ccold@m!@n", true, ch, nullptr, vict, TO_NOTVICT);
@@ -579,7 +579,7 @@ ACMD(do_throw) {
             obj_from_char(obj);
             obj_to_room(obj, IN_ROOM(vict));
 
-            ch->decCurST(((GET_MAX_HIT(ch) / 200) + GET_OBJ_WEIGHT(obj)));
+            ch->modCurVital(CharVital::stamina, -((GET_MAX_HIT(ch) / 200) + GET_OBJ_WEIGHT(obj)));
             if (!GET_EQ(ch, WEAR_WIELD1) && !GET_EQ(ch, WEAR_WIELD2))
                 perc += 12;
             if (perc + GET_CHA(ch) >= chance + penalty && multithrow == true && GET_HIT(vict) > 1 && ch->getBaseStat<int>("throws") > 1) {
@@ -613,7 +613,7 @@ ACMD(do_throw) {
             grab = true;
         }
 
-        if ((ch->getCurST()) < ((GET_MAX_HIT(ch) / 100) + tch->getBaseStat("weight_total"))) {
+        if ((ch->getCurVital(CharVital::stamina)) < ((GET_MAX_HIT(ch) / 100) + tch->getBaseStat("weight_total"))) {
             send_to_char(ch, "You do not have enough stamina to do it...\r\n");
             return;
         }
@@ -630,7 +630,7 @@ ACMD(do_throw) {
                 nullptr, tch, TO_NOTVICT);
             hurt(0, 0, ch, tch, nullptr, 0, 0);
             handle_cooldown(ch, 5);
-            ch->decCurST((GET_MAX_HIT(ch) / 200) + tch->getEffectiveStat("weight"));
+            ch->modCurVital(CharVital::stamina, -((GET_MAX_HIT(ch) / 200) + tch->getEffectiveStat("weight")));
             return;
         } else {
             handle_cooldown(ch, 5);
@@ -668,7 +668,7 @@ ACMD(do_throw) {
                     act("@WThrown through the air, @C$n@W flies at @c$N@W, but the throw is a miss! @C$n@W recovers $s bearingsa moment later!@n",
                         true, tch, nullptr, vict, TO_NOTVICT);
                 }
-                ch->decCurST(((GET_MAX_HIT(ch) / 100) + tch->getEffectiveStat("weight")));
+                ch->modCurVital(CharVital::stamina, -((GET_MAX_HIT(ch) / 100) + tch->getEffectiveStat("weight")));
                 act("@W--@R$N@W--@n", true, ch, nullptr, vict, TO_CHAR);
                 act("@W--@R$N@W--@n", true, tch, nullptr, vict, TO_CHAR);
                 act("@W--@RYOU@W--@n", true, vict, nullptr, nullptr, TO_CHAR);
@@ -703,7 +703,7 @@ ACMD(do_throw) {
                 act("@W--@RYOU@W--@n", true, tch, nullptr, nullptr, TO_CHAR);
                 hurt(0, 0, ch, tch, nullptr, damage, 0);
             }
-            ch->decCurST(((GET_MAX_HIT(ch) / 200) + tch->getEffectiveStat("weight")));
+            ch->modCurVital(CharVital::stamina, -((GET_MAX_HIT(ch) / 200) + tch->getEffectiveStat("weight")));
             WAIT_STATE(ch, PULSE_3SEC);
         }
     } /* End throwing character. */
@@ -776,9 +776,9 @@ ACMD(do_selfd) {
         tch = GRAPPLING(ch);
         dmg += GET_CHARGE(ch);
         ch->setBaseStat<int64_t>("charge", 0);
-        dmg += ch->getBasePL() * 0.6;
-        dmg += ch->getBaseST();
-        ch->decCurHealthPercent(1, 1);
+        dmg += ch->getBaseStat("health") * 0.6;
+        dmg += ch->getBaseStat("stamina");
+        ch->modCurVitalDam(CharVital::health, 1);
         ch->setBaseStat("suppression", 0);
         act("@RYou EXPLODE! The explosion concentrates on @r$N@R, engulfing $M in a sphere of deadly energy!@n", true,
             ch, nullptr, tch, TO_CHAR);
@@ -809,10 +809,10 @@ ACMD(do_selfd) {
     } else {
         dmg += GET_CHARGE(ch);
         ch->setBaseStat<int64_t>("charge", 0);
-        dmg += (ch->getBasePL()) * 0.6;
-        dmg += (ch->getBaseST());
+        dmg += (ch->getBaseStat("health")) * 0.6;
+        dmg += (ch->getBaseStat("stamina"));
         dmg *= 1.5;
-        ch->decCurHealthPercent(1, 1);
+        ch->modCurVitalDam(CharVital::health, 1);
         ch->setBaseStat("suppression", 0);
         act("@RYou EXPLODE! The explosion expands outward burning up all surroundings for a large distance. The explosion takes on the shape of a large energy dome with you at its center!@n",
             true, ch, nullptr, nullptr, TO_CHAR);

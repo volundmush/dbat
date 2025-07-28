@@ -329,7 +329,7 @@ static int has_flight(struct char_data *ch) {
             return 1;
 
         // Check if the character has enough KI to keep flying
-        if (ch->getCurKI() >= (GET_MAX_MANA(ch) / (GET_WIS(ch) * 30)))
+        if (ch->getCurVital(CharVital::ki) >= (GET_MAX_MANA(ch) / (GET_WIS(ch) * 30)))
             return 1;
 
         // If out of KI, crash to the ground
@@ -451,10 +451,10 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
 
     if (r->getEnvironment(ENV_WATER) >= 100.0 || dest->getEnvironment(ENV_WATER) >= 100.0) {
         if (!has_o2(ch) &&
-            ((group_bonus(ch, 2) != 10 && (ch->getCurKI()) < GET_MAX_MANA(ch) / 200) || (group_bonus(ch, 2) == 10 &&
-                                                                                         (ch->getCurKI()) <
+            ((group_bonus(ch, 2) != 10 && (ch->getCurVital(CharVital::ki)) < GET_MAX_MANA(ch) / 200) || (group_bonus(ch, 2) == 10 &&
+                                                                                         (ch->getCurVital(CharVital::ki)) <
                                                                                          GET_MAX_MANA(ch) / 800))) {
-            if (ch->decCurHealthPercent(0.05) > 0) {
+            if (ch->modCurVitalDam(CharVital::health, 0.05) > 0) {
                 send_to_char(ch, "@RYou struggle to breath!@n\r\n");
             }
             else {
@@ -464,14 +464,14 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
             }
         }
         if (!has_o2(ch) &&
-            ((group_bonus(ch, 2) != 10 && (ch->getCurKI()) >= GET_MAX_MANA(ch) / 200) || (group_bonus(ch, 2) == 10 &&
-                                                                                          (ch->getCurKI()) >=
+            ((group_bonus(ch, 2) != 10 && (ch->getCurVital(CharVital::ki)) >= GET_MAX_MANA(ch) / 200) || (group_bonus(ch, 2) == 10 &&
+                                                                                          (ch->getCurVital(CharVital::ki)) >=
                                                                                           GET_MAX_MANA(ch) / 800))) {
             send_to_char(ch, "@CYou hold your breath!@n\r\n");
             if (group_bonus(ch, 2) == 10) {
-                ch->decCurKI(ch->getMaxKI() / 800);
+                ch->modCurVital(CharVital::ki, -(ch->getEffectiveStat("ki") / 800));
             } else {
-                ch->decCurKI(ch->getMaxKI() / 200);
+                ch->modCurVital(CharVital::ki, -(ch->getEffectiveStat("ki") / 200));
             }
         }
     }
@@ -507,16 +507,16 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
         }
     }
 
-    if (AFF_FLAGGED(ch, AFF_FLYING) && ((ch->getCurKI()) < flight_cost) && !IS_ANDROID(ch)) {
-        ch->decCurKI(flight_cost);
+    if (AFF_FLAGGED(ch, AFF_FLYING) && ((ch->getCurVital(CharVital::ki)) < flight_cost) && !IS_ANDROID(ch)) {
+        ch->modCurVital(CharVital::ki, -flight_cost);
         act("@WYou crash to the ground, too tired to fly anymore!@n", true, ch, nullptr, nullptr, TO_CHAR);
         act("@W$n@W crashes to the ground!@n", true, ch, nullptr, nullptr, TO_ROOM);
         ch->affect_flags.set(AFF_FLYING, false);
     } else if (AFF_FLAGGED(ch, AFF_FLYING) && !IS_ANDROID(ch)) {
-        ch->decCurKI(flight_cost);
+        ch->modCurVital(CharVital::ki, -flight_cost);
     }
 
-    if ((ch->getCurST()) < need_movement && !AFF_FLAGGED(ch, AFF_FLYING) && !IS_NPC(ch)) {
+    if ((ch->getCurVital(CharVital::stamina)) < need_movement && !AFF_FLAGGED(ch, AFF_FLYING) && !IS_NPC(ch)) {
         if (need_specials_check && ch->master) {
             send_to_char(ch, "You are too exhausted to follow.\r\n");
         } else {
@@ -533,7 +533,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
                          spell_info[e->dcskill].name);
             /* A failed skill check still spends the movement points! */
             if (!ADM_FLAGGED(ch, ADM_WALKANYWHERE) && !IS_NPC(ch) && !AFF_FLAGGED(ch, AFF_FLYING))
-                ch->decCurST(need_movement);
+                ch->modCurVital(CharVital::stamina, -need_movement);
             return (0);
         } else {
             send_to_char(ch, "Your skill in %s aids in your movement.\r\n", spell_info[e->dcskill].name);
@@ -591,7 +591,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
 
     /* Now we know we're allowed to go into the room. */
     if (!ADM_FLAGGED(ch, ADM_WALKANYWHERE) && !IS_NPC(ch) && !AFF_FLAGGED(ch, AFF_FLYING)) {
-        ch->decCurST(need_movement);
+        ch->modCurVital(CharVital::stamina, -need_movement);
     }
 
     if (AFF_FLAGGED(ch, AFF_SNEAK) && !IS_NPC(ch)) {
@@ -703,7 +703,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
             if (IS_NPC(ch) && IS_HUMANOID(ch) && rand_number(1, 2) == 2) {
                 do_fly(ch, nullptr, 0, 0);
             }
-            ch->decCurHealth(ch->getMaxPL() / 20);
+            ch->modCurVital(CharVital::health, -(ch->getEffectiveStat("health") / 20));
             if (GET_HIT(ch) <= 0) {
                 act("@rYou have burned to death!@n", true, ch, nullptr, nullptr, TO_CHAR);
                 act("@R$n@r has burned to death!@n", true, ch, nullptr, nullptr, TO_ROOM);
@@ -713,7 +713,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
         if (DRAGGING(ch) && !IS_DEMON(DRAGGING(ch))) {
             act("@R$N@r gets burned!@n", true, ch, nullptr, DRAGGING(ch), TO_CHAR);
             act("@R$N@r gets burned!@n", true, ch, nullptr, DRAGGING(ch), TO_ROOM);
-            DRAGGING(ch)->decCurHealth(DRAGGING(ch)->getMaxPL() / 20);
+            DRAGGING(ch)->modCurVital(CharVital::health, -(DRAGGING(ch)->getEffectiveStat("health") / 20));
             if (GET_HIT(DRAGGING(ch)) < 0) {
                 act("@rYou have burned to death!@n", true, DRAGGING(ch), nullptr, nullptr, TO_CHAR);
                 act("@R$n@r has burned to death!@n", true, DRAGGING(ch), nullptr, nullptr, TO_ROOM);
@@ -1457,15 +1457,15 @@ static int ok_pick(struct char_data *ch, obj_vnum keynum, int pickproof, int dcl
    * thieves' tools. If the player has them, that modifier will be accounted
    * for in roll_skill, and negate (or surpass) this.
    */
-    } else if ((ch->getCurST()) < GET_MAX_MOVE(ch) / 30) {
+    } else if ((ch->getCurVital(CharVital::stamina)) < GET_MAX_MOVE(ch) / 30) {
         send_to_char(ch, "You don't have the stamina to try, it takes percision to pick locks."
                          "Not shaking tired hands.\r\n");
     } else if (dclock > (skill_lvl - 2)) {
         send_to_char(ch, "You failed to pick the lock...\r\n");
         act("@c$n@w puts a set of lockpick tools away.@n", true, ch, nullptr, nullptr, TO_ROOM);
-        ch->decCurST(ch->getCurST() / 30);
+        ch->modCurVital(CharVital::stamina, -(ch->getCurVital(CharVital::stamina) / 30));
     } else {
-        ch->decCurST(ch->getCurST() / 30);
+        ch->modCurVital(CharVital::stamina, -(ch->getCurVital(CharVital::stamina) / 30));
         return (1);
     }
 
@@ -1583,7 +1583,7 @@ static int do_simple_enter(struct char_data *ch, struct obj_data *obj, int need_
     if (GET_LEVEL(ch) <= 1) {
         need_movement = 0;
     }
-    if ((ch->getCurST()) < need_movement && !AFF_FLAGGED(ch, AFF_FLYING) && !IS_NPC(ch)) {
+    if ((ch->getCurVital(CharVital::stamina)) < need_movement && !AFF_FLAGGED(ch, AFF_FLYING) && !IS_NPC(ch)) {
         if (need_specials_check && ch->master)
             send_to_char(ch, "You are too exhausted to follow.\r\n");
         else
@@ -1608,7 +1608,7 @@ static int do_simple_enter(struct char_data *ch, struct obj_data *obj, int need_
     }
     /* Now we know we're allowed to go into the room. */
     if (!(IS_NPC(ch) || ADM_FLAGGED(ch, ADM_WALKANYWHERE)) && !AFF_FLAGGED(ch, AFF_FLYING))
-        ch->decCurST(need_movement);
+        ch->modCurVital(CharVital::stamina, -need_movement);
 
     act("$n enters $p.", true, ch, obj, nullptr, TO_ROOM | TO_SNEAKRESIST);
 
@@ -1810,7 +1810,7 @@ static int do_simple_leave(struct char_data *ch, struct obj_data *obj, int need_
     /* move points needed is avg. move loss for src and destination sect type */
     need_movement = calcNeedMovementGravity(ch);
 
-    if (ch->getCurST() < need_movement && !AFF_FLAGGED(ch, AFF_FLYING) && !IS_NPC(ch)) {
+    if (ch->getCurVital(CharVital::stamina) < need_movement && !AFF_FLAGGED(ch, AFF_FLYING) && !IS_NPC(ch)) {
         if (need_specials_check && ch->master)
             send_to_char(ch, "You are too exhausted to follow.\r\n");
         else
@@ -1829,7 +1829,7 @@ static int do_simple_leave(struct char_data *ch, struct obj_data *obj, int need_
     }
     /* Now we know we're allowed to go into the room. */
     if (!(IS_NPC(ch) || ADM_FLAGGED(ch, ADM_WALKANYWHERE)) && !AFF_FLAGGED(ch, AFF_FLYING))
-        ch->decCurST(need_movement);
+        ch->modCurVital(CharVital::stamina, -need_movement);
 
     act("$n leaves $p.", true, ch, vehicle, nullptr, TO_ROOM | TO_SNEAKRESIST);
 
@@ -1978,7 +1978,7 @@ static void handle_fall(struct char_data *ch) {
         }
         if (!EXIT(ch, 5) || ch->getLocationTileType() != SECT_FLYING) {
             act("@r$n slams into the ground!@n", true, ch, nullptr, nullptr, TO_ROOM);
-            ch->decCurHealth(ch->getMaxPL() / 20, 1);
+            ch->modCurVital(CharVital::health, -(ch->getEffectiveStat("health") / 20));
 
             act("@rYou slam into the ground!@n", true, ch, nullptr, nullptr, TO_CHAR);
             look_at_room(IN_ROOM(ch), ch, 0);
@@ -1987,20 +1987,20 @@ static void handle_fall(struct char_data *ch) {
         }
     }
     if (ch->getLocationTileType() == SECT_WATER_NOSWIM && !CARRIED_BY(ch) && !IS_KANASSAN(ch)) {
-        if ((ch->getCurST()) >= (ch->getEffectiveStat("weight_carried"))) {
+        if ((ch->getCurVital(CharVital::stamina)) >= (ch->getEffectiveStat("weight_carried"))) {
             act("@bYou swim in place.@n", true, ch, nullptr, nullptr, TO_CHAR);
             act("@C$n@b swims in place.@n", true, ch, nullptr, nullptr, TO_ROOM);
-            ch->decCurST(ch->getEffectiveStat("weight_carried"));
+            ch->modCurVital(CharVital::stamina, -ch->getEffectiveStat("weight_carried"));
             act("@RYou are drowning!@n", true, ch, nullptr, nullptr, TO_CHAR);
             act("@C$n@b gulps water as $e struggles to stay above the water line.@n", true, ch, nullptr, nullptr,
                 TO_ROOM);
-            if (GET_HIT(ch) - ((ch->getMaxPL()) / 3) <= 0) {
+            if (GET_HIT(ch) - ((ch->getEffectiveStat("health")) / 3) <= 0) {
                 act("@rYou drown!@n", true, ch, nullptr, nullptr, TO_CHAR);
                 act("@R$n@r drowns!@n", true, ch, nullptr, nullptr, TO_ROOM);
                 die(ch, nullptr);
-                ch->decCurHealthPercent(1, 1);
+                ch->modCurVitalDam(CharVital::health, 1);
             } else {
-                ch->decCurHealthPercent(.33);
+                ch->modCurVitalDam(CharVital::health, .33);
             }
         }
     }
@@ -2012,15 +2012,15 @@ static int check_swim(struct char_data *ch) {
 
     if (ch->getWhereFlag(WhereFlag::space)) {
         auto space_cost = (GET_MAX_MANA(ch) / 1000) + ((ch->getEffectiveStat("weight_carried")) / 2);
-        can = ch->getCurKI() >= space_cost;
-        ch->decCurKI(space_cost);
+        can = ch->getCurVital(CharVital::ki) >= space_cost;
+        ch->modCurVitalDam(CharVital::ki, -space_cost);
         if (!can) send_to_char(ch, "You do not have enough ki to fly through space. You are drifting helplessly.\r\n");
         return can;
     }
 
     auto swim_cost = (ch->getEffectiveStat("weight_carried")) - 1;
-    can = ch->getCurST() >= swim_cost;
-    ch->decCurST(swim_cost);
+    can = ch->getCurVital(CharVital::stamina) >= swim_cost;
+    ch->modCurVital(CharVital::stamina, -swim_cost);
     if (!can) send_to_char(ch, "You are too tired to swim!\r\n");
     return can;
 }

@@ -1606,13 +1606,13 @@ static void do_stat_character(struct char_data *ch, struct char_data *k) {
                  GET_STR(k), GET_INT(k), GET_WIS(k), GET_DEX(k), GET_CON(k), GET_CHA(k));
 
     send_to_char(ch, "PL :[@g%12s@n]  KI :[@g%12s@n]  ST :[@g%12s@n]\r\n",
-                 add_commas(GET_HIT(k)).c_str(), add_commas((k->getCurKI())).c_str(), add_commas((k->getCurST())).c_str());
+                 add_commas(GET_HIT(k)).c_str(), add_commas((k->getCurVital(CharVital::ki))).c_str(), add_commas((k->getCurVital(CharVital::stamina))).c_str());
     send_to_char(ch, "MPL:[@g%12s@n]  MKI:[@g%12s@n]  MST:[@g%12s@n]\r\n",
                  add_commas(GET_MAX_HIT(k)).c_str(), add_commas(GET_MAX_MANA(k)).c_str(), add_commas(GET_MAX_MOVE(k)).c_str());
     send_to_char(ch, "BPL:[@g%12s@n]  BKI:[@g%12s@n]  BST:[@g%12s@n]\r\n",
-                 add_commas((k->getBasePL())).c_str(), add_commas((k->getBaseKI())).c_str(), add_commas((k->getBaseST())).c_str());
+                 add_commas((k->getBaseStat("health"))).c_str(), add_commas((k->getBaseStat("ki"))).c_str(), add_commas((k->getBaseStat("stamina"))).c_str());
     send_to_char(ch, "LF :[@g%12s@n]  MLF:[@g%12s@n]  LFP:[@g%3d@n]\r\n",
-                 add_commas((k->getCurLF())).c_str(), add_commas((k->getMaxLF())).c_str(), GET_LIFEPERC(k));
+                 add_commas((k->getCurVital(CharVital::lifeforce))).c_str(), add_commas((k->getEffectiveStat("lifeforce"))).c_str(), GET_LIFEPERC(k));
 
     if (GET_ADMLEVEL(k))
         send_to_char(ch, "Admin Level: [@y%d - %s@n]\r\n", GET_ADMLEVEL(k), admin_level_names[GET_ADMLEVEL(k)]);
@@ -2274,14 +2274,14 @@ ACMD(do_rpreward) {
         int growthGain = 4;
     }
 
-    double boundPL = log(ch->getBasePL());
-    double boundKI = log(ch->getBaseKI());
-    double boundST = log(ch->getBaseST());
+    double boundPL = log(ch->getBaseStat("health"));
+    double boundKI = log(ch->getBaseStat("ki"));
+    double boundST = log(ch->getBaseStat("stamina"));
 
     vict->modRPP(rppGain);
     vict->gainGrowth(growthGain);
 
-    vict->gainBaseStatPercent("powerlevel", vitalsGain * (1.0 / boundPL));
+    vict->gainBaseStatPercent("health", vitalsGain * (1.0 / boundPL));
     vict->gainBaseStatPercent("ki", vitalsGain * (1.0 / boundKI));
     vict->gainBaseStatPercent("stamina", vitalsGain * (1.0 / boundST));
 
@@ -2575,7 +2575,7 @@ ACMD(do_advance) {
     } else if ((newlevel = atoi(level)) <= 0) {
         if (!strcasecmp("demote", level)) {
             victim->setBaseStat<int>("level", 1);
-            victim->setBaseStat("powerlevel",150);
+            victim->setBaseStat("health",150);
             victim->setBaseStat("ki",150);
             victim->setBaseStat("stamina",150);
             send_to_char(ch, "They have now been demoted!\r\n");
@@ -4085,7 +4085,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
 
 
         case 64:
-            vict->setBaseStat("powerlevel",value);
+            vict->setBaseStat("health",value);
             mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set basepl for %s.", GET_NAME(ch),
                    GET_NAME(vict));
             log_imm_action("SET: %s has set basepl for %s.", GET_NAME(ch), GET_NAME(vict));

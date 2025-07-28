@@ -815,7 +815,7 @@ void club_stamina(struct char_data *ch, struct char_data *vict, int wlvl, int64_
         drain += 0.05;
 
     drained = dmg * drain;
-    vict->decCurST(drained);
+    vict->modCurVital(CharVital::stamina, -drained);
 
     send_to_char(ch, "@D[@YVictim's @GStamina @cLoss@W: @g%s@D]@n\r\n", add_commas(drained).c_str());
     send_to_char(vict, "@D[@rYour @GStamina @cLoss@W: @g%s@D]@n\r\n", add_commas(drained).c_str());
@@ -1105,7 +1105,7 @@ int64_t advanced_energy(struct char_data *ch, int64_t dmg) {
                 act("@MThe attack causes your weak control to slip and you are shocked by your own charged energy!@n",
                     true, ch, nullptr, nullptr, TO_CHAR);
                 act("@m$n@M suffers shock from their own charged energy!@n", true, ch, nullptr, nullptr, TO_ROOM);
-                ch->decCurHealth(GET_CHARGE(ch) / 4, 1);
+                ch->modCurVital(CharVital::health, -(GET_CHARGE(ch) / 4));
             }
             add = dmg * rate;
         }
@@ -1376,13 +1376,13 @@ void hurt_limb(struct char_data *ch, struct char_data *vict, int chance, int are
         return;
     }
 
-    if (power > (vict->getMaxPL()) * 0.5) {
+    if (power > (vict->getEffectiveStat("health")) * 0.5) {
         dmg = rand_number(25, 40);
-    } else if (power > (vict->getMaxPL()) * 0.25) {
+    } else if (power > (vict->getEffectiveStat("health")) * 0.25) {
         dmg = rand_number(15, 24);
-    } else if (power > (vict->getMaxPL()) * 0.10) {
+    } else if (power > (vict->getEffectiveStat("health")) * 0.10) {
         dmg = rand_number(8, 14);
-    } else if (power > (vict->getMaxPL()) * 0.05) {
+    } else if (power > (vict->getEffectiveStat("health")) * 0.05) {
         dmg = rand_number(4, 7);
     } else {
         dmg = rand_number(1, 3);;
@@ -1698,7 +1698,7 @@ void huge_update(uint64_t heartPulse, double deltaTime) {
                             dge = handle_dodge(vict);
                             if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) ||
                                  AFF_FLAGGED(vict, AFF_ZANZOKEN)) &&
-                                (vict->getCurST()) >= 1 && GET_POS(vict) != POS_SLEEPING) {
+                                (vict->getCurVital(CharVital::stamina)) >= 1 && GET_POS(vict) != POS_SLEEPING) {
                                 act("@C$N@c disappears, avoiding the explosion!@n", false, ch, nullptr, vict, TO_CHAR);
                                 act("@cYou disappear, avoiding the explosion!@n", false, ch, nullptr, vict, TO_VICT);
                                 act("@C$N@c disappears, avoiding the explosion!@n", false, ch, nullptr, vict,
@@ -1754,7 +1754,7 @@ void huge_update(uint64_t heartPulse, double deltaTime) {
                         act("@C$n@W manages to unbelievably overpower the attack! It is lifted up into the sky and tossed away dramaticly!@n",
                             true, TARGET(k), nullptr, nullptr, TO_ROOM);
                         hurt(0, 0, ch, TARGET(k), nullptr, 0, 1);
-                        TARGET(k)->decCurST(KICHARGE(k) / 4);
+                        TARGET(k)->modCurVital(CharVital::stamina, -(KICHARGE(k) / 4));
                         extract_obj(k);
                         continue;
                     }
@@ -1792,7 +1792,7 @@ void huge_update(uint64_t heartPulse, double deltaTime) {
                         dge = handle_dodge(vict);
                         if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) ||
                              AFF_FLAGGED(vict, AFF_ZANZOKEN)) &&
-                            (vict->getCurST()) >= 1 && GET_POS(vict) != POS_SLEEPING) {
+                            (vict->getCurVital(CharVital::stamina)) >= 1 && GET_POS(vict) != POS_SLEEPING) {
                             act("@C$N@c disappears, avoiding the explosion!@n", false, ch, nullptr, vict, TO_CHAR);
                             act("@cYou disappear, avoiding the explosion!@n", false, ch, nullptr, vict, TO_VICT);
                             act("@C$N@c disappears, avoiding the explosion!@n", false, ch, nullptr, vict, TO_NOTVICT);
@@ -1881,7 +1881,7 @@ void huge_update(uint64_t heartPulse, double deltaTime) {
                             dge = handle_dodge(vict);
                             if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) ||
                                  AFF_FLAGGED(vict, AFF_ZANZOKEN)) &&
-                                (vict->getCurST()) >= 1 && GET_POS(vict) != POS_SLEEPING) {
+                                (vict->getCurVital(CharVital::stamina)) >= 1 && GET_POS(vict) != POS_SLEEPING) {
                                 act("@C$N@c disappears, avoiding the explosion!@n", false, ch, nullptr, vict, TO_CHAR);
                                 act("@cYou disappear, avoiding the explosion!@n", false, ch, nullptr, vict, TO_VICT);
                                 act("@C$N@c disappears, avoiding the explosion!@n", false, ch, nullptr, vict,
@@ -1935,7 +1935,7 @@ void huge_update(uint64_t heartPulse, double deltaTime) {
                         act("@C$n@W manages to unbelievably overpower the attack! It is lifted up into the sky and tossed away dramaticly!@n",
                             true, TARGET(k), nullptr, nullptr, TO_ROOM);
                         hurt(0, 0, ch, TARGET(k), nullptr, 0, 1);
-                        TARGET(k)->decCurST(KICHARGE(k) / 4);
+                        TARGET(k)->modCurVital(CharVital::stamina, -(KICHARGE(k) / 4));
                         extract_obj(k);
                         continue;
                     }
@@ -1973,7 +1973,7 @@ void huge_update(uint64_t heartPulse, double deltaTime) {
                         dge = handle_dodge(vict);
                         if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) ||
                              AFF_FLAGGED(vict, AFF_ZANZOKEN)) &&
-                            (vict->getCurST()) >= 1 && GET_POS(vict) != POS_SLEEPING) {
+                            (vict->getCurVital(CharVital::stamina)) >= 1 && GET_POS(vict) != POS_SLEEPING) {
                             act("@C$N@c disappears, avoiding the explosion!@n", false, ch, nullptr, vict, TO_CHAR);
                             act("@cYou disappear, avoiding the explosion!@n", false, ch, nullptr, vict, TO_VICT);
                             act("@C$N@c disappears, avoiding the explosion!@n", false, ch, nullptr, vict, TO_NOTVICT);
@@ -2123,25 +2123,25 @@ void homing_update(uint64_t heartPulse, double deltaTime) {
                             }
                         } else if (dmg > GET_MAX_HIT(vict) / 5 && (IS_MAJIN(vict) || IS_BIO(vict))) {
                             if (GET_SKILL(vict, SKILL_REGENERATE) > rand_number(1, 101) &&
-                                (vict->getCurKI()) >= GET_MAX_MANA(vict) / 40) {
+                                (vict->getCurVital(CharVital::ki)) >= GET_MAX_MANA(vict) / 40) {
                                 act("@R$N@r is cut in half by the attack but regenerates a moment later!@n", true,
                                     ch, nullptr, vict, TO_CHAR);
                                 act("@rYou are cut in half by the attack but regenerate a moment later!@n", true,
                                     ch, nullptr, vict, TO_VICT);
                                 act("@R$N@r is cut in half by the attack but regenerates a moment later!@n", true,
                                     ch, nullptr, vict, TO_NOTVICT);
-                                vict->decCurKI(vict->getMaxKI() / 40);
+                                vict->modCurVital(CharVital::ki, -(vict->getEffectiveStat("ki") / 40));
                                 hurt(0, 0, ch, vict, nullptr, dmg, 1);
                             } else if (dmg > GET_MAX_HIT(vict) / 5 && (IS_MAJIN(vict) || IS_BIO(vict))) {
                                 if (GET_SKILL(vict, SKILL_REGENERATE) > rand_number(1, 101) &&
-                                    (vict->getCurKI()) >= GET_MAX_MANA(vict) / 40) {
+                                    (vict->getCurVital(CharVital::ki)) >= GET_MAX_MANA(vict) / 40) {
                                     act("@R$N@r is cut in half by the attack but regenerates a moment later!@n",
                                         true, ch, nullptr, vict, TO_CHAR);
                                     act("@rYou are cut in half by the attack but regenerate a moment later!@n",
                                         true, ch, nullptr, vict, TO_VICT);
                                     act("@R$N@r is cut in half by the attack but regenerates a moment later!@n",
                                         true, ch, nullptr, vict, TO_NOTVICT);
-                                    vict->decCurKI(vict->getMaxKI() / 40);
+                                    vict->modCurVital(CharVital::ki, -(vict->getEffectiveStat("ki") / 40));
                                     hurt(0, 0, ch, vict, nullptr, dmg, 1);
                                 } else {
                                     act("@R$N@r is cut in half by the attack!@n", true, ch, nullptr, vict, TO_CHAR);
@@ -3321,10 +3321,10 @@ int64_t damtype(struct char_data *ch, int type, int skill, double percent) {
 
                 if (!IS_NPC(ch) && percent > 0.15) {
                     double hitperc = (percent - 0.15) * 5;
-                    int64_t amount = ch->getMaxPL() * hitperc;
+                    int64_t amount = ch->getEffectiveStat("health") * hitperc;
                     int64_t difference = GET_HIT(ch) - amount;
 
-                    ch->decCurHealth(amount, 1);
+                    ch->modCurVital(CharVital::health, -amount);
 
                     damtype_focus(ch, &dam, focus, 200);
                 } else {
@@ -3580,12 +3580,12 @@ void saiyan_gain(struct char_data *ch, struct char_data *vict) {
     }
 
     std::vector<int64_t> stats;
-    for (const auto stat: {CharVital::powerlevel, CharVital::ki, CharVital::stamina}) {
+    for (const auto stat: {CharVital::health, CharVital::ki, CharVital::stamina}) {
         if (!ch->is_soft_cap((int) stat, 1.0))
             stats.push_back((int) stat);
     }
 
-    if(ch->technique == Form::tiger_stance) stats.push_back((int) CharVital::powerlevel);
+    if(ch->technique == Form::tiger_stance) stats.push_back((int) CharVital::health);
     if(ch->technique == Form::eagle_stance) stats.push_back((int) CharVital::ki);
     if(ch->technique == Form::ox_stance) stats.push_back((int) CharVital::stamina);
 
@@ -3600,15 +3600,15 @@ void saiyan_gain(struct char_data *ch, struct char_data *vict) {
     double base = 0;
     switch (*itr) {
         case 0:
-            base = ch->getBasePL();
+            base = ch->getBaseStat("health");
             attrBonus = (1 + (GET_CON(ch) / 20));
             break;
         case 1:
-            base = ch->getBaseKI();
+            base = ch->getBaseStat("ki");
             attrBonus = (1 + (GET_WIS(ch) / 20));
             break;
         case 2:
-            base = ch->getBaseST();
+            base = ch->getBaseStat("stamina");
             attrBonus = (1 + (GET_CON(ch) / 20));
             break;
     }
@@ -3630,9 +3630,9 @@ void saiyan_gain(struct char_data *ch, struct char_data *vict) {
 
     switch (*itr) {
         case 0:
-            bonus *= (1 + ch->getAffectModifier(APPLY_CVIT_MULT, static_cast<int>(CharVital::powerlevel)));
-            ch->gainBaseStat("powerlevel", bonus);
-            send_to_char(ch, "@D[@YSaiyan @RBlood@D] @WYou feel slightly stronger. @D[@G+%s@D]@n\r\n",
+            bonus *= (1 + ch->getAffectModifier(APPLY_CVIT_MULT, static_cast<int>(CharVital::health)));
+            ch->gainBaseStat("health", bonus);
+            send_to_char(ch, "@D[@YSaiyan @RBlood@D] @WYou feel slightly tougher. @D[@G+%s@D]@n\r\n",
                          add_commas(bonus).c_str());
             break;
         case 1:
@@ -3715,7 +3715,7 @@ static void spar_helper(struct char_data *ch, struct char_data *vict, int type, 
 		//Check if victim is NPC or Player, both have different logic here.
         if (vict && IS_NPC(vict)) {
 			//Work out how challenging of an npc to fight this is, if the victim is stronger we want to give more xp. This doesn't affect attributes.
-			float plRatio = (float) vict->getMaxPLTrans() / (float) ch->getMaxPLTrans();
+			float plRatio = (float) vict->getPL() / (float) ch->getPL();
             float plGain = 1;
 
             //The lowest you can get from a fight is 0.5 times the xp, so long as they aren't 5x weaker than you
@@ -3791,9 +3791,9 @@ static void spar_helper(struct char_data *ch, struct char_data *vict, int type, 
         pl *= gaincalc * bonus * (GET_CON(ch) / 4) * Random::get<double>(0.8, 1.2) * ch->getPotential();
         ki *= gaincalc * bonus * (GET_WIS(ch) / 4) * Random::get<double>(0.8, 1.2) * ch->getPotential();
         st *= gaincalc * bonus * (GET_CON(ch) / 4) * Random::get<double>(0.8, 1.2) * ch->getPotential();
-        if(pl > (ch->getBasePL() / 20)) pl = ch->getBasePL() / 20;
-        if(ki > (ch->getBaseKI() / 20)) ki = ch->getBaseKI() / 20;
-        if(st > (ch->getBaseST() / 20)) st = ch->getBaseST() / 20;
+        if(pl > (ch->getBaseStat("health") / 20)) pl = ch->getBaseStat("health") / 20;
+        if(ki > (ch->getBaseStat("ki") / 20)) ki = ch->getBaseStat("ki") / 20;
+        if(st > (ch->getBaseStat("stamina") / 20)) st = ch->getBaseStat("stamina") / 20;
 
 		giveRandomVital(ch, pl, ki, st, attrChance);
     }
@@ -3801,20 +3801,20 @@ static void spar_helper(struct char_data *ch, struct char_data *vict, int type, 
 
 void giveRandomVital(char_data* ch, int64_t pl, int64_t ki, int64_t st, int attrChance) {
     //Handling for awarding vitals to the player
-    pl *= (1 + ch->getAffectModifier(APPLY_CVIT_MULT, static_cast<int>(CharVital::powerlevel)));
+    pl *= (1 + ch->getAffectModifier(APPLY_CVIT_MULT, static_cast<int>(CharVital::health)));
     ki *= (1 + ch->getAffectModifier(APPLY_CVIT_MULT, static_cast<int>(CharVital::ki)));
     st *= (1 + ch->getAffectModifier(APPLY_CVIT_MULT, static_cast<int>(CharVital::stamina)));
-    if(pl > (ch->getBasePL() / 10)) pl = ch->getBasePL() / 10;
-    if(ki > (ch->getBaseKI() / 10)) ki = ch->getBaseKI() / 10;
-    if(st > (ch->getBaseST() / 10)) st = ch->getBaseST() / 10;
+    if(pl > (ch->getBaseStat("health") / 10)) pl = ch->getBaseStat("health") / 10;
+    if(ki > (ch->getBaseStat("ki") / 10)) ki = ch->getBaseStat("ki") / 10;
+    if(st > (ch->getBaseStat("stamina") / 10)) st = ch->getBaseStat("stamina") / 10;
     
     std::vector<int64_t> stats;
-    for (const auto stat: {CharVital::powerlevel, CharVital::ki, CharVital::stamina}) {
+    for (const auto stat: {CharVital::health, CharVital::ki, CharVital::stamina}) {
         if (!ch->is_soft_cap((int) stat, 1.0))
             stats.push_back((int) stat);
     }
 
-    if(ch->technique == Form::tiger_stance) stats.push_back((int) CharVital::powerlevel);
+    if(ch->technique == Form::tiger_stance) stats.push_back((int) CharVital::health);
     if(ch->technique == Form::eagle_stance) stats.push_back((int) CharVital::ki);
     if(ch->technique == Form::ox_stance) stats.push_back((int) CharVital::stamina);
 
@@ -3825,7 +3825,7 @@ void giveRandomVital(char_data* ch, int64_t pl, int64_t ki, int64_t st, int attr
             switch(*itr) {
                 case 0:
                     send_to_char(ch, "@D[@Y+ @R%s @rPL@D]@n\r\n", add_commas(pl).c_str());
-                    ch->gainBaseStat("powerlevel", pl);
+                    ch->gainBaseStat("health", pl);
                     if(axion_dice(0) <= attrChance) {
                         int rand = rand_number(1, 2);
                         std::string val;
@@ -4054,11 +4054,11 @@ bool check_points(struct char_data *ch, int64_t ki, int64_t st) {
 
     int fail = false;
     if (IS_NPC(ch)) {
-        if ((ch->getCurKI()) < ki) {
+        if ((ch->getCurVital(CharVital::ki)) < ki) {
             send_to_char(ch, "You do not have enough ki!\r\n");
             return false;
         }
-        if ((ch->getCurST()) < st) {
+        if ((ch->getCurVital(CharVital::stamina)) < st) {
             send_to_char(ch, "You do not have enough stamina!\r\n");
             return false;
         }
@@ -4133,7 +4133,7 @@ bool check_points(struct char_data *ch, int64_t ki, int64_t st) {
     // If ratio is 0, then no change. If ratio is 1.0, then double the cost.
     st += st * ratio;
 
-    if ((ch->getCurST()) < st) {
+    if ((ch->getCurVital(CharVital::stamina)) < st) {
         send_to_char(ch, "You do not have enough stamina.\r\n@C%s@n needed.\r\n", add_commas(st).c_str());
         fail = true;
     }
@@ -4144,15 +4144,15 @@ bool check_points(struct char_data *ch, int64_t ki, int64_t st) {
 /* Subtract the stamina or ki required */
 void pcost(struct char_data *ch, double ki, int64_t st) {
     if (IS_NPC(ch)) {
-        if(ki) ch->decCurKI(ki);
-        if(st) ch->decCurST(st);
+        if(ki) ch->modCurVital(CharVital::ki, -ki);
+        if(st) ch->modCurVital(CharVital::stamina, -st);
         return;
     }
 
     int before = 0;
     if (!IS_NPC(ch)) {
         if (ki == 0) {
-            before = (ch->getCurST());
+            before = (ch->getCurVital(CharVital::stamina));
         }
         if (GET_CHARGE(ch) <= (GET_MAX_MANA(ch) * ki)) {
             ch->setBaseStat<int64_t>("charge", 0);
@@ -4216,7 +4216,7 @@ void pcost(struct char_data *ch, double ki, int64_t st) {
 
         auto ratio = ch->getBaseStat("burden_ratio");
         st += st * ratio;
-        ch->decCurST(st);
+        ch->modCurVital(CharVital::stamina, -st);
     }
 }
 
@@ -4226,7 +4226,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
     int64_t maindmg = dmg, beforered = dmg;
     int dead = false;
 
-    if(vict && vict->getCurHealth() <= 0) {
+    if(vict && vict->getCurVital(CharVital::health) <= 0) {
         send_to_char(ch, "They are already dead!");
         return;
     }
@@ -4263,10 +4263,10 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
     }
 
     if (AFF_FLAGGED(ch, AFF_INFUSE) && !AFF_FLAGGED(ch, AFF_HASS) && type <= 0) {
-        auto infuse_cost = ch->getPercentOfMaxKI(.005);
+        auto infuse_cost = ch->getMaxVitalPercent(CharVital::ki, .005);
         if (dmg > 0) {
-            if (ch->getCurKI() - infuse_cost) {
-                ch->decCurKI(infuse_cost);
+            if (ch->getCurVital(CharVital::ki) - infuse_cost) {
+                ch->modCurVital(CharVital::ki, -infuse_cost);
                 send_to_room(IN_ROOM(ch), "@CA swirl of ki explodes from the attack!@n\r\n");
             } else {
                 act("@wYou can no longer infuse ki into your attacks!@n", true, ch, nullptr, nullptr, TO_CHAR);
@@ -4293,7 +4293,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
         if (vict->mutations.get(Mutation::rubbery_body) && type == 0) {
             int64_t drain = dmg * 0.1;
             dmg -= drain;
-            ch->decCurST(drain, 1);
+            ch->modCurVital(CharVital::stamina, -drain);
             act("@Y$N's rubbery body makes hitting it tiring!@n", true, ch, nullptr, vict, TO_CHAR);
             act("@Y$n's stamina is sapped a bit by hitting your rubbery body!@n", true, ch, nullptr, vict, TO_VICT);
         }
@@ -4529,7 +4529,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
         }
 
         if (GET_CLAN(vict) && !strcasecmp(GET_CLAN(vict), "Heavenly Kaios")) {
-            if ((vict->getCurKI()) >= GET_MAX_MANA(vict) / 2) {
+            if ((vict->getCurVital(CharVital::ki)) >= GET_MAX_MANA(vict) / 2) {
                 dmg -= (dmg / 100) * 20;
                 act("@wYou are covered in a pristine @Cglow@w.@n", true, vict, nullptr, nullptr, TO_CHAR);
                 act("@w$n is covered in a pristine @Cglow@w!@n", true, vict, nullptr, nullptr, TO_ROOM);
@@ -4587,12 +4587,12 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
 
         if (!AFF_FLAGGED(vict, AFF_KNOCKED) && (GET_POS(vict) == POS_SITTING || GET_POS(vict) == POS_RESTING) &&
             GET_SKILL(vict, SKILL_ROLL) > axion_dice(0)) {
-            int64_t rollcost = (vict->getMaxHealth() / 300) * (GET_STR(ch) / 2);
-            if ((vict->getCurST()) >= rollcost) {
+            int64_t rollcost = (vict->getEffectiveStat("health") / 300) * (GET_STR(ch) / 2);
+            if ((vict->getCurVital(CharVital::stamina)) >= rollcost) {
                 act("@GYou roll to your feet in an agile fashion!@n", true, vict, nullptr, nullptr, TO_CHAR);
                 act("@G$n rolls to $s feet in an agile fashion!@n", true, vict, nullptr, nullptr, TO_ROOM);
                 do_stand(vict, nullptr, 0, 0);
-                vict->decCurST(rollcost);
+                vict->modCurVital(CharVital::stamina, -rollcost);
             }
         }
 
@@ -4603,7 +4603,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
         if (IS_HUMANOID(vict) && !IS_NPC(ch) && IS_NPC(vict) && (!is_sparring(ch) || !is_sparring(vict))) {
             vict->mob_specials.memory.push_back(ch->shared());
         }
-        if (IS_NPC(vict) && GET_HIT(vict) > ((vict->getMaxPL())) / 4) {
+        if (IS_NPC(vict) && GET_HIT(vict) > ((vict->getEffectiveStat("health"))) / 4) {
             vict->setBaseStat("lasthit", GET_IDNUM(ch));
         }
         if (AFF_FLAGGED(vict, AFF_SLEEP) && rand_number(1, 2) == 2) {
@@ -4663,31 +4663,31 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
             hurt_limb(ch, vict, chance, limb, dmg);
         }
 
-        if (IS_NPC(vict) && dmg > vict->getMaxHealth() * .7 && GET_BONUS(ch, BONUS_SADISTIC) > 0) {
+        if (IS_NPC(vict) && dmg > vict->getEffectiveStat("health") * .7 && GET_BONUS(ch, BONUS_SADISTIC) > 0) {
             gain /= 2;
-        } else if (IS_NPC(vict) && dmg > vict->getCurHealth() && vict->isFullHealth() * .5 &&
+        } else if (IS_NPC(vict) && dmg > vict->getCurVital(CharVital::health) && vict->isFullVital(CharVital::health) * .5 &&
                    GET_BONUS(ch, BONUS_SADISTIC) > 0) {
             gain /= 2;
         }
 
 
-        if (CARRYING(vict) && dmg > (((vict->getMaxPL())) * 0.01) && rand_number(1, 10) >= 8) {
+        if (CARRYING(vict) && dmg > (((vict->getEffectiveStat("health"))) * 0.01) && rand_number(1, 10) >= 8) {
             carry_drop(vict, 2);
         }
 
-        if (GET_POS(vict) == POS_SITTING && IS_NPC(vict) && vict->getCurHealth() >= ((vict->getMaxPL())) * .98) {
+        if (GET_POS(vict) == POS_SITTING && IS_NPC(vict) && vict->getCurVital(CharVital::health) >= ((vict->getEffectiveStat("health"))) * .98) {
             do_stand(vict, nullptr, 0, 0);
         }
         auto sup = GET_SUPPRESS(vict);
         bool suppresso = (sup > 0);
-        if (is_sparring(ch) && is_sparring(vict) && (sup + vict->getCurHealth()) - dmg <= 0) {
+        if (is_sparring(ch) && is_sparring(vict) && (sup + vict->getCurVital(CharVital::health)) - dmg <= 0) {
             if (!IS_NPC(vict)) {
                 act("@c$N@w falls down unconscious, and you stop sparring with $M.@n", true, ch, nullptr, vict,
                     TO_CHAR);
                 act("@C$n@w stops sparring with you as you fall unconscious.@n", true, ch, nullptr, vict, TO_VICT);
                 act("@c$N@w falls down unconscious, and @C$n@w stops sparring with $M.@n", true, ch, nullptr, vict,
                     TO_NOTVICT);
-                vict->setCurHealth(1);
+                vict->setCurVital(CharVital::health, 1);
                 vict->setBaseStat("suppression", 0);
                 if (FIGHTING(vict)) {
                     stop_fighting(vict);
@@ -4715,7 +4715,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                 if (founded == 1) {
                     act("@c$N@w leaves a reward behind out of respect.@n", true, ch, nullptr, vict, TO_CHAR);
                 }
-                vict->setCurHealth(0);
+                vict->setCurVital(CharVital::health, 0);
                 extract_char(vict);
                 return;
             }
@@ -4723,7 +4723,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
             act("@c$N@w falls down unconscious, and you spare $S life.@n", true, ch, nullptr, vict, TO_CHAR);
             act("@C$n@w spares your life as you fall unconscious.@n", true, ch, nullptr, vict, TO_VICT);
             act("@c$N@w falls down unconscious, and @C$n@w spares $S life.@n", true, ch, nullptr, vict, TO_NOTVICT);
-            vict->setCurHealth(1);
+            vict->setCurVital(CharVital::health, 1);
             if (FIGHTING(vict)) {
                 stop_fighting(vict);
             }
@@ -4742,7 +4742,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
             vict->character_flags.set(CharacterFlag::sparring, false);
         }
 
-        if (PLR_FLAGGED(vict, PLR_IMMORTAL) && !is_sparring(ch) && vict->getCurHealth() - dmg <= 0) {
+        if (PLR_FLAGGED(vict, PLR_IMMORTAL) && !is_sparring(ch) && vict->getCurVital(CharVital::health) - dmg <= 0) {
             if (IN_ARENA(vict)) {
                 send_to_all("@R%s@r manages to defeat @R%s@r in the Arena!@n\r\n", GET_NAME(ch), GET_NAME(vict));
                 char_from_room(ch);
@@ -4750,7 +4750,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                 look_at_room(IN_ROOM(ch), ch, 0);
                 char_from_room(vict);
                 char_to_room(vict, real_room(17875));
-                vict->setCurHealth(1);
+                vict->setCurVital(CharVital::health, 1);
                 look_at_room(IN_ROOM(vict), vict, 0);
                 if (FIGHTING(vict)) {
                     stop_fighting(vict);
@@ -4766,9 +4766,9 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                     vict, TO_VICT);
                 act("@c$N@w disappears right before dying. $N appears to be immortal.@n.", true, ch, nullptr, vict,
                     TO_NOTVICT);
-                vict->decCurHealthPercent(1, 1);
-                vict->decCurSTPercent(1, 1);
-                vict->decCurKIPercent(1, 1);
+                vict->modCurVitalDam(CharVital::health, 1);
+                vict->modCurVitalDam(CharVital::stamina, 1);
+                vict->modCurVitalDam(CharVital::ki, 1);
 
                 if (FIGHTING(vict)) {
                     stop_fighting(vict);
@@ -4799,27 +4799,27 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
             maindmg = maindmg / 2;
             hurt(0, 0, ch, GRAPPLED(vict), nullptr, maindmg, 3);
         }
-        bool deathblow = (GET_HIT(vict) - dmg <= 0 && suppresso == false) || (suppresso == true && vict->getUnsuppressedPL() - dmg <= 0);
+        bool deathblow = (GET_HIT(vict) - dmg <= 0 && suppresso == false) || (suppresso == true && vict->getPL(false) - dmg <= 0);
         if (!is_sparring(ch) && !PLR_FLAGGED(vict, PLR_IMMORTAL) && deathblow) {
-                vict->decCurHealthPercent(1, 0);
+                vict->modCurVitalDam(CharVital::health, 1);
                 int64_t lifeloss;
                 if (suppresso)
-                    lifeloss = dmg - vict->getUnsuppressedPL();
+                    lifeloss = dmg - vict->getPL(false);
                 else
                     lifeloss = dmg - GET_HIT(vict);
 
-                if (!IS_NPC(vict) && lifeloss <= vict->getCurLF()) {
+                if (!IS_NPC(vict) && lifeloss <= vict->getCurVital(CharVital::lifeforce)) {
                     act("@c$N@w barely clings to life!@n", true, ch, nullptr, vict, TO_CHAR);
                     act("@CYou barely cling to life!@n", true, ch, nullptr, vict, TO_VICT);
                     act("@c$N@w barely clings to life!@n.", true, ch, nullptr, vict, TO_NOTVICT);
-                    vict->decCurLF(lifeloss);
+                    vict->modCurVital(CharVital::lifeforce, -lifeloss);
                     send_to_char(vict, "@D[@CLifeforce@D: @R-%s@D]\n", add_commas(lifeloss).c_str());
-                    if ((vict->getCurLF()) >= (vict->getMaxLF()) * 0.05) {
+                    if ((vict->getCurVital(CharVital::lifeforce)) >= (vict->getEffectiveStat("lifeforce")) * 0.05) {
                         send_to_char(vict, "@YYou recover a bit thanks to your strong life force.@n\r\n");
-                        vict->incCurHealth((vict->getMaxLF()) * .05);
-                        vict->decCurLFPercent(.05);
+                        vict->modCurVital(CharVital::health, (vict->getEffectiveStat("lifeforce")) * .05);
+                        vict->modCurVitalDam(CharVital::lifeforce, .05);
                     } else {
-                        vict->incCurHealth(GET_CON(vict) * 100);
+                        vict->modCurVital(CharVital::health, GET_CON(vict) * 100);
                     }
                     vict->attemptLimitBreak();
                     return;
@@ -4836,9 +4836,9 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                     act("@R$N@w self destructs with a mild explosion!@n", true, ch, nullptr, vict, TO_ROOM);
                 }
                 if (dmg > 1) {
-                    if (type <= 0 && GET_HIT(ch) >= ((ch->getMaxPL()) * 0.5)) {
+                    if (type <= 0 && GET_HIT(ch) >= ((ch->getEffectiveStat("health")) * 0.5)) {
                         int64_t raise = (GET_MAX_MANA(ch) * 0.005) + 1;
-                        ch->incCurKI(raise);
+                        ch->modCurVital(CharVital::ki, raise);
                     }
                     send_to_char(ch, "@D[@GDamage@W: @R%s@D]@n\r\n", add_commas(dmg).c_str());
                     send_to_char(vict, "@D[@rDamage@W: @R%s@D]@n\r\n", add_commas(dmg).c_str());
@@ -4847,13 +4847,13 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                         act("@RYour dark aura saps some of @r$N's@R life energy!@n", true, ch, nullptr, vict, TO_CHAR);
                         act("@r$n@R's dark aura saps some of your life energy!@n", true, ch, nullptr, vict, TO_VICT);
                         if (GET_HIT(ch) <= GET_MAX_HIT(ch)) {
-                            ch->incCurHealth(healhp);
+                            ch->modCurVital(CharVital::health, healhp);
                         }
                         ch->modBaseStat<int64_t>("charge", GET_MAX_MANA(vict) * 0.12);
                         
                     }
                     if (ch->mutations.get(Mutation::natural_energy)) {
-                        ch->incCurKI(dmg * .05);
+                        ch->modCurVital(CharVital::ki, dmg * .05);
                     }
                     if (!is_sparring(ch) && IS_NPC(vict)) {
                         if (type == 0 && rand_number(1, 100) >= 97) {
@@ -4886,7 +4886,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                     send_to_char(vict, "@D[@rDamage@W: @BPitiful...@D]@n\r\n");
                 }
 
-                vict->decCurHealthPercent(1, 0);
+                vict->modCurVitalDam(CharVital::health, 1);
 
                 if (AFF_FLAGGED(ch, AFF_GROUP)) {
                     group_gain(ch, vict);
@@ -4901,7 +4901,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
             
         } else if (GET_HIT(vict) - dmg > 0 || suppresso == true) {
             if (suppresso == false) {
-                vict->decCurHealth(dmg);
+                vict->modCurVital(CharVital::health, -dmg);
             }
             if (FIGHTING(ch) == nullptr) {
                 set_fighting(ch, vict);
@@ -4914,12 +4914,12 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                 set_fighting(vict, ch);
             }
             if (dmg > 1 && suppresso == false) {
-                if (type == 0 && GET_HIT(ch) >= ((ch->getMaxPL()) * 0.5)) {
+                if (type == 0 && GET_HIT(ch) >= ((ch->getEffectiveStat("health")) * 0.5)) {
                     int64_t raise = (GET_MAX_MANA(ch) * 0.005) + 1;
-                    ch->incCurKI(raise);
+                    ch->modCurVital(CharVital::ki, raise);
                 }
                 if (ch->mutations.get(Mutation::natural_energy)) {
-                    ch->incCurKI(dmg * .05);
+                    ch->modCurVital(CharVital::ki, dmg * .05);
                 }
                 send_to_char(ch, "@D[@GDamage@W: @R%s@D]@n", add_commas(dmg).c_str());
                 send_to_char(vict, "@D[@rDamage@W: @R%s@D]@n\r\n", add_commas(dmg).c_str());
@@ -4930,7 +4930,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                     } else if (vict->getPL() >= scouter->getBaseStat<int64_t>(VAL_WORN_SCOUTER)) {
                         send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
                     } else {
-                        send_to_char(ch, " @D<@YProcessing@D: @c%s - @r%s%%@D>@n\r\n", add_commas(vict->getPL()).c_str(), std::to_string((int) ((1.0 - vict->getCurVitalDam(CharVital::powerlevel)) * 100)));
+                        send_to_char(ch, " @D<@YProcessing@D: @c%s - @r%s%%@D>@n\r\n", add_commas(vict->getPL()).c_str(), std::to_string((int) ((1.0 - vict->getCurVitalDam(CharVital::health)) * 100)));
                     }
                 } else {
                     send_to_char(ch, "\r\n");
@@ -4944,13 +4944,13 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                         if (IS_ANDROID(vict) || vpl > scouter->getBaseStat<int64_t>(VAL_WORN_SCOUTER)) {
                             send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
                         } else {
-                            send_to_char(ch, " @D<@YProcessing@D: @c%s - @r%s%%@D>@n\r\n", add_commas(vpl).c_str(), std::to_string((int) ((1.0 - vict->getCurVitalDam(CharVital::powerlevel)) * 100)));
+                            send_to_char(ch, " @D<@YProcessing@D: @c%s - @r%s%%@D>@n\r\n", add_commas(vpl).c_str(), std::to_string((int) ((1.0 - vict->getCurVitalDam(CharVital::health)) * 100)));
                         }
                     } else {
                         send_to_char(ch, "\r\n");
                     }
                 } else if (dmg > 1 && suppresso == true && !PRF_FLAGGED(ch, PRF_NODEC)) {
-                    double percentageDamage = (double) dmg / (double) vict->getMaxPL();
+                    double percentageDamage = (double) dmg / (double) vict->getEffectiveStat("health");
                     int64_t calcdamage = GET_HIT(vict) * percentageDamage;
 
                     send_to_char(ch, "@D[@GDamage@W: @R%s@D]@n", add_commas(dmg).c_str());
@@ -4958,14 +4958,14 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                     //int64_t healhp = GET_HIT(vict) * 0.12;
                     //Translate the damage into a percentage of max LF, remove that from the player instead
                     
-                    vict->decCurHealth(calcdamage);
+                    vict->modCurVital(CharVital::health, -calcdamage);
 
                     if (auto scouter = GET_EQ(ch, WEAR_EYE); scouter && scouter->getBaseStat<int64_t>(VAL_WORN_SCOUTER) && vict && !PRF_FLAGGED(ch, PRF_NODEC)) {
                         auto vpl = vict->getPL();
                         if (IS_ANDROID(vict) || vpl >= scouter->getBaseStat<int64_t>(VAL_WORN_SCOUTER)) {
                             send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
                         } else {
-                            send_to_char(ch, " @D<@YProcessing@D: @c%s - @r%s%%@D>@n\r\n", add_commas(vpl).c_str(), std::to_string((int) ((1.0 - vict->getCurVitalDam(CharVital::powerlevel)) * 100)));
+                            send_to_char(ch, " @D<@YProcessing@D: @c%s - @r%s%%@D>@n\r\n", add_commas(vpl).c_str(), std::to_string((int) ((1.0 - vict->getCurVitalDam(CharVital::health)) * 100)));
                         }
                     } else {
                         send_to_char(ch, "\r\n");
@@ -4977,7 +4977,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                         if (IS_ANDROID(vict) || vpl >= scouter->getBaseStat<int64_t>(VAL_WORN_SCOUTER)) {
                             send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
                         } else {
-                            send_to_char(ch, " @D<@YProcessing@D: @c%s - @r%s%%@D>@n\r\n", add_commas(vpl).c_str(), std::to_string((int) ((1.0 - vict->getCurVitalDam(CharVital::powerlevel)) * 100)));
+                            send_to_char(ch, " @D<@YProcessing@D: @c%s - @r%s%%@D>@n\r\n", add_commas(vpl).c_str(), std::to_string((int) ((1.0 - vict->getCurVitalDam(CharVital::health)) * 100)));
                         }
                     } else {
                         send_to_char(ch, "\r\n");
@@ -5951,7 +5951,7 @@ void handle_spiral(struct char_data *ch, struct char_data *vict, int skill, int 
         }
 
         if (prob < perc) {
-            if ((vict->getCurST()) > 0) {
+            if ((vict->getCurVital(CharVital::stamina)) > 0) {
                 if (blk > rand_number(1, 130)) {
                     act("@C$N@W moves quickly and blocks your Spiral Comet blast!@n", false, ch, nullptr, vict,
                         TO_CHAR);

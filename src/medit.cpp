@@ -425,8 +425,8 @@ void medit_disp_menu(struct descriptor_data *d) {
                     OLC_NUM(d), genders[(int) GET_SEX(mob)], GET_ALIAS(mob),
                     GET_SDESC(mob), GET_LDESC(mob), GET_DDESC(mob), GET_LEVEL(mob),
                     GET_ALIGNMENT(mob), GET_FISHD(mob), GET_DAMAGE_MOD(mob),
-                    GET_NDD(mob), GET_SDD(mob), mob->getBaseStat<int64_t>("powerlevel"), mob->getBaseStat<int64_t>("ki"),
-                    mob->getBaseStat<int64_t>("stamina"), mob->getBaseStat<int>("powerlevel"), mob->getBaseStat<int>("experience"), GET_GOLD(mob)
+                    GET_NDD(mob), GET_SDD(mob), mob->getBaseStat<int64_t>("health"), mob->getBaseStat<int64_t>("ki"),
+                    mob->getBaseStat<int64_t>("stamina"), mob->getBaseStat<int>("health"), mob->getBaseStat<int>("experience"), GET_GOLD(mob)
     );
     sprintbitarray(mob->mob_flags.getAll(), action_bits, AF_ARRAY_MAX, flags);
     sprintbitarray(mob->affect_flags.getAll(), affected_bits, AF_ARRAY_MAX, flag2);

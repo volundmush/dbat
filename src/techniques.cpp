@@ -11,7 +11,7 @@
 
 bool tech_handle_zanzoken(char_data *ch, char_data *vict, const std::string &name) {
     if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) &&
-        (vict->getCurST()) >= 1 && GET_POS(vict) != POS_SLEEPING) {
+        (vict->getCurVital(CharVital::stamina)) >= 1 && GET_POS(vict) != POS_SLEEPING) {
         if (!AFF_FLAGGED(ch, AFF_ZANZOKEN) || (AFF_FLAGGED(ch, AFF_ZANZOKEN) && GET_SPEEDI(ch) + rand_number(1, 5) <
                                                                                 GET_SPEEDI(vict) + rand_number(1, 5))) {
             auto msg = fmt::format("@C$N@c disappears, avoiding your {} before reappearing!@n", name);
@@ -127,7 +127,7 @@ bool tech_handle_android_absorb(char_data *ch, char_data *vict) {
             amot = GET_MAX_MANA(ch) / 20;
         }
         if (GET_CHARGE(vict) + amot > GET_MAX_MANA(vict)) {
-            vict->incCurKI(vict->getMaxKI() - GET_CHARGE(vict));
+            vict->modCurVital(CharVital::ki, vict->getEffectiveStat("ki") - GET_CHARGE(vict));
             vict->setBaseStat<int64_t>("charge", GET_MAX_MANA(vict));
         } else {
             vict->modBaseStat<int64_t>("charge", amot);

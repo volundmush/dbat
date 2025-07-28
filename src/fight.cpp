@@ -67,11 +67,11 @@ int group_bonus(struct char_data *ch, int type) {
                 continue;
             } else {
                 if (type == 0) {
-                    k->follower->incCurLFPercent(.25);
+                    k->follower->modCurVitalDam(CharVital::lifeforce, -.25);
                     send_to_char(k->follower, "@CIncensed by the death of your comrade your life force swells!@n");
                     return (true);
                 } else if (type == 1) {
-                    k->follower->incCurLFPercent(.4);
+                    k->follower->modCurVitalDam(CharVital::lifeforce, -.4);
                     send_to_char(k->follower, "@CIncensed by the death of your comrade your life force swells!@n");
                     return (true);
                 } else if (type == 2) {
@@ -242,14 +242,14 @@ static void mob_attack(struct char_data *ch, char *buf) {
         }
     }
 
-    if (axion_dice(-10) > 90 && ch->getCurHealthPercent() <= .5 && !ch->character_flags.get(CharacterFlag::powering_up) &&
+    if (axion_dice(-10) > 90 && ch->getCurVitalMeterPercent(CharVital::health) <= .5 && !ch->character_flags.get(CharacterFlag::powering_up) &&
         GET_MOB_VNUM(ch) != 25 &&
         !(IS_ANDROID(ch) || IS_ANIMAL(ch) || ch->sensei == Sensei::commoner)) {
         do_powerup(ch, nullptr, 0, 0);
         return;
     }
 
-    if ((ch->getCurKI()) >= GET_MAX_MANA(ch) * 0.05 && IS_HUMANOID(ch) && (!IS_DRAGON(ch) || dragonpass == true)) {
+    if ((ch->getCurVital(CharVital::ki)) >= GET_MAX_MANA(ch) * 0.05 && IS_HUMANOID(ch) && (!IS_DRAGON(ch) || dragonpass == true)) {
         if (ch->getBaseStat<int>("mobcharge") <= 0 && rand_number(1, 10) >= 8) {
             act("@wAn aura flares up around @R$n@w!@n", true, ch, nullptr, nullptr, TO_ROOM);
             ch->modBaseStat<int>("mobcharge", 1);
@@ -275,15 +275,15 @@ static void mob_attack(struct char_data *ch, char *buf) {
         } else if (AFF_FLAGGED(ch, AFF_ENSNARED)) {
             return;
         } else if (special < 100) { /* Normal physical attack */
-            if (IS_ANDROID(ch) && ch->subrace == SubRace::android_model_repair && GET_HIT(ch) <= (ch->getMaxPL()) * 0.5 &&
+            if (IS_ANDROID(ch) && ch->subrace == SubRace::android_model_repair && GET_HIT(ch) <= (ch->getEffectiveStat("health")) * 0.5 &&
                        rand_number(1, 20) >= 16) {
                 do_srepair(ch, nullptr, 0, 0);
             } else if (IS_ANDROID(ch) && ch->subrace == SubRace::android_model_absorb && rand_number(1, 20) >= 19) {
                 do_absorb(ch, buf2, 0, 0);
-            } else if ((IS_BIO(ch) || IS_MAJIN(ch)) && GET_HIT(ch) <= (ch->getMaxPL()) * 0.5 &&
+            } else if ((IS_BIO(ch) || IS_MAJIN(ch)) && GET_HIT(ch) <= (ch->getEffectiveStat("health")) * 0.5 &&
                        rand_number(1, 20) >= 17) {
                 do_regenerate(ch, "25", 0, 0);
-            } else if (IS_NAMEK(ch) && GET_HIT(ch) <= (ch->getMaxPL()) * 0.5 && rand_number(1, 20) == 20) {
+            } else if (IS_NAMEK(ch) && GET_HIT(ch) <= (ch->getEffectiveStat("health")) * 0.5 && rand_number(1, 20) == 20) {
                 do_regenerate(ch, "25", 0, 0);
             } else if (pick_n_throw(ch, buf)) {
                 /* This determines if they throw and also handles it */
@@ -805,20 +805,20 @@ void powerupService(uint64_t heartPulse, double deltaTime) {
 
         bool stopPowerup = false;
         bool maxedOut = false;
-        auto maxPL = ch->getMaxPL();
-        auto maxKI = ch->getMaxKI();
-        auto curKI = ch->getCurKI();
-        auto maxST = ch->getMaxST();
-        auto curST = ch->getCurST();
+        auto maxPL = ch->getEffectiveStat("health");
+        auto maxKI = ch->getEffectiveStat("ki");
+        auto curKI = ch->getCurVital(CharVital::ki);
+        auto maxST = ch->getEffectiveStat("stamina");
+        auto curST = ch->getCurVital(CharVital::stamina);
         auto perc = (GET_PREFERENCE(ch) == PREFERENCE_KI) ? 0.0375 : 0.05;
-        if (ch->isFullHealth() && (ch->getCurKIPercent() >= perc)) {
-            curST = ch->incCurSTPercent(0.02);
+        if (ch->isFullVital(CharVital::health) && (ch->getCurVitalMeterPercent(CharVital::ki) >= perc)) {
+            curST = ch->modCurVitalDam(CharVital::stamina, -0.02);
             ch->restoreHealth(false);
-            curKI = ch->decCurKIPercent(perc);
+            curKI = ch->modCurVitalDam(CharVital::ki, perc);
             maxedOut = true;
         }
 
-        if (ch->getCurKIPercent() <= perc) {
+        if (ch->getCurVitalMeterPercent(CharVital::ki) <= perc) {
             act("@RYou have run out of ki.@n", true, ch, nullptr, nullptr, TO_CHAR);
             stopPowerup = true;
         }
@@ -841,12 +841,12 @@ void powerupService(uint64_t heartPulse, double deltaTime) {
             continue;
         }
 
-        if (!ch->isFullHealth() && (ch->getCurKIPercent() >= perc)) {
-            ch->incCurHealthPercent(.1);
-            ch->decCurKIPercent(perc);
-            ch->incCurSTPercent(0.02);
+        if (!ch->isFullVital(CharVital::health) && (ch->getCurVitalMeterPercent(CharVital::ki) >= perc)) {
+            ch->modCurVitalDam(CharVital::health, -.1);
+            ch->modCurVitalDam(CharVital::ki, perc);
+            ch->modCurVitalDam(CharVital::stamina, -0.02);
 
-            auto curPL = ch->getCurPL();
+            auto curPL = ch->getCurVital(CharVital::health);
 
             for(const auto& [threshold, messages] : powerupMessages) {
                 if(curPL < threshold) {
@@ -898,14 +898,14 @@ void lifeforceSystem(uint64_t heartPulse, double deltaTime) {
                 lfcost = 0.03;
             }
 
-            ch->incCurHealthPercent(refill);
+            ch->modCurVitalDam(CharVital::health, -refill);
 
             if (!AFF_FLAGGED(ch, AFF_HEALGLOW)) {
-                ch->decCurLFPercent(lfcost);
+                ch->modCurVitalDam(CharVital::lifeforce, lfcost);
             }
         } else {
-            ch->incCurHealth(ch->getCurLF());
-            ch->decCurLFPercent(2, -1);
+            ch->modCurVital(CharVital::health, ch->getCurVital(CharVital::lifeforce));
+            ch->modCurVitalDam(CharVital::lifeforce, 2);
         }
 
         send_to_char(ch, "@YYour life force has kept you strong@n!\r\n");
@@ -977,11 +977,11 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
             }
         }
         if (GRAPPLING(ch) && GRAPTYPE(ch) == 2 && rand_number(1, 11) >= 8) {
-            if ((((ch)->grappling)->getCurST()) >= GET_MAX_MOVE(GRAPPLING(ch)) / 8) {
+            if ((((ch)->grappling)->getCurVital(CharVital::stamina)) >= GET_MAX_MOVE(GRAPPLING(ch)) / 8) {
                 act("@WYou choke @C$N@W!@n", true, ch, nullptr, GRAPPLING(ch), TO_CHAR);
                 act("@C$n@W chokes YOU@W!@n", true, ch, nullptr, GRAPPLING(ch), TO_VICT);
                 act("@C$n@W chokes @c$N@W!@n", true, ch, nullptr, GRAPPLING(ch), TO_NOTVICT);
-                GRAPPLING(ch)->decCurST(GRAPPLING(ch)->getMaxST() / 8);
+                GRAPPLING(ch)->modCurVital(CharVital::stamina, -(GRAPPLING(ch)->getEffectiveStat("stamina") / 8));
             } else {
                 act("@WYou choke @C$N@W, and $E passes out!@n", true, ch, nullptr, GRAPPLING(ch), TO_CHAR);
                 act("@C$n@W chokes YOU@W, and you pass out!@n", true, ch, nullptr, GRAPPLING(ch), TO_VICT);
@@ -1006,9 +1006,9 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
         if (IS_HALFBREED(ch) && PLR_FLAGGED(ch, PLR_FURY)) {
             if (ch->modBaseStat<int>("rage_meter", 1) >= 1000) {
 
-                ch->incCurHealthPercent(.15);
-                ch->incCurKIPercent(.15);
-                ch->incCurSTPercent(.15);
+                ch->modCurVitalDam(CharVital::health, -.15);
+                ch->modCurVitalDam(CharVital::ki, -.15);
+                ch->modCurVitalDam(CharVital::stamina, -.15);
                 send_to_char(ch, "Your fury has called forth more of your hidden power and you feel better!\r\n");
             }
         }
@@ -1191,16 +1191,16 @@ void kiChargeSystem(uint64_t heartPulse, double deltaTime) {
             perc = perc * 0.5;
         }
 
-        if (ch->getCurKI() <= 0) {
+        if (ch->getCurVital(CharVital::ki) <= 0) {
             send_to_char(ch, "You can not charge anymore, you have charged all your energy!\r\n");
             act("$n@w's aura grows calm.@n", true, ch, nullptr, nullptr, TO_ROOM);
             stopCharge = true;
-        } else if (((GET_MAX_MANA(ch) * 0.01) * perc) >=(ch->getCurKI())) {
+        } else if (((GET_MAX_MANA(ch) * 0.01) * perc) >=(ch->getCurVital(CharVital::ki))) {
             send_to_char(ch, "You have charged the last that you can.\r\n");
             act("$n@w's aura @Yflashes@w spectacularly, rushing upwards in torrents!@n", true, ch, nullptr, nullptr,
                 TO_ROOM);
-            ch->modBaseStat<int64_t>("charge", ch->getCurKI());
-            ch->decCurKIPercent(1);
+            ch->modBaseStat<int64_t>("charge", ch->getCurVital(CharVital::ki));
+            ch->modCurVitalDam(CharVital::ki, 1);
             stopCharge = true;
         } else {
             if (GET_CHARGE(ch) >= GET_CHARGETO(ch)) {
@@ -1208,14 +1208,14 @@ void kiChargeSystem(uint64_t heartPulse, double deltaTime) {
                 act("$n@w's aura burns steadily.@n", true, ch, nullptr, nullptr, TO_ROOM);
                 stopCharge = true;
             } else if (GET_CHARGE(ch) + (((GET_MAX_MANA(ch) * 0.01) * perc) + 1) >= GET_CHARGETO(ch)) {
-                ch->decCurKI(GET_CHARGETO(ch) - GET_CHARGE(ch));
+                ch->modCurVital(CharVital::ki, -(GET_CHARGETO(ch) - GET_CHARGE(ch)));
                 ch->setBaseStat<int64_t>("charge", GET_CHARGETO(ch));
                 send_to_char(ch, "You stop charging as you reach the maximum that you wished to charge.\r\n");
                 act("$n@w's aura flares up brightly and then burns steadily.@n", true, ch, nullptr, nullptr,
                     TO_ROOM);
                 stopCharge = true;
             } else {
-                ch->decCurKI(((GET_MAX_MANA(ch) * 0.01) * perc) + 1);
+                ch->modCurVital(CharVital::ki, -((GET_MAX_MANA(ch) * 0.01) * perc) + 1);
                 ch->modBaseStat<int64_t>("charge", ((GET_MAX_MANA(ch) * 0.01) * perc) + 1);
                 switch (rand_number(1, 3)) {
                     case 1:
@@ -1281,7 +1281,7 @@ void kiChargeSystem(uint64_t heartPulse, double deltaTime) {
                     break;
             }
             ch->player_flags.set(PLR_CHARGE, false);
-            ch->incCurKI(GET_CHARGE(ch));
+            ch->modCurVital(CharVital::ki, GET_CHARGE(ch));
             ch->setBaseStat<int64_t>("charge", 0);
             ch->setBaseStat<int64_t>("chargeto", 0);
         }
@@ -1304,11 +1304,11 @@ void kiChargeSystem(uint64_t heartPulse, double deltaTime) {
                     break;
             }
             ch->player_flags.set(PLR_CHARGE, false);
-            ch->incCurKI(GET_CHARGE(ch));
+            ch->modCurVital(CharVital::ki, GET_CHARGE(ch));
             ch->setBaseStat<int64_t>("charge", 0);
             ch->setBaseStat<int64_t>("chargeto", 0);
         }
-        if (GET_CHARGE(ch) >= ch->getMaxKI() / 2) {
+        if (GET_CHARGE(ch) >= ch->getEffectiveStat("ki") / 2) {
             improve_skill(ch, SKILL_CONCENTRATION, 1);
         }
         if (!docharge && rand_number(1, 40) >= 38 && !FIGHTING(ch) &&
@@ -1932,7 +1932,7 @@ void raw_kill(struct char_data *ch, struct char_data *killer) {
 
     if (IS_NPC(ch) && !MOB_FLAGGED(ch, MOB_DUMMY)) {
         int shadowed = false;
-        ch->decCurHealthPercent(1);
+        ch->modCurVitalDam(CharVital::health, 1);
         if (IS_SHADOW_DRAGON1(ch)) {
             struct obj_data *obj = nullptr;
             SHADOW_DRAGON1 = -1;
@@ -1997,7 +1997,7 @@ void raw_kill(struct char_data *ch, struct char_data *killer) {
             shadow_dragons_live();
         }
     } else if (IS_NPC(ch) && MOB_FLAGGED(ch, MOB_DUMMY)) {
-        ch->decCurHealthPercent(1);
+        ch->modCurVitalDam(CharVital::health, 1);
         extract_char(ch);
     } else {
         if (!AFF_FLAGGED(ch, AFF_SPIRIT) && !ch->getWhereFlag(WhereFlag::pendulum_past) &&
@@ -2079,10 +2079,10 @@ void die(struct char_data *ch, struct char_data *killer) {
     if (!IS_NPC(ch)) {
         ch->player_flags.set(PLR_HEALT, false);
         if ((IS_MAJIN(ch) || IS_BIO(ch)) &&
-            ((ch->getCurLF()) >= (ch->getMaxLF()) * 0.75 || (PLR_FLAGGED(ch, PLR_SELFD2) &&
-                                                             (ch->getCurLF()) >= (ch->getMaxLF()) * 0.5))) {
-            ch->decCurLFPercent(2, -1);
-            ch->decCurHealthPercent(1, 1);
+            ((ch->getCurVital(CharVital::lifeforce)) >= (ch->getEffectiveStat("lifeforce")) * 0.75 || (PLR_FLAGGED(ch, PLR_SELFD2) &&
+                                                             (ch->getCurVital(CharVital::lifeforce)) >= (ch->getEffectiveStat("lifeforce")) * 0.5))) {
+            ch->modCurVitalDam(CharVital::lifeforce, 2);
+            ch->modCurVitalDam(CharVital::health, 1);
             ch->player_flags.set(PLR_GOOP, true);
             characterSubscriptions.subscribe("goopTimeService", ch);
             ch->setBaseStat<int>("gooptime", 32);
@@ -2093,9 +2093,9 @@ void die(struct char_data *ch, struct char_data *killer) {
                 TO_CHAR);
             act("@c$n@w disappears right before dying. $n appears to be immortal.@n.", true, ch, nullptr, nullptr,
                 TO_ROOM);
-            ch->decCurHealthPercent(1, 1);
-            ch->decCurKIPercent(1, 1);
-            ch->decCurSTPercent(1, 1);
+            ch->modCurVitalDam(CharVital::health, 1);
+            ch->modCurVitalDam(CharVital::ki, 1);
+            ch->modCurVitalDam(CharVital::stamina, 1);
             null_affect(ch, AFF_POISON);
             if (GET_COND(ch, HUNGER) >= 0) {
                 GET_COND(ch, HUNGER) = 48;
@@ -2130,7 +2130,7 @@ void die(struct char_data *ch, struct char_data *killer) {
                 }
                 char_from_room(ch);
                 char_to_room(ch, real_room(17875));
-                ch->decCurHealthPercent(1, 1);
+                ch->modCurVitalDam(CharVital::health, 1);
                 look_at_room(IN_ROOM(ch), ch, 0);
                 final_combat_resolve(ch);
                 return;
@@ -2248,34 +2248,34 @@ static void perform_group_gain(struct char_data *ch, int base, struct char_data 
         send_to_char(ch, "You receive a bonus from your group's leader! @D[@G+5%s Exp!@D]@n\r\n", "%");
         share += share * 0.05;
     } else if (group_bonus(ch, 2) == 5) {
-        ch->incCurKIPercent(.04);
+        ch->modCurVitalDam(CharVital::ki, -.04);
         send_to_char(ch, "You receive a bonus from your group's leader! @D[@G4%s Ki Regenerated!@D]@n\r\n", "%");
     } else if (group_bonus(ch, 2) == 6) {
-        ch->incCurKIPercent(.02);
-        ch->incCurSTPercent(.02);
-        ch->incCurHealthPercent(.02);
+        ch->modCurVitalDam(CharVital::ki, -.02);
+        ch->modCurVitalDam(CharVital::stamina, -.02);
+        ch->modCurVitalDam(CharVital::health, -.02);
         send_to_char(ch, "You receive a bonus from your group's leader! @D[@G2%s PL/ST/Ki Regenerated!@D]@n\r\n", "%");
     } else if (group_bonus(ch, 2) == 7) {
         if (IS_ANDROID(ch)) {
             if (leader->subrace == SubRace::android_model_absorb) {
-                ch->incCurKIPercent(.02);
-                ch->incCurSTPercent(.02);
+                ch->modCurVitalDam(CharVital::ki, -.02);
+                ch->modCurVitalDam(CharVital::stamina, -.02);
                 send_to_char(ch, "You receive a bonus from your group's leader! @D[@G2%s PL/ST/Ki Recovered!@D]@n\r\n",
                              "%");
             } else if (leader->subrace == SubRace::android_model_repair) {
-                ch->incCurHealthPercent(.02);
+                ch->modCurVitalDam(CharVital::health, -.02);
                 send_to_char(ch, "You receive a bonus from your group's leader! @D[@G5%s PL Repaired@D]@n\r\n", "%");
             } else if (leader->subrace == SubRace::android_model_sense && !(ch->subrace == SubRace::android_model_absorb)) {
                 ch->modBaseStat<int>("upgrade_points", 5);
                 send_to_char(ch, "You receive a bonus from your group's leader! @D[@G+5 @mUpgrade Points@D]@n\r\n");
             }
         } else {
-            ch->incCurHealthPercent(.01);
-            ch->incCurKIPercent(.01);
-            ch->incCurSTPercent(.01);
+            ch->modCurVitalDam(CharVital::health, -.01);
+            ch->modCurVitalDam(CharVital::ki, -.01);
+            ch->modCurVitalDam(CharVital::stamina, -.01);
         }
     } else if (group_bonus(ch, 2) == 11) {
-        ch->incCurSTPercent(.04);
+        ch->modCurVitalDam(CharVital::stamina, -.04);
         send_to_char(ch, "You receive a bonus from your group's leader! @D[@G4%s ST Regenerated!@D]@n\r\n", "%");
     } else if (group_bonus(ch, 2) == 13) {
         if (GET_PHASE(leader) == 1) {
@@ -2318,7 +2318,7 @@ void group_gain(struct char_data *ch, struct char_data *victim) {
             if (!IS_WEIGHTED(f->follower)) {
                 tot_levels += GET_LEVEL(f->follower);
                 tot_members++;
-            } else if ((f->follower->getMaxPL()) >= (ch->getMaxPL()) * 0.5) {
+            } else if ((f->follower->getEffectiveStat("health")) >= (ch->getEffectiveStat("health")) * 0.5) {
                 tot_levels += GET_LEVEL(f->follower);
                 tot_members++;
             }

@@ -34,6 +34,7 @@ double initStatFunc(T* obj, const std::string& stat_name) {
     return 0.0; // Default initialization, can be overridden
 }
 
+
 template<typename T>
 class StatDef {
     std::string name;
@@ -45,6 +46,8 @@ class StatDef {
     std::function<double(T*, const std::string&)> init_func{initStatFunc<T>};
     std::function<void(T*, const std::string&, double*)> pre_effective_func{nullptr}, post_effective_func{nullptr};
     std::function<void(T*, const std::string&, double*)> pre_gain_func{nullptr}, post_gain_func{nullptr};
+    
+    std::function<void(T*, const std::string&, double, double)> on_change_func{nullptr};
 
     // puts caps on the values that'll be output and set.
     std::optional<double> min_base_value{};
@@ -133,6 +136,15 @@ class StatDef {
             return post_gain_func;
         }
 
+        StatDef<T>& setOnChangeFunc(std::function<void(T*, const std::string&, double, double)> func) {
+            on_change_func = std::move(func);
+            return *this;
+        }
+
+        std::function<void(T*, const std::string&, double, double)> getOnChangeFunc() const {
+            return on_change_func;
+        }
+
         StatDef<T>& setMinBaseValue(double value) { min_base_value = value; return *this; }
         std::optional<double> getMinBaseValue() const { return min_base_value; }
         
@@ -190,21 +202,28 @@ class StatHandler {
         }
 
         double getBaseHelper(T* target, const StatDef<T>& stat_def) const {
-            double out = 0.0;
+            auto base = 0.0;
             bool needInit = true;
             if(auto func = stat_def.getGetterFunc(); func) {
                 auto res = func(target, stat_def.getName());
                 if (res.has_value()) {
-                    out = *res;
+                    base = *res;
                     needInit = false; // We have a value, no need to initialize.
                 }
             }
+            auto out = base;
             
             if (auto init_func = stat_def.getInitFunc(); needInit && init_func) {
                 out = init_func(target, stat_def.getName());
                 // since this might be random we need to save the result instantly.
                 // We can return here to avoid repeat min/max checks.
-                return setBaseHelper(target, stat_def, out);
+                auto new_value = setBaseHelper(target, stat_def, out);
+                if(base != new_value && stat_def.getOnChangeFunc()) {
+                    // Call the on change function if it exists
+                    stat_def.getOnChangeFunc()(target, stat_def.getName(), base, new_value);
+                }
+
+                return new_value;
             }
             
             if(auto min = stat_def.getMinBaseValue(); min.has_value() && out < *min) {

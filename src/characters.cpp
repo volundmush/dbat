@@ -57,7 +57,7 @@ void char_data::restore(bool announce) {
     restoreVitals(announce);
     restoreLimbs(announce);
     restoreStatus(announce);
-    restoreLF(announce);
+    restoreVital(CharVital::ki);
 }
 
 void char_data::resurrect(ResurrectionMode mode) {
@@ -209,21 +209,25 @@ bool char_data::is_soft_cap(int64_t type, long double mult) {
         return false;
     }
     auto cur_cap = calc_soft_cap() * mult;
-
-    int64_t against = 0;
-
+    std::string stat;
     switch (type) {
         case 0:
-            against = (getBasePL());
+            stat = "health";
             break;
         case 1:
-            against = (getBaseKI());
+            stat = "ki";
             break;
         case 2:
-            against = (getBaseST());
+            stat = "stamina";
             break;
+        default:
+            basic_mud_log("Unknown stat type for soft cap check: %d", type);
+            return false;
     }
 
+    int64_t against = getBaseStat(stat);
+
+    
     return against >= cur_cap;
 }
 
@@ -294,451 +298,95 @@ int64_t char_data::calcGravCost(int64_t num) {
         if (cost) {
             send_to_char(this, "You sweat bullets struggling against a mighty burden.\r\n");
         }
-        if ((this->getCurST()) > cost) {
-            this->decCurST(cost);
+        if ((this->getCurVital(CharVital::stamina)) > cost) {
+            this->modCurVital(CharVital::stamina, -cost);
             return 1;
         } else {
-            this->decCurST(cost);
+            this->modCurVital(CharVital::stamina, -cost);
             return 0;
         }
     } else {
-        return (this->getCurST()) > (cost + num);
+        return (this->getCurVital(CharVital::stamina)) > (cost + num);
     }
 }
 
-
-int64_t char_data::getCurHealth() {
-    return getCurPL();
-}
-
-int64_t char_data::getMaxHealth() {
-    return getMaxPL();
-}
-
-double char_data::getCurHealthPercent() {
-    return getCurPLPercent();
-}
-
-int64_t char_data::getPercentOfCurHealth(double amt) {
-    return getPercentOfCurPL(amt);
-}
-
-int64_t char_data::getPercentOfMaxHealth(double amt) {
-    return getPercentOfMaxPL(amt);
-}
-
-bool char_data::isFullHealth() {
-    return isFullPL();
-}
-
-int64_t char_data::setCurHealth(int64_t amt) {
-    return 0;
-}
-
-int64_t char_data::setCurHealthPercent(double amt) {
-    return 0;
+bool char_data::isFullVital(CharVital type) {
+    return getBaseStat(fmt::format("{}_damage", magic_enum::enum_name(type))) <= 0.0;
 }
 
 double char_data::modCurVitalDam(CharVital type, double dam) {
-    return setCurVitalDam(type, getCurVitalDam(type) + dam);
+    return modBaseStat(fmt::format("{}_damage", magic_enum::enum_name(type)), dam);
 }
 
 double char_data::setCurVitalDam(CharVital type, double dam) {
-    if(dam <= 0.0) damages.erase(type);
-    else damages[type] = std::min(dam, 1.0);
-    auto r = shared_from_this();
-    if(damages.empty()) {
-        characterSubscriptions.unsubscribe("characterVitalsRecovery", r);
-        characterSubscriptions.unsubscribe("lifeforceSystem", r);
-    }
-    else {
-        characterSubscriptions.subscribe("characterVitalsRecovery", r);
-        if(!IS_ANDROID(this) && type == CharVital::powerlevel && GET_LIFEPERC(this) > 0 && (getCurHealthPercent() < static_cast<double>(GET_LIFEPERC(this)) / 100) && (getCurLF() > 0)) {
-            characterSubscriptions.subscribe("lifeforceSystem", r);
-        }
-    }
-    return getCurVitalDam(type);
+    return setBaseStat(fmt::format("{}_damage", magic_enum::enum_name(type)), dam);
 }
 
 double char_data::getCurVitalDam(CharVital type) {
-    if(auto find = damages.find(type); find != damages.end()) return find->second;
-    return 0.0;
+    return getBaseStat(fmt::format("{}_damage", magic_enum::enum_name(type)));
 }
 
-int64_t char_data::incCurHealth(int64_t amt, bool limit_max) {
-    auto dmg = (1.0 - getCurVitalDam(CharVital::powerlevel));
-    if (limit_max)
-        dmg = std::min(1.0, dmg + (double) std::abs(amt) / (double) getMaxPL());
-    else
-        dmg += (double) std::abs(amt) / (double) getMaxPL();
-    setCurVitalDam(CharVital::powerlevel, 1.0 - dmg);
-    return getCurHealth();
+double char_data::getCurVitalMeterPercent(CharVital type) {
+    auto dmg = getCurVitalDam(type);
+    return 1.0 - dmg;
 }
 
-int64_t char_data::decCurHealth(int64_t amt, int64_t floor) {
-    auto fl = 0.0;
-    auto dmg = (1.0 - getCurVitalDam(CharVital::powerlevel));
-    auto sup = getBaseStat<int>("suppression");
-    if (floor > 0)
-        fl = (double) floor / (double) getMaxPL();
-    if (sup > 0)
-        dmg = std::max(fl, dmg - (double) std::abs(amt) / ((double) getMaxPL() * ((double) sup / 100.0)));
-    else
-        dmg = std::max(fl, dmg - (double) std::abs(amt) / (double) getMaxPL());
-    setCurVitalDam(CharVital::powerlevel, 1.0 - dmg);
-    return getCurHealth();
+int64_t char_data::getCurVital(CharVital type) {
+    auto effective_stat = getMaxVital(type);
+    auto dmg = getCurVitalMeterPercent(type);
+    return static_cast<int64_t>(effective_stat * dmg);
 }
 
-int64_t char_data::incCurHealthPercent(double amt, bool limit_max) {
-    auto dmg = (1.0 - getCurVitalDam(CharVital::powerlevel));
-    if (limit_max)
-        dmg = std::min(1.0, dmg + std::abs(amt));
-    else
-        dmg += std::abs(amt);
-    setCurVitalDam(CharVital::powerlevel, 1.0 - dmg);
-    return getCurHealth();
+int64_t char_data::getMaxVital(CharVital type) {
+    auto effective_stat = getEffectiveStat(std::string(magic_enum::enum_name(type)));
+    return effective_stat;
 }
 
-int64_t char_data::decCurHealthPercent(double amt, int64_t floor) {
-    auto fl = 0.0;
-    auto dmg = (1.0 - getCurVitalDam(CharVital::powerlevel));
-    if (floor > 0)
-        fl = (double) floor / (double) getMaxPL();
-    dmg = std::max(fl, dmg - std::abs(amt));
-    setCurVitalDam(CharVital::powerlevel, 1.0 - dmg);
-    return getCurHealth();
+int64_t char_data::setCurVital(CharVital type, int64_t amt) {
+    auto m = getMaxVital(type);
+    auto ratio = static_cast<double>(amt) / static_cast<double>(m);
+    setBaseStat(fmt::format("{}_damage", magic_enum::enum_name(type)), 1.0 - ratio);
+    return getCurVital(type);
+}
+
+int64_t char_data::modCurVital(CharVital type, int64_t amt) {
+    auto m = getMaxVital(type);
+    auto ratio = static_cast<double>(amt) / static_cast<double>(m);
+    modBaseStat(fmt::format("{}_damage", magic_enum::enum_name(type)), 1.0 - ratio);
+    return getCurVital(type);
 }
 
 void char_data::restoreHealth(bool announce) {
-    if (!isFullHealth()) setCurVitalDam(CharVital::powerlevel, 0.0);
+    setCurVitalDam(CharVital::health, 0.0);
 }
 
-int64_t char_data::getMaxPLTrans() {
-    auto total = getEffBasePL();
-
-    total += getAffectModifier(APPLY_CVIT_BASE, static_cast<int>(CharVital::powerlevel));
-    total *= (1.0 + getAffectModifier(APPLY_CVIT_MULT, static_cast<int>(CharVital::powerlevel)));
-    return total;
+int64_t char_data::getCurVitalPercent(CharVital type, double amt) {
+    auto cur_vital = getEffectiveStat(std::string(magic_enum::enum_name(type)));
+    auto dmg = getCurVitalMeterPercent(type);
+    return (cur_vital * dmg) * amt;
 }
 
-int64_t char_data::getMaxPL() {
-    auto total = getMaxPLTrans();
-    /*if (GET_KAIOKEN(this) > 0) {
-        total += (total / 10) * GET_KAIOKEN(this);
-    }
-    if (AFF_FLAGGED(this, AFF_METAMORPH)) {
-        total += (total * .6);
-    }*/
-    return total;
+int64_t char_data::getMaxVitalPercent(CharVital type, double amt) {
+    auto max_vital = getEffectiveStat(std::string(magic_enum::enum_name(type)));
+    return static_cast<int64_t>(max_vital * amt);
 }
 
-int64_t char_data::getCurPL() {
-    auto dmg = (1.0 - getCurVitalDam(CharVital::powerlevel));
-    auto sup = getBaseStat<int>("suppression");
-    if (!IS_NPC(this) && sup > 0) {
-        return getMaxPL() * std::min(dmg, dmg * ((double) sup / 100));
-    } else {
-        return getMaxPL() * dmg;
-    }
+void char_data::restoreVital(CharVital type) {
+    setCurVitalDam(type, 0.0);
 }
-
-int64_t char_data::getUnsuppressedPL() {
-    auto dmg = (1.0 - getCurVitalDam(CharVital::powerlevel));
-    return getMaxPL() * dmg;
-}
-
-int64_t char_data::getEffBasePL() {
-    if (original) return original->getEffBasePL();
-
-    if (!clones.empty()) {
-        return getBasePL() / (clones.size() + 1);
-    } else {
-        return getBasePL();
-    }
-}
-
-int64_t char_data::getBasePL() {
-    return getBaseStat("powerlevel");
-}
-
-double char_data::getCurPLPercent() {
-    return (double) getCurPL() / (double) getMaxPL();
-}
-
-int64_t char_data::getPercentOfCurPL(double amt) {
-    return getCurPL() * std::abs(amt);
-}
-
-int64_t char_data::getPercentOfMaxPL(double amt) {
-    return getMaxPL() * std::abs(amt);
-}
-
-bool char_data::isFullPL() {
-    return getCurVitalDam(CharVital::powerlevel) <= 0.0;
-}
-
-int64_t char_data::getCurKI() {
-    auto dmg = (1.0 - getCurVitalDam(CharVital::ki));
-    return getMaxKI() * dmg;
-}
-
-int64_t char_data::getMaxKI() {
-    auto total = getEffBaseKI();
-    total += (getAffectModifier(APPLY_CVIT_BASE, static_cast<int>(CharVital::ki)));
-    total *= (1.0 + getAffectModifier(APPLY_CVIT_MULT, static_cast<int>(CharVital::ki)));
-    return total;
-}
-
-int64_t char_data::getEffBaseKI() {
-    if (original) return original->getEffBaseKI();
-    if (!clones.empty()) {
-        return getBaseKI() / (clones.size() + 1);
-    } else {
-        return getBaseKI();
-    }
-}
-
-int64_t char_data::getBaseKI() {
-    return getBaseStat("ki");
-}
-
-double char_data::getCurKIPercent() {
-    return (double) getCurKI() / (double) getMaxKI();
-}
-
-int64_t char_data::getPercentOfCurKI(double amt) {
-    return getCurKI() * std::abs(amt);
-}
-
-int64_t char_data::getPercentOfMaxKI(double amt) {
-    return getMaxKI() * std::abs(amt);
-}
-
-bool char_data::isFullKI() {
-    return getCurVitalDam(CharVital::ki) <= 0.0;
-}
-
-int64_t char_data::setCurKI(int64_t amt) {
-    return 0;
-}
-
-int64_t char_data::setCurKIPercent(double amt) {
-    return 0;
-}
-
-int64_t char_data::incCurKI(int64_t amt, bool limit_max) {
-    auto dmg = (1.0 - getCurVitalDam(CharVital::ki));
-    if (limit_max)
-        dmg = std::min(1.0, dmg + (double) std::abs(amt) / (double) getMaxKI());
-    else
-        dmg += (double) std::abs(amt) / (double) getMaxKI();
-    setCurVitalDam(CharVital::ki, 1.0 - dmg);
-    return getCurKI();
-};
-
-int64_t char_data::decCurKI(int64_t amt, int64_t floor) {
-    auto dmg = (1.0 - getCurVitalDam(CharVital::ki));
-    auto fl = 0.0;
-    if (floor > 0)
-        fl = (double) floor / (double) getMaxKI();
-    dmg = std::max(fl, dmg - (double) std::abs(amt) / (double) getMaxKI());
-    setCurVitalDam(CharVital::ki, 1.0 - dmg);
-    return getCurKI();
-}
-
-int64_t char_data::incCurKIPercent(double amt, bool limit_max) {
-    auto dmg = (1.0 - getCurVitalDam(CharVital::ki));
-    if (limit_max)
-        dmg = std::min(1.0, dmg + std::abs(amt));
-    else
-        dmg += std::abs(amt);
-    setCurVitalDam(CharVital::ki, 1.0 - dmg);
-    return getCurKI();
-}
-
-int64_t char_data::decCurKIPercent(double amt, int64_t floor) {
-    auto dmg = (1.0 - getCurVitalDam(CharVital::ki));
-    auto fl = 0.0;
-    if (floor > 0)
-        fl = (double) floor / (double) getMaxKI();
-    dmg = std::max(fl, dmg - std::abs(amt));
-    setCurVitalDam(CharVital::ki, 1.0 - dmg);
-    return getCurKI();
-}
-
-
-void char_data::restoreKI(bool announce) {
-    setCurVitalDam(CharVital::ki, 0.0);
-}
-
-int64_t char_data::getCurST() {
-    auto dmg = (1.0 - getCurVitalDam(CharVital::stamina));
-    return getMaxST() * dmg;
-}
-
-int64_t char_data::getMaxST() {
-    auto total = getEffBaseST();
-    total += getAffectModifier(APPLY_CVIT_BASE, static_cast<int>(CharVital::stamina));
-    total *= (1.0 + getAffectModifier(APPLY_CVIT_MULT, static_cast<int>(CharVital::stamina)));
-    return total;
-}
-
-int64_t char_data::getEffBaseST() {
-    if (original) return original->getEffBaseST();
-    if (!clones.empty()) {
-        return getBaseST() / (clones.size() + 1);
-    } else {
-        return getBaseST();
-    }
-}
-
-int64_t char_data::getBaseST() {
-    return getBaseStat("stamina");
-}
-
-double char_data::getCurSTPercent() {
-    return (double) getCurST() / (double) getMaxST();
-}
-
-int64_t char_data::getPercentOfCurST(double amt) {
-    return getCurST() * std::abs(amt);
-}
-
-int64_t char_data::getPercentOfMaxST(double amt) {
-    return getMaxST() * std::abs(amt);
-}
-
-bool char_data::isFullST() {
-    return getCurVitalDam(CharVital::stamina) <= 0.0;
-}
-
-int64_t char_data::setCurST(int64_t amt) {
-    return 0;
-}
-
-int64_t char_data::setCurSTPercent(double amt) {
-    return 0;
-}
-
-int64_t char_data::incCurST(int64_t amt, bool limit_max) {
-    auto dmg = (1.0 - getCurVitalDam(CharVital::stamina));
-    if (limit_max)
-        dmg = std::min(1.0, dmg + (double) std::abs(amt) / (double) getMaxST());
-    else
-        dmg += (double) std::abs(amt) / (double) getMaxST();
-    setCurVitalDam(CharVital::stamina, 1.0 - dmg);
-    return getCurST();
-};
-
-int64_t char_data::decCurST(int64_t amt, int64_t floor) {
-    auto dmg = (1.0 - getCurVitalDam(CharVital::stamina));
-    auto fl = 0.0;
-    if (floor > 0)
-        fl = (double) floor / (double) getMaxST();
-    dmg = std::max(fl, dmg - (double) std::abs(amt) / (double) getMaxST());
-    setCurVitalDam(CharVital::stamina, 1.0 - dmg);
-    return getCurST();
-}
-
-int64_t char_data::incCurSTPercent(double amt, bool limit_max) {
-    auto dmg = (1.0 - getCurVitalDam(CharVital::stamina));
-    if (limit_max)
-        dmg = std::min(1.0, dmg + std::abs(amt));
-    else
-        dmg += std::abs(amt);
-    setCurVitalDam(CharVital::stamina, 1.0 - dmg);
-    return getMaxST();
-}
-
-int64_t char_data::decCurSTPercent(double amt, int64_t floor) {
-    auto dmg = (1.0 - getCurVitalDam(CharVital::stamina));
-    auto fl = 0.0;
-    if (floor > 0)
-        fl = (double) floor / (double) getMaxST();
-    dmg = std::max(fl, dmg - std::abs(amt));
-    setCurVitalDam(CharVital::stamina, 1.0 - dmg);
-    return getCurST();
-}
-
-
-void char_data::restoreST(bool announce) {
-    setCurVitalDam(CharVital::stamina, 0.0);
-}
-
-
-int64_t char_data::getCurLF() {
-    auto dmg = (1.0 - getCurVitalDam(CharVital::lifeforce));
-    return getMaxLF() * dmg;
-}
-
-int64_t char_data::getMaxLF() {
-    auto lb = GET_LIFEBONUSES(this);
-
-    return (IS_DEMON(this) ? (((GET_MAX_MANA(this) * 0.5) + (GET_MAX_MOVE(this) * 0.5)) * 0.75) + lb
-                           : (IS_KONATSU(this) ? (((GET_MAX_MANA(this) * 0.5) + (GET_MAX_MOVE(this) * 0.5)) * 0.85) +
-                    lb : (GET_MAX_MANA(this) * 0.5) +
-                                                                         (GET_MAX_MOVE(this) * 0.5) +
-                    lb));
-}
-
-bool char_data::isFullLF() {
-    return getCurVitalDam(CharVital::lifeforce) <= 0.0;
-}
-
-int64_t char_data::incCurLF(int64_t amt, bool limit_max) {
-    auto dmg = (1.0 - getCurVitalDam(CharVital::lifeforce));
-    if (limit_max)
-        dmg = std::min(1.0, dmg + (double) std::abs(amt) / (double) getMaxLF());
-    else
-        dmg += (double) std::abs(amt) / (double) getMaxLF();
-    setCurVitalDam(CharVital::lifeforce, 1.0 - dmg);
-    return getCurLF();
-};
-
-int64_t char_data::decCurLF(int64_t amt, int64_t floor) {
-    auto dmg = (1.0 - getCurVitalDam(CharVital::lifeforce));
-    auto fl = 0.0;
-    if (floor > 0)
-        fl = (double) floor / (double) getMaxLF();
-    dmg = std::max(fl, dmg - (double) std::abs(amt) / (double) getMaxLF());
-    setCurVitalDam(CharVital::lifeforce, 1.0 - dmg);
-    return getCurLF();
-}
-
-int64_t char_data::incCurLFPercent(double amt, bool limit_max) {
-    auto dmg = (1.0 - getCurVitalDam(CharVital::lifeforce));
-    if (limit_max)
-        dmg = std::min(1.0, dmg + std::abs(amt));
-    else
-        dmg += std::abs(amt);
-    setCurVitalDam(CharVital::lifeforce, 1.0 - dmg);
-    return getCurLF();
-}
-
-int64_t char_data::decCurLFPercent(double amt, int64_t floor) {
-    auto dmg = (1.0 - getCurVitalDam(CharVital::lifeforce));
-    auto fl = 0.0;
-    if (floor > 0)
-        fl = (double) floor / (double) getMaxLF();
-    dmg = std::max(fl, dmg - std::abs(amt));
-    setCurVitalDam(CharVital::lifeforce, 1.0 - dmg);
-    return getCurLF();
-}
-
-
-void char_data::restoreLF(bool announce) {
-    setCurVitalDam(CharVital::lifeforce, 0.0);
-}
-
 
 bool char_data::isFullVitals() {
-    return isFullHealth() && isFullKI() && isFullST();
+    for(const auto& t : {CharVital::health, CharVital::ki, CharVital::stamina}) {
+        if(!isFullVital(t))
+            return false;
+    }
+    return true;
 }
 
 void char_data::restoreVitals(bool announce) {
-    restoreHealth(announce);
-    restoreKI(announce);
-    restoreST(announce);
+    for(const auto& t : {CharVital::health, CharVital::ki, CharVital::stamina}) {
+        setCurVitalDam(t, 0.0);
+    }
 }
 
 void char_data::restoreStatus(bool announce) {
@@ -862,9 +510,9 @@ void char_data::attemptLimitBreak() {
         return;
     if(transforms[form].time_spent_in_form > 50000 && rand_number(0, 1000) == 1000) {
         transforms[form].limit_broken = true;
-        incCurHealthPercent(0.35);
-        incCurKIPercent(0.35);
-        incCurSTPercent(0.35);
+        modCurVitalDam(CharVital::health, -0.35);
+        modCurVitalDam(CharVital::ki, -0.35);
+        modCurVitalDam(CharVital::stamina, -0.35);
         send_to_char(this, "@mA rush of energy bursts through your system as you defy your limits.@n\r\n");
         
         affect_flags.set(AFF_LIMIT_BREAKING, true);         
@@ -878,17 +526,16 @@ void char_data::removeLimitBreak() {
     }
 }
 
-int64_t char_data::getPL() {
-    int64_t vitalCalc = (getMaxPL() + getMaxKI()) / 4;
+int64_t char_data::getPL(bool suppressed) {
+    int64_t vitalCalc = (getEffectiveStat("health") + getEffectiveStat("ki")) / 4;
     int attrCalc = (getEffectiveStat("agility") + getEffectiveStat("constitution") + getEffectiveStat("intelligence") + getEffectiveStat("speed")
     + getEffectiveStat("strength") + getEffectiveStat("wisdom")) / 50;
 
-    auto sup = getBaseStat<int>("suppression");
+    auto sup = suppressed ? getBaseStat<int>("suppression") : 100.0;
 
-    double suppressed = sup > 0 ? ((double) sup / 100.0) : 1;
     double speed = getEffectiveStat("speednar");
 
-    double pl = vitalCalc * attrCalc * speed * suppressed;
+    double pl = (vitalCalc * attrCalc * speed) * (sup / 100.0);
 
     if(IS_NPC(this)) {
         if(GET_LEVEL(this) < 10)
@@ -1364,9 +1011,9 @@ int64_t char_data::modExperience(int64_t value, bool applyBonuses) {
 
                 if (rand_number(1, 5) >= 2) {
                     if (IS_HUMAN(this)) {
-                        this->gainBaseStat("powerlevel", diff * 0.8);
+                        this->gainBaseStat("health", diff * 0.8);
                     } else {
-                        this->gainBaseStat("powerlevel", diff);
+                        this->gainBaseStat("health", diff);
                     }
                     send_to_char(this, "@D[@G+@Y%s @RPL@D]@n ", add_commas(diff).c_str());
                 }

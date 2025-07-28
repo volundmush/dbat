@@ -296,7 +296,7 @@ void script_damage(struct char_data *vict, int dam) {
         return;
     }
 
-    vict->decCurHealth(dam);
+    vict->modCurVital(CharVital::health, -dam);
 
     update_pos(vict);
     send_char_pos(vict, dam);

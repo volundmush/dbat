@@ -101,8 +101,8 @@ static void barrier_shed(struct char_data *ch) {
             nullptr, TO_ROOM);
     }
 
-    if (recharge > 0 && (ch->getCurKI()) < GET_MAX_MANA(ch)) {
-        ch->incCurKI(recharge);
+    if (recharge > 0 && (ch->getCurVital(CharVital::ki)) < GET_MAX_MANA(ch)) {
+        ch->modCurVital(CharVital::ki, recharge);
         send_to_char(ch, "@CYou reabsorb some of the energy lost into your body!@n\r\n");
     }
 }
@@ -621,7 +621,7 @@ static int64_t move_gain(struct char_data *ch) {
         gain /= 4;
 
     if (ch->getRoomFlag(ROOM_AURA)) {
-        gain = GET_MAX_MOVE(ch) - (ch->getCurST());
+        gain = GET_MAX_MOVE(ch) - (ch->getCurVital(CharVital::stamina));
     }
 
     if (cook_element(IN_ROOM(ch)) == 1)
@@ -641,8 +641,8 @@ static void update_flags(struct char_data *ch) {
     }
 
     if (GET_BONUS(ch, BONUS_LATE) && GET_POS(ch) == POS_SLEEPING && rand_number(1, 3) == 3) {
-        if (GET_HIT(ch) >= (ch->getMaxPL()) && (ch->getCurST()) >= GET_MAX_MOVE(ch) &&
-            (ch->getCurKI()) >= GET_MAX_MANA(ch)) {
+        if (GET_HIT(ch) >= (ch->getEffectiveStat("health")) && (ch->getCurVital(CharVital::stamina)) >= GET_MAX_MOVE(ch) &&
+            (ch->getCurVital(CharVital::ki)) >= GET_MAX_MANA(ch)) {
             send_to_char(ch, "You FINALLY wake up.\r\n");
             act("$n wakes up.", true, ch, nullptr, nullptr, TO_ROOM);
             ch->setBaseStat<int>("position", POS_SITTING);
@@ -822,14 +822,14 @@ void gain_condition(struct char_data *ch, int condition, int value) {
                     if (getsHungry) {
                         switch (GET_COND(ch, condition)) {
                             case 0:
-                                if ((ch->getCurST()) >= GET_MAX_MOVE(ch) / 3) {
+                                if ((ch->getCurVital(CharVital::stamina)) >= GET_MAX_MOVE(ch) / 3) {
                                     send_to_char(ch, "@RYou are starving to death!@n\r\n");
-                                    ch->decCurSTPercent(.33);
+                                    ch->modCurVitalDam(CharVital::stamina, .33);
                                 }
-                                else if ((ch->getCurST()) < GET_MAX_MOVE(ch) / 3) {
+                                else if ((ch->getCurVital(CharVital::stamina)) < GET_MAX_MOVE(ch) / 3) {
                                     send_to_char(ch, "@RYou are starving to death!@n\r\n");
-                                    ch->decCurSTPercent(1, 0);
-                                    ch->decCurHealthPercent(.34);
+                                    ch->modCurVitalDam(CharVital::stamina, 1);
+                                    ch->modCurVitalDam(CharVital::health, .34);
                                 }
                                 break;
                             case 1:
@@ -876,13 +876,13 @@ void gain_condition(struct char_data *ch, int condition, int value) {
                 case THIRST:
                     switch (GET_COND(ch, condition)) {
                         case 0:
-                            if ((ch->getCurST()) >= GET_MAX_MOVE(ch) / 3) {
+                            if ((ch->getCurVital(CharVital::stamina)) >= GET_MAX_MOVE(ch) / 3) {
                                 send_to_char(ch, "@RYou are dehydrated!@n\r\n");
-                                ch->decCurSTPercent(.33);
-                            } else if ((ch->getCurST()) < GET_MAX_MOVE(ch) / 3) {
+                                ch->modCurVitalDam(CharVital::stamina, .33);
+                            } else if ((ch->getCurVital(CharVital::stamina)) < GET_MAX_MOVE(ch) / 3) {
                                 send_to_char(ch, "@RYou are dehydrated!@n\r\n");
-                                ch->decCurSTPercent(1, 0);
-                                ch->decCurHealthPercent(.34);
+                                ch->modCurVitalDam(CharVital::stamina, 1);
+                                ch->modCurVitalDam(CharVital::health, .34);
                             }
                             break;
                         case 1:
@@ -938,7 +938,7 @@ void gain_condition(struct char_data *ch, int condition, int value) {
             //If you starve or dehydrate, die and reset your conditions
             if (GET_HIT(ch) <= 0 && GET_COND(ch, HUNGER) == 0) {
                 send_to_char(ch, "You have starved to death!\r\n");
-                ch->decCurSTPercent(1, 0);
+                ch->modCurVitalDam(CharVital::stamina, 1);
                 act("@W$n@W falls down dead before you...@n", false, ch, nullptr, nullptr, TO_ROOM);
                 die(ch, nullptr);
                 if (GET_COND(ch, HUNGER) != -1) {
@@ -950,7 +950,7 @@ void gain_condition(struct char_data *ch, int condition, int value) {
             }
             if (GET_HIT(ch) <= 0 && GET_COND(ch, THIRST) == 0) {
                 send_to_char(ch, "You have died of dehydration!\r\n");
-                ch->decCurSTPercent(1, 0);
+                ch->modCurVitalDam(CharVital::stamina, 1);
                 act("@W$n@W falls down dead before you...@n", false, ch, nullptr, nullptr, TO_ROOM);
                 die(ch, nullptr);
                 if (GET_COND(ch, HUNGER) != -1) {
@@ -1125,7 +1125,7 @@ void androidAbsorbSystem(uint64_t heartPulse, double deltaTime) {
         }
 
         if (IS_ANDROID(ch) && victim) {
-            if ((ch->absorbing)->getCurST() < (GET_MAX_MOVE(ch) / 15) && (ch->absorbing)->getCurKI() < (GET_MAX_MANA(ch) / 15)) {
+            if ((ch->absorbing)->getCurVital(CharVital::stamina) < (GET_MAX_MOVE(ch) / 15) && (ch->absorbing)->getCurVital(CharVital::ki) < (GET_MAX_MANA(ch) / 15)) {
                 act("@WYou stop absorbing stamina and ki from @c$N as they don't have enough for you to take@W!@n",
                     true, ch, nullptr, victim, TO_CHAR);
                 act("@C$n@W stops absorbing stamina and ki from you!@n", true, ch, nullptr,
@@ -1144,14 +1144,14 @@ void androidAbsorbSystem(uint64_t heartPulse, double deltaTime) {
             }
         }
         if (IS_ANDROID(ch) && victim && rand_number(1, 9) >= 6) {
-            if (((ch->absorbing)->getCurST()) > (GET_MAX_MOVE(ch) / 15) ||
-                ((ch->absorbing)->getCurKI()) > (GET_MAX_MANA(ch) / 15)) {
+            if (((ch->absorbing)->getCurVital(CharVital::stamina)) > (GET_MAX_MOVE(ch) / 15) ||
+                ((ch->absorbing)->getCurVital(CharVital::ki)) > (GET_MAX_MANA(ch) / 15)) {
 
-                ch->incCurKI(ch->getMaxKI() * .08);
-                ch->incCurST(ch->getMaxST() * .08);
+                ch->modCurVital(CharVital::ki, ch->getEffectiveStat("ki") * .08);
+                ch->modCurVital(CharVital::stamina, ch->getEffectiveStat("stamina") * .08);
 
-                victim->decCurKI(ch->getMaxKI() / 20, 1);
-                victim->decCurST(ch->getMaxST() / 20, 1);
+                victim->modCurVital(CharVital::ki, -(ch->getEffectiveStat("ki") / 20));
+                victim->modCurVital(CharVital::stamina, -(ch->getEffectiveStat("stamina") / 20));
 
                 act("@WYou absorb stamina and ki from @c$N@W!@n", true, ch, nullptr, victim,
                     TO_CHAR);
@@ -1160,13 +1160,13 @@ void androidAbsorbSystem(uint64_t heartPulse, double deltaTime) {
                 send_to_char(victim, "@wTry 'escape'!@n\r\n");
                 act("@C$n@W absorbs stamina and ki from @c$N@w!@n", true, ch, nullptr,
                     victim, TO_NOTVICT);
-                if (GET_HIT(ch) < (ch->getMaxPL())) {
-                    ch->incCurHealth(ch->getMaxKI() * .04);
+                if (GET_HIT(ch) < (ch->getEffectiveStat("health"))) {
+                    ch->modCurVital(CharVital::health, ch->getEffectiveStat("ki") * .04);
                     send_to_char(ch,
                                  "@CYou convert a portion of the absorbed energy into refilling your powerlevel.@n\r\n");
                 }
 
-                if (ch->isFullST() && ch->isFullKI()) {
+                if (ch->isFullVital(CharVital::stamina) && ch->isFullVital(CharVital::stamina)) {
 
                     act("@WYou stop absorbing stamina and ki from @c$N as you are full@W!@n", true, ch,
                         nullptr, victim, TO_CHAR);
@@ -1218,7 +1218,7 @@ void androidAbsorbSystem(uint64_t heartPulse, double deltaTime) {
                                              add_commas(gbonus).c_str());
                             }
                         }
-                        ch->gainBaseStat("powerlevel", gain);
+                        ch->gainBaseStat("health", gain);
                     }
                 }
                 if (mum) {
@@ -1285,8 +1285,8 @@ void androidAbsorbSystem(uint64_t heartPulse, double deltaTime) {
                     if (rand_number(1, 8) >= 6) {
                         int gain = 1;
                         send_to_char(ch,
-                                     "@gYou gain +@G%d@g permanent powerlevel. You may need to level.@n\r\n", gain);
-                        ch->gainBaseStat("powerlevel", gain);
+                                     "@gYou gain +@G%d@g permanent health. You may need to level.@n\r\n", gain);
+                        ch->gainBaseStat("health", gain);
                     }
                 }
                 if (!mum) {
@@ -1373,9 +1373,9 @@ void goopTimeService(uint64_t heartPulse, double deltaTime) {
             else if (IS_SAIYAN(ch)) {
 
                 int zenkaiPL, zenkaiKi, zenkaiSt;
-                zenkaiPL = ch->getBasePL() * 1.03;
-                zenkaiKi = ch->getBaseKI() * 1.015;
-                zenkaiSt = ch->getBaseST() * 1.015;
+                zenkaiPL = ch->getBaseStat("health") * 1.03;
+                zenkaiKi = ch->getBaseStat("ki") * 1.015;
+                zenkaiSt = ch->getBaseStat("stamina") * 1.015;
 
                 //GET_HIT(ch) = gear_pl(ch) * .5;
                 //GET_MANA(ch) = GET_MAX_MANA(ch) *.2;
@@ -1383,7 +1383,7 @@ void goopTimeService(uint64_t heartPulse, double deltaTime) {
 
 
                 if (!IN_ARENA(ch)) {
-                    ch->gainBaseStat("powerlevel", zenkaiPL);
+                    ch->gainBaseStat("health", zenkaiPL);
                     ch->gainBaseStat("ki", zenkaiKi);
                     ch->gainBaseStat("stamina", zenkaiSt);
 
@@ -1506,7 +1506,7 @@ void characterVitalsRecovery(uint64_t heartPulse, double deltaTime) {
                 universalPerc += 2.0;
         }
 
-        for(auto v : {CharVital::powerlevel, CharVital::stamina, CharVital::ki, CharVital::lifeforce}) {
+        for(auto v : {CharVital::health, CharVital::stamina, CharVital::ki, CharVital::lifeforce}) {
 
             // Androids don't have Lifeforce.
             if(IS_ANDROID(ch) && v == CharVital::lifeforce) continue;
@@ -1578,7 +1578,7 @@ void hunger_update(uint64_t heartPulse, double deltaTime) {
     auto ac = characterSubscriptions.all("players");
     for(auto i : filter_raw(ac)) {
         // making it so that you don't get hungry/thirsty if you're just leisurely idling, rping, etc.
-        if (!i->isFullHealth()) {
+        if (!i->isFullVital(CharVital::health)) {
             if (rand_number(1, 2) == 2) {
                 gain_condition(i, HUNGER, -1);
             }
@@ -1618,7 +1618,7 @@ void auralight_update(uint64_t heartPulse, double deltaTime) {
     for(auto i : filter_raw(ac)) {
         if (PLR_FLAGGED(i, PLR_AURALIGHT)) {
             if (GET_KI(i) > 0) {
-                i->decCurKI(1);
+                i->modCurVital(CharVital::ki, -1);
             } else {
                 send_to_char(i, "You don't have enough energy to keep the aura active.\r\n");
                 act("$n's aura slowly stops shining and fades.\r\n", true, i, nullptr, nullptr, TO_ROOM);
@@ -1649,7 +1649,7 @@ void player_misc_update(uint64_t heartPulse, double deltaTime) {
         }
         heal_limb(i);
 
-        if (i->getCurKI() >= GET_MAX_MANA(i) * 0.5 && GET_CHARGE(i) < GET_MAX_MANA(i) * 0.1 && GET_PREFERENCE(i) == PREFERENCE_KI && !PLR_FLAGGED(i, PLR_AURALIGHT)) {
+        if (i->getCurVital(CharVital::ki) >= GET_MAX_MANA(i) * 0.5 && GET_CHARGE(i) < GET_MAX_MANA(i) * 0.1 && GET_PREFERENCE(i) == PREFERENCE_KI && !PLR_FLAGGED(i, PLR_AURALIGHT)) {
             i->setBaseStat<int64_t>("charge", GET_MAX_MANA(i) * 0.1);
         }
 
@@ -1663,7 +1663,7 @@ void kaioken_update(uint64_t heartPulse, double deltaTime) {
         int x = (kaioken * 5) + 5;
         if (kaioken > 0) {
             improve_skill(i, SKILL_KAIOKEN, -1);
-            if ((GET_SKILL(i, SKILL_KAIOKEN) < rand_number(1, x) || (i->getCurST()) <= GET_MAX_MOVE(i) / 10))
+            if ((GET_SKILL(i, SKILL_KAIOKEN) < rand_number(1, x) || (i->getCurVital(CharVital::stamina)) <= GET_MAX_MOVE(i) / 10))
                 i->remove_kaioken(2);
         }
     }
@@ -1691,7 +1691,7 @@ void poison_update(uint64_t heartPulse, double deltaTime) {
         } else {
             cost = 0.06;
         }
-        if (auto remaining = i->decCurHealthPercent(cost); remaining > 0) {
+        if (auto remaining = i->modCurVitalDam(CharVital::health, cost); remaining > 0) {
             send_to_char(i, "You puke as the poison burns through your blood.\r\n");
             act("$n shivers and then pukes.", true, i, nullptr, nullptr, TO_ROOM);
         } else {
@@ -1757,20 +1757,20 @@ void point_update(uint64_t heartPulse, double deltaTime)
                     if (i->getLocationTileType() == SECT_WATER_NOSWIM && !CARRIED_BY(i) && !IS_KANASSAN(i))
                     {
                         auto carweight = i->getEffectiveStat("weight_carried");
-                        if (i->getCurST() >= carweight)
+                        if (i->getCurVital(CharVital::stamina) >= carweight)
                         {
                             act("@bYou swim in place.@n", true, i, nullptr, nullptr, TO_CHAR);
                             act("@C$n@b swims in place.@n", true, i, nullptr, nullptr, TO_ROOM);
-                            i->decCurST(carweight);
+                            i->modCurVital(CharVital::stamina, -carweight);
                         }
                         else
                         {
-                            i->decCurST(carweight);
+                            i->modCurVital(CharVital::stamina, -carweight);
                             act("@RYou are drowning!@n", true, i, nullptr, nullptr, TO_CHAR);
                             act("@C$n@b gulps water as $e struggles to stay above the water line.@n", true, i, nullptr,
                                 nullptr,
                                 TO_ROOM);
-                            if (i->decCurHealthPercent(0.33) <= 0)
+                            if (i->modCurVitalDam(CharVital::health, 0.33) <= 0)
                             {
                                 act("@rYou drown!@n", true, i, nullptr, nullptr, TO_CHAR);
                                 act("@R$n@r drowns!@n", true, i, nullptr, nullptr, TO_ROOM);
@@ -1816,7 +1816,7 @@ void point_update(uint64_t heartPulse, double deltaTime)
                         {
                             do_fly(i, nullptr, 0, 0);
                         }
-                        i->decCurHealthPercent(.05);
+                        i->modCurVitalDam(CharVital::health, .05);
                         if (GET_HIT(i) < 0)
                         {
                             act("@rYou have burned to death!@n", true, i, nullptr, nullptr, TO_CHAR);
@@ -1831,17 +1831,17 @@ void point_update(uint64_t heartPulse, double deltaTime)
                         {
                             send_to_char(i, "@wYour sleep does you some good.@n\r\n");
                             if (!IS_ANDROID(i) && !FIGHTING(i))
-                                i->restoreLF(false);
+                                i->restoreVital(CharVital::lifeforce);
                         }
                         else if (GET_POS(i) == POS_RESTING)
                         {
                             send_to_char(i, "@wYou feel relaxed and better.@n\r\n");
-                            if (!i->isFullLF())
+                            if (!i->isFullVital(CharVital::lifeforce))
                             {
                                 if (!IS_ANDROID(i) && !FIGHTING(i) && GET_SUPPRESS(i) <= 0 &&
-                                    GET_HIT(i) != (i->getMaxPL()))
+                                    GET_HIT(i) != (i->getEffectiveStat("health")))
                                 {
-                                    i->incCurLFPercent(.15);
+                                    i->modCurVitalDam(CharVital::lifeforce, -.15);
                                     send_to_char(i, "@CYou feel more lively.@n\r\n");
                                 }
                             }
