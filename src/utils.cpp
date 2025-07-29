@@ -1444,19 +1444,19 @@ int64_t molt_threshold(struct char_data *ch) {
     if (!IS_ARLIAN(ch))
         return (0);
     else if (GET_MOLT_LEVEL(ch) < 100) {
-        threshold = (((GET_MOLT_LEVEL(ch) + 1) * (ch->getBaseStat("health") * 0.02)) * GET_CON(ch)) / 4;
+        threshold = (((GET_MOLT_LEVEL(ch) + 1) * (ch->getBaseStat<int64_t>("health") * 0.02)) * GET_CON(ch)) / 4;
         threshold = threshold * 0.25;
     } else if (GET_MOLT_LEVEL(ch) < 200) {
-        threshold = (((GET_MOLT_LEVEL(ch) + 1) * (ch->getBaseStat("health") * 0.02)) * GET_CON(ch)) / 2;
+        threshold = (((GET_MOLT_LEVEL(ch) + 1) * (ch->getBaseStat<int64_t>("health") * 0.02)) * GET_CON(ch)) / 2;
         threshold = threshold * 0.20;
     } else if (GET_MOLT_LEVEL(ch) < 400) {
-        threshold = (((GET_MOLT_LEVEL(ch) + 1) * (ch->getBaseStat("health") * 0.02)) * GET_CON(ch));
+        threshold = (((GET_MOLT_LEVEL(ch) + 1) * (ch->getBaseStat<int64_t>("health") * 0.02)) * GET_CON(ch));
         threshold = threshold * 0.17;
     } else if (GET_MOLT_LEVEL(ch) < 800) {
-        threshold = (((GET_MOLT_LEVEL(ch) + 1) * (ch->getBaseStat("health") * 0.02)) * GET_CON(ch)) * 2;
+        threshold = (((GET_MOLT_LEVEL(ch) + 1) * (ch->getBaseStat<int64_t>("health") * 0.02)) * GET_CON(ch)) * 2;
         threshold = threshold * 0.15;
     } else {
-        threshold = (((GET_MOLT_LEVEL(ch) + 1) * (ch->getBaseStat("health") * 0.02)) * GET_CON(ch)) * 4;
+        threshold = (((GET_MOLT_LEVEL(ch) + 1) * (ch->getBaseStat<int64_t>("health") * 0.02)) * GET_CON(ch)) * 4;
         threshold = threshold * 0.12;
     }
 
@@ -1531,8 +1531,8 @@ void handle_evolution(struct char_data *ch, int64_t dmg) {
                 ch->modBaseStat("armor_innate", armorgain);
 
 
-            double baseHl = ch->getBaseStat("health");
-            double baseSt = ch->getBaseStat("stamina");
+            double baseHl = ch->getBaseStat<int64_t>("health");
+            double baseSt = ch->getBaseStat<int64_t>("stamina");
             double attrBonus = (1 + (GET_CON(ch) / 20));
 
             int64_t bonusHl = 0;
@@ -1556,8 +1556,8 @@ void handle_evolution(struct char_data *ch, int64_t dmg) {
             bonusSt = start_bonusSt * diminishing_returnsSt * 16;
 
 
-            if(bonusHl > (ch->getBaseStat("health") / 10)) bonusHl = ch->getBaseStat("health") / 10;
-            if(bonusSt > (ch->getBaseStat("stamina") / 10)) bonusSt = ch->getBaseStat("stamina") / 10;
+            if(bonusHl > (ch->getBaseStat<int64_t>("health") / 10)) bonusHl = ch->getBaseStat<int64_t>("health") / 10;
+            if(bonusSt > (ch->getBaseStat<int64_t>("stamina") / 10)) bonusSt = ch->getBaseStat<int64_t>("stamina") / 10;
 
             bonusHl *= (1 + ch->getAffectModifier(APPLY_CVIT_GAIN_MULT, static_cast<int>(CharVital::health)));
             bonusSt *= (1 + ch->getAffectModifier(APPLY_CVIT_GAIN_MULT, static_cast<int>(CharVital::stamina)));

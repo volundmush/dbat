@@ -527,7 +527,7 @@ void char_data::removeLimitBreak() {
 }
 
 int64_t char_data::getPL(bool suppressed) {
-    int64_t vitalCalc = (getEffectiveStat("health") + getEffectiveStat("ki")) / 4;
+    int64_t vitalCalc = (getEffectiveStat<int64_t>("health") + getEffectiveStat<int64_t>("ki")) / 4;
     int attrCalc = (getEffectiveStat("agility") + getEffectiveStat("constitution") + getEffectiveStat("intelligence") + getEffectiveStat("speed")
     + getEffectiveStat("strength") + getEffectiveStat("wisdom")) / 50;
 
@@ -820,7 +820,7 @@ void char_data::gainGrowth(double gain) {
     double days = getDaysPassed();
 
     // Roughly increase by a multiplier of 1 every 60 days past the first 60
-    double timeMod = std::max((getDaysPassed() / 60.0) , 1.0);
+    double timeMod = std::max((days / 60.0) , 1.0);
 
     gain *= timeMod;
     

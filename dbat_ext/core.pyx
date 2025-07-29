@@ -4,7 +4,7 @@ import asyncio
 import time
 from pathlib import Path
 from fastapi import HTTPException, status
-import mudforge
+import dbat
 
 from dbat.events.circle import CircleText
 
@@ -354,7 +354,7 @@ cdef void distribute_output() noexcept:
     Iterate through all connected sessions and shove their output out to the
     EventHub as CircleText events and clear the buffer.
     """
-    hub = mudforge.EVENT_HUB
+    hub = dbat.EVENT_HUB
     for sess in db.sessions:
         desc = sess.second
         if desc.processed_output.empty():
@@ -367,7 +367,7 @@ cdef void send_close(int character_id) noexcept:
     """
     Send a close event to the EventHub for a character.
     """
-    hub = mudforge.EVENT_HUB
+    hub = dbat.EVENT_HUB
     event = CircleText(text="Connection closed.")
     hub.send_nowait(character_id, event)
     hub.send_nowait(character_id, None)

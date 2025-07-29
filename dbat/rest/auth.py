@@ -1,17 +1,17 @@
 from typing import Annotated, Optional
 
-import mudforge
+import dbat
 import jwt
 
 from fastapi import APIRouter, Depends, Body, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordRequestForm
 
-from mudforge.models.auth import TokenResponse, RefreshTokenModel
+from dbat.models.auth import TokenResponse, RefreshTokenModel
 from dbat.models.auth import UserLogin
 
 from dbat.db import auth as auth_db, users as users_db
-from mudforge.utils import crypt_context
-from mudforge.rest.utils import oauth2_scheme, get_real_ip
+from dbat.utils import crypt_context
+from dbat.rest.utils import oauth2_scheme, get_real_ip
 
 router = APIRouter()
 
@@ -47,7 +47,7 @@ async def login(
 
 @router.post("/refresh", response_model=TokenResponse)
 async def refresh_token(ref: Annotated[RefreshTokenModel, Body()]):
-    jwt_settings = mudforge.SETTINGS["JWT"]
+    jwt_settings = dbat.SETTINGS["JWT"]
     try:
         payload = jwt.decode(
             ref.refresh_token,

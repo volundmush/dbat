@@ -155,11 +155,11 @@ namespace trans {
 
             // Demon
             case Form::dark_king:
-                if(ch->getBaseStat("health") >= 600000000)
+                if(ch->getBaseStat<int64_t>("health") >= 600000000)
                     return "@bDark @rKing@n";
-                else if (ch->getBaseStat("health") >= 50000000)
+                else if (ch->getBaseStat<int64_t>("health") >= 50000000)
                     return "@bDark @yLord@n";
-                else if (ch->getBaseStat("health") >= 2000000)
+                else if (ch->getBaseStat<int64_t>("health") >= 2000000)
                     return "@bDark @yCourtier@n";
                 else
                     return "@bDark @ySeed@n";
@@ -1111,7 +1111,7 @@ namespace trans {
             Form::dark_king, {
                 {APPLY_CVIT_MULT,   0.0, ~0,                    [](struct char_data *ch) {
                     double base;
-                    auto bpl = ch->getBaseStat("health");
+                    auto bpl = ch->getBaseStat<int64_t>("health");
                     if(bpl < 2000000)
                         base = 1.0;
                     else if(bpl < 50000000)
@@ -1126,7 +1126,7 @@ namespace trans {
                 {APPLY_COMBAT_MULT, 0.0, static_cast<int>(ComStat::damage), [](struct char_data *ch) {
                     double base;
                     if(ch->getCurVital(CharVital::lifeforce) > 0) {
-                        auto bpl = ch->getBaseStat("health");
+                        auto bpl = ch->getBaseStat<int64_t>("health");
 
                         if(bpl < 2000000) {
                             base = 0.4;
@@ -1152,7 +1152,7 @@ namespace trans {
                     double base = 0.0;
                     if(ch->getCurVital(CharVital::lifeforce) > 0) {
                         int chance = 30;
-                        auto bpl = ch->getBaseStat("health");
+                        auto bpl = ch->getBaseStat<int64_t>("health");
 
                         if(bpl < 2000000) {
                             chance = 30;
@@ -2609,7 +2609,7 @@ namespace trans {
     }
 
     void revert(char_data *ch) {
-        int64_t beforeKi = ch->getEffectiveStat("ki");
+        int64_t beforeKi = ch->getEffectiveStat<int64_t>("ki");
         if(ch->form != Form::base) {
             onRevert(ch, ch->form);
             ch->form = Form::base;
@@ -2620,7 +2620,7 @@ namespace trans {
             ch->technique = Form::base;
             if(ch->form == Form::base) characterSubscriptions.unsubscribe("transforms", ch);
         }
-        int64_t afterKi = ch->getEffectiveStat("ki");
+        int64_t afterKi = ch->getEffectiveStat<int64_t>("ki");
 
         if (beforeKi > afterKi && GET_BARRIER(ch) > 0) {
             int64_t barrier = GET_BARRIER(ch);
@@ -2632,7 +2632,7 @@ namespace trans {
     }
 
     void transform(char_data *ch, Form form, int grade) {
-        int64_t beforeKi = ch->getEffectiveStat("ki");
+        int64_t beforeKi = ch->getEffectiveStat<int64_t>("ki");
         if (grade > getMaxGrade(ch, form)) {
             grade = getMaxGrade(ch, form);
             send_to_char(ch, "The max grade of this form is %s!\r\nSetting to max.\r\n", std::to_string(grade));
@@ -2659,7 +2659,7 @@ namespace trans {
         characterSubscriptions.subscribe("transforms", ch);
         onTransform(ch, form);
 
-        int64_t afterKi = ch->getEffectiveStat("ki");
+        int64_t afterKi = ch->getEffectiveStat<int64_t>("ki");
 
         if (beforeKi > afterKi && GET_BARRIER(ch) > 0) {
             int64_t barrier = GET_BARRIER(ch);

@@ -77,7 +77,7 @@ src/Makefile
 config.log
 config.status
 utils/Makefile
-bin/
+compiled/
 build
 circle/*.cpp
 game/secret_settings.py

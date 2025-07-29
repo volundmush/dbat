@@ -275,15 +275,15 @@ static void mob_attack(struct char_data *ch, char *buf) {
         } else if (AFF_FLAGGED(ch, AFF_ENSNARED)) {
             return;
         } else if (special < 100) { /* Normal physical attack */
-            if (IS_ANDROID(ch) && ch->subrace == SubRace::android_model_repair && GET_HIT(ch) <= (ch->getEffectiveStat("health")) * 0.5 &&
+            if (IS_ANDROID(ch) && ch->subrace == SubRace::android_model_repair && GET_HIT(ch) <= (ch->getEffectiveStat<int64_t>("health")) * 0.5 &&
                        rand_number(1, 20) >= 16) {
                 do_srepair(ch, nullptr, 0, 0);
             } else if (IS_ANDROID(ch) && ch->subrace == SubRace::android_model_absorb && rand_number(1, 20) >= 19) {
                 do_absorb(ch, buf2, 0, 0);
-            } else if ((IS_BIO(ch) || IS_MAJIN(ch)) && GET_HIT(ch) <= (ch->getEffectiveStat("health")) * 0.5 &&
+            } else if ((IS_BIO(ch) || IS_MAJIN(ch)) && GET_HIT(ch) <= (ch->getEffectiveStat<int64_t>("health")) * 0.5 &&
                        rand_number(1, 20) >= 17) {
                 do_regenerate(ch, "25", 0, 0);
-            } else if (IS_NAMEK(ch) && GET_HIT(ch) <= (ch->getEffectiveStat("health")) * 0.5 && rand_number(1, 20) == 20) {
+            } else if (IS_NAMEK(ch) && GET_HIT(ch) <= (ch->getEffectiveStat<int64_t>("health")) * 0.5 && rand_number(1, 20) == 20) {
                 do_regenerate(ch, "25", 0, 0);
             } else if (pick_n_throw(ch, buf)) {
                 /* This determines if they throw and also handles it */
@@ -804,10 +804,10 @@ void powerupService(uint64_t heartPulse, double deltaTime) {
 
         bool stopPowerup = false;
         bool maxedOut = false;
-        auto maxPL = ch->getEffectiveStat("health");
-        auto maxKI = ch->getEffectiveStat("ki");
+        auto maxPL = ch->getEffectiveStat<int64_t>("health");
+        auto maxKI = ch->getEffectiveStat<int64_t>("ki");
         auto curKI = ch->getCurVital(CharVital::ki);
-        auto maxST = ch->getEffectiveStat("stamina");
+        auto maxST = ch->getEffectiveStat<int64_t>("stamina");
         auto curST = ch->getCurVital(CharVital::stamina);
         auto perc = (GET_PREFERENCE(ch) == PREFERENCE_KI) ? 0.0375 : 0.05;
         if (ch->isFullVital(CharVital::health) && (ch->getCurVitalMeterPercent(CharVital::ki) >= perc)) {
@@ -876,12 +876,11 @@ void lifeforceSystem(uint64_t heartPulse, double deltaTime) {
 
         if (rand_number(1, 15) < 14) continue;
         auto threshold = (AFF_FLAGGED(ch, AFF_HEALGLOW) || IS_KANASSAN(ch)) ? 0.03 : 0.05;
-        auto curperc = 1.0 - ch->getCurVitalDam(CharVital::lifeforce);
+        auto curperc = ch->getCurVitalMeterPercent(CharVital::lifeforce);
 
         if (curperc >= threshold) {
             double refill = 0.05;
             double lfcost = 0.05;
-
             bool mutantBonus = ch->mutations.get(Mutation::increased_cell_regeneration);
 
             if (GET_BONUS(ch, BONUS_DIEHARD) > 0) {
@@ -980,7 +979,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
                 act("@WYou choke @C$N@W!@n", true, ch, nullptr, GRAPPLING(ch), TO_CHAR);
                 act("@C$n@W chokes YOU@W!@n", true, ch, nullptr, GRAPPLING(ch), TO_VICT);
                 act("@C$n@W chokes @c$N@W!@n", true, ch, nullptr, GRAPPLING(ch), TO_NOTVICT);
-                GRAPPLING(ch)->modCurVital(CharVital::stamina, -(GRAPPLING(ch)->getEffectiveStat("stamina") / 8));
+                GRAPPLING(ch)->modCurVital(CharVital::stamina, -(GRAPPLING(ch)->getEffectiveStat<int64_t>("stamina") / 8));
             } else {
                 act("@WYou choke @C$N@W, and $E passes out!@n", true, ch, nullptr, GRAPPLING(ch), TO_CHAR);
                 act("@C$n@W chokes YOU@W, and you pass out!@n", true, ch, nullptr, GRAPPLING(ch), TO_VICT);
@@ -1307,7 +1306,7 @@ void kiChargeSystem(uint64_t heartPulse, double deltaTime) {
             ch->setBaseStat<int64_t>("charge", 0);
             ch->setBaseStat<int64_t>("chargeto", 0);
         }
-        if (GET_CHARGE(ch) >= ch->getEffectiveStat("ki") / 2) {
+        if (GET_CHARGE(ch) >= ch->getEffectiveStat<int64_t>("ki") / 2) {
             improve_skill(ch, SKILL_CONCENTRATION, 1);
         }
         if (!docharge && rand_number(1, 40) >= 38 && !FIGHTING(ch) &&
@@ -2317,7 +2316,7 @@ void group_gain(struct char_data *ch, struct char_data *victim) {
             if (!IS_WEIGHTED(f->follower)) {
                 tot_levels += GET_LEVEL(f->follower);
                 tot_members++;
-            } else if ((f->follower->getEffectiveStat("health")) >= (ch->getEffectiveStat("health")) * 0.5) {
+            } else if ((f->follower->getEffectiveStat<int64_t>("health")) >= (ch->getEffectiveStat<int64_t>("health")) * 0.5) {
                 tot_levels += GET_LEVEL(f->follower);
                 tot_members++;
             }

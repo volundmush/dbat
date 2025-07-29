@@ -201,8 +201,19 @@ class StatHandler {
             return value;
         }
 
+        double setBaseHelperObserver(T* target, const StatDef<T>& stat_def, double value, double old_value) const {
+            // Apply min/max constraints
+            auto new_value = setBaseHelper(target, stat_def, value);
+            if(auto func = stat_def.getOnChangeFunc(); func && (new_value != old_value)) {
+                // Call the on change function if it exists
+                func(target, stat_def.getName(), old_value, new_value);
+            }
+
+            return new_value;
+        }
+
         double getBaseHelper(T* target, const StatDef<T>& stat_def) const {
-            auto base = 0.0;
+            double base = 0.0;
             bool needInit = true;
             if(auto func = stat_def.getGetterFunc(); func) {
                 auto res = func(target, stat_def.getName());
@@ -217,13 +228,7 @@ class StatHandler {
                 out = init_func(target, stat_def.getName());
                 // since this might be random we need to save the result instantly.
                 // We can return here to avoid repeat min/max checks.
-                auto new_value = setBaseHelper(target, stat_def, out);
-                if(base != new_value && stat_def.getOnChangeFunc()) {
-                    // Call the on change function if it exists
-                    stat_def.getOnChangeFunc()(target, stat_def.getName(), base, new_value);
-                }
-
-                return new_value;
+                return setBaseHelperObserver(target, stat_def, out, base);
             }
             
             if(auto min = stat_def.getMinBaseValue(); min.has_value() && out < *min) {
@@ -302,7 +307,8 @@ class StatHandler {
         template<typename R = double>
         R setBase(T* target, const std::string& stat_name, double value) {
             auto &st = stats.at(stat_name);
-            return static_cast<R>(setBaseHelper(target, st, value));
+            double current_value = getBaseHelper(target, st);
+            return static_cast<R>(setBaseHelperObserver(target, st, value, current_value));
         }
 
         template<typename R = double>
@@ -314,7 +320,7 @@ class StatHandler {
         R modBase(T* target, const std::string& stat_name, double value) {
             auto &st = stats.at(stat_name);
             double current_value = getBaseHelper(target, st);
-            return static_cast<R>(setBaseHelper(target, st, current_value + value));
+            return static_cast<R>(setBaseHelperObserver(target, st, current_value + value, current_value));
         }
 
         template<typename R = double>

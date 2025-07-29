@@ -38,9 +38,9 @@ file(GLOB_RECURSE CIRCLE_INCLUDE include/dbat/*.h)
 file(GLOB_RECURSE CIRCLE_SRC src/*.cpp)
 
 set(CMAKE_CXX_STANDARD 23)
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/compiled)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/compiled)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/compiled)
 set(CMAKE_CXX_FLAGS "-Wno-write-strings -Wno-format-truncation -Wno-multichar -Wno-unused-result -fpermissive")
 if (CMAKE_BUILD_TYPE MATCHES "Debug" OR CMAKE_BUILD_TYPE MATCHES "RelWithDebInfo")
     # Add sanitizers for debug-ish builds
@@ -77,4 +77,4 @@ add_executable(migrate apps/migrate.cpp)
 target_link_libraries(migrate circlemud ${CIRCLE_LINK_LIBRARIES})
 target_include_directories(migrate PUBLIC ${CIRCLE_INCLUDE_DIRS})
 
-SET(circle_link ${CMAKE_INSTALL_PREFIX}/bin/)
+SET(circle_link ${CMAKE_INSTALL_PREFIX}/compiled/)

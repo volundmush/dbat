@@ -1,8 +1,8 @@
-import mudforge
+import dbat
 from ..base import BaseParser
-from mudforge.portal.commands.base import CMD_MATCH
+from dbat.portal.commands.base import CMD_MATCH
 from httpx import HTTPStatusError
-from mudforge.utils import partial_match
+from dbat.utils import partial_match
 
 from dbat.models.game import AccountData, PlayerData
 

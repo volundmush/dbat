@@ -469,9 +469,9 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
                                                                                           GET_MAX_MANA(ch) / 800))) {
             send_to_char(ch, "@CYou hold your breath!@n\r\n");
             if (group_bonus(ch, 2) == 10) {
-                ch->modCurVital(CharVital::ki, -(ch->getEffectiveStat("ki") / 800));
+                ch->modCurVital(CharVital::ki, -(ch->getEffectiveStat<int64_t>("ki") / 800));
             } else {
-                ch->modCurVital(CharVital::ki, -(ch->getEffectiveStat("ki") / 200));
+                ch->modCurVital(CharVital::ki, -(ch->getEffectiveStat<int64_t>("ki") / 200));
             }
         }
     }
@@ -703,7 +703,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
             if (IS_NPC(ch) && IS_HUMANOID(ch) && rand_number(1, 2) == 2) {
                 do_fly(ch, nullptr, 0, 0);
             }
-            ch->modCurVital(CharVital::health, -(ch->getEffectiveStat("health") / 20));
+            ch->modCurVital(CharVital::health, -(ch->getEffectiveStat<int64_t>("health") / 20));
             if (GET_HIT(ch) <= 0) {
                 act("@rYou have burned to death!@n", true, ch, nullptr, nullptr, TO_CHAR);
                 act("@R$n@r has burned to death!@n", true, ch, nullptr, nullptr, TO_ROOM);
@@ -713,7 +713,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
         if (DRAGGING(ch) && !IS_DEMON(DRAGGING(ch))) {
             act("@R$N@r gets burned!@n", true, ch, nullptr, DRAGGING(ch), TO_CHAR);
             act("@R$N@r gets burned!@n", true, ch, nullptr, DRAGGING(ch), TO_ROOM);
-            DRAGGING(ch)->modCurVital(CharVital::health, -(DRAGGING(ch)->getEffectiveStat("health") / 20));
+            DRAGGING(ch)->modCurVital(CharVital::health, -(DRAGGING(ch)->getEffectiveStat<int64_t>("health") / 20));
             if (GET_HIT(DRAGGING(ch)) < 0) {
                 act("@rYou have burned to death!@n", true, DRAGGING(ch), nullptr, nullptr, TO_CHAR);
                 act("@R$n@r has burned to death!@n", true, DRAGGING(ch), nullptr, nullptr, TO_ROOM);
@@ -1978,7 +1978,7 @@ static void handle_fall(struct char_data *ch) {
         }
         if (!EXIT(ch, 5) || ch->getLocationTileType() != SECT_FLYING) {
             act("@r$n slams into the ground!@n", true, ch, nullptr, nullptr, TO_ROOM);
-            ch->modCurVital(CharVital::health, -(ch->getEffectiveStat("health") / 20));
+            ch->modCurVital(CharVital::health, -(ch->getEffectiveStat<int64_t>("health") / 20));
 
             act("@rYou slam into the ground!@n", true, ch, nullptr, nullptr, TO_CHAR);
             look_at_room(IN_ROOM(ch), ch, 0);
@@ -1994,7 +1994,7 @@ static void handle_fall(struct char_data *ch) {
             act("@RYou are drowning!@n", true, ch, nullptr, nullptr, TO_CHAR);
             act("@C$n@b gulps water as $e struggles to stay above the water line.@n", true, ch, nullptr, nullptr,
                 TO_ROOM);
-            if (GET_HIT(ch) - ((ch->getEffectiveStat("health")) / 3) <= 0) {
+            if (GET_HIT(ch) - ((ch->getEffectiveStat<int64_t>("health")) / 3) <= 0) {
                 act("@rYou drown!@n", true, ch, nullptr, nullptr, TO_CHAR);
                 act("@R$n@r drowns!@n", true, ch, nullptr, nullptr, TO_ROOM);
                 die(ch, nullptr);

@@ -166,6 +166,8 @@ struct trig_data : std::enable_shared_from_this<trig_data> {
     void activate();
     void deactivate();
 
+    std::unordered_set<std::string> subscriptions; // Subscriptions to services.
+
     std::shared_ptr<trig_data> shared();
 };
 
@@ -230,6 +232,8 @@ struct unit_data {
     virtual std::unordered_set<struct obj_data*> gatherObjects(const std::function<bool(struct obj_data*)> &func, bool working = true);
 
     virtual double getAffectModifier(uint64_t location, uint64_t specific);
+
+    std::unordered_set<std::string> subscriptions; // Subscriptions to services.
 
 };
 
@@ -301,7 +305,6 @@ struct item_proto_data : public proto_data, public picky_data {
     item_proto_data() = default;
     item_proto_data(obj_data& other);
     
-    item_proto_data& operator=(obj_data& other);
     item_proto_data& operator=(const item_proto_data& other);
 
     ItemType type_flag{ItemType::unknown};      /* Type of item                        */
@@ -1298,6 +1301,7 @@ public:
     // Subscribe an entity to a particular service
     void subscribe(const std::string& service, const std::shared_ptr<T>& thing) {
         subscriptions[service].push_front(thing);
+        thing->subscriptions.insert(service);
     }
 
     void subscribe(const std::string& service, T* thing) {
@@ -1337,6 +1341,7 @@ public:
                 subscriptions.erase(it);
             }
         }
+        thing->subscriptions.erase(service);
     }
 
     void unsubscribe(const std::string& service, T* thing) {
@@ -1383,6 +1388,7 @@ public:
                 ++it;
             }
         }
+        thing->subscriptions.clear();
     }
 
     void unsubscribeFromAll(T* thing) {

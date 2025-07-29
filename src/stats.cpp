@@ -161,7 +161,7 @@ static void init_char_stats_vitals() {
         charStats.addStat(fmt::format("{}_damage", name))
             .setInitFunc(0.0)
             .setMinBaseValue(0.0)
-            //.setMaxBaseValue(100.0)
+            .setMaxBaseValue(1.0)
             //.setSpecific(specific)
             .addTag("vital_damage")
             
@@ -187,31 +187,37 @@ static void init_char_stats_vitals() {
         })
         ;
 
-    for(const auto &s : {"health", "ki", "stamina"}) {
-        charStats.addStat(fmt::format("{}_damage", s))
-        .setOnChangeFunc([](struct char_data* target, const std::string& stat_name, double old_value, double new_value) {
-            // Handle vital changes here if needed
-            auto sh = target->shared();
-            if(new_value >= 0.0 && old_value < 0.0) {
-                characterSubscriptions.subscribe("characterVitalsRecovery", sh);
-            } else if(new_value <= 0.0 && old_value > 0.0) {
-                characterSubscriptions.unsubscribe("characterVitalsRecovery", sh);
-            }
-        })
-        ;
+    for (const auto& [statName, recoveryKey] : {
+        std::pair{"ki_damage", "characterKiRecovery"},
+        std::pair{"stamina_damage", "characterStaminaRecovery"},
+        std::pair{"lifeforce_damage", "characterLifeforceRecovery"},
+    })
+    {
+        charStats.addStat(statName)
+            .setOnChangeFunc([recoveryKey](char_data* target, const std::string& stat_name, double old_value, double new_value) {
+                if (new_value > 0.0 && old_value <= 0.0) {
+                    characterSubscriptions.subscribe(recoveryKey, target->shared());
+                } else if (new_value <= 0.0 && old_value > 0.0) {
+                    characterSubscriptions.unsubscribe(recoveryKey, target->shared());
+                }
+            });
     }
-    charStats.addStat("lifeforce_damage")
+
+    charStats.addStat("health_damage")
         .setOnChangeFunc([](struct char_data* target, const std::string& stat_name, double old_value, double new_value) {
-            // Handle lifeforce changes here if needed
-            if(IS_ANDROID(target)) {
-                // Androids don't use lifeforce, so we skip this.
-                return;
-            }
-            auto sh = target->shared();
-            if(new_value >= 0.0 && old_value < 0.0) {
-                characterSubscriptions.subscribe("lifeforceSystem", sh);
+            // Handle health changes here if needed
+            auto lifeperc = GET_LIFEPERC(target);
+            auto perc = (1.0 - new_value) * 100.0;
+            if(new_value > 0.0 && old_value <= 0.0) {
+                characterSubscriptions.subscribe("characterHealthRecovery", target->shared());
+                if(!IS_ANDROID(target) && (lifeperc > 0) && (perc < lifeperc)) {
+                    characterSubscriptions.subscribe("lifeforceSystem", target->shared());
+                }
             } else if(new_value <= 0.0 && old_value > 0.0) {
-                characterSubscriptions.unsubscribe("lifeforceSystem", sh);
+                characterSubscriptions.unsubscribe("characterHealthRecovery", target->shared());
+                if(!IS_ANDROID(target) && (lifeperc > 0) && (perc >= lifeperc)) {
+                    characterSubscriptions.unsubscribe("lifeforceSystem", target->shared());
+                }
             }
         })
         ;
@@ -231,7 +237,7 @@ static void init_char_stats_derived() {
             // Example derived stat calculation
             double out = target->getEffectiveStat("weight") + 100.0;
             out += target->getEffectiveStat("strength") * 50.0;
-            out += target->getEffectiveStat("health") / 200.0;
+            out += target->getEffectiveStat<int64_t>("health") / 200.0;
             return out;
         })
         .setSetterFunc(nullptr)
@@ -362,7 +368,7 @@ static void init_char_stats_misc() {
 "listen_room", "last_interest", "last_played", "boosts", "upgrade_points",
 "majinize", "majinizer", "death_time", "lasthit", "death_count", "rewtime", "starphase",
 "molt_experience", "molt_level", "damage_mod", "pole_bonus", "forgetting_skill", "stupidkiss",
-"personality", "life_percent", "mind_linker", "bless_level", "preference", "lifebonus",
+"personality", "mind_linker", "bless_level", "preference", "lifebonus",
 "auto_skill_bonus", "regen_rate", "relax_count", "ingest_learned", "gauntlet",
 "last_olc_mode", "throws", "gooptime", "mobcharge", "combine"}) {
         charStats.addStat(s)
@@ -375,6 +381,24 @@ static void init_char_stats_misc() {
         .setInitFunc(0.0)
         .setMinBaseValue(0.0)
         .addTag("misc")
+        ;
+    
+    charStats.addStat("life_percent")
+        .setInitFunc(75.0)
+        .setMinBaseValue(0.0)
+        .setMaxBaseValue(100.0)
+        .addTag("misc")
+        .setOnChangeFunc([](struct char_data* target, const std::string& stat_name, double old_value, double new_value) {
+            // Handle life percent changes here if needed
+            if(IS_ANDROID(target)) return;
+            auto lifeperc = new_value;
+            auto perc = target->getCurVitalMeterPercent(CharVital::health) * 100.0;
+            if(perc < lifeperc) {
+                characterSubscriptions.subscribe("lifeforceSystem", target->shared());
+            } else {
+                characterSubscriptions.unsubscribe("lifeforceSystem", target->shared());
+            }
+        })
         ;
 
     charStats.addStat("absorbs")

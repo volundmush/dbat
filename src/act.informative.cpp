@@ -114,9 +114,9 @@ ACMD(do_evolve) {
 
     // Define evolution costs
     std::vector<EvolutionCost> evolutionCosts = {
-        {(int64_t)(GET_LEVEL(ch) + (molt_threshold(ch) * 0.65) + (ch->getBaseStat("health") * 0.15)), "health", GET_CON(ch)},
-        {(int64_t)(GET_LEVEL(ch) + (molt_threshold(ch) * 0.50) + (ch->getBaseStat("ki") * 0.22)), "ki", GET_WIS(ch)},
-        {(int64_t)(GET_LEVEL(ch) + (molt_threshold(ch) * 0.50) + (ch->getBaseStat("stamina") * 0.15)), "stamina", GET_CON(ch)},
+        {(int64_t)(GET_LEVEL(ch) + (molt_threshold(ch) * 0.65) + (ch->getBaseStat<int64_t>("health") * 0.15)), "health", GET_CON(ch)},
+        {(int64_t)(GET_LEVEL(ch) + (molt_threshold(ch) * 0.50) + (ch->getBaseStat<int64_t>("ki") * 0.22)), "ki", GET_WIS(ch)},
+        {(int64_t)(GET_LEVEL(ch) + (molt_threshold(ch) * 0.50) + (ch->getBaseStat<int64_t>("stamina") * 0.15)), "stamina", GET_CON(ch)},
     };
 
     if (!*arg) {
@@ -158,7 +158,7 @@ ACMD(do_evolve) {
     double diminishingReturns = std::max<double>((softCap - baseVal) / softCap, 0.05);
     int64_t bonusVal = static_cast<int64_t>(startBonus * diminishingReturns * 20);
 
-    bonusVal = std::min<int64_t>(bonusVal, ch->getBaseStat("stamina") / 10);
+    bonusVal = std::min<int64_t>(bonusVal, ch->getBaseStat<int64_t>("stamina") / 10);
     ch->gainBaseStat(it->name, bonusVal);
     ch->modBaseStat<int64_t>("molt_experience", -it->cost);
     send_to_char(ch,
@@ -1743,35 +1743,6 @@ static int show_obj_modifiers(struct obj_data *obj, struct char_data *ch) {
     return (found);
 }
 
-static bool can_stack_objects(struct obj_data *a, struct obj_data *b) {
-    if (strcasecmp(a->getShortDescription(), b->getShortDescription()) != 0 ||
-        strcasecmp(a->getRoomDescription(), b->getRoomDescription()) != 0 ||
-        a->getVnum() != b->getVnum()) return false;
-
-    if (OBJ_FLAGGED(a, ITEM_BROKEN) != OBJ_FLAGGED(b, ITEM_BROKEN)) return false;
-
-    if (SITTING(a) || SITTING(b)) return false;
-
-    if (GET_OBJ_POSTTYPE(a) != 0 || GET_OBJ_POSTTYPE(b) != 0) return false;
-
-    if (GET_FELLOW_WALL(a) || GET_FELLOW_WALL(b)) return false;
-
-    if (GET_OBJ_VAL(a, VAL_OTHER_SERAF) != GET_OBJ_VAL(b, VAL_OTHER_SERAF)) return false;
-
-    if ((GET_OBJ_TYPE(a) == ITEM_PLANT && GET_OBJ_TYPE(b) == ITEM_PLANT) &&
-        (GET_OBJ_VAL(a, VAL_PLANT_MATURITY) != GET_OBJ_VAL(b, VAL_PLANT_MATURITY) ||
-         GET_OBJ_VAL(a, VAL_PLANT_WATERLEVEL) != GET_OBJ_VAL(b, VAL_PLANT_WATERLEVEL)))
-        return false;
-
-    if ((OBJ_FLAGGED(a, ITEM_DUPLICATE) != OBJ_FLAGGED(b, ITEM_DUPLICATE))) return false;
-
-    if ((GET_OBJ_VNUM(a) == 255 && GET_OBJ_VNUM(b) == 255 &&
-         GET_OBJ_VAL(a, VAL_OTHER_SOILQUALITY) != GET_OBJ_VAL(b, VAL_OTHER_SOILQUALITY)) ||
-        (GET_OBJ_VNUM(a) != 255 && GET_OBJ_VNUM(b) != 255)) return true;
-
-    return false;
-}
-
 
 static void list_obj_to_char(const std::vector<std::weak_ptr<obj_data>>& list, struct char_data *ch, int mode, int show) {
     struct obj_data *d;
@@ -1784,21 +1755,6 @@ static void list_obj_to_char(const std::vector<std::weak_ptr<obj_data>>& list, s
 
         num = 0;
         d = i;
-
-        if (CONFIG_STACK_OBJS) {
-            for (auto j : filter_raw(list)) {
-                if(j == i) break;
-                if (can_stack_objects(j, i) && CAN_SEE_OBJ(ch, j)) {
-                    num++;
-                    if (d == i && !CAN_SEE_OBJ(ch, d))
-                        d = j;
-                }
-            }
-
-            if (num > 1) {
-                send_to_char(ch, "@D(@Rx@Y%2i@D)@n ", num);
-            }
-        }
 
         if (CAN_SEE_OBJ(ch, d) &&
             ((*d->getRoomDescription() != '.' && *d->getShortDescription() != '.') || PRF_FLAGGED(ch, PRF_HOLYLIGHT)) ||
@@ -1862,7 +1818,7 @@ static void diag_char_to_char(struct char_data *i, struct char_data *ch) {
     };
     int percent, ar_index;
 
-    int64_t hit = GET_HIT(i), max = (i->getEffectiveStat("health"));
+    int64_t hit = GET_HIT(i), max = (i->getEffectiveStat<int64_t>("health"));
 
     int64_t total = max;
 
@@ -2122,25 +2078,25 @@ static void list_one_char(struct char_data *i, struct char_data *ch) {
     if (IS_NPC(i) && i->getRoomDescription() && GET_POS(i) == GET_DEFAULT_POS(i) && !FIGHTING(i)) {
         send_to_char(ch, "%s", i->getRoomDescription());
 
-        if (IS_NPC(i) && GET_HIT(i) >= (i->getEffectiveStat("health")) * .9 && GET_HIT(i) != (i->getEffectiveStat("health")))
+        if (IS_NPC(i) && GET_HIT(i) >= (i->getEffectiveStat<int64_t>("health")) * .9 && GET_HIT(i) != (i->getEffectiveStat<int64_t>("health")))
             act("@R...Some slight wounds on $s body.@w", true, i, nullptr, ch, TO_VICT);
-        else if (IS_NPC(i) && GET_HIT(i) >= (i->getEffectiveStat("health")) * .8 && GET_HIT(i) < (i->getEffectiveStat("health")) * .9)
+        else if (IS_NPC(i) && GET_HIT(i) >= (i->getEffectiveStat<int64_t>("health")) * .8 && GET_HIT(i) < (i->getEffectiveStat<int64_t>("health")) * .9)
             act("@R...A few wounds on $s body.@w", true, i, nullptr, ch, TO_VICT);
-        else if (IS_NPC(i) && GET_HIT(i) >= (i->getEffectiveStat("health")) * .7 && GET_HIT(i) < (i->getEffectiveStat("health")) * .8)
+        else if (IS_NPC(i) && GET_HIT(i) >= (i->getEffectiveStat<int64_t>("health")) * .7 && GET_HIT(i) < (i->getEffectiveStat<int64_t>("health")) * .8)
             act("@R...Many wounds on $s body.@w", true, i, nullptr, ch, TO_VICT);
-        else if (IS_NPC(i) && GET_HIT(i) >= (i->getEffectiveStat("health")) * .6 && GET_HIT(i) < (i->getEffectiveStat("health")) * .7)
+        else if (IS_NPC(i) && GET_HIT(i) >= (i->getEffectiveStat<int64_t>("health")) * .6 && GET_HIT(i) < (i->getEffectiveStat<int64_t>("health")) * .7)
             act("@R...Quite a few wounds on $s body.@w", true, i, nullptr, ch, TO_VICT);
-        else if (IS_NPC(i) && GET_HIT(i) >= (i->getEffectiveStat("health")) * .5 && GET_HIT(i) < (i->getEffectiveStat("health")) * .6)
+        else if (IS_NPC(i) && GET_HIT(i) >= (i->getEffectiveStat<int64_t>("health")) * .5 && GET_HIT(i) < (i->getEffectiveStat<int64_t>("health")) * .6)
             act("@R...Horrible wounds on $s body.@w", true, i, nullptr, ch, TO_VICT);
-        else if (IS_NPC(i) && GET_HIT(i) >= (i->getEffectiveStat("health")) * .4 && GET_HIT(i) < (i->getEffectiveStat("health")) * .5)
+        else if (IS_NPC(i) && GET_HIT(i) >= (i->getEffectiveStat<int64_t>("health")) * .4 && GET_HIT(i) < (i->getEffectiveStat<int64_t>("health")) * .5)
             act("@R...Blood is seeping from the wounds on $s body.@w", true, i, nullptr, ch, TO_VICT);
-        else if (IS_NPC(i) && GET_HIT(i) >= (i->getEffectiveStat("health")) * .3 && GET_HIT(i) < (i->getEffectiveStat("health")) * .4)
+        else if (IS_NPC(i) && GET_HIT(i) >= (i->getEffectiveStat<int64_t>("health")) * .3 && GET_HIT(i) < (i->getEffectiveStat<int64_t>("health")) * .4)
             act("@R...$s body is in terrible shape.@w", true, i, nullptr, ch, TO_VICT);
-        else if (IS_NPC(i) && GET_HIT(i) >= (i->getEffectiveStat("health")) * .2 && GET_HIT(i) < (i->getEffectiveStat("health")) * .3)
+        else if (IS_NPC(i) && GET_HIT(i) >= (i->getEffectiveStat<int64_t>("health")) * .2 && GET_HIT(i) < (i->getEffectiveStat<int64_t>("health")) * .3)
             act("@R...Is absolutely covered in wounds.@w", true, i, nullptr, ch, TO_VICT);
-        else if (IS_NPC(i) && GET_HIT(i) >= (i->getEffectiveStat("health")) * .1 && GET_HIT(i) < (i->getEffectiveStat("health")) * .2)
+        else if (IS_NPC(i) && GET_HIT(i) >= (i->getEffectiveStat<int64_t>("health")) * .1 && GET_HIT(i) < (i->getEffectiveStat<int64_t>("health")) * .2)
             act("@R...Is on $s last leg.@w", true, i, nullptr, ch, TO_VICT);
-        else if (IS_NPC(i) && GET_HIT(i) < (i->getEffectiveStat("health")) * .1)
+        else if (IS_NPC(i) && GET_HIT(i) < (i->getEffectiveStat<int64_t>("health")) * .1)
             act("@R...Should be DEAD soon.@w", true, i, nullptr, ch, TO_VICT);
 
 
@@ -2469,15 +2425,6 @@ static void add_hidden_char(struct hide_node **hideinfo, struct char_data *ch) {
     }
 }
 
-static bool can_stack_char(struct char_data *a, struct char_data *b) {
-    return (a->getVnum() == b->getVnum()) &&
-           (GET_POS(a) == GET_POS(b)) &&
-           (AFF_FLAGS(a) == AFF_FLAGS(b)) &&
-           (!FIGHTING(a) && !FIGHTING(b)) &&
-           (GET_HIT(a) == GET_MAX_HIT(a) && GET_HIT(b) == GET_MAX_HIT(b)) &&
-           !strcmp(GET_NAME(a), GET_NAME(b));
-}
-
 static bool is_hidden(struct hide_node *hideinfo, struct char_data *ch) {
     for (auto node = hideinfo; node; node = node->next) {
         if (node->hidden == ch) {
@@ -2513,14 +2460,6 @@ static void list_char_to_char(const std::vector<std::weak_ptr<char_data>>& list,
 
         if (CAN_SEE(ch, i)) {
             num = 0;
-            if (CONFIG_STACK_MOBS) {
-                for (auto j : filter_raw(list)) {
-                    if(j == i) break;
-                    if (can_stack_char(i, j) && !is_hidden(hideinfo, j)) {
-                        num++;
-                    }
-                }
-            }
 
             send_to_char(ch, "@w");
             if (num > 1) {
@@ -3927,11 +3866,11 @@ ACMD(do_score) {
         send_to_char(ch, "    @wCurrent   @D-[@R%-16s@D]-[@R%-16s@D]-[@R%-16s@D]@n\n", add_commas(ch->getCurVital(CharVital::health)).c_str(),
                      add_commas(
                              ch->getCurVital(CharVital::ki)).c_str(), add_commas(ch->getCurVital(CharVital::stamina)).c_str());
-        send_to_char(ch, "    @wMaximum   @D-[@r%-16s@D]-[@r%-16s@D]-[@r%-16s@D]@n\n", add_commas(ch->getEffectiveStat("health")).c_str(),
+        send_to_char(ch, "    @wMaximum   @D-[@r%-16s@D]-[@r%-16s@D]-[@r%-16s@D]@n\n", add_commas(ch->getEffectiveStat<int64_t>("health")).c_str(),
                      add_commas(GET_MAX_MANA(ch)).c_str(), add_commas(GET_MAX_MOVE(ch)).c_str());
-        send_to_char(ch, "    @wBase      @D-[@m%-16s@D]-[@m%-16s@D]-[@m%-16s@D]@n\n", add_commas(ch->getBaseStat("health")).c_str(),
+        send_to_char(ch, "    @wBase      @D-[@m%-16s@D]-[@m%-16s@D]-[@m%-16s@D]@n\n", add_commas(ch->getBaseStat<int64_t>("health")).c_str(),
                      add_commas(
-                             ch->getBaseStat("ki")).c_str(), add_commas(ch->getBaseStat("stamina")).c_str());
+                             ch->getBaseStat<int64_t>("ki")).c_str(), add_commas(ch->getBaseStat<int64_t>("stamina")).c_str());
         if (!IS_ANDROID(ch) && (ch->getCurVital(CharVital::lifeforce)) > 0) {
             send_to_char(ch, "    @wLife Force@D-[@C%16s@D%s@c%16s@D]- @wLife Percent@D-[@Y%3d%s@D]@n\n", add_commas(
                     ch->getCurVital(CharVital::lifeforce)).c_str(), "/", add_commas(ch->getEffectiveStat("lifeforce")).c_str(), GET_LIFEPERC(ch), "%");

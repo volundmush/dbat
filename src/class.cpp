@@ -632,12 +632,12 @@ void advance_level(struct char_data *ch) {
         }
 
         if (!IS_HUMAN(ch)) {
-            add_hp = ((ch->getBaseStat("health")) * 0.01) * pl_percent;
+            add_hp = ((ch->getBaseStat<int64_t>("health")) * 0.01) * pl_percent;
         } else if (IS_HUMAN(ch)) {
-            add_hp = (((ch->getBaseStat("health")) * 0.01) * pl_percent) * 0.8;
+            add_hp = (((ch->getBaseStat<int64_t>("health")) * 0.01) * pl_percent) * 0.8;
         }
-        add_mana = ((ch->getBaseStat("ki")) * 0.01) * ki_percent;
-        add_move = ((ch->getBaseStat("stamina")) * 0.01) * st_percent;
+        add_mana = ((ch->getBaseStat<int64_t>("ki")) * 0.01) * ki_percent;
+        add_move = ((ch->getBaseStat<int64_t>("stamina")) * 0.01) * st_percent;
         add_prac = prac_reward + GET_INT(ch);
     }
     if (add_hp >= 300000 && add_hp < 600000) {

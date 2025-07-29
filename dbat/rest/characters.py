@@ -1,20 +1,20 @@
 import pydantic
 from typing import Annotated, Optional
 
-import mudforge
+import dbat
 import typing
 import dbat_ext
 
 from fastapi import APIRouter, Depends, Body, HTTPException, status, Request
 from fastapi.responses import StreamingResponse
-from mudforge.rest.utils import streaming_list
-from mudforge.models import fields
+from dbat.rest.utils import streaming_list
+from dbat.models import fields
 
-from mudforge.rest.utils import get_real_ip
+from dbat.rest.utils import get_real_ip
 from .utils import get_current_user
 
 from dbat.models.game import AccountData, PlayerData, ChargenData
-from mudforge.models.characters import CharacterCreate
+from dbat.models.characters import CharacterCreate
 from dbat.db import characters as characters_db
 
 router = APIRouter()
@@ -69,13 +69,13 @@ async def stream_character_events(
     async def event_generator(cid):
         try:
             graceful = False
-            queue = mudforge.EVENT_HUB.subscribe(character_id)
+            queue = dbat.EVENT_HUB.subscribe(character_id)
             # run until we get a None or False or something stupid like that.
             while item := await queue.get():
                 yield f"event: {item.__class__.__name__}\ndata: {item.model_dump_json()}\n\n"
             graceful = True
         finally:
-            mudforge.EVENT_HUB.unsubscribe(character_id, queue)
+            dbat.EVENT_HUB.unsubscribe(character_id, queue)
             if not graceful:
                 dbat_ext.connection_lost(character_id, cid)
 
@@ -100,7 +100,7 @@ async def submit_command(
             status_code=403, detail="You do not have permission to use this character."
         )
     
-    if character_id not in mudforge.EVENT_HUB.online():
+    if character_id not in dbat.EVENT_HUB.online():
         raise HTTPException(
             status_code=403, detail="Character is not online."
         )

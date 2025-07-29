@@ -27,7 +27,7 @@ with open(build_dir / "CMakeCache.txt", mode="r") as f:
             CMAKE_CACHE[key] = (var, value)
 
 INCLUDES = CMAKE_CACHE["CIRCLE_INCLUDE_DIRS"][1].split(";")
-LINKS = ["bin"] + [str(p.absolute()) for p in deps.glob("*-build")]
+LINKS = ["compiled"] + [str(p.absolute()) for p in deps.glob("*-build")]
 
 LIBRARY_DIRS = LINKS + ["/usr/lib/x86_64-linux-gnu"]
 
@@ -56,7 +56,57 @@ extensions = [
     )
 ]
 
+def get_requirements():
+    """
+    To update the requirements for Evennia, edit the requirements.txt file.
+    """
+    with open("requirements.txt", "r") as f:
+        req_lines = f.readlines()
+    reqs = []
+    for line in req_lines:
+        # Avoid adding comments.
+        line = line.split("#")[0].strip()
+        if line:
+            reqs.append(line)
+    return reqs
+
+def get_scripts():
+    """
+    Determine which executable scripts should be added. For Windows,
+    this means creating a .bat file.
+    """
+    if OS_WINDOWS:
+        batpath = os.path.join("bin", "windows", "dbat.bat")
+        scriptpath = os.path.join(sys.prefix, "Scripts", "dbat.py")
+        with open(batpath, "w") as batfile:
+            batfile.write('@"%s" "%s" %%*' % (sys.executable, scriptpath))
+        return [batpath, os.path.join("bin", "windows", "dbat.py")]
+    else:
+        return [os.path.join("bin", "unix", "dbat")]
+
+def package_data():
+    """
+    By default, the distribution tools ignore all non-python files.
+
+    Make sure we get everything.
+    """
+    file_set = []
+    for root, dirs, files in os.walk("dbat"):
+        for f in files:
+            if ".git" in f.split(os.path.normpath(os.path.join(root, f))):
+                # Prevent the repo from being added.
+                continue
+            file_name = os.path.relpath(os.path.join(root, f), "dbat")
+            file_set.append(file_name)
+    return file_set
+
 setup(
     name="dbat_ext",
     ext_modules=cythonize(extensions),
+    author="VolundMush",
+    maintainer="VolundMush",
+    scripts=get_scripts(),
+    install_requires=get_requirements(),
+    package_data={"": package_data()},
+    zip_safe=False,
 )

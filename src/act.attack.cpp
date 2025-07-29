@@ -488,7 +488,7 @@ ACMD(do_throw) {
                 act("$n@n charges $p with the energy in $s fingertips! As it begins to @Yglow a bright hot @Rred@n $e throws $p at YOU@n full speed, and watches it smash into YOU!!",
                     true, ch, obj, vict, TO_VICT);
                 if (GET_MAX_MANA(ch) * 0.02 > 0) {
-                    ch->modCurVital(CharVital::ki, -(ch->getEffectiveStat("ki") * .02));
+                    ch->modCurVital(CharVital::ki, -(ch->getEffectiveStat<int64_t>("ki") * .02));
                 } else {
                     ch->modCurVital(CharVital::ki, -1);
                 }
@@ -552,7 +552,7 @@ ACMD(do_throw) {
                 }
                 if (OBJ_FLAGGED(obj, ITEM_ICE)) {
                     if (!IS_ANDROID(vict) && !IS_ICER(vict)) {
-                        vict->modCurVital(CharVital::stamina, -((vict->getEffectiveStat("stamina") * .005) + GET_OBJ_WEIGHT(obj)));
+                        vict->modCurVital(CharVital::stamina, -((vict->getEffectiveStat<int64_t>("stamina") * .005) + GET_OBJ_WEIGHT(obj)));
                         act("@mYou lose some stamina to the @ccold@m!@n", true, ch, nullptr, vict, TO_VICT);
                         act("@C$N@m loses some stamina to the @ccold@m!@n", true, ch, nullptr, vict, TO_CHAR);
                         act("@C$N@m loses some stamina to the @ccold@m!@n", true, ch, nullptr, vict, TO_NOTVICT);
@@ -776,8 +776,8 @@ ACMD(do_selfd) {
         tch = GRAPPLING(ch);
         dmg += GET_CHARGE(ch);
         ch->setBaseStat<int64_t>("charge", 0);
-        dmg += ch->getBaseStat("health") * 0.6;
-        dmg += ch->getBaseStat("stamina");
+        dmg += ch->getBaseStat<int64_t>("health") * 0.6;
+        dmg += ch->getBaseStat<int64_t>("stamina");
         ch->modCurVitalDam(CharVital::health, 1);
         ch->setBaseStat("suppression", 0);
         act("@RYou EXPLODE! The explosion concentrates on @r$N@R, engulfing $M in a sphere of deadly energy!@n", true,
@@ -809,8 +809,8 @@ ACMD(do_selfd) {
     } else {
         dmg += GET_CHARGE(ch);
         ch->setBaseStat<int64_t>("charge", 0);
-        dmg += (ch->getBaseStat("health")) * 0.6;
-        dmg += (ch->getBaseStat("stamina"));
+        dmg += (ch->getBaseStat<int64_t>("health")) * 0.6;
+        dmg += (ch->getBaseStat<int64_t>("stamina"));
         dmg *= 1.5;
         ch->modCurVitalDam(CharVital::health, 1);
         ch->setBaseStat("suppression", 0);

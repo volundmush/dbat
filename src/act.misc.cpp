@@ -402,7 +402,7 @@ static void resolve_song(struct char_data *ch) {
                                 }
                                 act("@c$n@C continues playing $s ocarina!@n", true, ch, nullptr, vict, TO_NOTVICT);
                                 improve_skill(ch, SKILL_MYSTICMUSIC, 2);
-                                ch->modCurVital(CharVital::ki, -((ch->getEffectiveStat("ki") * .0003) + skill));
+                                ch->modCurVital(CharVital::ki, -((ch->getEffectiveStat<int64_t>("ki") * .0003) + skill));
                             }
                         }
                     }
@@ -939,7 +939,7 @@ ACMD(do_moondust) {
     cost += (ch->getEffectiveStat("lifeforce")) * 0.02;
     heal = cost * 3;
 
-    if (GET_HIT(ch) >= (ch->getEffectiveStat("health")) * 0.8) {
+    if (GET_HIT(ch) >= (ch->getEffectiveStat<int64_t>("health")) * 0.8) {
         cost = cost * 0.5;
     }
 
@@ -2226,9 +2226,9 @@ ACMD(do_scry) {
             TO_NOTVICT);
         int64_t boost = GET_INT(ch) * 0.5;
 
-        vict->gainBaseStat("health", (vict->getBaseStat("health") * .01) * boost);
-        vict->gainBaseStat("ki", (vict->getBaseStat("ki") * .01) * boost);
-        vict->gainBaseStat("stamina", (vict->getBaseStat("stamina") * .01) * boost);
+        vict->gainBaseStat("health", (vict->getBaseStat<int64_t>("health") * .01) * boost);
+        vict->gainBaseStat("ki", (vict->getBaseStat<int64_t>("ki") * .01) * boost);
+        vict->gainBaseStat("stamina", (vict->getBaseStat<int64_t>("stamina") * .01) * boost);
 
         send_to_char(vict,
                      "Your Powerlevel, Ki, and Stamina have improved drastically! On top of that your Intelligence and Wisdom have improved permanantly!\r\n");
@@ -3030,7 +3030,7 @@ ACMD(do_kanso) {
             GET_COND(ch, THIRST) = 48;
 
         /* Heal the user */
-        ch->modCurVital(CharVital::health, (ch->getEffectiveStat("health") * .01) * dam);
+        ch->modCurVital(CharVital::health, (ch->getEffectiveStat<int64_t>("health") * .01) * dam);
 
         WAIT_STATE(ch, PULSE_2SEC); /* 2 second lag for the technique */
 
@@ -3939,19 +3939,19 @@ ACMD(do_adrenaline) {
 
             double percent = atoi(arg2) * 0.01;
 
-            if ((ch->getCurVital(CharVital::stamina) - (ch->getBaseStat("health") * percent)) < 0) {
+            if ((ch->getCurVital(CharVital::stamina) - (ch->getBaseStat<int64_t>("health") * percent)) < 0) {
                 send_to_char(ch, "You do not have enough stamina to trade for adrenaline!\r\n");
                 return;
             }
 
-            int64_t trade = ch->getBaseStat("stamina") * percent;
+            int64_t trade = ch->getBaseStat<int64_t>("stamina") * percent;
 
             if (!strcasecmp(arg, "pl")) {
                 act("@GYou focus your mind and begin to overwork your powerful adrenal glands and your wounds begin to heal!@n",
                     true, ch, nullptr, nullptr, TO_CHAR);
                 act("@g$n@G seems to concentrate and $s wounds begin to heal!@n", true, ch, nullptr, nullptr, TO_ROOM);
 
-                if (GET_HIT(ch) + trade > (ch->getEffectiveStat("health")))
+                if (GET_HIT(ch) + trade > (ch->getEffectiveStat<int64_t>("health")))
                     send_to_char(ch, "Some of your stamina was wasted because your powerlevel maxed out.\r\n");
                 ch->modCurVital(CharVital::health, trade);
                 ch->modCurVital(CharVital::stamina, -trade);

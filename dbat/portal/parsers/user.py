@@ -1,8 +1,8 @@
-import mudforge
+import dbat
 from .base import BaseParser
-from mudforge.portal.commands.base import CMD_MATCH
+from dbat.portal.commands.base import CMD_MATCH
 from httpx import HTTPStatusError
-from mudforge.utils import partial_match
+from dbat.utils import partial_match
 
 from dbat.models.game import AccountData, PlayerData
 
@@ -27,7 +27,7 @@ class UserParser(BaseParser):
         await self.send_rich(help_table)
 
     async def handle_create(self, args: str):
-        parser_class = mudforge.CLASSES["create_parser"]
+        parser_class = dbat.CLASSES["create_parser"]
         parser = parser_class()
         await self.connection.push_parser(parser)
 
@@ -45,7 +45,7 @@ class UserParser(BaseParser):
             await self.send_line("Character not found.")
             return
 
-        parser_class = mudforge.CLASSES["character_parser"]
+        parser_class = dbat.CLASSES["character_parser"]
 
         parser = parser_class(user, character)
         await self.connection.push_parser(parser)

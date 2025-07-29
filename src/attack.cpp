@@ -584,8 +584,8 @@ namespace atk {
         if(victim->getCurVital(CharVital::ki) > 0) {
             if (currentDodgeCheck > axion_dice(10))
                 incomingDamage /= 10;
-            if(incomingDamage > victim->getEffectiveStat("ki") / 5 && !incomingDamage > victim->getEffectiveStat("ki") * 5)
-                incomingDamage = victim->getEffectiveStat("ki") / 5;
+            if(incomingDamage > victim->getEffectiveStat<int64_t>("ki") / 5 && !incomingDamage > victim->getEffectiveStat<int64_t>("ki") * 5)
+                incomingDamage = victim->getEffectiveStat<int64_t>("ki") / 5;
 
 
             victim->modCurVital(CharVital::ki, -incomingDamage);
@@ -1547,8 +1547,8 @@ namespace atk {
         if(victim->getCurVital(CharVital::ki) > 0) {
             if (currentDodgeCheck > axion_dice(10))
                 incomingDamage /= 10;
-            if(incomingDamage > victim->getEffectiveStat("ki") / 5 && !incomingDamage > victim->getEffectiveStat("ki") * 5)
-                incomingDamage = victim->getEffectiveStat("ki") / 5;
+            if(incomingDamage > victim->getEffectiveStat<int64_t>("ki") / 5 && !incomingDamage > victim->getEffectiveStat<int64_t>("ki") * 5)
+                incomingDamage = victim->getEffectiveStat<int64_t>("ki") / 5;
 
             
             victim->modCurVital(CharVital::ki, -incomingDamage);
@@ -1714,7 +1714,7 @@ namespace atk {
             master_pass = true;
 
         if (master_pass == true && record > GET_HIT(victim) &&
-            (record - GET_HIT(victim) > (victim->getEffectiveStat("health")) * 0.025)) {
+            (record - GET_HIT(victim) > (victim->getEffectiveStat<int64_t>("health")) * 0.025)) {
             if (!AFF_FLAGGED(victim, AFF_KNOCKED) && !AFF_FLAGGED(victim, AFF_SANCTUARY)) {
                 act("@C$N@W is knocked out!@n", true, user, nullptr, victim, TO_CHAR);
                 act("@WYou are knocked out!@n", true, user, nullptr, victim, TO_VICT);
@@ -3659,11 +3659,11 @@ namespace atk {
 
     void WaterSpike::postProcess() {
         if (initSkill >= 100) {
-            user->modCurVital(CharVital::ki, (user->getEffectiveStat("ki") * attPerc) * .3);
+            user->modCurVital(CharVital::ki, (user->getEffectiveStat<int64_t>("ki") * attPerc) * .3);
         } else if (initSkill >= 60) {
-            user->modCurVital(CharVital::ki, (user->getEffectiveStat("ki") * attPerc) * .1);
+            user->modCurVital(CharVital::ki, (user->getEffectiveStat<int64_t>("ki") * attPerc) * .1);
         } else if (initSkill >= 40) {
-            user->modCurVital(CharVital::ki, (user->getEffectiveStat("ki") * attPerc) * .05);
+            user->modCurVital(CharVital::ki, (user->getEffectiveStat<int64_t>("ki") * attPerc) * .05);
         }
     }
 
@@ -4741,7 +4741,7 @@ namespace atk {
     }
 
     void Slash::attackPostprocess() {
-        if (beforepl - GET_HIT(victim) >= (victim->getEffectiveStat("health")) * 0.025) {
+        if (beforepl - GET_HIT(victim) >= (victim->getEffectiveStat<int64_t>("health")) * 0.025) {
             cut_limb(user, victim, wlvl, hitspot);
         }
     }

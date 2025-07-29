@@ -199,10 +199,21 @@ void char_data::activate() {
         services.insert("androidAbsorbSystem");
     if(character_flags.get(CharacterFlag::powering_up))
         services.insert("powerupService");
-    if(!isFullVitals())
-        services.insert("characterVitalsRecovery");
-    if(!IS_ANDROID(this) && GET_LIFEPERC(this) > 0 && getCurVitalMeterPercent(CharVital::health) < GET_LIFEPERC(this))
-        services.insert("lifeforceSystem");
+    if(!isFullVital(CharVital::health))
+        services.insert("characterHealthRecovery");
+    if(!isFullVital(CharVital::ki))
+        services.insert("characterKiRecovery");
+    if(!isFullVital(CharVital::stamina))
+        services.insert("characterStaminaRecovery");
+    if(!isFullVital(CharVital::lifeforce))
+        services.insert("characterLifeforceRecovery");
+    if(!IS_ANDROID(this) && GET_LIFEPERC(this) > 0) {
+        auto meter = getCurVitalMeterPercent(CharVital::health) * 100.0;
+        auto perc = GET_LIFEPERC(this);
+        if(meter < perc) {
+            services.insert("lifeforceRecovery");
+        }
+    }
     if(GET_CHARGE(this) || PLR_FLAGGED(this, PLR_CHARGE))
         services.insert("kiChargeSystem");
     if(PLR_FLAGGED(this, PLR_FISHING))

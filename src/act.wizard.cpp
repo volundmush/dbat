@@ -1610,7 +1610,7 @@ static void do_stat_character(struct char_data *ch, struct char_data *k) {
     send_to_char(ch, "MPL:[@g%12s@n]  MKI:[@g%12s@n]  MST:[@g%12s@n]\r\n",
                  add_commas(GET_MAX_HIT(k)).c_str(), add_commas(GET_MAX_MANA(k)).c_str(), add_commas(GET_MAX_MOVE(k)).c_str());
     send_to_char(ch, "BPL:[@g%12s@n]  BKI:[@g%12s@n]  BST:[@g%12s@n]\r\n",
-                 add_commas((k->getBaseStat("health"))).c_str(), add_commas((k->getBaseStat("ki"))).c_str(), add_commas((k->getBaseStat("stamina"))).c_str());
+                 add_commas((k->getBaseStat<int64_t>("health"))).c_str(), add_commas((k->getBaseStat<int64_t>("ki"))).c_str(), add_commas((k->getBaseStat<int64_t>("stamina"))).c_str());
     send_to_char(ch, "LF :[@g%12s@n]  MLF:[@g%12s@n]  LFP:[@g%3d@n]\r\n",
                  add_commas((k->getCurVital(CharVital::lifeforce))).c_str(), add_commas((k->getEffectiveStat("lifeforce"))).c_str(), GET_LIFEPERC(k));
 
@@ -2274,9 +2274,9 @@ ACMD(do_rpreward) {
         int growthGain = 4;
     }
 
-    double boundPL = log(ch->getBaseStat("health"));
-    double boundKI = log(ch->getBaseStat("ki"));
-    double boundST = log(ch->getBaseStat("stamina"));
+    double boundPL = log(ch->getBaseStat<int64_t>("health"));
+    double boundKI = log(ch->getBaseStat<int64_t>("ki"));
+    double boundST = log(ch->getBaseStat<int64_t>("stamina"));
 
     vict->modRPP(rppGain);
     vict->gainGrowth(growthGain);

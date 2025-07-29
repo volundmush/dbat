@@ -2945,7 +2945,7 @@ ACMD(do_drink) {
                     gain_condition(ch, THIRST, 1);
                     if (GET_SKILL(ch, SKILL_WELLSPRING) && !ch->isFullVital(CharVital::ki) && wasthirsty <= 30 && subcmd != SCMD_SIP) {
                         if (ch->modCurVital(CharVital::ki, ((GET_MAX_MANA(ch) * 0.005) + (GET_WIS(ch) * rand_number(80, 100))) *
-                                         GET_SKILL(ch, SKILL_WELLSPRING)) == ch->getEffectiveStat("ki")) {
+                                         GET_SKILL(ch, SKILL_WELLSPRING)) == ch->getEffectiveStat<int64_t>("ki")) {
                             send_to_char(ch, "You feel your ki return to full strength.\r\n");
                         } else {
                             send_to_char(ch, "You feel your ki has rejuvenated.\r\n");
@@ -3058,7 +3058,7 @@ ACMD(do_drink) {
     gain_condition(ch, HUNGER, drink_aff[GET_OBJ_VAL(temp, VAL_DRINKCON_LIQUID)][HUNGER] * amount);
     gain_condition(ch, THIRST, drink_aff[GET_OBJ_VAL(temp, VAL_DRINKCON_LIQUID)][THIRST] * amount);
     if (GET_FOODR(ch) == 0 && subcmd != SCMD_SIP) {
-        ch->modCurVital(CharVital::stamina, (ch->getEffectiveStat("stamina") / 100) * amount);
+        ch->modCurVital(CharVital::stamina, (ch->getEffectiveStat<int64_t>("stamina") / 100) * amount);
         ch->setBaseStat("food_rejuvenation", 2);
         send_to_char(ch, "You feel rejuvinated by it.\r\n");
     }
@@ -3068,7 +3068,7 @@ ACMD(do_drink) {
             GET_OBJ_VAL(temp, VAL_DRINKCON_LIQUID) == 15) {
 
             if (ch->modCurVital(CharVital::ki, ((GET_MAX_MANA(ch) * 0.005) + (GET_WIS(ch) * rand_number(80, 100))) *
-                             GET_SKILL(ch, SKILL_WELLSPRING)) == ch->getEffectiveStat("ki")) {
+                             GET_SKILL(ch, SKILL_WELLSPRING)) == ch->getEffectiveStat<int64_t>("ki")) {
                 send_to_char(ch, "You feel your ki return to full strength.\r\n");
             } else {
                 send_to_char(ch, "You feel your ki has rejuvenated.\r\n");
@@ -3184,7 +3184,7 @@ ACMD(do_eat) {
 
     gain_condition(ch, HUNGER, amount);
     if (GET_FOODR(ch) == 0 && subcmd != SCMD_TASTE) {
-        ch->modCurVital(CharVital::stamina, (ch->getEffectiveStat("stamina") / 100) * amount);
+        ch->modCurVital(CharVital::stamina, (ch->getEffectiveStat<int64_t>("stamina") / 100) * amount);
         ch->setBaseStat("food_rejuvenation", 2);
         send_to_char(ch, "You feel rejuvinated by it.\r\n");
     }
@@ -3245,8 +3245,8 @@ ACMD(do_eat) {
                 send_to_char(ch, "Practice Sessions capped for food at 1000 PS.\r\n");
         }
         //Good food can heal you
-        if (!GET_OBJ_VAL(food, VAL_FOOD_POISON) && GET_HIT(ch) < (ch->getEffectiveStat("health")) && subcmd != SCMD_TASTE) {
-            int64_t suppress = ((ch->getEffectiveStat("health")) * 0.01) * GET_SUPPRESS(ch);
+        if (!GET_OBJ_VAL(food, VAL_FOOD_POISON) && GET_HIT(ch) < (ch->getEffectiveStat<int64_t>("health")) && subcmd != SCMD_TASTE) {
+            int64_t suppress = ((ch->getEffectiveStat<int64_t>("health")) * 0.01) * GET_SUPPRESS(ch);
             if (food->getWeight() < 6) {
                 ch->modCurVitalDam(CharVital::health, -.05);
             } else {
@@ -3298,7 +3298,7 @@ static void majin_gain(struct char_data *ch, struct obj_data *food, int foob) {
     }
 
     auto soft_cap = ch->calc_soft_cap();
-    auto current = (ch->getBaseStat("health") + ch->getBaseStat("ki") + ch->getBaseStat("stamina"));
+    auto current = (ch->getBaseStat<int64_t>("health") + ch->getBaseStat<int64_t>("ki") + ch->getBaseStat<int64_t>("stamina"));
 
     auto available = soft_cap - current;
 

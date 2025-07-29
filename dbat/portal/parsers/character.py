@@ -6,9 +6,9 @@ from httpx import HTTPStatusError
 
 from loguru import logger
 
-import mudforge
-from mudforge.portal.commands.base import CMD_MATCH
-from mudforge.utils import partial_match
+import dbat
+from dbat.portal.commands.base import CMD_MATCH
+from dbat.utils import partial_match
 
 from dbat.models.game import AccountData, PlayerData
 
@@ -38,7 +38,7 @@ class CharacterParser(BaseParser):
 
     async def handle_event(self, event_name: str, event_data: dict):
 
-        if event_class := mudforge.EVENTS.get(event_name, None):
+        if event_class := dbat.EVENTS.get(event_name, None):
             event = event_class(**event_data)
             await event.handle_event(self)
         else:
@@ -70,16 +70,16 @@ class CharacterParser(BaseParser):
 
     def available_commands(self) -> dict[0, list["Command"]]:
         out = dict()
-        for priority, commands in mudforge.COMMANDS_PRIORITY.items():
+        for priority, commands in dbat.COMMANDS_PRIORITY.items():
             for c in commands:
                 if c.check_access(self.active):
                     out[c.name] = c
         return out
 
     def iter_commands(self):
-        priorities = sorted(mudforge.COMMANDS_PRIORITY.keys())
+        priorities = sorted(dbat.COMMANDS_PRIORITY.keys())
         for priority in priorities:
-            for command in mudforge.COMMANDS_PRIORITY[priority]:
+            for command in dbat.COMMANDS_PRIORITY[priority]:
                 if command.check_access(self.active):
                     yield command
 

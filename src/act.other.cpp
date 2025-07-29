@@ -1710,7 +1710,7 @@ void trainProgress(char_data* ch) {
         send_to_char(ch, "You feel your %s improve!@n\r\n", stat_name);
         ch->modBaseStat(stat_name, 1);
         if (IS_PICCOLO(ch) && IS_NAMEK(ch)) {
-            giveRandomVital(ch, ch->getEffectiveStat("health") / 5, ch->getEffectiveStat("ki") / 5, ch->getEffectiveStat("stamina") / 5, 30);
+            giveRandomVital(ch, ch->getEffectiveStat<int64_t>("health") / 5, ch->getEffectiveStat<int64_t>("ki") / 5, ch->getEffectiveStat<int64_t>("stamina") / 5, 30);
             send_to_char(ch, "You gained quite a bit of experience from that!\r\n");
         }
     }
@@ -1745,7 +1745,7 @@ ACMD(do_rip) {
             send_to_char(ch, "You are too tired to manage to grab their tail!\r\n");
             return;
         } else if (GET_SPEEDI(ch) > GET_SPEEDI(vict)) {
-            ch->modCurVital(CharVital::stamina, -(ch->getEffectiveStat("stamina") / 20));
+            ch->modCurVital(CharVital::stamina, -(ch->getEffectiveStat<int64_t>("stamina") / 20));
             if (GET_HIT(ch) > GET_HIT(vict) * 2) {
                 reveal_hiding(ch, 0);
                 act("@rYou rush at @R$N@r and grab $S tail! With a powerful tug you pull it off!@n", true, ch, nullptr,
@@ -1767,7 +1767,7 @@ ACMD(do_rip) {
                 return;
             }
         } else {
-            ch->modCurVital(CharVital::stamina, -(ch->getEffectiveStat("stamina") / 20));
+            ch->modCurVital(CharVital::stamina, -(ch->getEffectiveStat<int64_t>("stamina") / 20));
             reveal_hiding(ch, 0);
             act("@rYou rush at @R$N@r and try to grab $S tail, but fail!@n", true, ch, nullptr, vict, TO_CHAR);
             act("@R$n@r rushes at YOU and tries to grab your tail, but fails!@n", true, ch, nullptr, vict, TO_VICT);
@@ -1784,7 +1784,7 @@ ACMD(do_rip) {
             send_to_char(ch, "You are too tired to manage to grab their tail!\r\n");
             return;
         }
-        ch->modCurVital(CharVital::stamina, -(ch->getEffectiveStat("stamina") / 20));
+        ch->modCurVital(CharVital::stamina, -(ch->getEffectiveStat<int64_t>("stamina") / 20));
         reveal_hiding(ch, 0);
         act("@rYou reach and grab @R$N's@r tail! With a powerful tug you pull it off!@n", true, ch, nullptr, vict,
             TO_CHAR);
@@ -2075,9 +2075,9 @@ ACMD(do_candy) {
     snprintf(newsh, MAX_STRING_LENGTH, "%s@n (of %s@n)", sh, vict->getShortDescription());
     obj->short_description = strdup(newsh);
     obj_to_char(obj, ch);
-    obj->setBaseStat<int64_t>(VAL_FOOD_CANDY_PL, vict->getBaseStat("health"));
-    obj->setBaseStat<int64_t>(VAL_FOOD_CANDY_KI, vict->getBaseStat("ki"));
-    obj->setBaseStat<int64_t>(VAL_FOOD_CANDY_ST, vict->getBaseStat("stamina"));
+    obj->setBaseStat<int64_t>(VAL_FOOD_CANDY_PL, vict->getBaseStat<int64_t>("health"));
+    obj->setBaseStat<int64_t>(VAL_FOOD_CANDY_KI, vict->getBaseStat<int64_t>("ki"));
+    obj->setBaseStat<int64_t>(VAL_FOOD_CANDY_ST, vict->getBaseStat<int64_t>("stamina"));
 
     vict->mob_flags.set(MOB_HUSK, false);
     die(vict, ch);
@@ -2306,7 +2306,7 @@ ACMD(do_suppress) {
         return;
     }
 
-    int64_t max = (ch->getEffectiveStat("health"));
+    int64_t max = (ch->getEffectiveStat<int64_t>("health"));
     int64_t amt = ((max * 0.01) * num);
 
     reveal_hiding(ch, 0);
@@ -2344,7 +2344,7 @@ ACMD(do_hass) {
             nullptr, nullptr, TO_CHAR);
         act("@C$n@W tries to move $s arms at incredible speeds but screws up and wastes some of $s stamina.@n", true,
             ch, nullptr, nullptr, TO_ROOM);
-        ch->modCurVital(CharVital::stamina, -(ch->getEffectiveStat("stamina") / 30));
+        ch->modCurVital(CharVital::stamina, -(ch->getEffectiveStat<int64_t>("stamina") / 30));
         improve_skill(ch, SKILL_HASSHUKEN, 0);
         return;
     } else {
@@ -2355,7 +2355,7 @@ ACMD(do_hass) {
             TO_ROOM);
         int duration = perc / 15;
         assign_affect(ch, AFF_HASS, SKILL_HASSHUKEN, duration, 0, 0, 0, 0, 0, 0);
-        ch->modCurVital(CharVital::stamina, -(ch->getEffectiveStat("stamina") / 30));
+        ch->modCurVital(CharVital::stamina, -(ch->getEffectiveStat<int64_t>("stamina") / 30));
         improve_skill(ch, SKILL_HASSHUKEN, 0);
         return;
     }
@@ -2558,7 +2558,7 @@ ACMD(do_pose) {
             nullptr, TO_CHAR);
         act("@C$n@W attempts to strike an awe inspiring pose, but ends up falling on $s face!@n", true, ch, nullptr,
             nullptr, TO_ROOM);
-        ch->modCurVital(CharVital::stamina, -(ch->getEffectiveStat("stamina") / 40));
+        ch->modCurVital(CharVital::stamina, -(ch->getEffectiveStat<int64_t>("stamina") / 40));
         improve_skill(ch, SKILL_POSE, 0);
         return;
     }
@@ -2596,7 +2596,7 @@ ACMD(do_pose) {
         ch->player_flags.set(PLR_POSE, true);
 
         ch->modCurVital(CharVital::lifeforce, (ch->getEffectiveStat("lifeforce")) - before);
-        ch->modCurVital(CharVital::stamina, -(ch->getEffectiveStat("stamina") / 40));
+        ch->modCurVital(CharVital::stamina, -(ch->getEffectiveStat<int64_t>("stamina") / 40));
         improve_skill(ch, SKILL_POSE, 0);
         return;
 
@@ -2626,7 +2626,7 @@ ACMD(do_fury) {
     }
 
     if (!*arg) {
-        if (GET_HIT(ch) < (ch->getEffectiveStat("health"))) {
+        if (GET_HIT(ch) < (ch->getEffectiveStat<int64_t>("health"))) {
             if ((ch->getCurVital(CharVital::lifeforce)) >= (ch->getEffectiveStat("lifeforce")) * 0.2) {
                 ch->restoreHealth(false);
                 ch->modCurVitalDam(CharVital::lifeforce, 0.2);
@@ -3084,7 +3084,7 @@ ACMD(do_majinize) {
         ch->modBaseStat<int>("boosts", 1);
 
         if (vict->getBaseStat<int>("majinized") == 0) {
-            vict->setBaseStat("majinized", vict->getBaseStat("health") * .4);
+            vict->setBaseStat("majinized", vict->getBaseStat<int64_t>("health") * .4);
         }
         vict->permForms.erase(Form::majinized);
         return;
@@ -3112,7 +3112,7 @@ ACMD(do_majinize) {
         vict->setBaseStat("majinizer", ch->id);
         ch->modBaseStat<int>("boosts", -1);
 
-        vict->setBaseStat("majinized", (vict->getBaseStat("health")) * .4);
+        vict->setBaseStat("majinized", (vict->getBaseStat<int64_t>("health")) * .4);
         vict->addTransform(Form::majinized);
         return;
     }
@@ -3862,7 +3862,7 @@ ACMD(do_form) {
         }
     } else if (!(strcmp(arg, "senzu"))) {
         cost = GET_MAX_MANA(ch);
-        int64_t cost2 = (ch->getEffectiveStat("health")) - 1;
+        int64_t cost2 = (ch->getEffectiveStat<int64_t>("health")) - 1;
 
         if (senzu == false) {
             send_to_char(ch, "What do you want to create?\r\n");
@@ -3968,7 +3968,7 @@ ACMD(do_srepair) {
         if ((ch->getCurVital(CharVital::stamina)) < cost) {
             send_to_char(ch, "You do not have enough stamina to repair yourself.\r\n");
             return;
-        } else if (GET_HIT(ch) >= (ch->getEffectiveStat("health"))) {
+        } else if (GET_HIT(ch) >= (ch->getEffectiveStat<int64_t>("health"))) {
             send_to_char(ch, "You are already at full functionality and do not require repairs.\r\n");
             return;
         } else {
@@ -4001,7 +4001,7 @@ ACMD(do_srepair) {
                 heal += heal * .25;
             }
 
-            if (ch->modCurVital(CharVital::health, heal) == ch->getEffectiveStat("health")) {
+            if (ch->modCurVital(CharVital::health, heal) == ch->getEffectiveStat<int64_t>("health")) {
                 send_to_char(ch, "You are fully repaired now.\r\n");
             }
 
@@ -4307,7 +4307,7 @@ ACMD(do_ingest) {
             return;
         }
 
-        if (GET_MAX_HIT(vict) >= (ch->getBaseStat("health")) * 3) {
+        if (GET_MAX_HIT(vict) >= (ch->getBaseStat<int64_t>("health")) * 3) {
             send_to_char(ch, "You are too weak to ingest them into your body!\r\n");
             return;
         }
@@ -4343,9 +4343,9 @@ ACMD(do_ingest) {
             act("@C$n@w flings a piece of goo at @c$N@W! The goo engulfs $M and then return to @C$n@W!@n", true, ch,
                 nullptr, vict, TO_NOTVICT);
             ch->modBaseStat<int>("absorbs", 1);
-            int64_t pl = (vict->getBaseStat("health")) / 6;
-            int64_t stam = (vict->getBaseStat("stamina")) / 6;
-            int64_t ki = (vict->getBaseStat("ki")) / 6;
+            int64_t pl = (vict->getBaseStat<int64_t>("health")) / 6;
+            int64_t stam = (vict->getBaseStat<int64_t>("stamina")) / 6;
+            int64_t ki = (vict->getBaseStat<int64_t>("ki")) / 6;
             ch->gainBaseStat("health", pl);
             ch->gainBaseStat("stamina", stam);
             ch->gainBaseStat("ki", ki);
@@ -4548,7 +4548,7 @@ ACMD(do_absorb) {
             send_to_char(ch, "You already have already absorbed 3 people.\r\n");
             return;
         }
-        if (GET_MAX_HIT(vict) >= (ch->getBaseStat("health")) * 3) {
+        if (GET_MAX_HIT(vict) >= (ch->getBaseStat<int64_t>("health")) * 3) {
             send_to_char(ch, "You are too weak to absorb them into your cellular structure!\r\n");
             return;
         }
@@ -4577,9 +4577,9 @@ ACMD(do_absorb) {
                 true, ch, nullptr, vict, TO_NOTVICT);
             ch->modBaseStat<int>("absorbs", -1);
 
-            int64_t stam = (vict->getBaseStat("stamina")) / 5;
-            int64_t ki = (vict->getBaseStat("ki")) / 5;
-            int64_t pl = (vict->getBaseStat("health")) / 5;
+            int64_t stam = (vict->getBaseStat<int64_t>("stamina")) / 5;
+            int64_t ki = (vict->getBaseStat<int64_t>("ki")) / 5;
+            int64_t pl = (vict->getBaseStat<int64_t>("health")) / 5;
 
             ch->gainBaseStat("health", pl);
             ch->gainBaseStat("stamina", stam);
@@ -4647,9 +4647,9 @@ ACMD(do_absorb) {
                 true, ch, nullptr, vict, TO_CHAR);
             act("@C$n@w rushes at @c$N@W and stabs $M with $s tail! $e quickly sucks out all the bio extract and leaves the empty husk of @c$N@W behind!@n",
                 true, ch, nullptr, vict, TO_NOTVICT);
-            int64_t stam = (vict->getBaseStat("stamina")) / 12000;
-            int64_t ki = (vict->getBaseStat("ki")) / 12000;
-            int64_t pl = (vict->getBaseStat("health")) / 12000;
+            int64_t stam = (vict->getBaseStat<int64_t>("stamina")) / 12000;
+            int64_t ki = (vict->getBaseStat<int64_t>("ki")) / 12000;
+            int64_t pl = (vict->getBaseStat<int64_t>("health")) / 12000;
             auto chCon = GET_CON(ch);
             stam *= rand_number(chCon / 8, chCon / 4) * ch->getPotential();
             pl *= rand_number(chCon / 8, chCon / 4) * ch->getPotential();
@@ -4832,12 +4832,12 @@ ACMD(do_regenerate) {
         return;
     }
 
-    if (GET_HIT(ch) >= (ch->getEffectiveStat("health"))) {
+    if (GET_HIT(ch) >= (ch->getEffectiveStat<int64_t>("health"))) {
         send_to_char(ch, "You do not need to regenerate, you are at full health.\r\n");
         return;
     }
 
-    if (GET_SUPPRESS(ch) > 0 && GET_HIT(ch) >= (((ch->getEffectiveStat("health")) / 100) * GET_SUPPRESS(ch))) {
+    if (GET_SUPPRESS(ch) > 0 && GET_HIT(ch) >= (((ch->getEffectiveStat<int64_t>("health")) / 100) * GET_SUPPRESS(ch))) {
         send_to_char(ch, "You do not need to regenerate, you are at full health.\r\n");
         return;
     }
@@ -4864,7 +4864,7 @@ ACMD(do_regenerate) {
         return;
     }
 
-    amt = ((ch->getEffectiveStat("health")) * 0.01) * num;
+    amt = ((ch->getEffectiveStat<int64_t>("health")) * 0.01) * num;
     if (amt > 1)
         amt /= 2;
 
@@ -4892,7 +4892,7 @@ ACMD(do_regenerate) {
 
     reveal_hiding(ch, 0);
 
-    if (GET_HIT(ch) >= (ch->getEffectiveStat("health"))) {
+    if (GET_HIT(ch) >= (ch->getEffectiveStat<int64_t>("health"))) {
         act("You concentrate your ki and regenerate your body completely.", true, ch, nullptr, nullptr, TO_CHAR);
         act("$n concentrates and regenerates $s body completely.", true, ch, nullptr, nullptr, TO_ROOM);
     } else if (amt < GET_MAX_HIT(ch) / 10) {
@@ -5596,7 +5596,7 @@ ACMD(do_focus) {
                         true, ch, nullptr, vict, TO_NOTVICT);
                     if ((!IS_NPC(vict)) &&  AFF_FLAGGED(ch, AFF_GROUP) && AFF_FLAGGED(vict, AFF_GROUP)) {
                         if (IS_KAI(ch)) {
-                             giveRandomVital(ch, ch->getEffectiveStat("health") / 100, ch->getEffectiveStat("ki") / 100, ch->getEffectiveStat("stamina") / 100, 30);
+                             giveRandomVital(ch, ch->getEffectiveStat<int64_t>("health") / 100, ch->getEffectiveStat<int64_t>("ki") / 100, ch->getEffectiveStat<int64_t>("stamina") / 100, 30);
                         }
                     }
                     if (AFF_FLAGGED(vict, AFF_CURSE)) {
@@ -5792,10 +5792,10 @@ ACMD(do_focus) {
                 return;
             } else {
                 if (GET_BONUS(ch, BONUS_HEALER) > 0) {
-                    ch->modCurVital(CharVital::stamina, ch->getEffectiveStat("ki") / 8);
+                    ch->modCurVital(CharVital::stamina, ch->getEffectiveStat<int64_t>("ki") / 8);
                     ch->modCurVitalDam(CharVital::ki, 0.125);
                 } else {
-                    ch->modCurVital(CharVital::stamina, ch->getEffectiveStat("ki") / 10);
+                    ch->modCurVital(CharVital::stamina, ch->getEffectiveStat<int64_t>("ki") / 10);
                     ch->modCurVitalDam(CharVital::ki, 0.1);
                 }
 
@@ -5837,10 +5837,10 @@ ACMD(do_focus) {
                     return;
                 } else {
                     if (GET_BONUS(ch, BONUS_HEALER) > 0) {
-                        vict->modCurVital(CharVital::stamina, vict->getEffectiveStat("ki") / 8);
+                        vict->modCurVital(CharVital::stamina, vict->getEffectiveStat<int64_t>("ki") / 8);
                         ch->modCurVitalDam(CharVital::ki, 0.125);
                     } else {
-                        vict->modCurVital(CharVital::stamina, vict->getEffectiveStat("ki") / 10);
+                        vict->modCurVital(CharVital::stamina, vict->getEffectiveStat<int64_t>("ki") / 10);
                         ch->modCurVitalDam(CharVital::ki, 0.1);
                     }
                     reveal_hiding(ch, 0);
@@ -6365,7 +6365,7 @@ ACMD(do_disguise) {
                      "You finish attempting to disguise yourself, but realize you failed and need to try again.\r\n");
         act("@C$n @wattempts and fails to disguise $mself properly and must try again.", true, ch, nullptr, nullptr,
             TO_ROOM);
-        ch->modCurVital(CharVital::stamina, -(ch->getEffectiveStat("stamina") / 50));
+        ch->modCurVital(CharVital::stamina, -(ch->getEffectiveStat<int64_t>("stamina") / 50));
         return;
     }
 }
@@ -6639,7 +6639,7 @@ ACMD(do_heal) {
         heal += heal * .1;
     }
 
-    if (heal < (vict->getEffectiveStat("health"))) {
+    if (heal < (vict->getEffectiveStat<int64_t>("health"))) {
         heal += (heal / 100) * (GET_WIS(ch) / 4);
     }
 
@@ -6648,7 +6648,7 @@ ACMD(do_heal) {
         return;
     }
 
-    if (GET_HIT(vict) >= (vict->getEffectiveStat("health"))) {
+    if (GET_HIT(vict) >= (vict->getEffectiveStat<int64_t>("health"))) {
         if (vict != ch) {
             send_to_char(ch, "They are already at full health.\r\n");
         } else {
@@ -6657,7 +6657,7 @@ ACMD(do_heal) {
         return;
     }
 
-    if (GET_SUPPRESS(vict) > 0 && GET_HIT(vict) >= (((vict->getEffectiveStat("health")) / 100) * GET_SUPPRESS(vict))) {
+    if (GET_SUPPRESS(vict) > 0 && GET_HIT(vict) >= (((vict->getEffectiveStat<int64_t>("health")) / 100) * GET_SUPPRESS(vict))) {
         send_to_char(ch, "They are already at full health.\r\n");
         return;
     }
@@ -6732,8 +6732,8 @@ ACMD(do_heal) {
         }
         improve_skill(ch, SKILL_HEAL, 0);
         if (!IS_NPC(vict)) {
-            if (IS_NAIL(ch) && IS_NAMEK(ch) && GET_HIT(vict) <= (vict->getEffectiveStat("health")) * 0.85) {
-                giveRandomVital(ch, ch->getEffectiveStat("health") / 100, ch->getEffectiveStat("ki") / 100, ch->getEffectiveStat("stamina") / 100, 30);
+            if (IS_NAIL(ch) && IS_NAMEK(ch) && GET_HIT(vict) <= (vict->getEffectiveStat<int64_t>("health")) * 0.85) {
+                giveRandomVital(ch, ch->getEffectiveStat<int64_t>("health") / 100, ch->getEffectiveStat<int64_t>("ki") / 100, ch->getEffectiveStat<int64_t>("stamina") / 100, 30);
             }
         }
 
@@ -7288,7 +7288,7 @@ ACMD(do_transform) {
         return;
     }
 
-    int64_t beforeKi = ch->getEffectiveStat("ki");
+    int64_t beforeKi = ch->getEffectiveStat<int64_t>("ki");
 
     // check for revert.
     if (!strcasecmp("revert", arg)) {
@@ -7331,7 +7331,7 @@ ACMD(do_transform) {
         return;
     }
 
-    if (!npc && (trans::getRequiredPL(ch, trans) > ch->getBaseStat("health"))) {
+    if (!npc && (trans::getRequiredPL(ch, trans) > ch->getBaseStat<int64_t>("health"))) {
         send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
         return;
     }
@@ -7515,7 +7515,7 @@ void situpProgress(char_data* ch) {
 
     //double level_impact = (1.0 - (2 * std::max<double>(0, (double) GET_LEVEL(ch) - 51.0) / 100.0));
 
-    double base = (double)ch->getBaseStat("stamina");
+    double base = (double)ch->getBaseStat<int64_t>("stamina");
     double start_bonus = Random::get<double>(0.8, 1.2) * (1 + (GET_CON(ch) / 20)) * ch->getPotential();
     double ratio_bonus = 1.0 + (3.0 * ratio);
     double soft_cap = (double)ch->calc_soft_cap();
@@ -7559,7 +7559,7 @@ void situpProgress(char_data* ch) {
     if(bonus <= 0) bonus = 1;
     // Bonus due to prolonging exercise
     bonus *= 2;
-    if(bonus > (ch->getBaseStat("stamina") / 40)) bonus = ch->getBaseStat("stamina") / 40;
+    if(bonus > (ch->getBaseStat<int64_t>("stamina") / 40)) bonus = ch->getBaseStat<int64_t>("stamina") / 40;
 
     send_to_char(ch, "You feel slightly more vigorous @D[@G+%s@D]@n.\r\n", add_commas(bonus).c_str());
     ch->gainBaseStat("stamina", bonus);
@@ -7775,7 +7775,7 @@ void meditateProgress(char_data* ch) {
 
     //double level_impact = (1.0 - (2 * std::max<double>(0, (double) GET_LEVEL(ch) - 51.0) / 100.0));
 
-    double base = (double)ch->getBaseStat("ki");
+    double base = (double)ch->getBaseStat<int64_t>("ki");
     double start_bonus = Random::get<double>(0.8, 1.2) * (1 + (GET_WIS(ch) / 20)) * ch->getPotential();
     double ratio_bonus = 1.0 + (3.0 * ratio);
     double soft_cap = (double)ch->calc_soft_cap();
@@ -7832,7 +7832,7 @@ void meditateProgress(char_data* ch) {
     if(bonus <= 0) bonus = 0;
     // Bonus due to prolonging exercise
     bonus *= 2;
-    if(bonus > (ch->getBaseStat("ki") / 40)) bonus = ch->getBaseStat("ki") / 40;
+    if(bonus > (ch->getBaseStat<int64_t>("ki") / 40)) bonus = ch->getBaseStat<int64_t>("ki") / 40;
 
     send_to_char(ch, "You feel your spirit grow stronger @D[@G+%s@D]@n.\r\n", add_commas(bonus).c_str());
     ch->gainBaseStat("ki", bonus);
@@ -7990,7 +7990,7 @@ void pushupProgress(char_data* ch) {
 
     //double level_impact = (1.0 - (2 * std::max<double>(0, (double) GET_LEVEL(ch) - 51.0) / 100.0));
 
-    double base = (double)ch->getBaseStat("health");
+    double base = (double)ch->getBaseStat<int64_t>("health");
     double start_bonus = Random::get<double>(0.8, 1.2) * (1 + (GET_CON(ch) / 20)) * ch->getPotential();
     double ratio_bonus = 1.0 + (3.0 * ratio);
     double soft_cap = (double)ch->calc_soft_cap();
@@ -8040,7 +8040,7 @@ void pushupProgress(char_data* ch) {
     // Bonus for longer task
     bonus *= 2;
 
-    if(bonus > (ch->getBaseStat("health") / 40)) bonus = ch->getBaseStat("health") / 40;
+    if(bonus > (ch->getBaseStat<int64_t>("health") / 40)) bonus = ch->getBaseStat<int64_t>("health") / 40;
     send_to_char(ch, "You feel slightly stronger @D[@G+%s@D]@n.\r\n", add_commas(bonus).c_str());
     ch->gainBaseStat("health", bonus);
     WAIT_STATE(ch, 2.5);
@@ -9276,8 +9276,8 @@ ACMD(do_group) {
 
     highlvl = GET_LEVEL(ch);
     lowlvl = GET_LEVEL(ch);
-    highpl = (ch->getEffectiveStat("health"));
-    lowpl = (ch->getEffectiveStat("health"));
+    highpl = (ch->getEffectiveStat<int64_t>("health"));
+    lowpl = (ch->getEffectiveStat<int64_t>("health"));
 
     for (found = 0, f = ch->followers; f; f = f->next) {
         if (AFF_FLAGGED(f->follower, AFF_GROUP)) {
@@ -9613,10 +9613,10 @@ ACMD(do_use) {
                         }
                         refreshed = false;
 
-                        if (GET_HIT(ch) <= (ch->getEffectiveStat("health")) * 0.99) {
-                            ch->modCurVital(CharVital::health, large_rand((ch->getEffectiveStat("health")) * 0.08, (ch->getEffectiveStat("health")) * 0.16));
+                        if (GET_HIT(ch) <= (ch->getEffectiveStat<int64_t>("health")) * 0.99) {
+                            ch->modCurVital(CharVital::health, large_rand((ch->getEffectiveStat<int64_t>("health")) * 0.08, (ch->getEffectiveStat<int64_t>("health")) * 0.16));
                             refreshed = true;
-                        } else if ((ch->getCurVital(CharVital::ki)) <= (ch->getEffectiveStat("health")) * 0.99) {
+                        } else if ((ch->getCurVital(CharVital::ki)) <= (ch->getEffectiveStat<int64_t>("health")) * 0.99) {
                             ch->modCurVital(CharVital::ki, large_rand(GET_MAX_MANA(ch) * 0.08, GET_MAX_MANA(ch) * 0.16));
                             refreshed = true;
                         } else if ((ch->getCurVital(CharVital::stamina)) <= GET_MAX_MOVE(ch) * 0.99) {
@@ -10439,7 +10439,7 @@ ACMD(do_fix) {
         return;
     } else { /* For androids repairing themselves */
 
-        if (GET_HIT(ch) >= (ch->getEffectiveStat("health"))) {
+        if (GET_HIT(ch) >= (ch->getEffectiveStat<int64_t>("health"))) {
             send_to_char(ch, "Your body is already in peak condition.\r\n");
             return;
         } else if (GET_SKILL(ch, SKILL_REPAIR) < axion_dice(0)) {
@@ -10453,10 +10453,10 @@ ACMD(do_fix) {
             act("You use the repair kit to fix part of your body...", true, ch, nullptr, nullptr, TO_CHAR);
             act("$n works on their body with a repair kit.", true, ch, nullptr, nullptr, TO_ROOM);
             int64_t mult = GET_SKILL(ch, SKILL_REPAIR);
-            int64_t add = (((ch->getEffectiveStat("health")) * 0.005) + 10) * mult;
+            int64_t add = (((ch->getEffectiveStat<int64_t>("health")) * 0.005) + 10) * mult;
 
             extract_obj(obj4);
-            if (ch->modCurVital(CharVital::health, add) == ch->getEffectiveStat("health")) {
+            if (ch->modCurVital(CharVital::health, add) == ch->getEffectiveStat<int64_t>("health")) {
                 send_to_char(ch, "Your body has been totally repaired.\r\n");
                 WAIT_STATE(ch, PULSE_5SEC);
             } else {
@@ -11176,7 +11176,7 @@ ACMD(do_aid) {
             dc = axion_dice(0);
             if ((GET_SKILL(ch, SKILL_FIRST_AID) + 1) > dc) {
                 send_to_char(ch, "You bandage %s's wounds.\r\n", GET_NAME(vict));
-                int64_t roll = (((vict->getEffectiveStat("health")) / 100) * (GET_WIS(ch) / 4)) + (vict->getEffectiveStat("health")) * 0.25;
+                int64_t roll = (((vict->getEffectiveStat<int64_t>("health")) / 100) * (GET_WIS(ch) / 4)) + (vict->getEffectiveStat<int64_t>("health")) * 0.25;
                 if (GET_BONUS(ch, BONUS_HEALER) > 0) {
                     roll += roll * .1;
                 }

@@ -1,4 +1,4 @@
-from mudforge.events.base import EventBase
+from dbat.events.base import EventBase
 
 class CircleText(EventBase):
     text: str

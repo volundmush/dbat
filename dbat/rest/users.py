@@ -5,7 +5,7 @@ import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from mudforge.rest.utils import (
+from dbat.rest.utils import (
     streaming_list
 )
 

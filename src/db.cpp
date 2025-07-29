@@ -1096,7 +1096,7 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
     }
 
     mob->setBaseStat("last_played", time(nullptr));
-    bool autoset = mob->getBaseStat("health") <= 1;
+    bool autoset = mob->getBaseStat<int64_t>("health") <= 1;
     if(autoset) {
         for(auto c : {"health", "ki", "stamina"}) {
             vital_t base = GET_LEVEL(mob) * mult;
@@ -1589,8 +1589,8 @@ static void do_reset_cmds(zone_data &z) {
 
                     mob = read_mobile(c.arg1, REAL);
                     /*  Set the mobs loadroom for room_max checks. */
-                    mob->setBaseStat("hometown", c.arg3);
                     char_to_room(mob, c.arg3);
+                    mob->setBaseStat("hometown", c.arg3);
 
                     load_mtrigger(mob);
                     tmob = mob;

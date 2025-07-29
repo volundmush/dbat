@@ -641,7 +641,7 @@ static void update_flags(struct char_data *ch) {
     }
 
     if (GET_BONUS(ch, BONUS_LATE) && GET_POS(ch) == POS_SLEEPING && rand_number(1, 3) == 3) {
-        if (GET_HIT(ch) >= (ch->getEffectiveStat("health")) && (ch->getCurVital(CharVital::stamina)) >= GET_MAX_MOVE(ch) &&
+        if (GET_HIT(ch) >= (ch->getEffectiveStat<int64_t>("health")) && (ch->getCurVital(CharVital::stamina)) >= GET_MAX_MOVE(ch) &&
             (ch->getCurVital(CharVital::ki)) >= GET_MAX_MANA(ch)) {
             send_to_char(ch, "You FINALLY wake up.\r\n");
             act("$n wakes up.", true, ch, nullptr, nullptr, TO_ROOM);
@@ -1147,11 +1147,11 @@ void androidAbsorbSystem(uint64_t heartPulse, double deltaTime) {
             if (((ch->absorbing)->getCurVital(CharVital::stamina)) > (GET_MAX_MOVE(ch) / 15) ||
                 ((ch->absorbing)->getCurVital(CharVital::ki)) > (GET_MAX_MANA(ch) / 15)) {
 
-                ch->modCurVital(CharVital::ki, ch->getEffectiveStat("ki") * .08);
-                ch->modCurVital(CharVital::stamina, ch->getEffectiveStat("stamina") * .08);
+                ch->modCurVital(CharVital::ki, ch->getEffectiveStat<int64_t>("ki") * .08);
+                ch->modCurVital(CharVital::stamina, ch->getEffectiveStat<int64_t>("stamina") * .08);
 
-                victim->modCurVital(CharVital::ki, -(ch->getEffectiveStat("ki") / 20));
-                victim->modCurVital(CharVital::stamina, -(ch->getEffectiveStat("stamina") / 20));
+                victim->modCurVital(CharVital::ki, -(ch->getEffectiveStat<int64_t>("ki") / 20));
+                victim->modCurVital(CharVital::stamina, -(ch->getEffectiveStat<int64_t>("stamina") / 20));
 
                 act("@WYou absorb stamina and ki from @c$N@W!@n", true, ch, nullptr, victim,
                     TO_CHAR);
@@ -1160,8 +1160,8 @@ void androidAbsorbSystem(uint64_t heartPulse, double deltaTime) {
                 send_to_char(victim, "@wTry 'escape'!@n\r\n");
                 act("@C$n@W absorbs stamina and ki from @c$N@w!@n", true, ch, nullptr,
                     victim, TO_NOTVICT);
-                if (GET_HIT(ch) < (ch->getEffectiveStat("health"))) {
-                    ch->modCurVital(CharVital::health, ch->getEffectiveStat("ki") * .04);
+                if (GET_HIT(ch) < (ch->getEffectiveStat<int64_t>("health"))) {
+                    ch->modCurVital(CharVital::health, ch->getEffectiveStat<int64_t>("ki") * .04);
                     send_to_char(ch,
                                  "@CYou convert a portion of the absorbed energy into refilling your powerlevel.@n\r\n");
                 }
@@ -1373,9 +1373,9 @@ void goopTimeService(uint64_t heartPulse, double deltaTime) {
             else if (IS_SAIYAN(ch)) {
 
                 int zenkaiPL, zenkaiKi, zenkaiSt;
-                zenkaiPL = ch->getBaseStat("health") * 1.03;
-                zenkaiKi = ch->getBaseStat("ki") * 1.015;
-                zenkaiSt = ch->getBaseStat("stamina") * 1.015;
+                zenkaiPL = ch->getBaseStat<int64_t>("health") * 1.03;
+                zenkaiKi = ch->getBaseStat<int64_t>("ki") * 1.015;
+                zenkaiSt = ch->getBaseStat<int64_t>("stamina") * 1.015;
 
                 //GET_HIT(ch) = gear_pl(ch) * .5;
                 //GET_MANA(ch) = GET_MAX_MANA(ch) *.2;
@@ -1475,16 +1475,12 @@ void corpseRotService(uint64_t heartPulse, double deltaTime) {
 }
 
 void characterVitalsRecovery(uint64_t heartPulse, double deltaTime) {
-    auto subs = characterSubscriptions.all("characterVitalsRecovery");
-    for(auto ch : filter_raw(subs)) {
 
-        if(AFF_FLAGGED(ch, AFF_POISON) || ch->task != Task::nothing) {
-            // Poison stops all healing. So does having a task.
-            continue;
-        }
+    auto shouldRecover = [](char_data *ch) {
+        return !(AFF_FLAGGED(ch, AFF_POISON) && ch->task == Task::nothing);
+    };
 
-        double base = 0.005;
-
+    auto getUniversalPerc = [](char_data *ch) {
         double universalPerc = 0.0;
 
         // The healing tank bonus is pretty up there.
@@ -1492,7 +1488,6 @@ void characterVitalsRecovery(uint64_t heartPulse, double deltaTime) {
             universalPerc += 20.0;
         }
 
-        // TODO: figure out how to attach this data to rooms.
         if(auto r = ch->getRoom(); r) {
             // regen rooms (or destroyed rooms, with the right bonus) grant a huge boost.
             if (ROOM_FLAGGED(r, ROOM_REGEN)
@@ -1506,23 +1501,48 @@ void characterVitalsRecovery(uint64_t heartPulse, double deltaTime) {
                 universalPerc += 2.0;
         }
 
-        for(auto v : {CharVital::health, CharVital::stamina, CharVital::ki, CharVital::lifeforce}) {
+        return universalPerc;
+    };
 
-            // Androids don't have Lifeforce.
-            if(IS_ANDROID(ch) && v == CharVital::lifeforce) continue;
+    std::unordered_map<char_data*, double> universalPercCache;
 
-            // This will loop through most possible modifiers...
-            double perc = 1.0 + universalPerc + ch->getAffectModifier(APPLY_CVIT_REGEN_MULT, static_cast<int>(v));
+    double base = 0.005;
 
+    auto getUniversalPercCached = [&](char_data *ch) {
+        auto find = universalPercCache.find(ch);
+        if(find != universalPercCache.end()) {
+            return find->second;
+        }
+        double value = getUniversalPerc(ch);
+        universalPercCache[ch] = value;
+        return value;
+    };
+
+    auto runRecover = [&](const std::string& service, CharVital v) {
+        auto subs = characterSubscriptions.all(service);
+        for(auto ch : filter_raw(subs)) {
+            if(!shouldRecover(ch)) continue;
+            if(v == CharVital::lifeforce && IS_ANDROID(ch)) {
+                // androids don't recover lifeforce.
+                characterSubscriptions.unsubscribe(service, ch);
+                continue;
+            }
+            double universal = getUniversalPercCached(ch);
+            double perc = 1.0 + universal + ch->getAffectModifier(APPLY_CVIT_REGEN_MULT, static_cast<int>(v));
             if(perc <= 0.0) {
                 // the healing multipliers are so low that all healing is neutralized.
                 // Floor it out for sanity.
                 perc = 0.05;
             }
-
-            ch->modCurVitalDam(v, -(base * (perc)) * deltaTime);
+            ch->modCurVitalDam(v, -((base * (perc)) * deltaTime));
         }
-    }
+    };
+
+    runRecover("characterHealthRecovery", CharVital::health);
+    runRecover("characterStaminaRecovery", CharVital::stamina);
+    runRecover("characterKiRecovery", CharVital::ki);
+    runRecover("characterLifeforceRecovery", CharVital::lifeforce);
+
 }
 
 
@@ -1839,7 +1859,7 @@ void point_update(uint64_t heartPulse, double deltaTime)
                             if (!i->isFullVital(CharVital::lifeforce))
                             {
                                 if (!IS_ANDROID(i) && !FIGHTING(i) && GET_SUPPRESS(i) <= 0 &&
-                                    GET_HIT(i) != (i->getEffectiveStat("health")))
+                                    GET_HIT(i) != (i->getEffectiveStat<int64_t>("health")))
                                 {
                                     i->modCurVitalDam(CharVital::lifeforce, -.15);
                                     send_to_char(i, "@CYou feel more lively.@n\r\n");

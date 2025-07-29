@@ -374,9 +374,9 @@ static card comprehension = {   "Comprehension",
         ki *= (1 + ch->getAffectModifier(APPLY_CVIT_MULT, static_cast<int>(CharVital::ki)));
         st *= (1 + ch->getAffectModifier(APPLY_CVIT_MULT, static_cast<int>(CharVital::stamina)));
 
-        if(pl > (ch->getBaseStat("health") / 10)) pl = ch->getBaseStat("health") / 10;
-        if(ki > (ch->getBaseStat("ki") / 10)) ki = ch->getBaseStat("ki") / 10;
-        if(st > (ch->getBaseStat("stamina") / 10)) st = ch->getBaseStat("stamina") / 10;
+        if(pl > (ch->getBaseStat<int64_t>("health") / 10)) pl = ch->getBaseStat<int64_t>("health") / 10;
+        if(ki > (ch->getBaseStat<int64_t>("ki") / 10)) ki = ch->getBaseStat<int64_t>("ki") / 10;
+        if(st > (ch->getBaseStat<int64_t>("stamina") / 10)) st = ch->getBaseStat<int64_t>("stamina") / 10;
 
         send_to_char(ch, "@D[@Y+ @R%s @rPL@D]@n\r\n", add_commas(pl).c_str());
         ch->gainBaseStat("health", pl);

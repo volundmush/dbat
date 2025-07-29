@@ -255,7 +255,7 @@ static std::vector<GameSystem> gameSystems = {
         GameSystem("script_trigger_check", 13.0, script_trigger_check),
         GameSystem("zone_update", 0.0, zone_update),
         GameSystem("repairRoomDamage", 600.0, repairRoomDamage),
-        GameSystem("dball_load", 1.0, dball_load),
+        //GameSystem("dball_load", 1.0, dball_load),
         GameSystem("base_update", 2.0, base_update),
         GameSystem("androidAbsorbSystem", 2.0, androidAbsorbSystem),
         GameSystem("goopTimeService", 2.0, goopTimeService),
@@ -1010,7 +1010,7 @@ char *make_prompt(struct descriptor_data *d) {
                     auto ch = d->character;
                     // TODO: fix this.
                     auto cvp = ch->getCurVitalMeterPercent(CharVital::health);
-                    if (ch->getEffectiveStat("health") > ch->getBaseStat("health"))
+                    if (ch->getEffectiveStat<int64_t>("health") > ch->getBaseStat<int64_t>("health"))
                         col = "g";
                     else if (cvp > .5)
                         col = "c";

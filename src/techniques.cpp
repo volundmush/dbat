@@ -127,7 +127,7 @@ bool tech_handle_android_absorb(char_data *ch, char_data *vict) {
             amot = GET_MAX_MANA(ch) / 20;
         }
         if (GET_CHARGE(vict) + amot > GET_MAX_MANA(vict)) {
-            vict->modCurVital(CharVital::ki, vict->getEffectiveStat("ki") - GET_CHARGE(vict));
+            vict->modCurVital(CharVital::ki, vict->getEffectiveStat<int64_t>("ki") - GET_CHARGE(vict));
             vict->setBaseStat<int64_t>("charge", GET_MAX_MANA(vict));
         } else {
             vict->modBaseStat<int64_t>("charge", amot);

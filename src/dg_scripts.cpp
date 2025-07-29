@@ -8,6 +8,7 @@
 *  $Revision: 1.0.14 $                                                    *
 **************************************************************************/
 #include <filesystem>
+#include <charconv>
 
 #include "dbat/dg_scripts.h"
 #include "dbat/act.wizard.h"
@@ -1231,20 +1232,9 @@ void script_log(const char *format, ...) {
 bool is_num(const std::string& arg) {
     if (arg.empty()) return false;
 
-    bool decimal_point_found = false;
-    for (char c : arg) {
-        if (c == '.') {
-            if (decimal_point_found) {
-                // More than one decimal point found, not a number
-                return false;
-            }
-            decimal_point_found = true;
-        } else if (!std::isdigit(c)) {
-            // Non-digit character found, not a number
-            return false;
-        }
-    }
-    return true;
+    double value;
+    auto [ptr, ec] = std::from_chars(arg.data(), arg.data() + arg.size(), value);
+    return ec == std::errc() && ptr == arg.data() + arg.size();
 }
 
 static void eval_numeric_op(char *op, char *lhs, char *rhs, char *result) {
@@ -1351,6 +1341,8 @@ void eval_op(char *op, char *lhs, char *rhs, char *result, unit_data *go,
         sprintf(result, "%c", str_str(lhs, rhs) ? '1' : '0');
     else if (!strcmp("!", op)) {
         sprintf(result, "%d", !check_truthy(rhs));
+    } else if(!strcmp("-", op)) {
+        sprintf(result, "-%s", rhs);
     }
 }
 
@@ -1586,6 +1578,7 @@ void process_wait(unit_data *go, trig_data *trig, int type, char *cmd,
     char buf[MAX_INPUT_LENGTH], *arg;
     struct wait_event_data *wait_event_obj;
     long when, hr, min, ntime;
+    double to_wait = 0.0;
     char c;
 
     arg = any_one_arg(cmd, buf);
@@ -1627,14 +1620,22 @@ void process_wait(unit_data *go, trig_data *trig, int type, char *cmd,
         trig->waiting = waiting_mud_seconds / MUD_TIME_ACCELERATION;
 
     } else {
-        if (sscanf(arg, "%ld %c", &when, &c) == 2) {
+        std::string normalized;
+        for (size_t i = 0; i < strlen(arg); ++i) {
+            if (i > 0 && std::isdigit(arg[i - 1]) && std::isalpha(arg[i])) {
+                normalized += ' ';
+            }
+            normalized += arg[i];
+        }
+        if (sscanf(normalized.c_str(), "%ld %c", &when, &c) == 2) {
+            to_wait = when;
             if (c == 't')
-                when *= SECS_PER_HOUR / MUD_TIME_ACCELERATION;
+                to_wait *= SECS_PER_HOUR / MUD_TIME_ACCELERATION;
             else if (c == 's')
-                when *= 1.0 / MUD_TIME_ACCELERATION;
+                to_wait *= 1.0;
         }
         // We need to convert 'when' into a double of seconds-to-wait by dividing by PASSES_PER_SEC.
-        trig->waiting = when;
+        trig->waiting = to_wait;
     }
 
     // we're replacing the old wait_event_obj.
