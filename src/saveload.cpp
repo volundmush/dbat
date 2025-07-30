@@ -1760,6 +1760,8 @@ player_data* create_player_character(int account_id, const json& j) {
 
     init_char(ch.get());
 
+    send_to_imm("New character created, %s, by user, %s.", GET_NAME(ch), acc.name.c_str());
+
     return &p;
 }
 

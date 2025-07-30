@@ -1043,7 +1043,8 @@ int remove_trigger(script_data *sc, char *name) {
         j->deactivate();
         if(sc->running_scripts.has_value()) {
             auto &scr = sc->running_scripts.value();
-            scr.erase(std::remove(scr.begin(), scr.end(), j->vn), scr.end());
+            if (auto find = std::find(scr.begin(), scr.end(), j->vn); find != scr.end())
+                scr.erase(find);
         }
         sc->scripts.erase(j->vn);
 
@@ -1806,12 +1807,12 @@ void process_detach(unit_data *go, script_data *sc, trig_data *trig,
         o = obj.get();
     }
 
-    if (c && SCRIPT(c)) {
+    if (c) {
         if (!strcmp(trignum_s, "all")) {
             extract_script(c, MOB_TRIGGER);
             return;
         }
-        if (remove_trigger(SCRIPT(c), trignum_s)) {
+        if (remove_trigger(c, trignum_s)) {
             if (c->getScripts().empty()) {
                 extract_script(c, MOB_TRIGGER);
             }
@@ -1819,12 +1820,12 @@ void process_detach(unit_data *go, script_data *sc, trig_data *trig,
         return;
     }
 
-    if (o && SCRIPT(o)) {
+    if (o) {
         if (!strcmp(trignum_s, "all")) {
             extract_script(o, OBJ_TRIGGER);
             return;
         }
-        if (remove_trigger(SCRIPT(o), trignum_s)) {
+        if (remove_trigger(o, trignum_s)) {
             if (o->getScripts().empty()) {
                 extract_script(o, OBJ_TRIGGER);
             }
@@ -1832,12 +1833,12 @@ void process_detach(unit_data *go, script_data *sc, trig_data *trig,
         return;
     }
 
-    if (r && SCRIPT(r)) {
+    if (r) {
         if (!strcmp(trignum_s, "all")) {
             extract_script(r, WLD_TRIGGER);
             return;
         }
-        if (remove_trigger(SCRIPT(r), trignum_s)) {
+        if (remove_trigger(r, trignum_s)) {
             if (r->getScripts().empty()) {
                 extract_script(r, WLD_TRIGGER);
             }

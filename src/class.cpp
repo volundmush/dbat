@@ -412,7 +412,7 @@ void do_start(struct char_data *ch) {
         if(o) obj_to_char(o, ch);
     }
 
-    send_to_imm("New character created, %s, by user, %s.", GET_NAME(ch), GET_USER(ch));
+
     advance_level(ch);
     /*mudlog(BRF, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), TRUE, "%s advanced to level %d", GET_NAME(ch), GET_LEVEL(ch));*/
 

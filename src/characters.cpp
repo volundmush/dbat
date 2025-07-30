@@ -345,14 +345,14 @@ int64_t char_data::getMaxVital(CharVital type) {
 int64_t char_data::setCurVital(CharVital type, int64_t amt) {
     auto m = getMaxVital(type);
     auto ratio = static_cast<double>(amt) / static_cast<double>(m);
-    setBaseStat(fmt::format("{}_damage", magic_enum::enum_name(type)), 1.0 - ratio);
+    setBaseStat(fmt::format("{}_damage", magic_enum::enum_name(type)), -ratio);
     return getCurVital(type);
 }
 
 int64_t char_data::modCurVital(CharVital type, int64_t amt) {
     auto m = getMaxVital(type);
     auto ratio = static_cast<double>(amt) / static_cast<double>(m);
-    modBaseStat(fmt::format("{}_damage", magic_enum::enum_name(type)), 1.0 - ratio);
+    modBaseStat(fmt::format("{}_damage", magic_enum::enum_name(type)), -ratio);
     return getCurVital(type);
 }
 

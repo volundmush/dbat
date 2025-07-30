@@ -686,7 +686,7 @@ in the vault (vnum: 453) now and then. you can just use
                         strcpy(str, !IS_NPC(c) ? "1" : "0");
                     } else if (!strcasecmp(field, "inventory")) {
                         if (subfield && *subfield) {
-                            auto con = ch->getObjects();
+                            auto con = c->getObjects();
                             auto oid = atof(subfield);
                             for (auto obj : filter_raw(con)) {
                                 if (GET_OBJ_VNUM(obj) == oid) {

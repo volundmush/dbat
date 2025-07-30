@@ -4150,74 +4150,72 @@ void pcost(struct char_data *ch, double ki, int64_t st) {
     }
 
     int before = 0;
-    if (!IS_NPC(ch)) {
-        if (ki == 0) {
-            before = (ch->getCurVital(CharVital::stamina));
-        }
-        if (GET_CHARGE(ch) <= (GET_MAX_MANA(ch) * ki)) {
-            ch->setBaseStat<int64_t>("charge", 0);
-        }
-        if (GET_CHARGE(ch) > (GET_MAX_MANA(ch) * ki)) {
-            ch->modBaseStat<int64_t>("charge", -(GET_MAX_MANA(ch) * ki));
-        }
-        if (GET_CHARGE(ch) < 0) {
-            ch->setBaseStat<int64_t>("charge", 0);
-        }
-        if (AFF_FLAGGED(ch, AFF_HASS)) {
-            st += st * .3;
-        }
-        if (!IS_NPC(ch) && GET_BONUS(ch, BONUS_HARDWORKER) > 0) {
-            st -= st * .25;
-        } else if (!IS_NPC(ch) && GET_BONUS(ch, BONUS_SLACKER) > 0) {
-            st += st * .25;
-        }
-
-        if (GET_PREFERENCE(ch) == PREFERENCE_H2H && GET_CHARGE(ch) >= GET_MAX_MANA(ch) * 0.1) {
-            st -= st * 0.5;
-            ch->modBaseStat<int64_t>("charge", -st);
-            if (GET_CHARGE(ch) < 0)
-                ch->setBaseStat<int64_t>("charge", 0);
-        }
-
-        if (IS_ICER(ch)) {
-            switch(ch->form) {
-                case Form::icer_1:
-                    st *= 1.05;
-                    break;
-                case Form::icer_2:
-                    st *= 1.1;
-                    break;
-                case Form::icer_3:
-                    st *= 1.15;
-                    break;
-                case Form::icer_4:
-                    st *= 1.20;
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        // TODO: reimplement
-        /*
-        if (IS_NONPTRANS(ch)) {
-            if (PLR_FLAGGED(ch, PLR_TRANS1)) {
-                st -= st * 0.2;
-            } else if (PLR_FLAGGED(ch, PLR_TRANS2)) {
-                st -= st * 0.4;
-            } else if (PLR_FLAGGED(ch, PLR_TRANS3)) {
-                st -= st * 0.6;
-            } else if (PLR_FLAGGED(ch, PLR_TRANS4)) {
-                st -= st * 0.8;
-            }
-        }
-         */
-
-
-        auto ratio = ch->getBaseStat("burden_ratio");
-        st += st * ratio;
-        ch->modCurVital(CharVital::stamina, -st);
+    if (ki == 0) {
+        before = (ch->getCurVital(CharVital::stamina));
     }
+    if (GET_CHARGE(ch) <= (GET_MAX_MANA(ch) * ki)) {
+        ch->setBaseStat<int64_t>("charge", 0);
+    }
+    if (GET_CHARGE(ch) > (GET_MAX_MANA(ch) * ki)) {
+        ch->modBaseStat<int64_t>("charge", -(GET_MAX_MANA(ch) * ki));
+    }
+    if (GET_CHARGE(ch) < 0) {
+        ch->setBaseStat<int64_t>("charge", 0);
+    }
+    if (AFF_FLAGGED(ch, AFF_HASS)) {
+        st += st * .3;
+    }
+    if (!IS_NPC(ch) && GET_BONUS(ch, BONUS_HARDWORKER) > 0) {
+        st -= st * .25;
+    } else if (!IS_NPC(ch) && GET_BONUS(ch, BONUS_SLACKER) > 0) {
+        st += st * .25;
+    }
+
+    if (GET_PREFERENCE(ch) == PREFERENCE_H2H && GET_CHARGE(ch) >= GET_MAX_MANA(ch) * 0.1) {
+        st -= st * 0.5;
+        ch->modBaseStat<int64_t>("charge", -st);
+        if (GET_CHARGE(ch) < 0)
+            ch->setBaseStat<int64_t>("charge", 0);
+    }
+
+    if (IS_ICER(ch)) {
+        switch(ch->form) {
+            case Form::icer_1:
+                st *= 1.05;
+                break;
+            case Form::icer_2:
+                st *= 1.1;
+                break;
+            case Form::icer_3:
+                st *= 1.15;
+                break;
+            case Form::icer_4:
+                st *= 1.20;
+                break;
+            default:
+                break;
+        }
+    }
+
+    // TODO: reimplement
+    /*
+    if (IS_NONPTRANS(ch)) {
+        if (PLR_FLAGGED(ch, PLR_TRANS1)) {
+            st -= st * 0.2;
+        } else if (PLR_FLAGGED(ch, PLR_TRANS2)) {
+            st -= st * 0.4;
+        } else if (PLR_FLAGGED(ch, PLR_TRANS3)) {
+            st -= st * 0.6;
+        } else if (PLR_FLAGGED(ch, PLR_TRANS4)) {
+            st -= st * 0.8;
+        }
+    }
+        */
+
+
+    auto ratio = ch->getBaseStat("burden_ratio");
+    st += st * ratio;
+    ch->modCurVital(CharVital::stamina, -st);
 }
 
 /* Main damage function for RDBS 'Real Dragonball Battle System' */
