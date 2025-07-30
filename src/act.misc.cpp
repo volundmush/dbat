@@ -240,11 +240,7 @@ static void generate_multiform(struct char_data *ch, int count) {
         char_data *clone = nullptr;
         clone = read_mobile(r_num, REAL);
 
-        clone->name = strdup(clone_name.c_str());
-        clone->short_description = strdup(clone_sdesc.c_str());
-        clone->room_description = strdup(clone_ldesc.c_str());
-        if (ch->look_description)
-            clone->look_description = strdup(ch->look_description);
+        clone->strings = ch->strings;
         clone->race = ch->race;
         clone->sensei = ch->sensei;
 
@@ -5595,9 +5591,9 @@ ACMD(do_spoil) {
     snprintf(buf2, sizeof(buf2), "@wThe bloody head of %s@w is lying here@n", part.c_str());
     snprintf(buf3, sizeof(buf3), "@wThe bloody head of %s@w@n", part.c_str());
 
-    body_part->name = strdup(buf);
-    body_part->room_description = strdup(buf2);
-    body_part->short_description = strdup(buf3);
+    body_part->strings["name"] = buf;
+    body_part->strings["room_description"] = buf2;
+    body_part->strings["short_description"] = buf3;
 
     body_part->type_flag = ItemType::other;
     body_part->wear_flags.set(ITEM_WEAR_TAKE, true);

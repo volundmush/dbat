@@ -206,15 +206,15 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg) {
 
                     *buf = '\0';
                     sprintf(buf, "%s", d->obj_name);
-                    obj->name = strdup(buf);
+                    obj->strings["name"] = buf;
 
                     *buf2 = '\0';
                     sprintf(buf2, "%s", d->obj_short);
-                    obj->short_description = strdup(buf2);
+                    obj->strings["short_description"] = buf2;
 
                     *buf3 = '\0';
                     sprintf(buf3, "%s", d->obj_long);
-                    obj->room_description = strdup(buf3);
+                    obj->strings["room_description"] = buf3;
 
                     d->obj_editflag = EDIT_NONE;
                     d->obj_editval = EDIT_NONE;
@@ -479,25 +479,25 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg) {
                         }
                         *buf = '\0';
                         sprintf(buf, "%s", d->obj_name);
-                        obj->name = strdup(buf);
+                        obj->strings["name"] = buf;
                         *buf2 = '\0';
                         sprintf(buf2, "%s", d->obj_short);
-                        obj->short_description = strdup(buf2);
+                        obj->strings["short_description"] = buf2;
                         *buf3 = '\0';
                         sprintf(buf3, "%s", d->obj_long);
-                        obj->room_description = strdup(buf3);
+                        obj->strings["room_description"] = buf3;
                     } else {
                         obj = read_object(20098, VIRTUAL);
                         obj_to_char(obj, d->character);
                         *buf = '\0';
                         sprintf(buf, "%s", d->obj_name);
-                        obj->name = strdup(buf);
+                        obj->strings["name"] = strdup(buf);
                         *buf2 = '\0';
                         sprintf(buf2, "%s", d->obj_short);
-                        obj->short_description = strdup(buf2);
+                        obj->strings["short_description"] = buf2;
                         *buf3 = '\0';
                         sprintf(buf3, "%s", d->obj_long);
-                        obj->room_description = strdup(buf3);
+                        obj->strings["room_description"] = buf3;
                         switch (d->obj_weapon) {
                             case 1:
                                 SET_OBJ_VAL(obj, VAL_WEAPON_DAMTYPE, TYPE_SLASH - TYPE_HIT);

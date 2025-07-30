@@ -2073,7 +2073,7 @@ ACMD(do_candy) {
     auto sh = obj->getShortDescription();
     char newsh[MAX_STRING_LENGTH];
     snprintf(newsh, MAX_STRING_LENGTH, "%s@n (of %s@n)", sh, vict->getShortDescription());
-    obj->short_description = strdup(newsh);
+    obj->strings["short_description"] = newsh;
     obj_to_char(obj, ch);
     obj->setBaseStat<int64_t>(VAL_FOOD_CANDY_PL, vict->getBaseStat<int64_t>("health"));
     obj->setBaseStat<int64_t>(VAL_FOOD_CANDY_KI, vict->getBaseStat<int64_t>("ki"));

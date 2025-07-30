@@ -109,10 +109,7 @@ void extract_script(unit_data *thing, int type) {
         sc->deactivate();
     }
 
-    if (thing->global_vars) {
-        free_varlist(thing->global_vars);
-        thing->global_vars = nullptr;
-    }
+    thing->script_variables.clear();
 
 }
 

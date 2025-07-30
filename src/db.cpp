@@ -1822,8 +1822,7 @@ static void do_reset_cmds(zone_data &z) {
                         ZONE_ERROR("Attempt to give a variable to scriptless mobile");
                     }
                     else
-                        add_var(&(SCRIPT(tmob)->global_vars), (char *)c.sarg1.c_str(), (char *)c.sarg2.c_str(),
-                                c.arg3);
+                        tmob->script_variables[c.sarg1] = c.sarg2;
                     last_cmd = 1;
                 }
                 else if (c.arg1 == OBJ_TRIGGER && tobj)
@@ -1833,8 +1832,7 @@ static void do_reset_cmds(zone_data &z) {
                         ZONE_ERROR("Attempt to give variable to scriptless object");
                     }
                     else
-                        add_var(&(SCRIPT(tobj)->global_vars), (char *)c.sarg1.c_str(), (char *)c.sarg2.c_str(),
-                                c.arg3);
+                        tobj->script_variables[c.sarg1] = c.sarg2;
                     last_cmd = 1;
                 }
                 else if (c.arg1 == WLD_TRIGGER)
@@ -1845,8 +1843,7 @@ static void do_reset_cmds(zone_data &z) {
                     }
                     else
                     {
-                        add_var(&(get_room(c.arg3)->global_vars),
-                                    (char *)c.sarg1.c_str(), (char *)c.sarg2.c_str(), c.arg2);
+                        get_room(c.arg3)->script_variables[c.sarg1] = c.sarg2;
                         last_cmd = 1;
                     }
                 }

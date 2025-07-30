@@ -2,6 +2,7 @@ import os
 import orjson
 import asyncio
 import time
+import typing
 from pathlib import Path
 from fastapi import HTTPException, status
 import dbat
@@ -201,7 +202,7 @@ cdef class ScriptDB:
         res = deref(i)
         return orjson.loads(self._dump(res.second.proto))
     
-    def __iter__(self) -> typing.AsyncGenerator[gdict, None]:
+    def __iter__(self) -> typing.AsyncGenerator[dict, None]:
         for vn in db.trig_index:
             yield orjson.loads(self._dump(vn.second.proto))
     

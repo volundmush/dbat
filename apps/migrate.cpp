@@ -965,8 +965,8 @@ static void parse_room(FILE *fl, room_vnum virtual_nr) {
 
     r->zone = zone;
     r->id = virtual_nr;
-    r->name = fread_string(fl, buf2);
-    r->look_description = fread_string(fl, buf2);
+    r->strings["name"] = fread_string(fl, buf2);
+    r->strings["look_description"] = fread_string(fl, buf2);
 
     if (!get_line(fl, line)) {
         basic_mud_log("SYSERR: Expecting roomflags/sector type of room #%d but file ended!",
@@ -997,8 +997,6 @@ static void parse_room(FILE *fl, room_vnum virtual_nr) {
     for (i = 0; i < NUM_OF_DIRS; i++)
         r->dir_option[i] = nullptr;
 
-    r->ex_description = nullptr;
-
     snprintf(buf, sizeof(buf), "SYSERR: Format error in room #%d (expecting D/E/S)", virtual_nr);
     convert_room(*r);
     while(true) {
@@ -1010,25 +1008,14 @@ static void parse_room(FILE *fl, room_vnum virtual_nr) {
             case 'D':
                 setup_dir(fl, virtual_nr, atoi(line + 1));
                 break;
-            case 'E':
-                CREATE(new_descr, struct extra_descr_data, 1);
-                new_descr->keyword = fread_string(fl, buf2);
-                new_descr->description = fread_string(fl, buf2);
-                /* fix for crashes in the editor when formatting
-       * - e-descs are assumed to end with a \r\n
-       * -- Welcor 09/03
-       */
-                {
-                    char *tmp = strchr(new_descr->description, '\0');
-                    if (tmp > new_descr->description && *(tmp - 1) != '\n') {
-                        CREATE(tmp, char, strlen(new_descr->description) + 3);
-                        sprintf(tmp, "%s\r\n", new_descr->description); /* sprintf ok : size checked above*/
-                        free(new_descr->description);
-                        new_descr->description = tmp;
-                    }
+            case 'E': {
+                auto &ex = r->extra_descriptions.emplace_back();
+                ex.keyword = fread_string(fl, buf2);
+                ex.description = fread_string(fl, buf2);
+                if(!ex.description.ends_with("\r\n")) {
+                    ex.description += "\r\n"; /* ensure it ends with \r\n */
                 }
-                new_descr->next = r->ex_description;
-                r->ex_description = new_descr;
+            }
                 break;
             case 'S':            /* end of room */
                 /* DG triggers -- script is defined after the end of the room */
@@ -2532,7 +2519,7 @@ static int load_char(const char *name, struct char_data *ch) {
                 case 'D':
                     if (!strcmp(tag, "Deat")) ch->setBaseStat("death_time", atoi(line));
                     else if (!strcmp(tag, "Deac")) ch->setBaseStat("death_count", atoi(line));
-                    else if (!strcmp(tag, "Desc")) ch->look_description = fread_string(fl, buf2);
+                    else if (!strcmp(tag, "Desc")) ch->strings["look_description"] = fread_string(fl, buf2);
                     else if (!strcmp(tag, "Dex ")) ch->setBaseStat("agility", atoi(line));
                     else if (!strcmp(tag, "Drnk")) GET_COND(ch, DRUNK) = atoi(line);
                     else if (!strcmp(tag, "Damg")) ch->setBaseStat("damage_mod", atoi(line));
@@ -2616,7 +2603,7 @@ static int load_char(const char *name, struct char_data *ch) {
                     break;
 
                 case 'N':
-                    if (!strcmp(tag, "Name")) ch->name = strdup(line);
+                    if (!strcmp(tag, "Name")) ch->strings["name"] = strdup(line);
                     break;
 
                 case 'O':
@@ -2855,45 +2842,36 @@ int House_load(room_vnum rvnum) {
             for(auto i = 0; i < 128; i++) temp->item_flags.set(i, IS_SET_AR(ex, i));
 
             get_line(fl, line);
+            char *txt;
             /* read line check for xap. */
             if (!strcmp("XAP", line)) {  /* then this is a Xap Obj, requires
                                        special care */
-                if ((temp->name = fread_string(fl, buf2)) == nullptr) {
-                    temp->name = "undefined";
+                if ((txt = fread_string(fl, buf2))) {
+                    temp->strings["name"] = txt;
+                    free(txt);
+                } else {
+                    temp->strings["name"] = "undefined";
                 }
 
-                if ((temp->short_description = fread_string(fl, buf2)) == nullptr) {
-                    temp->short_description = "undefined";
+                if ((txt = fread_string(fl, buf2))) {
+                    temp->strings["short_description"] = txt;
+                    free(txt);
+                } else {
+                    temp->strings["short_description"] = "undefined";
                 }
 
-                if ((temp->room_description = fread_string(fl, buf2)) == nullptr) {
-                    temp->room_description = "undefined";
+                if ((txt = fread_string(fl, buf2))) {
+                    temp->strings["room_description"] = txt;
+                    free(txt);
+                } else {
+                    temp->strings["room_description"] = "undefined";
                 }
 
-                if ((temp->look_description = fread_string(fl, buf2)) == nullptr) {
-                    temp->look_description = nullptr;
-                }
-
-                if(temp->proto) {
-                    if(temp->proto->name && temp->name && !strcmp(temp->name, temp->proto->name)) {
-                        free(temp->name);
-                        temp->name = nullptr;
-                    }
-                    if(temp->proto->short_description && temp->short_description &&
-                       !strcmp(temp->short_description, temp->proto->short_description)) {
-                        free(temp->short_description);
-                        temp->short_description = nullptr;
-                    }
-                    if(temp->proto->room_description && temp->room_description &&
-                       !strcmp(temp->room_description, temp->proto->room_description)) {
-                        free(temp->room_description);
-                        temp->room_description = nullptr;
-                    }
-                    if(temp->proto->look_description && temp->look_description &&
-                       !strcmp(temp->look_description, temp->proto->look_description)) {
-                        free(temp->look_description);
-                        temp->look_description = nullptr;
-                    }
+                if ((txt = fread_string(fl, buf2))) {
+                    temp->strings["look_description"] = txt;
+                    free(txt);
+                } else {
+                    temp->strings["look_description"] = "undefined";
                 }
 
                 if (!get_line(fl, line) ||
@@ -2915,11 +2893,6 @@ int House_load(room_vnum rvnum) {
 
                 /* buf2 is error codes pretty much */
                 //strcat(buf2, ", after numeric constants (expecting E/#xxx)");
-
-                /*add_unique_id(temp);*/
-                /* we're clearing these for good luck */
-
-                temp->ex_description = nullptr;
 
                 get_line(fl, line);
                 int64_t fakeid;
@@ -3229,7 +3202,7 @@ void migrate_characters() {
         ch->id = id;
         if(!ch->generation) ch->generation = time(nullptr);
         p.character = ch;
-        p.name = ch->name;
+        p.name = ch->getName();
         auto &a = accounts[accID];
         p.account = &a;
         a.admin_level = std::max(a.admin_level, GET_ADMLEVEL(ch));
@@ -3346,7 +3319,7 @@ void migrate_characters() {
 
             try {
                 auto ctx = std::stoi(context);
-                add_var(&(ch->global_vars), (char*)varname.c_str(), data.c_str(), ctx);
+                ch->script_variables[varname] = data;
             } catch(...) {
                 basic_mud_log("Error parsing %s for variable migration.", line.c_str());
             }

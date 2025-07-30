@@ -179,8 +179,8 @@ ACMD(do_oasis_redit) {
 void redit_setup_new(struct descriptor_data *d) {
     OLC_ROOM(d) = new room_data();
 
-    OLC_ROOM(d)->name = strdup("An unfinished room");
-    OLC_ROOM(d)->look_description = strdup("You are in an unfinished room.\r\n");
+    OLC_ROOM(d)->strings["name"] = "An unfinished room";
+    OLC_ROOM(d)->strings["look_description"] = "You are in an unfinished room.\r\n";
     OLC_ITEM_TYPE(d) = WLD_TRIGGER;
     OLC_SCRIPT(d).clear();
 
@@ -196,13 +196,12 @@ void redit_setup_existing(struct descriptor_data *d, int real_num) {
      * Build a copy of the room for editing.
      */
     auto room = new room_data();
-
-    *room = *get_room(real_num);
+    auto exist = get_room(real_num);
     /*
      * Allocate space for all strings.
      */
-    room->name = str_udup(get_room(real_num)->name);
-    room->look_description = str_udup(get_room(real_num)->look_description);
+    room->strings = exist->strings;
+    room->extra_descriptions = exist->extra_descriptions;
 
     /*
      * Exits - We allocate only if necessary.
@@ -229,22 +228,7 @@ void redit_setup_existing(struct descriptor_data *d, int real_num) {
     /*
      * Extra descriptions, if necessary.
      */
-    if (get_room(real_num)->ex_description) {
-        struct extra_descr_data *tdesc, *temp, *temp2;
-        CREATE(temp, struct extra_descr_data, 1);
 
-        room->ex_description = temp;
-        for (tdesc = get_room(real_num)->ex_description; tdesc; tdesc = tdesc->next) {
-            temp->keyword = strdup(tdesc->keyword);
-            temp->description = strdup(tdesc->description);
-            if (tdesc->next) {
-                CREATE(temp2, struct extra_descr_data, 1);
-                temp->next = temp2;
-                temp = temp2;
-            } else
-                temp->next = nullptr;
-        }
-    }
     /*
      * Attach copy of room to player's descriptor.
      */
@@ -626,7 +610,7 @@ void redit_parse(struct descriptor_data *d, char *arg) {
                         write_to_output(d, "%s", ld);
                         oldtext = strdup(ld);
                     }
-                    string_write(d, &OLC_ROOM(d)->look_description, MAX_ROOM_DESC, 0, oldtext);
+                    //string_write(d, &OLC_ROOM(d)->look_description, MAX_ROOM_DESC, 0, oldtext);
                     OLC_VAL(d) = 1;
                     break;
                 case '3':
@@ -751,10 +735,10 @@ void redit_parse(struct descriptor_data *d, char *arg) {
                     /*
                      * If the extra description doesn't exist.
                      */
-                    if (!OLC_ROOM(d)->ex_description)
-                        CREATE(OLC_ROOM(d)->ex_description, struct extra_descr_data, 1);
-                    OLC_DESC(d) = OLC_ROOM(d)->ex_description;
-                    redit_disp_extradesc_menu(d);
+                    //if (!OLC_ROOM(d)->ex_description)
+                    //    CREATE(OLC_ROOM(d)->ex_description, struct extra_descr_data, 1);
+                    //OLC_DESC(d) = OLC_ROOM(d)->ex_description;
+                    //redit_disp_extradesc_menu(d);
                     break;
                 case 'w':
                 case 'W':
@@ -808,10 +792,8 @@ void redit_parse(struct descriptor_data *d, char *arg) {
         case REDIT_NAME:
             if (!genolc_checkstring(d, arg))
                 break;
-            if (OLC_ROOM(d)->name)
-                free(OLC_ROOM(d)->name);
             arg[MAX_ROOM_NAME] = '\0';
-            OLC_ROOM(d)->name = str_udup(arg);
+            OLC_ROOM(d)->strings["name"] = arg;
             break;
 
         case REDIT_DESC:
@@ -997,19 +979,19 @@ void redit_parse(struct descriptor_data *d, char *arg) {
                      * If something got left out, delete the extra description
                      * when backing out to the menu.
                      */
-                    if (OLC_DESC(d)->keyword == nullptr || OLC_DESC(d)->description == nullptr) {
-                        struct extra_descr_data *temp;
-                        if (OLC_DESC(d)->keyword)
-                            free(OLC_DESC(d)->keyword);
-                        if (OLC_DESC(d)->description)
-                            free(OLC_DESC(d)->description);
+                    //if (OLC_DESC(d)->keyword == nullptr || OLC_DESC(d)->description == nullptr) {
+                      //  struct extra_descr_data *temp;
+                       // if (OLC_DESC(d)->keyword)
+                       //     free(OLC_DESC(d)->keyword);
+                       // if (OLC_DESC(d)->description)
+                       //     free(OLC_DESC(d)->description);
 
                         /*
                          * Clean up pointers.
                          */
-                        REMOVE_FROM_LIST(OLC_DESC(d), OLC_ROOM(d)->ex_description, next, temp);
-                        free(OLC_DESC(d));
-                    }
+                        //REMOVE_FROM_LIST(OLC_DESC(d), OLC_ROOM(d)->ex_description, next, temp);
+                        //free(OLC_DESC(d));
+                   // }
                     break;
                 case 1:
                     OLC_MODE(d) = REDIT_EXTRADESC_KEY;

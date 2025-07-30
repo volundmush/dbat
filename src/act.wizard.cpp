@@ -89,7 +89,7 @@ ACMD(do_lag) {
     }
 
     for (d = descriptor_list; d; d = d->next) {
-        if (!strcasecmp(CAP(GET_NAME(d->character)), CAP(arg))) {
+        if (!strcasecmp(GET_NAME(d->character), arg)) {
             if (GET_ADMLEVEL(d->character) > GET_ADMLEVEL(ch)) {
                 send_to_char(ch, "Sorry, you've been outranked.\r\n");
                 return;
@@ -621,7 +621,7 @@ ACMD(do_finddoor) {
     char buf[MAX_STRING_LENGTH] = {0};
     struct char_data *tmp_char;
     struct obj_data *obj;
-    char *sdesc;
+    std::string sdesc;
 
     one_argument(argument, arg);
 
@@ -1243,10 +1243,11 @@ static void do_stat_room(struct char_data *ch) {
 
     send_to_char(ch, "Description:\r\n%s", rm->getLookDescription() ? rm->getLookDescription() : "  None.\r\n");
 
-    if (auto ex = rm->getExtraDescription(); ex) {
+    if (!rm->getExtraDescription().empty()) {
         send_to_char(ch, "Extra descs:");
-        for (desc = ex; desc; desc = desc->next)
-            send_to_char(ch, " [@c%s@n]", desc->keyword);
+        for (const auto& ex : rm->getExtraDescription()) {
+            send_to_char(ch, " [@c%s@n]", ex.keyword.c_str());
+        }
         send_to_char(ch, "\r\n");
     }
 
@@ -1368,10 +1369,11 @@ static void do_stat_object(struct char_data *ch, struct obj_data *j) {
         send_to_char(ch, "HOLDING: %s\r\n", GET_NAME(sitter));
     }
 
-    if (auto ex = j->getExtraDescription(); ex) {
+    if (!j->getExtraDescription().empty()) {
         send_to_char(ch, "Extra descs:");
-        for (desc = ex; desc; desc = desc->next)
-            send_to_char(ch, " [@g%s@n]", desc->keyword);
+        for (const auto& ex : j->getExtraDescription()) {
+            send_to_char(ch, " [@g%s@n]", ex.keyword.c_str());
+        }
         send_to_char(ch, "\r\n");
     }
 
@@ -1798,7 +1800,7 @@ ACMD(do_varstat) {
         return;
     } else {
         /* Display their global variables */
-        if (vict->global_vars) {
+        if (!vict->script_variables.empty()) {
             struct trig_var_data *tv;
             char uname[MAX_INPUT_LENGTH];
             void find_uid_name(char *uid, char *name, size_t nlen);
@@ -1807,16 +1809,16 @@ ACMD(do_varstat) {
 
             /* currently, variable context for players is always 0, so it is */
             /* not displayed here. in the future, this might change */
-            for (tv = vict->global_vars; tv; tv = tv->next) {
-                if (tv->value && *(tv->value) == UID_CHAR) {
-                    auto uidResult = resolveUID(tv->value);
+            for (const auto &[name, value] : vict->script_variables) {
+                if (value.starts_with(UID_CHAR)) {
+                    auto uidResult = resolveUID(value);
                     if(uidResult) {
-                        send_to_char(ch, "    %10s:  [UID]: %s\r\n", tv->name, uidResult->getName());
+                        send_to_char(ch, "    %10s:  [UID]: %s\r\n", name, uidResult->getName());
                     } else {
-                        send_to_char(ch, "   -BAD UID: %s", tv->value);
+                        send_to_char(ch, "   -BAD UID: %s", value);
                     }
                 } else {
-                    send_to_char(ch, "    %10s:  %s\r\n", tv->name, tv->value);
+                    send_to_char(ch, "    %10s:  %s\r\n", name, value);
                 }
             }
         }
@@ -4725,13 +4727,6 @@ ACMD (do_zcheck) {
                                 "- Room description not wrapped at %d chars (/fi in the editor).\r\n",
                                 MAX_COLOUMN_WIDTH);
 
-            for (ext2 = nullptr, ext = r->ex_description; ext; ext = ext->next)
-                if (strncmp(ext->description, "   ", 3))
-                    ext2 = ext;
-
-            if (ext2 && (found = 1))
-                len += snprintf(buf + len, sizeof(buf) - len,
-                                "- has unformatted extra description\r\n");
 
             if (found) {
                 send_to_char(ch, "[%5d] %-30s: \r\n%s",

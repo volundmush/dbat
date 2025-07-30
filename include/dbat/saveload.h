@@ -155,6 +155,7 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(time_data, birth, created, maxag
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(time_info_data, remainder, seconds, minutes, hours, day, month, year)
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(weather_data, pressure, change, sky, sunlight)
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(shop_buy_data, type, keywords)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ExtraDescription, keyword, description)
 
 void to_json(json& j, const struct help_index_element& r);
 void from_json(const json& j, struct help_index_element& r);
@@ -182,9 +183,6 @@ void from_json(const json& j, shop_data& s);
 
 void to_json(json& j, const guild_data& g);
 void from_json(const json& j, guild_data& g);
-
-void to_json(json& j, const unit_data& u);
-void from_json(const json& j, unit_data& u);
 
 void to_json(json& j, const room_direction_data &e);
 void from_json(const json& j, room_direction_data &e);

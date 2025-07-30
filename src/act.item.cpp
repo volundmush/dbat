@@ -1114,7 +1114,7 @@ void check_auction(uint64_t heartPulse, double deltaTime) {
                 /* Give the object to the buyer */
                 obj_to_char(obj_selling, ch_buying);
                 sprintf(buf, "%s flies out the sky and into your hands, what a steal!\r\n",
-                        obj_selling->short_description);
+                        obj_selling->getShortDescription());
                 CAP(buf);
                 send_to_char(ch_buying, buf);
 
@@ -1547,7 +1547,7 @@ ACMD(do_bid) {
                 if (GET_EQ(d->character, WEAR_EYE)) {
                     send_to_char(d->character,
                                  "@RScouter Auction News@D: @GThe bid on, @w%s@G, has been raised to @Y%s@n\r\n",
-                                 obj2->short_description, add_commas(GET_BID(obj2)).c_str());
+                                 obj2->getShortDescription(), add_commas(GET_BID(obj2)).c_str());
                 }
             }
         }
@@ -2138,6 +2138,14 @@ static char *find_exdesc_keywords(char *word, struct extra_descr_data *list) {
             return (i->keyword);
 
     return (nullptr);
+}
+
+static char *find_exdesc_keywords(char *word, const std::vector<ExtraDescription>& list) {
+    for (const auto &i : list) {
+        if (isname(word, i.keyword.c_str()))
+            return (char*)i.keyword.c_str();
+    }
+    return nullptr;
 }
 
 static void get_from_room(struct char_data *ch, char *arg, int howmany) {
@@ -2869,9 +2877,8 @@ void name_from_drinkcon(struct obj_data *obj) {
         strncat(new_name, cur_name, cpylen);    /* strncat: OK (size precalculated) */
     }
 
-    if (GET_OBJ_RNUM(obj) == NOTHING || obj->name != obj_proto.at(GET_OBJ_RNUM(obj)).name)
-        free(obj->name);
-    obj->name = new_name;
+    obj->strings["name"] = new_name;
+    free(new_name);
 }
 
 void name_to_drinkcon(struct obj_data *obj, int type) {
@@ -2880,13 +2887,11 @@ void name_to_drinkcon(struct obj_data *obj, int type) {
     if (!obj || (GET_OBJ_TYPE(obj) != ITEM_DRINKCON && GET_OBJ_TYPE(obj) != ITEM_FOUNTAIN))
         return;
 
-    CREATE(new_name, char, strlen(obj->name) + strlen(drinknames[type]) + 2);
-    sprintf(new_name, "%s %s", obj->name, drinknames[type]);    /* sprintf: OK */
+    CREATE(new_name, char, strlen(obj->getName()) + strlen(drinknames[type]) + 2);
+    sprintf(new_name, "%s %s", obj->getName(), drinknames[type]);    /* sprintf: OK */
 
-    if (GET_OBJ_RNUM(obj) == NOTHING || obj->name != obj_proto.at(GET_OBJ_RNUM(obj)).name)
-        free(obj->name);
-
-    obj->name = new_name;
+    obj->strings["name"] = new_name;
+    free(new_name);
 }
 
 ACMD(do_drink) {

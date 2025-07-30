@@ -232,6 +232,20 @@ static double terrain_bonus(struct char_data *ch) {
 
 }
 
+static bool match_exdesc(const char *word, const ExtraDescription& exdesc) {
+    if (exdesc.keyword.starts_with("."))
+        return isname(word, exdesc.keyword.c_str() + 1);
+    else
+        return isname(word, exdesc.keyword.c_str());
+}
+
+char *find_exdesc(char *word, const std::vector<ExtraDescription> &list) {
+    for (const auto &i : list) {
+        if (match_exdesc(word, i))
+            return ((char*)i.description.c_str());
+    }
+    return nullptr;
+}
 
 /* This is used to find hidden people in a room with search - Iovan 12/16/2012 */
 static void search_room(struct char_data *ch) {
@@ -761,7 +775,7 @@ ACMD(do_nickname) {
             } else {
                 char nick[MAX_INPUT_LENGTH];
                 sprintf(nick, "%s", CAP(arg2));
-                ship2->look_description = strdup(nick);
+                ship2->strings["look_description"] = nick;
                 auto objs = objectSubscriptions.all(fmt::format("vnum_{}", GET_OBJ_VNUM(ship2) + 1000));
                 for (auto k : filter_raw(objs)) {
                     extract_obj(k);
@@ -790,8 +804,8 @@ ACMD(do_nickname) {
     char nick[MAX_INPUT_LENGTH], nick2[MAX_INPUT_LENGTH];
     sprintf(nick, "%s @wnicknamed @D(@C%s@D)@n", sdesc, CAP(arg2));
     sprintf(nick2, "%s %s", obj->getName(), arg2);
-    obj->short_description = strdup(nick);
-    obj->name = strdup(nick2);
+    obj->strings["short_description"] = nick;
+    obj->strings["name"] = nick2;
 }
 
 
@@ -1388,7 +1402,7 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
             }
 
             if (PRF_FLAGGED(ch, PRF_IHEALTH)) {
-                send_to_char(ch, "@D<@gH@D: @C%d@D>@w %s", GET_OBJ_VAL(obj, VAL_ALL_HEALTH), obj->short_description);
+                send_to_char(ch, "@D<@gH@D: @C%d@D>@w %s", GET_OBJ_VAL(obj, VAL_ALL_HEALTH), obj->getShortDescription());
             } else {
                 send_to_char(ch, "%s", obj->getShortDescription());
             }
@@ -3136,8 +3150,10 @@ char *find_exdesc(char *word, struct extra_descr_data *list) {
         if (*i->keyword == '.' ? isname(word, i->keyword + 1) : isname(word, i->keyword))
             return (i->description);
 
-    return (nullptr);
+    return nullptr;
 }
+
+
 
 
 /*
@@ -3230,23 +3246,21 @@ static void handle_board_read(struct char_data *ch, char *arg) {
     }
 }
 
-static bool handle_exdesc_look(struct char_data *ch, char *arg, struct extra_descr_data *ex_desc_list, struct obj_data *obj) {
+static bool handle_exdesc_look(struct char_data *ch, char *arg, const std::vector<ExtraDescription>& ex_desc_list, struct obj_data *obj) {
     char *desc;
     int fnum = get_number(&arg);
     int i = 0;
 
-    while (ex_desc_list) {
-        if ((desc = find_exdesc(arg, ex_desc_list)) && ++i == fnum) {
-            write_to_output(ch->desc, desc);
+    for (const auto &i : ex_desc_list) {
+        if (match_exdesc(arg, i)) {
+            write_to_output(ch->desc, i.description.c_str());
             return true;
         }
-        ex_desc_list = ex_desc_list->next;
     }
     return false;
 }
 
 static void handle_look_in_inventory(struct char_data *ch, char *arg) {
-    if (handle_exdesc_look(ch, arg, nullptr, nullptr)) return;
 
     for (int j = 0; j < NUM_WEARS; j++) {
         struct obj_data *eq = GET_EQ(ch, j);
@@ -3720,10 +3734,10 @@ ACMD(do_look) {
         struct extra_descr_data *i;
         int found = 0;
 
-        for (i = ch->getRoom()->getExtraDescription(); i; i = i->next) {
-            if (*i->keyword != '.') {
+        for (const auto &ex : ch->getRoom()->getExtraDescription()) {
+            if (!ex.keyword.starts_with(".")) {
                 send_to_char(ch, "%s%s:\r\n%s",
-                             (found ? "\r\n" : ""), i->keyword, i->description);
+                             (found ? "\r\n" : ""), ex.keyword.c_str(), ex.description.c_str());
                 found = 1;
             }
         }
@@ -6366,8 +6380,8 @@ ACMD(do_desc) {
     if(ch->form == Form::base) {
         write_to_output(d, "Current description:\r\n%s\r\n", ch->getLookDescription());
         write_to_output(d, "Enter the new text you'd like others to see when they look at you.\r\n");
-        string_write(d, &ch->look_description, EXDSCR_LENGTH, 0, nullptr);
-        STATE(d) = CON_EXDESC;
+        //string_write(d, &ch->look_description, EXDSCR_LENGTH, 0, nullptr);
+        //STATE(d) = CON_EXDESC;
     } else {
         auto form = ch->form;
 

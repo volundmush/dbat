@@ -761,21 +761,19 @@ void script_stat(char_data *ch, script_data *sc) {
     char namebuf[512];
     char buf1[MAX_STRING_LENGTH];
 
-    send_to_char(ch, "Global Variables: %s\r\n", sc->global_vars ? "" : "None");
-    send_to_char(ch, "Global context: %ld\r\n", sc->script_context);
+    send_to_char(ch, "Global Variables: %s\r\n", !sc->script_variables.empty() ? "" : "None");
 
-    for (tv = sc->global_vars; tv; tv = tv->next) {
-        snprintf(namebuf, sizeof(namebuf), "%s:%ld", tv->name, tv->context);
-        if (*(tv->value) == UID_CHAR) {
-            auto uidResult = resolveUID(tv->value);
+    for (const auto& [name, value] : sc->script_variables) {
+        if (value[0] == UID_CHAR) {
+            auto uidResult = resolveUID(value);
             if(uidResult) {
                 std::string n = uidResult->getName();
-                send_to_char(ch, "    %15s:  %s\r\n", tv->context ? namebuf : tv->name, n.c_str());
+                send_to_char(ch, "    %15s:  %s\r\n", name.c_str(), n.c_str());
             } else {
-                send_to_char(ch, "   -BAD UID: %s", tv->value);
+                send_to_char(ch, "   -BAD UID: %s", value.c_str());
             }
         } else
-            send_to_char(ch, "    %15s:  %s\r\n", tv->context ? namebuf : tv->name, tv->value);
+            send_to_char(ch, "    %15s:  %s\r\n", name.c_str(), value.c_str());
     }
 
     for (const auto& t : sc->getScripts()) {
@@ -1661,7 +1659,7 @@ void process_set(script_data *sc, trig_data *trig, char *cmd) {
         return;
     }
 
-    add_var(&GET_TRIG_VARS(trig), name, value, sc ? sc->script_context : 0);
+    add_var(&GET_TRIG_VARS(trig), name, value, 0);
 
 }
 
@@ -1683,10 +1681,10 @@ void process_eval(unit_data *go, script_data *sc, trig_data *trig,
     }
 
     if(isUID(expr)) {
-        add_var(&GET_TRIG_VARS(trig), name, expr, sc ? sc->script_context : 0);
+        add_var(&GET_TRIG_VARS(trig), name, expr, 0);
     } else {
         eval_expr(expr, result, go, sc, trig, type);
-        add_var(&GET_TRIG_VARS(trig), name, result, sc ? sc->script_context : 0);
+        add_var(&GET_TRIG_VARS(trig), name, result, 0);
     }
 }
 
@@ -1890,8 +1888,11 @@ void process_unset(script_data *sc, trig_data *trig, char *cmd) {
         return;
     }
 
-    if (!remove_var(&(sc->global_vars), var))
-        remove_var(&GET_TRIG_VARS(trig), var);
+    if (auto find = sc->script_variables.find(var); find != sc->script_variables.end()) {
+        sc->script_variables.erase(find);
+        return;
+    }
+    remove_var(&GET_TRIG_VARS(trig), var);
 }
 
 
@@ -1928,12 +1929,6 @@ void process_remote(script_data *sc, trig_data *trig, char *cmd) {
         if (!strcasecmp(vd->name, buf))
             break;
 
-    if (!vd)
-        for (vd = sc->global_vars; vd; vd = vd->next)
-            if (!strcasecmp(vd->name, var) &&
-                (vd->context == 0 || vd->context == sc->script_context))
-                break;
-
     if (!vd) {
         script_log("Trigger: %s, VNum %d. local var '%s' not found in remote call",
                    GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), buf);
@@ -1954,8 +1949,7 @@ void process_remote(script_data *sc, trig_data *trig, char *cmd) {
     sc_remote = uidResult.get();
 
     if (sc_remote == nullptr) return; /* no script to assign */
-
-    add_var(&(sc_remote->global_vars), vd->name, vd->value, context);
+    sc->script_variables[vd->name] = vd->value; /* copy the variable to the script's variables */
 }
 
 
@@ -1997,43 +1991,25 @@ ACMD(do_vdelete) {
         return;
     }
 
-    if (sc_remote->global_vars == nullptr) {
+    if (sc_remote->script_variables.empty()) {
         send_to_char(ch, "That id represents no global variables.(2)\r\n");
         return;
     }
 
     if (*var == '*' || is_abbrev(var, "all")) {
-        struct trig_var_data *vd_next;
-        for (vd = sc_remote->global_vars; vd; vd = vd_next) {
-            vd_next = vd->next;
-            free(vd->value);
-            free(vd->name);
-            free(vd);
-        }
-        sc_remote->global_vars = nullptr;
+        sc_remote->script_variables.clear(); /* clear the script's variables */
         send_to_char(ch, "All variables deleted from that id.\r\n");
         return;
     }
 
     /* find the global */
-    for (vd = sc_remote->global_vars; vd; vd_prev = vd, vd = vd->next)
-        if (!strcasecmp(vd->name, var))
-            break;
-
-    if (!vd) {
+    auto find = sc_remote->script_variables.find(var);
+    if (find == sc_remote->script_variables.end()) {
         send_to_char(ch, "That variable cannot be located.\r\n");
         return;
     }
 
-    /* ok, delete the variable */
-    if (vd_prev) vd_prev->next = vd->next;
-    else sc_remote->global_vars = vd->next;
-
-    /* and free up the space */
-    free(vd->value);
-    free(vd->name);
-    free(vd);
-
+    sc_remote->script_variables.erase(find); /* remove from script's variables */
     send_to_char(ch, "Deleted.\r\n");
 }
 
@@ -2051,7 +2027,7 @@ int perform_set_dg_var(struct char_data *ch, struct char_data *vict, char *val_a
         return 0;
     }
 
-    add_var(&(vict->global_vars), var_name, var_value, 0);
+    vict->script_variables[var_name] = var_value; /* add the variable to the script's variables */
     return 1;
 }
 
@@ -2092,24 +2068,13 @@ void process_rdelete(script_data *sc, trig_data *trig, char *cmd) {
     sc_remote = uidResult.get();
 
     if (sc_remote == nullptr) return; /* no script to delete a trigger from */
-    if (sc_remote->global_vars == nullptr) return; /* no script globals */
-
-    /* find the global */
-    for (vd = sc_remote->global_vars; vd; vd_prev = vd, vd = vd->next)
-        if (!strcasecmp(vd->name, var) &&
-            (vd->context == 0 || vd->context == sc->script_context))
-            break;
-
-    if (!vd) return; /* the variable doesn't exist, or is the wrong context */
-
-    /* ok, delete the variable */
-    if (vd_prev) vd_prev->next = vd->next;
-    else sc_remote->global_vars = vd->next;
-
-    /* and free up the space */
-    free(vd->value);
-    free(vd->name);
-    free(vd);
+    if(auto find = sc_remote->script_variables.find(var); find != sc_remote->script_variables.end()) {
+        sc_remote->script_variables.erase(find); /* remove from script's variables */
+        return;
+    }
+    script_log("Trigger: %s, VNum %d. rdelete: variable '%s' not found in remote call",
+                   GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), var);
+    return;
 }
 
 
@@ -2140,8 +2105,7 @@ void process_global(script_data *sc, trig_data *trig, char *cmd, long id) {
         return;
     }
 
-    add_var(&(sc->global_vars), vd->name, vd->value, id);
-    remove_var(&GET_TRIG_VARS(trig), vd->name);
+    sc->script_variables[vd->name] = vd->value; /* copy the variable to the script's variables */
 }
 
 
@@ -2159,7 +2123,6 @@ void process_context(script_data *sc, trig_data *trig, char *cmd) {
         return;
     }
 
-    sc->script_context = atol(var);
 }
 
 void extract_value(script_data *sc, trig_data *trig, char *cmd) {
@@ -2185,7 +2148,7 @@ void extract_value(script_data *sc, trig_data *trig, char *cmd) {
         num--;
     }
 
-    add_var(&GET_TRIG_VARS(trig), to, buf, sc ? sc->script_context : 0);
+    add_var(&GET_TRIG_VARS(trig), to, buf, 0);
 }
 
 /*
@@ -2235,7 +2198,7 @@ void dg_letter_value(script_data *sc, trig_data *trig, char *cmd) {
 
     *junk = string[num - 1];
     *(junk + 1) = '\0';
-    add_var(&GET_TRIG_VARS(trig), varname, junk, sc->script_context);
+    add_var(&GET_TRIG_VARS(trig), varname, junk, 0);
 }
 
 /*  This is the core driver for scripts. */
@@ -2310,7 +2273,6 @@ static int true_script_driver(unit_data *go_adress, trig_data *trig, int type, i
     if (mode == TRIG_NEW) {
         GET_TRIG_DEPTH(trig) = 1;
         GET_TRIG_LOOPS(trig) = 0;
-        sc->script_context = 0;
     }
 
     dg_owner_purged = 0;
@@ -2417,7 +2379,7 @@ static int true_script_driver(unit_data *go_adress, trig_data *trig, int type, i
                 do_dg_affect(go, sc, trig, type, cmd);
 
             else if (!strncasecmp(cmd, "global ", 7))
-                process_global(sc, trig, cmd, sc->script_context);
+                process_global(sc, trig, cmd, 0);
 
             else if (!strncasecmp(cmd, "context ", 8))
                 process_context(sc, trig, cmd);
@@ -2629,7 +2591,7 @@ void read_saved_vars(struct char_data *ch) {
             skip_spaces(&temp); /* temp now points to the rest of the line */
 
             context = atol(context_str);
-            add_var(&(SCRIPT(ch)->global_vars), varname, temp, context);
+            ch->script_variables[varname] = temp; /* add the variable to the script's variables */
             free(p); /* plug memory hole */
         }
     } while (!feof(file));
@@ -2638,43 +2600,6 @@ void read_saved_vars(struct char_data *ch) {
     fclose(file);
 }
 
-/* save a characters variables out to disk */
-void save_char_vars(struct char_data *ch) {
-    FILE *file;
-    char fn[127];
-    struct trig_var_data *vars;
-
-    /* immediate return if no script (and therefore no variables) structure */
-    /* has been created. this will happen when the player is logging in */
-    if (SCRIPT(ch) == nullptr) return;
-
-    /* we should never be called for an NPC, but just in case... */
-    if (IS_NPC(ch)) return;
-
-    get_filename(fn, sizeof(fn), SCRIPT_VARS_FILE, GET_NAME(ch));
-    std::filesystem::remove(fn);
-
-    /* make sure this char has global variables to save */
-    if (ch->global_vars == nullptr) return;
-    vars = ch->global_vars;
-
-    file = fopen(fn, "wt");
-    if (!file) {
-        mudlog(NRM, ADMLVL_GOD, true,
-               "SYSERR: Could not open player variable file %s for writing.:%s",
-               fn, strerror(errno));
-        return;
-    }
-    /* note that currently, context will always be zero. this may change */
-    /* in the future */
-    while (vars) {
-        if (*vars->name != '-') /* don't save if it begins with - */
-            fprintf(file, "%s %ld %s\n", vars->name, vars->context, vars->value);
-        vars = vars->next;
-    }
-
-    fclose(file);
-}
 
 /* load in a character's saved variables from an ASCII pfile*/
 void read_saved_vars_ascii(FILE *file, struct char_data *ch, int count) {
@@ -2697,38 +2622,9 @@ void read_saved_vars_ascii(FILE *file, struct char_data *ch, int count) {
             skip_spaces(&temp); /* temp now points to the rest of the line */
 
             context = atol(context_str);
-            add_var(&(SCRIPT(ch)->global_vars), varname, temp, context);
+            ch->script_variables[varname] = temp; /* add the variable to the script's variables */
             free(p); /* plug memory hole */
         }
-    }
-}
-
-/* save a characters variables out to an ASCII pfile */
-void save_char_vars_ascii(FILE *file, struct char_data *ch) {
-    struct trig_var_data *vars;
-    int count = 0;
-    /* immediate return if no script (and therefore no variables) structure */
-    /* has been created. this will happen when the player is logging in */
-    if (SCRIPT(ch) == nullptr) return;
-
-    /* we should never be called for an NPC, but just in case... */
-    if (IS_NPC(ch)) return;
-
-    /* make sure this char has global variables to save */
-    if (ch->global_vars == nullptr) return;
-
-    /* note that currently, context will always be zero. this may change */
-    /* in the future */
-    for (vars = ch->global_vars; vars; vars = vars->next)
-        if (*vars->name != '-')
-            count++;
-
-    if (count != 0) {
-        fprintf(file, "Vars: %d\n", count);
-
-        for (vars = ch->global_vars; vars; vars = vars->next)
-            if (*vars->name != '-') /* don't save if it begins with - */
-                fprintf(file, "%s %ld %s\n", vars->name, vars->context, vars->value);
     }
 }
 

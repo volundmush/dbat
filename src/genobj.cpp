@@ -16,6 +16,10 @@
 #include "dbat/shop.h"
 #include "dbat/filter.h"
 
+obj_data::obj_data() : thing_data() {
+    type = UnitType::object;
+}
+
 static int copy_object_main(struct obj_data *to, struct obj_data *from, int free_object);
 
 
@@ -374,40 +378,6 @@ void obj_data::clearLocation() {
     else if(room) obj_from_room(this);
 }
 
-vnum obj_data::getVnum() const {
-    return proto ? proto->vn : NOTHING;
-}
-
-
-
-char* obj_data::getName() {
-    if(name) return name;
-    if(proto && proto->name) return proto->name;
-    return nullptr;
-}
-
-char* obj_data::getRoomDescription() {
-    if(room_description) return room_description;
-    if(proto && proto->room_description) return proto->room_description;
-    return nullptr;
-}
-
-char* obj_data::getLookDescription() {
-    if(look_description) return look_description;
-    if(proto && proto->look_description) return proto->look_description;
-    return nullptr;
-}
-
-char* obj_data::getShortDescription() {
-    if(short_description) return short_description;
-    if(proto && proto->short_description) return proto->short_description;
-    return nullptr;
-}
-
-extra_descr_data* obj_data::getExtraDescription() {
-    if(proto && proto->ex_description) return proto->ex_description;
-    return nullptr;
-}
 
 obj_data::~obj_data() {
     if(auctname) free(auctname);
@@ -415,13 +385,16 @@ obj_data::~obj_data() {
 }
 
 std::vector<trig_vnum> obj_data::getProtoScript() const {
-    return proto ? proto->proto_script : std::vector<trig_vnum>{};
+    auto v = getVnum();
+    if(obj_proto.contains(v)) {
+        return obj_proto.at(v).proto_script;
+    }
+    return {};
 }
 
-std::string obj_data::scriptString() const {
-    std::vector<std::string> vnums;
-    auto proto_script = getProtoScript();
-    for(auto p : proto_script) vnums.emplace_back(std::move(std::to_string(p)));
-
-    return fmt::format("@D[@wT{}@D]@n", fmt::join(vnums, ","));
+item_proto_data* obj_data::getProto() const {
+    if(obj_proto.contains(vn)) {
+        return &obj_proto.at(vn);
+    }
+    return nullptr;
 }

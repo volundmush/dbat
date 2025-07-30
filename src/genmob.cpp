@@ -23,9 +23,9 @@
 #include "dbat/filter.h"
 
 /* From db.c */
-void check_mobile_strings(struct char_data *mob);
-
-void check_mobile_string(mob_vnum i, char **string, const char *dscr);
+char_data::char_data() : thing_data() {
+    type = UnitType::character;
+}
 
 /* local functions */
 void extract_mobile_all(mob_vnum vnum);
@@ -138,25 +138,6 @@ int write_mobile_mobprog(mob_vnum mvnum, struct char_data *mob, FILE *fd)
 }
 #endif
 
-
-void check_mobile_strings(struct char_data *mob) {
-    mob_vnum mvnum = mob->getVnum();
-    check_mobile_string(mvnum, &GET_LDESC(mob), "long description");
-    check_mobile_string(mvnum, &GET_DDESC(mob), "detailed description");
-    check_mobile_string(mvnum, &GET_ALIAS(mob), "alias list");
-    check_mobile_string(mvnum, &GET_SDESC(mob), "short description");
-}
-
-void check_mobile_string(mob_vnum i, char **string, const char *dscr) {
-    if (*string == nullptr || **string == '\0') {
-        char smbuf[128];
-        snprintf(smbuf, sizeof(smbuf), "GenOLC: Mob #%d has an invalid %s.", i, dscr);
-        mudlog(BRF, ADMLVL_GOD, true, "%s", smbuf);
-        if (*string)
-            free(*string);
-        *string = strdup("An undefined string.");
-    }
-}
 
 
 std::shared_ptr<char_data> char_data::shared() {
@@ -318,36 +299,10 @@ void char_data::setAge(double newAge) {
     this->time.seconds_aged = newAge * SECS_PER_GAME_YEAR;
 }
 
-vnum char_data::getVnum() const {
-    return proto ? proto->vn : NOTHING;
-}
-
-char* char_data::getName() {
-    if(name) return name;
-    if(proto && proto->name) return proto->name;
-    return nullptr;
-}
-
-char* char_data::getRoomDescription() {
-    if(room_description) return room_description;
-    if(proto && proto->room_description) return proto->room_description;
-    return nullptr;
-}
-
-char* char_data::getLookDescription() {
-    if(look_description) return look_description;
-    if(proto && proto->look_description) return proto->look_description;
-    return nullptr;
-}
-
-char* char_data::getShortDescription() {
-    if(short_description) return short_description;
-    if(proto && proto->short_description) return proto->short_description;
-    return nullptr;
-}
-
-extra_descr_data* char_data::getExtraDescription() {
-    if(proto && proto->ex_description) return proto->ex_description;
+npc_proto_data* char_data::getProto() const {
+    if(mob_proto.contains(vn)) {
+        return &mob_proto.at(vn);
+    }
     return nullptr;
 }
 
@@ -369,13 +324,9 @@ char_data::~char_data() {
 }
 
 std::vector<trig_vnum> char_data::getProtoScript() const {
-    return proto ? proto->proto_script : std::vector<trig_vnum>{};
-}
-
-std::string char_data::scriptString() const {
-    std::vector<std::string> vnums;
-    auto proto_script = getProtoScript();
-    for(auto p : proto_script) vnums.emplace_back(std::move(std::to_string(p)));
-
-    return fmt::format("@D[@wT{}@D]@n", fmt::join(vnums, ","));
+    auto v = getVnum();
+    if(mob_proto.contains(v)) {
+        return mob_proto.at(v).proto_script;
+    }
+    return {};
 }

@@ -598,14 +598,14 @@ void postmaster_receive_mail(struct char_data *ch, struct char_data *mailman,
         obj->setBaseStat<weight_t>("weight", 1);
         obj->setBaseStat("cost", 0);
         obj->setBaseStat("cost_per_day", 0);
-        obj->look_description = read_delete(GET_IDNUM(ch), &from);
+        obj->strings["look_description"] = read_delete(GET_IDNUM(ch), &from);
         char bla[256], blm[256];
         sprintf(bla, "@WA piece of mail@n");
         sprintf(blm, "@WSomeone has left a piece of mail here@n");
-        obj->short_description = strdup(bla);
-        obj->room_description = strdup(blm);
+        obj->strings["short_description"] = bla;
+        obj->strings["room_description"] = blm;
         sprintf(bla, "mail paper letter");
-        obj->name = strdup(bla);
+        obj->strings["name"] = bla;
         *bla = '\0';
         *blm = '\0';
         obj->item_flags.set(ITEM_UNIQUE_SAVE, true);
@@ -614,8 +614,8 @@ void postmaster_receive_mail(struct char_data *ch, struct char_data *mailman,
         SET_OBJ_VAL(obj, VAL_ALL_HEALTH, 100);
         SET_OBJ_VAL(obj, VAL_ALL_MAXHEALTH, 100);
 
-        if (obj->look_description == nullptr)
-            obj->look_description = strdup("Mail system error - please report.  Error #11.\r\n");
+        if (obj->getLookDescription() == nullptr)
+            obj->strings["look_description"] = "Mail system error - please report.  Error #11.\r\n";
 
         /* so it saves */
         obj->item_flags.set(ITEM_UNIQUE_SAVE, true);

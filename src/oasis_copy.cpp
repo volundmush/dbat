@@ -285,12 +285,12 @@ ACMD(do_dig) {
 
         /* Copy the room's name. */
         if (*new_room_name)
-            OLC_ROOM(d)->name = strdup(new_room_name);
+            OLC_ROOM(d)->strings["name"] = new_room_name;
         else
-            OLC_ROOM(d)->name = strdup("An unfinished room");
+            OLC_ROOM(d)->strings["name"] = "An unfinished room";
 
         /* Copy the room's description.*/
-        OLC_ROOM(d)->look_description = strdup("You are in an unfinished room.\r\n");
+        OLC_ROOM(d)->strings["look_description"] = "You are in an unfinished room.\r\n";
         OLC_ROOM(d)->zone = OLC_ZNUM(d);
 
         /*
@@ -386,7 +386,10 @@ ACMD(do_rcopy) {
         return;
     }
 
-    zone = get_room(rrnum)->zone;
+    auto rn = get_room(rrnum);
+    auto tn = get_room(trnum);
+
+    zone = rn->zone;
     if ((zone == NOWHERE) || !can_edit_zone(ch, zone)) {
         send_to_char(ch, "\r\n");
         send_cannot_edit(ch, zone);
@@ -394,23 +397,8 @@ ACMD(do_rcopy) {
     }
 
     /* Free descriptions. */
-    if (get_room(rrnum)->name)
-        free(get_room(rrnum)->name);
-    if (get_room(rrnum)->look_description)
-        free(get_room(rrnum)->look_description);
-    if (get_room(rrnum)->ex_description)
-        free_ex_descriptions(get_room(rrnum)->ex_description);
-    get_room(rrnum)->sector_type = get_room(trnum)->sector_type;
-
-    /* Copy over description name and extra descriptions */
-    get_room(rrnum)->look_description = str_udup(get_room(trnum)->look_description);
-    get_room(rrnum)->name = str_udup(get_room(trnum)->name);
-
-    /* Copy over any existings extra descriptions */
-    if (get_room(trnum)->ex_description)
-        copy_ex_descriptions(&get_room(rrnum)->ex_description, get_room(trnum)->ex_description);
-    else
-        get_room(rrnum)->ex_description = nullptr;
+    rn->strings = tn->strings;
+    rn->extra_descriptions = tn->extra_descriptions;
 
     /* Finally copy over room flags */
     get_room(rrnum)->room_flags = get_room(trnum)->room_flags;
@@ -458,10 +446,10 @@ int buildwalk(struct char_data *ch, int dir) {
             OLC_NUM(d) = vnum;
             CREATE(OLC_ROOM(d), struct room_data, 1);
 
-            OLC_ROOM(d)->name = strdup("New BuildWalk Room");
+            OLC_ROOM(d)->strings["name"] = "New BuildWalk Room";
 
             sprintf(buf, "This unfinished room was created by %s.\r\n", GET_NAME(ch));
-            OLC_ROOM(d)->look_description = strdup(buf);
+            OLC_ROOM(d)->strings["look_description"] = buf;
             OLC_ROOM(d)->zone = OLC_ZNUM(d);
 
             /*

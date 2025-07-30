@@ -472,7 +472,7 @@ ACMD(do_mload) {
         }
         char_to_room(mob, rnum);
         if (SCRIPT(ch)) { /* It _should_ have, but it might be detached. */
-            add_var(&(SCRIPT(ch)->global_vars), "lastloaded", mob->getUID().c_str(), 0);
+            ch->script_variables["lastloaded"] = mob->getUID(true);
         }
         load_mtrigger(mob);
     } else if (is_abbrev(arg1, "obj")) {
@@ -481,7 +481,7 @@ ACMD(do_mload) {
             return;
         }
         if (SCRIPT(ch)) { /* It _should_ have, but it might be detached. */
-            add_var(&(SCRIPT(ch)->global_vars), "lastloaded", object->getUID().c_str(), 0);
+            ch->script_variables["lastloaded"] = object->getUID(true);
         }
         randomize_eq(object);
         /* special handling to make objects able to load on a person/in a container/worn etc. */
@@ -989,27 +989,7 @@ ACMD(do_mtransform) {
 
     /* Thanks to Russell Ryan for this fix. RRfon we need to copy the
     the strings so we don't end up free'ing the prototypes later */
-    ch->proto = m->proto;
-    if (m->name) {
-        if(ch->name) free(ch->name);
-        ch->name = strdup(m->name);
-    }
-    if (m->title) {
-        if(ch->title) free(ch->title);
-        ch->title = strdup(m->title);
-    }
-    if (m->short_description) {
-        if(ch->short_description) free(ch->short_description);
-        ch->short_description = strdup(m->short_description);
-    }
-    if (m->room_description) {
-        if(ch->room_description) free(ch->room_description);
-        ch->room_description = strdup(m->room_description);
-    }
-    if (m->look_description) {
-        if(ch->look_description) free(ch->look_description);
-        ch->look_description = strdup(m->look_description);
-    }
+    ch->strings = m->strings;
     ch->appearances = m->appearances;
     ch->mob_specials = m->mob_specials;
     ch->stats = m->stats;
@@ -1018,7 +998,7 @@ ACMD(do_mtransform) {
     ch->sensei = m->sensei;
     ch->race = m->race;
     ch->affect_flags = m->affect_flags;
-    ch->ex_description = m->ex_description;
+    ch->extra_descriptions = m->extra_descriptions;
 
     extract_char(m);
 

@@ -2545,3 +2545,10 @@ enum class Mutation : uint8_t {
     innate_telepathy = 8,
     natural_energy = 9
 };
+
+enum class UnitType : uint8_t {
+    room = 0,
+    character = 1,
+    object = 2,
+    unknown = 3
+};

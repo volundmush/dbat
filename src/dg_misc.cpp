@@ -130,10 +130,9 @@ void do_dg_cast(void *go, script_data *sc, trig_data *trig,
         }
         /* set the caster's name to that of the object, or the gods.... */
         if (type == OBJ_TRIGGER)
-            caster->short_description =
-                    strdup(((struct obj_data *) go)->getShortDescription());
+            caster->strings["short_description"] = ((struct obj_data *) go)->getShortDescription();
         else if (type == WLD_TRIGGER)
-            caster->short_description = strdup("The gods");
+            caster->strings["short_description"] = "The gods";
         char_to_room(caster, caster_room);
         call_magic(caster, tch, tobj, spellnum, DG_SPELL_LEVEL, CAST_SPELL, t);
         extract_char(caster);

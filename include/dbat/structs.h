@@ -45,6 +45,12 @@ struct extra_descr_data {
     struct extra_descr_data *next; /* Next in list                     */
 };
 
+// new variant of extra_descr_data that uses std::string
+struct ExtraDescription {
+    std::string keyword;          /* Keyword in look/examine          */
+    std::string description;      /* What to see                      */
+};
+
 struct affect_t {
     // DO NOT CHANGE THE ORDER OF THESE FIELDS.
     explicit affect_t() = default;
@@ -135,13 +141,6 @@ struct trig_var_data {
     struct trig_var_data *next{};
 };
 
-/* The event data for the wait command */
-struct wait_event_data {
-    struct trig_data *trigger{};
-    void *go{};
-    int type{};
-};
-
 /* structure for triggers */
 struct trig_data : std::enable_shared_from_this<trig_data> {
     ~trig_data();
@@ -179,50 +178,50 @@ struct picky_data {
 };
 
 struct unit_data {
+    unit_data& operator=(const proto_data& other);
     virtual ~unit_data();
 
-    virtual vnum getVnum() const = 0; // Returns the vnum of the unit.
-    
-    virtual int getType() const = 0; // 0 is room, 1 is object, 2 is character.
+    // re-adding vnum in and type so we can tell what kind of thing it is for some debugging and functions.
+    vnum vn{NOTHING}; // The vnum of the unit.
+    UnitType type{UnitType::unknown};
 
-    virtual char* getName() = 0;
-    virtual char* getRoomDescription() = 0;
-    virtual char* getLookDescription() = 0;
-    virtual char* getShortDescription() = 0;
-    virtual struct extra_descr_data* getExtraDescription() = 0; // Returns the extra description data.
+    int id{NOTHING}; /* the unique ID of this entity */
+    time_t generation{}; /* creation time for dupe check     */
 
-    char *name{};
-    char *room_description{};      /* When thing is listed in room */
-    char *look_description{};      /* what to show when looked at */
-    char *short_description{};     /* when displayed in list or action message. */
-    struct extra_descr_data *ex_description{}; /* extra descriptions     */
-    // for DGscripts data.
+    virtual vnum getVnum() const; // Returns the vnum of the unit.
+
+    const char* getName() const;
+    const char* getRoomDescription() const;
+    const char* getLookDescription() const;
+    const char* getShortDescription() const;
+    std::string_view getString(const std::string &key) const; // Returns a string from the strings map.
+
+    const std::vector<ExtraDescription>& getExtraDescription() const; // Returns the extra description data.
+
+    std::unordered_map<std::string, std::string> strings;
+    std::vector<ExtraDescription> extra_descriptions; // Extra descriptions for this unit.
+    FlagHandler<AffectFlag> affect_flags{}; /* To set chars bits          */
     
     long trigger_types{};                /* bitvector of trigger types */
     std::optional<std::vector<vnum>> running_scripts; /* list of attached scripts. the order matters. Only used if differs from proto scripts.*/
     std::unordered_map<trig_vnum, std::shared_ptr<trig_data>> scripts; /* list of attached triggers. accessed in order of running_scripts */
-    struct trig_var_data *global_vars{};    /* list of global variables   */
-    long script_context{};                /* current context for statics */
+    std::unordered_map<std::string, std::string> script_variables;
 
     void activateScripts();
     void deactivateScripts();
     std::vector<trig_vnum> getScriptOrder(); /* this will return running_scripts if said, or the results of getProtoScripts() */
     std::vector<std::shared_ptr<trig_data>> getScripts();
+    virtual std::vector<trig_vnum> getProtoScript() const = 0;
+    virtual std::string scriptString() const;
 
     weight_t getInventoryWeight();
     int64_t getInventoryCount();
 
-    std::list<std::weak_ptr<obj_data>> objects;
+    std::list<std::weak_ptr<obj_data>> objects{};
     std::vector<std::weak_ptr<obj_data>> getObjects();
-
-    int id{NOTHING}; /* the unique ID of this entity */
-    time_t generation{}; /* creation time for dupe check     */
 
     void activateContents();
     void deactivateContents();
-
-    virtual std::vector<trig_vnum> getProtoScript() const = 0;
-    virtual std::string scriptString() const = 0;
 
     std::string getUID(bool active = false);
     virtual bool isActive() = 0;
@@ -233,7 +232,9 @@ struct unit_data {
 
     virtual double getAffectModifier(uint64_t location, uint64_t specific);
 
-    std::unordered_set<std::string> subscriptions; // Subscriptions to services.
+    std::unordered_set<std::string> subscriptions{}; // Subscriptions to services.
+
+    std::unordered_map<std::string, double> stats;
 
 };
 
@@ -247,8 +248,6 @@ struct thing_data : public unit_data {
     std::string getLocationName() const;
     room_direction_data* getLocationExit(int dir) const;
     std::map<int, room_direction_data*> getLocationExits() const;
-
-    FlagHandler<AffectFlag> affect_flags{}; /* To set chars bits          */
 
     double getLocationEnvironment(int type) const;
     double setLocationEnvironment(int type, double value) const;
@@ -279,8 +278,6 @@ struct thing_data : public unit_data {
 
     SpecialFunc getLocationSpecialFunc() const;
 
-    std::unordered_map<std::string, double> stats;
-
 };
 
 // base struct for both npc_proto_data and item_proto_data
@@ -303,7 +300,7 @@ struct proto_data {
 
 struct item_proto_data : public proto_data, public picky_data {
     item_proto_data() = default;
-    item_proto_data(obj_data& other);
+    item_proto_data(const obj_data& other);
     
     item_proto_data& operator=(const item_proto_data& other);
 
@@ -331,28 +328,20 @@ struct item_proto_data : public proto_data, public picky_data {
 
 /* ================== Memory Structure for Objects ================== */
 struct obj_data : public thing_data, public picky_data, std::enable_shared_from_this<obj_data> {
+    obj_data();
     ~obj_data() override;
-    obj_data& operator=(item_proto_data& proto);
+    obj_data& operator=(const item_proto_data& proto);
     //~obj_data() override = default;
-    int getType() const override { return 1; }
-    vnum getVnum() const override;
     std::vector<trig_vnum> getProtoScript() const override;
-    std::string scriptString() const override;
     std::string serializeLocation();
     void deserializeLocation(const std::string& txt, int16_t slot);
     void activate();
     void deactivate();
     double getAffectModifier(uint64_t location, uint64_t specific) override;
 
-    struct item_proto_data *proto{};
-
     void commit_iedit(const item_proto_data &proto);
 
-    char* getName() override;
-    char* getRoomDescription() override;
-    char* getLookDescription() override;
-    char* getShortDescription() override;
-    extra_descr_data* getExtraDescription() override;
+    item_proto_data* getProto() const;
 
     bool active{false};
     bool isActive() override;
@@ -472,12 +461,11 @@ struct room_direction_data {
 
 /* ================== Memory Structure for room ======================= */
 struct room_data : public unit_data, std::enable_shared_from_this<room_data> {
+    room_data();
     ~room_data() override;
-    int getType() const override { return 0; }
     zone_vnum zone{NOTHING};
-    vnum getVnum() const override;
     std::vector<trig_vnum> getProtoScript() const override;
-    std::string scriptString() const override;
+
     SectorType sector_type{SectorType::inside};            /* sector type (move/hide)            */
     std::array<room_direction_data*, NUM_OF_DIRS> dir_option{}; /* Directions */
     FlagHandler<RoomFlag> room_flags{};   /* DEATH,DARK ... etc */
@@ -485,13 +473,6 @@ struct room_data : public unit_data, std::enable_shared_from_this<room_data> {
     SpecialFunc func{};
 
     std::vector<trig_vnum> proto_script; /* list of default triggers  */
-    
-
-    char* getName() override;
-    char* getRoomDescription() override;
-    char* getLookDescription() override;
-    char* getShortDescription() override;
-    extra_descr_data* getExtraDescription() override; // Returns the extra description data.
 
     std::list<std::weak_ptr<char_data>> characters;    /* List of characters in room          */
 
@@ -713,23 +694,17 @@ struct npc_proto_data : public proto_data {
 
 /* ================== Structure for player/non-player ===================== */
 struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
-    char_data() = default;
+    char_data();
     ~char_data() override;
     // this constructor below is to be used only for the mob_proto map.
-    int getType() const override { return 2; }
-    vnum getVnum() const override;
-    char* getName() override;
-    char* getRoomDescription() override;
-    char* getLookDescription() override;
-    char* getShortDescription() override;
-    extra_descr_data* getExtraDescription() override;
-    std::string scriptString() const override;
-    struct npc_proto_data *proto{}; /* For NPCs, this is the prototype data. */
+
     char_data& operator=(npc_proto_data& proto);
 
     std::vector<trig_vnum> getProtoScript() const override;
     void activate();
     void deactivate();
+
+    npc_proto_data* getProto() const;
 
     void login();
 

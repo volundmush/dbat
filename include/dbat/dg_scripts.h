@@ -326,12 +326,6 @@ extern void process_eval(unit_data *go, script_data *sc, trig_data *trig,
 
 extern void read_saved_vars(struct char_data *ch);
 
-extern void save_char_vars(struct char_data *ch);
-
-extern void add_to_lookup_table(long uid, void *c);
-
-extern void remove_from_lookup_table(long uid);
-
 /* from dg_db_scripts.c */
 extern void parse_trigger(FILE *trig_f, trig_vnum nr);
 
@@ -435,7 +429,7 @@ constexpr int OBJ_ID_BASE = 1300000; /* 250000 Rooms */
 #define SCRIPT_TYPES(s)          ((s)->trigger_types)
 #define TRIGGERS(s)          ((s)->trig_list)
 
-#define GET_SHORT(ch)    ((ch)->short_description)
+#define GET_SHORT(ch)    ((ch)->getShortDescription())
 
 
 #define SCRIPT_CHECK(go, type)   (SCRIPT(go) && \

@@ -18,6 +18,9 @@
 #include "dbat/constants.h"
 #include "dbat/filter.h"
 
+room_data::room_data() : unit_data() {
+    type = UnitType::room;
+}
 
 /*
  * This function will copy the strings so be sure you free your own
@@ -183,8 +186,8 @@ int copy_room_strings(struct room_data *dest, struct room_data *source) {
         return false;
     }
 
-    dest->look_description = str_udup(source->look_description);
-    dest->name = str_udup(source->name);
+    dest->strings = source->strings;
+    dest->extra_descriptions = source->extra_descriptions;
 
     for (i = 0; i < NUM_OF_DIRS; i++) {
         if (!R_EXIT(source, i))
@@ -198,8 +201,6 @@ int copy_room_strings(struct room_data *dest, struct room_data *source) {
             R_EXIT(dest, i)->keyword = strdup(R_EXIT(source, i)->keyword);
     }
 
-    if (source->ex_description)
-        copy_ex_descriptions(&dest->ex_description, source->ex_description);
 
     return true;
 }
@@ -208,12 +209,8 @@ int free_room_strings(struct room_data *room) {
     int i;
 
     /* Free descriptions. */
-    if (room->name)
-        free(room->name);
-    if (room->look_description)
-        free(room->look_description);
-    if (room->ex_description)
-        free_ex_descriptions(room->ex_description);
+    room->strings.clear();
+    room->extra_descriptions.clear();
 
     /* Free exits. */
     for (i = 0; i < NUM_OF_DIRS; i++) {
@@ -449,43 +446,10 @@ double room_data::getEnvironment(int type) {
     return 0.0;
 }
 
-vnum room_data::getVnum() const {
-    return id;
-}
 
-char* room_data::getName() {
-    if(name) return name;
-    return nullptr;
-}
 
-char* room_data::getRoomDescription() {
-    if(room_description) return room_description;
-    return nullptr;
-}
-
-char* room_data::getLookDescription() {
-    if(look_description) return look_description;
-    return nullptr;
-}
-
-char* room_data::getShortDescription() {
-    if(short_description) return short_description;
-    return nullptr;
-}
-
-extra_descr_data* room_data::getExtraDescription() {
-    if(ex_description) return ex_description;
-    return nullptr;
-}
 
 std::vector<trig_vnum> room_data::getProtoScript() const {
     return proto_script;
 }
 
-std::string room_data::scriptString() const {
-    std::vector<std::string> vnums;
-    auto proto_script = getProtoScript();
-    for(auto p : proto_script) vnums.emplace_back(std::move(std::to_string(p)));
-
-    return fmt::format("@D[@wT{}@D]@n", fmt::join(vnums, ","));
-}

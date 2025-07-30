@@ -491,7 +491,7 @@ WCMD(do_wload) {
         }
         char_to_room(mob, rnum);
         if (SCRIPT(room)) { /* It _should_ have, but it might be detached. */
-            add_var(&(SCRIPT(room)->global_vars), "lastloaded", mob->getUID().c_str(), 0);
+            room->script_variables["lastloaded"] = mob->getUID(true);
         }
         load_mtrigger(mob);
     } else if (is_abbrev(arg1, "obj")) {
@@ -503,7 +503,7 @@ WCMD(do_wload) {
         if (!target || !*target) {
             obj_to_room(object, real_room(room->getVnum()));
             if (SCRIPT(room)) { /* It _should_ have, but it might be detached. */
-                add_var(&(SCRIPT(room)->global_vars), "lastloaded", object->getUID().c_str(), 0);
+                room->script_variables["lastloaded"] = object->getUID(true);
             }
             load_otrigger(object);
             return;

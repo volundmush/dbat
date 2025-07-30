@@ -48,13 +48,19 @@ item_proto_data& item_proto_data::operator=(const item_proto_data& other) {
     return *this;
 }
 
-item_proto_data::item_proto_data(obj_data& other) {
+item_proto_data::item_proto_data(const obj_data& other) {
     name = strdup(other.getName());
     room_description = strdup(other.getRoomDescription());
     look_description = strdup(other.getLookDescription());
     short_description = strdup(other.getShortDescription());
-    if(other.ex_description) {
-        copy_ex_descriptions(&ex_description, other.ex_description);
+    if(!other.extra_descriptions.empty()) {
+        for (const auto& ex : other.extra_descriptions) {
+            auto e = new extra_descr_data();
+            e->keyword = strdup(ex.keyword.c_str());
+            e->description = strdup(ex.description.c_str());
+            e->next = ex_description;
+            ex_description = e;
+        }
     }
     stats = other.stats;
     affect_flags = other.affect_flags;
@@ -67,11 +73,33 @@ item_proto_data::item_proto_data(obj_data& other) {
 
 }
 
-obj_data& obj_data::operator=(item_proto_data& other) {
+unit_data& unit_data::operator=(const proto_data& other) {
     // basic proto data fields
-    proto = &other;
+    vn = other.vn;
+    if(other.name) strings["name"] = other.name;
+    if(other.room_description) strings["room_description"] = other.room_description;
+    if(other.look_description) strings["look_description"] = other.look_description;
+    if(other.short_description) strings["short_description"] = other.short_description;
+    if(other.ex_description) {
+        extra_descriptions.clear();
+        for (auto e = other.ex_description; e; e = e->next) {
+            auto &ex = extra_descriptions.emplace_back();
+            ex.keyword = e->keyword;
+            ex.description = e->description;
+        }
+    } else {
+        extra_descriptions.clear();
+    }
+
     affect_flags = other.affect_flags;
     stats = other.stats;
+
+    return *this;
+}
+
+obj_data& obj_data::operator=(const item_proto_data& other) {
+    // basic proto data fields
+    unit_data::operator=(other);
 
     // item proto data fields
     type_flag = other.type_flag;
@@ -84,52 +112,7 @@ obj_data& obj_data::operator=(item_proto_data& other) {
 }
 
 void obj_data::commit_iedit(const item_proto_data &other) {
-    if(name) free(name);
-    if(room_description) free(room_description);
-    if(look_description) free(look_description);
-    if(short_description) free(short_description);
-    if(ex_description) free_ex_descriptions(ex_description);
-
-    name = strdup(other.name);
-    room_description = strdup(other.room_description);
-    look_description = strdup(other.look_description);
-    short_description = strdup(other.short_description);
-
-    // run de-duplicate logic.
-    if(proto) {
-        if(name && proto->name && !strcmp(name, proto->name)) {
-            free(name);
-        }
-        if(room_description && proto->room_description && !strcmp(room_description, proto->room_description)) {
-            free(room_description);
-        }
-        if(look_description && proto->look_description && !strcmp(look_description, proto->look_description)) {
-            free(look_description);
-        }
-        if(short_description && proto->short_description && !strcmp(short_description, proto->short_description)) {
-            free(short_description);
-        }
-    }
-
-    if(other.ex_description) {
-        copy_ex_descriptions(&ex_description, other.ex_description);
-    }
-
-    if(other.ex_description) {
-        ex_description = nullptr;
-        copy_ex_descriptions(&ex_description, other.ex_description);
-    } else {
-        ex_description = nullptr;
-    }
-
-    stats = other.stats;
-    affect_flags = other.affect_flags;
-
-    type_flag = other.type_flag;
-    affected = other.affected;
-    wear_flags = other.wear_flags;
-    item_flags = other.item_flags;
-    size = other.size;
+    operator=(other);
 
     // Set the unique save flag
     item_flags.set(ITEM_UNIQUE_SAVE);
@@ -137,9 +120,7 @@ void obj_data::commit_iedit(const item_proto_data &other) {
 
 char_data& char_data::operator=(npc_proto_data& other) {
     // basic proto data fields
-    proto = &other;
-    affect_flags = other.affect_flags;
-    stats = other.stats;
+    unit_data::operator=(other);
 
     // item proto data fields
     race = other.race;

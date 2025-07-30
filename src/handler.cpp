@@ -714,9 +714,9 @@ void obj_to_room(struct obj_data *object, struct room_data *room) {
                                         ld);
                             }
                             snprintf(nick3, sizeof(nick3), "%s is resting here@w", nick2);
-                            vehicle->name = strdup(nick);
-                            vehicle->short_description = strdup(nick2);
-                            vehicle->room_description = strdup(nick3);
+                            vehicle->strings["name"] = nick;
+                            vehicle->strings["short_description"] = nick2;
+                            vehicle->strings["room_description"] = nick3;
                         }
                     }
                     int newval = GET_OBJ_VAL(object, VAL_CONTAINER_FLAGS) | CONT_CLOSED | CONT_LOCKED;
@@ -1464,8 +1464,6 @@ const char *money_desc(int amount) {
 
 
 struct obj_data *create_money(int amount) {
-    struct obj_data *obj;
-    struct extra_descr_data *new_descr;
     char buf[200];
     int y;
 
@@ -1473,22 +1471,20 @@ struct obj_data *create_money(int amount) {
         basic_mud_log("SYSERR: Try to create negative or 0 money. (%d)", amount);
         return (nullptr);
     }
-    obj = create_obj();
-    CREATE(new_descr, struct extra_descr_data, 1);
+    auto obj = create_obj();
+    auto &ex = obj->extra_descriptions.emplace_back();
+    ex.keyword = "zenni money";
 
+    obj->strings["name"] = "zenni money";
     if (amount == 1) {
-        obj->name = strdup("zenni money");
-        obj->short_description = strdup("a single zenni");
-        obj->room_description = strdup("One miserable zenni is lying here");
-        new_descr->keyword = strdup("zenni money");
-        new_descr->description = strdup("It's just one miserable little zenni.");
+        obj->strings["short_description"] = "a single zenni";
+        obj->strings["room_description"] = "One miserable zenni is lying here";
+        ex.description = "It's just one miserable little zenni.";
     } else {
-        obj->name = strdup("zenni money");
-        obj->short_description = strdup(money_desc(amount));
+        obj->strings["short_description"] = money_desc(amount);
         snprintf(buf, sizeof(buf), "%s is lying here", money_desc(amount));
-        obj->room_description = strdup(CAP(buf));
+        obj->strings["room_description"] = CAP(buf);
 
-        new_descr->keyword = strdup("zenni money");
         if (amount < 10)
             snprintf(buf, sizeof(buf), "There is %d zenni.", amount);
         else if (amount < 100)
@@ -1500,11 +1496,8 @@ struct obj_data *create_money(int amount) {
                      1000 * ((amount / 1000) + rand_number(0, (amount / 1000))));
         else
             strcpy(buf, "There are is LOT of zenni.");    /* strcpy: OK (is < 200) */
-        new_descr->description = strdup(buf);
+        ex.description = buf;
     }
-
-    new_descr->next = nullptr;
-    obj->ex_description = new_descr;
 
     obj->type_flag = ItemType::money;
     SET_OBJ_VAL(obj, VAL_ALL_MATERIAL, MATERIAL_GOLD);

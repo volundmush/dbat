@@ -184,10 +184,10 @@ void medit_setup_new(struct descriptor_data *d) {
     /*
      * Set up some default strings.
      */
-    GET_ALIAS(mob) = strdup("mob unfinished");
-    GET_SDESC(mob) = strdup("the unfinished mob");
-    GET_LDESC(mob) = strdup("An unfinished mob stands here.\r\n");
-    GET_DDESC(mob) = strdup("It looks unfinished.\r\n");
+    mob->name = strdup("mob unfinished");
+    mob->short_description = strdup("the unfinished mob");
+    mob->room_description = strdup("An unfinished mob stands here.\r\n");
+    mob->look_description = strdup("It looks unfinished.\r\n");
     OLC_SCRIPT(d).clear();
 
     OLC_MOB(d) = mob;
@@ -422,8 +422,8 @@ void medit_disp_menu(struct descriptor_data *d) {
                     "@gC@n) Num HP Dice: [@c%4" I64T "@n],  @gD@n) Size HP Dice: [@c%5" I64T "@n],  @gE@n) HP Bonus: [@c%5" I64T "@n]\r\n"
                     "@gF@n) Armor Class: [@c%4d@n],  @gG@n) Exp:      [@c%" I64T "@n],  @gH@n) Gold:  [@c%8d@n]\r\n",
 
-                    OLC_NUM(d), genders[(int) GET_SEX(mob)], GET_ALIAS(mob),
-                    GET_SDESC(mob), GET_LDESC(mob), GET_DDESC(mob), GET_LEVEL(mob),
+                    OLC_NUM(d), genders[(int) GET_SEX(mob)], mob->name,
+                    mob->short_description, mob->room_description, mob->look_description, GET_LEVEL(mob),
                     GET_ALIGNMENT(mob), GET_FISHD(mob), GET_DAMAGE_MOD(mob),
                     GET_NDD(mob), GET_SDD(mob), mob->getBaseStat<int64_t>("health"), mob->getBaseStat<int64_t>("ki"),
                     mob->getBaseStat<int64_t>("stamina"), mob->getBaseStat<int>("health"), mob->getBaseStat<int>("experience"), GET_GOLD(mob)

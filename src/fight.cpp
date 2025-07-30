@@ -739,14 +739,14 @@ void remove_limb(struct char_data *vict, int num) {
             break;
     }
 
-    body_part->name = strdup(buf);
+    body_part->strings["name"] = buf;
     if (num > 0) {
         snprintf(buf2, sizeof(buf2), "@wA %s is lying here@n", part);
     } else {
         snprintf(buf2, sizeof(buf2), "%s@w is lying here@n", part);
     }
-    body_part->room_description = strdup(buf2);
-    body_part->short_description = strdup(part);
+    body_part->strings["room_description"] = buf2;
+    body_part->strings["short_description"] = part;
 
     body_part->type_flag = ItemType::other;
     body_part->wear_flags.set(ITEM_WEAR_TAKE, true);
@@ -1505,67 +1505,67 @@ static void handle_corpse_condition(struct obj_data *corpse, struct char_data *c
         case DTYPE_HEAD:
             *buf2 = '\0';
             snprintf(buf2, sizeof(buf2), "headless corpse %s", GET_NAME(ch));
-            corpse->name = strdup(buf2);
+            corpse->strings["name"] = buf2;
 
             *descBuf = '\0';
             snprintf(descBuf, sizeof(descBuf), "The headless corpse of %s is lying here", GET_NAME(ch));
-            corpse->room_description = strdup(descBuf);
+            corpse->strings["room_description"] = descBuf;
 
             *descBuf = '\0';
             snprintf(descBuf, sizeof(descBuf), "The headless remains of %s's corpse", GET_NAME(ch));
-            corpse->short_description = strdup(descBuf);
+            corpse->strings["short_description"] = descBuf;
             SET_OBJ_VAL(corpse, VAL_CORPSE_HEAD, 0);
             break;
         case DTYPE_HALF:
             *buf2 = '\0';
             snprintf(buf2, sizeof(buf2), "half corpse %s", GET_NAME(ch));
-            corpse->name = strdup(buf2);
+            corpse->strings["name"] = buf2;
 
             *descBuf = '\0';
             snprintf(descBuf, sizeof(descBuf), "Half of %s's corpse is lying here", GET_NAME(ch));
-            corpse->room_description = strdup(descBuf);
+            corpse->strings["room_description"] = descBuf;
 
             *descBuf = '\0';
             snprintf(descBuf, sizeof(descBuf), "Half of %s's corpse", GET_NAME(ch));
-            corpse->short_description = strdup(descBuf);
+            corpse->strings["short_description"] = descBuf;
             break;
         case DTYPE_VAPOR:
             *buf2 = '\0';
             snprintf(buf2, sizeof(buf2), "burnt chunks corpse %s", GET_NAME(ch));
-            corpse->name = strdup(buf2);
+            corpse->strings["name"] = buf2;
 
             *descBuf = '\0';
             snprintf(descBuf, sizeof(descBuf), "The burnt chunks of %s's corpse are scattered here", GET_NAME(ch));
-            corpse->room_description = strdup(descBuf);
+            corpse->strings["room_description"] = descBuf;
 
             *descBuf = '\0';
             snprintf(descBuf, sizeof(descBuf), "The burnt chunks of %s's corpse", GET_NAME(ch));
-            corpse->short_description = strdup(descBuf);
+            corpse->strings["short_description"] = descBuf;
             break;
         case DTYPE_PULP:
             *buf2 = '\0';
             snprintf(buf2, sizeof(buf2), "beaten bloody corpse %s", GET_NAME(ch));
-            corpse->name = strdup(buf2);
+            corpse->strings["name"] = buf2;
 
             *descBuf = '\0';
             snprintf(descBuf, sizeof(descBuf), "The bloody and beaten corpse of %s is lying here", GET_NAME(ch));
-            corpse->room_description = strdup(descBuf);
+            corpse->strings["room_description"] = descBuf;
 
             *descBuf = '\0';
             snprintf(descBuf, sizeof(descBuf), "The bloody and beaten remains of %s's corpse", GET_NAME(ch));
-            corpse->short_description = strdup(descBuf);
+            corpse->strings["short_description"] = descBuf;
             break;
         default:
             snprintf(buf2, sizeof(buf2), "corpse %s", GET_NAME(ch));
-            corpse->name = strdup(buf2);
+            corpse->strings["name"] = buf2;
 
             *descBuf = '\0';
             snprintf(descBuf, sizeof(descBuf), "The corpse of %s is lying here", GET_NAME(ch));
-            corpse->room_description = strdup(descBuf);
+            corpse->strings["room_description"] = descBuf;
 
             *descBuf = '\0';
             snprintf(descBuf, sizeof(descBuf), "the remains of %s's corpse", GET_NAME(ch));
-            corpse->short_description = strdup(descBuf);
+            corpse->strings["short_description"] = descBuf;
             break;
     }
 
@@ -1671,9 +1671,9 @@ static void make_corpse(struct char_data *ch, struct char_data *tch) {
                     sprintf(nick, "@RRaw %s@R Steak@n", GET_NAME(ch));
                     sprintf(nick2, "Raw %s Steak", ch->getName());
                     sprintf(nick3, "@wA @Rraw %s@R steak@w is lying here@n", GET_NAME(ch));
-                    meat->short_description = strdup(nick);
-                    meat->name = strdup(nick2);
-                    meat->room_description = strdup(nick3);
+                    meat->strings["short_description"] = nick;
+                    meat->strings["name"] = nick2;
+                    meat->strings["room_description"] = nick3;
                     SET_OBJ_VAL(meat, VAL_ALL_MATERIAL, 14);
                 }
 

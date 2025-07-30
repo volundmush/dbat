@@ -251,6 +251,8 @@ find_replacement(unit_data *go, script_data *sc, trig_data *trig, int type, char
 
     *str = '\0';
 
+    std::optional<std::string> found;
+
     /* X.global() will have a nullptr trig */
     if (trig)
         for (vd = GET_TRIG_VARS(trig); vd; vd = vd->next)
@@ -258,15 +260,18 @@ find_replacement(unit_data *go, script_data *sc, trig_data *trig, int type, char
                 break;
 
     /* some evil waitstates could crash the mud if sent here with sc==nullptr*/
-    if (!vd && sc)
-        for (vd = sc->global_vars; vd; vd = vd->next)
-            if (!strcasecmp(vd->name, var) &&
-                (vd->context == 0 || vd->context == sc->script_context))
+    if (!vd && sc) {
+        for(const auto& [key, value] : sc->script_variables) {
+            if (!strcasecmp(key.c_str(), var)) {
+                found = value;
                 break;
+            }
+        }
+    }
 
     if (!*field) {
-        if (vd)
-            snprintf(str, slen, "%s", vd->value);
+        if (found)
+            snprintf(str, slen, "%s", found->c_str());
         else {
             if (!strcasecmp(var, "self")) {
                 auto uid = unit->getUID(true);
@@ -367,12 +372,14 @@ find_replacement(unit_data *go, script_data *sc, trig_data *trig, int type, char
                     script_log("Attempt to find global var. Apparently the void has no script.");
                     return;
                 }
-                for (vd = thescript->global_vars; vd; vd = vd->next)
-                    if (!strcasecmp(vd->name, field))
+                for (const auto &[key, val] : thescript->script_variables)
+                    if (!strcasecmp(key.c_str(), field)) {
+                        found = val;
                         break;
+                    }
 
-                if (vd)
-                    snprintf(str, slen, "%s", vd->value);
+                if (found)
+                    snprintf(str, slen, "%s", found->c_str());
 
                 return;
             } else if (!strcasecmp(var, "people")) {
@@ -901,15 +908,7 @@ in the vault (vnum: 453) now and then. you can just use
                                 strcpy(str, "-1");
                         }
                     } else if (!strcasecmp(field, "varexists")) {
-                        struct trig_var_data *remote_vd;
-                        int found = 0;
-                        for (remote_vd = c->global_vars; remote_vd; remote_vd = remote_vd->next) {
-                            if (!strcasecmp(remote_vd->name, subfield)) {
-                                found = 1;
-                                break;
-                            }
-                        }
-                        snprintf(str, slen, "%d", found);
+                        snprintf(str, slen, "%d", c->script_variables.contains(subfield));
                     }
 
                     break;
@@ -921,12 +920,9 @@ in the vault (vnum: 453) now and then. you can just use
             } /* switch *field */
 
             if (*str == '\x1') { /* no match found in switch */
-                for (vd = c->global_vars; vd; vd = vd->next)
-                    if (!strcasecmp(vd->name, field))
-                        break;
-                if (vd)
-                    snprintf(str, slen, "%s", vd->value);
-                else {
+                if (c->script_variables.contains(field)) {
+                    snprintf(str, slen, "%s", c->script_variables.at(field).c_str());
+                } else {
                     *str = '\0';
                     script_log("Trigger: %s, VNum %d. unknown char field: '%s'",
                                 GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), field);
@@ -1051,7 +1047,7 @@ in the vault (vnum: 453) now and then. you can just use
                         else {
                             char blah[500];
                             sprintf(blah, "%s %s", o->getName(), subfield);
-                            o->name = strdup(blah);
+                            o->strings["name"] = blah;
                         }
                     } else if (!strcasecmp(field, "next_in_list")) {
                         if (auto con = o->holder->getObjects(); !con.empty()) {
@@ -1087,7 +1083,7 @@ in the vault (vnum: 453) now and then. you can just use
                         else {
                             char blah[500];
                             sprintf(blah, "%s @wnicknamed @D(@C%s@D)@n", o->getShortDescription(), subfield);
-                            o->short_description = strdup(blah);
+                            o->strings["short_description"] = blah;
                         }
                     } else if (!strcasecmp(field, "setaffects")) {
                         if (subfield && *subfield) {
@@ -1156,12 +1152,9 @@ in the vault (vnum: 453) now and then. you can just use
 
 
             if (*str == '\x1') { /* no match in switch */
-                for (vd = o->global_vars; vd; vd = vd->next)
-                    if (!strcasecmp(vd->name, field))
-                        break;
-                if (vd)
-                    snprintf(str, slen, "%s", vd->value);
-                else {
+                if (o->script_variables.contains(field)) {
+                    snprintf(str, slen, "%s", o->script_variables.at(field).c_str());
+                } else {
                     *str = '\0';
                     if (strcasecmp(GET_TRIG_NAME(trig), "Rename Object")) {
                         script_log("Trigger: %s, VNum %d, type: %d. unknown object field: '%s'",
@@ -1180,12 +1173,9 @@ in the vault (vnum: 453) now and then. you can just use
 
             /* special handling of the void, as it stores all 'full global' variables */
             if (r->getVnum() == 0) {
-                for (vd = r->global_vars; vd; vd = vd->next)
-                        if (!strcasecmp(vd->name, field))
-                            break;
-                    if (vd)
-                        snprintf(str, slen, "%s", vd->value);
-                    else
+                    if (r->script_variables.contains(field)) 
+                        snprintf(str, slen, "%s", r->script_variables.at(field).c_str());
+                     else
                         *str = '\0';
             } else if (!strcasecmp(field, "name"))
                 snprintf(str, slen, "%s", r->getName());
@@ -1268,11 +1258,8 @@ in the vault (vnum: 453) now and then. you can just use
                 } else
                     snprintf(str, slen, "0");
             } else {
-                for (vd = r->global_vars; vd; vd = vd->next)
-                    if (!strcasecmp(vd->name, field))
-                        break;
-                if (vd)
-                    snprintf(str, slen, "%s", vd->value);
+                if (r->script_variables.contains(field))
+                    snprintf(str, slen, "%s", r->script_variables.at(field).c_str());
                 else {
                     *str = '\0';
                     script_log("Trigger: %s, VNum %d, type: %d. unknown room field: '%s'",

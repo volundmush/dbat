@@ -397,7 +397,7 @@ void from_json(const json& j, trig_data& t) {
     if(j.contains("instance")) {
         // we're deserializing an instance.
         t.vn = j["vn"].get<int>();
-        auto &tp = trig_index[t.vn];
+        auto &tp = trig_index.at(t.vn);
         auto p = tp.proto;
         if(p->name && strlen(p->name)) t.name = strdup(p->name);
         t.attach_type = p->attach_type;
@@ -674,11 +674,6 @@ void load_globaldata(const std::filesystem::path& loc) {
     if(j.contains("weather")) {
         j["weather"].get_to(weather_info);
     }
-    if(j.contains("dgGlobals")) {
-        if(auto room = get_room(0); room) {
-            deserializeVars(&(room->global_vars), j["dgGlobals"]);
-        }
-    }
 }
 
 void dump_globaldata(const std::filesystem::path &loc) {
@@ -687,11 +682,6 @@ void dump_globaldata(const std::filesystem::path &loc) {
     j["time"] = time_info;
     j["era_uptime"] = era_uptime;
     j["weather"] = weather_info;
-    if(auto gRoom = get_room(0); gRoom) {
-        if(gRoom->global_vars) {
-            j["dgGlobals"] = serializeVars(gRoom->global_vars);
-        }
-    }
 
     dump_to_file(loc, "globaldata.json", j);
 }
@@ -710,53 +700,31 @@ void from_json(const json& j, struct extra_descr_data& e) {
 void to_json(json& j, const unit_data& u) {
     j["id"] = u.id;
     j["generation"] = u.generation;
-
-    if(u.name && strlen(u.name)) j["name"] = u.name;
-    if(u.room_description && strlen(u.room_description)) j["room_description"] = u.room_description;
-    if(u.look_description && strlen(u.look_description)) j["look_description"] = u.look_description;
-    if(u.short_description && strlen(u.short_description)) j["short_description"] = u.short_description;
-    for(auto ex = u.ex_description; ex; ex = ex->next) {
-        if(ex->keyword && strlen(ex->keyword) && ex->description && strlen(ex->description)) {
-            j["ex_description"].push_back(*ex);
-        }
-    }
+    j["strings"] = u.strings;
+    j["extra_descriptions"] = u.extra_descriptions;
 
     if(u.running_scripts.has_value()) {
         j["running_scripts"] = u.running_scripts.value();
+    }
+
+    if(u.script_variables.empty()) {
+        j["script_variables"] = u.script_variables;
     }
 }
 
 void from_json(const json& j, unit_data& u) {
     if(j.contains("id")) u.id = j["id"];
     if(j.contains("generation")) u.generation = j["generation"];
-
-    if(j.contains("name")) {
-        u.name = strdup(j["name"].get<std::string>().c_str());
-    }
-    if(j.contains("room_description")) {
-        u.room_description = strdup(j["room_description"].get<std::string>().c_str());
-    }
-    if(j.contains("look_description")) {
-        u.look_description = strdup(j["look_description"].get<std::string>().c_str());
-    }
-    if(j.contains("short_description")) {
-        u.short_description = strdup(j["short_description"].get<std::string>().c_str());
-    }
-
-    if(j.contains("ex_description")) {
-        auto &e = j["ex_description"];
-        for(auto ex = e.rbegin(); ex != e.rend(); ex++) {
-            auto new_ex = new extra_descr_data();
-            ex->get_to(*new_ex);
-            new_ex->next = u.ex_description;
-            u.ex_description = new_ex;
-        }
-    }
+    if(j.contains("strings")) u.strings = j["strings"].get<std::unordered_map<std::string, std::string>>();
+    if(j.contains("extra_descriptions")) u.extra_descriptions = j["extra_descriptions"].get<std::vector<ExtraDescription>>();
 
     if(j.contains("running_scripts")) {
         u.running_scripts = j["running_scripts"].get<std::vector<trig_vnum>>();
     }
+
+    if(j.contains("script_variables")) u.script_variables = j["script_variables"].get<std::unordered_map<std::string, std::string>>();
 }
+
 
 void to_json(json& j, const proto_data& u) {
     j["vn"] = u.vn;
@@ -984,15 +952,9 @@ void to_json(json& j, const obj_data& o) {
     if(o.cost) j["cost"] = o.cost;
     if(o.cost_per_day) j["cost_per_day"] = o.cost_per_day;
 
-    if(o.proto) j["proto"] = o.proto->vn;
-
     for(auto & i : o.affected) {
         if(i.location == APPLY_NONE) continue;
         j["affected"].push_back(i);
-    }
-
-    if(o.global_vars) {
-        j["dgvariables"] = serializeVars(o.global_vars);
     }
 
     if(get_room(o.room_loaded)) j["room_loaded"] = o.room_loaded;
@@ -1061,21 +1023,7 @@ void from_json(const json& j, obj_data& o) {
     // this is an instance.
     if(j.contains("generation")) o.generation = j["generation"];
 
-    if(j.contains("dgvariables")) {
-        deserializeVars(&o.global_vars, j["dgvariables"]);
-    }
-
     if(j.contains("room_loaded")) o.room_loaded = j["room_loaded"];
-
-    if(j.contains("proto")) {
-        auto protoID = j["proto"].get<int64_t>();
-        auto protoFind = obj_proto.find(protoID);
-        if(protoFind != obj_proto.end()) {
-            o.proto = &protoFind->second;
-        } else {
-            basic_mud_log("Warning: Object %s (%ld) has a proto that does not exist: %ld", o.getName() ? o.getName() : "Unknown", o.id, protoID);
-        }
-    }
 
 }
 
@@ -1261,8 +1209,6 @@ void to_json(json& j, const char_data& c) {
 
     if(c.admin_flags) j["admin_flags"] = c.admin_flags;
 
-    if(c.proto) j["proto"] = c.proto->vn;
-
     json td;
     to_json(td, c.time);
     if(!td.empty()) j["time"] = td;
@@ -1311,10 +1257,6 @@ void to_json(json& j, const char_data& c) {
     if(c.feature) j["feature"] = c.feature;
 
     if(c.voice && strlen(c.voice)) j["voice"] = c.voice;
-
-    if(c.global_vars) {
-        j["dgvariables"] = serializeVars(c.global_vars);
-    }
 
     if (c.poofin && strlen(c.poofin)) j["poofin"] = c.poofin;
     if (c.poofout && strlen(c.poofout)) j["poofout"] = c.poofout;
@@ -1411,20 +1353,6 @@ void from_json(const json& j, char_data& c) {
     if(j.contains("feature")) c.feature = strdup(j["feature"].get<std::string>().c_str());
 
     if(j.contains("voice")) c.voice = strdup(j["voice"].get<std::string>().c_str());
-
-    if(j.contains("dgvariables")) {
-        deserializeVars(&c.global_vars, j["dgvariables"]);
-    }
-
-    if(j.contains("proto")) {
-        auto protoID = j["proto"].get<int64_t>();
-        auto protoFind = mob_proto.find(protoID);
-        if(protoFind != mob_proto.end()) {
-            c.proto = &protoFind->second;
-        } else {
-            basic_mud_log("Warning: Character %s (%ld) has a proto that does not exist: %ld", c.name ? c.name : "Unknown", c.id, protoID);
-        }
-    }
 
     if(j.contains("form")) c.form = j["form"];
     if(j.contains("transforms")) c.transforms = j["transforms"];
@@ -1739,7 +1667,7 @@ player_data* create_player_character(int account_id, const json& j) {
     p.account = &acc;
     p.character = ch.get();
     p.name = j.at("name").get<std::string>();
-    ch->name = strdup(p.name.c_str());
+    ch->strings["name"] = p.name;
 
     acc.characters.push_back(ch->id);
 

@@ -11,8 +11,7 @@ room_vnum thing_data::getRoomVnum() const {
 
 std::string thing_data::getLocationName() const {
     if(room)
-        if(room->name && strlen(room->name) > 0)
-            return room->name;
+        return room->getName();
     return "Unknown";
 }
 

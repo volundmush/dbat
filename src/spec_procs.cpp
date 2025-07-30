@@ -450,12 +450,12 @@ SPECIAL(pet_shops) {
         if (*pet_name) {
             snprintf(buf, sizeof(buf), "%s %s", pet->getName(), pet_name);
             /* free(pet->name); don't free the prototype! */
-            pet->name = strdup(buf);
+            pet->strings["name"] = buf;
 
             snprintf(buf, sizeof(buf), "%sA small sign on a chain around the neck says 'My name is %s'\r\n",
                      pet->getLookDescription(), pet_name);
             /* free(pet->description); don't free the prototype! */
-            pet->look_description = strdup(buf);
+            pet->strings["look_description"] = buf;
         }
         char_to_room(pet, ch->getRoom());
         add_follower(pet, ch);

@@ -96,11 +96,6 @@ double unit_data::getAffectModifier(uint64_t location, uint64_t specific) {
 }
 
 unit_data::~unit_data() {
-    if(name) free(name);
-    if(room_description) free(room_description);
-    if(look_description) free(look_description);
-    if(short_description) free(short_description);
-    if(ex_description) free_ex_descriptions(ex_description);
     extract_script(this, 0);
 }
 
@@ -125,3 +120,53 @@ std::vector<std::shared_ptr<trig_data>> unit_data::getScripts() {
     return out;
 }
 
+const char* unit_data::getName() const {
+    if(auto find = strings.find("name"); find != strings.end()) {
+        return find->second.c_str();
+    }
+    return "undefined";
+}
+
+const char* unit_data::getRoomDescription() const {
+    if(auto find = strings.find("room_description"); find != strings.end()) {
+        return find->second.c_str();
+    }
+    return "undefined";
+}
+
+const char* unit_data::getLookDescription() const {
+    if(auto find = strings.find("look_description"); find != strings.end()) {
+        return find->second.c_str();
+    }
+    return "undefined";
+}
+
+const char* unit_data::getShortDescription() const {
+    if(auto find = strings.find("short_description"); find != strings.end()) {
+        return find->second.c_str();
+    }
+    return "undefined";
+}
+
+const std::vector<ExtraDescription>& unit_data::getExtraDescription() const {
+    return extra_descriptions;
+}
+
+std::string unit_data::scriptString() const {
+    std::vector<std::string> vnums;
+    auto ps = getProtoScript();
+    for(auto p : ps) vnums.emplace_back(std::move(std::to_string(p)));
+
+    return fmt::format("@D[@wT{}@D]@n", fmt::join(vnums, ","));
+}
+
+vnum unit_data::getVnum() const {
+    return vn;
+}
+
+std::string_view unit_data::getString(const std::string &key) const {
+    if(auto it = strings.find(key); it != strings.end()) {
+        return it->second;
+    }
+    return {};
+}
