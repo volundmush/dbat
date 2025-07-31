@@ -2838,47 +2838,30 @@ void weight_change_object(struct obj_data *obj, int weight) {
     }
 }
 
-void name_from_drinkcon(struct obj_data *obj) {
-    char *new_name, *cur_name, *next;
-    const char *liqname;
-    int liqlen, cpylen;
-
+void name_from_drinkcon(struct obj_data* obj) {
     if (!obj || (GET_OBJ_TYPE(obj) != ITEM_DRINKCON && GET_OBJ_TYPE(obj) != ITEM_FOUNTAIN))
         return;
 
-    liqname = drinknames[GET_OBJ_VAL(obj, VAL_DRINKCON_LIQUID)];
-    if (!isname(liqname, obj->getName())) {
-        /*log("SYSERR: Can't remove liquid '%s' from '%s' (%d) item.", liqname, obj->name, obj->item_number);*/
-        /*  SYSERR_DESC:
-     *  From name_from_drinkcon(), this error comes about if the object
-     *  noted (by keywords and item vnum) does not contain the liquid string
-     *  being searched for.
-     */
-        return;
+    std::string name = obj->getName(); // copy the name
+    std::string liqname = drinknames[GET_OBJ_VAL(obj, VAL_DRINKCON_LIQUID)];
+
+    std::istringstream iss(name);
+    std::ostringstream oss;
+    std::string word;
+    bool first = true;
+
+    while (iss >> word) {
+        if (!std::equal(word.begin(), word.end(),
+                        liqname.begin(), liqname.end(),
+                        [](char a, char b) { return std::tolower(a) == std::tolower(b); }))
+        {
+            if (!first) oss << " ";
+            oss << word;
+            first = false;
+        }
     }
 
-    liqlen = strlen(liqname);
-    CREATE(new_name, char, strlen(obj->getName()) - strlen(liqname)); /* +1 for NUL, -1 for space */
-
-    for (cur_name = obj->getName(); cur_name; cur_name = next) {
-        if (*cur_name == ' ')
-            cur_name++;
-
-        if ((next = strchr(cur_name, ' ')))
-            cpylen = next - cur_name;
-        else
-            cpylen = strlen(cur_name);
-
-        if (!strncasecmp(cur_name, liqname, liqlen))
-            continue;
-
-        if (*new_name)
-            strcat(new_name, " ");    /* strcat: OK (size precalculated) */
-        strncat(new_name, cur_name, cpylen);    /* strncat: OK (size precalculated) */
-    }
-
-    obj->strings["name"] = new_name;
-    free(new_name);
+    obj->strings["name"] = oss.str();
 }
 
 void name_to_drinkcon(struct obj_data *obj, int type) {
@@ -3252,7 +3235,7 @@ ACMD(do_eat) {
         //Good food can heal you
         if (!GET_OBJ_VAL(food, VAL_FOOD_POISON) && GET_HIT(ch) < (ch->getEffectiveStat<int64_t>("health")) && subcmd != SCMD_TASTE) {
             int64_t suppress = ((ch->getEffectiveStat<int64_t>("health")) * 0.01) * GET_SUPPRESS(ch);
-            if (food->getWeight() < 6) {
+            if (food->getEffectiveStat("weight") < 6) {
                 ch->modCurVitalDam(CharVital::health, -.05);
             } else {
                 ch->modCurVitalDam(CharVital::health, -.1);

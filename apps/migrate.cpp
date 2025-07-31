@@ -956,7 +956,7 @@ static void parse_room(FILE *fl, room_vnum virtual_nr) {
         basic_mud_log("SYSERR: Room #%d already exists, cannot parse!", virtual_nr);
         exit(1);
     }
-    auto &z = zone_table[zone];
+    auto &z = zone_table.at(zone);
     auto sh = std::make_shared<room_data>();
     auto r = sh.get();
     units.emplace(virtual_nr, sh);
@@ -965,6 +965,7 @@ static void parse_room(FILE *fl, room_vnum virtual_nr) {
 
     r->zone = zone;
     r->id = virtual_nr;
+    r->vn = virtual_nr;
     r->strings["name"] = fread_string(fl, buf2);
     r->strings["look_description"] = fread_string(fl, buf2);
 
@@ -2887,9 +2888,9 @@ int House_load(room_vnum rvnum) {
                 wear[2] = t[3];
                 wear[3] = t[4];
                 for(auto i = 0; i < NUM_ITEM_WEARS; i++) temp->wear_flags.set(i, IS_SET_AR(wear, i));
-                temp->weight = t[5];
-                temp->cost = t[6];
-                temp->cost_per_day = t[7];
+                temp->setBaseStat("weight", t[5]);
+                temp->setBaseStat("cost", t[6]);
+                temp->setBaseStat("cost_per_day", t[7]);
 
                 /* buf2 is error codes pretty much */
                 //strcat(buf2, ", after numeric constants (expecting E/#xxx)");

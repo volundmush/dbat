@@ -66,27 +66,7 @@ int remove_var(struct trig_var_data **var_list, char *name) {
     return 0;
 }
 
-/*
- * Return memory used by a trigger
- * The command list is free'd when changed and when
- * shutting down.
- */
-void free_trigger(struct trig_data *trig) {
-    free(trig->name);
-    trig->name = nullptr;
 
-    if (trig->arglist) {
-        free(trig->arglist);
-        trig->arglist = nullptr;
-    }
-
-    if (trig->var_list) {
-        free_varlist(trig->var_list);
-        trig->var_list = nullptr;
-    }
-
-    
-}
 
 trig_data::~trig_data() {
     free(name);
@@ -94,10 +74,6 @@ trig_data::~trig_data() {
     if (arglist) {
         free(arglist);
         arglist = nullptr;
-    }
-    if (var_list) {
-        free_varlist(var_list);
-        var_list = nullptr;
     }
 }
 
@@ -109,19 +85,9 @@ void extract_script(unit_data *thing, int type) {
         sc->deactivate();
     }
 
-    thing->script_variables.clear();
+    thing->variables.clear();
 
 }
 
-/* erase the script memory of a mob */
-void extract_script_mem(struct script_memory *sc) {
-    struct script_memory *next;
-    while (sc) {
-        next = sc->next;
-        if (sc->cmd) free(sc->cmd);
-        free(sc);
-        sc = next;
-    }
-}
 
 

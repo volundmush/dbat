@@ -2517,9 +2517,9 @@ namespace trans {
                     true, ch, nullptr, nullptr, TO_CHAR);
                 act("@W$n jumps directly into the @cS@Cp@wi@cr@Ci@wt @cB@Co@wm@cb@W as it descends! It completely obscures $n from view before starting to be absorbed by them!@n",
                     true, ch, nullptr, nullptr, TO_ROOM);
-                hurt(0, 0, loc->user, ch, nullptr, loc->kicharge * 1.25, 1);
-                ch->transforms[Form::spirit_absorption].vars["energy"] = loc->kicharge * 0.9 + (0.1 * getMasteryTier(ch, Form::spirit_absorption));
-                ch->transforms[Form::spirit_absorption].vars["absorbed"] = loc->kicharge * 0.9 + (0.1 * getMasteryTier(ch, Form::spirit_absorption));
+                hurt(0, 0, loc->user, ch, nullptr, loc->getBaseStat("kicharge") * 1.25, 1);
+                ch->transforms[Form::spirit_absorption].vars["energy"] = loc->getBaseStat("kicharge") * 0.9 + (0.1 * getMasteryTier(ch, Form::spirit_absorption));
+                ch->transforms[Form::spirit_absorption].vars["absorbed"] = loc->getBaseStat("kicharge") * 0.9 + (0.1 * getMasteryTier(ch, Form::spirit_absorption));
                 send_to_char(ch, "@W[@cSpirit Force: @C%s@W]@n\r\n", add_commas((int64_t)ch->transforms[Form::spirit_absorption].vars["energy"]).c_str());
                 extract_obj(loc);
                 act("@WThe @cS@Cp@wi@cr@Ci@wt @cB@Co@wm@cb@W completely vanishes as it's absorbed, imploding inwards!@n",

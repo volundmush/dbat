@@ -484,7 +484,7 @@ OCMD(do_dgoload) {
         char_to_room(mob, rnum);
 
         if (SCRIPT(obj)) { /* It _should_ have, but it might be detached. */
-            obj->script_variables["lastloaded"] = mob->getUID(true);
+            obj->setVariable("lastloaded", mob->getUID(true));
         }
 
         load_mtrigger(mob);
@@ -495,7 +495,7 @@ OCMD(do_dgoload) {
         }
 
         if (SCRIPT(obj)) { /* It _should_ have, but it might be detached. */
-            obj->script_variables["lastloaded"] = object->getUID(true);
+            obj->setVariable("lastloaded", object->getUID(true));
         }
 
         /* special handling to make objects able to load on a person/in a container/worn etc. */

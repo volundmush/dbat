@@ -761,9 +761,9 @@ void script_stat(char_data *ch, script_data *sc) {
     char namebuf[512];
     char buf1[MAX_STRING_LENGTH];
 
-    send_to_char(ch, "Global Variables: %s\r\n", !sc->script_variables.empty() ? "" : "None");
+    send_to_char(ch, "Global Variables: %s\r\n", !sc->variables.empty() ? "" : "None");
 
-    for (const auto& [name, value] : sc->script_variables) {
+    for (const auto& [name, value] : sc->variables) {
         if (value[0] == UID_CHAR) {
             auto uidResult = resolveUID(value);
             if(uidResult) {
@@ -800,19 +800,19 @@ void script_stat(char_data *ch, script_data *sc) {
             send_to_char(ch, "    Wait: %f seconds, Current line: %s\r\n",
                          t->waiting,
                          t->curr_state ? t->curr_state->cmd : "End of Script");
-            send_to_char(ch, "  Variables: %s\r\n", GET_TRIG_VARS(t) ? "" : "None");
+            send_to_char(ch, "  Variables: %s\r\n", t->variables.empty() ? "None" : "");
 
-            for (tv = GET_TRIG_VARS(t); tv; tv = tv->next) {
-                if (*(tv->value) == UID_CHAR) {
-                    auto uidResult = resolveUID(tv->value);
+            for (const auto &[key, value] : t->variables) {
+                if (value.starts_with(UID_CHAR)) {
+                    auto uidResult = resolveUID(value);
                     if(uidResult) {
                         std::string n = uidResult->getName();
-                        send_to_char(ch, "    %15s:  %s\r\n", tv->name, n.c_str());
+                        send_to_char(ch, "    %15s:  %s\r\n", key.c_str(), n.c_str());
                     } else {
-                        send_to_char(ch, "   -BAD UID: %s", tv->value);
+                        send_to_char(ch, "   -BAD UID: %s", value.c_str());
                     }
                 } else {
-                    send_to_char(ch, "    %15s:  %s\r\n", tv->name, tv->value);
+                    send_to_char(ch, "    %15s:  %s\r\n", key.c_str(), value.c_str());
                 }
 
             }
@@ -1659,7 +1659,7 @@ void process_set(script_data *sc, trig_data *trig, char *cmd) {
         return;
     }
 
-    add_var(&GET_TRIG_VARS(trig), name, value, 0);
+    trig->setVariable(name, value);
 
 }
 
@@ -1681,10 +1681,10 @@ void process_eval(unit_data *go, script_data *sc, trig_data *trig,
     }
 
     if(isUID(expr)) {
-        add_var(&GET_TRIG_VARS(trig), name, expr, 0);
+        trig->setVariable(name, expr);
     } else {
         eval_expr(expr, result, go, sc, trig, type);
-        add_var(&GET_TRIG_VARS(trig), name, result, 0);
+        trig->setVariable(name, result);
     }
 }
 
@@ -1888,11 +1888,11 @@ void process_unset(script_data *sc, trig_data *trig, char *cmd) {
         return;
     }
 
-    if (auto find = sc->script_variables.find(var); find != sc->script_variables.end()) {
-        sc->script_variables.erase(find);
+    if (auto find = sc->variables.find(var); find != sc->variables.end()) {
+        sc->variables.erase(find);
         return;
     }
-    remove_var(&GET_TRIG_VARS(trig), var);
+    trig->eraseVariable(var);
 }
 
 
@@ -1925,11 +1925,8 @@ void process_remote(script_data *sc, trig_data *trig, char *cmd) {
     }
 
     /* find the locally owned variable */
-    for (vd = GET_TRIG_VARS(trig); vd; vd = vd->next)
-        if (!strcasecmp(vd->name, buf))
-            break;
-
-    if (!vd) {
+    auto varIt = trig->variables.find(buf);
+    if (varIt == trig->variables.end()) {
         script_log("Trigger: %s, VNum %d. local var '%s' not found in remote call",
                    GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), buf);
         return;
@@ -1942,14 +1939,10 @@ void process_remote(script_data *sc, trig_data *trig, char *cmd) {
         return;
     }
 
-    /* for all but PC's, context comes from the existing context. */
-    /* for PC's, context is 0 (global) */
-    context = vd->context;
-
     sc_remote = uidResult.get();
 
     if (sc_remote == nullptr) return; /* no script to assign */
-    sc->script_variables[vd->name] = vd->value; /* copy the variable to the script's variables */
+    sc_remote->setVariable(varIt->first, varIt->second); /* copy the variable to the script's variables */
 }
 
 
@@ -1991,25 +1984,25 @@ ACMD(do_vdelete) {
         return;
     }
 
-    if (sc_remote->script_variables.empty()) {
+    if (sc_remote->variables.empty()) {
         send_to_char(ch, "That id represents no global variables.(2)\r\n");
         return;
     }
 
     if (*var == '*' || is_abbrev(var, "all")) {
-        sc_remote->script_variables.clear(); /* clear the script's variables */
+        sc_remote->variables.clear(); /* clear the script's variables */
         send_to_char(ch, "All variables deleted from that id.\r\n");
         return;
     }
 
     /* find the global */
-    auto find = sc_remote->script_variables.find(var);
-    if (find == sc_remote->script_variables.end()) {
+    auto find = sc_remote->variables.find(var);
+    if (find == sc_remote->variables.end()) {
         send_to_char(ch, "That variable cannot be located.\r\n");
         return;
     }
 
-    sc_remote->script_variables.erase(find); /* remove from script's variables */
+    sc_remote->variables.erase(find); /* remove from script's variables */
     send_to_char(ch, "Deleted.\r\n");
 }
 
@@ -2027,7 +2020,7 @@ int perform_set_dg_var(struct char_data *ch, struct char_data *vict, char *val_a
         return 0;
     }
 
-    vict->script_variables[var_name] = var_value; /* add the variable to the script's variables */
+    vict->setVariable(var_name, var_value); /* add the variable to the script's variables */
     return 1;
 }
 
@@ -2068,8 +2061,8 @@ void process_rdelete(script_data *sc, trig_data *trig, char *cmd) {
     sc_remote = uidResult.get();
 
     if (sc_remote == nullptr) return; /* no script to delete a trigger from */
-    if(auto find = sc_remote->script_variables.find(var); find != sc_remote->script_variables.end()) {
-        sc_remote->script_variables.erase(find); /* remove from script's variables */
+    if(auto find = sc_remote->variables.find(var); find != sc_remote->variables.end()) {
+        sc_remote->variables.erase(find); /* remove from script's variables */
         return;
     }
     script_log("Trigger: %s, VNum %d. rdelete: variable '%s' not found in remote call",
@@ -2095,17 +2088,14 @@ void process_global(script_data *sc, trig_data *trig, char *cmd, long id) {
         return;
     }
 
-    for (vd = GET_TRIG_VARS(trig); vd; vd = vd->next)
-        if (!strcasecmp(vd->name, var))
-            break;
-
-    if (!vd) {
+    auto varIt = trig->variables.find(var);
+    if (varIt == trig->variables.end()) {
         script_log("Trigger: %s, VNum %d. local var '%s' not found in global call",
                    GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), var);
         return;
     }
 
-    sc->script_variables[vd->name] = vd->value; /* copy the variable to the script's variables */
+    sc->setVariable(varIt->first, varIt->second); /* copy the variable to the script's variables */
 }
 
 
@@ -2148,7 +2138,7 @@ void extract_value(script_data *sc, trig_data *trig, char *cmd) {
         num--;
     }
 
-    add_var(&GET_TRIG_VARS(trig), to, buf, 0);
+    trig->setVariable(to, buf);
 }
 
 /*
@@ -2198,7 +2188,7 @@ void dg_letter_value(script_data *sc, trig_data *trig, char *cmd) {
 
     *junk = string[num - 1];
     *(junk + 1) = '\0';
-    add_var(&GET_TRIG_VARS(trig), varname, junk, 0);
+    trig->setVariable(varname, junk);
 }
 
 /*  This is the core driver for scripts. */
@@ -2435,9 +2425,7 @@ static int true_script_driver(unit_data *go_adress, trig_data *trig, int type, i
         }
     }
 
-    if (!trig->owner)
-        free_varlist(GET_TRIG_VARS(trig));
-    GET_TRIG_VARS(trig) = nullptr;
+    trig->variables.clear();
     GET_TRIG_DEPTH(trig) = 0;
 
     depth--;
@@ -2552,82 +2540,6 @@ int fgetline(FILE *file, char *p) {
     return count;
 }
 
-
-/* load in a character's saved variables */
-void read_saved_vars(struct char_data *ch) {
-    FILE *file;
-    long context;
-    char fn[127];
-    char input_line[1024], *temp, *p;
-    char varname[32];
-    char context_str[16];
-
-    /*
-     * If getting to the menu from inside the game, the vars aren't removed.
-     * So let's not allocate them again.
-     */
-    if (SCRIPT(ch))
-        return;
-
-    /* create the space for the script structure which holds the vars */
-    /* We need to do this first, because later calls to 'remote' will need */
-    /* a script already assigned. */
-
-    /* find the file that holds the saved variables and open it*/
-    get_filename(fn, sizeof(fn), SCRIPT_VARS_FILE, GET_NAME(ch));
-    file = fopen(fn, "r");
-
-    /* if we failed to open the file, return */
-    if (!file) {
-        basic_mud_log("%s had no variable file", GET_NAME(ch));
-        return;
-    }
-    /* walk through each line in the file parsing variables */
-    do {
-        if (get_line(file, input_line) > 0) {
-            p = temp = strdup(input_line);
-            temp = any_one_arg(temp, varname);
-            temp = any_one_arg(temp, context_str);
-            skip_spaces(&temp); /* temp now points to the rest of the line */
-
-            context = atol(context_str);
-            ch->script_variables[varname] = temp; /* add the variable to the script's variables */
-            free(p); /* plug memory hole */
-        }
-    } while (!feof(file));
-
-    /* close the file and return */
-    fclose(file);
-}
-
-
-/* load in a character's saved variables from an ASCII pfile*/
-void read_saved_vars_ascii(FILE *file, struct char_data *ch, int count) {
-    long context;
-    char input_line[1024], *temp, *p;
-    char varname[READ_SIZE];
-    char context_str[READ_SIZE];
-    int i;
-
-    /* create the space for the script structure which holds the vars */
-    /* We need to do this first, because later calls to 'remote' will need */
-    /* a script already assigned. */
-
-    /* walk through each line in the file parsing variables */
-    for (i = 0; i < count; i++) {
-        if (get_line(file, input_line) > 0) {
-            p = temp = strdup(input_line);
-            temp = any_one_arg(temp, varname);
-            temp = any_one_arg(temp, context_str);
-            skip_spaces(&temp); /* temp now points to the rest of the line */
-
-            context = atol(context_str);
-            ch->script_variables[varname] = temp; /* add the variable to the script's variables */
-            free(p); /* plug memory hole */
-        }
-    }
-}
-
 /* find_char() helpers */
 
 // Must be power of 2
@@ -2671,7 +2583,7 @@ std::shared_ptr<trig_data> trig_data::shared() {
 
 void ADD_UID_VAR(char *buf, struct trig_data *trig, struct unit_data *thing, char *name, long context) {
 	auto uid = thing->getUID(true);
-    add_var(&GET_TRIG_VARS(trig), name, (char*)uid.c_str(), context);
+    trig->setVariable(name, uid);
 }
 
 // Note: Trigger instances are meant to be set all active or inactive on a per room/character/item basis,

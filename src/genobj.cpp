@@ -196,15 +196,6 @@ double obj_data::getAffectModifier(uint64_t location, uint64_t specific) {
     return modifier;
 }
 
-weight_t obj_data::getWeight() {
-    return weight;
-}
-
-weight_t obj_data::getTotalWeight() {
-    auto s = sitting.lock();
-    return getWeight() + getInventoryWeight() + (s ? s->getBaseStat("weight_total") : 0);
-}
-
 bool obj_data::isActive() {
     return active;
 }

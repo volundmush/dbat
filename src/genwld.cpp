@@ -396,7 +396,7 @@ double room_data::getEnvironment(int type) {
             // check for a gravity generator...
             auto con = getObjects();
             for(auto c : filter_raw(con)) {
-                if(c->gravity) return c->gravity.value();
+                if(auto g = c->getBaseStat("gravity"); g > 0.0) return g;
             }
 
             // check gravityRanges

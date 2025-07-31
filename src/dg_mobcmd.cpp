@@ -472,7 +472,7 @@ ACMD(do_mload) {
         }
         char_to_room(mob, rnum);
         if (SCRIPT(ch)) { /* It _should_ have, but it might be detached. */
-            ch->script_variables["lastloaded"] = mob->getUID(true);
+            ch->setVariable("lastloaded", mob->getUID(true));
         }
         load_mtrigger(mob);
     } else if (is_abbrev(arg1, "obj")) {
@@ -481,7 +481,7 @@ ACMD(do_mload) {
             return;
         }
         if (SCRIPT(ch)) { /* It _should_ have, but it might be detached. */
-            ch->script_variables["lastloaded"] = object->getUID(true);
+            ch->setVariable("lastloaded", object->getUID(true));
         }
         randomize_eq(object);
         /* special handling to make objects able to load on a person/in a container/worn etc. */

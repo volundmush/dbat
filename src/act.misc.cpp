@@ -2176,7 +2176,7 @@ ACMD(do_runic) {
 
 ACMD(do_scry) {
 
-    if (strcasecmp(CAP(GET_NAME(ch)), "Galeos")) {
+    if (strcasecmp(GET_NAME(ch), "Galeos")) {
         send_to_char(ch, "You do not know how to perform that technique.\r\n");
         return;
     }
@@ -3673,7 +3673,7 @@ ACMD(do_silk) {
                     weaved->affected[0].modifier = armor;
                     weaved->modBaseStat<int>("cost", GET_OBJ_COST(weaved) * (price - 1));
                     //SET_OBJ_VAL(weaved, VAL_WORN_UNUSED1, olevel);
-                    weaved->level = olevel;
+                    weaved->setBaseStat("level", olevel);
                     if (str > 0) {
                         weaved->affected[1].location = 1;
                         weaved->affected[1].modifier = str;
@@ -3737,7 +3737,7 @@ ACMD(do_silk) {
                     weaved->affected[0].modifier = armor;
                     weaved->modBaseStat<int>("cost", GET_OBJ_COST(weaved) * (price - 1));
                     //SET_OBJ_VAL(weaved, VAL_WORN_UNUSED1, olevel);
-                    weaved->level = olevel;
+                    weaved->setBaseStat("level", olevel);
                     if (str > 0) {
                         weaved->affected[1].location = 1;
                         weaved->affected[1].modifier = str;
@@ -3801,7 +3801,7 @@ ACMD(do_silk) {
                     weaved->affected[0].modifier = armor;
                     weaved->modBaseStat<int>("cost", GET_OBJ_COST(weaved) * (price - 1));
                     //SET_OBJ_VAL(weaved, VAL_WORN_UNUSED1, olevel);
-                    weaved->level = olevel;
+                    weaved->setBaseStat("level", olevel);
                     if (str > 0) {
                         weaved->affected[1].location = 1;
                         weaved->affected[1].modifier = str;

@@ -141,23 +141,48 @@ struct trig_var_data {
     struct trig_var_data *next{};
 };
 
-/* structure for triggers */
-struct trig_data : std::enable_shared_from_this<trig_data> {
-    ~trig_data();
-    trig_vnum vn{NOTHING};                    /* trigger's rnum                  */
+struct HasVariables {
+    std::unordered_map<std::string, std::string> variables; // Subscriptions to services.
+
+    std::optional<std::string> getVariable(const std::string &key) const {
+        if(auto it = variables.find(key); it != variables.end()) {
+            return it->second;
+        }
+        return std::nullopt;
+    }
+
+    void setVariable(const std::string &key, const std::string &value) {
+        variables[key] = value;
+    }
+
+    bool hasVariable(const std::string &key) const {
+        return variables.find(key) != variables.end();
+    }
+
+    bool eraseVariable(const std::string &key) {
+        return variables.erase(key) > 0;
+    }
+};
+
+struct trig_proto_data {
+    trig_vnum vn{NOTHING};
     int8_t attach_type{};            /* mob/obj/wld intentions          */
     int8_t data_type{};                /* type of game_data for trig      */
     char *name{};                    /* name of trigger                 */
     long trigger_type{};            /* type of trigger (for bitvector) */
     struct cmdlist_element *cmdlist{};    /* top of command list             */
-    struct cmdlist_element *curr_state{};    /* ptr to current line of trigger  */
     int narg{};                /* numerical argument              */
     char *arglist{};            /* argument list                   */
+};
+
+/* structure for triggers */
+struct trig_data : public trig_proto_data, public HasVariables, std::enable_shared_from_this<trig_data> {
+    ~trig_data();
+    struct cmdlist_element *curr_state{};    /* ptr to current line of trigger  */
     int depth{};                /* depth into nest ifs/whiles/etc  */
     int loops{};                /* loop iteration counter          */
     double waiting{0.0};    /* event to pause the trigger      */
     bool purged{};            /* trigger is set to be purged     */
-    struct trig_var_data *var_list{};    /* list of local vars for trigger  */
     unit_data* owner{};
     int countLine(struct cmdlist_element *c) const;
 
@@ -177,7 +202,7 @@ struct picky_data {
     std::unordered_set<Race> only_race, not_race;    /* Only these races can shop here	*/
 };
 
-struct unit_data {
+struct unit_data : public HasVariables {
     unit_data& operator=(const proto_data& other);
     virtual ~unit_data();
 
@@ -356,17 +381,9 @@ struct obj_data : public thing_data, public picky_data, std::enable_shared_from_
 
     /* arbitrary named doubles */
     ItemType type_flag{ItemType::unknown};      /* Type of item                        */
-    int level{}; /* Minimum level of object.            */
     
     FlagHandler<WearFlag> wear_flags{}; /* Where you can wear it     */
     FlagHandler<ItemFlag> item_flags{}; /* If it hums, glows, etc.  */
-
-    weight_t weight{};         /* Weight what else                     */
-    weight_t getWeight();
-    weight_t getTotalWeight();
-    int cost{};           /* Value when sold (gp.)               */
-    int cost_per_day{};   /* Cost to keep pr. real day           */
-    int timer{};          /* Timer for object                    */
     
     Size size{Size::medium};           /* Size class of object                */
 
@@ -381,25 +398,18 @@ struct obj_data : public thing_data, public picky_data, std::enable_shared_from_
 
     struct obj_spellbook_spell *sbinfo{};  /* For spellbook info */
     std::weak_ptr<char_data> sitting{};       /* Who is sitting on me? */
-    int scoutfreq{};
-    time_t lload{};
-    int64_t kicharge{};
-    int kitype{};
     struct char_data *user{};
     struct char_data *target{};
-    int distance{};
-    int foob{};
+    char *auctname{};
+    struct obj_data *posted_to{};
+    struct obj_data *fellow_wall{};
+
     int64_t aucter{};
     int64_t curBidder{};
     time_t aucTime{};
     int bid{};
     int startbid{};
-    char *auctname{};
     int posttype{};
-    struct obj_data *posted_to{};
-    struct obj_data *fellow_wall{};
-
-    std::optional<double> gravity;
 
     bool isProvidingLight();
     double currentGravity();
@@ -731,7 +741,7 @@ struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
     Sex sex{Sex::male};
 
     // Base stats for this unit.
-    std::unordered_map<Appearance, std::string> appearances;
+    std::unordered_map<Appearance, std::string> appearances{};
     std::string getAppearance(Appearance type, bool withTransform = true);
     const char* getAppearanceStr(Appearance type);
 
@@ -813,7 +823,7 @@ struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
     struct follow_type *followers{};/* List of chars followers		*/
     std::weak_ptr<obj_data> sits{};      /* What am I sitting on? */
 
-    struct char_data *fighting;    /* Opponent				*/
+    struct char_data *fighting{};    /* Opponent				*/
     struct char_data *master{};    /* Who is char following?		*/
     
     struct char_data *blocks{};    /* Who am I blocking?    */
@@ -1095,12 +1105,6 @@ struct index_data {
 
     char *farg;         /* string argument for special function     */
     struct trig_data *proto;     /* for triggers... the trigger     */
-};
-
-/* linked list for mob/object prototype trigger lists */
-struct trig_proto_list {
-    int vnum;                             /* vnum of the trigger   */
-    struct trig_proto_list *next;         /* next trigger          */
 };
 
 struct guild_info_type {

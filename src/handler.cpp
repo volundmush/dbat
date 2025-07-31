@@ -669,7 +669,7 @@ void obj_to_room(struct obj_data *object, struct room_data *room) {
     object->room = room;
     object->carried_by = nullptr;
     object->holder = room;
-    GET_LAST_LOAD(object) = time(nullptr);
+    object->setBaseStat("lload", time(nullptr));
 
     auto& z = zone_table.at(room->zone);
     z.objectsInZone.push_back(object->shared());
@@ -698,25 +698,26 @@ void obj_to_room(struct obj_data *object, struct room_data *room) {
                     vehicle = read_object(GET_OBJ_VAL(object, VAL_HATCH_DEST), VIRTUAL);
                     if(!vehicle) {
                         basic_mud_log("SYSERR: Vehicle %d not found for hatch %d", GET_OBJ_VAL(object, VAL_HATCH_DEST), GET_OBJ_VNUM(object));
-                    }
-                    obj_to_room(vehicle, real_room(GET_OBJ_VAL(object, VAL_HATCH_EXTROOM)));
-                    if (auto ld = object->getLookDescription(); ld) {
-                        if (strlen(ld)) {
-                            char nick[MAX_INPUT_LENGTH], nick2[MAX_INPUT_LENGTH], nick3[MAX_INPUT_LENGTH];
-                            if (GET_OBJ_VNUM(vehicle) <= 46099 && GET_OBJ_VNUM(vehicle) >= 46000) {
-                                snprintf(nick, sizeof(nick), "Saiyan Pod %s", ld);
-                                snprintf(nick2, sizeof(nick2), "@wA @Ys@ya@Yi@yy@Ya@yn @Dp@Wo@Dd@w named @D(@C%s@D)@w",
-                                        ld);
-                            } else if (GET_OBJ_VNUM(vehicle) >= 46100 && GET_OBJ_VNUM(vehicle) <= 46199) {
-                                snprintf(nick, sizeof(nick), "EDI Xenofighter MK. II %s", ld);
-                                snprintf(nick2, sizeof(nick2), 
-                                        "@wAn @YE@yD@YI @CX@ce@Wn@Do@Cf@ci@Wg@Dh@Wt@ce@Cr @RMK. II @wnamed @D(@C%s@D)@w",
-                                        ld);
+                    } else {
+                        obj_to_room(vehicle, real_room(GET_OBJ_VAL(object, VAL_HATCH_EXTROOM)));
+                        if (auto ld = object->getLookDescription(); ld) {
+                            if (strlen(ld)) {
+                                char nick[MAX_INPUT_LENGTH], nick2[MAX_INPUT_LENGTH], nick3[MAX_INPUT_LENGTH];
+                                if (GET_OBJ_VNUM(vehicle) <= 46099 && GET_OBJ_VNUM(vehicle) >= 46000) {
+                                    snprintf(nick, sizeof(nick), "Saiyan Pod %s", ld);
+                                    snprintf(nick2, sizeof(nick2), "@wA @Ys@ya@Yi@yy@Ya@yn @Dp@Wo@Dd@w named @D(@C%s@D)@w",
+                                            ld);
+                                } else if (GET_OBJ_VNUM(vehicle) >= 46100 && GET_OBJ_VNUM(vehicle) <= 46199) {
+                                    snprintf(nick, sizeof(nick), "EDI Xenofighter MK. II %s", ld);
+                                    snprintf(nick2, sizeof(nick2), 
+                                            "@wAn @YE@yD@YI @CX@ce@Wn@Do@Cf@ci@Wg@Dh@Wt@ce@Cr @RMK. II @wnamed @D(@C%s@D)@w",
+                                            ld);
+                                }
+                                snprintf(nick3, sizeof(nick3), "%s is resting here@w", nick2);
+                                vehicle->strings["name"] = nick;
+                                vehicle->strings["short_description"] = nick2;
+                                vehicle->strings["room_description"] = nick3;
                             }
-                            snprintf(nick3, sizeof(nick3), "%s is resting here@w", nick2);
-                            vehicle->strings["name"] = nick;
-                            vehicle->strings["short_description"] = nick2;
-                            vehicle->strings["room_description"] = nick3;
                         }
                     }
                     int newval = GET_OBJ_VAL(object, VAL_CONTAINER_FLAGS) | CONT_CLOSED | CONT_LOCKED;
@@ -1527,7 +1528,7 @@ struct obj_data *create_money(int amount) {
  * like the one_argument routine), but now it returns an integer that
  * describes what it filled in.
  */
-int generic_find(char *arg, bitvector_t bitvector, struct char_data *ch,
+int generic_find(const char *arg, bitvector_t bitvector, struct char_data *ch,
                  struct char_data **tar_ch, struct obj_data **tar_obj) {
     int i, found, number;
     char name_val[MAX_INPUT_LENGTH];

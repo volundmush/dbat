@@ -42,9 +42,7 @@ extern void command_interpreter(struct char_data *ch, char *argument);
 
 extern int search_block(char *arg, const char **list, int exact);
 
-extern char lower(char c);
-
-extern char *one_argument(char *argument, char *first_arg);
+extern char *one_argument(const char *argument, char *first_arg);
 
 extern char *one_word(char *argument, char *first_arg);
 

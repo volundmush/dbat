@@ -651,7 +651,7 @@ ACMD(do_finddoor) {
 
     if (vnum != NOTHING) {
         len = snprintf(buf, sizeof(buf), "Doors unlocked by key [%d] %s are:\r\n",
-                       vnum, sdesc);
+                       vnum, sdesc.c_str());
         for (auto &[vn, r] : world) {
             for (d = 0; d < NUM_OF_DIRS; d++) {
                 auto &e = r->dir_option[d];
@@ -1337,7 +1337,8 @@ static void do_stat_object(struct char_data *ch, struct obj_data *j) {
     vnum = GET_OBJ_VNUM(j);
     if (GET_LAST_LOAD(j) > 0) {
         char *tmstr;
-        tmstr = (char *) asctime(localtime(&GET_LAST_LOAD(j)));
+        time_t t = GET_LAST_LOAD(j);
+        tmstr = (char *) asctime(localtime(&t));
         *(tmstr + strlen(tmstr) - 1) = '\0';
         send_to_char(ch, "LOADED DROPPED: [%s]\r\n", tmstr);
     }
@@ -1800,7 +1801,7 @@ ACMD(do_varstat) {
         return;
     } else {
         /* Display their global variables */
-        if (!vict->script_variables.empty()) {
+        if (!vict->variables.empty()) {
             struct trig_var_data *tv;
             char uname[MAX_INPUT_LENGTH];
             void find_uid_name(char *uid, char *name, size_t nlen);
@@ -1809,7 +1810,7 @@ ACMD(do_varstat) {
 
             /* currently, variable context for players is always 0, so it is */
             /* not displayed here. in the future, this might change */
-            for (const auto &[name, value] : vict->script_variables) {
+            for (const auto &[name, value] : vict->variables) {
                 if (value.starts_with(UID_CHAR)) {
                     auto uidResult = resolveUID(value);
                     if(uidResult) {

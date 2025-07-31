@@ -250,9 +250,32 @@ static void init_char_stats_derived() {
             double weight = 0;
             auto objects = target->getObjects();
             for(auto obj : filter_raw(objects)) {
-                weight += obj->getTotalWeight();
+                weight += obj->getEffectiveStat("weight_total");
             }
             return weight;
+        })
+        .setSetterFunc(nullptr)
+        ;
+    
+    itemStats.addStat("weight_inventory")
+        .addTag("derived")
+        .setGetterFunc([](struct obj_data* target, const std::string& stat_name) {
+            // Example derived stat calculation
+            double weight = 0;
+            auto objects = target->getObjects();
+            for(auto obj : filter_raw(objects)) {
+                weight += obj->getEffectiveStat("weight_total");
+            }
+            return weight;
+        })
+        .setSetterFunc(nullptr)
+        ;
+    
+    itemStats.addStat("weight_total")
+        .addTag("derived")
+        .setGetterFunc([](struct obj_data* target, const std::string& stat_name) {
+            // Example derived stat calculation
+            return target->getEffectiveStat("weight") + target->getBaseStat("weight_inventory");
         })
         .setSetterFunc(nullptr)
         ;
@@ -541,7 +564,7 @@ static void init_item_stats() {
 "foodval", "max_foodval", "psbonus", "poison", "expbonus", "candy_pl", "candy_ki",
 "candy_st", "whichattr", "attrchance", "size", "destination_room", "fuel", "fuelcount",
 "external_room", "location", "viewport", "default_room", "vehicle_vnum", "speed",
-"appear", "read", "write", "erase", "comfort_level", "htank_charge", "mat_goal",
+"appear", "read", "write", "erase", "comfort_level", "htank_charge", "mat_goal", "gravity",
 "maturity", "max_mature", "water_level", "bait", "level", "weight", "cost", "cost_per_day", "energy", "keycode"}) {
         itemStats.addStat(s)
         .addTag("item")
@@ -550,6 +573,12 @@ static void init_item_stats() {
         .addTag("item")
         ;
     }
+
+    itemStats.addStat("scoutfreq")
+        .setMaxBaseValue(999.0)
+        .setMinBaseValue(0.0)
+        .setInitFunc(1.0);
+
 
     for(const auto& s : {"scoutfreq", "lload", "kicharge", "kitype", "distance", "foob", "aucter", "curBidder", "aucTime", "bid", "startbid", "posttype"}) {
         itemStats.addStat(s)

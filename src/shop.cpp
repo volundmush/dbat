@@ -1287,7 +1287,7 @@ SPECIAL(shop_keeper) {
             snprintf(argm, sizeof(argm), "$N shouts '%s'", MSG_NO_STEAL_HERE);
             act(argm, false, ch, nullptr, keeper, TO_CHAR);
             act(argm, false, ch, nullptr, keeper, TO_ROOM);
-            do_action(keeper, GET_NAME(ch), cmd_slap, 0);
+            do_action(keeper, (char*)GET_NAME(ch), cmd_slap, 0);
 
             return (true);
         } else {
@@ -1331,7 +1331,7 @@ int ok_damage_shopkeeper(struct char_data *ch, struct char_data *victim) {
             snprintf(buf, sizeof(buf), "%s %s", GET_NAME(ch), MSG_CANT_KILL_KEEPER);
             do_tell(victim, buf, cmd_tell, 0);
 
-            do_action(victim, GET_NAME(ch), cmd_slap, 0);
+            do_action(victim, (char*)GET_NAME(ch), cmd_slap, 0);
             return (false);
         }
     }
@@ -1350,7 +1350,7 @@ void assign_the_shopkeepers() {
 
     for (auto &[vn, sh] : shop_index) {
         if (!mob_index.contains(sh.keeper)) {
-            basic_mud_log("SYSERR: Shopkeeper vnum %d does not exist in mob_index.", sh.keeper);
+            basic_mud_log("SYSERR: Shop %d has an invalid keeper: %d", sh.vnum, sh.keeper);
             continue;
         }
         auto& mi = mob_index.at(sh.keeper);

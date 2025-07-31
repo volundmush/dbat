@@ -52,7 +52,7 @@ std::string proto_data::scriptString() const {
 double unit_data::getInventoryWeight() {
     double weight = 0;
     for(auto obj : filter_raw(getObjects())) {
-        weight += obj->getTotalWeight();
+        weight += obj->getEffectiveStat("weight_total");
     }
     return weight;
 }

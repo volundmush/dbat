@@ -324,8 +324,6 @@ extern trig_rnum real_trigger(trig_vnum vnum);
 extern void process_eval(unit_data *go, script_data *sc, trig_data *trig,
                          int type, char *cmd);
 
-extern void read_saved_vars(struct char_data *ch);
-
 /* from dg_db_scripts.c */
 extern void parse_trigger(FILE *trig_f, trig_vnum nr);
 
@@ -367,11 +365,7 @@ extern void free_varlist(struct trig_var_data *vd);
 
 extern int remove_var(struct trig_var_data **var_list, char *name);
 
-extern void free_trigger(trig_data *trig);
-
 extern void extract_script(unit_data *thing, int type);
-
-extern void extract_script_mem(struct script_memory *sc);
 
 /* from dg_comm.c */
 extern char *any_one_name(char *argument, char *first_arg);
@@ -410,7 +404,7 @@ extern room_rnum obj_room(obj_data *obj);
 #define GET_TRIG_TYPE(t)          ((t)->trigger_type)
 #define GET_TRIG_NARG(t)          ((t)->narg)
 #define GET_TRIG_ARG(t)           ((t)->arglist)
-#define GET_TRIG_VARS(t)      ((t)->var_list)
+#define GET_TRIG_VARS(t)      ((t)->variables)
 
 #define GET_TRIG_DEPTH(t)         ((t)->depth)
 #define GET_TRIG_LOOPS(t)         ((t)->loops)

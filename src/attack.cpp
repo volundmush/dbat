@@ -2063,12 +2063,14 @@ namespace atk {
         bool extracted = false;
         calcDamage = calculateObjectDamage();
 
-        if (KICHARGE(obj) > 0 && GET_CHARGE(user) > KICHARGE(obj)) {
-            KICHARGE(obj) -= GET_CHARGE(user);
+        auto kic = KICHARGE(obj);
+
+        if (kic > 0 && GET_CHARGE(user) > kic) {
+            obj->modBaseStat("kicharge", -GET_CHARGE(user));
             extract_obj(obj);
             extracted = true;
-        } else if (KICHARGE(obj) > 0 && GET_CHARGE(user) < KICHARGE(obj)) {
-            KICHARGE(obj) -= GET_CHARGE(user);
+        } else if (kic > 0 && GET_CHARGE(user) < kic) {
+            obj->modBaseStat("kicharge", -GET_CHARGE(user));
             user->setBaseStat<int64_t>("charge", 0);
             calcDamage = KICHARGE(obj);
             hurt(0, 0, USER(obj), user, nullptr, calcDamage, 0);
@@ -2082,10 +2084,11 @@ namespace atk {
     }
 
     void Shogekiha::announceObject() {
-        if (KICHARGE(obj) > 0 && GET_CHARGE(user) > KICHARGE(obj)) {
+        auto kic = KICHARGE(obj);
+        if (kic > 0 && GET_CHARGE(user) > kic) {
             actUser("@WYou leap at $p@W with your arms spread out to your sides. As you are about to make contact with $p@W you scream and shatter the attack with your ki!@n");
             actRoom("@C$n@W leaps out at $p@W with $s arms spead out to $s sides. As $e is about to make contact with $p@W $e screams and shatters the attack with $s ki!@n");
-        } else if (KICHARGE(obj) > 0 && GET_CHARGE(user) < KICHARGE(obj)) {
+        } else if (kic > 0 && GET_CHARGE(user) < kic) {
             actUser("@WYou leap at $p@W with your arms spread out to your sides. As you are about to make contact with $p@W you scream and weaken the attack with your ki before taking the rest of the attack in the chest!@n");
             actRoom("@C$n@W leaps out at $p@W with $s arms spead out to $s sides. As $e is about to make contact with $p@W $e screams and weakens the attack with $s ki before taking the rest of the attack in the chest!@n");
         } else {

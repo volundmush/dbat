@@ -96,7 +96,6 @@ void trig_data_init(trig_data *this_data) {;
     this_data->depth = 0;
     this_data->waiting = 0.0;
     this_data->purged = false;
-    this_data->var_list = nullptr;
 
 }
 

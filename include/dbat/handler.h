@@ -130,7 +130,7 @@ constexpr int FIND_ALLDOT = 2;
 
 /* Generic Find */
 
-extern int generic_find(char *arg, bitvector_t bitvector, struct char_data *ch,
+extern int generic_find(const char *arg, bitvector_t bitvector, struct char_data *ch,
                         struct char_data **tar_ch, struct obj_data **tar_obj);
 
 #define FIND_CHAR_ROOM     (1 << 0)

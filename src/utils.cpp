@@ -796,7 +796,7 @@ void broken_update(uint64_t heartPulse, double deltaTime) {
             grav_change = true;
         }
         if (grav_change == true) {
-            k->gravity = rand_gravity[grav_roll];
+            k->setBaseStat("gravity", rand_gravity[grav_roll]);
             k->setBaseStat<weight_t>("weight", rand_gravity[grav_roll]);
             send_to_room(IN_ROOM(k), "@RThe gravity generator malfunctions! The gravity level has changed!@n\r\n");
         }
@@ -864,11 +864,11 @@ void randomize_eq(struct obj_data *obj) {
         } else if (roll <= 2) {
             value -= 2;
         }
-        if (obj->level >= 80) {
+        if (obj->getBaseStat("level") >= 80) {
             if (value <= 0) {
                 value = 1;
             }
-        } else if (obj->level >= 60) {
+        } else if (obj->getBaseStat("level") >= 60) {
             if (value < 0) {
                 value = 0;
             }
@@ -2916,7 +2916,7 @@ int levenshtein_distance(char *s1, char *s2) {
     return i;
 }
 
-int count_color_chars(char *string) {
+int count_color_chars(const char *string) {
     int i, len;
     int num = 0;
 

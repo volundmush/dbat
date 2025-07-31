@@ -1435,7 +1435,7 @@ struct obj_data *read_object(obj_vnum nr, int type) /* and obj_rnum */
         if (GET_OBJ_VAL(obj, VAL_FOOD_MAXFOODVAL) == 0) {
             SET_OBJ_VAL(obj, VAL_FOOD_MAXFOODVAL, GET_OBJ_VAL(obj, VAL_FOOD_FOODVAL));
         }
-        FOOB(obj) = GET_OBJ_VAL(obj, VAL_FOOD_MAXFOODVAL);
+        obj->setBaseStat("foob", GET_OBJ_VAL(obj, VAL_FOOD_FOODVAL));     
     }
 
     obj->activate();
@@ -1822,7 +1822,7 @@ static void do_reset_cmds(zone_data &z) {
                         ZONE_ERROR("Attempt to give a variable to scriptless mobile");
                     }
                     else
-                        tmob->script_variables[c.sarg1] = c.sarg2;
+                        tmob->setVariable(c.sarg1, c.sarg2);
                     last_cmd = 1;
                 }
                 else if (c.arg1 == OBJ_TRIGGER && tobj)
@@ -1832,7 +1832,7 @@ static void do_reset_cmds(zone_data &z) {
                         ZONE_ERROR("Attempt to give variable to scriptless object");
                     }
                     else
-                        tobj->script_variables[c.sarg1] = c.sarg2;
+                        tobj->setVariable(c.sarg1, c.sarg2);
                     last_cmd = 1;
                 }
                 else if (c.arg1 == WLD_TRIGGER)
@@ -1843,7 +1843,7 @@ static void do_reset_cmds(zone_data &z) {
                     }
                     else
                     {
-                        get_room(c.arg3)->script_variables[c.sarg1] = c.sarg2;
+                        get_room(c.arg3)->setVariable(c.sarg1, c.sarg2);
                         last_cmd = 1;
                     }
                 }

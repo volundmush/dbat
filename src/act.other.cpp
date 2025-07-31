@@ -8332,10 +8332,7 @@ ACMD(do_snet) {
     }
 
     if (channel > 0) {
-        SFREQ(obj) = channel;
-        if (channel > 999) {
-            SFREQ(obj) = 999;
-        }
+        obj->setBaseStat("scoutfreq", channel);
         act("@wYou push some buttons on $p@w and change its channel.", true, ch, obj, nullptr, TO_CHAR);
         act("@C$n@w pushes some buttons on $p@w and changes its channel.", true, ch, obj, nullptr, TO_ROOM);
         return;
@@ -8345,7 +8342,7 @@ ACMD(do_snet) {
             return;
         }
         if (SFREQ(obj) == 0) {
-            SFREQ(obj) = 1;
+            obj->setBaseStat("scoutfreq", 1);
         }
         if (!strcasecmp(arg, "*") && call <= -1) {
             global = true;
@@ -8389,7 +8386,7 @@ ACMD(do_snet) {
             if (GET_EQ(i->character, WEAR_EYE)) {
                 obj2 = GET_EQ(i->character, WEAR_EYE);
                 if (SFREQ(obj2) == 0) {
-                    SFREQ(obj2) = 1;
+                    obj2->setBaseStat("scoutfreq", 1);
                 }
                 if (global == false && call <= -1 && SFREQ(obj2) == SFREQ(obj) && GET_ADMLEVEL(i->character) < 1) {
                     send_to_char(i->character, "@C%s is heard @W(@c%s@W), @D[@WSNET FREQ@D: @Y%d@D] @G%s %s@n\r\n",

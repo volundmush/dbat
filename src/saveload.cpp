@@ -375,7 +375,7 @@ void to_json(json& j, const trig_data& t) {
             j["curr_state"] = t.countLine(t.curr_state);
             if(t.curr_state->original) j["curr_state_original"] = t.countLine(t.curr_state->original);
         }
-        if(t.var_list) j["var_list"] = serializeVars(t.var_list);
+        if(!t.variables.empty()) j["variables"] = t.variables;
     } else {
         // we're serializing a prototype.
         if(t.vn != NOTHING) j["vn"] = t.vn;
@@ -432,8 +432,8 @@ void from_json(const json& j, trig_data& t) {
             }
         }
 
-        if(j.contains("var_list")) {
-            deserializeVars(&t.var_list, j["var_list"]);
+        if(j.contains("variables")) {
+            t.variables = j["variables"].get<std::unordered_map<std::string, std::string>>();
         }
     } else {
         // we're deserializing a prototype.
@@ -707,8 +707,8 @@ void to_json(json& j, const unit_data& u) {
         j["running_scripts"] = u.running_scripts.value();
     }
 
-    if(u.script_variables.empty()) {
-        j["script_variables"] = u.script_variables;
+    if(u.variables.empty()) {
+        j["variables"] = u.variables;
     }
 }
 
@@ -722,7 +722,7 @@ void from_json(const json& j, unit_data& u) {
         u.running_scripts = j["running_scripts"].get<std::vector<trig_vnum>>();
     }
 
-    if(j.contains("script_variables")) u.script_variables = j["script_variables"].get<std::unordered_map<std::string, std::string>>();
+    if(j.contains("variables")) u.variables = j["variables"].get<std::unordered_map<std::string, std::string>>();
 }
 
 
@@ -858,6 +858,7 @@ void load_rooms(const std::filesystem::path& loc) {
         auto r = std::make_shared<room_data>();
         j.get_to(*r);
         r->id = id;
+        r->vn = id;
         units.emplace(id, r);
         world.emplace(id, r);
         auto zone = r->zone;
@@ -944,13 +945,8 @@ void to_json(json& j, const obj_data& o) {
     to_json(j, static_cast<const thing_data&>(o));
 
     j["type_flag"] = o.type_flag;
-    if(o.level) j["level"] = o.level;
     if(o.wear_flags) j["wear_flags"] = o.wear_flags;
     if(o.item_flags) j["item_flags"] = o.item_flags;
-
-    if(o.weight != 0.0) j["weight"] = o.weight;
-    if(o.cost) j["cost"] = o.cost;
-    if(o.cost_per_day) j["cost_per_day"] = o.cost_per_day;
 
     for(auto & i : o.affected) {
         if(i.location == APPLY_NONE) continue;
@@ -1002,15 +998,10 @@ void from_json(const json& j, obj_data& o) {
     from_json(j, static_cast<thing_data&>(o));
 
     if(j.contains("type_flag")) o.type_flag = j["type_flag"];
-    if(j.contains("level")) o.level = j["level"];
 
     if(j.contains("wear_flags")) o.wear_flags = j["wear_flags"].get<FlagHandler<WearFlag>>();
 
     if(j.contains("item_flags")) o.item_flags = j["item_flags"].get<FlagHandler<ItemFlag>>();
-
-    if(j.contains("weight")) o.weight = j["weight"];
-    if(j.contains("cost")) o.cost = j["cost"];
-    if(j.contains("cost_per_day")) o.cost_per_day = j["cost_per_day"];
 
     if(j.contains("affected")) {
         int counter = 0;

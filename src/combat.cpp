@@ -2010,7 +2010,7 @@ void huge_update(uint64_t heartPulse, double deltaTime) {
             }
         }
         act("$p@W descends slowly towards the ground!@n", true, nullptr, k, nullptr, TO_ROOM);
-        KIDIST(k)--;
+        k->modBaseStat("distance", -1);
     }
 
 }
@@ -2063,8 +2063,8 @@ void homing_update(uint64_t heartPulse, double deltaTime) {
                         true, vict, k, nullptr, TO_CHAR);
                     act("@C$n @wmanages to deflect the $p@w sending it flying away and depleting some of its energy.@n",
                         true, vict, k, nullptr, TO_ROOM);
-                    KICHARGE(k) -= KICHARGE(k) * 0.1;
-                    if (KICHARGE(k) <= 0) {
+                    auto kic = KICHARGE(k);
+                    if (k->modBaseStat("kicharge", -(kic * 0.1)) <= 0) {
                         send_to_room(IN_ROOM(k), "%s has lost all its energy and disappears.\r\n",
                                      k->getShortDescription());
                         extract_obj(k);
@@ -2177,8 +2177,8 @@ void homing_update(uint64_t heartPulse, double deltaTime) {
                         true, vict, k, nullptr, TO_CHAR);
                     act("@C$n @wmanages to deflect the $p@w sending it flying away and depleting some of its energy.@n",
                         true, vict, k, nullptr, TO_ROOM);
-                    KICHARGE(k) -= KICHARGE(k) / 10;
-                    if (KICHARGE(k) <= 0) {
+                    auto kic = KICHARGE(k);
+                    if (k->modBaseStat("kicharge", -kic / 10) <= 0) {
                         send_to_room(IN_ROOM(k), "%s has lost all its energy and disappears.\r\n",
                                      k->getShortDescription());
                         extract_obj(k);
@@ -2852,8 +2852,8 @@ void dodge_ki(struct char_data *ch, struct char_data *vict, int type, int type2,
             obj_to_room(obj, IN_ROOM(ch));
 
             TARGET(obj) = vict;
-            KICHARGE(obj) = damtype(ch, type2, skill, .2);
-            KITYPE(obj) = skill2;
+            obj->setBaseStat("kicharge", damtype(ch, type2, skill, .2));
+            obj->setBaseStat("kitype", skill2);
             USER(obj) = ch;
         } else {
             act("@RIt fails to follow after @r$N@R!@n", true, ch, nullptr, vict, TO_CHAR);
@@ -2897,22 +2897,24 @@ void dodge_ki(struct char_data *ch, struct char_data *vict, int type, int type2,
         obj_to_room(obj, IN_ROOM(ch));
 
         TARGET(obj) = vict;
-        KICHARGE(obj) = damtype(ch, type2, skill, .3);
-        KITYPE(obj) = skill2;
+        obj->setBaseStat("kicharge", damtype(ch, type2, skill, .3));
+        obj->setBaseStat("kitype", skill2);
         USER(obj) = ch;
     }
 }
 
 static void damtype_unarmed_infuse(char_data *ch, int64_t *dam) {
     if (AFF_FLAGGED(ch, AFF_INFUSE)) {
-        *dam += (*dam / 100) * (GET_SKILL(ch, SKILL_INFUSE) / 2);
+        auto infuse = GET_SKILL(ch, SKILL_INFUSE);
+        *dam += (*dam / 100) * (infuse / 2);
         if (IS_JINTO(ch)) {
-            if (GET_SKILL_BASE(ch, SKILL_STYLE) >= 100) {
-                *dam += ((*dam * 0.01) * (GET_SKILL(ch, SKILL_INFUSE) / 2)) * 0.5;
-            } else if (GET_SKILL_BASE(ch, SKILL_STYLE) >= 60) {
-                *dam += ((*dam * 0.01) * (GET_SKILL(ch, SKILL_INFUSE) / 2)) * 0.25;
-            } else if (GET_SKILL_BASE(ch, SKILL_STYLE) >= 40) {
-                *dam += ((*dam * 0.01) * (GET_SKILL(ch, SKILL_INFUSE) / 2)) * 0.05;
+            auto style = GET_SKILL_BASE(ch, SKILL_STYLE);
+            if (style >= 100) {
+                *dam += ((*dam * 0.01) * (infuse / 2)) * 0.5;
+            } else if (style >= 60) {
+                *dam += ((*dam * 0.01) * (infuse / 2)) * 0.25;
+            } else if (style >= 40) {
+                *dam += ((*dam * 0.01) * (infuse / 2)) * 0.05;
             }
         }
     }
@@ -2922,11 +2924,12 @@ static void damtype_unarmed_hasshuken(char_data *ch, int64_t *dam) {
     if (AFF_FLAGGED(ch, AFF_HASS)) {
         *dam *= 2;
         if (IS_KRANE(ch)) {
-            if (GET_SKILL(ch, SKILL_HASSHUKEN) >= 100) {
+            auto hass = GET_SKILL(ch, SKILL_HASSHUKEN);
+            if (hass >= 100) {
                 *dam += *dam * 0.3;
-            } else if (GET_SKILL(ch, SKILL_HASSHUKEN) >= 60) {
+            } else if (hass >= 60) {
                 *dam += *dam * 0.2;
-            } else if (GET_SKILL(ch, SKILL_HASSHUKEN) >= 40) {
+            } else if (hass >= 40) {
                 *dam += *dam * 0.1;
             }
         }

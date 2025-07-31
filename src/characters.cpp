@@ -863,11 +863,11 @@ bool char_data::canCarryWeight(weight_t val) {
 }
 
 bool char_data::canCarryWeight(struct obj_data *obj) {
-    return canCarryWeight(obj->getTotalWeight());
+    return canCarryWeight(obj->getEffectiveStat("weight_total"));
 }
 
 bool char_data::canCarryWeight(struct char_data *obj) {
-    return canCarryWeight(obj->getBaseStat("weight_total"));
+    return canCarryWeight(obj->getEffectiveStat("weight_total"));
 }
 
 room_vnum char_data::normalizeLoadRoom(room_vnum in) {

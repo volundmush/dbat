@@ -22,7 +22,7 @@ static card refine = {"Refine",
         int slot = findItemApplySlot(task->pObject, bonus);
         int mod = 0;
         if(task->pObject->affected[slot].modifier == 0) {
-            mod = task->pObject->level * task->pObject->level;
+            mod = task->pObject->getBaseStat("level") * task->pObject->getBaseStat("level");
         } else {
             mod = task->pObject->affected[slot].modifier * 0.1;
         }
@@ -31,7 +31,7 @@ static card refine = {"Refine",
         task->pObject->affected[slot].specific = static_cast<int>(ComStat::armor);
         task->pObject->affected[slot].location = bonus;
 
-        task->pObject->cost *= 1.2; 
+        task->pObject->modBaseStat("cost", task->pObject->getBaseStat("cost") * 0.2); 
 
         if(task->improvementRounds++ * 20 + (axion_dice(0) / 6) <= GET_SKILL(ch, SKILL_BUILD) * (axion_dice(0) / 100))
             return true;

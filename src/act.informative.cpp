@@ -76,7 +76,7 @@ static void look_in_direction(struct char_data *ch, int dir);
 
 static void look_in_obj(struct char_data *ch, char *arg);
 
-static void look_out_window(struct char_data *ch, char *arg);
+static void look_out_window(struct char_data *ch, const char *arg);
 
 static void look_at_target(struct char_data *ch, char *arg, int read);
 
@@ -1325,8 +1325,8 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
                 }
             }
             if (GET_OBJ_VNUM(obj) == 11) {
-                if(obj->gravity) {
-                    auto msg = fmt::format("@wA gravity generator, set to {}x gravity, is built here", obj->gravity.value());
+                if(auto g = obj->getBaseStat("gravity"); g > 0.0) {
+                    auto msg = fmt::format("@wA gravity generator, set to {}x gravity, is built here", g);
                     send_to_char(ch, msg.c_str());
                 } else {
                     send_to_char(ch, "@wA gravity generator, currently on standby, is built here");
@@ -3333,7 +3333,7 @@ static void look_at_target(struct char_data *ch, char *arg, int cmread) {
 }
 
 
-static void look_out_window(struct char_data *ch, char *arg) {
+static void look_out_window(struct char_data *ch, const char *arg) {
     struct obj_data *i, *viewport = nullptr, *vehicle = nullptr;
     struct char_data *dummy = nullptr;
     room_rnum target_room = NOWHERE;
@@ -4139,7 +4139,7 @@ ACMD(do_status) {
         if (GET_EQ(ch, WEAR_EYE)) {
             struct obj_data *obj = GET_EQ(ch, WEAR_EYE);
             if (SFREQ(obj) == 0) {
-                SFREQ(obj) = 1;
+                obj->setBaseStat("scoutfreq", 1);
             }
             send_to_char(ch, "         Your scouter is on frequency @G%d@n\r\n", SFREQ(obj));
             obj = nullptr;

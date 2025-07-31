@@ -167,7 +167,7 @@ void trigedit_setup_existing(struct descriptor_data *d, int rtrg_num) {
 
 
 static void trigedit_disp_menu(struct descriptor_data *d) {
-    struct trig_data *trig = OLC_TRIG(d);
+    auto *trig = OLC_TRIG(d);
     char *attach_type;
     char trgtypes[256];
 
@@ -380,7 +380,7 @@ void trigedit_save(struct descriptor_data *d) {
     int found = 0;
     char *s;
     trig_data *proto;
-    trig_data *trig = OLC_TRIG(d);
+    auto trig = OLC_TRIG(d);
     struct cmdlist_element *cmd, *next_cmd;
     struct index_data **new_index;
     struct descriptor_data *dsc;
@@ -450,10 +450,7 @@ void trigedit_save(struct descriptor_data *d) {
             /* anything could have happened so we don't want to keep these */
             for(const auto& s : {"queued", "waiting"}) triggerSubscriptions.unsubscribe(s, live_trig);
 
-            if (live_trig->var_list) {
-                free_varlist(live_trig->var_list);
-                live_trig->var_list = nullptr;
-            }
+            live_trig->variables.clear();
 
             live_trig->cmdlist = proto->cmdlist;
             live_trig->curr_state = live_trig->cmdlist;
@@ -516,7 +513,6 @@ void dg_script_menu(struct descriptor_data *d) {
 }
 
 int dg_script_edit_parse(struct descriptor_data *d, char *arg) {
-    struct trig_proto_list *trig, *currtrig;
     int count, pos, vnum;
 
     auto tfind = std::find(OLC_SCRIPT(d).begin(), OLC_SCRIPT(d).end(), -1);

@@ -952,8 +952,8 @@ SPECIAL(gravity) {
 
         bool doChange = false;
 
-        if(obj->gravity) {
-            if(obj->gravity.value() == grav) {
+        if(obj->getEffectiveStat("gravity") > 0.0) {
+            if(obj->getEffectiveStat("gravity") == grav) {
                 send_to_char(ch, "The gravity generator is already set to that.\r\n");
                 return (true);
             }
@@ -971,7 +971,7 @@ SPECIAL(gravity) {
             if(grav > 0.0) {
                 auto msg = fmt::format("You punch in {} times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n", grav);
                 send_to_char(ch, msg.c_str());
-                obj->gravity = grav;
+                obj->setBaseStat("gravity", grav);
                 auto room = ch->getRoom();
                 if (room->room_flags.toggle(ROOM_AURA)) {
                     send_to_room(IN_ROOM(ch), "The increased gravity forces the aura to disappear.\r\n");
@@ -979,7 +979,7 @@ SPECIAL(gravity) {
             } else {
                 send_to_char(ch,
                              "You punch in normal gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
-                obj->gravity = std::nullopt;
+                obj->setBaseStat("gravity", 0.0);
             }
             act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, nullptr, nullptr, TO_ROOM);
 

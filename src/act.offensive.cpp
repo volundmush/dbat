@@ -186,10 +186,10 @@ ACMD(do_geno) {
 
     ch->modBaseStat<int64_t>("charge", GET_MAX_HIT(ch) / 10);
     TARGET(obj) = vict;
-    KICHARGE(obj) = damtype(ch, 41, prob, attperc);
-    KITYPE(obj) = SKILL_GENOCIDE;
+    obj->setBaseStat("kicharge", damtype(ch, 41, prob, attperc));
+    obj->setBaseStat("kitype", SKILL_GENOCIDE);
     USER(obj) = ch;
-    KIDIST(obj) = dista;
+    obj->setBaseStat("distance", dista);
     pcost(ch, attperc, 0);
     act("@WYou raise one arm above your head and pour your charged ki there. A large swirling pink ball of energy begins to form above your raised hand. You grin viciously as the @mG@Me@wn@mo@Mc@wi@md@Me@W attack is complete and you toss it at @c$N@W!@n",
         true, ch, nullptr, vict, TO_CHAR);
@@ -300,10 +300,10 @@ ACMD(do_genki) {
     obj_to_room(obj, IN_ROOM(vict));
 
     TARGET(obj) = vict;
-    KICHARGE(obj) = damtype(ch, 40, prob, attperc);
-    KITYPE(obj) = SKILL_GENKIDAMA;
+    obj->setBaseStat("kicharge", damtype(ch, 40, prob, attperc));
+    obj->setBaseStat("kitype", SKILL_GENKIDAMA);
     USER(obj) = ch;
-    KIDIST(obj) = dista;
+    obj->setBaseStat("distance", dista);
     objectSubscriptions.subscribe("hugeKiAttacks", obj);
     pcost(ch, attperc, 0);
     act("@WYou raise both your arms upwards and begin to pool your charged ki there. You also start calling on the ki of all living beings in the vicinity who are willing to help. A large @cS@Cp@wi@cr@Ci@wt @cB@Co@wm@cb@W forms above your hands, when it is finished you lob it toward @c$N@W!@n",

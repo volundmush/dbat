@@ -159,7 +159,7 @@ extern void core_dump_real(const char *who, int line);
 
 extern int room_is_dark(room_rnum room);
 
-extern int count_color_chars(char *string);
+extern int count_color_chars(const char *string);
 
 extern bool is_sparring(struct char_data *ch);
 
@@ -803,17 +803,17 @@ int64_t MOD_OBJ_VAL(T* obj, const std::string& val, int mod) {
 #define GET_AUCTIME(obj)        ((obj)->aucTime)
 #define GET_BID(obj)            ((obj)->bid)
 #define GET_STARTBID(obj)       ((obj)->startbid)
-#define FOOB(obj)               ((obj)->foob)
+#define FOOB(obj)               ((obj)->getBaseStat<int>("foob"))
 /* Below is used for "homing" ki attacks */
 #define TARGET(obj)             ((obj)->target)
-#define KICHARGE(obj)           ((obj)->kicharge)
-#define KITYPE(obj)             ((obj)->kitype)
+#define KICHARGE(obj)           ((obj)->getBaseStat("kicharge"))
+#define KITYPE(obj)             ((obj)->getBaseStat<int>("kitype"))
 #define USER(obj)               ((obj)->user)
-#define KIDIST(obj)             ((obj)->distance)
+#define KIDIST(obj)             ((obj)->getBaseStat<int>("distance"))
 /* Above is used for "homing ki attacks */
-#define SFREQ(obj)              ((obj)->scoutfreq)
+#define SFREQ(obj)              ((obj)->getBaseStat<int>("scoutfreq"))
 #define HCHARGE(obj)            (GET_OBJ_VAL((obj), VAL_BED_HTANK_CHARGE))
-#define GET_LAST_LOAD(obj)      ((obj)->lload)
+#define GET_LAST_LOAD(obj)      ((obj)->getBaseStat<time_t>("lload"))
 #define GET_OBJ_SIZE(obj)    (static_cast<int>((obj)->size))
 #define GET_OBJ_RNUM(obj)    ((obj)->getVnum())
 #define GET_OBJ_VNUM(obj)    ((obj)->getVnum())
