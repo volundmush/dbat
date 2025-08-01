@@ -143,6 +143,12 @@ struct HasVariables {
         variables[key] = value;
     }
 
+    template<typename T>
+    requires (!std::is_convertible_v<T, const char*>)
+    void setVariable(const std::string &key, T u) {
+        variables[key] = u->getUID(true);
+    }
+
     bool hasVariable(const std::string &key) const {
         return variables.find(key) != variables.end();
     }

@@ -2321,12 +2321,6 @@ std::shared_ptr<trig_data> trig_data::shared() {
     return shared_from_this();
 }
 
-
-void ADD_UID_VAR(char *buf, struct trig_data *trig, struct unit_data *thing, char *name, long context) {
-	auto uid = thing->getUID(true);
-    trig->setVariable(name, uid);
-}
-
 // Note: Trigger instances are meant to be set all active or inactive on a per room/character/item basis,
 // not individually.
 void trig_data::activate() {

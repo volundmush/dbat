@@ -414,8 +414,6 @@ constexpr int OBJ_ID_BASE = 1300000; /* 250000 Rooms */
                   IS_SET(SCRIPT_TYPES(SCRIPT(go)), type))
 #define TRIGGER_CHECK(t, type)   (IS_SET(GET_TRIG_TYPE(t), (type)) && (t)->isReady())
 
-extern void ADD_UID_VAR(char *buf, struct trig_data *trig, struct unit_data *thing, char *name, long context);
-
 //extern nlohmann::json serializeVars(struct trig_var_data *vd);
 
 //extern void deserializeVars(struct trig_var_data **vd, const nlohmann::json& j);
