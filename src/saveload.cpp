@@ -324,136 +324,51 @@ void load_accounts(const std::filesystem::path& loc) {
 
 }
 
-// Triggers serialize/deserialize...
-void to_json(json& j, const trig_var_data& t) {
-    if(t.name && std::strlen(t.name))
-        j["name"] = t.name;
-    if(t.value && std::strlen(t.value))
-        j["value"] = t.value;
-    if(t.context)
-        j["context"] = t.context;
-}
+void to_json(json& j, const trig_proto_data& t) {
+    j["vn"] = t.vn;
+    j["name"] = t.name;
+    j["attach_type"] = t.attach_type;
+    j["trigger_type"] = t.trigger_type;
+    j["narg"] = t.narg;
+    j["arglist"] = t.arglist;
 
-void from_json(const json& j, trig_var_data& t) {
-    if(j.contains("name"))
-        t.name = strdup(j["name"].get<std::string>().c_str());
-    if(j.contains("value"))
-        t.value = strdup(j["value"].get<std::string>().c_str());
-    if(j.contains("context"))
-        t.context = j["context"].get<long>();
-}
-
-json serializeVars(struct trig_var_data *vd) {
-    auto j = json::array();;
-    for(auto v = vd; v; v = v->next) {
-        j.push_back(*v);
-    }
-    return j;
+    j["body"] = t.scriptString();
 }
 
 
-void deserializeVars(struct trig_var_data **vd, const json &j) {
-    for(auto it = j.rbegin(); it != j.rend(); ++it) {
-        auto v = new trig_var_data();
-        it->get_to(*v);
-        v->next = *vd;
-        *vd = v;
+void from_json(const json& j, trig_proto_data& t) {
+    if(j.contains("vn")) t.vn = j["vn"].get<int>();
+    if(j.contains("name")) t.name = strdup(j["name"].get<std::string>().c_str());
+    if(j.contains("attach_type")) t.attach_type = j["attach_type"].get<UnitType>();
+    if(j.contains("trigger_type")) t.trigger_type = j["trigger_type"].get<int>();
+    if(j.contains("narg")) t.narg = j["narg"].get<int>();
+    if(j.contains("arglist")) t.arglist = strdup(j["arglist"].get<std::string>().c_str());
+
+    if(j.contains("body")) {
+        t.setBody(j["body"].get<std::string>());
     }
 }
+
 
 void to_json(json& j, const trig_data& t) {
-    if(t.owner) {
-        // we're serializing an instance.
-        j["vn"] = t.vn;
-        j["instance"] = true;
-
-        if(t.depth) j["depth"] = t.depth;
-        if(t.loops) j["loops"] = t.loops;
-        if(t.waiting != 0.0) j["waiting"] = t.waiting;
-
-        if(!(t.curr_state == t.cmdlist || !t.curr_state)) {
-            j["curr_state"] = t.countLine(t.curr_state);
-            if(t.curr_state->original) j["curr_state_original"] = t.countLine(t.curr_state->original);
-        }
-        if(!t.variables.empty()) j["variables"] = t.variables;
-    } else {
-        // we're serializing a prototype.
-        if(t.vn != NOTHING) j["vn"] = t.vn;
-        if(t.name && strlen(t.name)) j["name"] = t.name;
-        if(t.attach_type) j["attach_type"] = t.attach_type;
-        if(t.data_type) j["data_type"] = t.data_type;
-        if(t.trigger_type) j["trigger_type"] = t.trigger_type;
-        if(t.narg) j["narg"] = t.narg;
-        if(t.arglist && strlen(t.arglist)) j["arglist"] = t.arglist;
-
-        for(auto c = t.cmdlist; c; c = c->next) {
-            j["cmdlist"].push_back(c->cmd);
-        }
-
-    }
+    j["vn"] = t.getVnum();
+    j["current_line"] = t.current_line;
+    j["state"] = t.state;
+    j["depth_stack"] = t.depth_stack;
+    if(t.waiting != 0.0) j["waiting"] = t.waiting;
+    if(!t.variables.empty()) j["variables"] = t.variables;
 }
 
 void from_json(const json& j, trig_data& t) {
-    if(j.contains("instance")) {
-        // we're deserializing an instance.
-        t.vn = j["vn"].get<int>();
-        auto &tp = trig_index.at(t.vn);
-        auto p = tp.proto;
-        if(p->name && strlen(p->name)) t.name = strdup(p->name);
-        t.attach_type = p->attach_type;
-        t.data_type = p->data_type;
-        t.trigger_type = p->trigger_type;
-        t.narg = p->narg;
-        if(p->arglist && strlen(p->arglist)) t.arglist = strdup(p->arglist);
+    auto vn = j["vn"].get<int>();
+    t.proto = &trig_index.at(vn);
 
-        t.cmdlist = p->cmdlist;
-        t.curr_state = p->cmdlist;
+    if(j.contains("state")) t.state = j["state"].get<DgScriptState>();
+    if(j.contains("waiting")) t.waiting = j["waiting"].get<double>();
+    if(j.contains("depth_stack")) t.depth_stack = j["depth_stack"].get<std::vector<DepthType>>();
 
-        if(j.contains("waiting")) t.waiting = j["waiting"].get<double>();
-        if(j.contains("depth")) t.depth = j["depth"].get<int>();
-        if(j.contains("loops")) t.loops = j["loops"].get<int>();
-
-        if(j.contains("curr_state")) {
-            int curr_state_num = j["curr_state"].get<int>();
-            if(curr_state_num > 0) {
-                for(int i = 0; i < curr_state_num; i++) {
-                    t.curr_state = t.curr_state->next;
-                }
-            }
-        }
-
-        if(j.contains("curr_state_original")) {
-            int curr_state_num = j["curr_state_original"].get<int>();
-            t.curr_state->original = t.cmdlist;
-            if(curr_state_num > 0) {
-                for(int i = 0; i < curr_state_num; i++) {
-                    t.curr_state->original = t.curr_state->original->next;
-                }
-            }
-        }
-
-        if(j.contains("variables")) {
-            t.variables = j["variables"].get<std::unordered_map<std::string, std::string>>();
-        }
-    } else {
-        // we're deserializing a prototype.
-        if(j.contains("vn")) t.vn = j["vn"].get<int>();
-        if(j.contains("name")) t.name = strdup(j["name"].get<std::string>().c_str());
-        if(j.contains("attach_type")) t.attach_type = j["attach_type"].get<int>();
-        if(j.contains("data_type")) t.data_type = j["data_type"].get<int>();
-        if(j.contains("trigger_type")) t.trigger_type = j["trigger_type"].get<int>();
-        if(j.contains("narg")) t.narg = j["narg"].get<int>();
-        if(j.contains("arglist")) t.arglist = strdup(j["arglist"].get<std::string>().c_str());
-
-        if(j.contains("cmdlist")) {
-            auto &cl = j["cmdlist"];
-            for(auto c = cl.rbegin(); c != cl.rend(); c++) {
-                auto cle = new cmdlist_element();
-                cle->cmd = strdup(c->get<std::string>().c_str());
-                cle->next = t.cmdlist;
-                t.cmdlist = cle;
-            }
-        }
+    if(j.contains("variables")) {
+        t.variables = j["variables"].get<std::unordered_map<std::string, std::string>>();
     }
 }
 
@@ -461,9 +376,7 @@ void load_dgscript_prototypes(const std::filesystem::path& loc) {
     for(auto j : load_from_file(loc, "dgScriptPrototypes.json")) {
         auto id = j["vn"].get<int64_t>();
         auto &t = trig_index[id];
-        t.vn = id;
-        t.proto = new trig_data();
-        j.get_to(*t.proto);
+        j.get_to(t);
         auto zone = real_zone_by_thing(id);
         auto& z = zone_table.at(zone);
         z.triggers.insert(id);
@@ -473,8 +386,7 @@ void load_dgscript_prototypes(const std::filesystem::path& loc) {
 static void dump_dgscript_prototypes(const std::filesystem::path &loc) {
     json j;
     for(auto &[v, t] : trig_index) {
-        const auto &tp = *t.proto;
-        j.push_back(tp);
+        j.push_back(t);
     }
     dump_to_file(loc, "dgScriptPrototypes.json", j);
 }
@@ -698,6 +610,7 @@ void from_json(const json& j, struct extra_descr_data& e) {
 
 // unit_data serialize/deserialize...
 void to_json(json& j, const unit_data& u) {
+    j["vn"] = u.vn;
     j["id"] = u.id;
     j["generation"] = u.generation;
     j["strings"] = u.strings;
@@ -713,6 +626,7 @@ void to_json(json& j, const unit_data& u) {
 }
 
 void from_json(const json& j, unit_data& u) {
+    if(j.contains("vn")) u.vn = j["vn"].get<int>();
     if(j.contains("id")) u.id = j["id"];
     if(j.contains("generation")) u.generation = j["generation"];
     if(j.contains("strings")) u.strings = j["strings"].get<std::unordered_map<std::string, std::string>>();
@@ -1745,4 +1659,26 @@ void runSave() {
     std::filesystem::rename(tempPath, newPath);
     basic_mud_log("Finished dumping state to %s in %f seconds.", newPath.string(), duration);
     cleanup_state();
+}
+
+void rest_post_script(int accountID, int scriptID, const std::string& data) {
+    auto &acc = accounts.at(accountID);
+    json j;
+    try {
+        j = json::parse(data);
+    } catch (const json::parse_error& e) {
+        basic_mud_log("Error parsing JSON data for script %d: %s", scriptID, e.what());
+        return;
+    }
+    if(trig_index.contains(scriptID)) {
+        auto &trig = trig_index.at(scriptID);
+        // TODO: Post the data to the trigger
+
+        basic_mud_log("%s updated DgScript %d: '%s'", acc.name.c_str(), scriptID, trig.name);
+        
+    } else {
+        auto &trig = trig_index[scriptID];
+        j.get_to(trig);
+        basic_mud_log("%s created DgScript %d: '%s'", acc.name.c_str(), scriptID, trig.name);
+    }
 }

@@ -124,7 +124,7 @@ void random_mtrigger(char_data *ch) {
     for (const auto& t : ch->getScripts()) {
         if (TRIGGER_CHECK(t, MTRIG_RANDOM) &&
             (rand_number(1, 100) <= GET_TRIG_NARG(t))) {
-            script_driver(ch, t.get(), MOB_TRIGGER, TRIG_NEW);
+            t->execute();
             break;
         }
     }
@@ -141,7 +141,7 @@ void bribe_mtrigger(char_data *ch, char_data *actor, int amount) {
             snprintf(buf, sizeof(buf), "%d", amount);
             t->setVariable("amount", buf);
             ADD_UID_VAR(buf, t.get(), actor, "actor", 0);
-            script_driver(ch, t.get(), MOB_TRIGGER, TRIG_NEW);
+            t->execute();
             break;
         }
     }
@@ -173,10 +173,10 @@ void greet_memory_mtrigger(char_data *actor) {
                 for (const auto& t: ch->getScripts()) {
                     if (IS_SET(GET_TRIG_TYPE(t), MTRIG_MEMORY) &&
                         CAN_SEE(ch, actor) &&
-                        !GET_TRIG_DEPTH(t) &&
+                        t->isReady() &&
                         rand_number(1, 100) <= GET_TRIG_NARG(t)) {
                         ADD_UID_VAR(buf, t.get(), actor, "actor", 0);
-                        script_driver(ch, t.get(), MOB_TRIGGER, TRIG_NEW);
+                        t->execute();
                         break;
                     }
                 }
@@ -218,13 +218,13 @@ int greet_mtrigger(char_data *actor, int dir) {
         for (const auto& t: ch->getScripts()) {
             if (((IS_SET(GET_TRIG_TYPE(t), MTRIG_GREET) && CAN_SEE(ch, actor)) ||
                  IS_SET(GET_TRIG_TYPE(t), MTRIG_GREET_ALL)) &&
-                !GET_TRIG_DEPTH(t) && (rand_number(1, 100) <= GET_TRIG_NARG(t))) {
+                t->isReady() && (rand_number(1, 100) <= GET_TRIG_NARG(t))) {
                 if (dir >= 0 && dir < NUM_OF_DIRS)
                     t->setVariable("direction", (const char *) dirs[rev_dir[dir]]);
                 else
                     t->setVariable("direction", "none");
                 ADD_UID_VAR(buf, t.get(), actor, "actor", 0);
-                intermediate = script_driver(ch, t.get(), MOB_TRIGGER, TRIG_NEW);
+                intermediate = t->execute();
                 if (!intermediate) final = false;
                 continue;
             }
@@ -253,7 +253,7 @@ void entry_memory_mtrigger(char_data *ch) {
                             if (TRIGGER_CHECK(t, MTRIG_MEMORY) && (rand_number(1, 100) <=
                                                                    GET_TRIG_NARG(t))) {
                                 ADD_UID_VAR(buf, t.get(), actor, "actor", 0);
-                                script_driver(ch, t.get(), MOB_TRIGGER, TRIG_NEW);
+                                t->execute();
                                 break;
                             }
                         }
@@ -281,8 +281,7 @@ int entry_mtrigger(char_data *ch) {
 
     for (const auto& t: ch->getScripts()) {
         if (TRIGGER_CHECK(t, MTRIG_ENTRY) && (rand_number(1, 100) <= GET_TRIG_NARG(t))) {
-            return script_driver(ch, t.get(), MOB_TRIGGER, TRIG_NEW);
-            break;
+            return t->execute();
         }
     }
 
@@ -305,7 +304,7 @@ int command_mtrigger(char_data *actor, char *cmd, char *argument) {
                 if (!TRIGGER_CHECK(t, MTRIG_COMMAND))
                     continue;
 
-                if (!GET_TRIG_ARG(t) || !*GET_TRIG_ARG(t)) {
+                if (t->proto->arglist.empty()) {
                     mudlog(NRM, ADMLVL_BUILDER, true, "SYSERR: Command Trigger #%d has no text argument!",
                            GET_TRIG_VNUM(t));
                     continue;
@@ -319,7 +318,7 @@ int command_mtrigger(char_data *actor, char *cmd, char *argument) {
                     skip_spaces(&cmd);
                     t->setVariable("cmd", cmd);
 
-                    if (script_driver(ch, t.get(), MOB_TRIGGER, TRIG_NEW))
+                    if (t->execute())
                         return 1;
                 }
             }
@@ -342,7 +341,7 @@ void speech_mtrigger(char_data *actor, char *str) {
                 if (!TRIGGER_CHECK(t, MTRIG_SPEECH))
                     continue;
 
-                if (!GET_TRIG_ARG(t) || !*GET_TRIG_ARG(t)) {
+                if (t->proto->arglist.empty()) {
                     mudlog(NRM, ADMLVL_BUILDER, true, "SYSERR: Speech Trigger #%d has no text argument!",
                            GET_TRIG_VNUM(t));
                     continue;
@@ -352,7 +351,7 @@ void speech_mtrigger(char_data *actor, char *str) {
                      (!GET_TRIG_NARG(t) && is_substring(GET_TRIG_ARG(t), str)))) {
                     ADD_UID_VAR(buf, t.get(), actor, "actor", 0);
                     t->setVariable("speech", str);
-                    script_driver(ch, t.get(), MOB_TRIGGER, TRIG_NEW);
+                    t->execute();
                     break;
                 }
             }
@@ -370,7 +369,7 @@ void act_mtrigger(char_data *ch, char *str, char_data *actor, char_data *victim,
             if (!TRIGGER_CHECK(t, MTRIG_ACT))
                 continue;
 
-            if (!GET_TRIG_ARG(t) || !*GET_TRIG_ARG(t)) {
+            if (t->proto->arglist.empty()) {
                 mudlog(NRM, ADMLVL_BUILDER, true, "SYSERR: Act Trigger #%d has no text argument!",
                        GET_TRIG_VNUM(t));
                 continue;
@@ -394,7 +393,7 @@ void act_mtrigger(char_data *ch, char *str, char_data *actor, char_data *victim,
                     t->setVariable("arg", nstr);
                     free(fstr);
                 }
-                script_driver(ch, t.get(), MOB_TRIGGER, TRIG_NEW);
+                t->execute();
                 break;
             }
         }
@@ -418,7 +417,7 @@ void fight_mtrigger(char_data *ch) {
             else
                 t->setVariable("actor", "nobody");
 
-            script_driver(ch, t.get(), MOB_TRIGGER, TRIG_NEW);
+            t->execute();
             break;
         }
     }
@@ -439,7 +438,7 @@ void hitprcnt_mtrigger(char_data *ch) {
 
             actor = FIGHTING(ch);
             ADD_UID_VAR(buf, t.get(), actor, "actor", 0);
-            script_driver(ch, t.get(), MOB_TRIGGER, TRIG_NEW);
+            t->execute();
             break;
         }
     }
@@ -459,7 +458,7 @@ int receive_mtrigger(char_data *ch, char_data *actor, obj_data *obj) {
 
             ADD_UID_VAR(buf, t.get(), actor, "actor", 0);
             ADD_UID_VAR(buf, t.get(), obj, "object", 0);
-            ret_val = script_driver(ch, t.get(), MOB_TRIGGER, TRIG_NEW);
+            ret_val = t->execute();
             if (DEAD(actor) || DEAD(ch) || obj->carried_by != actor)
                 return 0;
             else
@@ -482,7 +481,7 @@ int death_mtrigger(char_data *ch, char_data *actor) {
             (rand_number(1, 100) <= GET_TRIG_NARG(t))) {
             if (actor)
                 ADD_UID_VAR(buf, t.get(), actor, "actor", 0);
-            return script_driver(ch, t.get(), MOB_TRIGGER, TRIG_NEW);
+            return t->execute();
         }
     }
 
@@ -498,7 +497,7 @@ void load_mtrigger(char_data *ch) {
     for (const auto& t: ch->getScripts()) {
         if (TRIGGER_CHECK(t, MTRIG_LOAD) &&
             (rand_number(1, 100) <= GET_TRIG_NARG(t))) {
-            result = script_driver(ch, t.get(), MOB_TRIGGER, TRIG_NEW);
+            result = t->execute();
             break;
         }
     }
@@ -527,7 +526,7 @@ int cast_mtrigger(char_data *actor, char_data *ch, int spellnum) {
             sprintf(buf, "%d", spellnum);
             t->setVariable("spell", buf);
             t->setVariable("spellname", (const char *) skill_name(spellnum));
-            return script_driver(ch, t.get(), MOB_TRIGGER, TRIG_NEW);
+            return t->execute();
         }
     }
 
@@ -548,13 +547,13 @@ int leave_mtrigger(char_data *actor, int dir) {
 
         for (const auto& t: ch->getScripts()) {
             if ((IS_SET(GET_TRIG_TYPE(t), MTRIG_LEAVE)) &&
-                !GET_TRIG_DEPTH(t) && (rand_number(1, 100) <= GET_TRIG_NARG(t))) {
+                t->isReady() && (rand_number(1, 100) <= GET_TRIG_NARG(t))) {
                 if (dir >= 0 && dir < NUM_OF_DIRS)
                     t->setVariable("direction", (const char *) dirs[dir]);
                 else
                     t->setVariable("direction", "none");
                 ADD_UID_VAR(buf, t.get(), actor, "actor", 0);
-                return script_driver(ch, t.get(), MOB_TRIGGER, TRIG_NEW);
+                return t->execute();
             }
         }
     }
@@ -572,14 +571,14 @@ int door_mtrigger(char_data *actor, int subcmd, int dir) {
 
         for (const auto& t: ch->getScripts()) {
             if (IS_SET(GET_TRIG_TYPE(t), MTRIG_DOOR) && CAN_SEE(ch, actor) &&
-                !GET_TRIG_DEPTH(t) && (rand_number(1, 100) <= GET_TRIG_NARG(t))) {
+                t->isReady() && (rand_number(1, 100) <= GET_TRIG_NARG(t))) {
                 t->setVariable("cmd", (const char *) cmd_door[subcmd]);
                 if (dir >= 0 && dir < NUM_OF_DIRS)
                     t->setVariable("direction", (const char *) dirs[dir]);
                 else
                     t->setVariable("direction", "none");
                 ADD_UID_VAR(buf, t.get(), actor, "actor", 0);
-                return script_driver(ch, t.get(), MOB_TRIGGER, TRIG_NEW);
+                return t->execute();
             }
         }
     }
@@ -597,7 +596,7 @@ void time_mtrigger(char_data *ch) {
     for (const auto& t: ch->getScripts()) {
         if (TRIGGER_CHECK(t, MTRIG_TIME) &&
             (time_info.hours == GET_TRIG_NARG(t))) {
-            script_driver(ch, t.get(), MOB_TRIGGER, TRIG_NEW);
+            t->execute();
             break;
         }
     }
@@ -613,7 +612,7 @@ void interval_mtrigger(char_data *ch, int trigFlag) {
 
     for (const auto& t: ch->getScripts()) {
         if (TRIGGER_CHECK(t, trigFlag)) {
-            script_driver(ch, t.get(), MOB_TRIGGER, TRIG_NEW);
+            t->execute();
             break;
             }
     }
@@ -631,7 +630,7 @@ void random_otrigger(obj_data *obj) {
     for (const auto& t : obj->getScripts()) {
         if (TRIGGER_CHECK(t, OTRIG_RANDOM) &&
             (rand_number(1, 100) <= GET_TRIG_NARG(t))) {
-            script_driver(obj, t.get(), OBJ_TRIGGER, TRIG_NEW);
+            t->execute();
             break;
         }
     }
@@ -645,7 +644,7 @@ void timer_otrigger(struct obj_data *obj) {
 
     for (const auto& t : obj->getScripts()) {
         if (TRIGGER_CHECK(t, OTRIG_TIMER)) {
-            script_driver(obj, t.get(), OBJ_TRIGGER, TRIG_NEW);
+            t->execute();
         }
     }
 
@@ -662,7 +661,7 @@ int get_otrigger(obj_data *obj, char_data *actor) {
     for (const auto& t : obj->getScripts()) {
         if (TRIGGER_CHECK(t, OTRIG_GET) && (rand_number(1, 100) <= GET_TRIG_NARG(t))) {
             ADD_UID_VAR(buf, t.get(), actor, "actor", 0);
-            ret_val = script_driver(obj, t.get(), OBJ_TRIGGER, TRIG_NEW);
+            ret_val = t->execute();
             /* don't allow a get to take place, if
              * a) the actor is killed (the mud would choke on obj_to_char).
              * b) the object is purged.
@@ -689,7 +688,7 @@ int cmd_otrig(obj_data *obj, char_data *actor, char *cmd,
                 continue;
 
             if (IS_SET(GET_TRIG_NARG(t), type) &&
-                (!GET_TRIG_ARG(t) || !*GET_TRIG_ARG(t))) {
+                (t->proto->arglist.empty())) {
                 mudlog(NRM, ADMLVL_BUILDER, true, "SYSERR: O-Command Trigger #%d has no text argument!",
                        GET_TRIG_VNUM(t));
                 continue;
@@ -705,7 +704,7 @@ int cmd_otrig(obj_data *obj, char_data *actor, char *cmd,
                 skip_spaces(&cmd);
                 t->setVariable("cmd", cmd);
 
-                if (script_driver(obj, t.get(), OBJ_TRIGGER, TRIG_NEW))
+                if (t->execute())
                     return 1;
             }
         }
@@ -748,7 +747,7 @@ int wear_otrigger(obj_data *obj, char_data *actor, int where) {
     for (const auto& t : obj->getScripts()) {
         if (TRIGGER_CHECK(t, OTRIG_WEAR)) {
             ADD_UID_VAR(buf, t.get(), actor, "actor", 0);
-            ret_val = script_driver(obj, t.get(), OBJ_TRIGGER, TRIG_NEW);
+            ret_val = t->execute();
             /* don't allow a wear to take place, if
              * the object is purged.
              */
@@ -776,7 +775,7 @@ int remove_otrigger(obj_data *obj, char_data *actor) {
     for (const auto& t : obj->getScripts()) {
         if (TRIGGER_CHECK(t, OTRIG_REMOVE)) {
             ADD_UID_VAR(buf, t.get(), actor, "actor", 0);
-            ret_val = script_driver(obj, t.get(), OBJ_TRIGGER, TRIG_NEW);
+            ret_val = t->execute();
             /* don't allow a remove to take place, if
              * the object is purged.
              */
@@ -801,7 +800,7 @@ int drop_otrigger(obj_data *obj, char_data *actor) {
     for (const auto& t : obj->getScripts()) {
         if (TRIGGER_CHECK(t, OTRIG_DROP) && (rand_number(1, 100) <= GET_TRIG_NARG(t))) {
             ADD_UID_VAR(buf, t.get(), actor, "actor", 0);
-            ret_val = script_driver(obj, t.get(), OBJ_TRIGGER, TRIG_NEW);
+            ret_val = t->execute();
             /* don't allow a drop to take place, if
              * the object is purged (nothing to drop).
              */
@@ -827,7 +826,7 @@ int give_otrigger(obj_data *obj, char_data *actor, char_data *victim) {
         if (TRIGGER_CHECK(t, OTRIG_GIVE) && (rand_number(1, 100) <= GET_TRIG_NARG(t))) {
             ADD_UID_VAR(buf, t.get(), actor, "actor", 0);
             ADD_UID_VAR(buf, t.get(), victim, "victim", 0);
-            ret_val = script_driver(obj, t.get(), OBJ_TRIGGER, TRIG_NEW);
+            ret_val = t->execute();
             /* don't allow a give to take place, if
              * a) the object is purged.
              * b) the object is not carried by the giver.
@@ -851,7 +850,7 @@ void load_otrigger(obj_data *obj) {
     for (const auto& t : obj->getScripts()) {
         if (TRIGGER_CHECK(t, OTRIG_LOAD) &&
             (rand_number(1, 100) <= GET_TRIG_NARG(t))) {
-            result = script_driver(obj, t.get(), OBJ_TRIGGER, TRIG_NEW);
+            result = t->execute();
             break;
         }
     }
@@ -881,7 +880,7 @@ int cast_otrigger(char_data *actor, obj_data *obj, int spellnum) {
             sprintf(buf, "%d", spellnum);
             t->setVariable("spell", buf);
             t->setVariable("spellname", (const char *) skill_name(spellnum));
-            return script_driver(obj, t.get(), OBJ_TRIGGER, TRIG_NEW);
+            return t->execute();
         }
     }
 
@@ -906,7 +905,7 @@ int leave_otrigger(room_data *room, char_data *actor, int dir) {
                 else
                     t->setVariable("direction", "none");
                 ADD_UID_VAR(buf, t.get(), actor, "actor", 0);
-                temp = script_driver(obj, t.get(), OBJ_TRIGGER, TRIG_NEW);
+                temp = t->execute();
                 if (temp == 0)
                     final = 0;
             }
@@ -937,7 +936,7 @@ int consume_otrigger(obj_data *obj, char_data *actor, int cmd) {
                     t->setVariable("command", "quaff");
                     break;
             }
-            ret_val = script_driver(obj, t.get(), OBJ_TRIGGER, TRIG_NEW);
+            ret_val = t->execute();
             /* don't allow a wear to take place, if
              * the object is purged.
              */
@@ -962,7 +961,7 @@ void time_otrigger(obj_data *obj) {
             (time_info.hours == GET_TRIG_NARG(t))) {
             sprintf(buf, "%d", time_info.hours);
             t->setVariable("time", buf);
-            script_driver(obj, t.get(), OBJ_TRIGGER, TRIG_NEW);
+            t->execute();
             break;
         }
     }
@@ -974,7 +973,7 @@ void interval_otrigger(obj_data *obj, int trigFlag) {
 
     for (const auto& t : obj->getScripts()) {
         if (TRIGGER_CHECK(t, trigFlag)) {
-            script_driver(obj, t.get(), OBJ_TRIGGER, TRIG_NEW);
+            t->execute();
             break;
             }
     }
@@ -992,7 +991,7 @@ void reset_wtrigger(struct room_data *room) {
     for (const auto& t : room->getScripts()) {
         if (TRIGGER_CHECK(t, WTRIG_RESET) &&
             (rand_number(1, 100) <= GET_TRIG_NARG(t))) {
-            script_driver(room, t.get(), WLD_TRIGGER, TRIG_NEW);
+            t->execute();
             break;
         }
     }
@@ -1006,7 +1005,7 @@ void random_wtrigger(struct room_data *room) {
     for (const auto& t : room->getScripts()) {
         if (TRIGGER_CHECK(t, WTRIG_RANDOM) &&
             (rand_number(1, 100) <= GET_TRIG_NARG(t))) {
-            script_driver(room, t.get(), WLD_TRIGGER, TRIG_NEW);
+            t->execute();
             break;
         }
     }
@@ -1027,7 +1026,7 @@ int enter_wtrigger(struct room_data *room, char_data *actor, int dir) {
             else
                 t->setVariable("direction", "none");
             ADD_UID_VAR(buf, t.get(), actor, "actor", 0);
-            return script_driver(room, t.get(), WLD_TRIGGER, TRIG_NEW);
+            return t->execute();
         }
     }
 
@@ -1050,7 +1049,7 @@ int command_wtrigger(char_data *actor, char *cmd, char *argument) {
         if (!TRIGGER_CHECK(t, WTRIG_COMMAND))
             continue;
 
-        if (!GET_TRIG_ARG(t) || !*GET_TRIG_ARG(t)) {
+        if (t->proto->arglist.empty()) {
             mudlog(NRM, ADMLVL_BUILDER, true, "SYSERR: W-Command Trigger #%d has no text argument!",
                    GET_TRIG_VNUM(t));
             continue;
@@ -1064,7 +1063,7 @@ int command_wtrigger(char_data *actor, char *cmd, char *argument) {
             skip_spaces(&cmd);
             t->setVariable("cmd", cmd);
 
-            return script_driver(room, t.get(), WLD_TRIGGER, TRIG_NEW);
+            return t->execute();
         }
     }
 
@@ -1083,7 +1082,7 @@ void speech_wtrigger(char_data *actor, char *str) {
         if (!TRIGGER_CHECK(t, WTRIG_SPEECH))
             continue;
 
-        if (!GET_TRIG_ARG(t) || !*GET_TRIG_ARG(t)) {
+        if (t->proto->arglist.empty()) {
             mudlog(NRM, ADMLVL_BUILDER, true, "SYSERR: W-Speech Trigger #%d has no text argument!",
                    GET_TRIG_VNUM(t));
             continue;
@@ -1094,7 +1093,7 @@ void speech_wtrigger(char_data *actor, char *str) {
             (!GET_TRIG_NARG(t) && is_substring(GET_TRIG_ARG(t), str))) {
             ADD_UID_VAR(buf, t.get(), actor, "actor", 0);
             t->setVariable("speech", str);
-            script_driver(room, t.get(), WLD_TRIGGER, TRIG_NEW);
+            t->execute();
             break;
         }
     }
@@ -1113,7 +1112,7 @@ int drop_wtrigger(obj_data *obj, char_data *actor) {
             (rand_number(1, 100) <= GET_TRIG_NARG(t))) {
             ADD_UID_VAR(buf, t.get(), actor, "actor", 0);
             ADD_UID_VAR(buf, t.get(), obj, "object", 0);
-            ret_val = script_driver(room, t.get(), WLD_TRIGGER, TRIG_NEW);
+            ret_val = t->execute();
             if (obj->carried_by != actor)
                 return 0;
             else
@@ -1143,7 +1142,7 @@ int cast_wtrigger(char_data *actor, char_data *vict, obj_data *obj, int spellnum
             sprintf(buf, "%d", spellnum);
             t->setVariable("spell", buf);
             t->setVariable("spellname", (const char *) skill_name(spellnum));
-            return script_driver(room, t.get(), WLD_TRIGGER, TRIG_NEW);
+            return t->execute();
         }
     }
 
@@ -1168,7 +1167,7 @@ int leave_wtrigger(struct room_data *room, char_data *actor, int dir) {
             else
                 t->setVariable("direction", "none");
             ADD_UID_VAR(buf, t.get(), actor, "actor", 0);
-            return script_driver(room, t.get(), WLD_TRIGGER, TRIG_NEW);
+            return t->execute();
         }
     }
 
@@ -1191,7 +1190,7 @@ int door_wtrigger(char_data *actor, int subcmd, int dir) {
             else
                 t->setVariable("direction", "none");
             ADD_UID_VAR(buf, t.get(), actor, "actor", 0);
-            return script_driver(room, t.get(), WLD_TRIGGER, TRIG_NEW);
+            return t->execute();
         }
     }
 
@@ -1209,7 +1208,7 @@ void time_wtrigger(struct room_data *room) {
             (time_info.hours == GET_TRIG_NARG(t))) {
             sprintf(buf, "%d", time_info.hours);
             t->setVariable("time", buf);
-            script_driver(room, t.get(), WLD_TRIGGER, TRIG_NEW);
+            t->execute();
             break;
         }
     }
@@ -1221,7 +1220,7 @@ void interval_wtrigger(struct room_data *room, int trigFlag) {
 
     for (const auto& t : room->getScripts()) {
         if (TRIGGER_CHECK(t, WTRIG_TIME)) {
-            script_driver(room, t.get(), WLD_TRIGGER, TRIG_NEW);
+            t->execute();
             break;
             }
     }

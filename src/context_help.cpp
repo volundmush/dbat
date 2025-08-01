@@ -7,7 +7,6 @@
 #include "dbat/act.informative.h"
 #include "dbat/oasis.h"
 #include "dbat/send.h"
-#include "dbat/dg_olc.h"
 #include "dbat/interpreter.h"
 #include "dbat/comm.h"
 
@@ -16,8 +15,6 @@ char *context_help_list[NUM_CONTEXTS];
 
 int find_context(struct descriptor_data *d) {
     switch (STATE(d)) {
-        case CON_TRIGEDIT:
-            return find_context_trigedit(d);
         case CON_REDIT:
             return find_context_redit(d);
         case CON_MEDIT:
@@ -91,8 +88,6 @@ int find_context_oedit(struct descriptor_data *d) {
             return CONTEXT_OEDIT_LEVEL;
         case OEDIT_PERM:
             return CONTEXT_OEDIT_PERM;
-        case OLC_SCRIPT_EDIT:
-            return find_context_script_edit(d);
         default:
             return NOTHING;
     }
@@ -132,8 +127,6 @@ int find_context_redit(struct descriptor_data *d) {
             return CONTEXT_REDIT_EXTRADESC_KEY;
         case REDIT_EXTRADESC_DESCRIPTION:
             return CONTEXT_REDIT_EXTRADESC_DESCRIPTION;
-        case OLC_SCRIPT_EDIT:
-            return find_context_script_edit(d);
         default:
             return NOTHING;
     }
@@ -230,8 +223,6 @@ int find_context_medit(struct descriptor_data *d) {
             return CONTEXT_MEDIT_LEVEL;
         case MEDIT_ALIGNMENT:
             return CONTEXT_MEDIT_ALIGNMENT;
-        case OLC_SCRIPT_EDIT:
-            return find_context_script_edit(d);
         default:
             return NOTHING;
     }
@@ -295,44 +286,6 @@ int find_context_sedit(struct descriptor_data *d) {
             return CONTEXT_SEDIT_SHOP_FLAGS;
         case SEDIT_NOTRADE:
             return CONTEXT_SEDIT_NOTRADE;
-        default:
-            return NOTHING;
-    }
-}
-
-int find_context_trigedit(struct descriptor_data *d) {
-    switch (OLC_MODE(d)) {
-        case TRIGEDIT_MAIN_MENU:
-            return CONTEXT_TRIGEDIT_MAIN_MENU;
-        case TRIGEDIT_TRIGTYPE:
-            return CONTEXT_TRIGEDIT_TRIGTYPE;
-        case TRIGEDIT_CONFIRM_SAVESTRING:
-            return CONTEXT_TRIGEDIT_CONFIRM_SAVESTRING;
-        case TRIGEDIT_NAME:
-            return CONTEXT_TRIGEDIT_NAME;
-        case TRIGEDIT_INTENDED:
-            return CONTEXT_TRIGEDIT_INTENDED;
-        case TRIGEDIT_TYPES:
-            return CONTEXT_TRIGEDIT_TYPES;
-        case TRIGEDIT_COMMANDS:
-            return CONTEXT_TRIGEDIT_COMMANDS;
-        case TRIGEDIT_NARG:
-            return CONTEXT_TRIGEDIT_NARG;
-        case TRIGEDIT_ARGUMENT:
-            return CONTEXT_TRIGEDIT_ARGUMENT;
-        default:
-            return NOTHING;
-    }
-}
-
-int find_context_script_edit(struct descriptor_data *d) {
-    switch (OLC_SCRIPT_EDIT_MODE(d)) {
-        case SCRIPT_MAIN_MENU:
-            return CONTEXT_SCRIPT_MAIN_MENU;
-        case SCRIPT_NEW_TRIGGER:
-            return CONTEXT_SCRIPT_NEW_TRIGGER;
-        case SCRIPT_DEL_TRIGGER:
-            return CONTEXT_SCRIPT_DEL_TRIGGER;
         default:
             return NOTHING;
     }

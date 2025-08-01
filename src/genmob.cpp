@@ -13,7 +13,6 @@
 #include "dbat/guild.h"
 #include "dbat/dg_scripts.h"
 #include "dbat/handler.h"
-#include "dbat/dg_olc.h"
 #include "dbat/class.h"
 #include "dbat/races.h"
 #include "dbat/spells.h"

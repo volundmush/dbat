@@ -10,6 +10,10 @@
 #include <filesystem>
 #include <charconv>
 
+#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/regex.hpp>
+#include <regex>
+
 #include "dbat/dg_scripts.h"
 #include "dbat/act.wizard.h"
 #include "dbat/dg_event.h"
@@ -24,7 +28,7 @@
 
 
 /* Local functions not used elsewhere */
-void do_stat_trigger(struct char_data *ch, trig_data *trig);
+void do_stat_trigger(struct char_data *ch, trig_proto_data *trig);
 
 void script_stat(char_data *ch, script_data *sc);
 
@@ -38,30 +42,30 @@ void eval_op(char *op, char *lhs, char *rhs, char *result, unit_data *go,
 char *matching_paren(char *p);
 
 void eval_expr(char *line, char *result, unit_data *go, script_data *sc,
-               trig_data *trig, int type);
+               trig_data *trig, UnitType type);
 
 int eval_lhs_op_rhs(char *expr, char *result, unit_data *go, script_data *sc,
-                    trig_data *trig, int type);
+                    trig_data *trig, UnitType type);
 
 int process_if(char *cond, unit_data *go, script_data *sc,
-               trig_data *trig, int type);
+               trig_data *trig, UnitType type);
 
 struct cmdlist_element *find_end(trig_data *trig, struct cmdlist_element *cl);
 
 struct cmdlist_element *find_else_end(trig_data *trig,
                                       struct cmdlist_element *cl, unit_data *go,
-                                      script_data *sc, int type);
+                                      script_data *sc, UnitType type);
 
-void process_wait(unit_data *go, trig_data *trig, int type, char *cmd,
+void process_wait(unit_data *go, trig_data *trig, UnitType type, char *cmd,
                   struct cmdlist_element *cl);
 
 void process_set(script_data *sc, trig_data *trig, char *cmd);
 
 void process_attach(unit_data *go, script_data *sc, trig_data *trig,
-                    int type, char *cmd);
+                    UnitType type, char *cmd);
 
 void process_detach(unit_data *go, script_data *sc, trig_data *trig,
-                    int type, char *cmd);
+                    UnitType type, char *cmd);
 
 int process_return(trig_data *trig, char *cmd);
 
@@ -81,7 +85,7 @@ void dg_letter_value(script_data *sc, trig_data *trig, char *cmd);
 
 struct cmdlist_element *
 find_case(struct trig_data *trig, struct cmdlist_element *cl,
-    unit_data *go, script_data *sc, int type, char *cond);
+    unit_data *go, script_data *sc, UnitType type, char *cond);
 
 struct cmdlist_element *find_done(struct cmdlist_element *cl);
 
@@ -692,51 +696,109 @@ void check_interval_triggers(int trigFlag) {
     }
 }
 
+void trig_proto_data::setBody(const std::string& body) {
+    std::vector<std::string> l;
+    boost::split_regex(l, body, boost::regex("\r\n|\r|\n"));
+    lines = parse_script(l);
+}
 
-void do_stat_trigger(struct char_data *ch, trig_data *trig) {
-    struct cmdlist_element *cmd_list;
-    char sb[MAX_STRING_LENGTH], buf[MAX_STRING_LENGTH];
-    int len = 0;
+std::string trig_proto_data::scriptString() const {
+    std::string out;
 
+    int depth = 0;
+    int i = 0;
+    
+    for(const auto &cl : lines) {
+        std::string line;
+        int predepthmod = 0;
+        int postdepthmod = 0;
+        switch(std::get<0>(cl)) {
+            case ScriptLineType::COMMAND:
+                line = std::get<1>(cl);
+                break;
+            case ScriptLineType::IF:
+                line = "if " + std::get<1>(cl);
+                postdepthmod = 1;
+                break;
+            case ScriptLineType::ELSE:
+                line = "else";
+                predepthmod = -1;
+                postdepthmod = 1;
+                break;
+            case ScriptLineType::ELSEIF:
+                line = "elseif " + std::get<1>(cl);
+                predepthmod = -1;
+                postdepthmod = 1;
+                break;
+            case ScriptLineType::END:
+                line = "end";
+                predepthmod = -1;
+                break;
+            case ScriptLineType::WHILE:
+                line = "while " + std::get<1>(cl);
+                postdepthmod = 1;
+                break;
+            case ScriptLineType::SWITCH:
+                line = "switch " + std::get<1>(cl);
+                postdepthmod = 1;
+                break;
+            case ScriptLineType::CASE:
+                line = "case " + std::get<1>(cl);
+                predepthmod = -1;
+                postdepthmod = 1;
+                break;
+            case ScriptLineType::DEFAULT:
+                line = "default";
+                predepthmod = -1;
+                postdepthmod = 1;
+                break;
+            case ScriptLineType::DONE:
+                line = "done";
+                predepthmod = -1;
+                break;
+            case ScriptLineType::COMMENT:
+                line = "* " + std::get<1>(cl);
+                break;
+        }
+        if(predepthmod) depth = std::max<int>(0, depth + predepthmod);
+        out += std::string(depth * 2, ' ') + line + "\r\n";
+        if(postdepthmod) depth = std::max<int>(0, depth + postdepthmod);
+        i++;
+    }
+
+    return out;
+}
+
+
+void do_stat_trigger(struct char_data *ch, trig_proto_data *trig) {
+    char buf[MAX_STRING_LENGTH];
     if (!trig) {
         basic_mud_log("SYSERR: nullptr trigger passed to do_stat_trigger.");
         return;
     }
 
-    len += snprintf(sb, sizeof(sb), "Name: '@y%s@n',  VNum: [@g%5d@n], RNum: [%5d]\r\n",
-                    GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), GET_TRIG_RNUM(trig));
+    std::string out;
+
+    out += "Name: '@y" + trig->name + "@n',  VNum: [@g" + std::to_string(trig->vn) + "@n]\r\n";
 
     if (trig->attach_type == OBJ_TRIGGER) {
-        len += snprintf(sb + len, sizeof(sb) - len, "Trigger Intended Assignment: Objects\r\n");
-        sprintbit(GET_TRIG_TYPE(trig), otrig_types, buf, sizeof(buf));
+        out += "Trigger Intended Assignment: Objects\r\n";
+        sprintbit(trig->trigger_type, otrig_types, buf, sizeof(buf));
     } else if (trig->attach_type == WLD_TRIGGER) {
-        len += snprintf(sb + len, sizeof(sb) - len, "Trigger Intended Assignment: Rooms\r\n");
-        sprintbit(GET_TRIG_TYPE(trig), wtrig_types, buf, sizeof(buf));
+        out += "Trigger Intended Assignment: Rooms\r\n";
+        sprintbit(trig->trigger_type, wtrig_types, buf, sizeof(buf));
     } else {
-        len += snprintf(sb + len, sizeof(sb) - len, "Trigger Intended Assignment: Mobiles\r\n");
-        sprintbit(GET_TRIG_TYPE(trig), trig_types, buf, sizeof(buf));
+        out += "Trigger Intended Assignment: Mobiles\r\n";
+        sprintbit(trig->trigger_type, trig_types, buf, sizeof(buf));
     }
 
-    len += snprintf(sb + len, sizeof(sb) - len, "Trigger Type: %s, Numeric Arg: %d, Arg list: %s\r\n",
-                    buf, GET_TRIG_NARG(trig),
-                    ((GET_TRIG_ARG(trig) && *GET_TRIG_ARG(trig))
-                     ? GET_TRIG_ARG(trig) : "None"));
+    out += "Trigger Type: " + std::string(buf) + ", Numeric Arg: " + std::to_string(trig->narg) + ", Arg list: " +
+           (!trig->arglist.empty() ? trig->arglist.c_str() : "None") + "\r\n";
 
-    len += snprintf(sb + len, sizeof(sb) - len, "Commands:\r\n");
+    out += "Script Body:\r\n";
+    out += trig->scriptString();
 
-    cmd_list = trig->cmdlist;
-    while (cmd_list) {
-        if (cmd_list->cmd)
-            len += snprintf(sb + len, sizeof(sb) - len, "%s\r\n", cmd_list->cmd);
-
-        if (len > MAX_STRING_LENGTH - 80) {
-            len += snprintf(sb + len, sizeof(sb) - len, "*** Overflow - script too long! ***\r\n");
-            break;
-        }
-        cmd_list = cmd_list->next;
-    }
-
-    ch->desc->sendText(sb);
+    ch->desc->sendText(out);
 }
 
 
@@ -780,10 +842,10 @@ void script_stat(char_data *ch, script_data *sc) {
         send_to_char(ch, "\r\n  Trigger: @y%s@n, VNum: [@y%5d@n], RNum: [%5d]\r\n",
                      GET_TRIG_NAME(t), GET_TRIG_VNUM(t), GET_TRIG_RNUM(t));
 
-        if (t->attach_type == OBJ_TRIGGER) {
+        if (t->getAttachType() == OBJ_TRIGGER) {
             send_to_char(ch, "  Trigger Intended Assignment: Objects\r\n");
             sprintbit(GET_TRIG_TYPE(t), otrig_types, buf1, sizeof(buf1));
-        } else if (t->attach_type == WLD_TRIGGER) {
+        } else if (t->getAttachType() == WLD_TRIGGER) {
             send_to_char(ch, "  Trigger Intended Assignment: Rooms\r\n");
             sprintbit(GET_TRIG_TYPE(t), wtrig_types, buf1, sizeof(buf1));
         } else {
@@ -797,9 +859,9 @@ void script_stat(char_data *ch, script_data *sc) {
                       "None"));
 
         if (t->waiting != 0.0) {
-            send_to_char(ch, "    Wait: %f seconds, Current line: %s\r\n",
+            send_to_char(ch, "    Wait: %f seconds, Current line: %d\r\n",
                          t->waiting,
-                         t->curr_state ? t->curr_state->cmd : "End of Script");
+                         t->current_line);
             send_to_char(ch, "  Variables: %s\r\n", t->variables.empty() ? "None" : "");
 
             for (const auto &[key, value] : t->variables) {
@@ -839,6 +901,8 @@ void do_sstat(struct char_data *ch, struct unit_data *ud) {
  */
 void add_trigger(script_data *sc, const std::shared_ptr<trig_data> t, int loc) {
 
+    auto tvn = t->getVnum();
+
     // if the sc (unit_data) isn't already using running_scripts...
     if(!sc->running_scripts.has_value()) {
         sc->running_scripts.emplace(sc->getProtoScript());
@@ -848,21 +912,21 @@ void add_trigger(script_data *sc, const std::shared_ptr<trig_data> t, int loc) {
 
     // Now insert t in the right spot...
     if(loc == -1) {
-        scr.emplace_back(t->vn);
+        scr.emplace_back(tvn);
     } else if(loc == 0) {
         // Insert at the beginning
-        scr.insert(scr.begin(), t->vn);
+        scr.insert(scr.begin(), tvn);
     } else if(loc > 0 && loc <= scr.size()) {
         // Insert at the specified location
-        scr.insert(scr.begin() + loc - 1, t->vn);
+        scr.insert(scr.begin() + loc - 1, tvn);
     } else {
         // If loc is invalid, just append it
-        scr.emplace_back(t->vn);
+        scr.emplace_back(tvn);
     }
 
     SCRIPT_TYPES(sc) |= GET_TRIG_TYPE(t);
 
-    sc->scripts.emplace(t->vn, t);
+    sc->scripts.emplace(tvn, t);
     t->owner = units.at(sc->id).get();
     t->activate();
 }
@@ -1017,7 +1081,7 @@ int remove_trigger(script_data *sc, char *name) {
     j = nullptr;
     for (auto i : sc->getScripts()) {
         if (string) {
-            if (isname(name, GET_TRIG_NAME(i)))
+            if (isname(name, i->proto->name.c_str()))
                 if (++n >= num) {
                     j = i;
                     break;
@@ -1031,7 +1095,7 @@ int remove_trigger(script_data *sc, char *name) {
             j = i;
             break;
         }
-        else if (i->vn == num) {
+        else if (i->getVnum() == num) {
             j = i;
             break;
         }
@@ -1041,10 +1105,10 @@ int remove_trigger(script_data *sc, char *name) {
         j->deactivate();
         if(sc->running_scripts.has_value()) {
             auto &scr = sc->running_scripts.value();
-            if (auto find = std::find(scr.begin(), scr.end(), j->vn); find != scr.end())
+            if (auto find = std::find(scr.begin(), scr.end(), j->getVnum()); find != scr.end())
                 scr.erase(find);
         }
-        sc->scripts.erase(j->vn);
+        sc->scripts.erase(j->getVnum());
 
         /* update the script type bitvector */
         SCRIPT_TYPES(sc) = 0;
@@ -1384,7 +1448,7 @@ char *matching_paren(char *p) {
 
 /* evaluates line, and returns answer in result */
 void eval_expr(char *line, char *result, unit_data *go, script_data *sc,
-               trig_data *trig, int type) {
+               trig_data *trig, UnitType type) {
     char expr[MAX_INPUT_LENGTH], *p;
 
     while (*line && isspace(*line))
@@ -1406,7 +1470,7 @@ void eval_expr(char *line, char *result, unit_data *go, script_data *sc,
  * answer in result.  returns 1 if expr is evaluated, else 0
  */
 int eval_lhs_op_rhs(char *expr, char *result, unit_data *go, script_data *sc,
-                    trig_data *trig, int type)
+                    trig_data *trig, UnitType type)
 {
     char *p, *tokens[MAX_INPUT_LENGTH];
     char line[MAX_INPUT_LENGTH], lhr[MAX_INPUT_LENGTH], rhr[MAX_INPUT_LENGTH];
@@ -1473,106 +1537,21 @@ int eval_lhs_op_rhs(char *expr, char *result, unit_data *go, script_data *sc,
     return 0;
 }
 
-
-/* returns 1 if cond is true, else 0 */
-int process_if(char *cond, unit_data *go, script_data *sc,
-               trig_data *trig, int type) {
-    char result[MAX_INPUT_LENGTH], *p;
-
-    eval_expr(cond, result, go, sc, trig, type);
-
-    p = result;
-    skip_spaces(&p);
-
-    if (!*p || *p == '0')
-        return 0;
-    else
-        return 1;
-}
-
-
 /*
  * scans for end of if-block.
  * returns the line containg 'end', or the last
  * line of the trigger if not found.
  */
-struct cmdlist_element *find_end(trig_data *trig, struct cmdlist_element *cl) {
-    struct cmdlist_element *c;
-    char *p;
-
-    if (!(cl->next)) { /* rryan: if this is the last line, theres no end. */
-        script_log("Trigger VNum %d has 'if' without 'end'. (error 1)", GET_TRIG_VNUM(trig));
-        return cl;
-    }
-
-    for (c = cl->next; c; c = c->next) {
-        for (p = c->cmd; *p && isspace(*p); p++);
-
-        if (!strncasecmp("if ", p, 3))
-            c = find_end(trig, c);
-        else if (!strncasecmp("end", p, 3))
-            return c;
-
-        /* thanks to Russell Ryan for this fix */
-        if (!c->next) { /* rryan: this is the last line, we didn't find an end. */
-            script_log("Trigger VNum %d has 'if' without 'end'. (error 2)", GET_TRIG_VNUM(trig));
-            return c;
-        }
-    }
-
-    /* rryan: we didn't find an end. */
-    script_log("Trigger VNum %d has 'if' without 'end'. (error 3)", GET_TRIG_VNUM(trig));
-    return c;
-}
 
 
 /*
  * searches for valid elseif, else, or end to continue execution at.
  * returns line of elseif, else, or end if found, or last line of trigger.
  */
-struct cmdlist_element *find_else_end(trig_data *trig,
-                                      struct cmdlist_element *cl, unit_data *go,
-                                      script_data *sc, int type) {
-    struct cmdlist_element *c;
-    char *p;
-
-    if (!(cl->next))
-        return cl;
-
-    for (c = cl->next; c->next; c = c->next) {
-        for (p = c->cmd; *p && isspace(*p); p++); /* skip spaces */
-
-        if (!strncasecmp("if ", p, 3))
-            c = find_end(trig, c);
-
-        else if (!strncasecmp("elseif ", p, 7)) {
-            if (process_if(p + 7, go, sc, trig, type)) {
-                GET_TRIG_DEPTH(trig)++;
-                return c;
-            }
-        } else if (!strncasecmp("else", p, 4)) {
-            GET_TRIG_DEPTH(trig)++;
-            return c;
-        } else if (!strncasecmp("end", p, 3))
-            return c;
-
-        /* thanks to Russell Ryan for this fix */
-        if (!c->next) { /* rryan: this is the last line, return. */
-            script_log("Trigger VNum %d has 'if' without 'end'. (error 4)", GET_TRIG_VNUM(trig));
-            return c;
-        }
-    }
-
-    /* rryan: if we got here, it's the last line, if its not an end, script_log it. */
-    for (p = c->cmd; *p && isspace(*p); p++); /* skip spaces */
-    if (strncasecmp("end", p, 3))
-        script_log("Trigger VNum %d has 'if' without 'end'. (error 5)", GET_TRIG_VNUM(trig));
-    return c;
-}
 
 
 /* processes any 'wait' commands in a trigger */
-void process_wait(unit_data *go, trig_data *trig, int type, char *cmd,
+void process_wait(unit_data *go, trig_data *trig, UnitType type, char *cmd,
                   struct cmdlist_element *cl) {
     char buf[MAX_INPUT_LENGTH], *arg;
     struct wait_event_data *wait_event_obj;
@@ -1616,7 +1595,7 @@ void process_wait(unit_data *go, trig_data *trig, int type, char *cmd,
         }
 
         // Convert waiting time to real seconds
-        trig->waiting = waiting_mud_seconds / MUD_TIME_ACCELERATION;
+        trig->setWaiting(waiting_mud_seconds / MUD_TIME_ACCELERATION);
 
     } else {
         std::string normalized;
@@ -1633,15 +1612,10 @@ void process_wait(unit_data *go, trig_data *trig, int type, char *cmd,
             else if (c == 's')
                 to_wait *= 1.0;
         }
+
         // We need to convert 'when' into a double of seconds-to-wait by dividing by PASSES_PER_SEC.
-        trig->waiting = to_wait;
+        trig->setWaiting(to_wait);
     }
-
-    // we're replacing the old wait_event_obj.
-
-    triggerSubscriptions.subscribe("waiting", trig);
-
-    trig->curr_state = cl->next;
 }
 
 
@@ -1665,7 +1639,7 @@ void process_set(script_data *sc, trig_data *trig, char *cmd) {
 
 /* processes a script eval command */
 void process_eval(unit_data *go, script_data *sc, trig_data *trig,
-                  int type, char *cmd) {
+                  UnitType type, char *cmd) {
     char arg[MAX_INPUT_LENGTH], name[MAX_INPUT_LENGTH];
     char result[MAX_INPUT_LENGTH], *expr;
 
@@ -1691,7 +1665,7 @@ void process_eval(unit_data *go, script_data *sc, trig_data *trig,
 
 /* script attaching a trigger to something */
 void process_attach(unit_data *go, script_data *sc, trig_data *trig,
-                    int type, char *cmd) {
+                    UnitType type, char *cmd) {
     char arg[MAX_INPUT_LENGTH], trignum_s[MAX_INPUT_LENGTH];
     char result[MAX_INPUT_LENGTH], *id_p;
     std::shared_ptr<trig_data> newtrig;
@@ -1765,7 +1739,7 @@ void process_attach(unit_data *go, script_data *sc, trig_data *trig,
 
 /* script detaching a trigger from something */
 void process_detach(unit_data *go, script_data *sc, trig_data *trig,
-                    int type, char *cmd) {
+                    UnitType type, char *cmd) {
     char arg[MAX_INPUT_LENGTH], trignum_s[MAX_INPUT_LENGTH];
     char result[MAX_INPUT_LENGTH], *id_p;
     char_data *c = nullptr;
@@ -2210,233 +2184,6 @@ void dg_letter_value(script_data *sc, trig_data *trig, char *cmd) {
 */
 
 
-
-static int true_script_driver(unit_data *go_adress, trig_data *trig, int type, int mode) {
-    static int depth = 0;
-    int ret_val = 1;
-    struct cmdlist_element *cl;
-    char cmd[MAX_INPUT_LENGTH], *p;
-    script_data *sc = go_adress;
-    struct cmdlist_element *temp;
-    unsigned long loops = 0;
-    unit_data *go = go_adress;
-
-    void obj_command_interpreter(obj_data *obj, char *argument);
-    void wld_command_interpreter(struct room_data *room, char *argument);
-
-
-    if (depth > MAX_SCRIPT_DEPTH) {
-        script_log("Trigger %d recursed beyond maximum allowed depth.", GET_TRIG_VNUM(trig));
-        switch (type) {
-            case MOB_TRIGGER:
-                script_log("It was attached to %s [%d]",
-                           GET_NAME((char_data *) go), GET_MOB_VNUM((char_data *) go));
-                break;
-            case OBJ_TRIGGER:
-                script_log("It was attached to %s [%d]",
-                           ((obj_data *) go)->getShortDescription(), GET_OBJ_VNUM((obj_data *) go));
-                break;
-            case WLD_TRIGGER:
-                script_log("It was attached to %s [%d]",
-                           ((room_data *) go)->getName(), ((room_data *) go)->getVnum());
-                break;
-        }
-
-        extract_script(go, type);
-
-        /*
-           extract_script() works on rooms, but on mobiles and objects,
-           it will be called again if the
-           caller is load_mtrigger or load_otrigger
-           if it is one of these, we must make sure the script
-           is not just reloaded on the next mob
-
-           We make the calling code decide how to handle it, so it doesn't
-           get totally removed unless it's a load_xtrigger().
-         */
-
-        return SCRIPT_ERROR_CODE;
-    }
-
-    depth++;
-
-    if (mode == TRIG_NEW) {
-        GET_TRIG_DEPTH(trig) = 1;
-        GET_TRIG_LOOPS(trig) = 0;
-    }
-
-    dg_owner_purged = 0;
-
-    for (cl = (mode == TRIG_NEW) ? trig->cmdlist : trig->curr_state;
-         cl && GET_TRIG_DEPTH(trig); cl = cl->next) {
-        for (p = cl->cmd; *p && isspace(*p); p++);
-
-        if (*p == '*') /* comment */
-            continue;
-
-        else if (!strncasecmp(p, "if ", 3)) {
-            if (process_if(p + 3, go, sc, trig, type))
-                GET_TRIG_DEPTH(trig)++;
-            else
-                cl = find_else_end(trig, cl, go, sc, type);
-        } else if (!strncasecmp("elseif ", p, 7) ||
-                   !strncasecmp("else", p, 4)) {
-            /*
-             * if not in an if-block, ignore the extra 'else[if]' and warn about it
-             */
-            if (GET_TRIG_DEPTH(trig) == 1) {
-                script_log("Trigger VNum %d has 'else' without 'if'.",
-                           GET_TRIG_VNUM(trig));
-                continue;
-            }
-            cl = find_end(trig, cl);
-            GET_TRIG_DEPTH(trig)--;
-        } else if (!strncasecmp("while ", p, 6)) {
-            temp = find_done(cl);
-            if (!temp) {
-                script_log("Trigger VNum %d has 'while' without 'done'.",
-                           GET_TRIG_VNUM(trig));
-                return ret_val;
-            }
-            if (process_if(p + 6, go, sc, trig, type)) {
-                temp->original = cl;
-            } else {
-                cl = temp;
-                loops = 0;
-            }
-        } else if (!strncasecmp("switch ", p, 7)) {
-            cl = find_case(trig, cl, go, sc, type, p + 7);
-        } else if (!strncasecmp("end", p, 3)) {
-            /*
-             * if not in an if-block, ignore the extra 'end' and warn about it.
-             */
-            if (GET_TRIG_DEPTH(trig) == 1) {
-                script_log("Trigger VNum %d has 'end' without 'if'.",
-                           GET_TRIG_VNUM(trig));
-                continue;
-            }
-            GET_TRIG_DEPTH(trig)--;
-        } else if (!strncasecmp("done", p, 4)) {
-            /* if in a while loop, cl->original is non-nullptr */
-            if (cl->original) {
-                char *orig_cmd = cl->original->cmd;
-                while (*orig_cmd && isspace(*orig_cmd)) orig_cmd++;
-                if (cl->original && process_if(orig_cmd + 6, go, sc, trig,
-                                               type)) {
-                    cl = cl->original;
-                    loops++;
-                    GET_TRIG_LOOPS(trig)++;
-                    if (loops == 40) {
-                        process_wait(go, trig, type, "wait 1", cl);
-                        depth--;
-                        return ret_val;
-                    }
-                    if (GET_TRIG_LOOPS(trig) >= 5000) {
-                        script_log("Trigger VNum %d has looped 5,000 times!!!",
-                                   GET_TRIG_VNUM(trig));
-                        break;
-                    }
-                } else {
-                    /* if we're falling through a switch statement, this ends it. */
-                }
-            }
-        } else if (!strncasecmp("break", p, 5)) {
-            cl = find_done(cl);
-        } else if (!strncasecmp("case", p, 4)) {
-            /* Do nothing, this allows multiple cases to a single instance */
-        } else {
-
-            var_subst(go, sc, trig, type, p, cmd);
-
-            if (!strncasecmp(cmd, "eval ", 5))
-                process_eval(go, sc, trig, type, cmd);
-
-            else if (!strncasecmp(cmd, "nop ", 4)); /* nop: do nothing */
-
-            else if (!strncasecmp(cmd, "extract ", 8))
-                extract_value(sc, trig, cmd);
-
-            else if (!strncasecmp(cmd, "dg_letter ", 10))
-                dg_letter_value(sc, trig, cmd);
-
-            else if (!strncasecmp(cmd, "halt", 4))
-                break;
-
-            else if (!strncasecmp(cmd, "dg_cast ", 8))
-                do_dg_cast(go, sc, trig, type, cmd);
-
-            else if (!strncasecmp(cmd, "dg_affect ", 10))
-                do_dg_affect(go, sc, trig, type, cmd);
-
-            else if (!strncasecmp(cmd, "global ", 7))
-                process_global(sc, trig, cmd, 0);
-
-            else if (!strncasecmp(cmd, "context ", 8))
-                process_context(sc, trig, cmd);
-
-            else if (!strncasecmp(cmd, "remote ", 7))
-                process_remote(sc, trig, cmd);
-
-            else if (!strncasecmp(cmd, "rdelete ", 8))
-                process_rdelete(sc, trig, cmd);
-
-            else if (!strncasecmp(cmd, "return ", 7))
-                ret_val = process_return(trig, cmd);
-
-            else if (!strncasecmp(cmd, "set ", 4))
-                process_set(sc, trig, cmd);
-
-            else if (!strncasecmp(cmd, "unset ", 6))
-                process_unset(sc, trig, cmd);
-
-            else if (!strncasecmp(cmd, "wait ", 5)) {
-                process_wait(go, trig, type, cmd, cl);
-                depth--;
-                return ret_val;
-            } else if (!strncasecmp(cmd, "attach ", 7))
-                process_attach(go, sc, trig, type, cmd);
-
-            else if (!strncasecmp(cmd, "detach ", 7))
-                process_detach(go, sc, trig, type, cmd);
-
-            else if (!strncasecmp(cmd, "version", 7))
-                mudlog(NRM, ADMLVL_GOD, true, "%s", DG_SCRIPT_VERSION);
-
-            else {
-                switch (type) {
-                    case MOB_TRIGGER:
-                        command_interpreter((char_data *) go, cmd);
-                        break;
-                    case OBJ_TRIGGER:
-                        obj_command_interpreter((obj_data *) go, cmd);
-                        break;
-                    case WLD_TRIGGER:
-                        wld_command_interpreter((struct room_data *) go, cmd);
-                        break;
-                }
-                if (dg_owner_purged) {
-                    depth--;
-                    if (type == OBJ_TRIGGER)
-                        *(obj_data **) go_adress = nullptr;
-                    return ret_val;
-                }
-            }
-
-        }
-    }
-
-    trig->variables.clear();
-    GET_TRIG_DEPTH(trig) = 0;
-
-    depth--;
-    return ret_val;
-}
-
-int script_driver(unit_data *go_adress, trig_data *trig, int type, int mode) {
-    auto result = true_script_driver(go_adress, trig, type, mode);
-    return result;
-}
-
 /* returns the real number of the trigger with given virtual number */
 trig_rnum real_trigger(trig_vnum vnum) {
     return trig_index.count(vnum) ? vnum : NOTHING;
@@ -2454,7 +2201,7 @@ ACMD(do_tstat) {
             return;
         }
 
-        do_stat_trigger(ch, trig_index.at(rnum).proto);
+        do_stat_trigger(ch, &trig_index.at(rnum));
     } else
         send_to_char(ch, "Usage: tstat <vnum>\r\n");
 }
@@ -2466,7 +2213,7 @@ ACMD(do_tstat) {
 */
 struct cmdlist_element *
 find_case(struct trig_data *trig, struct cmdlist_element *cl,
-    unit_data *go, script_data *sc, int type, char *cond) {
+    unit_data *go, script_data *sc, UnitType type, char *cond) {
     char result[MAX_INPUT_LENGTH];
     struct cmdlist_element *c;
     char *p, *buf;
@@ -2564,18 +2311,6 @@ int check_flags_by_name_ar(bitvector_t *array, int numflags, char *search, const
     return false;
 }
 
-
-
-int trig_data::countLine(struct cmdlist_element *c) const {
-    int count = 0;
-    for(auto cl = cmdlist; cl; cl = cl->next) {
-        if(cl == c) return count;
-        count++;
-    }
-    // This should never, EVER happen...
-    return -1;
-}
-
 std::shared_ptr<trig_data> trig_data::shared() {
     return shared_from_this();
 }
@@ -2596,7 +2331,7 @@ void trig_data::activate() {
     auto sh = shared_from_this();
     std::unordered_set<std::string> services;
     services.insert("active");
-    services.insert(fmt::format("vnum_{}", vn));
+    services.insert(fmt::format("vnum_{}", getVnum()));
     if(waiting != 0.0) {
         services.insert("waiting");
     }
@@ -2612,4 +2347,575 @@ void trig_data::deactivate() {
     active = false;
     auto sh = shared_from_this();
     triggerSubscriptions.unsubscribeFromAll(sh);
+}
+
+
+int trig_data::getVnum() const {
+    return proto->vn;
+}
+
+UnitType trig_data::getAttachType() const {
+    return proto->attach_type;
+}
+
+long trig_data::getTriggerType() const {
+    return proto->trigger_type;
+}
+
+
+trig_data::trig_data(const trig_proto_data& other) : trig_data() {
+    proto = (trig_proto_data*)&other;
+}
+
+ScriptLine trig_proto_data::getLine(int line) const {
+    if(line < 0 || line >= lines.size()) {
+            throw DgScriptError("Line number out of range");
+        }
+    return lines[line];
+}
+
+std::vector<ScriptLine> parse_script(const std::vector<std::string> &orig) {
+    std::vector<ScriptLine> result;
+    // We're going to iterate through orig and parse each line.
+    // Each line will be split into its type, and remaining content.
+    // The first token will be checked and used to determine the 
+    // appropriate ScriptLineType. It might be the entire string 
+    // (note: the lines in orig do not end in newlines),
+    // or it might be the first token, respecting ( and space as a token delimiter.
+    
+    // FOR EXAMPLE, some are written like "if (expr...",
+    // others as "if(expr..." and still more as "if expr..." and we must
+    // preserve the parentheses if they exist, so treat both space and
+    // start parentheses as opening delimiter.
+
+    // For else, end, break, their second part is empty, we can discard anything
+    // following them.
+
+    // Lines beginning with * are comments. Preserve following text in the second
+    // part of the ScriptLine.
+
+    // strip all leading whitespace from all ScriptLineTypes.
+    // strip all trailing whitespace from everything but COMMENT and COMMAND.
+
+    for (const auto &line : orig) {
+        ScriptLineType type;
+        std::string content;
+        std::string trimmedLine = line;
+        // Remove leading whitespace
+        trimmedLine.erase(0, trimmedLine.find_first_not_of(" \t"));
+        
+        if (trimmedLine.empty()) {
+            continue; // skip empty lines
+        }
+
+        // Check the first token
+        size_t pos = trimmedLine.find_first_of(" (");
+        std::string firstToken = (pos == std::string::npos) ? trimmedLine : trimmedLine.substr(0, pos);
+
+        if (firstToken == "if") {
+            type = ScriptLineType::IF;
+            content = trimmedLine.substr(pos + 1); // skip the 'if' and space/(
+        } else if (firstToken == "elseif") {
+            type = ScriptLineType::ELSEIF;
+            content = trimmedLine.substr(pos + 1); // skip the 'elseif' and space
+        } else if (firstToken == "else") {
+            type = ScriptLineType::ELSE;
+        } else if (firstToken == "while") {
+            type = ScriptLineType::WHILE;
+            content = trimmedLine.substr(pos + 1);
+        } else if (firstToken == "switch") {
+            type = ScriptLineType::SWITCH;
+            content = trimmedLine.substr(pos + 1);
+        } else if (firstToken == "case") {
+            type = ScriptLineType::CASE;
+            content = trimmedLine.substr(pos + 1);
+        } else if (firstToken == "default") {
+            type = ScriptLineType::DEFAULT;
+        } else if (firstToken == "end") {
+            type = ScriptLineType::END;
+        } else if (firstToken == "done") {
+            type = ScriptLineType::DONE;
+        } else if (firstToken == "break") {
+            type = ScriptLineType::BREAK;
+        } else if (firstToken[0] == '*') { // comment line
+            type = ScriptLineType::COMMENT;
+            content = trimmedLine.substr(1); // skip the '*
+        } else {
+            type = ScriptLineType::COMMAND;
+            content = trimmedLine; // the entire line is the command
+        }
+        result.emplace_back(type, content);
+    }
+    return result;
+}
+
+void trig_data::reset() {
+    variables.clear();
+    depth_stack.clear();
+    current_line = 0;
+    state = DgScriptState::READY;
+    waiting = 0.0;
+}
+
+void trig_data::setState(DgScriptState newState) {
+    state = newState;
+    switch(state) {
+        case DgScriptState::PAUSED:
+        case DgScriptState::WAITING:
+            triggerSubscriptions.subscribe("waiting", shared_from_this());
+            break;
+    }
+}
+
+void trig_data::setWaiting(double waitTime, DgScriptState newState) {
+    if(waitTime < 0.0) {
+        throw DgScriptError("Waiting time cannot be negative.");
+    }
+    waiting = waitTime;
+    setState(newState);
+}
+
+bool trig_data::isReady() const {
+    return state == DgScriptState::READY || state == DgScriptState::ERROR || state == DgScriptState::DONE;
+}
+
+void trig_data::error(const std::string &msg) {
+    // Log the error message and set the state to ERROR
+    script_log("Error in trigger '%s' (VNum %d) at line %d: %s", GET_TRIG_NAME(this), current_line, GET_TRIG_VNUM(this), (char*)msg.c_str());
+    // Optionally, you can also throw an exception or handle it as needed.
+}
+
+int trig_data::execute() {
+
+    // This is a clever hack to prevent the script from being deleted
+    // during execution if, by some chance, it obliterates its host object.
+    std::shared_ptr<unit_data> sh;
+    switch(owner->type) {
+        case UnitType::character:
+            sh = ((char_data*)owner)->shared();
+            break;
+        case UnitType::object:
+            sh = ((obj_data*)owner)->shared();
+            break;
+        case UnitType::room:
+            sh = ((room_data*)owner)->shared();
+            break;
+        default:
+            throw DgScriptError("Invalid owner type for script execution.");
+    }
+
+    try {
+        // Execute the trigger's script
+        if(!owner->isActive()) {
+            throw DgScriptError("Owner is inactive.");
+        }
+        if(depth_stack.size() > MAX_SCRIPT_DEPTH) {
+            throw DgScriptError("Exceeded maximum script depth.");
+        }
+        if(state == DgScriptState::ERROR || state == DgScriptState::DONE) {
+            reset();
+        }
+        int executionCount = 0;
+        state = DgScriptState::RUNNING;
+        int processed_line = 0;
+        // The main script driver, we'll keep running lines until we've run too long, run out of lines,
+        // the state changes, or the owner becomes inactive.
+        while((current_line < proto->lines.size()) && (state == DgScriptState::RUNNING) && owner->isActive()) {
+            if(executionCount++ > 50) {
+                setWaiting(0.1, DgScriptState::PAUSED);
+                break; // Prevent infinite loops, yield control
+            }
+            auto line = proto->getLine(current_line);
+            processed_line = current_line;
+            processLine(line);
+        }
+
+        if(state == DgScriptState::RUNNING && (processed_line == (proto->lines.size() - 1))) {
+            // If we reached the end of the script, we set it to DONE.
+            // This is important to ensure that the script is marked as finished.
+            setState(DgScriptState::DONE);
+        }
+        
+    } catch (const DgScriptError& e) {
+        state = DgScriptState::ERROR;
+        error(e.what());
+    }
+
+    return toReturn;
+}
+
+void trig_data::processLine(const ScriptLine& line) {
+    // The way this one works: it processes a single line of the script.
+    // Since we don't have proper blocks, this handles all flow control by
+    // determining which line to jump to and checking the context in the
+    // depth_stack.
+    switch(std::get<0>(line)) {
+
+        case ScriptLineType::COMMENT:
+            // Comments are ignored, just increment the line counter.
+            current_line++;
+            break;
+
+        case ScriptLineType::COMMAND:
+            // Execute the command.
+            processCommand(std::get<1>(line));
+            current_line++;
+            break;
+
+        case ScriptLineType::IF: {
+            
+            auto cond = std::get<1>(line);
+            // Evaluate the while condition.
+            auto expr = evaluateExpression(cond);
+            if(evaluateComparison(expr, "1", "==")) {
+                // Condition is true, execute the loop body
+                depth_stack.emplace_back(ScriptLineType::IF, current_line, true, "");
+                current_line++;
+            } else {
+                // Condition is false, exit the loop
+                depth_stack.emplace_back(ScriptLineType::IF, current_line, false, "");
+                current_line = locateElseIfElseEnd(current_line);
+            }
+        }
+            break;
+        case ScriptLineType::ELSEIF: {
+            if(depth_stack.empty() || std::get<0>(depth_stack.back()) != ScriptLineType::IF) {
+                throw DgScriptError("Elseif without matching if.");
+            }
+            auto cond = std::get<1>(line);
+            // Evaluate the while condition.
+            auto expr = evaluateExpression(cond);
+            if(!std::get<2>(depth_stack.back()) && evaluateComparison(expr, "1", "==")) {
+                // Condition is true, execute the loop body
+                std::get<2>(depth_stack.back()) = true; // mark this elseif as true
+                current_line++;
+            } else {
+                // Condition is false
+                current_line = locateElseIfElseEnd(current_line) + 1;
+            }
+        }
+            break;
+
+        case ScriptLineType::ELSE:
+            if(depth_stack.empty() || std::get<0>(depth_stack.back()) != ScriptLineType::IF) {
+                throw DgScriptError("Elseif without matching if.");
+            }
+            if(std::get<2>(depth_stack.back())) {
+                // We already executed an elseif, so we skip this else.
+                current_line = locateElseIfElseEnd(current_line);
+            } else {
+                // We execute the else block.
+                std::get<2>(depth_stack.back()) = true; // mark this else as true
+                current_line++;
+            }
+            break;
+
+        case ScriptLineType::WHILE: {
+            depth_stack.emplace_back(ScriptLineType::WHILE, current_line, false, "");
+            auto cond = std::get<1>(line);
+            // Evaluate the while condition.
+            auto expr = evaluateExpression(cond);
+            if(evaluateComparison(expr, "1", "==")) {
+                // Condition is true, execute the loop body
+                current_line++;
+            } else {
+                // Condition is false, exit the loop
+                current_line = locateDone(ScriptLineType::WHILE,  current_line) + 1;
+                depth_stack.pop_back(); // Remove the while context from the stack
+            }
+        }
+            break;
+
+        case ScriptLineType::SWITCH: {
+            auto cond = std::get<1>(line);
+            // Evaluate the switch condition.
+            auto expr = evaluateExpression(cond);
+            // we store the evaluated expression in the depth stack so we can compare it against cases.
+            depth_stack.emplace_back(ScriptLineType::SWITCH, current_line, false, expr);
+        }
+            break;
+
+        case ScriptLineType::CASE: {
+            if(depth_stack.empty() || std::get<0>(depth_stack.back()) != ScriptLineType::SWITCH) {
+                throw DgScriptError("Case without matching switch.");
+            }
+            auto &dep = depth_stack.back();
+            if(std::get<2>(dep)) {
+                // This case has already matched, and we didn't get a break, so we fallthrough.
+                current_line++;
+            } else {
+                auto swcond = std::get<3>(dep);
+                auto cond = std::get<1>(line);
+                auto expr = evaluateExpression(cond);
+                if(evaluateComparison(swcond, expr, "==")) {
+                    // This case matched so we will enter the case block.
+                    std::get<2>(dep) = true; // mark this case as matched
+                    current_line++; 
+                } else {
+                    // This case did not match, so we'll advance to the next case, default, or end.
+                    current_line = locateCaseDefaultEnd(current_line);
+                }
+            }
+        }
+            break;
+
+        case ScriptLineType::DEFAULT: {
+            if(depth_stack.empty() || std::get<0>(depth_stack.back()) != ScriptLineType::SWITCH) {
+                throw DgScriptError("Default without matching switch.");
+            }
+
+            auto &dep = depth_stack.back();
+            if(std::get<2>(dep)) {
+                // This switch has already matched, and we didn't get a break, so we fallthrough.
+                current_line++;
+            } else {
+                // This default was reached by lacking any other match.
+                std::get<2>(dep) = true; // mark this switch as matched
+                current_line++;
+            }
+        }
+            break;
+
+        case ScriptLineType::END:
+            if(depth_stack.empty() || std::get<0>(depth_stack.back()) != ScriptLineType::IF) {
+                throw DgScriptError("End without matching if.");
+            }
+            depth_stack.pop_back();
+            current_line++;
+            break;
+
+        case ScriptLineType::DONE: {
+            if(depth_stack.empty()) {
+                throw DgScriptError("Done without matching switch or while.");
+            }
+            auto last = std::get<0>(depth_stack.back());
+            auto retline = std::get<1>(depth_stack.back());
+            if(last != ScriptLineType::WHILE && last != ScriptLineType::SWITCH) {
+                throw DgScriptError("Done without matching switch or while.");
+            }
+            switch(last) {
+                case ScriptLineType::WHILE:
+                    current_line = retline; // Go back to the start of the while loop.
+                    break;
+                case ScriptLineType::SWITCH:
+                    current_line++;
+                    break;
+            }
+            depth_stack.pop_back();
+        }
+            break;
+
+        case ScriptLineType::BREAK: 
+            if(depth_stack.empty() || std::get<0>(depth_stack.back()) != ScriptLineType::SWITCH) {
+                throw DgScriptError("Break without matching switch.");
+            }
+            current_line = locateDone(ScriptLineType::SWITCH, current_line);
+            break;
+    }
+
+}
+
+int trig_data::locateElseIfElseEnd(int startLine) const {
+    auto i = startLine;
+    while(i < proto->lines.size()) {
+        auto line = proto->getLine(i);
+        switch(std::get<0>(line)) {
+            case ScriptLineType::IF:
+                // If we hit another if, we need to skip to the end of that if block.
+                i = locateEnd(i);
+                break;
+            case ScriptLineType::SWITCH:
+            case ScriptLineType::WHILE:
+                // If we hit a switch or while, we need to skip to the end of that
+                // block.
+                i = locateDone(std::get<0>(line), i);
+                break;
+            case ScriptLineType::ELSEIF:
+            case ScriptLineType::ELSE:
+            case ScriptLineType::END:
+                return i;
+            default:
+                // If we hit anything else, we are not at the end of the if block.
+                i++;
+                break;
+        }
+    }
+    throw DgScriptError("Else/elseif/end not found in script.");
+}
+
+int trig_data::locateCaseDefaultEnd(int startLine) const {
+    auto i = startLine;
+    while(i < proto->lines.size() - 1) {
+        auto line = proto->getLine(i);
+        switch(std::get<0>(line)) {
+            case ScriptLineType::CASE:
+            case ScriptLineType::DEFAULT:
+                return i; // found the case/default
+            case ScriptLineType::END:
+                return i; // found the end
+            default:
+                // If we hit anything else, we are not at the end of the switch block.
+                i++;
+                break;
+        }
+    }
+    throw DgScriptError("Case/default/end not found in script.");
+}
+
+int trig_data::locateEnd(int startLine) const {
+    auto i = startLine;
+    while(i < proto->lines.size() - 1) {
+        auto line = proto->getLine(i);
+        switch(std::get<0>(line)) {
+            case ScriptLineType::SWITCH:
+            case ScriptLineType::WHILE:
+                i = locateDone(std::get<0>(line), i);
+                break;
+            case ScriptLineType::IF:
+                i = locateEnd(i);
+                break;
+            case ScriptLineType::END:
+                return i; // found the end
+            default:
+                // If we hit anything else, we are not at the end of the if block.
+                i++;
+                break;
+        }
+    }
+    throw DgScriptError("End not found in script.");
+}
+
+int trig_data::locateDone(ScriptLineType type, int startLine) const {
+    auto i = startLine;
+    while(i < proto->lines.size() - 1) {
+        auto line = proto->getLine(i);
+        switch(std::get<0>(line)) {
+            case ScriptLineType::DONE:
+                return i; // found the done
+            case ScriptLineType::SWITCH:
+            case ScriptLineType::WHILE:
+                i = locateDone(std::get<0>(line), i);
+                break;
+            case ScriptLineType::IF:
+                i = locateEnd(i);
+                break;
+            default:
+                i++;
+        }
+    }
+    throw DgScriptError("Done not found in script.");
+}
+
+std::string trig_data::evaluateExpression(const std::string& expr) {
+    char buf[MAX_STRING_LENGTH];
+
+    eval_expr((char*)expr.c_str(), buf, owner, owner, this, proto->attach_type);
+    return std::string(buf);
+}
+
+bool trig_data::evaluateComparison(const std::string& left, const std::string& right, const std::string& op) {
+    char buf[MAX_STRING_LENGTH];
+
+    eval_op((char*)op.c_str(), (char*)left.c_str(), (char*)right.c_str(), buf, owner, owner, this);
+    return truthy(std::string(buf));
+}
+
+bool trig_data::truthy(const std::string& value) const {
+    // A value is truthy if it is not empty and not "0"
+    return !value.empty() && value != "0";
+}
+
+std::string trig_data::substituteVariables(const std::string& raw_text) {
+    char buf[MAX_STRING_LENGTH];
+
+    var_subst(owner, owner, this, proto->attach_type, (char*)raw_text.c_str(), buf);
+
+    return std::string(buf);
+}
+
+void trig_data::processCommand(const std::string& raw_text) {
+    void obj_command_interpreter(obj_data *obj, char *argument);
+    void wld_command_interpreter(struct room_data *room, char *argument);
+
+    // This function processes a single command line.
+    // It will handle the command based on its type.
+    
+    // we already have no leading whitespace, so we can just check if it's empty.
+    if(raw_text.empty()) {
+        return; // nothing to do
+    }
+
+    auto full_command = substituteVariables(raw_text);
+
+    // full_command should be in the form <cmd> <args>
+    // Although it might just be <cmd> without any args.
+    // commands are always alphanumeric and can contain underscores.
+
+    // attempt to split into command and arguments.
+    std::string cmd;
+    std::string args;
+    size_t space_pos = full_command.find(' ');
+    if(space_pos != std::string::npos) {
+        cmd = full_command.substr(0, space_pos);
+        args = full_command.substr(space_pos + 1);
+    } else {
+        cmd = full_command; // no arguments, just the command
+    }
+
+    // Now we can handle the command based on its type.
+    if(boost::iequals(cmd, "eval")) {
+        // Handle eval command
+        process_eval(owner, owner, this, proto->attach_type, (char*)full_command.c_str());
+    } else if(boost::iequals(cmd, "nop")) {
+        // NOP does nothing, so we can just return.
+    } else if(boost::iequals(cmd, "extract")) {
+        // Handle extract command
+        extract_value(owner, this, (char*)full_command.c_str());
+    } else if(boost::iequals(cmd, "dg_letter")) {
+        // Handle dg_letter command
+        dg_letter_value(owner, this, (char*)full_command.c_str());
+    } else if(boost::iequals(cmd, "halt")) {
+        // Halt the script execution
+        setState(DgScriptState::DONE);
+    } else if(boost::iequals(cmd, "dg_cast")) {
+        do_dg_cast(owner, owner, this, proto->attach_type, (char*)full_command.c_str());
+    } else if(boost::iequals(cmd, "dg_affect")) {
+        do_dg_affect(owner, owner, this, proto->attach_type, (char*)full_command.c_str());
+    } else if(boost::iequals(cmd, "global")) {
+        process_global(owner, this, (char*)full_command.c_str(), 0);
+    } else if(boost::iequals(cmd, "context")) {
+        process_context(owner, this, (char*)full_command.c_str());
+    } else if(boost::iequals(cmd, "remote")) {
+        process_remote(owner, this, (char*)full_command.c_str());
+    } else if(boost::iequals(cmd, "rdelete")) {
+        process_rdelete(owner, this, (char*)full_command.c_str());
+    } else if(boost::iequals(cmd, "return")) {
+        toReturn = process_return(this, (char*)full_command.c_str());
+    } else if(boost::iequals(cmd, "set")) {
+        process_set(owner, this, (char*)full_command.c_str());
+    } else if(boost::iequals(cmd, "unset")) {
+        process_unset(owner, this, (char*)full_command.c_str());
+    } else if(boost::iequals(cmd, "wait")) {
+        process_wait(owner, this, proto->attach_type,
+                     (char*)full_command.c_str(), nullptr);
+    } else if(boost::iequals(cmd, "attach")) {
+        process_attach(owner, owner, this, proto->attach_type, (char*)full_command.c_str());
+    } else if(boost::iequals(cmd, "detach")) {
+        process_detach(owner, owner, this, proto->attach_type, (char*)full_command.c_str());
+    } else if(boost::iequals(cmd, "version")) {
+        mudlog(NRM, ADMLVL_GOD, true, "%s", DG_SCRIPT_VERSION);
+    } else {
+        // If we reach here, we assume it's a command that should be executed.
+        switch(proto->attach_type) {
+            case MOB_TRIGGER:
+                command_interpreter((char_data *)owner, (char*)full_command.c_str());
+                break;
+            case OBJ_TRIGGER:
+                obj_command_interpreter((obj_data *)owner, (char*)full_command.c_str());
+                break;
+            case WLD_TRIGGER:
+                wld_command_interpreter((room_data *)owner, (char*)full_command.c_str());
+                break;
+        }
+    }
 }

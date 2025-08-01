@@ -10466,20 +10466,7 @@ ACMD(do_fix) {
 
 
 static int spell_in_book(struct obj_data *obj, int spellnum) {
-    int i;
-    bool found = false;
 
-    if (!obj->sbinfo)
-        return false;
-
-    for (i = 0; i < SPELLBOOK_SIZE; i++)
-        if (obj->sbinfo[i].spellname == spellnum) {
-            found = true;
-            break;
-        }
-
-    if (found)
-        return 1;
 
     return 0;
 }

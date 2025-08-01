@@ -82,37 +82,27 @@ cdef extern from "dbat/structs.h":
         cmdlist_element* original
         cmdlist_element* next
     
-    cdef struct trig_var_data:
-        char* name
-        char* value
-        long context
-        trig_var_data* next
-    
-    cdef cppclass trig_data:
+    cdef cppclass trig_proto_data:
         int vn
         int8_t attach_type
         int8_t data_type
         char* name
         long trigger_type
         cmdlist_element* cmdlist
-        cmdlist_element* curr_state
         int narg
         char *arglist
+
+    cdef cppclass trig_data(trig_proto_data):
+        cmdlist_element* curr_state
         int depth
         int loops
         double waiting
         bool purged
-        trig_var_data* var_list
-        shared_ptr[unit_data] owner
+        unordered_map[string, string] variables
+        unit_data* owner
         int order
         int countLine(cmdlist_element* c) const
         bool active
-
-        int id
-        time_t generation
-
-        trig_data *next
-        trig_data *next_in_world
         shared_ptr[trig_data] shared()
 
     cdef cppclass proto_data:

@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import Enum, IntFlag
 from dbat_ext import get_names
 
 # Map the Python enum name to the corresponding category string that your C++ get_names() expects.
@@ -43,3 +43,8 @@ for enum_name, cat in __categories.items():
     g = globals()
     new_enum = Enum(enum_name, {name: name for name in names})
     g[enum_name] = new_enum
+
+# DgScript related enums that match the C++ constants
+
+
+

@@ -19,8 +19,10 @@ application = "dbat.portal.application.Application"
 login_parser = "dbat.portal.parsers.login.LoginParser"
 user_parser = "dbat.portal.parsers.user.UserParser"
 character_parser = "dbat.portal.parsers.character.CharacterParser"
-admin_parser = "dbat.portal.parsers.admin.menu.AdminParser"
 create_parser = "dbat.portal.parsers.create.CreateParser"
+admin_parser = "dbat.portal.parsers.admin.menu.AdminParser"
+script_parser = "dbat.portal.parsers.admin.scripts.ScriptListParser"
+script_editor = "dbat.portal.parsers.admin.scripts.ScriptEditorParser"
 
 [fastapi.routers]
 auth = "dbat.rest.auth"

@@ -439,16 +439,16 @@ void list_triggers(struct char_data *ch, zone_rnum rnum, trig_vnum vmin, trig_vn
             counter++;
 
             send_to_char(ch, "%4d) [@g%5d@n] @[1]%-45.45s ",
-                         counter, t.first, t.second.proto->name);
+                         counter, t.first, t.second.name);
 
-            if (t.second.proto->attach_type == OBJ_TRIGGER) {
-                sprintbit(GET_TRIG_TYPE(t.second.proto), otrig_types, trgtypes, sizeof(trgtypes));
+            if (t.second.attach_type == OBJ_TRIGGER) {
+                sprintbit(t.second.trigger_type, otrig_types, trgtypes, sizeof(trgtypes));
                 send_to_char(ch, "obj @y%s@n\r\n", trgtypes);
-            } else if (t.second.proto->attach_type == WLD_TRIGGER) {
-                sprintbit(GET_TRIG_TYPE(t.second.proto), wtrig_types, trgtypes, sizeof(trgtypes));
+            } else if (t.second.attach_type == WLD_TRIGGER) {
+                sprintbit(t.second.trigger_type, wtrig_types, trgtypes, sizeof(trgtypes));
                 send_to_char(ch, "wld @y%s@n\r\n", trgtypes);
             } else {
-                sprintbit(GET_TRIG_TYPE(t.second.proto), trig_types, trgtypes, sizeof(trgtypes));
+                sprintbit(t.second.trigger_type, trig_types, trgtypes, sizeof(trgtypes));
                 send_to_char(ch, "mob @y%s@n\r\n", trgtypes);
             }
 

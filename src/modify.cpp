@@ -23,7 +23,7 @@
 #include "dbat/shop.h"
 #include "dbat/guild.h"
 #include "dbat/spell_parser.h"
-#include "dbat/dg_olc.h"
+#include "dbat/dg_scripts.h"
 
 /* local functions */
 
@@ -226,7 +226,6 @@ void string_add(struct descriptor_data *d, char *str) {
                 {CON_OEDIT,    oedit_string_cleanup},
                 {CON_REDIT,    redit_string_cleanup},
                 {CON_TEDIT,    tedit_string_cleanup},
-                {CON_TRIGEDIT, trigedit_string_cleanup},
                 {CON_EXDESC,   exdesc_string_cleanup},
                 {CON_PLAYING,  playing_string_cleanup},
                 {CON_IEDIT,    oedit_string_cleanup},

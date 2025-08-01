@@ -14,6 +14,8 @@ struct player_data;
 struct proto_data;
 struct npc_proto_data;
 struct item_proto_data;
+struct trig_data;
+struct trig_proto_data;
 
 typedef unit_data script_data;
 

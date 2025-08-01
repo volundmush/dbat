@@ -277,7 +277,17 @@ class BaseConnection:
             limits=Limits(max_connections=10, max_keepalive_connections=10),
             verify=False,
             follow_redirects=True,
+            timeout=10.0,  # Add timeout to prevent hanging
         )
+
+    async def check_game_server_health(self) -> bool:
+        """Check if the game server is reachable."""
+        try:
+            response = await self.client.get("/health", timeout=5.0)
+            return response.status_code == 200
+        except Exception as e:
+            logger.warning(f"Game server health check failed: {e}")
+            return False
 
     async def run_link(self):
         parser_class = dbat.CLASSES["login_parser"]

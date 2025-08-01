@@ -81,11 +81,6 @@ struct affected_type : affect_t {
     struct affected_type *next{};
 };
 
-struct obj_spellbook_spell {
-    int spellname;    /* Which spell is written */
-    int pages;        /* How many pages does it take up */
-};
-
 struct account_data {
     account_data() = default;
     int id{NOTHING};
@@ -134,13 +129,6 @@ struct cmdlist_element {
     struct cmdlist_element *next{};
 };
 
-struct trig_var_data {
-    char *name{};                /* name of variable  */
-    char *value{};                /* value of variable */
-    long context{};                /* 0: global context */
-    struct trig_var_data *next{};
-};
-
 struct HasVariables {
     std::unordered_map<std::string, std::string> variables; // Subscriptions to services.
 
@@ -164,27 +152,68 @@ struct HasVariables {
     }
 };
 
+enum class ScriptLineType : uint8_t {
+    COMMAND = 0,
+    IF = 1,
+    ELSEIF = 2,
+    ELSE = 3,
+    END = 4,
+    SWITCH = 5,
+    CASE = 6,
+    BREAK = 7,
+    DEFAULT = 8,
+    WHILE = 9,
+    DONE = 10,
+    COMMENT = 11
+};
+
+using ScriptLine = std::tuple<ScriptLineType, std::string>;
+
 struct trig_proto_data {
     trig_vnum vn{NOTHING};
-    int8_t attach_type{};            /* mob/obj/wld intentions          */
-    int8_t data_type{};                /* type of game_data for trig      */
-    char *name{};                    /* name of trigger                 */
+    UnitType attach_type{UnitType::unknown};            /* mob/obj/wld intentions          */
+    std::string name{};                    /* name of trigger                 */
     long trigger_type{};            /* type of trigger (for bitvector) */
-    struct cmdlist_element *cmdlist{};    /* top of command list             */
+    std::vector<ScriptLine> lines; /* list of commands in trigger     */
     int narg{};                /* numerical argument              */
-    char *arglist{};            /* argument list                   */
+    std::string arglist{};            /* argument list                   */
+
+    ScriptLine getLine(int line) const;
+
+    std::string scriptString() const;
+    void setBody(const std::string& body);
+};
+
+using DepthType = std::tuple<ScriptLineType, int, bool, std::string>;
+
+enum class DgScriptState : uint8_t {
+    READY = 0,
+    RUNNING = 1,
+    WAITING = 2,
+    PAUSED = 3,
+    ERROR = 4,
+    DONE = 5
+};
+
+class DgScriptError : public std::runtime_error {
+public:
+    explicit DgScriptError(const std::string& message)
+        : std::runtime_error(message) {}
 };
 
 /* structure for triggers */
-struct trig_data : public trig_proto_data, public HasVariables, std::enable_shared_from_this<trig_data> {
-    ~trig_data();
-    struct cmdlist_element *curr_state{};    /* ptr to current line of trigger  */
-    int depth{};                /* depth into nest ifs/whiles/etc  */
-    int loops{};                /* loop iteration counter          */
+struct trig_data : public HasVariables, std::enable_shared_from_this<trig_data> {
+    trig_data() = default;
+    trig_data(const trig_proto_data &other);
+    trig_proto_data* proto{};
+    int getVnum() const;
+    UnitType getAttachType() const;
+    long getTriggerType() const;
+    DgScriptState state{DgScriptState::READY}; /* current state of the script */
+    std::vector<DepthType> depth_stack{};
+    int current_line{};
     double waiting{0.0};    /* event to pause the trigger      */
-    bool purged{};            /* trigger is set to be purged     */
     unit_data* owner{};
-    int countLine(struct cmdlist_element *c) const;
 
     bool active{false};
     void activate();
@@ -193,6 +222,31 @@ struct trig_data : public trig_proto_data, public HasVariables, std::enable_shar
     std::unordered_set<std::string> subscriptions; // Subscriptions to services.
 
     std::shared_ptr<trig_data> shared();
+
+    int execute();
+    void reset();
+
+    bool isReady() const;
+    void setWaiting(double wait, DgScriptState newState = DgScriptState::WAITING);
+
+private:
+    void error(const std::string& message);
+    int toReturn{1}; // used to return from the script.
+    
+    void setState(DgScriptState newState);
+    
+    void processLine(const ScriptLine& line);
+
+    int locateElseIfElseEnd(int startLine) const;
+    int locateCaseDefaultEnd(int startLine) const;
+    int locateDone(ScriptLineType type, int startLine) const;
+    int locateEnd(int startLine) const;
+
+    std::string evaluateExpression(const std::string& expr);
+    bool evaluateComparison(const std::string& lhs, const std::string& rhs, const std::string& op);
+    void processCommand(const std::string& cmd);
+    bool truthy(const std::string& value) const;
+    std::string substituteVariables(const std::string& cmd);
 };
 
 
@@ -396,7 +450,6 @@ struct obj_data : public thing_data, public picky_data, std::enable_shared_from_
 
     unit_data *holder{};
 
-    struct obj_spellbook_spell *sbinfo{};  /* For spellbook info */
     std::weak_ptr<char_data> sitting{};       /* Who is sitting on me? */
     struct char_data *user{};
     struct char_data *target{};

@@ -79,7 +79,7 @@ NegativeKeyGuardMap<obj_vnum, struct item_proto_data> obj_proto;    /* prototype
 
 NegativeKeyGuardMap<zone_vnum, struct zone_data> zone_table;    /* zone table			 */
 
-NegativeKeyGuardMap<trig_vnum, struct index_data> trig_index; /* index table for triggers      */
+NegativeKeyGuardMap<trig_vnum, struct trig_proto_data> trig_index; /* index table for triggers      */
 
 NegativeKeyGuardMap<int64_t, player_data> players;
 
@@ -1791,17 +1791,17 @@ static void do_reset_cmds(zone_data &z) {
                 break;
 
             case 'T': /* trigger command */
-                if (c.arg1 == MOB_TRIGGER && tmob)
+                if (c.arg1 == static_cast<int>(MOB_TRIGGER) && tmob)
                 {
                     add_trigger(SCRIPT(tmob), read_trigger(c.arg2), -1);
                     last_cmd = 1;
                 }
-                else if (c.arg1 == OBJ_TRIGGER && tobj)
+                else if (c.arg1 == static_cast<int>(OBJ_TRIGGER) && tobj)
                 {
                     add_trigger(SCRIPT(tobj), read_trigger(c.arg2), -1);
                     last_cmd = 1;
                 }
-                else if (c.arg1 == WLD_TRIGGER)
+                else if (c.arg1 == static_cast<int>(WLD_TRIGGER))
                 {
                     room = get_room(c.arg3);
                     if (!room)
@@ -1815,7 +1815,7 @@ static void do_reset_cmds(zone_data &z) {
                 break;
 
             case 'V':
-                if (c.arg1 == MOB_TRIGGER && tmob)
+                if (c.arg1 == static_cast<int>(MOB_TRIGGER) && tmob)
                 {
                     if (!SCRIPT(tmob))
                     {
@@ -1825,7 +1825,7 @@ static void do_reset_cmds(zone_data &z) {
                         tmob->setVariable(c.sarg1, c.sarg2);
                     last_cmd = 1;
                 }
-                else if (c.arg1 == OBJ_TRIGGER && tobj)
+                else if (c.arg1 == static_cast<int>(OBJ_TRIGGER) && tobj)
                 {
                     if (!SCRIPT(tobj))
                     {
@@ -1835,7 +1835,7 @@ static void do_reset_cmds(zone_data &z) {
                         tobj->setVariable(c.sarg1, c.sarg2);
                     last_cmd = 1;
                 }
-                else if (c.arg1 == WLD_TRIGGER)
+                else if (c.arg1 == static_cast<int>(WLD_TRIGGER))
                 {
                     if (!get_room(c.arg3))
                     {

@@ -12,16 +12,13 @@
 #include "dbat/genzon.h"
 #include "dbat/utils.h"
 #include "dbat/handler.h"
-#include "dbat/dg_olc.h"
 #include "dbat/shop.h"
 #include "dbat/filter.h"
+#include "dbat/dg_scripts.h"
 
 obj_data::obj_data() : thing_data() {
     type = UnitType::object;
 }
-
-static int copy_object_main(struct obj_data *to, struct obj_data *from, int free_object);
-
 
 obj_rnum add_object(struct item_proto_data *newobj, obj_vnum ovnum) {
     int found = NOTHING;
@@ -372,7 +369,6 @@ void obj_data::clearLocation() {
 
 obj_data::~obj_data() {
     if(auctname) free(auctname);
-    if(sbinfo) free(sbinfo);
 }
 
 std::vector<trig_vnum> obj_data::getProtoScript() const {

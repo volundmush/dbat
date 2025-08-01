@@ -1235,18 +1235,6 @@ static void display_spells(struct char_data *ch, struct obj_data *obj) {
     send_to_char(ch, "The spellbook contains the following spells:\r\n");
     send_to_char(ch, "@c---@wSpell Name@c------------------------------------@w# of pages@c-----@n\r\n");
 
-    if (!obj->sbinfo) {
-        return;
-    }
-    for (i = 0; i < SPELLBOOK_SIZE; i++) {
-        if (obj->sbinfo[i].spellname) {
-            if (obj->sbinfo[i].spellname > MAX_SPELLS) {
-                continue;
-            }
-            send_to_char(ch, "@y%-20s@n					[@R%2d@n]\r\n", spell_info[obj->sbinfo[i].spellname].name,
-                         obj->sbinfo[i].pages);
-        }
-    }
     return;
 }
 

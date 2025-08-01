@@ -32,7 +32,7 @@
 /* set to TAR_IGNORE. Also, group spells are not permitted             */
 /* code borrowed from do_cast() */
 void do_dg_cast(void *go, script_data *sc, trig_data *trig,
-                int type, char *cmd) {
+                UnitType type, char *cmd) {
     struct char_data *caster = nullptr;
     struct char_data *tch = nullptr;
     struct obj_data *tobj = nullptr;
@@ -149,7 +149,7 @@ void do_dg_cast(void *go, script_data *sc, trig_data *trig,
 constexpr int APPLY_TYPE = 1;
 constexpr int AFFECT_TYPE = 2;
 
-void do_dg_affect(void *go, script_data *sc, trig_data *trig, int script_type, char *cmd) {
+void do_dg_affect(void *go, script_data *sc, trig_data *trig, UnitType script_type, char *cmd) {
     struct char_data *ch = nullptr;
     int value = 0, duration = 0;
     char junk[MAX_INPUT_LENGTH]; /* will be set to "dg_affect" */

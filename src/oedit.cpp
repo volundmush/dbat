@@ -21,13 +21,13 @@
 #include "dbat/genzon.h"
 #include "dbat/oasis.h"
 #include "dbat/improved-edit.h"
-#include "dbat/dg_olc.h"
 #include "dbat/feats.h"
 #include "dbat/act.informative.h"
 #include "dbat/act.wizard.h"
 #include "dbat/races.h"
 #include "dbat/fight.h"
 #include "dbat/bitarray.h"
+#include "dbat/dg_scripts.h"
 
 /*------------------------------------------------------------------------*/
 
@@ -207,14 +207,13 @@ void oedit_setup_new(struct descriptor_data *d) {
     OLC_OBJ(d)->short_description = strdup("an unfinished object");
     OLC_OBJ(d)->wear_flags.set(ITEM_WEAR_TAKE, true);
     OLC_VAL(d) = 0;
-    OLC_ITEM_TYPE(d) = OBJ_TRIGGER;
+    OLC_ITEM_TYPE(d) = static_cast<int>(OBJ_TRIGGER);
     OLC_OBJ(d)->type_flag = ItemType::worn;
     SET_OBJ_VAL(OLC_OBJ(d), VAL_ALL_HEALTH, 100);
     SET_OBJ_VAL(OLC_OBJ(d), VAL_ALL_MAXHEALTH, 100);
     SET_OBJ_VAL(OLC_OBJ(d), VAL_ALL_MATERIAL, MATERIAL_STEEL);
     OLC_OBJ(d)->size = Size::medium;
 
-    SCRIPT(OLC_OBJ(d)) = nullptr;
     OLC_OBJ(d)->proto_script.clear();
     OLC_SCRIPT(d).clear();
 }
@@ -230,8 +229,7 @@ void oedit_setup_existing(struct descriptor_data *d, int real_num) {
      */
     OLC_OBJ(d) = obj;
     OLC_VAL(d) = 0;
-    OLC_ITEM_TYPE(d) = OBJ_TRIGGER;
-    dg_olc_script_copy(d);
+    OLC_ITEM_TYPE(d) = static_cast<int>(OBJ_TRIGGER);
 
 }
 
@@ -1121,15 +1119,6 @@ void oedit_parse(struct descriptor_data *d, char *arg) {
                     oedit_disp_perm_menu(d);
                     OLC_MODE(d) = OEDIT_PERM;
                     break;
-                case 's':
-                case 'S':
-                    if (STATE(d) != CON_IEDIT) {
-                        OLC_SCRIPT_EDIT_MODE(d) = SCRIPT_MAIN_MENU;
-                        dg_script_menu(d);
-                    } else {
-                        write_to_output(d, "\r\nScripts cannot be modified on individual objects.\r\nEnter choice : ");
-                    }
-                    return;
                 case 't':
                 case 'T':
                     write_to_output(d, "We don't use spellbooks!\r\n");
@@ -1161,10 +1150,6 @@ void oedit_parse(struct descriptor_data *d, char *arg) {
             return;            /*
 				 * end of OEDIT_MAIN_MENU 
 				 */
-
-        case OLC_SCRIPT_EDIT:
-            if (dg_script_edit_parse(d, arg)) return;
-            break;
 
         case OEDIT_EDIT_NAMELIST:
             if (!genolc_checkstring(d, arg))

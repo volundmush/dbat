@@ -17,7 +17,6 @@
 #include "dbat/genzon.h"
 #include "dbat/oasis.h"
 #include "dbat/improved-edit.h"
-#include "dbat/dg_olc.h"
 #include "dbat/constants.h"
 #include "dbat/spells.h"
 #include "dbat/handler.h"
@@ -25,6 +24,7 @@
 #include "dbat/act.wizard.h"
 #include "dbat/act.informative.h"
 #include "dbat/bitarray.h"
+#include "dbat/dg_scripts.h"
 
 /*------------------------------------------------------------------------*/
 
@@ -181,7 +181,7 @@ void redit_setup_new(struct descriptor_data *d) {
 
     OLC_ROOM(d)->strings["name"] = "An unfinished room";
     OLC_ROOM(d)->strings["look_description"] = "You are in an unfinished room.\r\n";
-    OLC_ITEM_TYPE(d) = WLD_TRIGGER;
+    OLC_ITEM_TYPE(d) = static_cast<int>(WLD_TRIGGER);
     OLC_SCRIPT(d).clear();
 
     OLC_VAL(d) = 0;
@@ -234,11 +234,9 @@ void redit_setup_existing(struct descriptor_data *d, int real_num) {
      */
     OLC_ROOM(d) = room;
     OLC_VAL(d) = 0;
-    OLC_ITEM_TYPE(d) = WLD_TRIGGER;
+    OLC_ITEM_TYPE(d) = static_cast<int>(WLD_TRIGGER);
 
-    dg_olc_script_copy(d);
     room->proto_script.clear();
-    SCRIPT(room) = nullptr;
 }
 
 /*------------------------------------------------------------------------*/
@@ -759,15 +757,6 @@ void redit_parse(struct descriptor_data *d, char *arg) {
                     write_to_output(d, "Are you sure you want to delete this room? ");
                     OLC_MODE(d) = REDIT_DELETE;
                     break;
-                case 's':
-                case 'S':
-                    if (GET_ADMLEVEL(d->character) < 1) {
-                        write_to_output(d, "That options isn't available to non-builders.\r\n");
-                        break;
-                    }
-                    OLC_SCRIPT_EDIT_MODE(d) = SCRIPT_MAIN_MENU;
-                    dg_script_menu(d);
-                    return;
                 case 'Z':
                 case 'z':
                     if (GET_ADMLEVEL(d->character) < 1) {
@@ -783,11 +772,6 @@ void redit_parse(struct descriptor_data *d, char *arg) {
                     break;
             }
             return;
-
-
-        case OLC_SCRIPT_EDIT:
-            if (dg_script_edit_parse(d, arg)) return;
-            break;
 
         case REDIT_NAME:
             if (!genolc_checkstring(d, arg))

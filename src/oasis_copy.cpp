@@ -6,9 +6,9 @@
 /** Copyright 2002 Kip Potter [Mythran] (kip_potter@hotmail.com)             **/
 /******************************************************************************/
 
+#include "dbat/oasis.h"
 #include "dbat/oasis_copy.h"
 #include "dbat/dg_comm.h"
-#include "dbat/dg_olc.h"
 #include "dbat/act.wizard.h"
 #include "dbat/send.h"
 #include "dbat/interpreter.h"
@@ -18,6 +18,7 @@
 #include "dbat/genolc.h"
 #include "dbat/genwld.h"
 #include "dbat/genshp.h"
+#include "dbat/genzon.h"
 #include "dbat/constants.h"
 
 /******************************************************************************/
@@ -78,7 +79,6 @@ ACMD(do_oasis_copy) {
             {CON_OEDIT,    real_object,  oedit_save_internally, oedit_setup_existing,    "ocopy", "object"},
             {CON_MEDIT,    real_mobile,  medit_save_internally, medit_setup_existing,    "mcopy", "mobile"},
             {CON_SEDIT,    real_shop,    sedit_save_internally, sedit_setup_existing,    "scopy", "shop"},
-            {CON_TRIGEDIT, real_trigger, trigedit_save,         trigedit_setup_existing, "tcopy", "trigger"},
             {-1,           nullptr,      nullptr,               nullptr,                 "\n",    "\n"}
     };
 

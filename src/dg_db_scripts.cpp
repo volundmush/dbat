@@ -12,6 +12,9 @@
 *  $Date: 2004/10/11 12:07:00$                                            *
 *  $Revision: 1.0.14 $                                                    *
 ************************************************************************ */
+#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/regex.hpp>
+#include <regex>
 
 #include "dbat/structs.h"
 #include "dbat/dg_scripts.h"
@@ -25,45 +28,42 @@
 extern bitvector_t asciiflag_conv(char *flag);
 
 /* local functions */
-void trig_data_init(trig_data *this_data);
-
 void parse_trigger(FILE *trig_f, trig_vnum nr) {
     int t[2], k, attach_type;
     char line[256], *cmds, *s, flags[256], errors[MAX_INPUT_LENGTH];
     struct cmdlist_element *cle;
     auto &idx = trig_index[nr];
-    idx.vn = nr;
+    auto *trig = &idx;
 
-    auto trig = new trig_data();
     trig->vn = nr;
 
-    idx.proto = trig;
     auto& z = zone_table.at(real_zone_by_thing(nr));
     z.triggers.insert(nr);
 
     snprintf(errors, sizeof(errors), "trig vnum %d", nr);
 
-    trig->name = fread_string(trig_f, errors);
+    char *buf = fread_string(trig_f, errors);
+
+    trig->name = buf;
 
     get_line(trig_f, line);
     k = sscanf(line, "%d %s %d", &attach_type, flags, t);
-    trig->attach_type = (int8_t) attach_type;
+    trig->attach_type = static_cast<UnitType>(attach_type);
     trig->trigger_type = (long) asciiflag_conv(flags);
     trig->narg = (k == 3) ? t[0] : 0;
 
-    trig->arglist = fread_string(trig_f, errors);
+    buf = fread_string(trig_f, errors);
+
+    trig->arglist = buf ? buf : "";
+
+    free(buf);
 
     cmds = s = fread_string(trig_f, errors);
 
-    CREATE(trig->cmdlist, struct cmdlist_element, 1);
-    trig->cmdlist->cmd = strdup(strtok(s, "\r\n"));
-    cle = trig->cmdlist;
+    std::vector<std::string> lines;
+    boost::split_regex(lines, cmds, boost::regex("\r\n|\r|\n"));
 
-    while ((s = strtok(nullptr, "\r\n"))) {
-        CREATE(cle->next, struct cmdlist_element, 1);
-        cle = cle->next;
-        cle->cmd = strdup(s);
-    }
+    trig->lines = parse_script(lines);
 
     free(cmds);
 }
@@ -77,49 +77,18 @@ std::shared_ptr<trig_data> read_trigger(int nr) {
     auto idx = trig_index.find(nr);
     if(idx == trig_index.end()) return nullptr;
 
-    auto sh = std::make_shared<trig_data>();
-
-    trig_data_copy(sh.get(), idx->second.proto);
+    auto sh = std::make_shared<trig_data>(idx->second);
 
     return sh;
 }
 
 
-void trig_data_init(trig_data *this_data) {;
-    this_data->data_type = 0;
-    this_data->name = nullptr;
-    this_data->trigger_type = 0;
-    this_data->cmdlist = nullptr;
-    this_data->curr_state = nullptr;
-    this_data->narg = 0;
-    this_data->arglist = nullptr;
-    this_data->depth = 0;
-    this_data->waiting = 0.0;
-    this_data->purged = false;
-
-}
-
-
 void trig_data_copy(trig_data *this_data, const trig_data *trg) {
-    trig_data_init(this_data);
 
-    this_data->vn = trg->vn;
-    this_data->attach_type = trg->attach_type;
-    this_data->data_type = trg->data_type;
-    if (trg->name)
-        this_data->name = strdup(trg->name);
-    else {
-        this_data->name = strdup("unnamed trigger");
-        basic_mud_log("Trigger with no name! (%d)", trg->vn);
-    }
-    this_data->trigger_type = trg->trigger_type;
-    this_data->cmdlist = trg->cmdlist;
-    this_data->narg = trg->narg;
-    if (trg->arglist) this_data->arglist = strdup(trg->arglist);
 }
 
 /* for mobs and rooms: */
-void dg_read_trigger(FILE *fp, struct unit_data *proto, int type) {
+void dg_read_trigger(FILE *fp, struct unit_data *proto, UnitType type) {
     char line[READ_SIZE];
     char junk[8];
     int vnum, rnum, count;
@@ -197,7 +166,7 @@ void dg_read_trigger(FILE *fp, struct unit_data *proto, int type) {
     }
 }
 
-void dg_read_trigger(FILE *fp, struct proto_data *proto, int type) {
+void dg_read_trigger(FILE *fp, struct proto_data *proto, UnitType type) {
     char line[READ_SIZE];
     char junk[8];
     int vnum, rnum, count;
@@ -249,7 +218,7 @@ void dg_obj_trigger(char *line, struct item_proto_data *obj) {
     obj->proto_script.push_back(rnum);
 }
 
-void assign_triggers(struct unit_data *i, int type) {
+void assign_triggers(struct unit_data *i, UnitType type) {
 
     if(i->running_scripts.has_value()) {
         // If this value is set, then scripts have been manually assigned via attach or detach.
@@ -277,7 +246,7 @@ void assign_triggers(struct unit_data *i, int type) {
        if(i->scripts.find(tvn) == i->scripts.end()) {
             auto t = read_trigger(tvn);
             SCRIPT_TYPES(i) |= GET_TRIG_TYPE(t);
-            i->scripts.emplace(t->vn, t);
+            i->scripts.emplace(t->getVnum(), t);
             t->owner = units.at(i->id).get();
             t->activate();
        }

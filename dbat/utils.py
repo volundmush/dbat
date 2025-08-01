@@ -773,10 +773,11 @@ class EventHub:
     def __init__(self):
         self.subscriptions: dict[uuid.UUID, list[asyncio.Queue]] = defaultdict(list)
         self.subscribed_at: dict[uuid.UUID, datetime] = dict()
+        self._cleanup_task = None
 
-    def subscribe(self, character_id: uuid.UUID) -> asyncio.Queue:
+    def subscribe(self, character_id: uuid.UUID, maxsize: int = 100) -> asyncio.Queue:
         """Create a new queue for this character and add it to the subscription list."""
-        q = asyncio.Queue()
+        q = asyncio.Queue(maxsize=maxsize)
         if character_id not in self.subscriptions:
             self.subscribed_at[character_id] = datetime.now()
         self.subscriptions[character_id].append(q)
@@ -794,28 +795,77 @@ class EventHub:
                 del self.subscriptions[character_id]
                 del self.subscribed_at[character_id]
 
-    async def send(self, character_id: uuid.UUID, message):
-        """Send a message to all subscribers for this character."""
+    async def send(self, character_id: uuid.UUID, message, timeout: float = 1.0):
+        """Send a message to all subscribers for this character with timeout protection."""
         if character_id in self.subscriptions:
             # iterate a copy to prevent possible mutation during iteration
+            dead_queues = []
             for q in self.subscriptions[character_id].copy():
-                await q.put(message)
+                try:
+                    await asyncio.wait_for(q.put(message), timeout=timeout)
+                except asyncio.TimeoutError:
+                    logger.warning(f"Queue timeout for character {character_id}, marking for cleanup")
+                    dead_queues.append(q)
+                except Exception as e:
+                    logger.error(f"Error sending to queue for character {character_id}: {e}")
+                    dead_queues.append(q)
+            
+            # Clean up dead queues
+            for dead_q in dead_queues:
+                self.unsubscribe(character_id, dead_q)
 
     def send_nowait(self, character_id: uuid.UUID, message):
         if character_id in self.subscriptions:
+            dead_queues = []
             for q in self.subscriptions[character_id].copy():
-                q.put_nowait(message)
+                try:
+                    q.put_nowait(message)
+                except asyncio.QueueFull:
+                    logger.warning(f"Queue full for character {character_id}, dropping message")
+                    # Could optionally mark for cleanup here too
+                except Exception as e:
+                    logger.error(f"Error sending nowait to queue for character {character_id}: {e}")
+                    dead_queues.append(q)
+            
+            # Clean up dead queues
+            for dead_q in dead_queues:
+                self.unsubscribe(character_id, dead_q)
 
-    async def broadcast(self, message):
-        """Send a message to all subscribers blindly."""
-        for channel_list in self.subscriptions.values():
+    async def broadcast(self, message, timeout: float = 1.0):
+        """Send a message to all subscribers blindly with timeout protection."""
+        dead_subscriptions = []
+        for character_id, channel_list in self.subscriptions.items():
+            dead_queues = []
             for channel in channel_list:
-                await channel.put(message)
+                try:
+                    await asyncio.wait_for(channel.put(message), timeout=timeout)
+                except asyncio.TimeoutError:
+                    logger.warning(f"Broadcast timeout for character {character_id}")
+                    dead_queues.append(channel)
+                except Exception as e:
+                    logger.error(f"Broadcast error for character {character_id}: {e}")
+                    dead_queues.append(channel)
+            
+            # Clean up dead queues for this character
+            for dead_q in dead_queues:
+                self.unsubscribe(character_id, dead_q)
 
     def broadcast_nowait(self, message):
-        for channel_list in self.subscriptions.values():
+        for character_id, channel_list in self.subscriptions.items():
+            dead_queues = []
             for channel in channel_list:
-                channel.put_nowait(message)
+                try:
+                    channel.put_nowait(message)
+                except asyncio.QueueFull:
+                    logger.warning(f"Broadcast queue full for character {character_id}")
+                    # Could optionally mark for cleanup
+                except Exception as e:
+                    logger.error(f"Broadcast nowait error for character {character_id}: {e}")
+                    dead_queues.append(channel)
+            
+            # Clean up dead queues
+            for dead_q in dead_queues:
+                self.unsubscribe(character_id, dead_q)
 
     def online(self) -> set[uuid.UUID]:
         """Return a set of all currently online characters."""
@@ -823,3 +873,46 @@ class EventHub:
 
     def connected_at(self) -> dict[uuid.UUID, datetime]:
         return self.subscribed_at.copy()
+
+    async def start_cleanup_task(self):
+        """Start periodic cleanup of stale connections."""
+        if self._cleanup_task is None:
+            self._cleanup_task = asyncio.create_task(self._periodic_cleanup())
+
+    async def stop_cleanup_task(self):
+        """Stop the cleanup task."""
+        if self._cleanup_task:
+            self._cleanup_task.cancel()
+            try:
+                await self._cleanup_task
+            except asyncio.CancelledError:
+                pass
+            self._cleanup_task = None
+
+    async def _periodic_cleanup(self):
+        """Periodically clean up stale connections and empty queues."""
+        from datetime import timedelta
+        
+        while True:
+            try:
+                await asyncio.sleep(300)  # Run every 5 minutes
+                
+                # Find connections that haven't been active for over an hour
+                cutoff = datetime.now() - timedelta(hours=1)
+                stale_connections = [
+                    char_id for char_id, connected_at in self.subscribed_at.items()
+                    if connected_at < cutoff
+                ]
+                
+                for char_id in stale_connections:
+                    logger.info(f"Cleaning up stale connection for character {char_id}")
+                    # Remove all queues for this character
+                    if char_id in self.subscriptions:
+                        del self.subscriptions[char_id]
+                    if char_id in self.subscribed_at:
+                        del self.subscribed_at[char_id]
+                        
+            except asyncio.CancelledError:
+                break
+            except Exception as e:
+                logger.error(f"Error in EventHub cleanup task: {e}")

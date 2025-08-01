@@ -537,19 +537,19 @@ void zedit_disp_menu(struct descriptor_data *d) {
             case 'T':
                 write_to_output(d, "%sAttach trigger @c%s@y [@c%d@y] to %s, %% Chance %d",
                                 c.if_flag ? " then " : "",
-                                trig_index.at(c.arg2).proto->name,
+                                trig_index.at(c.arg2).name,
                                 c.arg2,
-                                ((c.arg1 == MOB_TRIGGER) ? "mobile" :
-                                 ((c.arg1 == OBJ_TRIGGER) ? "object" :
-                                  ((c.arg1 == WLD_TRIGGER) ? "room" : "????"))), c.arg5);
+                                ((c.arg1 == static_cast<int>(MOB_TRIGGER)) ? "mobile" :
+                                 ((c.arg1 == static_cast<int>(OBJ_TRIGGER)) ? "object" :
+                                  ((c.arg1 == static_cast<int>(WLD_TRIGGER)) ? "room" : "????"))), c.arg5);
                 break;
             case 'V':
                 write_to_output(d, "%sAssign global %s:%d to %s = %s, %% Chance %d",
                                 c.if_flag ? " then " : "",
                                 c.sarg1.c_str(), c.arg2,
-                                ((c.arg1 == MOB_TRIGGER) ? "mobile" :
-                                 ((c.arg1 == OBJ_TRIGGER) ? "object" :
-                                  ((c.arg1 == WLD_TRIGGER) ? "room" : "????"))),
+                                ((c.arg1 == static_cast<int>(MOB_TRIGGER)) ? "mobile" :
+                                 ((c.arg1 == static_cast<int>(OBJ_TRIGGER)) ? "object" :
+                                  ((c.arg1 == static_cast<int>(WLD_TRIGGER)) ? "room" : "????"))),
                                 c.sarg2.c_str(), c.arg5);
                 break;
             default:
@@ -1100,9 +1100,9 @@ void zedit_parse(struct descriptor_data *d, char *arg) {
                     break;
                 case 'T':
                 case 'V':
-                    if (atoi(arg) < MOB_TRIGGER || atoi(arg) > WLD_TRIGGER)
+                    if (atoi(arg) < static_cast<int>(MOB_TRIGGER) || atoi(arg) > static_cast<int>(WLD_TRIGGER)) {
                         write_to_output(d, "Invalid input.");
-                    else {
+                    } else {
                         OLC_CMD(d).arg1 = atoi(arg);
                         zedit_disp_arg2(d);
                     }

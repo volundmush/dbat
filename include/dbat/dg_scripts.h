@@ -22,10 +22,6 @@
 
 #define DG_SCRIPT_VERSION "DG Scripts 1.0.14"
 
-#define    MOB_TRIGGER   0
-#define    OBJ_TRIGGER   1
-#define    WLD_TRIGGER   2
-
 /* unless you change this, Puff casts all your dg spells */
 constexpr int DG_CASTER_PROXY = 1;
 /* spells cast by objects and rooms use this level */
@@ -317,12 +313,10 @@ struct room_data *dg_room_of_obj(struct obj_data *obj);
 
 /* To maintain strict-aliasing we'll have to do this trick with a union */
 /* Thanks to Chris Gilbert for reminding me that there are other options. */
-extern int script_driver(unit_data *go_adress, trig_data *trig, int type, int mode);
-
 extern trig_rnum real_trigger(trig_vnum vnum);
 
 extern void process_eval(unit_data *go, script_data *sc, trig_data *trig,
-                         int type, char *cmd);
+                         UnitType type, char *cmd);
 
 /* from dg_db_scripts.c */
 extern void parse_trigger(FILE *trig_f, trig_vnum nr);
@@ -331,17 +325,15 @@ std::shared_ptr<trig_data> read_trigger(int nr);
 
 extern void trig_data_copy(trig_data *this_data, const trig_data *trg);
 
-extern void dg_read_trigger(FILE *fp, struct unit_data *proto, int type);
-extern void dg_read_trigger(FILE *fp, struct proto_data *proto, int type);
+extern void dg_read_trigger(FILE *fp, struct unit_data *proto, UnitType type);
+extern void dg_read_trigger(FILE *fp, struct proto_data *proto, UnitType type);
 
 extern void dg_obj_trigger(char *line, struct item_proto_data *obj);
 
-extern void assign_triggers(struct unit_data *i, int type);
+extern void assign_triggers(struct unit_data *i, UnitType type);
 
 
 /* From dg_variables.c */
-extern void add_var(struct trig_var_data **var_list, char *name, const char *value, long id);
-
 extern int item_in_list(char *item, const std::vector<std::weak_ptr<obj_data>>& list);
 
 extern char *skill_percent(struct char_data *ch, char *skill);
@@ -349,23 +341,13 @@ extern char *skill_percent(struct char_data *ch, char *skill);
 extern int char_has_item(char *item, struct char_data *ch);
 
 extern void var_subst(unit_data *go, script_data *sc, trig_data *trig,
-                      int type, char *line, char *buf);
-
-extern int text_processed(char *field, char *subfield, struct trig_var_data *vd,
-                          char *str, size_t slen);
+                      UnitType type, char *line, char *buf);
 
 extern void find_replacement(unit_data *go, script_data *sc, trig_data *trig,
-                             int type, char *var, char *field, char *subfield, char *str, size_t slen);
-
+                             UnitType type, char *var, char *field, char *subfield, char *str, size_t slen);
 
 /* From dg_handler.c */
-extern void free_var_el(struct trig_var_data *var);
-
-extern void free_varlist(struct trig_var_data *vd);
-
-extern int remove_var(struct trig_var_data **var_list, char *name);
-
-extern void extract_script(unit_data *thing, int type);
+extern void extract_script(unit_data *thing, UnitType type);
 
 /* from dg_comm.c */
 extern char *any_one_name(char *argument, char *first_arg);
@@ -376,10 +358,10 @@ extern void send_to_zone(char *messg, zone_rnum zone);
 
 /* from dg_misc.c */
 extern void do_dg_cast(void *go, script_data *sc, trig_data *trig,
-                       int type, char *cmd);
+                       UnitType type, char *cmd);
 
 extern void do_dg_affect(void *go, script_data *sc, trig_data *trig,
-                         int type, char *cmd);
+                         UnitType type, char *cmd);
 
 extern void send_char_pos(struct char_data *ch, int dam);
 
@@ -388,6 +370,8 @@ extern int valid_dg_target(char_data *ch, int bitvector);
 extern void script_damage(char_data *vict, int dam);
 
 extern int check_flags_by_name_ar(bitvector_t *array, int numflags, char *search, const char *namelist[]);
+
+extern std::vector<ScriptLine> parse_script(const std::vector<std::string> &orig);
 
 /* from dg_objcmd.c */
 extern room_rnum obj_room(obj_data *obj);
@@ -398,12 +382,12 @@ extern room_rnum obj_room(obj_data *obj);
 /* Macros for scripts */
 
 #define UID_CHAR   '#'
-#define GET_TRIG_NAME(t)          ((t)->name)
-#define GET_TRIG_RNUM(t)          ((t)->vn)
-#define GET_TRIG_VNUM(t)      (trig_index.at((t)->vn).vn)
-#define GET_TRIG_TYPE(t)          ((t)->trigger_type)
-#define GET_TRIG_NARG(t)          ((t)->narg)
-#define GET_TRIG_ARG(t)           ((t)->arglist)
+#define GET_TRIG_NAME(t)          ((char*)(t)->proto->name.c_str())
+#define GET_TRIG_RNUM(t)          ((t)->getVnum())
+#define GET_TRIG_VNUM(t)           ((t)->getVnum())
+#define GET_TRIG_TYPE(t)          ((t)->getTriggerType())
+#define GET_TRIG_NARG(t)          ((t)->proto->narg)
+#define GET_TRIG_ARG(t)           ((char*)(t)->proto->arglist.c_str())
 #define GET_TRIG_VARS(t)      ((t)->variables)
 
 #define GET_TRIG_DEPTH(t)         ((t)->depth)
@@ -429,7 +413,7 @@ constexpr int OBJ_ID_BASE = 1300000; /* 250000 Rooms */
 #define SCRIPT_CHECK(go, type)   (SCRIPT(go) && \
                   IS_SET(SCRIPT_TYPES(SCRIPT(go)), type))
 #define TRIGGER_CHECK(t, type)   (IS_SET(GET_TRIG_TYPE(t), type) && \
-                  !GET_TRIG_DEPTH(t))
+                  !(t)->isReady())
 
 extern void ADD_UID_VAR(char *buf, struct trig_data *trig, struct unit_data *thing, char *name, long context);
 

@@ -16,12 +16,13 @@
 #include "dbat/oasis.h"
 #include "dbat/constants.h"
 #include "dbat/improved-edit.h"
-#include "dbat/dg_olc.h"
 #include "dbat/races.h"
 #include "dbat/class.h"
 #include "dbat/act.wizard.h"
 #include "dbat/modify.h"
 #include "dbat/bitarray.h"
+#include "dbat/oasis.h"
+#include "dbat/dg_scripts.h"
 /*-------------------------------------------------------------------*/
 
 /*
@@ -188,12 +189,11 @@ void medit_setup_new(struct descriptor_data *d) {
     mob->short_description = strdup("the unfinished mob");
     mob->room_description = strdup("An unfinished mob stands here.\r\n");
     mob->look_description = strdup("It looks unfinished.\r\n");
-    OLC_SCRIPT(d).clear();
 
     OLC_MOB(d) = mob;
     /* Has changed flag. (It hasn't so far, we just made it.) */
     OLC_VAL(d) = false;
-    OLC_ITEM_TYPE(d) = MOB_TRIGGER;
+    OLC_ITEM_TYPE(d) = static_cast<int>(MOB_TRIGGER);
 }
 
 /*-------------------------------------------------------------------*/
@@ -206,13 +206,11 @@ void medit_setup_existing(struct descriptor_data *d, int rmob_num) {
     *mob = mob_proto.at(rmob_num);
 
     OLC_MOB(d) = mob;
-    OLC_ITEM_TYPE(d) = MOB_TRIGGER;
-    dg_olc_script_copy(d);
+    OLC_ITEM_TYPE(d) = static_cast<int>(MOB_TRIGGER);
     /*
      * The edited mob must not have a script.
      * It will be assigned to the updated mob later, after editing.
      */
-    SCRIPT(mob) = nullptr;
     OLC_MOB(d)->proto_script.clear();
 }
 
@@ -641,11 +639,6 @@ void medit_parse(struct descriptor_data *d, char *arg) {
                     OLC_MODE(d) = MEDIT_RACE;
                     medit_disp_race(d);
                     return;
-                case 's':
-                case 'S':
-                    OLC_SCRIPT_EDIT_MODE(d) = SCRIPT_MAIN_MENU;
-                    dg_script_menu(d);
-                    return;
                 case 'w':
                 case 'W':
                     write_to_output(d, "Copy what mob? ");
@@ -679,10 +672,7 @@ void medit_parse(struct descriptor_data *d, char *arg) {
             else
                 write_to_output(d, "Oops...\r\n");
             return;
-/*-------------------------------------------------------------------*/
-        case OLC_SCRIPT_EDIT:
-            if (dg_script_edit_parse(d, arg)) return;
-            break;
+
 /*-------------------------------------------------------------------*/
         case MEDIT_ALIAS:
             smash_tilde(arg);

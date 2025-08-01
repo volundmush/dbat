@@ -20,8 +20,7 @@ void event_process(uint64_t heart_pulse, double deltaTime) {
     for(auto trig : filter_raw(queued)) {
         if(toProcess <= 0) break;
         triggerSubscriptions.unsubscribe("queued", trig);
-        
-        script_driver(trig->owner, trig, trig->attach_type, TRIG_RESTART);
+        trig->execute();
         toProcess--;
     }
 }

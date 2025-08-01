@@ -190,9 +190,9 @@ guild_db = GuildDB()
 
 cdef class ScriptDB:
     
-    cdef string _dump(self, structs.trig_data* i):
+    cdef string _dump(self, structs.trig_proto_data& i):
         j = jobject()
-        to_json(j, deref(i))
+        to_json(j, i)
         return jdumps(j)
 
     def __getitem__(self, vn: int) -> dict:
@@ -200,11 +200,11 @@ cdef class ScriptDB:
         if i == db.trig_index.end():
             raise ValueError(f"Script {vn} not found.")
         res = deref(i)
-        return orjson.loads(self._dump(res.second.proto))
-    
+        return orjson.loads(self._dump(res.second))
+
     def __iter__(self) -> typing.AsyncGenerator[dict, None]:
         for vn in db.trig_index:
-            yield orjson.loads(self._dump(vn.second.proto))
+            yield orjson.loads(self._dump(vn.second))
     
     def __len__(self) -> int:
         return db.trig_index.size()
@@ -215,6 +215,9 @@ cdef class ScriptDB:
     def keys(self) -> typing.AsyncGenerator[int, None]:
         for vn in db.trig_index:
             yield vn.first
+    
+    def set(self, account_id: int, vn: int, data: dict):
+        pass
 
 script_db = ScriptDB()
 

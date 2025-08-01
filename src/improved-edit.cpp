@@ -117,10 +117,6 @@ void parse_edit_action(int command, char *string, struct descriptor_data *d) {
                             "/s         -  saves text\r\n");
             break;
         case PARSE_FORMAT:
-            if (STATE(d) == CON_TRIGEDIT) {
-                write_to_output(d, "Script %sformatted.\r\n", format_script(d) ? "" : "not ");
-                return;
-            }
             while (isalpha(string[j]) && j < 2) {
                 if (string[j++] == 'i' && !indent) {
                     indent = true;

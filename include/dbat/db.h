@@ -278,7 +278,7 @@ extern NegativeKeyGuardMap<obj_vnum, struct item_proto_data> obj_proto;
 extern NegativeKeyGuardUnorderedMap<int, std::shared_ptr<obj_data>> uniqueObjects;
 extern std::vector<std::weak_ptr<obj_data>> getAllObjects();
 
-extern NegativeKeyGuardMap<trig_vnum, struct index_data> trig_index;
+extern NegativeKeyGuardMap<trig_vnum, struct trig_proto_data> trig_index;
 
 extern NegativeKeyGuardMap<vnum, account_data> accounts;
 extern NegativeKeyGuardMap<shop_vnum, struct shop_data> shop_index;

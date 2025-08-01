@@ -1395,7 +1395,6 @@ static struct {
         {CON_REDIT,    redit_parse},
         {CON_CEDIT,    cedit_parse},
         {CON_AEDIT,    aedit_parse},
-        {CON_TRIGEDIT, trigedit_parse},
         {CON_ASSEDIT,  assedit_parse},
         {CON_GEDIT,    gedit_parse},
         {CON_LEVELUP,  levelup_parse},

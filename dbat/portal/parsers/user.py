@@ -14,8 +14,14 @@ class UserParser(BaseParser):
 
     async def on_start(self):
         await self.handle_look()
+    
+    async def get_user(self) -> AccountData:
+        user_name = self.connection.payload.get("sub")
+        user_data = await self.api_call("GET", f"/users/name/{user_name}")
+        return AccountData(**user_data)
 
     async def handle_help(self, args: str):
+        user = await self.get_user()
         help_table = self.make_table("Command", "Description", title="User Commands")
         help_table.add_row("help", "Displays this help message.")
         help_table.add_row("create", "Enter character creation.")
@@ -24,7 +30,15 @@ class UserParser(BaseParser):
         help_table.add_row("delete <name>=YES", "Deletes a character.")
         help_table.add_row("logout", "Logs out of the game.")
         help_table.add_row("look", "Lists all characters.")
+        if user.admin_level > 0:
+            help_table.add_row("admin", "Enter admin menu for user management.")
         await self.send_rich(help_table)
+
+    async def handle_admin(self, args: str):
+        user = await self.get_user()
+        parser_class = dbat.CLASSES["admin_parser"]
+        parser = parser_class()
+        await self.connection.push_parser(parser)
 
     async def handle_create(self, args: str):
         parser_class = dbat.CLASSES["create_parser"]
@@ -35,9 +49,7 @@ class UserParser(BaseParser):
         if not args:
             await self.send_line("You must supply a name for your character.")
             return
-        user_name = self.connection.payload.get("sub")
-        user_data = await self.api_call("GET", f"/users/name/{user_name}")
-        user = AccountData(**user_data)
+        user = await self.get_user()
         character_data = await self.api_call("GET", f"/users/{user.id}/characters")
         characters = [PlayerData(**c) for c in character_data]
 

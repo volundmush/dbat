@@ -16,7 +16,6 @@
 #include "dbat/genzon.h"
 #include "dbat/genobj.h"
 #include "dbat/oasis.h"
-#include "dbat/dg_olc.h"
 #include "dbat/handler.h"
 #include "dbat/guild.h"
 
@@ -34,7 +33,6 @@ struct olc_scmd_info_t {
         {"mobile",  CON_MEDIT},
         {"shop",    CON_SEDIT},
         {"config",  CON_CEDIT},
-        {"trigger", CON_TRIGEDIT},
         {"action",  CON_AEDIT},
         {"guild",   CON_GEDIT},
         {"help",    CON_HEDIT},
@@ -136,10 +134,6 @@ ACMD(do_oasis) {
         case SCMD_OASIS_TLIST:
         case SCMD_OASIS_GLIST:
             do_oasis_list(ch, argument, cmd, subcmd);
-            break;
-
-        case SCMD_OASIS_TRIGEDIT:
-            do_oasis_trigedit(ch, argument, cmd, subcmd);
             break;
 
         case SCMD_OASIS_LINKS:

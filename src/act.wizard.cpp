@@ -1192,19 +1192,19 @@ void list_zone_commands_room(struct char_data *ch, room_vnum rvnum) {
                 case 'T':
                     send_to_char(ch, "%sAttach trigger @c%s@y [@c%d@y] to %s\r\n",
                                  zc.if_flag ? " then " : "",
-                                 trig_index.at(zc.arg2).proto->name,
+                                 trig_index.at(zc.arg2).name,
                                  zc.arg2,
-                                 ((zc.arg1 == MOB_TRIGGER) ? "mobile" :
-                                  ((zc.arg1 == OBJ_TRIGGER) ? "object" :
-                                   ((zc.arg1 == WLD_TRIGGER) ? "room" : "????"))));
+                                 ((zc.arg1 == static_cast<int>(MOB_TRIGGER)) ? "mobile" :
+                                  ((zc.arg1 == static_cast<int>(OBJ_TRIGGER)) ? "object" :
+                                   ((zc.arg1 == static_cast<int>(WLD_TRIGGER)) ? "room" : "????"))));
                     break;
                 case 'V':
                     send_to_char(ch, "%sAssign global %s:%d to %s = %s\r\n",
                                  zc.if_flag ? " then " : "",
                                  zc.sarg1.c_str(), zc.arg2,
-                                 ((zc.arg1 == MOB_TRIGGER) ? "mobile" :
-                                  ((zc.arg1 == OBJ_TRIGGER) ? "object" :
-                                   ((zc.arg1 == WLD_TRIGGER) ? "room" : "????"))),
+                                 ((zc.arg1 == static_cast<int>(MOB_TRIGGER)) ? "mobile" :
+                                  ((zc.arg1 == static_cast<int>(OBJ_TRIGGER)) ? "object" :
+                                   ((zc.arg1 == static_cast<int>(WLD_TRIGGER)) ? "room" : "????"))),
                                  zc.sarg2.c_str());
                     break;
                 default:
@@ -4957,9 +4957,9 @@ static void trg_checkload(struct char_data *ch, trig_vnum tvnum) {
     }
 
     send_to_char(ch, "Checking load info for the %s trigger [%d] '%s':\r\n",
-                 trg->second.proto->attach_type == MOB_TRIGGER ? "mobile" :
-                 (trg->second.proto->attach_type == OBJ_TRIGGER ? "object" : "room"),
-                 tvnum, trg->second.proto->name);
+                 trg->second.attach_type == MOB_TRIGGER ? "mobile" :
+                 (trg->second.attach_type == OBJ_TRIGGER ? "object" : "room"),
+                 tvnum, trg->second.name);
 
     for (auto &[zvn, z] : zone_table) {
         for (auto &c : z.cmd) {
@@ -4990,7 +4990,7 @@ static void trg_checkload(struct char_data *ch, trig_vnum tvnum) {
                 case 'T':                   /* trigger to something */
                     if (c.arg2 != tvnum)
                         break;
-                    if (c.arg1 == MOB_TRIGGER) {
+                    if (c.arg1 == static_cast<int>(MOB_TRIGGER)) {
                         lastmob = mob_proto.find(lastmob_v);
                         if(lastmob != mob_proto.end()) {
                             send_to_char(ch, "mob [%5d] %-60s (zedit room %5d)\r\n",
@@ -5005,7 +5005,7 @@ static void trg_checkload(struct char_data *ch, trig_vnum tvnum) {
                         }
 
                         found = 1;
-                    } else if (c.arg1 == OBJ_TRIGGER) {
+                    } else if (c.arg1 == static_cast<int>(OBJ_TRIGGER)) {
                         lastobj = obj_proto.find(lastobj_v);
                         if(lastobj != obj_proto.end()) {
                             send_to_char(ch, "obj [%5d] %-60s  (zedit room %d)\r\n",
@@ -5019,7 +5019,7 @@ static void trg_checkload(struct char_data *ch, trig_vnum tvnum) {
                                          lastroom_v);
                         }
                         found = 1;
-                    } else if (c.arg1 == WLD_TRIGGER) {
+                    } else if (c.arg1 == static_cast<int>(WLD_TRIGGER)) {
                         lastroom = get_room(lastroom_v);
                         if(lastroom) {
                             send_to_char(ch, "room [%5d] %-60s (zedit)\r\n",

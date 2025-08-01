@@ -96,7 +96,7 @@ double unit_data::getAffectModifier(uint64_t location, uint64_t specific) {
 }
 
 unit_data::~unit_data() {
-    extract_script(this, 0);
+    extract_script(this, type);
 }
 
 std::vector<trig_vnum> unit_data::getScriptOrder() {

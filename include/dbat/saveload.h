@@ -172,9 +172,6 @@ void from_json(const json& j, affect_t& a);
 void to_json(json& j, const account_data& a);
 void from_json(const json& j, account_data& a);
 
-void to_json(json& j, const trig_var_data& t);
-void from_json(const json& j, trig_var_data& t);
-
 void to_json(json& j, const trig_data& t);
 void from_json(const json& j, trig_data& t);
 

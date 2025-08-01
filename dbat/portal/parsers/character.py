@@ -2,7 +2,7 @@ import asyncio
 import pydantic
 import typing
 from rich.markup import MarkupError, escape
-from httpx import HTTPStatusError
+from httpx import HTTPStatusError, ConnectError, TimeoutException
 
 from loguru import logger
 

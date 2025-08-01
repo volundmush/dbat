@@ -12,11 +12,11 @@
 #include "dbat/handler.h"
 #include "dbat/genolc.h"
 #include "dbat/shop.h"
-#include "dbat/dg_olc.h"
 #include "dbat/constants.h"
 #include "dbat/area.h"
 #include "dbat/constants.h"
 #include "dbat/filter.h"
+#include "dbat/dg_scripts.h"
 
 room_data::room_data() : unit_data() {
     type = UnitType::room;

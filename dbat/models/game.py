@@ -1,7 +1,7 @@
 import typing
 import pydantic
 from enum import IntFlag
-from pydantic import BaseModel, Field, ConfigDict, field_serializer
+from pydantic import BaseModel, Field, ConfigDict, field_serializer, field_validator
 from . import names
 
 class MobSpecialData(BaseModel):
@@ -108,29 +108,6 @@ class PlayerData(BaseModel):
     dub_names: typing.Dict[int, str] = Field(default_factory=dict)
     color_choices: typing.List[str] = Field(default_factory=list)
 
-
-class TrigVarData(BaseModel):
-    name: str = ""
-    value: str = ""
-    context: int = 0
-
-class TrigData(BaseModel):
-    vn: int = -1
-    name: str = ""
-    attach_type: int = 0
-    data_type: int = 0
-    trigger_type: int = 0
-    depth: int = 0
-    loops: int = 0
-    waiting: float = 0.0
-    curr_state: int = 0
-    var_list: typing.List[TrigVarData] = Field(default_factory=list)
-    narg: int = 0
-    arglist: str = ""
-    order: int = 0
-    active: bool = False
-    id: int = -1
-    generation: int = 0
 
 class ShopBuyData(BaseModel):
     type: int

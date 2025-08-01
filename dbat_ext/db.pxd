@@ -40,7 +40,7 @@ cdef extern from "dbat/db.h":
 
     map[int, structs.shop_data] shop_index
     map[int, structs.guild_data] guild_index
-    map[int, structs.index_data] trig_index
+    map[int, structs.trig_proto_data] trig_index
     map[int64_t, structs.player_data] players
     map[int64_t, structs.descriptor_data*] sessions
 

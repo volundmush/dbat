@@ -107,7 +107,7 @@ struct oasis_olc_data {
     struct config_data *config;    /* used for 'cedit'         */
     struct extra_descr_data *desc; /* used in '[r|o|m]edit'    */
     struct social_messg *action;   /* Aedit uses this one      */
-    struct trig_data *trig;
+    struct trig_proto_data *trig;
     int script_mode;
     int trigger_position;
     int item_type;
@@ -142,6 +142,10 @@ struct oasis_olc_data {
 #define OLC_ACTION(d)   (OLC(d)->action)        /* Action structure     */
 #define OLC_GUILD(d)    (OLC(d)->guild)        /* Guild structure      */
 #define OLC_HELP(d)     (OLC(d)->help)          /* Hedit structure      */
+
+#define OLC_SCRIPT_EDIT_MODE(d)	(OLC(d)->script_mode)	/* parse input mode */
+#define OLC_SCRIPT(d)           (OLC(d)->script)	/* script editing   */
+#define OLC_ITEM_TYPE(d)	(OLC(d)->item_type)	/* mob/obj/room     */
 
 /*
  * Other macros.
@@ -927,10 +931,6 @@ extern int find_context_medit(struct descriptor_data *d);
 extern int find_context_sedit(struct descriptor_data *d);
 
 extern int find_context_gedit(struct descriptor_data *d);
-
-extern int find_context_trigedit(struct descriptor_data *d);
-
-extern int find_context_script_edit(struct descriptor_data *d);
 
 extern int context_help(struct descriptor_data *d, char *arg);
 

@@ -32,35 +32,6 @@
  * Thanks to James Long for his assistance in plugging the memory leak
  * that used to be here.   -- Welcor
  */
-/* adds a variable with given name and value to trigger */
-void add_var(struct trig_var_data **var_list, char *name, const char *value, long id) {
-    struct trig_var_data *vd;
-
-    if (strchr(name, '.')) {
-        basic_mud_log("add_var() : Attempt to add illegal var: %s", name);
-        return;
-    }
-
-    for (vd = *var_list; vd && strcasecmp(vd->name, name); vd = vd->next);
-
-    if (vd && (!vd->context || vd->context == id)) {
-        free(vd->value);
-        CREATE(vd->value, char, strlen(value) + 1);
-    } else {
-        CREATE(vd, struct trig_var_data, 1);
-
-        CREATE(vd->name, char, strlen(name) + 1);
-        strcpy(vd->name, name);                            /* strcpy: ok*/
-
-        CREATE(vd->value, char, strlen(value) + 1);
-
-        vd->next = *var_list;
-        vd->context = id;
-        *var_list = vd;
-    }
-    if(vd->value) free(vd->value);
-    vd->value = strdup(value);
-}
 
 
 /* perhaps not the best place for this, but I didn't want a new file */
@@ -145,19 +116,19 @@ int char_has_item(char *item, struct char_data *ch) {
         return 1;
 }
 
-int text_processed(char *field, char *subfield, struct trig_var_data *vd,
+int text_processed(char *field, char *subfield, char *value,
                    char *str, size_t slen) {
     char *p, *p2;
     char tmpvar[MAX_STRING_LENGTH];
 
     if (!strcasecmp(field, "strlen")) {                     /* strlen    */
         char limit[200];
-        sprintf(limit, "%" SZT, strlen(vd->value));
+        sprintf(limit, "%" SZT, strlen(value));
         snprintf(str, slen, "%d", atoi(limit));
         return true;
     } else if (!strcasecmp(field, "trim")) {                /* trim      */
         /* trim whitespace from ends */
-        snprintf(tmpvar, sizeof(tmpvar) - 1, "%s", vd->value); /* -1 to use later*/
+        snprintf(tmpvar, sizeof(tmpvar) - 1, "%s", value); /* -1 to use later*/
         p = tmpvar;
         p2 = tmpvar + strlen(tmpvar) - 1;
         while (*p && isspace(*p)) p++;
@@ -170,31 +141,31 @@ int text_processed(char *field, char *subfield, struct trig_var_data *vd,
         snprintf(str, slen, "%s", p);
         return true;
     } else if (!strcasecmp(field, "contains")) {            /* contains  */
-        if (str_str(vd->value, subfield))
+        if (str_str(value, subfield))
             strcpy(str, "1");
         else
             strcpy(str, "0");
         return true;
     } else if (!strcasecmp(field, "car")) {                 /* car       */
-        char *car = vd->value;
+        char *car = value;
         while (*car && !isspace(*car))
             *str++ = *car++;
         *str = '\0';
         return true;
 
     } else if (!strcasecmp(field, "cdr")) {                 /* cdr       */
-        char *cdr = vd->value;
+        char *cdr = value;
         while (*cdr && !isspace(*cdr)) cdr++; /* skip 1st field */
         while (*cdr && isspace(*cdr)) cdr++;  /* skip to next */
 
         snprintf(str, slen, "%s", cdr);
         return true;
     } else if (!strcasecmp(field, "charat")) {              /* CharAt    */
-        size_t len = strlen(vd->value), dgindex = atoi(subfield);
+        size_t len = strlen(value), dgindex = atoi(subfield);
         if (dgindex > len || dgindex < 1)
             strcpy(str, "");
         else
-            snprintf(str, slen, "%c", vd->value[dgindex - 1]);
+            snprintf(str, slen, "%c", value[dgindex - 1]);
         return true;
     } else if (!strcasecmp(field, "mudcommand")) {
         /* find the mud command returned from this text */
@@ -203,9 +174,9 @@ int text_processed(char *field, char *subfield, struct trig_var_data *vd,
 
 /* on older source bases:    extern struct command_info *cmd_info; */
         int length, cmd;
-        for (length = strlen(vd->value), cmd = 0;
+        for (length = strlen(value), cmd = 0;
              *cmd_info[cmd].command != '\n'; cmd++)
-            if (!strncmp(cmd_info[cmd].command, vd->value, length))
+            if (!strncmp(cmd_info[cmd].command, value, length))
                 break;
 
         if (*cmd_info[cmd].command == '\n')
@@ -238,9 +209,9 @@ static char *recho[] = {"mrecho ", "orecho ", "wrecho "};
 
 /* sets str to be the value of var.field */
 void
-find_replacement(unit_data *go, script_data *sc, trig_data *trig, int type, char *var, char *field, char *subfield,
+find_replacement(unit_data *go, script_data *sc, trig_data *trig, UnitType type, char *var, char *field, char *subfield,
                  char *str, size_t slen) {
-    struct trig_var_data *vd = nullptr;
+
     char_data *ch, *c = nullptr, *rndm;
     obj_data *obj, *o = nullptr;
     struct room_data *room, *r = nullptr;
@@ -267,6 +238,7 @@ find_replacement(unit_data *go, script_data *sc, trig_data *trig, int type, char
         if (found)
             snprintf(str, slen, "%s", found->c_str());
         else {
+            auto col = static_cast<int>(type);
             if (!strcasecmp(var, "self")) {
                 auto uid = unit->getUID(true);
                 snprintf(str, slen, "%s", uid.c_str());
@@ -277,33 +249,33 @@ find_replacement(unit_data *go, script_data *sc, trig_data *trig, int type, char
             } else if (!strcasecmp(var, "ctime"))
                 snprintf(str, slen, "%ld", time(nullptr));
             else if (!strcasecmp(var, "door"))
-                snprintf(str, slen, "%s", door[type]);
+                snprintf(str, slen, "%s", door[col]);
             else if (!strcasecmp(var, "force"))
-                snprintf(str, slen, "%s", force[type]);
+                snprintf(str, slen, "%s", force[col]);
             else if (!strcasecmp(var, "load"))
-                snprintf(str, slen, "%s", load[type]);
+                snprintf(str, slen, "%s", load[col]);
             else if (!strcasecmp(var, "purge"))
-                snprintf(str, slen, "%s", purge[type]);
+                snprintf(str, slen, "%s", purge[col]);
             else if (!strcasecmp(var, "teleport"))
-                snprintf(str, slen, "%s", teleport[type]);
+                snprintf(str, slen, "%s", teleport[col]);
             else if (!strcasecmp(var, "damage"))
-                snprintf(str, slen, "%s", xdamage[type]);
+                snprintf(str, slen, "%s", xdamage[col]);
             else if (!strcasecmp(var, "send"))
-                snprintf(str, slen, "%s", send_cmd[type]);
+                snprintf(str, slen, "%s", send_cmd[col]);
             else if (!strcasecmp(var, "echo"))
-                snprintf(str, slen, "%s", echo_cmd[type]);
+                snprintf(str, slen, "%s", echo_cmd[col]);
             else if (!strcasecmp(var, "echoaround"))
-                snprintf(str, slen, "%s", echoaround_cmd[type]);
+                snprintf(str, slen, "%s", echoaround_cmd[col]);
             else if (!strcasecmp(var, "zoneecho"))
-                snprintf(str, slen, "%s", zoneecho[type]);
+                snprintf(str, slen, "%s", zoneecho[col]);
             else if (!strcasecmp(var, "asound"))
-                snprintf(str, slen, "%s", asound[type]);
+                snprintf(str, slen, "%s", asound[col]);
             else if (!strcasecmp(var, "at"))
-                snprintf(str, slen, "%s", at[type]);
+                snprintf(str, slen, "%s", at[col]);
             else if (!strcasecmp(var, "transform"))
-                snprintf(str, slen, "%s", transform[type]);
+                snprintf(str, slen, "%s", transform[col]);
             else if (!strcasecmp(var, "recho"))
-                snprintf(str, slen, "%s", recho[type]);
+                snprintf(str, slen, "%s", recho[col]);
             else
                 *str = '\0';
         }
@@ -533,7 +505,9 @@ in the vault (vnum: 453) now and then. you can just use
             }
         }
 
-        if (text_processed(field, subfield, vd, str, slen)) return;
+        char *value = nullptr;
+        if(found) value = (char*)found->c_str();
+        if (text_processed(field, subfield, value, str, slen)) return;
 
         if (c) {
             
@@ -1153,7 +1127,7 @@ in the vault (vnum: 453) now and then. you can just use
                     *str = '\0';
                     if (strcasecmp(GET_TRIG_NAME(trig), "Rename Object")) {
                         script_log("Trigger: %s, VNum %d, type: %d. unknown object field: '%s'",
-                                    GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), type, field);
+                                    GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), static_cast<int>(type), field);
                     }
                 }
             }
@@ -1258,7 +1232,7 @@ in the vault (vnum: 453) now and then. you can just use
                 else {
                     *str = '\0';
                     script_log("Trigger: %s, VNum %d, type: %d. unknown room field: '%s'",
-                                GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), type, field);
+                                GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), static_cast<int>(type), field);
                 }
             }
         } /* if (r).. */
@@ -1282,7 +1256,7 @@ in the vault (vnum: 453) now and then. you can just use
 
 /* substitutes any variables into line and returns it as buf */
 void var_subst(unit_data *go, script_data *sc, trig_data *trig,
-               int type, char *line, char *buf) {
+               UnitType type, char *line, char *buf) {
     char tmp[MAX_INPUT_LENGTH], repl_str[MAX_INPUT_LENGTH];
     char *var = nullptr, *field = nullptr, *p = nullptr;
     char tmp2[MAX_INPUT_LENGTH];
