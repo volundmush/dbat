@@ -238,7 +238,7 @@ private:
     void processLine(const ScriptLine& line);
 
     int locateElseIfElseEnd(int startLine) const;
-    int locateCaseDefaultEnd(int startLine) const;
+    int locateCaseDefaultDone(int startLine) const;
     int locateDone(ScriptLineType type, int startLine) const;
     int locateEnd(int startLine) const;
 

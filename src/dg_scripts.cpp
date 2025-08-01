@@ -747,6 +747,9 @@ std::string trig_proto_data::scriptString() const {
                 predepthmod = -1;
                 postdepthmod = 1;
                 break;
+            case ScriptLineType::BREAK:
+                line = "break";
+                break;
             case ScriptLineType::DEFAULT:
                 line = "default";
                 predepthmod = -1;
@@ -759,6 +762,9 @@ std::string trig_proto_data::scriptString() const {
             case ScriptLineType::COMMENT:
                 line = "* " + std::get<1>(cl);
                 break;
+            default:
+                basic_mud_log("SYSERR: Unknown script line type in scriptString: %d", static_cast<int>(std::get<0>(cl)));
+                continue;
         }
         if(predepthmod) depth = std::max<int>(0, depth + predepthmod);
         out += std::string(depth * 2, ' ') + line + "\r\n";
@@ -2481,14 +2487,14 @@ bool trig_data::isReady() const {
 
 void trig_data::error(const std::string &msg) {
     // Log the error message and set the state to ERROR
-    script_log("Error in trigger '%s' (VNum %d) at line %d: %s", GET_TRIG_NAME(this), current_line, GET_TRIG_VNUM(this), (char*)msg.c_str());
+    script_log("Error in trigger '%s' (VNum %d) at line %d: %s", GET_TRIG_NAME(this), getVnum(), current_line, (char*)msg.c_str());
     // Optionally, you can also throw an exception or handle it as needed.
 }
 
 int trig_data::execute() {
-
     // This is a clever hack to prevent the script from being deleted
     // during execution if, by some chance, it obliterates its host object.
+
     std::shared_ptr<unit_data> sh;
     switch(owner->type) {
         case UnitType::character:
@@ -2574,7 +2580,7 @@ void trig_data::processLine(const ScriptLine& line) {
             } else {
                 // Condition is false, exit the loop
                 depth_stack.emplace_back(ScriptLineType::IF, current_line, false, "");
-                current_line = locateElseIfElseEnd(current_line);
+                current_line = locateElseIfElseEnd(current_line + 1);
             }
         }
             break;
@@ -2591,7 +2597,7 @@ void trig_data::processLine(const ScriptLine& line) {
                 current_line++;
             } else {
                 // Condition is false
-                current_line = locateElseIfElseEnd(current_line) + 1;
+                current_line = locateElseIfElseEnd(current_line + 1);
             }
         }
             break;
@@ -2602,7 +2608,7 @@ void trig_data::processLine(const ScriptLine& line) {
             }
             if(std::get<2>(depth_stack.back())) {
                 // We already executed an elseif, so we skip this else.
-                current_line = locateElseIfElseEnd(current_line);
+                current_line = locateElseIfElseEnd(current_line + 1);
             } else {
                 // We execute the else block.
                 std::get<2>(depth_stack.back()) = true; // mark this else as true
@@ -2620,8 +2626,7 @@ void trig_data::processLine(const ScriptLine& line) {
                 current_line++;
             } else {
                 // Condition is false, exit the loop
-                current_line = locateDone(ScriptLineType::WHILE,  current_line) + 1;
-                depth_stack.pop_back(); // Remove the while context from the stack
+                current_line = locateDone(ScriptLineType::WHILE,  current_line + 1);
             }
         }
             break;
@@ -2632,6 +2637,7 @@ void trig_data::processLine(const ScriptLine& line) {
             auto expr = evaluateExpression(cond);
             // we store the evaluated expression in the depth stack so we can compare it against cases.
             depth_stack.emplace_back(ScriptLineType::SWITCH, current_line, false, expr);
+            current_line = locateCaseDefaultDone(current_line + 1); // Skip to the next case/default/end
         }
             break;
 
@@ -2653,7 +2659,8 @@ void trig_data::processLine(const ScriptLine& line) {
                     current_line++; 
                 } else {
                     // This case did not match, so we'll advance to the next case, default, or end.
-                    current_line = locateCaseDefaultEnd(current_line);
+                    // important to +1 so we don't loop on the same case.
+                    current_line = locateCaseDefaultDone(current_line + 1);
                 }
             }
         }
@@ -2709,7 +2716,7 @@ void trig_data::processLine(const ScriptLine& line) {
             if(depth_stack.empty() || std::get<0>(depth_stack.back()) != ScriptLineType::SWITCH) {
                 throw DgScriptError("Break without matching switch.");
             }
-            current_line = locateDone(ScriptLineType::SWITCH, current_line);
+            current_line = locateDone(ScriptLineType::SWITCH, current_line + 1);
             break;
     }
 
@@ -2722,13 +2729,13 @@ int trig_data::locateElseIfElseEnd(int startLine) const {
         switch(std::get<0>(line)) {
             case ScriptLineType::IF:
                 // If we hit another if, we need to skip to the end of that if block.
-                i = locateEnd(i);
+                i = locateEnd(i + 1) + 1;
                 break;
             case ScriptLineType::SWITCH:
             case ScriptLineType::WHILE:
                 // If we hit a switch or while, we need to skip to the end of that
                 // block.
-                i = locateDone(std::get<0>(line), i);
+                i = locateDone(std::get<0>(line), i + 1) + 1;
                 break;
             case ScriptLineType::ELSEIF:
             case ScriptLineType::ELSE:
@@ -2743,36 +2750,45 @@ int trig_data::locateElseIfElseEnd(int startLine) const {
     throw DgScriptError("Else/elseif/end not found in script.");
 }
 
-int trig_data::locateCaseDefaultEnd(int startLine) const {
+int trig_data::locateCaseDefaultDone(int startLine) const {
     auto i = startLine;
-    while(i < proto->lines.size() - 1) {
+    while(i < proto->lines.size()) {
         auto line = proto->getLine(i);
         switch(std::get<0>(line)) {
             case ScriptLineType::CASE:
             case ScriptLineType::DEFAULT:
-                return i; // found the case/default
-            case ScriptLineType::END:
+            case ScriptLineType::DONE:
                 return i; // found the end
+            case ScriptLineType::SWITCH:
+            case ScriptLineType::WHILE:
+                // If we hit a switch or while, we need to skip to the end of that
+                // block.
+                i = locateDone(std::get<0>(line), i + 1) + 1;
+                break;
+            case ScriptLineType::IF:
+                // If we hit an if, we need to skip to the end of that if block
+                i = locateEnd(i + 1) + 1;
+                break;
             default:
                 // If we hit anything else, we are not at the end of the switch block.
                 i++;
                 break;
         }
     }
-    throw DgScriptError("Case/default/end not found in script.");
+    throw DgScriptError("Case/default/done not found in script.");
 }
 
 int trig_data::locateEnd(int startLine) const {
     auto i = startLine;
-    while(i < proto->lines.size() - 1) {
+    while(i < proto->lines.size()) {
         auto line = proto->getLine(i);
         switch(std::get<0>(line)) {
             case ScriptLineType::SWITCH:
             case ScriptLineType::WHILE:
-                i = locateDone(std::get<0>(line), i);
+                i = locateDone(std::get<0>(line), i + 1) + 1;
                 break;
             case ScriptLineType::IF:
-                i = locateEnd(i);
+                i = locateEnd(i + 1) + 1;
                 break;
             case ScriptLineType::END:
                 return i; // found the end
@@ -2787,20 +2803,21 @@ int trig_data::locateEnd(int startLine) const {
 
 int trig_data::locateDone(ScriptLineType type, int startLine) const {
     auto i = startLine;
-    while(i < proto->lines.size() - 1) {
+    while(i < proto->lines.size()) {
         auto line = proto->getLine(i);
         switch(std::get<0>(line)) {
             case ScriptLineType::DONE:
                 return i; // found the done
             case ScriptLineType::SWITCH:
             case ScriptLineType::WHILE:
-                i = locateDone(std::get<0>(line), i);
+                i = locateDone(std::get<0>(line), i + 1) + 1;
                 break;
             case ScriptLineType::IF:
-                i = locateEnd(i);
+                i = locateEnd(i + 1) + 1;
                 break;
             default:
                 i++;
+                break;
         }
     }
     throw DgScriptError("Done not found in script.");
