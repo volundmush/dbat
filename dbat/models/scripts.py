@@ -67,19 +67,13 @@ class RoomTriggerType(IntFlag):
     HOURLY = 1 << 20     # triggered every game hour
     QUARTER = 1 << 21    # triggered every 15 game minutes
 
+
 # Object command trigger types (for OTRIG_COMMAND)
 class ObjectCommandType(IntFlag):
     """Object command trigger subtypes"""
     EQUIP = 1 << 0       # obj must be in char's equip
     INVEN = 1 << 1       # obj must be in char's inven
     ROOM = 1 << 2        # obj must be in char's room
-
-# Object consume trigger commands (for OTRIG_CONSUME)
-class ObjectConsumeType(Enum):
-    """Object consume trigger subtypes"""
-    EAT = 1
-    DRINK = 2
-    QUAFF = 3
 
 
 class _DgScriptBaseModel(BaseModel):
@@ -97,13 +91,21 @@ class _DgScriptBaseModel(BaseModel):
             raise ValueError("VNum must be a non-negative integer")
         return True
 
+    def get_trigger_names(self) -> list[str]:
+        """Return a list of currently enabled trigger type names."""
+        if not hasattr(self, 'trigger_type'):
+            return []
+        
+        enabled = []
+        for flag in type(self.trigger_type):
+            if self.trigger_type & flag:
+                enabled.append(flag.name)
+        return enabled
+
 
 class DgMobScript(_DgScriptBaseModel):
     trigger_type: MobTriggerType = MobTriggerType(0)
-
-    @field_serializer('attach_type', return_type=int)
-    def always_attach_type(self, _):
-        return defs.UnitType.character.value
+    attach_type: defs.UnitType = defs.UnitType.character
 
     def available_trigger_types(self) -> list[str]:
         """Return a list of available trigger types for this script."""
@@ -116,10 +118,7 @@ class DgMobScript(_DgScriptBaseModel):
 
 class DgObjectScript(_DgScriptBaseModel):
     trigger_type: ObjectTriggerType = ObjectTriggerType(0)
-
-    @field_serializer('attach_type', return_type=int)
-    def always_attach_type(self, _):
-        return defs.UnitType.object.value
+    attach_type: defs.UnitType = defs.UnitType.object
 
     def available_trigger_types(self) -> list[str]:
         """Return a list of available trigger types for this script."""
@@ -131,10 +130,7 @@ class DgObjectScript(_DgScriptBaseModel):
 
 class DgRoomScript(_DgScriptBaseModel):
     trigger_type: RoomTriggerType = RoomTriggerType(0)
-
-    @field_serializer('attach_type', return_type=int)
-    def always_attach_type(self, _):
-        return defs.UnitType.room.value
+    attach_type: defs.UnitType = defs.UnitType.room
 
     def available_trigger_types(self) -> list[str]:
         """Return a list of available trigger types for this script."""

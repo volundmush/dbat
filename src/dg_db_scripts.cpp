@@ -83,10 +83,6 @@ std::shared_ptr<trig_data> read_trigger(int nr) {
 }
 
 
-void trig_data_copy(trig_data *this_data, const trig_data *trg) {
-
-}
-
 /* for mobs and rooms: */
 void dg_read_trigger(FILE *fp, struct unit_data *proto, UnitType type) {
     char line[READ_SIZE];

@@ -2747,7 +2747,7 @@ static void display_room_flags(struct room_data *rm, struct char_data *ch) {
 
     if (auto sc = rm->getScripts(); !sc.empty()) {
         send_to_char(ch, "@D[@GTriggers");
-        for (auto t : sc)
+        for (auto t : filter_shared(sc))
             send_to_char(ch, " %d", GET_TRIG_VNUM(t));
         send_to_char(ch, "@D] ");
     }

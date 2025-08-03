@@ -106,8 +106,8 @@ std::vector<trig_vnum> unit_data::getScriptOrder() {
     return getProtoScript();
 }
 
-std::vector<std::shared_ptr<trig_data>> unit_data::getScripts() {
-    std::vector<std::shared_ptr<trig_data>> out;
+std::vector<std::weak_ptr<trig_data>> unit_data::getScripts() {
+    std::vector<std::weak_ptr<trig_data>> out;
     auto proto = getScriptOrder();
     out.reserve(scripts.size() + proto.size());
     for(const auto &v : proto) {

@@ -323,8 +323,6 @@ extern void parse_trigger(FILE *trig_f, trig_vnum nr);
 
 std::shared_ptr<trig_data> read_trigger(int nr);
 
-extern void trig_data_copy(trig_data *this_data, const trig_data *trg);
-
 extern void dg_read_trigger(FILE *fp, struct unit_data *proto, UnitType type);
 extern void dg_read_trigger(FILE *fp, struct proto_data *proto, UnitType type);
 
@@ -393,25 +391,16 @@ extern room_rnum obj_room(obj_data *obj);
 #define GET_TRIG_DEPTH(t)         ((t)->depth)
 #define GET_TRIG_LOOPS(t)         ((t)->loops)
 
-/* player id's: 0 to MOB_ID_BASE - 1            */
-/* mob id's: MOB_ID_BASE to ROOM_ID_BASE - 1      */
-/* room id's: ROOM_ID_BASE to OBJ_ID_BASE - 1    */
-/* object id's: OBJ_ID_BASE and higher           */
-constexpr int MOB_ID_BASE = 50000;  /* 50000 player IDNUMS should suffice */
-constexpr int ROOM_ID_BASE = 1050000; /* 1000000 Mobs */
-constexpr int OBJ_ID_BASE = 1300000; /* 250000 Rooms */
 
 #define SCRIPT(o)          ((o))
-#define SCRIPT_MEM(c)             ((c)->memory)
+#define SCRIPT_MEM(c)      ((c)->memory)
 
 #define SCRIPT_TYPES(s)          ((s)->trigger_types)
 #define TRIGGERS(s)          ((s)->trig_list)
 
 #define GET_SHORT(ch)    ((ch)->getShortDescription())
 
-
-#define SCRIPT_CHECK(go, type)   (SCRIPT(go) && \
-                  IS_SET(SCRIPT_TYPES(SCRIPT(go)), type))
+#define SCRIPT_CHECK(go, type)   ((go) && IS_SET(SCRIPT_TYPES((go)), type))
 #define TRIGGER_CHECK(t, type)   (IS_SET(GET_TRIG_TYPE(t), (type)) && (t)->isReady())
 
 //extern nlohmann::json serializeVars(struct trig_var_data *vd);

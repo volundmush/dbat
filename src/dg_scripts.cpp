@@ -844,7 +844,8 @@ void script_stat(char_data *ch, script_data *sc) {
             send_to_char(ch, "    %15s:  %s\r\n", name.c_str(), value.c_str());
     }
 
-    for (const auto& t : sc->getScripts()) {
+    auto scripts = sc->getScripts();
+    for (const auto& t : filter_shared(scripts)) {
         send_to_char(ch, "\r\n  Trigger: @y%s@n, VNum: [@y%5d@n], RNum: [%5d]\r\n",
                      GET_TRIG_NAME(t), GET_TRIG_VNUM(t), GET_TRIG_RNUM(t));
 
@@ -1085,7 +1086,8 @@ int remove_trigger(script_data *sc, char *name) {
 
     n = 0;
     j = nullptr;
-    for (auto i : sc->getScripts()) {
+    auto scripts = sc->getScripts();
+    for (auto i : filter_shared(scripts)) {
         if (string) {
             if (isname(name, i->proto->name.c_str()))
                 if (++n >= num) {
@@ -1118,7 +1120,8 @@ int remove_trigger(script_data *sc, char *name) {
 
         /* update the script type bitvector */
         SCRIPT_TYPES(sc) = 0;
-        for (auto i : sc->getScripts())
+        auto update_scripts = sc->getScripts();
+        for (auto i : filter_shared(update_scripts))
             SCRIPT_TYPES(sc) |= GET_TRIG_TYPE(i);
 
         return 1;

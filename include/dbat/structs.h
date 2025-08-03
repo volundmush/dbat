@@ -295,7 +295,7 @@ struct unit_data : public HasVariables {
     void activateScripts();
     void deactivateScripts();
     std::vector<trig_vnum> getScriptOrder(); /* this will return running_scripts if said, or the results of getProtoScripts() */
-    std::vector<std::shared_ptr<trig_data>> getScripts();
+    std::vector<std::weak_ptr<trig_data>> getScripts();
     virtual std::vector<trig_vnum> getProtoScript() const = 0;
     virtual std::string scriptString() const;
 

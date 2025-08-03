@@ -1,5 +1,5 @@
 import dbat
-from .base import BaseParser
+from .base import BaseParser, StringEditorParser
 from dbat.portal.commands.base import CMD_MATCH
 from httpx import HTTPStatusError
 from dbat.utils import partial_match
@@ -15,11 +15,6 @@ class UserParser(BaseParser):
     async def on_start(self):
         await self.handle_look()
     
-    async def get_user(self) -> AccountData:
-        user_name = self.connection.payload.get("sub")
-        user_data = await self.api_call("GET", f"/users/name/{user_name}")
-        return AccountData(**user_data)
-
     async def handle_help(self, args: str):
         user = await self.get_user()
         help_table = self.make_table("Command", "Description", title="User Commands")
@@ -75,9 +70,7 @@ class UserParser(BaseParser):
         pass
 
     async def handle_look(self):
-        user_name = self.connection.payload.get("sub")
-        user_data = await self.api_call("GET", f"/users/name/{user_name}")
-        user = AccountData(**user_data)
+        user = await self.get_user()
         character_data = await self.api_call("GET", f"/users/{user.id}/characters")
 
         characters = [PlayerData(**c) for c in character_data]
@@ -87,6 +80,18 @@ class UserParser(BaseParser):
             character_table.add_row(character.name)
         await self.send_rich(character_table)
         await self.handle_help("")
+
+    async def handle_test(self):
+        # this will test the string editor parser.
+        
+        async def on_save(text: str):
+            await self.send_line(f"StringEditor saved with text: {text}")
+        
+        async def on_abort():
+            await self.send_line("StringEditor was aborted.")
+        
+        parser = StringEditorParser("Test String", "This is a test string editor.", on_save, on_abort)
+        await self.connection.push_parser(parser)
 
     async def handle_command(self, event: str):
         matched = CMD_MATCH.match(event)
@@ -113,5 +118,7 @@ class UserParser(BaseParser):
                 await self.handle_logout()
             case "look":
                 await self.handle_look()
+            case "test":
+                await self.handle_test()
             case _:
                 await self.send_line("Invalid command. Type 'help' for help.")

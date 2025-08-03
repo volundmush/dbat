@@ -66,7 +66,7 @@ def color_num_to_rich(color_num: int) -> ColorType:
 class BaseConnection:
     """
     Base implementation of the glue between the Portal and the Game. This represents a single player connection, mapping
-    a protocol like telnet to a SurrealDB client connection.
+    a protocol like telnet to a REST API client connection.
     """
 
     def __init__(self):
@@ -164,14 +164,6 @@ class BaseConnection:
     }
 
     async def at_capability_change(self, capability: str, value):
-        match capability:
-            case "color":
-                await self.send_line(
-                    f"Capability change: {capability} -> {self.color_types[value]}"
-                )
-            case _:
-                await self.send_line(f"Capability change: {capability} -> {value}")
-
         match capability:
             case "color":
                 self.console._color_system = color_num_to_rich(value)
