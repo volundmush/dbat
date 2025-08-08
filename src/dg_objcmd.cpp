@@ -95,16 +95,9 @@ void obj_log(obj_data *obj, const char *format, ...) {
 
 /* returns the real room number that the object or object's carrier is in */
 room_rnum obj_room(obj_data *obj) {
-    if (IN_ROOM(obj) != NOWHERE)
-        return IN_ROOM(obj);
-    else if (obj->carried_by)
-        return IN_ROOM(obj->carried_by);
-    else if (obj->worn_by)
-        return IN_ROOM(obj->worn_by);
-    else if (obj->in_obj)
-        return obj_room(obj->in_obj);
-    else
-        return NOWHERE;
+    if (auto ab = obj->getAbsoluteRoom(); ab)
+        return ab->getVnum();
+    return NOWHERE;
 }
 
 
@@ -305,10 +298,10 @@ OCMD(do_otransform) {
             return;
         }
 
-        if (obj->worn_by) {
-            pos = obj->worn_on;
-            wearer = obj->worn_by;
-            unequip_char(obj->worn_by, pos);
+        if (auto wby = obj->getWornBy(); wby) {
+            pos = obj->getWornOn();
+            wearer = wby;
+            unequip_char(wearer, pos);
         }
 
         /* move new obj info over to old object and delete new obj */

@@ -416,7 +416,7 @@ void char_from_room(struct char_data *ch) {
     }
     auto sh = ch->shared();
     r->characters.remove_if([sh](auto& c) { return c.expired() || c.lock() == sh; });
-    ch->room = nullptr;
+    ch->location = nullptr;
 
 }
 
@@ -425,7 +425,7 @@ void char_to_room(struct char_data *ch, struct room_data* room) {
     int i;
 
     room->characters.push_front(ch->shared());
-    ch->room = room;
+    ch->location = room;
 
     auto& z = zone_table.at(room->zone);
     if(IS_NPC(ch)) {
@@ -464,9 +464,10 @@ void obj_to_char(struct obj_data *object, struct char_data *ch) {
         return;
     }
     ch->objects.push_front(object->shared());
-    object->carried_by = ch;
-    object->holder = ch;
-    object->room = nullptr;
+    object->location = ch;
+    object->pos_x = -1.0;
+    object->pos_y = 0;
+    object->pos_z = 0;
 
 }
 
@@ -478,15 +479,30 @@ void obj_from_char(struct obj_data *object) {
         basic_mud_log("SYSERR: nullptr object passed to obj_from_char.");
         return;
     }
-    if(!object->carried_by) {
-        basic_mud_log("SYSERR: nullptr object->carried_by passed to obj_from_char.");
+
+    if(!object->location) {
+        basic_mud_log("SYSERR: nullptr object->location passed to obj_from_char.");
         return;
     }
-    auto sh = object->shared();
-    object->carried_by->objects.remove_if([sh](auto& o) { return o.expired() || o.lock() == sh; });
 
-    object->carried_by = nullptr;
-    object->holder = nullptr;
+    if(object->location->type != UnitType::character) {
+        basic_mud_log("SYSERR: object->location not char passed to obj_from_char.");
+        return;
+    }
+
+    if(object->pos_x != -1.0) {
+        basic_mud_log("SYSERR: object->pos_x is not -1.0 passed to obj_from_char.");
+        return;
+    }
+
+    auto ch = static_cast<char_data*>(object->location);
+
+    auto sh = object->shared();
+    ch->objects.remove_if([sh](auto& o) { return o.expired() || o.lock() == sh; });
+    object->location = nullptr;
+    object->pos_x = 0;
+    object->pos_y = 0;
+    object->pos_z = 0;
 }
 
 
@@ -547,7 +563,7 @@ void equip_char(struct char_data *ch, struct obj_data *obj, int pos) {
             obj->getShortDescription());
         return;
     }
-    if (obj->carried_by) {
+    if (obj->location && obj->location->type == UnitType::character && obj->pos_x == -1.0) {
         basic_mud_log("SYSERR: EQUIP: Obj is carried_by when equip.");
         return;
     }
@@ -563,9 +579,9 @@ void equip_char(struct char_data *ch, struct obj_data *obj, int pos) {
         return;
     }
 
-    GET_EQ(ch, pos) = obj;
-    obj->worn_by = ch;
-    obj->worn_on = pos;
+    ch->objects.push_front(obj->shared());
+    obj->location = ch;
+    obj->pos_x = pos;
 }
 
 
@@ -579,10 +595,14 @@ struct obj_data *unequip_char(struct char_data *ch, int pos) {
     }
 
     obj = GET_EQ(ch, pos);
-    obj->worn_by = nullptr;
-    obj->worn_on = -1;
 
-    GET_EQ(ch, pos) = nullptr;
+    auto sh = obj->shared();
+    ch->objects.remove_if([sh](auto& o) { return o.expired() || o.lock() == sh; });
+
+    obj->location = nullptr;
+    obj->pos_x = 0;
+    obj->pos_y = 0;
+    obj->pos_z = 0;
 
     return (obj);
 }
@@ -666,9 +686,10 @@ void obj_to_room(struct obj_data *object, struct room_data *room) {
     }
 
     room->objects.push_front(object->shared());
-    object->room = room;
-    object->carried_by = nullptr;
-    object->holder = room;
+    object->location = room;
+    object->pos_x = -1.0;
+    object->pos_y = 0;
+    object->pos_z = 0;
     object->setBaseStat("lload", time(nullptr));
 
     auto& z = zone_table.at(room->zone);
@@ -763,21 +784,20 @@ void obj_from_room(struct obj_data *object) {
     struct obj_data *temp;
     auto r = object->getRoom();
 
-    if (!object || IN_ROOM(object) == NOWHERE) {
-        basic_mud_log("SYSERR: nullptr object or obj not in a room (%d) passed to obj_from_room",
-            IN_ROOM(object));
+    if (!object || !r) {
+        basic_mud_log("SYSERR: nullptr object or obj not in a room passed to obj_from_room");
         return;
     }
 
     if(object->type_flag == ItemType::plant) objectSubscriptions.unsubscribe("growingPlants", object);
 
-    if (GET_OBJ_POSTED(object) && object->in_obj == nullptr) {
-        struct obj_data *obj = GET_OBJ_POSTED(object);
+    if (auto obj = GET_OBJ_POSTED(object); obj) {
+        auto r = obj->getRoom();
         if (GET_OBJ_POSTTYPE(object) <= 0) {
-            send_to_room(IN_ROOM(obj), "%s@W shakes loose from %s@W.@n\r\n", obj->getShortDescription(),
+            send_to_room(r, "%s@W shakes loose from %s@W.@n\r\n", obj->getShortDescription(),
                          object->getShortDescription());
         } else {
-            send_to_room(IN_ROOM(obj), "%s@W comes loose from %s@W.@n\r\n", object->getShortDescription(),
+            send_to_room(r, "%s@W comes loose from %s@W.@n\r\n", object->getShortDescription(),
                          obj->getShortDescription());
         }
         GET_OBJ_POSTED(obj) = nullptr;
@@ -789,43 +809,43 @@ void obj_from_room(struct obj_data *object) {
     auto& z = zone_table.at(r->zone);
     auto shared = object->shared();
     z.objectsInZone.remove_if([shared](auto& obj) { return obj.expired() || obj.lock() == shared; });
-    object->room->objects.remove_if([shared](auto& obj) { return obj.expired() || obj.lock() == shared; });
+    r->objects.remove_if([shared](auto& obj) { return obj.expired() || obj.lock() == shared; });
 
-    object->room = nullptr;
-    object->holder = nullptr;
+    object->location = nullptr;
 
 }
 
 
 /* put an object in an object (quaint)  */
 void obj_to_obj(struct obj_data *obj, struct obj_data *obj_to) {
-    struct obj_data *tmp_obj;
 
     if (!obj || !obj_to || obj == obj_to) {
         return;
     }
     obj_to->objects.push_front(obj->shared());
-    obj->in_obj = obj_to;
-    tmp_obj = obj->in_obj;
-    obj->holder = obj_to;
+    obj->location = obj_to;
+    obj->pos_x = -1.0;
+    obj->pos_y = 0;
+    obj->pos_z = 0;
 }
 
 
 /* remove an object from an object */
 void obj_from_obj(struct obj_data *obj) {
-    struct obj_data *temp, *obj_from;
 
-    if (obj->in_obj == nullptr) {
+    if (obj->location == nullptr || obj->location->type != UnitType::object) {
         basic_mud_log("SYSERR: (%s): trying to illegally extract obj from obj.", __FILE__);
         return;
     }
-    obj_from = obj->in_obj;
-    temp = obj->in_obj;
+    auto obj_from = static_cast<obj_data*>(obj->location);
+
     auto shared = obj->shared();
     obj_from->objects.remove_if([shared](auto& obj) { return obj.expired() || obj.lock() == shared; });
 
-    obj->in_obj = nullptr;
-    obj->holder = nullptr;
+    obj->location = nullptr;
+    obj->pos_x = 0;
+    obj->pos_y = 0;
+    obj->pos_z = 0;
 }
 
 
@@ -836,18 +856,18 @@ void extract_obj(struct obj_data *obj) {
     obj->clearLocation();
 
     /* Get rid of the contents of the object, as well. */
-    if (GET_FELLOW_WALL(obj) && GET_OBJ_VNUM(obj) == 79) {
-        auto trash = GET_FELLOW_WALL(obj);
+    if (auto trash = GET_FELLOW_WALL(obj); trash && GET_OBJ_VNUM(obj) == 79) {
         GET_FELLOW_WALL(obj) = nullptr;
         GET_FELLOW_WALL(trash) = nullptr;
         extract_obj(trash);
     }
-    if (GET_OBJ_POSTED(obj) && obj->in_obj == nullptr) {
-        struct obj_data *obj2 = GET_OBJ_POSTED(obj);
+
+    if (auto obj2 = GET_OBJ_POSTED(obj); obj2) {
         GET_OBJ_POSTED(obj2) = nullptr;
         GET_OBJ_POSTTYPE(obj2) = 0;
         GET_OBJ_POSTED(obj) = nullptr;
     }
+
     if (TARGET(obj)) {
         TARGET(obj) = nullptr;
     }
@@ -1388,7 +1408,7 @@ struct obj_data *get_obj_vis(struct char_data *ch, char *name, int *number) {
 }
 
 
-struct obj_data *get_obj_in_equip_vis(struct char_data *ch, char *arg, int *number, struct obj_data *equipment[]) {
+struct obj_data *get_obj_in_equip_vis(struct char_data *ch, char *arg, int *number, const std::map<int, struct obj_data*>& equipment) {
     int j, num;
 
     if (!number) {
@@ -1399,16 +1419,16 @@ struct obj_data *get_obj_in_equip_vis(struct char_data *ch, char *arg, int *numb
     if (*number == 0)
         return (nullptr);
 
-    for (j = 0; j < NUM_WEARS; j++)
-        if (equipment[j] && CAN_SEE_OBJ(ch, equipment[j]) && isname(arg, equipment[j]->getName()))
+    for (const auto& [slot, obj] : equipment)
+        if (obj && CAN_SEE_OBJ(ch, obj) && isname(arg, obj->getName()))
             if (--(*number) == 0)
-                return (equipment[j]);
+                return obj;
 
-    return (nullptr);
+    return nullptr;
 }
 
 
-int get_obj_pos_in_equip_vis(struct char_data *ch, char *arg, int *number, struct obj_data *equipment[]) {
+int get_obj_pos_in_equip_vis(struct char_data *ch, char *arg, int *number, const std::map<int, struct obj_data*>& equipment) {
     int j, num;
 
     if (!number) {
@@ -1417,14 +1437,14 @@ int get_obj_pos_in_equip_vis(struct char_data *ch, char *arg, int *number, struc
     }
 
     if (*number == 0)
-        return (-1);
+        return -1;
 
-    for (j = 0; j < NUM_WEARS; j++)
-        if (equipment[j] && CAN_SEE_OBJ(ch, equipment[j]) && isname(arg, equipment[j]->getName()))
+    for (const auto& [slot, obj] : equipment)
+        if (obj && CAN_SEE_OBJ(ch, obj) && isname(arg, obj->getName()))
             if (--(*number) == 0)
-                return (j);
+                return slot;
 
-    return (-1);
+    return -1;
 }
 
 

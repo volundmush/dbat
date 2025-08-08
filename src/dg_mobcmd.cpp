@@ -140,12 +140,12 @@ ACMD(do_masound) {
 
         if (((newexit = was_in_room->dir_option[door])) &&
             newexit->to_room != NOWHERE && newexit->getDestination() != was_in_room) {
-            ch->room = newexit->getDestination();
+            ch->location = newexit->getDestination();
             sub_write(argument, ch, true, TO_ROOM);
         }
     }
 
-    ch->room = was_in_room;
+    ch->location = was_in_room;
 }
 
 /* Heals a stat of the mob */
@@ -282,7 +282,7 @@ ACMD(do_mjunk) {
 
     if ((find_all_dots(arg) != FIND_INDIV) && !junk_all) {
         /* Thanks to Carlos Myers for fixing the line below */
-        if ((pos = get_obj_pos_in_equip_vis(ch, arg, nullptr, ch->equipment)) >= 0) {
+        if ((pos = get_obj_pos_in_equip_vis(ch, arg, nullptr, ch->getEquipment())) >= 0) {
             extract_obj(unequip_char(ch, pos));
             return;
         }
@@ -297,7 +297,7 @@ ACMD(do_mjunk) {
             }
         }
         /* Thanks to Carlos Myers for fixing the line below */
-        while ((pos = get_obj_pos_in_equip_vis(ch, arg, nullptr, ch->equipment)) >= 0)
+        while ((pos = get_obj_pos_in_equip_vis(ch, arg, nullptr, ch->getEquipment())) >= 0)
             extract_obj(unequip_char(ch, pos));
     }
     return;

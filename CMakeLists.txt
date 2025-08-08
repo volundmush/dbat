@@ -20,7 +20,7 @@ CPMAddPackage("gh:nlohmann/json#v3.12.0")
 CPMAddPackage("gh:ilqvya/random#v1.5.0")
 CPMAddPackage("gh:Neargye/magic_enum#v0.9.7")
 
-find_package(Boost CONFIG REQUIRED COMPONENTS system program_options regex iostreams)
+find_package(Boost CONFIG REQUIRED COMPONENTS regex iostreams)
 
 set(CIRCLE_INCLUDE_DIRS
         include

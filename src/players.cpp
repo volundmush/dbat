@@ -107,8 +107,8 @@ void deletePlayerCharacter(std::weak_ptr<char_data> ref) {
         extract_obj(o);
 
     // delete their gear.
-    for(auto & i : ch->equipment)
-        if(i) extract_obj(i);
+    for(auto & [slot, i] : ch->getEquipment())
+        extract_obj(i);
 
     // unsubscribe from everything, just in case.
     characterSubscriptions.unsubscribeFromAll(ch);

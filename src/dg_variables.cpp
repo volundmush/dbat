@@ -600,7 +600,7 @@ in the vault (vnum: 453) now and then. you can just use
                         } else if ((pos = find_eq_pos_script(subfield)) < 0 || !GET_EQ(c, pos))
                             *str = '\0';
                         else
-                            snprintf(str, slen, "%s", ((((c)->equipment[pos]))->getUID(true).c_str()));
+                            snprintf(str, slen, "%s", ((((c)->getEquipSlot(pos)))->getUID(true).c_str()));
                     }
                     if (!strcasecmp(field, "exp")) {
                         if (subfield && *subfield) {
@@ -929,8 +929,8 @@ in the vault (vnum: 453) now and then. you can just use
                         }
                         snprintf(str, slen, "%d", GET_OBJ_RENT(o));
                     } else if (!strcasecmp(field, "carried_by")) {
-                        if (o->carried_by)
-                            snprintf(str, slen, "%s", ((o->carried_by)->getUID(true).c_str()));
+                        if (auto carriedby = o->getCarriedBy(); carriedby)
+                            snprintf(str, slen, "%s", carriedby->getUID(true).c_str());
                         else
                             *str = '\0';
                     } else if (!strcasecmp(field, "contents")) {
@@ -1019,7 +1019,7 @@ in the vault (vnum: 453) now and then. you can just use
                             o->strings["name"] = blah;
                         }
                     } else if (!strcasecmp(field, "next_in_list")) {
-                        if (auto con = o->holder->getObjects(); !con.empty()) {
+                        if (auto con = o->location->getObjects(); !con.empty()) {
                             auto found = false;
                             for(auto ob : filter_raw(con)) {
                                 if(ob == o) {
@@ -1111,8 +1111,8 @@ in the vault (vnum: 453) now and then. you can just use
                         }
                         snprintf(str, slen, "%s", fmt::format("{}", GET_OBJ_WEIGHT(o)).c_str());
                     } else if (!strcasecmp(field, "worn_by")) {
-                        if (o->worn_by)
-                            snprintf(str, slen, "%s", ((o->worn_by)->getUID(true).c_str()));
+                        if (auto worn = o->getWornBy())
+                            snprintf(str, slen, "%s", worn->getUID(true).c_str());
                         else
                             *str = '\0';
                     }

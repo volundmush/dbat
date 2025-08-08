@@ -10,8 +10,8 @@ from dbat.rest.utils import (
 )
 
 from dbat.rest.utils import get_current_user
-from dbat.models.game import AccountData, PlayerData
-from dbat.db import users as users_db, characters as character_db
+from dbat.bridge.models.game import AccountData, PlayerData
+from dbat.bridge import users as users_db, characters as character_db
 
 router = APIRouter()
 

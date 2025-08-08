@@ -5,7 +5,7 @@ import pydantic
 import jwt
 
 import dbat
-from dbat.models import fields
+from dbat.bridge.models import fields
 
 class UserLogin(pydantic.BaseModel):
     username: fields.name_line

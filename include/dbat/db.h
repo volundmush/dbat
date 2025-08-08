@@ -12,31 +12,21 @@
 #include "structs.h"
 
 
-/* arbitrary constants used by index_boot() (must be unique) */
-constexpr int DB_BOOT_WLD = 0;
-constexpr int DB_BOOT_MOB = 1;
-constexpr int DB_BOOT_OBJ = 2;
-constexpr int DB_BOOT_ZON = 3;
-constexpr int DB_BOOT_SHP = 4;
-constexpr int DB_BOOT_HLP = 5;
-constexpr int DB_BOOT_TRG = 6;
-constexpr int DB_BOOT_GLD = 7;
-
-#define LIB_USER        "user/"
-#define LIB_INTRO       "intro/"
-#define LIB_SENSE       "sense/"
-#define LIB_WORLD    "world/"
-#define LIB_TEXT    "text/"
-#define LIB_TEXT_HELP    "text/help/"
-#define LIB_MISC    "misc/"
-#define LIB_ETC        "etc/"
-#define LIB_PLRTEXT    "plrtext/"
-#define LIB_PLROBJS    "plrobjs/"
-#define LIB_PLRVARS    "plrvars/"
-#define LIB_PLRALIAS    "plralias/"
-#define LIB_PLRFILES    "plrfiles/"
-#define LIB_HOUSE    "house/"
-#define LIB_PLRIMC      "plrimc/"
+#define LIB_USER        "data/user/"
+#define LIB_INTRO       "data/intro/"
+#define LIB_SENSE       "data/sense/"
+#define LIB_WORLD    "data/world/"
+#define LIB_TEXT    "data/text/"
+#define LIB_TEXT_HELP    "data/text/help/"
+#define LIB_MISC    "data/misc/"
+#define LIB_ETC        "data/etc/"
+#define LIB_PLRTEXT    "data/plrtext/"
+#define LIB_PLROBJS    "data/plrobjs/"
+#define LIB_PLRVARS    "data/plrvars/"
+#define LIB_PLRALIAS    "data/plralias/"
+#define LIB_PLRFILES    "data/plrfiles/"
+#define LIB_HOUSE    "data/house/"
+#define LIB_PLRIMC      "data/plrimc/"
 #define SLASH        "/"
 
 #define SUF_OBJS    "new"
@@ -50,10 +40,6 @@ constexpr int DB_BOOT_GLD = 7;
 #define SUF_INTRO       "itr"
 #define SUF_SENSE       "sen"
 #define SUF_CUSTOM      "cus"
-
-#define FASTBOOT_FILE   "../.fastboot"  /* autorun: boot without sleep  */
-#define KILLSCRIPT_FILE "../.killscript"/* autorun: shut mud down       */
-#define PAUSE_FILE      "../pause"      /* autorun: don't restart mud   */
 
 /* names of various files and directories */
 #define INDEX_FILE    "index"        /* index of world files		*/
@@ -83,6 +69,7 @@ constexpr int DB_BOOT_GLD = 7;
 #define HANDBOOK_FILE    LIB_TEXT "handbook"  /* handbook for new immorts	*/
 #define IHELP_PAGE_FILE    LIB_TEXT_HELP "iscreen"    /* for HELP <CR>	*/
 #define HELP_FILE       "help.hlp"
+#define MAP_FILE "data/surface.map" /* for the map command */
 
 #define IDEA_FILE    LIB_MISC "ideas"       /* for the 'idea'-command	*/
 #define TYPO_FILE    LIB_MISC "typos"       /*         'typo'		*/
@@ -312,10 +299,16 @@ extern bitvector_t asciiflag_conv(char *flag);
 
 extern void reset_zone(zone_rnum zone);
 
+extern std::vector<npc_proto_data*> collectNPCProtos(int start_vnum, int end_vnum);
+extern std::vector<item_proto_data*> collectItemProtos(int start_vnum, int end_vnum);
+extern std::vector<guild_data*> collectGuilds(int start_vnum, int end_vnum);
+extern std::vector<shop_data*> collectShops(int start_vnum, int end_vnum);
+extern std::vector<trig_proto_data*> collectTriggers(int start_vnum, int end_vnum);
+
 /* For disabled commands code by Erwin S. Andreasen, */
 /* ported to CircleMUD by Myrdred (Alexei Svitkine)  */
 
-#define DISABLED_FILE    "disabled.cmds"  /* disabled commands */
+#define DISABLED_FILE    "data/disabled.cmds"  /* disabled commands */
 #define END_MARKER    "END" /* for load_disabled() and save_disabled() */
 
 // commands

@@ -801,11 +801,8 @@ ACMD(do_nickname) {
     }
 
     send_to_char(ch, "@wYou nickname %s@w as '@C%s@w'.@n\r\n", sdesc, arg2);
-    char nick[MAX_INPUT_LENGTH], nick2[MAX_INPUT_LENGTH];
-    sprintf(nick, "%s @wnicknamed @D(@C%s@D)@n", sdesc, CAP(arg2));
-    sprintf(nick2, "%s %s", obj->getName(), arg2);
-    obj->strings["short_description"] = nick;
-    obj->strings["name"] = nick2;
+    obj->strings["short_description"] = fmt::format("{} @wnicknamed @D(@C{}@D)@n", sdesc, CAP(arg2));
+    obj->strings["name"] = fmt::format("{} {}", obj->getName(), arg2);
 }
 
 
@@ -5281,20 +5278,37 @@ static void print_object_location(int num, struct obj_data *obj, struct char_dat
 
     if (!obj->getProtoScript().empty())
         send_to_char(ch, "%s", obj->scriptString().c_str());
-
-    if (IN_ROOM(obj) != NOWHERE)
-        send_to_char(ch, "[%5d] %s\r\n", obj->getRoomVnum(), obj->getRoom()->getName());
-    else if (obj->carried_by)
-        send_to_char(ch, "carried by %s in room [%d]\r\n", PERS(obj->carried_by, ch),
-                     obj->carried_by->getRoomVnum());
-    else if (obj->worn_by)
-        send_to_char(ch, "worn by %s in room [%d]\r\n", PERS(obj->worn_by, ch), obj->worn_by->getRoomVnum());
-    else if (obj->in_obj) {
-        send_to_char(ch, "inside %s%s\r\n", obj->in_obj->getShortDescription(), (recur ? ", which is" : " "));
-        if (recur)
-            print_object_location(0, obj->in_obj, ch, recur);
-    } else
+    
+    if(obj->location) {
+        switch(obj->location->type) {
+            case UnitType::room: {
+                auto r = static_cast<room_data*>(obj->location);
+                send_to_char(ch, "[%5d] %s\r\n", r->getVnum(), r->getName());
+                }
+                break;
+            case UnitType::character: {
+                auto c = static_cast<char_data*>(obj->location);
+                if(obj->pos_x == -1) {
+                    send_to_char(ch, "carried by %s in room [%d]\r\n", PERS(c, ch), c->getRoomVnum());
+                } else {
+                    send_to_char(ch, "worn by %s in room [%d]\r\n", PERS(c, ch), c->getRoomVnum());
+                }
+                }
+                break;
+            case UnitType::object: {
+                auto o = static_cast<obj_data*>(obj->location);
+                send_to_char(ch, "inside %s%s\r\n", o->getShortDescription(), (recur ? ", which is" : " "));
+                if (recur)
+                    print_object_location(0, o, ch, recur);
+                }
+                break;
+            default:
+                send_to_char(ch, "in an unknown location\r\n");
+                break;
+        }
+    } else {
         send_to_char(ch, "in an unknown location\r\n");
+    }
 }
 
 static void perform_immort_where(struct char_data *ch, char *arg) {

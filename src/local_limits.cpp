@@ -1448,25 +1448,46 @@ void corpseRotService(uint64_t heartPulse, double deltaTime) {
         }
         if (!GET_OBJ_TIMER(j)) {
 
-            if (j->carried_by) {
+            if (j->location && j->location->type == UnitType::room && j->pos_x == -1.0) {
+                auto c = static_cast<char_data*>(j->location);
                 if (!strstr(j->getName(), "android")) {
-                    act("$p decays in your hands.", false, j->carried_by, j, nullptr, TO_CHAR);
+                    act("$p decays in your hands.", false, c, j, nullptr, TO_CHAR);
                 } else {
-                    act("$p decays in your hands.", false, j->carried_by, j, nullptr, TO_CHAR);
+                    act("$p decays in your hands.", false, c, j, nullptr, TO_CHAR);
                 }
             }
-            auto con = j->getObjects();
-            for (auto jj : filter_raw(con)) {
-                obj_from_obj(jj);
-
-                if (j->in_obj)
-                    obj_to_obj(jj, j->in_obj);
-                else if (j->carried_by)
-                    obj_to_room(jj, IN_ROOM(j->carried_by));
-                else if (room)
-                    obj_to_room(jj, room);
-                else
-                    core_dump();
+            
+            if(auto con = j->getObjects(); !con.empty() && j->location) {
+                switch(j->location->type) {
+                    case UnitType::room: {
+                        auto r = static_cast<room_data*>(j->location);
+                        for(auto jj : filter_raw(con)) {
+                            obj_from_obj(jj);
+                            obj_to_room(jj, r);
+                        }
+                    }
+                        break;
+                    case UnitType::character: {
+                        auto c = static_cast<char_data*>(j->location);
+                        auto r = c->getRoom();
+                        for(auto jj : filter_raw(con)) {
+                            obj_from_obj(jj);
+                            obj_to_room(jj, r);
+                        }
+                    }
+                        break;
+                    case UnitType::object: {
+                        auto o = static_cast<obj_data*>(j->location);
+                        for(auto jj : filter_raw(con)) {
+                            obj_from_obj(jj);
+                            obj_to_obj(jj, o);
+                        }
+                    }
+                        break;
+                    default:
+                        room = nullptr;
+                        break;
+                }
             }
             extract_obj(j);
         }
@@ -1845,15 +1866,18 @@ void point_update(uint64_t heartPulse, double deltaTime)
                         }
                     }
 
+                    auto pos = GET_POS(i);
+
                     if (change && !AFF_FLAGGED(i, AFF_POISON))
                     {
-                        if (GET_POS(i) == POS_SLEEPING)
+                        
+                        if (pos == POS_SLEEPING)
                         {
                             send_to_char(i, "@wYour sleep does you some good.@n\r\n");
                             if (!IS_ANDROID(i) && !FIGHTING(i))
                                 i->restoreVital(CharVital::lifeforce);
                         }
-                        else if (GET_POS(i) == POS_RESTING)
+                        else if (pos == POS_RESTING)
                         {
                             send_to_char(i, "@wYou feel relaxed and better.@n\r\n");
                             if (!i->isFullVital(CharVital::lifeforce))
@@ -1866,13 +1890,13 @@ void point_update(uint64_t heartPulse, double deltaTime)
                                 }
                             }
                         }
-                        else if (GET_POS(i) == POS_SITTING)
+                        else if (pos == POS_SITTING)
                             send_to_char(i, "@wYou feel rested and better.@n\r\n");
                         else
                             send_to_char(i, "You feel slightly better.\r\n");
                     }
 
-                    if (GET_POS(i) <= POS_STUNNED)
+                    if (pos <= POS_STUNNED)
                         update_pos(i);
                 }
             }
@@ -1883,19 +1907,6 @@ void point_update(uint64_t heartPulse, double deltaTime)
                 if (processed.contains(j->id))
                     continue;
                 processed.insert(j->id);
-
-                /* Let's get rid of dropped norent items. */
-                if (OBJ_FLAGGED(j, ITEM_NORENT) && j->worn_by == nullptr && j->carried_by == nullptr && obj_selling != j && GET_OBJ_VNUM(j) != 7200)
-                {
-                    time_t diff = 0;
-
-                    diff = time(nullptr) - GET_LAST_LOAD(j);
-                    if (diff > 240 && GET_LAST_LOAD(j) > 0)
-                    {
-                        basic_mud_log("No rent object (%s) extracted from room (%d)", j->getShortDescription(), j->getRoomVnum());
-                        extract_obj(j);
-                    }
-                }
 
                 if (GET_OBJ_TYPE(j) == ITEM_HATCH)
                 {
@@ -1964,17 +1975,18 @@ void point_update(uint64_t heartPulse, double deltaTime)
                     }
                     else if (GET_OBJ_VNUM(j) != 79)
                     {
-                        if (j->carried_by && !j->in_obj)
+                        if (j->location && j->location->type == UnitType::character && j->pos_x >= 0.0)
                         {
+                            auto c = static_cast<char_data*>(j->location);
                             int melt = 5 + (GET_OBJ_WEIGHT(j) * 0.02);
                             if (GET_OBJ_WEIGHT(j) - (5 + (GET_OBJ_WEIGHT(j) * 0.02)) > 0)
                             {
                                 j->modBaseStat<weight_t>("weight", -melt);
-                                send_to_char(j->carried_by, "%s @wmelts a little.\r\n", j->getShortDescription());
+                                send_to_char(c, "%s @wmelts a little.\r\n", j->getShortDescription());
                             }
                             else
                             {
-                                send_to_char(j->carried_by, "%s @wmelts completely away.\r\n", j->getShortDescription());
+                                send_to_char(c, "%s @wmelts completely away.\r\n", j->getShortDescription());
                                 int remainder = melt - GET_OBJ_WEIGHT(j);
                                 extract_obj(j);
                             }

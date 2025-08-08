@@ -13,8 +13,8 @@ from rich.box import ASCII2
 from httpx_sse import aconnect_sse
 import re
 from rich.color import ColorType
-from dbat.models.characters import ActiveAs
-from dbat.models.auth import TokenResponse
+from dbat.bridge.models.characters import ActiveAs
+from dbat.bridge.models.auth import TokenResponse
 from aiomudtelnet import MudClientCapabilities
 
 from dataclasses import dataclass, field

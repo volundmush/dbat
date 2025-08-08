@@ -3,10 +3,11 @@ from pathlib import Path
 from pydantic import ValidationError
 from dbat.portal.commands.base import CMD_MATCH
 from httpx import HTTPStatusError
-from dbat.models.validators import user_rich_text
+from dbat.bridge.models.validators import user_rich_text
 
-from dbat.models.auth import TokenResponse
-from dbat.models.auth import UserLogin
+from dbat.utils import partial_match
+from dbat.bridge.models.auth import TokenResponse
+from dbat.bridge.models.auth import UserLogin
 
 from .base import BaseParser
 
@@ -106,11 +107,16 @@ class LoginParser(BaseParser):
             await self.send_line("Invalid command. Type 'help' for help.")
             return
         match_dict = {k: v for k, v in matched.groupdict().items() if v is not None}
-        cmd = match_dict.get("cmd", "")
+        raw_cmd = match_dict.get("cmd", "")
         args = match_dict.get("args", "")
         lsargs = match_dict.get("lsargs", "")
         rsargs = match_dict.get("rsargs", "")
-        match cmd.lower():
+
+        if not (cmd := partial_match(raw_cmd, ["help", "login", "info", "register", "quit", "look", "rich"])):
+            await self.send_line("Invalid command. Type 'help' for help.")
+            return
+
+        match cmd:
             case "help":
                 await self.handle_help(args)
             case "login":

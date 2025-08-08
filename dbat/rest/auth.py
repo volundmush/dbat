@@ -6,10 +6,10 @@ import jwt
 from fastapi import APIRouter, Depends, Body, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordRequestForm
 
-from dbat.models.auth import TokenResponse, RefreshTokenModel
-from dbat.models.auth import UserLogin
+from dbat.bridge.models.auth import TokenResponse, RefreshTokenModel
+from dbat.bridge.models.auth import UserLogin
 
-from dbat.db import auth as auth_db, users as users_db
+from dbat.bridge import auth as auth_db, users as users_db
 from dbat.utils import crypt_context
 from dbat.rest.utils import oauth2_scheme, get_real_ip
 

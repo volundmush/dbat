@@ -775,7 +775,7 @@ void broken_update(uint64_t heartPulse, double deltaTime) {
     // Gravity generators
     auto gens = objectSubscriptions.all("vnum_11");
     for (auto k : filter_raw(gens)) {
-        if (k->carried_by) {
+        if (k->getCarriedBy()) {
             continue;
         }
 
@@ -806,7 +806,7 @@ void broken_update(uint64_t heartPulse, double deltaTime) {
     // ATMS
     auto atms = objectSubscriptions.all("vnum_3034");
     for(auto k : filter_raw(atms)) {
-        if (k->carried_by) {
+        if (k->getCarriedBy()) {
             continue;
         }
 

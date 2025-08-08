@@ -264,9 +264,7 @@ struct obj_data* char_data::findObject(const std::function<bool(struct obj_data*
     auto o = unit_data::findObject(func, working);
     if(o) return o;
 
-    for(auto i = 0; i < NUM_WEARS; i++) {
-        auto obj = equipment[i];
-        if(!obj) continue;
+    for(auto &[i, obj] : getEquipment()) {
         if(working && !obj->isWorking()) continue;
         if(func(obj)) return obj;
         auto p = obj->findObject(func, working);
@@ -279,9 +277,7 @@ struct obj_data* char_data::findObject(const std::function<bool(struct obj_data*
 std::unordered_set<struct obj_data*> char_data::gatherObjects(const std::function<bool(struct obj_data*)> &func, bool working) {
     auto out = unit_data::gatherObjects(func, working);
 
-    for(auto i = 0; i < NUM_WEARS; i++) {
-        auto obj = equipment[i];
-        if(!obj) continue;
+    for(auto &[i, obj] : getEquipment()) {
         if(working && !obj->isWorking()) continue;
         if(func(obj)) out.insert(obj);
         auto contents = obj->gatherObjects(func, working);

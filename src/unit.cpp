@@ -7,7 +7,9 @@
 std::vector<std::weak_ptr<obj_data>> unit_data::getObjects() {
     std::vector<std::weak_ptr<obj_data>> out;
     out.reserve(objects.size());
-    std::copy(objects.begin(), objects.end(), std::back_inserter(out));
+    std::copy_if(objects.begin(), objects.end(), std::back_inserter(out), [](const auto& obj) {
+        return !obj.expired() && obj.lock()->pos_x == -1.0;
+    });
     out.shrink_to_fit();
     return out;
 }

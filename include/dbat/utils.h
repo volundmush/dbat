@@ -699,7 +699,7 @@ void SET_SKILL(struct char_data *ch, uint16_t skill, int16_t val);
 void SET_SKILL_BONUS(struct char_data *ch, uint16_t skill, int16_t val);
 void SET_SKILL_PERF(struct char_data *ch, uint16_t skill, int16_t val);
 
-#define GET_EQ(ch, i)        ((ch)->equipment[i])
+#define GET_EQ(ch, i)        ((ch)->getEquipSlot((i)))
 
 #define GET_MOB_SPEC(ch)    (IS_MOB(ch) ? mob_index.at((ch)->getVnum()).func : 0)
 #define GET_MOB_RNUM(mob)    ((mob)->getVnum())
@@ -872,9 +872,9 @@ int64_t MOD_OBJ_VAL(T* obj, const std::string& val, int mod) {
 #define INVIS_OK_OBJ(sub, obj) (!OBJ_FLAGGED((obj), ITEM_INVISIBLE) || AFF_FLAGGED((sub), AFF_DETECT_INVIS))
 
 /* Is anyone carrying this object and if so, are they visible? */
-#define CAN_SEE_OBJ_CARRIER(sub, obj) ((!(obj)->carried_by || CAN_SEE((sub), (obj)->carried_by)) && (!(obj)->worn_by || CAN_SEE((sub), (obj)->worn_by)))
+#define CAN_SEE_OBJ_CARRIER(sub, obj) ((!(obj)->getCarriedBy() || CAN_SEE((sub), (obj)->getCarriedBy())) && (!(obj)->getWornBy() || CAN_SEE((sub), (obj)->getWornBy())))
 
-#define MORT_CAN_SEE_OBJ(sub, obj) ((LIGHT_OK(sub) || (obj)->carried_by == (sub) || (obj)->worn_by) && INVIS_OK_OBJ((sub), (obj)) && CAN_SEE_OBJ_CARRIER((sub), (obj)))
+#define MORT_CAN_SEE_OBJ(sub, obj) ((LIGHT_OK(sub) || (obj)->getCarriedBy() == (sub) || (obj)->getWornBy() == (sub)) && INVIS_OK_OBJ((sub), (obj)) && CAN_SEE_OBJ_CARRIER((sub), (obj)))
 
 #define CAN_SEE_OBJ(sub, obj) (MORT_CAN_SEE_OBJ(sub, obj) || (!IS_NPC(sub) && PRF_FLAGGED((sub), PRF_HOLYLIGHT)))
 

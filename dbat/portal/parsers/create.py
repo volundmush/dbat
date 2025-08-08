@@ -9,8 +9,8 @@ from dbat.portal.commands.base import CMD_MATCH
 from httpx import HTTPStatusError
 from dbat.utils import partial_match
 
-from dbat.models.game import AccountData, PlayerData, ChargenData, HelpData
-from dbat.models.names import Race, SubRace, Sensei, Mutation, BioGenome, Sex
+from dbat.bridge.models.game import AccountData, PlayerData, ChargenData, HelpData
+from dbat.bridge.models.names import Race, SubRace, Sensei, Mutation, BioGenome, Sex
 
 class CreateParser(BaseParser):
     """
@@ -265,11 +265,16 @@ class CreateParser(BaseParser):
             await self.send_line("Invalid command. Type 'cghelp' for help.")
             return
         match_dict = {k: v for k, v in matched.groupdict().items() if v is not None}
-        cmd = match_dict.get("cmd", "")
+        raw_cmd = match_dict.get("cmd", "")
         args = match_dict.get("args", "").strip()
         lsargs = match_dict.get("lsargs", "")
         rsargs = match_dict.get("rsargs", "")
-        match cmd.lower():
+
+        if not (cmd := partial_match(raw_cmd, ["cghelp", "help", "choices", "name", "race", "subrace", "sex", "sensei", "mutation", "genome", "keep", "align", "finish", "cancel", "look"])):
+            await self.send_line("Invalid command. Type 'cghelp' for help.")
+            return
+
+        match cmd:
             case "cghelp":
                 await self.handle_cghelp(args)
             case "help":

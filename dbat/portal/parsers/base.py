@@ -1,7 +1,7 @@
 import re
 import shlex
 from typing import List, Optional, Callable, Awaitable, Union
-from dbat.models.game import AccountData
+from dbat.bridge.models.game import AccountData
 
 
 class BaseParser:

@@ -310,7 +310,7 @@ static void db_load_activate_entities() {
 
 
 static std::vector<std::filesystem::path> getDumpFiles() {
-    std::filesystem::path dir = "dumps"; // Change to your directory
+    std::filesystem::path dir = "data/dumps"; // Change to your directory
     std::vector<std::filesystem::path> directories;
 
     auto pattern = "dump-";
@@ -319,6 +319,9 @@ static std::vector<std::filesystem::path> getDumpFiles() {
             directories.push_back(entry.path());
         }
     }
+
+    // Sorting lexicographically in descending order to get the newest first
+    // Assumes the naming convention ensures that lexicographical order matches chronological order.
 
     std::sort(directories.begin(), directories.end(), std::greater<>());
     return directories;
@@ -535,7 +538,7 @@ void boot_db_banned() {
 
 
 void boot_db_spacemap() {
-    FILE *mapfile = fopen("../lib/surface.map", "r");
+    FILE *mapfile = fopen(MAP_FILE, "r");
     int rowcounter, colcounter;
     int vnum_read;
     for (rowcounter = 0; rowcounter <= MAP_ROWS; rowcounter++) {
@@ -1729,11 +1732,11 @@ static void do_reset_cmds(zone_data &z) {
                     else
                     {
                         obj = read_object(c.arg1, REAL);
-                        obj->room = mob->room;
+                        obj->location = mob->location;
                         load_otrigger(obj);
                         if (wear_otrigger(obj, mob, c.arg3))
                         {
-                            obj->room = nullptr;
+                            obj->location = nullptr;
                             equip_char(mob, obj, c.arg3);
                         }
                         else
@@ -2229,7 +2232,7 @@ void load_default_config() {
     else
         CONFIG_DFLT_IP = nullptr;
 
-    CONFIG_DFLT_DIR = strdup(DFLT_DIR);
+    CONFIG_DFLT_DIR = strdup("data");
 
     if (LOGNAME)
         CONFIG_LOGNAME = strdup(LOGNAME);
@@ -2290,9 +2293,9 @@ void load_config() {
 
     load_default_config();
 
-    snprintf(buf, sizeof(buf), "%s/%s", "lib", "etc/config");
+    snprintf(buf, sizeof(buf), "%s/%s", "data", "etc/config");
     if (!(fl = fopen(buf, "r"))) {
-        snprintf(buf, sizeof(buf), "Game Config File: %s", "etc/config");
+        snprintf(buf, sizeof(buf), "Game Config File: %s", buf);
         perror(buf);
         return;
     }
@@ -2357,7 +2360,7 @@ void load_config() {
                     if (line && *line)
                         CONFIG_DFLT_DIR = strdup(line);
                     else
-                        CONFIG_DFLT_DIR = strdup(DFLT_DIR);
+                        CONFIG_DFLT_DIR = strdup("data");
                 } else if (!strcasecmp(tag, "dflt_ip")) {
                     if (CONFIG_DFLT_IP)
                         free(CONFIG_DFLT_IP);
@@ -2659,4 +2662,24 @@ int create_join_session(int account_id, int character_id, int64_t connection_id,
         send_to_char(ch.get(), "You have connected to %s from %s.\r\n", ch->getName(), ip);
         return 1;
     }
+}
+
+std::vector<npc_proto_data*> collectNPCProtos(int start_vnum, int end_vnum) {
+    return collectObjectsInRange(start_vnum, end_vnum, mob_proto);
+}
+
+std::vector<item_proto_data*> collectItemProtos(int start_vnum, int end_vnum) {
+    return collectObjectsInRange(start_vnum, end_vnum, obj_proto);
+}
+
+std::vector<guild_data*> collectGuilds(int start_vnum, int end_vnum) {
+    return collectObjectsInRange(start_vnum, end_vnum, guild_index);
+}
+
+std::vector<shop_data*> collectShops(int start_vnum, int end_vnum) {
+    return collectObjectsInRange(start_vnum, end_vnum, shop_index);
+}
+
+std::vector<trig_proto_data*> collectTriggers(int start_vnum, int end_vnum) {
+    return collectObjectsInRange(start_vnum, end_vnum, trig_index);
 }

@@ -153,8 +153,6 @@ int main(int argc, char **argv)
     basic_mud_log("%s", ascii_pfiles_version);
     basic_mud_log("%s", CWG_VERSION);
     basic_mud_log("Game starting cwd: %s", std::filesystem::current_path().c_str());
-    std::filesystem::current_path(dir);
-    basic_mud_log("Using %s as data directory.", dir);
 
     basic_mud_log("Running game.");
     try {

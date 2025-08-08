@@ -63,6 +63,14 @@
 #define TOROOM(room, dir) (get_room(room)->dir_option[dir] ? \
 get_room(room)->dir_option[dir]->to_room : NOWHERE)
 
+constexpr int DB_BOOT_WLD = 0;
+constexpr int DB_BOOT_MOB = 1;
+constexpr int DB_BOOT_OBJ = 2;
+constexpr int DB_BOOT_ZON = 3;
+constexpr int DB_BOOT_SHP = 4;
+constexpr int DB_BOOT_HLP = 5;
+constexpr int DB_BOOT_TRG = 6;
+constexpr int DB_BOOT_GLD = 7;
 
 static bool converting = false;
 
@@ -3090,7 +3098,7 @@ void migrate_accounts() {
 	// user files are stored in <cwd>/user/<folder>/<file>.usr so we'll need to do recursive iteration using
     // C++ std::filesystem...
 
-    auto path = std::filesystem::current_path() / "user";
+    auto path = std::filesystem::current_path() / "data" / "user";
     if(!std::filesystem::exists(path)) {
         basic_mud_log("No user directory found, skipping account migration.");
         return;
@@ -3215,7 +3223,7 @@ void migrate_characters() {
     }
 
     // migrate sense files...
-    auto path = std::filesystem::current_path() / "sense";
+    auto path = std::filesystem::current_path() / "data" / "sense";
     if(!std::filesystem::exists(path)) {
         basic_mud_log("No sense directory found, skipping account migration.");
         return;
@@ -3248,7 +3256,7 @@ void migrate_characters() {
         file.close();
     }
 
-    path = std::filesystem::current_path() / "intro";
+    path = std::filesystem::current_path() / "data" / "intro";
     if(!std::filesystem::exists(path)) {
         basic_mud_log("No intro directory found, skipping intro migration.");
         return;
@@ -3286,7 +3294,7 @@ void migrate_characters() {
         }
     }
 
-    path = std::filesystem::current_path() / "plrvars";
+    path = std::filesystem::current_path() / "data" / "plrvars";
     if(!std::filesystem::exists(path)) {
         basic_mud_log("No intro directory found, skipping intro migration.");
         return;
@@ -3327,7 +3335,7 @@ void migrate_characters() {
         }
     }
 
-    path = std::filesystem::current_path() / "plralias";
+    path = std::filesystem::current_path() / "data" / "plralias";
     if(!std::filesystem::exists(path)) {
         basic_mud_log("No plralias directory found, skipping alias migration.");
         return;
@@ -3367,7 +3375,7 @@ void migrate_characters() {
         }
     }
 
-    path = std::filesystem::current_path() / "plrobjs";
+    path = std::filesystem::current_path() / "data" / "plrobjs";
 
     for(auto &p : std::filesystem::recursive_directory_iterator(path)) {
         if(p.path().extension() != ".new") continue;
@@ -3925,7 +3933,6 @@ void run_migration() {
     isMigrating = true;
     load_config();
     game::init_locale();
-    chdir("lib");
     migrate_db();
     runSave();
     destroy_db();

@@ -4,7 +4,7 @@ from dbat.portal.commands.base import CMD_MATCH
 from httpx import HTTPStatusError
 from dbat.utils import partial_match
 
-from dbat.models.game import AccountData, PlayerData
+from dbat.bridge.models.game import AccountData, PlayerData
 
 
 class UserParser(BaseParser):
@@ -99,11 +99,16 @@ class UserParser(BaseParser):
             await self.send_line("Invalid command. Type 'help' for help.")
             return
         match_dict = {k: v for k, v in matched.groupdict().items() if v is not None}
-        cmd = match_dict.get("cmd", "")
+        raw_cmd = match_dict.get("cmd", "")
         args = match_dict.get("args", "")
         lsargs = match_dict.get("lsargs", "")
         rsargs = match_dict.get("rsargs", "")
-        match cmd.lower():
+
+        if not (cmd := partial_match(raw_cmd, ["help", "create", "play", "delete", "terminate", "logout", "look", "test", "admin"])):
+            await self.send_line("Invalid command. Type 'help' for help.")
+            return
+
+        match cmd:
             case "help":
                 await self.handle_help(args)
             case "create":

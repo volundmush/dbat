@@ -979,7 +979,12 @@ void load_items_finish(const std::filesystem::path& loc) {
         if(auto cf = uniqueObjects.find(id); cf != uniqueObjects.end()) {
             if(auto i = cf->second) {
                 deserialize_obj_relations(i.get(), j["relations"]);
-                i->deserializeLocation(j["location"], j["slot"].get<int>());
+                auto jloc = j["location"];
+                auto uid = jloc.at("uid").get<std::string>();
+                double x = jloc.at("pos_x").get<double>();
+                double y = jloc.at("pos_y").get<double>();
+                double z = jloc.at("pos_z").get<double>();
+                i->deserializeLocation(uid, x, y, z);
             }
         }
     }
@@ -994,6 +999,17 @@ static json serialize_obj_relations(const obj_data* o) {
     return j;
 }
 
+static json serialize_obj_location(const obj_data* o) {
+    json j = json::object();
+    if(o->location) {
+        j["uid"] = o->location->getUID();
+        j["pos_x"] = o->pos_x;
+        j["pos_y"] = o->pos_y;
+        j["pos_z"] = o->pos_z;
+    }
+    return j;
+}
+
 static void dump_items(const std::filesystem::path &loc) {
     json j;
 
@@ -1002,8 +1018,7 @@ static void dump_items(const std::filesystem::path &loc) {
         j2["id"] = v;
         j2["generation"] = static_cast<int32_t>(v);
         j2["data"] = *r;
-        j2["location"] = r->serializeLocation();
-        j2["slot"] = r->worn_on;
+        j2["location"] = serialize_obj_location(r.get());
         j2["relations"] = serialize_obj_relations(r.get());
         j.push_back(j2);
     }
@@ -1443,7 +1458,7 @@ void load_players(const std::filesystem::path& loc) {
 }
 
 static std::vector<std::filesystem::path> getDumpFiles() {
-    std::filesystem::path dir = "dumps"; // Change to your directory
+    std::filesystem::path dir = "data/dumps"; // Change to your directory
     std::vector<std::filesystem::path> directories;
 
     auto pattern = "dump-";
@@ -1601,7 +1616,7 @@ player_data* create_player_character(int account_id, const json& j) {
 void runSave() {
     basic_mud_log("Beginning dump of state to disk.");
     // Open up a new database file as <cwd>/state/<timestamp>.sqlite3 and dump the state into it.
-    auto path = std::filesystem::current_path() / "dumps";
+    auto path = std::filesystem::current_path() / "data" / "dumps";
     std::filesystem::create_directories(path);
     auto now = std::chrono::system_clock::now();
     auto time_t_now = std::chrono::system_clock::to_time_t(now);

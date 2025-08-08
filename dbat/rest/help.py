@@ -8,14 +8,14 @@ import dbat_ext
 from fastapi import APIRouter, Depends, Body, HTTPException, status, Request
 from fastapi.responses import StreamingResponse
 from dbat.rest.utils import streaming_list
-from dbat.models import fields
+from dbat.bridge.models import fields
 
 from dbat.rest.utils import get_real_ip
 from .utils import get_current_user
 
-from dbat.models.game import AccountData, PlayerData, HelpData
-from dbat.models.characters import CharacterCreate
-from dbat.db import help as help_db
+from dbat.bridge.models.game import AccountData, PlayerData, HelpData
+from dbat.bridge.models.characters import CharacterCreate
+from dbat.bridge import help as help_db
 
 router = APIRouter()
 

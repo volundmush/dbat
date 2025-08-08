@@ -1,5 +1,5 @@
 import typing
-from dbat.models.game import RoomData, RoomDirectionData
+from dbat.bridge.models.game import RoomData, RoomDirectionData
 from dbat_ext import room_db
 
 def list_rooms() -> typing.Generator[RoomData, None, None]:

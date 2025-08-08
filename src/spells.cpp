@@ -180,16 +180,29 @@ ASPELL(spell_locate_object) {
 
         send_to_char(ch, "%c%s", UPPER(*i->getShortDescription()), (i->getShortDescription()) + 1);
 
-        if (i->carried_by)
-            send_to_char(ch, " is being carried by %s.\r\n", PERS(i->carried_by, ch));
-        else if (IN_ROOM(i) != NOWHERE)
-            send_to_char(ch, " is in %s.\r\n", i->getRoom()->getName());
-        else if (i->in_obj)
-            send_to_char(ch, " is in %s.\r\n", i->in_obj->getShortDescription());
-        else if (i->worn_by)
-            send_to_char(ch, " is being worn by %s.\r\n", PERS(i->worn_by, ch));
+        if(i->location) {
+            switch(i->location->type) {
+                case UnitType::room:
+                    send_to_char(ch, " is in %s.\r\n", i->location->getName());
+                    break;
+                case UnitType::character: {
+                    auto c = static_cast<char_data*>(i->location);
+                    if(i->pos_x == -1) {
+                        send_to_char(ch, " is being carried by %s.\r\n", PERS(c, ch));
+                    } else {
+                        send_to_char(ch, " is being worn by %s.\r\n", PERS(c, ch));
+                    }
+                }
+                    break;
+                case UnitType::object:
+                    send_to_char(ch, " is in %s.\r\n", i->location->getShortDescription());
+                    break;
+                default:
+                    send_to_char(ch, " is in an unknown location.\r\n");
+            }
+        }
         else
-            send_to_char(ch, "'s location is uncertain.\r\n");
+            send_to_char(ch, "'s location is uncertain.\r\n");        
 
         j--;
     }

@@ -1787,8 +1787,8 @@ static void final_combat_resolve(struct char_data *ch) {
     if (CARRYING(ch)) {
         carry_drop(ch, 2);
     }
-    if (CARRIED_BY(ch)) {
-        carry_drop(CARRIED_BY(ch), 2);
+    if (auto carriedby = ch->carried_by; carriedby) {
+        carry_drop(carriedby, 2);
     }
     if (DRAGGING(ch)) {
         DRAGGED(DRAGGING(ch)) = nullptr;

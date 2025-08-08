@@ -730,7 +730,7 @@ ACMD(do_say) {
 ACMD(do_gsay) {
     struct char_data *k;
     struct follow_type *f;
-    char blah[MAX_INPUT_LENGTH];
+    char blah[MAX_STRING_LENGTH];
 
     skip_spaces(&argument);
 
@@ -754,7 +754,7 @@ ACMD(do_gsay) {
 
         strcpy(buf, argument);
 
-        sprintf(blah, "$n@W tells the group @W'@G%s@W'@n\r\n", buf);
+        snprintf(blah, MAX_STRING_LENGTH, "$n@W tells the group @W'@G%s@W'@n\r\n", buf);
 
         if (AFF_FLAGGED(k, AFF_GROUP) && (k != ch) && AWAKE(k)) {
             if (CONFIG_ENABLE_LANGUAGES) {

@@ -1,5 +1,5 @@
 import typing
-from dbat.models.scripts import TrigProtoData
+from dbat.bridge.models.scripts import TrigProtoData
 from dbat_ext import script_db
 
 def list_scripts() -> typing.Generator[TrigProtoData, None, None]:

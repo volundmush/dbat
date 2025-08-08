@@ -26,7 +26,6 @@ def load_db():
     """
     db.load_config()
     cur_path = Path().absolute()
-    os.chdir("lib")
     db.init()
     #os.chdir(cur_path)
 

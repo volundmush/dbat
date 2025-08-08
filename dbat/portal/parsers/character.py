@@ -10,7 +10,7 @@ import dbat
 from dbat.portal.commands.base import CMD_MATCH
 from dbat.utils import partial_match
 
-from dbat.models.game import AccountData, PlayerData
+from dbat.bridge.models.game import AccountData, PlayerData
 
 from .base import BaseParser
 

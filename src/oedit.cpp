@@ -1642,7 +1642,7 @@ ACMD(do_iedit) {
         send_to_char(ch, "You must supply an object name.\r\n");
     }
 
-    if ((k = get_obj_in_equip_vis(ch, arg, nullptr, ch->equipment))) {
+    if ((k = get_obj_in_equip_vis(ch, arg, nullptr, ch->getEquipment()))) {
         found = 1;
     } else if ((k = get_obj_in_list_vis(ch, arg, nullptr, ch->getObjects()))) {
         found = 1;

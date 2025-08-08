@@ -1,5 +1,5 @@
 import typing
-from dbat.models.game import AccountData
+from dbat.bridge.models.game import AccountData
 from fastapi import HTTPException, status
 from dbat_ext import account_db
 

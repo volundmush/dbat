@@ -62,7 +62,6 @@ requires.txt
 SOURCES.txt
 top_level.txt
 dist/
-
 *.pid
 
 # CLion
@@ -70,16 +69,11 @@ dist/
 cmake-*
 
 # DBAT
-libs
-lib
-logs
+data/
+logs/
 src/Makefile
-config.log
-config.status
-utils/Makefile
 compiled/
-build
-circle/*.cpp
+build/
 game/secret_settings.py
 dbat_ext/*.cpp
 

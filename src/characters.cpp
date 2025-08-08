@@ -928,17 +928,19 @@ room_vnum char_data::normalizeLoadRoom(room_vnum in) {
 
 std::map<int, obj_data *> char_data::getEquipment() {
     std::map<int, obj_data*> out;
-    for(auto i = 0; i < NUM_WEARS; i++) {
-        if(auto eq = GET_EQ(this, i); eq) {
-            out[i] = eq;
-        }
+    for(const auto &o : filter_raw(objects)) {
+        if(o->pos_x >= 0.0) out[o->pos_x] = o;
     }
     return out;
 }
 
 obj_data* char_data::getEquipSlot(int slot) {
-    if(slot < 0 || slot > NUM_WEARS-1) return nullptr;
-    return GET_EQ(this, slot);
+    auto eq = getEquipment();
+    if(eq.contains(slot)) {
+        return eq[slot];
+    }
+    // If we don't have the slot, return nullptr.
+    return nullptr;
 }
 
 void char_data::onAttack(atk::Attack& outgoing) {

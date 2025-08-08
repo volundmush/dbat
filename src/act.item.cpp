@@ -2816,26 +2816,7 @@ ACMD(do_give) {
 }
 
 void weight_change_object(struct obj_data *obj, int weight) {
-    struct obj_data *tmp_obj;
-    struct char_data *tmp_ch;
-
-    if (IN_ROOM(obj) != NOWHERE) {
-        obj->modBaseStat<weight_t>("weight", weight);
-    } else if ((tmp_ch = obj->carried_by)) {
-        obj_from_char(obj);
-        obj->modBaseStat<weight_t>("weight", weight);
-        obj_to_char(obj, tmp_ch);
-    } else if ((tmp_obj = obj->in_obj)) {
-        obj_from_obj(obj);
-        obj->modBaseStat<weight_t>("weight", weight);
-        obj_to_obj(obj, tmp_obj);
-    } else {
-        basic_mud_log("SYSERR: Unknown attempt to subtract weight from an object.");
-        /*  SYSERR_DESC:
-     *  weight_change_object() outputs this error when weight is attempted to
-     *  be removed from an object that is not carried or in another object.
-     */
-    }
+    obj->modBaseStat<weight_t>("weight", weight);
 }
 
 void name_from_drinkcon(struct obj_data* obj) {
@@ -3676,7 +3657,7 @@ void perform_wear(struct char_data *ch, struct obj_data *obj, int where) {
     }
 
     /* See if a trigger disallows it */
-    if (!wear_otrigger(obj, ch, where) || (obj->carried_by != ch))
+    if (!wear_otrigger(obj, ch, where) || (obj->getCarriedBy() != ch))
         return;
 
     if (GET_OBJ_TYPE(obj) == ITEM_WEAPON && OBJ_FLAGGED(obj, ITEM_CUSTOM)) {
@@ -4006,7 +3987,7 @@ ACMD(do_remove) {
             }
         }
     } else {
-        if ((i = get_obj_pos_in_equip_vis(ch, arg, nullptr, ch->equipment)) < 0) {
+        if ((i = get_obj_pos_in_equip_vis(ch, arg, nullptr, ch->getEquipment())) < 0) {
             send_to_char(ch, "You don't seem to be using %s %s.\r\n", AN(arg), arg);
         } else {
             perform_remove(ch, i);

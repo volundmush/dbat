@@ -387,23 +387,42 @@ obj_data *get_obj_near_obj(obj_data *obj, char *name) {
         return i;
 
     /* or outside ? */
-    if (obj->in_obj) {
-        if (*name == UID_CHAR) {
-            auto uidResult = resolveUID(name);
-            auto o = std::dynamic_pointer_cast<obj_data>(uidResult).get();
-            if(!o) return nullptr;
-            if(o == obj->in_obj) return o;
-        } else if (isname(name, obj->in_obj->getName()))
-            return obj->in_obj;
+    if(!obj->location)
+        return nullptr;
+    
+    switch(obj->location->type) {
+        case UnitType::object: {
+            auto o = static_cast<obj_data*>(obj->location);
+            if (*name == UID_CHAR) {
+                auto uidResult = resolveUID(name);
+                auto o2 = std::dynamic_pointer_cast<obj_data>(uidResult).get();
+                if(!o2) return nullptr;
+                if(o2 == o) return o;
+            } else if (isname(name, o->getName()))
+                return o;
+            break;
+        }
+        case UnitType::character: {
+            auto c = static_cast<char_data*>(obj->location);
+            if(obj->pos_x >= 0.0 && (i = get_object_in_equip(c, name))) {
+                // worn?
+                return i;
+            } else {
+                if(i = get_obj_in_list(name, c->getObjects())) {
+                    // carried?
+                    return i;
+                }
+            }
+        }
+        case UnitType::room: {
+            rm = obj_room(obj);
+            break;
+        }
+        default:
+            return nullptr;
     }
-        /* or worn ?*/
-    else if (obj->worn_by && (i = get_object_in_equip(obj->worn_by, name)))
-        return i;
-        /* or carried ? */
-    else if (obj->carried_by &&
-             (i = get_obj_in_list(name, obj->carried_by->getObjects())))
-        return i;
-    else if ((rm = obj_room(obj)) != NOWHERE) {
+
+    if ((rm = obj_room(obj)) != NOWHERE) {
         /* check the floor */
         if ((i = get_obj_in_list(name, get_room(rm)->getObjects())))
             return i;
@@ -465,16 +484,12 @@ char_data *get_char_by_obj(obj_data *obj, char *name) {
         if (ch && valid_dg_target(ch, DG_ALLOW_GODS))
             return ch;
     } else {
-        if (obj->carried_by &&
-            isname(name, obj->carried_by->getName()) &&
-            valid_dg_target(obj->carried_by, DG_ALLOW_GODS))
-            return obj->carried_by;
+        if (auto carrier = obj->getCarriedBy(); carrier && isname(name, carrier->getName()) && valid_dg_target(carrier, DG_ALLOW_GODS))
+            return carrier;
 
-        if (obj->worn_by &&
-            isname(name, obj->worn_by->getName()) &&
-            valid_dg_target(obj->worn_by, DG_ALLOW_GODS))
-            return obj->worn_by;
-        
+        if (auto wearer = obj->getWornBy(); wearer && isname(name, wearer->getName()) && valid_dg_target(wearer, DG_ALLOW_GODS))
+            return wearer;
+
         auto ac = characterSubscriptions.all("active");
         for (auto ch : filter_raw(ac)) {
             if (isname(name, ch->getName()) &&
@@ -538,15 +553,30 @@ obj_data *get_obj_by_obj(obj_data *obj, char *name) {
     if (i = get_obj_in_list(name, obj->getObjects()))
         return i;
 
-    if (obj->in_obj && isname(name, obj->in_obj->getName()))
-        return obj->in_obj;
-
-    if (obj->worn_by && (i = get_object_in_equip(obj->worn_by, name)))
-        return i;
-
-    if (obj->carried_by &&
-        (i = get_obj_in_list(name, obj->carried_by->getObjects())))
-        return i;
+    if(!obj->location)
+        return nullptr;
+    
+    switch(obj->location->type) {
+        case UnitType::object: {
+            auto o = static_cast<obj_data*>(obj->location);
+            if(isname(name, o->getName()))
+                return o;
+        }
+            break;
+        case UnitType::character: {
+            auto c = static_cast<char_data*>(obj->location);
+            if(obj->pos_x == -1) {
+                if(i = get_obj_in_list(name,c->getObjects()); i)
+                    return i;
+            } else {
+                if (i = get_object_in_equip(c, name); i)
+                    return i;
+            }
+        }
+            break;
+        default:
+            break;
+    }
 
     if (((rm = obj_room(obj)) != NOWHERE) &&
         (i = get_obj_in_list(name, get_room(rm)->getObjects())))
@@ -1203,7 +1233,7 @@ ACMD(do_detach) {
                 trigger = arg3;
         } else {
             /* Thanks to Carlos Myers for fixing the line below */
-            if ((object = get_obj_in_equip_vis(ch, arg1, nullptr, ch->equipment)));
+            if ((object = get_obj_in_equip_vis(ch, arg1, nullptr, ch->getEquipment())));
             else if ((object = get_obj_in_list_vis(ch, arg1, nullptr, ch->getObjects())));
             else if ((victim = get_char_room_vis(ch, arg1, nullptr)));
             else if ((object = get_obj_in_list_vis(ch, arg1, nullptr, ch->getLocationObjects())));

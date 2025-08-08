@@ -131,7 +131,7 @@ void update_space() {
     basic_mud_log("Updated Space Map. ");
 
     //Load the map vnums from a file into an array
-    mapfile = fopen("../lib/surface.map", "r");
+    mapfile = fopen(MAP_FILE, "r");
 
     for (rowcounter = 0; rowcounter <= MAP_ROWS; rowcounter++) {
         for (colcounter = 0; colcounter <= MAP_COLS; colcounter++) {
@@ -872,26 +872,21 @@ room_rnum find_target_room(struct char_data *ch, char *rawroomstr) {
         struct char_data *target_mob;
         struct obj_data *target_obj;
         char *mobobjstr = roomstr;
-        int num;
 
-        num = get_number(&mobobjstr);
+        auto num = get_number(&mobobjstr);
         if ((target_mob = get_char_vis(ch, mobobjstr, &num, FIND_CHAR_WORLD))) {
             if ((location = IN_ROOM(target_mob)) == NOWHERE) {
                 send_to_char(ch, "That character is currently lost.\r\n");
                 return (NOWHERE);
             }
         } else if ((target_obj = get_obj_vis(ch, mobobjstr, &num))) {
-            if (IN_ROOM(target_obj) != NOWHERE)
-                location = IN_ROOM(target_obj);
-            else if (target_obj->carried_by && IN_ROOM(target_obj->carried_by) != NOWHERE)
-                location = IN_ROOM(target_obj->carried_by);
-            else if (target_obj->worn_by && IN_ROOM(target_obj->worn_by) != NOWHERE)
-                location = IN_ROOM(target_obj->worn_by);
+            auto loc = target_obj->getAbsoluteRoom();
 
-            if (location == NOWHERE) {
+            if (!loc) {
                 send_to_char(ch, "That object is currently not in a room.\r\n");
                 return (NOWHERE);
             }
+            return loc->getVnum();
         }
 
         if (location == NOWHERE) {
@@ -1391,16 +1386,36 @@ static void do_stat_object(struct char_data *ch, struct obj_data *j) {
     send_to_char(ch, "Weight: %s, Value: %d, Cost/day: %d, Timer: %d, Min Level: %d\r\n",
                  wString.c_str(), GET_OBJ_COST(j), GET_OBJ_RENT(j), GET_OBJ_TIMER(j), GET_OBJ_LEVEL(j));
 
-    send_to_char(ch, "In room: %d (%s), ", j->getRoomVnum(),
-                 IN_ROOM(j) == NOWHERE ? "Nowhere" : j->getRoom()->getName());
-
     /*
    * NOTE: In order to make it this far, we must already be able to see the
    *       character holding the object. Therefore, we do not need CAN_SEE().
    */
-    send_to_char(ch, "In object: %s, ", j->in_obj ? j->in_obj->getShortDescription() : "None");
-    send_to_char(ch, "Carried by: %s, ", j->carried_by ? GET_NAME(j->carried_by) : "Nobody");
-    send_to_char(ch, "Worn by: %s\r\n", j->worn_by ? GET_NAME(j->worn_by) : "Nobody");
+    if(j->location) {
+        switch(j->location->type) {
+            case UnitType::object: {
+                auto j2 = static_cast<obj_data*>(j->location);
+                send_to_char(ch, "In object: %s, ", j2->getShortDescription());
+            }
+                break;
+            case UnitType::character: {
+                auto c2 = static_cast<char_data*>(j->location);
+                if(j->pos_x == -1) {
+                    send_to_char(ch, "Carried by: %s, ", GET_NAME(c2));
+                } else {
+                    send_to_char(ch, "Worn by: %s,", GET_NAME(c2));
+                }
+            }
+                break;
+            case UnitType::room: {
+                auto r = static_cast<room_data*>(j->location);
+                send_to_char(ch, "In room: %d (%s), ", r->getVnum(), r->getName());
+            }
+                break;
+            default: {
+                send_to_char(ch, "In unknown location: %s, ", j->location->getName());
+            }
+        }
+    }
 
     switch (GET_OBJ_TYPE(j)) {
         case ITEM_LIGHT:
@@ -1894,7 +1909,7 @@ ACMD(do_stat) {
         char *name = buf1;
         int number = get_number(&name);
 
-        if ((object = get_obj_in_equip_vis(ch, name, &number, ch->equipment)))
+        if ((object = get_obj_in_equip_vis(ch, name, &number, ch->getEquipment())))
             do_stat_object(ch, object);
         else if ((object = get_obj_in_list_vis(ch, name, &number, ch->getObjects())))
             do_stat_object(ch, object);
@@ -1924,26 +1939,11 @@ ACMD(do_shutdown) {
         basic_mud_log("(GC) Shutdown by %s.", GET_NAME(ch));
         send_to_all("Shutting down.\r\n");
         circle_shutdown = 1;
-    } else if (!strcasecmp(arg, "reboot")) {
-        basic_mud_log("(GC) Reboot by %s.", GET_NAME(ch));
-        send_to_all("Rebooting.. come back in a minute or two.\r\n");
-        touch(FASTBOOT_FILE);
-        circle_shutdown = circle_reboot = 1;
-    } else if (!strcasecmp(arg, "die")) {
-        basic_mud_log("(GC) Shutdown by %s.", GET_NAME(ch));
-        send_to_all("Shutting down for maintenance.\r\n");
-        touch(KILLSCRIPT_FILE);
-        circle_shutdown = 1;
     } else if (!strcasecmp(arg, "now")) {
         basic_mud_log("(GC) Shutdown NOW by %s.", GET_NAME(ch));
         send_to_all("Rebooting.. come back in a minute or two.\r\n");
         circle_shutdown = 1;
         circle_reboot = 2; /* do not autosave olc */
-    } else if (!strcasecmp(arg, "pause")) {
-        basic_mud_log("(GC) Shutdown by %s.", GET_NAME(ch));
-        send_to_all("Shutting down for maintenance.\r\n");
-        touch(PAUSE_FILE);
-        circle_shutdown = 1;
     } else
         send_to_char(ch, "Unknown shutdown option.\r\n");
 }

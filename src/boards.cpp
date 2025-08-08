@@ -67,7 +67,7 @@ void init_boards() {
     struct board_info *tmp_board;
     char dir_name[128];
 
-    auto path = std::filesystem::current_path() / "etc" / "boards";
+    auto path = std::filesystem::current_path() / "data"/ "etc" / "boards";
     std::filesystem::create_directory(path);
 
     // Iterate over all files within path that have integer filenames.

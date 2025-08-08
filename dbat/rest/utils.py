@@ -12,8 +12,8 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi import Request, Depends, HTTPException, status
 from fastapi.responses import StreamingResponse
 
-from dbat.models.game import AccountData
-from dbat.db.users import find_user
+from dbat.bridge.models.game import AccountData
+from dbat.bridge.users import find_user
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 

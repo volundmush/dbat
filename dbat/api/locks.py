@@ -5,7 +5,7 @@ import dbat
 from lark.exceptions import LarkError
 from fastapi import HTTPException, status
 
-from dbat.models.characters import ActiveAs
+from dbat.bridge.models.characters import ActiveAs
 
 
 class LockArguments(pydantic.BaseModel):

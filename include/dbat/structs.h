@@ -321,12 +321,16 @@ struct unit_data : public HasVariables {
 
     std::unordered_map<std::string, double> stats;
 
+    // Location data - for debugging and future unified location system
+    // These aren't used by all units, but putting it here means debug can see them.
+    unit_data* location{nullptr};  // What unit contains this unit (room, area, char, obj)
+    double pos_x{0.0}, pos_y{0.0}, pos_z{0.0};  // Position within location
+
 };
 
 struct room_direction_data;
 
 struct thing_data : public unit_data {
-    struct room_data* room;
     struct room_data* getRoom() const;
     room_vnum getRoomVnum() const;
 
@@ -418,8 +422,7 @@ struct obj_data : public thing_data, public picky_data, std::enable_shared_from_
     obj_data& operator=(const item_proto_data& proto);
     //~obj_data() override = default;
     std::vector<trig_vnum> getProtoScript() const override;
-    std::string serializeLocation();
-    void deserializeLocation(const std::string& txt, int16_t slot);
+    void deserializeLocation(const std::string& txt, double x, double y, double z);
     void activate();
     void deactivate();
     double getAffectModifier(uint64_t location, uint64_t specific) override;
@@ -449,12 +452,10 @@ struct obj_data : public thing_data, public picky_data, std::enable_shared_from_
 
     std::array<affected_type, MAX_OBJ_AFFECT> affected;  /* affects */
 
-    struct obj_data *in_obj{};       /* In what object nullptr when none    */
-    struct char_data *carried_by{};  /* Carried by :nullptr in room/conta   */
-    struct char_data *worn_by{};      /* Worn by? */
-    int16_t worn_on{-1};          /* Worn where?		      */
-
-    unit_data *holder{};
+    obj_data *getContainer() const;
+    char_data *getCarriedBy() const;
+    char_data *getWornBy() const;
+    int16_t getWornOn() const;
 
     std::weak_ptr<char_data> sitting{};       /* Who is sitting on me? */
     struct char_data *user{};

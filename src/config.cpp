@@ -368,9 +368,6 @@ uint16_t DFLT_PORT = 5001;
 const char *DFLT_IP = nullptr; /* bind to all interfaces */
 /* const char *DFLT_IP = "192.168.1.1";  -- bind only to one interface */
 
-/* default directory to use as data directory */
-const char *DFLT_DIR = "lib";
-
 /*
  * What file to log messages to (ex: "log/syslog").  Setting this to nullptr
  * means you want to log to stderr, which was the default in earlier

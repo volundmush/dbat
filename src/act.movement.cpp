@@ -1733,7 +1733,7 @@ ACMD(do_enter) {
             obj = get_obj_in_list_vis(ch, buf, nullptr, ch->getObjects());
         /* Is the character carrying the object? */
         if (!obj)
-            obj = get_obj_in_equip_vis(ch, buf, nullptr, ch->equipment);
+            obj = get_obj_in_equip_vis(ch, buf, nullptr, ch->getEquipment());
         /* We have an object to enter */
         if (obj)
             perform_enter_obj(ch, obj, 0);

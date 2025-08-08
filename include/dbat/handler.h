@@ -112,9 +112,9 @@ struct obj_data *get_obj_in_list_vis(struct char_data *ch, const char *name, int
 
 struct obj_data *get_obj_vis(struct char_data *ch, char *name, int *num);
 
-struct obj_data *get_obj_in_equip_vis(struct char_data *ch, char *arg, int *number, struct obj_data *equipment[]);
+struct obj_data *get_obj_in_equip_vis(struct char_data *ch, char *arg, int *number, const std::map<int, struct obj_data*>& equipment);
 
-extern int get_obj_pos_in_equip_vis(struct char_data *ch, char *arg, int *num, struct obj_data *equipment[]);
+extern int get_obj_pos_in_equip_vis(struct char_data *ch, char *arg, int *num, const std::map<int, struct obj_data*>& equipment);
 
 extern int find_eq_pos(struct char_data *ch, struct obj_data *obj, char *arg);
 

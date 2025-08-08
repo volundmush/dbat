@@ -2,153 +2,153 @@
 #include "dbat/send.h"
 
 struct room_data* thing_data::getRoom() const {
-    return room;
+    return dynamic_cast<room_data*>(location);
 }
 
 room_vnum thing_data::getRoomVnum() const {
-    return room ? room->getVnum() : NOWHERE;
+    auto r = getRoom();
+    return r ? r->getVnum() : NOWHERE;
 }
 
 std::string thing_data::getLocationName() const {
-    if(room)
-        return room->getName();
+    if(auto r = getRoom())
+        return r->getName();
     return "Unknown";
 }
 
 room_direction_data* thing_data::getLocationExit(int dir) const {
-    if(room)
-        if(room->dir_option[dir])
-            return room->dir_option[dir];
+    if(auto r = getRoom())
+        return r->dir_option[dir];
     return nullptr;
 }
 
 std::map<int, room_direction_data*> thing_data::getLocationExits() const {
     std::map<int, room_direction_data*> exits;
-    if(room)
+    if(auto r = getRoom())
         for(int i = 0; i < NUM_OF_DIRS; i++)
-            if(room->dir_option[i])
-                exits[i] = room->dir_option[i];
+            if(r->dir_option[i])
+                exits[i] = r->dir_option[i];
     return exits;
 }
 
 double thing_data::getLocationEnvironment(int type) const {
-    if(room)
-        return room->getEnvironment(type);
+    if(auto r = getRoom())
+        return r->getEnvironment(type);
     return 0.0;
 }
 
 double thing_data::setLocationEnvironment(int type, double value) const {
-    if(room)
-        return room->setEnvironment(type, value);
+    if(auto r = getRoom())
+        return r->setEnvironment(type, value);
     return 0.0;
 }
 
 double thing_data::modLocationEnvironment(int type, double value) const {
-    if(room)
-        return room->modEnvironment(type, value);
+    if(auto r = getRoom())
+        return r->modEnvironment(type, value);
     return 0.0;
 }
 
 void thing_data::clearLocationEnvironment(int type) const {
-    if(room)
-        room->clearEnvironment(type);
+    if(auto r = getRoom())
+        r->clearEnvironment(type);
 }
 
 void thing_data::setRoomFlag(int flag, bool value) const {
-    if(room)
-        room->room_flags.set(flag, value);
+    if(auto r = getRoom())
+        r->room_flags.set(flag, value);
 }
 
 bool thing_data::toggleRoomFlag(int flag) const {
-    if(room)
-        return room->room_flags.toggle(flag);
+    if(auto r = getRoom())
+        return r->room_flags.toggle(flag);
     return false;
 }
 
 bool thing_data::getRoomFlag(int flag) const {
-    if(room)
-        return room->room_flags.get(flag);
+    if(auto r = getRoom())
+        return r->room_flags.get(flag);
     return false;
 }
 
 void thing_data::setWhereFlag(WhereFlag flag, bool value) const {
-    if(room)
-        room->where_flags.set(flag, value);
+    if(auto r = getRoom())
+        r->where_flags.set(flag, value);
 }
 
 bool thing_data::toggleWhereFlag(WhereFlag flag) const {
-    if(room)
-        return room->where_flags.toggle(flag);
+    if(auto r = getRoom())
+        return r->where_flags.toggle(flag);
     return false;
 }
 
 bool thing_data::getWhereFlag(WhereFlag flag) const {
-    if(room)
-        return room->where_flags.get(flag);
+    if(auto r = getRoom())
+        return r->where_flags.get(flag);
     return false;
 }
 
 void thing_data::broadcastAtLocation(const std::string& message) const {
-    if(room)
-        send_to_room(room, message);
+    if(auto r = getRoom())
+        send_to_room(r, message);
 }
 
 std::vector<std::weak_ptr<obj_data>> thing_data::getLocationObjects() const {
-    if(room)
-        return room->getObjects();
+    if(auto r = getRoom())
+        return r->getObjects();
     return {};
 }
 
 std::vector<std::weak_ptr<char_data>> thing_data::getLocationPeople() const {
-    if(room)
-        return room->getPeople();
+    if(auto r = getRoom())
+        return r->getPeople();
     return {};
 }
 
 int thing_data::getLocationDamage() const {
-    if(room)
-        return room->damage;
+    if(auto r = getRoom())
+        return r->damage;
     return 0;
 }
 
 int thing_data::setLocationDamage(int value) const {
-    if(room)
-        return room->damage = value;
+    if(auto r = getRoom())
+        return r->damage = value;
     return 0;
 }
 
 int thing_data::modLocationDamage(int value) const {
-    if(room)
-        return room->damage += value;
+    if(auto r = getRoom())
+        return r->damage += value;
     return 0;
 }
 
 int thing_data::getLocationTileType() const {
-    if(room)
-        return static_cast<int>(room->sector_type);
+    if(auto r = getRoom())
+        return static_cast<int>(r->sector_type);
     return 0;
 }
 
 int thing_data::getLocationGroundEffect() const {
-    if(room)
-        return room->ground_effect;
+    if(auto r = getRoom())
+        return r->ground_effect;
     return 0;
 }
 
 int thing_data::setLocationGroundEffect(int value) const {
-    if(room)
-        return room->ground_effect = value;
+    if(auto r = getRoom())
+        return r->ground_effect = value;
     return 0;
 }
 
 int thing_data::modLocationGroundEffect(int value) const {
-    if(room)
-        return room->ground_effect += value;
+    if(auto r = getRoom())
+        return r->ground_effect += value;
     return 0;
 }
 
 SpecialFunc thing_data::getLocationSpecialFunc() const {
-    if(room)
-        return room->func;
+    if(auto r = getRoom())
+        return r->func;
     return nullptr;
 }

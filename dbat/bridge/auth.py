@@ -1,6 +1,6 @@
 from fastapi import HTTPException, status
 
-from dbat.models.game import AccountData
+from dbat.bridge.models.game import AccountData
 from dbat.utils import crypt_context
 from .users import find_user
 from dbat_ext import account_db
