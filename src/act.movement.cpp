@@ -526,21 +526,6 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
         return (0);
     }
 
-    /* Check if the character needs a skill check to go that way. */
-    if (e->dcskill != 0) {
-        if (e->dcmove > roll_skill(ch, e->dcskill)) {
-            send_to_char(ch, "Your skill in %s isn't enough to move that way!\r\n",
-                         spell_info[e->dcskill].name);
-            /* A failed skill check still spends the movement points! */
-            if (!ADM_FLAGGED(ch, ADM_WALKANYWHERE) && !IS_NPC(ch) && !AFF_FLAGGED(ch, AFF_FLYING))
-                ch->modCurVital(CharVital::stamina, -need_movement);
-            return (0);
-        } else {
-            send_to_char(ch, "Your skill in %s aids in your movement.\r\n", spell_info[e->dcskill].name);
-        }
-    }
-
-
     if (dest->room_flags.get(ROOM_TUNNEL) && (num_pc_in_room(dest) >= CONFIG_TUNNEL_SIZE)) {
         if (CONFIG_TUNNEL_SIZE > 1)
             send_to_char(ch, "There isn't enough room for you to go there!\r\n");
@@ -560,31 +545,31 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
     rm = dest;
 
     if (!IS_NPC(ch) && (GET_ADMLEVEL(ch) < ADMLVL_IMMORT) &&
-        (GET_MAX_HIT(ch) < ZONE_MINLVL(rm->zone)) && (ZONE_MINLVL(rm->zone) > 0)) {
+        (GET_MAX_HIT(ch) < rm->zone->min_level) && (rm->zone->min_level > 0)) {
         send_to_char(ch, "Sorry, you are too low a level to enter this zone.\r\n");
         return (0);
     }
 
-    if ((GET_ADMLEVEL(ch) < ADMLVL_IMMORT) && (GET_MAX_HIT(ch) > ZONE_MAXLVL(rm->zone)) &&
-        (ZONE_MAXLVL(rm->zone) > 0)) {
+    if ((GET_ADMLEVEL(ch) < ADMLVL_IMMORT) && (GET_MAX_HIT(ch) > rm->zone->max_level) &&
+        (rm->zone->max_level > 0)) {
         send_to_char(ch, "Sorry, you are too high a level to enter this zone.\r\n");
         return (0);
     }
 
-    if ((GET_ADMLEVEL(ch) < ADMLVL_IMMORT) && ZONE_FLAGGED(rm->zone, ZONE_CLOSED)) {
+    if ((GET_ADMLEVEL(ch) < ADMLVL_IMMORT) && rm->zone->zone_flags.get(ZONE_CLOSED)) {
         send_to_char(ch, "This zone is currently closed to mortals.\r\n");
         return (0);
     }
 
     if ((GET_ADMLEVEL(ch) >= ADMLVL_IMMORT && GET_ADMLEVEL(ch) < ADMLVL_GRGOD)
-        && ZONE_FLAGGED(rm->zone, ZONE_NOIMMORT)) {
+        && rm->zone->zone_flags.get(ZONE_NOIMMORT)) {
         send_to_char(ch, "This zone is closed to all.\r\n");
         return (0);
     }
 
     /* No low level immortal scouting */
     if ((GET_ADMLEVEL(ch) >= ADMLVL_IMMORT && GET_ADMLEVEL(ch) < ADMLVL_GOD) &&
-        !can_edit_zone(ch, rm->zone) && ZONE_FLAGGED(rm->zone, ZONE_QUEST)) {
+        !can_edit_zone(ch, rm->zone->number) && rm->zone->zone_flags.get(ZONE_QUEST)) {
         send_to_char(ch, "This is a Quest zone.\r\n");
         return (0);
     }
@@ -969,9 +954,9 @@ ACMD(do_move) {
             ch->pref_flags.set(PRF_ARENAWATCH, false);
             ch->setBaseStat<room_vnum>("arena_watch", -1);
         }
-        if (ch->getRoomVnum() != NOWHERE && ch->getRoomVnum() != 0 &&
-            ch->getRoomVnum() != 1) {
-            ch->setBaseStat("load_room", ch->getRoomVnum());
+        if (auto rvn = ch->getRoomVnum(); rvn != NOWHERE && rvn != 0 &&
+            rvn != 1) {
+            ch->setBaseStat("load_room", rvn);
         }
 
         auto ratio = ch->getBaseStat("burden_ratio");
@@ -1204,7 +1189,7 @@ static void do_doorcmd(struct char_data *ch, struct obj_data *obj, int door, int
     size_t len;
     int num = 0;
     room_rnum other_room = NOWHERE;
-    struct room_direction_data *back = nullptr;
+    struct Destination *back = nullptr;
     struct obj_data *hatch = nullptr, *obj2 = nullptr, *next_obj, *vehicle = nullptr;
 
     if ((obj) && GET_OBJ_TYPE(obj) == ITEM_HATCH) {
@@ -1649,17 +1634,17 @@ static int do_simple_enter(struct char_data *ch, struct obj_data *obj, int need_
             SITS(DRAGGING(ch))->setLocation(ch);
         }
     }
-    if (CARRYING(ch)) {
-        act("@wYou carry @C$N@w with you.@n", true, ch, nullptr, CARRYING(ch), TO_CHAR);
-        act("@C$n@w carries @c$N@w with $m.@n", true, ch, nullptr, CARRYING(ch), TO_ROOM);
-        if (!AFF_FLAGGED(CARRYING(ch), AFF_KNOCKED) && !AFF_FLAGGED(CARRYING(ch), AFF_SLEEP) && rand_number(1, 3)) {
-            send_to_char(CARRYING(ch), "You feel your sleeping body being moved.\r\n");
+    if (auto carry = CARRYING(ch); carry) {
+        act("@wYou carry @C$N@w with you.@n", true, ch, nullptr, carry, TO_CHAR);
+        act("@C$n@w carries @c$N@w with $m.@n", true, ch, nullptr, carry, TO_ROOM);
+        if (!AFF_FLAGGED(carry, AFF_KNOCKED) && !AFF_FLAGGED(carry, AFF_SLEEP) && rand_number(1, 3)) {
+            send_to_char(carry, "You feel your sleeping body being moved.\r\n");
         }
-        char_from_room(CARRYING(ch));
-        CARRYING(ch)->setLocation(ch);
-        if (SITS(CARRYING(ch))) {
-            obj_from_room(SITS(CARRYING(ch)));
-            SITS(CARRYING(ch))->setLocation(ch);
+        char_from_room(carry);
+        carry->setLocation(ch);
+        if (auto s = SITS(carry); s) {
+            obj_from_room(s);
+            s->setLocation(ch);
         }
     }
 
@@ -1739,11 +1724,12 @@ ACMD(do_enter) {
             perform_enter_obj(ch, obj, 0);
             /* Is there a door to enter? */
         else {
-            for (door = 0; door < NUM_OF_DIRS; door++)
-                if (r->dir_option[door])
-                    if (r->dir_option[door]->keyword)
-                        if (isname(buf, r->dir_option[door]->keyword))
-                            move_dir = door;
+            for (auto& [door, e] : r->getDirections()) {
+                if (e.keyword && isname(buf, e.keyword)) {
+                    move_dir = static_cast<int>(door);
+                    break;
+                }
+            }
             /* Did we find what they wanted to enter. */
             if (move_dir > -1)
                 perform_move(ch, move_dir, 1);
@@ -1754,12 +1740,13 @@ ACMD(do_enter) {
         send_to_char(ch, "You are already indoors.\r\n");
     } else {
         /* try to locate an entrance */
-        for (door = 0; door < NUM_OF_DIRS; door++)
-            if (r->dir_option[door])
-                if (r->dir_option[door]->to_room != NOWHERE)
-                    if (!EXIT_FLAGGED(r->dir_option[door], EX_CLOSED) &&
-                        ROOM_FLAGGED(r->dir_option[door]->to_room, ROOM_INDOORS))
-                        move_dir = door;
+        for (auto& [door, e] : r->getDirections()) {
+            if (!EXIT_FLAGGED(&e, EX_CLOSED) &&
+                ROOM_FLAGGED(e.to_room, ROOM_INDOORS)) {
+                move_dir = static_cast<int>(door);
+                break;
+            }
+        }
         if (move_dir > -1)
             perform_move(ch, move_dir, 1);
         else

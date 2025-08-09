@@ -1208,7 +1208,7 @@ void dball_load(uint64_t heartPulse, double deltaTime) {
             int vnum = GET_OBJ_VNUM(k);
             if (vnum >= 20 && vnum <= 26) {
                 foundFlags[vnum - 20] = true;
-            } else if (IN_ROOM(k) != NOWHERE && k->getLocationGroundEffect() == 6 && !OBJ_FLAGGED(k, ITEM_UNBREAKABLE)) {
+            } else if (k->getLocationGroundEffect() == 6 && !OBJ_FLAGGED(k, ITEM_UNBREAKABLE)) {
                 send_to_location(k, "@R%s@r melts in the lava!@n\r\n", k->getShortDescription());
                 extract_obj(k);
             }
@@ -1774,7 +1774,7 @@ ACMD(do_assemble) {
 static void perform_put(struct char_data *ch, struct obj_data *obj,
                         struct obj_data *cont) {
 
-    int dball[7] = {20, 21, 22, 23, 24, 25, 26};
+    static std::unordered_set<int> dball = {20, 21, 22, 23, 24, 25, 26};
 
     if (!drop_otrigger(obj, ch))
         return;
@@ -1803,23 +1803,24 @@ static void perform_put(struct char_data *ch, struct obj_data *obj,
             return;
         }
     }
+
+    auto ovn = cont->getVnum();
+
     if ((GET_OBJ_TYPE(cont) == ITEM_CONTAINER) && (GET_OBJ_VAL(cont, VAL_CONTAINER_CAPACITY) == 0))
         act("$p won't fit in $P.", false, ch, obj, cont, TO_CHAR);
-    else if (GET_OBJ_VNUM(cont) >= 600 && GET_OBJ_VNUM(cont) <= 603)
+    else if (ovn >= 600 && ovn <= 603)
         send_to_char(ch, "You can't put cards on a duel table. You have to @Gplay@n them.\r\n");
-    else if ((GET_OBJ_VNUM(cont) == 697 || GET_OBJ_VNUM(cont) == 698 || GET_OBJ_VNUM(cont) == 682 ||
-              GET_OBJ_VNUM(cont) == 683 || GET_OBJ_VNUM(cont) == 684 || OBJ_FLAGGED(cont, ITEM_CARDCASE)) &&
+    else if ((ovn == 697 || ovn == 698 || ovn == 682 ||
+              ovn == 683 || ovn == 684 || OBJ_FLAGGED(cont, ITEM_CARDCASE)) &&
              !OBJ_FLAGGED(obj, ITEM_CARD))
         send_to_char(ch, "You can only put cards in a case.\r\n");
     else if ((GET_OBJ_TYPE(cont) == ITEM_CONTAINER) &&
              (GET_OBJ_VAL(cont, VAL_CONTAINER_CAPACITY) > 0) &&
              (GET_OBJ_WEIGHT(cont) + GET_OBJ_WEIGHT(obj) > GET_OBJ_VAL(cont, VAL_CONTAINER_CAPACITY)))
         act("$p won't fit in $P.", false, ch, obj, cont, TO_CHAR);
-    else if (OBJ_FLAGGED(obj, ITEM_NODROP) && IN_ROOM(cont) != NOWHERE)
+    else if (OBJ_FLAGGED(obj, ITEM_NODROP) && cont->getLocation())
         act("You can't get $p out of your hand.", false, ch, obj, nullptr, TO_CHAR);
-    else if (GET_OBJ_VNUM(obj) == dball[0] || GET_OBJ_VNUM(obj) == dball[1] || GET_OBJ_VNUM(obj) == dball[2] ||
-             GET_OBJ_VNUM(obj) == dball[3] || GET_OBJ_VNUM(obj) == dball[4] || GET_OBJ_VNUM(obj) == dball[5] ||
-             GET_OBJ_VNUM(obj) == dball[6])
+    else if (dball.contains(ovn))
         send_to_char(ch, "You can not bag dragon balls.\r\n");
     else if (OBJ_FLAGGED(obj, ITEM_NORENT))
         send_to_char(ch, "That isn't worth bagging. Better keep that close if you wanna keep it at all.\r\n");
@@ -2629,7 +2630,7 @@ static void perform_give(struct char_data *ch, struct char_data *vict,
             act("$n@n drops $p because you can't carry anymore.", true, ch, obj, vict, TO_VICT);
             act("$n@n drops $p on the ground since $N's unable to carry it.", true, ch, obj, vict, TO_NOTVICT);
             obj_from_char(obj);
-            obj_to_room(obj, IN_ROOM(ch));
+            obj->setLocation(ch);
         }
         return;
     }

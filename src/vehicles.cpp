@@ -126,7 +126,7 @@ static void drive_outof_vehicle(struct char_data *ch, struct obj_data *vehicle) 
 
     sprintf(buf, "%s @wexits %s.\r\n", vehicle->getShortDescription(),
             vehicle_in_out->getShortDescription());
-    send_to_room(room->getVnum(), buf);
+    send_to_room(room, buf);
 
     obj_from_room(vehicle);
     vehicle->setLocation(vehicle_in_out);
@@ -138,15 +138,11 @@ static void drive_outof_vehicle(struct char_data *ch, struct obj_data *vehicle) 
             TO_ROOM);
     send_to_char(ch, "@wThe ship flies onward:\r\n");
     ch->lookAtLocation(vehicle);
-    int door;
-    for (door = 0; door < NUM_OF_DIRS; door++) {
-        auto e = room->dir_option[door];
-        if(!e) continue;
-        auto dest = e->getDestination();
-        if(!dest) continue;
-        if(!IS_SET(e->exit_info, EX_CLOSED)) continue;
-
-        send_to_room(dest->getVnum(), "@wThe @De@Wn@wg@Di@wn@We@Ds@w of the ship @rr@Ro@ra@Rr@w as it moves.\r\n");
+    for (auto &[door, e] : room->getDirections()) {
+        if(IS_SET(e.exit_info, EX_CLOSED)) continue;
+        if(auto dest = e.getDestination(); dest) {
+            send_to_room(dest, "@wThe @De@Wn@wg@Di@wn@We@Ds@w of the ship @rr@Ro@ra@Rr@w as it moves.\r\n");
+        }
     }
     sprintf(buf, "%s @wflies out of %s.\r\n", vehicle->getShortDescription(),
             vehicle_in_out->getShortDescription());
@@ -412,7 +408,7 @@ static bool validate_drive_conditions(struct char_data *ch, struct obj_data *&ve
         return false;
     }
 
-    if (IS_DARK(IN_ROOM(ch)) && !CAN_SEE_IN_DARK(ch)) {
+    if (ch->getLocationIsDark() && !CAN_SEE_IN_DARK(ch)) {
         send_to_char(ch, "@wIt is pitch black...\r\n");
         return false;
     }

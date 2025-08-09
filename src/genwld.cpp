@@ -17,8 +17,9 @@
 #include "dbat/constants.h"
 #include "dbat/filter.h"
 #include "dbat/dg_scripts.h"
+#include "dbat/send.h"
 
-room_data::room_data() : unit_data() {
+room_data::room_data() : location_data() {
     type = UnitType::room;
 }
 
@@ -193,7 +194,7 @@ int copy_room_strings(struct room_data *dest, struct room_data *source) {
         if (!R_EXIT(source, i))
             continue;
 
-        CREATE(R_EXIT(dest, i), struct room_direction_data, 1);
+        CREATE(R_EXIT(dest, i), struct Destination, 1);
         *R_EXIT(dest, i) = *R_EXIT(source, i);
         if (R_EXIT(source, i)->general_description)
             R_EXIT(dest, i)->general_description = strdup(R_EXIT(source, i)->general_description);
@@ -227,7 +228,7 @@ int free_room_strings(struct room_data *room) {
     return true;
 }
 
-room_direction_data::~room_direction_data() {
+Destination::~Destination() {
     if (general_description)
         free(general_description);
     if (keyword)
@@ -255,7 +256,7 @@ bool room_data::isActive() {
 }
 
 
-int room_data::getDamage() {
+int room_data::getDamage() const {
     return damage;
 }
 
@@ -292,15 +293,19 @@ int room_data::modDamage(int amount) {
     return setDamage(damage + amount);
 }
 
-struct room_data* room_direction_data::getDestination() {
+struct room_data* Destination::getDestination() {
     return get_room(to_room);
 }
 
-std::vector<std::weak_ptr<char_data>> room_data::getPeople() {
+std::vector<std::weak_ptr<char_data>> room_data::getPeople() const {
     std::vector<std::weak_ptr<char_data>> out;
-    out.reserve(characters.size());
-    std::copy(characters.begin(), characters.end(), std::back_inserter(out));
-    out.shrink_to_fit();
+    for(const auto &uw : contents) {
+        if(auto u = uw.lock()) {
+            if(auto c = std::dynamic_pointer_cast<char_data>(u)) {
+                out.push_back(c);
+            }
+        }
+    }
     return out;
 }
 
@@ -389,7 +394,7 @@ static const std::vector<std::pair<std::pair<room_vnum, room_vnum>, double>> gra
     {{64097, 64097}, 1000.0},
 };
 
-double room_data::getEnvironment(int type) {
+double room_data::getEnvironment(int type) const {
     auto planet = getPlanet(getVnum());
     switch(type) {
         case ENV_GRAVITY: {
@@ -453,3 +458,175 @@ std::vector<trig_vnum> room_data::getProtoScript() const {
     return proto_script;
 }
 
+bool room_data::isDark() const {
+    return false; // temporarily disabled.
+
+    // override the const...
+    auto r = (room_data*)this;
+
+    auto pe = r->getPeople();
+    for(auto c : filter_raw(pe)) {
+        if(c->isProvidingLight()) return false;
+    }
+
+    if (cook_element(r))
+        return (false);
+
+    if (ROOM_FLAGGED(r, ROOM_NOINSTANT) && ROOM_FLAGGED(r, ROOM_DARK)) {
+        return (true);
+    }
+    if (ROOM_FLAGGED(r, ROOM_NOINSTANT) && !ROOM_FLAGGED(r, ROOM_DARK)) {
+        return (false);
+    }
+
+    if (ROOM_FLAGGED(r, ROOM_DARK))
+        return (true);
+
+    if (ROOM_FLAGGED(r, ROOM_INDOORS))
+        return (false);
+
+    const auto tile = static_cast<int>(r->sector_type);
+
+    if (tile == SECT_INSIDE || tile == SECT_CITY || tile == SECT_IMPORTANT || tile == SECT_SHOP)
+        return (false);
+
+    if (tile == SECT_SPACE)
+        return (false);
+
+    if (weather_info.sunlight == SUN_SET)
+        return (true);
+
+    if (weather_info.sunlight == SUN_DARK)
+        return (true);
+
+    return (false);
+}
+
+// This implementation is problematic because it recursively calls itself.
+// Also, since unit_data::getName() takes no arguments, you cannot overload it with a const Coordinates&
+// unless you want to provide a new interface. If you want to call the base version, do:
+
+const char* room_data::getName(const Coordinates& /*coor*/) const {
+    return getName();
+}
+
+bool room_data::getIsDark(const Coordinates& coor) const {
+    return isDark();
+}
+
+std::vector<std::weak_ptr<obj_data>> room_data::getObjects(const Coordinates& coor) const {
+    return getObjects();
+}
+
+std::vector<std::weak_ptr<char_data>> room_data::getPeople(const Coordinates& coor) const {
+    return getPeople();
+}
+
+std::optional<Destination> room_data::getDirection(Direction dir) const {
+    auto i = static_cast<int>(dir);
+    if (i < 0 || i >= NUM_OF_DIRS) {
+        return std::nullopt;
+    }
+    if (dir_option[i] && *dir_option[i]) {
+        return *dir_option[i];
+    }
+    return std::nullopt;
+}
+
+std::map<Direction, Destination> room_data::getDirections() const {
+    std::map<Direction, Destination> directions;
+    for (int i = 0; i < NUM_OF_DIRS; ++i) {
+        if (dir_option[i] && *dir_option[i]) {
+            directions[static_cast<Direction>(i)] = *dir_option[i];
+        }
+    }
+    return directions;
+}
+
+std::optional<Destination> room_data::getDirection(const Coordinates& coor, Direction dir) {
+    return getDirection(dir);
+}
+
+std::map<Direction, Destination> room_data::getDirections(const Coordinates& coor) {
+    return getDirections();
+}
+
+void room_data::setRoomFlag(const Coordinates& coor, int flag, bool value) {
+    room_flags.set(flag, value);
+}
+
+bool room_data::toggleRoomFlag(const Coordinates& coor, int flag) {
+    return room_flags.toggle(flag);
+}
+
+bool room_data::getRoomFlag(const Coordinates& coor, int flag) const {
+    return room_flags.get(flag);
+}
+
+void room_data::setWhereFlag(const Coordinates& coor, WhereFlag flag, bool value) {
+    where_flags.set(flag, value);
+}
+
+bool room_data::toggleWhereFlag(const Coordinates& coor, WhereFlag flag) {
+    return where_flags.toggle(flag);
+}
+
+bool room_data::getWhereFlag(const Coordinates& coor, WhereFlag flag) const {
+    return where_flags.get(flag);
+}
+
+SectorType room_data::getSectorType(const Coordinates& coor) const {
+    return sector_type;
+}
+
+void room_data::broadcastAt(const Coordinates& coor, const std::string& message) const {
+    auto people = getPeople(coor);
+    for (const auto &uw : people) {
+        if (auto c = uw.lock()) {
+            send_to_char(c.get(), message.c_str());
+        }
+    }
+}
+
+int room_data::getDamage(const Coordinates& coor) const {
+    return getDamage();
+}
+int room_data::setDamage(const Coordinates& coor, int amount) {
+    return setDamage(amount);
+}
+int room_data::modDamage(const Coordinates& coor, int amount) {
+    return modDamage(amount);
+}
+
+int room_data::getGroundEffect(const Coordinates& coor) const {
+    return ground_effect;
+}
+void room_data::setGroundEffect(const Coordinates& coor, int effect) {
+    ground_effect = effect;
+}
+
+int room_data::modGroundEffect(const Coordinates& coor, int effect) {
+    ground_effect += effect;
+    return ground_effect;
+}
+
+SpecialFunc room_data::getSpecialFunc(const Coordinates& coor) const {
+    return func;
+}
+
+double room_data::getEnvironment(const Coordinates& coor, int type) const {
+    return getEnvironment(type);
+}
+double room_data::setEnvironment(const Coordinates& coor, int type, double value) {
+    return setEnvironment(type, value);
+}
+double room_data::modEnvironment(const Coordinates& coor, int type, double value) {
+    return modEnvironment(type, value);
+}
+void room_data::clearEnvironment(const Coordinates& coor, int type) {
+    clearEnvironment(type);
+}
+
+Destination::operator bool() const {
+    return to_room != NOWHERE;
+}

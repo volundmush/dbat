@@ -407,16 +407,15 @@ void char_from_room(struct char_data *ch) {
     if (AFF_FLAGGED(ch, AFF_PURSUIT) && FIGHTING(ch) == nullptr)
         ch->affect_flags.set(AFF_PURSUIT, false);
 
-    auto& z = zone_table.at(r->zone);
     auto shared = ch->shared();
     if(IS_NPC(ch)) {
-        z.npcsInZone.remove_if([shared](auto& npc) { return npc.expired() || npc.lock() == shared; });
+        r->zone->npcsInZone.remove_if([shared](auto& npc) { return npc.expired() || npc.lock() == shared; });
     } else {
-        z.playersInZone.remove_if([shared](auto& npc) { return npc.expired() || npc.lock() == shared; });
+        r->zone->playersInZone.remove_if([shared](auto& npc) { return npc.expired() || npc.lock() == shared; });
     }
     auto sh = ch->shared();
-    r->characters.remove_if([sh](auto& c) { return c.expired() || c.lock() == sh; });
-    ch->location = nullptr;
+    r->contents.remove_if([sh](auto& c) { return c.expired() || c.lock() == sh; });
+    ch->location.unit = nullptr;
 
 }
 
@@ -424,14 +423,13 @@ void char_from_room(struct char_data *ch) {
 void char_to_room(struct char_data *ch, struct room_data* room) {
     int i;
 
-    room->characters.push_front(ch->shared());
-    ch->location = room;
+    room->contents.push_front(ch->shared());
+    ch->location.unit = room;
 
-    auto& z = zone_table.at(room->zone);
     if(IS_NPC(ch)) {
-        z.npcsInZone.push_back(ch->shared());
+        room->zone->npcsInZone.push_back(ch->shared());
     } else {
-        z.playersInZone.push_back(ch->shared());
+        room->zone->playersInZone.push_back(ch->shared());
     }
 
     /* Stop fighting now, if we left. */
@@ -458,9 +456,9 @@ void char_to_room(struct char_data *ch, room_rnum room) {
 
 void char_to_location(struct char_data *ch, const Location& loc) {
     if(!ch) return;
-    if(!loc.location) return;
-    if(loc.location->type == UnitType::room) {
-        char_to_room(ch, static_cast<room_data*>(loc.location));
+    if(!loc.unit) return;
+    if(loc.unit->type == UnitType::room) {
+        char_to_room(ch, static_cast<room_data*>(loc.unit));
     }
 }
 
@@ -472,9 +470,9 @@ void char_to_location(struct char_data *ch, const thing_data* td) {
 
 void obj_to_location(struct obj_data *obj, const Location& loc) {
     if(!obj) return;
-    if(!loc.location) return;
-    if(loc.location->type == UnitType::room) {
-        obj_to_room(obj, static_cast<room_data*>(loc.location));
+    if(!loc.unit) return;
+    if(loc.unit->type == UnitType::room) {
+        obj_to_room(obj, static_cast<room_data*>(loc.unit));
     }
 }
 
@@ -491,11 +489,11 @@ void obj_to_char(struct obj_data *object, struct char_data *ch) {
         basic_mud_log("SYSERR: nullptr obj or char passed to obj_to_char.");
         return;
     }
-    ch->objects.push_front(object->shared());
-    object->location = ch;
-    object->pos_x = -1.0;
-    object->pos_y = 0;
-    object->pos_z = 0;
+    ch->contents.push_front(object->shared());
+    object->location.unit = ch;
+    object->location.position.x = -1.0;
+    object->location.position.y = 0;
+    object->location.position.z = 0;
 
 }
 
@@ -508,29 +506,27 @@ void obj_from_char(struct obj_data *object) {
         return;
     }
 
-    if(!object->location) {
+    if(!object->location.unit) {
         basic_mud_log("SYSERR: nullptr object->location passed to obj_from_char.");
         return;
     }
 
-    if(object->location->type != UnitType::character) {
+    if(object->location.getType() != UnitType::character) {
         basic_mud_log("SYSERR: object->location not char passed to obj_from_char.");
         return;
     }
 
-    if(object->pos_x != -1.0) {
+    if(object->location.position.x != -1.0) {
         basic_mud_log("SYSERR: object->pos_x is not -1.0 passed to obj_from_char.");
         return;
     }
 
-    auto ch = static_cast<char_data*>(object->location);
+    auto ch = static_cast<char_data*>(object->location.unit);
 
     auto sh = object->shared();
-    ch->objects.remove_if([sh](auto& o) { return o.expired() || o.lock() == sh; });
-    object->location = nullptr;
-    object->pos_x = 0;
-    object->pos_y = 0;
-    object->pos_z = 0;
+    ch->contents.remove_if([sh](auto& o) { return o.expired() || o.lock() == sh; });
+    object->location = {};
+
 }
 
 
@@ -591,7 +587,7 @@ void equip_char(struct char_data *ch, struct obj_data *obj, int pos) {
             obj->getShortDescription());
         return;
     }
-    if (obj->location && obj->location->type == UnitType::character && obj->pos_x == -1.0) {
+    if (obj->location.getType() == UnitType::character && obj->location.position.x == -1.0) {
         basic_mud_log("SYSERR: EQUIP: Obj is carried_by when equip.");
         return;
     }
@@ -607,9 +603,9 @@ void equip_char(struct char_data *ch, struct obj_data *obj, int pos) {
         return;
     }
 
-    ch->objects.push_front(obj->shared());
-    obj->location = ch;
-    obj->pos_x = pos;
+    ch->contents.push_front(obj->shared());
+    obj->location.unit = ch;
+    obj->location.position.x = pos;
 }
 
 
@@ -625,12 +621,9 @@ struct obj_data *unequip_char(struct char_data *ch, int pos) {
     obj = GET_EQ(ch, pos);
 
     auto sh = obj->shared();
-    ch->objects.remove_if([sh](auto& o) { return o.expired() || o.lock() == sh; });
+    ch->contents.remove_if([sh](auto& o) { return o.expired() || o.lock() == sh; });
 
-    obj->location = nullptr;
-    obj->pos_x = 0;
-    obj->pos_y = 0;
-    obj->pos_z = 0;
+    obj->location = {};
 
     return (obj);
 }
@@ -713,15 +706,14 @@ void obj_to_room(struct obj_data *object, struct room_data *room) {
         auc_load(object);
     }
 
-    room->objects.push_front(object->shared());
-    object->location = room;
-    object->pos_x = -1.0;
-    object->pos_y = 0;
-    object->pos_z = 0;
+    room->contents.push_front(object->shared());
+    object->location.unit = room;
+    object->location.position.x = -1.0;
+    object->location.position.y = 0;
+    object->location.position.z = 0;
     object->setBaseStat("lload", time(nullptr));
 
-    auto& z = zone_table.at(room->zone);
-    z.objectsInZone.push_back(object->shared());
+    room->zone->objectsInZone.push_back(object->shared());
 
     if (GET_OBJ_TYPE(object) == ITEM_VEHICLE && !OBJ_FLAGGED(object, ITEM_UNBREAKABLE) &&
         GET_OBJ_VNUM(object) > 19199) {
@@ -834,12 +826,11 @@ void obj_from_room(struct obj_data *object) {
         GET_OBJ_POSTTYPE(object) = 0;
     }
 
-    auto& z = zone_table.at(r->zone);
     auto shared = object->shared();
-    z.objectsInZone.remove_if([shared](auto& obj) { return obj.expired() || obj.lock() == shared; });
-    r->objects.remove_if([shared](auto& obj) { return obj.expired() || obj.lock() == shared; });
+    r->zone->objectsInZone.remove_if([shared](auto& obj) { return obj.expired() || obj.lock() == shared; });
+    r->contents.remove_if([shared](auto& obj) { return obj.expired() || obj.lock() == shared; });
 
-    object->location = nullptr;
+    object->location = {};
 
 }
 
@@ -850,30 +841,27 @@ void obj_to_obj(struct obj_data *obj, struct obj_data *obj_to) {
     if (!obj || !obj_to || obj == obj_to) {
         return;
     }
-    obj_to->objects.push_front(obj->shared());
-    obj->location = obj_to;
-    obj->pos_x = -1.0;
-    obj->pos_y = 0;
-    obj->pos_z = 0;
+    obj_to->contents.push_front(obj->shared());
+    obj->location.unit = obj_to;
+    obj->location.position.x = -1.0;
+    obj->location.position.y = 0;
+    obj->location.position.z = 0;
 }
 
 
 /* remove an object from an object */
 void obj_from_obj(struct obj_data *obj) {
 
-    if (obj->location == nullptr || obj->location->type != UnitType::object) {
+    if (obj->location.getType() != UnitType::object) {
         basic_mud_log("SYSERR: (%s): trying to illegally extract obj from obj.", __FILE__);
         return;
     }
-    auto obj_from = static_cast<obj_data*>(obj->location);
+    auto obj_from = static_cast<obj_data*>(obj->location.unit);
 
     auto shared = obj->shared();
-    obj_from->objects.remove_if([shared](auto& obj) { return obj.expired() || obj.lock() == shared; });
+    obj_from->contents.remove_if([shared](auto& obj) { return obj.expired() || obj.lock() == shared; });
 
-    obj->location = nullptr;
-    obj->pos_x = 0;
-    obj->pos_y = 0;
-    obj->pos_z = 0;
+    obj->location = {};
 }
 
 

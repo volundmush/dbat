@@ -653,14 +653,12 @@ ACMD(do_finddoor) {
         len = snprintf(buf, sizeof(buf), "Doors unlocked by key [%d] %s are:\r\n",
                        vnum, sdesc.c_str());
         for (auto &[vn, r] : world) {
-            for (d = 0; d < NUM_OF_DIRS; d++) {
-                auto &e = r->dir_option[d];
-                if (e && e->key &&
-                    e->key == vnum) {
+            for (auto& [d, e] : r->getDirections()) {
+                if (e.key == vnum) {
                     nlen = snprintf(buf + len, sizeof(buf) - len,
                                     "[%3d] Room %d, %s (%s)\r\n",
                                     ++num, vn,
-                                    dirs[d], e->keyword);
+                                    dirs[static_cast<int>(d)], e.keyword);
                     if (len + nlen >= sizeof(buf) || nlen < 0)
                         break;
                     len += nlen;
@@ -875,7 +873,7 @@ room_rnum find_target_room(struct char_data *ch, char *rawroomstr) {
 
         auto num = get_number(&mobobjstr);
         if ((target_mob = get_char_vis(ch, mobobjstr, &num, FIND_CHAR_WORLD))) {
-            if ((location = IN_ROOM(target_mob)) == NOWHERE) {
+            if (!target_mob->getLocation()) {
                 send_to_char(ch, "That character is currently lost.\r\n");
                 return (NOWHERE);
             }
@@ -901,13 +899,13 @@ room_rnum find_target_room(struct char_data *ch, char *rawroomstr) {
 
     rm = get_room(location);
 
-    if ((!can_edit_zone(ch, rm->zone) && GET_ADMLEVEL(ch) < ADMLVL_GOD)
-        && ZONE_FLAGGED(rm->zone, ZONE_QUEST)) {
+    if ((!can_edit_zone(ch, rm->zone->number) && GET_ADMLEVEL(ch) < ADMLVL_GOD)
+        && rm->zone->zone_flags.get(ZONE_QUEST)) {
         send_to_char(ch, "This target is in a quest zone.\r\n");
         return (NOWHERE);
     }
 
-    if ((GET_ADMLEVEL(ch) < ADMLVL_VICE) && ZONE_FLAGGED(rm->zone, ZONE_NOIMMORT)) {
+    if ((GET_ADMLEVEL(ch) < ADMLVL_VICE) && rm->zone->zone_flags.get(ZONE_NOIMMORT)) {
         send_to_char(ch, "This target is in a zone closed to all.\r\n");
         return (NOWHERE);
     }
@@ -921,8 +919,8 @@ room_rnum find_target_room(struct char_data *ch, char *rawroomstr) {
 }
 
 ACMD(do_at) {
+    room_vnum location;
     char command[MAX_INPUT_LENGTH], buf[MAX_INPUT_LENGTH];
-    room_rnum location, original_loc;
 
     half_chop(argument, buf, command);
     if (!*buf) {
@@ -939,15 +937,15 @@ ACMD(do_at) {
         return;
 
     /* a location has been found. */
-    original_loc = IN_ROOM(ch);
-    char_from_room(ch);
-    char_to_room(ch, location);
+    auto original_loc = ch->getLocation();
+    ch->clearLocation();
+    ch->setLocation(location);
     command_interpreter(ch, command);
 
     /* check if the char is still there */
-    if (IN_ROOM(ch) == location) {
-        char_from_room(ch);
-        char_to_room(ch, original_loc);
+    if (ch->getLocation() == location) {
+        ch->clearLocation();
+        ch->setLocation(original_loc);
     }
 }
 
@@ -1217,10 +1215,9 @@ void list_zone_commands_room(struct char_data *ch, room_vnum rvnum) {
 
 #undef ZOCMD
 
-static void do_stat_room(struct char_data *ch) {
+static void do_stat_room(struct char_data *ch, struct room_data *rm) {
     char buf2[MAX_STRING_LENGTH];
     struct extra_descr_data *desc;
-    struct room_data *rm = ch->getRoom();
     int i, found, column;
     struct obj_data *j;
     struct char_data *k;
@@ -1228,9 +1225,8 @@ static void do_stat_room(struct char_data *ch) {
     send_to_char(ch, "Room name: @c%s@n\r\n", rm->getName());
 
     sprinttype(static_cast<int>(rm->sector_type), sector_types, buf2, sizeof(buf2));
-    send_to_char(ch, "Zone: [%3d], VNum: [@g%5d@n], RNum: [%5d], IDNum: [%5ld], Type: %s\r\n",
-                 zone_table.at(rm->zone).number, rm->getVnum(), IN_ROOM(ch),
-                 (long) rm->getVnum(), buf2);
+    send_to_char(ch, "Zone: [%3d], VNum: [@g%5d@n], Type: %s\r\n",
+                 rm->zone->number, rm->getVnum(), buf2);
 
     sprintbitarray(rm->room_flags.getAll(), room_bits, RF_ARRAY_MAX, buf2);
     send_to_char(ch, "Room Damage: %d, Room Effect: %d\r\n", rm->getDamage(), rm->ground_effect);
@@ -1292,32 +1288,36 @@ static void do_stat_room(struct char_data *ch) {
     for (i = 0; i < NUM_OF_DIRS; i++) {
         char buf1[128];
 
-        if (!rm->dir_option[i])
+        auto ex = rm->dir_option[i];
+
+        if (!ex)
             continue;
 
-        if (rm->dir_option[i]->to_room == NOWHERE)
+        if (ex->to_room == NOWHERE)
             snprintf(buf1, sizeof(buf1), " @cNONE@n");
         else
-            snprintf(buf1, sizeof(buf1), "@c%5d@n", GET_ROOM_VNUM(rm->dir_option[i]->to_room));
+            snprintf(buf1, sizeof(buf1), "@c%5d@n", GET_ROOM_VNUM(ex->to_room));
 
-        sprintbit(rm->dir_option[i]->exit_info, exit_bits, buf2, sizeof(buf2));
+        sprintbit(ex->exit_info, exit_bits, buf2, sizeof(buf2));
 
         send_to_char(ch,
-                     "Exit @c%-5s@n:  To: [%s], Key: [%5d], Keywrd: %s, Type: %s\r\n  DC Lock: [%2d], DC Hide: [%2d], DC Skill: [%4s], DC Move: [%2d]\r\n%s",
+                     "Exit @c%-5s@n:  To: [%s], Key: [%5d], Keywrd: %s, Type: %s\r\n%s",
                      dirs[i], buf1,
-                     rm->dir_option[i]->key == NOTHING ? -1 : rm->dir_option[i]->key,
-                     rm->dir_option[i]->keyword ? rm->dir_option[i]->keyword : "None", buf2,
-                     rm->dir_option[i]->dclock, rm->dir_option[i]->dchide,
-                     rm->dir_option[i]->dcskill == 0 ? "None" : spell_info[rm->dir_option[i]->dcskill].name,
-                     rm->dir_option[i]->dcmove,
-                     rm->dir_option[i]->general_description ? rm->dir_option[i]->general_description
-                                                            : "  No exit description.\r\n");
+                     ex->key == NOTHING ? -1 : ex->key,
+                     ex->keyword ? ex->keyword : "None", buf2,
+                     ex->general_description ? ex->general_description
+                                             : "  No exit description.\r\n");
     }
 
     /* check the room for a script */
     do_sstat(ch, rm);
 
     list_zone_commands_room(ch, rm->getVnum());
+}
+
+static void do_stat_room(struct char_data *ch) {
+    auto rm = ch->getRoom();
+    do_stat_room(ch, rm);
 }
 
 
@@ -1390,16 +1390,16 @@ static void do_stat_object(struct char_data *ch, struct obj_data *j) {
    * NOTE: In order to make it this far, we must already be able to see the
    *       character holding the object. Therefore, we do not need CAN_SEE().
    */
-    if(j->location) {
-        switch(j->location->type) {
+    if(j->location.unit) {
+        switch(j->location.getType()) {
             case UnitType::object: {
-                auto j2 = static_cast<obj_data*>(j->location);
+                auto j2 = static_cast<obj_data*>(j->location.unit);
                 send_to_char(ch, "In object: %s, ", j2->getShortDescription());
             }
                 break;
             case UnitType::character: {
-                auto c2 = static_cast<char_data*>(j->location);
-                if(j->pos_x == -1) {
+                auto c2 = static_cast<char_data*>(j->location.unit);
+                if(j->location.position.x == -1) {
                     send_to_char(ch, "Carried by: %s, ", GET_NAME(c2));
                 } else {
                     send_to_char(ch, "Worn by: %s,", GET_NAME(c2));
@@ -1407,12 +1407,12 @@ static void do_stat_object(struct char_data *ch, struct obj_data *j) {
             }
                 break;
             case UnitType::room: {
-                auto r = static_cast<room_data*>(j->location);
+                auto r = static_cast<room_data*>(j->location.unit);
                 send_to_char(ch, "In room: %d (%s), ", r->getVnum(), r->getName());
             }
                 break;
             default: {
-                send_to_char(ch, "In unknown location: %s, ", j->location->getName());
+                send_to_char(ch, "In unknown location: %s, ", j->location.unit->getName());
             }
         }
     }
@@ -3306,7 +3306,7 @@ ACMD(do_show) {
         case 1:
             /* tightened up by JE 4/6/93 */
             if (self)
-                print_zone_to_buf(buf, sizeof(buf), ch->getRoom()->zone, 1);
+                print_zone_to_buf(buf, sizeof(buf), ch->getRoom()->zone->number, 1);
             else if (*value && is_number(value)) {
                 zvn = real_zone(atoi(value));
                 if (zvn == NOBODY) {
@@ -4360,7 +4360,7 @@ ACMD(do_zpurge) {
 
     one_argument(argument, arg);
 
-    zone = !*arg ? zone_table.at(ch->getRoom()->zone).number : atol(arg);
+    zone = !*arg ? ch->getRoom()->zone->number : atol(arg);
 
     if (!zone_table.count(zone) || !can_edit_zone(ch, zone)) {
         send_to_char(ch, "You cannot purge that zone. Try %d.\r\n", GET_OLC_ZONE(ch));
@@ -4463,7 +4463,7 @@ ACMD (do_zcheck) {
     one_argument(argument, buf);
 
     if (buf == nullptr || !*buf || !strcmp(buf, "."))
-        zrnum = ch->getRoom()->zone;
+        zrnum = ch->getRoom()->zone->number;
     else
         zrnum = real_zone(atoi(buf));
 
@@ -4699,7 +4699,7 @@ ACMD (do_zcheck) {
                     continue;
 
                 for (k = 0; offlimit_zones[k] != -1; k++) {
-                    if (ex->zone == real_zone(offlimit_zones[k]) && (found = 1))
+                    if (ex->zone->number == real_zone(offlimit_zones[k]) && (found = 1))
                         len += snprintf(buf + len, sizeof(buf) - len,
                                         "- Exit %s cannot connect to %d (zone off limits).\r\n",
                                         dirs[j], ex->getVnum());

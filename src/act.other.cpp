@@ -998,7 +998,7 @@ ACMD(do_trip) {
 
     vict = nullptr;
     if (!*arg || !(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM))) {
-        if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
+        if (FIGHTING(ch) && FIGHTING(ch)->getLocation() == ch->getLocation()) {
             vict = FIGHTING(ch);
         } else {
             send_to_char(ch, "That target isn't here.\r\n");
@@ -7246,7 +7246,7 @@ ACMD(do_summon) {
     SHENRON = true;
     DRAGONC = 300;
     DRAGONR = room->getVnum();
-    DRAGONZ = room->zone;
+    DRAGONZ = room->zone->number;
     send_to_imm("Shenron summoned to room: %d\r\n", DRAGONR);
 
     for(auto dball : dragonBalls) {
@@ -8143,7 +8143,7 @@ void base_update(uint64_t heartPulse, double deltaTime) {
             }
         } /* Andros End */
         if (CARRYING(d->character)) {
-            if (IN_ROOM(CARRYING(d->character)) != IN_ROOM(d->character)) {
+            if (CARRYING(d->character)->getLocation() != d->character->getLocation()) {
                 carry_drop(d->character, 3);
             }
         }
@@ -8688,19 +8688,22 @@ ACMD(do_quit) {
         send_to_char(ch, "This is the past, you can't quit here!\r\n");
         return;
     }
-    if (ch->getRoomVnum() >= 2002 && ch->getRoomVnum() <= 2011) {
+
+    auto rvn = ch->getRoomVnum();
+
+    if (rvn >= 2002 && rvn <= 2011) {
         send_to_char(ch, "You can't quit in the arena!\r\n");
         return;
     }
-    if (ch->getRoomVnum() >= 101 && ch->getRoomVnum() <= 139) {
+    if (rvn >= 101 && rvn <= 139) {
         send_to_char(ch, "You can't quit in the mud school!\r\n");
         return;
     }
-    if (ch->getRoomVnum() >= 19800 && ch->getRoomVnum() <= 19899) {
+    if (rvn >= 19800 && rvn <= 19899) {
         send_to_char(ch, "You can't quit in a pocket dimension!\r\n");
         return;
     }
-    if (ch->getRoomVnum() == 2069) {
+    if (rvn == 2069) {
         send_to_char(ch, "You can't quit here!\r\n");
         return;
     }
@@ -8712,7 +8715,7 @@ ACMD(do_quit) {
         }
         return;
     }
-    if (ch->getRoomVnum() == 2070) {
+    if (rvn == 2070) {
         send_to_char(ch, "You can't quit here!\r\n");
         return;
     }
@@ -8745,15 +8748,15 @@ ACMD(do_quit) {
 
         /* If someone is quitting in their house, let them load back here. */
         if (!ch->getWhereFlag(WhereFlag::pendulum_past) &&
-            (ch->getRoomVnum() < 19800 || ch->getRoomVnum() > 19899)) {
-            if (ch->getRoomVnum() != NOWHERE && ch->getRoomVnum() != 0 &&
-                ch->getRoomVnum() != 1) {
-                ch->setBaseStat("load_room", ch->getRoomVnum());
+            (rvn < 19800 || rvn > 19899)) {
+            if (rvn != NOWHERE && rvn != 0 &&
+                rvn != 1) {
+                ch->setBaseStat("load_room", rvn);
             }
         }
         if (ch->getWhereFlag(WhereFlag::pendulum_past)) {
-            if (ch->getRoomVnum() != NOWHERE && ch->getRoomVnum() != 0 &&
-                ch->getRoomVnum() != 1) {
+            if (rvn != NOWHERE && rvn != 0 &&
+                rvn != 1) {
                 ch->setBaseStat("load_room", GET_ROOM_VNUM(real_room(1561)));
             }
         }
@@ -8768,39 +8771,8 @@ ACMD(do_quit) {
 }
 
 ACMD(do_save) {
-    if (IS_NPC(ch) || !ch->desc)
-        return;
+    send_to_char(ch, "The game dumps automatically every 5 minutes now.\r\n");
 
-    /* Only tell the char we're saving if they actually typed "save" */
-    if (cmd) {
-        /*
-     * This prevents item duplication by two PC's using coordinated saves
-     * (or one PC with a house) and system crashes. Note that houses are
-     * still automatically saved without this enabled. This code assumes
-     * that guest immortals aren't trustworthy. If you've disabled guest
-     * immortal advances from mortality, you may want < instead of <=.
-     */
-        if (CONFIG_AUTO_SAVE && GET_ADMLEVEL(ch) < 1) {
-            send_to_char(ch, "Saving.\r\n");
-            if (ch->getRoomVnum() < 19800 || ch->getRoomVnum() > 19899) {
-                if (ch->getRoomVnum() != NOWHERE && ch->getRoomVnum() != 0 &&
-                    ch->getRoomVnum() != 1) {
-                    ch->setBaseStat("load_room", ch->getRoomVnum());
-
-                }
-            }
-            return;
-        }
-        send_to_char(ch, "Saving.\r\n");
-    }
-
-
-    if (ch->getRoomVnum() < 19800 || ch->getRoomVnum() > 19899) {
-        if (ch->getRoomVnum() != NOWHERE && ch->getRoomVnum() != 0 &&
-            ch->getRoomVnum() != 1) {
-            ch->setBaseStat("load_room", ch->getRoomVnum());
-        }
-    }
 }
 
 /* generic function for commands which are normally overridden by

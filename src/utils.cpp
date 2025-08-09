@@ -2767,58 +2767,6 @@ size_t countColors(const std::string &txt) {
     return txt.size() - stripped.size();
 }
 
-/* Rules (unless overridden by ROOM_DARK):
- *
- * Inside and City rooms are always lit.
- * Outside rooms are dark at sunset and night.  */
-int room_is_dark(room_rnum room) {
-    return false; // This function is effectively disabled.
-
-    if (!VALID_ROOM_RNUM(room)) {
-        basic_mud_log("room_is_dark: Invalid room rnum %d.", room);
-        return (false);
-    }
-
-    auto r = get_room(room);
-    auto pe = r->getPeople();
-    for(auto c : filter_raw(pe)) {
-        if(c->isProvidingLight()) return false;
-    }
-
-    if (cook_element(room))
-        return (false);
-
-    if (ROOM_FLAGGED(r, ROOM_NOINSTANT) && ROOM_FLAGGED(r, ROOM_DARK)) {
-        return (true);
-    }
-    if (ROOM_FLAGGED(r, ROOM_NOINSTANT) && !ROOM_FLAGGED(r, ROOM_DARK)) {
-        return (false);
-    }
-
-    if (ROOM_FLAGGED(r, ROOM_DARK))
-        return (true);
-
-    if (ROOM_FLAGGED(r, ROOM_INDOORS))
-        return (false);
-
-    const auto tile = static_cast<int>(r->sector_type);
-
-    if (tile == SECT_INSIDE || tile == SECT_CITY || tile == SECT_IMPORTANT || tile == SECT_SHOP)
-        return (false);
-
-    if (tile == SECT_SPACE)
-        return (false);
-
-    if (weather_info.sunlight == SUN_SET)
-        return (true);
-
-    if (weather_info.sunlight == SUN_DARK)
-        return (true);
-
-    return (false);
-}
-
-
 
 int default_admin_flags_mortal[] =
         {-1};

@@ -179,15 +179,16 @@ ASPELL(spell_locate_object) {
             continue;
 
         send_to_char(ch, "%c%s", UPPER(*i->getShortDescription()), (i->getShortDescription()) + 1);
+        auto loc = i->getLocation();
 
-        if(i->location) {
-            switch(i->location->type) {
+        if(loc.unit) {
+            switch(loc.unit->type) {
                 case UnitType::room:
-                    send_to_char(ch, " is in %s.\r\n", i->location->getName());
+                    send_to_char(ch, " is in %s.\r\n", loc.unit->getName());
                     break;
                 case UnitType::character: {
-                    auto c = static_cast<char_data*>(i->location);
-                    if(i->pos_x == -1) {
+                    auto c = static_cast<char_data*>(loc.unit);
+                    if(loc.position.x == -1) {
                         send_to_char(ch, " is being carried by %s.\r\n", PERS(c, ch));
                     } else {
                         send_to_char(ch, " is being worn by %s.\r\n", PERS(c, ch));
@@ -195,7 +196,7 @@ ASPELL(spell_locate_object) {
                 }
                     break;
                 case UnitType::object:
-                    send_to_char(ch, " is in %s.\r\n", i->location->getShortDescription());
+                    send_to_char(ch, " is in %s.\r\n", loc.unit->getShortDescription());
                     break;
                 default:
                     send_to_char(ch, " is in an unknown location.\r\n");
@@ -446,18 +447,20 @@ ASPELL(spell_portal) {
 
     if (ch == nullptr || victim == nullptr)
         return;
+    
+    auto &zf = rm->zone->zone_flags;
 
-    if (!can_edit_zone(ch, rm->zone) && ZONE_FLAGGED(rm->zone, ZONE_QUEST)) {
+    if (!can_edit_zone(ch, rm->zone->number) && zf.get(ZONE_QUEST)) {
         send_to_char(ch, "That target is in a quest zone.\r\n");
         return;
     }
 
-    if (ZONE_FLAGGED(rm->zone, ZONE_CLOSED) && GET_ADMLEVEL(ch) < ADMLVL_IMMORT) {
+    if (zf.get(ZONE_CLOSED) && GET_ADMLEVEL(ch) < ADMLVL_IMMORT) {
         send_to_char(ch, "That target is in a closed zone.\r\n");
         return;
     }
 
-    if (ZONE_FLAGGED(rm->zone, ZONE_NOIMMORT) && GET_ADMLEVEL(ch) < ADMLVL_GRGOD) {
+    if (zf.get(ZONE_NOIMMORT) && GET_ADMLEVEL(ch) < ADMLVL_GRGOD) {
         send_to_char(ch, "That target is in a zone closed to all.\r\n");
         return;
     }

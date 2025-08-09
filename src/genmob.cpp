@@ -326,10 +326,20 @@ std::vector<trig_vnum> char_data::getProtoScript() const {
     return {};
 }
 
+void char_data::setLocation(room_data* room) {
+    if(!room) return;
+    char_to_room(this, room);
+}
+
+void char_data::setLocation(room_vnum rv) {
+    auto room = real_room(rv);
+    setLocation(room);
+}
+
 void char_data::setLocation(const Location& loc) {
-    if(!loc.location) return;
-    if(loc.location->type == UnitType::room) {
-        char_to_room(this, static_cast<room_data*>(loc.location));
+    if(!loc.unit) return;
+    if(loc.unit->type == UnitType::room) {
+        setLocation(static_cast<room_data*>(loc.unit));
     }
 }
 
@@ -339,7 +349,6 @@ void char_data::setLocation(const thing_data* td) {
 }
 
 void char_data::clearLocation() {
-    if(!location) return;
-    if(location->type != UnitType::room) return;
+    if(location.getType() != UnitType::room) return;
     char_from_room(this);
 }

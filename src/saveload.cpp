@@ -686,7 +686,7 @@ void from_json(const json& j, proto_data& u) {
     }
 }
 
-void to_json(json& j, const room_direction_data &e) {
+void to_json(json& j, const Destination &e) {
     if(e.general_description && strlen(e.general_description)) j["general_description"] = e.general_description;
     if(e.keyword && strlen(e.keyword)) j["keyword"] = e.keyword;
     if(e.exit_info) {
@@ -703,15 +703,9 @@ void to_json(json& j, const room_direction_data &e) {
 	if(e.to_room != NOWHERE) j["to_room"] = e.to_room;
     if(e.dclock) j["dclock"] = e.dclock;
     if(e.dchide) j["dchide"] = e.dchide;
-    if(e.dcskill) j["dcskill"] = e.dcskill;
-    if(e.dcmove) j["dcmove"] = e.dcmove;
-    if(e.failsavetype) j["failsavetype"] = e.failsavetype;
-    if(e.dcfailsave) j["dcfailsave"] = e.dcfailsave;
-    if(e.failroom > 0) j["failroom"] = e.failroom;
-    if(e.totalfailroom > 0) j["totalfailroom"] = e.totalfailroom;
 }
 
-void from_json(const json& j, room_direction_data &e) {
+void from_json(const json& j, Destination &e) {
     if(j.contains("general_description")) e.general_description = strdup(j["general_description"].get<std::string>().c_str());
     if(j.contains("keyword")) e.keyword = strdup(j["keyword"].get<std::string>().c_str());
     if(j.contains("exit_info")) e.exit_info = j["exit_info"].get<int16_t>();
@@ -719,18 +713,12 @@ void from_json(const json& j, room_direction_data &e) {
     if(j.contains("to_room")) e.to_room = j["to_room"];
     if(j.contains("dclock")) e.dclock = j["dclock"];
     if(j.contains("dchide")) e.dchide = j["dchide"];
-    if(j.contains("dcskill")) e.dcskill = j["dcskill"];
-    if(j.contains("dcmove")) e.dcmove = j["dcmove"];
-    if(j.contains("failsavetype")) e.failsavetype = j["failsavetype"];
-    if(j.contains("dcfailsave")) e.dcfailsave = j["dcfailsave"];
-    if(j.contains("failroom")) e.failroom = j["failroom"];
-    if(j.contains("totalfailroom")) e.totalfailroom = j["totalfailroom"];
 }
 
 void to_json(json& j, const room_data& r) {
     // we need to call the to_json for unit_data...
     to_json(j, static_cast<const unit_data&>(r));
-    j["zone"] = r.zone;
+    j["zone"] = r.zone->number;
     
     j["sector_type"] = r.sector_type;
 
@@ -745,7 +733,7 @@ void from_json(const json& j, room_data& r) {
     // call the from_json of unit_data...
     from_json(j, static_cast<unit_data&>(r));
 
-    if(j.contains("zone")) r.zone = j["zone"];
+    if(j.contains("zone")) r.zone = &(zone_table.at(j["zone"].get<zone_vnum>()));
 
     if(j.contains("sector_type")) r.sector_type = j["sector_type"];
 
@@ -753,7 +741,7 @@ void from_json(const json& j, room_data& r) {
         // this is an array of (<number>, <json>) pairs, with number matching the dir_option array index.
         // Thankfully we can pass the json straight into the room_direction_data constructor...
         for(auto &d : j["dir_option"]) {
-            auto ex = new room_direction_data();
+            auto ex = new Destination();
             d[1].get_to(*ex);
             r.dir_option[d[0]] = ex;
         }
@@ -775,9 +763,7 @@ void load_rooms(const std::filesystem::path& loc) {
         r->vn = id;
         units.emplace(id, r);
         world.emplace(id, r);
-        auto zone = r->zone;
-        auto& z = zone_table.at(zone);
-        z.rooms.insert(id);
+        r->zone->rooms.insert(id);
         r->activate();
     }
 }
@@ -787,7 +773,7 @@ void load_exits(const std::filesystem::path& loc) {
         auto id = j["room"].get<int64_t>();
         auto dir = j["direction"].get<int64_t>();
         auto r = get_room(id);
-        auto ex = new room_direction_data();
+        auto ex = new Destination();
         j["data"].get_to(*ex);
         r->dir_option[dir] = ex;
     }
@@ -803,7 +789,6 @@ static void dump_exits(const std::filesystem::path &loc) {
                 json j2;
                 j2["room"] = v;
                 j2["direction"] = i;
-                j2["direction_name"] = dirs[i];
                 j2["data"] = *ex;
                 exits.push_back(j2);
             }
@@ -999,16 +984,31 @@ static json serialize_obj_relations(const obj_data* o) {
     return j;
 }
 
-static json serialize_obj_location(const obj_data* o) {
-    json j = json::object();
-    if(o->location) {
-        j["uid"] = o->location->getUID();
-        j["pos_x"] = o->pos_x;
-        j["pos_y"] = o->pos_y;
-        j["pos_z"] = o->pos_z;
-    }
-    return j;
+void to_json(json& j, const Coordinates& c) {
+    j["x"] = c.x;
+    j["y"] = c.y;
+    j["z"] = c.z;
 }
+
+void from_json(const json& j, Coordinates& c) {
+    c.x = j["x"].get<double>();
+    c.y = j["y"].get<double>();
+    c.z = j["z"].get<double>();
+}
+
+void to_json(json& j, const Location& loc) {
+    if(loc.unit) j["uid"] = loc.unit->getUID();
+    j["position"] = loc.position;
+}
+
+void from_json(const json& j, Location& loc) {
+    if(j.contains("uid")) {
+        auto uid = resolveUID(j["uid"]);
+        if(uid) loc.unit = uid.get();
+    }
+    loc.position = j["position"];
+}
+
 
 static void dump_items(const std::filesystem::path &loc) {
     json j;
@@ -1018,7 +1018,7 @@ static void dump_items(const std::filesystem::path &loc) {
         j2["id"] = v;
         j2["generation"] = static_cast<int32_t>(v);
         j2["data"] = *r;
-        j2["location"] = serialize_obj_location(r.get());
+        j2["location"] = r->location;
         j2["relations"] = serialize_obj_relations(r.get());
         j.push_back(j2);
     }

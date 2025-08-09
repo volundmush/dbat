@@ -137,15 +137,11 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
                 // Cache some room properties to avoid repeated checks
                 auto room_flags = r->room_flags;
 
-                for (int i = 0; i < NUM_OF_DIRS; ++i) {
-                    auto ex = r->dir_option[i];
-                    if (!ex) continue;
-
-                    auto exit_info = ex->exit_info;
+                for (auto &[i, dir] : r->getDirections()) {
+                    auto exit_info = dir.exit_info;
                     if (IS_SET(exit_info, EX_CLOSED)) continue;
 
-                    auto dest = ex->getDestination();
-                    if (!dest) continue;
+                    auto dest = dir.getDestination();
 
                     // Cache destination room flags and zone
                     auto dest_room_flags = dest->room_flags;
@@ -154,7 +150,7 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
                     if (dest->room_flags.get(ROOM_NOMOB)) continue;
                     if (MOB_FLAGGED(ch, MOB_STAY_ZONE) && dest_zone != r->zone) continue;
 
-                    availableDirections.push_back(i);
+                    availableDirections.push_back(static_cast<int>(i));
                 }
 
                 if (!availableDirections.empty()) {

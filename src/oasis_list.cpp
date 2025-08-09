@@ -62,7 +62,7 @@ ACMD(do_oasis_list) {
     }
 
     if (!*smin || *smin == '.') {
-        rzone = ch->getRoom()->zone;
+        rzone = ch->getRoom()->zone->number;
     } else if (!*smax) {
         rzone = real_zone(atoi(smin));
 
@@ -122,7 +122,7 @@ ACMD(do_oasis_links) {
     one_argument(argument, arg);
 
     if ((!arg || !*arg) || !strcmp(arg, ".")) {
-        zvnum = ch->getRoom()->zone;
+        zvnum = ch->getRoom()->zone->number;
     } else {
         zvnum = atol(arg);
     }
@@ -148,16 +148,11 @@ ACMD(do_oasis_links) {
             if(d->to_room == NOWHERE) continue;
             auto dest = d->getDestination();
             if(!dest) continue;
-            if(dest->zone == zvnum) continue;
-
-            auto z2 = zone_table.find(dest->zone);
-            if (z2 == zone_table.end()) {
-                send_to_char(ch, "Room %d has an invalid zone.\r\n", nr);
-                continue;
-            }
+            auto z2 = dest->zone;
+            if(z2->number == zvnum) continue;
 
             send_to_char(ch, "%3d %-30s at %5d (%-5s) ---> %5d\r\n",
-                         z2->first,z2->second.name,nr, dirs[j], dest->getVnum());
+                         z2->number, z2->name,nr, dirs[j], dest->getVnum());
         }
     }
 }

@@ -1094,7 +1094,7 @@ namespace atk {
                 actVictim("@C$n@W disappears, reappearing in front of you, and $e grabs you! Spinning quickly $e sends you flying into the ground!@n");
                 actOthers("@c$n@W disappears, reappearing in front of @C$N@W, and grabs $M! Spinning quickly $e sends $M flying into the ground!@n");
 
-                if (ROOM_DAMAGE(IN_ROOM(victim)) <= 95 && !victim->getWhereFlag(WhereFlag::space)) {
+                if (victim->getLocationDamage() <= 95 && !victim->getWhereFlag(WhereFlag::space)) {
                         act("@W$N@W slams into the ground forming a large crater with $S body!@n", true, user, nullptr,
                             victim,
                             TO_CHAR);

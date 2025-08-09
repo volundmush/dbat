@@ -302,24 +302,6 @@ void zedit_new_zone(struct char_data *ch, zone_vnum vzone_num, room_vnum bottom,
         return;
     }
 
-    for (dsc = descriptor_list; dsc; dsc = dsc->next) {
-        switch (STATE(dsc)) {
-            case CON_REDIT:
-                OLC_ROOM(dsc)->zone += (OLC_ZNUM(dsc) >= result);
-                /* Fall through. */
-            case CON_ZEDIT:
-            case CON_MEDIT:
-            case CON_SEDIT:
-            case CON_OEDIT:
-            case CON_TRIGEDIT:
-            case CON_GEDIT:
-                OLC_ZNUM(dsc) += (OLC_ZNUM(dsc) >= result);
-                break;
-            default:
-                break;
-        }
-    }
-
     zedit_save_to_disk(result); /* save to disk .. */
 
     mudlog(BRF, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), true, "OLC: %s creates new zone #%d", GET_NAME(ch), vzone_num);

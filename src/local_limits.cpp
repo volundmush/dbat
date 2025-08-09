@@ -1447,20 +1447,21 @@ void corpseRotService(uint64_t heartPulse, double deltaTime) {
             }
         }
         if (!GET_OBJ_TIMER(j)) {
+            auto loc = j->getLocation();
 
-            if (j->location && j->location->type == UnitType::room && j->pos_x == -1.0) {
-                auto c = static_cast<char_data*>(j->location);
+            if (loc.getType() == UnitType::room && loc.position.x == -1.0) {
+                auto c = static_cast<char_data*>(loc.unit);
                 if (!strstr(j->getName(), "android")) {
                     act("$p decays in your hands.", false, c, j, nullptr, TO_CHAR);
                 } else {
                     act("$p decays in your hands.", false, c, j, nullptr, TO_CHAR);
                 }
             }
-            
-            if(auto con = j->getObjects(); !con.empty() && j->location) {
-                switch(j->location->type) {
+
+            if(auto con = j->getObjects(); !con.empty() && loc.unit) {
+                switch(loc.getType()) {
                     case UnitType::room: {
-                        auto r = static_cast<room_data*>(j->location);
+                        auto r = static_cast<room_data*>(loc.unit);
                         for(auto jj : filter_raw(con)) {
                             obj_from_obj(jj);
                             obj_to_room(jj, r);
@@ -1468,7 +1469,7 @@ void corpseRotService(uint64_t heartPulse, double deltaTime) {
                     }
                         break;
                     case UnitType::character: {
-                        auto c = static_cast<char_data*>(j->location);
+                        auto c = static_cast<char_data*>(loc.unit);
                         auto r = c->getRoom();
                         for(auto jj : filter_raw(con)) {
                             obj_from_obj(jj);
@@ -1477,7 +1478,7 @@ void corpseRotService(uint64_t heartPulse, double deltaTime) {
                     }
                         break;
                     case UnitType::object: {
-                        auto o = static_cast<obj_data*>(j->location);
+                        auto o = static_cast<obj_data*>(loc.unit);
                         for(auto jj : filter_raw(con)) {
                             obj_from_obj(jj);
                             obj_to_obj(jj, o);
@@ -1975,9 +1976,10 @@ void point_update(uint64_t heartPulse, double deltaTime)
                     }
                     else if (GET_OBJ_VNUM(j) != 79)
                     {
-                        if (j->location && j->location->type == UnitType::character && j->pos_x >= 0.0)
+                        auto loc = j->getLocation();
+                        if (loc.getType() == UnitType::character && loc.position.x >= 0.0)
                         {
-                            auto c = static_cast<char_data*>(j->location);
+                            auto c = static_cast<char_data*>(loc.unit);
                             int melt = 5 + (GET_OBJ_WEIGHT(j) * 0.02);
                             if (GET_OBJ_WEIGHT(j) - (5 + (GET_OBJ_WEIGHT(j) * 0.02)) > 0)
                             {

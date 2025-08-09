@@ -1019,7 +1019,7 @@ in the vault (vnum: 453) now and then. you can just use
                             o->strings["name"] = blah;
                         }
                     } else if (!strcasecmp(field, "next_in_list")) {
-                        if (auto con = o->location->getObjects(); !con.empty()) {
+                        if (auto con = o->location.unit->getObjects(); !con.empty()) {
                             auto found = false;
                             for(auto ob : filter_raw(con)) {
                                 if(ob == o) {
@@ -1215,9 +1215,9 @@ in the vault (vnum: 453) now and then. you can just use
                 else
                     snprintf(str, slen, "0");
             } else if (!strcasecmp(field, "zonenumber"))
-                snprintf(str, slen, "%d", zone_table.at(r->zone).number);
+                snprintf(str, slen, "%d", r->zone->number);
             else if (!strcasecmp(field, "zonename"))
-                snprintf(str, slen, "%s", zone_table.at(r->zone).name);
+                snprintf(str, slen, "%s", r->zone->name);
             else if (!strcasecmp(field, "roomflag")) {
                 if (subfield && *subfield) {
                     if (check_flags_by_name_ar(r->room_flags.getAll(), NUM_ROOM_FLAGS, subfield, room_bits) > 0)

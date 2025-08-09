@@ -165,7 +165,7 @@ SPECIAL(gauntlet_room)  /* Jamdog - 13th Feb 2006 */
 
     /* give player credit for making it this far */
     for (i = 0; gauntlet_info[i][0] != -1; i++) {
-        if ((!IS_NPC(ch)) && (ch->getRoom()->getVnum() == gauntlet_info[i][1])) {
+        if ((!IS_NPC(ch)) && (ch->getRoomVnum() == gauntlet_info[i][1])) {
             /* Check not overwriting gauntlet rank with lower value (Jamdog - 20th July 2006) */
             if (GET_GAUNTLET(ch) < (gauntlet_info[i][0])) {
                 //set player's gauntlet rank

@@ -262,6 +262,25 @@ struct picky_data {
     std::unordered_set<Race> only_race, not_race;    /* Only these races can shop here	*/
 };
 
+struct Coordinates {
+    double x{0.0}, y{0.0}, z{0.0};
+
+    bool operator==(const Coordinates& other) const;
+};
+
+struct Location {
+    unit_data* unit{nullptr};  // What unit contains this unit (room, area, char, obj)
+    Coordinates position;
+    bool operator==(const Location& other) const;
+    bool operator==(const room_vnum rv) const;
+    bool operator==(const room_data* room) const;
+    
+    // Conversion to bool - returns true if location is valid. currently means it is a room.
+    explicit operator bool() const;
+    UnitType getType() const;
+    zone_data* getZone() const;
+};
+
 struct unit_data : public HasVariables {
     unit_data& operator=(const proto_data& other);
     virtual ~unit_data();
@@ -302,8 +321,8 @@ struct unit_data : public HasVariables {
     weight_t getInventoryWeight();
     int64_t getInventoryCount();
 
-    std::list<std::weak_ptr<obj_data>> objects{};
-    std::vector<std::weak_ptr<obj_data>> getObjects();
+    std::list<std::weak_ptr<unit_data>> contents{};
+    std::vector<std::weak_ptr<obj_data>> getObjects() const;
 
     void activateContents();
     void deactivateContents();
@@ -321,25 +340,15 @@ struct unit_data : public HasVariables {
 
     std::unordered_map<std::string, double> stats;
 
-    // Location data - for debugging and future unified location system
+    // Location data
     // These aren't used by all units, but putting it here means debug can see them.
-    unit_data* location{nullptr};  // What unit contains this unit (room, area, char, obj)
-    double pos_x{0.0}, pos_y{0.0}, pos_z{0.0};  // Position within location
+    Location location;
 
 };
 
-struct room_direction_data;
+struct Destination;
 
-struct Location {
-    unit_data* location{nullptr};  // What unit contains this unit (room, area, char, obj)
-    double pos_x{0.0}, pos_y{0.0}, pos_z{0.0};  // Position within location
-    
-    bool operator==(const Location& other) const;
-    bool operator!=(const Location& other) const;
-    
-    // Conversion to bool - returns true if location is valid
-    explicit operator bool() const;
-};
+
 
 struct thing_data : public unit_data {
     Location getLocation() const;
@@ -348,18 +357,22 @@ struct thing_data : public unit_data {
 
     virtual void setLocation(const Location& loc) = 0;
     virtual void setLocation(const thing_data* td) = 0;
+    virtual void setLocation(room_vnum rv) = 0;
+    virtual void setLocation(room_data* room) = 0;
     virtual void clearLocation() = 0;
+
+    bool getLocationIsDark() const;
 
     int getCookElement() const;
 
     std::string getLocationName() const;
-    room_direction_data* getLocationExit(int dir) const;
-    std::map<int, room_direction_data*> getLocationExits() const;
+    std::optional<Destination> getLocationExit(Direction dir) const;
+    std::map<Direction, Destination> getLocationExits() const;
 
     double getLocationEnvironment(int type) const;
-    double setLocationEnvironment(int type, double value) const;
-    double modLocationEnvironment(int type, double value) const;
-    void clearLocationEnvironment(int type) const;
+    double setLocationEnvironment(int type, double value);
+    double modLocationEnvironment(int type, double value);
+    void clearLocationEnvironment(int type);
 
     void setRoomFlag(int flag, bool value = true) const;
     bool toggleRoomFlag(int flag) const;
@@ -374,14 +387,15 @@ struct thing_data : public unit_data {
     std::vector<std::weak_ptr<char_data>> getLocationPeople() const;
 
     int getLocationDamage() const;
-    int setLocationDamage(int amount) const;
-    int modLocationDamage(int amount) const;
+    void setLocationDamage(int amount);
+    int modLocationDamage(int amount);
 
+    SectorType getLocationSectorType() const;
     int getLocationTileType() const;
 
     int getLocationGroundEffect() const;
-    int setLocationGroundEffect(int val) const;
-    int modLocationGroundEffect(int val) const;
+    void setLocationGroundEffect(int val);
+    int modLocationGroundEffect(int val);
 
     SpecialFunc getLocationSpecialFunc() const;
 
@@ -457,6 +471,8 @@ struct obj_data : public thing_data, public picky_data, std::enable_shared_from_
     void clearLocation() override;
     void setLocation(const Location& loc) override;
     void setLocation(const thing_data* td) override;
+    void setLocation(room_vnum rv) override;
+    void setLocation(room_data* room) override;
 
     std::shared_ptr<obj_data> shared();
 
@@ -528,43 +544,85 @@ struct obj_data : public thing_data, public picky_data, std::enable_shared_from_
 
 /* room-related structures ************************************************/
 
-struct room_direction_data {
-    ~room_direction_data();
+struct Destination {
+    ~Destination();
     char *general_description{};       /* When look DIR.			*/
     char *keyword{};        /* for open/close			*/
 
     int16_t exit_info{};        /* Exit info			*/
+
     obj_vnum key{NOTHING};        /* Key's number (-1 for no key)		*/
-    room_rnum to_room{NOWHERE};        /* Where direction leads (NOWHERE)	*/
+
+    room_vnum to_room{NOWHERE};        /* Where direction leads (NOWHERE)	*/
+
     int dclock{};            /* DC to pick the lock			*/
     int dchide{};            /* DC to find hidden			*/
-    int dcskill{};            /* Skill req. to move through exit	*/
-    int dcmove{};            /* DC for skill to move through exit	*/
-    int failsavetype{};        /* Saving Throw type on skill fail	*/
-    int dcfailsave{};        /* DC to save against on fail		*/
-    room_vnum failroom{NOWHERE};        /* Room # to put char in when fail > 5  */
-    room_vnum totalfailroom{NOWHERE};        /* Room # if char fails save < 5	*/
 
     struct room_data* getDestination();
+
+    explicit operator bool() const;
+
+    
+};
+
+struct location_data : public unit_data {
+
+    zone_data *zone{nullptr};
+
+    virtual const char* getName(const Coordinates& coor) const = 0;
+    virtual bool getIsDark(const Coordinates& coor) const = 0;
+
+    virtual std::vector<std::weak_ptr<obj_data>> getObjects(const Coordinates& coor) const = 0;
+    virtual std::vector<std::weak_ptr<char_data>> getPeople(const Coordinates& coor) const = 0;
+
+    virtual std::optional<Destination> getDirection(const Coordinates& coor, Direction dir) = 0;
+    virtual std::map<Direction, Destination> getDirections(const Coordinates& coor) = 0;
+
+    virtual void setRoomFlag(const Coordinates& coor, int flag, bool value = true) = 0;
+    virtual bool toggleRoomFlag(const Coordinates& coor, int flag) = 0;
+    virtual bool getRoomFlag(const Coordinates& coor, int flag) const = 0;
+    virtual void setWhereFlag(const Coordinates& coor, WhereFlag flag, bool value = true) = 0;
+    virtual bool toggleWhereFlag(const Coordinates& coor, WhereFlag flag) = 0;
+    virtual bool getWhereFlag(const Coordinates& coor, WhereFlag flag) const = 0;
+
+    virtual SectorType getSectorType(const Coordinates& coor) const = 0;
+
+    virtual void broadcastAt(const Coordinates& coor, const std::string& message) const = 0;
+
+    virtual int getDamage(const Coordinates& coor) const = 0;
+    virtual int setDamage(const Coordinates& coor, int amount) = 0;
+    virtual int modDamage(const Coordinates& coor, int amount) = 0;
+
+    virtual int getGroundEffect(const Coordinates& coor) const = 0;
+    virtual void setGroundEffect(const Coordinates& coor, int val) = 0;
+    virtual int modGroundEffect(const Coordinates& coor, int val) = 0;
+
+    virtual SpecialFunc getSpecialFunc(const Coordinates& coor) const = 0;
+
+    virtual double getEnvironment(const Coordinates& coor, int type) const = 0;
+    virtual double setEnvironment(const Coordinates& coor, int type, double value) = 0;
+    virtual double modEnvironment(const Coordinates& coor, int type, double value) = 0;
+    virtual void clearEnvironment(const Coordinates& coor, int type) = 0;
 };
 
 
 /* ================== Memory Structure for room ======================= */
-struct room_data : public unit_data, std::enable_shared_from_this<room_data> {
+struct room_data : public location_data, std::enable_shared_from_this<room_data> {
     room_data();
     ~room_data() override;
-    zone_vnum zone{NOTHING};
-    std::vector<trig_vnum> getProtoScript() const override;
+
+    // Bring the base class getName() into scope to avoid name hiding
+    using unit_data::getName;
+    using unit_data::getObjects;
 
     SectorType sector_type{SectorType::inside};            /* sector type (move/hide)            */
-    std::array<room_direction_data*, NUM_OF_DIRS> dir_option{}; /* Directions */
+    std::array<Destination*, NUM_OF_DIRS> dir_option{}; /* Directions */
     FlagHandler<RoomFlag> room_flags{};   /* DEATH,DARK ... etc */
     FlagHandler<WhereFlag> where_flags{};
     SpecialFunc func{};
 
     std::vector<trig_vnum> proto_script; /* list of default triggers  */
-
-    std::list<std::weak_ptr<char_data>> characters;    /* List of characters in room          */
+    std::vector<trig_vnum> getProtoScript() const override;
 
     int deathtrap_timer{};                   /* For timed Dt's                     */
     int damage{};                     /* How damaged the room is            */
@@ -573,7 +631,7 @@ struct room_data : public unit_data, std::enable_shared_from_this<room_data> {
     void activate();
     void deactivate();
 
-    int getDamage();
+    int getDamage() const;
     int setDamage(int amount);
     int modDamage(int amount);
 
@@ -581,17 +639,79 @@ struct room_data : public unit_data, std::enable_shared_from_this<room_data> {
 
     std::shared_ptr<room_data> shared();
 
-    std::optional<room_vnum> getLaunchDestination();
-
-    std::vector<std::weak_ptr<char_data>> getPeople();
+    std::vector<std::weak_ptr<char_data>> getPeople() const;
 
     std::optional<std::string> dgCallMember(const std::string& member, const std::string& arg);
 
-    double getEnvironment(int type);
+    double getEnvironment(int type) const;
     double setEnvironment(int type, double value);
     double modEnvironment(int type, double value);
     void clearEnvironment(int type);
     std::unordered_map<int, double> environment;
+
+    bool isDark() const;
+
+    template<typename R = double>
+    R getBaseStat(const std::string& stat) {
+        return roomStats.getBase<R>(this, stat);
+    }
+
+    template<typename R = double>
+    R setBaseStat(const std::string& stat, double val) {
+        return roomStats.setBase<R>(this, stat, val);
+    }
+
+    template<typename R = double>
+    R modBaseStat(const std::string& stat, double val) {
+        return roomStats.modBase<R>(this, stat, val);
+    }
+
+    template<typename R = double>
+    R gainBaseStat(const std::string& stat, double val, bool applyBonuses = true) {
+        return roomStats.gainBase<R>(this, stat, val, applyBonuses);
+    }
+
+    template<typename R = double>
+    R gainBaseStatPercent(const std::string& stat, double percent, bool applyBonuses = true) {
+        return roomStats.gainBasePercent<R>(this, stat, percent, applyBonuses);
+    }
+
+    template<typename R = double>
+    R getEffectiveStat(const std::string& stat) {
+        return roomStats.getEffective<R>(this, stat);
+    }
+
+    std::optional<Destination> getDirection(Direction dir) const;
+    std::map<Direction, Destination> getDirections() const;
+
+    // overrides for location_data...
+    const char* getName(const Coordinates& coor) const override;
+    bool getIsDark(const Coordinates& coor) const override;
+    std::vector<std::weak_ptr<obj_data>> getObjects(const Coordinates& coor) const override;
+    std::vector<std::weak_ptr<char_data>> getPeople(const Coordinates& coor) const override;
+    std::optional<Destination> getDirection(const Coordinates& coor, Direction dir) override;
+    std::map<Direction, Destination> getDirections(const Coordinates& coor) override;
+    void setRoomFlag(const Coordinates& coor, int flag, bool value = true) override;
+    bool toggleRoomFlag(const Coordinates& coor, int flag) override;
+    bool getRoomFlag(const Coordinates& coor, int flag) const override;
+    void setWhereFlag(const Coordinates& coor, WhereFlag flag, bool value = true) override;
+    bool toggleWhereFlag(const Coordinates& coor, WhereFlag flag) override;
+    bool getWhereFlag(const Coordinates& coor, WhereFlag flag) const override;
+    SectorType getSectorType(const Coordinates& coor) const override;
+    void broadcastAt(const Coordinates& coor, const std::string& message) const override;
+    int getDamage(const Coordinates& coor) const override;
+    int setDamage(const Coordinates& coor, int amount) override;
+    int modDamage(const Coordinates& coor, int amount) override;
+    int getGroundEffect(const Coordinates& coor) const override;
+    void setGroundEffect(const Coordinates& coor, int val) override;
+    int modGroundEffect(const Coordinates& coor, int val) override;
+    SpecialFunc getSpecialFunc(const Coordinates& coor) const override;
+
+    double getEnvironment(const Coordinates& coor, int type) const override;
+    double setEnvironment(const Coordinates& coor, int type, double value) override;
+    double modEnvironment(const Coordinates& coor, int type, double value) override;
+    void clearEnvironment(const Coordinates& coor, int type) override;
+
 };
 
 /* ====================================================================== */
@@ -810,6 +930,9 @@ struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
     void clearLocation() override;
     void setLocation(const Location& loc) override;
     void setLocation(const thing_data* td) override;
+    void setLocation(room_vnum rv) override;
+    void setLocation(room_data* room) override;
+
     void lookAtLocation();
     void lookAtLocation(room_data *room);
     void lookAtLocation(room_vnum rv);

@@ -4,12 +4,15 @@
 #include "dbat/filter.h"
 #include "dbat/genolc.h"
 
-std::vector<std::weak_ptr<obj_data>> unit_data::getObjects() {
+std::vector<std::weak_ptr<obj_data>> unit_data::getObjects() const {
     std::vector<std::weak_ptr<obj_data>> out;
-    out.reserve(objects.size());
-    std::copy_if(objects.begin(), objects.end(), std::back_inserter(out), [](const auto& obj) {
-        return !obj.expired() && obj.lock()->pos_x == -1.0;
-    });
+    for(const auto &uw : contents) {
+        if(auto u = uw.lock()) {
+            if(auto o = std::dynamic_pointer_cast<obj_data>(u)) {
+                out.push_back(o);
+            }
+        }
+    }
     out.shrink_to_fit();
     return out;
 }

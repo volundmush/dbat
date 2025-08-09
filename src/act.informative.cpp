@@ -1038,22 +1038,19 @@ static void draw_open_exit(char map[9][10], int x, int y, int door, int sect, do
 
 static void map_draw_room(char map[9][10], int x, int y, room_rnum rnum, struct char_data *ch) {
     auto room = get_room(rnum);
-    for (int door = 0; door < NUM_OF_DIRS; door++) {
-        auto d = room->dir_option[door];
-        if (!d) continue;
-        auto dest = d->getDestination();
-        if (!dest) continue;
+    for (auto &[door, e] : room->getDirections()) {
+        auto dest = e.getDestination();
 
-        bool isClosed = IS_SET(d->exit_info, EX_CLOSED);
-        bool isSecret = IS_SET(d->exit_info, EX_SECRET);
+        bool isClosed = IS_SET(e.exit_info, EX_CLOSED);
+        bool isSecret = IS_SET(e.exit_info, EX_SECRET);
 
         if (isClosed && !isSecret) {
-            draw_closed_exit(map, x, y, door);
+            draw_closed_exit(map, x, y, static_cast<int>(door));
         } else if (!isClosed) {
             auto sect = static_cast<int>(dest->sector_type);
             double geffect = dest->ground_effect;
             double waterEnv = dest->getEnvironment(ENV_WATER);
-            draw_open_exit(map, x, y, door, sect, geffect, waterEnv);
+            draw_open_exit(map, x, y, static_cast<int>(door), sect, geffect, waterEnv);
         }
     }
 }
@@ -2435,9 +2432,8 @@ static bool is_hidden(struct hide_node *hideinfo, struct char_data *ch) {
 
 static void list_char_to_char(const std::vector<std::weak_ptr<char_data>>& list, struct char_data *ch) {
     struct hide_node *hideinfo = nullptr;
-    int num;
 
-    for (auto i :filter_raw(list)) {
+    for (auto i : filter_raw(list)) {
         if (AFF_FLAGGED(i, AFF_HIDE) && roll_resisted(i, SKILL_HIDE, ch, SKILL_SPOT)) {
             if (GET_SKILL(i, SKILL_HIDE) && !IS_NPC(ch) && i != ch) {
                 improve_skill(i, SKILL_HIDE, 1);
@@ -2447,7 +2443,7 @@ static void list_char_to_char(const std::vector<std::weak_ptr<char_data>>& list,
         }
     }
 
-    for (auto i :filter_raw(list)) {
+    for (auto i : filter_raw(list)) {
         if (ch == i || (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_HOLYLIGHT) && IS_NPC(i) &&
                         i->getRoomDescription() && *i->getRoomDescription() == '.')) {
             continue;
@@ -2458,7 +2454,7 @@ static void list_char_to_char(const std::vector<std::weak_ptr<char_data>>& list,
         }
 
         if (CAN_SEE(ch, i)) {
-            num = 0;
+            auto num = 0;
 
             send_to_char(ch, "@w");
             if (num > 1) {
@@ -2467,7 +2463,7 @@ static void list_char_to_char(const std::vector<std::weak_ptr<char_data>>& list,
             list_one_char(i, ch);
             send_to_char(ch, "@n");
 
-        } else if (IS_DARK(IN_ROOM(ch)) && !CAN_SEE_IN_DARK(ch) &&
+        } else if (ch->getLocationIsDark() && !CAN_SEE_IN_DARK(ch) &&
                    AFF_FLAGGED(i, AFF_INFRAVISION)) {
             send_to_char(ch, "@wYou see a pair of glowing red eyes looking your way.@n\r\n");
         }
@@ -2497,7 +2493,9 @@ static void do_auto_exits(struct room_data *room, struct char_data *ch, int exit
         send_to_char(ch, "@D------------------------------------------------------------------------@n\r\n");
     }
 
-    if (exit_mode == EXIT_NORMAL && !space && IN_ROOM(ch) == room->getVnum()) {
+    auto loc = ch->getLocation();
+
+    if (exit_mode == EXIT_NORMAL && !space && loc == room) {
         send_to_char(ch, "@D------------------------------------------------------------------------@n\r\n");
         send_to_char(ch, "@w      Compass           Auto-Map            Map Key\r\n");
         send_to_char(ch, "@R     ---------         ----------   -----------------------------\r\n");
@@ -2512,7 +2510,7 @@ static void do_auto_exits(struct room_data *room, struct char_data *ch, int exit
         send_to_char(ch, "@D------------------------------------------------------------------------@n\r\n");
     }
 
-    if (exit_mode == EXIT_COMPLETE || (exit_mode == EXIT_NORMAL && !space && IN_ROOM(ch) != room->getVnum())) {
+    if (exit_mode == EXIT_COMPLETE || (exit_mode == EXIT_NORMAL && !space && loc != room)) {
         send_to_char(ch, "@D----------------------------[@gObvious Exits@D]-----------------------------@n\r\n");
 
         if (IS_AFFECTED(ch, AFF_BLIND)) {
@@ -2539,7 +2537,7 @@ static void do_auto_exits(struct room_data *room, struct char_data *ch, int exit
                 if (admVision) {
                     exitStr = fmt::format("@c{} @D- [@Y{}@D]@w {}.\r\n", direction, dest->getVnum(), dest->getName());
                 } else {
-                    exitStr = fmt::format("@c{} @D-@w {}.\r\n", direction, (IS_DARK(dest->getVnum()) && !CAN_SEE_IN_DARK(ch) && !has_light) ? "@bToo dark to tell.@w" : dest->getName());
+                    exitStr = fmt::format("@c{} @D-@w {}.\r\n", direction, (dest->isDark() && !CAN_SEE_IN_DARK(ch) && !has_light) ? "@bToo dark to tell.@w" : dest->getName());
                 }
 
                 if (IS_SET(d->exit_info, EX_ISDOOR) || IS_SET(d->exit_info, EX_SECRET)) {
@@ -2977,13 +2975,13 @@ static void look_in_direction(struct char_data *ch, int dir) {
 static void handle_portal(struct char_data *ch, struct obj_data *obj) {
     if (!OBJVAL_FLAGGED(obj, CONT_CLOSEABLE)) {
         int portal_appear = GET_OBJ_VAL(obj, VAL_PORTAL_APPEAR);
-        room_rnum portal_dest = real_room(GET_OBJ_VAL(obj, VAL_PORTAL_DEST));
+        auto dest = get_room(GET_OBJ_VAL(obj, VAL_PORTAL_DEST));
 
         if (portal_appear < 0) {
-            if (portal_dest == NOWHERE || (IS_DARK(portal_dest) && !CAN_SEE_IN_DARK(ch) && !PLR_FLAGGED(ch, PLR_AURALIGHT))) {
+            if (!dest || (dest->isDark() && !CAN_SEE_IN_DARK(ch) && !PLR_FLAGGED(ch, PLR_AURALIGHT))) {
                 send_to_char(ch, "You see nothing but infinite darkness...\r\n");
             } else {
-                send_to_char(ch, "After seconds of concentration you see the image of %s.\r\n", get_room(portal_dest)->getName());
+                send_to_char(ch, "After seconds of concentration you see the image of %s.\r\n", dest->getName());
             }
         } else if (portal_appear < MAX_PORTAL_TYPES) {
             send_to_char(ch, "%s\r\n", portal_appearance[portal_appear]);
@@ -2999,10 +2997,10 @@ static void handle_vehicle(struct char_data *ch, struct obj_data *obj) {
         return;
     }
 
-    room_rnum vehicle_inside = real_room(GET_OBJ_VAL(obj, VAL_VEHICLE_DEST));
-    if (vehicle_inside == NOWHERE) {
+    auto vehicle_inside = get_room(GET_OBJ_VAL(obj, VAL_VEHICLE_DEST));
+    if (!vehicle_inside) {
         send_to_char(ch, "You cannot see inside that.\r\n");
-    } else if (IS_DARK(vehicle_inside) && !CAN_SEE_IN_DARK(ch) && !PLR_FLAGGED(ch, PLR_AURALIGHT)) {
+    } else if (vehicle_inside->isDark() && !CAN_SEE_IN_DARK(ch) && !PLR_FLAGGED(ch, PLR_AURALIGHT)) {
         send_to_char(ch, "It is pitch black...\r\n");
     } else {
         send_to_char(ch, "You look inside and see:\r\n");
@@ -3614,7 +3612,7 @@ ACMD(do_look) {
 
     auto room = ch->getRoom();
 
-    if(IS_DARK(room->getVnum()) && !CAN_SEE_IN_DARK(ch)) {
+    if(room->isDark() && !CAN_SEE_IN_DARK(ch)) {
         send_to_char(ch, "It is pitch black...\r\n");
         list_char_to_char(room->getPeople(), ch);    /* glowing red eyes */
         return;
@@ -4041,46 +4039,49 @@ ACMD(do_status) {
         send_to_char(ch, "\r\n");
 
         send_to_char(ch, "         @D-----------------@YHunger@D/@yThirst@D-----------------@n\r\n");
-        if (GET_COND(ch, HUNGER) >= 48) {
+        auto hung = GET_COND(ch, HUNGER);
+        if (hung >= 48) {
             send_to_char(ch, "         You are full.\r\n");
-        } else if (GET_COND(ch, HUNGER) >= 40) {
+        } else if (hung >= 40) {
             send_to_char(ch, "         You are nearly full.\r\n");
-        } else if (GET_COND(ch, HUNGER) >= 30) {
+        } else if (hung >= 30) {
             send_to_char(ch, "         You are not hungry.\r\n");
-        } else if (GET_COND(ch, HUNGER) >= 21) {
+        } else if (hung >= 21) {
             send_to_char(ch, "         You wouldn't mind a snack.\r\n");
-        } else if (GET_COND(ch, HUNGER) >= 15) {
+        } else if (hung >= 15) {
             send_to_char(ch, "         You are slightly hungry.\r\n");
-        } else if (GET_COND(ch, HUNGER) >= 10) {
+        } else if (hung >= 10) {
             send_to_char(ch, "         You are partially hungry.\r\n");
-        } else if (GET_COND(ch, HUNGER) >= 5) {
+        } else if (hung >= 5) {
             send_to_char(ch, "         You are really hungry.\r\n");
-        } else if (GET_COND(ch, HUNGER) >= 2) {
+        } else if (hung >= 2) {
             send_to_char(ch, "         You are extremely hungry.\r\n");
-        } else if (GET_COND(ch, HUNGER) >= 0) {
+        } else if (hung >= 0) {
             send_to_char(ch, "         You are starving!\r\n");
-        } else if (GET_COND(ch, HUNGER) < 0) {
+        } else if (hung < 0) {
             send_to_char(ch, "         You need not eat.\r\n");
         }
-        if (GET_COND(ch, THIRST) >= 48) {
+
+        auto thirst = GET_COND(ch, THIRST);
+        if (thirst >= 48) {
             send_to_char(ch, "         You are not thirsty.\r\n");
-        } else if (GET_COND(ch, THIRST) >= 40) {
+        } else if (thirst >= 40) {
             send_to_char(ch, "         You are nearly quenched.\r\n");
-        } else if (GET_COND(ch, THIRST) >= 30) {
+        } else if (thirst >= 30) {
             send_to_char(ch, "         You are not thirsty.\r\n");
-        } else if (GET_COND(ch, THIRST) >= 21) {
+        } else if (thirst >= 21) {
             send_to_char(ch, "         You wouldn't mind a drink.\r\n");
-        } else if (GET_COND(ch, THIRST) >= 15) {
+        } else if (thirst >= 15) {
             send_to_char(ch, "         You are slightly thirsty.\r\n");
-        } else if (GET_COND(ch, THIRST) >= 10) {
+        } else if (thirst >= 10) {
             send_to_char(ch, "         You are partially thirsty.\r\n");
-        } else if (GET_COND(ch, THIRST) >= 5) {
+        } else if (thirst >= 5) {
             send_to_char(ch, "         You are really thirsty.\r\n");
-        } else if (GET_COND(ch, THIRST) >= 2) {
+        } else if (thirst >= 2) {
             send_to_char(ch, "         You are extremely thirsty.\r\n");
-        } else if (GET_COND(ch, THIRST) >= 0) {
+        } else if (thirst >= 0) {
             send_to_char(ch, "         You are dehydrated!\r\n");
-        } else if (GET_COND(ch, THIRST) < 0) {
+        } else if (thirst < 0) {
             send_to_char(ch, "         You need not drink.\r\n");
         }
         send_to_char(ch, "         @D--------------------@D[@GInfo@D]---------------------@n\r\n");
@@ -4089,7 +4090,7 @@ ACMD(do_status) {
         if (PLR_FLAGGED(ch, PLR_NOSHOUT)) {
             send_to_char(ch, "         You have been @rmuted@n on public channels.\r\n");
         }
-        if (IN_ROOM(ch) == 9) {
+        if (ch->getLocation() == 9) {
             send_to_char(ch, "         You are in punishment hell, so sad....\r\n");
         }
         if (!PRF_FLAGGED(ch, PRF_HINTS)) {
@@ -5279,16 +5280,16 @@ static void print_object_location(int num, struct obj_data *obj, struct char_dat
     if (!obj->getProtoScript().empty())
         send_to_char(ch, "%s", obj->scriptString().c_str());
     
-    if(obj->location) {
-        switch(obj->location->type) {
+    if(obj->location.unit) {
+        switch(obj->location.getType()) {
             case UnitType::room: {
-                auto r = static_cast<room_data*>(obj->location);
+                auto r = static_cast<room_data*>(obj->location.unit);
                 send_to_char(ch, "[%5d] %s\r\n", r->getVnum(), r->getName());
                 }
                 break;
             case UnitType::character: {
-                auto c = static_cast<char_data*>(obj->location);
-                if(obj->pos_x == -1) {
+                auto c = static_cast<char_data*>(obj->location.unit);
+                if(obj->location.position.x == -1) {
                     send_to_char(ch, "carried by %s in room [%d]\r\n", PERS(c, ch), c->getRoomVnum());
                 } else {
                     send_to_char(ch, "worn by %s in room [%d]\r\n", PERS(c, ch), c->getRoomVnum());
@@ -5296,7 +5297,7 @@ static void print_object_location(int num, struct obj_data *obj, struct char_dat
                 }
                 break;
             case UnitType::object: {
-                auto o = static_cast<obj_data*>(obj->location);
+                auto o = static_cast<obj_data*>(obj->location.unit);
                 send_to_char(ch, "inside %s%s\r\n", o->getShortDescription(), (recur ? ", which is" : " "));
                 if (recur)
                     print_object_location(0, o, ch, recur);
@@ -5325,21 +5326,21 @@ static void perform_immort_where(struct char_data *ch, char *arg) {
                      "Players                  Vnum    Planet        Location\r\n-------                 ------   ----------    ----------------\r\n");
         for (d = descriptor_list; d; d = d->next)
             if (IS_PLAYING(d)) {
-                if (IN_ROOM(d->character) != NOWHERE) {
+                if (d->character->getLocation()) {
                     planet = getPlanet(d->character->getRoomVnum());
                 } else {
                     planet = {};
                 }
                 i = (d->original ? d->original : d->character);
-                if (i && CAN_SEE(ch, i) && (IN_ROOM(i) != NOWHERE)) {
+                if (i && CAN_SEE(ch, i) && i->getLocation()) {
                     if (d->original)
                         send_to_char(ch, "%-20s - [%5d]   %s (in %s)\r\n",
                                      GET_NAME(i), d->character->getRoomVnum(),
-                                     d->character->getRoom()->getName(), GET_NAME(d->character));
+                                     d->character->getLocationName(), GET_NAME(d->character));
                     else {
                         std::string locName = getPlanetName(planet.value());
                         send_to_char(ch, "%-20s - [%5d]   %-14s %s\r\n", GET_NAME(i), i->getRoomVnum(),
-                                     locName.c_str(), i->getRoom()->getName());
+                                     locName.c_str(), i->getLocationName());
                     }
 
                 }
@@ -5349,7 +5350,7 @@ static void perform_immort_where(struct char_data *ch, char *arg) {
                GET_NAME(ch), arg);
         auto ac = characterSubscriptions.all("active");
         for (auto i : filter_raw(ac)) {
-            if (CAN_SEE(ch, i) && IN_ROOM(i) != NOWHERE && isname(arg, i->getName())) {
+            if (CAN_SEE(ch, i) && i->getLocation() && isname(arg, i->getName())) {
                 found = 1;
                 send_to_char(ch, "M%3d. %-25s - [%5d] %-25s", ++num, GET_NAME(i),
                              i->getRoomVnum(), i->getRoom()->getName());
@@ -6007,7 +6008,7 @@ ACMD(do_scan) {
         return;
     }
 
-    auto darkHere = IS_DARK(ch->getRoomVnum());
+    auto darkHere = ch->getLocationIsDark();
 
     for (i = 0; i < 10; i++) {
         auto d = room->dir_option[i];
@@ -6045,7 +6046,7 @@ ACMD(do_scan) {
         if(!dest2) continue;
         if(IS_SET(d2->exit_info, EX_CLOSED)) continue;
 
-        if (!IS_DARK(dest2->getVnum())) {
+        if (!dest2->isDark()) {
             send_to_char(ch, "@w-----------------------------------------@n\r\n");
             send_to_char(ch, "          %sFar %s: %s %s\r\n", CCCYN(ch, C_NRM), dirnames[i],
                          dest2->getName() ? dest2->getName()

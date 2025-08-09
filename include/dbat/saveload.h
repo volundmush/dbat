@@ -181,8 +181,8 @@ void from_json(const json& j, shop_data& s);
 void to_json(json& j, const guild_data& g);
 void from_json(const json& j, guild_data& g);
 
-void to_json(json& j, const room_direction_data &e);
-void from_json(const json& j, room_direction_data &e);
+void to_json(json& j, const Destination &e);
+void from_json(const json& j, Destination &e);
 
 void to_json(json& j, const room_data& r);
 void from_json(const json& j, room_data& r);

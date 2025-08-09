@@ -6,6 +6,7 @@ struct char_data;
 struct obj_data;
 struct thing_data;
 struct room_data;
+struct location_data;
 struct shop_buy_data;
 struct command_info;
 struct descriptor_data;

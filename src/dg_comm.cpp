@@ -192,18 +192,21 @@ void sub_write(char *arg, struct char_data *ch, int8_t find_invis, int targets) 
     }
 }
 
-
-void send_to_zone(char *messg, zone_rnum zone) {
-    struct descriptor_data *i;
+void send_to_zone(char *messg, zone_data *zone) {
 
     if (!messg || !*messg)
         return;
 
-    for (i = descriptor_list; i; i = i->next)
+    for (auto i = descriptor_list; i; i = i->next)
         if (!i->connected && i->character && AWAKE(i->character) &&
-            (IN_ROOM(i->character) != NOWHERE) &&
-            (i->character->getRoom()->zone == zone))
+            i->character->location &&
+            (i->character->location.getZone() == zone))
             write_to_output(i, "%s", messg);
+}
+
+void send_to_zone(char *messg, zone_rnum zone) {
+    auto &z = zone_table.at(zone);
+    send_to_zone(messg, &z);
 }
 
 void fly_planet(room_vnum roomVnum, const char *messg, struct char_data *ch) {
@@ -234,15 +237,13 @@ void fly_planet(room_vnum roomVnum, const char *messg, struct char_data *ch) {
     }
 }
 
-void fly_zone(zone_rnum zone, char *messg, struct char_data *ch) {
-    struct descriptor_data *i;
-
+void fly_zone(zone_data *zone, char *messg, struct char_data *ch) {
     if (!messg || !*messg)
         return;
 
-    for (i = descriptor_list; i; i = i->next) {
+    for (auto i = descriptor_list; i; i = i->next) {
         if (!i->connected && i->character && AWAKE(i->character) && OUTSIDE(i->character) &&
-            (IN_ROOM(i->character) != NOWHERE) && (i->character->getRoom()->zone == zone) && i->character != ch) {
+            (i->character->location.getZone() == zone) && i->character != ch) {
             if (PLR_FLAGGED(i->character, PLR_DISGUISED)) {
                 write_to_output(i, "A disguised figure %s", messg);
             } else {
@@ -251,6 +252,11 @@ void fly_zone(zone_rnum zone, char *messg, struct char_data *ch) {
             }
         }
     }
+}
+
+void fly_zone(zone_rnum zone, char *messg, struct char_data *ch) {
+    auto &z = zone_table.at(zone);
+    fly_zone(&z, messg, ch);
 }
 
 void send_to_sense(int type, const char *messg, struct char_data *ch) {

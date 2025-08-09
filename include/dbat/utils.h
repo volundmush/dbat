@@ -158,8 +158,6 @@ extern int num_pc_in_room(struct room_data *room);
 
 extern void core_dump_real(const char *who, int line);
 
-extern int room_is_dark(room_rnum room);
-
 extern int count_color_chars(const char *string);
 
 extern bool is_sparring(struct char_data *ch);
@@ -851,7 +849,7 @@ int64_t MOD_OBJ_VAL(T* obj, const std::string& val, int mod) {
 /* Various macros building up to CAN_SEE */
 
 #define LIGHT_OK(sub)    (!AFF_FLAGGED(sub, AFF_BLIND) && !PLR_FLAGGED(sub, PLR_EYEC) && \
-   (IS_LIGHT(IN_ROOM(sub)) || AFF_FLAGGED((sub), AFF_INFRAVISION) || (sub)->mutations.get(Mutation::infravision) || PLR_FLAGGED(sub, PLR_AURALIGHT)) )
+   (!(sub)->getLocationIsDark() || AFF_FLAGGED((sub), AFF_INFRAVISION) || (sub)->mutations.get(Mutation::infravision) || PLR_FLAGGED(sub, PLR_AURALIGHT)) )
 
 #define INVIS_OK(sub, obj) \
  (!AFF_FLAGGED((obj),AFF_INVISIBLE) || AFF_FLAGGED(sub,AFF_DETECT_INVIS))

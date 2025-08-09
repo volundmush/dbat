@@ -208,7 +208,7 @@ void redit_setup_existing(struct descriptor_data *d, int real_num) {
      */
     for (counter = 0; counter < NUM_OF_DIRS; counter++) {
         if (get_room(real_num)->dir_option[counter]) {
-            CREATE(room->dir_option[counter], struct room_direction_data, 1);
+            CREATE(room->dir_option[counter], struct Destination, 1);
 
             /*
              * Copy the numbers over.
@@ -250,7 +250,6 @@ void redit_save_internally(struct descriptor_data *d) {
     }
     OLC_ROOM(d)->id = OLC_NUM(d);
     /* FIXME: Why is this not set elsewhere? */
-    OLC_ROOM(d)->zone = OLC_ZNUM(d);
 
     if ((room_num = add_room(OLC_ROOM(d))) == NOWHERE) {
         write_to_output(d, "Something went wrong...\r\n");
@@ -353,7 +352,7 @@ void redit_disp_exit_menu(struct descriptor_data *d) {
      * if exit doesn't exist, alloc/create it
      */
     if (OLC_EXIT(d) == nullptr)
-        CREATE(OLC_EXIT(d), struct room_direction_data, 1);
+        CREATE(OLC_EXIT(d), struct Destination, 1);
 
     sprintbit(OLC_EXIT(d)->exit_info, exit_bits, door_buf, sizeof(door_buf));
 
@@ -367,23 +366,13 @@ void redit_disp_exit_menu(struct descriptor_data *d) {
                     "@g6@n) Purge exit.\r\n"
                     "@g7@n) DC Lock		: @c%d\r\n"
                     "@g8@n) DC Hide     		: @c%d\r\n"
-                    "@g9@n) DC Skill		: @c%s\r\n"
-                    "@gA@n) DC Move		: @c%d\r\n"
-                    "@gB@n) Skill Fail Save Type		: @c%d\r\n"
-                    "@gC@n) DC Skill Save		: @c%d\r\n"
-                    "@gD@n) Minor Fail Dest. Room	: @c%d\r\n"
-                    "@gE@n) Major Fail Dest. Room	: @c%d@n\r\n"
                     "Enter choice, 0 to quit : ",
 
                     OLC_EXIT(d)->to_room,
                     OLC_EXIT(d)->general_description ? OLC_EXIT(d)->general_description : "<NONE>",
                     OLC_EXIT(d)->keyword ? OLC_EXIT(d)->keyword : "<NONE>",
                     OLC_EXIT(d)->key != NOTHING ? OLC_EXIT(d)->key : -1,
-                    door_buf, OLC_EXIT(d)->dclock, OLC_EXIT(d)->dchide,
-                    OLC_EXIT(d)->dcskill != 0 ? spell_info[OLC_EXIT(d)->dcskill].name : "<NONE>",
-                    OLC_EXIT(d)->dcmove, OLC_EXIT(d)->failsavetype,
-                    OLC_EXIT(d)->dcfailsave, OLC_EXIT(d)->failroom,
-                    OLC_EXIT(d)->totalfailroom
+                    door_buf, OLC_EXIT(d)->dclock, OLC_EXIT(d)->dchide
     );
 
     OLC_MODE(d) = REDIT_EXIT_MENU;
@@ -1059,56 +1048,11 @@ void redit_parse(struct descriptor_data *d, char *arg) {
             return;
 
         case REDIT_EXIT_DCSKILL:
-            number = find_skill_num(arg, SKTYPE_SKILL);
-            if (number < 1)
-                OLC_EXIT(d)->dcskill = 0;
-            else
-                OLC_EXIT(d)->dcskill = number;
-            redit_disp_exit_menu(d);
-            return;
-
         case REDIT_EXIT_DCMOVE:
-            number = atoi(arg);
-            if (number < 0)
-                OLC_EXIT(d)->dcmove = NOTHING;
-            else
-                OLC_EXIT(d)->dcmove = number;
-            redit_disp_exit_menu(d);
-            return;
-
         case REDIT_EXIT_SAVETYPE:
-            number = atoi(arg);
-            if (number < 0)
-                OLC_EXIT(d)->failsavetype = NOTHING;
-            else
-                OLC_EXIT(d)->failsavetype = number;
-            redit_disp_exit_menu(d);
-            return;
-
         case REDIT_EXIT_DCSAVE:
-            number = atoi(arg);
-            if (number < 0)
-                OLC_EXIT(d)->dcfailsave = NOTHING;
-            else
-                OLC_EXIT(d)->dcfailsave = number;
-            redit_disp_exit_menu(d);
-            return;
-
         case REDIT_EXIT_FAILROOM:
-            number = atoi(arg);
-            if (number < 0)
-                OLC_EXIT(d)->failroom = NOWHERE;
-            else
-                OLC_EXIT(d)->failroom = number;
-            redit_disp_exit_menu(d);
-            return;
-
         case REDIT_EXIT_TOTALFAILROOM:
-            number = atoi(arg);
-            if (number < 0)
-                OLC_EXIT(d)->totalfailroom = NOWHERE;
-            else
-                OLC_EXIT(d)->totalfailroom = number;
             redit_disp_exit_menu(d);
             return;
 

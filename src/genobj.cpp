@@ -94,11 +94,11 @@ int delete_object(obj_rnum rnum) {
     for (auto tmp : filter_raw(allobj)) {
 
         /* extract_obj() will just axe contents. */
-        if (auto con = tmp->getObjects(); !con.empty() && tmp->location) {
+        if (auto con = tmp->getObjects(); !con.empty() && tmp->location.unit) {
 
-            switch(tmp->location->type) {
+            switch(tmp->location.getType()) {
                 case UnitType::room: {
-                    auto r = static_cast<room_data*>(tmp->location);
+                    auto r = static_cast<room_data*>(tmp->location.unit);
                     for(auto this_content : filter_raw(con)) {
                         /* Transfer stuff from object to room. */
                         obj_from_obj(this_content);
@@ -107,7 +107,7 @@ int delete_object(obj_rnum rnum) {
                 }
                     break;
                 case UnitType::character: {
-                    auto c = static_cast<char_data*>(tmp->location);
+                    auto c = static_cast<char_data*>(tmp->location.unit);
                     for(auto this_content : filter_raw(con)) {
                         /* Transfer stuff from object to person inventory. */
                         obj_from_char(this_content);
@@ -116,7 +116,7 @@ int delete_object(obj_rnum rnum) {
                 }
                     break;
                 case UnitType::object: {
-                    auto o = static_cast<obj_data*>(tmp->location);
+                    auto o = static_cast<obj_data*>(tmp->location.unit);
                     for(auto this_content : filter_raw(con)) {
                         /* Transfer stuff from object to containing object. */
                         obj_from_obj(this_content);
@@ -344,9 +344,9 @@ bool obj_data::isProvidingLight() {
 }
 
 struct room_data* obj_data::getAbsoluteRoom() {
-    auto loc = location;
+    auto loc = location.unit;
     while(loc && (loc->type != UnitType::room)) {
-        loc = loc->location;
+        loc = loc->location.unit;
     }
     return (room_data*)loc;
 }
@@ -363,14 +363,14 @@ bool obj_data::isWorking() {
 }
 
 void obj_data::clearLocation() {
-    if(!location) return;
-    switch(location->type) {
+    if(!location.unit) return;
+    switch(location.getType()) {
         case UnitType::room:
             obj_from_room(this);
             break;
         case UnitType::character:
-            if(pos_x >= 0.0) {
-                unequip_char((char_data*)location, pos_x);
+            if(location.position.x >= 0.0) {
+                unequip_char((char_data*)location.unit, location.position.x);
             } else {
                 obj_from_char(this);
             }
@@ -381,15 +381,26 @@ void obj_data::clearLocation() {
         default:
             break;
     }
-    pos_x = 0.0;
-    pos_y = 0.0;
-    pos_z = 0.0;
+    location.position.x = 0.0;
+    location.position.y = 0.0;
+    location.position.z = 0.0;
 }
 
+void obj_data::setLocation(room_data* room) {
+    if(!room) return;
+    obj_to_room(this, room);
+}
+
+void obj_data::setLocation(room_vnum rv) {
+    auto r = real_room(rv);
+    setLocation(r);
+}
+
+
 void obj_data::setLocation(const Location& loc) {
-    if(!loc.location) return;
-    if(loc.location->type == UnitType::room) {
-        obj_to_room(this, static_cast<room_data*>(loc.location));
+    if(!loc.unit) return;
+    if(loc.unit->type == UnitType::room) {
+        setLocation(static_cast<room_data*>(loc.unit));
     }
 }
 
@@ -419,28 +430,24 @@ item_proto_data* obj_data::getProto() const {
 }
 
 obj_data* obj_data::getContainer() const {
-    if(!location) return nullptr;
-    if(location->type != UnitType::object) return nullptr;
-    return static_cast<obj_data*>(location);
+    if(location.getType() != UnitType::object) return nullptr;
+    return static_cast<obj_data*>(location.unit);
 }
 
 char_data* obj_data::getCarriedBy() const {
-    if(!location) return nullptr;
-    if(location->type != UnitType::character) return nullptr;
-    if(pos_x != -1.0) return nullptr;
-    return static_cast<char_data*>(location);
+    if(location.getType() != UnitType::character) return nullptr;
+    if(location.position.x != -1.0) return nullptr;
+    return static_cast<char_data*>(location.unit);
 }
 
 char_data* obj_data::getWornBy() const {
-    if(!location) return nullptr;
-    if(location->type != UnitType::character) return nullptr;
-    if(pos_x == -1.0) return nullptr;
-    return static_cast<char_data*>(location);
+    if(location.getType() != UnitType::character) return nullptr;
+    if(location.position.x == -1.0) return nullptr;
+    return static_cast<char_data*>(location.unit);
 }
 
 int16_t obj_data::getWornOn() const {
-    if(!location) return -1;
-    if(location->type != UnitType::character) return -1;
-    if(pos_x == -1.0) return -1;
-    return pos_x;
+    if(location.getType() != UnitType::character) return -1;
+    if(location.position.x == -1.0) return -1;
+    return location.position.x;
 }

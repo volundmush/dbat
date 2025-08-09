@@ -92,16 +92,28 @@ def tool_index_room_scripts(dump_dir: Path, args):
     print(f"Total Scripts Used: {len(scripts)}")
     print(f"Scripts: {', '.join([str(i) for i in scripts])}")
 
+def tool_exit_skills(dump_dir: Path, args):
+    data = readJsonFile(dump_dir, "exits")
+
+    print(f"Searching through {len(data)} exits for dclock")
+    total = 0
+    for ex in data:
+        d = ex.get("data", dict())
+        if (val := d.get("dchide", 0)) > 0:
+            total += 1
+            print(f"Room: {ex.get("room")} Direction {ex.get('direction', 'Unknown')} - value: {val}")
+
 tools = {
     # Provided an affect (and, optionally, a specific), lists everything with matching obj_affected_type
     "SearchObjApply": tool_index_obj_apply,
     "SearchObjFlag": tool_index_obj_flag,
-    "RoomScripts": tool_index_room_scripts
+    "RoomScripts": tool_index_room_scripts,
+    "ExitSkills": tool_exit_skills
 }
 
 def main():
     # Read the dump directory from command line arguments or use default
-    dump_directory = Path.cwd() / "lib" / "dumps"
+    dump_directory = Path.cwd() / "data" / "dumps"
 
     try:
         dump = select_dump_folder(dump_directory)

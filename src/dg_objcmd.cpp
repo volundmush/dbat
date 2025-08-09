@@ -553,7 +553,6 @@ OCMD(do_odamage) {
 
 OCMD(do_oasound) {
     room_rnum room;
-    int door;
 
     skip_spaces(&argument);
 
@@ -568,14 +567,9 @@ OCMD(do_oasound) {
     }
 
     auto r = get_room(room);
-    for (door = 0; door < NUM_OF_DIRS; door++) {
-        auto ex = r->dir_option[door];
-        if(!ex) continue;
-        if (ex->to_room == room) continue;
-        if(auto dest = get_room(ex->to_room); dest) {
-            send_to_room(dest, "%s", argument);
-        }
-        
+    for (auto &[door, ex] : r->getDirections()) {
+        auto dest = ex.getDestination();
+        send_to_room(dest, "%s", argument);
     }
 }
 
@@ -584,7 +578,7 @@ OCMD(do_odoor) {
     char target[MAX_INPUT_LENGTH], direction[MAX_INPUT_LENGTH];
     char field[MAX_INPUT_LENGTH], *value;
     room_data *rm;
-    struct room_direction_data *newexit;
+    struct Destination *newexit;
     int dir, fd, to_room;
 
     const char *door_field[] = {
@@ -636,7 +630,7 @@ OCMD(do_odoor) {
         }
     } else {
         if (!newexit) {
-            CREATE(newexit, struct room_direction_data, 1);
+            CREATE(newexit, struct Destination, 1);
             rm->dir_option[dir] = newexit;
         }
 

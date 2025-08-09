@@ -2,7 +2,7 @@
 #include "dbat/send.h"
 
 struct room_data* thing_data::getRoom() const {
-    return dynamic_cast<room_data*>(location);
+    return dynamic_cast<room_data*>(location.unit);
 }
 
 room_vnum thing_data::getRoomVnum() const {
@@ -11,139 +11,160 @@ room_vnum thing_data::getRoomVnum() const {
 }
 
 std::string thing_data::getLocationName() const {
-    if(auto r = getRoom())
-        return r->getName();
+    if(auto l = dynamic_cast<location_data*>(location.unit)) {
+        return l->getName(location.position);
+    }
     return "Unknown";
 }
 
-room_direction_data* thing_data::getLocationExit(int dir) const {
-    if(auto r = getRoom())
-        return r->dir_option[dir];
-    return nullptr;
+std::optional<Destination> thing_data::getLocationExit(Direction dir) const {
+    if(auto l = dynamic_cast<location_data*>(location.unit))
+        return l->getDirection(location.position, dir);
+    return std::nullopt;
 }
 
-std::map<int, room_direction_data*> thing_data::getLocationExits() const {
-    std::map<int, room_direction_data*> exits;
-    if(auto r = getRoom())
-        for(int i = 0; i < NUM_OF_DIRS; i++)
-            if(r->dir_option[i])
-                exits[i] = r->dir_option[i];
-    return exits;
+std::map<Direction, Destination> thing_data::getLocationExits() const {
+    if(auto l = dynamic_cast<location_data*>(location.unit)) {
+        return l->getDirections(location.position);
+    }
+    return {};
 }
 
 double thing_data::getLocationEnvironment(int type) const {
-    if(auto r = getRoom())
-        return r->getEnvironment(type);
+    if(auto l = dynamic_cast<location_data*>(location.unit)) {
+        return l->getEnvironment(location.position, type);
+    }
     return 0.0;
 }
 
-double thing_data::setLocationEnvironment(int type, double value) const {
-    if(auto r = getRoom())
-        return r->setEnvironment(type, value);
+double thing_data::setLocationEnvironment(int type, double value) {
+    if(auto l = dynamic_cast<location_data*>(location.unit)) {
+        return l->setEnvironment(location.position, type, value);
+    }
     return 0.0;
 }
 
-double thing_data::modLocationEnvironment(int type, double value) const {
-    if(auto r = getRoom())
-        return r->modEnvironment(type, value);
+double thing_data::modLocationEnvironment(int type, double value) {
+    if(auto l = dynamic_cast<location_data*>(location.unit)) {
+        return l->modEnvironment(location.position, type, value);
+    }
     return 0.0;
 }
 
-void thing_data::clearLocationEnvironment(int type) const {
-    if(auto r = getRoom())
-        r->clearEnvironment(type);
+void thing_data::clearLocationEnvironment(int type) {
+    if(auto l = dynamic_cast<location_data*>(location.unit)) {
+        l->clearEnvironment(location.position, type);
+    }
 }
 
 void thing_data::setRoomFlag(int flag, bool value) const {
-    if(auto r = getRoom())
-        r->room_flags.set(flag, value);
+    if(auto l = dynamic_cast<location_data*>(location.unit)) {
+        l->setRoomFlag(location.position, flag, value);
+    }
 }
 
 bool thing_data::toggleRoomFlag(int flag) const {
-    if(auto r = getRoom())
-        return r->room_flags.toggle(flag);
+    if(auto l = dynamic_cast<location_data*>(location.unit)) {
+        return l->toggleRoomFlag(location.position, flag);
+    }
     return false;
 }
 
 bool thing_data::getRoomFlag(int flag) const {
-    if(auto r = getRoom())
-        return r->room_flags.get(flag);
+    if(auto l = dynamic_cast<location_data*>(location.unit)) {
+        return l->getRoomFlag(location.position, flag);
+    }
     return false;
 }
 
 void thing_data::setWhereFlag(WhereFlag flag, bool value) const {
-    if(auto r = getRoom())
-        r->where_flags.set(flag, value);
+    if(auto l = dynamic_cast<location_data*>(location.unit)) {
+        l->setWhereFlag(location.position, flag, value);
+    }
 }
 
 bool thing_data::toggleWhereFlag(WhereFlag flag) const {
-    if(auto r = getRoom())
-        return r->where_flags.toggle(flag);
+    if(auto l = dynamic_cast<location_data*>(location.unit)) {
+        return l->toggleWhereFlag(location.position, flag);
+    }
     return false;
 }
 
 bool thing_data::getWhereFlag(WhereFlag flag) const {
-    if(auto r = getRoom())
-        return r->where_flags.get(flag);
+    if(auto l = dynamic_cast<location_data*>(location.unit)) {
+        return l->getWhereFlag(location.position, flag);
+    }
     return false;
 }
 
 void thing_data::broadcastAtLocation(const std::string& message) const {
-    if(auto r = getRoom())
-        send_to_room(r, message);
+    if(auto l = dynamic_cast<location_data*>(location.unit)) {
+        l->broadcastAt(location.position, message);
+    }
 }
 
 std::vector<std::weak_ptr<obj_data>> thing_data::getLocationObjects() const {
-    if(auto r = getRoom())
-        return r->getObjects();
+    if(auto l = dynamic_cast<location_data*>(location.unit)) {
+        return l->getObjects(location.position);
+    }
     return {};
 }
 
 std::vector<std::weak_ptr<char_data>> thing_data::getLocationPeople() const {
-    if(auto r = getRoom())
-        return r->getPeople();
+    if(auto l = dynamic_cast<location_data*>(location.unit)) {
+        return l->getPeople(location.position);
+    }
     return {};
 }
 
 int thing_data::getLocationDamage() const {
-    if(auto r = getRoom())
-        return r->damage;
+    if(auto l = dynamic_cast<location_data*>(location.unit)) {
+        return l->getDamage(location.position);
+    }
     return 0;
 }
 
-int thing_data::setLocationDamage(int value) const {
-    if(auto r = getRoom())
-        return r->damage = value;
+void thing_data::setLocationDamage(int value) {
+    if(auto l = dynamic_cast<location_data*>(location.unit)) {
+        l->setDamage(location.position, value);
+    }
+}
+
+int thing_data::modLocationDamage(int value) {
+    if(auto l = dynamic_cast<location_data*>(location.unit)) {
+        return l->modDamage(location.position, value);
+    }
     return 0;
 }
 
-int thing_data::modLocationDamage(int value) const {
-    if(auto r = getRoom())
-        return r->damage += value;
-    return 0;
+SectorType thing_data::getLocationSectorType() const {
+    if(auto l = dynamic_cast<location_data*>(location.unit)) {
+        return l->getSectorType(location.position);
+    }
+    return SectorType::inside;
 }
 
 int thing_data::getLocationTileType() const {
-    if(auto r = getRoom())
-        return static_cast<int>(r->sector_type);
-    return 0;
+    return static_cast<int>(getLocationSectorType());
 }
 
 int thing_data::getLocationGroundEffect() const {
-    if(auto r = getRoom())
-        return r->ground_effect;
+    if(auto l = dynamic_cast<location_data*>(location.unit)) {
+        return l->getGroundEffect(location.position);
+    }
     return 0;
 }
 
-int thing_data::setLocationGroundEffect(int value) const {
-    if(auto r = getRoom())
-        return r->ground_effect = value;
-    return 0;
+void thing_data::setLocationGroundEffect(int value) {
+    if(auto l = dynamic_cast<location_data*>(location.unit)) {
+        l->setGroundEffect(location.position, value);
+    }
 }
 
-int thing_data::modLocationGroundEffect(int value) const {
-    if(auto r = getRoom())
-        return r->ground_effect += value;
+int thing_data::modLocationGroundEffect(int value) {
+    if(auto l = dynamic_cast<location_data*>(location.unit)) {
+        return l->modGroundEffect(location.position, value);
+    }
     return 0;
 }
 
@@ -154,7 +175,7 @@ SpecialFunc thing_data::getLocationSpecialFunc() const {
 }
 
 Location thing_data::getLocation() const {
-    return Location{location, pos_x, pos_y, pos_z};
+    return location;
 }
 
 int thing_data::getCookElement() const {
@@ -163,20 +184,43 @@ int thing_data::getCookElement() const {
     return 0;
 }
 
-bool Location::operator==(const Location& other) const {
-    return location == other.location && pos_x == other.pos_x && pos_y == other.pos_y && pos_z == other.pos_z;
+bool thing_data::getLocationIsDark() const {
+    if(auto r = getRoom())
+        return r->isDark();
+    return false;
 }
 
-bool Location::operator!=(const Location& other) const {
-    return !(*this == other);
+bool Coordinates::operator==(const Coordinates& other) const {
+    return x == other.x && y == other.y && z == other.z;
+}
+
+bool Location::operator==(const Location& other) const {
+    return unit == other.unit && position == other.position;
+}
+
+bool Location::operator==(const room_data* room) const {
+    return room == unit;
+}
+
+bool Location::operator==(const room_vnum rv) const {
+    if(!unit) return rv == NOWHERE;
+    if(unit->type != UnitType::room) return false;
+    auto r = static_cast<room_data*>(unit);
+    return r->getVnum() == rv;
 }
 
 // the bool operator for Location....
 Location::operator bool() const {
-    if(!location) return false;
-    switch(location->type) {
-        case UnitType::room:
-            return true;
+    return getType() == UnitType::room;
+}
+
+UnitType Location::getType() const {
+    return unit ? unit->type : UnitType::unknown;
+}
+
+zone_data* Location::getZone() const {
+    if(auto r = dynamic_cast<room_data*>(unit)) {
+        return r->zone;
     }
-    return false;
+    return nullptr;
 }

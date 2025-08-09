@@ -241,7 +241,7 @@ WCMD(do_wdoor) {
     char target[MAX_INPUT_LENGTH], direction[MAX_INPUT_LENGTH];
     char field[MAX_INPUT_LENGTH], *value;
     room_data *rm;
-    struct room_direction_data *newexit;
+    struct Destination *newexit;
     int dir, fd, to_room;
 
     const char *door_field[] = {
@@ -297,7 +297,7 @@ WCMD(do_wdoor) {
         }
     } else {
         if (!newexit) {
-            CREATE(newexit, struct room_direction_data, 1);
+            CREATE(newexit, struct Destination, 1);
             rm->dir_option[dir] = newexit;
         }
 

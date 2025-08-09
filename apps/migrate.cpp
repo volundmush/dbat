@@ -860,7 +860,7 @@ static void setup_dir(FILE *fl, room_vnum room, int dir) {
 
     auto r = get_room(room);
 
-    CREATE(r->dir_option[dir], struct room_direction_data, 1);
+    CREATE(r->dir_option[dir], struct Destination, 1);
 
     auto d = r->dir_option[dir];
 
@@ -895,48 +895,24 @@ static void setup_dir(FILE *fl, room_vnum room, int dir) {
             basic_mud_log("Converting world files to include DC add ons.");
             d->dclock = 20;
             d->dchide = 20;
-            d->dcskill = 0;
-            d->dcmove = 0;
-            d->failsavetype = 0;
-            d->dcfailsave = 0;
-            d->failroom = NOWHERE;
-            d->totalfailroom = NOWHERE;
             if (bitsavetodisk) {
                 converting = true;
             }
         } else if (retval == 5) {
             d->dclock = t[3];
             d->dchide = t[4];
-            d->dcskill = 0;
-            d->dcmove = 0;
-            d->failsavetype = 0;
-            d->dcfailsave = 0;
-            d->failroom = NOWHERE;
-            d->totalfailroom = NOWHERE;
             if (bitsavetodisk) {
                 converting = true;
             }
         } else if (retval == 7) {
             d->dclock = t[3];
             d->dchide = t[4];
-            d->dcskill = t[5];
-            d->dcmove = t[6];
-            d->failsavetype = 0;
-            d->dcfailsave = 0;
-            d->failroom = NOWHERE;
-            d->totalfailroom = NOWHERE;
             if (bitsavetodisk) {
                 converting = true;
             }
         } else if (retval == 11) {
             d->dclock = t[3];
             d->dchide = t[4];
-            d->dcskill = t[5];
-            d->dcmove = t[6];
-            d->failsavetype = t[7];
-            d->dcfailsave = t[8];
-            d->failroom = t[9];
-            d->totalfailroom = t[10];
         }
     }
 }
@@ -971,7 +947,7 @@ static void parse_room(FILE *fl, room_vnum virtual_nr) {
     world.emplace(virtual_nr, sh);
     z.rooms.insert(virtual_nr);
 
-    r->zone = zone;
+    r->zone = &z;
     r->id = virtual_nr;
     r->vn = virtual_nr;
     r->strings["name"] = fread_string(fl, buf2);

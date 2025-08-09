@@ -33,7 +33,7 @@ struct PathNode {
         }
     }
     int dir;
-    room_direction_data* exit{nullptr};
+    Destination* exit{nullptr};
     room_data* room{nullptr};
     operator bool() const {
         if(!exit || !room) return false;

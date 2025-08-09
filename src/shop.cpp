@@ -969,54 +969,7 @@ get_selling_obj(struct char_data *ch, char *name, struct char_data *keeper, vnum
 
 static void sort_keeper_objs(struct char_data *keeper, int shop_nr)
 {
-    std::unordered_set<int> already_produced; // Track vnums we've already added
-    std::list<std::shared_ptr<obj_data>> active_objects;
-
-    auto &sh = shop_index.at(shop_nr);
-    // 1. Promote all valid weak_ptrs to shared_ptr and collect into a working list
-    for (auto &wptr : keeper->objects) {
-        if (auto sptr = wptr.lock()) {
-            active_objects.push_back(sptr);
-        }
-    }
-
-    // 2. Clear the original list (we'll rebuild it in proper order)
-    keeper->objects.clear();
-    sh.lastsort = 0;
-
-    // 3. First, insert at most one of each shop-produced item
-    for (auto it = active_objects.begin(); it != active_objects.end(); ) {
-        auto &obj = *it;
-        if (shop_producing(obj.get(), shop_nr)) {
-            int vnum = GET_OBJ_RNUM(obj);
-            if (already_produced.insert(vnum).second) {
-                keeper->objects.push_back(obj);
-                sh.lastsort++;
-                it = active_objects.erase(it); // Remove from working list
-                continue;
-            }
-        }
-        ++it;
-    }
-
-    // 4. For remaining items, group identicals (same_obj) next to each other
-    while (!active_objects.empty()) {
-        auto obj = active_objects.front();
-        active_objects.pop_front();
-
-        // Insert `obj` and group any identicals directly after it
-        keeper->objects.push_back(obj);
-        sh.lastsort++;
-
-        for (auto it = active_objects.begin(); it != active_objects.end(); ) {
-            if (same_obj(obj.get(), it->get())) {
-                keeper->objects.push_back(*it);
-                it = active_objects.erase(it);
-            } else {
-                ++it;
-            }
-        }
-    }
+    
 }
 
 static void shopping_sell(char *arg, struct char_data *ch, struct char_data *keeper, vnum shop_nr) {

@@ -205,7 +205,7 @@ ACMD(do_dig) {
         dir = search_block(sdir, dirs, false);
     
     auto r = ch->getRoom();
-    zone = r->zone;
+    zone = r->zone->number;
 
     if (dir < 0) {
         send_to_char(ch, "Cannot create an exit to the '%s'.\r\n", sdir);
@@ -291,7 +291,7 @@ ACMD(do_dig) {
 
         /* Copy the room's description.*/
         OLC_ROOM(d)->strings["look_description"] = "You are in an unfinished room.\r\n";
-        OLC_ROOM(d)->zone = OLC_ZNUM(d);
+        OLC_ROOM(d)->zone = &zone_table.at(OLC_ZNUM(d));
 
         /*
          * Save the new room to memory.
@@ -312,7 +312,7 @@ ACMD(do_dig) {
     /*
      * Now dig.
      */
-    CREATE(r->dir_option[dir], struct room_direction_data, 1);
+    CREATE(r->dir_option[dir], struct Destination, 1);
     e = r->dir_option[dir];
     e->general_description = nullptr;
     e->keyword = nullptr;
@@ -330,7 +330,7 @@ ACMD(do_dig) {
         send_to_char(ch, "You cannot dig from %d to here. The target room already has an exit to the %s.\r\n",
                      rvnum, dirs[rev_dir[dir]]);
     else {
-        CREATE(W_EXIT(rrnum, rev_dir[dir]), struct room_direction_data, 1);
+        CREATE(W_EXIT(rrnum, rev_dir[dir]), struct Destination, 1);
         e2 = r2->dir_option[rev_dir[dir]];
         e2->general_description = nullptr;
         e2->keyword = nullptr;
@@ -389,7 +389,7 @@ ACMD(do_rcopy) {
     auto rn = get_room(rrnum);
     auto tn = get_room(trnum);
 
-    zone = rn->zone;
+    zone = rn->zone->number;
     if ((zone == NOWHERE) || !can_edit_zone(ch, zone)) {
         send_to_char(ch, "\r\n");
         send_cannot_edit(ch, zone);
@@ -427,9 +427,9 @@ int buildwalk(struct char_data *ch, int dir) {
     if (!IS_NPC(ch) && PRF_FLAGGED(ch, PRF_BUILDWALK) &&
         GET_ADMLEVEL(ch) >= ADMLVL_IMMORT) {
 
-        if (!can_edit_zone(ch, ch->getRoom()->zone)) {
-            send_cannot_edit(ch, ch->getRoom()->zone);
-        } else if ((vnum = redit_find_new_vnum(ch->getRoom()->zone)) == NOWHERE)
+        if (!can_edit_zone(ch, ch->getRoom()->zone->number)) {
+            send_cannot_edit(ch, ch->getRoom()->zone->number);
+        } else if ((vnum = redit_find_new_vnum(ch->getRoom()->zone->number)) == NOWHERE)
             send_to_char(ch, "No free vnums are available in this zone!\r\n");
         else {
             struct descriptor_data *d = ch->desc;
@@ -442,7 +442,7 @@ int buildwalk(struct char_data *ch, int dir) {
                 free(d->olc);
             }
             CREATE(d->olc, struct oasis_olc_data, 1);
-            OLC_ZNUM(d) = ch->getRoom()->zone;
+            OLC_ZNUM(d) = ch->getRoom()->zone->number;
             OLC_NUM(d) = vnum;
             CREATE(OLC_ROOM(d), struct room_data, 1);
 
@@ -450,7 +450,7 @@ int buildwalk(struct char_data *ch, int dir) {
 
             sprintf(buf, "This unfinished room was created by %s.\r\n", GET_NAME(ch));
             OLC_ROOM(d)->strings["look_description"] = buf;
-            OLC_ROOM(d)->zone = OLC_ZNUM(d);
+            OLC_ROOM(d)->zone = &zone_table.at(OLC_ZNUM(d));
 
             /*
              * Save the new room to memory.
@@ -461,9 +461,9 @@ int buildwalk(struct char_data *ch, int dir) {
 
             /* Link rooms */
             rnum = real_room(vnum);
-            CREATE(EXIT(ch, dir), struct room_direction_data, 1);
+            CREATE(EXIT(ch, dir), struct Destination, 1);
             EXIT(ch, dir)->to_room = rnum;
-            CREATE(get_room(rnum)->dir_option[rev_dir[dir]], struct room_direction_data, 1);
+            CREATE(get_room(rnum)->dir_option[rev_dir[dir]], struct Destination, 1);
             get_room(rnum)->dir_option[rev_dir[dir]]->to_room = IN_ROOM(ch);
 
             /* Report room creation to user */

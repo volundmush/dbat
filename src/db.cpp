@@ -1732,11 +1732,11 @@ static void do_reset_cmds(zone_data &z) {
                     else
                     {
                         obj = read_object(c.arg1, REAL);
-                        obj->location = mob->location;
+                        obj->location.unit = mob->location.unit;
                         load_otrigger(obj);
                         if (wear_otrigger(obj, mob, c.arg3))
                         {
-                            obj->location = nullptr;
+                            obj->location.unit = nullptr;
                             equip_char(mob, obj, c.arg3);
                         }
                         else

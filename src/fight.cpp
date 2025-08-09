@@ -675,10 +675,11 @@ static void shadow_dragons_live() {
 
 /* For announcing the sounds of battle to nearby rooms */
 void impact_sound(struct char_data *ch, const char *mssg) {
-    int door;
-    for (door = 0; door < NUM_OF_DIRS; door++)
-        if (CAN_GO(ch, door))
-            send_to_room(ch->getRoom()->dir_option[door]->to_room, "%s", mssg);
+    auto room = ch->getRoom();
+    for (auto &[dir, e] : room->getDirections()) {
+        if (CAN_GO(ch, static_cast<int>(dir)))
+            send_to_room(e.to_room, "%s", mssg);
+    }
 }
 
 /* For removing body parts */
@@ -1763,11 +1764,11 @@ static void change_alignment(struct char_data *ch, struct char_data *victim) {
 
 
 void death_cry(struct char_data *ch) {
-    int door;
-    for (door = 0; door < NUM_OF_DIRS; door++)
-        if (CAN_GO(ch, door))
-            send_to_room(ch->getRoom()->dir_option[door]->to_room,
-                         "Your blood freezes as you hear someone's death cry.\r\n");
+    auto room = ch->getRoom();
+    for (auto &[dir, e] : room->getDirections()) {
+        if (CAN_GO(ch, static_cast<int>(dir)))
+            send_to_room(e.to_room, "Your blood freezes as you hear someone's death cry.\r\n");
+    }
 }
 
 /* Let's clean up necessary things after "death" */

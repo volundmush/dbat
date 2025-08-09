@@ -1334,7 +1334,7 @@ int chance_to_hit(struct char_data *ch) {
         num += GET_COND(ch, DRUNK);
     }
 
-    if(IS_DARK(IN_ROOM(ch)) && !CAN_SEE_IN_DARK(ch) && !AFF_FLAGGED(ch, AFF_INFRAVISION))
+    if(ch->getLocationIsDark() && !CAN_SEE_IN_DARK(ch))
         num += 30;
 
     return (num);

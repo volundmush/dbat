@@ -387,12 +387,12 @@ obj_data *get_obj_near_obj(obj_data *obj, char *name) {
         return i;
 
     /* or outside ? */
-    if(!obj->location)
+    if(!obj->location.unit)
         return nullptr;
     
-    switch(obj->location->type) {
+    switch(obj->location.getType()) {
         case UnitType::object: {
-            auto o = static_cast<obj_data*>(obj->location);
+            auto o = static_cast<obj_data*>(obj->location.unit);
             if (*name == UID_CHAR) {
                 auto uidResult = resolveUID(name);
                 auto o2 = std::dynamic_pointer_cast<obj_data>(uidResult).get();
@@ -403,8 +403,8 @@ obj_data *get_obj_near_obj(obj_data *obj, char *name) {
             break;
         }
         case UnitType::character: {
-            auto c = static_cast<char_data*>(obj->location);
-            if(obj->pos_x >= 0.0 && (i = get_object_in_equip(c, name))) {
+            auto c = static_cast<char_data*>(obj->location.unit);
+            if(obj->location.position.x >= 0.0 && (i = get_object_in_equip(c, name))) {
                 // worn?
                 return i;
             } else {
@@ -553,19 +553,19 @@ obj_data *get_obj_by_obj(obj_data *obj, char *name) {
     if (i = get_obj_in_list(name, obj->getObjects()))
         return i;
 
-    if(!obj->location)
+    if(!obj->location.unit)
         return nullptr;
     
-    switch(obj->location->type) {
+    switch(obj->location.getType()) {
         case UnitType::object: {
-            auto o = static_cast<obj_data*>(obj->location);
+            auto o = static_cast<obj_data*>(obj->location.unit);
             if(isname(name, o->getName()))
                 return o;
         }
             break;
         case UnitType::character: {
-            auto c = static_cast<char_data*>(obj->location);
-            if(obj->pos_x == -1) {
+            auto c = static_cast<char_data*>(obj->location.unit);
+            if(obj->location.position.x == -1) {
                 if(i = get_obj_in_list(name,c->getObjects()); i)
                     return i;
             } else {
@@ -640,7 +640,7 @@ void script_trigger_check(uint64_t heartPulse, double deltaTime) {
         sc = SCRIPT(ch);
 
         if (IS_SET(SCRIPT_TYPES(sc), WTRIG_RANDOM) &&
-            (!is_empty(ch->getRoom()->zone) ||
+            (!is_empty(ch->getRoom()->zone->number) ||
                 IS_SET(SCRIPT_TYPES(sc), WTRIG_GLOBAL)))
             random_mtrigger(ch);
     }
@@ -658,7 +658,7 @@ void script_trigger_check(uint64_t heartPulse, double deltaTime) {
         sc = SCRIPT(room);
 
         if (IS_SET(SCRIPT_TYPES(sc), WTRIG_RANDOM) &&
-            (!is_empty(room->zone) ||
+            (!is_empty(room->zone->number) ||
                 IS_SET(SCRIPT_TYPES(sc), WTRIG_GLOBAL)))
             random_wtrigger(room);
     }
@@ -673,7 +673,7 @@ void check_time_triggers() {
         sc = SCRIPT(ch);
 
         if (IS_SET(SCRIPT_TYPES(sc), MTRIG_TIME) &&
-            (!is_empty(ch->getRoom()->zone) ||
+            (!is_empty(ch->getRoom()->zone->number) ||
                 IS_SET(SCRIPT_TYPES(sc), MTRIG_GLOBAL)))
             time_mtrigger(ch);
     }
@@ -691,7 +691,7 @@ void check_time_triggers() {
         sc = SCRIPT(room);
 
         if (IS_SET(SCRIPT_TYPES(sc), WTRIG_TIME) &&
-            (!is_empty(room->zone) ||
+            (!is_empty(room->zone->number) ||
                 IS_SET(SCRIPT_TYPES(sc), WTRIG_GLOBAL)))
             time_wtrigger(room);
     }
@@ -703,7 +703,7 @@ void check_interval_triggers(int trigFlag) {
         auto sc = SCRIPT(ch);
 
         if (IS_SET(SCRIPT_TYPES(sc), trigFlag) &&
-            (!is_empty(ch->getRoom()->zone) ||
+            (!is_empty(ch->getRoom()->zone->number) ||
                 IS_SET(SCRIPT_TYPES(sc), MTRIG_GLOBAL)))
             interval_mtrigger(ch, trigFlag);
     }
@@ -720,7 +720,7 @@ void check_interval_triggers(int trigFlag) {
         auto sc = SCRIPT(r);
 
         if (IS_SET(SCRIPT_TYPES(sc), trigFlag) &&
-            (!is_empty(r->zone) ||
+            (!is_empty(r->zone->number) ||
                 IS_SET(SCRIPT_TYPES(sc), WTRIG_GLOBAL)))
             interval_wtrigger(r.get(), trigFlag);
     }
@@ -1011,7 +1011,7 @@ ACMD(do_attach) {
             send_to_char(ch, "Players can't have scripts.\r\n");
             return;
         }
-        if (!can_edit_zone(ch, ch->getRoom()->zone)) {
+        if (!can_edit_zone(ch, ch->getRoom()->zone->number)) {
             send_to_char(ch, "You can only attach triggers in your own zone\r\n");
             return;
         }
@@ -1035,7 +1035,7 @@ ACMD(do_attach) {
             return;
         }
 
-        if (!can_edit_zone(ch, ch->getRoom()->zone)) {
+        if (!can_edit_zone(ch, ch->getRoom()->zone->number)) {
             send_to_char(ch, "You can only attach triggers in your own zone\r\n");
             return;
         }
@@ -1066,7 +1066,7 @@ ACMD(do_attach) {
             return;
         }
 
-        if (!can_edit_zone(ch, get_room(rnum)->zone)) {
+        if (!can_edit_zone(ch, get_room(rnum)->zone->number)) {
             send_to_char(ch, "You can only attach triggers in your own zone\r\n");
             return;
         }
@@ -1181,7 +1181,7 @@ ACMD(do_detach) {
 
     if (!strcasecmp(arg1, "room") || !strcasecmp(arg1, "wtr")) {
         room = ch->getRoom();
-        if (!can_edit_zone(ch, room->zone)) {
+        if (!can_edit_zone(ch, room->zone->number)) {
             send_to_char(ch, "You can only detach triggers in your own zone\r\n");
             return;
         }

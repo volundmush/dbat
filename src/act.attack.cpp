@@ -268,7 +268,7 @@ ACMD(do_throw) {
     }
 
     if (!(vict = get_char_vis(ch, arg2, nullptr, FIND_CHAR_ROOM))) {
-        if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
+        if (FIGHTING(ch) && FIGHTING(ch)->getLocation() == ch->getLocation()) {
             vict = FIGHTING(ch);
         } else {
             send_to_char(ch, "Who do you want to target?\r\n");

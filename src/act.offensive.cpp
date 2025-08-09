@@ -137,7 +137,7 @@ ACMD(do_geno) {
 
     vict = nullptr;
     if (!*arg || !(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM))) {
-        if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
+        if (FIGHTING(ch) && FIGHTING(ch)->getLocation() == ch->getLocation()) {
             vict = FIGHTING(ch);
         } else {
             send_to_char(ch, "No one around here by that name.\r\n");
@@ -240,7 +240,7 @@ ACMD(do_genki) {
 
     vict = nullptr;
     if (!*arg || !(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM))) {
-        if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
+        if (FIGHTING(ch) && FIGHTING(ch)->getLocation() == ch->getLocation()) {
             vict = FIGHTING(ch);
         } else {
             send_to_char(ch, "No one around here by that name.\r\n");

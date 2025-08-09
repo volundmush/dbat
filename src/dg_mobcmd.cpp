@@ -117,7 +117,6 @@ void mob_log(char_data *mob, const char *format, ...) {
 
 /* prints the argument to all the rooms aroud the mobile */
 ACMD(do_masound) {
-    int door;
 
     if (!MOB_OR_IMPL(ch)) {
         send_to_char(ch, "Huh?!?\r\n");
@@ -135,17 +134,15 @@ ACMD(do_masound) {
     skip_spaces(&argument);
 
     auto was_in_room = ch->getRoom();
-    for (door = 0; door < NUM_OF_DIRS; door++) {
-        struct room_direction_data *newexit;
-
-        if (((newexit = was_in_room->dir_option[door])) &&
-            newexit->to_room != NOWHERE && newexit->getDestination() != was_in_room) {
-            ch->location = newexit->getDestination();
+    for (auto &[door, ex] : was_in_room->getDirections()) {
+        auto dest = ex.getDestination();
+        if(dest != was_in_room) {
+            ch->location.unit = dest;
             sub_write(argument, ch, true, TO_ROOM);
         }
     }
 
-    ch->location = was_in_room;
+    ch->location.unit = was_in_room;
 }
 
 /* Heals a stat of the mob */
@@ -1060,7 +1057,7 @@ ACMD(do_mdoor) {
     char target[MAX_INPUT_LENGTH], direction[MAX_INPUT_LENGTH];
     char field[MAX_INPUT_LENGTH], *value;
     room_data *rm;
-    struct room_direction_data *newexit;
+    struct Destination *newexit;
     int dir, fd, to_room;
 
     const char *door_field[] = {
@@ -1120,7 +1117,7 @@ ACMD(do_mdoor) {
         }
     } else {
         if (!newexit) {
-            CREATE(newexit, struct room_direction_data, 1);
+            CREATE(newexit, struct Destination, 1);
             rm->dir_option[dir] = newexit;
         }
 

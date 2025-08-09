@@ -71,10 +71,10 @@ void char_data::lookAtLocation(room_vnum rv) {
 }
 
 void char_data::lookAtLocation(const Location& loc) {
-    if(!loc.location) return;
-    switch(loc.location->type) {
+    if(!loc.unit) return;
+    switch(loc.unit->type) {
         case UnitType::room:
-            lookAtLocation(static_cast<room_data*>(loc.location));
+            lookAtLocation(static_cast<room_data*>(loc.unit));
             break;
     }
 }
@@ -957,8 +957,9 @@ room_vnum char_data::normalizeLoadRoom(room_vnum in) {
 
 std::map<int, obj_data *> char_data::getEquipment() {
     std::map<int, obj_data*> out;
-    for(const auto &o : filter_raw(objects)) {
-        if(o->pos_x >= 0.0) out[o->pos_x] = o;
+    for(const auto &uw : filter_raw(contents)) {
+        if(auto o = dynamic_cast<obj_data*>(uw))
+            if(o->location.position.x >= 0.0) out[o->location.position.x] = o;
     }
     return out;
 }
