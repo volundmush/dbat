@@ -489,7 +489,7 @@ ACMD(do_mload) {
             if (CAN_WEAR(object, ITEM_WEAR_TAKE)) {
                 obj_to_char(object, ch);
             } else {
-                obj_to_room(object, IN_ROOM(ch));
+                object->setLocation(ch);
             }
             load_otrigger(object);
             return;
@@ -516,7 +516,7 @@ ACMD(do_mload) {
             return;
         }
         /* neither char nor container found - just dump it in room */
-        obj_to_room(object, IN_ROOM(ch));
+        object->setLocation(ch);
         load_otrigger(object);
         return;
     } else
@@ -801,7 +801,7 @@ ACMD(do_mforce) {
 
         for (i = descriptor_list; i; i = i->next) {
             if ((i->character != ch) && !i->connected &&
-                (IN_ROOM(i->character) == IN_ROOM(ch))) {
+                (i->character->getLocation() == ch->getLocation())) {
                 vch = i->character;
                 if (GET_LEVEL(vch) < GET_LEVEL(ch) && CAN_SEE(ch, vch) &&
                     valid_dg_target(vch, 0)) {

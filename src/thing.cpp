@@ -152,3 +152,31 @@ SpecialFunc thing_data::getLocationSpecialFunc() const {
         return r->func;
     return nullptr;
 }
+
+Location thing_data::getLocation() const {
+    return Location{location, pos_x, pos_y, pos_z};
+}
+
+int thing_data::getCookElement() const {
+    if(auto r = getRoom())
+        return cook_element(r);
+    return 0;
+}
+
+bool Location::operator==(const Location& other) const {
+    return location == other.location && pos_x == other.pos_x && pos_y == other.pos_y && pos_z == other.pos_z;
+}
+
+bool Location::operator!=(const Location& other) const {
+    return !(*this == other);
+}
+
+// the bool operator for Location....
+Location::operator bool() const {
+    if(!location) return false;
+    switch(location->type) {
+        case UnitType::room:
+            return true;
+    }
+    return false;
+}

@@ -330,9 +330,27 @@ struct unit_data : public HasVariables {
 
 struct room_direction_data;
 
+struct Location {
+    unit_data* location{nullptr};  // What unit contains this unit (room, area, char, obj)
+    double pos_x{0.0}, pos_y{0.0}, pos_z{0.0};  // Position within location
+    
+    bool operator==(const Location& other) const;
+    bool operator!=(const Location& other) const;
+    
+    // Conversion to bool - returns true if location is valid
+    explicit operator bool() const;
+};
+
 struct thing_data : public unit_data {
+    Location getLocation() const;
     struct room_data* getRoom() const;
     room_vnum getRoomVnum() const;
+
+    virtual void setLocation(const Location& loc) = 0;
+    virtual void setLocation(const thing_data* td) = 0;
+    virtual void clearLocation() = 0;
+
+    int getCookElement() const;
 
     std::string getLocationName() const;
     room_direction_data* getLocationExit(int dir) const;
@@ -436,7 +454,9 @@ struct obj_data : public thing_data, public picky_data, std::enable_shared_from_
 
     struct room_data* getAbsoluteRoom();
     bool isWorking();
-    void clearLocation();
+    void clearLocation() override;
+    void setLocation(const Location& loc) override;
+    void setLocation(const thing_data* td) override;
 
     std::shared_ptr<obj_data> shared();
 
@@ -786,6 +806,15 @@ struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
 
     void onAttack(atk::Attack& outgoing);
     void onAttacked(atk::Attack& incoming);
+
+    void clearLocation() override;
+    void setLocation(const Location& loc) override;
+    void setLocation(const thing_data* td) override;
+    void lookAtLocation();
+    void lookAtLocation(room_data *room);
+    void lookAtLocation(room_vnum rv);
+    void lookAtLocation(const Location& loc);
+    void lookAtLocation(const thing_data* td);
 
     std::optional<std::string> dgCallMember(const std::string& member, const std::string& arg);
 

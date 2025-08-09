@@ -606,7 +606,7 @@ ACMD(do_garden) {
                 act("@g$n@G digs a proper sized hole in a planter and plants @g$p@G in it.@n", true, ch, obj, nullptr,
                     TO_ROOM);
                 obj_from_char(obj);
-                obj_to_room(obj, IN_ROOM(ch));
+                obj->setLocation(ch);
                 ch->modCurVital(CharVital::stamina, -cost);
                 SET_OBJ_VAL(obj, VAL_PLANT_MAXMATURE, 6);
                 SET_OBJ_VAL(obj, VAL_PLANT_MATGOAL, 200);
@@ -715,12 +715,12 @@ ACMD(do_pack) {
             if (GET_OBJ_VNUM(obj) == 11) {
                 extract_obj(obj);
                 packed = read_object(19085, VIRTUAL);
-                obj_to_room(packed, IN_ROOM(ch));
+                packed->setLocation(ch);
             } else {
                 int fnum = GET_OBJ_VNUM(obj) - 10;
                 packed = read_object(fnum, VIRTUAL);
                 extract_obj(obj);
-                obj_to_room(packed, IN_ROOM(ch));
+                packed->setLocation(ch);
             }
             return;
         } else if (GET_OBJ_VNUM(obj) >= 18800 && GET_OBJ_VNUM(obj) <= 19199 && GET_OBJ_TYPE(obj) == ITEM_VEHICLE) {
@@ -793,7 +793,7 @@ ACMD(do_pack) {
                     }
                 }
                 auto money_obj = create_money(money);
-                obj_to_room(money_obj, IN_ROOM(ch));
+                money_obj->setLocation(ch);
                 extract_obj(obj);
                 return;
             }
@@ -895,7 +895,7 @@ ACMD(do_deploy) {
                 true, ch, furn, nullptr, TO_CHAR);
             act("@c$n@C clicks a capsule's button and tosses it to the floor. A puff of smoke erupts immediately and quickly dissipates to reveal, $p@C.@n",
                 true, ch, furn, nullptr, TO_ROOM);
-            obj_to_room(furn, IN_ROOM(ch));
+            furn->setLocation(ch);
             extract_obj(obj);
             return;
         } else {
@@ -1209,7 +1209,7 @@ void dball_load(uint64_t heartPulse, double deltaTime) {
             if (vnum >= 20 && vnum <= 26) {
                 foundFlags[vnum - 20] = true;
             } else if (IN_ROOM(k) != NOWHERE && k->getLocationGroundEffect() == 6 && !OBJ_FLAGGED(k, ITEM_UNBREAKABLE)) {
-                send_to_room(IN_ROOM(k), "@R%s@r melts in the lava!@n\r\n", k->getShortDescription());
+                send_to_location(k, "@R%s@r melts in the lava!@n\r\n", k->getShortDescription());
                 extract_obj(k);
             }
         }
@@ -1766,7 +1766,7 @@ ACMD(do_assemble) {
 
 
     } else {
-        obj_to_room(pObject, IN_ROOM(ch));
+        pObject->setLocation(ch);
         pObject->setBaseStat<int>("timer", (GET_SKILL(ch, SKILL_SURVIVAL) * 0.12));
     }
 }
@@ -1975,7 +1975,7 @@ static void get_check_money(struct char_data *ch, struct obj_data *obj) {
         int diff = 0;
         diff = (GET_GOLD(ch) + value) - GOLD_CARRY(ch);
         obj = create_money(diff);
-        obj_to_room(obj, IN_ROOM(ch));
+        obj->setLocation(ch);
         ch->setBaseStat("money_carried", GOLD_CARRY(ch));
         return;
     }
@@ -2315,7 +2315,7 @@ static void perform_drop_gold(struct char_data *ch, int amount,
                 act(buf, true, ch, nullptr, nullptr, TO_ROOM);
 
                 send_to_char(ch, "You drop some zenni.\r\n");
-                obj_to_room(obj, IN_ROOM(ch));
+                obj->setLocation(ch);
                 if (GET_ADMLEVEL(ch) > 0) {
                     send_to_imm("IMM DROP: %s dropped %s in room [%d]", GET_NAME(ch), obj->getShortDescription(),
                                 obj->getRoomVnum());
@@ -2421,7 +2421,7 @@ static int perform_drop(struct char_data *ch, struct obj_data *obj,
             } else if (ch->getLocationGroundEffect() == 6) {
                 act("$p plops down on some cooled lava!", false, ch, obj, nullptr, TO_CHAR);
                 act("$p plops down on some cooled lava!", false, ch, obj, nullptr, TO_ROOM);
-                obj_to_room(obj, IN_ROOM(ch));
+                obj->setLocation(ch);
                 if (GET_ADMLEVEL(ch) > 0) {
                     send_to_imm("IMM DROP: %s dropped %s in room [%d]", GET_NAME(ch), obj->getShortDescription(),
                                 obj->getRoomVnum());
@@ -2429,7 +2429,7 @@ static int perform_drop(struct char_data *ch, struct obj_data *obj,
                                    obj->getRoomVnum());
                 }
             } else {
-                obj_to_room(obj, IN_ROOM(ch));
+                obj->setLocation(ch);
                 if (GET_ADMLEVEL(ch) > 0) {
                     send_to_imm("IMM DROP: %s dropped %s in room [%d]", GET_NAME(ch), obj->getShortDescription(),
                                 obj->getRoomVnum());
@@ -2604,7 +2604,7 @@ static void perform_give(struct char_data *ch, struct char_data *vict,
             act("$n@n drops $p because you can't carry anymore.", true, ch, obj, vict, TO_VICT);
             act("$n@n drops $p on the ground since $N's unable to carry it.", true, ch, obj, vict, TO_NOTVICT);
             obj_from_char(obj);
-            obj_to_room(obj, IN_ROOM(ch));
+            obj->setLocation(ch);
         }
         return;
     }
@@ -2619,7 +2619,7 @@ static void perform_give(struct char_data *ch, struct char_data *vict,
             act("$n@n drops $p because you can't carry anymore.", true, ch, obj, vict, TO_VICT);
             act("$n@n drops $p on the ground since $N's unable to carry it.", true, ch, obj, vict, TO_NOTVICT);
             obj_from_char(obj);
-            obj_to_room(obj, IN_ROOM(ch));
+            obj->setLocation(ch);
         }
         return;
     }

@@ -2776,7 +2776,7 @@ ACMD(do_telepathy) {
         } else if (GET_SKILL(vict, SKILL_TELEPATHY) + GET_INT(vict) > GET_SKILL(ch, SKILL_TELEPATHY) + GET_INT(ch)) {
             send_to_char(ch, "They throw off your attempt with their own telepathic abilities!\r\n");
             return;
-        } else if (IN_ROOM(ch) == IN_ROOM(vict)) {
+        } else if (ch->getLocation() == vict->getLocation()) {
             send_to_char(ch, "They are in the same room as you!\r\n");
             return;
         } else if (AFF_FLAGGED(vict, AFF_BLIND)) {
@@ -2786,7 +2786,7 @@ ACMD(do_telepathy) {
             send_to_char(ch, "Their eyes are closed!\r\n");
             return;
         } else {
-            look_at_room(IN_ROOM(vict), ch, 0);
+            ch->lookAtLocation(vict);
             send_to_char(ch, "You see all this through their eyes!\r\n");
             if (GET_INT(vict) > GET_INT(ch)) {
                 send_to_char(ch, "You feel like someone was using your mind for something...\r\n");
@@ -3820,7 +3820,7 @@ ACMD(do_form) {
             return;
         } else {
             obj = read_object(87, VIRTUAL);
-            obj_to_room(obj, IN_ROOM(ch));
+            obj->setLocation(ch);
             obj->size = static_cast<Size>(get_size(ch));
             reveal_hiding(ch, 0);
             ch->setBaseStat("concentrate_cooldown", 10);
@@ -3849,7 +3849,7 @@ ACMD(do_form) {
             return;
         } else {
             obj = read_object(86, VIRTUAL);
-            obj_to_room(obj, IN_ROOM(ch));
+            obj->setLocation(ch);
             obj->size = static_cast<Size>(get_size(ch));
             reveal_hiding(ch, 0);
             ch->setBaseStat("concentrate_cooldown", 10);
@@ -8148,13 +8148,13 @@ void base_update(uint64_t heartPulse, double deltaTime) {
             }
         }
         if (GET_DEFENDER(d->character)) {
-            if (IN_ROOM(d->character) != IN_ROOM(GET_DEFENDER(d->character))) {
+            if (d->character->getLocation() != GET_DEFENDER(d->character)->getLocation()) {
                 GET_DEFENDING(GET_DEFENDER(d->character)) = nullptr;
                 GET_DEFENDER(d->character) = nullptr;
             }
         }
         if (GET_DEFENDING(d->character)) {
-            if (IN_ROOM(d->character) != IN_ROOM(GET_DEFENDING(d->character))) {
+            if (d->character->getLocation() != GET_DEFENDING(d->character)->getLocation()) {
                 GET_DEFENDER(GET_DEFENDING(d->character)) = nullptr;
                 GET_DEFENDING(d->character) = nullptr;
             }
@@ -8165,7 +8165,7 @@ void base_update(uint64_t heartPulse, double deltaTime) {
             d->character->affect_flags.set(AFF_POSITION, false);
         }
         if (SITS(d->character)) {
-            if (IN_ROOM(d->character) != IN_ROOM(SITS(d->character))) {
+            if (d->character->getLocation() != SITS(d->character)->getLocation()) {
                 struct obj_data *chair = SITS(d->character);
                 chair->sitting.reset();
                 d->character->sits.reset();
@@ -8242,7 +8242,7 @@ void base_update(uint64_t heartPulse, double deltaTime) {
 
         if (BLOCKS(d->character)) {
             struct char_data *vict = BLOCKS(d->character);
-            if (IN_ROOM(vict) != IN_ROOM(d->character)) {
+            if (vict->getLocation() != d->character->getLocation()) {
                 BLOCKED(vict) = nullptr;
                 BLOCKS(d->character) = nullptr;
             }
@@ -8360,7 +8360,7 @@ ACMD(do_snet) {
             if (i->character == ch) {
                 continue;
             }
-            if (IN_ROOM(i->character) == IN_ROOM(ch)) {
+            if (i->character->getLocation() == ch->getLocation()) {
                 continue;
             }
             if (i->character->getWhereFlag(WhereFlag::hyperbolic_time_chamber)) {
@@ -8707,7 +8707,7 @@ ACMD(do_quit) {
     if (MINDLINK(ch) && LINKER(ch) == 0) {
         send_to_char(ch, "@RYou feel like the mind that is linked with yours is preventing you from quiting!@n\r\n");
         if (IN_ROOM(MINDLINK(ch)) != NOWHERE) {
-            look_at_room(IN_ROOM(MINDLINK(ch)), ch, 0);
+            ch->lookAtLocation(MINDLINK(ch));
             send_to_char(ch, "You get an impression of where this interference is originating from.\r\n");
         }
         return;
@@ -9433,7 +9433,7 @@ ACMD(do_split) {
         ch->modBaseStat("money_carried", -amount);
         k = (ch->master ? ch->master : ch);
 
-        if (AFF_FLAGGED(k, AFF_GROUP) && (IN_ROOM(k) == IN_ROOM(ch)))
+        if (AFF_FLAGGED(k, AFF_GROUP) && (k->getLocation() == ch->getLocation()))
             num = 1;
         else
             num = 0;
@@ -9441,7 +9441,7 @@ ACMD(do_split) {
         for (f = k->followers; f; f = f->next)
             if (AFF_FLAGGED(f->follower, AFF_GROUP) &&
                 (!IS_NPC(f->follower)) && f->follower != ch &&
-                (IN_ROOM(f->follower) == IN_ROOM(ch)))
+                (f->follower->getLocation() == ch->getLocation()))
                 num++;
 
         if (num > 0 && AFF_FLAGGED(ch, AFF_GROUP)) {
@@ -9462,7 +9462,7 @@ ACMD(do_split) {
                      "%d zenni %s not splitable, so %s keeps the money.\r\n", rest, (rest == 1) ? "was" : "were",
                      GET_NAME(ch));
         }
-        if (AFF_FLAGGED(k, AFF_GROUP) && IN_ROOM(k) == IN_ROOM(ch) &&
+        if (AFF_FLAGGED(k, AFF_GROUP) && k->getLocation() == ch->getLocation() &&
             !IS_NPC(k) && k != ch) {
             k->modBaseStat("money_carried", share);
             send_to_char(k, "%s", buf);
@@ -9471,7 +9471,7 @@ ACMD(do_split) {
         for (f = k->followers; f; f = f->next) {
             if (AFF_FLAGGED(f->follower, AFF_GROUP) &&
                 (!IS_NPC(f->follower)) &&
-                (IN_ROOM(f->follower) == IN_ROOM(ch)) &&
+                (f->follower->getLocation() == ch->getLocation()) &&
                 f->follower != ch) {
 
                 f->follower->modBaseStat("money_carried", share);
@@ -10531,7 +10531,7 @@ ACMD(do_resurrect) {
     if (rm != NOWHERE) {
         char_from_room(ch);
         char_to_room(ch, rm);
-        look_at_room(IN_ROOM(ch), ch, 0);
+        ch->lookAtLocation();
     }
 
     act("$n's body forms in a pool of @Bblue light@n.", true, ch, nullptr, nullptr, TO_ROOM);

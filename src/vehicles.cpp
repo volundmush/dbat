@@ -91,7 +91,7 @@ static void drive_into_vehicle(struct char_data *ch, struct obj_data *vehicle, c
 
     sprintf(buf, "%s @wenters %s.\r\n", vehicle->getShortDescription(),
             vehicle_in_out->getShortDescription());
-    send_to_room(IN_ROOM(vehicle), buf);
+    send_to_location(vehicle, buf);
 
     was_in = IN_ROOM(vehicle);
     obj_from_room(vehicle);
@@ -100,7 +100,7 @@ static void drive_into_vehicle(struct char_data *ch, struct obj_data *vehicle, c
     if (ch->desc)
         act("", true, ch, nullptr, nullptr, TO_ROOM);
     send_to_char(ch, "@wThe ship flies onward:\r\n");
-    look_at_room(IN_ROOM(vehicle), ch, 0);
+    ch->lookAtLocation(vehicle);
     sprintf(buf, "%s @wenters.\r\n", vehicle->getShortDescription());
     send_to_room(is_in, buf);
 
@@ -129,7 +129,7 @@ static void drive_outof_vehicle(struct char_data *ch, struct obj_data *vehicle) 
     send_to_room(room->getVnum(), buf);
 
     obj_from_room(vehicle);
-    obj_to_room(vehicle, IN_ROOM(vehicle_in_out));
+    vehicle->setLocation(vehicle_in_out);
 
     room = vehicle->getRoom();
 
@@ -137,7 +137,7 @@ static void drive_outof_vehicle(struct char_data *ch, struct obj_data *vehicle) 
         act("@wThe @De@Wn@wg@Di@wn@We@Ds@w of the ship @rr@Ro@ra@Rr@w as it moves.", true, ch, nullptr, nullptr,
             TO_ROOM);
     send_to_char(ch, "@wThe ship flies onward:\r\n");
-    look_at_room(IN_ROOM(vehicle), ch, 0);
+    ch->lookAtLocation(vehicle);
     int door;
     for (door = 0; door < NUM_OF_DIRS; door++) {
         auto e = room->dir_option[door];
@@ -150,7 +150,7 @@ static void drive_outof_vehicle(struct char_data *ch, struct obj_data *vehicle) 
     }
     sprintf(buf, "%s @wflies out of %s.\r\n", vehicle->getShortDescription(),
             vehicle_in_out->getShortDescription());
-    send_to_room(IN_ROOM(vehicle), buf);
+    send_to_location(vehicle, buf);
 }
 
 /* Drive out vehicle in a certain direction */
@@ -186,7 +186,7 @@ void drive_in_direction(struct char_data *ch, struct obj_data *vehicle, int dir)
     int was_in, is_in;
 
     sprintf(buf, "%s @wflies %s.\r\n", vehicle->getShortDescription(), dirs[dir]);
-    send_to_room(IN_ROOM(vehicle), buf);
+    send_to_location(vehicle, buf);
 
     obj_from_room(vehicle);
     obj_to_room(vehicle, dest->getVnum());
@@ -219,7 +219,7 @@ void drive_in_direction(struct char_data *ch, struct obj_data *vehicle, int dir)
         act("@wThe @De@Wn@wg@Di@wn@We@Ds@w of the ship @rr@Ro@ra@Rr@w as it moves.", true, ch, nullptr, nullptr,
             TO_ROOM);
     send_to_char(ch, "@wThe ship flies onward:\r\n");
-    look_at_room(is_in, ch, 0);
+    ch->lookAtLocation(is_in);
     if (controls) {
         send_to_char(ch, "@RFUEL@D: %s%s@n\r\n",
                      GET_FUEL(controls) >= 200 ? "@G" : GET_FUEL(controls) >= 100 ? "@Y" : "@r",
@@ -253,12 +253,12 @@ static void warp_ship_to_location(struct char_data *ch, struct obj_data *vehicle
         true, ch, nullptr, nullptr, TO_CHAR);
     act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find the ship in a new location!@n",
         true, ch, nullptr, nullptr, TO_ROOM);
-    send_to_room(IN_ROOM(vehicle),
+    send_to_location(vehicle,
                  "%s @Bbegins to glow bright blue before disappearing in a flash of light!@n\r\n",
                  vehicle->getShortDescription());
     obj_from_room(vehicle);
     obj_to_room(vehicle, real_room(room_vnum));
-    send_to_room(IN_ROOM(vehicle),
+    send_to_location(vehicle,
                  "@BSuddenly in a flash of blue light @n%s @B appears instantly!@n\r\n",
                  vehicle->getShortDescription());
 }
@@ -368,7 +368,7 @@ static void handle_pilot_ready(struct char_data *ch) {
     }
 
     for (auto *d = descriptor_list; d; d = d->next) {
-        if (IS_PLAYING(d) && d->character != ch && PLR_FLAGGED(d->character, PLR_PILOTING) && IN_ROOM(d->character) == IN_ROOM(ch)) {
+        if (IS_PLAYING(d) && d->character != ch && PLR_FLAGGED(d->character, PLR_PILOTING) && d->character->getLocation() == ch->getLocation()) {
             send_to_char(ch, "@w%s is already piloting the ship!\r\n", GET_NAME(d->character));
             return;
         }
@@ -565,7 +565,7 @@ static void handle_drive_land(struct char_data *ch, struct obj_data *vehicle, co
 
     char buf3[MAX_INPUT_LENGTH];
     sprintf(buf3, "%s @wcomes in from above and slowly settles on the ground.@n\r\n", vehicle->getShortDescription());
-    look_at_room(landroom, ch, 0);
+    ch->lookAtLocation(landroom);
     send_to_room(landroom, buf3);
 
 }
@@ -589,7 +589,7 @@ static void handle_drive_launch(struct char_data *ch, struct obj_data *vehicle, 
     act("@RThe ship shudders as it launches up into the sky!@n", false, ch, nullptr, nullptr, TO_ROOM);
     act("@wThe ship has reached low orbit.@n", false, ch, nullptr, nullptr, TO_CHAR);
     act("@wThe ship has reached low orbit.@n", false, ch, nullptr, nullptr, TO_ROOM);
-    send_to_room(IN_ROOM(vehicle), "@R%s @Rshudders before blasting off into the sky!@n",
+    send_to_location(vehicle, "@R%s @Rshudders before blasting off into the sky!@n",
                  vehicle->getShortDescription());
 
     if (GET_FUELCOUNT(controls) < 5) {
@@ -604,7 +604,7 @@ static void handle_drive_launch(struct char_data *ch, struct obj_data *vehicle, 
 
     obj_from_room(vehicle);
     obj_to_room(vehicle, dest);
-    look_at_room(IN_ROOM(vehicle), ch, 0);
+    ch->lookAtLocation(vehicle);
     send_to_char(ch, "@RFUEL@D: %s%s@n\r\n",
                  GET_FUEL(controls) >= 200 ? "@G" : GET_FUEL(controls) >= 100 ? "@Y" : "@r",
                  add_commas(GET_FUEL(controls)).c_str());

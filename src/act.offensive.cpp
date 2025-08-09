@@ -181,7 +181,7 @@ ACMD(do_geno) {
     }
 
     obj = read_object(83, VIRTUAL);
-    obj_to_room(obj, IN_ROOM(vict));
+    obj->setLocation(vict);
     objectSubscriptions.subscribe("hugeKiAttacks", obj);
 
     ch->modBaseStat<int64_t>("charge", GET_MAX_HIT(ch) / 10);
@@ -297,7 +297,7 @@ ACMD(do_genki) {
     struct obj_data *obj;
 
     obj = read_object(82, VIRTUAL);
-    obj_to_room(obj, IN_ROOM(vict));
+    obj->setLocation(vict);
 
     TARGET(obj) = vict;
     obj->setBaseStat("kicharge", damtype(ch, 40, prob, attperc));
@@ -507,7 +507,7 @@ ACMD(do_blessedhammer) {
                         false, ch, nullptr, vict, TO_VICT);
                     act("@C$N@W manages to dodge @c$n's@W @WB@Dl@We@Ds@Ws@De@Wd @DH@Wa@Dm@Wm@De@Wr@W, letting it slam into the surroundings!@n",
                         false, ch, nullptr, vict, TO_NOTVICT);
-                    send_to_room(IN_ROOM(vict), "@wA bright explosion erupts from the impact!\r\n");
+                    send_to_location(vict, "@wA bright explosion erupts from the impact!\r\n");
 
                     dodge_ki(ch, vict, 0, 17, skill, SKILL_BLESSEDHAMMER); /* Effects on the room from dodging a ki attack
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]

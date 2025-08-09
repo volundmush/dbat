@@ -201,7 +201,7 @@ SPECIAL(gauntlet_room)  /* Jamdog - 13th Feb 2006 */
             /* Hit point penalty for surrendering */
             ch->modCurVital(CharVital::health, -2000);
 
-            look_at_room(IN_ROOM(ch), ch, 0);
+            ch->lookAtLocation();
             return true;
         } else {
             send_to_char(ch, "You can only surrender while fighting, so at least TRY to make an effort");
@@ -974,7 +974,7 @@ SPECIAL(gravity) {
                 obj->setBaseStat("gravity", grav);
                 auto room = ch->getRoom();
                 if (room->room_flags.toggle(ROOM_AURA)) {
-                    send_to_room(IN_ROOM(ch), "The increased gravity forces the aura to disappear.\r\n");
+                    send_to_location(ch, "The increased gravity forces the aura to disappear.\r\n");
                 }
             } else {
                 send_to_char(ch,

@@ -556,7 +556,7 @@ ACMD(do_shuffle) {
     }
     send_to_char(ch, "You shuffle the cards carefully.\r\n");
     act("$n shuffles their deck.", true, ch, nullptr, nullptr, TO_ROOM);
-    send_to_room(IN_ROOM(ch), "There were %d cards in the deck.\r\n", total);
+    send_to_location(ch, "There were %d cards in the deck.\r\n", total);
 }
 
 ACMD(do_hand) {
@@ -660,7 +660,7 @@ ACMD(do_post) {
         act("@WYou post $p@W on a nearby structure.@n", true, ch, obj, nullptr, TO_CHAR);
         act("@C$n@W posts $p@W on a nearby structure.@n", true, ch, obj, nullptr, TO_ROOM);
         obj_from_char(obj);
-        obj_to_room(obj, IN_ROOM(ch));
+        obj->setLocation(ch);
         GET_OBJ_POSTTYPE(obj) = 1;
         return;
     }
@@ -685,7 +685,7 @@ ACMD(do_post) {
     send_to_char(ch, "@WYou post %s@W on %s@W.@n\r\n", obj->getShortDescription(), obj2->getShortDescription());
     act(buf, true, ch, nullptr, nullptr, TO_ROOM);
     obj_from_char(obj);
-    obj_to_room(obj, IN_ROOM(ch));
+    obj->setLocation(ch);
     GET_OBJ_POSTTYPE(obj) = 2;
     GET_OBJ_POSTED(obj) = obj2;
     GET_OBJ_POSTED(obj2) = obj;
@@ -2267,7 +2267,7 @@ static void list_one_char(struct char_data *i, struct char_data *ch) {
                 send_to_char(ch, "@rYOU@w");
                 count = true;
             } else {
-                if (IN_ROOM(i) == IN_ROOM(FIGHTING(i))) {
+                if (i->getLocation() == FIGHTING(i)->getLocation()) {
                     send_to_char(ch, "%s", GET_ADMLEVEL(ch) ? GET_NAME(FIGHTING(i)) : (readIntro(ch, FIGHTING(i)) == 1
                                                                                        ? get_i_name(ch, FIGHTING(i))
                                                                                        : LRACE(FIGHTING(i))));
@@ -2308,7 +2308,7 @@ static void list_one_char(struct char_data *i, struct char_data *ch) {
             if (FIGHTING(i) == ch)
                 send_to_char(ch, "@rYOU@w!");
             else {
-                if (IN_ROOM(i) == IN_ROOM(FIGHTING(i)))
+                if (i->getLocation() == FIGHTING(i)->getLocation())
                     send_to_char(ch, "%s!", GET_ADMLEVEL(ch) ? GET_NAME(FIGHTING(i)) : (readIntro(ch, FIGHTING(i)) == 1
                                                                                         ? get_i_name(ch, FIGHTING(i))
                                                                                         : LRACE(FIGHTING(i))));
@@ -2970,7 +2970,7 @@ static void look_in_direction(struct char_data *ch, int dir) {
 
     if(canSeeRoom) {
         send_to_char(ch, "You peek over and see:\r\n");
-        look_at_room(dest, ch, 0);
+        ch->lookAtLocation(dest);
     }
 }
 
@@ -3006,7 +3006,7 @@ static void handle_vehicle(struct char_data *ch, struct obj_data *obj) {
         send_to_char(ch, "It is pitch black...\r\n");
     } else {
         send_to_char(ch, "You look inside and see:\r\n");
-        look_at_room(vehicle_inside, ch, 0);
+        ch->lookAtLocation(vehicle_inside);
     }
 }
 
@@ -3388,7 +3388,7 @@ static void look_out_window(struct char_data *ch, const char *arg) {
     else
         act("$n looks out the window.", true, ch, nullptr, nullptr, TO_ROOM);
     send_to_char(ch, "You look outside and see:\r\n");
-    look_at_room(target_room, ch, 0);
+    ch->lookAtLocation(target_room);
 }
 
 ACMD(do_finger) {
@@ -4867,7 +4867,7 @@ ACMD(do_who) {
                 hide += 1;
                 continue;
             }
-            if (who_room && (IN_ROOM(tch) != IN_ROOM(ch)))
+            if (who_room && (tch->getLocation() != ch->getLocation()))
                 continue;
             if (showgroup && (!tch->master || !AFF_FLAGGED(tch, AFF_GROUP)))
                 continue;
@@ -4909,7 +4909,7 @@ ACMD(do_who) {
                 continue;
             if (localwho && ch->getRoom()->zone != tch->getRoom()->zone)
                 continue;
-            if (who_room && (IN_ROOM(tch) != IN_ROOM(ch)))
+            if (who_room && (tch->getLocation() != ch->getLocation()))
                 continue;
             if (PRF_FLAGGED(tch, PRF_HIDE) && tch != ch && GET_ADMLEVEL(ch) < ADMLVL_IMMORT)
                 continue;

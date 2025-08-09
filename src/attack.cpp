@@ -2540,10 +2540,10 @@ namespace atk {
                 pcost(user, attPerc, 0);
             }
             if (user->getLocationGroundEffect() < -1) {
-                send_to_room(IN_ROOM(user), "The water surrounding the area evaporates some!\r\n");
+                send_to_location(user, "The water surrounding the area evaporates some!\r\n");
                 user->modLocationGroundEffect(1);
             } else if (user->getLocationGroundEffect() == -1) {
-                send_to_room(IN_ROOM(user), "The water surrounding the area evaporates completely away!\r\n");
+                send_to_location(user, "The water surrounding the area evaporates completely away!\r\n");
                 user->setLocationGroundEffect(0);
             }
             victim->affect_flags.set(AFF_ASHED, false);
@@ -2551,10 +2551,10 @@ namespace atk {
 
     void Honoo::postProcess() {
         if (user->getLocationGroundEffect() < -1) {
-            send_to_room(IN_ROOM(user), "The water surrounding the area evaporates some!\r\n");
+            send_to_location(user, "The water surrounding the area evaporates some!\r\n");
             user->modLocationGroundEffect(1);
         } else if (user->getLocationGroundEffect() == -1) {
-            send_to_room(IN_ROOM(user), "The water surrounding the area evaporates completely away!\r\n");
+            send_to_location(user, "The water surrounding the area evaporates completely away!\r\n");
             user->setLocationGroundEffect(0);
         }
     }   
@@ -4330,8 +4330,8 @@ namespace atk {
     void Kakusanha::postProcess() {
         int count = targets.size();
         if (count < 5 && !user->getWhereFlag(WhereFlag::space)) {
-            send_to_room(IN_ROOM(user), "The rest of the beams slam into the ground!@n\r\n");
-            send_to_room(IN_ROOM(user), "@wBright explosions erupt from the impacts!\r\n");
+            send_to_location(user, "The rest of the beams slam into the ground!@n\r\n");
+            send_to_location(user, "@wBright explosions erupt from the impacts!\r\n");
             const auto tile = user->getLocationTileType();
             if (tile != SECT_INSIDE) {
                 impact_sound(user, "@wA loud roar is heard nearby!@n\r\n");

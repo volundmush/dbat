@@ -728,7 +728,7 @@ int roll_pursue(struct char_data *ch, struct char_data *vict) {
         int inroom = ch->getRoomVnum();
         act("@C$n@R pursues after the fleeing @c$N@R!@n", true, ch, nullptr, vict, TO_NOTVICT);
         char_from_room(ch);
-        char_to_room(ch, IN_ROOM(vict));
+        ch->setLocation(vict);
         act("@GYou pursue right after @c$N@G!@n", true, ch, nullptr, vict, TO_CHAR);
         act("@C$n@R pursues after you!@n", true, ch, nullptr, vict, TO_VICT);
         act("@C$n@R pursues after the fleeing @c$N@R!@n", true, ch, nullptr, vict, TO_NOTVICT);
@@ -745,7 +745,7 @@ int roll_pursue(struct char_data *ch, struct char_data *vict) {
                     act("$n follows after $N.", true, k->follower, nullptr, ch, TO_NOTVICT);
                     act("$n follows after you.", true, k->follower, nullptr, ch, TO_VICT);
                     char_from_room(k->follower);
-                    char_to_room(k->follower, IN_ROOM(ch));
+                    k->follower->setLocation(ch);
                 }
             }
         }
@@ -798,7 +798,7 @@ void broken_update(uint64_t heartPulse, double deltaTime) {
         if (grav_change == true) {
             k->setBaseStat("gravity", rand_gravity[grav_roll]);
             k->setBaseStat<weight_t>("weight", rand_gravity[grav_roll]);
-            send_to_room(IN_ROOM(k), "@RThe gravity generator malfunctions! The gravity level has changed!@n\r\n");
+            send_to_location(k, "@RThe gravity generator malfunctions! The gravity level has changed!@n\r\n");
         }
         dice = rand_number(2, 12); // Reset the dice
     }
@@ -818,17 +818,17 @@ void broken_update(uint64_t heartPulse, double deltaTime) {
 
         dice = rand_number(2, 12); // Reset the dice
         if (health <= 10) {
-            send_to_room(IN_ROOM(k),
+            send_to_location(k,
                          "@RThe ATM machine shoots smoking bills from its money slot. The bills burn up as they float through the air!@n\r\n");
         } else if (health <= 40 && dice <= 8) {
-            send_to_room(IN_ROOM(k), "@RGibberish flashes across the cracked ATM info screen.@n\r\n");
+            send_to_location(k, "@RGibberish flashes across the cracked ATM info screen.@n\r\n");
         } else if (health <= 80 && dice == 4) {
-            send_to_room(IN_ROOM(k),
+            send_to_location(k,
                          "@GThe damaged ATM spits out some money while flashing ERROR on its screen!@n\r\n");
             money = create_money(rand_number(1, 30));
-            obj_to_room(money, IN_ROOM(k));
+            money->setLocation(k);
         } else if (health <= 99 && dice < 4) {
-            send_to_room(IN_ROOM(k), "@RThe ATM machine emits a loud grinding sound from inside.@n\r\n");
+            send_to_location(k, "@RThe ATM machine emits a loud grinding sound from inside.@n\r\n");
         }
 
         dice = rand_number(2, 12); // Reset the dice
@@ -1319,7 +1319,7 @@ void reveal_hiding(struct char_data *ch, int type) {
             if (tch == ch)
                 continue;
 
-            if (IN_ROOM(tch) != IN_ROOM(ch))
+            if (tch->getLocation() != ch->getLocation())
                 continue;
 
             if (GET_SKILL(tch, SKILL_SPOT) + rand1 >= GET_SKILL(ch, SKILL_HIDE) + rand2) {
@@ -1345,7 +1345,7 @@ void reveal_hiding(struct char_data *ch, int type) {
             if (tch == ch)
                 continue;
 
-            if (IN_ROOM(tch) != IN_ROOM(ch))
+            if (tch->getLocation() != ch->getLocation())
                 continue;
 
             if (GET_SKILL(tch, SKILL_LISTEN) > axion_dice(0)) {
@@ -1644,7 +1644,7 @@ int mob_respond(struct char_data *ch, struct char_data *vict, const char *speech
         if (!IS_NPC(ch) && IS_NPC(vict)) {
             if ((strstr(speech, "hello") || strstr(speech, "greet") || strstr(speech, "Hello") ||
                  strstr(speech, "Greet")) && !FIGHTING(vict)) {
-                send_to_room(IN_ROOM(vict), "\r\n");
+                send_to_location(vict, "\r\n");
                 if (IS_HUMAN(vict) || IS_HALFBREED(vict)) {
                     switch (rand_number(1, 4)) {
                         case 1:
@@ -1798,7 +1798,7 @@ int mob_respond(struct char_data *ch, struct char_data *vict, const char *speech
 
             if (strstr(speech, "goodbye") || strstr(speech, "Goodbye") || strstr(speech, "bye") ||
                 strstr(speech, "Bye")) {
-                send_to_room(IN_ROOM(vict), "\r\n");
+                send_to_location(vict, "\r\n");
                 if (GET_ALIGNMENT(vict) >= 0) {
                     if (GET_SEX(vict) == SEX_MALE) {
                         if (GET_SEX(ch) == SEX_FEMALE) {
@@ -1837,7 +1837,7 @@ int mob_respond(struct char_data *ch, struct char_data *vict, const char *speech
             } /* End goodbye If */
             if (strstr(speech, "train") || strstr(speech, "Train") || strstr(speech, "exercise") ||
                 strstr(speech, "Exercise")) {
-                send_to_room(IN_ROOM(vict), "\r\n");
+                send_to_location(vict, "\r\n");
                 if (GET_ALIGNMENT(vict) >= 0 && !MOB_FLAGGED(vict, MOB_NOKILL)) {
                     if (GET_LEVEL(vict) > 4 && GET_LEVEL(vict) < 10) {
                         act("@w$n@W says, '@CTraining is good for the body. I think I may need to go workout myself.@W'@n",
@@ -2644,9 +2644,9 @@ void core_dump_real(const char *who, int line) {
 }
 
 /* Is there a campfire in the room? */
-int cook_element(room_rnum room) {
+int cook_element(struct room_data *room) {
     int found = 0;
-    auto con = get_room(room)->getObjects();
+    auto con = room->getObjects();
     for(auto obj : filter_raw(con)) {
         if(GET_OBJ_TYPE(obj) == ITEM_CAMPFIRE) {
             found = 1;
@@ -2654,6 +2654,12 @@ int cook_element(room_rnum room) {
     }
 
     return found;
+}
+
+int cook_element(room_rnum room) {
+    auto r = get_room(room);
+    if(!r) return 0;
+    return cook_element(r);
 }
 
 // A C++ version of proc_color from comm.c. it returns the colored string.

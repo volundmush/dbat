@@ -295,7 +295,7 @@ static int64_t mana_gain(struct char_data *ch) {
     }
 
     if (IN_ROOM(ch) != NOWHERE) {
-        if (cook_element(IN_ROOM(ch)) == 1) {
+        if (ch->getCookElement() == 1) {
             gain += (gain * 0.2);
         }
     }
@@ -356,7 +356,7 @@ static int64_t mana_gain(struct char_data *ch) {
     if (AFF_FLAGGED(ch, AFF_POISON))
         gain /= 4;
 
-    if (cook_element(IN_ROOM(ch)) == 1)
+    if (ch->getCookElement() == 1)
         gain *= 2;
 
     return (gain);
@@ -494,7 +494,7 @@ int64_t hit_gain(struct char_data *ch) {
 
     if (AFF_FLAGGED(ch, AFF_POISON))
         gain /= 4;
-    if (cook_element(IN_ROOM(ch)) == 1)
+    if (ch->getCookElement() == 1)
         gain *= 2;
 
     if (ch->subrace == SubRace::android_model_absorb) {
@@ -624,7 +624,7 @@ static int64_t move_gain(struct char_data *ch) {
         gain = GET_MAX_MOVE(ch) - (ch->getCurVital(CharVital::stamina));
     }
 
-    if (cook_element(IN_ROOM(ch)) == 1)
+    if (ch->getCookElement() == 1)
         gain *= 2;
 
     if (auto reg = GET_REGEN(ch); reg > 0) {
@@ -1116,7 +1116,7 @@ void androidAbsorbSystem(uint64_t heartPulse, double deltaTime) {
             characterSubscriptions.unsubscribe("androidAbsorbSystem", ch);
         }
         
-        if(IN_ROOM(ch) != IN_ROOM(victim)) {
+        if(ch->getLocation() != victim->getLocation()) {
             send_to_char(ch, "You stop absorbing %s!\r\n", GET_NAME(ABSORBING(ch)));
             ABSORBBY(ABSORBING(ch)) = nullptr;
             ABSORBING(ch) = nullptr;
@@ -1518,7 +1518,7 @@ void characterVitalsRecovery(uint64_t heartPulse, double deltaTime) {
             if(ROOM_FLAGGED(r, ROOM_BEDROOM))
                 universalPerc += 0.25;
 
-            if (cook_element(IN_ROOM(ch)) == 1)
+            if (ch->getCookElement() == 1)
                 universalPerc += 2.0;
         }
 
@@ -1944,7 +1944,7 @@ void point_update(uint64_t heartPulse, double deltaTime)
                     {
                         if (j->getLocationGroundEffect() >= 1 && j->getLocationGroundEffect() <= 5)
                         {
-                            send_to_room(IN_ROOM(j),
+                            send_to_location(j,
                                          "The heat from the lava melts a great deal of the glacial wall and the lava cools a bit in turn.\r\n");
                             j->modLocationGroundEffect(-1);
                             if (GET_OBJ_WEIGHT(j) - (5 + (GET_OBJ_WEIGHT(j) * 0.025)) > 0)
@@ -1953,7 +1953,7 @@ void point_update(uint64_t heartPulse, double deltaTime)
                             }
                             else
                             {
-                                send_to_room(IN_ROOM(j),
+                                send_to_location(j,
                                              "The glacial wall blocking off the %s direction melts completely away.\r\n",
                                              dirs[GET_OBJ_COST(j)]);
                                 extract_obj(j);
@@ -1962,12 +1962,12 @@ void point_update(uint64_t heartPulse, double deltaTime)
                         else if (GET_OBJ_WEIGHT(j) - (5 + (GET_OBJ_WEIGHT(j) * 0.025)) > 0)
                         {
                             j->modBaseStat<weight_t>("weight", -(5 + (GET_OBJ_WEIGHT(j) * 0.025)));
-                            send_to_room(IN_ROOM(j), "The glacial wall blocking off the %s direction melts some what.\r\n",
+                            send_to_location(j, "The glacial wall blocking off the %s direction melts some what.\r\n",
                                          dirs[GET_OBJ_COST(j)]);
                         }
                         else
                         {
-                            send_to_room(IN_ROOM(j),
+                            send_to_location(j,
                                          "The glacial wall blocking off the %s direction melts completely away.\r\n",
                                          dirs[GET_OBJ_COST(j)]);
                             extract_obj(j);
@@ -1996,11 +1996,11 @@ void point_update(uint64_t heartPulse, double deltaTime)
                             if (GET_OBJ_WEIGHT(j) - (5 + (GET_OBJ_WEIGHT(j) * 0.02)) > 0)
                             {
                                 j->modBaseStat<weight_t>("weight", -(5 + (GET_OBJ_WEIGHT(j) * 0.02)));
-                                send_to_room(IN_ROOM(j), "%s @wmelts a little.\r\n", j->getShortDescription());
+                                send_to_location(j, "%s @wmelts a little.\r\n", j->getShortDescription());
                             }
                             else
                             {
-                                send_to_room(IN_ROOM(j), "%s @wmelts completely away.\r\n", j->getShortDescription());
+                                send_to_location(j, "%s @wmelts completely away.\r\n", j->getShortDescription());
                                 extract_obj(j);
                             }
                         }

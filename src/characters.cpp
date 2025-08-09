@@ -60,6 +60,35 @@ void char_data::restore(bool announce) {
     restoreVital(CharVital::ki);
 }
 
+void char_data::lookAtLocation(room_data *room) {
+    if(!room) return;
+    look_at_room(room, this, 0);
+}
+
+void char_data::lookAtLocation(room_vnum rv) {
+    auto room = get_room(rv);
+    lookAtLocation(room);
+}
+
+void char_data::lookAtLocation(const Location& loc) {
+    if(!loc.location) return;
+    switch(loc.location->type) {
+        case UnitType::room:
+            lookAtLocation(static_cast<room_data*>(loc.location));
+            break;
+    }
+}
+
+void char_data::lookAtLocation() {
+    if(!location) return;
+    lookAtLocation(getLocation());
+}
+
+void char_data::lookAtLocation(const thing_data* td) {
+    if(!td) return;
+    lookAtLocation(td->getLocation());
+}
+
 void char_data::resurrect(ResurrectionMode mode) {
     // First, fully heal the character.
     restore(true);
@@ -73,7 +102,7 @@ void char_data::resurrect(ResurrectionMode mode) {
     } else {
         char_to_room(this, real_room(sensei::getStartRoom(sensei)));
     }
-    look_at_room(getRoomVnum(), this, 0);
+    lookAtLocation();
 
     // If Costless, there's not going to be any penalties.
     int dur = 100;
@@ -151,7 +180,7 @@ void char_data::ghostify() {
 void char_data::teleport_to(IDXTYPE rnum) {
     char_from_room(this);
     char_to_room(this, real_room(rnum));
-    look_at_room(IN_ROOM(this), this, 0);
+    lookAtLocation();
     update_pos(this);
 }
 
@@ -666,17 +695,17 @@ void char_data::login() {
     }
 
     /*~~~ End PCOUNT and HIGHPCOUNT ~~~*/
-    if (GET_LEVEL(this) == 0) {      
+    if (GET_LEVEL(this) == 0) {
         send_to_char(this, "%s", CONFIG_START_MESSG);
     }
     if (this->getRoomVnum() <= 1 && GET_LOADROOM(this) != NOWHERE) {
         char_from_room(this);
-        char_to_room(this, real_room(real_room(GET_LOADROOM(this))));
+        char_to_room(this, real_room(GET_LOADROOM(this)));
     } else if (this->getRoomVnum() <= 1) {
         char_from_room(this);
-        char_to_room(this, real_room(real_room(300)));
+        char_to_room(this, 300);
     } else {
-        look_at_room(IN_ROOM(this), this, 0);
+        this->lookAtLocation();
     }
     if (has_mail(GET_IDNUM(this)))
         send_to_char(this, "\r\nYou have mail waiting.\r\n");

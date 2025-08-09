@@ -129,6 +129,13 @@ void send_to_room(room_rnum room, fmt::string_view format, Args&&... args) {
     }   
 }
 
+template<typename T, typename... Args>
+void send_to_location(T thing, fmt::string_view format, Args&&... args) {
+    if(auto r = thing->getRoom(); r) {
+        send_to_room(r, format, std::forward<Args>(args)...);
+    }
+}
+
 template<typename... Args>
 void send_to_range(room_vnum start, room_vnum finish, fmt::string_view format, Args&&... args) {
     if (start > finish) {

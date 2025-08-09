@@ -435,7 +435,7 @@ void char_to_room(struct char_data *ch, struct room_data* room) {
     }
 
     /* Stop fighting now, if we left. */
-    if (FIGHTING(ch) && IN_ROOM(ch) != IN_ROOM(FIGHTING(ch)) && !AFF_FLAGGED(ch, AFF_PURSUIT)) {
+    if (FIGHTING(ch) && ch->getLocation() != FIGHTING(ch)->getLocation() && !AFF_FLAGGED(ch, AFF_PURSUIT)) {
         stop_fighting(FIGHTING(ch));
         stop_fighting(ch);
     }
@@ -454,6 +454,34 @@ void char_to_room(struct char_data *ch, room_rnum room) {
     auto r = get_room(room);
     if(!r) return;
     char_to_room(ch, r);
+}
+
+void char_to_location(struct char_data *ch, const Location& loc) {
+    if(!ch) return;
+    if(!loc.location) return;
+    if(loc.location->type == UnitType::room) {
+        char_to_room(ch, static_cast<room_data*>(loc.location));
+    }
+}
+
+void char_to_location(struct char_data *ch, const thing_data* td) {
+    if(!ch) return;
+    if(!td) return;
+    char_to_location(ch, td->getLocation());
+}
+
+void obj_to_location(struct obj_data *obj, const Location& loc) {
+    if(!obj) return;
+    if(!loc.location) return;
+    if(loc.location->type == UnitType::room) {
+        obj_to_room(obj, static_cast<room_data*>(loc.location));
+    }
+}
+
+void obj_to_location(struct obj_data *obj, const thing_data* td) {
+    if(!obj) return;
+    if(!td) return;
+    obj_to_location(obj, td->getLocation());
 }
 
 
@@ -1129,7 +1157,7 @@ void extract_char(struct char_data *ch) {
 
     for (auto foll = ch->followers; foll; foll = foll->next) {
         if (IS_NPC(foll->follower) && AFF_FLAGGED(foll->follower, AFF_CHARM) &&
-            (IN_ROOM(foll->follower) == IN_ROOM(ch) || IN_ROOM(ch) == 1)) {
+            (foll->follower->getLocation() == ch->getLocation() || IN_ROOM(ch) == 1)) {
             /* transfer objects to char, if any */
             auto con = foll->follower->getObjects();
             for (auto obj : filter_raw(con)) {
@@ -1138,11 +1166,9 @@ void extract_char(struct char_data *ch) {
             }
 
             /* transfer equipment to char, if any */
-            for (auto i = 0; i < NUM_WEARS; i++)
-                if (GET_EQ(foll->follower, i)) {
-                    auto obj = unequip_char(foll->follower, i);
-                    obj_to_char(obj, ch);
-                }
+            for (auto &[slot, obj] : foll->follower->getEquipment()) {
+                obj_to_char(unequip_char(foll->follower, slot), ch);
+            }
 
             extract_char(foll->follower);
         }
@@ -1189,7 +1215,7 @@ struct char_data *get_player_vis(struct char_data *ch, char *name, int *number, 
     for (auto i : filter_raw(ac)) {
         if (IS_NPC(i))
             continue;
-        if (inroom == FIND_CHAR_ROOM && IN_ROOM(i) != IN_ROOM(ch))
+        if (inroom == FIND_CHAR_ROOM && i->getLocation() != ch->getLocation())
             continue;
         if (GET_ADMLEVEL(ch) < 1 && GET_ADMLEVEL(i) < 1 && !IS_NPC(ch) && !IS_NPC(i)) {
             if (strcasecmp(RACE(i), name) && !strstr(RACE(i), name)) {
@@ -1304,7 +1330,7 @@ struct char_data *get_char_world_vis(struct char_data *ch, char *name, int *numb
     
     auto ac = characterSubscriptions.all("active");
     for (auto i : filter_raw(ac)) {
-        if (IN_ROOM(ch) == IN_ROOM(i))
+        if (ch->getLocation() == i->getLocation())
             continue;
         if (GET_ADMLEVEL(ch) < 1 && GET_ADMLEVEL(i) < 1 && !IS_NPC(ch) && !IS_NPC(i)) {
             if (strcasecmp(RACE(i), name) && !strstr(RACE(i), name)) {

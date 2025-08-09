@@ -455,7 +455,7 @@ ACMD(do_track) {
     }
 
     if (GET_HIT(vict) < (GET_HIT(ch) * 0.001) + 1) {
-        if (IN_ROOM(ch) == IN_ROOM(vict)) {
+        if (ch->getLocation() == vict->getLocation()) {
             if (!read_sense_memory(ch, vict)) {
                 send_to_char(ch,
                              "Their powerlevel is too weak for you to sense properly, but you will recognise their ki signal from now on.\r\n");

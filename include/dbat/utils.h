@@ -85,6 +85,7 @@ extern void handle_evolution(struct char_data *ch, int64_t dmg);
 
 extern int64_t molt_threshold(struct char_data *ch);
 
+extern int cook_element(struct room_data *room);
 extern int cook_element(room_rnum room);
 
 extern void purge_homing(struct char_data *ch);

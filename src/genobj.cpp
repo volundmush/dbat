@@ -381,8 +381,23 @@ void obj_data::clearLocation() {
         default:
             break;
     }
+    pos_x = 0.0;
+    pos_y = 0.0;
+    pos_z = 0.0;
 }
 
+void obj_data::setLocation(const Location& loc) {
+    if(!loc.location) return;
+    if(loc.location->type == UnitType::room) {
+        obj_to_room(this, static_cast<room_data*>(loc.location));
+    }
+}
+
+void obj_data::setLocation(const thing_data* td) {
+    if(!td) return;
+    setLocation(td->getLocation());
+
+}
 
 obj_data::~obj_data() {
     if(auctname) free(auctname);

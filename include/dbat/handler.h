@@ -91,6 +91,12 @@ extern void char_from_room(struct char_data *ch);
 extern void char_to_room(struct char_data *ch, struct room_data *room);
 extern void char_to_room(struct char_data *ch, room_rnum room);
 
+extern void char_to_location(struct char_data *ch, const Location& loc);
+extern void char_to_location(struct char_data *ch, const thing_data* td);
+
+extern void obj_to_location(struct obj_data *ch, const Location& loc);
+extern void obj_to_location(struct obj_data *ch, const thing_data* td);
+
 extern void extract_char(struct char_data *ch);
 
 extern void extract_char_final(struct char_data *ch);

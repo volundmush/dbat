@@ -38,7 +38,7 @@ void ping_ship(int vnum, int vnum2) {
     }
 
     if (controls) {
-        send_to_room(IN_ROOM(controls), "@D[@RALERT@D: @YAn unknown radar signal has been detected!@D]@n");
+        send_to_location(controls, "@D[@RALERT@D: @YAn unknown radar signal has been detected!@D]@n");
     }
 }
 

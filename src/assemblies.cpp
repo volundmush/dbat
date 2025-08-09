@@ -157,7 +157,7 @@ bool assemblyCheckComponents(long lVnum, struct char_data *pCharacter, int extra
         if (pAssembly->pComponents[i].bExtract && bOk && extract_yes == true)
             extract_obj(ppComponentObjects[i]);
         else if (pAssembly->pComponents[i].bInRoom)
-            obj_to_room(ppComponentObjects[i], IN_ROOM(pCharacter));
+            ppComponentObjects[i]->setLocation(pCharacter);
         else
             obj_to_char(ppComponentObjects[i], pCharacter);
     }

@@ -755,7 +755,7 @@ void remove_limb(struct char_data *vict, int num) {
         SET_OBJ_VAL(body_part, v, 100);
     }
     body_part->setBaseStat<weight_t>("weight", rand_number(4, 10));
-    obj_to_room(body_part, IN_ROOM(vict));
+    body_part->setLocation(vict);
 }
 
 /* Weapon attack texts */
@@ -1112,7 +1112,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
 
             vict = FIGHTING(ch);
             sprintf(buf, "%s", GET_NAME(vict));
-            if (IN_ROOM(ch) == IN_ROOM(vict) && !MOB_FLAGGED(ch, MOB_DUMMY) && !AFF_FLAGGED(ch, AFF_KNOCKED) &&
+            if (ch->getLocation() == vict->getLocation() && !MOB_FLAGGED(ch, MOB_DUMMY) && !AFF_FLAGGED(ch, AFF_KNOCKED) &&
                 GET_POS(ch) != POS_SITTING && GET_POS(ch) != POS_RESTING && GET_POS(ch) != POS_SLEEPING) {
 
                 if (IS_NPC(ch) && rand_number(1, 30) <= 12)
@@ -1488,7 +1488,7 @@ static void make_pcorpse(struct char_data *ch) {
         ch->setBaseStat("money_carried", 0);
     }
 
-    obj_to_room(corpse, IN_ROOM(ch));
+    corpse->setLocation(ch);
 }
 
 /* This handles how corpses are viewed. How many limbs they have. If they were *
@@ -1613,19 +1613,19 @@ static void make_corpse(struct char_data *ch, struct char_data *tch) {
         struct obj_data *ashes;
         if (rand_number(1, 3) == 2) {
             ashes = read_object(1305, VIRTUAL);
-            obj_to_room(ashes, IN_ROOM(ch));
+            ashes->setLocation(ch);
             ashes = read_object(1305, VIRTUAL);
-            obj_to_room(ashes, IN_ROOM(ch));
+            ashes->setLocation(ch);
             ashes = read_object(1305, VIRTUAL);
-            obj_to_room(ashes, IN_ROOM(ch));
+            ashes->setLocation(ch);
         } else if (rand_number(1, 2) == 2) {
             ashes = read_object(1305, VIRTUAL);
-            obj_to_room(ashes, IN_ROOM(ch));
+            ashes->setLocation(ch);
             ashes = read_object(1305, VIRTUAL);
-            obj_to_room(ashes, IN_ROOM(ch));
+            ashes->setLocation(ch);
         } else {
             ashes = read_object(1305, VIRTUAL);
-            obj_to_room(ashes, IN_ROOM(ch));
+            ashes->setLocation(ch);
         }
     }
 
@@ -1735,7 +1735,7 @@ static void make_corpse(struct char_data *ch, struct char_data *tch) {
         }
         ch->setBaseStat("money_carried", 0);
     }
-    obj_to_room(corpse, IN_ROOM(ch));
+    corpse->setLocation(ch);
 
 }
 
@@ -1934,58 +1934,58 @@ void raw_kill(struct char_data *ch, struct char_data *killer) {
         if (IS_SHADOW_DRAGON1(ch)) {
             struct obj_data *obj = nullptr;
             SHADOW_DRAGON1 = -1;
-            send_to_room(IN_ROOM(ch), "@YThe one star dragon ball falls to the ground!@n\r\n");
+            send_to_location(ch, "@YThe one star dragon ball falls to the ground!@n\r\n");
 
             obj = read_object(20, VIRTUAL);
-            obj_to_room(obj, IN_ROOM(ch));
+            obj->setLocation(ch);
             shadowed = true;
         } else if (IS_SHADOW_DRAGON2(ch)) {
             struct obj_data *obj = nullptr;
             SHADOW_DRAGON2 = -1;
-            send_to_room(IN_ROOM(ch), "@YThe two star dragon ball falls to the ground!@n\r\n");
+            send_to_location(ch, "@YThe two star dragon ball falls to the ground!@n\r\n");
 
             obj = read_object(21, VIRTUAL);
-            obj_to_room(obj, IN_ROOM(ch));
+            obj->setLocation(ch);
             shadowed = true;
         } else if (IS_SHADOW_DRAGON3(ch)) {
             struct obj_data *obj = nullptr;
             SHADOW_DRAGON3 = -1;
-            send_to_room(IN_ROOM(ch), "@YThe three star dragon ball falls to the ground!@n\r\n");
+            send_to_location(ch, "@YThe three star dragon ball falls to the ground!@n\r\n");
 
             obj = read_object(22, VIRTUAL);
-            obj_to_room(obj, IN_ROOM(ch));
+            obj->setLocation(ch);
             shadowed = true;
         } else if (IS_SHADOW_DRAGON4(ch)) {
             struct obj_data *obj = nullptr;
             SHADOW_DRAGON4 = -1;
-            send_to_room(IN_ROOM(ch), "@YThe four star dragon ball falls to the ground!@n\r\n");
+            send_to_location(ch, "@YThe four star dragon ball falls to the ground!@n\r\n");
 
             obj = read_object(23, VIRTUAL);
-            obj_to_room(obj, IN_ROOM(ch));
+            obj->setLocation(ch);
             shadowed = true;
         } else if (IS_SHADOW_DRAGON5(ch)) {
             struct obj_data *obj = nullptr;
             SHADOW_DRAGON5 = -1;
-            send_to_room(IN_ROOM(ch), "@YThe five star dragon ball falls to the ground!@n\r\n");
+            send_to_location(ch, "@YThe five star dragon ball falls to the ground!@n\r\n");
 
             obj = read_object(24, VIRTUAL);
-            obj_to_room(obj, IN_ROOM(ch));
+            obj->setLocation(ch);
             shadowed = true;
         } else if (IS_SHADOW_DRAGON6(ch)) {
             struct obj_data *obj = nullptr;
             SHADOW_DRAGON6 = -1;
-            send_to_room(IN_ROOM(ch), "@YThe six star dragon ball falls to the ground!@n\r\n");
+            send_to_location(ch, "@YThe six star dragon ball falls to the ground!@n\r\n");
 
             obj = read_object(25, VIRTUAL);
-            obj_to_room(obj, IN_ROOM(ch));
+            obj->setLocation(ch);
             shadowed = true;
         } else if (IS_SHADOW_DRAGON7(ch)) {
             struct obj_data *obj = nullptr;
             SHADOW_DRAGON7 = -1;
-            send_to_room(IN_ROOM(ch), "@YThe seven star dragon ball falls to the ground!@n\r\n");
+            send_to_location(ch, "@YThe seven star dragon ball falls to the ground!@n\r\n");
 
             obj = read_object(26, VIRTUAL);
-            obj_to_room(obj, IN_ROOM(ch));
+            obj->setLocation(ch);
             shadowed = true;
         }
         make_corpse(ch, killer);
@@ -2129,7 +2129,7 @@ void die(struct char_data *ch, struct char_data *killer) {
                 char_from_room(ch);
                 char_to_room(ch, real_room(17875));
                 ch->modCurVitalDam(CharVital::health, 1);
-                look_at_room(IN_ROOM(ch), ch, 0);
+                ch->lookAtLocation();
                 final_combat_resolve(ch);
                 return;
             } else {
@@ -2303,7 +2303,7 @@ void group_gain(struct char_data *ch, struct char_data *victim) {
     if (!(k = ch->master))
         k = ch;
 
-    if (AFF_FLAGGED(k, AFF_GROUP) && (IN_ROOM(k) == IN_ROOM(ch))) {
+    if (AFF_FLAGGED(k, AFF_GROUP) && (k->getLocation() == ch->getLocation())) {
         tot_levels = GET_LEVEL(k);
         tot_members = 1;
     } else {
@@ -2312,7 +2312,7 @@ void group_gain(struct char_data *ch, struct char_data *victim) {
     }
 
     for (f = k->followers; f; f = f->next)
-        if (AFF_FLAGGED(f->follower, AFF_GROUP) && IN_ROOM(f->follower) == IN_ROOM(ch)) {
+        if (AFF_FLAGGED(f->follower, AFF_GROUP) && f->follower->getLocation() == ch->getLocation()) {
             if (!IS_WEIGHTED(f->follower)) {
                 tot_levels += GET_LEVEL(f->follower);
                 tot_members++;
@@ -2346,7 +2346,7 @@ void group_gain(struct char_data *ch, struct char_data *victim) {
         base = 0;
 
     /*
-    if (AFF_FLAGGED(k, AFF_GROUP) && IN_ROOM(k) == IN_ROOM(ch)) {
+    if (AFF_FLAGGED(k, AFF_GROUP) && k->getLocation() == ch->getLocation()) {
      if (!IS_WEIGHTED(k)) {
       perform_group_gain(k, base, victim);
      } else if (k != ch && (k->getEffMaxPL()) >= (ch->getEffMaxPL()) * 0.5) {
@@ -2365,7 +2365,7 @@ void group_gain(struct char_data *ch, struct char_data *victim) {
     perform_group_gain(k, base, victim);
 
     for (f = k->followers; f; f = f->next) {
-        if (AFF_FLAGGED(f->follower, AFF_GROUP) && IN_ROOM(f->follower) == IN_ROOM(ch)) {
+        if (AFF_FLAGGED(f->follower, AFF_GROUP) && f->follower->getLocation() == ch->getLocation()) {
             //if ((f->follower->getEffMaxPL()) >= GET_MAX_HIT(ch) * 0.5)
             perform_group_gain(f->follower, base, victim);
         }

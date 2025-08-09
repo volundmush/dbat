@@ -500,7 +500,7 @@ ACMD(do_say) {
                                         } else {
                                             char_to_room(wch, real_room(300));
                                         }
-                                        look_at_room(IN_ROOM(wch), wch, 0);
+                                        wch->lookAtLocation();
                                         send_to_char(wch,
                                                      "@wYou smile as the golden halo above your head disappears! You have returned to life where you had last died!@n\r\n");
                                         wch->affect_flags.set(AFF_SPIRIT, false);
@@ -533,7 +533,7 @@ ACMD(do_say) {
                                     if (real_room(GET_DROOM(wch)) != NOWHERE) {
                                         char_from_room(wch);
                                         char_to_room(wch, real_room(GET_DROOM(wch)));
-                                        look_at_room(IN_ROOM(wch), wch, 0);
+                                        wch->lookAtLocation();
                                         send_to_char(wch,
                                                      "@wYou smile as the golden halo above your head disappears! You have returned to life where you had last died!@n\r\n");
                                         for(auto f : {AFF_SPIRIT, AFF_ETHEREAL}) wch->affect_flags.set(f, false);
@@ -544,7 +544,7 @@ ACMD(do_say) {
                                     if (real_room(GET_DROOM(wch2)) != NOWHERE) {
                                         char_from_room(wch2);
                                         char_to_room(wch2, real_room(GET_DROOM(wch2)));
-                                        look_at_room(IN_ROOM(wch2), wch2, 0);
+                                        wch2->lookAtLocation();
                                         send_to_char(wch2,
                                                      "@wYou smile as the golden halo above your head disappears! You have returned to life where you had last died!@n\r\n");
                                         for(auto f : {AFF_SPIRIT, AFF_ETHEREAL}) wch2->affect_flags.set(f, false);
@@ -583,7 +583,7 @@ ACMD(do_say) {
                                     if (real_room(GET_DROOM(wch)) != NOWHERE) {
                                         char_from_room(wch);
                                         char_to_room(wch, real_room(GET_DROOM(wch)));
-                                        look_at_room(IN_ROOM(wch), wch, 0);
+                                        wch->lookAtLocation();
                                         send_to_char(wch,
                                                      "@wYou smile as the golden halo above your head disappears! You have returned to life where you had last died!@n\r\n");
                                         for(auto f : {AFF_SPIRIT, AFF_ETHEREAL}) wch->affect_flags.set(f, false);
@@ -594,7 +594,7 @@ ACMD(do_say) {
                                     if (real_room(GET_DROOM(wch2)) != NOWHERE) {
                                         char_from_room(wch2);
                                         char_to_room(wch2, real_room(GET_DROOM(wch2)));
-                                        look_at_room(IN_ROOM(wch2), wch2, 0);
+                                        wch2->lookAtLocation();
                                         send_to_char(wch2,
                                                      "@wYou smile as the golden halo above your head disappears! You have returned to life where you had last died!@n\r\n");
                                         for(auto f : {AFF_SPIRIT, AFF_ETHEREAL}) wch2->affect_flags.set(f, false);
@@ -605,7 +605,7 @@ ACMD(do_say) {
                                     if (real_room(GET_DROOM(wch3)) != NOWHERE) {
                                         char_from_room(wch3);
                                         char_to_room(wch3, real_room(GET_DROOM(wch3)));
-                                        look_at_room(IN_ROOM(wch3), wch3, 0);
+                                        wch3->lookAtLocation();
                                         send_to_char(wch3,
                                                      "@wYou smile as the golden halo above your head disappears! You have returned to life where you had last died!@n\r\n");
                                         for(auto f : {AFF_SPIRIT, AFF_ETHEREAL}) wch3->affect_flags.set(f, false);
@@ -1489,10 +1489,10 @@ ACMD(do_gen_comm) {
                          GET_ADMLEVEL(ch) > 0 ? GET_NAME(ch) : GET_USER(ch), com_msgs[subcmd][1],
                          GET_SKILL(i->character, SPEAKING(ch)) ? "," : ", in an unfamiliar tongue,", argument,
                          color_on);
-            } else if (subcmd == SCMD_SHOUT && IN_ROOM(i->character) != IN_ROOM(ch)) {
+            } else if (subcmd == SCMD_SHOUT && i->character->getLocation() != ch->getLocation()) {
                 snprintf(buf1, sizeof(buf1), "%s@WSomeone nearby %ss@W, '@w%s@W'@n%s", color_on, com_msgs[subcmd][1],
                          argument, color_on);
-            } else if (subcmd == SCMD_SHOUT && IN_ROOM(i->character) == IN_ROOM(ch)) {
+            } else if (subcmd == SCMD_SHOUT && i->character->getLocation() == ch->getLocation()) {
                 snprintf(buf1, sizeof(buf1), "%s@W$n@W %ss@W, '@w%s@W'@n%s", color_on, com_msgs[subcmd][1], argument,
                          color_on);
             } else {

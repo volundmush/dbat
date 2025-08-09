@@ -770,7 +770,7 @@ in the vault (vnum: 453) now and then. you can just use
                     } else if (!strcasecmp(field, "prac")) {
                         if (IS_NPC(c)) {
                             if (IN_ROOM(c) != NOWHERE) {
-                                send_to_room(IN_ROOM(c),
+                                send_to_location(c,
                                              "Error!: Report this trigger error to the coding authorities!\r\n");
                             }
                         }
