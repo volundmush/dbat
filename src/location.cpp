@@ -79,6 +79,13 @@ const char* Location::getName() const {
     return "Unknown";
 }
 
+const char* Location::getLookDescription() const {
+    if(auto l = dynamic_cast<location_data*>(unit)) {
+        return l->getLookDescription(position);
+    }
+    return "";
+}
+
 std::optional<Destination> Location::getExit(Direction dir) const {
     if(auto l = dynamic_cast<location_data*>(unit))
         return l->getDirection(position, dir);

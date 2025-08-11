@@ -423,6 +423,11 @@ const char* room_data::getName(const Coordinates& /*coor*/) const {
     return getName();
 }
 
+const char* room_data::getLookDescription(const Coordinates& coor) const {
+    // For rooms, look description does not vary by coordinate inside the room.
+    return unit_data::getLookDescription();
+}
+
 std::vector<std::weak_ptr<obj_data>> room_data::getObjects(const Coordinates& coor) const {
     return getObjects();
 }

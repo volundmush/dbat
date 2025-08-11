@@ -288,6 +288,7 @@ struct Location {
     vnum getVnum() const;
 
     const char* getName() const;
+    const char* getLookDescription() const; // New: coordinate-aware look description
     std::optional<Destination> getExit(Direction dir) const;
     std::map<Direction, Destination> getExits() const;
 
@@ -658,6 +659,7 @@ struct location_data : public unit_data {
     virtual zone_data* getZone() const = 0;
 
     virtual const char* getName(const Coordinates& coor) const = 0;
+    virtual const char* getLookDescription(const Coordinates& coor) const = 0; // New
     virtual bool getIsDark(const Coordinates& coor) const;
 
     virtual const std::vector<ExtraDescription>& getExtraDescription(const Coordinates& coor) const;
@@ -716,14 +718,15 @@ struct TileOverride {
     std::optional<SectorType> sectorType;
     FlagHandler<RoomFlag> roomFlags;
     FlagHandler<WhereFlag> whereFlags;
-    int damage;
-    int groundEffect;
+    int damage{0};
+    int groundEffect{0};
     std::unordered_map<int, double> environment;
     std::map<Direction, Destination> exits;
 };
 
 struct AbstractGridArea : public location_data {
     using unit_data::getName;
+    using unit_data::getLookDescription; // bring base (no-arg) into scope
 
     // the default sector type for undefined tiles.
     // if left empty, the tiles are completely impassable / void.
@@ -736,8 +739,12 @@ struct AbstractGridArea : public location_data {
 
     std::unordered_map<Coordinates, TileOverride> tileOverrides;
 
+    // location_data overrides (most implemented generically here). Subclasses still provide getZone().
+    zone_data* getZone() const override = 0; // still pure virtual; concrete grid instances decide zone binding.
+
     const std::vector<ExtraDescription>& getExtraDescription(const Coordinates& coor) const override;
     const char* getName(const Coordinates& coor) const override;
+    const char* getLookDescription(const Coordinates& coor) const override;
     std::vector<std::weak_ptr<obj_data>> getObjects(const Coordinates& coor) const override;
     std::vector<std::weak_ptr<char_data>> getPeople(const Coordinates& coor) const override;
     std::optional<Destination> getDirection(const Coordinates& coor, Direction dir) override;
@@ -777,6 +784,7 @@ struct room_data : public location_data, std::enable_shared_from_this<room_data>
 
     // Bring the base class getName() into scope to avoid name hiding
     using unit_data::getName;
+    using unit_data::getLookDescription; // restore hidden overload
     using unit_data::getObjects;
     using unit_data::findObject;
     using unit_data::findObjectVnum;
@@ -858,6 +866,7 @@ struct room_data : public location_data, std::enable_shared_from_this<room_data>
     zone_data* getZone() const override;
     const std::vector<ExtraDescription>& getExtraDescription(const Coordinates& coor) const override;
     const char* getName(const Coordinates& coor) const override;
+    const char* getLookDescription(const Coordinates& coor) const override;
     std::vector<std::weak_ptr<obj_data>> getObjects(const Coordinates& coor) const override;
     std::vector<std::weak_ptr<char_data>> getPeople(const Coordinates& coor) const override;
     std::optional<Destination> getDirection(const Coordinates& coor, Direction dir) override;
