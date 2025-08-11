@@ -299,7 +299,7 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
                     if (vict == ch)
                         continue;
                     if (IS_NPC(vict) && race::isPeople(vict->race) && FIGHTING(vict) && done == false) {
-                        if (!is_sparring(vict) && !is_sparring(ch) && GET_HIT(vict) < GET_HIT(ch) * 0.6 &&
+                        if (!vict->isSparring() && !ch->isSparring() && GET_HIT(vict) < GET_HIT(ch) * 0.6 &&
                             axion_dice(0) >= 90) {
                             act("@c$n@C rushes to @c$N's@C aid!@n", true, ch, nullptr, vict, TO_ROOM);
                             char buf[MAX_INPUT_LENGTH];
@@ -338,7 +338,7 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
                     if (vict == ch)
                         continue;
                     if (IS_NPC(vict) && race::isPeople(vict->race) && FIGHTING(vict) && done == false) {
-                        if (!is_sparring(vict) && !is_sparring(ch) && GET_HIT(vict) < GET_HIT(ch) * 0.6 && axion_dice(0) >= 70) {
+                        if (!vict->isSparring() && !ch->isSparring() && GET_HIT(vict) < GET_HIT(ch) * 0.6 && axion_dice(0) >= 70) {
                             act("@c$n@C rushes to @c$N's@C aid!@n", true, ch, nullptr, vict, TO_ROOM);
                             char buf[MAX_INPUT_LENGTH];
                             sprintf(buf, "%s", GET_NAME(vict));

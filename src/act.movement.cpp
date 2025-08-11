@@ -1571,7 +1571,8 @@ static int do_simple_enter(Character *ch, Object *obj, int need_specials_check) 
     room_rnum was_in = IN_ROOM(ch);
     int need_movement = 0;
 
-    auto r = get_room(dest_room);
+    Destination d;
+    d.unit = get_room(dest_room);
 
     /* charmed? */
     if (AFF_FLAGGED(ch, AFF_CHARM) && ch->master &&
@@ -1596,8 +1597,8 @@ static int do_simple_enter(Character *ch, Object *obj, int need_specials_check) 
         return (0);
     }
 
-    if (ROOM_FLAGGED(r, ROOM_TUNNEL) &&
-        num_pc_in_room(r) >= CONFIG_TUNNEL_SIZE) {
+    if (d.getRoomFlag(ROOM_TUNNEL) &&
+        d.countPlayers() >= CONFIG_TUNNEL_SIZE) {
         if (CONFIG_TUNNEL_SIZE > 1)
                         ch->sendText("There isn't enough room for you to go there!\r\n");
         else
@@ -1605,7 +1606,7 @@ static int do_simple_enter(Character *ch, Object *obj, int need_specials_check) 
         return (0);
     }
     /* Mortals and low level gods cannot enter greater god rooms. */
-    if (ROOM_FLAGGED(r, ROOM_GODROOM) &&
+    if (d.getRoomFlag(ROOM_GODROOM) &&
         GET_ADMLEVEL(ch) < ADMLVL_GRGOD) {
                 ch->sendText("You aren't godly enough to use that room!\r\n");
         return (0);
@@ -1623,12 +1624,12 @@ static int do_simple_enter(Character *ch, Object *obj, int need_specials_check) 
         act("@C$n@w carries @c$N@w with $m.@n", true, ch, nullptr, CARRYING(ch), TO_ROOM);
     }
     ch->clearLocation();
-    char_to_room(ch, r);
+    ch->setLocation(d);
 
     /* move them first, then move them back if they aren't allowed to go. */
     /* see if an entry trigger disallows the move */
     if (!entry_mtrigger(ch)) {
-    ch->clearLocation();
+        ch->clearLocation();
         char_to_room(ch, was_in);
         return 0;
     }
@@ -1659,7 +1660,7 @@ static int do_simple_enter(Character *ch, Object *obj, int need_specials_check) 
         if (!AFF_FLAGGED(carry, AFF_KNOCKED) && !AFF_FLAGGED(carry, AFF_SLEEP) && rand_number(1, 3)) {
                         carry->sendText("You feel your sleeping body being moved.\r\n");
         }
-    carry->clearLocation();
+        carry->clearLocation();
         carry->setLocation(ch);
         if (auto s = SITS(carry); s) {
             s->clearLocation();
@@ -1802,6 +1803,9 @@ static int do_simple_leave(Character *ch, Object *obj, int need_specials_check) 
         }
     }
 
+    Destination d;
+    d.unit = get_room(dest_room);
+
     /* charmed? */
     if (AFF_FLAGGED(ch, AFF_CHARM) && ch->master &&
         ch->location == ch->master->location) {
@@ -1822,8 +1826,8 @@ static int do_simple_leave(Character *ch, Object *obj, int need_specials_check) 
         return (0);
     }
 
-    if (ROOM_FLAGGED(dest_room, ROOM_TUNNEL) &&
-        num_pc_in_room(get_room(dest_room)) >= CONFIG_TUNNEL_SIZE) {
+    if (d.getRoomFlag(ROOM_TUNNEL) &&
+        d.countPlayers() >= CONFIG_TUNNEL_SIZE) {
         if (CONFIG_TUNNEL_SIZE > 1)
                         ch->sendText("There isn't enough room for you to go there!\r\n");
         else
@@ -1843,12 +1847,12 @@ static int do_simple_leave(Character *ch, Object *obj, int need_specials_check) 
         act("@C$n@w carries @c$N@w with $m.@n", true, ch, nullptr, car, TO_ROOM);
     }
     ch->clearLocation();
-    ch->setLocation(dest_room);
+    ch->setLocation(d);
 
     /* move them first, then move them back if they aren't allowed to go. */
     /* see if an entry trigger disallows the move */
     if (!entry_mtrigger(ch)) {
-    ch->clearLocation();
+        ch->clearLocation();
         char_to_room(ch, was_in);
         return 0;
     }
@@ -1861,7 +1865,7 @@ static int do_simple_leave(Character *ch, Object *obj, int need_specials_check) 
     if (auto drg = DRAGGING(ch)) {
         act("@wYou drag @C$N@w with you.@n", true, ch, nullptr, drg, TO_CHAR);
         act("@C$n@w drags @c$N@w with $m.@n", true, ch, nullptr, drg, TO_ROOM);
-    drg->clearLocation();
+        drg->clearLocation();
         drg->setLocation(ch);
         if (auto si = SITS(drg)) {
             si->clearLocation();
@@ -1877,7 +1881,7 @@ static int do_simple_leave(Character *ch, Object *obj, int need_specials_check) 
     if (auto car = CARRYING(ch)) {
         act("@wYou carry @C$N@w with you.@n", true, ch, nullptr, car, TO_CHAR);
         act("@C$n@w carries @c$N@w with $m.@n", true, ch, nullptr, car, TO_ROOM);
-    car->clearLocation();
+        car->clearLocation();
         car->setLocation(ch);
         if (auto si = SITS(car)) {
             si->clearLocation();

@@ -1375,6 +1375,9 @@ struct Character : public AbstractThing, std::enable_shared_from_this<Character>
     bool isProvidingLight();
     double currentGravity();
 
+    // converting functions to methods below...
+    bool isSparring() const;
+    
 };
 
 

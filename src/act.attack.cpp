@@ -242,7 +242,7 @@ ACMD(do_throw) {
         return;
     }
 
-    if (is_sparring(ch)) {
+    if (ch->isSparring()) {
                 ch->sendText("You can not spar with throw.\r\n");
         return;
     }

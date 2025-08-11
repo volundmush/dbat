@@ -1242,3 +1242,14 @@ void Character::sendText(const std::string& txt) {
     if(!desc) return;
     desc->sendText(txt);
 }
+
+bool Character::isSparring() const {
+
+    if(IS_NPC(this)) {
+        auto opponent = fighting;
+        if(!opponent) return false;
+        return IS_NPC(opponent) ? false : opponent->character_flags.get(CharacterFlag::sparring) && spar_friendly(opponent, (Character*)this);
+    }
+
+    return character_flags.get(CharacterFlag::sparring);
+}

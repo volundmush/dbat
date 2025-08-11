@@ -1405,7 +1405,7 @@ void hurt_limb(Character *ch, Character *vict, int chance, int area, int64_t pow
         return;
     }
 
-    if (!is_sparring(ch)) {
+    if (!ch->isSparring()) {
         if (area == 0) { /* Arms */
             if (GET_LIMBCOND(vict, 1) - dmg <= 0) {
                 act("@RYour attack @YDESTROYS @r$N's@R left arm!@n", true, ch, nullptr, vict, TO_CHAR);
@@ -3700,7 +3700,7 @@ static void spar_helper(Character *ch, Character *vict, int type, int64_t dmg) {
     auto chCon = GET_CON(ch);
     if (chance >= rand_number(40, 75)) {
 
-        bool isLethal = !(is_sparring(ch) && is_sparring(vict));
+        bool isLethal = !(ch->isSparring() && vict->isSparring());
 
 		//Check if victim is NPC or Player, both have different logic here.
         if (vict && IS_NPC(vict)) {
@@ -3954,13 +3954,13 @@ int can_kill(Character *ch, Character *vict, Object *obj, int num) {
                         ch->sendText("You can't reach that far in your current position!\r\n");
             return 0;
         } else if (!IS_NPC(ch) && !IS_NPC(vict) && AFF_FLAGGED(ch, AFF_SPIRIT) &&
-                   (!is_sparring(ch) || !is_sparring(vict)) && num != 2) {
+                   (!ch->isSparring() || !vict->isSparring()) && num != 2) {
                         ch->sendText("You can not fight other players in AL/Hell.\r\n");
             return 0;
-        } else if (vict->is_newbie() && !IS_NPC(ch) && !IS_NPC(vict) && (!is_sparring(ch) || !is_sparring(vict))) {
+        } else if (vict->is_newbie() && !IS_NPC(ch) && !IS_NPC(vict) && (!ch->isSparring() || !vict->isSparring())) {
                         ch->sendText("Newbie Shield Protects them!\r\n");
             return 0;
-        } else if (ch->is_newbie() && !IS_NPC(ch) && !IS_NPC(vict) && (!is_sparring(ch) || !is_sparring(vict))) {
+        } else if (ch->is_newbie() && !IS_NPC(ch) && !IS_NPC(vict) && (!ch->isSparring() || !vict->isSparring())) {
                         ch->sendText("Newbie Shield Protects you until PL 10,000.\r\n");
             return 0;
         } else if (PLR_FLAGGED(vict, PLR_SPIRAL) && num != 3) {
@@ -4587,7 +4587,7 @@ void hurt(int limb, int chance, Character *ch, Character *vict, Object *obj, int
             hitprcnt_mtrigger(vict);
         }
 
-        if (IS_HUMANOID(vict) && !IS_NPC(ch) && IS_NPC(vict) && (!is_sparring(ch) || !is_sparring(vict))) {
+        if (IS_HUMANOID(vict) && !IS_NPC(ch) && IS_NPC(vict) && (!ch->isSparring() || !vict->isSparring())) {
             vict->mob_specials.memory.push_back(ch->shared());
         }
         if (IS_NPC(vict) && GET_HIT(vict) > ((vict->getEffectiveStat<int64_t>("health"))) / 4) {
@@ -4667,7 +4667,7 @@ void hurt(int limb, int chance, Character *ch, Character *vict, Object *obj, int
         }
         auto sup = GET_SUPPRESS(vict);
         bool suppresso = (sup > 0);
-        if (is_sparring(ch) && is_sparring(vict) && (sup + vict->getCurVital(CharVital::health)) - dmg <= 0) {
+        if (ch->isSparring() && vict->isSparring() && (sup + vict->getCurVital(CharVital::health)) - dmg <= 0) {
             if (!IS_NPC(vict)) {
                 act("@c$N@w falls down unconscious, and you stop sparring with $M.@n", true, ch, nullptr, vict,
                     TO_CHAR);
@@ -4706,7 +4706,7 @@ void hurt(int limb, int chance, Character *ch, Character *vict, Object *obj, int
                 extract_char(vict);
                 return;
             }
-        } else if (is_sparring(ch) && (GET_SUPPRESS(vict) + GET_HIT(vict)) - dmg <= 0) {
+        } else if (ch->isSparring() && (GET_SUPPRESS(vict) + GET_HIT(vict)) - dmg <= 0) {
             act("@c$N@w falls down unconscious, and you spare $S life.@n", true, ch, nullptr, vict, TO_CHAR);
             act("@C$n@w spares your life as you fall unconscious.@n", true, ch, nullptr, vict, TO_VICT);
             act("@c$N@w falls down unconscious, and @C$n@w spares $S life.@n", true, ch, nullptr, vict, TO_NOTVICT);
@@ -4721,15 +4721,15 @@ void hurt(int limb, int chance, Character *ch, Character *vict, Object *obj, int
             if (!IS_NPC(ch)) {
                 vict->affect_flags.set(AFF_KNOCKED, true);
             }
-        } else if (is_sparring(ch) && !is_sparring(vict) && IS_NPC(ch)) {
+        } else if (ch->isSparring() && !vict->isSparring() && IS_NPC(ch)) {
             act("@w$n@w stops sparring!@n", true, ch, nullptr, vict, TO_ROOM);
             ch->character_flags.set(CharacterFlag::sparring, false);
-        } else if (!is_sparring(ch) && is_sparring(vict) && IS_NPC(vict)) {
+        } else if (!ch->isSparring() && vict->isSparring() && IS_NPC(vict)) {
             act("@w$n@w stops sparring!@n", true, ch, nullptr, vict, TO_ROOM);
             vict->character_flags.set(CharacterFlag::sparring, false);
         }
 
-        if (PLR_FLAGGED(vict, PLR_IMMORTAL) && !is_sparring(ch) && vict->getCurVital(CharVital::health) - dmg <= 0) {
+        if (PLR_FLAGGED(vict, PLR_IMMORTAL) && !ch->isSparring() && vict->getCurVital(CharVital::health) - dmg <= 0) {
             if (IN_ARENA(vict)) {
                 send_to_all("@R%s@r manages to defeat @R%s@r in the Arena!@n\r\n", GET_NAME(ch), GET_NAME(vict));
                 ch->clearLocation();
@@ -4787,7 +4787,7 @@ void hurt(int limb, int chance, Character *ch, Character *vict, Object *obj, int
             hurt(0, 0, ch, GRAPPLED(vict), nullptr, maindmg, 3);
         }
         bool deathblow = (GET_HIT(vict) - dmg <= 0 && suppresso == false) || (suppresso == true && vict->getPL(false) - dmg <= 0);
-        if (!is_sparring(ch) && !PLR_FLAGGED(vict, PLR_IMMORTAL) && deathblow) {
+        if (!ch->isSparring() && !PLR_FLAGGED(vict, PLR_IMMORTAL) && deathblow) {
                 vict->modCurVitalDam(CharVital::health, 1);
                 int64_t lifeloss;
                 if (suppresso)
@@ -4842,7 +4842,7 @@ void hurt(int limb, int chance, Character *ch, Character *vict, Object *obj, int
                     if (ch->mutations.get(Mutation::natural_energy)) {
                         ch->modCurVital(CharVital::ki, dmg * .05);
                     }
-                    if (!is_sparring(ch) && IS_NPC(vict)) {
+                    if (!ch->isSparring() && IS_NPC(vict)) {
                         if (type == 0 && rand_number(1, 100) >= 97) {
                                                         ch->sendText("@YY@yo@Yu @yg@Ya@yi@Yn@y s@Yo@ym@Ye @yb@Yo@yn@Yu@ys @Ye@yx@Yp@ye@Yr@yi@Ye@yn@Yc@ye@Y!@n\r\n");
                             gain = gain * 0.05;
@@ -4977,7 +4977,7 @@ void hurt(int limb, int chance, Character *ch, Character *vict, Object *obj, int
 
         /* Increases GET_FURY for halfbreeds who get damaged. */
 
-        if (!is_sparring(ch) && IS_HALFBREED(vict) && GET_FURY(vict) < 100 && !PLR_FLAGGED(vict, PLR_FURY)) {
+        if (!ch->isSparring() && IS_HALFBREED(vict) && GET_FURY(vict) < 100 && !PLR_FLAGGED(vict, PLR_FURY)) {
                         vict->sendText("@RYour fury increases a little bit!@n\r\n");
             vict->modBaseStat("fury", 1);
         }
@@ -4996,7 +4996,7 @@ void hurt(int limb, int chance, Character *ch, Character *vict, Object *obj, int
             }
         }
 
-        if (IS_ARLIAN(vict) && dead != true && !is_sparring(vict) && !is_sparring(ch)) {
+        if (IS_ARLIAN(vict) && dead != true && !vict->isSparring() && !ch->isSparring()) {
             handle_evolution(vict, dmg);
         }
         if (dead == true) {

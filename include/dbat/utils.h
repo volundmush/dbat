@@ -89,8 +89,6 @@ extern int planet_check(Character *ch, Character *vict);
 
 extern void improve_skill(Character *ch, int skill, int num);
 
-extern double speednar(Character *ch);
-
 extern int64_t gear_exp(Character *ch, int64_t exp);
 
 extern int get_flag_by_name(const char *flag_list[], char *flag_name);
@@ -123,13 +121,9 @@ extern int get_filename(char *filename, size_t fbufsize, int mode, const char *o
 
 extern time_t mud_time_to_secs(struct time_info_data *now);
 
-extern int num_pc_in_room(Room *room);
-
 extern void core_dump_real(const char *who, int line);
 
 extern int count_color_chars(const char *string);
-
-extern bool is_sparring(Character *ch);
 
 extern void mob_talk(Character *ch, const char *speech);
 
@@ -521,7 +515,7 @@ extern int GET_SPEEDI(Character *ch);
 #define GET_SPEEDCALC(ch) (IS_GRAP(ch) ? GET_CHA(ch) : (IS_INFERIOR(ch) ? (AFF_FLAGGED(ch, AFF_FLYING) ? (GET_SPEEDVAR(ch) * 1.25) : GET_SPEEDVAR(ch)) : GET_SPEEDVAR(ch)))
 #define GET_SPEEDBONUS(ch) (IS_ARLIAN(ch) ? AFF_FLAGGED(ch, AFF_SHELL) ? GET_SPEEDVAR(ch) * -0.5 : (IS_MALE(ch) ? (AFF_FLAGGED(ch, AFF_FLYING) ? (GET_SPEEDVAR(ch) * 0.5) : 0) : 0) : 0)
 #define GET_SPEEDVAR(ch) (GET_SPEEDVEM(ch) > GET_CHA(ch) ? GET_SPEEDVEM(ch) : GET_CHA(ch))
-#define GET_SPEEDVEM(ch) (GET_SPEEDINT(ch) - (GET_SPEEDINT(ch) * speednar(ch)))
+#define GET_SPEEDVEM(ch) (GET_SPEEDINT(ch) - (GET_SPEEDINT(ch) * (ch)->getBaseStat("speednar")))
 #define IS_GRAP(ch)     (GRAPPLING(ch) || GRAPPLED(ch))
 #define GET_SPEEDINT(ch) (IS_BIO(ch) ? ((GET_CHA(ch) * GET_DEX(ch)) * (GET_MAX_HIT(ch) / 1200) / 1200) + (GET_CHA(ch) * (GET_KAIOKEN(ch) * 100)) : ((GET_CHA(ch) * GET_DEX(ch)) * (GET_MAX_HIT(ch) / 1000) / 1000) + (GET_CHA(ch) * (GET_KAIOKEN(ch) * 100)))
 #define IS_INFERIOR(ch) (IS_KONATSU(ch) || IS_DEMON(ch))

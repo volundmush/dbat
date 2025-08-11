@@ -2574,9 +2574,9 @@ static void list_one_char(Character *i, Character *ch)
     else if (IS_NPC(i) && ABSORBBY(i) && ABSORBBY(i) != ch)
         ch->send_to("@w%c%s is being absorbed from by %s!", UPPER(*i->getShortDescription()), i->getShortDescription() + 1, readIntro(ch, ABSORBBY(i)) == 1 ? get_i_name(ch, ABSORBBY(i)) : AN(RACE(ABSORBBY(i))));
     else if (IS_NPC(i) && FIGHTING(i) && FIGHTING(i) != ch && GET_POS(i) != POS_SITTING && GET_POS(i) != POS_SLEEPING &&
-             is_sparring(i))
+             i->isSparring())
         ch->send_to("@w%c%s is sparring with %s!", UPPER(*i->getShortDescription()), i->getShortDescription() + 1, GET_ADMLEVEL(ch) ? GET_NAME(FIGHTING(i)) : (readIntro(ch, FIGHTING(i)) == 1 ? get_i_name(ch, FIGHTING(i)) : LRACE(FIGHTING(i))));
-    else if (IS_NPC(i) && FIGHTING(i) && is_sparring(i) && FIGHTING(i) == ch && GET_POS(i) != POS_SITTING &&
+    else if (IS_NPC(i) && FIGHTING(i) && i->isSparring() && FIGHTING(i) == ch && GET_POS(i) != POS_SITTING &&
              GET_POS(i) != POS_SLEEPING)
         ch->send_to("@w%c%s is sparring with you!", UPPER(*i->getShortDescription()), i->getShortDescription() + 1);
     else if (IS_NPC(i) && FIGHTING(i) && FIGHTING(i) != ch && GET_POS(i) != POS_SITTING && GET_POS(i) != POS_SLEEPING)

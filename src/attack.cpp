@@ -2404,13 +2404,13 @@ namespace atk {
             case 4:
                 calcDamage *= calc_critical(user, 1);
                 if (rand_number(1, 100) >= 70 && !IS_NPC(victim) && !AFF_FLAGGED(victim, AFF_SANCTUARY)) {
-                    if (GET_LIMBCOND(victim, 1) > 0 && !is_sparring(user) && rand_number(1, 1) == 2) {
+                    if (GET_LIMBCOND(victim, 1) > 0 && !user->isSparring() && rand_number(1, 1) == 2) {
                         act("@RYour attack severs $N's left arm!@n", true, user, nullptr, victim, TO_CHAR);
                         act("@R$n's attack severs your left arm!@n", true, user, nullptr, victim, TO_VICT);
                         act("@R$N's left arm is severered in the attack!@n", true, user, nullptr, victim, TO_VICT);
                         GET_LIMBCOND(victim, 1) = 0;
                         remove_limb(victim, 2);
-                    } else if (GET_LIMBCOND(victim, 0) > 0 && !is_sparring(user)) {
+                    } else if (GET_LIMBCOND(victim, 0) > 0 && !user->isSparring()) {
                         act("@RYour attack severs $N's right arm!@n", true, user, nullptr, victim, TO_CHAR);
                         act("@R$n's attack severs your right arm!@n", true, user, nullptr, victim, TO_VICT);
                         act("@R$N's right arm is severered in the attack!@n", true, user, nullptr, victim, TO_VICT);
@@ -2422,13 +2422,13 @@ namespace atk {
             case 5:
                 calcDamage *= calc_critical(user, 1);
                 if (rand_number(1, 100) >= 70 && !IS_NPC(victim) && !AFF_FLAGGED(victim, AFF_SANCTUARY)) {
-                    if (GET_LIMBCOND(victim, 3) > 0 && !is_sparring(user) && rand_number(1, 1) == 2) {
+                    if (GET_LIMBCOND(victim, 3) > 0 && !user->isSparring() && rand_number(1, 1) == 2) {
                         act("@RYour attack severs $N's left leg!@n", true, user, nullptr, victim, TO_CHAR);
                         act("@R$n's attack severs your left leg!@n", true, user, nullptr, victim, TO_VICT);
                         act("@R$N's left leg is severered in the attack!@n", true, user, nullptr, victim, TO_VICT);
                         GET_LIMBCOND(victim, 3) = 0;
                         remove_limb(victim, 4);
-                    } else if (GET_LIMBCOND(victim, 2) > 0 && !is_sparring(user)) {
+                    } else if (GET_LIMBCOND(victim, 2) > 0 && !user->isSparring()) {
                         act("@RYour attack severs $N's right leg!@n", true, user, nullptr, victim, TO_CHAR);
                         act("@R$n's attack severs your right leg!@n", true, user, nullptr, victim, TO_VICT);
                         act("@R$N's right leg is severered in the attack!@n", true, user, nullptr, victim, TO_VICT);
@@ -2714,13 +2714,13 @@ namespace atk {
             case 4:
                 calcDamage *= calc_critical(user, 1);
                 if (rand_number(1, 100) >= 70 && !IS_NPC(victim) && !AFF_FLAGGED(victim, AFF_SANCTUARY)) {
-                    if (GET_LIMBCOND(victim, 1) > 0 && !is_sparring(user) && rand_number(1, 1) == 2) {
+                    if (GET_LIMBCOND(victim, 1) > 0 && !user->isSparring() && rand_number(1, 1) == 2) {
                         act("@RYour attack severes $N's left arm!@n", true, user, nullptr, victim, TO_CHAR);
                         act("@R$n's attack severes your left arm!@n", true, user, nullptr, victim, TO_VICT);
                         act("@R$N's left arm is severed in the attack!@n", true, user, nullptr, victim, TO_NOTVICT);
                         GET_LIMBCOND(victim, 1) = 0;
                         remove_limb(victim, 2);
-                    } else if (GET_LIMBCOND(victim, 0) > 0 && !is_sparring(user)) {
+                    } else if (GET_LIMBCOND(victim, 0) > 0 && !user->isSparring()) {
                         act("@RYour attack severes $N's right arm!@n", true, user, nullptr, victim, TO_CHAR);
                         act("@R$n's attack severes your right arm!@n", true, user, nullptr, victim, TO_VICT);
                         act("@R$N's right arm is severed in the attack!@n", true, user, nullptr, victim, TO_NOTVICT);
@@ -2732,13 +2732,13 @@ namespace atk {
             case 5:
                 calcDamage *= calc_critical(user, 1);
                 if (rand_number(1, 100) >= 70 && !IS_NPC(victim) && !AFF_FLAGGED(victim, AFF_SANCTUARY)) {
-                    if (GET_LIMBCOND(victim, 3) > 0 && !is_sparring(user) && rand_number(1, 1) == 2) {
+                    if (GET_LIMBCOND(victim, 3) > 0 && !user->isSparring() && rand_number(1, 1) == 2) {
                         act("@RYour attack severes $N's left leg!@n", true, user, nullptr, victim, TO_CHAR);
                         act("@R$n's attack severes your left leg!@n", true, user, nullptr, victim, TO_VICT);
                         act("@R$N's left leg is severed in the attack!@n", true, user, nullptr, victim, TO_NOTVICT);
                         GET_LIMBCOND(victim, 3) = 0;
                         remove_limb(victim, 4);
-                    } else if (GET_LIMBCOND(victim, 2) > 0 && !is_sparring(user)) {
+                    } else if (GET_LIMBCOND(victim, 2) > 0 && !user->isSparring()) {
                         act("@RYour attack severes $N's right leg!@n", true, user, nullptr, victim, TO_CHAR);
                         act("@R$n's attack severes your right leg!@n", true, user, nullptr, victim, TO_VICT);
                         act("@R$N's right leg is severed in the attack!@n", true, user, nullptr, victim, TO_NOTVICT);
@@ -3391,13 +3391,13 @@ namespace atk {
             case 4:
                 calcDamage *= calc_critical(user, 1);
                 if (rand_number(1, 100) >= 70 && !IS_NPC(victim) && !AFF_FLAGGED(victim, AFF_SANCTUARY)) {
-                    if (GET_LIMBCOND(victim, 1) > 0 && !is_sparring(user) && rand_number(1, 1) == 2) {
+                    if (GET_LIMBCOND(victim, 1) > 0 && !user->isSparring() && rand_number(1, 1) == 2) {
                         act("@RYour attack severs $N's left arm!@n", true, user, nullptr, victim, TO_CHAR);
                         act("@R$n's attack severs your left arm!@n", true, user, nullptr, victim, TO_VICT);
                         act("@R$N's left arm is severered in the attack!@n", true, user, nullptr, victim, TO_VICT);
                         GET_LIMBCOND(victim, 1) = 0;
                         remove_limb(victim, 2);
-                    } else if (GET_LIMBCOND(victim, 0) > 0 && !is_sparring(user)) {
+                    } else if (GET_LIMBCOND(victim, 0) > 0 && !user->isSparring()) {
                         act("@RYour attack severs $N's right arm!@n", true, user, nullptr, victim, TO_CHAR);
                         act("@R$n's attack severs your right arm!@n", true, user, nullptr, victim, TO_VICT);
                         act("@R$N's right arm is severered in the attack!@n", true, user, nullptr, victim, TO_VICT);
@@ -3409,13 +3409,13 @@ namespace atk {
             case 5:
                 calcDamage *= calc_critical(user, 1);
                 if (rand_number(1, 100) >= 70 && !IS_NPC(victim) && !AFF_FLAGGED(victim, AFF_SANCTUARY)) {
-                    if (GET_LIMBCOND(victim, 3) > 0 && !is_sparring(user) && rand_number(1, 1) == 2) {
+                    if (GET_LIMBCOND(victim, 3) > 0 && !user->isSparring() && rand_number(1, 1) == 2) {
                         act("@RYour attack severs $N's left leg!@n", true, user, nullptr, victim, TO_CHAR);
                         act("@R$n's attack severs your left leg!@n", true, user, nullptr, victim, TO_VICT);
                         act("@R$N's left leg is severered in the attack!@n", true, user, nullptr, victim, TO_VICT);
                         GET_LIMBCOND(victim, 3) = 0;
                         remove_limb(victim, 4);
-                    } else if (GET_LIMBCOND(victim, 2) > 0 && !is_sparring(user)) {
+                    } else if (GET_LIMBCOND(victim, 2) > 0 && !user->isSparring()) {
                         act("@RYour attack severs $N's right leg!@n", true, user, nullptr, victim, TO_CHAR);
                         act("@R$n's attack severs your right leg!@n", true, user, nullptr, victim, TO_VICT);
                         act("@R$N's right leg is severered in the attack!@n", true, user, nullptr, victim, TO_VICT);

@@ -68,10 +68,7 @@ int has_group(Character *ch) {
             }
         }
     } else if (ch->master) {
-        if (!AFF_FLAGGED(ch->master, AFF_GROUP))
-            return (false);
-        else
-            return (true);
+        return AFF_FLAGGED(ch->master, AFF_GROUP);
     }
 
     return (false);
@@ -1878,16 +1875,6 @@ int mob_respond(Character *ch, Character *vict, const char *speech) {
     return 1;
 }
 
-bool is_sparring(Character *ch) {
-
-    if(IS_NPC(ch)) {
-        auto opponent = ch->fighting;
-        if(!opponent) return false;
-        return IS_NPC(opponent) ? false : opponent->character_flags.get(CharacterFlag::sparring) && spar_friendly(opponent, ch);
-    }
-
-    return ch->character_flags.get(CharacterFlag::sparring);
-}
 
 char *introd_calc(Character *ch) {
     static char intro[100];
@@ -1910,11 +1897,6 @@ char *introd_calc(Character *ch) {
     }
 
     return (intro);
-}
-
-double speednar(Character *ch) {
-    auto ratio = 1.0 - ch->getBaseStat("burden_ratio");
-    return std::clamp<double>(ratio, 0.01, 1.0);
 }
 
 int64_t gear_exp(Character *ch, int64_t exp) {
@@ -2603,17 +2585,6 @@ int get_filename(char *filename, size_t fbufsize, int mode, const char *orig_nam
     return (1);
 }
 
-
-int num_pc_in_room(Room *room) {
-    int i = 0;
-
-    auto pe = room->getPeople();
-    for (auto ch : filter_raw(pe))
-        if (!IS_NPC(ch))
-            i++;
-
-    return (i);
-}
 
 /* This function (derived from basic fork(); abort(); idea by Erwin S.
  * Andreasen) causes your MUD to dump core (assuming you can) but
