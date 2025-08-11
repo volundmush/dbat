@@ -642,8 +642,8 @@ SPECIAL(auction) {
         GET_AUCTERN(obj2) = strdup(GET_NAME(ch));
         GET_AUCTIME(obj2) = time(nullptr);
         GET_CURBID(obj2) = -1;
-        obj_from_char(obj2);
-        obj_to_room(obj2, auct_room);
+        obj2->clearLocation();
+        obj2->setLocation(auct_room);
         auc_save();
         send_to_char(ch, "You place %s on auction for %s zenni.\r\n", obj2->getShortDescription(),
                      add_commas(GET_BID(obj2)).c_str());

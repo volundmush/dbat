@@ -469,20 +469,6 @@ void char_to_location(struct char_data *ch, const thing_data* td) {
     char_to_location(ch, td->location);
 }
 
-void obj_to_location(struct obj_data *obj, const Location& loc) {
-    if(!obj) return;
-    if(!loc.unit) return;
-    if(loc.unit->type == UnitType::room) {
-        obj_to_room(obj, static_cast<room_data*>(loc.unit));
-    }
-}
-
-void obj_to_location(struct obj_data *obj, const thing_data* td) {
-    if(!obj) return;
-    if(!td) return;
-    obj_to_location(obj, td->location);
-}
-
 
 /* give an object to a char   */
 void obj_to_char(struct obj_data *object, struct char_data *ch) {
@@ -690,7 +676,6 @@ struct char_data *get_char_num(mob_rnum nr) {
 
 
 void obj_to_room(struct obj_data *object, struct room_data *room) {
-    struct obj_data *vehicle = nullptr;
 
     if (ROOM_FLAGGED(room, ROOM_GARDEN1) || ROOM_FLAGGED(room, ROOM_GARDEN2)) {
         if (GET_OBJ_TYPE(object) != ITEM_PLANT) {
@@ -728,20 +713,21 @@ void obj_to_room(struct obj_data *object, struct room_data *room) {
                 (GET_OBJ_VNUM(object) <= 19199 && GET_OBJ_VNUM(object) >= 19100)) {
                 int hnum = GET_OBJ_VAL(object, VAL_HATCH_DEST);
                 struct obj_data *house = read_object(hnum, VIRTUAL);
-                obj_to_room(house, real_room(GET_OBJ_VAL(object, VAL_HATCH_LOCATION)));
+                house->setLocation(GET_OBJ_VAL(object, VAL_HATCH_LOCATION));
                 int newval = GET_OBJ_VAL(object, VAL_CONTAINER_FLAGS) | CONT_CLOSED | CONT_LOCKED;
                 SET_OBJ_VAL(object, VAL_CONTAINER_FLAGS, newval);
             }
         }
 
         if (GET_OBJ_TYPE(object) == ITEM_HATCH && GET_OBJ_VAL(object, VAL_HATCH_DEST) > 1 && GET_OBJ_VNUM(object) > 19199) {
+            struct obj_data *vehicle = nullptr;
             if (!(vehicle = find_vehicle_by_vnum(GET_OBJ_VAL(object, VAL_HATCH_DEST)))) {
                 if (real_room(GET_OBJ_VAL(object, VAL_HATCH_EXTROOM)) != NOWHERE) {
                     vehicle = read_object(GET_OBJ_VAL(object, VAL_HATCH_DEST), VIRTUAL);
                     if(!vehicle) {
                         basic_mud_log("SYSERR: Vehicle %d not found for hatch %d", GET_OBJ_VAL(object, VAL_HATCH_DEST), GET_OBJ_VNUM(object));
                     } else {
-                        obj_to_room(vehicle, real_room(GET_OBJ_VAL(object, VAL_HATCH_EXTROOM)));
+                        vehicle->setLocation(GET_OBJ_VAL(object, VAL_HATCH_EXTROOM));
                         if (auto ld = object->getLookDescription(); ld) {
                             if (strlen(ld)) {
                                 char nick[MAX_INPUT_LENGTH], nick2[MAX_INPUT_LENGTH], nick3[MAX_INPUT_LENGTH];
@@ -786,15 +772,6 @@ void obj_to_room(struct obj_data *object, struct room_data *room) {
             act("$p @Cfalls down and smacks the ground.@n", true, nullptr, object, nullptr, TO_ROOM);
         }
     }
-}
-
-
-/* put an object in a room */
-void obj_to_room(struct obj_data *object, room_rnum room) {
-    if(!object) return;
-    auto r = get_room(room);
-    if(!r) return;
-    obj_to_room(object, r);
 }
 
 

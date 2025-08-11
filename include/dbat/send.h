@@ -10,7 +10,7 @@ void send_to_all(fmt::string_view format, Args&&... args) {
 
         for(auto i = descriptor_list; i; i = i->next) {
             if(STATE(i) != CON_PLAYING) continue;
-            i->output += formatted_string;
+            i->sendText(formatted_string);
         }
     }
     catch(const std::exception &e) {
@@ -31,7 +31,7 @@ void send_to_outdoor(fmt::string_view format, Args&&... args) {
             if(!room) continue;
             //If the character's current room isn't set as indoors, then send the message
             if (!(ROOM_FLAGGED(room, ROOM_INDOORS))) {
-                i->output += formatted_string;
+                i->sendText(formatted_string);
             }
         }
     }
@@ -108,7 +108,7 @@ void send_to_room(room_rnum room, fmt::string_view format, Args&&... args) {
 template<typename T, typename... Args>
 void send_to_location(T thing, fmt::string_view format, Args&&... args) {
     if(auto r = thing->getRoom(); r) {
-        send_to_room(r, format, std::forward<Args>(args)...);
+        r->send_to(format, std::forward<Args>(args)...);
     }
 }
 

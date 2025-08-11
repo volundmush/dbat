@@ -533,8 +533,8 @@ ACMD(do_shuffle) {
     int total = count;
     auto con2 = obj->getObjects();
     for (auto obj2 : filter_raw(con2)) {
-        obj_from_obj(obj2);
-        obj_to_room(obj2, 48);
+        obj2->clearLocation();
+        obj2->setLocation(48);
     }
     while (count > 0) {
         auto con = get_room(48)->getObjects();
@@ -544,11 +544,11 @@ ACMD(do_shuffle) {
             }
             if (count > 1 && rand_number(1, 4) == 3) {
                 count -= 1;
-                obj_from_room(obj2);
+                obj2->clearLocation();
                 obj_to_obj(obj2, obj);
             } else if (count == 1) {
                 count -= 1;
-                obj_from_room(obj2);
+                obj2->clearLocation();
                 obj_to_obj(obj2, obj);
             }
         }
@@ -778,9 +778,9 @@ ACMD(do_nickname) {
                 auto objs = objectSubscriptions.all(fmt::format("vnum_{}", GET_OBJ_VNUM(ship2) + 1000));
                 for (auto k : filter_raw(objs)) {
                     extract_obj(k);
-                    int was_in = ship2->getRoomVnum();
-                    obj_from_room(ship2);
-                    obj_to_room(ship2, real_room(was_in));
+                    auto was_in = ship2->location;
+                    ship2->clearLocation();
+                    ship2->setLocation(was_in);
                 }
             }
         }

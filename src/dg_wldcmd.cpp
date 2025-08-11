@@ -484,7 +484,7 @@ WCMD(do_wload) {
         }
         /* special handling to make objects able to load on a person/in a container/worn etc. */
         if (!target || !*target) {
-            obj_to_room(object, real_room(room->getVnum()));
+            object->setLocation(room);
             if (SCRIPT(room)) { /* It _should_ have, but it might be detached. */
                 room->setVariable("lastloaded", object->getUID(true));
             }
@@ -514,7 +514,7 @@ WCMD(do_wload) {
             return;
         }
         /* neither char nor container found - just dump it in room */
-        obj_to_room(object, real_room(room->getVnum()));
+        object->setLocation(room);
         load_otrigger(object);
         return;
     } else

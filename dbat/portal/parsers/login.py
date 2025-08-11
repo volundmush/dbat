@@ -13,7 +13,7 @@ from .base import BaseParser
 
 GREET: str = None
 
-GREET_PATH = Path() / "lib" / "text" / "greetansi"
+GREET_PATH = Path() / "data" / "text" / "greetansi"
 
 class LoginParser(BaseParser):
     """

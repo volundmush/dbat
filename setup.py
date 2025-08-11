@@ -52,7 +52,7 @@ extensions = [
         libraries=LIBRARIES,       # The libraries to link against
         include_dirs=INCLUDES,
         library_dirs=LIBRARY_DIRS,
-        extra_compile_args=["-std=c++23", "-g"],  # Or the C++ standard you are using
+        extra_compile_args=["-std=c++23", "-g", "-Wno-write-strings", "-Wno-format-truncation", "-Wno-multichar", "-Wno-unused-result", "-fpermissive"],  # Or the C++ standard you are using
     )
 ]
 

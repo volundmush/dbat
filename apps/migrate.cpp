@@ -184,7 +184,7 @@ static void load_help(FILE *fl, char *name) {
     char key[READ_SIZE + 1], next_key[READ_SIZE + 1], entry[32384];
     size_t entrylen;
     char line[READ_SIZE + 1], hname[READ_SIZE + 1], *scan;
-    struct help_index_element el;
+    struct help_index_element el{};
 
     strlcpy(hname, name, sizeof(hname));
 
@@ -347,7 +347,7 @@ constexpr int TRADE_NOARCHMAGE = 65; // kurzak
 constexpr int TRADE_NOBROKEN = 78;
 
 static void handle_org_who(org_data &g, bitvector_t with_who[]) {
-    for(auto i = 0; i < 178; i++) {
+    for(auto i = 0; i < 128; i++) {
         if(IS_SET_AR(with_who, i)) {
             switch(i) {
                 case TRADE_NOGOOD:
@@ -596,7 +596,7 @@ static void boot_the_shops(FILE *shop_f, char *filename, int rec_count) {
             z.shops.insert(sh.vnum);
             top_shop = temp;
             while(true) {
-                read_line(shop_f, "%ld", &shop_temp);
+                read_line(shop_f, "%d", &shop_temp);
                 if(shop_temp == -1) break;
                 temp = (shop_vnum)shop_temp;
                 if(obj_index.count(temp)) sh.producing.push_back(temp);
@@ -606,7 +606,7 @@ static void boot_the_shops(FILE *shop_f, char *filename, int rec_count) {
             read_line(shop_f, "%f", &SHOP_SELLPROFIT(top_shop));
 
             while(true) {
-                read_line(shop_f, "%ld", &shop_temp);
+                read_line(shop_f, "%d", &shop_temp);
                 if(shop_temp == -1) break;
                 auto &t = sh.type.emplace_back();
                 t.type = shop_temp;
@@ -622,7 +622,7 @@ static void boot_the_shops(FILE *shop_f, char *filename, int rec_count) {
             read_line(shop_f, "%d", &SHOP_BROKE_TEMPER(top_shop));
             
             bitvector_t bitvector;
-            read_line(shop_f, "%ld", &bitvector);
+            read_line(shop_f, "%d", &bitvector);
             for(auto i = 0; i < 2; i++) {
                 if(IS_SET(bitvector, 1 << i)) {
                     sh.shop_flags.set(static_cast<ShopFlag>(i));
@@ -655,7 +655,7 @@ static void boot_the_shops(FILE *shop_f, char *filename, int rec_count) {
             handle_org_who(sh, with_who);
 
             while(true) {
-                read_line(shop_f, "%ld", &shop_temp);
+                read_line(shop_f, "%d", &shop_temp);
                 if(shop_temp == -1) break;
                 if(world.contains(shop_temp)) sh.in_room.insert(shop_temp);
 
@@ -849,7 +849,7 @@ static int inv_backup(struct char_data *ch) {
     return 1;
 }
 
-
+static std::vector<std::tuple<room_data*, Direction, room_vnum>> room_directions;
 
 /* read direction data */
 static void setup_dir(FILE *fl, room_data *r, int dir) {
@@ -858,13 +858,24 @@ static void setup_dir(FILE *fl, room_data *r, int dir) {
 
     snprintf(buf2, sizeof(buf2), "room #%d, direction D%d", r->getVnum(), dir);
 
-    auto &de = r->exits[static_cast<Direction>(dir)];
+    auto cdir = static_cast<Direction>(dir);
+    auto &de = r->exits[cdir];
     auto d = &de;
 
-    d->dir = static_cast<Direction>(dir);
+    d->dir = cdir;
 
-    d->general_description = fread_string(fl, buf2);
-    d->keyword = fread_string(fl, buf2);
+    char *temp = fread_string(fl, buf2);
+    if(temp) {
+        d->general_description = temp;
+        free(temp);
+        temp = nullptr;
+    }
+    temp = fread_string(fl, buf2);
+    if(temp) {
+        d->keyword = temp;
+        free(temp);
+        temp = nullptr;
+    }
 
     if (!get_line(fl, line)) {
         basic_mud_log("SYSERR: Format error, %s", buf2);
@@ -887,8 +898,11 @@ static void setup_dir(FILE *fl, room_data *r, int dir) {
         else
             d->exit_info = 0;
 
-        d->key = ((t[1] == -1 || t[1] == 65535) ? NOTHING : t[1]);
-        d->unit = get_room(((t[2] == -1 || t[2] == 65535) ? NOWHERE : t[2]));
+        d->key = real_object(t[1]);
+        
+        // since the rooms don't exist yet, we can't set d->unit...
+        room_directions.emplace_back(r, cdir, t[2]);
+        //d->unit = get_room(t[2]);
 
         if (retval == 3) {
             basic_mud_log("Converting world files to include DC add ons.");
@@ -2939,7 +2953,7 @@ int House_load(room_vnum rvnum) {
             }   /* exit our xap loop */
             if (temp != nullptr) {
                 num_objs++;
-                obj_to_room(temp, rrnum);
+                temp->setLocation(rrnum);
             }
 
         } else {
@@ -3001,6 +3015,12 @@ void House_boot() {
     fclose(fl);
 }
 
+static void link_exits() {
+    for (const auto& [room, dir, target] : room_directions) {
+        room->exits.at(dir).unit = get_room(target);
+    }
+}
+
 void boot_db_world_legacy() {
 
     basic_mud_log("Loading stat handlers...");
@@ -3015,6 +3035,8 @@ void boot_db_world_legacy() {
 
     basic_mud_log("Loading rooms.");
     index_boot(DB_BOOT_WLD);
+
+    link_exits();
 
     basic_mud_log("Checking start rooms.");
     check_start_rooms();

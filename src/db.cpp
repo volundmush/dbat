@@ -1654,7 +1654,7 @@ static void do_reset_cmds(zone_data &z) {
                     }
 
                     obj = read_object(c.arg1, REAL);
-                    obj_to_room(obj, c.arg3);
+                    obj->setLocation(c.arg3);
                     /* Set the loadroom for room_max checks */
                     OBJ_LOADROOM(obj) = c.arg3;
 
@@ -2116,24 +2116,24 @@ void init_char(struct char_data *ch) {
 
 /* returns the real number of the room with given virtual number */
 room_rnum real_room(room_vnum vnum) {
-    return world.count(vnum) ? vnum : NOWHERE;
+    return world.contains(vnum) ? vnum : NOWHERE;
 }
 
 
 /* returns the real number of the monster with given virtual number */
 mob_rnum real_mobile(mob_vnum vnum) {
-    return mob_proto.count(vnum) ? vnum : NOBODY;
+    return mob_proto.contains(vnum) ? vnum : NOBODY;
 }
 
 
 /* returns the real number of the object with given virtual number */
 obj_rnum real_object(obj_vnum vnum) {
-    return obj_proto.count(vnum) ? vnum : NOTHING;
+    return obj_proto.contains(vnum) ? vnum : NOTHING;
 }
 
 /* returns the real number of the room with given virtual number */
 zone_rnum real_zone(zone_vnum vnum) {
-    return zone_table.count(vnum) ? vnum : NOWHERE;
+    return zone_table.contains(vnum) ? vnum : NOWHERE;
 }
 
 

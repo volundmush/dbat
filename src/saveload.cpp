@@ -688,15 +688,29 @@ void from_json(const json& j, proto_data& u) {
 
 void to_json(json& j, const Location& loc) {
     if(loc.unit) j["uid"] = loc.unit->getUID();
+    else {
+        throw std::runtime_error("Location has no unit.");
+    }
     j["position"] = loc.position;
 }
 
 void from_json(const json& j, Location& loc) {
-    if(j.contains("uid")) {
-        auto uid = resolveUID(j["uid"]);
+    try {
+        if(j.contains("uid")) {
+        auto u = j.at("uid").get<std::string>();
+        auto uid = resolveUID(u);
         if(uid) loc.unit = uid.get();
+        else {
+            throw std::runtime_error(fmt::format("Location has invalid unit: {}", u));
+        }
+        } else {
+            throw std::runtime_error("Location JSON does not contain 'uid'.");
+        }
+        loc.position = j["position"];
+    } catch (const std::exception &e) {
+        throw std::runtime_error(fmt::format("Error parsing Location JSON: {}\r\nJSON DATA: {}", e.what(), jdumps(j)));
     }
-    loc.position = j["position"];
+    
 }
 
 void to_json(json& j, const Destination &e) {
@@ -751,15 +765,6 @@ void from_json(const json& j, room_data& r) {
     if(j.contains("zone")) r.zone = &(zone_table.at(j["zone"].get<zone_vnum>()));
 
     if(j.contains("sector_type")) r.sector_type = j["sector_type"];
-
-    if(j.contains("exits")) {
-        // this is an array of (<number>, <json>) pairs, with number matching the dir_option array index.
-        // Thankfully we can pass the json straight into the room_direction_data constructor...
-        for(auto &d : j["exits"]) {
-            auto &ex = r.exits[static_cast<Direction>(d[0].get<int>())];
-            d[1].get_to(ex);
-        }
-    }
 
     if(j.contains("room_flags")) r.room_flags = j["room_flags"].get<FlagHandler<RoomFlag>>();
 
@@ -976,11 +981,9 @@ void load_items_finish(const std::filesystem::path& loc) {
             if(auto i = cf->second) {
                 deserialize_obj_relations(i.get(), j["relations"]);
                 auto jloc = j["location"];
-                auto uid = jloc.at("uid").get<std::string>();
-                double x = jloc.at("pos_x").get<double>();
-                double y = jloc.at("pos_y").get<double>();
-                double z = jloc.at("pos_z").get<double>();
-                i->deserializeLocation(uid, x, y, z);
+                Location loc;
+                jloc.get_to(loc);
+                i->setLocation(loc);
             }
         }
     }
@@ -995,20 +998,6 @@ static json serialize_obj_relations(const obj_data* o) {
     return j;
 }
 
-void to_json(json& j, const Coordinates& c) {
-    j["x"] = c.x;
-    j["y"] = c.y;
-    j["z"] = c.z;
-}
-
-void from_json(const json& j, Coordinates& c) {
-    c.x = j["x"].get<double>();
-    c.y = j["y"].get<double>();
-    c.z = j["z"].get<double>();
-}
-
-
-
 
 static void dump_items(const std::filesystem::path &loc) {
     json j;
@@ -1016,7 +1005,7 @@ static void dump_items(const std::filesystem::path &loc) {
     for(auto &[v, r] : uniqueObjects) {
         json j2;
         j2["id"] = v;
-        j2["generation"] = static_cast<int32_t>(v);
+        j2["generation"] = static_cast<int32_t>(r->generation);
         j2["data"] = *r;
         j2["location"] = r->location;
         j2["relations"] = serialize_obj_relations(r.get());
@@ -1301,7 +1290,11 @@ static void dump_characters(const std::filesystem::path &loc) {
         j2["id"] = v;
         j2["generation"] = r->generation;
         j2["data"] = *r;
-        j2["location"] = serialize_char_location(r.get());
+        if(r->location) {
+            // PCs who aren't logged in won't have a valid location.
+            // So we only care about those who do.
+            j2["location"] = r->location;
+        }
         //j2["relations"] = r->serializeRelations();
         j.push_back(j2);
     }
@@ -1323,7 +1316,7 @@ static void dump_npc_prototypes(const std::filesystem::path &loc) {
 void load_characters_initial(const std::filesystem::path& loc) {
     for(auto j : load_from_file(loc, "characters.json")) {
         auto id = j["id"].get<int64_t>();
-        auto generation = j["generation"].get<int>();
+        auto generation = j["generation"].get<time_t>();
         auto data = j["data"];
         auto c = std::make_shared<char_data>();
         j["data"].get_to(*c);
@@ -1335,23 +1328,19 @@ void load_characters_initial(const std::filesystem::path& loc) {
     }
 }
 
-static void deserialize_character_location(json& j, char_data* ch) {
-    if(j.contains("in_room")) {
-        auto vn = j["in_room"].get<room_vnum>();
-        char_to_room(ch, vn);
-    } else if(j.contains("load_room")) {
-        ch->setBaseStat("load_room", j["load_room"].get<room_vnum>());
-    }
-}
-
 void load_characters_finish(const std::filesystem::path& loc) {
     for(auto j : load_from_file(loc, "characters.json")) {
+        if(!j.contains("location")) {
+            // this can happen with PCs.
+            continue;
+        }
         auto id = j["id"].get<int64_t>();
-        auto generation = j["generation"].get<int>();
+        auto generation = j["generation"].get<time_t>();
+        //basic_mud_log("Finishing Character %d", id);
         if(auto cf = uniqueCharacters.find(id); cf != uniqueCharacters.end()) {
-            if(auto c = cf->second) {
-                deserialize_character_location(j["location"], c.get());
-            }
+            Location loc;
+            j.at("location").get_to(loc);
+            cf->second->setLocation(loc);
         }
     }
 }

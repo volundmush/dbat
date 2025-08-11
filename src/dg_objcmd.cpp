@@ -491,7 +491,7 @@ OCMD(do_dgoload) {
 
         /* special handling to make objects able to load on a person/in a container/worn etc. */
         if (!target || !*target) {
-            obj_to_room(object, room);
+            object->setLocation(room);
             load_otrigger(object);
             return;
         }
@@ -517,7 +517,7 @@ OCMD(do_dgoload) {
             return;
         }
         /* neither char nor container found - just dump it in room */
-        obj_to_room(object, room);
+        object->setLocation(room);
         load_otrigger(object);
         return;
     } else
@@ -688,7 +688,7 @@ OCMD(do_oat) {
     if (!(object = read_object(GET_OBJ_VNUM(obj), VIRTUAL)))
         return;
 
-    obj_to_room(object, loc);
+    object->setLocation(loc);
     obj_command_interpreter(object, command);
 
     if (IN_ROOM(object) == loc)

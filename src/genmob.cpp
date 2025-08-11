@@ -329,7 +329,7 @@ void char_data::setLocation(room_data* room) {
 }
 
 void char_data::setLocation(room_vnum rv) {
-    auto room = real_room(rv);
+    auto room = get_room(rv);
     setLocation(room);
 }
 

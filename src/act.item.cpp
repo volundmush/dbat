@@ -945,7 +945,7 @@ ACMD(do_deploy) {
         else
             SET_OBJ_VAL(door, VAL_HATCH_DEST, 18802);
         SET_OBJ_VAL(door, VAL_HATCH_DCSKILL, rnum);
-        obj_to_room(door, real_room(rnum));
+        door->setLocation(rnum);
         struct obj_data *key = read_object(rnum, VIRTUAL);
         obj_to_char(key, ch);
         act("@WYou click the capsule and toss it to the ground. A large cloud of smoke erupts from the capsule and after it clears a house is visible in its place!@n",
@@ -953,7 +953,7 @@ ACMD(do_deploy) {
         act("@C$n@W clicks a capsule and then tosses it to the ground. A large cloud of smoke erupts from the capsule and after it clears a house is visible in its place!@n",
             true, ch, nullptr, nullptr, TO_ROOM);
         struct obj_data *foun = read_object(18803, VIRTUAL);
-        obj_to_room(foun, real_room(rnum + 1));
+        foun->setLocation(rnum + 1);
         extract_obj(obj);
     } else {
         send_to_char(ch,
@@ -1171,13 +1171,13 @@ void loadDragonball(int vnum, int &foundFlag, bool &hunter1, bool &hunter2) {
             if (!hunter1) {
                 if ((r_num = real_mobile(DBALL_HUNTER1_VNUM)) == NOBODY) return;
                 hunter = read_mobile(r_num, REAL);
-                char_to_room(hunter, real_room(room));
+                hunter->setLocation(room);
                 hunter1 = true;
                 DBALL_HUNTER1 = room;
             } else if (!hunter2) {
                 if ((r_num = real_mobile(DBALL_HUNTER2_VNUM)) == NOBODY) return;
                 hunter = read_mobile(r_num, REAL);
-                char_to_room(hunter, real_room(room));
+                hunter->setLocation(room);
                 hunter2 = true;
                 DBALL_HUNTER2 = room;
             }
@@ -1185,7 +1185,7 @@ void loadDragonball(int vnum, int &foundFlag, bool &hunter1, bool &hunter2) {
             obj_to_char(k, hunter);
         } else {
             k = read_object(vnum, VIRTUAL);
-            obj_to_room(k, real_room(room));
+            k->setLocation(room);
         }
     }
 }
@@ -1843,8 +1843,8 @@ static void perform_put(struct char_data *ch, struct obj_data *obj,
         /* If object placed in portal or vehicle, move it to the portal destination */
         if ((GET_OBJ_TYPE(cont) == ITEM_PORTAL) ||
             (GET_OBJ_TYPE(cont) == ITEM_VEHICLE)) {
-            obj_from_obj(obj);
-            obj_to_room(obj, real_room(GET_OBJ_VAL(cont, VAL_CONTAINER_CAPACITY)));
+            obj->clearLocation();
+            obj->setLocation(GET_OBJ_VAL(cont, VAL_CONTAINER_CAPACITY));
             if (GET_OBJ_TYPE(cont) == ITEM_PORTAL) {
                 act("What? $U$p disappears from $P in a puff of smoke!",
                     true, ch, obj, cont, TO_ROOM);
@@ -2296,7 +2296,7 @@ static void perform_drop_gold(struct char_data *ch, int amount,
                 send_to_char(ch, "You throw some zenni into the air where it disappears in a puff of smoke!\r\n");
                 act("$n throws some gold into the air where it disappears in a puff of smoke!",
                     false, ch, nullptr, nullptr, TO_ROOM);
-                obj_to_room(obj, RDR);
+                obj->setLocation(RDR);
                 act("$p suddenly appears in a puff of orange smoke!", 0, nullptr, obj, nullptr, TO_ROOM);
             } else {
                 char buf[MAX_STRING_LENGTH];
@@ -2439,7 +2439,7 @@ static int perform_drop(struct char_data *ch, struct obj_data *obj,
             }
             return (0);
         case SCMD_DONATE:
-            obj_to_room(obj, RDR);
+            obj->setLocation(RDR);
             act("$p suddenly appears in a puff a smoke!", false, nullptr, obj, nullptr, TO_ROOM);
             return (0);
         case SCMD_JUNK:

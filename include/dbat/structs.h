@@ -318,7 +318,7 @@ struct Location {
             sendText(formatted_string);
         }
         catch(const fmt::format_error& e) {
-            basic_mud_log("SYSERR: Format error in sendFmt: %s", e.what());
+            basic_mud_log("SYSERR: Format error in Location::sendFmt: %s", e.what());
             basic_mud_log("Template was: %s", format.data());
         }
     }
@@ -331,7 +331,7 @@ struct Location {
             sendText(formatted_string);
         }
         catch(const fmt::format_error& e) {
-            basic_mud_log("SYSERR: Format error in send_to: %s", e.what());
+            basic_mud_log("SYSERR: Format error in Location::send_to: %s", e.what());
             basic_mud_log("Template was: %s", format.data());
         }
     }
@@ -541,7 +541,6 @@ struct obj_data : public thing_data, public picky_data, std::enable_shared_from_
     obj_data& operator=(const item_proto_data& proto);
     //~obj_data() override = default;
     std::vector<trig_vnum> getProtoScript() const override;
-    void deserializeLocation(const std::string& txt, double x, double y, double z);
     void activate();
     void deactivate();
     double getAffectModifier(uint64_t location, uint64_t specific) override;
@@ -1369,6 +1368,32 @@ struct descriptor_data {
     void start();
     void handleLostLastConnection(bool graceful);
     void sendText(const std::string &txt);
+
+    template<typename... Args>
+    void sendFmt(fmt::string_view format, Args&&... args) {
+        try {
+            std::string formatted_string = fmt::format(fmt::runtime(format), std::forward<Args>(args)...);
+            if(formatted_string.empty()) return;
+            sendText(formatted_string);
+        }
+        catch(const fmt::format_error& e) {
+            basic_mud_log("SYSERR: Format error in descriptor_data::sendFmt: %s", e.what());
+            basic_mud_log("Template was: %s", format.data());
+        }
+    }
+
+    template<typename... Args>
+    void send_to(fmt::string_view format, Args&&... args) {
+        try {
+            std::string formatted_string = fmt::sprintf(format, std::forward<Args>(args)...);
+            if(formatted_string.empty()) return;
+            sendText(formatted_string);
+        }
+        catch(const fmt::format_error& e) {
+            basic_mud_log("SYSERR: Format error in descriptor_data::send_to: %s", e.what());
+            basic_mud_log("Template was: %s", format.data());
+        }
+    }
 };
 
 /* used in the socials */
@@ -1765,11 +1790,11 @@ struct ban_list_element {
 };
 
 struct help_index_element {
-    char *index;      /*Future Use */
-    char *keywords;   /*Keyword Place holder and sorter */
-    char *entry;      /*Entries for help files with Keywords at very top*/
-    int duplicate;    /*Duplicate entries for multple keywords*/
-    int min_level;    /*Min Level to read help entry*/
+    char *index{};      /*Future Use */
+    char *keywords{};   /*Keyword Place holder and sorter */
+    char *entry{};      /*Entries for help files with Keywords at very top*/
+    int duplicate{};    /*Duplicate entries for multple keywords*/
+    int min_level{};    /*Min Level to read help entry*/
 };
 
 /* structure for the reset commands */

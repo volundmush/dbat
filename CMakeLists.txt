@@ -19,11 +19,13 @@ CPMAddPackage("gh:fmtlib/fmt#11.2.0")
 CPMAddPackage("gh:nlohmann/json#v3.12.0")
 CPMAddPackage("gh:ilqvya/random#v1.5.0")
 CPMAddPackage("gh:Neargye/magic_enum#v0.9.7")
+CPMAddPackage("gh:skypjack/entt#v3.15.0")
 
 find_package(Boost CONFIG REQUIRED COMPONENTS regex iostreams)
 
 set(CIRCLE_INCLUDE_DIRS
         include
+        ${entt_SOURCE_DIR}/single_include
         ${ZLIB_INCLUDE_DIRS}
         ${Boost_INCLUDE_DIRS}
         ${fmt_SOURCE_DIR}/include

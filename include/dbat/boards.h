@@ -3,7 +3,7 @@
 #include "structs.h"
 
 /* New Dynamic boards v2.4 -PjD (dughi@imaxx.net) */
-#define BOARD_DIRECTORY                "etc/boards" SLASH
+#define BOARD_DIRECTORY                "data/etc/boards" SLASH
 constexpr int MAX_MESSAGE_LENGTH = 4096;    /* arbitrary -- change if needed */
 
 constexpr int BOARD_MAGIC = 1048575;    /* arbitrary number - see modify.c */

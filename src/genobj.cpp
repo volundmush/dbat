@@ -101,8 +101,8 @@ int delete_object(obj_rnum rnum) {
                     auto r = static_cast<room_data*>(tmp->location.unit);
                     for(auto this_content : filter_raw(con)) {
                         /* Transfer stuff from object to room. */
-                        obj_from_obj(this_content);
-                        obj_to_room(this_content, r);
+                        this_content->clearLocation();
+                        this_content->setLocation(r);
                     }
                 }
                     break;
@@ -110,7 +110,7 @@ int delete_object(obj_rnum rnum) {
                     auto c = static_cast<char_data*>(tmp->location.unit);
                     for(auto this_content : filter_raw(con)) {
                         /* Transfer stuff from object to person inventory. */
-                        obj_from_char(this_content);
+                        this_content->clearLocation();
                         obj_to_char(this_content, c);
                     }
                 }
@@ -119,7 +119,7 @@ int delete_object(obj_rnum rnum) {
                     auto o = static_cast<obj_data*>(tmp->location.unit);
                     for(auto this_content : filter_raw(con)) {
                         /* Transfer stuff from object to containing object. */
-                        obj_from_obj(this_content);
+                        this_content->clearLocation();
                         obj_to_obj(this_content, o);
                     }
                 }
@@ -327,18 +327,6 @@ void auto_equip(struct char_data *ch, struct obj_data *obj, int location) {
 }
 
 
-void obj_data::deserializeLocation(const std::string& txt, double x, double y, double z) {
-    auto check = resolveUID(txt);
-    if(!check) return;
-    if(auto r = std::dynamic_pointer_cast<room_data>(check); r) {
-        obj_to_room(this, r.get());
-    } else if(auto o = std::dynamic_pointer_cast<obj_data>(check); o) {
-        obj_to_obj(this, o.get());
-    } else if(auto c = std::dynamic_pointer_cast<char_data>(check); c) {
-        auto_equip(c.get(), this, x);
-    }
-}
-
 bool obj_data::isProvidingLight() {
     return GET_OBJ_TYPE(this) == ITEM_LIGHT && GET_OBJ_VAL(this, VAL_LIGHT_HOURS);
 }
@@ -392,15 +380,19 @@ void obj_data::setLocation(room_data* room) {
 }
 
 void obj_data::setLocation(room_vnum rv) {
-    auto r = real_room(rv);
+    auto r = get_room(rv);
     setLocation(r);
 }
 
 
 void obj_data::setLocation(const Location& loc) {
     if(!loc.unit) return;
-    if(loc.unit->type == UnitType::room) {
-        setLocation(static_cast<room_data*>(loc.unit));
+    if(auto r = dynamic_cast<room_data*>(loc.unit); r) {
+        setLocation(r);
+    } else if(auto o = dynamic_cast<obj_data*>(loc.unit); o) {
+        obj_to_obj(this, o);
+    } else if(auto c = dynamic_cast<char_data*>(loc.unit); c) {
+        auto_equip(c, this, loc.position.x);
     }
 }
 

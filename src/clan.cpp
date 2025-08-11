@@ -504,6 +504,7 @@ void clanBoot() {
     FILE *fl;
     int i, len;
     char line[MAX_STRING_LENGTH];
+    char fline[MAX_STRING_LENGTH];
 
     if (!(fl = fopen(CLAN_LIST, "r"))) {
         basic_mud_log("  Could not open clan masterlist. Aborting.");
@@ -527,8 +528,9 @@ void clanBoot() {
 
     for (i = 0; i < num_clans; i++) {
         if ((len = fgetlinetomax(fl, line, MAX_STRING_LENGTH)) > 0) {
-            basic_mud_log("  Loading clan: %s", line);
-            clan[i] = clanLoad(line);
+            sprintf(fline, "data/%s", line);
+            basic_mud_log("  Loading clan: %s", fline);
+            clan[i] = clanLoad(fline);
         } else {
             basic_mud_log("  Found blank line while looking for clan names. Aborting.");
             for (i--; i >= 0; i--)

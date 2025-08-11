@@ -1256,36 +1256,33 @@ static void do_doorcmd(struct char_data *ch, struct obj_data *obj, int door, int
                 if ((obj) && GET_OBJ_TYPE(obj) == ITEM_HATCH && (vehicle)) {
                     OPEN_DOOR(IN_ROOM(ch), vehicle, door);
                     if (GET_OBJ_VNUM(obj) > 19199) {
-                        send_to_location(ch,
-                                     "@wThe ship hatch opens slowly and settles onto the ground outside.\r\n");
-                        send_to_location(vehicle,
-                                     "@wThe ship hatch opens slowly and settles onto the ground.\r\n");
+                        ch->location.sendText("@wThe ship hatch opens slowly and settles onto the ground outside.\r\n");
+                        vehicle->location.sendText("@wThe ship hatch opens slowly and settles onto the ground.\r\n");
                         if (vehicle->location.getWhereFlag(WhereFlag::space)) {
-                            send_to_location(ch,
-                                         "@wA great vortex forms as air begins to get sucked out into the void!\r\n");
+                            ch->location.sendText("@wA great vortex forms as air begins to get sucked out into the void!\r\n");
                         }
                     } else {
                         act("@wYou open @c$p@w.", true, ch, obj, 0, TO_CHAR);
                         act("@C$n@w opens @c$p@w.", true, ch, obj, 0, TO_ROOM);
-                        send_to_location(vehicle, "@wThe door to %s@w is opened from the other side.\r\n",
+                        vehicle->location.send_to("@wThe door to %s@w is opened from the other side.\r\n",
                                      vehicle->getShortDescription());
                     }
                     vehicle = nullptr;
                 }
                 if ((obj) && GET_OBJ_TYPE(obj) == ITEM_VEHICLE && (hatch)) {
                     OPEN_DOOR(IN_ROOM(ch), hatch, door);
-                    char_from_room(ch);
-                    char_to_room(ch, num);
+                    ch->clearLocation();
+                    ch->setLocation(num);
                     if (GET_OBJ_VNUM(obj) > 19199) {
-                        send_to_room(num, "@wThe ship hatch opens slowly and settles onto the ground.\r\n");
-                        send_to_location(hatch, "@wThe ship hatch opens slowly.\r\n");
+                        ch->location.sendText("@wThe ship hatch opens slowly and settles onto the ground.\r\n");
+                        hatch->location.sendText("@wThe ship hatch opens slowly.\r\n");
                         if (obj->location.getWhereFlag(WhereFlag::space)) {
-                            send_to_room(num, "@wThe air starts getting sucked out into space as the hatch opens!\r\n");
+                            ch->location.sendText("@wThe air starts getting sucked out into space as the hatch opens!\r\n");
                         }
                     } else {
                         act("@wYou open @c$p@w.", true, ch, obj, 0, TO_CHAR);
                         act("@C$n@w opens @c$p@w.", true, ch, obj, 0, TO_ROOM);
-                        send_to_location(hatch, "@wThe door is opened from the other side.\r\n");
+                        hatch->location.sendText("@wThe door is opened from the other side.\r\n");
                     }
                     hatch = nullptr;
                 }
@@ -1322,13 +1319,13 @@ static void do_doorcmd(struct char_data *ch, struct obj_data *obj, int door, int
                 }
                 if ((obj) && GET_OBJ_TYPE(obj) == ITEM_VEHICLE && (hatch)) {
                     CLOSE_DOOR(IN_ROOM(ch), hatch, door);
-                    char_from_room(ch);
-                    char_to_room(ch, num);
+                    ch->clearLocation();
+                    ch->setLocation(num);
                     if (GET_OBJ_VNUM(obj) > 19199) {
-                        send_to_room(num, "@wThe ship hatch slowly closes, sealing the ship.\r\n");
+                        ch->location.sendText("@wThe ship hatch slowly closes, sealing the ship.\r\n");
                         hatch->location.sendText("@wThe ship hatch slowly closes, sealing the ship from the outside.\r\n");
                         if (obj->location.getWhereFlag(WhereFlag::space)) {
-                            send_to_room(num, "@wAir stops getting sucked out into space as the hatch seals!\r\n");
+                            ch->location.sendText("@wAir stops getting sucked out into space as the hatch seals!\r\n");
                         }
                     } else {
                         act("@wYou close @c$p@w.", true, ch, obj, 0, TO_CHAR);
@@ -1344,10 +1341,10 @@ static void do_doorcmd(struct char_data *ch, struct obj_data *obj, int door, int
                 CLOSE_DOOR(other_room, obj, rev_dir[door]);
             }
             if (!obj) {
-                send_to_char(ch, "You close the %s that leads %s.\r\n",
+                ch->send_to("You close the %s that leads %s.\r\n",
                              !EXIT(ch, door)->keyword.empty() ? EXIT(ch, door)->keyword.c_str() : "door", dirs[door]);
             } else if (GET_OBJ_TYPE(obj) != ITEM_VEHICLE && GET_OBJ_TYPE(obj) != ITEM_HATCH) {
-                send_to_char(ch, "You close %s.\r\n", obj->getShortDescription());
+                ch->send_to("You close %s.\r\n", obj->getShortDescription());
             }
             break;
 
@@ -1359,8 +1356,8 @@ static void do_doorcmd(struct char_data *ch, struct obj_data *obj, int door, int
                 }
                 if ((obj) && GET_OBJ_TYPE(obj) == ITEM_VEHICLE && (hatch)) {
                     LOCK_DOOR(IN_ROOM(ch), hatch, door);
-                    char_from_room(ch);
-                    char_to_room(ch, num);
+                    ch->clearLocation();
+                    ch->setLocation(num);
                     hatch = NULL;
                 }
             }
@@ -1369,10 +1366,10 @@ static void do_doorcmd(struct char_data *ch, struct obj_data *obj, int door, int
                 LOCK_DOOR(other_room, obj, rev_dir[door]);
             }
             if (!obj) {
-                send_to_char(ch, "You lock the %s that leads %s.\r\n",
+                ch->send_to("You lock the %s that leads %s.\r\n",
                              !EXIT(ch, door)->keyword.empty() ? EXIT(ch, door)->keyword.c_str() : "door", dirs[door]);
             } else {
-                send_to_char(ch, "You lock %s.\r\n", obj->getShortDescription());
+                ch->send_to("You lock %s.\r\n", obj->getShortDescription());
             }
             break;
 
@@ -1384,8 +1381,8 @@ static void do_doorcmd(struct char_data *ch, struct obj_data *obj, int door, int
                 }
                 if ((obj) && GET_OBJ_TYPE(obj) == ITEM_VEHICLE && (hatch)) {
                     UNLOCK_DOOR(IN_ROOM(ch), hatch, door);
-                    char_from_room(ch);
-                    char_to_room(ch, num);
+                    ch->clearLocation();
+                    ch->setLocation(num);
                     hatch = NULL;
                 }
             }
@@ -1394,10 +1391,10 @@ static void do_doorcmd(struct char_data *ch, struct obj_data *obj, int door, int
                 UNLOCK_DOOR(other_room, obj, rev_dir[door]);
             }
             if (!obj) {
-                send_to_char(ch, "You unlock the %s that leads %s.\r\n",
+                ch->send_to("You unlock the %s that leads %s.\r\n",
                              !EXIT(ch, door)->keyword.empty() ? EXIT(ch, door)->keyword.c_str() : "door", dirs[door]);
             } else {
-                send_to_char(ch, "You unlock %s.\r\n", obj->getShortDescription());
+                ch->send_to("You unlock %s.\r\n", obj->getShortDescription());
             }
             break;
 
@@ -1405,7 +1402,7 @@ static void do_doorcmd(struct char_data *ch, struct obj_data *obj, int door, int
             TOGGLE_LOCK(IN_ROOM(ch), obj, door);
             if (back)
                 TOGGLE_LOCK(other_room, obj, rev_dir[door]);
-            send_to_char(ch, "The lock quickly yields to your skills.\r\n");
+            ch->sendText("The lock quickly yields to your skills.\r\n");
             len = strlcpy(buf, "$n skillfully picks the lock on ", sizeof(buf));
             break;
     }

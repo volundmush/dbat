@@ -105,13 +105,13 @@ int delete_room(room_rnum rnum) {
 
     auto con = room->getObjects();
     for (auto obj : filter_raw(con)) {
-        obj_from_room(obj);
-        obj_to_room(obj, 0);
+        obj->clearLocation();
+        obj->setLocation(0);
     }
     auto people = room->getPeople();
     for (auto ppl : filter_raw(people)) {
-        char_from_room(ppl);
-        char_to_room(ppl, 0);
+        ppl->clearLocation();
+        ppl->setLocation(0);
     }
 
     extract_script(room, WLD_TRIGGER);
@@ -433,7 +433,11 @@ std::optional<Destination> room_data::getDirection(Direction dir) const {
 }
 
 std::map<Direction, Destination> room_data::getDirections() const {
-    return exits;
+    std::map<Direction, Destination> out;
+    for (const auto& [dir, dest] : exits) {
+        if(dest) out[dir] = dest;
+    }
+    return out;
 }
 
 std::optional<Destination> room_data::getDirection(const Coordinates& coor, Direction dir) {
