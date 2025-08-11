@@ -1761,7 +1761,7 @@ static void do_reset_cmds(zone_data &z) {
             case 'D': /* set state of door */
                 room = get_room(c.arg1);
                 if (!room || c.arg2 < 0 || c.arg2 >= NUM_OF_DIRS ||
-                    (room->dir_option[c.arg2] == nullptr))
+                    (!room->exits.count(static_cast<Direction>(c.arg2))))
                 {
                     ZONE_ERROR("room or door does not exist, command disabled");
                     c.command = '*';
@@ -1770,21 +1770,21 @@ static void do_reset_cmds(zone_data &z) {
                     switch (c.arg3)
                     {
                     case 0:
-                        REMOVE_BIT(room->dir_option[c.arg2]->exit_info,
+                        REMOVE_BIT(room->exits.at(static_cast<Direction>(c.arg2)).exit_info,
                                    EX_LOCKED);
-                        REMOVE_BIT(room->dir_option[c.arg2]->exit_info,
+                        REMOVE_BIT(room->exits.at(static_cast<Direction>(c.arg2)).exit_info,
                                    EX_CLOSED);
                         break;
                     case 1:
-                        SET_BIT(room->dir_option[c.arg2]->exit_info,
+                        SET_BIT(room->exits.at(static_cast<Direction>(c.arg2)).exit_info,
                                 EX_CLOSED);
-                        REMOVE_BIT(room->dir_option[c.arg2]->exit_info,
+                        REMOVE_BIT(room->exits.at(static_cast<Direction>(c.arg2)).exit_info,
                                    EX_LOCKED);
                         break;
                     case 2:
-                        SET_BIT(room->dir_option[c.arg2]->exit_info,
+                        SET_BIT(room->exits.at(static_cast<Direction>(c.arg2)).exit_info,
                                 EX_LOCKED);
-                        SET_BIT(room->dir_option[c.arg2]->exit_info,
+                        SET_BIT(room->exits.at(static_cast<Direction>(c.arg2)).exit_info,
                                 EX_CLOSED);
                         break;
                     }

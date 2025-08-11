@@ -254,10 +254,7 @@ bool char_data::isProvidingLight() {
 }
 
 double char_data::currentGravity() {
-    if(auto room = getRoom(); room) {
-        return room->getEnvironment(ENV_GRAVITY);
-    }
-    return 1.0;
+    return location.getEnvironment(ENV_GRAVITY);
 }
 
 struct obj_data* char_data::findObject(const std::function<bool(struct obj_data*)> &func, bool working) {
@@ -345,7 +342,7 @@ void char_data::setLocation(const Location& loc) {
 
 void char_data::setLocation(const thing_data* td) {
     if(!td) return;
-    setLocation(td->getLocation());
+    setLocation(td->location);
 }
 
 void char_data::clearLocation() {

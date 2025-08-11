@@ -268,6 +268,9 @@ struct Coordinates {
     bool operator==(const Coordinates& other) const;
 };
 
+// Hash function for Coordinates
+
+
 struct Location {
     unit_data* unit{nullptr};  // What unit contains this unit (room, area, char, obj)
     Coordinates position;
@@ -279,7 +282,104 @@ struct Location {
     explicit operator bool() const;
     UnitType getType() const;
     zone_data* getZone() const;
+    location_data* getLoc() const;
+    vnum getVnum() const;
+
+    const char* getName() const;
+    std::optional<Destination> getExit(Direction dir) const;
+    std::map<Direction, Destination> getExits() const;
+
+    virtual const std::vector<ExtraDescription>& getExtraDescription() const; // Returns the extra description data.
+
+    double getEnvironment(int type) const;
+    double setEnvironment(int type, double value);
+    double modEnvironment(int type, double value);
+    void clearEnvironment(int type);
+
+    void setRoomFlag(int flag, bool value = true) const;
+    void setRoomFlag(RoomFlag flag, bool value = true) const;
+    bool toggleRoomFlag(int flag) const;
+    bool toggleRoomFlag(RoomFlag flag) const;
+    bool getRoomFlag(int flag) const;
+    bool getRoomFlag(RoomFlag flag) const;
+    void setWhereFlag(WhereFlag flag, bool value = true) const;
+    bool toggleWhereFlag(WhereFlag flag) const;
+    bool getWhereFlag(WhereFlag flag) const;
+
+    std::string getUID(bool active = false) const;
+
+    void sendText(const std::string& message) const;
+    
+    template<typename... Args>
+    void sendFmt(fmt::string_view format, Args&&... args) {
+        try {
+            std::string formatted_string = fmt::format(fmt::runtime(format), std::forward<Args>(args)...);
+            if(formatted_string.empty()) return;
+            sendText(formatted_string);
+        }
+        catch(const fmt::format_error& e) {
+            basic_mud_log("SYSERR: Format error in sendFmt: %s", e.what());
+            basic_mud_log("Template was: %s", format.data());
+        }
+    }
+
+    template<typename... Args>
+    void send_to(fmt::string_view format, Args&&... args) {
+        try {
+            std::string formatted_string = fmt::sprintf(format, std::forward<Args>(args)...);
+            if(formatted_string.empty()) return;
+            sendText(formatted_string);
+        }
+        catch(const fmt::format_error& e) {
+            basic_mud_log("SYSERR: Format error in send_to: %s", e.what());
+            basic_mud_log("Template was: %s", format.data());
+        }
+    }
+
+    std::vector<std::weak_ptr<obj_data>> getObjects() const;
+    std::vector<std::weak_ptr<char_data>> getPeople() const;
+
+    int getDamage() const;
+    void setDamage(int amount);
+    int modDamage(int amount);
+
+    SectorType getSectorType() const;
+    int getTileType() const;
+
+    int getGroundEffect() const;
+    void setGroundEffect(int val);
+    int modGroundEffect(int val);
+
+    SpecialFunc getSpecialFunc() const;
+
+    bool getIsDark() const;
+    int getCookElement() const;
+
+    struct obj_data* findObjectVnum(obj_vnum objVnum, bool working = true);
+    struct obj_data* findObject(const std::function<bool(struct obj_data*)> &func, bool working = true);
+    std::unordered_set<struct obj_data*> gatherObjects(const std::function<bool(struct obj_data*)> &func, bool working = true);
+
+    int countPlayers() const;
+    bool canGo(int dir) const;
+
+    // location editing
+    void replaceExit(const Destination& dest);
+    void deleteExit(Direction dir);
+
 };
+
+namespace std {
+    template<>
+    struct hash<Coordinates> {
+        std::size_t operator()(const Coordinates& coord) const noexcept;
+    };
+
+    template<>
+    struct hash<Location> {
+        std::size_t operator()(const Location& loc) const noexcept;
+    };
+}
+
 
 struct unit_data : public HasVariables {
     unit_data& operator=(const proto_data& other);
@@ -344,14 +444,37 @@ struct unit_data : public HasVariables {
     // These aren't used by all units, but putting it here means debug can see them.
     Location location;
 
+    virtual void sendText(const std::string& txt);
+    
+    template<typename... Args>
+    void sendFmt(fmt::string_view format, Args&&... args) {
+        try {
+            std::string formatted_string = fmt::format(fmt::runtime(format), std::forward<Args>(args)...);
+            if(formatted_string.empty()) return;
+            sendText(formatted_string);
+        }
+        catch(const fmt::format_error& e) {
+            basic_mud_log("SYSERR: Format error in sendFmt: %s", e.what());
+            basic_mud_log("Template was: %s", format.data());
+        }
+    }
+
+    template<typename... Args>
+    void send_to(fmt::string_view format, Args&&... args) {
+        try {
+            std::string formatted_string = fmt::sprintf(fmt::runtime(format), std::forward<Args>(args)...);
+            if(formatted_string.empty()) return;
+            sendText(formatted_string);
+        }
+        catch(const fmt::format_error& e) {
+            basic_mud_log("SYSERR: Format error in send_to: %s", e.what());
+            basic_mud_log("Template was: %s", format.data());
+        }
+    }
+
 };
 
-struct Destination;
-
-
-
 struct thing_data : public unit_data {
-    Location getLocation() const;
     struct room_data* getRoom() const;
     room_vnum getRoomVnum() const;
 
@@ -361,43 +484,7 @@ struct thing_data : public unit_data {
     virtual void setLocation(room_data* room) = 0;
     virtual void clearLocation() = 0;
 
-    bool getLocationIsDark() const;
-
-    int getCookElement() const;
-
-    std::string getLocationName() const;
-    std::optional<Destination> getLocationExit(Direction dir) const;
-    std::map<Direction, Destination> getLocationExits() const;
-
-    double getLocationEnvironment(int type) const;
-    double setLocationEnvironment(int type, double value);
-    double modLocationEnvironment(int type, double value);
-    void clearLocationEnvironment(int type);
-
-    void setRoomFlag(int flag, bool value = true) const;
-    bool toggleRoomFlag(int flag) const;
-    bool getRoomFlag(int flag) const;
-    void setWhereFlag(WhereFlag flag, bool value = true) const;
-    bool toggleWhereFlag(WhereFlag flag) const;
-    bool getWhereFlag(WhereFlag flag) const;
-
-    void broadcastAtLocation(const std::string& message) const;
-
-    std::vector<std::weak_ptr<obj_data>> getLocationObjects() const;
-    std::vector<std::weak_ptr<char_data>> getLocationPeople() const;
-
-    int getLocationDamage() const;
-    void setLocationDamage(int amount);
-    int modLocationDamage(int amount);
-
-    SectorType getLocationSectorType() const;
-    int getLocationTileType() const;
-
-    int getLocationGroundEffect() const;
-    void setLocationGroundEffect(int val);
-    int modLocationGroundEffect(int val);
-
-    SpecialFunc getLocationSpecialFunc() const;
+    Location getAbsoluteLocation() const;
 
 };
 
@@ -544,25 +631,20 @@ struct obj_data : public thing_data, public picky_data, std::enable_shared_from_
 
 /* room-related structures ************************************************/
 
-struct Destination {
-    ~Destination();
-    char *general_description{};       /* When look DIR.			*/
-    char *keyword{};        /* for open/close			*/
+struct Destination : public Location {
+    Direction dir{Direction::north}; /* Direction of the exit */
+
+    std::string general_description{};       /* When look DIR.			*/
+    std::string keyword{};        /* for open/close			*/
 
     int16_t exit_info{};        /* Exit info			*/
 
     obj_vnum key{NOTHING};        /* Key's number (-1 for no key)		*/
 
-    room_vnum to_room{NOWHERE};        /* Where direction leads (NOWHERE)	*/
-
     int dclock{};            /* DC to pick the lock			*/
     int dchide{};            /* DC to find hidden			*/
 
-    struct room_data* getDestination();
-
-    explicit operator bool() const;
-
-    
+    std::optional<Destination> getReverse() const;
 };
 
 struct location_data : public unit_data {
@@ -570,7 +652,9 @@ struct location_data : public unit_data {
     zone_data *zone{nullptr};
 
     virtual const char* getName(const Coordinates& coor) const = 0;
-    virtual bool getIsDark(const Coordinates& coor) const = 0;
+    virtual bool getIsDark(const Coordinates& coor) const;
+
+    virtual const std::vector<ExtraDescription>& getExtraDescription(const Coordinates& coor) const;
 
     virtual std::vector<std::weak_ptr<obj_data>> getObjects(const Coordinates& coor) const = 0;
     virtual std::vector<std::weak_ptr<char_data>> getPeople(const Coordinates& coor) const = 0;
@@ -578,9 +662,15 @@ struct location_data : public unit_data {
     virtual std::optional<Destination> getDirection(const Coordinates& coor, Direction dir) = 0;
     virtual std::map<Direction, Destination> getDirections(const Coordinates& coor) = 0;
 
-    virtual void setRoomFlag(const Coordinates& coor, int flag, bool value = true) = 0;
-    virtual bool toggleRoomFlag(const Coordinates& coor, int flag) = 0;
-    virtual bool getRoomFlag(const Coordinates& coor, int flag) const = 0;
+    virtual void setRoomFlag(const Coordinates& coor, RoomFlag flag, bool value = true) = 0;
+    virtual bool toggleRoomFlag(const Coordinates& coor, RoomFlag flag) = 0;
+    virtual bool getRoomFlag(const Coordinates& coor, RoomFlag flag) const = 0;
+
+    // these are overloadable but base implementations just call the RoomFlag variants.
+    virtual void setRoomFlag(const Coordinates& coor, int flag, bool value = true);
+    virtual bool toggleRoomFlag(const Coordinates& coor, int flag);
+    virtual bool getRoomFlag(const Coordinates& coor, int flag) const;
+
     virtual void setWhereFlag(const Coordinates& coor, WhereFlag flag, bool value = true) = 0;
     virtual bool toggleWhereFlag(const Coordinates& coor, WhereFlag flag) = 0;
     virtual bool getWhereFlag(const Coordinates& coor, WhereFlag flag) const = 0;
@@ -603,20 +693,33 @@ struct location_data : public unit_data {
     virtual double setEnvironment(const Coordinates& coor, int type, double value) = 0;
     virtual double modEnvironment(const Coordinates& coor, int type, double value) = 0;
     virtual void clearEnvironment(const Coordinates& coor, int type) = 0;
+
+    struct obj_data* findObjectVnum(const Coordinates& coor, obj_vnum objVnum, bool working = true);
+    virtual struct obj_data* findObject(const Coordinates& coor, const std::function<bool(struct obj_data*)> &func, bool working = true);
+    virtual std::unordered_set<struct obj_data*> gatherObjects(const Coordinates& coor, const std::function<bool(struct obj_data*)> &func, bool working = true);
+
+    int getCookElement(const Coordinates& coor) const;
+
+    // tools for editing the location.
+    virtual void replaceExit(const Coordinates& coor, const Destination& dest);
+    virtual void deleteExit(const Coordinates& coor, Direction dir);
 };
 
 
 /* ================== Memory Structure for room ======================= */
 struct room_data : public location_data, std::enable_shared_from_this<room_data> {
     room_data();
-    ~room_data() override;
 
     // Bring the base class getName() into scope to avoid name hiding
     using unit_data::getName;
     using unit_data::getObjects;
+    using unit_data::findObject;
+    using unit_data::findObjectVnum;
+    using unit_data::gatherObjects;
+    using unit_data::getExtraDescription;
 
     SectorType sector_type{SectorType::inside};            /* sector type (move/hide)            */
-    std::array<Destination*, NUM_OF_DIRS> dir_option{}; /* Directions */
+    std::map<Direction, Destination> exits{}; /* Directions */
     FlagHandler<RoomFlag> room_flags{};   /* DEATH,DARK ... etc */
     FlagHandler<WhereFlag> where_flags{};
     SpecialFunc func{};
@@ -637,6 +740,10 @@ struct room_data : public location_data, std::enable_shared_from_this<room_data>
 
     bool isActive() override;
 
+    void sendText(const std::string& txt) override;
+    void deleteExit(Direction dir);
+    void replaceExit(const Destination& dest);
+
     std::shared_ptr<room_data> shared();
 
     std::vector<std::weak_ptr<char_data>> getPeople() const;
@@ -648,8 +755,6 @@ struct room_data : public location_data, std::enable_shared_from_this<room_data>
     double modEnvironment(int type, double value);
     void clearEnvironment(int type);
     std::unordered_map<int, double> environment;
-
-    bool isDark() const;
 
     template<typename R = double>
     R getBaseStat(const std::string& stat) {
@@ -685,15 +790,15 @@ struct room_data : public location_data, std::enable_shared_from_this<room_data>
     std::map<Direction, Destination> getDirections() const;
 
     // overrides for location_data...
+    const std::vector<ExtraDescription>& getExtraDescription(const Coordinates& coor) const override;
     const char* getName(const Coordinates& coor) const override;
-    bool getIsDark(const Coordinates& coor) const override;
     std::vector<std::weak_ptr<obj_data>> getObjects(const Coordinates& coor) const override;
     std::vector<std::weak_ptr<char_data>> getPeople(const Coordinates& coor) const override;
     std::optional<Destination> getDirection(const Coordinates& coor, Direction dir) override;
     std::map<Direction, Destination> getDirections(const Coordinates& coor) override;
-    void setRoomFlag(const Coordinates& coor, int flag, bool value = true) override;
-    bool toggleRoomFlag(const Coordinates& coor, int flag) override;
-    bool getRoomFlag(const Coordinates& coor, int flag) const override;
+    void setRoomFlag(const Coordinates& coor, RoomFlag flag, bool value = true) override;
+    bool toggleRoomFlag(const Coordinates& coor, RoomFlag flag) override;
+    bool getRoomFlag(const Coordinates& coor, RoomFlag flag) const override;
     void setWhereFlag(const Coordinates& coor, WhereFlag flag, bool value = true) override;
     bool toggleWhereFlag(const Coordinates& coor, WhereFlag flag) override;
     bool getWhereFlag(const Coordinates& coor, WhereFlag flag) const override;
@@ -915,6 +1020,8 @@ struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
     void deactivate();
 
     npc_proto_data* getProto() const;
+
+    void sendText(const std::string& txt) override;
 
     void login();
 
@@ -1223,6 +1330,8 @@ struct descriptor_data {
     int connected{CON_PLAYING};        /* mode of 'connectedness'		*/
 
     time_t login_time{time(nullptr)};        /* when the person connected		*/
+    std::string* std_str{nullptr}; // for the alternate modify-str system...
+    std::string std_backstr{};    // for the alternate modify-str system...
     char **str{};            /* for the modify-str system		*/
     char *backstr{};        /* backup string for modify-str system	*/
     size_t max_str{};            /* maximum size of string in modify-str	*/

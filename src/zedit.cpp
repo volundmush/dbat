@@ -17,7 +17,6 @@
 #include "dbat/act.informative.h"
 #include "dbat/act.wizard.h"
 #include "dbat/handler.h"
-#include "dbat/bitarray.h"
 
 /*
  * Nasty internal macros to clean up the code.
@@ -134,7 +133,7 @@ ACMD(do_oasis_zedit) {
         free(d->olc);
     }
 
-    CREATE(d->olc, struct oasis_olc_data, 1);
+    d->olc = new oasis_olc_data();
 
     /****************************************************************************/
     /** Find the zone.                                                         **/
@@ -146,7 +145,7 @@ ACMD(do_oasis_zedit) {
         /**************************************************************************/
         /** Free the descriptor's OLC structure.                                 **/
         /**************************************************************************/
-        free(d->olc);
+        delete d->olc;
         d->olc = nullptr;
         return;
     }
@@ -281,7 +280,7 @@ void zedit_disp_flag_menu(struct descriptor_data *d) {
                         zone_bits[counter], !(++columns % 2) ? "\r\n" : "");
     }
 
-    sprintbitarray(OLC_ZONE(d)->zone_flags.getAll(), zone_bits, ZF_ARRAY_MAX, bits);
+    sprintf(bits, "%s", OLC_ZONE(d)->zone_flags.getFlagNames().c_str());
     write_to_output(d, "\r\nZone flags: @c%s@n\r\n"
                        "Enter Zone flags, 0 to quit : ", bits);
     OLC_MODE(d) = ZEDIT_ZONE_FLAGS;
@@ -420,7 +419,7 @@ void zedit_disp_menu(struct descriptor_data *d) {
 
     clear_screen(d);
     room = real_room(OLC_NUM(d));
-    sprintbitarray(OLC_ZONE(d)->zone_flags.getAll(), zone_bits, ZF_ARRAY_MAX, buf1);
+    sprintf(buf1, "%s", OLC_ZONE(d)->zone_flags.getFlagNames().c_str());
     auto& z = zone_table.at(OLC_ZNUM(d));
     /*
      * Menu header

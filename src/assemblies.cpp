@@ -135,7 +135,7 @@ bool assemblyCheckComponents(long lVnum, struct char_data *pCharacter, int extra
             bOk = false;
         else {
             if (pAssembly->pComponents[i].bInRoom) {
-                if ((ppComponentObjects[i] = pCharacter->getRoom()->findObjectVnum(lRnum)) == nullptr)
+                if ((ppComponentObjects[i] = pCharacter->location.findObjectVnum(lRnum)) == nullptr)
                     bOk = false;
                 else {
                     obj_from_room(ppComponentObjects[i]);

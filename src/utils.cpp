@@ -35,10 +35,8 @@ char commastring[MAX_STRING_LENGTH];
 
 
 void dispel_ash(struct char_data *ch) {
-    struct obj_data *obj, *next_obj, *ash = nullptr;
-    int there = false;
 
-    ash = ch->getRoom()->findObjectVnum(1306);
+    auto ash = ch->location.findObjectVnum(1306);
     if(!ash) return;
 
     int roll = axion_dice(0);
@@ -712,7 +710,7 @@ int roll_pursue(struct char_data *ch, struct char_data *vict) {
         skill = GET_SKILL(ch, SKILL_PURSUIT);
     } else if (IS_NPC(ch) && !MOB_FLAGGED(ch, MOB_SENTINEL)) {
         skill = GET_LEVEL(ch);
-        if (vict->getRoomFlag(ROOM_NOMOB))
+        if (vict->location.getRoomFlag(ROOM_NOMOB))
             skill = -1;
     } else {
         skill = -1;
@@ -1319,7 +1317,7 @@ void reveal_hiding(struct char_data *ch, int type) {
             if (tch == ch)
                 continue;
 
-            if (tch->getLocation() != ch->getLocation())
+            if (tch->location != ch->location)
                 continue;
 
             if (GET_SKILL(tch, SKILL_SPOT) + rand1 >= GET_SKILL(ch, SKILL_HIDE) + rand2) {
@@ -1345,7 +1343,7 @@ void reveal_hiding(struct char_data *ch, int type) {
             if (tch == ch)
                 continue;
 
-            if (tch->getLocation() != ch->getLocation())
+            if (tch->location != ch->location)
                 continue;
 
             if (GET_SKILL(tch, SKILL_LISTEN) > axion_dice(0)) {
@@ -1578,7 +1576,7 @@ void handle_evolution(struct char_data *ch, int64_t dmg) {
 }
 
 void demon_refill_lf(struct char_data *ch, int64_t num) {
-    auto pe = ch->getLocationPeople();
+    auto pe = ch->location.getPeople();
     for (auto tch : filter_raw(pe)) {
         if (!IS_DEMON(tch))
             continue;
@@ -1598,7 +1596,7 @@ void mob_talk(struct char_data *ch, const char *speech) {
     if (IS_NPC(ch)) {
         return;
     }
-    auto pe = ch->getLocationPeople();
+    auto pe = ch->location.getPeople();
     for (auto tch : filter_raw(pe)) {
         if (!IS_NPC(tch))
             continue;
@@ -1953,7 +1951,7 @@ int planet_check(struct char_data *ch, struct char_data *vict) {
 void purge_homing(struct char_data *ch) {
 
     auto isHoming = [&](const auto& o) {return (o->getVnum() == 80 || o->getVnum() == 81) && (TARGET(o) == ch || USER(o) == ch);};
-    auto gather = ch->getRoom()->gatherObjects(isHoming);
+    auto gather = ch->location.gatherObjects(isHoming);
     for(auto obj : gather) {
         act("$p @wloses its target and flies off into the distance.@n", true, nullptr, obj, nullptr, TO_ROOM);
         extract_obj(obj);
@@ -2643,24 +2641,7 @@ void core_dump_real(const char *who, int line) {
 
 }
 
-/* Is there a campfire in the room? */
-int cook_element(struct room_data *room) {
-    int found = 0;
-    auto con = room->getObjects();
-    for(auto obj : filter_raw(con)) {
-        if(GET_OBJ_TYPE(obj) == ITEM_CAMPFIRE) {
-            found = 1;
-        } else if(obj->getVnum() == 19093) return 2;
-    }
 
-    return found;
-}
-
-int cook_element(room_rnum room) {
-    auto r = get_room(room);
-    if(!r) return 0;
-    return cook_element(r);
-}
 
 // A C++ version of proc_color from comm.c. it returns the colored string.
 std::string processColors(const std::string &txt, int parse, char **choices) {
@@ -3002,7 +2983,7 @@ bool AFF_FLAGGED(struct char_data *ch, int flag) {
 }
 
 bool ETHER_STREAM(struct char_data *ch) {
-    return ch->getLocationEnvironment(ENV_ETHER_STREAM) > 0;
+    return ch->location.getEnvironment(ENV_ETHER_STREAM) > 0;
 }
 
 

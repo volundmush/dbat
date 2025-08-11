@@ -342,7 +342,7 @@ static void init_char_stats_derived() {
         .setGetterFunc([](struct char_data* target, const std::string& stat_name) {
             // Example derived stat calculation
             auto total = target->getBaseStat("weight_total");
-            total *= target->getLocationEnvironment(ENV_GRAVITY);
+            total *= target->location.getEnvironment(ENV_GRAVITY);
             return total;
         })
         .setSetterFunc(nullptr)

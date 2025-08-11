@@ -38,7 +38,6 @@
 #include "dbat/clan.h"
 #include "dbat/players.h"
 #include "dbat/random.h"
-#include "dbat/bitarray.h"
 
 /* local functions */
 static int has_scanner(struct char_data *ch);
@@ -998,7 +997,7 @@ ACMD(do_trip) {
 
     vict = nullptr;
     if (!*arg || !(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM))) {
-        if (FIGHTING(ch) && FIGHTING(ch)->getLocation() == ch->getLocation()) {
+        if (FIGHTING(ch) && FIGHTING(ch)->location == ch->location) {
             vict = FIGHTING(ch);
         } else {
             send_to_char(ch, "That target isn't here.\r\n");
@@ -1644,7 +1643,7 @@ void trainProgress(char_data* ch) {
     if (ch->getRoomVnum() >= 19800 && ch->getRoomVnum() <= 19899) {
         plus *= 4;
     }
-    if (ch->getWhereFlag(WhereFlag::hyperbolic_time_chamber)) {
+    if (ch->location.getWhereFlag(WhereFlag::hyperbolic_time_chamber)) {
         plus *= 3;
     }
     if (GET_BONUS(ch, BONUS_HARDWORKER)) {
@@ -1908,9 +1907,7 @@ ACMD(do_taisha) {
         return;
     }
 
-    auto room = ch->getRoom();
-
-    if (room->room_flags.get(ROOM_AURA)) {
+    if (ch->location.getRoomFlag(ROOM_AURA)) {
         send_to_char(ch, "This area already has an aura of regeneration around it.\r\n");
         return;
     }
@@ -1943,7 +1940,7 @@ ACMD(do_taisha) {
         act("@g$n holds up $s hands while channeling ki. Suddenly a @wburst@W of calming @Cblue@W light covers the surrounding area!@n",
             true, ch, nullptr, nullptr, TO_ROOM);
         improve_skill(ch, SKILL_TAISHA, 1);
-        room->room_flags.set(ROOM_AURA, true);
+        ch->location.setRoomFlag(ROOM_AURA, true);
         return;
     }
 }
@@ -2187,7 +2184,7 @@ ACMD(do_drag) {
         return;
     }
 
-    const auto tile = ch->getLocationTileType();
+    const auto tile = ch->location.getTileType();
 
     if (tile == SECT_WATER_NOSWIM || tile == SECT_WATER_SWIM) {
         send_to_char(ch, "You decide to not be a tugboat instead.\r\n");
@@ -2776,7 +2773,7 @@ ACMD(do_telepathy) {
         } else if (GET_SKILL(vict, SKILL_TELEPATHY) + GET_INT(vict) > GET_SKILL(ch, SKILL_TELEPATHY) + GET_INT(ch)) {
             send_to_char(ch, "They throw off your attempt with their own telepathic abilities!\r\n");
             return;
-        } else if (ch->getLocation() == vict->getLocation()) {
+        } else if (ch->location == vict->location) {
             send_to_char(ch, "They are in the same room as you!\r\n");
             return;
         } else if (AFF_FLAGGED(vict, AFF_BLIND)) {
@@ -6017,7 +6014,7 @@ ACMD(do_plant) {
     char vict_name[100], obj_name[100];
     int roll = 0, detect = 0, fail = 0;
 
-    if (ch->getRoomFlag(ROOM_PEACEFUL)) {
+    if (ch->location.getRoomFlag(ROOM_PEACEFUL)) {
         send_to_char(ch, "This room just has such a peaceful, easy feeling...\r\n");
         return;
     }
@@ -6316,7 +6313,7 @@ ACMD(do_appraise) {
     if (!found)
         send_to_char(ch, " None");
     char buf2[MAX_STRING_LENGTH];
-    sprintbitarray(GET_OBJ_PERM(obj).getAll(), affected_bits, AF_ARRAY_MAX, buf2);
+    sprintf(buf2, "%s", GET_OBJ_PERM(obj).getFlagNames().c_str());
     send_to_char(ch, "\nSpecial: %s\r\n", buf2);
 
     WAIT_STATE(ch, PULSE_2SEC);
@@ -6393,12 +6390,12 @@ ACMD(do_eavesdrop) {
     if (!know_skill(ch, SKILL_EAVESDROP)) {
         return;
     }
-    if (EXIT(ch, dir)) {
-        if (IS_SET(EXIT(ch, dir)->exit_info, EX_CLOSED) && EXIT(ch, dir)->keyword) {
-            sprintf(buf, "The %s is closed.\r\n", fname(EXIT(ch, dir)->keyword));
+    if (auto ex = EXIT(ch, dir); ex) {
+        if (IS_SET(ex->exit_info, EX_CLOSED) && !ex->keyword.empty()) {
+            sprintf(buf, "The %s is closed.\r\n", fname(ex->keyword.c_str()));
             send_to_char(ch, buf);
         } else {
-            ch->setBaseStat("listen_room", GET_ROOM_VNUM(EXIT(ch, dir)->to_room));
+            ch->setBaseStat("listen_room", ex->getVnum());
             ch->setBaseStat("listen_direction", dir);
             send_to_char(ch, "Okay.\r\n");
         }
@@ -6566,7 +6563,7 @@ ACMD(do_solar) {
     act("@C$n@W raises both $s hands to either side of $s face, while closing $s eyes, and shouts '@YSolar Flare@W' as a blinding light fills the area!@n",
         true, ch, nullptr, nullptr, TO_ROOM);
     
-    auto people = ch->getLocationPeople();
+    auto people = ch->location.getPeople();
     for (auto vict : filter_raw(people)) {
         if (vict == ch)
             continue;
@@ -6904,8 +6901,8 @@ ACMD(do_instant) {
     } else if (ch->getRoomVnum() >= 19800 && ch->getRoomVnum() <= 19899) {
         send_to_char(ch, "@rYou are in a pocket dimension!@n\r\n");
         return;
-    } else if (ch->getWhereFlag(WhereFlag::afterlife_hell) || ch->getWhereFlag(WhereFlag::afterlife) ||
-               ch->getRoomFlag(ROOM_HELL)) {
+    } else if (ch->location.getWhereFlag(WhereFlag::afterlife_hell) || ch->location.getWhereFlag(WhereFlag::afterlife) ||
+               ch->location.getRoomFlag(ROOM_HELL)) {
         send_to_char(ch, "You can not leave where you are at!\r\n");
         return;
     } else if (!*arg) {
@@ -6995,13 +6992,13 @@ ACMD(do_instant) {
         } else if (IS_ANDROID(tar) || GET_HIT(tar) < (GET_HIT(ch) * 0.001) + 1) {
             send_to_char(ch, "You can't sense them well enough.\r\n");
             return;
-        } else if (!ch->getWhereFlag(WhereFlag::afterlife) && tar->getWhereFlag(WhereFlag::afterlife)) {
+        } else if (!ch->location.getWhereFlag(WhereFlag::afterlife) && tar->location.getWhereFlag(WhereFlag::afterlife)) {
             send_to_char(ch, "They are dead and can't be reached.\r\n");
             return;
-        } else if (!ch->getWhereFlag(WhereFlag::afterlife_hell) && tar->getWhereFlag(WhereFlag::afterlife_hell)) {
+        } else if (!ch->location.getWhereFlag(WhereFlag::afterlife_hell) && tar->location.getWhereFlag(WhereFlag::afterlife_hell)) {
             send_to_char(ch, "They are dead and can't be reached.\r\n");
             return;
-        } else if (tar->getRoomFlag(ROOM_NOINSTANT)) {
+        } else if (tar->location.getRoomFlag(ROOM_NOINSTANT)) {
             send_to_char(ch, "You can not go there as it is a protected area!\r\n");
             return;
         }
@@ -7208,18 +7205,17 @@ void wishSYS(uint64_t heartPulse, double deltaTime) {
 
 
 ACMD(do_summon) {
-    auto room = ch->getRoom();
 
-    if (!room->where_flags.get(WhereFlag::planet_earth)) {
+    if (!ch->location.getWhereFlag(WhereFlag::planet_earth)) {
         send_to_char(ch, "@wYou can not summon Shenron when you are not on earth.@n\r\n");
         return;
     }
 
-    if (room->room_flags.get(ROOM_NOINSTANT) || room->room_flags.get(ROOM_PEACEFUL)) {
+    if (ch->location.getRoomFlag(ROOM_NOINSTANT) || ch->location.getRoomFlag(ROOM_PEACEFUL)) {
         send_to_char(ch, "You can not summon shenron in this protected area!\r\n");
         return;
     }
-    if (room->sector_type == SectorType::inside) {
+    if (ch->location.getSectorType() == SectorType::inside) {
         send_to_char(ch, "Go outside to summon Shenron! He won't fit in here!\r\n");
         return;
     }
@@ -7245,8 +7241,8 @@ ACMD(do_summon) {
         true, ch, nullptr, nullptr, TO_ROOM);
     SHENRON = true;
     DRAGONC = 300;
-    DRAGONR = room->getVnum();
-    DRAGONZ = room->zone->number;
+    DRAGONR = ch->location.getVnum();
+    DRAGONZ = ch->location.getZone()->number;
     send_to_imm("Shenron summoned to room: %d\r\n", DRAGONR);
 
     for(auto dball : dragonBalls) {
@@ -7367,7 +7363,7 @@ ACMD(do_situp) {
         send_to_char(ch, "You are a mob fool!\r\n");
         return;
     }
-    if (ch->getRoomFlag(ROOM_HELL)) {
+    if (ch->location.getRoomFlag(ROOM_HELL)) {
         send_to_char(ch, "The fire makes it too hot!\r\n");
         return;
     }
@@ -7419,7 +7415,7 @@ ACMD(do_situp) {
 void situpProgress(char_data* ch) {
     int64_t cost = 1, bonus = 0;
 
-    if (ch->getRoomFlag(ROOM_HELL)) {
+    if (ch->location.getRoomFlag(ROOM_HELL)) {
         send_to_char(ch, "The fire makes it too hot!\r\n");
         ch->setTask(Task::nothing);
         return;
@@ -7527,11 +7523,11 @@ void situpProgress(char_data* ch) {
     bonus = (start_bonus * ratio_bonus) * diminishing_returns;
     if(bonus <= 0) bonus = 0;
 
-    if (ch->getWhereFlag(WhereFlag::hyperbolic_time_chamber)) {
+    if (ch->location.getWhereFlag(WhereFlag::hyperbolic_time_chamber)) {
         send_to_char(ch, "@rThis place feels like it operates on a different time frame, it feels great...@n\r\n");
         bonus *= 8;
         if(bonus <= 10) bonus = 10;
-    } else if (ch->getRoomFlag(ROOM_WORKOUT)) {
+    } else if (ch->location.getRoomFlag(ROOM_WORKOUT)) {
         if (ch->getRoomVnum() >= 19100 && ch->getRoomVnum() <= 19199) {
             bonus *= 5;
             if(bonus <= 6) bonus = 6;
@@ -7579,7 +7575,7 @@ ACMD(do_meditate) {
         send_to_char(ch, "You are a mob fool!\r\n");
         return;
     }
-    if (ch->getRoomFlag(ROOM_HELL)) {
+    if (ch->location.getRoomFlag(ROOM_HELL)) {
         send_to_char(ch, "The fire makes it too hot!\r\n");
         return;
     }
@@ -7687,7 +7683,7 @@ ACMD(do_meditate) {
 void meditateProgress(char_data* ch) {
     int64_t bonus = 0, cost = 1;
 
-    if (ch->getRoomFlag(ROOM_HELL)) {
+    if (ch->location.getRoomFlag(ROOM_HELL)) {
         send_to_char(ch, "The fire makes it too hot!\r\n");
         ch->setTask(Task::nothing);
         return;
@@ -7788,11 +7784,11 @@ void meditateProgress(char_data* ch) {
     if(bonus <= 0) bonus = 0;
 
 
-    if (ch->getWhereFlag(WhereFlag::hyperbolic_time_chamber)) {
+    if (ch->location.getWhereFlag(WhereFlag::hyperbolic_time_chamber)) {
         if(bonus <= 0) bonus = 10;
         send_to_char(ch, "@rThis place feels like it operates on a different time frame, it feels great...@n\r\n");
         bonus *= 5;
-    } else if (ch->getRoomFlag(ROOM_WORKOUT)) {
+    } else if (ch->location.getRoomFlag(ROOM_WORKOUT)) {
         if (ch->getRoomVnum() >= 19100 && ch->getRoomVnum() <= 19199) {
             if(bonus <= 0) bonus = 6;
             bonus *= 5;
@@ -7806,10 +7802,10 @@ void meditateProgress(char_data* ch) {
     } else {
         if(bonus <= 0) bonus = 1;
     }
-    if (bonus <= 0 && !ch->getWhereFlag(WhereFlag::hyperbolic_time_chamber)) {
+    if (bonus <= 0 && !ch->location.getWhereFlag(WhereFlag::hyperbolic_time_chamber)) {
         bonus = 1;
     }
-    if (bonus <= 1 && ch->getRoomFlag(ROOM_WORKOUT)) {
+    if (bonus <= 1 && ch->location.getRoomFlag(ROOM_WORKOUT)) {
         if (ch->getRoomVnum() >= 19100 && ch->getRoomVnum() <= 19199) {
             bonus = 6;
         } else {
@@ -8002,11 +7998,11 @@ void pushupProgress(char_data* ch) {
     bonus = (start_bonus * ratio_bonus) * diminishing_returns;
     if(bonus <= 0) bonus = 0;
 
-    if (ch->getWhereFlag(WhereFlag::hyperbolic_time_chamber)) {
+    if (ch->location.getWhereFlag(WhereFlag::hyperbolic_time_chamber)) {
         send_to_char(ch, "@rThis place feels like it operates on a different time frame, it feels great...@n\r\n");
         bonus *= 5;
         if(bonus <= 6) bonus = 6;
-    } else if (ch->getRoomFlag(ROOM_WORKOUT)) {
+    } else if (ch->location.getRoomFlag(ROOM_WORKOUT)) {
         if (ch->getRoomVnum() >= 19100 && ch->getRoomVnum() <= 19199) {
             bonus *= 5;
             if(bonus <= 6) bonus = 6;
@@ -8143,18 +8139,18 @@ void base_update(uint64_t heartPulse, double deltaTime) {
             }
         } /* Andros End */
         if (CARRYING(d->character)) {
-            if (CARRYING(d->character)->getLocation() != d->character->getLocation()) {
+            if (CARRYING(d->character)->location != d->character->location) {
                 carry_drop(d->character, 3);
             }
         }
         if (GET_DEFENDER(d->character)) {
-            if (d->character->getLocation() != GET_DEFENDER(d->character)->getLocation()) {
+            if (d->character->location != GET_DEFENDER(d->character)->location) {
                 GET_DEFENDING(GET_DEFENDER(d->character)) = nullptr;
                 GET_DEFENDER(d->character) = nullptr;
             }
         }
         if (GET_DEFENDING(d->character)) {
-            if (d->character->getLocation() != GET_DEFENDING(d->character)->getLocation()) {
+            if (d->character->location != GET_DEFENDING(d->character)->location) {
                 GET_DEFENDER(GET_DEFENDING(d->character)) = nullptr;
                 GET_DEFENDING(d->character) = nullptr;
             }
@@ -8165,7 +8161,7 @@ void base_update(uint64_t heartPulse, double deltaTime) {
             d->character->affect_flags.set(AFF_POSITION, false);
         }
         if (SITS(d->character)) {
-            if (d->character->getLocation() != SITS(d->character)->getLocation()) {
+            if (d->character->location != SITS(d->character)->location) {
                 struct obj_data *chair = SITS(d->character);
                 chair->sitting.reset();
                 d->character->sits.reset();
@@ -8204,8 +8200,8 @@ void base_update(uint64_t heartPulse, double deltaTime) {
         if (!IS_NPC(d->character)) {
             check_eq(d->character);
         }
-        if (!IS_NPC(d->character) && d->character->getLocationGroundEffect() >= 1 && rand_number(1, 100) >= 96) {
-            if (d->character->getLocationGroundEffect() <= 4) {
+        if (!IS_NPC(d->character) && d->character->location.getGroundEffect() >= 1 && rand_number(1, 100) >= 96) {
+            if (d->character->location.getGroundEffect() <= 4) {
                 switch (rand_number(1, 4)) {
                     case 1:
                         act("@RLava spews up violently from the cracks in the ground!@n", false, d->character, nullptr,
@@ -8232,17 +8228,17 @@ void base_update(uint64_t heartPulse, double deltaTime) {
                             nullptr, nullptr, TO_CHAR);
                         break;
                 }
-                d->character->modLocationGroundEffect(1);
-            } else if (d->character->getLocationGroundEffect() == 5) {
+                d->character->location.modGroundEffect(1);
+            } else if (d->character->location.getGroundEffect() == 5) {
                 act("@RLava covers the entire area now!@n", false, d->character, nullptr, nullptr, TO_ROOM);
                 act("@RLava covers the entire area now!@n", false, d->character, nullptr, nullptr, TO_CHAR);
-                d->character->modLocationGroundEffect(1);
+                d->character->location.modGroundEffect(1);
             }
         }
 
         if (BLOCKS(d->character)) {
             struct char_data *vict = BLOCKS(d->character);
-            if (vict->getLocation() != d->character->getLocation()) {
+            if (vict->location != d->character->location) {
                 BLOCKED(vict) = nullptr;
                 BLOCKS(d->character) = nullptr;
             }
@@ -8278,7 +8274,7 @@ ACMD(do_snet) {
     struct obj_data *obj = nullptr;
     struct obj_data *obj2 = nullptr;
 
-    if (ch->getWhereFlag(WhereFlag::hyperbolic_time_chamber)) {
+    if (ch->location.getWhereFlag(WhereFlag::hyperbolic_time_chamber)) {
         send_to_char(ch, "This is a different dimension!\r\n");
         return;
     }
@@ -8286,11 +8282,11 @@ ACMD(do_snet) {
         send_to_char(ch, "Lol, no.\r\n");
         return;
     }
-    if (ch->getWhereFlag(WhereFlag::pendulum_past)) {
+    if (ch->location.getWhereFlag(WhereFlag::pendulum_past)) {
         send_to_char(ch, "This is the past, you can't talk on scouter net!\r\n");
         return;
     }
-    if (ch->getRoomFlag(ROOM_HELL)) {
+    if (ch->location.getRoomFlag(ROOM_HELL)) {
         send_to_char(ch, "The fire eats your transmission!\r\n");
         return;
     }
@@ -8360,21 +8356,21 @@ ACMD(do_snet) {
             if (i->character == ch) {
                 continue;
             }
-            if (i->character->getLocation() == ch->getLocation()) {
+            if (i->character->location == ch->location) {
                 continue;
             }
-            if (i->character->getWhereFlag(WhereFlag::hyperbolic_time_chamber)) {
+            if (i->character->location.getWhereFlag(WhereFlag::hyperbolic_time_chamber)) {
                 continue;
             }
-            if (i->character->getWhereFlag(WhereFlag::pendulum_past)) {
+            if (i->character->location.getWhereFlag(WhereFlag::pendulum_past)) {
                 continue;
             }
-            if ((i->character->getWhereFlag(WhereFlag::afterlife_hell) && !ch->getWhereFlag(WhereFlag::afterlife_hell)) ||
-                (i->character->getWhereFlag(WhereFlag::afterlife) && !ch->getWhereFlag(WhereFlag::afterlife))) {
+            if ((i->character->location.getWhereFlag(WhereFlag::afterlife_hell) && !ch->location.getWhereFlag(WhereFlag::afterlife_hell)) ||
+                (i->character->location.getWhereFlag(WhereFlag::afterlife) && !ch->location.getWhereFlag(WhereFlag::afterlife))) {
                 continue;
             }
-            if ((!i->character->getWhereFlag(WhereFlag::afterlife_hell) && ch->getWhereFlag(WhereFlag::afterlife_hell)) ||
-                (!i->character->getWhereFlag(WhereFlag::afterlife) && ch->getWhereFlag(WhereFlag::afterlife))) {
+            if ((!i->character->location.getWhereFlag(WhereFlag::afterlife_hell) && ch->location.getWhereFlag(WhereFlag::afterlife_hell)) ||
+                (!i->character->location.getWhereFlag(WhereFlag::afterlife) && ch->location.getWhereFlag(WhereFlag::afterlife))) {
                 continue;
             }
             if (GET_POS(i->character) == POS_SLEEPING) {
@@ -8459,7 +8455,7 @@ ACMD(do_snet) {
                 char over[MAX_STRING_LENGTH];
                 snprintf(over, sizeof(over), "@C$n@W says into $s scouter, '@G@G%s %s@W'@n\r\n", CAP(arg), !*arg2 ? "" : arg2);
                 act(over, true, ch, nullptr, nullptr, TO_ROOM);
-                if (ch->getWhereFlag(WhereFlag::afterlife_hell) || ch->getWhereFlag(WhereFlag::afterlife)) {
+                if (ch->location.getWhereFlag(WhereFlag::afterlife_hell) || ch->location.getWhereFlag(WhereFlag::afterlife)) {
                     send_to_char(ch, "@mThe transmission only reaches those who are in the afterlife.@n\r\n");
                 }
             }
@@ -8474,7 +8470,7 @@ ACMD(do_snet) {
                 char over[MAX_STRING_LENGTH];
                 snprintf(over, sizeof(over), "@C$n@W says into $s scouter, '@G@G%s@W'@n\r\n", !*arg2 ? "" : CAP(arg2));
                 act(over, true, ch, nullptr, nullptr, TO_ROOM);
-                if (ch->getWhereFlag(WhereFlag::afterlife_hell) || ch->getWhereFlag(WhereFlag::afterlife)) {
+                if (ch->location.getWhereFlag(WhereFlag::afterlife_hell) || ch->location.getWhereFlag(WhereFlag::afterlife)) {
                     send_to_char(ch, "@mThe transmission only reaches those who are in the afterlife.@n\r\n");
                 }
             }
@@ -8526,7 +8522,8 @@ ACMD(do_scouter) {
             } else if (IS_ANDROID(i->character)) {
                 continue;
             } else if (planet_check(ch, i->character)) {
-                int dir = find_first_step(ch->getRoom(), i->character->getRoom());
+                // TODO: replace graphing algorithm...
+                int dir = find_first_step(ch->location, i->character->location);
                 int same = false;
                 char pathway[MAX_STRING_LENGTH];
 
@@ -8684,7 +8681,7 @@ ACMD(do_quit) {
     if (IS_NPC(ch) || !ch->desc)
         return;
 
-    if (ch->getWhereFlag(WhereFlag::pendulum_past)) {
+    if (ch->location.getWhereFlag(WhereFlag::pendulum_past)) {
         send_to_char(ch, "This is the past, you can't quit here!\r\n");
         return;
     }
@@ -8747,14 +8744,14 @@ ACMD(do_quit) {
      */
 
         /* If someone is quitting in their house, let them load back here. */
-        if (!ch->getWhereFlag(WhereFlag::pendulum_past) &&
+        if (!ch->location.getWhereFlag(WhereFlag::pendulum_past) &&
             (rvn < 19800 || rvn > 19899)) {
             if (rvn != NOWHERE && rvn != 0 &&
                 rvn != 1) {
                 ch->setBaseStat("load_room", rvn);
             }
         }
-        if (ch->getWhereFlag(WhereFlag::pendulum_past)) {
+        if (ch->location.getWhereFlag(WhereFlag::pendulum_past)) {
             if (rvn != NOWHERE && rvn != 0 &&
                 rvn != 1) {
                 ch->setBaseStat("load_room", GET_ROOM_VNUM(real_room(1561)));
@@ -9405,7 +9402,7 @@ ACMD(do_split) {
         ch->modBaseStat("money_carried", -amount);
         k = (ch->master ? ch->master : ch);
 
-        if (AFF_FLAGGED(k, AFF_GROUP) && (k->getLocation() == ch->getLocation()))
+        if (AFF_FLAGGED(k, AFF_GROUP) && (k->location == ch->location))
             num = 1;
         else
             num = 0;
@@ -9413,7 +9410,7 @@ ACMD(do_split) {
         for (f = k->followers; f; f = f->next)
             if (AFF_FLAGGED(f->follower, AFF_GROUP) &&
                 (!IS_NPC(f->follower)) && f->follower != ch &&
-                (f->follower->getLocation() == ch->getLocation()))
+                (f->follower->location == ch->location))
                 num++;
 
         if (num > 0 && AFF_FLAGGED(ch, AFF_GROUP)) {
@@ -9434,7 +9431,7 @@ ACMD(do_split) {
                      "%d zenni %s not splitable, so %s keeps the money.\r\n", rest, (rest == 1) ? "was" : "were",
                      GET_NAME(ch));
         }
-        if (AFF_FLAGGED(k, AFF_GROUP) && k->getLocation() == ch->getLocation() &&
+        if (AFF_FLAGGED(k, AFF_GROUP) && k->location == ch->location &&
             !IS_NPC(k) && k != ch) {
             k->modBaseStat("money_carried", share);
             send_to_char(k, "%s", buf);
@@ -9443,7 +9440,7 @@ ACMD(do_split) {
         for (f = k->followers; f; f = f->next) {
             if (AFF_FLAGGED(f->follower, AFF_GROUP) &&
                 (!IS_NPC(f->follower)) &&
-                (f->follower->getLocation() == ch->getLocation()) &&
+                (f->follower->location == ch->location) &&
                 f->follower != ch) {
 
                 f->follower->modBaseStat("money_carried", share);
@@ -10705,7 +10702,7 @@ ACMD(do_clan) {
             if (!clanIsMember(GET_CLAN(ch), ch) && !clanIsModerator(GET_CLAN(ch), ch)) {
                 send_to_char(ch, "You are not in a clan.\r\n");
                 return;
-            } else if (!ch->getRoomFlag(ROOM_CBANK) && clanBANY(GET_CLAN(ch), ch) == false) {
+            } else if (!ch->location.getRoomFlag(ROOM_CBANK) && clanBANY(GET_CLAN(ch), ch) == false) {
                 send_to_char(ch, "You are not in your clan bank and your clan doesn't have bank anywhere.\r\n");
                 return;
             } else if (!*arg2) {

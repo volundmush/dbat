@@ -59,7 +59,7 @@ ACMD(do_action) {
     if (!vict) {
         if (action->char_obj_found) {
             targ = get_obj_in_list_vis(ch, arg, nullptr, ch->getObjects());
-            if (!targ) targ = get_obj_in_list_vis(ch, arg, nullptr, ch->getLocationObjects());
+            if (!targ) targ = get_obj_in_list_vis(ch, arg, nullptr, ch->location.getObjects());
             if (targ) {
                 act(action->char_obj_found, action->hide, ch, targ, nullptr, TO_CHAR);
                 act(action->others_obj_found, action->hide, ch, targ, nullptr, TO_ROOM);
@@ -436,7 +436,7 @@ ACMD(do_gmote) {
         return;
     }
 
-    if (ch->getRoom()->room_flags.get(ROOM_SOUNDPROOF)) {
+    if (ch->location.getRoomFlag(ROOM_SOUNDPROOF)) {
         send_to_char(ch, "The walls seem to absorb your actions.\r\n");
         return;
     }

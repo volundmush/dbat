@@ -137,16 +137,16 @@ ACMD(do_oasis_copy) {
     /* Give the descriptor an OLC structure. */
     if (d->olc) {
         mudlog(BRF, ADMLVL_IMMORT, true, "SYSERR: do_oasis_copy: Player already had olc structure.");
-        free(d->olc);
+        delete d->olc;
     }
 
     /* Create the OLC structure. */
-    CREATE(d->olc, struct oasis_olc_data, 1);
+    d->olc = new oasis_olc_data();
 
     /* Find the zone. */
     if ((OLC_ZNUM(d) = real_zone_by_thing(dst_vnum)) == NOWHERE) {
         send_to_char(ch, "Sorry, there is no zone for the given vnum (#%d)!\r\n", dst_vnum);
-        free(d->olc);
+        delete d->olc;
         d->olc = nullptr;
         return;
     }
@@ -154,7 +154,7 @@ ACMD(do_oasis_copy) {
     /* Make sure the builder is allowed to modify the target zone. */
     if (!can_edit_zone(ch, OLC_ZNUM(d))) {
         send_cannot_edit(ch, zone_table.at(OLC_ZNUM(d)).number);
-        free(d->olc);
+        delete d->olc;
         d->olc = nullptr;
         return;
     }
@@ -224,21 +224,18 @@ ACMD(do_dig) {
         send_to_char(ch, "The target exists, but you can't dig to limbo!\r\n");
         return;
     }
-    
-    auto e = W_EXIT(IN_ROOM(ch), dir);
-    
+
+    auto direction = static_cast<Direction>(dir);
+
+    // grab what already exists if anything.
+    auto e = ch->location.getExit(direction);
+
     /*
      * target room == -1 removes the exit
      */
     if (rvnum == NOTHING) {
         if (e) {
-            /* free the old pointers, if any */
-            if (e->general_description)
-                free(e->general_description);
-            if (e->keyword)
-                free(e->keyword);
-            free(e);
-            e = nullptr;
+            ch->location.deleteExit(direction);
             send_to_char(ch, "You remove the exit to the %s.\r\n", dirs[dir]);
             return;
         }
@@ -275,9 +272,9 @@ ACMD(do_dig) {
          */
         if (d->olc) {
             mudlog(BRF, ADMLVL_IMMORT, true, "SYSERR: do_dig: Player already had olc structure.");
-            free(d->olc);
+            delete d->olc;
         }
-        CREATE(d->olc, struct oasis_olc_data, 1);
+        d->olc = new oasis_olc_data();
         OLC_ZNUM(d) = zone;
         OLC_NUM(d) = rvnum;
         OLC_ROOM(d) = new room_data();
@@ -312,29 +309,32 @@ ACMD(do_dig) {
     /*
      * Now dig.
      */
-    CREATE(r->dir_option[dir], struct Destination, 1);
-    e = r->dir_option[dir];
-    e->general_description = nullptr;
-    e->keyword = nullptr;
-    e->to_room = rrnum;
+    
+    auto droom = get_room(rrnum);
+    Destination dest;
+    dest.dir = direction;
+    dest.unit = droom;
+    ch->location.replaceExit(dest);
+
     send_to_char(ch, "You make an exit %s to room %d (%s).\r\n",
-                 dirs[dir], rvnum, get_room(rrnum)->getName());
+                 dirs[dir], rvnum, droom->getName());
+    
 
     /*
      * check if we can dig from there to here.
      */
     auto r2 = get_room(rrnum);
-    auto e2 = r2->dir_option[rev_dir[dir]];
+    auto rdir = static_cast<Direction>(rev_dir[dir]);
+    auto e2 = r2->getDirection(rdir);
 
     if (e2)
         send_to_char(ch, "You cannot dig from %d to here. The target room already has an exit to the %s.\r\n",
                      rvnum, dirs[rev_dir[dir]]);
     else {
-        CREATE(W_EXIT(rrnum, rev_dir[dir]), struct Destination, 1);
-        e2 = r2->dir_option[rev_dir[dir]];
-        e2->general_description = nullptr;
-        e2->keyword = nullptr;
-        e2->to_room = IN_ROOM(ch);
+        Destination dest2;
+        dest2.dir = rdir;
+        dest2.unit = r2;
+        dest.replaceExit(dest2);
     }
 }
 
@@ -427,9 +427,9 @@ int buildwalk(struct char_data *ch, int dir) {
     if (!IS_NPC(ch) && PRF_FLAGGED(ch, PRF_BUILDWALK) &&
         GET_ADMLEVEL(ch) >= ADMLVL_IMMORT) {
 
-        if (!can_edit_zone(ch, ch->getRoom()->zone->number)) {
-            send_cannot_edit(ch, ch->getRoom()->zone->number);
-        } else if ((vnum = redit_find_new_vnum(ch->getRoom()->zone->number)) == NOWHERE)
+        if (!can_edit_zone(ch, ch->location.getZone()->number)) {
+            send_cannot_edit(ch, ch->location.getZone()->number);
+        } else if ((vnum = redit_find_new_vnum(ch->location.getZone()->number)) == NOWHERE)
             send_to_char(ch, "No free vnums are available in this zone!\r\n");
         else {
             struct descriptor_data *d = ch->desc;
@@ -439,12 +439,13 @@ int buildwalk(struct char_data *ch, int dir) {
              */
             if (d->olc) {
                 mudlog(BRF, ADMLVL_IMMORT, true, "SYSERR: buildwalk(): Player already had olc structure.");
-                free(d->olc);
+                delete d->olc;
             }
-            CREATE(d->olc, struct oasis_olc_data, 1);
-            OLC_ZNUM(d) = ch->getRoom()->zone->number;
+
+            d->olc = new oasis_olc_data();
+            OLC_ZNUM(d) = ch->location.getZone()->number;
             OLC_NUM(d) = vnum;
-            CREATE(OLC_ROOM(d), struct room_data, 1);
+            OLC_ROOM(d) = new room_data();
 
             OLC_ROOM(d)->strings["name"] = "New BuildWalk Room";
 
@@ -460,11 +461,15 @@ int buildwalk(struct char_data *ch, int dir) {
             OLC_VAL(d) = 0;
 
             /* Link rooms */
-            rnum = real_room(vnum);
-            CREATE(EXIT(ch, dir), struct Destination, 1);
-            EXIT(ch, dir)->to_room = rnum;
-            CREATE(get_room(rnum)->dir_option[rev_dir[dir]], struct Destination, 1);
-            get_room(rnum)->dir_option[rev_dir[dir]]->to_room = IN_ROOM(ch);
+            auto r = get_room(vnum);
+            Destination dest, rdest;
+            dest.dir = static_cast<Direction>(dir);
+            dest.unit = r;
+            ch->location.replaceExit(dest);
+
+            rdest.dir = static_cast<Direction>(rev_dir[dir]);
+            rdest.unit = ch->getRoom();
+            dest.replaceExit(rdest);
 
             /* Report room creation to user */
             send_to_char(ch, "@yRoom #%d created by BuildWalk.@n\r\n", vnum);

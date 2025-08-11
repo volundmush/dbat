@@ -41,13 +41,16 @@
 #include <functional>
 #include <stdexcept>
 #include <type_traits>
-
+#include <iostream>
 
 #define FMT_HEADER_ONLY
-//#include "fmt/core.h"
-//
+#include "fmt/format.h"
+#include "fmt/printf.h"
+#include "fmt/ranges.h"
 
-//#include "magic_enum/magic_enum_all.hpp"
+#include <boost/algorithm/string.hpp>
+#include "magic_enum/magic_enum_all.hpp"
+
 
 /* Basic system dependencies *******************************************/
 #define IDXTYPE	int
@@ -147,3 +150,31 @@ public:
         return Base::insert(hint, value);
     }
 };
+
+template<typename... Args>
+void basic_mud_log(fmt::string_view format, Args&&... args) {
+    try {
+        std::string formatted_string = fmt::sprintf(format, std::forward<Args>(args)...);
+        if(formatted_string.empty()) return;
+
+        std::cout << formatted_string << std::endl;
+    }
+    catch(const std::exception &e) {
+        std::cout << "SYSERR: Format error in basic_mud_log: " << e.what() << std::endl;
+        std::cout << "Template was: " << format.data() << std::endl;
+    }
+}
+
+template<typename... Args>
+void template_mud_log(fmt::string_view format, Args&&... args) {
+    try {
+        std::string formatted_string = fmt::format(fmt::runtime(format), std::forward<Args>(args)...);
+        if(formatted_string.empty()) return;
+
+        std::cout << formatted_string << std::endl;
+    }
+    catch(const std::exception &e) {
+        std::cout << "SYSERR: Format error in template_mud_log: " << e.what() << std::endl;
+        std::cout << "Template was: " << format.data() << std::endl;
+    }
+}

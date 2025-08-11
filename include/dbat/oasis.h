@@ -100,6 +100,7 @@ struct oasis_olc_data {
     char *storage;                 /* used for 'tedit'         */
     struct npc_proto_data *mob;    /* used for 'medit'         */
     struct room_data *room;        /* used for 'redit'         */
+    std::optional<Destination> dest; /* used for 'redit'       */
     struct item_proto_data *obj;   /* used for 'oedit'         */
     struct obj_data *iobj;         /* used for 'iedit'         */
     struct zone_data *zone;        /* used for 'zedit'         */
@@ -150,7 +151,7 @@ struct oasis_olc_data {
 /*
  * Other macros.
  */
-#define OLC_EXIT(d)        (OLC_ROOM(d)->dir_option[OLC_VAL(d)])
+#define OLC_EXIT(d)        (OLC(d)->dest)
 
 /*
  * Cleanup types.

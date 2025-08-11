@@ -3,7 +3,6 @@
 //
 #include <boost/algorithm/string.hpp>
 
-
 #include "dbat/structs.h"
 #include "dbat/races.h"
 #include "dbat/send.h"
@@ -23,16 +22,15 @@
 #include "dbat/weather.h"
 #include "dbat/attack.h"
 #include "dbat/modifiers.h"
-#include "dbat/bitarray.h"
 
 
 std::string char_data::juggleRaceName(bool capitalized) {
 
-    std::string apparent = fmt::format("{}", race);
+    std::string apparent = fmt::format("{}", magic_enum::enum_name(race));
 
     switch (race) {
         case Race::hoshijin:
-            if (mimic) apparent = fmt::format("{}", *mimic);
+            if (mimic) apparent = fmt::format("{}", magic_enum::enum_name(*mimic));
             break;
         case Race::halfbreed:
         case Race::android:
@@ -81,12 +79,12 @@ void char_data::lookAtLocation(const Location& loc) {
 
 void char_data::lookAtLocation() {
     if(!location) return;
-    lookAtLocation(getLocation());
+    lookAtLocation(location);
 }
 
 void char_data::lookAtLocation(const thing_data* td) {
     if(!td) return;
-    lookAtLocation(td->getLocation());
+    lookAtLocation(td->location);
 }
 
 void char_data::resurrect(ResurrectionMode mode) {
@@ -189,7 +187,7 @@ bool char_data::in_room_range(IDXTYPE low_rnum, IDXTYPE high_rnum) {
 }
 
 bool char_data::in_past() {
-    return this->getWhereFlag(WhereFlag::pendulum_past);
+    return location.getWhereFlag(WhereFlag::pendulum_past);
 }
 
 bool char_data::is_newbie() {
@@ -285,9 +283,7 @@ bool char_data::hasGravAcclim(int grav) {
 
 void char_data::raiseGravAcclim() {
     if (rand_number(1, 140) >= getEffectiveStat("strength")) {
-        auto room = getRoom();
-        if(!room) return;
-        auto gravity = room->getEnvironment(ENV_GRAVITY);
+        auto gravity = location.getEnvironment(ENV_GRAVITY);
 
         if(gravity >= 1000 && !hasGravAcclim(5) && hasGravAcclim(4))
             gravAcclim[5] += 1;
@@ -305,8 +301,7 @@ void char_data::raiseGravAcclim() {
 }
 
 int64_t char_data::calcGravCost(int64_t num) {
-    double gravity = 1.0;
-    if(auto room = getRoom(); room) gravity = room->getEnvironment(ENV_GRAVITY);
+    double gravity = location.getEnvironment(ENV_GRAVITY);
 
     if(gravity >= 1000 && hasGravAcclim(5))
         gravity /= 1000;
@@ -834,8 +829,7 @@ double char_data::getPotential() {
 
 void char_data::gainGrowth() {
     double modifier = 1;
-    auto r = getRoom();
-    if (r->where_flags[WhereFlag::afterlife_hell] || r->where_flags[WhereFlag::afterlife]) {
+    if (location.getWhereFlag(WhereFlag::afterlife_hell) || location.getWhereFlag(WhereFlag::afterlife)) {
         modifier = 1.5;
     }
 
@@ -1250,4 +1244,9 @@ const char* char_data::getAppearanceStr(Appearance type) {
     static char buf[MAX_STRING_LENGTH];
     snprintf(buf, MAX_STRING_LENGTH, "%s", getAppearance(type).c_str());
     return buf;
+}
+
+void char_data::sendText(const std::string& txt) {
+    if(!desc) return;
+    desc->sendText(txt);
 }

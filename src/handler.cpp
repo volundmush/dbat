@@ -395,7 +395,7 @@ void affect_join(struct char_data *ch, struct affected_type *af,
 void char_from_room(struct char_data *ch) {
     struct char_data *temp;
     int i;
-    struct room_data *r;
+    struct room_data *r = nullptr;
 
     if (ch == nullptr || !(r = ch->getRoom())) {
         basic_mud_log("SYSERR: nullptr character or NOWHERE in %s, char_from_room", __FILE__);
@@ -404,6 +404,7 @@ void char_from_room(struct char_data *ch) {
 
     if (FIGHTING(ch) && !AFF_FLAGGED(ch, AFF_PURSUIT))
         stop_fighting(ch);
+
     if (AFF_FLAGGED(ch, AFF_PURSUIT) && FIGHTING(ch) == nullptr)
         ch->affect_flags.set(AFF_PURSUIT, false);
 
@@ -433,7 +434,7 @@ void char_to_room(struct char_data *ch, struct room_data* room) {
     }
 
     /* Stop fighting now, if we left. */
-    if (FIGHTING(ch) && ch->getLocation() != FIGHTING(ch)->getLocation() && !AFF_FLAGGED(ch, AFF_PURSUIT)) {
+    if (FIGHTING(ch) && ch->location != FIGHTING(ch)->location && !AFF_FLAGGED(ch, AFF_PURSUIT)) {
         stop_fighting(FIGHTING(ch));
         stop_fighting(ch);
     }
@@ -465,7 +466,7 @@ void char_to_location(struct char_data *ch, const Location& loc) {
 void char_to_location(struct char_data *ch, const thing_data* td) {
     if(!ch) return;
     if(!td) return;
-    char_to_location(ch, td->getLocation());
+    char_to_location(ch, td->location);
 }
 
 void obj_to_location(struct obj_data *obj, const Location& loc) {
@@ -479,7 +480,7 @@ void obj_to_location(struct obj_data *obj, const Location& loc) {
 void obj_to_location(struct obj_data *obj, const thing_data* td) {
     if(!obj) return;
     if(!td) return;
-    obj_to_location(obj, td->getLocation());
+    obj_to_location(obj, td->location);
 }
 
 
@@ -770,20 +771,18 @@ void obj_to_room(struct obj_data *object, struct room_data *room) {
         }
     }
 
-    if (EXIT(object, 5) &&
-        (object->getLocationTileType() == SECT_UNDERWATER || object->getLocationTileType() == SECT_WATER_NOSWIM)) {
+    if (auto ex = EXIT(object, 5); ex &&
+        (object->location.getTileType() == SECT_UNDERWATER || object->location.getTileType() == SECT_WATER_NOSWIM)) {
         act("$p @Bsinks to deeper waters.@n", true, nullptr, object, nullptr, TO_ROOM);
-        int numb = GET_ROOM_VNUM(EXIT(object, 5)->to_room);
-        obj_from_room(object);
-        obj_to_room(object, real_room(numb));
+        object->clearLocation();
+        object->setLocation(*ex);
     }
-    if (EXIT(object, 5) && object->getLocationTileType() == SECT_FLYING &&
+    if (auto ex = EXIT(object, 5); ex && object->location.getTileType() == SECT_FLYING &&
         (GET_OBJ_VNUM(object) < 80 || GET_OBJ_VNUM(object) > 83)) {
         act("$p @Cfalls down.@n", true, nullptr, object, nullptr, TO_ROOM);
-        int numb = GET_ROOM_VNUM(EXIT(object, 5)->to_room);
-        obj_from_room(object);
-        obj_to_room(object, real_room(numb));
-        if (object->getLocationTileType() != SECT_FLYING) {
+        object->clearLocation();
+        object->setLocation(*ex);
+        if (object->location.getTileType() != SECT_FLYING) {
             act("$p @Cfalls down and smacks the ground.@n", true, nullptr, object, nullptr, TO_ROOM);
         }
     }
@@ -801,23 +800,25 @@ void obj_to_room(struct obj_data *object, room_rnum room) {
 
 /* Take an object from a room */
 void obj_from_room(struct obj_data *object) {
-    struct obj_data *temp;
-    auto r = object->getRoom();
+    if (!object) {
+        basic_mud_log("SYSERR: nullptr object passed to obj_from_room");
+        return;
+    }
 
-    if (!object || !r) {
-        basic_mud_log("SYSERR: nullptr object or obj not in a room passed to obj_from_room");
+    auto r = object->getRoom();
+    if(!r) {
+        basic_mud_log("SYSERR: object not in a room passed to obj_from_room");
         return;
     }
 
     if(object->type_flag == ItemType::plant) objectSubscriptions.unsubscribe("growingPlants", object);
 
     if (auto obj = GET_OBJ_POSTED(object); obj) {
-        auto r = obj->getRoom();
         if (GET_OBJ_POSTTYPE(object) <= 0) {
-            send_to_room(r, "%s@W shakes loose from %s@W.@n\r\n", obj->getShortDescription(),
+            obj->location.send_to("%s@W shakes loose from %s@W.@n\r\n", obj->getShortDescription(),
                          object->getShortDescription());
         } else {
-            send_to_room(r, "%s@W comes loose from %s@W.@n\r\n", object->getShortDescription(),
+            obj->location.send_to("%s@W comes loose from %s@W.@n\r\n", object->getShortDescription(),
                          obj->getShortDescription());
         }
         GET_OBJ_POSTED(obj) = nullptr;
@@ -827,7 +828,8 @@ void obj_from_room(struct obj_data *object) {
     }
 
     auto shared = object->shared();
-    r->zone->objectsInZone.remove_if([shared](auto& obj) { return obj.expired() || obj.lock() == shared; });
+    auto z = r->zone;
+    z->objectsInZone.remove_if([shared](auto& obj) { return obj.expired() || obj.lock() == shared; });
     r->contents.remove_if([shared](auto& obj) { return obj.expired() || obj.lock() == shared; });
 
     object->location = {};
@@ -1086,16 +1088,17 @@ void extract_char_final(struct char_data *ch) {
     /* transfer objects to room, if any */
     if(IS_NPC(ch)) {
         auto con = ch->getObjects();
-        auto room = ch->getRoom();
         for (auto obj : filter_raw(con)) {
-            obj_from_char(obj);
-            obj_to_room(obj, room);
+            obj->clearLocation();
+            obj->setLocation(ch);
         }
 
         /* transfer equipment to room, if any */
-        for (i = 0; i < NUM_WEARS; i++)
-            if (GET_EQ(ch, i))
-                obj_to_room(unequip_char(ch, i), room);
+        for (auto &[slot, o] : ch->getEquipment()) {
+            unequip_char(ch, slot);
+            o->setLocation(ch);
+        }
+            
     }
 
     if (FIGHTING(ch))
@@ -1106,7 +1109,7 @@ void extract_char_final(struct char_data *ch) {
             stop_fighting(k);
     }
 
-    char_from_room(ch);
+    ch->clearLocation();
 
     /* If there's a descriptor, they're in the menu now. */
     if(ch->desc) {
@@ -1145,7 +1148,7 @@ void extract_char(struct char_data *ch) {
 
     for (auto foll = ch->followers; foll; foll = foll->next) {
         if (IS_NPC(foll->follower) && AFF_FLAGGED(foll->follower, AFF_CHARM) &&
-            (foll->follower->getLocation() == ch->getLocation() || IN_ROOM(ch) == 1)) {
+            (foll->follower->location == ch->location || IN_ROOM(ch) == 1)) {
             /* transfer objects to char, if any */
             auto con = foll->follower->getObjects();
             for (auto obj : filter_raw(con)) {
@@ -1203,7 +1206,7 @@ struct char_data *get_player_vis(struct char_data *ch, char *name, int *number, 
     for (auto i : filter_raw(ac)) {
         if (IS_NPC(i))
             continue;
-        if (inroom == FIND_CHAR_ROOM && i->getLocation() != ch->getLocation())
+        if (inroom == FIND_CHAR_ROOM && i->location != ch->location)
             continue;
         if (GET_ADMLEVEL(ch) < 1 && GET_ADMLEVEL(i) < 1 && !IS_NPC(ch) && !IS_NPC(i)) {
             if (strcasecmp(RACE(i), name) && !strstr(RACE(i), name)) {
@@ -1256,7 +1259,7 @@ struct char_data *get_char_room_vis(struct char_data *ch, char *name, int *numbe
     /* 0.<name> means PC with name */
     if (*number == 0)
         return (get_player_vis(ch, name, nullptr, FIND_CHAR_ROOM));
-    auto people = ch->getLocationPeople();
+    auto people = ch->location.getPeople();
     for (auto i : filter_raw(people)) {
         if (!strcasecmp(name, "last") && LASTHIT(i) != 0 && LASTHIT(i) == GET_IDNUM(ch)) {
             if (CAN_SEE(ch, i))
@@ -1318,7 +1321,7 @@ struct char_data *get_char_world_vis(struct char_data *ch, char *name, int *numb
     
     auto ac = characterSubscriptions.all("active");
     for (auto i : filter_raw(ac)) {
-        if (ch->getLocation() == i->getLocation())
+        if (ch->location == i->location)
             continue;
         if (GET_ADMLEVEL(ch) < 1 && GET_ADMLEVEL(i) < 1 && !IS_NPC(ch) && !IS_NPC(i)) {
             if (strcasecmp(RACE(i), name) && !strstr(RACE(i), name)) {
@@ -1406,7 +1409,7 @@ struct obj_data *get_obj_vis(struct char_data *ch, char *name, int *number) {
         return (i);
 
     /* scan room */
-    if ((i = get_obj_in_list_vis(ch, name, number, ch->getLocationObjects())))
+    if ((i = get_obj_in_list_vis(ch, name, number, ch->location.getObjects())))
         return (i);
 
     /* ok.. no luck yet. scan the entire obj list   */
@@ -1604,7 +1607,7 @@ int generic_find(const char *arg, bitvector_t bitvector, struct char_data *ch,
     }
 
     if (IS_SET(bitvector, FIND_OBJ_ROOM)) {
-        if ((*tar_obj = get_obj_in_list_vis(ch, name, &number, ch->getLocationObjects())))
+        if ((*tar_obj = get_obj_in_list_vis(ch, name, &number, ch->location.getObjects())))
             return (FIND_OBJ_ROOM);
     }
 

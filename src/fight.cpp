@@ -201,7 +201,7 @@ static int pick_n_throw(struct char_data *ch, char *buf) {
         return (false);
     }
 
-    if (auto cont = ch->getRoom()->findObject([ch](const auto& o) { return ch->canCarryWeight(o);}); cont) {
+    if (auto cont = ch->location.findObject([ch](const auto& o) { return ch->canCarryWeight(o);}); cont) {
         snprintf(buf2, sizeof(buf2), "%s", cont->getName());
         do_get(ch, buf2, 0, 0);
         snprintf(buf3, sizeof(buf3), "%s %s", buf2, buf);
@@ -675,10 +675,9 @@ static void shadow_dragons_live() {
 
 /* For announcing the sounds of battle to nearby rooms */
 void impact_sound(struct char_data *ch, const char *mssg) {
-    auto room = ch->getRoom();
-    for (auto &[dir, e] : room->getDirections()) {
-        if (CAN_GO(ch, static_cast<int>(dir)))
-            send_to_room(e.to_room, "%s", mssg);
+    for (auto &[dir, e] : ch->location.getExits()) {
+        if (IS_SET(e.exit_info, EX_CLOSED)) continue;
+        e.sendText(mssg);
     }
 }
 
@@ -1113,7 +1112,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
 
             vict = FIGHTING(ch);
             sprintf(buf, "%s", GET_NAME(vict));
-            if (ch->getLocation() == vict->getLocation() && !MOB_FLAGGED(ch, MOB_DUMMY) && !AFF_FLAGGED(ch, AFF_KNOCKED) &&
+            if (ch->location == vict->location && !MOB_FLAGGED(ch, MOB_DUMMY) && !AFF_FLAGGED(ch, AFF_KNOCKED) &&
                 GET_POS(ch) != POS_SITTING && GET_POS(ch) != POS_RESTING && GET_POS(ch) != POS_SLEEPING) {
 
                 if (IS_NPC(ch) && rand_number(1, 30) <= 12)
@@ -1440,13 +1439,12 @@ static void make_pcorpse(struct char_data *ch) {
     /* This handles how the corpse is viewed - Iovan */
     handle_corpse_condition(corpse, ch);
 
-    auto r = ch->getRoom();
     if (AFF_FLAGGED(ch, AFF_ASHED)) {
         act("@WSome ashes fall off the corpse.@n", true, ch, nullptr, nullptr, TO_ROOM);
         int ashcount = rand_number(1, 3);
         while(ashcount--) {
             auto ashes = read_object(1305, VIRTUAL);
-            obj_to_room(ashes, r);
+            ashes->setLocation(ch);
         }
     }
 
@@ -1762,12 +1760,10 @@ static void change_alignment(struct char_data *ch, struct char_data *victim) {
      }*/
 }
 
-
 void death_cry(struct char_data *ch) {
-    auto room = ch->getRoom();
-    for (auto &[dir, e] : room->getDirections()) {
-        if (CAN_GO(ch, static_cast<int>(dir)))
-            send_to_room(e.to_room, "Your blood freezes as you hear someone's death cry.\r\n");
+    for (auto &[dir, e] : ch->location.getExits()) {
+        if (IS_SET(e.exit_info, EX_CLOSED)) continue;
+        e.sendText("Your blood freezes as you hear someone's death cry.\r\n");
     }
 }
 
@@ -1999,7 +1995,7 @@ void raw_kill(struct char_data *ch, struct char_data *killer) {
         ch->modCurVitalDam(CharVital::health, 1);
         extract_char(ch);
     } else {
-        if (!AFF_FLAGGED(ch, AFF_SPIRIT) && !ch->getWhereFlag(WhereFlag::pendulum_past) &&
+        if (!AFF_FLAGGED(ch, AFF_SPIRIT) && !ch->location.getWhereFlag(WhereFlag::pendulum_past) &&
             (ch->getRoomVnum() < 17900 || ch->getRoomVnum() > 17999)) {
             if (!PLR_FLAGGED(ch, PLR_ABSORBED)) {
                 make_pcorpse(ch);
@@ -2111,10 +2107,10 @@ void die(struct char_data *ch, struct char_data *killer) {
         }
         for(auto f : {PLR_KILLER, PLR_THIEF}) ch->player_flags.set(f, false);
         for(auto f : {AFF_KNOCKED, AFF_SLEEP, AFF_PARALYZE}) ch->affect_flags.set(f, false);
-        if (!AFF_FLAGGED(ch, AFF_SPIRIT) && !ch->getWhereFlag(WhereFlag::pendulum_past) && !ch->is_newbie()) {
+        if (!AFF_FLAGGED(ch, AFF_SPIRIT) && !ch->location.getWhereFlag(WhereFlag::pendulum_past) && !ch->is_newbie()) {
             if (ch->getRoomVnum() >= 2002 && ch->getRoomVnum() <= 2011) {
                 ch->setBaseStat("death_time", time(nullptr));
-            } else if (ch->getWhereFlag(WhereFlag::afterlife) || ch->getRoomFlag(ROOM_HELL)) {
+            } else if (ch->location.getWhereFlag(WhereFlag::afterlife) || ch->location.getRoomFlag(ROOM_HELL)) {
                 send_to_char(ch, "Your soul is saved from destruction by King Yemma. Why? Who knows.\r\n");
             } else if (IN_ARENA(ch)) {
                 cleanup_arena_watch(ch);
@@ -2304,7 +2300,7 @@ void group_gain(struct char_data *ch, struct char_data *victim) {
     if (!(k = ch->master))
         k = ch;
 
-    if (AFF_FLAGGED(k, AFF_GROUP) && (k->getLocation() == ch->getLocation())) {
+    if (AFF_FLAGGED(k, AFF_GROUP) && (k->location == ch->location)) {
         tot_levels = GET_LEVEL(k);
         tot_members = 1;
     } else {
@@ -2313,7 +2309,7 @@ void group_gain(struct char_data *ch, struct char_data *victim) {
     }
 
     for (f = k->followers; f; f = f->next)
-        if (AFF_FLAGGED(f->follower, AFF_GROUP) && f->follower->getLocation() == ch->getLocation()) {
+        if (AFF_FLAGGED(f->follower, AFF_GROUP) && f->follower->location == ch->location) {
             if (!IS_WEIGHTED(f->follower)) {
                 tot_levels += GET_LEVEL(f->follower);
                 tot_members++;
@@ -2347,7 +2343,7 @@ void group_gain(struct char_data *ch, struct char_data *victim) {
         base = 0;
 
     /*
-    if (AFF_FLAGGED(k, AFF_GROUP) && k->getLocation() == ch->getLocation()) {
+    if (AFF_FLAGGED(k, AFF_GROUP) && k->location == ch->location) {
      if (!IS_WEIGHTED(k)) {
       perform_group_gain(k, base, victim);
      } else if (k != ch && (k->getEffMaxPL()) >= (ch->getEffMaxPL()) * 0.5) {
@@ -2366,7 +2362,7 @@ void group_gain(struct char_data *ch, struct char_data *victim) {
     perform_group_gain(k, base, victim);
 
     for (f = k->followers; f; f = f->next) {
-        if (AFF_FLAGGED(f->follower, AFF_GROUP) && f->follower->getLocation() == ch->getLocation()) {
+        if (AFF_FLAGGED(f->follower, AFF_GROUP) && f->follower->location == ch->location) {
             //if ((f->follower->getEffMaxPL()) >= GET_MAX_HIT(ch) * 0.5)
             perform_group_gain(f->follower, base, victim);
         }

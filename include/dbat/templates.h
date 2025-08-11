@@ -455,6 +455,18 @@ public:
     {
         return flags.size();
     }
+
+    std::vector<std::string> getAllFlags() const {
+        std::vector<std::string> flag_names;
+        for (const auto& flag : flags) {
+            flag_names.push_back(fmt::format("{}", flag));
+        }
+        return flag_names;
+    }
+
+    std::string getFlagNames(const std::string& delim = ", ") const {
+        return fmt::format("{}", fmt::join(getAllFlags(), delim));
+    }
 };
 
 // Function to collect pointers to objects within a vnum range from a map

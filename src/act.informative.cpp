@@ -33,7 +33,6 @@
 #include "dbat/transformation.h"
 #include "dbat/area.h"
 #include "dbat/random.h"
-#include "dbat/bitarray.h"
 
 /* local functions */
 static void gen_map(struct char_data *ch, int num);
@@ -206,7 +205,7 @@ static double terrain_bonus(struct char_data *ch) {
 
     double bonus = 0.0;
 
-    switch (ch->getLocationTileType()) {
+    switch (ch->location.getTileType()) {
         case SECT_FOREST:
             bonus += 0.5;
             break;
@@ -224,7 +223,7 @@ static double terrain_bonus(struct char_data *ch) {
             break;
     }
 
-    if (ch->getWhereFlag(WhereFlag::space)) {
+    if (ch->location.getWhereFlag(WhereFlag::space)) {
         bonus += -0.5;
     }
 
@@ -268,7 +267,7 @@ static void search_room(struct char_data *ch) {
     reveal_hiding(ch, 0);
     act("@y$n@Y begins searching the room carefully.@n", true, ch, nullptr, nullptr, TO_ROOM);
     WAIT_STATE(ch, PULSE_1SEC);
-    auto people = ch->getLocationPeople();
+    auto people = ch->location.getPeople();
     for (auto t : filter_raw(people)) {
         vict = t;
         if (AFF_FLAGGED(vict, AFF_HIDE) && vict != ch) {
@@ -297,7 +296,7 @@ static void search_room(struct char_data *ch) {
             }
         }
     }
-    auto loco = ch->getLocationObjects();
+    auto loco = ch->location.getObjects();
     for (auto obj : filter_raw(loco)) {
         if (OBJ_FLAGGED(obj, ITEM_BURIED) && perc * bonus > rand_number(50, 200)) {
             act("@YYou uncover @y$p@Y, which had been burried here.@n", true, ch, obj, nullptr, TO_CHAR);
@@ -447,7 +446,7 @@ ACMD(do_table) {
         return;
     }
 
-    if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->getLocationObjects()))) {
+    if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->location.getObjects()))) {
         send_to_char(ch, "You don't see that table here.\r\n");
         return;
     }
@@ -646,13 +645,13 @@ ACMD(do_post) {
         return;
     }
 
-    if (ch->getRoomFlag(ROOM_GARDEN1) || ch->getRoomFlag(ROOM_GARDEN2)) {
+    if (ch->location.getRoomFlag(ROOM_GARDEN1) || ch->location.getRoomFlag(ROOM_GARDEN2)) {
         send_to_char(ch, "You can not post on things in a garden.\r\n");
         return;
     }
 
     if (!*arg2) {
-        const auto tile = ch->getLocationTileType();
+        const auto tile = ch->location.getTileType();
         if (tile != SECT_INSIDE && tile != SECT_CITY) {
             send_to_char(ch, "You are not near any general structure you can post it on.\r\n");
             return;
@@ -665,7 +664,7 @@ ACMD(do_post) {
         return;
     }
 
-    if (!(obj2 = get_obj_in_list_vis(ch, arg2, nullptr, ch->getLocationObjects()))) {
+    if (!(obj2 = get_obj_in_list_vis(ch, arg2, nullptr, ch->location.getObjects()))) {
         send_to_char(ch, "You can't seem to find the thing you want to post it on.\r\n");
         return;
     }
@@ -724,7 +723,7 @@ ACMD(do_play) {
     }
 
     auto sitting = [ch](const auto& o) { return GET_OBJ_VNUM(o) == GET_OBJ_VNUM(SITS(ch)) - 4;};
-    obj2 = ch->getRoom()->findObject(sitting);
+    obj2 = ch->location.findObject(sitting);
 
     if (obj2 == nullptr) {
         send_to_char(ch, "Your table is missing. Inform an immortal of this problem.\r\n");
@@ -765,7 +764,7 @@ ACMD(do_nickname) {
         struct obj_data *ship = nullptr, *next_obj = nullptr, *ship2 = nullptr;
         int found = false;
         auto is_ship = [](const auto& o) { return GET_OBJ_VNUM(o) >= 45000 && GET_OBJ_VNUM(o) <= 45999;};
-        if(ship2 = ch->getRoom()->findObject(is_ship)) {
+        if(ship2 = ch->location.findObject(is_ship)) {
             found = true;
         }
         if (found == true) {
@@ -1036,20 +1035,18 @@ static void draw_open_exit(char map[9][10], int x, int y, int door, int sect, do
     }
 }
 
-static void map_draw_room(char map[9][10], int x, int y, room_rnum rnum, struct char_data *ch) {
-    auto room = get_room(rnum);
-    for (auto &[door, e] : room->getDirections()) {
-        auto dest = e.getDestination();
+static void map_draw_room(char map[9][10], int x, int y, Destination& node, struct char_data *ch) {
 
+    for (auto &[door, e] : node.getExits()) {
         bool isClosed = IS_SET(e.exit_info, EX_CLOSED);
         bool isSecret = IS_SET(e.exit_info, EX_SECRET);
 
         if (isClosed && !isSecret) {
             draw_closed_exit(map, x, y, static_cast<int>(door));
         } else if (!isClosed) {
-            auto sect = static_cast<int>(dest->sector_type);
-            double geffect = dest->ground_effect;
-            double waterEnv = dest->getEnvironment(ENV_WATER);
+            auto sect = static_cast<int>(e.getSectorType());
+            double geffect = e.getGroundEffect();
+            double waterEnv = e.getEnvironment(ENV_WATER);
             draw_open_exit(map, x, y, static_cast<int>(door), sect, geffect, waterEnv);
         }
     }
@@ -1083,7 +1080,7 @@ static void initialize_map(char map[9][10]) {
 }
 
 static void replace_map_symbols(char *buf) {
-    const char *search_pairs[][2] = {
+    static const char *search_pairs[][2] = {
         {"x", "@RX"}, {"&", "@m$"}, {"*", "@m#"}, {"+", "@c~"}, {"s", "@CS"},
         {"i", "@wI"}, {"(", "@WC"}, {"^", "@DM"}, {"h", "@yH"}, {"`", "@BW"},
         {"=", "@bU"}, {"p", "@GP"}, {"f", "@gF"}, {"!", "@YD"}, {"-", "@w:"},
@@ -1121,39 +1118,41 @@ static void gen_map(struct char_data *ch, int num) {
     }
 
     initialize_map(map);
-    auto room = ch->getRoom();
-    map_draw_room(map, 4, 4, ch->getRoomVnum(), ch);
+    // Create a fake Destination for our start node.
+    Destination start;
+    start.unit = ch->location.unit;
+    start.position = ch->location.position;
 
-    for (int door = 0; door < NUM_OF_DIRS; door++) {
-        auto d = room->dir_option[door];
-        if (!d || EXIT_FLAGGED(d, EX_CLOSED)) continue;
-        auto dest = d->getDestination();
-        if (!dest) continue;
+    map_draw_room(map, 4, 4, start, ch);
+
+    auto exits = ch->location.getExits();
+
+    for (auto &[door, e] : exits) {
 
         switch (door) {
-            case NORTH:
-                map_draw_room(map, 4, 3, d->to_room, ch);
+            case Direction::north:
+                map_draw_room(map, 4, 3, e, ch);
                 break;
-            case EAST:
-                map_draw_room(map, 5, 4, d->to_room, ch);
+            case Direction::east:
+                map_draw_room(map, 5, 4, e, ch);
                 break;
-            case SOUTH:
-                map_draw_room(map, 4, 5, d->to_room, ch);
+            case Direction::south:
+                map_draw_room(map, 4, 5, e, ch);
                 break;
-            case WEST:
-                map_draw_room(map, 3, 4, d->to_room, ch);
+            case Direction::west:
+                map_draw_room(map, 3, 4, e, ch);
                 break;
-            case NORTHEAST:
-                map_draw_room(map, 5, 3, d->to_room, ch);
+            case Direction::northeast:
+                map_draw_room(map, 5, 3, e, ch);
                 break;
-            case NORTHWEST:
-                map_draw_room(map, 3, 3, d->to_room, ch);
+            case Direction::northwest:
+                map_draw_room(map, 3, 3, e, ch);
                 break;
-            case SOUTHEAST:
-                map_draw_room(map, 5, 5, d->to_room, ch);
+            case Direction::southeast:
+                map_draw_room(map, 5, 5, e, ch);
                 break;
-            case SOUTHWEST:
-                map_draw_room(map, 3, 5, d->to_room, ch);
+            case Direction::southwest:
+                map_draw_room(map, 3, 5, e, ch);
                 break;
         }
     }
@@ -1167,42 +1166,42 @@ static void gen_map(struct char_data *ch, int num) {
         switch (i) {
             case 2:
                 sprintf(buf2, "@w       @w|%s@w|           %s",
-                        room->dir_option[0] && !EXIT_FLAGGED(room->dir_option[0], EX_SECRET) ?
-                        (EXIT_FLAGGED(room->dir_option[0], EX_CLOSED) ? " @rN " : " @CN ") : "   ", map[i]);
+                        exits.contains(Direction::north) && !EXIT_FLAGGED(&exits.at(Direction::north), EX_SECRET) ?
+                        (EXIT_FLAGGED(&exits.at(Direction::north), EX_CLOSED) ? " @rN " : " @CN ") : "   ", map[i]);
                 break;
             case 3:
                 sprintf(buf2, "@w @w|%s@w| |%s@w| |%s@w|     %s",
-                        room->dir_option[6] && !EXIT_FLAGGED(room->dir_option[6], EX_SECRET) ?
-                        (EXIT_FLAGGED(room->dir_option[6], EX_CLOSED) ? " @rNW" : " @CNW") : "   ",
-                        room->dir_option[4] && !EXIT_FLAGGED(room->dir_option[4], EX_SECRET) ?
-                        (EXIT_FLAGGED(room->dir_option[4], EX_CLOSED) ? " @yU " : " @YU ") : "   ",
-                        room->dir_option[7] && !EXIT_FLAGGED(room->dir_option[7], EX_SECRET) ?
-                        (EXIT_FLAGGED(room->dir_option[7], EX_CLOSED) ? "@rNE " : "@CNE ") : "   ", map[i]);
+                        exits.contains(Direction::northwest) && !EXIT_FLAGGED(&exits.at(Direction::northwest), EX_SECRET) ?
+                        (EXIT_FLAGGED(&exits.at(Direction::northwest), EX_CLOSED) ? " @rNW" : " @CNW") : "   ",
+                        exits.contains(Direction::up) && !EXIT_FLAGGED(&exits.at(Direction::up), EX_SECRET) ?
+                        (EXIT_FLAGGED(&exits.at(Direction::up), EX_CLOSED) ? " @yU " : " @YU ") : "   ",
+                        exits.contains(Direction::northeast) && !EXIT_FLAGGED(&exits.at(Direction::northeast), EX_SECRET) ?
+                        (EXIT_FLAGGED(&exits.at(Direction::northeast), EX_CLOSED) ? "@rNE " : "@CNE ") : "   ", map[i]);
                 break;
             case 4:
                 sprintf(buf2, "@w @w|%s@w| |%s@w| |%s@w|     %s",
-                        room->dir_option[3] && !EXIT_FLAGGED(room->dir_option[3], EX_SECRET) ?
-                        (EXIT_FLAGGED(room->dir_option[3], EX_CLOSED) ? "  @rW" : "  @CW") : "   ",
-                        room->dir_option[10] && !EXIT_FLAGGED(room->dir_option[10], EX_SECRET) ?
-                        (EXIT_FLAGGED(room->dir_option[10], EX_CLOSED) ? " @rI " : " @mI ") :
-                        (room->dir_option[11] && !EXIT_FLAGGED(room->dir_option[11], EX_SECRET) ?
-                        (EXIT_FLAGGED(room->dir_option[11], EX_CLOSED) ? "@rOUT" : "@mOUT") : "@r{ }"),
-                        room->dir_option[1] && !EXIT_FLAGGED(room->dir_option[1], EX_SECRET) ?
-                        (EXIT_FLAGGED(room->dir_option[1], EX_CLOSED) ? "@rE  " : "@CE  ") : "   ", map[i]);
+                        exits.contains(Direction::west) && !EXIT_FLAGGED(&exits.at(Direction::west), EX_SECRET) ?
+                        (EXIT_FLAGGED(&exits.at(Direction::west), EX_CLOSED) ? "  @rW" : "  @CW") : "   ",
+                        exits.contains(Direction::down) && !EXIT_FLAGGED(&exits.at(Direction::down), EX_SECRET) ?
+                        (EXIT_FLAGGED(&exits.at(Direction::down), EX_CLOSED) ? " @rI " : " @mI ") :
+                        (exits.contains(Direction::outside) && !EXIT_FLAGGED(&exits.at(Direction::outside), EX_SECRET) ?
+                        (EXIT_FLAGGED(&exits.at(Direction::outside), EX_CLOSED) ? "@rOUT" : "@mOUT") : "@r{ }"),
+                        exits.contains(Direction::east) && !EXIT_FLAGGED(&exits.at(Direction::east), EX_SECRET) ?
+                        (EXIT_FLAGGED(&exits.at(Direction::east), EX_CLOSED) ? "@rE  " : "@CE  ") : "   ", map[i]);
                 break;
             case 5:
                 sprintf(buf2, "@w @w|%s@w| |%s@w| |%s@w|     %s",
-                        room->dir_option[9] && !EXIT_FLAGGED(room->dir_option[9], EX_SECRET) ?
-                        (EXIT_FLAGGED(room->dir_option[9], EX_CLOSED) ? " @rSW" : " @CSW") : "   ",
-                        room->dir_option[5] && !EXIT_FLAGGED(room->dir_option[5], EX_SECRET) ?
-                        (EXIT_FLAGGED(room->dir_option[5], EX_CLOSED) ? " @yD " : " @YD ") : "   ",
-                        room->dir_option[8] && !EXIT_FLAGGED(room->dir_option[8], EX_SECRET) ?
-                        (EXIT_FLAGGED(room->dir_option[8], EX_CLOSED) ? "@rSE " : "@CSE ") : "   ", map[i]);
+                        exits.contains(Direction::southwest) && !EXIT_FLAGGED(&exits.at(Direction::southwest), EX_SECRET) ?
+                        (EXIT_FLAGGED(&exits.at(Direction::southwest), EX_CLOSED) ? " @rSW" : " @CSW") : "   ",
+                        exits.contains(Direction::down) && !EXIT_FLAGGED(&exits.at(Direction::down), EX_SECRET) ?
+                        (EXIT_FLAGGED(&exits.at(Direction::down), EX_CLOSED) ? " @yD " : " @YD ") : "   ",
+                        exits.contains(Direction::southeast) && !EXIT_FLAGGED(&exits.at(Direction::southeast), EX_SECRET) ?
+                        (EXIT_FLAGGED(&exits.at(Direction::southeast), EX_CLOSED) ? "@rSE " : "@CSE ") : "   ", map[i]);
                 break;
             case 6:
                 sprintf(buf2, "@w       @w|%s@w|           %s",
-                        room->dir_option[2] && !EXIT_FLAGGED(room->dir_option[2], EX_SECRET) ?
-                        (EXIT_FLAGGED(room->dir_option[2], EX_CLOSED) ? " @rS " : " @CS ") : "   ", map[i]);
+                        exits.contains(Direction::south) && !EXIT_FLAGGED(&exits.at(Direction::south), EX_SECRET) ?
+                        (EXIT_FLAGGED(&exits.at(Direction::south), EX_CLOSED) ? " @rS " : " @CS ") : "   ", map[i]);
                 break;
         }
 
@@ -1257,7 +1256,7 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
         spotted = true;
     }
 
-    const auto tile = obj->getLocationTileType();
+    const auto tile = obj->location.getTileType();
     switch (mode) {
         case SHOW_OBJ_LONG:
             /*
@@ -1276,7 +1275,7 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
                 send_to_char(ch, "@D(@YBeing Used@D)@w");
             }
             if (GET_OBJ_TYPE(obj) == ITEM_PLANT &&
-                (obj->getRoomFlag(ROOM_GARDEN1) || obj->getRoomFlag(ROOM_GARDEN2))) {
+                (obj->location.getRoomFlag(ROOM_GARDEN1) || obj->location.getRoomFlag(ROOM_GARDEN2))) {
                 see_plant(obj, ch);
                 return;
             }
@@ -2264,7 +2263,7 @@ static void list_one_char(struct char_data *i, struct char_data *ch) {
                 send_to_char(ch, "@rYOU@w");
                 count = true;
             } else {
-                if (i->getLocation() == FIGHTING(i)->getLocation()) {
+                if (i->location == FIGHTING(i)->location) {
                     send_to_char(ch, "%s", GET_ADMLEVEL(ch) ? GET_NAME(FIGHTING(i)) : (readIntro(ch, FIGHTING(i)) == 1
                                                                                        ? get_i_name(ch, FIGHTING(i))
                                                                                        : LRACE(FIGHTING(i))));
@@ -2305,7 +2304,7 @@ static void list_one_char(struct char_data *i, struct char_data *ch) {
             if (FIGHTING(i) == ch)
                 send_to_char(ch, "@rYOU@w!");
             else {
-                if (i->getLocation() == FIGHTING(i)->getLocation())
+                if (i->location == FIGHTING(i)->location)
                     send_to_char(ch, "%s!", GET_ADMLEVEL(ch) ? GET_NAME(FIGHTING(i)) : (readIntro(ch, FIGHTING(i)) == 1
                                                                                         ? get_i_name(ch, FIGHTING(i))
                                                                                         : LRACE(FIGHTING(i))));
@@ -2463,7 +2462,7 @@ static void list_char_to_char(const std::vector<std::weak_ptr<char_data>>& list,
             list_one_char(i, ch);
             send_to_char(ch, "@n");
 
-        } else if (ch->getLocationIsDark() && !CAN_SEE_IN_DARK(ch) &&
+        } else if (ch->location.getIsDark() && !CAN_SEE_IN_DARK(ch) &&
                    AFF_FLAGGED(i, AFF_INFRAVISION)) {
             send_to_char(ch, "@wYou see a pair of glowing red eyes looking your way.@n\r\n");
         }
@@ -2493,7 +2492,7 @@ static void do_auto_exits(struct room_data *room, struct char_data *ch, int exit
         send_to_char(ch, "@D------------------------------------------------------------------------@n\r\n");
     }
 
-    auto loc = ch->getLocation();
+    auto loc = ch->location;
 
     if (exit_mode == EXIT_NORMAL && !space && loc == room) {
         send_to_char(ch, "@D------------------------------------------------------------------------@n\r\n");
@@ -2523,45 +2522,41 @@ static void do_auto_exits(struct room_data *room, struct char_data *ch, int exit
             return;
         }
 
-        for (int door = 0; door < NUM_OF_DIRS; ++door) {
-            auto d = room->dir_option[door];
-            if (!d) continue;
-            auto dest = d->getDestination();
-            if (!dest) continue;
-
-            if (admVision || (!IS_SET(d->exit_info, EX_CLOSED))) {
+        for (auto& [d, e] : room->getDirections()) {
+            auto door = static_cast<int>(d);
+            if (admVision || (!IS_SET(e.exit_info, EX_CLOSED))) {
                 std::string exitStr;
                 std::string direction = dirs[door];
                 direction[0] = toupper(direction[0]);
 
                 if (admVision) {
-                    exitStr = fmt::format("@c{} @D- [@Y{}@D]@w {}.\r\n", direction, dest->getVnum(), dest->getName());
+                    exitStr = fmt::format("@c{} @D- [@Y{}@D]@w {}.\r\n", direction, e.getVnum(), e.getName());
                 } else {
-                    exitStr = fmt::format("@c{} @D-@w {}.\r\n", direction, (dest->isDark() && !CAN_SEE_IN_DARK(ch) && !has_light) ? "@bToo dark to tell.@w" : dest->getName());
+                    exitStr = fmt::format("@c{} @D-@w {}.\r\n", direction, (e.getIsDark() && !CAN_SEE_IN_DARK(ch) && !has_light) ? "@bToo dark to tell.@w" : e.getName());
                 }
 
-                if (IS_SET(d->exit_info, EX_ISDOOR) || IS_SET(d->exit_info, EX_SECRET)) {
-                    if (fname(d->keyword) == nullptr) {
+                if (IS_SET(e.exit_info, EX_ISDOOR) || IS_SET(e.exit_info, EX_SECRET)) {
+                    if (fname(e.keyword.c_str()) == nullptr) {
                         send_to_char(ch, "@RREPORT THIS ERROR IMMEDIATELY FOR DIRECTION %s@n\r\n", direction.c_str());
                         basic_mud_log("ERROR: %s found error direction %s at room %d", direction.c_str(), GET_NAME(ch), ch->getRoomVnum());
                         return;
                     }
                     exitStr += fmt::format("The {}{} {} {} {}{}.\r\n",
-                                           IS_SET(d->exit_info, EX_SECRET) ? "@rsecret@w " : "",
-                                           (d->keyword && strcasecmp(fname(d->keyword), "undefined")) ? fname(d->keyword) : "opening",
-                                           strstr(fname(d->keyword), "s ") ? "are" : "is",
-                                           IS_SET(d->exit_info, EX_CLOSED) ? "closed" : "open",
-                                           IS_SET(d->exit_info, EX_LOCKED) ? "and locked" : "and unlocked",
-                                           IS_SET(d->exit_info, EX_PICKPROOF) ? " (pickproof)" : "");
+                                           IS_SET(e.exit_info, EX_SECRET) ? "@rsecret@w " : "",
+                                           (!e.keyword.empty() && strcasecmp(fname(e.keyword.c_str()), "undefined")) ? fname(e.keyword.c_str()) : "opening",
+                                           strstr(fname(e.keyword.c_str()), "s ") ? "are" : "is",
+                                           IS_SET(e.exit_info, EX_CLOSED) ? "closed" : "open",
+                                           IS_SET(e.exit_info, EX_LOCKED) ? "and locked" : "and unlocked",
+                                           IS_SET(e.exit_info, EX_PICKPROOF) ? " (pickproof)" : "");
                 }
 
                 exitStrings[door] = exitStr;
-            } else if (CONFIG_DISP_CLOSED_DOORS && !IS_SET(d->exit_info, EX_SECRET)) {
+            } else if (CONFIG_DISP_CLOSED_DOORS && !IS_SET(e.exit_info, EX_SECRET)) {
                 std::string direction = dirs[door];
                 direction[0] = toupper(direction[0]);
                 exitStrings[door] = fmt::format("@c{} @D-@w The {} appears @rclosed.@n\r\n",
                                                 direction,
-                                                (d->keyword) ? fname(d->keyword) : "opening");
+                                                (!e.keyword.empty() && strcasecmp(fname(e.keyword.c_str()), "undefined")) ? fname(e.keyword.c_str()) : "opening");
             }
         }
 
@@ -2609,13 +2604,11 @@ static void do_auto_exits2(struct room_data *room, struct char_data *ch) {
 
     send_to_char(ch, "\nExits: ");
 
-    for (door = 0; door < NUM_OF_DIRS; door++) {
-        auto d = room->dir_option[door];
-        if(!d) continue;
-        auto dest = d->getDestination();
-        if(!dest) continue;
-        if (EXIT_FLAGGED(d, EX_CLOSED))
+    for (auto& [d, e] : room->getDirections()) {
+        if (EXIT_FLAGGED(&e, EX_CLOSED))
             continue;
+        
+        door = static_cast<int>(d);
 
         send_to_char(ch, "%s ", abbr_dirs[door]);
         slen++;
@@ -2731,7 +2724,7 @@ static void display_room_info(struct room_data *rm, struct char_data *ch) {
 static void display_room_flags(struct room_data *rm, struct char_data *ch) {
     char buf[MAX_STRING_LENGTH], buf2[MAX_STRING_LENGTH], buf3[MAX_STRING_LENGTH];
 
-    sprintbitarray(rm->room_flags.getAll(), room_bits, sizeof(room_bits), buf);
+    sprintf(buf, "%s", rm->room_flags.getFlagNames().c_str());
     sprinttype(static_cast<int>(rm->sector_type), sector_types, buf2, sizeof(buf2));
 
     if (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_NODEC)) {
@@ -2933,33 +2926,23 @@ void look_at_room(struct room_data *rm, struct char_data *ch, int ignore_brief) 
 
 
 static void look_in_direction(struct char_data *ch, int dir) {
-    auto r = ch->getRoom();
-    if(!r) {
-        send_to_char(ch, "Nothing special there...\r\n");
-        return;
-    }
-    auto d = r->dir_option[dir];
-    if(!d) {
-        send_to_char(ch, "Nothing special there...\r\n");
-        return;
-    }
-    auto dest = d->getDestination();
-    if(!dest) {
+    auto ex = ch->location.getExit(static_cast<Direction>(dir));
+    if(!ex) {
         send_to_char(ch, "Nothing special there...\r\n");
         return;
     }
 
-    if (d->general_description)
-        send_to_char(ch, "%s", d->general_description);
+    if (ex->general_description.empty())
+        send_to_char(ch, "%s", ex->general_description.c_str());
 
     bool canSeeRoom = false;
 
-    if (EXIT_FLAGGED(d, EX_ISDOOR) && d->keyword) {
-        if (!EXIT_FLAGGED(d, EX_SECRET) &&
-            EXIT_FLAGGED(d, EX_CLOSED))
-            send_to_char(ch, "The %s is closed.\r\n", fname(d->keyword));
-        else if (!EXIT_FLAGGED(d, EX_CLOSED)) {
-            send_to_char(ch, "The %s is open.\r\n", fname(d->keyword));
+    if (EXIT_FLAGGED(ex, EX_ISDOOR) && !ex->keyword.empty()) {
+        if (!EXIT_FLAGGED(ex, EX_SECRET) &&
+            EXIT_FLAGGED(ex, EX_CLOSED))
+            send_to_char(ch, "The %s is closed.\r\n", fname(ex->keyword.c_str()));
+        else if (!EXIT_FLAGGED(ex, EX_CLOSED)) {
+            send_to_char(ch, "The %s is open.\r\n", fname(ex->keyword.c_str()));
             canSeeRoom = true;
         }
     } else {
@@ -2968,20 +2951,22 @@ static void look_in_direction(struct char_data *ch, int dir) {
 
     if(canSeeRoom) {
         send_to_char(ch, "You peek over and see:\r\n");
-        ch->lookAtLocation(dest);
+        ch->lookAtLocation(*ex);
     }
 }
 
 static void handle_portal(struct char_data *ch, struct obj_data *obj) {
     if (!OBJVAL_FLAGGED(obj, CONT_CLOSEABLE)) {
         int portal_appear = GET_OBJ_VAL(obj, VAL_PORTAL_APPEAR);
-        auto dest = get_room(GET_OBJ_VAL(obj, VAL_PORTAL_DEST));
+
+        Destination d;
+        d.unit = get_room(GET_OBJ_VAL(obj, VAL_PORTAL_DEST));
 
         if (portal_appear < 0) {
-            if (!dest || (dest->isDark() && !CAN_SEE_IN_DARK(ch) && !PLR_FLAGGED(ch, PLR_AURALIGHT))) {
+            if (!d || (d.getIsDark() && !CAN_SEE_IN_DARK(ch) && !PLR_FLAGGED(ch, PLR_AURALIGHT))) {
                 send_to_char(ch, "You see nothing but infinite darkness...\r\n");
             } else {
-                send_to_char(ch, "After seconds of concentration you see the image of %s.\r\n", dest->getName());
+                send_to_char(ch, "After seconds of concentration you see the image of %s.\r\n", d.getName());
             }
         } else if (portal_appear < MAX_PORTAL_TYPES) {
             send_to_char(ch, "%s\r\n", portal_appearance[portal_appear]);
@@ -2996,15 +2981,17 @@ static void handle_vehicle(struct char_data *ch, struct obj_data *obj) {
         send_to_char(ch, "It is closed.\r\n");
         return;
     }
+    
+    Destination d;
+    d.unit = get_room(GET_OBJ_VAL(obj, VAL_VEHICLE_DEST));
 
-    auto vehicle_inside = get_room(GET_OBJ_VAL(obj, VAL_VEHICLE_DEST));
-    if (!vehicle_inside) {
+    if (!d) {
         send_to_char(ch, "You cannot see inside that.\r\n");
-    } else if (vehicle_inside->isDark() && !CAN_SEE_IN_DARK(ch) && !PLR_FLAGGED(ch, PLR_AURALIGHT)) {
+    } else if (d.getIsDark() && !CAN_SEE_IN_DARK(ch) && !PLR_FLAGGED(ch, PLR_AURALIGHT)) {
         send_to_char(ch, "It is pitch black...\r\n");
     } else {
         send_to_char(ch, "You look inside and see:\r\n");
-        ch->lookAtLocation(vehicle_inside);
+        ch->lookAtLocation(d);
     }
 }
 
@@ -3205,7 +3192,7 @@ static void examine_item(struct char_data *ch, struct obj_data *obj, const char 
 
 static void handle_board_read(struct char_data *ch, char *arg) {
     struct obj_data *obj = ch->findObject([](const auto &o) { return GET_OBJ_TYPE(o) == ITEM_BOARD; });
-    if (!obj) obj = ch->getRoom()->findObject([](const auto &o) { return GET_OBJ_TYPE(o) == ITEM_BOARD; });
+    if (!obj) obj = ch->location.findObject([](const auto &o) { return GET_OBJ_TYPE(o) == ITEM_BOARD; });
 
     if (!obj) {
         send_to_char(ch, "Read what?\r\n");
@@ -3259,7 +3246,7 @@ static void handle_look_in_inventory(struct char_data *ch, char *arg) {
             return;
         }
     }
-    auto loco = ch->getLocationObjects();
+    auto loco = ch->location.getObjects();
     for (auto obj : filter_raw(loco)) {
         if (CAN_SEE_OBJ(ch, obj) && handle_exdesc_look(ch, arg, obj->getExtraDescription(), obj)) {
             examine_item(ch, obj, arg);
@@ -3342,7 +3329,7 @@ static void look_out_window(struct char_data *ch, const char *arg) {
         return;
     }
     /* Look for any old window in the room */
-    viewport = ch->getRoom()->findObject([&](auto obj) {return GET_OBJ_TYPE(obj) == ITEM_WINDOW && isname("window", obj->getName());});
+    viewport = ch->location.findObject([&](auto obj) {return GET_OBJ_TYPE(obj) == ITEM_WINDOW && isname("window", obj->getName());});
 
     if (!viewport) {
         /* Nothing suitable to look through */
@@ -3359,13 +3346,9 @@ static void look_out_window(struct char_data *ch, const char *arg) {
         /* We are looking out of the room */
         if (GET_OBJ_VAL(viewport, VAL_WINDOW_DEFAULT_ROOM) < 0) {
             /* Look for the default "outside" room */
-            for (door = 0; door < NUM_OF_DIRS; door++) {
-                auto e = r->dir_option[door];
-                if(!e) continue;
-                auto dest = e->getDestination();
-                if(!dest) continue;
-                if(!dest->room_flags.get(ROOM_INDOORS)) {
-                    target_room = dest->getVnum();
+            for (auto& [d, e] : r->getDirections()) {
+                if(!e.getRoomFlag(ROOM_INDOORS)) {
+                    target_room = e.getVnum();
                     break;
                 }
             }
@@ -3610,11 +3593,9 @@ ACMD(do_look) {
         return;
     }
 
-    auto room = ch->getRoom();
-
-    if(room->isDark() && !CAN_SEE_IN_DARK(ch)) {
+    if(ch->location.getIsDark() && !CAN_SEE_IN_DARK(ch)) {
         send_to_char(ch, "It is pitch black...\r\n");
-        list_char_to_char(room->getPeople(), ch);    /* glowing red eyes */
+        list_char_to_char(ch->location.getPeople(), ch);    /* glowing red eyes */
         return;
     }
 
@@ -3636,7 +3617,7 @@ ACMD(do_look) {
         if (subcmd == SCMD_SEARCH) {
             search_room(ch);
         } else {
-            look_at_room(room, ch, 1);
+            ch->lookAtLocation();
             if (GET_ADMLEVEL(ch) < 1 && !AFF_FLAGGED(ch, AFF_HIDE)) {
                 //act("@w$n@w looks around the room.@n", TRUE, ch, 0, 0, TO_ROOM);
             }
@@ -3645,7 +3626,7 @@ ACMD(do_look) {
     }
     
     if(is_abbrev(arg, "moon")) {
-        auto moonlight = ch->getLocationEnvironment(ENV_MOONLIGHT);
+        auto moonlight = ch->location.getEnvironment(ENV_MOONLIGHT);
         if(moonlight < 0) {
             send_to_char(ch, "It's kinda hard to see any moons from here.\r\n");
             return;
@@ -3662,7 +3643,9 @@ ACMD(do_look) {
         return;
     }
     
-    if (is_abbrev(arg, "inside") && room->dir_option[INDIR] && !*arg2) {
+    std::optional<Destination> dir;
+
+    if (is_abbrev(arg, "inside") && (dir = ch->location.getExit(Direction::inside)) && !*arg2) {
         if (subcmd == SCMD_SEARCH)
             search_in_direction(ch, INDIR);
         else
@@ -3683,8 +3666,8 @@ ACMD(do_look) {
         look_out_window(ch, arg2);
         return;
     }
-    
-    if (is_abbrev(arg, "outside") && (subcmd == SCMD_LOOK) && !room->dir_option[OUTDIR]) {
+
+    if (is_abbrev(arg, "outside") && (subcmd == SCMD_LOOK) && !(dir = ch->location.getExit(Direction::outside))) {
         look_out_window(ch, arg2);
         return;
     }
@@ -3717,7 +3700,7 @@ ACMD(do_look) {
         struct extra_descr_data *i;
         int found = 0;
 
-        for (const auto &ex : ch->getRoom()->getExtraDescription()) {
+        for (const auto &ex : ch->location.getExtraDescription()) {
             if (!ex.keyword.starts_with(".")) {
                 send_to_char(ch, "%s%s:\r\n%s",
                              (found ? "\r\n" : ""), ex.keyword.c_str(), ex.description.c_str());
@@ -3728,8 +3711,8 @@ ACMD(do_look) {
             send_to_char(ch, "You couldn't find anything noticeable.\r\n");
         return;
     }
-    
-    if (find_exdesc(arg, ch->getRoom()->getExtraDescription())) {
+
+    if (find_exdesc(arg, ch->location.getExtraDescription())) {
         look_at_target(ch, arg, 0);
         return;
     }
@@ -4090,7 +4073,7 @@ ACMD(do_status) {
         if (PLR_FLAGGED(ch, PLR_NOSHOUT)) {
             send_to_char(ch, "         You have been @rmuted@n on public channels.\r\n");
         }
-        if (ch->getLocation() == 9) {
+        if (ch->location == 9) {
             send_to_char(ch, "         You are in punishment hell, so sad....\r\n");
         }
         if (!PRF_FLAGGED(ch, PRF_HINTS)) {
@@ -4868,7 +4851,7 @@ ACMD(do_who) {
                 hide += 1;
                 continue;
             }
-            if (who_room && (tch->getLocation() != ch->getLocation()))
+            if (who_room && (tch->location != ch->location))
                 continue;
             if (showgroup && (!tch->master || !AFF_FLAGGED(tch, AFF_GROUP)))
                 continue;
@@ -4910,7 +4893,7 @@ ACMD(do_who) {
                 continue;
             if (localwho && ch->getRoom()->zone != tch->getRoom()->zone)
                 continue;
-            if (who_room && (tch->getLocation() != ch->getLocation()))
+            if (who_room && (tch->location != ch->location))
                 continue;
             if (PRF_FLAGGED(tch, PRF_HIDE) && tch != ch && GET_ADMLEVEL(ch) < ADMLVL_IMMORT)
                 continue;
@@ -5326,21 +5309,21 @@ static void perform_immort_where(struct char_data *ch, char *arg) {
                      "Players                  Vnum    Planet        Location\r\n-------                 ------   ----------    ----------------\r\n");
         for (d = descriptor_list; d; d = d->next)
             if (IS_PLAYING(d)) {
-                if (d->character->getLocation()) {
+                if (d->character->location) {
                     planet = getPlanet(d->character->getRoomVnum());
                 } else {
                     planet = {};
                 }
                 i = (d->original ? d->original : d->character);
-                if (i && CAN_SEE(ch, i) && i->getLocation()) {
+                if (i && CAN_SEE(ch, i) && i->location) {
                     if (d->original)
                         send_to_char(ch, "%-20s - [%5d]   %s (in %s)\r\n",
                                      GET_NAME(i), d->character->getRoomVnum(),
-                                     d->character->getLocationName(), GET_NAME(d->character));
+                                     d->character->location.getName(), GET_NAME(d->character));
                     else {
                         std::string locName = getPlanetName(planet.value());
                         send_to_char(ch, "%-20s - [%5d]   %-14s %s\r\n", GET_NAME(i), i->getRoomVnum(),
-                                     locName.c_str(), i->getLocationName());
+                                     locName.c_str(), i->location.getName());
                     }
 
                 }
@@ -5350,7 +5333,7 @@ static void perform_immort_where(struct char_data *ch, char *arg) {
                GET_NAME(ch), arg);
         auto ac = characterSubscriptions.all("active");
         for (auto i : filter_raw(ac)) {
-            if (CAN_SEE(ch, i) && i->getLocation() && isname(arg, i->getName())) {
+            if (CAN_SEE(ch, i) && i->location && isname(arg, i->getName())) {
                 found = 1;
                 send_to_char(ch, "M%3d. %-25s - [%5d] %-25s", ++num, GET_NAME(i),
                              i->getRoomVnum(), i->getRoom()->getName());
@@ -6002,17 +5985,17 @@ ACMD(do_scan) {
         return;
     }
 
-    auto room = ch->getRoom();
-    if(!room) {
+    if(!ch->location) {
         send_to_char(ch, "You are nowhere.\r\n");
         return;
     }
 
-    auto darkHere = ch->getLocationIsDark();
+    auto darkHere = ch->location.getIsDark();
 
     for (i = 0; i < 10; i++) {
-        auto d = room->dir_option[i];
+        auto d = ch->location.getExit(static_cast<Direction>(i));
         if(!d) continue;
+        auto &dest = d.value();
 
         if (darkHere && (GET_ADMLEVEL(ch) < ADMLVL_IMMORT) &&
             (!AFF_FLAGGED(ch, AFF_INFRAVISION))) {
@@ -6020,46 +6003,47 @@ ACMD(do_scan) {
             continue;
         }
 
-        auto dest = d->getDestination();
         if(!dest) continue;
-        if(IS_SET(d->exit_info, EX_CLOSED)) continue;
+        if(IS_SET(dest.exit_info, EX_CLOSED)) continue;
 
         send_to_char(ch, "@w-----------------------------------------@n\r\n");
         send_to_char(ch, "          %s%s: %s %s\r\n", CCCYN(ch, C_NRM), dirnames[i],
-                     dest->getName() ? dest->getName() : "You don't think you saw what you just saw.",
+                     dest.getName() ? dest.getName() : "You don't think you saw what you just saw.",
                      CCNRM(ch, C_NRM));
         send_to_char(ch, "@W          -----------------          @n\r\n");
 
-        list_obj_to_char(dest->getObjects(), ch, SHOW_OBJ_LONG, false);
-        list_char_to_char(dest->getPeople(), ch);
-        if (dest->ground_effect >= 1 && dest->ground_effect <= 5) {
+        list_obj_to_char(dest.getObjects(), ch, SHOW_OBJ_LONG, false);
+        list_char_to_char(dest.getPeople(), ch);
+        auto ge = dest.getGroundEffect();
+        if (ge >= 1 && ge <= 5) {
             send_to_char(ch, "@rLava@w is pooling in someplaces here...@n\r\n");
         }
-        if (dest->ground_effect >= 6) {
+        if (ge >= 6) {
             send_to_char(ch, "@RLava@r covers pretty much the entire area!@n\r\n");
         }
         /* Check 2nd room away */
 
-        auto d2 = dest->dir_option[i];
+        auto d2 = dest.getExit(static_cast<Direction>(i));
         if(!d2) continue;
-        auto dest2 = d2->getDestination();
+        auto &dest2 = d2.value();
         if(!dest2) continue;
-        if(IS_SET(d2->exit_info, EX_CLOSED)) continue;
+        if(IS_SET(dest2.exit_info, EX_CLOSED)) continue;
 
-        if (!dest2->isDark()) {
+        if (!dest2.getIsDark()) {
             send_to_char(ch, "@w-----------------------------------------@n\r\n");
             send_to_char(ch, "          %sFar %s: %s %s\r\n", CCCYN(ch, C_NRM), dirnames[i],
-                         dest2->getName() ? dest2->getName()
+                         dest2.getName() ? dest2.getName()
                                              : "You don't think you saw what you just saw.",
                          CCNRM(ch, C_NRM));
             send_to_char(ch, "@W          -----------------          @n\r\n");
 
-            list_obj_to_char(dest2->getObjects(), ch, SHOW_OBJ_LONG, false);
-            list_char_to_char(dest2->getPeople(), ch);
-            if (dest2->ground_effect >= 1 && dest2->ground_effect <= 5) {
+            list_obj_to_char(dest2.getObjects(), ch, SHOW_OBJ_LONG, false);
+            list_char_to_char(dest2.getPeople(), ch);
+            auto ge2 = dest2.getGroundEffect();
+            if (ge2 >= 1 && ge2 <= 5) {
                 send_to_char(ch, "@rLava@w is pooling in someplaces here...@n\r\n");
             }
-            if (dest2->ground_effect >= 6) {
+            if (ge2 >= 6) {
                 send_to_char(ch, "@RLava@r covers pretty much the entire area!@n\r\n");
             }
         } else {
@@ -6289,14 +6273,13 @@ static void search_in_direction(struct char_data *ch, int dir) {
     send_to_char(ch, "You search for secret doors.\r\n");
     act("$n searches the area intently.", true, ch, nullptr, nullptr, TO_ROOM);
 
-    auto r = ch->getRoom();
-    auto e = r->dir_option[dir];
+    auto ex = ch->location.getExit(static_cast<Direction>(dir));
 
-    if(!e) {
+    if(!ex) {
         send_to_char(ch, "There is no exit there.\r\n");
         return;
     }
-    auto dest = e->getDestination();
+    auto &dest = ex.value();
     if(!dest) {
         send_to_char(ch, "That leads nowhere.\r\n");
         return;
@@ -6309,22 +6292,22 @@ static void search_in_direction(struct char_data *ch, int dir) {
     if (IS_HALFBREED(ch))
         skill_lvl = skill_lvl + 1;
 
-    dchide = e->dchide;
+    dchide = dest.dchide;
 
     if (skill_lvl > dchide)
         check = true;
 
-    if (e->general_description &&
-        !EXIT_FLAGGED(e, EX_SECRET))
-        send_to_char(ch, e->general_description);
-    else if (!EXIT_FLAGGED(e, EX_SECRET))
+    if (!dest.general_description.empty() &&
+        !EXIT_FLAGGED(&dest, EX_SECRET))
+        send_to_char(ch, dest.general_description.c_str());
+    else if (!EXIT_FLAGGED(&dest, EX_SECRET))
         send_to_char(ch, "There is a normal exit there.\r\n");
-    else if (EXIT_FLAGGED(e, EX_ISDOOR) &&
-             EXIT_FLAGGED(e, EX_SECRET) &&
-             e->keyword && (check == true))
+    else if (EXIT_FLAGGED(&dest, EX_ISDOOR) &&
+             EXIT_FLAGGED(&dest, EX_SECRET) &&
+             !dest.keyword.empty() && (check == true))
         send_to_char(ch, "There is a hidden door keyword: '%s' %sthere.\r\n",
-                     fname(e->keyword),
-                     (EXIT_FLAGGED(e, EX_CLOSED)) ? "" : "open ");
+                     fname(dest.keyword.c_str()),
+                     (EXIT_FLAGGED(&dest, EX_CLOSED)) ? "" : "open ");
     else
         send_to_char(ch, "There is no exit there.\r\n");
 

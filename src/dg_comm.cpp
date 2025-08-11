@@ -160,7 +160,7 @@ void sub_write(char *arg, struct char_data *ch, int8_t find_invis, int targets) 
                 p = any_one_name(++p, name);
 
                 if (find_invis) obj = get_obj_in_room(ch->getRoom(), name);
-                else if (!(obj = get_obj_in_list_vis(ch, name, nullptr, ch->getLocationObjects())));
+                else if (!(obj = get_obj_in_list_vis(ch, name, nullptr, ch->location.getObjects())));
                 else if (!(obj = get_obj_in_equip_vis(ch, name, &tmp, ch->getEquipment())));
                 else obj = get_obj_in_list_vis(ch, name, nullptr, ch->getObjects());
 
@@ -185,7 +185,7 @@ void sub_write(char *arg, struct char_data *ch, int8_t find_invis, int targets) 
         sub_write_to_char(ch, tokens, otokens, type);
 
     if (IS_SET(targets, TO_ROOM)) {
-        auto people = ch->getLocationPeople();
+        auto people = ch->location.getPeople();
         for (auto to : filter_raw(people))
             if (to != ch && SENDOK(to))
                 sub_write_to_char(to, tokens, otokens, type);
@@ -276,7 +276,7 @@ void send_to_sense(int type, const char *messg, struct char_data *ch) {
         if (tch == ch) {
             continue;
         }
-        if (ch->getLocation() == tch->getLocation())
+        if (ch->location == tch->location)
             continue;
         auto obj = GET_EQ(tch, WEAR_EYE);
         if (!GET_SKILL(tch, SKILL_SENSE)) {
@@ -399,7 +399,7 @@ void send_to_scouter(const char *messg, struct char_data *ch, int num, int type)
         if (IS_ANDROID(ch)) continue;
 
         if (!obj) continue;
-        if (ch->getLocation() == tch->getLocation()) continue;
+        if (ch->location == tch->location) continue;
 
         auto scoutVal = obj->getBaseStat<int64_t>(VAL_WORN_SCOUTER);
         if (type == 0) {

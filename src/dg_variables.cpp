@@ -24,7 +24,6 @@
 #include "dbat/class.h"
 #include "dbat/races.h"
 #include "dbat/random.h"
-#include "dbat/bitarray.h"
 
 /* Utility functions */
 
@@ -293,7 +292,7 @@ find_replacement(unit_data *go, script_data *sc, trig_data *trig, UnitType type,
                     if ((o = get_object_in_equip(ch, name)));
                     else if ((o = get_obj_in_list(name, ch->getObjects())));
                     else if (IN_ROOM(ch) != NOWHERE && (c = get_char_in_room(ch->getRoom(), name)));
-                    else if ((o = get_obj_in_list(name, ch->getLocationObjects())));
+                    else if ((o = get_obj_in_list(name, ch->location.getObjects())));
                     else if ((c = get_char(name)));
                     else if ((o = get_obj(name)));
                     else if ((r = get_room(name))) {}
@@ -437,7 +436,7 @@ in the vault (vnum: 453) now and then. you can just use
 
                     if (type == MOB_TRIGGER) {
                         ch = (char_data *) go;
-                        auto people = ch->getLocationPeople();
+                        auto people = ch->location.getPeople();
                         for (auto c : filter_raw(people))
                             if ((c != ch) && valid_dg_target(c, DG_ALLOW_GODS) &&
                                 CAN_SEE(ch, c)) {
@@ -487,9 +486,8 @@ in the vault (vnum: 453) now and then. you can just use
                     } else {
                         std::vector<int> available;
                         room = get_room(in_room);
-                        for (i = 0; i < NUM_OF_DIRS; i++)
-                            if (R_EXIT(room, i))
-                                available.push_back(i);
+                        for (auto& [d, e] : room->getDirections())
+                            available.push_back(static_cast<int>(d));
 
                         if (available.empty()) {
                             *str = '\0';
@@ -737,7 +735,7 @@ in the vault (vnum: 453) now and then. you can just use
                     if (!strcasecmp(field, "name")) {
                         snprintf(str, slen, "%s", GET_NAME(c));
                     } else if (!strcasecmp(field, "next_in_room")) {
-                        if (auto people = c->getLocationPeople(); !people.empty()) {
+                        if (auto people = c->location.getPeople(); !people.empty()) {
                             auto found = false;
                             for(auto p : filter_raw(people)) {
                                 if(found) {
@@ -961,7 +959,7 @@ in the vault (vnum: 453) now and then. you can just use
                         } else
                             snprintf(str, slen, "0");
                     } else {
-                        sprintbitarray(GET_OBJ_EXTRA(o).getAll(), extra_bits, EF_ARRAY_MAX, str);
+                        snprintf(str, slen, "%s", GET_OBJ_EXTRA(o).getFlagNames().c_str());
                     }
                     break;
                 case 'h':

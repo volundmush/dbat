@@ -197,7 +197,7 @@ int call_magic(struct char_data *caster, struct char_data *cvict,
     if (!cast_mtrigger(caster, cvict, spellnum))
         return 0;
 
-    if (caster->getRoomFlag(ROOM_PEACEFUL) && GET_ADMLEVEL(caster) < ADMLVL_IMPL &&
+    if (caster->location.getRoomFlag(ROOM_PEACEFUL) && GET_ADMLEVEL(caster) < ADMLVL_IMPL &&
         (SINFO.violent || IS_SET(SINFO.routines, MAG_DAMAGE))) {
         send_to_char(caster, "A flash of white light fills the room, dispelling your violent magic!\r\n");
         act("White light from no particular source suddenly fills the room, then vanishes.", false, caster, nullptr,
@@ -334,13 +334,13 @@ void mag_objectmagic(struct char_data *ch, struct obj_data *obj,
                  * Problem : People like that behavior.
                  * Solution: We special case the area/mass spells here.
                  */
+                auto people = ch->location.getPeople();
                 if (HAS_SPELL_ROUTINE(GET_OBJ_VAL(obj, VAL_STAFF_SPELL), MAG_MASSES | MAG_AREAS)) {
-                    i = ch->getLocationPeople().size();
+                    i = people.size();
                     while (i-- > 0)
                         call_magic(ch, nullptr, nullptr, GET_OBJ_VAL(obj, VAL_STAFF_SPELL), k, CAST_STAFF, nullptr);
                 } else {
-                    auto locp = ch->getLocationPeople();
-                    for (auto blah : filter_raw(locp)) {
+                    for (auto blah : filter_raw(people)) {
                         tch = blah;
                         if (ch != tch)
                             call_magic(ch, tch, nullptr, GET_OBJ_VAL(obj, VAL_STAFF_SPELL), k, CAST_STAFF, nullptr);

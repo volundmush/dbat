@@ -81,6 +81,34 @@ enum class SubRace : uint8_t {
     android_model_sense = 2
 };
 
+/* Races */
+constexpr Race RACE_HUMAN        = Race::human;
+constexpr Race RACE_SAIYAN       = Race::saiyan;
+constexpr Race RACE_ICER         = Race::icer;
+constexpr Race RACE_KONATSU      = Race::konatsu;
+constexpr Race RACE_NAMEK        = Race::namekian;
+constexpr Race RACE_MUTANT       = Race::mutant;
+constexpr Race RACE_KANASSAN     = Race::kanassan;
+constexpr Race RACE_HALFBREED    = Race::halfbreed;
+constexpr Race RACE_BIO          = Race::bio_android;
+constexpr Race RACE_ANDROID      = Race::android;
+constexpr Race RACE_DEMON        = Race::demon;
+constexpr Race RACE_MAJIN        = Race::majin;
+constexpr Race RACE_KAI          = Race::kai;
+constexpr Race RACE_TRUFFLE      = Race::tuffle;
+constexpr Race RACE_GOBLIN       = Race::hoshijin;
+constexpr Race RACE_ANIMAL       = Race::animal;
+constexpr Race RACE_SAIBA        = Race::saiba;
+constexpr Race RACE_SERPENT      = Race::serpent;
+constexpr Race RACE_OGRE         = Race::ogre;
+constexpr Race RACE_YARDRATIAN   = Race::yardratian;
+constexpr Race RACE_ARLIAN       = Race::arlian;
+constexpr Race RACE_DRAGON       = Race::dragon;
+constexpr Race RACE_MECHANICAL   = Race::mechanical;
+constexpr Race RACE_FAERIE       = Race::spirit;
+
+constexpr int NUM_RACES = 24;
+
 enum class Sensei : uint8_t {
     commoner = 0,
     roshi = 1,
@@ -807,33 +835,7 @@ constexpr int BONUS_BMEMORY = 51;
 constexpr int MAX_BONUSES = 52;
 
 
-/* Races */
-constexpr Race RACE_HUMAN        = Race::human;
-constexpr Race RACE_SAIYAN       = Race::saiyan;
-constexpr Race RACE_ICER         = Race::icer;
-constexpr Race RACE_KONATSU      = Race::konatsu;
-constexpr Race RACE_NAMEK        = Race::namekian;
-constexpr Race RACE_MUTANT       = Race::mutant;
-constexpr Race RACE_KANASSAN     = Race::kanassan;
-constexpr Race RACE_HALFBREED    = Race::halfbreed;
-constexpr Race RACE_BIO          = Race::bio_android;
-constexpr Race RACE_ANDROID      = Race::android;
-constexpr Race RACE_DEMON        = Race::demon;
-constexpr Race RACE_MAJIN        = Race::majin;
-constexpr Race RACE_KAI          = Race::kai;
-constexpr Race RACE_TRUFFLE      = Race::tuffle;
-constexpr Race RACE_GOBLIN       = Race::hoshijin;
-constexpr Race RACE_ANIMAL       = Race::animal;
-constexpr Race RACE_SAIBA        = Race::saiba;
-constexpr Race RACE_SERPENT      = Race::serpent;
-constexpr Race RACE_OGRE         = Race::ogre;
-constexpr Race RACE_YARDRATIAN   = Race::yardratian;
-constexpr Race RACE_ARLIAN       = Race::arlian;
-constexpr Race RACE_DRAGON       = Race::dragon;
-constexpr Race RACE_MECHANICAL   = Race::mechanical;
-constexpr Race RACE_FAERIE       = Race::spirit;
 
-constexpr int NUM_RACES = 24;
 
 constexpr int ALIGN_SAINT = 0;
 constexpr int ALIGN_VALIANT = 1;

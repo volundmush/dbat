@@ -137,7 +137,7 @@ ACMD(do_geno) {
 
     vict = nullptr;
     if (!*arg || !(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM))) {
-        if (FIGHTING(ch) && FIGHTING(ch)->getLocation() == ch->getLocation()) {
+        if (FIGHTING(ch) && FIGHTING(ch)->location == ch->location) {
             vict = FIGHTING(ch);
         } else {
             send_to_char(ch, "No one around here by that name.\r\n");
@@ -240,7 +240,7 @@ ACMD(do_genki) {
 
     vict = nullptr;
     if (!*arg || !(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM))) {
-        if (FIGHTING(ch) && FIGHTING(ch)->getLocation() == ch->getLocation()) {
+        if (FIGHTING(ch) && FIGHTING(ch)->location == ch->location) {
             vict = FIGHTING(ch);
         } else {
             send_to_char(ch, "No one around here by that name.\r\n");
@@ -271,7 +271,7 @@ ACMD(do_genki) {
         improve_skill(ch, SKILL_GENKIDAMA, 2);
         return;
     }
-    auto people = ch->getLocationPeople();
+    auto people = ch->location.getPeople();
     for (auto f : filter_raw(people)) {
         friend_char = f;
         if (friend_char == ch) {
@@ -513,7 +513,7 @@ ACMD(do_blessedhammer) {
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-                    ch->getRoom()->modDamage(5);
+                    ch->location.modDamage(5);
                     improve_skill(vict, SKILL_DODGE, 0);
 
                     pcost(ch, attperc, 0);
@@ -1061,7 +1061,7 @@ ACMD(do_assist) {
         if (FIGHTING(helpee))
             opponent = FIGHTING(helpee);
         else {
-            auto people = ch->getLocationPeople();
+            auto people = ch->location.getPeople();
             for (auto opp : filter_raw(people)) {
                 if(FIGHTING(opp) == helpee) {
                     opponent = opp;
@@ -1150,7 +1150,7 @@ ACMD(do_flee) {
     if (!IS_NPC(ch)) {
         int fail = false;
         auto isMyAttack = [&](const auto&o) {return KICHARGE(o) > 0 && USER(o) == ch;};
-        if (auto obj = ch->getRoom()->findObject(isMyAttack); obj) {
+        if (auto obj = ch->location.findObject(isMyAttack); obj) {
             send_to_char(ch, "You are too busy controlling your attack!\r\n");
             return;
         }
@@ -1169,15 +1169,16 @@ ACMD(do_flee) {
         if (!*arg) {
             attempt = rand_number(0, NUM_OF_DIRS - 1);    /* Select a random direction */
         }
-        if (CAN_GO(ch, attempt)) {
+        auto att = ch->location.getExit(static_cast<Direction>(attempt));
+        if (att && !IS_SET(att->exit_info, EX_CLOSED)) {
             act("$n panics, and attempts to flee!", true, ch, nullptr, nullptr, TO_ROOM);
-            if (IS_NPC(ch) && ROOM_FLAGGED(EXIT(ch, attempt)->to_room, ROOM_NOMOB)) {
+            if (IS_NPC(ch) && att->getRoomFlag(ROOM_NOMOB)) {
                 return;
             }
             was_fighting = FIGHTING(ch);
 
             auto isWall = [&](obj_data*o) {return o->getVnum() == 79 && GET_OBJ_COST(o) == attempt;};
-            if(auto wall = ch->getRoom()->findObject(isWall); wall) {
+            if(auto wall = ch->location.findObject(isWall); wall) {
                 send_to_char(ch, "That direction has a glacial wall blocking it.\r\n");
                 return;
             }

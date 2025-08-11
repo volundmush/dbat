@@ -26,7 +26,6 @@
 #include "dbat/act.wizard.h"
 #include "dbat/races.h"
 #include "dbat/fight.h"
-#include "dbat/bitarray.h"
 #include "dbat/dg_scripts.h"
 
 /*------------------------------------------------------------------------*/
@@ -114,10 +113,10 @@ ACMD(do_oasis_oedit) {
     if (d->olc) {
         mudlog(BRF, ADMLVL_IMMORT, true,
                "SYSERR: do_oasis: Player already had olc structure.");
-        free(d->olc);
+        delete d->olc;
     }
 
-    CREATE(d->olc, struct oasis_olc_data, 1);
+    d->olc = new oasis_olc_data();
 
     /****************************************************************************/
     /** Find the zone.                                                         **/
@@ -129,7 +128,7 @@ ACMD(do_oasis_oedit) {
         /**************************************************************************/
         /** Free the descriptor's OLC structure.                                 **/
         /**************************************************************************/
-        free(d->olc);
+        delete d->olc;
         d->olc = nullptr;
         return;
     }
@@ -778,7 +777,7 @@ void oedit_disp_extra_menu(struct descriptor_data *d) {
         write_to_output(d, "@g%2d@n) %-20.20s %s", counter + 1,
                         extra_bits[counter], !(++columns % 3) ? "\r\n" : "");
     }
-    sprintbitarray(GET_OBJ_EXTRA(OLC_OBJ(d)).getAll(), extra_bits, EF_ARRAY_MAX, bits);
+    sprintf(bits, "%s", GET_OBJ_EXTRA(OLC_OBJ(d)).getFlagNames().c_str());
     write_to_output(d, "\r\nObject flags: @c%s@n\r\n"
                        "Enter object extra flag (0 to quit) : ",
                     bits);
@@ -800,7 +799,7 @@ void oedit_disp_perm_menu(struct descriptor_data *d) {
         write_to_output(d, "@g%2d@n) %-20.20s%s", counter,
                         affected_bits[counter], !(++columns % 3) ? "\r\n" : "");
     }
-    sprintbitarray(GET_OBJ_PERM(OLC_OBJ(d)).getAll(), affected_bits, EF_ARRAY_MAX, bitbuf);
+    sprintf(bitbuf, "%s", GET_OBJ_PERM(OLC_OBJ(d)).getFlagNames().c_str());
     write_to_output(d, "\r\nObject permanent flags: @c%s@n\r\n"
                        "Enter object perm flag (0 to quit) : ", bitbuf);
 }
@@ -833,7 +832,7 @@ void oedit_disp_wear_menu(struct descriptor_data *d) {
         write_to_output(d, "@g%2d@n) %-20.20s %s", counter + 1,
                         wear_bits[counter], !(++columns % 3) ? "\r\n" : "");
     }
-    sprintbitarray(GET_OBJ_WEAR(OLC_OBJ(d)).getAll(), wear_bits, TW_ARRAY_MAX, bits);
+    sprintf(bits, "%s", GET_OBJ_WEAR(OLC_OBJ(d)).getFlagNames().c_str());
     write_to_output(d, "\r\nWear flags: @c%s@n\r\n"
                        "Enter wear flag, 0 to quit : ", bits);
 }
@@ -852,7 +851,7 @@ void oedit_disp_menu(struct descriptor_data *d) {
      * Build buffers for first part of menu.
      */
     sprinttype(GET_OBJ_TYPE(obj), item_types, tbitbuf, sizeof(tbitbuf));
-    sprintbitarray(GET_OBJ_EXTRA(obj).getAll(), extra_bits, EF_ARRAY_MAX, ebitbuf);
+    sprintf(ebitbuf, "%s", GET_OBJ_EXTRA(obj).getFlagNames().c_str());
 
     /*
      * Build first half of menu.
@@ -881,8 +880,8 @@ void oedit_disp_menu(struct descriptor_data *d) {
     /*
      * Build second half of menu.
      */
-    sprintbitarray(GET_OBJ_WEAR(OLC_OBJ(d)).getAll(), wear_bits, EF_ARRAY_MAX, tbitbuf);
-    sprintbitarray(GET_OBJ_PERM(OLC_OBJ(d)).getAll(), affected_bits, EF_ARRAY_MAX, ebitbuf);
+    sprintf(tbitbuf, "%s", GET_OBJ_WEAR(OLC_OBJ(d)).getFlagNames().c_str());
+    sprintf(ebitbuf, "%s", GET_OBJ_PERM(OLC_OBJ(d)).getFlagNames().c_str());
 
     std::vector<std::string> values;
     for(const auto &[name, val] : obj->stats) {
@@ -1646,7 +1645,7 @@ ACMD(do_iedit) {
         found = 1;
     } else if ((k = get_obj_in_list_vis(ch, arg, nullptr, ch->getObjects()))) {
         found = 1;
-    } else if ((k = get_obj_in_list_vis(ch, arg, nullptr, ch->getLocationObjects()))) {
+    } else if ((k = get_obj_in_list_vis(ch, arg, nullptr, ch->location.getObjects()))) {
         found = 1;
     } else if ((k = get_obj_vis(ch, arg, nullptr))) {
         found = 1;
@@ -1658,7 +1657,7 @@ ACMD(do_iedit) {
     }
 
     /* set up here */
-    CREATE(OLC(ch->desc), struct oasis_olc_data, 1);
+    OLC(ch->desc) = new oasis_olc_data;
     k->item_flags.set(ITEM_UNIQUE_SAVE, true);
 
     ch->player_flags.set(PLR_WRITING, true);

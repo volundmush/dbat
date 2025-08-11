@@ -385,14 +385,15 @@ namespace atk {
 
             int divine = GET_SKILL(user, (int16_t) Skill::divine_halo);
             int vicDivine = GET_SKILL(victim, (int16_t) Skill::divine_halo);
+            // TODO: these messages are showing to everyone, need to use act() here...
             if(isKiAttack() && divine > 0 && divine >= axion_dice(0)) {
                 send_to_char(user, "You feel your Halo intensify, purging the impurity of your attack.\n");
-                send_to_room(user->getRoom(), "%s's halo flares, leaving their attack shimmering as it moves.\n", user->getName());
+                user->location.send_to("%s's halo flares, leaving their attack shimmering as it moves.\n", user->getName());
                 calcDamage *= divine / 2;
             }
             if(isKiAttack() && vicDivine > 0 && vicDivine >= axion_dice(0)) {
                 send_to_char(user, "You feel your Halo intensify, burning away at your opponents attack.\n");
-                send_to_room(user->getRoom(), "%s's halo flares, burning away part of the blast coming for them.\n", user->getName());
+                user->location.send_to("%s's halo flares, burning away part of the blast coming for them.\n", user->getName());
                 calcDamage /= (vicDivine / 50);
             }
 
@@ -1094,7 +1095,7 @@ namespace atk {
                 actVictim("@C$n@W disappears, reappearing in front of you, and $e grabs you! Spinning quickly $e sends you flying into the ground!@n");
                 actOthers("@c$n@W disappears, reappearing in front of @C$N@W, and grabs $M! Spinning quickly $e sends $M flying into the ground!@n");
 
-                if (victim->getLocationDamage() <= 95 && !victim->getWhereFlag(WhereFlag::space)) {
+                if (victim->location.getDamage() <= 95 && !victim->location.getWhereFlag(WhereFlag::space)) {
                         act("@W$N@W slams into the ground forming a large crater with $S body!@n", true, user, nullptr,
                             victim,
                             TO_CHAR);
@@ -1104,7 +1105,7 @@ namespace atk {
                         act("@W$N@W slams into the ground forming a large crater with $S body!@n", true, user, nullptr,
                             victim,
                             TO_NOTVICT);
-                        const auto tile = victim->getLocationTileType();
+                        const auto tile = victim->location.getTileType();
                         if (tile != SECT_INSIDE && tile != SECT_UNDERWATER &&
                             tile != SECT_WATER_SWIM && tile != SECT_WATER_NOSWIM) {
                             impact_sound(user, "@wA loud roar is heard nearby!@n\r\n");
@@ -1118,8 +1119,8 @@ namespace atk {
                                         victim, TO_ROOM);
                                     break;
                                 case 2:
-                                    if (rand_number(1, 4) == 4 && victim->getLocationGroundEffect() == 0) {
-                                        victim->setLocationGroundEffect(1);
+                                    if (rand_number(1, 4) == 4 && victim->location.getGroundEffect() == 0) {
+                                        victim->location.setGroundEffect(1);
                                         act("Lava leaks up through cracks in the crater!", true, user, nullptr, victim,
                                             TO_CHAR);
                                         act("Lava leaks up through cracks in the crater!", true, user, nullptr, victim,
@@ -1289,7 +1290,7 @@ namespace atk {
                                !AFF_FLAGGED(victim, AFF_KNOCKED)) {
                     victim->setBaseStat<int>("position", POS_SITTING);
                 }
-                victim->getRoom()->modDamage(5);
+                victim->location.modDamage(5);
                 break;
             case 3:
                 if (GET_BONUS(user, BONUS_SOFT)) 
@@ -1517,7 +1518,7 @@ namespace atk {
         pcost(victim, 0, GET_MAX_HIT(victim) / 500);
         improve_skill(victim, SKILL_PARRY, 0);
         parry_ki(attPerc, user, victim, (char*)getName().c_str(), 0, 0, getSkill(), getAtkID());
-        user->getRoom()->modDamage(5);
+        user->location.modDamage(5);
         return Result::Missed;
 
     }
@@ -1531,7 +1532,7 @@ namespace atk {
             pcost(victim, GET_MAX_MANA(victim) * 0.05, 0);
 
         dodge_ki(user, victim, getHoming(), getAtkID(), initSkill, getSkill());
-        user->getRoom()->modDamage(5 * getTier());
+        user->location.modDamage(5 * getTier());
         return Result::Missed;
 
     }
@@ -1804,13 +1805,13 @@ namespace atk {
             int count = 0;
             while (count < 12) {
                 attempt = count;
-                if (CAN_GO(victim, attempt)) {
+                if (victim->location.canGo(attempt)) {
                     count = 12;
                 } else {
                     count++;
                 }
             }
-            if (CAN_GO(victim, attempt)) {
+            if (victim->location.canGo(attempt)) {
                 act("$N@W is pushed away by the blast!@n", true, user, nullptr, victim, TO_CHAR);
                 act("@WYou are pushed away by the blast!@n", true, user, nullptr, victim, TO_VICT);
                 act("$N@W is pushed away by the blast!@n", true, user, nullptr, victim, TO_NOTVICT);
@@ -2539,23 +2540,23 @@ namespace atk {
             } else {
                 pcost(user, attPerc, 0);
             }
-            if (user->getLocationGroundEffect() < -1) {
+            if (user->location.getGroundEffect() < -1) {
                 send_to_location(user, "The water surrounding the area evaporates some!\r\n");
-                user->modLocationGroundEffect(1);
-            } else if (user->getLocationGroundEffect() == -1) {
+                user->location.modGroundEffect(1);
+            } else if (user->location.getGroundEffect() == -1) {
                 send_to_location(user, "The water surrounding the area evaporates completely away!\r\n");
-                user->setLocationGroundEffect(0);
+                user->location.setGroundEffect(0);
             }
             victim->affect_flags.set(AFF_ASHED, false);
     }
 
     void Honoo::postProcess() {
-        if (user->getLocationGroundEffect() < -1) {
+        if (user->location.getGroundEffect() < -1) {
             send_to_location(user, "The water surrounding the area evaporates some!\r\n");
-            user->modLocationGroundEffect(1);
-        } else if (user->getLocationGroundEffect() == -1) {
+            user->location.modGroundEffect(1);
+        } else if (user->location.getGroundEffect() == -1) {
             send_to_location(user, "The water surrounding the area evaporates completely away!\r\n");
-            user->setLocationGroundEffect(0);
+            user->location.setGroundEffect(0);
         }
     }   
 
@@ -4215,7 +4216,7 @@ namespace atk {
 
     bool KiAreaAttack::getOpponent() {
 
-        auto people = user->getLocationPeople();
+        auto people = user->location.getPeople();
 
         for (const auto& ref : people) {
             auto person2 = ref.lock();
@@ -4329,10 +4330,10 @@ namespace atk {
 
     void Kakusanha::postProcess() {
         int count = targets.size();
-        if (count < 5 && !user->getWhereFlag(WhereFlag::space)) {
+        if (count < 5 && !user->location.getWhereFlag(WhereFlag::space)) {
             send_to_location(user, "The rest of the beams slam into the ground!@n\r\n");
             send_to_location(user, "@wBright explosions erupt from the impacts!\r\n");
-            const auto tile = user->getLocationTileType();
+            const auto tile = user->location.getTileType();
             if (tile != SECT_INSIDE) {
                 impact_sound(user, "@wA loud roar is heard nearby!@n\r\n");
                 switch (rand_number(1, 8)) {
@@ -4343,8 +4344,8 @@ namespace atk {
                             TO_ROOM);
                         break;
                     case 2:
-                        if (rand_number(1, 4) == 4 && user->getLocationGroundEffect() == 0) {
-                            user->setLocationGroundEffect(5);
+                        if (rand_number(1, 4) == 4 && user->location.getGroundEffect() == 0) {
+                            user->location.setGroundEffect(5);
                             act("Lava spews up through cracks in the ground, roaring into the sky as a large column of molten rock!",
                                 true, user, nullptr, nullptr, TO_CHAR);
                             act("Lava spews up through cracks in the ground, roaring into the sky as a large column of molten rock!",
@@ -4463,7 +4464,7 @@ namespace atk {
                 }
             }
 
-            user->getRoom()->modDamage((5 - count) * 5);
+            user->location.modDamage((5 - count) * 5);
         }
     }
 

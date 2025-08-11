@@ -539,7 +539,9 @@ namespace trans {
 
     static std::unordered_map<Form, std::function<bool(struct char_data *ch)>> trans_requirements = {
         {Form::spirit_absorption, [](struct char_data *ch) {
-            auto loc = get_obj_in_room(ch->getRoom(), "Spirit Bomb");
+            auto loc = ch->location.findObject([](obj_data* obj) {
+                return isname("Spirit Bomb", obj->getName());
+            });
             return loc == nullptr ? false : true;
             }},
         {Form::super_saiyan_4, [](struct char_data *ch) {
@@ -714,10 +716,10 @@ namespace trans {
 
         // Lycanthrope
         {Form::lycanthrope, [](struct char_data *ch) {
-            return (ch->race == Race::konatsu && ch->getLocationEnvironment(ENV_MOONLIGHT));
+            return (ch->race == Race::konatsu && ch->location.getEnvironment(ENV_MOONLIGHT));
             }},
         {Form::alpha_lycanthrope, [](struct char_data *ch) {
-            return (ch->getLocationEnvironment(ENV_MOONLIGHT) && getMasteryTier(ch, Form::lycanthrope) >=4);
+            return (ch->location.getEnvironment(ENV_MOONLIGHT) && getMasteryTier(ch, Form::lycanthrope) >=4);
             }},
 
         // Techniques
@@ -743,7 +745,9 @@ namespace trans {
             }},
 
         {Form::spirit_absorption, [](struct char_data *ch) {
-            auto loc = get_obj_in_room(ch->getRoom(), "Spirit Bomb");
+            auto loc = ch->location.findObject([](obj_data* obj) {
+                return isname("Spirit Bomb", obj->getName());
+            });
             return loc == nullptr ? false : true;
             }},
 
@@ -1599,7 +1603,7 @@ namespace trans {
 
         if(form == Form::super_saiyan_1 && PLR_FLAGGED(ch, PLR_FPSSJ)) drain *= 0.5;
 
-        if (ch->getWhereFlag(WhereFlag::afterlife_hell) || ch->getWhereFlag(WhereFlag::afterlife)) 
+        if (ch->location.getWhereFlag(WhereFlag::afterlife_hell) || ch->location.getWhereFlag(WhereFlag::afterlife)) 
             drain *= 0.75;
 
         if(ch->form != Form::base && ch->technique != Form::base)
@@ -1638,7 +1642,7 @@ namespace trans {
             double techTimeAfter = data.time_spent_in_form;
 
             if(moonForms.contains(ch->form)) {
-                if(auto moonlight = ch->getLocationEnvironment(ENV_MOONLIGHT); moonlight >= 100.0) {
+                if(auto moonlight = ch->location.getEnvironment(ENV_MOONLIGHT); moonlight >= 100.0) {
                     // Top off the blutz.
                     data.vars["blutz"] = 60.0 * 30;
                 }
@@ -2509,7 +2513,9 @@ namespace trans {
 
     static std::unordered_map<Form, std::function<void(struct char_data *ch)>> trans_on_transform = {
         {Form::spirit_absorption, [](struct char_data *ch) {
-            auto loc = get_obj_in_room(ch->getRoom(), "Spirit Bomb");
+            auto loc = ch->location.findObject([](obj_data* obj) {
+                return isname("Spirit Bomb", obj->getName());
+            });
             if (loc == nullptr)
                 revert(ch);
             else {

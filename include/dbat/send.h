@@ -49,7 +49,7 @@ void send_to_moon(fmt::string_view format, Args&&... args) {
 
         for(auto i = descriptor_list; i; i = i->next) {
             if(STATE(i) != CON_PLAYING || !(i->character)) continue;
-            if (!AWAKE(i->character) || i->character->getLocationEnvironment(ENV_MOONLIGHT) <= 0.0) continue;
+            if (!AWAKE(i->character) || i->character->location.getEnvironment(ENV_MOONLIGHT) <= 0.0) continue;
             i->output += formatted_string;
         }
     }
@@ -90,31 +90,7 @@ void send_to_room(struct room_data *room, fmt::string_view format, Args&&... arg
     try {
         std::string formatted_string = fmt::sprintf(format, std::forward<Args>(args)...);
         if(formatted_string.empty()) return;
-
-        for(auto i : filter_raw(room->getPeople())) {
-            if(!i->desc) continue;
-            i->desc->output += formatted_string;
-        }
-
-        for(auto d = descriptor_list; d; d = d->next) {
-            if (STATE(d) != CON_PLAYING)
-                continue;
-
-            if (PRF_FLAGGED(d->character, PRF_ARENAWATCH)) {
-                if (arena_watch(d->character) == vn) {
-                    d->output += "@c-----@CArena@c-----@n\r\n%s\r\n@c-----@CArena@c-----@n\r\n";
-                    d->output += formatted_string;
-                }
-            }
-            if (auto eaves = GET_EAVESDROP(d->character); eaves > 0) {
-                int roll = rand_number(1, 101);
-                if (eaves == vn && GET_SKILL(d->character, SKILL_EAVESDROP) > roll) {
-                    d->output += "@c-----Eavesdrop-----@n\r\n%s\r\n@c-----Eavesdrop-----@n\r\n";
-                    d->output += formatted_string;
-                }
-            }
-
-        }
+        room->sendText(formatted_string);
     }
     catch(const std::exception &e) {
         basic_mud_log("SYSERR: Format error in send_to_room: %s", e.what());

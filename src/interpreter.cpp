@@ -1025,18 +1025,15 @@ int find_command(const char *command) {
 
 int special(struct char_data *ch, int cmd, char *arg) {
     /* special in room? */
-    auto room = ch->getRoom();
-
-    if (room && room->func)
-        if (room->func(ch, ch->getRoom(), cmd, arg))
+    if (auto func = ch->location.getSpecialFunc(); func)
+        if (func(ch, ch->getRoom(), cmd, arg))
             return 1;
 
     /* special in equipment list? */
-    for (auto j = 0; j < NUM_WEARS; j++) {
-        if(auto obj = GET_EQ(ch, j); obj)
-            if(auto func = GET_OBJ_SPEC(obj); func)
-                if (func(ch, obj, cmd, arg))
-                    return 1;
+    for (auto& [slot, obj] : ch->getEquipment()) {
+        if (auto func = GET_OBJ_SPEC(obj); func)
+            if (func(ch, obj, cmd, arg))
+                return 1;
     }
 
     /* special in inventory? */
@@ -1048,15 +1045,15 @@ int special(struct char_data *ch, int cmd, char *arg) {
     }
 
     /* special in mobile present? */
-    if(room) {
-        auto people = room->getPeople();
+    if(ch->location) {
+        auto people = ch->location.getPeople();
         for (auto mob : filter_raw(people))
         if (IS_NPC(mob) && !MOB_FLAGGED(mob, MOB_NOTDEADYET))
             if (auto func = GET_MOB_SPEC(mob); func)
                 if(func(ch, mob, cmd, arg))
                     return 1;
-        
-        auto con = room->getObjects();
+
+        auto con = ch->location.getObjects();
         for (auto obj : filter_raw(con)) {
             if(auto func = GET_OBJ_SPEC(obj); func)
                 if (func(ch, obj, cmd, arg))

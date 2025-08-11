@@ -406,7 +406,7 @@ void obj_data::setLocation(const Location& loc) {
 
 void obj_data::setLocation(const thing_data* td) {
     if(!td) return;
-    setLocation(td->getLocation());
+    setLocation(td->location);
 
 }
 

@@ -17,6 +17,7 @@ struct npc_proto_data;
 struct item_proto_data;
 struct trig_data;
 struct trig_proto_data;
+struct Destination;
 
 typedef unit_data script_data;
 

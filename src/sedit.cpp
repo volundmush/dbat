@@ -104,10 +104,10 @@ ACMD(do_oasis_sedit) {
     if (d->olc) {
         mudlog(BRF, ADMLVL_IMMORT, true,
                "SYSERR: do_oasis_sedit: Player already had olc structure.");
-        free(d->olc);
+        delete d->olc;
     }
 
-    CREATE(d->olc, struct oasis_olc_data, 1);
+    d->olc = new oasis_olc_data();
 
     /****************************************************************************/
     /** Find the zone.                                                         **/

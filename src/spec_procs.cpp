@@ -38,7 +38,7 @@
 SPECIAL(dump) {
     int value = 0;
 
-    auto con = ch->getLocationObjects();
+    auto con = ch->location.getObjects();
     for (auto k : filter_raw(con)) {
         act("$p vanishes in a puff of smoke!", false, nullptr, k, nullptr, TO_ROOM);
         extract_obj(k);
@@ -49,7 +49,7 @@ SPECIAL(dump) {
 
     do_drop(ch, argument, cmd, SCMD_DROP);
 
-    con = ch->getLocationObjects();
+    con = ch->location.getObjects();
     for (auto k : filter_raw(con)) {
         act("$p vanishes in a puff of smoke!", false, nullptr, k, nullptr, TO_ROOM);
         value += MAX(1, MIN(50, GET_OBJ_COST(k) / 10));
@@ -217,7 +217,7 @@ SPECIAL(gauntlet_room)  /* Jamdog - 13th Feb 2006 */
         if (ch->getRoomVnum() == gauntlet_info[i][1]) {
             if (cmd == gauntlet_info[i][2]) {
                 //don't let him proceed if mob is still alive
-                auto loco = ch->getLocationPeople();
+                auto loco = ch->location.getPeople();
                 for (auto tch : filter_raw(loco)) {
                     if (IS_NPC(tch) && i > 0)  /* Ignore mobs in the waiting room */
                     {
@@ -296,13 +296,13 @@ SPECIAL(gauntlet_end)  /* Jamdog - 20th Feb 2007 */
     if (IS_NPC(ch))                  /* Mobs can move about - Jamdog 20th July 2006   */
         return false;                  /* This also allows following pets!              */
 
-    if (!EXIT(ch, cmd - 1) || EXIT(ch, cmd - 1)->to_room == NOWHERE)
+    if (!EXIT(ch, cmd - 1))
         return false;
     if (EXIT_FLAGGED(EXIT(ch, cmd - 1), EX_CLOSED))
         return false;
 
     for (i = 0; gauntlet_info[i][0] != -1; i++) {
-        if (EXIT(ch, (cmd - 1))->to_room == gauntlet_info[i][1]) {
+        if (*EXIT(ch, (cmd - 1)) == gauntlet_info[i][1]) {
             send_to_char(ch, "You have completed the gauntlet, you cannot go backwards!\r\n");
             return true;
         }
@@ -345,12 +345,12 @@ SPECIAL(gauntlet_rest)  /* Jamdog - 20th Feb 2007 */
 
     for (i = 0; gauntlet_info[i][0] != -1; i++) {
         for (door = 0; door < NUM_OF_DIRS; door++) {
-            if (!EXIT(ch, door) || EXIT(ch, door)->to_room == NOWHERE)
+            if (!EXIT(ch, door))
                 continue;
             if (EXIT_FLAGGED(EXIT(ch, door), EX_CLOSED))
                 continue;
 
-            if ((EXIT(ch, door)->to_room == gauntlet_info[i][1]) && (door == (cmd - 1))) {
+            if ((EXIT(ch, door) == gauntlet_info[i][1]) && (door == (cmd - 1))) {
                 nomob = true;
 
                 /* Check the next room for players and ensure mob is waiting */
@@ -457,7 +457,7 @@ SPECIAL(pet_shops) {
             /* free(pet->description); don't free the prototype! */
             pet->strings["look_description"] = buf;
         }
-        char_to_room(pet, ch->getRoom());
+        pet->setLocation(ch);
         add_follower(pet, ch);
         pet->setBaseStat("master_id", GET_IDNUM(ch));
 
@@ -677,7 +677,7 @@ SPECIAL(healtank) {
     char arg[MAX_INPUT_LENGTH];
     one_argument(argument, arg);
 
-    auto htank = ch->getRoom()->findObjectVnum(65);
+    auto htank = ch->location.findObjectVnum(65);
 
     if (CMD_IS("htank")) {
         if (!htank) {
@@ -922,7 +922,7 @@ SPECIAL(gravity) {
     int match = false;
 
     one_argument(argument, arg);
-    auto obj = ch->getRoom()->findObjectVnum(11);
+    auto obj = ch->location.findObjectVnum(11);
 
     if (CMD_IS("gravity") || CMD_IS("generator")) {
 
@@ -972,9 +972,9 @@ SPECIAL(gravity) {
                 auto msg = fmt::format("You punch in {} times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n", grav);
                 send_to_char(ch, msg.c_str());
                 obj->setBaseStat("gravity", grav);
-                auto room = ch->getRoom();
-                if (room->room_flags.toggle(ROOM_AURA)) {
-                    send_to_location(ch, "The increased gravity forces the aura to disappear.\r\n");
+                if (ch->location.getRoomFlag(ROOM_AURA)) {
+                    ch->location.sendText("The increased gravity forces the aura to disappear.\r\n");
+                    ch->location.setRoomFlag(ROOM_AURA, false);
                 }
             } else {
                 send_to_char(ch,
@@ -994,7 +994,7 @@ SPECIAL(gravity) {
 SPECIAL(bank) {
     int amount, num = 0;
 
-    auto obj = ch->getRoom()->findObjectVnum(3034);
+    auto obj = ch->location.findObjectVnum(3034);
 
     if (CMD_IS("balance")) {
         if (OBJ_FLAGGED(obj, ITEM_BROKEN)) {

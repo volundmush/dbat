@@ -23,7 +23,6 @@
 #include "dbat/races.h"
 #include "dbat/act.wizard.h"
 #include "dbat/act.informative.h"
-#include "dbat/bitarray.h"
 #include "dbat/dg_scripts.h"
 
 /*------------------------------------------------------------------------*/
@@ -51,7 +50,7 @@ ACMD(do_oasis_redit) {
         buf3 = two_arguments(argument, buf1, buf2);
     }
 
-    if (GET_ADMLEVEL(ch) < 1 && !ch->getRoomFlag(ROOM_CANREMODEL)) {
+    if (GET_ADMLEVEL(ch) < 1 && !ch->location.getRoomFlag(ROOM_CANREMODEL)) {
         send_to_char(ch, "You can not remodel this room.\r\n");
         return;
     }
@@ -123,17 +122,17 @@ ACMD(do_oasis_redit) {
     /* Give the descriptor an OLC structure. */
     if (d->olc) {
         mudlog(BRF, ADMLVL_IMMORT, true, "SYSERR: do_oasis_redit: Player already had olc structure.");
-        free(d->olc);
+        delete d->olc;
     }
 
     /* Create the OLC structure. */
-    CREATE(d->olc, struct oasis_olc_data, 1);
+    d->olc = new oasis_olc_data();
 
     /* Find the zone. */
     OLC_ZNUM(d) = save ? real_zone(number) : real_zone_by_thing(number);
     if (OLC_ZNUM(d) == NOWHERE) {
         send_to_char(ch, "Sorry, there is no zone for that number!\r\n");
-        free(d->olc);
+        delete d->olc;
         d->olc = nullptr;
         return;
     }
@@ -141,7 +140,7 @@ ACMD(do_oasis_redit) {
     /* Make sure the builder is allowed to modify this zone. */
     if (!can_edit_zone(ch, OLC_ZNUM(d)) && remodeling == false) {
         send_cannot_edit(ch, z.number);
-        free(d->olc);
+        delete d->olc;
         d->olc = nullptr;
         return;
     }
@@ -155,7 +154,7 @@ ACMD(do_oasis_redit) {
         save_rooms(OLC_ZNUM(d));
 
         /* Free the olc data from the descriptor. */
-        free(d->olc);
+        delete d->olc;
         d->olc = nullptr;
         return;
     }
@@ -202,36 +201,8 @@ void redit_setup_existing(struct descriptor_data *d, int real_num) {
      */
     room->strings = exist->strings;
     room->extra_descriptions = exist->extra_descriptions;
+    room->exits = exist->exits;
 
-    /*
-     * Exits - We allocate only if necessary.
-     */
-    for (counter = 0; counter < NUM_OF_DIRS; counter++) {
-        if (get_room(real_num)->dir_option[counter]) {
-            CREATE(room->dir_option[counter], struct Destination, 1);
-
-            /*
-             * Copy the numbers over.
-             */
-            *room->dir_option[counter] = *get_room(real_num)->dir_option[counter];
-            /*
-             * Allocate the strings.
-             */
-            if (get_room(real_num)->dir_option[counter]->general_description)
-                room->dir_option[counter]->general_description = strdup(
-                        get_room(real_num)->dir_option[counter]->general_description);
-            if (get_room(real_num)->dir_option[counter]->keyword)
-                room->dir_option[counter]->keyword = strdup(get_room(real_num)->dir_option[counter]->keyword);
-        }
-    }
-
-    /*
-     * Extra descriptions, if necessary.
-     */
-
-    /*
-     * Attach copy of room to player's descriptor.
-     */
     OLC_ROOM(d) = room;
     OLC_VAL(d) = 0;
     OLC_ITEM_TYPE(d) = static_cast<int>(WLD_TRIGGER);
@@ -290,10 +261,7 @@ void redit_save_internally(struct descriptor_data *d) {
                         break;
                 }
         } else if (STATE(dsc) == CON_REDIT) {
-            for (j = 0; j < NUM_OF_DIRS; j++)
-                if (OLC_ROOM(dsc)->dir_option[j])
-                    if (OLC_ROOM(dsc)->dir_option[j]->to_room >= room_num)
-                        OLC_ROOM(dsc)->dir_option[j]->to_room++;
+
         }
     }
 }
@@ -351,8 +319,10 @@ void redit_disp_exit_menu(struct descriptor_data *d) {
     /*
      * if exit doesn't exist, alloc/create it
      */
-    if (OLC_EXIT(d) == nullptr)
-        CREATE(OLC_EXIT(d), struct Destination, 1);
+    if (!OLC_EXIT(d)) {
+        OLC_EXIT(d).emplace();
+        OLC_EXIT(d)->dir = static_cast<Direction>(OLC_VAL(d));
+    }
 
     sprintbit(OLC_EXIT(d)->exit_info, exit_bits, door_buf, sizeof(door_buf));
 
@@ -368,9 +338,9 @@ void redit_disp_exit_menu(struct descriptor_data *d) {
                     "@g8@n) DC Hide     		: @c%d\r\n"
                     "Enter choice, 0 to quit : ",
 
-                    OLC_EXIT(d)->to_room,
-                    OLC_EXIT(d)->general_description ? OLC_EXIT(d)->general_description : "<NONE>",
-                    OLC_EXIT(d)->keyword ? OLC_EXIT(d)->keyword : "<NONE>",
+                    OLC_EXIT(d)->getVnum(),
+                    !OLC_EXIT(d)->general_description.empty() ? OLC_EXIT(d)->general_description : "<NONE>",
+                    !OLC_EXIT(d)->keyword.empty() ? OLC_EXIT(d)->keyword : "<NONE>",
                     OLC_EXIT(d)->key != NOTHING ? OLC_EXIT(d)->key : -1,
                     door_buf, OLC_EXIT(d)->dclock, OLC_EXIT(d)->dchide
     );
@@ -411,7 +381,7 @@ void redit_disp_flag_menu(struct descriptor_data *d) {
         write_to_output(d, "@g%2d@n) %-20.20s%s", counter + 1,
                         room_bits[counter], !(++columns % 2) ? "\r\n" : "");
     }
-    sprintbitarray(OLC_ROOM(d)->room_flags.getAll(), room_bits, RF_ARRAY_MAX, bits);
+    sprintf(bits, "%s", OLC_ROOM(d)->room_flags.getFlagNames().c_str());
     write_to_output(d, "\r\nRoom flags: @c%s@n\r\n"
                        "Enter room flags, 0 to quit : ", bits);
     OLC_MODE(d) = REDIT_FLAGS;
@@ -443,9 +413,10 @@ void redit_disp_menu(struct descriptor_data *d) {
     clear_screen(d);
     room = OLC_ROOM(d);
 
-    sprintbitarray(room->room_flags.getAll(), room_bits, RF_ARRAY_MAX, buf1);
+    sprintf(buf1, "%s", room->room_flags.getFlagNames().c_str());
     sprinttype(static_cast<int>(room->sector_type), sector_types, buf2, sizeof(buf2));
     auto& z = zone_table.at(OLC_ZNUM(d));
+    auto &ex = OLC_ROOM(d)->exits;
     if (GET_ADMLEVEL(d->character) > 0) {
         write_to_output(d,
                         "-- Room number : [@c%d@n]  	Room zone: [@c%d@n]\r\n"
@@ -469,30 +440,18 @@ void redit_disp_menu(struct descriptor_data *d) {
 
                         OLC_NUM(d), z.number, room->getName(),
                         room->getLookDescription(), buf1, buf2,
-                        room->dir_option[NORTH] && room->dir_option[NORTH]->to_room != NOWHERE ?
-                        room->dir_option[NORTH]->to_room : -1,
-                        room->dir_option[NORTHWEST] && room->dir_option[NORTHWEST]->to_room != NOWHERE ?
-                        room->dir_option[NORTHWEST]->to_room : -1,
-                        room->dir_option[EAST] && room->dir_option[EAST]->to_room != NOWHERE ?
-                        room->dir_option[EAST]->to_room : -1,
-                        room->dir_option[NORTHEAST] && room->dir_option[NORTHEAST]->to_room != NOWHERE ?
-                        room->dir_option[NORTHEAST]->to_room : -1,
-                        room->dir_option[SOUTH] && room->dir_option[SOUTH]->to_room != NOWHERE ?
-                        room->dir_option[SOUTH]->to_room : -1,
-                        room->dir_option[SOUTHEAST] && room->dir_option[SOUTHEAST]->to_room != NOWHERE ?
-                        room->dir_option[SOUTHEAST]->to_room : -1,
-                        room->dir_option[WEST] && room->dir_option[WEST]->to_room != NOWHERE ?
-                        room->dir_option[WEST]->to_room : -1,
-                        room->dir_option[SOUTHWEST] && room->dir_option[SOUTHWEST]->to_room != NOWHERE ?
-                        room->dir_option[SOUTHWEST]->to_room : -1,
-                        room->dir_option[UP] && room->dir_option[UP]->to_room != NOWHERE ?
-                        room->dir_option[UP]->to_room : -1,
-                        room->dir_option[INDIR] && room->dir_option[INDIR]->to_room != NOWHERE ?
-                        room->dir_option[INDIR]->to_room : -1,
-                        room->dir_option[DOWN] && room->dir_option[DOWN]->to_room != NOWHERE ?
-                        room->dir_option[DOWN]->to_room : -1,
-                        room->dir_option[OUTDIR] && room->dir_option[OUTDIR]->to_room != NOWHERE ?
-                        room->dir_option[OUTDIR]->to_room : -1,
+                        ex.contains(Direction::north) ? ex.at(Direction::north).getVnum() : -1,
+                        ex.contains(Direction::northwest) ? ex.at(Direction::northwest).getVnum() : -1,
+                        ex.contains(Direction::east) ? ex.at(Direction::east).getVnum() : -1,
+                        ex.contains(Direction::northeast) ? ex.at(Direction::northeast).getVnum() : -1,
+                        ex.contains(Direction::south) ? ex.at(Direction::south).getVnum() : -1,
+                        ex.contains(Direction::southeast) ? ex.at(Direction::southeast).getVnum() : -1,
+                        ex.contains(Direction::west) ? ex.at(Direction::west).getVnum() : -1,
+                        ex.contains(Direction::southwest) ? ex.at(Direction::southwest).getVnum() : -1,
+                        ex.contains(Direction::up) ? ex.at(Direction::up).getVnum() : -1,
+                        ex.contains(Direction::inside) ? ex.at(Direction::inside).getVnum() : -1,
+                        ex.contains(Direction::down) ? ex.at(Direction::down).getVnum() : -1,
+                        ex.contains(Direction::outside) ? ex.at(Direction::outside).getVnum() : -1,
                         !OLC_SCRIPT(d).empty() ? "Set." : "Not Set."
         );
     } else {
@@ -806,6 +765,10 @@ void redit_parse(struct descriptor_data *d, char *arg) {
         case REDIT_EXIT_MENU:
             switch (*arg) {
                 case '0':
+                    if(OLC_EXIT(d)) {
+                        OLC_ROOM(d)->replaceExit(*OLC_EXIT(d));
+                        OLC_EXIT(d).reset();
+                    }
                     break;
                 case '1':
                     OLC_MODE(d) = REDIT_EXIT_NUMBER;
@@ -837,13 +800,8 @@ void redit_parse(struct descriptor_data *d, char *arg) {
                     /*
                      * Delete an exit.
                      */
-                    if (OLC_EXIT(d)->keyword)
-                        free(OLC_EXIT(d)->keyword);
-                    if (OLC_EXIT(d)->general_description)
-                        free(OLC_EXIT(d)->general_description);
-                    if (OLC_EXIT(d))
-                        free(OLC_EXIT(d));
-                    OLC_EXIT(d) = nullptr;
+                    OLC_ROOM(d)->deleteExit(static_cast<Direction>(OLC_VAL(d)));
+                    OLC_EXIT(d).reset();
                     break;
                 case '7':
                     OLC_MODE(d) = REDIT_EXIT_DCLOCK;
@@ -894,7 +852,7 @@ void redit_parse(struct descriptor_data *d, char *arg) {
                     write_to_output(d, "That room does not exist, try again : ");
                     return;
                 }
-            OLC_EXIT(d)->to_room = number;
+            OLC_EXIT(d)->unit = get_room(number);
             redit_disp_exit_menu(d);
             return;
 
@@ -907,9 +865,7 @@ void redit_parse(struct descriptor_data *d, char *arg) {
             break;
 
         case REDIT_EXIT_KEYWORD:
-            if (OLC_EXIT(d)->keyword)
-                free(OLC_EXIT(d)->keyword);
-            OLC_EXIT(d)->keyword = str_udup(arg);
+            OLC_EXIT(d)->keyword = arg;
             redit_disp_exit_menu(d);
             return;
 

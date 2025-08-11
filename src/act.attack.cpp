@@ -268,7 +268,7 @@ ACMD(do_throw) {
     }
 
     if (!(vict = get_char_vis(ch, arg2, nullptr, FIND_CHAR_ROOM))) {
-        if (FIGHTING(ch) && FIGHTING(ch)->getLocation() == ch->getLocation()) {
+        if (FIGHTING(ch) && FIGHTING(ch)->location == ch->location) {
             vict = FIGHTING(ch);
         } else {
             send_to_char(ch, "Who do you want to target?\r\n");
@@ -818,7 +818,7 @@ ACMD(do_selfd) {
             true, ch, nullptr, nullptr, TO_CHAR);
         act("@R$n EXPLODES! The explosion expands outward burning up all surroundings for a large distance. The explosion takes on the shape of a large energy dome with $n at its center!@n",
             true, ch, nullptr, nullptr, TO_ROOM);
-        auto people = ch->getLocationPeople();
+        auto people = ch->location.getPeople();
         for (auto tch : filter_raw(people)) {
             if (tch == ch) {
                 continue;

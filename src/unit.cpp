@@ -175,3 +175,7 @@ std::string_view unit_data::getString(const std::string &key) const {
     }
     return {};
 }
+
+void unit_data::sendText(const std::string& txt) {
+    // this does nothing on unit_data...
+}

@@ -1823,7 +1823,7 @@ char *act(const char *str, int hide_invisible, struct char_data *ch,
             if (!i->connected && i->character &&
                 !PRF_FLAGGED(i->character, PRF_NOGOSS) &&
                 !PLR_FLAGGED(i->character, PLR_WRITING) &&
-                !i->character->getRoom()->room_flags.get(ROOM_SOUNDPROOF)) {
+                !i->character->location.getRoomFlag(ROOM_SOUNDPROOF)) {
 
                 snprintf(buf, sizeof(buf), "@y%s@n", str);
                 perform_act(buf, ch, obj, vict_obj, i->character);
@@ -1838,9 +1838,9 @@ char *act(const char *str, int hide_invisible, struct char_data *ch,
     /* ASSUMPTION: at this point we know type must be TO_NOTVICT or TO_ROOM */
 
     if (ch && IN_ROOM(ch) != NOWHERE)
-        to = ch->getLocationPeople();
+        to = ch->location.getPeople();
     else if (obj && IN_ROOM(obj) != NOWHERE)
-        to = obj->getLocationPeople();
+        to = obj->location.getPeople();
     else {
         return nullptr;
     }
@@ -1934,6 +1934,9 @@ void descriptor_data::handle_input() {
 
     if (str)        /* Writing boards, mail, etc. */
         string_add(this, comm);
+    else if(std_str) {
+        std_string_add(this, command);
+    }
     else if (STATE(this) != CON_PLAYING) /* In menus, etc. */
         nanny(this, comm);
     else {            /* else: we're playing normally. */

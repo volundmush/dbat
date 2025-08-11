@@ -8,9 +8,7 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 #pragma once
-#include <iostream>
-#include "fmt/printf.h"
-#include "fmt/ranges.h"
+
 #include "db.h"
 #include "races.h"
 #include "handler.h"
@@ -85,9 +83,6 @@ extern void handle_evolution(struct char_data *ch, int64_t dmg);
 
 extern int64_t molt_threshold(struct char_data *ch);
 
-extern int cook_element(struct room_data *room);
-extern int cook_element(room_rnum room);
-
 extern void purge_homing(struct char_data *ch);
 
 extern int planet_check(struct char_data *ch, struct char_data *vict);
@@ -104,33 +99,7 @@ std::string add_commas(double X);
 
 extern char *introd_calc(struct char_data *ch);
 
-template<typename... Args>
-void basic_mud_log(fmt::string_view format, Args&&... args) {
-    try {
-        std::string formatted_string = fmt::sprintf(format, std::forward<Args>(args)...);
-        if(formatted_string.empty()) return;
 
-        std::cout << formatted_string << std::endl;
-    }
-    catch(const std::exception &e) {
-        std::cout << "SYSERR: Format error in basic_mud_log: " << e.what() << std::endl;
-        std::cout << "Template was: " << format.data() << std::endl;
-    }
-}
-
-template<typename... Args>
-void template_mud_log(fmt::string_view format, Args&&... args) {
-    try {
-        std::string formatted_string = fmt::format(fmt::runtime(format), std::forward<Args>(args)...);
-        if(formatted_string.empty()) return;
-
-        std::cout << formatted_string << std::endl;
-    }
-    catch(const std::exception &e) {
-        std::cout << "SYSERR: Format error in template_mud_log: " << e.what() << std::endl;
-        std::cout << "Template was: " << format.data() << std::endl;
-    }
-}
 
 extern void basic_mud_vlog(const char *format, va_list args);
 
@@ -849,7 +818,7 @@ int64_t MOD_OBJ_VAL(T* obj, const std::string& val, int mod) {
 /* Various macros building up to CAN_SEE */
 
 #define LIGHT_OK(sub)    (!AFF_FLAGGED(sub, AFF_BLIND) && !PLR_FLAGGED(sub, PLR_EYEC) && \
-   (!(sub)->getLocationIsDark() || AFF_FLAGGED((sub), AFF_INFRAVISION) || (sub)->mutations.get(Mutation::infravision) || PLR_FLAGGED(sub, PLR_AURALIGHT)) )
+   (!(sub)->location.getIsDark() || AFF_FLAGGED((sub), AFF_INFRAVISION) || (sub)->mutations.get(Mutation::infravision) || PLR_FLAGGED(sub, PLR_AURALIGHT)) )
 
 #define INVIS_OK(sub, obj) \
  (!AFF_FLAGGED((obj),AFF_INVISIBLE) || AFF_FLAGGED(sub,AFF_DETECT_INVIS))
@@ -899,15 +868,8 @@ int64_t MOD_OBJ_VAL(T* obj, const std::string& val, int mod) {
     fname((obj)->getName()) : "something")
 
 
-#define EXIT(ch, door)  ((ch)->getRoom()->dir_option[door])
-#define SECOND_EXIT(ch, door) (world[EXIT(ch, door)->to_room].dir_option[door])
-#define THIRD_EXIT(ch, door) (world[_2ND_EXIT(ch, door)->to_room].dir_option[door])
-#define W_EXIT(room, num)     (get_room((room))->dir_option[(num)])
-#define R_EXIT(room, num)     ((room)->dir_option[(num)])
-
-#define CAN_GO(ch, door) (EXIT(ch,door) && \
-             (EXIT(ch,door)->to_room != NOWHERE) && \
-             !IS_SET(EXIT(ch, door)->exit_info, EX_CLOSED))
+#define EXIT(ch, door)  ((ch)->location.getExit(static_cast<Direction>((door))))
+#define W_EXIT(room, num)     (get_room((room))->exits.contains(static_cast<Direction>((num))))
 
 #define RACE(ch)      ((ch)->juggleRaceName(true).c_str())
 #define LRACE(ch)     ((ch)->juggleRaceName(false).c_str())
@@ -1003,18 +965,18 @@ bool ETHER_STREAM(struct char_data *ch);
 
 #define OUTSIDE(ch)    (OUTSIDE_ROOMFLAG(ch) && OUTSIDE_SECTTYPE(ch))
 
-#define OUTSIDE_ROOMFLAG(ch)    (!ROOM_FLAGGED(IN_ROOM(ch), ROOM_INDOORS) && \
-             !ROOM_FLAGGED(IN_ROOM(ch), ROOM_UNDERGROUND) && \
-                          !(ch)->getWhereFlag(WhereFlag::space))
+#define OUTSIDE_ROOMFLAG(ch)    (!(ch)->location.getRoomFlag(ROOM_INDOORS) && \
+             !(ch)->location.getRoomFlag(ROOM_UNDERGROUND) && \
+                          !(ch)->location.getWhereFlag(WhereFlag::space))
 
-#define OUTSIDE_SECTTYPE(ch)    ((ch->getLocationTileType() != SECT_INSIDE) && \
-                         (ch->getLocationTileType() != SECT_UNDERWATER) && \
-                          (ch->getLocationTileType() != SECT_IMPORTANT) && \
-                           (ch->getLocationTileType() != SECT_SHOP) && \
-                            (ch->getLocationTileType() != SECT_SPACE))
+#define OUTSIDE_SECTTYPE(ch)    ((ch->location.getTileType() != SECT_INSIDE) && \
+                         (ch->location.getTileType() != SECT_UNDERWATER) && \
+                          (ch->location.getTileType() != SECT_IMPORTANT) && \
+                           (ch->location.getTileType() != SECT_SHOP) && \
+                            (ch->location.getTileType() != SECT_SPACE))
 
-#define DIRT_ROOM(ch) (OUTSIDE_SECTTYPE(ch) && ((ch->getLocationTileType() != SECT_WATER_NOSWIM) && \
-                       (ch->getLocationTileType() != SECT_WATER_SWIM)))
+#define DIRT_ROOM(ch) (OUTSIDE_SECTTYPE(ch) && ((ch->location.getTileType() != SECT_WATER_NOSWIM) && \
+                       (ch->location.getTileType() != SECT_WATER_SWIM)))
 
 #define SPEAKING(ch)     ((ch)->getBaseStat<int>("speaking"))
 

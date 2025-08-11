@@ -80,7 +80,7 @@ ACMD (do_assedit) {
         }
     } else if (isdigit(*buf)) {
         d = ch->desc;
-        CREATE (d->olc, struct oasis_olc_data, 1);
+        d->olc = new oasis_olc_data();
         assedit_setup(d, atoi(buf));
 
     }

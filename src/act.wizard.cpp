@@ -38,7 +38,6 @@
 #include "dbat/guild.h"
 #include "dbat/spell_parser.h"
 #include "dbat/transformation.h"
-#include "dbat/bitarray.h"
 
 /* local variables */
 static int copyover_timer = 0; /* for timed copyovers */
@@ -658,7 +657,7 @@ ACMD(do_finddoor) {
                     nlen = snprintf(buf + len, sizeof(buf) - len,
                                     "[%3d] Room %d, %s (%s)\r\n",
                                     ++num, vn,
-                                    dirs[static_cast<int>(d)], e.keyword);
+                                    dirs[static_cast<int>(d)], e.keyword.c_str());
                     if (len + nlen >= sizeof(buf) || nlen < 0)
                         break;
                     len += nlen;
@@ -751,7 +750,7 @@ ACMD(do_echo) {
             argument[strlen(argument) - trunc] = '\0';
             sprintf(argument, "%s\n@D(@gMessage truncated to %d characters@D)@n\n", argument, truncAt);
         }
-        auto people = ch->getLocationPeople();
+        auto people = ch->location.getPeople();
         for (auto vict : filter_raw(people)) {
             if (vict == ch)
                 continue;
@@ -873,7 +872,7 @@ room_rnum find_target_room(struct char_data *ch, char *rawroomstr) {
 
         auto num = get_number(&mobobjstr);
         if ((target_mob = get_char_vis(ch, mobobjstr, &num, FIND_CHAR_WORLD))) {
-            if (!target_mob->getLocation()) {
+            if (!target_mob->location) {
                 send_to_char(ch, "That character is currently lost.\r\n");
                 return (NOWHERE);
             }
@@ -937,13 +936,13 @@ ACMD(do_at) {
         return;
 
     /* a location has been found. */
-    auto original_loc = ch->getLocation();
+    auto original_loc = ch->location;
     ch->clearLocation();
     ch->setLocation(location);
     command_interpreter(ch, command);
 
     /* check if the char is still there */
-    if (ch->getLocation() == location) {
+    if (ch->location == location) {
         ch->clearLocation();
         ch->setLocation(original_loc);
     }
@@ -963,8 +962,8 @@ ACMD(do_goto) {
     snprintf(buf, sizeof(buf), "$n %s", POOFOUT(ch) ? POOFOUT(ch) : "disappears in a puff of smoke.");
     act(buf, true, ch, nullptr, nullptr, TO_ROOM);
 
-    char_from_room(ch);
-    char_to_room(ch, location);
+    ch->clearLocation();
+    ch->setLocation(location);
 
     snprintf(buf, sizeof(buf), "$n %s", POOFIN(ch) ? POOFIN(ch) : "appears with an ear-splitting bang.");
     act(buf, true, ch, nullptr, nullptr, TO_ROOM);
@@ -996,7 +995,7 @@ ACMD(do_trans) {
                 return;
             }
             act("$n disappears in a mushroom cloud.", false, victim, nullptr, nullptr, TO_ROOM);
-            char_from_room(victim);
+            victim->clearLocation();
             victim->setLocation(ch);
             act("$n arrives from a puff of smoke.", false, victim, nullptr, nullptr, TO_ROOM);
             act("$n has transferred you!", false, ch, nullptr, victim, TO_VICT);
@@ -1015,7 +1014,7 @@ ACMD(do_trans) {
                 if (GET_ADMLEVEL(victim) >= GET_ADMLEVEL(ch))
                     continue;
                 act("$n disappears in a mushroom cloud.", false, victim, nullptr, nullptr, TO_ROOM);
-                char_from_room(victim);
+                victim->clearLocation();
                 victim->setLocation(ch);
                 act("$n arrives from a puff of smoke.", false, victim, nullptr, nullptr, TO_ROOM);
                 act("$n has transferred you!", false, ch, nullptr, victim, TO_VICT);
@@ -1050,8 +1049,8 @@ ACMD(do_teleport) {
         }
         send_to_char(ch, "%s", CONFIG_OK);
         act("$n disappears in a puff of smoke.", false, victim, nullptr, nullptr, TO_ROOM);
-        char_from_room(victim);
-        char_to_room(victim, target);
+        victim->clearLocation();
+        victim->setLocation(target);
         act("$n arrives from a puff of smoke.", false, victim, nullptr, nullptr, TO_ROOM);
         act("$n has teleported you!", false, ch, nullptr, (char *) victim, TO_VICT);
         victim->lookAtLocation();
@@ -1228,7 +1227,7 @@ static void do_stat_room(struct char_data *ch, struct room_data *rm) {
     send_to_char(ch, "Zone: [%3d], VNum: [@g%5d@n], Type: %s\r\n",
                  rm->zone->number, rm->getVnum(), buf2);
 
-    sprintbitarray(rm->room_flags.getAll(), room_bits, RF_ARRAY_MAX, buf2);
+    sprintf(buf2, "%s", rm->room_flags.getFlagNames().c_str());
     send_to_char(ch, "Room Damage: %d, Room Effect: %d\r\n", rm->getDamage(), rm->ground_effect);
     send_to_char(ch, "SpecProc: %s, Flags: %s\r\n", rm->func == nullptr ? "None" : "Exists", buf2);
 
@@ -1285,27 +1284,22 @@ static void do_stat_room(struct char_data *ch, struct room_data *rm) {
         send_to_char(ch, "@n");
     }
 
-    for (i = 0; i < NUM_OF_DIRS; i++) {
+    for (auto& [d, ex] : rm->getDirections()) {
         char buf1[128];
-
-        auto ex = rm->dir_option[i];
-
+        i = static_cast<int>(d);
         if (!ex)
             continue;
 
-        if (ex->to_room == NOWHERE)
-            snprintf(buf1, sizeof(buf1), " @cNONE@n");
-        else
-            snprintf(buf1, sizeof(buf1), "@c%5d@n", GET_ROOM_VNUM(ex->to_room));
+        snprintf(buf1, sizeof(buf1), "@c%5d@n", ex.getVnum());
 
-        sprintbit(ex->exit_info, exit_bits, buf2, sizeof(buf2));
+        sprintbit(ex.exit_info, exit_bits, buf2, sizeof(buf2));
 
         send_to_char(ch,
                      "Exit @c%-5s@n:  To: [%s], Key: [%5d], Keywrd: %s, Type: %s\r\n%s",
                      dirs[i], buf1,
-                     ex->key == NOTHING ? -1 : ex->key,
-                     ex->keyword ? ex->keyword : "None", buf2,
-                     ex->general_description ? ex->general_description
+                     ex.key == NOTHING ? -1 : ex.key,
+                     !ex.keyword.empty() ? ex.keyword : "None", buf2,
+                     !ex.general_description.empty() ? ex.general_description
                                              : "  No exit description.\r\n");
     }
 
@@ -1373,13 +1367,13 @@ static void do_stat_object(struct char_data *ch, struct obj_data *j) {
         send_to_char(ch, "\r\n");
     }
 
-    sprintbitarray(GET_OBJ_WEAR(j).getAll(), wear_bits, TW_ARRAY_MAX, buf);
+    sprintf(buf, "%s", GET_OBJ_WEAR(j).getFlagNames().c_str());
     send_to_char(ch, "Can be worn on: %s\r\n", buf);
 
-    sprintbitarray(GET_OBJ_PERM(j).getAll(), affected_bits, AF_ARRAY_MAX, buf);
+    sprintf(buf, "%s", GET_OBJ_PERM(j).getFlagNames().c_str());
     send_to_char(ch, "Set char bits : %s\r\n", buf);
 
-    sprintbitarray(GET_OBJ_EXTRA(j).getAll(), extra_bits, EF_ARRAY_MAX, buf);
+    sprintf(buf, "%s", GET_OBJ_EXTRA(j).getFlagNames().c_str());
     send_to_char(ch, "Extra flags   : %s\r\n", buf);
 
     auto wString = fmt::format("{}", GET_OBJ_WEIGHT(j));
@@ -1559,7 +1553,7 @@ static void do_stat_character(struct char_data *ch, struct char_data *k) {
         *(tmstr + strlen(tmstr) - 1) = '\0';
         send_to_char(ch, "LOADED AT: [%s]\r\n", tmstr);
     }
-    auto sex = fmt::format("{}", k->sex);
+    auto sex = fmt::format("{}", magic_enum::enum_name(k->sex));
 
     snprintf(buf, sizeof(buf), "%s", sex.c_str());
     send_to_char(ch, "%s %s '%s'  IDNum: [%5d], In room [%5d], Loadroom : [%5d]\r\n",
@@ -1653,13 +1647,13 @@ static void do_stat_character(struct char_data *ch, struct char_data *k) {
     sprinttype(k->mob_specials.default_pos, position_types, buf, sizeof(buf));
     send_to_char(ch, ", Default position: %s", buf);
     send_to_char(ch, ", Idle Timer (in tics) [%d]\r\n", k->timer);
-    sprintbitarray(k->character_flags.getAll(), action_bits, PM_ARRAY_MAX, buf);
+    sprintf(buf, "%s", k->character_flags.getFlagNames().c_str());
     send_to_char(ch, "Character flags: @c%s@n\r\n", buf);
-    sprintbitarray(k->mob_flags.getAll(), action_bits, PM_ARRAY_MAX, buf);
+    sprintf(buf, "%s", k->mob_flags.getFlagNames().c_str());
     send_to_char(ch, "NPC flags: @c%s@n\r\n", buf);
-    sprintbitarray(k->player_flags.getAll(), player_bits, PM_ARRAY_MAX, buf);
+    sprintf(buf, "%s", k->player_flags.getFlagNames().c_str());
     send_to_char(ch, "PLR: @c%s@n\r\n", buf);
-    sprintbitarray(k->pref_flags.getAll(), preference_bits, PR_ARRAY_MAX, buf);
+    sprintf(buf, "%s", k->pref_flags.getFlagNames().c_str());
     send_to_char(ch, "PRF: @g%s@n\r\n", buf);
 
     send_to_char(ch, "Form: %s\r\n", trans::getName(k, k->form));
@@ -1720,7 +1714,7 @@ static void do_stat_character(struct char_data *ch, struct char_data *k) {
     }
 
     /* Showing the bitvector */
-    sprintbitarray(AFF_FLAGS(k).getAll(), affected_bits, AF_ARRAY_MAX, buf);
+    sprintf(buf, "%s", AFF_FLAGS(k).getFlagNames().c_str());
     send_to_char(ch, "AFF: @y%s@n\r\n", buf);
 
     /* Routine to show what spells a char is affected by */
@@ -1915,7 +1909,7 @@ ACMD(do_stat) {
             do_stat_object(ch, object);
         else if ((victim = get_char_vis(ch, name, &number, FIND_CHAR_ROOM)))
             do_stat_character(ch, victim);
-        else if ((object = get_obj_in_list_vis(ch, name, &number, ch->getLocationObjects())))
+        else if ((object = get_obj_in_list_vis(ch, name, &number, ch->location.getObjects())))
             do_stat_object(ch, object);
         else if ((victim = get_char_vis(ch, name, &number, FIND_CHAR_WORLD)))
             do_stat_character(ch, victim);
@@ -2038,7 +2032,7 @@ ACMD(do_switch) {
         send_to_char(ch, "You can't do that, the body is already in use!\r\n");
     else if (!(IS_NPC(victim) || ADM_FLAGGED(ch, ADM_SWITCHMORTAL)))
         send_to_char(ch, "You aren't holy enough to use a mortal's body.\r\n");
-    else if (GET_ADMLEVEL(ch) < ADMLVL_VICE && victim->getRoomFlag(ROOM_GODROOM))
+    else if (GET_ADMLEVEL(ch) < ADMLVL_VICE && victim->location.getRoomFlag(ROOM_GODROOM))
         send_to_char(ch, "You are not godly enough to use that room!\r\n");
     else {
         send_to_char(ch, "%s", CONFIG_OK);
@@ -2408,7 +2402,7 @@ ACMD(do_purge) {
                 }
             }
             extract_char(vict);
-        } else if ((obj = get_obj_in_list_vis(ch, buf, nullptr, ch->getLocationObjects()))) {
+        } else if ((obj = get_obj_in_list_vis(ch, buf, nullptr, ch->location.getObjects()))) {
             act("$n destroys $p.", false, ch, obj, nullptr, TO_ROOM);
             extract_obj(obj);
         } else {
@@ -2424,7 +2418,7 @@ ACMD(do_purge) {
             false, ch, nullptr, nullptr, TO_ROOM);
         send_to_location(ch, "The world seems a little cleaner.\r\n");
         
-        auto people = ch->getLocationPeople();
+        auto people = ch->location.getPeople();
         for (auto it : filter_raw(people)) {
             vict = it;
             if (!IS_NPC(vict))
@@ -2445,7 +2439,7 @@ ACMD(do_purge) {
         }
 
         /* Clear the ground. */
-        auto con = ch->getLocationObjects();
+        auto con = ch->location.getObjects();
         for (auto o :filter_raw(con))
             extract_obj(o);
     }
@@ -2682,7 +2676,7 @@ void perform_immort_vis(struct char_data *ch) {
 }
 
 static void perform_immort_invis(struct char_data *ch, int level) {
-    auto people = ch->getLocationPeople();
+    auto people = ch->location.getPeople();
     for (auto tch : filter_raw(people)) {
         if (tch == ch)
             continue;
@@ -2932,7 +2926,7 @@ ACMD(do_force) {
         send_to_char(ch, "%s", CONFIG_OK);
         mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "(GC) %s forced room %d to %s",
                GET_NAME(ch), ch->getRoomVnum(), to_force);
-        auto people = ch->getLocationPeople();
+        auto people = ch->location.getPeople();
         for (auto target : filter_raw(people)) {
             vict = target;
             if (!IS_NPC(vict) && GET_ADMLEVEL(vict) >= GET_ADMLEVEL(ch))
@@ -3306,7 +3300,7 @@ ACMD(do_show) {
         case 1:
             /* tightened up by JE 4/6/93 */
             if (self)
-                print_zone_to_buf(buf, sizeof(buf), ch->getRoom()->zone->number, 1);
+                print_zone_to_buf(buf, sizeof(buf), ch->location.getZone()->number, 1);
             else if (*value && is_number(value)) {
                 zvn = real_zone(atoi(value));
                 if (zvn == NOBODY) {
@@ -3408,11 +3402,8 @@ ACMD(do_show) {
         case 5:
             len = strlcpy(buf, "Errant Rooms\r\n------------\r\n", sizeof(buf));
             for (auto &[vn, r] : world) {
-                for (j = 0; j < NUM_OF_DIRS; j++) {
-                    auto &e = r->dir_option[j];
-                    if (!e)
-                        continue;
-                    if (e->to_room == 0) {
+                for (auto& [d, e] : r->getDirections()) {
+                    if (e == 0) {
                         nlen = snprintf(buf + len, sizeof(buf) - len, "%2d: (void   ) [%5d] %-*s%s (%s)\r\n", ++k,
                                         vn, count_color_chars(r->getName()) + 40, r->getName(), QNRM,
                                         dirs[j]);
@@ -3420,7 +3411,7 @@ ACMD(do_show) {
                             break;
                         len += nlen;
                     }
-                    if (e->to_room == NOWHERE && !e->general_description) {
+                    if (e == NOWHERE && !e.general_description.empty()) {
                         nlen = snprintf(buf + len, sizeof(buf) - len, "%2d: (Nowhere) [%5d] %-*s%s (%s)\r\n", ++k,
                                         vn, count_color_chars(r->getName()) + 40, r->getName(), QNRM,
                                         dirs[j]);
@@ -4252,7 +4243,7 @@ ACMD(do_plist) {
 
 ACMD(do_peace) {
     send_to_location(ch, "Everything is quite peaceful now.\r\n");
-    auto people = ch->getLocationPeople();
+    auto people = ch->location.getPeople();
     for (auto vict : filter_raw(people)) {
         if (GET_ADMLEVEL(vict) > GET_ADMLEVEL(ch))
             continue;
@@ -4360,7 +4351,7 @@ ACMD(do_zpurge) {
 
     one_argument(argument, arg);
 
-    zone = !*arg ? ch->getRoom()->zone->number : atol(arg);
+    zone = !*arg ? ch->location.getZone()->number : atol(arg);
 
     if (!zone_table.count(zone) || !can_edit_zone(ch, zone)) {
         send_to_char(ch, "You cannot purge that zone. Try %d.\r\n", GET_OLC_ZONE(ch));
@@ -4463,7 +4454,7 @@ ACMD (do_zcheck) {
     one_argument(argument, buf);
 
     if (buf == nullptr || !*buf || !strcmp(buf, "."))
-        zrnum = ch->getRoom()->zone->number;
+        zrnum = ch->location.getZone()->number;
     else
         zrnum = real_zone(atoi(buf));
 
@@ -4688,21 +4679,18 @@ ACMD (do_zcheck) {
 
     for (auto &i : z.rooms) {
         if (auto r = get_room(i); r) {
-            for (j = 0; j < NUM_OF_DIRS; j++) {
+            for (auto& [d, e] : r->getDirections()) {
                 /*check for exit, but ignore off limits if you're in an offlimit zone*/
-                if (!r->dir_option[j])
-                    continue;
-                auto &e = r->dir_option[j];
-                auto ex = get_room(e->to_room);
-                if(!ex) continue;
-                if (ex->zone == r->zone)
+                auto j = static_cast<int>(d);
+                auto ez = e.getZone();
+                if (ez == r->zone)
                     continue;
 
                 for (k = 0; offlimit_zones[k] != -1; k++) {
-                    if (ex->zone->number == real_zone(offlimit_zones[k]) && (found = 1))
+                    if (ez->number == real_zone(offlimit_zones[k]) && (found = 1))
                         len += snprintf(buf + len, sizeof(buf) - len,
                                         "- Exit %s cannot connect to %d (zone off limits).\r\n",
-                                        dirs[j], ex->getVnum());
+                                        dirs[j], e.getVnum());
                 } /* for (k.. */
             } /* cycle directions */
 
@@ -4742,11 +4730,7 @@ ACMD (do_zcheck) {
     for (auto &i : z.rooms) {
         if (auto room = get_room(i); room) {
             m++;
-            for (j = 0, k = 0; j < NUM_OF_DIRS; j++)
-                if (!room->dir_option[j])
-                    k++;
-
-            if (k == NUM_OF_DIRS)
+            if (room->exits.empty())
                 l++;
         }
     }

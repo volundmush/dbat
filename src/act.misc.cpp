@@ -154,7 +154,7 @@ ACMD(do_multiform) {
     std::vector<char_data *> multis;
     struct char_data *tch = nullptr, *next_v = nullptr;
 
-    auto people = ch->getLocationPeople();
+    auto people = ch->location.getPeople();
     for (auto tch : filter_raw(people)) {
         if (tch == ch || !IS_NPC(tch)) {
             continue;
@@ -344,7 +344,7 @@ static void resolve_song(struct char_data *ch) {
                                                                                                 : "Teleportation Melody")));
     act("@CYou continue playing your song.@n", true, ch, nullptr, nullptr, TO_CHAR);
     act(buf, true, ch, nullptr, nullptr, TO_ROOM);
-    auto people = ch->getLocationPeople();
+    auto people = ch->location.getPeople();
     for (auto t : filter_raw(people)) {
         vict = t;
         switch ((int)GET_SONG(ch)) {
@@ -966,7 +966,7 @@ ACMD(do_moondust) {
     send_to_char(ch, "@RHeal@Y: @C%s@n\r\n", add_commas(heal).c_str());
 
     struct char_data *vict = nullptr, *next_v = nullptr;
-    auto people = ch->getLocationPeople();
+    auto people = ch->location.getPeople();
     for (auto t : filter_raw(people)) {
         vict = t;
         if (vict == ch) {
@@ -1260,7 +1260,7 @@ ACMD(do_fish) {
         if (PLR_FLAGGED(ch, PLR_FISHING)) {
             send_to_char(ch, "You are already fishing! Syntax: fish stop\r\n");
             return;
-        } else if (!ch->getRoomFlag(ROOM_FISHING)) {
+        } else if (!ch->location.getRoomFlag(ROOM_FISHING)) {
             send_to_char(ch, "This is not an area you can fish at.\r\n");
             return;
         } else if (AFF_FLAGGED(ch, AFF_FLYING)) {
@@ -1417,7 +1417,7 @@ void fish_update(uint64_t heartPulse, double deltaTime) {
     for (auto i2 : filter_raw(subs)) {
         i = i2;
 
-        if(!i->getRoomFlag(ROOM_FISHING)) {
+        if(!i->location.getRoomFlag(ROOM_FISHING)) {
             i->player_flags.set(PLR_FISHING, false);
             i->setBaseStat("fish_distance", 0);
             i->setBaseStat("fish_state", FISH_NOFISH);
@@ -1480,8 +1480,8 @@ void fish_update(uint64_t heartPulse, double deltaTime) {
                     act("@CYou feel as if the fish has stopped biting...@n", true, ch, nullptr, nullptr, TO_CHAR);
                     ch->setBaseStat("fish_state", FISH_NOFISH);
                 } else if (fstate != FISH_HOOKED && fstate != FISH_BITE &&
-                           ((ch->getRoomFlag(ROOM_FISHFRESH) && rand_number(1, 10) >= 8) ||
-                            (!ch->getRoomFlag(ROOM_FISHFRESH) && rand_number(1, 20) >= 18))) {
+                           ((ch->location.getRoomFlag(ROOM_FISHFRESH) && rand_number(1, 10) >= 8) ||
+                            (!ch->location.getRoomFlag(ROOM_FISHFRESH) && rand_number(1, 20) >= 18))) {
                     act("@CYou feel a fish biting on your line! Better @Ghook@C it!@n", true, ch, nullptr, nullptr,
                         TO_CHAR);
                     ch->setBaseStat("fish_state", FISH_BITE);
@@ -1501,8 +1501,8 @@ static void catch_fish(struct char_data *ch, int quality) {
     struct obj_data *fish = nullptr;
     int num = 1000;
 
-    if (ch->getRoomFlag(ROOM_FISHFRESH)) {
-        if (ch->getWhereFlag(WhereFlag::planet_earth)) {
+    if (ch->location.getRoomFlag(ROOM_FISHFRESH)) {
+        if (ch->location.getWhereFlag(WhereFlag::planet_earth)) {
             switch (rand_number(1, 10)) {
                 case 1:
                 case 2:
@@ -1523,7 +1523,7 @@ static void catch_fish(struct char_data *ch, int quality) {
                     num = 1003;
                     break;
             }
-        } else if (ch->getWhereFlag(WhereFlag::planet_aether)) {
+        } else if (ch->location.getWhereFlag(WhereFlag::planet_aether)) {
             switch (rand_number(1, 10)) {
                 case 1:
                 case 2:
@@ -1546,7 +1546,7 @@ static void catch_fish(struct char_data *ch, int quality) {
             }
         }
     } else {
-        if (ch->getWhereFlag(WhereFlag::planet_earth)) {
+        if (ch->location.getWhereFlag(WhereFlag::planet_earth)) {
             switch (rand_number(1, 10)) {
                 case 1:
                 case 2:
@@ -1567,7 +1567,7 @@ static void catch_fish(struct char_data *ch, int quality) {
                     num = 1007;
                     break;
             }
-        } else if (ch->getWhereFlag(WhereFlag::planet_namek)) {
+        } else if (ch->location.getWhereFlag(WhereFlag::planet_namek)) {
             switch (rand_number(1, 10)) {
                 case 1:
                 case 2:
@@ -2243,10 +2243,8 @@ void ash_burn(struct char_data *ch) {
 
     if(!ch) return;
     if(IS_DEMON(ch) || IS_ANDROID(ch)) return;
-    auto room = ch->getRoom();
-    if(!room) return;
 
-    auto ash = room->findObjectVnum(1306);
+    auto ash = ch->location.findObjectVnum(1306);
     if(!ash) return;
 
     if(!(axion_dice(0) > GET_CON(ch))) return;
@@ -2298,9 +2296,7 @@ ACMD(do_ashcloud) {
         return;
     }
 
-    auto room = ch->getRoom();
-
-    if (room->findObjectVnum(1306)) {
+    if (ch->location.findObjectVnum(1306)) {
         send_to_char(ch, "You can not pile more ash into the air without causing it to clump together and settle.\r\n");
         return;
     }
@@ -2344,12 +2340,12 @@ ACMD(do_ashcloud) {
         return;
     }
 
-    if (room->getEnvironment(ENV_WATER) >= 100.0) {
+    if (ch->location.getEnvironment(ENV_WATER) >= 100.0) {
         send_to_char(ch, "You can not create an ashcloud here, because it is too wet.\r\n");
         return;
     }
 
-    if (room->sector_type == SectorType::space) {
+    if (ch->location.getSectorType() == SectorType::space) {
         send_to_char(ch, "You can not create an ashcloud in space.\r\n");
         return;
     }
@@ -2680,7 +2676,7 @@ ACMD(do_shimmer) {
         } else if (GET_ADMLEVEL(tar) > 0 && GET_ADMLEVEL(ch) < 1) {
             send_to_char(ch, "That immortal prevents you from reaching them.\r\n");
             return;
-        } else if (tar->getRoomFlag(ROOM_NOINSTANT)) {
+        } else if (tar->location.getRoomFlag(ROOM_NOINSTANT)) {
             send_to_char(ch, "You can not go there as it is a protected area!\r\n");
             return;
         } else if (GRAPPLING(ch) && AFF_FLAGGED(GRAPPLING(ch), AFF_SPIRIT)) {
@@ -2746,7 +2742,7 @@ ACMD(do_channel) {
         return;
     }
 
-    if (ch->getLocationGroundEffect() <= 0) {
+    if (ch->location.getGroundEffect() <= 0) {
         send_to_char(ch, "There is no lava here!\r\n");
         return;
     }
@@ -2763,7 +2759,7 @@ ACMD(do_channel) {
                 true, ch, nullptr, nullptr, TO_CHAR);
             act("@RAs $n@R moves $s ki through the lava $e begins to draw heat away from it into a blood ruby. The ruby glows red hot as $e finishes the process of channeling the heat!@n",
                 true, ch, nullptr, nullptr, TO_ROOM);
-            ch->setLocationGroundEffect(0);
+            ch->location.setGroundEffect(0);
             ruby->item_flags.set(ITEM_HOT, true);
         }
         ch->modCurVital(CharVital::ki, -cost);
@@ -2778,12 +2774,14 @@ ACMD(do_hydromancy) {
         send_to_char(ch, "You know nothing about hydromancy!\r\n");
         return;
     }
-    auto r = ch->getRoom();
+
     int skill = GET_SKILL_BASE(ch, SKILL_STYLE), chance = axion_dice(0);
     int64_t cost = (GET_MAX_MANA(ch) / 12) - (GET_INT(ch) * GET_WIS(ch));
 
-    if (r->ground_effect >= 0 && r->sector_type != SectorType::water_swim && r->sector_type != SectorType::water_noswim) {
-        if (r->sector_type != SectorType::underwater) {
+    auto sect = ch->location.getSectorType();
+
+    if (ch->location.getGroundEffect() >= 0 && sect != SectorType::water_swim && sect != SectorType::water_noswim) {
+        if (sect != SectorType::underwater) {
             send_to_char(ch, "There is not sufficient water here.\r\n");
             return;
         } else {
@@ -2870,17 +2868,17 @@ ACMD(do_hydromancy) {
         }
 
         attempt = search_block(arg2, dirs, false);
-        auto e = r->dir_option[attempt];
-        if(!e) {
+        auto ex = ch->location.getExit(static_cast<Direction>(attempt));
+        if(!ex) {
             send_to_char(ch, "You can not flood the water that direction!\r\n");
             return;
         }
-        auto dest = e->getDestination();
+        auto &dest = ex.value();
         if(!dest) {
             send_to_char(ch, "You can not flood the water that direction!\r\n");
             return;
         }
-        if(EXIT_FLAGGED(e, EX_CLOSED)) {
+        if(EXIT_FLAGGED(&dest, EX_CLOSED)) {
             send_to_char(ch, "You can not flood the water that direction!\r\n");
             return;
         }
@@ -2906,7 +2904,7 @@ ACMD(do_hydromancy) {
                     dirs[attempt]);
             act(bun, true, ch, nullptr, nullptr, TO_CHAR);
             act(bunn, true, ch, nullptr, nullptr, TO_ROOM);
-            auto people = r->getPeople();
+            auto people = ch->location.getPeople();
             for (auto t : filter_raw(people)) {
                 vict = t;
                 if (vict == ch)
@@ -2936,7 +2934,7 @@ ACMD(do_hydromancy) {
                     hurt(0, 0, ch, vict, nullptr, cost * 4, 1);
                 }
             }
-            dest->ground_effect = -3;
+            dest.setGroundEffect(-3);
             ch->setBaseStat<int>("last_attack", last);
             WAIT_STATE(ch, PULSE_2SEC);
             ch->setBaseStat("concentrate_cooldown", 15);
@@ -3301,7 +3299,7 @@ ACMD(do_bury) {
         return;
     }
 
-    const auto tile = ch->getLocationTileType();
+    const auto tile = ch->location.getTileType();
     if (tile != SECT_FIELD && tile != SECT_HILLS && tile != SECT_FOREST &&
         tile != SECT_DESERT && tile != SECT_MOUNTAIN) {
         send_to_char(ch, "You are not in a room with enough available dirt or sand to dig.\r\n");
@@ -4717,7 +4715,7 @@ ACMD(do_cook) {
     if (IS_NPC(ch))
         return;
     
-    auto elem = ch->getCookElement();
+    auto elem = ch->location.getCookElement();
 
     if (!elem) {
         send_to_char(ch, "You need a campfire or Flambus Stove nearby to cook.\r\n");
@@ -5016,7 +5014,7 @@ ACMD(do_fireshield) {
         return;
     }
 
-    if (ch->getLocationEnvironment(ENV_WATER) >= 100.0) {
+    if (ch->location.getEnvironment(ENV_WATER) >= 100.0) {
         send_to_char(ch, "There is way too much water here!\r\n");
         return;
     }
@@ -5100,7 +5098,7 @@ ACMD(do_warppool) {
         pass = true;
     } else if (ch->getRoomVnum() >= 13155 && ch->getRoomVnum() < 13199) {
         pass = true;
-    } else if (ch->getWhereFlag(WhereFlag::planet_namek) && ch->getLocationTileType() == SECT_WATER_NOSWIM) {
+    } else if (ch->location.getWhereFlag(WhereFlag::planet_namek) && ch->location.getTileType() == SECT_WATER_NOSWIM) {
         pass = true;
     } else if (ch->getRoomVnum() >= 12103 && ch->getRoomVnum() < 12289) {
         pass = true;
@@ -5111,19 +5109,19 @@ ACMD(do_warppool) {
         return;
     }
 
-    if (!strcasecmp("earth", arg) && ch->getWhereFlag(WhereFlag::planet_earth)) {
+    if (!strcasecmp("earth", arg) && ch->location.getWhereFlag(WhereFlag::planet_earth)) {
         send_to_char(ch, "You are already on Earth!\r\n");
         return;
-    } else if (!strcasecmp("frigid", arg) && ch->getWhereFlag(WhereFlag::planet_frigid)) {
+    } else if (!strcasecmp("frigid", arg) && ch->location.getWhereFlag(WhereFlag::planet_frigid)) {
         send_to_char(ch, "You are already on Frigid!\r\n");
         return;
-    } else if (!strcasecmp("kanassa", arg) && ch->getWhereFlag(WhereFlag::planet_kanassa)) {
+    } else if (!strcasecmp("kanassa", arg) && ch->location.getWhereFlag(WhereFlag::planet_kanassa)) {
         send_to_char(ch, "You are already on Kanasssa!\r\n");
         return;
-    } else if (!strcasecmp("namek", arg) && ch->getWhereFlag(WhereFlag::planet_namek)) {
+    } else if (!strcasecmp("namek", arg) && ch->location.getWhereFlag(WhereFlag::planet_namek)) {
         send_to_char(ch, "You are already on Namek!\r\n");
         return;
-    } else if (!strcasecmp("aether", arg) && ch->getWhereFlag(WhereFlag::planet_aether)) {
+    } else if (!strcasecmp("aether", arg) && ch->location.getWhereFlag(WhereFlag::planet_aether)) {
         send_to_char(ch, "You are already on Aether!\r\n");
         return;
     } else if (!strcasecmp("earth", arg)) {
@@ -5243,19 +5241,19 @@ ACMD(do_obstruct) {
         return;
     }
 
-    auto r = ch->getRoom();
-
-    if (r->room_flags.get(ROOM_PEACEFUL)) {
+    if (ch->location.getRoomFlag(ROOM_PEACEFUL)) {
         send_to_char(ch, "You can not use this in such a peaceful area.\r\n");
         return;
     }
 
-    if (r->sector_type == SectorType::space || r->where_flags.get(WhereFlag::space)) {
+    auto sect = ch->location.getSectorType();
+
+    if (sect == SectorType::space || ch->location.getWhereFlag(WhereFlag::space)) {
         send_to_char(ch, "You can not wall off the vastness of space.\r\n");
         return;
     }
 
-    if (r->sector_type == SectorType::flying) {
+    if (sect == SectorType::flying) {
         send_to_char(ch, "You can not create gravity defying glacial walls.\r\n");
         return;
     }
@@ -5285,16 +5283,12 @@ ACMD(do_obstruct) {
     }
     int dir2 = rev_dir[dir];
 
-    auto e = r->dir_option[dir];
-    if(!e) {
+    auto ex = ch->location.getExit(static_cast<Direction>(dir));
+    if(!ex) {
         send_to_char(ch, "That direction does not exist here.\r\n");
         return;
     }
-    auto dest = e->getDestination();
-    if(!dest) {
-        send_to_char(ch, "That leads nowhere.\r\n");
-        return;
-    }
+    auto &dest = ex.value();
 
     if (skill < prob) {
         act("@CYou channel your ki and start to create a wall of water, but lose your concentration and the water promptly disappears.@n",
@@ -5306,13 +5300,12 @@ ACMD(do_obstruct) {
         return;
     }
     struct obj_data *obj;
-    int newroom = dest->getVnum();
 
-    if (ROOM_FLAGGED(newroom, ROOM_PEACEFUL)) {
+    if (dest.getRoomFlag(ROOM_PEACEFUL)) {
         send_to_char(ch, "You can not block off a peaceful area.\r\n");
         return;
     }
-    auto con = dest->getObjects();
+    auto con = dest.getObjects();
     for (auto o : filter_raw(con)) {
         obj = o;
         if (GET_OBJ_VNUM(obj) == 79) {
@@ -5339,7 +5332,7 @@ ACMD(do_obstruct) {
     struct obj_data *obj2, *obj3;
 
     obj2 = read_object(79, VIRTUAL);
-    obj_to_room(obj2, newroom);
+    obj2->setLocation(dest);
     obj3 = read_object(79, VIRTUAL);
     obj3->setLocation(ch);
 
@@ -5367,8 +5360,7 @@ ACMD(do_obstruct) {
         true, ch, nullptr, nullptr, TO_CHAR);
     act("@c$n@C concentrates and channels $s ki. A wall of water starts to form in such a way to block off one of the directions of this area. As the wall becomes complete it freezes solid by @c$n's@C will!@n",
         true, ch, nullptr, nullptr, TO_ROOM);
-    send_to_room(newroom,
-                 "@cA wall of water forms slowly upward blocking off the %s direction. This wall of water then freezes instantly once it stops growing.@n\r\n",
+    dest.send_to("@cA wall of water forms slowly upward blocking off the %s direction. This wall of water then freezes instantly once it stops growing.@n\r\n",
                  dirs[dir2]);
     improve_skill(ch, SKILL_HYOGA_KABE, 0);
     ch->modCurVital(CharVital::ki, -cost);
@@ -5387,19 +5379,19 @@ ACMD(do_dimizu) {
     int skill = GET_SKILL(ch, SKILL_DIMIZU);
     int prob = axion_dice(0);
 
-    const auto tile = ch->getLocationTileType(); 
-    if (ch->getLocationGroundEffect() < 0) {
+    const auto tile = ch->location.getTileType(); 
+    if (ch->location.getGroundEffect() < 0) {
         act("@CYou concentrate and distabilie the water, separating the hydrogen and oxygen. The gases dissipate quickly.",
             true, ch, nullptr, nullptr, TO_CHAR);
         act("@c$n@C concentrates and the water filling the area seems to shudder. Suddenly the water begins to evaporate as the hydrogen and oxygen are separated.",
             true, ch, nullptr, nullptr, TO_ROOM);
-        ch->setLocationGroundEffect(0);
+        ch->location.setGroundEffect(0);
         WAIT_STATE(ch, PULSE_1SEC);
         return;
     } else if (tile == SECT_UNDERWATER) {
         send_to_char(ch, "The area is already underwater!\r\n");
         return;
-    } else if (tile == SECT_SPACE || ch->getWhereFlag(WhereFlag::space)) {
+    } else if (tile == SECT_SPACE || ch->location.getWhereFlag(WhereFlag::space)) {
         send_to_char(ch, "You can't flood space!\r\n");
         return;
     } else if ((ch->getCurVital(CharVital::ki)) < GET_MAX_MANA(ch) / 12) {
@@ -5419,7 +5411,7 @@ ACMD(do_dimizu) {
         act("@c$n@C gathers $s ki and concentrates on creating water from it. Water begins to flow upward around the entire area. @c$n@C forms the water into a perfect cube with barely any ripples in its walls. It appears the water will maintain this form for a while.@n",
             true, ch, nullptr, nullptr, TO_ROOM);
         ch->modCurVitalDam(CharVital::ki, 0.12);
-        ch->modLocationGroundEffect(-3);
+        ch->location.modGroundEffect(-3);
         improve_skill(ch, SKILL_DIMIZU, 0);
         return;
     }
@@ -5531,7 +5523,7 @@ ACMD(do_spoil) {
         return;
     }
 
-    if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->getLocationObjects()))) {
+    if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->location.getObjects()))) {
         send_to_char(ch, "No corpse around here by that name.\r\n");
         return;
     }

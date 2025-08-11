@@ -852,17 +852,16 @@ static int inv_backup(struct char_data *ch) {
 
 
 /* read direction data */
-static void setup_dir(FILE *fl, room_vnum room, int dir) {
+static void setup_dir(FILE *fl, room_data *r, int dir) {
     int t[11] = {0}, retval = 0;
     char line[READ_SIZE], buf2[128];
 
-    snprintf(buf2, sizeof(buf2), "room #%d, direction D%d", room, dir);
+    snprintf(buf2, sizeof(buf2), "room #%d, direction D%d", r->getVnum(), dir);
 
-    auto r = get_room(room);
+    auto &de = r->exits[static_cast<Direction>(dir)];
+    auto d = &de;
 
-    CREATE(r->dir_option[dir], struct Destination, 1);
-
-    auto d = r->dir_option[dir];
+    d->dir = static_cast<Direction>(dir);
 
     d->general_description = fread_string(fl, buf2);
     d->keyword = fread_string(fl, buf2);
@@ -889,7 +888,7 @@ static void setup_dir(FILE *fl, room_vnum room, int dir) {
             d->exit_info = 0;
 
         d->key = ((t[1] == -1 || t[1] == 65535) ? NOTHING : t[1]);
-        d->to_room = ((t[2] == -1 || t[2] == 65535) ? NOWHERE : t[2]);
+        d->unit = get_room(((t[2] == -1 || t[2] == 65535) ? NOWHERE : t[2]));
 
         if (retval == 3) {
             basic_mud_log("Converting world files to include DC add ons.");
@@ -979,9 +978,6 @@ static void parse_room(FILE *fl, room_vnum virtual_nr) {
     r->func = nullptr;
     r->deathtrap_timer = -1;
 
-    for (i = 0; i < NUM_OF_DIRS; i++)
-        r->dir_option[i] = nullptr;
-
     snprintf(buf, sizeof(buf), "SYSERR: Format error in room #%d (expecting D/E/S)", virtual_nr);
     convert_room(*r);
     while(true) {
@@ -991,7 +987,7 @@ static void parse_room(FILE *fl, room_vnum virtual_nr) {
         }
         switch (*line) {
             case 'D':
-                setup_dir(fl, virtual_nr, atoi(line + 1));
+                setup_dir(fl, r, atoi(line + 1));
                 break;
             case 'E': {
                 auto &ex = r->extra_descriptions.emplace_back();

@@ -640,7 +640,7 @@ void script_trigger_check(uint64_t heartPulse, double deltaTime) {
         sc = SCRIPT(ch);
 
         if (IS_SET(SCRIPT_TYPES(sc), WTRIG_RANDOM) &&
-            (!is_empty(ch->getRoom()->zone->number) ||
+            (!is_empty(ch->location.getZone()->number) ||
                 IS_SET(SCRIPT_TYPES(sc), WTRIG_GLOBAL)))
             random_mtrigger(ch);
     }
@@ -673,7 +673,7 @@ void check_time_triggers() {
         sc = SCRIPT(ch);
 
         if (IS_SET(SCRIPT_TYPES(sc), MTRIG_TIME) &&
-            (!is_empty(ch->getRoom()->zone->number) ||
+            (!is_empty(ch->location.getZone()->number) ||
                 IS_SET(SCRIPT_TYPES(sc), MTRIG_GLOBAL)))
             time_mtrigger(ch);
     }
@@ -703,7 +703,7 @@ void check_interval_triggers(int trigFlag) {
         auto sc = SCRIPT(ch);
 
         if (IS_SET(SCRIPT_TYPES(sc), trigFlag) &&
-            (!is_empty(ch->getRoom()->zone->number) ||
+            (!is_empty(ch->location.getZone()->number) ||
                 IS_SET(SCRIPT_TYPES(sc), MTRIG_GLOBAL)))
             interval_mtrigger(ch, trigFlag);
     }
@@ -994,7 +994,7 @@ ACMD(do_attach) {
     if (is_abbrev(arg, "mobile") || is_abbrev(arg, "mtr")) {
         victim = get_char_vis(ch, targ_name, nullptr, FIND_CHAR_WORLD);
         if (!victim) { /* search room for one with this vnum */
-            auto people = ch->getLocationPeople();
+            auto people = ch->location.getPeople();
             for (auto t : filter_raw(people)) {
                 if (GET_MOB_VNUM(t) == num_arg) {
                     victim = t;
@@ -1011,7 +1011,7 @@ ACMD(do_attach) {
             send_to_char(ch, "Players can't have scripts.\r\n");
             return;
         }
-        if (!can_edit_zone(ch, ch->getRoom()->zone->number)) {
+        if (!can_edit_zone(ch, ch->location.getZone()->number)) {
             send_to_char(ch, "You can only attach triggers in your own zone\r\n");
             return;
         }
@@ -1028,7 +1028,7 @@ ACMD(do_attach) {
                      tn, GET_TRIG_NAME(trig), GET_SHORT(victim), GET_MOB_VNUM(victim));
     } else if (is_abbrev(arg, "object") || is_abbrev(arg, "otr")) {
         object = get_obj_vis(ch, targ_name, nullptr);
-        if(!object) ch->getRoom()->findObjectVnum(num_arg);
+        if(!object) ch->location.findObjectVnum(num_arg);
         if(!object) ch->findObjectVnum(num_arg);
         if(!object) {
             send_to_char(ch, "That object does not exist.\r\n");
@@ -1201,7 +1201,7 @@ ACMD(do_detach) {
         if (is_abbrev(arg1, "mobile") || !strcasecmp(arg1, "mtr")) {
             victim = get_char_vis(ch, arg2, nullptr, FIND_CHAR_WORLD);
             if (!victim) { /* search room for one with this vnum */
-                auto people = ch->getLocationPeople();
+                auto people = ch->location.getPeople();
                 for (auto v : filter_raw(people)) {
                     victim = v;
                     if (GET_MOB_VNUM(victim) == num_arg)
@@ -1220,7 +1220,7 @@ ACMD(do_detach) {
                 trigger = arg3;
         } else if (is_abbrev(arg1, "object") || !strcasecmp(arg1, "otr")) {
             object = get_obj_vis(ch, arg2, nullptr);
-            if (!object) object = ch->getRoom()->findObjectVnum(num_arg);
+            if (!object) object = ch->location.findObjectVnum(num_arg);
             if (!object) object = ch->findObjectVnum(num_arg);
             if (!object) { /* give up */
                 send_to_char(ch, "No such object around.\r\n");
@@ -1236,7 +1236,7 @@ ACMD(do_detach) {
             if ((object = get_obj_in_equip_vis(ch, arg1, nullptr, ch->getEquipment())));
             else if ((object = get_obj_in_list_vis(ch, arg1, nullptr, ch->getObjects())));
             else if ((victim = get_char_room_vis(ch, arg1, nullptr)));
-            else if ((object = get_obj_in_list_vis(ch, arg1, nullptr, ch->getLocationObjects())));
+            else if ((object = get_obj_in_list_vis(ch, arg1, nullptr, ch->location.getObjects())));
             else if ((victim = get_char_vis(ch, arg1, nullptr, FIND_CHAR_WORLD)));
             else if ((object = get_obj_vis(ch, arg1, nullptr)));
             else

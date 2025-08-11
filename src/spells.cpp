@@ -25,7 +25,6 @@
 #include "dbat/races.h"
 #include "dbat/act.informative.h"
 #include "dbat/class.h"
-#include "dbat/bitarray.h"
 #include "dbat/random.h"
 
 /* external variables */
@@ -123,12 +122,12 @@ ASPELL(spell_summon) {
             send_to_char(victim, "%s just tried to summon you to: %s.\r\n"
                                  "%s failed because you have summon protection on.\r\n"
                                  "Type NOSUMMON to allow other players to summon you.\r\n",
-                         GET_NAME(ch), ch->getRoom()->getName(),
+                         GET_NAME(ch), ch->location.getName(),
                          HSSH(ch));
 
             send_to_char(ch, "You failed because %s has summon protection on.\r\n", GET_NAME(victim));
             mudlog(BRF, ADMLVL_IMMORT, true, "%s failed summoning %s to %s.", GET_NAME(ch), GET_NAME(victim),
-                   ch->getRoom()->getName());
+                   ch->location.getName());
             return;
         }
     }
@@ -179,7 +178,7 @@ ASPELL(spell_locate_object) {
             continue;
 
         send_to_char(ch, "%c%s", UPPER(*i->getShortDescription()), (i->getShortDescription()) + 1);
-        auto loc = i->getLocation();
+        auto loc = i->location;
 
         if(loc.unit) {
             switch(loc.unit->type) {
@@ -278,11 +277,11 @@ ASPELL(spell_identify) {
         send_to_char(ch, "You feel informed:\r\nObject '%s', Item type: %s\r\n", obj->getShortDescription(), bitbuf);
 
         if (obj->affect_flags) {
-            sprintbitarray(obj->affect_flags.getAll(), affected_bits, AF_ARRAY_MAX, bitbuf);
+            sprintf(bitbuf, "%s", obj->affect_flags.getFlagNames().c_str());
             send_to_char(ch, "Item will give you following abilities:  %s\r\n", bitbuf);
         }
 
-        sprintbitarray(obj->item_flags.getAll(), extra_bits, EF_ARRAY_MAX, bitbuf);
+        sprintf(bitbuf, "%s", obj->item_flags.getFlagNames().c_str());
         send_to_char(ch, "Item is: %s\r\n", bitbuf);
 
         send_to_char(ch, "Weight: %" I64T ", Value: %d, Rent: %d, Min Level: %d\r\n", GET_OBJ_WEIGHT(obj),
@@ -442,15 +441,16 @@ ASPELL(spell_detect_poison) {
 
 ASPELL(spell_portal) {
     struct obj_data *portal, *tportal;
-    struct room_data *rm;
-    rm = victim->getRoom();
+    auto &rm = victim->location;
 
     if (ch == nullptr || victim == nullptr)
         return;
-    
-    auto &zf = rm->zone->zone_flags;
 
-    if (!can_edit_zone(ch, rm->zone->number) && zf.get(ZONE_QUEST)) {
+    auto z = rm.getZone();
+
+    auto &zf = z->zone_flags;
+
+    if (!can_edit_zone(ch, z->number) && zf.get(ZONE_QUEST)) {
         send_to_char(ch, "That target is in a quest zone.\r\n");
         return;
     }
@@ -491,68 +491,7 @@ ASPELL(spell_portal) {
 
 
 ASPELL(art_abundant_step) {
-    int steps, i = 0, j, rep, max;
-    room_rnum r, nextroom;
-    char buf[MAX_INPUT_LENGTH], tc;
-    const char *p;
 
-    steps = 0;
-    r = IN_ROOM(ch);
-    p = arg;
-
-    while (p && *p && !isdigit(*p) && !isalpha(*p)) p++;
-
-    if (!p || !*p) {
-        send_to_char(ch, "You must give directions from your current location. Examples:\r\n"
-                         "  w w nw n e\r\n"
-                         "  2w nw n e\r\n");
-        return;
-    }
-
-    while (*p) {
-        while (*p && !isdigit(*p) && !isalpha(*p)) p++;
-        if (isdigit(*p)) {
-            rep = atoi(p);
-            while (isdigit(*p)) p++;
-        } else
-            rep = 1;
-        if (isalpha(*p)) {
-            for (i = 0; isalpha(*p); i++, p++) buf[i] = LOWER(*p);
-            j = i;
-            tc = buf[i];
-            buf[i] = 0;
-            for (i = 1;
-                 complete_cmd_info[i].command_pointer == do_move && strcmp(complete_cmd_info[i].sort_as, buf); i++);
-            if (complete_cmd_info[i].command_pointer == do_move) {
-                i = complete_cmd_info[i].subcmd - 1;
-            } else
-                i = -1;
-            buf[j] = tc;
-        }
-        if (i > -1)
-            while (rep--) {
-                if (++steps > max)
-                    break;
-                if (!W_EXIT(r, i)) {
-                    send_to_char(ch, "Invalid step. Skipping.\r\n");
-                    break;
-                }
-                nextroom = W_EXIT(r, i)->to_room;
-                if (nextroom == NOWHERE)
-                    break;
-                r = nextroom;
-            }
-        if (steps > max)
-            break;
-    }
-    send_to_char(ch, "Your will bends reality as you travel through the ethereal plane.\r\n");
-    act("$n is suddenly absent.", true, ch, nullptr, nullptr, TO_ROOM);
-
-    char_from_room(ch);
-    char_to_room(ch, r);
-
-    act("$n is suddenly present.", true, ch, nullptr, nullptr, TO_ROOM);
-    ch->lookAtLocation();
 
     return;
 }

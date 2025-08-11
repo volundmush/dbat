@@ -150,8 +150,8 @@ OCMD(do_oecho) {
     if (!*argument)
         obj_log(obj, "oecho called with no args");
 
-    else if (auto room = obj->getRoom(); room) {
-        send_to_room(room, "%s", argument);
+    else if (obj->location) {
+        obj->location.sendText(argument);
     } else
         obj_log(obj, "oecho called by object in NOWHERE");
 }
@@ -389,14 +389,14 @@ OCMD(do_ogoto) {
     } else if (IN_ROOM(obj) == NOWHERE) {
         obj_log(obj, "ogoto tried to leave nowhere");
     } else {
-        obj_from_room(obj);
-        obj_to_room(obj, target);
+        obj->clearLocation();
+        obj->setLocation(target);
     }
 }
 
 OCMD(do_oteleport) {
     char_data *ch, *next_ch;
-    room_rnum target, rm;
+    room_rnum target;
     char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 
     two_arguments(argument, arg1, arg2);
@@ -412,22 +412,20 @@ OCMD(do_oteleport) {
         obj_log(obj, "oteleport target is an invalid room");
 
     else if (!strcasecmp(arg1, "all")) {
-        rm = obj_room(obj);
-        if (target == rm)
-            obj_log(obj, "oteleport target is itself");
-        auto people = get_room(rm)->getPeople();
+        auto rm = obj->getAbsoluteLocation();
+        auto people = rm.getPeople();
         for (auto ch : filter_raw(people)) {
             if (!valid_dg_target(ch, DG_ALLOW_GODS))
                 continue;
-            char_from_room(ch);
-            char_to_room(ch, target);
+            ch->clearLocation();
+            ch->setLocation(target);
             enter_wtrigger(ch->getRoom(), ch, -1);
         }
     } else {
         if ((ch = get_char_by_obj(obj, arg1))) {
             if (valid_dg_target(ch, DG_ALLOW_GODS)) {
-                char_from_room(ch);
-                char_to_room(ch, target);
+                ch->clearLocation();
+                ch->setLocation(target);
                 enter_wtrigger(ch->getRoom(), ch, -1);
             }
         } else
@@ -568,8 +566,7 @@ OCMD(do_oasound) {
 
     auto r = get_room(room);
     for (auto &[door, ex] : r->getDirections()) {
-        auto dest = ex.getDestination();
-        send_to_room(dest, "%s", argument);
+        ex.sendText(argument);
     }
 }
 
@@ -578,7 +575,6 @@ OCMD(do_odoor) {
     char target[MAX_INPUT_LENGTH], direction[MAX_INPUT_LENGTH];
     char field[MAX_INPUT_LENGTH], *value;
     room_data *rm;
-    struct Destination *newexit;
     int dir, fd, to_room;
 
     const char *door_field[] = {
@@ -615,32 +611,23 @@ OCMD(do_odoor) {
         obj_log(obj, "odoor: invalid field");
         return;
     }
-
-    newexit = rm->dir_option[dir];
+    auto cdir = static_cast<Direction>(dir);
+    auto newexit = rm->getDirection(cdir);
 
     /* purge exit */
     if (fd == 0) {
         if (newexit) {
-            if (newexit->general_description)
-                free(newexit->general_description);
-            if (newexit->keyword)
-                free(newexit->keyword);
-            free(newexit);
-            rm->dir_option[dir] = nullptr;
+            rm->deleteExit(cdir);
         }
     } else {
         if (!newexit) {
-            CREATE(newexit, struct Destination, 1);
-            rm->dir_option[dir] = newexit;
+            newexit.emplace();
+            newexit->dir = cdir;
         }
 
         switch (fd) {
             case 1:  /* description */
-                if (newexit->general_description)
-                    free(newexit->general_description);
-                CREATE(newexit->general_description, char, strlen(value) + 3);
-                strcpy(newexit->general_description, value);
-                strcat(newexit->general_description, "\r\n"); /* strcat : OK */
+                newexit->general_description = std::string(value) + "\r\n";
                 break;
             case 2:  /* flags       */
                 newexit->exit_info = (int16_t) asciiflag_conv(value);
@@ -649,18 +636,16 @@ OCMD(do_odoor) {
                 newexit->key = atoi(value);
                 break;
             case 4:  /* name        */
-                if (newexit->keyword)
-                    free(newexit->keyword);
-                CREATE(newexit->keyword, char, strlen(value) + 1);
-                strcpy(newexit->keyword, value);
+                newexit->keyword = value;
                 break;
             case 5:  /* room        */
                 if ((to_room = real_room(atoi(value))) != NOWHERE)
-                    newexit->to_room = to_room;
+                    newexit->unit = get_room(to_room);
                 else
                     obj_log(obj, "odoor: invalid door target");
                 break;
         }
+        rm->replaceExit(*newexit);
     }
 }
 

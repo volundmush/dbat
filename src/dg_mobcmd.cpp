@@ -133,16 +133,22 @@ ACMD(do_masound) {
 
     skip_spaces(&argument);
 
-    auto was_in_room = ch->getRoom();
-    for (auto &[door, ex] : was_in_room->getDirections()) {
-        auto dest = ex.getDestination();
-        if(dest != was_in_room) {
-            ch->location.unit = dest;
-            sub_write(argument, ch, true, TO_ROOM);
-        }
+    auto loc = ch->location;
+    int counter = 0;
+    for (auto &[door, ex] : loc.getExits()) {
+        if(ex == loc) continue;
+        ch->clearLocation();
+        ch->setLocation(ex);
+        sub_write(argument, ch, true, TO_ROOM);
+        counter++;
     }
 
-    ch->location.unit = was_in_room;
+    if(counter > 0) {
+        // put the mob back where it started.
+        ch->clearLocation();
+        ch->setLocation(loc);
+    }
+    
 }
 
 /* Heals a stat of the mob */
@@ -549,13 +555,13 @@ ACMD(do_mpurge) {
         char_data *vnext;
         obj_data *obj_next;
 
-        auto people = ch->getLocationPeople();
+        auto people = ch->location.getPeople();
         for (auto victim : filter_raw(people)) {
             if (IS_NPC(victim) && victim != ch)
                 extract_char(victim);
         }
 
-        auto locobjs = ch->getLocationObjects();
+        auto locobjs = ch->location.getObjects();
         for (auto obj : filter_raw(locobjs)) {
             extract_obj(obj);
         }
@@ -623,8 +629,8 @@ ACMD(do_mgoto) {
     if (FIGHTING(ch))
         stop_fighting(ch);
 
-    char_from_room(ch);
-    char_to_room(ch, location);
+    ch->clearLocation();
+    ch->setLocation(location);
     enter_wtrigger(ch->getRoom(), ch, -1);
 }
 
@@ -704,12 +710,12 @@ ACMD(do_mteleport) {
             return;
         }
 
-        auto people = ch->getLocationPeople();
+        auto people = ch->location.getPeople();
         for (auto vict : filter_raw(people)) {
 
             if (valid_dg_target(vict, DG_ALLOW_GODS)) {
-                char_from_room(vict);
-                char_to_room(vict, target);
+                vict->clearLocation();
+                vict->setLocation(target);
                 enter_wtrigger(ch->getRoom(), ch, -1);
             }
         }
@@ -725,8 +731,8 @@ ACMD(do_mteleport) {
         }
 
         if (valid_dg_target(ch, DG_ALLOW_GODS)) {
-            char_from_room(vict);
-            char_to_room(vict, target);
+            vict->clearLocation();
+            vict->setLocation(target);
             enter_wtrigger(ch->getRoom(), ch, -1);
         }
     }
@@ -798,7 +804,7 @@ ACMD(do_mforce) {
 
         for (i = descriptor_list; i; i = i->next) {
             if ((i->character != ch) && !i->connected &&
-                (i->character->getLocation() == ch->getLocation())) {
+                (i->character->location == ch->location)) {
                 vch = i->character;
                 if (GET_LEVEL(vch) < GET_LEVEL(ch) && CAN_SEE(ch, vch) &&
                     valid_dg_target(vch, 0)) {
@@ -1057,7 +1063,6 @@ ACMD(do_mdoor) {
     char target[MAX_INPUT_LENGTH], direction[MAX_INPUT_LENGTH];
     char field[MAX_INPUT_LENGTH], *value;
     room_data *rm;
-    struct Destination *newexit;
     int dir, fd, to_room;
 
     const char *door_field[] = {
@@ -1103,31 +1108,24 @@ ACMD(do_mdoor) {
         return;
     }
 
-    newexit = rm->dir_option[dir];
+    auto cdir = static_cast<Direction>(dir);
+    auto newexit = rm->getDirection(cdir);
 
     /* purge exit */
     if (fd == 0) {
         if (newexit) {
-            if (newexit->general_description)
-                free(newexit->general_description);
-            if (newexit->keyword)
-                free(newexit->keyword);
-            free(newexit);
-            rm->dir_option[dir] = nullptr;
+
+            rm->deleteExit(cdir);
         }
     } else {
         if (!newexit) {
-            CREATE(newexit, struct Destination, 1);
-            rm->dir_option[dir] = newexit;
+            newexit.emplace();
+            newexit->dir = cdir;
         }
 
         switch (fd) {
             case 1:  /* description */
-                if (newexit->general_description)
-                    free(newexit->general_description);
-                CREATE(newexit->general_description, char, strlen(value) + 3);
-                strcpy(newexit->general_description, value);
-                strcat(newexit->general_description, "\r\n");
+                newexit->general_description = std::string(value) + "\r\n";
                 break;
             case 2:  /* flags       */
                 newexit->exit_info = (int16_t) asciiflag_conv(value);
@@ -1136,14 +1134,11 @@ ACMD(do_mdoor) {
                 newexit->key = atoi(value);
                 break;
             case 4:  /* name        */
-                if (newexit->keyword)
-                    free(newexit->keyword);
-                CREATE(newexit->keyword, char, strlen(value) + 1);
-                strcpy(newexit->keyword, value);
+                newexit->keyword = value;
                 break;
             case 5:  /* room        */
                 if ((to_room = real_room(atoi(value))) != NOWHERE)
-                    newexit->to_room = to_room;
+                    newexit->unit = get_room(to_room);
                 else
                     mob_log(ch, "mdoor: invalid door target");
                 break;

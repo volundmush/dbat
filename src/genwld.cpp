@@ -87,10 +87,12 @@ int delete_room(room_rnum rnum) {
         basic_mud_log("WARNING: GenOLC: delete_room: Deleting mortal start room!");
         r_mortal_start_room = 0;    /* The Void */
     }
+
     if (r_immort_start_room == rnum) {
         basic_mud_log("WARNING: GenOLC: delete_room: Deleting immortal start room!");
         r_immort_start_room = 0;    /* The Void */
     }
+
     if (r_frozen_start_room == rnum) {
         basic_mud_log("WARNING: GenOLC: delete_room: Deleting frozen start room!");
         r_frozen_start_room = 0;    /* The Void */
@@ -121,24 +123,7 @@ int delete_room(room_rnum rnum) {
      */
 
     for(auto &[vn, r] : world) {
-        for (j = 0; j < NUM_OF_DIRS; j++) {
-            auto &e = r->dir_option[j];
-            if (!e || e->to_room != rnum)
-                continue;
-            if ((!e->keyword || !*e->keyword) &&
-                (!e->general_description || !*e->general_description)) {
-                /* no description, remove exit completely */
-                if (e->keyword)
-                    free(e->keyword);
-                if (e->general_description)
-                    free(e->general_description);
-                free(e);
-                e = nullptr;
-            } else {
-                /* description is set, just point to nowhere */
-                e->to_room = NOWHERE;
-            }
-        }
+
 
     };
 
@@ -190,16 +175,9 @@ int copy_room_strings(struct room_data *dest, struct room_data *source) {
     dest->strings = source->strings;
     dest->extra_descriptions = source->extra_descriptions;
 
-    for (i = 0; i < NUM_OF_DIRS; i++) {
-        if (!R_EXIT(source, i))
-            continue;
-
-        CREATE(R_EXIT(dest, i), struct Destination, 1);
-        *R_EXIT(dest, i) = *R_EXIT(source, i);
-        if (R_EXIT(source, i)->general_description)
-            R_EXIT(dest, i)->general_description = strdup(R_EXIT(source, i)->general_description);
-        if (R_EXIT(source, i)->keyword)
-            R_EXIT(dest, i)->keyword = strdup(R_EXIT(source, i)->keyword);
+    for (auto& [d, e] : source->exits) {
+        dest->exits[d].keyword = e.keyword;
+        dest->exits[d].general_description = e.general_description;
     }
 
 
@@ -214,25 +192,12 @@ int free_room_strings(struct room_data *room) {
     room->extra_descriptions.clear();
 
     /* Free exits. */
-    for (i = 0; i < NUM_OF_DIRS; i++) {
-        if (room->dir_option[i]) {
-            if (room->dir_option[i]->general_description)
-                free(room->dir_option[i]->general_description);
-            if (room->dir_option[i]->keyword)
-                free(room->dir_option[i]->keyword);
-            free(room->dir_option[i]);
-            room->dir_option[i] = nullptr;
-        }
+    for (auto& [d, e] : room->exits) {
+        e.keyword.clear();
+        e.general_description.clear();
     }
 
     return true;
-}
-
-Destination::~Destination() {
-    if (general_description)
-        free(general_description);
-    if (keyword)
-        free(keyword);
 }
 
 /*
@@ -242,14 +207,6 @@ nlohmann::json room_data::serializeDgVars() {
     return nlohmann::json::array();
 }
 */
-
-room_data::~room_data() {
-    // fields like name are handled by the base destructor...
-    // we just need to clean up exits.
-    for(auto d : dir_option) {
-        delete d;
-    }
-}
 
 bool room_data::isActive() {
     return world.contains(id);
@@ -293,10 +250,6 @@ int room_data::modDamage(int amount) {
     return setDamage(damage + amount);
 }
 
-struct room_data* Destination::getDestination() {
-    return get_room(to_room);
-}
-
 std::vector<std::weak_ptr<char_data>> room_data::getPeople() const {
     std::vector<std::weak_ptr<char_data>> out;
     for(const auto &uw : contents) {
@@ -334,13 +287,14 @@ std::optional<std::string> room_data::dgCallMember(const std::string& member, co
     char bitholder[MAX_STRING_LENGTH];
 
     if(auto d = _dirNames.find(lmember); d != _dirNames.end()) {
-        auto ex = dir_option[d->second];
+        auto ex = getDirection(static_cast<Direction>(d->second));
         if(!ex) {
             return "";
         }
         if (!arg.empty()) {
-            if (!strcasecmp(arg.c_str(), "vnum"))
-                return fmt::format("{}", ex->to_room);
+            if (!strcasecmp(arg.c_str(), "vnum")) {
+                return fmt::format("{}", ex->getVnum());
+            }
             else if (!strcasecmp(arg.c_str(), "key"))
                 return fmt::format("{}", ex->key);
             else if (!strcasecmp(arg.c_str(), "bits")) {
@@ -348,10 +302,7 @@ std::optional<std::string> room_data::dgCallMember(const std::string& member, co
                 return bitholder;
             }
             else if (!strcasecmp(arg.c_str(), "room")) {
-                if (auto roomFound = get_room(ex->to_room); roomFound)
-                    return fmt::format("{}", roomFound->getUID(true));
-                else
-                    return "";
+                return fmt::format("{}", ex->getUID(true));
             }
         } else /* no subfield - default to bits */
             {
@@ -412,7 +363,7 @@ double room_data::getEnvironment(int type) const {
             }
 
             if(environment.contains(type))
-                return environment[type];
+                return environment.at(type);
 
             if(planet) {
                 if(auto a = getPlanetEnvironment(planet.value(), type); a) {
@@ -447,71 +398,25 @@ double room_data::getEnvironment(int type) const {
             return getPlanetEnvironment(planet.value(), type).value();
         }
     }
-    if(environment.contains(type)) return environment[type];
+    if(environment.contains(type)) return environment.at(type);
     return 0.0;
 }
-
-
-
 
 std::vector<trig_vnum> room_data::getProtoScript() const {
     return proto_script;
 }
 
-bool room_data::isDark() const {
-    return false; // temporarily disabled.
-
-    // override the const...
-    auto r = (room_data*)this;
-
-    auto pe = r->getPeople();
-    for(auto c : filter_raw(pe)) {
-        if(c->isProvidingLight()) return false;
-    }
-
-    if (cook_element(r))
-        return (false);
-
-    if (ROOM_FLAGGED(r, ROOM_NOINSTANT) && ROOM_FLAGGED(r, ROOM_DARK)) {
-        return (true);
-    }
-    if (ROOM_FLAGGED(r, ROOM_NOINSTANT) && !ROOM_FLAGGED(r, ROOM_DARK)) {
-        return (false);
-    }
-
-    if (ROOM_FLAGGED(r, ROOM_DARK))
-        return (true);
-
-    if (ROOM_FLAGGED(r, ROOM_INDOORS))
-        return (false);
-
-    const auto tile = static_cast<int>(r->sector_type);
-
-    if (tile == SECT_INSIDE || tile == SECT_CITY || tile == SECT_IMPORTANT || tile == SECT_SHOP)
-        return (false);
-
-    if (tile == SECT_SPACE)
-        return (false);
-
-    if (weather_info.sunlight == SUN_SET)
-        return (true);
-
-    if (weather_info.sunlight == SUN_DARK)
-        return (true);
-
-    return (false);
-}
 
 // This implementation is problematic because it recursively calls itself.
 // Also, since unit_data::getName() takes no arguments, you cannot overload it with a const Coordinates&
 // unless you want to provide a new interface. If you want to call the base version, do:
 
+const std::vector<ExtraDescription>& room_data::getExtraDescription(const Coordinates& coor) const {
+    return getExtraDescription();
+}   
+
 const char* room_data::getName(const Coordinates& /*coor*/) const {
     return getName();
-}
-
-bool room_data::getIsDark(const Coordinates& coor) const {
-    return isDark();
 }
 
 std::vector<std::weak_ptr<obj_data>> room_data::getObjects(const Coordinates& coor) const {
@@ -523,24 +428,12 @@ std::vector<std::weak_ptr<char_data>> room_data::getPeople(const Coordinates& co
 }
 
 std::optional<Destination> room_data::getDirection(Direction dir) const {
-    auto i = static_cast<int>(dir);
-    if (i < 0 || i >= NUM_OF_DIRS) {
-        return std::nullopt;
-    }
-    if (dir_option[i] && *dir_option[i]) {
-        return *dir_option[i];
-    }
+    if(exits.contains(dir)) return exits.at(dir);
     return std::nullopt;
 }
 
 std::map<Direction, Destination> room_data::getDirections() const {
-    std::map<Direction, Destination> directions;
-    for (int i = 0; i < NUM_OF_DIRS; ++i) {
-        if (dir_option[i] && *dir_option[i]) {
-            directions[static_cast<Direction>(i)] = *dir_option[i];
-        }
-    }
-    return directions;
+    return exits;
 }
 
 std::optional<Destination> room_data::getDirection(const Coordinates& coor, Direction dir) {
@@ -551,15 +444,15 @@ std::map<Direction, Destination> room_data::getDirections(const Coordinates& coo
     return getDirections();
 }
 
-void room_data::setRoomFlag(const Coordinates& coor, int flag, bool value) {
+void room_data::setRoomFlag(const Coordinates& coor, RoomFlag flag, bool value) {
     room_flags.set(flag, value);
 }
 
-bool room_data::toggleRoomFlag(const Coordinates& coor, int flag) {
+bool room_data::toggleRoomFlag(const Coordinates& coor, RoomFlag flag) {
     return room_flags.toggle(flag);
 }
 
-bool room_data::getRoomFlag(const Coordinates& coor, int flag) const {
+bool room_data::getRoomFlag(const Coordinates& coor, RoomFlag flag) const {
     return room_flags.get(flag);
 }
 
@@ -627,6 +520,27 @@ void room_data::clearEnvironment(const Coordinates& coor, int type) {
     clearEnvironment(type);
 }
 
-Destination::operator bool() const {
-    return to_room != NOWHERE;
+void room_data::sendText(const std::string& txt) {
+    auto people = getPeople();
+    for(auto i : filter_raw(people)) {
+        i->sendText(txt);
+    }
+
+    for(auto d = descriptor_list; d; d = d->next) {
+        if (STATE(d) != CON_PLAYING)
+            continue;
+
+        if (PRF_FLAGGED(d->character, PRF_ARENAWATCH)) {
+            if (arena_watch(d->character) == vn) {
+                d->sendText("@c-----@CArena@c-----@n\r\n%s\r\n@c-----@CArena@c-----@n\r\n" + txt);
+            }
+        }
+        if (auto eaves = GET_EAVESDROP(d->character); eaves > 0) {
+            int roll = rand_number(1, 101);
+            if (eaves == vn && GET_SKILL(d->character, SKILL_EAVESDROP) > roll) {
+                d->sendText("@c-----Eavesdrop-----@n\r\n%s\r\n@c-----Eavesdrop-----@n\r\n" + txt);
+            }
+        }
+
+    }
 }

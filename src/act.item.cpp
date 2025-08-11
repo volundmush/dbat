@@ -30,7 +30,6 @@
 #include "dbat/genzon.h"
 #include "dbat/dg_scripts.h"
 #include "dbat/boards.h"
-#include "dbat/bitarray.h"
 #include "dbat/random.h"
 
 
@@ -395,13 +394,13 @@ ACMD(do_garden) {
                 send_to_char(ch, "You need a shovel in order to collect soil.\r\n");
                 return;
             }
-            const auto tile = ch->getLocationTileType();
+            const auto tile = ch->location.getTileType();
             if (tile != SECT_FOREST && tile != SECT_FIELD &&
                 tile != SECT_MOUNTAIN && tile != SECT_HILLS) {
                 send_to_char(ch, "You can not collect soil from this area.\r\n");
                 return;
             }
-            if (ch->getRoomFlag(ROOM_FERTILE1)) {
+            if (ch->location.getRoomFlag(ROOM_FERTILE1)) {
                 struct obj_data *soil = read_object(255, VIRTUAL);
                 obj_to_char(soil, ch);
                 act("@yYou sink your shovel into the soft ground and manage to dig up a pile of fertile soil!@n", true,
@@ -411,7 +410,7 @@ ACMD(do_garden) {
                 SET_OBJ_VAL(soil, VAL_OTHER_SOILQUALITY, 8);
                 WAIT_STATE(ch, PULSE_4SEC);
                 return;
-            } else if (ch->getRoomFlag(ROOM_FERTILE2)) {
+            } else if (ch->location.getRoomFlag(ROOM_FERTILE2)) {
                 struct obj_data *soil = read_object(255, VIRTUAL);
                 obj_to_char(soil, ch);
                 act("@yYou sink your shovel into the soft ground and manage to dig up a pile of good soil!@n", true, ch,
@@ -441,7 +440,7 @@ ACMD(do_garden) {
         return;
     }
 
-    if (!ch->getRoomFlag(ROOM_GARDEN1) && !ch->getRoomFlag(ROOM_GARDEN2)) {
+    if (!ch->location.getRoomFlag(ROOM_GARDEN1) && !ch->location.getRoomFlag(ROOM_GARDEN2)) {
         send_to_char(ch, "You are not even in a garden!\r\n");
         return;
     }
@@ -453,7 +452,7 @@ ACMD(do_garden) {
             return;
         }
     } else {
-        if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->getLocationObjects()))) {
+        if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->location.getObjects()))) {
             send_to_char(ch, "That plant doesn't seem to be here.\r\n");
             return;
         }
@@ -582,14 +581,14 @@ ACMD(do_garden) {
             struct obj_data *soil = nullptr;
             soil = ch->findObjectVnum(255);
 
-            auto con = ch->getLocationObjects();
+            auto con = ch->location.getObjects();
 
             if (found == false) {
                 send_to_char(ch, "You don't have any real soil.\r\n");
-            } else if (con.size() > 7 && ch->getRoomFlag(ROOM_GARDEN1)) {
+            } else if (con.size() > 7 && ch->location.getRoomFlag(ROOM_GARDEN1)) {
                 send_to_char(ch, "This room already has all its planters full. Try digging up some plants.\r\n");
                 return;
-            } else if (con.size() > 19 && ch->getRoomFlag(ROOM_GARDEN2)) {
+            } else if (con.size() > 19 && ch->location.getRoomFlag(ROOM_GARDEN2)) {
                 send_to_char(ch, "This room already has all its planters full. Try digging up some plants.\r\n");
                 return;
             } else if (skill < axion_dice(-5)) {
@@ -702,7 +701,7 @@ ACMD(do_pack) {
         return;
     }
 
-    if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->getLocationObjects()))) {
+    if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->location.getObjects()))) {
         send_to_char(ch, "That house item doesn't seem to be around.\r\n");
         return;
     } else {
@@ -863,14 +862,14 @@ ACMD(do_deploy) {
     } else if (GET_RP(ch) < 10 && furniture == false) {
         send_to_char(ch, "You are required to have (not spend) 10 RPP in order to place a house.\r\n");
         return;
-    } else if (furniture == true && (!ch->getRoomFlag(ROOM_HOUSE) || ch->getRoomFlag(ROOM_SHIP))) {
+    } else if (furniture == true && (!ch->location.getRoomFlag(ROOM_HOUSE) || ch->location.getRoomFlag(ROOM_SHIP))) {
         send_to_char(ch, "You can't deploy house furniture capsules here.\r\n");
         return;
     } else if (furniture == true &&
-               (ch->getRoomFlag(ROOM_GARDEN1) || ch->getRoomFlag(ROOM_GARDEN2))) {
+               (ch->location.getRoomFlag(ROOM_GARDEN1) || ch->location.getRoomFlag(ROOM_GARDEN2))) {
         send_to_char(ch, "You can't deploy house furniture capsules here.\r\n");
         return;
-    } else if (const auto tile = ch->getLocationTileType(); furniture == false && (tile == SECT_INSIDE || tile == SECT_WATER_NOSWIM ||
+    } else if (const auto tile = ch->location.getTileType(); furniture == false && (tile == SECT_INSIDE || tile == SECT_WATER_NOSWIM ||
                                       tile == SECT_WATER_SWIM || tile == SECT_SPACE)) {
         send_to_char(ch, "You can not deploy that in this kind of area. Try an area more suitable for a house.\r\n");
         return;
@@ -1208,7 +1207,7 @@ void dball_load(uint64_t heartPulse, double deltaTime) {
             int vnum = GET_OBJ_VNUM(k);
             if (vnum >= 20 && vnum <= 26) {
                 foundFlags[vnum - 20] = true;
-            } else if (k->getLocationGroundEffect() == 6 && !OBJ_FLAGGED(k, ITEM_UNBREAKABLE)) {
+            } else if (k->location.getGroundEffect() == 6 && !OBJ_FLAGGED(k, ITEM_UNBREAKABLE)) {
                 send_to_location(k, "@R%s@r melts in the lava!@n\r\n", k->getShortDescription());
                 extract_obj(k);
             }
@@ -1241,11 +1240,11 @@ ACMD(do_auction) {
 
     two_arguments(argument, arg1, arg2);
 
-    if (ch->getWhereFlag(WhereFlag::hyperbolic_time_chamber)) {
+    if (ch->location.getWhereFlag(WhereFlag::hyperbolic_time_chamber)) {
         send_to_char(ch, "This is a different dimension!\r\n");
         return;
     }
-    if (ch->getWhereFlag(WhereFlag::pendulum_past)) {
+    if (ch->location.getWhereFlag(WhereFlag::pendulum_past)) {
         send_to_char(ch, "You are in the past!\r\n");
         return;
     }
@@ -1316,11 +1315,11 @@ ACMD(do_bid) {
         return;
     }
 
-    if (ch->getWhereFlag(WhereFlag::hyperbolic_time_chamber)) {
+    if (ch->location.getWhereFlag(WhereFlag::hyperbolic_time_chamber)) {
         send_to_char(ch, "This is a different dimension!\r\n");
         return;
     }
-    if (ch->getWhereFlag(WhereFlag::pendulum_past)) {
+    if (ch->location.getWhereFlag(WhereFlag::pendulum_past)) {
         send_to_char(ch, "This is the past, nothing is being auctioned!\r\n");
         return;
     }
@@ -1441,7 +1440,7 @@ ACMD(do_bid) {
                 }
                 send_to_char(ch, "@GItem Weight @W: @w%s@n\n", add_commas(GET_OBJ_WEIGHT(obj2)).c_str());
                 char bits[MAX_STRING_LENGTH];
-                sprintbitarray(GET_OBJ_WEAR(obj2).getAll(), wear_bits, TW_ARRAY_MAX, bits);
+                sprintf(bits, "%s", GET_OBJ_WEAR(obj2).getFlagNames().c_str());
                 search_replace(bits, "TAKE", "");
                 send_to_char(ch, "@GWear Loc.   @W:@w%s\n", bits);
                 if (GET_OBJ_TYPE(obj2) == ITEM_WEAPON) {
@@ -1477,7 +1476,7 @@ ACMD(do_bid) {
                 else
                     send_to_char(ch, "@n");
                 char buf2[MAX_STRING_LENGTH];
-                sprintbitarray(GET_OBJ_PERM(obj2).getAll(), affected_bits, AF_ARRAY_MAX, buf2);
+                sprintf(buf2, "%s", GET_OBJ_PERM(obj2).getFlagNames().c_str());
                 send_to_char(ch, "\n@GSpecial     @W:@w %s\n", buf2);
                 send_to_char(ch, "@c------------------------------------------------------------------------\n");
                 return;
@@ -1648,9 +1647,9 @@ static void auc_send_to_all(const char *messg, bool buyer) {
     for (i = descriptor_list; i; i = i->next) {
         if (STATE(i) != CON_PLAYING)
             continue;
-        if (i->character->getWhereFlag(WhereFlag::hyperbolic_time_chamber))
+        if (i->character->location.getWhereFlag(WhereFlag::hyperbolic_time_chamber))
             continue;
-        if (i->character->getWhereFlag(WhereFlag::pendulum_past))
+        if (i->character->location.getWhereFlag(WhereFlag::pendulum_past))
             continue;
         if (buyer)
             act(messg, true, ch_buying, obj_selling, i->character, TO_VICT | TO_SLEEP);
@@ -1714,7 +1713,7 @@ ACMD(do_assemble) {
     } else if (!assemblyCheckComponents(lVnum, ch, false)) {
         send_to_char(ch, "You haven't got all the things you need.\r\n");
         return;
-    } else if (ch->getWhereFlag(WhereFlag::space)) {
+    } else if (ch->location.getWhereFlag(WhereFlag::space)) {
         send_to_char(ch, "You can't do that in space.");
         return;
     } else if (!GET_SKILL(ch, SKILL_SURVIVAL) && !strcasecmp(arg2, "campfire")) {
@@ -1730,7 +1729,7 @@ ACMD(do_assemble) {
     }
 
     if (strcasecmp(arg2, "campfire")) {
-        if (ch->getWhereFlag(WhereFlag::space) || ch->getLocationTileType() == SECT_WATER_NOSWIM || ch->getLocationEnvironment(ENV_WATER) >= 100.0) {
+        if (ch->location.getWhereFlag(WhereFlag::space) || ch->location.getTileType() == SECT_WATER_NOSWIM || ch->location.getEnvironment(ENV_WATER) >= 100.0) {
             send_to_char(ch, "This area will not allow a fire to burn properly.\r\n");
             return;
         }
@@ -1818,7 +1817,7 @@ static void perform_put(struct char_data *ch, struct obj_data *obj,
              (GET_OBJ_VAL(cont, VAL_CONTAINER_CAPACITY) > 0) &&
              (GET_OBJ_WEIGHT(cont) + GET_OBJ_WEIGHT(obj) > GET_OBJ_VAL(cont, VAL_CONTAINER_CAPACITY)))
         act("$p won't fit in $P.", false, ch, obj, cont, TO_CHAR);
-    else if (OBJ_FLAGGED(obj, ITEM_NODROP) && cont->getLocation())
+    else if (OBJ_FLAGGED(obj, ITEM_NODROP) && cont->location)
         act("You can't get $p out of your hand.", false, ch, obj, nullptr, TO_CHAR);
     else if (dball.contains(ovn))
         send_to_char(ch, "You can not bag dragon balls.\r\n");
@@ -2101,7 +2100,7 @@ int perform_get_from_room(struct char_data *ch, struct obj_data *obj) {
         return (0);
     }
 
-    if (ch->getRoomFlag(ROOM_GARDEN1) || ch->getRoomFlag(ROOM_GARDEN2)) {
+    if (ch->location.getRoomFlag(ROOM_GARDEN1) || ch->location.getRoomFlag(ROOM_GARDEN2)) {
         send_to_char(ch, "You can't get things from a garden. Help garden.\r\n");
         return (0);
     }
@@ -2155,7 +2154,7 @@ static void get_from_room(struct char_data *ch, char *arg, int howmany) {
     char *descword;
 
     /* Are they trying to take something in a room extra description? */
-    if (find_exdesc(arg, ch->getRoom()->getExtraDescription())) {
+    if (find_exdesc(arg, ch->location.getExtraDescription())) {
         send_to_char(ch, "You can't take %s %s.\r\n", AN(arg), arg);
         return;
     }
@@ -2163,11 +2162,11 @@ static void get_from_room(struct char_data *ch, char *arg, int howmany) {
     dotmode = find_all_dots(arg);
 
     if (dotmode == FIND_INDIV) {
-        if ((descword = find_exdesc_keywords(arg, ch->getRoom()->getExtraDescription()))) {
+        if ((descword = find_exdesc_keywords(arg, ch->location.getExtraDescription()))) {
             send_to_char(ch, "%s: you can't take that!\r\n", fname(descword));
             return;
         }
-        auto con = ch->getLocationObjects();
+        auto con = ch->location.getObjects();
         int transferred = 0;
         for(auto obj : filter_raw(con)) {
             if (CAN_SEE_OBJ(ch, obj) && isname(arg, obj->getName())) {
@@ -2185,7 +2184,7 @@ static void get_from_room(struct char_data *ch, char *arg, int howmany) {
             send_to_char(ch, "Get all of what?\r\n");
             return;
         }
-        auto loco = ch->getLocationObjects();
+        auto loco = ch->location.getObjects();
         for (auto obj : filter_raw(loco)) {
             if (CAN_SEE_OBJ(ch, obj) && (dotmode == FIND_ALL || isname(arg, obj->getName()))) {
                 found = 1;
@@ -2259,7 +2258,7 @@ ACMD(do_get) {
                         act("$p is not a container.", false, ch, cont, nullptr, TO_CHAR);
                     }
                 }
-            auto loco = ch->getLocationObjects();
+            auto loco = ch->location.getObjects();
             for (auto cont : filter_raw(loco))
                 if (CAN_SEE_OBJ(ch, cont) &&
                     (cont_dotmode == FIND_ALL || isname(arg2, cont->getName()))) {
@@ -2361,12 +2360,12 @@ static int perform_drop(struct char_data *ch, struct obj_data *obj,
     }
     if (GET_OBJ_VNUM(obj) == 20 || GET_OBJ_VNUM(obj) == 21 || GET_OBJ_VNUM(obj) == 22 || GET_OBJ_VNUM(obj) == 23 ||
         GET_OBJ_VNUM(obj) == 24 || GET_OBJ_VNUM(obj) == 25 || GET_OBJ_VNUM(obj) == 26) {
-        if (ch->getWhereFlag(WhereFlag::space)) {
+        if (ch->location.getWhereFlag(WhereFlag::space)) {
             snprintf(buf, sizeof(buf), "You can't %s $p in space!", sname);
             act(buf, false, ch, obj, nullptr, TO_CHAR);
             return (0);
         }
-        if (ch->getRoomFlag(ROOM_GARDEN1) || ch->getRoomFlag(ROOM_GARDEN2)) {
+        if (ch->location.getRoomFlag(ROOM_GARDEN1) || ch->location.getRoomFlag(ROOM_GARDEN2)) {
             snprintf(buf, sizeof(buf), "You can't %s $p in here. Read help garden.", sname);
             act(buf, false, ch, obj, nullptr, TO_CHAR);
             return (0);
@@ -2378,17 +2377,17 @@ static int perform_drop(struct char_data *ch, struct obj_data *obj,
             extract_obj(obj);
             return (0);
         }
-        if (ch->getRoomFlag(ROOM_NOINSTANT)) {
+        if (ch->location.getRoomFlag(ROOM_NOINSTANT)) {
             snprintf(buf, sizeof(buf), "You can't %s $p in this protected area!", sname);
             act(buf, false, ch, obj, nullptr, TO_CHAR);
             return (0);
         }
-        if (ch->getRoomFlag(ROOM_SHIP)) {
+        if (ch->location.getRoomFlag(ROOM_SHIP)) {
             snprintf(buf, sizeof(buf), "You can't %s $p on a private ship!", sname);
             act(buf, false, ch, obj, nullptr, TO_CHAR);
             return (0);
         }
-        if (ch->getRoomFlag(ROOM_HOUSE)) {
+        if (ch->location.getRoomFlag(ROOM_HOUSE)) {
             snprintf(buf, sizeof(buf), "You can't %s $p in a private house!", sname);
             act(buf, false, ch, obj, nullptr, TO_CHAR);
             return (0);
@@ -2415,11 +2414,11 @@ static int perform_drop(struct char_data *ch, struct obj_data *obj,
 
     switch (mode) {
         case SCMD_DROP:
-            if (!OBJ_FLAGGED(obj, ITEM_UNBREAKABLE) && ch->getLocationGroundEffect() == 6) {
+            if (!OBJ_FLAGGED(obj, ITEM_UNBREAKABLE) && ch->location.getGroundEffect() == 6) {
                 act("$p melts in the lava!", false, ch, obj, nullptr, TO_CHAR);
                 act("$p melts in the lava!", false, ch, obj, nullptr, TO_ROOM);
                 extract_obj(obj);
-            } else if (ch->getLocationGroundEffect() == 6) {
+            } else if (ch->location.getGroundEffect() == 6) {
                 act("$p plops down on some cooled lava!", false, ch, obj, nullptr, TO_CHAR);
                 act("$p plops down on some cooled lava!", false, ch, obj, nullptr, TO_ROOM);
                 obj->setLocation(ch);
@@ -2472,7 +2471,7 @@ ACMD(do_drop) {
         return;
     }
 
-    if (ch->getRoomFlag(ROOM_GARDEN1) || ch->getRoomFlag(ROOM_GARDEN2)) {
+    if (ch->location.getRoomFlag(ROOM_GARDEN1) || ch->location.getRoomFlag(ROOM_GARDEN2)) {
         send_to_char(ch, "You can not do that in a garden.\r\n");
         return;
     }
@@ -2885,7 +2884,7 @@ ACMD(do_drink) {
     wasthirsty = GET_COND(ch, THIRST);
     if (!*arg && !IS_NPC(ch)) {
         char buf[MAX_STRING_LENGTH];
-        switch (ch->getLocationTileType()) {
+        switch (ch->location.getTileType()) {
             case SECT_WATER_SWIM:
             case SECT_WATER_NOSWIM:
             case SECT_UNDERWATER:
@@ -2905,7 +2904,7 @@ ACMD(do_drink) {
                     send_to_char(ch, "You don't feel thirsty anymore.\r\n");
                 return;
             default:
-                if (ch->getLocationEnvironment(ENV_WATER) < 100.0) {
+                if (ch->location.getEnvironment(ENV_WATER) < 100.0) {
                     send_to_char(ch, "Drink from what?\r\n");
                     return;
                 } else {
@@ -2928,7 +2927,7 @@ ACMD(do_drink) {
         }
     }
     if (!(temp = get_obj_in_list_vis(ch, arg, nullptr, ch->getObjects()))) {
-        if (!(temp = get_obj_in_list_vis(ch, arg, nullptr, ch->getLocationObjects()))) {
+        if (!(temp = get_obj_in_list_vis(ch, arg, nullptr, ch->location.getObjects()))) {
             send_to_char(ch, "You can't find it!\r\n");
             return;
         } else
@@ -3161,7 +3160,7 @@ ACMD(do_eat) {
 
     //Logic for food that will give PS or Exp
     if (GET_OBJ_VNUM(food) >= MEAL_START && GET_OBJ_VNUM(food) <= MEAL_LAST && 
-        (!ch->getWhereFlag(WhereFlag::afterlife) && !ch->getWhereFlag(WhereFlag::afterlife_hell))) {
+        (!ch->location.getWhereFlag(WhereFlag::afterlife) && !ch->location.getWhereFlag(WhereFlag::afterlife_hell))) {
         if (subcmd != SCMD_TASTE) {
             int psbonus = GET_OBJ_VAL(food, VAL_FOOD_PSBONUS);
             int expbonus = GET_OBJ_VAL(food, VAL_FOOD_EXPBONUS) * ((GET_LEVEL(ch) * 0.4) + 1);
@@ -3373,7 +3372,7 @@ ACMD(do_pour) {
             act("What do you want to fill $p from?", false, ch, to_obj, nullptr, TO_CHAR);
             return;
         }
-        if (!(from_obj = get_obj_in_list_vis(ch, arg2, nullptr, ch->getLocationObjects()))) {
+        if (!(from_obj = get_obj_in_list_vis(ch, arg2, nullptr, ch->location.getObjects()))) {
             send_to_char(ch, "There doesn't seem to be %s %s here.\r\n", AN(arg2), arg2);
             return;
         }
@@ -3947,7 +3946,7 @@ ACMD(do_remove) {
 
     obj = ch->findObject(isBoard);
     /* lemme check for a board FIRST */
-    if (!obj) ch->getRoom()->findObject(isBoard);
+    if (!obj) ch->location.findObject(isBoard);
 
     if (obj) {
         if (!isdigit(*arg) || (!(msg = atoi(arg)))) {
@@ -4007,7 +4006,7 @@ ACMD(do_sac) {
         return;
     }
 
-    if (!(j = get_obj_in_list_vis(ch, arg, nullptr, ch->getLocationObjects())) &&
+    if (!(j = get_obj_in_list_vis(ch, arg, nullptr, ch->location.getObjects())) &&
         (!(j = get_obj_in_list_vis(ch, arg, nullptr, ch->getObjects())))) {
         send_to_char(ch, "It doesn't seem to be here.\r\n");
         return;

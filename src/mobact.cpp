@@ -33,7 +33,7 @@
 static int player_present(struct char_data *ch) {
     if (IN_ROOM(ch) == NOWHERE)
         return 0;
-    auto people = ch->getLocationPeople();
+    auto people = ch->location.getPeople();
     for (auto vict : filter_raw(people)) {
         if (!IS_NPC(vict)) {
             return true;
@@ -100,7 +100,7 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
             /* Scavenger (picking up objects) */
             start = std::chrono::high_resolution_clock::now();
             if (IS_HUMANOID(ch) && !FIGHTING(ch) && !MOB_FLAGGED(ch, MOB_NOSCAVENGER) && !MOB_FLAGGED(ch, MOB_NOKILL) && (!player_present(ch) || axion_dice(0) > 118)) {
-                auto con = ch->getLocationObjects();
+                auto con = ch->location.getObjects();
                 if (!con.empty() && rand_number(1, 100) >= 95) {
                     max = 1;
                     best_obj = nullptr;
@@ -130,25 +130,15 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
                 !AFF_FLAGGED(ch, AFF_TAMED) &&
                 !ABSORBBY(ch)) {
 
-                auto r = ch->getRoom();
+                auto z = ch->location.getZone();
                 std::vector<int> availableDirections;
                 availableDirections.reserve(NUM_OF_DIRS);  // Reserve space to avoid reallocations
 
-                // Cache some room properties to avoid repeated checks
-                auto room_flags = r->room_flags;
+                for (auto &[i, dir] : ch->location.getExits()) {
+                    if (IS_SET(dir.exit_info, EX_CLOSED)) continue;
 
-                for (auto &[i, dir] : r->getDirections()) {
-                    auto exit_info = dir.exit_info;
-                    if (IS_SET(exit_info, EX_CLOSED)) continue;
-
-                    auto dest = dir.getDestination();
-
-                    // Cache destination room flags and zone
-                    auto dest_room_flags = dest->room_flags;
-                    auto dest_zone = dest->zone;
-
-                    if (dest->room_flags.get(ROOM_NOMOB)) continue;
-                    if (MOB_FLAGGED(ch, MOB_STAY_ZONE) && dest_zone != r->zone) continue;
+                    if (dir.getRoomFlag(ROOM_NOMOB)) continue;
+                    if (MOB_FLAGGED(ch, MOB_STAY_ZONE) && dir.getZone() != z) continue;
 
                     availableDirections.push_back(static_cast<int>(i));
                 }
@@ -163,7 +153,7 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
 
             /* RESPOND TO A HUGE ATTACK */
             start = std::chrono::high_resolution_clock::now();
-            auto con = ch->getLocationObjects();
+            auto con = ch->location.getObjects();
             for (auto hugeatk : filter_raw(con)) {
                 if (FIGHTING(ch)) {
                     continue;
@@ -195,7 +185,7 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
             if (MOB_FLAGGED(ch, MOB_AGGRESSIVE) && !IS_AFFECTED(ch, AFF_PARALYZE)) {
                 int spot_roll = rand_number(1, GET_LEVEL(ch) + 10);
                 found = false;
-                auto people = ch->getLocationPeople();
+                auto people = ch->location.getPeople();
                 for (auto v : filter_raw(people))  {
                     vict = v;
                     if (vict == ch)
@@ -303,7 +293,7 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
             if (false && IS_HUMANOID(ch) && !MOB_FLAGGED(ch, MOB_NOKILL)) {
                 struct char_data *vict, *next_v;
                 int done = false;
-                auto locp = ch->getLocationPeople();
+                auto locp = ch->location.getPeople();
                 for (auto v : filter_raw(locp)) {
                     v = vict;
                     if (vict == ch)
@@ -342,7 +332,7 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
             if (false && !FIGHTING(ch) && rand_number(1, 20) >= 14 && IS_HUMANOID(ch) && !MOB_FLAGGED(ch, MOB_NOKILL)) {
                 struct char_data *vict, *next_v;
                 int done = false;
-                auto locp = ch->getLocationPeople();
+                auto locp = ch->location.getPeople();
                 for (auto v : filter_raw(locp)) {
                     vict = v;
                     if (vict == ch)
@@ -378,7 +368,7 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
             start = std::chrono::high_resolution_clock::now();
             /* Mob Memory */
             if (IS_HUMANOID(ch) && !(ch->mob_specials.memory.empty()) && !MOB_FLAGGED(ch, MOB_DUMMY) && !IS_AFFECTED(ch, AFF_PARALYZE)) {
-                auto people = ch->getLocationPeople();
+                auto people = ch->location.getPeople();
                 for (auto vict : filter_raw(people)) {
                     if (IS_NPC(vict) || !CAN_SEE(ch, vict) || PRF_FLAGGED(vict, PRF_NOHASSLE))
                         continue;
@@ -415,7 +405,7 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
             /* Helper Mobs */
             if (MOB_FLAGGED(ch, MOB_HELPER) && !AFF_FLAGGED(ch, AFF_BLIND) && !AFF_FLAGGED(ch, AFF_CHARM)) {
                 found = false;
-                auto locp = ch->getLocationPeople();
+                auto locp = ch->location.getPeople();
                 for (auto v : filter_raw(locp)) {
                     vict = v;
                     if (ch == vict || !IS_NPC(vict) || !FIGHTING(vict))
@@ -499,7 +489,7 @@ static const std::vector<std::pair<std::string, std::string>> intelligentLand = 
 
 /* This handles NPCs taunting opponents or reacting to combat. */
 void mob_taunt(struct char_data *ch) {
-    if (ch->getWhereFlag(WhereFlag::space)) { /* In space.... nobody cares. */
+    if (ch->location.getWhereFlag(WhereFlag::space)) { /* In space.... nobody cares. */
         return;
     }
 
@@ -514,7 +504,7 @@ void mob_taunt(struct char_data *ch) {
     }
 
     if(!IS_HUMANOID(ch)) {
-        auto messages = Random::get(ch->getLocationEnvironment(ENV_WATER) >= 100.0 ? animalWater : animalLand);
+        auto messages = Random::get(ch->location.getEnvironment(ENV_WATER) >= 100.0 ? animalWater : animalLand);
         act(messages->first.c_str(), true, ch, nullptr, vict, TO_NOTVICT);
         act(messages->second.c_str(), true, ch, nullptr, vict, TO_VICT);
     } else if(!MOB_FLAGGED(ch, MOB_DUMMY)) {

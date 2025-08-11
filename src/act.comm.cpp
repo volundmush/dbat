@@ -218,7 +218,7 @@ ACMD(do_say) {
         } else {
             strcpy(verb, "say");
         }
-        auto people = ch->getLocationPeople();
+        auto people = ch->location.getPeople();
         for (auto tch : filter_raw(people)) {
             if (tch != ch && tch->desc) {
                 char sayto[100];
@@ -858,13 +858,13 @@ static int is_tell_ok(struct char_data *ch, struct char_data *vict) {
         send_to_char(ch, "They need to be 5000 PL or higher to send or receive tells");
     else if (PRF_FLAGGED(ch, PRF_NOTELL) && GET_ADMLEVEL(vict) < 1)
         send_to_char(ch, "You can't tell other people while you have notell on.\r\n");
-    else if (ch->getRoomFlag(ROOM_SOUNDPROOF) && GET_ADMLEVEL(vict) < 1)
+    else if (ch->location.getRoomFlag(ROOM_SOUNDPROOF) && GET_ADMLEVEL(vict) < 1)
         send_to_char(ch, "The walls seem to absorb your words.\r\n");
     else if (!vict->desc)        /* linkless */
         act("$E's linkless at the moment.", false, ch, nullptr, vict, TO_CHAR | TO_SLEEP);
     else if (PLR_FLAGGED(vict, PLR_WRITING))
         act("$E's writing a message right now; try again later.", false, ch, nullptr, vict, TO_CHAR | TO_SLEEP);
-    else if ((GET_ADMLEVEL(ch) < 1 && PRF_FLAGGED(vict, PRF_NOTELL)) || vict->getRoomFlag(ROOM_SOUNDPROOF))
+    else if ((GET_ADMLEVEL(ch) < 1 && PRF_FLAGGED(vict, PRF_NOTELL)) || vict->location.getRoomFlag(ROOM_SOUNDPROOF))
         act("$E can't hear you.", false, ch, nullptr, vict, TO_CHAR | TO_SLEEP);
     else
         return (true);
@@ -921,11 +921,11 @@ ACMD(do_reply) {
     if (IS_NPC(ch))
         return;
 
-    if (ch->getWhereFlag(WhereFlag::hyperbolic_time_chamber)) {
+    if (ch->location.getWhereFlag(WhereFlag::hyperbolic_time_chamber)) {
         send_to_char(ch, "This is a different dimension!\r\n");
         return;
     }
-    if (ch->getWhereFlag(WhereFlag::pendulum_past)) {
+    if (ch->location.getWhereFlag(WhereFlag::pendulum_past)) {
         send_to_char(ch, "This is the past, you can't send tells!\r\n");
         return;
     }
@@ -1030,7 +1030,7 @@ ACMD(do_spec_comm) {
 }
 
 static void handle_whisper(char *buf, struct char_data *ch, struct char_data *vict) {
-    auto people = ch->getLocationPeople();
+    auto people = ch->location.getPeople();
     for (auto tch : filter_raw(people)) {
         if (IS_NPC(tch)) {
             continue;
@@ -1227,7 +1227,7 @@ ACMD(do_write) {
     };
 
     auto obj = ch->findObject(isBoard);
-    if(!obj) ch->getRoom()->findObject(isBoard);
+    if(!obj) ch->location.findObject(isBoard);
 
 
     if (obj) {                /* then there IS a board! */
@@ -1413,7 +1413,7 @@ ACMD(do_gen_comm) {
         send_to_char(ch, "%s", com_msgs[subcmd][0]);
         return;
     }
-    if (ch->getRoomFlag(ROOM_SOUNDPROOF)) {
+    if (ch->location.getRoomFlag(ROOM_SOUNDPROOF)) {
         send_to_char(ch, "The walls seem to absorb your words.\r\n");
         return;
     }
@@ -1476,10 +1476,10 @@ ACMD(do_gen_comm) {
         if (STATE(i) == CON_PLAYING && i != ch->desc && i->character &&
             (IS_NPC(i->character) || !PRF_FLAGGED(i->character, channels[subcmd])) &&
             (IS_NPC(i->character) || !PLR_FLAGGED(i->character, PLR_WRITING)) &&
-            !i->character->getRoomFlag(ROOM_SOUNDPROOF)) {
+            !i->character->location.getRoomFlag(ROOM_SOUNDPROOF)) {
 
             if (subcmd == SCMD_SHOUT &&
-                ((ch->getRoom()->zone != i->character->getRoom()->zone) ||
+                ((ch->location.getZone() != i->character->location.getZone()) ||
                  !AWAKE(i->character)))
                 continue;
 
@@ -1489,10 +1489,10 @@ ACMD(do_gen_comm) {
                          GET_ADMLEVEL(ch) > 0 ? GET_NAME(ch) : GET_USER(ch), com_msgs[subcmd][1],
                          GET_SKILL(i->character, SPEAKING(ch)) ? "," : ", in an unfamiliar tongue,", argument,
                          color_on);
-            } else if (subcmd == SCMD_SHOUT && i->character->getLocation() != ch->getLocation()) {
+            } else if (subcmd == SCMD_SHOUT && i->character->location != ch->location) {
                 snprintf(buf1, sizeof(buf1), "%s@WSomeone nearby %ss@W, '@w%s@W'@n%s", color_on, com_msgs[subcmd][1],
                          argument, color_on);
-            } else if (subcmd == SCMD_SHOUT && i->character->getLocation() == ch->getLocation()) {
+            } else if (subcmd == SCMD_SHOUT && i->character->location == ch->location) {
                 snprintf(buf1, sizeof(buf1), "%s@W$n@W %ss@W, '@w%s@W'@n%s", color_on, com_msgs[subcmd][1], argument,
                          color_on);
             } else {
@@ -1577,7 +1577,7 @@ ACMD(do_respond) {
     auto isBoard = [](const auto& o) { return GET_OBJ_TYPE(o) == ITEM_BOARD; };
 
     auto obj = ch->findObject(isBoard);
-    if(!obj) obj = ch->getRoom()->findObject(isBoard);
+    if(!obj) obj = ch->location.findObject(isBoard);
 
     /* No board in the room? Send generic message -spl */
     if (!obj) {

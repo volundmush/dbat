@@ -18,7 +18,6 @@
 #include "dbat/guild.h"
 #include "dbat/races.h"
 #include "dbat/class.h"
-#include "dbat/bitarray.h"
 
 
 /******************************************************************************/
@@ -62,7 +61,7 @@ ACMD(do_oasis_list) {
     }
 
     if (!*smin || *smin == '.') {
-        rzone = ch->getRoom()->zone->number;
+        rzone = ch->location.getZone()->number;
     } else if (!*smax) {
         rzone = real_zone(atoi(smin));
 
@@ -122,7 +121,7 @@ ACMD(do_oasis_links) {
     one_argument(argument, arg);
 
     if ((!arg || !*arg) || !strcmp(arg, ".")) {
-        zvnum = ch->getRoom()->zone->number;
+        zvnum = ch->location.getZone()->number;
     } else {
         zvnum = atol(arg);
     }
@@ -142,17 +141,12 @@ ACMD(do_oasis_links) {
             continue;
         }
 
-        for (j = 0; j < NUM_OF_DIRS; j++) {
-            auto d = r->dir_option[j];
-            if(!d) continue;
-            if(d->to_room == NOWHERE) continue;
-            auto dest = d->getDestination();
-            if(!dest) continue;
-            auto z2 = dest->zone;
+        for (auto& [d, e] : r->getDirections()) {
+            auto z2 = e.getZone();
             if(z2->number == zvnum) continue;
 
             send_to_char(ch, "%3d %-30s at %5d (%-5s) ---> %5d\r\n",
-                         z2->number, z2->name,nr, dirs[j], dest->getVnum());
+                         z2->number, z2->name,nr, dirs[static_cast<int>(d)], e.getVnum());
         }
     }
 }
@@ -195,15 +189,9 @@ void list_rooms(struct char_data *ch, zone_rnum rnum, zone_vnum vmin, zone_vnum 
             send_to_char(ch, "[@g%-5d@n] @[1]%-*s@n %s",
                          vn, count_color_chars(r->getName()) + 44,
                          r->getName(), sString.c_str());
-            for (j = 0; j < NUM_OF_DIRS; j++) {
-                auto d = r->dir_option[j];
-                if(!d) continue;
-                auto dest = d->getDestination();
-                if(!dest) continue;
-
-                if (dest->zone != r->zone)
-                    send_to_char(ch, "(@y%d@n)", dest->getVnum());
-
+            for (auto& [d, e] : r->getDirections()) {
+                if (e.getZone() != r->zone)
+                    send_to_char(ch, "(@y%d@n)", e.getVnum());
             }
 
             send_to_char(ch, "\r\n");
@@ -365,7 +353,7 @@ void print_zone(struct char_data *ch, zone_vnum vnum) {
         return;
     }
     auto& z = zone_table.at(vnum);
-    sprintbitarray(z.zone_flags.getAll(), zone_bits, ZF_ARRAY_MAX, bits);
+    sprintf(bits, "%s", z.zone_flags.getFlagNames().c_str());
     size_rooms = z.rooms.size();
     size_objects = z.objects.size();
     size_mobiles = z.mobiles.size();

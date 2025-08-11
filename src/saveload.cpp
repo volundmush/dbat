@@ -686,9 +686,24 @@ void from_json(const json& j, proto_data& u) {
     }
 }
 
+void to_json(json& j, const Location& loc) {
+    if(loc.unit) j["uid"] = loc.unit->getUID();
+    j["position"] = loc.position;
+}
+
+void from_json(const json& j, Location& loc) {
+    if(j.contains("uid")) {
+        auto uid = resolveUID(j["uid"]);
+        if(uid) loc.unit = uid.get();
+    }
+    loc.position = j["position"];
+}
+
 void to_json(json& j, const Destination &e) {
-    if(e.general_description && strlen(e.general_description)) j["general_description"] = e.general_description;
-    if(e.keyword && strlen(e.keyword)) j["keyword"] = e.keyword;
+    to_json(j, static_cast<const Location&>(e));
+    j["dir"] = e.dir;
+    if(!e.general_description.empty()) j["general_description"] = e.general_description;
+    if(!e.keyword.empty()) j["keyword"] = e.keyword;
     if(e.exit_info) {
         j["exit_info"] = e.exit_info;
         for(auto i = 0; i < NUM_EXIT_FLAGS; i++) {
@@ -700,17 +715,17 @@ void to_json(json& j, const Destination &e) {
         }
     }
     if(e.key > 0) j["key"] = e.key;
-	if(e.to_room != NOWHERE) j["to_room"] = e.to_room;
     if(e.dclock) j["dclock"] = e.dclock;
     if(e.dchide) j["dchide"] = e.dchide;
 }
 
 void from_json(const json& j, Destination &e) {
-    if(j.contains("general_description")) e.general_description = strdup(j["general_description"].get<std::string>().c_str());
-    if(j.contains("keyword")) e.keyword = strdup(j["keyword"].get<std::string>().c_str());
+    from_json(j, static_cast<Location&>(e));
+    if(j.contains("dir")) e.dir = j["dir"].get<Direction>();
+    if(j.contains("general_description")) e.general_description = j["general_description"].get<std::string>();
+    if(j.contains("keyword")) e.keyword = j["keyword"].get<std::string>();
     if(j.contains("exit_info")) e.exit_info = j["exit_info"].get<int16_t>();
     if(j.contains("key")) e.key = j["key"];
-    if(j.contains("to_room")) e.to_room = j["to_room"];
     if(j.contains("dclock")) e.dclock = j["dclock"];
     if(j.contains("dchide")) e.dchide = j["dchide"];
 }
@@ -737,13 +752,12 @@ void from_json(const json& j, room_data& r) {
 
     if(j.contains("sector_type")) r.sector_type = j["sector_type"];
 
-    if(j.contains("dir_option")) {
+    if(j.contains("exits")) {
         // this is an array of (<number>, <json>) pairs, with number matching the dir_option array index.
         // Thankfully we can pass the json straight into the room_direction_data constructor...
-        for(auto &d : j["dir_option"]) {
-            auto ex = new Destination();
-            d[1].get_to(*ex);
-            r.dir_option[d[0]] = ex;
+        for(auto &d : j["exits"]) {
+            auto &ex = r.exits[static_cast<Direction>(d[0].get<int>())];
+            d[1].get_to(ex);
         }
     }
 
@@ -771,11 +785,10 @@ void load_rooms(const std::filesystem::path& loc) {
 void load_exits(const std::filesystem::path& loc) {
     for(auto j : load_from_file(loc, "exits.json")) {
         auto id = j["room"].get<int64_t>();
-        auto dir = j["direction"].get<int64_t>();
+        auto dir = j["direction"].get<Direction>();
         auto r = get_room(id);
-        auto ex = new Destination();
-        j["data"].get_to(*ex);
-        r->dir_option[dir] = ex;
+        auto &ex = r->exits[dir];
+        j["data"].get_to(ex);
     }
 }
 
@@ -784,14 +797,12 @@ static void dump_exits(const std::filesystem::path &loc) {
 
     for(auto &[v, r] : world) {
 
-        for(auto i = 0; i < NUM_OF_DIRS; i++) {
-            if(auto ex = r->dir_option[i]; ex) {
-                json j2;
-                j2["room"] = v;
-                j2["direction"] = i;
-                j2["data"] = *ex;
-                exits.push_back(j2);
-            }
+        for(auto& [d, e] : r->getDirections()) {
+            json j2;
+            j2["room"] = v;
+            j2["direction"] = d;
+            j2["data"] = e;
+            exits.push_back(j2);
         }
 
     }
@@ -996,18 +1007,7 @@ void from_json(const json& j, Coordinates& c) {
     c.z = j["z"].get<double>();
 }
 
-void to_json(json& j, const Location& loc) {
-    if(loc.unit) j["uid"] = loc.unit->getUID();
-    j["position"] = loc.position;
-}
 
-void from_json(const json& j, Location& loc) {
-    if(j.contains("uid")) {
-        auto uid = resolveUID(j["uid"]);
-        if(uid) loc.unit = uid.get();
-    }
-    loc.position = j["position"];
-}
 
 
 static void dump_items(const std::filesystem::path &loc) {

@@ -61,7 +61,7 @@ ACMD(do_oasis_cedit) {
     d = ch->desc;
 
     if (!*buf1) {
-        CREATE(d->olc, struct oasis_olc_data, 1);
+        d->olc = new oasis_olc_data();
         OLC_ZONE(d) = nullptr;
         cedit_setup(d);
         STATE(d) = CON_CEDIT;

@@ -203,9 +203,10 @@ ACMD(do_tedit) {
 
     if (ch->desc->olc) {
         mudlog(BRF, ADMLVL_IMMORT, true, "SYSERR: do_tedit: Player already had olc structure.");
-        free(ch->desc->olc);
+        delete ch->desc->olc;
     }
-    CREATE(ch->desc->olc, struct oasis_olc_data, 1);
+    ch->desc->olc = new oasis_olc_data();
+
 
     if (*fields[l].buffer) {
         send_to_char(ch, "%s", *fields[l].buffer);

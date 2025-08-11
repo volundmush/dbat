@@ -211,7 +211,7 @@ static int64_t mana_gain(struct char_data *ch) {
         /* Neat and fast */
         gain = GET_MAX_MANA(ch) / 70;
     } else {
-        if (ch->getRoomFlag(ROOM_REGEN) ||
+        if (ch->location.getRoomFlag(ROOM_REGEN) ||
             (GET_BONUS(ch, BONUS_DESTROYER) > 0 && ROOM_DAMAGE(IN_ROOM(ch)) >= 75)) {
             if (IS_KONATSU(ch)) {
                 gain = GET_MAX_MANA(ch) / 12;
@@ -225,7 +225,7 @@ static int64_t mana_gain(struct char_data *ch) {
             if (!IS_KONATSU(ch) && !IS_MUTANT(ch)) {
                 gain = GET_MAX_MANA(ch) / 10;
             }
-        } else if (!ch->getRoomFlag(ROOM_REGEN)) {
+        } else if (!ch->location.getRoomFlag(ROOM_REGEN)) {
             if (IS_KONATSU(ch)) {
                 gain = GET_MAX_MANA(ch) / 15;
             }
@@ -235,7 +235,7 @@ static int64_t mana_gain(struct char_data *ch) {
             if (!IS_KONATSU(ch) && !IS_MUTANT(ch)) {
                 gain = GET_MAX_MANA(ch) / 12;
             }
-            if (ch->getRoomFlag(ROOM_BEDROOM)) {
+            if (ch->location.getRoomFlag(ROOM_BEDROOM)) {
                 gain += gain * 0.25;
             }
             if (IS_ARLIAN(ch)) {
@@ -295,7 +295,7 @@ static int64_t mana_gain(struct char_data *ch) {
     }
 
     if (IN_ROOM(ch) != NOWHERE) {
-        if (ch->getCookElement() == 1) {
+        if (ch->location.getCookElement() == 1) {
             gain += (gain * 0.2);
         }
     }
@@ -307,7 +307,7 @@ static int64_t mana_gain(struct char_data *ch) {
     if (IS_KANASSAN(ch) && weather_info.sky == SKY_RAINING && OUTSIDE(ch)) {
         gain += gain * 0.1;
     }
-    if (IS_KANASSAN(ch) && ch->getLocationEnvironment(ENV_WATER) >= 100.0) {
+    if (IS_KANASSAN(ch) && ch->location.getEnvironment(ENV_WATER) >= 100.0) {
         gain *= 16;
     }
 
@@ -356,7 +356,7 @@ static int64_t mana_gain(struct char_data *ch) {
     if (AFF_FLAGGED(ch, AFF_POISON))
         gain /= 4;
 
-    if (ch->getCookElement() == 1)
+    if (ch->location.getCookElement() == 1)
         gain *= 2;
 
     return (gain);
@@ -370,7 +370,7 @@ int64_t hit_gain(struct char_data *ch) {
         /* Neat and fast */
         gain = GET_MAX_HIT(ch) / 70;
     } else {
-        if (ch->getRoomFlag(ROOM_REGEN) || (GET_BONUS(ch, BONUS_DESTROYER) > 0 && ROOM_DAMAGE(IN_ROOM(ch)) >= 75)) {
+        if (ch->location.getRoomFlag(ROOM_REGEN) || (GET_BONUS(ch, BONUS_DESTROYER) > 0 && ROOM_DAMAGE(IN_ROOM(ch)) >= 75)) {
             if (IS_HUMAN(ch)) {
                 gain = GET_MAX_HIT(ch) / 20;
             }
@@ -402,7 +402,7 @@ int64_t hit_gain(struct char_data *ch) {
             if (!IS_HUMAN(ch) && !IS_NAMEK(ch) && !IS_MUTANT(ch)) {
                 gain = GET_MAX_HIT(ch) / 15;
             }
-            if (ch->getRoomFlag(ROOM_BEDROOM)) {
+            if (ch->location.getRoomFlag(ROOM_BEDROOM)) {
                 gain += gain * 0.25;
             }
         }
@@ -465,7 +465,7 @@ int64_t hit_gain(struct char_data *ch) {
     if (IS_KANASSAN(ch) && weather_info.sky == SKY_RAINING && OUTSIDE(ch)) {
         gain += gain * 0.1;
     }
-    if (IS_KANASSAN(ch) && ch->getLocationEnvironment(ENV_WATER) >= 100.0) {
+    if (IS_KANASSAN(ch) && ch->location.getEnvironment(ENV_WATER) >= 100.0) {
         gain *= 16;
     }
 
@@ -494,7 +494,7 @@ int64_t hit_gain(struct char_data *ch) {
 
     if (AFF_FLAGGED(ch, AFF_POISON))
         gain /= 4;
-    if (ch->getCookElement() == 1)
+    if (ch->location.getCookElement() == 1)
         gain *= 2;
 
     if (ch->subrace == SubRace::android_model_absorb) {
@@ -516,7 +516,7 @@ static int64_t move_gain(struct char_data *ch) {
         /* Neat and fast */
         gain = GET_MAX_MOVE(ch) / 70;
     } else {
-        if (ch->getRoomFlag(ROOM_REGEN) ||
+        if (ch->location.getRoomFlag(ROOM_REGEN) ||
             (GET_BONUS(ch, BONUS_DESTROYER) > 0 && ROOM_DAMAGE(IN_ROOM(ch)) >= 75)) {
             if (IS_MUTANT(ch)) {
                 gain = GET_MAX_MOVE(ch) / 7;
@@ -527,14 +527,14 @@ static int64_t move_gain(struct char_data *ch) {
             if (!IS_MUTANT(ch)) {
                 gain = GET_MAX_MOVE(ch) / 6;
             }
-        } else if (!ch->getRoomFlag(ROOM_REGEN)) {
+        } else if (!ch->location.getRoomFlag(ROOM_REGEN)) {
             if (IS_MUTANT(ch)) {
                 gain = GET_MAX_MOVE(ch) / 9;
             }
             if (!IS_MUTANT(ch)) {
                 gain = GET_MAX_MOVE(ch) / 8;
             }
-            if (ch->getRoomFlag(ROOM_BEDROOM)) {
+            if (ch->location.getRoomFlag(ROOM_BEDROOM)) {
                 gain += gain * 0.25;
             }
         }
@@ -599,7 +599,7 @@ static int64_t move_gain(struct char_data *ch) {
     if (IS_KANASSAN(ch) && weather_info.sky == SKY_RAINING && OUTSIDE(ch)) {
         gain += gain * 0.1;
     }
-    if (IS_KANASSAN(ch) && ch->getLocationEnvironment(ENV_WATER) >= 100.0) {
+    if (IS_KANASSAN(ch) && ch->location.getEnvironment(ENV_WATER) >= 100.0) {
         gain *= 16;
     }
 
@@ -620,11 +620,11 @@ static int64_t move_gain(struct char_data *ch) {
     if (AFF_FLAGGED(ch, AFF_POISON))
         gain /= 4;
 
-    if (ch->getRoomFlag(ROOM_AURA)) {
+    if (ch->location.getRoomFlag(ROOM_AURA)) {
         gain = GET_MAX_MOVE(ch) - (ch->getCurVital(CharVital::stamina));
     }
 
-    if (ch->getCookElement() == 1)
+    if (ch->location.getCookElement() == 1)
         gain *= 2;
 
     if (auto reg = GET_REGEN(ch); reg > 0) {
@@ -780,9 +780,9 @@ void gain_condition(struct char_data *ch, int condition, int value) {
         return;
     } else if (GET_COND(ch, condition) < 0) {    /* No change */
         return;
-    } else if (ch->getWhereFlag(WhereFlag::afterlife_hell)) {
+    } else if (ch->location.getWhereFlag(WhereFlag::afterlife_hell)) {
         return;
-    } else if (ch->getRoomFlag(ROOM_HELL)) {
+    } else if (ch->location.getRoomFlag(ROOM_HELL)) {
         return;
     } else if (AFF_FLAGGED(ch, AFF_SPIRIT)) {
         return;
@@ -1116,7 +1116,7 @@ void androidAbsorbSystem(uint64_t heartPulse, double deltaTime) {
             characterSubscriptions.unsubscribe("androidAbsorbSystem", ch);
         }
         
-        if(ch->getLocation() != victim->getLocation()) {
+        if(ch->location != victim->location) {
             send_to_char(ch, "You stop absorbing %s!\r\n", GET_NAME(ABSORBING(ch)));
             ABSORBBY(ABSORBING(ch)) = nullptr;
             ABSORBING(ch) = nullptr;
@@ -1420,34 +1420,29 @@ void corpseRotService(uint64_t heartPulse, double deltaTime) {
         // how the fuck did this happen? TODO add a warning.
         if(!IS_CORPSE(j)) continue;
 
+        auto timer = GET_OBJ_TIMER(j);
+
         /* timer count down */
-        if (GET_OBJ_TIMER(j) > 0)
+        if (timer > 0)
             j->modBaseStat("timer", -1);
-        auto room = j->getRoom();
+
         if (!strstr(j->getName(), "android") && !strstr(j->getName(), "Android") && !OBJ_FLAGGED(j, ITEM_BURIED)) {
-            if (GET_OBJ_TIMER(j) == 5) {
-                if (room) {
-                    send_to_room(room, "@DFlies start to gather around $p@D.@n\r\n", j->getShortDescription());
-                }
+            if (timer == 5) {
+                j->location.send_to("@DFlies start to gather around %s@D.@n\r\n", j->getShortDescription());
             }
-            if (GET_OBJ_TIMER(j) == 3) {
-                if (room) {
-                    send_to_room(room, "@DA cloud of flies has formed over %s@D.@n\r\n", j->getShortDescription());
-                }
+            if (timer == 3) {
+                j->location.send_to("@DA cloud of flies has formed over %s@D.@n\r\n", j->getShortDescription());
             }
-            if (GET_OBJ_TIMER(j) == 2) {
-                if (room) {
-                    send_to_room(room, "@DMaggots can be seen crawling all over %s@D.@n\r\n", j->getShortDescription());
-                }
+            if (timer == 2) {
+                j->location.send_to("@DMaggots can be seen crawling all over %s@D.@n\r\n", j->getShortDescription());
             }
-            if (GET_OBJ_TIMER(j) == 1) {
-                if (room) {
-                    send_to_room(room, "@DMaggots have nearly stripped %s of all its flesh@D.@n\r\n", j->getShortDescription());
-                }
+            if (timer == 1) {
+                j->location.send_to("@DMaggots have nearly stripped %s of all its flesh@D.@n\r\n", j->getShortDescription());
             }
         }
-        if (!GET_OBJ_TIMER(j)) {
-            auto loc = j->getLocation();
+
+        if (!timer) {
+            auto &loc = j->location;
 
             if (loc.getType() == UnitType::room && loc.position.x == -1.0) {
                 auto c = static_cast<char_data*>(loc.unit);
@@ -1463,8 +1458,8 @@ void corpseRotService(uint64_t heartPulse, double deltaTime) {
                     case UnitType::room: {
                         auto r = static_cast<room_data*>(loc.unit);
                         for(auto jj : filter_raw(con)) {
-                            obj_from_obj(jj);
-                            obj_to_room(jj, r);
+                            jj->clearLocation();
+                            jj->setLocation(r);
                         }
                     }
                         break;
@@ -1472,21 +1467,20 @@ void corpseRotService(uint64_t heartPulse, double deltaTime) {
                         auto c = static_cast<char_data*>(loc.unit);
                         auto r = c->getRoom();
                         for(auto jj : filter_raw(con)) {
-                            obj_from_obj(jj);
-                            obj_to_room(jj, r);
+                            jj->clearLocation();
+                            jj->setLocation(r);
                         }
                     }
                         break;
                     case UnitType::object: {
                         auto o = static_cast<obj_data*>(loc.unit);
                         for(auto jj : filter_raw(con)) {
-                            obj_from_obj(jj);
+                            jj->clearLocation();
                             obj_to_obj(jj, o);
                         }
                     }
                         break;
                     default:
-                        room = nullptr;
                         break;
                 }
             }
@@ -1519,7 +1513,7 @@ void characterVitalsRecovery(uint64_t heartPulse, double deltaTime) {
             if(ROOM_FLAGGED(r, ROOM_BEDROOM))
                 universalPerc += 0.25;
 
-            if (ch->getCookElement() == 1)
+            if (ch->location.getCookElement() == 1)
                 universalPerc += 2.0;
         }
 
@@ -1637,7 +1631,7 @@ void hunger_update(uint64_t heartPulse, double deltaTime) {
 void relax_update(uint64_t heartPulse, double deltaTime) {
     auto ac = characterSubscriptions.all("players");
     for(auto i : filter_raw(ac)) {
-        if (i->getRoomFlag(ROOM_HOUSE)) {
+        if (i->location.getRoomFlag(ROOM_HOUSE)) {
             i->modBaseStat("relax_count", 1);
         } else if (GET_RELAXCOUNT(i) >= 464) {
             i->modBaseStat("relax_count", -4);
@@ -1796,7 +1790,7 @@ void point_update(uint64_t heartPulse, double deltaTime)
                         }
                     }
 
-                    if (i->getLocationTileType() == SECT_WATER_NOSWIM && !CARRIED_BY(i) && !IS_KANASSAN(i))
+                    if (i->location.getTileType() == SECT_WATER_NOSWIM && !CARRIED_BY(i) && !IS_KANASSAN(i))
                     {
                         auto carweight = i->getEffectiveStat("weight_carried");
                         if (i->getCurVital(CharVital::stamina) >= carweight)
@@ -1821,7 +1815,7 @@ void point_update(uint64_t heartPulse, double deltaTime)
                         }
                     }
 
-                    if (!has_o2(i) && (i->getLocationEnvironment(ENV_WATER) >= 100.0 || i->getWhereFlag(WhereFlag::space)))
+                    if (!has_o2(i) && (i->location.getEnvironment(ENV_WATER) >= 100.0 || i->location.getWhereFlag(WhereFlag::space)))
                     {
                         if (auto remKi = i->modCurVitalDam(CharVital::ki, .005); remKi < 1.0)
                         {
@@ -1835,7 +1829,7 @@ void point_update(uint64_t heartPulse, double deltaTime)
                             }
                             else
                             {
-                                if (i->getLocationEnvironment(ENV_WATER) >= 100.0)
+                                if (i->location.getEnvironment(ENV_WATER) >= 100.0)
                                 {
                                     send_to_char(i, "You have drowned!\r\n");
                                     act("@W$n@W drowns right in front of you.@n", false, i, nullptr, nullptr, TO_ROOM);
@@ -1850,7 +1844,7 @@ void point_update(uint64_t heartPulse, double deltaTime)
                         }
                     }
 
-                    if (!AFF_FLAGGED(i, AFF_FLYING) && i->getLocationGroundEffect() == 6 && !MOB_FLAGGED(i, MOB_NOKILL) && !IS_DEMON(i))
+                    if (!AFF_FLAGGED(i, AFF_FLYING) && i->location.getGroundEffect() == 6 && !MOB_FLAGGED(i, MOB_NOKILL) && !IS_DEMON(i))
                     {
                         act("@rYour legs are burned by the lava!@n", true, i, nullptr, nullptr, TO_CHAR);
                         act("@R$n@r's legs are burned by the lava!@n", true, i, nullptr, nullptr, TO_ROOM);
@@ -1935,7 +1929,7 @@ void point_update(uint64_t heartPulse, double deltaTime)
 
                     if (GET_OBJ_TIMER(j) == 0)
                     {
-                        send_to_room(j->getRoom(), "The %s@n settles to the ground and goes out.\r\n", j->getShortDescription());
+                        j->location.send_to("The %s@n settles to the ground and goes out.\r\n", j->getShortDescription());
                         extract_obj(j);
                     }
                 }
@@ -1943,19 +1937,17 @@ void point_update(uint64_t heartPulse, double deltaTime)
                 {
                     if (GET_OBJ_VNUM(j) == 79 && rand_number(1, 2) == 2)
                     {
-                        if (j->getLocationGroundEffect() >= 1 && j->getLocationGroundEffect() <= 5)
+                        if (j->location.getGroundEffect() >= 1 && j->location.getGroundEffect() <= 5)
                         {
-                            send_to_location(j,
-                                         "The heat from the lava melts a great deal of the glacial wall and the lava cools a bit in turn.\r\n");
-                            j->modLocationGroundEffect(-1);
+                            j->location.sendText("The heat from the lava melts a great deal of the glacial wall and the lava cools a bit in turn.\r\n");
+                            j->location.modGroundEffect(-1);
                             if (GET_OBJ_WEIGHT(j) - (5 + (GET_OBJ_WEIGHT(j) * 0.025)) > 0)
                             {
                                 j->modBaseStat<weight_t>("weight", -(5 + (GET_OBJ_WEIGHT(j) * 0.025)));
                             }
                             else
                             {
-                                send_to_location(j,
-                                             "The glacial wall blocking off the %s direction melts completely away.\r\n",
+                                j->location.send_to("The glacial wall blocking off the %s direction melts completely away.\r\n",
                                              dirs[GET_OBJ_COST(j)]);
                                 extract_obj(j);
                             }
@@ -1963,12 +1955,12 @@ void point_update(uint64_t heartPulse, double deltaTime)
                         else if (GET_OBJ_WEIGHT(j) - (5 + (GET_OBJ_WEIGHT(j) * 0.025)) > 0)
                         {
                             j->modBaseStat<weight_t>("weight", -(5 + (GET_OBJ_WEIGHT(j) * 0.025)));
-                            send_to_location(j, "The glacial wall blocking off the %s direction melts some what.\r\n",
+                            j->location.send_to("The glacial wall blocking off the %s direction melts some what.\r\n",
                                          dirs[GET_OBJ_COST(j)]);
                         }
                         else
                         {
-                            send_to_location(j,
+                            j->location.send_to(
                                          "The glacial wall blocking off the %s direction melts completely away.\r\n",
                                          dirs[GET_OBJ_COST(j)]);
                             extract_obj(j);
@@ -1976,7 +1968,7 @@ void point_update(uint64_t heartPulse, double deltaTime)
                     }
                     else if (GET_OBJ_VNUM(j) != 79)
                     {
-                        auto loc = j->getLocation();
+                        auto loc = j->location;
                         if (loc.getType() == UnitType::character && loc.position.x >= 0.0)
                         {
                             auto c = static_cast<char_data*>(loc.unit);

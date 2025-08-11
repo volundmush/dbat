@@ -25,20 +25,16 @@
 /* local functions */
 
 struct PathNode {
-    PathNode(room_data *src, int dir) {
+    PathNode(Destination& src, Direction dir) {
         this->dir = dir;
-        this->exit = src->dir_option[dir];
-        if(exit) {
-            this->room = exit->getDestination();
-        }
+        this->exit = src;
     }
-    int dir;
-    Destination* exit{nullptr};
-    room_data* room{nullptr};
+    Direction dir;
+    Destination exit;
     operator bool() const {
-        if(!exit || !room) return false;
-        if(!CONFIG_TRACK_T_DOORS && IS_SET(exit->exit_info, EX_CLOSED)) return {};
-        if(room->room_flags.get(ROOM_NOTRACK)) return {};
+        if(!exit) return false;
+        if(!CONFIG_TRACK_T_DOORS && IS_SET(exit.exit_info, EX_CLOSED)) return {};
+        if(exit.getRoomFlag(ROOM_NOTRACK)) return {};
         return true;
     }
 };
@@ -49,30 +45,27 @@ using TraverseFunc = std::function<bool(PathNode&)>;
 
 
 // Now, find_first_step can be implemented by calling find_bfs_path and taking the first step.
-std::optional<std::vector<PathNode>> find_bfs_path(room_data* src, room_data* target, TraverseFunc is_valid) {
+std::optional<std::vector<PathNode>> find_bfs_path(Location& src, Location& target, TraverseFunc is_valid) {
     // If already at target, return an empty path.
     if (src == target)
         return {};
 
     // Each queue element holds a current room and the path taken to reach it.
-    std::queue<std::pair<room_data*, std::vector<PathNode>>> frontier;
-    std::unordered_set<room_data*> visited;
+    std::queue<std::pair<Destination, std::vector<PathNode>>> frontier;
+    std::unordered_set<Location> visited;
 
     visited.insert(src);
 
     // Enqueue initial edges from src.
-    for (int d = 0; d < NUM_OF_DIRS; ++d) {
-        PathNode node(src, d);
+    for (auto &[door, e] : src.getExits()) {
+        PathNode node(e, door);
         if (node) {
             // If a TraverseFunc is provided, check if this edge is allowed.
             if (!is_valid || is_valid(node)) {
-                room_data* neighbor = node.room;
-                if (neighbor) {
-                    std::vector<PathNode> path;
-                    path.push_back(node);
-                    frontier.push({neighbor, path});
-                    visited.insert(neighbor);
-                }
+                std::vector<PathNode> path;
+                path.push_back(node);
+                frontier.push({e, path});
+                visited.insert(e);
             }
         }
     }
@@ -87,16 +80,15 @@ std::optional<std::vector<PathNode>> find_bfs_path(room_data* src, room_data* ta
             return path;
 
         // Otherwise, enqueue all valid neighbors.
-        for (int d = 0; d < NUM_OF_DIRS; ++d) {
-            PathNode node(curr, d);
+        for (auto &[door, e] : curr.getExits()) {
+            PathNode node(e, door);
             if (node) {
                 if (!is_valid || is_valid(node)) {
-                    room_data* neighbor = node.room;
-                    if (neighbor && visited.find(neighbor) == visited.end()) {
+                    if (visited.find(e) == visited.end()) {
                         std::vector<PathNode> new_path = path;  // copy current path
                         new_path.push_back(node);
-                        frontier.push({neighbor, new_path});
-                        visited.insert(neighbor);
+                        frontier.push({e, new_path});
+                        visited.insert(e);
                     }
                 }
             }
@@ -107,7 +99,7 @@ std::optional<std::vector<PathNode>> find_bfs_path(room_data* src, room_data* ta
     return std::nullopt;
 }
 
-int find_first_step(room_data* src, room_data* target) {
+int find_first_step(Location& src, Location& target) {
     // Assume these constants are defined:
     constexpr int BFS_ALREADY_THERE = -1;
     constexpr int BFS_NO_PATH = -2;
@@ -121,7 +113,7 @@ int find_first_step(room_data* src, room_data* target) {
         return BFS_ALREADY_THERE;
     }
     // The first step's direction is stored in the first pair.
-    return path.front().dir;
+    return static_cast<int>(path.front().dir);
 }
 
 /********************************************************
@@ -161,11 +153,11 @@ ACMD(do_sradar) {
         return;
     }
     
-    if (noship == false && vehicle->getLocationTileType() != SECT_SPACE) {
+    if (noship == false && vehicle->location.getTileType() != SECT_SPACE) {
         send_to_char(ch, "@wYour ship is not in space!\r\n");
         return;
     }
-    if (noship == true && ch->getLocationTileType() != SECT_SPACE) {
+    if (noship == true && ch->location.getTileType() != SECT_SPACE) {
         send_to_char(ch, "@wYou are not even in space!\r\n");
         return;
     }
@@ -194,22 +186,20 @@ ACMD(do_sradar) {
     std::string argstr(arg);
     boost::to_lower(argstr);
 
-    struct room_data *startRoom;
-    if (noship == false) {
-        startRoom = vehicle->getRoom();
-    } else {
-        startRoom = ch->getRoom();
-    }
+    auto startLoc = noship ? ch->location : vehicle->location;
+    Location endLoc;
 
     auto find = planetLocations.find(argstr);
     if(find != planetLocations.end()) {
-        dir = find_first_step(startRoom, get_room(find->second));
+        endLoc.unit = get_room(find->second);
+        dir = find_first_step(startLoc, endLoc);
         sprintf(planet, "%s", argstr.c_str());
     } else {
         if(!strcasecmp(arg, "buoy1")) {
             auto room = get_room(GET_RADAR1(ch));
             if(room) {
-                dir = find_first_step(startRoom, room);
+                endLoc.unit = room;
+                dir = find_first_step(startLoc, endLoc);
             } else {
                 send_to_char(ch, "@wYou haven't launched that buoy.\r\n");
                 return;
@@ -217,7 +207,8 @@ ACMD(do_sradar) {
         } else if(!strcasecmp(arg, "buoy2")) {
             auto room = get_room(GET_RADAR2(ch));
             if(room) {
-                dir = find_first_step(startRoom, room);
+                endLoc.unit = room;
+                dir = find_first_step(startLoc, endLoc);
             } else {
                 send_to_char(ch, "@wYou haven't launched that buoy.\r\n");
                 return;
@@ -225,7 +216,8 @@ ACMD(do_sradar) {
         } else if(!strcasecmp(arg, "buoy3")) {
             auto room = get_room(GET_RADAR3(ch));
             if(room) {
-                dir = find_first_step(startRoom, room);
+                endLoc.unit = room;
+                dir = find_first_step(startLoc, endLoc);
             } else {
                 send_to_char(ch, "@wYou haven't launched that buoy.\r\n");
                 return;
@@ -269,16 +261,14 @@ ACMD(do_radar) {
         return;
     }
 
-    auto cr = ch->getRoom();
-
     WAIT_STATE(ch, PULSE_2SEC);
     act("$n holds up a dragon radar and pushes its button.", false, ch, nullptr, nullptr, TO_ROOM);
     for(auto vn : dbVnums) {
         auto o = objectSubscriptions.first(fmt::format("vnum_{}", vn));
         if(!o) continue;
-        auto r = o->getAbsoluteRoom();
+        auto r = o->getAbsoluteLocation();
         if(!r) continue;
-        dir = find_first_step(cr, r);
+        dir = find_first_step(ch->location, r);
         switch (dir) {
             case BFS_ERROR:
                 send_to_char(ch, "Hmm.. something seems to be wrong.\r\n");
@@ -455,7 +445,7 @@ ACMD(do_track) {
     }
 
     if (GET_HIT(vict) < (GET_HIT(ch) * 0.001) + 1) {
-        if (ch->getLocation() == vict->getLocation()) {
+        if (ch->location == vict->location) {
             if (!read_sense_memory(ch, vict)) {
                 send_to_char(ch,
                              "Their powerlevel is too weak for you to sense properly, but you will recognise their ki signal from now on.\r\n");
@@ -480,7 +470,7 @@ ACMD(do_track) {
             /* Find a random direction. :) */
             do {
                 dir = rand_number(0, NUM_OF_DIRS - 1);
-            } while (!CAN_GO(ch, dir) && --tries);
+            } while (!ch->location.canGo(dir) && --tries);
             send_to_char(ch, "You sense them %s faintly from here, but are unsure....\r\n", dirs[dir]);
             improve_skill(ch, SKILL_SENSE, 1);
             improve_skill(ch, SKILL_SENSE, 1);
@@ -489,7 +479,7 @@ ACMD(do_track) {
         }
 
         /* They passed the skill check. */
-        dir = find_first_step(ch->getRoom(), vict->getRoom());
+        dir = find_first_step(ch->location, vict->location);
 
         switch (dir) {
             case BFS_ERROR:

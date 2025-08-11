@@ -619,7 +619,7 @@ void mag_groups(int level, struct char_data *ch, int spellnum) {
     for (f = k->followers; f; f = f_next) {
         f_next = f->next;
         tch = f->follower;
-        if (tch->getLocation() != ch->getLocation())
+        if (tch->location != ch->location)
             continue;
         if (!AFF_FLAGGED(tch, AFF_GROUP))
             continue;
@@ -640,7 +640,7 @@ void mag_groups(int level, struct char_data *ch, int spellnum) {
  * No spells of this class currently implemented.
  */
 void mag_masses(int level, struct char_data *ch, int spellnum) {
-    auto people = ch->getLocationPeople();
+    auto people = ch->location.getPeople();
     for (auto tch : filter_raw(people)) {
         if (tch == ch)
             continue;
@@ -681,7 +681,7 @@ void mag_areas(int level, struct char_data *ch, int spellnum) {
     if (to_room)
         act(to_room, false, ch, nullptr, nullptr, TO_ROOM);
 
-    auto people = ch->getLocationPeople();
+    auto people = ch->location.getPeople();
     for (auto tch : filter_raw(people)) {
 
 

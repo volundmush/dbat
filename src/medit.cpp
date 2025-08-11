@@ -20,7 +20,6 @@
 #include "dbat/class.h"
 #include "dbat/act.wizard.h"
 #include "dbat/modify.h"
-#include "dbat/bitarray.h"
 #include "dbat/oasis.h"
 #include "dbat/dg_scripts.h"
 /*-------------------------------------------------------------------*/
@@ -103,7 +102,7 @@ ACMD(do_oasis_medit) {
         free(d->olc);
     }
 
-    CREATE(d->olc, struct oasis_olc_data, 1);
+    d->olc = new oasis_olc_data();
 
     /****************************************************************************/
     /** Find the zone.                                                         **/
@@ -111,7 +110,7 @@ ACMD(do_oasis_medit) {
     OLC_ZNUM(d) = save ? real_zone(number) : real_zone_by_thing(number);
     if (OLC_ZNUM(d) == NOWHERE) {
         send_to_char(ch, "Sorry, there is no zone for that number!\r\n");
-        free(d->olc);
+        delete d->olc;
         d->olc = nullptr;
         return;
     }
@@ -307,7 +306,7 @@ void medit_disp_mob_flags(struct descriptor_data *d) {
         write_to_output(d, "@g%2d@n) %-20.20s  %s", i + 1, action_bits[i],
                         !(++columns % 2) ? "\r\n" : "");
     }
-    sprintbitarray(OLC_MOB(d)->mob_flags.getAll(), action_bits, AF_ARRAY_MAX, flags);
+    sprintf(flags, "%s", OLC_MOB(d)->mob_flags.getFlagNames().c_str());
     write_to_output(d, "\r\nCurrent flags : @c%s@n\r\nEnter mob flags (0 to quit) : ",
                     flags);
 }
@@ -338,7 +337,7 @@ void medit_disp_aff_flags(struct descriptor_data *d) {
         write_to_output(d, "@g%2d@n) %-20.20s  %s", i + 1, affected_bits[i + 1],
                         !(++columns % 2) ? "\r\n" : "");
     }
-    sprintbitarray(AFF_FLAGS(OLC_MOB(d)).getAll(), affected_bits, AF_ARRAY_MAX, flags);
+    sprintf(flags, "%s", AFF_FLAGS(OLC_MOB(d)).getFlagNames().c_str());
     write_to_output(d, "\r\nCurrent flags   : @c%s@n\r\nEnter aff flags (0 to quit) : ",
                     flags);
 }
@@ -426,8 +425,8 @@ void medit_disp_menu(struct descriptor_data *d) {
                     GET_NDD(mob), GET_SDD(mob), mob->getBaseStat<int64_t>("health"), mob->getBaseStat<int64_t>("ki"),
                     mob->getBaseStat<int64_t>("stamina"), mob->getBaseStat<int>("health"), mob->getBaseStat<int>("experience"), GET_GOLD(mob)
     );
-    sprintbitarray(mob->mob_flags.getAll(), action_bits, AF_ARRAY_MAX, flags);
-    sprintbitarray(mob->affect_flags.getAll(), affected_bits, AF_ARRAY_MAX, flag2);
+    sprintf(flags, "%s", mob->mob_flags.getFlagNames().c_str());
+    sprintf(flag2, "%s", mob->affect_flags.getFlagNames().c_str());
     write_to_output(d,
                     "@gI@n) Position   : @y%-10s@n,	 @gJ@n) Default   : @y%-10s\r\n"
                     "@gK@n) Personality: @Y%s@n\r\n"

@@ -144,8 +144,6 @@ WCMD(do_weffect) {
 
 /* prints the argument to all the rooms aroud the room */
 WCMD(do_wasound) {
-    int door;
-
     skip_spaces(&argument);
 
     if (!*argument) {
@@ -153,13 +151,9 @@ WCMD(do_wasound) {
         return;
     }
 
-    for (door = 0; door < NUM_OF_DIRS; door++) {
-        auto ex = room->dir_option[door];
-        if(!ex) continue;
-        if(ex->to_room == room->getVnum()) continue;
-        auto dest = get_room(ex->to_room);
-        if(!dest) continue;
-        send_to_room(dest, "%s", argument);
+    for (auto& [door, e] : room->getDirections()) {
+        if(e == room) continue;
+        e.sendText(argument);
     }
 }
 
@@ -171,7 +165,7 @@ WCMD(do_wecho) {
         wld_log(room, "wecho called with no args");
 
     else
-        send_to_room(room, "%s", argument);
+        room->sendText(argument);
 }
 
 
@@ -241,7 +235,6 @@ WCMD(do_wdoor) {
     char target[MAX_INPUT_LENGTH], direction[MAX_INPUT_LENGTH];
     char field[MAX_INPUT_LENGTH], *value;
     room_data *rm;
-    struct Destination *newexit;
     int dir, fd, to_room;
 
     const char *door_field[] = {
@@ -283,31 +276,23 @@ WCMD(do_wdoor) {
         return;
     }
 
-    newexit = rm->dir_option[dir];
+    auto cdir = static_cast<Direction>(dir);
+    auto newexit = rm->getDirection(cdir);
 
     /* purge exit */
     if (fd == 0) {
         if (newexit) {
-            if (newexit->general_description)
-                free(newexit->general_description);
-            if (newexit->keyword)
-                free(newexit->keyword);
-            free(newexit);
-            rm->dir_option[dir] = nullptr;
+            rm->deleteExit(cdir);
         }
     } else {
         if (!newexit) {
-            CREATE(newexit, struct Destination, 1);
-            rm->dir_option[dir] = newexit;
+            newexit.emplace();
+            newexit->dir = cdir;
         }
 
         switch (fd) {
             case 1:  /* description */
-                if (newexit->general_description)
-                    free(newexit->general_description);
-                CREATE(newexit->general_description, char, strlen(value) + 3);
-                strcpy(newexit->general_description, value);
-                strcat(newexit->general_description, "\r\n");
+                newexit->general_description = std::string(value) + "\r\n";
                 break;
             case 2:  /* flags       */
                 newexit->exit_info = (int16_t) asciiflag_conv(value);
@@ -316,24 +301,22 @@ WCMD(do_wdoor) {
                 newexit->key = atoi(value);
                 break;
             case 4:  /* name        */
-                if (newexit->keyword)
-                    free(newexit->keyword);
-                CREATE(newexit->keyword, char, strlen(value) + 1);
-                strcpy(newexit->keyword, value);
+                newexit->keyword = value;
                 break;
             case 5:  /* room        */
                 if ((to_room = real_room(atoi(value))) != NOWHERE)
-                    newexit->to_room = to_room;
+                    newexit->unit = get_room(to_room);
                 else
                     wld_log(room, "wdoor: invalid door target");
                 break;
         }
+        room->replaceExit(*newexit);
     }
 }
 
 
 WCMD(do_wteleport) {
-    room_rnum target, nr;
+    room_rnum nr;
     char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 
     two_arguments(argument, arg1, arg2);
@@ -344,9 +327,9 @@ WCMD(do_wteleport) {
     }
 
     nr = atoi(arg2);
-    target = real_room(nr);
+    auto target = get_room(nr);
 
-    if (target == NOWHERE)
+    if (!target)
         wld_log(room, "wteleport target is an invalid room");
 
     else if (!strcasecmp(arg1, "all")) {
@@ -358,16 +341,16 @@ WCMD(do_wteleport) {
         for (auto ch : filter_raw(people)) {
             if (!valid_dg_target(ch, DG_ALLOW_GODS))
                 continue;
-            char_from_room(ch);
-            char_to_room(ch, target);
-            enter_wtrigger(ch->getRoom(), ch, -1);
+            ch->clearLocation();
+            ch->setLocation(target);
+            enter_wtrigger(target, ch, -1);
         }
     } else {
         if (auto ch = get_char_by_room(room, arg1); ch) {
             if (valid_dg_target(ch, DG_ALLOW_GODS)) {
-                char_from_room(ch);
-                char_to_room(ch, target);
-                enter_wtrigger(ch->getRoom(), ch, -1);
+                ch->clearLocation();
+                ch->setLocation(target);
+                enter_wtrigger(target, ch, -1);
             }
         } else
             wld_log(room, "wteleport: no target found");

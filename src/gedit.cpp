@@ -108,17 +108,17 @@ ACMD(do_oasis_gedit) {
     if (d->olc) {
         mudlog(BRF, ADMLVL_IMMORT, true,
                "SYSERR: do_oasis_gedit: Player already had olc structure.");
-        free(d->olc);
+        delete d->olc;
     }
 
-    CREATE(d->olc, struct oasis_olc_data, 1);
+    d->olc = new oasis_olc_data();
 
     /****************************************************************************/
     /** Find the zone.                                                         **/
     /****************************************************************************/
     if ((OLC_ZNUM(d) = real_zone_by_thing(number)) == NOWHERE) {
         send_to_char(ch, "Sorry, there is no zone for that number!\r\n");
-        free(d->olc);
+        delete d->olc;
         d->olc = nullptr;
         return;
     }

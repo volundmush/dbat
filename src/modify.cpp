@@ -119,8 +119,24 @@ void string_write(struct descriptor_data *d, char **writeto, size_t len, long ma
         free(data);
 
     d->str = writeto;
+    d->std_str = nullptr;
     d->max_str = len;
     d->mail_to = mailto;
+}
+
+void string_write(struct descriptor_data *d, std::string *writeto, size_t len, long mailto, std::string backup) {
+    if (d->character && !IS_NPC(d->character))
+        d->character->player_flags.set(PLR_WRITING, true);
+
+    d->std_backstr = backup;
+    d->str = nullptr;
+    d->std_str = writeto;
+    d->max_str = len;
+    d->mail_to = mailto;
+}
+
+void std_string_add(struct descriptor_data *d, const std::string& txt) {
+    // TODO: implement.
 }
 
 /*

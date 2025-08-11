@@ -68,10 +68,10 @@ ACMD(do_oasis_hedit) {
     /* Give descriptor an OLC structure. */
     if (d->olc) {
         mudlog(BRF, ADMLVL_IMMORT, true, "SYSERR: do_oasis: Player already had olc structure.");
-        free(d->olc);
+        delete d->olc;
     }
 
-    CREATE(d->olc, struct oasis_olc_data, 1);
+    d->olc = new oasis_olc_data();
     OLC_NUM(d) = 0;
     OLC_STORAGE(d) = strdup(arg);
     OLC_ZNUM(d) = search_help((const char *) OLC_STORAGE(d), ADMLVL_IMPL);

@@ -41,20 +41,18 @@ struct obj_data *find_hatch_by_vnum(int vnum) {
 
 /* Search the player's room, inventory and equipment for a control */
 struct obj_data *find_control(struct char_data *ch) {
-    struct obj_data *controls, *obj;
-    int j;
     auto iscontrol = [ch](obj_data *o) { return CAN_SEE_OBJ(ch, o) && GET_OBJ_TYPE(o) == ITEM_CONTROL; };
 
-    controls = ch->getRoom()->findObject(iscontrol);
+    auto controls = ch->location.findObject(iscontrol);
     if (!controls) controls = ch->findObject(iscontrol);
 
     if (!controls)
-        for (j = 0; j < NUM_WEARS && !controls; j++)
-            if (GET_EQ(ch, j) && CAN_SEE_OBJ(ch, GET_EQ(ch, j)) &&
-                GET_OBJ_TYPE(GET_EQ(ch, j)) == ITEM_CONTROL) {
-                    controls = GET_EQ(ch, j);
-                    break;
-                }
+        for (auto &[slot, eq] : ch->getEquipment()) {
+            if(iscontrol(eq)) {
+                controls = eq;
+                break;
+            }
+        }
     return controls;
 }
 
@@ -68,7 +66,7 @@ static void drive_into_vehicle(struct char_data *ch, struct obj_data *vehicle, c
         send_to_char(ch, "@wDrive into what?\r\n");
         return;
     }
-    if (!(vehicle_in_out = get_obj_in_list_vis(ch, arg, nullptr, vehicle->getLocationObjects()))) {
+    if (!(vehicle_in_out = get_obj_in_list_vis(ch, arg, nullptr, vehicle->location.getObjects()))) {
         send_to_char(ch, "@wNothing here by that name!\r\n");
         return;
     }
@@ -109,10 +107,8 @@ static void drive_into_vehicle(struct char_data *ch, struct obj_data *vehicle, c
 /* Drive our vehicle out of another vehicle */
 static void drive_outof_vehicle(struct char_data *ch, struct obj_data *vehicle) {
     struct obj_data *vehicle_in_out;
-    char buf[MAX_INPUT_LENGTH];
 
-    auto room = vehicle->getRoom();
-    auto hatch = room->findObject([&](obj_data *o) { return GET_OBJ_TYPE(o) == ITEM_HATCH; });
+    auto hatch = ch->location.findObject([&](obj_data *o) { return GET_OBJ_TYPE(o) == ITEM_HATCH; });
 
     if (!hatch) {
         send_to_char(ch, "@wNowhere to pilot out of.\r\n");
@@ -124,68 +120,60 @@ static void drive_outof_vehicle(struct char_data *ch, struct obj_data *vehicle) 
         return;
     }
 
-    sprintf(buf, "%s @wexits %s.\r\n", vehicle->getShortDescription(),
+    vehicle->location.send_to("%s @wexits %s.\r\n", vehicle->getShortDescription(),
             vehicle_in_out->getShortDescription());
-    send_to_room(room, buf);
 
-    obj_from_room(vehicle);
+    vehicle->clearLocation();
     vehicle->setLocation(vehicle_in_out);
-
-    room = vehicle->getRoom();
 
     if (ch->desc)
         act("@wThe @De@Wn@wg@Di@wn@We@Ds@w of the ship @rr@Ro@ra@Rr@w as it moves.", true, ch, nullptr, nullptr,
             TO_ROOM);
     send_to_char(ch, "@wThe ship flies onward:\r\n");
     ch->lookAtLocation(vehicle);
-    for (auto &[door, e] : room->getDirections()) {
+    for (auto &[door, e] : vehicle->location.getExits()) {
         if(IS_SET(e.exit_info, EX_CLOSED)) continue;
-        if(auto dest = e.getDestination(); dest) {
-            send_to_room(dest, "@wThe @De@Wn@wg@Di@wn@We@Ds@w of the ship @rr@Ro@ra@Rr@w as it moves.\r\n");
-        }
+        e.sendText("@wThe @De@Wn@wg@Di@wn@We@Ds@w of the ship @rr@Ro@ra@Rr@w as it moves.\r\n");
     }
-    sprintf(buf, "%s @wflies out of %s.\r\n", vehicle->getShortDescription(),
+    vehicle->location.send_to("%s @wflies out of %s.\r\n", vehicle->getShortDescription(),
             vehicle_in_out->getShortDescription());
-    send_to_location(vehicle, buf);
 }
 
 /* Drive out vehicle in a certain direction */
 void drive_in_direction(struct char_data *ch, struct obj_data *vehicle, int dir) {
     char buf[MAX_INPUT_LENGTH];
-    auto room = vehicle->getRoom();
 
-    auto d = room->dir_option[dir];
+    auto d = vehicle->location.getExit(static_cast<Direction>(dir));
     if(!d) {
         send_to_char(ch, "@wApparently %s doesn't exist there.\r\n", dirs[dir]);
         return;
     }
-    auto dest = d->getDestination();
+    auto &dest = d.value();
     if(!dest) {
         send_to_char(ch, "@wApparently %s doesn't exist there.\r\n", dirs[dir]);
         return;
     }
 
-    if(IS_SET(d->exit_info, EX_CLOSED)) {
-        if (d->keyword)
-            send_to_char(ch, "@wThe %s seems to be closed.\r\n", fname(d->keyword));
+    if(IS_SET(dest.exit_info, EX_CLOSED)) {
+        if (!dest.keyword.empty())
+            send_to_char(ch, "@wThe %s seems to be closed.\r\n", fname(dest.keyword.c_str()));
         else
             send_to_char(ch, "@wIt seems to be closed.\r\n");
         return;
     }
 
-    if (!dest->room_flags.get(RoomFlag::vehicle) && !dest->where_flags.get(WhereFlag::space)) {
+    if (!dest.getRoomFlag(RoomFlag::vehicle) && !dest.getWhereFlag(WhereFlag::space)) {
         /* But the vehicle can't go that way*/
         send_to_char(ch, "@wThe ship can't fit there!\r\n");
         return;
     }
 
-    int was_in, is_in;
-
     sprintf(buf, "%s @wflies %s.\r\n", vehicle->getShortDescription(), dirs[dir]);
     send_to_location(vehicle, buf);
 
-    obj_from_room(vehicle);
-    obj_to_room(vehicle, dest->getVnum());
+    vehicle->clearLocation();
+    vehicle->setLocation(dest);
+
     struct obj_data *controls;
     if ((controls = find_control(ch))) {
         if (GET_FUELCOUNT(controls) < 5) {
@@ -209,33 +197,25 @@ void drive_in_direction(struct char_data *ch, struct obj_data *vehicle, int dir)
         }
     }
 
-    is_in = IN_ROOM(vehicle);
-
     if (ch->desc)
         act("@wThe @De@Wn@wg@Di@wn@We@Ds@w of the ship @rr@Ro@ra@Rr@w as it moves.", true, ch, nullptr, nullptr,
             TO_ROOM);
     send_to_char(ch, "@wThe ship flies onward:\r\n");
-    ch->lookAtLocation(is_in);
+    ch->lookAtLocation(vehicle);
     if (controls) {
         send_to_char(ch, "@RFUEL@D: %s%s@n\r\n",
                      GET_FUEL(controls) >= 200 ? "@G" : GET_FUEL(controls) >= 100 ? "@Y" : "@r",
                      add_commas(GET_FUEL(controls)).c_str());
     }
-    int door;
-    room = vehicle->getRoom();
-    for (door = 0; door < NUM_OF_DIRS; door++) {
-        auto e = room->dir_option[door];
-        if(!e) continue;
-        dest = e->getDestination();
-        if(!dest) continue;
-        if(!IS_SET(e->exit_info, EX_CLOSED)) continue;
 
-        send_to_room(dest->getVnum(), "@wThe @De@Wn@wg@Di@wn@We@Ds@w of the ship @rr@Ro@ra@Rr@w as it moves.\r\n");
+    for (auto &[door, e] : vehicle->location.getExits()) {
+        if(IS_SET(e.exit_info, EX_CLOSED)) continue;
+        e.sendText("@wThe @De@Wn@wg@Di@wn@We@Ds@w of the ship @rr@Ro@ra@Rr@w as it moves.\r\n");
     }
     sprintf(buf, "%s @wflies in from the %s.\r\n",
             vehicle->getShortDescription(), dirs[rev_dir[dir]]);
 
-    send_to_room(is_in, buf);
+    vehicle->location.sendText(buf);
 
 }
 
@@ -284,7 +264,7 @@ static bool validate_warp_conditions(struct char_data *ch, struct obj_data *vehi
         return false;
     }
 
-    if (!vehicle->getWhereFlag(WhereFlag::space)) {
+    if (!vehicle->location.getWhereFlag(WhereFlag::space)) {
         send_to_char(ch, "Your ship needs to be in space to utilize its Instant Travel Warp Accelerator.\r\n");
         return false;
     }
@@ -364,7 +344,7 @@ static void handle_pilot_ready(struct char_data *ch) {
     }
 
     for (auto *d = descriptor_list; d; d = d->next) {
-        if (IS_PLAYING(d) && d->character != ch && PLR_FLAGGED(d->character, PLR_PILOTING) && d->character->getLocation() == ch->getLocation()) {
+        if (IS_PLAYING(d) && d->character != ch && PLR_FLAGGED(d->character, PLR_PILOTING) && d->character->location == ch->location) {
             send_to_char(ch, "@w%s is already piloting the ship!\r\n", GET_NAME(d->character));
             return;
         }
@@ -408,7 +388,7 @@ static bool validate_drive_conditions(struct char_data *ch, struct obj_data *&ve
         return false;
     }
 
-    if (ch->getLocationIsDark() && !CAN_SEE_IN_DARK(ch)) {
+    if (ch->location.getIsDark() && !CAN_SEE_IN_DARK(ch)) {
         send_to_char(ch, "@wIt is pitch black...\r\n");
         return false;
     }
@@ -567,8 +547,7 @@ static void handle_drive_land(struct char_data *ch, struct obj_data *vehicle, co
 }
 
 static void handle_drive_launch(struct char_data *ch, struct obj_data *vehicle, struct obj_data *controls) {
-    auto room = vehicle->getRoom();
-    auto planet = getPlanet(room->getVnum());
+    auto planet = getPlanet(vehicle->location.getVnum());
     if (!planet) {
         send_to_char(ch, "@wYou are not on a planet.@n\r\n");
         return;
@@ -599,7 +578,7 @@ static void handle_drive_launch(struct char_data *ch, struct obj_data *vehicle, 
     }
 
     obj_from_room(vehicle);
-    obj_to_room(vehicle, dest);
+    vehicle->setLocation(dest);
     ch->lookAtLocation(vehicle);
     send_to_char(ch, "@RFUEL@D: %s%s@n\r\n",
                  GET_FUEL(controls) >= 200 ? "@G" : GET_FUEL(controls) >= 100 ? "@Y" : "@r",
@@ -607,7 +586,7 @@ static void handle_drive_launch(struct char_data *ch, struct obj_data *vehicle, 
 }
 
 static void handle_buoy_launch(struct char_data *ch, struct obj_data *vehicle, const std::string& marker) {
-    if (!vehicle->getWhereFlag(WhereFlag::space)) {
+    if (!vehicle->location.getWhereFlag(WhereFlag::space)) {
         send_to_char(ch, "@wYou need to be in space to launch a marker buoy.\r\n");
         return;
     }
@@ -677,7 +656,7 @@ ACMD(do_ship_fire) {
 
     struct obj_data *obj = nullptr, *obj2 = nullptr, *next_obj = nullptr;
     int shot = false;
-    auto loco = ch->getLocationObjects();
+    auto loco = ch->location.getObjects();
     for (auto obj : filter_raw(loco)) {
         if (shot == false) {
             if (GET_OBJ_TYPE(obj) == ITEM_VEHICLE && obj != vehicle) {

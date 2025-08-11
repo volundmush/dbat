@@ -180,7 +180,7 @@ void cleanup_olc(struct descriptor_data *d, int8_t cleanup_type) {
                 free_room(OLC_ROOM(d));
                 break;
             case CLEANUP_STRUCTS:
-                free(OLC_ROOM(d));
+                delete OLC_ROOM(d);
                 break;
             case CLEANUP_CONFIG:
                 free_config(OLC_CONFIG(d));
@@ -309,7 +309,7 @@ void cleanup_olc(struct descriptor_data *d, int8_t cleanup_type) {
         STATE(d) = CON_PLAYING;
     }
 
-    free(d->olc);
+    delete d->olc;
     d->olc = nullptr;
 }
 
