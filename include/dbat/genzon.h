@@ -10,10 +10,6 @@
 
 extern zone_rnum create_new_zone(zone_vnum vzone_num, room_vnum bottom, room_vnum top, const char **error);
 
-extern int save_zone(zone_rnum zone_num);
-
-extern int count_commands(struct reset_com *list);
-
 extern int new_command(struct zone_data *zone, int pos);
 
 extern void delete_zone_command(struct zone_data *zone, int pos);

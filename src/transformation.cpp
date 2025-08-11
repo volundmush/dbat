@@ -1145,7 +1145,7 @@ namespace trans {
                             base = 1.0;
                         }
 
-                        send_to_char(ch, "@MYour tainted lifeforce infuses your attack with a sickly purple hue!@n");
+                                                ch->sendText("@MYour tainted lifeforce infuses your attack with a sickly purple hue!@n");
 
                         base = base * ch->modCurVitalDam(CharVital::lifeforce, 0.05);
                     }
@@ -1177,14 +1177,14 @@ namespace trans {
 
                         if(axion_dice(0) <= chance && GET_BARRIER(ch) <= 0) {
                             ch->setBaseStat("barrier", ch->getCurVital(CharVital::lifeforce) / 5);
-                            send_to_char(ch, "@MThe mantle of your tainted life flares out, creating a barrier.@n");
+                                                        ch->sendText("@MThe mantle of your tainted life flares out, creating a barrier.@n");
                         }
                         else
-                            send_to_char(ch, "@MYour tainted lifeforce saps the strength of your opponents attack!@n");
+                                                        ch->sendText("@MYour tainted lifeforce saps the strength of your opponents attack!@n");
 
                         ch->modCurVitalDam(CharVital::lifeforce, 0.05);
                     } else {
-                        send_to_char(ch, "@MYou feel far too exhausted to strengthen yourself!@n");
+                                                ch->sendText("@MYou feel far too exhausted to strengthen yourself!@n");
                     }
 
                     return -base - ((base/10) * getMasteryTier(ch, Form::dark_king));
@@ -1313,11 +1313,11 @@ namespace trans {
                         healthBoost = (1 - chealth) * (4 + (0.2 * getMasteryTier(ch, Form::evil_aura)));
 
                         if(chealth < 0.25)
-                            send_to_char(ch, "@RYou feel your agony infuse the attack.\r\n@n");
+                                                        ch->sendText("@RYou feel your agony infuse the attack.\r\n@n");
                         else if(chealth < 0.50)
-                            send_to_char(ch, "@RYou feel your rage infuse the attack.\r\n@n");
+                                                        ch->sendText("@RYou feel your rage infuse the attack.\r\n@n");
                         else
-                            send_to_char(ch, "@RYou feel your anger infuse the attack.\r\n@n");
+                                                        ch->sendText("@RYou feel your anger infuse the attack.\r\n@n");
                     }
 	                return healthBoost;
                 }},
@@ -1367,7 +1367,7 @@ namespace trans {
                 {APPLY_COMBAT_MULT,     0.0, static_cast<int>(ComStat::damage),            [](struct char_data *ch) {
                     double mult = (1 + (0.05 * getMasteryTier(ch, Form::kaioken)));
                     if (axion_dice(0) <= (GET_SKILL(ch, (int)Skill::kaioken) * mult)) {
-                        send_to_char(ch, "You push yourself to the limit as you attack!.\r\n");
+                                                ch->sendText("You push yourself to the limit as you attack!.\r\n");
                         act("$n's red aura ripples with power as they strike!", true, ch, nullptr, nullptr, TO_ROOM);
                         improve_skill(ch, (int)Skill::kaioken, 0);
                         return (0.06 * ch->transforms[Form::kaioken].grade) * mult;
@@ -1384,7 +1384,7 @@ namespace trans {
                     double mult = (1 + (0.05 * getMasteryTier(ch, Form::dark_metamorphosis)));
 
                     if (axion_dice(0) <= (GET_SKILL(ch, (int)Skill::dark_metamorphosis) * mult)) {
-                        send_to_char(ch, "Your darkness burns into your very ki!.\r\n");
+                                                ch->sendText("Your darkness burns into your very ki!.\r\n");
                         act("$n's ki ripples with a horrifying darkness!", true, ch, nullptr, nullptr, TO_ROOM);
                         improve_skill(ch, (int)Skill::dark_metamorphosis, 0);
                         return (0.05 * ch->transforms[Form::dark_metamorphosis].grade) * mult;
@@ -1400,7 +1400,7 @@ namespace trans {
                     double mult = (1 + (0.05 * getMasteryTier(ch, Form::tiger_stance)));
 
                     if (axion_dice(0) <= (GET_SKILL(ch, (int)Skill::tiger_stance) * mult)) {
-                        send_to_char(ch, "Primal strength courses through you.\r\n");
+                                                ch->sendText("Primal strength courses through you.\r\n");
                         act("$n lurches forwards with ferocious might.", true, ch, nullptr, nullptr, TO_ROOM);
                         improve_skill(ch, (int)Skill::tiger_stance, 0);
                         return (0.05 * ch->transforms[Form::tiger_stance].grade) * mult;
@@ -1415,7 +1415,7 @@ namespace trans {
                     double mult = (1 + (0.05 * getMasteryTier(ch, Form::eagle_stance)));
 
                     if (axion_dice(0) <= (GET_SKILL(ch, (int)Skill::eagle_stance) * mult)) {
-                        send_to_char(ch, "Your mind and ki align, power flaring.\r\n");
+                                                ch->sendText("Your mind and ki align, power flaring.\r\n");
                         act("$n's movements slow, their ki redoubling in strength.", true, ch, nullptr, nullptr, TO_ROOM);
                         improve_skill(ch, (int)Skill::eagle_stance, 0);
                         return (0.05 * ch->transforms[Form::eagle_stance].grade) * mult;
@@ -1430,7 +1430,7 @@ namespace trans {
                     double mult = (1 + (0.05 * getMasteryTier(ch, Form::ox_stance)));
 
                     if (axion_dice(0) <= (GET_SKILL(ch, (int)Skill::ox_stance) * mult)) {
-                        send_to_char(ch, "Hah, that didn't hurt half as much!\r\n");
+                                                ch->sendText("Hah, that didn't hurt half as much!\r\n");
                         act("$n's hulking form barely seems grazed by the attack!", true, ch, nullptr, nullptr, TO_ROOM);
                         improve_skill(ch, (int)Skill::ox_stance, 0);
                         return (0.05 * ch->transforms[Form::ox_stance].grade) * mult;
@@ -1663,23 +1663,23 @@ namespace trans {
             // Notify at thresholds
             if(form != Form::base) {
                 if(timeBefore < MASTERY_THRESHOLD && timeAfter >= MASTERY_THRESHOLD)
-                    send_to_char(ch, "@mSomething settles in your core, you feel more comfortable using @n" + getName(ch, form) + "\r\n");
+                                        ch->sendText("@mSomething settles in your core, you feel more comfortable using @n" + getName(ch, form) + "\r\n");
 
                 if(timeBefore < LIMIT_THRESHOLD && timeAfter >= LIMIT_THRESHOLD)
-                    send_to_char(ch, "@mYou feel power overwhelming emanate from your core, you instinctively know you've hit the limit of @n" + getName(ch, form) + "\r\n");
+                                        ch->sendText("@mYou feel power overwhelming emanate from your core, you instinctively know you've hit the limit of @n" + getName(ch, form) + "\r\n");
 
                 if(timeBefore < LIMITBREAK_THRESHOLD && timeAfter >= LIMITBREAK_THRESHOLD && data.limit_broken == true)
-                    send_to_char(ch, "@mThere's a snap as a tide of power rushes throughout your veins,@n " + getName(ch, form) + " @mhas evolved.@n\r\n");
+                                        ch->sendText("@mThere's a snap as a tide of power rushes throughout your veins,@n " + getName(ch, form) + " @mhas evolved.@n\r\n");
             }
             if(technique != Form::base) {
                 if(techTimeBefore < MASTERY_THRESHOLD && techTimeAfter >= MASTERY_THRESHOLD)
-                    send_to_char(ch, "@mSomething settles in your core, you feel more comfortable using @n" + getName(ch, technique) + "\r\n");
+                                        ch->sendText("@mSomething settles in your core, you feel more comfortable using @n" + getName(ch, technique) + "\r\n");
 
                 if(techTimeBefore < LIMIT_THRESHOLD && techTimeAfter >= LIMIT_THRESHOLD)
-                    send_to_char(ch, "@mYou feel power overwhelming emanate from your core, you instinctively know you've hit the limit of @n" + getName(ch, technique) + "\r\n");
+                                        ch->sendText("@mYou feel power overwhelming emanate from your core, you instinctively know you've hit the limit of @n" + getName(ch, technique) + "\r\n");
 
                 if(techTimeBefore < LIMITBREAK_THRESHOLD && techTimeAfter >= LIMITBREAK_THRESHOLD && techdata.limit_broken == true)
-                    send_to_char(ch, "@mThere's a snap as a tide of power rushes throughout your veins,@n " + getName(ch, technique) + " @mhas evolved.@n\r\n");
+                                        ch->sendText("@mThere's a snap as a tide of power rushes throughout your veins,@n " + getName(ch, technique) + " @mhas evolved.@n\r\n");
             }
 
 
@@ -2266,11 +2266,11 @@ namespace trans {
     void displayForms(char_data* ch) {
         auto forms = getFormsFor(ch);
         if (forms.empty()) {
-            send_to_char(ch, "You have no forms. Bummer.\r\n");
+                        ch->sendText("You have no forms. Bummer.\r\n");
             return;
         }
 
-        send_to_char(ch, "              @YForms@n\r\n");
+                ch->sendText("              @YForms@n\r\n");
         
         auto ik = ch->getBaseStat("internalGrowth");
         std::vector<std::string> form_names;
@@ -2289,13 +2289,12 @@ namespace trans {
             if(!permActive) {
                 if (unlocked) {
                     if (!bannerDisplayed) {
-                        send_to_char(ch, "@b-------------------Unlocked--------------------@n\r\n");
+                                                ch->sendText("@b-------------------Unlocked--------------------@n\r\n");
                         bannerDisplayed = true;
                     }
-                    send_to_char(ch, "@W%s@n\r\n", name);
+                                        ch->send_to("@W%s@n\r\n", name);
                 } else {
-                    //send_to_char(ch, "@W%s@n @R-@G %s Growth Req\r\n", name,
-                    //       (ik >= (req * 0.75) && !unlocked) ? add_commas(req) : "??????????");
+                    //                    ch->send_to("@W%s@n @R-@G %s Growth Req\r\n", name, //       (ik >= (req * 0.75) && !unlocked) ? add_commas(req) : "??????????");
                     locked_forms.push_back(form);
                 }
 
@@ -2304,7 +2303,7 @@ namespace trans {
         }
 
         if(!locked_forms.empty()) {
-            send_to_char(ch, "@b--------------------Locked---------------------@n\r\n");
+                        ch->sendText("@b--------------------Locked---------------------@n\r\n");
             for (auto form: locked_forms) {
                 auto name = getName(ch, form);
                 auto req = getRequiredPL(ch, form);
@@ -2314,13 +2313,12 @@ namespace trans {
                 else if(getFormType(ch, form) == 2)
                     type = "tech";
 
-                send_to_char(ch, "@W(%s) %s@n @R-@G %s Growth Req\r\n", type.c_str(), name,
-                       (ik >= (req * 0.75)) ? add_commas(req) : "??????????");
+                                ch->send_to("@W(%s) %s@n @R-@G %s Growth Req\r\n", type.c_str(), name, (ik >= (req * 0.75)) ? add_commas(req) : "??????????");
             }
         }
 
         if(!ch->permForms.empty()) {
-            send_to_char(ch, "@b-------------------Perm Forms-------------------@n\r\n");
+                        ch->sendText("@b-------------------Perm Forms-------------------@n\r\n");
             for(auto form : ch->permForms) {
                 auto name = getName(ch, form);
                 if(getMasteryTier(ch, form) > 3)
@@ -2329,14 +2327,14 @@ namespace trans {
                     name = "@RLIMIT@n " + name;
                 else if (getMasteryTier(ch, form) > 1)
                     name = "@BMASTERED@n " + name;
-                send_to_char(ch, "@W%s@n\r\n", name);
+                                ch->send_to("@W%s@n\r\n", name);
             }
         }
 
-        send_to_char(ch, "@b------------------------------------------------@n\r\n");
+                ch->sendText("@b------------------------------------------------@n\r\n");
         if (!form_names.empty()) {
             auto names = boost::join(form_names, ", ");
-            send_to_char(ch, "Available Forms: @W%s@n\r\n", names.c_str());
+                        ch->send_to("Available Forms: @W%s@n\r\n", names.c_str());
         }
 
         const double epsilon = 0.05;  // A small tolerance value for floating point comparison
@@ -2344,25 +2342,25 @@ namespace trans {
         auto tbonus = ch->getBaseStat("transBonus");
 
         if (tbonus <= -0.3 + epsilon) {
-            send_to_char(ch, "\r\n@WYou have @wGREAT@W transformation BPL Requirements.@n\r\n");
+                        ch->sendText("\r\n@WYou have @wGREAT@W transformation BPL Requirements.@n\r\n");
         } else if (tbonus <= -0.2 + epsilon) {
-            send_to_char(ch, "\r\n@MYou have @mabove average@M transformation BPL Requirements.@n\r\n");
+                        ch->sendText("\r\n@MYou have @mabove average@M transformation BPL Requirements.@n\r\n");
         } else if (tbonus <= -0.1 + epsilon) {
-            send_to_char(ch, "\r\n@BYou have @bslightly above average@B transformation BPL Requirements.@n\r\n");
+                        ch->sendText("\r\n@BYou have @bslightly above average@B transformation BPL Requirements.@n\r\n");
         } else if (tbonus < 0.1 - epsilon) {
-            send_to_char(ch, "\r\n@GYou have @gaverage@G transformation BPL Requirements.@n\r\n");
+                        ch->sendText("\r\n@GYou have @gaverage@G transformation BPL Requirements.@n\r\n");
         } else if (tbonus < 0.2 - epsilon) {
-            send_to_char(ch, "\r\n@YYou have @yslightly below average@Y transformation BPL Requirements.@n\r\n");
+                        ch->sendText("\r\n@YYou have @yslightly below average@Y transformation BPL Requirements.@n\r\n");
         } else if (tbonus < 0.3 - epsilon) {
-            send_to_char(ch, "\r\n@CYou have @cbelow average@C transformation BPL Requirements.@n\r\n");
+                        ch->sendText("\r\n@CYou have @cbelow average@C transformation BPL Requirements.@n\r\n");
         } else {
-            send_to_char(ch, "\r\n@RYou have @rterrible@R transformation BPL Requirements.@n\r\n");
+                        ch->sendText("\r\n@RYou have @rterrible@R transformation BPL Requirements.@n\r\n");
         }
-        send_to_char(ch, "@b------------------------------------------------@n\r\n");
+                ch->sendText("@b------------------------------------------------@n\r\n");
         std::stringstream ss;
         ss << std::fixed << std::setprecision(0) << ik;
         std::string growthString = ss.str();
-        send_to_char(ch, "\r\n@BGrowth: %s@n\r\n", growthString);
+                ch->send_to("\r\n@BGrowth: %s@n\r\n", growthString);
     }
 
 
@@ -2526,7 +2524,7 @@ namespace trans {
                 hurt(0, 0, loc->user, ch, nullptr, loc->getBaseStat("kicharge") * 1.25, 1);
                 ch->transforms[Form::spirit_absorption].vars["energy"] = loc->getBaseStat("kicharge") * 0.9 + (0.1 * getMasteryTier(ch, Form::spirit_absorption));
                 ch->transforms[Form::spirit_absorption].vars["absorbed"] = loc->getBaseStat("kicharge") * 0.9 + (0.1 * getMasteryTier(ch, Form::spirit_absorption));
-                send_to_char(ch, "@W[@cSpirit Force: @C%s@W]@n\r\n", add_commas((int64_t)ch->transforms[Form::spirit_absorption].vars["energy"]).c_str());
+                                ch->send_to("@W[@cSpirit Force: @C%s@W]@n\r\n", add_commas((int64_t)ch->transforms[Form::spirit_absorption].vars["energy"]).c_str());
                 extract_obj(loc);
                 act("@WThe @cS@Cp@wi@cr@Ci@wt @cB@Co@wm@cb@W completely vanishes as it's absorbed, imploding inwards!@n",
                     true, nullptr, nullptr, nullptr, TO_ROOM);
@@ -2546,7 +2544,7 @@ namespace trans {
 
     static std::unordered_map<Form, std::function<void(struct char_data *ch, atk::Attack& outgoing)>> trans_on_attack = {
         {Form::spirit_absorption, [](struct char_data *ch, atk::Attack& outgoing) {
-            send_to_char(ch, "Spirit Force infuses your %s, cloaking it in an @Ci@cn@Cc@ca@Cn@cd@Ce@cs@Cc@ce@Cn@ct@n hue.\r\n", outgoing.getName());
+                        ch->send_to("Spirit Force infuses your %s, cloaking it in an @Ci@cn@Cc@ca@Cn@cd@Ce@cs@Cc@ce@Cn@ct@n hue.\r\n", outgoing.getName());
             act("@W$n's @Ci@cn@Cc@ca@Cn@cd@Ce@cs@Cc@ce@Cn@ct@n aura infuses the attack with cataclysmic energy.@n",
                     true, ch, nullptr, nullptr, TO_ROOM);
             
@@ -2561,13 +2559,13 @@ namespace trans {
 
             if(ch->transforms[Form::spirit_absorption].vars["energy"] <= 0)
                 revert(ch);
-            send_to_char(ch, "@W[@cSpirit Force: @C%s@W]@n\r\n", add_commas((int64_t)ch->transforms[Form::spirit_absorption].vars["energy"]).c_str());
+                        ch->send_to("@W[@cSpirit Force: @C%s@W]@n\r\n", add_commas((int64_t)ch->transforms[Form::spirit_absorption].vars["energy"]).c_str());
             }},
     };
 
     static std::unordered_map<Form, std::function<void(struct char_data *ch, atk::Attack& incoming)>> trans_on_attacked = {
         {Form::spirit_absorption, [](struct char_data *ch, atk::Attack& incoming) {
-            send_to_char(ch, "Your @Ci@cn@Cc@ca@Cn@cd@Ce@cs@Cc@ce@Cn@ct@n aura burns away at your opponent's %s.\r\n", incoming.getName());
+                        ch->send_to("Your @Ci@cn@Cc@ca@Cn@cd@Ce@cs@Cc@ce@Cn@ct@n aura burns away at your opponent's %s.\r\n", incoming.getName());
             act("@W$n's @Ci@cn@Cc@ca@Cn@cd@Ce@cs@Cc@ce@Cn@ct@n aura burns away some of the incoming attack.@n",
                     true, ch, nullptr, nullptr, TO_ROOM);
             
@@ -2580,7 +2578,7 @@ namespace trans {
 
             if(ch->transforms[Form::spirit_absorption].vars["energy"] <= 0)
                 revert(ch);
-            send_to_char(ch, "@W[@cSpirit Force: @C%s@W]@n\r\n", add_commas((int64_t)ch->transforms[Form::spirit_absorption].vars["energy"]).c_str());
+                        ch->send_to("@W[@cSpirit Force: @C%s@W]@n\r\n", add_commas((int64_t)ch->transforms[Form::spirit_absorption].vars["energy"]).c_str());
             }},
     };
 
@@ -2633,7 +2631,7 @@ namespace trans {
             float ratio = (float) afterKi / (float) beforeKi;
             ch->setBaseStat<int64_t>("barrier", barrier * ratio);
 
-            send_to_char(ch, "Your barrier shimmers as it loses some energy with your transformation.\r\n");
+                        ch->sendText("Your barrier shimmers as it loses some energy with your transformation.\r\n");
         }
     }
 
@@ -2641,7 +2639,7 @@ namespace trans {
         int64_t beforeKi = ch->getEffectiveStat<int64_t>("ki");
         if (grade > getMaxGrade(ch, form)) {
             grade = getMaxGrade(ch, form);
-            send_to_char(ch, "The max grade of this form is %s!\r\nSetting to max.\r\n", std::to_string(grade));
+                        ch->send_to("The max grade of this form is %s!\r\nSetting to max.\r\n", std::to_string(grade));
         }
         if (grade < 1)
             grade = 1;
@@ -2650,7 +2648,7 @@ namespace trans {
 
         if (grade > getMaxGrade(ch, form)) {
             grade = getMaxGrade(ch, form);
-            send_to_char(ch, "The max grade of this form is %s!\r\nSetting to max.\r\n", std::to_string(grade));
+                        ch->send_to("The max grade of this form is %s!\r\nSetting to max.\r\n", std::to_string(grade));
         }
         if (grade < 1)
         grade = 1;
@@ -2672,15 +2670,14 @@ namespace trans {
             float ratio = (float) afterKi / (float) beforeKi;
             ch->setBaseStat<int64_t>("barrier", barrier * ratio);
 
-            send_to_char(ch, "Your barrier shimmers as it loses some energy with your transformation.\r\n");
+                        ch->sendText("Your barrier shimmers as it loses some energy with your transformation.\r\n");
         }
 
         // Announce noisy transformations in the zone.
-        int zone = 0;
         if (race::isSenseable(ch->race)) {
-            if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
-                send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
-            };
+            if (auto zone = ch->location.getZone(); zone) {
+                zone->sendText("An explosion of power ripples through the surrounding area!\r\n");
+            }
         }
         
         char buf3[MAX_INPUT_LENGTH];

@@ -45,11 +45,11 @@ ACMD(do_oasis_medit) {
     buf3 = two_arguments(argument, buf1, buf2);
 
     if (!*buf1) {
-        send_to_char(ch, "Specify a mobile VNUM to edit.\r\n");
+                ch->sendText("Specify a mobile VNUM to edit.\r\n");
         return;
     } else if (!isdigit(*buf1)) {
         if (strcasecmp("save", buf1) != 0) {
-            send_to_char(ch, "Yikes!  Stop that, someone will get hurt!\r\n");
+                        ch->sendText("Yikes!  Stop that, someone will get hurt!\r\n");
             return;
         }
 
@@ -67,7 +67,7 @@ ACMD(do_oasis_medit) {
         }
 
         if (number == NOWHERE) {
-            send_to_char(ch, "Save which zone?\r\n");
+                        ch->sendText("Save which zone?\r\n");
             return;
         }
     }
@@ -84,8 +84,7 @@ ACMD(do_oasis_medit) {
     for (d = descriptor_list; d; d = d->next) {
         if (STATE(d) == CON_MEDIT) {
             if (d->olc && OLC_NUM(d) == number) {
-                send_to_char(ch, "That mobile is currently being edited by %s.\r\n",
-                             GET_NAME(d->character));
+                                ch->send_to("That mobile is currently being edited by %s.\r\n", GET_NAME(d->character));
                 return;
             }
         }
@@ -109,7 +108,7 @@ ACMD(do_oasis_medit) {
     /****************************************************************************/
     OLC_ZNUM(d) = save ? real_zone(number) : real_zone_by_thing(number);
     if (OLC_ZNUM(d) == NOWHERE) {
-        send_to_char(ch, "Sorry, there is no zone for that number!\r\n");
+                ch->sendText("Sorry, there is no zone for that number!\r\n");
         delete d->olc;
         d->olc = nullptr;
         return;
@@ -130,8 +129,7 @@ ACMD(do_oasis_medit) {
     /****************************************************************************/
     if (save) {
         auto& z = zone_table.at(OLC_ZNUM(d));
-        send_to_char(ch, "Saving all mobiles in zone %d.\r\n",
-                     z.number);
+                ch->send_to("Saving all mobiles in zone %d.\r\n", z.number);
         mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), true,
                "OLC: %s saves mobile info for zone %d.",
                GET_NAME(ch), z.number);
@@ -271,9 +269,9 @@ void medit_disp_positions(struct descriptor_data *d) {
     clear_screen(d);
 
     for (i = 0; *position_types[i] != '\n'; i++) {
-        write_to_output(d, "@g%2d@n) %s\r\n", i, position_types[i]);
+        d->send_to("@g%2d@n) %s\r\n", i, position_types[i]);
     }
-    write_to_output(d, "Enter position number : ");
+    d->sendText("Enter position number : ");
 }
 
 /*-------------------------------------------------------------------*/
@@ -287,9 +285,9 @@ void medit_disp_sex(struct descriptor_data *d) {
     clear_screen(d);
 
     for (i = 0; i < NUM_GENDERS; i++) {
-        write_to_output(d, "@g%2d@n) %s\r\n", i, genders[i]);
+        d->send_to("@g%2d@n) %s\r\n", i, genders[i]);
     }
-    write_to_output(d, "Enter gender number : ");
+    d->sendText("Enter gender number : ");
 }
 
 /*-------------------------------------------------------------------*/
@@ -303,26 +301,23 @@ void medit_disp_mob_flags(struct descriptor_data *d) {
 
     clear_screen(d);
     for (i = 0; i < NUM_MOB_FLAGS; i++) {
-        write_to_output(d, "@g%2d@n) %-20.20s  %s", i + 1, action_bits[i],
+            d->send_to("@g%2d@n) %-20.20s  %s", i + 1, action_bits[i],
                         !(++columns % 2) ? "\r\n" : "");
     }
-    sprintf(flags, "%s", OLC_MOB(d)->mob_flags.getFlagNames().c_str());
-    write_to_output(d, "\r\nCurrent flags : @c%s@n\r\nEnter mob flags (0 to quit) : ",
-                    flags);
+        d->send_to("\r\nCurrent flags : @c%s@n\r\nEnter mob flags (0 to quit) : ",
+                        flags);
 }
 
 /*-------------------------------------------------------------------*/
 
 void medit_disp_personality(struct descriptor_data *d) {
-
-    write_to_output(d, "@GPersonalities\n");
-    write_to_output(d, "@D--------------@n\n");
-    write_to_output(d, "@w1@D) @WBasic@n\n");
-    write_to_output(d, "@w1@D) @WCareful@n\n");
-    write_to_output(d, "@w1@D) @WAggressive@n\n");
-    write_to_output(d, "@w1@D) @WArrogant\n");
-    write_to_output(d, "@w1@D) @WIntelligent@n\n");
-
+    d->sendText("@GPersonalities\n");
+    d->sendText("@D--------------@n\n");
+    d->sendText("@w1@D) @WBasic@n\n");
+    d->sendText("@w1@D) @WCareful@n\n");
+    d->sendText("@w1@D) @WAggressive@n\n");
+    d->sendText("@w1@D) @WArrogant\n");
+    d->sendText("@w1@D) @WIntelligent@n\n");
 }
 
 /*
@@ -334,12 +329,11 @@ void medit_disp_aff_flags(struct descriptor_data *d) {
 
     clear_screen(d);
     for (i = 0; i < NUM_AFF_FLAGS; i++) {
-        write_to_output(d, "@g%2d@n) %-20.20s  %s", i + 1, affected_bits[i + 1],
+            d->send_to("@g%2d@n) %-20.20s  %s", i + 1, affected_bits[i + 1],
                         !(++columns % 2) ? "\r\n" : "");
     }
-    sprintf(flags, "%s", AFF_FLAGS(OLC_MOB(d)).getFlagNames().c_str());
-    write_to_output(d, "\r\nCurrent flags   : @c%s@n\r\nEnter aff flags (0 to quit) : ",
-                    flags);
+        d->send_to("\r\nCurrent flags   : @c%s@n\r\nEnter aff flags (0 to quit) : ",
+                        flags);
 }
 
 /*-------------------------------------------------------------------*/
@@ -355,9 +349,9 @@ void medit_disp_class(struct descriptor_data *d) {
 
     for (const auto cl: sensei::filterSenseis(check)) {
         sprintf(buf, "@g%2d@n) %s\r\n", static_cast<int>(cl), sensei::getName(cl).c_str());
-        write_to_output(d, buf);
+        d->send_to("%s", buf);
     }
-    write_to_output(d, "Enter class number : ");
+    d->sendText("Enter class number : ");
 }
 /*-------------------------------------------------------------------*/
 /*
@@ -372,9 +366,9 @@ void medit_disp_race(struct descriptor_data *d) {
     for (const auto &r: race::filterRaces(check)) {
         sprintf(buf, "@g%2d@n) %-20.20s  %s", static_cast<int>(r), race::getName(r).c_str(),
                 !(++columns % 2) ? "\r\n" : "");
-        write_to_output(d, buf);
+        d->send_to("%s", buf);
     }
-    write_to_output(d, "Enter race number : ");
+    d->sendText("Enter race number : ");
 }
 
 /*-------------------------------------------------------------------*/
@@ -390,9 +384,9 @@ void medit_disp_size(struct descriptor_data *d) {
         sprintf(buf, "@g%2d@n) %-20.20s  %s", i,
                 (i == SIZE_UNDEFINED) ? "DEFAULT" : size_names[i],
                 !(++columns % 2) ? "\r\n" : "");
-        write_to_output(d, buf);
+        d->send_to("%s", buf);
     }
-    write_to_output(d, "Enter size number (-1 for default): ");
+    d->sendText("Enter size number (-1 for default): ");
 }
 
 /*-------------------------------------------------------------------*/
@@ -407,7 +401,7 @@ void medit_disp_menu(struct descriptor_data *d) {
     mob = OLC_MOB(d);
     clear_screen(d);
 
-    write_to_output(d,
+        d->send_to(
                     "-- Mob Number:  [@c%d@n]\r\n"
                     "@g1@n) Sex: @y%-7.7s@n	         @g2@n) Alias: @y%s\r\n"
                     "@g3@n) S-Desc: @y%s\r\n"
@@ -427,7 +421,7 @@ void medit_disp_menu(struct descriptor_data *d) {
     );
     sprintf(flags, "%s", mob->mob_flags.getFlagNames().c_str());
     sprintf(flag2, "%s", mob->affect_flags.getFlagNames().c_str());
-    write_to_output(d,
+        d->send_to(
                     "@gI@n) Position   : @y%-10s@n,	 @gJ@n) Default   : @y%-10s\r\n"
                     "@gK@n) Personality: @Y%s@n\r\n"
                     "@gL@n) NPC Flags  : @c%s\r\n"
@@ -462,7 +456,7 @@ void medit_parse(struct descriptor_data *d, char *arg) {
     if (OLC_MODE(d) > MEDIT_NUMERICAL_RESPONSE) {
         i = atoi(arg);
         if (!*arg || (!isdigit(arg[0]) && ((*arg == '-') && !isdigit(arg[1])))) {
-            write_to_output(d, "Field must be numerical, try again : ");
+            d->sendText("Field must be numerical, try again : ");
             return;
         }
     } else {    /* String response. */
@@ -488,9 +482,9 @@ void medit_parse(struct descriptor_data *d, char *arg) {
                            "OLC: %s edits mob %d", GET_NAME(d->character), OLC_NUM(d));
                     if (CONFIG_OLC_SAVE) {
                         medit_save_to_disk(zone_table.at(real_zone_by_thing(OLC_NUM(d))).number);
-                        write_to_output(d, "Mobile saved to disk.\r\n");
+                        d->sendText("Mobile saved to disk.\r\n");
                     } else
-                        write_to_output(d, "Mobile saved to memory.\r\n");
+                        d->sendText("Mobile saved to memory.\r\n");
                     cleanup_olc(d, CLEANUP_ALL);
                     return;
                 case 'n':
@@ -502,8 +496,8 @@ void medit_parse(struct descriptor_data *d, char *arg) {
                     cleanup_olc(d, CLEANUP_ALL);
                     return;
                 default:
-                    write_to_output(d, "Invalid choice!\r\n");
-                    write_to_output(d, "Do you wish to save the mobile? : ");
+                    d->sendText("Invalid choice!\r\n");
+                    d->sendText("Do you wish to save the mobile? : ");
                     return;
             }
             break;
@@ -515,7 +509,7 @@ void medit_parse(struct descriptor_data *d, char *arg) {
                 case 'q':
                 case 'Q':
                     if (OLC_VAL(d)) {    /* Anything been changed? */
-                        write_to_output(d, "Do you wish to save your changes? : ");
+                        d->sendText("Do you wish to save your changes? : ");
                         OLC_MODE(d) = MEDIT_CONFIRM_SAVESTRING;
                     } else
                         cleanup_olc(d, CLEANUP_ALL);
@@ -539,9 +533,9 @@ void medit_parse(struct descriptor_data *d, char *arg) {
                 case '5':
                     OLC_MODE(d) = MEDIT_D_DESC;
                     send_editor_help(d);
-                    write_to_output(d, "Enter mob description:\r\n\r\n");
+                    d->sendText("Enter mob description:\r\n\r\n");
                     if (OLC_MOB(d)->look_description) {
-                        write_to_output(d, "%s", OLC_MOB(d)->look_description);
+                        d->send_to("%s", OLC_MOB(d)->look_description);
                         oldtext = strdup(OLC_MOB(d)->look_description);
                     }
                     string_write(d, &OLC_MOB(d)->look_description, MAX_MOB_DESC, 0, oldtext);
@@ -640,12 +634,12 @@ void medit_parse(struct descriptor_data *d, char *arg) {
                     return;
                 case 'w':
                 case 'W':
-                    write_to_output(d, "Copy what mob? ");
+                    d->sendText("Copy what mob? ");
                     OLC_MODE(d) = MEDIT_COPY;
                     return;
                 case 'x':
                 case 'X':
-                    write_to_output(d, "Are you sure you want to delete this mobile? ");
+                    d->sendText("Are you sure you want to delete this mobile? ");
                     OLC_MODE(d) = MEDIT_DELETE;
                     return;
                 case 'y':
@@ -665,11 +659,11 @@ void medit_parse(struct descriptor_data *d, char *arg) {
             if (i == 0)
                 break;
             else if (i == 1)
-                write_to_output(d, "\r\nEnter new value : ");
+                d->sendText("\r\nEnter new value : ");
             else if (i == -1)
-                write_to_output(d, "\r\nEnter new text :\r\n] ");
+                d->sendText("\r\nEnter new text :\r\n] ");
             else
-                write_to_output(d, "Oops...\r\n");
+                d->sendText("Oops...\r\n");
             return;
 
 /*-------------------------------------------------------------------*/
@@ -706,7 +700,7 @@ void medit_parse(struct descriptor_data *d, char *arg) {
              */
             cleanup_olc(d, CLEANUP_ALL);
             mudlog(BRF, ADMLVL_BUILDER, true, "SYSERR: OLC: medit_parse(): Reached D_DESC case!");
-            write_to_output(d, "Oops...\r\n");
+            d->sendText("Oops...\r\n");
             break;
 /*-------------------------------------------------------------------*/
         case MEDIT_NPC_FLAGS:
@@ -821,7 +815,7 @@ void medit_parse(struct descriptor_data *d, char *arg) {
                 OLC_MOB(d)->sensei = sensei;
             }
             else {
-                write_to_output(d, "Couldn't find the requested Sensei!\r\n");
+                d->sendText("Couldn't find the requested Sensei!\r\n");
             }
         }
             break;
@@ -830,15 +824,15 @@ void medit_parse(struct descriptor_data *d, char *arg) {
             if ((i = real_mobile(atoi(arg))) != NOWHERE) {
                 medit_setup_existing(d, i);
             } else
-                write_to_output(d, "That mob does not exist.\r\n");
+                d->sendText("That mob does not exist.\r\n");
             break;
 
         case MEDIT_DELETE:
             if (*arg == 'y' || *arg == 'Y') {
                 if (delete_mobile(OLC_MOB(d)->vn) != NOBODY)
-                    write_to_output(d, "Mobile deleted.\r\n");
+                    d->sendText("Mobile deleted.\r\n");
                 else
-                    write_to_output(d, "Couldn't delete the mobile!\r\n");
+                    d->sendText("Couldn't delete the mobile!\r\n");
 
                 cleanup_olc(d, CLEANUP_ALL);
                 return;
@@ -847,13 +841,13 @@ void medit_parse(struct descriptor_data *d, char *arg) {
                 OLC_MODE(d) = MEDIT_MAIN_MENU;
                 return;
             } else
-                write_to_output(d, "Please answer 'Y' or 'N': ");
+                d->sendText("Please answer 'Y' or 'N': ");
             break;
 
         case MEDIT_RACE: {
             auto chosen_race = static_cast<Race>(i);
             if (!race::exists(chosen_race)) {
-                write_to_output(d, "That's not a race!");
+                d->sendText("That's not a race!");
                 break;
             }
             OLC_MOB(d)->race = chosen_race;
@@ -873,7 +867,7 @@ void medit_parse(struct descriptor_data *d, char *arg) {
              */
             cleanup_olc(d, CLEANUP_ALL);
             mudlog(BRF, ADMLVL_BUILDER, true, "SYSERR: OLC: medit_parse(): Reached default case!");
-            write_to_output(d, "Oops...\r\n");
+            d->sendText("Oops...\r\n");
             break;
     }
 /*-------------------------------------------------------------------*/

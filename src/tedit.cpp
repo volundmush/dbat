@@ -54,15 +54,13 @@ void news_string_cleanup(struct descriptor_data *d, int terminator) {
                     if (PLR_FLAGGED(i->character, PLR_WRITING))
                         continue;
                     if (NEWSUPDATE > GET_LPLAY(i->character))
-                        send_to_char(i->character,
-                                     "\r\n@GA news entry has been made by %s, type 'news %d' to see it.@n\r\n",
-                                     GET_NAME(d->character), TOP_OF_NEWS);
+                                                i->character->send_to("\r\n@GA news entry has been made by %s, type 'news %d' to see it.@n\r\n", GET_NAME(d->character), TOP_OF_NEWS);
                 }
                 do_reboot(d->character, "news", 0, 0);
             }
             break;
         case STRINGADD_ABORT:
-            write_to_output(d, "Edit aborted.\r\n");
+            d->sendText("Edit aborted.\r\n");
             act("$n stops editing the news.", true, d->character, nullptr, nullptr, TO_ROOM);
             break;
         default:
@@ -102,7 +100,7 @@ void tedit_string_cleanup(struct descriptor_data *d, int terminator) {
                 }
                 fclose(fl);
                 mudlog(CMP, ADMLVL_GOD, true, "OLC: %s saves '%s'.", GET_NAME(d->character), storage);
-                write_to_output(d, "Saved.\r\n");
+                d->sendText("Saved.\r\n");
 
                 if (!(strcmp(storage, "text/news"))) {
                     NEWSUPDATE = time(nullptr);
@@ -115,15 +113,14 @@ void tedit_string_cleanup(struct descriptor_data *d, int terminator) {
                         if (PLR_FLAGGED(i->character, PLR_WRITING))
                             continue;
                         if (NEWSUPDATE > GET_LPLAY(i->character))
-                            send_to_char(i->character,
-                                         "\r\n@GThe NEWS file has been updated, type 'news' to see it.@n\r\n");
+                                                        i->character->sendText("\r\n@GThe NEWS file has been updated, type 'news' to see it.@n\r\n");
                     }
                     do_reboot(d->character, "all", 0, 0);
                 }
             }
             break;
         case STRINGADD_ABORT:
-            write_to_output(d, "Edit aborted.\r\n");
+            d->sendText("Edit aborted.\r\n");
             act("$n stops editing some scrolls.", true, d->character, nullptr, nullptr, TO_ROOM);
             break;
         default:
@@ -168,18 +165,18 @@ ACMD(do_tedit) {
     one_argument(argument, field);
 
     if (!*field) {
-        send_to_char(ch, "Files available to be edited:\r\n");
+                ch->sendText("Files available to be edited:\r\n");
         for (l = 0; *fields[l].cmd != '\n'; l++) {
             if (GET_ADMLEVEL(ch) >= fields[l].level) {
-                send_to_char(ch, "%-11.11s ", fields[l].cmd);
+                                ch->send_to("%-11.11s ", fields[l].cmd);
                 if (!(++i % 7))
-                    send_to_char(ch, "\r\n");
+                                        ch->sendText("\r\n");
             }
         }
         if (i % 7)
-            send_to_char(ch, "\r\n");
+                        ch->sendText("\r\n");
         if (i == 0)
-            send_to_char(ch, "None.\r\n");
+                        ch->sendText("None.\r\n");
         return;
     }
     for (l = 0; *(fields[l].cmd) != '\n'; l++)
@@ -187,19 +184,19 @@ ACMD(do_tedit) {
             break;
 
     if (*fields[l].cmd == '\n') {
-        send_to_char(ch, "Invalid text editor option.\r\n");
+                ch->sendText("Invalid text editor option.\r\n");
         return;
     }
 
     if (GET_ADMLEVEL(ch) < fields[l].level) {
-        send_to_char(ch, "You are not godly enough for that!\r\n");
+                ch->sendText("You are not godly enough for that!\r\n");
         return;
     }
 
     /* set up editor stats */
     clear_screen(ch->desc);
     send_editor_help(ch->desc);
-    send_to_char(ch, "Edit file below:\r\n\r\n");
+        ch->sendText("Edit file below:\r\n\r\n");
 
     if (ch->desc->olc) {
         mudlog(BRF, ADMLVL_IMMORT, true, "SYSERR: do_tedit: Player already had olc structure.");
@@ -209,7 +206,7 @@ ACMD(do_tedit) {
 
 
     if (*fields[l].buffer) {
-        send_to_char(ch, "%s", *fields[l].buffer);
+                ch->send_to("%s", *fields[l].buffer);
         backstr = strdup(*fields[l].buffer);
     }
 

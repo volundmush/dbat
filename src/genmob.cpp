@@ -347,5 +347,5 @@ void char_data::setLocation(const thing_data* td) {
 
 void char_data::clearLocation() {
     if(location.getType() != UnitType::room) return;
-    char_from_room(this);
+    char_from_room(this); // original call preserved; do not replace inside clearLocation()
 }

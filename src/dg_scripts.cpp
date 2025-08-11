@@ -47,15 +47,6 @@ void eval_expr(char *line, char *result, unit_data *go, script_data *sc,
 int eval_lhs_op_rhs(char *expr, char *result, unit_data *go, script_data *sc,
                     trig_data *trig, UnitType type);
 
-int process_if(char *cond, unit_data *go, script_data *sc,
-               trig_data *trig, UnitType type);
-
-struct cmdlist_element *find_end(trig_data *trig, struct cmdlist_element *cl);
-
-struct cmdlist_element *find_else_end(trig_data *trig,
-                                      struct cmdlist_element *cl, unit_data *go,
-                                      script_data *sc, UnitType type);
-
 void process_wait(unit_data *go, trig_data *trig, UnitType type, char *cmd,
                   struct cmdlist_element *cl);
 
@@ -859,59 +850,54 @@ void script_stat(char_data *ch, script_data *sc) {
     char namebuf[512];
     char buf1[MAX_STRING_LENGTH];
 
-    send_to_char(ch, "Global Variables: %s\r\n", !sc->variables.empty() ? "" : "None");
+        ch->send_to("Global Variables: %s\r\n", !sc->variables.empty() ? "" : "None");
 
     for (const auto& [name, value] : sc->variables) {
         if (value[0] == UID_CHAR) {
             auto uidResult = resolveUID(value);
             if(uidResult) {
                 std::string n = uidResult->getName();
-                send_to_char(ch, "    %15s:  %s\r\n", name.c_str(), n.c_str());
+                                ch->send_to("    %15s:  %s\r\n", name.c_str(), n.c_str());
             } else {
-                send_to_char(ch, "   -BAD UID: %s", value.c_str());
+                                ch->send_to("   -BAD UID: %s", value.c_str());
             }
         } else
-            send_to_char(ch, "    %15s:  %s\r\n", name.c_str(), value.c_str());
+                        ch->send_to("    %15s:  %s\r\n", name.c_str(), value.c_str());
     }
 
     auto scripts = sc->getScripts();
     for (const auto& t : filter_shared(scripts)) {
-        send_to_char(ch, "\r\n  Trigger: @y%s@n, VNum: [@y%5d@n], RNum: [%5d]\r\n",
-                     GET_TRIG_NAME(t), GET_TRIG_VNUM(t), GET_TRIG_RNUM(t));
+                ch->send_to("\r\n  Trigger: @y%s@n, VNum: [@y%5d@n], RNum: [%5d]\r\n", GET_TRIG_NAME(t), GET_TRIG_VNUM(t), GET_TRIG_RNUM(t));
 
         if (t->getAttachType() == OBJ_TRIGGER) {
-            send_to_char(ch, "  Trigger Intended Assignment: Objects\r\n");
+                        ch->sendText("  Trigger Intended Assignment: Objects\r\n");
             sprintbit(GET_TRIG_TYPE(t), otrig_types, buf1, sizeof(buf1));
         } else if (t->getAttachType() == WLD_TRIGGER) {
-            send_to_char(ch, "  Trigger Intended Assignment: Rooms\r\n");
+                        ch->sendText("  Trigger Intended Assignment: Rooms\r\n");
             sprintbit(GET_TRIG_TYPE(t), wtrig_types, buf1, sizeof(buf1));
         } else {
-            send_to_char(ch, "  Trigger Intended Assignment: Mobiles\r\n");
+                        ch->sendText("  Trigger Intended Assignment: Mobiles\r\n");
             sprintbit(GET_TRIG_TYPE(t), trig_types, buf1, sizeof(buf1));
         }
 
-        send_to_char(ch, "  Trigger Type: %s, Numeric Arg: %d, Arg list: %s\r\n",
-                     buf1, GET_TRIG_NARG(t),
-                     ((GET_TRIG_ARG(t) && *GET_TRIG_ARG(t)) ? GET_TRIG_ARG(t) :
+                ch->send_to("  Trigger Type: %s, Numeric Arg: %d, Arg list: %s\r\n", buf1, GET_TRIG_NARG(t), ((GET_TRIG_ARG(t) && *GET_TRIG_ARG(t)) ? GET_TRIG_ARG(t) :
                       "None"));
 
         if (t->waiting != 0.0) {
-            send_to_char(ch, "    Wait: %f seconds, Current line: %d\r\n",
-                         t->waiting,
-                         t->current_line);
-            send_to_char(ch, "  Variables: %s\r\n", t->variables.empty() ? "None" : "");
+                        ch->send_to("    Wait: %f seconds, Current line: %d\r\n", t->waiting, t->current_line);
+                        ch->send_to("  Variables: %s\r\n", t->variables.empty() ? "None" : "");
 
             for (const auto &[key, value] : t->variables) {
                 if (value.starts_with(UID_CHAR)) {
                     auto uidResult = resolveUID(value);
                     if(uidResult) {
                         std::string n = uidResult->getName();
-                        send_to_char(ch, "    %15s:  %s\r\n", key.c_str(), n.c_str());
+                                                ch->send_to("    %15s:  %s\r\n", key.c_str(), n.c_str());
                     } else {
-                        send_to_char(ch, "   -BAD UID: %s", value.c_str());
+                                                ch->send_to("   -BAD UID: %s", value.c_str());
                     }
                 } else {
-                    send_to_char(ch, "    %15s:  %s\r\n", key.c_str(), value.c_str());
+                                        ch->send_to("    %15s:  %s\r\n", key.c_str(), value.c_str());
                 }
 
             }
@@ -921,9 +907,9 @@ void script_stat(char_data *ch, script_data *sc) {
 
 
 void do_sstat(struct char_data *ch, struct unit_data *ud) {
-    send_to_char(ch, "Triggers:\r\n");
+        ch->sendText("Triggers:\r\n");
     if (!SCRIPT(ud)) {
-        send_to_char(ch, "  None.\r\n");
+                ch->sendText("  None.\r\n");
         return;
     }
 
@@ -983,7 +969,7 @@ ACMD(do_attach) {
     two_arguments(argument, targ_name, loc_name);
 
     if (!*arg || !*targ_name || !*trig_name) {
-        send_to_char(ch, "Usage: attach { mob | obj | room } { trigger } { name } [ location ]\r\n");
+                ch->sendText("Usage: attach { mob | obj | room } { trigger } { name } [ location ]\r\n");
         return;
     }
 
@@ -1003,56 +989,52 @@ ACMD(do_attach) {
             }
 
             if (!victim) {
-                send_to_char(ch, "That mob does not exist.\r\n");
+                                ch->sendText("That mob does not exist.\r\n");
                 return;
             }
         }
         if (!IS_NPC(victim)) {
-            send_to_char(ch, "Players can't have scripts.\r\n");
+                        ch->sendText("Players can't have scripts.\r\n");
             return;
         }
         if (!can_edit_zone(ch, ch->location.getZone()->number)) {
-            send_to_char(ch, "You can only attach triggers in your own zone\r\n");
+                        ch->sendText("You can only attach triggers in your own zone\r\n");
             return;
         }
         /* have a valid mob, now get trigger */
         rn = real_trigger(tn);
         if ((rn == NOTHING) || !(trig = read_trigger(rn))) {
-            send_to_char(ch, "That trigger does not exist.\r\n");
+                        ch->sendText("That trigger does not exist.\r\n");
             return;
         }
 
         add_trigger(victim, trig, loc);
 
-        send_to_char(ch, "Trigger %d (%s) attached to %s [%d].\r\n",
-                     tn, GET_TRIG_NAME(trig), GET_SHORT(victim), GET_MOB_VNUM(victim));
+                ch->send_to("Trigger %d (%s) attached to %s [%d].\r\n", tn, GET_TRIG_NAME(trig), GET_SHORT(victim), GET_MOB_VNUM(victim));
     } else if (is_abbrev(arg, "object") || is_abbrev(arg, "otr")) {
         object = get_obj_vis(ch, targ_name, nullptr);
         if(!object) ch->location.findObjectVnum(num_arg);
         if(!object) ch->findObjectVnum(num_arg);
         if(!object) {
-            send_to_char(ch, "That object does not exist.\r\n");
+                        ch->sendText("That object does not exist.\r\n");
             return;
         }
 
-        if (!can_edit_zone(ch, ch->getRoom()->zone->number)) {
-            send_to_char(ch, "You can only attach triggers in your own zone\r\n");
+        if (!can_edit_zone(ch, ch->location.getZone()->number)) {
+                        ch->sendText("You can only attach triggers in your own zone\r\n");
             return;
         }
         /* have a valid obj, now get trigger */
         rn = real_trigger(tn);
         if ((rn == NOTHING) || !(trig = read_trigger(rn))) {
-            send_to_char(ch, "That trigger does not exist.\r\n");
+                        ch->sendText("That trigger does not exist.\r\n");
             return;
         }
 
         add_trigger(object, trig, loc);
 
-        send_to_char(ch, "Trigger %d (%s) attached to %s [%d].\r\n",
-                     tn, GET_TRIG_NAME(trig),
-                     (object->getShortDescription() ?
-                      object->getShortDescription() : object->getName()),
-                     GET_OBJ_VNUM(object));
+                ch->send_to("Trigger %d (%s) attached to %s [%d].\r\n", tn, GET_TRIG_NAME(trig), (object->getShortDescription() ?
+                      object->getShortDescription() : object->getName()), GET_OBJ_VNUM(object));
     } else if (is_abbrev(arg, "room") || is_abbrev(arg, "wtr")) {
         if (strchr(targ_name, '.'))
             rnum = IN_ROOM(ch);
@@ -1062,18 +1044,18 @@ ACMD(do_attach) {
             rnum = NOWHERE;
 
         if (rnum == NOWHERE) {
-            send_to_char(ch, "You need to supply a room number or . for current room.\r\n");
+                        ch->sendText("You need to supply a room number or . for current room.\r\n");
             return;
         }
 
         if (!can_edit_zone(ch, get_room(rnum)->zone->number)) {
-            send_to_char(ch, "You can only attach triggers in your own zone\r\n");
+                        ch->sendText("You can only attach triggers in your own zone\r\n");
             return;
         }
         /* have a valid room, now get trigger */
         rn = real_trigger(tn);
         if ((rn == NOTHING) || !(trig = read_trigger(rn))) {
-            send_to_char(ch, "That trigger does not exist.\r\n");
+                        ch->sendText("That trigger does not exist.\r\n");
             return;
         }
 
@@ -1081,10 +1063,9 @@ ACMD(do_attach) {
 
         add_trigger(room, trig, loc);
 
-        send_to_char(ch, "Trigger %d (%s) attached to room %d.\r\n",
-                     tn, GET_TRIG_NAME(trig), get_room(rnum)->getVnum());
+                ch->send_to("Trigger %d (%s) attached to room %d.\r\n", tn, GET_TRIG_NAME(trig), get_room(rnum)->getVnum());
     } else
-        send_to_char(ch, "Please specify 'mob', 'obj', or 'room'.\r\n");
+                ch->sendText("Please specify 'mob', 'obj', or 'room'.\r\n");
 }
 
 
@@ -1171,8 +1152,8 @@ ACMD(do_detach) {
     one_argument(argument, arg3);
 
     if (!*arg1 || !*arg2) {
-        send_to_char(ch, "Usage: detach [ mob | object | room ] { target } { trigger |"
-                         " 'all' }\r\n");
+        ch->sendText("Usage: detach [ mob | object | room ] { target } { trigger |"
+                    " 'all' }\r\n");
         return;
     }
 
@@ -1182,21 +1163,21 @@ ACMD(do_detach) {
     if (!strcasecmp(arg1, "room") || !strcasecmp(arg1, "wtr")) {
         room = ch->getRoom();
         if (!can_edit_zone(ch, room->zone->number)) {
-            send_to_char(ch, "You can only detach triggers in your own zone\r\n");
+            ch->sendText("You can only detach triggers in your own zone\r\n");
             return;
         }
         if (!SCRIPT(room))
-            send_to_char(ch, "This room does not have any triggers.\r\n");
+                ch->sendText("This room does not have any triggers.\r\n");
         else if (!strcasecmp(arg2, "all")) {
             extract_script(room, WLD_TRIGGER);
-            send_to_char(ch, "All triggers removed from room.\r\n");
+            ch->sendText("All triggers removed from room.\r\n");
         } else if (remove_trigger(SCRIPT(room), arg2)) {
-            send_to_char(ch, "Trigger removed.\r\n");
+            ch->sendText("Trigger removed.\r\n");
             if (room->getScripts().empty()) {
                 extract_script(room, WLD_TRIGGER);
             }
         } else
-            send_to_char(ch, "That trigger was not found.\r\n");
+            ch->sendText("That trigger was not found.\r\n");
     } else {
         if (is_abbrev(arg1, "mobile") || !strcasecmp(arg1, "mtr")) {
             victim = get_char_vis(ch, arg2, nullptr, FIND_CHAR_WORLD);
@@ -1209,13 +1190,13 @@ ACMD(do_detach) {
                 }
 
                 if (!victim) {
-                    send_to_char(ch, "No such mobile around.\r\n");
+                                        ch->sendText("No such mobile around.\r\n");
                     return;
                 }
             }
 
             if (arg3 == nullptr || !*arg3)
-                send_to_char(ch, "You must specify a trigger to remove.\r\n");
+                                ch->sendText("You must specify a trigger to remove.\r\n");
             else
                 trigger = arg3;
         } else if (is_abbrev(arg1, "object") || !strcasecmp(arg1, "otr")) {
@@ -1223,12 +1204,12 @@ ACMD(do_detach) {
             if (!object) object = ch->location.findObjectVnum(num_arg);
             if (!object) object = ch->findObjectVnum(num_arg);
             if (!object) { /* give up */
-                send_to_char(ch, "No such object around.\r\n");
+                                ch->sendText("No such object around.\r\n");
                 return;
             }
 
             if (arg3 == nullptr || !*arg3)
-                send_to_char(ch, "You must specify a trigger to remove.\r\n");
+                                ch->sendText("You must specify a trigger to remove.\r\n");
             else
                 trigger = arg3;
         } else {
@@ -1240,49 +1221,48 @@ ACMD(do_detach) {
             else if ((victim = get_char_vis(ch, arg1, nullptr, FIND_CHAR_WORLD)));
             else if ((object = get_obj_vis(ch, arg1, nullptr)));
             else
-                send_to_char(ch, "Nothing around by that name.\r\n");
+                                ch->sendText("Nothing around by that name.\r\n");
 
             trigger = arg2;
         }
 
         if (victim) {
             if (!IS_NPC(victim))
-                send_to_char(ch, "Players don't have triggers.\r\n");
+                                ch->sendText("Players don't have triggers.\r\n");
 
             else if (!SCRIPT(victim))
-                send_to_char(ch, "That mob doesn't have any triggers.\r\n");
+                                ch->sendText("That mob doesn't have any triggers.\r\n");
             else if (!can_edit_zone(ch, real_zone_by_thing(GET_MOB_VNUM(victim)))) {
-                send_to_char(ch, "You can only detach triggers in your own zone\r\n");
+                                ch->sendText("You can only detach triggers in your own zone\r\n");
                 return;
             } else if (trigger && !strcasecmp(trigger, "all")) {
                 extract_script(victim, MOB_TRIGGER);
-                send_to_char(ch, "All triggers removed from %s.\r\n", GET_SHORT(victim));
+                                ch->send_to("All triggers removed from %s.\r\n", GET_SHORT(victim));
             } else if (trigger && remove_trigger(SCRIPT(victim), trigger)) {
-                send_to_char(ch, "Trigger removed.\r\n");
+                                ch->sendText("Trigger removed.\r\n");
                 if (victim->getScripts().empty()) {
                     extract_script(victim, MOB_TRIGGER);
                 }
             } else
-                send_to_char(ch, "That trigger was not found.\r\n");
+                                ch->sendText("That trigger was not found.\r\n");
         } else if (object) {
             if (!SCRIPT(object))
-                send_to_char(ch, "That object doesn't have any triggers.\r\n");
+                                ch->sendText("That object doesn't have any triggers.\r\n");
 
             else if (!can_edit_zone(ch, real_zone_by_thing(GET_OBJ_VNUM(object)))) {
-                send_to_char(ch, "You can only detach triggers in your own zone\r\n");
+                                ch->sendText("You can only detach triggers in your own zone\r\n");
                 return;
             } else if (trigger && !strcasecmp(trigger, "all")) {
                 extract_script(object, OBJ_TRIGGER);
-                send_to_char(ch, "All triggers removed from %s.\r\n",
-                             object->getShortDescription() ? object->getShortDescription() :
+                                ch->send_to("All triggers removed from %s.\r\n", object->getShortDescription() ? object->getShortDescription() :
                              object->getName());
             } else if (remove_trigger(SCRIPT(object), trigger)) {
-                send_to_char(ch, "Trigger removed.\r\n");
+                                ch->sendText("Trigger removed.\r\n");
                 if (object->getScripts().empty()) {
                     extract_script(object, OBJ_TRIGGER);
                 }
             } else
-                send_to_char(ch, "That trigger was not found.\r\n");
+                                ch->sendText("That trigger was not found.\r\n");
         }
     }
 }
@@ -1318,7 +1298,7 @@ void script_vlog(const char *format, va_list args) {
         if (NRM > (PRF_FLAGGED(i->character, PRF_LOG1) ? 1 : 0) + (PRF_FLAGGED(i->character, PRF_LOG2) ? 2 : 0))
             continue;
 
-        send_to_char(i->character, "@g%s@n", output);
+                i->character->send_to("@g%s@n", output);
     }
 }
 
@@ -1981,42 +1961,42 @@ ACMD(do_vdelete) {
 
 
     if (!*buf || !*buf2) {
-        send_to_char(ch, "Usage: vdelete { <variablename> | * | all } <id>\r\n");
+                ch->sendText("Usage: vdelete { <variablename> | * | all } <id>\r\n");
         return;
     }
 
     auto uidResult = resolveUID(buf2);
     if(!uidResult) {
-        send_to_char(ch, "vdelete: illegal id specified.\r\n");
+                ch->sendText("vdelete: illegal id specified.\r\n");
         return;
     }
     sc_remote = uidResult.get();
 
     if(!sc_remote) {
-        send_to_char(ch, "vdelete: cannot resolve specified id.\r\n");
+                ch->sendText("vdelete: cannot resolve specified id.\r\n");
         return;
     }
 
     if (sc_remote->variables.empty()) {
-        send_to_char(ch, "That id represents no global variables.(2)\r\n");
+                ch->sendText("That id represents no global variables.(2)\r\n");
         return;
     }
 
     if (*var == '*' || is_abbrev(var, "all")) {
         sc_remote->variables.clear(); /* clear the script's variables */
-        send_to_char(ch, "All variables deleted from that id.\r\n");
+                ch->sendText("All variables deleted from that id.\r\n");
         return;
     }
 
     /* find the global */
     auto find = sc_remote->variables.find(var);
     if (find == sc_remote->variables.end()) {
-        send_to_char(ch, "That variable cannot be located.\r\n");
+                ch->sendText("That variable cannot be located.\r\n");
         return;
     }
 
     sc_remote->variables.erase(find); /* remove from script's variables */
-    send_to_char(ch, "Deleted.\r\n");
+        ch->sendText("Deleted.\r\n");
 }
 
 /*
@@ -2029,7 +2009,7 @@ int perform_set_dg_var(struct char_data *ch, struct char_data *vict, char *val_a
     var_value = any_one_arg(val_arg, var_name);
 
     if (var_name == nullptr || !*var_name || var_value == nullptr || !*var_value) {
-        send_to_char(ch, "Usage: set <char> <varname> <value>\r\n");
+                ch->sendText("Usage: set <char> <varname> <value>\r\n");
         return 0;
     }
 
@@ -2236,13 +2216,13 @@ ACMD(do_tstat) {
     if (*str) {
         rnum = real_trigger(atoi(str));
         if (rnum == NOTHING) {
-            send_to_char(ch, "That vnum does not exist.\r\n");
+                        ch->sendText("That vnum does not exist.\r\n");
             return;
         }
 
         do_stat_trigger(ch, &trig_index.at(rnum));
     } else
-        send_to_char(ch, "Usage: tstat <vnum>\r\n");
+                ch->sendText("Usage: tstat <vnum>\r\n");
 }
 
 /*

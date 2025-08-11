@@ -6,8 +6,6 @@
 #include "structs.h"
 
 // functions
-extern void run_autowiz();
-
 extern void reboot_wizlists();
 
 extern void mutant_limb_regen(struct char_data *ch);

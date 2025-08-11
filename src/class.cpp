@@ -805,7 +805,7 @@ void advance_level(struct char_data *ch) {
 
     /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
     if (rand_number(1, 4) == 4) {
-        send_to_char(ch, "@D[@mPractice Session Bonus!@D]@n\r\n");
+                ch->sendText("@D[@mPractice Session Bonus!@D]@n\r\n");
         add_prac += rand_number(4, 12);
     }
 
@@ -851,15 +851,15 @@ void advance_level(struct char_data *ch) {
         (lvl == 20 || lvl == 40 || lvl == 60 || lvl == 80 ||
          lvl == 100)) {
         ch->modBaseStat<int>("skill_slots", 1);
-        send_to_char(ch, "@CYou feel like you could remember a new skill!@n\r\n");
+                ch->sendText("@CYou feel like you could remember a new skill!@n\r\n");
     }
     if (IS_NAMEK(ch) && rand_number(1, 100) <= 5) {
         ch->modBaseStat<int>("skill_slots", 1);
-        send_to_char(ch, "@CYou feel as though you could learn another skill.@n\r\n");
+                ch->sendText("@CYou feel as though you could learn another skill.@n\r\n");
     }
     if (IS_ICER(ch) && rand_number(1, 100) <= 25) {
         bring_to_cap(ch);
-        send_to_char(ch, "@GYou feel your body obtain its current optimal strength!@n\r\n");
+                ch->sendText("@GYou feel your body obtain its current optimal strength!@n\r\n");
     }
 
     int gain_stat = false;
@@ -886,7 +886,7 @@ void advance_level(struct char_data *ch) {
                 if (auto agi = ch->getBaseStat("agility"); agi < 100 && rand_number(1, 2) == 2 && stat_fail != 1) {
                     if (agi < 45 || GET_BONUS(ch, BONUS_CLUMSY) <= 0) {
                         ch->modBaseStat("agility", 1);
-                        send_to_char(ch, "@GYou feel your agility increase!@n\r\n");
+                                                ch->sendText("@GYou feel your agility increase!@n\r\n");
                         raise = true;
                     } else {
                         stat_fail += 1;
@@ -894,13 +894,13 @@ void advance_level(struct char_data *ch) {
                 } else if (auto speed = ch->getBaseStat("speed"); speed < 100 && raise == false && stat_fail < 2) {
                     if (speed < 45 || GET_BONUS(ch, BONUS_SLOW) > 0) {
                         ch->modBaseStat("speed", 1);
-                        send_to_char(ch, "@GYou feel your speed increase!@n\r\n");
+                                                ch->sendText("@GYou feel your speed increase!@n\r\n");
                         raise = true;
                     } else {
                         stat_fail += 2;
                     }
                 } else if (stat_fail == 3) {
-                    send_to_char(ch, "@RBoth agility and speed are capped!@n");
+                                        ch->sendText("@RBoth agility and speed are capped!@n");
                     raise = true;
                 }
             } // End while
@@ -911,7 +911,7 @@ void advance_level(struct char_data *ch) {
                 if (auto con = ch->getBaseStat("constitution"); con < 100 && rand_number(1, 2) == 2 && stat_fail != 1) {
                     if (con < 45 || GET_BONUS(ch, BONUS_FRAIL) <= 0) {
                         ch->modBaseStat("constitution", 1);
-                        send_to_char(ch, "@GYou feel your constitution increase!@n\r\n");
+                                                ch->sendText("@GYou feel your constitution increase!@n\r\n");
                         raise = true;
                     } else {
                         stat_fail += 1;
@@ -919,13 +919,13 @@ void advance_level(struct char_data *ch) {
                 } else if (auto speed = ch->getBaseStat("speed"); speed < 100 && raise == false && stat_fail < 2) {
                     if (speed < 45 || GET_BONUS(ch, BONUS_SLOW) > 0) {
                         ch->modBaseStat("speed", 1);
-                        send_to_char(ch, "@GYou feel your speed increase!@n\r\n");
+                                                ch->sendText("@GYou feel your speed increase!@n\r\n");
                         raise = true;
                     } else {
                         stat_fail += 2;
                     }
                 } else if (stat_fail == 3) {
-                    send_to_char(ch, "@RBoth constitution and speed are capped!@n");
+                                        ch->sendText("@RBoth constitution and speed are capped!@n");
                     raise = true;
                 }
             } // End while
@@ -936,7 +936,7 @@ void advance_level(struct char_data *ch) {
                 if (auto str = ch->getBaseStat("strength") ; str < 100 && rand_number(1, 2) == 2 && stat_fail != 1) {
                     if (str < 45 || GET_BONUS(ch, BONUS_WIMP) <= 0) {
                         ch->modBaseStat("strength", 1);
-                        send_to_char(ch, "@GYou feel your strength increase!@n\r\n");
+                                                ch->sendText("@GYou feel your strength increase!@n\r\n");
                         raise = true;
                     } else {
                         stat_fail += 1;
@@ -944,13 +944,13 @@ void advance_level(struct char_data *ch) {
                 } else if (auto agi = ch->getBaseStat("agility") ; agi < 100 && raise == false && stat_fail < 2) {
                     if (agi < 45 || GET_BONUS(ch, BONUS_SLOW) > 0) {
                         ch->modBaseStat("agility", 1);
-                        send_to_char(ch, "@GYou feel your agility increase!@n\r\n");
+                                                ch->sendText("@GYou feel your agility increase!@n\r\n");
                         raise = true;
                     } else {
                         stat_fail += 2;
                     }
                 } else if (stat_fail == 3) {
-                    send_to_char(ch, "@RBoth strength and agility are capped!@n");
+                                        ch->sendText("@RBoth strength and agility are capped!@n");
                     raise = true;
                 }
             } // End while
@@ -959,14 +959,14 @@ void advance_level(struct char_data *ch) {
     } // End stat bonus on level gain
 
     strcat(buf, ".\r\n");
-    send_to_char(ch, "%s", buf);
+        ch->send_to("%s", buf);
 
     if (GET_SKILL(ch, SKILL_POTENTIAL) && rand_number(1, 4) == 4) {
-        send_to_char(ch, "You can now perform another Potential Release.\r\n");
+                ch->sendText("You can now perform another Potential Release.\r\n");
         ch->modBaseStat<int>("boosts", 1);
     }
     if (IS_MAJIN(ch) && ((lvl % 25) == 0)) {
-        send_to_char(ch, "You can now perform another Majinization.\r\n");
+                ch->sendText("You can now perform another Majinization.\r\n");
         ch->modBaseStat<int>("boosts", 1);
     }
 
@@ -983,7 +983,7 @@ void advance_level(struct char_data *ch) {
         for (auto& [trait, res]: checks) {
             if (GET_BONUS(ch, trait)) {
                 ch->modBaseStat(res.first, 2);
-                send_to_char(ch, "%s\r\n", res.second.c_str());
+                                ch->send_to("%s\r\n", res.second.c_str());
             }
         }
     }

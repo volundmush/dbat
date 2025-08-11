@@ -135,7 +135,7 @@ void copyover_recover_final() {
         c->setBaseStat("load_room", room);
         for(auto f : {PLR_WRITING, PLR_MAILING, PLR_CRYO}) c->player_flags.set(f, false);
 
-        write_to_output(d, "@rThe world comes back into focus... has something changed?@n\r\n");
+    d->sendText("@rThe world comes back into focus... has something changed?@n\r\n");
 
         if (AFF_FLAGGED(d->character, AFF_HAYASA)) {
             d->character->setBaseStat<int>("speedboost", GET_SPEEDCALC(d->character) * 0.5);
@@ -421,7 +421,7 @@ void runOneLoop(double deltaTime) {
         start = std::chrono::high_resolution_clock::now();
         for (auto d = descriptor_list; d; d = d->next) {
             if (!d->has_prompt) {
-                write_to_output(d, "@n");
+                d->sendText("@n");
                 process_output(d);
                 d->has_prompt = true;
             }
@@ -493,7 +493,7 @@ namespace game {
 
     void init_zones() {
         for (auto &[vn, z] : zone_table) {
-            basic_mud_log("Resetting #%d: %s (rooms %d-%d).", vn, z.name, z.bot, z.top);
+            basic_mud_log("Resetting #%d: %s (rooms %d-%d).", vn, z.name.c_str(), z.bot, z.top);
             reset_zone(vn);
         }
     }
@@ -1450,14 +1450,13 @@ void free_bufpool() {
 
 
 void descriptor_data::start() {
-    write_to_output(this, GREETANSI);
-    write_to_output(this, "\r\n@w                  Welcome to Dragonball Advent Truth\r\n");
-    write_to_output(this, "@D                 ---(@CPeak Logon Count Today@W: @w%4d@D)---@n\r\n", PCOUNT);
-    write_to_output(this, "@D                 ---(@CHighest Logon Count   @W: @w%4d@D)---@n\r\n", HIGHPCOUNT);
-    write_to_output(this, "@D                 ---(@CTotal Era %d Characters@W: @w%4s@D)---@n\r\n", CURRENT_ERA,
-                    add_commas(players.size()).c_str());
-    write_to_output(this,
-                    "\r\n@cEnter your desired username or the username you have already made.\n@CEnter Username:@n\r\n");
+    sendText(GREETANSI);
+    sendText("\r\n@w                  Welcome to Dragonball Advent Truth\r\n");
+    send_to("@D                 ---(@CPeak Logon Count Today@W: @w%4d@D)---@n\r\n", PCOUNT);
+    send_to("@D                 ---(@CHighest Logon Count   @W: @w%4d@D)---@n\r\n", HIGHPCOUNT);
+    send_to("@D                 ---(@CTotal Era %d Characters@W: @w%4s@D)---@n\r\n", CURRENT_ERA,
+        add_commas(players.size()).c_str());
+    sendText("\r\n@cEnter your desired username or the username you have already made.\n@CEnter Username:@n\r\n");
 }
 
 
@@ -1498,8 +1497,8 @@ int process_output(struct descriptor_data *t) {
 
     /* Handle snooping: prepend "% " and send to snooper. */
     if (t->snoop_by)
-        write_to_output(t->snoop_by, "\nvvvvvvvvvvvvv[Snoop]vvvvvvvvvvvvv\n%s\n^^^^^^^^^^^^^[Snoop]^^^^^^^^^^^^^\n",
-                        t->output.c_str());
+    t->snoop_by->send_to("\nvvvvvvvvvvvvv[Snoop]vvvvvvvvvvvvv\n%s\n^^^^^^^^^^^^^[Snoop]^^^^^^^^^^^^^\n",
+            t->output.c_str());
 
     t->processed_output += out;
     t->output.clear();
@@ -1537,7 +1536,7 @@ void close_socket(struct descriptor_data *d) {
         d->snooping->snoop_by = nullptr;
 
     if (d->snoop_by) {
-        write_to_output(d->snoop_by, "Your victim is no longer among us.\r\n");
+    d->snoop_by->sendText("Your victim is no longer among us.\r\n");
         d->snoop_by->snooping = nullptr;
     }
 
@@ -1741,7 +1740,7 @@ void perform_act(const char *orig, struct char_data *ch, struct obj_data *obj, c
     *(++buf) = '\0';
 
     if (to->desc)
-        write_to_output(to->desc, "%s", CAP(lbuf));
+    to->desc->send_to("%s", CAP(lbuf));
 
     if ((IS_NPC(to) && dg_act_check) && (to != ch))
         act_mtrigger(to, lbuf, ch, dg_victim, obj, dg_target, dg_arg);
@@ -1904,16 +1903,16 @@ void descriptor_data::handle_input() {
     // Commands are processed first-come-first served...
     for(auto &command : raw_input_queue) {
         if (snoop_by)
-            write_to_output(snoop_by, "%% %s\r\n", command.c_str());
+            snoop_by->send_to("%% %s\r\n", command.c_str());
 
         if(command == "--") {
             // this is a special command that clears out the processed input_queue.
             input_queue.clear();
             character->wait_input_queue.clear();
-            write_to_output(this, "All queued commands cancelled.\r\n");
+            sendText("All queued commands cancelled.\r\n");
             if (character->task != Task::nothing) {
                 character->setTask(Task::nothing);
-                write_to_output(this, "You stop focussing on your task.\r\n");
+                sendText("You stop focussing on your task.\r\n");
             }
             characterSubscriptions.unsubscribe("commandWaitQueue", character);
         } else {

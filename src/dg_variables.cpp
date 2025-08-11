@@ -768,8 +768,7 @@ in the vault (vnum: 453) now and then. you can just use
                     } else if (!strcasecmp(field, "prac")) {
                         if (IS_NPC(c)) {
                             if (IN_ROOM(c) != NOWHERE) {
-                                send_to_location(c,
-                                             "Error!: Report this trigger error to the coding authorities!\r\n");
+                                c->location.sendText("Error!: Report this trigger error to the coding authorities!\r\n");
                             }
                         }
                         if (subfield && *subfield) {
@@ -1215,7 +1214,7 @@ in the vault (vnum: 453) now and then. you can just use
             } else if (!strcasecmp(field, "zonenumber"))
                 snprintf(str, slen, "%d", r->zone->number);
             else if (!strcasecmp(field, "zonename"))
-                snprintf(str, slen, "%s", r->zone->name);
+                snprintf(str, slen, "%s", r->zone->name.c_str());
             else if (!strcasecmp(field, "roomflag")) {
                 if (subfield && *subfield) {
                     if (check_flags_by_name_ar(r->room_flags.getAll(), NUM_ROOM_FLAGS, subfield, room_bits) > 0)

@@ -324,15 +324,17 @@ struct Location {
     }
 
     template<typename... Args>
-    void send_to(fmt::string_view format, Args&&... args) {
+    size_t send_to(fmt::string_view format, Args&&... args) {
         try {
             std::string formatted_string = fmt::sprintf(format, std::forward<Args>(args)...);
-            if(formatted_string.empty()) return;
+            if(formatted_string.empty()) return 0;
             sendText(formatted_string);
+            return formatted_string.size();
         }
         catch(const fmt::format_error& e) {
             basic_mud_log("SYSERR: Format error in Location::send_to: %s", e.what());
             basic_mud_log("Template was: %s", format.data());
+            return 0;
         }
     }
 
@@ -460,15 +462,18 @@ struct unit_data : public HasVariables {
     }
 
     template<typename... Args>
-    void send_to(fmt::string_view format, Args&&... args) {
+    size_t send_to(fmt::string_view format, Args&&... args) {
         try {
-            std::string formatted_string = fmt::sprintf(fmt::runtime(format), std::forward<Args>(args)...);
-            if(formatted_string.empty()) return;
+            // Use fmt::sprintf directly (printf-style).
+            std::string formatted_string = fmt::sprintf(format, std::forward<Args>(args)...);
+            if(formatted_string.empty()) return 0;
             sendText(formatted_string);
+            return formatted_string.size();
         }
         catch(const fmt::format_error& e) {
             basic_mud_log("SYSERR: Format error in send_to: %s", e.what());
             basic_mud_log("Template was: %s", format.data());
+            return 0;
         }
     }
 
@@ -1383,15 +1388,17 @@ struct descriptor_data {
     }
 
     template<typename... Args>
-    void send_to(fmt::string_view format, Args&&... args) {
+    size_t send_to(fmt::string_view format, Args&&... args) {
         try {
             std::string formatted_string = fmt::sprintf(format, std::forward<Args>(args)...);
-            if(formatted_string.empty()) return;
+            if(formatted_string.empty()) return 0;
             sendText(formatted_string);
+            return formatted_string.size();
         }
         catch(const fmt::format_error& e) {
             basic_mud_log("SYSERR: Format error in descriptor_data::send_to: %s", e.what());
             basic_mud_log("Template was: %s", format.data());
+            return 0;
         }
     }
 };
@@ -1618,114 +1625,6 @@ struct aging_data {
 };
 
 
-
-
-
-template <typename T>
-class SubscriptionManager {
-
-public:
-    // Subscribe an entity to a particular service
-    void subscribe(const std::string& service, const std::shared_ptr<T>& thing) {
-        subscriptions[service].push_front(thing);
-        thing->subscriptions.insert(service);
-    }
-
-    void subscribe(const std::string& service, T* thing) {
-        subscribe(service, thing->shared());
-    }
-
-    T* first(const std::string& service) {
-        auto it = subscriptions.find(service);
-        if (it != subscriptions.end()) {
-            for (const auto& weak : it->second) {
-                if (auto shared = weak.lock()) {
-                    return shared.get();
-                }
-            }
-        }
-        return nullptr;
-    }
-
-    size_t count(const std::string& service) const {
-        auto it = subscriptions.find(service);
-        if (it != subscriptions.end()) {
-            return std::count_if(it->second.begin(), it->second.end(), [](const std::weak_ptr<T>& weak) {
-                return !weak.expired();
-            });
-        }
-        return 0;
-    }
-
-    // Unsubscribe an entity from a particular service
-    void unsubscribe(const std::string& service, const std::shared_ptr<T>& thing) {
-        auto it = subscriptions.find(service);
-        if (it != subscriptions.end()) {
-            it->second.remove_if([thing](const auto& weak) {
-                return weak.expired() || weak.lock() == thing;
-            });
-            if (it->second.empty()) {
-                subscriptions.erase(it);
-            }
-        }
-        thing->subscriptions.erase(service);
-    }
-
-    void unsubscribe(const std::string& service, T* thing) {
-        unsubscribe(service, thing->shared());
-    }
-
-    // Get all entities subscribed to a particular service
-    std::vector<std::weak_ptr<T>> all(const std::string& service) const {
-        auto it = subscriptions.find(service);
-        if (it != subscriptions.end()) {
-            std::vector<std::weak_ptr<T>> out;
-            out.reserve(it->second.size());
-            std::copy_if(it->second.begin(), it->second.end(), std::back_inserter(out), [](const std::weak_ptr<T>& weak) {
-                return !weak.expired();
-            });
-            out.shrink_to_fit();
-            return out;
-        }
-        return {};
-    }
-
-    // Check if an entity is subscribed to a particular service
-    bool isSubscribed(const std::string& service, const std::shared_ptr<T>& thing) const {
-        auto it = subscriptions.find(service);
-        if (it != subscriptions.end()) {
-            auto weak = std::weak_ptr<T>(thing);
-            return it->second.find(weak) != it->second.end();
-        }
-        return false;
-    }
-
-    bool isSubscribed(const std::string& service, T* thing) const {
-        return isSubscribed(service, thing->shared());
-    }
-
-    void unsubscribeFromAll(const std::shared_ptr<T>& thing) {
-        for (auto it = subscriptions.begin(); it != subscriptions.end(); ) {
-            it->second.remove_if([thing](const std::weak_ptr<T>& weak) {
-                return weak.expired() || weak.lock() == thing;
-            });
-            if (it->second.empty()) {
-                it = subscriptions.erase(it); // Erase and get the next iterator
-            } else {
-                ++it;
-            }
-        }
-        thing->subscriptions.clear();
-    }
-
-    void unsubscribeFromAll(T* thing) {
-        unsubscribeFromAll(thing->shared());
-    }
-
-private:
-    std::unordered_map<std::string, std::list<std::weak_ptr<T>>> subscriptions;
-};
-
 struct shop_buy_data {
     int type{};
     std::string keywords{};
@@ -1826,9 +1725,10 @@ struct reset_com {
 };
 
 struct zone_data {
-    ~zone_data();
-    char *name{};            /* name of this zone                  */
-    char *builders{};          /* namelist of builders allowed to    */
+    zone_vnum number{};        /* virtual number of this zone	  */
+    
+    std::string name{};            /* name of this zone                  */
+    std::string builders{};          /* namelist of builders allowed to    */
     /* modify this zone.		  */
     int lifespan{};           /* how long between resets (minutes)  */
     double age{};                /* current age of this zone (minutes) */
@@ -1836,7 +1736,7 @@ struct zone_data {
     vnum top{};           /* upper limit for rooms in this zone */
 
     int reset_mode{};         /* conditions for reset (see below)   */
-    zone_vnum number{};        /* virtual number of this zone	  */
+    
     std::vector<struct reset_com> cmd;   /* command table for reset	          */
     int min_level{};           /* Minimum level to enter zone        */
     int max_level{};           /* Max Mortal level to enter zone     */
@@ -1850,7 +1750,7 @@ struct zone_data {
      *   1: Reset if no PC's are located in zone.
      *   2: Just reset.
      */
-    std::unordered_set<room_vnum> rooms;
+    std::list<std::weak_ptr<room_data>> rooms;
     std::unordered_set<mob_vnum> mobiles;
     std::unordered_set<obj_vnum> objects;
     std::unordered_set<shop_vnum> shops;
@@ -1860,6 +1760,36 @@ struct zone_data {
     std::list<std::weak_ptr<char_data>> npcsInZone;
     std::list<std::weak_ptr<char_data>> playersInZone;
     std::list<std::weak_ptr<obj_data>> objectsInZone;
+
+    void sendText(const std::string &txt);
+
+    template<typename... Args>
+    void sendFmt(fmt::string_view format, Args&&... args) {
+        try {
+            std::string formatted_string = fmt::format(fmt::runtime(format), std::forward<Args>(args)...);
+            if(formatted_string.empty()) return;
+            sendText(formatted_string);
+        }
+        catch(const fmt::format_error& e) {
+            basic_mud_log("SYSERR: Format error in zone_data::sendFmt: %s", e.what());
+            basic_mud_log("Template was: %s", format.data());
+        }
+    }
+
+    template<typename... Args>
+    size_t send_to(fmt::string_view format, Args&&... args) {
+        try {
+            std::string formatted_string = fmt::sprintf(format, std::forward<Args>(args)...);
+            if(formatted_string.empty()) return 0;
+            sendText(formatted_string);
+            return formatted_string.size();
+        }
+        catch(const fmt::format_error& e) {
+            basic_mud_log("SYSERR: Format error in zone_data::send_to: %s", e.what());
+            basic_mud_log("Template was: %s", format.data());
+            return 0;
+        }
+    }
 };
 
 typedef struct disabled_data DISABLED_DATA;

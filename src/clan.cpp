@@ -581,9 +581,9 @@ void clanINFOW(char *name, struct char_data *ch) {
         act("$n begins to edit a clan's info.", true, ch, nullptr, nullptr, TO_ROOM);
         ch->player_flags.set(PLR_WRITING, true);
         send_editor_help(ch->desc);
-        write_to_output(ch->desc, "@rYou are limited to 1000 characters for the clan info.@n\r\n");
+    ch->desc->sendText("@rYou are limited to 1000 characters for the clan info.@n\r\n");
         backstr = strdup(S->info);
-        write_to_output(ch->desc, "%s\r\n", S->info);
+    ch->desc->send_to("%s\r\n", S->info);
         string_write(ch->desc, &S->info, 1000, 0, backstr);
         clanSave(S, clanFilename(S));
     }
@@ -686,15 +686,15 @@ bool clanRANKD(const char *name, struct char_data *ch, struct char_data *vict) {
     if (S == nullptr || IS_NPC(ch)) {
         return false;
     } else {
-        send_to_char(ch, "@cClan Rank@D: @w");
+                ch->sendText("@cClan Rank@D: @w");
         if (GET_CRANK(vict) == 0 && !clanMemberFromList(GET_IDNUM(vict), S->moderators)) {
-            send_to_char(ch, "Member@n\r\n");
+                        ch->sendText("Member@n\r\n");
         } else if (GET_CRANK(vict) == 1 && !clanMemberFromList(GET_IDNUM(vict), S->moderators)) {
-            send_to_char(ch, "%s@n\r\n", S->midrank);
+                        ch->send_to("%s@n\r\n", S->midrank);
         } else if (GET_CRANK(vict) == 2 && !clanMemberFromList(GET_IDNUM(vict), S->moderators)) {
-            send_to_char(ch, "%s@n\r\n", S->highrank);
+                        ch->send_to("%s@n\r\n", S->highrank);
         } else {
-            send_to_char(ch, "Leader@n\r\n");
+                        ch->sendText("Leader@n\r\n");
         }
         return true;
     }
@@ -721,12 +721,12 @@ bool clanBSET(const char *name, struct char_data *ch) {
     }
     if (S->bany > 0) {
         S->bany = 0;
-        send_to_char(ch, "The clan bank will now only be accessible from its room.\r\n");
+                ch->sendText("The clan bank will now only be accessible from its room.\r\n");
         clanSave(S, clanFilename(S));
         return true;
     } else {
         S->bany = 1;
-        send_to_char(ch, "The clan bank will now be accessible from anywhere.\r\n");
+                ch->sendText("The clan bank will now be accessible from anywhere.\r\n");
         clanSave(S, clanFilename(S));
         return true;
     }
@@ -896,10 +896,10 @@ void handle_clan_member_list(struct char_data *ch) {
     if (S == nullptr)
         return;
 
-    send_to_char(ch, S->modlist);
-    send_to_char(ch, S->memlist);
-    send_to_char(ch, S->applist);
-    send_to_char(ch, "@n");
+        ch->sendText(S->modlist);
+        ch->sendText(S->memlist);
+        ch->sendText(S->applist);
+        ch->sendText("@n");
 }
 
 bool clanIsMember(const char *name, struct char_data *ch) {
@@ -986,11 +986,11 @@ void listClanInfo(const char *name, struct char_data *ch) {
     struct clan_data *S = clanGet(name);
 
     if (S == nullptr) {
-        send_to_char(ch, "%s is not a formal clan.\r\n", name);
+                ch->send_to("%s is not a formal clan.\r\n", name);
         return;
     }
 
-    send_to_char(ch, "@cClan Name        @D: @C%s\n"
+        ch->send_to("@cClan Name        @D: @C%s\n"
                      "@cJoin Restriction @D: @C%s\n"
                      "@cLeave Restriction@D: @C%s\n"
                      "@D---@YClan Ranks@D---@n\n"
@@ -999,13 +999,9 @@ void listClanInfo(const char *name, struct char_data *ch) {
                      "@c%s@n\n"
                      "@cMember@n\n"
                      "\n"
-                     "%s@n\n",
-                 S->name,
-                 (S->open_join == false) ? "Players must be enrolled to join this clan" :
-                 "Players may join this clan as they please",
-                 (S->open_leave == false) ? "Players must be expelled to leave this clan" :
-                 "Players may leave this clan as they please", S->highrank, S->midrank,
-                 S->info);
+                     "%s@n\n", S->name, (S->open_join == false) ? "Players must be enrolled to join this clan" :
+                 "Players may join this clan as they please", (S->open_leave == false) ? "Players must be expelled to leave this clan" :
+                 "Players may leave this clan as they please", S->highrank, S->midrank, S->info);
 }
 
 
@@ -1023,15 +1019,15 @@ void listClansOfVictToChar(struct char_data *vict, struct
 
                 if (clan_found == false) {
                     clan_found = true;
-                    send_to_char(ch, "Clans %s belongs to:\r\n", GET_NAME(vict));
+                                        ch->send_to("Clans %s belongs to:\r\n", GET_NAME(vict));
                 }
-                send_to_char(ch, "  %s\r\n", clan[i]->name);
+                                ch->send_to("  %s\r\n", clan[i]->name);
             }
         }
     }
 
     if (!clan_found)
-        send_to_char(ch, "%s does not belong to any clans.\r\n", GET_NAME(vict));
+                ch->send_to("%s does not belong to any clans.\r\n", GET_NAME(vict));
 }
 
 
@@ -1040,13 +1036,13 @@ void listClans(struct char_data *ch) {
     int i;
 
     if (num_clans < 1) {
-        send_to_char(ch, "Presently, no clans have formally created.\r\n");
+                ch->sendText("Presently, no clans have formally created.\r\n");
         return;
     }
 
-    send_to_char(ch, "The list of clans on Dragonball Advent Truth:\r\n");
+        ch->sendText("The list of clans on Dragonball Advent Truth:\r\n");
     for (i = 0; i < num_clans; i++)
-        send_to_char(ch, "  %s\r\n", clan[i]->name);
+                ch->send_to("  %s\r\n", clan[i]->name);
 
 }
 

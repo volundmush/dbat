@@ -250,7 +250,7 @@ void list_feats_available(struct char_data *ch) {
         strcat(buf2, buf);
     }
 
-    write_to_output(ch->desc, buf2);
+    ch->desc->send_to("%s", buf2);
 }
 
 void list_feats_complete(struct char_data *ch) {
@@ -287,7 +287,7 @@ void list_feats_complete(struct char_data *ch) {
         strcat(buf2, buf);
     }
 
-    write_to_output(ch->desc, buf2);
+    ch->desc->send_to("%s", buf2);
 }
 
 int find_feat_num(char *name) {
@@ -323,7 +323,7 @@ ACMD(do_feats) {
     one_argument(argument, arg);
 
     if (is_abbrev(arg, "known") || !*arg) {
-        send_to_char(ch, "Syntax is \"feats <available | complete | known>\".\r\n");
+                ch->sendText("Syntax is \"feats <available | complete | known>\".\r\n");
         //list_feats_known(ch);
     } else if (is_abbrev(arg, "available")) {
         list_feats_available(ch);

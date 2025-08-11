@@ -65,24 +65,24 @@ const char *custom_weapon[7] = {
 
 /* This displays the custom equipment construction menu to the player. */
 void disp_custom_menu(struct descriptor_data *d) {
-    write_to_output(d, "@GCustom Equipment Construction Menu@n\n");
-    write_to_output(d, "@D-----------------------------------------@n\n");
-    write_to_output(d, "@C1@D) @WKeyword Name     @D: @w%s@n\n", d->obj_name);
-    write_to_output(d, "@C2@D) @WShort Description@D: @w%s@n\n", d->obj_short);
-    write_to_output(d, "@C3@D) @WLong Description @D: @w%s@n\n", d->obj_long);
-    write_to_output(d, "@C4@D) @WEquipment Type   @D: @w%s@n\n", custom_types[d->obj_type]);
-    write_to_output(d, "@C5@D) @WWeapon Type      @D: @w%s@n\n", custom_weapon[d->obj_weapon]);
-    write_to_output(d, "@CQ@D) @WQuit Menu@n\n");
+    d->sendText("@GCustom Equipment Construction Menu@n\n");
+    d->sendText("@D-----------------------------------------@n\n");
+    d->send_to("@C1@D) @WKeyword Name     @D: @w%s@n\n", d->obj_name);
+    d->send_to("@C2@D) @WShort Description@D: @w%s@n\n", d->obj_short);
+    d->send_to("@C3@D) @WLong Description @D: @w%s@n\n", d->obj_long);
+    d->send_to("@C4@D) @WEquipment Type   @D: @w%s@n\n", custom_types[d->obj_type]);
+    d->send_to("@C5@D) @WWeapon Type      @D: @w%s@n\n", custom_weapon[d->obj_weapon]);
+    d->sendText("@CQ@D) @WQuit Menu@n\n");
 }
 
 /* This displays the equipment restring menu, as if you couldn't tell. */
 void disp_restring_menu(struct descriptor_data *d) {
-    write_to_output(d, "@GEquipment Restring Menu@n\n");
-    write_to_output(d, "@D-----------------------------------------@n\n");
-    write_to_output(d, "@C1@D) @WKeyword Name     @D: @w%s@n\n", d->obj_name);
-    write_to_output(d, "@C2@D) @WShort Description@D: @w%s@n\n", d->obj_short);
-    write_to_output(d, "@C3@D) @WLong Description @D: @w%s@n\n", d->obj_long);
-    write_to_output(d, "@CQ@D) @WQuit Menu@n\n");
+    d->sendText("@GEquipment Restring Menu@n\n");
+    d->sendText("@D-----------------------------------------@n\n");
+    d->send_to("@C1@D) @WKeyword Name     @D: @w%s@n\n", d->obj_name);
+    d->send_to("@C2@D) @WShort Description@D: @w%s@n\n", d->obj_short);
+    d->send_to("@C3@D) @WLong Description @D: @w%s@n\n", d->obj_long);
+    d->sendText("@CQ@D) @WQuit Menu@n\n");
 }
 
 /* This handles the player level object construction process. */
@@ -97,26 +97,26 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg) {
             case EDIT_RESTRING_MAIN:
                 switch (*arg) {
                     case '1': /* Name Editing */
-                        write_to_output(d, "@wCurrent Equipment's Keyword Name @D<@Y%s@D>@n\r\n", d->obj_name);
-                        write_to_output(d, "@wEnter Name @D(@RDo not use colorcode!@D)@w:@n \n");
+                        d->send_to("@wCurrent Equipment's Keyword Name @D<@Y%s@D>@n\r\n", d->obj_name);
+                        d->sendText("@wEnter Name @D(@RDo not use colorcode!@D)@w:@n \n");
                         d->obj_editval = EDIT_RESTRING_NAME;
                         break;
 
                     case '2': /* Short Desc Editing */
-                        write_to_output(d, "@wCurrent Equipment's Short Desc @D<@Y%s@D>@n\r\n", d->obj_short);
-                        write_to_output(d, "@wEnter Short Desc@w:@n \n");
+                        d->send_to("@wCurrent Equipment's Short Desc @D<@Y%s@D>@n\r\n", d->obj_short);
+                        d->sendText("@wEnter Short Desc@w:@n \n");
                         d->obj_editval = EDIT_RESTRING_SDESC;
                         break;
 
                     case '3': /* Long Desc Editing */
-                        write_to_output(d, "@wCurrent Equipment's Long Desc @D<@Y%s@D>@n\r\n", d->obj_long);
-                        write_to_output(d, "@wEnter Long Desc@w:@n \n");
+                        d->send_to("@wCurrent Equipment's Long Desc @D<@Y%s@D>@n\r\n", d->obj_long);
+                        d->sendText("@wEnter Long Desc@w:@n \n");
                         d->obj_editval = EDIT_RESTRING_LDESC;
                         break;
 
                     case 'Q': /* Quit Editing */
                     case 'q':
-                        write_to_output(d, "Save current changes and be charged?\r\nYes or No\r\n");
+                        d->sendText("Save current changes and be charged?\r\nYes or No\r\n");
                         d->obj_editval = EDIT_RESTRING_QUIT;
                         break;
 
@@ -128,17 +128,17 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg) {
 
             case EDIT_RESTRING_NAME: /* Name menu */
                 if (!*arg) {
-                    write_to_output(d, "@wNothing entered. Keeping what was previously entered.@n\r\n");
+                    d->sendText("@wNothing entered. Keeping what was previously entered.@n\r\n");
                     disp_restring_menu(d);
                     d->obj_editval = EDIT_RESTRING_MAIN;
                     return;
                 } else if (strstr(arg, "@")) {
-                    write_to_output(d, "@RNO COLORCODE IN THE KEYWORD NAME.@n");
-                    write_to_output(d, "@wEnter: @n\n");
+                    d->sendText("@RNO COLORCODE IN THE KEYWORD NAME.@n");
+                    d->sendText("@wEnter: @n\n");
                     return;
                 } else if (strlen(arg) > 100) {
-                    write_to_output(d, "@wToo long. Limit is 100 character.@n\r\n");
-                    write_to_output(d, "@wEnter: @n\n");
+                    d->sendText("@wToo long. Limit is 100 character.@n\r\n");
+                    d->sendText("@wEnter: @n\n");
                     return;
                 } else {
                     if (d->obj_name) {
@@ -154,13 +154,13 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg) {
 
             case EDIT_RESTRING_SDESC: /* Short Desc Menu */
                 if (!*arg) {
-                    write_to_output(d, "@wNothing entered. Keeping what was previously entered.@n\r\n");
+                    d->sendText("@wNothing entered. Keeping what was previously entered.@n\r\n");
                     disp_custom_menu(d);
                     d->obj_editval = EDIT_RESTRING_MAIN;
                     return;
                 } else if (strlen(arg) > 150) {
-                    write_to_output(d, "@wToo long. Limit is 200 character.@n\r\n");
-                    write_to_output(d, "@wEnter: @n\n");
+                    d->sendText("@wToo long. Limit is 200 character.@n\r\n");
+                    d->sendText("@wEnter: @n\n");
                     return;
                 } else {
                     if (d->obj_short) {
@@ -176,13 +176,13 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg) {
 
             case EDIT_RESTRING_LDESC: /* Long Desc Menu */
                 if (!*arg) {
-                    write_to_output(d, "@wNothing entered. Keeping what was previously entered.@n\r\n");
+                    d->sendText("@wNothing entered. Keeping what was previously entered.@n\r\n");
                     disp_custom_menu(d);
                     d->obj_editval = EDIT_RESTRING_MAIN;
                     return;
                 } else if (strlen(arg) > 200) {
-                    write_to_output(d, "@wToo long. Limit is 200 character.@n\r\n");
-                    write_to_output(d, "@wEnter: @n\n");
+                    d->sendText("@wToo long. Limit is 200 character.@n\r\n");
+                    d->sendText("@wEnter: @n\n");
                     return;
                 } else {
                     if (d->obj_long) {
@@ -198,7 +198,7 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg) {
 
             case EDIT_RESTRING_QUIT:
                 if (!*arg) {
-                    write_to_output(d, "Save current changes and be charged?\r\nYes or No\r\n");
+                    d->sendText("Save current changes and be charged?\r\nYes or No\r\n");
                     return;
                 } else if (!strcasecmp(arg, "yes") || !strcasecmp(arg, "Yes") || !strcasecmp(arg, "y") ||
                            !strcasecmp(arg, "Y")) {
@@ -220,18 +220,18 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg) {
                     d->obj_editval = EDIT_NONE;
                     d->character->modBaseStat("money_carried",  -5000);
                     obj->item_flags.set(ITEM_RESTRING, true);
-                    write_to_output(d, "Purchase complete.");
+                    d->sendText("Purchase complete.");
                     send_to_imm("Restring Eq: %s has bought: %s, which was %s.", GET_NAME(d->character),
                                 obj->getShortDescription(), d->obj_was);
                     STATE(d) = CON_PLAYING;
                 } else if (!strcasecmp(arg, "No") || !strcasecmp(arg, "no") || !strcasecmp(arg, "n") ||
                            !strcasecmp(arg, "N")) {
-                    write_to_output(d, "Canceling purchase at no cost.\r\n");
+                    d->sendText("Canceling purchase at no cost.\r\n");
                     send_to_imm("Restring Eq: %s has canceled their equipment restring.", GET_NAME(d->character));
                     d->obj_editval = EDIT_NONE;
                     STATE(d) = CON_PLAYING;
                 } else {
-                    write_to_output(d, "Save current changes and be charged?\r\nYes or No\r\n");
+                    d->sendText("Save current changes and be charged?\r\nYes or No\r\n");
                     return;
                 }
                 break;
@@ -249,56 +249,56 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg) {
             case EDIT_CUSTOM_MAIN: /* The main menu of custom equipment edit */
                 switch (*arg) {
                     case '1': /* Let them name it. */
-                        write_to_output(d, "@wEnter Equipment's Keyword Name @D(@RDo not use colorcode!@D)@w.@n\r\n");
-                        write_to_output(d, "@wEnter: @n\n");
+                        d->sendText("@wEnter Equipment's Keyword Name @D(@RDo not use colorcode!@D)@w.@n\r\n");
+                        d->sendText("@wEnter: @n\n");
                         d->obj_editval = EDIT_CUSTOM_NAME;
                         break;
                     case '2': /* Let them give it a short description. */
-                        write_to_output(d,
+                        d->send_to(
                                         "@wEnter Equipment's Short Description. This is the colored name you see in your inventory or when the eq is used.@n\r\n");
-                        write_to_output(d, "@wEnter: @n\n");
+                        d->sendText("@wEnter: @n\n");
                         d->obj_editval = EDIT_CUSTOM_SDESC;
                         break;
                     case '3': /* Let them give it a long description. */
-                        write_to_output(d,
+                        d->send_to(
                                         "@wEnter Equipment's Long Description. This is the colored name you see when it's seen in a room. @D(@RNo punctuation at the end!@D)@n\r\n");
-                        write_to_output(d, "@wEnter: @n\n");
+                        d->sendText("@wEnter: @n\n");
                         d->obj_editval = EDIT_CUSTOM_LDESC;
                         break;
                     case '4': /* Let them choose what type of equipment it is. */
-                        write_to_output(d, "@wEnter number to select type of equipment you want it to be: @n\n");
-                        write_to_output(d,
+                        d->sendText("@wEnter number to select type of equipment you want it to be: @n\n");
+                        d->send_to(
                                         "@D[ @C--1@W) @cArmor Slot  @C--2@W) @cGi Slot     @C--3@W) @cWrist Slot   @D]@n\n");
-                        write_to_output(d,
+                        d->send_to(
                                         "@D[ @C--4@W) @cEar Slot    @C--5@W) @cFinger Slot @C--6@W) @cEye Slot     @D]@n\n");
-                        write_to_output(d,
+                        d->send_to(
                                         "@D[ @C--7@W) @cHands Slot  @C--8@W) @cFeet Slot   @C--9@W) @cBelt Slot    @D]@n\n");
-                        write_to_output(d,
+                        d->send_to(
                                         "@D[ @C-10@W) @cLegs Slot   @C-11@W) @cArms Slot   @C-12@W) @cHead Slot    @D]@n\n");
-                        write_to_output(d,
+                        d->send_to(
                                         "@D[ @C-13@W) @cNeck Slot   @C-14@W) @cBack Slot   @C-15@W) @cShoulder Slot@D]@n\n");
-                        write_to_output(d, "@D[ @C-16@W) @cWeapon@n\r\n");
-                        write_to_output(d, "@wEnter: @n\n");
+                        d->sendText("@D[ @C-16@W) @cWeapon@n\r\n");
+                        d->sendText("@wEnter: @n\n");
                         d->obj_editval = EDIT_CUSTOM_TYPE;
                         break;
                     case '5': /* If it's a weapon then let them choose what type. */
                         if (d->obj_type != 16) {
-                            write_to_output(d,
+                            d->send_to(
                                             "@wYou can only use this part of the menu if you select the weapon type.@n\r\n");
                             return;
                         } else {
-                            write_to_output(d, "@wEnter number to select type of weapon you want it to be: @n\n");
-                            write_to_output(d,
+                            d->sendText("@wEnter number to select type of weapon you want it to be: @n\n");
+                            d->send_to(
                                             "@D[ @C--1@W) @cSword       @C--2@W) @cDagger      @C--3@W) @cSpear        @D]@n\n");
-                            write_to_output(d,
+                            d->send_to(
                                             "@D[ @C--4@W) @cClub        @C--5@W) @cGun         @C--6@W) @cBrawling     @D]@n\n");
-                            write_to_output(d, "@wEnter: @n\n");
+                            d->sendText("@wEnter: @n\n");
                             d->obj_editval = EDIT_CUSTOM_WEAPON;
                         }
                         break;
                     case 'q': /* They are exiting, time to finalize purchase or clear it. */
                     case 'Q':
-                        write_to_output(d, "@wPurchase this custom piece? (Y or N)@n\r\n");
+                        d->sendText("@wPurchase this custom piece? (Y or N)@n\r\n");
                         d->obj_editval = EDIT_CUSTOM_QUIT;
                         break;
                     default: /* They entered nothing, show them the menu. */
@@ -309,17 +309,17 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg) {
 
             case EDIT_CUSTOM_NAME: /* Name menu */
                 if (!*arg) {
-                    write_to_output(d, "@wNothing entered. Keeping what was previously entered.@n\r\n");
+                    d->sendText("@wNothing entered. Keeping what was previously entered.@n\r\n");
                     disp_custom_menu(d);
                     d->obj_editval = EDIT_CUSTOM_MAIN;
                     return;
                 } else if (strstr(arg, "@")) {
-                    write_to_output(d, "@RNO COLORCODE IN THE KEYWORD NAME.@n");
-                    write_to_output(d, "@wEnter: @n\n");
+                    d->sendText("@RNO COLORCODE IN THE KEYWORD NAME.@n");
+                    d->sendText("@wEnter: @n\n");
                     return;
                 } else if (strlen(arg) > 100) {
-                    write_to_output(d, "@wToo long. Limit is 100 character.@n\r\n");
-                    write_to_output(d, "@wEnter: @n\n");
+                    d->sendText("@wToo long. Limit is 100 character.@n\r\n");
+                    d->sendText("@wEnter: @n\n");
                     return;
                 } else {
                     if (d->obj_name) {
@@ -335,13 +335,13 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg) {
 
             case EDIT_CUSTOM_SDESC: /* Short Desc Menu */
                 if (!*arg) {
-                    write_to_output(d, "@wNothing entered. Keeping what was previously entered.@n\r\n");
+                    d->sendText("@wNothing entered. Keeping what was previously entered.@n\r\n");
                     disp_custom_menu(d);
                     d->obj_editval = EDIT_CUSTOM_MAIN;
                     return;
                 } else if (strlen(arg) > 150) {
-                    write_to_output(d, "@wToo long. Limit is 200 character.@n\r\n");
-                    write_to_output(d, "@wEnter: @n\n");
+                    d->sendText("@wToo long. Limit is 200 character.@n\r\n");
+                    d->sendText("@wEnter: @n\n");
                     return;
                 } else {
                     if (d->obj_short) {
@@ -357,13 +357,13 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg) {
 
             case EDIT_CUSTOM_LDESC: /* Long Desc Menu */
                 if (!*arg) {
-                    write_to_output(d, "@wNothing entered. Keeping what was previously entered.@n\r\n");
+                    d->sendText("@wNothing entered. Keeping what was previously entered.@n\r\n");
                     disp_custom_menu(d);
                     d->obj_editval = EDIT_CUSTOM_MAIN;
                     return;
                 } else if (strlen(arg) > 200) {
-                    write_to_output(d, "@wToo long. Limit is 200 character.@n\r\n");
-                    write_to_output(d, "@wEnter: @n\n");
+                    d->sendText("@wToo long. Limit is 200 character.@n\r\n");
+                    d->sendText("@wEnter: @n\n");
                     return;
                 } else {
                     if (d->obj_long) {
@@ -379,15 +379,15 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg) {
 
             case EDIT_CUSTOM_TYPE: /* Type Menu */
                 if (!*arg) {
-                    write_to_output(d, "@wNothing entered. Returning to main menu.@n\r\n");
+                    d->sendText("@wNothing entered. Returning to main menu.@n\r\n");
                     disp_custom_menu(d);
                     d->obj_editval = EDIT_CUSTOM_MAIN;
                     return;
                 } else {
                     d->obj_type = atoi(arg);
                     if (d->obj_type < 1 || d->obj_type > 16) {
-                        write_to_output(d, "@wValue must be between 1 and 16.@n\r\n");
-                        write_to_output(d, "@wEnter: @n\n");
+                        d->sendText("@wValue must be between 1 and 16.@n\r\n");
+                        d->sendText("@wEnter: @n\n");
                         d->obj_type = 1;
                         return;
                     } else {
@@ -402,15 +402,15 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg) {
 
             case EDIT_CUSTOM_WEAPON: /* Weapon Menu */
                 if (!*arg) {
-                    write_to_output(d, "@wNothing entered. Returning to main menu.@n\r\n");
+                    d->sendText("@wNothing entered. Returning to main menu.@n\r\n");
                     disp_custom_menu(d);
                     d->obj_editval = EDIT_CUSTOM_MAIN;
                     return;
                 } else {
                     d->obj_weapon = atoi(arg);
                     if (d->obj_weapon < 1 || d->obj_weapon > 6) {
-                        write_to_output(d, "@wValue must be between 1 and 6.@n\r\n");
-                        write_to_output(d, "@wEnter: @n\n");
+                        d->sendText("@wValue must be between 1 and 6.@n\r\n");
+                        d->sendText("@wEnter: @n\n");
                         d->obj_weapon = 0;
                         return;
                     } else {
@@ -422,10 +422,10 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg) {
 
             case EDIT_CUSTOM_QUIT: /* Quiting */
                 if (!*arg) {
-                    write_to_output(d, "@wPurchase this custom piece? (Y or N)@n\r\n");
+                    d->sendText("@wPurchase this custom piece? (Y or N)@n\r\n");
                     return;
                 } else if (!strcasecmp(arg, "y") || !strcasecmp(arg, "Y")) {
-                    write_to_output(d, "@wPurchase complete.@n\r\n");
+                    d->sendText("@wPurchase complete.@n\r\n");
                     STATE(d) = CON_PLAYING;
                     if (d->obj_weapon == 0) {
                         obj = read_object(20099, VIRTUAL);
@@ -529,7 +529,7 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg) {
                     d->account->customs.emplace_back(obj->getShortDescription());
                     log_custom(d, obj);
                 } else if (!strcasecmp(arg, "n") || !strcasecmp(arg, "N")) {
-                    write_to_output(d, "Canceling purchase at no cost.\r\n");
+                    d->sendText("Canceling purchase at no cost.\r\n");
                     send_to_imm("Custom Eq: %s has canceled their custom eq construction.", GET_NAME(d->character));
                     d->obj_editval = EDIT_NONE;
 

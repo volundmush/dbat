@@ -710,12 +710,12 @@ static void shopping_app(char *arg, struct char_data *ch, struct char_data *keep
         keeper, TO_ROOM);
 
     if (!GET_SKILL(ch, SKILL_APPRAISE)) {
-        send_to_char(ch, "You are unskilled at appraising.\r\n");
+                ch->sendText("You are unskilled at appraising.\r\n");
         return;
     }
     improve_skill(ch, SKILL_APPRAISE, 1);
     if (GET_SKILL(ch, SKILL_APPRAISE) < rand_number(1, 101)) {
-        send_to_char(ch, "@wYou were completely stumped about the worth of %s@n\r\n", obj->getShortDescription());
+                ch->send_to("@wYou were completely stumped about the worth of %s@n\r\n", obj->getShortDescription());
         WAIT_STATE(ch, PULSE_2SEC);
         return;
     } else {
@@ -724,72 +724,72 @@ static void shopping_app(char *arg, struct char_data *ch, struct char_data *keep
         if (GET_OBJ_TYPE(obj) == ITEM_WEAPON && OBJ_FLAGGED(obj, ITEM_CUSTOM))
             displevel = 20;
 
-        send_to_char(ch, "@c---------------------------------------------------------------@n\n");
-        send_to_char(ch, "@GItem Name   @W: @w%s@n\n", obj->getShortDescription());
-        send_to_char(ch, "@GTrue Value  @W: @Y%s@n\n", add_commas(GET_OBJ_COST(obj)).c_str());
-        send_to_char(ch, "@GItem Min LVL@W: @w%d@n\n", displevel);
+                ch->sendText("@c---------------------------------------------------------------@n\n");
+                ch->send_to("@GItem Name   @W: @w%s@n\n", obj->getShortDescription());
+                ch->send_to("@GTrue Value  @W: @Y%s@n\n", add_commas(GET_OBJ_COST(obj)).c_str());
+                ch->send_to("@GItem Min LVL@W: @w%d@n\n", displevel);
         if (GET_OBJ_VAL(obj, VAL_ALL_HEALTH) >= 100) {
-            send_to_char(ch, "@GCondition   @W: @C%d%s@n\n", GET_OBJ_VAL(obj, VAL_ALL_HEALTH), "%");
+                        ch->send_to("@GCondition   @W: @C%d%s@n\n", GET_OBJ_VAL(obj, VAL_ALL_HEALTH), "%");
         } else if (GET_OBJ_VAL(obj, VAL_ALL_HEALTH) >= 50) {
-            send_to_char(ch, "@GCondition   @W: @y%d%s@n\n", GET_OBJ_VAL(obj, VAL_ALL_HEALTH), "%");
+                        ch->send_to("@GCondition   @W: @y%d%s@n\n", GET_OBJ_VAL(obj, VAL_ALL_HEALTH), "%");
         } else if (GET_OBJ_VAL(obj, VAL_ALL_HEALTH) >= 1) {
-            send_to_char(ch, "@GCondition   @W: @r%d%s@n\n", GET_OBJ_VAL(obj, VAL_ALL_HEALTH), "%");
+                        ch->send_to("@GCondition   @W: @r%d%s@n\n", GET_OBJ_VAL(obj, VAL_ALL_HEALTH), "%");
         } else {
-            send_to_char(ch, "@GCondition   @W: @D%d%s@n\n", GET_OBJ_VAL(obj, VAL_ALL_HEALTH), "%");
+                        ch->send_to("@GCondition   @W: @D%d%s@n\n", GET_OBJ_VAL(obj, VAL_ALL_HEALTH), "%");
         }
-        send_to_char(ch, "@GItem Size   @W:@w %s@n\n", size_names[GET_OBJ_SIZE(obj)]);
-        send_to_char(ch, "@GItem Weight @W: @w%s@n\n", add_commas(GET_OBJ_WEIGHT(obj)).c_str());
+                ch->send_to("@GItem Size   @W:@w %s@n\n", size_names[GET_OBJ_SIZE(obj)]);
+                ch->send_to("@GItem Weight @W: @w%s@n\n", add_commas(GET_OBJ_WEIGHT(obj)).c_str());
         if (OBJ_FLAGGED(obj, ITEM_SLOT1) && !OBJ_FLAGGED(obj, ITEM_SLOTS_FILLED)) {
-            send_to_char(ch, "GToken Slots  @W: @m0/1@n\n");
+                        ch->sendText("GToken Slots  @W: @m0/1@n\n");
         } else if (OBJ_FLAGGED(obj, ITEM_SLOT1) && OBJ_FLAGGED(obj, ITEM_SLOTS_FILLED)) {
-            send_to_char(ch, "GToken Slots  @W: @m1/1@n\n");
+                        ch->sendText("GToken Slots  @W: @m1/1@n\n");
         } else if (OBJ_FLAGGED(obj, ITEM_SLOT2) && !OBJ_FLAGGED(obj, ITEM_SLOT_ONE) &&
                    !OBJ_FLAGGED(obj, ITEM_SLOTS_FILLED)) {
-            send_to_char(ch, "GToken Slots  @W: @m0/2@n\n");
+                        ch->sendText("GToken Slots  @W: @m0/2@n\n");
         } else if (OBJ_FLAGGED(obj, ITEM_SLOT2) && OBJ_FLAGGED(obj, ITEM_SLOT_ONE) &&
                    !OBJ_FLAGGED(obj, ITEM_SLOTS_FILLED)) {
-            send_to_char(ch, "GToken Slots  @W: @m1/2@n\n");
+                        ch->sendText("GToken Slots  @W: @m1/2@n\n");
         } else if (OBJ_FLAGGED(obj, ITEM_SLOT2) && !OBJ_FLAGGED(obj, ITEM_SLOTS_FILLED)) {
-            send_to_char(ch, "GToken Slots  @W: @m2/2@n\n");
+                        ch->sendText("GToken Slots  @W: @m2/2@n\n");
         }
         char bits[MAX_STRING_LENGTH];
         sprintf(bits, "%s", GET_OBJ_WEAR(obj).getFlagNames().c_str());
         search_replace(bits, "TAKE", "");
-        send_to_char(ch, "@GWear Loc.   @W:@w%s\n", bits);
+                ch->send_to("@GWear Loc.   @W:@w%s\n", bits);
         if (GET_OBJ_TYPE(obj) == ITEM_WEAPON) {
             auto wlvl = obj->getBaseStat<int64_t>(VAL_WEAPON_LEVEL);
             if (wlvl == 1) {
-                send_to_char(ch, "@GWeapon Level@W: @D[@C1@D]\n@GDamage Bonus@W: @D[@w5%s@D]@n\r\n", "%");
+                                ch->send_to("@GWeapon Level@W: @D[@C1@D]\n@GDamage Bonus@W: @D[@w5%s@D]@n\r\n", "%");
             } else if (wlvl == 2) {
-                send_to_char(ch, "@GWeapon Level@W: @D[@C2@D]\n@GDamage Bonus@W: @D[@w10%s@D]@n\r\n", "%");
+                                ch->send_to("@GWeapon Level@W: @D[@C2@D]\n@GDamage Bonus@W: @D[@w10%s@D]@n\r\n", "%");
             } else if (wlvl == 3) {
-                send_to_char(ch, "@GWeapon Level@W: @D[@C3@D]\n@GDamage Bonus@W: @D[@w20%s@D]@n\r\n", "%");
+                                ch->send_to("@GWeapon Level@W: @D[@C3@D]\n@GDamage Bonus@W: @D[@w20%s@D]@n\r\n", "%");
             } else if (wlvl == 4) {
-                send_to_char(ch, "@GWeapon Level@W: @D[@C4@D]\n@GDamage Bonus@W: @D[@w30%s@D]@n\r\n", "%");
+                                ch->send_to("@GWeapon Level@W: @D[@C4@D]\n@GDamage Bonus@W: @D[@w30%s@D]@n\r\n", "%");
             } else if (wlvl == 5) {
-                send_to_char(ch, "@GWeapon Level@W: @D[@C5@D]\n@GDamage Bonus@W: @D[@w50%s@D]@n\r\n", "%");
+                                ch->send_to("@GWeapon Level@W: @D[@C5@D]\n@GDamage Bonus@W: @D[@w50%s@D]@n\r\n", "%");
             }
         }
-        send_to_char(ch, "@GItem Bonuses@W:@w");
+                ch->sendText("@GItem Bonuses@W:@w");
         for (i = 0; i < MAX_OBJ_AFFECT; i++) {
             if (obj->affected[i].modifier) {
                 sprinttype(obj->affected[i].location, apply_types, buf, sizeof(buf));
-                send_to_char(ch, "%s %+f to %s", found++ ? "," : "", obj->affected[i].modifier, buf);
+                                ch->send_to("%s %+f to %s", found++ ? "," : "", obj->affected[i].modifier, buf);
                 switch (obj->affected[i].location) {
                     case APPLY_SKILL:
-                        send_to_char(ch, " (%s)", spell_info[obj->affected[i].specific].name);
+                                                ch->send_to(" (%s)", spell_info[obj->affected[i].specific].name);
                         break;
                 }
             }
         }
         if (!found)
-            send_to_char(ch, " None@n");
+                        ch->sendText(" None@n");
         else
-            send_to_char(ch, "@n");
+                        ch->sendText("@n");
         char buf2[MAX_STRING_LENGTH];
         sprintf(buf2, "%s", GET_OBJ_PERM(obj).getFlagNames().c_str());
-        send_to_char(ch, "\n@GSpecial     @W:@w %s", buf2);
-        send_to_char(ch, "\n@c---------------------------------------------------------------@n\n");
+                ch->send_to("\n@GSpecial     @W:@w %s", buf2);
+                ch->sendText("\n@c---------------------------------------------------------------@n\n");
     }
 }
 
@@ -843,11 +843,11 @@ static void shopping_buy(char *arg, struct char_data *ch, struct char_data *keep
         }
     }
     if (IS_CARRYING_N(ch) + 1 > CAN_CARRY_N(ch)) {
-        send_to_char(ch, "%s: You can't carry any more items.\r\n", fname(obj->getName()));
+                ch->send_to("%s: You can't carry any more items.\r\n", fname(obj->getName()));
         return;
     }
     if (!ch->canCarryWeight(obj)) {
-        send_to_char(ch, "%s: You can't carry that much weight.\r\n", fname(obj->getName()));
+                ch->send_to("%s: You can't carry that much weight.\r\n", fname(obj->getName()));
         return;
     }
     while (obj && (GET_GOLD(ch) >= buy_price(obj, shop_nr, keeper, ch) || ADM_FLAGGED(ch, ADM_MONEY))
@@ -860,7 +860,7 @@ static void shopping_buy(char *arg, struct char_data *ch, struct char_data *keep
         if (shop_producing(obj, shop_nr)) {
             obj = read_object(GET_OBJ_RNUM(obj), REAL);
         } else {
-            obj_from_char(obj);
+            obj->clearLocation();
             SHOP_SORT(shop_nr)--;
         }
         obj_to_char(obj, ch);
@@ -916,7 +916,7 @@ static void shopping_buy(char *arg, struct char_data *ch, struct char_data *keep
     snprintf(tempbuf, sizeof(tempbuf), shop_index.at(shop_nr).message_buy, GET_NAME(ch), goldamt);
     do_tell(keeper, tempbuf, cmd_tell, 0);
 
-    send_to_char(ch, "You now have %s.\r\n", tempstr);
+        ch->send_to("You now have %s.\r\n", tempstr);
     auto& sh = shop_index.at(shop_nr);
     if (sh.shop_flags.get(ShopFlag::bank_money))
         if (GET_GOLD(keeper) > MAX_OUTSIDE_BANK) {
@@ -1020,7 +1020,7 @@ static void shopping_sell(char *arg, struct char_data *ch, struct char_data *kee
         goldamt += charged;
         keeper->modBaseStat("money_carried", -charged);
         sold++;
-        obj_from_char(obj);
+    obj->clearLocation();
         obj = get_selling_obj(ch, name, keeper, shop_nr, false);
     }
 
@@ -1043,12 +1043,12 @@ static void shopping_sell(char *arg, struct char_data *ch, struct char_data *kee
     snprintf(tempbuf, sizeof(tempbuf), shop_index.at(shop_nr).message_sell, GET_NAME(ch), goldamt);
     do_tell(keeper, tempbuf, cmd_tell, 0);
 
-    send_to_char(ch, "The shopkeeper gives you %s zenni.\r\n", add_commas(goldamt).c_str());
+        ch->send_to("The shopkeeper gives you %s zenni.\r\n", add_commas(goldamt).c_str());
     if (GET_GOLD(ch) + goldamt > GOLD_CARRY(ch)) {
         goldamt = (GET_GOLD(ch) + goldamt) - GOLD_CARRY(ch);
         ch->setBaseStat("money_carried", GOLD_CARRY(ch));
         ch->modBaseStat("money_bank", goldamt);
-        send_to_char(ch, "You couldn't hold all of the money. The rest was deposited for you.\r\n");
+                ch->sendText("You couldn't hold all of the money. The rest was deposited for you.\r\n");
     } else {
         ch->modBaseStat("money_carried", goldamt);
     }
@@ -1175,9 +1175,9 @@ static void shopping_list(char *arg, struct char_data *ch, struct char_data *kee
             }
     lindex++;
     if (!last_obj)    /* we actually have nothing in our list for sale, period */
-        send_to_char(ch, "Currently, there is nothing for sale.\r\n");
+                ch->sendText("Currently, there is nothing for sale.\r\n");
     else if (*name && !found)    /* nothing the char was looking for was found */
-        send_to_char(ch, "Presently, none of those are for sale.\r\n");
+                ch->sendText("Presently, none of those are for sale.\r\n");
     else {
         char zen[80];
         if (!*name || isname(name, last_obj->getName()))    /* show last obj */
@@ -1189,7 +1189,8 @@ static void shopping_list(char *arg, struct char_data *ch, struct char_data *kee
             sprintf(zen, "@W[@wYour Zenni@D: @Y%s@W]", add_commas(GET_GOLD(ch)).c_str());
             strncat(buf, zen, sizeof(buf) - len - 1);
         }
-        write_to_output(ch->desc, buf);
+        if (ch->desc)
+            ch->desc->send_to("%s", buf);
     }
 }
 
@@ -1226,7 +1227,7 @@ SPECIAL(shop_keeper) {
             SHOP_SORT(shop_nr) = 0;    /* Safety in case "drop all" */
         return (false);
     }
-    if (!ok_shop_room(shop_nr, ch->getRoomVnum()))
+    if (!ok_shop_room(shop_nr, ch->location.getVnum()))
         return (0);
 
     if (!AWAKE(keeper))
@@ -1421,7 +1422,8 @@ static void list_all_shops(struct char_data *ch) {
                         customer_string(shop_nr, false));
     }
 
-    write_to_output(ch->desc, buf);
+    if (ch->desc)
+        ch->desc->send_to("%s", buf);
 }
 
 static void list_detailed_shop(struct char_data *ch, vnum shop_nr) {
@@ -1429,18 +1431,19 @@ static void list_detailed_shop(struct char_data *ch, vnum shop_nr) {
     int sindex, column;
     char *ptrsave;
 
-    send_to_char(ch, "Vnum:       [%5d], Rnum: [%5d]\r\n", SHOP_NUM(shop_nr), shop_nr + 1);
+        ch->send_to("Vnum:       [%5d], Rnum: [%5d]\r\n", SHOP_NUM(shop_nr), shop_nr + 1);
 
 
-    send_to_char(ch, "Rooms:      ");
+        ch->sendText("Rooms:      ");
     column = 12;    /* ^^^ strlen ^^^ */
+    sindex = 0; /* initialize before using in loop */
     auto& sh = shop_index.at(shop_nr);
 	for(auto r : sh.in_room) {
         char buf1[128];
         int linelen, temp;
 
         if (sindex) {
-            send_to_char(ch, ", ");
+                        ch->sendText(", ");
             column += 2;
         }
         auto room = get_room(r);
@@ -1451,36 +1454,32 @@ static void list_detailed_shop(struct char_data *ch, vnum shop_nr) {
         }
         /* Implementing word-wrapping: assumes screen-size == 80 */
         if (linelen + column >= 78 && column >= 20) {
-            send_to_char(ch, "\r\n            ");
+                        ch->sendText("\r\n            ");
             /* 12 is to line up with "Rooms:" printed first, and spaces above. */
             column = 12;
         }
 
-        if (!send_to_char(ch, "%s", buf1))
-            return;
-        column += linelen;
+    ch->sendText(buf1);
+    column += linelen;
+    sindex++;
     }
     if (sh.in_room.empty())
-        send_to_char(ch, "Rooms:      None!");
+                ch->sendText("Rooms:      None!");
 
-    send_to_char(ch, "\r\nShopkeeper: ");
+        ch->sendText("\r\nShopkeeper: ");
     if (sh.keeper != NOBODY) {
-        send_to_char(ch, "%s (#%d), Special Function: %s\r\n",
-                     mob_proto.at(SHOP_KEEPER(shop_nr)).short_description,
-                     sh.keeper,
-                     YESNO(SHOP_FUNC(shop_nr)));
+                ch->send_to("%s (#%d), Special Function: %s\r\n", mob_proto.at(SHOP_KEEPER(shop_nr)).short_description, sh.keeper, YESNO(SHOP_FUNC(shop_nr)));
 
         if ((k = get_char_num(sh.keeper)))
-            send_to_char(ch, "Coins:      [%9d], Bank: [%9d] (Total: %d)\r\n",
-                         GET_GOLD(k), SHOP_BANK(shop_nr), GET_GOLD(k) + SHOP_BANK(shop_nr));
+                        ch->send_to("Coins:      [%9d], Bank: [%9d] (Total: %d)\r\n", GET_GOLD(k), SHOP_BANK(shop_nr), GET_GOLD(k) + SHOP_BANK(shop_nr));
     } else
-        send_to_char(ch, "<NONE>\r\n");
+                ch->sendText("<NONE>\r\n");
 
 
-    send_to_char(ch, "Customers:  %s\r\n", (ptrsave = customer_string(shop_nr, true)) ? ptrsave : "None");
+        ch->send_to("Customers:  %s\r\n", (ptrsave = customer_string(shop_nr, true)) ? ptrsave : "None");
 
 
-    send_to_char(ch, "Produces:   ");
+        ch->sendText("Produces:   ");
     column = 12;    /* ^^^ strlen ^^^ */
     sindex = 0;
     for (auto &p : sh.producing) {
@@ -1489,7 +1488,7 @@ static void list_detailed_shop(struct char_data *ch, vnum shop_nr) {
         int linelen;
 
         if (sindex) {
-            send_to_char(ch, ", ");
+                        ch->sendText(", ");
             column += 2;
         }
         linelen = snprintf(buf1, sizeof(buf1), "%s (#%d)",
@@ -1498,19 +1497,19 @@ static void list_detailed_shop(struct char_data *ch, vnum shop_nr) {
 
         /* Implementing word-wrapping: assumes screen-size == 80 */
         if (linelen + column >= 78 && column >= 20) {
-            send_to_char(ch, "\r\n            ");
+                        ch->sendText("\r\n            ");
             /* 12 is to line up with "Produces:" printed first, and spaces above. */
             column = 12;
         }
 
-        if (!send_to_char(ch, "%s", buf1))
-            return;
-        column += linelen;
+    ch->sendText(buf1);
+    column += linelen;
+    sindex++;
     }
     if (!sindex)
-        send_to_char(ch, "Produces:   Nothing!");
+                ch->sendText("Produces:   Nothing!");
 
-    send_to_char(ch, "\r\nBuys:       ");
+        ch->sendText("\r\nBuys:       ");
     column = 12;    /* ^^^ strlen ^^^ */
     sindex = 0;
     for (auto &t : sh.type) {
@@ -1518,7 +1517,7 @@ static void list_detailed_shop(struct char_data *ch, vnum shop_nr) {
         size_t linelen;
 
         if (sindex) {
-            send_to_char(ch, ", ");
+                        ch->sendText(", ");
             column += 2;
         }
 
@@ -1529,29 +1528,26 @@ static void list_detailed_shop(struct char_data *ch, vnum shop_nr) {
 
         /* Implementing word-wrapping: assumes screen-size == 80 */
         if (linelen + column >= 78 && column >= 20) {
-            send_to_char(ch, "\r\n            ");
+                        ch->sendText("\r\n            ");
             /* 12 is to line up with "Buys:" printed first, and spaces above. */
             column = 12;
         }
 
-        if (!send_to_char(ch, "%s", buf1))
-            return;
+        ch->sendText(buf1);
         column += linelen;
         sindex++;
     }
     if (!sindex)
-        send_to_char(ch, "Buys:       Nothing!");
+                ch->sendText("Buys:       Nothing!");
 
-    send_to_char(ch, "\r\nBuy at:     [%4.2f], Sell at: [%4.2f], Open: [%d-%d, %d-%d]\r\n",
-                 SHOP_SELLPROFIT(shop_nr), SHOP_BUYPROFIT(shop_nr), SHOP_OPEN1(shop_nr),
-                 SHOP_CLOSE1(shop_nr), SHOP_OPEN2(shop_nr), SHOP_CLOSE2(shop_nr));
+        ch->send_to("\r\nBuy at:     [%4.2f], Sell at: [%4.2f], Open: [%d-%d, %d-%d]\r\n", SHOP_SELLPROFIT(shop_nr), SHOP_BUYPROFIT(shop_nr), SHOP_OPEN1(shop_nr), SHOP_CLOSE1(shop_nr), SHOP_OPEN2(shop_nr), SHOP_CLOSE2(shop_nr));
 
 
     /* Need a local buffer. */
     {
         char buf1[MAX_STRING_LENGTH];
         sprintf(buf1, "%s", shop_index.at(shop_nr).shop_flags.getFlagNames().c_str());
-        send_to_char(ch, "Bits:       %s\r\n", buf1);
+                ch->send_to("Bits:       %s\r\n", buf1);
     }
 }
 
@@ -1563,14 +1559,14 @@ void show_shops(struct char_data *ch, char *arg) {
     else {
         if (!strcasecmp(arg, ".")) {
             for (auto &sh : shop_index) {
-                if (ok_shop_room(sh.first, ch->getRoomVnum())) {
+                if (ok_shop_room(sh.first, ch->location.getVnum())) {
                     shop_nr = sh.first;
                     break;
                 }
             }
 
             if (shop_nr == NOTHING) {
-                send_to_char(ch, "This isn't a shop!\r\n");
+                                ch->sendText("This isn't a shop!\r\n");
                 return;
             }
         } else if (is_number(arg))
@@ -1579,7 +1575,7 @@ void show_shops(struct char_data *ch, char *arg) {
             shop_nr = NOTHING;
 
         if (!shop_index.count(shop_nr)) {
-            send_to_char(ch, "Illegal shop number.\r\n");
+                        ch->sendText("Illegal shop number.\r\n");
             return;
         }
         list_detailed_shop(ch, shop_nr);

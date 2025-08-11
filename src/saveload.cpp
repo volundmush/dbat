@@ -147,9 +147,9 @@ void from_json(const json& j, reset_com& r) {
 
 void to_json(json& j, const zone_data& z) {
     j["number"] = z.number;
-    if(z.name && std::strlen(z.name))
+    if(!z.name.empty())
         j["name"] = z.name;
-    if(z.builders && std::strlen(z.builders))
+    if(!z.builders.empty())
         j["builders"] = z.builders;
     if(z.lifespan)
         j["lifespan"] = z.lifespan;
@@ -175,9 +175,9 @@ void from_json(const json& j, zone_data& z) {
     if(j.contains("number"))
         z.number = j["number"];
     if(j.contains("name"))
-        z.name = strdup(j["name"].get<std::string>().c_str());
+        z.name = j["name"].get<std::string>();
     if(j.contains("builders"))
-        z.builders = strdup(j["builders"].get<std::string>().c_str());
+        z.builders = j["builders"].get<std::string>();
     if(j.contains("lifespan"))
         z.lifespan = j["lifespan"];
     if(j.contains("bot"))
@@ -782,7 +782,7 @@ void load_rooms(const std::filesystem::path& loc) {
         r->vn = id;
         units.emplace(id, r);
         world.emplace(id, r);
-        r->zone->rooms.insert(id);
+        r->zone->rooms.push_back(r);
         r->activate();
     }
 }
@@ -1269,10 +1269,9 @@ void from_json(const json& j, char_data& c) {
 static json serialize_char_location(char_data* ch) {
     auto j = json::object();
 
-    if(IS_NPC(ch)) {
-        j["in_room"] = ch->getRoomVnum();
-    } else {
-        auto r = ch->getRoomVnum() != NOWHERE ? ch->getRoomVnum() : ch->getBaseStat<room_vnum>("was_in_room");
+    // PCs have special handling. NPCs just use the normal approach.
+    if(!IS_NPC(ch)) {
+        auto r = ch->location.getVnum() != NOWHERE ? ch->location.getVnum() : ch->getBaseStat<room_vnum>("was_in_room");
         if(!ch->desc) {
             r = ch->getBaseStat<room_vnum>("load_room");
         }

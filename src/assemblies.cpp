@@ -26,31 +26,31 @@ void assemblyListToChar(struct char_data *pCharacter, int type) {
         basic_mud_log("SYSERR: assemblyListAssembliesToChar(): nullptr 'pCharacter'.");
         return;
     } else if (g_pAssemblyTable == nullptr) {
-        send_to_char(pCharacter, "No assemblies exist.\r\n");
+                pCharacter->sendText("No assemblies exist.\r\n");
         return;
     }
 
     /* Send out a "header" of sorts. */
     if(type == 0)
-        send_to_char(pCharacter, "The following assemblies exists:\r\n");
+                pCharacter->sendText("The following assemblies exists:\r\n");
     else
-        send_to_char(pCharacter, "Only displaying [%s]\r\n", item_types[type]);
+                pCharacter->send_to("Only displaying [%s]\r\n", item_types[type]);
 
     for (i = 0; i < g_lNumAssemblies; i++) {
         if ((lRnum = real_object(g_pAssemblyTable[i].lVnum)) < 0) {
-            send_to_char(pCharacter, "[-----] ***RESERVED***\r\n");
+                        pCharacter->sendText("[-----] ***RESERVED***\r\n");
             basic_mud_log("SYSERR: assemblyListToChar(): Invalid vnum #%ld in assembly table.", g_pAssemblyTable[i].lVnum);
         } else {
             if(type == 0 || type == static_cast<int>(obj_proto.at(lRnum).type_flag)) {
                 sprinttype(g_pAssemblyTable[i].uchAssemblyType, AssemblyTypes, szAssmType, sizeof(szAssmType));
                 sprintf(szBuffer, "[%5ld] %s (%s)\r\n", g_pAssemblyTable[i].lVnum,
                         obj_proto.at(lRnum).short_description, szAssmType);
-                send_to_char(pCharacter, szBuffer);
+                                pCharacter->sendText(szBuffer);
 
                 if(GET_ADMLEVEL(pCharacter) > 0) {
                     for (j = 0; j < g_pAssemblyTable[i].lNumComponents; j++) {
                         if ((lRnum = real_object(g_pAssemblyTable[i].pComponents[j].lVnum)) < 0) {
-                            send_to_char(pCharacter, " -----: ***RESERVED***\r\n");
+                                                        pCharacter->sendText(" -----: ***RESERVED***\r\n");
                             basic_mud_log("SYSERR: assemblyListToChar(): Invalid component vnum #%ld in assembly for vnum #%ld.",
                                 g_pAssemblyTable[i].pComponents[j].lVnum, g_pAssemblyTable[i].lVnum);
                         } else {
@@ -59,7 +59,7 @@ void assemblyListToChar(struct char_data *pCharacter, int type) {
                                     obj_proto.at(lRnum).short_description,
                                     (g_pAssemblyTable[i].pComponents[j].bExtract ? "Yes" : "No"),
                                     (g_pAssemblyTable[i].pComponents[j].bInRoom ? "Yes" : "No"));
-                            send_to_char(pCharacter, szBuffer);
+                                                        pCharacter->sendText(szBuffer);
                         }
                     }
                 }
@@ -138,13 +138,13 @@ bool assemblyCheckComponents(long lVnum, struct char_data *pCharacter, int extra
                 if ((ppComponentObjects[i] = pCharacter->location.findObjectVnum(lRnum)) == nullptr)
                     bOk = false;
                 else {
-                    obj_from_room(ppComponentObjects[i]);
+                    ppComponentObjects[i]->clearLocation();
                 }
             } else {
                 if ((ppComponentObjects[i] = pCharacter->findObjectVnum(lRnum)) == nullptr)
                     bOk = false;
                 else {
-                    obj_from_char(ppComponentObjects[i]);
+                    ppComponentObjects[i]->clearLocation();
                 }
             }
         }

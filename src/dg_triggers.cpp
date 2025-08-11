@@ -1083,6 +1083,7 @@ int command_wtrigger(char_data *actor, char *cmd, char *argument) {
         return 0;
 
     auto room = actor->getRoom();
+    if(!room) return 0;
     auto scripts = room->getScripts();
     for (const auto& t : filter_shared(scripts)) {
         if (!TRIGGER_CHECK(t, WTRIG_COMMAND))

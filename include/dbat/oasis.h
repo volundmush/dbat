@@ -639,8 +639,6 @@ extern void sedit_setup_existing(struct descriptor_data *d, vnum rshop_num);
 
 extern void sedit_save_internally(struct descriptor_data *d);
 
-extern void sedit_save_to_disk(int zone_num);
-
 extern void sedit_products_menu(struct descriptor_data *d);
 
 extern void sedit_compact_rooms_menu(struct descriptor_data *d);

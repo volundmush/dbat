@@ -59,8 +59,7 @@ bool tech_handle_charge(char_data *ch, char *arg, double minimum, double *attper
     if (*arg) {
         double adjust = (double) (atoi(arg)) * 0.01;
         if (adjust < 0.01 || adjust > 1.00) {
-            send_to_char(ch,
-                         "If you are going to supply a percentage of your charge to use then use an acceptable number (1-100)\r\n");
+                        ch->sendText("If you are going to supply a percentage of your charge to use then use an acceptable number (1-100)\r\n");
             return false;
         } else if (adjust < *attperc && adjust >= minimum) {
             *attperc = adjust;
@@ -79,7 +78,7 @@ bool tech_handle_targeting(char_data *ch, char *arg, char_data **vict, obj_data 
             *vict = FIGHTING(ch);
             return true;
         } else if (!(*obj = get_obj_in_list_vis(ch, arg, nullptr, ch->location.getObjects()))) {
-            send_to_char(ch, "Nothing around here by that name.\r\n");
+                        ch->sendText("Nothing around here by that name.\r\n");
             return false;
         }
         return true;
@@ -101,17 +100,17 @@ void tech_handle_fireshield(char_data *ch, char_data *vict, const std::string &p
         vict->modBaseStat<int>("last_attack", 1000);
         hurt(0, 0, vict, ch, nullptr, dmg, 0);
         if (GET_BONUS(ch, BONUS_FIREPRONE)) {
-            send_to_char(ch, "@RYou are extremely flammable and are burned by the attack!@n\r\n");
-            send_to_char(vict, "@RThey are easily burned!@n\r\n");
+                        ch->sendText("@RYou are extremely flammable and are burned by the attack!@n\r\n");
+                        vict->sendText("@RThey are easily burned!@n\r\n");
             ch->affect_flags.set(AFF_BURNED, true);
         } else if (GET_CON(ch) < axion_dice(0)) {
-            send_to_char(ch, "@RYou are badly burned!@n\r\n");
-            send_to_char(vict, "@RThey are burned!@n\r\n");
+                        ch->sendText("@RYou are badly burned!@n\r\n");
+                        vict->sendText("@RThey are burned!@n\r\n");
             ch->affect_flags.set(AFF_BURNED, true);
         }
     } else if (GET_HIT(vict) > 0 && !AFF_FLAGGED(vict, AFF_SPIRIT) && AFF_FLAGGED(vict, AFF_FIRESHIELD) &&
                (GET_BONUS(ch, BONUS_FIREPROOF) || IS_DEMON(ch))) {
-        send_to_char(vict, "@RThey appear to be fireproof!@n\r\n");
+                vict->sendText("@RThey appear to be fireproof!@n\r\n");
     }
 }
 

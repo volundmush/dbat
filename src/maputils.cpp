@@ -38,7 +38,7 @@ void ping_ship(int vnum, int vnum2) {
     }
 
     if (controls) {
-        send_to_location(controls, "@D[@RALERT@D: @YAn unknown radar signal has been detected!@D]@n");
+    controls->location.sendText("@D[@RALERT@D: @YAn unknown radar signal has been detected!@D]@n");
     }
 }
 
@@ -172,7 +172,7 @@ void printmap(int rnum, struct char_data *ch, int type, int vnum) {
     }
 
     if (type == 0) {
-        send_to_char(ch, "@b______________________________________________________________________@n\n");
+                ch->sendText("@b______________________________________________________________________@n\n");
     }
 
     for (y = coord.y - sightradius; y <= coord.y + sightradius; y++) {
@@ -267,10 +267,10 @@ void printmap(int rnum, struct char_data *ch, int type, int vnum) {
         lasty = false;
     }
 
-    send_to_char(ch, buf);
+        ch->sendText(buf);
     *buf2 = '\0';
     *buf = '\0';
     if (type == 0) {
-        send_to_char(ch, "\n@b______________________________________________________________________@n");
+                ch->sendText("\n@b______________________________________________________________________@n");
     }
 }

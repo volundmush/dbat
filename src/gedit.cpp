@@ -51,11 +51,11 @@ ACMD(do_oasis_gedit) {
     buf3 = two_arguments(argument, buf1, buf2);
 
     if (!*buf1) {
-        send_to_char(ch, "Specify a guild VNUM to edit.\r\n");
+                ch->sendText("Specify a guild VNUM to edit.\r\n");
         return;
     } else if (!isdigit(*buf1)) {
         if (strcasecmp("save", buf1) != 0) {
-            send_to_char(ch, "Yikes!  Stop that, someone will get hurt!\r\n");
+                        ch->sendText("Yikes!  Stop that, someone will get hurt!\r\n");
             return;
         }
 
@@ -73,7 +73,7 @@ ACMD(do_oasis_gedit) {
         }
 
         if (number == NOWHERE) {
-            send_to_char(ch, "Save which zone?\r\n");
+                        ch->sendText("Save which zone?\r\n");
             return;
         }
     }
@@ -90,8 +90,7 @@ ACMD(do_oasis_gedit) {
     for (d = descriptor_list; d; d = d->next) {
         if (STATE(d) == CON_GEDIT) {
             if (d->olc && OLC_NUM(d) == number) {
-                send_to_char(ch, "That guild is currently being edited by %s.\r\n",
-                             PERS(d->character, ch));
+                                ch->send_to("That guild is currently being edited by %s.\r\n", PERS(d->character, ch));
                 return;
             }
         }
@@ -117,7 +116,7 @@ ACMD(do_oasis_gedit) {
     /** Find the zone.                                                         **/
     /****************************************************************************/
     if ((OLC_ZNUM(d) = real_zone_by_thing(number)) == NOWHERE) {
-        send_to_char(ch, "Sorry, there is no zone for that number!\r\n");
+                ch->sendText("Sorry, there is no zone for that number!\r\n");
         delete d->olc;
         d->olc = nullptr;
         return;
@@ -138,8 +137,7 @@ ACMD(do_oasis_gedit) {
     }
 
     if (save) {
-        send_to_char(ch, "Saving all guilds in zone %d.\r\n",
-                     zone_table.at(OLC_ZNUM(d)).number);
+                ch->send_to("Saving all guilds in zone %d.\r\n", zone_table.at(OLC_ZNUM(d)).number);
         mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), true,
                "OLC: %s saves guild info for zone %d.",
                GET_NAME(ch), zone_table.at(OLC_ZNUM(d)).number);
@@ -206,22 +204,22 @@ void gedit_select_skills_menu(struct descriptor_data *d) {
     auto guilddata = OLC_GUILD(d);
     clear_screen(d);
 
-    write_to_output(d, "Skills known:\r\n");
+    d->sendText("Skills known:\r\n");
 
     for (i = 0; i < SKILL_TABLE_SIZE; i++) {
         if (spell_info[i].skilltype == SKTYPE_SKILL &&
             strcmp(spell_info[i].name, "!UNUSED!")) {
-            write_to_output(d, "@n[@c%-3s@n] %-3d %-20.20s  ",
-                            YESNO(guilddata->skills.get(i)), i, spell_info[i].name);
+            d->send_to("@n[@c%-3s@n] %-3d %-20.20s  ",
+                       YESNO(guilddata->skills.get(i)), i, spell_info[i].name);
             j++;
             found = 1;
         }
         if (found && !(j % 3)) {
             found = 0;
-            write_to_output(d, "\r\n");
+            d->sendText("\r\n");
         }
     }
-    write_to_output(d, "\r\nEnter skill num, 0 to quit:  ");
+    d->sendText("\r\nEnter skill num, 0 to quit:  ");
 
     OLC_MODE(d) = GEDIT_SELECT_SKILLS;
 }
@@ -235,22 +233,22 @@ void gedit_select_spells_menu(struct descriptor_data *d) {
     guilddata = OLC_GUILD(d);
     clear_screen(d);
 
-    write_to_output(d, "Spells known:\r\n");
+    d->sendText("Spells known:\r\n");
 
     for (i = 0; i < SKILL_TABLE_SIZE; i++) {
         if (IS_SET(spell_info[i].skilltype, SKTYPE_SPELL) &&
             strcmp(spell_info[i].name, "!UNUSED!")) {
-            write_to_output(d, "@n[@c%-3s@n] %-3d %-20.20s  ",
-                            YESNO(guilddata->skills.get(i)), i, spell_info[i].name);
+            d->send_to("@n[@c%-3s@n] %-3d %-20.20s  ",
+                       YESNO(guilddata->skills.get(i)), i, spell_info[i].name);
             j++;
             found = 1;
         }
         if (found && !(j % 3)) {
             found = 0;
-            write_to_output(d, "\r\n");
+            d->sendText("\r\n");
         }
     }
-    write_to_output(d, "\r\nEnter spell num, 0 to quit:  ");
+    d->sendText("\r\nEnter spell num, 0 to quit:  ");
 
     OLC_MODE(d) = GEDIT_SELECT_SPELLS;
 }
@@ -262,21 +260,21 @@ void gedit_select_feats_menu(struct descriptor_data *d) {
     auto guilddata = OLC_GUILD(d);
     clear_screen(d);
 
-    write_to_output(d, "Feats known:\r\n");
+    d->sendText("Feats known:\r\n");
 
     for (i = 0; i <= NUM_FEATS_DEFINED; i++) {
         if (feat_list[i].in_game) {
-            write_to_output(d, "@n[@c%-3s@n] %-3d %-20.20s  ",
-                            YESNO(guilddata->feats.count(i)), i, feat_list[i].name);
+            d->send_to("@n[@c%-3s@n] %-3d %-20.20s  ",
+                       YESNO(guilddata->feats.count(i)), i, feat_list[i].name);
             j++;
             found = 1;
         }
         if (found && !(j % 3)) {
             found = 0;
-            write_to_output(d, "\r\n");
+            d->sendText("\r\n");
         }
     }
-    write_to_output(d, "\r\nEnter feat num, 0 to quit:  ");
+    d->sendText("\r\nEnter feat num, 0 to quit:  ");
 
     OLC_MODE(d) = GEDIT_SELECT_FEATS;
 }
@@ -288,22 +286,22 @@ void gedit_select_lang_menu(struct descriptor_data *d) {
     auto guilddata = OLC_GUILD(d);
     clear_screen(d);
 
-    write_to_output(d, "Skills known:\r\n");
+    d->sendText("Skills known:\r\n");
 
     for (i = 0; i < SKILL_TABLE_SIZE; i++) {
         if (IS_SET(spell_info[i].skilltype, SKTYPE_LANG) &&
             strcmp(spell_info[i].name, "!UNUSED!")) {
-            write_to_output(d, "@n[@c%-3s@n] %-3d %-20.20s  ",
-                            YESNO(guilddata->skills.get(i)), i, spell_info[i].name);
+            d->send_to("@n[@c%-3s@n] %-3d %-20.20s  ",
+                       YESNO(guilddata->skills.get(i)), i, spell_info[i].name);
             j++;
             found = 1;
         }
         if (found && !(j % 3)) {
             found = 0;
-            write_to_output(d, "\r\n");
+            d->sendText("\r\n");
         }
     }
-    write_to_output(d, "\r\nEnter skill num, 0 to quit:  ");
+    d->sendText("\r\nEnter skill num, 0 to quit:  ");
 
     OLC_MODE(d) = GEDIT_SELECT_LANGS;
 }
@@ -315,22 +313,22 @@ void gedit_select_wp_menu(struct descriptor_data *d) {
     auto guilddata = OLC_GUILD(d);
     clear_screen(d);
 
-    write_to_output(d, "Skills known:\r\n");
+    d->sendText("Skills known:\r\n");
 
     for (i = 0; i < SKILL_TABLE_SIZE; i++) {
         if (IS_SET(spell_info[i].skilltype, SKTYPE_WEAPON) &&
             strcmp(spell_info[i].name, "!UNUSED!")) {
-            write_to_output(d, "@n[@c%-3s@n] %-3d %-20.20s  ",
-                            YESNO(guilddata->skills.get(i)), i, spell_info[i].name);
+            d->send_to("@n[@c%-3s@n] %-3d %-20.20s  ",
+                       YESNO(guilddata->skills.get(i)), i, spell_info[i].name);
             j++;
             found = 1;
         }
         if (found && !(j % 3)) {
             found = 0;
-            write_to_output(d, "\r\n");
+            d->sendText("\r\n");
         }
     }
-    write_to_output(d, "\r\nEnter skill num, 0 to quit:  ");
+    d->sendText("\r\nEnter skill num, 0 to quit:  ");
 
     OLC_MODE(d) = GEDIT_SELECT_WPS;
 }
@@ -346,13 +344,12 @@ void gedit_no_train_menu(struct descriptor_data *d) {
     clear_screen(d);
 
     for (i = 0; i < NUM_TRADERS; i++) {
-        write_to_output(d, "@g%2d@n) %-20.20s   %s", i + 1, trade_letters[i],
-                        !(++count % 2) ? "\r\n" : "");
+    d->send_to("@g%2d@n) %-20.20s   %s", i + 1, trade_letters[i],
+            !(++count % 2) ? "\r\n" : "");
     }
 
     //sprintbitarray(G_WITH_WHO(guilddata), trade_letters, sizeof(bits), bits);
-    write_to_output(d, "\r\nCurrent train flags: @c%s@n\r\n"
-                       "Enter choice, 0 to quit : ", bits);
+    d->send_to("\r\nCurrent train flags: @c%s@n\r\nEnter choice, 0 to quit : ", bits);
     OLC_MODE(d) = GEDIT_NO_TRAIN;
 }
 
@@ -369,7 +366,7 @@ void gedit_disp_menu(struct descriptor_data *d) {
 
     //sprintbitarray(G_WITH_WHO(guilddata), trade_letters, sizeof(buf1), buf1);
 
-    write_to_output(d,
+    d->send_to(
                     "-- Guild Number: [@c%d@n]\r\n"
                     "@g 0@n) Guild Master : [@c%d@n] @y%s\r\n"
                     "@g 1@n) Doesn't know skill:\r\n @y%s\r\n"
@@ -408,7 +405,7 @@ void gedit_parse(struct descriptor_data *d, char *arg) {
 
     if (OLC_MODE(d) > GEDIT_NUMERICAL_RESPONSE) {
         if (!isdigit(arg[0]) && ((*arg == '-') && (!isdigit(arg[1])))) {
-            write_to_output(d, "Field must be numerical, try again : ");
+            d->sendText("Field must be numerical, try again : ");
             return;
         }
     }
@@ -418,15 +415,15 @@ void gedit_parse(struct descriptor_data *d, char *arg) {
             switch (*arg) {
                 case 'y':
                 case 'Y':
-                    send_to_char(d->character, "Saving Guild to memory.\r\n");
+                                        d->character->sendText("Saving Guild to memory.\r\n");
                     gedit_save_internally(d);
                     mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(d->character)), true,
                            "OLC: %s edits guild %d", GET_NAME(d->character), OLC_NUM(d));
                     if (CONFIG_OLC_SAVE) {
                         gedit_save_to_disk(real_zone_by_thing(OLC_NUM(d)));
-                        write_to_output(d, "Guild %d saved to disk.\r\n", OLC_NUM(d));
+                        d->send_to("Guild %d saved to disk.\r\n", OLC_NUM(d));
                     } else
-                        write_to_output(d, "Guild %d saved to memory.\r\n", OLC_NUM(d));
+                        d->send_to("Guild %d saved to memory.\r\n", OLC_NUM(d));
                     cleanup_olc(d, CLEANUP_STRUCTS);
                     return;
                 case 'n':
@@ -434,7 +431,7 @@ void gedit_parse(struct descriptor_data *d, char *arg) {
                     cleanup_olc(d, CLEANUP_ALL);
                     return;
                 default:
-                    write_to_output(d, "Invalid choice!\r\nDo you wish to save the guild? : ");
+                    d->sendText("Invalid choice!\r\nDo you wish to save the guild? : ");
                     return;
             }
             break;
@@ -446,14 +443,14 @@ void gedit_parse(struct descriptor_data *d, char *arg) {
                 case 'q':
                 case 'Q':
                     if (OLC_VAL(d)) {        /*. Anything been changed? . */
-                        write_to_output(d, "Do you wish to save the changes to the Guild? (y/n) : ");
+                        d->sendText("Do you wish to save the changes to the Guild? (y/n) : ");
                         OLC_MODE(d) = GEDIT_CONFIRM_SAVESTRING;
                     } else
                         cleanup_olc(d, CLEANUP_ALL);
                     return;
                 case '0':
                     OLC_MODE(d) = GEDIT_TRAINER;
-                    write_to_output(d, "Enter vnum of guild master : ");
+                    d->sendText("Enter vnum of guild master : ");
                     return;
                 case '1':
                     OLC_MODE(d) = GEDIT_NO_SKILL;
@@ -465,12 +462,12 @@ void gedit_parse(struct descriptor_data *d, char *arg) {
                     break;
                 case '3':
                     OLC_MODE(d) = GEDIT_OPEN;
-                    write_to_output(d, "When does this shop open (a day has 28 hours) ? ");
+                    d->sendText("When does this shop open (a day has 28 hours) ? ");
                     i++;
                     break;
                 case '4':
                     OLC_MODE(d) = GEDIT_CLOSE;
-                    write_to_output(d, "When does this shop close (a day has 28 hours) ? ");
+                    d->sendText("When does this shop close (a day has 28 hours) ? ");
                     i++;
                     break;
                 case '5':
@@ -479,7 +476,7 @@ void gedit_parse(struct descriptor_data *d, char *arg) {
                     break;
                 case '6':
                     OLC_MODE(d) = GEDIT_MINLVL;
-                    write_to_output(d, "Minumum Level will Train: ");
+                    d->sendText("Minumum Level will Train: ");
                     i++;
                     return;
                 case '7':
@@ -512,11 +509,11 @@ void gedit_parse(struct descriptor_data *d, char *arg) {
             if (i == 0)
                 break;
             else if (i == 1)
-                write_to_output(d, "\r\nEnter new value : ");
+                d->sendText("\r\nEnter new value : ");
             else if (i == -1)
-                write_to_output(d, "\r\nEnter new text :\r\n] ");
+                d->sendText("\r\nEnter new text :\r\n] ");
             else
-                write_to_output(d, "Oops...\r\n");
+                d->sendText("Oops...\r\n");
             return;
 /*-------------------------------------------------------------------*/
             /*. String edits . */
@@ -535,7 +532,7 @@ void gedit_parse(struct descriptor_data *d, char *arg) {
                 i = atoi(arg);
                 if ((i = atoi(arg)) != -1)
                     if ((i = real_mobile(i)) == NOBODY) {
-                        write_to_output(d, "That mobile does not exist, try again : ");
+                        d->sendText("That mobile does not exist, try again : ");
                         return;
                     }
                 G_TRAINER(OLC_GUILD(d)) = i;
@@ -546,7 +543,7 @@ void gedit_parse(struct descriptor_data *d, char *arg) {
                 mob_index.at(i).func = guild;
                 break;
             } else {
-                write_to_output(d, "Invalid response.\r\n");
+                d->sendText("Invalid response.\r\n");
                 gedit_disp_menu(d);
                 return;
             }
@@ -622,7 +619,7 @@ void gedit_parse(struct descriptor_data *d, char *arg) {
             cleanup_olc(d, CLEANUP_ALL);
             mudlog(BRF, ADMLVL_BUILDER, true, "SYSERR: OLC: gedit_parse(): "
                                               "Reached default case!");
-            write_to_output(d, "Oops...\r\n");
+            d->sendText("Oops...\r\n");
             break;
     }
 /*-------------------------------------------------------------------*/

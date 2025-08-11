@@ -198,7 +198,7 @@ WCMD(do_wsend) {
 
 WCMD(do_wzoneecho) {
     zone_rnum zone;
-    char room_num[MAX_INPUT_LENGTH], buf[MAX_INPUT_LENGTH], *msg;
+    char room_num[MAX_INPUT_LENGTH], *msg;
 
     msg = any_one_arg(argument, room_num);
     skip_spaces(&msg);
@@ -210,8 +210,7 @@ WCMD(do_wzoneecho) {
         wld_log(room, "wzoneecho called for nonexistant zone");
 
     else {
-        sprintf(buf, "%s\r\n", msg);
-        send_to_zone(buf, zone);
+        room->zone->send_to("%s\r\n", msg);
     }
 }
 

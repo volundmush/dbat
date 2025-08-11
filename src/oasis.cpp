@@ -52,7 +52,7 @@ void free_config(struct config_data *data);
  */
 void clear_screen(struct descriptor_data *d) {
     if (PRF_FLAGGED(d->character, PRF_CLS))
-        write_to_output(d, "[H[J");
+        d->sendText("\x1B[H\x1B[J");
 }
 
 /* -------------------------------------------------------------------------- */
@@ -211,12 +211,7 @@ void cleanup_olc(struct descriptor_data *d, int8_t cleanup_type) {
      * Check for a zone.  cleanup_type is irrelevant here, free() everything.
      */
     if (OLC_ZONE(d)) {
-        if (OLC_ZONE(d)->builders)
-            free(OLC_ZONE(d)->builders);
-        if (OLC_ZONE(d)->name)
-            free(OLC_ZONE(d)->name);
-        OLC_ZONE(d)->cmd.clear();
-        free(OLC_ZONE(d));
+        delete OLC_ZONE(d);
     }
 
     /*
@@ -381,7 +376,7 @@ int can_edit_zone(struct char_data *ch, zone_rnum rnum) {
         return (true);
 
     /* always access if a player helped build the zone in the first place */
-    if (is_name(GET_NAME(ch), zone_table.at(rnum).builders))
+    if (is_name(GET_NAME(ch), zone_table.at(rnum).builders.c_str()))
         return (true);
 
     /* no access if you haven't been assigned a zone */
@@ -400,10 +395,10 @@ int can_edit_zone(struct char_data *ch, zone_rnum rnum) {
 }
 
 void send_cannot_edit(struct char_data *ch, zone_vnum zone) {
-    send_to_char(ch, "You do not have permission to edit zone %d.", zone);
+        ch->send_to("You do not have permission to edit zone %d.", zone);
     if (GET_OLC_ZONE(ch) != NOWHERE)
-        send_to_char(ch, "  Try zone %d.", GET_OLC_ZONE(ch));
-    send_to_char(ch, "\r\n");
+                ch->send_to("  Try zone %d.", GET_OLC_ZONE(ch));
+        ch->sendText("\r\n");
     mudlog(BRF, ADMLVL_IMPL, true, "OLC: %s tried to edit zone %d allowed zone %d",
            GET_NAME(ch), zone, GET_OLC_ZONE(ch));
 

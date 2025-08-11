@@ -191,7 +191,7 @@ OCMD(do_oforce) {
 
 OCMD(do_ozoneecho) {
     int zone;
-    char room_number[MAX_INPUT_LENGTH], buf[MAX_INPUT_LENGTH], *msg;
+    char room_number[MAX_INPUT_LENGTH], *msg;
 
     msg = any_one_arg(argument, room_number);
     skip_spaces(&msg);
@@ -203,8 +203,7 @@ OCMD(do_ozoneecho) {
         obj_log(obj, "ozoneecho called for nonexistant zone");
 
     else {
-        sprintf(buf, "%s\r\n", msg);
-        send_to_zone(buf, zone);
+        zone_table.at(zone).send_to("%s\r\n", msg);
     }
 }
 

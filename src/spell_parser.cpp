@@ -125,7 +125,7 @@ void mag_nextstrike(int level, struct char_data *caster, int spellnum) {
     if (!caster)
         return;
     if (caster->actq) {
-        send_to_char(caster, "You can't perform more than one special attack at a time!");
+                caster->sendText("You can't perform more than one special attack at a time!");
         return;
     }
     CREATE(caster->actq, struct queued_act, 1);
@@ -199,7 +199,7 @@ int call_magic(struct char_data *caster, struct char_data *cvict,
 
     if (caster->location.getRoomFlag(ROOM_PEACEFUL) && GET_ADMLEVEL(caster) < ADMLVL_IMPL &&
         (SINFO.violent || IS_SET(SINFO.routines, MAG_DAMAGE))) {
-        send_to_char(caster, "A flash of white light fills the room, dispelling your violent magic!\r\n");
+                caster->sendText("A flash of white light fills the room, dispelling your violent magic!\r\n");
         act("White light from no particular source suddenly fills the room, then vanishes.", false, caster, nullptr,
             nullptr, TO_ROOM);
         return (0);
@@ -320,7 +320,7 @@ void mag_objectmagic(struct char_data *ch, struct obj_data *obj,
                 act("$n taps $p three times on the ground.", false, ch, obj, nullptr, TO_ROOM);
 
             if (GET_OBJ_VAL(obj, VAL_STAFF_CHARGES) <= 0) {
-                send_to_char(ch, "It seems powerless.\r\n");
+                                ch->sendText("It seems powerless.\r\n");
                 act("Nothing seems to happen.", false, ch, obj, nullptr, TO_ROOM);
             } else {
                 MOD_OBJ_VAL(obj, VAL_STAFF_CHARGES, 1);
@@ -376,7 +376,7 @@ void mag_objectmagic(struct char_data *ch, struct obj_data *obj,
             }
 
             if (GET_OBJ_VAL(obj, VAL_WAND_CHARGES) <= 0) {
-                send_to_char(ch, "It seems powerless.\r\n");
+                                ch->sendText("It seems powerless.\r\n");
                 act("Nothing seems to happen.", false, ch, obj, nullptr, TO_ROOM);
                 return;
             }

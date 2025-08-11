@@ -68,11 +68,11 @@ int group_bonus(struct char_data *ch, int type) {
             } else {
                 if (type == 0) {
                     k->follower->modCurVitalDam(CharVital::lifeforce, -.25);
-                    send_to_char(k->follower, "@CIncensed by the death of your comrade your life force swells!@n");
+                                        k->follower->sendText("@CIncensed by the death of your comrade your life force swells!@n");
                     return (true);
                 } else if (type == 1) {
                     k->follower->modCurVitalDam(CharVital::lifeforce, -.4);
-                    send_to_char(k->follower, "@CIncensed by the death of your comrade your life force swells!@n");
+                                        k->follower->sendText("@CIncensed by the death of your comrade your life force swells!@n");
                     return (true);
                 } else if (type == 2) {
                     if (IS_ROSHI(ch)) {
@@ -906,7 +906,7 @@ void lifeforceSystem(uint64_t heartPulse, double deltaTime) {
             ch->modCurVitalDam(CharVital::lifeforce, 2);
         }
 
-        send_to_char(ch, "@YYour life force has kept you strong@n!\r\n");
+                ch->sendText("@YYour life force has kept you strong@n!\r\n");
 
     }
 }
@@ -999,7 +999,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
             hurt(0, 0, ch, GRAPPLING(ch), nullptr, damg, 0);
         }
         if (GRAPPLED(ch) && rand_number(1, 2) == 2) {
-            send_to_char(ch, "@CTry 'escape' to break free from the hold!@n\r\n");
+                        ch->sendText("@CTry 'escape' to break free from the hold!@n\r\n");
         }
         if (IS_HALFBREED(ch) && PLR_FLAGGED(ch, PLR_FURY)) {
             if (ch->modBaseStat<int>("rage_meter", 1) >= 1000) {
@@ -1007,12 +1007,12 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
                 ch->modCurVitalDam(CharVital::health, -.15);
                 ch->modCurVitalDam(CharVital::ki, -.15);
                 ch->modCurVitalDam(CharVital::stamina, -.15);
-                send_to_char(ch, "Your fury has called forth more of your hidden power and you feel better!\r\n");
+                                ch->sendText("Your fury has called forth more of your hidden power and you feel better!\r\n");
             }
         }
 
         if (!IS_NPC(ch) && GET_WIMP_LEV(ch) && GET_HIT(ch) < GET_WIMP_LEV(ch) && GET_HIT(ch) > 0 && FIGHTING(ch)) {
-            send_to_char(ch, "You wimp out, and attempt to flee!\r\n");
+                        ch->sendText("You wimp out, and attempt to flee!\r\n");
             do_flee(ch, nullptr, 0, 0);
         }
         if (IS_NPC(ch) && GET_HIT(ch) < GET_MAX_HIT(ch) / 10 && GET_HIT(ch) > 0 && FIGHTING(ch) &&
@@ -1025,7 +1025,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
             mutant_limb_regen(ch);
         }
         if (!IS_NPC(ch) && PLR_FLAGGED(ch, PLR_DISGUISED) && GET_SKILL(ch, SKILL_DISGUISE) < rand_number(1, 125)) {
-            send_to_char(ch, "Your disguise comes off because of your swift movements!\r\n");
+                        ch->sendText("Your disguise comes off because of your swift movements!\r\n");
             ch->player_flags.set(PLR_DISGUISED, false);
             act("@W$n's@W disguise comes off because of $s swift movements!@n", false, ch, nullptr, nullptr, TO_ROOM);
         }
@@ -1190,11 +1190,11 @@ void kiChargeSystem(uint64_t heartPulse, double deltaTime) {
         }
 
         if (ch->getCurVital(CharVital::ki) <= 0) {
-            send_to_char(ch, "You can not charge anymore, you have charged all your energy!\r\n");
+                        ch->sendText("You can not charge anymore, you have charged all your energy!\r\n");
             act("$n@w's aura grows calm.@n", true, ch, nullptr, nullptr, TO_ROOM);
             stopCharge = true;
         } else if (((GET_MAX_MANA(ch) * 0.01) * perc) >=(ch->getCurVital(CharVital::ki))) {
-            send_to_char(ch, "You have charged the last that you can.\r\n");
+                        ch->sendText("You have charged the last that you can.\r\n");
             act("$n@w's aura @Yflashes@w spectacularly, rushing upwards in torrents!@n", true, ch, nullptr, nullptr,
                 TO_ROOM);
             ch->modBaseStat<int64_t>("charge", ch->getCurVital(CharVital::ki));
@@ -1202,13 +1202,13 @@ void kiChargeSystem(uint64_t heartPulse, double deltaTime) {
             stopCharge = true;
         } else {
             if (GET_CHARGE(ch) >= GET_CHARGETO(ch)) {
-                send_to_char(ch, "You have already reached the maximum that you wished to charge.\r\n");
+                                ch->sendText("You have already reached the maximum that you wished to charge.\r\n");
                 act("$n@w's aura burns steadily.@n", true, ch, nullptr, nullptr, TO_ROOM);
                 stopCharge = true;
             } else if (GET_CHARGE(ch) + (((GET_MAX_MANA(ch) * 0.01) * perc) + 1) >= GET_CHARGETO(ch)) {
                 ch->modCurVital(CharVital::ki, -(GET_CHARGETO(ch) - GET_CHARGE(ch)));
                 ch->setBaseStat<int64_t>("charge", GET_CHARGETO(ch));
-                send_to_char(ch, "You stop charging as you reach the maximum that you wished to charge.\r\n");
+                                ch->sendText("You stop charging as you reach the maximum that you wished to charge.\r\n");
                 act("$n@w's aura flares up brightly and then burns steadily.@n", true, ch, nullptr, nullptr,
                     TO_ROOM);
                 stopCharge = true;
@@ -1219,16 +1219,16 @@ void kiChargeSystem(uint64_t heartPulse, double deltaTime) {
                     case 1:
                         act("$n@w's aura ripples magnificantly while growing brighter!@n", true, ch, nullptr,
                             nullptr, TO_ROOM);
-                        send_to_char(ch, "Your aura grows bright as you charge more ki.\r\n");
+                                                ch->sendText("Your aura grows bright as you charge more ki.\r\n");
                         break;
                     case 2:
                         act("$n@w's aura ripples with power as it grows larger!@n", true, ch, nullptr, nullptr,
                             TO_ROOM);
-                        send_to_char(ch, "Your aura ripples with power as you charge more ki.\r\n");
+                                                ch->sendText("Your aura ripples with power as you charge more ki.\r\n");
                         break;
                     case 3:
                         act("$n@w's aura throws sparks off violently!.@n", true, ch, nullptr, nullptr, TO_ROOM);
-                        send_to_char(ch, "Your aura throws sparks off violently as you charge more ki.\r\n");
+                                                ch->sendText("Your aura throws sparks off violently as you charge more ki.\r\n");
                         break;
                     default:
                         break;
@@ -1236,7 +1236,7 @@ void kiChargeSystem(uint64_t heartPulse, double deltaTime) {
                 if (GET_CHARGE(ch) >= GET_CHARGETO(ch)) {
                     ch->setBaseStat<int64_t>("charge", GET_CHARGETO(ch));
                     ch->modBaseStat<int64_t>("charge", GET_INT(ch));
-                    send_to_char(ch, "You have finished charging!\r\n");
+                                        ch->sendText("You have finished charging!\r\n");
                     act("$n@w's aura burns brightly and then evens out.@n", true, ch, nullptr, nullptr, TO_ROOM);
                     stopCharge = true;
                 }
@@ -1263,7 +1263,7 @@ void kiChargeSystem(uint64_t heartPulse, double deltaTime) {
         }
 
         if ((GET_POS(ch) == POS_SLEEPING || GET_POS(ch) == POS_RESTING)) {
-            send_to_char(ch, "You stop charging and release all your pent up energy!\r\n");
+                        ch->sendText("You stop charging and release all your pent up energy!\r\n");
             switch (rand_number(1, 3)) {
                 case 1:
                     act("$n@w's aura disappears.@n", true, ch, nullptr, nullptr, TO_ROOM);
@@ -1286,7 +1286,7 @@ void kiChargeSystem(uint64_t heartPulse, double deltaTime) {
         auto docharge = PLR_FLAGGED(ch, PLR_CHARGE);
         auto prefki = GET_PREFERENCE(ch) == PREFERENCE_KI;
         if (docharge && GET_BONUS(ch, BONUS_UNFOCUSED) > 0 && rand_number(1, 80) >= 70) {
-            send_to_char(ch, "You lose concentration due to your unfocused mind and release your charged energy!\r\n");
+                        ch->sendText("You lose concentration due to your unfocused mind and release your charged energy!\r\n");
             switch (rand_number(1, 3)) {
                 case 1:
                     act("$n@w's aura disappears.@n", true, ch, nullptr, nullptr, TO_ROOM);
@@ -1313,7 +1313,7 @@ void kiChargeSystem(uint64_t heartPulse, double deltaTime) {
             (!prefki || GET_CHARGE(ch) > GET_MAX_MANA(ch) * 0.1)) {
             if (GET_CHARGE(ch) >= GET_MAX_MANA(ch) / 100 && axion_dice(-10) > ch->getEffectiveStat("intelligence")) {
                 int64_t loss = 0;
-                send_to_char(ch, "You lose some of your energy slowly.\r\n");
+                                ch->sendText("You lose some of your energy slowly.\r\n");
                 switch (rand_number(1, 3)) {
                     case 1:
                         act("$n@w's aura flickers weakly.@n", true, ch, nullptr, nullptr, TO_ROOM);
@@ -1332,7 +1332,7 @@ void kiChargeSystem(uint64_t heartPulse, double deltaTime) {
                 loss = GET_CHARGE(ch) / 20;
                 ch->modBaseStat<int64_t>("charge", -loss);
             } else if (GET_CHARGE(ch) < GET_MAX_MANA(ch) / 100 && GET_CHARGE(ch) != 0) {
-                send_to_char(ch, "Your charged energy is completely gone as your aura fades.\r\n");
+                                ch->sendText("Your charged energy is completely gone as your aura fades.\r\n");
                 act("$n@w's aura fades away dimmly.@n", true, ch, nullptr, nullptr, TO_ROOM);
                 ch->setBaseStat<int64_t>("charge", 0);
             }
@@ -1465,7 +1465,7 @@ static void make_pcorpse(struct char_data *ch) {
     for (auto obj : filter_raw(ch->getObjects())) {
         if (GET_OBJ_VNUM(obj) < 19900 && GET_OBJ_VNUM(obj) != 17998) {
             if (!((GET_OBJ_VNUM(obj) >= 18800 && GET_OBJ_VNUM(obj) <= 18999) || (GET_OBJ_VNUM(obj) >= 19100 && GET_OBJ_VNUM(obj) <= 19199))) {
-                obj_from_char(obj);
+                obj->clearLocation();
                 obj_to_obj(obj, corpse);
             }
         }
@@ -1659,7 +1659,7 @@ static void make_corpse(struct char_data *ch, struct char_data *tch) {
                 }
 
                 if (repeats > 0) {
-                    send_to_char(tch, "The choice edible meat is preserved because of your skill.\r\n");
+                                        tch->sendText("The choice edible meat is preserved because of your skill.\r\n");
                 }
 
                 for (int ind = 0; ind < repeats; ind++) {
@@ -1698,14 +1698,14 @@ static void make_corpse(struct char_data *ch, struct char_data *tch) {
     if (MOB_FLAGGED(ch, MOB_HUSK)) {
         auto con = ch->getObjects();
         for (auto obj : filter_raw(con)) {
-            obj_from_char(obj);
+            obj->clearLocation();
             extract_obj(obj);
         }
     } else {
         /* transfer character's inventory to the corpse */
         auto con = ch->getObjects();
         for(auto o : filter_raw(con)) {
-            obj_from_char(o);
+            o->clearLocation();
             obj_to_obj(o, corpse);
         }
 
@@ -1872,10 +1872,10 @@ void raw_kill(struct char_data *ch, struct char_data *killer) {
                 if (IS_NPC(ch) && MOB_FLAGGED(ch, MOB_HUSK) && GET_PRACTICES(killer) > 50 &&
                     IS_BIO(ch)) {
                     psreward = 0;
-                    send_to_char(killer, "@D[@G+0 @BPS @cCapped at 50 for Absorb@D]@n\r\n");
+                                        killer->sendText("@D[@G+0 @BPS @cCapped at 50 for Absorb@D]@n\r\n");
                 } else {
                     killer->modPractices(psreward);
-                    send_to_char(killer, "@D[@G+%d @BPS@D]@n\r\n", psreward);
+                                        killer->send_to("@D[@G+%d @BPS@D]@n\r\n", psreward);
                 }
             }
         }
@@ -1886,7 +1886,7 @@ void raw_kill(struct char_data *ch, struct char_data *killer) {
             if (killer->subrace == SubRace::android_model_repair) {
                 
                 if (klevel > chlevel + 15) {
-                    send_to_char(killer, "@D[@G+0 @mUpgrade Point @r-WEAK-@D]@n\r\n");
+                                        killer->sendText("@D[@G+0 @mUpgrade Point @r-WEAK-@D]@n\r\n");
                 } else if (klevel > chlevel + 10) {
                     up = 3;
                 } else if (klevel > chlevel + 8) {
@@ -1900,7 +1900,7 @@ void raw_kill(struct char_data *ch, struct char_data *killer) {
                 }
             } else {
                 if (klevel > chlevel + 15) {
-                    send_to_char(killer, "@D[@G+0 @mUpgrade Point @r-WEAK-@D]@n\r\n");
+                                        killer->sendText("@D[@G+0 @mUpgrade Point @r-WEAK-@D]@n\r\n");
                 } else if (klevel > chlevel + 10) {
                     up = 5;
                 } else if (klevel > chlevel + 6) {
@@ -1915,7 +1915,7 @@ void raw_kill(struct char_data *ch, struct char_data *killer) {
             }
             if(up > 0) {
                 killer->modBaseStat<int>("upgrade_points", up);
-                send_to_char(killer, "@D[@G+%d @mUpgrade Points@D]@n\r\n", up);
+                                killer->send_to("@D[@G+%d @mUpgrade Points@D]@n\r\n", up);
             }
         }
         if (death_mtrigger(ch, killer))
@@ -1931,7 +1931,7 @@ void raw_kill(struct char_data *ch, struct char_data *killer) {
         if (IS_SHADOW_DRAGON1(ch)) {
             struct obj_data *obj = nullptr;
             SHADOW_DRAGON1 = -1;
-            send_to_location(ch, "@YThe one star dragon ball falls to the ground!@n\r\n");
+            ch->location.sendText("@YThe one star dragon ball falls to the ground!@n\r\n");
 
             obj = read_object(20, VIRTUAL);
             obj->setLocation(ch);
@@ -1939,7 +1939,7 @@ void raw_kill(struct char_data *ch, struct char_data *killer) {
         } else if (IS_SHADOW_DRAGON2(ch)) {
             struct obj_data *obj = nullptr;
             SHADOW_DRAGON2 = -1;
-            send_to_location(ch, "@YThe two star dragon ball falls to the ground!@n\r\n");
+            ch->location.sendText("@YThe two star dragon ball falls to the ground!@n\r\n");
 
             obj = read_object(21, VIRTUAL);
             obj->setLocation(ch);
@@ -1947,7 +1947,7 @@ void raw_kill(struct char_data *ch, struct char_data *killer) {
         } else if (IS_SHADOW_DRAGON3(ch)) {
             struct obj_data *obj = nullptr;
             SHADOW_DRAGON3 = -1;
-            send_to_location(ch, "@YThe three star dragon ball falls to the ground!@n\r\n");
+            ch->location.sendText("@YThe three star dragon ball falls to the ground!@n\r\n");
 
             obj = read_object(22, VIRTUAL);
             obj->setLocation(ch);
@@ -1955,7 +1955,7 @@ void raw_kill(struct char_data *ch, struct char_data *killer) {
         } else if (IS_SHADOW_DRAGON4(ch)) {
             struct obj_data *obj = nullptr;
             SHADOW_DRAGON4 = -1;
-            send_to_location(ch, "@YThe four star dragon ball falls to the ground!@n\r\n");
+            ch->location.sendText("@YThe four star dragon ball falls to the ground!@n\r\n");
 
             obj = read_object(23, VIRTUAL);
             obj->setLocation(ch);
@@ -1963,7 +1963,7 @@ void raw_kill(struct char_data *ch, struct char_data *killer) {
         } else if (IS_SHADOW_DRAGON5(ch)) {
             struct obj_data *obj = nullptr;
             SHADOW_DRAGON5 = -1;
-            send_to_location(ch, "@YThe five star dragon ball falls to the ground!@n\r\n");
+            ch->location.sendText("@YThe five star dragon ball falls to the ground!@n\r\n");
 
             obj = read_object(24, VIRTUAL);
             obj->setLocation(ch);
@@ -1971,7 +1971,7 @@ void raw_kill(struct char_data *ch, struct char_data *killer) {
         } else if (IS_SHADOW_DRAGON6(ch)) {
             struct obj_data *obj = nullptr;
             SHADOW_DRAGON6 = -1;
-            send_to_location(ch, "@YThe six star dragon ball falls to the ground!@n\r\n");
+            ch->location.sendText("@YThe six star dragon ball falls to the ground!@n\r\n");
 
             obj = read_object(25, VIRTUAL);
             obj->setLocation(ch);
@@ -1979,7 +1979,7 @@ void raw_kill(struct char_data *ch, struct char_data *killer) {
         } else if (IS_SHADOW_DRAGON7(ch)) {
             struct obj_data *obj = nullptr;
             SHADOW_DRAGON7 = -1;
-            send_to_location(ch, "@YThe seven star dragon ball falls to the ground!@n\r\n");
+            ch->location.sendText("@YThe seven star dragon ball falls to the ground!@n\r\n");
 
             obj = read_object(26, VIRTUAL);
             obj->setLocation(ch);
@@ -2040,18 +2040,18 @@ void raw_kill(struct char_data *ch, struct char_data *killer) {
                 ch->restore(false);
                 ch->teleport_to(17900);
                 android_lose = false;
-                send_to_char(ch, "You wake up and realise that you didn't die, how or why are a mystery.\r\n");
+                                ch->sendText("You wake up and realise that you didn't die, how or why are a mystery.\r\n");
                 break;
             case Past:
                 ch->restore(false);
                 ch->teleport_to(1561);
                 android_lose = false;
-                send_to_char(ch, "You wake up and realise that you died, but only in your mind.\r\n");
+                                ch->sendText("You wake up and realise that you died, but only in your mind.\r\n");
                 break;
             case Newbie:
                 ch->restore(false);
                 ch->teleport_to(sensei::getStartRoom(ch->sensei));
-                send_to_char(ch, "\r\n@RYou should beware, when you reach level 9, you will actually die. So you\r\n"
+                                ch->sendText("\r\n@RYou should beware, when you reach level 9, you will actually die. So you\r\n"
                                  "should learn to be more careful. Since when you die past that point and\r\n"
                                  "actually reach the afterlife you need to realise that being revived will\r\n"
                                  "not be very easy. So treat your character's dying with as much care as\r\n"
@@ -2063,7 +2063,7 @@ void raw_kill(struct char_data *ch, struct char_data *killer) {
             if (IS_ANDROID(ch) && ch->subrace != SubRace::android_model_absorb && android_lose && GET_UP(ch) > 5) {
                 int loss = GET_UP(ch) / 5;
                 ch->modBaseStat<int>("upgrade_points", -loss);
-                send_to_char(ch, "@rYou lose @R%s@r upgrade points!@n\r\n", add_commas(loss).c_str());
+                                ch->send_to("@rYou lose @R%s@r upgrade points!@n\r\n", add_commas(loss).c_str());
             }
         }
         WAIT_STATE(ch, PULSE_VIOLENCE);
@@ -2111,7 +2111,7 @@ void die(struct char_data *ch, struct char_data *killer) {
             if (ch->getRoomVnum() >= 2002 && ch->getRoomVnum() <= 2011) {
                 ch->setBaseStat("death_time", time(nullptr));
             } else if (ch->location.getWhereFlag(WhereFlag::afterlife) || ch->location.getRoomFlag(ROOM_HELL)) {
-                send_to_char(ch, "Your soul is saved from destruction by King Yemma. Why? Who knows.\r\n");
+                                ch->sendText("Your soul is saved from destruction by King Yemma. Why? Who knows.\r\n");
             } else if (IN_ARENA(ch)) {
                 cleanup_arena_watch(ch);
                 if (killer) {
@@ -2123,7 +2123,7 @@ void die(struct char_data *ch, struct char_data *killer) {
                 } else {
                     send_to_all("@R%s@r dies in the water of the Arena and is disqualified!@n\r\n", GET_NAME(ch));
                 }
-                char_from_room(ch);
+                ch->clearLocation();
                 char_to_room(ch, real_room(17875));
                 ch->modCurVitalDam(CharVital::health, 1);
                 ch->lookAtLocation();
@@ -2202,7 +2202,7 @@ static void perform_group_gain(struct char_data *ch, int base, struct char_data 
             }
         }
         if (checkit == false) {
-            send_to_char(ch, "@RYou didn't do most of the work for this kill.@n\r\n");
+                        ch->sendText("@RYou didn't do most of the work for this kill.@n\r\n");
             share = 1;
         }
     }
@@ -2237,32 +2237,31 @@ static void perform_group_gain(struct char_data *ch, int base, struct char_data 
         share += (share * 0.02) * ((GET_GROUPKILLS(ch) + 1) / 20);
     }
     if (group_bonus(ch, 2) == 2) {
-        send_to_char(ch, "You receive a bonus from your group's leader! @D[@G+2 PS!@D]@n\r\n");
+                ch->sendText("You receive a bonus from your group's leader! @D[@G+2 PS!@D]@n\r\n");
         ch->modPractices(2);
     } else if (group_bonus(ch, 2) == 3) {
-        send_to_char(ch, "You receive a bonus from your group's leader! @D[@G+5%s Exp!@D]@n\r\n", "%");
+                ch->send_to("You receive a bonus from your group's leader! @D[@G+5%s Exp!@D]@n\r\n", "%");
         share += share * 0.05;
     } else if (group_bonus(ch, 2) == 5) {
         ch->modCurVitalDam(CharVital::ki, -.04);
-        send_to_char(ch, "You receive a bonus from your group's leader! @D[@G4%s Ki Regenerated!@D]@n\r\n", "%");
+                ch->send_to("You receive a bonus from your group's leader! @D[@G4%s Ki Regenerated!@D]@n\r\n", "%");
     } else if (group_bonus(ch, 2) == 6) {
         ch->modCurVitalDam(CharVital::ki, -.02);
         ch->modCurVitalDam(CharVital::stamina, -.02);
         ch->modCurVitalDam(CharVital::health, -.02);
-        send_to_char(ch, "You receive a bonus from your group's leader! @D[@G2%s PL/ST/Ki Regenerated!@D]@n\r\n", "%");
+                ch->send_to("You receive a bonus from your group's leader! @D[@G2%s PL/ST/Ki Regenerated!@D]@n\r\n", "%");
     } else if (group_bonus(ch, 2) == 7) {
         if (IS_ANDROID(ch)) {
             if (leader->subrace == SubRace::android_model_absorb) {
                 ch->modCurVitalDam(CharVital::ki, -.02);
                 ch->modCurVitalDam(CharVital::stamina, -.02);
-                send_to_char(ch, "You receive a bonus from your group's leader! @D[@G2%s PL/ST/Ki Recovered!@D]@n\r\n",
-                             "%");
+                                ch->send_to("You receive a bonus from your group's leader! @D[@G2%s PL/ST/Ki Recovered!@D]@n\r\n", "%");
             } else if (leader->subrace == SubRace::android_model_repair) {
                 ch->modCurVitalDam(CharVital::health, -.02);
-                send_to_char(ch, "You receive a bonus from your group's leader! @D[@G5%s PL Repaired@D]@n\r\n", "%");
+                                ch->send_to("You receive a bonus from your group's leader! @D[@G5%s PL Repaired@D]@n\r\n", "%");
             } else if (leader->subrace == SubRace::android_model_sense && !(ch->subrace == SubRace::android_model_absorb)) {
                 ch->modBaseStat<int>("upgrade_points", 5);
-                send_to_char(ch, "You receive a bonus from your group's leader! @D[@G+5 @mUpgrade Points@D]@n\r\n");
+                                ch->sendText("You receive a bonus from your group's leader! @D[@G+5 @mUpgrade Points@D]@n\r\n");
             }
         } else {
             ch->modCurVitalDam(CharVital::health, -.01);
@@ -2271,21 +2270,21 @@ static void perform_group_gain(struct char_data *ch, int base, struct char_data 
         }
     } else if (group_bonus(ch, 2) == 11) {
         ch->modCurVitalDam(CharVital::stamina, -.04);
-        send_to_char(ch, "You receive a bonus from your group's leader! @D[@G4%s ST Regenerated!@D]@n\r\n", "%");
+                ch->send_to("You receive a bonus from your group's leader! @D[@G4%s ST Regenerated!@D]@n\r\n", "%");
     } else if (group_bonus(ch, 2) == 13) {
         if (GET_PHASE(leader) == 1) {
             share += share * 0.05;
-            send_to_char(ch, "You receive a bonus from your group's leader! @D[@G+5%s Exp!@D]@n\r\n", "%");
+                        ch->send_to("You receive a bonus from your group's leader! @D[@G+5%s Exp!@D]@n\r\n", "%");
         } else if (GET_PHASE(leader) == 2) {
             share += share * 0.1;
-            send_to_char(ch, "You receive a bonus from your group's leader! @D[@G+10%s Exp!@D]@n\r\n", "%");
+                        ch->send_to("You receive a bonus from your group's leader! @D[@G+10%s Exp!@D]@n\r\n", "%");
         }
     }
     share = gear_exp(ch, share);
     if (share > 1)
-        send_to_char(ch, "You receive your share of experience -- %s points.\r\n", add_commas(share).c_str());
+                ch->send_to("You receive your share of experience -- %s points.\r\n", add_commas(share).c_str());
     else
-        send_to_char(ch, "You receive your share of experience -- one measly little point!\r\n");
+                ch->sendText("You receive your share of experience -- one measly little point!\r\n");
 
     ch->modExperience(share);
     /*change_alignment(ch, victim);*/
@@ -2352,9 +2351,9 @@ void group_gain(struct char_data *ch, struct char_data *victim) {
       perform_group_gain(k, base, victim);
      } else {
       if (k == ch) {
-       send_to_char(ch, "You can not group gain while your powerlevel is weighted down more than half of your max.\r\n");
+              ch->sendText("You can not group gain while your powerlevel is weighted down more than half of your max.\r\n");
       } else {
-       send_to_char(ch, "You can not group gain while your powerlevel is weighted down more than half of the leader's adjusted powerlevel.\r\n");
+              ch->sendText("You can not group gain while your powerlevel is weighted down more than half of the leader's adjusted powerlevel.\r\n");
       }
      }
     }
@@ -2402,7 +2401,7 @@ void solo_gain(struct char_data *ch, struct char_data *victim) {
         }
     }
     if (LASTHIT(victim) != 0 && LASTHIT(victim) != GET_IDNUM(ch)) {
-        send_to_char(ch, "@RYou didn't do most of the work for this victory.@n\r\n");
+                ch->sendText("@RYou didn't do most of the work for this victory.@n\r\n");
         exp = 1;
     }
     if (IS_NPC(victim) && MOB_FLAGGED(victim, MOB_HUSK)) {
@@ -2427,9 +2426,9 @@ void solo_gain(struct char_data *ch, struct char_data *victim) {
     exp = MAX(exp, 1);
 
     if (exp > 1)
-        send_to_char(ch, "You receive %s experience points.\r\n", add_commas(exp).c_str());
+                ch->send_to("You receive %s experience points.\r\n", add_commas(exp).c_str());
     else {
-        send_to_char(ch, "You receive one lousy experience point. That fight was hardly worth it...\r\n");
+                ch->sendText("You receive one lousy experience point. That fight was hardly worth it...\r\n");
     }
     if (!IS_NPC(ch)) {
         ch->modExperience(exp);

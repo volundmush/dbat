@@ -28,8 +28,6 @@ extern void modify_string(char **str, char *newstr);
 
 extern int add_shop(struct shop_data *shop);
 
-extern int save_shops(zone_rnum zone_num);
-
 extern shop_rnum real_shop(shop_vnum vnum);
 
 /*

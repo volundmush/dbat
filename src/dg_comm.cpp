@@ -117,7 +117,7 @@ void sub_write_to_char(struct char_data *ch, char *tokens[],
     strcat(sb, tokens[i]);
     strcat(sb, "\r\n");
     sb[0] = toupper(sb[0]);
-    send_to_char(ch, "%s", sb);
+        ch->send_to("%s", sb);
 }
 
 
@@ -192,23 +192,6 @@ void sub_write(char *arg, struct char_data *ch, int8_t find_invis, int targets) 
     }
 }
 
-void send_to_zone(char *messg, zone_data *zone) {
-
-    if (!messg || !*messg)
-        return;
-
-    for (auto i = descriptor_list; i; i = i->next)
-        if (!i->connected && i->character && AWAKE(i->character) &&
-            i->character->location &&
-            (i->character->location.getZone() == zone))
-            write_to_output(i, "%s", messg);
-}
-
-void send_to_zone(char *messg, zone_rnum zone) {
-    auto &z = zone_table.at(zone);
-    send_to_zone(messg, &z);
-}
-
 void fly_planet(room_vnum roomVnum, const char *messg, struct char_data *ch) {
     if (!messg || !*messg)
         return;
@@ -229,10 +212,10 @@ void fly_planet(room_vnum roomVnum, const char *messg, struct char_data *ch) {
         if(planet != getPlanet(i->character->getRoomVnum())) continue;
 
         if (PLR_FLAGGED(i->character, PLR_DISGUISED)) {
-            write_to_output(i, "A disguised figure %s", messg);
+            i->send_to("A disguised figure %s", messg);
         } else {
-            write_to_output(i, "%s%s %s", readIntro(i->character, ch) == 1 ? "" : "A ",
-                            get_i_name(i->character, ch), messg);
+            i->send_to("%s%s %s", readIntro(i->character, ch) == 1 ? "" : "A ",
+                       get_i_name(i->character, ch), messg);
         }
     }
 }
@@ -245,10 +228,10 @@ void fly_zone(zone_data *zone, char *messg, struct char_data *ch) {
         if (!i->connected && i->character && AWAKE(i->character) && OUTSIDE(i->character) &&
             (i->character->location.getZone() == zone) && i->character != ch) {
             if (PLR_FLAGGED(i->character, PLR_DISGUISED)) {
-                write_to_output(i, "A disguised figure %s", messg);
+                i->send_to("A disguised figure %s", messg);
             } else {
-                write_to_output(i, "%s%s %s", readIntro(i->character, ch) == 1 ? "" : "A ",
-                                get_i_name(i->character, ch), messg);
+                i->send_to("%s%s %s", readIntro(i->character, ch) == 1 ? "" : "A ",
+                           get_i_name(i->character, ch), messg);
             }
         }
     }
@@ -303,18 +286,18 @@ void send_to_sense(int type, const char *messg, struct char_data *ch) {
             auto maxch = GET_MAX_HIT(ch);
             auto maxtch = GET_MAX_HIT(tch);
             if (maxch > maxtch) {
-                write_to_output(i, "%s who is stronger than you. They are nearby.\r\n", messg);
+                i->send_to("%s who is stronger than you. They are nearby.\r\n", messg);
             } else if (maxch >= maxtch * .9) {
-                write_to_output(i, "%s who is near your strength. They are nearby.\r\n", messg);
+                i->send_to("%s who is near your strength. They are nearby.\r\n", messg);
             } else if (maxch >= maxtch * .6) {
-                write_to_output(i, "%s who is a good bit weaker than you. They are nearby.\r\n", messg);
+                i->send_to("%s who is a good bit weaker than you. They are nearby.\r\n", messg);
             } else if (maxch >= maxtch * .4) {
-                write_to_output(i, "%s who is a lot weaker than you. They are nearby.\r\n", messg);
+                i->send_to("%s who is a lot weaker than you. They are nearby.\r\n", messg);
             }
             if (readIntro(tch, ch) == 1) {
-                write_to_output(i, "@YYou recognise this signal as @y%s@Y!@n\r\n", get_i_name(tch, ch));
+                i->send_to("@YYou recognise this signal as @y%s@Y!@n\r\n", get_i_name(tch, ch));
             } else if (read_sense_memory(ch, tch)) {
-                write_to_output(i, "@YYou recognise this signal, but don't seem to know their name.@n\r\n");
+                i->sendText("@YYou recognise this signal, but don't seem to know their name.@n\r\n");
             }
         } else if (planet_check(ch, tch)) {
             char power[MAX_INPUT_LENGTH];
@@ -357,11 +340,11 @@ void send_to_sense(int type, const char *messg, struct char_data *ch) {
                 sprintf(align, ", with a @rd@De@Wv@wil@Wi@Ds@rh@Y aura,");
             }
             if (strstr(messg, "land"))
-                write_to_output(i, "@YYou sense %s%s%s %s! They appear to have landed at...@G%s@n\r\n",
-                                readIntro(tch, ch) == 1 ? get_i_name(tch, ch) : "someone", power, align, messg, sense_location(ch));
+                i->send_to("@YYou sense %s%s%s %s! They appear to have landed at...@G%s@n\r\n",
+                            readIntro(tch, ch) == 1 ? get_i_name(tch, ch) : "someone", power, align, messg, sense_location(ch));
             else
-                write_to_output(i, "@YYou sense %s%s%s %s!@n\r\n",
-                                readIntro(tch, ch) == 1 ? get_i_name(tch, ch) : "someone", power, align, messg);
+                i->send_to("@YYou sense %s%s%s %s!@n\r\n",
+                            readIntro(tch, ch) == 1 ? get_i_name(tch, ch) : "someone", power, align, messg);
         }
     }
 }
@@ -405,29 +388,29 @@ void send_to_scouter(const char *messg, struct char_data *ch, int num, int type)
         if (type == 0) {
             if (num == 1) {
                 if (pl >= scoutVal) {
-                    write_to_output(i, "@D[@GBlip@D]@r Rising Powerlevel Detected@D:@Y ??????????\r\n");
+                    i->sendText("@D[@GBlip@D]@r Rising Powerlevel Detected@D:@Y ??????????\r\n");
                 } else {
-                    write_to_output(i, "%s@n", messg);
+                    i->send_to("%s@n", messg);
                 }
             } else {
                 if (pl >= scoutVal) {
-                    write_to_output(i, "@D[@GBlip@D]@r Nearby Powerlevel Detected@D:@Y ??????????\r\n");
+                    i->sendText("@D[@GBlip@D]@r Nearby Powerlevel Detected@D:@Y ??????????\r\n");
                 } else {
-                    write_to_output(i, "%s\r\n", messg);
+                    i->send_to("%s\r\n", messg);
                 }
             }
         } else if (type == 1 && GET_SKILL(tch, SKILL_SENSE) < 20) {
             if (pl >= scoutVal) {
-                write_to_output(i, "@D[@GBlip@D]@w %s. @RPL@D:@Y ??????????\r\n", messg);
+                i->send_to("@D[@GBlip@D]@w %s. @RPL@D:@Y ??????????\r\n", messg);
             } else {
-                write_to_output(i, "@D[Blip@D]@w %s. @RPL@D:@Y %s@n\r\n\r\n", messg, add_commas(pl).c_str());
+                i->send_to("@D[Blip@D]@w %s. @RPL@D:@Y %s@n\r\n\r\n", messg, add_commas(pl).c_str());
             }
         } else if (type == 2 && GET_SKILL(tch, SKILL_SENSE) < 20) {
             if (pl >= scoutVal) {
-                write_to_output(i, "@D[@GBlip@D]@w %s at... @G%s. @RPL@D:@Y ??????????\r\n", messg, senseLoc);
+                i->send_to("@D[@GBlip@D]@w %s at... @G%s. @RPL@D:@Y ??????????\r\n", messg, senseLoc);
             } else {
-                write_to_output(i, "@D[Blip@D]@w %s at... @G%s. @RPL@D:@Y %s@n\r\n\r\n", messg, senseLoc,
-                                add_commas(pl).c_str());
+                i->send_to("@D[Blip@D]@w %s at... @G%s. @RPL@D:@Y %s@n\r\n\r\n", messg, senseLoc,
+                           add_commas(pl).c_str());
             }
         }
     }
@@ -460,6 +443,6 @@ void send_to_worlds(struct char_data *ch) {
             continue;
         }
         if(p != getPlanet(i->character->getRoomVnum())) continue;
-        send_to_char(i->character, "%s", message);
+                i->character->send_to("%s", message);
     }
 }

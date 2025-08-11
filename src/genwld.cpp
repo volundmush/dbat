@@ -480,7 +480,7 @@ void room_data::broadcastAt(const Coordinates& coor, const std::string& message)
     auto people = getPeople(coor);
     for (const auto &uw : people) {
         if (auto c = uw.lock()) {
-            send_to_char(c.get(), message.c_str());
+                        c.get()->sendText(message.c_str());
         }
     }
 }

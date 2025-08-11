@@ -446,12 +446,11 @@ int know_skill(struct char_data *ch, int skill) {
         know = 2;
 
     if (know == 0) {
-        send_to_char(ch, "You do not know how to perform %s.\r\n", spell_info[skill].name);
+                ch->send_to("You do not know how to perform %s.\r\n", spell_info[skill].name);
         know = 0;
     } else if (know == 2) {
-        send_to_char(ch, "@WYou try to use @M%s@W but lingering thoughts of a certain kiss distracts you!@n\r\n",
-                     spell_info[skill].name);
-        send_to_char(ch, "You must sleep in order to cure this.\r\n");
+                ch->send_to("@WYou try to use @M%s@W but lingering thoughts of a certain kiss distracts you!@n\r\n", spell_info[skill].name);
+                ch->sendText("You must sleep in order to cure this.\r\n");
         know = 0;
     }
 
@@ -723,9 +722,8 @@ int roll_pursue(struct char_data *ch, struct char_data *vict) {
     }
 
     if (skill > perc) {
-        int inroom = ch->getRoomVnum();
         act("@C$n@R pursues after the fleeing @c$N@R!@n", true, ch, nullptr, vict, TO_NOTVICT);
-        char_from_room(ch);
+    ch->clearLocation();
         ch->setLocation(vict);
         act("@GYou pursue right after @c$N@G!@n", true, ch, nullptr, vict, TO_CHAR);
         act("@C$n@R pursues after you!@n", true, ch, nullptr, vict, TO_VICT);
@@ -736,13 +734,13 @@ int roll_pursue(struct char_data *ch, struct char_data *vict) {
         if (ch->followers) {
             for (k = ch->followers; k; k = next) {
                 next = k->next;
-                if ((k->follower->getRoomVnum() == inroom) && (GET_POS(k->follower) >= POS_STANDING) &&
+                if ((k->follower->location == ch->location) && (GET_POS(k->follower) >= POS_STANDING) &&
                     (!AFF_FLAGGED(ch, AFF_ZANZOKEN) ||
                      (AFF_FLAGGED(ch, AFF_GROUP) && AFF_FLAGGED(k->follower, AFF_GROUP)))) {
                     act("You follow $N.", true, k->follower, nullptr, ch, TO_CHAR);
                     act("$n follows after $N.", true, k->follower, nullptr, ch, TO_NOTVICT);
                     act("$n follows after you.", true, k->follower, nullptr, ch, TO_VICT);
-                    char_from_room(k->follower);
+                    k->follower->clearLocation();
                     k->follower->setLocation(ch);
                 }
             }
@@ -750,7 +748,7 @@ int roll_pursue(struct char_data *ch, struct char_data *vict) {
         vict->affect_flags.set(AFF_PURSUIT, false);
         return (true);
     } else {
-        send_to_char(ch, "@RYou fail to pursue after them!@n\r\n");
+                ch->sendText("@RYou fail to pursue after them!@n\r\n");
         for(auto c : {ch, vict}) {
             if (FIGHTING(c)) {
                 stop_fighting(c);
@@ -796,7 +794,7 @@ void broken_update(uint64_t heartPulse, double deltaTime) {
         if (grav_change == true) {
             k->setBaseStat("gravity", rand_gravity[grav_roll]);
             k->setBaseStat<weight_t>("weight", rand_gravity[grav_roll]);
-            send_to_location(k, "@RThe gravity generator malfunctions! The gravity level has changed!@n\r\n");
+            k->location.sendText("@RThe gravity generator malfunctions! The gravity level has changed!@n\r\n");
         }
         dice = rand_number(2, 12); // Reset the dice
     }
@@ -816,17 +814,15 @@ void broken_update(uint64_t heartPulse, double deltaTime) {
 
         dice = rand_number(2, 12); // Reset the dice
         if (health <= 10) {
-            send_to_location(k,
-                         "@RThe ATM machine shoots smoking bills from its money slot. The bills burn up as they float through the air!@n\r\n");
+            k->location.sendText("@RThe ATM machine shoots smoking bills from its money slot. The bills burn up as they float through the air!@n\r\n");
         } else if (health <= 40 && dice <= 8) {
-            send_to_location(k, "@RGibberish flashes across the cracked ATM info screen.@n\r\n");
+            k->location.sendText("@RGibberish flashes across the cracked ATM info screen.@n\r\n");
         } else if (health <= 80 && dice == 4) {
-            send_to_location(k,
-                         "@GThe damaged ATM spits out some money while flashing ERROR on its screen!@n\r\n");
+            k->location.sendText("@GThe damaged ATM spits out some money while flashing ERROR on its screen!@n\r\n");
             money = create_money(rand_number(1, 30));
             money->setLocation(k);
         } else if (health <= 99 && dice < 4) {
-            send_to_location(k, "@RThe ATM machine emits a loud grinding sound from inside.@n\r\n");
+            k->location.sendText("@RThe ATM machine emits a loud grinding sound from inside.@n\r\n");
         }
 
         dice = rand_number(2, 12); // Reset the dice
@@ -1386,12 +1382,12 @@ int block_calc(struct char_data *ch) {
                 act("$n tries to leave, but can't outrun you!", true, ch, nullptr, blocker, TO_VICT);
                 act("You try to leave, but can't outrun $N!", true, ch, nullptr, blocker, TO_CHAR);
                 if (AFF_FLAGGED(ch, AFF_FLYING) && !AFF_FLAGGED(blocker, AFF_FLYING) && GET_ALT(ch) == 1) {
-                    send_to_char(blocker, "You're now floating in the air.\r\n");
+                                        blocker->sendText("You're now floating in the air.\r\n");
 
                     blocker->affect_flags.set(AFF_FLYING, true);
                     blocker->setBaseStat<int>("altitude", GET_ALT(ch));
                 } else if (AFF_FLAGGED(ch, AFF_FLYING) && !AFF_FLAGGED(blocker, AFF_FLYING) && GET_ALT(ch) == 2) {
-                    send_to_char(blocker, "You're now floating high in the sky.\r\n");
+                                        blocker->sendText("You're now floating high in the sky.\r\n");
                     blocker->affect_flags.set(AFF_FLYING, true);
                     blocker->setBaseStat<int>("altitude", GET_ALT(ch));
                 }
@@ -1514,8 +1510,7 @@ void handle_evolution(struct char_data *ch, int64_t dmg) {
     ch->modBaseStat<int64_t>("molt_experience", moltgain);
 
     if (AFF_FLAGGED(ch, AFF_SPIRIT)) {
-        send_to_char(ch,
-                     "You are dead and all evolution experience is reduced. Gains are divided by 100 or reduced to a minimum of 1.\r\n");
+                ch->sendText("You are dead and all evolution experience is reduced. Gains are divided by 100 or reduced to a minimum of 1.\r\n");
         moltgain /= 100;
     }
 
@@ -1564,12 +1559,9 @@ void handle_evolution(struct char_data *ch, int64_t dmg) {
                 true, ch, nullptr, nullptr, TO_CHAR);
             act("@G$n's@g @De@Wx@wo@Ds@Wk@we@Dl@We@wt@Do@Wn@g begins to crack. Suddenly $e sheds the damaged @De@Wx@wo@Ds@Wk@we@Dl@We@wt@Do@Wn and reveals a stronger version that had been growing underneath!@n",
                 true, ch, nullptr, nullptr, TO_ROOM);
-            send_to_char(ch, "@D[@RHL@W: @G+%s@D] [@gStamina@W: @G+%s@D] [@wArmor Index@W: @G+%s@D]@n\r\n",
-                         add_commas(bonusHl).c_str(), add_commas(bonusSt).c_str(),
-                         GET_ARMOR(ch) >= 500000 ? "500k CAP" : add_commas(armorgain).c_str());
+                        ch->send_to("@D[@RHL@W: @G+%s@D] [@gStamina@W: @G+%s@D] [@wArmor Index@W: @G+%s@D]@n\r\n", add_commas(bonusHl).c_str(), add_commas(bonusSt).c_str(), GET_ARMOR(ch) >= 500000 ? "500k CAP" : add_commas(armorgain).c_str());
         } else {
-            send_to_char(ch,
-                         "@gYou are unable to evolve while your evolution level is higher than twice your character Constitution.@n\r\n");
+                        ch->sendText("@gYou are unable to evolve while your evolution level is higher than twice your character Constitution.@n\r\n");
         }
     }
 
@@ -1642,7 +1634,7 @@ int mob_respond(struct char_data *ch, struct char_data *vict, const char *speech
         if (!IS_NPC(ch) && IS_NPC(vict)) {
             if ((strstr(speech, "hello") || strstr(speech, "greet") || strstr(speech, "Hello") ||
                  strstr(speech, "Greet")) && !FIGHTING(vict)) {
-                send_to_location(vict, "\r\n");
+                vict->location.sendText("\r\n");
                 if (IS_HUMAN(vict) || IS_HALFBREED(vict)) {
                     switch (rand_number(1, 4)) {
                         case 1:
@@ -1796,7 +1788,7 @@ int mob_respond(struct char_data *ch, struct char_data *vict, const char *speech
 
             if (strstr(speech, "goodbye") || strstr(speech, "Goodbye") || strstr(speech, "bye") ||
                 strstr(speech, "Bye")) {
-                send_to_location(vict, "\r\n");
+                vict->location.sendText("\r\n");
                 if (GET_ALIGNMENT(vict) >= 0) {
                     if (GET_SEX(vict) == SEX_MALE) {
                         if (GET_SEX(ch) == SEX_FEMALE) {
@@ -1835,7 +1827,7 @@ int mob_respond(struct char_data *ch, struct char_data *vict, const char *speech
             } /* End goodbye If */
             if (strstr(speech, "train") || strstr(speech, "Train") || strstr(speech, "exercise") ||
                 strstr(speech, "Exercise")) {
-                send_to_location(vict, "\r\n");
+                vict->location.sendText("\r\n");
                 if (GET_ALIGNMENT(vict) >= 0 && !MOB_FLAGGED(vict, MOB_NOKILL)) {
                     if (GET_LEVEL(vict) > 4 && GET_LEVEL(vict) < 10) {
                         act("@w$n@W says, '@CTraining is good for the body. I think I may need to go workout myself.@W'@n",
@@ -2105,11 +2097,11 @@ void improve_skill(struct char_data *ch, int skill, int num) {
     SET_SKILL(ch, skill, percent);
     if (newpercent >= 1) {
         sprintf(skillbuf, "@WYou feel you have learned something new about @G%s@W.@n\r\n", spell_info[skill].name);
-        send_to_char(ch, skillbuf);
+                ch->sendText(skillbuf);
         if (GET_SKILL_BASE(ch, skill) >= 100) {
-            send_to_char(ch, "You learned a lot by mastering that skill.\r\n");
+                        ch->sendText("You learned a lot by mastering that skill.\r\n");
             if (perf_skill(skill)) {
-                send_to_char(ch, "You can now choose a perfection for this skill (help perfection).\r\n");
+                                ch->sendText("You can now choose a perfection for this skill (help perfection).\r\n");
             }
             if (IS_KONATSU(ch) && skill == SKILL_PARRY) {
                 SET_SKILL(ch, skill, GET_SKILL_BASE(ch, skill) + 5);
@@ -2294,7 +2286,7 @@ void mudlog(int type, int level, int file, const char *str, ...) {
         if (type > (PRF_FLAGGED(i->character, PRF_LOG1) ? 1 : 0) + (PRF_FLAGGED(i->character, PRF_LOG2) ? 2 : 0))
             continue;
 
-        send_to_char(i->character, "@g%s@n", buf);
+                i->character->send_to("@g%s@n", buf);
     }
 }
 
@@ -2779,7 +2771,6 @@ int *default_admin_flags[ADMLVL_IMPL + 1] = {
 };
 
 void admin_set(struct char_data *ch, int value) {
-    void run_autowiz();
     int i;
     int orig = GET_ADMLEVEL(ch);
 
@@ -2796,7 +2787,7 @@ void admin_set(struct char_data *ch, int value) {
             for (i = 0; default_admin_flags[GET_ADMLEVEL(ch)][i] != -1; i++)
                 ch->admin_flags.set(default_admin_flags[GET_ADMLEVEL(ch)][i], true);
         }
-        run_autowiz();
+
         if (orig < ADMLVL_IMMORT && value >= ADMLVL_IMMORT) {
             for(auto f : {PRF_LOG2, PRF_HOLYLIGHT, PRF_ROOMFLAGS, PRF_AUTOEXIT}) ch->pref_flags.set(f, true);
 
@@ -2817,7 +2808,7 @@ void admin_set(struct char_data *ch, int value) {
                 ch->admin_flags.set(default_admin_flags[GET_ADMLEVEL(ch)][i], false);
             ch->modBaseStat<int>("admin_level", -1);
         }
-        run_autowiz();
+
         if (orig >= ADMLVL_IMMORT && value < ADMLVL_IMMORT) {
             for(auto f : {PRF_LOG1, PRF_LOG2, PRF_NOHASSLE, PRF_HOLYLIGHT, PRF_ROOMFLAGS}) ch->pref_flags.set(f, false);
         }
@@ -3022,7 +3013,7 @@ void craftProgress(char_data* ch) {
     continueCraft = ch->craftingDeck.playTopCard(ch);
 
     if(!continueCraft) {
-        send_to_char(ch, "You finish your project!\r\n");
+                ch->sendText("You finish your project!\r\n");
         act("$n finally finishes their project!", true, ch, nullptr, nullptr, TO_ROOM);
 
         obj_to_char(ch->craftingTask.pObject, ch);

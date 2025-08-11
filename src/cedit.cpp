@@ -54,7 +54,7 @@ ACMD(do_oasis_cedit) {
     one_argument(argument, buf1);
 
     if (GET_ADMLEVEL(ch) < 5) {
-        send_to_char(ch, "You can't modify the game configuration.\r\n");
+                ch->sendText("You can't modify the game configuration.\r\n");
         return;
     }
 
@@ -72,11 +72,11 @@ ACMD(do_oasis_cedit) {
                "OLC: %s starts editing the game configuration.", GET_NAME(ch));
         return;
     } else if (strcasecmp("save", buf1) != 0) {
-        send_to_char(ch, "Yikes!  Stop that, someone will get hurt!\r\n");
+                ch->sendText("Yikes!  Stop that, someone will get hurt!\r\n");
         return;
     }
 
-    send_to_char(ch, "Saving the game configuration.\r\n");
+        ch->sendText("Saving the game configuration.\r\n");
     mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), true,
            "OLC: %s saves the game configuration.", GET_NAME(ch));
 
@@ -732,18 +732,18 @@ void cedit_disp_menu(struct descriptor_data *d) {
     /*
      * Menu header
      */
-    write_to_output(d,
-                    "OasisOLC MUD Configuration Editor\r\n"
-                    "@WA@B) @CAutowiz Options\r\n"
-                    "@WC@B) @CCrashsave/Rent Options\r\n"
-                    "@WD@B) @CaDvancement Options\r\n"
-                    "@WG@B) @CGame Play Options\r\n"
-                    "@WN@B) @CNew Character Creation Options\r\n"
-                    "@WO@B) @COperation Options\r\n"
-                    "@WR@B) @CRoom Numbers\r\n"
-                    "@WT@B) @CGame Tick Options\r\n"
-                    "@WQ@B) @CQuit\r\n"
-                    "@WEnter your choice : @n"
+    d->sendText(
+        "OasisOLC MUD Configuration Editor\r\n"
+        "@WA@B) @CAutowiz Options\r\n"
+        "@WC@B) @CCrashsave/Rent Options\r\n"
+        "@WD@B) @CaDvancement Options\r\n"
+        "@WG@B) @CGame Play Options\r\n"
+        "@WN@B) @CNew Character Creation Options\r\n"
+        "@WO@B) @COperation Options\r\n"
+        "@WR@B) @CRoom Numbers\r\n"
+        "@WT@B) @CGame Tick Options\r\n"
+        "@WQ@B) @CQuit\r\n"
+        "@WEnter your choice : @n"
     );
 
     OLC_MODE(d) = CEDIT_MAIN_MENU;
@@ -754,7 +754,7 @@ void cedit_disp_menu(struct descriptor_data *d) {
 void cedit_disp_game_play_options(struct descriptor_data *d) {
     clear_screen(d);
 
-    write_to_output(d, "\r\n\r\n"
+    d->send_to("\r\n\r\n"
                        "@WA@B) @CPlayer Killing Allowed  : @c%s\r\n"
                        "@WB@B) @CPlayer Thieving Allowed : @c%s\r\n"
                        "@WC@B) @CMinimum Level To Shout  : @c%d\r\n"
@@ -822,7 +822,7 @@ void cedit_disp_game_play_options(struct descriptor_data *d) {
 void cedit_disp_crash_save_options(struct descriptor_data *d) {
     clear_screen(d);
 
-    write_to_output(d, "\r\n\r\n"
+    d->send_to("\r\n\r\n"
                        "@WA@B) @CFree Rent          : @c%s\r\n"
                        "@WB@B) @CMax Objects Saved  : @c%d\r\n"
                        "@WC@B) @CMinimum Rent Cost  : @c%d\r\n"
@@ -849,7 +849,7 @@ void cedit_disp_crash_save_options(struct descriptor_data *d) {
 void cedit_disp_room_numbers(struct descriptor_data *d) {
     clear_screen(d);
 
-    write_to_output(d, "\r\n\r\n"
+    d->send_to("\r\n\r\n"
                        "@WA@B) @CMortal Start Room   : @c%d\r\n"
                        "@WB@B) @CImmortal Start Room : @c%d\r\n"
                        "@WC@B) @CFrozen Start Room   : @c%d\r\n"
@@ -875,7 +875,7 @@ void cedit_disp_room_numbers(struct descriptor_data *d) {
 void cedit_disp_operation_options(struct descriptor_data *d) {
     clear_screen(d);
 
-    write_to_output(d, "\r\n\r\n"
+    d->send_to("\r\n\r\n"
                        "@WA@B) @CDefault Port : @c%d\r\n"
                        "@WB@B) @CDefault IP   : @c%s\r\n"
                        "@WC@B) @CDefault Directory   : @c%s\r\n"
@@ -919,7 +919,7 @@ void cedit_disp_operation_options(struct descriptor_data *d) {
 void cedit_disp_autowiz_options(struct descriptor_data *d) {
     clear_screen(d);
 
-    write_to_output(d, "\r\n\r\n"
+    d->send_to("\r\n\r\n"
                        "@WA@B) @CUse the autowiz        : @c%s\r\n"
                        "@WB@B) @CMinimum wizlist level  : @c%d\r\n"
                        "@WQ@B) @CExit To The Main Menu\r\n"
@@ -937,7 +937,7 @@ void cedit_disp_autowiz_options(struct descriptor_data *d) {
 void cedit_disp_advance_options(struct descriptor_data *d) {
     clear_screen(d);
 
-    write_to_output(d, "\r\n\r\n"
+    d->send_to("\r\n\r\n"
                        "@WA@B) @CAllow multiclass       : @c%s\r\n"
                        "@WB@B) @CAllow Prestige Classes : @c%s\r\n"
                        "@WQ@B) @CExit To The Main Menu\r\n"
@@ -954,7 +954,7 @@ void cedit_disp_advance_options(struct descriptor_data *d) {
 void cedit_disp_ticks_menu(struct descriptor_data *d) {
     clear_screen(d);
 
-    write_to_output(d, "\r\n\r\n"
+    d->send_to("\r\n\r\n"
                        "@WA@B) @CPulse Violence Time  : @c%d\r\n"
                        "@WB@B) @CMobile Action Time   : @c%d\r\n"
                        "@WC@B) @CZone Time            : @c%d\r\n"
@@ -985,7 +985,7 @@ void cedit_disp_ticks_menu(struct descriptor_data *d) {
 void cedit_disp_creation_options(struct descriptor_data *d) {
     clear_screen(d);
 
-    write_to_output(d, "\r\n\r\n"
+    d->send_to("\r\n\r\n"
                        "@WA@B) @CCharacter Creation Method : @c%d \r\n"
                        "   %s\r\n"
                        "@WB@B) @CPlayers can reroll stats on creation : @c%s\r\n"
@@ -1006,16 +1006,16 @@ void cedit_disp_creation_menu(struct descriptor_data *d) {
     clear_screen(d);
     for (i = 0; i < NUM_CREATION_METHODS; i++) {
         sprintf(buf, "@W%d@B) @C%s@n\r\n", i, creation_methods[i]);
-        write_to_output(d, buf);
+    d->send_to("%s", buf);
     }
-    write_to_output(d, "Choose character creation type: ");
+    d->sendText("Choose character creation type: ");
     OLC_MODE(d) = CEDIT_CREATION_MENU;
 }
 
 
 void cedit_disp_points_menu(struct descriptor_data *d) {
 
-    write_to_output(d, "Enter size of initial points pool. (0 or greater). ");
+    d->sendText("Enter size of initial points pool. (0 or greater). ");
     OLC_MODE(d) = CEDIT_POINTS_MENU;
 }
 
@@ -1039,18 +1039,18 @@ void cedit_parse(struct descriptor_data *d, char *arg) {
                     cleanup_olc(d, CLEANUP_CONFIG);
                     if (CONFIG_AUTO_SAVE) {
                         cedit_save_to_disk();
-                        write_to_output(d, "Game configuration saved to disk.\r\n");
+                        d->sendText("Game configuration saved to disk.\r\n");
                     } else
-                        write_to_output(d, "Game configuration saved to memory.\r\n");
+                        d->sendText("Game configuration saved to memory.\r\n");
                     return;
                 case 'n':
                 case 'N':
-                    write_to_output(d, "Game configuration not saved to memory.\r\n");
+                    d->sendText("Game configuration not saved to memory.\r\n");
                     cleanup_olc(d, CLEANUP_CONFIG);
                     return;
                 default :
-                    write_to_output(d, "\r\nThat is an invalid choice!\r\n");
-                    write_to_output(d, "Do you wish to save your changes? : ");
+                    d->sendText("\r\nThat is an invalid choice!\r\n");
+                    d->sendText("Do you wish to save your changes? : ");
                     return;
             }
 
@@ -1102,7 +1102,7 @@ void cedit_parse(struct descriptor_data *d, char *arg) {
 
                 case 'q':
                 case 'Q':
-                    write_to_output(d, "Do you wish to save your changes? : ");
+                    d->sendText("Do you wish to save your changes? : ");
                     OLC_MODE(d) = CEDIT_CONFIRM_SAVESTRING;
                     break;
 
@@ -1113,7 +1113,7 @@ void cedit_parse(struct descriptor_data *d, char *arg) {
                     break;
 
                 default:
-                    write_to_output(d, "That is an invalid choice!\r\n");
+                    d->sendText("That is an invalid choice!\r\n");
                     cedit_disp_menu(d);
                     break;
             }
@@ -1136,62 +1136,61 @@ void cedit_parse(struct descriptor_data *d, char *arg) {
 
                 case 'c':
                 case 'C':
-                    write_to_output(d, "Enter the minimum level a player must be to shout, gossip, etc : ");
+                    d->sendText("Enter the minimum level a player must be to shout, gossip, etc : ");
                     OLC_MODE(d) = CEDIT_LEVEL_CAN_SHOUT;
                     return;
 
                 case 'd':
                 case 'D':
-                    write_to_output(d, "Enter the amount it costs (in move points) to holler : ");
+                    d->sendText("Enter the amount it costs (in move points) to holler : ");
                     OLC_MODE(d) = CEDIT_HOLLER_MOVE_COST;
                     return;
 
                 case 'e':
                 case 'E':
-                    write_to_output(d, "Enter the maximum number of people allowed in a tunnel : ");
+                    d->sendText("Enter the maximum number of people allowed in a tunnel : ");
                     OLC_MODE(d) = CEDIT_TUNNEL_SIZE;
                     return;
 
                 case 'f':
                 case 'F':
-                    write_to_output(d, "Enter the maximum gain of experience per kill for players : ");
+                    d->sendText("Enter the maximum gain of experience per kill for players : ");
                     OLC_MODE(d) = CEDIT_MAX_EXP_GAIN;
                     return;
 
                 case 'g':
                 case 'G':
-                    write_to_output(d, "Enter the maximum loss of experience per death for players : ");
+                    d->sendText("Enter the maximum loss of experience per death for players : ");
                     OLC_MODE(d) = CEDIT_MAX_EXP_LOSS;
                     return;
 
                 case 'h':
                 case 'H':
-                    write_to_output(d, "Enter the number of tics before NPC corpses decompose : ");
+                    d->sendText("Enter the number of tics before NPC corpses decompose : ");
                     OLC_MODE(d) = CEDIT_MAX_NPC_CORPSE_TIME;
                     return;
 
                 case 'i':
                 case 'I':
-                    write_to_output(d, "Enter the number of tics before PC corpses decompose : ");
+                    d->sendText("Enter the number of tics before PC corpses decompose : ");
                     OLC_MODE(d) = CEDIT_MAX_PC_CORPSE_TIME;
                     return;
 
                 case 'j':
                 case 'J':
-                    write_to_output(d, "Enter the number of tics before PC's are sent to the void (idle) : ");
+                    d->sendText("Enter the number of tics before PC's are sent to the void (idle) : ");
                     OLC_MODE(d) = CEDIT_IDLE_VOID;
                     return;
 
                 case 'k':
                 case 'K':
-                    write_to_output(d,
-                                    "Enter the number of tics before PC's are automatically rented and forced to quit : ");
+                    d->sendText("Enter the number of tics before PC's are automatically rented and forced to quit : ");
                     OLC_MODE(d) = CEDIT_IDLE_RENT_TIME;
                     return;
 
                 case 'l':
                 case 'L':
-                    write_to_output(d, "Enter the level a player must be to become immune to IDLE : ");
+                    d->sendText("Enter the level a player must be to become immune to IDLE : ");
                     OLC_MODE(d) = CEDIT_IDLE_MAX_LEVEL;
                     return;
 
@@ -1217,7 +1216,7 @@ void cedit_parse(struct descriptor_data *d, char *arg) {
 
                 case 'r':
                 case 'R':
-                    write_to_output(d, "Enter the number a character cannot level to : ");
+                    d->sendText("Enter the number a character cannot level to : ");
                     OLC_MODE(d) = CEDIT_LEVEL_CAP;
                     return;
 
@@ -1228,7 +1227,7 @@ void cedit_parse(struct descriptor_data *d, char *arg) {
 
                 case 't':
                 case 'T':
-                    write_to_output(d, "Enter the multiplier a player will recieve to experience gained : ");
+                    d->sendText("Enter the multiplier a player will recieve to experience gained : ");
                     OLC_MODE(d) = CEDIT_EXP_MULTIPLIER;
                     return;
 
@@ -1245,17 +1244,17 @@ void cedit_parse(struct descriptor_data *d, char *arg) {
                     break;
 
                 case '4':
-                    write_to_output(d, "Enter the OK message : ");
+                    d->sendText("Enter the OK message : ");
                     OLC_MODE(d) = CEDIT_OK;
                     return;
 
                 case '5':
-                    write_to_output(d, "Enter the NOPERSON message : ");
+                    d->sendText("Enter the NOPERSON message : ");
                     OLC_MODE(d) = CEDIT_NOPERSON;
                     return;
 
                 case '6':
-                    write_to_output(d, "Enter the NOEFFECT message : ");
+                    d->sendText("Enter the NOEFFECT message : ");
                     OLC_MODE(d) = CEDIT_NOEFFECT;
                     return;
 
@@ -1273,7 +1272,7 @@ void cedit_parse(struct descriptor_data *d, char *arg) {
                     return;
 
                 default:
-                    write_to_output(d, "\r\nThat is an invalid choice!\r\n");
+                    d->sendText("\r\nThat is an invalid choice!\r\n");
                     cedit_disp_game_play_options(d);
             }
 
@@ -1291,13 +1290,13 @@ void cedit_parse(struct descriptor_data *d, char *arg) {
 
                 case 'b':
                 case 'B':
-                    write_to_output(d, "Enter the maximum number of items players can rent : ");
+                    d->sendText("Enter the maximum number of items players can rent : ");
                     OLC_MODE(d) = CEDIT_MAX_OBJ_SAVE;
                     return;
 
                 case 'c':
                 case 'C':
-                    write_to_output(d, "Enter the surcharge on top of item costs : ");
+                    d->sendText("Enter the surcharge on top of item costs : ");
                     OLC_MODE(d) = CEDIT_MIN_RENT_COST;
                     return;
 
@@ -1308,19 +1307,19 @@ void cedit_parse(struct descriptor_data *d, char *arg) {
 
                 case 'e':
                 case 'E':
-                    write_to_output(d, "Enter how often (in minutes) should the MUD save players : ");
+                    d->sendText("Enter how often (in minutes) should the MUD save players : ");
                     OLC_MODE(d) = CEDIT_AUTOSAVE_TIME;
                     return;
 
                 case 'f':
                 case 'F':
-                    write_to_output(d, "Enter the lifetime of crash and idlesave files (days) : ");
+                    d->sendText("Enter the lifetime of crash and idlesave files (days) : ");
                     OLC_MODE(d) = CEDIT_CRASH_FILE_TIMEOUT;
                     return;
 
                 case 'g':
                 case 'G':
-                    write_to_output(d, "Enter the lifetime of normal rent files (days) : ");
+                    d->sendText("Enter the lifetime of normal rent files (days) : ");
                     OLC_MODE(d) = CEDIT_RENT_FILE_TIMEOUT;
                     return;
 
@@ -1330,7 +1329,7 @@ void cedit_parse(struct descriptor_data *d, char *arg) {
                     return;
 
                 default:
-                    write_to_output(d, "\r\nThat is an invalid choice!\r\n");
+                    d->sendText("\r\nThat is an invalid choice!\r\n");
             }
 
             cedit_disp_crash_save_options(d);
@@ -1342,34 +1341,34 @@ void cedit_parse(struct descriptor_data *d, char *arg) {
             switch (*arg) {
                 case 'a':
                 case 'A':
-                    write_to_output(d, "Enter the room's vnum where mortals should load into : ");
+                    d->sendText("Enter the room's vnum where mortals should load into : ");
                     OLC_MODE(d) = CEDIT_MORTAL_START_ROOM;
                     return;
 
                 case 'b':
                 case 'B':
-                    write_to_output(d, "Enter the room's vnum where immortals should load into : ");
+                    d->sendText("Enter the room's vnum where immortals should load into : ");
                     OLC_MODE(d) = CEDIT_IMMORT_START_ROOM;
                     return;
 
                 case 'c':
                 case 'C':
-                    write_to_output(d, "Enter the room's vnum where frozen people should load into : ");
+                    d->sendText("Enter the room's vnum where frozen people should load into : ");
                     OLC_MODE(d) = CEDIT_FROZEN_START_ROOM;
                     return;
 
                 case '1':
-                    write_to_output(d, "Enter the vnum for donation room #1 : ");
+                    d->sendText("Enter the vnum for donation room #1 : ");
                     OLC_MODE(d) = CEDIT_DONATION_ROOM_1;
                     return;
 
                 case '2':
-                    write_to_output(d, "Enter the vnum for donation room #2 : ");
+                    d->sendText("Enter the vnum for donation room #2 : ");
                     OLC_MODE(d) = CEDIT_DONATION_ROOM_2;
                     return;
 
                 case '3':
-                    write_to_output(d, "Enter the vnum for donation room #3 : ");
+                    d->sendText("Enter the vnum for donation room #3 : ");
                     OLC_MODE(d) = CEDIT_DONATION_ROOM_3;
                     return;
 
@@ -1379,7 +1378,7 @@ void cedit_parse(struct descriptor_data *d, char *arg) {
                     return;
 
                 default:
-                    write_to_output(d, "\r\nThat is an invalid choice!\r\n");
+                    d->sendText("\r\nThat is an invalid choice!\r\n");
             }
 
             cedit_disp_room_numbers(d);
@@ -1391,43 +1390,43 @@ void cedit_parse(struct descriptor_data *d, char *arg) {
             switch (*arg) {
                 case 'a':
                 case 'A':
-                    write_to_output(d, "Enter the default port number : ");
+                    d->sendText("Enter the default port number : ");
                     OLC_MODE(d) = CEDIT_DFLT_PORT;
                     return;
 
                 case 'b':
                 case 'B':
-                    write_to_output(d, "Enter the default IP Address : ");
+                    d->sendText("Enter the default IP Address : ");
                     OLC_MODE(d) = CEDIT_DFLT_IP;
                     return;
 
                 case 'c':
                 case 'C':
-                    write_to_output(d, "Enter the default directory : ");
+                    d->sendText("Enter the default directory : ");
                     OLC_MODE(d) = CEDIT_DFLT_DIR;
                     return;
 
                 case 'd':
                 case 'D':
-                    write_to_output(d, "Enter the name of the logfile : ");
+                    d->sendText("Enter the name of the logfile : ");
                     OLC_MODE(d) = CEDIT_LOGNAME;
                     return;
 
                 case 'e':
                 case 'E':
-                    write_to_output(d, "Enter the maximum number of players : ");
+                    d->sendText("Enter the maximum number of players : ");
                     OLC_MODE(d) = CEDIT_MAX_PLAYING;
                     return;
 
                 case 'f':
                 case 'F':
-                    write_to_output(d, "Enter the maximum size of the logs : ");
+                    d->sendText("Enter the maximum size of the logs : ");
                     OLC_MODE(d) = CEDIT_MAX_FILESIZE;
                     return;
 
                 case 'g':
                 case 'G':
-                    write_to_output(d, "Enter the maximum number of password attempts : ");
+                    d->sendText("Enter the maximum number of password attempts : ");
                     OLC_MODE(d) = CEDIT_MAX_BAD_PWS;
                     return;
 
@@ -1444,8 +1443,7 @@ void cedit_parse(struct descriptor_data *d, char *arg) {
                 case 'j':
                 case 'J':
                     TOGGLE_VAR(OLC_CONFIG(d)->operation.use_new_socials);
-                    send_to_char(d->character,
-                                 "Please note that using the stock social file will disable AEDIT.\r\n");
+                                        d->character->sendText("Please note that using the stock social file will disable AEDIT.\r\n");
                     break;
 
                 case 'k':
@@ -1458,10 +1456,10 @@ void cedit_parse(struct descriptor_data *d, char *arg) {
                     OLC_MODE(d) = CEDIT_MENU;
                     clear_screen(d);
                     send_editor_help(d);
-                    write_to_output(d, "Enter the new MENU :\r\n\r\n");
+                    d->sendText("Enter the new MENU :\r\n\r\n");
 
                     if (OLC_CONFIG(d)->operation.MENU) {
-                        write_to_output(d, "%s", OLC_CONFIG(d)->operation.MENU);
+                        d->send_to("%s", OLC_CONFIG(d)->operation.MENU);
                         oldtext = strdup(OLC_CONFIG(d)->operation.MENU);
                     }
 
@@ -1473,10 +1471,10 @@ void cedit_parse(struct descriptor_data *d, char *arg) {
                     OLC_MODE(d) = CEDIT_WELC_MESSG;
                     clear_screen(d);
                     send_editor_help(d);
-                    write_to_output(d, "Enter the new welcome message :\r\n\r\n");
+                    d->sendText("Enter the new welcome message :\r\n\r\n");
 
                     if (OLC_CONFIG(d)->operation.WELC_MESSG) {
-                        write_to_output(d, "%s", OLC_CONFIG(d)->operation.WELC_MESSG);
+                        d->send_to("%s", OLC_CONFIG(d)->operation.WELC_MESSG);
                         oldtext = str_udup(OLC_CONFIG(d)->operation.WELC_MESSG);
                     }
 
@@ -1488,10 +1486,10 @@ void cedit_parse(struct descriptor_data *d, char *arg) {
                     OLC_MODE(d) = CEDIT_START_MESSG;
                     clear_screen(d);
                     send_editor_help(d);
-                    write_to_output(d, "Enter the new newbie start message :\r\n\r\n");
+                    d->sendText("Enter the new newbie start message :\r\n\r\n");
 
                     if (OLC_CONFIG(d)->operation.START_MESSG) {
-                        write_to_output(d, "%s", OLC_CONFIG(d)->operation.START_MESSG);
+                        d->send_to("%s", OLC_CONFIG(d)->operation.START_MESSG);
                         oldtext = strdup(OLC_CONFIG(d)->operation.START_MESSG);
                     }
 
@@ -1508,7 +1506,7 @@ void cedit_parse(struct descriptor_data *d, char *arg) {
                     return;
 
                 default:
-                    write_to_output(d, "\r\nThat is an invalid choice!\r\n");
+                    d->sendText("\r\nThat is an invalid choice!\r\n");
             }
 
             cedit_disp_operation_options(d);
@@ -1525,7 +1523,7 @@ void cedit_parse(struct descriptor_data *d, char *arg) {
 
                 case 'b':
                 case 'B':
-                    write_to_output(d, "Enter the minimum level for players to appear on the wizlist : ");
+                    d->sendText("Enter the minimum level for players to appear on the wizlist : ");
                     OLC_MODE(d) = CEDIT_MIN_WIZLIST_LEV;
                     return;
 
@@ -1535,7 +1533,7 @@ void cedit_parse(struct descriptor_data *d, char *arg) {
                     return;
 
                 default:
-                    write_to_output(d, "\r\nThat is an invalid choice!\r\n");
+                    d->sendText("\r\nThat is an invalid choice!\r\n");
             }
 
             cedit_disp_autowiz_options(d);
@@ -1561,7 +1559,7 @@ void cedit_parse(struct descriptor_data *d, char *arg) {
                     return;
 
                 default:
-                    write_to_output(d, "\r\nThat is an invalid choice!\r\n");
+                    d->sendText("\r\nThat is an invalid choice!\r\n");
             }
 
             cedit_disp_advance_options(d);
@@ -1573,55 +1571,55 @@ void cedit_parse(struct descriptor_data *d, char *arg) {
             switch (*arg) {
                 case 'a':
                 case 'A':
-                    write_to_output(d, "Enter the Speed of the violence system (1 - 10) 10 = Slowest : ");
+                    d->sendText("Enter the Speed of the violence system (1 - 10) 10 = Slowest : ");
                     OLC_MODE(d) = CEDIT_PULSE_VIOLENCE;
                     return;
 
                 case 'b':
                 case 'B':
-                    write_to_output(d, "Enter the Speed of the Mobile Actions (1 - 20) 20 = Slowest : ");
+                    d->sendText("Enter the Speed of the Mobile Actions (1 - 20) 20 = Slowest : ");
                     OLC_MODE(d) = CEDIT_PULSE_MOBILE;
                     return;
 
                 case 'c':
                 case 'C':
-                    write_to_output(d, "Enter Zone update time : ");
+                    d->sendText("Enter Zone update time : ");
                     OLC_MODE(d) = CEDIT_PULSE_ZONE;
                     return;
 
                 case 'd':
                 case 'D':
-                    write_to_output(d, "Enter time for autosaving : ");
+                    d->sendText("Enter time for autosaving : ");
                     OLC_MODE(d) = CEDIT_PULSE_AUTOSAVE;
                     return;
 
                 case 'e':
                 case 'E':
-                    write_to_output(d, "Enter the time to kill connection waiting for password : ");
+                    d->sendText("Enter the time to kill connection waiting for password : ");
                     OLC_MODE(d) = CEDIT_PULSE_IDLEPWD;
                     return;
 
                 case 'f':
                 case 'F':
-                    write_to_output(d, "Enter the maximum size of the logs : ");
+                    d->sendText("Enter the maximum size of the logs : ");
                     OLC_MODE(d) = CEDIT_PULSE_SANITY;
                     return;
 
                 case 'g':
                 case 'G':
-                    write_to_output(d, "Enter the maximum number of password attempts : ");
+                    d->sendText("Enter the maximum number of password attempts : ");
                     OLC_MODE(d) = CEDIT_PULSE_USAGE;
                     return;
 
                 case 'h':
                 case 'H':
-                    write_to_output(d, "Enter timesave : ");
+                    d->sendText("Enter timesave : ");
                     OLC_MODE(d) = CEDIT_PULSE_TIMESAVE;
                     return;
 
                 case 'i':
                 case 'I':
-                    write_to_output(d, "Enter Current update time : ");
+                    d->sendText("Enter Current update time : ");
                     OLC_MODE(d) = CEDIT_PULSE_CURRENT;
                     return;
 
@@ -1631,7 +1629,7 @@ void cedit_parse(struct descriptor_data *d, char *arg) {
                     return;
 
                 default:
-                    write_to_output(d, "\r\nThat is an invalid choice!\r\n");
+                    d->sendText("\r\nThat is an invalid choice!\r\n");
             }
 
 
@@ -1642,7 +1640,7 @@ void cedit_parse(struct descriptor_data *d, char *arg) {
 
         case CEDIT_LEVEL_CAN_SHOUT:
             if (!*arg) {
-                write_to_output(d,
+                d->sendText(
                                 "That is an invalid choice!\r\n"
                                 "Enter the minimum level a player must be to shout, gossip, etc : ");
             } else {
@@ -1655,7 +1653,7 @@ void cedit_parse(struct descriptor_data *d, char *arg) {
 
         case CEDIT_HOLLER_MOVE_COST:
             if (!*arg) {
-                write_to_output(d,
+                d->sendText(
                                 "That is an invalid choice!\r\n"
                                 "Enter the amount it costs (in move points) to holler : ");
             } else {
@@ -1668,7 +1666,7 @@ void cedit_parse(struct descriptor_data *d, char *arg) {
 
         case CEDIT_TUNNEL_SIZE:
             if (!*arg) {
-                write_to_output(d,
+                d->sendText(
                                 "That is an invalid choice!\r\n"
                                 "Enter the maximum number of people allowed in a tunnel : ");
             } else {
@@ -1700,7 +1698,7 @@ void cedit_parse(struct descriptor_data *d, char *arg) {
 
         case CEDIT_MAX_NPC_CORPSE_TIME:
             if (!*arg) {
-                write_to_output(d,
+                d->sendText(
                                 "That is an invalid choice!\r\n"
                                 "Enter the number of tics before NPC corpses decompose : ");
             } else {
@@ -1713,7 +1711,7 @@ void cedit_parse(struct descriptor_data *d, char *arg) {
 
         case CEDIT_MAX_PC_CORPSE_TIME:
             if (!*arg) {
-                write_to_output(d,
+                d->sendText(
                                 "That is an invalid choice!\r\n"
                                 "Enter the number of tics before PC corpses decompose : ");
             } else {
@@ -1726,7 +1724,7 @@ void cedit_parse(struct descriptor_data *d, char *arg) {
 
         case CEDIT_IDLE_VOID:
             if (!*arg) {
-                write_to_output(d,
+                d->sendText(
                                 "That is an invalid choice!\r\n"
                                 "Enter the number of tics before PC's are sent to the void (idle) : ");
             } else {
@@ -1739,7 +1737,7 @@ void cedit_parse(struct descriptor_data *d, char *arg) {
 
         case CEDIT_IDLE_RENT_TIME:
             if (!*arg) {
-                write_to_output(d,
+                d->sendText(
                                 "That is an invalid choice!\r\n"
                                 "Enter the number of tics before PC's are automatically rented and forced to quit : ");
             } else {
@@ -1752,7 +1750,7 @@ void cedit_parse(struct descriptor_data *d, char *arg) {
 
         case CEDIT_IDLE_MAX_LEVEL:
             if (!*arg) {
-                write_to_output(d,
+                d->sendText(
                                 "That is an invalid choice!\r\n"
                                 "Enter the level a player must be to become immune to IDLE : ");
             } else {
@@ -1765,7 +1763,7 @@ void cedit_parse(struct descriptor_data *d, char *arg) {
 
         case CEDIT_LEVEL_CAP:
             if (!*arg) {
-                write_to_output(d,
+                d->sendText(
                                 "That is an invalid choice!\r\n"
                                 "Enter the level a player cannot reach : ");
             } else {
@@ -1823,7 +1821,7 @@ void cedit_parse(struct descriptor_data *d, char *arg) {
 
         case CEDIT_MAX_OBJ_SAVE:
             if (!*arg) {
-                write_to_output(d,
+                d->sendText(
                                 "That is an invalid choice!\r\n"
                                 "Enter the maximum objects a player can save : ");
             } else {
@@ -1836,7 +1834,7 @@ void cedit_parse(struct descriptor_data *d, char *arg) {
 
         case CEDIT_MIN_RENT_COST:
             if (!*arg) {
-                write_to_output(d,
+                d->sendText(
                                 "That is an invalid choice!\r\n"
                                 "Enter the minimum amount it costs to rent : ");
             } else {
@@ -1849,7 +1847,7 @@ void cedit_parse(struct descriptor_data *d, char *arg) {
 
         case CEDIT_AUTOSAVE_TIME:
             if (!*arg) {
-                write_to_output(d,
+                d->sendText(
                                 "That is an invalid choice!\r\n"
                                 "Enter the interval for player's being autosaved : ");
             } else {
@@ -1862,7 +1860,7 @@ void cedit_parse(struct descriptor_data *d, char *arg) {
 
         case CEDIT_CRASH_FILE_TIMEOUT:
             if (!*arg) {
-                write_to_output(d,
+                d->sendText(
                                 "That is an invalid choice!\r\n"
                                 "Enter the lifetime of crash and idlesave files (days) : ");
             } else {
@@ -1875,7 +1873,7 @@ void cedit_parse(struct descriptor_data *d, char *arg) {
 
         case CEDIT_RENT_FILE_TIMEOUT:
             if (!*arg) {
-                write_to_output(d,
+                d->sendText(
                                 "That is an invalid choice!\r\n"
                                 "Enter the lifetime of rent files (days) : ");
             } else {
@@ -1888,11 +1886,11 @@ void cedit_parse(struct descriptor_data *d, char *arg) {
 
         case CEDIT_MORTAL_START_ROOM:
             if (!*arg) {
-                write_to_output(d,
+                d->sendText(
                                 "That is an invalid choice!\r\n"
                                 "Enter the room's vnum where mortals should load into : ");
             } else if (real_room(atoi(arg)) == NOWHERE) {
-                write_to_output(d,
+                d->sendText(
                                 "That room doesn't exist!\r\n"
                                 "Enter the room's vnum where mortals should load into : ");
             } else {
@@ -1905,11 +1903,11 @@ void cedit_parse(struct descriptor_data *d, char *arg) {
 
         case CEDIT_IMMORT_START_ROOM:
             if (!*arg) {
-                write_to_output(d,
+                d->sendText(
                                 "That is an invalid choice!\r\n"
                                 "Enter the room's vnum where immortals should load into : ");
             } else if (real_room(atoi(arg)) == NOWHERE) {
-                write_to_output(d,
+                d->sendText(
                                 "That room doesn't exist!\r\n"
                                 "Enter the room's vnum where immortals should load into : ");
             } else {
@@ -1922,11 +1920,11 @@ void cedit_parse(struct descriptor_data *d, char *arg) {
 
         case CEDIT_FROZEN_START_ROOM:
             if (!*arg) {
-                write_to_output(d,
+                d->sendText(
                                 "That is an invalid choice!\r\n"
                                 "Enter the room's vnum where frozen people should load into : ");
             } else if (real_room(atoi(arg)) == NOWHERE) {
-                write_to_output(d,
+                d->sendText(
                                 "That room doesn't exist!\r\n"
                                 "Enter the room's vnum where frozen people should load into : ");
             } else {
@@ -1939,11 +1937,11 @@ void cedit_parse(struct descriptor_data *d, char *arg) {
 
         case CEDIT_DONATION_ROOM_1:
             if (!*arg) {
-                write_to_output(d,
+                d->sendText(
                                 "That is an invalid choice!\r\n"
                                 "Enter the vnum for donation room #1 : ");
             } else if (real_room(atoi(arg)) == NOWHERE) {
-                write_to_output(d,
+                d->sendText(
                                 "That room doesn't exist!\r\n"
                                 "Enter the vnum for donation room #1 : ");
             } else {
@@ -1956,11 +1954,11 @@ void cedit_parse(struct descriptor_data *d, char *arg) {
 
         case CEDIT_DONATION_ROOM_2:
             if (!*arg) {
-                write_to_output(d,
+                d->sendText(
                                 "That is an invalid choice!\r\n"
                                 "Enter the vnum for donation room #2 : ");
             } else if (real_room(atoi(arg)) == NOWHERE) {
-                write_to_output(d,
+                d->sendText(
                                 "That room doesn't exist!\r\n"
                                 "Enter the vnum for donation room #2 : ");
             } else {
@@ -1973,11 +1971,11 @@ void cedit_parse(struct descriptor_data *d, char *arg) {
 
         case CEDIT_DONATION_ROOM_3:
             if (!*arg) {
-                write_to_output(d,
+                d->sendText(
                                 "That is an invalid choice!\r\n"
                                 "Enter the vnum for donation room #3 : ");
             } else if (real_room(atoi(arg)) == NOWHERE) {
-                write_to_output(d,
+                d->sendText(
                                 "That room doesn't exist!\r\n"
                                 "Enter the vnum for donation room #3 : ");
             } else {
@@ -1997,7 +1995,7 @@ void cedit_parse(struct descriptor_data *d, char *arg) {
 
         case CEDIT_DFLT_IP:
             if (!*arg) {
-                write_to_output(d,
+                d->sendText(
                                 "That is an invalid choice!\r\n"
                                 "Enter the default ip address : ");
             } else {
@@ -2010,7 +2008,7 @@ void cedit_parse(struct descriptor_data *d, char *arg) {
 
         case CEDIT_DFLT_DIR:
             if (!*arg) {
-                write_to_output(d,
+                d->sendText(
                                 "That is an invalid choice!\r\n"
                                 "Enter the default directory : ");
             } else {
@@ -2023,7 +2021,7 @@ void cedit_parse(struct descriptor_data *d, char *arg) {
 
         case CEDIT_LOGNAME:
             if (!*arg) {
-                write_to_output(d,
+                d->sendText(
                                 "That is an invalid choice!\r\n"
                                 "Enter the name of the logfile : ");
             } else {
@@ -2057,7 +2055,7 @@ void cedit_parse(struct descriptor_data *d, char *arg) {
 
         case CEDIT_MIN_WIZLIST_LEV:
             if (atoi(arg) > ADMLVL_IMPL) {
-                write_to_output(d,
+                d->send_to(
                                 "The minimum wizlist level can't be greater than %d.\r\n"
                                 "Enter the minimum level for players to appear on the wizlist : ", ADMLVL_IMPL);
             } else {
@@ -2070,7 +2068,7 @@ void cedit_parse(struct descriptor_data *d, char *arg) {
 
         case CEDIT_PULSE_VIOLENCE:
             if (!isdigit(*arg) || atoi(arg) < 0 || atoi(arg) > 10) {
-                write_to_output(d, "Please enter a number between 0 - 10.\r\n");
+                d->sendText("Please enter a number between 0 - 10.\r\n");
                 cedit_disp_ticks_menu(d);
             } else {
                 OLC_CONFIG(d)->ticks.pulse_violence = atoi(arg);
@@ -2081,7 +2079,7 @@ void cedit_parse(struct descriptor_data *d, char *arg) {
 /*-------------------------------------------------------------------*/
         case CEDIT_PULSE_MOBILE:
             if (!isdigit(*arg) || atoi(arg) < 0 || atoi(arg) > 20) {
-                write_to_output(d, "Please enter a number between 0 - 20.\r\n");
+                d->sendText("Please enter a number between 0 - 20.\r\n");
                 cedit_disp_ticks_menu(d);
             } else {
                 OLC_CONFIG(d)->ticks.pulse_mobile = atoi(arg);
@@ -2092,7 +2090,7 @@ void cedit_parse(struct descriptor_data *d, char *arg) {
 /*-------------------------------------------------------------------*/
         case CEDIT_PULSE_IDLEPWD:
             if (!isdigit(*arg) || atoi(arg) < 0 || atoi(arg) > 30) {
-                write_to_output(d, "Please enter a number between 0 - 30.\r\n");
+                d->sendText("Please enter a number between 0 - 30.\r\n");
                 cedit_disp_ticks_menu(d);
             } else {
                 OLC_CONFIG(d)->ticks.pulse_idlepwd = atoi(arg);
@@ -2103,7 +2101,7 @@ void cedit_parse(struct descriptor_data *d, char *arg) {
 /*-------------------------------------------------------------------*/
         case CEDIT_PULSE_ZONE:
             if (!isdigit(*arg) || atoi(arg) < 0 || atoi(arg) > 20) {
-                write_to_output(d, "Please enter a number between 0 - 20.\r\n");
+                d->sendText("Please enter a number between 0 - 20.\r\n");
                 cedit_disp_ticks_menu(d);
             } else {
                 OLC_CONFIG(d)->ticks.pulse_zone = atoi(arg);
@@ -2114,7 +2112,7 @@ void cedit_parse(struct descriptor_data *d, char *arg) {
 /*-------------------------------------------------------------------*/
         case CEDIT_PULSE_AUTOSAVE:
             if (!isdigit(*arg) || atoi(arg) < 0 || atoi(arg) > 100) {
-                write_to_output(d, "Please enter a number between 0 - 100.\r\n");
+                d->sendText("Please enter a number between 0 - 100.\r\n");
                 cedit_disp_ticks_menu(d);
             } else {
                 OLC_CONFIG(d)->ticks.pulse_autosave = atoi(arg);
@@ -2125,7 +2123,7 @@ void cedit_parse(struct descriptor_data *d, char *arg) {
 /*-------------------------------------------------------------------*/
         case CEDIT_PULSE_CURRENT:
             if (!isdigit(*arg) || atoi(arg) < 0 || atoi(arg) > 30) {
-                write_to_output(d, "Please enter a number between 0 - 30.\r\n");
+                d->sendText("Please enter a number between 0 - 30.\r\n");
                 cedit_disp_ticks_menu(d);
             } else {
                 OLC_CONFIG(d)->ticks.pulse_current = atoi(arg);
@@ -2136,7 +2134,7 @@ void cedit_parse(struct descriptor_data *d, char *arg) {
 /*-------------------------------------------------------------------*/
         case CEDIT_PULSE_SANITY:
             if (!isdigit(*arg) || atoi(arg) < 0 || atoi(arg) > 50) {
-                write_to_output(d, "Please enter a number between 0 - 50.\r\n");
+                d->sendText("Please enter a number between 0 - 50.\r\n");
                 cedit_disp_ticks_menu(d);
             } else {
                 OLC_CONFIG(d)->ticks.pulse_sanity = atoi(arg);
@@ -2147,7 +2145,7 @@ void cedit_parse(struct descriptor_data *d, char *arg) {
 /*-------------------------------------------------------------------*/
         case CEDIT_PULSE_USAGE:
             if (!isdigit(*arg) || atoi(arg) < 0 || atoi(arg) > 10) {
-                write_to_output(d, "Please enter a number between 0 - 10.\r\n");
+                d->sendText("Please enter a number between 0 - 10.\r\n");
                 cedit_disp_ticks_menu(d);
             } else {
                 OLC_CONFIG(d)->ticks.pulse_usage = atoi(arg);
@@ -2190,7 +2188,7 @@ void cedit_parse(struct descriptor_data *d, char *arg) {
                     return;
 
                 default:
-                    write_to_output(d, "\r\nThat is an invalid choice!\r\n");
+                    d->sendText("\r\nThat is an invalid choice!\r\n");
                     cedit_disp_creation_menu(d);
             }
             return;
@@ -2199,7 +2197,7 @@ void cedit_parse(struct descriptor_data *d, char *arg) {
 
         case CEDIT_CREATION_MENU:
             if (!isdigit(*arg) || atoi(arg) < 0 || atoi(arg) > NUM_CREATION_METHODS - 1) {
-                write_to_output(d, "Please enter a number between 0 - %d.\r\n", NUM_CREATION_METHODS - 1);
+                d->send_to("Please enter a number between 0 - %d.\r\n", NUM_CREATION_METHODS - 1);
                 cedit_disp_creation_menu(d);
             } else {
                 OLC_CONFIG(d)->creation.method = atoi(arg);
@@ -2212,7 +2210,7 @@ void cedit_parse(struct descriptor_data *d, char *arg) {
 
         case CEDIT_POINTS_MENU:
             if (!isdigit(*arg) || atoi(arg) < 0) {
-                write_to_output(d, "Please enter a number 0 or higher.\r\n");
+                d->sendText("Please enter a number 0 or higher.\r\n");
                 cedit_disp_points_menu(d);
             } else {
                 OLC_CONFIG(d)->play.initial_points = atoi(arg);
@@ -2228,7 +2226,7 @@ void cedit_parse(struct descriptor_data *d, char *arg) {
              */
             cleanup_olc(d, CLEANUP_CONFIG);
             mudlog(BRF, ADMLVL_BUILDER, true, "SYSERR: OLC: cedit_parse(): Reached default case!");
-            write_to_output(d, "Oops...\r\n");
+            d->sendText("Oops...\r\n");
             break;
     }
 }

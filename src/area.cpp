@@ -262,30 +262,30 @@ void displayLandSpots(struct char_data *ch, const std::string& planet_name, cons
     const int line_length = 60;  // Adjust the max line length as needed
     int current_length = 0;
 
-    send_to_char(ch, "@D------------------[ %s@D ]------------------@c\n", planet_name.c_str());
+        ch->send_to("@D------------------[ %s@D ]------------------@c\n", planet_name.c_str());
 
     for (size_t i = 0; i < locations.size(); ++i) {
         const std::string& location = locations[i].first;
 
         // Check if adding this location would exceed the line length
         if (current_length + location.length() + 2 > line_length) { // +2 for the ", "
-            send_to_char(ch, "\n");  // Start a new line
+                        ch->sendText("\n");  // Start a new line
             current_length = 0;
         }
 
         // Add the location to the line
-        send_to_char(ch, "%s", location.c_str());
+                ch->send_to("%s", location.c_str());
         current_length += location.length();
 
         // Add a comma and space unless it's the last item
         if (i < locations.size() - 1) {
-            send_to_char(ch, ", ");
+                        ch->sendText(", ");
             current_length += 2;
         }
     }
 
-    send_to_char(ch, ".\n");  // End the list with a period and new line
-    send_to_char(ch, "@D---------------------------------------------@n\n");
+        ch->sendText(".\n");  // End the list with a period and new line
+        ch->sendText("@D---------------------------------------------@n\n");
 }
 
 static const land_spots dock_earth = {

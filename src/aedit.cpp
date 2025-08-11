@@ -27,25 +27,25 @@ ACMD(do_oasis_aedit) {
     int i;
 
     if (CONFIG_NEW_SOCIALS == 0) {
-        send_to_char(ch, "Socials cannot be edited at the moment.\r\n");
+                ch->sendText("Socials cannot be edited at the moment.\r\n");
         return;
     }
 
     if (GET_OLC_ZONE(ch) != AEDIT_PERMISSION && GET_ADMLEVEL(ch) < ADMLVL_BUILDER) {
-        send_to_char(ch, "You don't have access to editing socials.\r\n");
+                ch->sendText("You don't have access to editing socials.\r\n");
         return;
     }
 
     for (d = descriptor_list; d; d = d->next)
         if (STATE(d) == CON_AEDIT) {
-            send_to_char(ch, "Sorry, only one can edit socials at a time.\r\n");
+                        ch->sendText("Sorry, only one can edit socials at a time.\r\n");
             return;
         }
 
     one_argument(argument, arg);
 
     if (!*arg) {
-        send_to_char(ch, "Please specify a social to edit.\r\n");
+                ch->sendText("Please specify a social to edit.\r\n");
         return;
     }
 
@@ -53,9 +53,9 @@ ACMD(do_oasis_aedit) {
 
     if (!strcasecmp("save", arg)) {
         mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), true, "OLC: %s saves socials.", GET_NAME(ch));
-        send_to_char(ch, "Writing social file..\r\n");
+                ch->sendText("Writing social file..\r\n");
         aedit_save_to_disk(d);
-        send_to_char(ch, "Done.\r\n");
+                ch->sendText("Done.\r\n");
         return;
     }
 
@@ -77,14 +77,14 @@ ACMD(do_oasis_aedit) {
 
     if (OLC_ZNUM(d) > top_of_socialt) {
         if ((i = aedit_find_command(OLC_STORAGE(d))) != -1) {
-            send_to_char(ch, "The '%s' command already exists (%s).\r\n", OLC_STORAGE(d), complete_cmd_info[i].command);
+                        ch->send_to("The '%s' command already exists (%s).\r\n", OLC_STORAGE(d), complete_cmd_info[i].command);
             cleanup_olc(d, CLEANUP_ALL);
             return;
         }
-        send_to_char(ch, "Do you wish to add the '%s' action? ", OLC_STORAGE(d));
+                ch->send_to("Do you wish to add the '%s' action? ", OLC_STORAGE(d));
         OLC_MODE(d) = AEDIT_CONFIRM_ADD;
     } else {
-        send_to_char(ch, "Do you wish to edit the '%s' action? ", soc_mess_list[OLC_ZNUM(d)].command);
+                ch->send_to("Do you wish to edit the '%s' action? ", soc_mess_list[OLC_ZNUM(d)].command);
         OLC_MODE(d) = AEDIT_CONFIRM_EDIT;
     }
     STATE(d) = CON_AEDIT;
@@ -242,7 +242,7 @@ void aedit_save_to_disk(struct descriptor_data *d) {
 void aedit_disp_menu(struct descriptor_data *d) {
     struct social_messg *action = OLC_ACTION(d);
 
-    write_to_output(d,
+    d->send_to(
                     "@n-- Action editor\r\n"
                     "@gn@n) Command         : @y%-15.15s@n @g1@n) Sort as Command  : @y%-15.15s@n\r\n"
                     "@g2@n) Min Position[CH]: @c%-8.8s        @g3@n) Min Position [VT]: @c%-8.8s\r\n"
@@ -304,7 +304,7 @@ void aedit_parse(struct descriptor_data *d, char *arg) {
 
                     /* do not free the strings.. just the structure */
                     cleanup_olc(d, CLEANUP_STRUCTS);
-                    write_to_output(d, "Action saved to disk.\r\n");
+                    d->sendText("Action saved to disk.\r\n");
                     break;
                 case 'n':
                 case 'N':
@@ -312,8 +312,7 @@ void aedit_parse(struct descriptor_data *d, char *arg) {
                     cleanup_olc(d, CLEANUP_ALL);
                     break;
                 default:
-                    write_to_output(d, "Invalid choice!\r\n"
-                                       "Do you wish to save your changes? : ");
+                    d->sendText("Invalid choice!\r\nDo you wish to save your changes? : ");
                     break;
             }
             return; /* end of AEDIT_CONFIRM_SAVESTRING */
@@ -340,19 +339,15 @@ void aedit_parse(struct descriptor_data *d, char *arg) {
                             cleanup_olc(d, CLEANUP_ALL);
                             break;
                         }
-                        write_to_output(d, "Do you wish to add the '%s' action? ",
-                                        OLC_STORAGE(d));
+                        d->send_to("Do you wish to add the '%s' action? ", OLC_STORAGE(d));
                         OLC_MODE(d) = AEDIT_CONFIRM_ADD;
                     } else {
-                        write_to_output(d, "Do you wish to edit the '%s' action? ",
-                                        soc_mess_list[OLC_ZNUM(d)].command);
+                        d->send_to("Do you wish to edit the '%s' action? ", soc_mess_list[OLC_ZNUM(d)].command);
                         OLC_MODE(d) = AEDIT_CONFIRM_EDIT;
                     }
                     break;
                 default:
-                    write_to_output(d, "Invalid choice!\r\n"
-                                       "Do you wish to edit the '%s' action? ",
-                                    soc_mess_list[OLC_ZNUM(d)].command);
+                    d->send_to("Invalid choice!\r\nDo you wish to edit the '%s' action? ", soc_mess_list[OLC_ZNUM(d)].command);
                     break;
             }
             return;
@@ -370,9 +365,7 @@ void aedit_parse(struct descriptor_data *d, char *arg) {
                     cleanup_olc(d, CLEANUP_ALL);
                     break;
                 default:
-                    write_to_output(d, "Invalid choice!\r\n"
-                                       "Do you wish to add the '%s' action? ",
-                                    OLC_STORAGE(d));
+                    d->send_to("Invalid choice!\r\nDo you wish to add the '%s' action? ", OLC_STORAGE(d));
                     break;
             }
             return;
@@ -382,40 +375,40 @@ void aedit_parse(struct descriptor_data *d, char *arg) {
                 case 'q':
                 case 'Q':
                     if (OLC_VAL(d)) { /* Something was modified */
-                        write_to_output(d, "Do you wish to save your changes? : ");
+                        d->sendText("Do you wish to save your changes? : ");
                         OLC_MODE(d) = AEDIT_CONFIRM_SAVESTRING;
                     } else cleanup_olc(d, CLEANUP_ALL);
                     break;
                 case 'n':
-                    write_to_output(d, "Enter action name: ");
+                    d->sendText("Enter action name: ");
                     OLC_MODE(d) = AEDIT_ACTION_NAME;
                     return;
                 case '1':
-                    write_to_output(d, "Enter sort info for this action (for the command listing): ");
+                    d->sendText("Enter sort info for this action (for the command listing): ");
                     OLC_MODE(d) = AEDIT_SORT_AS;
                     return;
                 case '2':
-                    write_to_output(d, "Enter the minimum position the Character has to be in to activate social:\r\n");
+                    d->sendText("Enter the minimum position the Character has to be in to activate social:\r\n");
                     {
                         for (i = POS_DEAD; i <= POS_STANDING; i++)
-                            write_to_output(d, "   %d) %s\r\n", i, position_types[i]);
+                            d->send_to("   %d) %s\r\n", i, position_types[i]);
 
-                        write_to_output(d, "Enter choice: ");
+                        d->sendText("Enter choice: ");
                     }
                     OLC_MODE(d) = AEDIT_MIN_CHAR_POS;
                     return;
                 case '3':
-                    write_to_output(d, "Enter the minimum position the Victim has to be in to activate social:\r\n");
+                    d->sendText("Enter the minimum position the Victim has to be in to activate social:\r\n");
                     {
                         for (i = POS_DEAD; i <= POS_STANDING; i++)
-                            write_to_output(d, "   %d) %s\r\n", i, position_types[i]);
+                            d->send_to("   %d) %s\r\n", i, position_types[i]);
 
-                        write_to_output(d, "Enter choice: ");
+                        d->sendText("Enter choice: ");
                     }
                     OLC_MODE(d) = AEDIT_MIN_VICT_POS;
                     return;
                 case '4':
-                    write_to_output(d, "Enter new minimum level for social: ");
+                    d->sendText("Enter new minimum level for social: ");
                     OLC_MODE(d) = AEDIT_MIN_CHAR_LEVEL;
                     return;
                 case '5':
@@ -425,7 +418,7 @@ void aedit_parse(struct descriptor_data *d, char *arg) {
                     break;
                 case 'a':
                 case 'A':
-                    write_to_output(d, "Enter social shown to the Character when there is no argument supplied.\r\n"
+                    d->send_to("Enter social shown to the Character when there is no argument supplied.\r\n"
                                        "[OLD]: %s\r\n"
                                        "[NEW]: ",
                                     ((OLC_ACTION(d)->char_no_arg) ? OLC_ACTION(d)->char_no_arg : "nullptr"));
@@ -433,7 +426,7 @@ void aedit_parse(struct descriptor_data *d, char *arg) {
                     return;
                 case 'b':
                 case 'B':
-                    write_to_output(d, "Enter social shown to Others when there is no argument supplied.\r\n"
+                    d->send_to("Enter social shown to Others when there is no argument supplied.\r\n"
                                        "[OLD]: %s\r\n"
                                        "[NEW]: ",
                                     ((OLC_ACTION(d)->others_no_arg) ? OLC_ACTION(d)->others_no_arg : "nullptr"));
@@ -441,7 +434,7 @@ void aedit_parse(struct descriptor_data *d, char *arg) {
                     return;
                 case 'c':
                 case 'C':
-                    write_to_output(d, "Enter text shown to the Character when his victim isnt found.\r\n"
+                    d->send_to("Enter text shown to the Character when his victim isnt found.\r\n"
                                        "[OLD]: %s\r\n"
                                        "[NEW]: ",
                                     ((OLC_ACTION(d)->not_found) ? OLC_ACTION(d)->not_found : "nullptr"));
@@ -450,7 +443,7 @@ void aedit_parse(struct descriptor_data *d, char *arg) {
                     return;
                 case 'd':
                 case 'D':
-                    write_to_output(d, "Enter social shown to the Character when it is its own victim.\r\n"
+                    d->send_to("Enter social shown to the Character when it is its own victim.\r\n"
                                        "[OLD]: %s\r\n"
                                        "[NEW]: ",
                                     ((OLC_ACTION(d)->char_auto) ? OLC_ACTION(d)->char_auto : "nullptr"));
@@ -459,7 +452,7 @@ void aedit_parse(struct descriptor_data *d, char *arg) {
                     return;
                 case 'e':
                 case 'E':
-                    write_to_output(d, "Enter social shown to Others when the Char is its own victim.\r\n"
+                    d->send_to("Enter social shown to Others when the Char is its own victim.\r\n"
                                        "[OLD]: %s\r\n"
                                        "[NEW]: ",
                                     ((OLC_ACTION(d)->others_auto) ? OLC_ACTION(d)->others_auto : "nullptr"));
@@ -468,7 +461,7 @@ void aedit_parse(struct descriptor_data *d, char *arg) {
                     return;
                 case 'f':
                 case 'F':
-                    write_to_output(d, "Enter normal social shown to the Character when the victim is found.\r\n"
+                    d->send_to("Enter normal social shown to the Character when the victim is found.\r\n"
                                        "[OLD]: %s\r\n"
                                        "[NEW]: ",
                                     ((OLC_ACTION(d)->char_found) ? OLC_ACTION(d)->char_found : "nullptr"));
@@ -477,7 +470,7 @@ void aedit_parse(struct descriptor_data *d, char *arg) {
                     return;
                 case 'g':
                 case 'G':
-                    write_to_output(d, "Enter normal social shown to Others when the victim is found.\r\n"
+                    d->send_to("Enter normal social shown to Others when the victim is found.\r\n"
                                        "[OLD]: %s\r\n"
                                        "[NEW]: ",
                                     ((OLC_ACTION(d)->others_found) ? OLC_ACTION(d)->others_found : "nullptr"));
@@ -486,7 +479,7 @@ void aedit_parse(struct descriptor_data *d, char *arg) {
                     return;
                 case 'h':
                 case 'H':
-                    write_to_output(d, "Enter normal social shown to the Victim when the victim is found.\r\n"
+                    d->send_to("Enter normal social shown to the Victim when the victim is found.\r\n"
                                        "[OLD]: %s\r\n"
                                        "[NEW]: ",
                                     ((OLC_ACTION(d)->vict_found) ? OLC_ACTION(d)->vict_found : "nullptr"));
@@ -495,7 +488,7 @@ void aedit_parse(struct descriptor_data *d, char *arg) {
                     return;
                 case 'i':
                 case 'I':
-                    write_to_output(d, "Enter 'body part' social shown to the Character when the victim is found.\r\n"
+                    d->send_to("Enter 'body part' social shown to the Character when the victim is found.\r\n"
                                        "[OLD]: %s\r\n"
                                        "[NEW]: ",
                                     ((OLC_ACTION(d)->char_body_found) ? OLC_ACTION(d)->char_body_found : "nullptr"));
@@ -504,7 +497,7 @@ void aedit_parse(struct descriptor_data *d, char *arg) {
                     return;
                 case 'j':
                 case 'J':
-                    write_to_output(d, "Enter 'body part' social shown to Others when the victim is found.\r\n"
+                    d->send_to("Enter 'body part' social shown to Others when the victim is found.\r\n"
                                        "[OLD]: %s\r\n"
                                        "[NEW]: ",
                                     ((OLC_ACTION(d)->others_body_found) ? OLC_ACTION(d)->others_body_found
@@ -514,7 +507,7 @@ void aedit_parse(struct descriptor_data *d, char *arg) {
                     return;
                 case 'k':
                 case 'K':
-                    write_to_output(d, "Enter 'body part' social shown to the Victim when the victim is found.\r\n"
+                    d->send_to("Enter 'body part' social shown to the Victim when the victim is found.\r\n"
                                        "[OLD]: %s\r\n"
                                        "[NEW]: ",
                                     ((OLC_ACTION(d)->vict_body_found) ? OLC_ACTION(d)->vict_body_found : "nullptr"));
@@ -523,7 +516,7 @@ void aedit_parse(struct descriptor_data *d, char *arg) {
                     return;
                 case 'l':
                 case 'L':
-                    write_to_output(d, "Enter 'object' social shown to the Character when the object is found.\r\n"
+                    d->send_to("Enter 'object' social shown to the Character when the object is found.\r\n"
                                        "[OLD]: %s\r\n"
                                        "[NEW]: ",
                                     ((OLC_ACTION(d)->char_obj_found) ? OLC_ACTION(d)->char_obj_found : "nullptr"));
@@ -532,7 +525,7 @@ void aedit_parse(struct descriptor_data *d, char *arg) {
                     return;
                 case 'm':
                 case 'M':
-                    write_to_output(d, "Enter 'object' social shown to the Room when the object is found.\r\n"
+                    d->send_to("Enter 'object' social shown to the Room when the object is found.\r\n"
                                        "[OLD]: %s\r\n"
                                        "[NEW]: ",
                                     ((OLC_ACTION(d)->others_obj_found) ? OLC_ACTION(d)->others_obj_found : "nullptr"));
@@ -745,7 +738,7 @@ ACMD(do_astat) {
     one_argument(argument, arg);
 
     if (!*arg) {
-        send_to_char(ch, "Astat which social?\r\n");
+                ch->sendText("Astat which social?\r\n");
         return;
     }
 
@@ -757,12 +750,11 @@ ACMD(do_astat) {
     }
 
     if (!real) {
-        send_to_char(ch, "No such social.\r\n");
+                ch->sendText("No such social.\r\n");
         return;
     }
 
-    send_to_char(ch,
-                 "n) Command         : @y%-15.15s@n 1) Sort as Command : @y%-15.15s@n\r\n"
+        ch->send_to("Command         : @y%-15.15s@n 1) Sort as Command : @y%-15.15s@n\r\n"
                  "2) Min Position[CH]: @c%-8.8s@n        3) Min Position[VT]: @c%-8.8s@n\r\n"
                  "4) Min Level   [CH]: @c%-3d@n             5) Show if Invis   : @c%s@n\r\n"
                  "a) Char    [NO ARG]: @c%s@n\r\n"

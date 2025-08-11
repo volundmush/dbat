@@ -275,8 +275,3 @@ int add_shop(struct shop_data *nshp) {
     return S_NUM(nshp);
 }
 
-/*-------------------------------------------------------------------*/
-
-int save_shops(zone_rnum zone_num) {
-    return true;
-}

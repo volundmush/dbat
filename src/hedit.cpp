@@ -39,19 +39,19 @@ ACMD(do_oasis_hedit) {
         return;
 
     if (HEDITS == true) {
-        send_to_char(ch, "Sorry, only one person can edit help files at a time.\r\n");
+                ch->sendText("Sorry, only one person can edit help files at a time.\r\n");
         return;
     }
 
     if (GET_ADMLEVEL(ch) < 4 && (!strcasecmp("Tepsih", GET_NAME(ch)) && !strcasecmp("Rogoshen", GET_NAME(ch)))) {
-        send_to_char(ch, "Sorry you are incapable of editing help files at this time.\r\n");
+                ch->sendText("Sorry you are incapable of editing help files at this time.\r\n");
         return;
     }
 
     one_argument(argument, arg);
 
     if (!*arg) {
-        send_to_char(ch, "Please specify a help entry to edit.\r\n");
+                ch->sendText("Please specify a help entry to edit.\r\n");
         return;
     }
 
@@ -61,7 +61,7 @@ ACMD(do_oasis_hedit) {
         mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), true, "OLC: %s saves help files.",
                GET_NAME(ch));
         hedit_save_to_disk(d);
-        send_to_char(ch, "Saving help files.\r\n");
+                ch->sendText("Saving help files.\r\n");
         return;
     }
 
@@ -77,10 +77,10 @@ ACMD(do_oasis_hedit) {
     OLC_ZNUM(d) = search_help((const char *) OLC_STORAGE(d), ADMLVL_IMPL);
 
     if (OLC_ZNUM(d) == NOWHERE) {
-        send_to_char(ch, "Do you wish to add the '%s' help file? ", OLC_STORAGE(d));
+                ch->send_to("Do you wish to add the '%s' help file? ", OLC_STORAGE(d));
         OLC_MODE(d) = HEDIT_CONFIRM_ADD;
     } else {
-        send_to_char(ch, "Do you wish to edit the '%s' help file? ", help_table[OLC_ZNUM(d)].keywords);
+                ch->send_to("Do you wish to edit the '%s' help file? ", help_table[OLC_ZNUM(d)].keywords);
         OLC_MODE(d) = HEDIT_CONFIRM_EDIT;
     }
 
@@ -146,16 +146,16 @@ static void hedit_save_to_disk(struct descriptor_data *d) {
 
 /* The main menu. */
 static void hedit_disp_menu(struct descriptor_data *d) {
-    write_to_output(d,
-                    "@n-- Help file editor\r\n"
-                    "@g1@n) Keywords    : @y%s\n"
-                    "@g2@n) Entry       :\r\n@y%s"
-                    "@g3@n) Min Level   : @y%d\r\n"
-                    "@gQ@n) Quit\r\n"
-                    "Enter choice : ",
-                    OLC_HELP(d)->keywords,
-                    OLC_HELP(d)->entry,
-                    OLC_HELP(d)->min_level
+    d->send_to(
+        "@n-- Help file editor\r\n"
+        "@g1@n) Keywords    : @y%s\n"
+        "@g2@n) Entry       :\r\n@y%s"
+        "@g3@n) Min Level   : @y%d\r\n"
+        "@gQ@n) Quit\r\n"
+        "Enter choice : ",
+        OLC_HELP(d)->keywords,
+        OLC_HELP(d)->entry,
+        OLC_HELP(d)->min_level
     );
     OLC_MODE(d) = HEDIT_MAIN_MENU;
 }
@@ -172,15 +172,15 @@ void hedit_parse(struct descriptor_data *d, char *arg) {
                 case 'Y':
                     if (OLC_HELP(d)->keywords == nullptr) {
                         hedit_disp_menu(d);
-                        write_to_output(d, "\n@RYou must fill in the keywords before you save.@n\r\n");
+                        d->sendText("\n@RYou must fill in the keywords before you save.@n\r\n");
                     } else if (strstr(OLC_HELP(d)->keywords, "undefined")) {
                         hedit_disp_menu(d);
-                        write_to_output(d, "\n@RYou must fill in the keywords before you save.@n\r\n");
+                        d->sendText("\n@RYou must fill in the keywords before you save.@n\r\n");
                     } else if (strstr(OLC_HELP(d)->keywords, "<<X<<")) {
                         hedit_disp_menu(d);
-                        write_to_output(d, "\n@RYou must fill in the keywords before you save.@n\r\n");
+                        d->sendText("\n@RYou must fill in the keywords before you save.@n\r\n");
                     } else {
-                        write_to_output(d, "Help saved to disk.\r\n");
+                        d->sendText("Help saved to disk.\r\n");
                         char buf[MAX_INPUT_LENGTH];
                         *buf = '\0';
                         sprintf(buf, "%s", OLC_HELP(d)->keywords);
@@ -198,7 +198,7 @@ void hedit_parse(struct descriptor_data *d, char *arg) {
                     HEDITS = false;
                     break;
                 default:
-                    write_to_output(d, "Invalid choice!\r\nDo you wish to save your changes? : \r\n");
+                    d->sendText("Invalid choice!\r\nDo you wish to save your changes? : \r\n");
                     break;
             }
             return;
@@ -223,19 +223,18 @@ void hedit_parse(struct descriptor_data *d, char *arg) {
                             OLC_ZNUM(d) = top_of_helpt + 1;
 
                     if (OLC_ZNUM(d) > top_of_helpt) {
-                        write_to_output(d, "Do you wish to add the '%s' help file? ",
-                                        OLC_STORAGE(d));
+                        d->send_to("Do you wish to add the '%s' help file? ",
+                                   OLC_STORAGE(d));
                         OLC_MODE(d) = HEDIT_CONFIRM_ADD;
                     } else {
-                        write_to_output(d, "Do you wish to edit the '%s' help file? ",
-                                        help_table[OLC_ZNUM(d)].keywords);
+                        d->send_to("Do you wish to edit the '%s' help file? ",
+                                   help_table[OLC_ZNUM(d)].keywords);
                         OLC_MODE(d) = HEDIT_CONFIRM_EDIT;
                     }
                     break;
                 default:
-                    write_to_output(d, "Invalid choice!\r\n"
-                                       "Do you wish to edit the '%s' help file? ",
-                                    help_table[OLC_ZNUM(d)].keywords);
+                    d->send_to("Invalid choice!\r\nDo you wish to edit the '%s' help file? ",
+                               help_table[OLC_ZNUM(d)].keywords);
                     break;
             }
             return;
@@ -254,9 +253,8 @@ void hedit_parse(struct descriptor_data *d, char *arg) {
                     HEDITS = false;
                     break;
                 default:
-                    write_to_output(d, "Invalid choice!\r\n"
-                                       "Do you wish to add the '%s' help file? ",
-                                    OLC_STORAGE(d));
+                    d->send_to("Invalid choice!\r\nDo you wish to add the '%s' help file? ",
+                               OLC_STORAGE(d));
                     break;
             }
             return;
@@ -267,10 +265,10 @@ void hedit_parse(struct descriptor_data *d, char *arg) {
                 case 'Q':
                     if (OLC_VAL(d)) {
                         /* Something has been modified. */
-                        write_to_output(d, "Do you wish to save your changes? : ");
+                        d->sendText("Do you wish to save your changes? : ");
                         OLC_MODE(d) = HEDIT_CONFIRM_SAVESTRING;
                     } else {
-                        write_to_output(d, "No changes made.\r\n");
+                        d->sendText("No changes made.\r\n");
                         cleanup_olc(d, CLEANUP_ALL);
                         HEDITS = false;
                     }
@@ -278,26 +276,26 @@ void hedit_parse(struct descriptor_data *d, char *arg) {
                 case '1':
                     OLC_MODE(d) = HEDIT_KEYWORDS;
                     clear_screen(d);
-                    write_to_output(d, "Enter help file keywords: ");
+                    d->sendText("Enter help file keywords: ");
                     break;
                 case '2':
                     OLC_MODE(d) = HEDIT_ENTRY;
                     clear_screen(d);
                     send_editor_help(d);
-                    write_to_output(d, "Enter help entry: (/s saves /h for help)\r\n");
+                    d->sendText("Enter help entry: (/s saves /h for help)\r\n");
                     if (OLC_HELP(d)->entry) {
-                        write_to_output(d, "%s", OLC_HELP(d)->entry);
+                        d->send_to("%s", OLC_HELP(d)->entry);
                         oldtext = strdup(OLC_HELP(d)->entry);
                     }
                     string_write(d, &OLC_HELP(d)->entry, MAX_MESSAGE_LENGTH, 0, (char*)oldtext.c_str());
                     OLC_VAL(d) = 1;
                     break;
                 case '3':
-                    write_to_output(d, "Enter min level : ");
+                    d->sendText("Enter min level : ");
                     OLC_MODE(d) = HEDIT_MIN_LEVEL;
                     break;
                 default:
-                    write_to_output(d, "Invalid choice!\r\n");
+                    d->sendText("Invalid choice!\r\n");
                     hedit_disp_menu(d);
                     break;
             }
@@ -314,20 +312,20 @@ void hedit_parse(struct descriptor_data *d, char *arg) {
             if (strstr(OLC_HELP(d)->keywords, "undefined")) {
                 OLC_MODE(d) = HEDIT_KEYWORDS;
                 clear_screen(d);
-                write_to_output(d, "@RYou must at least enter SOME keywords.@n\n");
-                write_to_output(d, "Keywords: ");
+                d->sendText("@RYou must at least enter SOME keywords.@n\n");
+                d->sendText("Keywords: ");
                 change = false;
             } else if (strstr(OLC_HELP(d)->keywords, "<<X<<")) {
                 OLC_MODE(d) = HEDIT_KEYWORDS;
                 clear_screen(d);
-                write_to_output(d, "@RLet's not joke around with help files now.@n\n");
-                write_to_output(d, "Keywords: ");
+                d->sendText("@RLet's not joke around with help files now.@n\n");
+                d->sendText("Keywords: ");
                 change = false;
             } else if (strstr(OLC_HELP(d)->keywords, "<<x<<")) {
                 OLC_MODE(d) = HEDIT_KEYWORDS;
                 clear_screen(d);
-                write_to_output(d, "@RLet's not joke around with help files now.@n\n");
-                write_to_output(d, "Keywords: ");
+                d->sendText("@RLet's not joke around with help files now.@n\n");
+                d->sendText("Keywords: ");
                 change = false;
             } else {
                 sprintf(buf4, "%s\r\n----------\r\n\r\n%s", OLC_HELP(d)->keywords, OLC_HELP(d)->entry);
@@ -343,7 +341,7 @@ void hedit_parse(struct descriptor_data *d, char *arg) {
         case HEDIT_MIN_LEVEL:
             number = atoi(arg);
             if ((number < 0) || (number > ADMLVL_IMPL))
-                write_to_output(d, "That is not a valid choice!\r\nEnter min level:-\r\n] ");
+                d->sendText("That is not a valid choice!\r\nEnter min level:-\r\n] ");
             else {
                 OLC_HELP(d)->min_level = number;
                 break;
@@ -378,7 +376,7 @@ ACMD(do_helpcheck) {
     int i, count = 0;
     size_t len = 0, nlen;
 
-    send_to_char(ch, "Commands without help entries:\r\n");
+        ch->sendText("Commands without help entries:\r\n");
 
     for (i = 1; *(complete_cmd_info[i].command) != '\n'; i++) {
         if (complete_cmd_info[i].command_pointer != do_action && complete_cmd_info[i].minimum_level >= 0) {
@@ -397,7 +395,7 @@ NOWHERE) {*/
         nlen = snprintf(buf + len, sizeof(buf) - len, "\r\n");
 
     if (ch->desc) {
-        write_to_output(ch->desc, buf);
+        ch->desc->send_to("%s", buf);
     }
 
     *buf = '\0';
@@ -411,12 +409,12 @@ ACMD(do_hindex) {
     skip_spaces(&argument);
 
     if (!*argument) {
-        send_to_char(ch, "Usage: hindex <string>\r\n");
+                ch->sendText("Usage: hindex <string>\r\n");
         for (i = 0; i < top_of_helpt; i++) {
             num++;
         }
         if (num > 0 && GET_ADMLEVEL(ch) > 0) {
-            send_to_char(ch, "\r\n@D[@Y%d@y Help files in index.@D]@n\r\n", num);
+                        ch->send_to("\r\n@D[@Y%d@y Help files in index.@D]@n\r\n", num);
         }
         return;
     }
@@ -439,5 +437,5 @@ ACMD(do_hindex) {
     if (count > 0 && GET_ADMLEVEL(ch) > 0) {
         len += snprintf(buf + len, sizeof(buf) - len, "  %d Help files in index.\r\n", count);
     }
-    write_to_output(ch->desc, buf);
+    ch->desc->send_to("%s", buf);
 }

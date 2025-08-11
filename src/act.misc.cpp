@@ -47,16 +47,16 @@ static int valid_silk(struct obj_data *obj);
 ACMD(do_spiritcontrol) {
 
     if (!GET_SKILL(ch, SKILL_SPIRITCONTROL)) {
-        send_to_char(ch, "You do not know how to perform that technique.\r\n");
+                ch->sendText("You do not know how to perform that technique.\r\n");
         return;
     }
     if (AFF_FLAGGED(ch, AFF_SPIRITCONTROL)) {
-        send_to_char(ch, "You have already concentrated and have full control of your spirit.\r\n");
+                ch->sendText("You have already concentrated and have full control of your spirit.\r\n");
         return;
     }
 
     if (ch->getCurVitalDam(CharVital::ki) >= 0.8) {
-        send_to_char(ch, "You need at least 20%s of your max ki in stamina to prepare this skill.\r\n", "%");
+                ch->send_to("You need at least 20%s of your max ki in stamina to prepare this skill.\r\n", "%");
         return;
     }
     ch->modCurVitalDam(CharVital::ki, 0.2);
@@ -71,25 +71,25 @@ ACMD(do_spiritcontrol) {
 ACMD(do_tailhide) {
 
     if (!(IS_SAIYAN(ch)) || (IS_HALFBREED(ch))) {
-        send_to_char(ch, "You have no need to hide your tail!\r\n");
+                ch->sendText("You have no need to hide your tail!\r\n");
         return;
     }
 
     const char *message = ch->player_flags.toggle(PLR_TAILHIDE) ? "display your tail for all to see!" : "hide your tail!";
 
-    send_to_char(ch, "You have decided to %s\r\n", message);
+        ch->send_to("You have decided to %s\r\n", message);
 }
 
 ACMD(do_nogrow) {
 
     if (!(IS_SAIYAN(ch)) || (IS_HALFBREED(ch))) {
-        send_to_char(ch, "What do you mean?\r\n");
+                ch->sendText("What do you mean?\r\n");
         return;
     }
 
     const char *message = ch->player_flags.toggle(PLR_NOGROW) ? "halt your tail growth" : "regrow your tail";
 
-    send_to_char(ch, "You have decided to %s\r\n", message);
+        ch->send_to("You have decided to %s\r\n", message);
 }
 
 ACMD(do_restring) {
@@ -105,18 +105,18 @@ ACMD(do_restring) {
     }
 
     if (GET_GOLD(ch) < pay) {
-        send_to_char(ch, "You need at least 5,000 zenni to initiate an equipment restring.\r\n");
+                ch->sendText("You need at least 5,000 zenni to initiate an equipment restring.\r\n");
         return;
     }
     
     if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->getObjects()))) {
-        send_to_char(ch, "You don't have a that equipment to restring in your inventory.\r\n");
-        send_to_char(ch, "Syntax: restring (obj name)\r\n");
+                ch->sendText("You don't have a that equipment to restring in your inventory.\r\n");
+                ch->sendText("Syntax: restring (obj name)\r\n");
         return;
     }
 
     if (OBJ_FLAGGED(obj, ITEM_CUSTOM)) {
-        send_to_char(ch, "You can not restring a custom piece. Why? Because you already restrung it you dummy.\r\n");
+                ch->sendText("You can not restring a custom piece. Why? Because you already restrung it you dummy.\r\n");
         return;
     }
 
@@ -147,7 +147,7 @@ ACMD(do_restring) {
 ACMD(do_multiform) {
 
     if (!IS_NPC(ch) && !GET_SKILL(ch, SKILL_MULTIFORM)) {
-        send_to_char(ch, "You do not know how to perform that technique.\r\n");
+                ch->sendText("You do not know how to perform that technique.\r\n");
         return;
     }
 
@@ -169,7 +169,7 @@ ACMD(do_multiform) {
 
     if (!strcasecmp(arg, "merge")) {
         if (multis.empty()) {
-            send_to_char(ch, "You have no multiforms present to merge with!\r\n");
+                        ch->sendText("You have no multiforms present to merge with!\r\n");
             return;
         }
         for (const auto &m: multis) {
@@ -179,7 +179,7 @@ ACMD(do_multiform) {
     }
 
     if (strcasecmp(arg, "split")) {
-        send_to_char(ch, "Huh? Try help multiform\r\n");
+                ch->sendText("Huh? Try help multiform\r\n");
         return;
     }
 
@@ -195,11 +195,11 @@ ACMD(do_multiform) {
     cost *= (GET_SKILL(ch, SKILL_MULTIFORM) * 0.2);
 
     if ((ch->getCurVital(CharVital::ki)) < cost) {
-        send_to_char(ch, "You do not have enough ki to split!\r\n");
+                ch->sendText("You do not have enough ki to split!\r\n");
         return;
     }
     if ((ch->getCurVital(CharVital::stamina)) < cost) {
-        send_to_char(ch, "You do not have enough stamina to split!\r\n");
+                ch->sendText("You do not have enough stamina to split!\r\n");
         return;
     }
     improve_skill(ch, SKILL_MULTIFORM, 1);
@@ -279,7 +279,7 @@ void handle_multi_merge(struct char_data *form) {
         return;
     }
 
-    send_to_char(ch, "@YYou merge with one of your forms!@n\r\n");
+        ch->sendText("@YYou merge with one of your forms!@n\r\n");
     act("@y$n@Y merges with one of his multiforms!@n\r\n", true, ch, nullptr, nullptr, TO_ROOM);
 
     extract_char(form);
@@ -324,7 +324,7 @@ static void resolve_song(struct char_data *ch) {
     }
 
     if (instrument == 0) {
-        send_to_char(ch, "You do not have an instrument.\r\n");
+                ch->sendText("You do not have an instrument.\r\n");
         act("@c$n@C stops playing $s song.@n", true, ch, nullptr, nullptr, TO_ROOM);
         ch->setBaseStat<int>("mystic_melody", 0);
         return;
@@ -367,28 +367,28 @@ static void resolve_song(struct char_data *ch) {
                                 if (GET_LIMBCOND(vict, 0) < 100) {
                                     GET_LIMBCOND(vict, 0) += 1 + (skill * 0.1);
                                     if (GET_LIMBCOND(vict, 0) > 100) {
-                                        send_to_char(vict, "Your right arm is no longer broken!@n\r\n");
+                                                                                vict->sendText("Your right arm is no longer broken!@n\r\n");
                                         GET_LIMBCOND(vict, 0) = 100;
                                     }
                                 }
                                 if (GET_LIMBCOND(vict, 1) < 100) {
                                     GET_LIMBCOND(vict, 1) += 1 + (skill * 0.1);
                                     if (GET_LIMBCOND(vict, 1) > 100) {
-                                        send_to_char(vict, "Your left arm is no longer broken!@n\r\n");
+                                                                                vict->sendText("Your left arm is no longer broken!@n\r\n");
                                         GET_LIMBCOND(vict, 1) = 100;
                                     }
                                 }
                                 if (GET_LIMBCOND(vict, 2) < 100) {
                                     GET_LIMBCOND(vict, 2) += 1 + (skill * 0.1);
                                     if (GET_LIMBCOND(vict, 2) > 100) {
-                                        send_to_char(vict, "Your right leg is no longer broken!@n\r\n");
+                                                                                vict->sendText("Your right leg is no longer broken!@n\r\n");
                                         GET_LIMBCOND(vict, 2) = 100;
                                     }
                                 }
                                 if (GET_LIMBCOND(vict, 0) < 100) {
                                     GET_LIMBCOND(vict, 3) += 1 + (skill * 0.1);
                                     if (GET_LIMBCOND(vict, 3) > 100) {
-                                        send_to_char(vict, "Your left leg is no longer broken!@n\r\n");
+                                                                                vict->sendText("Your left leg is no longer broken!@n\r\n");
                                         GET_LIMBCOND(vict, 3) = 100;
                                     }
                                 }
@@ -404,7 +404,7 @@ static void resolve_song(struct char_data *ch) {
                     }
                 }
                 if ((ch->getCurVital(CharVital::ki)) <= 0) {
-                    send_to_char(ch, "You no longer have the ki necessary to play your song.\r\n");
+                                        ch->sendText("You no longer have the ki necessary to play your song.\r\n");
                     act("@c$n@C stops playing $s song.@n", true, ch, nullptr, nullptr, TO_ROOM);
                     ch->setBaseStat<int>("mystic_melody", 0);
                     return;
@@ -453,7 +453,7 @@ static void resolve_song(struct char_data *ch) {
                     applyShadow(ch, vict);
                 }
                 if ((ch->getCurVital(CharVital::ki)) <= 0) {
-                    send_to_char(ch, "You no longer have the ki necessary to play your song.\r\n");
+                                        ch->sendText("You no longer have the ki necessary to play your song.\r\n");
                     act("@c$n@C stops playing $s song.@n", true, ch, nullptr, nullptr, TO_ROOM);
                     ch->setBaseStat<int>("mystic_melody", 0);
                     return;
@@ -473,7 +473,7 @@ static void resolve_song(struct char_data *ch) {
                                 nullptr, vict, TO_VICT);
                             act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", true, ch,
                                 nullptr, vict, TO_NOTVICT);
-                            char_from_room(vict);
+                            vict->clearLocation();
                             char_to_room(vict, real_room(300));
                         }
                     }
@@ -491,7 +491,7 @@ static void resolve_song(struct char_data *ch) {
                                 nullptr, vict, TO_VICT);
                             act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", true, ch,
                                 nullptr, vict, TO_NOTVICT);
-                            char_from_room(vict);
+                            vict->clearLocation();
                             char_to_room(vict, real_room(2234));
                         }
                     }
@@ -509,7 +509,7 @@ static void resolve_song(struct char_data *ch) {
                                 nullptr, vict, TO_VICT);
                             act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", true, ch,
                                 nullptr, vict, TO_NOTVICT);
-                            char_from_room(vict);
+                            vict->clearLocation();
                             char_to_room(vict, real_room(4047));
                         }
                     }
@@ -527,7 +527,7 @@ static void resolve_song(struct char_data *ch) {
                                 nullptr, vict, TO_VICT);
                             act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", true, ch,
                                 nullptr, vict, TO_NOTVICT);
-                            char_from_room(vict);
+                            vict->clearLocation();
                             char_to_room(vict, real_room(8003));
                         }
                     }
@@ -545,7 +545,7 @@ static void resolve_song(struct char_data *ch) {
                                 nullptr, vict, TO_VICT);
                             act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", true, ch,
                                 nullptr, vict, TO_NOTVICT);
-                            char_from_room(vict);
+                            vict->clearLocation();
                             char_to_room(vict, real_room(10182));
                         }
                     }
@@ -563,7 +563,7 @@ static void resolve_song(struct char_data *ch) {
                                 nullptr, vict, TO_VICT);
                             act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", true, ch,
                                 nullptr, vict, TO_NOTVICT);
-                            char_from_room(vict);
+                            vict->clearLocation();
                             char_to_room(vict, real_room(16087));
                         }
                     }
@@ -581,7 +581,7 @@ static void resolve_song(struct char_data *ch) {
                                 nullptr, vict, TO_VICT);
                             act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", true, ch,
                                 nullptr, vict, TO_NOTVICT);
-                            char_from_room(vict);
+                            vict->clearLocation();
                             char_to_room(vict, real_room(12025));
                         }
                     }
@@ -599,7 +599,7 @@ static void resolve_song(struct char_data *ch) {
                                 nullptr, vict, TO_VICT);
                             act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", true, ch,
                                 nullptr, vict, TO_NOTVICT);
-                            char_from_room(vict);
+                            vict->clearLocation();
                             char_to_room(vict, real_room(14910));
                         }
                     }
@@ -630,7 +630,7 @@ static void resolve_song(struct char_data *ch) {
                     }
                 }
                 if ((ch->getCurVital(CharVital::ki)) <= 0) {
-                    send_to_char(ch, "You no longer have the ki necessary to play your song.\r\n");
+                                        ch->sendText("You no longer have the ki necessary to play your song.\r\n");
                     act("@c$n@C stops playing $s song.@n", true, ch, nullptr, nullptr, TO_ROOM);
                     ch->setBaseStat<int>("mystic_melody", 0);
                     return;
@@ -643,56 +643,56 @@ static void resolve_song(struct char_data *ch) {
     if (GET_SONG(ch) >= 4 && skill > diceroll) {
         switch ((int)GET_SONG(ch)) {
             case SONG_TELEPORT_EARTH:
-                char_from_room(ch);
+                ch->clearLocation();
                 char_to_room(ch, real_room(300));
                 ch->setBaseStat<int>("mystic_melody", 0);
                 act("@CFinally as the last of your comrades has been teleported you teleport yourself to Earth and stop your song.@n",
                     true, ch, nullptr, nullptr, TO_CHAR);
                 break;
             case SONG_TELEPORT_VEGETA:
-                char_from_room(ch);
+                ch->clearLocation();
                 char_to_room(ch, real_room(2234));
                 ch->setBaseStat<int>("mystic_melody", 0);
                 act("@CFinally as the last of your comrades has been teleported you teleport yourself to Vegeta and stop your song.@n",
                     true, ch, nullptr, nullptr, TO_CHAR);
                 break;
             case SONG_TELEPORT_FRIGID:
-                char_from_room(ch);
+                ch->clearLocation();
                 char_to_room(ch, real_room(4047));
                 ch->setBaseStat<int>("mystic_melody", 0);
                 act("@CFinally as the last of your comrades has been teleported you teleport yourself to Frigid and stop your song.@n",
                     true, ch, nullptr, nullptr, TO_CHAR);
                 break;
             case SONG_TELEPORT_NAMEK:
-                char_from_room(ch);
+                ch->clearLocation();
                 char_to_room(ch, real_room(10182));
                 ch->setBaseStat<int>("mystic_melody", 0);
                 act("@CFinally as the last of your comrades has been teleported you teleport yourself to Namek and stop your song.@n",
                     true, ch, nullptr, nullptr, TO_CHAR);
                 break;
             case SONG_TELEPORT_KANASSA:
-                char_from_room(ch);
+                ch->clearLocation();
                 char_to_room(ch, real_room(14910));
                 ch->setBaseStat<int>("mystic_melody", 0);
                 act("@CFinally as the last of your comrades has been teleported you teleport yourself to Kanassa and stop your song.@n",
                     true, ch, nullptr, nullptr, TO_CHAR);
                 break;
             case SONG_TELEPORT_AETHER:
-                char_from_room(ch);
+                ch->clearLocation();
                 char_to_room(ch, real_room(12025));
                 ch->setBaseStat<int>("mystic_melody", 0);
                 act("@CFinally as the last of your comrades has been teleported you teleport yourself to Aether and stop your song.@n",
                     true, ch, nullptr, nullptr, TO_CHAR);
                 break;
             case SONG_TELEPORT_ARLIA:
-                char_from_room(ch);
+                ch->clearLocation();
                 char_to_room(ch, real_room(16087));
                 ch->setBaseStat<int>("mystic_melody", 0);
                 act("@CFinally as the last of your comrades has been teleported you teleport yourself to Arlia and stop your song.@n",
                     true, ch, nullptr, nullptr, TO_CHAR);
                 break;
             case SONG_TELEPORT_KONACK:
-                char_from_room(ch);
+                ch->clearLocation();
                 char_to_room(ch, real_room(8003));
                 ch->setBaseStat<int>("mystic_melody", 0);
                 act("@CFinally as the last of your comrades has been teleported you teleport yourself to Konack and stop your song.@n",
@@ -705,7 +705,7 @@ static void resolve_song(struct char_data *ch) {
 ACMD(do_song) {
 
     if (!GET_SKILL(ch, SKILL_MYSTICMUSIC)) {
-        send_to_char(ch, "You do not know how to play mystical music.\r\n");
+                ch->sendText("You do not know how to play mystical music.\r\n");
         return;
     }
 
@@ -721,7 +721,7 @@ ACMD(do_song) {
     }
 
     if (instrument == 0) {
-        send_to_char(ch, "You do not have an instrument.\r\n");
+                ch->sendText("You do not have an instrument.\r\n");
         return;
     }
 
@@ -736,10 +736,9 @@ ACMD(do_song) {
 
     two_arguments(argument, arg, arg2);
     if (!*arg) {
-        send_to_char(ch, "@YSongs Known\n@c-------------------@n\r\n");
-        send_to_char(ch, "@W%s%s%sSong of Safety\r\n", skill > 99 ? "Song of Shielding\n" : "",
-                        skill > 80 ? "Melody of Teleportation\n" : "", skill > 50 ? "Shadow Stitch Minuet\n" : "");
-        send_to_char(ch, "@wSyntax: song (shielding | safety | teleport | shadow )\r\n");
+                ch->sendText("@YSongs Known\n@c-------------------@n\r\n");
+                ch->send_to("@W%s%s%sSong of Safety\r\n", skill > 99 ? "Song of Shielding\n" : "", skill > 80 ? "Melody of Teleportation\n" : "", skill > 50 ? "Shadow Stitch Minuet\n" : "");
+                ch->sendText("@wSyntax: song (shielding | safety | teleport | shadow )\r\n");
         return;
     }
     int64_t cost = GET_MAX_MANA(ch) * 0.01;
@@ -763,12 +762,12 @@ ACMD(do_song) {
     }
 
     if (modifier == 0) {
-        send_to_char(ch, "@wSyntax: song (shielding | safety | teleport | shadow )\r\n");
+                ch->sendText("@wSyntax: song (shielding | safety | teleport | shadow )\r\n");
         return;
     }
     
     if (modifier == 3 && (ch->getCurVital(CharVital::ki)) < cost) {
-        send_to_char(ch, "@wYou do not have enough ki to power the instrument for that song!@n\r\n");
+                ch->sendText("@wYou do not have enough ki to power the instrument for that song!@n\r\n");
         return;
     }
     
@@ -782,11 +781,11 @@ ACMD(do_song) {
         return;
     }
     if (modifier == 8 && (ch->getCurVital(CharVital::ki)) < cost) {
-        send_to_char(ch, "@wYou do not have enough ki to power the instrument for that song!@n\r\n");
+                ch->sendText("@wYou do not have enough ki to power the instrument for that song!@n\r\n");
         return;
     }
     if (modifier == 8 && skill <= 49) {
-        send_to_char(ch, "You do not posess the skill to play such a song!\r\n");
+                ch->sendText("You do not posess the skill to play such a song!\r\n");
         return;
     }
 
@@ -801,23 +800,22 @@ ACMD(do_song) {
     }
     
     if (modifier == 50 && (ch->getCurVital(CharVital::ki)) < cost) {
-        send_to_char(ch, "@wYou do not have enough ki to power the instrument for that song!@n\r\n");
+                ch->sendText("@wYou do not have enough ki to power the instrument for that song!@n\r\n");
         return;
     }
     
     if (modifier == 50 && skill <= 79) {
-        send_to_char(ch, "You do not posess the skill to play such a song!\r\n");
+                ch->sendText("You do not posess the skill to play such a song!\r\n");
         return;
     }
     
     if (modifier == 50) {
         if (!*arg2) {
-            send_to_char(ch,
-                            "Where would you like to teleport to?\nSyntax: song teleport (earth | vegeta | kanassa | arlia | aether | namek | konack| frigid)\r\n");
+                        ch->sendText("Where would you like to teleport to?\nSyntax: song teleport (earth | vegeta | kanassa | arlia | aether | namek | konack| frigid)\r\n");
             return;
         }
         if (AFF_FLAGGED(ch, AFF_SPIRIT)) {
-            send_to_char(ch, "Not while you're dead!\r\n");
+                        ch->sendText("Not while you're dead!\r\n");
             return;
         }
         
@@ -838,8 +836,7 @@ ACMD(do_song) {
         } else if (!strcasecmp(arg2, "aether")) {
             ch->setBaseStat<int>("mystic_melody", SONG_TELEPORT_AETHER);
         } else {
-            send_to_char(ch,
-                            "Syntax: song teleport (earth | vegeta | namek | aether | konack | kanassa | arlia | frigid)\r\n");
+                        ch->sendText("Syntax: song teleport (earth | vegeta | namek | aether | konack | kanassa | arlia | frigid)\r\n");
             return;
         }
         act("@CYou begin to play the Melody of Teleportation! Your fingers lightly glide over the ocarina and as you blow into it a repeating light hearted melody issues forth.@n",
@@ -850,11 +847,11 @@ ACMD(do_song) {
         return;
     }
     if (modifier == 20 && (ch->getCurVital(CharVital::ki)) < cost) {
-        send_to_char(ch, "@wYou do not have enough ki to power the instrument for that song!@n\r\n");
+                ch->sendText("@wYou do not have enough ki to power the instrument for that song!@n\r\n");
         return;
     }
     if (modifier == 20 && skill <= 98) {
-        send_to_char(ch, "You do not posess the skill to play such a song!\r\n");
+                ch->sendText("You do not posess the skill to play such a song!\r\n");
         return;
     }
     if (modifier == 20) {
@@ -873,7 +870,7 @@ ACMD(do_preference) {
     if (IS_NPC(ch))
         return;
 
-    send_to_char(ch, "Undergoing rework/removal, sorry! Not this era!");
+        ch->sendText("Undergoing rework/removal, sorry! Not this era!");
 
     /*
     char arg[MAX_INPUT_LENGTH];
@@ -881,37 +878,36 @@ ACMD(do_preference) {
     one_argument(argument, arg);
 
     if (!*arg) {
-        send_to_char(ch, "Syntax: preference (throw | weapon | hand | ki)\r\n");
+                ch->sendText("Syntax: preference (throw | weapon | hand | ki)\r\n");
         return;
     }
 
     if (GET_PREFERENCE(ch) > 0) {
-        send_to_char(ch, "You've already chosen a specialization. No going back.\r\n");
+                ch->sendText("You've already chosen a specialization. No going back.\r\n");
         return;
     }
 
     if (!strcasecmp(arg, "throw")) {
-        send_to_char(ch, "You will now favor throwing weapons as fighting specialization. You're sure to nail it.\r\n");
+                ch->sendText("You will now favor throwing weapons as fighting specialization. You're sure to nail it.\r\n");
         ch->setBaseStat("preference", PREFERENCE_THROWING);
         auto &s = ch->skill[SKILL_THROW];
         if(s.level <= 90) s.level += 10;
         else if(s.level < 100) s.level = 100;
         return;
     } else if (!strcasecmp(arg, "hand")) {
-        send_to_char(ch, "You will now favor your body as your fighting specialization. Your body is ready.\r\n");
+                ch->sendText("You will now favor your body as your fighting specialization. Your body is ready.\r\n");
         ch->setBaseStat("preference", PREFERENCE_H2H);
         return;
     } else if (!strcasecmp(arg, "ki")) {
-        send_to_char(ch,
-                     "You will now favor your ki energy as your fighting specialization. I expect more than a few smoldering craters.\r\n");
+                ch->sendText("You will now favor your ki energy as your fighting specialization. I expect more than a few smoldering craters.\r\n");
         ch->setBaseStat("preference", PREFERENCE_KI);
         return;
     } else if (!strcasecmp(arg, "weapon")) {
-        send_to_char(ch, "You will now favor your weapons as your fighting specialization. Let the blood fly!\r\n");
+                ch->sendText("You will now favor your weapons as your fighting specialization. Let the blood fly!\r\n");
         ch->setBaseStat("preference", PREFERENCE_WEAPON);
         return;
     } else {
-        send_to_char(ch, "Syntax: preference (throw | weapon | hand | ki)\r\n");
+                ch->sendText("Syntax: preference (throw | weapon | hand | ki)\r\n");
         return;
     }
     */
@@ -923,12 +919,12 @@ ACMD(do_moondust) {
     /* Can they do the technique? */
 
     if (!IS_ARLIAN(ch) || GET_SEX(ch) != SEX_FEMALE) {
-        send_to_char(ch, "You are not an arlian female.\r\n");
+                ch->sendText("You are not an arlian female.\r\n");
         return;
     }
 
     if (!AFF_FLAGGED(ch, AFF_GROUP)) {
-        send_to_char(ch, "You need to be in a group to use this skill!\r\n");
+                ch->sendText("You need to be in a group to use this skill!\r\n");
         return;
     }
 
@@ -940,7 +936,7 @@ ACMD(do_moondust) {
     }
 
     if ((ch->getCurVital(CharVital::stamina)) < cost) {
-        send_to_char(ch, "You do not have enough stamina to perform this technique.\r\n");
+                ch->sendText("You do not have enough stamina to perform this technique.\r\n");
         return;
     }
 
@@ -963,7 +959,7 @@ ACMD(do_moondust) {
         true, ch, nullptr, nullptr, TO_CHAR);
     act("@g$n@G spreads $s wings and seems to concentrate for a moment. Suddenly $s wings begin to glow a soft sea green color. This soft glow grows brighter and as $e flexes $s wings to their full extent a shockwave of energy explodes outward. Carried on this shockwave is a cloud of glowing dust! You notice some of the dust being breathed in by $s!@n",
         true, ch, nullptr, nullptr, TO_ROOM);
-    send_to_char(ch, "@RHeal@Y: @C%s@n\r\n", add_commas(heal).c_str());
+        ch->send_to("@RHeal@Y: @C%s@n\r\n", add_commas(heal).c_str());
 
     struct char_data *vict = nullptr, *next_v = nullptr;
     auto people = ch->location.getPeople();
@@ -978,7 +974,7 @@ ACMD(do_moondust) {
                 act("@CYou breathe in the dust and are healed by it somewhat!@n", true, vict, nullptr, nullptr,
                     TO_CHAR);
                 act("@c$n@C breathes in the dust and is healed somewhat!@n", true, vict, nullptr, nullptr, TO_ROOM);
-                send_to_char(vict, "@RHeal@Y: @C%s@n\r\n", add_commas(heal).c_str());
+                                vict->send_to("@RHeal@Y: @C%s@n\r\n", add_commas(heal).c_str());
             }
         }
     }
@@ -987,12 +983,12 @@ ACMD(do_moondust) {
 ACMD(do_shell) {
 
     if (!IS_ARLIAN(ch)) {
-        send_to_char(ch, "You are not capable of doing that!\r\n");
+                ch->sendText("You are not capable of doing that!\r\n");
         return;
     }
 
     if (GET_SEX(ch) == SEX_FEMALE) {
-        send_to_char(ch, "Sorry, you can't do that.\r\n");
+                ch->sendText("Sorry, you can't do that.\r\n");
         return;
     }
 
@@ -1005,7 +1001,7 @@ ACMD(do_shell) {
     }
 
     if ((ch->getCurVital(CharVital::stamina)) < GET_MAX_MOVE(ch) * 0.2) {
-        send_to_char(ch, "You do not have enough stamina to grow your armored carapace.@n\r\n");
+                ch->sendText("You do not have enough stamina to grow your armored carapace.@n\r\n");
         return;
     }
     
@@ -1027,8 +1023,7 @@ ACMD(do_shell) {
 ACMD(do_liquefy) {
 
     if (!IS_MAJIN(ch)) {
-        send_to_char(ch,
-                     "You are not capable of liquefying yourself right now. Try finding a giant blender maybe?\r\n");
+                ch->sendText("You are not capable of liquefying yourself right now. Try finding a giant blender maybe?\r\n");
         return;
     }
 
@@ -1051,12 +1046,12 @@ ACMD(do_liquefy) {
     two_arguments(argument, arg, arg2);
 
     if (!*arg) {
-        send_to_char(ch, "Syntax: liquefy hide\nSyntax: liquefy explode (target)\r\n");
+                ch->sendText("Syntax: liquefy hide\nSyntax: liquefy explode (target)\r\n");
         return;
     }
 
     if ((ch->getCurVital(CharVital::ki)) < (GET_MAX_MANA(ch) * 0.002) + 150) {
-        send_to_char(ch, "You do not have enough ki to manage this level of body control!\r\n");
+                ch->sendText("You do not have enough ki to manage this level of body control!\r\n");
         return;
     }
 
@@ -1105,16 +1100,16 @@ ACMD(do_liquefy) {
             DRAGGING(ch) = nullptr;
         }
         if (!*arg2) {
-            send_to_char(ch, "Syntax: liquefy hide\nSyntax: liquefy explode (target)\r\n");
+                        ch->sendText("Syntax: liquefy hide\nSyntax: liquefy explode (target)\r\n");
             return;
         } else if ((ch->getCurVital(CharVital::ki)) < (GET_MAX_MANA(ch) * 0.10) + 150) {
-            send_to_char(ch, "You do not have enough ki for that action!@n\r\n");
+                        ch->sendText("You do not have enough ki for that action!@n\r\n");
             return;
         } else if (!(vict = get_char_vis(ch, arg2, nullptr, FIND_CHAR_ROOM))) {
-            send_to_char(ch, "That target isn't here.\r\n");
+                        ch->sendText("That target isn't here.\r\n");
             return;
         } else if (!can_kill(ch, vict, nullptr, 1)) {
-            send_to_char(ch, "You can't kill them!\r\n");
+                        ch->sendText("You can't kill them!\r\n");
             return;
         } else if (axion_dice(0) > GET_CON(ch)) {
             act("@MYour body starts to become loose and sag, but you lose focus and it reverts to its original shape!@n",
@@ -1173,7 +1168,7 @@ ACMD(do_liquefy) {
             return;
         }
     } else {
-        send_to_char(ch, "Syntax: liquefy hide\nSyntax: liquefy explode (target)\r\n");
+                ch->sendText("Syntax: liquefy hide\nSyntax: liquefy explode (target)\r\n");
         return;
     }
 }
@@ -1186,24 +1181,23 @@ ACMD(do_lifeforce) {
     one_argument(argument, arg);
 
     if (!*arg) {
-        send_to_char(ch, "Syntax: life (0 - 99)\n0 is off.\r\n");
+                ch->sendText("Syntax: life (0 - 99)\n0 is off.\r\n");
         return;
     }
 
     setting = atoi(arg);
 
     if (setting > 99) {
-        send_to_char(ch, "Syntax: life (1 - 99)\n%s isn't an acceptable percent.\r\n", add_commas(setting).c_str());
+                ch->send_to("Syntax: life (1 - 99)\n%s isn't an acceptable percent.\r\n", add_commas(setting).c_str());
         return;
     }
     
     if (setting <= 0) {
-        send_to_char(ch,
-                     "Your will just isn't in the fight, huh?\nYou will not use up life force to maintain your PL period.\r\n");
+                ch->sendText("Your will just isn't in the fight, huh?\nYou will not use up life force to maintain your PL period.\r\n");
         ch->setBaseStat("life_percent", 0);
         return;
     }
-    send_to_char(ch, "Your life force will automatically kick in at %d%s of your optimal PL.\r\n", setting, "%");
+        ch->send_to("Your life force will automatically kick in at %d%s of your optimal PL.\r\n", setting, "%");
     ch->setBaseStat("life_percent", setting);
 }
 
@@ -1214,7 +1208,7 @@ ACMD(do_defend) {
     one_argument(argument, arg);
 
     if (!*arg && GET_DEFENDING(ch) == nullptr) {
-        send_to_char(ch, "Defend who?\r\n");
+                ch->sendText("Defend who?\r\n");
         return;
     } else if (!*arg && GET_DEFENDING(ch)) {
         act("@YYou stop defending @y$N@Y.@n", true, ch, nullptr, GET_DEFENDING(ch), TO_CHAR);
@@ -1226,10 +1220,10 @@ ACMD(do_defend) {
     }
 
     if (!(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM))) {
-        send_to_char(ch, "You can't seem to find that person.\r\n");
+                ch->sendText("You can't seem to find that person.\r\n");
         return;
     } else if (vict == ch) {
-        send_to_char(ch, "Well hopefully you are smart enough to defend yourself.\r\n");
+                ch->sendText("Well hopefully you are smart enough to defend yourself.\r\n");
         return;
     } else {
         act("@YYou start defending @y$N@Y.@n", true, ch, nullptr, vict, TO_CHAR);
@@ -1252,33 +1246,33 @@ ACMD(do_fish) {
     two_arguments(argument, arg, arg2);
 
     if (!*arg) {
-        send_to_char(ch, "Syntax: fish ( cast | hook | reel | apply | stop)\r\n");
+                ch->sendText("Syntax: fish ( cast | hook | reel | apply | stop)\r\n");
         return;
     }
 
     if (!strcasecmp(arg, "cast")) {
         if (PLR_FLAGGED(ch, PLR_FISHING)) {
-            send_to_char(ch, "You are already fishing! Syntax: fish stop\r\n");
+                        ch->sendText("You are already fishing! Syntax: fish stop\r\n");
             return;
         } else if (!ch->location.getRoomFlag(ROOM_FISHING)) {
-            send_to_char(ch, "This is not an area you can fish at.\r\n");
+                        ch->sendText("This is not an area you can fish at.\r\n");
             return;
         } else if (AFF_FLAGGED(ch, AFF_FLYING)) {
-            send_to_char(ch, "You can't fish while flying.\r\n");
+                        ch->sendText("You can't fish while flying.\r\n");
             return;
         } else if (FIGHTING(ch)) {
-            send_to_char(ch, "You can't fish while fighting!\r\n");
+                        ch->sendText("You can't fish while fighting!\r\n");
             return;
         } else if (!GET_EQ(ch, WEAR_WIELD2)) {
-            send_to_char(ch, "You are not holding a fishing pole.\r\n");
+                        ch->sendText("You are not holding a fishing pole.\r\n");
             return;
         } else {
             struct obj_data *pole = GET_EQ(ch, WEAR_WIELD2);
             if (GET_OBJ_TYPE(pole) != ITEM_FISHPOLE) {
-                send_to_char(ch, "You do not have a fishing pole in your hand!\r\n");
+                                ch->sendText("You do not have a fishing pole in your hand!\r\n");
                 return;
             } else if (GET_OBJ_VAL(pole, VAL_FISHPOLE_BAIT) == 0) {
-                send_to_char(ch, "There is no bait on your line!\r\n");
+                                ch->sendText("There is no bait on your line!\r\n");
                 return;
             }
             reveal_hiding(ch, 0);
@@ -1288,21 +1282,21 @@ ACMD(do_fish) {
                 true, ch, nullptr, nullptr, TO_ROOM);
             auto dis = ch->setBaseStat("fish_distance", rand_number(30, 80));
             ch->player_flags.set(PLR_FISHING, true);
-            send_to_char(ch, "@D[@wDistance@D: @Y%d@D]@n\r\n", dis);
+                        ch->send_to("@D[@wDistance@D: @Y%d@D]@n\r\n", dis);
             return;
         }
     } else if (!strcasecmp(arg, "hook")) {
         if (!PLR_FLAGGED(ch, PLR_FISHING)) {
-            send_to_char(ch, "You are not even fishing!\r\n");
+                        ch->sendText("You are not even fishing!\r\n");
             return;
         } else if (GET_FISHSTATE(ch) == FISH_NOFISH) {
-            send_to_char(ch, "You do not have a fish biting on your line.\r\n");
+                        ch->sendText("You do not have a fish biting on your line.\r\n");
             return;
         } else if (GET_FISHSTATE(ch) == FISH_REELING) {
-            send_to_char(ch, "You are already trying to reel the fish in!\r\n");
+                        ch->sendText("You are already trying to reel the fish in!\r\n");
             return;
         } else if (GET_FISHSTATE(ch) == FISH_HOOKED) {
-            send_to_char(ch, "You already have the fish hooked! Reel it in!\r\n");
+                        ch->sendText("You already have the fish hooked! Reel it in!\r\n");
             return;
         } else if (axion_dice(-18) > GET_POLE_BONUS(ch)) {
             reveal_hiding(ch, 0);
@@ -1323,18 +1317,18 @@ ACMD(do_fish) {
         }
     } else if (!strcasecmp(arg, "reel")) {
         if (!PLR_FLAGGED(ch, PLR_FISHING)) {
-            send_to_char(ch, "You are not even fishing!\r\n");
+                        ch->sendText("You are not even fishing!\r\n");
             return;
         }
         auto fishs = ch->getBaseStat("fish_state");
         if (fishs == FISH_NOFISH) {
-            send_to_char(ch, "You do not have a fish biting on your line.\r\n");
+                        ch->sendText("You do not have a fish biting on your line.\r\n");
             return;
         } else if (fishs == FISH_REELING) {
-            send_to_char(ch, "You are already trying to reel the fish in!\r\n");
+                        ch->sendText("You are already trying to reel the fish in!\r\n");
             return;
         } else if (fishs != FISH_HOOKED) {
-            send_to_char(ch, "You don't have a fish hooked!\r\n");
+                        ch->sendText("You don't have a fish hooked!\r\n");
             return;
         } else {
             reveal_hiding(ch, 0);
@@ -1345,28 +1339,28 @@ ACMD(do_fish) {
         }
     } else if (!strcasecmp(arg, "apply")) {
         if (!GET_EQ(ch, WEAR_WIELD2)) {
-            send_to_char(ch, "You are not holding a fishing pole.\r\n");
+                        ch->sendText("You are not holding a fishing pole.\r\n");
             return;
         } else {
             struct obj_data *pole = GET_EQ(ch, WEAR_WIELD2);
             if (GET_OBJ_TYPE(pole) != ITEM_FISHPOLE) {
-                send_to_char(ch, "You do not have a fishing pole in your hand!\r\n");
+                                ch->sendText("You do not have a fishing pole in your hand!\r\n");
                 return;
             } else if (GET_OBJ_VAL(pole, VAL_FISHPOLE_BAIT) != 0) {
-                send_to_char(ch, "Your fishing pole already has bait on its hook.\r\n");
+                                ch->sendText("Your fishing pole already has bait on its hook.\r\n");
                 return;
             } else {
                 struct obj_data *bait;
 
                 if (!*arg2) {
-                    send_to_char(ch, "Syntax: fish apply (bait)\r\n");
+                                        ch->sendText("Syntax: fish apply (bait)\r\n");
                     return;
                 }
                 if (!(bait = get_obj_in_list_vis(ch, arg2, nullptr, ch->getObjects()))) {
-                    send_to_char(ch, "You don't have that bait.\r\n");
+                                        ch->sendText("You don't have that bait.\r\n");
                     return;
                 } else if (GET_OBJ_TYPE(bait) != ITEM_FISHBAIT) {
-                    send_to_char(ch, "That isn't fishing bait!\r\n");
+                                        ch->sendText("That isn't fishing bait!\r\n");
                     return;
                 } else {
                     reveal_hiding(ch, 0);
@@ -1380,7 +1374,7 @@ ACMD(do_fish) {
         } /* end has pole */
     } else if (!strcasecmp(arg, "stop")) {
         if (!PLR_FLAGGED(ch, PLR_FISHING)) {
-            send_to_char(ch, "You are not even fishing!\r\n");
+                        ch->sendText("You are not even fishing!\r\n");
             return;
         } else {
             reveal_hiding(ch, 0);
@@ -1392,7 +1386,7 @@ ACMD(do_fish) {
             return;
         }
     } else {
-        send_to_char(ch, "Syntax: fish ( cast | hook | reel | apply | stop )\r\n");
+                ch->sendText("Syntax: fish ( cast | hook | reel | apply | stop )\r\n");
         return;
     }
 } /* End fish */
@@ -1450,7 +1444,7 @@ void fish_update(uint64_t heartPulse, double deltaTime) {
                     ch->modBaseStat("fish_distance", -reduceBy);
                     act("@CYou reel the line on your pole some.@n", true, ch, nullptr, nullptr, TO_CHAR);
                     act("@c$n@C reels the line on $s pole slowly.@n", true, ch, nullptr, nullptr, TO_ROOM);
-                    send_to_char(ch, "@D[@wDistance@D: @Y%d@D]@n\r\n", GET_FISHD(ch) > 0 ? GET_FISHD(ch) : 0);
+                                        ch->send_to("@D[@wDistance@D: @Y%d@D]@n\r\n", GET_FISHD(ch) > 0 ? GET_FISHD(ch) : 0);
                 } else if (fstate == FISH_REELING && rand_number(1, 58) <= 55) {
                     act("@CYou struggle as the fish fights against your attempts to reel it in!@n", true, ch,
                         nullptr, nullptr, TO_CHAR);
@@ -1647,7 +1641,7 @@ static void catch_fish(struct char_data *ch, int quality) {
     SET_OBJ_VAL(pole, VAL_FISHPOLE_BAIT, 0);
     fish->setLocation(ch);
     do_get(ch, "fish", 0, 0);
-    send_to_char(ch, "@D[@cFish Weight@D: @G%" I64T "@D]@n\r\n", GET_OBJ_WEIGHT(fish));
+        ch->send_to("@D[@cFish Weight@D: @G%" I64T "@D]@n\r\n", GET_OBJ_WEIGHT(fish));
     ch->player_flags.set(PLR_FISHING, false);
     characterSubscriptions.unsubscribe("goneFishing", ch);
     ch->setBaseStat("fish_distance", 0);
@@ -1657,7 +1651,7 @@ static void catch_fish(struct char_data *ch, int quality) {
 ACMD(do_extract) {
 
     if (!GET_SKILL(ch, SKILL_EXTRACT)) {
-        send_to_char(ch, "You do not know how to extract!\r\n");
+                ch->sendText("You do not know how to extract!\r\n");
         return;
     }
 
@@ -1669,32 +1663,32 @@ ACMD(do_extract) {
     two_arguments(argu, arg2, arg3);
 
     if (!*arg) {
-        send_to_char(ch, "Syntax: extract (object)\r\n");
-        send_to_char(ch, "Syntax: extract combine (bottle1) (bottle2)\r\n");
+                ch->sendText("Syntax: extract (object)\r\n");
+                ch->sendText("Syntax: extract combine (bottle1) (bottle2)\r\n");
         return;
     }
 
     if (!strcasecmp(arg, "combine")) {
         if (!(obj = get_obj_in_list_vis(ch, arg2, nullptr, ch->getObjects()))) {
-            send_to_char(ch, "You do not have the first bottle that you were wanting to combine.\r\n");
+                        ch->sendText("You do not have the first bottle that you were wanting to combine.\r\n");
             return;
         }
         if (!(obj2 = get_obj_in_list_vis(ch, arg3, nullptr, ch->getObjects()))) {
-            send_to_char(ch, "You do not have the second bottle that you were wanting to combine.\r\n");
+                        ch->sendText("You do not have the second bottle that you were wanting to combine.\r\n");
             return;
         }
         if (obj && obj2) {
             if (GET_OBJ_VNUM(obj) != 3424) {
-                send_to_char(ch, "That is not an ink bottle!\r\n");
+                                ch->sendText("That is not an ink bottle!\r\n");
                 return;
             } else if (GET_OBJ_VNUM(obj2) != 3424) {
-                send_to_char(ch, "That is not an ink bottle!\r\n");
+                                ch->sendText("That is not an ink bottle!\r\n");
                 return;
             } else if (GET_OBJ_VAL(obj, VAL_OTHER_SERAF) <= 0) {
-                send_to_char(ch, "There isn't any ink in the first bottle!\r\n");
+                                ch->sendText("There isn't any ink in the first bottle!\r\n");
                 return;
             } else if (GET_OBJ_VAL(obj2, VAL_OTHER_SERAF) <= 0) {
-                send_to_char(ch, "There isn't any ink in the second bottle!\r\n");
+                                ch->sendText("There isn't any ink in the second bottle!\r\n");
                 return;
             } else {
                 if (GET_OBJ_VAL(obj, VAL_OTHER_SERAF) >= GET_OBJ_VAL(obj2, VAL_OTHER_SERAF)) {
@@ -1702,16 +1696,14 @@ ACMD(do_extract) {
                     if (GET_OBJ_VAL(obj, VAL_OTHER_SERAF) > 24) {
                         SET_OBJ_VAL(obj, VAL_OTHER_SERAF, 24);
                     }
-                    send_to_char(ch,
-                                 "You combine the ink of the two bottles into one bottle, and discard the leftovers.\r\n");
+                                        ch->sendText("You combine the ink of the two bottles into one bottle, and discard the leftovers.\r\n");
                     extract_obj(obj2);
                 } else if (GET_OBJ_VAL(obj2, VAL_OTHER_SERAF) > GET_OBJ_VAL(obj, VAL_OTHER_SERAF)) {
                     MOD_OBJ_VAL(obj2, VAL_OTHER_SERAF, GET_OBJ_VAL(obj, VAL_OTHER_SERAF));
                     if (GET_OBJ_VAL(obj2, VAL_OTHER_SERAF) > 24) {
                         SET_OBJ_VAL(obj2, VAL_OTHER_SERAF, 24);
                     }
-                    send_to_char(ch,
-                                 "You combine the ink of the two bottles into one bottle, and discard the leftovers.\r\n");
+                                        ch->sendText("You combine the ink of the two bottles into one bottle, and discard the leftovers.\r\n");
                     extract_obj(obj);
                 }
                 return;
@@ -1720,13 +1712,13 @@ ACMD(do_extract) {
     }
 
     if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->getObjects()))) {
-        send_to_char(ch, "You do not have that item.\r\n");
+                ch->sendText("You do not have that item.\r\n");
         return;
     } else {
         if (GET_OBJ_VNUM(obj) == 3425) {
             if (GET_OBJ_VAL(obj, VAL_PLANT_MAXMATURE) != 0 &&
                 GET_OBJ_VAL(obj, VAL_PLANT_MATURITY) < GET_OBJ_VAL(obj, VAL_PLANT_MAXMATURE)) {
-                send_to_char(ch, "It's not mature enough to extract from!\r\n");
+                                ch->sendText("It's not mature enough to extract from!\r\n");
                 return;
             }
             struct obj_data *bottle = nullptr, *next_obj, *obj2;
@@ -1738,7 +1730,7 @@ ACMD(do_extract) {
             int64_t cost = ((GET_MAX_MANA(ch) * 0.35) + 500);
 
             if (found == false) {
-                send_to_char(ch, "You do not have an empty bottle to put the extracted ink in.\r\n");
+                                ch->sendText("You do not have an empty bottle to put the extracted ink in.\r\n");
                 return;
             }
 
@@ -1750,7 +1742,7 @@ ACMD(do_extract) {
             cost += extra;
 
             if ((ch->getCurVital(CharVital::ki)) < cost) {
-                send_to_char(ch, "You do not have enough ki! @D[@rNeeded@D: @R%s@D]@n\r\n", add_commas(cost).c_str());
+                                ch->send_to("You do not have enough ki! @D[@rNeeded@D: @R%s@D]@n\r\n", add_commas(cost).c_str());
                 return;
             } else if (skill < chance) {
                 ch->modCurVital(CharVital::ki, -cost);
@@ -1780,14 +1772,13 @@ ACMD(do_extract) {
                     act("@GAs the last of the ink fills the bottle @g$n@G infuses a final burst of ki into the bottle.@n ",
                         true, ch, filled, nullptr, TO_ROOM);
                 } else {
-                    send_to_char(ch,
-                                 "You will need to fill the bottle before giving it a final infusion of ki to complete the process.\r\n");
+                                        ch->sendText("You will need to fill the bottle before giving it a final infusion of ki to complete the process.\r\n");
                 }
                 improve_skill(ch, SKILL_EXTRACT, 0);
                 WAIT_STATE(ch, PULSE_3SEC);
             }
         } else {
-            send_to_char(ch, "That is not something you can extract from.\r\n");
+                        ch->sendText("That is not something you can extract from.\r\n");
             return;
         }
     }
@@ -1796,7 +1787,7 @@ ACMD(do_extract) {
 ACMD(do_runic) {
 
     if (!GET_SKILL(ch, SKILL_RUNIC)) {
-        send_to_char(ch, "You do not know how to write down runes.\r\n");
+                ch->sendText("You do not know how to write down runes.\r\n");
         return;
     }
 
@@ -1806,16 +1797,14 @@ ACMD(do_runic) {
     two_arguments(argument, arg, arg2);
 
     if (FIGHTING(ch)) {
-        send_to_char(ch, "You are too busy fighting to write runes!\r\n");
+                ch->sendText("You are too busy fighting to write runes!\r\n");
         return;
     }
 
     if (!*arg || !*arg2) {
-        send_to_char(ch, "Syntax: runic (target) (skill)\r\n");
-        send_to_char(ch, "@D----@GRunic Skills@D----@n\r\n");
-        send_to_char(ch, "@Rkenaz\n%s\n%s\n%s\n%s\n%s\n%s@n\n", skill >= 40 ? "@Galgiz" : "",
-                     skill >= 40 ? "@moagaz" : "", skill >= 50 ? "@CLaguz" : "", skill >= 60 ? "@Ywunjo" : "",
-                     skill >= 80 ? "@rpurisaz" : "", skill >= 100 ? "@mgebo" : "");
+                ch->sendText("Syntax: runic (target) (skill)\r\n");
+                ch->sendText("@D----@GRunic Skills@D----@n\r\n");
+                ch->send_to("@Rkenaz\n%s\n%s\n%s\n%s\n%s\n%s@n\n", skill >= 40 ? "@Galgiz" : "", skill >= 40 ? "@moagaz" : "", skill >= 50 ? "@CLaguz" : "", skill >= 60 ? "@Ywunjo" : "", skill >= 80 ? "@rpurisaz" : "", skill >= 100 ? "@mgebo" : "");
         return;
     }
 
@@ -1828,10 +1817,10 @@ ACMD(do_runic) {
     brush = ch->findObjectVnum(3427) ? true : false;
 
     if (found == false) {
-        send_to_char(ch, "You do not have a bottle with enough ink in it.\r\n");
+                ch->sendText("You do not have a bottle with enough ink in it.\r\n");
         return;
     } else if (brush == false) {
-        send_to_char(ch, "You do not have a brush!\r\n");
+                ch->sendText("You do not have a brush!\r\n");
         return;
     }
 
@@ -1846,10 +1835,10 @@ ACMD(do_runic) {
     struct char_data *vict;
 
     if (!(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM))) {
-        send_to_char(ch, "You can't seem to find that person.\r\n");
+                ch->sendText("You can't seem to find that person.\r\n");
         return;
     } else if ((ch->getCurVital(CharVital::ki)) < cost) {
-        send_to_char(ch, "You do not have enough ki to write runes.\r\n");
+                ch->sendText("You do not have enough ki to write runes.\r\n");
         return;
     } else if (skill + bonus < axion_dice(0) && rand_number(1, 5) == 5) {
         act("@BYou dip your brush into the ink, but as you infuse your ki you balance the flow wrong and end up destroying the ink bottle!@n",
@@ -1880,11 +1869,11 @@ ACMD(do_runic) {
                 true, ch, nullptr, nullptr, TO_CHAR);
             act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@CKenaz@D'@B rune on $s skin.@n",
                 true, ch, nullptr, nullptr, TO_ROOM);
-            send_to_char(ch, "@D[@B%d@b ink used.@D]@n\r\n", inkcost);
+                        ch->send_to("@D[@B%d@b ink used.@D]@n\r\n", inkcost);
             int duration = skill * 0.16;
             if (duration < 1)
                 duration = 1;
-            send_to_char(vict, "@GYou can now see in the dark! @D(@WLasts@D: @w%d@D)@n\r\n", duration);
+                        vict->send_to("@GYou can now see in the dark! @D(@WLasts@D: @w%d@D)@n\r\n", duration);
             assign_affect(vict, AFF_INFRAVISION, SKILL_RUNIC, duration, 0, 0, 0, 0, 0, 0);
             if (MOD_OBJ_VAL(bottle, VAL_OTHER_SERAF, -inkcost) <= 0) {
                 extract_obj(bottle);
@@ -1899,11 +1888,11 @@ ACMD(do_runic) {
                 true, ch, nullptr, vict, TO_VICT);
             act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@CKenaz@D'@B rune on @b$N's@B skin.@n",
                 true, ch, nullptr, vict, TO_NOTVICT);
-            send_to_char(ch, "@D[@B%d@b ink used.@D]@n\r\n", inkcost);
+                        ch->send_to("@D[@B%d@b ink used.@D]@n\r\n", inkcost);
             int duration = skill * 0.16;
             if (duration < 1)
                 duration = 1;
-            send_to_char(vict, "@GYou can now see in the dark! @D(@WLasts@D: @w%d@D)@n\r\n", duration);
+                        vict->send_to("@GYou can now see in the dark! @D(@WLasts@D: @w%d@D)@n\r\n", duration);
             assign_affect(vict, AFF_INFRAVISION, SKILL_RUNIC, duration, 0, 0, 0, 0, 0, 0);
             if (MOD_OBJ_VAL(bottle, VAL_OTHER_SERAF, -inkcost) <= 0) {
                 extract_obj(bottle);
@@ -1917,7 +1906,7 @@ ACMD(do_runic) {
     } else if (!strcasecmp(arg2, "algiz") || !strcasecmp(arg2, "Algiz")) {
         inkcost += 2;
         if (amount < inkcost) {
-            send_to_char(ch, "You do not have a bottle with enough ink. @D[@bInkcost@D: @R%d@D]@n\r\n", inkcost);
+                        ch->send_to("You do not have a bottle with enough ink. @D[@bInkcost@D: @R%d@D]@n\r\n", inkcost);
             return;
         } else if (vict == ch) {
             ch->modCurVital(CharVital::ki, -cost);
@@ -1925,11 +1914,11 @@ ACMD(do_runic) {
                 true, ch, nullptr, nullptr, TO_CHAR);
             act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@CAlgiz@D'@B rune on $s skin.@n",
                 true, ch, nullptr, nullptr, TO_ROOM);
-            send_to_char(ch, "@D[@B%d@b ink used.@D]@n\r\n", inkcost);
+                        ch->send_to("@D[@B%d@b ink used.@D]@n\r\n", inkcost);
             int duration = skill * 0.05;
             if (duration < 1)
                 duration = 1;
-            send_to_char(vict, "@GYou now have Ethereal Armor! @D(@WLasts@D: @w%d@D)@n\r\n", duration);
+                        vict->send_to("@GYou now have Ethereal Armor! @D(@WLasts@D: @w%d@D)@n\r\n", duration);
             assign_affect(vict, AFF_EARMOR, SKILL_PUNCH, duration, 0, 0, 0, 0, 0, 0);
             if (MOD_OBJ_VAL(bottle, VAL_OTHER_SERAF, -inkcost) <= 0) {
                 extract_obj(bottle);
@@ -1944,11 +1933,11 @@ ACMD(do_runic) {
                 true, ch, nullptr, vict, TO_VICT);
             act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@CAlgiz@D'@B rune on @b$N's@B skin.@n",
                 true, ch, nullptr, vict, TO_NOTVICT);
-            send_to_char(ch, "@D[@B%d@b ink used.@D]@n\r\n", inkcost);
+                        ch->send_to("@D[@B%d@b ink used.@D]@n\r\n", inkcost);
             int duration = skill * 0.05;
             if (duration < 1)
                 duration = 1;
-            send_to_char(vict, "@GYou now have Ethereal Armor! @D(@WLasts@D: @w%d@D)@n\r\n", duration);
+                        vict->send_to("@GYou now have Ethereal Armor! @D(@WLasts@D: @w%d@D)@n\r\n", duration);
             assign_affect(vict, AFF_EARMOR, SKILL_PUNCH, duration, 0, 0, 0, 0, 0, 0);
             if (MOD_OBJ_VAL(bottle, VAL_OTHER_SERAF, -inkcost) <= 0) {
                 extract_obj(bottle);
@@ -1962,7 +1951,7 @@ ACMD(do_runic) {
     } else if (!strcasecmp(arg2, "oagaz") || !strcasecmp(arg2, "Oagaz")) {
         inkcost += 3;
         if (amount < inkcost) {
-            send_to_char(ch, "You do not have a bottle with enough ink. @D[@bInkcost@D: @R%d@D]@n\r\n", inkcost);
+                        ch->send_to("You do not have a bottle with enough ink. @D[@bInkcost@D: @R%d@D]@n\r\n", inkcost);
             return;
         } else if (vict == ch) {
             ch->modCurVital(CharVital::ki, -cost);
@@ -1970,11 +1959,11 @@ ACMD(do_runic) {
                 true, ch, nullptr, nullptr, TO_CHAR);
             act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@COagaz@D'@B rune on $s skin.@n",
                 true, ch, nullptr, nullptr, TO_ROOM);
-            send_to_char(ch, "@D[@B%d@b ink used.@D]@n\r\n", inkcost);
+                        ch->send_to("@D[@B%d@b ink used.@D]@n\r\n", inkcost);
             int duration = skill * 0.04;
             if (duration < 1)
                 duration = 1;
-            send_to_char(vict, "@GYou now are protected by Ethereal Chains! @D(@WLasts@D: @w%d@D)@n\r\n", duration);
+                        vict->send_to("@GYou now are protected by Ethereal Chains! @D(@WLasts@D: @w%d@D)@n\r\n", duration);
             assign_affect(vict, AFF_ECHAINS, SKILL_KNEE, duration, 0, 0, 0, 0, 0, 0);
             if (MOD_OBJ_VAL(bottle, VAL_OTHER_SERAF, -inkcost) <= 0) {
                 extract_obj(bottle);
@@ -1985,7 +1974,7 @@ ACMD(do_runic) {
     } else if (!strcasecmp(arg2, "laguz") || !strcasecmp(arg2, "Laguz")) {
         inkcost += 4;
         if (amount < inkcost) {
-            send_to_char(ch, "You do not have a bottle with enough ink. @D[@bInkcost@D: @R%d@D]@n\r\n", inkcost);
+                        ch->send_to("You do not have a bottle with enough ink. @D[@bInkcost@D: @R%d@D]@n\r\n", inkcost);
             return;
         } else if (vict == ch) {
             ch->modCurVital(CharVital::ki, -cost);
@@ -1993,11 +1982,11 @@ ACMD(do_runic) {
                 true, ch, nullptr, nullptr, TO_CHAR);
             act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@CLaguz@D'@B rune on $s skin.@n",
                 true, ch, nullptr, nullptr, TO_ROOM);
-            send_to_char(ch, "@D[@B%d@b ink used.@D]@n\r\n", inkcost);
+                        ch->send_to("@D[@B%d@b ink used.@D]@n\r\n", inkcost);
             int duration = skill * 0.04;
             if (duration < 1)
                 duration = 1;
-            send_to_char(vict, "@GYou now have water breathing! @D(@WLasts@D: @w%d@D)@n\r\n", duration);
+                        vict->send_to("@GYou now have water breathing! @D(@WLasts@D: @w%d@D)@n\r\n", duration);
             assign_affect(vict, AFF_WATERBREATH, SKILL_SBC, duration, 0, 0, 0, 0, 0, 0);
             if (MOD_OBJ_VAL(bottle, VAL_OTHER_SERAF, -inkcost) <= 0) {
                 extract_obj(bottle);
@@ -2012,11 +2001,11 @@ ACMD(do_runic) {
                 true, ch, nullptr, vict, TO_VICT);
             act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@COagaz@D'@B rune on @b$N's@B skin.@n",
                 true, ch, nullptr, vict, TO_NOTVICT);
-            send_to_char(ch, "@D[@B%d@b ink used.@D]@n\r\n", inkcost);
+                        ch->send_to("@D[@B%d@b ink used.@D]@n\r\n", inkcost);
             int duration = skill * 0.04;
             if (duration < 1)
                 duration = 1;
-            send_to_char(vict, "@GYou now are protected by Ethereal Chains! @D(@WLasts@D: @w%d@D)@n\r\n", duration);
+                        vict->send_to("@GYou now are protected by Ethereal Chains! @D(@WLasts@D: @w%d@D)@n\r\n", duration);
             assign_affect(vict, AFF_ECHAINS, SKILL_KNEE, duration, 0, 0, 0, 0, 0, 0);
             if (MOD_OBJ_VAL(bottle, VAL_OTHER_SERAF, -inkcost) <= 0) {
                 extract_obj(bottle);
@@ -2030,7 +2019,7 @@ ACMD(do_runic) {
     } else if (!strcasecmp(arg2, "wunjo") || !strcasecmp(arg2, "Wunjo")) {
         inkcost += 4;
         if (amount < inkcost) {
-            send_to_char(ch, "You do not have a bottle with enough ink. @D[@bInkcost@D: @R%d@D]@n\r\n", inkcost);
+                        ch->send_to("You do not have a bottle with enough ink. @D[@bInkcost@D: @R%d@D]@n\r\n", inkcost);
             return;
         } else if (vict == ch) {
             ch->modCurVital(CharVital::ki, -cost);
@@ -2038,13 +2027,11 @@ ACMD(do_runic) {
                 true, ch, nullptr, nullptr, TO_CHAR);
             act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@CWunjo@D'@B rune on $s skin.@n",
                 true, ch, nullptr, nullptr, TO_ROOM);
-            send_to_char(ch, "@D[@B%d@b ink used.@D]@n\r\n", inkcost);
+                        ch->send_to("@D[@B%d@b ink used.@D]@n\r\n", inkcost);
             int duration = skill * 0.08;
             if (duration < 1)
                 duration = 1;
-            send_to_char(vict,
-                         "@GYou are now blessed with a deeper understanding of things you experience! @D(@WLasts@D: @w%d@D)@n\r\n",
-                         duration);
+                        vict->send_to("@GYou are now blessed with a deeper understanding of things you experience! @D(@WLasts@D: @w%d@D)@n\r\n", duration);
             assign_affect(vict, AFF_WUNJO, SKILL_SLAM, duration, 0, 0, 0, 0, 0, 0);
             if (MOD_OBJ_VAL(bottle, VAL_OTHER_SERAF, -inkcost) <= 0) {
                 extract_obj(bottle);
@@ -2059,13 +2046,11 @@ ACMD(do_runic) {
                 true, ch, nullptr, vict, TO_VICT);
             act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@CWunjo@D'@B rune on @b$N's@B skin.@n",
                 true, ch, nullptr, vict, TO_NOTVICT);
-            send_to_char(ch, "@D[@B%d@b ink used.@D]@n\r\n", inkcost);
+                        ch->send_to("@D[@B%d@b ink used.@D]@n\r\n", inkcost);
             int duration = skill * 0.08;
             if (duration < 1)
                 duration = 1;
-            send_to_char(vict,
-                         "@GYou are now blessed with a deeper understanding of things you experience! @D(@WLasts@D: @w%d@D)@n\r\n",
-                         duration);
+                        vict->send_to("@GYou are now blessed with a deeper understanding of things you experience! @D(@WLasts@D: @w%d@D)@n\r\n", duration);
             assign_affect(vict, AFF_WUNJO, SKILL_SLAM, duration, 0, 0, 0, 0, 0, 0);
             if (MOD_OBJ_VAL(bottle, VAL_OTHER_SERAF, -inkcost) <= 0) {
                 extract_obj(bottle);
@@ -2079,7 +2064,7 @@ ACMD(do_runic) {
     } else if (!strcasecmp(arg2, "purisaz") || !strcasecmp(arg2, "Purisaz")) {
         inkcost += 4;
         if (amount < inkcost) {
-            send_to_char(ch, "You do not have a bottle with enough ink. @D[@bInkcost@D: @R%d@D]@n\r\n", inkcost);
+                        ch->send_to("You do not have a bottle with enough ink. @D[@bInkcost@D: @R%d@D]@n\r\n", inkcost);
             return;
         } else if (vict == ch) {
             ch->modCurVital(CharVital::ki, -cost);
@@ -2087,12 +2072,11 @@ ACMD(do_runic) {
                 true, ch, nullptr, nullptr, TO_CHAR);
             act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@CPurisaz@D'@B rune on $s skin.@n",
                 true, ch, nullptr, nullptr, TO_ROOM);
-            send_to_char(ch, "@D[@B%d@b ink used.@D]@n\r\n", inkcost);
+                        ch->send_to("@D[@B%d@b ink used.@D]@n\r\n", inkcost);
             int duration = skill * 0.06;
             if (duration < 1)
                 duration = 1;
-            send_to_char(vict, "@GYou feel as if your inner energy is more potent! @D(@WLasts@D: @w%d@D)@n\r\n",
-                         duration);
+                        vict->send_to("@GYou feel as if your inner energy is more potent! @D(@WLasts@D: @w%d@D)@n\r\n", duration);
             assign_affect(vict, AFF_POTENT, SKILL_HEELDROP, duration, 0, 0, 0, 0, 0, 0);
             if (MOD_OBJ_VAL(bottle, VAL_OTHER_SERAF, -inkcost) <= 0) {
                 extract_obj(bottle);
@@ -2107,10 +2091,9 @@ ACMD(do_runic) {
                 true, ch, nullptr, vict, TO_VICT);
             act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@CPUrisaz@D'@B rune on @b$N's@B skin.@n",
                 true, ch, nullptr, vict, TO_NOTVICT);
-            send_to_char(ch, "@D[@B%d@b ink used.@D]@n\r\n", inkcost);
+                        ch->send_to("@D[@B%d@b ink used.@D]@n\r\n", inkcost);
             int duration = skill * 0.06;
-            send_to_char(vict, "@GYou feel as if your inner energy is more potent! @D(@WLasts@D: @w%d@D)@n\r\n",
-                         duration);
+                        vict->send_to("@GYou feel as if your inner energy is more potent! @D(@WLasts@D: @w%d@D)@n\r\n", duration);
             if (duration < 1)
                 duration = 1;
             assign_affect(vict, AFF_POTENT, SKILL_HEELDROP, duration, 0, 0, 0, 0, 0, 0);
@@ -2126,7 +2109,7 @@ ACMD(do_runic) {
     } else if (!strcasecmp(arg2, "gebo") || !strcasecmp(arg2, "Gebo")) {
         inkcost += 10;
         if (amount < inkcost) {
-            send_to_char(ch, "You do not have a bottle with enough ink. @D[@bInkcost@D: @R%d@D]@n\r\n", inkcost);
+                        ch->send_to("You do not have a bottle with enough ink. @D[@bInkcost@D: @R%d@D]@n\r\n", inkcost);
             return;
         } else if (vict == ch) {
             ch->modCurVital(CharVital::ki, -cost);
@@ -2134,10 +2117,9 @@ ACMD(do_runic) {
                 true, ch, nullptr, nullptr, TO_CHAR);
             act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@CGebo@D'@B rune on $s skin. The rune flashes out of existence immediately!@n",
                 true, ch, nullptr, nullptr, TO_ROOM);
-            send_to_char(ch, "@D[@B%d@b ink used.@D]@n\r\n", inkcost);
+                        ch->send_to("@D[@B%d@b ink used.@D]@n\r\n", inkcost);
             vict->modPractices(125);
-            send_to_char(vict,
-                         "@GYou feel like you've just gained a lot of knowledge. Now if only you could apply it. @D[@m+125 PS@D]@n\r\n");
+                        vict->sendText("@GYou feel like you've just gained a lot of knowledge. Now if only you could apply it. @D[@m+125 PS@D]@n\r\n");
             if (MOD_OBJ_VAL(bottle, VAL_OTHER_SERAF, -inkcost) <= 0) {
                 extract_obj(bottle);
                 struct obj_data *empty = read_object(3423, VIRTUAL);
@@ -2151,10 +2133,9 @@ ACMD(do_runic) {
                 true, ch, nullptr, vict, TO_VICT);
             act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@CGebo@D'@B rune on @b$N's@B skin. The rune flashes out of existence immediately!@n",
                 true, ch, nullptr, vict, TO_NOTVICT);
-            send_to_char(ch, "@D[@B%d@b ink used.@D]@n\r\n", inkcost);
+                        ch->send_to("@D[@B%d@b ink used.@D]@n\r\n", inkcost);
             vict->modPractices(125);
-            send_to_char(vict,
-                         "@GYou feel like you've just gained a lot of knowledge. Now if only you could apply it. @D[@m+125 PS@D]@n\r\n");
+                        vict->sendText("@GYou feel like you've just gained a lot of knowledge. Now if only you could apply it. @D[@m+125 PS@D]@n\r\n");
             if (MOD_OBJ_VAL(bottle, VAL_OTHER_SERAF, -inkcost) <= 0) {
                 extract_obj(bottle);
                 struct obj_data *empty = read_object(3423, VIRTUAL);
@@ -2165,10 +2146,9 @@ ACMD(do_runic) {
         WAIT_STATE(ch, PULSE_3SEC);
         return;
     } else {
-        send_to_char(ch, "Syntax: runic (target) (skill)\r\n");
-        send_to_char(ch, "@D----@GRunic Skills@D----@n\r\n");
-        send_to_char(ch, "@Rkenaz\n%s\n%s\n%s\n%s\n%s@n\n", skill >= 40 ? "@Galgiz" : "", skill >= 40 ? "@moagaz" : "",
-                     skill >= 60 ? "@Ywunjo" : "", skill >= 80 ? "@rpurisaz" : "", skill >= 100 ? "@mgebo" : "");
+                ch->sendText("Syntax: runic (target) (skill)\r\n");
+                ch->sendText("@D----@GRunic Skills@D----@n\r\n");
+                ch->send_to("@Rkenaz\n%s\n%s\n%s\n%s\n%s@n\n", skill >= 40 ? "@Galgiz" : "", skill >= 40 ? "@moagaz" : "", skill >= 60 ? "@Ywunjo" : "", skill >= 80 ? "@rpurisaz" : "", skill >= 100 ? "@mgebo" : "");
         return;
     }
 
@@ -2177,7 +2157,7 @@ ACMD(do_runic) {
 ACMD(do_scry) {
 
     if (strcasecmp(GET_NAME(ch), "Galeos")) {
-        send_to_char(ch, "You do not know how to perform that technique.\r\n");
+                ch->sendText("You do not know how to perform that technique.\r\n");
         return;
     }
 
@@ -2186,31 +2166,31 @@ ACMD(do_scry) {
     one_argument(argument, arg);
 
     if (!*arg) {
-        send_to_char(ch, "Syntax: scry (target)\r\n");
+                ch->sendText("Syntax: scry (target)\r\n");
         return;
     }
 
     struct char_data *vict;
 
     if (!(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM))) {
-        send_to_char(ch, "Who are you using Oracle Scry on?\r\n");
+                ch->sendText("Who are you using Oracle Scry on?\r\n");
         return;
     }
 
     if (vict == ch) {
-        send_to_char(ch, "You can't do that to yourself!\r\n");
+                ch->sendText("You can't do that to yourself!\r\n");
         return;
     }
 
     if (IS_NPC(vict)) {
-        send_to_char(ch, "No using this on mobs!\r\n");
+                ch->sendText("No using this on mobs!\r\n");
         return;
     }
 
     int cost = 2000;
 
     if (GET_PRACTICES(ch) < cost) {
-        send_to_char(ch, "You do not have enough PS to Oracle Scry!\r\n");
+                ch->sendText("You do not have enough PS to Oracle Scry!\r\n");
         return;
     } else {
         reveal_hiding(ch, 0);
@@ -2226,15 +2206,14 @@ ACMD(do_scry) {
         vict->gainBaseStat("ki", (vict->getBaseStat<int64_t>("ki") * .01) * boost);
         vict->gainBaseStat("stamina", (vict->getBaseStat<int64_t>("stamina") * .01) * boost);
 
-        send_to_char(vict,
-                     "Your Powerlevel, Ki, and Stamina have improved drastically! On top of that your Intelligence and Wisdom have improved permanantly!\r\n");
+                vict->sendText("Your Powerlevel, Ki, and Stamina have improved drastically! On top of that your Intelligence and Wisdom have improved permanantly!\r\n");
         vict->modBaseStat("intelligence", 2);
         vict->modBaseStat("wisdom", 2);
         ch->modPractices(-2000);
         for(const auto& s : { "health", "ki", "stamina" }) {
             vict->gainBaseStatPercent(s, .025);
         }
-        send_to_char(ch, "Your Powerlevel, Ki, and Stamina have improved!\r\n");
+                ch->sendText("Your Powerlevel, Ki, and Stamina have improved!\r\n");
     }
 
 }
@@ -2273,7 +2252,7 @@ void ash_burn(struct char_data *ch) {
 ACMD(do_ashcloud) {
 
     if (!IS_DEMON(ch)) {
-        send_to_char(ch, "You are not trained in the use of ash and fire!\r\n");
+                ch->sendText("You are not trained in the use of ash and fire!\r\n");
         return;
     }
     int level = 1;
@@ -2283,7 +2262,7 @@ ACMD(do_ashcloud) {
     one_argument(argument, arg);
 
     if (!*arg) {
-        send_to_char(ch, "Syntax: ashcloud (1 | 2 | 3)\r\n");
+                ch->sendText("Syntax: ashcloud (1 | 2 | 3)\r\n");
         return;
     }
 
@@ -2292,12 +2271,12 @@ ACMD(do_ashcloud) {
 
     ash = ch->findObjectVnum(1305);
     if (!ash) {
-        send_to_char(ch, "You do not have any ash!\r\n");
+                ch->sendText("You do not have any ash!\r\n");
         return;
     }
 
     if (ch->location.findObjectVnum(1306)) {
-        send_to_char(ch, "You can not pile more ash into the air without causing it to clump together and settle.\r\n");
+                ch->sendText("You can not pile more ash into the air without causing it to clump together and settle.\r\n");
         return;
     }
 
@@ -2329,24 +2308,24 @@ ACMD(do_ashcloud) {
             initial = 0.05;
             break;
         default:
-            send_to_char(ch, "Syntax: ashcloud (1 | 2 | 3)\r\n");
+                        ch->sendText("Syntax: ashcloud (1 | 2 | 3)\r\n");
             return;
     }
 
     int64_t cost = (GET_MAX_MANA(ch) * initial) + (GET_INT(ch) * mult);
 
     if ((ch->getCurVital(CharVital::ki)) < cost) {
-        send_to_char(ch, "You do not have enough ki!\r\n");
+                ch->sendText("You do not have enough ki!\r\n");
         return;
     }
 
     if (ch->location.getEnvironment(ENV_WATER) >= 100.0) {
-        send_to_char(ch, "You can not create an ashcloud here, because it is too wet.\r\n");
+                ch->sendText("You can not create an ashcloud here, because it is too wet.\r\n");
         return;
     }
 
     if (ch->location.getSectorType() == SectorType::space) {
-        send_to_char(ch, "You can not create an ashcloud in space.\r\n");
+                ch->sendText("You can not create an ashcloud in space.\r\n");
         return;
     }
 
@@ -2377,10 +2356,10 @@ ACMD(do_ashcloud) {
 
     switch(level) {
         case 3:
-            send_to_location(ch, "@WThe ashes ripple with an intense aftershock of power.@n\r\n");
+            ch->location.sendText("@WThe ashes ripple with an intense aftershock of power.@n\r\n");
             break;
         case 2:
-            send_to_location(ch, "@WThe ashes ripple with a strong aftershock of power.@n\r\n");
+            ch->location.sendText("@WThe ashes ripple with a strong aftershock of power.@n\r\n");
             break;
         default:
             break;
@@ -2397,30 +2376,30 @@ ACMD(do_resize) {
     two_arguments(argument, arg, arg2);
 
     if (!GET_SKILL(ch, SKILL_BUILD)) {
-        send_to_char(ch, "You do not have the skill to resize equipment!\r\n");
+                ch->sendText("You do not have the skill to resize equipment!\r\n");
         return;
     } else if (GET_SKILL(ch, SKILL_BUILD) < 80) {
-        send_to_char(ch, "Your build skill must be at least level 80 before you can resize equipment.\r\n");
+                ch->sendText("Your build skill must be at least level 80 before you can resize equipment.\r\n");
         return;
     } else {
         if (!*arg || !*arg2) {
-            send_to_char(ch, "Syntax: resize (obj) (small | medium)\r\n");
+                        ch->sendText("Syntax: resize (obj) (small | medium)\r\n");
             return;
         }
         if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->getObjects()))) {
-            send_to_char(ch, "You don't have that object!\r\n");
+                        ch->sendText("You don't have that object!\r\n");
             return;
         } else {
             if (!wearable_obj(obj)) {
-                send_to_char(ch, "That is not equipment! You can only resize equipment.\r\n");
+                                ch->sendText("That is not equipment! You can only resize equipment.\r\n");
                 return;
             } else {
                 if ((ch->getCurVital(CharVital::stamina)) < GET_OBJ_WEIGHT(obj) + (GET_MAX_MOVE(ch) / 40)) {
-                    send_to_char(ch, "You do not have enough stamina to resize this object at this time.\r\n");
+                                        ch->sendText("You do not have enough stamina to resize this object at this time.\r\n");
                     return;
                 } else if (!strcasecmp(arg2, "small")) {
                     if (GET_OBJ_SIZE(obj) == SIZE_SMALL) {
-                        send_to_char(ch, "The equipment is already small sized.\r\n");
+                                                ch->sendText("The equipment is already small sized.\r\n");
                         return;
                     } else {
                         act("@WYou carefully adjust the size of @c$p@W.@n", true, ch, obj, nullptr, TO_CHAR);
@@ -2430,7 +2409,7 @@ ACMD(do_resize) {
                     }
                 } else if (!strcasecmp(arg2, "medium")) {
                     if (GET_OBJ_SIZE(obj) == SIZE_MEDIUM) {
-                        send_to_char(ch, "The equipment is already medium sized.\r\n");
+                                                ch->sendText("The equipment is already medium sized.\r\n");
                         return;
                     } else {
                         act("@WYou carefully adjust the size of @c$p@W.@n", true, ch, obj, nullptr, TO_CHAR);
@@ -2439,7 +2418,7 @@ ACMD(do_resize) {
                         ch->modCurVital(CharVital::stamina, -(GET_OBJ_WEIGHT(obj) + (GET_MAX_MOVE(ch) / 40)));
                     }
                 } else {
-                    send_to_char(ch, "Syntax: resize (obj) (small | medium)\r\n");
+                                        ch->sendText("Syntax: resize (obj) (small | medium)\r\n");
                 }
             }
         }
@@ -2453,41 +2432,40 @@ ACMD(do_healglow) {
     one_argument(argument, arg);
 
     if (!GET_SKILL(ch, SKILL_HEALGLOW)) {
-        send_to_char(ch, "You do not know how to perform that technique.\r\n");
+                ch->sendText("You do not know how to perform that technique.\r\n");
         return;
     }
 
     if (!*arg) {
         vict = ch;
     } else if (GET_SKILL(ch, SKILL_HEALGLOW) < 100) {
-        send_to_char(ch,
-                     "You can not target anyone except yourself unless you are a master of this technique.\nSyntax: healingglow\r\n");
+                ch->sendText("You can not target anyone except yourself unless you are a master of this technique.\nSyntax: healingglow\r\n");
         return;
     } else if (!(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM))) {
-        send_to_char(ch, "Nobody around by that name.\r\n");
+                ch->sendText("Nobody around by that name.\r\n");
         return;
     }
 
     if (AFF_FLAGGED(vict, AFF_HEALGLOW) && vict == ch) {
-        send_to_char(ch, "You already have a healing glow surrounding your body.\r\n");
+                ch->sendText("You already have a healing glow surrounding your body.\r\n");
         return;
     } else if (AFF_FLAGGED(vict, AFF_HEALGLOW)) {
-        send_to_char(ch, "They already have a healing glow surrounding their body.\r\n");
+                ch->sendText("They already have a healing glow surrounding their body.\r\n");
         return;
     }
 
     if (FIGHTING(vict) && vict == ch) {
-        send_to_char(ch, "You are too busy fighting!@n\r\n");
+                ch->sendText("You are too busy fighting!@n\r\n");
         return;
     } else if (FIGHTING(vict)) {
-        send_to_char(ch, "They are too busy fighting!@n\r\n");
+                ch->sendText("They are too busy fighting!@n\r\n");
         return;
     }
 
     int64_t cost = GET_MAX_MANA(ch) * 0.5;
 
     if ((ch->getCurVital(CharVital::ki)) < cost) {
-        send_to_char(ch, "You do not have enough ki. It requires at least 50%s of your ki in cost.\r\n", "%");
+                ch->send_to("You do not have enough ki. It requires at least 50%s of your ki in cost.\r\n", "%");
         return;
     } else {
         if (vict == ch) {
@@ -2522,7 +2500,7 @@ ACMD(do_healglow) {
 ACMD(do_amnisiac) {
 
     if (strcasecmp(GET_NAME(ch), "Kanashimi")) {
-        send_to_char(ch, "You do not know how to perform that technique.\r\n");
+                ch->sendText("You do not know how to perform that technique.\r\n");
         return;
     }
 
@@ -2533,26 +2511,26 @@ ACMD(do_amnisiac) {
     two_arguments(argument, arg, arg2);
 
     if (!*arg || !*arg2) {
-        send_to_char(ch, "Syntax: amnesiac (target) (skill)\r\n");
+                ch->sendText("Syntax: amnesiac (target) (skill)\r\n");
         return;
     }
 
     if (!(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM))) {
-        send_to_char(ch, "Perform amnesiac kiss on whom?\r\n");
+                ch->sendText("Perform amnesiac kiss on whom?\r\n");
         return;
     }
 
     skill = find_skill_num(arg2, SKTYPE_SKILL);
 
     if (skill <= 0) {
-        send_to_char(ch, "That is not a skill\r\n");
+                ch->sendText("That is not a skill\r\n");
         return;
     }
 
     int chance = axion_dice(0), perc = 10 + GET_INT(ch), cost = GET_MAX_MANA(ch) * 0.18;
 
     if (cost > (ch->getCurVital(CharVital::ki))) {
-        send_to_char(ch, "You do not have enough ki!\r\n");
+                ch->sendText("You do not have enough ki!\r\n");
         return;
     } else if (perc < chance) {
         act("@WYou attempt to grab @C$N@W to kiss $M, but $E evades!@n", true, ch, nullptr, vict, TO_CHAR);
@@ -2590,31 +2568,31 @@ ACMD(do_shimmer) {
         if (PRF_FLAGGED(ch, PRF_ARENAWATCH)) {
             ch->pref_flags.set(PRF_ARENAWATCH, true);
             ch->setBaseStat<room_vnum>("arena_watch", -1);
-            send_to_char(ch, "You stop watching the arena action.\r\n");
+                        ch->sendText("You stop watching the arena action.\r\n");
         }
     }
     if (strcasecmp(GET_NAME(ch), "Anubis")) {
-        send_to_char(ch, "You do not even know how to perform that skill!\r\n");
+                ch->sendText("You do not even know how to perform that skill!\r\n");
         return;
     } else if (PLR_FLAGGED(ch, PLR_PILOTING)) {
-        send_to_char(ch, "You are busy piloting a ship!\r\n");
+                ch->sendText("You are busy piloting a ship!\r\n");
         return;
     } else if (PLR_FLAGGED(ch, PLR_HEALT)) {
-        send_to_char(ch, "You are inside a healing tank!\r\n");
+                ch->sendText("You are inside a healing tank!\r\n");
         return;
     } else if (ch->getRoomVnum() >= 19800 && ch->getRoomVnum() <= 19899) {
-        send_to_char(ch, "@rYou are in a pocket dimension!@n\r\n");
+                ch->sendText("@rYou are in a pocket dimension!@n\r\n");
         return;
     } else if (!*arg) {
-        send_to_char(ch, "Who or where do you want to shimmer to? [target | planet-(planet name) | afterlife]\r\n");
-        send_to_char(ch, "Example: shimmer goku\nExample 2: shimmer planet-earth\r\n");
+                ch->sendText("Who or where do you want to shimmer to? [target | planet-(planet name) | afterlife]\r\n");
+                ch->sendText("Example: shimmer goku\nExample 2: shimmer planet-earth\r\n");
         return;
     }
 
     cost = GET_MAX_MANA(ch) / 40;
 
     if ((ch->getCurVital(CharVital::ki)) - cost < 0) {
-        send_to_char(ch, "You do not have enough ki to instantaneously move.\r\n");
+                ch->sendText("You do not have enough ki to instantaneously move.\r\n");
         return;
     }
 
@@ -2636,27 +2614,25 @@ ACMD(do_shimmer) {
     } else if (!strcasecmp(arg, "afterlife")) {
         location = 6000;
     } else if (!(tar = get_char_vis(ch, arg, nullptr, FIND_CHAR_WORLD))) {
-        send_to_char(ch, "@RThat target doesn't exist.@n\r\n");
-        send_to_char(ch, "Who or where do you want to shimmer to? [target | planet-(planet name) | afterlife]\r\n");
-        send_to_char(ch, "Example: shimmer goku\nExample 2: shimmer planet-earth\r\n");
+                ch->sendText("@RThat target doesn't exist.@n\r\n");
+                ch->sendText("Who or where do you want to shimmer to? [target | planet-(planet name) | afterlife]\r\n");
+                ch->sendText("Example: shimmer goku\nExample 2: shimmer planet-earth\r\n");
         return;
     }
 
     if (skill < perc || (FIGHTING(ch) && rand_number(1, 2) <= 1)) {
         if (tar) {
             if (tar != ch) {
-                send_to_char(ch,
-                             "You prepare to move instantly but mess up the process and waste some of your ki!\r\n");
+                                ch->sendText("You prepare to move instantly but mess up the process and waste some of your ki!\r\n");
                 ch->modCurVital(CharVital::ki, -cost);
                 WAIT_STATE(ch, PULSE_2SEC);
                 return;
             } else {
-                send_to_char(ch,
-                             "Moving to yourself would be kinda impossible wouldn't it? If not that then it would at least be pointless.\r\n");
+                                ch->sendText("Moving to yourself would be kinda impossible wouldn't it? If not that then it would at least be pointless.\r\n");
                 return;
             }
         } else {
-            send_to_char(ch, "You prepare to move instantly but mess up the process and waste some of your ki!\r\n");
+                        ch->sendText("You prepare to move instantly but mess up the process and waste some of your ki!\r\n");
             ch->modCurVital(CharVital::ki, -cost);
             WAIT_STATE(ch, PULSE_2SEC);
             return;
@@ -2667,26 +2643,25 @@ ACMD(do_shimmer) {
     WAIT_STATE(ch, PULSE_2SEC);
     if (tar) {
         if (tar == ch) {
-            send_to_char(ch,
-                         "Moving to yourself would be kinda impossible wouldn't it? If not that then it would at least be pointless.\r\n");
+                        ch->sendText("Moving to yourself would be kinda impossible wouldn't it? If not that then it would at least be pointless.\r\n");
             return;
         } else if (GRAPPLING(ch) && GRAPPLING(ch) == tar) {
-            send_to_char(ch, "You are already in the same room with them and are grappling with them!\r\n");
+                        ch->sendText("You are already in the same room with them and are grappling with them!\r\n");
             return;
         } else if (GET_ADMLEVEL(tar) > 0 && GET_ADMLEVEL(ch) < 1) {
-            send_to_char(ch, "That immortal prevents you from reaching them.\r\n");
+                        ch->sendText("That immortal prevents you from reaching them.\r\n");
             return;
         } else if (tar->location.getRoomFlag(ROOM_NOINSTANT)) {
-            send_to_char(ch, "You can not go there as it is a protected area!\r\n");
+                        ch->sendText("You can not go there as it is a protected area!\r\n");
             return;
         } else if (GRAPPLING(ch) && AFF_FLAGGED(GRAPPLING(ch), AFF_SPIRIT)) {
-            send_to_char(ch, "You can not take the dead with you!\r\n");
+                        ch->sendText("You can not take the dead with you!\r\n");
             return;
         } else if (DRAGGING(ch) && AFF_FLAGGED(DRAGGING(ch), AFF_SPIRIT)) {
-            send_to_char(ch, "You can not take the dead with you!\r\n");
+                        ch->sendText("You can not take the dead with you!\r\n");
             return;
         } else if (GRAPPLED(ch) && AFF_FLAGGED(GRAPPLED(ch), AFF_SPIRIT)) {
-            send_to_char(ch, "You can not take the dead with you!\r\n");
+                        ch->sendText("You can not take the dead with you!\r\n");
             return;
         }
 
@@ -2712,12 +2687,12 @@ ACMD(do_shimmer) {
 ACMD(do_channel) {
 
     if (!IS_DEMON(ch) || GET_SKILL_BASE(ch, SKILL_STYLE) < 40) {
-        send_to_char(ch, "You are not a Demon!\r\n");
+                ch->sendText("You are not a Demon!\r\n");
         return;
     }
 
     if (GET_SKILL_BASE(ch, SKILL_STYLE) < 40) {
-        send_to_char(ch, "This requires a fighting style at level 40 or more!!\r\n");
+                ch->sendText("This requires a fighting style at level 40 or more!!\r\n");
         return;
     }
 
@@ -2726,7 +2701,7 @@ ACMD(do_channel) {
     int chance = axion_dice(0), skill = GET_SKILL(ch, SKILL_STYLE);
 
     if (cost > (ch->getCurVital(CharVital::ki))) {
-        send_to_char(ch, "You do not have enough ki to channel with!\r\n");
+                ch->sendText("You do not have enough ki to channel with!\r\n");
         return;
     }
 
@@ -2738,12 +2713,12 @@ ACMD(do_channel) {
     }
 
     if (found == false) {
-        send_to_char(ch, "You do not have any uncharged blood rubies.\r\n");
+                ch->sendText("You do not have any uncharged blood rubies.\r\n");
         return;
     }
 
     if (ch->location.getGroundEffect() <= 0) {
-        send_to_char(ch, "There is no lava here!\r\n");
+                ch->sendText("There is no lava here!\r\n");
         return;
     }
 
@@ -2771,7 +2746,7 @@ ACMD(do_channel) {
 ACMD(do_hydromancy) {
 
     if (!IS_TSUNA(ch) || GET_SKILL_BASE(ch, SKILL_STYLE) <= 0) {
-        send_to_char(ch, "You know nothing about hydromancy!\r\n");
+                ch->sendText("You know nothing about hydromancy!\r\n");
         return;
     }
 
@@ -2782,10 +2757,10 @@ ACMD(do_hydromancy) {
 
     if (ch->location.getGroundEffect() >= 0 && sect != SectorType::water_swim && sect != SectorType::water_noswim) {
         if (sect != SectorType::underwater) {
-            send_to_char(ch, "There is not sufficient water here.\r\n");
+                        ch->sendText("There is not sufficient water here.\r\n");
             return;
         } else {
-            send_to_char(ch, "There is too much water here to control!\r\n");
+                        ch->sendText("There is too much water here to control!\r\n");
             return;
         }
     }
@@ -2794,12 +2769,12 @@ ACMD(do_hydromancy) {
         cost = 100;
 
     if ((ch->getCurVital(CharVital::ki)) < cost) {
-        send_to_char(ch, "You do not have enough ki to manipulate any water around you.\r\n");
+                ch->sendText("You do not have enough ki to manipulate any water around you.\r\n");
         return;
     }
 
     if (GET_COOLDOWN(ch) > 0) {
-        send_to_char(ch, "You must wait a short period before concentrating again.\r\n");
+                ch->sendText("You must wait a short period before concentrating again.\r\n");
         return;
     }
 
@@ -2809,9 +2784,9 @@ ACMD(do_hydromancy) {
     two_arguments(argument, arg, arg2);
 
     if (!*arg) {
-        send_to_char(ch, "Syntax 1: hydromancy flood (direction)\r\n");
-        send_to_char(ch, "Example: hydromancy flood nw\r\n");
-        send_to_char(ch, "\nSyntax 2: hydromancy spike\r\n");
+                ch->sendText("Syntax 1: hydromancy flood (direction)\r\n");
+                ch->sendText("Example: hydromancy flood nw\r\n");
+                ch->sendText("\nSyntax 2: hydromancy spike\r\n");
         return;
     }
 
@@ -2823,7 +2798,7 @@ ACMD(do_hydromancy) {
         cost = 100 + (GET_SKILL(ch, SKILL_STYLE) / (1 + (GET_MAX_MANA(ch) * 0.5)));
 
         if ((ch->getCurVital(CharVital::ki)) < cost) {
-            send_to_char(ch, "You do not have enough ki to form an ice spike.\r\n");
+                        ch->sendText("You do not have enough ki to form an ice spike.\r\n");
             return;
         }
 
@@ -2853,7 +2828,7 @@ ACMD(do_hydromancy) {
         if (GET_OBJ_WEIGHT(obj) + (ch->getEffectiveStat("weight_carried")) <= CAN_CARRY_W(ch))
             obj_to_char(obj, ch);
         else {
-            send_to_char(ch, "You are unable to hold it and so let it go at your feet.\r\n");
+                        ch->sendText("You are unable to hold it and so let it go at your feet.\r\n");
             act("@C$n@w drops an ice spike.@n", true, ch, nullptr, nullptr, TO_ROOM);
             obj->setLocation(ch);
         }
@@ -2861,25 +2836,25 @@ ACMD(do_hydromancy) {
         ch->setBaseStat("concentrate_cooldown", 10);
     } else if (!strcasecmp(arg, "flood")) {
         if (!*arg2) {
-            send_to_char(ch, "Syntax 1: hydromancy flood (direction)\r\n");
-            send_to_char(ch, "Example: hydromancy flood nw\r\n");
-            send_to_char(ch, "\nSyntax 2: hydromancy spike\r\n");
+                        ch->sendText("Syntax 1: hydromancy flood (direction)\r\n");
+                        ch->sendText("Example: hydromancy flood nw\r\n");
+                        ch->sendText("\nSyntax 2: hydromancy spike\r\n");
             return;
         }
 
         attempt = search_block(arg2, dirs, false);
         auto ex = ch->location.getExit(static_cast<Direction>(attempt));
         if(!ex) {
-            send_to_char(ch, "You can not flood the water that direction!\r\n");
+                        ch->sendText("You can not flood the water that direction!\r\n");
             return;
         }
         auto &dest = ex.value();
         if(!dest) {
-            send_to_char(ch, "You can not flood the water that direction!\r\n");
+                        ch->sendText("You can not flood the water that direction!\r\n");
             return;
         }
         if(EXIT_FLAGGED(&dest, EX_CLOSED)) {
-            send_to_char(ch, "You can not flood the water that direction!\r\n");
+                        ch->sendText("You can not flood the water that direction!\r\n");
             return;
         }
 
@@ -2940,9 +2915,9 @@ ACMD(do_hydromancy) {
             ch->setBaseStat("concentrate_cooldown", 15);
         }
     } else {
-        send_to_char(ch, "Syntax 1: hydromancy (flood) (direction)\r\n");
-        send_to_char(ch, "Example: hydromancy flood nw\r\n");
-        send_to_char(ch, "\nSyntax 2: hydromancy spike\r\n");
+                ch->sendText("Syntax 1: hydromancy (flood) (direction)\r\n");
+                ch->sendText("Example: hydromancy flood nw\r\n");
+                ch->sendText("\nSyntax 2: hydromancy spike\r\n");
         return;
     }
 
@@ -2954,7 +2929,7 @@ ACMD(do_kanso) {
         return;
 
     if (strcasecmp(GET_NAME(ch), "Levanthoth")) { /* NOT the right player */
-        send_to_char(ch, "You do not know how to perform that technique. \r\n");
+                ch->sendText("You do not know how to perform that technique. \r\n");
         return;
     }
 
@@ -2964,12 +2939,12 @@ ACMD(do_kanso) {
     one_argument(argument, arg);
 
     if (!(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM))) {
-        send_to_char(ch, "Perform Kanso Suru on who?\r\n");
+                ch->sendText("Perform Kanso Suru on who?\r\n");
         return;
     }
 
     if (IS_ANDROID(vict)) {
-        send_to_char(ch, "Mechanical beings are not effected by this technique.\r\n");
+                ch->sendText("Mechanical beings are not effected by this technique.\r\n");
         return;
     }
 
@@ -2987,7 +2962,7 @@ ACMD(do_kanso) {
         dam += 1;
 
     if ((ch->getCurVital(CharVital::ki)) < cost) { /* Not enough ki */
-        send_to_char(ch, "You do not have enough ki.\r\n");
+                ch->sendText("You do not have enough ki.\r\n");
         return;
     }
 
@@ -3029,7 +3004,7 @@ ACMD(do_kanso) {
         WAIT_STATE(ch, PULSE_2SEC); /* 2 second lag for the technique */
 
         if (!AFF_FLAGGED(vict, AFF_HYDROZAP)) { /* Drop their AGL/CON if not already lowered */
-            send_to_char(vict, "@RYou feel less agile and your muscles ache!@n\r\n");
+                        vict->sendText("@RYou feel less agile and your muscles ache!@n\r\n");
             assign_affect(vict, AFF_HYDROZAP, 0, -1, 0, -4, 0, -4, 0, 0);
         }
 
@@ -3055,13 +3030,12 @@ void rpp_feature(struct char_data *ch, const char *arg) {
     int cost = 0, change = false;
 
     if (!*arg) {
-        send_to_char(ch,
-                     "Syntax: rpp 13 (description)\nExample: rpp 13 a large red scar on his face\nDisplayed to others: He has a large red scar on his face.\r\n");
+                ch->sendText("Syntax: rpp 13 (description)\nExample: rpp 13 a large red scar on his face\nDisplayed to others: He has a large red scar on his face.\r\n");
         return;
     }
 
     if (strlen(arg) > 60) {
-        send_to_char(ch, "Please limit it to 60 characters.\r\n");
+                ch->sendText("Please limit it to 60 characters.\r\n");
         return;
     }
 
@@ -3073,7 +3047,7 @@ void rpp_feature(struct char_data *ch, const char *arg) {
     }
 
     if (cost > ch->getRPP()) {
-        send_to_char(ch, "You do not have enough RPP in your Bank for that!\r\n");
+                ch->sendText("You do not have enough RPP in your Bank for that!\r\n");
         return;
     } else {
         char sex[128], buf8[MAX_INPUT_LENGTH];
@@ -3081,17 +3055,14 @@ void rpp_feature(struct char_data *ch, const char *arg) {
 
         ch->modRPP(-cost);
         sprintf(buf8, "...%s has %s.", sex, arg);
-        send_to_char(ch, "@R%d@W RPP paid for your selection. Enjoy!@n\r\n", cost);
-        send_to_char(ch,
-                     "You now have the following line underneath you when someone sees you in a room as:\n@C%s@n\r\n",
-                     buf8);
+                ch->send_to("@R%d@W RPP paid for your selection. Enjoy!@n\r\n", cost);
+                ch->send_to("You now have the following line underneath you when someone sees you in a room as:\n@C%s@n\r\n", buf8);
         GET_FEATURE(ch) = strdup(buf8);
         if (change == true) {
             send_to_imm(
                     "%s has altered their extra description. Make sure the reason is legit! If it is then reimb them 2 RPP.\r\n",
                     GET_USER(ch));
-            send_to_char(ch,
-                         "The immortals have been notified about this change. It had better have been for a good reason.\r\n");
+                        ch->sendText("The immortals have been notified about this change. It had better have been for a good reason.\r\n");
         }
         basic_mud_log("%s RPP Feature: '%s' Check for rule compliance.", GET_USER(ch), buf8);
         return;
@@ -3110,42 +3081,42 @@ ACMD(do_instill) {
     two_arguments(argument, arg, arg2);
 
     if (!*arg || !*arg2) {
-        send_to_char(ch, "Syntax: instill (token) (target)\r\n");
+                ch->sendText("Syntax: instill (token) (target)\r\n");
         return;
     }
 
     if (!(token = get_obj_in_list_vis(ch, arg, nullptr, ch->getObjects()))) {
-        send_to_char(ch, "Syntax: instill (token) (target)\r\n");
+                ch->sendText("Syntax: instill (token) (target)\r\n");
         return;
     }
 
     if (!(obj = get_obj_in_list_vis(ch, arg2, nullptr, ch->getObjects()))) {
-        send_to_char(ch, "Syntax: instill (token) (target)\r\n");
+                ch->sendText("Syntax: instill (token) (target)\r\n");
         return;
     }
 
     if (!OBJ_FLAGGED(token, ITEM_TOKEN)) {
-        send_to_char(ch, "That is not a token.\r\n");
+                ch->sendText("That is not a token.\r\n");
         return;
     }
 
     if (OBJ_FLAGGED(token, ITEM_FORGED)) {
-        send_to_char(ch, "That token is a forgery!\r\n");
+                ch->sendText("That token is a forgery!\r\n");
         return;
     }
 
     if (!wearable_obj(obj)) {
-        send_to_char(ch, "You can only instill tokens into equipment.\r\n");
+                ch->sendText("You can only instill tokens into equipment.\r\n");
         return;
     }
 
     if (!OBJ_FLAGGED(obj, ITEM_SLOT1) && !OBJ_FLAGGED(obj, ITEM_SLOT2)) {
-        send_to_char(ch, "That piece of equipment does not have any slots.\r\n");
+                ch->sendText("That piece of equipment does not have any slots.\r\n");
         return;
     }
 
     if (OBJ_FLAGGED(obj, ITEM_SLOTS_FILLED)) {
-        send_to_char(ch, "That piece of equipment has already had its token slots filled. This can not be reversed.");
+                ch->sendText("That piece of equipment has already had its token slots filled. This can not be reversed.");
         return;
     } else { /* It has at least one open slot. */
         int stat = 0, raise = 0;
@@ -3156,7 +3127,7 @@ ACMD(do_instill) {
             if (obj->affected[0].location != stat && obj->affected[1].location != stat &&
                 obj->affected[2].location != stat && obj->affected[3].location != stat &&
                 obj->affected[4].location != stat && obj->affected[5].location != stat) {
-                send_to_char(ch, "This already has as many different stats as it can hold.\r\n");
+                                ch->sendText("This already has as many different stats as it can hold.\r\n");
                 return;
             }
         }
@@ -3215,12 +3186,12 @@ ACMD(do_instill) {
 ACMD(do_hayasa) {
 
     if (!IS_NPC(ch) && !GET_SKILL(ch, SKILL_HAYASA)) {
-        send_to_char(ch, "You do not know how to perform this technique!\r\n");
+                ch->sendText("You do not know how to perform this technique!\r\n");
         return;
     }
 
     if (AFF_FLAGGED(ch, AFF_HAYASA)) {
-        send_to_char(ch, "You are already focusing ki to continually speed up your movements.\r\n");
+                ch->sendText("You are already focusing ki to continually speed up your movements.\r\n");
         return;
     }
 
@@ -3241,7 +3212,7 @@ ACMD(do_hayasa) {
     }
 
     if ((ch->getCurVital(CharVital::ki)) < cost) {
-        send_to_char(ch, "You do not have enough ki.\r\n");
+                ch->sendText("You do not have enough ki.\r\n");
         return;
     } else if (skill < prob) {
         ch->modCurVital(CharVital::ki, -cost);
@@ -3276,17 +3247,17 @@ ACMD(do_hayasa) {
 ACMD(do_bury) {
 
     if (!HAS_ARMS(ch)) {
-        send_to_char(ch, "You have no arms!\r\n");
+                ch->sendText("You have no arms!\r\n");
         return;
     }
 
     if (GRAPPLING(ch) || GRAPPLED(ch)) {
-        send_to_char(ch, "You are busy grappling with someone!\r\n");
+                ch->sendText("You are busy grappling with someone!\r\n");
         return;
     }
 
     if (ABSORBING(ch) || ABSORBBY(ch)) {
-        send_to_char(ch, "You are busy struggling with someone!\r\n");
+                ch->sendText("You are busy struggling with someone!\r\n");
         return;
     }
 
@@ -3295,29 +3266,29 @@ ACMD(do_bury) {
     two_arguments(argument, arg, arg2);
 
     if (!*arg) {
-        send_to_char(ch, "Syntax: dig [bury (item) | uncover]\r\n");
+                ch->sendText("Syntax: dig [bury (item) | uncover]\r\n");
         return;
     }
 
     const auto tile = ch->location.getTileType();
     if (tile != SECT_FIELD && tile != SECT_HILLS && tile != SECT_FOREST &&
         tile != SECT_DESERT && tile != SECT_MOUNTAIN) {
-        send_to_char(ch, "You are not in a room with enough available dirt or sand to dig.\r\n");
+                ch->sendText("You are not in a room with enough available dirt or sand to dig.\r\n");
         return;
     }
 
     struct obj_data *obj = nullptr, *buried = nullptr, *fobj = nullptr, *next_obj;
-    fobj = ch->getRoom()->findObject([&](const auto obj) { return OBJ_FLAGGED(obj, ITEM_BURIED); });
+    fobj = ch->location.findObject([&](const auto obj) { return OBJ_FLAGGED(obj, ITEM_BURIED); });
 
     if (!strcasecmp(arg, "bury")) {
         if (!*arg2) {
-            send_to_char(ch, "Bury what?\r\n");
+                ch->sendText("Bury what?\r\n");
             return;
         } else if (!(obj = get_obj_in_list_vis(ch, arg2, nullptr, ch->getObjects()))) {
-            send_to_char(ch, "You don't have that object to bury.\r\n");
+                ch->sendText("You don't have that object to bury.\r\n");
             return;
         } else if (fobj) {
-            send_to_char(ch, "There is already something buried near here.\r\n");
+                ch->sendText("There is already something buried near here.\r\n");
             return;
         } else {
             if (tile != SECT_DESERT) {
@@ -3331,13 +3302,13 @@ ACMD(do_bury) {
                 act("@C$n@Y starts digging in a spot of soft sand. Once $e has an appropriately sized hole $e drops @G$p@Y in and then covers it.@n",
                     true, ch, obj, nullptr, TO_ROOM);
             }
-            obj_from_char(obj);
-            obj->setLocation(ch);
+            obj->clearLocation();
+            obj->setLocation(ch->location);
             obj->item_flags.set(ITEM_BURIED, true);
         }
     } else if (!strcasecmp(arg, "uncover")) {
         if (fobj == nullptr) {
-            send_to_char(ch, "There is nothing buried here.\r\n");
+                        ch->sendText("There is nothing buried here.\r\n");
             return;
         } else {
             if (tile != SECT_DESERT) {
@@ -3354,7 +3325,7 @@ ACMD(do_bury) {
             fobj->item_flags.set(ITEM_BURIED, false);
         }
     } else {
-        send_to_char(ch, "Syntax: dig [bury (item) | uncover]\r\n");
+                ch->sendText("Syntax: dig [bury (item) | uncover]\r\n");
         return;
     }
 
@@ -3367,25 +3338,24 @@ ACMD(do_arena) {
     one_argument(argument, arg);
 
     if (IN_ARENA(ch)) {
-        send_to_char(ch, "You are too busy competing to be a spectator.\r\n");
+                ch->sendText("You are too busy competing to be a spectator.\r\n");
         return;
     }
 
     if (!*arg) {
-        send_to_char(ch,
-                     "Syntax: arena (fighter number of participant)\r\n        arena look\r\n        arena scan\r\n        arena stop\r\n");
+                ch->sendText("Syntax: arena (fighter number of participant)\r\n        arena look\r\n        arena scan\r\n        arena stop\r\n");
         return;
     } else if (!strcasecmp(arg, "stop")) {
-        send_to_char(ch, "You stop viewing what's going on in the arena.\r\n");
+                ch->sendText("You stop viewing what's going on in the arena.\r\n");
         ch->pref_flags.set(PRF_ARENAWATCH, false);
         ch->setBaseStat<room_vnum>("arena_watch", -1);
         return;
     } else if (ch->getRoomVnum() != 17875) {
-        send_to_char(ch, "You are not close enough to the arena floor to see it.\r\n");
+                ch->sendText("You are not close enough to the arena floor to see it.\r\n");
         return;
     } else if (!strcasecmp(arg, "look")) {
         if (!PRF_FLAGGED(ch, PRF_ARENAWATCH)) {
-            send_to_char(ch, "You are not even watching anyone in the arena.\r\n");
+                        ch->sendText("You are not even watching anyone in the arena.\r\n");
             return;
         } else if (arena_watch(ch) != NOWHERE) {
             ch->lookAtLocation(arena_watch(ch));
@@ -3395,7 +3365,7 @@ ACMD(do_arena) {
             int found = false;
             struct descriptor_data *d;
 
-            send_to_char(ch, "@D---@CFighters in the arena@D---@n\r\n");
+                        ch->sendText("@D---@CFighters in the arena@D---@n\r\n");
             for (d = descriptor_list; d; d = d->next) {
                 if (STATE(d) != CON_PLAYING)
                     continue;
@@ -3409,17 +3379,17 @@ ACMD(do_arena) {
             }
 
             if (found == false) {
-                send_to_char(ch, "@wNone.@n\r\n");
+                                ch->sendText("@wNone.@n\r\n");
             }
         } else {
-            send_to_char(ch, "You are not close enough to see what fighters are in the arena.\r\n");
+                        ch->sendText("You are not close enough to see what fighters are in the arena.\r\n");
             return;
         }
     } else {
         int num = atoi(arg);
 
         if (num < 0) {
-            send_to_char(ch, "That is not a valid fighter number\r\n");
+                        ch->sendText("That is not a valid fighter number\r\n");
             return;
         } else {
             struct descriptor_data *d;
@@ -3444,7 +3414,7 @@ ACMD(do_arena) {
                 ch->pref_flags.set(PRF_ARENAWATCH, true);
                 ch->setBaseStat<room_vnum>("arena_watch", num);
             } else {
-                send_to_char(ch, "A fighter with such a number was not found in the arena.\r\n");
+                                ch->sendText("A fighter with such a number was not found in the arena.\r\n");
                 return;
             }
         } /* Secondary else end */
@@ -3465,7 +3435,7 @@ ACMD(do_ensnare) {
     }
 
     if (found == false) {
-        send_to_char(ch, "You do not have a bundle of silk to ensnare an opponent with!\r\n");
+                ch->sendText("You do not have a bundle of silk to ensnare an opponent with!\r\n");
         return;
     } else {
         int prob = GET_SKILL(ch, SKILL_ENSNARE), perc = axion_dice(0);
@@ -3475,18 +3445,18 @@ ACMD(do_ensnare) {
         one_argument(argument, arg);
 
         if (!*arg) {
-            send_to_char(ch, "Syntax: ensnare (target)\r\n");
+                        ch->sendText("Syntax: ensnare (target)\r\n");
             return;
         }
 
         if (!(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM))) {
-            send_to_char(ch, "Who are you trying to target with ensnare?\r\n");
+                        ch->sendText("Who are you trying to target with ensnare?\r\n");
             return;
         } else if (AFF_FLAGGED(vict, AFF_ENSNARED)) {
-            send_to_char(ch, "They are already ensnared!\r\n");
+                        ch->sendText("They are already ensnared!\r\n");
             return;
         } else if (!HAS_ARMS(vict)) {
-            send_to_char(ch, "They don't have arms to ensnare!\r\n");
+                        ch->sendText("They don't have arms to ensnare!\r\n");
             return;
         } else if (prob <= perc) {
             act("@WYou unwind your bundle of silk and grab a loose end of it. Splitting that end to reveal the sticky innards of the strand you swing the strand at @c$N@W! Unfortunately you miss and lose the bundle...@n",
@@ -3602,14 +3572,14 @@ ACMD(do_silk) {
     int prob = GET_SKILL(ch, SKILL_SILK), perc = rand_number(1, 120);
 
     if (!*arg) {
-        send_to_char(ch, "Syntax: silk (weave | bundle)\r\n");
+                ch->sendText("Syntax: silk (weave | bundle)\r\n");
         return;
     }
 
     if (!strcasecmp(arg, "weave")) {
 
         if (!*arg2) {
-            send_to_char(ch, "Syntax: silk weave (head | wrist | belt)\r\n");
+                        ch->sendText("Syntax: silk weave (head | wrist | belt)\r\n");
             return;
         }
 
@@ -3621,7 +3591,7 @@ ACMD(do_silk) {
         }
 
         if (found == false) {
-            send_to_char(ch, "You do not have an acceptable bundle of silk in your inventory!\r\n");
+                        ch->sendText("You do not have an acceptable bundle of silk in your inventory!\r\n");
             return;
         } else {
             if (!strcasecmp(arg2, "head")) {
@@ -3817,7 +3787,7 @@ ACMD(do_silk) {
                     WAIT_STATE(ch, PULSE_4SEC);
                 }
             } else {
-                send_to_char(ch, "Syntax: silk weave (head | wrist | belt)");
+                                ch->sendText("Syntax: silk weave (head | wrist | belt)");
                 return;
             }
             return;
@@ -3827,7 +3797,7 @@ ACMD(do_silk) {
         int64_t cost = ((GET_MAX_MANA(ch) * 0.01) * (prob * 0.20)) + (GET_INT(ch) * GET_WIS(ch));
 
         if ((ch->getCurVital(CharVital::ki)) < cost) {
-            send_to_char(ch, "You do not have enough ki to weave any bundles of silk.\r\n");
+                        ch->sendText("You do not have enough ki to weave any bundles of silk.\r\n");
             return;
         } else {
             WAIT_STATE(ch, PULSE_3SEC);
@@ -3852,7 +3822,7 @@ ACMD(do_silk) {
                 obj->setLocation(ch);
                 act("@YYou concentrate your ki into your silk sacs and begin to spit silk out of your mouth. You gently weave the silk and in no time at all you have a $p@Y piled at your feet!@n",
                     true, ch, obj, nullptr, TO_CHAR);
-                send_to_char(ch, "@YIt's SUPER grand!@n\r\n");
+                                ch->sendText("@YIt's SUPER grand!@n\r\n");
                 act("@C$n@W seems to concentrate for a moment before spitting out a golden colored silk from $s mouth. Gently $e weaves the silk and in no time at all $e has a $p@W piled at $s feet!@n",
                     true, ch, obj, nullptr, TO_ROOM);
                 ch->modCurVital(CharVital::ki, -cost);
@@ -3906,7 +3876,7 @@ ACMD(do_silk) {
             }
         }
     } else {
-        send_to_char(ch, "Syntax: silk (weave | bundle)\r\n");
+                ch->sendText("Syntax: silk (weave | bundle)\r\n");
         return;
     }
 
@@ -3916,25 +3886,25 @@ ACMD(do_silk) {
 ACMD(do_adrenaline) {
 
     if (!(IS_ARLIAN(ch) || ch->bio_genomes.get(Race::arlian))) {
-        send_to_char(ch, "You are not an arlian and do not possess this ability\r\n");
+                ch->sendText("You are not an arlian and do not possess this ability\r\n");
         return;
     } else {
         char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
         two_arguments(argument, arg, arg2);
 
         if (!*arg || !*arg2) {
-            send_to_char(ch, "Syntax: adrenaline (pl or ki) (percent)\r\nExample: adrenaline pl 10\r\n");
+                        ch->sendText("Syntax: adrenaline (pl or ki) (percent)\r\nExample: adrenaline pl 10\r\n");
             return;
         } else {
             if (atoi(arg2) < 0 || atoi(arg2) > 100) {
-                send_to_char(ch, "The percent must be between 1 and 100%s.\r\n", "%");
+                                ch->send_to("The percent must be between 1 and 100%s.\r\n", "%");
                 return;
             }
 
             double percent = atoi(arg2) * 0.01;
 
             if ((ch->getCurVital(CharVital::stamina) - (ch->getBaseStat<int64_t>("health") * percent)) < 0) {
-                send_to_char(ch, "You do not have enough stamina to trade for adrenaline!\r\n");
+                                ch->sendText("You do not have enough stamina to trade for adrenaline!\r\n");
                 return;
             }
 
@@ -3946,7 +3916,7 @@ ACMD(do_adrenaline) {
                 act("@g$n@G seems to concentrate and $s wounds begin to heal!@n", true, ch, nullptr, nullptr, TO_ROOM);
 
                 if (GET_HIT(ch) + trade > (ch->getEffectiveStat<int64_t>("health")))
-                    send_to_char(ch, "Some of your stamina was wasted because your powerlevel maxed out.\r\n");
+                                        ch->sendText("Some of your stamina was wasted because your powerlevel maxed out.\r\n");
                 ch->modCurVital(CharVital::health, trade);
                 ch->modCurVital(CharVital::stamina, -trade);
 
@@ -3956,7 +3926,7 @@ ACMD(do_adrenaline) {
                 act("@g$n@G seems to concentrate and $e appears energized!@n", true, ch, nullptr, nullptr, TO_ROOM);
 
                 if ((ch->getCurVital(CharVital::ki)) + trade > GET_MAX_MANA(ch))
-                    send_to_char(ch, "Some of your stamina was wasted because your ki maxed out.\r\n");
+                                        ch->sendText("Some of your stamina was wasted because your ki maxed out.\r\n");
                 ch->modCurVital(CharVital::ki, trade);
                 ch->modCurVital(CharVital::stamina, -trade);
             }
@@ -3968,21 +3938,21 @@ ACMD(do_adrenaline) {
 /* This handles displaying the rpp item store to a player. */
 void disp_rpp_store(struct char_data *ch) {
 
-    send_to_char(ch, "@m                        RPP Item Store@n\n");
-    send_to_char(ch, "@D~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~@n\n");
-    send_to_char(ch, "@GItem Name                      @gRPP Cost        @cChoice Number   @yMin Lvl@n\n");
-    send_to_char(ch, "@WStardust Equipment Set         @D[@Y20@D]            @D[ @C1@D]            @w50@n\n");
-    send_to_char(ch, "@WPlatinum Masamune (Sword Skill)@D[@Y 5@D]            @D[ @C2@D]            @w40@n\n");
-    send_to_char(ch, "@WObsidian Dirk (Dagger Skill)   @D[@Y 5@D]            @D[ @C3@D]            @w40@n\n");
-    send_to_char(ch, "@WEmerald Javelin (Spear Skill)  @D[@Y 5@D]            @D[ @C4@D]            @w40@n\n");
-    send_to_char(ch, "@WIvory Cane (Club Skill)        @D[@Y 5@D]            @D[ @C5@D]            @w40@n\n");
-    send_to_char(ch, "@WHyper X65 Cannon (Gun Skill)   @D[@Y 5@D]            @D[ @C6@D]            @w40@n\n");
-    send_to_char(ch, "@WJagged Rock (Brawl skill)      @D[@Y 5@D]            @D[ @C7@D]            @w40@n\n");
-    send_to_char(ch, "@WKachin Mountain                @D[@Y 8@D]            @D[ @C8@D]@n\n");
-    send_to_char(ch, "@WSpar Booster                   @D[@Y15@D]            @D[ @C9@D]@n\n");
-    send_to_char(ch, "@D~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~@n\n");
+        ch->sendText("@m                        RPP Item Store@n\n");
+        ch->sendText("@D~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~@n\n");
+        ch->sendText("@GItem Name                      @gRPP Cost        @cChoice Number   @yMin Lvl@n\n");
+        ch->sendText("@WStardust Equipment Set         @D[@Y20@D]            @D[ @C1@D]            @w50@n\n");
+        ch->sendText("@WPlatinum Masamune (Sword Skill)@D[@Y 5@D]            @D[ @C2@D]            @w40@n\n");
+        ch->sendText("@WObsidian Dirk (Dagger Skill)   @D[@Y 5@D]            @D[ @C3@D]            @w40@n\n");
+        ch->sendText("@WEmerald Javelin (Spear Skill)  @D[@Y 5@D]            @D[ @C4@D]            @w40@n\n");
+        ch->sendText("@WIvory Cane (Club Skill)        @D[@Y 5@D]            @D[ @C5@D]            @w40@n\n");
+        ch->sendText("@WHyper X65 Cannon (Gun Skill)   @D[@Y 5@D]            @D[ @C6@D]            @w40@n\n");
+        ch->sendText("@WJagged Rock (Brawl skill)      @D[@Y 5@D]            @D[ @C7@D]            @w40@n\n");
+        ch->sendText("@WKachin Mountain                @D[@Y 8@D]            @D[ @C8@D]@n\n");
+        ch->sendText("@WSpar Booster                   @D[@Y15@D]            @D[ @C9@D]@n\n");
+        ch->sendText("@D~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~@n\n");
 
-    send_to_char(ch, "@wSyntax: rpp 12 (choice number)@n\r\n");
+        ch->sendText("@wSyntax: rpp 12 (choice number)@n\r\n");
 }
 
 /* This handles buying an item from the rpp item store. */
@@ -4009,23 +3979,23 @@ void handle_rpp_store(struct char_data *ch, int choice) {
             cost = 15;
             break;
         default:
-            send_to_char(ch, "That is not a selection option!\r\n");
+                        ch->sendText("That is not a selection option!\r\n");
             return;
     }
 
 
     if (GET_RP(ch) < cost) { /* They can't afford it. */
-        send_to_char(ch, "You do not have enough RPP to afford that option.\r\n");
+                ch->sendText("You do not have enough RPP to afford that option.\r\n");
         return;
     } else { /* They can afford it. */
         switch (choice) {
             case 1:
                 if (!ch->canCarryWeight(26)) {
-                    send_to_char(ch, "You can not carry that much weight at this moment.\r\n");
+                                        ch->sendText("You can not carry that much weight at this moment.\r\n");
                 } else if (IS_CARRYING_N(ch) + 13 > CAN_CARRY_N(ch)) {
-                    send_to_char(ch, "You have too many items on you to carry anymore at this moment.\r\n");
+                                        ch->sendText("You have too many items on you to carry anymore at this moment.\r\n");
                 } else if (GET_WIS(ch) < 50) {
-                    send_to_char(ch, "You are below the minimum level to equip it.\r\n");
+                                        ch->sendText("You are below the minimum level to equip it.\r\n");
                 } else {
                     for (objnum = 1110; objnum < 1120; objnum++) {
                         if (objnum <= 1116) {
@@ -4044,133 +4014,133 @@ void handle_rpp_store(struct char_data *ch, int choice) {
                         }
                     }
                     ch->modRPP(-cost);
-                    send_to_char(ch, "@R%d@W RPP paid for your selection. Enjoy!@n\r\n", cost);
+                                        ch->send_to("@R%d@W RPP paid for your selection. Enjoy!@n\r\n", cost);
                     send_to_imm("RPP Purchase: %s %d", GET_NAME(ch), cost);
                 }
                 break;
             case 2:
                 if (!ch->canCarryWeight(2)) {
-                    send_to_char(ch, "You can not carry that much weight at this moment.\r\n");
+                                        ch->sendText("You can not carry that much weight at this moment.\r\n");
                 } else if (IS_CARRYING_N(ch) + 1 > CAN_CARRY_N(ch)) {
-                    send_to_char(ch, "You have too many items on you to carry anymore at this moment.\r\n");
+                                        ch->sendText("You have too many items on you to carry anymore at this moment.\r\n");
                 } else if (GET_WIS(ch) < 40) {
-                    send_to_char(ch, "You are below the minimum level to equip it.\r\n");
+                                        ch->sendText("You are below the minimum level to equip it.\r\n");
                 } else {
                     obj = read_object(1120, VIRTUAL);
                     obj_to_char(obj, ch);
                     obj->size = static_cast<Size>(get_size(ch));
                     ch->modRPP(-cost);
-                    send_to_char(ch, "@R%d@W RPP from your Bank paid for your selection. Enjoy!@n\r\n", cost);
+                                        ch->send_to("@R%d@W RPP from your Bank paid for your selection. Enjoy!@n\r\n", cost);
                     send_to_imm("RPP Purchase: %s %d", GET_NAME(ch), cost);
                 }
                 break;
             case 3:
                 if (!ch->canCarryWeight(2)) {
-                    send_to_char(ch, "You can not carry that much weight at this moment.\r\n");
+                                        ch->sendText("You can not carry that much weight at this moment.\r\n");
                 } else if (IS_CARRYING_N(ch) + 1 > CAN_CARRY_N(ch)) {
-                    send_to_char(ch, "You have too many items on you to carry anymore at this moment.\r\n");
+                                        ch->sendText("You have too many items on you to carry anymore at this moment.\r\n");
                 } else if (GET_WIS(ch) < 40) {
-                    send_to_char(ch, "You are below the minimum level to equip it.\r\n");
+                                        ch->sendText("You are below the minimum level to equip it.\r\n");
                 } else {
                     obj = read_object(1121, VIRTUAL);
                     obj_to_char(obj, ch);
                     obj->size = static_cast<Size>(get_size(ch));
                     ch->modRPP(-cost);
-                    send_to_char(ch, "@R%d@W RPP paid for your selection. Enjoy!@n\r\n", cost);
+                                        ch->send_to("@R%d@W RPP paid for your selection. Enjoy!@n\r\n", cost);
                     send_to_imm("RPP Purchase: %s %d", GET_NAME(ch), cost);
                 }
                 break;
             case 4:
                 if (!ch->canCarryWeight(2)) {
-                    send_to_char(ch, "You can not carry that much weight at this moment.\r\n");
+                                        ch->sendText("You can not carry that much weight at this moment.\r\n");
                 } else if (IS_CARRYING_N(ch) + 1 > CAN_CARRY_N(ch)) {
-                    send_to_char(ch, "You have too many items on you to carry anymore at this moment.\r\n");
+                                        ch->sendText("You have too many items on you to carry anymore at this moment.\r\n");
                 } else if (GET_WIS(ch) < 40) {
-                    send_to_char(ch, "You are below the minimum level to equip it.\r\n");
+                                        ch->sendText("You are below the minimum level to equip it.\r\n");
                 } else {
                     obj = read_object(1122, VIRTUAL);
                     obj_to_char(obj, ch);
                     obj->size = static_cast<Size>(get_size(ch));
                     ch->modRPP(-cost);
-                    send_to_char(ch, "@R%d@W RPP paid for your selection. Enjoy!@n\r\n", cost);
+                                        ch->send_to("@R%d@W RPP paid for your selection. Enjoy!@n\r\n", cost);
                     send_to_imm("RPP Purchase: %s %d", GET_NAME(ch), cost);
                 }
                 break;
             case 5:
                 if (!ch->canCarryWeight(2)) {
-                    send_to_char(ch, "You can not carry that much weight at this moment.\r\n");
+                                        ch->sendText("You can not carry that much weight at this moment.\r\n");
                 } else if (IS_CARRYING_N(ch) + 1 > CAN_CARRY_N(ch)) {
-                    send_to_char(ch, "@R%d@W RPP from your Bank paid for your selection. Enjoy!@n\r\n", cost);
+                                        ch->send_to("@R%d@W RPP from your Bank paid for your selection. Enjoy!@n\r\n", cost);
                 } else if (GET_WIS(ch) < 40) {
-                    send_to_char(ch, "You are below the minimum level to equip it.\r\n");
+                                        ch->sendText("You are below the minimum level to equip it.\r\n");
                 } else {
                     obj = read_object(1123, VIRTUAL);
                     obj_to_char(obj, ch);
                     obj->size = static_cast<Size>(get_size(ch));
                     ch->modRPP(-cost);
-                    send_to_char(ch, "@R%d@W RPP paid for your selection. Enjoy!@n\r\n", cost);
+                                        ch->send_to("@R%d@W RPP paid for your selection. Enjoy!@n\r\n", cost);
                     send_to_imm("RPP Purchase: %s %d", GET_NAME(ch), cost);
                 }
                 break;
             case 6:
                 if (!ch->canCarryWeight(2)) {
-                    send_to_char(ch, "You can not carry that much weight at this moment.\r\n");
+                                        ch->sendText("You can not carry that much weight at this moment.\r\n");
                 } else if (IS_CARRYING_N(ch) + 1 > CAN_CARRY_N(ch)) {
-                    send_to_char(ch, "You have too many items on you to carry anymore at this moment.\r\n");
+                                        ch->sendText("You have too many items on you to carry anymore at this moment.\r\n");
                 } else if (GET_WIS(ch) < 40) {
-                    send_to_char(ch, "You are below the minimum level to equip it.\r\n");
+                                        ch->sendText("You are below the minimum level to equip it.\r\n");
                 } else {
                     obj = read_object(1124, VIRTUAL);
                     obj_to_char(obj, ch);
                     obj->size = static_cast<Size>(get_size(ch));
                     ch->modRPP(-cost);
-                    send_to_char(ch, "@R%d@W RPP paid for your selection. Enjoy!@n\r\n", cost);
+                                        ch->send_to("@R%d@W RPP paid for your selection. Enjoy!@n\r\n", cost);
                     send_to_imm("RPP Purchase: %s %d", GET_NAME(ch), cost);
                 }
                 break;
             case 7:
                 if (!ch->canCarryWeight(2)) {
-                    send_to_char(ch, "You can not carry that much weight at this moment.\r\n");
+                                        ch->sendText("You can not carry that much weight at this moment.\r\n");
                 } else if (IS_CARRYING_N(ch) + 1 > CAN_CARRY_N(ch)) {
-                    send_to_char(ch, "You have too many items on you to carry anymore at this moment.\r\n");
+                                        ch->sendText("You have too many items on you to carry anymore at this moment.\r\n");
                 } else if (GET_WIS(ch) < 40) {
-                    send_to_char(ch, "You are below the minimum level to equip it.\r\n");
+                                        ch->sendText("You are below the minimum level to equip it.\r\n");
                 } else {
                     obj = read_object(1125, VIRTUAL);
                     obj_to_char(obj, ch);
                     obj->size = static_cast<Size>(get_size(ch));
                     ch->modRPP(-cost);
-                    send_to_char(ch, "@R%d@W RPP paid for your selection. Enjoy!@n\r\n", cost);
+                                        ch->send_to("@R%d@W RPP paid for your selection. Enjoy!@n\r\n", cost);
                     send_to_imm("RPP Purchase: %s %d", GET_NAME(ch), cost);
                 }
                 break;
             case 8: {
                 auto& o = obj_proto.at(1126);
                 if (!ch->canCarryWeight(o.getBaseStat("weight"))) {
-                    send_to_char(ch, "You can not carry that much weight at this moment.\r\n");
+                                        ch->sendText("You can not carry that much weight at this moment.\r\n");
                 } else if (IS_CARRYING_N(ch) + 1 > CAN_CARRY_N(ch)) {
-                    send_to_char(ch, "You have too many items on you to carry anymore at this moment.\r\n");
+                                        ch->sendText("You have too many items on you to carry anymore at this moment.\r\n");
                 } else {
                     obj = read_object(1126, VIRTUAL);
                     obj_to_char(obj, ch);
                     obj->size = static_cast<Size>(get_size(ch));
                     ch->modRPP(-cost);
-                    send_to_char(ch, "@R%d@W RPP paid for your selection. Enjoy!@n\r\n", cost);
+                                        ch->send_to("@R%d@W RPP paid for your selection. Enjoy!@n\r\n", cost);
                     send_to_imm("RPP Purchase: %s %d", GET_NAME(ch), cost);
                 }
             }
                 break;
             case 9:
                 if (!ch->canCarryWeight(2)) {
-                    send_to_char(ch, "You can not carry that much weight at this moment.\r\n");
+                                        ch->sendText("You can not carry that much weight at this moment.\r\n");
                 } else if (IS_CARRYING_N(ch) + 1 > CAN_CARRY_N(ch)) {
-                    send_to_char(ch, "You have too many items on you to carry anymore at this moment.\r\n");
+                                        ch->sendText("You have too many items on you to carry anymore at this moment.\r\n");
                 } else {
                     obj = read_object(1127, VIRTUAL);
                     obj_to_char(obj, ch);
                     obj->size = static_cast<Size>(get_size(ch));
                     ch->modRPP(-cost);
-                    send_to_char(ch, "@R%d@W RPP paid for your selection. Enjoy!@n\r\n", cost);
+                                        ch->send_to("@R%d@W RPP paid for your selection. Enjoy!@n\r\n", cost);
                     send_to_imm("RPP Purchase: %s %d", GET_NAME(ch), cost);
                 }
                 break;
@@ -4611,79 +4581,67 @@ static int valid_recipe(struct char_data *ch, int recipe, int type) {
 
     if (pass == false) {
         if (tomato > 0) {
-            send_to_char(ch, "@WYou need @m%d@W tomato%s for this recipe.@n\r\n", tomato, tomato > 1 ? "es" : "");
+                        ch->send_to("@WYou need @m%d@W tomato%s for this recipe.@n\r\n", tomato, tomato > 1 ? "es" : "");
         }
         if (potato > 0) {
-            send_to_char(ch, "@WYou need @m%d@W potato%s for this recipe.@n\r\n", potato, potato > 1 ? "es" : "");
+                        ch->send_to("@WYou need @m%d@W potato%s for this recipe.@n\r\n", potato, potato > 1 ? "es" : "");
         }
         if (onion > 0) {
-            send_to_char(ch, "@WYou need @m%d@W onion%s for this recipe.@n\r\n", onion, onion > 1 ? "s" : "");
+                        ch->send_to("@WYou need @m%d@W onion%s for this recipe.@n\r\n", onion, onion > 1 ? "s" : "");
         }
         if (appleplum > 0) {
-            send_to_char(ch, "@WYou need @m%d@W appleplum%s for this recipe.@n\r\n", appleplum,
-                         appleplum > 1 ? "s" : "");
+                        ch->send_to("@WYou need @m%d@W appleplum%s for this recipe.@n\r\n", appleplum, appleplum > 1 ? "s" : "");
         }
         if (fberry > 0) {
-            send_to_char(ch, "@WYou need @m%d@W frozen berry%s for this recipe.@n\r\n", fberry, fberry > 1 ? "s" : "");
+                        ch->send_to("@WYou need @m%d@W frozen berry%s for this recipe.@n\r\n", fberry, fberry > 1 ? "s" : "");
         }
         if (carambola > 0) {
-            send_to_char(ch, "@WYou need @m%d@W carambola%s for this recipe.@n\r\n", carambola,
-                         carambola > 1 ? "s" : "");
+                        ch->send_to("@WYou need @m%d@W carambola%s for this recipe.@n\r\n", carambola, carambola > 1 ? "s" : "");
         }
         if (lettuce > 0) {
-            send_to_char(ch, "@WYou need @m%d@W head%s of lettuce for this recipe.@n\r\n", lettuce,
-                         lettuce > 1 ? "s" : "");
+                        ch->send_to("@WYou need @m%d@W head%s of lettuce for this recipe.@n\r\n", lettuce, lettuce > 1 ? "s" : "");
         }
         if (flour > 0) {
-            send_to_char(ch, "@WYou need @m%d@W cup%s of white flour for this recipe.@n\r\n", flour,
-                         flour > 1 ? "s" : "");
+                        ch->send_to("@WYou need @m%d@W cup%s of white flour for this recipe.@n\r\n", flour, flour > 1 ? "s" : "");
         }
         if (rice > 0) {
-            send_to_char(ch, "@WYou need @m%d@W cup%s of white rice for this recipe.@n\r\n", rice, rice > 1 ? "s" : "");
+                        ch->send_to("@WYou need @m%d@W cup%s of white rice for this recipe.@n\r\n", rice, rice > 1 ? "s" : "");
         }
         if (garlic > 0) {
-            send_to_char(ch, "@WYou need @m%d@W garlic clove%s for this recipe.@n\r\n", garlic, garlic > 1 ? "s" : "");
+                        ch->send_to("@WYou need @m%d@W garlic clove%s for this recipe.@n\r\n", garlic, garlic > 1 ? "s" : "");
         }
         if (carrot > 0) {
-            send_to_char(ch, "@WYou need @m%d@W carrot%s for this recipe.@n\r\n", carrot, carrot > 1 ? "s" : "");
+                        ch->send_to("@WYou need @m%d@W carrot%s for this recipe.@n\r\n", carrot, carrot > 1 ? "s" : "");
         }
         if (cucumber > 0) {
-            send_to_char(ch, "@WYou need @m%d@W cucumber%s for this recipe.@n\r\n", cucumber, cucumber > 1 ? "s" : "");
+                        ch->send_to("@WYou need @m%d@W cucumber%s for this recipe.@n\r\n", cucumber, cucumber > 1 ? "s" : "");
         }
         if (greenbean > 0) {
-            send_to_char(ch, "@WYou need @m%d@W green bean%s for this recipe.@n\r\n", greenbean,
-                         greenbean > 1 ? "s" : "");
+                        ch->send_to("@WYou need @m%d@W green bean%s for this recipe.@n\r\n", greenbean, greenbean > 1 ? "s" : "");
         }
         if (normmeat > 0) {
-            send_to_char(ch, "@WYou need @m%d@W normal raw steak%s for this recipe.@n\r\n", normmeat,
-                         normmeat > 1 ? "s" : "");
+                        ch->send_to("@WYou need @m%d@W normal raw steak%s for this recipe.@n\r\n", normmeat, normmeat > 1 ? "s" : "");
         }
         if (goodmeat > 0) {
-            send_to_char(ch, "@WYou need @m%d@W good raw steak%s for this recipe.@n\r\n", goodmeat,
-                         goodmeat > 1 ? "s" : "");
+                        ch->send_to("@WYou need @m%d@W good raw steak%s for this recipe.@n\r\n", goodmeat, goodmeat > 1 ? "s" : "");
         }
         if (redpep > 0) {
-            send_to_char(ch, "@WYou need @m%d@W chili pepper%s for this recipe.@n\r\n", redpep, redpep > 1 ? "s" : "");
+                        ch->send_to("@WYou need @m%d@W chili pepper%s for this recipe.@n\r\n", redpep, redpep > 1 ? "s" : "");
         }
         if (normfish > 0) {
-            send_to_char(ch, "@WYou need @m%d@W black bass, flounder, narri, or gravel reboi for this recipe.@n\r\n",
-                         normfish);
+                        ch->send_to("@WYou need @m%d@W black bass, flounder, narri, or gravel reboi for this recipe.@n\r\n", normfish);
         }
         if (goodfish > 0) {
-            send_to_char(ch, "@WYou need @m%d@W silver trout, silver eel, valbish, or voos pike for this recipe.@n\r\n",
-                         goodfish);
+                        ch->send_to("@WYou need @m%d@W silver trout, silver eel, valbish, or voos pike for this recipe.@n\r\n", goodfish);
         }
         if (greatfish > 0) {
-            send_to_char(ch, "@WYou need @m%d@W striped bass, cobia, gusblat, or shadowfish for this recipe.@n\r\n",
-                         greatfish);
+                        ch->send_to("@WYou need @m%d@W striped bass, cobia, gusblat, or shadowfish for this recipe.@n\r\n", greatfish);
         }
         if (bestfish > 0) {
-            send_to_char(ch, "@WYou need @m%d@W blue catfish, tambor, repeeil, or shadeeel for this recipe.@n\r\n",
-                         bestfish);
+                        ch->send_to("@WYou need @m%d@W blue catfish, tambor, repeeil, or shadeeel for this recipe.@n\r\n", bestfish);
         }
         if (brownmush > 0) {
-            send_to_char(ch, "@WYou need @m%d@W brown mushroom%s for this recipe.@n\r\n", brownmush,
-                         brownmush > 1 ? "s" : "");
+                        ch->send_to("@WYou need @m%d@W brown mushroom%s for this recipe.@n\r\n", brownmush, brownmush > 1 ? "s" : "");
         }
         return (false);
     } else {
@@ -4718,36 +4676,36 @@ ACMD(do_cook) {
     auto elem = ch->location.getCookElement();
 
     if (!elem) {
-        send_to_char(ch, "You need a campfire or Flambus Stove nearby to cook.\r\n");
+                ch->sendText("You need a campfire or Flambus Stove nearby to cook.\r\n");
         return;
     }
 
     if (!GET_SKILL(ch, SKILL_COOKING)) {
-        send_to_char(ch, "You don't even know the basics!\r\n");
+                ch->sendText("You don't even know the basics!\r\n");
         return;
     }
 
     int skill = GET_SKILL(ch, SKILL_COOKING), prob = axion_dice(0);
 
     if (!*arg) {
-        send_to_char(ch, "@D---------------------@RCooking@D---------------------@n\r\n");
-        send_to_char(ch, "@Y 1@B) @CCooked Steak		@Y17@B) @CCarambola Bread@n\r\n");
-        send_to_char(ch, "@Y 2@B) @CTomato Soup		@n\r\n");
-        send_to_char(ch, "@Y 3@B) @CPotato Soup		@n\r\n");
-        send_to_char(ch, "@Y 4@B) @CVegetable Soup		@n\r\n");
-        send_to_char(ch, "@Y 5@B) @CMeat Stew			@n\r\n");
-        send_to_char(ch, "@Y 6@B) @CChili Soup		@n\r\n");
-        send_to_char(ch, "@Y 7@B) @CGrilled Fish		@n\r\n");
-        send_to_char(ch, "@Y 8@B) @CGood Grilled Fish		@n\r\n");
-        send_to_char(ch, "@Y 9@B) @CGreat Grilled Fish	@n\r\n");
-        send_to_char(ch, "@Y10@B) @CMagnificent Grilled Fish	@n\r\n");
-        send_to_char(ch, "@Y11@B) @CCooked White Rice		@n\r\n");
-        send_to_char(ch, "@Y12@B) @CSushi			@n\r\n");
-        send_to_char(ch, "@Y13@B) @CWhite Bread		@n\r\n");
-        send_to_char(ch, "@Y14@B) @CBasic Salad		@n\r\n");
-        send_to_char(ch, "@Y15@B) @CAppleplum Chasan		@n\r\n");
-        send_to_char(ch, "@Y16@B) @CFrozen Berry Muffin	@n\r\n");
-        send_to_char(ch, "@wSyntax: cook (recipe number)@n\r\n");
+                ch->sendText("@D---------------------@RCooking@D---------------------@n\r\n");
+                ch->sendText("@Y 1@B);@CCooked Steak		@Y17@B) @CCarambola Bread@n\r\n");
+                ch->sendText("@Y 2@B);@CTomato Soup		@n\r\n");
+                ch->sendText("@Y 3@B);@CPotato Soup		@n\r\n");
+                ch->sendText("@Y 4@B);@CVegetable Soup		@n\r\n");
+                ch->sendText("@Y 5@B);@CMeat Stew			@n\r\n");
+                ch->sendText("@Y 6@B);@CChili Soup		@n\r\n");
+                ch->sendText("@Y 7@B);@CGrilled Fish		@n\r\n");
+                ch->sendText("@Y 8@B);@CGood Grilled Fish		@n\r\n");
+                ch->sendText("@Y 9@B);@CGreat Grilled Fish	@n\r\n");
+                ch->sendText("@Y10@B);@CMagnificent Grilled Fish	@n\r\n");
+                ch->sendText("@Y11@B);@CCooked White Rice		@n\r\n");
+                ch->sendText("@Y12@B);@CSushi			@n\r\n");
+                ch->sendText("@Y13@B);@CWhite Bread		@n\r\n");
+                ch->sendText("@Y14@B);@CBasic Salad		@n\r\n");
+                ch->sendText("@Y15@B);@CAppleplum Chasan		@n\r\n");
+                ch->sendText("@Y16@B);@CFrozen Berry Muffin	@n\r\n");
+                ch->sendText("@wSyntax: cook (recipe number)@n\r\n");
         return;
     } else {
         int num = atoi(arg), pass = false;
@@ -4814,14 +4772,14 @@ ACMD(do_cook) {
         }
 
         if (recipe == -1) {
-            send_to_char(ch, "That is not a valid dish!\r\n");
+                        ch->sendText("That is not a valid dish!\r\n");
             return;
         }
 
         if (!valid_recipe(ch, recipe, 0)) {
             return;
         } else if (elem == 1 && !campfire_cook(recipe)) {
-            send_to_char(ch, "You can not cook that dish over a campfire.\r\n");
+                        ch->sendText("You can not cook that dish over a campfire.\r\n");
             return;
         } else {
             valid_recipe(ch, recipe, 1);
@@ -4962,7 +4920,7 @@ ACMD(do_cook) {
                     attr = 5;
                     break;
                 default:
-                    send_to_char(ch, "That is not a valid dish!\r\n");
+                                        ch->sendText("That is not a valid dish!\r\n");
                     break;
             }
 
@@ -5005,24 +4963,24 @@ ACMD(do_fireshield) {
     }
 
     if (AFF_FLAGGED(ch, AFF_FIRESHIELD)) {
-        send_to_char(ch, "You are already covered in a fireshield!\r\n");
+                ch->sendText("You are already covered in a fireshield!\r\n");
         return;
     }
 
     if (AFF_FLAGGED(ch, AFF_SANCTUARY)) {
-        send_to_char(ch, "You are covered in a barrier!\r\n");
+                ch->sendText("You are covered in a barrier!\r\n");
         return;
     }
 
     if (ch->location.getEnvironment(ENV_WATER) >= 100.0) {
-        send_to_char(ch, "There is way too much water here!\r\n");
+                ch->sendText("There is way too much water here!\r\n");
         return;
     }
 
     int64_t cost = GET_MAX_MANA(ch) * 0.03;
 
     if ((ch->getCurVital(CharVital::ki)) < cost) {
-        send_to_char(ch, "You do not have enough ki!\r\n");
+                ch->sendText("You do not have enough ki!\r\n");
         return;
     }
 
@@ -5060,17 +5018,17 @@ ACMD(do_warppool) {
     }
 
     if (GRAPPLING(ch) || GRAPPLED(ch)) {
-        send_to_char(ch, "You are grappling with someone!\r\n");
+                ch->sendText("You are grappling with someone!\r\n");
         return;
     }
 
     if (ABSORBING(ch) || ABSORBBY(ch)) {
-        send_to_char(ch, "You are struggling with someone!\r\n");
+                ch->sendText("You are struggling with someone!\r\n");
         return;
     }
 
     if (SITS(ch)) {
-        send_to_char(ch, "You should get up first.\r\n");
+                ch->sendText("You should get up first.\r\n");
         return;
     }
 
@@ -5081,12 +5039,12 @@ ACMD(do_warppool) {
     one_argument(argument, arg);
 
     if (!*arg) {
-        send_to_char(ch, "What planet are you wanting to warp to?\n[ earth | frigid | kanassa | namek | aether ]\r\n");
+                ch->sendText("What planet are you wanting to warp to?\n[ earth | frigid | kanassa | namek | aether ]\r\n");
         return;
     }
 
     if ((ch->getCurVital(CharVital::ki)) < cost) {
-        send_to_char(ch, "You do not have enough ki to perform the technique.\r\n");
+                ch->sendText("You do not have enough ki to perform the technique.\r\n");
         return;
     }
 
@@ -5105,24 +5063,24 @@ ACMD(do_warppool) {
     }
 
     if (pass == false) {
-        send_to_char(ch, "You must be on or in a sea or ocean for warp pool to work.\r\n");
+                ch->sendText("You must be on or in a sea or ocean for warp pool to work.\r\n");
         return;
     }
 
     if (!strcasecmp("earth", arg) && ch->location.getWhereFlag(WhereFlag::planet_earth)) {
-        send_to_char(ch, "You are already on Earth!\r\n");
+                ch->sendText("You are already on Earth!\r\n");
         return;
     } else if (!strcasecmp("frigid", arg) && ch->location.getWhereFlag(WhereFlag::planet_frigid)) {
-        send_to_char(ch, "You are already on Frigid!\r\n");
+                ch->sendText("You are already on Frigid!\r\n");
         return;
     } else if (!strcasecmp("kanassa", arg) && ch->location.getWhereFlag(WhereFlag::planet_kanassa)) {
-        send_to_char(ch, "You are already on Kanasssa!\r\n");
+                ch->sendText("You are already on Kanasssa!\r\n");
         return;
     } else if (!strcasecmp("namek", arg) && ch->location.getWhereFlag(WhereFlag::planet_namek)) {
-        send_to_char(ch, "You are already on Namek!\r\n");
+                ch->sendText("You are already on Namek!\r\n");
         return;
     } else if (!strcasecmp("aether", arg) && ch->location.getWhereFlag(WhereFlag::planet_aether)) {
-        send_to_char(ch, "You are already on Aether!\r\n");
+                ch->sendText("You are already on Aether!\r\n");
         return;
     } else if (!strcasecmp("earth", arg)) {
         if (prob > perc) {
@@ -5138,7 +5096,7 @@ ACMD(do_warppool) {
             act("@c$n@C reaches $s hand out and begins to swirl nearby water with it. The water that is being swirled begins to glow @wbright@B blue@C and has a distinct separation from the rest of the waters. Suddenly @c$n@C vanishes into this water! A moment later the waters return to normal.@n",
                 true, ch, nullptr, nullptr, TO_ROOM);
             improve_skill(ch, SKILL_WARP, 1);
-            char_from_room(ch);
+            ch->clearLocation();
             char_to_room(ch, real_room(850));
             act("@CSuddenly a large whirlpool of flashing water begins to form nearby. After a few seconds @c$n@C pops out of the center of the pool! The water then return to normal a moment laterr...@n",
                 true, ch, nullptr, nullptr, TO_ROOM);
@@ -5158,7 +5116,7 @@ ACMD(do_warppool) {
             act("@c$n@C reaches $s hand out and begins to swirl nearby water with it. The water that is being swirled begins to glow @wbright@B blue@C and has a distinct separation from the rest of the waters. Suddenly @c$n@C vanishes into this water! A moment later the waters return to normal.@n",
                 true, ch, nullptr, nullptr, TO_ROOM);
             improve_skill(ch, SKILL_WARP, 1);
-            char_from_room(ch);
+            ch->clearLocation();
             char_to_room(ch, real_room(4609));
             act("@CSuddenly a large whirlpool of flashing water begins to form nearby. After a few seconds @c$n@C pops out of the center of the pool! The water then return to normal a moment laterr...@n",
                 true, ch, nullptr, nullptr, TO_ROOM);
@@ -5178,7 +5136,7 @@ ACMD(do_warppool) {
             act("@c$n@C reaches $s hand out and begins to swirl nearby water with it. The water that is being swirled begins to glow @wbright@B blue@C and has a distinct separation from the rest of the waters. Suddenly @c$n@C vanishes into this water! A moment later the waters return to normal.@n",
                 true, ch, nullptr, nullptr, TO_ROOM);
             improve_skill(ch, SKILL_WARP, 1);
-            char_from_room(ch);
+            ch->clearLocation();
             char_to_room(ch, real_room(10904));
             act("@CSuddenly a large whirlpool of flashing water begins to form nearby. After a few seconds @c$n@C pops out of the center of the pool! The water then return to normal a moment laterr...@n",
                 true, ch, nullptr, nullptr, TO_ROOM);
@@ -5198,7 +5156,7 @@ ACMD(do_warppool) {
             act("@c$n@C reaches $s hand out and begins to swirl nearby water with it. The water that is being swirled begins to glow @wbright@B blue@C and has a distinct separation from the rest of the waters. Suddenly @c$n@C vanishes into this water! A moment later the waters return to normal.@n",
                 true, ch, nullptr, nullptr, TO_ROOM);
             improve_skill(ch, SKILL_WARP, 1);
-            char_from_room(ch);
+            ch->clearLocation();
             char_to_room(ch, real_room(15100));
             act("@CSuddenly a large whirlpool of flashing water begins to form nearby. After a few seconds @c$n@C pops out of the center of the pool! The water then return to normal a moment laterr...@n",
                 true, ch, nullptr, nullptr, TO_ROOM);
@@ -5218,15 +5176,14 @@ ACMD(do_warppool) {
             act("@c$n@C reaches $s hand out and begins to swirl nearby water with it. The water that is being swirled begins to glow @wbright@B blue@C and has a distinct separation from the rest of the waters. Suddenly @c$n@C vanishes into this water! A moment later the waters return to normal.@n",
                 true, ch, nullptr, nullptr, TO_ROOM);
             improve_skill(ch, SKILL_WARP, 1);
-            char_from_room(ch);
+            ch->clearLocation();
             char_to_room(ch, real_room(12252));
             act("@CSuddenly a large whirlpool of flashing water begins to form nearby. After a few seconds @c$n@C pops out of the center of the pool! The water then return to normal a moment laterr...@n",
                 true, ch, nullptr, nullptr, TO_ROOM);
             ch->modCurVital(CharVital::ki, -cost);
         }
     } else {
-        send_to_char(ch,
-                     "That is not an acceptable choice. It must be a planet with a large body of water.\n[ earth | frigid | kanassa | namek | aether ]\r\n");
+                ch->sendText("That is not an acceptable choice. It must be a planet with a large body of water.\n[ earth | frigid | kanassa | namek | aether ]\r\n");
         return;
     }
 }
@@ -5242,19 +5199,19 @@ ACMD(do_obstruct) {
     }
 
     if (ch->location.getRoomFlag(ROOM_PEACEFUL)) {
-        send_to_char(ch, "You can not use this in such a peaceful area.\r\n");
+                ch->sendText("You can not use this in such a peaceful area.\r\n");
         return;
     }
 
     auto sect = ch->location.getSectorType();
 
     if (sect == SectorType::space || ch->location.getWhereFlag(WhereFlag::space)) {
-        send_to_char(ch, "You can not wall off the vastness of space.\r\n");
+                ch->sendText("You can not wall off the vastness of space.\r\n");
         return;
     }
 
     if (sect == SectorType::flying) {
-        send_to_char(ch, "You can not create gravity defying glacial walls.\r\n");
+                ch->sendText("You can not create gravity defying glacial walls.\r\n");
         return;
     }
 
@@ -5265,27 +5222,25 @@ ACMD(do_obstruct) {
     one_argument(argument, arg);
 
     if (!*arg) {
-        send_to_char(ch,
-                     "What direction are you wanting to block off?\n[ N | E | S | W | NE | NW | SE | SW | U | D | I | O ]\r\n");
+                ch->sendText("What direction are you wanting to block off?\n[ N | E | S | W | NE | NW | SE | SW | U | D | I | O ]\r\n");
         return;
     }
 
     if ((ch->getCurVital(CharVital::ki)) < cost) {
-        send_to_char(ch, "You do not have enough ki to perform the technique.\r\n");
+                ch->sendText("You do not have enough ki to perform the technique.\r\n");
         return;
     }
 
     int dir = search_block(arg, dirs, false);
     if(dir < 0) {
-        send_to_char(ch,
-                     "That is not an acceptable direction.\n[ N | E | S | W | NE | NW | SE | SW | U | D | I | O ]\r\n");
+                ch->sendText("That is not an acceptable direction.\n[ N | E | S | W | NE | NW | SE | SW | U | D | I | O ]\r\n");
         return;
     }
     int dir2 = rev_dir[dir];
 
     auto ex = ch->location.getExit(static_cast<Direction>(dir));
     if(!ex) {
-        send_to_char(ch, "That direction does not exist here.\r\n");
+                ch->sendText("That direction does not exist here.\r\n");
         return;
     }
     auto &dest = ex.value();
@@ -5302,7 +5257,7 @@ ACMD(do_obstruct) {
     struct obj_data *obj;
 
     if (dest.getRoomFlag(ROOM_PEACEFUL)) {
-        send_to_char(ch, "You can not block off a peaceful area.\r\n");
+                ch->sendText("You can not block off a peaceful area.\r\n");
         return;
     }
     auto con = dest.getObjects();
@@ -5389,13 +5344,13 @@ ACMD(do_dimizu) {
         WAIT_STATE(ch, PULSE_1SEC);
         return;
     } else if (tile == SECT_UNDERWATER) {
-        send_to_char(ch, "The area is already underwater!\r\n");
+                ch->sendText("The area is already underwater!\r\n");
         return;
     } else if (tile == SECT_SPACE || ch->location.getWhereFlag(WhereFlag::space)) {
-        send_to_char(ch, "You can't flood space!\r\n");
+                ch->sendText("You can't flood space!\r\n");
         return;
     } else if ((ch->getCurVital(CharVital::ki)) < GET_MAX_MANA(ch) / 12) {
-        send_to_char(ch, "You do not have enough ki to perform the technique.\r\n");
+                ch->sendText("You do not have enough ki to perform the technique.\r\n");
         return;
     } else if (skill < prob) {
         act("@CYou gather your ki and concentrate on creating water from it. Water begins to flow upward around the entire area, but you lose your concentration and it all goes flooding away!@n",
@@ -5425,13 +5380,13 @@ ACMD(do_beacon) {
         return;
 
     if (AFF_FLAGGED(ch, AFF_SPIRIT)) {
-        send_to_char(ch, "You are dead. You can not stake out a room to return to upon revival.\r\n");
+                ch->sendText("You are dead. You can not stake out a room to return to upon revival.\r\n");
         return;
     } else if (ch->getRoomVnum() >= 0 && ch->getRoomVnum() <= 14) {
-        send_to_char(ch, "You can not stake out an immortal room to be revived in.\r\n");
+                ch->sendText("You can not stake out an immortal room to be revived in.\r\n");
         return;
     } else {
-        send_to_char(ch, "You stake out the room you are in and will return to it if you die and are revived.\r\n");
+                ch->sendText("You stake out the room you are in and will return to it if you die and are revived.\r\n");
         ch->setBaseStat("death_room", ch->getRoomVnum());
         return;
     }
@@ -5451,52 +5406,52 @@ ACMD(do_feed) {
     two_arguments(argument, arg, arg2);
 
     if (!*arg) {
-        send_to_char(ch, "Feed a senzu to whom?\r\n");
+                ch->sendText("Feed a senzu to whom?\r\n");
         return;
     }
 
     if (!(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM))) {
-        send_to_char(ch, "That target isn't here.\r\n");
+                ch->sendText("That target isn't here.\r\n");
         return;
     }
 
     if (IS_ANDROID(vict)) {
-        send_to_char(ch, "They are unaffected by senzu beans.\r\n");
+                ch->sendText("They are unaffected by senzu beans.\r\n");
         return;
     }
 
     if (!(obj = get_obj_in_list_vis(ch, arg2, nullptr, ch->getObjects()))) {
-        send_to_char(ch, "You need to give them a senzu.\r\n");
+                ch->sendText("You need to give them a senzu.\r\n");
         return;
     }
 
     if (GET_OBJ_TYPE(obj) != ITEM_POTION) {
-        send_to_char(ch, "You can only feed senzu beans.\r\n");
+                ch->sendText("You can only feed senzu beans.\r\n");
         return;
     }
 
     if (OBJ_FLAGGED(obj, ITEM_FORGED)) {
-        send_to_char(ch, "They can't swallow that, it is fake!\r\n");
+                ch->sendText("They can't swallow that, it is fake!\r\n");
         return;
     }
 
     if (OBJ_FLAGGED(obj, ITEM_BROKEN)) {
-        send_to_char(ch, "They can't swallow that, it is broken!\r\n");
+                ch->sendText("They can't swallow that, it is broken!\r\n");
         return;
     }
 
     if (FIGHTING(vict)) {
-        send_to_char(ch, "They are a bit busy at the moment!\r\n");
+                ch->sendText("They are a bit busy at the moment!\r\n");
         return;
     }
 
     if (vict->master != ch && ch->master != vict && ch->master != vict->master) {
-        send_to_char(ch, "You need to be grouped with them first.\r\n");
+                ch->sendText("You need to be grouped with them first.\r\n");
         return;
     }
 
     if (!AFF_FLAGGED(vict, AFF_GROUP) || !AFF_FLAGGED(ch, AFF_GROUP)) {
-        send_to_char(ch, "You need to be grouped with them first.\r\n");
+                ch->sendText("You need to be grouped with them first.\r\n");
         return;
     }
 
@@ -5519,17 +5474,17 @@ ACMD(do_spoil) {
     one_argument(argument, arg);
 
     if (!*arg) {
-        send_to_char(ch, "What corpse do you want to decapitate?\r\n");
+                ch->sendText("What corpse do you want to decapitate?\r\n");
         return;
     }
 
     if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->location.getObjects()))) {
-        send_to_char(ch, "No corpse around here by that name.\r\n");
+                ch->sendText("No corpse around here by that name.\r\n");
         return;
     }
 
     if (GET_OBJ_VAL(obj, VAL_CORPSE_HEAD) == 0) {
-        send_to_char(ch, "That corpse is already missing its head.\r\n");
+                ch->sendText("That corpse is already missing its head.\r\n");
         return;
     }
 
@@ -5597,7 +5552,7 @@ ACMD(do_spoil) {
     body_part->setBaseStat<weight_t>("weight", rand_number(4, 10));
     body_part->setBaseStat<int>("cost_per_day", 0);
     body_part->setLocation(ch);
-    obj_from_room(body_part);
+    body_part->clearLocation();
     obj_to_char(body_part, ch);
 
 }

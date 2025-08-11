@@ -289,7 +289,7 @@ void free_text_files() {
  * To fix later, if desired. -gg 6/24/99
  */
 ACMD(do_reboot) {
-    send_to_char(ch, "Not a thing anymore.\r\n");
+        ch->sendText("Not a thing anymore.\r\n");
 }
 
 
@@ -775,9 +775,7 @@ int vnum_mobile(char *searchname, struct char_data *ch) {
 
     for (auto &[vn, m] : mob_proto)
         if (isname(searchname, m.name))
-            send_to_char(ch, "%3d. [%5d] %-40s %s\r\n",
-                         ++found, vn, m.short_description,
-                         !m.proto_script.empty() ? m.scriptString().c_str() : "");
+                        ch->send_to("%3d. [%5d] %-40s %s\r\n", ++found, vn, m.short_description, !m.proto_script.empty() ? m.scriptString().c_str() : "");
 
     return (found);
 }
@@ -788,9 +786,7 @@ int vnum_object(char *searchname, struct char_data *ch) {
 
     for (auto &o : obj_proto)
         if (isname(searchname, o.second.name))
-            send_to_char(ch, "%3d. [%5d] %-40s %s\r\n",
-                         ++found, o.first, o.second.short_description,
-                         !o.second.proto_script.empty() ? o.second.scriptString().c_str() : "");
+                        ch->send_to("%3d. [%5d] %-40s %s\r\n", ++found, o.first, o.second.short_description, !o.second.proto_script.empty() ? o.second.scriptString().c_str() : "");
 
     return (found);
 }
@@ -801,9 +797,7 @@ int vnum_material(char *searchname, struct char_data *ch) {
 
     for (auto &o : obj_proto)
         if (isname(searchname, material_names[o.second.getBaseStat<int>(VAL_ALL_MATERIAL)])) {
-            send_to_char(ch, "%3d. [%5d] %-40s %s\r\n",
-                         ++found, o.first, o.second.short_description,
-                         !o.second.proto_script.empty() ? o.second.scriptString().c_str() : "");
+                        ch->send_to("%3d. [%5d] %-40s %s\r\n", ++found, o.first, o.second.short_description, !o.second.proto_script.empty() ? o.second.scriptString().c_str() : "");
         }
 
     return (found);
@@ -816,9 +810,7 @@ int vnum_weapontype(char *searchname, struct char_data *ch) {
     for (auto &o : obj_proto)
         if (o.second.type_flag == ItemType::weapon) {
             if (isname(searchname, weapon_type[o.second.getBaseStat<int>(VAL_WEAPON_SKILL)])) {
-                send_to_char(ch, "%3d. [%5d] %-40s %s\r\n",
-                             ++found, o.first, o.second.short_description,
-                             !o.second.proto_script.empty() ? o.second.scriptString().c_str() : "");
+                                ch->send_to("%3d. [%5d] %-40s %s\r\n", ++found, o.first, o.second.short_description, !o.second.proto_script.empty() ? o.second.scriptString().c_str() : "");
             }
         }
 
@@ -832,9 +824,7 @@ int vnum_armortype(char *searchname, struct char_data *ch) {
     for (auto &o : obj_proto)
         if (o.second.type_flag == ItemType::armor) {
             if (isname(searchname, armor_type[o.second.getBaseStat<int>(VAL_ARMOR_SKILL)])) {
-                send_to_char(ch, "%3d. [%5d] %-40s %s\r\n",
-                             ++found, o.first, o.second.short_description,
-                             !o.second.proto_script.empty() ? o.second.scriptString().c_str() : "");
+                                ch->send_to("%3d. [%5d] %-40s %s\r\n", ++found, o.first, o.second.short_description, !o.second.proto_script.empty() ? o.second.scriptString().c_str() : "");
             }
         }
 
@@ -1491,7 +1481,7 @@ void zone_update(uint64_t heartPulse, double deltaTime) {
         auto& z = zone_table.at(vn);
         reset_zone(vn);
         mudlog(CMP, ADMLVL_GOD, false, "Auto zone reset: %s (Zone %d)",
-               z.name, vn);
+               z.name.c_str(), vn);
         zonesToUpdate.pop_front();
         break;
     }
@@ -1867,9 +1857,8 @@ static void do_reset_cmds(zone_data &z) {
 }
 
 static void do_reset_rooms(zone_data &z) {
-    for (auto &rvnum : z.rooms)
-        if(auto room = get_room(rvnum); room)
-            reset_wtrigger(room);
+    for (auto r : filter_raw(z.rooms))
+         reset_wtrigger(r);
 }
 
 /* execute the reset command table of a given zone */
@@ -1885,14 +1874,12 @@ void reset_zone(zone_rnum zone)
     }
 
     // TODO: Split this off into subscriptions.
-    for (auto &rrnum : z.rooms)
+    for (auto r : filter_raw(z.rooms))
     {
-        auto r = get_room(rrnum);
-        if(!r) continue;
 
         if (r->room_flags.get(ROOM_AURA) && rand_number(1, 5) >= 4)
         {
-            send_to_room(r, "The aura of regeneration covering the surrounding area disappears.\r\n");
+            r->sendText("The aura of regeneration covering the surrounding area disappears.\r\n");
             r->room_flags.set(ROOM_AURA, false);
         }
 
@@ -1903,24 +1890,24 @@ void reset_zone(zone_rnum zone)
 
         if (r->ground_effect < -1)
         {
-            send_to_room(r, "The area loses some of the water flooding it.\r\n");
+            r->sendText("The area loses some of the water flooding it.\r\n");
             r->ground_effect += 1;
         }
         else if (r->ground_effect == -1)
         {
-            send_to_room(r, "The area loses the last of the water flooding it in one large rush.\r\n");
+            r->sendText("The area loses the last of the water flooding it in one large rush.\r\n");
             r->ground_effect = 0;
         }
 
         if (r->ground_effect >= 1 && rand_number(1, 4) == 4 && !r->getEnvironment(ENV_WATER) >= 100.0 && r->sector_type != SectorType::lava)
         {
-            send_to_room(r, "The lava has cooled and become solid rock.\r\n");
+            r->sendText("The lava has cooled and become solid rock.\r\n");
             r->ground_effect = 0;
         }
         else if (r->ground_effect >= 1 && rand_number(1, 2) == 2 && r->getEnvironment(ENV_WATER) >= 100.0 &&
                  r->sector_type != SectorType::lava)
         {
-            send_to_room(r, "The water has cooled the lava and it has become solid rock.\r\n");
+            r->sendText("The water has cooled the lava and it has become solid rock.\r\n");
             r->ground_effect = 0;
         }
     }
@@ -1938,7 +1925,7 @@ void repairRoomDamage(uint64_t heartPulse, double deltaTime) {
             else if(dmg > 1) toRepair = rand_number(1, dmg);
             else toRepair = 1;
             room->modDamage(-toRepair);
-            send_to_room(room, "The area gets rebuilt a little.\r\n");
+            room->sendText("The area gets rebuilt a little.\r\n");
         }
     }
 }
@@ -2628,9 +2615,9 @@ int create_join_session(int account_id, int character_id, int64_t connection_id,
         if(sess->conns.empty()) {
             // the character is currently active, but link dead.
             sess->timeoutCounter = 0.0;
-            send_to_char(ch.get(), "You have reconnected to %s from %s.\r\n", ch->getName(), ip);
+                        ch.get()->send_to("You have reconnected to %s from %s.\r\n", ch->getName(), ip);
         } else {
-            send_to_char(ch.get(), "Another connection is now linked to %s, from %s.\r\n", ch->getName(), ip);
+                        ch.get()->send_to("Another connection is now linked to %s, from %s.\r\n", ch->getName(), ip);
         }
         sess->conns.emplace(connection_id, ip);
         acc.descriptors.insert(sess);
@@ -2659,7 +2646,7 @@ int create_join_session(int account_id, int character_id, int64_t connection_id,
         sessions.emplace(character_id, desc);
         desc->next = descriptor_list;
         descriptor_list = desc;
-        send_to_char(ch.get(), "You have connected to %s from %s.\r\n", ch->getName(), ip);
+                ch.get()->send_to("You have connected to %s from %s.\r\n", ch->getName(), ip);
         return 1;
     }
 }

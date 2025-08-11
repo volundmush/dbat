@@ -40,7 +40,7 @@ void affect_update(uint64_t heartPulse, double deltaTime) {
                 if (af->type > 0)
                     if (!af->next || (af->next->type != af->type) || (af->next->duration > 0)) {
                         if (spell_info[af->type].wear_off_msg)
-                            send_to_char(i, "%s\r\n", spell_info[af->type].wear_off_msg);
+                                                        i->send_to("%s\r\n", spell_info[af->type].wear_off_msg);
                         if (GET_SPEEDBOOST(i) > 0 && af->type == SPELL_HAYASA) {
                             i->setBaseStat<int>("speedboost", 0);
                         }
@@ -79,13 +79,13 @@ int mag_materials(struct char_data *ch, int item0, int item1, int item2, int ext
         if (verbose) {
             switch (rand_number(0, 2)) {
                 case 0:
-                    send_to_char(ch, "A wart sprouts on your nose.\r\n");
+                                        ch->sendText("A wart sprouts on your nose.\r\n");
                     break;
                 case 1:
-                    send_to_char(ch, "Your hair falls out in clumps.\r\n");
+                                        ch->sendText("Your hair falls out in clumps.\r\n");
                     break;
                 case 2:
-                    send_to_char(ch, "A huge corn develops on your big toe.\r\n");
+                                        ch->sendText("A huge corn develops on your big toe.\r\n");
                     break;
             }
         }
@@ -100,7 +100,7 @@ int mag_materials(struct char_data *ch, int item0, int item1, int item2, int ext
             extract_obj(obj2);
     }
     if (verbose) {
-        send_to_char(ch, "A puff of smoke rises from your pack.\r\n");
+                ch->sendText("A puff of smoke rises from your pack.\r\n");
         act("A puff of smoke rises from $n's pack.", true, ch, nullptr, nullptr, TO_ROOM);
     }
     return (true);
@@ -229,7 +229,7 @@ int mag_damage(int level, struct char_data *ch, struct char_data *victim,
             if (AFF_FLAGGED(victim, AFF_UNDEAD))
                 dam = dice(1, 6);
             else {
-                send_to_char(ch, "This magic only affects the undead!\r\n");
+                                ch->sendText("This magic only affects the undead!\r\n");
                 dam = 0;
             }
             break;
@@ -247,7 +247,7 @@ int mag_damage(int level, struct char_data *ch, struct char_data *victim,
 
     if (mag_newsaves(ch, victim, spellnum, level, GET_INT(ch))) {
         if (IS_SET(spell_info[spellnum].save_flags, MAGSAVE_NONE)) {
-            send_to_char(victim, "@g*save*@y You avoid any injury.@n\r\n");
+                        victim->sendText("@g*save*@y You avoid any injury.@n\r\n");
             dam = 0;
         } else if (IS_SET(spell_info[spellnum].save_flags, MAGSAVE_HALF)) {
             if (IS_SET(spell_info[spellnum].save_flags, MAGSAVE_REFLEX) &&
@@ -255,10 +255,10 @@ int mag_damage(int level, struct char_data *ch, struct char_data *victim,
                 (!GET_EQ(victim, WEAR_BODY) ||
                  GET_OBJ_TYPE(GET_EQ(victim, WEAR_BODY)) != ITEM_ARMOR ||
                  GET_OBJ_VAL(GET_EQ(victim, WEAR_BODY), VAL_ARMOR_SKILL) < ARMOR_TYPE_MEDIUM)) {
-                send_to_char(victim, "@g*save*@y Your evasion ability allows you to avoid ANY injury.@n\r\n");
+                                victim->sendText("@g*save*@y Your evasion ability allows you to avoid ANY injury.@n\r\n");
                 dam = 0;
             } else {
-                send_to_char(victim, "@g*save*@y You take half damage.@n\r\n");
+                                victim->sendText("@g*save*@y You take half damage.@n\r\n");
                 dam /= 2;
             }
         }
@@ -268,7 +268,7 @@ int mag_damage(int level, struct char_data *ch, struct char_data *victim,
                (!GET_EQ(victim, WEAR_BODY) ||
                 GET_OBJ_TYPE(GET_EQ(victim, WEAR_BODY)) != ITEM_ARMOR ||
                 GET_OBJ_VAL(GET_EQ(victim, WEAR_BODY), VAL_ARMOR_SKILL) < ARMOR_TYPE_MEDIUM)) {
-        send_to_char(victim, "@r*save*@y Your improved evasion prevents full damage even on failure.@n\r\n");
+                victim->sendText("@r*save*@y Your improved evasion prevents full damage even on failure.@n\r\n");
         dam /= 2;
     }
 
@@ -307,7 +307,7 @@ void mag_affects(int level, struct char_data *ch, struct char_data *victim,
 
     if (mag_newsaves(ch, victim, spellnum, level, GET_INT(ch))) {
         if (IS_SET(spell_info[spellnum].save_flags, MAGSAVE_PARTIAL | MAGSAVE_NONE)) {
-            send_to_char(victim, "@g*save*@y You avoid any lasting affects.@n\r\n");
+                        victim->sendText("@g*save*@y You avoid any lasting affects.@n\r\n");
             return;
         }
     }
@@ -344,7 +344,7 @@ void mag_affects(int level, struct char_data *ch, struct char_data *victim,
 
         case SPELL_BLINDNESS:
             if (MOB_FLAGGED(victim, MOB_NOBLIND)) {
-                send_to_char(ch, "You fail.\r\n");
+                                ch->sendText("You fail.\r\n");
                 return;
             }
 
@@ -486,7 +486,7 @@ void mag_affects(int level, struct char_data *ch, struct char_data *victim,
             af[0].bitvector = AFF_SLEEP;
 
             if (GET_POS(victim) > POS_SLEEPING) {
-                send_to_char(victim, "You feel very sleepy...  Zzzz......\r\n");
+                                victim->sendText("You feel very sleepy...  Zzzz......\r\n");
                 act("$n goes to sleep.", true, victim, nullptr, nullptr, TO_ROOM);
                 victim->setBaseStat("combo", POS_SLEEPING);
             }
@@ -502,7 +502,7 @@ void mag_affects(int level, struct char_data *ch, struct char_data *victim,
             af[0].bitvector = AFF_SLEEP;
 
             if (GET_POS(victim) > POS_SLEEPING) {
-                send_to_char(victim, "You feel very sleepy...  Zzzz......\r\n");
+                                victim->sendText("You feel very sleepy...  Zzzz......\r\n");
                 act("$n goes to sleep.", true, victim, nullptr, nullptr, TO_ROOM);
                 victim->setBaseStat("combo", POS_SLEEPING);
             }
@@ -548,7 +548,7 @@ void mag_affects(int level, struct char_data *ch, struct char_data *victim,
     if (IS_NPC(victim) && !affected_by_spell(victim, spellnum))
         for (i = 0; i < MAX_SPELL_AFFECTS; i++)
             if (AFF_FLAGGED(victim, af[i].bitvector)) {
-                send_to_char(ch, "%s", CONFIG_NOEFFECT);
+                                ch->send_to("%s", CONFIG_NOEFFECT);
                 return;
             }
 
@@ -557,7 +557,7 @@ void mag_affects(int level, struct char_data *ch, struct char_data *victim,
      * not have an accumulative effect, then fail the spell.
      */
     if (affected_by_spell(victim, spellnum) && !(accum_duration || accum_affect)) {
-        send_to_char(ch, "%s", CONFIG_NOEFFECT);
+                ch->send_to("%s", CONFIG_NOEFFECT);
         return;
     }
 
@@ -861,11 +861,11 @@ void mag_summons(int level, struct char_data *ch, struct obj_data *obj, int spel
     switch (spellnum) {
         case SPELL_ANIMATE_DEAD:
             if (obj == nullptr) {
-                send_to_char(ch, "With what corpse?\r\n");
+                                ch->sendText("With what corpse?\r\n");
                 return;
             }
             if (!IS_CORPSE(obj)) {
-                send_to_char(ch, "That's not a corpse!\r\n");
+                                ch->sendText("That's not a corpse!\r\n");
                 return;
             }
             handle_corpse = true;
@@ -908,7 +908,7 @@ void mag_summons(int level, struct char_data *ch, struct obj_data *obj, int spel
                         break;
                 }
                 if (mob_num == NOBODY) {
-                    send_to_char(ch, "That's not a name for a monster you can summon. Summoning something else.\r\n");
+                                        ch->sendText("That's not a name for a monster you can summon. Summoning something else.\r\n");
                 } else {
                     basic_mud_log("lev=%d, i=%d, ngen=%d", lev, i, lev - i);
                     switch (lev - i) {
@@ -941,12 +941,12 @@ void mag_summons(int level, struct char_data *ch, struct obj_data *obj, int spel
     }
 
     if (AFF_FLAGGED(ch, AFF_CHARM)) {
-        send_to_char(ch, "You are too giddy to have any followers!\r\n");
+                ch->sendText("You are too giddy to have any followers!\r\n");
         return;
     }
     for (i = 0; i < num; i++) {
         if (!(mob = read_mobile(mob_num, VIRTUAL))) {
-            send_to_char(ch, "You don't quite remember how to summon that creature.\r\n");
+                        ch->sendText("You don't quite remember how to summon that creature.\r\n");
             return;
         }
         mob->setLocation(ch);
@@ -966,7 +966,7 @@ void mag_summons(int level, struct char_data *ch, struct obj_data *obj, int spel
     if (handle_corpse) {
         auto con = obj->getObjects();
         for (auto tobj : filter_raw(con)) {
-            obj_from_obj(tobj);
+            tobj->clearLocation();
             obj_to_char(tobj, mob);
         }
         extract_obj(obj);
@@ -985,18 +985,18 @@ void mag_points(int level, struct char_data *ch, struct char_data *victim,
     switch (spellnum) {
         case SPELL_CURE_LIGHT:
             healing = dice(1, 8) + MIN(level, 5);
-            send_to_char(victim, "You feel better.\r\n");
+                        victim->sendText("You feel better.\r\n");
             break;
         case SPELL_CURE_CRITIC:
             healing = dice(4, 8) + MIN(level, 20);
-            send_to_char(victim, "You feel a lot better!\r\n");
+                        victim->sendText("You feel a lot better!\r\n");
             break;
         case SPELL_HEAL:
             healing = 100 + dice(3, 8);
-            send_to_char(victim, "A warm feeling floods your body.\r\n");
+                        victim->sendText("A warm feeling floods your body.\r\n");
             if (AFF_FLAGGED(ch, AFF_CDEATH)) {
                 affectv_from_char(ch, ART_QUIVERING_PALM);
-                send_to_char(ch, "Your nerves settle slightly\r\n");
+                                ch->sendText("Your nerves settle slightly\r\n");
             }
             break;
         case SPELL_SENSU:
@@ -1057,7 +1057,7 @@ void mag_unaffects(int level, struct char_data *ch, struct char_data *victim,
 
     if (!affected_by_spell(victim, spell)) {
         if (msg_not_affected)
-            send_to_char(ch, "%s", CONFIG_NOEFFECT);
+                        ch->send_to("%s", CONFIG_NOEFFECT);
         return;
     }
 
@@ -1118,7 +1118,7 @@ void mag_alter_objs(int level, struct char_data *ch, struct obj_data *obj,
     }
 
     if (to_char == nullptr)
-        send_to_char(ch, "%s", CONFIG_NOEFFECT);
+                ch->send_to("%s", CONFIG_NOEFFECT);
     else
         act(to_char, true, ch, obj, nullptr, TO_CHAR);
 
@@ -1143,12 +1143,12 @@ void mag_creations(int level, struct char_data *ch, int spellnum) {
             z = 10;
             break;
         default:
-            send_to_char(ch, "Spell unimplemented, it would seem.\r\n");
+                        ch->sendText("Spell unimplemented, it would seem.\r\n");
             return;
     }
 
     if (!(tobj = read_object(z, VIRTUAL))) {
-        send_to_char(ch, "I seem to have goofed.\r\n");
+                ch->sendText("I seem to have goofed.\r\n");
         basic_mud_log("SYSERR: spell_creations, spell %d, obj %d: obj not found",
             spellnum, z);
         return;
@@ -1183,7 +1183,7 @@ void affect_update_violence(uint64_t heartPulse, double deltaTime) {
                     if (!af->next || (af->next->type != af->type) ||
                         (af->next->duration > 0))
                         if (spell_info[af->type].wear_off_msg)
-                            send_to_char(i, "%s\r\n", spell_info[af->type].wear_off_msg);
+                                                        i->send_to("%s\r\n", spell_info[af->type].wear_off_msg);
                 if (af->bitvector == AFF_SUMMONED) {
                     stop_follower(i);
                     if (!DEAD(i))
@@ -1222,7 +1222,7 @@ void mag_affectsv(int level, struct char_data *ch, struct char_data *victim,
 
     if (mag_newsaves(ch, victim, spellnum, level, GET_INT(ch))) {
         if (IS_SET(spell_info[spellnum].save_flags, MAGSAVE_PARTIAL | MAGSAVE_NONE)) {
-            send_to_char(victim, "@g*save*@y You avoid any lasting affects.@n\r\n");
+                        victim->sendText("@g*save*@y You avoid any lasting affects.@n\r\n");
             return;
         }
     }
@@ -1251,7 +1251,7 @@ void mag_affectsv(int level, struct char_data *ch, struct char_data *victim,
             break;
         case ART_QUIVERING_PALM:
             if (GET_LEVEL(ch) <= GET_LEVEL(victim)) {
-                send_to_char(ch, "They are too high level for that.\r\n");
+                                ch->sendText("They are too high level for that.\r\n");
                 return;
             }
             af[0].duration = MAX(6, 20 - level);
@@ -1290,7 +1290,7 @@ void mag_affectsv(int level, struct char_data *ch, struct char_data *victim,
 
         case SPELL_FLARE:
             if (MOB_FLAGGED(victim, MOB_NOBLIND)) {
-                send_to_char(ch, "You fail.\r\n");
+                                ch->sendText("You fail.\r\n");
                 return;
             }
             af[0].location = APPLY_COMBAT_MULT;
@@ -1320,7 +1320,7 @@ void mag_affectsv(int level, struct char_data *ch, struct char_data *victim,
     if (IS_NPC(victim) && !affected_by_spell(victim, spellnum))
         for (i = 0; i < MAX_SPELL_AFFECTS; i++)
             if (AFF_FLAGGED(victim, af[i].bitvector)) {
-                send_to_char(ch, "%s", CONFIG_NOEFFECT);
+                                ch->send_to("%s", CONFIG_NOEFFECT);
                 return;
             }
     /*
@@ -1328,7 +1328,7 @@ void mag_affectsv(int level, struct char_data *ch, struct char_data *victim,
      * not have an accumulative effect, then fail the spell.
      */
     if (affected_by_spell(victim, spellnum) && !(accum_duration || accum_affect)) {
-        send_to_char(ch, "%s", CONFIG_NOEFFECT);
+                ch->send_to("%s", CONFIG_NOEFFECT);
         return;
     }
 

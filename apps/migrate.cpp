@@ -958,7 +958,7 @@ static void parse_room(FILE *fl, room_vnum virtual_nr) {
     auto r = sh.get();
     units.emplace(virtual_nr, sh);
     world.emplace(virtual_nr, sh);
-    z.rooms.insert(virtual_nr);
+    z.rooms.push_back(sh);
 
     r->zone = &z;
     r->id = virtual_nr;
@@ -1937,12 +1937,12 @@ static void load_zones(FILE *fl, char *zonename) {
     line_num += get_line(fl, buf);
     if ((ptr = strchr(buf, '~')) != nullptr)    /* take off the '~' if it's there */
         *ptr = '\0';
-    z.builders = strdup(buf);
+    z.builders = buf;
 
     line_num += get_line(fl, buf);
     if ((ptr = strchr(buf, '~')) != nullptr)    /* take off the '~' if it's there */
         *ptr = '\0';
-    z.name = strdup(buf);
+    z.name = buf;
 
     line_num += get_line(fl, buf);
     bitvector_t zone_flags[4];
@@ -1971,14 +1971,13 @@ static void load_zones(FILE *fl, char *zonename) {
      * last one.
      */
         basic_mud_log("SYSERR: Format error in numeric constant line of %s, attempting to fix.", zname);
-        if (sscanf(z.name, " %d %d %d %d ", &z.bot, &z.top, &z.lifespan, &z.reset_mode) != 4) {
+        char* zname = nullptr;
+        if (sscanf(zname, " %d %d %d %d ", &z.bot, &z.top, &z.lifespan, &z.reset_mode) != 4) {
             basic_mud_log("SYSERR: Could not fix previous error, aborting game.");
             exit(1);
         } else {
-            free(z.name);
-            z.name = strdup(z.builders);
-            free(z.builders);
-            z.builders = strdup("None.");
+            //if(zname) z.name = zname;
+            z.builders = "None.";
             zone_fix = true;
         }
     }

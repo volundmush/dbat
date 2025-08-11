@@ -151,9 +151,9 @@ zone_rnum create_new_zone(zone_vnum vzone_num, room_vnum bottom, room_vnum top, 
     /*
      * Ok, insert the new zone here.
      */
-    z.name = strdup("New Zone");
+    z.name = "New Zone";
     z.number = vzone_num;
-    z.builders = strdup("None");
+    z.builders = "None";
 #if _CIRCLEMUD >= CIRCLEMUD_VERSION(3, 0, 21)
     z.bot = bottom;
     z.top = top;
@@ -258,42 +258,6 @@ void create_world_index(int znum, const char *type) {
 }
 
 
-
-/*-------------------------------------------------------------------*/
-
-/*
- * Save all the zone_table for this zone to disk.  This function now
- * writes simple comments in the form of (<name>) to each record.  A
- * header for each field is also there.
- */
-int save_zone(zone_rnum zone_num) {
-    return true;
-}
-
-/*-------------------------------------------------------------------*/
-
-/*
- * Some common code to count the number of comands in the list.
- */
-int count_commands(struct reset_com *list) {
-    int count = 0;
-
-    while (list[count].command != 'S')
-        count++;
-
-    return count;
-}
-
-/*-------------------------------------------------------------------*/
-
-/*
- * Adds a new reset command into a list.  Takes a pointer to the list
- * so that it may play with the memory locations.
- */
-
-/*-------------------------------------------------------------------*/
-
-
 /*-------------------------------------------------------------------*/
 
 /*
@@ -324,12 +288,6 @@ void delete_zone_command(struct zone_data *zone, int pos) {
 /*-------------------------------------------------------------------*/
 
 
-zone_data::~zone_data() {
-    if(name) free(name);
-    if(builders) free(builders);
-}
-
-
 void zone_data::remove_room_commands(room_vnum rv) {
     room_vnum cmd_room = NOTHING;
     for(auto &c : cmd) {
@@ -352,4 +310,11 @@ void zone_data::remove_room_commands(room_vnum rv) {
     }
     // now filter out any where c.command == 'X'
     cmd.erase(std::remove_if(cmd.begin(), cmd.end(), [](const reset_com &c) { return c.command == 'X'; }), cmd.end());
+}
+
+void zone_data::sendText(const std::string& txt) {
+    for (auto i = descriptor_list; i; i = i->next)
+        if (!i->connected && i->character && AWAKE(i->character) &&
+            i->character->location.getZone() == this)
+            i->sendText(txt);
 }

@@ -93,7 +93,7 @@ void char_data::resurrect(ResurrectionMode mode) {
     for(auto f : {AFF_ETHEREAL, AFF_SPIRIT}) affect_flags.set(f, false);
     player_flags.set(PLR_PDEATH, false);
     // Send them to their starting room and have them 'look'.
-    char_from_room(this);
+    this->clearLocation();
     auto droom = GET_DROOM(this);
     if (droom != NOWHERE && droom != 0 && droom != 1) {
         char_to_room(this, real_room(droom));
@@ -128,8 +128,7 @@ void char_data::resurrect(ResurrectionMode mode) {
     // Also no penalties if the character isn't at least level 10.
     if (GET_LEVEL(this) > 9) {
         int losschance = axion_dice(0);
-        send_to_char(this,
-                     "@RThe the strain of this type of revival has caused you to be in a weakened state for 100 hours (Game time)! Strength,itution, wisdom, intelligence, speed, and agility have been reduced by 8 points for the duration.@n\r\n");
+                this->sendText("@RThe the strain of this type of revival has caused you to be in a weakened state for 100 hours (Game time)! Strength,itution, wisdom, intelligence, speed, and agility have been reduced by 8 points for the duration.@n\r\n");
         std::map<std::string, int> statReductions = {
             {"strength", -8},
             {"constitution", -8},
@@ -156,7 +155,7 @@ void char_data::resurrect(ResurrectionMode mode) {
         if (losschance >= 100) {
             int psloss = rand_number(100, 300);
             modPractices(-psloss);
-            send_to_char(this, "@R...and a loss of @r%d@R PS!@n", psloss);
+                        this->send_to("@R...and a loss of @r%d@R PS!@n", psloss);
         }
     }
     setBaseStat("death_time", 0);
@@ -176,7 +175,7 @@ void char_data::ghostify() {
 }
 
 void char_data::teleport_to(IDXTYPE rnum) {
-    char_from_room(this);
+    this->clearLocation();
     char_to_room(this, real_room(rnum));
     lookAtLocation();
     update_pos(this);
@@ -320,7 +319,7 @@ int64_t char_data::calcGravCost(int64_t num) {
 
     if (!num) {
         if (cost) {
-            send_to_char(this, "You sweat bullets struggling against a mighty burden.\r\n");
+                        this->sendText("You sweat bullets struggling against a mighty burden.\r\n");
         }
         if ((this->getCurVital(CharVital::stamina)) > cost) {
             this->modCurVital(CharVital::stamina, -cost);
@@ -430,7 +429,7 @@ void char_data::cureStatusKnockedOut(bool announce) {
     if (AFF_FLAGGED(this, AFF_KNOCKED)) {
         if (announce) {
             ::act("@W$n@W is no longer senseless, and wakes up.@n", false, this, nullptr, nullptr, TO_ROOM);
-            send_to_char(this, "You are no longer knocked out, and wake up!@n\r\n");
+                        this->sendText("You are no longer knocked out, and wake up!@n\r\n");
         }
 
         if (CARRIED_BY(this)) {
@@ -449,7 +448,7 @@ void char_data::cureStatusKnockedOut(bool announce) {
 void char_data::cureStatusBurn(bool announce) {
     if (AFF_FLAGGED(this, AFF_BURNED)) {
         if (announce) {
-            send_to_char(this, "Your burns are healed now.\r\n");
+                        this->sendText("Your burns are healed now.\r\n");
             ::act("$n@w's burns are now healed.@n", true, this, nullptr, nullptr, TO_ROOM);
         }
         affect_flags.set(AFF_BURNED, false);
@@ -476,9 +475,9 @@ void char_data::restoreLimbs(bool announce) {
     for (const auto &l: limb_names) {
         if (announce) {
             if (GET_LIMBCOND(this, l.first) <= 0)
-                send_to_char(this, "Your %s grows back!\r\n", l.second.c_str());
+                                this->send_to("Your %s grows back!\r\n", l.second.c_str());
             else if (GET_LIMBCOND(this, l.first) < 50)
-                send_to_char(this, "Your %s is no longer broken!\r\n", l.second.c_str());
+                                this->send_to("Your %s is no longer broken!\r\n", l.second.c_str());
         }
         GET_LIMBCOND(this, l.first) = 100;
     }
@@ -493,7 +492,7 @@ void char_data::gainTail(bool announce) {
     if(character_flags.get(CharacterFlag::tail)) return;
     character_flags.set(CharacterFlag::tail, true);
     if(announce) {
-        send_to_char(this, "@wYour tail grows back.@n\r\n");
+                this->sendText("@wYour tail grows back.@n\r\n");
         act("$n@w's tail grows back.@n", true, this, nullptr, nullptr, TO_ROOM);
     }
 }
@@ -537,7 +536,7 @@ void char_data::attemptLimitBreak() {
         modCurVitalDam(CharVital::health, -0.35);
         modCurVitalDam(CharVital::ki, -0.35);
         modCurVitalDam(CharVital::stamina, -0.35);
-        send_to_char(this, "@mA rush of energy bursts through your system as you defy your limits.@n\r\n");
+                this->sendText("@mA rush of energy bursts through your system as you defy your limits.@n\r\n");
         
         affect_flags.set(AFF_LIMIT_BREAKING, true);         
     }
@@ -546,7 +545,7 @@ void char_data::attemptLimitBreak() {
 void char_data::removeLimitBreak() {
     if (AFF_FLAGGED(this, AFF_LIMIT_BREAKING)) {
         this->affect_flags.set(AFF_LIMIT_BREAKING, false);
-        send_to_char(this, "@mYou feel your body finally calm down.@n\r\n");
+                this->sendText("@mYou feel your body finally calm down.@n\r\n");
     }
 }
 
@@ -584,7 +583,7 @@ void char_data::apply_kaioken(int times, bool announce) {
     character_flags.set(CharacterFlag::powering_up, false);
 
     if (announce) {
-        send_to_char(this, "@rA dark red aura bursts up around your body as you achieve Kaioken x %d!@n\r\n", times);
+                this->send_to("@rA dark red aura bursts up around your body as you achieve Kaioken x %d!@n\r\n", times);
         ::act("@rA dark red aura bursts up around @R$n@r as they achieve a level of Kaioken!@n", true, this, nullptr,
               nullptr, TO_ROOM);
     }
@@ -600,11 +599,11 @@ void char_data::remove_kaioken(int8_t announce) {
 
     switch (announce) {
         case 1:
-            send_to_char(this, "You drop out of kaioken.\r\n");
+                        this->sendText("You drop out of kaioken.\r\n");
             ::act("$n@w drops out of kaioken.@n", true, this, nullptr, nullptr, TO_ROOM);
             break;
         case 2:
-            send_to_char(this, "You lose focus and your kaioken disappears.\r\n");
+                        this->sendText("You lose focus and your kaioken disappears.\r\n");
             ::act("$n loses focus and $s kaioken aura disappears.", true, this, nullptr, nullptr, TO_ROOM);
     }
 }
@@ -649,7 +648,7 @@ void char_data::modPractices(int amt) {
 
 void char_data::login() {
     enter_player_game(desc);
-    send_to_char(this, "%s", CONFIG_WELC_MESSG);
+        this->send_to("%s", CONFIG_WELC_MESSG);
     ::act("$n has entered the game.", true, this, nullptr, nullptr, TO_ROOM);
     mudlog(NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(this)), true, "%s has entered the game.", GET_NAME(this));
     /*~~~ For PCOUNT and HIGHPCOUNT ~~~*/
@@ -691,37 +690,31 @@ void char_data::login() {
 
     /*~~~ End PCOUNT and HIGHPCOUNT ~~~*/
     if (GET_LEVEL(this) == 0) {
-        send_to_char(this, "%s", CONFIG_START_MESSG);
+                this->send_to("%s", CONFIG_START_MESSG);
     }
     if (this->getRoomVnum() <= 1 && GET_LOADROOM(this) != NOWHERE) {
-        char_from_room(this);
+    this->clearLocation();
         char_to_room(this, real_room(GET_LOADROOM(this)));
     } else if (this->getRoomVnum() <= 1) {
-        char_from_room(this);
+    this->clearLocation();
         char_to_room(this, 300);
     } else {
         this->lookAtLocation();
     }
     if (has_mail(GET_IDNUM(this)))
-        send_to_char(this, "\r\nYou have mail waiting.\r\n");
+                this->sendText("\r\nYou have mail waiting.\r\n");
     if (GET_ADMLEVEL(this) >= 1 && BOARDNEWIMM > GET_BOARD(this, 1))
-        send_to_char(this,
-                     "\r\n@GMake sure to check the immortal board, there is a new post there.@n\r\n");
+                this->sendText("\r\n@GMake sure to check the immortal board, there is a new post there.@n\r\n");
     if (GET_ADMLEVEL(this) >= 1 && BOARDNEWCOD > GET_BOARD(this, 2))
-        send_to_char(this,
-                     "\r\n@GMake sure to check the request file, it has been updated.@n\r\n");
+                this->sendText("\r\n@GMake sure to check the request file, it has been updated.@n\r\n");
     if (GET_ADMLEVEL(this) >= 1 && BOARDNEWBUI > GET_BOARD(this, 4))
-        send_to_char(this,
-                     "\r\n@GMake sure to check the builder board, there is a new post there.@n\r\n");
+                this->sendText("\r\n@GMake sure to check the builder board, there is a new post there.@n\r\n");
     if (GET_ADMLEVEL(this) >= 1 && BOARDNEWDUO > GET_BOARD(this, 3))
-        send_to_char(this,
-                     "\r\n@GMake sure to check punishment board, there is a new post there.@n\r\n");
+                this->sendText("\r\n@GMake sure to check punishment board, there is a new post there.@n\r\n");
     if (BOARDNEWMORT > GET_BOARD(this, 0))
-        send_to_char(this, "\r\n@GThere is a new bulletin board post.@n\r\n");
+                this->sendText("\r\n@GThere is a new bulletin board post.@n\r\n");
     if (NEWSUPDATE > GET_LPLAY(this))
-        send_to_char(this,
-                     "\r\n@GThe NEWS file has been updated, type 'news %d' to see the latest entry or 'news list' to see available entries.@n\r\n",
-                     LASTNEWS);
+                this->send_to("\r\n@GThe NEWS file has been updated, type 'news %d' to see the latest entry or 'news list' to see available entries.@n\r\n", LASTNEWS);
 
     if (LASTINTEREST != 0 && LASTINTEREST > GET_LINTEREST(this)) {
         int diff = (LASTINTEREST - GET_LINTEREST(this));
@@ -747,7 +740,7 @@ void char_data::login() {
             }
             inc *= mult;
             setBaseStat("money_bank", inc);
-            send_to_char(this, "Interest happened while you were away, %d times.\r\n"
+                        this->send_to("Interest happened while you were away, %d times.\r\n"
                                        "@cBank Interest@D: @Y%s@n\r\n", mult, add_commas(inc).c_str());
         }
     }
@@ -867,8 +860,8 @@ void char_data::gainGrowth(double gain) {
 
 
 bool char_data::canCarryWeight(weight_t val) {
-    double gravity = 1.0;
-    if(auto room = getRoom(); room) gravity = room->getEnvironment(ENV_GRAVITY);
+    double gravity = location.getEnvironment(ENV_GRAVITY);
+
     if(gravity >= 1000 && hasGravAcclim(5))
         gravity /= 1000;
     else if(gravity >= 100 && hasGravAcclim(4))
@@ -1023,7 +1016,7 @@ int64_t char_data::modExperience(int64_t value, bool applyBonuses) {
                 int64_t spar = gain;
                 gain += gain * 0.25;
                 spar = gain - spar;
-                send_to_char(this, "@D[@BBooster EXP@W: @G+%s@D]\r\n", add_commas(spar).c_str());
+                                this->send_to("@D[@BBooster EXP@W: @G+%s@D]\r\n", add_commas(spar).c_str());
             }
 
             // Post-100 gains.
@@ -1041,7 +1034,7 @@ int64_t char_data::modExperience(int64_t value, bool applyBonuses) {
                     } else {
                         this->gainBaseStat("health", diff);
                     }
-                    send_to_char(this, "@D[@G+@Y%s @RPL@D]@n ", add_commas(diff).c_str());
+                                        this->send_to("@D[@G+@Y%s @RPL@D]@n ", add_commas(diff).c_str());
                 }
                 if (rand_number(1, 5) >= 2) {
                     if (IS_HALFBREED(this)) {
@@ -1049,11 +1042,11 @@ int64_t char_data::modExperience(int64_t value, bool applyBonuses) {
                     } else {
                         this->gainBaseStat("stamina", diff);
                     }
-                    send_to_char(this, "@D[@G+@Y%s @gSTA@D]@n ", add_commas(diff).c_str());
+                                        this->send_to("@D[@G+@Y%s @gSTA@D]@n ", add_commas(diff).c_str());
                 }
                 if (rand_number(1, 5) >= 2) {
                     this->gainBaseStat("ki", diff);
-                    send_to_char(this, "@D[@G+@Y%s @CKi@D]@n", add_commas(diff).c_str());
+                                        this->send_to("@D[@G+@Y%s @CKi@D]@n", add_commas(diff).c_str());
                 }
             }
         }
@@ -1064,8 +1057,7 @@ int64_t char_data::modExperience(int64_t value, bool applyBonuses) {
 
     if (MINDLINK(this) && gain > 0 && LINKER(this) == 0) {
         if (GET_INT(this) + 20 < GET_INT(MINDLINK(this)) || GET_INT(this) - 20 > GET_INT(MINDLINK(this))) {
-            send_to_char(MINDLINK(this),
-                         "The intelligence difference between the two of you is too great to gain from mind read.\r\n");
+                        MINDLINK(this)->sendText("The intelligence difference between the two of you is too great to gain from mind read.\r\n");
         } else {
             act("@GYou've absorbed some new experiences from @W$n@G!@n", false, this, nullptr, MINDLINK(this),
                 TO_VICT);
@@ -1083,13 +1075,13 @@ int64_t char_data::modExperience(int64_t value, bool applyBonuses) {
         int64_t tnl = level_exp(this, GET_LEVEL(this) + 1);
 
         if(cur < tnl && (cur + gain) >= tnl) {
-            send_to_char(this, "@rYou have earned enough experience to gain a @ylevel@r.@n\r\n");
+                        this->sendText("@rYou have earned enough experience to gain a @ylevel@r.@n\r\n");
         }
 
         int64_t max_over_tnl = tnl * 5;
         if((cur + gain) >= max_over_tnl) {
             gain = max_over_tnl - getExperience();
-            send_to_char(this, "@WYou -@RNEED@W- to @ylevel@W. You can't hold any more experience!@n\r\n");
+                        this->sendText("@WYou -@RNEED@W- to @ylevel@W. You can't hold any more experience!@n\r\n");
         }
 
     }

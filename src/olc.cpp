@@ -77,7 +77,7 @@ ACMD(do_olc) {
 
     /* WARNING!  **DO NOT** under any circumstances remove the code below!!!!  */
     if (strcmp(GET_NAME(ch), "Ras")) {
-        send_to_char(ch, "OLC is not yet complete.  Sorry.\r\n");
+                ch->sendText("OLC is not yet complete.  Sorry.\r\n");
         return;
     }
     /* WARNING!  **DO NOT** under any circumstances remove the code above!!!!  */
@@ -85,7 +85,7 @@ ACMD(do_olc) {
     /* first, figure out the first (mode) argument */
     half_chop(argument, mode_arg, argument);
     if ((olc_mode = search_block(mode_arg, olc_modes, false)) < 0) {
-        send_to_char(ch, "Invalid mode '%s'.\r\n%s", mode_arg, OLC_USAGE);
+                ch->send_to("Invalid mode '%s'.\r\n%s", mode_arg, OLC_USAGE);
         return;
     }
     switch (olc_mode) {
@@ -96,7 +96,7 @@ ACMD(do_olc) {
         case OLC_REPEAT:
             if (!(olc_mode = ch->getBaseStat<int>("last_olc_mode")) ||
                 ((olc_targ = GET_LAST_OLC_TARG(ch)) == nullptr)) {
-                send_to_char(ch, "No last OLC operation!\r\n");
+                                ch->sendText("No last OLC operation!\r\n");
                 return;
             }
             break;
@@ -105,22 +105,22 @@ ACMD(do_olc) {
                 /* room specified.  take the numeric argument off */
                 argument = one_argument(argument, arg);
                 if (!is_number(arg)) {
-                    send_to_char(ch, "Invalid room vnum '%s'.\r\n", arg);
+                                        ch->send_to("Invalid room vnum '%s'.\r\n", arg);
                     return;
                 }
                 vnum = atoi(arg);
                 if ((rnum = real_room(vnum)) == NOWHERE) {
-                    send_to_char(ch, "No such room!\r\n");
+                                        ch->sendText("No such room!\r\n");
                     return;
                 }
             } else {
                 rnum = IN_ROOM(ch);
                 vnum = ch->getRoomVnum();
-                send_to_char(ch, "(Using current room %d)\r\n", vnum);
+                                ch->send_to("(Using current room %d)\r\n", vnum);
             }
 
 /*   if (!ROOM_FLAGGED(rnum, ROOM_OLC))
-	 send_to_char(ch, "That room is not modifyable.\r\n");
+	 	 ch->sendText("That room is not modifyable.\r\n");
      else
 */
             olc_targ = (void *)get_room(rnum);
@@ -128,29 +128,29 @@ ACMD(do_olc) {
         case OLC_MOB:
             argument = one_argument(argument, arg);
             if (!is_number(arg)) {
-                send_to_char(ch, "Invalid mob vnum '%s'.\r\n", arg);
+                                ch->send_to("Invalid mob vnum '%s'.\r\n", arg);
                 return;
             }
             vnum = atoi(arg);
             if ((rnum = real_mobile(vnum)) == NOBODY)
-                send_to_char(ch, "No such mobile vnum.\r\n");
+                                ch->sendText("No such mobile vnum.\r\n");
             else
                 olc_targ = (void *) &(mob_proto.at(rnum));
             break;
         case OLC_OBJ:
             argument = one_argument(argument, arg);
             if (!is_number(arg)) {
-                send_to_char(ch, "Invalid obj vnum '%s'\r\n", arg);
+                                ch->send_to("Invalid obj vnum '%s'\r\n", arg);
                 return;
             }
             vnum = atoi(arg);
             if ((rnum = real_object(vnum)) == NOTHING)
-                send_to_char(ch, "No object with vnum %d.\r\n", vnum);
+                                ch->send_to("No object with vnum %d.\r\n", vnum);
             else
                 olc_targ = (void *) &(obj_proto.at(rnum));
             break;
         default:
-            send_to_char(ch, "Usage: olc {.|set|show|obj|mob|room} [args]\r\n");
+                        ch->sendText("Usage: olc {.|set|show|obj|mob|room} [args]\r\n");
             return;
     }
 
@@ -158,7 +158,7 @@ ACMD(do_olc) {
         return;
 
     if (!can_modify(ch, vnum)) {
-        send_to_char(ch, "You can't modify that.\r\n");
+                ch->sendText("You can't modify that.\r\n");
         return;
     }
     ch->setBaseStat<int>("last_olc_mode", olc_mode);
@@ -180,7 +180,7 @@ void olc_interpreter(void *targ, int mode, char *arg) {
 
     half_chop(arg, command_string, arg);
     if ((command = search_block(command_string, olc_commands, false)) < 0) {
-        send_to_char(olc_ch, "Invalid OLC command '%s'.\r\n", command_string);
+                olc_ch->send_to("Invalid OLC command '%s'.\r\n", command_string);
         return;
     }
     switch (mode) {
@@ -275,18 +275,17 @@ void olc_string(char **string, size_t maxlen, char *arg) {
     skip_spaces(&arg);
 
     if (!*arg) {
-        send_to_char(olc_ch, "Enter new string (max of %d characters); use '@' on a new line when done.\r\n",
-                     (int) maxlen);
+                olc_ch->send_to("Enter new string (max of %d characters); use '@' on a new line when done.\r\n", (int) maxlen);
         **string = '\0';
         string_write(olc_ch->desc, string, maxlen, 0, nullptr);
     } else {
         if (strlen(arg) > maxlen) {
-            send_to_char(olc_ch, "String too long (cannot be more than %d chars).\r\n", (int) maxlen);
+                        olc_ch->send_to("String too long (cannot be more than %d chars).\r\n", (int) maxlen);
         } else {
             if (*string)
                 free(*string);
             *string = strdup(arg);
-            send_to_char(olc_ch, "%s", CONFIG_OK);
+                        olc_ch->send_to("%s", CONFIG_OK);
         }
     }
 }
@@ -301,7 +300,7 @@ void olc_bitvector(int *bv, const char **names, char *arg) {
     skip_spaces(&arg);
 
     if (!*arg) {
-        send_to_char(olc_ch, "Flag list or flag modifiers required.\r\n");
+                olc_ch->sendText("Flag list or flag modifiers required.\r\n");
         return;
     }
     /* determine if this is 'absolute' or 'relative' mode */
@@ -331,7 +330,7 @@ void olc_bitvector(int *bv, const char **names, char *arg) {
 
         /* figure out which one we're dealing with */
         if ((flagnum = search_block(this_name, names, true)) < 0)
-            send_to_char(olc_ch, "Unknown flag: %s\r\n", this_name);
+                        olc_ch->send_to("Unknown flag: %s\r\n", this_name);
         else {
             if (doremove)
                 REMOVE_BIT(newbv, (1 << flagnum));
@@ -342,7 +341,7 @@ void olc_bitvector(int *bv, const char **names, char *arg) {
 
     *bv = newbv;
     sprintbit(newbv, names, buf, sizeof(buf));
-    send_to_char(olc_ch, "Flags now set to: %s\r\n", buf);
+        olc_ch->send_to("Flags now set to: %s\r\n", buf);
 }
 
 void olc_set_show(struct char_data *ch, int olc_mode, char *arg) {

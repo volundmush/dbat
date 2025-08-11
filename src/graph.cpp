@@ -137,28 +137,28 @@ ACMD(do_sradar) {
     one_argument(argument, arg);
 
     if (!PLR_FLAGGED(ch, PLR_PILOTING) && GET_ADMLEVEL(ch) < 1) {
-        send_to_char(ch, "You are not flying a ship, maybe you want detect?\r\n");
+                ch->sendText("You are not flying a ship, maybe you want detect?\r\n");
         return;
     }
 
     if (!(controls = find_control(ch)) && GET_ADMLEVEL(ch) < 1) {
-        send_to_char(ch, "@wYou have nothing to control here!\r\n");
+                ch->sendText("@wYou have nothing to control here!\r\n");
         return;
     }
 
     if (!PLR_FLAGGED(ch, PLR_PILOTING) && GET_ADMLEVEL(ch) >= 1) {
         noship = true;
     } else if (!(vehicle = find_vehicle_by_vnum(GET_OBJ_VAL(controls, VAL_CONTROL_VEHICLE_VNUM)))) {
-        send_to_char(ch, "@wYou can't find anything to pilot.\r\n");
+                ch->sendText("@wYou can't find anything to pilot.\r\n");
         return;
     }
     
     if (noship == false && vehicle->location.getTileType() != SECT_SPACE) {
-        send_to_char(ch, "@wYour ship is not in space!\r\n");
+                ch->sendText("@wYour ship is not in space!\r\n");
         return;
     }
     if (noship == true && ch->location.getTileType() != SECT_SPACE) {
-        send_to_char(ch, "@wYou are not even in space!\r\n");
+                ch->sendText("@wYou are not even in space!\r\n");
         return;
     }
 
@@ -169,18 +169,18 @@ ACMD(do_sradar) {
             printmap(IN_ROOM(vehicle), ch, 0, GET_OBJ_VNUM(vehicle));
         }
         /*
-         send_to_char(ch, "     @D----------------[@C Radar @D]-----------------@n\r\n");
-         send_to_char(ch, "    @D|@GEE@D:@w Earth    @gNN@D:@w Namek   @YVV@D:@w Vegeta       @D|@n\r\n");
-         send_to_char(ch, "    @D|@CFF@D:@w Frigid   @mKK@D:@w Konack  @BAA@D:@w Aether       @D|@n\r\n");
-         send_to_char(ch, "    @D|@MYY@D:@w Yardrat  @CKK@D:@w Kanassa @mAA@D:@w Arlia        @D|@n\r\n");
-         send_to_char(ch, "    @D|@WBB@D:@w Buoy     @m&&@D:@w Nebula  @yQQ@D:@w Asteroid     @D|@n\r\n");
-         send_to_char(ch, "    @D|@b@1**@n@D:@w Wormhole @DSS@D:@w Station  @r#@D: @wUnknown Ship @D|@n\n");
-         send_to_char(ch, "    @D|@6  @n@D:@w Star                                  @D|@n\n"); */
+                  ch->sendText("     @D----------------[@C Radar @D]-----------------@n\r\n");
+                  ch->sendText("    @D|@GEE@D:@w Earth    @gNN@D:@w Namek   @YVV@D:@w Vegeta       @D|@n\r\n");
+                  ch->sendText("    @D|@CFF@D:@w Frigid   @mKK@D:@w Konack  @BAA@D:@w Aether       @D|@n\r\n");
+                  ch->sendText("    @D|@MYY@D:@w Yardrat  @CKK@D:@w Kanassa @mAA@D:@w Arlia        @D|@n\r\n");
+                  ch->sendText("    @D|@WBB@D:@w Buoy     @m&&@D:@w Nebula  @yQQ@D:@w Asteroid     @D|@n\r\n");
+                  ch->sendText("    @D|@b@1**@n@D:@w Wormhole @DSS@D:@w Station  @r#@D: @wUnknown Ship @D|@n\n");
+                  ch->sendText("    @D|@6  @n@D:@w Star                                  @D|@n\n"); */
         return;
     }
 
     if (GET_PING(ch) > 0) {
-        send_to_char(ch, "@wYou need to wait a few more seconds before pinging a destination again.\r\n");
+                ch->sendText("@wYou need to wait a few more seconds before pinging a destination again.\r\n");
         return;
     }
     std::string argstr(arg);
@@ -201,7 +201,7 @@ ACMD(do_sradar) {
                 endLoc.unit = room;
                 dir = find_first_step(startLoc, endLoc);
             } else {
-                send_to_char(ch, "@wYou haven't launched that buoy.\r\n");
+                                ch->sendText("@wYou haven't launched that buoy.\r\n");
                 return;
             }
         } else if(!strcasecmp(arg, "buoy2")) {
@@ -210,7 +210,7 @@ ACMD(do_sradar) {
                 endLoc.unit = room;
                 dir = find_first_step(startLoc, endLoc);
             } else {
-                send_to_char(ch, "@wYou haven't launched that buoy.\r\n");
+                                ch->sendText("@wYou haven't launched that buoy.\r\n");
                 return;
             }
         } else if(!strcasecmp(arg, "buoy3")) {
@@ -219,27 +219,27 @@ ACMD(do_sradar) {
                 endLoc.unit = room;
                 dir = find_first_step(startLoc, endLoc);
             } else {
-                send_to_char(ch, "@wYou haven't launched that buoy.\r\n");
+                                ch->sendText("@wYou haven't launched that buoy.\r\n");
                 return;
             }
         } else {
-            send_to_char(ch, "@wThat is not a valid planet.\r\n");
+                        ch->sendText("@wThat is not a valid planet.\r\n");
             return;
         }
     }
 
     switch (dir) {
         case BFS_ERROR:
-            send_to_char(ch, "Hmm.. something seems to be wrong.\r\n");
+                        ch->sendText("Hmm.. something seems to be wrong.\r\n");
             break;
         case BFS_ALREADY_THERE:
-            send_to_char(ch, "@wThe radar shows that your are already there.@n\r\n");
+                        ch->sendText("@wThe radar shows that your are already there.@n\r\n");
             break;
         case BFS_NO_PATH:
-            send_to_char(ch, "@wYou should be in space to use the radar.@n\r\n");
+                        ch->sendText("@wYou should be in space to use the radar.@n\r\n");
             break;
         default:
-            send_to_char(ch, "@wYour radar detects @C%s@w to the @G%s@n\r\n", planet, dirs[dir]);
+                        ch->send_to("@wYour radar detects @C%s@w to the @G%s@n\r\n", planet, dirs[dir]);
             break;
     }
     ch->setBaseStat<int>("ping", 5);
@@ -252,12 +252,12 @@ ACMD(do_radar) {
 
     auto dradar = ch->findObjectVnum(12);
     if (!dradar) {
-        send_to_char(ch, "You do not even have a dragon radar!\r\n");
+                ch->sendText("You do not even have a dragon radar!\r\n");
         return;
     }
 
     if (IS_NPC(ch)) {
-        send_to_char(ch, "You are a freaking mob!\r\n");
+                ch->sendText("You are a freaking mob!\r\n");
         return;
     }
 
@@ -271,19 +271,16 @@ ACMD(do_radar) {
         dir = find_first_step(ch->location, r);
         switch (dir) {
             case BFS_ERROR:
-                send_to_char(ch, "Hmm.. something seems to be wrong.\r\n");
+                                ch->sendText("Hmm.. something seems to be wrong.\r\n");
                 break;
             case BFS_ALREADY_THERE:
-                send_to_char(ch, "@D<@G%d@D>@w The radar detects a dragonball right here!\r\n", fcount);
+                                ch->send_to("@D<@G%d@D>@w The radar detects a dragonball right here!\r\n", fcount);
                 break;
             case BFS_NO_PATH:
-                send_to_char(ch,
-                             "@D<@G%d@D>@w The radar detects a faint dragonball signal, but can not direct you further.\r\n",
-                             fcount);
+                                ch->send_to("@D<@G%d@D>@w The radar detects a faint dragonball signal, but can not direct you further.\r\n", fcount);
                 break;
             default:
-                send_to_char(ch, "@D<@G%d@D>@w The radar detects a dragonball %s of here.\r\n", fcount,
-                             dirs[dir]);
+                                ch->send_to("@D<@G%d@D>@w The radar detects a dragonball %s of here.\r\n", fcount, dirs[dir]);
                 break;
         }
         found = true;
@@ -291,7 +288,7 @@ ACMD(do_radar) {
     }
 
     if (found == false) {
-        send_to_char(ch, "The radar didn't detect any dragonballs on the planet.\r\n");
+                ch->sendText("The radar didn't detect any dragonballs on the planet.\r\n");
         return;
     }
 }
@@ -357,41 +354,40 @@ ACMD(do_track) {
 
     /* The character must have the track skill. */
     if (IS_NPC(ch) || !GET_SKILL(ch, SKILL_SENSE)) {
-        send_to_char(ch, "You have no idea how.\r\n");
+                ch->sendText("You have no idea how.\r\n");
         return;
     }
 
     auto sup = GET_SUPPRESS(ch);
 
     if (sup <= 20 && sup > 0) {
-        send_to_char(ch,
-                     "You are concentrating too hard on suppressing your powerlevel at this level of suppression.\r\n");
+                ch->sendText("You are concentrating too hard on suppressing your powerlevel at this level of suppression.\r\n");
         return;
     }
 
     one_argument(argument, arg);
     if (!*arg && !FIGHTING(ch)) {
-        send_to_char(ch, "Whom are you trying to sense?\r\n");
+                ch->sendText("Whom are you trying to sense?\r\n");
         return;
     } else if (!*arg && FIGHTING(ch)) {
         vict = FIGHTING(ch);
-        send_to_char(ch, "You focus on the one your are fighting.\r\n");
+                ch->sendText("You focus on the one your are fighting.\r\n");
         if (AFF_FLAGGED(vict, AFF_NOTRACK) || IS_ANDROID(vict)) {
-            send_to_char(ch, "You can't sense them.\r\n");
+                        ch->sendText("You can't sense them.\r\n");
             return;
         }
         if (!read_sense_memory(ch, vict)) {
-            send_to_char(ch, "You will remember their ki signal from now on.\r\n");
+                        ch->sendText("You will remember their ki signal from now on.\r\n");
             sense_memory_write(ch, vict);
         }
         act("You look at $N@n intently for a moment.", true, ch, nullptr, vict, TO_CHAR);
         act("$n looks at you intently for a moment.", true, ch, nullptr, vict, TO_VICT);
         act("$n looks at $N@n intently for a moment.", true, ch, nullptr, vict, TO_NOTVICT);
         if (!IS_ANDROID(vict)) {
-            send_to_char(ch, sense_align(vict).c_str());
-            send_to_char(ch, sense_compare(ch, vict).c_str());
+                        ch->sendText(sense_align(vict).c_str());
+                        ch->sendText(sense_compare(ch, vict).c_str());
         } else {
-            send_to_char(ch, "You can't sense their powerlevel as they are a machine.\r\n");
+                        ch->sendText("You can't sense their powerlevel as they are a machine.\r\n");
         }
         return;
     }
@@ -409,24 +405,24 @@ ACMD(do_track) {
                 continue;
             } else if (planet_check(ch, i->character)) {
                 if (readIntro(ch, i->character) == 1) {
-                    send_to_char(ch, "@D[@Y%d@D] @CYou sense @c%s@C.\r\n", (count + 1), get_i_name(ch, i->character));
+                                        ch->send_to("@D[@Y%d@D] @CYou sense @c%s@C.\r\n", (count + 1), get_i_name(ch, i->character));
                 } else {
-                    send_to_char(ch, "@D[@Y%d@D] @CYou sense an unknown individual.\r\n", (count + 1));
+                                        ch->send_to("@D[@Y%d@D] @CYou sense an unknown individual.\r\n", (count + 1));
                 }
                 /* How strong is the one we sense? */
-                send_to_char(ch, sense_compare(ch, i->character).c_str());
+                                ch->sendText(sense_compare(ch, i->character).c_str());
 
                 /* What's their alignment? */
-				send_to_char(ch, sense_align(i->character).c_str());
+								ch->sendText(sense_align(i->character).c_str());
 
                 const char *blah = sense_location(i->character);
-                send_to_char(ch, "@wLastly you sense that they are at... @C%s@n\n", blah);
+                                ch->send_to("@wLastly you sense that they are at... @C%s@n\n", blah);
                 ++count;
                 //free(blah);
             }
         }
         if (count == 0) {
-            send_to_char(ch, "You sense that there is no one important around.@n\n");
+                        ch->sendText("You sense that there is no one important around.@n\n");
         }
         return;
     }
@@ -434,34 +430,33 @@ ACMD(do_track) {
     /* The person can't see the victim. */
 
     if (!(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_WORLD))) {
-        send_to_char(ch, "No one is around by that name.\r\n");
+                ch->sendText("No one is around by that name.\r\n");
         return;
     }
 
     /* We can't track the victim. */
     if (AFF_FLAGGED(vict, AFF_NOTRACK) || IS_ANDROID(vict)) {
-        send_to_char(ch, "You can't sense them.\r\n");
+                ch->sendText("You can't sense them.\r\n");
         return;
     }
 
     if (GET_HIT(vict) < (GET_HIT(ch) * 0.001) + 1) {
         if (ch->location == vict->location) {
             if (!read_sense_memory(ch, vict)) {
-                send_to_char(ch,
-                             "Their powerlevel is too weak for you to sense properly, but you will recognise their ki signal from now on.\r\n");
+                                ch->sendText("Their powerlevel is too weak for you to sense properly, but you will recognise their ki signal from now on.\r\n");
                 sense_memory_write(ch, vict);
             } else {
-                send_to_char(ch, "Their powerlevel is too weak for you to sense properly.\r\n");
+                                ch->sendText("Their powerlevel is too weak for you to sense properly.\r\n");
             }
         } else {
-            send_to_char(ch, "Their powerlevel is too weak for you to sense properly.\r\n");
+                        ch->sendText("Their powerlevel is too weak for you to sense properly.\r\n");
         }
         return;
     }
 
     if(GET_SKILL_BASE(ch, SKILL_SENSE) == 100) {
         if(planet_check(ch, vict)) {
-            send_to_char(ch, "@WSense@D: %s@n\r\n", sense_location(vict));
+                        ch->send_to("@WSense@D: %s@n\r\n", sense_location(vict));
         }
     } else {
 
@@ -471,7 +466,7 @@ ACMD(do_track) {
             do {
                 dir = rand_number(0, NUM_OF_DIRS - 1);
             } while (!ch->location.canGo(dir) && --tries);
-            send_to_char(ch, "You sense them %s faintly from here, but are unsure....\r\n", dirs[dir]);
+                        ch->send_to("You sense them %s faintly from here, but are unsure....\r\n", dirs[dir]);
             improve_skill(ch, SKILL_SENSE, 1);
             improve_skill(ch, SKILL_SENSE, 1);
             improve_skill(ch, SKILL_SENSE, 1);
@@ -483,29 +478,29 @@ ACMD(do_track) {
 
         switch (dir) {
             case BFS_ERROR:
-                send_to_char(ch, "Hmm.. something seems to be wrong.\r\n");
+                                ch->sendText("Hmm.. something seems to be wrong.\r\n");
                 break;
             case BFS_ALREADY_THERE:
                 act("You look at $N@n intently for a moment.", true, ch, nullptr, vict, TO_CHAR);
                 act("$n looks at you intently for a moment.", true, ch, nullptr, vict, TO_VICT);
                 act("$n looks at $N intently for a moment.", true, ch, nullptr, vict, TO_NOTVICT);
                 if (!IS_ANDROID(vict)) {
-                    send_to_char(ch, sense_align(vict).c_str());
-                    send_to_char(ch, sense_compare(ch, vict).c_str());
+                                        ch->sendText(sense_align(vict).c_str());
+                                        ch->sendText(sense_compare(ch, vict).c_str());
                 } else {
-                    send_to_char(ch, "You can't sense their powerlevel as they are a machine.\r\n");
+                                        ch->sendText("You can't sense their powerlevel as they are a machine.\r\n");
                 }
                 break;
             case BFS_TO_FAR:
-                send_to_char(ch, "You are too far to sense %s accurately from here.\r\n", HMHR(vict));
+                                ch->send_to("You are too far to sense %s accurately from here.\r\n", HMHR(vict));
                 break;
             case BFS_NO_PATH:
-                send_to_char(ch, "You can't sense %s from here.\r\n", HMHR(vict));
+                                ch->send_to("You can't sense %s from here.\r\n", HMHR(vict));
                 break;
             default:    /* Success! */
-                send_to_char(ch, "You sense them %s from here!\r\n", dirs[dir]);
+                                ch->send_to("You sense them %s from here!\r\n", dirs[dir]);
                 if (GET_SKILL_BASE(ch, SKILL_SENSE) >= 75) {
-                    send_to_char(ch, "@WSense@D: @Y%s@n\r\n", sense_location(vict));
+                                        ch->send_to("@WSense@D: @Y%s@n\r\n", sense_location(vict));
                 }
                 WAIT_STATE(ch, PULSE_2SEC);
                 improve_skill(ch, SKILL_SENSE, 1);

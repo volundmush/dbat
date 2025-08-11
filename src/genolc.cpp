@@ -32,9 +32,7 @@ struct {
 } save_types[] = {
         {SL_MOB, save_mobiles, "mobile"},
         {SL_OBJ, save_objects, "object"},
-        {SL_SHP, save_shops,   "shop"},
         {SL_WLD, save_rooms,   "room"},
-        {SL_ZON, save_zone,    "zone"},
         {SL_CFG, save_config,  "config"},
         {SL_GLD, save_guilds,  "guild"},
         {SL_ACT, nullptr,      "social"},
@@ -129,14 +127,14 @@ int in_save_list(zone_vnum zone, int type) {
 /* Used from do_show(), ideally.  */
 ACMD(do_show_save_list) {
     if (save_list.empty())
-        send_to_char(ch, "All world files are up to date.\r\n");
+                ch->sendText("All world files are up to date.\r\n");
     else {
-        send_to_char(ch, "The following files need saving:\r\n");
+                ch->sendText("The following files need saving:\r\n");
         for (auto &i : save_list) {
             if (i.type != SL_CFG)
-                send_to_char(ch, " - %s data for zone %d.\r\n", save_types[i.type].message, i.zone);
+                                ch->send_to(" - %s data for zone %d.\r\n", save_types[i.type].message, i.zone);
             else
-                send_to_char(ch, " - Game configuration data.\r\n");
+                                ch->sendText(" - Game configuration data.\r\n");
         }
     }
 }

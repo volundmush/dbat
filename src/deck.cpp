@@ -378,11 +378,11 @@ static card comprehension = {   "Comprehension",
         if(ki > (ch->getBaseStat<int64_t>("ki") / 10)) ki = ch->getBaseStat<int64_t>("ki") / 10;
         if(st > (ch->getBaseStat<int64_t>("stamina") / 10)) st = ch->getBaseStat<int64_t>("stamina") / 10;
 
-        send_to_char(ch, "@D[@Y+ @R%s @rPL@D]@n\r\n", add_commas(pl).c_str());
+                ch->send_to("@D[@Y+ @R%s @rPL@D]@n\r\n", add_commas(pl).c_str());
         ch->gainBaseStat("health", pl);
-        send_to_char(ch, "@D[@Y+ @B%s @bKI@D]@n\r\n", add_commas(ki).c_str());
+                ch->send_to("@D[@Y+ @B%s @bKI@D]@n\r\n", add_commas(ki).c_str());
         ch->gainBaseStat("ki", ki);
-        send_to_char(ch, "@D[@Y+ @G%s @gST@D]@n\r\n", add_commas(st).c_str());
+                ch->send_to("@D[@Y+ @G%s @gST@D]@n\r\n", add_commas(st).c_str());
         ch->gainBaseStat("stamina", st);
 
         task->improvementRounds++;

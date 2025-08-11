@@ -352,8 +352,6 @@ extern char *any_one_name(char *argument, char *first_arg);
 
 extern void sub_write(char *arg, char_data *ch, int8_t find_invis, int targets);
 
-extern void send_to_zone(char *messg, zone_rnum zone);
-
 /* from dg_misc.c */
 extern void do_dg_cast(void *go, script_data *sc, trig_data *trig,
                        UnitType type, char *cmd);

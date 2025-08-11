@@ -349,7 +349,7 @@ int context_help(struct descriptor_data *d, char *arg) {
             strncpy(actbuf, context_help_list[context] + 1, sizeof(actbuf) - 1);
             do_help(d->character, actbuf, 0, 0);
         } else {
-            write_to_output(d, "\r\n%s\r\n>  ", context_help_list[context]);
+            d->send_to("\r\n%s\r\n>  ", context_help_list[context]);
         }
         return true;
     }

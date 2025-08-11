@@ -562,8 +562,6 @@ int invalid_align(struct char_data *ch, struct obj_data *obj) {
 }
 
 void equip_char(struct char_data *ch, struct obj_data *obj, int pos) {
-    int j;
-
     if (pos < 0 || pos >= NUM_WEARS) {
         core_dump();
         return;
@@ -582,6 +580,7 @@ void equip_char(struct char_data *ch, struct obj_data *obj, int pos) {
         basic_mud_log("SYSERR: EQUIP: Obj is in_room when equip.");
         return;
     }
+
     if (invalid_align(ch, obj) || invalid_class(ch, obj) || invalid_race(ch, obj)) {
         act("You stop wearing $p as something prevents you.", false, ch, obj, nullptr, TO_CHAR);
         act("$n stops wearing $p as something prevents $m.", false, ch, obj, nullptr, TO_ROOM);
@@ -679,8 +678,7 @@ void obj_to_room(struct obj_data *object, struct room_data *room) {
 
     if (ROOM_FLAGGED(room, ROOM_GARDEN1) || ROOM_FLAGGED(room, ROOM_GARDEN2)) {
         if (GET_OBJ_TYPE(object) != ITEM_PLANT) {
-            send_to_room(room,
-                         "%s @wDisappears in a puff of smoke! It seems the room was designed to vaporize anything not plant related. Strange...@n\r\n",
+            room->send_to("%s @wDisappears in a puff of smoke! It seems the room was designed to vaporize anything not plant related. Strange...@n\r\n",
                          object->getShortDescription());
             extract_obj(object);
             return;
@@ -906,10 +904,10 @@ void update_char_objects(struct char_data *ch) {
                 j = MOD_OBJ_VAL(GET_EQ(ch, i), VAL_LIGHT_HOURS, -1);
                 SET_OBJ_VAL(GET_EQ(ch, i), VAL_LIGHT_TIME, 3);
                 if (j == 1) {
-                    send_to_char(ch, "Your light begins to flicker and fade.\r\n");
+                                        ch->sendText("Your light begins to flicker and fade.\r\n");
                     act("$n's light begins to flicker and fade.", false, ch, nullptr, nullptr, TO_ROOM);
                 } else if (j == 0) {
-                    send_to_char(ch, "Your light sputters out and dies.\r\n");
+                                        ch->sendText("Your light sputters out and dies.\r\n");
                     act("$n's light sputters out and dies.", false, ch, nullptr, nullptr, TO_ROOM);
                 }
             } else if (GET_OBJ_TYPE(GET_EQ(ch, i)) == ITEM_LIGHT && GET_OBJ_VAL(GET_EQ(ch, i), VAL_LIGHT_HOURS) > 0) {
@@ -1129,7 +1127,7 @@ void extract_char(struct char_data *ch) {
             /* transfer objects to char, if any */
             auto con = foll->follower->getObjects();
             for (auto obj : filter_raw(con)) {
-                obj_from_char(obj);
+                obj->clearLocation();
                 obj_to_char(obj, ch);
             }
 

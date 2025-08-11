@@ -219,9 +219,9 @@ static int std_improved_editor_execute(struct descriptor_data *d, const std::str
         case 'c':
             if (!d->std_str->empty()) {
                 d->std_str->clear();
-                write_to_output(d, "Current buffer cleared.\r\n");
+                d->sendText("Current buffer cleared.\r\n");
             } else {
-                write_to_output(d, "Current buffer empty.\r\n");
+                d->sendText("Current buffer empty.\r\n");
             }
             break;
         case 'd':
@@ -234,14 +234,14 @@ static int std_improved_editor_execute(struct descriptor_data *d, const std::str
             if (!d->std_str->empty()) {
                 std_parse_format(actions, d);
             } else {
-                write_to_output(d, "Current buffer empty.\r\n");
+                d->sendText("Current buffer empty.\r\n");
             }
             break;
         case 'i':
             if (!d->std_str->empty()) {
                 std_parse_insert(actions, d);
             } else {
-                write_to_output(d, "Current buffer empty.\r\n");
+                d->sendText("Current buffer empty.\r\n");
             }
             break;
         case 'h':
@@ -251,14 +251,14 @@ static int std_improved_editor_execute(struct descriptor_data *d, const std::str
             if (!d->std_str->empty()) {
                 std_parse_list_norm(actions, d);
             } else {
-                write_to_output(d, "Current buffer empty.\r\n");
+                d->sendText("Current buffer empty.\r\n");
             }
             break;
         case 'n':
             if (!d->std_str->empty()) {
                 std_parse_list_num(actions, d);
             } else {
-                write_to_output(d, "Current buffer empty.\r\n");
+                d->sendText("Current buffer empty.\r\n");
             }
             break;
         case 'r':
@@ -267,7 +267,7 @@ static int std_improved_editor_execute(struct descriptor_data *d, const std::str
         case 's':
             return STRINGADD_SAVE;
         default:
-            write_to_output(d, "Invalid option.\r\n");
+            d->sendText("Invalid option.\r\n");
             break;
     }
     return STRINGADD_ACTION;
@@ -287,7 +287,7 @@ static std::string std_join_lines(const std::vector<std::string>& lines) {
 
 // std::string version of parse_help
 static void std_parse_help(struct descriptor_data *d) {
-    write_to_output(d,
+    d->sendText(
         "Editor command formats: /<letter>\r\n\r\n"
         "/a         -  aborts editor\r\n"
         "/c         -  clears buffer\r\n"
@@ -310,7 +310,7 @@ static void std_parse_help(struct descriptor_data *d) {
 // std::string version of parse_delete
 static void std_parse_delete(const std::string& args, struct descriptor_data *d) {
     if (d->std_str->empty()) {
-        write_to_output(d, "Buffer is empty.\r\n");
+        d->sendText("Buffer is empty.\r\n");
         return;
     }
     
@@ -318,17 +318,17 @@ static void std_parse_delete(const std::string& args, struct descriptor_data *d)
     int parsed = sscanf(args.c_str(), " %d - %d ", &line_low, &line_high);
     
     if (parsed == 0) {
-        write_to_output(d, "You must specify a line number or range to delete.\r\n");
+        d->sendText("You must specify a line number or range to delete.\r\n");
         return;
     } else if (parsed == 1) {
         line_high = line_low;
     } else if (line_high < line_low) {
-        write_to_output(d, "That range is invalid.\r\n");
+        d->sendText("That range is invalid.\r\n");
         return;
     }
     
     if (line_low <= 0) {
-        write_to_output(d, "Invalid, line numbers to delete must be higher than 0.\r\n");
+        d->sendText("Invalid, line numbers to delete must be higher than 0.\r\n");
         return;
     }
     
@@ -339,7 +339,7 @@ static void std_parse_delete(const std::string& args, struct descriptor_data *d)
     line_high--;
     
     if (line_low >= static_cast<int>(lines.size())) {
-        write_to_output(d, "Line(s) out of range; not deleting.\r\n");
+        d->sendText("Line(s) out of range; not deleting.\r\n");
         return;
     }
     
@@ -349,7 +349,7 @@ static void std_parse_delete(const std::string& args, struct descriptor_data *d)
     lines.erase(lines.begin() + line_low, lines.begin() + line_high + 1);
     *d->std_str = std_join_lines(lines);
     
-    write_to_output(d, "%d line%s deleted.\r\n", deleted_count, (deleted_count != 1 ? "s" : ""));
+    d->send_to("%d line%s deleted.\r\n", deleted_count, (deleted_count != 1 ? "s" : ""));
 }
 
 // std::string version of parse_list_norm
@@ -364,10 +364,10 @@ static void std_parse_list_norm(const std::string& args, struct descriptor_data 
     }
     
     if (line_low < 1) {
-        write_to_output(d, "Line numbers must be greater than 0.\r\n");
+        d->sendText("Line numbers must be greater than 0.\r\n");
         return;
     } else if (line_high < line_low) {
-        write_to_output(d, "That range is invalid.\r\n");
+        d->sendText("That range is invalid.\r\n");
         return;
     }
     
@@ -378,7 +378,7 @@ static void std_parse_list_norm(const std::string& args, struct descriptor_data 
     line_high--;
     
     if (line_low >= static_cast<int>(lines.size())) {
-        write_to_output(d, "Line(s) out of range; no buffer listing.\r\n");
+        d->sendText("Line(s) out of range; no buffer listing.\r\n");
         return;
     }
     
@@ -411,10 +411,10 @@ static void std_parse_list_num(const std::string& args, struct descriptor_data *
     }
     
     if (line_low < 1) {
-        write_to_output(d, "Line numbers must be greater than 0.\r\n");
+        d->sendText("Line numbers must be greater than 0.\r\n");
         return;
     } else if (line_high < line_low) {
-        write_to_output(d, "That range is invalid.\r\n");
+        d->sendText("That range is invalid.\r\n");
         return;
     }
     
@@ -425,7 +425,7 @@ static void std_parse_list_num(const std::string& args, struct descriptor_data *
     line_high--;
     
     if (line_low >= static_cast<int>(lines.size())) {
-        write_to_output(d, "Line(s) out of range; no buffer listing.\r\n");
+        d->sendText("Line(s) out of range; no buffer listing.\r\n");
         return;
     }
     
@@ -442,7 +442,7 @@ static void std_parse_list_num(const std::string& args, struct descriptor_data *
 // std::string version of parse_insert
 static void std_parse_insert(const std::string& args, struct descriptor_data *d) {
     if (d->std_str->empty()) {
-        write_to_output(d, "Buffer is empty, nowhere to insert.\r\n");
+        d->sendText("Buffer is empty, nowhere to insert.\r\n");
         return;
     }
     
@@ -452,13 +452,13 @@ static void std_parse_insert(const std::string& args, struct descriptor_data *d)
     std::getline(iss, text);
     
     if (line_str.empty()) {
-        write_to_output(d, "You must specify a line number before which to insert text.\r\n");
+        d->sendText("You must specify a line number before which to insert text.\r\n");
         return;
     }
     
     int line_num = std::stoi(line_str);
     if (line_num <= 0) {
-        write_to_output(d, "Line number must be higher than 0.\r\n");
+        d->sendText("Line number must be higher than 0.\r\n");
         return;
     }
     
@@ -473,27 +473,27 @@ static void std_parse_insert(const std::string& args, struct descriptor_data *d)
     line_num--;
     
     if (line_num > static_cast<int>(lines.size())) {
-        write_to_output(d, "Line number out of range; insert aborted.\r\n");
+        d->sendText("Line number out of range; insert aborted.\r\n");
         return;
     }
     
     // Check if adding this line would exceed max_str
     std::string new_content = std_join_lines(lines);
     if (new_content.length() + text.length() + 3 > d->max_str) {
-        write_to_output(d, "Insert text pushes buffer over maximum size, insert aborted.\r\n");
+        d->sendText("Insert text pushes buffer over maximum size, insert aborted.\r\n");
         return;
     }
     
     lines.insert(lines.begin() + line_num, text);
     *d->std_str = std_join_lines(lines);
     
-    write_to_output(d, "Line inserted.\r\n");
+    d->sendText("Line inserted.\r\n");
 }
 
 // std::string version of parse_edit
 static void std_parse_edit(const std::string& args, struct descriptor_data *d) {
     if (d->std_str->empty()) {
-        write_to_output(d, "Buffer is empty, nothing to change.\r\n");
+        d->sendText("Buffer is empty, nothing to change.\r\n");
         return;
     }
     
@@ -503,13 +503,13 @@ static void std_parse_edit(const std::string& args, struct descriptor_data *d) {
     std::getline(iss, text);
     
     if (line_str.empty()) {
-        write_to_output(d, "You must specify a line number at which to change text.\r\n");
+        d->sendText("You must specify a line number at which to change text.\r\n");
         return;
     }
     
     int line_num = std::stoi(line_str);
     if (line_num <= 0) {
-        write_to_output(d, "Line number must be higher than 0.\r\n");
+        d->sendText("Line number must be higher than 0.\r\n");
         return;
     }
     
@@ -524,7 +524,7 @@ static void std_parse_edit(const std::string& args, struct descriptor_data *d) {
     line_num--;
     
     if (line_num >= static_cast<int>(lines.size())) {
-        write_to_output(d, "Line number out of range; change aborted.\r\n");
+        d->sendText("Line number out of range; change aborted.\r\n");
         return;
     }
     
@@ -533,12 +533,12 @@ static void std_parse_edit(const std::string& args, struct descriptor_data *d) {
     std::string new_content = std_join_lines(lines);
     
     if (new_content.length() > d->max_str) {
-        write_to_output(d, "Change causes new length to exceed buffer maximum size, aborted.\r\n");
+        d->sendText("Change causes new length to exceed buffer maximum size, aborted.\r\n");
         return;
     }
     
     *d->std_str = new_content;
-    write_to_output(d, "Line changed.\r\n");
+    d->sendText("Line changed.\r\n");
 }
 
 // std::string version of parse_replace
@@ -561,25 +561,25 @@ static void std_parse_replace(const std::string& args, struct descriptor_data *d
     // Parse the pattern and replacement using simple string parsing
     size_t first_quote = working_args.find('\'');
     if (first_quote == std::string::npos) {
-        write_to_output(d, "Invalid format.\r\n");
+    d->sendText("Invalid format.\r\n");
         return;
     }
     
     size_t second_quote = working_args.find('\'', first_quote + 1);
     if (second_quote == std::string::npos) {
-        write_to_output(d, "Target string must be enclosed in single quotes.\r\n");
+    d->sendText("Target string must be enclosed in single quotes.\r\n");
         return;
     }
     
     size_t third_quote = working_args.find('\'', second_quote + 1);
     if (third_quote == std::string::npos) {
-        write_to_output(d, "No replacement string.\r\n");
+    d->sendText("No replacement string.\r\n");
         return;
     }
     
     size_t fourth_quote = working_args.find('\'', third_quote + 1);
     if (fourth_quote == std::string::npos) {
-        write_to_output(d, "Replacement string must be enclosed in single quotes.\r\n");
+    d->sendText("Replacement string must be enclosed in single quotes.\r\n");
         return;
     }
     
@@ -597,13 +597,13 @@ static void std_parse_replace(const std::string& args, struct descriptor_data *d
     }
     
     if (pattern_count == 0) {
-        write_to_output(d, "String '%s' not found.\r\n", pattern.c_str());
+    d->send_to("String '%s' not found.\r\n", pattern.c_str());
         return;
     }
     
     size_t new_length = d->std_str->length() - (pattern_count * pattern.length()) + (pattern_count * replacement.length());
     if (new_length > d->max_str) {
-        write_to_output(d, "Not enough space left in buffer.\r\n");
+    d->sendText("Not enough space left in buffer.\r\n");
         return;
     }
     
@@ -614,8 +614,8 @@ static void std_parse_replace(const std::string& args, struct descriptor_data *d
         boost::algorithm::replace_first(*d->std_str, pattern, replacement);
     }
     
-    write_to_output(d, "Replaced %d occurrence%s of '%s' with '%s'.\r\n", 
-                   static_cast<int>(pattern_count), (pattern_count != 1) ? "s" : "", pattern.c_str(), replacement.c_str());
+    d->send_to("Replaced %d occurrence%s of '%s' with '%s'.\r\n", 
+               static_cast<int>(pattern_count), (pattern_count != 1) ? "s" : "", pattern.c_str(), replacement.c_str());
 }
 
 // std::string version of parse_format (simplified)
@@ -623,7 +623,7 @@ static void std_parse_format(const std::string& args, struct descriptor_data *d)
     // For now, just a simple implementation that doesn't change formatting
     // The original format_text function is quite complex and handles word wrapping
     // This can be enhanced later if needed
-    write_to_output(d, "Text formatting not yet implemented for std::string editor.\r\n");
+    d->sendText("Text formatting not yet implemented for std::string editor.\r\n");
 }
 
 void std_string_add(struct descriptor_data *d, char *str) {
@@ -647,7 +647,7 @@ void std_string_add(struct descriptor_data *d, char *str) {
     if (action == STRINGADD_OK) {
         if (d->std_str->empty()) {
             if (input_str.length() + 3 > d->max_str) { // \r\n\0
-                send_to_char(d->character, "String too long - Truncated.\r\n");
+                                d->character->sendText("String too long - Truncated.\r\n");
                 input_str = input_str.substr(0, d->max_str - 3);
                 *d->std_str = input_str;
                 if (!using_improved_editor) {
@@ -658,7 +658,7 @@ void std_string_add(struct descriptor_data *d, char *str) {
             }
         } else {
             if (input_str.length() + d->std_str->length() + 3 > d->max_str) { // \r\n\0
-                send_to_char(d->character, "String too long. Last line skipped.\r\n");
+                                d->character->sendText("String too long. Last line skipped.\r\n");
                 if (!using_improved_editor) {
                     action = STRINGADD_SAVE;
                 } else if (action == STRINGADD_OK) {
@@ -751,7 +751,7 @@ void string_add(struct descriptor_data *d, char *str) {
         /* Do nothing. */ ;
     else if (!(*d->str)) {
         if (strlen(str) + 3 > d->max_str) { /* \r\n\0 */
-            send_to_char(d->character, "String too long - Truncated.\r\n");
+                        d->character->sendText("String too long - Truncated.\r\n");
             strcpy(str + (d->max_str - 3), "\r\n");
             CREATE(*d->str, char, d->max_str);
             strcpy(*d->str, str);    /* strcpy: OK (size checked) */
@@ -763,7 +763,7 @@ void string_add(struct descriptor_data *d, char *str) {
         }
     } else {
         if (strlen(str) + strlen(*d->str) + 3 > d->max_str) { /* \r\n\0 */
-            send_to_char(d->character, "String too long.  Last line skipped.\r\n");
+                        d->character->sendText("String too long.  Last line skipped.\r\n");
             if (!using_improved_editor)
                 action = STRINGADD_SAVE;
             else if (action == STRINGADD_OK)
@@ -844,10 +844,10 @@ static void playing_string_cleanup(struct descriptor_data *d, int action) {
     if (PLR_FLAGGED(d->character, PLR_MAILING)) {
         if (action == STRINGADD_SAVE && *d->str) {
             store_mail(d->mail_to, GET_IDNUM(d->character), *d->str);
-            write_to_output(d, "Message sent!\r\n");
+            d->sendText("Message sent!\r\n");
             notify_if_playing(d->character, d->mail_to);
         } else {
-            write_to_output(d, "Mail aborted.\r\n");
+            d->sendText("Mail aborted.\r\n");
             free(*d->str);
             free(d->str);
         }
@@ -879,14 +879,14 @@ static void playing_string_cleanup(struct descriptor_data *d, int action) {
                         free(cur->data);
                         free(cur);
                         BOARD_MNUM(board)--;
-                        write_to_output(d, "Post aborted.\r\n");
+            d->sendText("Post aborted.\r\n");
                         return;
                     }
                     fore = cur;
                 }
-                write_to_output(d, "Unable to find your message to delete it!\r\n");
+        d->sendText("Unable to find your message to delete it!\r\n");
             } else {
-                write_to_output(d, "\r\nPost saved.\r\n");
+        d->sendText("\r\nPost saved.\r\n");
                 save_board(locate_board(d->mail_to - BOARD_MAGIC));
             }
         }
@@ -897,7 +897,7 @@ static void playing_string_cleanup(struct descriptor_data *d, int action) {
 
 static void exdesc_string_cleanup(struct descriptor_data *d, int action) {
     if (action == STRINGADD_ABORT)
-        write_to_output(d, "Description aborted.\r\n");
+        d->sendText("Description aborted.\r\n");
 
     STATE(d) = CON_PLAYING;
 }
@@ -916,22 +916,22 @@ ACMD(do_skillset) {
     argument = one_argument(argument, name);
 
     if (!*name) {            /* no arguments. print an informative text */
-        send_to_char(ch, "Syntax: skillset <name> '<skill>' <value>\r\n"
+                ch->sendText("Syntax: skillset <name> '<skill>' <value>\r\n"
                          "Skill being one of the following:\r\n");
         for (qend = 0, i = 0; i < SKILL_TABLE_SIZE; i++) {
             if (spell_info[i].name == unused_spellname)    /* This is valid. */
                 continue;
-            send_to_char(ch, "%18s", spell_info[i].name);
+                        ch->send_to("%18s", spell_info[i].name);
             if (qend++ % 4 == 3)
-                send_to_char(ch, "\r\n");
+                                ch->sendText("\r\n");
         }
         if (qend % 4 != 0)
-            send_to_char(ch, "\r\n");
+                        ch->sendText("\r\n");
         return;
     }
 
     if (!(vict = get_char_vis(ch, name, nullptr, FIND_CHAR_WORLD))) {
-        send_to_char(ch, "%s", CONFIG_NOPERSON);
+                ch->send_to("%s", CONFIG_NOPERSON);
         return;
     }
     skip_spaces(&argument);
@@ -948,12 +948,12 @@ ACMD(do_skillset) {
         }
         if (i >= sizeof(help))
             strcpy(help + sizeof(help) - strlen("** OVERFLOW **") - 1, "** OVERFLOW **"); /* strcpy: OK */
-        write_to_output(ch->desc, help);
+    ch->desc->send_to("%s", help);
         return;
     }
 
     if (*argument != '\'') {
-        send_to_char(ch, "Skill must be enclosed in: ''\r\n");
+                ch->sendText("Skill must be enclosed in: ''\r\n");
         return;
     }
     /* Locate the last quote and lowercase the magic words (if any) */
@@ -962,25 +962,25 @@ ACMD(do_skillset) {
         argument[qend] = LOWER(argument[qend]);
 
     if (argument[qend] != '\'') {
-        send_to_char(ch, "Skill must be enclosed in: ''\r\n");
+                ch->sendText("Skill must be enclosed in: ''\r\n");
         return;
     }
     strcpy(help, (argument + 1));    /* strcpy: OK (MAX_INPUT_LENGTH <= MAX_STRING_LENGTH) */
     help[qend - 1] = '\0';
     if ((skill = find_skill_num(help, SKTYPE_SKILL)) <= 0) {
-        send_to_char(ch, "Unrecognized skill.\r\n");
+                ch->sendText("Unrecognized skill.\r\n");
         return;
     }
     argument += qend + 1;        /* skip to next parameter */
     argument = one_argument(argument, buf);
 
     if (!*buf) {
-        send_to_char(ch, "Learned value expected.\r\n");
+                ch->sendText("Learned value expected.\r\n");
         return;
     }
     value = atoi(buf);
     if (value < 0) {
-        send_to_char(ch, "Minimum value for learned is 0.\r\n");
+                ch->sendText("Minimum value for learned is 0.\r\n");
         return;
     }
 
@@ -991,5 +991,5 @@ ACMD(do_skillset) {
     SET_SKILL(vict, skill, value);
     mudlog(BRF, ADMLVL_IMMORT, true, "skillset: %s changed %s's '%s' to %d.", GET_NAME(ch), GET_NAME(vict),
            spell_info[skill].name, value);
-    send_to_char(ch, "You change %s's %s to %d.\r\n", GET_NAME(vict), spell_info[skill].name, value);
+        ch->send_to("You change %s's %s to %d.\r\n", GET_NAME(vict), spell_info[skill].name, value);
 }
