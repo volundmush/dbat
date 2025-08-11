@@ -3,39 +3,39 @@
 #include "dbat/attack.h"
 
 namespace trans {
-    extern std::string getName(struct char_data *ch, Form form);
-    extern std::string getAbbr(struct char_data *ch, Form form);
-    extern std::string getExtra(struct char_data *ch, Form form);
-    extern int getMaxGrade(struct char_data *ch, Form form);
+    extern std::string getName(Character *ch, Form form);
+    extern std::string getAbbr(Character *ch, Form form);
+    extern std::string getExtra(Character *ch, Form form);
+    extern int getMaxGrade(Character *ch, Form form);
 
-    extern bool unlock(struct char_data *ch, Form form);
+    extern bool unlock(Character *ch, Form form);
 
-    extern double getModifier(struct char_data *ch, int location, int specific);
-    extern double getModifierExact(struct char_data *ch, int location, int specific);
+    extern double getModifier(Character *ch, int location, int specific);
+    extern double getModifierExact(Character *ch, int location, int specific);
 
-    extern double getStaminaDrain(struct char_data *ch, Form form, bool upkeep = false);
+    extern double getStaminaDrain(Character *ch, Form form, bool upkeep = false);
 
-    extern void handleEchoTransform(struct char_data *ch, Form form);
-    extern void handleEchoRevert(struct char_data *ch, Form form);
+    extern void handleEchoTransform(Character *ch, Form form);
+    extern void handleEchoRevert(Character *ch, Form form);
 
-    extern void displayForms(struct char_data *ch);
-    extern int64_t getRequiredPL(struct char_data* ch, Form trans);
-    extern int getFormType(struct char_data* ch, Form trans);
-    extern std::optional<Form> findFormFor(char_data* ch, const std::string& form);
-    extern std::unordered_set<Form> getFormsFor(char_data* ch);
+    extern void displayForms(Character *ch);
+    extern int64_t getRequiredPL(Character* ch, Form trans);
+    extern int getFormType(Character* ch, Form trans);
+    extern std::optional<Form> findFormFor(Character* ch, const std::string& form);
+    extern std::unordered_set<Form> getFormsFor(Character* ch);
 
-    extern bool blockRevertDisallowed(struct char_data *ch, Form form);
+    extern bool blockRevertDisallowed(Character *ch, Form form);
 
-    extern std::optional<Form> findForm(struct char_data *ch, const std::string& arg);
+    extern std::optional<Form> findForm(Character *ch, const std::string& arg);
 
-    extern void onAttacked(char_data *ch, atk::Attack& incoming, Form form);
-    extern void onAttack(char_data *ch, atk::Attack& outgoing, Form form);
+    extern void onAttacked(Character *ch, atk::Attack& incoming, Form form);
+    extern void onAttack(Character *ch, atk::Attack& outgoing, Form form);
 
-    extern void transform(struct char_data *ch, Form form, int grade = 1);
-    extern void revert(char_data* ch);
+    extern void transform(Character *ch, Form form, int grade = 1);
+    extern void revert(Character* ch);
 
     extern void gamesys_transform(uint64_t heartPulse, double deltaTime);
     extern void gamesys_oozaru(uint64_t heartPulse, double deltaTime);
 
-    extern std::optional<std::string> getAppearance(char_data *ch, Form form, Appearance type);
+    extern std::optional<std::string> getAppearance(Character *ch, Form form, Appearance type);
 }

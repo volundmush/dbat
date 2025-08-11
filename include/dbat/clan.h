@@ -27,7 +27,7 @@
 //********************************************************************************
 #pragma once
 
-#include "structs.h"        // for char_data
+#include "structs.h"        // for Character
 
 constexpr int LVL_CLAN_MOD = 32;
 #define DEFAULT_OPEN_JOIN       false
@@ -61,7 +61,7 @@ extern bool clanCreate(const char *name);
 //
 // Write a clan's info.
 //
-extern void clanINFOW(char *name, struct char_data *ch);
+extern void clanINFOW(char *name, Character *ch);
 
 extern void clanSAFE(char *name);
 
@@ -89,7 +89,7 @@ extern bool isClan(const char *name);
 // returns true if the member has already applied
 // or if the application is successful
 //
-extern bool clanApply(const char *name, struct char_data *ch);
+extern bool clanApply(const char *name, Character *ch);
 
 
 //
@@ -97,75 +97,75 @@ extern bool clanApply(const char *name, struct char_data *ch);
 // returns false if the person is an NPC or does not exist
 // returns true if the person was added or is already a member
 //
-extern bool clanInduct(const char *name, struct char_data *ch);
+extern bool clanInduct(const char *name, Character *ch);
 
 
 //
 // These handle clan ranks
 //
 
-extern bool clanHIGHRANK(const char *name, struct char_data *ch, const char *rank);
+extern bool clanHIGHRANK(const char *name, Character *ch, const char *rank);
 
-extern bool clanMIDRANK(const char *name, struct char_data *ch, const char *rank);
+extern bool clanMIDRANK(const char *name, Character *ch, const char *rank);
 
-extern bool clanRANK(const char *name, struct char_data *ch, struct char_data *vict, int num);
+extern bool clanRANK(const char *name, Character *ch, Character *vict, int num);
 
-extern bool clanRANKD(const char *name, struct char_data *ch, struct char_data *vict);
+extern bool clanRANKD(const char *name, Character *ch, Character *vict);
 
 //
 // This handles deposit, withdraw, and checking the clan bank
 //
-extern bool clanBANKADD(const char *name, struct char_data *ch, long amt);
+extern bool clanBANKADD(const char *name, Character *ch, long amt);
 
-extern bool clanBANKSUB(const char *name, struct char_data *ch, long amt);
+extern bool clanBANKSUB(const char *name, Character *ch, long amt);
 
-extern long clanBANK(const char *name, struct char_data *ch);
+extern long clanBANK(const char *name, Character *ch);
 
-extern bool clanBANY(const char *name, struct char_data *ch);
+extern bool clanBANY(const char *name, Character *ch);
 
-extern bool clanBSET(const char *name, struct char_data *ch);
+extern bool clanBSET(const char *name, Character *ch);
 
 //
 // make a person a moderator of the clan.
 //
-extern bool clanMakeModerator(const char *name, struct char_data *ch);
+extern bool clanMakeModerator(const char *name, Character *ch);
 
 
 //
 // Expels a character from the clan.
 //
-extern void clanExpel(const char *name, struct char_data *ch);
+extern void clanExpel(const char *name, Character *ch);
 
 
 //
 // Decline a character's application to the clan.
 //
-extern void clanDecline(const char *name, struct char_data *ch);
+extern void clanDecline(const char *name, Character *ch);
 
 
 //
 // returns true if the character is a member of the clan
 // return false otherwise
 //
-extern bool clanIsMember(const char *name, struct char_data *ch);
+extern bool clanIsMember(const char *name, Character *ch);
 
 //
 // returns clan mod, member, and applicant lists
 //
-extern void handle_clan_member_list(struct char_data *ch);
+extern void handle_clan_member_list(Character *ch);
 
 //
 // returns true if the character is a moderator for the clan
 // (i.e. can induct and expell other members)
 //
-extern bool clanIsModerator(const char *name, struct char_data *ch);
+extern bool clanIsModerator(const char *name, Character *ch);
 
 
 //
 // returns true if the character is applying for the given
 // clan. returns false otherwise, or if the char is an NPC
 //
-extern bool clanIsApplicant(const char *name, struct char_data *ch);
+extern bool clanIsApplicant(const char *name, Character *ch);
 
 
 //
@@ -199,23 +199,23 @@ extern bool clanSetOpenLeave(const char *name, int val);
 //
 // list all info for the given clan to a character
 //
-extern void listClanInfo(const char *name, struct char_data *ch);
+extern void listClanInfo(const char *name, Character *ch);
 
 
 //
 // send a list of all clans to the character
 //
-extern void listClans(struct char_data *ch);
+extern void listClans(Character *ch);
 
-extern int checkCLAN(struct char_data *ch);
+extern int checkCLAN(Character *ch);
 
-extern void checkAPP(struct char_data *ch);
+extern void checkAPP(Character *ch);
 
 
 //
 // send a list of the ranks of a clan NOT FINISHED
 //
-//void listClanRanks(struct char_data *ch);
+//void listClanRanks(Character *ch);
 
 //
 // number of clans
@@ -226,4 +226,4 @@ extern int num_clans;
 //
 // List all of the clans vict belongs to, to char
 //
-extern void listClansOfVictToChar(struct char_data *vict, struct char_data *ch);
+extern void listClansOfVictToChar(Character *vict, Character *ch);

@@ -9,4 +9,4 @@
 // functions
 extern void mobile_activity(uint64_t heartPulse, double deltaTime);
 
-extern void mob_taunt(struct char_data *ch);
+extern void mob_taunt(Character *ch);

@@ -26,13 +26,13 @@
 #endif
 
 
-struct obj_data *find_vehicle_by_vnum(int vnum) {
+Object *find_vehicle_by_vnum(int vnum) {
     auto o = objectSubscriptions.first(fmt::format("vnum_{}", vnum));
     if(o && GET_OBJ_TYPE(o) == ITEM_VEHICLE) return o;
     return nullptr;
 }
 
-struct obj_data *find_hatch_by_vnum(int vnum) {
+Object *find_hatch_by_vnum(int vnum) {
     auto o = objectSubscriptions.first(fmt::format("vnum_{}", vnum));
     if(o && GET_OBJ_TYPE(o) == ITEM_HATCH) return o;
     return nullptr;
@@ -40,8 +40,8 @@ struct obj_data *find_hatch_by_vnum(int vnum) {
 
 
 /* Search the player's room, inventory and equipment for a control */
-struct obj_data *find_control(struct char_data *ch) {
-    auto iscontrol = [ch](obj_data *o) { return CAN_SEE_OBJ(ch, o) && GET_OBJ_TYPE(o) == ITEM_CONTROL; };
+Object *find_control(Character *ch) {
+    auto iscontrol = [ch](Object *o) { return CAN_SEE_OBJ(ch, o) && GET_OBJ_TYPE(o) == ITEM_CONTROL; };
 
     auto controls = ch->location.findObject(iscontrol);
     if (!controls) controls = ch->findObject(iscontrol);
@@ -57,8 +57,8 @@ struct obj_data *find_control(struct char_data *ch) {
 }
 
 /* Drive our vehicle into another vehicle */
-static void drive_into_vehicle(struct char_data *ch, struct obj_data *vehicle, char *arg) {
-    struct obj_data *vehicle_in_out;
+static void drive_into_vehicle(Character *ch, Object *vehicle, char *arg) {
+    Object *vehicle_in_out;
     int is_going_to;
     char buf[MAX_INPUT_LENGTH];
 
@@ -103,10 +103,10 @@ static void drive_into_vehicle(struct char_data *ch, struct obj_data *vehicle, c
 }
 
 /* Drive our vehicle out of another vehicle */
-static void drive_outof_vehicle(struct char_data *ch, struct obj_data *vehicle) {
-    struct obj_data *vehicle_in_out;
+static void drive_outof_vehicle(Character *ch, Object *vehicle) {
+    Object *vehicle_in_out;
 
-    auto hatch = ch->location.findObject([&](obj_data *o) { return GET_OBJ_TYPE(o) == ITEM_HATCH; });
+    auto hatch = ch->location.findObject([&](Object *o) { return GET_OBJ_TYPE(o) == ITEM_HATCH; });
 
     if (!hatch) {
                 ch->sendText("@wNowhere to pilot out of.\r\n");
@@ -138,7 +138,7 @@ static void drive_outof_vehicle(struct char_data *ch, struct obj_data *vehicle) 
 }
 
 /* Drive out vehicle in a certain direction */
-void drive_in_direction(struct char_data *ch, struct obj_data *vehicle, int dir) {
+void drive_in_direction(Character *ch, Object *vehicle, int dir) {
 
     auto d = vehicle->location.getExit(static_cast<Direction>(dir));
     if(!d) {
@@ -170,7 +170,7 @@ void drive_in_direction(struct char_data *ch, struct obj_data *vehicle, int dir)
     vehicle->clearLocation();
     vehicle->setLocation(dest);
 
-    struct obj_data *controls;
+    Object *controls;
     if ((controls = find_control(ch))) {
         if (GET_FUELCOUNT(controls) < 5) {
             MOD_OBJ_VAL(controls, VAL_CONTROL_FUEL, 1);
@@ -183,7 +183,7 @@ void drive_in_direction(struct char_data *ch, struct obj_data *vehicle, int dir)
         }
     }
 
-    struct obj_data *hatch = nullptr;
+    Object *hatch = nullptr;
     auto con = get_room(GET_OBJ_VAL(vehicle, VAL_VEHICLE_DEST))->getObjects();
     for (auto h : filter_raw(con)) {
         if (GET_OBJ_TYPE(hatch) == ITEM_HATCH) {
@@ -211,7 +211,7 @@ void drive_in_direction(struct char_data *ch, struct obj_data *vehicle, int dir)
             vehicle->getShortDescription(), dirs[rev_dir[dir]]);
 }
 
-static void warp_ship_to_location(struct char_data *ch, struct obj_data *vehicle, int room_vnum) {
+static void warp_ship_to_location(Character *ch, Object *vehicle, int room_vnum) {
     if (vehicle->location == room_vnum) {
         ch->sendText("Your ship is already there!\r\n");
         return;
@@ -229,7 +229,7 @@ static void warp_ship_to_location(struct char_data *ch, struct obj_data *vehicle
                  vehicle->getShortDescription());
 }
 
-static bool validate_warp_conditions(struct char_data *ch, struct obj_data *vehicle, const char *arg) {
+static bool validate_warp_conditions(Character *ch, Object *vehicle, const char *arg) {
     if (IS_NPC(ch))
         return false;
 
@@ -242,7 +242,7 @@ static bool validate_warp_conditions(struct char_data *ch, struct obj_data *vehi
         return false;
     }
 
-    struct obj_data *controls = find_control(ch);
+    Object *controls = find_control(ch);
     if (!controls) {
                 ch->sendText("@wYou have nothing to control here!\r\n");
         return false;
@@ -272,7 +272,7 @@ static bool validate_warp_conditions(struct char_data *ch, struct obj_data *vehi
     return true;
 }
 
-static int get_warp_destination(const char *arg, struct char_data *ch) {
+static int get_warp_destination(const char *arg, Character *ch) {
     if (!strcasecmp(arg, "earth"))
         return 40979;
     if (!strcasecmp(arg, "namek"))
@@ -298,7 +298,7 @@ static int get_warp_destination(const char *arg, struct char_data *ch) {
 ACMD(do_warp) {
     return;
     char arg[MAX_INPUT_LENGTH];
-    struct obj_data *vehicle = nullptr;
+    Object *vehicle = nullptr;
 
     one_argument(argument, arg);
 
@@ -314,18 +314,18 @@ ACMD(do_warp) {
     warp_ship_to_location(ch, vehicle, destination);
 }
 
-static void handle_pilot_ready(struct char_data *ch);
-static void handle_pilot_unready(struct char_data *ch);
-static bool validate_drive_conditions(struct char_data *ch, struct obj_data *&vehicle, struct obj_data *&controls);
-static void handle_drive_command(struct char_data *ch, struct obj_data *vehicle, struct obj_data *controls, const std::string& arg, const std::string& arg2);
-static void handle_drive_direction(struct char_data *ch, struct obj_data *vehicle, int dir, int speed);
-static void handle_drive_land(struct char_data *ch, struct obj_data *vehicle, const std::string& pad);
-static void handle_drive_launch(struct char_data *ch, struct obj_data *vehicle, struct obj_data *controls);
-static void handle_buoy_launch(struct char_data *ch, struct obj_data *vehicle, const std::string& marker);
-static void handle_buoy_deactivate(struct char_data *ch, const std::string& marker);
+static void handle_pilot_ready(Character *ch);
+static void handle_pilot_unready(Character *ch);
+static bool validate_drive_conditions(Character *ch, Object *&vehicle, Object *&controls);
+static void handle_drive_command(Character *ch, Object *vehicle, Object *controls, const std::string& arg, const std::string& arg2);
+static void handle_drive_direction(Character *ch, Object *vehicle, int dir, int speed);
+static void handle_drive_land(Character *ch, Object *vehicle, const std::string& pad);
+static void handle_drive_launch(Character *ch, Object *vehicle, Object *controls);
+static void handle_buoy_launch(Character *ch, Object *vehicle, const std::string& marker);
+static void handle_buoy_deactivate(Character *ch, const std::string& marker);
 
-static void handle_pilot_ready(struct char_data *ch) {
-    struct obj_data *controls = find_control(ch);
+static void handle_pilot_ready(Character *ch) {
+    Object *controls = find_control(ch);
     if (!controls) {
                 ch->sendText("@wYou have nothing to control here!\r\n");
         return;
@@ -344,7 +344,7 @@ static void handle_pilot_ready(struct char_data *ch) {
         ch->sendText("@wYou take a seat in the pilot's chair.\r\n");
 }
 
-static void handle_pilot_unready(struct char_data *ch) {
+static void handle_pilot_unready(Character *ch) {
     if (PLR_FLAGGED(ch, PLR_PILOTING)) {
         act("@w$n stands up and stops piloting the ship.", true, ch, nullptr, nullptr, TO_ROOM);
                 ch->sendText("@wYou stand up from the pilot's seat.\r\n");
@@ -355,7 +355,7 @@ static void handle_pilot_unready(struct char_data *ch) {
     }
 }
 
-static bool validate_drive_conditions(struct char_data *ch, struct obj_data *&vehicle, struct obj_data *&controls) {
+static bool validate_drive_conditions(Character *ch, Object *&vehicle, Object *&controls) {
     if (!HAS_ARMS(ch)) {
                 ch->sendText("You have no arms!\r\n");
         return false;
@@ -422,7 +422,7 @@ static const std::map<std::string, int> directions = {
     {"outside", 11}
 };
 
-static void handle_drive_command(struct char_data *ch, struct obj_data *vehicle, struct obj_data *controls, const std::string& arg, const std::string& arg2) {
+static void handle_drive_command(Character *ch, Object *vehicle, Object *controls, const std::string& arg, const std::string& arg2) {
     if (arg.empty()) {
                 ch->sendText("@wPilot, yes, but where?\r\n");
         return;
@@ -458,7 +458,7 @@ static void handle_drive_command(struct char_data *ch, struct obj_data *vehicle,
     }
 }
 
-static void handle_drive_direction(struct char_data *ch, struct obj_data *vehicle, int dir, int speed) {
+static void handle_drive_direction(Character *ch, Object *vehicle, int dir, int speed) {
     drive_in_direction(ch, vehicle, dir);
 
     switch (speed) {
@@ -480,7 +480,7 @@ static void handle_drive_direction(struct char_data *ch, struct obj_data *vehicl
     }
 }
 
-static void handle_drive_land(struct char_data *ch, struct obj_data *vehicle, const std::string& pad) {
+static void handle_drive_land(Character *ch, Object *vehicle, const std::string& pad) {
     auto rvn = vehicle->getRoomVnum();
     auto planet = checkOrbit(rvn);
 
@@ -534,7 +534,7 @@ static void handle_drive_land(struct char_data *ch, struct obj_data *vehicle, co
 
 }
 
-static void handle_drive_launch(struct char_data *ch, struct obj_data *vehicle, struct obj_data *controls) {
+static void handle_drive_launch(Character *ch, Object *vehicle, Object *controls) {
     auto planet = getPlanet(vehicle->location.getVnum());
     if (!planet) {
                 ch->sendText("@wYou are not on a planet.@n\r\n");
@@ -571,7 +571,7 @@ static void handle_drive_launch(struct char_data *ch, struct obj_data *vehicle, 
         ch->send_to("@RFUEL@D: %s%s@n\r\n", GET_FUEL(controls) >= 200 ? "@G" : GET_FUEL(controls) >= 100 ? "@Y" : "@r", add_commas(GET_FUEL(controls)).c_str());
 }
 
-static void handle_buoy_launch(struct char_data *ch, struct obj_data *vehicle, const std::string& marker) {
+static void handle_buoy_launch(Character *ch, Object *vehicle, const std::string& marker) {
     if (!vehicle->location.getWhereFlag(WhereFlag::space)) {
                 ch->sendText("@wYou need to be in space to launch a marker buoy.\r\n");
         return;
@@ -589,7 +589,7 @@ static void handle_buoy_launch(struct char_data *ch, struct obj_data *vehicle, c
     }
 }
 
-static void handle_buoy_deactivate(struct char_data *ch, const std::string& marker) {
+static void handle_buoy_deactivate(Character *ch, const std::string& marker) {
     auto buoy = ch->getBaseStat(fmt::format("radar{}", marker));
 
     if (buoy <= 0) {
@@ -603,7 +603,7 @@ static void handle_buoy_deactivate(struct char_data *ch, const std::string& mark
 
 ACMD(do_drive) {
     char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
-    struct obj_data *vehicle = nullptr, *controls = nullptr;
+    Object *vehicle = nullptr, *controls = nullptr;
 
     half_chop(argument, arg, arg2);
 
@@ -625,7 +625,7 @@ ACMD(do_drive) {
 
 
 ACMD(do_ship_fire) {
-    struct obj_data *vehicle, *controls;
+    Object *vehicle, *controls;
     char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 
     two_arguments(argument, arg1, arg2);
@@ -640,7 +640,7 @@ ACMD(do_ship_fire) {
         return;
     }
 
-    struct obj_data *obj = nullptr, *obj2 = nullptr, *next_obj = nullptr;
+    Object *obj = nullptr, *obj2 = nullptr, *next_obj = nullptr;
     int shot = false;
     auto loco = ch->location.getObjects();
     for (auto obj : filter_raw(loco)) {

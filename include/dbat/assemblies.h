@@ -27,12 +27,12 @@ constexpr int ASSM_FORGE = 10;      // Assembly must be forged.
 *
  * ******************************************************************** */
 
-extern void assemblyListToChar(struct char_data *pCharacter, int type = 0);
+extern void assemblyListToChar(Character *pCharacter, int type = 0);
 
 extern bool assemblyAddComponent(long lVnum, long lComponentVnum,
                                  bool bExtract, bool bInRoom);
 
-extern bool assemblyCheckComponents(long lVnum, struct char_data
+extern bool assemblyCheckComponents(long lVnum, Character
 *pCharacter, int extract_yes);
 
 extern bool assemblyCreate(long lVnum, int iAssembledType);

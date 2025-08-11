@@ -4,7 +4,7 @@
 #include <dbat/send.h>
 #include "dbat/random.h"
 
-int findItemApplySlot(obj_data *pObject, int location) {
+int findItemApplySlot(Object *pObject, int location) {
     for (int i = 0; i < MAX_OBJ_AFFECT ; i++) {
         if (pObject->affected[i].location == location || pObject->affected[i].location == 0)
             return i;
@@ -14,7 +14,7 @@ int findItemApplySlot(obj_data *pObject, int location) {
 }
 
 static card refine = {"Refine", 
-    [](struct char_data *ch) {
+    [](Character *ch) {
         craftTask* task = &ch->craftingTask;
 
         int bonus = APPLY_COMBAT_BASE;
@@ -43,7 +43,7 @@ static card refine = {"Refine",
 };
 
 static card tranquility = {"Tranquility", 
-    [](struct char_data *ch) {
+    [](Character *ch) {
         craftTask* task = &ch->craftingTask;
 
         task->improvementRounds--;
@@ -54,7 +54,7 @@ static card tranquility = {"Tranquility",
 };
 
 static card basicAttr = {"Basic Enhancement (Attributes)", 
-    [](struct char_data *ch) {
+    [](Character *ch) {
         craftTask* task = &ch->craftingTask;
 
         std::vector<CharAttribute> possibles = {CharAttribute::strength, CharAttribute::agility, CharAttribute::intelligence,
@@ -78,7 +78,7 @@ static card basicAttr = {"Basic Enhancement (Attributes)",
 };
 
 static card basicTrain = {"Basic Enhancement (Training)", 
-    [](struct char_data *ch) {
+    [](Character *ch) {
         craftTask* task = &ch->craftingTask;
 
         int rand = std::rand() % 3;
@@ -116,7 +116,7 @@ static card basicTrain = {"Basic Enhancement (Training)",
 };
 
 static card improvedAttr = {"Improved Enhancement (Attributes)", 
-    [](struct char_data *ch) {
+    [](Character *ch) {
         craftTask* task = &ch->craftingTask;
 
         std::vector<CharAttribute> possibles = {CharAttribute::strength, CharAttribute::agility, CharAttribute::intelligence,
@@ -139,7 +139,7 @@ static card improvedAttr = {"Improved Enhancement (Attributes)",
 };
 
 static card improvedTrain = {"Improved Enhancement (Training)", 
-    [](struct char_data *ch) {
+    [](Character *ch) {
         craftTask* task = &ch->craftingTask;
 
         int rand = std::rand() % 3;
@@ -176,7 +176,7 @@ static card improvedTrain = {"Improved Enhancement (Training)",
     false
 };
 static card expertAttr = {"Expert Enhancement (Attributes)", 
-    [](struct char_data *ch) {
+    [](Character *ch) {
         craftTask* task = &ch->craftingTask;
 
         std::vector<CharAttribute> possibles = {CharAttribute::strength, CharAttribute::agility, CharAttribute::intelligence,
@@ -199,7 +199,7 @@ static card expertAttr = {"Expert Enhancement (Attributes)",
     false
 };
 static card expertTrain = {"Expert Enhancement (Training)", 
-    [](struct char_data *ch) {
+    [](Character *ch) {
         craftTask* task = &ch->craftingTask;
 
         int rand = std::rand() % 3;
@@ -234,7 +234,7 @@ static card expertTrain = {"Expert Enhancement (Training)",
 };
 
 static card tuffleArtisany = {"Tuffle Artisany", 
-    [](struct char_data *ch) {
+    [](Character *ch) {
         craftTask* task = &ch->craftingTask;
 
         int rand = std::rand() % 6;
@@ -284,7 +284,7 @@ static card tuffleArtisany = {"Tuffle Artisany",
     false
 };
 static card tuffleIngenuity = {"Tuffle Ingenuity", 
-    [](struct char_data *ch) {
+    [](Character *ch) {
         craftTask* task = &ch->craftingTask;
 
         task->improvementRounds -= 2;
@@ -336,7 +336,7 @@ static card tuffleIngenuity = {"Tuffle Ingenuity",
     true,
 };
 static card reflection = {"Reflection", 
-    [](struct char_data *ch) {
+    [](Character *ch) {
         
         return true;},
     "",
@@ -344,7 +344,7 @@ static card reflection = {"Reflection",
     false
 };
 static card refraction = {"Refraction", 
-    [](struct char_data *ch) {
+    [](Character *ch) {
         //GET_OBJ_COST(pObject) += GET_OBJ_COST(pObject) * 0.12;
         return true;},
     "",
@@ -352,7 +352,7 @@ static card refraction = {"Refraction",
     false
 };
 static card timePasses = {"Time Passes", 
-    [](struct char_data *ch) {
+    [](Character *ch) {
         craftTask* task = &ch->craftingTask;
         task->improvementRounds++;
         
@@ -363,7 +363,7 @@ static card timePasses = {"Time Passes",
 };
 
 static card comprehension = {   "Comprehension", 
-    [](struct char_data *ch) {
+    [](Character *ch) {
         craftTask* task = &ch->craftingTask;
 
         int64_t pl = (GET_CON(ch) / 2) * Random::get<double>(0.8, 1.2) * ch->getPotential();
@@ -411,7 +411,7 @@ static std::vector<struct card> cards = {
 };
 
 
-static card blank = {"Blank", [](struct char_data *ch) {return true;},
+static card blank = {"Blank", [](Character *ch) {return true;},
             "",
             "",
             false};
@@ -457,7 +457,7 @@ card deck::findCard(std::string cardName) {
     return blank;
 }
 
-bool deck::playTopCard(char_data* ch) {
+bool deck::playTopCard(Character* ch) {
     bool continueDeck = true;
     shuffleDeck();
     card topDeck = deck.front();
@@ -502,7 +502,7 @@ void deck::removeCard(card toRem) {
     }
 }
 
-void deck::initDeck(char_data* ch) {
+void deck::initDeck(Character* ch) {
     deck.clear();
 
     int skill = GET_SKILL(ch, SKILL_BUILD);

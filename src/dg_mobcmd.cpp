@@ -50,7 +50,7 @@
 /*
  * Local functions.
  */
-void mob_log(char_data *mob, const char *format, ...);
+void mob_log(Character *mob, const char *format, ...);
 
 ACMD(do_masound);
 
@@ -95,7 +95,7 @@ ACMD(do_mfollow);
 ACMD(do_mrecho);
 
 /* attaches mob's name and vnum to msg and sends it to script_log */
-void mob_log(char_data *mob, const char *format, ...) {
+void mob_log(Character *mob, const char *format, ...) {
     va_list args;
     char output[MAX_STRING_LENGTH];
 
@@ -188,7 +188,7 @@ ACMD(do_mheal) {
 /* lets the mobile kill any player or mobile without murder*/
 ACMD(do_mkill) {
     char arg[MAX_INPUT_LENGTH];
-    char_data *victim;
+    Character *victim;
     char buf[MAX_INPUT_LENGTH];
 
     if (!MOB_OR_IMPL(ch)) {
@@ -263,8 +263,8 @@ ACMD(do_mkill) {
 ACMD(do_mjunk) {
     char arg[MAX_INPUT_LENGTH];
     int pos, junk_all = 0;
-    obj_data *obj;
-    obj_data *obj_next;
+    Object *obj;
+    Object *obj_next;
 
     if (!MOB_OR_IMPL(ch)) {
                 ch->sendText("Huh?!?\r\n");
@@ -310,7 +310,7 @@ ACMD(do_mjunk) {
 /* prints the message to everyone in the room other than the mob and victim */
 ACMD(do_mechoaround) {
     char arg[MAX_INPUT_LENGTH];
-    char_data *victim;
+    Character *victim;
     char *p;
 
     if (!MOB_OR_IMPL(ch)) {
@@ -351,7 +351,7 @@ ACMD(do_mechoaround) {
 /* sends the message to only the victim */
 ACMD(do_msend) {
     char arg[MAX_INPUT_LENGTH];
-    char_data *victim;
+    Character *victim;
     char *p;
 
     if (!MOB_OR_IMPL(ch)) {
@@ -431,11 +431,11 @@ ACMD(do_mzoneecho) {
 ACMD(do_mload) {
     char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
     int number = 0;
-    char_data *mob;
-    obj_data *object;
+    Character *mob;
+    Object *object;
     char *target;
-    char_data *tch;
-    obj_data *cnt;
+    Character *tch;
+    Object *cnt;
     int pos;
 
     if (!MOB_OR_IMPL(ch)) {
@@ -533,8 +533,8 @@ ACMD(do_mload) {
  */
 ACMD(do_mpurge) {
     char arg[MAX_INPUT_LENGTH];
-    char_data *victim;
-    obj_data *obj;
+    Character *victim;
+    Object *obj;
 
     if (!MOB_OR_IMPL(ch)) {
                 ch->sendText("Huh?!?\r\n");
@@ -551,8 +551,8 @@ ACMD(do_mpurge) {
 
     if (!*arg) {
         /* 'purge' */
-        char_data *vnext;
-        obj_data *obj_next;
+        Character *vnext;
+        Object *obj_next;
 
         auto people = ch->location.getPeople();
         for (auto victim : filter_raw(people)) {
@@ -679,7 +679,7 @@ ACMD(do_mat) {
 ACMD(do_mteleport) {
     char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
     room_rnum target;
-    char_data *vict, *next_ch;
+    Character *vict, *next_ch;
 
     if (!MOB_OR_IMPL(ch)) {
                 ch->sendText("Huh?!?\r\n");
@@ -741,7 +741,7 @@ ACMD(do_mteleport) {
 ACMD(do_mdamage) {
     char name[MAX_INPUT_LENGTH], amount[MAX_INPUT_LENGTH];
     int dam = 0;
-    char_data *vict;
+    Character *vict;
 
     if (!MOB_OR_IMPL(ch)) {
                 ch->sendText("Huh?!?\r\n");
@@ -799,7 +799,7 @@ ACMD(do_mforce) {
 
     if (!strcasecmp(arg, "all")) {
         struct descriptor_data *i;
-        char_data *vch;
+        Character *vch;
 
         for (i = descriptor_list; i; i = i->next) {
             if ((i->character != ch) && !i->connected &&
@@ -812,7 +812,7 @@ ACMD(do_mforce) {
             }
         }
     } else {
-        char_data *victim;
+        Character *victim;
 
         if (*arg == UID_CHAR) {
             if (!(victim = get_char(arg))) {
@@ -837,7 +837,7 @@ ACMD(do_mforce) {
 
 /* place someone into the mob's memory list */
 ACMD(do_mremember) {
-    char_data *victim;
+    Character *victim;
     struct script_memory *mem;
     char arg[MAX_INPUT_LENGTH];
 
@@ -888,7 +888,7 @@ ACMD(do_mremember) {
 
 /* remove someone from the list */
 ACMD(do_mforget) {
-    char_data *victim;
+    Character *victim;
     struct script_memory *mem, *prev;
     char arg[MAX_INPUT_LENGTH];
 
@@ -945,8 +945,8 @@ ACMD(do_mforget) {
 /* transform into a different mobile */
 ACMD(do_mtransform) {
     char arg[MAX_INPUT_LENGTH];
-    char_data *m, tmpmob;
-    obj_data *obj[NUM_WEARS];
+    Character *m, tmpmob;
+    Object *obj[NUM_WEARS];
     mob_rnum this_rnum = GET_MOB_RNUM(ch);
     int pos;
 
@@ -1012,7 +1012,7 @@ ACMD(do_mtransform) {
 ACMD(do_maddtransform) {
     char name[MAX_INPUT_LENGTH], operation[MAX_INPUT_LENGTH], formName[MAX_INPUT_LENGTH];
     int dam = 0;
-    char_data* vict;
+    Character* vict;
 
     if (!MOB_OR_IMPL(ch)) {
                 ch->sendText("Huh?!?\r\n");
@@ -1061,7 +1061,7 @@ ACMD(do_maddtransform) {
 ACMD(do_mdoor) {
     char target[MAX_INPUT_LENGTH], direction[MAX_INPUT_LENGTH];
     char field[MAX_INPUT_LENGTH], *value;
-    room_data *rm;
+    Room *rm;
     int dir, fd, to_room;
 
     const char *door_field[] = {
@@ -1147,7 +1147,7 @@ ACMD(do_mdoor) {
 
 ACMD(do_mfollow) {
     char buf[MAX_INPUT_LENGTH];
-    struct char_data *leader;
+    Character *leader;
     struct follow_type *j, *k;
 
     if (!MOB_OR_IMPL(ch)) {

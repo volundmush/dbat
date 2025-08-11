@@ -4,7 +4,7 @@
 
 
 // functions
-extern void npc_steal(struct char_data *ch, struct char_data *victim);
+extern void npc_steal(Character *ch, Character *victim);
 
 extern int num_players_in_room(room_vnum room);
 

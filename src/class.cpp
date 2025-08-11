@@ -172,7 +172,7 @@ static const int race_template[NUM_RACES][6] = {
                 {10, 10, 10, 10, 10, 10}
 };
 
-void cedit_creation(struct char_data *ch) {
+void cedit_creation(Character *ch) {
     switch (CONFIG_CREATION_METHOD) {
         case CEDIT_CREATION_METHOD_3: /* Points Pool */
             break;
@@ -231,9 +231,9 @@ const int class_hit_die_size[NUM_CLASSES] = {
 };
 
 /* Some initializations for characters, including initial skills */
-void do_start(struct char_data *ch) {
+void do_start(Character *ch) {
     int punch;
-    struct obj_data *obj;
+    Object *obj;
 
     ch->setBaseStat<int>("level", 1);
     ch->setExperience(1);
@@ -561,7 +561,7 @@ static const int *free_start_feats[] = {
  * each class every time they gain a level.
  */
 /* Rillao: transloc, add new transes here */
-void advance_level(struct char_data *ch) {
+void advance_level(Character *ch) {
     int64_t add_hp = 0, add_move = 0, add_mana = 0, add_ki = 0;
     int add_prac = 1, add_train, i, j = 0, ranks;
     int add_gen_feats = 0, add_class_feats = 0;
@@ -995,7 +995,7 @@ void advance_level(struct char_data *ch) {
  * invalid_class is used by handler.c to determine if a piece of equipment is
  * usable by a particular class, based on the ITEM_ANTI_{class} bitvectors.
  */
-int invalid_class(struct char_data *ch, struct obj_data *obj) {
+int invalid_class(Character *ch, Object *obj) {
     if (GET_ADMLEVEL(ch) >= ADMLVL_IMMORT)
         return false;
 
@@ -1015,7 +1015,7 @@ int invalid_class(struct char_data *ch, struct obj_data *obj) {
  */
 
 /* Function to return the exp required for each class/level */
-int64_t level_exp(struct char_data *ch, int level) {
+int64_t level_exp(Character *ch, int level) {
     int req = 1;
 
     switch (level) {
@@ -1338,9 +1338,9 @@ int8_t ability_mod_value(int abil) {
 }
 
 /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
-int8_t dex_mod_capped(struct char_data *ch) {
+int8_t dex_mod_capped(Character *ch) {
     int8_t mod;
-    struct obj_data *armor;
+    Object *armor;
     mod = ability_mod_value(GET_DEX(ch));
     armor = GET_EQ(ch, WEAR_BODY);
     if (armor && GET_OBJ_TYPE(armor) == ITEM_ARMOR) {
@@ -1408,7 +1408,7 @@ int highest_skill_value(int level, int type, int skill) {
 
 
 /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
-time_t birth_age(struct char_data *ch) {
+time_t birth_age(Character *ch) {
     int tmp;
 
     tmp = rand_number(16, 18);
@@ -1597,7 +1597,7 @@ namespace sensei {
         int location{};
         double modifier{};
         int specific{-1};
-        std::function<double(struct char_data *ch)> func{};
+        std::function<double(Character *ch)> func{};
     };
 
     static std::unordered_map<Sensei, std::vector<sen_affect_type>> sensei_affects = {
@@ -1606,7 +1606,7 @@ namespace sensei {
         }}
     };
 
-    double getModifier(char_data* ch, int location, int specific) {
+    double getModifier(Character* ch, int location, int specific) {
         double out = 0.0;
         if(auto found = sensei_affects.find(ch->sensei); found != sensei_affects.end()) {
 

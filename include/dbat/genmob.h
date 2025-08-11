@@ -9,7 +9,7 @@
 
 extern int delete_mobile(mob_rnum);
 
-extern int add_mobile(struct npc_proto_data *, mob_vnum);
+extern int add_mobile(CharacterPrototype *, mob_vnum);
 
 extern int save_mobiles(zone_rnum rznum);
 

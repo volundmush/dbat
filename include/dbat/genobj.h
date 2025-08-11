@@ -7,12 +7,12 @@
 #pragma once
 
 #include "structs.h"
-extern void auto_equip(struct char_data *ch, struct obj_data *obj, int location);
+extern void auto_equip(Character *ch, Object *obj, int location);
 
 extern int save_objects(zone_rnum vznum);
 
-extern int update_objects(struct item_proto_data* refobj);
+extern int update_objects(ObjectPrototype* refobj);
 
-extern obj_rnum add_object(struct item_proto_data*, obj_vnum ovnum);
+extern obj_rnum add_object(ObjectPrototype*, obj_vnum ovnum);
 
 extern int delete_object(obj_rnum);

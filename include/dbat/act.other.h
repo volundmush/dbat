@@ -8,24 +8,24 @@ extern const room_vnum freeres[NUM_ALIGNS];
 // functions
 extern void log_imm_action(const char *messg, ...);
 
-extern void hint_system(struct char_data *ch, int num);
+extern void hint_system(Character *ch, int num);
 
-extern std::unordered_set<struct obj_data*> dball_count(struct char_data *ch);
+extern std::unordered_set<Object*> dball_count(Character *ch);
 
-extern void log_custom(struct descriptor_data *d, struct obj_data *obj);
+extern void log_custom(struct descriptor_data *d, Object *obj);
 
 extern void wishSYS(uint64_t heartPulse, double deltaTime);
 
-extern void bring_to_cap(struct char_data *ch);
+extern void bring_to_cap(Character *ch);
 
 extern void base_update(uint64_t heartPulse, double deltaTime);
 
 extern void load_shadow_dragons();
 
-extern void situpProgress(char_data* ch);
-extern void meditateProgress(char_data* ch);
-extern void pushupProgress(char_data* ch);
-extern void trainProgress(char_data* ch);
+extern void situpProgress(Character* ch);
+extern void meditateProgress(Character* ch);
+extern void pushupProgress(Character* ch);
+extern void trainProgress(Character* ch);
 
 // commands
 extern ACMD(do_gen_comm);

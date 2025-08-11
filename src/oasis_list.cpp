@@ -23,21 +23,21 @@
 /******************************************************************************/
 /** Internal Functions                                                       **/
 /******************************************************************************/
-void list_rooms(struct char_data *ch, zone_rnum rnum, room_vnum vmin, room_vnum vmax);
+void list_rooms(Character *ch, zone_rnum rnum, room_vnum vmin, room_vnum vmax);
 
-void list_mobiles(struct char_data *ch, zone_rnum rnum, mob_vnum vmin, mob_vnum vmax);
+void list_mobiles(Character *ch, zone_rnum rnum, mob_vnum vmin, mob_vnum vmax);
 
-void list_objects(struct char_data *ch, zone_rnum rnum, obj_vnum vmin, obj_vnum vmax);
+void list_objects(Character *ch, zone_rnum rnum, obj_vnum vmin, obj_vnum vmax);
 
-void list_shops(struct char_data *ch, zone_rnum rnum, shop_vnum vmin, shop_vnum vmax);
+void list_shops(Character *ch, zone_rnum rnum, shop_vnum vmin, shop_vnum vmax);
 
-void list_triggers(struct char_data *ch, zone_rnum rnum, trig_vnum vmin, trig_vnum vmax);
+void list_triggers(Character *ch, zone_rnum rnum, trig_vnum vmin, trig_vnum vmax);
 
-void list_zones(struct char_data *ch);
+void list_zones(Character *ch);
 
-void print_zone(struct char_data *ch, zone_vnum vnum);
+void print_zone(Character *ch, zone_vnum vnum);
 
-void list_guilds(struct char_data *ch, zone_rnum rnum, guild_vnum vmin, guild_vnum vmax);
+void list_guilds(Character *ch, zone_rnum rnum, guild_vnum vmin, guild_vnum vmax);
 
 
 /******************************************************************************/
@@ -153,7 +153,7 @@ ACMD(do_oasis_links) {
 /*
  * List all rooms in a zone.                              
  */
-void list_rooms(struct char_data *ch, zone_rnum rnum, zone_vnum vmin, zone_vnum vmax) {
+void list_rooms(Character *ch, zone_rnum rnum, zone_vnum vmin, zone_vnum vmax) {
     room_vnum i, j, bottom, top, counter = 0;
     /*
      * Expect a minimum / maximum number if the rnum for the zone is NOWHERE.
@@ -197,7 +197,7 @@ void list_rooms(struct char_data *ch, zone_rnum rnum, zone_vnum vmin, zone_vnum 
 /*
  * List all mobiles in a zone.                              
  */
-void list_mobiles(struct char_data *ch, zone_rnum rnum, zone_vnum vmin, zone_vnum vmax) {
+void list_mobiles(Character *ch, zone_rnum rnum, zone_vnum vmin, zone_vnum vmax) {
     mob_vnum i, bottom, top, counter = 0, admg;
 
     if (rnum != NOWHERE) {
@@ -232,7 +232,7 @@ void list_mobiles(struct char_data *ch, zone_rnum rnum, zone_vnum vmin, zone_vnu
 /*
  * List all objects in a zone.                              
  */
-void list_objects(struct char_data *ch, zone_rnum rnum, room_vnum vmin, room_vnum vmax) {
+void list_objects(Character *ch, zone_rnum rnum, room_vnum vmin, room_vnum vmax) {
     obj_vnum i, bottom, top, counter = 0;
 
     if (rnum != NOWHERE) {
@@ -267,7 +267,7 @@ void list_objects(struct char_data *ch, zone_rnum rnum, room_vnum vmin, room_vnu
 /*
  * List all shops in a zone.                              
  */
-void list_shops(struct char_data *ch, zone_rnum rnum, shop_vnum vmin, shop_vnum vmax) {
+void list_shops(Character *ch, zone_rnum rnum, shop_vnum vmin, shop_vnum vmax) {
     int i, j, bottom, top, counter = 0;
 
     if (rnum != NOWHERE) {
@@ -313,7 +313,7 @@ void list_shops(struct char_data *ch, zone_rnum rnum, shop_vnum vmin, shop_vnum 
 /*
  * List all zones in the world (sort of like 'show zones').                              
  */
-void list_zones(struct char_data *ch) {
+void list_zones(Character *ch) {
 
         ch->sendText("VNum  Zone Name                      Builder(s)\r\n"
                  "----- ------------------------------ --------------------------------------\r\n");
@@ -326,7 +326,7 @@ void list_zones(struct char_data *ch) {
 /*
  * Prints all of the zone information for the selected zone.
  */
-void print_zone(struct char_data *ch, zone_vnum vnum) {
+void print_zone(Character *ch, zone_vnum vnum) {
     zone_rnum rnum;
     std::size_t size_rooms, size_objects, size_mobiles, i;
     std::size_t size_guilds, size_triggers, size_shops;
@@ -371,7 +371,7 @@ void print_zone(struct char_data *ch, zone_vnum vnum) {
 }
 
 /* List code by Ronald Evers - dlanor@xs4all.nl */
-void list_triggers(struct char_data *ch, zone_rnum rnum, trig_vnum vmin, trig_vnum vmax) {
+void list_triggers(Character *ch, zone_rnum rnum, trig_vnum vmin, trig_vnum vmax) {
     int i, bottom, top, counter = 0;
     char trgtypes[256];
 

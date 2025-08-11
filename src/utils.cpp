@@ -34,7 +34,7 @@
 char commastring[MAX_STRING_LENGTH];
 
 
-void dispel_ash(struct char_data *ch) {
+void dispel_ash(Character *ch) {
 
     auto ash = ch->location.findObjectVnum(1306);
     if(!ash) return;
@@ -51,7 +51,7 @@ void dispel_ash(struct char_data *ch) {
 
 }
 
-int has_group(struct char_data *ch) {
+int has_group(Character *ch) {
 
     struct follow_type *k, *next;
 
@@ -77,7 +77,7 @@ int has_group(struct char_data *ch) {
     return (false);
 }
 
-const char *report_party_health(struct char_data *ch) {
+const char *report_party_health(Character *ch) {
 
     if (!AFF_FLAGGED(ch, AFF_GROUP))
         return ("");
@@ -87,7 +87,7 @@ const char *report_party_health(struct char_data *ch) {
 
     struct follow_type *k, *next;
     int count = 0, stam1 = 8, stam2 = 8, stam3 = 8, stam4 = 8, plc1 = 4, plc2 = 4, plc3 = 4, plc4 = 4;
-    struct char_data *party1 = nullptr, *party2 = nullptr, *party3 = nullptr, *party4 = nullptr;
+    Character *party1 = nullptr, *party2 = nullptr, *party3 = nullptr, *party4 = nullptr;
     int64_t plperc1 = 0, plperc2 = 0, plperc3 = 0, plperc4 = 0;
     int64_t kiperc1 = 0, kiperc2 = 0, kiperc3 = 0, kiperc4 = 0;
     char result_party_health[MAX_STRING_LENGTH], result1[MAX_STRING_LENGTH], result2[MAX_STRING_LENGTH], result3[MAX_STRING_LENGTH], result4[MAX_STRING_LENGTH], result5[MAX_STRING_LENGTH];
@@ -436,7 +436,7 @@ const char *report_party_health(struct char_data *ch) {
 
 
 /* Check to see if anything interferes with their "knowing" the skill */
-int know_skill(struct char_data *ch, int skill) {
+int know_skill(Character *ch, int skill) {
 
     int know = 0;
 
@@ -469,7 +469,7 @@ int roll_aff_duration(int num, int add) {
     return (outcome);
 }
 
-void null_affect(struct char_data *ch, int aff_flag) {
+void null_affect(Character *ch, int aff_flag) {
     struct affected_type *af, *next_af;
 
     for (af = ch->affected; af; af = next_af) {
@@ -488,7 +488,7 @@ void null_affect(struct char_data *ch, int aff_flag) {
 }
 
 void
-assign_affect(struct char_data *ch, int aff_flag, int skill, int dur, int str, int con, int intel, int agl, int wis,
+assign_affect(Character *ch, int aff_flag, int skill, int dur, int str, int con, int intel, int agl, int wis,
               int spd) {
     struct affected_type af[6];
     int num = 0;
@@ -569,7 +569,7 @@ assign_affect(struct char_data *ch, int aff_flag, int skill, int dur, int str, i
     }
 }
 
-int sec_roll_check(struct char_data *ch) {
+int sec_roll_check(Character *ch) {
 
     int figure = 0, chance = 0, outcome = 0;
 
@@ -585,7 +585,7 @@ int sec_roll_check(struct char_data *ch) {
 }
 
 
-int64_t physical_cost(struct char_data *ch, int skill) {
+int64_t physical_cost(Character *ch, int skill) {
 
     int64_t result = 0;
 
@@ -638,7 +638,7 @@ int64_t physical_cost(struct char_data *ch, int skill) {
 }
 
 
-const char *disp_align(struct char_data *ch) {
+const char *disp_align(Character *ch) {
     int align;
 
     if (GET_ALIGNMENT(ch) < -800) { // Horrifically Evil
@@ -664,7 +664,7 @@ const char *disp_align(struct char_data *ch) {
     return (alignments[align]);
 }
 
-int read_sense_memory(struct char_data *ch, struct char_data *vict) {
+int read_sense_memory(Character *ch, Character *vict) {
     /* Read Sense File */
     if (!vict || vict == ch) {
         return 0;
@@ -682,7 +682,7 @@ int read_sense_memory(struct char_data *ch, struct char_data *vict) {
 }
 
 /* This writes a player's sense memory to file. */
-void sense_memory_write(struct char_data *ch, struct char_data *vict) {
+void sense_memory_write(Character *ch, Character *vict) {
     if (!vict || vict == ch) {
         return;
     }
@@ -698,7 +698,7 @@ void sense_memory_write(struct char_data *ch, struct char_data *vict) {
 }
 
 /* Will they manage to pursue a fleeing enemy? */
-int roll_pursue(struct char_data *ch, struct char_data *vict) {
+int roll_pursue(Character *ch, Character *vict) {
 
     int skill, perc = axion_dice(0);
 
@@ -763,7 +763,7 @@ int roll_pursue(struct char_data *ch, struct char_data *vict) {
 
 /* This updates the malfunctioning of certain objects that are damaged. */
 void broken_update(uint64_t heartPulse, double deltaTime) {
-    struct obj_data *k, *money;
+    Object *k, *money;
 
     int rand_gravity[14] = {0, 10, 20, 30, 40, 50, 100, 200, 300, 400, 500, 1000, 5000, 10000};
     int dice = rand_number(2, 12), grav_roll = 0, grav_change = false, health = 0;
@@ -831,7 +831,7 @@ void broken_update(uint64_t heartPulse, double deltaTime) {
 }
 
 
-bool wearable_obj(struct obj_data *obj) {
+bool wearable_obj(Object *obj) {
     for(auto i = 1; i < NUM_ITEM_WEARS; i++) {
         if(CAN_WEAR(obj, i)) {
             return true;
@@ -840,7 +840,7 @@ bool wearable_obj(struct obj_data *obj) {
     return false;
 }
 
-void randomize_eq(struct obj_data *obj) {
+void randomize_eq(Object *obj) {
     if (!wearable_obj(obj) || OBJ_FLAGGED(obj, ITEM_NORANDOM)) return;
 
     for(auto &aff : obj->affected) {
@@ -1274,13 +1274,13 @@ const char* sense_location_name(room_vnum roomnum) {
     }
 }
 
-const char *sense_location(struct char_data *ch) {
+const char *sense_location(Character *ch) {
     
     return sense_location_name(ch->getRoomVnum());
 
 }
 
-void reveal_hiding(struct char_data *ch, int type) {
+void reveal_hiding(Character *ch, int type) {
     if (IS_NPC(ch) || !AFF_FLAGGED(ch, AFF_HIDE))
         return;
 
@@ -1304,7 +1304,7 @@ void reveal_hiding(struct char_data *ch, int type) {
         }
     } else if (type == 2) { /* They were spotted */
         struct descriptor_data *d;
-        struct char_data *tch = nullptr;
+        Character *tch = nullptr;
         for (d = descriptor_list; d; d = d->next) {
             if (STATE(d) != CON_PLAYING)
                 continue;
@@ -1327,7 +1327,7 @@ void reveal_hiding(struct char_data *ch, int type) {
         }
     } else if (type == 3) { /* They were heard, reveal with different messages. */
         struct descriptor_data *d;
-        struct char_data *tch = nullptr;
+        Character *tch = nullptr;
 
         act("@MThe scouter makes some beeping sounds as you tinker with its buttons.@n", true, ch, nullptr, nullptr,
             TO_CHAR);
@@ -1360,8 +1360,8 @@ void reveal_hiding(struct char_data *ch, int type) {
     }
 }
 
-int block_calc(struct char_data *ch) {
-    struct char_data *blocker = nullptr;
+int block_calc(Character *ch) {
+    Character *blocker = nullptr;
 
     if (BLOCKED(ch)) {
         blocker = BLOCKED(ch);
@@ -1429,7 +1429,7 @@ int block_calc(struct char_data *ch) {
     return (1);
 }
 
-int64_t molt_threshold(struct char_data *ch) {
+int64_t molt_threshold(Character *ch) {
 
     int64_t threshold = 0, max = 2000000000;
 
@@ -1457,7 +1457,7 @@ int64_t molt_threshold(struct char_data *ch) {
     return std::min(threshold, max);
 }
 
-int armor_evolve(struct char_data *ch) {
+int armor_evolve(Character *ch) {
     int value = 0;
 
     if (GET_MOLT_LEVEL(ch) <= 5) {
@@ -1486,7 +1486,7 @@ int armor_evolve(struct char_data *ch) {
 }
 
 /* This handles arlian exoskeleton molting */
-void handle_evolution(struct char_data *ch, int64_t dmg) {
+void handle_evolution(Character *ch, int64_t dmg) {
 
     /* Reject NPCs and non-arlians */
     if (IS_NPC(ch) || !IS_ARLIAN(ch)) {
@@ -1567,7 +1567,7 @@ void handle_evolution(struct char_data *ch, int64_t dmg) {
 
 }
 
-void demon_refill_lf(struct char_data *ch, int64_t num) {
+void demon_refill_lf(Character *ch, int64_t num) {
     auto pe = ch->location.getPeople();
     for (auto tch : filter_raw(pe)) {
         if (!IS_DEMON(tch))
@@ -1581,7 +1581,7 @@ void demon_refill_lf(struct char_data *ch, int64_t num) {
 }
 
 
-void mob_talk(struct char_data *ch, const char *speech) {
+void mob_talk(Character *ch, const char *speech) {
 
     int stop = 1;
 
@@ -1606,7 +1606,7 @@ void mob_talk(struct char_data *ch, const char *speech) {
     } /* End for loop */
 } /* End Mob Talk */
 
-bool spar_friendly(struct char_data *ch, struct char_data *npc) {
+bool spar_friendly(Character *ch, Character *npc) {
     if(!IS_NPC(npc)) return false;
 
     if(!IS_HUMANOID(npc)) return false;
@@ -1629,7 +1629,7 @@ bool spar_friendly(struct char_data *ch, struct char_data *npc) {
 
 }
 
-int mob_respond(struct char_data *ch, struct char_data *vict, const char *speech) {
+int mob_respond(Character *ch, Character *vict, const char *speech) {
     if (ch && vict) {
         if (!IS_NPC(ch) && IS_NPC(vict)) {
             if ((strstr(speech, "hello") || strstr(speech, "greet") || strstr(speech, "Hello") ||
@@ -1878,7 +1878,7 @@ int mob_respond(struct char_data *ch, struct char_data *vict, const char *speech
     return 1;
 }
 
-bool is_sparring(struct char_data *ch) {
+bool is_sparring(Character *ch) {
 
     if(IS_NPC(ch)) {
         auto opponent = ch->fighting;
@@ -1889,7 +1889,7 @@ bool is_sparring(struct char_data *ch) {
     return ch->character_flags.get(CharacterFlag::sparring);
 }
 
-char *introd_calc(struct char_data *ch) {
+char *introd_calc(Character *ch) {
     static char intro[100];
 
     *intro = '\0';
@@ -1912,12 +1912,12 @@ char *introd_calc(struct char_data *ch) {
     return (intro);
 }
 
-double speednar(struct char_data *ch) {
+double speednar(Character *ch) {
     auto ratio = 1.0 - ch->getBaseStat("burden_ratio");
     return std::clamp<double>(ratio, 0.01, 1.0);
 }
 
-int64_t gear_exp(struct char_data *ch, int64_t exp) {
+int64_t gear_exp(Character *ch, int64_t exp) {
 
     if (IS_NPC(ch)) {
         return exp;
@@ -1928,7 +1928,7 @@ int64_t gear_exp(struct char_data *ch, int64_t exp) {
     return exp;
 }
 
-int planet_check(struct char_data *ch, struct char_data *vict) {
+int planet_check(Character *ch, Character *vict) {
     if (!ch) {
         basic_mud_log("ERROR: planet_check called without ch!");
         return false;
@@ -1940,7 +1940,7 @@ int planet_check(struct char_data *ch, struct char_data *vict) {
     return getPlanet(ch->getRoomVnum()) == getPlanet(vict->getRoomVnum());
 }
 
-void purge_homing(struct char_data *ch) {
+void purge_homing(Character *ch) {
 
     auto isHoming = [&](const auto& o) {return (o->getVnum() == 80 || o->getVnum() == 81) && (TARGET(o) == ch || USER(o) == ch);};
     auto gather = ch->location.gatherObjects(isHoming);
@@ -1959,7 +1959,7 @@ static std::unordered_set<uint16_t> masoSkills = {
         SKILL_TSKIN
 };
 
-void improve_skill(struct char_data *ch, int skill, int num) {
+void improve_skill(Character *ch, int skill, int num) {
     if (IS_NPC(ch))
         return;
 
@@ -2345,8 +2345,8 @@ time_t mud_time_to_secs(struct time_info_data *now) {
 
 /* Check if making CH follow VICTIM will create an illegal */
 /* Follow "Loop/circle"                                    */
-bool circle_follow(struct char_data *ch, struct char_data *victim) {
-    struct char_data *k;
+bool circle_follow(Character *ch, Character *victim) {
+    Character *k;
 
     for (k = victim; k; k = k->master) {
         if (k == ch)
@@ -2360,7 +2360,7 @@ bool circle_follow(struct char_data *ch, struct char_data *victim) {
 
 /* Called when stop following persons, or stopping charm */
 /* This will NOT do if a character quits/dies!!          */
-void stop_follower(struct char_data *ch) {
+void stop_follower(Character *ch) {
     struct follow_type *j, *k;
 
     if (ch->master == nullptr) {
@@ -2391,7 +2391,7 @@ void stop_follower(struct char_data *ch) {
     ch->master = nullptr;
 }
 
-int num_followers_charmed(struct char_data *ch) {
+int num_followers_charmed(Character *ch) {
     struct follow_type *lackey;
     int total = 0;
 
@@ -2405,9 +2405,9 @@ int num_followers_charmed(struct char_data *ch) {
     return (total);
 }
 
-void switch_leader(struct char_data *old, struct char_data *new_leader) {
+void switch_leader(Character *old, Character *new_leader) {
     struct follow_type *f;
-    struct char_data *tch = nullptr;
+    Character *tch = nullptr;
 
     for (f = old->followers; f; f = f->next) {
         if (f->follower == new_leader) {
@@ -2423,7 +2423,7 @@ void switch_leader(struct char_data *old, struct char_data *new_leader) {
 }
 
 /* Called when a character that follows/is followed dies */
-void die_follower(struct char_data *ch) {
+void die_follower(Character *ch) {
     struct follow_type *j, *k;
 
     if (ch->master)
@@ -2439,7 +2439,7 @@ void die_follower(struct char_data *ch) {
 
 /* Do NOT call this before having checked if a circle of followers */
 /* will arise. CH will follow leader                               */
-void add_follower(struct char_data *ch, struct char_data *leader) {
+void add_follower(Character *ch, Character *leader) {
     struct follow_type *k;
 
     if (ch->master) {
@@ -2604,7 +2604,7 @@ int get_filename(char *filename, size_t fbufsize, int mode, const char *orig_nam
 }
 
 
-int num_pc_in_room(struct room_data *room) {
+int num_pc_in_room(Room *room) {
     int i = 0;
 
     auto pe = room->getPeople();
@@ -2770,7 +2770,7 @@ int *default_admin_flags[ADMLVL_IMPL + 1] = {
         default_admin_flags_impl
 };
 
-void admin_set(struct char_data *ch, int value) {
+void admin_set(Character *ch, int value) {
     int i;
     int orig = GET_ADMLEVEL(ch);
 
@@ -2879,11 +2879,11 @@ int get_flag_by_name(const char *flag_list[], char *flag_name) {
     return (NOFLAG);
 }
 
-int16_t GET_SKILL_BONUS(struct char_data *ch, uint16_t skill) {
+int16_t GET_SKILL_BONUS(Character *ch, uint16_t skill) {
     return ch->getAffectModifier(APPLY_SKILL, skill);
 }
 
-int16_t GET_SKILL_PERF(struct char_data *ch, uint16_t skill) {
+int16_t GET_SKILL_PERF(Character *ch, uint16_t skill) {
     auto found = ch->skill.find(static_cast<Skill>(skill));
     if (found != ch->skill.end()) {
         return found->second.perfs;
@@ -2891,7 +2891,7 @@ int16_t GET_SKILL_PERF(struct char_data *ch, uint16_t skill) {
     return 0;
 }
 
-int16_t GET_SKILL_BASE(struct char_data *ch, uint16_t skill) {
+int16_t GET_SKILL_BASE(Character *ch, uint16_t skill) {
     auto found = ch->skill.find(static_cast<Skill>(skill));
     if (found != ch->skill.end()) {
         return found->second.level;
@@ -2899,29 +2899,29 @@ int16_t GET_SKILL_BASE(struct char_data *ch, uint16_t skill) {
     return 0;
 }
 
-int16_t GET_SKILL(struct char_data *ch, uint16_t skill) {
+int16_t GET_SKILL(Character *ch, uint16_t skill) {
     return GET_SKILL_BASE(ch, skill) + GET_SKILL_BONUS(ch, skill);
 }
 
-void SET_SKILL(struct char_data *ch, uint16_t skill, int16_t val) {
+void SET_SKILL(Character *ch, uint16_t skill, int16_t val) {
     auto &s = ch->skill[static_cast<Skill>(skill)];
     s.level = val;
 }
 
-void SET_SKILL_BONUS(struct char_data *ch, uint16_t skill, int16_t val) {
+void SET_SKILL_BONUS(Character *ch, uint16_t skill, int16_t val) {
 
 }
 
-void SET_SKILL_PERF(struct char_data *ch, uint16_t skill, int16_t val) {
+void SET_SKILL_PERF(Character *ch, uint16_t skill, int16_t val) {
     auto &s = ch->skill[static_cast<Skill>(skill)];
     s.perfs = val;
 }
 
-bool OBJ_FLAGGED(struct obj_data *obj, int flag) {
+bool OBJ_FLAGGED(Object *obj, int flag) {
     return obj->item_flags.get(flag);
 }
 
-bool OBJAFF_FLAGGED(struct obj_data *obj, int flag) {
+bool OBJAFF_FLAGGED(Object *obj, int flag) {
     return obj->affect_flags.get(flag);
 }
 
@@ -2939,33 +2939,33 @@ bool WHERE_FLAGGED(room_vnum loc, WhereFlag flag) {
     return false;
 }
 
-bool WHERE_FLAGGED(struct room_data *loc, WhereFlag flag) {
+bool WHERE_FLAGGED(Room *loc, WhereFlag flag) {
     if(!loc) return false;
     return loc->where_flags.get(flag);
 }
 
-bool ROOM_FLAGGED(struct room_data *loc, int flag) {
+bool ROOM_FLAGGED(Room *loc, int flag) {
     if(!loc) return false;
     return loc->room_flags.get(flag);
 }
 
-bool ADM_FLAGGED(struct char_data *ch, int flag) {
+bool ADM_FLAGGED(Character *ch, int flag) {
     return ch->admin_flags.get(flag);
 }
 
-bool PRF_FLAGGED(struct char_data *ch, int flag) {
+bool PRF_FLAGGED(Character *ch, int flag) {
     return ch->pref_flags.get(flag);
 }
 
-bool PLR_FLAGGED(struct char_data *ch, int flag) {
+bool PLR_FLAGGED(Character *ch, int flag) {
     return ch->player_flags.get(flag);
 }
 
-bool AFF_FLAGGED(struct npc_proto_data *ch, int flag) {
+bool AFF_FLAGGED(CharacterPrototype *ch, int flag) {
     return ch->affect_flags.get(flag);
 }
 
-bool AFF_FLAGGED(struct char_data *ch, int flag) {
+bool AFF_FLAGGED(Character *ch, int flag) {
     if(ch->affect_flags.get(flag)) return true;
     for(auto i = 0; i < NUM_WEARS; i++)
         if(auto eq = GET_EQ(ch, i); eq)
@@ -2973,12 +2973,12 @@ bool AFF_FLAGGED(struct char_data *ch, int flag) {
     return false;
 }
 
-bool ETHER_STREAM(struct char_data *ch) {
+bool ETHER_STREAM(Character *ch) {
     return ch->location.getEnvironment(ENV_ETHER_STREAM) > 0;
 }
 
 
-int GET_SPEEDI(struct char_data *ch) {
+int GET_SPEEDI(Character *ch) {
     return (GET_SPEEDCALC(ch) + GET_SPEEDBONUS(ch) + GET_SPEEDBOOST(ch) + GET_MUTBOOST(ch));
 }
 
@@ -3008,7 +3008,7 @@ bool is_all_alpha(const std::string& str) {
     });
 }
 
-void craftProgress(char_data* ch) {
+void craftProgress(Character* ch) {
     bool continueCraft = true;
     continueCraft = ch->craftingDeck.playTopCard(ch);
 
@@ -3027,7 +3027,7 @@ void craftProgress(char_data* ch) {
     }
 }
 
-void doContinuedTask(char_data* ch) {
+void doContinuedTask(Character* ch) {
     auto task = ch->task;
 
     if (task == Task::meditate) {
@@ -3052,7 +3052,7 @@ void doContinuedTask(char_data* ch) {
     }
 }
 
-void WAIT_STATE(struct char_data *ch, double timeToWait) {
+void WAIT_STATE(Character *ch, double timeToWait) {
     ch->setBaseStat("waitTime", timeToWait);
     characterSubscriptions.subscribe("commandWaitQueue", ch);
 }

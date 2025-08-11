@@ -177,7 +177,7 @@ void medit_save_to_disk(zone_vnum foo) {
 }
 
 void medit_setup_new(struct descriptor_data *d) {
-    auto mob = new npc_proto_data();
+    auto mob = new CharacterPrototype();
     init_mobile(mob);
     /*
      * Set up some default strings.
@@ -199,7 +199,7 @@ void medit_setup_existing(struct descriptor_data *d, int rmob_num) {
     /*
      * Allocate a scratch mobile structure.
      */
-    auto mob = new npc_proto_data();
+    auto mob = new CharacterPrototype();
     *mob = mob_proto.at(rmob_num);
 
     OLC_MOB(d) = mob;
@@ -217,7 +217,7 @@ void medit_setup_existing(struct descriptor_data *d, int rmob_num) {
  * Ideally, this function should be in db.c, but I'll put it here for
  * portability.
  */
-void init_mobile(struct npc_proto_data *mob) {
+void init_mobile(CharacterPrototype *mob) {
     GET_NDD(mob) = 0;
 
     mob->setBaseStat("weight", rand_number(100, 200));
@@ -235,7 +235,7 @@ void medit_save_internally(struct descriptor_data *d) {
     int i;
     mob_rnum new_rnum;
     struct descriptor_data *dsc;
-    struct char_data *mob;
+    Character *mob;
 
     i = (real_mobile(OLC_NUM(d)) == NOBODY);
 
@@ -395,7 +395,7 @@ void medit_disp_size(struct descriptor_data *d) {
  * Display main menu.
  */
 void medit_disp_menu(struct descriptor_data *d) {
-    struct npc_proto_data *mob;
+    CharacterPrototype *mob;
     char flags[MAX_STRING_LENGTH], flag2[MAX_STRING_LENGTH];
 
     mob = OLC_MOB(d);

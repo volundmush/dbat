@@ -12,40 +12,40 @@
 #include "structs.h"
 
 /* handling the affected-structures */
-extern void update_char_objects(struct char_data *ch);    /* handler.c */
-extern void item_check(struct obj_data *object, struct char_data *ch);
+extern void update_char_objects(Character *ch);    /* handler.c */
+extern void item_check(Object *object, Character *ch);
 
-extern void affect_total(struct char_data *ch);
+extern void affect_total(Character *ch);
 
-extern void affect_modify(struct char_data *ch, int loc, int mod, int spec, long bitv, bool add);
+extern void affect_modify(Character *ch, int loc, int mod, int spec, long bitv, bool add);
 
-extern void affect_to_char(struct char_data *ch, struct affected_type *af);
+extern void affect_to_char(Character *ch, struct affected_type *af);
 
-extern void affect_remove(struct char_data *ch, struct affected_type *af);
+extern void affect_remove(Character *ch, struct affected_type *af);
 
-extern void affect_from_char(struct char_data *ch, int type);
+extern void affect_from_char(Character *ch, int type);
 
-extern bool affected_by_spell(struct char_data *ch, int type);
+extern bool affected_by_spell(Character *ch, int type);
 
-extern bool affectedv_by_spell(struct char_data *ch, int type);
+extern bool affectedv_by_spell(Character *ch, int type);
 
-extern void affect_join(struct char_data *ch, struct affected_type *af,
+extern void affect_join(Character *ch, struct affected_type *af,
                         bool add_dur, bool avg_dur, bool add_mod, bool avg_mod);
 
-extern void affectv_join(struct char_data *ch, struct affected_type *af,
+extern void affectv_join(Character *ch, struct affected_type *af,
                          bool add_dur, bool avg_dur, bool add_mod, bool avg_mod);
 
-extern void affectv_remove(struct char_data *ch, struct affected_type *af);
+extern void affectv_remove(Character *ch, struct affected_type *af);
 
-extern void affectv_to_char(struct char_data *ch, struct affected_type *af);
+extern void affectv_to_char(Character *ch, struct affected_type *af);
 
-extern void affectv_from_char(struct char_data *ch, int type);
+extern void affectv_from_char(Character *ch, int type);
 
 
 /* utility */
 const char *money_desc(int amount);
 
-struct obj_data *create_money(int amount);
+Object *create_money(int amount);
 
 extern int isname(const char *str, const char *namelist);
 
@@ -55,70 +55,70 @@ extern char *fname(const char *namelist);
 
 extern int get_number(char **name);
 
-const char *get_i_name(struct char_data *ch, struct char_data *vict);
+const char *get_i_name(Character *ch, Character *vict);
 
 /* ******** objects *********** */
 
-extern void obj_to_char(struct obj_data *object, struct char_data *ch);
+extern void obj_to_char(Object *object, Character *ch);
 
-extern void obj_from_char(struct obj_data *object);
+extern void obj_from_char(Object *object);
 
-extern void equip_char(struct char_data *ch, struct obj_data *obj, int pos);
+extern void equip_char(Character *ch, Object *obj, int pos);
 
-struct obj_data *unequip_char(struct char_data *ch, int pos);
+Object *unequip_char(Character *ch, int pos);
 
-extern int invalid_align(struct char_data *ch, struct obj_data *obj);
+extern int invalid_align(Character *ch, Object *obj);
 
-extern void obj_to_room(struct obj_data *object, struct room_data *room);
+extern void obj_to_room(Object *object, Room *room);
 
-extern void obj_from_room(struct obj_data *object);
+extern void obj_from_room(Object *object);
 
-extern void obj_to_obj(struct obj_data *obj, struct obj_data *obj_to);
+extern void obj_to_obj(Object *obj, Object *obj_to);
 
-extern void obj_from_obj(struct obj_data *obj);
+extern void obj_from_obj(Object *obj);
 
-extern void extract_obj(struct obj_data *obj);
+extern void extract_obj(Object *obj);
 
 /* ******* characters ********* */
 
-struct char_data *get_char_room(char *name, int *num, room_rnum room);
+Character *get_char_room(char *name, int *num, room_rnum room);
 
-struct char_data *get_char_num(mob_rnum nr);
+Character *get_char_num(mob_rnum nr);
 
-extern void char_from_room(struct char_data *ch);
+extern void char_from_room(Character *ch);
 
-extern void char_to_room(struct char_data *ch, struct room_data *room);
-extern void char_to_room(struct char_data *ch, room_rnum room);
+extern void char_to_room(Character *ch, Room *room);
+extern void char_to_room(Character *ch, room_rnum room);
 
-extern void char_to_location(struct char_data *ch, const Location& loc);
-extern void char_to_location(struct char_data *ch, const thing_data* td);
+extern void char_to_location(Character *ch, const Location& loc);
+extern void char_to_location(Character *ch, const AbstractThing* td);
 
-extern void extract_char(struct char_data *ch);
+extern void extract_char(Character *ch);
 
-extern void extract_char_final(struct char_data *ch);
+extern void extract_char_final(Character *ch);
 
 extern void extract_pending_chars(uint64_t heartBeat, double deltaTime);
 
 /* find if character can see */
-struct char_data *get_player_vis(struct char_data *ch, char *name, int *number, int inroom);
+Character *get_player_vis(Character *ch, char *name, int *number, int inroom);
 
-struct char_data *get_char_vis(struct char_data *ch, char *name, int *number, int where);
+Character *get_char_vis(Character *ch, char *name, int *number, int where);
 
-struct char_data *get_char_room_vis(struct char_data *ch, char *name, int *number);
+Character *get_char_room_vis(Character *ch, char *name, int *number);
 
-struct char_data *get_char_world_vis(struct char_data *ch, char *name, int *number);
+Character *get_char_world_vis(Character *ch, char *name, int *number);
 
-struct obj_data *get_obj_num(obj_rnum nr);
+Object *get_obj_num(obj_rnum nr);
 
-struct obj_data *get_obj_in_list_vis(struct char_data *ch, const char *name, int *number, const std::vector<std::weak_ptr<obj_data>> &list);
+Object *get_obj_in_list_vis(Character *ch, const char *name, int *number, const std::vector<std::weak_ptr<Object>> &list);
 
-struct obj_data *get_obj_vis(struct char_data *ch, char *name, int *num);
+Object *get_obj_vis(Character *ch, char *name, int *num);
 
-struct obj_data *get_obj_in_equip_vis(struct char_data *ch, char *arg, int *number, const std::map<int, struct obj_data*>& equipment);
+Object *get_obj_in_equip_vis(Character *ch, char *arg, int *number, const std::map<int, Object*>& equipment);
 
-extern int get_obj_pos_in_equip_vis(struct char_data *ch, char *arg, int *num, const std::map<int, struct obj_data*>& equipment);
+extern int get_obj_pos_in_equip_vis(Character *ch, char *arg, int *num, const std::map<int, Object*>& equipment);
 
-extern int find_eq_pos(struct char_data *ch, struct obj_data *obj, char *arg);
+extern int find_eq_pos(Character *ch, Object *obj, char *arg);
 
 
 /* find all dots */
@@ -132,8 +132,8 @@ constexpr int FIND_ALLDOT = 2;
 
 /* Generic Find */
 
-extern int generic_find(const char *arg, bitvector_t bitvector, struct char_data *ch,
-                        struct char_data **tar_ch, struct obj_data **tar_obj);
+extern int generic_find(const char *arg, bitvector_t bitvector, Character *ch,
+                        Character **tar_ch, Object **tar_obj);
 
 #define FIND_CHAR_ROOM     (1 << 0)
 #define FIND_CHAR_WORLD    (1 << 1)

@@ -40,7 +40,7 @@ void perform_complex_alias(struct txt_q *input_q, char *orig, struct alias_data 
 
 int reserved_word(char *argument);
 
-int command_pass(char *cmd, struct char_data *ch);
+int command_pass(char *cmd, Character *ch);
 
 void payout(int num);
 
@@ -91,7 +91,7 @@ const char *reserved[] =
  * It makes sure you are the proper level and position to execute the command,
  * then calls the appropriate function.
  */
-void command_interpreter(struct char_data *ch, char *argument) {
+void command_interpreter(Character *ch, char *argument) {
     int cmd, length;
     int skip_ld = 0;
     char *line;
@@ -180,7 +180,7 @@ void commandWaitQueue(uint64_t heartPulse, double deltaTime) {
     }
 }
 
-void processCommand(char_data* ch, int cmd, std::string ln) {
+void processCommand(Character* ch, int cmd, std::string ln) {
     char blah[MAX_INPUT_LENGTH];
     int skip_ld = 0;
     char *line = ln.data();
@@ -589,7 +589,7 @@ void topLoad() {
 }
 
 /* Write the toplist to file */
-void topWrite(struct char_data *ch) {
+void topWrite(Character *ch) {
     if (GET_ADMLEVEL(ch) > 0 || IS_NPC(ch))
         return;
 
@@ -1023,7 +1023,7 @@ int find_command(const char *command) {
 }
 
 
-int special(struct char_data *ch, int cmd, char *arg) {
+int special(Character *ch, int cmd, char *arg) {
     /* special in room? */
     if (auto func = ch->location.getSpecialFunc(); func)
         if (auto r = ch->getRoom(); r && func(ch, r, cmd, arg))
@@ -1095,7 +1095,7 @@ constexpr int UNSWITCH = 3;
 /* load the player, put them in the right room - used by copyover_recover too */
 void enter_player_game(struct descriptor_data *d) {
     IDXTYPE load_room;
-    struct char_data *check;
+    Character *check;
 
     d->character->timer = 0;
     reset_char(d->character);
@@ -1258,7 +1258,7 @@ void payout(int num) {
     }
 }
 
-int command_pass(char *cmd, struct char_data *ch) {
+int command_pass(char *cmd, Character *ch) {
 
     if (AFF_FLAGGED(ch, AFF_LIQUEFIED)) {
         if (strcasecmp(cmd, "liquefy") && strcasecmp(cmd, "ingest") && strcasecmp(cmd, "look") &&
@@ -1320,7 +1320,7 @@ int lockRead(char *name) {
 }
 
 /* For transfering money or doing things with an offline player */
-char *rIntro(struct char_data *ch, char *arg) {
+char *rIntro(Character *ch, char *arg) {
     char fname[40], filler[50], scrap[100], line[256];
     static char name[80];
     int known = false;
@@ -1354,7 +1354,7 @@ char *rIntro(struct char_data *ch, char *arg) {
 }
 
 
-void fingerUser(struct char_data *ch, struct account_data *account) {
+void fingerUser(Character *ch, struct Account *account) {
         ch->send_to("@D[@gUsername   @D: @w%-30s@D]@n\r\n", account->name.c_str());
         ch->send_to("@D[@gEmail      @D: @w%-30s@D]@n\r\n", account->email.c_str());
         ch->send_to("@D[@gTotal Slots@D: @w%-30d@D]@n\r\n", account->slots);

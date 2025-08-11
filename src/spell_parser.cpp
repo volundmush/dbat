@@ -26,9 +26,9 @@
 struct spell_info_type spell_info[SKILL_TABLE_SIZE];
 
 /* local functions */
-int mag_manacost(struct char_data *ch, int spellnum);
+int mag_manacost(Character *ch, int spellnum);
 
-void mag_nextstrike(int level, struct char_data *caster, int spellnum);
+void mag_nextstrike(int level, Character *caster, int spellnum);
 
 void unused_spell(int spl);
 
@@ -107,12 +107,12 @@ struct syllable syls[] = {
 
 const char *unused_spellname = "!UNUSED!"; /* So we can get &unused_spellname */
 
-int mag_manacost(struct char_data *ch, int spellnum) {
+int mag_manacost(Character *ch, int spellnum) {
     return 0;
 }
 
 
-int mag_kicost(struct char_data *ch, int spellnum) {
+int mag_kicost(Character *ch, int spellnum) {
     int i, min, tval;
     Sensei whichclass;
     return MAX(SINFO.ki_max - (SINFO.ki_change *
@@ -121,7 +121,7 @@ int mag_kicost(struct char_data *ch, int spellnum) {
 }
 
 
-void mag_nextstrike(int level, struct char_data *caster, int spellnum) {
+void mag_nextstrike(int level, Character *caster, int spellnum) {
     if (!caster)
         return;
     if (caster->actq) {
@@ -185,8 +185,8 @@ int find_skill_num(char *name, int sktype) {
  * This is also the entry point for non-spoken or unrestricted spells.
  * Spellnum 0 is legal but silently ignored here, to make callers simpler.
  */
-int call_magic(struct char_data *caster, struct char_data *cvict,
-               struct obj_data *ovict, int spellnum, int level, int casttype, char *arg) {
+int call_magic(Character *caster, Character *cvict,
+               Object *ovict, int spellnum, int level, int casttype, char *arg) {
     if (spellnum < 1 || spellnum > SKILL_TABLE_SIZE)
         return (0);
 
@@ -299,12 +299,12 @@ int call_magic(struct char_data *caster, struct char_data *cvict,
  * the DikuMUD format did not specify staff and wand levels in the world
  * files (this is a CircleMUD enhancement).
  */
-void mag_objectmagic(struct char_data *ch, struct obj_data *obj,
+void mag_objectmagic(Character *ch, Object *obj,
                      char *argument) {
     char arg[MAX_INPUT_LENGTH];
     int i, k;
-    struct char_data *tch = nullptr, *next_tch;
-    struct obj_data *tobj = nullptr;
+    Character *tch = nullptr, *next_tch;
+    Object *tobj = nullptr;
 
     one_argument(argument, arg);
 

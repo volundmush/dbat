@@ -47,7 +47,7 @@ constexpr int NUM_OF_SAVE_THROWS = 3;
 *  stuff related to the player file cleanup system			 *
 *************************************************************************/
 
-struct char_data *findPlayer(const std::string& name) {
+Character *findPlayer(const std::string& name) {
     for (auto& player : players) {
         if (boost::iequals(player.second.name, name)) {
             return player.second.character;
@@ -79,7 +79,7 @@ OpResult<> validate_pc_name(const std::string& name) {
     return {true, n};
 }
 
-bool canDeleteCharacter(std::weak_ptr<char_data> ref) {
+bool canDeleteCharacter(std::weak_ptr<Character> ref) {
     auto ch = ref.lock();
     if(!ch) return false;
 
@@ -93,7 +93,7 @@ bool canDeleteCharacter(std::weak_ptr<char_data> ref) {
     return true;
 }
 
-void deletePlayerCharacter(std::weak_ptr<char_data> ref) {
+void deletePlayerCharacter(std::weak_ptr<Character> ref) {
     if(!canDeleteCharacter(ref)) return;
 
     auto ch = ref.lock();
@@ -114,7 +114,7 @@ void deletePlayerCharacter(std::weak_ptr<char_data> ref) {
     characterSubscriptions.unsubscribeFromAll(ch);
 
     // Get a copy of player_data
-    player_data pdata = players.at(ch->id);
+    PlayerData pdata = players.at(ch->id);
 
     // Erase the character from the players map.
     players.erase(ch->id);
@@ -138,7 +138,7 @@ void deletePlayerCharacter(std::weak_ptr<char_data> ref) {
     uniqueCharacters.erase(ch->id);
 }
 
-bool account_data::canBeDeleted() {
+bool Account::canBeDeleted() {
     if(!descriptors.empty()) return false;
     for(auto ref : characters) {
         auto find = players.find(ref);

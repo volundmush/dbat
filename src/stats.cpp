@@ -4,11 +4,11 @@
 #include "dbat/filter.h"
 #include "dbat/random.h"
 
-StatHandler<struct char_data> charStats;
-StatHandler<struct obj_data> itemStats;
-StatHandler<struct room_data> roomStats;
-StatHandler<struct npc_proto_data> npcProtoStats;
-StatHandler<struct item_proto_data> itemProtoStats;
+StatHandler<Character> charStats;
+StatHandler<Object> itemStats;
+StatHandler<Room> roomStats;
+StatHandler<CharacterPrototype> npcProtoStats;
+StatHandler<ObjectPrototype> itemProtoStats;
 
 static void init_char_stats_attributes() {
     // attributes...
@@ -176,7 +176,7 @@ static void init_char_stats_vitals() {
 
     charStats.addStat("lifeforce")
         .setSetterFunc(nullptr)
-        .setGetterFunc([](struct char_data* target, const std::string& stat_name) {
+        .setGetterFunc([](Character* target, const std::string& stat_name) {
             auto lb = GET_LIFEBONUSES(target);
 
             return (IS_DEMON(target) ? (((GET_MAX_MANA(target) * 0.5) + (GET_MAX_MOVE(target) * 0.5)) * 0.75) + lb
@@ -194,7 +194,7 @@ static void init_char_stats_vitals() {
     })
     {
         charStats.addStat(statName)
-            .setOnChangeFunc([recoveryKey](char_data* target, const std::string& stat_name, double old_value, double new_value) {
+            .setOnChangeFunc([recoveryKey](Character* target, const std::string& stat_name, double old_value, double new_value) {
                 if (new_value > 0.0 && old_value <= 0.0) {
                     characterSubscriptions.subscribe(recoveryKey, target->shared());
                 } else if (new_value <= 0.0 && old_value > 0.0) {
@@ -204,7 +204,7 @@ static void init_char_stats_vitals() {
     }
 
     charStats.addStat("health_damage")
-        .setOnChangeFunc([](struct char_data* target, const std::string& stat_name, double old_value, double new_value) {
+        .setOnChangeFunc([](Character* target, const std::string& stat_name, double old_value, double new_value) {
             // Handle health changes here if needed
             auto lifeperc = GET_LIFEPERC(target);
             auto perc = (1.0 - new_value) * 100.0;
@@ -233,7 +233,7 @@ static void init_char_stats_derived() {
         .setApplyMultiplier(APPLY_CDER_MULT)
         .setApplyPostMultiplier(APPLY_CDER_POST)
         .addTag("derived")
-        .setGetterFunc([](struct char_data* target, const std::string& stat_name) {
+        .setGetterFunc([](Character* target, const std::string& stat_name) {
             // Example derived stat calculation
             double out = target->getEffectiveStat("weight") + 100.0;
             out += target->getEffectiveStat("strength") * 50.0;
@@ -245,7 +245,7 @@ static void init_char_stats_derived() {
     
     charStats.addStat("weight_inventory")
         .addTag("derived")
-        .setGetterFunc([](struct char_data* target, const std::string& stat_name) {
+        .setGetterFunc([](Character* target, const std::string& stat_name) {
             // Example derived stat calculation
             double weight = 0;
             auto objects = target->getObjects();
@@ -259,7 +259,7 @@ static void init_char_stats_derived() {
     
     itemStats.addStat("weight_inventory")
         .addTag("derived")
-        .setGetterFunc([](struct obj_data* target, const std::string& stat_name) {
+        .setGetterFunc([](Object* target, const std::string& stat_name) {
             // Example derived stat calculation
             double weight = 0;
             auto objects = target->getObjects();
@@ -273,7 +273,7 @@ static void init_char_stats_derived() {
     
     itemStats.addStat("weight_total")
         .addTag("derived")
-        .setGetterFunc([](struct obj_data* target, const std::string& stat_name) {
+        .setGetterFunc([](Object* target, const std::string& stat_name) {
             // Example derived stat calculation
             return target->getEffectiveStat("weight") + target->getBaseStat("weight_inventory");
         })
@@ -282,7 +282,7 @@ static void init_char_stats_derived() {
 
     charStats.addStat("weight_equipped")
         .addTag("derived")
-        .setGetterFunc([](struct char_data* target, const std::string& stat_name) {
+        .setGetterFunc([](Character* target, const std::string& stat_name) {
             // Example derived stat calculation
             double total_weight = 0;
 
@@ -298,7 +298,7 @@ static void init_char_stats_derived() {
     
     charStats.addStat("weight_carried")
         .addTag("derived")
-        .setGetterFunc([](struct char_data* target, const std::string& stat_name) {
+        .setGetterFunc([](Character* target, const std::string& stat_name) {
             // Example derived stat calculation
             return target->getBaseStat("weight_inventory") + target->getBaseStat("weight_equipped") + (target->carrying ? target->carrying->getEffectiveStat("weight_total") : 0);
         })
@@ -307,7 +307,7 @@ static void init_char_stats_derived() {
     
     charStats.addStat("weight_total")
         .addTag("derived")
-        .setGetterFunc([](struct char_data* target, const std::string& stat_name) {
+        .setGetterFunc([](Character* target, const std::string& stat_name) {
             // Example derived stat calculation
             return target->getEffectiveStat("weight") + target->getBaseStat("weight_carried");
         })
@@ -317,7 +317,7 @@ static void init_char_stats_derived() {
     charStats.addStat("carry_available")
         .setSpecific(1 << 3)
         .addTag("derived")
-        .setGetterFunc([](struct char_data* target, const std::string& stat_name) {
+        .setGetterFunc([](Character* target, const std::string& stat_name) {
             // Example derived stat calculation
             return target->getEffectiveStat("carry_capacity") - target->getBaseStat("weight_carried");
         })
@@ -326,7 +326,7 @@ static void init_char_stats_derived() {
     
     charStats.addStat("speednar")
         .addTag("derived")
-        .setGetterFunc([](struct char_data* target, const std::string& stat_name) {
+        .setGetterFunc([](Character* target, const std::string& stat_name) {
             // Example derived stat calculation
             double ratio = target->getBaseStat("weight_carried") / target->getEffectiveStat("carry_capacity");
             if (ratio >= 0.05) {
@@ -339,7 +339,7 @@ static void init_char_stats_derived() {
     
     charStats.addStat("burden_current")
         .addTag("derived")
-        .setGetterFunc([](struct char_data* target, const std::string& stat_name) {
+        .setGetterFunc([](Character* target, const std::string& stat_name) {
             // Example derived stat calculation
             auto total = target->getBaseStat("weight_total");
             total *= target->location.getEnvironment(ENV_GRAVITY);
@@ -350,7 +350,7 @@ static void init_char_stats_derived() {
     
     charStats.addStat("burden_ratio")
         .addTag("derived")
-        .setGetterFunc([](struct char_data* target, const std::string& stat_name) {
+        .setGetterFunc([](Character* target, const std::string& stat_name) {
             // Example derived stat calculation
             auto total = target->getBaseStat("burden_current");
             auto max = target->getEffectiveStat("carry_capacity");
@@ -373,7 +373,7 @@ static void init_char_stats_combat() {
         .setApplyBase(APPLY_COMBAT_BASE)
         .setApplyMultiplier(APPLY_COMBAT_MULT)
         .setSpecific(1 << 2)
-        .setPreEffectiveFunc([](struct char_data* target, const std::string& stat_name, double* total) {
+        .setPreEffectiveFunc([](Character* target, const std::string& stat_name, double* total) {
             // Example effective stat calculation
             *total += target->getBaseStat("armor_wishes") * 5000.0;
         })
@@ -411,7 +411,7 @@ static void init_char_stats_misc() {
         .setMinBaseValue(0.0)
         .setMaxBaseValue(100.0)
         .addTag("misc")
-        .setOnChangeFunc([](struct char_data* target, const std::string& stat_name, double old_value, double new_value) {
+        .setOnChangeFunc([](Character* target, const std::string& stat_name, double old_value, double new_value) {
             // Handle life percent changes here if needed
             if(IS_ANDROID(target)) return;
             auto lifeperc = new_value;
@@ -425,7 +425,7 @@ static void init_char_stats_misc() {
         ;
 
     charStats.addStat("absorbs")
-        .setInitFunc([](struct char_data* target, const std::string& stat_name) {
+        .setInitFunc([](Character* target, const std::string& stat_name) {
             if(target->race == Race::bio_android) return 3.0;
             return 0.0;
         })
@@ -433,7 +433,7 @@ static void init_char_stats_misc() {
         ;
 
     charStats.addStat("transBonus")
-        .setInitFunc([](struct char_data* target, const std::string& stat_name) {
+        .setInitFunc([](Character* target, const std::string& stat_name) {
             if(IS_NPC(target)) return 0.0;
             return Random::get<double>(-0.3, 0.3);
         })
@@ -590,14 +590,14 @@ static void init_item_stats() {
     }
 
     itemStats.addStat("timer")
-        .setInitFunc([] (struct obj_data* target, const std::string& stat_name) {
+        .setInitFunc([] (Object* target, const std::string& stat_name) {
             if(target->type_flag == ItemType::portal) {
                 return -1.0;
             }
             return 0.0;
         });
     itemProtoStats.addStat("timer")
-        .setInitFunc([] (struct item_proto_data* target, const std::string& stat_name) {
+        .setInitFunc([] (ObjectPrototype* target, const std::string& stat_name) {
             if(target->type_flag == ItemType::portal) {
                 return -1.0;
             }

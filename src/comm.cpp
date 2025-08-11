@@ -505,7 +505,7 @@ void record_usage(uint64_t heartPulse, double deltaTime) {
 
 char *make_prompt(struct descriptor_data *d) {
     static char prompt[MAX_PROMPT_LENGTH];
-    struct obj_data *chair = nullptr;
+    Object *chair = nullptr;
     int flagged = false;
 
     /* Note, prompt is truncated at MAX_PROMPT_LENGTH chars (structs.h) */
@@ -533,7 +533,7 @@ char *make_prompt(struct descriptor_data *d) {
         }
         /* show only when below 25% */
         if (PRF_FLAGGED(d->character, PRF_DISPAUTO) && GET_LEVEL(d->character) >= 500 && len < sizeof(prompt)) {
-            struct char_data *ch = d->character;
+            Character *ch = d->character;
             if (GET_HIT(ch) << 2 < GET_MAX_HIT(ch)) {
                 count = snprintf(prompt + len, sizeof(prompt) - len, "HL: %" I64T " ", GET_HIT(ch));
                 if (count >= 0)
@@ -1594,7 +1594,7 @@ void close_socket(struct descriptor_data *d) {
 **************************************************************** */
 
 
-int arena_watch(struct char_data *ch) {
+int arena_watch(Character *ch) {
 
     struct descriptor_data *d;
     int found = false, room = NOWHERE;
@@ -1628,12 +1628,12 @@ const char *ACTNULL = "<nullptr>";
 
 
 /* higher-level communication: the act() function */
-void perform_act(const char *orig, struct char_data *ch, struct obj_data *obj, const void *vict_obj, struct char_data *to) {
+void perform_act(const char *orig, Character *ch, Object *obj, const void *vict_obj, Character *to) {
     const char *i = nullptr;
     char lbuf[MAX_STRING_LENGTH], *buf, *j;
     bool uppercasenext = false;
-    struct char_data *dg_victim = nullptr;
-    struct obj_data *dg_target = nullptr;
+    Character *dg_victim = nullptr;
+    Object *dg_target = nullptr;
     char *dg_arg = nullptr;
 
     buf = lbuf;
@@ -1645,50 +1645,50 @@ void perform_act(const char *orig, struct char_data *ch, struct obj_data *obj, c
                     i = PERS(ch, to);
                     break;
                 case 'N':
-                    CHECK_NULL(vict_obj, PERS((struct char_data *) vict_obj, to));
-                    dg_victim = (struct char_data *) vict_obj;
+                    CHECK_NULL(vict_obj, PERS((Character *) vict_obj, to));
+                    dg_victim = (Character *) vict_obj;
                     break;
                 case 'm':
                     i = HMHR(ch);
                     break;
                 case 'M':
-                    CHECK_NULL(vict_obj, HMHR((struct char_data *) vict_obj));
-                    dg_victim = (struct char_data *) vict_obj;
+                    CHECK_NULL(vict_obj, HMHR((Character *) vict_obj));
+                    dg_victim = (Character *) vict_obj;
                     break;
                 case 's':
                     i = HSHR(ch);
                     break;
                 case 'S':
-                    CHECK_NULL(vict_obj, HSHR((struct char_data *) vict_obj));
-                    dg_victim = (struct char_data *) vict_obj;
+                    CHECK_NULL(vict_obj, HSHR((Character *) vict_obj));
+                    dg_victim = (Character *) vict_obj;
                     break;
                 case 'e':
                     i = HSSH(ch);
                     break;
                 case 'E':
-                    CHECK_NULL(vict_obj, HSSH((struct char_data *) vict_obj));
-                    dg_victim = (struct char_data *) vict_obj;
+                    CHECK_NULL(vict_obj, HSSH((Character *) vict_obj));
+                    dg_victim = (Character *) vict_obj;
                     break;
                 case 'o':
                     CHECK_NULL(obj, OBJN(obj, to));
                     break;
                 case 'O':
-                    CHECK_NULL(vict_obj, OBJN((struct obj_data *) vict_obj, to));
-                    dg_target = (struct obj_data *) vict_obj;
+                    CHECK_NULL(vict_obj, OBJN((Object *) vict_obj, to));
+                    dg_target = (Object *) vict_obj;
                     break;
                 case 'p':
                     CHECK_NULL(obj, OBJS(obj, to));
                     break;
                 case 'P':
-                    CHECK_NULL(vict_obj, OBJS((struct obj_data *) vict_obj, to));
-                    dg_target = (struct obj_data *) vict_obj;
+                    CHECK_NULL(vict_obj, OBJS((Object *) vict_obj, to));
+                    dg_target = (Object *) vict_obj;
                     break;
                 case 'a':
                     CHECK_NULL(obj, SANA(obj));
                     break;
                 case 'A':
-                    CHECK_NULL(vict_obj, SANA((struct obj_data *) vict_obj));
-                    dg_target = (struct obj_data *) vict_obj;
+                    CHECK_NULL(vict_obj, SANA((Object *) vict_obj));
+                    dg_target = (Object *) vict_obj;
                     break;
                 case 'T':
                     CHECK_NULL(vict_obj, (char *) vict_obj);
@@ -1751,9 +1751,9 @@ void perform_act(const char *orig, struct char_data *ch, struct obj_data *obj, c
 
 }
 
-char *act(const char *str, int hide_invisible, struct char_data *ch,
-          struct obj_data *obj, const void *vict_obj, int type) {
-    std::vector<std::weak_ptr<char_data>> to;
+char *act(const char *str, int hide_invisible, Character *ch,
+          Object *obj, const void *vict_obj, int type) {
+    std::vector<std::weak_ptr<Character>> to;
     int to_sleeping, res_sneak, res_hide, dcval = 0, resskill = 0;
 
     if (!str || !*str)
@@ -1806,7 +1806,7 @@ char *act(const char *str, int hide_invisible, struct char_data *ch,
     }
 
     if (type == TO_VICT) {
-        auto to = (struct char_data *) vict_obj;
+        auto to = (Character *) vict_obj;
         if (to != nullptr && SENDOK(to) &&
             (!resskill || (roll_skill(to, resskill) >= dcval))) {
             perform_act(str, ch, obj, vict_obj, to);

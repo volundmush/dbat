@@ -46,7 +46,7 @@ cdef extern from "dbat/structs.h":
         int spellname
         int pages
     
-    cdef cppclass account_data:
+    cdef cppclass Account:
         int id
         string name
         string password
@@ -68,11 +68,11 @@ cdef extern from "dbat/structs.h":
         bool setPassword(const string& password)
 
     
-    cdef struct player_data:
+    cdef struct PlayerData:
         int id
         string name
-        account_data* account
-        char_data* character
+        Account* account
+        Character* character
         unordered_set[int] sensePlayer
         unordered_set[int] senseMemory
         map[int, string] dubNames
@@ -82,7 +82,7 @@ cdef extern from "dbat/structs.h":
         cmdlist_element* original
         cmdlist_element* next
     
-    cdef cppclass trig_proto_data:
+    cdef cppclass DgScriptPrototype:
         int vn
         int8_t attach_type
         int8_t data_type
@@ -92,20 +92,20 @@ cdef extern from "dbat/structs.h":
         int narg
         char *arglist
 
-    cdef cppclass trig_data(trig_proto_data):
+    cdef cppclass DgScript(DgScriptPrototype):
         cmdlist_element* curr_state
         int depth
         int loops
         double waiting
         bool purged
         unordered_map[string, string] variables
-        unit_data* owner
+        Entity* owner
         int order
         int countLine(cmdlist_element* c) const
         bool active
-        shared_ptr[trig_data] shared()
+        shared_ptr[DgScript] shared()
 
-    cdef cppclass proto_data:
+    cdef cppclass ThingPrototype:
         int vn
 
         char* name
@@ -116,10 +116,19 @@ cdef extern from "dbat/structs.h":
         vector[int] proto_script
         unordered_map[string, double] stats
 
-    cdef cppclass unit_data:
+    cdef cppclass Coordinates:
+        int32_t x
+        int32_t y
+        int32_t z
+    
+    cdef cppclass Location:
+        Entity* unit
+        Coordinates position
+
+    cdef cppclass Entity:
         int getVnum() const
         int getType() const
-        unit_data* proto
+        Entity* proto
 
         # univeral strings.
         char* name
@@ -136,7 +145,7 @@ cdef extern from "dbat/structs.h":
         double getInventoryWeight()
         int64_t getInventoryCount()
 
-        vector[weak_ptr[obj_data]] getObjects()
+        vector[weak_ptr[Object]] getObjects()
 
         int id
         time_t generation
@@ -145,16 +154,16 @@ cdef extern from "dbat/structs.h":
 
         string getUID(bool active)
         bool isActive()
+
+        Location location
     
-    cdef cppclass thing_data(unit_data):
-        int in_room
-        room_data* room
-        room_data* getRoom() const
+    cdef cppclass AbstractThing(Entity):
+        Room* getRoom() const
         int getRoomVnum() const
 
         string getLocationName() const
-        room_direction_data* getLocationExit(int dir) const
-        map[int, room_direction_data*] getLocationExits() const
+        optional[Destination] getLocationExit(int dir) const
+        map[int, Destination] getLocationExits() const
 
         double getLocationEnvironment(int type) const
         double setLocationEnvironment(int type, double value) const
@@ -166,8 +175,8 @@ cdef extern from "dbat/structs.h":
         bool getRoomFlag(int flag) const
 
         void broadcastAtLocation(const string& message) const
-        vector[weak_ptr[obj_data]] getLocationObjects() const
-        vector[weak_ptr[char_data]] getLocationPeople() const
+        vector[weak_ptr[Object]] getLocationObjects() const
+        vector[weak_ptr[Character]] getLocationPeople() const
 
         int getLocationDamage() const
         int setLocationDamage(int amount) const
@@ -179,16 +188,16 @@ cdef extern from "dbat/structs.h":
         int setLocationGroundEffect(int val) const
         int modLocationGroundEffect(int val)
     
-    cdef cppclass item_proto_data(proto_data):
+    cdef cppclass ObjectPrototype(ThingPrototype):
         pass
 
-    cdef cppclass obj_data(thing_data):
+    cdef cppclass Object(AbstractThing):
         bool active
         
-        room_data* getAbsoluteRoom()
+        Room* getAbsoluteRoom()
         bool isWorking()
         void clearLocation()
-        shared_ptr[obj_data] shared()
+        shared_ptr[Object] shared()
         int room_loaded
 
         # can't convert the std::array value, skipping...
@@ -208,19 +217,19 @@ cdef extern from "dbat/structs.h":
         int size
         #skipping affected bitset...
 
-        obj_data* in_obj
-        char_data* carried_by
-        char_data* worn_by
+        Object* in_obj
+        Character* carried_by
+        Character* worn_by
         int16_t worn_on
-        unit_data* holder
+        Entity* holder
 
-        weak_ptr[char_data] sitting
+        weak_ptr[Character] sitting
         int scoutfreq
         time_t lload
         int64_t kicharge
         int kitype
-        char_data* user
-        char_data* target
+        Character* user
+        Character* target
         int distance
         int foob
         int64_t aucter
@@ -230,44 +239,40 @@ cdef extern from "dbat/structs.h":
         int startbid
         char *auctname
         int posttype
-        obj_data* posted_to
-        obj_data* fellow_wall
+        Object* posted_to
+        Object* fellow_wall
         optional[double] gravity
 
         bool isProvidingLight()
         double currentGravity()
     
 
-    cdef cppclass room_direction_data:
-        char* general_description
-        char* keyword
+    cdef cppclass Destination(Location):
+        string general_description
+        string keyword
         int16_t exit_info
         int key
-        int to_room
         int dclock
         int dchide
-        int dcskill
-        int dcmove
-        int failsavetype
-        int dcfailsave
-        int failroom
-        int totalfailroom
 
-        room_data* getDestination()
+        optional[Destination] getReverse() const
 
-    cdef cppclass room_data(unit_data):
+    cdef cppclass AbstractLocation(Entity):
+        pass
+
+    cdef cppclass Room(AbstractLocation):
         int zone
         vector[int] proto_script
         int sector_type
-        list[weak_ptr[char_data]] characters
+        list[weak_ptr[Character]] characters
         int timed
         int dmg
         int geffect
 
-        shared_ptr[room_data] shared()
+        shared_ptr[Room] shared()
         optional[int] getLaunchDestination()
 
-        vector[weak_ptr[char_data]] getPeople()
+        vector[weak_ptr[Character]] getPeople()
 
         double getEnvironment(int type)
         double setEnvironment(int type, double value)
@@ -300,7 +305,7 @@ cdef extern from "dbat/structs.h":
         int type
     
     cdef cppclass mob_special_data:
-        list[weak_ptr[char_data]] memory
+        list[weak_ptr[Character]] memory
         int attack_type
         int default_pos
         int damnodice
@@ -308,7 +313,7 @@ cdef extern from "dbat/structs.h":
         bool newitem
     
     cdef struct follow_type:
-        char_data* follower
+        Character* follower
         follow_type* next
     
     cdef struct skill_data:
@@ -316,7 +321,7 @@ cdef extern from "dbat/structs.h":
         int16_t perfs
     
     cdef cppclass trans_data:
-        char* description
+        string description
         double timeSpentInForm
         int grade
         bool visible
@@ -325,11 +330,11 @@ cdef extern from "dbat/structs.h":
         double vars[5]
         double blutz
 
-    cdef cppclass npc_proto_data(proto_data):
+    cdef cppclass CharacterPrototype(ThingPrototype):
         pass
 
-    cdef cppclass char_data(thing_data):
-        shared_ptr[char_data] shared()
+    cdef cppclass Character(AbstractThing):
+        shared_ptr[Character] shared()
         char* title
 
     cdef struct weather_data:
@@ -339,7 +344,7 @@ cdef extern from "dbat/structs.h":
         int vn
 
         char* farg
-        trig_data* proto
+        DgScript* proto
     
     cdef cppclass shop_buy_data:
         int type
@@ -370,9 +375,9 @@ cdef extern from "dbat/structs.h":
         string sarg1
         string sarg2
     
-    cdef cppclass zone_data:
-        char* name
-        char* builders
+    cdef cppclass Zone:
+        string name
+        string builders
         int lifespan
         double age
         int bot
@@ -384,16 +389,16 @@ cdef extern from "dbat/structs.h":
         int max_level
         uint32_t zone_flags[4]
 
-        unordered_set[int] rooms
+        list[weak_ptr[Room]] rooms
         unordered_set[int] mobiles
         unordered_set[int] objects
         unordered_set[int] shops
         unordered_set[int] triggers
         unordered_set[int] guilds
 
-        list[weak_ptr[char_data]] npcsInZone
-        list[weak_ptr[char_data]] playersInZone
-        list[weak_ptr[obj_data]] objectsInZone
+        list[weak_ptr[Character]] npcsInZone
+        list[weak_ptr[Character]] playersInZone
+        list[weak_ptr[Object]] objectsInZone
 
 
 cdef extern from "dbat/account.h":

@@ -40,24 +40,24 @@
 #include "dbat/random.h"
 
 /* local functions */
-static int has_scanner(struct char_data *ch);
+static int has_scanner(Character *ch);
 
-static void boost_obj(struct obj_data *obj, struct char_data *ch, int type);
+static void boost_obj(Object *obj, Character *ch, int type);
 
 static int
-perform_group(struct char_data *ch, struct char_data *vict, int highlvl, int lowlvl, int64_t highpl, int64_t lowpl);
+perform_group(Character *ch, Character *vict, int highlvl, int lowlvl, int64_t highpl, int64_t lowpl);
 
-static void print_group(struct char_data *ch);
+static void print_group(Character *ch);
 
-static void check_eq(struct char_data *ch);
+static void check_eq(Character *ch);
 
-static int spell_in_book(struct obj_data *obj, int spellnum);
+static int spell_in_book(Object *obj, int spellnum);
 
-static int spell_in_scroll(struct obj_data *obj, int spellnum);
+static int spell_in_scroll(Object *obj, int spellnum);
 
-static int spell_in_domain(struct char_data *ch, int spellnum);
+static int spell_in_domain(Character *ch, int spellnum);
 
-static void show_clan_info(struct char_data *ch);
+static void show_clan_info(Character *ch);
 
 // definitions
 void log_imm_action(const char *messg, ...) {
@@ -107,7 +107,7 @@ void log_imm_action(const char *messg, ...) {
 
 }
 
-void log_custom(struct descriptor_data *d, struct obj_data *obj) {
+void log_custom(struct descriptor_data *d, Object *obj) {
     FILE *fl;
     const char *filename;
     struct stat fbuf;
@@ -143,7 +143,7 @@ void log_custom(struct descriptor_data *d, struct obj_data *obj) {
 }
 
 /* Used by do_rpp for soft-cap */
-void bring_to_cap(struct char_data *ch) {
+void bring_to_cap(Character *ch) {
 
     auto cap = ch->calc_soft_cap();
 
@@ -160,7 +160,7 @@ ACMD(do_rpp) {
     char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
     int tnlcost = 1, revcost = 1, selection = 0, pay = 0, bpay = 0;
     int max_choice = 15; /* Controls the maximum number of menu choices */
-    struct obj_data *obj;
+    Object *obj;
 
     half_chop(argument, arg, arg2);
 
@@ -529,7 +529,7 @@ ACMD(do_rpp) {
                 return;
             } else {
                                 ch->sendText("You now have an Excel House Capsule!\r\n");
-                struct obj_data *hobj = read_object(6, VIRTUAL);
+                Object *hobj = read_object(6, VIRTUAL);
                 obj_to_char(hobj, ch);
                 ch->modRPP(-pay);
                                 ch->send_to("@R%d@W RPP paid for your selection. Enjoy!@n\r\n", pay);
@@ -736,7 +736,7 @@ ACMD(do_grapple) {
         return;
     }
 
-    struct char_data *vict;
+    Character *vict;
     char arg[200], arg2[200];
 
     two_arguments(argument, arg, arg2);
@@ -961,7 +961,7 @@ ACMD(do_grapple) {
 ACMD(do_trip) {
 
     char arg[200];
-    struct char_data *vict = nullptr;
+    Character *vict = nullptr;
 
     one_argument(argument, arg);
 
@@ -1287,7 +1287,7 @@ ACMD(do_train) {
 
 }
 
-void trainProgress(char_data* ch) {
+void trainProgress(Character* ch) {
     if (ch->getBaseStat("burden_ratio") >= 1.0) {
                 ch->sendText("You are weighted down too much!\r\n");
         return;
@@ -1697,7 +1697,7 @@ void trainProgress(char_data* ch) {
 }
 
 ACMD(do_rip) {
-    struct char_data *vict;
+    Character *vict;
     char arg[MAX_INPUT_LENGTH];
 
     one_argument(argument, arg);
@@ -1801,7 +1801,7 @@ ACMD(do_infuse) {
 }
 
 ACMD(do_paralyze) {
-    struct char_data *vict;
+    Character *vict;
     char arg[MAX_INPUT_LENGTH];
 
     one_argument(argument, arg);
@@ -1978,8 +1978,8 @@ ACMD(do_kura) {
 
 ACMD(do_candy) {
 
-    struct char_data *vict;
-    struct obj_data *obj;
+    Character *vict;
+    Object *obj;
     char arg[MAX_INPUT_LENGTH];
 
     one_argument(argument, arg);
@@ -2064,7 +2064,7 @@ ACMD(do_candy) {
 
 ACMD(do_future) {
     char arg[MAX_INPUT_LENGTH];
-    struct char_data *vict = nullptr;
+    Character *vict = nullptr;
     one_argument(argument, arg);
 
     if (IS_NPC(ch) || !IS_KANASSAN(ch)) {
@@ -2128,7 +2128,7 @@ ACMD(do_future) {
 }
 
 ACMD(do_drag) {
-    struct char_data *vict = nullptr;
+    Character *vict = nullptr;
     char arg[MAX_INPUT_LENGTH];
 
     one_argument(argument, arg);
@@ -2341,8 +2341,8 @@ ACMD(do_hass) {
 
 ACMD(do_implant) {
 
-    struct obj_data *limb = nullptr, *obj = nullptr, *next_obj;
-    struct char_data *vict = nullptr;
+    Object *limb = nullptr, *obj = nullptr, *next_obj;
+    Character *vict = nullptr;
     char arg[MAX_INPUT_LENGTH];
     char arg2[MAX_INPUT_LENGTH];
     int found = false;
@@ -2630,7 +2630,7 @@ ACMD(do_fury) {
 
 /* End of do_fury for halfbreeds to release their raaage, rawrg! */
 
-void hint_system(struct char_data *ch, int num) {
+void hint_system(Character *ch, int num) {
     const char *hints[22] = {"Remember to save often.", /* 0 */
                              "Remember to eat or drink if you want to stay alive.", /* 1 */
                              "It is a good idea to save up PS for learning skills instead of just practicing them.", /* 2 */
@@ -2691,7 +2691,7 @@ ACMD(do_think) {
                 ch->sendText("Syntax: think (message)\r\n");
         return;
     } else {
-        struct char_data *tch;
+        Character *tch;
         tch = MINDLINK(ch);
                 ch->send_to("@c%s@w reads your thoughts, '@C%s@w'@n\r\n", GET_NAME(tch), argument);
                 tch->send_to("@c%s@w thinks, '@C%s@w'@n\r\n", GET_NAME(ch), argument);
@@ -2703,7 +2703,7 @@ ACMD(do_think) {
 }
 
 ACMD(do_telepathy) {
-    struct char_data *vict;
+    Character *vict;
     char arg[MAX_INPUT_LENGTH];
     char arg2[MAX_INPUT_LENGTH];
 
@@ -2930,7 +2930,7 @@ ACMD(do_telepathy) {
 ACMD(do_potential) {
     int boost = 0;
 
-    struct char_data *vict;
+    Character *vict;
     char arg[MAX_INPUT_LENGTH];
 
     one_argument(argument, arg);
@@ -3000,7 +3000,7 @@ ACMD(do_potential) {
 
 ACMD(do_majinize) {
 
-    struct char_data *vict;
+    Character *vict;
     char arg[MAX_INPUT_LENGTH];
 
     one_argument(argument, arg);
@@ -3096,7 +3096,7 @@ ACMD(do_majinize) {
 
 ACMD(do_spit) {
     int cost = 0;
-    struct char_data *vict;
+    Character *vict;
     struct affected_type af;
     char arg[MAX_INPUT_LENGTH];
 
@@ -3187,7 +3187,7 @@ ACMD(do_spit) {
 
 /* This handles increasing the stats of a created object based on the skill *
  * and/or stats of the user.                                                */
-static void boost_obj(struct obj_data *obj, struct char_data *ch, int type) {
+static void boost_obj(Object *obj, Character *ch, int type) {
 
     if (!obj || !ch)
         return;
@@ -3266,7 +3266,7 @@ ACMD(do_form) {
     int clothes = false, wrist = false, boots = false, level = 0;
     double discount = 1.0;
     int64_t cost = 0;
-    struct obj_data *obj;
+    Object *obj;
     char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH], arg3[MAX_INPUT_LENGTH], clam[MAX_INPUT_LENGTH];
 
     half_chop(argument, arg, clam);
@@ -3592,7 +3592,7 @@ ACMD(do_form) {
             return;
         }
 
-        struct char_data *vict = nullptr;
+        Character *vict = nullptr;
 
         if (!(vict = get_char_vis(ch, arg2, nullptr, FIND_CHAR_ROOM))) {
                         ch->sendText("Clothesbeam who?\r\nSyntax: create clothesbeam (target)\r\n");
@@ -4002,7 +4002,7 @@ ACMD(do_upgrade) {
     }
 
     if (!strcasecmp("augment", arg)) {
-        struct obj_data *obj = nullptr;
+        Object *obj = nullptr;
         int64_t gain = 0;
         if (GET_WIS(ch) < 80) {
                         ch->sendText("You need to be at least Wisdom 80 to use these kits.\r\n");
@@ -4220,7 +4220,7 @@ ACMD(do_upgrade) {
 ACMD(do_ingest) {
 
     if (IS_MAJIN(ch)) {
-        struct char_data *vict;
+        Character *vict;
         char arg[MAX_INPUT_LENGTH];
 
         one_argument(argument, arg);
@@ -4352,7 +4352,7 @@ ACMD(do_ingest) {
 }
 
 ACMD(do_absorb) {
-    struct char_data *vict = nullptr;
+    Character *vict = nullptr;
     char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 
     two_arguments(argument, arg, arg2);
@@ -4912,7 +4912,7 @@ ACMD(do_regenerate) {
 }
 
 ACMD(do_focus) {
-    struct char_data *vict = nullptr;
+    Character *vict = nullptr;
     char arg[MAX_INPUT_LENGTH];
     char name[MAX_INPUT_LENGTH];
 
@@ -5953,8 +5953,8 @@ ACMD(do_focus) {
 
 
 ACMD(do_plant) {
-    struct char_data *vict;
-    struct obj_data *obj;
+    Character *vict;
+    Object *obj;
     char vict_name[100], obj_name[100];
     int roll = 0, detect = 0, fail = 0;
 
@@ -6033,8 +6033,8 @@ ACMD(do_plant) {
 
 ACMD(do_forgery) {
 
-    struct obj_data *obj2, *obj3 = nullptr;
-    struct obj_data *obj, *obj4 = nullptr, *next_obj;
+    Object *obj2, *obj3 = nullptr;
+    Object *obj, *obj4 = nullptr, *next_obj;
     int found = false;
     char arg[MAX_INPUT_LENGTH];
 
@@ -6140,7 +6140,7 @@ ACMD(do_forgery) {
 
 ACMD(do_appraise) {
     int i, found;
-    struct obj_data *obj;
+    Object *obj;
     char arg[MAX_INPUT_LENGTH];
     char buf[MAX_STRING_LENGTH];
 
@@ -6364,7 +6364,7 @@ ACMD(do_zanzoken) {
 }
 
 ACMD(do_block) {
-    struct char_data *vict;
+    Character *vict;
     char arg[MAX_INPUT_LENGTH];
 
     one_argument(argument, arg);
@@ -6412,7 +6412,7 @@ ACMD(do_block) {
         act("@wYou stop blocking @c$N@w.@n", true, ch, nullptr, BLOCKS(ch), TO_CHAR);
         act("@C$n@w stops blocking you.@n", true, ch, nullptr, BLOCKS(ch), TO_VICT);
         act("@C$n@w stops blocking @c$N@w.@n", true, ch, nullptr, BLOCKS(ch), TO_NOTVICT);
-        struct char_data *oldv = BLOCKS(ch);
+        Character *oldv = BLOCKS(ch);
         BLOCKED(oldv) = nullptr;
         BLOCKS(ch) = vict;
         BLOCKED(vict) = ch;
@@ -6452,7 +6452,7 @@ ACMD(do_eyec) {
 }
 
 ACMD(do_solar) {
-    struct char_data *vict = nullptr, *next_v = nullptr;
+    Character *vict = nullptr, *next_v = nullptr;
 
     int prob = 0, perc = 0, cost = 0, bonus = 0;
 
@@ -6524,7 +6524,7 @@ ACMD(do_solar) {
 
 ACMD(do_heal) {
     int64_t cost = 0, prob = 0, perc = 0, heal = 0, bonus = 0;
-    struct char_data *vict;
+    Character *vict;
     char arg[MAX_INPUT_LENGTH];
 
     one_argument(argument, arg);
@@ -6812,7 +6812,7 @@ ACMD(do_instant) {
 
     int skill = 0, perc = 0, skill_num = 0, location = 0;
     int64_t cost = 0;
-    struct char_data *tar = nullptr;
+    Character *tar = nullptr;
 
     char arg[MAX_INPUT_LENGTH] = "";
 
@@ -6959,7 +6959,7 @@ ACMD(do_instant) {
 }
 
 void load_shadow_dragons() {
-    struct char_data *mob = nullptr;
+    Character *mob = nullptr;
     mob_rnum r_num;
 
     if (SHADOW_DRAGON1 > 0) {
@@ -7082,7 +7082,7 @@ void summonShadowDragons() {
     placeShadowDragon(SHADOW_DRAGON6);
     placeShadowDragon(SHADOW_DRAGON7);
 
-    struct char_data *mob = nullptr;
+    Character *mob = nullptr;
     mob_rnum r_num;
 
     r_num = real_mobile(SHADOW_DRAGON1_VNUM);
@@ -7348,7 +7348,7 @@ ACMD(do_situp) {
     WAIT_STATE(ch, 2.5);
 }
 
-void situpProgress(char_data* ch) {
+void situpProgress(Character* ch) {
     int64_t cost = 1, bonus = 0;
 
     if (ch->location.getRoomFlag(ROOM_HELL)) {
@@ -7613,7 +7613,7 @@ ACMD(do_meditate) {
 
 }
 
-void meditateProgress(char_data* ch) {
+void meditateProgress(Character* ch) {
     int64_t bonus = 0, cost = 1;
 
     if (ch->location.getRoomFlag(ROOM_HELL)) {
@@ -7825,7 +7825,7 @@ ACMD(do_pushup) {
     
 }
 
-void pushupProgress(char_data* ch) {
+void pushupProgress(Character* ch) {
     int64_t cost = 1, bonus = 0;
 
     if (PLR_FLAGGED(ch, PLR_FISHING)) {
@@ -7988,8 +7988,8 @@ ACMD(do_spar) {
     }
 }
 
-static void check_eq(struct char_data *ch) {
-    struct obj_data *obj;
+static void check_eq(Character *ch) {
+    Object *obj;
     int i;
     for (i = 0; i < NUM_WEARS; i++) {
         if (GET_EQ(ch, i)) {
@@ -8094,7 +8094,7 @@ void base_update(uint64_t heartPulse, double deltaTime) {
         }
         if (SITS(d->character)) {
             if (d->character->location != SITS(d->character)->location) {
-                struct obj_data *chair = SITS(d->character);
+                Object *chair = SITS(d->character);
                 chair->sitting.reset();
                 d->character->sits.reset();
             }
@@ -8168,7 +8168,7 @@ void base_update(uint64_t heartPulse, double deltaTime) {
         }
 
         if (BLOCKS(d->character)) {
-            struct char_data *vict = BLOCKS(d->character);
+            Character *vict = BLOCKS(d->character);
             if (vict->location != d->character->location) {
                 BLOCKED(vict) = nullptr;
                 BLOCKS(d->character) = nullptr;
@@ -8190,7 +8190,7 @@ void base_update(uint64_t heartPulse, double deltaTime) {
     }
 }
 
-static int has_scanner(struct char_data *ch) {
+static int has_scanner(Character *ch) {
     return ch->findObjectVnum(13600) ? true : false;
 }
 
@@ -8202,8 +8202,8 @@ ACMD(do_snet) {
 
     half_chop(argument, arg, arg2);
 
-    struct obj_data *obj = nullptr;
-    struct obj_data *obj2 = nullptr;
+    Object *obj = nullptr;
+    Object *obj2 = nullptr;
 
     if (ch->location.getWhereFlag(WhereFlag::hyperbolic_time_chamber)) {
                 ch->sendText("This is a different dimension!\r\n");
@@ -8412,7 +8412,7 @@ ACMD(do_snet) {
 } /*end snet command */
 
 ACMD(do_scouter) {
-    struct char_data *vict = nullptr;
+    Character *vict = nullptr;
     struct descriptor_data *i;
     int count = 0;
     char arg[MAX_INPUT_LENGTH];
@@ -8424,7 +8424,7 @@ ACMD(do_scouter) {
         return;
     }
 
-    struct obj_data *obj = GET_EQ(ch, WEAR_EYE);
+    Object *obj = GET_EQ(ch, WEAR_EYE);
     if (!obj) {
                 ch->sendText("You do not even have a scouter!");
         return;
@@ -8574,11 +8574,11 @@ ACMD(do_scouter) {
         ch->sendText("@D`==================================|@n\r\n");
 }
 
-std::unordered_set<struct obj_data*> dball_count(struct char_data *ch) {
+std::unordered_set<Object*> dball_count(Character *ch) {
     std::unordered_set<obj_vnum> dbVn;
     dbVn.insert(dbVnums.begin(), dbVnums.end());
 
-    auto isDragonBall = [&](struct obj_data *obj) {
+    auto isDragonBall = [&](Object *obj) {
         if(dbVn.contains(GET_OBJ_VNUM(obj))) {
             dbVn.erase(GET_OBJ_VNUM(obj));
             return true;
@@ -8701,8 +8701,8 @@ ACMD(do_steal) {
     }
 
 
-    struct char_data *vict;
-    struct obj_data *obj;
+    Character *vict;
+    Object *obj;
     char arg[500], arg2[500];
     int gold = 0, prob = GET_SKILL(ch, SKILL_SLEIGHT_OF_HAND), perc = 0, eq_pos;
 
@@ -9029,7 +9029,7 @@ ACMD(do_title) {
 }
 
 static int
-perform_group(struct char_data *ch, struct char_data *vict, int highlvl, int lowlvl, int64_t highpl, int64_t lowpl) {
+perform_group(Character *ch, Character *vict, int highlvl, int lowlvl, int64_t highpl, int64_t lowpl) {
     if (AFF_FLAGGED(vict, AFF_GROUP) || !CAN_SEE(ch, vict))
         return (0);
 
@@ -9070,8 +9070,8 @@ perform_group(struct char_data *ch, struct char_data *vict, int highlvl, int low
     return (1);
 }
 
-static void print_group(struct char_data *ch) {
-    struct char_data *k;
+static void print_group(Character *ch) {
+    Character *k;
     struct follow_type *f;
 
     if (!AFF_FLAGGED(ch, AFF_GROUP))
@@ -9126,7 +9126,7 @@ static void print_group(struct char_data *ch) {
 
 ACMD(do_group) {
     char buf[MAX_STRING_LENGTH];
-    struct char_data *vict;
+    Character *vict;
     struct follow_type *f;
     int found, highlvl = 0, lowlvl = 0;
     int64_t highpl = 0, lowpl = 0;
@@ -9209,7 +9209,7 @@ ACMD(do_group) {
 ACMD(do_ungroup) {
     char buf[MAX_INPUT_LENGTH];
     struct follow_type *f, *next_fol;
-    struct char_data *tch;
+    Character *tch;
 
     one_argument(argument, buf);
 
@@ -9262,7 +9262,7 @@ ACMD(do_ungroup) {
 
 ACMD(do_report) {
     char buf[MAX_STRING_LENGTH];
-    struct char_data *k;
+    Character *k;
     struct follow_type *f;
 
     if (!AFF_FLAGGED(ch, AFF_GROUP)) {
@@ -9291,7 +9291,7 @@ ACMD(do_split) {
     char buf[MAX_INPUT_LENGTH];
     int amount, num, share, rest;
     size_t len;
-    struct char_data *k;
+    Character *k;
     struct follow_type *f;
 
     if (IS_NPC(ch))
@@ -9371,7 +9371,7 @@ ACMD(do_split) {
 
 ACMD(do_use) {
     char buf[100], arg[MAX_INPUT_LENGTH];
-    struct obj_data *mag_item = nullptr;
+    Object *mag_item = nullptr;
 
     half_chop(argument, arg, buf);
     if (!*arg) {
@@ -10119,8 +10119,8 @@ ACMD(do_file) {
 ACMD(do_compare) {
     char arg1[100];
     char arg2[MAX_INPUT_LENGTH];
-    struct obj_data *obj1, *obj2;
-    struct char_data *tchar;
+    Object *obj1, *obj2;
+    Character *tchar;
     int value1 = 0, value2 = 0, o1, o2;
     const char *msg = nullptr;
 
@@ -10173,8 +10173,8 @@ ACMD(do_compare) {
 
 ACMD(do_break) {
     char arg[MAX_INPUT_LENGTH];
-    struct obj_data *obj;
-    struct char_data *dummy = nullptr;
+    Object *obj;
+    Character *dummy = nullptr;
     int cmbrk;
 
     one_argument(argument, arg);
@@ -10206,8 +10206,8 @@ ACMD(do_break) {
 
 ACMD(do_fix) {
     char arg[MAX_INPUT_LENGTH];
-    struct obj_data *obj, *obj4 = nullptr, *rep, *next_obj;
-    struct char_data *dummy = nullptr;
+    Object *obj, *obj4 = nullptr, *rep, *next_obj;
+    Character *dummy = nullptr;
     int cmbrk, found = false, self = false, custom = false;
 
     one_argument(argument, arg);
@@ -10340,20 +10340,20 @@ ACMD(do_fix) {
 }
 
 
-static int spell_in_book(struct obj_data *obj, int spellnum) {
+static int spell_in_book(Object *obj, int spellnum) {
 
 
     return 0;
 }
 
-static int spell_in_scroll(struct obj_data *obj, int spellnum) {
+static int spell_in_scroll(Object *obj, int spellnum) {
     if (GET_OBJ_VAL(obj, VAL_SCROLL_SPELL1) == spellnum)
         return true;
 
     return false;
 }
 
-static int spell_in_domain(struct char_data *ch, int spellnum) {
+static int spell_in_domain(Character *ch, int spellnum) {
     if (spell_info[spellnum].domain == DOMAIN_UNDEFINED) {
         return false;
     }
@@ -10412,7 +10412,7 @@ ACMD(do_resurrect) {
     act("$n's body forms in a pool of @Bblue light@n.", true, ch, nullptr, nullptr, TO_ROOM);
 }
 
-static void show_clan_info(struct char_data *ch) {
+static void show_clan_info(Character *ch) {
 
         ch->sendText("@c----------------------------------------\r\n"
                      "@c|@WProvided by@D: @YAlister of Aeonian Dreams@c|\r\n"
@@ -10677,7 +10677,7 @@ ACMD(do_clan) {
             return;
         }
     } else if (!(strcmp(arg1, "rank"))) {
-        struct char_data *vict = nullptr;
+        Character *vict = nullptr;
         char arg3[100];
         char name[100];
         half_chop(arg2, name, arg3);
@@ -10798,7 +10798,7 @@ ACMD(do_clan) {
             handle_clan_member_list(ch);
         }
     } else if (!(strcmp(arg1, "expel"))) {
-        struct char_data *vict;
+        Character *vict;
         char arg3[100];
         char name[MAX_INPUT_LENGTH];
         char name1[100];
@@ -10844,7 +10844,7 @@ ACMD(do_clan) {
         }
         return;
     } else if (!(strcmp(arg1, "decline"))) {
-        struct char_data *vict;
+        Character *vict;
         char arg3[100];
         char name[100];
         half_chop(arg2, name, arg3);
@@ -10867,7 +10867,7 @@ ACMD(do_clan) {
         }
         return;
     } else if (!(strcmp(arg1, "enroll"))) {
-        struct char_data *vict;
+        Character *vict;
         char arg3[100];
         char name[100];
         half_chop(arg2, name, arg3);
@@ -10891,7 +10891,7 @@ ACMD(do_clan) {
         }
         return;
     } else if (!(strcmp(arg1, "makemod"))) {
-        struct char_data *vict;
+        Character *vict;
         char arg3[100];
         char name[100];
         half_chop(arg2, name, arg3);
@@ -10964,8 +10964,8 @@ ACMD(do_clan) {
 }
 
 ACMD(do_aid) {
-    struct char_data *vict;
-    struct obj_data *obj = nullptr, *aid_obj = nullptr, *aid_prod = nullptr, *next_obj;
+    Character *vict;
+    Object *obj = nullptr, *aid_obj = nullptr, *aid_prod = nullptr, *next_obj;
     char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
     int dc = 0, found = false, num = 47, num2 = 0, survival = 0;
 
@@ -11209,7 +11209,7 @@ ACMD(do_aura) {
 }
 
 
-void genGender(char_data* ch, std::string suggestedGender) {
+void genGender(Character* ch, std::string suggestedGender) {
     if(is_abbrev(suggestedGender.c_str(), "male")) {
         ch->sex = Sex::male;
                 ch->sendText("Gender set to Male.\r\n");
@@ -11232,7 +11232,7 @@ void genGender(char_data* ch, std::string suggestedGender) {
 
 }
 
-void genRace(char_data* ch, std::string suggestedRace) {
+void genRace(Character* ch, std::string suggestedRace) {
     auto currentRace = ch->race;
     auto check = [&](Race id) {return race::isPlayable(id);};
     auto chosen_race = race::findRace(suggestedRace, check);
@@ -11275,7 +11275,7 @@ void genRace(char_data* ch, std::string suggestedRace) {
 }
 
 
-void genBonus(char_data* ch, std::string bonus){
+void genBonus(Character* ch, std::string bonus){
     int toSet = NOTHING;
     
     if(is_abbrev(bonus.c_str(), "hand to hand") || bonus == "1") {
@@ -11330,7 +11330,7 @@ void genBonus(char_data* ch, std::string bonus){
         ch->sendText("@B10@W);@C Weaponry (Dagger) - Starts with weaponry, but low Zenni@n\r\n");
 }
 
-void genHeight(char_data* ch, std::string suggestedHeight) {
+void genHeight(Character* ch, std::string suggestedHeight) {
     int height = atoi(suggestedHeight.c_str());
 
 
@@ -11354,7 +11354,7 @@ void genHeight(char_data* ch, std::string suggestedHeight) {
 
 }
 
-void genWeight(char_data* ch, std::string suggestedWeight) {
+void genWeight(Character* ch, std::string suggestedWeight) {
     int weight = atoi(suggestedWeight.c_str());
 
     if (ch->race == Race::tuffle && (weight >= 3 && weight <= 40)) {
@@ -11376,7 +11376,7 @@ void genWeight(char_data* ch, std::string suggestedWeight) {
     }
 }
 
-void genAge(char_data* ch, std::string suggestedAge) {
+void genAge(Character* ch, std::string suggestedAge) {
     try {
         auto years = std::stod(suggestedAge);
         if(years <= 8.0) {
@@ -11392,7 +11392,7 @@ void genAge(char_data* ch, std::string suggestedAge) {
     }
 }
 
-void genFinish(char_data* ch) {
+void genFinish(Character* ch) {
 
     auto gb = ch->getBaseStat<int>("genBonus");
 

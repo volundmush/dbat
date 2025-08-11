@@ -66,9 +66,9 @@ struct affect_t {
 };
 
 struct character_affect_type : affect_t {
-    std::function<double(struct char_data *ch)> func{};
+    std::function<double(struct Character *ch)> func{};
 
-    character_affect_type(int loc, double mod, int spec, std::function<double(struct char_data *ch)> f = {})
+    character_affect_type(int loc, double mod, int spec, std::function<double(struct Character *ch)> f = {})
             : affect_t{loc, mod, spec}, func{f} {}
 };
 
@@ -81,8 +81,8 @@ struct affected_type : affect_t {
     struct affected_type *next{};
 };
 
-struct account_data {
-    account_data() = default;
+struct Account {
+    Account() = default;
     int id{NOTHING};
     std::string name;
     std::string password;
@@ -110,11 +110,11 @@ struct account_data {
 
 };
 
-struct player_data {
+struct PlayerData {
     int id{NOTHING};
     std::string name;
-    struct account_data *account{};
-    struct char_data *character{};
+    struct Account *account{};
+    struct Character *character{};
     std::vector<struct alias_data> aliases;    /* Character's aliases                  */
     std::unordered_set<int> sense_player;
     std::unordered_set<mob_vnum> sense_memory;
@@ -175,7 +175,7 @@ enum class ScriptLineType : uint8_t {
 
 using ScriptLine = std::tuple<ScriptLineType, std::string>;
 
-struct trig_proto_data {
+struct DgScriptPrototype {
     trig_vnum vn{NOTHING};
     UnitType attach_type{UnitType::unknown};            /* mob/obj/wld intentions          */
     std::string name{};                    /* name of trigger                 */
@@ -208,10 +208,10 @@ public:
 };
 
 /* structure for triggers */
-struct trig_data : public HasVariables, std::enable_shared_from_this<trig_data> {
-    trig_data() = default;
-    trig_data(const trig_proto_data &other);
-    trig_proto_data* proto{};
+struct DgScript : public HasVariables, std::enable_shared_from_this<DgScript> {
+    DgScript() = default;
+    DgScript(const DgScriptPrototype &other);
+    DgScriptPrototype* proto{};
     int getVnum() const;
     UnitType getAttachType() const;
     long getTriggerType() const;
@@ -219,7 +219,7 @@ struct trig_data : public HasVariables, std::enable_shared_from_this<trig_data> 
     std::vector<DepthType> depth_stack{};
     int current_line{};
     double waiting{0.0};    /* event to pause the trigger      */
-    unit_data* owner{};
+    Entity* owner{};
 
     bool active{false};
     void activate();
@@ -227,7 +227,7 @@ struct trig_data : public HasVariables, std::enable_shared_from_this<trig_data> 
 
     std::unordered_set<std::string> subscriptions; // Subscriptions to services.
 
-    std::shared_ptr<trig_data> shared();
+    std::shared_ptr<DgScript> shared();
 
     int execute();
     void reset();
@@ -274,17 +274,17 @@ struct Coordinates {
 
 
 struct Location {
-    unit_data* unit{nullptr};  // What unit contains this unit (room, area, char, obj)
+    Entity* unit{nullptr};  // What unit contains this unit (room, area, char, obj)
     Coordinates position;
     bool operator==(const Location& other) const;
     bool operator==(const room_vnum rv) const;
-    bool operator==(const room_data* room) const;
+    bool operator==(const Room* room) const;
     
     // Conversion to bool - returns true if location is valid. currently means it is a room.
     explicit operator bool() const;
     UnitType getType() const;
-    zone_data* getZone() const;
-    location_data* getLoc() const;
+    Zone* getZone() const;
+    AbstractLocation* getLoc() const;
     vnum getVnum() const;
 
     const char* getName() const;
@@ -341,8 +341,8 @@ struct Location {
         }
     }
 
-    std::vector<std::weak_ptr<obj_data>> getObjects() const;
-    std::vector<std::weak_ptr<char_data>> getPeople() const;
+    std::vector<std::weak_ptr<Object>> getObjects() const;
+    std::vector<std::weak_ptr<Character>> getPeople() const;
 
     int getDamage() const;
     void setDamage(int amount);
@@ -360,9 +360,9 @@ struct Location {
     bool getIsDark() const;
     int getCookElement() const;
 
-    struct obj_data* findObjectVnum(obj_vnum objVnum, bool working = true);
-    struct obj_data* findObject(const std::function<bool(struct obj_data*)> &func, bool working = true);
-    std::unordered_set<struct obj_data*> gatherObjects(const std::function<bool(struct obj_data*)> &func, bool working = true);
+    struct Object* findObjectVnum(obj_vnum objVnum, bool working = true);
+    struct Object* findObject(const std::function<bool(struct Object*)> &func, bool working = true);
+    std::unordered_set<struct Object*> gatherObjects(const std::function<bool(struct Object*)> &func, bool working = true);
 
     int countPlayers() const;
     bool canGo(int dir) const;
@@ -386,9 +386,9 @@ namespace std {
 }
 
 
-struct unit_data : public HasVariables {
-    unit_data& operator=(const proto_data& other);
-    virtual ~unit_data();
+struct Entity : public HasVariables {
+    Entity& operator=(const ThingPrototype& other);
+    virtual ~Entity();
 
     // re-adding vnum in and type so we can tell what kind of thing it is for some debugging and functions.
     vnum vn{NOTHING}; // The vnum of the unit.
@@ -413,21 +413,21 @@ struct unit_data : public HasVariables {
     
     long trigger_types{};                /* bitvector of trigger types */
     std::optional<std::vector<vnum>> running_scripts; /* list of attached scripts. the order matters. Only used if differs from proto scripts.*/
-    std::unordered_map<trig_vnum, std::shared_ptr<trig_data>> scripts; /* list of attached triggers. accessed in order of running_scripts */
+    std::unordered_map<trig_vnum, std::shared_ptr<DgScript>> scripts; /* list of attached triggers. accessed in order of running_scripts */
     std::unordered_map<std::string, std::string> script_variables;
 
     void activateScripts();
     void deactivateScripts();
     std::vector<trig_vnum> getScriptOrder(); /* this will return running_scripts if said, or the results of getProtoScripts() */
-    std::vector<std::weak_ptr<trig_data>> getScripts();
+    std::vector<std::weak_ptr<DgScript>> getScripts();
     virtual std::vector<trig_vnum> getProtoScript() const = 0;
     virtual std::string scriptString() const;
 
     weight_t getInventoryWeight();
     int64_t getInventoryCount();
 
-    std::list<std::weak_ptr<unit_data>> contents{};
-    std::vector<std::weak_ptr<obj_data>> getObjects() const;
+    std::list<std::weak_ptr<Entity>> contents{};
+    std::vector<std::weak_ptr<Object>> getObjects() const;
 
     void activateContents();
     void deactivateContents();
@@ -435,9 +435,9 @@ struct unit_data : public HasVariables {
     std::string getUID(bool active = false);
     virtual bool isActive() = 0;
 
-    struct obj_data* findObjectVnum(obj_vnum objVnum, bool working = true);
-    virtual struct obj_data* findObject(const std::function<bool(struct obj_data*)> &func, bool working = true);
-    virtual std::unordered_set<struct obj_data*> gatherObjects(const std::function<bool(struct obj_data*)> &func, bool working = true);
+    struct Object* findObjectVnum(obj_vnum objVnum, bool working = true);
+    virtual struct Object* findObject(const std::function<bool(struct Object*)> &func, bool working = true);
+    virtual std::unordered_set<struct Object*> gatherObjects(const std::function<bool(struct Object*)> &func, bool working = true);
 
     virtual double getAffectModifier(uint64_t location, uint64_t specific);
 
@@ -482,14 +482,14 @@ struct unit_data : public HasVariables {
 
 };
 
-struct thing_data : public unit_data {
-    struct room_data* getRoom() const;
+struct AbstractThing : public Entity {
+    struct Room* getRoom() const;
     room_vnum getRoomVnum() const;
 
     virtual void setLocation(const Location& loc) = 0;
-    virtual void setLocation(const thing_data* td) = 0;
+    virtual void setLocation(const AbstractThing* td) = 0;
     virtual void setLocation(room_vnum rv) = 0;
-    virtual void setLocation(room_data* room) = 0;
+    virtual void setLocation(Room* room) = 0;
     virtual void clearLocation() = 0;
 
     Location getAbsoluteLocation() const;
@@ -497,8 +497,8 @@ struct thing_data : public unit_data {
 };
 
 // base struct for both npc_proto_data and item_proto_data
-struct proto_data {
-    virtual ~proto_data();
+struct ThingPrototype {
+    virtual ~ThingPrototype();
     vnum vn{NOTHING};
     char *name{};
     char *room_description{};      /* When thing is listed in room */
@@ -511,14 +511,14 @@ struct proto_data {
 
     std::string scriptString() const;
 
-    proto_data& operator=(const proto_data& other);
+    ThingPrototype& operator=(const ThingPrototype& other);
 };
 
-struct item_proto_data : public proto_data, public picky_data {
-    item_proto_data() = default;
-    item_proto_data(const obj_data& other);
+struct ObjectPrototype : public ThingPrototype, public picky_data {
+    ObjectPrototype() = default;
+    ObjectPrototype(const Object& other);
     
-    item_proto_data& operator=(const item_proto_data& other);
+    ObjectPrototype& operator=(const ObjectPrototype& other);
 
     ItemType type_flag{ItemType::unknown};      /* Type of item                        */
     std::array<affected_type, MAX_OBJ_AFFECT> affected;  /* affects */
@@ -543,32 +543,32 @@ struct item_proto_data : public proto_data, public picky_data {
 };
 
 /* ================== Memory Structure for Objects ================== */
-struct obj_data : public thing_data, public picky_data, std::enable_shared_from_this<obj_data> {
-    obj_data();
-    ~obj_data() override;
-    obj_data& operator=(const item_proto_data& proto);
-    //~obj_data() override = default;
+struct Object : public AbstractThing, public picky_data, std::enable_shared_from_this<Object> {
+    Object();
+    ~Object() override;
+    Object& operator=(const ObjectPrototype& proto);
+    //~Object() override = default;
     std::vector<trig_vnum> getProtoScript() const override;
     void activate();
     void deactivate();
     double getAffectModifier(uint64_t location, uint64_t specific) override;
 
-    void commit_iedit(const item_proto_data &proto);
+    void commit_iedit(const ObjectPrototype &proto);
 
-    item_proto_data* getProto() const;
+    ObjectPrototype* getProto() const;
 
     bool active{false};
     bool isActive() override;
 
-    struct room_data* getAbsoluteRoom();
+    struct Room* getAbsoluteRoom();
     bool isWorking();
     void clearLocation() override;
     void setLocation(const Location& loc) override;
-    void setLocation(const thing_data* td) override;
+    void setLocation(const AbstractThing* td) override;
     void setLocation(room_vnum rv) override;
-    void setLocation(room_data* room) override;
+    void setLocation(Room* room) override;
 
-    std::shared_ptr<obj_data> shared();
+    std::shared_ptr<Object> shared();
 
     room_vnum room_loaded{NOWHERE};    /* Room loaded in, for room_max checks	*/
 
@@ -582,17 +582,17 @@ struct obj_data : public thing_data, public picky_data, std::enable_shared_from_
 
     std::array<affected_type, MAX_OBJ_AFFECT> affected;  /* affects */
 
-    obj_data *getContainer() const;
-    char_data *getCarriedBy() const;
-    char_data *getWornBy() const;
+    Object *getContainer() const;
+    Character *getCarriedBy() const;
+    Character *getWornBy() const;
     int16_t getWornOn() const;
 
-    std::weak_ptr<char_data> sitting{};       /* Who is sitting on me? */
-    struct char_data *user{};
-    struct char_data *target{};
+    std::weak_ptr<Character> sitting{};       /* Who is sitting on me? */
+    struct Character *user{};
+    struct Character *target{};
     char *auctname{};
-    struct obj_data *posted_to{};
-    struct obj_data *fellow_wall{};
+    struct Object *posted_to{};
+    struct Object *fellow_wall{};
 
     int64_t aucter{};
     int64_t curBidder{};
@@ -654,9 +654,9 @@ struct Destination : public Location {
     std::optional<Destination> getReverse() const;
 };
 
-struct location_data : public unit_data {
+struct AbstractLocation : public Entity {
 
-    virtual zone_data* getZone() const = 0;
+    virtual Zone* getZone() const = 0;
 
     virtual const char* getName(const Coordinates& coor) const = 0;
     virtual const char* getLookDescription(const Coordinates& coor) const = 0; // New
@@ -664,8 +664,8 @@ struct location_data : public unit_data {
 
     virtual const std::vector<ExtraDescription>& getExtraDescription(const Coordinates& coor) const;
 
-    virtual std::vector<std::weak_ptr<obj_data>> getObjects(const Coordinates& coor) const = 0;
-    virtual std::vector<std::weak_ptr<char_data>> getPeople(const Coordinates& coor) const = 0;
+    virtual std::vector<std::weak_ptr<Object>> getObjects(const Coordinates& coor) const = 0;
+    virtual std::vector<std::weak_ptr<Character>> getPeople(const Coordinates& coor) const = 0;
 
     virtual std::optional<Destination> getDirection(const Coordinates& coor, Direction dir) = 0;
     virtual std::map<Direction, Destination> getDirections(const Coordinates& coor) = 0;
@@ -702,9 +702,9 @@ struct location_data : public unit_data {
     virtual double modEnvironment(const Coordinates& coor, int type, double value) = 0;
     virtual void clearEnvironment(const Coordinates& coor, int type) = 0;
 
-    struct obj_data* findObjectVnum(const Coordinates& coor, obj_vnum objVnum, bool working = true);
-    virtual struct obj_data* findObject(const Coordinates& coor, const std::function<bool(struct obj_data*)> &func, bool working = true);
-    virtual std::unordered_set<struct obj_data*> gatherObjects(const Coordinates& coor, const std::function<bool(struct obj_data*)> &func, bool working = true);
+    struct Object* findObjectVnum(const Coordinates& coor, obj_vnum objVnum, bool working = true);
+    virtual struct Object* findObject(const Coordinates& coor, const std::function<bool(struct Object*)> &func, bool working = true);
+    virtual std::unordered_set<struct Object*> gatherObjects(const Coordinates& coor, const std::function<bool(struct Object*)> &func, bool working = true);
 
     int getCookElement(const Coordinates& coor) const;
 
@@ -724,9 +724,9 @@ struct TileOverride {
     std::map<Direction, Destination> exits;
 };
 
-struct AbstractGridArea : public location_data {
-    using unit_data::getName;
-    using unit_data::getLookDescription; // bring base (no-arg) into scope
+struct AbstractGridArea : public AbstractLocation {
+    using Entity::getName;
+    using Entity::getLookDescription; // bring base (no-arg) into scope
 
     // the default sector type for undefined tiles.
     // if left empty, the tiles are completely impassable / void.
@@ -740,13 +740,13 @@ struct AbstractGridArea : public location_data {
     std::unordered_map<Coordinates, TileOverride> tileOverrides;
 
     // location_data overrides (most implemented generically here). Subclasses still provide getZone().
-    zone_data* getZone() const override = 0; // still pure virtual; concrete grid instances decide zone binding.
+    Zone* getZone() const override = 0; // still pure virtual; concrete grid instances decide zone binding.
 
     const std::vector<ExtraDescription>& getExtraDescription(const Coordinates& coor) const override;
     const char* getName(const Coordinates& coor) const override;
     const char* getLookDescription(const Coordinates& coor) const override;
-    std::vector<std::weak_ptr<obj_data>> getObjects(const Coordinates& coor) const override;
-    std::vector<std::weak_ptr<char_data>> getPeople(const Coordinates& coor) const override;
+    std::vector<std::weak_ptr<Object>> getObjects(const Coordinates& coor) const override;
+    std::vector<std::weak_ptr<Character>> getPeople(const Coordinates& coor) const override;
     std::optional<Destination> getDirection(const Coordinates& coor, Direction dir) override;
     std::map<Direction, Destination> getDirections(const Coordinates& coor) override;
     void setRoomFlag(const Coordinates& coor, RoomFlag flag, bool value = true) override;
@@ -777,19 +777,19 @@ struct AbstractGridArea : public location_data {
 
 
 /* ================== Memory Structure for room ======================= */
-struct room_data : public location_data, std::enable_shared_from_this<room_data> {
-    room_data();
+struct Room : public AbstractLocation, std::enable_shared_from_this<Room> {
+    Room();
 
-    zone_data *zone{nullptr};
+    Zone *zone{nullptr};
 
     // Bring the base class getName() into scope to avoid name hiding
-    using unit_data::getName;
-    using unit_data::getLookDescription; // restore hidden overload
-    using unit_data::getObjects;
-    using unit_data::findObject;
-    using unit_data::findObjectVnum;
-    using unit_data::gatherObjects;
-    using unit_data::getExtraDescription;
+    using Entity::getName;
+    using Entity::getLookDescription; // restore hidden overload
+    using Entity::getObjects;
+    using Entity::findObject;
+    using Entity::findObjectVnum;
+    using Entity::gatherObjects;
+    using Entity::getExtraDescription;
 
     SectorType sector_type{SectorType::inside};            /* sector type (move/hide)            */
     std::map<Direction, Destination> exits{}; /* Directions */
@@ -817,9 +817,9 @@ struct room_data : public location_data, std::enable_shared_from_this<room_data>
     void deleteExit(Direction dir);
     void replaceExit(const Destination& dest);
 
-    std::shared_ptr<room_data> shared();
+    std::shared_ptr<Room> shared();
 
-    std::vector<std::weak_ptr<char_data>> getPeople() const;
+    std::vector<std::weak_ptr<Character>> getPeople() const;
 
     std::optional<std::string> dgCallMember(const std::string& member, const std::string& arg);
 
@@ -863,12 +863,12 @@ struct room_data : public location_data, std::enable_shared_from_this<room_data>
     std::map<Direction, Destination> getDirections() const;
 
     // overrides for location_data...
-    zone_data* getZone() const override;
+    Zone* getZone() const override;
     const std::vector<ExtraDescription>& getExtraDescription(const Coordinates& coor) const override;
     const char* getName(const Coordinates& coor) const override;
     const char* getLookDescription(const Coordinates& coor) const override;
-    std::vector<std::weak_ptr<obj_data>> getObjects(const Coordinates& coor) const override;
-    std::vector<std::weak_ptr<char_data>> getPeople(const Coordinates& coor) const override;
+    std::vector<std::weak_ptr<Object>> getObjects(const Coordinates& coor) const override;
+    std::vector<std::weak_ptr<Character>> getPeople(const Coordinates& coor) const override;
     std::optional<Destination> getDirection(const Coordinates& coor, Direction dir) override;
     std::map<Direction, Destination> getDirections(const Coordinates& coor) override;
     void setRoomFlag(const Coordinates& coor, RoomFlag flag, bool value = true) override;
@@ -942,7 +942,7 @@ struct alias_data {
 
 /* Specials used by NPCs, not PCs */
 struct mob_special_data {
-    std::list<std::weak_ptr<char_data>> memory{};        /* List of attackers to remember	       */
+    std::list<std::weak_ptr<Character>> memory{};        /* List of attackers to remember	       */
     int attack_type{};        /* The Attack Type Bitvector for NPC's     */
     int default_pos{POS_STANDING};        /* Default position for NPC                */
     int damnodice{};          /* The number of damage dice's	       */
@@ -958,7 +958,7 @@ struct queued_act {
 
 /* Structure used for chars following other chars */
 struct follow_type {
-    struct char_data *follower;
+    struct Character *follower;
     struct follow_type *next;
 };
 
@@ -1026,7 +1026,7 @@ const std::string DoingTaskName[] {
 
 struct card {
     std::string name = "Default";
-    std::function<bool(struct char_data *ch)> effect;
+    std::function<bool(struct Character *ch)> effect;
     std::string playerAnnounce = "You focus hard on your work.\r\n";
     std::string roomAnnounce = "$n focuses hard on $s work.\r\n";
     bool discard = false;
@@ -1040,21 +1040,21 @@ struct deck {
     void shuffleDeck();
     void discardCard(std::string);
     void discardCard(card card);
-    bool playTopCard(char_data* ch);
+    bool playTopCard(Character* ch);
     card findCard(std::string);
     void addCardToDeck(std::string, int num = 1);
     void removeCard(std::string);
     void addCardToDeck(card, int num = 1);
     void removeCard(card);
-    void initDeck(char_data* ch);
+    void initDeck(Character* ch);
 };
 
 struct craftTask {
-    struct obj_data *pObject = nullptr;
+    struct Object *pObject = nullptr;
     int improvementRounds = 0;
 };
 
-struct npc_proto_data : public proto_data {
+struct CharacterPrototype : public ThingPrototype {
     Race race{Race::human};
     std::optional<SubRace> subrace{};
     Sensei sensei{Sensei::commoner};
@@ -1085,18 +1085,18 @@ struct npc_proto_data : public proto_data {
 };
 
 /* ================== Structure for player/non-player ===================== */
-struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
-    char_data();
-    ~char_data() override;
+struct Character : public AbstractThing, std::enable_shared_from_this<Character> {
+    Character();
+    ~Character() override;
     // this constructor below is to be used only for the mob_proto map.
 
-    char_data& operator=(npc_proto_data& proto);
+    Character& operator=(CharacterPrototype& proto);
 
     std::vector<trig_vnum> getProtoScript() const override;
     void activate();
     void deactivate();
 
-    npc_proto_data* getProto() const;
+    CharacterPrototype* getProto() const;
 
     void sendText(const std::string& txt) override;
 
@@ -1113,22 +1113,22 @@ struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
 
     void clearLocation() override;
     void setLocation(const Location& loc) override;
-    void setLocation(const thing_data* td) override;
+    void setLocation(const AbstractThing* td) override;
     void setLocation(room_vnum rv) override;
-    void setLocation(room_data* room) override;
+    void setLocation(Room* room) override;
 
     void lookAtLocation();
-    void lookAtLocation(room_data *room);
+    void lookAtLocation(Room *room);
     void lookAtLocation(room_vnum rv);
     void lookAtLocation(const Location& loc);
-    void lookAtLocation(const thing_data* td);
+    void lookAtLocation(const AbstractThing* td);
 
     std::optional<std::string> dgCallMember(const std::string& member, const std::string& arg);
 
-    struct obj_data* findObject(const std::function<bool(struct obj_data*)> &func, bool working = true) override;
-    std::unordered_set<struct obj_data*> gatherObjects(const std::function<bool(struct obj_data*)> &func, bool working = true) override;
+    struct Object* findObject(const std::function<bool(struct Object*)> &func, bool working = true) override;
+    std::unordered_set<struct Object*> gatherObjects(const std::function<bool(struct Object*)> &func, bool working = true) override;
 
-    std::shared_ptr<char_data> shared();
+    std::shared_ptr<Character> shared();
 
     char *title{};
     Race race{Race::spirit};
@@ -1148,8 +1148,8 @@ struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
     struct deck craftingDeck;
 
     /* PC / NPC's weight                    */
-    bool canCarryWeight(struct obj_data *obj);
-    bool canCarryWeight(struct char_data *obj);
+    bool canCarryWeight(struct Object *obj);
+    bool canCarryWeight(struct Character *obj);
     bool canCarryWeight(weight_t val);
 
     template<typename R = double>
@@ -1202,45 +1202,45 @@ struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
     struct queued_act *actq{};    /* queued spells / other actions	*/
 
     /* Equipment array			*/
-    struct obj_data *equipment[NUM_WEARS]{};
+    struct Object *equipment[NUM_WEARS]{};
 
-    std::map<int, struct obj_data*> getEquipment();
-    struct obj_data* getEquipSlot(int slot);
+    std::map<int, struct Object*> getEquipment();
+    struct Object* getEquipSlot(int slot);
 
     struct descriptor_data *desc{};    /* nullptr for mobiles			*/
 
     struct script_memory *memory{};    /* for mob memory triggers		*/
 
     /* For fighting list			*/
-    struct char_data *next_affect{};/* For affect wearoff			*/
-    struct char_data *next_affectv{};
+    struct Character *next_affect{};/* For affect wearoff			*/
+    struct Character *next_affectv{};
     /* For round based affect wearoff	*/
 
     struct follow_type *followers{};/* List of chars followers		*/
-    std::weak_ptr<obj_data> sits{};      /* What am I sitting on? */
+    std::weak_ptr<Object> sits{};      /* What am I sitting on? */
 
-    struct char_data *fighting{};    /* Opponent				*/
-    struct char_data *master{};    /* Who is char following?		*/
+    struct Character *fighting{};    /* Opponent				*/
+    struct Character *master{};    /* Who is char following?		*/
     
-    struct char_data *blocks{};    /* Who am I blocking?    */
-    struct char_data *blocked{};   /* Who is blocking me?    */
-    struct char_data *absorbing{}; /* Who am I absorbing */
-    struct char_data *absorbby{};  /* Who is absorbing me */
-    struct char_data *carrying{};
-    struct char_data *carried_by{};
+    struct Character *blocks{};    /* Who am I blocking?    */
+    struct Character *blocked{};   /* Who is blocking me?    */
+    struct Character *absorbing{}; /* Who am I absorbing */
+    struct Character *absorbby{};  /* Who is absorbing me */
+    struct Character *carrying{};
+    struct Character *carried_by{};
     
-    struct char_data *drag{};
-    struct char_data *dragged{};
-    struct char_data *mindlink{};
-    struct char_data *grappling{};
-    struct char_data *grappled{};
-    struct char_data *defender{};
-    struct char_data *defending{};
-    struct char_data *poisonby{};
-    std::list<std::weak_ptr<char_data>> poisoned;
-    struct char_data *original{};
+    struct Character *drag{};
+    struct Character *dragged{};
+    struct Character *mindlink{};
+    struct Character *grappling{};
+    struct Character *grappled{};
+    struct Character *defender{};
+    struct Character *defending{};
+    struct Character *poisonby{};
+    std::list<std::weak_ptr<Character>> poisoned;
+    struct Character *original{};
 
-    std::list<std::weak_ptr<char_data>> clones{};
+    std::list<std::weak_ptr<Character>> clones{};
     std::map<Skill, skill_data> skill;
 
     FlagHandler<CharacterFlag> character_flags{};
@@ -1297,7 +1297,7 @@ struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
 
     void ghostify();
 
-    void restore_by(char_data *ch);
+    void restore_by(Character *ch);
 
     void gainTail(bool announce = true);
     void loseTail();
@@ -1419,13 +1419,13 @@ struct descriptor_data {
     std::string output;        /* ptr to the current output buffer	*/
     std::string processed_output;
     std::list<std::string> history;        /* History of commands, for ! mostly.	*/
-    struct char_data *character{};    /* linked to char			*/
-    struct char_data *original{};    /* original char if switched		*/
+    struct Character *character{};    /* linked to char			*/
+    struct Character *original{};    /* original char if switched		*/
     struct descriptor_data *snooping{}; /* Who is this char snooping	*/
     struct descriptor_data *snoop_by{}; /* And who is snooping this char	*/
     struct descriptor_data *next{}; /* link to next descriptor		*/
     struct oasis_olc_data *olc{};   /* OLC info                            */
-    struct account_data *account{}; /* Account info                        */
+    struct Account *account{}; /* Account info                        */
     int level{};
     char *newsbuf{};
     /*---------------Player Level Object Editing Variables-------------------*/
@@ -1437,7 +1437,7 @@ struct descriptor_data {
     char *obj_long{};
     int obj_type{};
     int obj_weapon{};
-    struct obj_data *obj_point{};
+    struct Object *obj_point{};
     char *title{};
     double timeoutCounter{0};
     void handle_input();
@@ -1530,7 +1530,7 @@ struct index_data {
     SpecialFunc func;
 
     char *farg;         /* string argument for special function     */
-    struct trig_data *proto;     /* for triggers... the trigger     */
+    struct DgScript *proto;     /* for triggers... the trigger     */
 };
 
 struct guild_info_type {
@@ -1705,7 +1705,7 @@ struct org_data : public picky_data {
     int vnum{NOTHING};        /* Virtual number of this shop		*/
 
     mob_vnum keeper{NOBODY};                   /* GM's vnum */
-    std::vector<std::weak_ptr<char_data>> getKeepers();
+    std::vector<std::weak_ptr<Character>> getKeepers();
     SpecialFunc func{};        /* Secondary spec_proc for keeper	*/
     std::string customerString();
 };
@@ -1795,7 +1795,7 @@ struct reset_com {
     */
 };
 
-struct zone_data {
+struct Zone {
     zone_vnum number{};        /* virtual number of this zone	  */
 
     std::string name{};            /* name of this zone                  */
@@ -1821,16 +1821,16 @@ struct zone_data {
      *   1: Reset if no PC's are located in zone.
      *   2: Just reset.
      */
-    std::list<std::weak_ptr<room_data>> rooms;
+    std::list<std::weak_ptr<Room>> rooms;
     std::unordered_set<mob_vnum> mobiles;
     std::unordered_set<obj_vnum> objects;
     std::unordered_set<shop_vnum> shops;
     std::unordered_set<trig_vnum> triggers;
     std::unordered_set<guild_vnum> guilds;
 
-    std::list<std::weak_ptr<char_data>> npcsInZone;
-    std::list<std::weak_ptr<char_data>> playersInZone;
-    std::list<std::weak_ptr<obj_data>> objectsInZone;
+    std::list<std::weak_ptr<Character>> npcsInZone;
+    std::list<std::weak_ptr<Character>> playersInZone;
+    std::list<std::weak_ptr<Object>> objectsInZone;
 
     void sendText(const std::string &txt);
 

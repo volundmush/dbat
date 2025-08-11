@@ -17,7 +17,7 @@ from libcpp.vector cimport vector
 
 cimport structs
 cimport db
-from structs cimport unit_data, thing_data, room_data, char_data, obj_data, account_data, help_index_element, item_proto_data, npc_proto_data
+from structs cimport Entity, AbstractThing, Room, Character, Object, account_data, help_index_element, ObjectPrototype, CharacterPrototype
 from saveload cimport jdumps, jloads, jobject, to_json, from_json, runSave, create_player_character
 
 def load_db():
@@ -39,7 +39,7 @@ def get_help(name, level):
 
 cdef class RoomDB:
     
-    cdef string _dump(self, room_data* r):
+    cdef string _dump(self, Room* r):
         j = jobject()
         to_json(j, deref(r))
         return jdumps(j)
@@ -69,7 +69,7 @@ room_db = RoomDB()
 
 cdef class ObjectPrototypeDB:
     
-    cdef string _dump(self, item_proto_data& o):
+    cdef string _dump(self, ObjectPrototype& o):
         j = jobject()
         to_json(j, o)
         return jdumps(j)
@@ -99,7 +99,7 @@ obj_proto_db = ObjectPrototypeDB()
 
 cdef class MobilePrototypeDB:
 
-    cdef string _dump(self, npc_proto_data& c):
+    cdef string _dump(self, CharacterPrototype& c):
         j = jobject()
         to_json(j, c)
         return jdumps(j)
@@ -189,7 +189,7 @@ guild_db = GuildDB()
 
 cdef class ScriptDB:
     
-    cdef string _dump(self, structs.trig_proto_data& i):
+    cdef string _dump(self, structs.DgScriptPrototype& i):
         j = jobject()
         to_json(j, i)
         return jdumps(j)

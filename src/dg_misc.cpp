@@ -31,12 +31,12 @@
 /* LIMITATION: a target MUST exist for the spell unless the spell is   */
 /* set to TAR_IGNORE. Also, group spells are not permitted             */
 /* code borrowed from do_cast() */
-void do_dg_cast(void *go, script_data *sc, trig_data *trig,
+void do_dg_cast(void *go, script_data *sc, DgScript *trig,
                 UnitType type, char *cmd) {
-    struct char_data *caster = nullptr;
-    struct char_data *tch = nullptr;
-    struct obj_data *tobj = nullptr;
-    struct room_data *caster_room = nullptr;
+    Character *caster = nullptr;
+    Character *tch = nullptr;
+    Object *tobj = nullptr;
+    Room *caster_room = nullptr;
     char *s, *t;
     int spellnum, target = 0;
     char buf2[MAX_STRING_LENGTH], orig_cmd[MAX_INPUT_LENGTH];
@@ -44,13 +44,13 @@ void do_dg_cast(void *go, script_data *sc, trig_data *trig,
     /* need to get the caster or the room of the temporary caster */
     switch (type) {
         case MOB_TRIGGER:
-            caster = (struct char_data *) go;
+            caster = (Character *) go;
             break;
         case WLD_TRIGGER:
-            caster_room = (struct room_data *) go;
+            caster_room = (Room *) go;
             break;
         case OBJ_TRIGGER:
-            caster_room = dg_room_of_obj((struct obj_data *) go);
+            caster_room = dg_room_of_obj((Object *) go);
             if (!caster_room) {
                 script_log("dg_do_cast: unknown room for object-caster!");
                 return;
@@ -130,7 +130,7 @@ void do_dg_cast(void *go, script_data *sc, trig_data *trig,
         }
         /* set the caster's name to that of the object, or the gods.... */
         if (type == OBJ_TRIGGER)
-            caster->strings["short_description"] = ((struct obj_data *) go)->getShortDescription();
+            caster->strings["short_description"] = ((Object *) go)->getShortDescription();
         else if (type == WLD_TRIGGER)
             caster->strings["short_description"] = "The gods";
         char_to_room(caster, caster_room);
@@ -149,8 +149,8 @@ void do_dg_cast(void *go, script_data *sc, trig_data *trig,
 constexpr int APPLY_TYPE = 1;
 constexpr int AFFECT_TYPE = 2;
 
-void do_dg_affect(void *go, script_data *sc, trig_data *trig, UnitType script_type, char *cmd) {
-    struct char_data *ch = nullptr;
+void do_dg_affect(void *go, script_data *sc, DgScript *trig, UnitType script_type, char *cmd) {
+    Character *ch = nullptr;
     int value = 0, duration = 0;
     char junk[MAX_INPUT_LENGTH]; /* will be set to "dg_affect" */
     char charname[MAX_INPUT_LENGTH], property[MAX_INPUT_LENGTH];
@@ -239,7 +239,7 @@ void do_dg_affect(void *go, script_data *sc, trig_data *trig, UnitType script_ty
     affect_to_char(ch, &af);
 }
 
-void send_char_pos(struct char_data *ch, int dam) {
+void send_char_pos(Character *ch, int dam) {
     switch (GET_POS(ch)) {
         case POS_MORTALLYW:
             act("$n is mortally wounded, and will die soon, if not aided.", true, ch, nullptr, nullptr, TO_ROOM);
@@ -271,7 +271,7 @@ void send_char_pos(struct char_data *ch, int dam) {
  * - allow_gods is false when called by %force%, for instance,
  * while true for %teleport%.  -- Welcor
  */
-int valid_dg_target(struct char_data *ch, int bitvector) {
+int valid_dg_target(Character *ch, int bitvector) {
     if (IS_NPC(ch))
         return true;  /* all npcs are allowed as targets */
     else if (GET_ADMLEVEL(ch) < ADMLVL_IMMORT)
@@ -287,7 +287,7 @@ int valid_dg_target(struct char_data *ch, int bitvector) {
 }
 
 
-void script_damage(struct char_data *vict, int dam) {
+void script_damage(Character *vict, int dam) {
     if (ADM_FLAGGED(vict, ADM_NODAMAGE) && (dam > 0)) {
                 vict->sendText("Being the cool immortal you are, you sidestep a trap, "
                            "obviously placed to kill you.\r\n");

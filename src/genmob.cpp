@@ -22,16 +22,16 @@
 #include "dbat/filter.h"
 
 /* From db.c */
-char_data::char_data() : thing_data() {
+Character::Character() : AbstractThing() {
     type = UnitType::character;
 }
 
 /* local functions */
 void extract_mobile_all(mob_vnum vnum);
 
-int add_mobile(struct npc_proto_data *mob, mob_vnum vnum) {
+int add_mobile(CharacterPrototype *mob, mob_vnum vnum) {
     mob_vnum rnum, found = false;
-    struct char_data *live_mob;
+    Character *live_mob;
 
     bool exists = mob_proto.contains(vnum);
 
@@ -61,7 +61,7 @@ void extract_mobile_all(mob_vnum vnum) {
 }
 
 int delete_mobile(mob_rnum refpt) {
-    struct char_data *live_mob;
+    Character *live_mob;
     int counter, cmd_no;
     mob_vnum vnum;
     zone_rnum zone;
@@ -115,7 +115,7 @@ int save_mobiles(zone_rnum zone_num) {
 }
 
 #if CONFIG_GENOLC_MOBPROG
-int write_mobile_mobprog(mob_vnum mvnum, struct char_data *mob, FILE *fd)
+int write_mobile_mobprog(mob_vnum mvnum, Character *mob, FILE *fd)
 {
   char wmmarg[MAX_STRING_LENGTH], wmmcom[MAX_STRING_LENGTH];
   MPROG_DATA *mob_prog;
@@ -139,11 +139,11 @@ int write_mobile_mobprog(mob_vnum mvnum, struct char_data *mob, FILE *fd)
 
 
 
-std::shared_ptr<char_data> char_data::shared() {
+std::shared_ptr<Character> Character::shared() {
     return shared_from_this();
 }
 
-void char_data::activate() {
+void Character::activate() {
     if(active) {
         basic_mud_log("Attempted to activate an already active character.");
         return;
@@ -222,10 +222,10 @@ void char_data::activate() {
 }
 
 
-void char_data::deactivate() {
+void Character::deactivate() {
     if(!active) return;
     active = false;
-    char_data *temp = nullptr;
+    Character *temp = nullptr;
 
     for(auto &[vn, sc] : scripts) {
         sc->deactivate();
@@ -242,23 +242,23 @@ void char_data::deactivate() {
     }
 }
 
-bool char_data::isActive() {
+bool Character::isActive() {
     return active;
 }
 
 
-bool char_data::isProvidingLight() {
+bool Character::isProvidingLight() {
     if(!IS_NPC(this) && PLR_FLAGGED(this, PLR_AURALIGHT)) return true;
     for(auto i = 0; i < NUM_WEARS; i++) if(auto e = GET_EQ(this, i); e) if(e->isProvidingLight()) return true;
     return false;
 }
 
-double char_data::currentGravity() {
+double Character::currentGravity() {
     return location.getEnvironment(ENV_GRAVITY);
 }
 
-struct obj_data* char_data::findObject(const std::function<bool(struct obj_data*)> &func, bool working) {
-    auto o = unit_data::findObject(func, working);
+Object* Character::findObject(const std::function<bool(Object*)> &func, bool working) {
+    auto o = Entity::findObject(func, working);
     if(o) return o;
 
     for(auto &[i, obj] : getEquipment()) {
@@ -271,8 +271,8 @@ struct obj_data* char_data::findObject(const std::function<bool(struct obj_data*
     return nullptr;
 }
 
-std::unordered_set<struct obj_data*> char_data::gatherObjects(const std::function<bool(struct obj_data*)> &func, bool working) {
-    auto out = unit_data::gatherObjects(func, working);
+std::unordered_set<Object*> Character::gatherObjects(const std::function<bool(Object*)> &func, bool working) {
+    auto out = Entity::gatherObjects(func, working);
 
     for(auto &[i, obj] : getEquipment()) {
         if(working && !obj->isWorking()) continue;
@@ -283,22 +283,22 @@ std::unordered_set<struct obj_data*> char_data::gatherObjects(const std::functio
     return out;
 }
 
-void char_data::ageBy(double addedTime) {
+void Character::ageBy(double addedTime) {
     this->time.seconds_aged += addedTime;
 }
 
-void char_data::setAge(double newAge) {
+void Character::setAge(double newAge) {
     this->time.seconds_aged = newAge * SECS_PER_GAME_YEAR;
 }
 
-npc_proto_data* char_data::getProto() const {
+CharacterPrototype* Character::getProto() const {
     if(mob_proto.contains(vn)) {
         return &mob_proto.at(vn);
     }
     return nullptr;
 }
 
-char_data::~char_data() {
+Character::~Character() {
     if(title) free(title);
     struct affected_type *cmtemp;
 
@@ -315,7 +315,7 @@ char_data::~char_data() {
 
 }
 
-std::vector<trig_vnum> char_data::getProtoScript() const {
+std::vector<trig_vnum> Character::getProtoScript() const {
     auto v = getVnum();
     if(mob_proto.contains(v)) {
         return mob_proto.at(v).proto_script;
@@ -323,29 +323,29 @@ std::vector<trig_vnum> char_data::getProtoScript() const {
     return {};
 }
 
-void char_data::setLocation(room_data* room) {
+void Character::setLocation(Room* room) {
     if(!room) return;
     char_to_room(this, room);
 }
 
-void char_data::setLocation(room_vnum rv) {
+void Character::setLocation(room_vnum rv) {
     auto room = get_room(rv);
     setLocation(room);
 }
 
-void char_data::setLocation(const Location& loc) {
+void Character::setLocation(const Location& loc) {
     if(!loc.unit) return;
     if(loc.unit->type == UnitType::room) {
-        setLocation(static_cast<room_data*>(loc.unit));
+        setLocation(static_cast<Room*>(loc.unit));
     }
 }
 
-void char_data::setLocation(const thing_data* td) {
+void Character::setLocation(const AbstractThing* td) {
     if(!td) return;
     setLocation(td->location);
 }
 
-void char_data::clearLocation() {
+void Character::clearLocation() {
     if(location.getType() != UnitType::room) return;
     char_from_room(this); // original call preserved; do not replace inside clearLocation()
 }

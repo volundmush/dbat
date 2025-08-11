@@ -1,7 +1,7 @@
 #pragma once
 #include "spells.h"
 
-struct char_data;
+struct Character;
 
 namespace atk {
     // If there is no entry for a skill, then the attack doesn't require a skill.
@@ -28,7 +28,7 @@ namespace atk {
     };
 
     struct Attack {
-        Attack(struct char_data *ch, const std::string& arg);
+        Attack(Character *ch, const std::string& arg);
         virtual int getSkill() = 0;
         virtual int getAtkID() = 0; // used for damtype and roll_hitloc
         virtual std::string getName() = 0;
@@ -38,7 +38,7 @@ namespace atk {
         virtual int autoTrainSkill() { return 0;};
 
         virtual Result doAttack();
-        virtual DefenseResult attackOutcome(char_data*, char_data*, int, bool);
+        virtual DefenseResult attackOutcome(Character*, Character*, int, bool);
         virtual DefenseResult calculateDefense();
         virtual Result attackCharacter();
         virtual Result attackObject();
@@ -112,9 +112,9 @@ namespace atk {
         virtual void announceMiss() = 0;
         virtual void announceObject() = 0;
 
-        struct char_data *user{};
-        struct char_data *victim{};
-        struct obj_data *obj{};
+        Character *user{};
+        Character *victim{};
+        Object *obj{};
         std::string input;
         std::vector<std::string> args;
 
@@ -1036,7 +1036,7 @@ namespace atk {
     struct KiAreaAttack : RangedKiAttack {
         using RangedKiAttack::RangedKiAttack;
 
-        std::vector<char_data*> targets;
+        std::vector<Character*> targets;
         bool paidCost = false;
         bool canParry() override {return false;};
         bool canBlock() override {return false;};
@@ -1125,7 +1125,7 @@ namespace atk {
     struct WeaponAttack : MeleeAttack {
         using MeleeAttack::MeleeAttack;
 
-        struct obj_data *weap = nullptr;
+        Object *weap = nullptr;
         bool secondAttack = false;
         int wielded = 0;
         int dualWield = 0;

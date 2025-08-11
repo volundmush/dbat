@@ -5,9 +5,9 @@
 #include "dbat/db.h"
 #include "dbat/utils.h"
 
-NegativeKeyGuardMap<vnum, account_data> accounts;
+NegativeKeyGuardMap<vnum, Account> accounts;
 
-struct account_data *findAccount(const std::string &name) {
+struct Account *findAccount(const std::string &name) {
     for (auto &[aid, account] : accounts) {
         if (boost::iequals(account.name, name)) {
             return &account;
@@ -16,13 +16,13 @@ struct account_data *findAccount(const std::string &name) {
     return nullptr;
 }
 
-int account_data::getNextID() {
+int Account::getNextID() {
     int id = 0;
     while(accounts.contains(id)) id++;
     return id;
 }
 
-account_data *createAccount(const std::string &name, const std::string &password) {
+Account *createAccount(const std::string &name, const std::string &password) {
     if(name.empty()) throw std::invalid_argument("Username cannot be blank.");
     if(password.empty()) throw std::invalid_argument("Password cannot be blank.");
 
@@ -30,7 +30,7 @@ account_data *createAccount(const std::string &name, const std::string &password
         throw std::invalid_argument("Username already exists.");
     }
 
-    auto nextId = account_data::getNextID();
+    auto nextId = Account::getNextID();
     auto a = accounts[nextId];
     a.name = name;
     a.id = nextId;

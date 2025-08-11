@@ -158,7 +158,7 @@ SPECIAL(gauntlet_room)  /* Jamdog - 13th Feb 2006 */
 {
     int i = 0;
     int proceed = 1;
-    struct char_data *tch;
+    Character *tch;
     char *buf2 = "$N tried to sneak past without a fight, and got nowhere.";
     char buf[MAX_STRING_LENGTH];
     bool nomob = true;
@@ -312,7 +312,7 @@ SPECIAL(gauntlet_rest)  /* Jamdog - 20th Feb 2007 */
 {
     int i = 0;
     int proceed = 1, door;
-    struct char_data *tch;
+    Character *tch;
     char *buf2 = "$N tried to return to the gauntlet, and got nowhere.";
     char buf[MAX_STRING_LENGTH];
     bool nomob = true;
@@ -378,7 +378,7 @@ SPECIAL(gauntlet_rest)  /* Jamdog - 20th Feb 2007 */
     return false;
 }
 
-void npc_steal(struct char_data *ch, struct char_data *victim) {
+void npc_steal(Character *ch, Character *victim) {
     int gold;
 
     if (IS_NPC(victim))
@@ -412,7 +412,7 @@ void npc_steal(struct char_data *ch, struct char_data *victim) {
 SPECIAL(pet_shops) {
     char buf[MAX_STRING_LENGTH], pet_name[256];
     room_rnum pet_room;
-    struct char_data *pet;
+    Character *pet;
     /* Gross. */
     pet_room = IN_ROOM(ch) + 1;
 
@@ -469,7 +469,7 @@ SPECIAL(pet_shops) {
 
 SPECIAL(auction) {
     room_rnum auct_room;
-    struct obj_data *obj, *next_obj, *obj2 = nullptr;
+    Object *obj, *next_obj, *obj2 = nullptr;
     int found = false;
 
     /* Gross. */
@@ -654,7 +654,7 @@ SPECIAL(auction) {
 ******************************************************************** */
 
 SPECIAL(healtank) {
-    struct obj_data *i;
+    Object *i;
     char arg[MAX_INPUT_LENGTH];
     one_argument(argument, arg);
 
@@ -891,7 +891,7 @@ static std::map<std::string, double> gravMap = {
 
 /* This controls gravity generator functions */
 SPECIAL(gravity) {
-    struct obj_data *i;
+    Object *i;
     char arg[MAX_INPUT_LENGTH];
     int match = false;
 
@@ -982,7 +982,7 @@ SPECIAL(bank) {
         return (true);
     } else if (CMD_IS("wire")) {
         char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
-        struct char_data *vict = nullptr;
+        Character *vict = nullptr;
 
         two_arguments(argument, arg, arg2);
 

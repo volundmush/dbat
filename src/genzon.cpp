@@ -22,7 +22,7 @@ zone_rnum real_zone_by_thing(room_vnum vznum) {
 
 zone_rnum create_new_zone(zone_vnum vzone_num, room_vnum bottom, room_vnum top, const char **error) {
     FILE *fp;
-    struct zone_data *zone;
+    struct Zone *zone;
     int i;
     zone_rnum rznum;
     char buf[MAX_STRING_LENGTH];
@@ -263,7 +263,7 @@ void create_world_index(int znum, const char *type) {
 /*
  * Error check user input and then add new (blank) command  
  */
-int new_command(struct zone_data *zone, int pos) {
+int new_command(struct Zone *zone, int pos) {
     int subcmd = zone->cmd.size();
     struct reset_com new_com;
     new_com.command = 'N';
@@ -281,14 +281,14 @@ int new_command(struct zone_data *zone, int pos) {
 /*
  * Error check user input and then remove command  
  */
-void delete_zone_command(struct zone_data *zone, int pos) {
+void delete_zone_command(struct Zone *zone, int pos) {
     zone->cmd.erase(zone->cmd.begin()+pos);
 }
 
 /*-------------------------------------------------------------------*/
 
 
-void zone_data::remove_room_commands(room_vnum rv) {
+void Zone::remove_room_commands(room_vnum rv) {
     room_vnum cmd_room = NOTHING;
     for(auto &c : cmd) {
         if(c.command == 'S') break;
@@ -312,7 +312,7 @@ void zone_data::remove_room_commands(room_vnum rv) {
     cmd.erase(std::remove_if(cmd.begin(), cmd.end(), [](const reset_com &c) { return c.command == 'X'; }), cmd.end());
 }
 
-void zone_data::sendText(const std::string& txt) {
+void Zone::sendText(const std::string& txt) {
     for (auto i = descriptor_list; i; i = i->next)
         if (!i->connected && i->character && AWAKE(i->character) &&
             i->character->location.getZone() == this)

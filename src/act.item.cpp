@@ -33,9 +33,9 @@
 #include "dbat/random.h"
 
 /* global variables */
-struct obj_data *obj_selling = nullptr; /* current object for sale */
-struct char_data *ch_selling = nullptr; /* current character selling obj */
-struct char_data *ch_buying = nullptr;  /* current character buying the object */
+Object *obj_selling = nullptr; /* current object for sale */
+Character *ch_selling = nullptr; /* current character selling obj */
+Character *ch_buying = nullptr;  /* current character buying the object */
 
 /* local vvariables  */
 static int curbid = 0;               /* current bid on item being auctioned */
@@ -56,45 +56,45 @@ static const char *auctioneer[AUC_BID + 1] = {
     "@D[@CAUCTION@c: @C$n@W bids @Y%d@W zenni on $p@W.@D]@n"};
 
 /* local functions */
-static void majin_gain(struct char_data *ch, struct obj_data *food, int foob);
+static void majin_gain(Character *ch, Object *food, int foob);
 
-static int can_take_obj(struct char_data *ch, struct obj_data *obj);
+static int can_take_obj(Character *ch, Object *obj);
 
-static void get_check_money(struct char_data *ch, struct obj_data *obj);
+static void get_check_money(Character *ch, Object *obj);
 
-static void get_from_room(struct char_data *ch, char *arg, int howmany);
+static void get_from_room(Character *ch, char *arg, int howmany);
 
-static void perform_give_gold(struct char_data *ch, struct char_data *vict, int amount);
+static void perform_give_gold(Character *ch, Character *vict, int amount);
 
-static void perform_give(struct char_data *ch, struct char_data *vict, struct obj_data *obj);
+static void perform_give(Character *ch, Character *vict, Object *obj);
 
-static int perform_drop(struct char_data *ch, struct obj_data *obj, int8_t mode, const char *sname, room_rnum RDR);
+static int perform_drop(Character *ch, Object *obj, int8_t mode, const char *sname, room_rnum RDR);
 
-static void perform_drop_gold(struct char_data *ch, int amount, int8_t mode, room_rnum RDR);
+static void perform_drop_gold(Character *ch, int amount, int8_t mode, room_rnum RDR);
 
-static struct char_data *give_find_vict(struct char_data *ch, char *arg);
+static Character *give_find_vict(Character *ch, char *arg);
 
-static void perform_put(struct char_data *ch, struct obj_data *obj, struct obj_data *cont);
+static void perform_put(Character *ch, Object *obj, Object *cont);
 
-static void get_from_container(struct char_data *ch, struct obj_data *cont, char *arg, int mode, int howmany);
+static void get_from_container(Character *ch, Object *cont, char *arg, int mode, int howmany);
 
-static void wear_message(struct char_data *ch, struct obj_data *obj, int where);
+static void wear_message(Character *ch, Object *obj, int where);
 
-static void perform_get_from_container(struct char_data *ch, struct obj_data *obj, struct obj_data *cont, int mode);
+static void perform_get_from_container(Character *ch, Object *obj, Object *cont, int mode);
 
-static int hands(struct char_data *ch);
+static int hands(Character *ch);
 
-static void start_auction(struct char_data *ch, struct obj_data *obj, int bid);
+static void start_auction(Character *ch, Object *obj, int bid);
 
-static void auc_stat(struct char_data *ch, struct obj_data *obj);
+static void auc_stat(Character *ch, Object *obj);
 
 static void auc_send_to_all(const char *messg, bool buyer);
 
-static bool has_housekey(struct char_data *ch, struct obj_data *obj);
+static bool has_housekey(Character *ch, Object *obj);
 
-static void harvest_plant(struct char_data *ch, struct obj_data *plant);
+static void harvest_plant(Character *ch, Object *plant);
 
-static int can_harvest(struct obj_data *plant);
+static int can_harvest(Object *plant);
 
 static char *find_exdesc_keywords(char *word, struct extra_descr_data *list);
 
@@ -106,7 +106,7 @@ static char buf[MAX_STRING_LENGTH];
 ACMD(do_refuel)
 {
 
-    struct obj_data *controls;
+    Object *controls;
 
     if (!(controls = find_control(ch)))
     {
@@ -114,7 +114,7 @@ ACMD(do_refuel)
         return;
     }
 
-    struct obj_data *rep = nullptr, *next_obj = nullptr, *fuel = nullptr;
+    Object *rep = nullptr, *next_obj = nullptr, *fuel = nullptr;
     fuel = ch->findObjectVnum(17290);
 
     if (!fuel)
@@ -161,7 +161,7 @@ ACMD(do_refuel)
     }
 }
 
-static int can_harvest(struct obj_data *plant)
+static int can_harvest(Object *plant)
 {
 
     switch (GET_OBJ_VNUM(plant))
@@ -184,10 +184,10 @@ static int can_harvest(struct obj_data *plant)
     return false;
 }
 
-static void harvest_plant(struct char_data *ch, struct obj_data *plant)
+static void harvest_plant(Character *ch, Object *plant)
 {
     int extract = false, reward = rand_number(5, 15), count = reward;
-    struct obj_data *fruit = nullptr;
+    Object *fruit = nullptr;
 
     if (GET_OBJ_VAL(plant, VAL_PLANT_SOILQUALITY) > 7)
     {
@@ -417,7 +417,7 @@ ACMD(do_garden)
 {
 
     char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
-    struct obj_data *obj;
+    Object *obj;
 
     two_arguments(argument, arg, arg2);
 
@@ -437,7 +437,7 @@ ACMD(do_garden)
     {
         if (!strcasecmp(arg, "collect"))
         {
-            struct obj_data *obj2, *shovel = nullptr, *next_obj;
+            Object *obj2, *shovel = nullptr, *next_obj;
             int found = false;
             shovel = ch->findObjectVnum(254);
             if (!shovel)
@@ -454,7 +454,7 @@ ACMD(do_garden)
             }
             if (ch->location.getRoomFlag(ROOM_FERTILE1))
             {
-                struct obj_data *soil = read_object(255, VIRTUAL);
+                Object *soil = read_object(255, VIRTUAL);
                 obj_to_char(soil, ch);
                 act("@yYou sink your shovel into the soft ground and manage to dig up a pile of fertile soil!@n", true,
                     ch, nullptr, nullptr, TO_CHAR);
@@ -466,7 +466,7 @@ ACMD(do_garden)
             }
             else if (ch->location.getRoomFlag(ROOM_FERTILE2))
             {
-                struct obj_data *soil = read_object(255, VIRTUAL);
+                Object *soil = read_object(255, VIRTUAL);
                 obj_to_char(soil, ch);
                 act("@yYou sink your shovel into the soft ground and manage to dig up a pile of good soil!@n", true, ch,
                     nullptr, nullptr, TO_CHAR);
@@ -478,7 +478,7 @@ ACMD(do_garden)
             }
             else
             {
-                struct obj_data *soil = read_object(255, VIRTUAL);
+                Object *soil = read_object(255, VIRTUAL);
                 obj_to_char(soil, ch);
                 act("@yYou sink your shovel into the soft ground and manage to dig up a pile of soil!@n", true, ch,
                     nullptr, nullptr, TO_CHAR);
@@ -540,7 +540,7 @@ ACMD(do_garden)
     {
         if (!strcasecmp(arg2, "water"))
         {
-            struct obj_data *obj2, *water = nullptr, *next_obj;
+            Object *obj2, *water = nullptr, *next_obj;
             int found = false;
             water = ch->findObjectVnum(251);
             if (!water)
@@ -594,7 +594,7 @@ ACMD(do_garden)
         }
         else if (!strcasecmp(arg2, "harvest"))
         {
-            struct obj_data *obj2, *clippers = nullptr, *next_obj;
+            Object *obj2, *clippers = nullptr, *next_obj;
             int found = false;
             clippers = ch->findObjectVnum(253);
             if (!clippers)
@@ -647,7 +647,7 @@ ACMD(do_garden)
         }
         else if (!strcasecmp(arg2, "dig"))
         {
-            struct obj_data *obj2, *shovel = nullptr, *next_obj;
+            Object *obj2, *shovel = nullptr, *next_obj;
             int found = false;
             shovel = ch->findObjectVnum(254);
             if (!shovel)
@@ -670,7 +670,7 @@ ACMD(do_garden)
         }
         else if (!strcasecmp(arg2, "plant"))
         {
-            struct obj_data *obj2, *shovel, *next_obj;
+            Object *obj2, *shovel, *next_obj;
             int found = false;
             shovel = ch->findObjectVnum(254);
 
@@ -680,7 +680,7 @@ ACMD(do_garden)
                 return;
             }
             found = false;
-            struct obj_data *soil = nullptr;
+            Object *soil = nullptr;
             soil = ch->findObjectVnum(255);
 
             auto con = ch->location.getObjects();
@@ -798,13 +798,13 @@ ACMD(do_garden)
     }
 }
 
-static bool has_housekey(struct char_data *ch, struct obj_data *obj)
+static bool has_housekey(Character *ch, Object *obj)
 {
 
     if (OBJ_FLAGGED(obj, ITEM_DUPLICATE))
         return false;
 
-    auto isHouseKey = [&](struct obj_data *obj2) -> bool
+    auto isHouseKey = [&](Object *obj2) -> bool
     {
         if (obj2->getVnum() == 18800 && obj->getVnum() == 18802)
             return true;
@@ -819,7 +819,7 @@ static bool has_housekey(struct char_data *ch, struct obj_data *obj)
 ACMD(do_pack)
 {
 
-    struct obj_data *obj;
+    Object *obj;
     char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 
     two_arguments(argument, arg, arg2);
@@ -837,7 +837,7 @@ ACMD(do_pack)
     }
     else
     {
-        struct obj_data *packed = nullptr;
+        Object *packed = nullptr;
         if ((GET_OBJ_VNUM(obj) >= 19090 && GET_OBJ_VNUM(obj) <= 19099) || GET_OBJ_VNUM(obj) == 11)
         {
             act("@CYou push a hidden button on $p@C and a cloud of smoke erupts and covers it. As the smoke clears a small capsule can be seen on the ground.@n",
@@ -878,7 +878,7 @@ ACMD(do_pack)
             }
             else
             {
-                struct obj_data *cont = nullptr;
+                Object *cont = nullptr;
                 act("@CYou push a hidden button on $p@C and a cloud of smoke erupts and covers it. As the smoke clears a pile of money can be seen on the ground!@n",
                     true, ch, obj, nullptr, TO_CHAR);
                 act("@c$n@C pushes a hidden button on $p@C and a cloud of smokes erupts and covers it. As the smoke clears a pile of money can be seen on the ground!@n",
@@ -965,7 +965,7 @@ ACMD(do_pack)
     }
 }
 
-int check_insidebag(struct obj_data *cont, double mult)
+int check_insidebag(Object *cont, double mult)
 {
     int count = 0, containers = 0;
 
@@ -993,7 +993,7 @@ int check_insidebag(struct obj_data *cont, double mult)
 ACMD(do_deploy)
 {
 
-    struct obj_data *obj3, *next_obj, *obj4, *obj = nullptr;
+    Object *obj3, *next_obj, *obj4, *obj = nullptr;
     int capsule = false, furniture = false;
 
     char arg[MAX_INPUT_LENGTH];
@@ -1082,7 +1082,7 @@ ACMD(do_deploy)
         }
         if (fnum != 0)
         {
-            struct obj_data *furn = read_object(fnum, VIRTUAL);
+            Object *furn = read_object(fnum, VIRTUAL);
             act("@CYou click the capsule's button and toss it to the floor. A puff of smoke erupts immediately and quickly dissipates to reveal, $p@C.@n",
                 true, ch, furn, nullptr, TO_CHAR);
             act("@c$n@C clicks a capsule's button and tosses it to the floor. A puff of smoke erupts immediately and quickly dissipates to reveal, $p@C.@n",
@@ -1148,7 +1148,7 @@ ACMD(do_deploy)
     if (cont == true)
     {
         int hnum = ch->getRoomVnum();
-        struct obj_data *door = read_object(18801, VIRTUAL);
+        Object *door = read_object(18801, VIRTUAL);
 
         SET_OBJ_VAL(door, VAL_HATCH_LOCATION, ch->getRoomVnum());
         if (rnum != 18800)
@@ -1157,13 +1157,13 @@ ACMD(do_deploy)
             SET_OBJ_VAL(door, VAL_HATCH_DEST, 18802);
         SET_OBJ_VAL(door, VAL_HATCH_DCSKILL, rnum);
         door->setLocation(rnum);
-        struct obj_data *key = read_object(rnum, VIRTUAL);
+        Object *key = read_object(rnum, VIRTUAL);
         obj_to_char(key, ch);
         act("@WYou click the capsule and toss it to the ground. A large cloud of smoke erupts from the capsule and after it clears a house is visible in its place!@n",
             true, ch, nullptr, nullptr, TO_CHAR);
         act("@C$n@W clicks a capsule and then tosses it to the ground. A large cloud of smoke erupts from the capsule and after it clears a house is visible in its place!@n",
             true, ch, nullptr, nullptr, TO_ROOM);
-        struct obj_data *foun = read_object(18803, VIRTUAL);
+        Object *foun = read_object(18803, VIRTUAL);
         foun->setLocation(rnum + 1);
         extract_obj(obj);
     }
@@ -1220,7 +1220,7 @@ ACMD(do_twohand)
     }
 }
 
-static void start_auction(struct char_data *ch, struct obj_data *obj, int bid)
+static void start_auction(Character *ch, Object *obj, int bid)
 {
     /* Take object from character and set variables */
 
@@ -1391,8 +1391,8 @@ void loadDragonball(int vnum, int &foundFlag, bool &hunter1, bool &hunter2)
         int room = 0;
         int num = rand_number(200, 20000);
         mob_rnum r_num;
-        struct char_data *hunter = nullptr;
-        struct obj_data *k = nullptr;
+        Character *hunter = nullptr;
+        Object *k = nullptr;
 
         while (!load)
         {
@@ -1451,7 +1451,7 @@ void dball_load(uint64_t heartPulse, double deltaTime)
 
     if (dballtime == 0)
     {
-        struct obj_data *k = nullptr;
+        Object *k = nullptr;
 
         WISHTIME = 0;
         auto ao = objectSubscriptions.all("active");
@@ -1503,7 +1503,7 @@ ACMD(do_auction)
 {
     char arg1[MAX_INPUT_LENGTH];
     char arg2[MAX_INPUT_LENGTH];
-    struct obj_data *obj;
+    Object *obj;
     int bid = 0;
 
     two_arguments(argument, arg1, arg2);
@@ -1596,7 +1596,7 @@ ACMD(do_auction)
 
 ACMD(do_bid)
 {
-    struct obj_data *obj, *next_obj, *obj2 = nullptr;
+    Object *obj, *next_obj, *obj2 = nullptr;
     char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
     int found = false, list = 0, masterList = 0;
     room_vnum auct_room;
@@ -1902,7 +1902,7 @@ ACMD(do_bid)
     }
 }
 
-void stop_auction(int type, struct char_data *ch)
+void stop_auction(int type, Character *ch)
 {
     if (obj_selling == nullptr)
     {
@@ -1971,7 +1971,7 @@ void stop_auction(int type, struct char_data *ch)
     aucstat = AUC_NULL_STATE;
 }
 
-static void auc_stat(struct char_data *ch, struct obj_data *obj)
+static void auc_stat(Character *ch, Object *obj)
 {
 
     if (aucstat == AUC_NULL_STATE)
@@ -2025,7 +2025,7 @@ static void auc_send_to_all(const char *messg, bool buyer)
 ACMD(do_assemble)
 {
     long lVnum = NOTHING;
-    struct obj_data *pObject = nullptr;
+    Object *pObject = nullptr;
     char buf[MAX_STRING_LENGTH];
     char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 
@@ -2034,7 +2034,7 @@ ACMD(do_assemble)
     // skip_spaces(&argument);
     two_arguments(argument, arg, arg2);
 
-    struct obj_data *tool = nullptr, *next_obj;
+    Object *tool = nullptr, *next_obj;
 
     if (tool = ch->findObjectVnum(386))
     {
@@ -2147,8 +2147,8 @@ ACMD(do_assemble)
     }
 }
 
-static void perform_put(struct char_data *ch, struct obj_data *obj,
-                        struct obj_data *cont)
+static void perform_put(Character *ch, Object *obj,
+                        Object *cont)
 {
 
     static std::unordered_set<int> dball = {20, 21, 22, 23, 24, 25, 26};
@@ -2170,7 +2170,7 @@ static void perform_put(struct char_data *ch, struct obj_data *obj,
     }
     if (OBJ_FLAGGED(cont, ITEM_SHEATH))
     {
-        struct obj_data *obj2 = nullptr, *next_obj = nullptr;
+        Object *obj2 = nullptr, *next_obj = nullptr;
         int count = 0, minus = 0;
         auto con = cont->getObjects();
         for (auto obj2 : filter_raw(con))
@@ -2261,8 +2261,8 @@ ACMD(do_put)
     char arg1[MAX_INPUT_LENGTH];
     char arg2[MAX_INPUT_LENGTH];
     char arg3[MAX_INPUT_LENGTH];
-    struct obj_data *obj, *next_obj, *cont;
-    struct char_data *tmp_char;
+    Object *obj, *next_obj, *cont;
+    Character *tmp_char;
     int obj_dotmode, cont_dotmode, found = 0, howmany = 1;
     char *theobj, *thecont;
 
@@ -2356,7 +2356,7 @@ ACMD(do_put)
     }
 }
 
-static int can_take_obj(struct char_data *ch, struct obj_data *obj)
+static int can_take_obj(Character *ch, Object *obj)
 {
     if (!(CAN_WEAR(obj, ITEM_WEAR_TAKE)))
     {
@@ -2376,7 +2376,7 @@ static int can_take_obj(struct char_data *ch, struct obj_data *obj)
     return (1);
 }
 
-static void get_check_money(struct char_data *ch, struct obj_data *obj)
+static void get_check_money(Character *ch, Object *obj)
 {
     int value = GET_OBJ_VAL(obj, VAL_MONEY_SIZE);
 
@@ -2415,8 +2415,8 @@ static void get_check_money(struct char_data *ch, struct obj_data *obj)
     }
 }
 
-static void perform_get_from_container(struct char_data *ch, struct obj_data *obj,
-                                       struct obj_data *cont, int mode)
+static void perform_get_from_container(Character *ch, Object *obj,
+                                       Object *cont, int mode)
 {
     if (mode == FIND_OBJ_INV || mode == FIND_OBJ_EQUIP || can_take_obj(ch, obj))
     {
@@ -2467,10 +2467,10 @@ static void perform_get_from_container(struct char_data *ch, struct obj_data *ob
     }
 }
 
-static void get_from_container(struct char_data *ch, struct obj_data *cont,
+static void get_from_container(Character *ch, Object *cont,
                                char *arg, int mode, int howmany)
 {
-    struct obj_data *obj, *next_obj;
+    Object *obj, *next_obj;
     int obj_dotmode, found = 0;
 
     obj_dotmode = find_all_dots(arg);
@@ -2529,7 +2529,7 @@ static void get_from_container(struct char_data *ch, struct obj_data *cont,
     }
 }
 
-int perform_get_from_room(struct char_data *ch, struct obj_data *obj)
+int perform_get_from_room(Character *ch, Object *obj)
 {
 
     if (SITTING(obj))
@@ -2599,9 +2599,9 @@ static char *find_exdesc_keywords(char *word, const std::vector<ExtraDescription
     return nullptr;
 }
 
-static void get_from_room(struct char_data *ch, char *arg, int howmany)
+static void get_from_room(Character *ch, char *arg, int howmany)
 {
-    struct obj_data *obj, *next_obj;
+    Object *obj, *next_obj;
     int dotmode, found = 0;
     char *descword;
 
@@ -2671,8 +2671,8 @@ ACMD(do_get)
     char arg3[MAX_INPUT_LENGTH];
 
     int cont_dotmode, found = 0, mode;
-    struct obj_data *cont;
-    struct char_data *tmp_char;
+    Object *cont;
+    Character *tmp_char;
 
     one_argument(two_arguments(argument, arg1, arg2), arg3); /* three_arguments */
 
@@ -2761,10 +2761,10 @@ ACMD(do_get)
     }
 }
 
-static void perform_drop_gold(struct char_data *ch, int amount,
+static void perform_drop_gold(Character *ch, int amount,
                               int8_t mode, room_rnum RDR)
 {
-    struct obj_data *obj;
+    Object *obj;
 
     if (amount <= 0)
         ch->sendText("Heh heh heh.. we are jolly funny today, eh?\r\n");
@@ -2834,7 +2834,7 @@ static void perform_drop_gold(struct char_data *ch, int amount,
 
 #define VANISH(mode) ((mode == SCMD_DONATE || mode == SCMD_JUNK) ? "  It vanishes in a puff of smoke!" : "")
 
-static int perform_drop(struct char_data *ch, struct obj_data *obj,
+static int perform_drop(Character *ch, Object *obj,
                         int8_t mode, const char *sname, room_rnum RDR)
 {
     char buf[MAX_STRING_LENGTH];
@@ -2972,7 +2972,7 @@ static int perform_drop(struct char_data *ch, struct obj_data *obj,
 ACMD(do_drop)
 {
     char arg[MAX_INPUT_LENGTH];
-    struct obj_data *obj, *next_obj;
+    Object *obj, *next_obj;
     room_rnum RDR = 0;
     int8_t mode = SCMD_DROP;
     int dotmode, amount = 0, multi, num_don_rooms;
@@ -3127,8 +3127,8 @@ ACMD(do_drop)
     }
 }
 
-static void perform_give(struct char_data *ch, struct char_data *vict,
-                         struct obj_data *obj)
+static void perform_give(Character *ch, Character *vict,
+                         Object *obj)
 {
     if (!give_otrigger(obj, ch, vict))
         return;
@@ -3215,9 +3215,9 @@ static void perform_give(struct char_data *ch, struct char_data *vict,
 }
 
 /* utility function for give */
-static struct char_data *give_find_vict(struct char_data *ch, char *arg)
+static Character *give_find_vict(Character *ch, char *arg)
 {
-    struct char_data *vict;
+    Character *vict;
 
     skip_spaces(&arg);
     if (!*arg)
@@ -3236,7 +3236,7 @@ static struct char_data *give_find_vict(struct char_data *ch, char *arg)
     return (nullptr);
 }
 
-static void perform_give_gold(struct char_data *ch, struct char_data *vict,
+static void perform_give_gold(Character *ch, Character *vict,
                               int amount)
 {
     char buf[MAX_STRING_LENGTH];
@@ -3275,8 +3275,8 @@ ACMD(do_give)
 {
     char arg[MAX_STRING_LENGTH];
     int amount, dotmode;
-    struct char_data *vict;
-    struct obj_data *obj, *next_obj;
+    Character *vict;
+    Object *obj, *next_obj;
 
     argument = one_argument(argument, arg);
 
@@ -3394,12 +3394,12 @@ ACMD(do_give)
     }
 }
 
-void weight_change_object(struct obj_data *obj, int weight)
+void weight_change_object(Object *obj, int weight)
 {
     obj->modBaseStat<weight_t>("weight", weight);
 }
 
-void name_from_drinkcon(struct obj_data *obj)
+void name_from_drinkcon(Object *obj)
 {
     if (!obj || (GET_OBJ_TYPE(obj) != ITEM_DRINKCON && GET_OBJ_TYPE(obj) != ITEM_FOUNTAIN))
         return;
@@ -3429,7 +3429,7 @@ void name_from_drinkcon(struct obj_data *obj)
     obj->strings["name"] = oss.str();
 }
 
-void name_to_drinkcon(struct obj_data *obj, int type)
+void name_to_drinkcon(Object *obj, int type)
 {
     char *new_name;
 
@@ -3446,7 +3446,7 @@ void name_to_drinkcon(struct obj_data *obj, int type)
 ACMD(do_drink)
 {
     char arg[MAX_INPUT_LENGTH];
-    struct obj_data *temp;
+    Object *temp;
     struct affected_type af;
     int amount, weight, wasthirsty = 0;
     int on_ground = 0;
@@ -3706,7 +3706,7 @@ ACMD(do_drink)
 ACMD(do_eat)
 {
     char arg[MAX_INPUT_LENGTH];
-    struct obj_data *food;
+    Object *food;
     struct affected_type af;
     int amount;
 
@@ -3923,7 +3923,7 @@ ACMD(do_eat)
     }
 }
 
-static void majin_gain(struct char_data *ch, struct obj_data *food, int foob)
+static void majin_gain(Character *ch, Object *food, int foob)
 {
     if (!IS_MAJIN(ch) || IS_NPC(ch))
     {
@@ -4003,7 +4003,7 @@ static void majin_gain(struct char_data *ch, struct obj_data *food, int foob)
 ACMD(do_pour)
 {
     char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
-    struct obj_data *from_obj = nullptr, *to_obj = nullptr;
+    Object *from_obj = nullptr, *to_obj = nullptr;
     int amount = 0;
 
     two_arguments(argument, arg1, arg2);
@@ -4176,7 +4176,7 @@ ACMD(do_pour)
     weight_change_object(to_obj, amount); /* Add weight */
 }
 
-static void wear_message(struct char_data *ch, struct obj_data *obj, int where)
+static void wear_message(Character *ch, Object *obj, int where)
 {
     const char *wear_messages[][2] = {
         {"$n lights $p and holds it.",
@@ -4254,7 +4254,7 @@ static void wear_message(struct char_data *ch, struct obj_data *obj, int where)
     act(wear_messages[where][1], false, ch, obj, nullptr, TO_CHAR);
 }
 
-static int hands(struct char_data *ch)
+static int hands(Character *ch)
 {
     int x;
 
@@ -4318,7 +4318,7 @@ static const char *already_wearing[] = {
     "You're already wearing something on your shoulders.\r\n",
     "You're already wearing something as a scouter.\r\n"};
 
-void perform_wear(struct char_data *ch, struct obj_data *obj, int where)
+void perform_wear(Character *ch, Object *obj, int where)
 {
     /*
      * ITEM_WEAR_TAKE is used for objects that do not require special bits
@@ -4397,7 +4397,7 @@ void perform_wear(struct char_data *ch, struct obj_data *obj, int where)
     equip_char(ch, obj, where);
 }
 
-int find_eq_pos(struct char_data *ch, struct obj_data *obj, char *arg)
+int find_eq_pos(Character *ch, Object *obj, char *arg)
 {
     int where = -1;
 
@@ -4477,7 +4477,7 @@ ACMD(do_wear)
 {
     char arg1[MAX_INPUT_LENGTH];
     char arg2[MAX_INPUT_LENGTH];
-    struct obj_data *obj, *next_obj;
+    Object *obj, *next_obj;
     int where, dotmode, items_worn = 0;
 
     two_arguments(argument, arg1, arg2);
@@ -4587,7 +4587,7 @@ ACMD(do_wear)
 ACMD(do_wield)
 {
     char arg[MAX_INPUT_LENGTH];
-    struct obj_data *obj;
+    Object *obj;
 
     one_argument(argument, arg);
 
@@ -4621,7 +4621,7 @@ ACMD(do_wield)
 ACMD(do_grab)
 {
     char arg[MAX_INPUT_LENGTH];
-    struct obj_data *obj;
+    Object *obj;
 
     one_argument(argument, arg);
 
@@ -4661,9 +4661,9 @@ ACMD(do_grab)
     }
 }
 
-void perform_remove(struct char_data *ch, int pos)
+void perform_remove(Character *ch, int pos)
 {
-    struct obj_data *obj;
+    Object *obj;
 
     int64_t previous = GET_HIT(ch);
 
@@ -4701,7 +4701,7 @@ void perform_remove(struct char_data *ch, int pos)
 
 ACMD(do_remove)
 {
-    struct obj_data *obj;
+    Object *obj;
     char arg[MAX_INPUT_LENGTH];
     int i, dotmode, found = 0, msg;
 
@@ -4793,7 +4793,7 @@ ACMD(do_remove)
 ACMD(do_sac)
 {
     char arg[MAX_INPUT_LENGTH];
-    struct obj_data *j;
+    Object *j;
 
     one_argument(argument, arg);
 
@@ -4901,7 +4901,7 @@ const int max_carry_load[] = {
 };
 
 /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
-int64_t max_carry_weight(struct char_data *ch)
+int64_t max_carry_weight(Character *ch)
 {
     int64_t abil;
     int total;

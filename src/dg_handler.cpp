@@ -22,7 +22,7 @@
 
 
 /* remove all triggers from a mob/obj/room */
-void extract_script(unit_data *thing, UnitType type) {
+void extract_script(Entity *thing, UnitType type) {
     
     for(auto &[vn, sc] : thing->scripts) {
         sc->deactivate();

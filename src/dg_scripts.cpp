@@ -28,55 +28,55 @@
 
 
 /* Local functions not used elsewhere */
-void do_stat_trigger(struct char_data *ch, trig_proto_data *trig);
+void do_stat_trigger(Character *ch, DgScriptPrototype *trig);
 
-void script_stat(char_data *ch, script_data *sc);
+void script_stat(Character *ch, script_data *sc);
 
 int remove_trigger(script_data *sc, char *name);
 
 bool is_num(const std::string &arg);
 
-void eval_op(char *op, char *lhs, char *rhs, char *result, unit_data *go,
-             script_data *sc, trig_data *trig);
+void eval_op(char *op, char *lhs, char *rhs, char *result, Entity *go,
+             script_data *sc, DgScript *trig);
 
 char *matching_paren(char *p);
 
-void eval_expr(char *line, char *result, unit_data *go, script_data *sc,
-               trig_data *trig, UnitType type);
+void eval_expr(char *line, char *result, Entity *go, script_data *sc,
+               DgScript *trig, UnitType type);
 
-int eval_lhs_op_rhs(char *expr, char *result, unit_data *go, script_data *sc,
-                    trig_data *trig, UnitType type);
+int eval_lhs_op_rhs(char *expr, char *result, Entity *go, script_data *sc,
+                    DgScript *trig, UnitType type);
 
-void process_wait(unit_data *go, trig_data *trig, UnitType type, char *cmd,
+void process_wait(Entity *go, DgScript *trig, UnitType type, char *cmd,
                   struct cmdlist_element *cl);
 
-void process_set(script_data *sc, trig_data *trig, char *cmd);
+void process_set(script_data *sc, DgScript *trig, char *cmd);
 
-void process_attach(unit_data *go, script_data *sc, trig_data *trig,
+void process_attach(Entity *go, script_data *sc, DgScript *trig,
                     UnitType type, char *cmd);
 
-void process_detach(unit_data *go, script_data *sc, trig_data *trig,
+void process_detach(Entity *go, script_data *sc, DgScript *trig,
                     UnitType type, char *cmd);
 
-int process_return(trig_data *trig, char *cmd);
+int process_return(DgScript *trig, char *cmd);
 
-void process_unset(script_data *sc, trig_data *trig, char *cmd);
+void process_unset(script_data *sc, DgScript *trig, char *cmd);
 
-void process_remote(script_data *sc, trig_data *trig, char *cmd);
+void process_remote(script_data *sc, DgScript *trig, char *cmd);
 
-void process_rdelete(script_data *sc, trig_data *trig, char *cmd);
+void process_rdelete(script_data *sc, DgScript *trig, char *cmd);
 
-void process_global(script_data *sc, trig_data *trig, char *cmd, long id);
+void process_global(script_data *sc, DgScript *trig, char *cmd, long id);
 
-void process_context(script_data *sc, trig_data *trig, char *cmd);
+void process_context(script_data *sc, DgScript *trig, char *cmd);
 
-void extract_value(script_data *sc, trig_data *trig, char *cmd);
+void extract_value(script_data *sc, DgScript *trig, char *cmd);
 
-void dg_letter_value(script_data *sc, trig_data *trig, char *cmd);
+void dg_letter_value(script_data *sc, DgScript *trig, char *cmd);
 
 struct cmdlist_element *
-find_case(struct trig_data *trig, struct cmdlist_element *cl,
-    unit_data *go, script_data *sc, UnitType type, char *cond);
+find_case(DgScript *trig, struct cmdlist_element *cl,
+    Entity *go, script_data *sc, UnitType type, char *cond);
 
 struct cmdlist_element *find_done(struct cmdlist_element *cl);
 
@@ -122,7 +122,7 @@ char *str_str(char *cs, char *ct) {
 int trgvar_in_room(room_vnum vnum) {
     room_rnum rnum = real_room(vnum);
     int i = 0;
-    char_data *ch;
+    Character *ch;
 
     if (rnum == NOWHERE) {
         script_log("people.vnum: world[rnum] does not exist");
@@ -132,11 +132,11 @@ int trgvar_in_room(room_vnum vnum) {
     return get_room(rnum)->getPeople().size();
 }
 
-obj_data *get_obj_in_list(char *name, const std::vector<std::weak_ptr<obj_data>>& list) {
+Object *get_obj_in_list(char *name, const std::vector<std::weak_ptr<Object>>& list) {
     if (*name == UID_CHAR) {
         auto uidResult = resolveUID(name);;
         if(!uidResult) return nullptr;
-        auto obj2 = std::dynamic_pointer_cast<obj_data>(uidResult);
+        auto obj2 = std::dynamic_pointer_cast<Object>(uidResult);
         if(!obj2) return nullptr;
         auto obj = obj2.get();
 
@@ -151,9 +151,9 @@ obj_data *get_obj_in_list(char *name, const std::vector<std::weak_ptr<obj_data>>
     return nullptr;
 }
 
-obj_data *get_object_in_equip(char_data *ch, char *name) {
+Object *get_object_in_equip(Character *ch, char *name) {
     int j, n = 0, number;
-    obj_data *obj;
+    Object *obj;
     char tmpname[MAX_INPUT_LENGTH];
     char *tmp = tmpname;
     int32_t id;
@@ -161,7 +161,7 @@ obj_data *get_object_in_equip(char_data *ch, char *name) {
     if (*name == UID_CHAR) {
         auto uidResult = resolveUID(name);
         if(!uidResult) return nullptr;
-        auto obj2 = std::dynamic_pointer_cast<obj_data>(uidResult);
+        auto obj2 = std::dynamic_pointer_cast<Object>(uidResult);
         if(!obj2) return nullptr;
         auto o = obj2.get();
 
@@ -235,7 +235,7 @@ int find_eq_pos_script(char *arg) {
     return (-1);
 }
 
-int can_wear_on_pos(struct obj_data *obj, int pos) {
+int can_wear_on_pos(Object *obj, int pos) {
     switch (pos) {
         case WEAR_WIELD1:
             return CAN_WEAR(obj, ITEM_WEAR_WIELD);
@@ -285,12 +285,12 @@ int can_wear_on_pos(struct obj_data *obj, int pos) {
  ************************************************************/
 
 /* search the entire world for a char, and return a pointer */
-char_data *get_char(char *name) {
-    char_data *i;
+Character *get_char(char *name) {
+    Character *i;
 
     if (*name == UID_CHAR) {
         auto uidResult = resolveUID(name);
-        i = std::dynamic_pointer_cast<char_data>(uidResult).get();
+        i = std::dynamic_pointer_cast<Character>(uidResult).get();
         if(!i) return nullptr;
 
         if (i && valid_dg_target(i, DG_ALLOW_GODS))
@@ -311,12 +311,12 @@ char_data *get_char(char *name) {
 /*
  * Finds a char in the same room as the object with the name 'name'
  */
-char_data *get_char_near_obj(obj_data *obj, char *name) {
-    char_data *ch;
+Character *get_char_near_obj(Object *obj, char *name) {
+    Character *ch;
 
     if (*name == UID_CHAR) {
         auto uidResult = resolveUID(name);
-        ch = std::dynamic_pointer_cast<char_data>(uidResult).get();
+        ch = std::dynamic_pointer_cast<Character>(uidResult).get();
         if(!ch) return nullptr;
 
         if (ch && valid_dg_target(ch, DG_ALLOW_GODS))
@@ -341,12 +341,12 @@ char_data *get_char_near_obj(obj_data *obj, char *name) {
  * returns a pointer to the first character in world by name name,
  * or nullptr if none found.  Starts searching in room room first
  */
-char_data *get_char_in_room(room_data *room, char *name) {
-    char_data *ch;
+Character *get_char_in_room(Room *room, char *name) {
+    Character *ch;
 
     if (*name == UID_CHAR) {
         auto uidResult = resolveUID(name);
-        ch = std::dynamic_pointer_cast<char_data>(uidResult).get();
+        ch = std::dynamic_pointer_cast<Character>(uidResult).get();
         if(!ch) return nullptr;
 
         if (ch && valid_dg_target(ch, DG_ALLOW_GODS))
@@ -364,9 +364,9 @@ char_data *get_char_in_room(room_data *room, char *name) {
 
 /* searches the room with the object for an object with name 'name'*/
 
-obj_data *get_obj_near_obj(obj_data *obj, char *name) {
-    obj_data *i = nullptr;
-    char_data *ch;
+Object *get_obj_near_obj(Object *obj, char *name) {
+    Object *i = nullptr;
+    Character *ch;
     room_vnum rm;
     int32_t id;
 
@@ -383,10 +383,10 @@ obj_data *get_obj_near_obj(obj_data *obj, char *name) {
     
     switch(obj->location.getType()) {
         case UnitType::object: {
-            auto o = static_cast<obj_data*>(obj->location.unit);
+            auto o = static_cast<Object*>(obj->location.unit);
             if (*name == UID_CHAR) {
                 auto uidResult = resolveUID(name);
-                auto o2 = std::dynamic_pointer_cast<obj_data>(uidResult).get();
+                auto o2 = std::dynamic_pointer_cast<Object>(uidResult).get();
                 if(!o2) return nullptr;
                 if(o2 == o) return o;
             } else if (isname(name, o->getName()))
@@ -394,7 +394,7 @@ obj_data *get_obj_near_obj(obj_data *obj, char *name) {
             break;
         }
         case UnitType::character: {
-            auto c = static_cast<char_data*>(obj->location.unit);
+            auto c = static_cast<Character*>(obj->location.unit);
             if(obj->location.position.x >= 0.0 && (i = get_object_in_equip(c, name))) {
                 // worn?
                 return i;
@@ -428,12 +428,12 @@ obj_data *get_obj_near_obj(obj_data *obj, char *name) {
 }
 
 /* returns the object in the world with name name, or nullptr if not found */
-obj_data *get_obj(char *name) {
-    obj_data *obj;
+Object *get_obj(char *name) {
+    Object *obj;
 
     if (*name == UID_CHAR) {
         auto uidResult = resolveUID(name);
-        return std::dynamic_pointer_cast<obj_data>(uidResult).get();
+        return std::dynamic_pointer_cast<Object>(uidResult).get();
     }
     else {
         auto ao = objectSubscriptions.all("active");
@@ -448,12 +448,12 @@ obj_data *get_obj(char *name) {
 
 
 /* finds room by id or vnum.  returns nullptr if not found */
-room_data *get_room(char *name) {
+Room *get_room(char *name) {
     room_rnum nr;
 
     if (*name == UID_CHAR) {
         auto uidResult = resolveUID(name);
-        return std::dynamic_pointer_cast<room_data>(uidResult).get();
+        return std::dynamic_pointer_cast<Room>(uidResult).get();
     }
     else if ((nr = real_room(atoi(name))) == NOWHERE)
         return nullptr;
@@ -466,12 +466,12 @@ room_data *get_room(char *name) {
  * returns a pointer to the first character in world by name name,
  * or nullptr if none found.  Starts searching with the person owing the object
  */
-char_data *get_char_by_obj(obj_data *obj, char *name) {
-    char_data *ch;
+Character *get_char_by_obj(Object *obj, char *name) {
+    Character *ch;
 
     if (*name == UID_CHAR) {
         auto uidResult = resolveUID(name);
-        ch = std::dynamic_pointer_cast<char_data>(uidResult).get();
+        ch = std::dynamic_pointer_cast<Character>(uidResult).get();
         if (ch && valid_dg_target(ch, DG_ALLOW_GODS))
             return ch;
     } else {
@@ -497,12 +497,12 @@ char_data *get_char_by_obj(obj_data *obj, char *name) {
  * returns a pointer to the first character in world by name name,
  * or nullptr if none found.  Starts searching in room room first
  */
-char_data *get_char_by_room(room_data *room, char *name) {
-    char_data *ch;
+Character *get_char_by_room(Room *room, char *name) {
+    Character *ch;
 
     if (*name == UID_CHAR) {
         auto uidResult = resolveUID(name);
-        ch = std::dynamic_pointer_cast<char_data>(uidResult).get();
+        ch = std::dynamic_pointer_cast<Character>(uidResult).get();
 
         if (ch && valid_dg_target(ch, DG_ALLOW_GODS))
             return ch;
@@ -529,13 +529,13 @@ char_data *get_char_by_room(room_data *room, char *name) {
  * returns the object in the world with name name, or nullptr if not found
  * search based on obj
  */
-obj_data *get_obj_by_obj(obj_data *obj, char *name) {
-    obj_data *i = nullptr;
+Object *get_obj_by_obj(Object *obj, char *name) {
+    Object *i = nullptr;
     room_vnum rm;
 
     if (*name == UID_CHAR) {
         auto uidResult = resolveUID(name);
-        return std::dynamic_pointer_cast<obj_data>(uidResult).get();
+        return std::dynamic_pointer_cast<Object>(uidResult).get();
     }
 
     if (!strcasecmp(name, "self") || !strcasecmp(name, "me"))
@@ -549,13 +549,13 @@ obj_data *get_obj_by_obj(obj_data *obj, char *name) {
     
     switch(obj->location.getType()) {
         case UnitType::object: {
-            auto o = static_cast<obj_data*>(obj->location.unit);
+            auto o = static_cast<Object*>(obj->location.unit);
             if(isname(name, o->getName()))
                 return o;
         }
             break;
         case UnitType::character: {
-            auto c = static_cast<char_data*>(obj->location.unit);
+            auto c = static_cast<Character*>(obj->location.unit);
             if(obj->location.position.x == -1) {
                 if(i = get_obj_in_list(name,c->getObjects()); i)
                     return i;
@@ -577,13 +577,13 @@ obj_data *get_obj_by_obj(obj_data *obj, char *name) {
 }
 
 /* only searches the room */
-obj_data *get_obj_in_room(room_data *room, char *name) {
-    obj_data *obj;
+Object *get_obj_in_room(Room *room, char *name) {
+    Object *obj;
     int32_t id;
 
     if (*name == UID_CHAR) {
         auto uidResult = resolveUID(name);
-        auto o = std::dynamic_pointer_cast<obj_data>(uidResult).get();
+        auto o = std::dynamic_pointer_cast<Object>(uidResult).get();
         if(!o) return nullptr;
         auto con = room->getObjects();
         for (auto obj : filter_raw(con))
@@ -600,11 +600,11 @@ obj_data *get_obj_in_room(room_data *room, char *name) {
 }
 
 /* returns obj with name - searches room, then world */
-obj_data *get_obj_by_room(room_data *room, char *name) {
+Object *get_obj_by_room(Room *room, char *name) {
 
     if (*name == UID_CHAR) {
         auto uidResult = resolveUID(name);
-        return std::dynamic_pointer_cast<obj_data>(uidResult).get();
+        return std::dynamic_pointer_cast<Object>(uidResult).get();
     }
 
     auto con = room->getObjects();
@@ -717,13 +717,13 @@ void check_interval_triggers(int trigFlag) {
     }
 }
 
-void trig_proto_data::setBody(const std::string& body) {
+void DgScriptPrototype::setBody(const std::string& body) {
     std::vector<std::string> l;
     boost::split_regex(l, body, boost::regex("\r\n|\r|\n"));
     lines = parse_script(l);
 }
 
-std::string trig_proto_data::scriptString() const {
+std::string DgScriptPrototype::scriptString() const {
     std::string out;
 
     int depth = 0;
@@ -797,7 +797,7 @@ std::string trig_proto_data::scriptString() const {
 }
 
 
-void do_stat_trigger(struct char_data *ch, trig_proto_data *trig) {
+void do_stat_trigger(Character *ch, DgScriptPrototype *trig) {
     char buf[MAX_STRING_LENGTH];
     if (!trig) {
         basic_mud_log("SYSERR: nullptr trigger passed to do_stat_trigger.");
@@ -831,8 +831,8 @@ void do_stat_trigger(struct char_data *ch, trig_proto_data *trig) {
 
 /* find the name of what the uid points to */
 void find_uid_name(char *uid, char *name, size_t nlen) {
-    char_data *ch;
-    obj_data *obj;
+    Character *ch;
+    Object *obj;
 
     if ((ch = get_char(uid)))
         snprintf(name, nlen, "%s", ch->getName());
@@ -844,7 +844,7 @@ void find_uid_name(char *uid, char *name, size_t nlen) {
 
 
 /* general function to display stats on script sc */
-void script_stat(char_data *ch, script_data *sc) {
+void script_stat(Character *ch, script_data *sc) {
     struct trig_var_data *tv;
     char name[MAX_INPUT_LENGTH];
     char namebuf[512];
@@ -906,7 +906,7 @@ void script_stat(char_data *ch, script_data *sc) {
 }
 
 
-void do_sstat(struct char_data *ch, struct unit_data *ud) {
+void do_sstat(Character *ch, struct Entity *ud) {
         ch->sendText("Triggers:\r\n");
     if (!SCRIPT(ud)) {
                 ch->sendText("  None.\r\n");
@@ -922,7 +922,7 @@ void do_sstat(struct char_data *ch, struct unit_data *ud) {
  * adds the trigger t to script sc in in location loc.  loc = -1 means
  * add to the end, loc = 0 means add before all other triggers.
  */
-void add_trigger(script_data *sc, const std::shared_ptr<trig_data> t, int loc) {
+void add_trigger(script_data *sc, const std::shared_ptr<DgScript> t, int loc) {
 
     auto tvn = t->getVnum();
 
@@ -956,10 +956,10 @@ void add_trigger(script_data *sc, const std::shared_ptr<trig_data> t, int loc) {
 
 
 ACMD(do_attach) {
-    char_data *victim;
-    obj_data *object;
-    room_data *room;
-    std::shared_ptr<trig_data> trig;
+    Character *victim;
+    Object *object;
+    Room *room;
+    std::shared_ptr<DgScript> trig;
     char targ_name[MAX_INPUT_LENGTH], trig_name[MAX_INPUT_LENGTH];
     char loc_name[MAX_INPUT_LENGTH], arg[MAX_INPUT_LENGTH];
     int loc, tn, rn, num_arg;
@@ -1078,7 +1078,7 @@ ACMD(do_attach) {
  *  this function returns, in order to remove the script.
  */
 int remove_trigger(script_data *sc, char *name) {
-    std::shared_ptr<trig_data> j;
+    std::shared_ptr<DgScript> j;
     int num = 0, string = false, n;
     char *cname;
 
@@ -1141,9 +1141,9 @@ int remove_trigger(script_data *sc, char *name) {
 }
 
 ACMD(do_detach) {
-    char_data *victim = nullptr;
-    obj_data *object = nullptr;
-    struct room_data *room;
+    Character *victim = nullptr;
+    Object *object = nullptr;
+    Room *room;
     char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH], arg3[MAX_INPUT_LENGTH];
     char *trigger = nullptr;
     int num_arg;
@@ -1374,8 +1374,8 @@ static bool check_truthy(const char *txt) {
 
 
 /* evaluates 'lhs op rhs', and copies to result */
-void eval_op(char *op, char *lhs, char *rhs, char *result, unit_data *go,
-             script_data *sc, trig_data *trig) {
+void eval_op(char *op, char *lhs, char *rhs, char *result, Entity *go,
+             script_data *sc, DgScript *trig) {
     unsigned char *p;
     int n;
 
@@ -1466,8 +1466,8 @@ char *matching_paren(char *p) {
 
 
 /* evaluates line, and returns answer in result */
-void eval_expr(char *line, char *result, unit_data *go, script_data *sc,
-               trig_data *trig, UnitType type) {
+void eval_expr(char *line, char *result, Entity *go, script_data *sc,
+               DgScript *trig, UnitType type) {
     char expr[MAX_INPUT_LENGTH], *p;
 
     while (*line && isspace(*line))
@@ -1488,8 +1488,8 @@ void eval_expr(char *line, char *result, unit_data *go, script_data *sc,
  * evaluates expr if it is in the form lhs op rhs, and copies
  * answer in result.  returns 1 if expr is evaluated, else 0
  */
-int eval_lhs_op_rhs(char *expr, char *result, unit_data *go, script_data *sc,
-                    trig_data *trig, UnitType type)
+int eval_lhs_op_rhs(char *expr, char *result, Entity *go, script_data *sc,
+                    DgScript *trig, UnitType type)
 {
     char *p, *tokens[MAX_INPUT_LENGTH];
     char line[MAX_INPUT_LENGTH], lhr[MAX_INPUT_LENGTH], rhr[MAX_INPUT_LENGTH];
@@ -1570,7 +1570,7 @@ int eval_lhs_op_rhs(char *expr, char *result, unit_data *go, script_data *sc,
 
 
 /* processes any 'wait' commands in a trigger */
-void process_wait(unit_data *go, trig_data *trig, UnitType type, char *cmd,
+void process_wait(Entity *go, DgScript *trig, UnitType type, char *cmd,
                   struct cmdlist_element *cl) {
     char buf[MAX_INPUT_LENGTH], *arg;
     struct wait_event_data *wait_event_obj;
@@ -1639,7 +1639,7 @@ void process_wait(unit_data *go, trig_data *trig, UnitType type, char *cmd,
 
 
 /* processes a script set command */
-void process_set(script_data *sc, trig_data *trig, char *cmd) {
+void process_set(script_data *sc, DgScript *trig, char *cmd) {
     char arg[MAX_INPUT_LENGTH], name[MAX_INPUT_LENGTH], *value;
 
     value = two_arguments(cmd, arg, name);
@@ -1657,7 +1657,7 @@ void process_set(script_data *sc, trig_data *trig, char *cmd) {
 }
 
 /* processes a script eval command */
-void process_eval(unit_data *go, script_data *sc, trig_data *trig,
+void process_eval(Entity *go, script_data *sc, DgScript *trig,
                   UnitType type, char *cmd) {
     char arg[MAX_INPUT_LENGTH], name[MAX_INPUT_LENGTH];
     char result[MAX_INPUT_LENGTH], *expr;
@@ -1683,14 +1683,14 @@ void process_eval(unit_data *go, script_data *sc, trig_data *trig,
 
 
 /* script attaching a trigger to something */
-void process_attach(unit_data *go, script_data *sc, trig_data *trig,
+void process_attach(Entity *go, script_data *sc, DgScript *trig,
                     UnitType type, char *cmd) {
     char arg[MAX_INPUT_LENGTH], trignum_s[MAX_INPUT_LENGTH];
     char result[MAX_INPUT_LENGTH], *id_p;
-    std::shared_ptr<trig_data> newtrig;
-    char_data *c = nullptr;
-    obj_data *o = nullptr;
-    room_data *r = nullptr;
+    std::shared_ptr<DgScript> newtrig;
+    Character *c = nullptr;
+    Object *o = nullptr;
+    Room *r = nullptr;
     long trignum, id;
 
     id_p = two_arguments(cmd, arg, trignum_s);
@@ -1717,11 +1717,11 @@ void process_attach(unit_data *go, script_data *sc, trig_data *trig,
         return;
     }
 
-    if(auto room = std::dynamic_pointer_cast<room_data>(uidResult); room) {
+    if(auto room = std::dynamic_pointer_cast<Room>(uidResult); room) {
         r = room.get();
-    } else if(auto ch = std::dynamic_pointer_cast<char_data>(uidResult); ch) {
+    } else if(auto ch = std::dynamic_pointer_cast<Character>(uidResult); ch) {
         c = ch.get();
-    } else if(auto obj = std::dynamic_pointer_cast<obj_data>(uidResult); obj) {
+    } else if(auto obj = std::dynamic_pointer_cast<Object>(uidResult); obj) {
         o = obj.get();
     }
 
@@ -1757,13 +1757,13 @@ void process_attach(unit_data *go, script_data *sc, trig_data *trig,
 
 
 /* script detaching a trigger from something */
-void process_detach(unit_data *go, script_data *sc, trig_data *trig,
+void process_detach(Entity *go, script_data *sc, DgScript *trig,
                     UnitType type, char *cmd) {
     char arg[MAX_INPUT_LENGTH], trignum_s[MAX_INPUT_LENGTH];
     char result[MAX_INPUT_LENGTH], *id_p;
-    char_data *c = nullptr;
-    obj_data *o = nullptr;
-    room_data *r = nullptr;
+    Character *c = nullptr;
+    Object *o = nullptr;
+    Room *r = nullptr;
     long id;
 
     id_p = two_arguments(cmd, arg, trignum_s);
@@ -1790,11 +1790,11 @@ void process_detach(unit_data *go, script_data *sc, trig_data *trig,
         return;
     }
 
-    if(auto room = std::dynamic_pointer_cast<room_data>(uidResult); room) {
+    if(auto room = std::dynamic_pointer_cast<Room>(uidResult); room) {
         r = room.get();
-    } else if(auto ch = std::dynamic_pointer_cast<char_data>(uidResult); ch) {
+    } else if(auto ch = std::dynamic_pointer_cast<Character>(uidResult); ch) {
         c = ch.get();
-    } else if(auto obj = std::dynamic_pointer_cast<obj_data>(uidResult); obj) {
+    } else if(auto obj = std::dynamic_pointer_cast<Object>(uidResult); obj) {
         o = obj.get();
     }
 
@@ -1839,7 +1839,7 @@ void process_detach(unit_data *go, script_data *sc, trig_data *trig,
 
 }
 
-struct room_data *dg_room_of_obj(struct obj_data *obj) {
+Room *dg_room_of_obj(Object *obj) {
     return obj->getAbsoluteRoom();
 }
 
@@ -1848,7 +1848,7 @@ struct room_data *dg_room_of_obj(struct obj_data *obj) {
  * processes a script return command.
  * returns the new value for the script to return.
  */
-int process_return(trig_data *trig, char *cmd) {
+int process_return(DgScript *trig, char *cmd) {
     char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 
     two_arguments(cmd, arg1, arg2);
@@ -1868,7 +1868,7 @@ int process_return(trig_data *trig, char *cmd) {
  * removes a variable from the global vars of sc,
  * or the local vars of trig if not found in global list.
  */
-void process_unset(script_data *sc, trig_data *trig, char *cmd) {
+void process_unset(script_data *sc, DgScript *trig, char *cmd) {
     char arg[MAX_INPUT_LENGTH], *var;
 
     var = any_one_arg(cmd, arg);
@@ -1893,15 +1893,15 @@ void process_unset(script_data *sc, trig_data *trig, char *cmd) {
  * copy a locally owned variable to the globals of another script
  *     'remote <variable_name> <uid>'
  */
-void process_remote(script_data *sc, trig_data *trig, char *cmd) {
+void process_remote(script_data *sc, DgScript *trig, char *cmd) {
     struct trig_var_data *vd;
     script_data *sc_remote = nullptr;
     char *line, *var, *uid_p;
     char arg[MAX_INPUT_LENGTH], buf[MAX_INPUT_LENGTH], buf2[MAX_INPUT_LENGTH];
     long uid, context;
-    room_data *room;
-    char_data *mob;
-    obj_data *obj;
+    Room *room;
+    Character *mob;
+    Object *obj;
 
     line = any_one_arg(cmd, arg);
     two_arguments(line, buf, buf2);
@@ -1949,9 +1949,9 @@ ACMD(do_vdelete) {
     char *var, *uid_p;
     char buf[MAX_INPUT_LENGTH], buf2[MAX_INPUT_LENGTH];
     long uid, context;
-    room_data *room;
-    char_data *mob;
-    obj_data *obj;
+    Room *room;
+    Character *mob;
+    Object *obj;
 
     argument = two_arguments(argument, buf, buf2);
     var = buf;
@@ -2003,7 +2003,7 @@ ACMD(do_vdelete) {
  * Called from do_set - return 0 for failure, 1 for success.
  * ch and vict are verified
  */
-int perform_set_dg_var(struct char_data *ch, struct char_data *vict, char *val_arg) {
+int perform_set_dg_var(Character *ch, Character *vict, char *val_arg) {
     char var_name[MAX_INPUT_LENGTH], *var_value;
 
     var_value = any_one_arg(val_arg, var_name);
@@ -2021,15 +2021,15 @@ int perform_set_dg_var(struct char_data *ch, struct char_data *vict, char *val_a
  * delete a variable from the globals of another script
  *     'rdelete <variable_name> <uid>'
  */
-void process_rdelete(script_data *sc, trig_data *trig, char *cmd) {
+void process_rdelete(script_data *sc, DgScript *trig, char *cmd) {
     struct trig_var_data *vd, *vd_prev = nullptr;
     script_data *sc_remote = nullptr;
     char *line, *var, *uid_p;
     char arg[MAX_INPUT_LENGTH], buf[MAX_STRING_LENGTH], buf2[MAX_STRING_LENGTH];
     long uid, context;
-    room_data *room;
-    char_data *mob;
-    obj_data *obj;
+    Room *room;
+    Character *mob;
+    Object *obj;
 
     line = any_one_arg(cmd, arg);
     two_arguments(line, buf, buf2);
@@ -2067,7 +2067,7 @@ void process_rdelete(script_data *sc, trig_data *trig, char *cmd) {
 /*
  * makes a local variable into a global variable
  */
-void process_global(script_data *sc, trig_data *trig, char *cmd, long id) {
+void process_global(script_data *sc, DgScript *trig, char *cmd, long id) {
     struct trig_var_data *vd;
     char arg[MAX_INPUT_LENGTH], *var;
 
@@ -2093,7 +2093,7 @@ void process_global(script_data *sc, trig_data *trig, char *cmd, long id) {
 
 
 /* set the current context for a script */
-void process_context(script_data *sc, trig_data *trig, char *cmd) {
+void process_context(script_data *sc, DgScript *trig, char *cmd) {
     char arg[MAX_INPUT_LENGTH], *var;
 
     var = any_one_arg(cmd, arg);
@@ -2108,7 +2108,7 @@ void process_context(script_data *sc, trig_data *trig, char *cmd) {
 
 }
 
-void extract_value(script_data *sc, trig_data *trig, char *cmd) {
+void extract_value(script_data *sc, DgScript *trig, char *cmd) {
     char buf[MAX_INPUT_LENGTH], buf2[MAX_INPUT_LENGTH];
     char *buf3;
     char to[128];
@@ -2151,7 +2151,7 @@ void extract_value(script_data *sc, trig_data *trig, char *cmd) {
 
 */
 
-void dg_letter_value(script_data *sc, trig_data *trig, char *cmd) {
+void dg_letter_value(script_data *sc, DgScript *trig, char *cmd) {
     //set the letter/number at position 'num' as the variable.
     char junk[MAX_INPUT_LENGTH];
     char varname[MAX_INPUT_LENGTH];
@@ -2231,8 +2231,8 @@ ACMD(do_tstat) {
 * line of the trigger if not found.
 */
 struct cmdlist_element *
-find_case(struct trig_data *trig, struct cmdlist_element *cl,
-    unit_data *go, script_data *sc, UnitType type, char *cond) {
+find_case(DgScript *trig, struct cmdlist_element *cl,
+    Entity *go, script_data *sc, UnitType type, char *cond) {
     char result[MAX_INPUT_LENGTH];
     struct cmdlist_element *c;
     char *p, *buf;
@@ -2330,13 +2330,13 @@ int check_flags_by_name_ar(bitvector_t *array, int numflags, char *search, const
     return false;
 }
 
-std::shared_ptr<trig_data> trig_data::shared() {
+std::shared_ptr<DgScript> DgScript::shared() {
     return shared_from_this();
 }
 
 // Note: Trigger instances are meant to be set all active or inactive on a per room/character/item basis,
 // not individually.
-void trig_data::activate() {
+void DgScript::activate() {
     if(active) {
         return;
     }
@@ -2353,7 +2353,7 @@ void trig_data::activate() {
     }
 }
 
-void trig_data::deactivate() {
+void DgScript::deactivate() {
     if(!active) {
         return;
     }
@@ -2363,24 +2363,24 @@ void trig_data::deactivate() {
 }
 
 
-int trig_data::getVnum() const {
+int DgScript::getVnum() const {
     return proto->vn;
 }
 
-UnitType trig_data::getAttachType() const {
+UnitType DgScript::getAttachType() const {
     return proto->attach_type;
 }
 
-long trig_data::getTriggerType() const {
+long DgScript::getTriggerType() const {
     return proto->trigger_type;
 }
 
 
-trig_data::trig_data(const trig_proto_data& other) : trig_data() {
-    proto = (trig_proto_data*)&other;
+DgScript::DgScript(const DgScriptPrototype& other) : DgScript() {
+    proto = (DgScriptPrototype*)&other;
 }
 
-ScriptLine trig_proto_data::getLine(int line) const {
+ScriptLine DgScriptPrototype::getLine(int line) const {
     if(line < 0 || line >= lines.size()) {
             throw DgScriptError("Line number out of range");
         }
@@ -2462,7 +2462,7 @@ std::vector<ScriptLine> parse_script(const std::vector<std::string> &orig) {
     return result;
 }
 
-void trig_data::reset() {
+void DgScript::reset() {
     variables.clear();
     depth_stack.clear();
     current_line = 0;
@@ -2470,7 +2470,7 @@ void trig_data::reset() {
     waiting = 0.0;
 }
 
-void trig_data::setState(DgScriptState newState) {
+void DgScript::setState(DgScriptState newState) {
     state = newState;
     switch(state) {
         case DgScriptState::PAUSED:
@@ -2480,7 +2480,7 @@ void trig_data::setState(DgScriptState newState) {
     }
 }
 
-void trig_data::setWaiting(double waitTime, DgScriptState newState) {
+void DgScript::setWaiting(double waitTime, DgScriptState newState) {
     if(waitTime < 0.0) {
         throw DgScriptError("Waiting time cannot be negative.");
     }
@@ -2488,30 +2488,30 @@ void trig_data::setWaiting(double waitTime, DgScriptState newState) {
     setState(newState);
 }
 
-bool trig_data::isReady() const {
+bool DgScript::isReady() const {
     return state == DgScriptState::READY || state == DgScriptState::ERROR || state == DgScriptState::DONE;
 }
 
-void trig_data::error(const std::string &msg) {
+void DgScript::error(const std::string &msg) {
     // Log the error message and set the state to ERROR
     script_log("Error in trigger '%s' (VNum %d) at line %d: %s", GET_TRIG_NAME(this), getVnum(), current_line, (char*)msg.c_str());
     // Optionally, you can also throw an exception or handle it as needed.
 }
 
-int trig_data::execute() {
+int DgScript::execute() {
     // This is a clever hack to prevent the script from being deleted
     // during execution if, by some chance, it obliterates its host object.
 
-    std::shared_ptr<unit_data> sh;
+    std::shared_ptr<Entity> sh;
     switch(owner->type) {
         case UnitType::character:
-            sh = ((char_data*)owner)->shared();
+            sh = ((Character*)owner)->shared();
             break;
         case UnitType::object:
-            sh = ((obj_data*)owner)->shared();
+            sh = ((Object*)owner)->shared();
             break;
         case UnitType::room:
-            sh = ((room_data*)owner)->shared();
+            sh = ((Room*)owner)->shared();
             break;
         default:
             throw DgScriptError("Invalid owner type for script execution.");
@@ -2557,7 +2557,7 @@ int trig_data::execute() {
     return toReturn;
 }
 
-void trig_data::processLine(const ScriptLine& line) {
+void DgScript::processLine(const ScriptLine& line) {
     // The way this one works: it processes a single line of the script.
     // Since we don't have proper blocks, this handles all flow control by
     // determining which line to jump to and checking the context in the
@@ -2729,7 +2729,7 @@ void trig_data::processLine(const ScriptLine& line) {
 
 }
 
-int trig_data::locateElseIfElseEnd(int startLine) const {
+int DgScript::locateElseIfElseEnd(int startLine) const {
     auto i = startLine;
     while(i < proto->lines.size()) {
         auto line = proto->getLine(i);
@@ -2757,7 +2757,7 @@ int trig_data::locateElseIfElseEnd(int startLine) const {
     throw DgScriptError("Else/elseif/end not found in script.");
 }
 
-int trig_data::locateCaseDefaultDone(int startLine) const {
+int DgScript::locateCaseDefaultDone(int startLine) const {
     auto i = startLine;
     while(i < proto->lines.size()) {
         auto line = proto->getLine(i);
@@ -2785,7 +2785,7 @@ int trig_data::locateCaseDefaultDone(int startLine) const {
     throw DgScriptError("Case/default/done not found in script.");
 }
 
-int trig_data::locateEnd(int startLine) const {
+int DgScript::locateEnd(int startLine) const {
     auto i = startLine;
     while(i < proto->lines.size()) {
         auto line = proto->getLine(i);
@@ -2808,7 +2808,7 @@ int trig_data::locateEnd(int startLine) const {
     throw DgScriptError("End not found in script.");
 }
 
-int trig_data::locateDone(ScriptLineType type, int startLine) const {
+int DgScript::locateDone(ScriptLineType type, int startLine) const {
     auto i = startLine;
     while(i < proto->lines.size()) {
         auto line = proto->getLine(i);
@@ -2830,26 +2830,26 @@ int trig_data::locateDone(ScriptLineType type, int startLine) const {
     throw DgScriptError("Done not found in script.");
 }
 
-std::string trig_data::evaluateExpression(const std::string& expr) {
+std::string DgScript::evaluateExpression(const std::string& expr) {
     char buf[MAX_STRING_LENGTH];
 
     eval_expr((char*)expr.c_str(), buf, owner, owner, this, proto->attach_type);
     return std::string(buf);
 }
 
-bool trig_data::evaluateComparison(const std::string& left, const std::string& right, const std::string& op) {
+bool DgScript::evaluateComparison(const std::string& left, const std::string& right, const std::string& op) {
     char buf[MAX_STRING_LENGTH];
 
     eval_op((char*)op.c_str(), (char*)left.c_str(), (char*)right.c_str(), buf, owner, owner, this);
     return truthy(std::string(buf));
 }
 
-bool trig_data::truthy(const std::string& value) const {
+bool DgScript::truthy(const std::string& value) const {
     // A value is truthy if it is not empty and not "0"
     return !value.empty() && value != "0";
 }
 
-std::string trig_data::substituteVariables(const std::string& raw_text) {
+std::string DgScript::substituteVariables(const std::string& raw_text) {
     char buf[MAX_STRING_LENGTH];
 
     var_subst(owner, owner, this, proto->attach_type, (char*)raw_text.c_str(), buf);
@@ -2857,9 +2857,9 @@ std::string trig_data::substituteVariables(const std::string& raw_text) {
     return std::string(buf);
 }
 
-void trig_data::processCommand(const std::string& raw_text) {
-    void obj_command_interpreter(obj_data *obj, char *argument);
-    void wld_command_interpreter(struct room_data *room, char *argument);
+void DgScript::processCommand(const std::string& raw_text) {
+    void obj_command_interpreter(Object *obj, char *argument);
+    void wld_command_interpreter(Room *room, char *argument);
 
     // This function processes a single command line.
     // It will handle the command based on its type.
@@ -2932,13 +2932,13 @@ void trig_data::processCommand(const std::string& raw_text) {
         // If we reach here, we assume it's a command that should be executed.
         switch(proto->attach_type) {
             case MOB_TRIGGER:
-                command_interpreter((char_data *)owner, (char*)full_command.c_str());
+                command_interpreter((Character *)owner, (char*)full_command.c_str());
                 break;
             case OBJ_TRIGGER:
-                obj_command_interpreter((obj_data *)owner, (char*)full_command.c_str());
+                obj_command_interpreter((Object *)owner, (char*)full_command.c_str());
                 break;
             case WLD_TRIGGER:
-                wld_command_interpreter((room_data *)owner, (char*)full_command.c_str());
+                wld_command_interpreter((Room *)owner, (char*)full_command.c_str());
                 break;
         }
     }

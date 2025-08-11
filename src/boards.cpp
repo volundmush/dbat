@@ -99,7 +99,7 @@ struct board_info *create_new_board(obj_vnum board_vnum) {
     char buf[512];
     FILE *fl;
     struct board_info *temp = nullptr, *backup;
-    struct item_proto_data *obj = nullptr;
+    ObjectPrototype *obj = nullptr;
 
     /* object exists, but no board file (yet) */
 
@@ -197,7 +197,7 @@ int save_board(struct board_info *ts) {
 struct board_info *load_board(obj_vnum board_vnum) {
     struct board_info *temp_board = nullptr;
     struct board_msg *bmsg = nullptr;
-    struct item_proto_data *obj = nullptr;
+    ObjectPrototype *obj = nullptr;
     struct stat st{};
     struct board_memory *memboard = nullptr, *list = nullptr;
     int t[10], mnum, poster = 0, timestamp = 0, msg_num = 0, retval = 0;
@@ -449,7 +449,7 @@ void clear_one_board(struct board_info *tmp) {
     tmp = nullptr;
 }
 
-void show_board(obj_vnum board_vnum, struct char_data *ch) {
+void show_board(obj_vnum board_vnum, Character *ch) {
     struct board_info *thisboard;
     struct board_msg *message;
     char *tmstr;
@@ -480,7 +480,7 @@ void show_board(obj_vnum board_vnum, struct char_data *ch) {
     }
 
     /* send the standard board boilerplate */
-    struct obj_data *obj;
+    Object *obj;
     int num = board_vnum;
     if ((board_vnum = real_object(num)) == NOTHING) {
         basic_mud_log("SYSERR: DEFUNCT BOARD VNUM.\r\n");
@@ -572,7 +572,7 @@ void show_board(obj_vnum board_vnum, struct char_data *ch) {
 
 }
 
-void board_display_msg(obj_vnum board_vnum, struct char_data *ch, int arg) {
+void board_display_msg(obj_vnum board_vnum, Character *ch, int arg) {
     struct board_info *thisboard = bboards;
     struct board_msg *message;
     char *tmstr;
@@ -602,7 +602,7 @@ void board_display_msg(obj_vnum board_vnum, struct char_data *ch, int arg) {
         return;
     }
 
-    struct obj_data *obj;
+    Object *obj;
     int num = board_vnum;
     int bnum = 0;
     if ((board_vnum = real_object(num)) == NOTHING) {
@@ -734,7 +734,7 @@ void board_display_msg(obj_vnum board_vnum, struct char_data *ch, int arg) {
 }
 
 
-int mesglookup(struct board_msg *message, struct char_data *ch, struct board_info *board) {
+int mesglookup(struct board_msg *message, Character *ch, struct board_info *board) {
     int mem = 0;
     struct board_memory *mboard_type;
     char *tempname = nullptr;
@@ -771,7 +771,7 @@ int mesglookup(struct board_msg *message, struct char_data *ch, struct board_inf
     return 0;
 }
 
-void write_board_message(obj_vnum board_vnum, struct char_data *ch, char *arg) {
+void write_board_message(obj_vnum board_vnum, Character *ch, char *arg) {
     struct board_info *thisboard = bboards;
     struct board_msg *message;
 
@@ -859,7 +859,7 @@ void write_board_message(obj_vnum board_vnum, struct char_data *ch, char *arg) {
     return;
 }
 
-void board_respond(long board_vnum, struct char_data *ch, int mnum) {
+void board_respond(long board_vnum, Character *ch, int mnum) {
     struct board_info *thisboard = bboards;
     struct board_msg *message, *other;
     char number[MAX_STRING_LENGTH], buf[MAX_STRING_LENGTH];
@@ -972,11 +972,11 @@ struct board_info *locate_board(obj_vnum board_vnum) {
 }
 
 
-void remove_board_msg(obj_vnum board_vnum, struct char_data *ch, int arg) {
+void remove_board_msg(obj_vnum board_vnum, Character *ch, int arg) {
     struct board_info *thisboard;
     struct board_msg *cur, *temp;
     struct descriptor_data *d;
-    struct obj_data *obj;
+    Object *obj;
     int msgcount;
     char buf[MAX_STRING_LENGTH + 1];
 

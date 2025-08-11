@@ -30,74 +30,74 @@ constexpr int READ_SIZE = 256;
 extern FILE *player_fl;
 
 /* public functions in utils.c */
-extern void demon_refill_lf(struct char_data *ch, int64_t num);
+extern void demon_refill_lf(Character *ch, int64_t num);
 
-extern void dispel_ash(struct char_data *ch);
+extern void dispel_ash(Character *ch);
 
 extern char *strlwr(char *s);
 
-extern int mob_respond(struct char_data *ch, struct char_data *vict, const char *speech);
+extern int mob_respond(Character *ch, Character *vict, const char *speech);
 
-extern int armor_evolve(struct char_data *ch);
+extern int armor_evolve(Character *ch);
 
-extern int has_group(struct char_data *ch);
+extern int has_group(Character *ch);
 
-const char *report_party_health(struct char_data *ch);
+const char *report_party_health(Character *ch);
 
-extern int know_skill(struct char_data *ch, int skill);
+extern int know_skill(Character *ch, int skill);
 
 extern int roll_aff_duration(int num, int add);
 
-extern void null_affect(struct char_data *ch, int aff_flag);
+extern void null_affect(Character *ch, int aff_flag);
 
 extern void
-assign_affect(struct char_data *ch, int aff_flag, int skill, int dur, int str, int con, int intel, int agl, int wis,
+assign_affect(Character *ch, int aff_flag, int skill, int dur, int str, int con, int intel, int agl, int wis,
               int spd);
 
-extern int sec_roll_check(struct char_data *ch);
+extern int sec_roll_check(Character *ch);
 
 
-extern int64_t physical_cost(struct char_data *ch, int skill);
+extern int64_t physical_cost(Character *ch, int skill);
 
 extern int axion_dice(int adjust);
 
-const char *disp_align(struct char_data *ch);
+const char *disp_align(Character *ch);
 
-extern void sense_memory_write(struct char_data *ch, struct char_data *vict);
+extern void sense_memory_write(Character *ch, Character *vict);
 
-extern int read_sense_memory(struct char_data *ch, struct char_data *vict);
+extern int read_sense_memory(Character *ch, Character *vict);
 
-extern int roll_pursue(struct char_data *ch, struct char_data *vict);
+extern int roll_pursue(Character *ch, Character *vict);
 
 extern void broken_update(uint64_t heartPulse, double deltaTime);
 
-extern bool wearable_obj(struct obj_data *obj);
+extern bool wearable_obj(Object *obj);
 
-extern void randomize_eq(struct obj_data *obj);
+extern void randomize_eq(Object *obj);
 
-extern const char *sense_location(struct char_data *ch);
+extern const char *sense_location(Character *ch);
 
 extern const char* sense_location_name(room_vnum roomnum);
 
-extern void handle_evolution(struct char_data *ch, int64_t dmg);
+extern void handle_evolution(Character *ch, int64_t dmg);
 
-extern int64_t molt_threshold(struct char_data *ch);
+extern int64_t molt_threshold(Character *ch);
 
-extern void purge_homing(struct char_data *ch);
+extern void purge_homing(Character *ch);
 
-extern int planet_check(struct char_data *ch, struct char_data *vict);
+extern int planet_check(Character *ch, Character *vict);
 
-extern void improve_skill(struct char_data *ch, int skill, int num);
+extern void improve_skill(Character *ch, int skill, int num);
 
-extern double speednar(struct char_data *ch);
+extern double speednar(Character *ch);
 
-extern int64_t gear_exp(struct char_data *ch, int64_t exp);
+extern int64_t gear_exp(Character *ch, int64_t exp);
 
 extern int get_flag_by_name(const char *flag_list[], char *flag_name);
 
 std::string add_commas(double X);
 
-extern char *introd_calc(struct char_data *ch);
+extern char *introd_calc(Character *ch);
 
 
 
@@ -123,19 +123,19 @@ extern int get_filename(char *filename, size_t fbufsize, int mode, const char *o
 
 extern time_t mud_time_to_secs(struct time_info_data *now);
 
-extern int num_pc_in_room(struct room_data *room);
+extern int num_pc_in_room(Room *room);
 
 extern void core_dump_real(const char *who, int line);
 
 extern int count_color_chars(const char *string);
 
-extern bool is_sparring(struct char_data *ch);
+extern bool is_sparring(Character *ch);
 
-extern void mob_talk(struct char_data *ch, const char *speech);
+extern void mob_talk(Character *ch, const char *speech);
 
-extern int block_calc(struct char_data *ch);
+extern int block_calc(Character *ch);
 
-extern void reveal_hiding(struct char_data *ch, int type);
+extern void reveal_hiding(Character *ch, int type);
 
 std::string processColors(const std::string &txt, int parse, char **choices);
 size_t countColors(const std::string &txt);
@@ -164,33 +164,33 @@ extern int64_t MIN(int64_t a, int64_t b);
 extern char *CAP(char *txt);
 
 /* Followers */
-extern int num_followers_charmed(struct char_data *ch);
+extern int num_followers_charmed(Character *ch);
 
-extern void die_follower(struct char_data *ch);
+extern void die_follower(Character *ch);
 
-extern void add_follower(struct char_data *ch, struct char_data *leader);
+extern void add_follower(Character *ch, Character *leader);
 
-extern void stop_follower(struct char_data *ch);
+extern void stop_follower(Character *ch);
 
-extern bool circle_follow(struct char_data *ch, struct char_data *victim);
+extern bool circle_follow(Character *ch, Character *victim);
 
 /* in act.informative.c */
-extern void add_history(struct char_data *ch, char *msg, int type);
+extern void add_history(Character *ch, char *msg, int type);
 
 /* in act.movement.c */
-extern int do_simple_move(struct char_data *ch, int dir, int following);
+extern int do_simple_move(Character *ch, int dir, int following);
 
-extern int perform_move(struct char_data *ch, int dir, int following);
+extern int perform_move(Character *ch, int dir, int following);
 
 /* in act.item.c */
-extern int64_t max_carry_weight(struct char_data *ch);
+extern int64_t max_carry_weight(Character *ch);
 
 /* in limits.c */
-extern void advance_level(struct char_data *ch);
+extern void advance_level(Character *ch);
 
-extern void set_title(struct char_data *ch, char *title);
+extern void set_title(Character *ch, char *title);
 
-extern void gain_condition(struct char_data *ch, int condition, int value);
+extern void gain_condition(Character *ch, int condition, int value);
 
 extern void point_update(uint64_t heartPulse, double deltaTime);
 extern void hunger_update(uint64_t heartPulse, double deltaTime);
@@ -199,24 +199,24 @@ extern void auralight_update(uint64_t heartPulse, double deltaTime);
 extern void player_misc_update(uint64_t heartPulse, double deltaTime);
 extern void kaioken_update(uint64_t heartPulse, double deltaTime);
 extern void poison_update(uint64_t heartPulse, double deltaTime);
-extern void update_pos(struct char_data *victim);
+extern void update_pos(Character *victim);
 
 /* in class.c */
-extern int total_skill_levels(struct char_data *ch, int skill);
+extern int total_skill_levels(Character *ch, int skill);
 
 extern int8_t ability_mod_value(int abil);
 
 extern int highest_skill_value(int level, int type, int skill);
 
 
-extern int raise_class_only(struct char_data *ch, int cl, int v);
+extern int raise_class_only(Character *ch, int cl, int v);
 
 /* in races.c */
-extern int get_size(struct char_data *ch);
+extern int get_size(Character *ch);
 
 extern int get_size_bonus(int sz);
 
-extern int wield_type(int chsize, struct obj_data *weap);
+extern int wield_type(int chsize, Object *weap);
 
 
 /* various constants *****************************************************/
@@ -397,17 +397,17 @@ bool MOB_FLAGGED(T* ch, int flag) {
 };
 
 
-extern bool AFF_FLAGGED(struct char_data *ch, int flag);
-extern bool AFF_FLAGGED(struct npc_proto_data *ch, int flag);
+extern bool AFF_FLAGGED(Character *ch, int flag);
+extern bool AFF_FLAGGED(CharacterPrototype *ch, int flag);
 
-extern bool PLR_FLAGGED(struct char_data *ch, int flag);
-extern bool PRF_FLAGGED(struct char_data *ch, int flag);
-extern bool ADM_FLAGGED(struct char_data *ch, int flag);
+extern bool PLR_FLAGGED(Character *ch, int flag);
+extern bool PRF_FLAGGED(Character *ch, int flag);
+extern bool ADM_FLAGGED(Character *ch, int flag);
 
 bool WHERE_FLAGGED(room_vnum loc, WhereFlag flag);
-bool WHERE_FLAGGED(struct room_data *loc, WhereFlag flag);
+bool WHERE_FLAGGED(Room *loc, WhereFlag flag);
 bool ROOM_FLAGGED(room_vnum loc, int flag);
-bool ROOM_FLAGGED(struct room_data *loc, int flag);
+bool ROOM_FLAGGED(Room *loc, int flag);
 
 template<typename T>
 bool OBJWEAR_FLAGGED(T *obj, int flag) {
@@ -415,10 +415,10 @@ bool OBJWEAR_FLAGGED(T *obj, int flag) {
 }
 
 #define EXIT_FLAGGED(exit, flag) (IS_SET((exit)->exit_info, (flag)))
-extern bool OBJAFF_FLAGGED(struct obj_data *obj, int flag);
+extern bool OBJAFF_FLAGGED(Object *obj, int flag);
 #define OBJVAL_FLAGGED(obj, flag) (IS_SET(GET_OBJ_VAL((obj), VAL_CONTAINER_FLAGS), (flag)))
 
-extern bool OBJ_FLAGGED(struct obj_data *obj, int flag);
+extern bool OBJ_FLAGGED(Object *obj, int flag);
 #define BODY_FLAGGED(ch, flag) ((ch)->bodyparts.test(flag))
 #define ZONE_FLAGGED(rnum, flag)   (zone_table.at((rnum)).zone_flags.get((flag)))
 #define HAS_SPELL_ROUTINE(spl, flag) (IS_SET(SPELL_ROUTINES(spl), (flag)))
@@ -517,7 +517,7 @@ extern bool OBJ_FLAGGED(struct obj_data *obj, int flag);
 #define GET_CON(ch)     ((int)(ch)->getEffectiveStat("constitution"))
 #define GET_CHA(ch)     ((int)(ch)->getEffectiveStat("speed"))
 #define GET_MUTBOOST(ch) (IS_MUTANT(ch) ? (((ch)->mutations.get(Mutation::extreme_speed)) ? (GET_SPEEDCALC(ch) + GET_SPEEDBONUS(ch) + GET_SPEEDBOOST(ch)) * 0.3 : 0) : 0)
-extern int GET_SPEEDI(struct char_data *ch);
+extern int GET_SPEEDI(Character *ch);
 #define GET_SPEEDCALC(ch) (IS_GRAP(ch) ? GET_CHA(ch) : (IS_INFERIOR(ch) ? (AFF_FLAGGED(ch, AFF_FLYING) ? (GET_SPEEDVAR(ch) * 1.25) : GET_SPEEDVAR(ch)) : GET_SPEEDVAR(ch)))
 #define GET_SPEEDBONUS(ch) (IS_ARLIAN(ch) ? AFF_FLAGGED(ch, AFF_SHELL) ? GET_SPEEDVAR(ch) * -0.5 : (IS_MALE(ch) ? (AFF_FLAGGED(ch, AFF_FLYING) ? (GET_SPEEDVAR(ch) * 0.5) : 0) : 0) : 0)
 #define GET_SPEEDVAR(ch) (GET_SPEEDVEM(ch) > GET_CHA(ch) ? GET_SPEEDVEM(ch) : GET_CHA(ch))
@@ -658,14 +658,14 @@ extern int GET_SPEEDI(struct char_data *ch);
 #define GET_LAST_OLC_TARG(ch)    ((ch)->last_olc_targ)
 #define GET_LAST_TELL(ch)    ((ch)->getBaseStat<int>("last_tell"))
 
-int16_t GET_SKILL_BONUS(struct char_data *ch, uint16_t skill);
-int16_t GET_SKILL_PERF(struct char_data *ch, uint16_t skill);
-int16_t GET_SKILL_BASE(struct char_data *ch, uint16_t skill);
-int16_t GET_SKILL(struct char_data *ch, uint16_t skill);
+int16_t GET_SKILL_BONUS(Character *ch, uint16_t skill);
+int16_t GET_SKILL_PERF(Character *ch, uint16_t skill);
+int16_t GET_SKILL_BASE(Character *ch, uint16_t skill);
+int16_t GET_SKILL(Character *ch, uint16_t skill);
 
-void SET_SKILL(struct char_data *ch, uint16_t skill, int16_t val);
-void SET_SKILL_BONUS(struct char_data *ch, uint16_t skill, int16_t val);
-void SET_SKILL_PERF(struct char_data *ch, uint16_t skill, int16_t val);
+void SET_SKILL(Character *ch, uint16_t skill, int16_t val);
+void SET_SKILL_BONUS(Character *ch, uint16_t skill, int16_t val);
+void SET_SKILL_PERF(Character *ch, uint16_t skill, int16_t val);
 
 #define GET_EQ(ch, i)        ((ch)->getEquipSlot((i)))
 
@@ -704,7 +704,7 @@ void SET_SKILL_PERF(struct char_data *ch, uint16_t skill, int16_t val);
 #define ARENA_IDNUM(ch) ((ch)->getBaseStat<room_vnum>("arena_watch"))
 
 /* These three deprecated. */
-extern void WAIT_STATE(struct char_data *ch, double timeToWait);
+extern void WAIT_STATE(Character *ch, double timeToWait);
 #define GET_WAIT_STATE(ch)    ((ch)->getBaseStat("waitTime"))
 #define CHECK_WAIT(ch)                (GET_WAIT_STATE(ch) > 0)
 #define GET_MOB_WAIT(ch)      GET_WAIT_STATE(ch)
@@ -920,7 +920,7 @@ int64_t MOD_OBJ_VAL(T* obj, const std::string& val, int mod) {
 #define MOON_TIME               (time_info.hours >= 21 || time_info.hours <= 4)
 #define MOON_DATE               (time_info.day >= 20 && time_info.day <= 23)
 extern bool MOON_TIMECHECK();
-bool ETHER_STREAM(struct char_data *ch);
+bool ETHER_STREAM(Character *ch);
 #define _HAS_LIMB(ch, num, flag) (GET_LIMBCOND((ch), (num)) > 0 || (ch)->character_flags.get((flag)))
 
 #define HAS_ARMS(ch)            ((_HAS_LIMB((ch), 0, CharacterFlag::cyber_right_arm)) || _HAS_LIMB((ch), 1, CharacterFlag::cyber_left_arm) && \
@@ -1103,7 +1103,7 @@ constexpr int SEEK_END = 2;
 /* different OS'es.  Needs solid testing though.                 */
 /* Added by Dynamic Boards v2.4 - PjD (dughi@imaxx.net)          */
 
-extern void admin_set(struct char_data *ch, int value);
+extern void admin_set(Character *ch, int value);
 
 #define IS_COLOR_CHAR(c)  ((c) == 'n' || (c) == 'b' || (c) == 'B' || (c) == '(c)' || \
    (c) == '(c)' || (c) == 'g' || (c) == 'G' || (c) == 'm' || (c) == 'M' || (c) == 'r' || \
@@ -1141,11 +1141,11 @@ int check_flags_by_name_ar(const Container& container, int numflags, char *searc
 }
 
 
-extern bool spar_friendly(struct char_data *ch, struct char_data *npc);
+extern bool spar_friendly(Character *ch, Character *npc);
 
 extern bool is_numeric(const std::string& str);
 extern bool is_all_alpha(const std::string& str);
 
-extern void doContinuedTask(char_data* ch);
+extern void doContinuedTask(Character* ch);
 
 extern std::string format_double(double value);

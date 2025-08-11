@@ -197,7 +197,7 @@ ACMD(do_oasis_oedit) {
 }
 
 void oedit_setup_new(struct descriptor_data *d) {
-    OLC_OBJ(d) = new item_proto_data();
+    OLC_OBJ(d) = new ObjectPrototype();
 
     OLC_OBJ(d)->name = strdup("unfinished object");
     OLC_OBJ(d)->room_description = strdup("An unfinished object is lying here.");
@@ -218,7 +218,7 @@ void oedit_setup_new(struct descriptor_data *d) {
 /*------------------------------------------------------------------------*/
 
 void oedit_setup_existing(struct descriptor_data *d, int real_num) {
-    auto obj = new item_proto_data();
+    auto obj = new ObjectPrototype();
     *obj = obj_proto.at(real_num);
 
     /*
@@ -236,7 +236,7 @@ void oedit_save_internally(struct descriptor_data *d) {
     int i;
     obj_rnum robj_num;
     struct descriptor_data *dsc;
-    struct obj_data *obj;
+    Object *obj;
 
     i = (real_object(OLC_NUM(d)) == NOTHING);
 
@@ -837,7 +837,7 @@ void oedit_disp_wear_menu(struct descriptor_data *d) {
  */
 void oedit_disp_menu(struct descriptor_data *d) {
     char tbitbuf[MAX_INPUT_LENGTH], ebitbuf[MAX_INPUT_LENGTH];
-    struct item_proto_data *obj;
+    ObjectPrototype *obj;
 
     obj = OLC_OBJ(d);
     clear_screen(d);
@@ -918,7 +918,7 @@ void oedit_parse(struct descriptor_data *d, char *arg) {
     int number, max_val, min_val;
     char *oldtext = nullptr;
     struct board_info *tmp;
-    struct obj_data *obj;
+    Object *obj;
     obj_rnum robj;
 
     switch (OLC_MODE(d)) {
@@ -1608,13 +1608,13 @@ void oedit_string_cleanup(struct descriptor_data *d, int terminator) {
 }
 
 /* this is all iedit stuff */
-void iedit_setup_existing(struct descriptor_data *d, struct obj_data *real_num) {
-    struct item_proto_data *obj;
+void iedit_setup_existing(struct descriptor_data *d, Object *real_num) {
+    ObjectPrototype *obj;
 
     OLC_IOBJ(d) = real_num;
 
 
-    obj = new item_proto_data(*real_num);
+    obj = new ObjectPrototype(*real_num);
     // use the assignment constructor to copy real_num into the item_proto_data....
 
     OLC_OBJ(d) = obj;
@@ -1624,7 +1624,7 @@ void iedit_setup_existing(struct descriptor_data *d, struct obj_data *real_num) 
 }
 
 ACMD(do_iedit) {
-    struct obj_data *k;
+    Object *k;
     int found = 0;
     char arg[MAX_INPUT_LENGTH];
 

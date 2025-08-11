@@ -129,7 +129,7 @@ static std::map<std::string, room_vnum> planetLocations = {
 };
 
 ACMD(do_sradar) {
-    struct obj_data *vehicle = nullptr, *controls = nullptr;
+    Object *vehicle = nullptr, *controls = nullptr;
     int dir = 0, noship = false;
     char arg[MAX_INPUT_LENGTH];
     char planet[20];
@@ -293,7 +293,7 @@ ACMD(do_radar) {
     }
 }
 
-static std::string sense_align(struct char_data *vict) {
+static std::string sense_align(Character *vict) {
     auto align = GET_ALIGNMENT(vict);
     if (align > 50 && align < 200) {
         return "You sense slightly pure and good ki from them.\r\n";
@@ -313,7 +313,7 @@ static std::string sense_align(struct char_data *vict) {
         return "You sense an uncertain quality of ki from them.\r\n";
 }
 
-static std::string sense_compare(struct char_data *ch, struct char_data *vict) {
+static std::string sense_compare(Character *ch, Character *vict) {
     auto hitv = GET_HIT(vict);
     auto hitc = GET_HIT(ch);
     if (hitv > hitc * 50) {
@@ -348,7 +348,7 @@ static std::string sense_compare(struct char_data *ch, struct char_data *vict) {
 
 ACMD(do_track) {
     char arg[MAX_INPUT_LENGTH];
-    struct char_data *vict;
+    Character *vict;
     struct descriptor_data *i;
     int count = 0, dir;
 

@@ -468,8 +468,8 @@ struct attack_hit_type {
 
 
 #define ASPELL(spellname) \
-extern void spellname(int level, struct char_data *ch, \
-          struct char_data *victim, struct obj_data *obj, const char *arg)
+extern void spellname(int level, Character *ch, \
+          Character *victim, Object *obj, const char *arg)
 
 #define MANUAL_SPELL(spellname)    spellname(level, caster, cvict, ovict, arg);
 
@@ -501,44 +501,44 @@ ASPELL(art_abundant_step);
 
 extern int find_skill_num(char *name, int sktype);
 
-extern int mag_damage(int level, struct char_data *ch, struct char_data *victim,
+extern int mag_damage(int level, Character *ch, Character *victim,
                       int spellnum);
 
-extern void mag_affects(int level, struct char_data *ch, struct char_data *victim,
+extern void mag_affects(int level, Character *ch, Character *victim,
                         int spellnum);
 
-extern void mag_groups(int level, struct char_data *ch, int spellnum);
+extern void mag_groups(int level, Character *ch, int spellnum);
 
-extern void mag_masses(int level, struct char_data *ch, int spellnum);
+extern void mag_masses(int level, Character *ch, int spellnum);
 
-extern void mag_areas(int level, struct char_data *ch, int spellnum);
+extern void mag_areas(int level, Character *ch, int spellnum);
 
-extern void mag_summons(int level, struct char_data *ch, struct obj_data *obj, int spellnum, char *arg);
+extern void mag_summons(int level, Character *ch, Object *obj, int spellnum, char *arg);
 
-extern void mag_points(int level, struct char_data *ch, struct char_data *victim,
+extern void mag_points(int level, Character *ch, Character *victim,
                        int spellnum);
 
-extern void mag_unaffects(int level, struct char_data *ch, struct char_data *victim,
+extern void mag_unaffects(int level, Character *ch, Character *victim,
                           int spellnum);
 
-extern void mag_alter_objs(int level, struct char_data *ch, struct obj_data *obj,
+extern void mag_alter_objs(int level, Character *ch, Object *obj,
                            int spellnum);
 
-extern void mag_creations(int level, struct char_data *ch, int spellnum);
+extern void mag_creations(int level, Character *ch, int spellnum);
 
-extern void mag_affectsv(int level, struct char_data *ch, struct char_data *victim,
+extern void mag_affectsv(int level, Character *ch, Character *victim,
                          int spellnum);
 
-extern int call_magic(struct char_data *caster, struct char_data *cvict,
-                      struct obj_data *ovict, int spellnum, int level, int casttype, char *arg);
+extern int call_magic(Character *caster, Character *cvict,
+                      Object *ovict, int spellnum, int level, int casttype, char *arg);
 
-extern void mag_objectmagic(struct char_data *ch, struct obj_data *obj,
+extern void mag_objectmagic(Character *ch, Object *obj,
                             char *argument);
 
-extern int cast_spell(struct char_data *ch, struct char_data *tch,
-                      struct obj_data *tobj, int spellnum, char *arg);
+extern int cast_spell(Character *ch, Character *tch,
+                      Object *tobj, int spellnum, char *arg);
 
-extern int mag_newsaves(struct char_data *ch, struct char_data *victim, int spellnum,
+extern int mag_newsaves(Character *ch, Character *victim, int spellnum,
                         int level, int cast_stat);
 
 
@@ -551,8 +551,8 @@ extern void skill_class(int skill, int chclass, int learntype);
 
 const char *skill_name(int num);
 
-extern int roll_skill(struct char_data *ch, int snum);
+extern int roll_skill(Character *ch, int snum);
 
-extern int roll_resisted(struct char_data *actor, int sact, struct char_data *resistor, int sres);
+extern int roll_resisted(Character *actor, int sact, Character *resistor, int sres);
 
 extern int skill_type(int skill);

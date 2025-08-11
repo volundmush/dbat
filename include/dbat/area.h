@@ -33,4 +33,4 @@ extern std::optional<double> getPlanetEnvironment(const WhereFlag planet, const 
 extern room_vnum getPlanetOrbit(const WhereFlag planet);
 extern std::vector<std::pair<std::string, room_vnum>> getPlanetLandspots(const WhereFlag orbit);
 extern std::vector<std::pair<std::string, room_vnum>> getPlanetSpacepads(const WhereFlag orbit);
-extern void displayLandSpots(struct char_data *ch, const std::string& planet_name, const std::vector<std::pair<std::string, room_vnum>>& locations);
+extern void displayLandSpots(Character *ch, const std::string& planet_name, const std::vector<std::pair<std::string, room_vnum>>& locations);

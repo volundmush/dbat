@@ -275,7 +275,7 @@ ACMD(do_dig) {
         d->olc = new oasis_olc_data();
         OLC_ZNUM(d) = zone;
         OLC_NUM(d) = rvnum;
-        OLC_ROOM(d) = new room_data();
+        OLC_ROOM(d) = new Room();
 
 
         /* Copy the room's name. */
@@ -414,7 +414,7 @@ room_vnum redit_find_new_vnum(zone_rnum zone) {
     return NOWHERE;
 }
 
-int buildwalk(struct char_data *ch, int dir) {
+int buildwalk(Character *ch, int dir) {
     char buf[MAX_INPUT_LENGTH];
     room_vnum vnum;
     room_rnum rnum;
@@ -440,7 +440,7 @@ int buildwalk(struct char_data *ch, int dir) {
             d->olc = new oasis_olc_data();
             OLC_ZNUM(d) = ch->location.getZone()->number;
             OLC_NUM(d) = vnum;
-            OLC_ROOM(d) = new room_data();
+            OLC_ROOM(d) = new Room();
 
             OLC_ROOM(d)->strings["name"] = "New BuildWalk Room";
 

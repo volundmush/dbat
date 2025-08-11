@@ -13,11 +13,11 @@
 #include <dbat/attack.h>
 
 namespace trans {
-    static std::string getCustomName(struct char_data* ch, Form form) {
+    static std::string getCustomName(Character* ch, Form form) {
         return "Unknown";
     }
 
-    std::string getName(struct char_data* ch, Form form) {
+    std::string getName(Character* ch, Form form) {
         switch (form) {
             case Form::base:
                 return "Base";
@@ -222,7 +222,7 @@ namespace trans {
         }
     }
 
-    std::string getExtra(struct char_data* ch, Form form) {
+    std::string getExtra(Character* ch, Form form) {
         double energy = 0;
         std::string tag = "";
         switch (form) {
@@ -274,7 +274,7 @@ namespace trans {
 
     }
 
-    int getMaxGrade(struct char_data* ch, Form form) {
+    int getMaxGrade(Character* ch, Form form) {
         int maxGrade = 1;
         switch (form) {
             case Form::kaioken:
@@ -305,11 +305,11 @@ namespace trans {
         }
     }
 
-    static std::string getCustomAbbr(struct char_data* ch, Form form) {
+    static std::string getCustomAbbr(Character* ch, Form form) {
         return "N/A";
     }
 
-    int getMasteryTier(char_data* ch, Form form) {
+    int getMasteryTier(Character* ch, Form form) {
         if(ch->transforms.contains(form)) {
             double timeSpent = ch->transforms[form].time_spent_in_form;
             int mastery = 0;
@@ -330,7 +330,7 @@ namespace trans {
         }
     }
     
-    std::string getAbbr(struct char_data* ch, Form form) {
+    std::string getAbbr(Character* ch, Form form) {
         switch (form) {
             case Form::base:
                 return "Base";
@@ -537,215 +537,215 @@ namespace trans {
         {Form::kaioken, {Form::dark_metamorphosis}},
     };
 
-    static std::unordered_map<Form, std::function<bool(struct char_data *ch)>> trans_requirements = {
-        {Form::spirit_absorption, [](struct char_data *ch) {
-            auto loc = ch->location.findObject([](obj_data* obj) {
+    static std::unordered_map<Form, std::function<bool(Character *ch)>> trans_requirements = {
+        {Form::spirit_absorption, [](Character *ch) {
+            auto loc = ch->location.findObject([](Object* obj) {
                 return isname("Spirit Bomb", obj->getName());
             });
             return loc == nullptr ? false : true;
             }},
-        {Form::super_saiyan_4, [](struct char_data *ch) {
+        {Form::super_saiyan_4, [](Character *ch) {
             return ch->hasTail();
             }},
     };
 
-    static std::unordered_map<Form, std::function<bool(struct char_data *ch)>> trans_unlocks = {
+    static std::unordered_map<Form, std::function<bool(Character *ch)>> trans_unlocks = {
         // Saiyan
-        {Form::super_saiyan_1, [](struct char_data *ch) {
+        {Form::super_saiyan_1, [](Character *ch) {
             return ((ch->race == Race::saiyan || ch->race == Race::halfbreed));
             }},
-        {Form::super_saiyan_2, [](struct char_data *ch) {
+        {Form::super_saiyan_2, [](Character *ch) {
             return ((ch->race == Race::saiyan || ch->race == Race::halfbreed) && !ch->transforms.contains(Form::ikari) 
                 && !ch->transforms.contains(Form::legendary_saiyan) && getMasteryTier(ch, Form::super_saiyan_1) >=2);
             }},
-        {Form::super_saiyan_3, [](struct char_data *ch) {
+        {Form::super_saiyan_3, [](Character *ch) {
             return ((ch->race == Race::saiyan || ch->race == Race::halfbreed) && getMasteryTier(ch, Form::super_saiyan_2) >=2);
             }},
-        {Form::super_saiyan_4, [](struct char_data *ch) {
+        {Form::super_saiyan_4, [](Character *ch) {
             return ((ch->race == Race::saiyan || ch->race == Race::halfbreed) && ch->hasTail() && getMasteryTier(ch, Form::golden_oozaru) >=3 && getMasteryTier(ch, Form::super_saiyan_3) >=3);
             }},
 
         // Legendary Saiyan
-        {Form::ikari, [](struct char_data *ch) {
+        {Form::ikari, [](Character *ch) {
             return (ch->race == Race::saiyan && !ch->transforms.contains(Form::super_saiyan_2) && getMasteryTier(ch, Form::oozaru) >=3);
             }},
-        {Form::legendary_saiyan, [](struct char_data *ch) {
+        {Form::legendary_saiyan, [](Character *ch) {
             return (ch->race == Race::saiyan && !ch->transforms.contains(Form::super_saiyan_2) && ch->transforms.contains(Form::super_saiyan_1) 
                 && getMasteryTier(ch, Form::super_saiyan_1) >=4 && getMasteryTier(ch, Form::ikari) >=3);
             }},
 
         // Human
-        {Form::super_human_1, [](struct char_data *ch) {
+        {Form::super_human_1, [](Character *ch) {
             return (ch->race == Race::human);
             }},
-        {Form::super_human_2, [](struct char_data *ch) {
+        {Form::super_human_2, [](Character *ch) {
             return (ch->race == Race::human && getMasteryTier(ch, Form::super_human_1) >=2);
             }},
-        {Form::super_human_3, [](struct char_data *ch) {
+        {Form::super_human_3, [](Character *ch) {
             return (ch->race == Race::human && getMasteryTier(ch, Form::super_human_2) >=2);
             }},
-        {Form::super_human_4, [](struct char_data *ch) {
+        {Form::super_human_4, [](Character *ch) {
             return (ch->race == Race::human && getMasteryTier(ch, Form::super_human_3) >=3);
             }},
 
         // Icer
-        {Form::icer_1, [](struct char_data *ch) {
+        {Form::icer_1, [](Character *ch) {
             return (ch->race == Race::icer);
             }},
-        {Form::icer_2, [](struct char_data *ch) {
+        {Form::icer_2, [](Character *ch) {
             return (ch->race == Race::icer && getMasteryTier(ch, Form::icer_1) >=2);
             }},
-        {Form::icer_3, [](struct char_data *ch) {
+        {Form::icer_3, [](Character *ch) {
             return (ch->race == Race::icer && getMasteryTier(ch, Form::icer_2) >=2);
             }},
-        {Form::icer_4, [](struct char_data *ch) {
+        {Form::icer_4, [](Character *ch) {
             return (ch->race == Race::icer && getMasteryTier(ch, Form::icer_3) >=3);
             }},
 
         // Namekian
-        {Form::super_namekian_1, [](struct char_data *ch) {
+        {Form::super_namekian_1, [](Character *ch) {
             return (ch->race == Race::namekian);
             }},
-        {Form::super_namekian_2, [](struct char_data *ch) {
+        {Form::super_namekian_2, [](Character *ch) {
             return (ch->race == Race::namekian && getMasteryTier(ch, Form::super_namekian_1) >=2);
             }},
-        {Form::super_namekian_3, [](struct char_data *ch) {
+        {Form::super_namekian_3, [](Character *ch) {
             return (ch->race == Race::namekian && getMasteryTier(ch, Form::super_namekian_2) >=2);
             }},
-        {Form::super_namekian_4, [](struct char_data *ch) {
+        {Form::super_namekian_4, [](Character *ch) {
             return (ch->race == Race::namekian && getMasteryTier(ch, Form::super_namekian_3) >=3);
             }},
 
         // Konatsu
-        {Form::shadow_first, [](struct char_data *ch) {
+        {Form::shadow_first, [](Character *ch) {
             return (ch->race == Race::konatsu);
             }},
-        {Form::shadow_second, [](struct char_data *ch) {
+        {Form::shadow_second, [](Character *ch) {
             return (ch->race == Race::konatsu && getMasteryTier(ch, Form::shadow_first) >=2);
             }},
-        {Form::shadow_third, [](struct char_data *ch) {
+        {Form::shadow_third, [](Character *ch) {
             return (ch->race == Race::konatsu && getMasteryTier(ch, Form::shadow_second) >=3);
             }},
 
         // Mutant
-        {Form::mutate_1, [](struct char_data *ch) {
+        {Form::mutate_1, [](Character *ch) {
             return (ch->race == Race::mutant);
             }},
-        {Form::mutate_2, [](struct char_data *ch) {
+        {Form::mutate_2, [](Character *ch) {
             return (ch->race == Race::mutant && getMasteryTier(ch, Form::mutate_1) >=2);
             }},
-        {Form::mutate_3, [](struct char_data *ch) {
+        {Form::mutate_3, [](Character *ch) {
             return (ch->race == Race::mutant && getMasteryTier(ch, Form::mutate_2) >=3);
             }},
 
         // BioAndroid
-        {Form::bio_mature, [](struct char_data *ch) {
+        {Form::bio_mature, [](Character *ch) {
             return (ch->race == Race::bio_android);
             }},
-        {Form::bio_semi_perfect, [](struct char_data *ch) {
+        {Form::bio_semi_perfect, [](Character *ch) {
             return (ch->race == Race::bio_android && getMasteryTier(ch, Form::bio_mature) >=2);
             }},
-        {Form::bio_perfect, [](struct char_data *ch) {
+        {Form::bio_perfect, [](Character *ch) {
             return (ch->race == Race::bio_android && getMasteryTier(ch, Form::bio_semi_perfect) >=2);
             }},
-        {Form::bio_super_perfect, [](struct char_data *ch) {
+        {Form::bio_super_perfect, [](Character *ch) {
             return (ch->race == Race::bio_android && getMasteryTier(ch, Form::bio_perfect) >=3);
             }},
 
         // Android
-        {Form::android_1, [](struct char_data *ch) {
+        {Form::android_1, [](Character *ch) {
             return (ch->race == Race::android);
             }},
-        {Form::android_2, [](struct char_data *ch) {
+        {Form::android_2, [](Character *ch) {
             return (ch->race == Race::android && getMasteryTier(ch, Form::android_1) >=2);
             }},
-        {Form::android_3, [](struct char_data *ch) {
+        {Form::android_3, [](Character *ch) {
             return (ch->race == Race::android && getMasteryTier(ch, Form::android_2) >=2);
             }},
-        {Form::android_4, [](struct char_data *ch) {
+        {Form::android_4, [](Character *ch) {
             return (ch->race == Race::android && getMasteryTier(ch, Form::android_3) >=2);
             }},
-        {Form::android_5, [](struct char_data *ch) {
+        {Form::android_5, [](Character *ch) {
             return (ch->race == Race::android && getMasteryTier(ch, Form::android_4) >=2);
             }},
-        {Form::android_6, [](struct char_data *ch) {
+        {Form::android_6, [](Character *ch) {
             return (ch->race == Race::android && getMasteryTier(ch, Form::android_5) >=3);
             }},
 
         // Majin
-        {Form::maj_affinity, [](struct char_data *ch) {
+        {Form::maj_affinity, [](Character *ch) {
             return (ch->race == Race::majin);
             }},
-        {Form::maj_super, [](struct char_data *ch) {
+        {Form::maj_super, [](Character *ch) {
             return (ch->race == Race::majin && getMasteryTier(ch, Form::maj_affinity) >=2);
             }},
-        {Form::maj_true, [](struct char_data *ch) {
+        {Form::maj_true, [](Character *ch) {
             return (ch->race == Race::majin && getMasteryTier(ch, Form::maj_super) >=3);
             }},
 
         // Kai
-        {Form::mystic_1, [](struct char_data *ch) {
+        {Form::mystic_1, [](Character *ch) {
             return (ch->race == Race::kai);
             }},
-        {Form::mystic_2, [](struct char_data *ch) {
+        {Form::mystic_2, [](Character *ch) {
             return (ch->race == Race::kai && getMasteryTier(ch, Form::mystic_1) >=2);
             }},
-        {Form::mystic_3, [](struct char_data *ch) {
+        {Form::mystic_3, [](Character *ch) {
             return (ch->race == Race::kai && getMasteryTier(ch, Form::mystic_2) >=3);
             }},
 
-        {Form::divine_halo, [](struct char_data *ch) {
+        {Form::divine_halo, [](Character *ch) {
             return (ch->race == Race::kai && getMasteryTier(ch, Form::mystic_2) >=3);
             }},
 
         // Tuffle
-        {Form::ascend_1, [](struct char_data *ch) {
+        {Form::ascend_1, [](Character *ch) {
             return (ch->race == Race::tuffle);
             }},
-        {Form::ascend_2, [](struct char_data *ch) {
+        {Form::ascend_2, [](Character *ch) {
             return (ch->race == Race::tuffle && getMasteryTier(ch, Form::ascend_1) >=2);
             }},
-        {Form::ascend_3, [](struct char_data *ch) {
+        {Form::ascend_3, [](Character *ch) {
             return (ch->race == Race::tuffle && getMasteryTier(ch, Form::ascend_2) >=3);
             }},
 
         // Demon
-        {Form::dark_king, [](struct char_data *ch) {
+        {Form::dark_king, [](Character *ch) {
             return (ch->race == Race::demon);
             }},
 
         // Lycanthrope
-        {Form::lycanthrope, [](struct char_data *ch) {
+        {Form::lycanthrope, [](Character *ch) {
             return (ch->race == Race::konatsu && ch->location.getEnvironment(ENV_MOONLIGHT));
             }},
-        {Form::alpha_lycanthrope, [](struct char_data *ch) {
+        {Form::alpha_lycanthrope, [](Character *ch) {
             return (ch->location.getEnvironment(ENV_MOONLIGHT) && getMasteryTier(ch, Form::lycanthrope) >=4);
             }},
 
         // Techniques
-        {Form::kaioken, [](struct char_data *ch) {
+        {Form::kaioken, [](Character *ch) {
             return GET_SKILL(ch, (int) Skill::kaioken) > 0 && !ch->transforms.contains(Form::dark_metamorphosis);
             }},
 
-        {Form::dark_metamorphosis, [](struct char_data *ch) {
+        {Form::dark_metamorphosis, [](Character *ch) {
             return GET_SKILL(ch, (int) Skill::dark_metamorphosis) > 0 && !ch->transforms.contains(Form::kaioken);
             }},
 
 
-        {Form::tiger_stance, [](struct char_data *ch) {
+        {Form::tiger_stance, [](Character *ch) {
             return GET_SKILL(ch, (int) Skill::tiger_stance) > 0;
             }},
 
-        {Form::eagle_stance, [](struct char_data *ch) {
+        {Form::eagle_stance, [](Character *ch) {
             return GET_SKILL(ch, (int) Skill::eagle_stance) > 0;
             }},
         
-        {Form::ox_stance, [](struct char_data *ch) {
+        {Form::ox_stance, [](Character *ch) {
             return GET_SKILL(ch, (int) Skill::ox_stance) > 0;
             }},
 
-        {Form::spirit_absorption, [](struct char_data *ch) {
-            auto loc = ch->location.findObject([](obj_data* obj) {
+        {Form::spirit_absorption, [](Character *ch) {
+            auto loc = ch->location.findObject([](Object* obj) {
                 return isname("Spirit Bomb", obj->getName());
             });
             return loc == nullptr ? false : true;
@@ -755,26 +755,26 @@ namespace trans {
 
     using trans_affect_type = character_affect_type;
 
-    static double getModifierHelper(char_data* ch, Form form, int location, int specific);
+    static double getModifierHelper(Character* ch, Form form, int location, int specific);
 
     static std::unordered_map<Form, std::vector<trans_affect_type>> trans_affects = {
 
         // Saiyan'y forms...
         {
             Form::oozaru, {
-                {APPLY_COMBAT_MULT,  0.0, static_cast<int>(ComStat::block),                    [](struct char_data *ch) {return 0.3 + (0.1 * getMasteryTier(ch, Form::oozaru));}},
-                {APPLY_COMBAT_MULT,    0.0, static_cast<int>(ComStat::dodge),                    [](struct char_data *ch) {return -0.7 * 1.0 + (0.05 * getMasteryTier(ch, Form::oozaru));}},
-                {APPLY_CDIM_MULT,      0.0, static_cast<int>(CharDim::height),                        [](struct char_data *ch) {return 9.0 + (0.5 * getMasteryTier(ch, Form::oozaru));}},
-                {APPLY_CDIM_MULT, 0.0, static_cast<int>(CharDim::weight), [](struct char_data *ch) {return 49.0 + (4.00 * getMasteryTier(ch, Form::oozaru));}},
-                {APPLY_COMBAT_MULT, 0.0, static_cast<int>(ComStat::defense), [](struct char_data *ch) {return -0.1 - (0.05 * getMasteryTier(ch, Form::oozaru));}},
-                {APPLY_COMBAT_MULT, 0.0, static_cast<int>(ComStat::damage), [](struct char_data *ch) {return 0.2 + (0.05 * getMasteryTier(ch, Form::oozaru));}},
-                {APPLY_CVIT_MULT, 0.0, ~0, [](struct char_data *ch) {return 0.9 + (0.05 * getMasteryTier(ch, Form::oozaru));}},
-                {APPLY_CVIT_BASE, 0.0, ~0, [](struct char_data *ch) {return 9000 * 1.0 + (0.05 * getMasteryTier(ch, Form::oozaru));}},
+                {APPLY_COMBAT_MULT,  0.0, static_cast<int>(ComStat::block),                    [](Character *ch) {return 0.3 + (0.1 * getMasteryTier(ch, Form::oozaru));}},
+                {APPLY_COMBAT_MULT,    0.0, static_cast<int>(ComStat::dodge),                    [](Character *ch) {return -0.7 * 1.0 + (0.05 * getMasteryTier(ch, Form::oozaru));}},
+                {APPLY_CDIM_MULT,      0.0, static_cast<int>(CharDim::height),                        [](Character *ch) {return 9.0 + (0.5 * getMasteryTier(ch, Form::oozaru));}},
+                {APPLY_CDIM_MULT, 0.0, static_cast<int>(CharDim::weight), [](Character *ch) {return 49.0 + (4.00 * getMasteryTier(ch, Form::oozaru));}},
+                {APPLY_COMBAT_MULT, 0.0, static_cast<int>(ComStat::defense), [](Character *ch) {return -0.1 - (0.05 * getMasteryTier(ch, Form::oozaru));}},
+                {APPLY_COMBAT_MULT, 0.0, static_cast<int>(ComStat::damage), [](Character *ch) {return 0.2 + (0.05 * getMasteryTier(ch, Form::oozaru));}},
+                {APPLY_CVIT_MULT, 0.0, ~0, [](Character *ch) {return 0.9 + (0.05 * getMasteryTier(ch, Form::oozaru));}},
+                {APPLY_CVIT_BASE, 0.0, ~0, [](Character *ch) {return 9000 * 1.0 + (0.05 * getMasteryTier(ch, Form::oozaru));}},
             }
         },
         {
             Form::golden_oozaru, {
-                {APPLY_CVIT_BASE,   0.0, ~0, [](struct char_data *ch) {
+                {APPLY_CVIT_BASE,   0.0, ~0, [](Character *ch) {
                     if(ch->transforms.contains(Form::super_saiyan_4)) return getModifierHelper(ch,
                                                                                                Form::super_saiyan_4,
                                                                                                APPLY_CVIT_BASE,
@@ -789,7 +789,7 @@ namespace trans {
                                                                                                ~0);
                     return getModifierHelper(ch, Form::super_saiyan_1, APPLY_CVIT_BASE, ~0);
                 }},
-                {APPLY_CVIT_MULT,     0.0, ~0,                    [](struct char_data *ch) {
+                {APPLY_CVIT_MULT,     0.0, ~0,                    [](Character *ch) {
                     if(ch->transforms.contains(Form::super_saiyan_4)) return getModifierHelper(ch,
                                                                                                Form::super_saiyan_4,
                                                                                                APPLY_CVIT_MULT,
@@ -804,241 +804,241 @@ namespace trans {
                                                                                                ~0);
                     return getModifierHelper(ch, Form::super_saiyan_1, APPLY_CVIT_MULT, ~0);
                 }},
-                {APPLY_COMBAT_MULT, 0.0, static_cast<int>(ComStat::block), [](struct char_data *ch) {return 0.3 + (0.1 * getMasteryTier(ch, Form::golden_oozaru));}},
-                {APPLY_COMBAT_MULT, 0.0, static_cast<int>(ComStat::dodge), [](struct char_data *ch) {return -0.7 + (0.05 * getMasteryTier(ch, Form::golden_oozaru));}},
-                {APPLY_CDIM_MULT, 0.0, static_cast<int>(CharDim::height), [](struct char_data *ch) {return 9.0 + (0.5 * getMasteryTier(ch, Form::golden_oozaru));}},
-                {APPLY_CDIM_MULT, 0.0, static_cast<int>(CharDim::weight), [](struct char_data *ch) {return 49.0 + (4.00 * getMasteryTier(ch, Form::golden_oozaru));}},
-                {APPLY_COMBAT_MULT, 0.0, static_cast<int>(ComStat::defense), [](struct char_data *ch) {return -0.1 - (0.05 * getMasteryTier(ch, Form::golden_oozaru));}},
-                {APPLY_COMBAT_MULT, 0.0, static_cast<int>(ComStat::damage), [](struct char_data *ch) {return 0.2 + (0.05 * getMasteryTier(ch, Form::golden_oozaru));}},
+                {APPLY_COMBAT_MULT, 0.0, static_cast<int>(ComStat::block), [](Character *ch) {return 0.3 + (0.1 * getMasteryTier(ch, Form::golden_oozaru));}},
+                {APPLY_COMBAT_MULT, 0.0, static_cast<int>(ComStat::dodge), [](Character *ch) {return -0.7 + (0.05 * getMasteryTier(ch, Form::golden_oozaru));}},
+                {APPLY_CDIM_MULT, 0.0, static_cast<int>(CharDim::height), [](Character *ch) {return 9.0 + (0.5 * getMasteryTier(ch, Form::golden_oozaru));}},
+                {APPLY_CDIM_MULT, 0.0, static_cast<int>(CharDim::weight), [](Character *ch) {return 49.0 + (4.00 * getMasteryTier(ch, Form::golden_oozaru));}},
+                {APPLY_COMBAT_MULT, 0.0, static_cast<int>(ComStat::defense), [](Character *ch) {return -0.1 - (0.05 * getMasteryTier(ch, Form::golden_oozaru));}},
+                {APPLY_COMBAT_MULT, 0.0, static_cast<int>(ComStat::damage), [](Character *ch) {return 0.2 + (0.05 * getMasteryTier(ch, Form::golden_oozaru));}},
             }
         },
 
         {
             Form::super_saiyan_1, {
-                {APPLY_CVIT_MULT,   0.0, ~0,                    [](struct char_data *ch) {return 0.9 + (0.1 * getMasteryTier(ch, Form::super_saiyan_1));}},
-                {APPLY_CVIT_BASE,     0.0, ~0,                    [](struct char_data *ch) {return 700000 * 1.0 + (0.1 * getMasteryTier(ch, Form::super_saiyan_1));}},
+                {APPLY_CVIT_MULT,   0.0, ~0,                    [](Character *ch) {return 0.9 + (0.1 * getMasteryTier(ch, Form::super_saiyan_1));}},
+                {APPLY_CVIT_BASE,     0.0, ~0,                    [](Character *ch) {return 700000 * 1.0 + (0.1 * getMasteryTier(ch, Form::super_saiyan_1));}},
             }
         },
 
         {
             Form::super_saiyan_2, {
-                {APPLY_CVIT_MULT,   0.0, ~0,                    [](struct char_data *ch) {return 1.5 + (0.15 * getMasteryTier(ch, Form::super_saiyan_2));}},
-                {APPLY_CVIT_BASE,     0.0, ~0,                    [](struct char_data *ch) {return 15000000 * 1.0 + (0.15 * getMasteryTier(ch, Form::super_saiyan_2));}},
+                {APPLY_CVIT_MULT,   0.0, ~0,                    [](Character *ch) {return 1.5 + (0.15 * getMasteryTier(ch, Form::super_saiyan_2));}},
+                {APPLY_CVIT_BASE,     0.0, ~0,                    [](Character *ch) {return 15000000 * 1.0 + (0.15 * getMasteryTier(ch, Form::super_saiyan_2));}},
             }
         },
 
         {
             Form::super_saiyan_3, {
-                {APPLY_CVIT_MULT,   0.0, ~0,                    [](struct char_data *ch) {return 2.4 + (0.25 * getMasteryTier(ch, Form::super_saiyan_3));}},
-                {APPLY_CVIT_BASE,     0.0, ~0,                    [](struct char_data *ch) {return 70000000 * 1.0 + (0.25 * getMasteryTier(ch, Form::super_saiyan_3));}},
+                {APPLY_CVIT_MULT,   0.0, ~0,                    [](Character *ch) {return 2.4 + (0.25 * getMasteryTier(ch, Form::super_saiyan_3));}},
+                {APPLY_CVIT_BASE,     0.0, ~0,                    [](Character *ch) {return 70000000 * 1.0 + (0.25 * getMasteryTier(ch, Form::super_saiyan_3));}},
             }
         },
 
         {
             Form::super_saiyan_4, {
-                {APPLY_CVIT_MULT,   0.0, ~0,                    [](struct char_data *ch) {return 3.8 + (0.35 * getMasteryTier(ch, Form::super_saiyan_4));}},
-                {APPLY_CVIT_BASE,     0.0, ~0,                    [](struct char_data *ch) {return 17000000 * 1.0 + (0.35 * getMasteryTier(ch, Form::super_saiyan_4));}},
+                {APPLY_CVIT_MULT,   0.0, ~0,                    [](Character *ch) {return 3.8 + (0.35 * getMasteryTier(ch, Form::super_saiyan_4));}},
+                {APPLY_CVIT_BASE,     0.0, ~0,                    [](Character *ch) {return 17000000 * 1.0 + (0.35 * getMasteryTier(ch, Form::super_saiyan_4));}},
             }
         },
 
         // Human'y forms.
         {
             Form::super_human_1, {
-                {APPLY_CVIT_MULT,   0.0, ~0,                    [](struct char_data *ch) {return 0.8 + (0.1 * getMasteryTier(ch, Form::super_human_1));}},
-                {APPLY_CVIT_BASE,     0.0, ~0,                    [](struct char_data *ch) {return 950000 * 1.0 + (0.1 * getMasteryTier(ch, Form::super_human_1));}},
+                {APPLY_CVIT_MULT,   0.0, ~0,                    [](Character *ch) {return 0.8 + (0.1 * getMasteryTier(ch, Form::super_human_1));}},
+                {APPLY_CVIT_BASE,     0.0, ~0,                    [](Character *ch) {return 950000 * 1.0 + (0.1 * getMasteryTier(ch, Form::super_human_1));}},
             }
         },
 
         {
             Form::super_human_2, {
-                {APPLY_CVIT_MULT,   0.0, ~0,                    [](struct char_data *ch) {return 1.6 + (0.2 * getMasteryTier(ch, Form::super_human_2));}},
-                {APPLY_CVIT_BASE,     0.0, ~0,                    [](struct char_data *ch) {return 10000000 * 1.0 + (0.2 * getMasteryTier(ch, Form::super_human_2));}},
+                {APPLY_CVIT_MULT,   0.0, ~0,                    [](Character *ch) {return 1.6 + (0.2 * getMasteryTier(ch, Form::super_human_2));}},
+                {APPLY_CVIT_BASE,     0.0, ~0,                    [](Character *ch) {return 10000000 * 1.0 + (0.2 * getMasteryTier(ch, Form::super_human_2));}},
             }
         },
 
         {
             Form::super_human_3, {
-                {APPLY_CVIT_MULT,   0.0, ~0,                    [](struct char_data *ch) {return 2.5 + (0.3 * getMasteryTier(ch, Form::super_human_3));}},
-                {APPLY_CVIT_BASE,     0.0, ~0,                    [](struct char_data *ch) {return 40000000 * 1.0 + (0.3 * getMasteryTier(ch, Form::super_human_3));}},
+                {APPLY_CVIT_MULT,   0.0, ~0,                    [](Character *ch) {return 2.5 + (0.3 * getMasteryTier(ch, Form::super_human_3));}},
+                {APPLY_CVIT_BASE,     0.0, ~0,                    [](Character *ch) {return 40000000 * 1.0 + (0.3 * getMasteryTier(ch, Form::super_human_3));}},
             }
         },
 
         {
             Form::super_human_4, {
-                {APPLY_CVIT_MULT,   0.0, ~0,                    [](struct char_data *ch) {return 3.1 + (0.4 * getMasteryTier(ch, Form::super_human_4));}},
-                {APPLY_CVIT_BASE,     0.0, ~0,                    [](struct char_data *ch) {return 200000000 * 1.0 + (0.4 * getMasteryTier(ch, Form::super_human_4));}},
+                {APPLY_CVIT_MULT,   0.0, ~0,                    [](Character *ch) {return 3.1 + (0.4 * getMasteryTier(ch, Form::super_human_4));}},
+                {APPLY_CVIT_BASE,     0.0, ~0,                    [](Character *ch) {return 200000000 * 1.0 + (0.4 * getMasteryTier(ch, Form::super_human_4));}},
             }
         },
 
         // Icer'y Forms.
         {
             Form::icer_1, {
-                {APPLY_CDIM_MULT, 0.0, static_cast<int>(CharDim::height),                    [](struct char_data *ch) {return 2.0 + (0.2 * getMasteryTier(ch, Form::icer_1));}},
-                {APPLY_CDIM_MULT,   0.0, static_cast<int>(CharDim::weight),                    [](struct char_data *ch) {return 3.0 + (0.3 * getMasteryTier(ch, Form::icer_1));}},
-                {APPLY_CVIT_MULT,        0.0, ~0,                        [](struct char_data *ch) {return 1.0 + (0.05 * getMasteryTier(ch, Form::icer_1));}},
-                {APPLY_CVIT_BASE,   0.0, ~0, [](struct char_data *ch) {return 400000 * 1.0 + (0.05 * getMasteryTier(ch, Form::icer_1));}},
+                {APPLY_CDIM_MULT, 0.0, static_cast<int>(CharDim::height),                    [](Character *ch) {return 2.0 + (0.2 * getMasteryTier(ch, Form::icer_1));}},
+                {APPLY_CDIM_MULT,   0.0, static_cast<int>(CharDim::weight),                    [](Character *ch) {return 3.0 + (0.3 * getMasteryTier(ch, Form::icer_1));}},
+                {APPLY_CVIT_MULT,        0.0, ~0,                        [](Character *ch) {return 1.0 + (0.05 * getMasteryTier(ch, Form::icer_1));}},
+                {APPLY_CVIT_BASE,   0.0, ~0, [](Character *ch) {return 400000 * 1.0 + (0.05 * getMasteryTier(ch, Form::icer_1));}},
 
 
             }
         },
         {
             Form::icer_2, {
-                {APPLY_CDIM_MULT, 0.0, static_cast<int>(CharDim::height),                    [](struct char_data *ch) {return 2.0 + (0.2 * getMasteryTier(ch, Form::icer_2));}},
-                {APPLY_CDIM_MULT,   0.0, static_cast<int>(CharDim::weight),                    [](struct char_data *ch) {return 3.0 + (0.3 * getMasteryTier(ch, Form::icer_2));}},
-                {APPLY_CVIT_MULT,        0.0, ~0,                        [](struct char_data *ch) {return 2.0 + (0.05 * getMasteryTier(ch, Form::icer_2));}},
-                {APPLY_CVIT_BASE,   0.0, ~0, [](struct char_data *ch) {return 7000000 * 1.0 + (0.05 * getMasteryTier(ch, Form::icer_2));}},
+                {APPLY_CDIM_MULT, 0.0, static_cast<int>(CharDim::height),                    [](Character *ch) {return 2.0 + (0.2 * getMasteryTier(ch, Form::icer_2));}},
+                {APPLY_CDIM_MULT,   0.0, static_cast<int>(CharDim::weight),                    [](Character *ch) {return 3.0 + (0.3 * getMasteryTier(ch, Form::icer_2));}},
+                {APPLY_CVIT_MULT,        0.0, ~0,                        [](Character *ch) {return 2.0 + (0.05 * getMasteryTier(ch, Form::icer_2));}},
+                {APPLY_CVIT_BASE,   0.0, ~0, [](Character *ch) {return 7000000 * 1.0 + (0.05 * getMasteryTier(ch, Form::icer_2));}},
             }
         },
 
         {
             Form::icer_3, {
-                {APPLY_CDIM_MULT, 0.0, static_cast<int>(CharDim::height),                    [](struct char_data *ch) {return 0.5 + (0.25 * getMasteryTier(ch, Form::icer_3));}},
-                {APPLY_CDIM_MULT,   0.0, static_cast<int>(CharDim::weight),                    [](struct char_data *ch) {return 1.0 + (0.1 * getMasteryTier(ch, Form::icer_3));}},
-                {APPLY_CVIT_MULT,        0.0, ~0,                        [](struct char_data *ch) {return 3.0 + (0.075 * getMasteryTier(ch, Form::icer_3));}},
-                {APPLY_CVIT_BASE,   0.0, ~0, [](struct char_data *ch) {return 45000000 * 1.0 + (0.075 * getMasteryTier(ch, Form::icer_3));}},
+                {APPLY_CDIM_MULT, 0.0, static_cast<int>(CharDim::height),                    [](Character *ch) {return 0.5 + (0.25 * getMasteryTier(ch, Form::icer_3));}},
+                {APPLY_CDIM_MULT,   0.0, static_cast<int>(CharDim::weight),                    [](Character *ch) {return 1.0 + (0.1 * getMasteryTier(ch, Form::icer_3));}},
+                {APPLY_CVIT_MULT,        0.0, ~0,                        [](Character *ch) {return 3.0 + (0.075 * getMasteryTier(ch, Form::icer_3));}},
+                {APPLY_CVIT_BASE,   0.0, ~0, [](Character *ch) {return 45000000 * 1.0 + (0.075 * getMasteryTier(ch, Form::icer_3));}},
             }
         },
 
         {
             Form::icer_4, {
-                {APPLY_CDIM_MULT, 0.0, static_cast<int>(CharDim::height),                    [](struct char_data *ch) {return 1.0 + (0.1 * getMasteryTier(ch, Form::icer_4));}},
-                {APPLY_CDIM_MULT,   0.0, static_cast<int>(CharDim::weight),                    [](struct char_data *ch) {return 2.0 + (0.2 * getMasteryTier(ch, Form::icer_4));}},
-                {APPLY_CVIT_MULT,        0.0, ~0,                        [](struct char_data *ch) {return 4.0 + (0.1 * getMasteryTier(ch, Form::icer_4));}},
-                {APPLY_CVIT_BASE,   0.0, ~0, [](struct char_data *ch) {return 200000000 * 1.0 + (0.1 * getMasteryTier(ch, Form::icer_4));}},
+                {APPLY_CDIM_MULT, 0.0, static_cast<int>(CharDim::height),                    [](Character *ch) {return 1.0 + (0.1 * getMasteryTier(ch, Form::icer_4));}},
+                {APPLY_CDIM_MULT,   0.0, static_cast<int>(CharDim::weight),                    [](Character *ch) {return 2.0 + (0.2 * getMasteryTier(ch, Form::icer_4));}},
+                {APPLY_CVIT_MULT,        0.0, ~0,                        [](Character *ch) {return 4.0 + (0.1 * getMasteryTier(ch, Form::icer_4));}},
+                {APPLY_CVIT_BASE,   0.0, ~0, [](Character *ch) {return 200000000 * 1.0 + (0.1 * getMasteryTier(ch, Form::icer_4));}},
             }
         },
 
         // Namekian Forms.
         {
             Form::super_namekian_1, {
-                {APPLY_CVIT_MULT,   0.0, ~0,                    [](struct char_data *ch) {return 1.0 + (0.05 * getMasteryTier(ch, Form::super_namekian_1));}},
-                {APPLY_CVIT_BASE,     0.0, ~0,                    [](struct char_data *ch) {return 190000 * 1.0 + (0.05 * getMasteryTier(ch, Form::super_namekian_1));}},
+                {APPLY_CVIT_MULT,   0.0, ~0,                    [](Character *ch) {return 1.0 + (0.05 * getMasteryTier(ch, Form::super_namekian_1));}},
+                {APPLY_CVIT_BASE,     0.0, ~0,                    [](Character *ch) {return 190000 * 1.0 + (0.05 * getMasteryTier(ch, Form::super_namekian_1));}},
             }
         },
         {
             Form::super_namekian_2, {
-                {APPLY_CVIT_MULT,   0.0, ~0,                    [](struct char_data *ch) {return 1.9 + (0.1 * getMasteryTier(ch, Form::super_namekian_2));}},
-                {APPLY_CVIT_BASE,     0.0, ~0,                    [](struct char_data *ch) {return 3500000 * 1.0 + (0.1 * getMasteryTier(ch, Form::super_namekian_2));}},
+                {APPLY_CVIT_MULT,   0.0, ~0,                    [](Character *ch) {return 1.9 + (0.1 * getMasteryTier(ch, Form::super_namekian_2));}},
+                {APPLY_CVIT_BASE,     0.0, ~0,                    [](Character *ch) {return 3500000 * 1.0 + (0.1 * getMasteryTier(ch, Form::super_namekian_2));}},
             }
         },
         {
             Form::super_namekian_3, {
-                {APPLY_CVIT_MULT,   0.0, ~0,                    [](struct char_data *ch) {return 2.95 + (0.15 * getMasteryTier(ch, Form::super_namekian_3));}},
-                {APPLY_CVIT_BASE,     0.0, ~0,                    [](struct char_data *ch) {return 60000000 * 1.0 + (0.15 * getMasteryTier(ch, Form::super_namekian_3));}},
+                {APPLY_CVIT_MULT,   0.0, ~0,                    [](Character *ch) {return 2.95 + (0.15 * getMasteryTier(ch, Form::super_namekian_3));}},
+                {APPLY_CVIT_BASE,     0.0, ~0,                    [](Character *ch) {return 60000000 * 1.0 + (0.15 * getMasteryTier(ch, Form::super_namekian_3));}},
             }
         },
         {
             Form::super_namekian_4, {
-                {APPLY_CVIT_MULT,   0.0, ~0,                    [](struct char_data *ch) {return 3.3 + (0.2 * getMasteryTier(ch, Form::super_namekian_4));}},
-                {APPLY_CVIT_BASE,     0.0, ~0,                    [](struct char_data *ch) {return 210000000 * 1.0 + (0.2 * getMasteryTier(ch, Form::super_namekian_4));}},
+                {APPLY_CVIT_MULT,   0.0, ~0,                    [](Character *ch) {return 3.3 + (0.2 * getMasteryTier(ch, Form::super_namekian_4));}},
+                {APPLY_CVIT_BASE,     0.0, ~0,                    [](Character *ch) {return 210000000 * 1.0 + (0.2 * getMasteryTier(ch, Form::super_namekian_4));}},
             }
         },
 
         // Konatsu Forms.
         {
             Form::shadow_first, {
-                {APPLY_CVIT_MULT,   0.0, ~0,                    [](struct char_data *ch) {return 1.0 + (0.05 * getMasteryTier(ch, Form::shadow_first));}},
-                {APPLY_CVIT_BASE,     0.0, ~0,                    [](struct char_data *ch) {return 70000 * 1.0 + (0.05 * getMasteryTier(ch, Form::shadow_first));}},
+                {APPLY_CVIT_MULT,   0.0, ~0,                    [](Character *ch) {return 1.0 + (0.05 * getMasteryTier(ch, Form::shadow_first));}},
+                {APPLY_CVIT_BASE,     0.0, ~0,                    [](Character *ch) {return 70000 * 1.0 + (0.05 * getMasteryTier(ch, Form::shadow_first));}},
             }
         },
         {
             Form::shadow_second, {
-                {APPLY_CVIT_MULT,   0.0, ~0,                    [](struct char_data *ch) {return 1.8 + (0.15 * getMasteryTier(ch, Form::shadow_second));}},
-                {APPLY_CVIT_BASE,     0.0, ~0,                    [](struct char_data *ch) {return 7000000 * 1.0 + (0.15 * getMasteryTier(ch, Form::shadow_second));}},
+                {APPLY_CVIT_MULT,   0.0, ~0,                    [](Character *ch) {return 1.8 + (0.15 * getMasteryTier(ch, Form::shadow_second));}},
+                {APPLY_CVIT_BASE,     0.0, ~0,                    [](Character *ch) {return 7000000 * 1.0 + (0.15 * getMasteryTier(ch, Form::shadow_second));}},
             }
         },
         {
             Form::shadow_third, {
-                {APPLY_CVIT_MULT,   0.0, ~0,                    [](struct char_data *ch) {return 2.5 + (0.3 * getMasteryTier(ch, Form::shadow_third));}},
-                {APPLY_CVIT_BASE,     0.0, ~0,                    [](struct char_data *ch) {return 60000000 * 1.0 + (0.3 * getMasteryTier(ch, Form::shadow_third));}},
+                {APPLY_CVIT_MULT,   0.0, ~0,                    [](Character *ch) {return 2.5 + (0.3 * getMasteryTier(ch, Form::shadow_third));}},
+                {APPLY_CVIT_BASE,     0.0, ~0,                    [](Character *ch) {return 60000000 * 1.0 + (0.3 * getMasteryTier(ch, Form::shadow_third));}},
             }
         },
 
         // Mutant Forms.
         {
             Form::mutate_1, {
-                {APPLY_CVIT_MULT,   0.0, ~0,                    [](struct char_data *ch) {return 0.9 + (0.05 * getMasteryTier(ch, Form::mutate_1));}},
-                {APPLY_CVIT_BASE,     0.0, ~0,                    [](struct char_data *ch) {return 90000 * 1.0 + (0.05 * getMasteryTier(ch, Form::mutate_1));}},
+                {APPLY_CVIT_MULT,   0.0, ~0,                    [](Character *ch) {return 0.9 + (0.05 * getMasteryTier(ch, Form::mutate_1));}},
+                {APPLY_CVIT_BASE,     0.0, ~0,                    [](Character *ch) {return 90000 * 1.0 + (0.05 * getMasteryTier(ch, Form::mutate_1));}},
             }
         },
         {
             Form::mutate_2, {
-                {APPLY_CVIT_MULT,   0.0, ~0,                    [](struct char_data *ch) {return 1.7 + (0.15 * getMasteryTier(ch, Form::mutate_2));}},
-                {APPLY_CVIT_BASE,     0.0, ~0,                    [](struct char_data *ch) {return 8000000 * 1.0 + (0.15 * getMasteryTier(ch, Form::mutate_2));}},
+                {APPLY_CVIT_MULT,   0.0, ~0,                    [](Character *ch) {return 1.7 + (0.15 * getMasteryTier(ch, Form::mutate_2));}},
+                {APPLY_CVIT_BASE,     0.0, ~0,                    [](Character *ch) {return 8000000 * 1.0 + (0.15 * getMasteryTier(ch, Form::mutate_2));}},
             }
         },
         {
             Form::mutate_3, {
-                {APPLY_CVIT_MULT,   0.0, ~0,                    [](struct char_data *ch) {return 2.4 + (0.3 * getMasteryTier(ch, Form::mutate_3));}},
-                {APPLY_CVIT_BASE,     0.0, ~0,                    [](struct char_data *ch) {return 70000000 * 1.0 + (0.3 * getMasteryTier(ch, Form::mutate_3));}},
+                {APPLY_CVIT_MULT,   0.0, ~0,                    [](Character *ch) {return 2.4 + (0.3 * getMasteryTier(ch, Form::mutate_3));}},
+                {APPLY_CVIT_BASE,     0.0, ~0,                    [](Character *ch) {return 70000000 * 1.0 + (0.3 * getMasteryTier(ch, Form::mutate_3));}},
             }
         },
         // BioAndroid forms.
         {
             Form::bio_mature, {
-                {APPLY_CVIT_MULT,   0.0, ~0,                    [](struct char_data *ch) {return 0.6 + (0.05 * getMasteryTier(ch, Form::bio_mature));}},
-                {APPLY_CVIT_BASE,     0.0, ~0,                    [](struct char_data *ch) {return 900000 * 1.0 + (0.1 * getMasteryTier(ch, Form::bio_mature));}},
+                {APPLY_CVIT_MULT,   0.0, ~0,                    [](Character *ch) {return 0.6 + (0.05 * getMasteryTier(ch, Form::bio_mature));}},
+                {APPLY_CVIT_BASE,     0.0, ~0,                    [](Character *ch) {return 900000 * 1.0 + (0.1 * getMasteryTier(ch, Form::bio_mature));}},
             }
         },
         {
             Form::bio_semi_perfect, {
-                {APPLY_CVIT_MULT,   0.0, ~0,                    [](struct char_data *ch) {return 0.6 + (0.05 * getMasteryTier(ch, Form::bio_semi_perfect));}},
-                {APPLY_CVIT_BASE,     0.0, ~0,                    [](struct char_data *ch) {return 7500000 * 1.0 + (0.15 * getMasteryTier(ch, Form::bio_semi_perfect));}},
+                {APPLY_CVIT_MULT,   0.0, ~0,                    [](Character *ch) {return 0.6 + (0.05 * getMasteryTier(ch, Form::bio_semi_perfect));}},
+                {APPLY_CVIT_BASE,     0.0, ~0,                    [](Character *ch) {return 7500000 * 1.0 + (0.15 * getMasteryTier(ch, Form::bio_semi_perfect));}},
             }
         },
         {
             Form::bio_perfect, {
-                {APPLY_CVIT_MULT,   0.0, ~0,                    [](struct char_data *ch) {return 0.6 + (0.05 * getMasteryTier(ch, Form::bio_super_perfect));}},
-                {APPLY_CVIT_BASE,     0.0, ~0,                    [](struct char_data *ch) {return 60000000 * 1.0 + (0.2 * getMasteryTier(ch, Form::bio_perfect));}},
+                {APPLY_CVIT_MULT,   0.0, ~0,                    [](Character *ch) {return 0.6 + (0.05 * getMasteryTier(ch, Form::bio_super_perfect));}},
+                {APPLY_CVIT_BASE,     0.0, ~0,                    [](Character *ch) {return 60000000 * 1.0 + (0.2 * getMasteryTier(ch, Form::bio_perfect));}},
             }
         },
         {
             Form::bio_super_perfect, {
-                {APPLY_CVIT_MULT,   0.0, ~0,                    [](struct char_data *ch) {return 2.6 + (0.2 * getMasteryTier(ch, Form::bio_super_perfect));}},
-                {APPLY_CVIT_BASE,     0.0, ~0,                    [](struct char_data *ch) {return 350000000 * 1.0 + (0.2 * getMasteryTier(ch, Form::bio_super_perfect));}},
+                {APPLY_CVIT_MULT,   0.0, ~0,                    [](Character *ch) {return 2.6 + (0.2 * getMasteryTier(ch, Form::bio_super_perfect));}},
+                {APPLY_CVIT_BASE,     0.0, ~0,                    [](Character *ch) {return 350000000 * 1.0 + (0.2 * getMasteryTier(ch, Form::bio_super_perfect));}},
             }
         },
 
         // Android Forms
         {
             Form::android_1, {
-                {APPLY_CVIT_BASE,   0.0, ~0, [](struct char_data *ch) {return 11000000 * 1.0 + (0.05 * getMasteryTier(ch, Form::android_1));}},
-                {APPLY_CVIT_REGEN_MULT, 0.0, static_cast<int>(CharVital::ki), [](struct char_data *ch) {return 0.001 + (0.05 * getMasteryTier(ch, Form::android_1));}},
+                {APPLY_CVIT_BASE,   0.0, ~0, [](Character *ch) {return 11000000 * 1.0 + (0.05 * getMasteryTier(ch, Form::android_1));}},
+                {APPLY_CVIT_REGEN_MULT, 0.0, static_cast<int>(CharVital::ki), [](Character *ch) {return 0.001 + (0.05 * getMasteryTier(ch, Form::android_1));}},
                 {APPLY_CATTR_BASE,      2,   ~0},
             }
         },
         {
             Form::android_2, {
-                {APPLY_CVIT_BASE,   0.0, ~0, [](struct char_data *ch) {return 45000000 * 1.0 + (0.1 * getMasteryTier(ch, Form::android_2));}},
-                {APPLY_CVIT_REGEN_MULT, 0.0, static_cast<int>(CharVital::ki), [](struct char_data *ch) {return 0.001 + (0.05 * getMasteryTier(ch, Form::android_2));}},
+                {APPLY_CVIT_BASE,   0.0, ~0, [](Character *ch) {return 45000000 * 1.0 + (0.1 * getMasteryTier(ch, Form::android_2));}},
+                {APPLY_CVIT_REGEN_MULT, 0.0, static_cast<int>(CharVital::ki), [](Character *ch) {return 0.001 + (0.05 * getMasteryTier(ch, Form::android_2));}},
                 {APPLY_CATTR_BASE,      2,   ~0},
             }
         },
         {
             Form::android_3, {
-                {APPLY_CVIT_BASE,   0.0, ~0, [](struct char_data *ch) {return 300000000 * 1.0 + (0.15 * getMasteryTier(ch, Form::android_3));}},
-                {APPLY_CVIT_REGEN_MULT, 0.0, static_cast<int>(CharVital::ki), [](struct char_data *ch) {return 0.001 + (0.05 * getMasteryTier(ch, Form::android_3));}},
+                {APPLY_CVIT_BASE,   0.0, ~0, [](Character *ch) {return 300000000 * 1.0 + (0.15 * getMasteryTier(ch, Form::android_3));}},
+                {APPLY_CVIT_REGEN_MULT, 0.0, static_cast<int>(CharVital::ki), [](Character *ch) {return 0.001 + (0.05 * getMasteryTier(ch, Form::android_3));}},
                 {APPLY_CATTR_BASE,      2,   ~0},
             }
         },
         {
             Form::android_4, {
-                {APPLY_CVIT_BASE,   0.0, ~0, [](struct char_data *ch) {return 2000000000 * 1.0 + (0.2 * getMasteryTier(ch, Form::android_4));}},
-                {APPLY_CVIT_REGEN_MULT, 0.0, static_cast<int>(CharVital::ki), [](struct char_data *ch) {return 0.001 + (0.05 * getMasteryTier(ch, Form::android_4));}},
+                {APPLY_CVIT_BASE,   0.0, ~0, [](Character *ch) {return 2000000000 * 1.0 + (0.2 * getMasteryTier(ch, Form::android_4));}},
+                {APPLY_CVIT_REGEN_MULT, 0.0, static_cast<int>(CharVital::ki), [](Character *ch) {return 0.001 + (0.05 * getMasteryTier(ch, Form::android_4));}},
                 {APPLY_CATTR_BASE,      2,   ~0},
             }
         },
         {
             Form::android_5, {
-                {APPLY_CVIT_BASE,   0.0, ~0, [](struct char_data *ch) {return 4000000000 * 1.0 + (0.25 * getMasteryTier(ch, Form::android_5));}},
-                {APPLY_CVIT_REGEN_MULT, 0.0, static_cast<int>(CharVital::ki), [](struct char_data *ch) {return 0.001 + (0.05 * getMasteryTier(ch, Form::android_5));}},
+                {APPLY_CVIT_BASE,   0.0, ~0, [](Character *ch) {return 4000000000 * 1.0 + (0.25 * getMasteryTier(ch, Form::android_5));}},
+                {APPLY_CVIT_REGEN_MULT, 0.0, static_cast<int>(CharVital::ki), [](Character *ch) {return 0.001 + (0.05 * getMasteryTier(ch, Form::android_5));}},
                 {APPLY_CATTR_BASE,      2,   ~0},
             }
         },
         {
             Form::android_6, {
-                {APPLY_CVIT_BASE,   0.0, ~0, [](struct char_data *ch) {return 7000000000 * 1.0 + (0.3 * getMasteryTier(ch, Form::android_6));}},
-                {APPLY_CVIT_REGEN_MULT, 0.0, static_cast<int>(CharVital::ki), [](struct char_data *ch) {return 0.001 + (0.05 * getMasteryTier(ch, Form::android_6));}},
+                {APPLY_CVIT_BASE,   0.0, ~0, [](Character *ch) {return 7000000000 * 1.0 + (0.3 * getMasteryTier(ch, Form::android_6));}},
+                {APPLY_CVIT_REGEN_MULT, 0.0, static_cast<int>(CharVital::ki), [](Character *ch) {return 0.001 + (0.05 * getMasteryTier(ch, Form::android_6));}},
                 {APPLY_CATTR_BASE,      2,   ~0},
             }
         },
@@ -1046,74 +1046,74 @@ namespace trans {
         // Majin Forms
         {
             Form::maj_affinity, {
-                {APPLY_CVIT_MULT,   0.0, ~0,                    [](struct char_data *ch) {return 0.8 + (0.05 * getMasteryTier(ch, Form::mystic_1));}},
-                {APPLY_CVIT_BASE,     0.0, ~0,                    [](struct char_data *ch) {return 1150000 * 1.0 + (0.10 * getMasteryTier(ch, Form::mystic_1));}},
+                {APPLY_CVIT_MULT,   0.0, ~0,                    [](Character *ch) {return 0.8 + (0.05 * getMasteryTier(ch, Form::mystic_1));}},
+                {APPLY_CVIT_BASE,     0.0, ~0,                    [](Character *ch) {return 1150000 * 1.0 + (0.10 * getMasteryTier(ch, Form::mystic_1));}},
             }
         },
         {
             Form::maj_super, {
-                {APPLY_CVIT_MULT,   0.0, ~0,                    [](struct char_data *ch) {return 0.8 + (0.05 * getMasteryTier(ch, Form::maj_super));}},
-                {APPLY_CVIT_BASE,     0.0, ~0,                    [](struct char_data *ch) {return 12000000 * 1.0 + (0.15 * getMasteryTier(ch, Form::maj_super));}},
+                {APPLY_CVIT_MULT,   0.0, ~0,                    [](Character *ch) {return 0.8 + (0.05 * getMasteryTier(ch, Form::maj_super));}},
+                {APPLY_CVIT_BASE,     0.0, ~0,                    [](Character *ch) {return 12000000 * 1.0 + (0.15 * getMasteryTier(ch, Form::maj_super));}},
             }
         },
         {
             Form::maj_true, {
-                {APPLY_CVIT_MULT,   0.0, ~0,                    [](struct char_data *ch) {return 0.8 + (0.05 * getMasteryTier(ch, Form::maj_true));}},
-                {APPLY_CVIT_BASE,     0.0, ~0,                    [](struct char_data *ch) {return 300000000 * 1.0 + (0.2 * getMasteryTier(ch, Form::maj_true));}},
+                {APPLY_CVIT_MULT,   0.0, ~0,                    [](Character *ch) {return 0.8 + (0.05 * getMasteryTier(ch, Form::maj_true));}},
+                {APPLY_CVIT_BASE,     0.0, ~0,                    [](Character *ch) {return 300000000 * 1.0 + (0.2 * getMasteryTier(ch, Form::maj_true));}},
             }
         },
 
         // Kai Forms
         {
             Form::mystic_1, {
-                {APPLY_CVIT_MULT,   0.0, ~0,                    [](struct char_data *ch) {return 1.8 + (0.10 * getMasteryTier(ch, Form::mystic_1));}},
-                {APPLY_CVIT_BASE,     0.0, ~0,                    [](struct char_data *ch) {return 1000000 * 1.0 + (0.10 * getMasteryTier(ch, Form::mystic_1));}},
+                {APPLY_CVIT_MULT,   0.0, ~0,                    [](Character *ch) {return 1.8 + (0.10 * getMasteryTier(ch, Form::mystic_1));}},
+                {APPLY_CVIT_BASE,     0.0, ~0,                    [](Character *ch) {return 1000000 * 1.0 + (0.10 * getMasteryTier(ch, Form::mystic_1));}},
             }
         },
         {
             Form::mystic_2, {
-                {APPLY_CVIT_MULT,   0.0, ~0,                    [](struct char_data *ch) {return 2.7 + (0.15 * getMasteryTier(ch, Form::mystic_2));}},
-                {APPLY_CVIT_BASE,     0.0, ~0,                    [](struct char_data *ch) {return 100000000 * 1.0 + (0.15 * getMasteryTier(ch, Form::mystic_2));}},
+                {APPLY_CVIT_MULT,   0.0, ~0,                    [](Character *ch) {return 2.7 + (0.15 * getMasteryTier(ch, Form::mystic_2));}},
+                {APPLY_CVIT_BASE,     0.0, ~0,                    [](Character *ch) {return 100000000 * 1.0 + (0.15 * getMasteryTier(ch, Form::mystic_2));}},
             }
         },
         {
             Form::mystic_3, {
-                {APPLY_CVIT_MULT,   0.0, ~0,                    [](struct char_data *ch) {return 3.6 + (0.2 * getMasteryTier(ch, Form::mystic_3));}},
-                {APPLY_CVIT_BASE,     0.0, ~0,                    [](struct char_data *ch) {return 220000000 * 1.0 + (0.2 * getMasteryTier(ch, Form::mystic_3));}},
+                {APPLY_CVIT_MULT,   0.0, ~0,                    [](Character *ch) {return 3.6 + (0.2 * getMasteryTier(ch, Form::mystic_3));}},
+                {APPLY_CVIT_BASE,     0.0, ~0,                    [](Character *ch) {return 220000000 * 1.0 + (0.2 * getMasteryTier(ch, Form::mystic_3));}},
             }
         },
 
         {
             Form::divine_halo, {
-                {APPLY_CVIT_MULT,   0.0, ~0,                    [](struct char_data *ch) {return 3.6 + (0.2 * getMasteryTier(ch, Form::divine_halo));}},
-                {APPLY_CVIT_BASE,     0.0, ~0,                    [](struct char_data *ch) {return 220000000 * 1.0 + (0.2 * getMasteryTier(ch, Form::divine_halo));}},
-                {APPLY_SKILL,            0.0, (int) Skill::divine_halo, [](struct char_data *ch) {return 20 * getMasteryTier(ch, Form::divine_halo);}},
+                {APPLY_CVIT_MULT,   0.0, ~0,                    [](Character *ch) {return 3.6 + (0.2 * getMasteryTier(ch, Form::divine_halo));}},
+                {APPLY_CVIT_BASE,     0.0, ~0,                    [](Character *ch) {return 220000000 * 1.0 + (0.2 * getMasteryTier(ch, Form::divine_halo));}},
+                {APPLY_SKILL,            0.0, (int) Skill::divine_halo, [](Character *ch) {return 20 * getMasteryTier(ch, Form::divine_halo);}},
             }
         },
 
         // Tuffle Forms
         {
             Form::ascend_1, {
-                {APPLY_CVIT_MULT,   0.0, ~0,                    [](struct char_data *ch) {return 0.9 + (0.1 * getMasteryTier(ch, Form::ascend_1));}},
-                {APPLY_CVIT_BASE,     0.0, ~0,                    [](struct char_data *ch) {return 1200000 * 1.0 + (0.10 * getMasteryTier(ch, Form::ascend_1));}},
+                {APPLY_CVIT_MULT,   0.0, ~0,                    [](Character *ch) {return 0.9 + (0.1 * getMasteryTier(ch, Form::ascend_1));}},
+                {APPLY_CVIT_BASE,     0.0, ~0,                    [](Character *ch) {return 1200000 * 1.0 + (0.10 * getMasteryTier(ch, Form::ascend_1));}},
             }
         },
         {
             Form::ascend_2, {
-                {APPLY_CVIT_MULT,   0.0, ~0,                    [](struct char_data *ch) {return 0.8 + (0.075 * getMasteryTier(ch, Form::ascend_2));}},
-                {APPLY_CVIT_BASE,     0.0, ~0,                    [](struct char_data *ch) {return 70000000 * 1.0 + (0.15 * getMasteryTier(ch, Form::ascend_2));}},
+                {APPLY_CVIT_MULT,   0.0, ~0,                    [](Character *ch) {return 0.8 + (0.075 * getMasteryTier(ch, Form::ascend_2));}},
+                {APPLY_CVIT_BASE,     0.0, ~0,                    [](Character *ch) {return 70000000 * 1.0 + (0.15 * getMasteryTier(ch, Form::ascend_2));}},
             }
         },
         {
             Form::ascend_3, {
-                {APPLY_CVIT_MULT,   0.0, ~0,                    [](struct char_data *ch) {return 0.7 + (0.05 * getMasteryTier(ch, Form::ascend_3));}},
-                {APPLY_CVIT_BASE,     0.0, ~0,                    [](struct char_data *ch) {return 250000000 * 1.0 + (0.2 * getMasteryTier(ch, Form::ascend_3));}},
+                {APPLY_CVIT_MULT,   0.0, ~0,                    [](Character *ch) {return 0.7 + (0.05 * getMasteryTier(ch, Form::ascend_3));}},
+                {APPLY_CVIT_BASE,     0.0, ~0,                    [](Character *ch) {return 250000000 * 1.0 + (0.2 * getMasteryTier(ch, Form::ascend_3));}},
             }
         },
         // Demon Form
         {
             Form::dark_king, {
-                {APPLY_CVIT_MULT,   0.0, ~0,                    [](struct char_data *ch) {
+                {APPLY_CVIT_MULT,   0.0, ~0,                    [](Character *ch) {
                     double base;
                     auto bpl = ch->getBaseStat<int64_t>("health");
                     if(bpl < 2000000)
@@ -1127,7 +1127,7 @@ namespace trans {
 
                     return base + ((base/10.0) * getMasteryTier(ch, Form::dark_king));
                     }},
-                {APPLY_COMBAT_MULT, 0.0, static_cast<int>(ComStat::damage), [](struct char_data *ch) {
+                {APPLY_COMBAT_MULT, 0.0, static_cast<int>(ComStat::damage), [](Character *ch) {
                     double base;
                     if(ch->getCurVital(CharVital::lifeforce) > 0) {
                         auto bpl = ch->getBaseStat<int64_t>("health");
@@ -1152,7 +1152,7 @@ namespace trans {
 
                     return base + ((base/10) * getMasteryTier(ch, Form::dark_king));
                 }},
-                {APPLY_COMBAT_MULT, 0.0, static_cast<int>(ComStat::defense), [](struct char_data *ch) {
+                {APPLY_COMBAT_MULT, 0.0, static_cast<int>(ComStat::defense), [](Character *ch) {
                     double base = 0.0;
                     if(ch->getCurVital(CharVital::lifeforce) > 0) {
                         int chance = 30;
@@ -1196,56 +1196,56 @@ namespace trans {
         // LSSJ
         {
             Form::ikari, {
-                {APPLY_CVIT_MULT,   0.0, ~0,                    [](struct char_data *ch) {
+                {APPLY_CVIT_MULT,   0.0, ~0,                    [](Character *ch) {
                     return 1.0 + (0.15 * getMasteryTier(ch, Form::ikari) + 0.15 * getMasteryTier(ch, Form::oozaru));
                     }},
-                {APPLY_CVIT_BASE,        0.0, ~0,                    [](struct char_data *ch) {
+                {APPLY_CVIT_BASE,        0.0, ~0,                    [](Character *ch) {
                     return 700000 * 1.0 + (0.15 * getMasteryTier(ch, Form::ikari) + 0.15 * getMasteryTier(ch, Form::oozaru));
                     }},
-                {APPLY_COMBAT_MULT, 0.0, static_cast<int>(ComStat::parry), [](struct char_data *ch) {
+                {APPLY_COMBAT_MULT, 0.0, static_cast<int>(ComStat::parry), [](Character *ch) {
                     return -0.3 - (0.04 * getMasteryTier(ch, Form::ikari) + 0.04 * getMasteryTier(ch, Form::oozaru));
                     }},
-                {APPLY_COMBAT_MULT, 0.0, static_cast<int>(ComStat::dodge), [](struct char_data *ch) {
+                {APPLY_COMBAT_MULT, 0.0, static_cast<int>(ComStat::dodge), [](Character *ch) {
                     return -0.3 - (0.04 * getMasteryTier(ch, Form::ikari) + 0.04 * getMasteryTier(ch, Form::oozaru));
                     }},
-                {APPLY_CATTR_BASE, 0.0, ~0, [](struct char_data *ch) {
+                {APPLY_CATTR_BASE, 0.0, ~0, [](Character *ch) {
                     return 2 * 1.0 + (0.15 * getMasteryTier(ch, Form::ikari) + 0.15 * getMasteryTier(ch, Form::oozaru));
                     }},
-                {APPLY_COMBAT_MULT, 0.0, static_cast<int>(ComStat::damage), [](struct char_data *ch) {
+                {APPLY_COMBAT_MULT, 0.0, static_cast<int>(ComStat::damage), [](Character *ch) {
                     return 0.1 * 1.0 + (0.15 * getMasteryTier(ch, Form::ikari) + 0.15 * getMasteryTier(ch, Form::oozaru));
                     }},
-                {APPLY_CVIT_REGEN_MULT, 0.0, static_cast<int>(CharVital::ki), [](struct char_data *ch) {
+                {APPLY_CVIT_REGEN_MULT, 0.0, static_cast<int>(CharVital::ki), [](Character *ch) {
                     return 0.02 * 1.0 + (0.15 * getMasteryTier(ch, Form::ikari) + 0.15 * getMasteryTier(ch, Form::oozaru));
                     }},
             }
         },
         {
             Form::legendary_saiyan, {
-                {APPLY_CVIT_MULT,   0.0, ~0,                    [](struct char_data *ch) {
+                {APPLY_CVIT_MULT,   0.0, ~0,                    [](Character *ch) {
                     return 4.0 + (0.1 * getMasteryTier(ch, Form::legendary_saiyan));
                     }},
-                {APPLY_CVIT_BASE,        0.0, ~0,                    [](struct char_data *ch) {
+                {APPLY_CVIT_BASE,        0.0, ~0,                    [](Character *ch) {
                     return 100000000 * 1.0 + (0.15 * getMasteryTier(ch, Form::legendary_saiyan));
                     }},
-                {APPLY_CVIT_REGEN_MULT, 0.0, static_cast<int>(CharVital::ki),         [](struct char_data *ch) {
+                {APPLY_CVIT_REGEN_MULT, 0.0, static_cast<int>(CharVital::ki),         [](Character *ch) {
                     return 1 * 1.0 + (0.15 * getMasteryTier(ch, Form::legendary_saiyan));
                     }},
-                {APPLY_COMBAT_MULT, 0.0, static_cast<int>(ComStat::parry), [](struct char_data *ch) {
+                {APPLY_COMBAT_MULT, 0.0, static_cast<int>(ComStat::parry), [](Character *ch) {
                     return -0.4 - (0.8 * getMasteryTier(ch, Form::legendary_saiyan));
                     }},
-                {APPLY_COMBAT_MULT, 0.0, static_cast<int>(ComStat::dodge), [](struct char_data *ch) {
+                {APPLY_COMBAT_MULT, 0.0, static_cast<int>(ComStat::dodge), [](Character *ch) {
                     return -0.4 - (0.8 * getMasteryTier(ch, Form::legendary_saiyan));
                     }},
-                {APPLY_COMBAT_MULT, 0.0, static_cast<int>(ComStat::block), [](struct char_data *ch) {
+                {APPLY_COMBAT_MULT, 0.0, static_cast<int>(ComStat::block), [](Character *ch) {
                     return 0.2 + (0.1 * getMasteryTier(ch, Form::legendary_saiyan));
                     }},
-                {APPLY_CATTR_BASE, 0.0, ~0, [](struct char_data *ch) {
+                {APPLY_CATTR_BASE, 0.0, ~0, [](Character *ch) {
                     return 5 * 1.0 + (0.15 * getMasteryTier(ch, Form::legendary_saiyan));
                     }},
-                {APPLY_COMBAT_MULT, 0.0, static_cast<int>(ComStat::damage), [](struct char_data *ch) {
+                {APPLY_COMBAT_MULT, 0.0, static_cast<int>(ComStat::damage), [](Character *ch) {
                     return 0.3 * 1.0 + (0.15 * getMasteryTier(ch, Form::legendary_saiyan));
                     }},
-                {APPLY_CVIT_REGEN_MULT, 0.0, static_cast<int>(CharVital::ki), [](struct char_data *ch) {
+                {APPLY_CVIT_REGEN_MULT, 0.0, static_cast<int>(CharVital::ki), [](Character *ch) {
                     return 0.1 * 1.0 + (0.15 * getMasteryTier(ch, Form::legendary_saiyan));
                     }},
             }
@@ -1254,39 +1254,39 @@ namespace trans {
         // Lycan
         {
             Form::lesser_lycanthrope, {
-                {APPLY_CVIT_MULT,   0.0, ~0,                    [](struct char_data *ch) {return 0.5 + (0.1 * getMasteryTier(ch, Form::lesser_lycanthrope));}},
-                {APPLY_DTYPE_BON,   0.0, static_cast<int>(DamType::physical),            [](struct char_data *ch) {return 0.2 * 1.0 + (0.10 * getMasteryTier(ch, Form::lesser_lycanthrope));}},
-                {APPLY_COMBAT_MULT,      0.0, static_cast<int>(ComStat::parry),                    [](struct char_data *ch) {return 0.2 * 1.0 + (0.10 * getMasteryTier(ch, Form::lesser_lycanthrope));}},
-                {APPLY_CVIT_REGEN_MULT, 0.0, static_cast<int>(CharVital::health), [](struct char_data *ch) {return 0.1 * 1.0 + (0.10 * getMasteryTier(ch, Form::lesser_lycanthrope));}},
-                {APPLY_DTYPE_RES, 0.0, static_cast<int>(DamType::physical), [](struct char_data *ch) {return 0.3 * 1.0 + (0.10 * getMasteryTier(ch, Form::lesser_lycanthrope));}},
-                {APPLY_DTYPE_RES, 0.0, static_cast<int>(DamType::physical), [](struct char_data *ch) {return 0.2 * 1.0 + (0.10 * getMasteryTier(ch, Form::lesser_lycanthrope));}},
+                {APPLY_CVIT_MULT,   0.0, ~0,                    [](Character *ch) {return 0.5 + (0.1 * getMasteryTier(ch, Form::lesser_lycanthrope));}},
+                {APPLY_DTYPE_BON,   0.0, static_cast<int>(DamType::physical),            [](Character *ch) {return 0.2 * 1.0 + (0.10 * getMasteryTier(ch, Form::lesser_lycanthrope));}},
+                {APPLY_COMBAT_MULT,      0.0, static_cast<int>(ComStat::parry),                    [](Character *ch) {return 0.2 * 1.0 + (0.10 * getMasteryTier(ch, Form::lesser_lycanthrope));}},
+                {APPLY_CVIT_REGEN_MULT, 0.0, static_cast<int>(CharVital::health), [](Character *ch) {return 0.1 * 1.0 + (0.10 * getMasteryTier(ch, Form::lesser_lycanthrope));}},
+                {APPLY_DTYPE_RES, 0.0, static_cast<int>(DamType::physical), [](Character *ch) {return 0.3 * 1.0 + (0.10 * getMasteryTier(ch, Form::lesser_lycanthrope));}},
+                {APPLY_DTYPE_RES, 0.0, static_cast<int>(DamType::physical), [](Character *ch) {return 0.2 * 1.0 + (0.10 * getMasteryTier(ch, Form::lesser_lycanthrope));}},
             }
         },
         {
             Form::lycanthrope, {
-                {APPLY_CVIT_MULT,   0.0, ~0,                    [](struct char_data *ch) {return 1.0 + (0.1 * getMasteryTier(ch, Form::lycanthrope));}},
-                {APPLY_DTYPE_BON,   0.0, static_cast<int>(DamType::physical),            [](struct char_data *ch) {return 0.4 * 1.0 + (0.10 * getMasteryTier(ch, Form::lycanthrope));}},
-                {APPLY_COMBAT_MULT,      0.0, static_cast<int>(ComStat::parry),                    [](struct char_data *ch) {return 0.3 * 1.0 + (0.10 * getMasteryTier(ch, Form::lycanthrope));}},
-                {APPLY_CVIT_REGEN_MULT, 0.0, static_cast<int>(CharVital::health), [](struct char_data *ch) {return 0.2 * 1.0 + (0.10 * getMasteryTier(ch, Form::lycanthrope));}},
-                {APPLY_DTYPE_RES, 0.0, static_cast<int>(DamType::physical), [](struct char_data *ch) {return 0.5 * 1.0 + (0.10 * getMasteryTier(ch, Form::lycanthrope));}},
-                {APPLY_DTYPE_RES, 0.0, static_cast<int>(DamType::physical), [](struct char_data *ch) {return 0.25 * 1.0 + (0.10 * getMasteryTier(ch, Form::lycanthrope));}},
+                {APPLY_CVIT_MULT,   0.0, ~0,                    [](Character *ch) {return 1.0 + (0.1 * getMasteryTier(ch, Form::lycanthrope));}},
+                {APPLY_DTYPE_BON,   0.0, static_cast<int>(DamType::physical),            [](Character *ch) {return 0.4 * 1.0 + (0.10 * getMasteryTier(ch, Form::lycanthrope));}},
+                {APPLY_COMBAT_MULT,      0.0, static_cast<int>(ComStat::parry),                    [](Character *ch) {return 0.3 * 1.0 + (0.10 * getMasteryTier(ch, Form::lycanthrope));}},
+                {APPLY_CVIT_REGEN_MULT, 0.0, static_cast<int>(CharVital::health), [](Character *ch) {return 0.2 * 1.0 + (0.10 * getMasteryTier(ch, Form::lycanthrope));}},
+                {APPLY_DTYPE_RES, 0.0, static_cast<int>(DamType::physical), [](Character *ch) {return 0.5 * 1.0 + (0.10 * getMasteryTier(ch, Form::lycanthrope));}},
+                {APPLY_DTYPE_RES, 0.0, static_cast<int>(DamType::physical), [](Character *ch) {return 0.25 * 1.0 + (0.10 * getMasteryTier(ch, Form::lycanthrope));}},
             }
         },
         {
             Form::alpha_lycanthrope, {
-                {APPLY_CVIT_MULT,   0.0, ~0,                    [](struct char_data *ch) {return 1.4 + (0.1 * getMasteryTier(ch, Form::alpha_lycanthrope));}},
-                {APPLY_DTYPE_BON,   0.0, static_cast<int>(DamType::physical),            [](struct char_data *ch) {return 0.7 * 1.0 + (0.10 * getMasteryTier(ch, Form::alpha_lycanthrope));}},
-                {APPLY_COMBAT_MULT,      0.0, static_cast<int>(ComStat::parry),                    [](struct char_data *ch) {return 0.4 * 1.0 + (0.10 * getMasteryTier(ch, Form::alpha_lycanthrope));}},
-                {APPLY_CVIT_REGEN_MULT, 0.0, static_cast<int>(CharVital::health), [](struct char_data *ch) {return 0.4 * 1.0 + (0.10 * getMasteryTier(ch, Form::alpha_lycanthrope));}},
-                {APPLY_DTYPE_RES, 0.0, static_cast<int>(DamType::physical), [](struct char_data *ch) {return 0.8 * 1.0 + (0.10 * getMasteryTier(ch, Form::alpha_lycanthrope));}},
-                {APPLY_DTYPE_RES, 0.0, static_cast<int>(DamType::ki), [](struct char_data *ch) {return 0.4 * 1.0 + (0.10 * getMasteryTier(ch, Form::alpha_lycanthrope));}},
+                {APPLY_CVIT_MULT,   0.0, ~0,                    [](Character *ch) {return 1.4 + (0.1 * getMasteryTier(ch, Form::alpha_lycanthrope));}},
+                {APPLY_DTYPE_BON,   0.0, static_cast<int>(DamType::physical),            [](Character *ch) {return 0.7 * 1.0 + (0.10 * getMasteryTier(ch, Form::alpha_lycanthrope));}},
+                {APPLY_COMBAT_MULT,      0.0, static_cast<int>(ComStat::parry),                    [](Character *ch) {return 0.4 * 1.0 + (0.10 * getMasteryTier(ch, Form::alpha_lycanthrope));}},
+                {APPLY_CVIT_REGEN_MULT, 0.0, static_cast<int>(CharVital::health), [](Character *ch) {return 0.4 * 1.0 + (0.10 * getMasteryTier(ch, Form::alpha_lycanthrope));}},
+                {APPLY_DTYPE_RES, 0.0, static_cast<int>(DamType::physical), [](Character *ch) {return 0.8 * 1.0 + (0.10 * getMasteryTier(ch, Form::alpha_lycanthrope));}},
+                {APPLY_DTYPE_RES, 0.0, static_cast<int>(DamType::ki), [](Character *ch) {return 0.4 * 1.0 + (0.10 * getMasteryTier(ch, Form::alpha_lycanthrope));}},
             }
         },
 
         // Unbound Forms
         {
             Form::potential_unleashed, {
-                {APPLY_CVIT_MULT,   0.0, ~0,                    [](struct char_data *ch) {
+                {APPLY_CVIT_MULT,   0.0, ~0,                    [](Character *ch) {
                     auto cl = ch->getBaseStat("lifetimeGrowth");
                     if(cl < 50) return 1.0 + (0.1 * getMasteryTier(ch, Form::potential_unleashed));
                     if(cl < 100) return 2.0 + (0.1 * getMasteryTier(ch, Form::potential_unleashed));
@@ -1300,13 +1300,13 @@ namespace trans {
         },
         {
             Form::evil_aura, {
-                {APPLY_CVIT_MULT,   0.0, ~0,                    [](struct char_data *ch) { return 2.0 + (0.2 * getMasteryTier(ch, Form::evil_aura));}},
-                {APPLY_CVIT_MULT,     0.0, static_cast<int>(CharVital::health), [](struct char_data *ch) {
+                {APPLY_CVIT_MULT,   0.0, ~0,                    [](Character *ch) { return 2.0 + (0.2 * getMasteryTier(ch, Form::evil_aura));}},
+                {APPLY_CVIT_MULT,     0.0, static_cast<int>(CharVital::health), [](Character *ch) {
 	                double healthBoost = ch->getCurVitalDam(CharVital::health) * 5.0;
 	                return healthBoost + (0.2 * getMasteryTier(ch, Form::evil_aura));
                 }},
-                {APPLY_CVIT_BASE,        0.0, ~0,                        [](struct char_data *ch) { return 1300000 * 1.0 + (0.2 * getMasteryTier(ch, Form::evil_aura));}},
-                {APPLY_COMBAT_MULT, 0.0, static_cast<int>(ComStat::damage), [](struct char_data *ch) {
+                {APPLY_CVIT_BASE,        0.0, ~0,                        [](Character *ch) { return 1300000 * 1.0 + (0.2 * getMasteryTier(ch, Form::evil_aura));}},
+                {APPLY_COMBAT_MULT, 0.0, static_cast<int>(ComStat::damage), [](Character *ch) {
                     double healthBoost = 0.1;
                     auto chealth = 1.0 - ch->getCurVitalDam(CharVital::health);
                     if(chealth < 0.75) {
@@ -1325,36 +1325,36 @@ namespace trans {
         },
         {
             Form::ultra_instinct, {
-                {APPLY_COMBAT_MULT,    0.0, static_cast<int>(ComStat::accuracy),                    [](struct char_data *ch) {return 1 + (0.1 * getMasteryTier(ch, Form::ultra_instinct));}},
-                {APPLY_CVIT_MULT,     0.0, static_cast<int>(CharVital::ki),         [](struct char_data *ch) {return 2 + (0.4 * getMasteryTier(ch, Form::ultra_instinct));}},
-                {APPLY_COMBAT_MULT,      0.0, static_cast<int>(ComStat::damage),                        [](struct char_data *ch) {return -0.7 + (0.2 * getMasteryTier(ch, Form::ultra_instinct));}},
-                {APPLY_COMBAT_MULT, 0.0, static_cast<int>(ComStat::perfect_dodge), [](struct char_data *ch) {return -0.4 - (0.05 * getMasteryTier(ch, Form::ultra_instinct));}},
-                {APPLY_SKILL, 0.0, (int) Skill::instinctual_combat, [](struct char_data *ch) {return 20 * getMasteryTier(ch, Form::ultra_instinct);}},
+                {APPLY_COMBAT_MULT,    0.0, static_cast<int>(ComStat::accuracy),                    [](Character *ch) {return 1 + (0.1 * getMasteryTier(ch, Form::ultra_instinct));}},
+                {APPLY_CVIT_MULT,     0.0, static_cast<int>(CharVital::ki),         [](Character *ch) {return 2 + (0.4 * getMasteryTier(ch, Form::ultra_instinct));}},
+                {APPLY_COMBAT_MULT,      0.0, static_cast<int>(ComStat::damage),                        [](Character *ch) {return -0.7 + (0.2 * getMasteryTier(ch, Form::ultra_instinct));}},
+                {APPLY_COMBAT_MULT, 0.0, static_cast<int>(ComStat::perfect_dodge), [](Character *ch) {return -0.4 - (0.05 * getMasteryTier(ch, Form::ultra_instinct));}},
+                {APPLY_SKILL, 0.0, (int) Skill::instinctual_combat, [](Character *ch) {return 20 * getMasteryTier(ch, Form::ultra_instinct);}},
             }
         },
 
         {
             Form::potential_unlocked, {
-                {APPLY_CVIT_MULT,   0.0, ~0,                    [](struct char_data *ch) {return 0.4 + (0.05 * getMasteryTier(ch, Form::potential_unlocked));}},
+                {APPLY_CVIT_MULT,   0.0, ~0,                    [](Character *ch) {return 0.4 + (0.05 * getMasteryTier(ch, Form::potential_unlocked));}},
                 {APPLY_CATTR_BASE,    2,   ~0},
             }
         },
         {
             Form::potential_unlocked_max, {
-                {APPLY_CVIT_MULT,   0.0, ~0,                    [](struct char_data *ch) {return 0.4 + (0.05 * getMasteryTier(ch, Form::potential_unlocked_max));}},
+                {APPLY_CVIT_MULT,   0.0, ~0,                    [](Character *ch) {return 0.4 + (0.05 * getMasteryTier(ch, Form::potential_unlocked_max));}},
                 {APPLY_CATTR_BASE,    4,   ~0},
             }
         },
         {
             Form::majinized, {
-                {APPLY_CVIT_MULT,   0.0, ~0,                    [](struct char_data *ch) {return 0.6 + (0.02 * getMasteryTier(ch, Form::majinized));}},
-                {APPLY_CVIT_BASE,     0.0, ~0,                    [](struct char_data *ch) {return 50000 * 1.0 + (0.1 * getMasteryTier(ch, Form::majinized));}},
+                {APPLY_CVIT_MULT,   0.0, ~0,                    [](Character *ch) {return 0.6 + (0.02 * getMasteryTier(ch, Form::majinized));}},
+                {APPLY_CVIT_BASE,     0.0, ~0,                    [](Character *ch) {return 50000 * 1.0 + (0.1 * getMasteryTier(ch, Form::majinized));}},
             }
         },
         {
             Form::divine_water, {
-                {APPLY_CVIT_MULT,   0.0, ~0,                    [](struct char_data *ch) {return 0.2 + (0.05 * getMasteryTier(ch, Form::divine_water));}},
-                {APPLY_CVIT_BASE,     0.0, ~0,                    [](struct char_data *ch) {return 15000 * 1.0 + (0.1 * getMasteryTier(ch, Form::divine_water));}},
+                {APPLY_CVIT_MULT,   0.0, ~0,                    [](Character *ch) {return 0.2 + (0.05 * getMasteryTier(ch, Form::divine_water));}},
+                {APPLY_CVIT_BASE,     0.0, ~0,                    [](Character *ch) {return 15000 * 1.0 + (0.1 * getMasteryTier(ch, Form::divine_water));}},
                 {APPLY_CATTR_BASE,       2,   ~0},
             }
         },
@@ -1363,8 +1363,8 @@ namespace trans {
         // Techniques
         {
             Form::kaioken, {
-                {APPLY_CVIT_MULT,   0.0, static_cast<int>(CharVital::health), [](struct char_data *ch) {return 0.1 * (ch->transforms[Form::kaioken].grade);}},
-                {APPLY_COMBAT_MULT,     0.0, static_cast<int>(ComStat::damage),            [](struct char_data *ch) {
+                {APPLY_CVIT_MULT,   0.0, static_cast<int>(CharVital::health), [](Character *ch) {return 0.1 * (ch->transforms[Form::kaioken].grade);}},
+                {APPLY_COMBAT_MULT,     0.0, static_cast<int>(ComStat::damage),            [](Character *ch) {
                     double mult = (1 + (0.05 * getMasteryTier(ch, Form::kaioken)));
                     if (axion_dice(0) <= (GET_SKILL(ch, (int)Skill::kaioken) * mult)) {
                                                 ch->sendText("You push yourself to the limit as you attack!.\r\n");
@@ -1373,14 +1373,14 @@ namespace trans {
                         return (0.06 * ch->transforms[Form::kaioken].grade) * mult;
                     }
                     return 0.03 * (ch->transforms[Form::kaioken].grade);}},
-                {APPLY_CVIT_REGEN_MULT, 0.0, static_cast<int>(CharVital::health), [](struct char_data *ch) {return -0.05 * (ch->transforms[Form::kaioken].grade) + (0.01 * getMasteryTier(ch, Form::kaioken));}},
-                {APPLY_CVIT_REGEN_MULT, 0.0, static_cast<int>(CharVital::ki),         [](struct char_data *ch) {return -0.05 * (ch->transforms[Form::kaioken].grade) + (0.01 * getMasteryTier(ch, Form::kaioken));}},
+                {APPLY_CVIT_REGEN_MULT, 0.0, static_cast<int>(CharVital::health), [](Character *ch) {return -0.05 * (ch->transforms[Form::kaioken].grade) + (0.01 * getMasteryTier(ch, Form::kaioken));}},
+                {APPLY_CVIT_REGEN_MULT, 0.0, static_cast<int>(CharVital::ki),         [](Character *ch) {return -0.05 * (ch->transforms[Form::kaioken].grade) + (0.01 * getMasteryTier(ch, Form::kaioken));}},
             }
         },
         {
             Form::dark_metamorphosis, {
-                {APPLY_CVIT_MULT,   0.0, static_cast<int>(CharVital::health), [](struct char_data *ch) {return 0.6 * (ch->transforms[Form::dark_metamorphosis].grade) + (0.05 * getMasteryTier(ch, Form::dark_metamorphosis));}},
-                {APPLY_DTYPE_BON,   0.0, static_cast<int>(DamType::ki),                    [](struct char_data *ch) {
+                {APPLY_CVIT_MULT,   0.0, static_cast<int>(CharVital::health), [](Character *ch) {return 0.6 * (ch->transforms[Form::dark_metamorphosis].grade) + (0.05 * getMasteryTier(ch, Form::dark_metamorphosis));}},
+                {APPLY_DTYPE_BON,   0.0, static_cast<int>(DamType::ki),                    [](Character *ch) {
                     double mult = (1 + (0.05 * getMasteryTier(ch, Form::dark_metamorphosis)));
 
                     if (axion_dice(0) <= (GET_SKILL(ch, (int)Skill::dark_metamorphosis) * mult)) {
@@ -1396,7 +1396,7 @@ namespace trans {
 
         {
             Form::tiger_stance, {
-                {APPLY_DTYPE_BON, 0.0, static_cast<int>(DamType::physical), [](struct char_data *ch) {
+                {APPLY_DTYPE_BON, 0.0, static_cast<int>(DamType::physical), [](Character *ch) {
                     double mult = (1 + (0.05 * getMasteryTier(ch, Form::tiger_stance)));
 
                     if (axion_dice(0) <= (GET_SKILL(ch, (int)Skill::tiger_stance) * mult)) {
@@ -1411,7 +1411,7 @@ namespace trans {
         },
         {
             Form::eagle_stance, {
-                {APPLY_DTYPE_BON, 0.0, static_cast<int>(DamType::physical), [](struct char_data *ch) {
+                {APPLY_DTYPE_BON, 0.0, static_cast<int>(DamType::physical), [](Character *ch) {
                     double mult = (1 + (0.05 * getMasteryTier(ch, Form::eagle_stance)));
 
                     if (axion_dice(0) <= (GET_SKILL(ch, (int)Skill::eagle_stance) * mult)) {
@@ -1426,7 +1426,7 @@ namespace trans {
         },
         {
             Form::ox_stance, {
-                {APPLY_DTYPE_RES, 0.0, static_cast<int>(DamType::physical), [](struct char_data *ch) {
+                {APPLY_DTYPE_RES, 0.0, static_cast<int>(DamType::physical), [](Character *ch) {
                     double mult = (1 + (0.05 * getMasteryTier(ch, Form::ox_stance)));
 
                     if (axion_dice(0) <= (GET_SKILL(ch, (int)Skill::ox_stance) * mult)) {
@@ -1441,9 +1441,9 @@ namespace trans {
         },
         {
             Form::spirit_absorption, {
-                {APPLY_COMBAT_BASE, 0.0, static_cast<int>(ComStat::armor), [](struct char_data *ch) {
+                {APPLY_COMBAT_BASE, 0.0, static_cast<int>(ComStat::armor), [](Character *ch) {
                     return sqrt(ch->transforms[Form::spirit_absorption].vars["energy"]) * 10;}},
-                {APPLY_CVIT_BASE,        0.0, ~0,                    [](struct char_data *ch) {
+                {APPLY_CVIT_BASE,        0.0, ~0,                    [](Character *ch) {
                     return (ch->transforms[Form::spirit_absorption].vars["energy"] / 5) * 1 + (0.1 * ch->transforms[Form::spirit_absorption].grade);}},
             }
         },
@@ -1472,7 +1472,7 @@ namespace trans {
         }
     };
 
-    static double getModifierHelper(char_data* ch, Form form, int location, int specific) {
+    static double getModifierHelper(Character* ch, Form form, int location, int specific) {
         if (form == Form::base) return 0.0;
         double out = 0.0;
         if (auto found = trans_affects.find(form); found != trans_affects.end()) {
@@ -1489,7 +1489,7 @@ namespace trans {
         return out;
     }
 
-    double getModifier(char_data *ch, int location, int specific) {
+    double getModifier(Character *ch, int location, int specific) {
         double modifier = 0;
         if(!ch->permForms.empty()) {
             for(auto form : ch->permForms) {
@@ -1592,7 +1592,7 @@ namespace trans {
         {Form::spirit_absorption, .15},
     };
 
-    double getStaminaDrain(char_data* ch, Form form, bool upkeep) {
+    double getStaminaDrain(Character* ch, Form form, bool upkeep) {
         if (ch->form == Form::base) return 0.0;
 
         double drain = 0.0;
@@ -2057,7 +2057,7 @@ namespace trans {
 
     };
 
-    void handleEchoTransform(struct char_data* ch, Form form) {
+    void handleEchoTransform(Character* ch, Form form) {
         if (auto found = trans_echoes.find(form); found != trans_echoes.end()) {
             auto& echo = found->second;
             act(echo.self.c_str(), true, ch, nullptr, nullptr, TO_CHAR);
@@ -2073,7 +2073,7 @@ namespace trans {
         }
     }
 
-    void handleEchoRevert(struct char_data* ch, Form form) {
+    void handleEchoRevert(Character* ch, Form form) {
         if (form == Form::base) return;
 
         auto name = getName(ch, form);
@@ -2204,7 +2204,7 @@ namespace trans {
     };
 
 
-    std::optional<Form> findForm(char_data* ch, const std::string& form) {
+    std::optional<Form> findForm(Character* ch, const std::string& form) {
         for (auto formFound : forms) {
             if (form == getAbbr(ch, formFound)) {
                 return formFound;
@@ -2216,7 +2216,7 @@ namespace trans {
         return {};
     }
 
-    void initTransforms(char_data* ch) {
+    void initTransforms(Character* ch) {
         auto transforms = ch->transforms;
 
         for (auto unlockForms : trans_unlocks) {
@@ -2227,7 +2227,7 @@ namespace trans {
         }
     }
 
-    bool requirementsMet(char_data* ch, Form form) {
+    bool requirementsMet(Character* ch, Form form) {
         if(trans_requirements.contains(form)) {
             auto formReq = trans_requirements.find(form);
             return formReq->second(ch);
@@ -2236,7 +2236,7 @@ namespace trans {
         return true;
     }
 
-    void removeExclusives(char_data* ch, Form form) {
+    void removeExclusives(Character* ch, Form form) {
         if(!transform_exclusive.contains(form) || !ch->transforms[form].unlocked)
             return;
 
@@ -2248,7 +2248,7 @@ namespace trans {
         }
     }
 
-    std::unordered_set<Form> getFormsFor(char_data* ch) {
+    std::unordered_set<Form> getFormsFor(Character* ch) {
         initTransforms(ch);
         auto forms = ch->transforms;
         std::unordered_set<Form> pforms;
@@ -2263,7 +2263,7 @@ namespace trans {
         return pforms;
     }
 
-    void displayForms(char_data* ch) {
+    void displayForms(Character* ch) {
         auto forms = getFormsFor(ch);
         if (forms.empty()) {
                         ch->sendText("You have no forms. Bummer.\r\n");
@@ -2466,21 +2466,21 @@ namespace trans {
 
     };
 
-    int64_t getRequiredPL(struct char_data* ch, Form trans) {
+    int64_t getRequiredPL(Character* ch, Form trans) {
         if (auto req = trans_pl.find(trans); req != trans_pl.end()) {
             return req->second.first;
         }
         return 0;
     }
 
-    int getFormType(struct char_data* ch, Form trans) {
+    int getFormType(Character* ch, Form trans) {
         if (auto req = trans_pl.find(trans); req != trans_pl.end()) {
             return req->second.second;
         }
         return 0;
     }
 
-    std::optional<Form> findFormFor(struct char_data* ch, const std::string& arg) {
+    std::optional<Form> findFormFor(Character* ch, const std::string& arg) {
         for (auto form: getFormsFor(ch)) {
             if (boost::iequals(arg, getAbbr(ch, form))) return form;
         }
@@ -2488,7 +2488,7 @@ namespace trans {
         return {};
     }
 
-    bool unlock(struct char_data *ch, Form form) {
+    bool unlock(Character *ch, Form form) {
         initTransforms(ch);
         auto &data = ch->transforms[form];
 
@@ -2509,9 +2509,9 @@ namespace trans {
 
     };
 
-    static std::unordered_map<Form, std::function<void(struct char_data *ch)>> trans_on_transform = {
-        {Form::spirit_absorption, [](struct char_data *ch) {
-            auto loc = ch->location.findObject([](obj_data* obj) {
+    static std::unordered_map<Form, std::function<void(Character *ch)>> trans_on_transform = {
+        {Form::spirit_absorption, [](Character *ch) {
+            auto loc = ch->location.findObject([](Object* obj) {
                 return isname("Spirit Bomb", obj->getName());
             });
             if (loc == nullptr)
@@ -2532,7 +2532,7 @@ namespace trans {
 
             return loc == nullptr ? false : true;
             }},
-        {Form::lycanthrope, [](struct char_data *ch) {
+        {Form::lycanthrope, [](Character *ch) {
             if(!ch->transforms.contains(Form::lesser_lycanthrope)) 
                 ch->addTransform(Form::lesser_lycanthrope);
             
@@ -2542,8 +2542,8 @@ namespace trans {
             }},
     };
 
-    static std::unordered_map<Form, std::function<void(struct char_data *ch, atk::Attack& outgoing)>> trans_on_attack = {
-        {Form::spirit_absorption, [](struct char_data *ch, atk::Attack& outgoing) {
+    static std::unordered_map<Form, std::function<void(Character *ch, atk::Attack& outgoing)>> trans_on_attack = {
+        {Form::spirit_absorption, [](Character *ch, atk::Attack& outgoing) {
                         ch->send_to("Spirit Force infuses your %s, cloaking it in an @Ci@cn@Cc@ca@Cn@cd@Ce@cs@Cc@ce@Cn@ct@n hue.\r\n", outgoing.getName());
             act("@W$n's @Ci@cn@Cc@ca@Cn@cd@Ce@cs@Cc@ce@Cn@ct@n aura infuses the attack with cataclysmic energy.@n",
                     true, ch, nullptr, nullptr, TO_ROOM);
@@ -2563,8 +2563,8 @@ namespace trans {
             }},
     };
 
-    static std::unordered_map<Form, std::function<void(struct char_data *ch, atk::Attack& incoming)>> trans_on_attacked = {
-        {Form::spirit_absorption, [](struct char_data *ch, atk::Attack& incoming) {
+    static std::unordered_map<Form, std::function<void(Character *ch, atk::Attack& incoming)>> trans_on_attacked = {
+        {Form::spirit_absorption, [](Character *ch, atk::Attack& incoming) {
                         ch->send_to("Your @Ci@cn@Cc@ca@Cn@cd@Ce@cs@Cc@ce@Cn@ct@n aura burns away at your opponent's %s.\r\n", incoming.getName());
             act("@W$n's @Ci@cn@Cc@ca@Cn@cd@Ce@cs@Cc@ce@Cn@ct@n aura burns away some of the incoming attack.@n",
                     true, ch, nullptr, nullptr, TO_ROOM);
@@ -2582,21 +2582,21 @@ namespace trans {
             }},
     };
 
-    void onAttack(char_data *ch, atk::Attack& outgoing, Form form) {
+    void onAttack(Character *ch, atk::Attack& outgoing, Form form) {
         if(trans_on_attack.contains(form)) {
             auto& on_trans_attk = trans_on_attack.at(form);
             on_trans_attk(ch, outgoing);
         }
     }
 
-    void onAttacked(char_data *ch, atk::Attack& incoming, Form form) {
+    void onAttacked(Character *ch, atk::Attack& incoming, Form form) {
         if(trans_on_attacked.contains(form)) {
             auto& on_trans_attkd = trans_on_attacked.at(form);
             on_trans_attkd(ch, incoming);
         }
     }
 
-    void onTransform(char_data *ch, Form form) {
+    void onTransform(Character *ch, Form form) {
         ch->removeLimitBreak();
         reveal_hiding(ch, 0);
         handleEchoTransform(ch, form);
@@ -2607,12 +2607,12 @@ namespace trans {
         }
     }
 
-    void onRevert(char_data *ch, Form form) {
+    void onRevert(Character *ch, Form form) {
         handleEchoRevert(ch, ch->form);
         ch->removeLimitBreak();
     }
 
-    void revert(char_data *ch) {
+    void revert(Character *ch) {
         int64_t beforeKi = ch->getEffectiveStat<int64_t>("ki");
         if(ch->form != Form::base) {
             onRevert(ch, ch->form);
@@ -2635,7 +2635,7 @@ namespace trans {
         }
     }
 
-    void transform(char_data *ch, Form form, int grade) {
+    void transform(Character *ch, Form form, int grade) {
         int64_t beforeKi = ch->getEffectiveStat<int64_t>("ki");
         if (grade > getMaxGrade(ch, form)) {
             grade = getMaxGrade(ch, form);
@@ -2686,7 +2686,7 @@ namespace trans {
         send_to_scouter(buf3, ch, 1, 0);
     }
 
-    std::optional<std::string> getAppearance(char_data *ch, Form form, Appearance type) {
+    std::optional<std::string> getAppearance(Character *ch, Form form, Appearance type) {
         // first we'll check for a specific override
         if(auto found = ch->transforms.find(form) ; found != ch->transforms.end()) {
             auto& data = found->second;

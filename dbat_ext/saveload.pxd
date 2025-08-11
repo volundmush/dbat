@@ -32,15 +32,15 @@ cdef extern from "dbat/saveload.h":
     void to_json(json& j, const structs.help_index_element& h)
     void from_json(const json& j, structs.help_index_element& m)
 
-    void to_json(json& j, const structs.proto_data& h)
-    void from_json(const json& j, structs.proto_data& m)
+    void to_json(json& j, const structs.ThingPrototype& h)
+    void from_json(const json& j, structs.ThingPrototype& m)
 
-    void to_json(json& j, const structs.item_proto_data& h)
-    void from_json(const json& j, structs.item_proto_data& m)
+    void to_json(json& j, const structs.ObjectPrototype& h)
+    void from_json(const json& j, structs.ObjectPrototype& m)
 
-    void to_json(json& j, const structs.npc_proto_data& h)
-    void from_json(const json& j, structs.npc_proto_data& m)
-    
+    void to_json(json& j, const structs.CharacterPrototype& h)
+    void from_json(const json& j, structs.CharacterPrototype& m)
+
     void to_json(json& j, const structs.mob_special_data& m)
     void from_json(const json& j, structs.mob_special_data& m)
 
@@ -56,8 +56,8 @@ cdef extern from "dbat/saveload.h":
     void to_json(json& j, const structs.reset_com& r)
     void from_json(const json& j, structs.reset_com& r)
 
-    void to_json(json& j, const structs.zone_data& z)
-    void from_json(const json& j, structs.zone_data& z)
+    void to_json(json& j, const structs.Zone& z)
+    void from_json(const json& j, structs.Zone& z)
 
     void to_json(json& j, const structs.affect_t& a)
     void from_json(const json& j, structs.affect_t& a)
@@ -65,11 +65,11 @@ cdef extern from "dbat/saveload.h":
     void to_json(json& j, const structs.account_data& a)
     void from_json(const json& j, structs.account_data& a)
 
-    void to_json(json& j, const structs.trig_proto_data& t)
-    void from_json(const json& j, structs.trig_proto_data& t)
+    void to_json(json& j, const structs.DgScriptPrototype& t)
+    void from_json(const json& j, structs.DgScriptPrototype& t)
 
-    void to_json(json& j, const structs.trig_data& t)
-    void from_json(const json& j, structs.trig_data& t)
+    void to_json(json& j, const structs.DgScript& t)
+    void from_json(const json& j, structs.DgScript& t)
 
     void to_json(json& j, const structs.shop_buy_data& b)
     void from_json(const json& j, structs.shop_buy_data& b)
@@ -80,17 +80,17 @@ cdef extern from "dbat/saveload.h":
     void to_json(json& j, const structs.guild_data& g)
     void from_json(const json& j, structs.guild_data& g)
 
-    void to_json(json& j, const structs.unit_data& u)
-    void from_json(const json& j, structs.unit_data& u)
+    void to_json(json& j, const structs.Entity& u)
+    void from_json(const json& j, structs.Entity& u)
 
-    void to_json(json& j, const structs.room_direction_data &e)
-    void from_json(const json& j, structs.room_direction_data &e)
+    void to_json(json& j, const structs.Destination &e)
+    void from_json(const json& j, structs.Destination &e)
 
-    void to_json(json& j, const structs.room_data& r)
-    void from_json(const json& j, structs.room_data& r)
+    void to_json(json& j, const structs.Room& r)
+    void from_json(const json& j, structs.Room& r)
 
-    void to_json(json& j, const structs.obj_data& o)
-    void from_json(const json& j, structs.obj_data& o)
+    void to_json(json& j, const structs.Object& o)
+    void from_json(const json& j, structs.Object& o)
 
     void to_json(json& j, const structs.skill_data& s)
     void from_json(const json& j, structs.skill_data& s)
@@ -104,8 +104,8 @@ cdef extern from "dbat/saveload.h":
     void to_json(json& j, const structs.affected_type& a)
     void from_json(const json& j, structs.affected_type& a)
 
-    void to_json(json& j, const structs.char_data& c)
-    void from_json(const json& j, structs.char_data& c)
+    void to_json(json& j, const structs.Character& c)
+    void from_json(const json& j, structs.Character& c)
 
     void to_json(json& j, const structs.player_data& p)
     void from_json(const json& j, structs.player_data& p)

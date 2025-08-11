@@ -213,7 +213,7 @@ void zedit_setup(struct descriptor_data *d, int room_num) {
      */
 
     auto& z = zone_table.at(OLC_ZNUM(d));
-    auto zd = OLC_ZONE(d) = new zone_data();
+    auto zd = OLC_ZONE(d) = new Zone();
     /*
      * Copy all the zone header information over.
      */
@@ -287,7 +287,7 @@ void zedit_disp_flag_menu(struct descriptor_data *d) {
 /*
  * Create a new zone.
  */
-void zedit_new_zone(struct char_data *ch, zone_vnum vzone_num, room_vnum bottom, room_vnum top) {
+void zedit_new_zone(Character *ch, zone_vnum vzone_num, room_vnum bottom, room_vnum top) {
     int result;
     const char *error;
     struct descriptor_data *dsc;

@@ -4,11 +4,11 @@
 #include "dbat/filter.h"
 #include "dbat/genolc.h"
 
-std::vector<std::weak_ptr<obj_data>> unit_data::getObjects() const {
-    std::vector<std::weak_ptr<obj_data>> out;
+std::vector<std::weak_ptr<Object>> Entity::getObjects() const {
+    std::vector<std::weak_ptr<Object>> out;
     for(const auto &uw : contents) {
         if(auto u = uw.lock()) {
-            if(auto o = std::dynamic_pointer_cast<obj_data>(u)) {
+            if(auto o = std::dynamic_pointer_cast<Object>(u)) {
                 out.push_back(o);
             }
         }
@@ -17,44 +17,44 @@ std::vector<std::weak_ptr<obj_data>> unit_data::getObjects() const {
     return out;
 }
 
-std::string unit_data::getUID(bool active) {
+std::string Entity::getUID(bool active) {
     return fmt::format("#{}:{}{}", id, generation, active ? "!" : "");
 }
 
-void unit_data::activateScripts() {
+void Entity::activateScripts() {
     for(auto &[vn, t] : scripts) {
         t->activate();
     }
 }
 
-void unit_data::deactivateScripts() {
+void Entity::deactivateScripts() {
     for(auto &[vn, t] : scripts) {
         t->deactivate();
     }
 }
 
-void unit_data::activateContents() {
+void Entity::activateContents() {
     auto con = getObjects();
     for(auto obj : filter_raw(con)) {
         obj->activate();
     }
 }
 
-void unit_data::deactivateContents() {
+void Entity::deactivateContents() {
     auto con = getObjects();
     for(auto obj : filter_raw(con)) {
         obj->deactivate();
     }
 }
 
-std::string proto_data::scriptString() const {
+std::string ThingPrototype::scriptString() const {
     std::vector<std::string> vnums;
     for(auto p : proto_script) vnums.emplace_back(std::move(std::to_string(p)));
 
     return fmt::format("@D[@wT{}@D]@n", fmt::join(vnums, ","));
 }
 
-double unit_data::getInventoryWeight() {
+double Entity::getInventoryWeight() {
     double weight = 0;
     for(auto obj : filter_raw(getObjects())) {
         weight += obj->getEffectiveStat("weight_total");
@@ -62,11 +62,11 @@ double unit_data::getInventoryWeight() {
     return weight;
 }
 
-int64_t unit_data::getInventoryCount() {
+int64_t Entity::getInventoryCount() {
     return getObjects().size();
 }
 
-struct obj_data* unit_data::findObject(const std::function<bool(struct obj_data*)> &func, bool working) {
+Object* Entity::findObject(const std::function<bool(Object*)> &func, bool working) {
     auto con = getObjects();
     for(auto obj : filter_raw(con)) {
         if(func(obj)) {
@@ -78,12 +78,12 @@ struct obj_data* unit_data::findObject(const std::function<bool(struct obj_data*
     return nullptr;
 }
 
-struct obj_data* unit_data::findObjectVnum(obj_vnum objVnum, bool working) {
+Object* Entity::findObjectVnum(obj_vnum objVnum, bool working) {
     return findObject([objVnum](auto o) {return o->getVnum() == objVnum;}, working);
 }
 
-std::unordered_set<struct obj_data*> unit_data::gatherObjects(const std::function<bool(struct obj_data*)> &func, bool working) {
-    std::unordered_set<struct obj_data*> out;
+std::unordered_set<Object*> Entity::gatherObjects(const std::function<bool(Object*)> &func, bool working) {
+    std::unordered_set<Object*> out;
     auto con = getObjects();
     for(auto obj : filter_raw(con)) {
         if(func(obj)) {
@@ -96,23 +96,23 @@ std::unordered_set<struct obj_data*> unit_data::gatherObjects(const std::functio
     return out;
 }
 
-double unit_data::getAffectModifier(uint64_t location, uint64_t specific) {
+double Entity::getAffectModifier(uint64_t location, uint64_t specific) {
     return 0.0;
 }
 
-unit_data::~unit_data() {
+Entity::~Entity() {
     extract_script(this, type);
 }
 
-std::vector<trig_vnum> unit_data::getScriptOrder() {
+std::vector<trig_vnum> Entity::getScriptOrder() {
     if(running_scripts.has_value()) {
         return *running_scripts;
     }
     return getProtoScript();
 }
 
-std::vector<std::weak_ptr<trig_data>> unit_data::getScripts() {
-    std::vector<std::weak_ptr<trig_data>> out;
+std::vector<std::weak_ptr<DgScript>> Entity::getScripts() {
+    std::vector<std::weak_ptr<DgScript>> out;
     auto proto = getScriptOrder();
     out.reserve(scripts.size() + proto.size());
     for(const auto &v : proto) {
@@ -125,39 +125,39 @@ std::vector<std::weak_ptr<trig_data>> unit_data::getScripts() {
     return out;
 }
 
-const char* unit_data::getName() const {
+const char* Entity::getName() const {
     if(auto find = strings.find("name"); find != strings.end()) {
         return find->second.c_str();
     }
     return "undefined";
 }
 
-const char* unit_data::getRoomDescription() const {
+const char* Entity::getRoomDescription() const {
     if(auto find = strings.find("room_description"); find != strings.end()) {
         return find->second.c_str();
     }
     return "undefined";
 }
 
-const char* unit_data::getLookDescription() const {
+const char* Entity::getLookDescription() const {
     if(auto find = strings.find("look_description"); find != strings.end()) {
         return find->second.c_str();
     }
     return "undefined";
 }
 
-const char* unit_data::getShortDescription() const {
+const char* Entity::getShortDescription() const {
     if(auto find = strings.find("short_description"); find != strings.end()) {
         return find->second.c_str();
     }
     return "undefined";
 }
 
-const std::vector<ExtraDescription>& unit_data::getExtraDescription() const {
+const std::vector<ExtraDescription>& Entity::getExtraDescription() const {
     return extra_descriptions;
 }
 
-std::string unit_data::scriptString() const {
+std::string Entity::scriptString() const {
     std::vector<std::string> vnums;
     auto ps = getProtoScript();
     for(auto p : ps) vnums.emplace_back(std::move(std::to_string(p)));
@@ -165,17 +165,17 @@ std::string unit_data::scriptString() const {
     return fmt::format("@D[@wT{}@D]@n", fmt::join(vnums, ","));
 }
 
-vnum unit_data::getVnum() const {
+vnum Entity::getVnum() const {
     return vn;
 }
 
-std::string_view unit_data::getString(const std::string &key) const {
+std::string_view Entity::getString(const std::string &key) const {
     if(auto it = strings.find(key); it != strings.end()) {
         return it->second;
     }
     return {};
 }
 
-void unit_data::sendText(const std::string& txt) {
+void Entity::sendText(const std::string& txt) {
     // this does nothing on unit_data...
 }

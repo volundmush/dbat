@@ -22,23 +22,23 @@ extern void perform_alias(struct descriptor_data *d, char *orig);
 
 extern void commandWaitQueue(uint64_t heartPulse, double deltaTime);
 
-void processCommand(char_data* ch, int cmd, std::string arg);
+void processCommand(Character* ch, int cmd, std::string arg);
 
 extern void topLoad(void);
 
-extern void topWrite(struct char_data *ch);
+extern void topWrite(Character *ch);
 
-extern char *rIntro(struct char_data *ch, char *arg);
+extern char *rIntro(Character *ch, char *arg);
 
-extern int special(struct char_data *ch, int cmd, char *arg);
+extern int special(Character *ch, int cmd, char *arg);
 
 void payout(int num);
 int lockRead(char *name);
-extern void fingerUser(struct char_data *ch, struct account_data *acc);
+extern void fingerUser(Character *ch, struct Account *acc);
 
 extern int readUserIndex(char *name);
 
-extern void command_interpreter(struct char_data *ch, char *argument);
+extern void command_interpreter(Character *ch, char *argument);
 
 extern int search_block(char *arg, const char **list, int exact);
 

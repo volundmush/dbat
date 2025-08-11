@@ -27,40 +27,40 @@
 #include "dbat/partial.h"
 
 /* local functions */
-static void handle_fall(struct char_data *ch);
+static void handle_fall(Character *ch);
 
-static int check_swim(struct char_data *ch);
+static int check_swim(Character *ch);
 
-static void disp_locations(struct char_data *ch, vnum areaVnum, std::unordered_set<room_vnum>& rooms);
+static void disp_locations(Character *ch, vnum areaVnum, std::unordered_set<room_vnum>& rooms);
 
-static int has_boat(struct char_data *ch);
+static int has_boat(Character *ch);
 
-static int find_door(struct char_data *ch, const char *type, char *dir, const char *cmdname);
+static int find_door(Character *ch, const char *type, char *dir, const char *cmdname);
 
-static int has_key(struct char_data *ch, obj_vnum key);
+static int has_key(Character *ch, obj_vnum key);
 
-static void do_doorcmd(struct char_data *ch, struct obj_data *obj, int door, int scmd);
+static void do_doorcmd(Character *ch, Object *obj, int door, int scmd);
 
-static int ok_pick(struct char_data *ch, obj_vnum keynum, int pickproof, int dclock, int scmd, struct obj_data *obj);
+static int ok_pick(Character *ch, obj_vnum keynum, int pickproof, int dclock, int scmd, Object *obj);
 
-static int has_flight(struct char_data *ch);
+static int has_flight(Character *ch);
 
-static int do_simple_enter(struct char_data *ch, struct obj_data *obj, int need_specials_check);
+static int do_simple_enter(Character *ch, Object *obj, int need_specials_check);
 
-static int perform_enter_obj(struct char_data *ch, struct obj_data *obj, int need_specials_check);
+static int perform_enter_obj(Character *ch, Object *obj, int need_specials_check);
 
-static int do_simple_leave(struct char_data *ch, struct obj_data *obj, int need_specials_check);
+static int do_simple_leave(Character *ch, Object *obj, int need_specials_check);
 
-static int perform_leave_obj(struct char_data *ch, struct obj_data *obj, int need_specials_check);
+static int perform_leave_obj(Character *ch, Object *obj, int need_specials_check);
 
-static int64_t calcNeedMovementGravity(struct char_data *ch) {
+static int64_t calcNeedMovementGravity(Character *ch) {
     if(IS_NPC(ch)) return 0.0;
     auto gravity = ch->currentGravity();
     return (gravity * gravity) * ch->getBaseStat("burden_ratio");
 }
 
 /* This handles teleporting players with instant transmission or skills like it. */
-void handle_teleport(struct char_data *ch, struct char_data *tar, int location) {
+void handle_teleport(Character *ch, Character *tar, int location) {
     int success = false;
 
     if (location != 0) { /* Teleport to a particular room */
@@ -130,7 +130,7 @@ ACMD(do_carry) {
     if (IS_NPC(ch))
         return;
 
-    struct char_data *vict = nullptr;
+    Character *vict = nullptr;
     char arg[MAX_INPUT_LENGTH];
 
     if (DRAGGING(ch)) {
@@ -192,7 +192,7 @@ ACMD(do_carry) {
     act("@WYou pick up @C$N@W and put $M over your shoulder.@n", true, ch, nullptr, vict, TO_CHAR);
     act("@C$n@W picks up $c$N@W and puts $M over $s shoulder.@n", true, ch, nullptr, vict, TO_NOTVICT);
     if (SITS(vict)) {
-        struct obj_data *chair = SITS(vict);
+        Object *chair = SITS(vict);
         chair->sitting.reset();
         vict->sits.reset();
     }
@@ -202,10 +202,10 @@ ACMD(do_carry) {
 }
 
 /* Handles dropping someone you are carrying. */
-void carry_drop(struct char_data *ch, int type) {
+void carry_drop(Character *ch, int type) {
 
 
-    struct char_data *vict = nullptr;
+    Character *vict = nullptr;
 
     vict = CARRYING(ch);
 
@@ -300,8 +300,8 @@ ACMD(do_land) {
 
 
 /* simple function to determine if char can walk on water */
-static int has_boat(struct char_data *ch) {
-    struct obj_data *obj;
+static int has_boat(Character *ch) {
+    Object *obj;
     int i;
 
     if (ADM_FLAGGED(ch, ADM_WALKANYWHERE) || GET_ADMLEVEL(ch) > 4)
@@ -318,7 +318,7 @@ static int has_boat(struct char_data *ch) {
 }
 
 /* simple function to determine if char can fly */
-static int has_flight(struct char_data *ch) {
+static int has_flight(Character *ch) {
     if (ADM_FLAGGED(ch, ADM_WALKANYWHERE))
         return 1;
 
@@ -345,7 +345,7 @@ static int has_flight(struct char_data *ch) {
 }
 
 /* simple function to determine if char can breathe non-o2 */
-int has_o2(struct char_data *ch) {
+int has_o2(Character *ch) {
     if (ADM_FLAGGED(ch, ADM_WALKANYWHERE))
         return (1);
 
@@ -367,12 +367,12 @@ int has_o2(struct char_data *ch) {
  *   0 : If fail
  */
 
-int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
+int do_simple_move(Character *ch, int dir, int need_specials_check) {
     char throwaway[MAX_INPUT_LENGTH] = ""; /* Functions assume writable. */
     char buf2[MAX_STRING_LENGTH];
     char buf3[MAX_STRING_LENGTH];
     int need_movement;
-    struct room_data *rm;
+    Room *rm;
 
     /*
    * Check for special routines (North is 1 in command list, but 0 here) Note
@@ -727,7 +727,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
     return (1);
 }
 
-int perform_move(struct char_data *ch, int dir, int need_specials_check) {
+int perform_move(Character *ch, int dir, int need_specials_check) {
     room_rnum was_in;
     struct follow_type *k, *next;
 
@@ -871,7 +871,7 @@ ACMD(do_move) {
    * by other functions which do not require the remapping.
    */
     if (PLR_FLAGGED(ch, PLR_PILOTING)) {
-        struct obj_data *vehicle = nullptr, *controls = nullptr;
+        Object *vehicle = nullptr, *controls = nullptr;
         int noship = false;
         if (!(controls = find_control(ch)) && GET_ADMLEVEL(ch) < 1) {
             noship = true;
@@ -1043,7 +1043,7 @@ ACMD(do_move) {
             act("@wYou crawl on your hands and knees.@n", true, ch, nullptr, nullptr, TO_CHAR);
             act("@C$n@w crawls on $s hands and knees.@n", true, ch, nullptr, nullptr, TO_ROOM);
             if (SITS(ch)) {
-                struct obj_data *chair = SITS(ch);
+                Object *chair = SITS(ch);
                 chair->sitting.reset();
                 ch->sits.reset();
             }
@@ -1052,7 +1052,7 @@ ACMD(do_move) {
             act("@wYou shuffle on your hands and knees.@n", true, ch, nullptr, nullptr, TO_CHAR);
             act("@C$n@w shuffles on $s hands and knees.@n", true, ch, nullptr, nullptr, TO_ROOM);
             if (SITS(ch)) {
-                struct obj_data *chair = SITS(ch);
+                Object *chair = SITS(ch);
                 chair->sitting.reset();
                 ch->sits.reset();
             }
@@ -1065,7 +1065,7 @@ ACMD(do_move) {
     perform_move(ch, subcmd - 1, 0);
 }
 
-static int find_door(struct char_data *ch, const char *type, char *dir, const char *cmdname) {
+static int find_door(Character *ch, const char *type, char *dir, const char *cmdname) {
     int door;
 
     if (*dir) {            /* a direction was specified */
@@ -1104,7 +1104,7 @@ static int find_door(struct char_data *ch, const char *type, char *dir, const ch
     }
 }
 
-static int has_key(struct char_data *ch, obj_vnum key) {
+static int has_key(Character *ch, obj_vnum key) {
     return ch->findObjectVnum(key) ? true : false;
 }
 
@@ -1132,7 +1132,7 @@ static const int flags_door[] =
         };
 
 
-static void OPEN_DOOR(room_vnum room, struct obj_data* obj, int door) {
+static void OPEN_DOOR(room_vnum room, Object* obj, int door) {
     if (obj) {
         int val = GET_OBJ_VAL(obj, VAL_CONTAINER_FLAGS);
         val &= ~CONT_CLOSED;
@@ -1146,7 +1146,7 @@ static void OPEN_DOOR(room_vnum room, struct obj_data* obj, int door) {
     }
 }
 
-static void CLOSE_DOOR(room_vnum room, struct obj_data* obj, int door) {
+static void CLOSE_DOOR(room_vnum room, Object* obj, int door) {
     if (obj) {
         int val = GET_OBJ_VAL(obj, VAL_CONTAINER_FLAGS);
         val |= CONT_CLOSED;
@@ -1160,7 +1160,7 @@ static void CLOSE_DOOR(room_vnum room, struct obj_data* obj, int door) {
     }
 }
 
-static void LOCK_DOOR(room_vnum room, struct obj_data* obj, int door) {
+static void LOCK_DOOR(room_vnum room, Object* obj, int door) {
     if (obj) {
         int val = GET_OBJ_VAL(obj, VAL_CONTAINER_FLAGS);
         val |= CONT_LOCKED;
@@ -1174,7 +1174,7 @@ static void LOCK_DOOR(room_vnum room, struct obj_data* obj, int door) {
     }
 }
 
-static void UNLOCK_DOOR(room_vnum room, struct obj_data* obj, int door) {
+static void UNLOCK_DOOR(room_vnum room, Object* obj, int door) {
     if (obj) {
         int val = GET_OBJ_VAL(obj, VAL_CONTAINER_FLAGS);
         val &= ~CONT_LOCKED;
@@ -1188,7 +1188,7 @@ static void UNLOCK_DOOR(room_vnum room, struct obj_data* obj, int door) {
     }
 }
 
-static void TOGGLE_LOCK(room_vnum room, struct obj_data* obj, int door) {
+static void TOGGLE_LOCK(room_vnum room, Object* obj, int door) {
     if (obj) {
         int val = GET_OBJ_VAL(obj, VAL_CONTAINER_FLAGS);
         val ^= CONT_LOCKED;
@@ -1202,12 +1202,12 @@ static void TOGGLE_LOCK(room_vnum room, struct obj_data* obj, int door) {
     }
 }
 
-static void do_doorcmd(struct char_data *ch, struct obj_data *obj, int door, int scmd) {
+static void do_doorcmd(Character *ch, Object *obj, int door, int scmd) {
     char buf[MAX_STRING_LENGTH];
     size_t len;
     int num = 0;
     room_rnum other_room = NOWHERE;
-    struct obj_data *hatch = nullptr, *obj2 = nullptr, *next_obj, *vehicle = nullptr;
+    Object *hatch = nullptr, *obj2 = nullptr, *next_obj, *vehicle = nullptr;
 
     std::optional<Destination> ex;
     std::optional<Destination> back;
@@ -1423,9 +1423,9 @@ static void do_doorcmd(struct char_data *ch, struct obj_data *obj, int door, int
     *dbuf = '\0';
 }
 
-static int ok_pick(struct char_data *ch, obj_vnum keynum, int pickproof, int dclock, int scmd, struct obj_data *hatch) {
+static int ok_pick(Character *ch, obj_vnum keynum, int pickproof, int dclock, int scmd, Object *hatch) {
     int skill_lvl, found = false;
-    struct obj_data *obj, *next_obj;
+    Object *obj, *next_obj;
     obj = ch->findObjectVnum(18);
 
     if (scmd != SCMD_PICK)
@@ -1510,8 +1510,8 @@ ACMD(do_gen_door) {
     int door = -1;
     obj_vnum keynum;
     char type[MAX_INPUT_LENGTH], dir[MAX_INPUT_LENGTH];
-    struct obj_data *obj = nullptr;
-    struct char_data *victim = nullptr;
+    Object *obj = nullptr;
+    Character *victim = nullptr;
 
     skip_spaces(&argument);
     if (!*argument) {
@@ -1566,7 +1566,7 @@ ACMD(do_gen_door) {
     }
 }
 
-static int do_simple_enter(struct char_data *ch, struct obj_data *obj, int need_specials_check) {
+static int do_simple_enter(Character *ch, Object *obj, int need_specials_check) {
     room_rnum dest_room = real_room(GET_OBJ_VAL(obj, VAL_PORTAL_DEST));
     room_rnum was_in = IN_ROOM(ch);
     int need_movement = 0;
@@ -1676,7 +1676,7 @@ static int do_simple_enter(struct char_data *ch, struct obj_data *obj, int need_
     return 1;
 }
 
-static int perform_enter_obj(struct char_data *ch, struct obj_data *obj, int need_specials_check) {
+static int perform_enter_obj(Character *ch, Object *obj, int need_specials_check) {
     room_rnum was_in = IN_ROOM(ch);
     int could_move = false;
     struct follow_type *k;
@@ -1721,7 +1721,7 @@ static int perform_enter_obj(struct char_data *ch, struct obj_data *obj, int nee
 }
 
 ACMD(do_enter) {
-    struct obj_data *obj = nullptr;
+    Object *obj = nullptr;
     char buf[MAX_INPUT_LENGTH];
     int door, move_dir = -1;
 
@@ -1770,10 +1770,10 @@ ACMD(do_enter) {
     }
 }
 
-static int do_simple_leave(struct char_data *ch, struct obj_data *obj, int need_specials_check) {
+static int do_simple_leave(Character *ch, Object *obj, int need_specials_check) {
     room_rnum was_in = IN_ROOM(ch), dest_room = NOWHERE;
     int need_movement = 0;
-    struct obj_data *vehicle = nullptr;
+    Object *vehicle = nullptr;
 
     if (GET_OBJ_TYPE(obj) != ITEM_PORTAL) {
         vehicle = find_vehicle_by_vnum(GET_OBJ_VAL(obj, VAL_HATCH_DEST));
@@ -1905,7 +1905,7 @@ static int do_simple_leave(struct char_data *ch, struct obj_data *obj, int need_
     return 1;
 }
 
-static int perform_leave_obj(struct char_data *ch, struct obj_data *obj, int need_specials_check) {
+static int perform_leave_obj(Character *ch, Object *obj, int need_specials_check) {
     room_rnum was_in = IN_ROOM(ch);
     int could_move = false;
     struct follow_type *k;
@@ -1961,7 +1961,7 @@ ACMD(do_leave) {
     ch->sendText("I see no obvious exits to the outside.\r\n");
 }
 
-static void handle_fall(struct char_data *ch) {
+static void handle_fall(Character *ch) {
     int room = -1;
     std::optional<Destination> ex;
     ex = EXIT(ch, 5);
@@ -2003,7 +2003,7 @@ static void handle_fall(struct char_data *ch) {
 
 }
 
-static int check_swim(struct char_data *ch) {
+static int check_swim(Character *ch) {
     auto can = false;
 
     if (ch->location.getWhereFlag(WhereFlag::space)) {
@@ -2022,7 +2022,7 @@ static int check_swim(struct char_data *ch) {
 }
 
 
-static void handle_fly_space(char_data *ch) {
+static void handle_fly_space(Character *ch) {
     if (!OUTSIDE(ch)) {
                 ch->sendText("You are not outside!");
         return;
@@ -2092,7 +2092,7 @@ ACMD(do_fly) {
     one_argument(argument, arg);
 
     // Common checks for flying restrictions
-    auto cannot_fly = [](struct char_data *ch) {
+    auto cannot_fly = [](Character *ch) {
         if (ABSORBING(ch) || ABSORBBY(ch)) {
                         ch->sendText("You can't fly, you are struggling with someone right now!\r\n");
             return true;
@@ -2191,7 +2191,7 @@ ACMD(do_fly) {
     set_flying(1);
 }
 
-static void autochair(struct char_data *ch, struct obj_data *chair) {
+static void autochair(Character *ch, Object *chair) {
     // TODO: Make this configurable.
     chair->sitting.reset();
     ch->sits.reset();
@@ -2249,7 +2249,7 @@ ACMD(do_stand) {
 }
 
 ACMD(do_sit) {
-    struct obj_data *chair = nullptr;
+    Object *chair = nullptr;
     char arg[MAX_INPUT_LENGTH];
     one_argument(argument, arg);
 
@@ -2362,7 +2362,7 @@ ACMD(do_sit) {
 }
 
 ACMD(do_rest) {
-    struct obj_data *chair = nullptr;
+    Object *chair = nullptr;
     char arg[MAX_INPUT_LENGTH];
     one_argument(argument, arg);
 
@@ -2506,7 +2506,7 @@ ACMD(do_rest) {
 }
 
 ACMD(do_sleep) {
-    struct obj_data *chair = nullptr;
+    Object *chair = nullptr;
     char arg[MAX_INPUT_LENGTH];
     one_argument(argument, arg);
 
@@ -2692,7 +2692,7 @@ ACMD(do_sleep) {
 
 ACMD(do_wake) {
     char arg[MAX_INPUT_LENGTH];
-    struct char_data *vict;
+    Character *vict;
     int self = 0;
 
     one_argument(argument, arg);
@@ -2772,7 +2772,7 @@ ACMD(do_wake) {
 
 ACMD(do_follow) {
     char buf[MAX_INPUT_LENGTH];
-    struct char_data *leader;
+    Character *leader;
 
     one_argument(argument, buf);
 

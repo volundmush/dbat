@@ -554,7 +554,7 @@ constexpr int SHADOW_DRAGON7_VNUM = 87;
 /* room-related defines *************************************************/
 
 
-/* The cardinal directions: used as index to room_data.dir_option[] */
+/* The cardinal directions: used as index to Room.dir_option[] */
 constexpr int NORTH = 0;
 constexpr int EAST = 1;
 constexpr int SOUTH = 2;
@@ -568,7 +568,7 @@ constexpr int SOUTHWEST = 9;
 constexpr int INDIR = 10;
 constexpr int OUTDIR = 11;
 
-/* Room flags: used in room_data.room_flags */
+/* Room flags: used in Room.room_flags */
 /* WARNING: In the world files, NEVER set the bits marked "R" ("Reserved") */
 constexpr int ROOM_DARK = 0;   /* Dark			*/
 constexpr int ROOM_DEATH = 1;   /* Death trap		*/
@@ -709,7 +709,7 @@ enum class ZoneFlag : uint8_t {
 };
 
 
-/* Exit info: used in room_data.dir_option.exit_info */
+/* Exit info: used in Room.dir_option.exit_info */
 constexpr int EX_ISDOOR = (1 << 0);   /* Exit is a door		*/
 constexpr int EX_CLOSED = (1 << 1);   /* The door is closed	*/
 constexpr int EX_LOCKED = (1 << 2);   /* The door is locked	*/
@@ -736,7 +736,7 @@ enum class SectorType {
     lava        = 14  // This room always has lava
 };
 
-/* Sector types: used in room_data.sector_type */
+/* Sector types: used in Room.sector_type */
 constexpr int SECT_INSIDE = 0;           /* Indoors			*/
 constexpr int SECT_CITY = 1;           /* In a city			*/
 constexpr int SECT_FIELD = 2;           /* In a field		*/
@@ -1003,7 +1003,7 @@ enum class PlayerFlag : uint8_t {
     no_regrow_tail       = 79   // Halt Growth for S & HB
 };
 
-/* Player flags: used by char_data.act */
+/* Player flags: used by Character.act */
 constexpr int PLR_KILLER = 0;   /* Player is a player-killer        */
 constexpr int PLR_THIEF = 1;   /* Player is a player-thief         */
 constexpr int PLR_FROZEN = 2;   /* Player is frozen                 */
@@ -1083,7 +1083,7 @@ enum class MobFlag : uint8_t {
     know_kaioken        = 33, // Knows kaioken
 };
 
-/* Mobile flags: used by char_data.act */
+/* Mobile flags: used by Character.act */
 constexpr int MOB_SPEC = 0;  /* Mob has a callable spec-proc   	*/
 constexpr int MOB_SENTINEL = 1;  /* Mob should not move            	*/
 constexpr int MOB_NOSCAVENGER = 2;  /* Mob won't pick up items from rooms*/
@@ -1177,7 +1177,7 @@ enum class PrefFlag {
     tech          = 61
 };
 
-/*  flags: used by char_data.player_specials.pref */
+/*  flags: used by Character.player_specials.pref */
 constexpr int PRF_BRIEF = 0;  /* Room descs won't normally be shown	*/
 constexpr int PRF_COMPACT = 1;  /* No extra CRLF pair before prompts		*/
 constexpr int PRF_DEAF = 2;  /* Can't hear shouts              		*/
@@ -1337,7 +1337,7 @@ enum class AffectFlag {
     limit_breaking   = 81
 };
 
-/* Affect bits: used in char_data.affected_by */
+/* Affect bits: used in Character.affected_by */
 /* WARNING: In the world files, NEVER set the bits marked "R" ("Reserved") */
 constexpr int AFF_DONTUSE = 0;    /* DON'T USE! 		*/
 constexpr int AFF_BLIND = 1;    /* (R) Char is blind         */
@@ -1525,7 +1525,7 @@ constexpr int COLOR_ROOMSAY = 15;
 
 constexpr int NUM_COLOR = 16;
 
-/* Character equipment positions: used as index for char_data.equipment[] */
+/* Character equipment positions: used as index for Character.equipment[] */
 /* NOTE: Don't confuse these constants with the ITEM_ bitvectors
    which control the valid places you can wear a piece of equipment */
 constexpr int WEAR_UNUSED0 = 0;
@@ -1683,7 +1683,7 @@ enum class ItemType : uint8_t {
     fishing_bait   = 36   // DITTO
 };
 
-/* Item types: used by obj_data.type_flag */
+/* Item types: used by Object.type_flag */
 constexpr int ITEM_LIGHT = 1;        /* Item is a light source	*/
 constexpr int ITEM_SCROLL = 2;        /* Item is a scroll		*/
 constexpr int ITEM_WAND = 3;        /* Item is a wand		*/
@@ -1745,7 +1745,7 @@ enum class WearFlag {
     eyes      = 18  // Can be worn as a mask
 };
 
-/* Take/Wear flags: used by obj_data.wear_flags */
+/* Take/Wear flags: used by Object.wear_flags */
 constexpr int ITEM_WEAR_TAKE = 0;  /* Item can be taken         */
 constexpr int ITEM_WEAR_FINGER = 1;  /* Can be worn on finger     */
 constexpr int ITEM_WEAR_NECK = 2;  /* Can be worn around neck   */
@@ -1809,7 +1809,7 @@ enum class ItemFlag {
     no_steal      = 37
 };
 
-/* Extra object flags: used by obj_data.extra_flags */
+/* Extra object flags: used by Object.extra_flags */
 constexpr int ITEM_GLOW = 0;  /* Item is glowing              */
 constexpr int ITEM_HUM = 1;  /* Item is humming              */
 constexpr int ITEM_NORENT = 2;  /* Item cannot be rented        */

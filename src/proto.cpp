@@ -1,7 +1,7 @@
 #include "dbat/structs.h"
 #include "dbat/genolc.h"
 
-proto_data::~proto_data() {
+ThingPrototype::~ThingPrototype() {
     if (name) free(name);
     if (room_description) free(room_description);
     if (look_description) free(look_description);
@@ -9,7 +9,7 @@ proto_data::~proto_data() {
     if(ex_description) free_ex_descriptions(ex_description);
 }
 
-proto_data& proto_data::operator=(const proto_data& other) {
+ThingPrototype& ThingPrototype::operator=(const ThingPrototype& other) {
     if (this == &other) return *this; // self-assignment check
 
     // basic proto data fields
@@ -36,9 +36,9 @@ proto_data& proto_data::operator=(const proto_data& other) {
     return *this;
 }
 
-item_proto_data& item_proto_data::operator=(const item_proto_data& other) {
+ObjectPrototype& ObjectPrototype::operator=(const ObjectPrototype& other) {
     // basic proto data fields
-    proto_data::operator=(other);
+    ThingPrototype::operator=(other);
     type_flag = other.type_flag;
     affected = other.affected;
     wear_flags = other.wear_flags;
@@ -48,7 +48,7 @@ item_proto_data& item_proto_data::operator=(const item_proto_data& other) {
     return *this;
 }
 
-item_proto_data::item_proto_data(const obj_data& other) {
+ObjectPrototype::ObjectPrototype(const Object& other) {
     name = strdup(other.getName());
     room_description = strdup(other.getRoomDescription());
     look_description = strdup(other.getLookDescription());
@@ -73,7 +73,7 @@ item_proto_data::item_proto_data(const obj_data& other) {
 
 }
 
-unit_data& unit_data::operator=(const proto_data& other) {
+Entity& Entity::operator=(const ThingPrototype& other) {
     // basic proto data fields
     vn = other.vn;
     if(other.name) strings["name"] = other.name;
@@ -97,9 +97,9 @@ unit_data& unit_data::operator=(const proto_data& other) {
     return *this;
 }
 
-obj_data& obj_data::operator=(const item_proto_data& other) {
+Object& Object::operator=(const ObjectPrototype& other) {
     // basic proto data fields
-    unit_data::operator=(other);
+    Entity::operator=(other);
 
     // item proto data fields
     type_flag = other.type_flag;
@@ -111,16 +111,16 @@ obj_data& obj_data::operator=(const item_proto_data& other) {
     return *this;
 }
 
-void obj_data::commit_iedit(const item_proto_data &other) {
+void Object::commit_iedit(const ObjectPrototype &other) {
     operator=(other);
 
     // Set the unique save flag
     item_flags.set(ITEM_UNIQUE_SAVE);
 }
 
-char_data& char_data::operator=(npc_proto_data& other) {
+Character& Character::operator=(CharacterPrototype& other) {
     // basic proto data fields
-    unit_data::operator=(other);
+    Entity::operator=(other);
 
     // item proto data fields
     race = other.race;

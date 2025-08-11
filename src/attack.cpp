@@ -23,7 +23,7 @@ namespace atk {
             SKILL_SLAM, SKILL_HEELDROP, SKILL_BASH, SKILL_HEADBUTT, SKILL_TAILWHIP
     };
 
-    Attack::Attack(struct char_data *ch, const std::string& arg) : user(ch) {
+    Attack::Attack(Character *ch, const std::string& arg) : user(ch) {
         input = arg;
         boost::trim(input);
         boost::split(args, input, boost::is_space());
@@ -178,7 +178,7 @@ namespace atk {
         return 0;
     }
 
-    DefenseResult Attack::attackOutcome(char_data* user, char_data* victim, int Skill, bool kiAttack) {
+    DefenseResult Attack::attackOutcome(Character* user, Character* victim, int Skill, bool kiAttack) {
         initStats();
 
         currentHitProbability = roll_accuracy(user, init_skill(user, Skill), kiAttack);
@@ -4080,7 +4080,7 @@ namespace atk {
                 act("@R$N@r was poisoned by your bite!@n", true, user, nullptr, victim, TO_CHAR);
                 act("@rYou were poisoned by the bite!@n", true, user, nullptr, victim, TO_VICT);
                 victim->poisonby = user;
-                user->poisoned.push_back(std::weak_ptr<char_data>(victim->shared()));
+                user->poisoned.push_back(std::weak_ptr<Character>(victim->shared()));
                 int duration = (GET_INT(user) / 50) + 1;
                 assign_affect(victim, AFF_POISON, SKILL_POISON, duration, 0, 0, 0, 0, 0, 0);
             }
@@ -4257,7 +4257,7 @@ namespace atk {
     void KiAreaAttack::processAttack() {
         announceAttack();
 
-        for(char_data *value : targets) {
+        for(Character *value : targets) {
             victim = value;
             switch(doAttack()) {
                 case Result::Landed:
@@ -4903,7 +4903,7 @@ namespace atk {
         
 
         int guncost = 1;
-        struct obj_data *weap = nullptr;
+        Object *weap = nullptr;
         if (GET_EQ(user, WEAR_WIELD1)) {
             weap = GET_EQ(user, WEAR_WIELD1);
         } else {

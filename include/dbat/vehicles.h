@@ -7,13 +7,13 @@
 
 
 // functions
-extern void drive_in_direction(struct char_data *ch, struct obj_data *vehicle, int dir);
+extern void drive_in_direction(Character *ch, Object *vehicle, int dir);
 
-struct obj_data *find_control(struct char_data *ch);
+Object *find_control(Character *ch);
 
-struct obj_data *find_vehicle_by_vnum(int vnum);
+Object *find_vehicle_by_vnum(int vnum);
 
-struct obj_data *find_hatch_by_vnum(int vnum);
+Object *find_hatch_by_vnum(int vnum);
 
 
 // commands

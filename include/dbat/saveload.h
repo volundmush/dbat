@@ -13,7 +13,7 @@ inline std::string demangle(const char* mangled_name) {
     return result;
 }
 
-extern player_data* create_player_character(int account_id, const json &j);
+extern PlayerData* create_player_character(int account_id, const json &j);
 
 void runSave();
 void load_zones(const std::filesystem::path& loc);
@@ -164,17 +164,17 @@ void from_json(const json& j, struct help_index_element& r);
 void to_json(json& j, const reset_com& r);
 void from_json(const json& j, reset_com& r);
 
-void to_json(json& j, const zone_data& z);
-void from_json(const json& j, zone_data& z);
+void to_json(json& j, const Zone& z);
+void from_json(const json& j, Zone& z);
 
 void to_json(json& j, const affect_t& a);
 void from_json(const json& j, affect_t& a);
 
-void to_json(json& j, const account_data& a);
-void from_json(const json& j, account_data& a);
+void to_json(json& j, const Account& a);
+void from_json(const json& j, Account& a);
 
-void to_json(json& j, const trig_data& t);
-void from_json(const json& j, trig_data& t);
+void to_json(json& j, const DgScript& t);
+void from_json(const json& j, DgScript& t);
 
 void to_json(json&j, const shop_data& s);
 void from_json(const json& j, shop_data& s);
@@ -185,20 +185,20 @@ void from_json(const json& j, guild_data& g);
 void to_json(json& j, const Destination &e);
 void from_json(const json& j, Destination &e);
 
-void to_json(json& j, const room_data& r);
-void from_json(const json& j, room_data& r);
+void to_json(json& j, const Room& r);
+void from_json(const json& j, Room& r);
 
-void to_json(json& j, const obj_data& o);
-void from_json(const json& j, obj_data& o);
+void to_json(json& j, const Object& o);
+void from_json(const json& j, Object& o);
 
-void to_json(json& j, const proto_data& o);
-void from_json(const json& j, proto_data& o);
+void to_json(json& j, const ThingPrototype& o);
+void from_json(const json& j, ThingPrototype& o);
 
-void to_json(json& j, const item_proto_data& o);
-void from_json(const json& j, item_proto_data& o);
+void to_json(json& j, const ObjectPrototype& o);
+void from_json(const json& j, ObjectPrototype& o);
 
-void to_json(json& j, const npc_proto_data& o);
-void from_json(const json& j, npc_proto_data& o);
+void to_json(json& j, const CharacterPrototype& o);
+void from_json(const json& j, CharacterPrototype& o);
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(skill_data, level, perfs)
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(alias_data, name, replacement, type)
@@ -209,11 +209,11 @@ void from_json(const json& j, trans_data& t);
 void to_json(json& j, const affected_type& a);
 void from_json(const json& j, affected_type& a);
 
-void to_json(json& j, const char_data& c);
-void from_json(const json& j, char_data& c);
+void to_json(json& j, const Character& c);
+void from_json(const json& j, Character& c);
 
-void from_json(const json& j, char_data& c);
-void to_json(json& j, const char_data& c);
+void from_json(const json& j, Character& c);
+void to_json(json& j, const Character& c);
 
-void to_json(json& j, const player_data& p);
-void from_json(const json& j, player_data& p);
+void to_json(json& j, const PlayerData& p);
+void from_json(const json& j, PlayerData& p);

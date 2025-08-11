@@ -56,6 +56,6 @@ constexpr int SL_GLD = 6;
 
 extern room_vnum genolc_zone_bottom(zone_rnum rznum);
 
-extern room_vnum genolc_zonep_bottom(struct zone_data *zone);
+extern room_vnum genolc_zonep_bottom(struct Zone *zone);
 
 extern void create_world_index(int znum, const char *type);

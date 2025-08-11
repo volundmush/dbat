@@ -55,7 +55,7 @@ ACMD(do_oasis_redit) {
         return;
     }
 
-    struct obj_data *capsule = nullptr, *next_obj = nullptr, *remove = nullptr;
+    Object *capsule = nullptr, *next_obj = nullptr, *remove = nullptr;
     int remodeling = false;
 
     remove = ch->findObjectVnum(19094);
@@ -175,7 +175,7 @@ ACMD(do_oasis_redit) {
 }
 
 void redit_setup_new(struct descriptor_data *d) {
-    OLC_ROOM(d) = new room_data();
+    OLC_ROOM(d) = new Room();
 
     OLC_ROOM(d)->strings["name"] = "An unfinished room";
     OLC_ROOM(d)->strings["look_description"] = "You are in an unfinished room.\r\n";
@@ -193,7 +193,7 @@ void redit_setup_existing(struct descriptor_data *d, int real_num) {
     /*
      * Build a copy of the room for editing.
      */
-    auto room = new room_data();
+    auto room = new Room();
     auto exist = get_room(real_num);
     /*
      * Allocate space for all strings.
@@ -274,7 +274,7 @@ void redit_save_to_disk(zone_vnum zone_num) {
 
 /*------------------------------------------------------------------------*/
 
-void free_room(struct room_data *room) {
+void free_room(Room *room) {
     /* Free the strings (Mythran). */
     free_room_strings(room);
 
@@ -402,7 +402,7 @@ void redit_disp_sector_menu(struct descriptor_data *d) {
 void redit_disp_menu(struct descriptor_data *d) {
     char buf1[MAX_STRING_LENGTH];
     char buf2[MAX_STRING_LENGTH];
-    struct room_data *room;
+    Room *room;
 
     clear_screen(d);
     room = OLC_ROOM(d);
@@ -507,7 +507,7 @@ void redit_parse(struct descriptor_data *d, char *arg) {
                                         "@GYou close the droids interface and put it back among the rest of your things.@n\r\n");
                         act("@g$n@G stops typing information into the droid in $s hands and closes it back up.@n\r\n",
                             true, d->character, nullptr, nullptr, TO_ROOM);
-                        struct obj_data *obj;
+                        Object *obj;
                         obj = read_object(19094, VIRTUAL);
                         obj_to_char(obj, d->character);
                     }

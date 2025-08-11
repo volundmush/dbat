@@ -116,6 +116,6 @@ struct mail_index_type_d {
 
 typedef struct mail_index_type_d mail_index_type;
 
-extern void notify_if_playing(struct char_data *from, int recipient_id);
+extern void notify_if_playing(Character *from, int recipient_id);
 
 extern SPECIAL(postmaster);

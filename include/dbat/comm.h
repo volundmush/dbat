@@ -33,13 +33,13 @@ constexpr int NUM_RESERVED_DESCS = 8;
 /* comm.c */
 void enter_player_game(struct descriptor_data *d);
 
-extern int arena_watch(struct char_data *ch);
+extern int arena_watch(Character *ch);
 
 extern void setup_log();
 
-extern void perform_act(const char *orig, struct char_data *ch, struct obj_data *obj, const void *vict_obj, struct char_data *to);
+extern void perform_act(const char *orig, Character *ch, Object *obj, const void *vict_obj, Character *to);
 
-extern char *act(const char *str, int hide_invisible, struct char_data *ch, struct obj_data *obj, const void *vict_obj, int type);
+extern char *act(const char *str, int hide_invisible, Character *ch, Object *obj, const void *vict_obj, int type);
 
 extern void close_socket(struct descriptor_data *d);
 extern void runOneLoop(double deltaTime);

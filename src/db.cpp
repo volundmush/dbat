@@ -64,29 +64,29 @@ bool isMigrating = false;
 struct config_data config_info; /* Game configuration list.    */
 
 // The global database of entities.
-NegativeKeyGuardUnorderedMap<int, std::shared_ptr<unit_data>> units;
-NegativeKeyGuardMap<room_vnum, std::shared_ptr<room_data>> world;
-NegativeKeyGuardUnorderedMap<int, std::shared_ptr<char_data>> uniqueCharacters;
-NegativeKeyGuardUnorderedMap<int, std::shared_ptr<obj_data>> uniqueObjects;
+NegativeKeyGuardUnorderedMap<int, std::shared_ptr<Entity>> units;
+NegativeKeyGuardMap<room_vnum, std::shared_ptr<Room>> world;
+NegativeKeyGuardUnorderedMap<int, std::shared_ptr<Character>> uniqueCharacters;
+NegativeKeyGuardUnorderedMap<int, std::shared_ptr<Object>> uniqueObjects;
 
-struct char_data *affect_list = nullptr; /* global linked list of chars with affects */
-struct char_data *affectv_list = nullptr; /* global linked list of chars with round-based affects */
+Character *affect_list = nullptr; /* global linked list of chars with affects */
+Character *affectv_list = nullptr; /* global linked list of chars with round-based affects */
 NegativeKeyGuardMap<mob_vnum, struct index_data> mob_index;    /* index table for mobile file	 */
-NegativeKeyGuardMap<mob_vnum, struct npc_proto_data> mob_proto;    /* prototypes for mobs		 */
+NegativeKeyGuardMap<mob_vnum, CharacterPrototype> mob_proto;    /* prototypes for mobs		 */
 
 NegativeKeyGuardMap<obj_vnum, struct index_data> obj_index;    /* index table for object file	 */
-NegativeKeyGuardMap<obj_vnum, struct item_proto_data> obj_proto;    /* prototypes for objs		 */
+NegativeKeyGuardMap<obj_vnum, ObjectPrototype> obj_proto;    /* prototypes for objs		 */
 
-NegativeKeyGuardMap<zone_vnum, struct zone_data> zone_table;    /* zone table			 */
+NegativeKeyGuardMap<zone_vnum, struct Zone> zone_table;    /* zone table			 */
 
-NegativeKeyGuardMap<trig_vnum, struct trig_proto_data> trig_index; /* index table for triggers      */
+NegativeKeyGuardMap<trig_vnum, DgScriptPrototype> trig_index; /* index table for triggers      */
 
-NegativeKeyGuardMap<int64_t, player_data> players;
+NegativeKeyGuardMap<int64_t, PlayerData> players;
 
 NegativeKeyGuardMap<int64_t, struct descriptor_data*> sessions;
 
-std::vector<std::weak_ptr<char_data>> getAllCharacters() {
-    std::vector<std::weak_ptr<char_data>> out;
+std::vector<std::weak_ptr<Character>> getAllCharacters() {
+    std::vector<std::weak_ptr<Character>> out;
     out.reserve(uniqueCharacters.size());
 
     for(const auto&[id, ent] : uniqueCharacters)
@@ -95,8 +95,8 @@ std::vector<std::weak_ptr<char_data>> getAllCharacters() {
     return out;
 }
 
-std::vector<std::weak_ptr<obj_data>> getAllObjects() {
-    std::vector<std::weak_ptr<obj_data>> out;
+std::vector<std::weak_ptr<Object>> getAllObjects() {
+    std::vector<std::weak_ptr<Object>> out;
     out.reserve(uniqueObjects.size());
 
     for(const auto&[id, ent] : uniqueObjects)
@@ -105,7 +105,7 @@ std::vector<std::weak_ptr<obj_data>> getAllObjects() {
     return out;
 }
 
-room_data* get_room(room_vnum vn) {
+Room* get_room(room_vnum vn) {
     if(auto it = world.find(vn); it != world.end())
         return it->second.get();
     return nullptr;
@@ -143,7 +143,7 @@ int DRAGONR = 0;                /* Room Shenron has been summoned to */
 int DRAGONZ = 0;                /* Zone Shenron has been summoned to */
 int WISH[2] = {0, 0};           /* Keeps track of wishes granted */
 int DRAGONC = 0;                /* Keeps count of Shenron's remaining time */
-struct char_data *EDRAGON = nullptr;      /* This is Shenron when he is loaded */
+Character *EDRAGON = nullptr;      /* This is Shenron when he is loaded */
 room_rnum r_mortal_start_room;    /* rnum of mortal start room	 */
 room_rnum r_immort_start_room;    /* rnum of immort start room	 */
 room_rnum r_frozen_start_room;    /* rnum of frozen start room	 */
@@ -178,13 +178,13 @@ std::unordered_set<zone_vnum> zone_reset_queue;
 
 std::vector<obj_vnum> dbVnums = {20, 21, 22, 23, 24, 25, 26};
 
-SubscriptionManager<char_data> characterSubscriptions;
-SubscriptionManager<obj_data> objectSubscriptions;
-SubscriptionManager<room_data> roomSubscriptions;
-SubscriptionManager<trig_data> triggerSubscriptions;
+SubscriptionManager<Character> characterSubscriptions;
+SubscriptionManager<Object> objectSubscriptions;
+SubscriptionManager<Room> roomSubscriptions;
+SubscriptionManager<DgScript> triggerSubscriptions;
 
 /* local functions */
-static void dragon_level(struct char_data *ch);
+static void dragon_level(Character *ch);
 
 static int file_to_string(const char *name, char *buf);
 
@@ -208,7 +208,7 @@ void load_banned();
 
 void Read_Invalid_List();
 
-void memorize_add(struct char_data *ch, int spellnum, int timer);
+void memorize_add(Character *ch, int spellnum, int timer);
 
 void free_feats();
 
@@ -231,7 +231,7 @@ struct help_index_element *get_help(const std::string &name, int level) {
 }
 
 
-static void dragon_level(struct char_data *ch) {
+static void dragon_level(Character *ch) {
     struct descriptor_data *d;
     int level = 0, count = 0;
 
@@ -591,7 +591,7 @@ void auc_save() {
 }
 
 /* load from auction file */
-void auc_load(struct obj_data *obj) {
+void auc_load(Object *obj) {
     char line[500], filler[50];
     int64_t oID;
     time_t timer;
@@ -770,7 +770,7 @@ void free_help_table() {
 *  procedures for resetting, both play-time and boot-time	 	 *
 *************************************************************************/
 
-int vnum_mobile(char *searchname, struct char_data *ch) {
+int vnum_mobile(char *searchname, Character *ch) {
     int found = 0;
 
     for (auto &[vn, m] : mob_proto)
@@ -781,7 +781,7 @@ int vnum_mobile(char *searchname, struct char_data *ch) {
 }
 
 
-int vnum_object(char *searchname, struct char_data *ch) {
+int vnum_object(char *searchname, Character *ch) {
     int found = 0;
 
     for (auto &o : obj_proto)
@@ -792,7 +792,7 @@ int vnum_object(char *searchname, struct char_data *ch) {
 }
 
 
-int vnum_material(char *searchname, struct char_data *ch) {
+int vnum_material(char *searchname, Character *ch) {
     int found = 0;
 
     for (auto &o : obj_proto)
@@ -804,7 +804,7 @@ int vnum_material(char *searchname, struct char_data *ch) {
 }
 
 
-int vnum_weapontype(char *searchname, struct char_data *ch) {
+int vnum_weapontype(char *searchname, Character *ch) {
     int found = 0;
 
     for (auto &o : obj_proto)
@@ -818,7 +818,7 @@ int vnum_weapontype(char *searchname, struct char_data *ch) {
 }
 
 
-int vnum_armortype(char *searchname, struct char_data *ch) {
+int vnum_armortype(char *searchname, Character *ch) {
     int found = 0;
 
     for (auto &o : obj_proto)
@@ -833,7 +833,7 @@ int vnum_armortype(char *searchname, struct char_data *ch) {
 
 
 /* create a new mobile from a prototype */
-struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
+Character *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
 {
     auto proto = mob_proto.find(nr);
 
@@ -841,7 +841,7 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
         basic_mud_log("WARNING: Mobile vnum %d does not exist in database.", nr);
         return (nullptr);
     }
-    auto sh = std::make_shared<char_data>();
+    auto sh = std::make_shared<Character>();
     auto mob = sh.get();
 
     *mob = proto->second;
@@ -1385,8 +1385,8 @@ char *sprintuniques(int low, int high) {
 
 
 /* create an object, and add it to the object list */
-struct obj_data *create_obj() {
-    auto sh = std::make_shared<obj_data>();
+Object *create_obj() {
+    auto sh = std::make_shared<Object>();
     sh->id = getNextUnitID();
     sh->generation = time(nullptr);
     uniqueObjects.emplace(sh->id, sh);
@@ -1398,7 +1398,7 @@ struct obj_data *create_obj() {
 
 
 /* create a new object from a prototype */
-struct obj_data *read_object(obj_vnum nr, int type) /* and obj_rnum */
+Object *read_object(obj_vnum nr, int type) /* and obj_rnum */
 {
     auto i = nr;
     int j;
@@ -1409,7 +1409,7 @@ struct obj_data *read_object(obj_vnum nr, int type) /* and obj_rnum */
         basic_mud_log("Object (%c) %d does not exist in database.", type == VIRTUAL ? 'V' : 'R', nr);
         return (nullptr);
     }
-    auto sh = std::make_shared<obj_data>();
+    auto sh = std::make_shared<Object>();
     auto obj = sh.get();
     // the operator= will copy the prototype data into the new object.
     *obj = proto->second;
@@ -1499,19 +1499,19 @@ static void log_zone_error(zone_rnum zone, int cmd_no, const char *message) {
     { log_zone_error(zone, cmd_no, message); last_cmd = 0; }
 
 
-static void do_reset_cmds(zone_data &z) {
+static void do_reset_cmds(Zone &z) {
     int cmd_no = 0, last_cmd = 0;
-    struct char_data *mob = nullptr;
-    struct obj_data *obj, *obj_to;
+    Character *mob = nullptr;
+    Object *obj, *obj_to;
     room_vnum rvnum;
     room_rnum rrnum;
-    struct char_data *tmob = nullptr; /* for trigger assignment */
-    struct obj_data *tobj = nullptr;  /* for trigger assignment */
+    Character *tmob = nullptr; /* for trigger assignment */
+    Object *tobj = nullptr;  /* for trigger assignment */
     int mob_load = false;             /* ### */
     int obj_load = false;             /* ### */
     auto oproto = obj_proto.find(-1);
     auto mproto = mob_proto.find(-1);
-    struct room_data* room = nullptr;
+    Room* room = nullptr;
     auto zone = z.number;
 
     for (auto &c : z.cmd)
@@ -1548,7 +1548,7 @@ static void do_reset_cmds(zone_data &z) {
                     (rand_number(1, 100) >= c.arg5))
                 {
                     int room_max = 0;
-                    struct char_data *i;
+                    Character *i;
 
                     /* First find out how many mobs of VNUM are in the mud with this rooms */
                     /* VNUM as a load point for max from room checks. */
@@ -1856,7 +1856,7 @@ static void do_reset_cmds(zone_data &z) {
     }
 }
 
-static void do_reset_rooms(zone_data &z) {
+static void do_reset_rooms(Zone &z) {
     for (auto r : filter_raw(z.rooms))
          reset_wtrigger(r);
 }
@@ -2047,7 +2047,7 @@ static int file_to_string(const char *name, char *buf) {
 
 
 /* clear some of the the working variables of a char */
-void reset_char(struct char_data *ch) {
+void reset_char(Character *ch) {
     int i;
 
     ch->followers = nullptr;
@@ -2064,7 +2064,7 @@ void reset_char(struct char_data *ch) {
  * Called during character creation after picking character class
  * (and then never again for that character).
  */
-void init_char(struct char_data *ch) {
+void init_char(Character *ch) {
     int i;
 
     ch->setBaseStat("money_carried", 1500);
@@ -2575,7 +2575,7 @@ bool isUID(const std::string& uid) {
     return std::regex_match(uid, uid_regex);
 }
 
-std::shared_ptr<unit_data> resolveUID(const std::string& uid) {
+std::shared_ptr<Entity> resolveUID(const std::string& uid) {
     // First we need to check if it matches or not.
     std::smatch match;
     std::optional<time_t> generation = std::nullopt;
@@ -2651,11 +2651,11 @@ int create_join_session(int account_id, int character_id, int64_t connection_id,
     }
 }
 
-std::vector<npc_proto_data*> collectNPCProtos(int start_vnum, int end_vnum) {
+std::vector<CharacterPrototype*> collectNPCProtos(int start_vnum, int end_vnum) {
     return collectObjectsInRange(start_vnum, end_vnum, mob_proto);
 }
 
-std::vector<item_proto_data*> collectItemProtos(int start_vnum, int end_vnum) {
+std::vector<ObjectPrototype*> collectItemProtos(int start_vnum, int end_vnum) {
     return collectObjectsInRange(start_vnum, end_vnum, obj_proto);
 }
 
@@ -2667,6 +2667,6 @@ std::vector<shop_data*> collectShops(int start_vnum, int end_vnum) {
     return collectObjectsInRange(start_vnum, end_vnum, shop_index);
 }
 
-std::vector<trig_proto_data*> collectTriggers(int start_vnum, int end_vnum) {
+std::vector<DgScriptPrototype*> collectTriggers(int start_vnum, int end_vnum) {
     return collectObjectsInRange(start_vnum, end_vnum, trig_index);
 }

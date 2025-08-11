@@ -152,7 +152,7 @@ ASPELL(spell_summon) {
 
 
 ASPELL(spell_locate_object) {
-    struct obj_data *i;
+    Object *i;
     char name[MAX_INPUT_LENGTH];
     int j;
 
@@ -184,7 +184,7 @@ ASPELL(spell_locate_object) {
                                         ch->send_to(" is in %s.\r\n", loc.unit->getName());
                     break;
                 case UnitType::character: {
-                    auto c = static_cast<char_data*>(loc.unit);
+                    auto c = static_cast<Character*>(loc.unit);
                     if(loc.position.x == -1) {
                                                 ch->send_to(" is being carried by %s.\r\n", PERS(c, ch));
                     } else {
@@ -431,7 +431,7 @@ ASPELL(spell_detect_poison) {
 }
 
 ASPELL(spell_portal) {
-    struct obj_data *portal, *tportal;
+    Object *portal, *tportal;
     auto &rm = victim->location;
 
     if (ch == nullptr || victim == nullptr)
@@ -488,7 +488,7 @@ ASPELL(art_abundant_step) {
 }
 
 
-int roll_skill(struct char_data *ch, int snum) {
+int roll_skill(Character *ch, int snum) {
     int roll, skval, i;
     if (!IS_NPC(ch)) {
         skval = GET_SKILL(ch, snum);
@@ -571,6 +571,6 @@ int roll_skill(struct char_data *ch, int snum) {
     }
 }
 
-int roll_resisted(struct char_data *actor, int sact, struct char_data *resistor, int sres) {
+int roll_resisted(Character *actor, int sact, Character *resistor, int sres) {
     return roll_skill(actor, sact) >= roll_skill(resistor, sres);
 }

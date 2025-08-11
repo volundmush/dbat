@@ -35,66 +35,66 @@
 #include "dbat/random.h"
 
 /* local functions */
-static void gen_map(struct char_data *ch, int num);
+static void gen_map(Character *ch, int num);
 
-static void see_plant(struct obj_data *obj, struct char_data *ch);
+static void see_plant(Object *obj, Character *ch);
 
-static double terrain_bonus(struct char_data *ch);
+static double terrain_bonus(Character *ch);
 
-static void search_room(struct char_data *ch);
+static void search_room(Character *ch);
 
-static void bonus_status(struct char_data *ch);
+static void bonus_status(Character *ch);
 
 static int sort_commands_helper(const void *a, const void *b);
 
-static void print_object_location(int num, struct obj_data *obj, struct char_data *ch, int recur);
+static void print_object_location(int num, Object *obj, Character *ch, int recur);
 
-static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mode);
+static void show_obj_to_char(Object *obj, Character *ch, int mode);
 
-static void list_obj_to_char(const std::vector<std::weak_ptr<obj_data>> &list, struct char_data *ch, int mode, int show);
+static void list_obj_to_char(const std::vector<std::weak_ptr<Object>> &list, Character *ch, int mode, int show);
 
-static void trans_check(struct char_data *ch, struct char_data *vict);
+static void trans_check(Character *ch, Character *vict);
 
-static int show_obj_modifiers(struct obj_data *obj, struct char_data *ch);
+static int show_obj_modifiers(Object *obj, Character *ch);
 
-static void perform_mortal_where(struct char_data *ch, char *arg);
+static void perform_mortal_where(Character *ch, char *arg);
 
-static void perform_immort_where(struct char_data *ch, char *arg);
+static void perform_immort_where(Character *ch, char *arg);
 
-static void diag_char_to_char(struct char_data *i, struct char_data *ch);
+static void diag_char_to_char(Character *i, Character *ch);
 
-static void diag_obj_to_char(struct obj_data *obj, struct char_data *ch);
+static void diag_obj_to_char(Object *obj, Character *ch);
 
-static void look_at_char(struct char_data *i, struct char_data *ch);
+static void look_at_char(Character *i, Character *ch);
 
-static void list_one_char(struct char_data *i, struct char_data *ch);
+static void list_one_char(Character *i, Character *ch);
 
-static void list_char_to_char(const std::vector<std::weak_ptr<char_data>> &list, struct char_data *ch);
+static void list_char_to_char(const std::vector<std::weak_ptr<Character>> &list, Character *ch);
 
-static void look_in_direction(struct char_data *ch, int dir);
+static void look_in_direction(Character *ch, int dir);
 
-static void look_in_obj(struct char_data *ch, char *arg);
+static void look_in_obj(Character *ch, char *arg);
 
-static void look_out_window(struct char_data *ch, const char *arg);
+static void look_out_window(Character *ch, const char *arg);
 
-static void look_at_target(struct char_data *ch, char *arg, int read);
+static void look_at_target(Character *ch, char *arg, int read);
 
-static void search_in_direction(struct char_data *ch, int dir);
+static void search_in_direction(Character *ch, int dir);
 
-static void do_auto_exits(struct room_data *room, struct char_data *ch, int exit_mode);
+static void do_auto_exits(Room *room, Character *ch, int exit_mode);
 
-static void do_auto_exits2(room_rnum target_room, struct char_data *ch);
+static void do_auto_exits2(room_rnum target_room, Character *ch);
 
-static void display_spells(struct char_data *ch, struct obj_data *obj);
+static void display_spells(Character *ch, Object *obj);
 
-static void display_scroll(struct char_data *ch, struct obj_data *obj);
+static void display_scroll(Character *ch, Object *obj);
 
 static void space_to_minus(char *str);
 
 static int yesrace(int num);
 
 static void map_draw_room(char map[9][10], int x, int y, room_rnum rnum,
-                          struct char_data *ch);
+                          Character *ch);
 // definitions
 ACMD(do_evolve)
 {
@@ -172,7 +172,7 @@ ACMD(do_evolve)
     ch->send_to("Your body evolves to make better use of the way it is now, and you feel that your %s has strengthened. @D[@C%s@D: @Y+%s@D]@n\r\n", it->name, it->name, add_commas(bonusVal).c_str());
 }
 
-static void see_plant(struct obj_data *obj, struct char_data *ch)
+static void see_plant(Object *obj, Character *ch)
 {
     int water = GET_OBJ_VAL(obj, VAL_PLANT_WATERLEVEL);
     const char *description = obj->getShortDescription();
@@ -232,7 +232,7 @@ static void see_plant(struct obj_data *obj, struct char_data *ch)
 }
 
 /* This is used to determine the terrain bonus for search_room - Iovan 12/16/2012*/
-static double terrain_bonus(struct char_data *ch)
+static double terrain_bonus(Character *ch)
 {
 
     double bonus = 0.0;
@@ -283,10 +283,10 @@ char *find_exdesc(char *word, const std::vector<ExtraDescription> &list)
 }
 
 /* This is used to find hidden people in a room with search - Iovan 12/16/2012 */
-static void search_room(struct char_data *ch)
+static void search_room(Character *ch)
 {
 
-    struct char_data *vict, *next_v;
+    Character *vict, *next_v;
     int perc =
         (GET_INT(ch) * 0.6) + GET_SKILL(ch, SKILL_SPOT) + GET_SKILL(ch, SKILL_SEARCH) + GET_SKILL(ch, SKILL_LISTEN);
     int prob = 0, found = 0;
@@ -503,7 +503,7 @@ ACMD(do_kyodaika)
 
 ACMD(do_table)
 {
-    struct obj_data *obj = nullptr, *obj2 = nullptr;
+    Object *obj = nullptr, *obj2 = nullptr;
     char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 
     two_arguments(argument, arg, arg2);
@@ -546,7 +546,7 @@ ACMD(do_draw)
         return;
     }
 
-    struct obj_data *obj = nullptr, *obj2 = nullptr, *obj3 = nullptr, *next_obj = nullptr;
+    Object *obj = nullptr, *obj2 = nullptr, *obj3 = nullptr, *next_obj = nullptr;
     int drawn = false;
 
     if (!(obj = get_obj_in_list_vis(ch, "case", nullptr, ch->getObjects())))
@@ -591,7 +591,7 @@ ACMD(do_shuffle)
         return;
     }
 
-    struct obj_data *obj = nullptr, *obj2 = nullptr, *next_obj = nullptr;
+    Object *obj = nullptr, *obj2 = nullptr, *next_obj = nullptr;
     int count = 0;
 
     if (!(obj = get_obj_in_list_vis(ch, "case", nullptr, ch->getObjects())))
@@ -652,7 +652,7 @@ ACMD(do_shuffle)
 ACMD(do_hand)
 {
 
-    struct obj_data *obj, *next_obj;
+    Object *obj, *next_obj;
     char arg[MAX_INPUT_LENGTH];
     int count = 0;
 
@@ -736,8 +736,8 @@ ACMD(do_post)
 {
 
     char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
-    struct obj_data *obj;
-    struct obj_data *obj2;
+    Object *obj;
+    Object *obj2;
 
     two_arguments(argument, arg, arg2);
 
@@ -832,7 +832,7 @@ ACMD(do_play)
         return;
     }
 
-    struct obj_data *obj = nullptr, *obj2 = nullptr, *obj3 = nullptr, *next_obj = nullptr;
+    Object *obj = nullptr, *obj2 = nullptr, *obj3 = nullptr, *next_obj = nullptr;
     char arg[MAX_INPUT_LENGTH];
     one_argument(argument, arg);
 
@@ -867,7 +867,7 @@ ACMD(do_play)
 /* Nickname an object */
 ACMD(do_nickname)
 {
-    struct obj_data *obj = nullptr;
+    Object *obj = nullptr;
     char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 
     two_arguments(argument, arg, arg2);
@@ -895,7 +895,7 @@ ACMD(do_nickname)
 
     if (!strcasecmp(arg, "ship"))
     {
-        struct obj_data *ship = nullptr, *next_obj = nullptr, *ship2 = nullptr;
+        Object *ship = nullptr, *next_obj = nullptr, *ship2 = nullptr;
         int found = false;
         auto is_ship = [](const auto &o)
         { return GET_OBJ_VNUM(o) >= 45000 && GET_OBJ_VNUM(o) <= 45999; };
@@ -962,8 +962,8 @@ static const char *portal_appearance[] = {
 
 ACMD(do_showoff)
 {
-    struct obj_data *obj = nullptr;
-    struct char_data *vict = nullptr;
+    Object *obj = nullptr;
+    Character *vict = nullptr;
     char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 
     *arg = '\0';
@@ -996,7 +996,7 @@ ACMD(do_showoff)
     show_obj_to_char(obj, vict, SHOW_OBJ_ACTION);
 }
 
-int readIntro(struct char_data *ch, struct char_data *vict)
+int readIntro(Character *ch, Character *vict)
 {
     if (vict == nullptr)
     {
@@ -1013,7 +1013,7 @@ int readIntro(struct char_data *ch, struct char_data *vict)
     return p.dub_names.contains(vict->id);
 }
 
-void introWrite(struct char_data *ch, struct char_data *vict, char *name)
+void introWrite(Character *ch, Character *vict, char *name)
 {
     std::string n(name);
     auto &p = players.at(ch->id);
@@ -1027,7 +1027,7 @@ ACMD(do_intro)
         return;
 
     char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
-    struct char_data *vict;
+    Character *vict;
 
     two_arguments(argument, arg, arg2);
 
@@ -1097,7 +1097,7 @@ ACMD(do_intro)
 }
 
 /* Used when checking status or looking at a character */
-static void send_attribute_desc(struct char_data *ch, const char *label, const char *value)
+static void send_attribute_desc(Character *ch, const char *label, const char *value)
 {
     ch->send_to("            @D[@c%-12s@D: @W%-12s@D]@n\r\n", label, value);
 }
@@ -1222,7 +1222,7 @@ static void draw_open_exit(char map[9][10], int x, int y, int door, int sect, do
     }
 }
 
-static void map_draw_room(char map[9][10], int x, int y, Destination &node, struct char_data *ch)
+static void map_draw_room(char map[9][10], int x, int y, Destination &node, Character *ch)
 {
 
     for (auto &[door, e] : node.getExits())
@@ -1249,7 +1249,7 @@ ACMD(do_map)
     gen_map(ch, 1);
 }
 
-static void print_map_key(struct char_data *ch)
+static void print_map_key(Character *ch)
 {
     ch->sendText("@W               @D-[@CArea Map@D]-\r\n");
     ch->sendText("@D-------------------------------------------@w\r\n");
@@ -1286,7 +1286,7 @@ static void replace_map_symbols(char *buf)
     }
 }
 
-static void print_map_line(struct char_data *ch, int key, const char *buf)
+static void print_map_line(Character *ch, int key, const char *buf)
 {
     const char *key_strings[] = {
         "    @WC: City, @wI@W: Inside, @GP@W: Plain@n\r\n",
@@ -1305,7 +1305,7 @@ static void print_map_line(struct char_data *ch, int key, const char *buf)
     }
 }
 
-static void gen_map(struct char_data *ch, int num)
+static void gen_map(Character *ch, int num)
 {
     char map[9][10] = {{'-'}, {'-'}};
     char buf2[MAX_INPUT_LENGTH];
@@ -1414,7 +1414,7 @@ static void gen_map(struct char_data *ch, int num)
     }
 }
 
-static void display_spells(struct char_data *ch, struct obj_data *obj)
+static void display_spells(Character *ch, Object *obj)
 {
     int i;
 
@@ -1424,7 +1424,7 @@ static void display_spells(struct char_data *ch, struct obj_data *obj)
     return;
 }
 
-static void display_scroll(struct char_data *ch, struct obj_data *obj)
+static void display_scroll(Character *ch, Object *obj)
 {
     ch->sendText("The scroll contains the following spell:\r\n");
     ch->sendText("@c---@wSpell Name@c---------------------------------------------------@n\r\n");
@@ -1432,7 +1432,7 @@ static void display_scroll(struct char_data *ch, struct obj_data *obj)
     return;
 }
 
-static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mode)
+static void show_obj_to_char(Object *obj, Character *ch, int mode)
 {
     if (!obj || !ch)
     {
@@ -1953,7 +1953,7 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
         ch->sendText("\r\n");
 }
 
-static int show_obj_modifiers(struct obj_data *obj, struct char_data *ch)
+static int show_obj_modifiers(Object *obj, Character *ch)
 {
     int found = false;
 
@@ -2055,7 +2055,7 @@ static int show_obj_modifiers(struct obj_data *obj, struct char_data *ch)
             }
             if (!IS_NPC(ch) && GET_OBJ_POSTED(obj) && GET_OBJ_POSTTYPE(obj) <= 0)
             {
-                struct obj_data *obj2 = GET_OBJ_POSTED(obj);
+                Object *obj2 = GET_OBJ_POSTED(obj);
                 char dvnum[200];
                 *dvnum = '\0';
                 sprintf(dvnum, "@D[@G%d@D] @w", GET_OBJ_VNUM(obj2));
@@ -2067,9 +2067,9 @@ static int show_obj_modifiers(struct obj_data *obj, struct char_data *ch)
     return (found);
 }
 
-static void list_obj_to_char(const std::vector<std::weak_ptr<obj_data>> &list, struct char_data *ch, int mode, int show)
+static void list_obj_to_char(const std::vector<std::weak_ptr<Object>> &list, Character *ch, int mode, int show)
 {
-    struct obj_data *d;
+    Object *d;
     bool found = false;
     int num;
 
@@ -2094,7 +2094,7 @@ static void list_obj_to_char(const std::vector<std::weak_ptr<obj_data>> &list, s
         ch->sendText(" Nothing.\r\n");
 }
 
-static void diag_obj_to_char(struct obj_data *obj, struct char_data *ch)
+static void diag_obj_to_char(Object *obj, Character *ch)
 {
     struct
     {
@@ -2125,7 +2125,7 @@ static void diag_obj_to_char(struct obj_data *obj, struct char_data *ch)
     ch->send_to("\r\n%c%s %s\r\n", UPPER(*objs), objs + 1, diagnosis[ar_index].text);
 }
 
-static void diag_char_to_char(struct char_data *i, struct char_data *ch)
+static void diag_char_to_char(Character *i, Character *ch)
 {
     struct
     {
@@ -2207,7 +2207,7 @@ static void diag_char_to_char(struct char_data *i, struct char_data *ch)
     ch->send_to("%s\r\n", diagnosis[ar_index].text);
 }
 
-void display_limb(char_data *ch, char_data *i, int limb_index, const char *limb_display, CharacterFlag cyber_flag)
+void display_limb(Character *ch, Character *i, int limb_index, const char *limb_display, CharacterFlag cyber_flag)
 {
     int cond = GET_LIMBCOND(i, limb_index);
     bool isCyber = i->character_flags.get(cyber_flag);
@@ -2229,11 +2229,11 @@ void display_limb(char_data *ch, char_data *i, int limb_index, const char *limb_
     }
 }
 
-static void look_at_char(struct char_data *i, struct char_data *ch)
+static void look_at_char(Character *i, Character *ch)
 {
     int j, found, clan = false;
     char buf[100];
-    struct obj_data *tmp_obj;
+    Object *tmp_obj;
 
     if (!ch->desc)
     {
@@ -2479,9 +2479,9 @@ static void look_at_char(struct char_data *i, struct char_data *ch)
     }
 }
 
-static void list_one_char(struct char_data *i, struct char_data *ch)
+static void list_one_char(Character *i, Character *ch)
 {
-    struct obj_data *chair = nullptr;
+    Object *chair = nullptr;
     int count = false;
     const char *positions[] = {
         " is dead",
@@ -2881,10 +2881,10 @@ static void list_one_char(struct char_data *i, struct char_data *ch)
 struct hide_node
 {
     struct hide_node *next;
-    struct char_data *hidden;
+    Character *hidden;
 };
 
-static void add_hidden_char(struct hide_node **hideinfo, struct char_data *ch)
+static void add_hidden_char(struct hide_node **hideinfo, Character *ch)
 {
     struct hide_node *new_node = new hide_node{nullptr, ch};
     if (!*hideinfo)
@@ -2902,7 +2902,7 @@ static void add_hidden_char(struct hide_node **hideinfo, struct char_data *ch)
     }
 }
 
-static bool is_hidden(struct hide_node *hideinfo, struct char_data *ch)
+static bool is_hidden(struct hide_node *hideinfo, Character *ch)
 {
     for (auto node = hideinfo; node; node = node->next)
     {
@@ -2914,7 +2914,7 @@ static bool is_hidden(struct hide_node *hideinfo, struct char_data *ch)
     return false;
 }
 
-static void list_char_to_char(const std::vector<std::weak_ptr<char_data>> &list, struct char_data *ch)
+static void list_char_to_char(const std::vector<std::weak_ptr<Character>> &list, Character *ch)
 {
     struct hide_node *hideinfo = nullptr;
 
@@ -2972,7 +2972,7 @@ static void list_char_to_char(const std::vector<std::weak_ptr<char_data>> &list,
     }
 }
 
-static void do_auto_exits(struct room_data *room, struct char_data *ch, int exit_mode)
+static void do_auto_exits(Room *room, Character *ch, int exit_mode)
 {
     const int MAX_DIRS = 12;
     const char *dirNames[MAX_DIRS] = {"Northwest", "North", "Northeast", "East", "Southeast", "South", "Southwest", "West", "Up", "Down", "Inside", "Outside"};
@@ -3129,7 +3129,7 @@ static void do_auto_exits(struct room_data *room, struct char_data *ch, int exit
     }
 }
 
-static void do_auto_exits2(struct room_data *room, struct char_data *ch)
+static void do_auto_exits2(Room *room, Character *ch)
 {
     int door, slen = 0;
 
@@ -3203,15 +3203,15 @@ ACMD(do_autoexit)
     ch->send_to("Your @rautoexit level@n is now %s.\r\n", exitlevels[EXIT_LEV(ch)]);
 }
 
-void look_at_room(room_rnum target_room, struct char_data *ch, int ignore_brief)
+void look_at_room(room_rnum target_room, Character *ch, int ignore_brief)
 {
-    struct room_data *rm = get_room(target_room);
+    Room *rm = get_room(target_room);
     look_at_room(rm, ch, ignore_brief);
 }
 
-static void display_room_info(struct room_data *rm, struct char_data *ch);
+static void display_room_info(Room *rm, Character *ch);
 
-static void display_dimension_info(struct room_data *rm, struct char_data *ch)
+static void display_dimension_info(Room *rm, Character *ch)
 {
     if (rm->where_flags.get(WhereFlag::neo_nirvana))
     {
@@ -3231,7 +3231,7 @@ static void display_dimension_info(struct room_data *rm, struct char_data *ch)
     }
 }
 
-static void display_special_room_descriptions(struct room_data *rm, struct char_data *ch)
+static void display_special_room_descriptions(Room *rm, Character *ch)
 {
     if (rm->room_flags.get(ROOM_REGEN))
     {
@@ -3247,7 +3247,7 @@ static void display_special_room_descriptions(struct room_data *rm, struct char_
     }
 }
 
-static void display_room_info(struct room_data *rm, struct char_data *ch)
+static void display_room_info(Room *rm, Character *ch)
 {
     if (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_NODEC))
     {
@@ -3284,7 +3284,7 @@ static void display_room_info(struct room_data *rm, struct char_data *ch)
     }
 }
 
-static void display_room_flags(struct room_data *rm, struct char_data *ch)
+static void display_room_flags(Room *rm, Character *ch)
 {
     char buf[MAX_STRING_LENGTH], buf2[MAX_STRING_LENGTH], buf3[MAX_STRING_LENGTH];
 
@@ -3317,7 +3317,7 @@ static void display_room_flags(struct room_data *rm, struct char_data *ch)
     }
 }
 
-static void display_damage_description(struct char_data *ch, int dmg, const char *surface)
+static void display_damage_description(Character *ch, int dmg, const char *surface)
 {
     if (dmg <= 2)
     {
@@ -3361,7 +3361,7 @@ static void display_damage_description(struct char_data *ch, int dmg, const char
     }
 }
 
-static void display_damage_description_forest(struct char_data *ch, int dmg)
+static void display_damage_description_forest(Character *ch, int dmg)
 {
     if (dmg <= 2)
     {
@@ -3405,7 +3405,7 @@ static void display_damage_description_forest(struct char_data *ch, int dmg)
     }
 }
 
-static void display_damage_description_mountain(struct char_data *ch, int dmg)
+static void display_damage_description_mountain(Character *ch, int dmg)
 {
     if (dmg <= 2)
     {
@@ -3449,7 +3449,7 @@ static void display_damage_description_mountain(struct char_data *ch, int dmg)
     }
 }
 
-static void display_room_damage_description(struct room_data *rm, struct char_data *ch)
+static void display_room_damage_description(Room *rm, Character *ch)
 {
     auto dmg = rm->getDamage();
     auto sect = static_cast<int>(rm->sector_type);
@@ -3503,7 +3503,7 @@ static void display_room_damage_description(struct room_data *rm, struct char_da
     }
 }
 
-static void display_garden_info(struct room_data *rm, struct char_data *ch)
+static void display_garden_info(Room *rm, Character *ch)
 {
     auto con = rm->getObjects();
     if (rm->room_flags.get(ROOM_GARDEN1))
@@ -3520,7 +3520,7 @@ static void display_garden_info(struct room_data *rm, struct char_data *ch)
     }
 }
 
-void look_at_room(struct room_data *rm, struct char_data *ch, int ignore_brief)
+void look_at_room(Room *rm, Character *ch, int ignore_brief)
 {
     if (!ch->desc)
         return;
@@ -3573,7 +3573,7 @@ void look_at_room(struct room_data *rm, struct char_data *ch, int ignore_brief)
     list_char_to_char(rm->getPeople(), ch);
 }
 
-static void look_in_direction(struct char_data *ch, int dir)
+static void look_in_direction(Character *ch, int dir)
 {
     auto ex = ch->location.getExit(static_cast<Direction>(dir));
     if (!ex)
@@ -3610,7 +3610,7 @@ static void look_in_direction(struct char_data *ch, int dir)
     }
 }
 
-static void handle_portal(struct char_data *ch, struct obj_data *obj)
+static void handle_portal(Character *ch, Object *obj)
 {
     if (!OBJVAL_FLAGGED(obj, CONT_CLOSEABLE))
     {
@@ -3641,7 +3641,7 @@ static void handle_portal(struct char_data *ch, struct obj_data *obj)
     }
 }
 
-static void handle_vehicle(struct char_data *ch, struct obj_data *obj)
+static void handle_vehicle(Character *ch, Object *obj)
 {
     if (OBJVAL_FLAGGED(obj, CONT_CLOSED))
     {
@@ -3667,7 +3667,7 @@ static void handle_vehicle(struct char_data *ch, struct obj_data *obj)
     }
 }
 
-static void handle_container(struct char_data *ch, struct obj_data *obj, int bits)
+static void handle_container(Character *ch, Object *obj, int bits)
 {
     if (OBJVAL_FLAGGED(obj, CONT_CLOSED))
     {
@@ -3700,7 +3700,7 @@ static void handle_container(struct char_data *ch, struct obj_data *obj, int bit
     }
 }
 
-static void describe_drink_level(struct char_data *ch, const char *liquid, int howfull, int capacity)
+static void describe_drink_level(Character *ch, const char *liquid, int howfull, int capacity)
 {
     if (howfull == capacity)
     {
@@ -3728,7 +3728,7 @@ static void describe_drink_level(struct char_data *ch, const char *liquid, int h
     }
 }
 
-static void handle_drinkcon(struct char_data *ch, struct obj_data *obj)
+static void handle_drinkcon(Character *ch, Object *obj)
 {
     int capacity = GET_OBJ_VAL(obj, VAL_DRINKCON_CAPACITY);
     int howfull = GET_OBJ_VAL(obj, VAL_DRINKCON_HOWFULL);
@@ -3755,10 +3755,10 @@ static void handle_drinkcon(struct char_data *ch, struct obj_data *obj)
     }
 }
 
-static void look_in_obj(struct char_data *ch, char *arg)
+static void look_in_obj(Character *ch, char *arg)
 {
-    struct obj_data *obj = nullptr;
-    struct char_data *dummy = nullptr;
+    Object *obj = nullptr;
+    Character *dummy = nullptr;
 
     if (!*arg)
     {
@@ -3831,7 +3831,7 @@ char *find_exdesc(char *word, struct extra_descr_data *list)
  * Thanks to Angus Mezick <angus@EDGIL.CCMAIL.COMPUSERVE.COM> for the
  * suggested fix to this problem.
  */
-static void examine_equipped_item(struct char_data *ch, struct obj_data *obj, const char *arg)
+static void examine_equipped_item(Character *ch, Object *obj, const char *arg)
 {
     if (isname(arg, obj->getName()))
     {
@@ -3852,7 +3852,7 @@ static void examine_equipped_item(struct char_data *ch, struct obj_data *obj, co
     }
 }
 
-static void examine_item(struct char_data *ch, struct obj_data *obj, const char *arg)
+static void examine_item(Character *ch, Object *obj, const char *arg)
 {
     if (isname(arg, obj->getName()))
     {
@@ -3899,9 +3899,9 @@ static void examine_item(struct char_data *ch, struct obj_data *obj, const char 
     }
 }
 
-static void handle_board_read(struct char_data *ch, char *arg)
+static void handle_board_read(Character *ch, char *arg)
 {
-    struct obj_data *obj = ch->findObject([](const auto &o)
+    Object *obj = ch->findObject([](const auto &o)
                                           { return GET_OBJ_TYPE(o) == ITEM_BOARD; });
     if (!obj)
         obj = ch->location.findObject([](const auto &o)
@@ -3937,7 +3937,7 @@ static void handle_board_read(struct char_data *ch, char *arg)
     }
 }
 
-static bool handle_exdesc_look(struct char_data *ch, char *arg, const std::vector<ExtraDescription> &ex_desc_list, struct obj_data *obj)
+static bool handle_exdesc_look(Character *ch, char *arg, const std::vector<ExtraDescription> &ex_desc_list, Object *obj)
 {
     char *desc;
     int fnum = get_number(&arg);
@@ -3954,12 +3954,12 @@ static bool handle_exdesc_look(struct char_data *ch, char *arg, const std::vecto
     return false;
 }
 
-static void handle_look_in_inventory(struct char_data *ch, char *arg)
+static void handle_look_in_inventory(Character *ch, char *arg)
 {
 
     for (int j = 0; j < NUM_WEARS; j++)
     {
-        struct obj_data *eq = GET_EQ(ch, j);
+        Object *eq = GET_EQ(ch, j);
         if (eq && CAN_SEE_OBJ(ch, eq) && handle_exdesc_look(ch, arg, eq->getExtraDescription(), eq))
         {
             examine_equipped_item(ch, eq, arg);
@@ -3986,10 +3986,10 @@ static void handle_look_in_inventory(struct char_data *ch, char *arg)
     }
 }
 
-static void handle_look(struct char_data *ch, char *arg)
+static void handle_look(Character *ch, char *arg)
 {
-    struct char_data *found_char = nullptr;
-    struct obj_data *found_obj = nullptr;
+    Character *found_char = nullptr;
+    Object *found_obj = nullptr;
     int bits = generic_find(arg, FIND_OBJ_INV | FIND_OBJ_ROOM | FIND_OBJ_EQUIP | FIND_CHAR_ROOM, ch, &found_char, &found_obj);
 
     if (found_char)
@@ -4022,7 +4022,7 @@ static void handle_look(struct char_data *ch, char *arg)
     }
 }
 
-static void look_at_target(struct char_data *ch, char *arg, int cmread)
+static void look_at_target(Character *ch, char *arg, int cmread)
 {
     if (!ch->desc)
         return;
@@ -4043,10 +4043,10 @@ static void look_at_target(struct char_data *ch, char *arg, int cmread)
     }
 }
 
-static void look_out_window(struct char_data *ch, const char *arg)
+static void look_out_window(Character *ch, const char *arg)
 {
-    struct obj_data *i, *viewport = nullptr, *vehicle = nullptr;
-    struct char_data *dummy = nullptr;
+    Object *i, *viewport = nullptr, *vehicle = nullptr;
+    Character *dummy = nullptr;
     room_rnum target_room = NOWHERE;
     int bits, door;
 
@@ -4155,7 +4155,7 @@ ACMD(do_finger)
 
 ACMD(do_rptrans)
 {
-    struct char_data *vict = nullptr;
+    Character *vict = nullptr;
     struct descriptor_data *k;
     int amt = 0;
     char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
@@ -4535,8 +4535,8 @@ ACMD(do_look)
 
 ACMD(do_examine)
 {
-    struct char_data *tmp_char;
-    struct obj_data *tmp_object;
+    Character *tmp_char;
+    Object *tmp_object;
     char tempsave[MAX_INPUT_LENGTH], arg[MAX_INPUT_LENGTH];
 
     one_argument(argument, arg);
@@ -4755,7 +4755,7 @@ ACMD(do_score)
     ch->sendText("  @cO@D------------------------------------------------------------------------@cO@n\n");
 }
 
-static void trans_check(struct char_data *ch, struct char_data *vict)
+static void trans_check(Character *ch, Character *vict)
 {
     /* Rillao: transloc, add new transes here */
     if (vict->form == Form::base || (vict->mimic && vict != ch))
@@ -5003,7 +5003,7 @@ ACMD(do_status)
 
         if (GET_EQ(ch, WEAR_EYE))
         {
-            struct obj_data *obj = GET_EQ(ch, WEAR_EYE);
+            Object *obj = GET_EQ(ch, WEAR_EYE);
             if (SFREQ(obj) == 0)
             {
                 obj->setBaseStat("scoutfreq", 1);
@@ -5513,7 +5513,7 @@ const char *list_bonuses[] = {
 };
 
 /* Display What Bonuses/Negatives Player Has */
-static void bonus_status(struct char_data *ch)
+static void bonus_status(Character *ch)
 {
     int i, max = 52, count = 0;
 
@@ -5570,7 +5570,7 @@ ACMD(do_inventory)
     ch->sendText("\n");
 }
 
-static void show_equipment(struct char_data *ch, struct obj_data *equipment, const char *wear_location, int wear_pos)
+static void show_equipment(Character *ch, Object *equipment, const char *wear_location, int wear_pos)
 {
     ch->send_to("%s", wear_location);
     show_obj_to_char(equipment, ch, SHOW_OBJ_SHORT);
@@ -5806,7 +5806,7 @@ ACMD(do_help)
 ACMD(do_who)
 {
     struct descriptor_data *d;
-    struct char_data *tch;
+    Character *tch;
     int i, num_can_see = 0;
     char name_search[MAX_INPUT_LENGTH], buf[MAX_INPUT_LENGTH];
     int low = 0, high = CONFIG_LEVEL_CAP, localwho = 0, questwho = 0, hide = 0;
@@ -6043,7 +6043,7 @@ ACMD(do_users)
     char line[200], line2[220], idletime[10];
     char state[30], *timeptr, mode;
     char name_search[MAX_INPUT_LENGTH], host_search[MAX_INPUT_LENGTH];
-    struct char_data *tch;
+    Character *tch;
     struct descriptor_data *d;
     int low = 0, high = CONFIG_LEVEL_CAP, num_can_see = 0;
     int showclass = 0, outlaws = 0, playing = 0, deadweight = 0, showrace = 0;
@@ -6259,9 +6259,9 @@ ACMD(do_gen_ps)
     }
 }
 
-static void perform_mortal_where(struct char_data *ch, char *arg)
+static void perform_mortal_where(Character *ch, char *arg)
 {
-    struct char_data *i;
+    Character *i;
     struct descriptor_data *d;
 
     if (!*arg)
@@ -6300,7 +6300,7 @@ static void perform_mortal_where(struct char_data *ch, char *arg)
     }
 }
 
-static void print_object_location(int num, struct obj_data *obj, struct char_data *ch,
+static void print_object_location(int num, Object *obj, Character *ch,
                                   int recur)
 {
     if (num > 0)
@@ -6317,13 +6317,13 @@ static void print_object_location(int num, struct obj_data *obj, struct char_dat
         {
         case UnitType::room:
         {
-            auto r = static_cast<room_data *>(obj->location.unit);
+            auto r = static_cast<Room *>(obj->location.unit);
             ch->send_to("[%5d] %s\r\n", r->getVnum(), r->getName());
         }
         break;
         case UnitType::character:
         {
-            auto c = static_cast<char_data *>(obj->location.unit);
+            auto c = static_cast<Character *>(obj->location.unit);
             if (obj->location.position.x == -1)
             {
                 ch->send_to("carried by %s in room [%d]\r\n", PERS(c, ch), c->getRoomVnum());
@@ -6336,7 +6336,7 @@ static void print_object_location(int num, struct obj_data *obj, struct char_dat
         break;
         case UnitType::object:
         {
-            auto o = static_cast<obj_data *>(obj->location.unit);
+            auto o = static_cast<Object *>(obj->location.unit);
             ch->send_to("inside %s%s\r\n", o->getShortDescription(), (recur ? ", which is" : " "));
             if (recur)
                 print_object_location(0, o, ch, recur);
@@ -6353,10 +6353,10 @@ static void print_object_location(int num, struct obj_data *obj, struct char_dat
     }
 }
 
-static void perform_immort_where(struct char_data *ch, char *arg)
+static void perform_immort_where(Character *ch, char *arg)
 {
-    struct char_data *i;
-    struct obj_data *k;
+    Character *i;
+    Object *k;
     struct descriptor_data *d;
     int num = 0, num2 = 0, found = 0;
     std::optional<WhereFlag> planet;
@@ -6470,7 +6470,7 @@ ACMD(do_levels)
 ACMD(do_consider)
 {
     char buf[MAX_INPUT_LENGTH];
-    struct char_data *victim;
+    Character *victim;
     double diff;
 
     one_argument(argument, buf);
@@ -6519,7 +6519,7 @@ ACMD(do_diagnose)
 
     one_argument(argument, buf);
 
-    struct char_data *vict = FIGHTING(ch);
+    Character *vict = FIGHTING(ch);
 
     if (*buf)
     {
@@ -6929,7 +6929,7 @@ ACMD(do_commands)
 {
     int no, i, cmd_num;
     int wizhelp = 0, socials = 0;
-    struct char_data *vict = ch;
+    Character *vict = ch;
     char arg[MAX_INPUT_LENGTH];
 
     one_argument(argument, arg);
@@ -7035,7 +7035,7 @@ ACMD(do_history)
         ch->sendText("You have no history in that channel.\r\n");
 }
 
-void add_history(struct char_data *ch, char *str, int type)
+void add_history(Character *ch, char *str, int type)
 {
     int i = 0;
     char time_str[MAX_STRING_LENGTH], buf[MAX_STRING_LENGTH];
@@ -7416,7 +7416,7 @@ ACMD(do_whois)
     ch->sendText("@D~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~@n\r\n");
 }
 
-static void search_in_direction(struct char_data *ch, int dir)
+static void search_in_direction(Character *ch, int dir)
 {
     int check = false, skill_lvl, dchide = 20;
 

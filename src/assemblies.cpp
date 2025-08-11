@@ -15,7 +15,7 @@
 long g_lNumAssemblies = 0;
 ASSEMBLY *g_pAssemblyTable = nullptr;
 
-void assemblyListToChar(struct char_data *pCharacter, int type) {
+void assemblyListToChar(Character *pCharacter, int type) {
     char szBuffer[MAX_STRING_LENGTH] = {'\0'};
     char szAssmType[MAX_INPUT_LENGTH] = {'\0'};
     long i = 0;                  // Outer iterator.
@@ -108,11 +108,11 @@ bool assemblyAddComponent(long lVnum, long lComponentVnum, bool bExtract, bool b
     return (true);
 }
 
-bool assemblyCheckComponents(long lVnum, struct char_data *pCharacter, int extract_yes) {
+bool assemblyCheckComponents(long lVnum, Character *pCharacter, int extract_yes) {
     bool bOk = true;
     long i = 0;
     long lRnum = 0;
-    struct obj_data **ppComponentObjects = nullptr;
+    Object **ppComponentObjects = nullptr;
     ASSEMBLY *pAssembly = nullptr;
 
     if (pCharacter == nullptr) {
@@ -128,7 +128,7 @@ bool assemblyCheckComponents(long lVnum, struct char_data *pCharacter, int extra
     else if (pAssembly->lNumComponents <= 0)
         return (false);
 
-    CREATE(ppComponentObjects, struct obj_data*, pAssembly->lNumComponents);
+    CREATE(ppComponentObjects, Object*, pAssembly->lNumComponents);
 
     for (i = 0; i < pAssembly->lNumComponents && bOk; i++) {
         if ((lRnum = real_object(pAssembly->pComponents[i].lVnum)) < 0)

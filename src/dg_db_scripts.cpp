@@ -72,24 +72,24 @@ void parse_trigger(FILE *trig_f, trig_vnum nr) {
  * create a new trigger from a prototype.
  * nr is the real number of the trigger.
  */
-std::shared_ptr<trig_data> read_trigger(int nr) {
+std::shared_ptr<DgScript> read_trigger(int nr) {
 
     auto idx = trig_index.find(nr);
     if(idx == trig_index.end()) return nullptr;
 
-    auto sh = std::make_shared<trig_data>(idx->second);
+    auto sh = std::make_shared<DgScript>(idx->second);
 
     return sh;
 }
 
 
 /* for mobs and rooms: */
-void dg_read_trigger(FILE *fp, struct unit_data *proto, UnitType type) {
+void dg_read_trigger(FILE *fp, struct Entity *proto, UnitType type) {
     char line[READ_SIZE];
     char junk[8];
     int vnum, rnum, count;
-    char_data *mob;
-    room_data *room;
+    Character *mob;
+    Room *room;
     struct trig_proto_list *trg_proto, *new_trg;
 
     get_line(fp, line);
@@ -112,12 +112,12 @@ void dg_read_trigger(FILE *fp, struct unit_data *proto, UnitType type) {
             case MOB_TRIGGER:
                 mudlog(BRF, ADMLVL_BUILDER, true,
                        "SYSERR: dg_read_trigger: Trigger vnum #%d asked for but non-existant! (mob: %s - %d)",
-                       vnum, GET_NAME((char_data *) proto), GET_MOB_VNUM((char_data *) proto));
+                       vnum, GET_NAME((Character *) proto), GET_MOB_VNUM((Character *) proto));
                 break;
             case WLD_TRIGGER:
                 mudlog(BRF, ADMLVL_BUILDER, true,
                        "SYSERR: dg_read_trigger: Trigger vnum #%d asked for but non-existant! (room:%d)",
-                       vnum, GET_ROOM_VNUM(((room_data *) proto)->getVnum()));
+                       vnum, GET_ROOM_VNUM(((Room *) proto)->getVnum()));
                 break;
             default:
                 mudlog(BRF, ADMLVL_BUILDER, true,
@@ -141,7 +141,7 @@ void dg_read_trigger(FILE *fp, struct unit_data *proto, UnitType type) {
             if(!mob_proto.contains(proto->getVnum())) {
                 mudlog(BRF, ADMLVL_BUILDER, true,
                        "SYSERR: dg_read_trigger: Trigger vnum #%d asked for but non-existant! (mob: %s - %d)",
-                       vnum, GET_NAME((char_data *) proto), GET_MOB_VNUM((char_data *) proto));
+                       vnum, GET_NAME((Character *) proto), GET_MOB_VNUM((Character *) proto));
                 return;
             }
             mob_proto.at(proto->getVnum()).proto_script.push_back(rnum);
@@ -150,7 +150,7 @@ void dg_read_trigger(FILE *fp, struct unit_data *proto, UnitType type) {
             if(!world.contains(proto->getVnum())) {
                 mudlog(BRF, ADMLVL_BUILDER, true,
                        "SYSERR: dg_read_trigger: Trigger vnum #%d asked for but non-existant! (room:%d)",
-                       vnum, GET_ROOM_VNUM(((room_data *) proto)->getVnum()));
+                       vnum, GET_ROOM_VNUM(((Room *) proto)->getVnum()));
                 return;
             }
             world.at(proto->getVnum())->proto_script.push_back(rnum);
@@ -162,12 +162,12 @@ void dg_read_trigger(FILE *fp, struct unit_data *proto, UnitType type) {
     }
 }
 
-void dg_read_trigger(FILE *fp, struct proto_data *proto, UnitType type) {
+void dg_read_trigger(FILE *fp, struct ThingPrototype *proto, UnitType type) {
     char line[READ_SIZE];
     char junk[8];
     int vnum, rnum, count;
-    char_data *mob;
-    room_data *room;
+    Character *mob;
+    Room *room;
     struct trig_proto_list *trg_proto, *new_trg;
 
     get_line(fp, line);
@@ -190,7 +190,7 @@ void dg_read_trigger(FILE *fp, struct proto_data *proto, UnitType type) {
 
 }
 
-void dg_obj_trigger(char *line, struct item_proto_data *obj) {
+void dg_obj_trigger(char *line, ObjectPrototype *obj) {
     char junk[8];
     int vnum, rnum, count;
     struct trig_proto_list *trg_proto, *new_trg;
@@ -214,7 +214,7 @@ void dg_obj_trigger(char *line, struct item_proto_data *obj) {
     obj->proto_script.push_back(rnum);
 }
 
-void assign_triggers(struct unit_data *i, UnitType type) {
+void assign_triggers(struct Entity *i, UnitType type) {
 
     if(i->running_scripts.has_value()) {
         // If this value is set, then scripts have been manually assigned via attach or detach.

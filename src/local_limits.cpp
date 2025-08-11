@@ -28,17 +28,17 @@
 constexpr int sick_fail = 2;
 
 /* local functions */
-static void heal_limb(struct char_data *ch);
+static void heal_limb(Character *ch);
 
-static void update_flags(struct char_data *ch);
+static void update_flags(Character *ch);
 
-static int wearing_stardust(struct char_data *ch);
+static int wearing_stardust(Character *ch);
 
-static void barrier_shed(struct char_data *ch);
+static void barrier_shed(Character *ch);
 
-static void check_idling(struct char_data *ch);
+static void check_idling(Character *ch);
 
-static void barrier_shed(struct char_data *ch)
+static void barrier_shed(Character *ch)
 {
 
     if (!AFF_FLAGGED(ch, AFF_SANCTUARY))
@@ -126,7 +126,7 @@ static void barrier_shed(struct char_data *ch)
 }
 
 
-static int wearing_stardust(struct char_data *ch)
+static int wearing_stardust(Character *ch)
 {
 
     int count = 0, i;
@@ -135,7 +135,7 @@ static int wearing_stardust(struct char_data *ch)
     {
         if (GET_EQ(ch, i))
         {
-            struct obj_data *obj = GET_EQ(ch, i);
+            Object *obj = GET_EQ(ch, i);
             switch (GET_OBJ_VNUM(obj))
             {
             case 1110:
@@ -161,7 +161,7 @@ static int wearing_stardust(struct char_data *ch)
 }
 
 
-static void update_flags(struct char_data *ch)
+static void update_flags(Character *ch)
 {
     if (ch == nullptr)
     {
@@ -276,7 +276,7 @@ static void update_flags(struct char_data *ch)
     }
 }
 
-void set_title(struct char_data *ch, char *title)
+void set_title(Character *ch, char *title)
 {
     if (ch)
     {
@@ -298,7 +298,7 @@ void set_title(struct char_data *ch, char *title)
     */
 }
 
-void gain_level(struct char_data *ch)
+void gain_level(Character *ch)
 {
     ch->sendText("Levelling no longer exists!\r\n");
     /*
@@ -314,7 +314,7 @@ void gain_level(struct char_data *ch)
 }
 
 
-void gain_condition(struct char_data *ch, int condition, int value)
+void gain_condition(Character *ch, int condition, int value)
 {
     bool intoxicated;
 
@@ -543,7 +543,7 @@ void gain_condition(struct char_data *ch, int condition, int value)
     }
 }
 
-static void check_idling(struct char_data *ch)
+static void check_idling(Character *ch)
 {
 
     /*
@@ -573,7 +573,7 @@ static void check_idling(struct char_data *ch)
     */
 }
 
-static void heal_limb(struct char_data *ch)
+static void heal_limb(Character *ch)
 {
     int healrate = 0, recovered = false;
 
@@ -1087,7 +1087,7 @@ void goopTimeService(uint64_t heartPulse, double deltaTime)
 
 void corpseRotService(uint64_t heartPulse, double deltaTime)
 {
-    obj_data *jj, *next_thing2;
+    Object *jj, *next_thing2;
     auto subs = objectSubscriptions.all("corpseRotService");
     for (auto j : filter_raw(subs))
     {
@@ -1128,7 +1128,7 @@ void corpseRotService(uint64_t heartPulse, double deltaTime)
 
             if (loc.getType() == UnitType::room && loc.position.x == -1.0)
             {
-                auto c = static_cast<char_data *>(loc.unit);
+                auto c = static_cast<Character *>(loc.unit);
                 if (!strstr(j->getName(), "android"))
                 {
                     act("$p decays in your hands.", false, c, j, nullptr, TO_CHAR);
@@ -1145,7 +1145,7 @@ void corpseRotService(uint64_t heartPulse, double deltaTime)
                 {
                 case UnitType::room:
                 {
-                    auto r = static_cast<room_data *>(loc.unit);
+                    auto r = static_cast<Room *>(loc.unit);
                     for (auto jj : filter_raw(con))
                     {
                         jj->clearLocation();
@@ -1155,7 +1155,7 @@ void corpseRotService(uint64_t heartPulse, double deltaTime)
                 break;
                 case UnitType::character:
                 {
-                    auto c = static_cast<char_data *>(loc.unit);
+                    auto c = static_cast<Character *>(loc.unit);
                     for (auto jj : filter_raw(con))
                     {
                         jj->clearLocation();
@@ -1165,7 +1165,7 @@ void corpseRotService(uint64_t heartPulse, double deltaTime)
                 break;
                 case UnitType::object:
                 {
-                    auto o = static_cast<obj_data *>(loc.unit);
+                    auto o = static_cast<Object *>(loc.unit);
                     for (auto jj : filter_raw(con))
                     {
                         jj->clearLocation();
@@ -1185,12 +1185,12 @@ void corpseRotService(uint64_t heartPulse, double deltaTime)
 void characterVitalsRecovery(uint64_t heartPulse, double deltaTime)
 {
 
-    auto shouldRecover = [](char_data *ch)
+    auto shouldRecover = [](Character *ch)
     {
         return !(AFF_FLAGGED(ch, AFF_POISON) && ch->task == Task::nothing);
     };
 
-    auto getUniversalPerc = [](char_data *ch)
+    auto getUniversalPerc = [](Character *ch)
     {
         double universalPerc = 0.0;
 
@@ -1216,11 +1216,11 @@ void characterVitalsRecovery(uint64_t heartPulse, double deltaTime)
         return universalPerc;
     };
 
-    std::unordered_map<char_data *, double> universalPercCache;
+    std::unordered_map<Character *, double> universalPercCache;
 
     double base = 0.005;
 
-    auto getUniversalPercCached = [&](char_data *ch)
+    auto getUniversalPercCached = [&](Character *ch)
     {
         auto find = universalPercCache.find(ch);
         if (find != universalPercCache.end())
@@ -1502,7 +1502,7 @@ void poison_update(uint64_t heartPulse, double deltaTime)
 /* Update PCs, NPCs, and objects */
 void point_update(uint64_t heartPulse, double deltaTime)
 {
-    struct obj_data *jj, *next_thing2, *vehicle = nullptr;
+    Object *jj, *next_thing2, *vehicle = nullptr;
     /* characters */
 
     std::unordered_set<int> processed;
@@ -1732,7 +1732,7 @@ void point_update(uint64_t heartPulse, double deltaTime)
                         auto loc = j->location;
                         if (loc.getType() == UnitType::character && loc.position.x >= 0.0)
                         {
-                            auto c = static_cast<char_data *>(loc.unit);
+                            auto c = static_cast<Character *>(loc.unit);
                             int melt = 5 + (GET_OBJ_WEIGHT(j) * 0.02);
                             if (GET_OBJ_WEIGHT(j) - (5 + (GET_OBJ_WEIGHT(j) * 0.02)) > 0)
                             {

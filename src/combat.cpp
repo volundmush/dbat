@@ -30,7 +30,7 @@
 #include "dbat/random.h"
 
 /* local functions */
-void damage_weapon(struct char_data *ch, struct obj_data *obj, struct char_data *vict) {
+void damage_weapon(Character *ch, Object *obj, Character *vict) {
 
     if (obj) {
         if (OBJ_FLAGGED(obj, ITEM_UNBREAKABLE))
@@ -148,7 +148,7 @@ void damage_weapon(struct char_data *ch, struct obj_data *obj, struct char_data 
     }
 }
 
-void handle_multihit(struct char_data *ch, struct char_data *vict) {
+void handle_multihit(Character *ch, Character *vict) {
 
     int perc = GET_DEX(ch), prob = GET_DEX(vict);
 
@@ -277,12 +277,12 @@ void handle_multihit(struct char_data *ch, struct char_data *vict) {
 
 }
 
-int handle_defender(struct char_data *vict, struct char_data *ch) {
+int handle_defender(Character *vict, Character *ch) {
 
     int result = false;
 
     if (GET_DEFENDER(vict)) {
-        struct char_data *def = GET_DEFENDER(vict);
+        Character *def = GET_DEFENDER(vict);
         int64_t defnum = (GET_SPEEDI(def) * 0.01) * rand_number(-10, 10);
         int64_t chnum = (GET_SPEEDI(ch) * 0.01) * rand_number(-5, 10);
         if (GET_SPEEDI(def) + defnum > GET_SPEEDI(ch) + chnum && def->location == vict->location &&
@@ -307,7 +307,7 @@ int handle_defender(struct char_data *vict, struct char_data *ch) {
     return (result);
 }
 
-void handle_disarm(struct char_data *ch, struct char_data *vict) {
+void handle_disarm(Character *ch, Character *vict) {
 
     int roll1 = rand_number(-10, 10), roll2 = rand_number(-10, 10), handled = false;
     roll1 += GET_STR(ch) + GET_DEX(ch);
@@ -334,7 +334,7 @@ void handle_disarm(struct char_data *ch, struct char_data *vict) {
     }
 
     if (roll1 < roll2) {
-        struct obj_data *obj;
+        Object *obj;
         if (GET_EQ(ch, WEAR_WIELD1) && handled == false) {
             obj = GET_EQ(ch, WEAR_WIELD1);
             act("@y$N@Y manages to disarm you! The @w$p@Y falls from your grasp!@n", true, ch, obj, vict, TO_CHAR);
@@ -376,7 +376,7 @@ void handle_disarm(struct char_data *ch, struct char_data *vict) {
 
 }
 
-void combine_attacks(struct char_data *ch, struct char_data *vict) {
+void combine_attacks(Character *ch, Character *vict) {
 
     struct follow_type *f;
     char chbuf[MAX_INPUT_LENGTH], victbuf[MAX_INPUT_LENGTH], rmbuf[MAX_INPUT_LENGTH];
@@ -627,7 +627,7 @@ void combine_attacks(struct char_data *ch, struct char_data *vict) {
     }
 }
 
-int check_ruby(struct char_data *ch) {
+int check_ruby(Character *ch) {
 
     auto isHotRuby = [](const auto&o) {return o->getVnum() == 6600 && OBJ_FLAGGED(o, ITEM_HOT);};
     auto ruby = ch->findObject(isHotRuby);
@@ -644,7 +644,7 @@ int check_ruby(struct char_data *ch) {
 
 }
 
-int64_t combo_damage(struct char_data *ch, int64_t damage, int type) {
+int64_t combo_damage(Character *ch, int64_t damage, int type) {
     int64_t bonus = 0;
 
     if (type == 0) { /* Not a finish */
@@ -675,7 +675,7 @@ int64_t combo_damage(struct char_data *ch, int64_t damage, int type) {
 
 
 /* For getting into a better combat position */
-int roll_balance(struct char_data *ch) {
+int roll_balance(Character *ch) {
 
     int chance = 0;
 
@@ -701,7 +701,7 @@ int roll_balance(struct char_data *ch) {
 
 }
 
-void handle_knockdown(struct char_data *ch) {
+void handle_knockdown(Character *ch) {
     int chance = 0;
 
     if (IS_NPC(ch)) {
@@ -733,7 +733,7 @@ void handle_knockdown(struct char_data *ch) {
 
 }
 
-int boom_headshot(struct char_data *ch) {
+int boom_headshot(Character *ch) {
 
     int skill = GET_SKILL_BASE(ch, SKILL_TWOHAND);
 
@@ -748,7 +748,7 @@ int boom_headshot(struct char_data *ch) {
 
 }
 
-int64_t gun_dam(struct char_data *ch, int wlvl) {
+int64_t gun_dam(Character *ch, int wlvl) {
     int64_t dmg = 100;
 
     switch (wlvl) {
@@ -786,7 +786,7 @@ int64_t gun_dam(struct char_data *ch, int wlvl) {
     return (dmg);
 }
 
-void club_stamina(struct char_data *ch, struct char_data *vict, int wlvl, int64_t dmg) {
+void club_stamina(Character *ch, Character *vict, int wlvl, int64_t dmg) {
 
     double drain = 0.0;
     int64_t drained = 0;
@@ -822,7 +822,7 @@ void club_stamina(struct char_data *ch, struct char_data *vict, int wlvl, int64_
 
 }
 
-int backstab(struct char_data *ch, struct char_data *vict, int wlvl, int64_t dmg) {
+int backstab(Character *ch, Character *vict, int wlvl, int64_t dmg) {
 
     int chance = 0, roll_to_beat = rand_number(1, 100);
     double bonus = 0.0;
@@ -885,7 +885,7 @@ int backstab(struct char_data *ch, struct char_data *vict, int wlvl, int64_t dmg
     }
 }
 
-void cut_limb(struct char_data *ch, struct char_data *vict, int wlvl, int hitspot) {
+void cut_limb(Character *ch, Character *vict, int wlvl, int hitspot) {
 
     int chance = 0, decap = 0, decapitate = false;
     int roll_to_beat = rand_number(1, 10000);
@@ -981,7 +981,7 @@ void cut_limb(struct char_data *ch, struct char_data *vict, int wlvl, int hitspo
 
 }
 
-int count_physical(struct char_data *ch) {
+int count_physical(Character *ch) {
     int count = 0;
 
     if (GET_SKILL(ch, SKILL_PUNCH) >= 1) {
@@ -1018,7 +1018,7 @@ int count_physical(struct char_data *ch) {
     return (count);
 }
 
-int physical_mastery(struct char_data *ch) {
+int physical_mastery(Character *ch) {
 
     int count = 22;
 
@@ -1062,7 +1062,7 @@ int physical_mastery(struct char_data *ch) {
 
 }
 
-int64_t advanced_energy(struct char_data *ch, int64_t dmg) {
+int64_t advanced_energy(Character *ch, int64_t dmg) {
 
     if (ch == nullptr) {
         return (false);
@@ -1113,7 +1113,7 @@ int64_t advanced_energy(struct char_data *ch, int64_t dmg) {
     return (add);
 } /* End of advanced_energy function */
 
-int roll_accuracy(struct char_data *ch, int skill, bool kiatt) {
+int roll_accuracy(Character *ch, int skill, bool kiatt) {
     if (!IS_NPC(ch)) {
         if (GET_BONUS(ch, BONUS_ACCURATE)) {
             if (kiatt == true)
@@ -1135,7 +1135,7 @@ int roll_accuracy(struct char_data *ch, int skill, bool kiatt) {
     return (skill);
 }
 
-long double calc_critical(struct char_data *ch, int loc) {
+long double calc_critical(Character *ch, int loc) {
 
     int roll = rand_number(1, 100);
     long double multi = 1;
@@ -1169,7 +1169,7 @@ long double calc_critical(struct char_data *ch, int loc) {
     return (multi);
 }
 
-int roll_hitloc(struct char_data *ch, struct char_data *vict, int skill) {
+int roll_hitloc(Character *ch, Character *vict, int skill) {
 
     int location = 4, critmax = 1000;
     int critical = 0;
@@ -1216,7 +1216,7 @@ int roll_hitloc(struct char_data *ch, struct char_data *vict, int skill) {
 
 }
 
-int64_t armor_calc(struct char_data *ch, int64_t dmg, int type) {
+int64_t armor_calc(Character *ch, int64_t dmg, int type) {
     if (IS_NPC(ch))
         return (70);
 
@@ -1250,7 +1250,7 @@ int64_t armor_calc(struct char_data *ch, int64_t dmg, int type) {
 
     for (i = 0; i < NUM_WEARS; i++) {
         if (GET_EQ(ch, i)) {
-            struct obj_data *obj = GET_EQ(ch, i);
+            Object *obj = GET_EQ(ch, i);
             switch (GET_OBJ_VAL(obj, VAL_ALL_MATERIAL)) {
                 case MATERIAL_STEEL:
                     loc = 0;
@@ -1322,7 +1322,7 @@ int64_t armor_calc(struct char_data *ch, int64_t dmg, int type) {
 }
 
 /* For calculating the difficulty the player has to hit with the skill. */
-int chance_to_hit(struct char_data *ch) {
+int chance_to_hit(Character *ch) {
 
     int num = axion_dice(0);
 
@@ -1340,7 +1340,7 @@ int chance_to_hit(struct char_data *ch) {
 }
 
 /* For calculating the speed of the attacker and defender */
-int handle_speed(struct char_data *ch, struct char_data *vict) {
+int handle_speed(Character *ch, Character *vict) {
 
     if (ch == nullptr || vict == nullptr) { /* Ruh roh*/
         return (0);
@@ -1364,7 +1364,7 @@ int handle_speed(struct char_data *ch, struct char_data *vict) {
 }
 
 /* For Destroying or Breaking Limbs */
-void hurt_limb(struct char_data *ch, struct char_data *vict, int chance, int area, int64_t power) {
+void hurt_limb(Character *ch, Character *vict, int chance, int area, int64_t power) {
     if (!vict || IS_NPC(vict)) {
         return;
     }
@@ -1463,7 +1463,7 @@ void hurt_limb(struct char_data *ch, struct char_data *vict, int chance, int are
 }
 
 /* For damaging equipment when hit */
-void dam_eq_loc(struct char_data *vict, int area) {
+void dam_eq_loc(Character *vict, int area) {
     int location = 0, num = 0;
     /* Area is 4 possible hit locations in an attack.
     1 Arms, 2 legs, 3 head, and 4 body. */
@@ -1559,10 +1559,10 @@ void dam_eq_loc(struct char_data *vict, int area) {
     damage_eq(vict, location);
 }
 
-void damage_eq(struct char_data *vict, int location) {
+void damage_eq(Character *vict, int location) {
 
     if (GET_EQ(vict, location) && rand_number(1, 20) >= 19 && !AFF_FLAGGED(vict, AFF_SANCTUARY)) {
-        struct obj_data *eq = GET_EQ(vict, location);
+        Object *eq = GET_EQ(vict, location);
         if (OBJ_FLAGGED(eq, ITEM_UNBREAKABLE)) {
             return;
         }
@@ -1622,7 +1622,7 @@ void damage_eq(struct char_data *vict, int location) {
 void huge_update(uint64_t heartPulse, double deltaTime) {
     int dge = 0, skill = 0, bonus = 1, count = 0;
     int64_t dmg = 0;
-    struct char_data *ch, *vict, *next_v;
+    Character *ch, *vict, *next_v;
 
     /* Checking the object list for any huge ki attacks */
     auto subs = objectSubscriptions.all("hugeKiAttacks");
@@ -2021,8 +2021,8 @@ void homing_update(uint64_t heartPulse, double deltaTime) {
         if (GET_OBJ_VNUM(k) != 80 && GET_OBJ_VNUM(k) != 81 && GET_OBJ_VNUM(k) != 84) continue;
         if(!(TARGET(k) && USER(k))) continue;
 
-        struct char_data *ch = USER(k);
-        struct char_data *vict = TARGET(k);
+        Character *ch = USER(k);
+        Character *vict = TARGET(k);
 
         if (GET_OBJ_VNUM(k) == 80) { // Tsuihidan
             if (KICHARGE(k) <= 0) {
@@ -2194,7 +2194,7 @@ void homing_update(uint64_t heartPulse, double deltaTime) {
 
 /* For checking if they have enough free limbs to preform the technique. */
 // type 0 is arms, type 1 is legs. 2 is both. 3 is tail.
-int limb_ok(struct char_data *ch, int type) {
+int limb_ok(Character *ch, int type) {
     if (IS_NPC(ch)) {
         if (AFF_FLAGGED(ch, AFF_ENSNARED) && rand_number(1, 100) <= 90) {
             return false;
@@ -2254,7 +2254,7 @@ int limb_ok(struct char_data *ch, int type) {
     return true;
 }
 
-int init_skill(struct char_data *ch, int snum) {
+int init_skill(Character *ch, int snum) {
     int skill = 0;
 
     if (!IS_NPC(ch)) {
@@ -2295,7 +2295,7 @@ int init_skill(struct char_data *ch, int snum) {
     }
 }
 
-int handle_block(struct char_data *ch) {
+int handle_block(Character *ch) {
 
     if (axion_dice(0) <= 4) { /* Critical failure */
         return (1);
@@ -2351,7 +2351,7 @@ int handle_block(struct char_data *ch) {
     }
 }
 
-int handle_dodge(struct char_data *ch) {
+int handle_dodge(Character *ch) {
 
     if (axion_dice(0) <= 4) { /* Critical failure */
         return (1);
@@ -2428,7 +2428,7 @@ int handle_dodge(struct char_data *ch) {
     }
 }
 
-int check_def(struct char_data *vict) {
+int check_def(Character *vict) {
     int index = 0;
     int pry = handle_parry(vict), dge = handle_dodge(vict), blk = handle_block(vict);
 
@@ -2443,7 +2443,7 @@ int check_def(struct char_data *vict) {
     return index;
 }
 
-void handle_defense(struct char_data *vict, int *pry, int *blk, int *dge) {
+void handle_defense(Character *vict, int *pry, int *blk, int *dge) {
 
     *pry = handle_parry(vict);
 
@@ -2494,15 +2494,15 @@ void handle_defense(struct char_data *vict, int *pry, int *blk, int *dge) {
 }
 
 void
-parry_ki(double attperc, struct char_data *ch, struct char_data *vict, char sname[1000], int prob, int perc, int skill,
+parry_ki(double attperc, Character *ch, Character *vict, char sname[1000], int prob, int perc, int skill,
          int type) {
     char buf[200];
     char buf2[200];
     char buf3[200];
     int foundv = false, foundo = false;
     int64_t dmg = 0;
-    struct obj_data *tob, *next_obj;
-    struct char_data *tch, *next_v;
+    Object *tob, *next_obj;
+    Character *tch, *next_v;
     auto people = ch->location.getPeople();
     for (auto target : filter_raw(people)) {
         tch = target;
@@ -2696,7 +2696,7 @@ parry_ki(double attperc, struct char_data *ch, struct char_data *vict, char snam
     }
 }
 
-void dodge_ki(struct char_data *ch, struct char_data *vict, int type, int type2, int skill, int skill2) {
+void dodge_ki(Character *ch, Character *vict, int type, int type2, int skill, int skill2) {
     if (type == 0 && !vict->location.getWhereFlag(WhereFlag::space)) {
         const auto tile = ch->location.getTileType();
         if (tile != SECT_INSIDE) {
@@ -2826,7 +2826,7 @@ void dodge_ki(struct char_data *ch, struct char_data *vict, int type, int type2,
             act("@RIt turns around at the last second and begins to pursue YOU!@n", true, ch, nullptr, vict, TO_VICT);
             act("@RIt turns around at the last second and begins to pursue @r$N@R!@n", true, ch, nullptr, vict,
                 TO_NOTVICT);
-            struct obj_data *obj;
+            Object *obj;
             int num = 0;
 
             switch (skill2) {
@@ -2868,7 +2868,7 @@ void dodge_ki(struct char_data *ch, struct char_data *vict, int type, int type2,
         act("@RYou turn it around and send it back after @r$N@R!@n", true, ch, nullptr, vict, TO_CHAR);
         act("@W$n @Rturns it around and sends it back after YOU!@n", true, ch, nullptr, vict, TO_VICT);
         act("@W$n @Rturns it around and sends it back after @r$N@R!@n", true, ch, nullptr, vict, TO_NOTVICT);
-        struct obj_data *obj;
+        Object *obj;
         int num = 0;
 
         switch (skill2) {
@@ -2893,7 +2893,7 @@ void dodge_ki(struct char_data *ch, struct char_data *vict, int type, int type2,
     }
 }
 
-static void damtype_unarmed_infuse(char_data *ch, int64_t *dam) {
+static void damtype_unarmed_infuse(Character *ch, int64_t *dam) {
     if (AFF_FLAGGED(ch, AFF_INFUSE)) {
         auto infuse = GET_SKILL(ch, SKILL_INFUSE);
         *dam += (*dam / 100) * (infuse / 2);
@@ -2910,7 +2910,7 @@ static void damtype_unarmed_infuse(char_data *ch, int64_t *dam) {
     }
 }
 
-static void damtype_unarmed_hasshuken(char_data *ch, int64_t *dam) {
+static void damtype_unarmed_hasshuken(Character *ch, int64_t *dam) {
     if (AFF_FLAGGED(ch, AFF_HASS)) {
         *dam *= 2;
         if (IS_KRANE(ch)) {
@@ -2926,7 +2926,7 @@ static void damtype_unarmed_hasshuken(char_data *ch, int64_t *dam) {
     }
 }
 
-static void damtype_unarmed_hasshuken_or_infuse(char_data *ch, int64_t *dam) {
+static void damtype_unarmed_hasshuken_or_infuse(Character *ch, int64_t *dam) {
     if (AFF_FLAGGED(ch, AFF_HASS)) {
         damtype_unarmed_hasshuken(ch, dam);
     } else {
@@ -2934,7 +2934,7 @@ static void damtype_unarmed_hasshuken_or_infuse(char_data *ch, int64_t *dam) {
     }
 }
 
-static void damtype_unarmed_preference(char_data *ch, int64_t *dam) {
+static void damtype_unarmed_preference(Character *ch, int64_t *dam) {
     if (GET_PREFERENCE(ch) == PREFERENCE_THROWING) {
         *dam -= *dam * 0.15;
     } else if (GET_PREFERENCE(ch) == PREFERENCE_H2H) {
@@ -2942,13 +2942,13 @@ static void damtype_unarmed_preference(char_data *ch, int64_t *dam) {
     }
 }
 
-static void damtype_focus(char_data *ch, int64_t *dam, int64_t focus, int divby) {
+static void damtype_focus(Character *ch, int64_t *dam, int64_t focus, int divby) {
     if (focus > 0) {
         dam += focus * (*dam / divby);
     }
 }
 
-static void damtype_unarmed(char_data *ch, int skill, int64_t *dam) {
+static void damtype_unarmed(Character *ch, int skill, int64_t *dam) {
     // General Arlian bonus.
     if (IS_ARLIAN(ch)) {
         *dam += *dam * 0.02;
@@ -3001,7 +3001,7 @@ static void damtype_unarmed(char_data *ch, int skill, int64_t *dam) {
 
 }
 
-static void damtype_human_grandmaster(char_data *ch, int skill, int64_t *dam) {
+static void damtype_human_grandmaster(Character *ch, int skill, int64_t *dam) {
     if (IS_HUMAN(ch)) {
         switch (skill) {
             case 101:
@@ -3014,32 +3014,32 @@ static void damtype_human_grandmaster(char_data *ch, int skill, int64_t *dam) {
     }
 }
 
-static void damtype_human_ki(char_data *ch, int64_t *dam, int bon) {
+static void damtype_human_ki(Character *ch, int64_t *dam, int bon) {
     if (IS_HUMAN(ch)) {
         *dam += (*dam / 100) * bon;
     }
 }
 
-static void damtype_saiyan_ki(char_data *ch, int64_t *dam, int bon) {
+static void damtype_saiyan_ki(Character *ch, int64_t *dam, int bon) {
     if (IS_SAIYAN(ch)) {
         *dam += (*dam / 100) * bon;
     }
 }
 
-static void damtype_kai_ki(char_data *ch, int64_t *dam, int bon) {
+static void damtype_kai_ki(Character *ch, int64_t *dam, int bon) {
     if (IS_KAI(ch)) {
         *dam += (*dam / 100) * bon;
     }
 }
 
-static void damtype_icer_ki(char_data *ch, int64_t *dam, int bon) {
+static void damtype_icer_ki(Character *ch, int64_t *dam, int bon) {
     if (IS_ICER(ch) || ch->bio_genomes.get(Race::icer)) {
         *dam += (*dam / 100) * bon;
     }
 }
 
 /* Damage for player and NPC attacks  */
-int64_t damtype(struct char_data *ch, int type, int skill, double percent) {
+int64_t damtype(Character *ch, int type, int skill, double percent) {
     int64_t dam = 0, cou1 = 0, cou2 = 0, focus = 0;
 
     /* Player damages based on attack */
@@ -3555,7 +3555,7 @@ int64_t damtype(struct char_data *ch, int type, int skill, double percent) {
     return dam;
 }
 
-void saiyan_gain(struct char_data *ch, struct char_data *vict) {
+void saiyan_gain(Character *ch, Character *vict) {
     int weak = false;
     if (!vict)
         return;
@@ -3642,7 +3642,7 @@ void saiyan_gain(struct char_data *ch, struct char_data *vict) {
 }
 
 
-static void spar_helper(struct char_data *ch, struct char_data *vict, int type, int64_t dmg) {
+static void spar_helper(Character *ch, Character *vict, int type, int64_t dmg) {
     int chance = 0, gmult, gravity, bonus = 1, pscost = 2;
     double difference = 0.0;
     int64_t gain = 0, pl = 0, ki = 0, st = 0, gaincalc = 0;
@@ -3789,7 +3789,7 @@ static void spar_helper(struct char_data *ch, struct char_data *vict, int type, 
     }
 }
 
-void giveRandomVital(char_data* ch, int64_t pl, int64_t ki, int64_t st, int attrChance) {
+void giveRandomVital(Character* ch, int64_t pl, int64_t ki, int64_t st, int attrChance) {
     //Handling for awarding vitals to the player
     pl *= (1 + ch->getAffectModifier(APPLY_CVIT_MULT, static_cast<int>(CharVital::health)));
     ki *= (1 + ch->getAffectModifier(APPLY_CVIT_MULT, static_cast<int>(CharVital::ki)));
@@ -3872,7 +3872,7 @@ void giveRandomVital(char_data* ch, int64_t pl, int64_t ki, int64_t st, int attr
     
 }
 
-void spar_gain(struct char_data *ch, struct char_data *vict, int type, int64_t dmg) {
+void spar_gain(Character *ch, Character *vict, int type, int64_t dmg) {
     for(auto c : {ch, vict}) {
         if(GET_POS(c) < POS_FIGHTING) return;
         for(auto a : {AFF_SLEEP, AFF_PARALYZE, AFF_STUNNED, AFF_KNOCKED, AFF_PARA, AFF_FROZEN}) if(AFF_FLAGGED(c, a)) return;
@@ -3884,7 +3884,7 @@ void spar_gain(struct char_data *ch, struct char_data *vict, int type, int64_t d
     spar_helper(vict, ch, type, dmg);
 }
 
-bool can_grav(struct char_data *ch) {
+bool can_grav(Character *ch) {
     if(IS_NPC(ch))
         return true;
     auto result = ch->getBaseStat("burden_ratio") <= 1.0;
@@ -3895,7 +3895,7 @@ bool can_grav(struct char_data *ch) {
 }
 
 /* If they can preform the attack or perform the attack on target. */
-int can_kill(struct char_data *ch, struct char_data *vict, struct obj_data *obj, int num) {
+int can_kill(Character *ch, Character *vict, Object *obj, int num) {
     /* Target Related */
     if (!IS_NPC(ch) && PLR_FLAGGED(ch, PLR_HEALT)) {
                 ch->sendText("You are inside a healing tank!\r\n");
@@ -4026,7 +4026,7 @@ int can_kill(struct char_data *ch, struct char_data *vict, struct obj_data *obj,
 }
 
 /* Whether they know the skill they are trying to use */
-int check_skill(struct char_data *ch, int skill) {
+int check_skill(Character *ch, int skill) {
     if (!know_skill(ch, skill) && !IS_NPC(ch)) {
         return 0;
     } else {
@@ -4035,7 +4035,7 @@ int check_skill(struct char_data *ch, int skill) {
 }
 
 /* Whether they have enough stamina or charged ki to preform the skill */
-bool check_points(struct char_data *ch, int64_t ki, int64_t st) {
+bool check_points(Character *ch, int64_t ki, int64_t st) {
 
     if (GET_PREFERENCE(ch) == PREFERENCE_H2H && GET_CHARGE(ch) >= GET_MAX_MANA(ch) * 0.1) {
         st *= 0.5;
@@ -4131,7 +4131,7 @@ bool check_points(struct char_data *ch, int64_t ki, int64_t st) {
 }
 
 /* Subtract the stamina or ki required */
-void pcost(struct char_data *ch, double ki, int64_t st) {
+void pcost(Character *ch, double ki, int64_t st) {
     if (IS_NPC(ch)) {
         if(ki) ch->modCurVital(CharVital::ki, -ki);
         if(st) ch->modCurVital(CharVital::stamina, -st);
@@ -4208,7 +4208,7 @@ void pcost(struct char_data *ch, double ki, int64_t st) {
 }
 
 /* Main damage function for RDBS 'Real Dragonball Battle System' */
-void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, struct obj_data *obj, int64_t dmg, int type) {
+void hurt(int limb, int chance, Character *ch, Character *vict, Object *obj, int64_t dmg, int type) {
     int64_t index = 0;
     int64_t maindmg = dmg, beforered = dmg;
     int dead = false;
@@ -5047,7 +5047,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                     act("$p@w cracks some.@n", true, ch, obj, nullptr, TO_ROOM);
                     obj->modBaseStat<weight_t>("weight", -dmg);
                     if (GET_FELLOW_WALL(obj)) {
-                        struct obj_data *wall;
+                        Object *wall;
                         wall = GET_FELLOW_WALL(obj);
                         wall->modBaseStat<weight_t>("weight", -dmg);
                         act("$p@w cracks some. A humanoid shadow can be seen moving on the other side.@n", true,
@@ -5059,7 +5059,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                     act("$p@w melts some.@n", true, ch, obj, nullptr, TO_ROOM);
                     obj->modBaseStat<weight_t>("weight", -dmg);
                     if (GET_FELLOW_WALL(obj)) {
-                        struct obj_data *wall;
+                        Object *wall;
                         wall = GET_FELLOW_WALL(obj);
                         wall->modBaseStat<weight_t>("weight", -dmg);
                         act("$p@w melts some.@n", true, ch, obj, nullptr, TO_ROOM);
@@ -5103,7 +5103,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
 /* This handles the length of time between attacks and other actions *
 * players AND non-players will have to endure. Allowing for a more   *
 * balanced and interesting attack cooldown system. - Iovan 2/25/2011 */
-void handle_cooldown(struct char_data *ch, int cooldown) {
+void handle_cooldown(Character *ch, int cooldown) {
 
     /* Let's clear any cooldown they may accidently have so it doesn't stack *
    * This is only for NPCs as player cooldown is handled through the stock *
@@ -5185,7 +5185,7 @@ void handle_cooldown(struct char_data *ch, int cooldown) {
 }
 
 /* This handles whether parry is turned on */
-int handle_parry(struct char_data *ch) {
+int handle_parry(Character *ch) {
 
     if (axion_dice(0) <= 4) { /* Critical failure */
         return (1);
@@ -5242,7 +5242,7 @@ int handle_parry(struct char_data *ch) {
 }
 
 /* This handles whether a step of the combo was preformed. */
-int handle_combo(struct char_data *ch, struct char_data *vict) {
+int handle_combo(Character *ch, Character *vict) {
     int success = false, pass = false;
 
     if (IS_NPC(ch))
@@ -5838,7 +5838,7 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
     return 0;
 }
 
-void handle_spiral(struct char_data *ch, struct char_data *vict, int skill, int first) {
+void handle_spiral(Character *ch, Character *vict, int skill, int first) {
     int prob, perc, avo, index, pry = 2, dge = 2, blk = 2;
     int64_t dmg;
     double amount = 0.0;
@@ -6013,7 +6013,7 @@ void handle_spiral(struct char_data *ch, struct char_data *vict, int skill, int 
     }
 }
 
-void handle_death_msg(struct char_data *ch, struct char_data *vict, int type) {
+void handle_death_msg(Character *ch, Character *vict, int type) {
     const auto tile = vict->location.getTileType();
     if (type == 0) {
         if (vict->location.getEnvironment(ENV_WATER) < 100.0 && tile != SECT_WATER_SWIM &&

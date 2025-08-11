@@ -7,9 +7,9 @@
 
 
 // commands
-extern void star_phase(struct char_data *ch, int type);
+extern void star_phase(Character *ch, int type);
 
-extern void oozaru_revert(struct char_data *ch);
+extern void oozaru_revert(Character *ch);
 
 void advanceClock(uint64_t heartPulse, double deltaTime);
 

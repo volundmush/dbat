@@ -34,7 +34,7 @@
 
 
 /* perhaps not the best place for this, but I didn't want a new file */
-char *skill_percent(struct char_data *ch, char *skill) {
+char *skill_percent(Character *ch, char *skill) {
     static char retval[16];
     int skillnum;
 
@@ -55,7 +55,7 @@ char *skill_percent(struct char_data *ch, char *skill) {
    Now returns the number of matching objects -- Welcor 02/04
 */
 
-int item_in_list(char *item, const std::vector<std::weak_ptr<obj_data>>& list) {
+int item_in_list(char *item, const std::vector<std::weak_ptr<Object>>& list) {
     int count = 0;
 
     if (list.empty())
@@ -64,7 +64,7 @@ int item_in_list(char *item, const std::vector<std::weak_ptr<obj_data>>& list) {
     if (*item == UID_CHAR) {
         auto uidResult = resolveUID(item);
         if(!uidResult) return 0;
-        auto obj = std::dynamic_pointer_cast<obj_data>(uidResult).get();
+        auto obj = std::dynamic_pointer_cast<Object>(uidResult).get();
         if(!obj) return 0;
 
         for (auto i : filter_raw(list)) {
@@ -103,7 +103,7 @@ int item_in_list(char *item, const std::vector<std::weak_ptr<obj_data>>& list) {
    MUD -- 4dimensions.org:6000
 */
 
-int char_has_item(char *item, struct char_data *ch) {
+int char_has_item(char *item, Character *ch) {
 
     /* If this works, no more searching needed */
     if (get_object_in_equip(ch, item))
@@ -208,16 +208,16 @@ static char *recho[] = {"mrecho ", "orecho ", "wrecho "};
 
 /* sets str to be the value of var.field */
 void
-find_replacement(unit_data *go, script_data *sc, trig_data *trig, UnitType type, char *var, char *field, char *subfield,
+find_replacement(Entity *go, script_data *sc, DgScript *trig, UnitType type, char *var, char *field, char *subfield,
                  char *str, size_t slen) {
 
-    char_data *ch, *c = nullptr, *rndm;
-    obj_data *obj, *o = nullptr;
-    struct room_data *room, *r = nullptr;
+    Character *ch, *c = nullptr, *rndm;
+    Object *obj, *o = nullptr;
+    Room *room, *r = nullptr;
     char *name;
     int num, count, i, j, doors;
 
-    auto unit = (unit_data*)go;
+    auto unit = (Entity*)go;
 
     *str = '\0';
 
@@ -287,7 +287,7 @@ find_replacement(unit_data *go, script_data *sc, trig_data *trig, UnitType type,
 
             switch (type) {
                 case MOB_TRIGGER:
-                    ch = (char_data *) go;
+                    ch = (Character *) go;
 
                     if ((o = get_object_in_equip(ch, name)));
                     else if ((o = get_obj_in_list(name, ch->getObjects())));
@@ -299,7 +299,7 @@ find_replacement(unit_data *go, script_data *sc, trig_data *trig, UnitType type,
 
                     break;
                 case OBJ_TRIGGER:
-                    obj = (obj_data *) go;
+                    obj = (Object *) go;
 
                     if ((c = get_char_by_obj(obj, name)));
                     else if ((o = get_obj_by_obj(obj, name)));
@@ -307,7 +307,7 @@ find_replacement(unit_data *go, script_data *sc, trig_data *trig, UnitType type,
 
                     break;
                 case WLD_TRIGGER:
-                    room = (struct room_data *) go;
+                    room = (Room *) go;
 
                     if ((c = get_char_by_room(room, name)));
                     else if ((o = get_obj_by_room(room, name)));
@@ -322,13 +322,13 @@ find_replacement(unit_data *go, script_data *sc, trig_data *trig, UnitType type,
                 o = nullptr;
                 switch (type) {
                     case MOB_TRIGGER:
-                        c = (char_data *) go;
+                        c = (Character *) go;
                         break;     /* the room.  - Welcor        */
                     case OBJ_TRIGGER:
-                        o = (obj_data *) go;
+                        o = (Object *) go;
                         break;
                     case WLD_TRIGGER:
-                        r = (struct room_data *) go;
+                        r = (Room *) go;
                         break;
                 }
             } else if (!strcasecmp(var, "global")) {
@@ -435,7 +435,7 @@ in the vault (vnum: 453) now and then. you can just use
                     count = 0;
 
                     if (type == MOB_TRIGGER) {
-                        ch = (char_data *) go;
+                        ch = (Character *) go;
                         auto people = ch->location.getPeople();
                         for (auto c : filter_raw(people))
                             if ((c != ch) && valid_dg_target(c, DG_ALLOW_GODS) &&
@@ -445,7 +445,7 @@ in the vault (vnum: 453) now and then. you can just use
                                 count++;
                             }
                     } else if (type == OBJ_TRIGGER) {
-                        auto people = get_room(obj_room((obj_data*)go))->getPeople();
+                        auto people = get_room(obj_room((Object*)go))->getPeople();
                         for (auto c : filter_raw(people))
                             if (valid_dg_target(c, DG_ALLOW_GODS)) {
                                 if (!rand_number(0, count))
@@ -453,7 +453,7 @@ in the vault (vnum: 453) now and then. you can just use
                                 count++;
                             }
                     } else if (type == WLD_TRIGGER) {
-                        auto people = ((struct room_data *) go)->getPeople();
+                        auto people = ((Room *) go)->getPeople();
                         for (auto c : filter_raw(people))
                             if (valid_dg_target(c, DG_ALLOW_GODS)) {
 
@@ -472,13 +472,13 @@ in the vault (vnum: 453) now and then. you can just use
 
                     switch (type) {
                         case WLD_TRIGGER:
-                            in_room = real_room(((struct room_data *) go)->getVnum());
+                            in_room = real_room(((Room *) go)->getVnum());
                             break;
                         case OBJ_TRIGGER:
-                            in_room = obj_room((struct obj_data *) go);
+                            in_room = obj_room((Object *) go);
                             break;
                         case MOB_TRIGGER:
-                            in_room = IN_ROOM((struct char_data *) go);
+                            in_room = IN_ROOM((Character *) go);
                             break;
                     }
                     if (in_room == NOWHERE) {
@@ -549,7 +549,7 @@ in the vault (vnum: 453) now and then. you can just use
                     break;
                 case 'c':
                     if (!strcasecmp(field, "canbeseen")) {
-                        if ((type == MOB_TRIGGER) && !CAN_SEE(((char_data *) go), c))
+                        if ((type == MOB_TRIGGER) && !CAN_SEE(((Character *) go), c))
                             strcpy(str, "0");
                         else
                             strcpy(str, "1");
@@ -1252,7 +1252,7 @@ in the vault (vnum: 453) now and then. you can just use
  */
 
 /* substitutes any variables into line and returns it as buf */
-void var_subst(unit_data *go, script_data *sc, trig_data *trig,
+void var_subst(Entity *go, script_data *sc, DgScript *trig,
                UnitType type, char *line, char *buf) {
     char tmp[MAX_INPUT_LENGTH], repl_str[MAX_INPUT_LENGTH];
     char *var = nullptr, *field = nullptr, *p = nullptr;

@@ -18,8 +18,8 @@ int mapnums[MAP_ROWS + 1][MAP_COLS + 1];
 
 void ping_ship(int vnum, int vnum2) {
 
-    struct char_data *tch, *next_ch;
-    struct obj_data *controls = nullptr, *obj = nullptr;
+    Character *tch, *next_ch;
+    Object *controls = nullptr, *obj = nullptr;
     int found = false;
 
     if (vnum2 == -1) {
@@ -86,7 +86,7 @@ static const RoomType roomTypes[] = {
     {WhereFlag::star, "@6 @RX@n", "@6 @r#@n", "@6  @n"},
 };
 
-char* getmapchar(int rnum, struct char_data* ch, int start, int vnum) {
+char* getmapchar(int rnum, Character* ch, int start, int vnum) {
     static char mapchar[50];
     bool there = (rnum == start);
     bool enemy = checkship(rnum, vnum);
@@ -152,7 +152,7 @@ MapStruct findcoord(int rnum) {
     return coords;
 }
 
-void printmap(int rnum, struct char_data *ch, int type, int vnum) {
+void printmap(int rnum, Character *ch, int type, int vnum) {
     int x = 0, lasty = -1;
     int y = 0;
     int sightradius;

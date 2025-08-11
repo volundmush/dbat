@@ -30,7 +30,7 @@
 #define MOB_AGGR_TO_ALIGN (MOB_AGGR_EVIL | MOB_AGGR_NEUTRAL | MOB_AGGR_GOOD)
 
 /* local functions */
-static int player_present(struct char_data *ch) {
+static int player_present(Character *ch) {
     if (IN_ROOM(ch) == NOWHERE)
         return 0;
     auto people = ch->location.getPeople();
@@ -53,8 +53,8 @@ static const std::vector<std::string> scavengerTalk = {
 
 
 void mobile_activity(uint64_t heartPulse, double deltaTime) {
-    struct char_data *vict;
-    struct obj_data *obj, *best_obj;
+    Character *vict;
+    Object *obj, *best_obj;
     int door, found, max;
 
     std::unordered_map<std::string, double> mobTimings;
@@ -291,7 +291,7 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
 
             /* Be helpful */ /* - temporarily disabled by the first false check */
             if (false && IS_HUMANOID(ch) && !MOB_FLAGGED(ch, MOB_NOKILL)) {
-                struct char_data *vict, *next_v;
+                Character *vict, *next_v;
                 int done = false;
                 auto locp = ch->location.getPeople();
                 for (auto v : filter_raw(locp)) {
@@ -330,7 +330,7 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
 
             /* Help those under attack! */ /* - temporarily disabled by the first false check */
             if (false && !FIGHTING(ch) && rand_number(1, 20) >= 14 && IS_HUMANOID(ch) && !MOB_FLAGGED(ch, MOB_NOKILL)) {
-                struct char_data *vict, *next_v;
+                Character *vict, *next_v;
                 int done = false;
                 auto locp = ch->location.getPeople();
                 for (auto v : filter_raw(locp)) {
@@ -488,7 +488,7 @@ static const std::vector<std::pair<std::string, std::string>> intelligentLand = 
 
 
 /* This handles NPCs taunting opponents or reacting to combat. */
-void mob_taunt(struct char_data *ch) {
+void mob_taunt(Character *ch) {
     if (ch->location.getWhereFlag(WhereFlag::space)) { /* In space.... nobody cares. */
         return;
     }

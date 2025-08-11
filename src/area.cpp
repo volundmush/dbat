@@ -258,7 +258,7 @@ land_spots getPlanetLandspots(const WhereFlag orbit) {
     }
 }
 
-void displayLandSpots(struct char_data *ch, const std::string& planet_name, const land_spots& locations) {
+void displayLandSpots(Character *ch, const std::string& planet_name, const land_spots& locations) {
     const int line_length = 60;  // Adjust the max line length as needed
     int current_length = 0;
 

@@ -17,11 +17,11 @@ static inline TileOverride *find_tile_nc(std::unordered_map<Coordinates, TileOve
     return &it->second;
 }
 
-std::vector<std::weak_ptr<obj_data>> AbstractGridArea::getObjects(const Coordinates& coor) const {
-    std::vector<std::weak_ptr<obj_data>> out;
+std::vector<std::weak_ptr<Object>> AbstractGridArea::getObjects(const Coordinates& coor) const {
+    std::vector<std::weak_ptr<Object>> out;
     for(const auto &uw : contents) {
         if(auto u = uw.lock()) {
-            if(auto o = std::dynamic_pointer_cast<obj_data>(u); o && o->location.position == coor) {
+            if(auto o = std::dynamic_pointer_cast<Object>(u); o && o->location.position == coor) {
                 out.push_back(o);
             }
         }
@@ -30,11 +30,11 @@ std::vector<std::weak_ptr<obj_data>> AbstractGridArea::getObjects(const Coordina
     return out;
 }
 
-std::vector<std::weak_ptr<char_data>> AbstractGridArea::getPeople(const Coordinates& coor) const {
-    std::vector<std::weak_ptr<char_data>> out;
+std::vector<std::weak_ptr<Character>> AbstractGridArea::getPeople(const Coordinates& coor) const {
+    std::vector<std::weak_ptr<Character>> out;
     for(const auto &uw : contents) {
         if(auto u = uw.lock()) {
-            if(auto c = std::dynamic_pointer_cast<char_data>(u); c && c->location.position == coor) {
+            if(auto c = std::dynamic_pointer_cast<Character>(u); c && c->location.position == coor) {
                 out.push_back(c);
             }
         }
@@ -125,7 +125,7 @@ const char* AbstractGridArea::getLookDescription(const Coordinates& coor) const 
         }
     }
     // Fallback to base unit look description.
-    return unit_data::getLookDescription();
+    return Entity::getLookDescription();
 }
 
 void AbstractGridArea::setRoomFlag(const Coordinates& coor, RoomFlag flag, bool value) {

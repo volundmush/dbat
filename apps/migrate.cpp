@@ -127,7 +127,7 @@ static const std::unordered_map<int, WhereFlag> wheremap = {
     {68, WhereFlag::zenith_orbit}
 };
 
-static void convert_room(room_data& r) {
+static void convert_room(Room& r) {
     for(const auto& [oldflag, newflag] : wheremap) {
         if(r.room_flags[oldflag]) {
             r.where_flags.set(newflag);
@@ -136,7 +136,7 @@ static void convert_room(room_data& r) {
     }
 }
 
-static void convert_character(npc_proto_data *c) {
+static void convert_character(CharacterPrototype *c) {
     c->character_flags.set(CharacterFlag::is_npc, true);
     c->character_flags.set(CharacterFlag::tail, race::hasTail(c->race));
 
@@ -148,7 +148,7 @@ static void convert_character(npc_proto_data *c) {
     }
 }
 
-static void convert_character(char_data *c) {
+static void convert_character(Character *c) {
     auto npc = c->mob_flags.get(static_cast<MobFlag>(3)) || c->character_flags.get(CharacterFlag::is_npc);
     if(npc) {
         c->character_flags.set(CharacterFlag::is_npc, true);
@@ -680,7 +680,7 @@ static void boot_the_shops(FILE *shop_f, char *filename, int rec_count) {
     }
 }
 
-static int check_object_spell_number(struct obj_data *obj, const char* val) {
+static int check_object_spell_number(struct Object *obj, const char* val) {
     int error = false;
     const char *spellname;
 
@@ -728,7 +728,7 @@ static int check_object_spell_number(struct obj_data *obj, const char* val) {
     return (error);
 }
 
-static int check_object_level(struct obj_data *obj, const char* val) {
+static int check_object_level(struct Object *obj, const char* val) {
     int error = false;
 
     if ((GET_OBJ_VAL(obj, val) < 0) && (error = true))
@@ -756,7 +756,7 @@ static int check_bitvector_names(bitvector_t bits, size_t namecount, const char 
     return (error);
 }
 
-int load_inv_backup(struct char_data *ch) {
+int load_inv_backup(struct Character *ch) {
     if (GET_LEVEL(ch) < 2)
         return (-1);
 
@@ -813,7 +813,7 @@ int load_inv_backup(struct char_data *ch) {
     return 1;
 }
 
-static int inv_backup(struct char_data *ch) {
+static int inv_backup(struct Character *ch) {
     FILE *backup;
     char buf[20480];
 
@@ -849,10 +849,10 @@ static int inv_backup(struct char_data *ch) {
     return 1;
 }
 
-static std::vector<std::tuple<room_data*, Direction, room_vnum>> room_directions;
+static std::vector<std::tuple<Room*, Direction, room_vnum>> room_directions;
 
 /* read direction data */
-static void setup_dir(FILE *fl, room_data *r, int dir) {
+static void setup_dir(FILE *fl, Room *r, int dir) {
     int t[11] = {0}, retval = 0;
     char line[READ_SIZE], buf2[128];
 
@@ -954,7 +954,7 @@ static void parse_room(FILE *fl, room_vnum virtual_nr) {
         exit(1);
     }
     auto &z = zone_table.at(zone);
-    auto sh = std::make_shared<room_data>();
+    auto sh = std::make_shared<Room>();
     auto r = sh.get();
     units.emplace(virtual_nr, sh);
     world.emplace(virtual_nr, sh);
@@ -1041,11 +1041,11 @@ static void parse_room(FILE *fl, room_vnum virtual_nr) {
  * NOTE 2: Assumes sizeof(room_rnum) >= (sizeof(mob_rnum) and sizeof(obj_rnum))
  */
 
-static void mob_autobalance(struct npc_proto_data *ch) {
+static void mob_autobalance(struct CharacterPrototype *ch) {
 
 }
 
-static int parse_simple_mob(FILE *mob_f, struct npc_proto_data *ch, mob_vnum nr) {
+static int parse_simple_mob(FILE *mob_f, struct CharacterPrototype *ch, mob_vnum nr) {
     int j, t[10];
     char line[READ_SIZE];
 
@@ -1141,7 +1141,7 @@ static int parse_simple_mob(FILE *mob_f, struct npc_proto_data *ch, mob_vnum nr)
 #define RANGE(low, high)    \
     (num_arg = MAX((low), MIN((high), (num_arg))))
 
-static void interpret_espec(const char *keyword, const char *value, struct npc_proto_data *ch, mob_vnum nr) {
+static void interpret_espec(const char *keyword, const char *value, struct CharacterPrototype *ch, mob_vnum nr) {
     int num_arg = 0, matched = false;
     int num, num2, num3, num4, num5, num6;
     struct affected_type af;
@@ -1238,7 +1238,7 @@ static void interpret_espec(const char *keyword, const char *value, struct npc_p
 #undef BOOL_CASE
 #undef RANGE
 
-static void parse_espec(char *buf, struct npc_proto_data *ch, mob_vnum nr) {
+static void parse_espec(char *buf, struct CharacterPrototype *ch, mob_vnum nr) {
     char *ptr;
 
     if ((ptr = strchr(buf, ':')) != nullptr) {
@@ -1249,7 +1249,7 @@ static void parse_espec(char *buf, struct npc_proto_data *ch, mob_vnum nr) {
     interpret_espec(buf, ptr, ch, nr);
 }
 
-static void mob_stats(struct npc_proto_data *mob) {
+static void mob_stats(struct CharacterPrototype *mob) {
     int start = GET_LEVEL(mob) * 0.5, finish = GET_LEVEL(mob);
 
     if (finish < 20)
@@ -1327,7 +1327,7 @@ static void mob_stats(struct npc_proto_data *mob) {
     }
 }
 
-static int parse_enhanced_mob(FILE *mob_f, struct npc_proto_data *ch, mob_vnum nr) {
+static int parse_enhanced_mob(FILE *mob_f, struct CharacterPrototype *ch, mob_vnum nr) {
     char line[READ_SIZE];
 
     parse_simple_mob(mob_f, ch, nr);
@@ -1346,7 +1346,7 @@ static int parse_enhanced_mob(FILE *mob_f, struct npc_proto_data *ch, mob_vnum n
     return 0;
 }
 
-static int parse_mobile_from_file(FILE *mob_f, struct npc_proto_data *ch, vnum nr) {
+static int parse_mobile_from_file(FILE *mob_f, struct CharacterPrototype *ch, vnum nr) {
     int j, t[10], retval;
     char line[READ_SIZE], *tmpptr, letter;
     char f1[128], f2[128], f3[128], f4[128], f5[128], f6[128];
@@ -2173,21 +2173,21 @@ static void index_boot(int mode) {
         case DB_BOOT_TRG:
             break;
         case DB_BOOT_WLD:
-            size[0] = sizeof(struct room_data) * rec_count;
+            size[0] = sizeof(struct Room) * rec_count;
             basic_mud_log("   %d rooms, %d bytes.", rec_count, size[0]);
             break;
         case DB_BOOT_MOB:
             size[0] = sizeof(struct index_data) * rec_count;
-            size[1] = sizeof(struct char_data) * rec_count;
+            size[1] = sizeof(struct Character) * rec_count;
             basic_mud_log("   %d mobs, %d bytes in index, %d bytes in prototypes.", rec_count, size[0], size[1]);
             break;
         case DB_BOOT_OBJ:
             size[0] = sizeof(struct index_data) * rec_count;
-            size[1] = sizeof(struct obj_data) * rec_count;
+            size[1] = sizeof(struct Object) * rec_count;
             basic_mud_log("   %d objs, %d bytes in index, %d bytes in prototypes.", rec_count, size[0], size[1]);
             break;
         case DB_BOOT_ZON:
-            size[0] = sizeof(struct zone_data) * rec_count;
+            size[0] = sizeof(struct Zone) * rec_count;
             basic_mud_log("   %d zones, %d bytes.", rec_count, size[0]);
             break;
         case DB_BOOT_HLP:
@@ -2273,7 +2273,7 @@ static void tag_argument(char *argument, char *tag) {
 }
 
 
-static void load_affects(FILE *fl, struct char_data *ch, int violence) {
+static void load_affects(FILE *fl, struct Character *ch, int violence) {
     int num, num2, num3, num4, num5, num6, i;
     char line[MAX_INPUT_LENGTH + 1];
     struct affected_type af;
@@ -2300,7 +2300,7 @@ static void load_affects(FILE *fl, struct char_data *ch, int violence) {
 }
 
 
-static void load_skills(FILE *fl, struct char_data *ch, bool mods) {
+static void load_skills(FILE *fl, struct Character *ch, bool mods) {
     int num = 0, num2 = 0, num3 = 0;
     char line[MAX_INPUT_LENGTH + 1];
 
@@ -2318,7 +2318,7 @@ static void load_skills(FILE *fl, struct char_data *ch, bool mods) {
     } while (num != 0);
 }
 
-static void load_bonuses(FILE *fl, struct char_data *ch, bool mods) {
+static void load_bonuses(FILE *fl, struct Character *ch, bool mods) {
     int num[52] = {0}, i;
     char line[MAX_INPUT_LENGTH + 1];
 
@@ -2343,7 +2343,7 @@ static void load_bonuses(FILE *fl, struct char_data *ch, bool mods) {
 #define LOAD_KI        3
 #define LOAD_LIFE       4
 
-static void load_HMVS(struct char_data *ch, const char *line, int mode) {
+static void load_HMVS(struct Character *ch, const char *line, int mode) {
     int64_t num = 0, num2 = 0;
 
     sscanf(line, "%" I64T "/%" I64T "", &num, &num2);
@@ -2367,7 +2367,7 @@ static void load_HMVS(struct char_data *ch, const char *line, int mode) {
     }
 }
 
-static void load_BASE(struct char_data *ch, const char *line, int mode) {
+static void load_BASE(struct Character *ch, const char *line, int mode) {
     int64_t num = 0;
 
     sscanf(line, "%" I64T "", &num);
@@ -2391,7 +2391,7 @@ static void load_BASE(struct char_data *ch, const char *line, int mode) {
     }
 }
 
-static void load_majin(struct char_data *ch, const char *line) {
+static void load_majin(struct Character *ch, const char *line) {
     int64_t num = 0;
 
     sscanf(line, "%" I64T "", &num);
@@ -2399,7 +2399,7 @@ static void load_majin(struct char_data *ch, const char *line) {
 
 }
 
-static void load_molt(struct char_data *ch, const char *line) {
+static void load_molt(struct Character *ch, const char *line) {
     int64_t num = 0;
 
     sscanf(line, "%" I64T "", &num);
@@ -2409,7 +2409,7 @@ static void load_molt(struct char_data *ch, const char *line) {
 
 /* new load_char reads ASCII Player Files */
 /* Load a char, TRUE if loaded, FALSE if not */
-static int load_char(const char *name, struct char_data *ch) {
+static int load_char(const char *name, struct Character *ch) {
     int id = 0, i, num = 0, num2 = 0, num3 = 0;
     FILE *fl = nullptr;
     char fname[READ_SIZE];
@@ -2770,10 +2770,10 @@ int House_load(room_vnum rvnum) {
     char buf2[MAX_STRING_LENGTH];
     char line[256];
     int64_t t[21], danger, zwei = 0;
-    struct obj_data *temp;
+    struct Object *temp;
     int locate = 0, j, nr, k, num_objs = 0;
-    struct obj_data *obj1;
-    struct obj_data *cont_row[MAX_BAG_ROWS];
+    struct Object *obj1;
+    struct Object *cont_row[MAX_BAG_ROWS];
     struct extra_descr_data *new_descr;
     room_rnum rrnum = rvnum;
 
@@ -3097,7 +3097,7 @@ void migrate_accounts() {
         return;
     }
 
-    std::unordered_map<account_data*, std::string> pendingPasswords;
+    std::unordered_map<Account*, std::string> pendingPasswords;
 
     for(auto &p : std::filesystem::recursive_directory_iterator(path)) {
         if(p.path().extension() != ".usr") continue;
@@ -3190,7 +3190,7 @@ void migrate_characters() {
     // if we can load them, we'll convert them and bind them to the appropriate account.
 
     for(auto &[cname, accID] : characterToAccount) {
-        auto sh = std::make_shared<char_data>();
+        auto sh = std::make_shared<Character>();
         if(load_char(cname.c_str(), sh.get()) < 0) {
             basic_mud_log("Error loading %s for account migration.", cname.c_str());
             sh.reset();

@@ -145,7 +145,7 @@ void from_json(const json& j, reset_com& r) {
         r.sarg2 = j["sarg2"];
 }
 
-void to_json(json& j, const zone_data& z) {
+void to_json(json& j, const Zone& z) {
     j["number"] = z.number;
     if(!z.name.empty())
         j["name"] = z.name;
@@ -171,7 +171,7 @@ void to_json(json& j, const zone_data& z) {
     }
 }
 
-void from_json(const json& j, zone_data& z) {
+void from_json(const json& j, Zone& z) {
     if(j.contains("number"))
         z.number = j["number"];
     if(j.contains("name"))
@@ -236,7 +236,7 @@ void from_json(const json& j, affect_t& a) {
 
 
 // account_data serialize/deserialize...
-void to_json(json& j, const account_data& a) {
+void to_json(json& j, const Account& a) {
     if(a.id != NOTHING)
         j["id"] = a.id;
     if(!a.name.empty())
@@ -270,7 +270,7 @@ void to_json(json& j, const account_data& a) {
     j["characters"] = a.characters;
 }
 
-void from_json(const json& j, account_data& a) {
+void from_json(const json& j, Account& a) {
     if(j.contains("id"))
         a.id = j["id"];
     if(j.contains("name"))
@@ -324,7 +324,7 @@ void load_accounts(const std::filesystem::path& loc) {
 
 }
 
-void to_json(json& j, const trig_proto_data& t) {
+void to_json(json& j, const DgScriptPrototype& t) {
     j["vn"] = t.vn;
     j["name"] = t.name;
     j["attach_type"] = t.attach_type;
@@ -336,7 +336,7 @@ void to_json(json& j, const trig_proto_data& t) {
 }
 
 
-void from_json(const json& j, trig_proto_data& t) {
+void from_json(const json& j, DgScriptPrototype& t) {
     if(j.contains("vn")) t.vn = j["vn"].get<int>();
     if(j.contains("name")) t.name = strdup(j["name"].get<std::string>().c_str());
     if(j.contains("attach_type")) t.attach_type = j["attach_type"].get<UnitType>();
@@ -350,7 +350,7 @@ void from_json(const json& j, trig_proto_data& t) {
 }
 
 
-void to_json(json& j, const trig_data& t) {
+void to_json(json& j, const DgScript& t) {
     j["vn"] = t.getVnum();
     j["current_line"] = t.current_line;
     j["state"] = t.state;
@@ -359,7 +359,7 @@ void to_json(json& j, const trig_data& t) {
     if(!t.variables.empty()) j["variables"] = t.variables;
 }
 
-void from_json(const json& j, trig_data& t) {
+void from_json(const json& j, DgScript& t) {
     auto vn = j["vn"].get<int>();
     t.proto = &trig_index.at(vn);
 
@@ -399,7 +399,7 @@ void load_dgscripts(const std::filesystem::path& loc) {
 
         for(auto d : j["scripts"]) {
             auto vn = d["vn"].get<int>();
-            auto r = std::make_shared<trig_data>();
+            auto r = std::make_shared<DgScript>();
             d["data"].get_to(*r);
             u->scripts.emplace(vn, r);
             r->owner = u.get();
@@ -609,7 +609,7 @@ void from_json(const json& j, struct extra_descr_data& e) {
 }
 
 // unit_data serialize/deserialize...
-void to_json(json& j, const unit_data& u) {
+void to_json(json& j, const Entity& u) {
     j["vn"] = u.vn;
     j["id"] = u.id;
     j["generation"] = u.generation;
@@ -625,7 +625,7 @@ void to_json(json& j, const unit_data& u) {
     }
 }
 
-void from_json(const json& j, unit_data& u) {
+void from_json(const json& j, Entity& u) {
     if(j.contains("vn")) u.vn = j["vn"].get<int>();
     if(j.contains("id")) u.id = j["id"];
     if(j.contains("generation")) u.generation = j["generation"];
@@ -640,7 +640,7 @@ void from_json(const json& j, unit_data& u) {
 }
 
 
-void to_json(json& j, const proto_data& u) {
+void to_json(json& j, const ThingPrototype& u) {
     j["vn"] = u.vn;
     if(u.name && strlen(u.name)) j["name"] = u.name;
     if(u.room_description && strlen(u.room_description)) j["room_description"] = u.room_description;
@@ -656,7 +656,7 @@ void to_json(json& j, const proto_data& u) {
     if(u.affect_flags) j["affect_flags"] = u.affect_flags;
 }
 
-void from_json(const json& j, proto_data& u) {
+void from_json(const json& j, ThingPrototype& u) {
     u.vn = j["vn"].get<int>();
     if(j.contains("name")) u.name = strdup(j["name"].get<std::string>().c_str());
     if(j.contains("room_description")) u.room_description = strdup(j["room_description"].get<std::string>().c_str());
@@ -744,9 +744,9 @@ void from_json(const json& j, Destination &e) {
     if(j.contains("dchide")) e.dchide = j["dchide"];
 }
 
-void to_json(json& j, const room_data& r) {
+void to_json(json& j, const Room& r) {
     // we need to call the to_json for unit_data...
-    to_json(j, static_cast<const unit_data&>(r));
+    to_json(j, static_cast<const Entity&>(r));
     j["zone"] = r.zone->number;
     
     j["sector_type"] = r.sector_type;
@@ -758,9 +758,9 @@ void to_json(json& j, const room_data& r) {
     }
 }
 
-void from_json(const json& j, room_data& r) {
+void from_json(const json& j, Room& r) {
     // call the from_json of unit_data...
-    from_json(j, static_cast<unit_data&>(r));
+    from_json(j, static_cast<Entity&>(r));
 
     if(j.contains("zone")) r.zone = &(zone_table.at(j["zone"].get<zone_vnum>()));
 
@@ -776,7 +776,7 @@ void from_json(const json& j, room_data& r) {
 void load_rooms(const std::filesystem::path& loc) {
     for(auto j : load_from_file(loc, "rooms.json")) {
         auto id = j["id"].get<int64_t>();
-        auto r = std::make_shared<room_data>();
+        auto r = std::make_shared<Room>();
         j.get_to(*r);
         r->id = id;
         r->vn = id;
@@ -824,24 +824,24 @@ static void dump_rooms(const std::filesystem::path &loc) {
 }
 
 // thing_data serialize/deserialize...
-void to_json(json& j, const thing_data& t) {
-    to_json(j, static_cast<const unit_data&>(t));
+void to_json(json& j, const AbstractThing& t) {
+    to_json(j, static_cast<const Entity&>(t));
 
     if(!t.stats.empty()) j["stats"] = t.stats;
     if(t.affect_flags) j["affect_flags"] = t.affect_flags;
 }
 
-void from_json(const json& j, thing_data& t) {
-    from_json(j, static_cast<unit_data&>(t));
+void from_json(const json& j, AbstractThing& t) {
+    from_json(j, static_cast<Entity&>(t));
 
     if(j.contains("stats")) t.stats = j["stats"];
     if(j.contains("affect_flags")) t.affect_flags = j["affect_flags"].get<FlagHandler<AffectFlag>>();
 }
 
-// obj_data serialize/deserialize...
+// Object serialize/deserialize...
 
-void to_json(json& j, const item_proto_data& o) {
-    to_json(j, static_cast<const proto_data&>(o));
+void to_json(json& j, const ObjectPrototype& o) {
+    to_json(j, static_cast<const ThingPrototype&>(o));
     to_json(j, static_cast<const picky_data&>(o));
 
     j["type_flag"] = o.type_flag;
@@ -855,9 +855,9 @@ void to_json(json& j, const item_proto_data& o) {
 
 };
 
-void to_json(json& j, const obj_data& o) {
+void to_json(json& j, const Object& o) {
     to_json(j, static_cast<const picky_data&>(o));
-    to_json(j, static_cast<const thing_data&>(o));
+    to_json(j, static_cast<const AbstractThing&>(o));
 
     j["type_flag"] = o.type_flag;
     if(o.wear_flags) j["wear_flags"] = o.wear_flags;
@@ -871,9 +871,9 @@ void to_json(json& j, const obj_data& o) {
     if(get_room(o.room_loaded)) j["room_loaded"] = o.room_loaded;
 }
 
-void from_json(const json& j, item_proto_data& o) {
+void from_json(const json& j, ObjectPrototype& o) {
     from_json(j, static_cast<picky_data&>(o));
-    from_json(j, static_cast<proto_data&>(o));
+    from_json(j, static_cast<ThingPrototype&>(o));
 
     if(j.contains("type_flag")) o.type_flag = j["type_flag"];
     if(j.contains("wear_flags")) o.wear_flags = j["wear_flags"].get<FlagHandler<WearFlag>>();
@@ -908,9 +908,9 @@ void from_json(const json& j, item_proto_data& o) {
         }
 }
 
-void from_json(const json& j, obj_data& o) {
+void from_json(const json& j, Object& o) {
     from_json(j, static_cast<picky_data&>(o));
-    from_json(j, static_cast<thing_data&>(o));
+    from_json(j, static_cast<AbstractThing&>(o));
 
     if(j.contains("type_flag")) o.type_flag = j["type_flag"];
 
@@ -954,7 +954,7 @@ void load_items_initial(const std::filesystem::path& loc) {
         auto id = j["id"].get<int64_t>();
         auto generation = j["generation"].get<int>();
         auto data = j["data"];
-        auto sh = std::make_shared<obj_data>();
+        auto sh = std::make_shared<Object>();
         data.get_to(*sh);
         uniqueObjects.emplace(id, sh);
         units.emplace(id, sh);
@@ -962,14 +962,14 @@ void load_items_initial(const std::filesystem::path& loc) {
     basic_mud_log("Loaded %d items", uniqueObjects.size());
 }
 
-static void deserialize_obj_relations(obj_data* o, const json& j) {
+static void deserialize_obj_relations(Object* o, const json& j) {
     if(j.contains("posted_to")) {
         auto check = resolveUID(j["posted_to"]);
-        if(check) o->posted_to = std::dynamic_pointer_cast<obj_data>(check).get();
+        if(check) o->posted_to = std::dynamic_pointer_cast<Object>(check).get();
     }
     if(j.contains("fellow_wall")) {
         auto check = resolveUID(j["fellow_wall"]);
-        if(check) o->fellow_wall = std::dynamic_pointer_cast<obj_data>(check).get();
+        if(check) o->fellow_wall = std::dynamic_pointer_cast<Object>(check).get();
     }
 }
 
@@ -989,7 +989,7 @@ void load_items_finish(const std::filesystem::path& loc) {
     }
 }
 
-static json serialize_obj_relations(const obj_data* o) {
+static json serialize_obj_relations(const Object* o) {
     auto j = json::object();
 
     if(o->posted_to) j["posted_to"] = o->posted_to->getUID();
@@ -1025,7 +1025,7 @@ static void dump_item_prototypes(const std::filesystem::path &loc) {
     dump_to_file(loc, "itemPrototypes.json", j);
 }
 
-// char_data serialize/deserialize...
+// Character serialize/deserialize...
 void to_json(json& j, const trans_data& t) {
     if(t.time_spent_in_form != 0.0) j["time_spent_in_form"] = t.time_spent_in_form;
     j["visible"] = t.visible;
@@ -1062,8 +1062,8 @@ void from_json(const json& j, affected_type& a) {
     if(j.contains("bitvector")) a.bitvector = j["bitvector"];
 }
 
-void to_json(json& j, const npc_proto_data& c) {
-    to_json(j, static_cast<const proto_data&>(c));
+void to_json(json& j, const CharacterPrototype& c) {
+    to_json(j, static_cast<const ThingPrototype&>(c));
     j["sex"] = c.sex;
     if(c.character_flags) j["character_flags"] = c.character_flags;
     if(c.mob_flags) j["mob_flags"] = c.mob_flags;
@@ -1074,8 +1074,8 @@ void to_json(json& j, const npc_proto_data& c) {
     if(!ms.empty()) j["mob_specials"] = ms;
 }
 
-void from_json(const json& j, npc_proto_data& c) {
-    from_json(j, static_cast<proto_data&>(c));
+void from_json(const json& j, CharacterPrototype& c) {
+    from_json(j, static_cast<ThingPrototype&>(c));
     if(j.contains("sex")) c.sex = j["sex"];
     if(j.contains("character_flags")) c.character_flags = j["character_flags"];
     if(j.contains("mob_flags")) c.mob_flags = j["mob_flags"];
@@ -1092,8 +1092,8 @@ void from_json(const json& j, npc_proto_data& c) {
 
 }
 
-void to_json(json& j, const char_data& c) {
-    to_json(j, static_cast<const thing_data&>(c));
+void to_json(json& j, const Character& c) {
+    to_json(j, static_cast<const AbstractThing&>(c));
 
     j["sex"] = c.sex;
     if(!c.appearances.empty()) j["appearances"] = c.appearances;
@@ -1133,7 +1133,7 @@ void to_json(json& j, const char_data& c) {
         if(c.gravAcclim[i]) j["gravAcclim"].push_back(std::make_pair(i, c.gravAcclim[i]));
     }
 
-    auto ch = (char_data*)&c;
+    auto ch = (Character*)&c;
     
     std::erase_if(ch->skill, [](const auto &s) { return s.second.level == 0 && s.second.perfs == 0; });
     if(!c.skill.empty()) j["skill"] = c.skill;
@@ -1173,8 +1173,8 @@ void to_json(json& j, const char_data& c) {
 
 }
 
-void from_json(const json& j, char_data& c) {
-    from_json(j, static_cast<thing_data&>(c));
+void from_json(const json& j, Character& c) {
+    from_json(j, static_cast<AbstractThing&>(c));
 
     if(j.contains("sex")) c.sex = j["sex"];
     if(j.contains("appearances")) c.appearances = j["appearances"];
@@ -1266,7 +1266,7 @@ void from_json(const json& j, char_data& c) {
 
 }
 
-static json serialize_char_location(char_data* ch) {
+static json serialize_char_location(Character* ch) {
     auto j = json::object();
 
     // PCs have special handling. NPCs just use the normal approach.
@@ -1317,7 +1317,7 @@ void load_characters_initial(const std::filesystem::path& loc) {
         auto id = j["id"].get<int64_t>();
         auto generation = j["generation"].get<time_t>();
         auto data = j["data"];
-        auto c = std::make_shared<char_data>();
+        auto c = std::make_shared<Character>();
         j["data"].get_to(*c);
         if(auto isPlayer = players.find(id); isPlayer != players.end()) {
             isPlayer->second.character = c.get();
@@ -1360,7 +1360,7 @@ void load_npc_prototypes(const std::filesystem::path& loc) {
 }
 
 // players data serialize/deserialize...
-void to_json(json& j, const player_data& p) {
+void to_json(json& j, const PlayerData& p) {
     j["id"] = p.id;
     j["name"] = p.name;
     if(p.account) j["account"] = p.account->id;
@@ -1386,7 +1386,7 @@ void to_json(json& j, const player_data& p) {
     }
 }
 
-void from_json(const json& j, player_data& p) {
+void from_json(const json& j, PlayerData& p) {
     p.id = j["id"];
     p.name = j["name"].get<std::string>();
     if(j.contains("account")) {
@@ -1562,9 +1562,9 @@ void load_assemblies(const std::filesystem::path &loc) {
 
 // This is called by the Cython code to create a new player character.
 // Everything should be already validated several times over.
-player_data* create_player_character(int account_id, const json& j) {
+PlayerData* create_player_character(int account_id, const json& j) {
     auto &acc = accounts[account_id];
-    auto ch = std::make_shared<char_data>();
+    auto ch = std::make_shared<Character>();
     ch->id = getNextUnitID();
     ch->generation = time(nullptr);
     auto &p = players[ch->id];

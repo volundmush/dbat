@@ -19,18 +19,18 @@ cdef extern from "dbat/db.h":
     int getNextAccountID()
 
     void load_config()
-    map[int, shared_ptr[structs.room_data]] world
-    structs.room_data* get_room(int vn)
+    map[int, shared_ptr[structs.Room]] world
+    structs.Room* get_room(int vn)
 
-    map[int, structs.zone_data] zone_table
-    map[int, structs.npc_proto_data] mob_proto
-    map[int, structs.item_proto_data] obj_proto
+    map[int, structs.Zone] zone_table
+    map[int, structs.CharacterPrototype] mob_proto
+    map[int, structs.ObjectPrototype] obj_proto
 
-    unordered_map[int, shared_ptr[structs.char_data]] uniqueCharacters
-    vector[weak_ptr[structs.char_data]] getAllCharacters()
+    unordered_map[int, shared_ptr[structs.Character]] uniqueCharacters
+    vector[weak_ptr[structs.Character]] getAllCharacters()
 
-    map[int, shared_ptr[structs.obj_data]] uniqueObjects
-    vector[weak_ptr[structs.obj_data]] getAllObjects()
+    map[int, shared_ptr[structs.Object]] uniqueObjects
+    vector[weak_ptr[structs.Object]] getAllObjects()
 
     map[int, structs.account_data] accounts
 
@@ -40,18 +40,18 @@ cdef extern from "dbat/db.h":
 
     map[int, structs.shop_data] shop_index
     map[int, structs.guild_data] guild_index
-    map[int, structs.trig_proto_data] trig_index
+    map[int, structs.DgScriptPrototype] trig_index
     map[int64_t, structs.player_data] players
     map[int64_t, structs.descriptor_data*] sessions
 
     int create_join_session(int account_id, int character_id, int64_t connection_id, const string& ip)
 
 cdef extern from "dbat/comm.h" namespace "game":
-    void init();
-    void init_locale();
-    void init_database();
-    void init_zones();
-    void init_copyover();
+    void init()
+    void init_locale()
+    void init_database()
+    void init_zones()
+    void init_copyover()
 
 cdef extern from "dbat/comm.h":
     void runOneLoop(double deltaTime)

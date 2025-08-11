@@ -22,9 +22,9 @@
  */
 
 #define WCMD(name)  \
-    void (name)(room_data *room, char *argument, int cmd, int subcmd)
+    void (name)(Room *room, char *argument, int cmd, int subcmd)
 
-void wld_log(room_data *room, const char *format, ...);
+void wld_log(Room *room, const char *format, ...);
 
 WCMD(do_wasound);
 
@@ -52,14 +52,14 @@ WCMD(do_wat);
 
 WCMD(do_weffect);
 
-void wld_command_interpreter(room_data *room, char *argument);
+void wld_command_interpreter(Room *room, char *argument);
 
 
 struct wld_command_info {
     char *command;
 
     void (*command_pointer)
-            (room_data *room, char *argument, int cmd, int subcmd);
+            (Room *room, char *argument, int cmd, int subcmd);
 
     int subcmd;
 };
@@ -71,7 +71,7 @@ constexpr int SCMD_WECHOAROUND = 1;
 
 
 /* attaches room vnum to msg and sends it to script_log */
-void wld_log(room_data *room, const char *format, ...) {
+void wld_log(Room *room, const char *format, ...) {
     va_list args;
     char output[MAX_STRING_LENGTH];
 
@@ -171,7 +171,7 @@ WCMD(do_wecho) {
 
 WCMD(do_wsend) {
     char buf[MAX_INPUT_LENGTH], *msg;
-    char_data *ch;
+    Character *ch;
 
     msg = any_one_arg(argument, buf);
 
@@ -233,7 +233,7 @@ WCMD(do_wrecho) {
 WCMD(do_wdoor) {
     char target[MAX_INPUT_LENGTH], direction[MAX_INPUT_LENGTH];
     char field[MAX_INPUT_LENGTH], *value;
-    room_data *rm;
+    Room *rm;
     int dir, fd, to_room;
 
     const char *door_field[] = {
@@ -388,9 +388,9 @@ WCMD(do_wforce) {
 
 /* purge all objects an npcs in room, or specified object or mob */
 WCMD(do_wpurge) {
-    struct char_data *ch;
+    Character *ch;
     char arg[MAX_INPUT_LENGTH];
-    obj_data *obj, *next_obj;
+    Object *obj, *next_obj;
 
     one_argument(argument, arg);
 
@@ -442,11 +442,11 @@ WCMD(do_wpurge) {
 WCMD(do_wload) {
     char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
     int number = 0;
-    char_data *mob;
-    obj_data *object;
+    Character *mob;
+    Object *object;
     char *target;
-    char_data *tch;
-    obj_data *cnt;
+    Character *tch;
+    Object *cnt;
     int pos;
 
     target = two_arguments(argument, arg1, arg2);
@@ -523,7 +523,7 @@ WCMD(do_wload) {
 WCMD(do_wdamage) {
     char name[MAX_INPUT_LENGTH], amount[MAX_INPUT_LENGTH];
     int dam = 0;
-    char_data *ch;
+    Character *ch;
 
     two_arguments(argument, name, amount);
 
@@ -546,7 +546,7 @@ WCMD(do_wdamage) {
 
 WCMD(do_wat) {
     room_rnum loc = NOWHERE;
-    struct char_data *ch;
+    Character *ch;
     char arg[MAX_INPUT_LENGTH], *command;
 
     command = any_one_arg(argument, arg);
@@ -601,7 +601,7 @@ const struct wld_command_info wld_cmd_info[] = {
 /*
  *  This is the command interpreter used by rooms, called by script_driver.
  */
-void wld_command_interpreter(room_data *room, char *argument) {
+void wld_command_interpreter(Room *room, char *argument) {
     int cmd, length;
     char *line, arg[MAX_INPUT_LENGTH];
 

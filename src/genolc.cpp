@@ -139,7 +139,7 @@ ACMD(do_show_save_list) {
     }
 }
 
-room_vnum genolc_zonep_bottom(struct zone_data *zone) {
+room_vnum genolc_zonep_bottom(struct Zone *zone) {
     return zone->bot;
 }
 

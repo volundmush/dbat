@@ -24,7 +24,7 @@
 #include "dbat/modifiers.h"
 
 
-std::string char_data::juggleRaceName(bool capitalized) {
+std::string Character::juggleRaceName(bool capitalized) {
 
     std::string apparent = fmt::format("{}", magic_enum::enum_name(race));
 
@@ -45,49 +45,49 @@ std::string char_data::juggleRaceName(bool capitalized) {
     return apparent;
 }
 
-void char_data::restore_by(char_data *ch) {
+void Character::restore_by(Character *ch) {
     this->restore(true);
 
     ::act("You have been fully healed by $N!", false, this, nullptr, ch, TO_CHAR | TO_SLEEP);
 }
 
-void char_data::restore(bool announce) {
+void Character::restore(bool announce) {
     restoreVitals(announce);
     restoreLimbs(announce);
     restoreStatus(announce);
     restoreVital(CharVital::ki);
 }
 
-void char_data::lookAtLocation(room_data *room) {
+void Character::lookAtLocation(Room *room) {
     if(!room) return;
     look_at_room(room, this, 0);
 }
 
-void char_data::lookAtLocation(room_vnum rv) {
+void Character::lookAtLocation(room_vnum rv) {
     auto room = get_room(rv);
     lookAtLocation(room);
 }
 
-void char_data::lookAtLocation(const Location& loc) {
+void Character::lookAtLocation(const Location& loc) {
     if(!loc.unit) return;
     switch(loc.unit->type) {
         case UnitType::room:
-            lookAtLocation(static_cast<room_data*>(loc.unit));
+            lookAtLocation(static_cast<Room*>(loc.unit));
             break;
     }
 }
 
-void char_data::lookAtLocation() {
+void Character::lookAtLocation() {
     if(!location) return;
     lookAtLocation(location);
 }
 
-void char_data::lookAtLocation(const thing_data* td) {
+void Character::lookAtLocation(const AbstractThing* td) {
     if(!td) return;
     lookAtLocation(td->location);
 }
 
-void char_data::resurrect(ResurrectionMode mode) {
+void Character::resurrect(ResurrectionMode mode) {
     // First, fully heal the character.
     restore(true);
     for(auto f : {AFF_ETHEREAL, AFF_SPIRIT}) affect_flags.set(f, false);
@@ -162,7 +162,7 @@ void char_data::resurrect(ResurrectionMode mode) {
     ::act("$n's body forms in a pool of @Bblue light@n.", true, this, nullptr, nullptr, TO_ROOM);
 }
 
-void char_data::ghostify() {
+void Character::ghostify() {
     restore(true);
     for(auto f : {AFF_SPIRIT, AFF_ETHEREAL, AFF_KNOCKED, AFF_SLEEP, AFF_PARALYZE}) affect_flags.set(f, false);
 
@@ -174,26 +174,26 @@ void char_data::ghostify() {
 
 }
 
-void char_data::teleport_to(IDXTYPE rnum) {
+void Character::teleport_to(IDXTYPE rnum) {
     this->clearLocation();
     char_to_room(this, real_room(rnum));
     lookAtLocation();
     update_pos(this);
 }
 
-bool char_data::in_room_range(IDXTYPE low_rnum, IDXTYPE high_rnum) {
+bool Character::in_room_range(IDXTYPE low_rnum, IDXTYPE high_rnum) {
     return this->getRoomVnum() >= low_rnum && this->getRoomVnum() <= high_rnum;
 }
 
-bool char_data::in_past() {
+bool Character::in_past() {
     return location.getWhereFlag(WhereFlag::pendulum_past);
 }
 
-bool char_data::is_newbie() {
+bool Character::is_newbie() {
     return GET_MAX_HIT(this) <= 10000;
 }
 
-bool char_data::in_northran() {
+bool Character::in_northran() {
     return in_room_range(17900, 17999);
 }
 
@@ -213,18 +213,18 @@ static std::map<int, uint16_t> grav_threshold = {
         {10000, 200000000}
 };
 
-int64_t char_data::calc_soft_cap() {
+int64_t Character::calc_soft_cap() {
     return 750000000;
     //auto level = getBaseStat<int>("Level");
     //if(level >= 100) return 5e9;
     //return race::getSoftCap(race, level);
 }
 
-bool char_data::is_soft_cap(int64_t type) {
+bool Character::is_soft_cap(int64_t type) {
     return is_soft_cap(type, 1.0);
 }
 
-bool char_data::is_soft_cap(int64_t type, long double mult) {
+bool Character::is_soft_cap(int64_t type, long double mult) {
     if (IS_NPC(this))
         return true;
     
@@ -257,7 +257,7 @@ bool char_data::is_soft_cap(int64_t type, long double mult) {
     return against >= cur_cap;
 }
 
-int char_data::wearing_android_canister() {
+int Character::wearing_android_canister() {
     if (!IS_ANDROID(this))
         return 0;
     auto obj = GET_EQ(this, WEAR_BACKPACK);
@@ -273,14 +273,14 @@ int char_data::wearing_android_canister() {
     }
 }
 
-bool char_data::hasGravAcclim(int grav) {
+bool Character::hasGravAcclim(int grav) {
     //0 is x2, 1 is x5, 2 is x10, 3 is x50 and 4 is x100, 5 is x1000
     if(gravAcclim[grav] >= 10000)
         return true;
     return false;
 }
 
-void char_data::raiseGravAcclim() {
+void Character::raiseGravAcclim() {
     if (rand_number(1, 140) >= getEffectiveStat("strength")) {
         auto gravity = location.getEnvironment(ENV_GRAVITY);
 
@@ -299,7 +299,7 @@ void char_data::raiseGravAcclim() {
     }
 }
 
-int64_t char_data::calcGravCost(int64_t num) {
+int64_t Character::calcGravCost(int64_t num) {
     double gravity = location.getEnvironment(ENV_GRAVITY);
 
     if(gravity >= 1000 && hasGravAcclim(5))
@@ -333,72 +333,72 @@ int64_t char_data::calcGravCost(int64_t num) {
     }
 }
 
-bool char_data::isFullVital(CharVital type) {
+bool Character::isFullVital(CharVital type) {
     return getBaseStat(fmt::format("{}_damage", magic_enum::enum_name(type))) <= 0.0;
 }
 
-double char_data::modCurVitalDam(CharVital type, double dam) {
+double Character::modCurVitalDam(CharVital type, double dam) {
     return modBaseStat(fmt::format("{}_damage", magic_enum::enum_name(type)), dam);
 }
 
-double char_data::setCurVitalDam(CharVital type, double dam) {
+double Character::setCurVitalDam(CharVital type, double dam) {
     return setBaseStat(fmt::format("{}_damage", magic_enum::enum_name(type)), dam);
 }
 
-double char_data::getCurVitalDam(CharVital type) {
+double Character::getCurVitalDam(CharVital type) {
     return getBaseStat(fmt::format("{}_damage", magic_enum::enum_name(type)));
 }
 
-double char_data::getCurVitalMeterPercent(CharVital type) {
+double Character::getCurVitalMeterPercent(CharVital type) {
     auto dmg = getCurVitalDam(type);
     return 1.0 - dmg;
 }
 
-int64_t char_data::getCurVital(CharVital type) {
+int64_t Character::getCurVital(CharVital type) {
     auto effective_stat = getMaxVital(type);
     auto dmg = getCurVitalMeterPercent(type);
     return static_cast<int64_t>(effective_stat * dmg);
 }
 
-int64_t char_data::getMaxVital(CharVital type) {
+int64_t Character::getMaxVital(CharVital type) {
     auto effective_stat = getEffectiveStat(std::string(magic_enum::enum_name(type)));
     return effective_stat;
 }
 
-int64_t char_data::setCurVital(CharVital type, int64_t amt) {
+int64_t Character::setCurVital(CharVital type, int64_t amt) {
     auto m = getMaxVital(type);
     auto ratio = static_cast<double>(amt) / static_cast<double>(m);
     setBaseStat(fmt::format("{}_damage", magic_enum::enum_name(type)), -ratio);
     return getCurVital(type);
 }
 
-int64_t char_data::modCurVital(CharVital type, int64_t amt) {
+int64_t Character::modCurVital(CharVital type, int64_t amt) {
     auto m = getMaxVital(type);
     auto ratio = static_cast<double>(amt) / static_cast<double>(m);
     modBaseStat(fmt::format("{}_damage", magic_enum::enum_name(type)), -ratio);
     return getCurVital(type);
 }
 
-void char_data::restoreHealth(bool announce) {
+void Character::restoreHealth(bool announce) {
     setCurVitalDam(CharVital::health, 0.0);
 }
 
-int64_t char_data::getCurVitalPercent(CharVital type, double amt) {
+int64_t Character::getCurVitalPercent(CharVital type, double amt) {
     auto cur_vital = getEffectiveStat(std::string(magic_enum::enum_name(type)));
     auto dmg = getCurVitalMeterPercent(type);
     return (cur_vital * dmg) * amt;
 }
 
-int64_t char_data::getMaxVitalPercent(CharVital type, double amt) {
+int64_t Character::getMaxVitalPercent(CharVital type, double amt) {
     auto max_vital = getEffectiveStat(std::string(magic_enum::enum_name(type)));
     return static_cast<int64_t>(max_vital * amt);
 }
 
-void char_data::restoreVital(CharVital type) {
+void Character::restoreVital(CharVital type) {
     setCurVitalDam(type, 0.0);
 }
 
-bool char_data::isFullVitals() {
+bool Character::isFullVitals() {
     for(const auto& t : {CharVital::health, CharVital::ki, CharVital::stamina}) {
         if(!isFullVital(t))
             return false;
@@ -406,26 +406,26 @@ bool char_data::isFullVitals() {
     return true;
 }
 
-void char_data::restoreVitals(bool announce) {
+void Character::restoreVitals(bool announce) {
     for(const auto& t : {CharVital::health, CharVital::ki, CharVital::stamina}) {
         setCurVitalDam(t, 0.0);
     }
 }
 
-void char_data::restoreStatus(bool announce) {
+void Character::restoreStatus(bool announce) {
     cureStatusKnockedOut(announce);
     cureStatusBurn(announce);
     cureStatusPoison(announce);
 }
 
-void char_data::setStatusKnockedOut() {
+void Character::setStatusKnockedOut() {
     affect_flags.set(AFF_KNOCKED, true);
     affect_flags.set(AFF_FLYING, false);
     setBaseStat("altitude", 0);
     this->setBaseStat<int>("position", POS_SLEEPING);
 }
 
-void char_data::cureStatusKnockedOut(bool announce) {
+void Character::cureStatusKnockedOut(bool announce) {
     if (AFF_FLAGGED(this, AFF_KNOCKED)) {
         if (announce) {
             ::act("@W$n@W is no longer senseless, and wakes up.@n", false, this, nullptr, nullptr, TO_ROOM);
@@ -445,7 +445,7 @@ void char_data::cureStatusKnockedOut(bool announce) {
     }
 }
 
-void char_data::cureStatusBurn(bool announce) {
+void Character::cureStatusBurn(bool announce) {
     if (AFF_FLAGGED(this, AFF_BURNED)) {
         if (announce) {
                         this->sendText("Your burns are healed now.\r\n");
@@ -455,7 +455,7 @@ void char_data::cureStatusBurn(bool announce) {
     }
 }
 
-void char_data::cureStatusPoison(bool announce) {
+void Character::cureStatusPoison(bool announce) {
     ::act("@C$n@W suddenly looks a lot better!@b", false, this, nullptr, nullptr, TO_NOTVICT);
     affect_from_char(this, SPELL_POISON);
 }
@@ -467,7 +467,7 @@ static std::map<int, std::string> limb_names = {
         {3, "left leg"}
 };
 
-void char_data::restoreLimbs(bool announce) {
+void Character::restoreLimbs(bool announce) {
     // restore head...
     GET_LIMBCOND(this, 0) = 100;
 
@@ -487,7 +487,7 @@ void char_data::restoreLimbs(bool announce) {
 }
 
 
-void char_data::gainTail(bool announce) {
+void Character::gainTail(bool announce) {
     if (!race::hasTail(race)) return;
     if(character_flags.get(CharacterFlag::tail)) return;
     character_flags.set(CharacterFlag::tail, true);
@@ -497,7 +497,7 @@ void char_data::gainTail(bool announce) {
     }
 }
 
-void char_data::loseTail() {
+void Character::loseTail() {
     if (!character_flags.get(CharacterFlag::tail)) return;
     character_flags.set(CharacterFlag::tail, false);
     remove_limb(this, 6);
@@ -505,20 +505,20 @@ void char_data::loseTail() {
     oozaru_revert(this);
 }
 
-bool char_data::hasTail() {
+bool Character::hasTail() {
     return character_flags.get(CharacterFlag::tail);
 }
 
-void char_data::addTransform(Form form) {
+void Character::addTransform(Form form) {
     transforms.insert({form, trans_data()});
 }
 
-void char_data::hideTransform(Form form, bool hide) {
+void Character::hideTransform(Form form, bool hide) {
     auto foundForm = transforms.find(form);
     foundForm->second.visible = !hide;
 }
 
-bool char_data::removeTransform(Form form) {
+bool Character::removeTransform(Form form) {
     if (transforms.contains(form))
     {
         transforms.erase(form);
@@ -528,7 +528,7 @@ bool char_data::removeTransform(Form form) {
     return false;
 }
 
-void char_data::attemptLimitBreak() {
+void Character::attemptLimitBreak() {
     if(form == Form::base)
         return;
     if(transforms[form].time_spent_in_form > 50000 && rand_number(0, 1000) == 1000) {
@@ -542,14 +542,14 @@ void char_data::attemptLimitBreak() {
     }
 }
 
-void char_data::removeLimitBreak() {
+void Character::removeLimitBreak() {
     if (AFF_FLAGGED(this, AFF_LIMIT_BREAKING)) {
         this->affect_flags.set(AFF_LIMIT_BREAKING, false);
                 this->sendText("@mYou feel your body finally calm down.@n\r\n");
     }
 }
 
-int64_t char_data::getPL(bool suppressed) {
+int64_t Character::getPL(bool suppressed) {
     int64_t vitalCalc = (getEffectiveStat<int64_t>("health") + getEffectiveStat<int64_t>("ki")) / 4;
     int attrCalc = (getEffectiveStat("agility") + getEffectiveStat("constitution") + getEffectiveStat("intelligence") + getEffectiveStat("speed")
     + getEffectiveStat("strength") + getEffectiveStat("wisdom")) / 50;
@@ -578,7 +578,7 @@ int64_t char_data::getPL(bool suppressed) {
     return pl;
 }
 
-void char_data::apply_kaioken(int times, bool announce) {
+void Character::apply_kaioken(int times, bool announce) {
     setBaseStat("kaioken", times);
     character_flags.set(CharacterFlag::powering_up, false);
 
@@ -590,7 +590,7 @@ void char_data::apply_kaioken(int times, bool announce) {
 
 }
 
-void char_data::remove_kaioken(int8_t announce) {
+void Character::remove_kaioken(int8_t announce) {
     auto kaio = getBaseStat<int>("kaioken");
     if (!kaio) {
         return;
@@ -609,7 +609,7 @@ void char_data::remove_kaioken(int8_t announce) {
 }
 
 
-int char_data::getRPP() {
+int Character::getRPP() {
     if(IS_NPC(this)) {
         return 0;
     }
@@ -620,14 +620,14 @@ int char_data::getRPP() {
 
 }
 
-void account_data::modRPP(int amt) {
+void Account::modRPP(int amt) {
     rpp += amt;
     if(rpp < 0) {
         rpp = 0;
     }
 }
 
-void char_data::modRPP(int amt) {
+void Character::modRPP(int amt) {
     if(IS_NPC(this)) {
         return;
     }
@@ -637,16 +637,16 @@ void char_data::modRPP(int amt) {
     p.account->modRPP(amt);
 }
 
-int char_data::getPractices() {
+int Character::getPractices() {
     return getBaseStat<int>("practices");
 }
 
-void char_data::modPractices(int amt) {
+void Character::modPractices(int amt) {
     modBaseStat("practices", amt);
 }
 
 
-void char_data::login() {
+void Character::login() {
     enter_player_game(desc);
         this->send_to("%s", CONFIG_WELC_MESSG);
     ::act("$n has entered the game.", true, this, nullptr, nullptr, TO_ROOM);
@@ -763,7 +763,7 @@ void char_data::login() {
 
 }
 
-double char_data::getAffectModifier(uint64_t location, uint64_t specific) {
+double Character::getAffectModifier(uint64_t location, uint64_t specific) {
     double total = 0;
     // Personal modifiers.
     for(auto a = affected; a; a = a->next) {
@@ -792,12 +792,12 @@ double char_data::getAffectModifier(uint64_t location, uint64_t specific) {
     return total;
 }
 
-int char_data::setSize(int val) {
+int Character::setSize(int val) {
     this->size = static_cast<Size>(val);
     return static_cast<int>(this->size);
 }
 
-int char_data::getSize() {
+int Character::getSize() {
     return static_cast<int>(size) != SIZE_UNDEFINED ? static_cast<int>(size) : race::getSize(race);
 }
 
@@ -806,7 +806,7 @@ double getDaysPassed() {
     return ingameDays;
 }
 
-double char_data::getPotential() {
+double Character::getPotential() {
     //Gain one potential per RL week, reaches 100 in two years
     double timePotential = 1 + (getDaysPassed() / 7);
 
@@ -820,7 +820,7 @@ double char_data::getPotential() {
     return timePotential * physiquePotential;
 }
 
-void char_data::gainGrowth() {
+void Character::gainGrowth() {
     double modifier = 1;
     if (location.getWhereFlag(WhereFlag::afterlife_hell) || location.getWhereFlag(WhereFlag::afterlife)) {
         modifier = 1.5;
@@ -831,7 +831,7 @@ void char_data::gainGrowth() {
     gainGrowth(gain);
 }
 
-void char_data::gainGrowth(double gain) {
+void Character::gainGrowth(double gain) {
     // You cannot exceed the amount of days the server has been online for
     double days = getDaysPassed();
 
@@ -859,7 +859,7 @@ void char_data::gainGrowth(double gain) {
 }
 
 
-bool char_data::canCarryWeight(weight_t val) {
+bool Character::canCarryWeight(weight_t val) {
     double gravity = location.getEnvironment(ENV_GRAVITY);
 
     if(gravity >= 1000 && hasGravAcclim(5))
@@ -878,15 +878,15 @@ bool char_data::canCarryWeight(weight_t val) {
     return getEffectiveStat("carry_available") >= (val * gravity);
 }
 
-bool char_data::canCarryWeight(struct obj_data *obj) {
+bool Character::canCarryWeight(Object *obj) {
     return canCarryWeight(obj->getEffectiveStat("weight_total"));
 }
 
-bool char_data::canCarryWeight(struct char_data *obj) {
+bool Character::canCarryWeight(Character *obj) {
     return canCarryWeight(obj->getEffectiveStat("weight_total"));
 }
 
-room_vnum char_data::normalizeLoadRoom(room_vnum in) {
+room_vnum Character::normalizeLoadRoom(room_vnum in) {
     // If they were in the void, then we need to use their last good room.
     room_vnum room = NOWHERE;
     room_vnum lroom = NOWHERE;
@@ -942,16 +942,16 @@ room_vnum char_data::normalizeLoadRoom(room_vnum in) {
 
 }
 
-std::map<int, obj_data *> char_data::getEquipment() {
-    std::map<int, obj_data*> out;
+std::map<int, Object *> Character::getEquipment() {
+    std::map<int, Object*> out;
     for(const auto &uw : filter_raw(contents)) {
-        if(auto o = dynamic_cast<obj_data*>(uw))
+        if(auto o = dynamic_cast<Object*>(uw))
             if(o->location.position.x >= 0.0) out[o->location.position.x] = o;
     }
     return out;
 }
 
-obj_data* char_data::getEquipSlot(int slot) {
+Object* Character::getEquipSlot(int slot) {
     auto eq = getEquipment();
     if(eq.contains(slot)) {
         return eq[slot];
@@ -960,30 +960,30 @@ obj_data* char_data::getEquipSlot(int slot) {
     return nullptr;
 }
 
-void char_data::onAttack(atk::Attack& outgoing) {
+void Character::onAttack(atk::Attack& outgoing) {
     if(form != Form::base)
         trans::onAttack(this, outgoing, form);
     if(technique != Form::base)
         trans::onAttack(this, outgoing, technique);
 }
 
-void char_data::onAttacked(atk::Attack& incoming) {
+void Character::onAttacked(atk::Attack& incoming) {
     if(form != Form::base)
         trans::onAttacked(this, incoming, form);
     if(technique != Form::base)
         trans::onAttacked(this, incoming, technique);
 }
 
-int64_t char_data::getExperience() {
+int64_t Character::getExperience() {
     return getEffectiveStat("experience");
 }
 
-int64_t char_data::setExperience(int64_t value) {
+int64_t Character::setExperience(int64_t value) {
     return setBaseStat("experience", value);
 }
 
 // This returns the exact amount that was modified by.
-int64_t char_data::modExperience(int64_t value, bool applyBonuses) {
+int64_t Character::modExperience(int64_t value, bool applyBonuses) {
 
     if(value < 0) {
         // removing experience. We can do this easily.
@@ -1091,7 +1091,7 @@ int64_t char_data::modExperience(int64_t value, bool applyBonuses) {
 
 }
 
-void char_data::gazeAtMoon() {
+void Character::gazeAtMoon() {
     if(OOZARU_RACE(this) && character_flags.get(CharacterFlag::tail)) {
         if(form == Form::oozaru || form == Form::golden_oozaru) return;
         Form toForm = Form::oozaru;
@@ -1160,7 +1160,7 @@ static const std::map<std::string, int> _aflags = {
 };
 
 
-std::optional<std::string> char_data::dgCallMember(const std::string& member, const std::string& arg) {
+std::optional<std::string> Character::dgCallMember(const std::string& member, const std::string& arg) {
     std::string lmember = member;
     boost::to_lower(lmember);
     boost::trim(lmember);
@@ -1210,7 +1210,7 @@ std::optional<std::string> char_data::dgCallMember(const std::string& member, co
     return {};
 }
 
-void char_data::setTask(Task t) {
+void Character::setTask(Task t) {
     task = t;
     if(task == Task::nothing) {
         if(wait_input_queue.empty()) characterSubscriptions.unsubscribe("commandWaitQueue", this);
@@ -1219,7 +1219,7 @@ void char_data::setTask(Task t) {
     }
 }
 
-std::string char_data::getAppearance(Appearance type, bool withTransform) {
+std::string Character::getAppearance(Appearance type, bool withTransform) {
     if(withTransform && form != Form::base) {
         if(auto override = trans::getAppearance(this, form, type); override) {
             return override.value();
@@ -1232,13 +1232,13 @@ std::string char_data::getAppearance(Appearance type, bool withTransform) {
     return race::defaultAppearance(this, type);
 }
 
-const char* char_data::getAppearanceStr(Appearance type) {
+const char* Character::getAppearanceStr(Appearance type) {
     static char buf[MAX_STRING_LENGTH];
     snprintf(buf, MAX_STRING_LENGTH, "%s", getAppearance(type).c_str());
     return buf;
 }
 
-void char_data::sendText(const std::string& txt) {
+void Character::sendText(const std::string& txt) {
     if(!desc) return;
     desc->sendText(txt);
 }

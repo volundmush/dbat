@@ -19,7 +19,7 @@
 #include "dbat/dg_scripts.h"
 #include "dbat/send.h"
 
-room_data::room_data() : location_data() {
+Room::Room() : AbstractLocation() {
     type = UnitType::room;
 }
 
@@ -27,13 +27,13 @@ room_data::room_data() : location_data() {
  * This function will copy the strings so be sure you free your own
  * copies of the description, title, and such.
  */
-std::shared_ptr<room_data> room_data::shared() {
+std::shared_ptr<Room> Room::shared() {
     return shared_from_this();
 }
 
-room_rnum add_room(struct room_data *room) {
-    struct char_data *tch;
-    struct obj_data *tobj;
+room_rnum add_room(Room *room) {
+    Character *tch;
+    Object *tobj;
     vnum j, found = false;
     room_rnum i;
 
@@ -50,7 +50,7 @@ room_rnum add_room(struct room_data *room) {
         assign_triggers(ro, WLD_TRIGGER);
         return i;
     }
-    auto sh = std::shared_ptr<room_data>(room);
+    auto sh = std::shared_ptr<Room>(room);
     world.emplace(vn, sh);
     units.emplace(vn, sh);
     basic_mud_log("GenOLC: add_room: Added room %d.", vn);
@@ -66,9 +66,9 @@ room_rnum add_room(struct room_data *room) {
 int delete_room(room_rnum rnum) {
     room_rnum i;
     int j;
-    struct char_data *ppl, *next_ppl;
-    struct obj_data *obj, *next_obj;
-    struct room_data *room;
+    Character *ppl, *next_ppl;
+    Object *obj, *next_obj;
+    Room *room;
 
     if (!world.count(rnum))    /* Can't delete void yet. */
         return false;
@@ -144,7 +144,7 @@ int save_rooms(zone_rnum zone_num) {
     return true;
 }
 
-int copy_room(struct room_data *to, struct room_data *from) {
+int copy_room(Room *to, Room *from) {
     // TODO: Fix this.
     free_room_strings(to);
     *to = *from;
@@ -164,7 +164,7 @@ int copy_room(struct room_data *to, struct room_data *from) {
  * and we'd be freeing the very strings we're copying.  If this function
  * is used elsewhere, be sure to free_room_strings() the 'dest' room first.
  */
-int copy_room_strings(struct room_data *dest, struct room_data *source) {
+int copy_room_strings(Room *dest, Room *source) {
     int i;
 
     if (dest == nullptr || source == nullptr) {
@@ -184,7 +184,7 @@ int copy_room_strings(struct room_data *dest, struct room_data *source) {
     return true;
 }
 
-int free_room_strings(struct room_data *room) {
+int free_room_strings(Room *room) {
     int i;
 
     /* Free descriptions. */
@@ -201,23 +201,23 @@ int free_room_strings(struct room_data *room) {
 }
 
 /*
-nlohmann::json room_data::serializeDgVars() {
+nlohmann::json Room::serializeDgVars() {
     if(global_vars)
         return serializeVars(global_vars);
     return nlohmann::json::array();
 }
 */
 
-bool room_data::isActive() {
+bool Room::isActive() {
     return world.contains(id);
 }
 
 
-int room_data::getDamage() const {
+int Room::getDamage() const {
     return damage;
 }
 
-void room_data::activate() {
+void Room::activate() {
     assign_triggers(this, WLD_TRIGGER);
     
     if(!scripts.empty()) {
@@ -230,11 +230,11 @@ void room_data::activate() {
         roomSubscriptions.subscribe("roomRepairDamage", shared_from_this());
 }
 
-void room_data::deactivate() {
+void Room::deactivate() {
     roomSubscriptions.unsubscribeFromAll(shared_from_this());
 }
 
-int room_data::setDamage(int amount) {
+int Room::setDamage(int amount) {
     auto before = damage;
     damage = std::clamp<int>(amount, 0, 100);
     // if(dmg != before) save();
@@ -246,15 +246,15 @@ int room_data::setDamage(int amount) {
     return damage;
 }
 
-int room_data::modDamage(int amount) {
+int Room::modDamage(int amount) {
     return setDamage(damage + amount);
 }
 
-std::vector<std::weak_ptr<char_data>> room_data::getPeople() const {
-    std::vector<std::weak_ptr<char_data>> out;
+std::vector<std::weak_ptr<Character>> Room::getPeople() const {
+    std::vector<std::weak_ptr<Character>> out;
     for(const auto &uw : contents) {
         if(auto u = uw.lock()) {
-            if(auto c = std::dynamic_pointer_cast<char_data>(u)) {
+            if(auto c = std::dynamic_pointer_cast<Character>(u)) {
                 out.push_back(c);
             }
         }
@@ -280,7 +280,7 @@ static const std::map<std::string, int> _dirNames = {
 
 };
 
-std::optional<std::string> room_data::dgCallMember(const std::string& member, const std::string& arg) {
+std::optional<std::string> Room::dgCallMember(const std::string& member, const std::string& arg) {
     std::string lmember = member;
     boost::to_lower(lmember);
     boost::trim(lmember);
@@ -314,17 +314,17 @@ std::optional<std::string> room_data::dgCallMember(const std::string& member, co
     return {};
 }
 
-double room_data::setEnvironment(int type, double value) {
+double Room::setEnvironment(int type, double value) {
     environment[type] = value;
     return value;
 }
 
-double room_data::modEnvironment(int type, double value) {
+double Room::modEnvironment(int type, double value) {
     environment[type] += value;
     return environment[type];
 }
 
-void room_data::clearEnvironment(int type) {
+void Room::clearEnvironment(int type) {
     environment.erase(type);
 }
 
@@ -345,7 +345,7 @@ static const std::vector<std::pair<std::pair<room_vnum, room_vnum>, double>> gra
     {{64097, 64097}, 1000.0},
 };
 
-double room_data::getEnvironment(int type) const {
+double Room::getEnvironment(int type) const {
     auto planet = getPlanet(getVnum());
     switch(type) {
         case ENV_GRAVITY: {
@@ -402,7 +402,7 @@ double room_data::getEnvironment(int type) const {
     return 0.0;
 }
 
-std::vector<trig_vnum> room_data::getProtoScript() const {
+std::vector<trig_vnum> Room::getProtoScript() const {
     return proto_script;
 }
 
@@ -411,37 +411,37 @@ std::vector<trig_vnum> room_data::getProtoScript() const {
 // Also, since unit_data::getName() takes no arguments, you cannot overload it with a const Coordinates&
 // unless you want to provide a new interface. If you want to call the base version, do:
 
-const std::vector<ExtraDescription>& room_data::getExtraDescription(const Coordinates& coor) const {
+const std::vector<ExtraDescription>& Room::getExtraDescription(const Coordinates& coor) const {
     return getExtraDescription();
 }   
 
-zone_data* room_data::getZone() const {
+Zone* Room::getZone() const {
     return zone;
 }
 
-const char* room_data::getName(const Coordinates& /*coor*/) const {
+const char* Room::getName(const Coordinates& /*coor*/) const {
     return getName();
 }
 
-const char* room_data::getLookDescription(const Coordinates& coor) const {
+const char* Room::getLookDescription(const Coordinates& coor) const {
     // For rooms, look description does not vary by coordinate inside the room.
-    return unit_data::getLookDescription();
+    return Entity::getLookDescription();
 }
 
-std::vector<std::weak_ptr<obj_data>> room_data::getObjects(const Coordinates& coor) const {
+std::vector<std::weak_ptr<Object>> Room::getObjects(const Coordinates& coor) const {
     return getObjects();
 }
 
-std::vector<std::weak_ptr<char_data>> room_data::getPeople(const Coordinates& coor) const {
+std::vector<std::weak_ptr<Character>> Room::getPeople(const Coordinates& coor) const {
     return getPeople();
 }
 
-std::optional<Destination> room_data::getDirection(Direction dir) const {
+std::optional<Destination> Room::getDirection(Direction dir) const {
     if(exits.contains(dir)) return exits.at(dir);
     return std::nullopt;
 }
 
-std::map<Direction, Destination> room_data::getDirections() const {
+std::map<Direction, Destination> Room::getDirections() const {
     std::map<Direction, Destination> out;
     for (const auto& [dir, dest] : exits) {
         if(dest) out[dir] = dest;
@@ -449,43 +449,43 @@ std::map<Direction, Destination> room_data::getDirections() const {
     return out;
 }
 
-std::optional<Destination> room_data::getDirection(const Coordinates& coor, Direction dir) {
+std::optional<Destination> Room::getDirection(const Coordinates& coor, Direction dir) {
     return getDirection(dir);
 }
 
-std::map<Direction, Destination> room_data::getDirections(const Coordinates& coor) {
+std::map<Direction, Destination> Room::getDirections(const Coordinates& coor) {
     return getDirections();
 }
 
-void room_data::setRoomFlag(const Coordinates& coor, RoomFlag flag, bool value) {
+void Room::setRoomFlag(const Coordinates& coor, RoomFlag flag, bool value) {
     room_flags.set(flag, value);
 }
 
-bool room_data::toggleRoomFlag(const Coordinates& coor, RoomFlag flag) {
+bool Room::toggleRoomFlag(const Coordinates& coor, RoomFlag flag) {
     return room_flags.toggle(flag);
 }
 
-bool room_data::getRoomFlag(const Coordinates& coor, RoomFlag flag) const {
+bool Room::getRoomFlag(const Coordinates& coor, RoomFlag flag) const {
     return room_flags.get(flag);
 }
 
-void room_data::setWhereFlag(const Coordinates& coor, WhereFlag flag, bool value) {
+void Room::setWhereFlag(const Coordinates& coor, WhereFlag flag, bool value) {
     where_flags.set(flag, value);
 }
 
-bool room_data::toggleWhereFlag(const Coordinates& coor, WhereFlag flag) {
+bool Room::toggleWhereFlag(const Coordinates& coor, WhereFlag flag) {
     return where_flags.toggle(flag);
 }
 
-bool room_data::getWhereFlag(const Coordinates& coor, WhereFlag flag) const {
+bool Room::getWhereFlag(const Coordinates& coor, WhereFlag flag) const {
     return where_flags.get(flag);
 }
 
-SectorType room_data::getSectorType(const Coordinates& coor) const {
+SectorType Room::getSectorType(const Coordinates& coor) const {
     return sector_type;
 }
 
-void room_data::broadcastAt(const Coordinates& coor, const std::string& message) const {
+void Room::broadcastAt(const Coordinates& coor, const std::string& message) const {
     auto people = getPeople(coor);
     for (const auto &uw : people) {
         if (auto c = uw.lock()) {
@@ -494,46 +494,46 @@ void room_data::broadcastAt(const Coordinates& coor, const std::string& message)
     }
 }
 
-int room_data::getDamage(const Coordinates& coor) const {
+int Room::getDamage(const Coordinates& coor) const {
     return getDamage();
 }
-int room_data::setDamage(const Coordinates& coor, int amount) {
+int Room::setDamage(const Coordinates& coor, int amount) {
     return setDamage(amount);
 }
-int room_data::modDamage(const Coordinates& coor, int amount) {
+int Room::modDamage(const Coordinates& coor, int amount) {
     return modDamage(amount);
 }
 
-int room_data::getGroundEffect(const Coordinates& coor) const {
+int Room::getGroundEffect(const Coordinates& coor) const {
     return ground_effect;
 }
-void room_data::setGroundEffect(const Coordinates& coor, int effect) {
+void Room::setGroundEffect(const Coordinates& coor, int effect) {
     ground_effect = effect;
 }
 
-int room_data::modGroundEffect(const Coordinates& coor, int effect) {
+int Room::modGroundEffect(const Coordinates& coor, int effect) {
     ground_effect += effect;
     return ground_effect;
 }
 
-SpecialFunc room_data::getSpecialFunc(const Coordinates& coor) const {
+SpecialFunc Room::getSpecialFunc(const Coordinates& coor) const {
     return func;
 }
 
-double room_data::getEnvironment(const Coordinates& coor, int type) const {
+double Room::getEnvironment(const Coordinates& coor, int type) const {
     return getEnvironment(type);
 }
-double room_data::setEnvironment(const Coordinates& coor, int type, double value) {
+double Room::setEnvironment(const Coordinates& coor, int type, double value) {
     return setEnvironment(type, value);
 }
-double room_data::modEnvironment(const Coordinates& coor, int type, double value) {
+double Room::modEnvironment(const Coordinates& coor, int type, double value) {
     return modEnvironment(type, value);
 }
-void room_data::clearEnvironment(const Coordinates& coor, int type) {
+void Room::clearEnvironment(const Coordinates& coor, int type) {
     clearEnvironment(type);
 }
 
-void room_data::sendText(const std::string& txt) {
+void Room::sendText(const std::string& txt) {
     auto people = getPeople();
     for(auto i : filter_raw(people)) {
         i->sendText(txt);
@@ -558,20 +558,20 @@ void room_data::sendText(const std::string& txt) {
     }
 }
 
-void room_data::deleteExit(Direction dir) {
+void Room::deleteExit(Direction dir) {
     if (auto find = exits.find(dir); find != exits.end()) {
         exits.erase(find);
     }
 }
 
-void room_data::replaceExit(const Destination& dest) {
+void Room::replaceExit(const Destination& dest) {
     exits[dest.dir] = dest;
 }
 
-void room_data::deleteExit(const Coordinates& coor, Direction dir) {
+void Room::deleteExit(const Coordinates& coor, Direction dir) {
     deleteExit(dir);
 }
 
-void room_data::replaceExit(const Coordinates& coor, const Destination& dest) {
+void Room::replaceExit(const Coordinates& coor, const Destination& dest) {
     replaceExit(dest);
 }

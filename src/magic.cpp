@@ -23,9 +23,9 @@
 #include "dbat/fight.h"
 
 /* local functions */
-int mag_materials(struct char_data *ch, int item0, int item1, int item2, int extract, int verbose);
+int mag_materials(Character *ch, int item0, int item1, int item2, int extract, int verbose);
 
-void perform_mag_groups(int level, struct char_data *ch, struct char_data *tch, int spellnum);
+void perform_mag_groups(int level, Character *ch, Character *tch, int spellnum);
 
 /* affect_update: called from comm.c (causes spells to wear off) */
 void affect_update(uint64_t heartPulse, double deltaTime) {
@@ -60,8 +60,8 @@ void affect_update(uint64_t heartPulse, double deltaTime) {
  * it to implement your own spells which require ingredients (i.e., some
  * heal spell which requires a rare herb or some such.)
  */
-int mag_materials(struct char_data *ch, int item0, int item1, int item2, int extract, int verbose) {
-    struct obj_data *obj0 = nullptr, *obj1 = nullptr, *obj2 = nullptr;
+int mag_materials(Character *ch, int item0, int item1, int item2, int extract, int verbose) {
+    Object *obj0 = nullptr, *obj1 = nullptr, *obj2 = nullptr;
     auto con = ch->getObjects();
     for (auto tobj : filter_raw(con)) {
         if ((item0 > 0) && (GET_OBJ_VNUM(tobj) == item0)) {
@@ -107,7 +107,7 @@ int mag_materials(struct char_data *ch, int item0, int item1, int item2, int ext
 }
 
 
-int mag_newsaves(struct char_data *ch, struct char_data *victim, int spellnum, int level, int cast_stat) {
+int mag_newsaves(Character *ch, Character *victim, int spellnum, int level, int cast_stat) {
     int stype;
     int dc;
     int total;
@@ -136,7 +136,7 @@ int mag_newsaves(struct char_data *ch, struct char_data *victim, int spellnum, i
  *
  * -1 = dead, otherwise the amount of damage done.
  */
-int mag_damage(int level, struct char_data *ch, struct char_data *victim,
+int mag_damage(int level, Character *ch, Character *victim,
                int spellnum) {
     int dam = 0;
 
@@ -287,7 +287,7 @@ int mag_damage(int level, struct char_data *ch, struct char_data *victim,
 
 constexpr int MAX_SPELL_AFFECTS = 5;    /* change if more needed */
 
-void mag_affects(int level, struct char_data *ch, struct char_data *victim,
+void mag_affects(int level, Character *ch, Character *victim,
                  int spellnum) {
     struct affected_type af[MAX_SPELL_AFFECTS];
     bool accum_affect = false, accum_duration = false;
@@ -576,8 +576,8 @@ void mag_affects(int level, struct char_data *ch, struct char_data *victim,
  * This function is used to provide services to mag_groups.  This function
  * is the one you should change to add new group spells.
  */
-void perform_mag_groups(int level, struct char_data *ch,
-                        struct char_data *tch, int spellnum) {
+void perform_mag_groups(int level, Character *ch,
+                        Character *tch, int spellnum) {
     switch (spellnum) {
         case SPELL_MASS_HEAL:
             mag_points(level, ch, tch, SPELL_HEAL);
@@ -603,8 +603,8 @@ void perform_mag_groups(int level, struct char_data *ch,
  * To add new group spells, you shouldn't have to change anything in
  * mag_groups -- just add a new case to perform_mag_groups.
  */
-void mag_groups(int level, struct char_data *ch, int spellnum) {
-    struct char_data *tch, *k;
+void mag_groups(int level, Character *ch, int spellnum) {
+    Character *tch, *k;
     struct follow_type *f, *f_next;
 
     if (ch == nullptr)
@@ -639,7 +639,7 @@ void mag_groups(int level, struct char_data *ch, int spellnum) {
  *
  * No spells of this class currently implemented.
  */
-void mag_masses(int level, struct char_data *ch, int spellnum) {
+void mag_masses(int level, Character *ch, int spellnum) {
     auto people = ch->location.getPeople();
     for (auto tch : filter_raw(people)) {
         if (tch == ch)
@@ -659,7 +659,7 @@ void mag_masses(int level, struct char_data *ch, int spellnum) {
  *
  *  area spells have limited targets within the room.
  */
-void mag_areas(int level, struct char_data *ch, int spellnum) {
+void mag_areas(int level, Character *ch, int spellnum) {
     const char *to_char = nullptr, *to_room = nullptr;
 
     if (ch == nullptr)
@@ -845,8 +845,8 @@ constexpr int MOB_ELEMENTAL_BASE = 20;    /* Only one for now. */
 constexpr int MOB_ZOMBIE = 11;
 constexpr int MOB_AERIALSERVANT = 19;
 
-void mag_summons(int level, struct char_data *ch, struct obj_data *obj, int spellnum, char *arg) {
-    struct char_data *mob = nullptr;
+void mag_summons(int level, Character *ch, Object *obj, int spellnum, char *arg) {
+    Character *mob = nullptr;
     int msg = 0, num = 1, handle_corpse = false, affs = 0, affvs = 0, assist = 0, i, j, count;
     char *buf = nullptr;
     char buf2[MAX_INPUT_LENGTH];
@@ -974,7 +974,7 @@ void mag_summons(int level, struct char_data *ch, struct obj_data *obj, int spel
 }
 
 
-void mag_points(int level, struct char_data *ch, struct char_data *victim,
+void mag_points(int level, Character *ch, Character *victim,
                 int spellnum) {
     int healing = 0;
     int tmp;
@@ -1021,7 +1021,7 @@ void mag_points(int level, struct char_data *ch, struct char_data *victim,
 }
 
 
-void mag_unaffects(int level, struct char_data *ch, struct char_data *victim,
+void mag_unaffects(int level, Character *ch, Character *victim,
                    int spellnum) {
     int spell = 0, msg_not_affected = true;
     const char *to_vict = nullptr, *to_room = nullptr;
@@ -1070,7 +1070,7 @@ void mag_unaffects(int level, struct char_data *ch, struct char_data *victim,
 }
 
 
-void mag_alter_objs(int level, struct char_data *ch, struct obj_data *obj,
+void mag_alter_objs(int level, Character *ch, Object *obj,
                     int spellnum) {
     const char *to_char = nullptr, *to_room = nullptr;
 
@@ -1130,8 +1130,8 @@ void mag_alter_objs(int level, struct char_data *ch, struct obj_data *obj,
 }
 
 
-void mag_creations(int level, struct char_data *ch, int spellnum) {
-    struct obj_data *tobj;
+void mag_creations(int level, Character *ch, int spellnum) {
+    Object *tobj;
     obj_vnum z;
 
     if (ch == nullptr)
@@ -1162,7 +1162,7 @@ void mag_creations(int level, struct char_data *ch, int spellnum) {
 /* affect_update_violence: called from fight.c (causes spells to wear off) */
 void affect_update_violence(uint64_t heartPulse, double deltaTime) {
     struct affected_type *af, *next;
-    struct char_data *i;
+    Character *i;
     int dam;
     int maxdam;
 
@@ -1202,7 +1202,7 @@ void affect_update_violence(uint64_t heartPulse, double deltaTime) {
     }
 }
 
-void mag_affectsv(int level, struct char_data *ch, struct char_data *victim,
+void mag_affectsv(int level, Character *ch, Character *victim,
                   int spellnum) {
     struct affected_type af[MAX_SPELL_AFFECTS];
     bool accum_affect = false, accum_duration = false;

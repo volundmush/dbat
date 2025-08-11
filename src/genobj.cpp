@@ -16,11 +16,11 @@
 #include "dbat/filter.h"
 #include "dbat/dg_scripts.h"
 
-obj_data::obj_data() : thing_data() {
+Object::Object() : AbstractThing() {
     type = UnitType::object;
 }
 
-obj_rnum add_object(struct item_proto_data *newobj, obj_vnum ovnum) {
+obj_rnum add_object(ObjectPrototype *newobj, obj_vnum ovnum) {
     int found = NOTHING;
     
     /*
@@ -51,7 +51,7 @@ obj_rnum add_object(struct item_proto_data *newobj, obj_vnum ovnum) {
  * if object is pointing to this prototype, then we need to replace it
  * with the new one.
  */
-int update_objects(struct item_proto_data *refobj) {
+int update_objects(ObjectPrototype *refobj) {
     int count = 0;
 
     auto objects = objectSubscriptions.all(fmt::format("vnum_{}", refobj->vn));
@@ -78,7 +78,7 @@ int save_objects(zone_rnum zone_num) {
 int delete_object(obj_rnum rnum) {
     obj_rnum i;
     zone_rnum zrnum;
-    struct obj_data *tmp;
+    Object *tmp;
     int shop, j, zone, cmd_no;
 
     if (!obj_proto.count(rnum))
@@ -98,7 +98,7 @@ int delete_object(obj_rnum rnum) {
 
             switch(tmp->location.getType()) {
                 case UnitType::room: {
-                    auto r = static_cast<room_data*>(tmp->location.unit);
+                    auto r = static_cast<Room*>(tmp->location.unit);
                     for(auto this_content : filter_raw(con)) {
                         /* Transfer stuff from object to room. */
                         this_content->clearLocation();
@@ -107,7 +107,7 @@ int delete_object(obj_rnum rnum) {
                 }
                     break;
                 case UnitType::character: {
-                    auto c = static_cast<char_data*>(tmp->location.unit);
+                    auto c = static_cast<Character*>(tmp->location.unit);
                     for(auto this_content : filter_raw(con)) {
                         /* Transfer stuff from object to person inventory. */
                         this_content->clearLocation();
@@ -116,7 +116,7 @@ int delete_object(obj_rnum rnum) {
                 }
                     break;
                 case UnitType::object: {
-                    auto o = static_cast<obj_data*>(tmp->location.unit);
+                    auto o = static_cast<Object*>(tmp->location.unit);
                     for(auto this_content : filter_raw(con)) {
                         /* Transfer stuff from object to containing object. */
                         this_content->clearLocation();
@@ -145,11 +145,11 @@ int delete_object(obj_rnum rnum) {
 }
 
 
-std::shared_ptr<obj_data> obj_data::shared() {
+std::shared_ptr<Object> Object::shared() {
     return shared_from_this();
 }
 
-void obj_data::activate() {
+void Object::activate() {
     if(active) {
         basic_mud_log("Attempted to activate an already active item.");
         return;
@@ -187,7 +187,7 @@ void obj_data::activate() {
     activateContents();
 }
 
-void obj_data::deactivate() {
+void Object::deactivate() {
     if(!active) return;
     active = false;
 
@@ -201,7 +201,7 @@ void obj_data::deactivate() {
 }
 
 
-double obj_data::getAffectModifier(uint64_t location, uint64_t specific) {
+double Object::getAffectModifier(uint64_t location, uint64_t specific) {
     double modifier = 0;
     for(auto &aff : affected) {
         if(aff.match(location, specific)) {
@@ -211,12 +211,12 @@ double obj_data::getAffectModifier(uint64_t location, uint64_t specific) {
     return modifier;
 }
 
-bool obj_data::isActive() {
+bool Object::isActive() {
     return active;
 }
 
 constexpr int LOC_INVENTORY = 0;
-void auto_equip(struct char_data *ch, struct obj_data *obj, int location) {
+void auto_equip(Character *ch, Object *obj, int location) {
     int j;
 
     /* Lots of checks... */
@@ -327,30 +327,30 @@ void auto_equip(struct char_data *ch, struct obj_data *obj, int location) {
 }
 
 
-bool obj_data::isProvidingLight() {
+bool Object::isProvidingLight() {
     return GET_OBJ_TYPE(this) == ITEM_LIGHT && GET_OBJ_VAL(this, VAL_LIGHT_HOURS);
 }
 
-struct room_data* obj_data::getAbsoluteRoom() {
+Room* Object::getAbsoluteRoom() {
     auto loc = location.unit;
     while(loc && (loc->type != UnitType::room)) {
         loc = loc->location.unit;
     }
-    return (room_data*)loc;
+    return (Room*)loc;
 }
 
-double obj_data::currentGravity() {
+double Object::currentGravity() {
     if(auto room = getAbsoluteRoom(); room) {
         return room->getEnvironment(ENV_GRAVITY);
     }
     return 1.0;
 }
 
-bool obj_data::isWorking() {
+bool Object::isWorking() {
     return !(OBJ_FLAGGED(this, ITEM_BROKEN) || OBJ_FLAGGED(this, ITEM_FORGED));
 }
 
-void obj_data::clearLocation() {
+void Object::clearLocation() {
     if(!location.unit) return;
     switch(location.getType()) {
         case UnitType::room:
@@ -358,7 +358,7 @@ void obj_data::clearLocation() {
             break;
         case UnitType::character:
             if(location.position.x >= 0.0) {
-                unequip_char((char_data*)location.unit, location.position.x);
+                unequip_char((Character*)location.unit, location.position.x);
             } else {
                 obj_from_char(this);
             }
@@ -374,39 +374,39 @@ void obj_data::clearLocation() {
     location.position.z = 0.0;
 }
 
-void obj_data::setLocation(room_data* room) {
+void Object::setLocation(Room* room) {
     if(!room) return;
     obj_to_room(this, room);
 }
 
-void obj_data::setLocation(room_vnum rv) {
+void Object::setLocation(room_vnum rv) {
     auto r = get_room(rv);
     setLocation(r);
 }
 
 
-void obj_data::setLocation(const Location& loc) {
+void Object::setLocation(const Location& loc) {
     if(!loc.unit) return;
-    if(auto r = dynamic_cast<room_data*>(loc.unit); r) {
+    if(auto r = dynamic_cast<Room*>(loc.unit); r) {
         setLocation(r);
-    } else if(auto o = dynamic_cast<obj_data*>(loc.unit); o) {
+    } else if(auto o = dynamic_cast<Object*>(loc.unit); o) {
         obj_to_obj(this, o);
-    } else if(auto c = dynamic_cast<char_data*>(loc.unit); c) {
+    } else if(auto c = dynamic_cast<Character*>(loc.unit); c) {
         auto_equip(c, this, loc.position.x);
     }
 }
 
-void obj_data::setLocation(const thing_data* td) {
+void Object::setLocation(const AbstractThing* td) {
     if(!td) return;
     setLocation(td->location);
 
 }
 
-obj_data::~obj_data() {
+Object::~Object() {
     if(auctname) free(auctname);
 }
 
-std::vector<trig_vnum> obj_data::getProtoScript() const {
+std::vector<trig_vnum> Object::getProtoScript() const {
     auto v = getVnum();
     if(obj_proto.contains(v)) {
         return obj_proto.at(v).proto_script;
@@ -414,31 +414,31 @@ std::vector<trig_vnum> obj_data::getProtoScript() const {
     return {};
 }
 
-item_proto_data* obj_data::getProto() const {
+ObjectPrototype* Object::getProto() const {
     if(obj_proto.contains(vn)) {
         return &obj_proto.at(vn);
     }
     return nullptr;
 }
 
-obj_data* obj_data::getContainer() const {
+Object* Object::getContainer() const {
     if(location.getType() != UnitType::object) return nullptr;
-    return static_cast<obj_data*>(location.unit);
+    return static_cast<Object*>(location.unit);
 }
 
-char_data* obj_data::getCarriedBy() const {
+Character* Object::getCarriedBy() const {
     if(location.getType() != UnitType::character) return nullptr;
     if(location.position.x != -1.0) return nullptr;
-    return static_cast<char_data*>(location.unit);
+    return static_cast<Character*>(location.unit);
 }
 
-char_data* obj_data::getWornBy() const {
+Character* Object::getWornBy() const {
     if(location.getType() != UnitType::character) return nullptr;
     if(location.position.x == -1.0) return nullptr;
-    return static_cast<char_data*>(location.unit);
+    return static_cast<Character*>(location.unit);
 }
 
-int16_t obj_data::getWornOn() const {
+int16_t Object::getWornOn() const {
     if(location.getType() != UnitType::character) return -1;
     if(location.position.x == -1.0) return -1;
     return location.position.x;

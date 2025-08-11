@@ -19,7 +19,7 @@
 #include "dbat/dg_scripts.h"
 #include "dbat/transformation.h"
 
-static void phase_powerup(struct char_data *ch, int type, int phase);
+static void phase_powerup(Character *ch, int type, int phase);
 
 static void grow_plants() {
 
@@ -152,7 +152,7 @@ static void weather_change() {
     }
 }
 
-void oozaru_revert(char_data *ch) {
+void oozaru_revert(Character *ch) {
     if (!(ch->form == Form::oozaru || ch->form == Form::golden_oozaru || ch->form == Form::lycanthrope || ch->form == Form::alpha_lycanthrope))
         return;
 
@@ -180,7 +180,7 @@ void oozaru_revert(char_data *ch) {
 
 
 /* This controls the powering up of Hoshi-jin from their Eldritch Star */
-void star_phase(struct char_data *ch, int type) {
+void star_phase(Character *ch, int type) {
     struct descriptor_data *d;
 
     if (ch == nullptr) {
@@ -279,7 +279,7 @@ void star_phase(struct char_data *ch, int type) {
 }
 
 /* This handles powering up a Hoshijin or powering them down */
-static void phase_powerup(struct char_data *ch, int type, int phase) {
+static void phase_powerup(Character *ch, int type, int phase) {
     if (!ch) {
         return;
     }
@@ -303,7 +303,7 @@ static void phase_powerup(struct char_data *ch, int type, int phase) {
 
 static void advanceGrowth() {
     struct descriptor_data *d;
-    struct char_data *tch;
+    Character *tch;
     for (d = descriptor_list; d; d = d->next) {
         if (!IS_PLAYING(d))
             continue;

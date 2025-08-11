@@ -102,7 +102,7 @@ ACMD(do_geno) {
 
     int perc, prob;
     double attperc = 0.5, minimum = .4;
-    struct char_data *vict = nullptr;
+    Character *vict = nullptr;
     char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 
     two_arguments(argument, arg, arg2);
@@ -150,7 +150,7 @@ ACMD(do_geno) {
     }
 
     if (handle_defender(vict, ch)) {
-        struct char_data *def = GET_DEFENDER(vict);
+        Character *def = GET_DEFENDER(vict);
         vict = def;
     }
 
@@ -169,7 +169,7 @@ ACMD(do_geno) {
         return;
     }
 
-    struct obj_data *obj;
+    Object *obj;
     int dista = 15 - (GET_INT(ch) * 0.1);
 
     if (GET_SKILL(ch, SKILL_GENOCIDE) >= 100) {
@@ -205,7 +205,7 @@ ACMD(do_genki) {
 
     int perc, prob;
     double attperc = .5, minimum = .4;
-    struct char_data *friend_char = nullptr, *vict = nullptr, *next_v = nullptr;
+    Character *friend_char = nullptr, *vict = nullptr, *next_v = nullptr;
     char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 
     two_arguments(argument, arg, arg2);
@@ -253,7 +253,7 @@ ACMD(do_genki) {
     }
 
     if (handle_defender(vict, ch)) {
-        struct char_data *def = GET_DEFENDER(vict);
+        Character *def = GET_DEFENDER(vict);
         vict = def;
     }
 
@@ -294,7 +294,7 @@ ACMD(do_genki) {
         dista -= 1;
     }
 
-    struct obj_data *obj;
+    Object *obj;
 
     obj = read_object(82, VIRTUAL);
     obj->setLocation(vict);
@@ -413,8 +413,8 @@ ACMD(do_blessedhammer) {
     int prob, perc, avo, index, pry = 2, dge = 2, blk = 2, skill;
     int64_t dmg;
     double attperc = .05, minimum = .01;
-    struct char_data *vict;
-    struct obj_data *obj;
+    Character *vict;
+    Object *obj;
     char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 
     two_arguments(argument, arg, arg2);
@@ -457,7 +457,7 @@ ACMD(do_blessedhammer) {
             return;
         }
         if (handle_defender(vict, ch)) {
-            struct char_data *def = GET_DEFENDER(vict);
+            Character *def = GET_DEFENDER(vict);
             vict = def;
         }
         improve_skill(ch, SKILL_BLESSEDHAMMER, 0);
@@ -994,7 +994,7 @@ ACMD(do_powerup) {
 ACMD(do_rescue) {
 
     char arg[100];
-    struct char_data *helpee, *opponent;
+    Character *helpee, *opponent;
 
     one_argument(argument, arg);
 
@@ -1036,7 +1036,7 @@ ACMD(do_rescue) {
 
 ACMD(do_assist) {
     char arg[MAX_INPUT_LENGTH];
-    struct char_data *helpee, *opponent;
+    Character *helpee, *opponent;
 
     if (FIGHTING(ch)) {
                 ch->sendText("You're already fighting!  How can you assist someone else?\r\n");
@@ -1088,7 +1088,7 @@ ACMD(do_assist) {
 
 ACMD(do_kill) {
     char arg[MAX_INPUT_LENGTH];
-    struct char_data *vict;
+    Character *vict;
 
     if (IS_NPC(ch) || !ADM_FLAGGED(ch, ADM_INSTANTKILL)) {
         return;
@@ -1113,7 +1113,7 @@ ACMD(do_kill) {
 
 ACMD(do_flee) {
     int i, attempt;
-    struct char_data *was_fighting;
+    Character *was_fighting;
     char arg[MAX_INPUT_LENGTH];
 
     one_argument(argument, arg);
@@ -1173,7 +1173,7 @@ ACMD(do_flee) {
             }
             was_fighting = FIGHTING(ch);
 
-            auto isWall = [&](obj_data*o) {return o->getVnum() == 79 && GET_OBJ_COST(o) == attempt;};
+            auto isWall = [&](Object*o) {return o->getVnum() == 79 && GET_OBJ_COST(o) == attempt;};
             if(auto wall = ch->location.findObject(isWall); wall) {
                 ch->sendText("That direction has a glacial wall blocking it.\r\n");
                 return;

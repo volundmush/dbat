@@ -128,7 +128,7 @@ struct {
 };
 
 
-void set_height_and_weight_by_race(struct char_data *ch) {
+void set_height_and_weight_by_race(Character *ch) {
     if (!IS_NPC(ch)) {
         return;
     }
@@ -144,7 +144,7 @@ void set_height_and_weight_by_race(struct char_data *ch) {
 }
 
 
-int invalid_race(struct char_data *ch, struct obj_data *obj) {
+int invalid_race(Character *ch, Object *obj) {
     if (GET_ADMLEVEL(ch) >= ADMLVL_IMMORT)
         return false;
 
@@ -158,7 +158,7 @@ int invalid_race(struct char_data *ch, struct obj_data *obj) {
 }
 
 
-int get_size(struct char_data *ch) {
+int get_size(Character *ch) {
     return ch->getSize();
 }
 
@@ -183,7 +183,7 @@ int get_size_bonus(int sz) {
 }
 
 
-int wield_type(int chsize, struct obj_data *weap) {
+int wield_type(int chsize, Object *weap) {
     if (GET_OBJ_TYPE(weap) != ITEM_WEAPON) {
         return OBJ_FLAGGED(weap, ITEM_2H) ? WIELD_TWOHAND : WIELD_ONEHAND;
     } else if (chsize > GET_OBJ_SIZE(weap)) {
@@ -252,7 +252,7 @@ int race_bodyparts[NUM_RACES][NUM_WEARS] = {
                        {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
 };
 
-void racial_body_parts(struct char_data *ch) {
+void racial_body_parts(Character *ch) {
 
     auto parts = race_bodyparts[(int)GET_RACE(ch)];
 
@@ -463,10 +463,10 @@ namespace race {
                              }},
             {Race::saiyan, {
                                      {APPLY_CSTAT_GAIN_MULT, 0.3,  static_cast<int>(CharStat::experience)},
-                                     //{APPLY_PHYS_DAM_PERC, 0.0, 0, [](struct char_data *ch) {return PLR_FLAGGED(ch, PLR_TAIL) ? 0.15 : 0;}},
+                                     //{APPLY_PHYS_DAM_PERC, 0.0, 0, [](Character *ch) {return PLR_FLAGGED(ch, PLR_TAIL) ? 0.15 : 0;}},
                                      //{APPLY_DAM_ATK_TIER, 0.2, 3},
                                      //{APPLY_SKILL_SLOTS, -1},
-                                     //{APPLY_TRANS_ST_UPKEEP, 0.0, 0, [](struct char_data *ch) {return ch->getCurLFPercent() > 0.7 ? -0.25 : 0.0}}
+                                     //{APPLY_TRANS_ST_UPKEEP, 0.0, 0, [](Character *ch) {return ch->getCurLFPercent() > 0.7 ? -0.25 : 0.0}}
                              }},
 
             {Race::halfbreed, {
@@ -488,7 +488,7 @@ namespace race {
                              }}
     };
 
-    double getModifier(char_data *ch, int location, int specific) {
+    double getModifier(Character *ch, int location, int specific) {
         double out = 0.0;
         if(auto found = race_affects.find(ch->race); found != race_affects.end()) {
 
@@ -521,7 +521,7 @@ namespace race {
 
     }
 
-    std::string defaultAppearance(char_data* ch, Appearance type) {
+    std::string defaultAppearance(Character* ch, Appearance type) {
         switch(type) {
             case Appearance::hair_style:
                 switch(ch->race) {
