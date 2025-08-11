@@ -263,9 +263,11 @@ struct picky_data {
 };
 
 struct Coordinates {
-    double x{0.0}, y{0.0}, z{0.0};
+    int32_t x{0}, y{0}, z{0};
 
     bool operator==(const Coordinates& other) const;
+
+    void apply(Direction dir);
 };
 
 // Hash function for Coordinates
@@ -653,7 +655,7 @@ struct Destination : public Location {
 
 struct location_data : public unit_data {
 
-    zone_data *zone{nullptr};
+    virtual zone_data* getZone() const = 0;
 
     virtual const char* getName(const Coordinates& coor) const = 0;
     virtual bool getIsDark(const Coordinates& coor) const;
@@ -709,10 +711,69 @@ struct location_data : public unit_data {
     virtual void deleteExit(const Coordinates& coor, Direction dir);
 };
 
+struct TileOverride {
+    std::unordered_map<std::string, std::string> strings;
+    std::optional<SectorType> sectorType;
+    FlagHandler<RoomFlag> roomFlags;
+    FlagHandler<WhereFlag> whereFlags;
+    int damage;
+    int groundEffect;
+    std::unordered_map<int, double> environment;
+    std::map<Direction, Destination> exits;
+};
+
+struct AbstractGridArea : public location_data {
+    using unit_data::getName;
+
+    // the default sector type for undefined tiles.
+    // if left empty, the tiles are completely impassable / void.
+    // defaultGroundSector covers z = 0, defaultUnderSector covers z < 0, and defaultSkySector covers z > 0
+    std::optional<SectorType> defaultGroundSector, defaultUnderSector, defaultSkySector;
+    // The minimum and maximum coordinates for the grid area.
+    // It will 'expand' using the default tiles.
+    // This doesn't use more RAM unless a point of interest is created at those coordinates.
+    std::optional<int32_t> minX, maxX, minY, maxY, minZ, maxZ;
+
+    std::unordered_map<Coordinates, TileOverride> tileOverrides;
+
+    const std::vector<ExtraDescription>& getExtraDescription(const Coordinates& coor) const override;
+    const char* getName(const Coordinates& coor) const override;
+    std::vector<std::weak_ptr<obj_data>> getObjects(const Coordinates& coor) const override;
+    std::vector<std::weak_ptr<char_data>> getPeople(const Coordinates& coor) const override;
+    std::optional<Destination> getDirection(const Coordinates& coor, Direction dir) override;
+    std::map<Direction, Destination> getDirections(const Coordinates& coor) override;
+    void setRoomFlag(const Coordinates& coor, RoomFlag flag, bool value = true) override;
+    bool toggleRoomFlag(const Coordinates& coor, RoomFlag flag) override;
+    bool getRoomFlag(const Coordinates& coor, RoomFlag flag) const override;
+    void setWhereFlag(const Coordinates& coor, WhereFlag flag, bool value = true) override;
+    bool toggleWhereFlag(const Coordinates& coor, WhereFlag flag) override;
+    bool getWhereFlag(const Coordinates& coor, WhereFlag flag) const override;
+    SectorType getSectorType(const Coordinates& coor) const override;
+    void broadcastAt(const Coordinates& coor, const std::string& message) const override;
+    int getDamage(const Coordinates& coor) const override;
+    int setDamage(const Coordinates& coor, int amount) override;
+    int modDamage(const Coordinates& coor, int amount) override;
+    int getGroundEffect(const Coordinates& coor) const override;
+    void setGroundEffect(const Coordinates& coor, int val) override;
+    int modGroundEffect(const Coordinates& coor, int val) override;
+    SpecialFunc getSpecialFunc(const Coordinates& coor) const override;
+
+    double getEnvironment(const Coordinates& coor, int type) const override;
+    double setEnvironment(const Coordinates& coor, int type, double value) override;
+    double modEnvironment(const Coordinates& coor, int type, double value) override;
+    void clearEnvironment(const Coordinates& coor, int type) override;
+
+    void replaceExit(const Coordinates& coor, const Destination& dest) override;
+    void deleteExit(const Coordinates& coor, Direction dir) override;
+
+};
+
 
 /* ================== Memory Structure for room ======================= */
 struct room_data : public location_data, std::enable_shared_from_this<room_data> {
     room_data();
+
+    zone_data *zone{nullptr};
 
     // Bring the base class getName() into scope to avoid name hiding
     using unit_data::getName;
@@ -794,6 +855,7 @@ struct room_data : public location_data, std::enable_shared_from_this<room_data>
     std::map<Direction, Destination> getDirections() const;
 
     // overrides for location_data...
+    zone_data* getZone() const override;
     const std::vector<ExtraDescription>& getExtraDescription(const Coordinates& coor) const override;
     const char* getName(const Coordinates& coor) const override;
     std::vector<std::weak_ptr<obj_data>> getObjects(const Coordinates& coor) const override;
@@ -1726,7 +1788,7 @@ struct reset_com {
 
 struct zone_data {
     zone_vnum number{};        /* virtual number of this zone	  */
-    
+
     std::string name{};            /* name of this zone                  */
     std::string builders{};          /* namelist of builders allowed to    */
     /* modify this zone.		  */

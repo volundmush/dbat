@@ -415,6 +415,10 @@ const std::vector<ExtraDescription>& room_data::getExtraDescription(const Coordi
     return getExtraDescription();
 }   
 
+zone_data* room_data::getZone() const {
+    return zone;
+}
+
 const char* room_data::getName(const Coordinates& /*coor*/) const {
     return getName();
 }

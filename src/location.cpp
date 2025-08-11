@@ -8,6 +8,25 @@ bool Coordinates::operator==(const Coordinates& other) const {
     return x == other.x && y == other.y && z == other.z;
 }
 
+void Coordinates::apply(Direction dir) {
+    switch(dir) {
+        case Direction::north:    y += 1; break;
+        case Direction::east:     x += 1; break;
+        case Direction::south:    y -= 1; break;
+        case Direction::west:     x -= 1; break;
+        case Direction::up:       z += 1; break;
+        case Direction::down:     z -= 1; break;
+        case Direction::northeast: x += 1; y += 1; break;
+        case Direction::southeast: x += 1; y -= 1; break;
+        case Direction::southwest: x -= 1; y -= 1; break;
+        case Direction::northwest: x -= 1; y += 1; break;
+        case Direction::inside:
+        case Direction::outside:
+            // No movement for inside/outside
+            break;
+    }
+}
+
 bool Location::operator==(const Location& other) const {
     return unit == other.unit && position == other.position;
 }
@@ -48,7 +67,7 @@ vnum Location::getVnum() const {
 
 zone_data* Location::getZone() const {
     if(auto r = dynamic_cast<location_data*>(unit)) {
-        return r->zone;
+        return r->getZone();
     }
     return nullptr;
 }
@@ -284,10 +303,10 @@ int Location::getCookElement() const {
 namespace std {
     std::size_t hash<Coordinates>::operator()(const Coordinates& coord) const noexcept {
         // Combine hash of x, y, and z coordinates
-        std::size_t h1 = std::hash<double>{}(coord.x);
-        std::size_t h2 = std::hash<double>{}(coord.y);
-        std::size_t h3 = std::hash<double>{}(coord.z);
-        
+        std::size_t h1 = std::hash<int32_t>{}(coord.x);
+        std::size_t h2 = std::hash<int32_t>{}(coord.y);
+        std::size_t h3 = std::hash<int32_t>{}(coord.z);
+
         // Use bit shifting and XOR to combine hashes
         return h1 ^ (h2 << 1) ^ (h3 << 2);
     }
