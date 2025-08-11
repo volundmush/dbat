@@ -25,6 +25,12 @@
 #include "dbat/spell_parser.h"
 #include "dbat/dg_scripts.h"
 
+#include <string>
+#include <vector>
+#include <sstream>
+#include <algorithm>
+#include <boost/algorithm/string.hpp>
+
 /* local functions */
 
 static void smash_numb(char *str);
@@ -32,6 +38,21 @@ static void smash_numb(char *str);
 static void playing_string_cleanup(struct descriptor_data *d, int action);
 
 static void exdesc_string_cleanup(struct descriptor_data *d, int action);
+
+// std::string editor helper functions
+static void std_smash_tilde(std::string& str);
+static void std_smash_numb(std::string& str);
+static int std_improved_editor_execute(struct descriptor_data *d, const std::string& str);
+static std::vector<std::string> std_split_lines(const std::string& text);
+static std::string std_join_lines(const std::vector<std::string>& lines);
+static void std_parse_help(struct descriptor_data *d);
+static void std_parse_delete(const std::string& args, struct descriptor_data *d);
+static void std_parse_list_norm(const std::string& args, struct descriptor_data *d);
+static void std_parse_list_num(const std::string& args, struct descriptor_data *d);
+static void std_parse_insert(const std::string& args, struct descriptor_data *d);
+static void std_parse_edit(const std::string& args, struct descriptor_data *d);
+static void std_parse_replace(const std::string& args, struct descriptor_data *d);
+static void std_parse_format(const std::string& args, struct descriptor_data *d);
 
 
 /* maximum length for text field x+1 */
@@ -135,8 +156,576 @@ void string_write(struct descriptor_data *d, std::string *writeto, size_t len, l
     d->mail_to = mailto;
 }
 
-void std_string_add(struct descriptor_data *d, const std::string& txt) {
-    // TODO: implement.
+struct {
+            int mode;
+
+            void (*func)(struct descriptor_data *dsc, int todo);
+        } cleanup_modes[] = {
+                {CON_CEDIT,    cedit_string_cleanup},
+                {CON_MEDIT,    medit_string_cleanup},
+                {CON_OEDIT,    oedit_string_cleanup},
+                {CON_REDIT,    redit_string_cleanup},
+                {CON_TEDIT,    tedit_string_cleanup},
+                {CON_EXDESC,   exdesc_string_cleanup},
+                {CON_PLAYING,  playing_string_cleanup},
+                {CON_IEDIT,    oedit_string_cleanup},
+                {CON_HEDIT,    hedit_string_cleanup},
+                {CON_NEWSEDIT, news_string_cleanup},
+                {-1,           nullptr}
+        };
+
+// Helper functions for std::string editor
+
+// std::string version of smash_tilde
+static void std_smash_tilde(std::string& str) {
+    // Replace line-ending tildes
+    for (size_t i = 0; i < str.length(); ++i) {
+        if (str[i] == '~' && (i + 1 >= str.length() || str[i + 1] == '\r' || str[i + 1] == '\n')) {
+            str[i] = ' ';
+        }
+    }
+    // Replace all tildes
+    boost::algorithm::replace_all(str, "~", " ");
+}
+
+// std::string version of smash_numb
+static void std_smash_numb(std::string& str) {
+    // Replace line-ending hashes
+    for (size_t i = 0; i < str.length(); ++i) {
+        if (str[i] == '#' && (i + 1 >= str.length() || str[i + 1] == '\r' || str[i + 1] == '\n')) {
+            str[i] = ' ';
+        }
+    }
+    // Replace all hashes
+    boost::algorithm::replace_all(str, "#", " ");
+}
+
+// std::string version of improved editor execute
+static int std_improved_editor_execute(struct descriptor_data *d, const std::string& str) {
+    if (!using_improved_editor || str.empty() || str[0] != '/') {
+        return STRINGADD_OK;
+    }
+    
+    std::string actions;
+    if (str.length() > 2) {
+        actions = str.substr(2);
+    }
+    
+    char command = (str.length() > 1) ? str[1] : '\0';
+    
+    switch (command) {
+        case 'a':
+            return STRINGADD_ABORT;
+        case 'c':
+            if (!d->std_str->empty()) {
+                d->std_str->clear();
+                write_to_output(d, "Current buffer cleared.\r\n");
+            } else {
+                write_to_output(d, "Current buffer empty.\r\n");
+            }
+            break;
+        case 'd':
+            std_parse_delete(actions, d);
+            break;
+        case 'e':
+            std_parse_edit(actions, d);
+            break;
+        case 'f':
+            if (!d->std_str->empty()) {
+                std_parse_format(actions, d);
+            } else {
+                write_to_output(d, "Current buffer empty.\r\n");
+            }
+            break;
+        case 'i':
+            if (!d->std_str->empty()) {
+                std_parse_insert(actions, d);
+            } else {
+                write_to_output(d, "Current buffer empty.\r\n");
+            }
+            break;
+        case 'h':
+            std_parse_help(d);
+            break;
+        case 'l':
+            if (!d->std_str->empty()) {
+                std_parse_list_norm(actions, d);
+            } else {
+                write_to_output(d, "Current buffer empty.\r\n");
+            }
+            break;
+        case 'n':
+            if (!d->std_str->empty()) {
+                std_parse_list_num(actions, d);
+            } else {
+                write_to_output(d, "Current buffer empty.\r\n");
+            }
+            break;
+        case 'r':
+            std_parse_replace(actions, d);
+            break;
+        case 's':
+            return STRINGADD_SAVE;
+        default:
+            write_to_output(d, "Invalid option.\r\n");
+            break;
+    }
+    return STRINGADD_ACTION;
+}
+
+// Helper to split string into lines and get specific line ranges
+static std::vector<std::string> std_split_lines(const std::string& text) {
+    std::vector<std::string> lines;
+    boost::algorithm::split(lines, text, boost::algorithm::is_any_of("\n"), boost::algorithm::token_compress_off);
+    return lines;
+}
+
+// Helper to join lines back into string
+static std::string std_join_lines(const std::vector<std::string>& lines) {
+    return boost::algorithm::join(lines, "\n");
+}
+
+// std::string version of parse_help
+static void std_parse_help(struct descriptor_data *d) {
+    write_to_output(d,
+        "Editor command formats: /<letter>\r\n\r\n"
+        "/a         -  aborts editor\r\n"
+        "/c         -  clears buffer\r\n"
+        "/d#        -  deletes a line #\r\n"
+        "/e# <text> -  changes the line at # with <text>\r\n"
+        "/f         -  formats text\r\n"
+        "/fi        -  indented formatting of text\r\n"
+        "/fi#       -  indented formatting on a specific line\r\n"
+        "/fi #-#    -  indented formatting on specific lines\r\n"
+        "/h         -  list text editor commands\r\n"
+        "/i# <text> -  inserts <text> before line #\r\n"
+        "/l         -  lists buffer\r\n"
+        "/n         -  lists buffer with line numbers\r\n"
+        "/r 'a' 'b' -  replace 1st occurrence of text <a> in buffer with text <b>\r\n"
+        "/ra 'a' 'b'-  replace all occurrences of text <a> within buffer with text <b>\r\n"
+        "              usage: /r[a] 'pattern' 'replacement'\r\n"
+        "/s         -  saves text\r\n");
+}
+
+// std::string version of parse_delete
+static void std_parse_delete(const std::string& args, struct descriptor_data *d) {
+    if (d->std_str->empty()) {
+        write_to_output(d, "Buffer is empty.\r\n");
+        return;
+    }
+    
+    int line_low = 0, line_high = 0;
+    int parsed = sscanf(args.c_str(), " %d - %d ", &line_low, &line_high);
+    
+    if (parsed == 0) {
+        write_to_output(d, "You must specify a line number or range to delete.\r\n");
+        return;
+    } else if (parsed == 1) {
+        line_high = line_low;
+    } else if (line_high < line_low) {
+        write_to_output(d, "That range is invalid.\r\n");
+        return;
+    }
+    
+    if (line_low <= 0) {
+        write_to_output(d, "Invalid, line numbers to delete must be higher than 0.\r\n");
+        return;
+    }
+    
+    auto lines = std_split_lines(*d->std_str);
+    
+    // Convert to 0-based indexing
+    line_low--;
+    line_high--;
+    
+    if (line_low >= static_cast<int>(lines.size())) {
+        write_to_output(d, "Line(s) out of range; not deleting.\r\n");
+        return;
+    }
+    
+    line_high = std::min(line_high, static_cast<int>(lines.size()) - 1);
+    int deleted_count = line_high - line_low + 1;
+    
+    lines.erase(lines.begin() + line_low, lines.begin() + line_high + 1);
+    *d->std_str = std_join_lines(lines);
+    
+    write_to_output(d, "%d line%s deleted.\r\n", deleted_count, (deleted_count != 1 ? "s" : ""));
+}
+
+// std::string version of parse_list_norm
+static void std_parse_list_norm(const std::string& args, struct descriptor_data *d) {
+    int line_low = 1, line_high = 999999;
+    
+    if (!args.empty()) {
+        int parsed = sscanf(args.c_str(), " %d - %d ", &line_low, &line_high);
+        if (parsed == 1) {
+            line_high = line_low;
+        }
+    }
+    
+    if (line_low < 1) {
+        write_to_output(d, "Line numbers must be greater than 0.\r\n");
+        return;
+    } else if (line_high < line_low) {
+        write_to_output(d, "That range is invalid.\r\n");
+        return;
+    }
+    
+    auto lines = std_split_lines(*d->std_str);
+    
+    // Convert to 0-based indexing
+    line_low--;
+    line_high--;
+    
+    if (line_low >= static_cast<int>(lines.size())) {
+        write_to_output(d, "Line(s) out of range; no buffer listing.\r\n");
+        return;
+    }
+    
+    line_high = std::min(line_high, static_cast<int>(lines.size()) - 1);
+    
+    std::string output;
+    if (line_high < 999998 || line_low > 0) {
+        output = fmt::format("Current buffer range [%d - %d]:\r\n", line_low + 1, line_high + 1);
+    }
+    
+    for (int i = line_low; i <= line_high; ++i) {
+        output += lines[i] + "\r\n";
+    }
+    
+    int shown_count = line_high - line_low + 1;
+    output += fmt::format("\r\n%d line%s shown.\r\n", shown_count, (shown_count != 1) ? "s" : "");
+    
+    d->sendText(output);
+}
+
+// std::string version of parse_list_num
+static void std_parse_list_num(const std::string& args, struct descriptor_data *d) {
+    int line_low = 1, line_high = 999999;
+    
+    if (!args.empty()) {
+        int parsed = sscanf(args.c_str(), " %d - %d ", &line_low, &line_high);
+        if (parsed == 1) {
+            line_high = line_low;
+        }
+    }
+    
+    if (line_low < 1) {
+        write_to_output(d, "Line numbers must be greater than 0.\r\n");
+        return;
+    } else if (line_high < line_low) {
+        write_to_output(d, "That range is invalid.\r\n");
+        return;
+    }
+    
+    auto lines = std_split_lines(*d->std_str);
+    
+    // Convert to 0-based indexing
+    line_low--;
+    line_high--;
+    
+    if (line_low >= static_cast<int>(lines.size())) {
+        write_to_output(d, "Line(s) out of range; no buffer listing.\r\n");
+        return;
+    }
+    
+    line_high = std::min(line_high, static_cast<int>(lines.size()) - 1);
+    
+    std::string output;
+    for (int i = line_low; i <= line_high; ++i) {
+        output += fmt::format("{:4d}: {}\r\n", i + 1, lines[i]);
+    }
+    
+    d->sendText(output);
+}
+
+// std::string version of parse_insert
+static void std_parse_insert(const std::string& args, struct descriptor_data *d) {
+    if (d->std_str->empty()) {
+        write_to_output(d, "Buffer is empty, nowhere to insert.\r\n");
+        return;
+    }
+    
+    std::istringstream iss(args);
+    std::string line_str, text;
+    iss >> line_str;
+    std::getline(iss, text);
+    
+    if (line_str.empty()) {
+        write_to_output(d, "You must specify a line number before which to insert text.\r\n");
+        return;
+    }
+    
+    int line_num = std::stoi(line_str);
+    if (line_num <= 0) {
+        write_to_output(d, "Line number must be higher than 0.\r\n");
+        return;
+    }
+    
+    // Trim leading space from text
+    if (!text.empty() && text[0] == ' ') {
+        text = text.substr(1);
+    }
+    
+    auto lines = std_split_lines(*d->std_str);
+    
+    // Convert to 0-based indexing
+    line_num--;
+    
+    if (line_num > static_cast<int>(lines.size())) {
+        write_to_output(d, "Line number out of range; insert aborted.\r\n");
+        return;
+    }
+    
+    // Check if adding this line would exceed max_str
+    std::string new_content = std_join_lines(lines);
+    if (new_content.length() + text.length() + 3 > d->max_str) {
+        write_to_output(d, "Insert text pushes buffer over maximum size, insert aborted.\r\n");
+        return;
+    }
+    
+    lines.insert(lines.begin() + line_num, text);
+    *d->std_str = std_join_lines(lines);
+    
+    write_to_output(d, "Line inserted.\r\n");
+}
+
+// std::string version of parse_edit
+static void std_parse_edit(const std::string& args, struct descriptor_data *d) {
+    if (d->std_str->empty()) {
+        write_to_output(d, "Buffer is empty, nothing to change.\r\n");
+        return;
+    }
+    
+    std::istringstream iss(args);
+    std::string line_str, text;
+    iss >> line_str;
+    std::getline(iss, text);
+    
+    if (line_str.empty()) {
+        write_to_output(d, "You must specify a line number at which to change text.\r\n");
+        return;
+    }
+    
+    int line_num = std::stoi(line_str);
+    if (line_num <= 0) {
+        write_to_output(d, "Line number must be higher than 0.\r\n");
+        return;
+    }
+    
+    // Trim leading space from text
+    if (!text.empty() && text[0] == ' ') {
+        text = text.substr(1);
+    }
+    
+    auto lines = std_split_lines(*d->std_str);
+    
+    // Convert to 0-based indexing
+    line_num--;
+    
+    if (line_num >= static_cast<int>(lines.size())) {
+        write_to_output(d, "Line number out of range; change aborted.\r\n");
+        return;
+    }
+    
+    // Replace the line
+    lines[line_num] = text;
+    std::string new_content = std_join_lines(lines);
+    
+    if (new_content.length() > d->max_str) {
+        write_to_output(d, "Change causes new length to exceed buffer maximum size, aborted.\r\n");
+        return;
+    }
+    
+    *d->std_str = new_content;
+    write_to_output(d, "Line changed.\r\n");
+}
+
+// std::string version of parse_replace
+static void std_parse_replace(const std::string& args, struct descriptor_data *d) {
+    if (d->std_str->empty()) {
+        return;
+    }
+    
+    bool rep_all = false;
+    std::string working_args = args;
+    
+    // Check for 'a' flag
+    if (!working_args.empty() && std::isalpha(working_args[0])) {
+        if (working_args[0] == 'a') {
+            rep_all = true;
+        }
+        working_args = working_args.substr(1);
+    }
+    
+    // Parse the pattern and replacement using simple string parsing
+    size_t first_quote = working_args.find('\'');
+    if (first_quote == std::string::npos) {
+        write_to_output(d, "Invalid format.\r\n");
+        return;
+    }
+    
+    size_t second_quote = working_args.find('\'', first_quote + 1);
+    if (second_quote == std::string::npos) {
+        write_to_output(d, "Target string must be enclosed in single quotes.\r\n");
+        return;
+    }
+    
+    size_t third_quote = working_args.find('\'', second_quote + 1);
+    if (third_quote == std::string::npos) {
+        write_to_output(d, "No replacement string.\r\n");
+        return;
+    }
+    
+    size_t fourth_quote = working_args.find('\'', third_quote + 1);
+    if (fourth_quote == std::string::npos) {
+        write_to_output(d, "Replacement string must be enclosed in single quotes.\r\n");
+        return;
+    }
+    
+    std::string pattern = working_args.substr(first_quote + 1, second_quote - first_quote - 1);
+    std::string replacement = working_args.substr(third_quote + 1, fourth_quote - third_quote - 1);
+    
+    // Check if replacement would make string too long
+    size_t pattern_count = 0;
+    std::string temp_str = *d->std_str;
+    size_t pos = 0;
+    while ((pos = temp_str.find(pattern, pos)) != std::string::npos) {
+        pattern_count++;
+        pos += pattern.length();
+        if (!rep_all) break;
+    }
+    
+    if (pattern_count == 0) {
+        write_to_output(d, "String '%s' not found.\r\n", pattern.c_str());
+        return;
+    }
+    
+    size_t new_length = d->std_str->length() - (pattern_count * pattern.length()) + (pattern_count * replacement.length());
+    if (new_length > d->max_str) {
+        write_to_output(d, "Not enough space left in buffer.\r\n");
+        return;
+    }
+    
+    // Perform the replacement
+    if (rep_all) {
+        boost::algorithm::replace_all(*d->std_str, pattern, replacement);
+    } else {
+        boost::algorithm::replace_first(*d->std_str, pattern, replacement);
+    }
+    
+    write_to_output(d, "Replaced %d occurrence%s of '%s' with '%s'.\r\n", 
+                   static_cast<int>(pattern_count), (pattern_count != 1) ? "s" : "", pattern.c_str(), replacement.c_str());
+}
+
+// std::string version of parse_format (simplified)
+static void std_parse_format(const std::string& args, struct descriptor_data *d) {
+    // For now, just a simple implementation that doesn't change formatting
+    // The original format_text function is quite complex and handles word wrapping
+    // This can be enhanced later if needed
+    write_to_output(d, "Text formatting not yet implemented for std::string editor.\r\n");
+}
+
+void std_string_add(struct descriptor_data *d, char *str) {
+    int action;
+
+    delete_doubledollar(str);
+    std::string input_str(str);
+    std_smash_tilde(input_str);
+    std_smash_numb(input_str);
+
+    // Check for terminal string (@)
+    if (input_str == "@") {
+        action = STRINGADD_SAVE;
+        input_str.clear();
+    } else if ((action = std_improved_editor_execute(d, input_str)) == STRINGADD_ACTION) {
+        return;
+    } else {
+        action = STRINGADD_OK;
+    }
+
+    if (action == STRINGADD_OK) {
+        if (d->std_str->empty()) {
+            if (input_str.length() + 3 > d->max_str) { // \r\n\0
+                send_to_char(d->character, "String too long - Truncated.\r\n");
+                input_str = input_str.substr(0, d->max_str - 3);
+                *d->std_str = input_str;
+                if (!using_improved_editor) {
+                    action = STRINGADD_SAVE;
+                }
+            } else {
+                *d->std_str = input_str;
+            }
+        } else {
+            if (input_str.length() + d->std_str->length() + 3 > d->max_str) { // \r\n\0
+                send_to_char(d->character, "String too long. Last line skipped.\r\n");
+                if (!using_improved_editor) {
+                    action = STRINGADD_SAVE;
+                } else if (action == STRINGADD_OK) {
+                    action = STRINGADD_ACTION; // No appending \r\n, but still let them save
+                }
+            } else {
+                if (!d->std_str->empty()) {
+                    *d->std_str += "\r\n";
+                }
+                *d->std_str += input_str;
+            }
+        }
+    }
+
+    // Common cleanup code adapted from normal string_add...
+    switch (action) {
+        case STRINGADD_ABORT:
+            switch (STATE(d)) {
+                case CON_CEDIT:
+                case CON_TEDIT:
+                case CON_NEWSEDIT:
+                case CON_REDIT:
+                case CON_MEDIT:
+                case CON_OEDIT:
+                case CON_IEDIT:
+                case CON_EXDESC:
+                case CON_TRIGEDIT:
+                case CON_HEDIT:
+                    *d->std_str = d->std_backstr;
+                    break;
+                case CON_PLAYING:
+                    /* all CON_PLAYING are handled below in playing_string_cleanup */
+                    break;
+
+                default:
+                    basic_mud_log("SYSERR: string_add: Aborting write from unknown origin.");
+                    break;
+            }
+            break;
+        case STRINGADD_SAVE:
+            if (d->std_str && d->std_str->empty()) {
+                *d->std_str = "Nothing.\r\n";
+            }
+            break;
+        case STRINGADD_ACTION:
+            break;
+    }
+
+    /* Ok, now final cleanup. */
+
+    if (action == STRINGADD_SAVE || action == STRINGADD_ABORT) {
+        int i;
+        
+        for (i = 0; cleanup_modes[i].func; i++)
+            if (STATE(d) == cleanup_modes[i].mode)
+                (*cleanup_modes[i].func)(d, action);
+
+        /* Common post cleanup code. */
+        d->str = nullptr;
+        d->std_str = nullptr;
+        d->mail_to = 0;
+        d->max_str = 0;
+        if (d->character && !IS_NPC(d->character)) {
+            for(auto f : {PLR_MAILING, PLR_WRITING}) d->character->player_flags.set(f, false);
+        }
+    } else if (action != STRINGADD_ACTION && d->std_str->size() + 3 <= d->max_str) /* 3 = \r\n\0 */
+        *d->std_str += "\r\n";
 }
 
 /*
@@ -232,23 +821,6 @@ void string_add(struct descriptor_data *d, char *str) {
 
     if (action == STRINGADD_SAVE || action == STRINGADD_ABORT) {
         int i;
-        struct {
-            int mode;
-
-            void (*func)(struct descriptor_data *dsc, int todo);
-        } cleanup_modes[] = {
-                {CON_CEDIT,    cedit_string_cleanup},
-                {CON_MEDIT,    medit_string_cleanup},
-                {CON_OEDIT,    oedit_string_cleanup},
-                {CON_REDIT,    redit_string_cleanup},
-                {CON_TEDIT,    tedit_string_cleanup},
-                {CON_EXDESC,   exdesc_string_cleanup},
-                {CON_PLAYING,  playing_string_cleanup},
-                {CON_IEDIT,    oedit_string_cleanup},
-                {CON_HEDIT,    hedit_string_cleanup},
-                {CON_NEWSEDIT, news_string_cleanup},
-                {-1,           nullptr}
-        };
 
         for (i = 0; cleanup_modes[i].func; i++)
             if (STATE(d) == cleanup_modes[i].mode)

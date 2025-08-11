@@ -554,9 +554,8 @@ void redit_parse(struct descriptor_data *d, char *arg) {
 
                     if (auto ld = OLC_ROOM(d)->getLookDescription(); ld) {
                         write_to_output(d, "%s", ld);
-                        oldtext = strdup(ld);
                     }
-                    //string_write(d, &OLC_ROOM(d)->look_description, MAX_ROOM_DESC, 0, oldtext);
+                    string_write(d, &OLC_ROOM(d)->strings["look_description"], MAX_ROOM_DESC, 0, OLC_ROOM(d)->strings["look_description"]);
                     OLC_VAL(d) = 1;
                     break;
                 case '3':
@@ -778,11 +777,10 @@ void redit_parse(struct descriptor_data *d, char *arg) {
                     OLC_MODE(d) = REDIT_EXIT_DESCRIPTION;
                     send_editor_help(d);
                     write_to_output(d, "Enter exit description:\r\n\r\n");
-                    if (OLC_EXIT(d)->general_description) {
+                    if (!OLC_EXIT(d)->general_description.empty()) {
                         write_to_output(d, "%s", OLC_EXIT(d)->general_description);
-                        oldtext = strdup(OLC_EXIT(d)->general_description);
                     }
-                    string_write(d, &OLC_EXIT(d)->general_description, MAX_EXIT_DESC, 0, oldtext);
+                    string_write(d, &OLC_EXIT(d)->general_description, MAX_EXIT_DESC, 0, OLC_EXIT(d)->general_description);
                     return;
                 case '3':
                     OLC_MODE(d) = REDIT_EXIT_KEYWORD;

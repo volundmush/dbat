@@ -1935,7 +1935,7 @@ void descriptor_data::handle_input() {
     if (str)        /* Writing boards, mail, etc. */
         string_add(this, comm);
     else if(std_str) {
-        std_string_add(this, command);
+        std_string_add(this, comm);
     }
     else if (STATE(this) != CON_PLAYING) /* In menus, etc. */
         nanny(this, comm);

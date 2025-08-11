@@ -544,3 +544,21 @@ void room_data::sendText(const std::string& txt) {
 
     }
 }
+
+void room_data::deleteExit(Direction dir) {
+    if (auto find = exits.find(dir); find != exits.end()) {
+        exits.erase(find);
+    }
+}
+
+void room_data::replaceExit(const Destination& dest) {
+    exits[dest.dir] = dest;
+}
+
+void room_data::deleteExit(const Coordinates& coor, Direction dir) {
+    deleteExit(dir);
+}
+
+void room_data::replaceExit(const Coordinates& coor, const Destination& dest) {
+    replaceExit(dest);
+}

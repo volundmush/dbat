@@ -331,6 +331,27 @@ std::unordered_set<obj_data*> location_data::gatherObjects(const Coordinates& co
     return result;
 }
 
+struct obj_data* Location::findObject(const std::function<bool(struct obj_data*)> &func, bool working) {
+    if(auto l = dynamic_cast<location_data*>(unit)) {
+        return l->findObject(position, func, working);
+    }
+    return nullptr;
+}
+
+struct obj_data* Location::findObjectVnum(obj_vnum objVnum, bool working) {
+    if(auto l = dynamic_cast<location_data*>(unit)) {
+        return l->findObjectVnum(position, objVnum, working);
+    }
+    return nullptr;
+}
+
+std::unordered_set<struct obj_data*> Location::gatherObjects(const std::function<bool(struct obj_data*)> &func, bool working) {
+    if(auto l = dynamic_cast<location_data*>(unit)) {
+        return l->gatherObjects(position, func, working);
+    }
+    return {};
+}
+
 std::optional<Destination> Destination::getReverse() const {
     return getExit(static_cast<Direction>(rev_dir[static_cast<int>(dir)]));
 }
@@ -403,4 +424,24 @@ bool location_data::getIsDark(const Coordinates& coor) const {
         return true;
 
     return false;
+}
+
+void Location::deleteExit(Direction dir) {
+    if(auto l = dynamic_cast<location_data*>(unit)) {
+        l->deleteExit(position, dir);
+    }
+}
+
+void Location::replaceExit(const Destination& dest) {
+    if(auto l = dynamic_cast<location_data*>(unit)) {
+        l->replaceExit(position, dest);
+    }
+}
+
+void location_data::replaceExit(const Coordinates& coor, const Destination& dest) {
+    // Implementation for replacing an exit in the location data
+}
+
+void location_data::deleteExit(const Coordinates& coor, Direction dir) {
+    // Implementation for deleting an exit in the location data
 }

@@ -1044,7 +1044,7 @@ void to_json(json& j, const trans_data& t) {
     j["unlocked"] = t.unlocked;
     j["grade"] = t.grade;
     if(!t.vars.empty()) j["vars"] = t.vars;
-    if(t.description && strlen(t.description)) j["description"] = t.description;
+    if(!t.description.empty()) j["description"] = t.description;
     if(!t.appearances.empty()) j["appearances"] = t.appearances;
 }
 
@@ -1055,10 +1055,7 @@ void from_json(const json& j, trans_data& t) {
     if(j.contains("unlocked")) t.unlocked = j["unlocked"];
     if(j.contains("grade")) t.grade = j["grade"];
     if(j.contains("vars")) t.vars = j["vars"];
-    if(j.contains("description")) {
-        if(t.description) free(t.description);
-        t.description = strdup(j["description"].get<std::string>().c_str());
-    }
+    if(j.contains("description")) t.description = j["description"].get<std::string>();
     if(j.contains("appearances")) t.appearances = j["appearances"];
 }
 

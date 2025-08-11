@@ -2751,8 +2751,3 @@ namespace trans {
     }
 
 }
-
-
-trans_data::~trans_data() {
-    if(description) free(description);
-}

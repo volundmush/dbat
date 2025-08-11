@@ -1876,7 +1876,7 @@ static void look_at_char(struct char_data *i, struct char_data *ch) {
     if (!ch->desc) {
         return;
     }
-    if(i->form == Form::base || i->transforms[i->form].description == nullptr || i->transforms[i->form].description == "") {
+    if(i->form == Form::base || !i->transforms[i->form].description.empty()) {
         if (auto ld = i->getLookDescription(); ld) {
             send_to_char(ch, "%s", ld);
         }
@@ -6366,15 +6366,15 @@ ACMD(do_desc) {
     if(ch->form == Form::base) {
         write_to_output(d, "Current description:\r\n%s\r\n", ch->getLookDescription());
         write_to_output(d, "Enter the new text you'd like others to see when they look at you.\r\n");
-        //string_write(d, &ch->look_description, EXDSCR_LENGTH, 0, nullptr);
-        //STATE(d) = CON_EXDESC;
+        string_write(d, &ch->strings["look_description"], EXDSCR_LENGTH, 0, ch->strings["look_description"]);
+        STATE(d) = CON_EXDESC;
     } else {
         auto form = ch->form;
 
         write_to_output(d, "Current description for %s:\r\n%s\r\n", trans::getName(ch, form), ch->transforms[form].description);
         write_to_output(d, "Enter the new text you'd like others to see when they look at you in this form.\r\n");
 
-        string_write(d, &ch->transforms[form].description, EXDSCR_LENGTH, 0, nullptr);
+        string_write(d, &ch->transforms[form].description, EXDSCR_LENGTH, 0, ch->transforms[form].description);
         STATE(d) = CON_EXDESC;
     }
 }

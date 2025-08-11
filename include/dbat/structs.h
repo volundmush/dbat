@@ -817,6 +817,9 @@ struct room_data : public location_data, std::enable_shared_from_this<room_data>
     double modEnvironment(const Coordinates& coor, int type, double value) override;
     void clearEnvironment(const Coordinates& coor, int type) override;
 
+    void replaceExit(const Coordinates& coor, const Destination& dest) override;
+    void deleteExit(const Coordinates& coor, Direction dir) override;
+
 };
 
 /* ====================================================================== */
@@ -897,9 +900,8 @@ struct skill_data {
 };
 
 struct trans_data {
-    ~trans_data();
 
-    char *description{nullptr};
+    std::string description{};
     double time_spent_in_form{0.0};
     int grade = 1;
     bool visible = true;
