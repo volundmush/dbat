@@ -162,7 +162,7 @@ void sub_write(char *arg, Character *ch, int8_t find_invis, int targets) {
                 if (find_invis) obj = get_obj_in_room(ch->getRoom(), name);
                 else if (!(obj = get_obj_in_list_vis(ch, name, nullptr, ch->location.getObjects())));
                 else if (!(obj = get_obj_in_equip_vis(ch, name, &tmp, ch->getEquipment())));
-                else obj = get_obj_in_list_vis(ch, name, nullptr, ch->getObjects());
+                else obj = get_obj_in_list_vis(ch, name, nullptr, ch->getInventory());
 
                 otokens[i] = (void *) obj;
                 tokens[++i] = ++s;

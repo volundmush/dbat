@@ -71,7 +71,7 @@ int item_in_list(char *item, const std::vector<std::weak_ptr<Object>>& list) {
             if (i == obj)
                 count++;
             if (GET_OBJ_TYPE(i) == ITEM_CONTAINER)
-                count += item_in_list(item, i->getObjects());
+                count += item_in_list(item, i->getInventory());
         }
     } else if (is_number(item) > -1) { /* check for vnum */
         obj_vnum ovnum = atof(item);
@@ -80,14 +80,14 @@ int item_in_list(char *item, const std::vector<std::weak_ptr<Object>>& list) {
             if (GET_OBJ_VNUM(i) == ovnum)
                 count++;
             if (GET_OBJ_TYPE(i) == ITEM_CONTAINER)
-                count += item_in_list(item, i->getObjects());
+                count += item_in_list(item, i->getInventory());
         }
     } else {
         for (auto i : filter_raw(list)) {
             if (isname(item, i->getName()))
                 count++;
             if (GET_OBJ_TYPE(i) == ITEM_CONTAINER)
-                count += item_in_list(item, i->getObjects());
+                count += item_in_list(item, i->getInventory());
         }
     }
     return count;
@@ -109,7 +109,7 @@ int char_has_item(char *item, Character *ch) {
     if (get_object_in_equip(ch, item))
         return 1;
 
-    if (item_in_list(item, ch->getObjects()) == 0)
+    if (item_in_list(item, ch->getInventory()) == 0)
         return 0;
     else
         return 1;
@@ -290,7 +290,7 @@ find_replacement(Entity *go, script_data *sc, DgScript *trig, UnitType type, cha
                     ch = (Character *) go;
 
                     if ((o = get_object_in_equip(ch, name)));
-                    else if ((o = get_obj_in_list(name, ch->getObjects())));
+                    else if ((o = get_obj_in_list(name, ch->getInventory())));
                     else if (IN_ROOM(ch) != NOWHERE && (c = get_char_in_room(ch->getRoom(), name)));
                     else if ((o = get_obj_in_list(name, ch->location.getObjects())));
                     else if ((c = get_char(name)));
@@ -660,7 +660,7 @@ in the vault (vnum: 453) now and then. you can just use
                         strcpy(str, !IS_NPC(c) ? "1" : "0");
                     } else if (!strcasecmp(field, "inventory")) {
                         if (subfield && *subfield) {
-                            auto con = c->getObjects();
+                            auto con = c->getInventory();
                             auto oid = atof(subfield);
                             for (auto obj : filter_raw(con)) {
                                 if (GET_OBJ_VNUM(obj) == oid) {
@@ -669,7 +669,7 @@ in the vault (vnum: 453) now and then. you can just use
                                 }
                             }
                         } else { /* no arg given */
-                            if (auto con = c->getObjects(); !con.empty()) {
+                            if (auto con = c->getInventory(); !con.empty()) {
                                 for(auto o : filter_raw(con)) {
                                     snprintf(str, slen, "%s", o->getUID(true).c_str());
                                     return;
@@ -931,7 +931,7 @@ in the vault (vnum: 453) now and then. you can just use
                         else
                             *str = '\0';
                     } else if (!strcasecmp(field, "contents")) {
-                        if (auto con = o->getObjects(); !con.empty()) {
+                        if (auto con = o->getInventory(); !con.empty()) {
                             for(auto obj : filter_raw(con)) {
                                 snprintf(str, slen, "%s", obj->getUID(true).c_str());
                                 return;
@@ -943,7 +943,7 @@ in the vault (vnum: 453) now and then. you can just use
                         /* thanks to Jamie Nelson (Mordecai of 4 Dimensions MUD) */
                     else if (!strcasecmp(field, "count")) {
                         if (GET_OBJ_TYPE(o) == ITEM_CONTAINER)
-                            snprintf(str, slen, "%d", item_in_list(subfield, o->getObjects()));
+                            snprintf(str, slen, "%d", item_in_list(subfield, o->getInventory()));
                         else
                             strcpy(str, "0");
                     }
@@ -965,7 +965,7 @@ in the vault (vnum: 453) now and then. you can just use
                     /* thanks to Jamie Nelson (Mordecai of 4 Dimensions MUD) */
                     if (!strcasecmp(field, "has_in")) {
                         if (GET_OBJ_TYPE(o) == ITEM_CONTAINER)
-                            snprintf(str, slen, "%s", (item_in_list(subfield, o->getObjects()) ? "1" : "0"));
+                            snprintf(str, slen, "%s", (item_in_list(subfield, o->getInventory()) ? "1" : "0"));
                         else
                             strcpy(str, "0");
                     }
@@ -1016,7 +1016,7 @@ in the vault (vnum: 453) now and then. you can just use
                             o->strings["name"] = blah;
                         }
                     } else if (!strcasecmp(field, "next_in_list")) {
-                        if (auto con = o->location.unit->getObjects(); !con.empty()) {
+                        if (auto con = o->location.getObjects(); !con.empty()) {
                             auto found = false;
                             for(auto ob : filter_raw(con)) {
                                 if(ob == o) {

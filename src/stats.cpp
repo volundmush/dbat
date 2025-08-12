@@ -248,7 +248,7 @@ static void init_char_stats_derived() {
         .setGetterFunc([](Character* target, const std::string& stat_name) {
             // Example derived stat calculation
             double weight = 0;
-            auto objects = target->getObjects();
+            auto objects = target->getInventory();
             for(auto obj : filter_raw(objects)) {
                 weight += obj->getEffectiveStat("weight_total");
             }
@@ -262,7 +262,7 @@ static void init_char_stats_derived() {
         .setGetterFunc([](Object* target, const std::string& stat_name) {
             // Example derived stat calculation
             double weight = 0;
-            auto objects = target->getObjects();
+            auto objects = target->getInventory();
             for(auto obj : filter_raw(objects)) {
                 weight += obj->getEffectiveStat("weight_total");
             }

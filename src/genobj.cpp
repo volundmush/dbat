@@ -94,7 +94,7 @@ int delete_object(obj_rnum rnum) {
     for (auto tmp : filter_raw(allobj)) {
 
         /* extract_obj() will just axe contents. */
-        if (auto con = tmp->getObjects(); !con.empty() && tmp->location.unit) {
+        if (auto con = tmp->getInventory(); !con.empty() && tmp->location.unit) {
 
             switch(tmp->location.getType()) {
                 case UnitType::room: {
@@ -352,31 +352,24 @@ bool Object::isWorking() {
 
 void Object::clearLocation() {
     if(!location.unit) return;
-    switch(location.getType()) {
-        case UnitType::room:
-            obj_from_room(this);
-            break;
-        case UnitType::character:
-            if(location.position.x >= 0.0) {
-                unequip_char((Character*)location.unit, location.position.x);
-            } else {
-                obj_from_char(this);
-            }
-            break;
-        case UnitType::object:
-            obj_from_obj(this);
-            break;
-        default:
-            break;
+    if(auto l = dynamic_cast<AbstractLocation*>(location.unit); l) {
+        l->removeFrom(this);
+    } else if(auto o = dynamic_cast<Object*>(location.unit); o) {
+        obj_from_obj(this);
+    } else if(auto c = dynamic_cast<Character*>(location.unit); c) {
+        if(location.position.x >= 0.0) {
+            unequip_char((Character*)location.unit, location.position.x);
+        } else {
+            obj_from_char(this);
+        }
     }
-    location.position.x = 0.0;
-    location.position.y = 0.0;
-    location.position.z = 0.0;
 }
 
 void Object::setLocation(Room* room) {
     if(!room) return;
-    obj_to_room(this, room);
+    Location loc;
+    loc.unit = room;
+    setLocation(loc);
 }
 
 void Object::setLocation(room_vnum rv) {
@@ -387,8 +380,8 @@ void Object::setLocation(room_vnum rv) {
 
 void Object::setLocation(const Location& loc) {
     if(!loc.unit) return;
-    if(auto r = dynamic_cast<Room*>(loc.unit); r) {
-        setLocation(r);
+    if(auto l = dynamic_cast<AbstractLocation*>(loc.unit); l) {
+        l->addTo(loc.position, this);
     } else if(auto o = dynamic_cast<Object*>(loc.unit); o) {
         obj_to_obj(this, o);
     } else if(auto c = dynamic_cast<Character*>(loc.unit); c) {

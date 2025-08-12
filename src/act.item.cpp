@@ -506,7 +506,7 @@ ACMD(do_garden)
 
     if (!strcasecmp(arg2, "plant"))
     {
-        if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->getObjects())))
+        if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->getInventory())))
         {
             ch->sendText("What are you trying to plant?\r\n");
             ch->sendText("Syntax: garden (plant in inventory) plant\r\n");
@@ -933,7 +933,7 @@ ACMD(do_pack)
                         rnum++;
                     }
                 }
-                auto con = ch->getObjects();
+                auto con = ch->getInventory();
                 for (auto obj2 : filter_raw(con))
                 {
                     if (GET_OBJ_VNUM(obj) == 18802)
@@ -1009,7 +1009,7 @@ ACMD(do_deploy)
             capsule = true;
         }
     }
-    else if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->getObjects())))
+    else if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->getInventory())))
     {
         ch->sendText("Syntax: deploy (no argument for houses)\nSyntax: deploy (target) <-- For furniture\r\n");
         return;
@@ -1552,7 +1552,7 @@ ACMD(do_auction)
         auc_stat(ch, obj_selling);
         return;
     }
-    else if (!(obj = get_obj_in_list_vis(ch, arg1, nullptr, ch->getObjects())))
+    else if (!(obj = get_obj_in_list_vis(ch, arg1, nullptr, ch->getInventory())))
     {
         sprintf(buf, "You don't seem to have %s %s.\r\n", AN(arg1), arg1);
         ch->sendText(buf);
@@ -2311,7 +2311,7 @@ ACMD(do_put)
         {
             if (obj_dotmode == FIND_INDIV)
             { /* put <obj> <container> */
-                auto con = ch->getObjects();
+                auto con = ch->getInventory();
                 int transferred = 0;
                 for (auto obj : filter_raw(con))
                 {
@@ -2335,7 +2335,7 @@ ACMD(do_put)
             }
             else
             {
-                auto con = ch->getObjects();
+                auto con = ch->getInventory();
                 for (auto obj : filter_raw(con))
                 {
                     if (obj != cont && CAN_SEE_OBJ(ch, obj) && (obj_dotmode == FIND_ALL || isname(theobj, obj->getName())))
@@ -2718,7 +2718,7 @@ ACMD(do_get)
                 ch->sendText("Get from all of what?\r\n");
                 return;
             }
-            auto con = ch->getObjects();
+            auto con = ch->getInventory();
             for (auto cont : filter_raw(con))
                 if (CAN_SEE_OBJ(ch, cont) &&
                     (cont_dotmode == FIND_ALL || isname(arg2, cont->getName())))
@@ -3049,7 +3049,7 @@ ACMD(do_drop)
             ch->send_to("What do you want to %s %d of?\r\n", sname, multi);
         else
         {
-            auto con = ch->getObjects();
+            auto con = ch->getInventory();
             for (auto obj : filter_raw(con))
             {
                 if (CAN_SEE_OBJ(ch, obj) && isname(arg, obj->getName()))
@@ -3081,7 +3081,7 @@ ACMD(do_drop)
         if (dotmode == FIND_ALL)
         {
             int fail = false;
-            auto con = ch->getObjects();
+            auto con = ch->getInventory();
             if (con.empty())
                 ch->sendText("You don't seem to be carrying anything.\r\n");
             else
@@ -3099,7 +3099,7 @@ ACMD(do_drop)
                 ch->send_to("What do you want to %s all of?\r\n", sname);
                 return;
             }
-            auto con = ch->getObjects();
+            auto con = ch->getInventory();
             for (auto obj : filter_raw(con))
             {
                 if (isname(arg, obj->getName()))
@@ -3115,7 +3115,7 @@ ACMD(do_drop)
         }
         else
         {
-            if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->getObjects())))
+            if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->getInventory())))
             {
                 ch->send_to("You don't seem to have %s %s.\r\n", AN(arg), arg);
             }
@@ -3314,7 +3314,7 @@ ACMD(do_give)
         else if (!(vict = give_find_vict(ch, argument)))
             return;
 
-        auto con = ch->getObjects();
+        auto con = ch->getInventory();
         int given = 0;
         for (auto obj : filter_raw(con))
         {
@@ -3348,7 +3348,7 @@ ACMD(do_give)
         dotmode = find_all_dots(arg);
         if (dotmode == FIND_INDIV)
         {
-            if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->getObjects())))
+            if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->getInventory())))
                 ch->send_to("You don't seem to have %s %s.\r\n", AN(arg), arg);
             else
             {
@@ -3369,7 +3369,7 @@ ACMD(do_give)
                 ch->sendText("All of what?\r\n");
                 return;
             }
-            auto con = ch->getObjects();
+            auto con = ch->getInventory();
             if (con.empty())
                 ch->sendText("You don't seem to be holding anything.\r\n");
             else
@@ -3527,7 +3527,7 @@ ACMD(do_drink)
             ;
         }
     }
-    if (!(temp = get_obj_in_list_vis(ch, arg, nullptr, ch->getObjects())))
+    if (!(temp = get_obj_in_list_vis(ch, arg, nullptr, ch->getInventory())))
     {
         if (!(temp = get_obj_in_list_vis(ch, arg, nullptr, ch->location.getObjects())))
         {
@@ -3736,7 +3736,7 @@ ACMD(do_eat)
         ch->sendText("Eat what?\r\n");
         return;
     }
-    if (!(food = get_obj_in_list_vis(ch, arg, nullptr, ch->getObjects())))
+    if (!(food = get_obj_in_list_vis(ch, arg, nullptr, ch->getInventory())))
     {
         ch->send_to("You don't seem to have %s %s.\r\n", AN(arg), arg);
         return;
@@ -4015,7 +4015,7 @@ ACMD(do_pour)
             ch->sendText("From what do you want to pour?\r\n");
             return;
         }
-        if (!(from_obj = get_obj_in_list_vis(ch, arg1, nullptr, ch->getObjects())))
+        if (!(from_obj = get_obj_in_list_vis(ch, arg1, nullptr, ch->getInventory())))
         {
             ch->sendText("You can't find it!\r\n");
             return;
@@ -4033,7 +4033,7 @@ ACMD(do_pour)
             ch->sendText("What do you want to fill?  And what are you filling it from?\r\n");
             return;
         }
-        if (!(to_obj = get_obj_in_list_vis(ch, arg1, nullptr, ch->getObjects())))
+        if (!(to_obj = get_obj_in_list_vis(ch, arg1, nullptr, ch->getInventory())))
         {
             ch->sendText("You can't find it!\r\n");
             return;
@@ -4098,7 +4098,7 @@ ACMD(do_pour)
 
             return;
         }
-        if (!(to_obj = get_obj_in_list_vis(ch, arg2, nullptr, ch->getObjects())))
+        if (!(to_obj = get_obj_in_list_vis(ch, arg2, nullptr, ch->getInventory())))
         {
             ch->sendText("You can't find it!\r\n");
             return;
@@ -4496,7 +4496,7 @@ ACMD(do_wear)
     }
     if (dotmode == FIND_ALL)
     {
-        auto con = ch->getObjects();
+        auto con = ch->getInventory();
         for (auto obj : filter_raw(con))
         {
             if (CAN_SEE_OBJ(ch, obj) && (where = find_eq_pos(ch, obj, nullptr)) >= 0)
@@ -4534,7 +4534,7 @@ ACMD(do_wear)
             ch->sendText("Wear all of what?\r\n");
             return;
         }
-        auto con = ch->getObjects();
+        auto con = ch->getInventory();
         int found = 0;
         for (auto obj : filter_raw(con))
         {
@@ -4562,7 +4562,7 @@ ACMD(do_wear)
     }
     else
     {
-        if (!(obj = get_obj_in_list_vis(ch, arg1, nullptr, ch->getObjects())))
+        if (!(obj = get_obj_in_list_vis(ch, arg1, nullptr, ch->getInventory())))
             ch->send_to("You don't seem to have %s %s.\r\n", AN(arg1), arg1);
         else if (OBJ_FLAGGED(obj, ITEM_BROKEN))
             ch->sendText("But it seems to be broken!\r\n");
@@ -4593,7 +4593,7 @@ ACMD(do_wield)
 
     if (!*arg)
         ch->sendText("Wield what?\r\n");
-    else if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->getObjects())))
+    else if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->getInventory())))
         ch->send_to("You don't seem to have %s %s.\r\n", AN(arg), arg);
     else
     {
@@ -4627,7 +4627,7 @@ ACMD(do_grab)
 
     if (!*arg)
         ch->sendText("Hold what?\r\n");
-    else if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->getObjects())))
+    else if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->getInventory())))
         ch->send_to("You don't seem to have %s %s.\r\n", AN(arg), arg);
     else if (GET_WIS(ch) < GET_OBJ_LEVEL(obj))
         ch->sendText("You are not experienced enough to use that.\r\n");
@@ -4804,7 +4804,7 @@ ACMD(do_sac)
     }
 
     if (!(j = get_obj_in_list_vis(ch, arg, nullptr, ch->location.getObjects())) &&
-        (!(j = get_obj_in_list_vis(ch, arg, nullptr, ch->getObjects()))))
+        (!(j = get_obj_in_list_vis(ch, arg, nullptr, ch->getInventory()))))
     {
         ch->sendText("It doesn't seem to be here.\r\n");
         return;

@@ -4693,7 +4693,7 @@ void hurt(int limb, int chance, Character *ch, Character *vict, Object *obj, int
                     TO_NOTVICT);
                 solo_gain(ch, vict);
                 int founded = 0;
-                auto con = vict->getObjects();
+                auto con = vict->getInventory();
                 for (auto rew : filter_raw(con)) {
                     rew->clearLocation();
                     rew->setLocation(vict);
@@ -4733,10 +4733,10 @@ void hurt(int limb, int chance, Character *ch, Character *vict, Object *obj, int
             if (IN_ARENA(vict)) {
                 send_to_all("@R%s@r manages to defeat @R%s@r in the Arena!@n\r\n", GET_NAME(ch), GET_NAME(vict));
                 ch->clearLocation();
-                char_to_room(ch, real_room(17875));
+                ch->setLocation(17875);
                 ch->lookAtLocation();
                 vict->clearLocation();
-                char_to_room(vict, real_room(17875));
+                vict->setLocation(17875);
                 vict->setCurVital(CharVital::health, 1);
                 vict->lookAtLocation();
                 if (FIGHTING(vict)) {
@@ -4765,7 +4765,7 @@ void hurt(int limb, int chance, Character *ch, Character *vict, Object *obj, int
                 }
                 vict->setBaseStat<int>("position", POS_SITTING);
                 vict->clearLocation();
-                char_to_room(vict, real_room(sensei::getStartRoom(vict->sensei)));
+                vict->setLocation(sensei::getStartRoom(vict->sensei));
             }
             return;
         }

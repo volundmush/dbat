@@ -289,11 +289,11 @@ ACMD(do_mjunk) {
             extract_obj(unequip_char(ch, pos));
             return;
         }
-        if ((obj = get_obj_in_list_vis(ch, arg, nullptr, ch->getObjects())))
+        if ((obj = get_obj_in_list_vis(ch, arg, nullptr, ch->getInventory())))
             extract_obj(obj);
         return;
     } else {
-        auto con = ch->getObjects();
+        auto con = ch->getInventory();
         for (auto obj : filter_raw(con)) {
             if (arg[3] == '\0' || isname(arg + 4, obj->getName())) {
                 extract_obj(obj);
@@ -472,7 +472,7 @@ ACMD(do_mload) {
             mob_log(ch, "mload: bad mob vnum");
             return;
         }
-        char_to_room(mob, rnum);
+        mob->setLocation(rnum);
         if (SCRIPT(ch)) { /* It _should_ have, but it might be detached. */
             ch->setVariable("lastloaded", mob->getUID(true));
         }
@@ -637,7 +637,7 @@ ACMD(do_mgoto) {
 /* lets the mobile do a command at another location. Very useful */
 ACMD(do_mat) {
     char arg[MAX_INPUT_LENGTH];
-    room_rnum location, original;
+    room_vnum location;
 
     if (!MOB_OR_IMPL(ch)) {
                 ch->sendText("Huh?!?\r\n");
@@ -659,15 +659,15 @@ ACMD(do_mat) {
         return;
     }
 
-    original = IN_ROOM(ch);
+    auto original = ch->location;
     ch->clearLocation();
-    char_to_room(ch, location);
+    ch->setLocation(location);
     command_interpreter(ch, argument);
 
     /* See if 'ch' still exists before continuing! Handles 'at XXXX quit' case. */
-    if (IN_ROOM(ch) == location) {
-    ch->clearLocation();
-        char_to_room(ch, original);
+    if (ch->location == location) {
+        ch->clearLocation();
+        ch->setLocation(original);
     }
 }
 

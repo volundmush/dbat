@@ -184,7 +184,10 @@ void drive_in_direction(Character *ch, Object *vehicle, int dir) {
     }
 
     Object *hatch = nullptr;
-    auto con = get_room(GET_OBJ_VAL(vehicle, VAL_VEHICLE_DEST))->getObjects();
+    Destination des;
+    des.unit = get_room(GET_OBJ_VAL(vehicle, VAL_VEHICLE_DEST));
+    auto con = des.getObjects();
+    
     for (auto h : filter_raw(con)) {
         if (GET_OBJ_TYPE(hatch) == ITEM_HATCH) {
             SET_OBJ_VAL(hatch, VAL_HATCH_EXTROOM, vehicle->getRoomVnum());

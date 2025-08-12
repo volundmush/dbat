@@ -574,9 +574,9 @@ static Object *get_purchase_obj(Character *ch, char *arg,
     one_argument(arg, name);
     do {
         if (*name == '#' || is_number(name))
-            obj = get_hash_obj_vis(ch, name, keeper->getObjects());
+            obj = get_hash_obj_vis(ch, name, keeper->getInventory());
         else
-            obj = get_slide_obj_vis(ch, name, keeper->getObjects());
+            obj = get_slide_obj_vis(ch, name, keeper->getInventory());
         if (!obj) {
             if (msg) {
                 char buf[MAX_INPUT_LENGTH];
@@ -902,7 +902,7 @@ static void shopping_buy(char *arg, Character *ch, Character *keeper, vnum shop_
         keeper->modBaseStat("money_carried", goldamt);
 
     {
-        auto contents = ch->getObjects();
+        auto contents = ch->getInventory();
         for (auto i : filter_raw(contents)) {
             strlcpy(tempstr, times_message(i, nullptr, bought), sizeof(tempstr));
             break;
@@ -931,7 +931,7 @@ get_selling_obj(Character *ch, char *name, Character *keeper, vnum shop_nr, int 
     Object *obj;
     int result;
 
-    if (!(obj = get_obj_in_list_vis(ch, name, nullptr, ch->getObjects()))) {
+    if (!(obj = get_obj_in_list_vis(ch, name, nullptr, ch->getInventory()))) {
         if (msg) {
             char tbuf[MAX_INPUT_LENGTH];
 
@@ -1151,7 +1151,7 @@ static void shopping_list(char *arg, Character *ch, Character *keeper, vnum shop
 
     len = strlcpy(buf, " ##   Available   Item                             Min. Lvl       Cost\r\n"
                        "----------------------------------------------------------------------\r\n", sizeof(buf));
-    if (auto con = keeper->getObjects(); !con.empty())
+    if (auto con = keeper->getInventory(); !con.empty())
         for (auto obj : filter_raw(con))
             if (CAN_SEE_OBJ(ch, obj) && GET_OBJ_COST(obj) > 0) {
                 if (!last_obj) {
@@ -1609,7 +1609,7 @@ bool shop_data::isProducing(obj_vnum vn) {
 void shop_data::runPurge() {
     auto keepers = getKeepers();
     for(auto keeper : filter_raw(keepers)) {
-        auto con = keeper->getObjects();
+        auto con = keeper->getInventory();
         for (auto sobj : filter_raw(con)) {
             if(isProducing(sobj->getVnum())) {
                 keeper->modBaseStat("money_carried", GET_OBJ_COST(sobj));

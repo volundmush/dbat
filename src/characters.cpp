@@ -96,9 +96,9 @@ void Character::resurrect(ResurrectionMode mode) {
     this->clearLocation();
     auto droom = GET_DROOM(this);
     if (droom != NOWHERE && droom != 0 && droom != 1) {
-        char_to_room(this, real_room(droom));
+        setLocation(droom);
     } else {
-        char_to_room(this, real_room(sensei::getStartRoom(sensei)));
+        setLocation(sensei::getStartRoom(sensei));
     }
     lookAtLocation();
 
@@ -174,15 +174,15 @@ void Character::ghostify() {
 
 }
 
-void Character::teleport_to(IDXTYPE rnum) {
+void Character::teleport_to(room_vnum rnum) {
     this->clearLocation();
-    char_to_room(this, real_room(rnum));
+    this->setLocation(rnum);
     lookAtLocation();
     update_pos(this);
 }
 
-bool Character::in_room_range(IDXTYPE low_rnum, IDXTYPE high_rnum) {
-    return this->getRoomVnum() >= low_rnum && this->getRoomVnum() <= high_rnum;
+bool Character::in_room_range(room_vnum low_rnum, room_vnum high_rnum) {
+    return getRoomVnum() >= low_rnum && getRoomVnum() <= high_rnum;
 }
 
 bool Character::in_past() {
@@ -693,11 +693,11 @@ void Character::login() {
                 this->send_to("%s", CONFIG_START_MESSG);
     }
     if (this->getRoomVnum() <= 1 && GET_LOADROOM(this) != NOWHERE) {
-    this->clearLocation();
-        char_to_room(this, real_room(GET_LOADROOM(this)));
+        this->clearLocation();
+        this->setLocation(GET_LOADROOM(this));
     } else if (this->getRoomVnum() <= 1) {
-    this->clearLocation();
-        char_to_room(this, 300);
+        this->clearLocation();
+        this->setLocation(300);
     } else {
         this->lookAtLocation();
     }
@@ -942,23 +942,7 @@ room_vnum Character::normalizeLoadRoom(room_vnum in) {
 
 }
 
-std::map<int, Object *> Character::getEquipment() {
-    std::map<int, Object*> out;
-    for(const auto &uw : filter_raw(contents)) {
-        if(auto o = dynamic_cast<Object*>(uw))
-            if(o->location.position.x >= 0.0) out[o->location.position.x] = o;
-    }
-    return out;
-}
 
-Object* Character::getEquipSlot(int slot) {
-    auto eq = getEquipment();
-    if(eq.contains(slot)) {
-        return eq[slot];
-    }
-    // If we don't have the slot, return nullptr.
-    return nullptr;
-}
 
 void Character::onAttack(atk::Attack& outgoing) {
     if(form != Form::base)

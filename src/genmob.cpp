@@ -325,7 +325,9 @@ std::vector<trig_vnum> Character::getProtoScript() const {
 
 void Character::setLocation(Room* room) {
     if(!room) return;
-    char_to_room(this, room);
+    Location loc;
+    loc.unit = room;
+    setLocation(loc);
 }
 
 void Character::setLocation(room_vnum rv) {
@@ -335,8 +337,8 @@ void Character::setLocation(room_vnum rv) {
 
 void Character::setLocation(const Location& loc) {
     if(!loc.unit) return;
-    if(loc.unit->type == UnitType::room) {
-        setLocation(static_cast<Room*>(loc.unit));
+    if(auto l = dynamic_cast<AbstractLocation*>(loc.unit); l) {
+        l->addTo(loc.position, this);
     }
 }
 
@@ -346,6 +348,8 @@ void Character::setLocation(const AbstractThing* td) {
 }
 
 void Character::clearLocation() {
-    if(location.getType() != UnitType::room) return;
-    char_from_room(this); // original call preserved; do not replace inside clearLocation()
+    // Characters really shouldn't ever be anywhere else.
+    if(auto l = dynamic_cast<AbstractLocation*>(location.unit); l) {
+        l->removeFrom(this);
+    }
 }

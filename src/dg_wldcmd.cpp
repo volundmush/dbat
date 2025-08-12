@@ -471,7 +471,7 @@ WCMD(do_wload) {
             wld_log(room, "mload: bad mob vnum");
             return;
         }
-        char_to_room(mob, rnum);
+        mob->setLocation(rnum);
         if (SCRIPT(room)) { /* It _should_ have, but it might be detached. */
             room->setVariable("lastloaded", mob->getUID(true));
         }

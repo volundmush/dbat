@@ -192,7 +192,7 @@ SPECIAL(gauntlet_room)  /* Jamdog - 13th Feb 2006 */
         if (FIGHTING(ch)) {
             /* OK, player has had enough - position is already stored, so throw them back to the start */
             ch->clearLocation();
-            char_to_room(ch, real_room(gauntlet_info[0][1]));
+            ch->setLocation(gauntlet_info[0][1]);
             act("$n suddenly appears looking relieved after $s trial in the Gauntlet", false, ch, nullptr, ch,
                 TO_NOTVICT);
             act("You are returned to the start of the Gauntlet", false, ch, nullptr, ch, TO_VICT);
@@ -476,7 +476,9 @@ SPECIAL(auction) {
     auct_room = real_room(80);
 
     if (CMD_IS("cancel")) {
-        auto con = get_room(auct_room)->getObjects();
+        Destination des;
+        des.unit = get_room(auct_room);
+        auto con = des.getObjects();
         for (auto obj : filter_raw(con)) {
             if (GET_AUCTER(obj) == ((ch)->id)) {
                 obj2 = obj;
@@ -519,7 +521,9 @@ SPECIAL(auction) {
     } else if (CMD_IS("pickup")) {
         struct descriptor_data *d;
         int founded = false;
-        auto con = get_room(auct_room)->getObjects();
+        Destination des;
+        des.unit = get_room(auct_room);
+        auto con = des.getObjects();
         for (auto obj : filter_raw(con)) {
             if (GET_CURBID(obj) == ((ch)->id)) {
                 obj2 = obj;
@@ -594,7 +598,7 @@ SPECIAL(auction) {
 
         value = atoi(arg2);
 
-        if (!(obj2 = get_obj_in_list_vis(ch, arg, nullptr, ch->getObjects()))) {
+        if (!(obj2 = get_obj_in_list_vis(ch, arg, nullptr, ch->getInventory()))) {
                         ch->sendText("You don't have that item to auction.\r\n");
             return (true);
         }

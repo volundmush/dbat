@@ -1071,7 +1071,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
                 GET_POS(ch) > POS_RESTING) {
                 if (rand_number(1, 30) >= 22 && !block_calc(ch)) {
                     act("$n@G flees in terror and you lose sight of $m!", true, ch, nullptr, nullptr, TO_ROOM);
-                    auto con = ch->getObjects();
+                    auto con = ch->getInventory();
                     for (auto o : filter_raw(con))
                         extract_obj(o);
 
@@ -1082,7 +1082,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
             if (AFF_FLAGGED(FIGHTING(ch), AFF_FLYING) && IS_HUMANOID(ch) && GET_LEVEL(ch) <= 10) {
                 if (rand_number(1, 30) >= 22 && !block_calc(ch)) {
                     act("$n@G turns and runs away. You lose sight of $m!", true, ch, nullptr, nullptr, TO_ROOM);
-                    auto con = ch->getObjects();
+                    auto con = ch->getInventory();
                     for (auto o : filter_raw(con))
                         extract_obj(o);
                     extract_char(ch);
@@ -1461,8 +1461,8 @@ static void make_pcorpse(Character *ch) {
     corpse->setBaseStat<int>("timer", CONFIG_MAX_PC_CORPSE_TIME);
 
 
-
-    for (auto obj : filter_raw(ch->getObjects())) {
+    auto inv = ch->getInventory();
+    for (auto obj : filter_raw(inv)) {
         if (GET_OBJ_VNUM(obj) < 19900 && GET_OBJ_VNUM(obj) != 17998) {
             if (!((GET_OBJ_VNUM(obj) >= 18800 && GET_OBJ_VNUM(obj) <= 18999) || (GET_OBJ_VNUM(obj) >= 19100 && GET_OBJ_VNUM(obj) <= 19199))) {
                 obj->clearLocation();
@@ -1696,14 +1696,14 @@ static void make_corpse(Character *ch, Character *tch) {
         corpse->setBaseStat<int>("timer", rand_number(CONFIG_MAX_PC_CORPSE_TIME / 2, CONFIG_MAX_PC_CORPSE_TIME));
 
     if (MOB_FLAGGED(ch, MOB_HUSK)) {
-        auto con = ch->getObjects();
+        auto con = ch->getInventory();
         for (auto obj : filter_raw(con)) {
             obj->clearLocation();
             extract_obj(obj);
         }
     } else {
         /* transfer character's inventory to the corpse */
-        auto con = ch->getObjects();
+        auto con = ch->getInventory();
         for(auto o : filter_raw(con)) {
             o->clearLocation();
             obj_to_obj(o, corpse);
@@ -2124,7 +2124,7 @@ void die(Character *ch, Character *killer) {
                     send_to_all("@R%s@r dies in the water of the Arena and is disqualified!@n\r\n", GET_NAME(ch));
                 }
                 ch->clearLocation();
-                char_to_room(ch, real_room(17875));
+                ch->setLocation(17875);
                 ch->modCurVitalDam(CharVital::health, 1);
                 ch->lookAtLocation();
                 final_combat_resolve(ch);

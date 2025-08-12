@@ -529,7 +529,7 @@ ACMD(do_transobj) {
         return;
     }
 
-    if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->getObjects()))) {
+    if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->getInventory()))) {
                 ch->sendText("You want to send what?\r\n");
         return;
     } else if (!strcasecmp("all", arg2)) {
@@ -678,7 +678,7 @@ ACMD(do_recall) {
         act("$n disappears in a burst of light!", false, ch, nullptr, nullptr, TO_ROOM);
         if (real_room(2) != NOWHERE) {
             ch->clearLocation();
-            char_to_room(ch, real_room(2));
+            ch->setLocation(2);
             ch->lookAtLocation();
             ch->setBaseStat("load_room", ch->getRoomVnum());
         }
@@ -1412,7 +1412,7 @@ static void do_stat_object(Character *ch, Object *j) {
    * more or less useless and just takes up valuable screen space.
    */
 
-    if (auto con = j->getObjects(); !con.empty()) {
+    if (auto con = j->getInventory(); !con.empty()) {
         int column;
 
                 ch->sendText("\r\nContents:@g");
@@ -1568,7 +1568,7 @@ static void do_stat_character(Character *ch, Character *k) {
 
     int counts = 0, total = 0;
     i = 0;
-    auto con = k->getObjects();
+    auto con = k->getInventory();
     for (auto j : filter_raw(con)) {
         counts += check_insidebag(j, 0.5);
         counts++;
@@ -1800,7 +1800,7 @@ ACMD(do_stat) {
 
         if ((object = get_obj_in_equip_vis(ch, name, &number, ch->getEquipment())))
             do_stat_object(ch, object);
-        else if ((object = get_obj_in_list_vis(ch, name, &number, ch->getObjects())))
+        else if ((object = get_obj_in_list_vis(ch, name, &number, ch->getInventory())))
             do_stat_object(ch, object);
         else if ((victim = get_char_vis(ch, name, &number, FIND_CHAR_ROOM)))
             do_stat_character(ch, victim);
@@ -2060,7 +2060,7 @@ ACMD(do_vstat) {
             return;
         }
         mob = read_mobile(r_num, REAL);
-        char_to_room(mob, 0);
+        mob->setLocation(0);
         do_stat_character(ch, mob);
         extract_char(mob);
     } else if (is_abbrev(buf, "obj")) {
@@ -2319,7 +2319,7 @@ ACMD(do_purge) {
                 continue;
 
             /* Dump inventory. */
-            auto con = vict->getObjects();
+            auto con = vict->getInventory();
             for (auto o : filter_raw(con))
                 extract_obj(o);
 
@@ -3778,9 +3778,8 @@ static int perform_set(Character *ch, Character *vict, int mode,
                                 ch->sendText("No room exists with that number.\r\n");
                 return (0);
             }
-            if (IN_ROOM(vict) != NOWHERE)    /* Another Eric Green special. */
-                vict->clearLocation();
-            char_to_room(vict, rnum);
+            vict->clearLocation();
+            vict->setLocation(rnum);
             break;
         case 36: vict->pref_flags.toggle(PRF_ROOMFLAGS);
             break;
@@ -4185,8 +4184,8 @@ ACMD(do_chown) {
             }
         }
 
-        if (!(obj = get_obj_in_list_vis(victim, buf2, nullptr, victim->getObjects()))) {
-            if (!k && !(obj = get_obj_in_list_vis(victim, buf2, nullptr, victim->getObjects()))) {
+        if (!(obj = get_obj_in_list_vis(victim, buf2, nullptr, victim->getInventory()))) {
+            if (!k && !(obj = get_obj_in_list_vis(victim, buf2, nullptr, victim->getInventory()))) {
                                 ch->send_to("%s does not appear to have the %s.\r\n", GET_NAME(victim), buf2);
                 return;
             }

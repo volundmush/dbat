@@ -1582,7 +1582,7 @@ static void do_reset_cmds(Zone &z) {
 
                     mob = read_mobile(c.arg1, REAL);
                     /*  Set the mobs loadroom for room_max checks. */
-                    char_to_room(mob, c.arg3);
+                    mob->setLocation(c.arg3);
                     mob->setBaseStat("hometown", c.arg3);
 
                     load_mtrigger(mob);

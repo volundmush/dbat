@@ -1037,7 +1037,7 @@ int special(Character *ch, int cmd, char *arg) {
     }
 
     /* special in inventory? */
-    auto con = ch->getObjects();
+    auto con = ch->getInventory();
     for (auto obj : filter_raw(con)) {
         if (auto func = GET_OBJ_SPEC(obj))
             if (func(ch, obj, cmd, arg))
@@ -1125,7 +1125,7 @@ void enter_player_game(struct descriptor_data *d) {
         load_room = real_room(CONFIG_FROZEN_START);
 
     d->character->activate();
-    char_to_room(d->character, load_room);
+    d->character->setLocation(load_room);
 
     /*load_char_pets(d->character);*/
     auto ac = characterSubscriptions.all("active");

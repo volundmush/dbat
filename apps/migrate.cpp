@@ -29,6 +29,7 @@
 #include "dbat/random.h"
 #include "dbat/assedit.h"
 #include "dbat/assemblies.h"
+#include "dbat/vehicles.h"
 
 #define RENT_FACTOR    1
 #define CRYO_FACTOR    4
@@ -2762,6 +2763,56 @@ int House_get_filename(room_vnum vnum, char *filename, size_t maxlen) {
     return (1);
 }
 
+static void handle_ships(Object *object, Room *room) {
+    if (GET_OBJ_TYPE(object) == ITEM_HATCH && GET_OBJ_VNUM(object) <= 19199) {
+        if ((GET_OBJ_VNUM(object) <= 18999 && GET_OBJ_VNUM(object) >= 18800) ||
+            (GET_OBJ_VNUM(object) <= 19199 && GET_OBJ_VNUM(object) >= 19100)) {
+            int hnum = GET_OBJ_VAL(object, VAL_HATCH_DEST);
+            Object *house = read_object(hnum, VIRTUAL);
+            house->setLocation(GET_OBJ_VAL(object, VAL_HATCH_LOCATION));
+            int newval = GET_OBJ_VAL(object, VAL_CONTAINER_FLAGS) | CONT_CLOSED | CONT_LOCKED;
+            SET_OBJ_VAL(object, VAL_CONTAINER_FLAGS, newval);
+        }
+    }
+
+    if (GET_OBJ_TYPE(object) == ITEM_HATCH && GET_OBJ_VAL(object, VAL_HATCH_DEST) > 1 && GET_OBJ_VNUM(object) > 19199) {
+        Object *vehicle = nullptr;
+        if (!(vehicle = find_vehicle_by_vnum(GET_OBJ_VAL(object, VAL_HATCH_DEST)))) {
+            if (real_room(GET_OBJ_VAL(object, VAL_HATCH_EXTROOM)) != NOWHERE) {
+                vehicle = read_object(GET_OBJ_VAL(object, VAL_HATCH_DEST), VIRTUAL);
+                if(!vehicle) {
+                    basic_mud_log("SYSERR: Vehicle %d not found for hatch %d", GET_OBJ_VAL(object, VAL_HATCH_DEST), GET_OBJ_VNUM(object));
+                } else {
+                    vehicle->setLocation(GET_OBJ_VAL(object, VAL_HATCH_EXTROOM));
+                    if (auto ld = object->getLookDescription(); ld) {
+                        if (strlen(ld)) {
+                            char nick[MAX_INPUT_LENGTH], nick2[MAX_INPUT_LENGTH], nick3[MAX_INPUT_LENGTH];
+                            if (GET_OBJ_VNUM(vehicle) <= 46099 && GET_OBJ_VNUM(vehicle) >= 46000) {
+                                snprintf(nick, sizeof(nick), "Saiyan Pod %s", ld);
+                                snprintf(nick2, sizeof(nick2), "@wA @Ys@ya@Yi@yy@Ya@yn @Dp@Wo@Dd@w named @D(@C%s@D)@w",
+                                        ld);
+                            } else if (GET_OBJ_VNUM(vehicle) >= 46100 && GET_OBJ_VNUM(vehicle) <= 46199) {
+                                snprintf(nick, sizeof(nick), "EDI Xenofighter MK. II %s", ld);
+                                snprintf(nick2, sizeof(nick2), 
+                                        "@wAn @YE@yD@YI @CX@ce@Wn@Do@Cf@ci@Wg@Dh@Wt@ce@Cr @RMK. II @wnamed @D(@C%s@D)@w",
+                                        ld);
+                            }
+                            snprintf(nick3, sizeof(nick3), "%s is resting here@w", nick2);
+                            vehicle->strings["name"] = nick;
+                            vehicle->strings["short_description"] = nick2;
+                            vehicle->strings["room_description"] = nick3;
+                        }
+                    }
+                }
+                int newval = GET_OBJ_VAL(object, VAL_CONTAINER_FLAGS) | CONT_CLOSED | CONT_LOCKED;
+                SET_OBJ_VAL(object, VAL_CONTAINER_FLAGS, newval);
+            } else {
+                basic_mud_log("Hatch load: Hatch with no vehicle load room: #%d!", GET_OBJ_VNUM(object));
+            }
+        }
+    }
+}
+
 int House_load(room_vnum rvnum) {
     FILE *fl;
     char f1[READ_SIZE], f2[READ_SIZE], f3[READ_SIZE], f4[READ_SIZE];
@@ -2952,7 +3003,9 @@ int House_load(room_vnum rvnum) {
             }   /* exit our xap loop */
             if (temp != nullptr) {
                 num_objs++;
-                temp->setLocation(rrnum);
+                auto r = get_room(rrnum);
+                temp->setLocation(r);
+                handle_ships(temp, r);
             }
 
         } else {

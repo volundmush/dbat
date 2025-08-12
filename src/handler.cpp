@@ -391,84 +391,6 @@ void affect_join(Character *ch, struct affected_type *af,
 }
 
 
-/* move a player out of a room */
-void char_from_room(Character *ch) {
-    Character *temp;
-    int i;
-    Room *r = nullptr;
-
-    if (ch == nullptr || !(r = ch->getRoom())) {
-        basic_mud_log("SYSERR: nullptr character or NOWHERE in %s, char_from_room", __FILE__);
-        return;
-    }
-
-    if (FIGHTING(ch) && !AFF_FLAGGED(ch, AFF_PURSUIT))
-        stop_fighting(ch);
-
-    if (AFF_FLAGGED(ch, AFF_PURSUIT) && FIGHTING(ch) == nullptr)
-        ch->affect_flags.set(AFF_PURSUIT, false);
-
-    auto shared = ch->shared();
-    if(IS_NPC(ch)) {
-        r->zone->npcsInZone.remove_if([shared](auto& npc) { return npc.expired() || npc.lock() == shared; });
-    } else {
-        r->zone->playersInZone.remove_if([shared](auto& npc) { return npc.expired() || npc.lock() == shared; });
-    }
-    auto sh = ch->shared();
-    r->contents.remove_if([sh](auto& c) { return c.expired() || c.lock() == sh; });
-    ch->location.unit = nullptr;
-
-}
-
-/* place a character in a room */
-void char_to_room(Character *ch, Room* room) {
-    int i;
-
-    room->contents.push_front(ch->shared());
-    ch->location.unit = room;
-
-    if(IS_NPC(ch)) {
-        room->zone->npcsInZone.push_back(ch->shared());
-    } else {
-        room->zone->playersInZone.push_back(ch->shared());
-    }
-
-    /* Stop fighting now, if we left. */
-    if (FIGHTING(ch) && ch->location != FIGHTING(ch)->location && !AFF_FLAGGED(ch, AFF_PURSUIT)) {
-        stop_fighting(FIGHTING(ch));
-        stop_fighting(ch);
-    }
-    if (!IS_NPC(ch)) {
-        if (PRF_FLAGGED(ch, PRF_ARENAWATCH)) {
-            ch->pref_flags.set(PRF_ARENAWATCH, false);
-            ch->setBaseStat<room_vnum>("arena_watch", -1);
-        }
-    }
-
-}
-
-/* place a character in a room */
-void char_to_room(Character *ch, room_rnum room) {
-    if(!ch) return;
-    auto r = get_room(room);
-    if(!r) return;
-    char_to_room(ch, r);
-}
-
-void char_to_location(Character *ch, const Location& loc) {
-    if(!ch) return;
-    if(!loc.unit) return;
-    if(loc.unit->type == UnitType::room) {
-        char_to_room(ch, static_cast<Room*>(loc.unit));
-    }
-}
-
-void char_to_location(Character *ch, const AbstractThing* td) {
-    if(!ch) return;
-    if(!td) return;
-    char_to_location(ch, td->location);
-}
-
 
 /* give an object to a char   */
 void obj_to_char(Object *object, Character *ch) {
@@ -674,144 +596,6 @@ Character *get_char_num(mob_rnum nr) {
 }
 
 
-void obj_to_room(Object *object, Room *room) {
-
-    if (ROOM_FLAGGED(room, ROOM_GARDEN1) || ROOM_FLAGGED(room, ROOM_GARDEN2)) {
-        if (GET_OBJ_TYPE(object) != ITEM_PLANT) {
-            room->send_to("%s @wDisappears in a puff of smoke! It seems the room was designed to vaporize anything not plant related. Strange...@n\r\n",
-                         object->getShortDescription());
-            extract_obj(object);
-            return;
-        } else {
-            objectSubscriptions.subscribe("growingPlants", object);
-        }
-    }
-    if (room->getVnum() == real_room(80)) {
-        auc_load(object);
-    }
-
-    room->contents.push_front(object->shared());
-    object->location.unit = room;
-    object->location.position.x = -1.0;
-    object->location.position.y = 0;
-    object->location.position.z = 0;
-    object->setBaseStat("lload", time(nullptr));
-
-    room->zone->objectsInZone.push_back(object->shared());
-
-    if (GET_OBJ_TYPE(object) == ITEM_VEHICLE && !OBJ_FLAGGED(object, ITEM_UNBREAKABLE) &&
-        GET_OBJ_VNUM(object) > 19199) {
-        object->item_flags.set(ITEM_UNBREAKABLE, true);
-    }
-
-    // This section is now only going to be called during migrations.
-    if(isMigrating) {
-        if (GET_OBJ_TYPE(object) == ITEM_HATCH && GET_OBJ_VNUM(object) <= 19199) {
-            if ((GET_OBJ_VNUM(object) <= 18999 && GET_OBJ_VNUM(object) >= 18800) ||
-                (GET_OBJ_VNUM(object) <= 19199 && GET_OBJ_VNUM(object) >= 19100)) {
-                int hnum = GET_OBJ_VAL(object, VAL_HATCH_DEST);
-                Object *house = read_object(hnum, VIRTUAL);
-                house->setLocation(GET_OBJ_VAL(object, VAL_HATCH_LOCATION));
-                int newval = GET_OBJ_VAL(object, VAL_CONTAINER_FLAGS) | CONT_CLOSED | CONT_LOCKED;
-                SET_OBJ_VAL(object, VAL_CONTAINER_FLAGS, newval);
-            }
-        }
-
-        if (GET_OBJ_TYPE(object) == ITEM_HATCH && GET_OBJ_VAL(object, VAL_HATCH_DEST) > 1 && GET_OBJ_VNUM(object) > 19199) {
-            Object *vehicle = nullptr;
-            if (!(vehicle = find_vehicle_by_vnum(GET_OBJ_VAL(object, VAL_HATCH_DEST)))) {
-                if (real_room(GET_OBJ_VAL(object, VAL_HATCH_EXTROOM)) != NOWHERE) {
-                    vehicle = read_object(GET_OBJ_VAL(object, VAL_HATCH_DEST), VIRTUAL);
-                    if(!vehicle) {
-                        basic_mud_log("SYSERR: Vehicle %d not found for hatch %d", GET_OBJ_VAL(object, VAL_HATCH_DEST), GET_OBJ_VNUM(object));
-                    } else {
-                        vehicle->setLocation(GET_OBJ_VAL(object, VAL_HATCH_EXTROOM));
-                        if (auto ld = object->getLookDescription(); ld) {
-                            if (strlen(ld)) {
-                                char nick[MAX_INPUT_LENGTH], nick2[MAX_INPUT_LENGTH], nick3[MAX_INPUT_LENGTH];
-                                if (GET_OBJ_VNUM(vehicle) <= 46099 && GET_OBJ_VNUM(vehicle) >= 46000) {
-                                    snprintf(nick, sizeof(nick), "Saiyan Pod %s", ld);
-                                    snprintf(nick2, sizeof(nick2), "@wA @Ys@ya@Yi@yy@Ya@yn @Dp@Wo@Dd@w named @D(@C%s@D)@w",
-                                            ld);
-                                } else if (GET_OBJ_VNUM(vehicle) >= 46100 && GET_OBJ_VNUM(vehicle) <= 46199) {
-                                    snprintf(nick, sizeof(nick), "EDI Xenofighter MK. II %s", ld);
-                                    snprintf(nick2, sizeof(nick2), 
-                                            "@wAn @YE@yD@YI @CX@ce@Wn@Do@Cf@ci@Wg@Dh@Wt@ce@Cr @RMK. II @wnamed @D(@C%s@D)@w",
-                                            ld);
-                                }
-                                snprintf(nick3, sizeof(nick3), "%s is resting here@w", nick2);
-                                vehicle->strings["name"] = nick;
-                                vehicle->strings["short_description"] = nick2;
-                                vehicle->strings["room_description"] = nick3;
-                            }
-                        }
-                    }
-                    int newval = GET_OBJ_VAL(object, VAL_CONTAINER_FLAGS) | CONT_CLOSED | CONT_LOCKED;
-                    SET_OBJ_VAL(object, VAL_CONTAINER_FLAGS, newval);
-                } else {
-                    basic_mud_log("Hatch load: Hatch with no vehicle load room: #%d!", GET_OBJ_VNUM(object));
-                }
-            }
-        }
-    }
-
-    if (auto ex = EXIT(object, 5); ex &&
-        (object->location.getTileType() == SECT_UNDERWATER || object->location.getTileType() == SECT_WATER_NOSWIM)) {
-        act("$p @Bsinks to deeper waters.@n", true, nullptr, object, nullptr, TO_ROOM);
-        object->clearLocation();
-        object->setLocation(*ex);
-    }
-    if (auto ex = EXIT(object, 5); ex && object->location.getTileType() == SECT_FLYING &&
-        (GET_OBJ_VNUM(object) < 80 || GET_OBJ_VNUM(object) > 83)) {
-        act("$p @Cfalls down.@n", true, nullptr, object, nullptr, TO_ROOM);
-        object->clearLocation();
-        object->setLocation(*ex);
-        if (object->location.getTileType() != SECT_FLYING) {
-            act("$p @Cfalls down and smacks the ground.@n", true, nullptr, object, nullptr, TO_ROOM);
-        }
-    }
-}
-
-
-/* Take an object from a room */
-void obj_from_room(Object *object) {
-    if (!object) {
-        basic_mud_log("SYSERR: nullptr object passed to obj_from_room");
-        return;
-    }
-
-    auto r = object->getRoom();
-    if(!r) {
-        basic_mud_log("SYSERR: object not in a room passed to obj_from_room");
-        return;
-    }
-
-    if(object->type_flag == ItemType::plant) objectSubscriptions.unsubscribe("growingPlants", object);
-
-    if (auto obj = GET_OBJ_POSTED(object); obj) {
-        if (GET_OBJ_POSTTYPE(object) <= 0) {
-            obj->location.send_to("%s@W shakes loose from %s@W.@n\r\n", obj->getShortDescription(),
-                         object->getShortDescription());
-        } else {
-            obj->location.send_to("%s@W comes loose from %s@W.@n\r\n", object->getShortDescription(),
-                         obj->getShortDescription());
-        }
-        GET_OBJ_POSTED(obj) = nullptr;
-        GET_OBJ_POSTTYPE(obj) = 0;
-        GET_OBJ_POSTED(object) = nullptr;
-        GET_OBJ_POSTTYPE(object) = 0;
-    }
-
-    auto shared = object->shared();
-    auto z = r->zone;
-    z->objectsInZone.remove_if([shared](auto& obj) { return obj.expired() || obj.lock() == shared; });
-    r->contents.remove_if([shared](auto& obj) { return obj.expired() || obj.lock() == shared; });
-
-    object->location = {};
-
-}
-
-
 /* put an object in an object (quaint)  */
 void obj_to_obj(Object *obj, Object *obj_to) {
 
@@ -868,7 +652,7 @@ void extract_obj(Object *obj) {
         USER(obj) = nullptr;
     }
 
-    auto con = obj->getObjects();
+    auto con = obj->getInventory();
     for (auto o : filter_raw(con))
         extract_obj(o);
 
@@ -887,7 +671,7 @@ static void update_object(Object *obj, int use) {
     /* dont update objects with a timer trigger */
     if (!SCRIPT_CHECK(obj, OTRIG_TIMER) && (GET_OBJ_TIMER(obj) > 0))
         obj->modBaseStat("timer", -use);
-    auto con = obj->getObjects();
+    auto con = obj->getInventory();
     for(auto o : filter_raw(con)) {
         update_object(o, use);
     }
@@ -915,7 +699,7 @@ void update_char_objects(Character *ch) {
             }
             update_object(GET_EQ(ch, i), 2);
         }
-    auto con = ch->getObjects();
+    auto con = ch->getInventory();
     for(auto o : filter_raw(con))
         update_object(o, 1);
 }
@@ -1062,7 +846,7 @@ void extract_char_final(Character *ch) {
 
     /* transfer objects to room, if any */
     if(IS_NPC(ch)) {
-        auto con = ch->getObjects();
+        auto con = ch->getInventory();
         for (auto obj : filter_raw(con)) {
             obj->clearLocation();
             obj->setLocation(ch);
@@ -1125,7 +909,7 @@ void extract_char(Character *ch) {
         if (IS_NPC(foll->follower) && AFF_FLAGGED(foll->follower, AFF_CHARM) &&
             (foll->follower->location == ch->location || IN_ROOM(ch) == 1)) {
             /* transfer objects to char, if any */
-            auto con = foll->follower->getObjects();
+            auto con = foll->follower->getInventory();
             for (auto obj : filter_raw(con)) {
                 obj->clearLocation();
                 obj_to_char(obj, ch);
@@ -1380,7 +1164,7 @@ Object *get_obj_vis(Character *ch, char *name, int *number) {
         return (nullptr);
 
     /* scan items carried */
-    if ((i = get_obj_in_list_vis(ch, name, number, ch->getObjects())))
+    if ((i = get_obj_in_list_vis(ch, name, number, ch->getInventory())))
         return (i);
 
     /* scan room */
@@ -1577,7 +1361,7 @@ int generic_find(const char *arg, bitvector_t bitvector, Character *ch,
     }
 
     if (IS_SET(bitvector, FIND_OBJ_INV)) {
-        if ((*tar_obj = get_obj_in_list_vis(ch, name, &number, ch->getObjects())))
+        if ((*tar_obj = get_obj_in_list_vis(ch, name, &number, ch->getInventory())))
             return (FIND_OBJ_INV);
     }
 

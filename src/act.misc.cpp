@@ -109,7 +109,7 @@ ACMD(do_restring) {
         return;
     }
     
-    if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->getObjects()))) {
+    if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->getInventory()))) {
                 ch->sendText("You don't have a that equipment to restring in your inventory.\r\n");
                 ch->sendText("Syntax: restring (obj name)\r\n");
         return;
@@ -315,7 +315,7 @@ static void resolve_song(Character *ch) {
         return;
     }
 
-    auto con = ch->getObjects();
+    auto con = ch->getInventory();
     for (auto obj2 : filter_raw(con)) {
         if (GET_OBJ_VNUM(obj2) == 8802 || GET_OBJ_VNUM(obj2) == 8807) {
             instrument = GET_OBJ_VNUM(obj2);
@@ -474,7 +474,7 @@ static void resolve_song(Character *ch) {
                             act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", true, ch,
                                 nullptr, vict, TO_NOTVICT);
                             vict->clearLocation();
-                            char_to_room(vict, real_room(300));
+                            vict->setLocation(300);
                         }
                     }
                 }
@@ -492,7 +492,7 @@ static void resolve_song(Character *ch) {
                             act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", true, ch,
                                 nullptr, vict, TO_NOTVICT);
                             vict->clearLocation();
-                            char_to_room(vict, real_room(2234));
+                            vict->setLocation(2234);
                         }
                     }
                 }
@@ -510,7 +510,7 @@ static void resolve_song(Character *ch) {
                             act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", true, ch,
                                 nullptr, vict, TO_NOTVICT);
                             vict->clearLocation();
-                            char_to_room(vict, real_room(4047));
+                            vict->setLocation(4047);
                         }
                     }
                 }
@@ -528,7 +528,7 @@ static void resolve_song(Character *ch) {
                             act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", true, ch,
                                 nullptr, vict, TO_NOTVICT);
                             vict->clearLocation();
-                            char_to_room(vict, real_room(8003));
+                            vict->setLocation(8003);
                         }
                     }
                 }
@@ -546,7 +546,7 @@ static void resolve_song(Character *ch) {
                             act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", true, ch,
                                 nullptr, vict, TO_NOTVICT);
                             vict->clearLocation();
-                            char_to_room(vict, real_room(10182));
+                            vict->setLocation(10182);
                         }
                     }
                 }
@@ -564,7 +564,7 @@ static void resolve_song(Character *ch) {
                             act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", true, ch,
                                 nullptr, vict, TO_NOTVICT);
                             vict->clearLocation();
-                            char_to_room(vict, real_room(16087));
+                            vict->setLocation(16087);
                         }
                     }
                 }
@@ -582,7 +582,7 @@ static void resolve_song(Character *ch) {
                             act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", true, ch,
                                 nullptr, vict, TO_NOTVICT);
                             vict->clearLocation();
-                            char_to_room(vict, real_room(12025));
+                            vict->setLocation(12025);
                         }
                     }
                 }
@@ -600,7 +600,7 @@ static void resolve_song(Character *ch) {
                             act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", true, ch,
                                 nullptr, vict, TO_NOTVICT);
                             vict->clearLocation();
-                            char_to_room(vict, real_room(14910));
+                            vict->setLocation(14910);
                         }
                     }
                 }
@@ -644,56 +644,56 @@ static void resolve_song(Character *ch) {
         switch ((int)GET_SONG(ch)) {
             case SONG_TELEPORT_EARTH:
                 ch->clearLocation();
-                char_to_room(ch, real_room(300));
+                ch->setLocation(300);
                 ch->setBaseStat<int>("mystic_melody", 0);
                 act("@CFinally as the last of your comrades has been teleported you teleport yourself to Earth and stop your song.@n",
                     true, ch, nullptr, nullptr, TO_CHAR);
                 break;
             case SONG_TELEPORT_VEGETA:
                 ch->clearLocation();
-                char_to_room(ch, real_room(2234));
+                ch->setLocation(2234);
                 ch->setBaseStat<int>("mystic_melody", 0);
                 act("@CFinally as the last of your comrades has been teleported you teleport yourself to Vegeta and stop your song.@n",
                     true, ch, nullptr, nullptr, TO_CHAR);
                 break;
             case SONG_TELEPORT_FRIGID:
                 ch->clearLocation();
-                char_to_room(ch, real_room(4047));
+                ch->setLocation(4047);
                 ch->setBaseStat<int>("mystic_melody", 0);
                 act("@CFinally as the last of your comrades has been teleported you teleport yourself to Frigid and stop your song.@n",
                     true, ch, nullptr, nullptr, TO_CHAR);
                 break;
             case SONG_TELEPORT_NAMEK:
                 ch->clearLocation();
-                char_to_room(ch, real_room(10182));
+                ch->setLocation(10182);
                 ch->setBaseStat<int>("mystic_melody", 0);
                 act("@CFinally as the last of your comrades has been teleported you teleport yourself to Namek and stop your song.@n",
                     true, ch, nullptr, nullptr, TO_CHAR);
                 break;
             case SONG_TELEPORT_KANASSA:
                 ch->clearLocation();
-                char_to_room(ch, real_room(14910));
+                ch->setLocation(14910);
                 ch->setBaseStat<int>("mystic_melody", 0);
                 act("@CFinally as the last of your comrades has been teleported you teleport yourself to Kanassa and stop your song.@n",
                     true, ch, nullptr, nullptr, TO_CHAR);
                 break;
             case SONG_TELEPORT_AETHER:
                 ch->clearLocation();
-                char_to_room(ch, real_room(12025));
+                ch->setLocation(12025);
                 ch->setBaseStat<int>("mystic_melody", 0);
                 act("@CFinally as the last of your comrades has been teleported you teleport yourself to Aether and stop your song.@n",
                     true, ch, nullptr, nullptr, TO_CHAR);
                 break;
             case SONG_TELEPORT_ARLIA:
                 ch->clearLocation();
-                char_to_room(ch, real_room(16087));
+                ch->setLocation(16087);
                 ch->setBaseStat<int>("mystic_melody", 0);
                 act("@CFinally as the last of your comrades has been teleported you teleport yourself to Arlia and stop your song.@n",
                     true, ch, nullptr, nullptr, TO_CHAR);
                 break;
             case SONG_TELEPORT_KONACK:
                 ch->clearLocation();
-                char_to_room(ch, real_room(8003));
+                ch->setLocation(8003);
                 ch->setBaseStat<int>("mystic_melody", 0);
                 act("@CFinally as the last of your comrades has been teleported you teleport yourself to Konack and stop your song.@n",
                     true, ch, nullptr, nullptr, TO_CHAR);
@@ -712,7 +712,7 @@ ACMD(do_song) {
     Object *obj2 = nullptr, *next_obj;
     int instrument = 0;
 
-    auto con = ch->getObjects();
+    auto con = ch->getInventory();
     for (auto obj2 : filter_raw(con)) {
         if (GET_OBJ_VNUM(obj2) == 8802 || GET_OBJ_VNUM(obj2) == 8807) {
             instrument = GET_OBJ_VNUM(obj2);
@@ -1356,7 +1356,7 @@ ACMD(do_fish) {
                                         ch->sendText("Syntax: fish apply (bait)\r\n");
                     return;
                 }
-                if (!(bait = get_obj_in_list_vis(ch, arg2, nullptr, ch->getObjects()))) {
+                if (!(bait = get_obj_in_list_vis(ch, arg2, nullptr, ch->getInventory()))) {
                                         ch->sendText("You don't have that bait.\r\n");
                     return;
                 } else if (GET_OBJ_TYPE(bait) != ITEM_FISHBAIT) {
@@ -1669,11 +1669,11 @@ ACMD(do_extract) {
     }
 
     if (!strcasecmp(arg, "combine")) {
-        if (!(obj = get_obj_in_list_vis(ch, arg2, nullptr, ch->getObjects()))) {
+        if (!(obj = get_obj_in_list_vis(ch, arg2, nullptr, ch->getInventory()))) {
                         ch->sendText("You do not have the first bottle that you were wanting to combine.\r\n");
             return;
         }
-        if (!(obj2 = get_obj_in_list_vis(ch, arg3, nullptr, ch->getObjects()))) {
+        if (!(obj2 = get_obj_in_list_vis(ch, arg3, nullptr, ch->getInventory()))) {
                         ch->sendText("You do not have the second bottle that you were wanting to combine.\r\n");
             return;
         }
@@ -1711,7 +1711,7 @@ ACMD(do_extract) {
         }
     }
 
-    if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->getObjects()))) {
+    if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->getInventory()))) {
                 ch->sendText("You do not have that item.\r\n");
         return;
     } else {
@@ -2386,7 +2386,7 @@ ACMD(do_resize) {
                         ch->sendText("Syntax: resize (obj) (small | medium)\r\n");
             return;
         }
-        if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->getObjects()))) {
+        if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->getInventory()))) {
                         ch->sendText("You don't have that object!\r\n");
             return;
         } else {
@@ -3085,12 +3085,12 @@ ACMD(do_instill) {
         return;
     }
 
-    if (!(token = get_obj_in_list_vis(ch, arg, nullptr, ch->getObjects()))) {
+    if (!(token = get_obj_in_list_vis(ch, arg, nullptr, ch->getInventory()))) {
                 ch->sendText("Syntax: instill (token) (target)\r\n");
         return;
     }
 
-    if (!(obj = get_obj_in_list_vis(ch, arg2, nullptr, ch->getObjects()))) {
+    if (!(obj = get_obj_in_list_vis(ch, arg2, nullptr, ch->getInventory()))) {
                 ch->sendText("Syntax: instill (token) (target)\r\n");
         return;
     }
@@ -3284,7 +3284,7 @@ ACMD(do_bury) {
         if (!*arg2) {
                 ch->sendText("Bury what?\r\n");
             return;
-        } else if (!(obj = get_obj_in_list_vis(ch, arg2, nullptr, ch->getObjects()))) {
+        } else if (!(obj = get_obj_in_list_vis(ch, arg2, nullptr, ch->getInventory()))) {
                 ch->sendText("You don't have that object to bury.\r\n");
             return;
         } else if (fobj) {
@@ -4240,7 +4240,7 @@ static int valid_recipe(Character *ch, int recipe, int type) {
 
     if (type == 0) {
         /* Check for ingredients in inventory */
-        auto con = ch->getObjects();
+        auto con = ch->getInventory();
         for (auto obj2 : filter_raw(con)) {
             switch (GET_OBJ_VNUM(obj2)) {
                 case RCP_TOMATO:
@@ -4358,7 +4358,7 @@ static int valid_recipe(Character *ch, int recipe, int type) {
             }
         }
     } else { /* We know the ingredients are there, remove and exit. */
-        auto con = ch->getObjects();
+        auto con = ch->getInventory();
         for (auto obj2 : filter_raw(con)) {
             switch (GET_OBJ_VNUM(obj2)) {
                 case RCP_TOMATO:
@@ -5097,7 +5097,7 @@ ACMD(do_warppool) {
                 true, ch, nullptr, nullptr, TO_ROOM);
             improve_skill(ch, SKILL_WARP, 1);
             ch->clearLocation();
-            char_to_room(ch, real_room(850));
+            ch->setLocation(850);
             act("@CSuddenly a large whirlpool of flashing water begins to form nearby. After a few seconds @c$n@C pops out of the center of the pool! The water then return to normal a moment laterr...@n",
                 true, ch, nullptr, nullptr, TO_ROOM);
             ch->modCurVital(CharVital::ki, -cost);
@@ -5117,7 +5117,7 @@ ACMD(do_warppool) {
                 true, ch, nullptr, nullptr, TO_ROOM);
             improve_skill(ch, SKILL_WARP, 1);
             ch->clearLocation();
-            char_to_room(ch, real_room(4609));
+            ch->setLocation(4609);
             act("@CSuddenly a large whirlpool of flashing water begins to form nearby. After a few seconds @c$n@C pops out of the center of the pool! The water then return to normal a moment laterr...@n",
                 true, ch, nullptr, nullptr, TO_ROOM);
             ch->modCurVital(CharVital::ki, -cost);
@@ -5137,7 +5137,7 @@ ACMD(do_warppool) {
                 true, ch, nullptr, nullptr, TO_ROOM);
             improve_skill(ch, SKILL_WARP, 1);
             ch->clearLocation();
-            char_to_room(ch, real_room(10904));
+            ch->setLocation(10904);
             act("@CSuddenly a large whirlpool of flashing water begins to form nearby. After a few seconds @c$n@C pops out of the center of the pool! The water then return to normal a moment laterr...@n",
                 true, ch, nullptr, nullptr, TO_ROOM);
             ch->modCurVital(CharVital::ki, -cost);
@@ -5157,7 +5157,7 @@ ACMD(do_warppool) {
                 true, ch, nullptr, nullptr, TO_ROOM);
             improve_skill(ch, SKILL_WARP, 1);
             ch->clearLocation();
-            char_to_room(ch, real_room(15100));
+            ch->setLocation(15100);
             act("@CSuddenly a large whirlpool of flashing water begins to form nearby. After a few seconds @c$n@C pops out of the center of the pool! The water then return to normal a moment laterr...@n",
                 true, ch, nullptr, nullptr, TO_ROOM);
             ch->modCurVital(CharVital::ki, -cost);
@@ -5177,7 +5177,7 @@ ACMD(do_warppool) {
                 true, ch, nullptr, nullptr, TO_ROOM);
             improve_skill(ch, SKILL_WARP, 1);
             ch->clearLocation();
-            char_to_room(ch, real_room(12252));
+            ch->setLocation(12252);
             act("@CSuddenly a large whirlpool of flashing water begins to form nearby. After a few seconds @c$n@C pops out of the center of the pool! The water then return to normal a moment laterr...@n",
                 true, ch, nullptr, nullptr, TO_ROOM);
             ch->modCurVital(CharVital::ki, -cost);
@@ -5420,7 +5420,7 @@ ACMD(do_feed) {
         return;
     }
 
-    if (!(obj = get_obj_in_list_vis(ch, arg2, nullptr, ch->getObjects()))) {
+    if (!(obj = get_obj_in_list_vis(ch, arg2, nullptr, ch->getInventory()))) {
                 ch->sendText("You need to give them a senzu.\r\n");
         return;
     }

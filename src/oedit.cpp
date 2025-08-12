@@ -1636,7 +1636,7 @@ ACMD(do_iedit) {
 
     if ((k = get_obj_in_equip_vis(ch, arg, nullptr, ch->getEquipment()))) {
         found = 1;
-    } else if ((k = get_obj_in_list_vis(ch, arg, nullptr, ch->getObjects()))) {
+    } else if ((k = get_obj_in_list_vis(ch, arg, nullptr, ch->getInventory()))) {
         found = 1;
     } else if ((k = get_obj_in_list_vis(ch, arg, nullptr, ch->location.getObjects()))) {
         found = 1;

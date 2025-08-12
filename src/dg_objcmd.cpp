@@ -471,7 +471,7 @@ OCMD(do_dgoload) {
             obj_log(obj, "oload: bad mob vnum");
             return;
         }
-        char_to_room(mob, rnum);
+        mob->setLocation(rnum);
 
         if (SCRIPT(obj)) { /* It _should_ have, but it might be detached. */
             obj->setVariable("lastloaded", mob->getUID(true));

@@ -374,7 +374,7 @@ Object *get_obj_near_obj(Object *obj, char *name) {
         return obj;
 
     /* is it inside ? */
-    if ((i = get_obj_in_list(name, obj->getObjects())))
+    if ((i = get_obj_in_list(name, obj->getInventory())))
         return i;
 
     /* or outside ? */
@@ -399,7 +399,7 @@ Object *get_obj_near_obj(Object *obj, char *name) {
                 // worn?
                 return i;
             } else {
-                if(i = get_obj_in_list(name, c->getObjects())) {
+                if(i = get_obj_in_list(name, c->getInventory())) {
                     // carried?
                     return i;
                 }
@@ -541,7 +541,7 @@ Object *get_obj_by_obj(Object *obj, char *name) {
     if (!strcasecmp(name, "self") || !strcasecmp(name, "me"))
         return obj;
 
-    if (i = get_obj_in_list(name, obj->getObjects()))
+    if (i = get_obj_in_list(name, obj->getInventory()))
         return i;
 
     if(!obj->location.unit)
@@ -557,7 +557,7 @@ Object *get_obj_by_obj(Object *obj, char *name) {
         case UnitType::character: {
             auto c = static_cast<Character*>(obj->location.unit);
             if(obj->location.position.x == -1) {
-                if(i = get_obj_in_list(name,c->getObjects()); i)
+                if(i = get_obj_in_list(name, c->getInventory()); i)
                     return i;
             } else {
                 if (i = get_object_in_equip(c, name); i)
@@ -1215,7 +1215,7 @@ ACMD(do_detach) {
         } else {
             /* Thanks to Carlos Myers for fixing the line below */
             if ((object = get_obj_in_equip_vis(ch, arg1, nullptr, ch->getEquipment())));
-            else if ((object = get_obj_in_list_vis(ch, arg1, nullptr, ch->getObjects())));
+            else if ((object = get_obj_in_list_vis(ch, arg1, nullptr, ch->getInventory())));
             else if ((victim = get_char_room_vis(ch, arg1, nullptr)));
             else if ((object = get_obj_in_list_vis(ch, arg1, nullptr, ch->location.getObjects())));
             else if ((victim = get_char_vis(ch, arg1, nullptr, FIND_CHAR_WORLD)));

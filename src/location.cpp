@@ -3,6 +3,7 @@
 #include "dbat/filter.h"
 #include "dbat/utils.h"
 #include "dbat/constants.h"
+#include "dbat/fight.h"
 
 bool Coordinates::operator==(const Coordinates& other) const {
     return x == other.x && y == other.y && z == other.z;
@@ -44,7 +45,7 @@ bool Location::operator==(const room_vnum rv) const {
 
 // the bool operator for ...
 Location::operator bool() const {
-    return getType() == UnitType::room;
+    return dynamic_cast<const AbstractLocation*>(unit) != nullptr;
 }
 
 UnitType Location::getType() const {
@@ -470,4 +471,136 @@ void AbstractLocation::replaceExit(const Coordinates& coor, const Destination& d
 
 void AbstractLocation::deleteExit(const Coordinates& coor, Direction dir) {
     // Implementation for deleting an exit in the location data
+}
+
+void AbstractLocation::addTo(const Coordinates& coor, Character* ch) {
+
+    auto sh = ch->shared();
+    contents.push_front(sh);
+    ch->location.unit = this;
+    ch->location.position = coor;
+    auto z = getZone();
+
+    if(IS_NPC(ch)) {
+        z->npcsInZone.push_back(sh);
+    } else {
+        z->playersInZone.push_back(sh);
+        if (PRF_FLAGGED(ch, PRF_ARENAWATCH)) {
+            ch->pref_flags.set(PRF_ARENAWATCH, false);
+            ch->setBaseStat<room_vnum>("arena_watch", -1);
+        }
+    }
+
+    /* Stop fighting now, if we left. */
+    if (FIGHTING(ch) && ch->location != FIGHTING(ch)->location && !AFF_FLAGGED(ch, AFF_PURSUIT)) {
+        stop_fighting(FIGHTING(ch));
+        stop_fighting(ch);
+    }
+}
+
+void AbstractLocation::addTo(const Coordinates& coor, Object* obj) {
+
+    if (getVnum() == real_room(80)) {
+        auc_load(obj);
+    }
+    auto sh = obj->shared();
+
+    contents.push_front(sh);
+    obj->location.unit = this;
+    obj->location.position = coor;
+    obj->setBaseStat("lload", time(nullptr));
+    auto z = getZone();
+
+    z->objectsInZone.push_back(sh);
+
+    if (GET_OBJ_TYPE(obj) == ITEM_VEHICLE && !OBJ_FLAGGED(obj, ITEM_UNBREAKABLE) &&
+        GET_OBJ_VNUM(obj) > 19199) {
+        obj->item_flags.set(ITEM_UNBREAKABLE, true);
+    }
+
+    /* // Putting this here for safekeeping.
+    
+    if (auto ex = EXIT(object, 5); ex &&
+        (object->location.getTileType() == SECT_UNDERWATER || object->location.getTileType() == SECT_WATER_NOSWIM)) {
+        act("$p @Bsinks to deeper waters.@n", true, nullptr, object, nullptr, TO_ROOM);
+        object->clearLocation();
+        object->setLocation(*ex);
+    }
+    if (auto ex = EXIT(object, 5); ex && object->location.getTileType() == SECT_FLYING &&
+        (GET_OBJ_VNUM(object) < 80 || GET_OBJ_VNUM(object) > 83)) {
+        act("$p @Cfalls down.@n", true, nullptr, object, nullptr, TO_ROOM);
+        object->clearLocation();
+        object->setLocation(*ex);
+        if (object->location.getTileType() != SECT_FLYING) {
+            act("$p @Cfalls down and smacks the ground.@n", true, nullptr, object, nullptr, TO_ROOM);
+        }
+    }
+    
+    */
+}
+
+void AbstractLocation::removeFrom(Character* ch) {
+    // Implementation for removing a character from the location
+    if(!ch) {
+        basic_mud_log("SYSERR: nullptr character passed to AbstractLocation::removeFrom.");
+        return;
+    }
+
+    if(ch->location.unit != this) {
+        basic_mud_log("SYSERR: character not present when passed to AbstractLocation::removeFrom.");
+        return;
+    }
+
+    if (FIGHTING(ch) && !AFF_FLAGGED(ch, AFF_PURSUIT))
+        stop_fighting(ch);
+
+    if (AFF_FLAGGED(ch, AFF_PURSUIT) && FIGHTING(ch) == nullptr)
+        ch->affect_flags.set(AFF_PURSUIT, false);
+    
+    auto sh = ch->shared();
+    auto z = getZone();
+    if(IS_NPC(ch)) {
+        z->npcsInZone.remove_if([sh](auto& npc) { return npc.expired() || npc.lock() == sh; });
+    } else {
+        z->playersInZone.remove_if([sh](auto& npc) { return npc.expired() || npc.lock() == sh; });
+    }
+
+    contents.remove_if([sh](auto& c) { return c.expired() || c.lock() == sh; });
+    ch->location = {};
+}
+
+void AbstractLocation::removeFrom(Object* obj) {
+    if(!obj) {
+        basic_mud_log("SYSERR: nullptr object passed to AbstractLocation::removeFrom.");
+        return;
+    }
+
+    if(obj->location.unit != this) {
+        basic_mud_log("SYSERR: object not in a room passed to AbstractLocation::removeFrom.");
+        return;
+    }
+
+    if(obj->type_flag == ItemType::plant) objectSubscriptions.unsubscribe("growingPlants", obj);
+
+    if (auto o = GET_OBJ_POSTED(obj); o) {
+        if (GET_OBJ_POSTTYPE(obj) <= 0) {
+            o->location.send_to("%s@W shakes loose from %s@W.@n\r\n", o->getShortDescription(),
+                obj->getShortDescription());
+        } else {
+            o->location.send_to("%s@W comes loose from %s@W.@n\r\n", obj->getShortDescription(),
+                o->getShortDescription());
+        }
+        GET_OBJ_POSTED(o) = nullptr;
+        GET_OBJ_POSTTYPE(o) = 0;
+        GET_OBJ_POSTED(obj) = nullptr;
+        GET_OBJ_POSTTYPE(obj) = 0;
+    }
+
+    auto shared = obj->shared();
+    auto z = getZone();
+    z->objectsInZone.remove_if([shared](auto& obj) { return obj.expired() || obj.lock() == shared; });
+    contents.remove_if([shared](auto& obj) { return obj.expired() || obj.lock() == shared; });
+
+    obj->location = {};
+
 }

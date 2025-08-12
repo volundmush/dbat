@@ -520,7 +520,7 @@ ACMD(do_table)
         return;
     }
 
-    if (!(obj2 = get_obj_in_list_vis(ch, arg2, nullptr, obj->getObjects())))
+    if (!(obj2 = get_obj_in_list_vis(ch, arg2, nullptr, obj->getInventory())))
     {
         ch->sendText("That card doesn't seem to be on that table.\r\n");
         return;
@@ -549,12 +549,12 @@ ACMD(do_draw)
     Object *obj = nullptr, *obj2 = nullptr, *obj3 = nullptr, *next_obj = nullptr;
     int drawn = false;
 
-    if (!(obj = get_obj_in_list_vis(ch, "case", nullptr, ch->getObjects())))
+    if (!(obj = get_obj_in_list_vis(ch, "case", nullptr, ch->getInventory())))
     {
         ch->sendText("You don't have a case.\r\n");
         return;
     }
-    auto con = obj->getObjects();
+    auto con = obj->getInventory();
     for (auto obj2 : filter_raw(con))
     {
         obj2->clearLocation();
@@ -594,13 +594,13 @@ ACMD(do_shuffle)
     Object *obj = nullptr, *obj2 = nullptr, *next_obj = nullptr;
     int count = 0;
 
-    if (!(obj = get_obj_in_list_vis(ch, "case", nullptr, ch->getObjects())))
+    if (!(obj = get_obj_in_list_vis(ch, "case", nullptr, ch->getInventory())))
     {
         ch->sendText("You don't have a case.\r\n");
         return;
     }
 
-    auto con = obj->getObjects();
+    auto con = obj->getInventory();
     for (auto obj2 : filter_raw(con))
     {
         if (!OBJ_FLAGGED(obj2, ITEM_CARD))
@@ -615,7 +615,7 @@ ACMD(do_shuffle)
         return;
     }
     int total = count;
-    auto con2 = obj->getObjects();
+    auto con2 = obj->getInventory();
     for (auto obj2 : filter_raw(con2))
     {
         obj2->clearLocation();
@@ -667,7 +667,7 @@ ACMD(do_hand)
     if (!strcasecmp("look", arg))
     {
         ch->sendText("@CYour hand contains:\r\n@D---------------------------@n\r\n");
-        auto con = ch->getObjects();
+        auto con = ch->getInventory();
         for (auto obj : filter_raw(con))
         {
             if (obj && !OBJ_FLAGGED(obj, ITEM_CARD))
@@ -702,7 +702,7 @@ ACMD(do_hand)
     {
         ch->sendText("You show off your hand to the room.\r\n");
         act("@C$n's hand contains:\r\n@D---------------------------@n", true, ch, nullptr, nullptr, TO_ROOM);
-        auto con = ch->getObjects();
+        auto con = ch->getInventory();
         for (auto obj : filter_raw(con))
         {
             if (obj && !OBJ_FLAGGED(obj, ITEM_CARD))
@@ -748,7 +748,7 @@ ACMD(do_post)
         return;
     }
 
-    if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->getObjects())))
+    if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->getInventory())))
     {
         ch->sendText("You don't seem to have that.\r\n");
         return;
@@ -842,7 +842,7 @@ ACMD(do_play)
         return;
     }
 
-    if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->getObjects())))
+    if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->getInventory())))
     {
         ch->sendText("You don't have that card to play.\r\n");
         return;
@@ -881,7 +881,7 @@ ACMD(do_nickname)
 
     if (strcasecmp(arg, "ship"))
     {
-        if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->getObjects())))
+        if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->getInventory())))
         {
             ch->sendText("You don't have that item to nickname.\r\n");
             return;
@@ -977,7 +977,7 @@ ACMD(do_showoff)
         return;
     }
 
-    if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->getObjects())))
+    if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->getInventory())))
     {
         ch->sendText("You don't seem to have that.\r\n");
         return;
@@ -2411,7 +2411,7 @@ static void look_at_char(Character *i, Character *ch)
                 if (OBJ_FLAGGED(GET_EQ(i, j), ITEM_SHEATH))
                 {
                     auto sheath = GET_EQ(i, j);
-                    auto con = sheath->getObjects();
+                    auto con = sheath->getInventory();
                     for (auto obj2 : filter_raw(con))
                     {
                         ch->sendText("@D  ---- @YSheathed@D ----@c> @n");
@@ -2426,7 +2426,7 @@ static void look_at_char(Character *i, Character *ch)
                 if (OBJ_FLAGGED(GET_EQ(i, j), ITEM_SHEATH))
                 {
                     auto sheath = GET_EQ(i, j);
-                    auto con = sheath->getObjects();
+                    auto con = sheath->getInventory();
                     for (auto obj2 : filter_raw(con))
                     {
                         ch->sendText("@D  ---- @YSheathed@D ----@c> @n");
@@ -2448,7 +2448,7 @@ static void look_at_char(Character *i, Character *ch)
             act("$n tries to evaluate what you have in your inventory.", true, ch, nullptr, i, TO_VICT);
         if (GET_SKILL(ch, SKILL_KEEN) > axion_dice(0) && (!IS_NPC(i) || GET_ADMLEVEL(ch) > 1))
         {
-            auto con = i->getObjects();
+            auto con = i->getInventory();
             for (auto tmp_obj : filter_raw(con))
             {
                 if (CAN_SEE_OBJ(ch, tmp_obj) && (ADM_FLAGGED(ch, ADM_SEEINV) || (rand_number(0, 20) < GET_WIS(ch))))
@@ -3696,7 +3696,7 @@ static void handle_container(Character *ch, Object *obj, int bits)
             act("$n looks in $p.", true, ch, obj, nullptr, TO_ROOM);
         }
 
-        list_obj_to_char(obj->getObjects(), ch, SHOW_OBJ_SHORT, true);
+        list_obj_to_char(obj->getInventory(), ch, SHOW_OBJ_SHORT, true);
     }
 }
 
@@ -3966,7 +3966,7 @@ static void handle_look_in_inventory(Character *ch, char *arg)
             return;
         }
     }
-    auto con = ch->getObjects();
+    auto con = ch->getInventory();
     for (auto obj : filter_raw(con))
     {
         if (CAN_SEE_OBJ(ch, obj) && handle_exdesc_look(ch, arg, obj->getExtraDescription(), obj))
@@ -5566,7 +5566,7 @@ ACMD(do_inventory)
             return;
         }
     }
-    list_obj_to_char(ch->getObjects(), ch, SHOW_OBJ_SHORT, true);
+    list_obj_to_char(ch->getInventory(), ch, SHOW_OBJ_SHORT, true);
     ch->sendText("\n");
 }
 
@@ -5577,7 +5577,7 @@ static void show_equipment(Character *ch, Object *equipment, const char *wear_lo
 
     if (OBJ_FLAGGED(equipment, ITEM_SHEATH))
     {
-        auto con = equipment->getObjects();
+        auto con = equipment->getInventory();
         for (auto obj2 : filter_raw(con))
         {
             ch->sendText("@D  ---- @YSheathed@D ----@c> @n");

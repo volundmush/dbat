@@ -454,16 +454,21 @@ ACMD(do_say) {
                         } /* end vitality if */
 
                         if (granted == false && strstr(argument, "revive")) {
+                            auto revive = [&](Character *c) {
+                                auto droom = real_room(GET_DROOM(c));
+                                if (droom == NOWHERE) {
+                                    droom = c->setBaseStat("death_room", 300);
+                                }
+                                c->clearLocation();
+                                ch->setLocation(droom);
+                                c->lookAtLocation();
+                                c->sendText("@wYou smile as the golden halo above your head disappears! You have returned to life where you had last died!@n\r\n");
+                                for (auto f : {AFF_SPIRIT, AFF_ETHEREAL})
+                                    c->affect_flags.set(f, false);
+                            };
                             int count = 0;
-                            if (wch) {
-                                count += 1;
-                            }
-                            if (wch2) {
-                                count += 1;
-                            }
-                            if (wch3) {
-                                count += 1;
-                            }
+                            for(auto w : {wch, wch2, wch3}) if(w) count++;
+
                             if (count == 1) {
                                 if (!AFF_FLAGGED(wch, AFF_SPIRIT)) {
                                     dr->send_to("@wShenron says, '@C%s is not dead, and can not be revived.@w'@n\r\n",
@@ -471,21 +476,8 @@ ACMD(do_say) {
                                 } else {
                                     dr->send_to("@wShenron says, '@CYour wish has been granted, %s has returned to life!%s@w'@n\r\n",
                                                  GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
-                                    if (real_room(GET_DROOM(wch)) == NOWHERE) {
-                                        wch->setBaseStat("death_room", 300);
-                                    }
-                                    if (real_room(GET_DROOM(wch)) != NOWHERE) {
-                                        wch->clearLocation();
-                                        if (GET_DROOM(wch) > 0) {
-                                            char_to_room(wch, real_room(GET_DROOM(wch)));
-                                        } else {
-                                            char_to_room(wch, real_room(300));
-                                        }
-                                        wch->lookAtLocation();
-                                                                                wch->sendText("@wYou smile as the golden halo above your head disappears! You have returned to life where you had last died!@n\r\n");
-                                        wch->affect_flags.set(AFF_SPIRIT, false);
-                                        wch->affect_flags.set(AFF_ETHEREAL, false);
-                                    }
+                                    
+                                    revive(wch);
                                     granted = true;
                                     SELFISHMETER -= 2;
                                     mudlog(NRM, ADMLVL_GOD, true, "Shenron: %s has made a revive wish on %s.",
@@ -504,26 +496,8 @@ ACMD(do_say) {
                                     dr->send_to("@wShenron says, '@CYour wish has been granted, %s and %s have returned to life!%s@w'@n\r\n",
                                                  GET_NAME(wch), GET_NAME(wch2),
                                                  WISH[0] ? "" : " Now make your second wish.");
-                                    if (real_room(GET_DROOM(wch)) == NOWHERE) {
-                                        wch->setBaseStat("death_room", 300);
-                                    }
-                                    if (real_room(GET_DROOM(wch)) != NOWHERE) {
-                                        wch->clearLocation();
-                                        char_to_room(wch, real_room(GET_DROOM(wch)));
-                                        wch->lookAtLocation();
-                                                                                wch->sendText("@wYou smile as the golden halo above your head disappears! You have returned to life where you had last died!@n\r\n");
-                                        for(auto f : {AFF_SPIRIT, AFF_ETHEREAL}) wch->affect_flags.set(f, false);
-                                    }
-                                    if (real_room(GET_DROOM(wch2)) == NOWHERE) {
-                                        wch2->setBaseStat("death_room", 300);
-                                    }
-                                    if (real_room(GET_DROOM(wch2)) != NOWHERE) {
-                                        wch2->clearLocation();
-                                        char_to_room(wch2, real_room(GET_DROOM(wch2)));
-                                        wch2->lookAtLocation();
-                                                                                wch2->sendText("@wYou smile as the golden halo above your head disappears! You have returned to life where you had last died!@n\r\n");
-                                        for(auto f : {AFF_SPIRIT, AFF_ETHEREAL}) wch2->affect_flags.set(f, false);
-                                    }
+
+                                    for(auto w : {wch, wch2}) revive(w);
                                     granted = true;
                                     SELFISHMETER -= 3;
                                     mudlog(NRM, ADMLVL_GOD, true, "Shenron: %s has made a revive wish on %s.",
@@ -548,36 +522,7 @@ ACMD(do_say) {
                                     dr->send_to("@wShenron says, '@CYour wish has been granted, %s, %s, and %s have returned to life!!%s@w'@n\r\n",
                                                  GET_NAME(wch), GET_NAME(wch2), GET_NAME(wch3),
                                                  WISH[0] ? "" : " Now make your second wish.");
-                                    if (real_room(GET_DROOM(wch)) == NOWHERE) {
-                                        wch->setBaseStat("death_room", 300);
-                                    }
-                                    if (real_room(GET_DROOM(wch)) != NOWHERE) {
-                                        wch->clearLocation();
-                                        char_to_room(wch, real_room(GET_DROOM(wch)));
-                                        wch->lookAtLocation();
-                                                                                wch->sendText("@wYou smile as the golden halo above your head disappears! You have returned to life where you had last died!@n\r\n");
-                                        for(auto f : {AFF_SPIRIT, AFF_ETHEREAL}) wch->affect_flags.set(f, false);
-                                    }
-                                    if (real_room(GET_DROOM(wch2)) == NOWHERE) {
-                                        wch2->setBaseStat("death_room", 300);
-                                    }
-                                    if (real_room(GET_DROOM(wch2)) != NOWHERE) {
-                                        wch2->clearLocation();
-                                        char_to_room(wch2, real_room(GET_DROOM(wch2)));
-                                        wch2->lookAtLocation();
-                                                                                wch2->sendText("@wYou smile as the golden halo above your head disappears! You have returned to life where you had last died!@n\r\n");
-                                        for(auto f : {AFF_SPIRIT, AFF_ETHEREAL}) wch2->affect_flags.set(f, false);
-                                    }
-                                    if (real_room(GET_DROOM(wch3)) == NOWHERE) {
-                                        wch3->setBaseStat("death_room", 300);
-                                    }
-                                    if (real_room(GET_DROOM(wch3)) != NOWHERE) {
-                                        wch3->clearLocation();
-                                        char_to_room(wch3, real_room(GET_DROOM(wch3)));
-                                        wch3->lookAtLocation();
-                                                                                wch3->sendText("@wYou smile as the golden halo above your head disappears! You have returned to life where you had last died!@n\r\n");
-                                        for(auto f : {AFF_SPIRIT, AFF_ETHEREAL}) wch3->affect_flags.set(f, false);
-                                    }
+                                    for(auto w : {wch, wch2, wch3}) revive(w);
                                     granted = true;
                                     SELFISHMETER -= 3;
                                     mudlog(NRM, ADMLVL_GOD, true, "Shenron: %s has made a revive wish on %s and %s.",
@@ -623,26 +568,11 @@ ACMD(do_say) {
 
                         if (granted == false && strstr(argument, "senzu")) {
                             if (wch) {
-                                obj = read_object(1, VIRTUAL);
-                                obj_to_char(obj, ch);
-                                obj = read_object(1, VIRTUAL);
-                                obj_to_char(obj, ch);
-                                obj = read_object(1, VIRTUAL);
-                                obj_to_char(obj, ch);
-                                obj = read_object(1, VIRTUAL);
-                                obj_to_char(obj, ch);
-                                obj = read_object(1, VIRTUAL);
-                                obj_to_char(obj, ch);
-                                obj = read_object(1, VIRTUAL);
-                                obj_to_char(obj, ch);
-                                obj = read_object(1, VIRTUAL);
-                                obj_to_char(obj, ch);
-                                obj = read_object(1, VIRTUAL);
-                                obj_to_char(obj, ch);
-                                obj = read_object(1, VIRTUAL);
-                                obj_to_char(obj, ch);
-                                obj = read_object(1, VIRTUAL);
-                                obj_to_char(obj, ch);
+                                for(auto i = 0; i < 10; i++) {
+                                    obj = read_object(1, VIRTUAL);
+                                    obj_to_char(obj, ch);
+                                }
+
                                 dr->send_to("@wShenron says, '@CYour wish has been granted, %s now possesses 10 senzus!%s@w'@n\r\n",
                                              GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
                                 granted = true;
@@ -1207,16 +1137,16 @@ ACMD(do_write) {
         return;
     }
     if (*penname) {        /* there were two arguments */
-        if (!(paper = get_obj_in_list_vis(ch, papername, nullptr, ch->getObjects()))) {
+        if (!(paper = get_obj_in_list_vis(ch, papername, nullptr, ch->getInventory()))) {
                         ch->send_to("You have no %s.\r\n", papername);
             return;
         }
-        if (!(pen = get_obj_in_list_vis(ch, penname, nullptr, ch->getObjects()))) {
+        if (!(pen = get_obj_in_list_vis(ch, penname, nullptr, ch->getInventory()))) {
                         ch->send_to("You have no %s.\r\n", penname);
             return;
         }
     } else {        /* there was one arg.. let's see what we can find */
-        if (!(paper = get_obj_in_list_vis(ch, papername, nullptr, ch->getObjects()))) {
+        if (!(paper = get_obj_in_list_vis(ch, papername, nullptr, ch->getInventory()))) {
                         ch->send_to("There is no %s in your inventory.\r\n", papername);
             return;
         }

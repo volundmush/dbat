@@ -486,6 +486,13 @@ struct AbstractThing : public Entity {
     struct Room* getRoom() const;
     room_vnum getRoomVnum() const;
 
+    virtual void addToInventory(Object* obj);
+    virtual std::vector<std::weak_ptr<Object>> getInventory() const;
+
+    std::map<int, struct Object*> getEquipment();
+    struct Object* getEquipSlot(int slot);
+
+    // the *Location methods are used for handling database alterations, not logic.
     virtual void setLocation(const Location& loc) = 0;
     virtual void setLocation(const AbstractThing* td) = 0;
     virtual void setLocation(room_vnum rv) = 0;
@@ -711,6 +718,11 @@ struct AbstractLocation : public Entity {
     // tools for editing the location.
     virtual void replaceExit(const Coordinates& coor, const Destination& dest);
     virtual void deleteExit(const Coordinates& coor, Direction dir);
+
+    virtual void addTo(const Coordinates& coor, Character* ch);
+    virtual void addTo(const Coordinates& coor, Object* obj);
+    virtual void removeFrom(Character* ch);
+    virtual void removeFrom(Object* obj);
 };
 
 struct TileOverride {
@@ -1204,8 +1216,7 @@ struct Character : public AbstractThing, std::enable_shared_from_this<Character>
     /* Equipment array			*/
     struct Object *equipment[NUM_WEARS]{};
 
-    std::map<int, struct Object*> getEquipment();
-    struct Object* getEquipSlot(int slot);
+    
 
     struct descriptor_data *desc{};    /* nullptr for mobiles			*/
 
@@ -1314,9 +1325,9 @@ struct Character : public AbstractThing, std::enable_shared_from_this<Character>
     bool hasGravAcclim(int tier);
     void raiseGravAcclim();
 
-    void teleport_to(IDXTYPE rnum);
+    void teleport_to(room_vnum rnum);
 
-    bool in_room_range(IDXTYPE low_rnum, IDXTYPE high_rnum);
+    bool in_room_range(room_vnum low_rnum, room_vnum high_rnum);
 
     bool in_past();
 
@@ -1864,6 +1875,9 @@ struct Zone {
             return 0;
         }
     }
+
+
+
 };
 
 typedef struct disabled_data DISABLED_DATA;

@@ -102,7 +102,7 @@ void deletePlayerCharacter(std::weak_ptr<Character> ref) {
     // Okay the coast is clear.
 
     // erase their inventory.
-    auto con = ch->getObjects();
+    auto con = ch->getInventory();
     for(auto o : filter_raw(con))
         extract_obj(o);
 

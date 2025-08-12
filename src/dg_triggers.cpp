@@ -749,7 +749,7 @@ int command_otrigger(Character *actor, char *cmd, char *argument) {
             if (cmd_otrig(GET_EQ(actor, i), actor, cmd, argument, OCMD_EQUIP) &&
                 !OBJ_FLAGGED(GET_EQ(actor, i), ITEM_FORGED))
                 return 1;
-    auto con = actor->getObjects();
+    auto con = actor->getInventory();
     for (auto obj : filter_raw(con))
         if (cmd_otrig(obj, actor, cmd, argument, OCMD_INVEN) && !OBJ_FLAGGED(obj, ITEM_FORGED))
             return 1;

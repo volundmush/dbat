@@ -67,7 +67,7 @@ ASPELL(spell_recall) {
 
     act("$n disappears.", true, victim, nullptr, nullptr, TO_ROOM);
     victim->clearLocation();
-    char_to_room(victim, real_room(CONFIG_MORTAL_START));
+    victim->setLocation(CONFIG_MORTAL_START);
     act("$n appears in the middle of the room.", true, victim, nullptr, nullptr, TO_ROOM);
     victim->lookAtLocation();
     entry_memory_mtrigger(victim);
@@ -77,19 +77,19 @@ ASPELL(spell_recall) {
 
 
 ASPELL(spell_teleport) {
-    room_rnum to_room;
+    Room* to_room;
 
     if (victim == nullptr || IS_NPC(victim))
         return;
 
     do {
-        to_room = Random::get(world)->first;
-    } while (ROOM_FLAGGED(to_room, ROOM_PRIVATE | ROOM_GODROOM));
+        to_room = Random::get(world)->second.get();
+    } while (to_room->room_flags.get(ROOM_PRIVATE) || to_room->room_flags.get(ROOM_GODROOM));
 
     act("$n slowly fades out of existence and is gone.",
         false, victim, nullptr, nullptr, TO_ROOM);
     victim->clearLocation();
-    char_to_room(victim, to_room);
+    victim->setLocation(to_room);
     act("$n slowly fades into existence.", false, victim, nullptr, nullptr, TO_ROOM);
     victim->lookAtLocation();
     entry_memory_mtrigger(victim);

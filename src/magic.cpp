@@ -62,7 +62,7 @@ void affect_update(uint64_t heartPulse, double deltaTime) {
  */
 int mag_materials(Character *ch, int item0, int item1, int item2, int extract, int verbose) {
     Object *obj0 = nullptr, *obj1 = nullptr, *obj2 = nullptr;
-    auto con = ch->getObjects();
+    auto con = ch->getInventory();
     for (auto tobj : filter_raw(con)) {
         if ((item0 > 0) && (GET_OBJ_VNUM(tobj) == item0)) {
             obj0 = tobj;
@@ -964,7 +964,7 @@ void mag_summons(int level, Character *ch, Object *obj, int spellnum, char *arg)
         mob->setBaseStat("master_id", GET_IDNUM(ch));
     }
     if (handle_corpse) {
-        auto con = obj->getObjects();
+        auto con = obj->getInventory();
         for (auto tobj : filter_raw(con)) {
             tobj->clearLocation();
             obj_to_char(tobj, mob);

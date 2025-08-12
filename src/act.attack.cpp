@@ -251,7 +251,7 @@ ACMD(do_throw) {
         two_arguments(chunk, arg2, arg3);
     }
 
-    if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->getObjects()))) {
+    if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->getInventory()))) {
         if (!(tch = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM))) {
                         ch->sendText("You do not have that object or character to throw!\r\n");
             return;
