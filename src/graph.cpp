@@ -164,7 +164,7 @@ ACMD(do_sradar) {
 
     if (!*arg) {
         if (GET_ADMLEVEL(ch) >= 1 && noship == true) {
-            printmap(ch->getRoomVnum(), ch, 0, -1);
+            printmap(ch->location.getVnum(), ch, 0, -1);
         } else {
             printmap(IN_ROOM(vehicle), ch, 0, GET_OBJ_VNUM(vehicle));
         }
@@ -250,7 +250,7 @@ ACMD(do_sradar) {
 ACMD(do_radar) {
     int dir, found = false, fcount = 0;
 
-    auto dradar = ch->findObjectVnum(12);
+    auto dradar = ch->searchInventory(12);
     if (!dradar) {
                 ch->sendText("You do not even have a dragon radar!\r\n");
         return;

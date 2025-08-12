@@ -502,13 +502,13 @@ WCMD(do_wload) {
                 load_otrigger(object);
                 return;
             }
-            obj_to_char(object, tch);
+            tch->addToInventory(object);
             load_otrigger(object);
             return;
         }
         cnt = get_obj_in_room(room, arg1);
         if (cnt && GET_OBJ_TYPE(cnt) == ITEM_CONTAINER) {
-            obj_to_obj(object, cnt);
+            cnt->addToInventory(object);
             load_otrigger(object);
             return;
         }

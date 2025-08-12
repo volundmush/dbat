@@ -402,5 +402,5 @@ cdef extern from "dbat/structs.h":
 
 
 cdef extern from "dbat/account.h":
-    account_data* findAccount(const string& name)
-    account_data* createAccount(const string& name, const string& password)
+    Account* findAccount(const string& name)
+    Account* createAccount(const string& name, const string& password)

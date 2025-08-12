@@ -630,7 +630,7 @@ void combine_attacks(Character *ch, Character *vict) {
 int check_ruby(Character *ch) {
 
     auto isHotRuby = [](const auto&o) {return o->getVnum() == 6600 && OBJ_FLAGGED(o, ITEM_HOT);};
-    auto ruby = ch->findObject(isHotRuby);
+    auto ruby = ch->searchInventory(isHotRuby);
 
     if (ruby) {
         act("@RYour $p@R flares up and disappears. Your fire attack has been aided!@n", true, ch, ruby, nullptr,
@@ -1629,7 +1629,7 @@ void huge_update(uint64_t heartPulse, double deltaTime) {
     for (auto k : filter_raw(subs)) {
 
         if (GET_AUCTER(k) > 0 && GET_AUCTIME(k) + 604800 <= time(nullptr)) {
-            if (IN_ROOM(k) && k->getRoomVnum() == 80) {
+            if (IN_ROOM(k) && k->location.getVnum() == 80) {
                 room_vnum inroom = IN_ROOM(k);
                 extract_obj(k);
                 continue;
@@ -1645,7 +1645,7 @@ void huge_update(uint64_t heartPulse, double deltaTime) {
             if (KITYPE(k) == 497) {
                 if (IN_ROOM(TARGET(k)) == IN_ROOM(k)) {
                     ch = USER(k);
-                    if (ch->getRoomVnum() == k->getRoomVnum()) {
+                    if (ch->location.getVnum() == k->location.getVnum()) {
                         bonus = 2;
                     }
 
@@ -1825,7 +1825,7 @@ void huge_update(uint64_t heartPulse, double deltaTime) {
             if (KITYPE(k) == 498) {
                 if (IN_ROOM(TARGET(k)) == IN_ROOM(k)) {
                     ch = USER(k);
-                    if (ch->getRoomVnum() == k->getRoomVnum()) {
+                    if (ch->location.getVnum() == k->location.getVnum()) {
                         bonus = 2;
                     }
 
@@ -3680,7 +3680,7 @@ static void spar_helper(Character *ch, Character *vict, int type, int64_t dmg) {
 
 	//Bonuses by room to vital gains
     if (ch->location.getRoomFlag(ROOM_WORKOUT) || (ch->location.getWhereFlag(WhereFlag::hyperbolic_time_chamber))) {
-        if (ch->getRoomVnum() >= 19100 && ch->getRoomVnum() <= 19199) {
+        if (ch->location.getVnum() >= 19100 && ch->location.getVnum() <= 19199) {
             gmult *= 1.75;
             pscost += 2;
         } else {
@@ -3772,7 +3772,7 @@ static void spar_helper(Character *ch, Character *vict, int type, int64_t dmg) {
         }
 		//Room bonuses to xp gain
         if (ch->location.getRoomFlag(ROOM_WORKOUT) || (ch->location.getWhereFlag(WhereFlag::hyperbolic_time_chamber))) {
-            if (ch->getRoomVnum() >= 19100 && ch->getRoomVnum() <= 19199) {
+            if (ch->location.getVnum() >= 19100 && ch->location.getVnum() <= 19199) {
                 gaincalc *= 1.5;
             } else {
                 gaincalc *= 1.25;
@@ -4266,7 +4266,7 @@ void hurt(int limb, int chance, Character *ch, Character *vict, Object *obj, int
     if (vict) {
         int64_t gain = IS_NPC(ch) ? vict->getExperience() : 0;
 
-        if (vict->getRoomVnum() == 17875) {
+        if (vict->location.getVnum() == 17875) {
             return;
         }
 

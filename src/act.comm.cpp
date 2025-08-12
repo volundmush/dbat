@@ -194,7 +194,7 @@ ACMD(do_say) {
 
     skip_spaces(&argument);
 
-    if (GET_BONUS(ch, BONUS_MUTE) > 0 && ch->getRoomVnum() > 160) {
+    if (GET_BONUS(ch, BONUS_MUTE) > 0 && ch->location.getVnum() > 160) {
                 ch->sendText("You are mute and unable to talk though.\r\n");
         return;
     } else if (GET_BONUS(ch, BONUS_MUTE) > 0) {
@@ -264,7 +264,7 @@ ACMD(do_say) {
                         ch->send_to("%s", buf);
             add_history(ch, buf, HIST_SAY);
             if (SHENRON == true) {
-                if (ch->getRoomVnum() == DRAGONR && EDRAGON->getRoomVnum() == DRAGONR) {
+                if (ch->location.getVnum() == DRAGONR && EDRAGON->location.getVnum() == DRAGONR) {
                     if (strstr(argument, "wish")) {
                         auto dr = get_room(DRAGONR);
                         for (d = descriptor_list; d; d = d->next) {
@@ -570,7 +570,7 @@ ACMD(do_say) {
                             if (wch) {
                                 for(auto i = 0; i < 10; i++) {
                                     obj = read_object(1, VIRTUAL);
-                                    obj_to_char(obj, ch);
+                                    ch->addToInventory(obj);
                                 }
 
                                 dr->send_to("@wShenron says, '@CYour wish has been granted, %s now possesses 10 senzus!%s@w'@n\r\n",
@@ -1114,8 +1114,8 @@ ACMD(do_write) {
         return GET_OBJ_TYPE(o) == ITEM_BOARD;
     };
 
-    auto obj = ch->findObject(isBoard);
-    if(!obj) ch->location.findObject(isBoard);
+    auto obj = ch->searchInventory(isBoard);
+    if(!obj) ch->location.searchObjects(isBoard);
 
 
     if (obj) {                /* then there IS a board! */
@@ -1463,8 +1463,8 @@ ACMD(do_respond) {
 
     auto isBoard = [](const auto& o) { return GET_OBJ_TYPE(o) == ITEM_BOARD; };
 
-    auto obj = ch->findObject(isBoard);
-    if(!obj) obj = ch->location.findObject(isBoard);
+    auto obj = ch->searchInventory(isBoard);
+    if(!obj) obj = ch->location.searchObjects(isBoard);
 
     /* No board in the room? Send generic message -spl */
     if (!obj) {

@@ -1606,7 +1606,7 @@ int arena_watch(Character *ch) {
         if (IN_ARENA(d->character)) {
             if (ARENA_IDNUM(ch) == GET_IDNUM(d->character)) {
                 found = true;
-                room = d->character->getRoomVnum();
+                room = d->character->location.getVnum();
             }
         }
     }
@@ -1854,7 +1854,7 @@ char *act(const char *str, int hide_invisible, Character *ch,
             if (ch != nullptr) {
                 if (IN_ARENA(ch)) {
                     if (PRF_FLAGGED(d->character, PRF_ARENAWATCH)) {
-                        if (arena_watch(d->character) == ch->getRoomVnum()) {
+                        if (arena_watch(d->character) == ch->location.getVnum()) {
                             char buf3[2000];
                             *buf3 = '\0';
                             sprintf(buf3, "@c-----@CArena@c-----@n\r\n%s\r\n@c-----@CArena@c-----@n\r\n", str);
@@ -1866,13 +1866,13 @@ char *act(const char *str, int hide_invisible, Character *ch,
             if (auto eaves = GET_EAVESDROP(d->character); eaves > 0) {
                 int roll = rand_number(1, 101);
                 if (!resskill || (roll_skill(d->character, resskill) >= dcval)) {
-                    if (ch != nullptr && eaves == ch->getRoomVnum() &&
+                    if (ch != nullptr && eaves == ch->location.getVnum() &&
                         GET_SKILL(d->character, SKILL_EAVESDROP) > roll) {
                         char buf3[1000];
                         *buf3 = '\0';
                         sprintf(buf3, "-----Eavesdrop-----\r\n%s\r\n-----Eavesdrop-----\r\n", str);
                         perform_act(buf3, ch, obj, vict_obj, d->character);
-                    } else if (obj != nullptr && eaves == obj->getRoomVnum() &&
+                    } else if (obj != nullptr && eaves == obj->location.getVnum() &&
                                GET_SKILL(d->character, SKILL_EAVESDROP) > roll) {
                         char buf3[1000];
                         *buf3 = '\0';

@@ -99,7 +99,7 @@ void mob_log(Character *mob, const char *format, ...) {
     va_list args;
     char output[MAX_STRING_LENGTH];
 
-    snprintf(output, sizeof(output), "Mob (%s [%d], VNum %d):: %s",
+    snprintf(output, sizeof(output), "Mob (%s [%ld], VNum %d):: %s",
              GET_SHORT(mob), mob->id, GET_MOB_VNUM(mob), format);
 
     va_start(args, format);
@@ -489,7 +489,7 @@ ACMD(do_mload) {
         /* special handling to make objects able to load on a person/in a container/worn etc. */
         if (!target || !*target) {
             if (CAN_WEAR(object, ITEM_WEAR_TAKE)) {
-                obj_to_char(object, ch);
+                ch->addToInventory(object);
             } else {
                 object->setLocation(ch);
             }
@@ -507,13 +507,13 @@ ACMD(do_mload) {
                 load_otrigger(object);
                 return;
             }
-            obj_to_char(object, tch);
+            tch->addToInventory(object);
             load_otrigger(object);
             return;
         }
         cnt = (arg1 && *arg1 == UID_CHAR) ? get_obj(arg1) : get_obj_vis(ch, arg1, nullptr);
         if (cnt && GET_OBJ_TYPE(cnt) == ITEM_CONTAINER) {
-            obj_to_obj(object, cnt);
+            cnt->addToInventory(object);
             load_otrigger(object);
             return;
         }
@@ -1000,7 +1000,7 @@ ACMD(do_mtransform) {
     ch->sensei = m->sensei;
     ch->race = m->race;
     ch->affect_flags = m->affect_flags;
-    ch->extra_descriptions = m->extra_descriptions;
+    //ch->extra_descriptions = m->extra_descriptions;
 
     extract_char(m);
 

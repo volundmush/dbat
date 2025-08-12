@@ -115,7 +115,7 @@ ACMD(do_refuel)
     }
 
     Object *rep = nullptr, *next_obj = nullptr, *fuel = nullptr;
-    fuel = ch->findObjectVnum(17290);
+    fuel = ch->searchInventory(17290);
 
     if (!fuel)
     {
@@ -260,7 +260,7 @@ static void harvest_plant(Character *ch, Object *plant)
         while (count > 0)
         {
             fruit = read_object(1, VIRTUAL);
-            obj_to_char(fruit, ch);
+            ch->addToInventory(fruit);
             count -= 1;
         }
         ch->send_to("@YYou harvest @D[@G%d@D]@Y @g%s@Y!@n\r\n", reward, fruit->getShortDescription());
@@ -270,7 +270,7 @@ static void harvest_plant(Character *ch, Object *plant)
         while (count > 0)
         {
             fruit = read_object(1131, VIRTUAL);
-            obj_to_char(fruit, ch);
+            ch->addToInventory(fruit);
             count -= 1;
         }
         ch->send_to("@YYou harvest @D[@G%d@D]@Y @g%s@Y!@n\r\n", reward, fruit->getShortDescription());
@@ -282,7 +282,7 @@ static void harvest_plant(Character *ch, Object *plant)
         while (count > 0)
         {
             fruit = read_object(17212, VIRTUAL);
-            obj_to_char(fruit, ch);
+            ch->addToInventory(fruit);
             count -= 1;
         }
         ch->send_to("@YYou harvest @D[@G%d@D]@Y @g%s@Y!@n\r\n", reward, fruit->getShortDescription());
@@ -294,7 +294,7 @@ static void harvest_plant(Character *ch, Object *plant)
         while (count > 0)
         {
             fruit = read_object(17213, VIRTUAL);
-            obj_to_char(fruit, ch);
+            ch->addToInventory(fruit);
             count -= 1;
         }
         ch->send_to("@YYou harvest @D[@G%d@D]@Y @g%s@Y!@n\r\n", reward, fruit->getShortDescription());
@@ -306,7 +306,7 @@ static void harvest_plant(Character *ch, Object *plant)
         while (count > 0)
         {
             fruit = read_object(17215, VIRTUAL);
-            obj_to_char(fruit, ch);
+            ch->addToInventory(fruit);
             count -= 1;
         }
         ch->send_to("@YYou harvest @D[@G%d@D]@Y @g%s@Y!@n\r\n", reward, fruit->getShortDescription());
@@ -316,7 +316,7 @@ static void harvest_plant(Character *ch, Object *plant)
         while (count > 0)
         {
             fruit = read_object(17217, VIRTUAL);
-            obj_to_char(fruit, ch);
+            ch->addToInventory(fruit);
             count -= 1;
         }
         ch->send_to("@YYou harvest @D[@G%d@D]@Y @g%s@Y!@n\r\n", reward, fruit->getShortDescription());
@@ -328,7 +328,7 @@ static void harvest_plant(Character *ch, Object *plant)
         while (count > 0)
         {
             fruit = read_object(17219, VIRTUAL);
-            obj_to_char(fruit, ch);
+            ch->addToInventory(fruit);
             count -= 1;
         }
         ch->send_to("@YYou harvest @D[@G%d@D]@Y @g%s@Y!@n\r\n", reward, fruit->getShortDescription());
@@ -340,7 +340,7 @@ static void harvest_plant(Character *ch, Object *plant)
         while (count > 0)
         {
             fruit = read_object(17221, VIRTUAL);
-            obj_to_char(fruit, ch);
+            ch->addToInventory(fruit);
             count -= 1;
         }
         ch->send_to("@YYou harvest @D[@G%d@D]@Y @g%s@Y!@n\r\n", reward, fruit->getShortDescription());
@@ -352,7 +352,7 @@ static void harvest_plant(Character *ch, Object *plant)
         while (count > 0)
         {
             fruit = read_object(17223, VIRTUAL);
-            obj_to_char(fruit, ch);
+            ch->addToInventory(fruit);
             count -= 1;
         }
         ch->send_to("@YYou harvest @D[@G%d@D]@Y @g%s@Y!@n\r\n", reward, fruit->getShortDescription());
@@ -364,7 +364,7 @@ static void harvest_plant(Character *ch, Object *plant)
         while (count > 0)
         {
             fruit = read_object(17225, VIRTUAL);
-            obj_to_char(fruit, ch);
+            ch->addToInventory(fruit);
             count -= 1;
         }
         ch->send_to("@YYou harvest @D[@G%d@D]@Y @g%s@Y!@n\r\n", reward, fruit->getShortDescription());
@@ -378,7 +378,7 @@ static void harvest_plant(Character *ch, Object *plant)
         while (count > 0)
         {
             fruit = read_object(17227, VIRTUAL);
-            obj_to_char(fruit, ch);
+            ch->addToInventory(fruit);
             count -= 1;
         }
         ch->send_to("@YYou harvest @D[@G%d@D]@Y @g%s@Y!@n\r\n", reward, fruit->getShortDescription());
@@ -390,7 +390,7 @@ static void harvest_plant(Character *ch, Object *plant)
         while (count > 0)
         {
             fruit = read_object(3703, VIRTUAL);
-            obj_to_char(fruit, ch);
+            ch->addToInventory(fruit);
             count -= 1;
         }
         ch->send_to("@YYou harvest @D[@G%d@D]@Y @g%s@Y!@n\r\n", reward, fruit->getShortDescription());
@@ -439,7 +439,7 @@ ACMD(do_garden)
         {
             Object *obj2, *shovel = nullptr, *next_obj;
             int found = false;
-            shovel = ch->findObjectVnum(254);
+            shovel = ch->searchInventory(254);
             if (!shovel)
             {
                 ch->sendText("You need a shovel in order to collect soil.\r\n");
@@ -455,7 +455,7 @@ ACMD(do_garden)
             if (ch->location.getRoomFlag(ROOM_FERTILE1))
             {
                 Object *soil = read_object(255, VIRTUAL);
-                obj_to_char(soil, ch);
+                ch->addToInventory(soil);
                 act("@yYou sink your shovel into the soft ground and manage to dig up a pile of fertile soil!@n", true,
                     ch, nullptr, nullptr, TO_CHAR);
                 act("@w$n@y sinks $s shovel into the soft ground and manages to dig up a pile of fertile soil!@n", true,
@@ -467,7 +467,7 @@ ACMD(do_garden)
             else if (ch->location.getRoomFlag(ROOM_FERTILE2))
             {
                 Object *soil = read_object(255, VIRTUAL);
-                obj_to_char(soil, ch);
+                ch->addToInventory(soil);
                 act("@yYou sink your shovel into the soft ground and manage to dig up a pile of good soil!@n", true, ch,
                     nullptr, nullptr, TO_CHAR);
                 act("@w$n@y sinks $s shovel into the soft ground and manages to dig up a pile of good soil!@n", true,
@@ -479,7 +479,7 @@ ACMD(do_garden)
             else
             {
                 Object *soil = read_object(255, VIRTUAL);
-                obj_to_char(soil, ch);
+                ch->addToInventory(soil);
                 act("@yYou sink your shovel into the soft ground and manage to dig up a pile of soil!@n", true, ch,
                     nullptr, nullptr, TO_CHAR);
                 act("@w$n@y sinks $s shovel into the soft ground and manages to dig up a pile of soil!@n", true, ch,
@@ -542,7 +542,7 @@ ACMD(do_garden)
         {
             Object *obj2, *water = nullptr, *next_obj;
             int found = false;
-            water = ch->findObjectVnum(251);
+            water = ch->searchInventory(251);
             if (!water)
             {
                 ch->sendText("You do not have any grow water!\r\n");
@@ -596,7 +596,7 @@ ACMD(do_garden)
         {
             Object *obj2, *clippers = nullptr, *next_obj;
             int found = false;
-            clippers = ch->findObjectVnum(253);
+            clippers = ch->searchInventory(253);
             if (!clippers)
             {
                 ch->sendText("You do not have any working gardening clippers!\r\n");
@@ -649,7 +649,7 @@ ACMD(do_garden)
         {
             Object *obj2, *shovel = nullptr, *next_obj;
             int found = false;
-            shovel = ch->findObjectVnum(254);
+            shovel = ch->searchInventory(254);
             if (!shovel)
             {
                 ch->sendText("You do not have any working gardening shovels!\r\n");
@@ -661,7 +661,7 @@ ACMD(do_garden)
                 act("@g$n@G calmly digs up @g$p@G.@n", true, ch, obj, nullptr, TO_ROOM);
                 ch->modCurVital(CharVital::stamina, -cost);
                 obj->clearLocation();
-                obj_to_char(obj, ch);
+                ch->addToInventory(obj);
                 SET_OBJ_VAL(obj, VAL_OTHER_SOILQUALITY, 0);
                 WAIT_STATE(ch, PULSE_3SEC);
                 improve_skill(ch, SKILL_GARDENING, 0);
@@ -672,7 +672,7 @@ ACMD(do_garden)
         {
             Object *obj2, *shovel, *next_obj;
             int found = false;
-            shovel = ch->findObjectVnum(254);
+            shovel = ch->searchInventory(254);
 
             if (found == false)
             {
@@ -681,7 +681,7 @@ ACMD(do_garden)
             }
             found = false;
             Object *soil = nullptr;
-            soil = ch->findObjectVnum(255);
+            soil = ch->searchInventory(255);
 
             auto con = ch->location.getObjects();
 
@@ -782,7 +782,7 @@ ACMD(do_garden)
                 act("@g$n@G grabs a hold of @g$p@G and carefully picks it out of the soil.@n", true, ch, obj, nullptr,
                     TO_ROOM);
                 obj->clearLocation();
-                obj_to_char(obj, ch);
+                ch->addToInventory(obj);
                 ch->modCurVital(CharVital::stamina, -cost);
                 WAIT_STATE(ch, PULSE_3SEC);
                 improve_skill(ch, SKILL_GARDENING, 0);
@@ -813,7 +813,7 @@ static bool has_housekey(Character *ch, Object *obj)
         return false;
     };
 
-    return ch->findObject(isHouseKey);
+    return ch->searchInventory(isHouseKey);
 }
 
 ACMD(do_pack)
@@ -969,7 +969,7 @@ int check_insidebag(Object *cont, double mult)
 {
     int count = 0, containers = 0;
 
-    auto con = cont->getObjects();
+    auto con = cont->getInventory();
     for (auto inside : filter_raw(con))
     {
         if (GET_OBJ_TYPE(inside) == ITEM_CONTAINER)
@@ -1004,7 +1004,7 @@ ACMD(do_deploy)
     {
         auto iscapsule = [](const auto &o)
         { return o->getVnum() == 4 || o->getVnum() == 5 || o->getVnum() == 6; };
-        if (obj = ch->findObject(iscapsule))
+        if (obj = ch->searchInventory(iscapsule))
         {
             capsule = true;
         }
@@ -1093,7 +1093,7 @@ ACMD(do_deploy)
         }
         else
         {
-            send_to_imm("ERROR: Furniture failed to deploy at %d.", ch->getRoomVnum());
+            send_to_imm("ERROR: Furniture failed to deploy at %d.", ch->location.getVnum());
             return;
         }
     }
@@ -1119,7 +1119,7 @@ ACMD(do_deploy)
 
     while (giveup == false && cont == false)
     {
-        if (obj3 = get_room(rnum)->findObjectVnum(18801))
+        if (obj3 = Location(get_room(rnum)).searchObjects(18801))
         {
             found = true;
         }
@@ -1147,10 +1147,10 @@ ACMD(do_deploy)
 
     if (cont == true)
     {
-        int hnum = ch->getRoomVnum();
+        int hnum = ch->location.getVnum();
         Object *door = read_object(18801, VIRTUAL);
 
-        SET_OBJ_VAL(door, VAL_HATCH_LOCATION, ch->getRoomVnum());
+        SET_OBJ_VAL(door, VAL_HATCH_LOCATION, ch->location.getVnum());
         if (rnum != 18800)
             SET_OBJ_VAL(door, VAL_HATCH_DEST, rnum + 1);
         else
@@ -1158,7 +1158,7 @@ ACMD(do_deploy)
         SET_OBJ_VAL(door, VAL_HATCH_DCSKILL, rnum);
         door->setLocation(rnum);
         Object *key = read_object(rnum, VIRTUAL);
-        obj_to_char(key, ch);
+        ch->addToInventory(key);
         act("@WYou click the capsule and toss it to the ground. A large cloud of smoke erupts from the capsule and after it clears a house is visible in its place!@n",
             true, ch, nullptr, nullptr, TO_CHAR);
         act("@C$n@W clicks a capsule and then tosses it to the ground. A large cloud of smoke erupts from the capsule and after it clears a house is visible in its place!@n",
@@ -1331,7 +1331,7 @@ void check_auction(uint64_t heartPulse, double deltaTime)
             sprintf(buf, "%s flies out the sky and into your hands.\r\n", obj_selling->getShortDescription());
             CAP(buf);
             ch_selling->sendText(buf);
-            obj_to_char(obj_selling, ch_selling);
+            ch_selling->addToInventory(obj_selling);
 
             /* Reset auctioning values */
             obj_selling = nullptr;
@@ -1348,7 +1348,7 @@ void check_auction(uint64_t heartPulse, double deltaTime)
             auc_send_to_all(buf, true);
 
             /* Give the object to the buyer */
-            obj_to_char(obj_selling, ch_buying);
+            ch_buying->addToInventory(obj_selling);
             sprintf(buf, "%s flies out the sky and into your hands, what a steal!\r\n",
                     obj_selling->getShortDescription());
             CAP(buf);
@@ -1431,7 +1431,7 @@ void loadDragonball(int vnum, int &foundFlag, bool &hunter1, bool &hunter2)
                 DBALL_HUNTER2 = room;
             }
             k = read_object(vnum, VIRTUAL);
-            obj_to_char(k, hunter);
+            hunter->addToInventory(k);
         }
         else
         {
@@ -1950,14 +1950,14 @@ void stop_auction(int type, Character *ch)
         sprintf(buf, "%s flies out the sky and into your hands.\r\n", obj_selling->getShortDescription());
         CAP(buf);
         ch_selling->sendText(buf);
-        obj_to_char(obj_selling, ch_selling);
+        ch_selling->addToInventory(obj_selling);
     }
     else
     {
         sprintf(buf, "%s flies out the sky and into your hands.\r\n", obj_selling->getShortDescription());
         CAP(buf);
         ch->sendText(buf);
-        obj_to_char(obj_selling, ch);
+        ch->addToInventory(obj_selling);
     }
 
     if (!(ch_buying == nullptr))
@@ -2036,7 +2036,7 @@ ACMD(do_assemble)
 
     Object *tool = nullptr, *next_obj;
 
-    if (tool = ch->findObjectVnum(386))
+    if (tool = ch->searchInventory(386))
     {
         act("@WYou open up your toolkit and take out the necessary tools.@n", true, ch, nullptr, nullptr, TO_CHAR);
         act("@C$n@W opens up $s toolkit and takes out the necessary tools.@n", true, ch, nullptr, nullptr, TO_ROOM);
@@ -2128,7 +2128,7 @@ ACMD(do_assemble)
     /* Now give the object to the character. */
     if (GET_OBJ_VNUM(pObject) != 1611)
     {
-        // obj_to_char(pObject, ch);
+        // ch->addToInventory(pObject);
         ch->craftingTask.improvementRounds = 0;
         ch->craftingTask.pObject = pObject;
 
@@ -2172,7 +2172,7 @@ static void perform_put(Character *ch, Object *obj,
     {
         Object *obj2 = nullptr, *next_obj = nullptr;
         int count = 0, minus = 0;
-        auto con = cont->getObjects();
+        auto con = cont->getInventory();
         for (auto obj2 : filter_raw(con))
         {
             minus += GET_OBJ_WEIGHT(obj2);
@@ -2208,8 +2208,8 @@ static void perform_put(Character *ch, Object *obj,
         ch->sendText("That isn't worth bagging. Better keep that close if you wanna keep it at all.\r\n");
     else
     {
-    obj->clearLocation();
-        obj_to_obj(obj, cont);
+        obj->clearLocation();
+        cont->addToInventory(obj);
 
         if (!OBJ_FLAGGED(obj, ITEM_CARD))
         {
@@ -2434,7 +2434,7 @@ static void perform_get_from_container(Character *ch, Object *obj,
         else if (get_otrigger(obj, ch))
         {
             obj->clearLocation();
-            obj_to_char(obj, ch);
+            ch->addToInventory(obj);
             if (OBJ_FLAGGED(cont, ITEM_SHEATH))
             {
                 act("You draw $p from $P.", false, ch, obj, cont, TO_CHAR);
@@ -2479,7 +2479,7 @@ static void get_from_container(Character *ch, Object *cont,
         act("$p is closed.", false, ch, cont, nullptr, TO_CHAR);
     else if (obj_dotmode == FIND_INDIV)
     {
-        auto con = cont->getObjects();
+        auto con = cont->getInventory();
         int transferred = 0;
         for (auto obj : filter_raw(con))
         {
@@ -2505,7 +2505,7 @@ static void get_from_container(Character *ch, Object *cont,
             ch->sendText("Get all of what?\r\n");
             return;
         }
-        auto con = cont->getObjects();
+        auto con = cont->getInventory();
         for (auto obj : filter_raw(con))
         {
             if (CAN_SEE_OBJ(ch, obj) && (obj_dotmode == FIND_ALL || isname(arg, obj->getName())))
@@ -2553,7 +2553,7 @@ int perform_get_from_room(Character *ch, Object *obj)
     if (can_take_obj(ch, obj) && get_otrigger(obj, ch))
     {
         obj->clearLocation();
-        obj_to_char(obj, ch);
+        ch->addToInventory(obj);
         act("You get $p.", false, ch, obj, nullptr, TO_CHAR);
         act("$n gets $p.", true, ch, obj, nullptr, TO_ROOM);
 
@@ -2808,9 +2808,9 @@ static void perform_drop_gold(Character *ch, int amount,
                 if (GET_ADMLEVEL(ch) > 0)
                 {
                     send_to_imm("IMM DROP: %s dropped %s in room [%d]", GET_NAME(ch), obj->getShortDescription(),
-                                obj->getRoomVnum());
+                                obj->location.getVnum());
                     log_imm_action("IMM DROP: %s dropped %s in room [%d]", GET_NAME(ch), obj->getShortDescription(),
-                                   obj->getRoomVnum());
+                                   obj->location.getVnum());
                     if (check_insidebag(obj, 0.0) > 1)
                     {
                         send_to_imm("IMM DROP: Object contains %d other items.", check_insidebag(obj, 0.0));
@@ -2932,9 +2932,9 @@ static int perform_drop(Character *ch, Object *obj,
             if (GET_ADMLEVEL(ch) > 0)
             {
                 send_to_imm("IMM DROP: %s dropped %s in room [%d]", GET_NAME(ch), obj->getShortDescription(),
-                            obj->getRoomVnum());
+                            obj->location.getVnum());
                 log_imm_action("IMM DROP: %s dropped %s in room [%d]", GET_NAME(ch), obj->getShortDescription(),
-                               obj->getRoomVnum());
+                               obj->location.getVnum());
             }
         }
         else
@@ -2943,9 +2943,9 @@ static int perform_drop(Character *ch, Object *obj,
             if (GET_ADMLEVEL(ch) > 0)
             {
                 send_to_imm("IMM DROP: %s dropped %s in room [%d]", GET_NAME(ch), obj->getShortDescription(),
-                            obj->getRoomVnum());
+                            obj->location.getVnum());
                 log_imm_action("IMM DROP: %s dropped %s in room [%d]", GET_NAME(ch), obj->getShortDescription(),
-                               obj->getRoomVnum());
+                               obj->location.getVnum());
             }
         }
         return (0);
@@ -3194,7 +3194,7 @@ static void perform_give(Character *ch, Character *vict,
         }
     }
     obj->clearLocation();
-    obj_to_char(obj, vict);
+    vict->addToInventory(obj);
     act("You give $p to $N.", false, ch, obj, vict, TO_CHAR);
     act("$n gives you $p.", false, ch, obj, vict, TO_VICT);
     act("$n gives $p to $N.", true, ch, obj, vict, TO_NOTVICT);
@@ -4686,7 +4686,8 @@ void perform_remove(Character *ch, int pos)
         {
             ch->player_flags.set(PLR_THANDW, false);
         }
-        obj_to_char(unequip_char(ch, pos), ch);
+        auto un = unequip_char(ch, pos);
+        ch->addToInventory(un);
         act("You stop using $p.", false, ch, obj, nullptr, TO_CHAR);
         act("$n stops using $p.", true, ch, obj, nullptr, TO_ROOM);
         if (previous > GET_HIT(ch))
@@ -4716,10 +4717,10 @@ ACMD(do_remove)
     auto isBoard = [&](const auto &o)
     { return GET_OBJ_TYPE(o) == ITEM_BOARD; };
 
-    obj = ch->findObject(isBoard);
+    obj = ch->searchInventory(isBoard);
     /* lemme check for a board FIRST */
     if (!obj)
-        ch->location.findObject(isBoard);
+        ch->location.searchObjects(isBoard);
 
     if (obj)
     {

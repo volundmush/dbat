@@ -1,13 +1,13 @@
 /*************************************************************************
-*  File: vehicles.c                                    Part of CircleMUD *
-*  Usage: Vechicle related code						 *
-*									 *
-*  All rights reserved.  See license.doc for complete information.	 *
-*									 *
-*  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University*
-*  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.              *
-*  Vehicle.c written by Chris Jacobson <fear@athenet.net>		 *
-*************************************************************************/
+ *  File: vehicles.c                                    Part of CircleMUD *
+ *  Usage: Vechicle related code						 *
+ *									 *
+ *  All rights reserved.  See license.doc for complete information.	 *
+ *									 *
+ *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University*
+ *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.              *
+ *  Vehicle.c written by Chris Jacobson <fear@athenet.net>		 *
+ *************************************************************************/
 #include "dbat/vehicles.h"
 #include "dbat/send.h"
 #include "dbat/comm.h"
@@ -22,33 +22,40 @@
 #include "dbat/partial.h"
 
 #ifndef EXITN
-#  define EXITN(room, door)        (get_room(room)->dir_option[door])
+#define EXITN(room, door) (get_room(room)->dir_option[door])
 #endif
 
-
-Object *find_vehicle_by_vnum(int vnum) {
+Object *find_vehicle_by_vnum(int vnum)
+{
     auto o = objectSubscriptions.first(fmt::format("vnum_{}", vnum));
-    if(o && GET_OBJ_TYPE(o) == ITEM_VEHICLE) return o;
+    if (o && GET_OBJ_TYPE(o) == ITEM_VEHICLE)
+        return o;
     return nullptr;
 }
 
-Object *find_hatch_by_vnum(int vnum) {
+Object *find_hatch_by_vnum(int vnum)
+{
     auto o = objectSubscriptions.first(fmt::format("vnum_{}", vnum));
-    if(o && GET_OBJ_TYPE(o) == ITEM_HATCH) return o;
+    if (o && GET_OBJ_TYPE(o) == ITEM_HATCH)
+        return o;
     return nullptr;
 }
-
 
 /* Search the player's room, inventory and equipment for a control */
-Object *find_control(Character *ch) {
-    auto iscontrol = [ch](Object *o) { return CAN_SEE_OBJ(ch, o) && GET_OBJ_TYPE(o) == ITEM_CONTROL; };
+Object *find_control(Character *ch)
+{
+    auto iscontrol = [ch](Object *o)
+    { return CAN_SEE_OBJ(ch, o) && GET_OBJ_TYPE(o) == ITEM_CONTROL; };
 
-    auto controls = ch->location.findObject(iscontrol);
-    if (!controls) controls = ch->findObject(iscontrol);
+    auto controls = ch->location.searchObjects(iscontrol);
+    if (!controls)
+        controls = ch->searchInventory(iscontrol);
 
     if (!controls)
-        for (auto &[slot, eq] : ch->getEquipment()) {
-            if(iscontrol(eq)) {
+        for (auto &[slot, eq] : ch->getEquipment())
+        {
+            if (iscontrol(eq))
+            {
                 controls = eq;
                 break;
             }
@@ -57,38 +64,44 @@ Object *find_control(Character *ch) {
 }
 
 /* Drive our vehicle into another vehicle */
-static void drive_into_vehicle(Character *ch, Object *vehicle, char *arg) {
+static void drive_into_vehicle(Character *ch, Object *vehicle, char *arg)
+{
     Object *vehicle_in_out;
     int is_going_to;
     char buf[MAX_INPUT_LENGTH];
 
-    if (!*arg) {
-                ch->sendText("@wDrive into what?\r\n");
+    if (!*arg)
+    {
+        ch->sendText("@wDrive into what?\r\n");
         return;
     }
-    if (!(vehicle_in_out = get_obj_in_list_vis(ch, arg, nullptr, vehicle->location.getObjects()))) {
-                ch->sendText("@wNothing here by that name!\r\n");
-        return;
-    }
-
-    if (GET_OBJ_TYPE(vehicle_in_out) != ITEM_VEHICLE) {
-                ch->sendText("@wThat's not a ship.\r\n");
+    if (!(vehicle_in_out = get_obj_in_list_vis(ch, arg, nullptr, vehicle->location.getObjects())))
+    {
+        ch->sendText("@wNothing here by that name!\r\n");
         return;
     }
 
-    if (vehicle == vehicle_in_out) {
-                ch->sendText("@wMy, we are in a clever mood today, aren't we.\r\n");
+    if (GET_OBJ_TYPE(vehicle_in_out) != ITEM_VEHICLE)
+    {
+        ch->sendText("@wThat's not a ship.\r\n");
+        return;
+    }
+
+    if (vehicle == vehicle_in_out)
+    {
+        ch->sendText("@wMy, we are in a clever mood today, aren't we.\r\n");
         return;
     }
 
     is_going_to = real_room(GET_OBJ_VAL(vehicle_in_out, VAL_VEHICLE_DEST));
-    if (!ROOM_FLAGGED(is_going_to, ROOM_VEHICLE)) {
-                ch->sendText("@wThat ship can't carry other ships.");
+    if (!ROOM_FLAGGED(is_going_to, ROOM_VEHICLE))
+    {
+        ch->sendText("@wThat ship can't carry other ships.");
         return;
     }
 
     vehicle->location.send_to("%s @wenters %s.\r\n", vehicle->getShortDescription(),
-            vehicle_in_out->getShortDescription());
+                              vehicle_in_out->getShortDescription());
 
     auto was_in = vehicle->location;
     vehicle->clearLocation();
@@ -97,87 +110,102 @@ static void drive_into_vehicle(Character *ch, Object *vehicle, char *arg) {
     if (ch->desc)
         act("", true, ch, nullptr, nullptr, TO_ROOM);
     ch->sendText("@wThe ship flies onward:\r\n");
-    ch->lookAtLocation(vehicle);
+    ch->lookAtLocation(vehicle->location);
     vehicle->location.send_to("%s @wenters.\r\n", vehicle->getShortDescription());
-
 }
 
 /* Drive our vehicle out of another vehicle */
-static void drive_outof_vehicle(Character *ch, Object *vehicle) {
+static void drive_outof_vehicle(Character *ch, Object *vehicle)
+{
     Object *vehicle_in_out;
 
-    auto hatch = ch->location.findObject([&](Object *o) { return GET_OBJ_TYPE(o) == ITEM_HATCH; });
+    auto hatch = ch->location.searchObjects([&](Object *o)
+                                            { return GET_OBJ_TYPE(o) == ITEM_HATCH; });
 
-    if (!hatch) {
-                ch->sendText("@wNowhere to pilot out of.\r\n");
+    if (!hatch)
+    {
+        ch->sendText("@wNowhere to pilot out of.\r\n");
         return;
     }
 
-    if (!(vehicle_in_out = find_vehicle_by_vnum(GET_OBJ_VAL(hatch, VAL_HATCH_DEST)))) {
-                ch->sendText("@wYou can't pilot out anywhere!\r\n");
+    if (!(vehicle_in_out = find_vehicle_by_vnum(GET_OBJ_VAL(hatch, VAL_HATCH_DEST))))
+    {
+        ch->sendText("@wYou can't pilot out anywhere!\r\n");
         return;
     }
 
     vehicle->location.send_to("%s @wexits %s.\r\n", vehicle->getShortDescription(),
-            vehicle_in_out->getShortDescription());
+                              vehicle_in_out->getShortDescription());
 
     vehicle->clearLocation();
-    vehicle->setLocation(vehicle_in_out);
+    vehicle->setLocation(vehicle_in_out->location);
 
     if (ch->desc)
         act("@wThe @De@Wn@wg@Di@wn@We@Ds@w of the ship @rr@Ro@ra@Rr@w as it moves.", true, ch, nullptr, nullptr,
             TO_ROOM);
-        ch->sendText("@wThe ship flies onward:\r\n");
-    ch->lookAtLocation(vehicle);
-    for (auto &[door, e] : vehicle->location.getExits()) {
-        if(IS_SET(e.exit_info, EX_CLOSED)) continue;
+    ch->sendText("@wThe ship flies onward:\r\n");
+    ch->lookAtLocation(vehicle->location);
+    for (auto &[door, e] : vehicle->location.getExits())
+    {
+        if (IS_SET(e.exit_info, EX_CLOSED))
+            continue;
         e.sendText("@wThe @De@Wn@wg@Di@wn@We@Ds@w of the ship @rr@Ro@ra@Rr@w as it moves.\r\n");
     }
     vehicle->location.send_to("%s @wflies out of %s.\r\n", vehicle->getShortDescription(),
-            vehicle_in_out->getShortDescription());
+                              vehicle_in_out->getShortDescription());
 }
 
 /* Drive out vehicle in a certain direction */
-void drive_in_direction(Character *ch, Object *vehicle, int dir) {
+void drive_in_direction(Character *ch, Object *vehicle, int dir)
+{
 
     auto d = vehicle->location.getExit(static_cast<Direction>(dir));
-    if(!d) {
-                ch->send_to("@wApparently %s doesn't exist there.\r\n", dirs[dir]);
+    if (!d)
+    {
+        ch->send_to("@wApparently %s doesn't exist there.\r\n", dirs[dir]);
         return;
     }
     auto &dest = d.value();
-    if(!dest) {
-                ch->send_to("@wApparently %s doesn't exist there.\r\n", dirs[dir]);
+    if (!dest)
+    {
+        ch->send_to("@wApparently %s doesn't exist there.\r\n", dirs[dir]);
         return;
     }
 
-    if(IS_SET(dest.exit_info, EX_CLOSED)) {
+    if (IS_SET(dest.exit_info, EX_CLOSED))
+    {
         if (!dest.keyword.empty())
-                        ch->send_to("@wThe %s seems to be closed.\r\n", fname(dest.keyword.c_str()));
+            ch->send_to("@wThe %s seems to be closed.\r\n", fname(dest.keyword.c_str()));
         else
-                        ch->sendText("@wIt seems to be closed.\r\n");
+            ch->sendText("@wIt seems to be closed.\r\n");
         return;
     }
 
-    if (!dest.getRoomFlag(RoomFlag::vehicle) && !dest.getWhereFlag(WhereFlag::space)) {
+    if (!dest.getRoomFlag(RoomFlag::vehicle) && !dest.getWhereFlag(WhereFlag::space))
+    {
         /* But the vehicle can't go that way*/
-                ch->sendText("@wThe ship can't fit there!\r\n");
+        ch->sendText("@wThe ship can't fit there!\r\n");
         return;
     }
 
-    vehicle->send_to("%s @wflies %s.\r\n", vehicle->getShortDescription(), dirs[dir]);
+    vehicle->location.send_to("%s @wflies %s.\r\n", vehicle->getShortDescription(), dirs[dir]);
 
     vehicle->clearLocation();
     vehicle->setLocation(dest);
 
     Object *controls;
-    if ((controls = find_control(ch))) {
-        if (GET_FUELCOUNT(controls) < 5) {
+    if ((controls = find_control(ch)))
+    {
+        if (GET_FUELCOUNT(controls) < 5)
+        {
             MOD_OBJ_VAL(controls, VAL_CONTROL_FUEL, 1);
-        } else {
+        }
+        else
+        {
             SET_OBJ_VAL(controls, VAL_CONTROL_FUEL, 0);
             MOD_OBJ_VAL(controls, VAL_CONTROL_FUEL, -1);
-            if (GET_FUEL(controls) < 0) {
+            if (GET_FUEL(controls) < 0)
+            {
                 SET_OBJ_VAL(controls, VAL_CONTROL_FUEL, 0);
             }
         }
@@ -187,10 +215,12 @@ void drive_in_direction(Character *ch, Object *vehicle, int dir) {
     Destination des;
     des.unit = get_room(GET_OBJ_VAL(vehicle, VAL_VEHICLE_DEST));
     auto con = des.getObjects();
-    
-    for (auto h : filter_raw(con)) {
-        if (GET_OBJ_TYPE(hatch) == ITEM_HATCH) {
-            SET_OBJ_VAL(hatch, VAL_HATCH_EXTROOM, vehicle->getRoomVnum());
+
+    for (auto h : filter_raw(con))
+    {
+        if (GET_OBJ_TYPE(hatch) == ITEM_HATCH)
+        {
+            SET_OBJ_VAL(hatch, VAL_HATCH_EXTROOM, vehicle->location.getVnum());
             hatch = h;
             break;
         }
@@ -199,23 +229,30 @@ void drive_in_direction(Character *ch, Object *vehicle, int dir) {
     if (ch->desc)
         act("@wThe @De@Wn@wg@Di@wn@We@Ds@w of the ship @rr@Ro@ra@Rr@w as it moves.", true, ch, nullptr, nullptr,
             TO_ROOM);
-        ch->sendText("@wThe ship flies onward:\r\n");
-    ch->lookAtLocation(vehicle);
-    if (controls) {
-                ch->send_to("@RFUEL@D: %s%s@n\r\n", GET_FUEL(controls) >= 200 ? "@G" : GET_FUEL(controls) >= 100 ? "@Y" : "@r", add_commas(GET_FUEL(controls)).c_str());
+    ch->sendText("@wThe ship flies onward:\r\n");
+    ch->lookAtLocation(vehicle->location);
+    if (controls)
+    {
+        ch->send_to("@RFUEL@D: %s%s@n\r\n", GET_FUEL(controls) >= 200 ? "@G" : GET_FUEL(controls) >= 100 ? "@Y"
+                                                                                                         : "@r",
+                    add_commas(GET_FUEL(controls)).c_str());
     }
 
-    for (auto &[door, e] : vehicle->location.getExits()) {
-        if(IS_SET(e.exit_info, EX_CLOSED)) continue;
+    for (auto &[door, e] : vehicle->location.getExits())
+    {
+        if (IS_SET(e.exit_info, EX_CLOSED))
+            continue;
         e.sendText("@wThe @De@Wn@wg@Di@wn@We@Ds@w of the ship @rr@Ro@ra@Rr@w as it moves.\r\n");
     }
 
     vehicle->location.send_to("%s @wflies in from the %s.\r\n",
-            vehicle->getShortDescription(), dirs[rev_dir[dir]]);
+                              vehicle->getShortDescription(), dirs[rev_dir[dir]]);
 }
 
-static void warp_ship_to_location(Character *ch, Object *vehicle, int room_vnum) {
-    if (vehicle->location == room_vnum) {
+static void warp_ship_to_location(Character *ch, Object *vehicle, int room_vnum)
+{
+    if (vehicle->location == room_vnum)
+    {
         ch->sendText("Your ship is already there!\r\n");
         return;
     }
@@ -225,57 +262,66 @@ static void warp_ship_to_location(Character *ch, Object *vehicle, int room_vnum)
     act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find the ship in a new location!@n",
         true, ch, nullptr, nullptr, TO_ROOM);
     vehicle->location.send_to("%s @Bbegins to glow bright blue before disappearing in a flash of light!@n\r\n",
-                 vehicle->getShortDescription());
+                              vehicle->getShortDescription());
     vehicle->clearLocation();
     vehicle->setLocation(room_vnum);
     vehicle->location.send_to("@BSuddenly in a flash of blue light @n%s @B appears instantly!@n\r\n",
-                 vehicle->getShortDescription());
+                              vehicle->getShortDescription());
 }
 
-static bool validate_warp_conditions(Character *ch, Object *vehicle, const char *arg) {
+static bool validate_warp_conditions(Character *ch, Object *vehicle, const char *arg)
+{
     if (IS_NPC(ch))
         return false;
 
-    if (!HAS_ARMS(ch)) {
-                ch->sendText("You have no arms!\r\n");
+    if (!HAS_ARMS(ch))
+    {
+        ch->sendText("You have no arms!\r\n");
         return false;
     }
-    if (!PLR_FLAGGED(ch, PLR_PILOTING)) {
-                ch->sendText("@wYou need to be seated in the pilot's seat.\r\n[Enter: Pilot ready/unready]\r\n");
+    if (!PLR_FLAGGED(ch, PLR_PILOTING))
+    {
+        ch->sendText("@wYou need to be seated in the pilot's seat.\r\n[Enter: Pilot ready/unready]\r\n");
         return false;
     }
 
     Object *controls = find_control(ch);
-    if (!controls) {
-                ch->sendText("@wYou have nothing to control here!\r\n");
+    if (!controls)
+    {
+        ch->sendText("@wYou have nothing to control here!\r\n");
         return false;
     }
 
     vehicle = find_vehicle_by_vnum(GET_OBJ_VAL(controls, VAL_CONTROL_VEHICLE_VNUM));
-    if (!vehicle) {
-                ch->sendText("@wYou can't find anything to pilot.\r\n");
+    if (!vehicle)
+    {
+        ch->sendText("@wYou can't find anything to pilot.\r\n");
         return false;
     }
 
-    if (!vehicle->location.getWhereFlag(WhereFlag::space)) {
-                ch->sendText("Your ship needs to be in space to utilize its Instant Travel Warp Accelerator.\r\n");
+    if (!vehicle->location.getWhereFlag(WhereFlag::space))
+    {
+        ch->sendText("Your ship needs to be in space to utilize its Instant Travel Warp Accelerator.\r\n");
         return false;
     }
 
-    if (GET_OBJ_VNUM(vehicle) != 18400) {
-                ch->sendText("Your ship is not outfitted with an Instant Travel Warp Accelerator.\r\n");
+    if (GET_OBJ_VNUM(vehicle) != 18400)
+    {
+        ch->sendText("Your ship is not outfitted with an Instant Travel Warp Accelerator.\r\n");
         return false;
     }
 
-    if (!*arg) {
-                ch->sendText("Syntax: shipwarp [ earth | vegeta | namek | konack | aether | frigid | buoy1 | buoy2 | buoy3 ]\r\n");
+    if (!*arg)
+    {
+        ch->sendText("Syntax: shipwarp [ earth | vegeta | namek | konack | aether | frigid | buoy1 | buoy2 | buoy3 ]\r\n");
         return false;
     }
 
     return true;
 }
 
-static int get_warp_destination(const char *arg, Character *ch) {
+static int get_warp_destination(const char *arg, Character *ch)
+{
     if (!strcasecmp(arg, "earth"))
         return 40979;
     if (!strcasecmp(arg, "namek"))
@@ -298,7 +344,8 @@ static int get_warp_destination(const char *arg, Character *ch) {
     return NOWHERE;
 }
 
-ACMD(do_warp) {
+ACMD(do_warp)
+{
     return;
     char arg[MAX_INPUT_LENGTH];
     Object *vehicle = nullptr;
@@ -309,8 +356,9 @@ ACMD(do_warp) {
         return;
 
     int destination = get_warp_destination(arg, ch);
-    if (destination == NOWHERE) {
-                ch->sendText("Invalid warp destination or buoy not launched.\r\n");
+    if (destination == NOWHERE)
+    {
+        ch->sendText("Invalid warp destination or buoy not launched.\r\n");
         return;
     }
 
@@ -320,23 +368,27 @@ ACMD(do_warp) {
 static void handle_pilot_ready(Character *ch);
 static void handle_pilot_unready(Character *ch);
 static bool validate_drive_conditions(Character *ch, Object *&vehicle, Object *&controls);
-static void handle_drive_command(Character *ch, Object *vehicle, Object *controls, const std::string& arg, const std::string& arg2);
+static void handle_drive_command(Character *ch, Object *vehicle, Object *controls, const std::string &arg, const std::string &arg2);
 static void handle_drive_direction(Character *ch, Object *vehicle, int dir, int speed);
-static void handle_drive_land(Character *ch, Object *vehicle, const std::string& pad);
+static void handle_drive_land(Character *ch, Object *vehicle, const std::string &pad);
 static void handle_drive_launch(Character *ch, Object *vehicle, Object *controls);
-static void handle_buoy_launch(Character *ch, Object *vehicle, const std::string& marker);
-static void handle_buoy_deactivate(Character *ch, const std::string& marker);
+static void handle_buoy_launch(Character *ch, Object *vehicle, const std::string &marker);
+static void handle_buoy_deactivate(Character *ch, const std::string &marker);
 
-static void handle_pilot_ready(Character *ch) {
+static void handle_pilot_ready(Character *ch)
+{
     Object *controls = find_control(ch);
-    if (!controls) {
-                ch->sendText("@wYou have nothing to control here!\r\n");
+    if (!controls)
+    {
+        ch->sendText("@wYou have nothing to control here!\r\n");
         return;
     }
 
-    for (auto *d = descriptor_list; d; d = d->next) {
-        if (IS_PLAYING(d) && d->character != ch && PLR_FLAGGED(d->character, PLR_PILOTING) && d->character->location == ch->location) {
-                        ch->send_to("@w%s is already piloting the ship!\r\n", GET_NAME(d->character));
+    for (auto *d = descriptor_list; d; d = d->next)
+    {
+        if (IS_PLAYING(d) && d->character != ch && PLR_FLAGGED(d->character, PLR_PILOTING) && d->character->location == ch->location)
+        {
+            ch->send_to("@w%s is already piloting the ship!\r\n", GET_NAME(d->character));
             return;
         }
     }
@@ -344,66 +396,80 @@ static void handle_pilot_ready(Character *ch) {
     ch->player_flags.set(PLR_PILOTING, true);
     act("@w$n sits down and begins piloting the ship.", true, ch, nullptr, nullptr, TO_ROOM);
     ch->setBaseStat<int>("position", POS_SITTING);
-        ch->sendText("@wYou take a seat in the pilot's chair.\r\n");
+    ch->sendText("@wYou take a seat in the pilot's chair.\r\n");
 }
 
-static void handle_pilot_unready(Character *ch) {
-    if (PLR_FLAGGED(ch, PLR_PILOTING)) {
+static void handle_pilot_unready(Character *ch)
+{
+    if (PLR_FLAGGED(ch, PLR_PILOTING))
+    {
         act("@w$n stands up and stops piloting the ship.", true, ch, nullptr, nullptr, TO_ROOM);
-                ch->sendText("@wYou stand up from the pilot's seat.\r\n");
+        ch->sendText("@wYou stand up from the pilot's seat.\r\n");
         ch->setBaseStat<int>("position", POS_STANDING);
         ch->player_flags.set(PLR_PILOTING, false);
-    } else {
-                ch->sendText("You are already not flying the ship!\r\n");
+    }
+    else
+    {
+        ch->sendText("You are already not flying the ship!\r\n");
     }
 }
 
-static bool validate_drive_conditions(Character *ch, Object *&vehicle, Object *&controls) {
-    if (!HAS_ARMS(ch)) {
-                ch->sendText("You have no arms!\r\n");
+static bool validate_drive_conditions(Character *ch, Object *&vehicle, Object *&controls)
+{
+    if (!HAS_ARMS(ch))
+    {
+        ch->sendText("You have no arms!\r\n");
         return false;
     }
 
-    if (!PLR_FLAGGED(ch, PLR_PILOTING)) {
-                ch->sendText("@wYou need to be seated in the pilot's seat.\r\n[Enter: Pilot ready/unready]\r\n");
+    if (!PLR_FLAGGED(ch, PLR_PILOTING))
+    {
+        ch->sendText("@wYou need to be seated in the pilot's seat.\r\n[Enter: Pilot ready/unready]\r\n");
         return false;
     }
 
-    if (GET_POS(ch) < POS_SLEEPING) {
-                ch->sendText("@wYou can't see anything but stars!\r\n");
+    if (GET_POS(ch) < POS_SLEEPING)
+    {
+        ch->sendText("@wYou can't see anything but stars!\r\n");
         return false;
     }
 
-    if (AFF_FLAGGED(ch, AFF_BLIND)) {
-                ch->sendText("@wYou can't see a damned thing, you're blind!\r\n");
+    if (AFF_FLAGGED(ch, AFF_BLIND))
+    {
+        ch->sendText("@wYou can't see a damned thing, you're blind!\r\n");
         return false;
     }
 
-    if (ch->location.getIsDark() && !CAN_SEE_IN_DARK(ch)) {
-                ch->sendText("@wIt is pitch black...\r\n");
+    if (ch->location.getIsDark() && !CAN_SEE_IN_DARK(ch))
+    {
+        ch->sendText("@wIt is pitch black...\r\n");
         return false;
     }
 
     controls = find_control(ch);
-    if (!controls) {
-                ch->sendText("@wYou have nothing to control here!\r\n");
+    if (!controls)
+    {
+        ch->sendText("@wYou have nothing to control here!\r\n");
         return false;
     }
 
-    if (invalid_align(ch, controls) || invalid_class(ch, controls) || invalid_race(ch, controls)) {
+    if (invalid_align(ch, controls) || invalid_class(ch, controls) || invalid_race(ch, controls))
+    {
         act("@wYou are zapped by $p@w and instantly step away from it.", false, ch, controls, nullptr, TO_CHAR);
         act("@w$n@w is zapped by $p@w and instantly steps away from it.", false, ch, controls, nullptr, TO_ROOM);
         return false;
     }
 
     vehicle = find_vehicle_by_vnum(GET_OBJ_VAL(controls, VAL_CONTROL_VEHICLE_VNUM));
-    if (!vehicle) {
-                ch->sendText("@wYou can't find anything to pilot.\r\n");
+    if (!vehicle)
+    {
+        ch->sendText("@wYou can't find anything to pilot.\r\n");
         return false;
     }
 
-    if (GET_FUEL(controls) <= 0) {
-                ch->sendText("Your ship doesn't have enough fuel to move.\r\n");
+    if (GET_FUEL(controls) <= 0)
+    {
+        ch->sendText("Your ship doesn't have enough fuel to move.\r\n");
         return false;
     }
 
@@ -411,96 +477,108 @@ static bool validate_drive_conditions(Character *ch, Object *&vehicle, Object *&
 }
 
 static const std::map<std::string, int> directions = {
-    {"north", 0}, {"n", 0},
-    {"east", 1}, {"e", 1},
-    {"south", 2}, {"s", 2},
-    {"west", 3}, {"w", 3},
-    {"up", 4}, {"u", 4},
-    {"down", 5}, {"d", 5},
-    {"northwest", 6}, {"nw", 6}, {"northw", 6},
-    {"northeast", 7}, {"ne", 7}, {"northe", 7},
-    {"southeast", 8}, {"se", 8}, {"southe", 8},
-    {"southwest", 9}, {"sw", 9}, {"southw", 9},
-    {"inside", 10},
-    {"outside", 11}
-};
+    {"north", 0}, {"n", 0}, {"east", 1}, {"e", 1}, {"south", 2}, {"s", 2}, {"west", 3}, {"w", 3}, {"up", 4}, {"u", 4}, {"down", 5}, {"d", 5}, {"northwest", 6}, {"nw", 6}, {"northw", 6}, {"northeast", 7}, {"ne", 7}, {"northe", 7}, {"southeast", 8}, {"se", 8}, {"southe", 8}, {"southwest", 9}, {"sw", 9}, {"southw", 9}, {"inside", 10}, {"outside", 11}};
 
-static void handle_drive_command(Character *ch, Object *vehicle, Object *controls, const std::string& arg, const std::string& arg2) {
-    if (arg.empty()) {
-                ch->sendText("@wPilot, yes, but where?\r\n");
+static void handle_drive_command(Character *ch, Object *vehicle, Object *controls, const std::string &arg, const std::string &arg2)
+{
+    if (arg.empty())
+    {
+        ch->sendText("@wPilot, yes, but where?\r\n");
         return;
     }
 
-    if (is_abbrev(arg.c_str(), "into") || is_abbrev(arg.c_str(), "onto")) {
-        drive_into_vehicle(ch, vehicle, (char*)arg2.c_str());
-    } else if (is_abbrev(arg.c_str(), "out") && !EXIT(vehicle, OUTDIR)) {
+    if (is_abbrev(arg.c_str(), "into") || is_abbrev(arg.c_str(), "onto"))
+    {
+        drive_into_vehicle(ch, vehicle, (char *)arg2.c_str());
+    }
+    else if (is_abbrev(arg.c_str(), "out") && !EXIT(vehicle, OUTDIR))
+    {
         drive_outof_vehicle(ch, vehicle);
-    } else {
+    }
+    else
+    {
 
         auto it = directions.find(arg);
-        if (it != directions.end()) {
+        if (it != directions.end())
+        {
             int dir = it->second;
             handle_drive_direction(ch, vehicle, dir, GET_OBJ_VAL(controls, VAL_CONTROL_SPEED));
-        } else if (is_abbrev(arg.c_str(), "land")) {
+        }
+        else if (is_abbrev(arg.c_str(), "land"))
+        {
             handle_drive_land(ch, vehicle, arg2);
-        } else if (is_abbrev(arg.c_str(), "launch")) {
+        }
+        else if (is_abbrev(arg.c_str(), "launch"))
+        {
             handle_drive_launch(ch, vehicle, controls);
-        } else if (is_abbrev(arg.c_str(), "mark")) {
+        }
+        else if (is_abbrev(arg.c_str(), "mark"))
+        {
             handle_buoy_launch(ch, vehicle, arg2);
-        } else if (is_abbrev(arg.c_str(), "deactivate")) {
+        }
+        else if (is_abbrev(arg.c_str(), "deactivate"))
+        {
             handle_buoy_deactivate(ch, arg2);
-        } else {
-                        ch->sendText("@wThats not a valid direction.\r\n");
-                        ch->sendText("Try one of these.\r\n");
-                        ch->sendText("[ north/n  | south/s  | east/e  |  west/w  ]\r\n");
-                        ch->sendText("[ up/u | down/d | northeast/ne/northe | northwest/nw/northw]\r\n");
-                        ch->sendText("[  southeast/se/southe  |  southwest/sw/southw]\r\n");
-                        ch->sendText("[  into  |  onto  |  inside  |  outside  ]@n\r\n");
-                        ch->sendText("[ land | launch ]@n\r\n");
+        }
+        else
+        {
+            ch->sendText("@wThats not a valid direction.\r\n");
+            ch->sendText("Try one of these.\r\n");
+            ch->sendText("[ north/n  | south/s  | east/e  |  west/w  ]\r\n");
+            ch->sendText("[ up/u | down/d | northeast/ne/northe | northwest/nw/northw]\r\n");
+            ch->sendText("[  southeast/se/southe  |  southwest/sw/southw]\r\n");
+            ch->sendText("[  into  |  onto  |  inside  |  outside  ]@n\r\n");
+            ch->sendText("[ land | launch ]@n\r\n");
         }
     }
 }
 
-static void handle_drive_direction(Character *ch, Object *vehicle, int dir, int speed) {
+static void handle_drive_direction(Character *ch, Object *vehicle, int dir, int speed)
+{
     drive_in_direction(ch, vehicle, dir);
 
-    switch (speed) {
-        case 1:
-            WAIT_STATE(ch, PULSE_2SEC * 1.5);
-            break;
-        case 2:
-            WAIT_STATE(ch, PULSE_2SEC);
-            break;
-        case 3:
-            WAIT_STATE(ch, PULSE_1SEC * 1.5);
-            break;
-        case 4:
-            WAIT_STATE(ch, PULSE_1SEC);
-            break;
-        case 5:
-            WAIT_STATE(ch, PULSE_1SEC * 0.5);
-            break;
+    switch (speed)
+    {
+    case 1:
+        WAIT_STATE(ch, PULSE_2SEC * 1.5);
+        break;
+    case 2:
+        WAIT_STATE(ch, PULSE_2SEC);
+        break;
+    case 3:
+        WAIT_STATE(ch, PULSE_1SEC * 1.5);
+        break;
+    case 4:
+        WAIT_STATE(ch, PULSE_1SEC);
+        break;
+    case 5:
+        WAIT_STATE(ch, PULSE_1SEC * 0.5);
+        break;
     }
 }
 
-static void handle_drive_land(Character *ch, Object *vehicle, const std::string& pad) {
-    auto rvn = vehicle->getRoomVnum();
+static void handle_drive_land(Character *ch, Object *vehicle, const std::string &pad)
+{
+    auto rvn = vehicle->location.getVnum();
     auto planet = checkOrbit(rvn);
 
-    if(!planet) {
-                ch->sendText("@wYou are not orbiting a planet.\r\n");
+    if (!planet)
+    {
+        ch->sendText("@wYou are not orbiting a planet.\r\n");
         return;
     }
 
     auto pads = getPlanetSpacepads(planet.value());
 
-    if(pads.empty()) {
-                ch->sendText("@wThere are no landing destinations here.\r\n");
+    if (pads.empty())
+    {
+        ch->sendText("@wThere are no landing destinations here.\r\n");
         return;
     }
 
-    if(pad.empty()) {
-                ch->sendText("Land where?\r\n");
+    if (pad.empty())
+    {
+        ch->sendText("Land where?\r\n");
         displayLandSpots(ch, getPlanetColorName(planet.value()), pads);
         return;
     }
@@ -508,15 +586,19 @@ static void handle_drive_land(Character *ch, Object *vehicle, const std::string&
     room_vnum landing = NOWHERE;
     std::string landName = "UNKNOWN";
 
-    if(auto matched = partialMatch(pad, pads.begin(), pads.end(), false, [](const auto& p) {return p.first;}); matched != pads.end()) {
+    if (auto matched = partialMatch(pad, pads.begin(), pads.end(), false, [](const auto &p)
+                                    { return p.first; });
+        matched != pads.end())
+    {
         landing = matched->second;
         landName = matched->first;
     }
 
     auto landroom = get_room(landing);
 
-    if(!landroom) {
-                ch->sendText("You can't land there.\r\n");
+    if (!landroom)
+    {
+        ch->sendText("You can't land there.\r\n");
         return;
     }
 
@@ -532,20 +614,22 @@ static void handle_drive_land(Character *ch, Object *vehicle, const std::string&
 
     char buf3[MAX_INPUT_LENGTH];
     sprintf(buf3, "%s @wcomes in from above and slowly settles on the ground.@n\r\n", vehicle->getShortDescription());
-    ch->lookAtLocation(vehicle);
+    ch->lookAtLocation(vehicle->location);
     landroom->sendText(buf3);
-
 }
 
-static void handle_drive_launch(Character *ch, Object *vehicle, Object *controls) {
+static void handle_drive_launch(Character *ch, Object *vehicle, Object *controls)
+{
     auto planet = getPlanet(vehicle->location.getVnum());
-    if (!planet) {
-                ch->sendText("@wYou are not on a planet.@n\r\n");
+    if (!planet)
+    {
+        ch->sendText("@wYou are not on a planet.@n\r\n");
         return;
     }
     auto dest = getPlanetOrbit(planet.value());
-    if(dest == NOWHERE) {
-                ch->sendText("@wYou are not on a planet.@n\r\n");
+    if (dest == NOWHERE)
+    {
+        ch->sendText("@wYou are not on a planet.@n\r\n");
         return;
     }
 
@@ -555,67 +639,85 @@ static void handle_drive_launch(Character *ch, Object *vehicle, Object *controls
     act("@RThe ship shudders as it launches up into the sky!@n", false, ch, nullptr, nullptr, TO_ROOM);
     act("@wThe ship has reached low orbit.@n", false, ch, nullptr, nullptr, TO_CHAR);
     act("@wThe ship has reached low orbit.@n", false, ch, nullptr, nullptr, TO_ROOM);
-    vehicle->send_to("@R%s @Rshudders before blasting off into the sky!@n",
-                 vehicle->getShortDescription());
+    vehicle->location.send_to("@R%s @Rshudders before blasting off into the sky!@n",
+                              vehicle->getShortDescription());
 
-    if (GET_FUELCOUNT(controls) < 5) {
+    if (GET_FUELCOUNT(controls) < 5)
+    {
         MOD_OBJ_VAL(controls, VAL_CONTROL_FUELCOUNT, 1);
-    } else {
+    }
+    else
+    {
         SET_OBJ_VAL(controls, VAL_CONTROL_FUELCOUNT, 0);
         MOD_OBJ_VAL(controls, VAL_CONTROL_FUEL, -1);
-        if (GET_FUEL(controls) < 0) {
+        if (GET_FUEL(controls) < 0)
+        {
             SET_OBJ_VAL(controls, VAL_CONTROL_FUEL, 0);
         }
     }
 
     vehicle->clearLocation();
     vehicle->setLocation(dest);
-    ch->lookAtLocation(vehicle);
-        ch->send_to("@RFUEL@D: %s%s@n\r\n", GET_FUEL(controls) >= 200 ? "@G" : GET_FUEL(controls) >= 100 ? "@Y" : "@r", add_commas(GET_FUEL(controls)).c_str());
+    ch->lookAtLocation(vehicle->location);
+    ch->send_to("@RFUEL@D: %s%s@n\r\n", GET_FUEL(controls) >= 200 ? "@G" : GET_FUEL(controls) >= 100 ? "@Y"
+                                                                                                     : "@r",
+                add_commas(GET_FUEL(controls)).c_str());
 }
 
-static void handle_buoy_launch(Character *ch, Object *vehicle, const std::string& marker) {
-    if (!vehicle->location.getWhereFlag(WhereFlag::space)) {
-                ch->sendText("@wYou need to be in space to launch a marker buoy.\r\n");
+static void handle_buoy_launch(Character *ch, Object *vehicle, const std::string &marker)
+{
+    if (!vehicle->location.getWhereFlag(WhereFlag::space))
+    {
+        ch->sendText("@wYou need to be in space to launch a marker buoy.\r\n");
         return;
     }
 
     int buoy_num = ch->getBaseStat(fmt::format("radar{}", marker));
 
-    if (buoy_num > 0) {
-                ch->sendText("@wYou need to 'deactivate' that marker.\r\n");
-    } else {
+    if (buoy_num > 0)
+    {
+        ch->sendText("@wYou need to 'deactivate' that marker.\r\n");
+    }
+    else
+    {
         act("@wYou enter a unique code and launch a marker buoy.@n\r\n", false, ch, nullptr, nullptr, TO_CHAR);
         act("@C$n@w manipulates the ship controls.@n\r\n", false, ch, nullptr, nullptr, TO_ROOM);
 
-        ch->setBaseStat(fmt::format("radar{}", marker), vehicle->getRoomVnum());
+        ch->setBaseStat(fmt::format("radar{}", marker), vehicle->location.getVnum());
     }
 }
 
-static void handle_buoy_deactivate(Character *ch, const std::string& marker) {
+static void handle_buoy_deactivate(Character *ch, const std::string &marker)
+{
     auto buoy = ch->getBaseStat(fmt::format("radar{}", marker));
 
-    if (buoy <= 0) {
-                ch->sendText("@wYou haven't launched that buoy yet.\r\n");
-    } else {
+    if (buoy <= 0)
+    {
+        ch->sendText("@wYou haven't launched that buoy yet.\r\n");
+    }
+    else
+    {
         act("@wYou enter buoy's code and command it to deactivate.@n\r\n", false, ch, nullptr, nullptr, TO_CHAR);
         act("@C$n@w manipulates the ship controls.@n\r\n", false, ch, nullptr, nullptr, TO_ROOM);
         ch->setBaseStat(fmt::format("radar{}", marker), 0);
     }
 }
 
-ACMD(do_drive) {
+ACMD(do_drive)
+{
     char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
     Object *vehicle = nullptr, *controls = nullptr;
 
     half_chop(argument, arg, arg2);
 
-    if (!strcasecmp(arg, "ready")) {
+    if (!strcasecmp(arg, "ready"))
+    {
         handle_pilot_ready(ch);
         return;
     }
 
-    if (!strcasecmp(arg, "unready")) {
+    if (!strcasecmp(arg, "unready"))
+    {
         handle_pilot_unready(ch);
         return;
     }
@@ -626,30 +728,36 @@ ACMD(do_drive) {
     handle_drive_command(ch, vehicle, controls, arg, arg2);
 }
 
-
-ACMD(do_ship_fire) {
+ACMD(do_ship_fire)
+{
     Object *vehicle, *controls;
     char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 
     two_arguments(argument, arg1, arg2);
 
-    if (!(controls = find_control(ch))) {
-                ch->sendText("@wYou must be near the comm station in the cockpit.\r\n");
+    if (!(controls = find_control(ch)))
+    {
+        ch->sendText("@wYou must be near the comm station in the cockpit.\r\n");
         return;
     }
 
-    if (!(vehicle = find_vehicle_by_vnum(GET_OBJ_VAL(controls, VAL_CONTROL_VEHICLE_VNUM)))) {
-                ch->sendText("@wSomething cosmic is jamming your signal! Quick call Iovan to repair it!\r\n");
+    if (!(vehicle = find_vehicle_by_vnum(GET_OBJ_VAL(controls, VAL_CONTROL_VEHICLE_VNUM))))
+    {
+        ch->sendText("@wSomething cosmic is jamming your signal! Quick call Iovan to repair it!\r\n");
         return;
     }
 
     Object *obj = nullptr, *obj2 = nullptr, *next_obj = nullptr;
     int shot = false;
     auto loco = ch->location.getObjects();
-    for (auto obj : filter_raw(loco)) {
-        if (shot == false) {
-            if (GET_OBJ_TYPE(obj) == ITEM_VEHICLE && obj != vehicle) {
-                if (!strcasecmp(arg1, obj->getName())) {
+    for (auto obj : filter_raw(loco))
+    {
+        if (shot == false)
+        {
+            if (GET_OBJ_TYPE(obj) == ITEM_VEHICLE && obj != vehicle)
+            {
+                if (!strcasecmp(arg1, obj->getName()))
+                {
                     obj2 = obj;
                     shot = true;
                 }

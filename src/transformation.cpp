@@ -539,7 +539,7 @@ namespace trans {
 
     static std::unordered_map<Form, std::function<bool(Character *ch)>> trans_requirements = {
         {Form::spirit_absorption, [](Character *ch) {
-            auto loc = ch->location.findObject([](Object* obj) {
+            auto loc = ch->location.searchObjects([](Object* obj) {
                 return isname("Spirit Bomb", obj->getName());
             });
             return loc == nullptr ? false : true;
@@ -745,7 +745,7 @@ namespace trans {
             }},
 
         {Form::spirit_absorption, [](Character *ch) {
-            auto loc = ch->location.findObject([](Object* obj) {
+            auto loc = ch->location.searchObjects([](Object* obj) {
                 return isname("Spirit Bomb", obj->getName());
             });
             return loc == nullptr ? false : true;
@@ -2511,7 +2511,7 @@ namespace trans {
 
     static std::unordered_map<Form, std::function<void(Character *ch)>> trans_on_transform = {
         {Form::spirit_absorption, [](Character *ch) {
-            auto loc = ch->location.findObject([](Object* obj) {
+            auto loc = ch->location.searchObjects([](Object* obj) {
                 return isname("Spirit Bomb", obj->getName());
             });
             if (loc == nullptr)

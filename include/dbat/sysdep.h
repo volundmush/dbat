@@ -91,10 +91,10 @@ typedef uint32_t bitvector_t;
 
 typedef void(*CommandFunc)(Character *ch, char *argument, int cmd, int subcmd);
 
-typedef int(*SpecialFunc)(Character *ch, Entity *me, int cmd, char *argument);
+typedef int(*SpecialFunc)(Character *ch, HasDgScripts *me, int cmd, char *argument);
 
 #define ACMD(name) void (name)(Character *ch, char *argument, int cmd, int subcmd)
-#define SPECIAL(name) int (name)(Character *ch, Entity *me, int cmd, char *argument)
+#define SPECIAL(name) int (name)(Character *ch, HasDgScripts *me, int cmd, char *argument)
 
 template<typename T = bool>
 using OpResult = std::pair<T, std::optional<std::string>>;

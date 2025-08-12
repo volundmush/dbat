@@ -22,7 +22,7 @@
 #include "dbat/filter.h"
 
 /* From db.c */
-Character::Character() : AbstractThing() {
+Character::Character() {
     type = UnitType::character;
 }
 
@@ -212,13 +212,8 @@ void Character::activate() {
 
     for(const auto& s : services) characterSubscriptions.subscribe(s, sh);
 
-    activateContents();
-    for(auto i = 0; i < NUM_WEARS; i++) {
-        if(GET_EQ(this, i)) {
-            auto obj = GET_EQ(this, i);
-            obj->activate();
-        }
-    }
+    activateInventory();
+    activateEquipment();
 }
 
 
@@ -233,16 +228,11 @@ void Character::deactivate() {
 
     auto sh = shared_from_this();
     characterSubscriptions.unsubscribeFromAll(sh);
-    deactivateContents();
-    for(auto i = 0; i < NUM_WEARS; i++) {
-        if(GET_EQ(this, i)) {
-            auto obj = GET_EQ(this, i);
-            obj->deactivate();
-        }
-    }
+    deactivateInventory();
+    deactivateEquipment();
 }
 
-bool Character::isActive() {
+bool Character::isActive() const {
     return active;
 }
 
@@ -257,31 +247,6 @@ double Character::currentGravity() {
     return location.getEnvironment(ENV_GRAVITY);
 }
 
-Object* Character::findObject(const std::function<bool(Object*)> &func, bool working) {
-    auto o = Entity::findObject(func, working);
-    if(o) return o;
-
-    for(auto &[i, obj] : getEquipment()) {
-        if(working && !obj->isWorking()) continue;
-        if(func(obj)) return obj;
-        auto p = obj->findObject(func, working);
-        if(p) return p;
-    }
-
-    return nullptr;
-}
-
-std::unordered_set<Object*> Character::gatherObjects(const std::function<bool(Object*)> &func, bool working) {
-    auto out = Entity::gatherObjects(func, working);
-
-    for(auto &[i, obj] : getEquipment()) {
-        if(working && !obj->isWorking()) continue;
-        if(func(obj)) out.insert(obj);
-        auto contents = obj->gatherObjects(func, working);
-        out.insert(contents.begin(), contents.end());
-    }
-    return out;
-}
 
 void Character::ageBy(double addedTime) {
     this->time.seconds_aged += addedTime;
@@ -312,7 +277,13 @@ Character::~Character() {
 
     if (desc)
         desc->character = nullptr;
+    
+    extract_script(this, type);
 
+}
+
+const char* Character::getDgName() const {
+    return HasMudStrings::getName();
 }
 
 std::vector<trig_vnum> Character::getProtoScript() const {
@@ -323,33 +294,9 @@ std::vector<trig_vnum> Character::getProtoScript() const {
     return {};
 }
 
-void Character::setLocation(Room* room) {
-    if(!room) return;
-    Location loc;
-    loc.unit = room;
-    setLocation(loc);
-}
-
-void Character::setLocation(room_vnum rv) {
-    auto room = get_room(rv);
-    setLocation(room);
-}
-
-void Character::setLocation(const Location& loc) {
-    if(!loc.unit) return;
-    if(auto l = dynamic_cast<AbstractLocation*>(loc.unit); l) {
-        l->addTo(loc.position, this);
-    }
-}
-
-void Character::setLocation(const AbstractThing* td) {
-    if(!td) return;
-    setLocation(td->location);
-}
-
 void Character::clearLocation() {
     // Characters really shouldn't ever be anywhere else.
-    if(auto l = dynamic_cast<AbstractLocation*>(location.unit); l) {
-        l->removeFrom(this);
+    if(location.unit) {
+        location.unit->removeFromContents(this);
     }
 }

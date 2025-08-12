@@ -354,7 +354,7 @@ ACMD(do_rcopy) {
 
     if (!arg2 || !*arg2) {
         tvnum = atoi(arg);
-        rvnum = ch->getRoomVnum();
+        rvnum = ch->location.getVnum();
     } else if (arg2 || *arg2) {
         rvnum = atoi(arg2);
         tvnum = atoi(arg);

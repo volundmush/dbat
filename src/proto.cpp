@@ -73,33 +73,24 @@ ObjectPrototype::ObjectPrototype(const Object& other) {
 
 }
 
-Entity& Entity::operator=(const ThingPrototype& other) {
+
+Object& Object::operator=(const ObjectPrototype& other) {
     // basic proto data fields
     vn = other.vn;
     if(other.name) strings["name"] = other.name;
     if(other.room_description) strings["room_description"] = other.room_description;
     if(other.look_description) strings["look_description"] = other.look_description;
     if(other.short_description) strings["short_description"] = other.short_description;
+    affect_flags = other.affect_flags;
+    stats = other.stats;
+    extra_descriptions.clear();
     if(other.ex_description) {
-        extra_descriptions.clear();
         for (auto e = other.ex_description; e; e = e->next) {
             auto &ex = extra_descriptions.emplace_back();
             ex.keyword = e->keyword;
             ex.description = e->description;
         }
-    } else {
-        extra_descriptions.clear();
     }
-
-    affect_flags = other.affect_flags;
-    stats = other.stats;
-
-    return *this;
-}
-
-Object& Object::operator=(const ObjectPrototype& other) {
-    // basic proto data fields
-    Entity::operator=(other);
 
     // item proto data fields
     type_flag = other.type_flag;
@@ -120,7 +111,13 @@ void Object::commit_iedit(const ObjectPrototype &other) {
 
 Character& Character::operator=(CharacterPrototype& other) {
     // basic proto data fields
-    Entity::operator=(other);
+    vn = other.vn;
+    if(other.name) strings["name"] = other.name;
+    if(other.room_description) strings["room_description"] = other.room_description;
+    if(other.look_description) strings["look_description"] = other.look_description;
+    if(other.short_description) strings["short_description"] = other.short_description;
+    affect_flags = other.affect_flags;
+    stats = other.stats;
 
     // item proto data fields
     race = other.race;
@@ -137,4 +134,11 @@ Character& Character::operator=(CharacterPrototype& other) {
     size = other.size;
     
     return *this;
+}
+
+std::string ThingPrototype::scriptString() const {
+    std::vector<std::string> vnums;
+    for(auto p : proto_script) vnums.emplace_back(std::move(std::to_string(p)));
+
+    return fmt::format("@D[@wT{}@D]@n", fmt::join(vnums, ","));
 }

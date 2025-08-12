@@ -28,6 +28,21 @@ void Coordinates::apply(Direction dir) {
     }
 }
 
+Location::Location(room_vnum rv) {
+    unit = get_room(rv);
+    position = Coordinates{0, 0, 0};
+}
+
+Location::Location(Room* room) {
+    unit = room;
+    position = Coordinates{0, 0, 0};
+}
+
+Location::Location(Character* ch) {
+    *this = ch->location;
+}
+
+
 bool Location::operator==(const Location& other) const {
     return unit == other.unit && position == other.position;
 }
@@ -37,212 +52,212 @@ bool Location::operator==(const Room* room) const {
 }
 
 bool Location::operator==(const room_vnum rv) const {
-    if(!unit) return rv == NOWHERE;
-    if(unit->type != UnitType::room) return false;
-    auto r = static_cast<Room*>(unit);
-    return r->getVnum() == rv;
+    if(auto r = dynamic_cast<Room*>(unit); r) {
+        return r->getVnum() == rv;
+    }
+    return false;
 }
 
 // the bool operator for ...
 Location::operator bool() const {
-    return dynamic_cast<const AbstractLocation*>(unit) != nullptr;
+    return unit != nullptr;
 }
 
-UnitType Location::getType() const {
-    return unit ? unit->type : UnitType::unknown;
-}
-
-AbstractLocation* Location::getLoc() const {
-    if(auto l = dynamic_cast<AbstractLocation*>(unit)) {
-        return l;
-    }
-    return nullptr;
-}
 
 vnum Location::getVnum() const {
-    if(auto l = getLoc(); l) {
-        return l->getVnum();
+    if(unit) {
+        return unit->getLocVnum();
     }
     return NOWHERE;
 }
 
 Zone* Location::getZone() const {
-    if(auto r = dynamic_cast<AbstractLocation*>(unit)) {
-        return r->getZone();
+    if(unit) {
+        return unit->getZone();
     }
     return nullptr;
 }
 
+std::string Location::getLocID() const {
+    if(auto r = dynamic_cast<Room*>(unit); r) {
+        return fmt::format("{}:{}", "R", r->getVnum());
+    }
+    
+    return "";
+}
+
 const char* Location::getName() const {
-    if(auto l = dynamic_cast<AbstractLocation*>(unit)) {
-        return l->getName(position);
+    if(unit) {
+        return unit->getName(position);
     }
     return "Unknown";
 }
 
 const char* Location::getLookDescription() const {
-    if(auto l = dynamic_cast<AbstractLocation*>(unit)) {
-        return l->getLookDescription(position);
+    if(unit) {
+        return unit->getLookDescription(position);
     }
     return "";
 }
 
 std::optional<Destination> Location::getExit(Direction dir) const {
-    if(auto l = dynamic_cast<AbstractLocation*>(unit))
-        return l->getDirection(position, dir);
+    if(unit)
+        return unit->getDirection(position, dir);
     return std::nullopt;
 }
 
 std::map<Direction, Destination> Location::getExits() const {
-    if(auto l = dynamic_cast<AbstractLocation*>(unit)) {
-        return l->getDirections(position);
+    if(unit) {
+        return unit->getDirections(position);
     }
     return {};
 }
 
 const std::vector<ExtraDescription>& Location::getExtraDescription() const {
-    if(auto l = dynamic_cast<AbstractLocation*>(unit)) {
-        return l->getExtraDescription(position);
+    if(unit) {
+        return unit->getExtraDescription(position);
     }
     static std::vector<ExtraDescription> empty;
     return empty;
 }
 
 double Location::getEnvironment(int type) const {
-    if(auto l = dynamic_cast<AbstractLocation*>(unit)) {
-        return l->getEnvironment(position, type);
+    if(unit) {
+        return unit->getEnvironment(position, type);
     }
     return 0.0;
 }
 
 double Location::setEnvironment(int type, double value) {
-    if(auto l = dynamic_cast<AbstractLocation*>(unit)) {
-        return l->setEnvironment(position, type, value);
+    if(unit) {
+        return unit->setEnvironment(position, type, value);
     }
     return 0.0;
 }
 
 double Location::modEnvironment(int type, double value) {
-    if(auto l = dynamic_cast<AbstractLocation*>(unit)) {
-        return l->modEnvironment(position, type, value);
+    if(unit) {
+        return unit->modEnvironment(position, type, value);
     }
     return 0.0;
 }
 
 void Location::clearEnvironment(int type) {
-    if(auto l = dynamic_cast<AbstractLocation*>(unit)) {
-        l->clearEnvironment(position, type);
+    if(unit) {
+        unit->clearEnvironment(position, type);
     }
 }
 
 void Location::setRoomFlag(int flag, bool value) const {
-    if(auto l = dynamic_cast<AbstractLocation*>(unit)) {
-        l->setRoomFlag(position, flag, value);
+    if(unit) {
+        unit->setRoomFlag(position, flag, value);
     }
 }
 
 void Location::setRoomFlag(RoomFlag flag, bool value) const {
-    if(auto l = dynamic_cast<AbstractLocation*>(unit)) {
-        l->setRoomFlag(position, flag, value);
+    if(unit) {
+        unit->setRoomFlag(position, flag, value);
     }
 }
 
 bool Location::toggleRoomFlag(int flag) const {
-    if(auto l = dynamic_cast<AbstractLocation*>(unit)) {
-        return l->toggleRoomFlag(position, flag);
+    if(unit) {
+        return unit->toggleRoomFlag(position, flag);
     }
     return false;
 }
 
 bool Location::toggleRoomFlag(RoomFlag flag) const {
-    if(auto l = dynamic_cast<AbstractLocation*>(unit)) {
-        return l->toggleRoomFlag(position, flag);
+    if(unit) {
+        return unit->toggleRoomFlag(position, flag);
     }
     return false;
 }
 
 bool Location::getRoomFlag(int flag) const {
-    if(auto l = dynamic_cast<AbstractLocation*>(unit)) {
-        return l->getRoomFlag(position, flag);
+    if(unit) {
+        return unit->getRoomFlag(position, flag);
     }
     return false;
 }
 
 bool Location::getRoomFlag(RoomFlag flag) const {
-    if(auto l = dynamic_cast<AbstractLocation*>(unit)) {
-        return l->getRoomFlag(position, flag);
+    if(unit) {
+        return unit->getRoomFlag(position, flag);
     }
     return false;
 }
 
 void Location::setWhereFlag(WhereFlag flag, bool value) const {
-    if(auto l = dynamic_cast<AbstractLocation*>(unit)) {
-        l->setWhereFlag(position, flag, value);
+    if(unit) {
+        unit->setWhereFlag(position, flag, value);
     }
 }
 
 bool Location::toggleWhereFlag(WhereFlag flag) const {
-    if(auto l = dynamic_cast<AbstractLocation*>(unit)) {
-        return l->toggleWhereFlag(position, flag);
+    if(unit) {
+        return unit->toggleWhereFlag(position, flag);
     }
     return false;
 }
 
 bool Location::getWhereFlag(WhereFlag flag) const {
-    if(auto l = dynamic_cast<AbstractLocation*>(unit)) {
-        return l->getWhereFlag(position, flag);
+    if(unit) {
+        return unit->getWhereFlag(position, flag);
     }
     return false;
 }
 
 std::string Location::getUID(bool active) const {
-    if(unit) return unit->getUID(active);
+    if(auto r = dynamic_cast<Room*>(unit); r) {
+        return r->getUID(active);
+    }
     return "";
 }
 
 void Location::sendText(const std::string& message) const {
-    if(auto l = dynamic_cast<AbstractLocation*>(unit)) {
-        l->broadcastAt(position, message);
+    if(unit) {
+        unit->broadcastAt(position, message);
     }
 }
 
 std::vector<std::weak_ptr<Object>> Location::getObjects() const {
-    if(auto l = dynamic_cast<AbstractLocation*>(unit)) {
-        return l->getObjects(position);
+    if(unit) {
+        return unit->getObjects(position);
     }
     return {};
 }
 
 std::vector<std::weak_ptr<Character>> Location::getPeople() const {
-    if(auto l = dynamic_cast<AbstractLocation*>(unit)) {
-        return l->getPeople(position);
+    if(unit) {
+        return unit->getPeople(position);
     }
     return {};
 }
 
 int Location::getDamage() const {
-    if(auto l = dynamic_cast<AbstractLocation*>(unit)) {
-        return l->getDamage(position);
+    if(unit) {
+        return unit->getDamage(position);
     }
     return 0;
 }
 
 void Location::setDamage(int value) {
-    if(auto l = dynamic_cast<AbstractLocation*>(unit)) {
-        l->setDamage(position, value);
+    if(unit) {
+        unit->setDamage(position, value);
     }
 }
 
 int Location::modDamage(int value) {
-    if(auto l = dynamic_cast<AbstractLocation*>(unit)) {
-        return l->modDamage(position, value);
+    if(unit) {
+        return unit->modDamage(position, value);
     }
     return 0;
 }
 
 SectorType Location::getSectorType() const {
-    if(auto l = dynamic_cast<AbstractLocation*>(unit)) {
-        return l->getSectorType(position);
+    if(unit) {
+        return unit->getSectorType(position);
     }
     return SectorType::inside;
 }
@@ -252,34 +267,36 @@ int Location::getTileType() const {
 }
 
 int Location::getGroundEffect() const {
-    if(auto l = dynamic_cast<AbstractLocation*>(unit)) {
-        return l->getGroundEffect(position);
+    if(unit) {
+        return unit->getGroundEffect(position);
     }
     return 0;
 }
 
 void Location::setGroundEffect(int value) {
-    if(auto l = dynamic_cast<AbstractLocation*>(unit)) {
-        l->setGroundEffect(position, value);
+    if(unit) {
+        unit->setGroundEffect(position, value);
     }
 }
 
 int Location::modGroundEffect(int value) {
-    if(auto l = dynamic_cast<AbstractLocation*>(unit)) {
-        return l->modGroundEffect(position, value);
+    if(unit) {
+        return unit->modGroundEffect(position, value);
     }
     return 0;
 }
 
+
 SpecialFunc Location::getSpecialFunc() const {
-    if(auto l = dynamic_cast<AbstractLocation*>(unit))
-        return l->getSpecialFunc(position);
+    if(unit) {
+        return unit->getSpecialFunc(position);
+    }
     return nullptr;
 }
 
 bool Location::getIsDark() const {
-    if(auto l = dynamic_cast<AbstractLocation*>(unit)) {
-        return l->getIsDark(position);
+    if(unit) {
+        return unit->getIsDark(position);
     }
     return false;
 }
@@ -301,8 +318,8 @@ bool Location::canGo(int dir) const {
 
 
 int Location::getCookElement() const {
-    if(auto l = dynamic_cast<AbstractLocation*>(unit)) {
-        return l->getCookElement(position);
+    if(unit) {
+        return unit->getCookElement(position);
     }
     return 0;
 }
@@ -329,54 +346,85 @@ namespace std {
     }
 }
 
-Object* AbstractLocation::findObject(const Coordinates& coor, const std::function<bool(Object*)> &func, bool working) {
-    auto objs = getObjects(coor);
-    for (const auto& obj : filter_raw(objs)) {
-        if(working && !obj->isWorking()) continue;
+std::vector<std::weak_ptr<Object>> AbstractLocation::getObjects() const {
+    std::vector<std::weak_ptr<Object>> out;
+    for(const auto& obj : filter_shared(objects)) {
+        out.push_back(obj);
+    }
+    return out;
+}
+
+std::vector<std::weak_ptr<Character>> AbstractLocation::getPeople() const {
+    std::vector<std::weak_ptr<Character>> out;
+    for(const auto& chara : filter_shared(people)) {
+        out.push_back(chara);
+    }
+    return out;
+}
+
+std::vector<std::weak_ptr<Object>> AbstractLocation::getObjects(const Coordinates& coor) const {
+    std::vector<std::weak_ptr<Object>> out;
+    for(const auto& obj : filter_shared(objects)) {
+        if(obj->location.position == coor) out.push_back(obj);
+    }
+    return out;
+}
+
+std::vector<std::weak_ptr<Character>> AbstractLocation::getPeople(const Coordinates& coor) const {
+    std::vector<std::weak_ptr<Character>> out;
+    for(const auto& chara : filter_shared(people)) {
+        if(chara->location.position == coor) out.push_back(chara);
+    }
+    return out;
+}
+
+void Location::traverseObjects(const std::function<void(Object*)> &func, bool recurse) {
+    for (const auto& obj : filter_raw(getObjects())) {
+        func(obj);
+        if (recurse) {
+            obj->traverseInventory(func);
+        }
+    }
+}
+
+std::unordered_set<Object*> Location::gatherFromObjects(const std::function<bool(Object*)> &func, bool recurse) {
+    std::unordered_set<Object*> found;
+    for (const auto& obj : filter_raw(getObjects())) {
+        if (func(obj)) {
+            found.insert(obj);
+        }
+        if (recurse) {
+            auto subFound = obj->gatherFromInventory(func);
+            found.insert(subFound.begin(), subFound.end());
+        }
+    }
+    return found;
+}
+
+Object* Location::searchObjects(const std::function<bool(Object*)> &func, bool recurse) {
+    for (const auto& obj : filter_raw(getObjects())) {
         if (func(obj)) {
             return obj;
         }
-    }
-    return nullptr;
-}
-
-Object* AbstractLocation::findObjectVnum(const Coordinates& coor, obj_vnum objVnum, bool working) {
-    return findObject(coor, [objVnum, working](Object* obj) {
-        return obj->getVnum() == objVnum && (!working || obj->isWorking());
-    });
-}
-
-std::unordered_set<Object*> AbstractLocation::gatherObjects(const Coordinates& coor, const std::function<bool(Object*)> &func, bool working) {
-    std::unordered_set<Object*> result;
-    auto objs = getObjects(coor);
-    for (const auto& obj : filter_raw(objs)) {
-        if(working && !obj->isWorking()) continue;
-        if (func(obj)) {
-            result.insert(obj);
+        if (recurse) {
+            auto found = obj->searchInventory(func);
+            if (found) return found;
         }
     }
-    return result;
-}
-
-Object* Location::findObject(const std::function<bool(Object*)> &func, bool working) {
-    if(auto l = dynamic_cast<AbstractLocation*>(unit)) {
-        return l->findObject(position, func, working);
-    }
     return nullptr;
 }
 
-Object* Location::findObjectVnum(obj_vnum objVnum, bool working) {
-    if(auto l = dynamic_cast<AbstractLocation*>(unit)) {
-        return l->findObjectVnum(position, objVnum, working);
+Object* Location::searchObjects(obj_vnum vnum, bool working, bool recurse) {
+    for (const auto& obj : filter_raw(getObjects())) {
+        if (obj->getVnum() == vnum && (!working || obj->isWorking())) {
+            return obj;
+        }
+        if (recurse) {
+            auto found = obj->searchInventory(vnum, working);
+            if (found) return found;
+        }
     }
     return nullptr;
-}
-
-std::unordered_set<Object*> Location::gatherObjects(const std::function<bool(Object*)> &func, bool working) {
-    if(auto l = dynamic_cast<AbstractLocation*>(unit)) {
-        return l->gatherObjects(position, func, working);
-    }
-    return {};
 }
 
 std::optional<Destination> Destination::getReverse() const {
@@ -473,50 +521,49 @@ void AbstractLocation::deleteExit(const Coordinates& coor, Direction dir) {
     // Implementation for deleting an exit in the location data
 }
 
-void AbstractLocation::addTo(const Coordinates& coor, Character* ch) {
+void AbstractLocation::addToContents(const Coordinates& coor, Character*ch) {
+    addToContents(coor, ch->shared());
+}
 
-    auto sh = ch->shared();
-    contents.push_front(sh);
+void AbstractLocation::addToContents(const Coordinates& coor, const std::shared_ptr<Character>& ch) {
+
+    people.push_front(ch);
     ch->location.unit = this;
     ch->location.position = coor;
     auto z = getZone();
 
     if(IS_NPC(ch)) {
-        z->npcsInZone.push_back(sh);
+        z->npcsInZone.push_back(ch);
     } else {
-        z->playersInZone.push_back(sh);
-        if (PRF_FLAGGED(ch, PRF_ARENAWATCH)) {
+        z->playersInZone.push_back(ch);
+        if (ch->pref_flags.get(PRF_ARENAWATCH)) {
             ch->pref_flags.set(PRF_ARENAWATCH, false);
             ch->setBaseStat<room_vnum>("arena_watch", -1);
         }
     }
 
     /* Stop fighting now, if we left. */
-    if (FIGHTING(ch) && ch->location != FIGHTING(ch)->location && !AFF_FLAGGED(ch, AFF_PURSUIT)) {
+    if (FIGHTING(ch) && ch->location != FIGHTING(ch)->location && !ch->affect_flags.get(AFF_PURSUIT)) {
         stop_fighting(FIGHTING(ch));
-        stop_fighting(ch);
+        stop_fighting(ch.get());
     }
 }
 
-void AbstractLocation::addTo(const Coordinates& coor, Object* obj) {
+void AbstractLocation::addToContents(const Coordinates& coor, Object* obj) {
+    addToContents(coor, obj->shared());
+}
 
-    if (getVnum() == real_room(80)) {
-        auc_load(obj);
-    }
-    auto sh = obj->shared();
+void AbstractLocation::addToContents(const Coordinates& coor, const std::shared_ptr<Object>& obj) {
 
-    contents.push_front(sh);
+    objects.push_front(obj);
     obj->location.unit = this;
     obj->location.position = coor;
     obj->setBaseStat("lload", time(nullptr));
+
     auto z = getZone();
+    z->objectsInZone.push_back(obj);
 
-    z->objectsInZone.push_back(sh);
-
-    if (GET_OBJ_TYPE(obj) == ITEM_VEHICLE && !OBJ_FLAGGED(obj, ITEM_UNBREAKABLE) &&
-        GET_OBJ_VNUM(obj) > 19199) {
-        obj->item_flags.set(ITEM_UNBREAKABLE, true);
-    }
+    onAddToContents(coor, obj);
 
     /* // Putting this here for safekeeping.
     
@@ -539,7 +586,13 @@ void AbstractLocation::addTo(const Coordinates& coor, Object* obj) {
     */
 }
 
-void AbstractLocation::removeFrom(Character* ch) {
+
+
+void AbstractLocation::removeFromContents(Character* ch) {
+    removeFromContents(ch->shared());
+}
+
+void AbstractLocation::removeFromContents(const std::shared_ptr<Character>& ch) {
     // Implementation for removing a character from the location
     if(!ch) {
         basic_mud_log("SYSERR: nullptr character passed to AbstractLocation::removeFrom.");
@@ -551,10 +604,10 @@ void AbstractLocation::removeFrom(Character* ch) {
         return;
     }
 
-    if (FIGHTING(ch) && !AFF_FLAGGED(ch, AFF_PURSUIT))
-        stop_fighting(ch);
+    if (FIGHTING(ch) && !ch->affect_flags.get(AFF_PURSUIT))
+        stop_fighting(ch.get());
 
-    if (AFF_FLAGGED(ch, AFF_PURSUIT) && FIGHTING(ch) == nullptr)
+    if (ch->affect_flags.get(AFF_PURSUIT) && FIGHTING(ch) == nullptr)
         ch->affect_flags.set(AFF_PURSUIT, false);
     
     auto sh = ch->shared();
@@ -565,11 +618,17 @@ void AbstractLocation::removeFrom(Character* ch) {
         z->playersInZone.remove_if([sh](auto& npc) { return npc.expired() || npc.lock() == sh; });
     }
 
-    contents.remove_if([sh](auto& c) { return c.expired() || c.lock() == sh; });
+    people.remove_if([sh](auto& c) { return c.expired() || c.lock() == sh; });
     ch->location = {};
+
+    onRemoveFromContents(ch);
 }
 
-void AbstractLocation::removeFrom(Object* obj) {
+void AbstractLocation::removeFromContents(Object* obj) {
+    removeFromContents(obj->shared());
+}
+
+void AbstractLocation::removeFromContents(const std::shared_ptr<Object>& obj) {
     if(!obj) {
         basic_mud_log("SYSERR: nullptr object passed to AbstractLocation::removeFrom.");
         return;
@@ -596,11 +655,11 @@ void AbstractLocation::removeFrom(Object* obj) {
         GET_OBJ_POSTTYPE(obj) = 0;
     }
 
-    auto shared = obj->shared();
     auto z = getZone();
-    z->objectsInZone.remove_if([shared](auto& obj) { return obj.expired() || obj.lock() == shared; });
-    contents.remove_if([shared](auto& obj) { return obj.expired() || obj.lock() == shared; });
+    z->objectsInZone.remove_if([obj](auto& o) { return o.expired() || o.lock() == obj; });
+    objects.remove_if([obj](auto& o) { return o.expired() || o.lock() == obj; });
 
     obj->location = {};
+    onRemoveFromContents(obj);
 
 }

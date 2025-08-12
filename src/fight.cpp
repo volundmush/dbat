@@ -201,7 +201,7 @@ static int pick_n_throw(Character *ch, char *buf) {
         return (false);
     }
 
-    if (auto cont = ch->location.findObject([ch](const auto& o) { return ch->canCarryWeight(o);}); cont) {
+    if (auto cont = ch->location.searchObjects([ch](const auto& o) { return ch->canCarryWeight(o);}); cont) {
         snprintf(buf2, sizeof(buf2), "%s", cont->getName());
         do_get(ch, buf2, 0, 0);
         snprintf(buf3, sizeof(buf3), "%s %s", buf2, buf);
@@ -780,14 +780,14 @@ struct attack_hit_type attack_hit_text[NUM_ATTACK_TYPES] =
 
 #define IS_WEAPON(type) (((type) >= TYPE_HIT) && ((type) < TYPE_SUFFERING))
 
-static const std::map<vital_t, std::pair<std::string, std::string>> powerupMessages = {
+static const std::map<int64_t, std::pair<std::string, std::string>> powerupMessages = {
         {50000, {"@RYou continue to powerup, as wind billows out from around you!@n", "@R$n continues to powerup, as wind billows out from around $m!@n"}},
         {500000, {"@RYou continue to powerup, as the ground splits beneath you!@n", "@R$n continues to powerup, as the ground splits beneath $m!@n"}},
         {5000000, {"@RYou continue to powerup, as the ground shudders and splits beneath you!@n", "@R$n continues to powerup, as the ground shudders and splits beneath $m!@n"}},
         {50000000, {"@RYou continue to powerup, as a huge depression forms beneath you!@n", "@R$n continues to powerup, as a huge depression forms beneath $m!@n"}},
         {100000000, {"@RYou continue to powerup, as the entire area quakes around you!@n", "@R$n continues to powerup, as the entire area quakes around $m!@n"}},
         {300000000, {"@RYou continue to powerup, as huge chunks of ground are ripped apart beneath you!@n", "@R$n continues to powerup, as huge chunks of ground are ripped apart beneath $m!@n"}},
-        {std::numeric_limits<vital_t>::max(), {"@RYou continue to powerup, as the very air around you crackles and burns!@n", "@R$n continues to powerup, as the very air around $m crackles and burns!@n"}}
+        {std::numeric_limits<int64_t>::max(), {"@RYou continue to powerup, as the very air around you crackles and burns!@n", "@R$n continues to powerup, as the very air around $m crackles and burns!@n"}}
 };
 
 void powerupService(uint64_t heartPulse, double deltaTime) {
@@ -1462,11 +1462,11 @@ static void make_pcorpse(Character *ch) {
 
 
     auto inv = ch->getInventory();
-    for (auto obj : filter_raw(inv)) {
+    for (auto obj : filter_shared(inv)) {
         if (GET_OBJ_VNUM(obj) < 19900 && GET_OBJ_VNUM(obj) != 17998) {
             if (!((GET_OBJ_VNUM(obj) >= 18800 && GET_OBJ_VNUM(obj) <= 18999) || (GET_OBJ_VNUM(obj) >= 19100 && GET_OBJ_VNUM(obj) <= 19199))) {
                 obj->clearLocation();
-                obj_to_obj(obj, corpse);
+                corpse->addToInventory(obj);
             }
         }
     }
@@ -1482,7 +1482,7 @@ static void make_pcorpse(Character *ch) {
          */
         if (IS_NPC(ch) || ch->desc) {
             money = create_money(GET_GOLD(ch));
-            obj_to_obj(money, corpse);
+            corpse->addToInventory(money);
         }
         ch->setBaseStat("money_carried", 0);
     }
@@ -1595,7 +1595,8 @@ static void handle_corpse_condition(Object *corpse, Character *ch) {
     }
 }
 
-static void make_corpse(Character *ch, Character *tch) {
+static void make_corpse(Character *ch, Character *tch)
+{
     Object *corpse, *o;
     Object *money;
     Object *obj, *next_obj;
@@ -1607,65 +1608,82 @@ static void make_corpse(Character *ch, Character *tch) {
     /* This handles how the corpse is viewed - Iovan */
     handle_corpse_condition(corpse, ch);
 
-    if (AFF_FLAGGED(ch, AFF_ASHED)) {
+    if (AFF_FLAGGED(ch, AFF_ASHED))
+    {
         act("@WSome ashes fall off the corpse.@n", true, ch, nullptr, nullptr, TO_ROOM);
         Object *ashes;
-        if (rand_number(1, 3) == 2) {
+        if (rand_number(1, 3) == 2)
+        {
             ashes = read_object(1305, VIRTUAL);
             ashes->setLocation(ch);
             ashes = read_object(1305, VIRTUAL);
             ashes->setLocation(ch);
             ashes = read_object(1305, VIRTUAL);
             ashes->setLocation(ch);
-        } else if (rand_number(1, 2) == 2) {
+        }
+        else if (rand_number(1, 2) == 2)
+        {
             ashes = read_object(1305, VIRTUAL);
             ashes->setLocation(ch);
             ashes = read_object(1305, VIRTUAL);
             ashes->setLocation(ch);
-        } else {
+        }
+        else
+        {
             ashes = read_object(1305, VIRTUAL);
             ashes->setLocation(ch);
         }
     }
 
     /* Let's have a chance to give animals meat */
-    if (tch) {
-        if (!IS_NPC(tch) && GET_SKILL(tch, SKILL_SURVIVAL)) {
+    if (tch)
+    {
+        if (!IS_NPC(tch) && GET_SKILL(tch, SKILL_SURVIVAL))
+        {
             int skill = GET_SKILL(tch, SKILL_SURVIVAL);
-            if (!IS_HUMANOID(ch) && PRF_FLAGGED(tch, PRF_CARVE) && axion_dice(0) < skill) {
+            if (!IS_HUMANOID(ch) && PRF_FLAGGED(tch, PRF_CARVE) && axion_dice(0) < skill)
+            {
                 bool chance = false;
                 int repeats = 0;
 
-                if (skill < 25) {
+                if (skill < 25)
+                {
                     chance = true;
                 }
-                else if (skill < 50) {
+                else if (skill < 50)
+                {
                     repeats = 1;
                 }
-                else if (skill < 75) {
+                else if (skill < 75)
+                {
                     chance = true;
                     repeats = 1;
                 }
-                else if (skill < 100) {
+                else if (skill < 100)
+                {
                     repeats = 2;
                 }
-                else if (skill == 100) {
+                else if (skill == 100)
+                {
                     chance = true;
                     repeats = 2;
                 }
 
-                if (chance && rand_number(1, 10) > 5) {
+                if (chance && rand_number(1, 10) > 5)
+                {
                     repeats += 1;
                 }
 
-                if (repeats > 0) {
-                                        tch->sendText("The choice edible meat is preserved because of your skill.\r\n");
+                if (repeats > 0)
+                {
+                    tch->sendText("The choice edible meat is preserved because of your skill.\r\n");
                 }
 
-                for (int ind = 0; ind < repeats; ind++) {
+                for (int ind = 0; ind < repeats; ind++)
+                {
                     Object *meat;
                     meat = read_object(1612, VIRTUAL);
-                    obj_to_char(meat, ch);
+                    ch->addToInventory(meat);
                     char nick[MAX_INPUT_LENGTH], nick2[MAX_INPUT_LENGTH], nick3[MAX_INPUT_LENGTH];
                     sprintf(nick, "@RRaw %s@R Steak@n", GET_NAME(ch));
                     sprintf(nick2, "Raw %s Steak", ch->getName());
@@ -1675,7 +1693,6 @@ static void make_corpse(Character *ch, Character *tch) {
                     meat->strings["room_description"] = nick3;
                     SET_OBJ_VAL(meat, VAL_ALL_MATERIAL, 14);
                 }
-
             }
         }
     }
@@ -1684,10 +1701,11 @@ static void make_corpse(Character *ch, Character *tch) {
     corpse->size = static_cast<Size>(get_size(ch));
 
     corpse->wear_flags.set(ITEM_WEAR_TAKE, true);
-    for(auto f : {ITEM_NODONATE, ITEM_UNIQUE_SAVE}) corpse->item_flags.set(f, true);
-    SET_OBJ_VAL(corpse, VAL_CONTAINER_CAPACITY, 0);    /* You can't store stuff in a corpse */
-    SET_OBJ_VAL(corpse, VAL_CONTAINER_CORPSE, 1);    /* corpse identifier */
-    SET_OBJ_VAL(corpse, VAL_CONTAINER_OWNER, -1);    /* corpse identifier */
+    for (auto f : {ITEM_NODONATE, ITEM_UNIQUE_SAVE})
+        corpse->item_flags.set(f, true);
+    SET_OBJ_VAL(corpse, VAL_CONTAINER_CAPACITY, 0); /* You can't store stuff in a corpse */
+    SET_OBJ_VAL(corpse, VAL_CONTAINER_CORPSE, 1);   /* corpse identifier */
+    SET_OBJ_VAL(corpse, VAL_CONTAINER_OWNER, -1);   /* corpse identifier */
     corpse->setBaseStat<weight_t>("weight", ch->getBaseStat("weight_total"));
     corpse->setBaseStat<int>("cost_per_day", 100000);
     if (IS_NPC(ch))
@@ -1695,49 +1713,55 @@ static void make_corpse(Character *ch, Character *tch) {
     else
         corpse->setBaseStat<int>("timer", rand_number(CONFIG_MAX_PC_CORPSE_TIME / 2, CONFIG_MAX_PC_CORPSE_TIME));
 
-    if (MOB_FLAGGED(ch, MOB_HUSK)) {
+    if (MOB_FLAGGED(ch, MOB_HUSK))
+    {
         auto con = ch->getInventory();
-        for (auto obj : filter_raw(con)) {
+        for (auto obj : filter_raw(con))
+        {
             obj->clearLocation();
             extract_obj(obj);
         }
-    } else {
+    }
+    else
+    {
         /* transfer character's inventory to the corpse */
         auto con = ch->getInventory();
-        for(auto o : filter_raw(con)) {
+        for (auto o : filter_shared(con))
+        {
             o->clearLocation();
-            obj_to_obj(o, corpse);
+            corpse->addToInventory(o);
         }
 
         /* transfer character's equipment to the corpse */
         int eqdrop = false;
-        for (i = 0; i < NUM_WEARS; i++)
-            if (GET_EQ(ch, i)) {
-                remove_otrigger(GET_EQ(ch, i), ch);
-                obj_to_obj(unequip_char(ch, i), corpse);
-                eqdrop = true;
-            }
-    }
-
-    /* transfer gold */
-    if (GET_GOLD(ch) > 0 && !MOB_FLAGGED(ch, MOB_HUSK)) {
-        /*
-         * following 'if' clause added to fix gold duplication loophole
-         * The above line apparently refers to the old "partially log in,
-         * kill the game character, then finish login sequence" duping
-         * bug. The duplication has been fixed (knock on wood) but the
-         * test below shall live on, for a while. -gg 3/3/2002
-         */
-        if (IS_NPC(ch) || ch->desc) {
-            money = create_money(GET_GOLD(ch));
-            obj_to_obj(money, corpse);
+        for (auto &[slot, obj] : ch->getEquipment())
+        {
+            remove_otrigger(obj, ch);
+            auto un = unequip_char(ch, slot);
+            corpse->addToInventory(un);
+            eqdrop = true;
         }
-        ch->setBaseStat("money_carried", 0);
+
+        /* transfer gold */
+        if (GET_GOLD(ch) > 0 && !MOB_FLAGGED(ch, MOB_HUSK))
+        {
+            /*
+             * following 'if' clause added to fix gold duplication loophole
+             * The above line apparently refers to the old "partially log in,
+             * kill the game character, then finish login sequence" duping
+             * bug. The duplication has been fixed (knock on wood) but the
+             * test below shall live on, for a while. -gg 3/3/2002
+             */
+            if (IS_NPC(ch) || ch->desc)
+            {
+                money = create_money(GET_GOLD(ch));
+                corpse->addToInventory(money);
+            }
+            ch->setBaseStat("money_carried", 0);
+        }
     }
     corpse->setLocation(ch);
-
 }
-
 
 void loadmap(Character *ch) {
 
@@ -1852,7 +1876,7 @@ void raw_kill(Character *ch, Character *killer) {
     if (killer && !IS_NPC(killer)) {
         if (!IS_NPC(killer) && !IS_NPC(ch)) {
             send_to_imm("[PK] %s killed %s at room [%d]\r\n", GET_NAME(killer), GET_NAME(ch),
-                        killer->getRoomVnum());
+                        killer->location.getVnum());
         }
         if ((IS_SAIYAN(killer) && rand_number(1, 2) == 2) || !IS_SAIYAN(killer)) {
             if (rand_number(1, 6) >= 5 &&
@@ -1996,7 +2020,7 @@ void raw_kill(Character *ch, Character *killer) {
         extract_char(ch);
     } else {
         if (!AFF_FLAGGED(ch, AFF_SPIRIT) && !ch->location.getWhereFlag(WhereFlag::pendulum_past) &&
-            (ch->getRoomVnum() < 17900 || ch->getRoomVnum() > 17999)) {
+            (ch->location.getVnum() < 17900 || ch->location.getVnum() > 17999)) {
             if (!PLR_FLAGGED(ch, PLR_ABSORBED)) {
                 make_pcorpse(ch);
                 loadmap(ch);
@@ -2108,7 +2132,7 @@ void die(Character *ch, Character *killer) {
         for(auto f : {PLR_KILLER, PLR_THIEF}) ch->player_flags.set(f, false);
         for(auto f : {AFF_KNOCKED, AFF_SLEEP, AFF_PARALYZE}) ch->affect_flags.set(f, false);
         if (!AFF_FLAGGED(ch, AFF_SPIRIT) && !ch->location.getWhereFlag(WhereFlag::pendulum_past) && !ch->is_newbie()) {
-            if (ch->getRoomVnum() >= 2002 && ch->getRoomVnum() <= 2011) {
+            if (ch->location.getVnum() >= 2002 && ch->location.getVnum() <= 2011) {
                 ch->setBaseStat("death_time", time(nullptr));
             } else if (ch->location.getWhereFlag(WhereFlag::afterlife) || ch->location.getRoomFlag(ROOM_HELL)) {
                                 ch->sendText("Your soul is saved from destruction by King Yemma. Why? Who knows.\r\n");

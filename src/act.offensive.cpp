@@ -928,7 +928,7 @@ ACMD(do_charge) {
             characterSubscriptions.unsubscribe("kiLeakingSystem", ch);
             ch->player_flags.set(PLR_CHARGE, true);
         }
-    } else if (amt < 1 && ch->getRoomVnum() != 1562) {
+    } else if (amt < 1 && ch->location.getVnum() != 1562) {
                 ch->sendText("You have set it too low!\r\n");
         return;
     } else {
@@ -936,14 +936,14 @@ ACMD(do_charge) {
     }
 }
 
-static const std::map<vital_t, std::pair<std::string, std::string>> startPowerUpMessages = {
+static const std::map<int64_t, std::pair<std::string, std::string>> startPowerUpMessages = {
         {50000, {"@RYou begin to powerup, and air billows outward around you!@n", "@R$n begins to powerup, and air billows outward around $m!@n"}},
         {500000, {"@RYou begin to powerup, and loose objects are lifted into the air!@n", "@R$n begins to powerup, and loose objects are lifted into the air!@n"}},
         {5000000, {"@RYou begin to powerup, and torrents of energy crackle around you!@n", "@R$n begins to powerup, and torrents of energy crackle around $m!@n"}},
         {50000000, {"@RYou begin to powerup, and the entire area begins to shudder!@n", "@R$n begins to powerup, and the entire area begins to shudder!@n"}},
         {100000000, {"@RYou begin to powerup, and massive cracks begin to form beneath you!@n", "@R$n begins to powerup, and massive cracks begin to form beneath $m!@n"}},
         {300000000, {"@RYou begin to powerup, and everything around you shudders from the power!@n", "@R$n begins to powerup, and everything around $m shudders from the power!@n"}},
-        {std::numeric_limits<vital_t>::max(), {"@RYou begin to powerup, and the very air around you begins to burn!@n", "@R$n begins to powerup, and the very air around $m begins to burn!@n"}}
+        {std::numeric_limits<int64_t>::max(), {"@RYou begin to powerup, and the very air around you begins to burn!@n", "@R$n begins to powerup, and the very air around $m begins to burn!@n"}}
 };
 
 ACMD(do_powerup) {
@@ -1146,7 +1146,7 @@ ACMD(do_flee) {
     if (!IS_NPC(ch)) {
         int fail = false;
         auto isMyAttack = [&](const auto&o) {return KICHARGE(o) > 0 && USER(o) == ch;};
-        if (auto obj = ch->location.findObject(isMyAttack); obj) {
+        if (auto obj = ch->location.searchObjects(isMyAttack); obj) {
             ch->sendText("You are too busy controlling your attack!\r\n");
             return;
         }
@@ -1174,7 +1174,7 @@ ACMD(do_flee) {
             was_fighting = FIGHTING(ch);
 
             auto isWall = [&](Object*o) {return o->getVnum() == 79 && GET_OBJ_COST(o) == attempt;};
-            if(auto wall = ch->location.findObject(isWall); wall) {
+            if(auto wall = ch->location.searchObjects(isWall); wall) {
                 ch->sendText("That direction has a glacial wall blocking it.\r\n");
                 return;
             }

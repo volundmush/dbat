@@ -621,7 +621,7 @@ void postmaster_receive_mail(Character *ch, Character *mailman,
         obj->item_flags.set(ITEM_UNIQUE_SAVE, true);
 
         if (IS_PLAYING(ch->desc) && mailman) {
-            obj_to_char(obj, ch);
+            ch->addToInventory(obj);
             act("$n gives you a piece of mail.", false, mailman, nullptr, ch, TO_VICT);
             act("$N gives $n a piece of mail.", false, ch, nullptr, mailman, TO_ROOM);
         } else {

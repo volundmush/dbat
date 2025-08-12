@@ -134,7 +134,6 @@ void deletePlayerCharacter(std::weak_ptr<Character> ref) {
     }), acc->characters.end());
 
     // Let the destructor take it from here, and pray.
-    units.erase(ch->id);
     uniqueCharacters.erase(ch->id);
 }
 

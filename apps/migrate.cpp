@@ -957,12 +957,10 @@ static void parse_room(FILE *fl, room_vnum virtual_nr) {
     auto &z = zone_table.at(zone);
     auto sh = std::make_shared<Room>();
     auto r = sh.get();
-    units.emplace(virtual_nr, sh);
     world.emplace(virtual_nr, sh);
     z.rooms.push_back(sh);
 
     r->zone = &z;
-    r->id = virtual_nr;
     r->vn = virtual_nr;
     r->strings["name"] = fread_string(fl, buf2);
     r->strings["look_description"] = fread_string(fl, buf2);
@@ -2728,8 +2726,6 @@ static int load_char(const char *name, struct Character *ch) {
         ch->time.created = time(nullptr);
     }
 
-    ch->generation = ch->time.created;
-
     if (!ch->time.birth) {
         basic_mud_log("No birthday for user %s, using standard starting age determination", GET_NAME(ch));
         ch->time.birth = time(nullptr) - birth_age(ch);
@@ -2964,7 +2960,7 @@ int House_load(room_vnum rvnum) {
 
                         case 'G':
                             get_line(fl, line);
-                            sscanf(line, "%" TMT, &temp->generation);
+                            //sscanf(line, "%" TMT, &temp->generation);
                             get_line(fl, line);
                             break;
                         case 'U':
@@ -3160,7 +3156,7 @@ void migrate_accounts() {
         std::ifstream file(p.path());
 
         // Step 1: create an ID for this account...
-        auto id = getNextAccountID();
+        auto id = getNextID(lastAccountID, accounts);
 
         // Now let's get a new account_data...
         auto &a = accounts[id];
@@ -3251,11 +3247,10 @@ void migrate_characters() {
         }
         auto ch = sh.get();
         convert_character(ch);
-        auto id = getNextUnitID();
+        auto id = getNextID(lastCharacterID, uniqueCharacters);
         auto &p = players[id];
         p.id = id;
         ch->id = id;
-        if(!ch->generation) ch->generation = time(nullptr);
         p.character = ch;
         p.name = ch->getName();
         auto &a = accounts[accID];
@@ -3265,7 +3260,6 @@ void migrate_characters() {
         auto lroom = ch->getBaseStat<room_vnum>("load_room");
         ch->setBaseStat<room_vnum>("was_in_room", lroom);
         uniqueCharacters.emplace(id, sh);
-        units.emplace(id, sh);
     }
 
     // migrate sense files...
@@ -3374,7 +3368,7 @@ void migrate_characters() {
 
             try {
                 auto ctx = std::stoi(context);
-                ch->script_variables[varname] = data;
+                ch->variables[varname] = data;
             } catch(...) {
                 basic_mud_log("Error parsing %s for variable migration.", line.c_str());
             }

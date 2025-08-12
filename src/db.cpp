@@ -60,14 +60,15 @@ bool gameIsLoading = true;
 bool saveAll = false;
 bool isMigrating = false;
 
+int64_t lastCharacterID{0}, lastObjectID{0}, lastAccountID{0};
 
 struct config_data config_info; /* Game configuration list.    */
 
 // The global database of entities.
 NegativeKeyGuardUnorderedMap<int, std::shared_ptr<Entity>> units;
 NegativeKeyGuardMap<room_vnum, std::shared_ptr<Room>> world;
-NegativeKeyGuardUnorderedMap<int, std::shared_ptr<Character>> uniqueCharacters;
-NegativeKeyGuardUnorderedMap<int, std::shared_ptr<Object>> uniqueObjects;
+NegativeKeyGuardUnorderedMap<int64_t, std::shared_ptr<Character>> uniqueCharacters;
+NegativeKeyGuardUnorderedMap<int64_t, std::shared_ptr<Object>> uniqueObjects;
 
 Character *affect_list = nullptr; /* global linked list of chars with affects */
 Character *affectv_list = nullptr; /* global linked list of chars with round-based affects */
@@ -127,8 +128,6 @@ void destroy_db() {
         if(ent) ent->deactivate();
     }
     world.clear();
-
-    units.clear();
     
 }
 
@@ -298,7 +297,10 @@ static void db_load_activate_entities() {
     for(auto &[id, r] : world) {
         assign_triggers(r.get(), WLD_TRIGGER);
         r->activateScripts();
-        r->activateContents();
+        auto con = r->getObjects();
+        for(auto o : filter_raw(con)) {
+            o->activate();
+        }
         auto people = r->getPeople();
         for(auto c : filter_raw(people)) {
             if(IS_NPC(c)) {
@@ -582,7 +584,7 @@ void auc_save() {
     else {
         auto con = get_room(80)->getObjects();
         for (auto obj : filter_raw(con)) {
-            fprintf(fl, "%d %s %ld %ld %d %d %ld\n", obj->id, GET_AUCTERN(obj), GET_AUCTER(obj),
+            fprintf(fl, "%ld %s %ld %ld %d %d %ld\n", obj->id, GET_AUCTERN(obj), GET_AUCTER(obj),
                         GET_CURBID(obj), GET_STARTBID(obj), GET_BID(obj), GET_AUCTIME(obj));
         }
         fprintf(fl, "~END~\n");
@@ -845,10 +847,8 @@ Character *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
     auto mob = sh.get();
 
     *mob = proto->second;
-    mob->id = getNextUnitID();
-    mob->generation = time(nullptr);
+    mob->id = getNextID(lastCharacterID, uniqueCharacters);
     uniqueCharacters.emplace(mob->id, sh);
-    units.emplace(mob->id, sh);
 
     mob->activate();
 
@@ -1092,7 +1092,7 @@ Character *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
     bool autoset = mob->getBaseStat<int64_t>("health") <= 1;
     if(autoset) {
         for(auto c : {"health", "ki", "stamina"}) {
-            vital_t base = GET_LEVEL(mob) * mult;
+            int64_t base = GET_LEVEL(mob) * mult;
             if (GET_LEVEL(mob) > 140) {
                 base *= 8;
             } else if (GET_LEVEL(mob) > 130) {
@@ -1387,10 +1387,8 @@ char *sprintuniques(int low, int high) {
 /* create an object, and add it to the object list */
 Object *create_obj() {
     auto sh = std::make_shared<Object>();
-    sh->id = getNextUnitID();
-    sh->generation = time(nullptr);
+    sh->id = getNextID(lastObjectID, uniqueObjects);
     uniqueObjects.emplace(sh->id, sh);
-    units.emplace(sh->id, sh);
     sh->activate();
     assign_triggers(sh.get(), OBJ_TRIGGER);
     return sh.get();
@@ -1415,10 +1413,8 @@ Object *read_object(obj_vnum nr, int type) /* and obj_rnum */
     *obj = proto->second;
 
     OBJ_LOADROOM(obj) = NOWHERE;
-    obj->id = getNextUnitID();
-    obj->generation = time(nullptr);
+    obj->id = getNextID(lastObjectID, uniqueObjects);
     uniqueObjects.emplace(obj->id, sh);
-    units.emplace(obj->id, sh);
 
     
     if (nr == 65) {
@@ -1670,7 +1666,7 @@ static void do_reset_cmds(Zone &z) {
                         break;
                     }
                     obj = read_object(c.arg1, REAL);
-                    obj_to_obj(obj, obj_to);
+                    obj_to->addToInventory(obj);
                     last_cmd = 1;
                     load_otrigger(obj);
                     tobj = obj;
@@ -1691,7 +1687,7 @@ static void do_reset_cmds(Zone &z) {
                     mob_load && (rand_number(1, 100) >= c.arg5))
                 {
                     obj = read_object(c.arg1, REAL);
-                    obj_to_char(obj, mob);
+                    mob->addToInventory(obj);
                     if (GET_MOB_SPEC(mob) != shop_keeper)
                     {
                         randomize_eq(obj);
@@ -1730,7 +1726,7 @@ static void do_reset_cmds(Zone &z) {
                             equip_char(mob, obj, c.arg3);
                         }
                         else
-                            obj_to_char(obj, mob);
+                            mob->addToInventory(obj);
                         tobj = obj;
                         last_cmd = 1;
                     }
@@ -1741,7 +1737,7 @@ static void do_reset_cmds(Zone &z) {
                 break;
 
             case 'R': /* rem obj from room */
-                if (obj = get_room(c.arg1)->findObjectVnum(c.arg2))
+                if (obj = Location(get_room(c.arg1)).searchObjects(c.arg2))
                     extract_obj(obj);
                 last_cmd = 1;
                 tmob = nullptr;
@@ -2555,46 +2551,72 @@ void load_config() {
     fclose(fl);
 }
 
-
-int getNextUnitID() {
-    static int id = 0;
-    while(units.contains(id)) id++;
-    return id;
-}
-
-int getNextAccountID() {
-    static int id = 0;
-    while(accounts.contains(id)) id++;
-    return id;
-}
-
 // ^#(?<id>\d+)(?::(?<generation>\d+)?)?
-static std::regex uid_regex(R"(^#(\d+)(?::(\d+)?)?(!)?)", std::regex::icase);
+static std::regex uid_regex(R"(^#(R|O|C)(\d+)(!)?)", std::regex::icase);
 
 bool isUID(const std::string& uid) {
     return std::regex_match(uid, uid_regex);
 }
 
-std::shared_ptr<Entity> resolveUID(const std::string& uid) {
+std::shared_ptr<HasDgScripts> resolveUID(const std::string& uid) {
     // First we need to check if it matches or not.
     std::smatch match;
-    std::optional<time_t> generation = std::nullopt;
 
     if(!std::regex_search(uid, match, uid_regex)) {
         return nullptr;
     }
 
-    int64_t id = std::stoll(match[1].str()); // First capture group
-    if(match[2].matched) { // Second capture group
-        generation = std::stoll(match[2].str());
+    std::string letter = match[1].str();// First capture group
+    boost::to_upper(letter);
+    int64_t id = std::stoll(match[2].str()); // Second capture group
+    bool active = match[3].matched; // Third capture group
+
+    if(letter == "R") {
+        // Room
+        if(auto find = world.find(id); find != world.end()) {
+            if(active && !find->second->isActive()) return nullptr;
+            return find->second;
+        }
+    } else if(letter == "O") {
+        // Object
+        if(auto find = uniqueObjects.find(id); find != uniqueObjects.end()) {
+            if(active && !find->second->isActive()) return nullptr;
+            return find->second;
+        }
+    } else if(letter == "C") {
+        // Character
+        if(auto find = uniqueCharacters.find(id); find != uniqueCharacters.end()) {
+            if(active && !find->second->isActive()) return nullptr;
+            return find->second;
+        }
     }
 
-    bool active = match[3].matched; // Third capture group
-    
-    if(auto find = units.find(id); find != units.end()) {
-        if(generation && find->second->generation != *generation) return nullptr;
-        if(active && !find->second->isActive()) return nullptr;
-        return find->second;
+    return nullptr;
+}
+
+// ^#(?<id>\d+)(?::(?<generation>\d+)?)?
+static std::regex lid_regex(R"(^(R):(\d+)(:(\d+):(\d+):(\d+))?)", std::regex::icase);
+
+bool isLocID(const std::string& lid) {
+    return std::regex_match(lid, lid_regex);
+}
+
+std::shared_ptr<AbstractLocation> resolveLocID(const std::string& lid) {
+    // First we need to check if it matches or not.
+    std::smatch match;
+
+    if(!std::regex_search(lid, match, lid_regex)) {
+        return nullptr;
+    }
+
+    std::string letter = match[1].str();// First capture group
+    int64_t id = std::stoll(match[2].str()); // Second capture group
+
+    if(letter == "R") {
+        // Room
+        if(auto find = world.find(id); find != world.end()) {
+            return find->second;
+        }
     }
 
     return nullptr;
@@ -2669,4 +2691,8 @@ std::vector<shop_data*> collectShops(int start_vnum, int end_vnum) {
 
 std::vector<DgScriptPrototype*> collectTriggers(int start_vnum, int end_vnum) {
     return collectObjectsInRange(start_vnum, end_vnum, trig_index);
+}
+
+int64_t getNextAccountID() {
+    return getNextID(lastAccountID, accounts);
 }

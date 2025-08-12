@@ -863,7 +863,7 @@ static void shopping_buy(char *arg, Character *ch, Character *keeper, vnum shop_
             obj->clearLocation();
             SHOP_SORT(shop_nr)--;
         }
-        obj_to_char(obj, ch);
+        ch->addToInventory(obj);
         if (OBJ_FLAGGED(obj, ITEM_MATURE)) {
             SET_OBJ_VAL(obj, VAL_PLANT_MAXMATURE, 6);
         }

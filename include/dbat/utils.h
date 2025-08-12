@@ -453,7 +453,7 @@ extern bool OBJ_FLAGGED(Object *obj, int flag);
 /* char utils ************************************************************/
 
 
-#define IN_ROOM(ch)    ((ch)->getRoomVnum())
+#define IN_ROOM(ch)    ((ch)->location.getVnum())
 #define IN_ZONE(ch)   ((ch)->getRoom()->zone)
 #define GET_WAS_IN(ch)    ((ch)->getBaseStat<room_vnum>("was_in_room"))
 #define GET_AGE(ch)     ((ch)->time.currentAge())
@@ -606,7 +606,7 @@ extern int GET_SPEEDI(Character *ch);
 #define GET_POS(ch)        ((ch)->getBaseStat<int>("position"))
 #define GET_IDNUM(ch)        ((ch)->id)
 #define IS_CARRYING_W(ch)    ((ch)->getBaseStat("weight_carried"))
-#define IS_CARRYING_N(ch)    ((ch)->getInventoryCount())
+#define IS_CARRYING_N(ch)    ((ch)->getInventory().size())
 #define FIGHTING(ch)        ((ch)->fighting)
 #define GET_POWERATTACK(ch)    ((ch)->powerattack)
 #define GET_GROUPKILLS(ch)    ((ch)->getBaseStat<int>("group_kills"))
@@ -753,7 +753,7 @@ int64_t MOD_OBJ_VAL(T* obj, const std::string& val, int mod) {
 #define GET_OBJ_EXTRA(obj)    ((obj)->item_flags)
 #define GET_OBJ_EXTRA_AR(obj, i)   ((obj)->item_flags.get((i)))
 #define GET_OBJ_WEAR(obj)    ((obj)->wear_flags)
-#define GET_OBJ_WEIGHT(obj)    ((obj)->getBaseStat<weight_t>("weight"))
+#define GET_OBJ_WEIGHT(obj)    ((obj)->getBaseStat("weight"))
 #define GET_OBJ_TIMER(obj)    ((obj)->getBaseStat<int>("timer"))
 #define SITTING(obj)            ((obj)->sitting.lock().get())
 #define GET_OBJ_POSTTYPE(obj)   ((obj)->posttype)

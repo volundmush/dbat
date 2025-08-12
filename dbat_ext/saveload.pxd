@@ -27,7 +27,7 @@ cdef extern from "dbat/json.h":
 cdef extern from "dbat/saveload.h":
     void runSave()
 
-    structs.player_data* create_player_character(int account_id, const json& j)
+    structs.PlayerData* create_player_character(int account_id, const json& j)
 
     void to_json(json& j, const structs.help_index_element& h)
     void from_json(const json& j, structs.help_index_element& m)
@@ -62,8 +62,8 @@ cdef extern from "dbat/saveload.h":
     void to_json(json& j, const structs.affect_t& a)
     void from_json(const json& j, structs.affect_t& a)
 
-    void to_json(json& j, const structs.account_data& a)
-    void from_json(const json& j, structs.account_data& a)
+    void to_json(json& j, const structs.Account& a)
+    void from_json(const json& j, structs.Account& a)
 
     void to_json(json& j, const structs.DgScriptPrototype& t)
     void from_json(const json& j, structs.DgScriptPrototype& t)
@@ -107,5 +107,5 @@ cdef extern from "dbat/saveload.h":
     void to_json(json& j, const structs.Character& c)
     void from_json(const json& j, structs.Character& c)
 
-    void to_json(json& j, const structs.player_data& p)
-    void from_json(const json& j, structs.player_data& p)
+    void to_json(json& j, const structs.PlayerData& p)
+    void from_json(const json& j, structs.PlayerData& p)

@@ -196,7 +196,7 @@ void fly_planet(room_vnum roomVnum, const char *messg, Character *ch) {
     if (!messg || !*messg)
         return;
 
-    auto planet = getPlanet(ch->getRoomVnum());
+    auto planet = getPlanet(ch->location.getVnum());
 
     if(!planet) {
         return;
@@ -209,7 +209,7 @@ void fly_planet(room_vnum roomVnum, const char *messg, Character *ch) {
         if(IN_ROOM(i->character) == NOWHERE) continue;
         if(!OUTSIDE(i->character)) continue;
 
-        if(planet != getPlanet(i->character->getRoomVnum())) continue;
+        if(planet != getPlanet(i->character->location.getVnum())) continue;
 
         if (PLR_FLAGGED(i->character, PLR_DISGUISED)) {
             i->send_to("A disguised figure %s", messg);
@@ -246,7 +246,7 @@ void send_to_sense(int type, const char *messg, Character *ch) {
     if (!messg || !*messg)
         return;
 
-    auto planet = getPlanet(ch->getRoomVnum());
+    auto planet = getPlanet(ch->location.getVnum());
     if(!planet && type == 0) {
         return;
     }
@@ -265,7 +265,7 @@ void send_to_sense(int type, const char *messg, Character *ch) {
         if (!GET_SKILL(tch, SKILL_SENSE)) {
             continue;
         }
-        if(auto p = getPlanet(tch->getRoomVnum()); type == 0) {
+        if(auto p = getPlanet(tch->location.getVnum()); type == 0) {
             if (!p) {
                 continue;
             }
@@ -353,7 +353,7 @@ void send_to_scouter(const char *messg, Character *ch, int num, int type) {
     if (!messg || !*messg)
         return;
 
-    auto planet = getPlanet(ch->getRoomVnum());
+    auto planet = getPlanet(ch->location.getVnum());
     if(!planet && type == 0) {
         return;
     }
@@ -370,7 +370,7 @@ void send_to_scouter(const char *messg, Character *ch, int num, int type) {
         if (tch == ch) continue;
         if(!AWAKE(tch)) continue;
 
-        if(auto p = getPlanet(tch->getRoomVnum()); type == 0) {
+        if(auto p = getPlanet(tch->location.getVnum()); type == 0) {
             if (!p) {
                 continue;
             }
@@ -435,14 +435,14 @@ void send_to_worlds(Character *ch) {
         return;
     }
 
-    auto p = getPlanet(ch->getRoomVnum());
+    auto p = getPlanet(ch->location.getVnum());
     if(!p) return;
 
     for (auto i = descriptor_list; i; i = i->next) {
         if (STATE(i) != CON_PLAYING) {
             continue;
         }
-        if(p != getPlanet(i->character->getRoomVnum())) continue;
+        if(p != getPlanet(i->character->location.getVnum())) continue;
                 i->character->send_to("%s", message);
     }
 }

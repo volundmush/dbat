@@ -135,13 +135,13 @@ bool assemblyCheckComponents(long lVnum, Character *pCharacter, int extract_yes)
             bOk = false;
         else {
             if (pAssembly->pComponents[i].bInRoom) {
-                if ((ppComponentObjects[i] = pCharacter->location.findObjectVnum(lRnum)) == nullptr)
+                if ((ppComponentObjects[i] = pCharacter->location.searchObjects(lRnum)) == nullptr)
                     bOk = false;
                 else {
                     ppComponentObjects[i]->clearLocation();
                 }
             } else {
-                if ((ppComponentObjects[i] = pCharacter->findObjectVnum(lRnum)) == nullptr)
+                if ((ppComponentObjects[i] = pCharacter->searchInventory(lRnum)) == nullptr)
                     bOk = false;
                 else {
                     ppComponentObjects[i]->clearLocation();
@@ -159,7 +159,7 @@ bool assemblyCheckComponents(long lVnum, Character *pCharacter, int extract_yes)
         else if (pAssembly->pComponents[i].bInRoom)
             ppComponentObjects[i]->setLocation(pCharacter);
         else
-            obj_to_char(ppComponentObjects[i], pCharacter);
+            pCharacter->addToInventory(ppComponentObjects[i]);
     }
 
     free(ppComponentObjects);

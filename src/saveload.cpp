@@ -392,10 +392,40 @@ static void dump_dgscript_prototypes(const std::filesystem::path &loc) {
 }
 
 void load_dgscripts(const std::filesystem::path& loc) {
-    for(auto j : load_from_file(loc, "dgscripts.json")) {
+    for(auto j : load_from_file(loc, "dgscripts_characters.json")) {
         auto id = j["id"].get<int64_t>();
 
-        auto u = units.at(id);
+        auto u = uniqueCharacters.at(id);
+
+        for(auto d : j["scripts"]) {
+            auto vn = d["vn"].get<int>();
+            auto r = std::make_shared<DgScript>();
+            d["data"].get_to(*r);
+            u->scripts.emplace(vn, r);
+            r->owner = u.get();
+            u->trigger_types |= GET_TRIG_TYPE(r);
+        }
+    }
+
+    for(auto j : load_from_file(loc, "dgscripts_objects.json")) {
+        auto id = j["id"].get<int64_t>();
+
+        auto u = uniqueObjects.at(id);
+
+        for(auto d : j["scripts"]) {
+            auto vn = d["vn"].get<int>();
+            auto r = std::make_shared<DgScript>();
+            d["data"].get_to(*r);
+            u->scripts.emplace(vn, r);
+            r->owner = u.get();
+            u->trigger_types |= GET_TRIG_TYPE(r);
+        }
+    }
+
+    for(auto j : load_from_file(loc, "dgscripts_rooms.json")) {
+        auto id = j["vn"].get<int64_t>();
+
+        auto u = world.at(id);
 
         for(auto d : j["scripts"]) {
             auto vn = d["vn"].get<int>();
@@ -409,9 +439,22 @@ void load_dgscripts(const std::filesystem::path& loc) {
 }
 
 static void dump_dgscripts(const std::filesystem::path &loc) {
-    json j;
+    json jr, jo, jc;
 
-    for(auto &[id, u] : units) {
+    for(auto &[id, u] : world) {
+        if(u->scripts.empty()) continue; // Skip units without scripts
+        json j2;
+        j2["vn"] = id;
+        for(auto &[vn, r] : u->scripts) {
+            json j3;
+            j3["vn"] = vn;
+            j3["data"] = *r;
+            j2["scripts"].push_back(j3);
+        }
+        jr.push_back(j2);
+    }
+
+    for(auto &[id, u] : uniqueObjects) {
         if(u->scripts.empty()) continue; // Skip units without scripts
         json j2;
         j2["id"] = id;
@@ -421,9 +464,25 @@ static void dump_dgscripts(const std::filesystem::path &loc) {
             j3["data"] = *r;
             j2["scripts"].push_back(j3);
         }
-        j.push_back(j2);
+        jo.push_back(j2);
     }
-    dump_to_file(loc, "dgscripts.json", j);
+
+    for(auto &[id, u] : uniqueCharacters) {
+        if(u->scripts.empty()) continue; // Skip units without scripts
+        json j2;
+        j2["id"] = id;
+        for(auto &[vn, r] : u->scripts) {
+            json j3;
+            j3["vn"] = vn;
+            j3["data"] = *r;
+            j2["scripts"].push_back(j3);
+        }
+        jc.push_back(j2);
+    }
+
+    dump_to_file(loc, "dgscripts_rooms.json", jr);
+    dump_to_file(loc, "dgscripts_objects.json", jo);
+    dump_to_file(loc, "dgscripts_characters.json", jc);
 }
 
 // org_data...
@@ -586,6 +645,15 @@ void load_globaldata(const std::filesystem::path& loc) {
     if(j.contains("weather")) {
         j["weather"].get_to(weather_info);
     }
+    if(j.contains("lastCharacterID")) {
+        j["lastCharacterID"].get_to(lastCharacterID);
+    }
+    if(j.contains("lastAccountID")) {
+        j["lastAccountID"].get_to(lastAccountID);
+    }
+    if(j.contains("lastObjectID")) {
+        j["lastObjectID"].get_to(lastObjectID);
+    }
 }
 
 void dump_globaldata(const std::filesystem::path &loc) {
@@ -594,6 +662,9 @@ void dump_globaldata(const std::filesystem::path &loc) {
     j["time"] = time_info;
     j["era_uptime"] = era_uptime;
     j["weather"] = weather_info;
+    j["lastCharacterID"] = lastCharacterID;
+    j["lastAccountID"] = lastAccountID;
+    j["lastObjectID"] = lastObjectID;
 
     dump_to_file(loc, "globaldata.json", j);
 }
@@ -606,37 +677,6 @@ void to_json(json& j, const struct extra_descr_data& e) {
 void from_json(const json& j, struct extra_descr_data& e) {
     if(j.contains("keyword")) e.keyword = strdup(j["keyword"].get<std::string>().c_str());
     if(j.contains("description")) e.description = strdup(j["description"].get<std::string>().c_str());
-}
-
-// unit_data serialize/deserialize...
-void to_json(json& j, const Entity& u) {
-    j["vn"] = u.vn;
-    j["id"] = u.id;
-    j["generation"] = u.generation;
-    j["strings"] = u.strings;
-    j["extra_descriptions"] = u.extra_descriptions;
-
-    if(u.running_scripts.has_value()) {
-        j["running_scripts"] = u.running_scripts.value();
-    }
-
-    if(u.variables.empty()) {
-        j["variables"] = u.variables;
-    }
-}
-
-void from_json(const json& j, Entity& u) {
-    if(j.contains("vn")) u.vn = j["vn"].get<int>();
-    if(j.contains("id")) u.id = j["id"];
-    if(j.contains("generation")) u.generation = j["generation"];
-    if(j.contains("strings")) u.strings = j["strings"].get<std::unordered_map<std::string, std::string>>();
-    if(j.contains("extra_descriptions")) u.extra_descriptions = j["extra_descriptions"].get<std::vector<ExtraDescription>>();
-
-    if(j.contains("running_scripts")) {
-        u.running_scripts = j["running_scripts"].get<std::vector<trig_vnum>>();
-    }
-
-    if(j.contains("variables")) u.variables = j["variables"].get<std::unordered_map<std::string, std::string>>();
 }
 
 
@@ -687,7 +727,7 @@ void from_json(const json& j, ThingPrototype& u) {
 }
 
 void to_json(json& j, const Location& loc) {
-    if(loc.unit) j["uid"] = loc.unit->getUID();
+    if(loc) j["loc"] = loc.getLocID();
     else {
         throw std::runtime_error("Location has no unit.");
     }
@@ -696,10 +736,10 @@ void to_json(json& j, const Location& loc) {
 
 void from_json(const json& j, Location& loc) {
     try {
-        if(j.contains("uid")) {
-        auto u = j.at("uid").get<std::string>();
-        auto uid = resolveUID(u);
-        if(uid) loc.unit = uid.get();
+        if(j.contains("loc")) {
+        auto u = j.at("loc").get<std::string>();
+        auto locid = resolveLocID(u);
+        if(locid) loc.unit = locid.get();
         else {
             throw std::runtime_error(fmt::format("Location has invalid unit: {}", u));
         }
@@ -746,7 +786,15 @@ void from_json(const json& j, Destination &e) {
 
 void to_json(json& j, const Room& r) {
     // we need to call the to_json for unit_data...
-    to_json(j, static_cast<const Entity&>(r));
+    to_json(j, static_cast<const HasVnum&>(r));
+    to_json(j, static_cast<const HasVariables&>(r));
+    to_json(j, static_cast<const HasMudStrings&>(r));
+    to_json(j, static_cast<const HasExtraDescriptions&>(r));
+    //to_json(j, static_cast<const HasStats&>(r));
+    //to_json(j, static_cast<const HasAffectFlags&>(r));
+
+    if(r.running_scripts) j["running_scripts"] = r.running_scripts.value();
+
     j["zone"] = r.zone->number;
     
     j["sector_type"] = r.sector_type;
@@ -760,7 +808,17 @@ void to_json(json& j, const Room& r) {
 
 void from_json(const json& j, Room& r) {
     // call the from_json of unit_data...
-    from_json(j, static_cast<Entity&>(r));
+    from_json(j, static_cast<HasVnum&>(r));
+    from_json(j, static_cast<HasVariables&>(r));
+    from_json(j, static_cast<HasMudStrings&>(r));
+    from_json(j, static_cast<HasExtraDescriptions&>(r));
+    //from_json(j, static_cast<HasStats&>(r));
+    //from_json(j, static_cast<HasAffectFlags&>(r));
+
+    if(j.contains("running_scripts")) {
+        r.running_scripts.emplace();
+       j["running_scripts"].get_to(r.running_scripts.value());
+    }
 
     if(j.contains("zone")) r.zone = &(zone_table.at(j["zone"].get<zone_vnum>()));
 
@@ -775,13 +833,10 @@ void from_json(const json& j, Room& r) {
 
 void load_rooms(const std::filesystem::path& loc) {
     for(auto j : load_from_file(loc, "rooms.json")) {
-        auto id = j["id"].get<int64_t>();
+        auto vn = j["vn"].get<int64_t>();
         auto r = std::make_shared<Room>();
         j.get_to(*r);
-        r->id = id;
-        r->vn = id;
-        units.emplace(id, r);
-        world.emplace(id, r);
+        world.emplace(vn, r);
         r->zone->rooms.push_back(r);
         r->activate();
     }
@@ -823,20 +878,6 @@ static void dump_rooms(const std::filesystem::path &loc) {
     dump_to_file(loc, "rooms.json", rooms);
 }
 
-// thing_data serialize/deserialize...
-void to_json(json& j, const AbstractThing& t) {
-    to_json(j, static_cast<const Entity&>(t));
-
-    if(!t.stats.empty()) j["stats"] = t.stats;
-    if(t.affect_flags) j["affect_flags"] = t.affect_flags;
-}
-
-void from_json(const json& j, AbstractThing& t) {
-    from_json(j, static_cast<Entity&>(t));
-
-    if(j.contains("stats")) t.stats = j["stats"];
-    if(j.contains("affect_flags")) t.affect_flags = j["affect_flags"].get<FlagHandler<AffectFlag>>();
-}
 
 // Object serialize/deserialize...
 
@@ -856,8 +897,16 @@ void to_json(json& j, const ObjectPrototype& o) {
 };
 
 void to_json(json& j, const Object& o) {
+    to_json(j, static_cast<const HasID&>(o));
+    to_json(j, static_cast<const HasVnum&>(o));
     to_json(j, static_cast<const picky_data&>(o));
-    to_json(j, static_cast<const AbstractThing&>(o));
+    to_json(j, static_cast<const HasVariables&>(o));
+    to_json(j, static_cast<const HasMudStrings&>(o));
+    to_json(j, static_cast<const HasExtraDescriptions&>(o));
+    to_json(j, static_cast<const HasStats&>(o));
+    to_json(j, static_cast<const HasAffectFlags&>(o));
+
+    if(o.running_scripts) j["running_scripts"] = o.running_scripts.value();
 
     j["type_flag"] = o.type_flag;
     if(o.wear_flags) j["wear_flags"] = o.wear_flags;
@@ -910,7 +959,18 @@ void from_json(const json& j, ObjectPrototype& o) {
 
 void from_json(const json& j, Object& o) {
     from_json(j, static_cast<picky_data&>(o));
-    from_json(j, static_cast<AbstractThing&>(o));
+    from_json(j, static_cast<HasID&>(o));
+    from_json(j, static_cast<HasVnum&>(o));
+    from_json(j, static_cast<HasVariables&>(o));
+    from_json(j, static_cast<HasMudStrings&>(o));
+    from_json(j, static_cast<HasExtraDescriptions&>(o));
+    from_json(j, static_cast<HasStats&>(o));
+    from_json(j, static_cast<HasAffectFlags&>(o));
+
+    if(j.contains("running_scripts")) {
+        o.running_scripts.emplace();
+       j["running_scripts"].get_to(o.running_scripts.value());
+    }
 
     if(j.contains("type_flag")) o.type_flag = j["type_flag"];
 
@@ -925,9 +985,6 @@ void from_json(const json& j, Object& o) {
             counter++;
         }
     }
-
-    // this is an instance.
-    if(j.contains("generation")) o.generation = j["generation"];
 
     if(j.contains("room_loaded")) o.room_loaded = j["room_loaded"];
 
@@ -952,51 +1009,74 @@ void load_item_prototypes(const std::filesystem::path& loc) {
 void load_items_initial(const std::filesystem::path& loc) {
     for(const auto j : load_from_file(loc, "items.json")) {
         auto id = j["id"].get<int64_t>();
-        auto generation = j["generation"].get<int>();
         auto data = j["data"];
         auto sh = std::make_shared<Object>();
         data.get_to(*sh);
         uniqueObjects.emplace(id, sh);
-        units.emplace(id, sh);
     }
     basic_mud_log("Loaded %d items", uniqueObjects.size());
 }
 
+static json serialize_obj_relations(const Object* o) {
+    auto j = json::object();
+
+    if(o->posted_to) j["posted_to"] = o->posted_to->id;
+    if(o->fellow_wall) j["fellow_wall"] = o->fellow_wall->id;
+    if(auto c = o->getContainer()) {
+        j["container"] = c->id;
+    } else if(auto l = o->location) {
+        j["location"] = l;
+    } else if(auto c = o->getCarriedBy()) {
+        j["carried_by"] = c->id;
+    } else if(auto c = o->getWornBy()) {
+        j["worn_by"] = c->id;
+        j["worn_on"] = o->worn_on;
+    }
+
+    return j;
+}
+
 static void deserialize_obj_relations(Object* o, const json& j) {
     if(j.contains("posted_to")) {
-        auto check = resolveUID(j["posted_to"]);
-        if(check) o->posted_to = std::dynamic_pointer_cast<Object>(check).get();
+        auto check = uniqueObjects.find(j["posted_to"].get<int64_t>());
+        if(check != uniqueObjects.end()) o->posted_to = check->second.get();
     }
     if(j.contains("fellow_wall")) {
-        auto check = resolveUID(j["fellow_wall"]);
-        if(check) o->fellow_wall = std::dynamic_pointer_cast<Object>(check).get();
+        auto check = uniqueObjects.find(j["fellow_wall"].get<int64_t>());
+        if(check != uniqueObjects.end()) o->fellow_wall = check->second.get();
+    }
+
+    if(j.contains("location")) {
+        auto jloc = j["location"];
+        Location loc;
+        jloc.get_to(loc);
+        o->setLocation(loc);
+    } else if(j.contains("container")) {
+        auto check = uniqueObjects.find(j["container"].get<int64_t>());
+        if(check != uniqueObjects.end()) check->second->addToInventory(o);
+    } else if(j.contains("carried_by")) {
+        auto check = uniqueCharacters.find(j["carried_by"].get<int64_t>());
+        if(check != uniqueCharacters.end()) check->second->addToInventory(o);
+    } else if(j.contains("worn_by")) {
+        auto check = uniqueCharacters.find(j["worn_by"].get<int64_t>());
+        if(check != uniqueCharacters.end()) {
+            check->second->addToEquip(o, j["worn_on"].get<int>());
+        }
     }
 }
 
 void load_items_finish(const std::filesystem::path& loc) {
     for(auto j : load_from_file(loc, "items.json")) {
         auto id = j["id"].get<int64_t>();
-        auto generation = j["generation"].get<int>();
         if(auto cf = uniqueObjects.find(id); cf != uniqueObjects.end()) {
             if(auto i = cf->second) {
                 deserialize_obj_relations(i.get(), j["relations"]);
-                auto jloc = j["location"];
-                Location loc;
-                jloc.get_to(loc);
-                i->setLocation(loc);
             }
         }
     }
 }
 
-static json serialize_obj_relations(const Object* o) {
-    auto j = json::object();
 
-    if(o->posted_to) j["posted_to"] = o->posted_to->getUID();
-    if(o->fellow_wall) j["fellow_wall"] = o->fellow_wall->getUID();
-
-    return j;
-}
 
 
 static void dump_items(const std::filesystem::path &loc) {
@@ -1005,9 +1085,7 @@ static void dump_items(const std::filesystem::path &loc) {
     for(auto &[v, r] : uniqueObjects) {
         json j2;
         j2["id"] = v;
-        j2["generation"] = static_cast<int32_t>(r->generation);
         j2["data"] = *r;
-        j2["location"] = r->location;
         j2["relations"] = serialize_obj_relations(r.get());
         j.push_back(j2);
     }
@@ -1093,7 +1171,15 @@ void from_json(const json& j, CharacterPrototype& c) {
 }
 
 void to_json(json& j, const Character& c) {
-    to_json(j, static_cast<const AbstractThing&>(c));
+    to_json(j, static_cast<const HasID&>(c));
+    to_json(j, static_cast<const HasVnum&>(c));
+    to_json(j, static_cast<const HasVariables&>(c));
+    to_json(j, static_cast<const HasMudStrings&>(c));
+    //to_json(j, static_cast<const HasExtraDescriptions&>(c));
+    to_json(j, static_cast<const HasStats&>(c));
+    to_json(j, static_cast<const HasAffectFlags&>(c));
+
+    if(c.running_scripts) j["running_scripts"] = c.running_scripts.value();
 
     j["sex"] = c.sex;
     if(!c.appearances.empty()) j["appearances"] = c.appearances;
@@ -1174,7 +1260,18 @@ void to_json(json& j, const Character& c) {
 }
 
 void from_json(const json& j, Character& c) {
-    from_json(j, static_cast<AbstractThing&>(c));
+    from_json(j, static_cast<HasID&>(c));
+    from_json(j, static_cast<HasVnum&>(c));
+    from_json(j, static_cast<HasVariables&>(c));
+    from_json(j, static_cast<HasMudStrings&>(c));
+    //from_json(j, static_cast<HasExtraDescriptions&>(c));
+    from_json(j, static_cast<HasStats&>(c));
+    from_json(j, static_cast<HasAffectFlags&>(c));
+
+    if(j.contains("running_scripts")) {
+        c.running_scripts.emplace();
+       j["running_scripts"].get_to(c.running_scripts.value());
+    }
 
     if(j.contains("sex")) c.sex = j["sex"];
     if(j.contains("appearances")) c.appearances = j["appearances"];
@@ -1287,7 +1384,6 @@ static void dump_characters(const std::filesystem::path &loc) {
     for(auto &[v, r] : uniqueCharacters) {
         json j2;
         j2["id"] = v;
-        j2["generation"] = r->generation;
         j2["data"] = *r;
         if(r->location) {
             // PCs who aren't logged in won't have a valid location.
@@ -1315,7 +1411,6 @@ static void dump_npc_prototypes(const std::filesystem::path &loc) {
 void load_characters_initial(const std::filesystem::path& loc) {
     for(auto j : load_from_file(loc, "characters.json")) {
         auto id = j["id"].get<int64_t>();
-        auto generation = j["generation"].get<time_t>();
         auto data = j["data"];
         auto c = std::make_shared<Character>();
         j["data"].get_to(*c);
@@ -1323,7 +1418,6 @@ void load_characters_initial(const std::filesystem::path& loc) {
             isPlayer->second.character = c.get();
         }
         uniqueCharacters.emplace(id, c);
-        units.emplace(id, c);
     }
 }
 
@@ -1334,7 +1428,7 @@ void load_characters_finish(const std::filesystem::path& loc) {
             continue;
         }
         auto id = j["id"].get<int64_t>();
-        auto generation = j["generation"].get<time_t>();
+
         //basic_mud_log("Finishing Character %d", id);
         if(auto cf = uniqueCharacters.find(id); cf != uniqueCharacters.end()) {
             Location loc;
@@ -1565,8 +1659,7 @@ void load_assemblies(const std::filesystem::path &loc) {
 PlayerData* create_player_character(int account_id, const json& j) {
     auto &acc = accounts[account_id];
     auto ch = std::make_shared<Character>();
-    ch->id = getNextUnitID();
-    ch->generation = time(nullptr);
+    ch->id = getNextID(lastCharacterID, uniqueCharacters);
     auto &p = players[ch->id];
     p.id = ch->id;
     p.account = &acc;
@@ -1589,7 +1682,6 @@ PlayerData* create_player_character(int account_id, const json& j) {
     }
 
     uniqueCharacters.emplace(ch->id, ch);
-    units.emplace(ch->id, ch);
 
     init_char(ch.get());
 

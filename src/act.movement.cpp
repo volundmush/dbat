@@ -268,7 +268,7 @@ void carry_drop(Character *ch, int type)
 ACMD(do_land)
 {
 
-    auto inroom = ch->getRoomVnum();
+    auto inroom = ch->location.getVnum();
     skip_spaces(&argument);
     auto planet = checkOrbit(inroom);
 
@@ -355,7 +355,7 @@ static int has_boat(Character *ch)
     /* non-wearable boats in inventory will do it */
     auto isBoat = [](const auto &o)
     { return GET_OBJ_TYPE(o) == ITEM_BOAT; };
-    if (ch->findObject(isBoat))
+    if (ch->searchInventory(isBoat))
         return true;
 
     return false;
@@ -388,7 +388,7 @@ static int has_flight(Character *ch)
     // Check for flying items in inventory
     auto givesFlight = [](const auto &o)
     { return OBJAFF_FLAGGED(o, AFF_FLYING); };
-    return ch->findObject(givesFlight) ? true : false;
+    return ch->searchInventory(givesFlight) ? true : false;
 }
 
 /* simple function to determine if char can breathe non-o2 */
@@ -911,7 +911,7 @@ int perform_move(Character *ch, int dir, int need_specials_check)
         return 0;
     }
 
-    if (auto wall = ch->location.findObjectVnum(79); wall && (GET_OBJ_COST(wall) == dir))
+    if (auto wall = ch->location.searchObjects(79); wall && (GET_OBJ_COST(wall) == dir))
     {
         ch->sendText("That direction has a glacial wall blocking it.\r\n");
         return 0;
@@ -1085,7 +1085,7 @@ ACMD(do_move)
         {
             return KICHARGE(o) > 0 && USER(o) == ch;
         };
-        if (auto obj = ch->location.findObject(shouldfail))
+        if (auto obj = ch->location.searchObjects(shouldfail))
         {
             fail = true;
         }
@@ -1146,7 +1146,7 @@ ACMD(do_move)
             ch->pref_flags.set(PRF_ARENAWATCH, false);
             ch->setBaseStat<room_vnum>("arena_watch", -1);
         }
-        if (auto rvn = ch->getRoomVnum(); rvn != NOWHERE && rvn != 0 &&
+        if (auto rvn = ch->location.getVnum(); rvn != NOWHERE && rvn != 0 &&
                                           rvn != 1)
         {
             ch->setBaseStat("load_room", rvn);
@@ -1342,7 +1342,7 @@ static int find_door(Character *ch, const char *type, char *dir, const char *cmd
 
 static int has_key(Character *ch, obj_vnum key)
 {
-    return ch->findObjectVnum(key) ? true : false;
+    return ch->searchInventory(key) ? true : false;
 }
 
 #define NEED_OPEN (1 << 0)
@@ -1493,7 +1493,7 @@ static void do_doorcmd(Character *ch, Object *obj, int door, int scmd)
         {
             return GET_OBJ_TYPE(o) == ITEM_HATCH;
         };
-        hatch = ch->location.findObject(ishatch);
+        hatch = ch->location.searchObjects(ishatch);
         obj2 = nullptr;
     }
 
@@ -1750,7 +1750,7 @@ static int ok_pick(Character *ch, obj_vnum keynum, int pickproof, int dclock, in
 {
     int skill_lvl, found = false;
     Object *obj, *next_obj;
-    obj = ch->findObjectVnum(18);
+    obj = ch->searchInventory(18);
 
     if (scmd != SCMD_PICK)
         return (1);
@@ -2356,7 +2356,7 @@ ACMD(do_leave)
         return CAN_SEE_OBJ(ch, o) && GET_OBJ_TYPE(o) == ITEM_HATCH || GET_OBJ_TYPE(o) == ITEM_PORTAL;
     };
 
-    if (auto obj = ch->location.findObject(leave_obj))
+    if (auto obj = ch->location.searchObjects(leave_obj))
     {
         perform_leave_obj(ch, obj, 0);
         return;
@@ -2474,7 +2474,7 @@ static void handle_fly_space(Character *ch)
         return;
     }
 
-    auto planet = getPlanet(ch->getRoomVnum());
+    auto planet = getPlanet(ch->location.getVnum());
     if (!planet)
     {
         ch->sendText("You can't fly to space from here!");
@@ -2663,7 +2663,7 @@ static void autochair(Character *ch, Object *chair)
     if (CAN_WEAR(chair, ITEM_WEAR_TAKE) && GET_OBJ_TYPE(chair) != ITEM_CHAIR && ch->canCarryWeight(chair))
     {
         chair->clearLocation();
-        obj_to_char(chair, ch);
+        ch->addToInventory(chair);
         act("You pick up $p.", true, ch, chair, nullptr, TO_CHAR);
         act("$n picks up $p.", true, ch, chair, nullptr, TO_ROOM);
     }

@@ -391,54 +391,6 @@ void affect_join(Character *ch, struct affected_type *af,
 }
 
 
-
-/* give an object to a char   */
-void obj_to_char(Object *object, Character *ch) {
-    if(!(object && ch)) {
-        basic_mud_log("SYSERR: nullptr obj or char passed to obj_to_char.");
-        return;
-    }
-    ch->contents.push_front(object->shared());
-    object->location.unit = ch;
-    object->location.position.x = -1.0;
-    object->location.position.y = 0;
-    object->location.position.z = 0;
-
-}
-
-
-/* take an object from a char */
-void obj_from_char(Object *object) {
-
-    if (object == nullptr) {
-        basic_mud_log("SYSERR: nullptr object passed to obj_from_char.");
-        return;
-    }
-
-    if(!object->location.unit) {
-        basic_mud_log("SYSERR: nullptr object->location passed to obj_from_char.");
-        return;
-    }
-
-    if(object->location.getType() != UnitType::character) {
-        basic_mud_log("SYSERR: object->location not char passed to obj_from_char.");
-        return;
-    }
-
-    if(object->location.position.x != -1.0) {
-        basic_mud_log("SYSERR: object->pos_x is not -1.0 passed to obj_from_char.");
-        return;
-    }
-
-    auto ch = static_cast<Character*>(object->location.unit);
-
-    auto sh = object->shared();
-    ch->contents.remove_if([sh](auto& o) { return o.expired() || o.lock() == sh; });
-    object->location = {};
-
-}
-
-
 /* Return the effect of a piece of armor in position eq_pos */
 static int apply_ac(Character *ch, int eq_pos) {
     if (GET_EQ(ch, eq_pos) == nullptr) {
@@ -494,11 +446,11 @@ void equip_char(Character *ch, Object *obj, int pos) {
             obj->getShortDescription());
         return;
     }
-    if (obj->location.getType() == UnitType::character && obj->location.position.x == -1.0) {
+    if (auto c = obj->getCarriedBy()) {
         basic_mud_log("SYSERR: EQUIP: Obj is carried_by when equip.");
         return;
     }
-    if (IN_ROOM(obj) != NOWHERE) {
+    if (auto r = obj->getRoom()) {
         basic_mud_log("SYSERR: EQUIP: Obj is in_room when equip.");
         return;
     }
@@ -507,13 +459,11 @@ void equip_char(Character *ch, Object *obj, int pos) {
         act("You stop wearing $p as something prevents you.", false, ch, obj, nullptr, TO_CHAR);
         act("$n stops wearing $p as something prevents $m.", false, ch, obj, nullptr, TO_ROOM);
         /* Changed to drop in inventory instead of the ground. */
-        obj_to_char(obj, ch);
+        ch->addToInventory(obj);
         return;
     }
 
-    ch->contents.push_front(obj->shared());
-    obj->location.unit = ch;
-    obj->location.position.x = pos;
+    ch->addToEquip(obj, pos);
 }
 
 
@@ -528,10 +478,7 @@ Object *unequip_char(Character *ch, int pos) {
 
     obj = GET_EQ(ch, pos);
 
-    auto sh = obj->shared();
-    ch->contents.remove_if([sh](auto& o) { return o.expired() || o.lock() == sh; });
-
-    obj->location = {};
+    ch->removeFromEquip(pos);
 
     return (obj);
 }
@@ -596,35 +543,6 @@ Character *get_char_num(mob_rnum nr) {
 }
 
 
-/* put an object in an object (quaint)  */
-void obj_to_obj(Object *obj, Object *obj_to) {
-
-    if (!obj || !obj_to || obj == obj_to) {
-        return;
-    }
-    obj_to->contents.push_front(obj->shared());
-    obj->location.unit = obj_to;
-    obj->location.position.x = -1.0;
-    obj->location.position.y = 0;
-    obj->location.position.z = 0;
-}
-
-
-/* remove an object from an object */
-void obj_from_obj(Object *obj) {
-
-    if (obj->location.getType() != UnitType::object) {
-        basic_mud_log("SYSERR: (%s): trying to illegally extract obj from obj.", __FILE__);
-        return;
-    }
-    auto obj_from = static_cast<Object*>(obj->location.unit);
-
-    auto shared = obj->shared();
-    obj_from->contents.remove_if([shared](auto& obj) { return obj.expired() || obj.lock() == shared; });
-
-    obj->location = {};
-}
-
 
 /* Extract an object from the world */
 void extract_obj(Object *obj) {
@@ -660,7 +578,6 @@ void extract_obj(Object *obj) {
 
     auto id = obj->id;
 
-    units.erase(id);
     uniqueObjects.erase(id);
 }
 
@@ -878,7 +795,6 @@ void extract_char_final(Character *ch) {
     ch->deactivate();
     if (IS_NPC(ch)) {
         auto id = ch->id;
-        units.erase(id);
         uniqueCharacters.erase(id);
     }
 }
@@ -910,14 +826,15 @@ void extract_char(Character *ch) {
             (foll->follower->location == ch->location || IN_ROOM(ch) == 1)) {
             /* transfer objects to char, if any */
             auto con = foll->follower->getInventory();
-            for (auto obj : filter_raw(con)) {
+            for (auto obj : filter_shared(con)) {
                 obj->clearLocation();
-                obj_to_char(obj, ch);
+                ch->addToInventory(obj);
             }
 
             /* transfer equipment to char, if any */
             for (auto &[slot, obj] : foll->follower->getEquipment()) {
-                obj_to_char(unequip_char(foll->follower, slot), ch);
+                auto un = unequip_char(foll->follower, slot);
+                ch->addToInventory(un);
             }
 
             extract_char(foll->follower);

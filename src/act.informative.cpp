@@ -61,9 +61,9 @@ static void perform_mortal_where(Character *ch, char *arg);
 
 static void perform_immort_where(Character *ch, char *arg);
 
-static void diag_char_to_char(Character *i, Character *ch);
+static void char_to_char(Character *i, Character *ch);
 
-static void diag_obj_to_char(Object *obj, Character *ch);
+static void obj_to_char(Object *obj, Character *ch);
 
 static void look_at_char(Character *i, Character *ch);
 
@@ -558,7 +558,7 @@ ACMD(do_draw)
     for (auto obj2 : filter_raw(con))
     {
         obj2->clearLocation();
-        obj_to_char(obj2, ch);
+        ch->addToInventory(obj2);
         obj3 = obj2;
         drawn = true;
         break;
@@ -634,13 +634,13 @@ ACMD(do_shuffle)
             {
                 count -= 1;
                 obj2->clearLocation();
-                obj_to_obj(obj2, obj);
+                obj->addToInventory(obj2);
             }
             else if (count == 1)
             {
                 count -= 1;
                 obj2->clearLocation();
-                obj_to_obj(obj2, obj);
+                obj2->addToInventory(obj);
             }
         }
     }
@@ -850,7 +850,7 @@ ACMD(do_play)
 
     auto sitting = [ch](const auto &o)
     { return GET_OBJ_VNUM(o) == GET_OBJ_VNUM(SITS(ch)) - 4; };
-    obj2 = ch->location.findObject(sitting);
+    obj2 = ch->location.searchObjects(sitting);
 
     if (obj2 == nullptr)
     {
@@ -861,7 +861,7 @@ ACMD(do_play)
     act("You play $p on your table.", true, ch, obj, nullptr, TO_CHAR);
     act("$n plays $p on $s table.", true, ch, obj, nullptr, TO_ROOM);
     obj->clearLocation();
-    obj_to_obj(obj, obj2);
+    obj2->addToInventory(obj);
 }
 
 /* Nickname an object */
@@ -899,7 +899,7 @@ ACMD(do_nickname)
         int found = false;
         auto is_ship = [](const auto &o)
         { return GET_OBJ_VNUM(o) >= 45000 && GET_OBJ_VNUM(o) <= 45999; };
-        if (ship2 = ch->location.findObject(is_ship))
+        if (ship2 = ch->location.searchObjects(is_ship))
         {
             found = true;
         }
@@ -1463,7 +1463,7 @@ static void show_obj_to_char(Object *obj, Character *ch, int mode)
          */
         if (*obj->getRoomDescription() == '.' && (IS_NPC(ch) || !PRF_FLAGGED(ch, PRF_HOLYLIGHT)))
             return;
-        if (GET_OBJ_TYPE(obj) == ITEM_VEHICLE && ch->getRoomVnum() == GET_OBJ_VAL(obj, VAL_VEHICLE_DEST))
+        if (GET_OBJ_TYPE(obj) == ITEM_VEHICLE && ch->location.getVnum() == GET_OBJ_VAL(obj, VAL_VEHICLE_DEST))
         {
             return;
         }
@@ -1933,7 +1933,7 @@ static void show_obj_to_char(Object *obj, Character *ch, int mode)
             ch->send_to("The weapon type of %s@n is '%s'.\r\n", GET_OBJ_SHORT(obj), weapon_disp[num]);
             ch->send_to("You could wield it %s.\r\n", wield_names[wield_type(get_size(ch), obj)]);
         }
-        diag_obj_to_char(obj, ch);
+        ch->addToInventory(obj);
         ch->send_to("It appears to be made of %s, and weighs %s", material_names[GET_OBJ_MATERIAL(obj)], add_commas(GET_OBJ_WEIGHT(obj)).c_str());
         break;
 
@@ -2094,7 +2094,7 @@ static void list_obj_to_char(const std::vector<std::weak_ptr<Object>> &list, Cha
         ch->sendText(" Nothing.\r\n");
 }
 
-static void diag_obj_to_char(Object *obj, Character *ch)
+static void obj_to_char(Object *obj, Character *ch)
 {
     struct
     {
@@ -2125,7 +2125,7 @@ static void diag_obj_to_char(Object *obj, Character *ch)
     ch->send_to("\r\n%c%s %s\r\n", UPPER(*objs), objs + 1, diagnosis[ar_index].text);
 }
 
-static void diag_char_to_char(Character *i, Character *ch)
+static void char_to_char(Character *i, Character *ch)
 {
     struct
     {
@@ -2386,7 +2386,7 @@ static void look_at_char(Character *i, Character *ch)
             ch->sendText(" appears to be slightly older than you, and ");
         }
     }
-    diag_char_to_char(i, ch);
+    char_to_char(i, ch);
     found = false;
     for (j = 0; !found && j < NUM_WEARS; j++)
         if (GET_EQ(i, j) && CAN_SEE_OBJ(ch, GET_EQ(i, j)))
@@ -3046,7 +3046,7 @@ static void do_auto_exits(Room *room, Character *ch, int exit_mode)
                     if (fname(e.keyword.c_str()) == nullptr)
                     {
                         ch->send_to("@RREPORT THIS ERROR IMMEDIATELY FOR DIRECTION %s@n\r\n", direction.c_str());
-                        basic_mud_log("ERROR: %s found error direction %s at room %d", direction.c_str(), GET_NAME(ch), ch->getRoomVnum());
+                        basic_mud_log("ERROR: %s found error direction %s at room %d", direction.c_str(), GET_NAME(ch), ch->location.getVnum());
                         return;
                     }
                     exitStr += fmt::format("The {}{} {} {} {}{}.\r\n",
@@ -3086,7 +3086,7 @@ static void do_auto_exits(Room *room, Character *ch, int exit_mode)
 
         if (room->room_flags.get(ROOM_HOUSE))
         {
-            auto con = room->getInventoryCount();
+            auto con = room->getObjects().size();
             if (!room->room_flags.get(ROOM_GARDEN1) && !room->room_flags.get(ROOM_GARDEN2))
             {
                 ch->send_to("@D[@GItems Stored@D: @g%d@D]@n\r\n", con);
@@ -3256,7 +3256,7 @@ static void display_room_info(Room *rm, Character *ch)
 
     ch->send_to("@wLocation: %-70s@n\r\n", rm->getName());
 
-    if (auto planet = getPlanet(ch->getRoomVnum()); planet)
+    if (auto planet = getPlanet(ch->location.getVnum()); planet)
     {
         ch->send_to("@wPlanet: @G%s@n\r\n", getPlanetColorName(planet.value()).c_str());
     }
@@ -3847,7 +3847,7 @@ static void examine_equipped_item(Character *ch, Object *obj, const char *arg)
         {
             display_scroll(ch, obj);
         }
-        diag_obj_to_char(obj, ch);
+        ch->addToInventory(obj);
         ch->send_to("It appears to be made of %s", material_names[GET_OBJ_MATERIAL(obj)]);
     }
 }
@@ -3894,17 +3894,17 @@ static void examine_item(Character *ch, Object *obj, const char *arg)
                                                                                                    : "@r",
                         add_commas(GET_FUEL(obj)).c_str());
         }
-        diag_obj_to_char(obj, ch);
+        ch->addToInventory(obj);
         ch->send_to("It appears to be made of %s, and weighs %s", material_names[GET_OBJ_MATERIAL(obj)], add_commas(GET_OBJ_WEIGHT(obj)).c_str());
     }
 }
 
 static void handle_board_read(Character *ch, char *arg)
 {
-    Object *obj = ch->findObject([](const auto &o)
+    Object *obj = ch->searchInventory([](const auto &o)
                                           { return GET_OBJ_TYPE(o) == ITEM_BOARD; });
     if (!obj)
-        obj = ch->location.findObject([](const auto &o)
+        obj = ch->location.searchObjects([](const auto &o)
                                       { return GET_OBJ_TYPE(o) == ITEM_BOARD; });
 
     if (!obj)
@@ -4003,7 +4003,7 @@ static void handle_look(Character *ch, char *arg)
         return;
     }
 
-    if (!handle_exdesc_look(ch, arg, ch->getRoom()->getExtraDescription(), nullptr))
+    if (!handle_exdesc_look(ch, arg, ch->location.getExtraDescription(), nullptr))
     {
         handle_look_in_inventory(ch, arg);
     }
@@ -4076,7 +4076,7 @@ static void look_out_window(Character *ch, const char *arg)
         return;
     }
     /* Look for any old window in the room */
-    viewport = ch->location.findObject([&](auto obj)
+    viewport = ch->location.searchObjects([&](auto obj)
                                        { return GET_OBJ_TYPE(obj) == ITEM_WINDOW && isname("window", obj->getName()); });
 
     if (!viewport)
@@ -6310,45 +6310,18 @@ static void print_object_location(int num, Object *obj, Character *ch,
 
     if (!obj->getProtoScript().empty())
         ch->send_to("%s", obj->scriptString().c_str());
-
-    if (obj->location.unit)
-    {
-        switch (obj->location.getType())
-        {
-        case UnitType::room:
-        {
-            auto r = static_cast<Room *>(obj->location.unit);
-            ch->send_to("[%5d] %s\r\n", r->getVnum(), r->getName());
-        }
-        break;
-        case UnitType::character:
-        {
-            auto c = static_cast<Character *>(obj->location.unit);
-            if (obj->location.position.x == -1)
-            {
-                ch->send_to("carried by %s in room [%d]\r\n", PERS(c, ch), c->getRoomVnum());
-            }
-            else
-            {
-                ch->send_to("worn by %s in room [%d]\r\n", PERS(c, ch), c->getRoomVnum());
-            }
-        }
-        break;
-        case UnitType::object:
-        {
-            auto o = static_cast<Object *>(obj->location.unit);
-            ch->send_to("inside %s%s\r\n", o->getShortDescription(), (recur ? ", which is" : " "));
-            if (recur)
-                print_object_location(0, o, ch, recur);
-        }
-        break;
-        default:
-            ch->sendText("in an unknown location\r\n");
-            break;
-        }
-    }
-    else
-    {
+    
+    if(auto r = obj->getRoom()) {
+        ch->send_to("[%5d] %s\r\n", r->getVnum(), r->getName());
+    } else if(auto c = obj->getCarriedBy()) {
+        ch->send_to("carried by %s in room [%d]\r\n", PERS(c, ch), c->location.getVnum());
+    } else if(auto c = obj->getWornBy()) {
+        ch->send_to("worn by %s in room [%d]\r\n", PERS(c, ch), c->location.getVnum());
+    } else if(auto o = obj->getContainer()) {
+        ch->send_to("inside %s%s\r\n", o->getShortDescription(), (recur ? ", which is" : " "));
+        if (recur)
+            print_object_location(0, o, ch, recur);
+    } else {
         ch->sendText("in an unknown location\r\n");
     }
 }
@@ -6371,7 +6344,7 @@ static void perform_immort_where(Character *ch, char *arg)
             {
                 if (d->character->location)
                 {
-                    planet = getPlanet(d->character->getRoomVnum());
+                    planet = getPlanet(d->character->location.getVnum());
                 }
                 else
                 {
@@ -6381,11 +6354,11 @@ static void perform_immort_where(Character *ch, char *arg)
                 if (i && CAN_SEE(ch, i) && i->location)
                 {
                     if (d->original)
-                        ch->send_to("%-20s - [%5d]   %s (in %s)\r\n", GET_NAME(i), d->character->getRoomVnum(), d->character->location.getName(), GET_NAME(d->character));
+                        ch->send_to("%-20s - [%5d]   %s (in %s)\r\n", GET_NAME(i), d->character->location.getVnum(), d->character->location.getName(), GET_NAME(d->character));
                     else
                     {
                         std::string locName = getPlanetName(planet.value());
-                        ch->send_to("%-20s - [%5d]   %-14s %s\r\n", GET_NAME(i), i->getRoomVnum(), locName.c_str(), i->location.getName());
+                        ch->send_to("%-20s - [%5d]   %-14s %s\r\n", GET_NAME(i), i->location.getVnum(), locName.c_str(), i->location.getName());
                     }
                 }
             }
@@ -6400,7 +6373,7 @@ static void perform_immort_where(Character *ch, char *arg)
             if (CAN_SEE(ch, i) && i->location && isname(arg, i->getName()))
             {
                 found = 1;
-                ch->send_to("M%3d. %-25s - [%5d] %-25s", ++num, GET_NAME(i), i->getRoomVnum(), i->getRoom()->getName());
+                ch->send_to("M%3d. %-25s - [%5d] %-25s", ++num, GET_NAME(i), i->location.getVnum(), i->getRoom()->getName());
                 if (IS_NPC(i) && !i->scripts.empty())
                 {
                     auto t = i->scriptString();
@@ -6538,7 +6511,7 @@ ACMD(do_diagnose)
     }
 
     ch->send_to("%s", HSSH(ch));
-    diag_char_to_char(vict, ch);
+    char_to_char(vict, ch);
 }
 
 static const char *ctypes[] = {

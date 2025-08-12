@@ -4,7 +4,6 @@
 #pragma once
 
 #include "sysdep.h"
-#include "magic_enum/magic_enum_all.hpp"
 
 /*
  * Intended use of this macro is to allow external packages to work with
@@ -2476,7 +2475,6 @@ enum class CharMoney : uint8_t {
  bank = 1 << 1
 };
 
-using vital_t = int64_t;
 enum class CharVital : uint8_t {
  health = 1 << 0,
  ki = 1 << 1,
@@ -2484,7 +2482,6 @@ enum class CharVital : uint8_t {
  lifeforce = 1 << 3
 };
 
-using stat_t = int64_t;
 enum class CharStat : uint8_t {
     experience = 1 << 0,
     skill_train = 1 << 1,

@@ -115,7 +115,7 @@ ACMD(do_olc) {
                 }
             } else {
                 rnum = IN_ROOM(ch);
-                vnum = ch->getRoomVnum();
+                vnum = ch->location.getVnum();
                                 ch->send_to("(Using current room %d)\r\n", vnum);
             }
 

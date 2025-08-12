@@ -647,7 +647,7 @@ ACMD(do_rpp)
             {
                 ch->sendText("You now have an Excel House Capsule!\r\n");
                 Object *hobj = read_object(6, VIRTUAL);
-                obj_to_char(hobj, ch);
+                ch->addToInventory(hobj);
                 ch->modRPP(-pay);
                 ch->send_to("@R%d@W RPP paid for your selection. Enjoy!@n\r\n", pay);
                 send_to_imm("RPP Purchase: %s %d", GET_NAME(ch), pay);
@@ -1367,7 +1367,7 @@ ACMD(do_train)
     total = chCon * 6;
     total += total * ratio;
 
-    if (ch->getRoomVnum() >= 6100 && ch->getRoomVnum() <= 6135)
+    if (ch->location.getVnum() >= 6100 && ch->location.getVnum() <= 6135)
     {
         total += total * 0.15;
     }
@@ -1375,7 +1375,7 @@ ACMD(do_train)
     auto sensei = ch->sensei;
     bool senseiPresent = false;
 
-    if (ch->getRoomVnum() == sensei::getLocation(sensei))
+    if (ch->location.getVnum() == sensei::getLocation(sensei))
     {
         senseiPresent = true;
         if (!(GET_GOLD(ch) >= 8 && GET_PRACTICES(ch) >= 1))
@@ -1604,7 +1604,7 @@ void trainProgress(Character *ch)
     total = chCon * 6;
     total += total * ratio;
 
-    if (ch->getRoomVnum() >= 6100 && ch->getRoomVnum() <= 6135)
+    if (ch->location.getVnum() >= 6100 && ch->location.getVnum() <= 6135)
     {
         total += total * 0.15;
     }
@@ -1612,7 +1612,7 @@ void trainProgress(Character *ch)
     auto sensei = ch->sensei;
     bool senseiPresent = false;
 
-    if (ch->getRoomVnum() == sensei::getLocation(sensei))
+    if (ch->location.getVnum() == sensei::getLocation(sensei))
     {
         senseiPresent = true;
         if (!(GET_GOLD(ch) >= 8 && GET_PRACTICES(ch) >= 1))
@@ -1937,7 +1937,7 @@ void trainProgress(Character *ch)
 
     plus += 75;
 
-    if (ch->getRoomVnum() >= 19800 && ch->getRoomVnum() <= 19899)
+    if (ch->location.getVnum() >= 19800 && ch->location.getVnum() <= 19899)
     {
         plus *= 4;
     }
@@ -2440,7 +2440,7 @@ ACMD(do_candy)
     char newsh[MAX_STRING_LENGTH];
     snprintf(newsh, MAX_STRING_LENGTH, "%s@n (of %s@n)", sh, vict->getShortDescription());
     obj->strings["short_description"] = newsh;
-    obj_to_char(obj, ch);
+    ch->addToInventory(obj);
     obj->setBaseStat<int64_t>(VAL_FOOD_CANDY_PL, vict->getBaseStat<int64_t>("health"));
     obj->setBaseStat<int64_t>(VAL_FOOD_CANDY_KI, vict->getBaseStat<int64_t>("ki"));
     obj->setBaseStat<int64_t>(VAL_FOOD_CANDY_ST, vict->getBaseStat<int64_t>("stamina"));
@@ -2807,7 +2807,7 @@ ACMD(do_implant)
         return;
     }
 
-    limb = ch->findObjectVnum(66);
+    limb = ch->searchInventory(66);
     if (!limb)
     {
         ch->sendText("You do not have a cybernetic limb to implant.\r\n");
@@ -4122,7 +4122,7 @@ ACMD(do_form)
             {
                 obj = read_object(70, VIRTUAL);
             }
-            obj_to_char(obj, ch);
+            ch->addToInventory(obj);
             reveal_hiding(ch, 0);
             ch->setBaseStat("concentrate_cooldown", 10);
             act("You hold out your hand and create $p out of your ki!", true, ch, obj, nullptr, TO_CHAR);
@@ -4183,7 +4183,7 @@ ACMD(do_form)
             {
                 obj = read_object(71, VIRTUAL);
             }
-            obj_to_char(obj, ch);
+            ch->addToInventory(obj);
             reveal_hiding(ch, 0);
             ch->setBaseStat("concentrate_cooldown", 10);
             act("You hold out your hand and create $p out of your ki!", true, ch, obj, nullptr, TO_CHAR);
@@ -4210,7 +4210,7 @@ ACMD(do_form)
         else
         {
             obj = read_object(319, VIRTUAL);
-            obj_to_char(obj, ch);
+            ch->addToInventory(obj);
             reveal_hiding(ch, 0);
             ch->setBaseStat("concentrate_cooldown", 10);
             act("You hold out your hand and create $p out of your ki!", true, ch, obj, nullptr, TO_CHAR);
@@ -4237,7 +4237,7 @@ ACMD(do_form)
         else
         {
             obj = read_object(16, VIRTUAL);
-            obj_to_char(obj, ch); // cooldown removed on 10/24/2021
+            ch->addToInventory(obj); // cooldown removed on 10/24/2021
             reveal_hiding(ch, 0); // ch->setBaseStat("concentrate_cooldown", 10);
             act("You hold out your hand and create $p out of your ki!", true, ch, obj, nullptr, TO_CHAR);
             act("$n holds out $s hand and creates $p out of thin air!", true, ch, obj, nullptr, TO_ROOM);
@@ -4415,7 +4415,7 @@ ACMD(do_form)
                 ch->sendText("What type of weapon?\r\nSyntax: create weapon (sword | club | spear | dagger | gun)\r\n");
                 return;
             }
-            obj_to_char(obj, ch);
+            ch->addToInventory(obj);
             obj->size = static_cast<Size>(get_size(ch));
             reveal_hiding(ch, 0);
             ch->setBaseStat("concentrate_cooldown", 10);
@@ -4463,23 +4463,23 @@ ACMD(do_form)
         {
             obj = read_object(92, VIRTUAL); /* gi */
             boost_obj(obj, ch, 0);
-            obj_to_char(obj, vict);
+            vict->addToInventory(obj);
             obj->size = static_cast<Size>(get_size(vict));
             obj = read_object(91, VIRTUAL); /* pants */
             boost_obj(obj, ch, 0);
-            obj_to_char(obj, vict);
+            vict->addToInventory(obj);
             obj->size = static_cast<Size>(get_size(vict));
             obj = read_object(1528, VIRTUAL); /* wrist */
             boost_obj(obj, ch, 0);
-            obj_to_char(obj, vict);
+            vict->addToInventory(obj);
             obj->size = static_cast<Size>(get_size(vict));
             obj = read_object(1528, VIRTUAL); /* wrist */
             boost_obj(obj, ch, 0);
-            obj_to_char(obj, vict);
+            vict->addToInventory(obj);
             obj->size = static_cast<Size>(get_size(vict));
             obj = read_object(1532, VIRTUAL); /* boots */
             boost_obj(obj, ch, 0);
-            obj_to_char(obj, vict);
+            vict->addToInventory(obj);
             obj->size = static_cast<Size>(get_size(vict));
             do_wear(vict, "all", 0, 0);
             reveal_hiding(ch, 0);
@@ -4508,7 +4508,7 @@ ACMD(do_form)
         {
             obj = read_object(92, VIRTUAL);
             boost_obj(obj, ch, 0);
-            obj_to_char(obj, ch);
+            ch->addToInventory(obj);
             obj->size = static_cast<Size>(get_size(ch));
             reveal_hiding(ch, 0);
             ch->setBaseStat("concentrate_cooldown", 10);
@@ -4536,7 +4536,7 @@ ACMD(do_form)
         else
         {
             obj = read_object(19053, VIRTUAL);
-            obj_to_char(obj, ch);
+            ch->addToInventory(obj);
             for (auto f : {ITEM_NORENT, ITEM_NOSELL})
                 obj->item_flags.set(f, true);
             obj->size = static_cast<Size>(get_size(ch));
@@ -4567,7 +4567,7 @@ ACMD(do_form)
         {
             obj = read_object(91, VIRTUAL);
             boost_obj(obj, ch, 0);
-            obj_to_char(obj, ch);
+            ch->addToInventory(obj);
             obj->size = static_cast<Size>(get_size(ch));
             reveal_hiding(ch, 0);
             ch->setBaseStat("concentrate_cooldown", 10);
@@ -4596,7 +4596,7 @@ ACMD(do_form)
         {
             obj = read_object(1528, VIRTUAL);
             boost_obj(obj, ch, 0);
-            obj_to_char(obj, ch);
+            ch->addToInventory(obj);
             obj->size = static_cast<Size>(get_size(ch));
             reveal_hiding(ch, 0);
             ch->setBaseStat("concentrate_cooldown", 10);
@@ -4625,7 +4625,7 @@ ACMD(do_form)
         {
             obj = read_object(1532, VIRTUAL);
             boost_obj(obj, ch, 0);
-            obj_to_char(obj, ch);
+            ch->addToInventory(obj);
             obj->size = static_cast<Size>(get_size(ch));
             reveal_hiding(ch, 0);
             ch->setBaseStat("concentrate_cooldown", 10);
@@ -4653,7 +4653,7 @@ ACMD(do_form)
         else
         {
             obj = read_object(72, VIRTUAL);
-            obj_to_char(obj, ch);
+            ch->addToInventory(obj);
             obj->size = static_cast<Size>(get_size(ch));
             reveal_hiding(ch, 0);
             ch->setBaseStat("concentrate_cooldown", 10);
@@ -4764,7 +4764,7 @@ ACMD(do_form)
         else
         {
             obj = read_object(1, VIRTUAL);
-            obj_to_char(obj, ch);
+            ch->addToInventory(obj);
             reveal_hiding(ch, 0);
             ch->setBaseStat("concentrate_cooldown", 10);
             act("You hold out your hand and create $p out of your ki!", true, ch, obj, nullptr, TO_CHAR);
@@ -5374,7 +5374,7 @@ ACMD(do_ingest)
             if (!IS_NPC(vict) && !IS_NPC(ch))
             {
                 send_to_imm("[PK] %s killed %s at room [%d]\r\n", GET_NAME(ch), GET_NAME(vict),
-                            vict->getRoomVnum());
+                            vict->location.getVnum());
                 vict->player_flags.set(PLR_ABSORBED, true);
             }
             ch->send_to("@D[@mINGEST@D] @rPL@W: @D(@y%s@D) @cKi@W: @D(@y%s@D) @gSt@W: @D(@y%s@D)@n\r\n", add_commas(pl).c_str(), add_commas(ki).c_str(), add_commas(stam).c_str());
@@ -5671,7 +5671,7 @@ ACMD(do_absorb)
             if (!IS_NPC(vict) && !IS_NPC(ch))
             {
                 send_to_imm("[PK] %s killed %s at room [%d]\r\n", GET_NAME(ch), GET_NAME(vict),
-                            vict->getRoomVnum());
+                            vict->location.getVnum());
                 vict->player_flags.set(PLR_ABSORBED, true);
             }
 
@@ -7609,7 +7609,7 @@ ACMD(do_plant)
         act("@wYou plant $p@w on @c$N@w! @c$N @wseems to notice the change in weight in their inventory.@n", true, ch,
             obj, vict, TO_CHAR);
         obj->clearLocation();
-        obj_to_char(obj, vict);
+        vict->addToInventory(obj);
         WAIT_STATE(ch, PULSE_2SEC);
         return;
     }
@@ -7617,7 +7617,7 @@ ACMD(do_plant)
     {
         act("@wYou plant $p@w on @c$N@w! No one noticed, whew....@n", true, ch, obj, vict, TO_CHAR);
         obj->clearLocation();
-        obj_to_char(obj, vict);
+        vict->addToInventory(obj);
         WAIT_STATE(ch, PULSE_2SEC);
         return;
     }
@@ -7655,7 +7655,7 @@ ACMD(do_forgery)
         return;
     }
 
-    obj4 = ch->findObjectVnum(19);
+    obj4 = ch->searchInventory(19);
 
     if (!obj4)
     {
@@ -7733,7 +7733,7 @@ ACMD(do_forgery)
     int loadn = GET_OBJ_VNUM(obj2);
 
     obj3 = read_object(loadn, VIRTUAL);
-    obj_to_char(obj3, ch);
+    ch->addToInventory(obj3);
 
     /* Set Object Variables */
     obj3->item_flags.set(ITEM_FORGED, true);
@@ -8607,7 +8607,7 @@ ACMD(do_instant)
         ch->sendText("You are inside a healing tank!\r\n");
         return;
     }
-    else if (ch->getRoomVnum() >= 19800 && ch->getRoomVnum() <= 19899)
+    else if (ch->location.getVnum() >= 19800 && ch->location.getVnum() <= 19899)
     {
         ch->sendText("@rYou are in a pocket dimension!@n\r\n");
         return;
@@ -9288,7 +9288,7 @@ void situpProgress(Character *ch)
     }
     else if (ch->location.getRoomFlag(ROOM_WORKOUT))
     {
-        if (ch->getRoomVnum() >= 19100 && ch->getRoomVnum() <= 19199)
+        if (ch->location.getVnum() >= 19100 && ch->location.getVnum() <= 19199)
         {
             bonus *= 5;
             if (bonus <= 6)
@@ -9301,7 +9301,7 @@ void situpProgress(Character *ch)
                 bonus = 4;
         }
     }
-    else if (ch->getRoomVnum() >= 19800 && ch->getRoomVnum() <= 19899)
+    else if (ch->location.getVnum() >= 19800 && ch->location.getVnum() <= 19899)
     {
         ch->sendText("@rThis place feels like... Magic.@n\r\n");
         bonus *= 10;
@@ -9614,7 +9614,7 @@ void meditateProgress(Character *ch)
     }
     else if (ch->location.getRoomFlag(ROOM_WORKOUT))
     {
-        if (ch->getRoomVnum() >= 19100 && ch->getRoomVnum() <= 19199)
+        if (ch->location.getVnum() >= 19100 && ch->location.getVnum() <= 19199)
         {
             if (bonus <= 0)
                 bonus = 6;
@@ -9627,7 +9627,7 @@ void meditateProgress(Character *ch)
             bonus *= 2;
         }
     }
-    else if (ch->getRoomVnum() >= 19800 && ch->getRoomVnum() <= 19899)
+    else if (ch->location.getVnum() >= 19800 && ch->location.getVnum() <= 19899)
     {
         ch->sendText("@rThis place feels like... Magic.@n\r\n");
         bonus *= 10;
@@ -9643,7 +9643,7 @@ void meditateProgress(Character *ch)
     }
     if (bonus <= 1 && ch->location.getRoomFlag(ROOM_WORKOUT))
     {
-        if (ch->getRoomVnum() >= 19100 && ch->getRoomVnum() <= 19199)
+        if (ch->location.getVnum() >= 19100 && ch->location.getVnum() <= 19199)
         {
             bonus = 6;
         }
@@ -9886,7 +9886,7 @@ void pushupProgress(Character *ch)
     }
     else if (ch->location.getRoomFlag(ROOM_WORKOUT))
     {
-        if (ch->getRoomVnum() >= 19100 && ch->getRoomVnum() <= 19199)
+        if (ch->location.getVnum() >= 19100 && ch->location.getVnum() <= 19199)
         {
             bonus *= 5;
             if (bonus <= 6)
@@ -9899,7 +9899,7 @@ void pushupProgress(Character *ch)
                 bonus = 4;
         }
     }
-    else if (ch->getRoomVnum() >= 19800 && ch->getRoomVnum() <= 19899)
+    else if (ch->location.getVnum() >= 19800 && ch->location.getVnum() <= 19899)
     {
         ch->sendText("@rThis place feels like... Magic.@n\r\n");
         bonus *= 10;
@@ -10208,7 +10208,7 @@ void base_update(uint64_t heartPulse, double deltaTime)
 
 static int has_scanner(Character *ch)
 {
-    return ch->findObjectVnum(13600) ? true : false;
+    return ch->searchInventory(13600) ? true : false;
 }
 
 ACMD(do_snet)
@@ -10243,7 +10243,7 @@ ACMD(do_snet)
         ch->sendText("The fire eats your transmission!\r\n");
         return;
     }
-    if (ch->getRoomVnum() >= 19800 && ch->getRoomVnum() <= 19899)
+    if (ch->location.getVnum() >= 19800 && ch->location.getVnum() <= 19899)
     {
         ch->sendText("Your signal will not be able to escape the walls of the pocket dimension.\r\n");
         return;
@@ -10356,7 +10356,7 @@ ACMD(do_snet)
             {
                 continue;
             }
-            if (i->character->getRoomVnum() >= 19800 && i->character->getRoomVnum() <= 19899)
+            if (i->character->location.getVnum() >= 19800 && i->character->location.getVnum() <= 19899)
             {
                 continue;
             }
@@ -10399,7 +10399,7 @@ ACMD(do_snet)
                 {
                     i->character->send_to("@C%s is heard @W(@c%s@W), @D[@R#@W%d @Ycalling YOU@D] @G%s@n\r\n", voice, readIntro(i->character, ch) == 1 ? get_i_name(i->character, ch) : "Unknown", ((ch)->id), !*arg2 ? "" : CAP(arg2));
                     *hist = '\0';
-                    sprintf(hist, "@C%s is heard @W(@c%s@W), @D[@R#@W%d @Ycalling YOU@D] @G%s@n\r\n", voice,
+                    sprintf(hist, "@C%s is heard @W(@c%s@W), @D[@R#@W%ld @Ycalling YOU@D] @G%s@n\r\n", voice,
                             readIntro(i->character, ch) == 1 ? get_i_name(i->character, ch) : "Unknown", ((ch)->id),
                             !*arg2 ? "" : CAP(arg2));
                     add_history(i->character, hist, HIST_SNET);
@@ -10689,7 +10689,7 @@ std::unordered_set<Object *> dball_count(Character *ch)
         return false;
     };
 
-    return ch->gatherObjects(isDragonBall);
+    return ch->gatherFromInventory(isDragonBall);
 }
 
 ACMD(do_quit)
@@ -10703,7 +10703,7 @@ ACMD(do_quit)
         return;
     }
 
-    auto rvn = ch->getRoomVnum();
+    auto rvn = ch->location.getVnum();
 
     if (rvn >= 2002 && rvn <= 2011)
     {
@@ -11062,7 +11062,8 @@ ACMD(do_steal)
                         vict->sendText("You feel your body being disturbed.\r\n");
                         improve_skill(vict, SKILL_SPOT, 1);
                     }
-                    obj_to_char(unequip_char(vict, eq_pos), ch);
+                    auto un = unequip_char(vict, eq_pos);
+                    ch->addToInventory(un);
                     improve_skill(ch, SKILL_SLEIGHT_OF_HAND, 1);
                     return;
                 }
@@ -11122,7 +11123,7 @@ ACMD(do_steal)
                 { /* Right out of their pockets */
                     act("You steal $p from $N.", false, ch, obj, vict, TO_CHAR);
                     obj->clearLocation();
-                    obj_to_char(obj, ch);
+                    ch->addToInventory(obj);
                     if (!IS_NPC(vict))
                     {
                         vict->player_flags.set(PLR_STOLEN, true);
@@ -12045,7 +12046,7 @@ ACMD(do_gen_write)
     }
     fprintf(fl,
             "@D[@WUser: @c%-10s@D] [@WChar: @C%-10s@D] [@WRoom: @G%-4d@D] [@WDate: @Y%6.6s@D]@b \n-----------@w\n%s\n",
-            GET_USER(ch) ? GET_USER(ch) : "ERR", GET_NAME(ch), ch->getRoomVnum(), (tmp + 4), argument);
+            GET_USER(ch) ? GET_USER(ch) : "ERR", GET_NAME(ch), ch->location.getVnum(), (tmp + 4), argument);
     fprintf(fl, "@D-------------------------------@n\n");
     fclose(fl);
     ch->sendText("Okay.  Thanks!\r\n");
@@ -12644,7 +12645,7 @@ ACMD(do_fix)
         }
     }
 
-    obj4 = ch->findObjectVnum(custom ? 13593 : 48);
+    obj4 = ch->searchInventory(custom ? 13593 : 48);
 
     if (!obj4)
     {
@@ -13604,7 +13605,7 @@ ACMD(do_aid)
         num2 = 385;
     }
 
-    aid_obj = ch->findObjectVnum(num);
+    aid_obj = ch->searchInventory(num);
 
     if (!aid_obj)
     {
@@ -13718,7 +13719,7 @@ ACMD(do_aid)
                 act("@C$n@W holds a steel case up and opens it. The case hisses as its lid opens. @C$n@W wastes no time as $e reaches into the case and begins constructing something. A moment later $e holds up a completed Adrenex Adreneline Injector!@n",
                     true, ch, nullptr, nullptr, TO_ROOM);
                 aid_prod = read_object(num2, VIRTUAL);
-                obj_to_char(aid_prod, ch);
+                ch->addToInventory(aid_prod);
                 extract_obj(aid_obj);
                 improve_skill(ch, SKILL_FIRST_AID, 1);
             }
@@ -13748,7 +13749,7 @@ ACMD(do_aid)
                 act("@C$n@W holds a steel case up and opens it. The case hisses as its lid opens. @C$n@W wastes no time as $e reaches into the case and begins constructing something. A moment later $e holds up a jar of burn salve!@n",
                     true, ch, nullptr, nullptr, TO_ROOM);
                 aid_prod = read_object(num2, VIRTUAL);
-                obj_to_char(aid_prod, ch);
+                ch->addToInventory(aid_prod);
                 extract_obj(aid_obj);
                 improve_skill(ch, SKILL_FIRST_AID, 1);
             }
@@ -13778,7 +13779,7 @@ ACMD(do_aid)
                 act("@C$n@W holds a steel case up and opens it. The case hisses as its lid opens. @C$n@W wastes no time as $e reaches into the case and begins constructing something. A moment later $e holds up a completed Antitoxin Injector!@n",
                     true, ch, nullptr, nullptr, TO_ROOM);
                 aid_prod = read_object(num2, VIRTUAL);
-                obj_to_char(aid_prod, ch);
+                ch->addToInventory(aid_prod);
                 extract_obj(aid_obj);
                 improve_skill(ch, SKILL_FIRST_AID, 1);
             }
@@ -13808,7 +13809,7 @@ ACMD(do_aid)
                 act("@C$n@W holds a steel case up and opens it. The case hisses as its lid opens. @C$n@W wastes no time as $e reaches into the case and begins constructing something. A moment later $e holds up a completed Vial of Formula 82!@n",
                     true, ch, nullptr, nullptr, TO_ROOM);
                 aid_prod = read_object(num2, VIRTUAL);
-                obj_to_char(aid_prod, ch);
+                ch->addToInventory(aid_prod);
                 extract_obj(aid_obj);
                 improve_skill(ch, SKILL_FIRST_AID, 1);
             }

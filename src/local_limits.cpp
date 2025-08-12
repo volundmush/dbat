@@ -125,7 +125,6 @@ static void barrier_shed(Character *ch)
     }
 }
 
-
 static int wearing_stardust(Character *ch)
 {
 
@@ -159,7 +158,6 @@ static int wearing_stardust(Character *ch)
     else
         return (0);
 }
-
 
 static void update_flags(Character *ch)
 {
@@ -313,7 +311,6 @@ void gain_level(Character *ch)
     */
 }
 
-
 void gain_condition(Character *ch, int condition, int value)
 {
     bool intoxicated;
@@ -341,7 +338,7 @@ void gain_condition(Character *ch, int condition, int value)
     {
         return;
     }
-    else if (ch->getRoomVnum() <= 1)
+    else if (ch->location.getVnum() <= 1)
     {
         return;
     }
@@ -1124,11 +1121,8 @@ void corpseRotService(uint64_t heartPulse, double deltaTime)
 
         if (!timer)
         {
-            auto &loc = j->location;
-
-            if (loc.getType() == UnitType::room && loc.position.x == -1.0)
+            if (auto c = j->getCarriedBy())
             {
-                auto c = static_cast<Character *>(loc.unit);
                 if (!strstr(j->getName(), "android"))
                 {
                     act("$p decays in your hands.", false, c, j, nullptr, TO_CHAR);
@@ -1139,42 +1133,28 @@ void corpseRotService(uint64_t heartPulse, double deltaTime)
                 }
             }
 
-            if (auto con = j->getObjects(); !con.empty() && loc.unit)
+            if (auto con = j->getInventory(); !con.empty())
             {
-                switch (loc.getType())
-                {
-                case UnitType::room:
-                {
-                    auto r = static_cast<Room *>(loc.unit);
-                    for (auto jj : filter_raw(con))
-                    {
+                if(j->location) {
+                    for(auto jj : filter_raw(con)) {
                         jj->clearLocation();
-                        jj->setLocation(r);
+                        jj->setLocation(j->location);
                     }
-                }
-                break;
-                case UnitType::character:
-                {
-                    auto c = static_cast<Character *>(loc.unit);
-                    for (auto jj : filter_raw(con))
-                    {
+                } else if(auto c = j->getCarriedBy()) {
+                    for(auto jj : filter_raw(con)) {
                         jj->clearLocation();
-                        jj->setLocation(c->location);
+                        c->addToInventory(jj);
                     }
-                }
-                break;
-                case UnitType::object:
-                {
-                    auto o = static_cast<Object *>(loc.unit);
-                    for (auto jj : filter_raw(con))
-                    {
+                } else if(auto c = j->getWornBy()) {
+                    for(auto jj : filter_raw(con)) {
                         jj->clearLocation();
-                        obj_to_obj(jj, o);
+                        c->addToInventory(jj);
                     }
-                }
-                break;
-                default:
-                    break;
+                } else if(auto o = j->getContainer()) {
+                    for(auto jj : filter_raw(con)) {
+                        jj->clearLocation();
+                        o->addToInventory(jj);
+                    }
                 }
             }
             extract_obj(j);
@@ -1668,7 +1648,7 @@ void point_update(uint64_t heartPulse, double deltaTime)
                 {
                     if ((vehicle = find_vehicle_by_vnum(GET_OBJ_VAL(j, VAL_HATCH_DEST))))
                     {
-                        SET_OBJ_VAL(j, VAL_HATCH_EXTROOM, vehicle->getRoomVnum());
+                        SET_OBJ_VAL(j, VAL_HATCH_EXTROOM, vehicle->location.getVnum());
                     }
                 }
 
@@ -1729,10 +1709,8 @@ void point_update(uint64_t heartPulse, double deltaTime)
                     }
                     else if (GET_OBJ_VNUM(j) != 79)
                     {
-                        auto loc = j->location;
-                        if (loc.getType() == UnitType::character && loc.position.x >= 0.0)
+                        if (auto c = j->getWornBy())
                         {
-                            auto c = static_cast<Character *>(loc.unit);
                             int melt = 5 + (GET_OBJ_WEIGHT(j) * 0.02);
                             if (GET_OBJ_WEIGHT(j) - (5 + (GET_OBJ_WEIGHT(j) * 0.02)) > 0)
                             {
@@ -1746,7 +1724,7 @@ void point_update(uint64_t heartPulse, double deltaTime)
                                 extract_obj(j);
                             }
                         }
-                        else if (IN_ROOM(j) != NOWHERE)
+                        else if (j->location)
                         {
                             if (GET_OBJ_WEIGHT(j) - (5 + (GET_OBJ_WEIGHT(j) * 0.02)) > 0)
                             {

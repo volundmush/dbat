@@ -496,7 +496,7 @@ public:
     }
 
     void subscribe(const std::string& service, T* thing) {
-        subscribe(service, thing->shared());
+        subscribe(service, thing->shared_from_this());
     }
 
     T* first(const std::string& service) {
@@ -536,7 +536,7 @@ public:
     }
 
     void unsubscribe(const std::string& service, T* thing) {
-        unsubscribe(service, thing->shared());
+        unsubscribe(service, thing->shared_from_this());
     }
 
     // Get all entities subscribed to a particular service
@@ -589,3 +589,9 @@ public:
 private:
     std::unordered_map<std::string, std::list<std::weak_ptr<T>>> subscriptions;
 };
+
+template<typename T>
+int64_t getNextID(int64_t &counter, T cont) {
+    while(cont.contains(counter)) counter++;
+    return counter;
+}

@@ -967,7 +967,7 @@ void mag_summons(int level, Character *ch, Object *obj, int spellnum, char *arg)
         auto con = obj->getInventory();
         for (auto tobj : filter_raw(con)) {
             tobj->clearLocation();
-            obj_to_char(tobj, mob);
+            mob->addToInventory(tobj);
         }
         extract_obj(obj);
     }
@@ -1153,7 +1153,7 @@ void mag_creations(int level, Character *ch, int spellnum) {
             spellnum, z);
         return;
     }
-    obj_to_char(tobj, ch);
+    ch->addToInventory(tobj);
     act("$n creates $p.", false, ch, tobj, nullptr, TO_ROOM);
     act("You create $p.", false, ch, tobj, nullptr, TO_CHAR);
     load_otrigger(tobj);

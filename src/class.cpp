@@ -409,7 +409,7 @@ void do_start(Character *ch) {
 
     for(auto v : obj_vnums) {
         auto o = read_object(v, VIRTUAL);
-        if(o) obj_to_char(o, ch);
+        if(o) ch->addToInventory(o);
     }
 
 

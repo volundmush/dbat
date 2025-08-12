@@ -84,7 +84,7 @@ std::shared_ptr<DgScript> read_trigger(int nr) {
 
 
 /* for mobs and rooms: */
-void dg_read_trigger(FILE *fp, struct Entity *proto, UnitType type) {
+void dg_read_trigger(FILE *fp, HasDgScripts *proto, UnitType type) {
     char line[READ_SIZE];
     char junk[8];
     int vnum, rnum, count;
@@ -107,17 +107,17 @@ void dg_read_trigger(FILE *fp, struct Entity *proto, UnitType type) {
             case OBJ_TRIGGER:
                 mudlog(BRF, ADMLVL_BUILDER, true,
                        "SYSERR: dg_read_trigger: Trigger vnum #%d asked for but non-existant! (object: %s - %d)",
-                       vnum, proto->getName(), proto->getVnum());
+                       vnum, static_cast<Object*>(proto)->getName(), proto->getVnum());
                 break;
             case MOB_TRIGGER:
                 mudlog(BRF, ADMLVL_BUILDER, true,
                        "SYSERR: dg_read_trigger: Trigger vnum #%d asked for but non-existant! (mob: %s - %d)",
-                       vnum, GET_NAME((Character *) proto), GET_MOB_VNUM((Character *) proto));
+                       vnum, GET_NAME(static_cast<Character *>(proto)), GET_MOB_VNUM(static_cast<Character *>(proto)));
                 break;
             case WLD_TRIGGER:
                 mudlog(BRF, ADMLVL_BUILDER, true,
                        "SYSERR: dg_read_trigger: Trigger vnum #%d asked for but non-existant! (room:%d)",
-                       vnum, GET_ROOM_VNUM(((Room *) proto)->getVnum()));
+                       vnum, GET_ROOM_VNUM(static_cast<Room *>(proto)->getVnum()));
                 break;
             default:
                 mudlog(BRF, ADMLVL_BUILDER, true,
@@ -132,7 +132,7 @@ void dg_read_trigger(FILE *fp, struct Entity *proto, UnitType type) {
             if(!obj_proto.contains(proto->getVnum())) {
                 mudlog(BRF, ADMLVL_BUILDER, true,
                        "SYSERR: dg_read_trigger: Trigger vnum #%d asked for but non-existant! (object: %s - %d)",
-                       vnum, proto->getName(), proto->getVnum());
+                       vnum, static_cast<Object*>(proto)->getName(), proto->getVnum());
                 return;
             }
             obj_proto.at(proto->getVnum()).proto_script.push_back(rnum);
@@ -141,7 +141,7 @@ void dg_read_trigger(FILE *fp, struct Entity *proto, UnitType type) {
             if(!mob_proto.contains(proto->getVnum())) {
                 mudlog(BRF, ADMLVL_BUILDER, true,
                        "SYSERR: dg_read_trigger: Trigger vnum #%d asked for but non-existant! (mob: %s - %d)",
-                       vnum, GET_NAME((Character *) proto), GET_MOB_VNUM((Character *) proto));
+                       vnum, GET_NAME(static_cast<Character *>(proto)), GET_MOB_VNUM(static_cast<Character *>(proto)));
                 return;
             }
             mob_proto.at(proto->getVnum()).proto_script.push_back(rnum);
@@ -150,7 +150,7 @@ void dg_read_trigger(FILE *fp, struct Entity *proto, UnitType type) {
             if(!world.contains(proto->getVnum())) {
                 mudlog(BRF, ADMLVL_BUILDER, true,
                        "SYSERR: dg_read_trigger: Trigger vnum #%d asked for but non-existant! (room:%d)",
-                       vnum, GET_ROOM_VNUM(((Room *) proto)->getVnum()));
+                       vnum, GET_ROOM_VNUM(static_cast<Room *>(proto)->getVnum()));
                 return;
             }
             world.at(proto->getVnum())->proto_script.push_back(rnum);
@@ -214,7 +214,7 @@ void dg_obj_trigger(char *line, ObjectPrototype *obj) {
     obj->proto_script.push_back(rnum);
 }
 
-void assign_triggers(struct Entity *i, UnitType type) {
+void assign_triggers(HasDgScripts *i, UnitType type) {
 
     if(i->running_scripts.has_value()) {
         // If this value is set, then scripts have been manually assigned via attach or detach.
@@ -243,7 +243,7 @@ void assign_triggers(struct Entity *i, UnitType type) {
             auto t = read_trigger(tvn);
             SCRIPT_TYPES(i) |= GET_TRIG_TYPE(t);
             i->scripts.emplace(t->getVnum(), t);
-            t->owner = units.at(i->id).get();
+            t->owner = i;
             t->activate();
        }
    }

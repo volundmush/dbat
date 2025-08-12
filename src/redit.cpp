@@ -58,7 +58,7 @@ ACMD(do_oasis_redit) {
     Object *capsule = nullptr, *next_obj = nullptr, *remove = nullptr;
     int remodeling = false;
 
-    remove = ch->findObjectVnum(19094);
+    remove = ch->searchInventory(19094);
 
     if (remove == nullptr && GET_ADMLEVEL(ch) < 1) {
                 ch->sendText("You do not have a R.A.D. Remodeling Assistance Droid.\r\n");
@@ -73,7 +73,7 @@ ACMD(do_oasis_redit) {
     }
 
     if (!*buf1 || GET_ADMLEVEL(ch) < 1)
-        number = ch->getRoomVnum();
+        number = ch->location.getVnum();
     else if (!isdigit(*buf1)) {
         if (strcasecmp("save", buf1) != 0) {
                         ch->sendText("Yikes!  Stop that, someone will get hurt!\r\n");
@@ -218,7 +218,7 @@ void redit_save_internally(struct descriptor_data *d) {
     if (OLC_ROOM(d)->getVnum() == NOWHERE) {
         new_room = true;
     }
-    OLC_ROOM(d)->id = OLC_NUM(d);
+    OLC_ROOM(d)->vn = OLC_NUM(d);
     /* FIXME: Why is this not set elsewhere? */
 
     if ((room_num = add_room(OLC_ROOM(d))) == NOWHERE) {
@@ -509,7 +509,7 @@ void redit_parse(struct descriptor_data *d, char *arg) {
                             true, d->character, nullptr, nullptr, TO_ROOM);
                         Object *obj;
                         obj = read_object(19094, VIRTUAL);
-                        obj_to_char(obj, d->character);
+                        d->character->addToInventory(obj);
                     }
                     break;
                 default:

@@ -207,8 +207,12 @@ public:
         : std::runtime_error(message) {}
 };
 
+struct HasSubscriptions {
+    std::unordered_set<std::string> subscriptions{}; // Subscriptions to services.
+};
+
 /* structure for triggers */
-struct DgScript : public HasVariables, std::enable_shared_from_this<DgScript> {
+struct DgScript : public HasVariables, public HasSubscriptions, std::enable_shared_from_this<DgScript> {
     DgScript() = default;
     DgScript(const DgScriptPrototype &other);
     DgScriptPrototype* proto{};
@@ -219,15 +223,11 @@ struct DgScript : public HasVariables, std::enable_shared_from_this<DgScript> {
     std::vector<DepthType> depth_stack{};
     int current_line{};
     double waiting{0.0};    /* event to pause the trigger      */
-    Entity* owner{};
+    HasDgScripts* owner{};
 
     bool active{false};
     void activate();
     void deactivate();
-
-    std::unordered_set<std::string> subscriptions; // Subscriptions to services.
-
-    std::shared_ptr<DgScript> shared();
 
     int execute();
     void reset();
@@ -270,11 +270,12 @@ struct Coordinates {
     void apply(Direction dir);
 };
 
-// Hash function for Coordinates
-
-
 struct Location {
-    Entity* unit{nullptr};  // What unit contains this unit (room, area, char, obj)
+    Location() = default;
+    Location(room_vnum rv);
+    Location(Room* room);
+    Location(Character* ch);
+    AbstractLocation* unit{nullptr};  // What unit contains this unit (room, area, char, obj)
     Coordinates position;
     bool operator==(const Location& other) const;
     bool operator==(const room_vnum rv) const;
@@ -282,10 +283,11 @@ struct Location {
     
     // Conversion to bool - returns true if location is valid. currently means it is a room.
     explicit operator bool() const;
-    UnitType getType() const;
+ 
     Zone* getZone() const;
-    AbstractLocation* getLoc() const;
     vnum getVnum() const;
+
+    std::string getLocID() const;
 
     const char* getName() const;
     const char* getLookDescription() const; // New: coordinate-aware look description
@@ -360,9 +362,10 @@ struct Location {
     bool getIsDark() const;
     int getCookElement() const;
 
-    struct Object* findObjectVnum(obj_vnum objVnum, bool working = true);
-    struct Object* findObject(const std::function<bool(struct Object*)> &func, bool working = true);
-    std::unordered_set<struct Object*> gatherObjects(const std::function<bool(struct Object*)> &func, bool working = true);
+    void traverseObjects(const std::function<void(Object*)> &func, bool recurse = true);
+    struct Object* searchObjects(const std::function<bool(Object*)> &func, bool recurse = true);
+    struct Object* searchObjects(obj_vnum vnum, bool working = true, bool recurse = true);
+    std::unordered_set<struct Object*> gatherFromObjects(const std::function<bool(Object*)> &func, bool recurse = true);
 
     int countPlayers() const;
     bool canGo(int dir) const;
@@ -385,122 +388,135 @@ namespace std {
     };
 }
 
+struct HasVnum {
+    vnum vn{NOTHING};
+    vnum getVnum() const;
+};
 
-struct Entity : public HasVariables {
-    Entity& operator=(const ThingPrototype& other);
-    virtual ~Entity();
+struct HasDgScripts : public HasVariables, public HasVnum {
 
-    // re-adding vnum in and type so we can tell what kind of thing it is for some debugging and functions.
-    vnum vn{NOTHING}; // The vnum of the unit.
+    virtual const char* getDgName() const = 0;
+
     UnitType type{UnitType::unknown};
 
-    int id{NOTHING}; /* the unique ID of this entity */
-    time_t generation{}; /* creation time for dupe check     */
+    virtual bool isActive() const = 0;
 
-    virtual vnum getVnum() const; // Returns the vnum of the unit.
-
-    const char* getName() const;
-    const char* getRoomDescription() const;
-    const char* getLookDescription() const;
-    const char* getShortDescription() const;
-    std::string_view getString(const std::string &key) const; // Returns a string from the strings map.
-
-    const std::vector<ExtraDescription>& getExtraDescription() const; // Returns the extra description data.
-
-    std::unordered_map<std::string, std::string> strings;
-    std::vector<ExtraDescription> extra_descriptions; // Extra descriptions for this unit.
-    FlagHandler<AffectFlag> affect_flags{}; /* To set chars bits          */
-    
-    long trigger_types{};                /* bitvector of trigger types */
+    long trigger_types{};   /* bitvector of trigger types */
     std::optional<std::vector<vnum>> running_scripts; /* list of attached scripts. the order matters. Only used if differs from proto scripts.*/
     std::unordered_map<trig_vnum, std::shared_ptr<DgScript>> scripts; /* list of attached triggers. accessed in order of running_scripts */
-    std::unordered_map<std::string, std::string> script_variables;
 
     void activateScripts();
     void deactivateScripts();
     std::vector<trig_vnum> getScriptOrder(); /* this will return running_scripts if said, or the results of getProtoScripts() */
     std::vector<std::weak_ptr<DgScript>> getScripts();
     virtual std::vector<trig_vnum> getProtoScript() const = 0;
-    virtual std::string scriptString() const;
+    std::string scriptString() const;
 
-    weight_t getInventoryWeight();
-    int64_t getInventoryCount();
+    // generates the persistent UID which will identify this object when it's saved
+    // to a variable and which hopefully survives a reboot.
+    virtual std::string getUID(bool active = false) const = 0;
 
-    std::list<std::weak_ptr<Entity>> contents{};
-    std::vector<std::weak_ptr<Object>> getObjects() const;
-
-    void activateContents();
-    void deactivateContents();
-
-    std::string getUID(bool active = false);
-    virtual bool isActive() = 0;
-
-    struct Object* findObjectVnum(obj_vnum objVnum, bool working = true);
-    virtual struct Object* findObject(const std::function<bool(struct Object*)> &func, bool working = true);
-    virtual std::unordered_set<struct Object*> gatherObjects(const std::function<bool(struct Object*)> &func, bool working = true);
-
-    virtual double getAffectModifier(uint64_t location, uint64_t specific);
-
-    std::unordered_set<std::string> subscriptions{}; // Subscriptions to services.
-
-    std::unordered_map<std::string, double> stats;
-
-    // Location data
-    // These aren't used by all units, but putting it here means debug can see them.
-    Location location;
-
-    virtual void sendText(const std::string& txt);
-    
-    template<typename... Args>
-    void sendFmt(fmt::string_view format, Args&&... args) {
-        try {
-            std::string formatted_string = fmt::format(fmt::runtime(format), std::forward<Args>(args)...);
-            if(formatted_string.empty()) return;
-            sendText(formatted_string);
-        }
-        catch(const fmt::format_error& e) {
-            basic_mud_log("SYSERR: Format error in sendFmt: %s", e.what());
-            basic_mud_log("Template was: %s", format.data());
-        }
-    }
-
-    template<typename... Args>
-    size_t send_to(fmt::string_view format, Args&&... args) {
-        try {
-            // Use fmt::sprintf directly (printf-style).
-            std::string formatted_string = fmt::sprintf(format, std::forward<Args>(args)...);
-            if(formatted_string.empty()) return 0;
-            sendText(formatted_string);
-            return formatted_string.size();
-        }
-        catch(const fmt::format_error& e) {
-            basic_mud_log("SYSERR: Format error in send_to: %s", e.what());
-            basic_mud_log("Template was: %s", format.data());
-            return 0;
-        }
-    }
+    virtual std::optional<std::string> dgCallMember(const std::string& member, const std::string& arg);
 
 };
 
-struct AbstractThing : public Entity {
+struct HasMudStrings {
+    const char* getName() const;
+    const char* getRoomDescription() const;
+    const char* getLookDescription() const;
+    const char* getShortDescription() const;
+    std::string_view getString(const std::string &key) const; // Returns a string from the strings map.
+    std::unordered_map<std::string, std::string> strings;
+};
+
+struct HasExtraDescriptions {
+    const std::vector<ExtraDescription>& getExtraDescription() const; // Returns the extra description data.    
+    std::vector<ExtraDescription> extra_descriptions; // Extra descriptions for this unit.
+};
+
+// Character, Object, and perhaps later some new vehicles use HasLocation.
+struct HasLocation {
+    Location location;
+
     struct Room* getRoom() const;
     room_vnum getRoomVnum() const;
 
-    virtual void addToInventory(Object* obj);
-    virtual std::vector<std::weak_ptr<Object>> getInventory() const;
+    // TODO: Remove setLocation.
+    void setLocation(const Location& loc);
+    virtual void addToLocation(const Location& loc) = 0;
+    virtual void onAddToLocation(const Location& loc) = 0;
+    virtual void removeFromLocation() = 0;
+    virtual void onRemoveFromLocation(const Location& loc) = 0;
+    virtual void onLocationChanged(const Location& oldloc, const Location& newloc) = 0;
+};
 
-    std::map<int, struct Object*> getEquipment();
-    struct Object* getEquipSlot(int slot);
-
+struct AbstractThing {
+    
     // the *Location methods are used for handling database alterations, not logic.
-    virtual void setLocation(const Location& loc) = 0;
+    
     virtual void setLocation(const AbstractThing* td) = 0;
     virtual void setLocation(room_vnum rv) = 0;
     virtual void setLocation(Room* room) = 0;
     virtual void clearLocation() = 0;
 
-    Location getAbsoluteLocation() const;
+};
 
+// Characters and Objects have inventories.
+// Only Objects can be in inventories.
+struct HasInventory {
+    std::vector<std::weak_ptr<Object>> getInventory() const;
+    std::list<std::weak_ptr<Object>> inventory;
+
+    void addToInventory(Object* obj);
+    void addToInventory(const std::shared_ptr<Object>& obj);
+    virtual void onAddToInventory(const std::shared_ptr<Object>& obj) = 0;
+    void removeFromInventory(Object* obj);
+    virtual void removeFromInventory(const std::shared_ptr<Object>& obj);
+    virtual void onRemoveFromInventory(const std::shared_ptr<Object>& obj) = 0;
+
+    void traverseInventory(const std::function<void(Object*)> &func, bool recurse = true);
+    struct Object* searchInventory(const std::function<bool(Object*)> &func, bool recurse = true);
+    struct Object* searchInventory(obj_vnum vnum, bool working = true, bool recurse = true);
+    std::unordered_set<struct Object*> gatherFromInventory(const std::function<bool(Object*)> &func, bool recurse = true);
+
+    void activateInventory();
+    void deactivateInventory();
+};
+
+// Characters have Equipment. Perhaps Objects will too soon.
+struct HasEquipment {
+    std::map<int, std::weak_ptr<Object>> equipment;
+
+    std::map<int, Object*> getEquipment() const;
+    Object* getEquipSlot(int slot) const;
+
+    void addToEquip(Object* obj, int slot);
+    void addToEquip(const std::shared_ptr<Object>& obj, int slot);
+    virtual void onAddToEquip(const std::shared_ptr<Object>& obj, int slot) = 0;
+    void removeFromEquip(int slot);
+    void removeFromEquip(Object* obj);
+    void removeFromEquip(const std::shared_ptr<Object>& obj);
+    virtual void onRemoveFromEquip(const std::shared_ptr<Object>& obj, int slot) = 0;
+
+    void traverseEquipment(const std::function<void(Object*)> &func, bool recurse = true);
+    struct Object* searchEquipment(const std::function<bool(Object*)> &func, bool recurse = true);
+    struct Object* searchEquipment(obj_vnum vnum, bool working = true, bool recurse = true);
+    std::unordered_set<struct Object*> gatherFromEquipment(const std::function<bool(Object*)> &func, bool recurse = true);
+
+    void activateEquipment();
+    void deactivateEquipment();
+};
+
+struct HasAffectFlags {
+    FlagHandler<AffectFlag> affect_flags{};
+};
+
+struct HasStats {
+    std::unordered_map<std::string, double> stats{};
+};
+
+struct HasID {
+    int64_t id{NOTHING}; /* the unique ID of this entity */
 };
 
 // base struct for both npc_proto_data and item_proto_data
@@ -550,30 +566,38 @@ struct ObjectPrototype : public ThingPrototype, public picky_data {
 };
 
 /* ================== Memory Structure for Objects ================== */
-struct Object : public AbstractThing, public picky_data, std::enable_shared_from_this<Object> {
+struct Object : public HasID, public HasLocation, public HasInventory, public HasExtraDescriptions, public HasDgScripts, public HasMudStrings, public HasAffectFlags, public HasSubscriptions, public HasStats,public picky_data, std::enable_shared_from_this<Object> {
     Object();
-    ~Object() override;
+    ~Object();
     Object& operator=(const ObjectPrototype& proto);
-    //~Object() override = default;
+    
+    const char* getDgName() const override;
     std::vector<trig_vnum> getProtoScript() const override;
-    void activate();
-    void deactivate();
-    double getAffectModifier(uint64_t location, uint64_t specific) override;
+    
+    double getAffectModifier(uint64_t location, uint64_t specific);
 
     void commit_iedit(const ObjectPrototype &proto);
 
     ObjectPrototype* getProto() const;
 
     bool active{false};
-    bool isActive() override;
+    bool isActive() const override;
+    void activate();
+    void deactivate();
+    std::string getUID(bool active) const override;
 
     struct Room* getAbsoluteRoom();
     bool isWorking();
-    void clearLocation() override;
-    void setLocation(const Location& loc) override;
-    void setLocation(const AbstractThing* td) override;
-    void setLocation(room_vnum rv) override;
-    void setLocation(Room* room) override;
+
+    Location getAbsoluteLocation() const;
+
+    void addToLocation(const Location& loc) override;
+    void removeFromLocation() override;
+
+    void onAddToInventory(const std::shared_ptr<Object>& obj) override;
+    void onRemoveFromInventory(const std::shared_ptr<Object>& obj) override;
+
+    void clearLocation();
 
     std::shared_ptr<Object> shared();
 
@@ -588,6 +612,13 @@ struct Object : public AbstractThing, public picky_data, std::enable_shared_from
     Size size{Size::medium};           /* Size class of object                */
 
     std::array<affected_type, MAX_OBJ_AFFECT> affected;  /* affects */
+
+    // when equipped or held by a character, they'll be set to this.
+    std::weak_ptr<Character> carrier{};
+    int16_t worn_on{-1};        /* If the object is worn, where */
+
+    // if the object is inside a container...
+    std::weak_ptr<Object> container{};
 
     Object *getContainer() const;
     Character *getCarriedBy() const;
@@ -610,6 +641,10 @@ struct Object : public AbstractThing, public picky_data, std::enable_shared_from
 
     bool isProvidingLight();
     double currentGravity();
+
+    void onAddToLocation(const Location& loc) override;
+    void onRemoveFromLocation(const Location& loc) override;
+    void onLocationChanged(const Location& oldloc, const Location& newloc) override;
 
     template<typename R = double>
     R getBaseStat(const std::string& stat) {
@@ -661,8 +696,12 @@ struct Destination : public Location {
     std::optional<Destination> getReverse() const;
 };
 
-struct AbstractLocation : public Entity {
+struct AbstractLocation {
 
+    std::list<std::weak_ptr<Character>> people;
+    std::list<std::weak_ptr<Object>> objects;
+
+    virtual vnum getLocVnum() const = 0;
     virtual Zone* getZone() const = 0;
 
     virtual const char* getName(const Coordinates& coor) const = 0;
@@ -671,8 +710,11 @@ struct AbstractLocation : public Entity {
 
     virtual const std::vector<ExtraDescription>& getExtraDescription(const Coordinates& coor) const;
 
-    virtual std::vector<std::weak_ptr<Object>> getObjects(const Coordinates& coor) const = 0;
-    virtual std::vector<std::weak_ptr<Character>> getPeople(const Coordinates& coor) const = 0;
+    std::vector<std::weak_ptr<Object>> getObjects() const;
+    std::vector<std::weak_ptr<Character>> getPeople() const;
+
+    virtual std::vector<std::weak_ptr<Object>> getObjects(const Coordinates& coor) const;
+    virtual std::vector<std::weak_ptr<Character>> getPeople(const Coordinates& coor) const;
 
     virtual std::optional<Destination> getDirection(const Coordinates& coor, Direction dir) = 0;
     virtual std::map<Direction, Destination> getDirections(const Coordinates& coor) = 0;
@@ -709,20 +751,26 @@ struct AbstractLocation : public Entity {
     virtual double modEnvironment(const Coordinates& coor, int type, double value) = 0;
     virtual void clearEnvironment(const Coordinates& coor, int type) = 0;
 
-    struct Object* findObjectVnum(const Coordinates& coor, obj_vnum objVnum, bool working = true);
-    virtual struct Object* findObject(const Coordinates& coor, const std::function<bool(struct Object*)> &func, bool working = true);
-    virtual std::unordered_set<struct Object*> gatherObjects(const Coordinates& coor, const std::function<bool(struct Object*)> &func, bool working = true);
-
     int getCookElement(const Coordinates& coor) const;
 
     // tools for editing the location.
     virtual void replaceExit(const Coordinates& coor, const Destination& dest);
     virtual void deleteExit(const Coordinates& coor, Direction dir);
 
-    virtual void addTo(const Coordinates& coor, Character* ch);
-    virtual void addTo(const Coordinates& coor, Object* obj);
-    virtual void removeFrom(Character* ch);
-    virtual void removeFrom(Object* obj);
+    void addToContents(const Coordinates& coor, const std::shared_ptr<Character>& ch);
+    void addToContents(const Coordinates& coor, const std::shared_ptr<Object>& obj);
+    void removeFromContents(const std::shared_ptr<Character>& ch);
+    void removeFromContents(const std::shared_ptr<Object>& obj);
+
+    void addToContents(const Coordinates& coor, Character* ch);
+    void addToContents(const Coordinates& coor, Object* obj);
+    void removeFromContents(Character* ch);
+    void removeFromContents(Object* obj);
+
+    virtual void onAddToContents(const Coordinates& coor, const std::shared_ptr<Character>& ch) = 0;
+    virtual void onAddToContents(const Coordinates& coor, const std::shared_ptr<Object>& obj) = 0;
+    virtual void onRemoveFromContents(const std::shared_ptr<Character>& ch) = 0;
+    virtual void onRemoveFromContents(const std::shared_ptr<Object>& obj) = 0;
 };
 
 struct TileOverride {
@@ -736,9 +784,7 @@ struct TileOverride {
     std::map<Direction, Destination> exits;
 };
 
-struct AbstractGridArea : public AbstractLocation {
-    using Entity::getName;
-    using Entity::getLookDescription; // bring base (no-arg) into scope
+struct AbstractGridArea : public AbstractLocation, public HasMudStrings {
 
     // the default sector type for undefined tiles.
     // if left empty, the tiles are completely impassable / void.
@@ -757,8 +803,6 @@ struct AbstractGridArea : public AbstractLocation {
     const std::vector<ExtraDescription>& getExtraDescription(const Coordinates& coor) const override;
     const char* getName(const Coordinates& coor) const override;
     const char* getLookDescription(const Coordinates& coor) const override;
-    std::vector<std::weak_ptr<Object>> getObjects(const Coordinates& coor) const override;
-    std::vector<std::weak_ptr<Character>> getPeople(const Coordinates& coor) const override;
     std::optional<Destination> getDirection(const Coordinates& coor, Direction dir) override;
     std::map<Direction, Destination> getDirections(const Coordinates& coor) override;
     void setRoomFlag(const Coordinates& coor, RoomFlag flag, bool value = true) override;
@@ -789,19 +833,14 @@ struct AbstractGridArea : public AbstractLocation {
 
 
 /* ================== Memory Structure for room ======================= */
-struct Room : public AbstractLocation, std::enable_shared_from_this<Room> {
+struct Room : public AbstractLocation, public HasDgScripts, public HasMudStrings, public HasExtraDescriptions, public HasSubscriptions, std::enable_shared_from_this<Room> {
     Room();
 
+    vnum getLocVnum() const override;
     Zone *zone{nullptr};
 
-    // Bring the base class getName() into scope to avoid name hiding
-    using Entity::getName;
-    using Entity::getLookDescription; // restore hidden overload
-    using Entity::getObjects;
-    using Entity::findObject;
-    using Entity::findObjectVnum;
-    using Entity::gatherObjects;
-    using Entity::getExtraDescription;
+    using HasMudStrings::getName;
+    using HasMudStrings::getLookDescription;
 
     SectorType sector_type{SectorType::inside};            /* sector type (move/hide)            */
     std::map<Direction, Destination> exits{}; /* Directions */
@@ -809,6 +848,7 @@ struct Room : public AbstractLocation, std::enable_shared_from_this<Room> {
     FlagHandler<WhereFlag> where_flags{};
     SpecialFunc func{};
 
+    const char* getDgName() const override;
     std::vector<trig_vnum> proto_script; /* list of default triggers  */
     std::vector<trig_vnum> getProtoScript() const override;
 
@@ -816,22 +856,50 @@ struct Room : public AbstractLocation, std::enable_shared_from_this<Room> {
     int damage{};                     /* How damaged the room is            */
     int ground_effect{};            /* Effect of ground destruction       */
     
+    bool isActive() const override;
     void activate();
     void deactivate();
+    std::string getUID(bool active) const override;
 
     int getDamage() const;
     int setDamage(int amount);
     int modDamage(int amount);
 
-    bool isActive() override;
+    void sendText(const std::string& txt);
 
-    void sendText(const std::string& txt) override;
+    template<typename... Args>
+    void sendFmt(fmt::string_view format, Args&&... args) {
+        try {
+            std::string formatted_string = fmt::format(fmt::runtime(format), std::forward<Args>(args)...);
+            if(formatted_string.empty()) return;
+            sendText(formatted_string);
+        }
+        catch(const fmt::format_error& e) {
+            basic_mud_log("SYSERR: Format error in Room::sendFmt: %s", e.what());
+            basic_mud_log("Template was: %s", format.data());
+        }
+    }
+
+    template<typename... Args>
+    size_t send_to(fmt::string_view format, Args&&... args) {
+        try {
+            // Use fmt::sprintf directly (printf-style).
+            std::string formatted_string = fmt::sprintf(format, std::forward<Args>(args)...);
+            if(formatted_string.empty()) return 0;
+            sendText(formatted_string);
+            return formatted_string.size();
+        }
+        catch(const fmt::format_error& e) {
+            basic_mud_log("SYSERR: Format error in Room::send_to: %s", e.what());
+            basic_mud_log("Template was: %s", format.data());
+            return 0;
+        }
+    }
+    
     void deleteExit(Direction dir);
     void replaceExit(const Destination& dest);
 
     std::shared_ptr<Room> shared();
-
-    std::vector<std::weak_ptr<Character>> getPeople() const;
 
     std::optional<std::string> dgCallMember(const std::string& member, const std::string& arg);
 
@@ -874,13 +942,17 @@ struct Room : public AbstractLocation, std::enable_shared_from_this<Room> {
     std::optional<Destination> getDirection(Direction dir) const;
     std::map<Direction, Destination> getDirections() const;
 
+    void onAddToContents(const Coordinates& coor, const std::shared_ptr<Character>& ch) override;
+    void onAddToContents(const Coordinates& coor, const std::shared_ptr<Object>& obj) override;
+
+    void onRemoveFromContents(const std::shared_ptr<Character>& ch) override;
+    void onRemoveFromContents(const std::shared_ptr<Object>& obj) override;
+
     // overrides for location_data...
     Zone* getZone() const override;
     const std::vector<ExtraDescription>& getExtraDescription(const Coordinates& coor) const override;
     const char* getName(const Coordinates& coor) const override;
     const char* getLookDescription(const Coordinates& coor) const override;
-    std::vector<std::weak_ptr<Object>> getObjects(const Coordinates& coor) const override;
-    std::vector<std::weak_ptr<Character>> getPeople(const Coordinates& coor) const override;
     std::optional<Destination> getDirection(const Coordinates& coor, Direction dir) override;
     std::map<Direction, Destination> getDirections(const Coordinates& coor) override;
     void setRoomFlag(const Coordinates& coor, RoomFlag flag, bool value = true) override;
@@ -1097,25 +1169,64 @@ struct CharacterPrototype : public ThingPrototype {
 };
 
 /* ================== Structure for player/non-player ===================== */
-struct Character : public AbstractThing, std::enable_shared_from_this<Character> {
+struct Character : public HasID, public HasLocation, public HasEquipment, public HasInventory, public HasMudStrings, public HasDgScripts, public HasAffectFlags, public HasSubscriptions, public HasStats, std::enable_shared_from_this<Character> {
     Character();
-    ~Character() override;
+    ~Character();
     // this constructor below is to be used only for the mob_proto map.
 
     Character& operator=(CharacterPrototype& proto);
 
+    const char* getDgName() const override;
     std::vector<trig_vnum> getProtoScript() const override;
     void activate();
     void deactivate();
+    std::optional<std::string> dgCallMember(const std::string& member, const std::string& arg) override;
+
+    std::string getUID(bool active) const override;
 
     CharacterPrototype* getProto() const;
 
-    void sendText(const std::string& txt) override;
+    void addToLocation(const Location& loc) override;
+    void removeFromLocation() override;
+    void onAddToLocation(const Location& loc) override;
+    void onRemoveFromLocation(const Location& loc) override;
+    void onLocationChanged(const Location& oldloc, const Location& newloc) override;
+
+    void sendText(const std::string& txt);
+
+    template<typename... Args>
+    void sendFmt(fmt::string_view format, Args&&... args) {
+        try {
+            std::string formatted_string = fmt::format(fmt::runtime(format), std::forward<Args>(args)...);
+            if(formatted_string.empty()) return;
+            sendText(formatted_string);
+        }
+        catch(const fmt::format_error& e) {
+            basic_mud_log("SYSERR: Format error in Character::sendFmt: %s", e.what());
+            basic_mud_log("Template was: %s", format.data());
+        }
+    }
+
+    template<typename... Args>
+    size_t send_to(fmt::string_view format, Args&&... args) {
+        try {
+            // Use fmt::sprintf directly (printf-style).
+            std::string formatted_string = fmt::sprintf(format, std::forward<Args>(args)...);
+            if(formatted_string.empty()) return 0;
+            sendText(formatted_string);
+            return formatted_string.size();
+        }
+        catch(const fmt::format_error& e) {
+            basic_mud_log("SYSERR: Format error in Character::send_to: %s", e.what());
+            basic_mud_log("Template was: %s", format.data());
+            return 0;
+        }
+    }
 
     void login();
 
     bool active{false};
-    bool isActive() override;
+    bool isActive() const override;
 
     void ageBy(double addedTime);
     void setAge(double newAge);
@@ -1123,22 +1234,15 @@ struct Character : public AbstractThing, std::enable_shared_from_this<Character>
     void onAttack(atk::Attack& outgoing);
     void onAttacked(atk::Attack& incoming);
 
-    void clearLocation() override;
-    void setLocation(const Location& loc) override;
-    void setLocation(const AbstractThing* td) override;
-    void setLocation(room_vnum rv) override;
-    void setLocation(Room* room) override;
+    void onAddToInventory(const std::shared_ptr<Object>& obj) override;
+    void onRemoveFromInventory(const std::shared_ptr<Object>& obj) override;
+    void onAddToEquip(const std::shared_ptr<Object>& obj, int slot) override;
+    void onRemoveFromEquip(const std::shared_ptr<Object>& obj, int slot) override;
+
+    void clearLocation();
 
     void lookAtLocation();
-    void lookAtLocation(Room *room);
-    void lookAtLocation(room_vnum rv);
     void lookAtLocation(const Location& loc);
-    void lookAtLocation(const AbstractThing* td);
-
-    std::optional<std::string> dgCallMember(const std::string& member, const std::string& arg);
-
-    struct Object* findObject(const std::function<bool(struct Object*)> &func, bool working = true) override;
-    std::unordered_set<struct Object*> gatherObjects(const std::function<bool(struct Object*)> &func, bool working = true) override;
 
     std::shared_ptr<Character> shared();
 
@@ -1299,7 +1403,7 @@ struct Character : public AbstractThing, std::enable_shared_from_this<Character>
 
     room_vnum normalizeLoadRoom(room_vnum in);
 
-    double getAffectModifier(uint64_t location, uint64_t specific) override;
+    double getAffectModifier(uint64_t location, uint64_t specific);
 
     // C++ reworking
     std::string juggleRaceName(bool capitalized);

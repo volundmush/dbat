@@ -58,22 +58,10 @@ void Character::restore(bool announce) {
     restoreVital(CharVital::ki);
 }
 
-void Character::lookAtLocation(Room *room) {
-    if(!room) return;
-    look_at_room(room, this, 0);
-}
-
-void Character::lookAtLocation(room_vnum rv) {
-    auto room = get_room(rv);
-    lookAtLocation(room);
-}
 
 void Character::lookAtLocation(const Location& loc) {
-    if(!loc.unit) return;
-    switch(loc.unit->type) {
-        case UnitType::room:
-            lookAtLocation(static_cast<Room*>(loc.unit));
-            break;
+    if(auto r = getRoom()) {
+        look_at_room(r, this, 0);
     }
 }
 
@@ -82,10 +70,6 @@ void Character::lookAtLocation() {
     lookAtLocation(location);
 }
 
-void Character::lookAtLocation(const AbstractThing* td) {
-    if(!td) return;
-    lookAtLocation(td->location);
-}
 
 void Character::resurrect(ResurrectionMode mode) {
     // First, fully heal the character.
@@ -692,10 +676,10 @@ void Character::login() {
     if (GET_LEVEL(this) == 0) {
                 this->send_to("%s", CONFIG_START_MESSG);
     }
-    if (this->getRoomVnum() <= 1 && GET_LOADROOM(this) != NOWHERE) {
+    if (this->location.getVnum() <= 1 && GET_LOADROOM(this) != NOWHERE) {
         this->clearLocation();
         this->setLocation(GET_LOADROOM(this));
-    } else if (this->getRoomVnum() <= 1) {
+    } else if (this->location.getVnum() <= 1) {
         this->clearLocation();
         this->setLocation(300);
     } else {
@@ -1236,4 +1220,55 @@ bool Character::isSparring() const {
     }
 
     return character_flags.get(CharacterFlag::sparring);
+}
+
+std::string Character::getUID(bool active) const {
+    return fmt::format("#C{}{}", id, active ? "!" : "");
+}
+
+void Character::onAddToEquip(const std::shared_ptr<Object>& obj, int slot) {
+    obj->container.reset();
+    obj->carrier = shared_from_this();
+    obj->worn_on = slot;
+}
+
+void Character::onRemoveFromEquip(const std::shared_ptr<Object>& obj, int slot) {
+    // Custom logic for when an object is removed from equipment
+    obj->container.reset();
+    obj->carrier.reset();
+    obj->worn_on = -1;
+}
+
+void Character::onAddToInventory(const std::shared_ptr<Object>& obj) {
+    obj->container.reset();
+    obj->carrier = shared();
+    obj->worn_on = -1;
+}
+
+void Character::onRemoveFromInventory(const std::shared_ptr<Object>& obj) {
+    obj->container.reset();
+    obj->carrier.reset();
+    obj->worn_on = -1;
+}
+
+void Character::onAddToLocation(const Location& loc) {
+
+}
+
+void Character::onRemoveFromLocation(const Location& loc) {
+
+}
+
+void Character::onLocationChanged(const Location& oldloc, const Location& newloc) {
+    
+}
+
+void Character::addToLocation(const Location& loc) {
+    if(!loc.unit) return;
+    loc.unit->addToContents(loc.position, shared_from_this());
+}
+
+void Character::removeFromLocation() {
+    if(!location.unit) return;
+    location.unit->removeFromContents(shared_from_this());
 }

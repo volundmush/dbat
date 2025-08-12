@@ -429,7 +429,7 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg) {
                     STATE(d) = CON_PLAYING;
                     if (d->obj_weapon == 0) {
                         obj = read_object(20099, VIRTUAL);
-                        obj_to_char(obj, d->character);
+                        d->character->addToInventory(obj);
                         switch (d->obj_type) {
                             case 1:
                                 obj->wear_flags.set(ITEM_WEAR_BODY, true);
@@ -488,7 +488,7 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg) {
                         obj->strings["room_description"] = buf3;
                     } else {
                         obj = read_object(20098, VIRTUAL);
-                        obj_to_char(obj, d->character);
+                        d->character->addToInventory(obj);
                         *buf = '\0';
                         sprintf(buf, "%s", d->obj_name);
                         obj->strings["name"] = strdup(buf);

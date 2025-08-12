@@ -32,7 +32,7 @@ cdef extern from "dbat/db.h":
     map[int, shared_ptr[structs.Object]] uniqueObjects
     vector[weak_ptr[structs.Object]] getAllObjects()
 
-    map[int, structs.account_data] accounts
+    map[int, structs.Account] accounts
 
     void boot_db_new()
 
@@ -41,7 +41,7 @@ cdef extern from "dbat/db.h":
     map[int, structs.shop_data] shop_index
     map[int, structs.guild_data] guild_index
     map[int, structs.DgScriptPrototype] trig_index
-    map[int64_t, structs.player_data] players
+    map[int64_t, structs.PlayerData] players
     map[int64_t, structs.descriptor_data*] sessions
 
     int create_join_session(int account_id, int character_id, int64_t connection_id, const string& ip)

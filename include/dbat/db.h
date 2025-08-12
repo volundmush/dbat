@@ -256,13 +256,13 @@ extern NegativeKeyGuardMap<int64_t, struct descriptor_data*> sessions;
 extern NegativeKeyGuardMap<mob_vnum, struct index_data> mob_index;
 extern NegativeKeyGuardMap<mob_vnum, CharacterPrototype> mob_proto;
 
-extern NegativeKeyGuardUnorderedMap<int, std::shared_ptr<Character>> uniqueCharacters;
+extern NegativeKeyGuardUnorderedMap<int64_t, std::shared_ptr<Character>> uniqueCharacters;
 extern std::vector<std::weak_ptr<Character>> getAllCharacters();
 
 extern NegativeKeyGuardMap<obj_vnum, struct index_data> obj_index;
 extern NegativeKeyGuardMap<obj_vnum, ObjectPrototype> obj_proto;
 
-extern NegativeKeyGuardUnorderedMap<int, std::shared_ptr<Object>> uniqueObjects;
+extern NegativeKeyGuardUnorderedMap<int64_t, std::shared_ptr<Object>> uniqueObjects;
 extern std::vector<std::weak_ptr<Object>> getAllObjects();
 
 extern NegativeKeyGuardMap<trig_vnum, DgScriptPrototype> trig_index;
@@ -273,10 +273,18 @@ extern NegativeKeyGuardMap<guild_vnum, struct guild_data> guild_index;
 
 extern NegativeKeyGuardMap<int64_t, PlayerData> players;
 
-int getNextUnitID();
-int getNextAccountID();
+extern int64_t lastCharacterID;
+extern int64_t lastObjectID;
+extern int64_t lastAccountID;
+
+int64_t getNextAccountID();
+
+
 bool isUID(const std::string& uid);
-std::shared_ptr<Entity> resolveUID(const std::string& uid);
+std::shared_ptr<HasDgScripts> resolveUID(const std::string& uid);
+
+bool isLocID(const std::string& lid);
+std::shared_ptr<AbstractLocation> resolveLocID(const std::string& lid);
 
 extern Character *affect_list;
 extern Character *affectv_list;

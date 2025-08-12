@@ -16,7 +16,7 @@
 #include "dbat/filter.h"
 #include "dbat/dg_scripts.h"
 
-Object::Object() : AbstractThing() {
+Object::Object() {
     type = UnitType::object;
 }
 
@@ -93,43 +93,6 @@ int delete_object(obj_rnum rnum) {
     auto allobj = objectSubscriptions.all(fmt::format("vnum_{}", obj->vn));
     for (auto tmp : filter_raw(allobj)) {
 
-        /* extract_obj() will just axe contents. */
-        if (auto con = tmp->getInventory(); !con.empty() && tmp->location.unit) {
-
-            switch(tmp->location.getType()) {
-                case UnitType::room: {
-                    auto r = static_cast<Room*>(tmp->location.unit);
-                    for(auto this_content : filter_raw(con)) {
-                        /* Transfer stuff from object to room. */
-                        this_content->clearLocation();
-                        this_content->setLocation(r);
-                    }
-                }
-                    break;
-                case UnitType::character: {
-                    auto c = static_cast<Character*>(tmp->location.unit);
-                    for(auto this_content : filter_raw(con)) {
-                        /* Transfer stuff from object to person inventory. */
-                        this_content->clearLocation();
-                        obj_to_char(this_content, c);
-                    }
-                }
-                    break;
-                case UnitType::object: {
-                    auto o = static_cast<Object*>(tmp->location.unit);
-                    for(auto this_content : filter_raw(con)) {
-                        /* Transfer stuff from object to containing object. */
-                        this_content->clearLocation();
-                        obj_to_obj(this_content, o);
-                    }
-                }
-                    break;
-                default:
-                    basic_mud_log("SYSERR: delete_object: Unknown container type for object being deleted.");
-                    break;
-            }
-
-        }
         /* Remove from object_list, etc. - handles weight changes, and similar. */
         extract_obj(tmp);
     }
@@ -184,7 +147,7 @@ void Object::activate() {
         objectSubscriptions.subscribe(s, sh);
     }
 
-    activateContents();
+    activateInventory();
 }
 
 void Object::deactivate() {
@@ -197,7 +160,7 @@ void Object::deactivate() {
 
     auto sh = shared_from_this();
     objectSubscriptions.unsubscribeFromAll(sh);
-    deactivateContents();
+    deactivateInventory();
 }
 
 
@@ -211,7 +174,7 @@ double Object::getAffectModifier(uint64_t location, uint64_t specific) {
     return modifier;
 }
 
-bool Object::isActive() {
+bool Object::isActive() const {
     return active;
 }
 
@@ -323,7 +286,7 @@ void auto_equip(Character *ch, Object *obj, int location) {
     }
 
     if (location <= 0)    /* Inventory */
-        obj_to_char(obj, ch);
+        ch->addToInventory(obj);
 }
 
 
@@ -332,18 +295,21 @@ bool Object::isProvidingLight() {
 }
 
 Room* Object::getAbsoluteRoom() {
-    auto loc = location.unit;
-    while(loc && (loc->type != UnitType::room)) {
-        loc = loc->location.unit;
+    if(auto r = getRoom()) {
+        return r;
+    } else if(auto c = getCarriedBy()) {
+        return c->getRoom();
+    } else if(auto c = getWornBy()) {
+        return c->getRoom();
+    } else if(auto o = getContainer()) {
+        return o->getAbsoluteRoom();
     }
-    return (Room*)loc;
+
+    return nullptr;
 }
 
 double Object::currentGravity() {
-    if(auto room = getAbsoluteRoom(); room) {
-        return room->getEnvironment(ENV_GRAVITY);
-    }
-    return 1.0;
+    return location.getEnvironment(ENV_GRAVITY);
 }
 
 bool Object::isWorking() {
@@ -351,52 +317,16 @@ bool Object::isWorking() {
 }
 
 void Object::clearLocation() {
-    if(!location.unit) return;
-    if(auto l = dynamic_cast<AbstractLocation*>(location.unit); l) {
-        l->removeFrom(this);
-    } else if(auto o = dynamic_cast<Object*>(location.unit); o) {
-        obj_from_obj(this);
-    } else if(auto c = dynamic_cast<Character*>(location.unit); c) {
-        if(location.position.x >= 0.0) {
-            unequip_char((Character*)location.unit, location.position.x);
-        } else {
-            obj_from_char(this);
-        }
-    }
-}
-
-void Object::setLocation(Room* room) {
-    if(!room) return;
-    Location loc;
-    loc.unit = room;
-    setLocation(loc);
-}
-
-void Object::setLocation(room_vnum rv) {
-    auto r = get_room(rv);
-    setLocation(r);
-}
-
-
-void Object::setLocation(const Location& loc) {
-    if(!loc.unit) return;
-    if(auto l = dynamic_cast<AbstractLocation*>(loc.unit); l) {
-        l->addTo(loc.position, this);
-    } else if(auto o = dynamic_cast<Object*>(loc.unit); o) {
-        obj_to_obj(this, o);
-    } else if(auto c = dynamic_cast<Character*>(loc.unit); c) {
-        auto_equip(c, this, loc.position.x);
-    }
-}
-
-void Object::setLocation(const AbstractThing* td) {
-    if(!td) return;
-    setLocation(td->location);
 
 }
 
 Object::~Object() {
+    extract_script(this, type);
     if(auctname) free(auctname);
+}
+
+const char* Object::getDgName() const {
+    return getName();
 }
 
 std::vector<trig_vnum> Object::getProtoScript() const {
@@ -415,24 +345,80 @@ ObjectPrototype* Object::getProto() const {
 }
 
 Object* Object::getContainer() const {
-    if(location.getType() != UnitType::object) return nullptr;
-    return static_cast<Object*>(location.unit);
+    if(auto o = container.lock()) {
+        return o.get();
+    }
+    return nullptr;
 }
 
 Character* Object::getCarriedBy() const {
-    if(location.getType() != UnitType::character) return nullptr;
-    if(location.position.x != -1.0) return nullptr;
-    return static_cast<Character*>(location.unit);
+    if(auto c = carrier.lock(); c && worn_on == -1) {
+        return c.get();
+    }
+    return nullptr;
 }
 
 Character* Object::getWornBy() const {
-    if(location.getType() != UnitType::character) return nullptr;
-    if(location.position.x == -1.0) return nullptr;
-    return static_cast<Character*>(location.unit);
+    if(auto c = carrier.lock(); c && worn_on != -1) {
+        return c.get();
+    }
+    return nullptr;
 }
 
 int16_t Object::getWornOn() const {
-    if(location.getType() != UnitType::character) return -1;
-    if(location.position.x == -1.0) return -1;
-    return location.position.x;
+    if(auto c = carrier.lock(); c && worn_on != -1) {
+        return worn_on;
+    }
+    return -1;
+}
+
+void Object::onAddToInventory(const std::shared_ptr<Object>& obj) {
+    obj->container = shared_from_this();
+    obj->carrier.reset();
+    obj->worn_on = -1;
+}
+
+void Object::onRemoveFromInventory(const std::shared_ptr<Object>& obj) {
+    obj->container.reset();
+    obj->carrier.reset();
+    obj->worn_on = -1;
+}
+
+std::string Object::getUID(bool active) const {
+    return fmt::format("#O{}{}", id, active ? "!" : "");
+}
+
+Location Object::getAbsoluteLocation() const {
+    if(location) {
+        return location;
+    } else if(auto o = getContainer()) {
+        return o->getAbsoluteLocation();
+    } else if(auto c = getCarriedBy()) {
+        return c->location;
+    } else if(auto c = getWornBy()) {
+        return c->location;
+    }
+    return {};
+}
+
+void Object::onAddToLocation(const Location& loc) {
+
+}
+
+void Object::onRemoveFromLocation(const Location& loc) {
+
+}
+
+void Object::onLocationChanged(const Location& oldloc, const Location& newloc) {
+
+}
+
+void Object::addToLocation(const Location& loc) {
+    if(!loc.unit) return;
+    loc.unit->addToContents(loc.position, shared_from_this());
+}
+
+void Object::removeFromLocation() {
+    if(!location.unit) return;
+    location.unit->removeFromContents(shared_from_this());
 }

@@ -52,7 +52,6 @@ room_rnum add_room(Room *room) {
     }
     auto sh = std::shared_ptr<Room>(room);
     world.emplace(vn, sh);
-    units.emplace(vn, sh);
     basic_mud_log("GenOLC: add_room: Added room %d.", vn);
 
     /*
@@ -134,7 +133,6 @@ int delete_room(room_rnum rnum) {
         sh.in_room.erase(rnum);
     }
 
-    units.erase(rnum);
     world.erase(rnum);
     return true;
 }
@@ -208,8 +206,12 @@ nlohmann::json Room::serializeDgVars() {
 }
 */
 
-bool Room::isActive() {
-    return world.contains(id);
+std::string Room::getUID(bool active) const {
+    return fmt::format("#R{}{}", vn, active ? "!" : "");
+}
+
+bool Room::isActive() const {
+    return true;
 }
 
 
@@ -248,18 +250,6 @@ int Room::setDamage(int amount) {
 
 int Room::modDamage(int amount) {
     return setDamage(damage + amount);
-}
-
-std::vector<std::weak_ptr<Character>> Room::getPeople() const {
-    std::vector<std::weak_ptr<Character>> out;
-    for(const auto &uw : contents) {
-        if(auto u = uw.lock()) {
-            if(auto c = std::dynamic_pointer_cast<Character>(u)) {
-                out.push_back(c);
-            }
-        }
-    }
-    return out;
 }
 
 static const std::unordered_set<int> inside_sectors = {SECT_INSIDE, SECT_UNDERWATER, SECT_IMPORTANT, SECT_SHOP, SECT_SPACE};
@@ -357,7 +347,7 @@ double Room::getEnvironment(int type) const {
 
             // check gravityRanges
             for(const auto& [range, grav] : gravityRanges) {
-                if(id >= range.first && id <= range.second) {
+                if(vn >= range.first && vn <= range.second) {
                     return grav;
                 }
             }
@@ -402,6 +392,14 @@ double Room::getEnvironment(int type) const {
     return 0.0;
 }
 
+vnum Room::getLocVnum() const {
+    return getVnum();
+}
+
+const char* Room::getDgName() const {
+    return HasMudStrings::getName();
+}
+
 std::vector<trig_vnum> Room::getProtoScript() const {
     return proto_script;
 }
@@ -412,7 +410,7 @@ std::vector<trig_vnum> Room::getProtoScript() const {
 // unless you want to provide a new interface. If you want to call the base version, do:
 
 const std::vector<ExtraDescription>& Room::getExtraDescription(const Coordinates& coor) const {
-    return getExtraDescription();
+    return HasExtraDescriptions::getExtraDescription();
 }   
 
 Zone* Room::getZone() const {
@@ -425,15 +423,7 @@ const char* Room::getName(const Coordinates& /*coor*/) const {
 
 const char* Room::getLookDescription(const Coordinates& coor) const {
     // For rooms, look description does not vary by coordinate inside the room.
-    return Entity::getLookDescription();
-}
-
-std::vector<std::weak_ptr<Object>> Room::getObjects(const Coordinates& coor) const {
-    return getObjects();
-}
-
-std::vector<std::weak_ptr<Character>> Room::getPeople(const Coordinates& coor) const {
-    return getPeople();
+    return HasMudStrings::getLookDescription();
 }
 
 std::optional<Destination> Room::getDirection(Direction dir) const {
@@ -574,4 +564,22 @@ void Room::deleteExit(const Coordinates& coor, Direction dir) {
 
 void Room::replaceExit(const Coordinates& coor, const Destination& dest) {
     replaceExit(dest);
+}
+
+void Room::onAddToContents(const Coordinates& coor, const std::shared_ptr<Object>& obj) {
+    if (getVnum() == real_room(80)) {
+        auc_load(obj.get());
+    }
+}
+
+void Room::onAddToContents(const Coordinates& coor, const std::shared_ptr<Character>& ch) {
+
+}
+
+void Room::onRemoveFromContents(const std::shared_ptr<Object>& obj) {
+
+}
+
+void Room::onRemoveFromContents(const std::shared_ptr<Character>& ch) {
+
 }

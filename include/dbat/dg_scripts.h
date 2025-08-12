@@ -299,7 +299,7 @@ extern void check_interval_triggers(int trigFlag);
 
 extern void find_uid_name(char *uid, char *name, size_t nlen);
 
-extern void do_sstat(Character *ch, struct Entity *ud);
+extern void do_sstat(Character *ch, struct HasDgScripts *ud);
 
 extern void add_trigger(script_data *sc,  const std::shared_ptr<DgScript> t, int loc);
 
@@ -315,7 +315,7 @@ Room *dg_room_of_obj(Object *obj);
 /* Thanks to Chris Gilbert for reminding me that there are other options. */
 extern trig_rnum real_trigger(trig_vnum vnum);
 
-extern void process_eval(Entity *go, script_data *sc, DgScript *trig,
+extern void process_eval(HasDgScripts *go, script_data *sc, DgScript *trig,
                          UnitType type, char *cmd);
 
 /* from dg_db_scripts.c */
@@ -323,12 +323,12 @@ extern void parse_trigger(FILE *trig_f, trig_vnum nr);
 
 std::shared_ptr<DgScript> read_trigger(int nr);
 
-extern void dg_read_trigger(FILE *fp, struct Entity *proto, UnitType type);
+extern void dg_read_trigger(FILE *fp, struct HasDgScripts *proto, UnitType type);
 extern void dg_read_trigger(FILE *fp, struct ThingPrototype *proto, UnitType type);
 
 extern void dg_obj_trigger(char *line, ObjectPrototype *obj);
 
-extern void assign_triggers(struct Entity *i, UnitType type);
+extern void assign_triggers(struct HasDgScripts *i, UnitType type);
 
 
 /* From dg_variables.c */
@@ -338,14 +338,14 @@ extern char *skill_percent(Character *ch, char *skill);
 
 extern int char_has_item(char *item, Character *ch);
 
-extern void var_subst(Entity *go, script_data *sc, DgScript *trig,
+extern void var_subst(HasDgScripts *go, script_data *sc, DgScript *trig,
                       UnitType type, char *line, char *buf);
 
-extern void find_replacement(Entity *go, script_data *sc, DgScript *trig,
+extern void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig,
                              UnitType type, char *var, char *field, char *subfield, char *str, size_t slen);
 
 /* From dg_handler.c */
-extern void extract_script(Entity *thing, UnitType type);
+extern void extract_script(HasDgScripts *thing, UnitType type);
 
 /* from dg_comm.c */
 extern char *any_one_name(char *argument, char *first_arg);

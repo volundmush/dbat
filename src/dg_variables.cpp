@@ -208,7 +208,7 @@ static char *recho[] = {"mrecho ", "orecho ", "wrecho "};
 
 /* sets str to be the value of var.field */
 void
-find_replacement(Entity *go, script_data *sc, DgScript *trig, UnitType type, char *var, char *field, char *subfield,
+find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitType type, char *var, char *field, char *subfield,
                  char *str, size_t slen) {
 
     Character *ch, *c = nullptr, *rndm;
@@ -217,7 +217,7 @@ find_replacement(Entity *go, script_data *sc, DgScript *trig, UnitType type, cha
     char *name;
     int num, count, i, j, doors;
 
-    auto unit = (Entity*)go;
+    auto unit = (HasDgScripts*)go;
 
     *str = '\0';
 
@@ -1252,7 +1252,7 @@ in the vault (vnum: 453) now and then. you can just use
  */
 
 /* substitutes any variables into line and returns it as buf */
-void var_subst(Entity *go, script_data *sc, DgScript *trig,
+void var_subst(HasDgScripts *go, script_data *sc, DgScript *trig,
                UnitType type, char *line, char *buf) {
     char tmp[MAX_INPUT_LENGTH], repl_str[MAX_INPUT_LENGTH];
     char *var = nullptr, *field = nullptr, *p = nullptr;

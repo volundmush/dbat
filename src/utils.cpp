@@ -36,7 +36,7 @@ char commastring[MAX_STRING_LENGTH];
 
 void dispel_ash(Character *ch) {
 
-    auto ash = ch->location.findObjectVnum(1306);
+    auto ash = ch->location.searchObjects(1306);
     if(!ash) return;
 
     int roll = axion_dice(0);
@@ -817,7 +817,7 @@ void broken_update(uint64_t heartPulse, double deltaTime) {
         } else if (health <= 80 && dice == 4) {
             k->location.sendText("@GThe damaged ATM spits out some money while flashing ERROR on its screen!@n\r\n");
             money = create_money(rand_number(1, 30));
-            money->setLocation(k);
+            money->setLocation(k->location);
         } else if (health <= 99 && dice < 4) {
             k->location.sendText("@RThe ATM machine emits a loud grinding sound from inside.@n\r\n");
         }
@@ -1273,7 +1273,7 @@ const char* sense_location_name(room_vnum roomnum) {
 
 const char *sense_location(Character *ch) {
     
-    return sense_location_name(ch->getRoomVnum());
+    return sense_location_name(ch->location.getVnum());
 
 }
 
@@ -1919,13 +1919,13 @@ int planet_check(Character *ch, Character *vict) {
         return false;
     }
 
-    return getPlanet(ch->getRoomVnum()) == getPlanet(vict->getRoomVnum());
+    return getPlanet(ch->location.getVnum()) == getPlanet(vict->location.getVnum());
 }
 
 void purge_homing(Character *ch) {
 
     auto isHoming = [&](const auto& o) {return (o->getVnum() == 80 || o->getVnum() == 81) && (TARGET(o) == ch || USER(o) == ch);};
-    auto gather = ch->location.gatherObjects(isHoming);
+    auto gather = ch->location.gatherFromObjects(isHoming);
     for(auto obj : gather) {
         act("$p @wloses its target and flies off into the distance.@n", true, nullptr, obj, nullptr, TO_ROOM);
         extract_obj(obj);
@@ -2984,10 +2984,9 @@ void craftProgress(Character* ch) {
     continueCraft = ch->craftingDeck.playTopCard(ch);
 
     if(!continueCraft) {
-                ch->sendText("You finish your project!\r\n");
+        ch->sendText("You finish your project!\r\n");
         act("$n finally finishes their project!", true, ch, nullptr, nullptr, TO_ROOM);
-
-        obj_to_char(ch->craftingTask.pObject, ch);
+        ch->addToInventory(ch->craftingTask.pObject);
         ch->craftingTask.pObject = nullptr;
         ch->craftingTask.improvementRounds = 0;
 

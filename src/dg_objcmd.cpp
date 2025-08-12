@@ -86,7 +86,7 @@ void obj_log(Object *obj, const char *format, ...) {
     va_list args;
     char output[MAX_STRING_LENGTH];
 
-    snprintf(output, sizeof(output), "Obj (%s [%d], VNum %d):: %s", obj->getShortDescription(), obj->id, GET_OBJ_VNUM(obj), format);
+    snprintf(output, sizeof(output), "Obj (%s [%ld], VNum %d):: %s", obj->getShortDescription(), obj->id, GET_OBJ_VNUM(obj), format);
 
     va_start(args, format);
     script_vlog(output, args);
@@ -505,13 +505,13 @@ OCMD(do_dgoload) {
                 load_otrigger(object);
                 return;
             }
-            obj_to_char(object, tch);
+            tch->addToInventory(object);
             load_otrigger(object);
             return;
         }
         cnt = get_obj_near_obj(obj, arg1);
         if (cnt && GET_OBJ_TYPE(cnt) == ITEM_CONTAINER) {
-            obj_to_obj(object, cnt);
+            cnt->addToInventory(object);
             load_otrigger(object);
             return;
         }

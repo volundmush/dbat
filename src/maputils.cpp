@@ -46,7 +46,7 @@ int checkship(int rnum, int vnum) {
     if(WHERE_FLAGGED(rnum, WhereFlag::nebula)) return false;
 
     auto check = [](const auto& o) { return GET_OBJ_TYPE(o) == ITEM_VEHICLE;};
-    if(auto found = get_room(rnum)->findObject(check); found) {
+    if(auto found = Location(get_room(rnum)).searchObjects(check); found) {
         ping_ship(GET_OBJ_VNUM(found), vnum);
         return true;
     }

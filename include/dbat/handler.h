@@ -58,20 +58,11 @@ extern int get_number(char **name);
 const char *get_i_name(Character *ch, Character *vict);
 
 /* ******** objects *********** */
-
-extern void obj_to_char(Object *object, Character *ch);
-
-extern void obj_from_char(Object *object);
-
 extern void equip_char(Character *ch, Object *obj, int pos);
 
 Object *unequip_char(Character *ch, int pos);
 
 extern int invalid_align(Character *ch, Object *obj);
-
-extern void obj_to_obj(Object *obj, Object *obj_to);
-
-extern void obj_from_obj(Object *obj);
 
 extern void extract_obj(Object *obj);
 

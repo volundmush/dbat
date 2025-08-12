@@ -36,26 +36,26 @@ int remove_trigger(script_data *sc, char *name);
 
 bool is_num(const std::string &arg);
 
-void eval_op(char *op, char *lhs, char *rhs, char *result, Entity *go,
+void eval_op(char *op, char *lhs, char *rhs, char *result, HasDgScripts *go,
              script_data *sc, DgScript *trig);
 
 char *matching_paren(char *p);
 
-void eval_expr(char *line, char *result, Entity *go, script_data *sc,
+void eval_expr(char *line, char *result, HasDgScripts *go, script_data *sc,
                DgScript *trig, UnitType type);
 
-int eval_lhs_op_rhs(char *expr, char *result, Entity *go, script_data *sc,
+int eval_lhs_op_rhs(char *expr, char *result, HasDgScripts *go, script_data *sc,
                     DgScript *trig, UnitType type);
 
-void process_wait(Entity *go, DgScript *trig, UnitType type, char *cmd,
+void process_wait(HasDgScripts *go, DgScript *trig, UnitType type, char *cmd,
                   struct cmdlist_element *cl);
 
 void process_set(script_data *sc, DgScript *trig, char *cmd);
 
-void process_attach(Entity *go, script_data *sc, DgScript *trig,
+void process_attach(HasDgScripts *go, script_data *sc, DgScript *trig,
                     UnitType type, char *cmd);
 
-void process_detach(Entity *go, script_data *sc, DgScript *trig,
+void process_detach(HasDgScripts *go, script_data *sc, DgScript *trig,
                     UnitType type, char *cmd);
 
 int process_return(DgScript *trig, char *cmd);
@@ -76,7 +76,7 @@ void dg_letter_value(script_data *sc, DgScript *trig, char *cmd);
 
 struct cmdlist_element *
 find_case(DgScript *trig, struct cmdlist_element *cl,
-    Entity *go, script_data *sc, UnitType type, char *cond);
+    HasDgScripts *go, script_data *sc, UnitType type, char *cond);
 
 struct cmdlist_element *find_done(struct cmdlist_element *cl);
 
@@ -381,36 +381,20 @@ Object *get_obj_near_obj(Object *obj, char *name) {
     if(!obj->location.unit)
         return nullptr;
     
-    switch(obj->location.getType()) {
-        case UnitType::object: {
-            auto o = static_cast<Object*>(obj->location.unit);
-            if (*name == UID_CHAR) {
-                auto uidResult = resolveUID(name);
-                auto o2 = std::dynamic_pointer_cast<Object>(uidResult).get();
-                if(!o2) return nullptr;
-                if(o2 == o) return o;
-            } else if (isname(name, o->getName()))
-                return o;
-            break;
-        }
-        case UnitType::character: {
-            auto c = static_cast<Character*>(obj->location.unit);
-            if(obj->location.position.x >= 0.0 && (i = get_object_in_equip(c, name))) {
-                // worn?
-                return i;
-            } else {
-                if(i = get_obj_in_list(name, c->getInventory())) {
-                    // carried?
-                    return i;
-                }
-            }
-        }
-        case UnitType::room: {
-            rm = obj_room(obj);
-            break;
-        }
-        default:
-            return nullptr;
+    if(auto o = obj->getContainer()) {
+        if (*name == UID_CHAR) {
+            auto uidResult = resolveUID(name);
+            auto o2 = std::dynamic_pointer_cast<Object>(uidResult).get();
+            if(!o2) return nullptr;
+            if(o2 == o) return o;
+        } else if (isname(name, o->getName()))
+            return o;
+    } else if(auto c = obj->getWornBy(); c && (i = get_object_in_equip(c, name))) {
+        return i;
+    } else if(auto c = obj->getCarriedBy(); c && (i = get_obj_in_list(name, c->getInventory()))) {
+        return i;
+    } else if(auto r = obj->getRoom()) {
+        rm = obj_room(obj);
     }
 
     if ((rm = obj_room(obj)) != NOWHERE) {
@@ -546,27 +530,14 @@ Object *get_obj_by_obj(Object *obj, char *name) {
 
     if(!obj->location.unit)
         return nullptr;
-    
-    switch(obj->location.getType()) {
-        case UnitType::object: {
-            auto o = static_cast<Object*>(obj->location.unit);
-            if(isname(name, o->getName()))
+
+    if(auto o = obj->getContainer()) {
+        if(isname(name, o->getName()))
                 return o;
-        }
-            break;
-        case UnitType::character: {
-            auto c = static_cast<Character*>(obj->location.unit);
-            if(obj->location.position.x == -1) {
-                if(i = get_obj_in_list(name, c->getInventory()); i)
-                    return i;
-            } else {
-                if (i = get_object_in_equip(c, name); i)
-                    return i;
-            }
-        }
-            break;
-        default:
-            break;
+    } else if(auto c = obj->getWornBy(); c && (i = get_object_in_equip(c, name))) {
+        return i;
+    } else if(auto c = obj->getCarriedBy(); c && (i = get_obj_in_list(name, c->getInventory()))) {
+        return i;
     }
 
     if (((rm = obj_room(obj)) != NOWHERE) &&
@@ -856,7 +827,7 @@ void script_stat(Character *ch, script_data *sc) {
         if (value[0] == UID_CHAR) {
             auto uidResult = resolveUID(value);
             if(uidResult) {
-                std::string n = uidResult->getName();
+                std::string n = uidResult->getDgName();
                                 ch->send_to("    %15s:  %s\r\n", name.c_str(), n.c_str());
             } else {
                                 ch->send_to("   -BAD UID: %s", value.c_str());
@@ -891,7 +862,7 @@ void script_stat(Character *ch, script_data *sc) {
                 if (value.starts_with(UID_CHAR)) {
                     auto uidResult = resolveUID(value);
                     if(uidResult) {
-                        std::string n = uidResult->getName();
+                        std::string n = uidResult->getDgName();
                                                 ch->send_to("    %15s:  %s\r\n", key.c_str(), n.c_str());
                     } else {
                                                 ch->send_to("   -BAD UID: %s", value.c_str());
@@ -906,7 +877,7 @@ void script_stat(Character *ch, script_data *sc) {
 }
 
 
-void do_sstat(Character *ch, struct Entity *ud) {
+void do_sstat(Character *ch, struct HasDgScripts *ud) {
         ch->sendText("Triggers:\r\n");
     if (!SCRIPT(ud)) {
                 ch->sendText("  None.\r\n");
@@ -950,7 +921,7 @@ void add_trigger(script_data *sc, const std::shared_ptr<DgScript> t, int loc) {
     SCRIPT_TYPES(sc) |= GET_TRIG_TYPE(t);
 
     sc->scripts.emplace(tvn, t);
-    t->owner = units.at(sc->id).get();
+    t->owner = sc;
     t->activate();
 }
 
@@ -1013,8 +984,8 @@ ACMD(do_attach) {
                 ch->send_to("Trigger %d (%s) attached to %s [%d].\r\n", tn, GET_TRIG_NAME(trig), GET_SHORT(victim), GET_MOB_VNUM(victim));
     } else if (is_abbrev(arg, "object") || is_abbrev(arg, "otr")) {
         object = get_obj_vis(ch, targ_name, nullptr);
-        if(!object) ch->location.findObjectVnum(num_arg);
-        if(!object) ch->findObjectVnum(num_arg);
+        if(!object) ch->location.searchObjects(num_arg);
+        if(!object) ch->searchInventory(num_arg);
         if(!object) {
                         ch->sendText("That object does not exist.\r\n");
             return;
@@ -1201,8 +1172,8 @@ ACMD(do_detach) {
                 trigger = arg3;
         } else if (is_abbrev(arg1, "object") || !strcasecmp(arg1, "otr")) {
             object = get_obj_vis(ch, arg2, nullptr);
-            if (!object) object = ch->location.findObjectVnum(num_arg);
-            if (!object) object = ch->findObjectVnum(num_arg);
+            if (!object) object = ch->location.searchObjects(num_arg);
+            if (!object) object = ch->searchInventory(num_arg);
             if (!object) { /* give up */
                                 ch->sendText("No such object around.\r\n");
                 return;
@@ -1374,7 +1345,7 @@ static bool check_truthy(const char *txt) {
 
 
 /* evaluates 'lhs op rhs', and copies to result */
-void eval_op(char *op, char *lhs, char *rhs, char *result, Entity *go,
+void eval_op(char *op, char *lhs, char *rhs, char *result, HasDgScripts *go,
              script_data *sc, DgScript *trig) {
     unsigned char *p;
     int n;
@@ -1466,7 +1437,7 @@ char *matching_paren(char *p) {
 
 
 /* evaluates line, and returns answer in result */
-void eval_expr(char *line, char *result, Entity *go, script_data *sc,
+void eval_expr(char *line, char *result, HasDgScripts *go, script_data *sc,
                DgScript *trig, UnitType type) {
     char expr[MAX_INPUT_LENGTH], *p;
 
@@ -1488,7 +1459,7 @@ void eval_expr(char *line, char *result, Entity *go, script_data *sc,
  * evaluates expr if it is in the form lhs op rhs, and copies
  * answer in result.  returns 1 if expr is evaluated, else 0
  */
-int eval_lhs_op_rhs(char *expr, char *result, Entity *go, script_data *sc,
+int eval_lhs_op_rhs(char *expr, char *result, HasDgScripts *go, script_data *sc,
                     DgScript *trig, UnitType type)
 {
     char *p, *tokens[MAX_INPUT_LENGTH];
@@ -1570,7 +1541,7 @@ int eval_lhs_op_rhs(char *expr, char *result, Entity *go, script_data *sc,
 
 
 /* processes any 'wait' commands in a trigger */
-void process_wait(Entity *go, DgScript *trig, UnitType type, char *cmd,
+void process_wait(HasDgScripts *go, DgScript *trig, UnitType type, char *cmd,
                   struct cmdlist_element *cl) {
     char buf[MAX_INPUT_LENGTH], *arg;
     struct wait_event_data *wait_event_obj;
@@ -1657,7 +1628,7 @@ void process_set(script_data *sc, DgScript *trig, char *cmd) {
 }
 
 /* processes a script eval command */
-void process_eval(Entity *go, script_data *sc, DgScript *trig,
+void process_eval(HasDgScripts *go, script_data *sc, DgScript *trig,
                   UnitType type, char *cmd) {
     char arg[MAX_INPUT_LENGTH], name[MAX_INPUT_LENGTH];
     char result[MAX_INPUT_LENGTH], *expr;
@@ -1683,7 +1654,7 @@ void process_eval(Entity *go, script_data *sc, DgScript *trig,
 
 
 /* script attaching a trigger to something */
-void process_attach(Entity *go, script_data *sc, DgScript *trig,
+void process_attach(HasDgScripts *go, script_data *sc, DgScript *trig,
                     UnitType type, char *cmd) {
     char arg[MAX_INPUT_LENGTH], trignum_s[MAX_INPUT_LENGTH];
     char result[MAX_INPUT_LENGTH], *id_p;
@@ -1757,7 +1728,7 @@ void process_attach(Entity *go, script_data *sc, DgScript *trig,
 
 
 /* script detaching a trigger from something */
-void process_detach(Entity *go, script_data *sc, DgScript *trig,
+void process_detach(HasDgScripts *go, script_data *sc, DgScript *trig,
                     UnitType type, char *cmd) {
     char arg[MAX_INPUT_LENGTH], trignum_s[MAX_INPUT_LENGTH];
     char result[MAX_INPUT_LENGTH], *id_p;
@@ -2232,7 +2203,7 @@ ACMD(do_tstat) {
 */
 struct cmdlist_element *
 find_case(DgScript *trig, struct cmdlist_element *cl,
-    Entity *go, script_data *sc, UnitType type, char *cond) {
+    HasDgScripts *go, script_data *sc, UnitType type, char *cond) {
     char result[MAX_INPUT_LENGTH];
     struct cmdlist_element *c;
     char *p, *buf;
@@ -2330,9 +2301,6 @@ int check_flags_by_name_ar(bitvector_t *array, int numflags, char *search, const
     return false;
 }
 
-std::shared_ptr<DgScript> DgScript::shared() {
-    return shared_from_this();
-}
 
 // Note: Trigger instances are meant to be set all active or inactive on a per room/character/item basis,
 // not individually.
@@ -2502,7 +2470,7 @@ int DgScript::execute() {
     // This is a clever hack to prevent the script from being deleted
     // during execution if, by some chance, it obliterates its host object.
 
-    std::shared_ptr<Entity> sh;
+    std::shared_ptr<HasDgScripts> sh;
     switch(owner->type) {
         case UnitType::character:
             sh = ((Character*)owner)->shared();
@@ -2941,5 +2909,49 @@ void DgScript::processCommand(const std::string& raw_text) {
                 wld_command_interpreter((Room *)owner, (char*)full_command.c_str());
                 break;
         }
+    }
+}
+
+std::vector<trig_vnum> HasDgScripts::getScriptOrder() {
+    if(running_scripts.has_value()) {
+        return *running_scripts;
+    }
+    return getProtoScript();
+}
+
+std::vector<std::weak_ptr<DgScript>> HasDgScripts::getScripts() {
+    std::vector<std::weak_ptr<DgScript>> out;
+    auto proto = getScriptOrder();
+    out.reserve(scripts.size() + proto.size());
+    for(const auto &v : proto) {
+        if(auto it = scripts.find(v); it != scripts.end()) {
+            out.push_back(it->second);
+        } else {
+            basic_mud_log("Warning: script vnum %d not found in scripts map for %s", v, getDgName());
+        }
+    }
+    return out;
+}
+
+std::string HasDgScripts::scriptString() const {
+    std::vector<std::string> vnums;
+    for(auto p : getProtoScript()) vnums.emplace_back(std::move(std::to_string(p)));
+
+    return fmt::format("@D[@wT{}@D]@n", fmt::join(vnums, ","));
+}
+
+std::optional<std::string> HasDgScripts::dgCallMember(const std::string& member, const std::string& arg) {
+    return std::nullopt;
+}
+
+void HasDgScripts::activateScripts() {
+    for(auto &[vn, t] : scripts) {
+        t->activate();
+    }
+}
+
+void HasDgScripts::deactivateScripts() {
+    for(auto &[vn, t] : scripts) {
+        t->deactivate();
     }
 }

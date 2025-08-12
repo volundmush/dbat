@@ -17,31 +17,6 @@ static inline TileOverride *find_tile_nc(std::unordered_map<Coordinates, TileOve
     return &it->second;
 }
 
-std::vector<std::weak_ptr<Object>> AbstractGridArea::getObjects(const Coordinates& coor) const {
-    std::vector<std::weak_ptr<Object>> out;
-    for(const auto &uw : contents) {
-        if(auto u = uw.lock()) {
-            if(auto o = std::dynamic_pointer_cast<Object>(u); o && o->location.position == coor) {
-                out.push_back(o);
-            }
-        }
-    }
-    out.shrink_to_fit();
-    return out;
-}
-
-std::vector<std::weak_ptr<Character>> AbstractGridArea::getPeople(const Coordinates& coor) const {
-    std::vector<std::weak_ptr<Character>> out;
-    for(const auto &uw : contents) {
-        if(auto u = uw.lock()) {
-            if(auto c = std::dynamic_pointer_cast<Character>(u); c && c->location.position == coor) {
-                out.push_back(c);
-            }
-        }
-    }
-    out.shrink_to_fit();
-    return out;
-}
 
 std::optional<Destination> AbstractGridArea::getDirection(const Coordinates& coor, Direction dir) {
     // First check for an override...
@@ -115,7 +90,7 @@ const char* AbstractGridArea::getName(const Coordinates& coor) const {
         }
     }
     // Fallback to unit base name.
-    return getName();
+    return HasMudStrings::getName();
 }
 
 const char* AbstractGridArea::getLookDescription(const Coordinates& coor) const {
@@ -125,7 +100,7 @@ const char* AbstractGridArea::getLookDescription(const Coordinates& coor) const 
         }
     }
     // Fallback to base unit look description.
-    return Entity::getLookDescription();
+    return HasMudStrings::getLookDescription();
 }
 
 void AbstractGridArea::setRoomFlag(const Coordinates& coor, RoomFlag flag, bool value) {

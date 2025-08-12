@@ -17,7 +17,7 @@ from libcpp.vector cimport vector
 
 cimport structs
 cimport db
-from structs cimport Entity, AbstractThing, Room, Character, Object, account_data, help_index_element, ObjectPrototype, CharacterPrototype
+from structs cimport Entity, AbstractThing, Room, Character, Object, Account, help_index_element, ObjectPrototype, CharacterPrototype
 from saveload cimport jdumps, jloads, jobject, to_json, from_json, runSave, create_player_character
 
 def load_db():
@@ -222,7 +222,7 @@ script_db = ScriptDB()
 
 cdef class AccountDB:
     
-    cdef string _dump(self, account_data& a):
+    cdef string _dump(self, Account& a):
         j = jobject()
         to_json(j, a)
         return jdumps(j)
@@ -277,7 +277,7 @@ account_db = AccountDB()
 
 cdef class PlayerDB:
     
-    cdef string _dump(self, structs.player_data& p):
+    cdef string _dump(self, structs.PlayerData& p):
         j = jobject()
         to_json(j, p)
         return jdumps(j)
