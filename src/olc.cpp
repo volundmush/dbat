@@ -1,12 +1,12 @@
 /*************************************************************************
-*   File: olc.c                                         Part of CircleMUD *
-*  Usage: online creation                                                 *
-*                                                                         *
-*  All rights reserved.  See license.doc for complete information.        *
-*                                                                         *
-*  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
-*  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
-************************************************************************ */
+ *   File: olc.c                                         Part of CircleMUD *
+ *  Usage: online creation                                                 *
+ *                                                                         *
+ *  All rights reserved.  See license.doc for complete information.        *
+ *                                                                         *
+ *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
+ *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
+ ************************************************************************ */
 
 /*
  * PLEASE, FOR THE LOVE OF GOD, DON'T TRY TO USE THIS YET!!!
@@ -47,28 +47,27 @@ ACMD(do_olc);
 void olc_bitvector(int *bv, const char **names, char *arg);
 
 const char *olc_modes[] = {
-        "set",            /* set OLC characteristics */
-        "show",            /* show OLC characteristics */
-        ".",                /* repeat last modification command */
-        "room",            /* modify a room */
-        "mobile",            /* modify a mobile */
-        "object",            /* modify an object */
-        "assedit",                    /* assembly olc */
-        "\n"
-};
+    "set",     /* set OLC characteristics */
+    "show",    /* show OLC characteristics */
+    ".",       /* repeat last modification command */
+    "room",    /* modify a room */
+    "mobile",  /* modify a mobile */
+    "object",  /* modify an object */
+    "assedit", /* assembly olc */
+    "\n"};
 
 const char *olc_commands[] = {
-        "copy",
-        "name",
-        "description",
-        "aliases",
-        "\n",                /* many more to be added */
+    "copy",
+    "name",
+    "description",
+    "aliases",
+    "\n", /* many more to be added */
 };
-
 
 /* The actual do_olc command for the interpreter.  Determines the target
    entity, checks permissions, and passes control to olc_interpreter */
-ACMD(do_olc) {
+ACMD(do_olc)
+{
     void *olc_targ = nullptr;
     char mode_arg[MAX_INPUT_LENGTH], arg[MAX_INPUT_LENGTH];
     room_rnum rnum;
@@ -76,89 +75,101 @@ ACMD(do_olc) {
     int olc_mode;
 
     /* WARNING!  **DO NOT** under any circumstances remove the code below!!!!  */
-    if (strcmp(GET_NAME(ch), "Ras")) {
-                ch->sendText("OLC is not yet complete.  Sorry.\r\n");
+    if (strcmp(GET_NAME(ch), "Ras"))
+    {
+        ch->sendText("OLC is not yet complete.  Sorry.\r\n");
         return;
     }
     /* WARNING!  **DO NOT** under any circumstances remove the code above!!!!  */
 
     /* first, figure out the first (mode) argument */
     half_chop(argument, mode_arg, argument);
-    if ((olc_mode = search_block(mode_arg, olc_modes, false)) < 0) {
-                ch->send_to("Invalid mode '%s'.\r\n%s", mode_arg, OLC_USAGE);
+    if ((olc_mode = search_block(mode_arg, olc_modes, false)) < 0)
+    {
+        ch->send_to("Invalid mode '%s'.\r\n%s", mode_arg, OLC_USAGE);
         return;
     }
-    switch (olc_mode) {
-        case OLC_SET:
-        case OLC_SHOW:
-            olc_set_show(ch, olc_mode, argument);
+    switch (olc_mode)
+    {
+    case OLC_SET:
+    case OLC_SHOW:
+        olc_set_show(ch, olc_mode, argument);
+        return;
+    case OLC_REPEAT:
+        if (!(olc_mode = ch->getBaseStat<int>("last_olc_mode")) ||
+            ((olc_targ = GET_LAST_OLC_TARG(ch)) == nullptr))
+        {
+            ch->sendText("No last OLC operation!\r\n");
             return;
-        case OLC_REPEAT:
-            if (!(olc_mode = ch->getBaseStat<int>("last_olc_mode")) ||
-                ((olc_targ = GET_LAST_OLC_TARG(ch)) == nullptr)) {
-                                ch->sendText("No last OLC operation!\r\n");
+        }
+        break;
+    case OLC_ROOM:
+        if (isdigit(*argument))
+        {
+            /* room specified.  take the numeric argument off */
+            argument = one_argument(argument, arg);
+            if (!is_number(arg))
+            {
+                ch->send_to("Invalid room vnum '%s'.\r\n", arg);
                 return;
             }
-            break;
-        case OLC_ROOM:
-            if (isdigit(*argument)) {
-                /* room specified.  take the numeric argument off */
-                argument = one_argument(argument, arg);
-                if (!is_number(arg)) {
-                                        ch->send_to("Invalid room vnum '%s'.\r\n", arg);
-                    return;
-                }
-                vnum = atoi(arg);
-                if ((rnum = real_room(vnum)) == NOWHERE) {
-                                        ch->sendText("No such room!\r\n");
-                    return;
-                }
-            } else {
-                rnum = IN_ROOM(ch);
-                vnum = ch->location.getVnum();
-                                ch->send_to("(Using current room %d)\r\n", vnum);
+            vnum = atoi(arg);
+            if ((rnum = real_room(vnum)) == NOWHERE)
+            {
+                ch->sendText("No such room!\r\n");
+                return;
             }
+        }
+        else
+        {
+            rnum = IN_ROOM(ch);
+            vnum = ch->location.getVnum();
+            ch->send_to("(Using current room %d)\r\n", vnum);
+        }
 
-/*   if (!ROOM_FLAGGED(rnum, ROOM_OLC))
-	 	 ch->sendText("That room is not modifyable.\r\n");
-     else
-*/
-            olc_targ = (void *)get_room(rnum);
-            break;
-        case OLC_MOB:
-            argument = one_argument(argument, arg);
-            if (!is_number(arg)) {
-                                ch->send_to("Invalid mob vnum '%s'.\r\n", arg);
-                return;
-            }
-            vnum = atoi(arg);
-            if ((rnum = real_mobile(vnum)) == NOBODY)
-                                ch->sendText("No such mobile vnum.\r\n");
-            else
-                olc_targ = (void *) &(mob_proto.at(rnum));
-            break;
-        case OLC_OBJ:
-            argument = one_argument(argument, arg);
-            if (!is_number(arg)) {
-                                ch->send_to("Invalid obj vnum '%s'\r\n", arg);
-                return;
-            }
-            vnum = atoi(arg);
-            if ((rnum = real_object(vnum)) == NOTHING)
-                                ch->send_to("No object with vnum %d.\r\n", vnum);
-            else
-                olc_targ = (void *) &(obj_proto.at(rnum));
-            break;
-        default:
-                        ch->sendText("Usage: olc {.|set|show|obj|mob|room} [args]\r\n");
+        /*   if (!ROOM_FLAGGED(rnum, ROOM_OLC))
+                 ch->sendText("That room is not modifyable.\r\n");
+             else
+        */
+        olc_targ = (void *)get_room(rnum);
+        break;
+    case OLC_MOB:
+        argument = one_argument(argument, arg);
+        if (!is_number(arg))
+        {
+            ch->send_to("Invalid mob vnum '%s'.\r\n", arg);
             return;
+        }
+        vnum = atoi(arg);
+        if ((rnum = real_mobile(vnum)) == NOBODY)
+            ch->sendText("No such mobile vnum.\r\n");
+        else
+            olc_targ = (void *)&(mob_proto.at(rnum));
+        break;
+    case OLC_OBJ:
+        argument = one_argument(argument, arg);
+        if (!is_number(arg))
+        {
+            ch->send_to("Invalid obj vnum '%s'\r\n", arg);
+            return;
+        }
+        vnum = atoi(arg);
+        if ((rnum = real_object(vnum)) == NOTHING)
+            ch->send_to("No object with vnum %d.\r\n", vnum);
+        else
+            olc_targ = (void *)&(obj_proto.at(rnum));
+        break;
+    default:
+        ch->sendText("Usage: olc {.|set|show|obj|mob|room} [args]\r\n");
+        return;
     }
 
     if (olc_targ == nullptr)
         return;
 
-    if (!can_modify(ch, vnum)) {
-                ch->sendText("You can't modify that.\r\n");
+    if (!can_modify(ch, vnum))
+    {
+        ch->sendText("You can't modify that.\r\n");
         return;
     }
     ch->setBaseStat<int>("last_olc_mode", olc_mode);
@@ -169,9 +180,9 @@ ACMD(do_olc) {
     /* freshen? */
 }
 
-
 /* OLC interpreter command; called by do_olc */
-void olc_interpreter(void *targ, int mode, char *arg) {
+void olc_interpreter(void *targ, int mode, char *arg)
+{
     int error = 0, command;
     char command_string[MAX_INPUT_LENGTH];
     Character *olc_mob = nullptr;
@@ -179,128 +190,140 @@ void olc_interpreter(void *targ, int mode, char *arg) {
     Object *olc_obj = nullptr;
 
     half_chop(arg, command_string, arg);
-    if ((command = search_block(command_string, olc_commands, false)) < 0) {
-                olc_ch->send_to("Invalid OLC command '%s'.\r\n", command_string);
+    if ((command = search_block(command_string, olc_commands, false)) < 0)
+    {
+        olc_ch->send_to("Invalid OLC command '%s'.\r\n", command_string);
         return;
     }
-    switch (mode) {
+    switch (mode)
+    {
+    case OLC_ROOM:
+        olc_room = (Room *)targ;
+        break;
+    case OLC_MOB:
+        olc_mob = (Character *)targ;
+        break;
+    case OLC_OBJ:
+        olc_obj = (Object *)targ;
+        break;
+    default:
+        basic_mud_log("SYSERR: Invalid OLC mode %d passed to interp.", mode);
+        return;
+    }
+
+    switch (command)
+    {
+    case OLC_COPY:
+        switch (mode)
+        {
         case OLC_ROOM:
-            olc_room = (Room *) targ;
             break;
         case OLC_MOB:
-            olc_mob = (Character *) targ;
             break;
         case OLC_OBJ:
-            olc_obj = (Object *) targ;
             break;
         default:
-            basic_mud_log("SYSERR: Invalid OLC mode %d passed to interp.", mode);
-            return;
-    }
-
-
-    switch (command) {
-        case OLC_COPY:
-            switch (mode) {
-                case OLC_ROOM:
-                    break;
-                case OLC_MOB:
-                    break;
-                case OLC_OBJ:
-                    break;
-                default:
-                    error = 1;
-                    break;
-            }
+            error = 1;
             break;
-        case OLC_NAME:
-            switch (mode) {
-                case OLC_ROOM:
-                    //olc_string(&(olc_room->name), MAX_ROOM_NAME, arg);
-                    break;
-                case OLC_MOB:
-                    //olc_string(&olc_mob->short_description, MAX_MOB_NAME, arg);
-                    break;
-                case OLC_OBJ:
-                    //olc_string(&olc_obj->short_description, MAX_OBJ_NAME, arg);
-                    break;
-                default:
-                    error = 1;
-                    break;
-            }
+        }
+        break;
+    case OLC_NAME:
+        switch (mode)
+        {
+        case OLC_ROOM:
+            // olc_string(&(olc_room->name), MAX_ROOM_NAME, arg);
             break;
-
-        case OLC_DESC:
-            switch (mode) {
-                case OLC_ROOM:
-                    //olc_string(&olc_room->look_description, MAX_ROOM_DESC, arg);
-                    break;
-                case OLC_MOB:
-                    //olc_string(&olc_mob->room_description, MAX_MOB_DESC, arg);
-                    break;
-                case OLC_OBJ:
-                    //olc_string(&olc_obj->room_description, MAX_OBJ_DESC, arg);
-                    break;
-                default:
-                    error = 1;
-                    break;
-            }
+        case OLC_MOB:
+            // olc_string(&olc_mob->short_description, MAX_MOB_NAME, arg);
             break;
+        case OLC_OBJ:
+            // olc_string(&olc_obj->short_description, MAX_OBJ_NAME, arg);
+            break;
+        default:
+            error = 1;
+            break;
+        }
+        break;
 
-        case OLC_ALIASES:
-            switch (mode) {
-                case OLC_ROOM:
-                    break;
-                case OLC_MOB:
-                    break;
-                case OLC_OBJ:
-                    break;
-                default:
-                    error = 1;
-                    break;
-            }
+    case OLC_DESC:
+        switch (mode)
+        {
+        case OLC_ROOM:
+            // olc_string(&olc_room->look_description, MAX_ROOM_DESC, arg);
+            break;
+        case OLC_MOB:
+            // olc_string(&olc_mob->room_description, MAX_MOB_DESC, arg);
+            break;
+        case OLC_OBJ:
+            // olc_string(&olc_obj->room_description, MAX_OBJ_DESC, arg);
+            break;
+        default:
+            error = 1;
+            break;
+        }
+        break;
 
-    }
-}
-
-
-/* can_modify: determine if a particular char can modify a vnum */
-int can_modify(Character *ch, int vnum) {
-    return (1);
-}
-
-
-/* generic fn for modifying a string */
-void olc_string(char **string, size_t maxlen, char *arg) {
-    skip_spaces(&arg);
-
-    if (!*arg) {
-                olc_ch->send_to("Enter new string (max of %d characters); use '@' on a new line when done.\r\n", (int) maxlen);
-        **string = '\0';
-        string_write(olc_ch->desc, string, maxlen, 0, nullptr);
-    } else {
-        if (strlen(arg) > maxlen) {
-                        olc_ch->send_to("String too long (cannot be more than %d chars).\r\n", (int) maxlen);
-        } else {
-            if (*string)
-                free(*string);
-            *string = strdup(arg);
-                        olc_ch->send_to("%s", CONFIG_OK);
+    case OLC_ALIASES:
+        switch (mode)
+        {
+        case OLC_ROOM:
+            break;
+        case OLC_MOB:
+            break;
+        case OLC_OBJ:
+            break;
+        default:
+            error = 1;
+            break;
         }
     }
 }
 
+/* can_modify: determine if a particular char can modify a vnum */
+int can_modify(Character *ch, int vnum)
+{
+    return (1);
+}
+
+/* generic fn for modifying a string */
+void olc_string(char **string, size_t maxlen, char *arg)
+{
+    skip_spaces(&arg);
+
+    if (!*arg)
+    {
+        olc_ch->send_to("Enter new string (max of %d characters); use '@' on a new line when done.\r\n", (int)maxlen);
+        **string = '\0';
+        string_write(olc_ch->desc, string, maxlen, 0, nullptr);
+    }
+    else
+    {
+        if (strlen(arg) > maxlen)
+        {
+            olc_ch->send_to("String too long (cannot be more than %d chars).\r\n", (int)maxlen);
+        }
+        else
+        {
+            if (*string)
+                free(*string);
+            *string = strdup(arg);
+            olc_ch->send_to("%s", CONFIG_OK);
+        }
+    }
+}
 
 /* generic fn for modifying a bitvector */
-void olc_bitvector(int *bv, const char **names, char *arg) {
+void olc_bitvector(int *bv, const char **names, char *arg)
+{
     int newbv, flagnum, doremove = 0;
     char *this_name;
     char buf[MAX_STRING_LENGTH];
 
     skip_spaces(&arg);
 
-    if (!*arg) {
-                olc_ch->sendText("Flag list or flag modifiers required.\r\n");
+    if (!*arg)
+    {
+        olc_ch->sendText("Flag list or flag modifiers required.\r\n");
         return;
     }
     /* determine if this is 'absolute' or 'relative' mode */
@@ -309,29 +332,34 @@ void olc_bitvector(int *bv, const char **names, char *arg) {
     else
         newbv = 0;
 
-    while (*arg) {
-        arg = one_argument(arg, buf);    /* get next argument */
+    while (*arg)
+    {
+        arg = one_argument(arg, buf); /* get next argument */
 
         /* change to upper-case */
         for (this_name = buf; *this_name; this_name++)
             CAP(this_name);
 
         /* determine if this is an add or a subtract */
-        if (*buf == '+' || *buf == '-') {
+        if (*buf == '+' || *buf == '-')
+        {
             this_name = buf + 1;
             if (*buf == '-')
                 doremove = true;
             else
                 doremove = false;
-        } else {
+        }
+        else
+        {
             this_name = buf;
             doremove = false;
         }
 
         /* figure out which one we're dealing with */
         if ((flagnum = search_block(this_name, names, true)) < 0)
-                        olc_ch->send_to("Unknown flag: %s\r\n", this_name);
-        else {
+            olc_ch->send_to("Unknown flag: %s\r\n", this_name);
+        else
+        {
             if (doremove)
                 REMOVE_BIT(newbv, (1 << flagnum));
             else
@@ -341,8 +369,9 @@ void olc_bitvector(int *bv, const char **names, char *arg) {
 
     *bv = newbv;
     sprintbit(newbv, names, buf, sizeof(buf));
-        olc_ch->send_to("Flags now set to: %s\r\n", buf);
+    olc_ch->send_to("Flags now set to: %s\r\n", buf);
 }
 
-void olc_set_show(Character *ch, int olc_mode, char *arg) {
+void olc_set_show(Character *ch, int olc_mode, char *arg)
+{
 }

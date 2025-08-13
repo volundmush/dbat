@@ -644,20 +644,6 @@ int do_simple_move(Character *ch, int dir, int need_specials_check)
 
     auto z = e.getZone();
 
-    if (!IS_NPC(ch) && (GET_ADMLEVEL(ch) < ADMLVL_IMMORT) &&
-        (GET_MAX_HIT(ch) < z->min_level) && (z->min_level > 0))
-    {
-        ch->sendText("Sorry, you are too low a level to enter this zone.\r\n");
-        return (0);
-    }
-
-    if ((GET_ADMLEVEL(ch) < ADMLVL_IMMORT) && (GET_MAX_HIT(ch) > z->max_level) &&
-        (z->max_level > 0))
-    {
-        ch->sendText("Sorry, you are too high a level to enter this zone.\r\n");
-        return (0);
-    }
-
     if ((GET_ADMLEVEL(ch) < ADMLVL_IMMORT) && z->zone_flags.get(ZONE_CLOSED))
     {
         ch->sendText("This zone is currently closed to mortals.\r\n");
@@ -1147,7 +1133,7 @@ ACMD(do_move)
             ch->setBaseStat<room_vnum>("arena_watch", -1);
         }
         if (auto rvn = ch->location.getVnum(); rvn != NOWHERE && rvn != 0 &&
-                                          rvn != 1)
+                                               rvn != 1)
         {
             ch->setBaseStat("load_room", rvn);
         }

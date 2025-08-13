@@ -590,8 +590,10 @@ private:
     std::unordered_map<std::string, std::list<std::weak_ptr<T>>> subscriptions;
 };
 
-template<typename T>
-int64_t getNextID(int64_t &counter, T cont) {
+template <class Counter, class Container>
+Counter getNextID(Counter& counter, const Container& cont) {
+    static_assert(std::is_arithmetic_v<Counter>,
+                  "Counter must be a numeric type");
     while(cont.contains(counter)) counter++;
     return counter;
-}
+};

@@ -551,8 +551,6 @@ extern void oedit_setup_existing(struct descriptor_data *d, int real_num);
 
 extern void oedit_save_internally(struct descriptor_data *d);
 
-extern void oedit_save_to_disk(int zone_num);
-
 extern void oedit_disp_container_flags_menu(struct descriptor_data *d);
 
 extern void oedit_disp_extradesc_menu(struct descriptor_data *d);
@@ -681,13 +679,9 @@ extern ACMD(do_oasis_gedit);
 
 extern void zedit_setup(struct descriptor_data *d, int room_num);
 
-extern void zedit_new_zone(Character *ch, zone_vnum vzone_num, room_vnum bottom, room_vnum top);
-
-extern void zedit_create_index(int znum, char *type);
+extern void zedit_new_zone(Character *ch, zone_vnum vzone_num);
 
 extern void zedit_save_internally(struct descriptor_data *d);
-
-extern void zedit_save_to_disk(int zone_num);
 
 extern void zedit_disp_menu(struct descriptor_data *d);
 
@@ -757,13 +751,13 @@ extern int stats_disp_menu(struct descriptor_data *d);
 
 extern int free_strings(void *data, int type);
 
-extern void list_rooms(Character *ch, zone_rnum rnum, room_vnum vmin, room_vnum vmax);
+extern void list_rooms(Character *ch, room_vnum vmin, room_vnum vmax);
 
-extern void list_mobiles(Character *ch, zone_rnum rnum, mob_vnum vmin, mob_vnum vmax);
+extern void list_mobiles(Character *ch, mob_vnum vmin, mob_vnum vmax);
 
-extern void list_objects(Character *ch, zone_rnum rnum, obj_vnum vmin, obj_vnum vmax);
+extern void list_objects(Character *ch, obj_vnum vmin, obj_vnum vmax);
 
-extern void list_shops(Character *ch, zone_rnum rnum, shop_vnum vmin, shop_vnum vmax);
+extern void list_shops(Character *ch, shop_vnum vmin, shop_vnum vmax);
 
 extern void list_zones(Character *ch);
 

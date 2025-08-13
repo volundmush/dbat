@@ -4238,7 +4238,7 @@ ACMD(do_form)
         {
             obj = read_object(16, VIRTUAL);
             ch->addToInventory(obj); // cooldown removed on 10/24/2021
-            reveal_hiding(ch, 0); // ch->setBaseStat("concentrate_cooldown", 10);
+            reveal_hiding(ch, 0);    // ch->setBaseStat("concentrate_cooldown", 10);
             act("You hold out your hand and create $p out of your ki!", true, ch, obj, nullptr, TO_CHAR);
             act("$n holds out $s hand and creates $p out of thin air!", true, ch, obj, nullptr, TO_ROOM);
             ch->modCurVital(CharVital::ki, -cost);
@@ -8779,12 +8779,14 @@ ACMD(do_instant)
     }
 }
 
-static std::vector<std::tuple<int, int&>> sds = {{SHADOW_DRAGON1_VNUM, SHADOW_DRAGON1}, {SHADOW_DRAGON2_VNUM, SHADOW_DRAGON2}, {SHADOW_DRAGON3_VNUM, SHADOW_DRAGON3}, {SHADOW_DRAGON4_VNUM, SHADOW_DRAGON4}, {SHADOW_DRAGON5_VNUM, SHADOW_DRAGON5}, {SHADOW_DRAGON6_VNUM, SHADOW_DRAGON6}, {SHADOW_DRAGON7_VNUM, SHADOW_DRAGON7}};
+static std::vector<std::tuple<int, int &>> sds = {{SHADOW_DRAGON1_VNUM, SHADOW_DRAGON1}, {SHADOW_DRAGON2_VNUM, SHADOW_DRAGON2}, {SHADOW_DRAGON3_VNUM, SHADOW_DRAGON3}, {SHADOW_DRAGON4_VNUM, SHADOW_DRAGON4}, {SHADOW_DRAGON5_VNUM, SHADOW_DRAGON5}, {SHADOW_DRAGON6_VNUM, SHADOW_DRAGON6}, {SHADOW_DRAGON7_VNUM, SHADOW_DRAGON7}};
 
 void load_shadow_dragons()
 {
-    for(auto& [vnum, location] : sds) {
-        if (location > 0) {
+    for (auto &[vnum, location] : sds)
+    {
+        if (location > 0)
+        {
             auto mob = read_mobile(vnum, VIRTUAL);
             auto room = real_room(location);
             mob->setLocation(location);
@@ -8860,12 +8862,13 @@ bool placeShadowDragon(int &location)
 
 void summonShadowDragons()
 {
-    for(auto& [vn, location] : sds)
+    for (auto &[vn, location] : sds)
     {
         placeShadowDragon(location);
     }
 
-    for(auto& [vn, location] : sds) {
+    for (auto &[vn, location] : sds)
+    {
         auto m = read_mobile(vn, VIRTUAL);
         m->setLocation(location);
     }

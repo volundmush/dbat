@@ -23,58 +23,64 @@
 std::list<struct save_list_data> save_list;
 
 /* Structure defining all known save types.  */
-struct {
+struct
+{
     int save_type;
 
     int (*func)(IDXTYPE rnum);
 
     const char *message;
 } save_types[] = {
-        {SL_MOB, save_mobiles, "mobile"},
-        {SL_OBJ, save_objects, "object"},
-        {SL_WLD, save_rooms,   "room"},
-        {SL_CFG, save_config,  "config"},
-        {SL_GLD, save_guilds,  "guild"},
-        {SL_ACT, nullptr,      "social"},
-        {SL_HLP, nullptr,      "help"},
-        {-1,     nullptr,      nullptr},
+    {SL_WLD, save_rooms, "room"},
+    {SL_CFG, save_config, "config"},
+    {SL_GLD, save_guilds, "guild"},
+    {SL_ACT, nullptr, "social"},
+    {SL_HLP, nullptr, "help"},
+    {-1, nullptr, nullptr},
 };
 
-int genolc_checkstring(struct descriptor_data *d, char *arg) {
+int genolc_checkstring(struct descriptor_data *d, char *arg)
+{
     smash_tilde(arg);
     return true;
 }
 
-char *str_udup(const char *txt) {
+char *str_udup(const char *txt)
+{
     return strdup((txt && *txt) ? txt : "undefined");
 }
 
 /* Original use: to be called at shutdown time.  */
-void save_all() {
+void save_all()
+{
     saveAll = true;
 }
 
 /* NOTE: This changes the buffer passed in.  */
-void strip_cr(char *buffer) {
+void strip_cr(char *buffer)
+{
     int rpos, wpos;
 
     if (buffer == nullptr)
         return;
 
-    for (rpos = 0, wpos = 0; buffer[rpos]; rpos++) {
+    for (rpos = 0, wpos = 0; buffer[rpos]; rpos++)
+    {
         buffer[wpos] = buffer[rpos];
         wpos += (buffer[rpos] != '\r');
     }
     buffer[wpos] = '\0';
 }
 
-void copy_ex_descriptions(struct extra_descr_data **to, struct extra_descr_data *from) {
+void copy_ex_descriptions(struct extra_descr_data **to, struct extra_descr_data *from)
+{
     struct extra_descr_data *wpos;
 
     CREATE(*to, struct extra_descr_data, 1);
     wpos = *to;
 
-    for (; from; from = from->next, wpos = wpos->next) {
+    for (; from; from = from->next, wpos = wpos->next)
+    {
         wpos->keyword = str_udup(from->keyword);
         wpos->description = str_udup(from->description);
         if (from->next)
@@ -82,15 +88,18 @@ void copy_ex_descriptions(struct extra_descr_data **to, struct extra_descr_data 
     }
 }
 
-void free_ex_descriptions(struct extra_descr_data *head) {
+void free_ex_descriptions(struct extra_descr_data *head)
+{
     struct extra_descr_data *thised, *next_one;
 
-    if (!head) {
+    if (!head)
+    {
         basic_mud_log("free_ex_descriptions: nullptr pointer or nullptr data.");
         return;
     }
 
-    for (thised = head; thised; thised = next_one) {
+    for (thised = head; thised; thised = next_one)
+    {
         next_one = thised->next;
         if (thised->keyword)
             free(thised->keyword);
@@ -100,23 +109,28 @@ void free_ex_descriptions(struct extra_descr_data *head) {
     }
 }
 
-int remove_from_save_list(zone_vnum zone, int type) {
+int remove_from_save_list(zone_vnum zone, int type)
+{
     int counter = 0;
     // This is not an error, the static analysis doesn't understand what to do with the return in the lambda.
-    auto check = [&](save_list_data &d) {if(d.zone == zone && d.type == type) {counter++; return true;} return false;};
+    auto check = [&](save_list_data &d)
+    {if(d.zone == zone && d.type == type) {counter++; return true;} return false; };
 
     save_list.erase(std::remove_if(save_list.begin(), save_list.end(), check), save_list.end());
     return counter;
 }
 
-int add_to_save_list(zone_vnum zone, int type) {
-    if(zone == HEDIT_PERMISSION || zone == NOWHERE || zone == AEDIT_PERMISSION) {
+int add_to_save_list(zone_vnum zone, int type)
+{
+    if (zone == HEDIT_PERMISSION || zone == NOWHERE || zone == AEDIT_PERMISSION)
+    {
         return true;
     }
     return true;
 }
 
-int in_save_list(zone_vnum zone, int type) {
+int in_save_list(zone_vnum zone, int type)
+{
 
     for (auto &i : save_list)
         if (i.zone == zone && i.type == type)
@@ -125,29 +139,25 @@ int in_save_list(zone_vnum zone, int type) {
 }
 
 /* Used from do_show(), ideally.  */
-ACMD(do_show_save_list) {
+ACMD(do_show_save_list)
+{
     if (save_list.empty())
-                ch->sendText("All world files are up to date.\r\n");
-    else {
-                ch->sendText("The following files need saving:\r\n");
-        for (auto &i : save_list) {
+        ch->sendText("All world files are up to date.\r\n");
+    else
+    {
+        ch->sendText("The following files need saving:\r\n");
+        for (auto &i : save_list)
+        {
             if (i.type != SL_CFG)
-                                ch->send_to(" - %s data for zone %d.\r\n", save_types[i.type].message, i.zone);
+                ch->send_to(" - %s data for zone %d.\r\n", save_types[i.type].message, i.zone);
             else
-                                ch->sendText(" - Game configuration data.\r\n");
+                ch->sendText(" - Game configuration data.\r\n");
         }
     }
 }
 
-room_vnum genolc_zonep_bottom(struct Zone *zone) {
-    return zone->bot;
-}
-
-zone_vnum genolc_zone_bottom(zone_rnum rznum) {
-    return zone_table.at(rznum).bot;
-}
-
-int sprintascii(char *out, bitvector_t bits) {
+int sprintascii(char *out, bitvector_t bits)
+{
     int i, j = 0;
     /* 32 bits, don't just add letters to try to get more unless your bitvector_t is also as large. */
     char *flags = "abcdefghijklmnopqrstuvwxyzABCDEF";
@@ -163,4 +173,3 @@ int sprintascii(char *out, bitvector_t bits) {
     out[j++] = '\0';
     return j;
 }
-

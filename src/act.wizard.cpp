@@ -1297,85 +1297,16 @@ ACMD(do_vnum)
             ch->sendText("No armor types by that name.\r\n");
 }
 
-#define ZOCMD zone_table.at(zrnum).cmd[subcmd]
-
-void list_zone_commands_room(Character *ch, room_vnum rvnum)
+static void list_zone_commands_room(Character *ch, Room *room)
 {
-    zone_rnum zrnum = real_zone_by_thing(rvnum);
-    room_rnum rrnum = real_room(rvnum), cmd_room = NOWHERE;
-    int subcmd = 0, count = 0;
-
-    if (zrnum == NOWHERE || rrnum == NOWHERE)
+    auto out = room->printResetCommands();
+    if (out.empty())
     {
-        ch->sendText("No zone information available.\r\n");
+        ch->sendText("None!\r\n");
         return;
     }
-
-    ch->sendText("Zone commands in this room:@y\r\n");
-    for (int i; i < zone_table.at(zrnum).cmd.size(); i++)
-    {
-        switch (ZOCMD.command)
-        {
-        case 'M':
-        case 'O':
-        case 'T':
-        case 'V':
-            cmd_room = ZOCMD.arg3;
-            break;
-        case 'D':
-        case 'R':
-            cmd_room = ZOCMD.arg1;
-            break;
-        default:
-            break;
-        }
-        if (cmd_room == rrnum)
-        {
-            count++;
-            /* start listing */
-            auto zc = ZOCMD;
-            switch (zc.command)
-            {
-            case 'M':
-                ch->send_to("%sLoad %s@y [@c%d@y], MaxMud : %d, MaxR : %d, Chance : %d\r\n", zc.if_flag ? " then " : "", mob_proto.at(zc.arg1).short_description, zc.arg1, zc.arg2, zc.arg4, zc.arg5);
-                break;
-            case 'G':
-                ch->send_to("%sGive it %s@y [@c%d@y], Max : %d, Chance : %d\r\n", zc.if_flag ? " then " : "", obj_proto.at(zc.arg1).short_description, zc.arg1, zc.arg2, zc.arg5);
-                break;
-            case 'O':
-                ch->send_to("%sLoad %s@y [@c%d@y], Max : %d, MaxR : %d, Chance : %d\r\n", zc.if_flag ? " then " : "", obj_proto.at(zc.arg1).short_description, zc.arg1, zc.arg2, zc.arg4, zc.arg5);
-                break;
-            case 'E':
-                ch->send_to("%sEquip with %s@y [@c%d@y], %s, Max : %d, Chance : %d\r\n", zc.if_flag ? " then " : "", obj_proto.at(zc.arg1).short_description, zc.arg1, equipment_types[zc.arg3], zc.arg2, zc.arg5);
-                break;
-            case 'P':
-                ch->send_to("%sPut %s@y [@c%d@y] in %s@y [@c%d@y], Max : %d, Chance : %d\r\n", zc.if_flag ? " then " : "", obj_proto.at(zc.arg1).short_description, zc.arg1, obj_proto.at(zc.arg3).short_description, zc.arg3, zc.arg2, zc.arg5);
-                break;
-            case 'R':
-                ch->send_to("%sRemove %s@y [@c%d@y] from room.\r\n", zc.if_flag ? " then " : "", obj_proto.at(zc.arg2).short_description, zc.arg2);
-                break;
-            case 'D':
-                ch->send_to("%sSet door %s as %s.\r\n", zc.if_flag ? " then " : "", dirs[zc.arg2], zc.arg3 ? ((zc.arg3 == 1) ? "closed" : "locked") : "open");
-                break;
-            case 'T':
-                ch->send_to("%sAttach trigger @c%s@y [@c%d@y] to %s\r\n", zc.if_flag ? " then " : "", trig_index.at(zc.arg2).name, zc.arg2, ((zc.arg1 == static_cast<int>(MOB_TRIGGER)) ? "mobile" : ((zc.arg1 == static_cast<int>(OBJ_TRIGGER)) ? "object" : ((zc.arg1 == static_cast<int>(WLD_TRIGGER)) ? "room" : "????"))));
-                break;
-            case 'V':
-                ch->send_to("%sAssign global %s:%d to %s = %s\r\n", zc.if_flag ? " then " : "", zc.sarg1.c_str(), zc.arg2, ((zc.arg1 == static_cast<int>(MOB_TRIGGER)) ? "mobile" : ((zc.arg1 == static_cast<int>(OBJ_TRIGGER)) ? "object" : ((zc.arg1 == static_cast<int>(WLD_TRIGGER)) ? "room" : "????"))), zc.sarg2.c_str());
-                break;
-            default:
-                ch->sendText("<Unknown Command>\r\n");
-                break;
-            }
-        }
-        subcmd++;
-    }
-    ch->sendText("@n");
-    if (!count)
-        ch->sendText("None!\r\n");
+    ch->sendText(out);
 }
-
-#undef ZOCMD
 
 static void do_stat_room(Character *ch, Room *rm)
 {
@@ -1472,7 +1403,7 @@ static void do_stat_room(Character *ch, Room *rm)
     /* check the room for a script */
     do_sstat(ch, rm);
 
-    list_zone_commands_room(ch, rm->getVnum());
+    list_zone_commands_room(ch, rm);
 }
 
 static void do_stat_room(Character *ch)
@@ -1547,15 +1478,24 @@ static void do_stat_object(Character *ch, Object *j)
      * NOTE: In order to make it this far, we must already be able to see the
      *       character holding the object. Therefore, we do not need CAN_SEE().
      */
-    if(auto r = j->getRoom()) {
+    if (auto r = j->getRoom())
+    {
         ch->send_to("In room: %d (%s), ", r->getVnum(), r->getName());
-    } else if(auto j2 = j->getContainer()) {
+    }
+    else if (auto j2 = j->getContainer())
+    {
         ch->send_to("In object: %s, ", j2->getShortDescription());
-    } else if(auto c = j->getCarriedBy()) {
+    }
+    else if (auto c = j->getCarriedBy())
+    {
         ch->send_to("Carried by: %s, ", GET_NAME(c));
-    } else if(auto c = j->getWornBy()) {
+    }
+    else if (auto c = j->getWornBy())
+    {
         ch->send_to("Worn by: %s, ", GET_NAME(c));
-    } else {
+    }
+    else
+    {
         ch->send_to("In unknown location: %s, ", j->getName());
     }
 
@@ -3456,7 +3396,7 @@ ACMD(do_zreset)
         }
     }
     else if (*arg == '.' || !*arg)
-        i = real_zone_by_thing(ch->location.getVnum());
+        i = ch->location.getZone()->number;
     else
     {
         i = atol(arg);
@@ -3598,37 +3538,26 @@ static size_t print_zone_to_buf(char *bufptr, size_t left, zone_rnum zone, int l
     {
 
         tmp = snprintf(bufptr, left,
-                       "%3d %-30.30s By: %-10.10s Age: %3f; Reset: %3d (%1d); Range: %5d-%5d\r\n",
+                       "%3d %-30.30s By: %-10.10s Age: %3f; Reset: %3d (%1d)\r\n",
                        z.number, z.name.c_str(), z.builders.c_str(),
                        z.age, z.lifespan,
-                       z.reset_mode,
-                       z.bot, z.top);
+                       z.reset_mode);
 
         auto j = z.rooms.size();
-        auto k = z.objects.size();
-        auto l = z.mobiles.size();
-        auto m = z.shops.size();
-        auto n = z.triggers.size();
-        auto o = z.guilds.size();
 
         tmp += snprintf(bufptr + tmp, left - tmp,
                         "       Zone stats:\r\n"
                         "       ---------------\r\n"
-                        "         Rooms:    %2lu\r\n"
-                        "         Objects:  %2lu\r\n"
-                        "         Mobiles:  %2lu\r\n"
-                        "         Shops:    %2lu\r\n"
-                        "         Triggers: %2lu\r\n"
-                        "         Guilds:   %2lu\r\n",
-                        j, k, l, m, n, o);
+                        "         Rooms:    %2lu\r\n",
+                        j);
 
         return tmp;
     }
 
     return snprintf(bufptr, left,
-                    "%3d %-*s By: %-10.10s Range: %5d-%5d\r\n", z.number,
+                    "%3d %-*s By: %-10.10s\r\n", z.number,
                     count_color_chars(z.name.c_str()) + 30, z.name.c_str(),
-                    z.builders.c_str(), z.bot, z.top);
+                    z.builders.c_str());
 }
 
 ACMD(do_show)
@@ -4853,14 +4782,11 @@ ACMD(do_chown)
 
 ACMD(do_zpurge)
 {
-    Object *obj, *next_obj;
-    Character *mob, *next_mob;
-    vnum i, stored = -1, zone;
     char arg[MAX_INPUT_LENGTH];
 
     one_argument(argument, arg);
 
-    zone = !*arg ? ch->location.getZone()->number : atol(arg);
+    auto zone = !*arg ? ch->location.getZone()->number : atoi(arg);
 
     if (!zone_table.count(zone) || !can_edit_zone(ch, zone))
     {
@@ -4870,23 +4796,19 @@ ACMD(do_zpurge)
 
     auto &z = zone_table.at(zone);
 
-    for (auto room = z.bot; room <= z.top; room++)
+    for (auto r : filter_raw(z.rooms))
     {
-        if (auto rm = get_room(room); rm)
+        auto people = r->getPeople();
+        for (auto mob : filter_raw(people))
         {
-            auto people = rm->getPeople();
-            for (auto mob : filter_raw(people))
-            {
-                if (IS_NPC(mob))
-                {
-                    extract_char(mob);
-                }
-            }
-            auto con = rm->getObjects();
-            for (auto obj : filter_raw(con))
-            {
-                extract_obj(obj);
-            }
+            if (!IS_NPC(mob))
+                continue;
+            extract_char(mob);
+        }
+        auto con = r->getObjects();
+        for (auto obj : filter_raw(con))
+        {
+            extract_obj(obj);
         }
     }
 
@@ -4983,14 +4905,12 @@ ACMD(do_zcheck)
     else
         ch->send_to("Checking zone %d!\r\n", z.number);
 
-    /************** Check mobs *****************/
-
+    /*
     ch->sendText("Checking Mobs for limits...\r\n");
-    /*check mobs first*/
     for (auto &[vn, mo] : mob_proto)
     {
         if (real_zone_by_thing(vn) == zrnum)
-        { /*is mob in this zone?*/
+        {
             auto mob = &mo;
             if (!strcmp(mob->name, "mob unfinished") && (found = 1))
                 len += snprintf(buf + len, sizeof(buf) - len,
@@ -5024,7 +4944,6 @@ ACMD(do_zcheck)
                                 "- Damage mod of %d is too high (limit: %ld)\r\n",
                                 GET_DAMAGE_MOD(mob), MAX_DAMAGE_MOD_ALLOWED);
 
-            /* avg. dam including damroll per round of combat */
             avg_dam = (((mob->mob_specials.damsizedice / 2.0) * mob->mob_specials.damnodice) + GET_DAMAGE_MOD(mob));
             if (avg_dam > MAX_MOB_DAM_ALLOWED && (found = 1))
                 len += snprintf(buf + len, sizeof(buf) - len,
@@ -5060,32 +4979,27 @@ ACMD(do_zcheck)
                                 AFF_FLAGGED(mob, AFF_CHARM) ? "CHARM" : "",
                                 AFF_FLAGGED(mob, AFF_POISON) ? "POISON" : "");
 
-            /*if (!MOB_FLAGGED(mob, MOB_SENTINEL) && !MOB_FLAGGED(mob, MOB_STAY_ZONE) && (found = 1))
-          len += snprintf(buf + len, sizeof(buf) - len,
-                            "- Neither SENTINEL nor STAY_ZONE bits set.\r\n");*/
-
             if (MOB_FLAGGED(mob, MOB_SPEC) && (found = 1))
                 len += snprintf(buf + len, sizeof(buf) - len,
                                 "- SPEC flag needs to be removed.\r\n");
 
-            /*****ADDITIONAL MOB CHECKS HERE*****/
             if (found)
             {
                 ch->send_to("%s[%5d]%s %-30s: %s\r\n%s", CCCYN(ch, C_NRM), vn, CCYEL(ch, C_NRM), mob->short_description, CCNRM(ch, C_NRM), buf);
             }
-            /* reset buffers and found flag */
             strcpy(buf, "");
             found = 0;
             len = 0;
-        } /*mob is in zone*/
-    } /*check mobs*/
+        }
+    }*/
 
     /************** Check objects *****************/
+    /*
     ch->sendText("\r\nChecking Objects for limits...\r\n");
     for (auto &[vn, ob] : obj_proto)
     {
         if (real_zone_by_thing(vn) == zrnum)
-        { /*is object in this zone?*/
+        {
             auto obj = &ob;
             switch (GET_OBJ_TYPE(obj))
             {
@@ -5111,7 +5025,7 @@ ACMD(do_zcheck)
                 }
                 break;
 
-            } /*switch on Item_Type*/
+            }
 
             if (!CAN_WEAR(obj, ITEM_WEAR_TAKE))
             {
@@ -5156,7 +5070,6 @@ ACMD(do_zcheck)
                 len += snprintf(buf + len, sizeof(buf) - len,
                                 "- has action_description set, but is inappropriate type.\r\n");
 
-            /*first check for over-all affections*/
             for (affs = 0, j = 0; j < MAX_OBJ_AFFECT; j++)
                 if (obj->affected[j].modifier)
                     affs++;
@@ -5166,7 +5079,6 @@ ACMD(do_zcheck)
                                 "- has %d affects (limit %d).\r\n",
                                 affs, MAX_AFFECTS_ALLOWED);
 
-            /* special handling of +hit and +dam because of +hit_n_dam */
             for (todam = 0, tohit = 0, j = 0; j < MAX_OBJ_AFFECT; j++)
             {
                 if (obj->affected[j].location == APPLY_COMBAT_BASE && obj->affected[j].specific | static_cast<int>(ComStat::damage))
@@ -5188,7 +5100,7 @@ ACMD(do_zcheck)
             if (ext2 && (found = 1))
                 len += snprintf(buf + len, sizeof(buf) - len,
                                 "- has unformatted extra description\r\n");
-            /*****ADDITIONAL OBJ CHECKS HERE*****/
+
             if (found)
             {
                 ch->send_to("[%5d] %-30s: \r\n%s", vn, obj->short_description, buf);
@@ -5196,8 +5108,8 @@ ACMD(do_zcheck)
             strcpy(buf, "");
             len = 0;
             found = 0;
-        } /*object is in zone*/
-    } /*check objects*/
+        }
+    }*/
 
     /************** Check rooms *****************/
     ch->sendText("\r\nChecking Rooms for limits...\r\n");
@@ -5279,25 +5191,23 @@ static void mob_checkload(Character *ch, mob_vnum mvnum)
 
     for (auto &[zvn, z] : zone_table)
     {
-        for (auto &c : z.cmd)
-        {
-            if (c.command != 'M')
-                continue;
-            if (c.arg1 != mvnum)
-                continue;
+        for(auto r : filter_raw(z.rooms)) {
+            for (auto c : r->resetCommands)
+            {
+                if (c.type != ResetCommandType::MOB)
+                    continue;
+                if (c.target != mvnum)
+                    continue;
 
-            /* read a mobile */
-            auto room = get_room(c.arg3);
-            if (!room)
-            {
-                ch->send_to("  [%5d] %s (room does not exist)\r\n", c.arg3, "ERROR");
+                /* read a mobile */
+                else
+                {
+                    ch->send_to("  [%5d] %s (%d MaxW, %d MaxL)\r\n", r->getVnum(), r->getName(), c.max, c.max_location);
+                }
+                count += 1;
             }
-            else
-            {
-                ch->send_to("  [%5d] %s (%d MaxW, %d MaxW)\r\n", room->getVnum(), room->getName(), c.arg2, c.arg4);
-            }
-            count += 1;
         }
+
     }
     if (count > 0)
         ch->send_to("@D[@nTotal counted: %s.@D]@n\r\n", add_commas(count).c_str());
@@ -5325,110 +5235,78 @@ static void obj_checkload(Character *ch, obj_vnum ovnum)
 
     ch->send_to("Checking load info for the obj [%d] %s...\r\n", ovnum, obj->second.short_description);
 
-    for (auto &[zvn, z] : zone_table)
+    for (auto &[vn, r] : world)
     {
-        for (auto &c : z.cmd)
+        lastroom = r.get();
+        lastroom_v = r->getVnum();
+        for (auto &c : r->resetCommands)
         {
-            switch (c.command)
+            
+            switch (c.type)
             {
-            case 'M':
-                lastroom_v = c.arg3;
-                lastroom = get_room(lastroom_v);
-                lastmob_v = c.arg1;
+            case ResetCommandType::MOB:
+                lastmob_v = c.target;
                 lastmob = mob_proto.find(lastmob_v);
                 break;
-            case 'O': /* read an object */
-                lastroom_v = c.arg3;
-                lastroom = get_room(lastroom_v);
-                lastobj_v = c.arg1;
+            case ResetCommandType::OBJ: /* read an object */
+                lastobj_v = c.target;
                 lastobj = obj_proto.find(lastobj_v);
-                if (c.arg1 == ovnum)
+                if (c.target == ovnum)
                 {
-                    if (lastroom)
-                    {
-                        ch->send_to("  [%5d] %s (%d MaxR, %d MaxW)\r\n", lastroom->getVnum(), lastroom->getName(), c.arg2, c.arg4);
-                    }
-                    else
-                    {
-                        ch->send_to("  [%5d] %s (room does not exist)\r\n", c.arg3, "ERROR");
-                    }
-
+                    ch->send_to("  [%5d] %s (%d MaxR, %d MaxW)\r\n", lastroom->getVnum(), lastroom->getName(), c.max_location, c.max);
                     count += 1;
                 }
                 break;
-            case 'P': /* object to object */
-                if (c.arg1 == ovnum)
+            case ResetCommandType::PUT: /* object to object */
+                if (c.target == ovnum)
                 {
-                    if (lastroom && lastobj != obj_proto.end())
+                    if (lastobj != obj_proto.end())
                     {
-                        ch->send_to("  [%5d] %s (Put in another object [%d Max])\r\n", lastroom->getVnum(), lastroom->getName(), c.arg2);
+                        ch->send_to("  [%5d] %s (Put in another object [%d Max])\r\n", lastroom->getVnum(), lastroom->getName(), c.max);
                     }
-                    else
+                    else if (lastobj == obj_proto.end())
                     {
-                        if (!lastroom && lastobj == obj_proto.end())
-                        {
-                            ch->send_to("  [%5d] %s (room does not exist) (object does not exist)\r\n", c.arg3, "ERROR", c.arg3);
-                        }
-                        else if (!lastroom)
-                        {
-                            ch->send_to("  [%5d] %s (room does not exist)\r\n", c.arg3, "ERROR");
-                        }
-                        else if (lastobj == obj_proto.end())
-                        {
-                            ch->send_to("  [%5d] %s (object does not exist)\r\n", c.arg3, "ERROR");
-                        }
+                        ch->send_to("  [%5d] %s (object does not exist)\r\n", c.target, "ERROR");
                     }
                     count += 1;
                 }
                 break;
-            case 'G': /* obj_to_char */
-                if (c.arg1 == ovnum)
-                {
-                    if (lastroom && lastmob != mob_proto.end())
-                    {
-                        ch->send_to("  [%5d] %s (Given to %s [%d][%d Max])\r\n", lastroom_v, lastroom->getName(), lastmob->second.short_description, lastmob->first, c.arg2);
-                    }
-                    else
-                    {
-                        if (!lastroom)
-                        {
-                            ch->send_to("  [%5d] %s (room does not exist)\r\n", c.arg3, "ERROR");
-                        }
-                        else if (lastmob == mob_proto.end())
-                        {
-                            ch->send_to("  [%5d] %s (mob does not exist)\r\n", c.arg3, "ERROR");
-                        }
-                    }
-                    count += 1;
-                }
-                break;
-            case 'E': /* object to equipment list */
-                if (c.arg1 == ovnum)
+            case ResetCommandType::GIVE: /* obj_to_char */
+                if (c.target == ovnum)
                 {
                     if (lastmob != mob_proto.end())
                     {
-                        ch->send_to("  [%5d] %s (Equipped to %s [%d] at %s [%d Max])\r\n", lastroom_v, lastroom->getName(), lastmob->second.short_description, lastmob->first, equipment_types[c.arg3], c.arg2);
+                        ch->send_to("  [%5d] %s (Given to %s [%d][%d Max])\r\n", lastroom_v, lastroom->getName(), lastmob->second.short_description, lastmob->first, c.max);
+                    }
+                    else if (lastmob == mob_proto.end())
+                    {
+                        ch->send_to("  [%5d] %s (mob does not exist)\r\n", c.target, "ERROR");
+                    }
+                    count += 1;
+                }
+                break;
+            case ResetCommandType::EQUIP: /* object to equipment list */
+                if (c.target == ovnum)
+                {
+                    if (lastmob != mob_proto.end())
+                    {
+                        ch->send_to("  [%5d] %s (Equipped to %s [%d] at %s [%d Max])\r\n", lastroom_v, lastroom->getName(), lastmob->second.short_description, lastmob->first, equipment_types[c.ex], c.max);
                     }
                     else
                     {
-                        ch->send_to("  [%5d] %s (Equipped to ??? [%d] at %s [%d Max])\r\n", lastroom_v, lastroom->getName(), c.arg1, equipment_types[c.arg3], c.arg2);
+                        ch->send_to("  [%5d] %s (Equipped to ??? [%d] at %s [%d Max])\r\n", lastroom_v, lastroom->getName(), c.target, equipment_types[c.ex], c.max);
                     }
 
                     count += 1;
                 }
                 break;
-            case 'R': /* rem obj from room */
-                lastroom_v = c.arg1;
-                lastroom = get_room(lastroom_v);
-                if (c.arg2 == ovnum)
+            case ResetCommandType::REMOVE: /* rem obj from room */
+                
+                if (c.target == ovnum)
                 {
                     if (lastroom)
                     {
                         ch->send_to("  [%5d] %s (Removed from room)\r\n", lastroom_v, lastroom->getName());
-                    }
-                    else
-                    {
-                        ch->send_to("  [%5d] %s (room does not exist)\r\n", c.arg1, "ERROR");
                     }
                     count += 1;
                 }
@@ -5463,39 +5341,36 @@ static void trg_checkload(Character *ch, trig_vnum tvnum)
 
     ch->send_to("Checking load info for the %s trigger [%d] '%s':\r\n", trg->second.attach_type == MOB_TRIGGER ? "mobile" : (trg->second.attach_type == OBJ_TRIGGER ? "object" : "room"), tvnum, trg->second.name);
 
-    for (auto &[zvn, z] : zone_table)
+    for (auto &[zvn, r] : world)
     {
-        for (auto &c : z.cmd)
+        lastroom_v = r->getVnum();
+        for (auto &c : r->resetCommands)
         {
-            switch (c.command)
+            switch (c.type)
             {
-            case 'M':
-                lastroom_v = c.arg3;
-                lastroom_v = c.arg3;
-                lastmob_v = c.arg1;
+            case ResetCommandType::MOB:
+                lastmob_v = c.target;
                 break;
-            case 'O': /* read an object */
-                lastroom_v = c.arg3;
-                lastroom_v = c.arg3;
-                lastobj_v = c.arg1;
+            case ResetCommandType::OBJ: /* read an object */
+                lastobj_v = c.target;
                 break;
-            case 'P': /* object to object */
-                lastobj_v = c.arg1;
+            case ResetCommandType::PUT: /* object to object */
+                lastobj_v = c.target;
                 break;
-            case 'G': /* obj_to_char */
-                lastobj_v = c.arg1;
+            case ResetCommandType::GET: /* obj_to_char */
+                lastobj_v = c.target;
                 break;
-            case 'E': /* object to equipment list */
-                lastobj_v = c.arg1;
+            case ResetCommandType::EQUIP: /* object to equipment list */
+                lastobj_v = c.target;
                 break;
-            case 'R': /* rem obj from room */
+            case ResetCommandType::REMOVE: /* rem obj from room */
                 lastroom_v = 0;
                 lastobj_v = 0;
                 lastmob_v = 0;
-            case 'T': /* trigger to something */
-                if (c.arg2 != tvnum)
+            case ResetCommandType::TRIGGER: /* trigger to something */
+                if (c.target != tvnum)
                     break;
-                if (c.arg1 == static_cast<int>(MOB_TRIGGER))
+                if (c.ex == static_cast<int>(MOB_TRIGGER))
                 {
                     lastmob = mob_proto.find(lastmob_v);
                     if (lastmob != mob_proto.end())
@@ -5509,7 +5384,7 @@ static void trg_checkload(Character *ch, trig_vnum tvnum)
 
                     found = 1;
                 }
-                else if (c.arg1 == static_cast<int>(OBJ_TRIGGER))
+                else if (c.ex == static_cast<int>(OBJ_TRIGGER))
                 {
                     lastobj = obj_proto.find(lastobj_v);
                     if (lastobj != obj_proto.end())
@@ -5522,17 +5397,9 @@ static void trg_checkload(Character *ch, trig_vnum tvnum)
                     }
                     found = 1;
                 }
-                else if (c.arg1 == static_cast<int>(WLD_TRIGGER))
+                else if (c.ex == static_cast<int>(WLD_TRIGGER))
                 {
-                    lastroom = get_room(lastroom_v);
-                    if (lastroom)
-                    {
-                        ch->send_to("room [%5d] %-60s (zedit)\r\n", lastroom_v, lastroom->getName());
-                    }
-                    else
-                    {
-                        ch->send_to("room [%5d] %-60s (zedit)\r\n", lastroom_v, "ERROR NOTEXIST");
-                    }
+                    ch->send_to("room [%5d] %-60s (zedit)\r\n", lastroom_v, lastroom->getName());
                     found = 1;
                 }
                 break;

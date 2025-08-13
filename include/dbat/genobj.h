@@ -9,10 +9,8 @@
 #include "structs.h"
 extern void auto_equip(Character *ch, Object *obj, int location);
 
-extern int save_objects(zone_rnum vznum);
+extern int update_objects(ObjectPrototype *refobj);
 
-extern int update_objects(ObjectPrototype* refobj);
-
-extern obj_rnum add_object(ObjectPrototype*, obj_vnum ovnum);
+extern obj_rnum add_object(ObjectPrototype *, obj_vnum ovnum);
 
 extern int delete_object(obj_rnum);

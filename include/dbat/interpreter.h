@@ -1,12 +1,12 @@
 /* ************************************************************************
-*   File: interpreter.h                                 Part of CircleMUD *
-*  Usage: header file: public procs, macro defs, subcommand defines       *
-*                                                                         *
-*  All rights reserved.  See license.doc for complete information.        *
-*                                                                         *
-*  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
-*  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
-************************************************************************ */
+ *   File: interpreter.h                                 Part of CircleMUD *
+ *  Usage: header file: public procs, macro defs, subcommand defines       *
+ *                                                                         *
+ *  All rights reserved.  See license.doc for complete information.        *
+ *                                                                         *
+ *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
+ *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
+ ************************************************************************ */
 #pragma once
 
 #include "structs.h"
@@ -22,7 +22,7 @@ extern void perform_alias(struct descriptor_data *d, char *orig);
 
 extern void commandWaitQueue(uint64_t heartPulse, double deltaTime);
 
-void processCommand(Character* ch, int cmd, std::string arg);
+void processCommand(Character *ch, int cmd, std::string arg);
 
 extern void topLoad(void);
 
@@ -77,7 +77,6 @@ constexpr int RESERVE_CMDS = 15;
 /* for compatibility with 2.20: */
 #define argument_interpreter(a, b, c) two_arguments(a, b, c)
 
-
 /*
  * Necessary for CMD_IS macro.  Borland needs the structure defined first
  * so it has been moved down here.
@@ -89,5 +88,3 @@ extern struct command_info *complete_cmd_info;
  * because a Windows 95 compiler gives a warning about it having similiar
  * named member.
  */
-
-

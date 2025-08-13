@@ -16,17 +16,19 @@
 
 /*-------------------------------------------------------------------*/
 
-void copy_guild(struct guild_data *tgm, struct guild_data *fgm) {
+void copy_guild(struct guild_data *tgm, struct guild_data *fgm)
+{
     *tgm = *fgm;
 }
 
 /*-------------------------------------------------------------------*/
 
-/* returns the real number of the guild with given virtual number 
+/* returns the real number of the guild with given virtual number
  *
  * We take so good care to keep it sorted - let's use it :) - Welcor
  */
-guild_rnum real_guild(guild_vnum vnum) {
+guild_rnum real_guild(guild_vnum vnum)
+{
     return guild_index.count(vnum) ? vnum : NOTHING;
 }
 
@@ -34,15 +36,18 @@ guild_rnum real_guild(guild_vnum vnum) {
 
 /*. Generic string modifyer for guild master messages . */
 
-void gedit_modify_string(std::string &str, char *new_g) {
+void gedit_modify_string(std::string &str, char *new_g)
+{
     char *pointer;
     char buf[MAX_STRING_LENGTH];
 
     /*. Check the '%s' is present, if not, add it . */
-    if (*new_g != '%') {
+    if (*new_g != '%')
+    {
         snprintf(buf, sizeof(buf), "%%s %s", new_g);
         pointer = buf;
-    } else
+    }
+    else
         pointer = new_g;
 
     str = pointer;
@@ -50,16 +55,14 @@ void gedit_modify_string(std::string &str, char *new_g) {
 
 /*-------------------------------------------------------------------*/
 
-int add_guild(struct guild_data *ngld) {
+int add_guild(struct guild_data *ngld)
+{
     guild_rnum rguild = G_NUM(ngld);
-    zone_rnum rznum = real_zone_by_thing(rguild);
     auto exists = guild_index.contains(rguild);
-    auto& g = guild_index.at(rguild);
+    auto &g = guild_index.at(rguild);
 
-    auto& z = zone_table.at(rznum);
-    z.guilds.insert(rguild);
-
-    if(!exists) mudlog(BRF, ADMLVL_BUILDER, true, "SYSERR: GenOLC: Creating new guild.");
+    if (!exists)
+        mudlog(BRF, ADMLVL_BUILDER, true, "SYSERR: GenOLC: Creating new guild.");
 
     copy_guild(&g, ngld);
 
@@ -68,6 +71,7 @@ int add_guild(struct guild_data *ngld) {
 
 /*-------------------------------------------------------------------*/
 
-int save_guilds(zone_rnum zone_num) {
+int save_guilds(zone_rnum zone_num)
+{
     return true;
 }

@@ -1,12 +1,12 @@
 /* ************************************************************************
-*   File: handler.c                                     Part of CircleMUD *
-*  Usage: internal funcs: moving and finding chars/objs                   *
-*                                                                         *
-*  All rights reserved.  See license.doc for complete information.        *
-*                                                                         *
-*  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
-*  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
-************************************************************************ */
+ *   File: handler.c                                     Part of CircleMUD *
+ *  Usage: internal funcs: moving and finding chars/objs                   *
+ *                                                                         *
+ *  All rights reserved.  See license.doc for complete information.        *
+ *                                                                         *
+ *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
+ *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
+ ************************************************************************ */
 #include "dbat/handler.h"
 #include "dbat/send.h"
 #include "dbat/comm.h"
@@ -28,7 +28,7 @@
 #include "dbat/mobact.h"
 
 /* local vars */
-static std::unordered_set<Character*> extractions_pending;
+static std::unordered_set<Character *> extractions_pending;
 
 /* external vars */
 
@@ -36,7 +36,6 @@ static std::unordered_set<Character*> extractions_pending;
 static int apply_ac(Character *ch, int eq_pos);
 
 static void update_object(Object *obj, int use);
-
 
 /* external functions */
 Object *find_vehicle_by_vnum(int vnum);
@@ -54,29 +53,34 @@ int find_eq_pos(Character *ch, Object *obj, char *arg);
 SPECIAL(shop_keeper);
 
 /* For Getting An Intro Name */
-const char *get_i_name(Character *ch, Character *vict) {
+const char *get_i_name(Character *ch, Character *vict)
+{
     static char name[50];
 
     /* Read Introduction File */
-    if (!vict || vict == ch) {
+    if (!vict || vict == ch)
+    {
         return ("");
     }
 
-    if (IS_NPC(ch) || IS_NPC(vict)) {
+    if (IS_NPC(ch) || IS_NPC(vict))
+    {
         return (RACE(vict));
     }
 
-    auto& p = players.at(ch->id);
+    auto &p = players.at(ch->id);
 
     auto found = p.dub_names.find(vict->id);
-    if(found == p.dub_names.end()) return RACE(vict);
+    if (found == p.dub_names.end())
+        return RACE(vict);
 
     // print *found to name and return buf pointer.
     sprintf(name, "%s", found->second.c_str());
     return (name);
 }
 
-char *fname(const char *namelist) {
+char *fname(const char *namelist)
+{
     static char holder[READ_SIZE];
     char *point;
 
@@ -90,15 +94,18 @@ char *fname(const char *namelist) {
 
 /* Stock isname().  Leave this here even if you put in a newer  *
  * isname().  Used for OasisOLC.                                */
-int is_name(const char *str, const char *namelist) {
+int is_name(const char *str, const char *namelist)
+{
     const char *curname, *curstr;
 
     if (!*str || !*namelist || !str || !namelist)
         return (0);
 
     curname = namelist;
-    for (;;) {
-        for (curstr = str;; curstr++, curname++) {
+    for (;;)
+    {
+        for (curstr = str;; curstr++, curname++)
+        {
             if (!*curstr && !isalpha(*curname))
                 return (1);
 
@@ -113,21 +120,21 @@ int is_name(const char *str, const char *namelist) {
         }
 
         /* skip to next name */
-        for (; isalpha(*curname); curname++);
+        for (; isalpha(*curname); curname++)
+            ;
         if (!*curname)
             return (0);
-        curname++;                  /* first char of new name */
+        curname++; /* first char of new name */
     }
 }
 
 /* allow abbreviations */
 #define WHITESPACE " \t"
 
-
-static char* mystrsep(char** stringp, const char* delim)
+static char *mystrsep(char **stringp, const char *delim)
 {
-    char* start = *stringp;
-    char* p;
+    char *start = *stringp;
+    char *p;
 
     p = (start != NULL) ? strpbrk(start, delim) : NULL;
 
@@ -144,27 +151,33 @@ static char* mystrsep(char** stringp, const char* delim)
     return start;
 }
 
-int isname(const char *str, const char *namelist) {
+int isname(const char *str, const char *namelist)
+{
     char *newlist;
     char *curtok;
     static char newlistbuf[MAX_STRING_LENGTH];
 
-    if (!str || !*str || !namelist || !*namelist) {
+    if (!str || !*str || !namelist || !*namelist)
+    {
         return 0;
     }
 
-    if (!strcasecmp(str, namelist)) { /* the easy way */
+    if (!strcasecmp(str, namelist))
+    { /* the easy way */
         return 1;
     }
 
     strlcpy(newlistbuf, namelist, sizeof(newlistbuf));
     newlist = newlistbuf;
-    for (curtok = mystrsep(&newlist, WHITESPACE); curtok; curtok = mystrsep(&newlist, WHITESPACE)) {
-        if (curtok && is_abbrev(str, curtok)) {
+    for (curtok = mystrsep(&newlist, WHITESPACE); curtok; curtok = mystrsep(&newlist, WHITESPACE))
+    {
+        if (curtok && is_abbrev(str, curtok))
+        {
             /* Don't allow abbreviated numbers, only alpha names need abbreviation */
             /* This, I just consider a bug fix, because abbreviating numbers is just*/
             /* asking for trouble. IE: 100 would return true on 1000 --Sryth*/
-            if (isdigit(*str) && (atoi(str) != atoi(curtok))) {
+            if (isdigit(*str) && (atoi(str) != atoi(curtok)))
+            {
                 return 0;
             }
             return 1;
@@ -173,18 +186,23 @@ int isname(const char *str, const char *namelist) {
     return 0;
 }
 
-void aff_apply_modify(Character *ch, int loc, int mod, int spec, char *msg) {
-
+void aff_apply_modify(Character *ch, int loc, int mod, int spec, char *msg)
+{
 }
 
-
-void affect_modify(Character *ch, int loc, int mod, int spec, long bitv, bool add) {
-    if (add) {
-        if (bitv != AFF_INFRAVISION || !IS_ANDROID(ch)) {
+void affect_modify(Character *ch, int loc, int mod, int spec, long bitv, bool add)
+{
+    if (add)
+    {
+        if (bitv != AFF_INFRAVISION || !IS_ANDROID(ch))
+        {
             ch->affect_flags.set(bitv, true);
         }
-    } else {
-        if (bitv != AFF_INFRAVISION || !IS_ANDROID(ch)) {
+    }
+    else
+    {
+        if (bitv != AFF_INFRAVISION || !IS_ANDROID(ch))
+        {
             ch->affect_flags.set(bitv, false);
             mod = -mod;
         }
@@ -193,43 +211,58 @@ void affect_modify(Character *ch, int loc, int mod, int spec, long bitv, bool ad
     aff_apply_modify(ch, loc, mod, spec, "affect_modify");
 }
 
-
-void affect_modify_ar(Character *ch, int loc, int mod, int spec, const std::bitset<NUM_AFF_FLAGS>& bitv, bool add) {
+void affect_modify_ar(Character *ch, int loc, int mod, int spec, const std::bitset<NUM_AFF_FLAGS> &bitv, bool add)
+{
     int i, j;
 
-    if (add) for (i = 0; i < bitv.size(); i++) if(bitv.test(i)) ch->affect_flags.set(i, true);
-    else {
-        for (i = 0; i < bitv.size(); i++) if(bitv.test(i)) ch->affect_flags.set(i, false);
-        mod = -mod;
-    }
+    if (add)
+        for (i = 0; i < bitv.size(); i++)
+            if (bitv.test(i))
+                ch->affect_flags.set(i, true);
+            else
+            {
+                for (i = 0; i < bitv.size(); i++)
+                    if (bitv.test(i))
+                        ch->affect_flags.set(i, false);
+                mod = -mod;
+            }
 
     aff_apply_modify(ch, loc, mod, spec, "affect_modify_ar");
 }
 
-void affect_modify_ar(Character *ch, int loc, int mod, int spec, const std::unordered_set<AffectFlag>& bitv, bool add) {
+void affect_modify_ar(Character *ch, int loc, int mod, int spec, const std::unordered_set<AffectFlag> &bitv, bool add)
+{
     int i, j;
 
-    if (add) for (i = 0; i < bitv.size(); i++) if(bitv.contains(static_cast<AffectFlag>(i))) ch->affect_flags.set(i, true);
-    else {
-        for (i = 0; i < bitv.size(); i++) if(bitv.contains(static_cast<AffectFlag>(i))) ch->affect_flags.set(i, false);
-        mod = -mod;
-    }
+    if (add)
+        for (i = 0; i < bitv.size(); i++)
+            if (bitv.contains(static_cast<AffectFlag>(i)))
+                ch->affect_flags.set(i, true);
+            else
+            {
+                for (i = 0; i < bitv.size(); i++)
+                    if (bitv.contains(static_cast<AffectFlag>(i)))
+                        ch->affect_flags.set(i, false);
+                mod = -mod;
+            }
 
     aff_apply_modify(ch, loc, mod, spec, "affect_modify_ar");
 }
-
 
 /* This updates a character by subtracting everything he is affected by */
 /* restoring original abilities, and then affecting all again           */
-void affect_total(Character *ch) {
+void affect_total(Character *ch)
+{
     struct affected_type *af;
     int i, j;
 
-    for(const auto &s : {"spellfail", "armorcheck", "armorcheckall"}) {
+    for (const auto &s : {"spellfail", "armorcheck", "armorcheckall"})
+    {
         ch->setBaseStat(s, 0.0);
     }
 
-    for (i = 0; i < NUM_WEARS; i++) {
+    for (i = 0; i < NUM_WEARS; i++)
+    {
         if (GET_EQ(ch, i))
             for (j = 0; j < MAX_OBJ_AFFECT; j++)
                 affect_modify_ar(ch, GET_EQ(ch, i)->affected[j].location,
@@ -238,14 +271,15 @@ void affect_total(Character *ch) {
                                  GET_OBJ_PERM(GET_EQ(ch, i)).getAll(), false);
     }
 
-
     for (af = ch->affected; af; af = af->next)
         affect_modify(ch, af->location, af->modifier, af->specific, af->bitvector, false);
 
-
-    for (i = 0; i < NUM_WEARS; i++) {
-        if (GET_EQ(ch, i)) {
-            if (GET_OBJ_TYPE(GET_EQ(ch, i)) == ITEM_ARMOR) {
+    for (i = 0; i < NUM_WEARS; i++)
+    {
+        if (GET_EQ(ch, i))
+        {
+            if (GET_OBJ_TYPE(GET_EQ(ch, i)) == ITEM_ARMOR)
+            {
                 ch->modBaseStat("spellfail", GET_OBJ_VAL(GET_EQ(ch, i), VAL_ARMOR_SPELLFAIL));
                 ch->modBaseStat("armorcheck", GET_OBJ_VAL(GET_EQ(ch, i), VAL_ARMOR_CHECK));
                 if (!is_proficient_with_armor(ch, GET_OBJ_VAL(GET_EQ(ch, i), VAL_ARMOR_SKILL)))
@@ -259,20 +293,18 @@ void affect_total(Character *ch) {
         }
     }
 
-
     for (af = ch->affected; af; af = af->next)
         affect_modify(ch, af->location, af->modifier, af->specific, af->bitvector, true);
-
-
 }
-
 
 /* Insert an affect_type in a Character structure
    Automatically sets apropriate bits and apply's */
-void affect_to_char(Character *ch, struct affected_type *af) {
+void affect_to_char(Character *ch, struct affected_type *af)
+{
     auto affected_alloc = new affected_type();
 
-    if (!ch->affected) {
+    if (!ch->affected)
+    {
         characterSubscriptions.subscribe("affected", ch->shared());
     }
     *affected_alloc = *af;
@@ -283,16 +315,17 @@ void affect_to_char(Character *ch, struct affected_type *af) {
     affect_total(ch);
 }
 
-
 /*
  * Remove an affected_type structure from a char (called when duration
  * reaches zero). Pointer *af must never be NIL!  Frees mem and calls
  * affect_location_apply
  */
-void affect_remove(Character *ch, struct affected_type *af) {
+void affect_remove(Character *ch, struct affected_type *af)
+{
     struct affected_type *cmtemp;
 
-    if (ch->affected == nullptr) {
+    if (ch->affected == nullptr)
+    {
         core_dump();
         return;
     }
@@ -301,41 +334,44 @@ void affect_remove(Character *ch, struct affected_type *af) {
     REMOVE_FROM_LIST(af, ch->affected, next, cmtemp);
     delete af;
     affect_total(ch);
-    if (!ch->affected) {
+    if (!ch->affected)
+    {
         characterSubscriptions.unsubscribe("affected", ch->shared());
     }
 }
 
-
 /* Call affect_remove with every spell of spelltype "skill" */
-void affect_from_char(Character *ch, int type) {
+void affect_from_char(Character *ch, int type)
+{
     struct affected_type *hjp, *next;
 
-    for (hjp = ch->affected; hjp; hjp = next) {
+    for (hjp = ch->affected; hjp; hjp = next)
+    {
         next = hjp->next;
         if (hjp->type == type)
             affect_remove(ch, hjp);
     }
 }
 
-
 /* Call affect_remove with every spell of spelltype "skill" */
-void affectv_from_char(Character *ch, int type) {
+void affectv_from_char(Character *ch, int type)
+{
     struct affected_type *hjp, *next;
 
-    for (hjp = ch->affectedv; hjp; hjp = next) {
+    for (hjp = ch->affectedv; hjp; hjp = next)
+    {
         next = hjp->next;
         if (hjp->type == type)
             affectv_remove(ch, hjp);
     }
 }
 
-
 /*
  * Return TRUE if a char is affected by a spell (SPELL_XXX),
  * FALSE indicates not affected.
  */
-bool affected_by_spell(Character *ch, int type) {
+bool affected_by_spell(Character *ch, int type)
+{
     struct affected_type *hjp;
 
     for (hjp = ch->affected; hjp; hjp = hjp->next)
@@ -345,12 +381,12 @@ bool affected_by_spell(Character *ch, int type) {
     return (false);
 }
 
-
 /*
  * Return TRUE if a char is affected by a spell (SPELL_XXX),
  * FALSE indicates not affected.
  */
-bool affectedv_by_spell(Character *ch, int type) {
+bool affectedv_by_spell(Character *ch, int type)
+{
     struct affected_type *hjp;
 
     for (hjp = ch->affectedv; hjp; hjp = hjp->next)
@@ -360,16 +396,18 @@ bool affectedv_by_spell(Character *ch, int type) {
     return (false);
 }
 
-
 void affect_join(Character *ch, struct affected_type *af,
-                 bool add_dur, bool avg_dur, bool add_mod, bool avg_mod) {
+                 bool add_dur, bool avg_dur, bool add_mod, bool avg_mod)
+{
     struct affected_type *hjp, *next;
     bool found = false;
 
-    for (hjp = ch->affected; !found && hjp; hjp = next) {
+    for (hjp = ch->affected; !found && hjp; hjp = next)
+    {
         next = hjp->next;
 
-        if ((hjp->type == af->type) && (hjp->location == af->location)) {
+        if ((hjp->type == af->type) && (hjp->location == af->location))
+        {
             if (add_dur)
                 af->duration += hjp->duration;
             if (avg_dur)
@@ -390,10 +428,11 @@ void affect_join(Character *ch, struct affected_type *af,
     characterSubscriptions.subscribe("affected", ch->shared());
 }
 
-
 /* Return the effect of a piece of armor in position eq_pos */
-static int apply_ac(Character *ch, int eq_pos) {
-    if (GET_EQ(ch, eq_pos) == nullptr) {
+static int apply_ac(Character *ch, int eq_pos)
+{
+    if (GET_EQ(ch, eq_pos) == nullptr)
+    {
         core_dump();
         return (0);
     }
@@ -425,7 +464,8 @@ static int apply_ac(Character *ch, int eq_pos) {
     return (GET_OBJ_VAL(GET_EQ(ch, eq_pos), VAL_ARMOR_APPLYAC));
 }
 
-int invalid_align(Character *ch, Object *obj) {
+int invalid_align(Character *ch, Object *obj)
+{
     if (obj->not_alignment.contains(MoralAlign::evil) && IS_EVIL(ch))
         return true;
     if (obj->not_alignment.contains(MoralAlign::good) && IS_GOOD(ch))
@@ -435,27 +475,33 @@ int invalid_align(Character *ch, Object *obj) {
     return false;
 }
 
-void equip_char(Character *ch, Object *obj, int pos) {
-    if (pos < 0 || pos >= NUM_WEARS) {
+void equip_char(Character *ch, Object *obj, int pos)
+{
+    if (pos < 0 || pos >= NUM_WEARS)
+    {
         core_dump();
         return;
     }
 
-    if (GET_EQ(ch, pos)) {
+    if (GET_EQ(ch, pos))
+    {
         basic_mud_log("SYSERR: Char is already equipped: %s, %s", GET_NAME(ch),
-            obj->getShortDescription());
+                      obj->getShortDescription());
         return;
     }
-    if (auto c = obj->getCarriedBy()) {
+    if (auto c = obj->getCarriedBy())
+    {
         basic_mud_log("SYSERR: EQUIP: Obj is carried_by when equip.");
         return;
     }
-    if (auto r = obj->getRoom()) {
+    if (auto r = obj->getRoom())
+    {
         basic_mud_log("SYSERR: EQUIP: Obj is in_room when equip.");
         return;
     }
 
-    if (invalid_align(ch, obj) || invalid_class(ch, obj) || invalid_race(ch, obj)) {
+    if (invalid_align(ch, obj) || invalid_class(ch, obj) || invalid_race(ch, obj))
+    {
         act("You stop wearing $p as something prevents you.", false, ch, obj, nullptr, TO_CHAR);
         act("$n stops wearing $p as something prevents $m.", false, ch, obj, nullptr, TO_ROOM);
         /* Changed to drop in inventory instead of the ground. */
@@ -466,12 +512,13 @@ void equip_char(Character *ch, Object *obj, int pos) {
     ch->addToEquip(obj, pos);
 }
 
-
-Object *unequip_char(Character *ch, int pos) {
+Object *unequip_char(Character *ch, int pos)
+{
     int j;
     Object *obj;
 
-    if ((pos < 0 || pos >= NUM_WEARS) || GET_EQ(ch, pos) == nullptr) {
+    if ((pos < 0 || pos >= NUM_WEARS) || GET_EQ(ch, pos) == nullptr)
+    {
         core_dump();
         return (nullptr);
     }
@@ -483,18 +530,19 @@ Object *unequip_char(Character *ch, int pos) {
     return (obj);
 }
 
-
-int get_number(char **name) {
+int get_number(char **name)
+{
     int i;
     char *ppos;
     char number[MAX_INPUT_LENGTH];
 
     *number = '\0';
 
-    if ((ppos = strchr((char*)*name, '.'))) {
+    if ((ppos = strchr((char *)*name, '.')))
+    {
         *ppos++ = '\0';
         strlcpy(number, *name, sizeof(number));
-        strcpy((char*)*name, ppos);    /* strcpy: OK (always smaller) */
+        strcpy((char *)*name, ppos); /* strcpy: OK (always smaller) */
 
         for (i = 0; *(number + i); i++)
             if (!isdigit(*(number + i)))
@@ -505,20 +553,20 @@ int get_number(char **name) {
     return (1);
 }
 
-
-
 /* search the entire world for an object number, and return a pointer  */
-Object *get_obj_num(obj_rnum nr) {
+Object *get_obj_num(obj_rnum nr)
+{
     return objectSubscriptions.first(fmt::format("vnum_{}", nr));
 }
 
-
 /* search a room for a char, and return a pointer if found..  */
-Character *get_char_room(char *name, int *number, room_rnum room) {
+Character *get_char_room(char *name, int *number, room_rnum room)
+{
     Character *i;
     int num;
 
-    if (!number) {
+    if (!number)
+    {
         number = &num;
         num = get_number(&name);
     }
@@ -527,7 +575,8 @@ Character *get_char_room(char *name, int *number, room_rnum room) {
         return nullptr;
 
     auto people = get_room(room)->getPeople();
-    for (auto i : filter_raw(people)) {
+    for (auto i : filter_raw(people))
+    {
         if (isname(name, i->getName()))
             if (--(*number) == 0)
                 return (i);
@@ -536,37 +585,40 @@ Character *get_char_room(char *name, int *number, room_rnum room) {
     return nullptr;
 }
 
-
 /* search all over the world for a char num, and return a pointer if found */
-Character *get_char_num(mob_rnum nr) {
+Character *get_char_num(mob_rnum nr)
+{
     return characterSubscriptions.first(fmt::format("vnum_{}", nr));
 }
 
-
-
 /* Extract an object from the world */
-void extract_obj(Object *obj) {
+void extract_obj(Object *obj)
+{
     Object *temp;
     Character *ch;
     obj->clearLocation();
 
     /* Get rid of the contents of the object, as well. */
-    if (auto trash = GET_FELLOW_WALL(obj); trash && GET_OBJ_VNUM(obj) == 79) {
+    if (auto trash = GET_FELLOW_WALL(obj); trash && GET_OBJ_VNUM(obj) == 79)
+    {
         GET_FELLOW_WALL(obj) = nullptr;
         GET_FELLOW_WALL(trash) = nullptr;
         extract_obj(trash);
     }
 
-    if (auto obj2 = GET_OBJ_POSTED(obj); obj2) {
+    if (auto obj2 = GET_OBJ_POSTED(obj); obj2)
+    {
         GET_OBJ_POSTED(obj2) = nullptr;
         GET_OBJ_POSTTYPE(obj2) = 0;
         GET_OBJ_POSTED(obj) = nullptr;
     }
 
-    if (TARGET(obj)) {
+    if (TARGET(obj))
+    {
         TARGET(obj) = nullptr;
     }
-    if (USER(obj)) {
+    if (USER(obj))
+    {
         USER(obj) = nullptr;
     }
 
@@ -581,63 +633,72 @@ void extract_obj(Object *obj) {
     uniqueObjects.erase(id);
 }
 
-
-static void update_object(Object *obj, int use) {
+static void update_object(Object *obj, int use)
+{
     if (!obj)
         return;
     /* dont update objects with a timer trigger */
     if (!SCRIPT_CHECK(obj, OTRIG_TIMER) && (GET_OBJ_TIMER(obj) > 0))
         obj->modBaseStat("timer", -use);
     auto con = obj->getInventory();
-    for(auto o : filter_raw(con)) {
+    for (auto o : filter_raw(con))
+    {
         update_object(o, use);
     }
 }
 
-
-void update_char_objects(Character *ch) {
+void update_char_objects(Character *ch)
+{
     int i, j;
 
     for (i = 0; i < NUM_WEARS; i++)
-        if (GET_EQ(ch, i)) {
+        if (GET_EQ(ch, i))
+        {
             if (GET_OBJ_TYPE(GET_EQ(ch, i)) == ITEM_LIGHT && GET_OBJ_VAL(GET_EQ(ch, i), VAL_LIGHT_HOURS) > 0 &&
-                GET_OBJ_VAL(GET_EQ(ch, i), VAL_LIGHT_TIME) <= 0) {
+                GET_OBJ_VAL(GET_EQ(ch, i), VAL_LIGHT_TIME) <= 0)
+            {
                 j = MOD_OBJ_VAL(GET_EQ(ch, i), VAL_LIGHT_HOURS, -1);
                 SET_OBJ_VAL(GET_EQ(ch, i), VAL_LIGHT_TIME, 3);
-                if (j == 1) {
-                                        ch->sendText("Your light begins to flicker and fade.\r\n");
+                if (j == 1)
+                {
+                    ch->sendText("Your light begins to flicker and fade.\r\n");
                     act("$n's light begins to flicker and fade.", false, ch, nullptr, nullptr, TO_ROOM);
-                } else if (j == 0) {
-                                        ch->sendText("Your light sputters out and dies.\r\n");
+                }
+                else if (j == 0)
+                {
+                    ch->sendText("Your light sputters out and dies.\r\n");
                     act("$n's light sputters out and dies.", false, ch, nullptr, nullptr, TO_ROOM);
                 }
-            } else if (GET_OBJ_TYPE(GET_EQ(ch, i)) == ITEM_LIGHT && GET_OBJ_VAL(GET_EQ(ch, i), VAL_LIGHT_HOURS) > 0) {
+            }
+            else if (GET_OBJ_TYPE(GET_EQ(ch, i)) == ITEM_LIGHT && GET_OBJ_VAL(GET_EQ(ch, i), VAL_LIGHT_HOURS) > 0)
+            {
                 MOD_OBJ_VAL(GET_EQ(ch, i), VAL_LIGHT_TIME, -1);
             }
             update_object(GET_EQ(ch, i), 2);
         }
     auto con = ch->getInventory();
-    for(auto o : filter_raw(con))
+    for (auto o : filter_raw(con))
         update_object(o, 1);
 }
 
-
-
 /* Extract a ch completely from the world, and leave his stuff behind */
-void extract_char_final(Character *ch) {
+void extract_char_final(Character *ch)
+{
     Character *k, *temp;
     Object *chair;
     struct descriptor_data *d;
     Object *obj;
     int i;
 
-    if (IN_ROOM(ch) == NOWHERE) {
+    if (IN_ROOM(ch) == NOWHERE)
+    {
         basic_mud_log("SYSERR: NOWHERE extracting char %s. (%s, extract_char_final)",
-            GET_NAME(ch), __FILE__);
+                      GET_NAME(ch), __FILE__);
         shutdown_game(1);
     }
 
-    if(!IS_NPC(ch)) {
+    if (!IS_NPC(ch))
+    {
         // PCs have a very complicated set of places they're not allowed to log off from.
         // If they do, somehow, then this function will ensure they show up somewhere sane.
         ch->setBaseStat("load_room", ch->normalizeLoadRoom(IN_ROOM(ch)));
@@ -648,15 +709,18 @@ void extract_char_final(Character *ch) {
      * need to stuff them back into their own body.  This will set ch->desc
      * we're checking below this loop to the proper value.
      */
-    if (!IS_NPC(ch) && !ch->desc) {
+    if (!IS_NPC(ch) && !ch->desc)
+    {
         for (d = descriptor_list; d; d = d->next)
-            if (d->original == ch) {
+            if (d->original == ch)
+            {
                 do_return(d->character, nullptr, 0, 0);
                 break;
             }
     }
 
-    if (ch->desc) {
+    if (ch->desc)
+    {
         if (ch->desc->original)
             do_return(ch, nullptr, 0, 0);
     }
@@ -665,25 +729,31 @@ void extract_char_final(Character *ch) {
     if (ch->followers || ch->master)
         die_follower(ch);
 
-    if (auto original = GET_ORIGINAL(ch); original) {
+    if (auto original = GET_ORIGINAL(ch); original)
+    {
         auto shared = ch->shared();
-        original->clones.remove_if([shared](auto& c) { return c.expired() || c.lock() == shared; });
+        original->clones.remove_if([shared](auto &c)
+                                   { return c.expired() || c.lock() == shared; });
     }
 
-    if (auto clones = ch->clones; !clones.empty()) {
-        for(auto c : filter_raw(clones)) {
+    if (auto clones = ch->clones; !clones.empty())
+    {
+        for (auto c : filter_raw(clones))
+        {
             handle_multi_merge(c);
         }
     }
 
     purge_homing(ch);
 
-    if (MINDLINK(ch)) {
+    if (MINDLINK(ch))
+    {
         MINDLINK(MINDLINK(ch)) = nullptr;
         MINDLINK(ch) = nullptr;
     }
 
-    if (GRAPPLING(ch)) {
+    if (GRAPPLING(ch))
+    {
         act("@WYou stop grappling with @C$N@W!@n", true, ch, nullptr, GRAPPLING(ch), TO_CHAR);
         act("@C$n@W stops grappling with @c$N@W!@n", true, ch, nullptr, GRAPPLING(ch), TO_ROOM);
         GRAPPLING(ch)->setBaseStat<int>("grapple_type", -1);
@@ -691,7 +761,8 @@ void extract_char_final(Character *ch) {
         GRAPPLING(ch) = nullptr;
         ch->setBaseStat<int>("grapple_type", -1);
     }
-    if (GRAPPLED(ch)) {
+    if (GRAPPLED(ch))
+    {
         act("@WYou stop being grappled with by @C$N@W!@n", true, ch, nullptr, GRAPPLED(ch), TO_CHAR);
         act("@C$n@W stops being grappled with by @c$N@W!@n", true, ch, nullptr, GRAPPLED(ch), TO_ROOM);
         GRAPPLED(ch)->setBaseStat<int>("grapple_type", -1);
@@ -700,87 +771,104 @@ void extract_char_final(Character *ch) {
         ch->setBaseStat<int>("grapple_type", -1);
     }
 
-    if (CARRYING(ch)) {
+    if (CARRYING(ch))
+    {
         carry_drop(ch, 3);
     }
 
-    if (CARRIED_BY(ch)) {
+    if (CARRIED_BY(ch))
+    {
         carry_drop(CARRIED_BY(ch), 3);
     }
 
-    if (ch->poisonby) {
+    if (ch->poisonby)
+    {
         auto shared = ch->shared();
-        ch->poisonby->poisoned.remove_if([shared](auto& c) { return c.expired() || c.lock() == shared; });
+        ch->poisonby->poisoned.remove_if([shared](auto &c)
+                                         { return c.expired() || c.lock() == shared; });
         ch->poisonby = nullptr;
     }
 
-    for(auto c : ch->poisoned) {
-        if(auto c2 = c.lock(); c2) {
+    for (auto c : ch->poisoned)
+    {
+        if (auto c2 = c.lock(); c2)
+        {
             c2->poisonby = nullptr;
         }
     }
     ch->poisoned.clear();
 
-    if (DRAGGING(ch)) {
+    if (DRAGGING(ch))
+    {
         act("@WYou stop dragging @C$N@W!@n", true, ch, nullptr, DRAGGING(ch), TO_CHAR);
         act("@C$n@W stops dragging @c$N@W!@n", true, ch, nullptr, DRAGGING(ch), TO_ROOM);
         DRAGGED(DRAGGING(ch)) = nullptr;
         DRAGGING(ch) = nullptr;
     }
 
-    if (DRAGGED(ch)) {
+    if (DRAGGED(ch))
+    {
         act("@WYou stop being dragged by @C$N@W!@n", true, ch, nullptr, DRAGGED(ch), TO_CHAR);
         act("@C$n@W stops being dragged by @c$N@W!@n", true, ch, nullptr, DRAGGED(ch), TO_ROOM);
         DRAGGING(DRAGGED(ch)) = nullptr;
         DRAGGED(ch) = nullptr;
     }
 
-    if (GET_DEFENDER(ch)) {
+    if (GET_DEFENDER(ch))
+    {
         GET_DEFENDING(GET_DEFENDER(ch)) = nullptr;
         GET_DEFENDER(ch) = nullptr;
     }
-    if (GET_DEFENDING(ch)) {
+    if (GET_DEFENDING(ch))
+    {
         GET_DEFENDER(GET_DEFENDING(ch)) = nullptr;
         GET_DEFENDING(ch) = nullptr;
     }
 
-    if (BLOCKED(ch)) {
+    if (BLOCKED(ch))
+    {
         BLOCKS(BLOCKED(ch)) = nullptr;
         BLOCKED(ch) = nullptr;
     }
-    if (BLOCKS(ch)) {
+    if (BLOCKS(ch))
+    {
         BLOCKED(BLOCKS(ch)) = nullptr;
         BLOCKS(ch) = nullptr;
     }
-    if (ABSORBING(ch)) {
+    if (ABSORBING(ch))
+    {
         ABSORBBY(ABSORBING(ch)) = nullptr;
         ABSORBING(ch) = nullptr;
     }
-    if (ABSORBBY(ch)) {
+    if (ABSORBBY(ch))
+    {
         ABSORBING(ABSORBBY(ch)) = nullptr;
         ABSORBBY(ch) = nullptr;
     }
 
     /* transfer objects to room, if any */
-    if(IS_NPC(ch)) {
+    if (IS_NPC(ch))
+    {
         auto con = ch->getInventory();
-        for (auto obj : filter_raw(con)) {
+        for (auto obj : filter_raw(con))
+        {
             obj->clearLocation();
             obj->setLocation(ch);
         }
 
         /* transfer equipment to room, if any */
-        for (auto &[slot, o] : ch->getEquipment()) {
+        for (auto &[slot, o] : ch->getEquipment())
+        {
             unequip_char(ch, slot);
             o->setLocation(ch);
         }
-            
     }
 
     if (FIGHTING(ch))
         stop_fighting(ch);
     auto subs = characterSubscriptions.all("combatSystem");
-    for (auto k : filter_raw(subs)) {
+    for (auto k : filter_raw(subs))
+    {
         if (FIGHTING(k) == ch)
             stop_fighting(k);
     }
@@ -788,17 +876,18 @@ void extract_char_final(Character *ch) {
     ch->clearLocation();
 
     /* If there's a descriptor, they're in the menu now. */
-    if(ch->desc) {
+    if (ch->desc)
+    {
         ch->desc->connected = CON_QUITGAME;
     }
 
     ch->deactivate();
-    if (IS_NPC(ch)) {
+    if (IS_NPC(ch))
+    {
         auto id = ch->id;
         uniqueCharacters.erase(id);
     }
 }
-
 
 /*
  * Q: Why do we do this?
@@ -813,26 +902,32 @@ void extract_char_final(Character *ch) {
  * A: Because code doing 'vict = vict->next' would
  *    get really confused otherwise.
  */
-void extract_char(Character *ch) {
-    if(!ch->active) {
+void extract_char(Character *ch)
+{
+    if (!ch->active)
+    {
         basic_mud_log("Attempt to extract an inactive character.");
         return;
     }
 
     extractions_pending.insert(ch);
 
-    for (auto foll = ch->followers; foll; foll = foll->next) {
+    for (auto foll = ch->followers; foll; foll = foll->next)
+    {
         if (IS_NPC(foll->follower) && AFF_FLAGGED(foll->follower, AFF_CHARM) &&
-            (foll->follower->location == ch->location || IN_ROOM(ch) == 1)) {
+            (foll->follower->location == ch->location || IN_ROOM(ch) == 1))
+        {
             /* transfer objects to char, if any */
             auto con = foll->follower->getInventory();
-            for (auto obj : filter_shared(con)) {
+            for (auto obj : filter_shared(con))
+            {
                 obj->clearLocation();
                 ch->addToInventory(obj);
             }
 
             /* transfer equipment to char, if any */
-            for (auto &[slot, obj] : foll->follower->getEquipment()) {
+            for (auto &[slot, obj] : foll->follower->getEquipment())
+            {
                 auto un = unequip_char(foll->follower, slot);
                 ch->addToInventory(un);
             }
@@ -841,7 +936,6 @@ void extract_char(Character *ch) {
         }
     }
 }
-
 
 /*
  * I'm not particularly pleased with the MOB/PLR
@@ -853,56 +947,72 @@ void extract_char(Character *ch) {
  *
  * NOTE: This doesn't handle recursive extractions.
  */
-void extract_pending_chars(uint64_t heartBeat, double deltaTime) {
+void extract_pending_chars(uint64_t heartBeat, double deltaTime)
+{
     auto pending = extractions_pending;
 
-    for(auto ch : pending) {
+    for (auto ch : pending)
+    {
         extractions_pending.erase(ch);
         extract_char_final(ch);
     }
 }
 
-
 /* ***********************************************************************
-* Here follows high-level versions of some earlier routines, ie functions*
-* which incorporate the actual player-data                               *.
-*********************************************************************** */
+ * Here follows high-level versions of some earlier routines, ie functions*
+ * which incorporate the actual player-data                               *.
+ *********************************************************************** */
 
-
-Character *get_player_vis(Character *ch, char *name, int *number, int inroom) {
+Character *get_player_vis(Character *ch, char *name, int *number, int inroom)
+{
     Character *i;
     int num;
 
-    if (!number) {
+    if (!number)
+    {
         number = &num;
         num = get_number(&name);
     }
-    
+
     auto ac = characterSubscriptions.all("active");
-    for (auto i : filter_raw(ac)) {
+    for (auto i : filter_raw(ac))
+    {
         if (IS_NPC(i))
             continue;
         if (inroom == FIND_CHAR_ROOM && i->location != ch->location)
             continue;
-        if (GET_ADMLEVEL(ch) < 1 && GET_ADMLEVEL(i) < 1 && !IS_NPC(ch) && !IS_NPC(i)) {
-            if (strcasecmp(RACE(i), name) && !strstr(RACE(i), name)) {
-                if (readIntro(ch, i) == 1) {
-                    if (strcasecmp(get_i_name(ch, i), name) && !strstr(get_i_name(ch, i), name)) {
+        if (GET_ADMLEVEL(ch) < 1 && GET_ADMLEVEL(i) < 1 && !IS_NPC(ch) && !IS_NPC(i))
+        {
+            if (strcasecmp(RACE(i), name) && !strstr(RACE(i), name))
+            {
+                if (readIntro(ch, i) == 1)
+                {
+                    if (strcasecmp(get_i_name(ch, i), name) && !strstr(get_i_name(ch, i), name))
+                    {
                         continue;
                     }
-                } else {
+                }
+                else
+                {
                     continue;
                 }
             }
         }
-        if ((GET_ADMLEVEL(ch) >= 1 || GET_ADMLEVEL(i) >= 1 || IS_NPC(ch) || IS_NPC(i))) {
-            if (strcasecmp(i->getName(), name) && !strstr(i->getName(), name)) {
-                if (strcasecmp(RACE(i), name) && !strstr(RACE(i), name)) {
-                    if (!IS_NPC(ch) && !IS_NPC(i) && readIntro(ch, i) == 1) {
-                        if (strcasecmp(get_i_name(ch, i), name) && !strstr(get_i_name(ch, i), name)) {
+        if ((GET_ADMLEVEL(ch) >= 1 || GET_ADMLEVEL(i) >= 1 || IS_NPC(ch) || IS_NPC(i)))
+        {
+            if (strcasecmp(i->getName(), name) && !strstr(i->getName(), name))
+            {
+                if (strcasecmp(RACE(i), name) && !strstr(RACE(i), name))
+                {
+                    if (!IS_NPC(ch) && !IS_NPC(i) && readIntro(ch, i) == 1)
+                    {
+                        if (strcasecmp(get_i_name(ch, i), name) && !strstr(get_i_name(ch, i), name))
+                        {
                             continue;
                         }
-                    } else {
+                    }
+                    else
+                    {
                         continue;
                     }
                 }
@@ -918,12 +1028,13 @@ Character *get_player_vis(Character *ch, char *name, int *number, int inroom) {
     return (nullptr);
 }
 
-
-Character *get_char_room_vis(Character *ch, char *name, int *number) {
+Character *get_char_room_vis(Character *ch, char *name, int *number)
+{
     Character *i;
     int num;
 
-    if (!number) {
+    if (!number)
+    {
         number = &num;
         num = get_number(&name);
     }
@@ -936,41 +1047,59 @@ Character *get_char_room_vis(Character *ch, char *name, int *number) {
     if (*number == 0)
         return (get_player_vis(ch, name, nullptr, FIND_CHAR_ROOM));
     auto people = ch->location.getPeople();
-    for (auto i : filter_raw(people)) {
-        if (!strcasecmp(name, "last") && LASTHIT(i) != 0 && LASTHIT(i) == GET_IDNUM(ch)) {
+    for (auto i : filter_raw(people))
+    {
+        if (!strcasecmp(name, "last") && LASTHIT(i) != 0 && LASTHIT(i) == GET_IDNUM(ch))
+        {
             if (CAN_SEE(ch, i))
                 if (--(*number) == 0)
                     return (i);
-        } else if (isname(name, i->getName()) && (IS_NPC(i) || IS_NPC(ch) || GET_ADMLEVEL(i) > 0 || GET_ADMLEVEL(ch) > 0) &&
-                   i != ch) {
+        }
+        else if (isname(name, i->getName()) && (IS_NPC(i) || IS_NPC(ch) || GET_ADMLEVEL(i) > 0 || GET_ADMLEVEL(ch) > 0) &&
+                 i != ch)
+        {
             if (CAN_SEE(ch, i))
                 if (--(*number) == 0)
                     return (i);
-        } else if (isname(name, i->getName()) && i == ch) {
+        }
+        else if (isname(name, i->getName()) && i == ch)
+        {
             if (CAN_SEE(ch, i))
                 if (--(*number) == 0)
                     return (i);
-        } else if (!IS_NPC(i) && !IS_NPC(ch) && !strcasecmp(get_i_name(ch, i), CAP(name)) && i != ch) {
+        }
+        else if (!IS_NPC(i) && !IS_NPC(ch) && !strcasecmp(get_i_name(ch, i), CAP(name)) && i != ch)
+        {
             if (CAN_SEE(ch, i))
                 if (--(*number) == 0)
                     return (i);
-        } else if (!IS_NPC(i) && !IS_NPC(ch) && strstr(get_i_name(ch, i), CAP(name)) && i != ch) {
+        }
+        else if (!IS_NPC(i) && !IS_NPC(ch) && strstr(get_i_name(ch, i), CAP(name)) && i != ch)
+        {
             if (CAN_SEE(ch, i))
                 if (--(*number) == 0)
                     return (i);
-        } else if (!IS_NPC(i) && !(strcmp(RACE(i), CAP(name))) && i != ch) {
+        }
+        else if (!IS_NPC(i) && !(strcmp(RACE(i), CAP(name))) && i != ch)
+        {
             if (CAN_SEE(ch, i))
                 if (--(*number) == 0)
                     return (i);
-        } else if (!IS_NPC(i) && strstr(RACE(i), CAP(name)) && i != ch) {
+        }
+        else if (!IS_NPC(i) && strstr(RACE(i), CAP(name)) && i != ch)
+        {
             if (CAN_SEE(ch, i))
                 if (--(*number) == 0)
                     return (i);
-        } else if (!IS_NPC(i) && !(strcmp(RACE(i), name)) && i != ch) {
+        }
+        else if (!IS_NPC(i) && !(strcmp(RACE(i), name)) && i != ch)
+        {
             if (CAN_SEE(ch, i))
                 if (--(*number) == 0)
                     return (i);
-        } else if (!IS_NPC(i) && strstr(RACE(i), name) && i != ch) {
+        }
+        else if (!IS_NPC(i) && strstr(RACE(i), name) && i != ch)
+        {
             if (CAN_SEE(ch, i))
                 if (--(*number) == 0)
                     return (i);
@@ -979,12 +1108,13 @@ Character *get_char_room_vis(Character *ch, char *name, int *number) {
     return (nullptr);
 }
 
-
-Character *get_char_world_vis(Character *ch, char *name, int *number) {
+Character *get_char_world_vis(Character *ch, char *name, int *number)
+{
     Character *i;
     int num;
 
-    if (!number) {
+    if (!number)
+    {
         number = &num;
         num = get_number(&name);
     }
@@ -994,30 +1124,44 @@ Character *get_char_world_vis(Character *ch, char *name, int *number) {
 
     if (*number == 0)
         return get_player_vis(ch, name, nullptr, 0);
-    
+
     auto ac = characterSubscriptions.all("active");
-    for (auto i : filter_raw(ac)) {
+    for (auto i : filter_raw(ac))
+    {
         if (ch->location == i->location)
             continue;
-        if (GET_ADMLEVEL(ch) < 1 && GET_ADMLEVEL(i) < 1 && !IS_NPC(ch) && !IS_NPC(i)) {
-            if (strcasecmp(RACE(i), name) && !strstr(RACE(i), name)) {
-                if (readIntro(ch, i) == 1) {
-                    if (strcasecmp(get_i_name(ch, i), name) && !strstr(get_i_name(ch, i), name)) {
+        if (GET_ADMLEVEL(ch) < 1 && GET_ADMLEVEL(i) < 1 && !IS_NPC(ch) && !IS_NPC(i))
+        {
+            if (strcasecmp(RACE(i), name) && !strstr(RACE(i), name))
+            {
+                if (readIntro(ch, i) == 1)
+                {
+                    if (strcasecmp(get_i_name(ch, i), name) && !strstr(get_i_name(ch, i), name))
+                    {
                         continue;
                     }
-                } else {
+                }
+                else
+                {
                     continue;
                 }
             }
         }
-        if ((GET_ADMLEVEL(ch) >= 1 || GET_ADMLEVEL(i) >= 1 || IS_NPC(ch) || IS_NPC(i))) {
-            if (strcasecmp(i->getName(), name) && !strstr(i->getName(), name)) {
-                if (strcasecmp(RACE(i), name) && !strstr(RACE(i), name)) {
-                    if (!IS_NPC(ch) && !IS_NPC(i) && readIntro(ch, i) == 1) {
-                        if (strcasecmp(get_i_name(ch, i), name) && !strstr(get_i_name(ch, i), name)) {
+        if ((GET_ADMLEVEL(ch) >= 1 || GET_ADMLEVEL(i) >= 1 || IS_NPC(ch) || IS_NPC(i)))
+        {
+            if (strcasecmp(i->getName(), name) && !strstr(i->getName(), name))
+            {
+                if (strcasecmp(RACE(i), name) && !strstr(RACE(i), name))
+                {
+                    if (!IS_NPC(ch) && !IS_NPC(i) && readIntro(ch, i) == 1)
+                    {
+                        if (strcasecmp(get_i_name(ch, i), name) && !strstr(get_i_name(ch, i), name))
+                        {
                             continue;
                         }
-                    } else {
+                    }
+                    else
+                    {
                         continue;
                     }
                 }
@@ -1033,8 +1177,8 @@ Character *get_char_world_vis(Character *ch, char *name, int *number) {
     return (nullptr);
 }
 
-
-Character *get_char_vis(Character *ch, char *name, int *number, int where) {
+Character *get_char_vis(Character *ch, char *name, int *number, int where)
+{
     if (where == FIND_CHAR_ROOM)
         return get_char_room_vis(ch, name, number);
     else if (where == FIND_CHAR_WORLD)
@@ -1043,12 +1187,12 @@ Character *get_char_vis(Character *ch, char *name, int *number, int where) {
         return (nullptr);
 }
 
-
-
-Object *get_obj_in_list_vis(Character *ch, const char *name, int *number, const std::vector<std::weak_ptr<Object>>& list) {
+Object *get_obj_in_list_vis(Character *ch, const char *name, int *number, const std::vector<std::weak_ptr<Object>> &list)
+{
     int num;
 
-    if (!number) {
+    if (!number)
+    {
         number = &num;
         num = get_number(&name);
     }
@@ -1056,7 +1200,8 @@ Object *get_obj_in_list_vis(Character *ch, const char *name, int *number, const 
     if (*number == 0)
         return nullptr;
 
-    for (auto i : filter_raw(list)) {
+    for (auto i : filter_raw(list))
+    {
         if (isname(name, i->getName()))
             if (CAN_SEE_OBJ(ch, i) || (GET_OBJ_TYPE(i) == ITEM_LIGHT))
                 if (--(*number) == 0)
@@ -1066,13 +1211,14 @@ Object *get_obj_in_list_vis(Character *ch, const char *name, int *number, const 
     return nullptr;
 }
 
-
 /* search the entire world for an object, and return a pointer  */
-Object *get_obj_vis(Character *ch, char *name, int *number) {
+Object *get_obj_vis(Character *ch, char *name, int *number)
+{
     Object *i;
     int num;
 
-    if (!number) {
+    if (!number)
+    {
         number = &num;
         num = get_number(&name);
     }
@@ -1090,7 +1236,8 @@ Object *get_obj_vis(Character *ch, char *name, int *number) {
 
     /* ok.. no luck yet. scan the entire obj list   */
     auto ao = objectSubscriptions.all("active");
-    for (auto i : filter_raw(ao)) {
+    for (auto i : filter_raw(ao))
+    {
         if (isname(name, i->getName()))
             if (CAN_SEE_OBJ(ch, i))
                 if (--(*number) == 0)
@@ -1100,11 +1247,12 @@ Object *get_obj_vis(Character *ch, char *name, int *number) {
     return (nullptr);
 }
 
-
-Object *get_obj_in_equip_vis(Character *ch, char *arg, int *number, const std::map<int, Object*>& equipment) {
+Object *get_obj_in_equip_vis(Character *ch, char *arg, int *number, const std::map<int, Object *> &equipment)
+{
     int j, num;
 
-    if (!number) {
+    if (!number)
+    {
         number = &num;
         num = get_number(&arg);
     }
@@ -1112,7 +1260,7 @@ Object *get_obj_in_equip_vis(Character *ch, char *arg, int *number, const std::m
     if (*number == 0)
         return (nullptr);
 
-    for (const auto& [slot, obj] : equipment)
+    for (const auto &[slot, obj] : equipment)
         if (obj && CAN_SEE_OBJ(ch, obj) && isname(arg, obj->getName()))
             if (--(*number) == 0)
                 return obj;
@@ -1120,11 +1268,12 @@ Object *get_obj_in_equip_vis(Character *ch, char *arg, int *number, const std::m
     return nullptr;
 }
 
-
-int get_obj_pos_in_equip_vis(Character *ch, char *arg, int *number, const std::map<int, Object*>& equipment) {
+int get_obj_pos_in_equip_vis(Character *ch, char *arg, int *number, const std::map<int, Object *> &equipment)
+{
     int j, num;
 
-    if (!number) {
+    if (!number)
+    {
         number = &num;
         num = get_number(&arg);
     }
@@ -1132,7 +1281,7 @@ int get_obj_pos_in_equip_vis(Character *ch, char *arg, int *number, const std::m
     if (*number == 0)
         return -1;
 
-    for (const auto& [slot, obj] : equipment)
+    for (const auto &[slot, obj] : equipment)
         if (obj && CAN_SEE_OBJ(ch, obj) && isname(arg, obj->getName()))
             if (--(*number) == 0)
                 return slot;
@@ -1140,31 +1289,33 @@ int get_obj_pos_in_equip_vis(Character *ch, char *arg, int *number, const std::m
     return -1;
 }
 
-
-const char *money_desc(int amount) {
+const char *money_desc(int amount)
+{
     int cnt;
-    struct {
+    struct
+    {
         int limit;
         const char *description;
     } money_table[] = {
-            {1,     "a single zenni"},
-            {10,    "a tiny pile of zenni"},
-            {20,    "a handful of zenni"},
-            {75,    "a little pile of zenni"},
-            {150,   "a small pile of zenni"},
-            {250,   "a pile of zenni"},
-            {500,   "a big pile of zenni"},
-            {1000,  "a large heap of zenni"},
-            {5000,  "a huge mound of zenni"},
-            {10000, "an enormous mound of zenni"},
-            {15000, "a small mountain of zenni"},
-            {20000, "a mountain of zenni"},
-            {25000, "a huge mountain of zenni"},
-            {50000, "an enormous mountain of zenni"},
-            {0,     nullptr},
+        {1, "a single zenni"},
+        {10, "a tiny pile of zenni"},
+        {20, "a handful of zenni"},
+        {75, "a little pile of zenni"},
+        {150, "a small pile of zenni"},
+        {250, "a pile of zenni"},
+        {500, "a big pile of zenni"},
+        {1000, "a large heap of zenni"},
+        {5000, "a huge mound of zenni"},
+        {10000, "an enormous mound of zenni"},
+        {15000, "a small mountain of zenni"},
+        {20000, "a mountain of zenni"},
+        {25000, "a huge mountain of zenni"},
+        {50000, "an enormous mountain of zenni"},
+        {0, nullptr},
     };
 
-    if (amount <= 0) {
+    if (amount <= 0)
+    {
         basic_mud_log("SYSERR: Try to create negative or 0 money (%d).", amount);
         return (nullptr);
     }
@@ -1176,12 +1327,13 @@ const char *money_desc(int amount) {
     return ("an absolutely colossal mountain of zenni");
 }
 
-
-Object *create_money(int amount) {
+Object *create_money(int amount)
+{
     char buf[200];
     int y;
 
-    if (amount <= 0) {
+    if (amount <= 0)
+    {
         basic_mud_log("SYSERR: Try to create negative or 0 money. (%d)", amount);
         return (nullptr);
     }
@@ -1190,11 +1342,14 @@ Object *create_money(int amount) {
     ex.keyword = "zenni money";
 
     obj->strings["name"] = "zenni money";
-    if (amount == 1) {
+    if (amount == 1)
+    {
         obj->strings["short_description"] = "a single zenni";
         obj->strings["room_description"] = "One miserable zenni is lying here";
         ex.description = "It's just one miserable little zenni.";
-    } else {
+    }
+    else
+    {
         obj->strings["short_description"] = money_desc(amount);
         snprintf(buf, sizeof(buf), "%s is lying here", money_desc(amount));
         obj->strings["room_description"] = CAP(buf);
@@ -1209,7 +1364,7 @@ Object *create_money(int amount) {
             snprintf(buf, sizeof(buf), "You guess there is, maybe, %d zenni.",
                      1000 * ((amount / 1000) + rand_number(0, (amount / 1000))));
         else
-            strcpy(buf, "There are is LOT of zenni.");    /* strcpy: OK (is < 200) */
+            strcpy(buf, "There are is LOT of zenni."); /* strcpy: OK (is < 200) */
         ex.description = buf;
     }
 
@@ -1223,7 +1378,6 @@ Object *create_money(int amount) {
 
     return (obj);
 }
-
 
 /* Generic Find, designed to find any object/character
  *
@@ -1242,7 +1396,8 @@ Object *create_money(int amount) {
  * describes what it filled in.
  */
 int generic_find(const char *arg, bitvector_t bitvector, Character *ch,
-                 Character **tar_ch, Object **tar_obj) {
+                 Character **tar_ch, Object **tar_obj)
+{
     int i, found, number;
     char name_val[MAX_INPUT_LENGTH];
     char *name = name_val;
@@ -1257,19 +1412,23 @@ int generic_find(const char *arg, bitvector_t bitvector, Character *ch,
     if (!(number = get_number(&name)))
         return (0);
 
-    if (IS_SET(bitvector, FIND_CHAR_ROOM)) {    /* Find person in room */
+    if (IS_SET(bitvector, FIND_CHAR_ROOM))
+    { /* Find person in room */
         if ((*tar_ch = get_char_room_vis(ch, name, &number)))
             return (FIND_CHAR_ROOM);
     }
 
-    if (IS_SET(bitvector, FIND_CHAR_WORLD)) {
+    if (IS_SET(bitvector, FIND_CHAR_WORLD))
+    {
         if ((*tar_ch = get_char_world_vis(ch, name, &number)))
             return (FIND_CHAR_WORLD);
     }
 
-    if (IS_SET(bitvector, FIND_OBJ_EQUIP)) {
+    if (IS_SET(bitvector, FIND_OBJ_EQUIP))
+    {
         for (found = false, i = 0; i < NUM_WEARS && !found; i++)
-            if (GET_EQ(ch, i) && isname(name, GET_EQ(ch, i)->getName()) && --number == 0) {
+            if (GET_EQ(ch, i) && isname(name, GET_EQ(ch, i)->getName()) && --number == 0)
+            {
                 *tar_obj = GET_EQ(ch, i);
                 found = true;
             }
@@ -1277,17 +1436,20 @@ int generic_find(const char *arg, bitvector_t bitvector, Character *ch,
             return (FIND_OBJ_EQUIP);
     }
 
-    if (IS_SET(bitvector, FIND_OBJ_INV)) {
+    if (IS_SET(bitvector, FIND_OBJ_INV))
+    {
         if ((*tar_obj = get_obj_in_list_vis(ch, name, &number, ch->getInventory())))
             return (FIND_OBJ_INV);
     }
 
-    if (IS_SET(bitvector, FIND_OBJ_ROOM)) {
+    if (IS_SET(bitvector, FIND_OBJ_ROOM))
+    {
         if ((*tar_obj = get_obj_in_list_vis(ch, name, &number, ch->location.getObjects())))
             return (FIND_OBJ_ROOM);
     }
 
-    if (IS_SET(bitvector, FIND_OBJ_WORLD)) {
+    if (IS_SET(bitvector, FIND_OBJ_WORLD))
+    {
         if ((*tar_obj = get_obj_vis(ch, name, &number)))
             return (FIND_OBJ_WORLD);
     }
@@ -1295,24 +1457,28 @@ int generic_find(const char *arg, bitvector_t bitvector, Character *ch,
     return (0);
 }
 
-
 /* a function to scan for "all" or "all.x" */
-int find_all_dots(char *arg) {
+int find_all_dots(char *arg)
+{
     if (!strcmp(arg, "all"))
         return (FIND_ALL);
-    else if (!strncmp(arg, "all.", 4)) {
-        strcpy(arg, arg + 4);    /* strcpy: OK (always less) */
+    else if (!strncmp(arg, "all.", 4))
+    {
+        strcpy(arg, arg + 4); /* strcpy: OK (always less) */
         return (FIND_ALLDOT);
-    } else
+    }
+    else
         return (FIND_INDIV);
 }
 
-void affectv_to_char(Character *ch, struct affected_type *af) {
+void affectv_to_char(Character *ch, struct affected_type *af)
+{
     struct affected_type *affected_alloc;
 
     CREATE(affected_alloc, struct affected_type, 1);
 
-    if (!ch->affectedv) {
+    if (!ch->affectedv)
+    {
         ch->next_affectv = affectv_list;
         affectv_list = ch;
     }
@@ -1324,10 +1490,12 @@ void affectv_to_char(Character *ch, struct affected_type *af) {
     affect_total(ch);
 }
 
-void affectv_remove(Character *ch, struct affected_type *af) {
+void affectv_remove(Character *ch, struct affected_type *af)
+{
     struct affected_type *cmtemp;
 
-    if (ch->affectedv == nullptr) {
+    if (ch->affectedv == nullptr)
+    {
         core_dump();
         return;
     }
@@ -1336,20 +1504,24 @@ void affectv_remove(Character *ch, struct affected_type *af) {
     REMOVE_FROM_LIST(af, ch->affectedv, next, cmtemp);
     free(af);
     affect_total(ch);
-    if (!ch->affectedv) {
+    if (!ch->affectedv)
+    {
         characterSubscriptions.unsubscribe("affectedv", ch);
     }
 }
 
 void affectv_join(Character *ch, struct affected_type *af,
-                  bool add_dur, bool avg_dur, bool add_mod, bool avg_mod) {
+                  bool add_dur, bool avg_dur, bool add_mod, bool avg_mod)
+{
     struct affected_type *hjp, *next;
     bool found = false;
 
-    for (hjp = ch->affectedv; !found && hjp; hjp = next) {
+    for (hjp = ch->affectedv; !found && hjp; hjp = next)
+    {
         next = hjp->next;
 
-        if ((hjp->type == af->type) && (hjp->location == af->location)) {
+        if ((hjp->type == af->type) && (hjp->location == af->location))
+        {
             if (add_dur)
                 af->duration += hjp->duration;
             if (avg_dur)
@@ -1370,20 +1542,22 @@ void affectv_join(Character *ch, struct affected_type *af,
     characterSubscriptions.subscribe("affectedv", ch);
 }
 
-int is_better(Object *object, Object *object2) {
+int is_better(Object *object, Object *object2)
+{
     int value1 = 0, value2 = 0;
 
-    switch (GET_OBJ_TYPE(object)) {
-        case ITEM_ARMOR:
-            value1 = GET_OBJ_VAL(object, VAL_ARMOR_APPLYAC);
-            value2 = GET_OBJ_VAL(object2, VAL_ARMOR_APPLYAC);
-            break;
-        case ITEM_WEAPON:
-            value1 = (1 + GET_OBJ_VAL(object, VAL_WEAPON_DAMSIZE)) * GET_OBJ_VAL(object, VAL_WEAPON_DAMDICE);
-            value2 = (1 + GET_OBJ_VAL(object2, VAL_WEAPON_DAMSIZE)) * GET_OBJ_VAL(object2, VAL_WEAPON_DAMDICE);
-            break;
-        default:
-            break;
+    switch (GET_OBJ_TYPE(object))
+    {
+    case ITEM_ARMOR:
+        value1 = GET_OBJ_VAL(object, VAL_ARMOR_APPLYAC);
+        value2 = GET_OBJ_VAL(object2, VAL_ARMOR_APPLYAC);
+        break;
+    case ITEM_WEAPON:
+        value1 = (1 + GET_OBJ_VAL(object, VAL_WEAPON_DAMSIZE)) * GET_OBJ_VAL(object, VAL_WEAPON_DAMDICE);
+        value2 = (1 + GET_OBJ_VAL(object2, VAL_WEAPON_DAMSIZE)) * GET_OBJ_VAL(object2, VAL_WEAPON_DAMDICE);
+        break;
+    default:
+        break;
     }
 
     if (value1 > value2)
@@ -1393,39 +1567,50 @@ int is_better(Object *object, Object *object2) {
 }
 
 /* check and see if this item is better */
-void item_check(Object *object, Character *ch) {
+void item_check(Object *object, Character *ch)
+{
     int where = 0;
 
-    if (IS_HUMANOID(ch) && !(mob_index.at(GET_MOB_RNUM(ch)).func == shop_keeper)) {
+    if (IS_HUMANOID(ch) && !(mob_index.at(GET_MOB_RNUM(ch)).func == shop_keeper))
+    {
         if (invalid_align(ch, object) || invalid_class(ch, object))
             return;
 
-        switch (GET_OBJ_TYPE(object)) {
-            case ITEM_WEAPON:
-                if (!GET_EQ(ch, WEAR_WIELD1)) {
+        switch (GET_OBJ_TYPE(object))
+        {
+        case ITEM_WEAPON:
+            if (!GET_EQ(ch, WEAR_WIELD1))
+            {
+                perform_wear(ch, object, WEAR_WIELD1);
+            }
+            else
+            {
+                if (is_better(object, GET_EQ(ch, WEAR_WIELD1)))
+                {
+                    perform_remove(ch, WEAR_WIELD1);
                     perform_wear(ch, object, WEAR_WIELD1);
-                } else {
-                    if (is_better(object, GET_EQ(ch, WEAR_WIELD1))) {
-                        perform_remove(ch, WEAR_WIELD1);
-                        perform_wear(ch, object, WEAR_WIELD1);
-                    }
                 }
-                break;
-            case ITEM_ARMOR:
-            case ITEM_WORN:
-                where = find_eq_pos(ch, object, nullptr);
-                if (!GET_EQ(ch, where)) {
+            }
+            break;
+        case ITEM_ARMOR:
+        case ITEM_WORN:
+            where = find_eq_pos(ch, object, nullptr);
+            if (!GET_EQ(ch, where))
+            {
+                perform_wear(ch, object, where);
+            }
+            else
+            {
+                if (is_better(object, GET_EQ(ch, where)))
+                {
+                    perform_remove(ch, where);
                     perform_wear(ch, object, where);
-                } else {
-                    if (is_better(object, GET_EQ(ch, where))) {
-                        perform_remove(ch, where);
-                        perform_wear(ch, object, where);
-                    }
                 }
+            }
 
-                break;
-            default:
-                break;
+            break;
+        default:
+            break;
         }
     }
 }

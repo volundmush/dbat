@@ -1,12 +1,12 @@
 /*************************************************************************
-*   File: fight.c                                       Part of CircleMUD *
-*  Usage: Combat system                                                   *
-*                                                                         *
-*  All rights reserved.  See license.doc for complete information.        *
-*                                                                         *
-*  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
-*  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
-************************************************************************ */
+ *   File: fight.c                                       Part of CircleMUD *
+ *  Usage: Combat system                                                   *
+ *                                                                         *
+ *  All rights reserved.  See license.doc for complete information.        *
+ *                                                                         *
+ *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
+ *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
+ ************************************************************************ */
 
 #include "dbat/fight.h"
 #include "dbat/dg_comm.h"
@@ -28,7 +28,6 @@
 #include "dbat/transformation.h"
 
 /* Structures */
-
 
 /* local functions */
 static void perform_group_gain(Character *ch, int base, Character *victim);
@@ -53,91 +52,157 @@ static void mob_attack(Character *ch, char *buf);
 
 static int pick_n_throw(Character *ch, char *buf);
 
-
-int group_bonus(Character *ch, int type) {
+int group_bonus(Character *ch, int type)
+{
     struct follow_type *k, *next;
 
     if (!AFF_FLAGGED(ch, AFF_GROUP))
         return (false);
 
-    if (ch->followers) {
-        for (k = ch->followers; k; k = next) {
+    if (ch->followers)
+    {
+        for (k = ch->followers; k; k = next)
+        {
             next = k->next;
-            if (!AFF_FLAGGED(k->follower, AFF_GROUP)) {
+            if (!AFF_FLAGGED(k->follower, AFF_GROUP))
+            {
                 continue;
-            } else {
-                if (type == 0) {
+            }
+            else
+            {
+                if (type == 0)
+                {
                     k->follower->modCurVitalDam(CharVital::lifeforce, -.25);
-                                        k->follower->sendText("@CIncensed by the death of your comrade your life force swells!@n");
+                    k->follower->sendText("@CIncensed by the death of your comrade your life force swells!@n");
                     return (true);
-                } else if (type == 1) {
+                }
+                else if (type == 1)
+                {
                     k->follower->modCurVitalDam(CharVital::lifeforce, -.4);
-                                        k->follower->sendText("@CIncensed by the death of your comrade your life force swells!@n");
+                    k->follower->sendText("@CIncensed by the death of your comrade your life force swells!@n");
                     return (true);
-                } else if (type == 2) {
-                    if (IS_ROSHI(ch)) {
+                }
+                else if (type == 2)
+                {
+                    if (IS_ROSHI(ch))
+                    {
                         return (2);
-                    } else if (IS_KRANE(ch)) {
+                    }
+                    else if (IS_KRANE(ch))
+                    {
                         return (3);
-                    } else if (IS_BARDOCK(ch)) {
+                    }
+                    else if (IS_BARDOCK(ch))
+                    {
                         return (4);
-                    } else if (IS_NAIL(ch)) {
+                    }
+                    else if (IS_NAIL(ch))
+                    {
                         return (5);
-                    } else if (IS_KABITO(ch)) {
+                    }
+                    else if (IS_KABITO(ch))
+                    {
                         return (6);
-                    } else if (IS_ANDSIX(ch)) {
+                    }
+                    else if (IS_ANDSIX(ch))
+                    {
                         return (7);
-                    } else if (IS_TAPION(ch)) {
+                    }
+                    else if (IS_TAPION(ch))
+                    {
                         return (8);
-                    } else if (IS_FRIEZA(ch)) {
+                    }
+                    else if (IS_FRIEZA(ch))
+                    {
                         return (9);
-                    } else if (IS_TSUNA(ch)) {
+                    }
+                    else if (IS_TSUNA(ch))
+                    {
                         return (10);
-                    } else if (IS_PICCOLO(ch)) {
+                    }
+                    else if (IS_PICCOLO(ch))
+                    {
                         return (11);
-                    } else if (IS_KURZAK(ch)) {
+                    }
+                    else if (IS_KURZAK(ch))
+                    {
                         return (12);
-                    } else if (IS_JINTO(ch)) {
+                    }
+                    else if (IS_JINTO(ch))
+                    {
                         return (13);
-                    } else if (IS_DABURA(ch)) {
+                    }
+                    else if (IS_DABURA(ch))
+                    {
                         return (14);
                     }
                 }
                 return (false);
             }
         }
-    } else if (ch->master) {
+    }
+    else if (ch->master)
+    {
         if (!AFF_FLAGGED(ch->master, AFF_GROUP))
             return (false);
-        else {
-            if (type == 0) {
+        else
+        {
+            if (type == 0)
+            {
                 group_bonus(ch->master, 0);
-            } else if (type == 2) {
-                if (IS_ROSHI(ch->master)) {
+            }
+            else if (type == 2)
+            {
+                if (IS_ROSHI(ch->master))
+                {
                     return (2);
-                } else if (IS_KRANE(ch->master)) {
+                }
+                else if (IS_KRANE(ch->master))
+                {
                     return (3);
-                } else if (IS_BARDOCK(ch->master)) {
+                }
+                else if (IS_BARDOCK(ch->master))
+                {
                     return (4);
-                } else if (IS_NAIL(ch->master)) {
+                }
+                else if (IS_NAIL(ch->master))
+                {
                     return (5);
-                } else if (IS_KABITO(ch->master)) {
+                }
+                else if (IS_KABITO(ch->master))
+                {
                     return (6);
-                } else if (IS_ANDSIX(ch->master)) {
+                }
+                else if (IS_ANDSIX(ch->master))
+                {
                     return (7);
-                } else if (IS_TAPION(ch->master)) {
+                }
+                else if (IS_TAPION(ch->master))
+                {
                     return (8);
-                } else if (IS_FRIEZA(ch->master)) {
+                }
+                else if (IS_FRIEZA(ch->master))
+                {
                     return (9);
-                } else if (IS_TSUNA(ch->master)) {
+                }
+                else if (IS_TSUNA(ch->master))
+                {
                     return (10);
-                } else if (IS_PICCOLO(ch->master)) {
+                }
+                else if (IS_PICCOLO(ch->master))
+                {
                     return (11);
-                } else if (IS_KURZAK(ch->master)) {
+                }
+                else if (IS_KURZAK(ch->master))
+                {
                     return (12);
-                } else if (IS_JINTO(ch->master)) {
+                }
+                else if (IS_JINTO(ch->master))
+                {
                     return (13);
-                } else if (IS_DABURA(ch->master)) {
+                }
+                else if (IS_DABURA(ch->master))
+                {
                     return (14);
                 }
             }
@@ -147,45 +212,58 @@ int group_bonus(Character *ch, int type) {
     return (false);
 }
 
-void mutant_limb_regen(Character *ch) {
-    if (GET_LIMBCOND(ch, 0) > 0 && GET_LIMBCOND(ch, 0) < 50) {
+void mutant_limb_regen(Character *ch)
+{
+    if (GET_LIMBCOND(ch, 0) > 0 && GET_LIMBCOND(ch, 0) < 50)
+    {
         act("The bones in your right arm have mended them selves.", true, ch, nullptr, nullptr, TO_CHAR);
         act("$n starts moving $s right arm gingerly for a moment.", true, ch, nullptr, nullptr, TO_ROOM);
         GET_LIMBCOND(ch, 0) = 100;
-    } else if (GET_LIMBCOND(ch, 0) <= 0) {
+    }
+    else if (GET_LIMBCOND(ch, 0) <= 0)
+    {
         act("Your right arm begins to grow back very quickly. Within moments it is whole again!", true, ch, nullptr,
             nullptr, TO_CHAR);
         act("$n's right arm starts to regrow! Within moments the arm is whole again!.", true, ch, nullptr, nullptr,
             TO_ROOM);
         GET_LIMBCOND(ch, 0) = 100;
     }
-    if (GET_LIMBCOND(ch, 1) > 0 && GET_LIMBCOND(ch, 1) < 50) {
+    if (GET_LIMBCOND(ch, 1) > 0 && GET_LIMBCOND(ch, 1) < 50)
+    {
         act("The bones in your left arm have mended them selves.", true, ch, nullptr, nullptr, TO_CHAR);
         act("$n starts moving $s left arm gingerly for a moment.", true, ch, nullptr, nullptr, TO_ROOM);
         GET_LIMBCOND(ch, 1) = 100;
-    } else if (GET_LIMBCOND(ch, 1) <= 0) {
+    }
+    else if (GET_LIMBCOND(ch, 1) <= 0)
+    {
         act("Your right arm begins to grow back very quickly. Within moments it is whole again!", true, ch, nullptr,
             nullptr, TO_CHAR);
         act("$n's right arm starts to regrow! Within moments the arm is whole again!.", true, ch, nullptr, nullptr,
             TO_ROOM);
         GET_LIMBCOND(ch, 1) = 100;
     }
-    if (GET_LIMBCOND(ch, 2) > 0 && GET_LIMBCOND(ch, 2) < 50) {
+    if (GET_LIMBCOND(ch, 2) > 0 && GET_LIMBCOND(ch, 2) < 50)
+    {
         act("The bones in your right leg have mended them selves.", true, ch, nullptr, nullptr, TO_CHAR);
         act("$n starts moving $s right leg gingerly for a moment.", true, ch, nullptr, nullptr, TO_ROOM);
         GET_LIMBCOND(ch, 2) = 100;
-    } else if (GET_LIMBCOND(ch, 2) <= 0) {
+    }
+    else if (GET_LIMBCOND(ch, 2) <= 0)
+    {
         act("Your right arm begins to grow back very quickly. Within moments it is whole again!", true, ch, nullptr,
             nullptr, TO_CHAR);
         act("$n's right arm starts to regrow! Within moments the arm is whole again!.", true, ch, nullptr, nullptr,
             TO_ROOM);
         GET_LIMBCOND(ch, 2) = 100;
     }
-    if (GET_LIMBCOND(ch, 3) > 0 && GET_LIMBCOND(ch, 3) < 50) {
+    if (GET_LIMBCOND(ch, 3) > 0 && GET_LIMBCOND(ch, 3) < 50)
+    {
         act("The bones in your left leg have mended them selves.", true, ch, nullptr, nullptr, TO_CHAR);
         act("$n starts moving $s left leg gingerly for a moment.", true, ch, nullptr, nullptr, TO_ROOM);
         GET_LIMBCOND(ch, 3) = 100;
-    } else if (GET_LIMBCOND(ch, 3) <= 0) {
+    }
+    else if (GET_LIMBCOND(ch, 3) <= 0)
+    {
         act("Your right arm begins to grow back very quickly. Within moments it is whole again!", true, ch, nullptr,
             nullptr, TO_CHAR);
         act("$n's right arm starts to regrow! Within moments the arm is whole again!.", true, ch, nullptr, nullptr,
@@ -194,14 +272,19 @@ void mutant_limb_regen(Character *ch) {
     }
 }
 
-static int pick_n_throw(Character *ch, char *buf) {
+static int pick_n_throw(Character *ch, char *buf)
+{
     char buf2[MAX_INPUT_LENGTH], buf3[MAX_INPUT_LENGTH];
 
-    if (rand_number(1, 20) < 18) {
+    if (rand_number(1, 20) < 18)
+    {
         return (false);
     }
 
-    if (auto cont = ch->location.searchObjects([ch](const auto& o) { return ch->canCarryWeight(o);}); cont) {
+    if (auto cont = ch->location.searchObjects([ch](const auto &o)
+                                               { return ch->canCarryWeight(o); });
+        cont)
+    {
         snprintf(buf2, sizeof(buf2), "%s", cont->getName());
         do_get(ch, buf2, 0, 0);
         snprintf(buf3, sizeof(buf3), "%s %s", buf2, buf);
@@ -212,7 +295,8 @@ static int pick_n_throw(Character *ch, char *buf) {
     return (false);
 }
 
-static void mob_attack(Character *ch, char *buf) {
+static void mob_attack(Character *ch, char *buf)
+{
 
     int power = rand_number(1, 5);
     int bonus = GET_LEVEL(ch) * 0.1;
@@ -232,408 +316,480 @@ static void mob_attack(Character *ch, char *buf) {
 
     int dragonpass = true;
 
-    if (IS_DRAGON(ch)) {
+    if (IS_DRAGON(ch))
+    {
         if (GET_MOB_VNUM(ch) == 81 || GET_MOB_VNUM(ch) == 82 || GET_MOB_VNUM(ch) == 83 || GET_MOB_VNUM(ch) == 84 ||
-            GET_MOB_VNUM(ch) == 85 || GET_MOB_VNUM(ch) == 86 || GET_MOB_VNUM(ch) == 87) {
+            GET_MOB_VNUM(ch) == 85 || GET_MOB_VNUM(ch) == 86 || GET_MOB_VNUM(ch) == 87)
+        {
             dragonpass = true;
             special = rand_number(40, 100);
-        } else {
+        }
+        else
+        {
             dragonpass = false;
         }
     }
 
     if (axion_dice(-10) > 90 && ch->getCurVitalMeterPercent(CharVital::health) <= .5 && !ch->character_flags.get(CharacterFlag::powering_up) &&
         GET_MOB_VNUM(ch) != 25 &&
-        !(IS_ANDROID(ch) || IS_ANIMAL(ch) || ch->sensei == Sensei::commoner)) {
+        !(IS_ANDROID(ch) || IS_ANIMAL(ch) || ch->sensei == Sensei::commoner))
+    {
         do_powerup(ch, nullptr, 0, 0);
         return;
     }
 
-    if ((ch->getCurVital(CharVital::ki)) >= GET_MAX_MANA(ch) * 0.05 && IS_HUMANOID(ch) && (!IS_DRAGON(ch) || dragonpass == true)) {
-        if (ch->getBaseStat<int>("mobcharge") <= 0 && rand_number(1, 10) >= 8) {
+    if ((ch->getCurVital(CharVital::ki)) >= GET_MAX_MANA(ch) * 0.05 && IS_HUMANOID(ch) && (!IS_DRAGON(ch) || dragonpass == true))
+    {
+        if (ch->getBaseStat<int>("mobcharge") <= 0 && rand_number(1, 10) >= 8)
+        {
             act("@wAn aura flares up around @R$n@w!@n", true, ch, nullptr, nullptr, TO_ROOM);
             ch->modBaseStat<int>("mobcharge", 1);
-            if (GET_LEVEL(ch) > 80) {
+            if (GET_LEVEL(ch) > 80)
+            {
                 ch->modBaseStat<int>("mobcharge", 1);
             }
-        } else if (ch->getBaseStat<int>("mobcharge") <= 5) {
+        }
+        else if (ch->getBaseStat<int>("mobcharge") <= 5)
+        {
             act("@wThe aura burns brighter around @R$n@w!@n", true, ch, nullptr, nullptr, TO_ROOM);
             ch->modBaseStat<int>("mobcharge", 1);
-            if (GET_LEVEL(ch) > 80) {
+            if (GET_LEVEL(ch) > 80)
+            {
                 ch->modBaseStat<int>("mobcharge", 1);
             }
-        } else if (ch->getBaseStat<int>("mobcharge") == 6) {
+        }
+        else if (ch->getBaseStat<int>("mobcharge") == 6)
+        {
             act("@wThe aura around @R$n@w flashes!@n", true, ch, nullptr, nullptr, TO_ROOM);
             ch->modBaseStat<int>("mobcharge", 1);
             special = 100;
         }
     }
 
-    if (IS_HUMANOID(ch) && dragonpass == true) { /* Is a humanoid mob */
-        if (AFF_FLAGGED(ch, AFF_PARALYZE)) {
+    if (IS_HUMANOID(ch) && dragonpass == true)
+    { /* Is a humanoid mob */
+        if (AFF_FLAGGED(ch, AFF_PARALYZE))
+        {
             return;
-        } else if (AFF_FLAGGED(ch, AFF_ENSNARED)) {
+        }
+        else if (AFF_FLAGGED(ch, AFF_ENSNARED))
+        {
             return;
-        } else if (special < 100) { /* Normal physical attack */
+        }
+        else if (special < 100)
+        { /* Normal physical attack */
             if (IS_ANDROID(ch) && ch->subrace == SubRace::android_model_repair && GET_HIT(ch) <= (ch->getEffectiveStat<int64_t>("health")) * 0.5 &&
-                       rand_number(1, 20) >= 16) {
+                rand_number(1, 20) >= 16)
+            {
                 do_srepair(ch, nullptr, 0, 0);
-            } else if (IS_ANDROID(ch) && ch->subrace == SubRace::android_model_absorb && rand_number(1, 20) >= 19) {
+            }
+            else if (IS_ANDROID(ch) && ch->subrace == SubRace::android_model_absorb && rand_number(1, 20) >= 19)
+            {
                 do_absorb(ch, buf2, 0, 0);
-            } else if ((IS_BIO(ch) || IS_MAJIN(ch)) && GET_HIT(ch) <= (ch->getEffectiveStat<int64_t>("health")) * 0.5 &&
-                       rand_number(1, 20) >= 17) {
+            }
+            else if ((IS_BIO(ch) || IS_MAJIN(ch)) && GET_HIT(ch) <= (ch->getEffectiveStat<int64_t>("health")) * 0.5 &&
+                     rand_number(1, 20) >= 17)
+            {
                 do_regenerate(ch, "25", 0, 0);
-            } else if (IS_NAMEK(ch) && GET_HIT(ch) <= (ch->getEffectiveStat<int64_t>("health")) * 0.5 && rand_number(1, 20) == 20) {
+            }
+            else if (IS_NAMEK(ch) && GET_HIT(ch) <= (ch->getEffectiveStat<int64_t>("health")) * 0.5 && rand_number(1, 20) == 20)
+            {
                 do_regenerate(ch, "25", 0, 0);
-            } else if (pick_n_throw(ch, buf)) {
+            }
+            else if (pick_n_throw(ch, buf))
+            {
                 /* This determines if they throw and also handles it */
-            } else if (MOB_FLAGGED(ch, MOB_KNOWKAIO) && rand_number(1, 50) >= 46) {
-                if (rand_number(1, 10) == 10) {
+            }
+            else if (MOB_FLAGGED(ch, MOB_KNOWKAIO) && rand_number(1, 50) >= 46)
+            {
+                if (rand_number(1, 10) == 10)
+                {
                     ch->addTransform(Form::kaioken);
                     ch->technique = Form::kaioken;
                     ch->transforms[Form::kaioken].grade = 5;
-                } else if (rand_number(1, 10) >= 8) {
+                }
+                else if (rand_number(1, 10) >= 8)
+                {
                     ch->addTransform(Form::kaioken);
                     ch->technique = Form::kaioken;
                     ch->transforms[Form::kaioken].grade = 10;
-                } else {
+                }
+                else
+                {
                     ch->addTransform(Form::kaioken);
                     ch->technique = Form::kaioken;
                     ch->transforms[Form::kaioken].grade = 20;
                 }
-            } else {
-                switch (power) {
-                    case 1:
-                    case 2:
-                    case 3:
-                    case 4:
-                    case 5:
-                        if (GET_EQ(ch, WEAR_WIELD1))
-                            do_attack(ch, buf, 0, 0);
-                        else if (rand_number(1, 5) == 5)
-                            do_kick(ch, buf, 0, 0);
-                        else if (rand_number(1, 10) == 10)
-                            do_elbow(ch, buf, 0, 0);
-                        else
-                            do_punch(ch, buf, 0, 0);
-                        break;
-                    case 6:
-                    case 7:
-                    case 8:
-                        if (GET_EQ(ch, WEAR_WIELD1))
-                            do_attack(ch, buf, 0, 0);
-                        else if (rand_number(1, 5) == 5)
-                            do_punch(ch, buf, 0, 0);
-                        else if (rand_number(1, 10) == 10)
-                            do_knee(ch, buf, 0, 0);
-                        else
-                            do_kick(ch, buf, 0, 0);
-                        break;
-                    case 9:
-                    case 10:
-                        if (rand_number(1, 5) == 5)
-                            do_knee(ch, buf, 0, 0);
-                        else if (rand_number(1, 10) == 10)
-                            do_uppercut(ch, buf, 0, 0);
-                        else
-                            do_elbow(ch, buf, 0, 0);
-                        break;
-                    case 11:
-                    case 12:
-                        if (rand_number(1, 5) == 5)
-                            do_elbow(ch, buf, 0, 0);
-                        else if (rand_number(1, 10) == 10)
-                            do_roundhouse(ch, buf, 0, 0);
-                        else if (rand_number(1, 8) == 8)
-                            do_trip(ch, buf, 0, 0);
-                        else
-                            do_knee(ch, buf, 0, 0);
-                        break;
-                    case 13:
-                    case 14:
-                        if ((IS_BARDOCK(ch) || IS_KURZAK(ch)) && rand_number(1, 2) == 2)
-                            do_head(ch, buf, 0, 0);
-                        else if ((IS_ICER(ch) || IS_BIO(ch)) && rand_number(1, 2) == 2)
-                            do_tailwhip(ch, buf, 0, 0);
-                        else if (rand_number(1, 8) == 8)
-                            do_trip(ch, buf, 0, 0);
-                        else
-                            do_uppercut(ch, buf, 0, 0);
-                        break;
-                    case 15:
-                    case 16:
-                        if ((IS_BARDOCK(ch) || IS_KURZAK(ch)) && rand_number(1, 2) == 2)
-                            do_head(ch, buf, 0, 0);
-                        else if ((IS_ICER(ch) || IS_BIO(ch)) && rand_number(1, 2) == 2)
-                            do_tailwhip(ch, buf, 0, 0);
-                        else if (rand_number(1, 8) >= 7)
-                            do_trip(ch, buf, 0, 0);
-                        else
-                            do_roundhouse(ch, buf, 0, 0);
-                        break;
-                    case 17:
-                    case 18:
-                        do_slam(ch, buf, 0, 0);
-                        break;
-                    case 19:
-                    case 20:
-                        do_heeldrop(ch, buf, 0, 0);
-                        break;
-                }
             }
-        } else {
-            mob_specials_used += 1;
-            switch (power) {
+            else
+            {
+                switch (power)
+                {
                 case 1:
                 case 2:
                 case 3:
                 case 4:
-                    if (special > 80)
-                        do_zanzoken(ch, buf, 0, 0);
-                    if (ch->getBaseStat<int>("mobcharge") == 7) {
-                        ch->setBaseStat<int>("mobcharge", 0);
-                        do_kiball(ch, buf, 0, 0);
-                    }
-                    break;
                 case 5:
+                    if (GET_EQ(ch, WEAR_WIELD1))
+                        do_attack(ch, buf, 0, 0);
+                    else if (rand_number(1, 5) == 5)
+                        do_kick(ch, buf, 0, 0);
+                    else if (rand_number(1, 10) == 10)
+                        do_elbow(ch, buf, 0, 0);
+                    else
+                        do_punch(ch, buf, 0, 0);
+                    break;
                 case 6:
                 case 7:
                 case 8:
-                    if (special > 80)
-                        do_zanzoken(ch, buf, 0, 0);
-                    if (ch->getBaseStat<int>("mobcharge") == 7) {
-                        ch->setBaseStat<int>("mobcharge", 0);
-                        do_kiblast(ch, buf, 0, 0);
-                    }
+                    if (GET_EQ(ch, WEAR_WIELD1))
+                        do_attack(ch, buf, 0, 0);
+                    else if (rand_number(1, 5) == 5)
+                        do_punch(ch, buf, 0, 0);
+                    else if (rand_number(1, 10) == 10)
+                        do_knee(ch, buf, 0, 0);
+                    else
+                        do_kick(ch, buf, 0, 0);
                     break;
                 case 9:
                 case 10:
-                case 11:
-                    if (special > 80)
-                        do_zanzoken(ch, buf, 0, 0);
-                    if (IS_DRAGON(ch) && rand_number(1, 4) == 4) {
-                        do_breath(ch, buf, 0, 0);
-                    } else {
-                        if (ch->getBaseStat<int>("mobcharge") == 7) {
-                            ch->setBaseStat<int>("mobcharge", 0);
-                            do_beam(ch, buf, 0, 0);
-                        }
-                    }
+                    if (rand_number(1, 5) == 5)
+                        do_knee(ch, buf, 0, 0);
+                    else if (rand_number(1, 10) == 10)
+                        do_uppercut(ch, buf, 0, 0);
+                    else
+                        do_elbow(ch, buf, 0, 0);
                     break;
+                case 11:
                 case 12:
+                    if (rand_number(1, 5) == 5)
+                        do_elbow(ch, buf, 0, 0);
+                    else if (rand_number(1, 10) == 10)
+                        do_roundhouse(ch, buf, 0, 0);
+                    else if (rand_number(1, 8) == 8)
+                        do_trip(ch, buf, 0, 0);
+                    else
+                        do_knee(ch, buf, 0, 0);
+                    break;
                 case 13:
                 case 14:
-                    if (special > 80)
-                        do_zanzoken(ch, buf, 0, 0);
-                    if (IS_DRAGON(ch) && rand_number(1, 4) == 4) {
-                        do_breath(ch, buf, 0, 0);
-                    } else {
-                        if (ch->getBaseStat<int>("mobcharge") == 7) {
-                            ch->setBaseStat<int>("mobcharge", 0);
-                            do_renzo(ch, buf, 0, 0);
-                        }
-                    }
+                    if ((IS_BARDOCK(ch) || IS_KURZAK(ch)) && rand_number(1, 2) == 2)
+                        do_head(ch, buf, 0, 0);
+                    else if ((IS_ICER(ch) || IS_BIO(ch)) && rand_number(1, 2) == 2)
+                        do_tailwhip(ch, buf, 0, 0);
+                    else if (rand_number(1, 8) == 8)
+                        do_trip(ch, buf, 0, 0);
+                    else
+                        do_uppercut(ch, buf, 0, 0);
                     break;
                 case 15:
                 case 16:
-                    if (IS_DRAGON(ch) && rand_number(1, 4) == 4) {
-                        do_breath(ch, buf, 0, 0);
-                    } else {
-                        if (ch->getBaseStat<int>("mobcharge") == 7) {
-                            ch->setBaseStat<int>("mobcharge", 0);
-                            do_tsuihidan(ch, buf, 0, 0);
-                        }
-                    }
+                    if ((IS_BARDOCK(ch) || IS_KURZAK(ch)) && rand_number(1, 2) == 2)
+                        do_head(ch, buf, 0, 0);
+                    else if ((IS_ICER(ch) || IS_BIO(ch)) && rand_number(1, 2) == 2)
+                        do_tailwhip(ch, buf, 0, 0);
+                    else if (rand_number(1, 8) >= 7)
+                        do_trip(ch, buf, 0, 0);
+                    else
+                        do_roundhouse(ch, buf, 0, 0);
                     break;
                 case 17:
                 case 18:
-                    if (IS_DRAGON(ch) && rand_number(1, 4) == 4) {
-                        do_breath(ch, buf, 0, 0);
-                    } else {
-                        if (ch->getBaseStat<int>("mobcharge") == 7) {
-                            ch->setBaseStat<int>("mobcharge", 0);
-                            do_shogekiha(ch, buf, 0, 0);
-                        }
-                    }
+                    do_slam(ch, buf, 0, 0);
                     break;
                 case 19:
                 case 20:
-                    if (IS_DRAGON(ch)) {
-                        do_breath(ch, buf, 0, 0);
-                    }
-                    if (ch->getBaseStat<int>("mobcharge") == 7) {
-                        ch->setBaseStat<int>("mobcharge", 0);
-                        switch (GET_CLASS(ch)) {
-                            case Sensei::roshi:
-                                if (special >= 100)
-                                    do_kakusanha(ch, buf, 0, 0);
-                                else if (special >= 80)
-                                    do_kienzan(ch, buf, 0, 0);
-                                else if (special >= 70)
-                                    do_kamehameha(ch, buf, 0, 0);
-                                else if (special >= 50)
-                                    do_barrier(ch, "40", 0, 0);
-                                else
-                                    do_barrier(ch, "25", 0, 0);
-                                break;
-                            case Sensei::frieza:
-                                if (special >= 100)
-                                    do_deathball(ch, buf, 0, 0);
-                                else if (special >= 80)
-                                    do_kienzan(ch, buf, 0, 0);
-                                else if (special >= 70)
-                                    do_deathbeam(ch, buf, 0, 0);
-                                else if (special >= 50)
-                                    do_barrier(ch, "40", 0, 0);
-                                else
-                                    do_barrier(ch, "25", 0, 0);
-                                break;
-                            case Sensei::crane:
-                                if (special >= 100)
-                                    do_tribeam(ch, buf, 0, 0);
-                                else if (special >= 80)
-                                    do_hass(ch, nullptr, 0, 0);
-                                else if (special >= 70)
-                                    do_dodonpa(ch, buf, 0, 0);
-                                else if (special >= 50)
-                                    do_barrier(ch, "40", 0, 0);
-                                else
-                                    do_barrier(ch, "25", 0, 0);
-                                break;
-                            case Sensei::piccolo:
-                                if (special >= 100)
-                                    do_scatter(ch, buf, 0, 0);
-                                else if (special >= 80)
-                                    do_sbc(ch, buf, 0, 0);
-                                else if (special >= 70)
-                                    do_masenko(ch, buf, 0, 0);
-                                else if (special >= 100)
-                                    do_balefire(ch, buf, 0, 0);
-                                else if (special >= 50)
-                                    do_barrier(ch, "40", 0, 0);
-                                else
-                                    do_barrier(ch, "25", 0, 0);
-                                break;
-                            case Sensei::bardock:
-                                if (special >= 100)
-                                    do_final(ch, buf, 0, 0);
-                                else if (special >= 80)
-                                    do_bigbang(ch, buf, 0, 0);
-                                else if (special >= 70)
-                                    do_galikgun(ch, buf, 0, 0);
-                                else if (special >= 50)
-                                    do_barrier(ch, "40", 0, 0);
-                                else
-                                    do_barrier(ch, "25", 0, 0);
-                                break;
-                            case Sensei::sixteen:
-                                if (special >= 100)
-                                    do_hellflash(ch, buf, 0, 0);
-                                else if (special >= 80)
-                                    do_kousengan(ch, buf, 0, 0);
-                                else if (special >= 70)
-                                    do_dualbeam(ch, buf, 0, 0);
-                                else if (special >= 50)
-                                    do_barrier(ch, "40", 0, 0);
-                                else
-                                    do_barrier(ch, "25", 0, 0);
-                                break;
-                            case Sensei::nail:
-                                if (special >= 100)
-                                    do_regenerate(ch, "50", 0, 0);
-                                else if (special >= 80)
-                                    do_heal(ch, "self", 0, 0);
-                                else if (special >= 70)
-                                    do_masenko(ch, buf, 0, 0);
-                                else
-                                    do_zanzoken(ch, nullptr, 0, 0);
-                                break;
-                            case Sensei::kurzak:
-                                if (special >= 100)
-                                    do_ensnare(ch, buf, 0, 0);
-                                else if (special >= 80)
-                                    do_seishou(ch, buf, 0, 0);
-                                else if (special >= 70)
-                                    do_renzo(ch, buf, 0, 0);
-                                else if (special >= 50)
-                                    do_barrier(ch, "40", 0, 0);
-                                else
-                                    do_barrier(ch, "25", 0, 0);
-                                break;
-                            case Sensei::jinto:
-                                if (special >= 100)
-                                    do_nova(ch, buf, 0, 0);
-                                else if (special >= 80)
-                                    do_breaker(ch, buf, 0, 0);
-                                else if (special >= 70)
-                                    do_trip(ch, buf, 0, 0);
-                                else
-                                    do_zanzoken(ch, "40", 0, 0);
-                                break;
-                            case Sensei::tsuna:
-                                if (special >= 100)
-                                    do_koteiru(ch, buf, 0, 0);
-                                else if (special >= 80)
-                                    do_razor(ch, buf, 0, 0);
-                                else if (special >= 70)
-                                    do_spike(ch, buf, 0, 0);
-                                else
-                                    do_barrier(ch, "20", 0, 0);
-                                break;
-                            case Sensei::tapion:
-                                if (special >= 100)
-                                    do_pslash(ch, buf, 0, 0);
-                                else if (special >= 80)
-                                    do_ddslash(ch, buf, 0, 0);
-                                else if (special >= 70)
-                                    do_tslash(ch, buf, 0, 0);
-                                else
-                                    do_zanzoken(ch, "40", 0, 0);
-                                break;
-                            case Sensei::kibito:
-                                if (special >= 100)
-                                    do_pbarrage(ch, buf, 0, 0);
-                                else if (special >= 80)
-                                    do_psyblast(ch, buf, 0, 0);
-                                else if (special >= 70)
-                                    do_heal(ch, buf, 0, 0);
-                                else
-                                    do_zanzoken(ch, "40", 0, 0);
-                                break;
-                            case Sensei::dabura:
-                                if (special >= 100)
-                                    do_hellspear(ch, buf, 0, 0);
-                                else if (special >= 80)
-                                    do_honoo(ch, buf, 0, 0);
-                                else if (special >= 70)
-                                    do_fireshield(ch, buf, 0, 0);
-                                else
-                                    do_zanzoken(ch, "40", 0, 0);
-                                break;
-                            case Sensei::ginyu:
-                                if (special >= 100)
-                                    do_spiral(ch, buf, 0, 0);
-                                else if (special >= 80)
-                                    do_crusher(ch, buf, 0, 0);
-                                else if (special >= 70)
-                                    do_eraser(ch, buf, 0, 0);
-                                else
-                                    do_zanzoken(ch, "40", 0, 0);
-                                break;
-                        }
-                    }
+                    do_heeldrop(ch, buf, 0, 0);
                     break;
+                }
+            }
+        }
+        else
+        {
+            mob_specials_used += 1;
+            switch (power)
+            {
+            case 1:
+            case 2:
+            case 3:
+            case 4:
+                if (special > 80)
+                    do_zanzoken(ch, buf, 0, 0);
+                if (ch->getBaseStat<int>("mobcharge") == 7)
+                {
+                    ch->setBaseStat<int>("mobcharge", 0);
+                    do_kiball(ch, buf, 0, 0);
+                }
+                break;
+            case 5:
+            case 6:
+            case 7:
+            case 8:
+                if (special > 80)
+                    do_zanzoken(ch, buf, 0, 0);
+                if (ch->getBaseStat<int>("mobcharge") == 7)
+                {
+                    ch->setBaseStat<int>("mobcharge", 0);
+                    do_kiblast(ch, buf, 0, 0);
+                }
+                break;
+            case 9:
+            case 10:
+            case 11:
+                if (special > 80)
+                    do_zanzoken(ch, buf, 0, 0);
+                if (IS_DRAGON(ch) && rand_number(1, 4) == 4)
+                {
+                    do_breath(ch, buf, 0, 0);
+                }
+                else
+                {
+                    if (ch->getBaseStat<int>("mobcharge") == 7)
+                    {
+                        ch->setBaseStat<int>("mobcharge", 0);
+                        do_beam(ch, buf, 0, 0);
+                    }
+                }
+                break;
+            case 12:
+            case 13:
+            case 14:
+                if (special > 80)
+                    do_zanzoken(ch, buf, 0, 0);
+                if (IS_DRAGON(ch) && rand_number(1, 4) == 4)
+                {
+                    do_breath(ch, buf, 0, 0);
+                }
+                else
+                {
+                    if (ch->getBaseStat<int>("mobcharge") == 7)
+                    {
+                        ch->setBaseStat<int>("mobcharge", 0);
+                        do_renzo(ch, buf, 0, 0);
+                    }
+                }
+                break;
+            case 15:
+            case 16:
+                if (IS_DRAGON(ch) && rand_number(1, 4) == 4)
+                {
+                    do_breath(ch, buf, 0, 0);
+                }
+                else
+                {
+                    if (ch->getBaseStat<int>("mobcharge") == 7)
+                    {
+                        ch->setBaseStat<int>("mobcharge", 0);
+                        do_tsuihidan(ch, buf, 0, 0);
+                    }
+                }
+                break;
+            case 17:
+            case 18:
+                if (IS_DRAGON(ch) && rand_number(1, 4) == 4)
+                {
+                    do_breath(ch, buf, 0, 0);
+                }
+                else
+                {
+                    if (ch->getBaseStat<int>("mobcharge") == 7)
+                    {
+                        ch->setBaseStat<int>("mobcharge", 0);
+                        do_shogekiha(ch, buf, 0, 0);
+                    }
+                }
+                break;
+            case 19:
+            case 20:
+                if (IS_DRAGON(ch))
+                {
+                    do_breath(ch, buf, 0, 0);
+                }
+                if (ch->getBaseStat<int>("mobcharge") == 7)
+                {
+                    ch->setBaseStat<int>("mobcharge", 0);
+                    switch (GET_CLASS(ch))
+                    {
+                    case Sensei::roshi:
+                        if (special >= 100)
+                            do_kakusanha(ch, buf, 0, 0);
+                        else if (special >= 80)
+                            do_kienzan(ch, buf, 0, 0);
+                        else if (special >= 70)
+                            do_kamehameha(ch, buf, 0, 0);
+                        else if (special >= 50)
+                            do_barrier(ch, "40", 0, 0);
+                        else
+                            do_barrier(ch, "25", 0, 0);
+                        break;
+                    case Sensei::frieza:
+                        if (special >= 100)
+                            do_deathball(ch, buf, 0, 0);
+                        else if (special >= 80)
+                            do_kienzan(ch, buf, 0, 0);
+                        else if (special >= 70)
+                            do_deathbeam(ch, buf, 0, 0);
+                        else if (special >= 50)
+                            do_barrier(ch, "40", 0, 0);
+                        else
+                            do_barrier(ch, "25", 0, 0);
+                        break;
+                    case Sensei::crane:
+                        if (special >= 100)
+                            do_tribeam(ch, buf, 0, 0);
+                        else if (special >= 80)
+                            do_hass(ch, nullptr, 0, 0);
+                        else if (special >= 70)
+                            do_dodonpa(ch, buf, 0, 0);
+                        else if (special >= 50)
+                            do_barrier(ch, "40", 0, 0);
+                        else
+                            do_barrier(ch, "25", 0, 0);
+                        break;
+                    case Sensei::piccolo:
+                        if (special >= 100)
+                            do_scatter(ch, buf, 0, 0);
+                        else if (special >= 80)
+                            do_sbc(ch, buf, 0, 0);
+                        else if (special >= 70)
+                            do_masenko(ch, buf, 0, 0);
+                        else if (special >= 100)
+                            do_balefire(ch, buf, 0, 0);
+                        else if (special >= 50)
+                            do_barrier(ch, "40", 0, 0);
+                        else
+                            do_barrier(ch, "25", 0, 0);
+                        break;
+                    case Sensei::bardock:
+                        if (special >= 100)
+                            do_final(ch, buf, 0, 0);
+                        else if (special >= 80)
+                            do_bigbang(ch, buf, 0, 0);
+                        else if (special >= 70)
+                            do_galikgun(ch, buf, 0, 0);
+                        else if (special >= 50)
+                            do_barrier(ch, "40", 0, 0);
+                        else
+                            do_barrier(ch, "25", 0, 0);
+                        break;
+                    case Sensei::sixteen:
+                        if (special >= 100)
+                            do_hellflash(ch, buf, 0, 0);
+                        else if (special >= 80)
+                            do_kousengan(ch, buf, 0, 0);
+                        else if (special >= 70)
+                            do_dualbeam(ch, buf, 0, 0);
+                        else if (special >= 50)
+                            do_barrier(ch, "40", 0, 0);
+                        else
+                            do_barrier(ch, "25", 0, 0);
+                        break;
+                    case Sensei::nail:
+                        if (special >= 100)
+                            do_regenerate(ch, "50", 0, 0);
+                        else if (special >= 80)
+                            do_heal(ch, "self", 0, 0);
+                        else if (special >= 70)
+                            do_masenko(ch, buf, 0, 0);
+                        else
+                            do_zanzoken(ch, nullptr, 0, 0);
+                        break;
+                    case Sensei::kurzak:
+                        if (special >= 100)
+                            do_ensnare(ch, buf, 0, 0);
+                        else if (special >= 80)
+                            do_seishou(ch, buf, 0, 0);
+                        else if (special >= 70)
+                            do_renzo(ch, buf, 0, 0);
+                        else if (special >= 50)
+                            do_barrier(ch, "40", 0, 0);
+                        else
+                            do_barrier(ch, "25", 0, 0);
+                        break;
+                    case Sensei::jinto:
+                        if (special >= 100)
+                            do_nova(ch, buf, 0, 0);
+                        else if (special >= 80)
+                            do_breaker(ch, buf, 0, 0);
+                        else if (special >= 70)
+                            do_trip(ch, buf, 0, 0);
+                        else
+                            do_zanzoken(ch, "40", 0, 0);
+                        break;
+                    case Sensei::tsuna:
+                        if (special >= 100)
+                            do_koteiru(ch, buf, 0, 0);
+                        else if (special >= 80)
+                            do_razor(ch, buf, 0, 0);
+                        else if (special >= 70)
+                            do_spike(ch, buf, 0, 0);
+                        else
+                            do_barrier(ch, "20", 0, 0);
+                        break;
+                    case Sensei::tapion:
+                        if (special >= 100)
+                            do_pslash(ch, buf, 0, 0);
+                        else if (special >= 80)
+                            do_ddslash(ch, buf, 0, 0);
+                        else if (special >= 70)
+                            do_tslash(ch, buf, 0, 0);
+                        else
+                            do_zanzoken(ch, "40", 0, 0);
+                        break;
+                    case Sensei::kibito:
+                        if (special >= 100)
+                            do_pbarrage(ch, buf, 0, 0);
+                        else if (special >= 80)
+                            do_psyblast(ch, buf, 0, 0);
+                        else if (special >= 70)
+                            do_heal(ch, buf, 0, 0);
+                        else
+                            do_zanzoken(ch, "40", 0, 0);
+                        break;
+                    case Sensei::dabura:
+                        if (special >= 100)
+                            do_hellspear(ch, buf, 0, 0);
+                        else if (special >= 80)
+                            do_honoo(ch, buf, 0, 0);
+                        else if (special >= 70)
+                            do_fireshield(ch, buf, 0, 0);
+                        else
+                            do_zanzoken(ch, "40", 0, 0);
+                        break;
+                    case Sensei::ginyu:
+                        if (special >= 100)
+                            do_spiral(ch, buf, 0, 0);
+                        else if (special >= 80)
+                            do_crusher(ch, buf, 0, 0);
+                        else if (special >= 70)
+                            do_eraser(ch, buf, 0, 0);
+                        else
+                            do_zanzoken(ch, "40", 0, 0);
+                        break;
+                    }
+                }
+                break;
             } /* End power switch */
         } /* End special attacks */
-    } else if (!IS_HUMANOID(ch) || dragonpass == false) { /* Is not a humanoid mob */
-        if (IS_SERPENT(ch) && rand_number(1, 5) == 5) {
+    }
+    else if (!IS_HUMANOID(ch) || dragonpass == false)
+    { /* Is not a humanoid mob */
+        if (IS_SERPENT(ch) && rand_number(1, 5) == 5)
+        {
             do_strike(ch, buf, 0, 0);
-        } else if (IS_DRAGON(ch) && rand_number(1, 12) >= 10 && GET_MOB_VNUM(ch) != 17917) {
+        }
+        else if (IS_DRAGON(ch) && rand_number(1, 12) >= 10 && GET_MOB_VNUM(ch) != 17917)
+        {
             do_breath(ch, buf, 0, 0);
-        } else {
-            if (rand_number(1, 10) >= 7 && GET_LEVEL(ch) >= 10) {
+        }
+        else
+        {
+            if (rand_number(1, 10) >= 7 && GET_LEVEL(ch) >= 10)
+            {
                 do_ram(ch, buf, 0, 0);
-            } else {
+            }
+            else
+            {
                 do_bite(ch, buf, 0, 0);
             }
         }
@@ -643,16 +799,20 @@ static void mob_attack(Character *ch, char *buf) {
 
 } /* End mob_attack */
 
-static void cleanup_arena_watch(Character *ch) {
+static void cleanup_arena_watch(Character *ch)
+{
     struct descriptor_data *d;
 
-    for (d = descriptor_list; d; d = d->next) {
+    for (d = descriptor_list; d; d = d->next)
+    {
 
         if (STATE(d) != CON_PLAYING)
             continue;
 
-        if (PRF_FLAGGED(d->character, PRF_ARENAWATCH)) {
-            if (ARENA_IDNUM(d->character) == GET_IDNUM(ch)) {
+        if (PRF_FLAGGED(d->character, PRF_ARENAWATCH))
+        {
+            if (ARENA_IDNUM(d->character) == GET_IDNUM(ch))
+            {
                 d->character->pref_flags.set(PRF_ARENAWATCH, false);
                 d->character->setBaseStat<room_vnum>("arena_watch", -1);
             }
@@ -660,29 +820,36 @@ static void cleanup_arena_watch(Character *ch) {
     }
 }
 
-static void shadow_dragons_live() {
+static void shadow_dragons_live()
+{
     int value = 0;
     if (SHADOW_DRAGON1 != -1 || SHADOW_DRAGON2 != -1 || SHADOW_DRAGON3 != -1 || SHADOW_DRAGON4 != -1 ||
-        SHADOW_DRAGON5 != -1 || SHADOW_DRAGON6 != -1 || SHADOW_DRAGON7 != -1) {
+        SHADOW_DRAGON5 != -1 || SHADOW_DRAGON6 != -1 || SHADOW_DRAGON7 != -1)
+    {
         value = 1;
     }
 
-    if (value == 0) {
+    if (value == 0)
+    {
         SELFISHMETER = 0;
         save_mud_time(&time_info);
     }
 }
 
 /* For announcing the sounds of battle to nearby rooms */
-void impact_sound(Character *ch, const char *mssg) {
-    for (auto &[dir, e] : ch->location.getExits()) {
-        if (IS_SET(e.exit_info, EX_CLOSED)) continue;
+void impact_sound(Character *ch, const char *mssg)
+{
+    for (auto &[dir, e] : ch->location.getExits())
+    {
+        if (IS_SET(e.exit_info, EX_CLOSED))
+            continue;
         e.sendText(mssg);
     }
 }
 
 /* For removing body parts */
-void remove_limb(Character *vict, int num) {
+void remove_limb(Character *vict, int num)
+{
     /* 0 = head, 1 = rarm, 2 = larm, 3 = rleg, 4 = lleg , 5 = tail, 6 = tail*/
 
     Object *body_part;
@@ -691,58 +858,63 @@ void remove_limb(Character *vict, int num) {
     char buf2[1000];
 
     body_part = create_obj();
-    
-    switch(num) {
-        case 1:
-        case 2:
-        case 3:
-        case 4:
-            vict->limb_condition[num-1] = 0;
-            break;
+
+    switch (num)
+    {
+    case 1:
+    case 2:
+    case 3:
+    case 4:
+        vict->limb_condition[num - 1] = 0;
+        break;
     }
 
-    switch (num) {
-        case 0:
-            snprintf(part, sizeof(part), "@C%s@w's bloody head@n", GET_NAME(vict));
-            snprintf(buf, sizeof(buf), "%s bloody head", GET_NAME(vict));
-            break;
-        case 1:
-            snprintf(part, sizeof(part), "@w%s right arm@n", race::getName(vict->race).c_str());
-            snprintf(buf, sizeof(buf), "right arm");
-            vict->character_flags.set(CharacterFlag::cyber_right_arm, false);
-            break;
-        case 2:
-            snprintf(part, sizeof(part), "@w%s left arm@n", race::getName(vict->race).c_str());
-            snprintf(buf, sizeof(buf), "left arm");
-            vict->character_flags.set(CharacterFlag::cyber_left_arm, false);
-            break;
-        case 3:
-            snprintf(part, sizeof(part), "@w%s right leg@n", race::getName(vict->race).c_str());
-            snprintf(buf, sizeof(buf), "right leg");
-            vict->character_flags.set(CharacterFlag::cyber_right_leg, false);
-            break;
-        case 4:
-            snprintf(part, sizeof(part), "@w%s left leg@n", race::getName(vict->race).c_str());
-            snprintf(buf, sizeof(buf), "left leg");
-            vict->character_flags.set(CharacterFlag::cyber_left_leg, false);
-            break;
-        case 5:
-            snprintf(part, sizeof(part), "@wA %s tail@n", race::getName(vict->race).c_str());
-            snprintf(buf, sizeof(buf), "tail");
-            break;
-        case 6:
-            snprintf(buf, sizeof(buf), "tail");
-            break;
-        default:
-            snprintf(part, sizeof(part), "@w%s body part@n", race::getName(vict->race).c_str());
-            snprintf(buf, sizeof(buf), "body part");
-            break;
+    switch (num)
+    {
+    case 0:
+        snprintf(part, sizeof(part), "@C%s@w's bloody head@n", GET_NAME(vict));
+        snprintf(buf, sizeof(buf), "%s bloody head", GET_NAME(vict));
+        break;
+    case 1:
+        snprintf(part, sizeof(part), "@w%s right arm@n", race::getName(vict->race).c_str());
+        snprintf(buf, sizeof(buf), "right arm");
+        vict->character_flags.set(CharacterFlag::cyber_right_arm, false);
+        break;
+    case 2:
+        snprintf(part, sizeof(part), "@w%s left arm@n", race::getName(vict->race).c_str());
+        snprintf(buf, sizeof(buf), "left arm");
+        vict->character_flags.set(CharacterFlag::cyber_left_arm, false);
+        break;
+    case 3:
+        snprintf(part, sizeof(part), "@w%s right leg@n", race::getName(vict->race).c_str());
+        snprintf(buf, sizeof(buf), "right leg");
+        vict->character_flags.set(CharacterFlag::cyber_right_leg, false);
+        break;
+    case 4:
+        snprintf(part, sizeof(part), "@w%s left leg@n", race::getName(vict->race).c_str());
+        snprintf(buf, sizeof(buf), "left leg");
+        vict->character_flags.set(CharacterFlag::cyber_left_leg, false);
+        break;
+    case 5:
+        snprintf(part, sizeof(part), "@wA %s tail@n", race::getName(vict->race).c_str());
+        snprintf(buf, sizeof(buf), "tail");
+        break;
+    case 6:
+        snprintf(buf, sizeof(buf), "tail");
+        break;
+    default:
+        snprintf(part, sizeof(part), "@w%s body part@n", race::getName(vict->race).c_str());
+        snprintf(buf, sizeof(buf), "body part");
+        break;
     }
 
     body_part->strings["name"] = buf;
-    if (num > 0) {
+    if (num > 0)
+    {
         snprintf(buf2, sizeof(buf2), "@wA %s is lying here@n", part);
-    } else {
+    }
+    else
+    {
         snprintf(buf2, sizeof(buf2), "%s@w is lying here@n", part);
     }
     body_part->strings["room_description"] = buf2;
@@ -751,7 +923,8 @@ void remove_limb(Character *vict, int num) {
     body_part->type_flag = ItemType::other;
     body_part->wear_flags.set(ITEM_WEAR_TAKE, true);
     body_part->item_flags.set(ITEM_UNIQUE_SAVE, true);
-    for(const auto &v : {VAL_ALL_HEALTH, VAL_ALL_MAXHEALTH}) {
+    for (const auto &v : {VAL_ALL_HEALTH, VAL_ALL_MAXHEALTH})
+    {
         SET_OBJ_VAL(body_part, v, 100);
     }
     body_part->setBaseStat<weight_t>("weight", rand_number(4, 10));
@@ -760,47 +933,49 @@ void remove_limb(Character *vict, int num) {
 
 /* Weapon attack texts */
 struct attack_hit_type attack_hit_text[NUM_ATTACK_TYPES] =
-        {
-                {"hit",      "hits"},        /* 0 */
-                {"sting",    "stings"},
-                {"whip",     "whips"},
-                {"slash",    "slashes"},
-                {"bite",     "bites"},
-                {"bludgeon", "bludgeons"},    /* 5 */
-                {"crush",    "crushes"},
-                {"pound",    "pounds"},
-                {"claw",     "claws"},
-                {"maul",     "mauls"},
-                {"thrash",   "thrashes"},    /* 10 */
-                {"pierce",   "pierces"},
-                {"blast",    "blasts"},
-                {"punch",    "punches"},
-                {"stab",     "stabs"}
-        };
+    {
+        {"hit", "hits"}, /* 0 */
+        {"sting", "stings"},
+        {"whip", "whips"},
+        {"slash", "slashes"},
+        {"bite", "bites"},
+        {"bludgeon", "bludgeons"}, /* 5 */
+        {"crush", "crushes"},
+        {"pound", "pounds"},
+        {"claw", "claws"},
+        {"maul", "mauls"},
+        {"thrash", "thrashes"}, /* 10 */
+        {"pierce", "pierces"},
+        {"blast", "blasts"},
+        {"punch", "punches"},
+        {"stab", "stabs"}};
 
 #define IS_WEAPON(type) (((type) >= TYPE_HIT) && ((type) < TYPE_SUFFERING))
 
 static const std::map<int64_t, std::pair<std::string, std::string>> powerupMessages = {
-        {50000, {"@RYou continue to powerup, as wind billows out from around you!@n", "@R$n continues to powerup, as wind billows out from around $m!@n"}},
-        {500000, {"@RYou continue to powerup, as the ground splits beneath you!@n", "@R$n continues to powerup, as the ground splits beneath $m!@n"}},
-        {5000000, {"@RYou continue to powerup, as the ground shudders and splits beneath you!@n", "@R$n continues to powerup, as the ground shudders and splits beneath $m!@n"}},
-        {50000000, {"@RYou continue to powerup, as a huge depression forms beneath you!@n", "@R$n continues to powerup, as a huge depression forms beneath $m!@n"}},
-        {100000000, {"@RYou continue to powerup, as the entire area quakes around you!@n", "@R$n continues to powerup, as the entire area quakes around $m!@n"}},
-        {300000000, {"@RYou continue to powerup, as huge chunks of ground are ripped apart beneath you!@n", "@R$n continues to powerup, as huge chunks of ground are ripped apart beneath $m!@n"}},
-        {std::numeric_limits<int64_t>::max(), {"@RYou continue to powerup, as the very air around you crackles and burns!@n", "@R$n continues to powerup, as the very air around $m crackles and burns!@n"}}
-};
+    {50000, {"@RYou continue to powerup, as wind billows out from around you!@n", "@R$n continues to powerup, as wind billows out from around $m!@n"}},
+    {500000, {"@RYou continue to powerup, as the ground splits beneath you!@n", "@R$n continues to powerup, as the ground splits beneath $m!@n"}},
+    {5000000, {"@RYou continue to powerup, as the ground shudders and splits beneath you!@n", "@R$n continues to powerup, as the ground shudders and splits beneath $m!@n"}},
+    {50000000, {"@RYou continue to powerup, as a huge depression forms beneath you!@n", "@R$n continues to powerup, as a huge depression forms beneath $m!@n"}},
+    {100000000, {"@RYou continue to powerup, as the entire area quakes around you!@n", "@R$n continues to powerup, as the entire area quakes around $m!@n"}},
+    {300000000, {"@RYou continue to powerup, as huge chunks of ground are ripped apart beneath you!@n", "@R$n continues to powerup, as huge chunks of ground are ripped apart beneath $m!@n"}},
+    {std::numeric_limits<int64_t>::max(), {"@RYou continue to powerup, as the very air around you crackles and burns!@n", "@R$n continues to powerup, as the very air around $m crackles and burns!@n"}}};
 
-void powerupService(uint64_t heartPulse, double deltaTime) {
+void powerupService(uint64_t heartPulse, double deltaTime)
+{
     char buf3[MAX_STRING_LENGTH];
     auto subs = characterSubscriptions.all("powerupService");
-    for(auto ch : filter_raw(subs)) {
+    for (auto ch : filter_raw(subs))
+    {
 
-        if(!ch->character_flags.get(CharacterFlag::powering_up)) {
+        if (!ch->character_flags.get(CharacterFlag::powering_up))
+        {
             characterSubscriptions.unsubscribe("powerupService", ch);
             continue;
         }
 
-        if(rand_number(1, 3) != 3) continue;
+        if (rand_number(1, 3) != 3)
+            continue;
 
         bool stopPowerup = false;
         bool maxedOut = false;
@@ -810,27 +985,32 @@ void powerupService(uint64_t heartPulse, double deltaTime) {
         auto maxST = ch->getEffectiveStat<int64_t>("stamina");
         auto curST = ch->getCurVital(CharVital::stamina);
         auto perc = (GET_PREFERENCE(ch) == PREFERENCE_KI) ? 0.0375 : 0.05;
-        if (ch->isFullVital(CharVital::health) && (ch->getCurVitalMeterPercent(CharVital::ki) >= perc)) {
+        if (ch->isFullVital(CharVital::health) && (ch->getCurVitalMeterPercent(CharVital::ki) >= perc))
+        {
             curST = ch->modCurVitalDam(CharVital::stamina, -0.02);
             ch->restoreHealth(false);
             curKI = ch->modCurVitalDam(CharVital::ki, perc);
             maxedOut = true;
         }
 
-        if (ch->getCurVitalMeterPercent(CharVital::ki) <= perc) {
+        if (ch->getCurVitalMeterPercent(CharVital::ki) <= perc)
+        {
             act("@RYou have run out of ki.@n", true, ch, nullptr, nullptr, TO_CHAR);
             stopPowerup = true;
         }
 
-        if(maxedOut) {
+        if (maxedOut)
+        {
             dispel_ash(ch);
             act("@RYou have reached your maximum!@n", true, ch, nullptr, nullptr, TO_CHAR);
             stopPowerup = true;
         }
 
-        if(stopPowerup) {
+        if (stopPowerup)
+        {
             act("@R$n stops powering up in a flash of light!@n", true, ch, nullptr, nullptr, TO_ROOM);
-            if(!IS_NPC(ch)) {
+            if (!IS_NPC(ch))
+            {
                 send_to_sense(0, "You sense someone stop powering up", ch);
                 sprintf(buf3, "@D[@GBlip@D]@r Rising Powerlevel Final@D: [@Y%s@D]", add_commas(GET_HIT(ch)).c_str());
                 send_to_scouter(buf3, ch, 1, 0);
@@ -840,15 +1020,18 @@ void powerupService(uint64_t heartPulse, double deltaTime) {
             continue;
         }
 
-        if (!ch->isFullVital(CharVital::health) && (ch->getCurVitalMeterPercent(CharVital::ki) >= perc)) {
+        if (!ch->isFullVital(CharVital::health) && (ch->getCurVitalMeterPercent(CharVital::ki) >= perc))
+        {
             ch->modCurVitalDam(CharVital::health, -.1);
             ch->modCurVitalDam(CharVital::ki, perc);
             ch->modCurVitalDam(CharVital::stamina, -0.02);
 
             auto curPL = ch->getCurVital(CharVital::health);
 
-            for(const auto& [threshold, messages] : powerupMessages) {
-                if(curPL < threshold) {
+            for (const auto &[threshold, messages] : powerupMessages)
+            {
+                if (curPL < threshold)
+                {
                     act(messages.first.c_str(), true, ch, nullptr, nullptr,
                         TO_CHAR);
                     act(messages.second.c_str(), true, ch, nullptr, nullptr,
@@ -857,7 +1040,8 @@ void powerupService(uint64_t heartPulse, double deltaTime) {
                 }
             }
 
-            if(!IS_NPC(ch)) {
+            if (!IS_NPC(ch))
+            {
                 send_to_sense(0, "You sense someone powering up", ch);
                 send_to_worlds(ch);
                 sprintf(buf3, "@D[@GBlip@D]@r Rising Powerlevel Detected@D: [@Y%s@D]", add_commas(GET_HIT(ch)).c_str());
@@ -866,95 +1050,124 @@ void powerupService(uint64_t heartPulse, double deltaTime) {
 
             dispel_ash(ch);
         }
-
     }
 }
 
-void lifeforceSystem(uint64_t heartPulse, double deltaTime) {
+void lifeforceSystem(uint64_t heartPulse, double deltaTime)
+{
     auto subs = characterSubscriptions.all("lifeforceSystem");
-    for(auto ch : filter_raw(subs)) {
+    for (auto ch : filter_raw(subs))
+    {
 
-        if (rand_number(1, 15) < 14) continue;
+        if (rand_number(1, 15) < 14)
+            continue;
         auto threshold = (AFF_FLAGGED(ch, AFF_HEALGLOW) || IS_KANASSAN(ch)) ? 0.03 : 0.05;
         auto curperc = ch->getCurVitalMeterPercent(CharVital::lifeforce);
 
-        if (curperc >= threshold) {
+        if (curperc >= threshold)
+        {
             double refill = 0.05;
             double lfcost = 0.05;
             bool mutantBonus = ch->mutations.get(Mutation::increased_cell_regeneration);
 
-            if (GET_BONUS(ch, BONUS_DIEHARD) > 0) {
-                if (mutantBonus) {
+            if (GET_BONUS(ch, BONUS_DIEHARD) > 0)
+            {
+                if (mutantBonus)
+                {
                     refill = 0.17;
-                } else {
+                }
+                else
+                {
                     refill = 0.1;
                 }
-            } else if (mutantBonus) {
+            }
+            else if (mutantBonus)
+            {
                 refill = 0.12;
-            } else if (IS_KANASSAN(ch)) {
+            }
+            else if (IS_KANASSAN(ch))
+            {
                 refill = 0.03;
                 lfcost = 0.03;
             }
 
             ch->modCurVitalDam(CharVital::health, -refill);
 
-            if (!AFF_FLAGGED(ch, AFF_HEALGLOW)) {
+            if (!AFF_FLAGGED(ch, AFF_HEALGLOW))
+            {
                 ch->modCurVitalDam(CharVital::lifeforce, lfcost);
             }
-        } else {
+        }
+        else
+        {
             ch->modCurVital(CharVital::health, ch->getCurVital(CharVital::lifeforce));
             ch->modCurVitalDam(CharVital::lifeforce, 2);
         }
 
-                ch->sendText("@YYour life force has kept you strong@n!\r\n");
-
+        ch->sendText("@YYour life force has kept you strong@n!\r\n");
     }
 }
 
 /* The Fight related routines */
-void fight_stack(uint64_t heartPulse, double deltaTime) {
+void fight_stack(uint64_t heartPulse, double deltaTime)
+{
     int perc = 0;
     auto subs = characterSubscriptions.all("fight_stack");
-    for (auto ch : filter_raw(subs)) {
+    for (auto ch : filter_raw(subs))
+    {
 
-        if (GET_POS(ch) == POS_FIGHTING) {
+        if (GET_POS(ch) == POS_FIGHTING)
+        {
             ch->setBaseStat<int>("position", POS_STANDING);
         }
-        if (PLR_FLAGGED(ch, PLR_SPIRAL)) {
+        if (PLR_FLAGGED(ch, PLR_SPIRAL))
+        {
             handle_spiral(ch, nullptr, GET_SKILL(ch, SKILL_SPIRAL), false);
         }
 
-        if (IS_NPC(ch) && GET_WAIT_STATE(ch) > 0.0) {
+        if (IS_NPC(ch) && GET_WAIT_STATE(ch) > 0.0)
+        {
             // mob cooldown now handled by commandWaitQueue.
             continue;
         }
 
-        if (IS_NPC(ch) && IS_AFFECTED(ch, AFF_FROZEN)) {
+        if (IS_NPC(ch) && IS_AFFECTED(ch, AFF_FROZEN))
+        {
             continue;
         }
 
-        if (FIGHTING(ch) && (IN_ROOM(FIGHTING(ch)) != IN_ROOM(ch))) {
-            for(auto c : {FIGHTING(ch), ch}) stop_fighting(c);
+        if (FIGHTING(ch) && (IN_ROOM(FIGHTING(ch)) != IN_ROOM(ch)))
+        {
+            for (auto c : {FIGHTING(ch), ch})
+                stop_fighting(c);
         }
-        if (FIGHTING(ch) && DRAGGING(ch)) {
+        if (FIGHTING(ch) && DRAGGING(ch))
+        {
             act("@WYou are forced to stop dragging @C$N@W!@n", true, ch, nullptr, DRAGGING(ch), TO_CHAR);
             act("@C$n@W is forced to stop dragging @c$N@W!@n", true, ch, nullptr, DRAGGING(ch), TO_ROOM);
             DRAGGED(DRAGGING(ch)) = nullptr;
             DRAGGING(ch) = nullptr;
         }
 
-        if (!AFF_FLAGGED(ch, AFF_POSITION)) {
-            if (roll_balance(ch) > axion_dice(0) && rand_number(1, 10) >= 7) {
-                if (FIGHTING(ch)) {
-                    if (!AFF_FLAGGED(FIGHTING(ch), AFF_POSITION)) {
+        if (!AFF_FLAGGED(ch, AFF_POSITION))
+        {
+            if (roll_balance(ch) > axion_dice(0) && rand_number(1, 10) >= 7)
+            {
+                if (FIGHTING(ch))
+                {
+                    if (!AFF_FLAGGED(FIGHTING(ch), AFF_POSITION))
+                    {
                         act("@YYou manage to move into an advantageous position!@n", true, ch, nullptr, nullptr,
                             TO_CHAR);
                         act("@y$n@Y manages to move into an advantageous position!@n", true, ch, nullptr, nullptr,
                             TO_ROOM);
                         ch->affect_flags.set(AFF_POSITION, true);
-                    } else {
+                    }
+                    else
+                    {
                         Character *vict = FIGHTING(ch);
-                        if (roll_balance(ch) > roll_balance(vict)) {
+                        if (roll_balance(ch) > roll_balance(vict))
+                        {
                             act("@YYou struggle to gain a better position than @y$N@Y and succeed!@n", true, ch,
                                 nullptr, vict, TO_CHAR);
                             act("@y$n@Y struggles to gain a better position than you and succeeds!@n", true, ch,
@@ -967,20 +1180,27 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
                     }
                 }
             }
-        } else {
-            if (roll_balance(ch) < axion_dice(-30) || GET_POS(ch) < POS_STANDING) {
+        }
+        else
+        {
+            if (roll_balance(ch) < axion_dice(-30) || GET_POS(ch) < POS_STANDING)
+            {
                 act("@YYou are moved out of your position!@n", true, ch, nullptr, nullptr, TO_CHAR);
                 act("@y$n@Y is moved out of $s position!@n", true, ch, nullptr, nullptr, TO_ROOM);
                 ch->affect_flags.set(AFF_POSITION, false);
             }
         }
-        if (GRAPPLING(ch) && GRAPTYPE(ch) == 2 && rand_number(1, 11) >= 8) {
-            if ((((ch)->grappling)->getCurVital(CharVital::stamina)) >= GET_MAX_MOVE(GRAPPLING(ch)) / 8) {
+        if (GRAPPLING(ch) && GRAPTYPE(ch) == 2 && rand_number(1, 11) >= 8)
+        {
+            if ((((ch)->grappling)->getCurVital(CharVital::stamina)) >= GET_MAX_MOVE(GRAPPLING(ch)) / 8)
+            {
                 act("@WYou choke @C$N@W!@n", true, ch, nullptr, GRAPPLING(ch), TO_CHAR);
                 act("@C$n@W chokes YOU@W!@n", true, ch, nullptr, GRAPPLING(ch), TO_VICT);
                 act("@C$n@W chokes @c$N@W!@n", true, ch, nullptr, GRAPPLING(ch), TO_NOTVICT);
                 GRAPPLING(ch)->modCurVital(CharVital::stamina, -(GRAPPLING(ch)->getEffectiveStat<int64_t>("stamina") / 8));
-            } else {
+            }
+            else
+            {
                 act("@WYou choke @C$N@W, and $E passes out!@n", true, ch, nullptr, GRAPPLING(ch), TO_CHAR);
                 act("@C$n@W chokes YOU@W, and you pass out!@n", true, ch, nullptr, GRAPPLING(ch), TO_VICT);
                 act("@C$n@W chokes @c$N@W, and $E passes out!@n", true, ch, nullptr, GRAPPLING(ch), TO_NOTVICT);
@@ -991,85 +1211,107 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
                 GRAPPLING(ch) = nullptr;
                 ch->setBaseStat<int>("grapple_type", -1);
             }
-        } else if (GRAPPLING(ch) && GRAPTYPE(ch) == 4 && rand_number(1, 12) >= 8) {
+        }
+        else if (GRAPPLING(ch) && GRAPTYPE(ch) == 4 && rand_number(1, 12) >= 8)
+        {
             act("@WYou crush @C$N@W some more!@n", true, ch, nullptr, GRAPPLING(ch), TO_CHAR);
             act("@C$n@W crushes YOU@W some more!@n", true, ch, nullptr, GRAPPLING(ch), TO_VICT);
             act("@C$n@W crushes @c$N@W some more!@n", true, ch, nullptr, GRAPPLING(ch), TO_NOTVICT);
             int64_t damg = GET_STR(ch) * (10 + (GET_MAX_HIT(ch) * 0.005));
             hurt(0, 0, ch, GRAPPLING(ch), nullptr, damg, 0);
         }
-        if (GRAPPLED(ch) && rand_number(1, 2) == 2) {
-                        ch->sendText("@CTry 'escape' to break free from the hold!@n\r\n");
+        if (GRAPPLED(ch) && rand_number(1, 2) == 2)
+        {
+            ch->sendText("@CTry 'escape' to break free from the hold!@n\r\n");
         }
-        if (IS_HALFBREED(ch) && PLR_FLAGGED(ch, PLR_FURY)) {
-            if (ch->modBaseStat<int>("rage_meter", 1) >= 1000) {
+        if (IS_HALFBREED(ch) && PLR_FLAGGED(ch, PLR_FURY))
+        {
+            if (ch->modBaseStat<int>("rage_meter", 1) >= 1000)
+            {
 
                 ch->modCurVitalDam(CharVital::health, -.15);
                 ch->modCurVitalDam(CharVital::ki, -.15);
                 ch->modCurVitalDam(CharVital::stamina, -.15);
-                                ch->sendText("Your fury has called forth more of your hidden power and you feel better!\r\n");
+                ch->sendText("Your fury has called forth more of your hidden power and you feel better!\r\n");
             }
         }
 
-        if (!IS_NPC(ch) && GET_WIMP_LEV(ch) && GET_HIT(ch) < GET_WIMP_LEV(ch) && GET_HIT(ch) > 0 && FIGHTING(ch)) {
-                        ch->sendText("You wimp out, and attempt to flee!\r\n");
+        if (!IS_NPC(ch) && GET_WIMP_LEV(ch) && GET_HIT(ch) < GET_WIMP_LEV(ch) && GET_HIT(ch) > 0 && FIGHTING(ch))
+        {
+            ch->sendText("You wimp out, and attempt to flee!\r\n");
             do_flee(ch, nullptr, 0, 0);
         }
         if (IS_NPC(ch) && GET_HIT(ch) < GET_MAX_HIT(ch) / 10 && GET_HIT(ch) > 0 && FIGHTING(ch) &&
-            !MOB_FLAGGED(ch, MOB_SENTINEL)) {
-            if (rand_number(1, 30) >= 25 && GET_POS(ch) > POS_SITTING) {
+            !MOB_FLAGGED(ch, MOB_SENTINEL))
+        {
+            if (rand_number(1, 30) >= 25 && GET_POS(ch) > POS_SITTING)
+            {
                 do_flee(ch, nullptr, 0, 0);
             }
         }
-        if (ch->mutations.get(Mutation::limb_regeneration) && rand_number(1, 200) >= 175) {
+        if (ch->mutations.get(Mutation::limb_regeneration) && rand_number(1, 200) >= 175)
+        {
             mutant_limb_regen(ch);
         }
-        if (!IS_NPC(ch) && PLR_FLAGGED(ch, PLR_DISGUISED) && GET_SKILL(ch, SKILL_DISGUISE) < rand_number(1, 125)) {
-                        ch->sendText("Your disguise comes off because of your swift movements!\r\n");
+        if (!IS_NPC(ch) && PLR_FLAGGED(ch, PLR_DISGUISED) && GET_SKILL(ch, SKILL_DISGUISE) < rand_number(1, 125))
+        {
+            ch->sendText("Your disguise comes off because of your swift movements!\r\n");
             ch->player_flags.set(PLR_DISGUISED, false);
             act("@W$n's@W disguise comes off because of $s swift movements!@n", false, ch, nullptr, nullptr, TO_ROOM);
         }
-        if (IS_NPC(ch) && AFF_FLAGGED(ch, AFF_BLIND) && rand_number(1, 200) >= 190) {
+        if (IS_NPC(ch) && AFF_FLAGGED(ch, AFF_BLIND) && rand_number(1, 200) >= 190)
+        {
             act("@W$n@W is no longer blind.@n", false, ch, nullptr, nullptr, TO_ROOM);
             ch->affect_flags.set(AFF_BLIND, false);
         }
 
-        if (AFF_FLAGGED(ch, AFF_KNOCKED) && rand_number(1, 200) >= 195) {
+        if (AFF_FLAGGED(ch, AFF_KNOCKED) && rand_number(1, 200) >= 195)
+        {
             ch->cureStatusKnockedOut(true);
-            if (IS_NPC(ch) && rand_number(1, 20) >= 12) {
+            if (IS_NPC(ch) && rand_number(1, 20) >= 12)
+            {
                 act("@W$n@W stands up.@n", false, ch, nullptr, nullptr, TO_ROOM);
                 ch->setBaseStat<int>("position", POS_STANDING);
             }
         }
 
-        if (!IS_NPC(ch) && !(ch->desc) && GET_POS(ch) > POS_STUNNED && !IS_AFFECTED(ch, AFF_FROZEN)) {
-            if (FIGHTING(ch)) {
+        if (!IS_NPC(ch) && !(ch->desc) && GET_POS(ch) > POS_STUNNED && !IS_AFFECTED(ch, AFF_FROZEN))
+        {
+            if (FIGHTING(ch))
+            {
                 do_flee(ch, nullptr, 0, 0);
             }
         }
         /* Mobile Defense System */
-        if (IS_NPC(ch) && GRAPPLED(ch) && !MOB_FLAGGED(ch, MOB_DUMMY) && rand_number(1, 5) >= 4) {
+        if (IS_NPC(ch) && GRAPPLED(ch) && !MOB_FLAGGED(ch, MOB_DUMMY) && rand_number(1, 5) >= 4)
+        {
             do_escape(ch, nullptr, 0, 0);
             continue;
         }
-        if (FIGHTING(ch) && IS_NPC(ch) && !MOB_FLAGGED(ch, MOB_DUMMY)) {
+        if (FIGHTING(ch) && IS_NPC(ch) && !MOB_FLAGGED(ch, MOB_DUMMY))
+        {
             if (AFF_FLAGGED(FIGHTING(ch), AFF_FLYING) && !AFF_FLAGGED(ch, AFF_FLYING) && IS_HUMANOID(ch) &&
-                GET_LEVEL(ch) > 10) {
+                GET_LEVEL(ch) > 10)
+            {
                 do_fly(ch, nullptr, 0, 0);
                 continue;
             }
-            if (!AFF_FLAGGED(FIGHTING(ch), AFF_FLYING) && AFF_FLAGGED(ch, AFF_FLYING)) {
+            if (!AFF_FLAGGED(FIGHTING(ch), AFF_FLYING) && AFF_FLAGGED(ch, AFF_FLYING))
+            {
                 do_fly(ch, nullptr, 0, 0);
                 continue;
             }
             if (AFF_FLAGGED(FIGHTING(ch), AFF_FLYING) && AFF_FLAGGED(ch, AFF_FLYING) &&
-                GET_ALT(ch) < GET_ALT(FIGHTING(ch))) {
+                GET_ALT(ch) < GET_ALT(FIGHTING(ch)))
+            {
                 do_fly(ch, "high", 0, 0);
                 continue;
             }
             if (AFF_FLAGGED(FIGHTING(ch), AFF_FLYING) && !IS_HUMANOID(ch) && !AFF_FLAGGED(ch, AFF_FLYING) &&
-                GET_POS(ch) > POS_RESTING) {
-                if (rand_number(1, 30) >= 22 && !block_calc(ch)) {
+                GET_POS(ch) > POS_RESTING)
+            {
+                if (rand_number(1, 30) >= 22 && !block_calc(ch))
+                {
                     act("$n@G flees in terror and you lose sight of $m!", true, ch, nullptr, nullptr, TO_ROOM);
                     auto con = ch->getInventory();
                     for (auto o : filter_raw(con))
@@ -1079,8 +1321,10 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
                     continue;
                 }
             }
-            if (AFF_FLAGGED(FIGHTING(ch), AFF_FLYING) && IS_HUMANOID(ch) && GET_LEVEL(ch) <= 10) {
-                if (rand_number(1, 30) >= 22 && !block_calc(ch)) {
+            if (AFF_FLAGGED(FIGHTING(ch), AFF_FLYING) && IS_HUMANOID(ch) && GET_LEVEL(ch) <= 10)
+            {
+                if (rand_number(1, 30) >= 22 && !block_calc(ch))
+                {
                     act("$n@G turns and runs away. You lose sight of $m!", true, ch, nullptr, nullptr, TO_ROOM);
                     auto con = ch->getInventory();
                     for (auto o : filter_raw(con))
@@ -1089,20 +1333,24 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
                     continue;
                 }
             }
-            if (GET_POS(ch) == POS_SITTING && sec_roll_check(ch) == 1) {
+            if (GET_POS(ch) == POS_SITTING && sec_roll_check(ch) == 1)
+            {
                 do_stand(ch, nullptr, 0, 0);
                 continue;
             }
-            if (GET_POS(ch) == POS_RESTING && sec_roll_check(ch) == 1) {
+            if (GET_POS(ch) == POS_RESTING && sec_roll_check(ch) == 1)
+            {
                 do_stand(ch, nullptr, 0, 0);
                 continue;
             }
-            if (IS_AFFECTED(ch, AFF_PARA) && IS_NPC(ch) && GET_INT(ch) + 10 < rand_number(1, 60)) {
+            if (IS_AFFECTED(ch, AFF_PARA) && IS_NPC(ch) && GET_INT(ch) + 10 < rand_number(1, 60))
+            {
                 act("@yYou fail to overcome your paralysis!@n", true, ch, nullptr, nullptr, TO_CHAR);
                 act("@Y$n @ystruggles with $s paralysis!@n", true, ch, nullptr, nullptr, TO_ROOM);
                 continue;
             }
-            if (GET_POS(ch) == POS_SLEEPING && !AFF_FLAGGED(ch, AFF_KNOCKED) && sec_roll_check(ch) == 1) {
+            if (GET_POS(ch) == POS_SLEEPING && !AFF_FLAGGED(ch, AFF_KNOCKED) && sec_roll_check(ch) == 1)
+            {
                 do_wake(ch, nullptr, 0, 0);
                 do_stand(ch, nullptr, 0, 0);
                 continue;
@@ -1113,33 +1361,40 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
             vict = FIGHTING(ch);
             sprintf(buf, "%s", GET_NAME(vict));
             if (ch->location == vict->location && !MOB_FLAGGED(ch, MOB_DUMMY) && !AFF_FLAGGED(ch, AFF_KNOCKED) &&
-                GET_POS(ch) != POS_SITTING && GET_POS(ch) != POS_RESTING && GET_POS(ch) != POS_SLEEPING) {
+                GET_POS(ch) != POS_SITTING && GET_POS(ch) != POS_RESTING && GET_POS(ch) != POS_SLEEPING)
+            {
 
                 if (IS_NPC(ch) && rand_number(1, 30) <= 12)
                     continue;
 
                 mob_attack(ch, buf);
 
-            }//end if
-            else {
+            } // end if
+            else
+            {
                 continue;
             }
         }
-        if (GET_POS(ch) <= POS_RESTING && ch->character_flags.get(CharacterFlag::powering_up)) {
+        if (GET_POS(ch) <= POS_RESTING && ch->character_flags.get(CharacterFlag::powering_up))
+        {
             ch->character_flags.set(CharacterFlag::powering_up, false);
         }
 
-        if (GET_BARRIER(ch) > 0) {
+        if (GET_BARRIER(ch) > 0)
+        {
             improve_skill(ch, SKILL_BARRIER, 0);
         }
     }
 }
 
-void kiChargeSystem(uint64_t heartPulse, double deltaTime) {
+void kiChargeSystem(uint64_t heartPulse, double deltaTime)
+{
     auto subs = characterSubscriptions.all("kiChargeSystem");
-    for(auto ch : filter_raw(subs)) {
+    for (auto ch : filter_raw(subs))
+    {
 
-        if(!PLR_FLAGGED(ch, PLR_CHARGE)) {
+        if (!PLR_FLAGGED(ch, PLR_CHARGE))
+        {
             characterSubscriptions.unsubscribe("chargeMoreKi", ch);
             continue;
         }
@@ -1148,135 +1403,171 @@ void kiChargeSystem(uint64_t heartPulse, double deltaTime) {
         auto concentration = GET_SKILL(ch, SKILL_CONCENTRATION);
         bool stopCharge = false;
 
-        if (concentration > 74) {
+        if (concentration > 74)
+        {
             perc = 10;
-        } else if (concentration > 49) {
+        }
+        else if (concentration > 49)
+        {
             perc = 5;
-        } else if (concentration > 24) {
+        }
+        else if (concentration > 24)
+        {
             perc = 2;
-        } else {
+        }
+        else
+        {
             perc = 1;
         }
 
-        if(IS_TRUFFLE(ch)) {
-            if (perc == 10) {
+        if (IS_TRUFFLE(ch))
+        {
+            if (perc == 10)
+            {
                 perc += 10;
             }
-            if (perc == 5) {
+            if (perc == 5)
+            {
                 perc += 5;
             }
-            if (perc == 2) {
+            if (perc == 2)
+            {
                 perc += 3;
             }
-            if (perc == 1) {
+            if (perc == 1)
+            {
                 perc += 1;
             }
         }
 
-        if(IS_MUTANT(ch)) {
-            if (perc == 10) {
+        if (IS_MUTANT(ch))
+        {
+            if (perc == 10)
+            {
                 perc -= 1;
             }
-            if (perc == 5) {
+            if (perc == 5)
+            {
                 perc -= 1;
             }
-            if (perc == 2) {
+            if (perc == 2)
+            {
                 perc -= 1;
             }
         }
 
-        if (perc > 1 && GET_PREFERENCE(ch) == PREFERENCE_H2H) {
+        if (perc > 1 && GET_PREFERENCE(ch) == PREFERENCE_H2H)
+        {
             perc = perc * 0.5;
         }
 
-        if (ch->getCurVital(CharVital::ki) <= 0) {
-                        ch->sendText("You can not charge anymore, you have charged all your energy!\r\n");
+        if (ch->getCurVital(CharVital::ki) <= 0)
+        {
+            ch->sendText("You can not charge anymore, you have charged all your energy!\r\n");
             act("$n@w's aura grows calm.@n", true, ch, nullptr, nullptr, TO_ROOM);
             stopCharge = true;
-        } else if (((GET_MAX_MANA(ch) * 0.01) * perc) >=(ch->getCurVital(CharVital::ki))) {
-                        ch->sendText("You have charged the last that you can.\r\n");
+        }
+        else if (((GET_MAX_MANA(ch) * 0.01) * perc) >= (ch->getCurVital(CharVital::ki)))
+        {
+            ch->sendText("You have charged the last that you can.\r\n");
             act("$n@w's aura @Yflashes@w spectacularly, rushing upwards in torrents!@n", true, ch, nullptr, nullptr,
                 TO_ROOM);
             ch->modBaseStat<int64_t>("charge", ch->getCurVital(CharVital::ki));
             ch->modCurVitalDam(CharVital::ki, 1);
             stopCharge = true;
-        } else {
-            if (GET_CHARGE(ch) >= GET_CHARGETO(ch)) {
-                                ch->sendText("You have already reached the maximum that you wished to charge.\r\n");
+        }
+        else
+        {
+            if (GET_CHARGE(ch) >= GET_CHARGETO(ch))
+            {
+                ch->sendText("You have already reached the maximum that you wished to charge.\r\n");
                 act("$n@w's aura burns steadily.@n", true, ch, nullptr, nullptr, TO_ROOM);
                 stopCharge = true;
-            } else if (GET_CHARGE(ch) + (((GET_MAX_MANA(ch) * 0.01) * perc) + 1) >= GET_CHARGETO(ch)) {
+            }
+            else if (GET_CHARGE(ch) + (((GET_MAX_MANA(ch) * 0.01) * perc) + 1) >= GET_CHARGETO(ch))
+            {
                 ch->modCurVital(CharVital::ki, -(GET_CHARGETO(ch) - GET_CHARGE(ch)));
                 ch->setBaseStat<int64_t>("charge", GET_CHARGETO(ch));
-                                ch->sendText("You stop charging as you reach the maximum that you wished to charge.\r\n");
+                ch->sendText("You stop charging as you reach the maximum that you wished to charge.\r\n");
                 act("$n@w's aura flares up brightly and then burns steadily.@n", true, ch, nullptr, nullptr,
                     TO_ROOM);
                 stopCharge = true;
-            } else {
+            }
+            else
+            {
                 ch->modCurVital(CharVital::ki, -((GET_MAX_MANA(ch) * 0.01) * perc) + 1);
                 ch->modBaseStat<int64_t>("charge", ((GET_MAX_MANA(ch) * 0.01) * perc) + 1);
-                switch (rand_number(1, 3)) {
-                    case 1:
-                        act("$n@w's aura ripples magnificantly while growing brighter!@n", true, ch, nullptr,
-                            nullptr, TO_ROOM);
-                                                ch->sendText("Your aura grows bright as you charge more ki.\r\n");
-                        break;
-                    case 2:
-                        act("$n@w's aura ripples with power as it grows larger!@n", true, ch, nullptr, nullptr,
-                            TO_ROOM);
-                                                ch->sendText("Your aura ripples with power as you charge more ki.\r\n");
-                        break;
-                    case 3:
-                        act("$n@w's aura throws sparks off violently!.@n", true, ch, nullptr, nullptr, TO_ROOM);
-                                                ch->sendText("Your aura throws sparks off violently as you charge more ki.\r\n");
-                        break;
-                    default:
-                        break;
+                switch (rand_number(1, 3))
+                {
+                case 1:
+                    act("$n@w's aura ripples magnificantly while growing brighter!@n", true, ch, nullptr,
+                        nullptr, TO_ROOM);
+                    ch->sendText("Your aura grows bright as you charge more ki.\r\n");
+                    break;
+                case 2:
+                    act("$n@w's aura ripples with power as it grows larger!@n", true, ch, nullptr, nullptr,
+                        TO_ROOM);
+                    ch->sendText("Your aura ripples with power as you charge more ki.\r\n");
+                    break;
+                case 3:
+                    act("$n@w's aura throws sparks off violently!.@n", true, ch, nullptr, nullptr, TO_ROOM);
+                    ch->sendText("Your aura throws sparks off violently as you charge more ki.\r\n");
+                    break;
+                default:
+                    break;
                 }
-                if (GET_CHARGE(ch) >= GET_CHARGETO(ch)) {
+                if (GET_CHARGE(ch) >= GET_CHARGETO(ch))
+                {
                     ch->setBaseStat<int64_t>("charge", GET_CHARGETO(ch));
                     ch->modBaseStat<int64_t>("charge", GET_INT(ch));
-                                        ch->sendText("You have finished charging!\r\n");
+                    ch->sendText("You have finished charging!\r\n");
                     act("$n@w's aura burns brightly and then evens out.@n", true, ch, nullptr, nullptr, TO_ROOM);
                     stopCharge = true;
                 }
             }
-            if (concentration) {
+            if (concentration)
+            {
                 improve_skill(ch, SKILL_CONCENTRATION, 1);
             }
         }
-        if(stopCharge) {
+        if (stopCharge)
+        {
             ch->setBaseStat<int64_t>("chargeto", 0);
             ch->player_flags.set(PLR_CHARGE, false);
         }
-        if(GET_CHARGE(ch) > 0) {
+        if (GET_CHARGE(ch) > 0)
+        {
             characterSubscriptions.subscribe("kiLeakingSystem", ch);
         }
     }
 
     auto subs2 = characterSubscriptions.all("kiLeakingSystem");
-    for(auto ch : filter_raw(subs2)) {
+    for (auto ch : filter_raw(subs2))
+    {
 
-        if(GET_CHARGE(ch) <= 0) {
+        if (GET_CHARGE(ch) <= 0)
+        {
             characterSubscriptions.unsubscribe("kiLeakingSystem", ch);
             continue;
         }
 
-        if ((GET_POS(ch) == POS_SLEEPING || GET_POS(ch) == POS_RESTING)) {
-                        ch->sendText("You stop charging and release all your pent up energy!\r\n");
-            switch (rand_number(1, 3)) {
-                case 1:
-                    act("$n@w's aura disappears.@n", true, ch, nullptr, nullptr, TO_ROOM);
-                    break;
-                case 2:
-                    act("$n@w's aura fades.@n", true, ch, nullptr, nullptr, TO_ROOM);
-                    break;
-                case 3:
-                    act("$n@w's aura flickers brightly before disappearing.@n", true, ch, nullptr, nullptr, TO_ROOM);
-                    break;
-                default:
-                    act("$n@w's aura disappears.@n", true, ch, nullptr, nullptr, TO_ROOM);
-                    break;
+        if ((GET_POS(ch) == POS_SLEEPING || GET_POS(ch) == POS_RESTING))
+        {
+            ch->sendText("You stop charging and release all your pent up energy!\r\n");
+            switch (rand_number(1, 3))
+            {
+            case 1:
+                act("$n@w's aura disappears.@n", true, ch, nullptr, nullptr, TO_ROOM);
+                break;
+            case 2:
+                act("$n@w's aura fades.@n", true, ch, nullptr, nullptr, TO_ROOM);
+                break;
+            case 3:
+                act("$n@w's aura flickers brightly before disappearing.@n", true, ch, nullptr, nullptr, TO_ROOM);
+                break;
+            default:
+                act("$n@w's aura disappears.@n", true, ch, nullptr, nullptr, TO_ROOM);
+                break;
             }
             ch->player_flags.set(PLR_CHARGE, false);
             ch->modCurVital(CharVital::ki, GET_CHARGE(ch));
@@ -1285,75 +1576,87 @@ void kiChargeSystem(uint64_t heartPulse, double deltaTime) {
         }
         auto docharge = PLR_FLAGGED(ch, PLR_CHARGE);
         auto prefki = GET_PREFERENCE(ch) == PREFERENCE_KI;
-        if (docharge && GET_BONUS(ch, BONUS_UNFOCUSED) > 0 && rand_number(1, 80) >= 70) {
-                        ch->sendText("You lose concentration due to your unfocused mind and release your charged energy!\r\n");
-            switch (rand_number(1, 3)) {
-                case 1:
-                    act("$n@w's aura disappears.@n", true, ch, nullptr, nullptr, TO_ROOM);
-                    break;
-                case 2:
-                    act("$n@w's aura fades.@n", true, ch, nullptr, nullptr, TO_ROOM);
-                    break;
-                case 3:
-                    act("$n@w's aura flickers brightly before disappearing.@n", true, ch, nullptr, nullptr, TO_ROOM);
-                    break;
-                default:
-                    act("$n@w's aura disappears.@n", true, ch, nullptr, nullptr, TO_ROOM);
-                    break;
+        if (docharge && GET_BONUS(ch, BONUS_UNFOCUSED) > 0 && rand_number(1, 80) >= 70)
+        {
+            ch->sendText("You lose concentration due to your unfocused mind and release your charged energy!\r\n");
+            switch (rand_number(1, 3))
+            {
+            case 1:
+                act("$n@w's aura disappears.@n", true, ch, nullptr, nullptr, TO_ROOM);
+                break;
+            case 2:
+                act("$n@w's aura fades.@n", true, ch, nullptr, nullptr, TO_ROOM);
+                break;
+            case 3:
+                act("$n@w's aura flickers brightly before disappearing.@n", true, ch, nullptr, nullptr, TO_ROOM);
+                break;
+            default:
+                act("$n@w's aura disappears.@n", true, ch, nullptr, nullptr, TO_ROOM);
+                break;
             }
             ch->player_flags.set(PLR_CHARGE, false);
             ch->modCurVital(CharVital::ki, GET_CHARGE(ch));
             ch->setBaseStat<int64_t>("charge", 0);
             ch->setBaseStat<int64_t>("chargeto", 0);
         }
-        if (GET_CHARGE(ch) >= ch->getEffectiveStat<int64_t>("ki") / 2) {
+        if (GET_CHARGE(ch) >= ch->getEffectiveStat<int64_t>("ki") / 2)
+        {
             improve_skill(ch, SKILL_CONCENTRATION, 1);
         }
         if (!docharge && rand_number(1, 40) >= 38 && !FIGHTING(ch) &&
-            (!prefki || GET_CHARGE(ch) > GET_MAX_MANA(ch) * 0.1)) {
-            if (GET_CHARGE(ch) >= GET_MAX_MANA(ch) / 100 && axion_dice(-10) > ch->getEffectiveStat("intelligence")) {
+            (!prefki || GET_CHARGE(ch) > GET_MAX_MANA(ch) * 0.1))
+        {
+            if (GET_CHARGE(ch) >= GET_MAX_MANA(ch) / 100 && axion_dice(-10) > ch->getEffectiveStat("intelligence"))
+            {
                 int64_t loss = 0;
-                                ch->sendText("You lose some of your energy slowly.\r\n");
-                switch (rand_number(1, 3)) {
-                    case 1:
-                        act("$n@w's aura flickers weakly.@n", true, ch, nullptr, nullptr, TO_ROOM);
-                        break;
-                    case 2:
-                        act("$n@w's aura sheds energy.@n", true, ch, nullptr, nullptr, TO_ROOM);
-                        break;
-                    case 3:
-                        act("$n@w's aura flickers brightly before growing dimmer.@n", true, ch, nullptr, nullptr,
-                            TO_ROOM);
-                        break;
-                    default:
-                        act("$n@w's aura shrinks some.@n", true, ch, nullptr, nullptr, TO_ROOM);
-                        break;
+                ch->sendText("You lose some of your energy slowly.\r\n");
+                switch (rand_number(1, 3))
+                {
+                case 1:
+                    act("$n@w's aura flickers weakly.@n", true, ch, nullptr, nullptr, TO_ROOM);
+                    break;
+                case 2:
+                    act("$n@w's aura sheds energy.@n", true, ch, nullptr, nullptr, TO_ROOM);
+                    break;
+                case 3:
+                    act("$n@w's aura flickers brightly before growing dimmer.@n", true, ch, nullptr, nullptr,
+                        TO_ROOM);
+                    break;
+                default:
+                    act("$n@w's aura shrinks some.@n", true, ch, nullptr, nullptr, TO_ROOM);
+                    break;
                 }
                 loss = GET_CHARGE(ch) / 20;
                 ch->modBaseStat<int64_t>("charge", -loss);
-            } else if (GET_CHARGE(ch) < GET_MAX_MANA(ch) / 100 && GET_CHARGE(ch) != 0) {
-                                ch->sendText("Your charged energy is completely gone as your aura fades.\r\n");
+            }
+            else if (GET_CHARGE(ch) < GET_MAX_MANA(ch) / 100 && GET_CHARGE(ch) != 0)
+            {
+                ch->sendText("Your charged energy is completely gone as your aura fades.\r\n");
                 act("$n@w's aura fades away dimmly.@n", true, ch, nullptr, nullptr, TO_ROOM);
                 ch->setBaseStat<int64_t>("charge", 0);
             }
         }
 
-        if(GET_CHARGE(ch) <= 0)
+        if (GET_CHARGE(ch) <= 0)
             characterSubscriptions.unsubscribe("kiLeakingSystem", ch);
     }
 }
 
-void appear(Character *ch) {
+void appear(Character *ch)
+{
     if (affected_by_spell(ch, SPELL_INVISIBLE))
         affect_from_char(ch, SPELL_INVISIBLE);
 
-    for(auto f : {AFF_INVISIBLE, AFF_HIDE}) ch->affect_flags.set(f, false);
+    for (auto f : {AFF_INVISIBLE, AFF_HIDE})
+        ch->affect_flags.set(f, false);
 
     act("$n slowly fades into existence.", false, ch, nullptr, nullptr, TO_ROOM);
 }
 
-void update_pos(Character *victim) {
-    if (AFF_FLAGGED(victim, AFF_KNOCKED)) {
+void update_pos(Character *victim)
+{
+    if (AFF_FLAGGED(victim, AFF_KNOCKED))
+    {
         return;
     }
     if ((GET_HIT(victim) > 0) && (GET_POS(victim) > POS_STUNNED))
@@ -1374,35 +1677,39 @@ void update_pos(Character *victim) {
         victim->setBaseStat<int>("position", POS_STUNNED);
 }
 
-
-static void check_killer(Character *ch, Character *vict) {
+static void check_killer(Character *ch, Character *vict)
+{
     if (PLR_FLAGGED(vict, PLR_KILLER) || PLR_FLAGGED(vict, PLR_THIEF))
         return;
     if (PLR_FLAGGED(ch, PLR_KILLER) || IS_NPC(ch) || IS_NPC(vict) || ch == vict)
         return;
-
 }
 
-
 /* start one char fighting another (yes, it is horrible, I know... )  */
-void set_fighting(Character *ch, Character *vict) {
+void set_fighting(Character *ch, Character *vict)
+{
     if (ch == vict)
         return;
 
-    if (FIGHTING(ch)) {
+    if (FIGHTING(ch))
+    {
         core_dump();
         return;
     }
 
     FIGHTING(ch) = vict;
 
-    if (GET_POS(ch) == POS_SITTING) {
+    if (GET_POS(ch) == POS_SITTING)
+    {
         ch->setBaseStat<int>("position", POS_SITTING);
-    } else if (GET_POS(ch) == POS_SLEEPING) {
+    }
+    else if (GET_POS(ch) == POS_SLEEPING)
+    {
         ch->setBaseStat<int>("position", POS_SLEEPING);
     }
 
-    for(auto c : {ch, vict}) {
+    for (auto c : {ch, vict})
+    {
         characterSubscriptions.subscribe("combatSystem", c);
     }
 
@@ -1410,12 +1717,13 @@ void set_fighting(Character *ch, Character *vict) {
         check_killer(ch, vict);
 }
 
-
 /* remove a char from the list of fighting chars */
-void stop_fighting(Character *ch) {
+void stop_fighting(Character *ch)
+{
     Character *temp;
 
-    if (IS_NPC(ch)) {
+    if (IS_NPC(ch))
+    {
         ch->setBaseStat<int>("combo", -1);
         ch->setBaseStat<int>("combo_hits", 0);
     }
@@ -1426,7 +1734,8 @@ void stop_fighting(Character *ch) {
     update_pos(ch);
 }
 
-static void make_pcorpse(Character *ch) {
+static void make_pcorpse(Character *ch)
+{
 
     Object *corpse;
     Object *money;
@@ -1439,10 +1748,12 @@ static void make_pcorpse(Character *ch) {
     /* This handles how the corpse is viewed - Iovan */
     handle_corpse_condition(corpse, ch);
 
-    if (AFF_FLAGGED(ch, AFF_ASHED)) {
+    if (AFF_FLAGGED(ch, AFF_ASHED))
+    {
         act("@WSome ashes fall off the corpse.@n", true, ch, nullptr, nullptr, TO_ROOM);
         int ashcount = rand_number(1, 3);
-        while(ashcount--) {
+        while (ashcount--)
+        {
             auto ashes = read_object(1305, VIRTUAL);
             ashes->setLocation(ch);
         }
@@ -1452,19 +1763,22 @@ static void make_pcorpse(Character *ch) {
     corpse->size = static_cast<Size>(get_size(ch));
 
     corpse->wear_flags.set(ITEM_WEAR_TAKE, true);
-    for(auto f : {ITEM_NODONATE, ITEM_UNIQUE_SAVE}) corpse->item_flags.set(f, true);
-    SET_OBJ_VAL(corpse, VAL_CONTAINER_CAPACITY, 0);      /* You can't store stuff in a corpse */
-    SET_OBJ_VAL(corpse, VAL_CONTAINER_CORPSE, 1);        /* corpse identifier */
-    SET_OBJ_VAL(corpse, VAL_CONTAINER_OWNER, ch->id);  /* corpse identifier */
+    for (auto f : {ITEM_NODONATE, ITEM_UNIQUE_SAVE})
+        corpse->item_flags.set(f, true);
+    SET_OBJ_VAL(corpse, VAL_CONTAINER_CAPACITY, 0);   /* You can't store stuff in a corpse */
+    SET_OBJ_VAL(corpse, VAL_CONTAINER_CORPSE, 1);     /* corpse identifier */
+    SET_OBJ_VAL(corpse, VAL_CONTAINER_OWNER, ch->id); /* corpse identifier */
     corpse->setBaseStat<weight_t>("weight", ch->getBaseStat("weight_total"));
     corpse->setBaseStat<int>("cost_per_day", 100000);
     corpse->setBaseStat<int>("timer", CONFIG_MAX_PC_CORPSE_TIME);
 
-
     auto inv = ch->getInventory();
-    for (auto obj : filter_shared(inv)) {
-        if (GET_OBJ_VNUM(obj) < 19900 && GET_OBJ_VNUM(obj) != 17998) {
-            if (!((GET_OBJ_VNUM(obj) >= 18800 && GET_OBJ_VNUM(obj) <= 18999) || (GET_OBJ_VNUM(obj) >= 19100 && GET_OBJ_VNUM(obj) <= 19199))) {
+    for (auto obj : filter_shared(inv))
+    {
+        if (GET_OBJ_VNUM(obj) < 19900 && GET_OBJ_VNUM(obj) != 17998)
+        {
+            if (!((GET_OBJ_VNUM(obj) >= 18800 && GET_OBJ_VNUM(obj) <= 18999) || (GET_OBJ_VNUM(obj) >= 19100 && GET_OBJ_VNUM(obj) <= 19199)))
+            {
                 obj->clearLocation();
                 corpse->addToInventory(obj);
             }
@@ -1472,7 +1786,8 @@ static void make_pcorpse(Character *ch) {
     }
 
     /* transfer gold */
-    if (GET_GOLD(ch) > 0) {
+    if (GET_GOLD(ch) > 0)
+    {
         /*
          * following 'if' clause added to fix gold duplication loophole
          * The above line apparently refers to the old "partially log in,
@@ -1480,7 +1795,8 @@ static void make_pcorpse(Character *ch) {
          * bug. The duplication has been fixed (knock on wood) but the
          * test below shall live on, for a while. -gg 3/3/2002
          */
-        if (IS_NPC(ch) || ch->desc) {
+        if (IS_NPC(ch) || ch->desc)
+        {
             money = create_money(GET_GOLD(ch));
             corpse->addToInventory(money);
         }
@@ -1492,105 +1808,123 @@ static void make_pcorpse(Character *ch) {
 
 /* This handles how corpses are viewed. How many limbs they have. If they were *
  * disintergrated, blown in half, beat to a pulp, etc.        - Iovan 3/2/2011 */
-static void handle_corpse_condition(Object *corpse, Character *ch) {
+static void handle_corpse_condition(Object *corpse, Character *ch)
+{
 
     char buf2[MAX_NAME_LENGTH + 128];
     char descBuf[512];
-    for(const auto& v : {VAL_CORPSE_HEAD, VAL_CORPSE_RARM, VAL_CORPSE_LARM, VAL_CORPSE_RLEG, VAL_CORPSE_LLEG}) {
+    for (const auto &v : {VAL_CORPSE_HEAD, VAL_CORPSE_RARM, VAL_CORPSE_LARM, VAL_CORPSE_RLEG, VAL_CORPSE_LLEG})
+    {
         SET_OBJ_VAL(corpse, v, 1);
     }
 
-    switch (GET_DEATH_TYPE(ch)) {
-        case DTYPE_HEAD:
-            *buf2 = '\0';
-            snprintf(buf2, sizeof(buf2), "headless corpse %s", GET_NAME(ch));
-            corpse->strings["name"] = buf2;
+    switch (GET_DEATH_TYPE(ch))
+    {
+    case DTYPE_HEAD:
+        *buf2 = '\0';
+        snprintf(buf2, sizeof(buf2), "headless corpse %s", GET_NAME(ch));
+        corpse->strings["name"] = buf2;
 
-            *descBuf = '\0';
-            snprintf(descBuf, sizeof(descBuf), "The headless corpse of %s is lying here", GET_NAME(ch));
-            corpse->strings["room_description"] = descBuf;
+        *descBuf = '\0';
+        snprintf(descBuf, sizeof(descBuf), "The headless corpse of %s is lying here", GET_NAME(ch));
+        corpse->strings["room_description"] = descBuf;
 
-            *descBuf = '\0';
-            snprintf(descBuf, sizeof(descBuf), "The headless remains of %s's corpse", GET_NAME(ch));
-            corpse->strings["short_description"] = descBuf;
-            SET_OBJ_VAL(corpse, VAL_CORPSE_HEAD, 0);
-            break;
-        case DTYPE_HALF:
-            *buf2 = '\0';
-            snprintf(buf2, sizeof(buf2), "half corpse %s", GET_NAME(ch));
-            corpse->strings["name"] = buf2;
+        *descBuf = '\0';
+        snprintf(descBuf, sizeof(descBuf), "The headless remains of %s's corpse", GET_NAME(ch));
+        corpse->strings["short_description"] = descBuf;
+        SET_OBJ_VAL(corpse, VAL_CORPSE_HEAD, 0);
+        break;
+    case DTYPE_HALF:
+        *buf2 = '\0';
+        snprintf(buf2, sizeof(buf2), "half corpse %s", GET_NAME(ch));
+        corpse->strings["name"] = buf2;
 
-            *descBuf = '\0';
-            snprintf(descBuf, sizeof(descBuf), "Half of %s's corpse is lying here", GET_NAME(ch));
-            corpse->strings["room_description"] = descBuf;
+        *descBuf = '\0';
+        snprintf(descBuf, sizeof(descBuf), "Half of %s's corpse is lying here", GET_NAME(ch));
+        corpse->strings["room_description"] = descBuf;
 
-            *descBuf = '\0';
-            snprintf(descBuf, sizeof(descBuf), "Half of %s's corpse", GET_NAME(ch));
-            corpse->strings["short_description"] = descBuf;
-            break;
-        case DTYPE_VAPOR:
-            *buf2 = '\0';
-            snprintf(buf2, sizeof(buf2), "burnt chunks corpse %s", GET_NAME(ch));
-            corpse->strings["name"] = buf2;
+        *descBuf = '\0';
+        snprintf(descBuf, sizeof(descBuf), "Half of %s's corpse", GET_NAME(ch));
+        corpse->strings["short_description"] = descBuf;
+        break;
+    case DTYPE_VAPOR:
+        *buf2 = '\0';
+        snprintf(buf2, sizeof(buf2), "burnt chunks corpse %s", GET_NAME(ch));
+        corpse->strings["name"] = buf2;
 
-            *descBuf = '\0';
-            snprintf(descBuf, sizeof(descBuf), "The burnt chunks of %s's corpse are scattered here", GET_NAME(ch));
-            corpse->strings["room_description"] = descBuf;
+        *descBuf = '\0';
+        snprintf(descBuf, sizeof(descBuf), "The burnt chunks of %s's corpse are scattered here", GET_NAME(ch));
+        corpse->strings["room_description"] = descBuf;
 
-            *descBuf = '\0';
-            snprintf(descBuf, sizeof(descBuf), "The burnt chunks of %s's corpse", GET_NAME(ch));
-            corpse->strings["short_description"] = descBuf;
-            break;
-        case DTYPE_PULP:
-            *buf2 = '\0';
-            snprintf(buf2, sizeof(buf2), "beaten bloody corpse %s", GET_NAME(ch));
-            corpse->strings["name"] = buf2;
+        *descBuf = '\0';
+        snprintf(descBuf, sizeof(descBuf), "The burnt chunks of %s's corpse", GET_NAME(ch));
+        corpse->strings["short_description"] = descBuf;
+        break;
+    case DTYPE_PULP:
+        *buf2 = '\0';
+        snprintf(buf2, sizeof(buf2), "beaten bloody corpse %s", GET_NAME(ch));
+        corpse->strings["name"] = buf2;
 
-            *descBuf = '\0';
-            snprintf(descBuf, sizeof(descBuf), "The bloody and beaten corpse of %s is lying here", GET_NAME(ch));
-            corpse->strings["room_description"] = descBuf;
+        *descBuf = '\0';
+        snprintf(descBuf, sizeof(descBuf), "The bloody and beaten corpse of %s is lying here", GET_NAME(ch));
+        corpse->strings["room_description"] = descBuf;
 
-            *descBuf = '\0';
-            snprintf(descBuf, sizeof(descBuf), "The bloody and beaten remains of %s's corpse", GET_NAME(ch));
-            corpse->strings["short_description"] = descBuf;
-            break;
-        default:
-            snprintf(buf2, sizeof(buf2), "corpse %s", GET_NAME(ch));
-            corpse->strings["name"] = buf2;
+        *descBuf = '\0';
+        snprintf(descBuf, sizeof(descBuf), "The bloody and beaten remains of %s's corpse", GET_NAME(ch));
+        corpse->strings["short_description"] = descBuf;
+        break;
+    default:
+        snprintf(buf2, sizeof(buf2), "corpse %s", GET_NAME(ch));
+        corpse->strings["name"] = buf2;
 
-            *descBuf = '\0';
-            snprintf(descBuf, sizeof(descBuf), "The corpse of %s is lying here", GET_NAME(ch));
-            corpse->strings["room_description"] = descBuf;
+        *descBuf = '\0';
+        snprintf(descBuf, sizeof(descBuf), "The corpse of %s is lying here", GET_NAME(ch));
+        corpse->strings["room_description"] = descBuf;
 
-            *descBuf = '\0';
-            snprintf(descBuf, sizeof(descBuf), "the remains of %s's corpse", GET_NAME(ch));
-            corpse->strings["short_description"] = descBuf;
-            break;
+        *descBuf = '\0';
+        snprintf(descBuf, sizeof(descBuf), "the remains of %s's corpse", GET_NAME(ch));
+        corpse->strings["short_description"] = descBuf;
+        break;
     }
 
-    if (!IS_NPC(ch)) { /* Let's set the corpse's limbs */
-        if (GET_LIMBCOND(ch, 0) <= 0) {
+    if (!IS_NPC(ch))
+    { /* Let's set the corpse's limbs */
+        if (GET_LIMBCOND(ch, 0) <= 0)
+        {
             SET_OBJ_VAL(corpse, VAL_CORPSE_RARM, 0);
-        } else if (GET_LIMBCOND(ch, 0) > 0 && GET_LIMBCOND(ch, 0) < 50) {
+        }
+        else if (GET_LIMBCOND(ch, 0) > 0 && GET_LIMBCOND(ch, 0) < 50)
+        {
             SET_OBJ_VAL(corpse, VAL_CORPSE_RARM, 2);
         }
-        if (GET_LIMBCOND(ch, 1) <= 0) {
+        if (GET_LIMBCOND(ch, 1) <= 0)
+        {
             SET_OBJ_VAL(corpse, VAL_CORPSE_LARM, 0);
-        } else if (GET_LIMBCOND(ch, 1) > 0 && GET_LIMBCOND(ch, 1) < 50) {
+        }
+        else if (GET_LIMBCOND(ch, 1) > 0 && GET_LIMBCOND(ch, 1) < 50)
+        {
             SET_OBJ_VAL(corpse, VAL_CORPSE_LARM, 2);
         }
-        if (GET_LIMBCOND(ch, 2) <= 0) {
+        if (GET_LIMBCOND(ch, 2) <= 0)
+        {
             SET_OBJ_VAL(corpse, VAL_CORPSE_RLEG, 0);
-        } else if (GET_LIMBCOND(ch, 2) > 0 && GET_LIMBCOND(ch, 2) < 50) {
+        }
+        else if (GET_LIMBCOND(ch, 2) > 0 && GET_LIMBCOND(ch, 2) < 50)
+        {
             SET_OBJ_VAL(corpse, VAL_CORPSE_RLEG, 2);
         }
-        if (GET_LIMBCOND(ch, 3) <= 0) {
+        if (GET_LIMBCOND(ch, 3) <= 0)
+        {
             SET_OBJ_VAL(corpse, VAL_CORPSE_LLEG, 0);
-        } else if (GET_LIMBCOND(ch, 3) > 0 && GET_LIMBCOND(ch, 3) < 50) {
+        }
+        else if (GET_LIMBCOND(ch, 3) > 0 && GET_LIMBCOND(ch, 3) < 50)
+        {
             SET_OBJ_VAL(corpse, VAL_CORPSE_LLEG, 2);
         }
         return;
-    } else { /* Do nothing else! */
+    }
+    else
+    { /* Do nothing else! */
         return;
     }
 }
@@ -1763,13 +2097,13 @@ static void make_corpse(Character *ch, Character *tch)
     corpse->setLocation(ch);
 }
 
-void loadmap(Character *ch) {
-
+void loadmap(Character *ch)
+{
 }
 
-
 /* When ch kills victim */
-static void change_alignment(Character *ch, Character *victim) {
+static void change_alignment(Character *ch, Character *victim)
+{
     /*
      * If you kill a monster with alignment A, you move 1/20th of the way to
      * having alignment -A.
@@ -1784,80 +2118,98 @@ static void change_alignment(Character *ch, Character *victim) {
      }*/
 }
 
-void death_cry(Character *ch) {
-    for (auto &[dir, e] : ch->location.getExits()) {
-        if (IS_SET(e.exit_info, EX_CLOSED)) continue;
+void death_cry(Character *ch)
+{
+    for (auto &[dir, e] : ch->location.getExits())
+    {
+        if (IS_SET(e.exit_info, EX_CLOSED))
+            continue;
         e.sendText("Your blood freezes as you hear someone's death cry.\r\n");
     }
 }
 
 /* Let's clean up necessary things after "death" */
-static void final_combat_resolve(Character *ch) {
+static void final_combat_resolve(Character *ch)
+{
     Object *chair;
 
-    if (auto chair = SITS(ch); chair) {
+    if (auto chair = SITS(ch); chair)
+    {
         ch->sits.reset();
         chair->sitting.reset();
     }
-    if (!IS_NPC(ch) && !ch->clones.empty()) {
+    if (!IS_NPC(ch) && !ch->clones.empty())
+    {
         auto clones = ch->clones;
-        for(auto c : filter_raw(clones)) {
+        for (auto c : filter_raw(clones))
+        {
             handle_multi_merge(c);
         }
     }
-    if (CARRYING(ch)) {
+    if (CARRYING(ch))
+    {
         carry_drop(ch, 2);
     }
-    if (auto carriedby = ch->carried_by; carriedby) {
+    if (auto carriedby = ch->carried_by; carriedby)
+    {
         carry_drop(carriedby, 2);
     }
-    if (DRAGGING(ch)) {
+    if (DRAGGING(ch))
+    {
         DRAGGED(DRAGGING(ch)) = nullptr;
         DRAGGING(ch) = nullptr;
     }
-    if (DRAGGED(ch)) {
+    if (DRAGGED(ch))
+    {
         DRAGGING(DRAGGED(ch)) = nullptr;
         DRAGGED(ch) = nullptr;
     }
-    if (GRAPPLING(ch)) {
+    if (GRAPPLING(ch))
+    {
         GRAPPLING(ch)->setBaseStat<int>("grapple_type", -1);
         GRAPPLED(GRAPPLING(ch)) = nullptr;
         GRAPPLING(ch) = nullptr;
         ch->setBaseStat<int>("grapple_type", -1);
     }
-    if (GRAPPLED(ch)) {
+    if (GRAPPLED(ch))
+    {
         GRAPPLED(ch)->setBaseStat<int>("grapple_type", -1);
         GRAPPLING(GRAPPLED(ch)) = nullptr;
         GRAPPLED(ch) = nullptr;
         ch->setBaseStat<int>("grapple_type", -1);
     }
-    if (BLOCKED(ch)) {
+    if (BLOCKED(ch))
+    {
         BLOCKS(BLOCKED(ch)) = nullptr;
         BLOCKED(ch) = nullptr;
     }
-    if (BLOCKS(ch)) {
+    if (BLOCKS(ch))
+    {
         BLOCKED(BLOCKS(ch)) = nullptr;
         BLOCKS(ch) = nullptr;
     }
-    if (ABSORBING(ch)) {
+    if (ABSORBING(ch))
+    {
         ABSORBBY(ABSORBING(ch)) = nullptr;
         ABSORBING(ch) = nullptr;
     }
-    if (ABSORBBY(ch)) {
+    if (ABSORBBY(ch))
+    {
         ABSORBING(ABSORBBY(ch)) = nullptr;
         ABSORBBY(ch) = nullptr;
     }
-
 }
 
-enum DeathType : uint8_t {
+enum DeathType : uint8_t
+{
     Afterlife = 0,
     Northran = 1,
     Past = 2,
     Newbie = 3
 };
 
-void raw_kill(Character *ch, Character *killer) {
+void raw_kill(Character *ch, Character *killer)
+{
     Character *k, *temp;
 
     if (FIGHTING(ch))
@@ -1873,86 +2225,128 @@ void raw_kill(Character *ch, Character *killer) {
     if (GET_POS(ch) != POS_SITTING && GET_POS(ch) != POS_SLEEPING && GET_POS(ch) != POS_RESTING)
         ch->setBaseStat<int>("position", POS_STANDING);
 
-    if (killer && !IS_NPC(killer)) {
-        if (!IS_NPC(killer) && !IS_NPC(ch)) {
+    if (killer && !IS_NPC(killer))
+    {
+        if (!IS_NPC(killer) && !IS_NPC(ch))
+        {
             send_to_imm("[PK] %s killed %s at room [%d]\r\n", GET_NAME(killer), GET_NAME(ch),
                         killer->location.getVnum());
         }
-        if ((IS_SAIYAN(killer) && rand_number(1, 2) == 2) || !IS_SAIYAN(killer)) {
+        if ((IS_SAIYAN(killer) && rand_number(1, 2) == 2) || !IS_SAIYAN(killer))
+        {
             if (rand_number(1, 6) >= 5 &&
-                (level_exp(killer, GET_LEVEL(killer) + 1) - GET_EXP(killer) > 0 || GET_LEVEL(killer) == 100)) {
+                (level_exp(killer, GET_LEVEL(killer) + 1) - GET_EXP(killer) > 0 || GET_LEVEL(killer) == 100))
+            {
                 int psreward = GET_WIS(killer) * 0.35;
-                if (GET_LEVEL(killer) > GET_LEVEL(ch) + 5) {
+                if (GET_LEVEL(killer) > GET_LEVEL(ch) + 5)
+                {
                     psreward *= 0.2;
-                } else if (GET_LEVEL(killer) > GET_LEVEL(ch) + 2) {
+                }
+                else if (GET_LEVEL(killer) > GET_LEVEL(ch) + 2)
+                {
                     psreward *= 0.5;
                 }
-                if (IS_HUMAN(killer) || killer->bio_genomes.get(Race::human)) {
+                if (IS_HUMAN(killer) || killer->bio_genomes.get(Race::human))
+                {
                     psreward *= 1.25;
                 }
-                if (IS_HALFBREED(ch)) {
+                if (IS_HALFBREED(ch))
+                {
                     psreward -= psreward * 0.4;
                 }
                 if (IS_NPC(ch) && MOB_FLAGGED(ch, MOB_HUSK) && GET_PRACTICES(killer) > 50 &&
-                    IS_BIO(ch)) {
+                    IS_BIO(ch))
+                {
                     psreward = 0;
-                                        killer->sendText("@D[@G+0 @BPS @cCapped at 50 for Absorb@D]@n\r\n");
-                } else {
+                    killer->sendText("@D[@G+0 @BPS @cCapped at 50 for Absorb@D]@n\r\n");
+                }
+                else
+                {
                     killer->modPractices(psreward);
-                                        killer->send_to("@D[@G+%d @BPS@D]@n\r\n", psreward);
+                    killer->send_to("@D[@G+%d @BPS@D]@n\r\n", psreward);
                 }
             }
         }
-        if (IS_ANDROID(killer) && !IS_NPC(killer) && !(killer->subrace == SubRace::android_model_absorb)) {
+        if (IS_ANDROID(killer) && !IS_NPC(killer) && !(killer->subrace == SubRace::android_model_absorb))
+        {
             int up = 0;
             auto klevel = GET_LEVEL(killer);
             auto chlevel = GET_LEVEL(ch);
-            if (killer->subrace == SubRace::android_model_repair) {
-                
-                if (klevel > chlevel + 15) {
-                                        killer->sendText("@D[@G+0 @mUpgrade Point @r-WEAK-@D]@n\r\n");
-                } else if (klevel > chlevel + 10) {
+            if (killer->subrace == SubRace::android_model_repair)
+            {
+
+                if (klevel > chlevel + 15)
+                {
+                    killer->sendText("@D[@G+0 @mUpgrade Point @r-WEAK-@D]@n\r\n");
+                }
+                else if (klevel > chlevel + 10)
+                {
                     up = 3;
-                } else if (klevel > chlevel + 8) {
+                }
+                else if (klevel > chlevel + 8)
+                {
                     up = 6;
-                } else if (klevel > chlevel + 4) {
+                }
+                else if (klevel > chlevel + 4)
+                {
                     up = 12;
-                } else if (klevel > chlevel + 2) {
+                }
+                else if (klevel > chlevel + 2)
+                {
                     up = 16;
-                } else {
+                }
+                else
+                {
                     up = 28;
                 }
-            } else {
-                if (klevel > chlevel + 15) {
-                                        killer->sendText("@D[@G+0 @mUpgrade Point @r-WEAK-@D]@n\r\n");
-                } else if (klevel > chlevel + 10) {
+            }
+            else
+            {
+                if (klevel > chlevel + 15)
+                {
+                    killer->sendText("@D[@G+0 @mUpgrade Point @r-WEAK-@D]@n\r\n");
+                }
+                else if (klevel > chlevel + 10)
+                {
                     up = 5;
-                } else if (klevel > chlevel + 6) {
+                }
+                else if (klevel > chlevel + 6)
+                {
                     up = 12;
-                } else if (klevel > chlevel + 4) {
+                }
+                else if (klevel > chlevel + 4)
+                {
                     up = 18;
-                } else if (klevel > chlevel + 2) {
+                }
+                else if (klevel > chlevel + 2)
+                {
                     up = 28;
-                } else {
+                }
+                else
+                {
                     up = 36;
                 }
             }
-            if(up > 0) {
+            if (up > 0)
+            {
                 killer->modBaseStat<int>("upgrade_points", up);
-                                killer->send_to("@D[@G+%d @mUpgrade Points@D]@n\r\n", up);
+                killer->send_to("@D[@G+%d @mUpgrade Points@D]@n\r\n", up);
             }
         }
         if (death_mtrigger(ch, killer))
             death_cry(ch);
-    } else
+    }
+    else
         death_cry(ch);
 
     update_pos(ch);
 
-    if (IS_NPC(ch) && !MOB_FLAGGED(ch, MOB_DUMMY)) {
+    if (IS_NPC(ch) && !MOB_FLAGGED(ch, MOB_DUMMY))
+    {
         int shadowed = false;
         ch->modCurVitalDam(CharVital::health, 1);
-        if (IS_SHADOW_DRAGON1(ch)) {
+        if (IS_SHADOW_DRAGON1(ch))
+        {
             Object *obj = nullptr;
             SHADOW_DRAGON1 = -1;
             ch->location.sendText("@YThe one star dragon ball falls to the ground!@n\r\n");
@@ -1960,7 +2354,9 @@ void raw_kill(Character *ch, Character *killer) {
             obj = read_object(20, VIRTUAL);
             obj->setLocation(ch);
             shadowed = true;
-        } else if (IS_SHADOW_DRAGON2(ch)) {
+        }
+        else if (IS_SHADOW_DRAGON2(ch))
+        {
             Object *obj = nullptr;
             SHADOW_DRAGON2 = -1;
             ch->location.sendText("@YThe two star dragon ball falls to the ground!@n\r\n");
@@ -1968,7 +2364,9 @@ void raw_kill(Character *ch, Character *killer) {
             obj = read_object(21, VIRTUAL);
             obj->setLocation(ch);
             shadowed = true;
-        } else if (IS_SHADOW_DRAGON3(ch)) {
+        }
+        else if (IS_SHADOW_DRAGON3(ch))
+        {
             Object *obj = nullptr;
             SHADOW_DRAGON3 = -1;
             ch->location.sendText("@YThe three star dragon ball falls to the ground!@n\r\n");
@@ -1976,7 +2374,9 @@ void raw_kill(Character *ch, Character *killer) {
             obj = read_object(22, VIRTUAL);
             obj->setLocation(ch);
             shadowed = true;
-        } else if (IS_SHADOW_DRAGON4(ch)) {
+        }
+        else if (IS_SHADOW_DRAGON4(ch))
+        {
             Object *obj = nullptr;
             SHADOW_DRAGON4 = -1;
             ch->location.sendText("@YThe four star dragon ball falls to the ground!@n\r\n");
@@ -1984,7 +2384,9 @@ void raw_kill(Character *ch, Character *killer) {
             obj = read_object(23, VIRTUAL);
             obj->setLocation(ch);
             shadowed = true;
-        } else if (IS_SHADOW_DRAGON5(ch)) {
+        }
+        else if (IS_SHADOW_DRAGON5(ch))
+        {
             Object *obj = nullptr;
             SHADOW_DRAGON5 = -1;
             ch->location.sendText("@YThe five star dragon ball falls to the ground!@n\r\n");
@@ -1992,7 +2394,9 @@ void raw_kill(Character *ch, Character *killer) {
             obj = read_object(24, VIRTUAL);
             obj->setLocation(ch);
             shadowed = true;
-        } else if (IS_SHADOW_DRAGON6(ch)) {
+        }
+        else if (IS_SHADOW_DRAGON6(ch))
+        {
             Object *obj = nullptr;
             SHADOW_DRAGON6 = -1;
             ch->location.sendText("@YThe six star dragon ball falls to the ground!@n\r\n");
@@ -2000,7 +2404,9 @@ void raw_kill(Character *ch, Character *killer) {
             obj = read_object(25, VIRTUAL);
             obj->setLocation(ch);
             shadowed = true;
-        } else if (IS_SHADOW_DRAGON7(ch)) {
+        }
+        else if (IS_SHADOW_DRAGON7(ch))
+        {
             Object *obj = nullptr;
             SHADOW_DRAGON7 = -1;
             ch->location.sendText("@YThe seven star dragon ball falls to the ground!@n\r\n");
@@ -2012,19 +2418,28 @@ void raw_kill(Character *ch, Character *killer) {
         make_corpse(ch, killer);
         purge_homing(ch);
         extract_char(ch);
-        if (shadowed == true) {
+        if (shadowed == true)
+        {
             shadow_dragons_live();
         }
-    } else if (IS_NPC(ch) && MOB_FLAGGED(ch, MOB_DUMMY)) {
+    }
+    else if (IS_NPC(ch) && MOB_FLAGGED(ch, MOB_DUMMY))
+    {
         ch->modCurVitalDam(CharVital::health, 1);
         extract_char(ch);
-    } else {
+    }
+    else
+    {
         if (!AFF_FLAGGED(ch, AFF_SPIRIT) && !ch->location.getWhereFlag(WhereFlag::pendulum_past) &&
-            (ch->location.getVnum() < 17900 || ch->location.getVnum() > 17999)) {
-            if (!PLR_FLAGGED(ch, PLR_ABSORBED)) {
+            (ch->location.getVnum() < 17900 || ch->location.getVnum() > 17999))
+        {
+            if (!PLR_FLAGGED(ch, PLR_ABSORBED))
+            {
                 make_pcorpse(ch);
                 loadmap(ch);
-            } else {
+            }
+            else
+            {
                 ch->player_flags.set(PLR_ABSORBED, false);
             }
         }
@@ -2032,7 +2447,8 @@ void raw_kill(Character *ch, Character *killer) {
         if (FIGHTING(ch))
             stop_fighting(ch);
         auto subs = characterSubscriptions.all("combatSystem");
-        for (auto c : filter_raw(subs)) {
+        for (auto c : filter_raw(subs))
+        {
             if (FIGHTING(c) == ch)
                 stop_fighting(c);
         }
@@ -2046,60 +2462,69 @@ void raw_kill(Character *ch, Character *killer) {
         else if (ch->is_newbie())
             death_type = Newbie;
 
-
-        switch (death_type) {
-            case Afterlife:
-                purge_homing(ch);
-                if (GET_LEVEL(ch) > 0 && has_group(ch)) {
-                    if (ch->master) {
-                        group_bonus(ch, 1);
-                    } else {
-                        group_bonus(ch, 0);
-                    }
+        switch (death_type)
+        {
+        case Afterlife:
+            purge_homing(ch);
+            if (GET_LEVEL(ch) > 0 && has_group(ch))
+            {
+                if (ch->master)
+                {
+                    group_bonus(ch, 1);
                 }
-                ch->teleport_to(6000);
-                ch->ghostify();
-                break;
-            case Northran:
-                ch->restore(false);
-                ch->teleport_to(17900);
-                android_lose = false;
-                                ch->sendText("You wake up and realise that you didn't die, how or why are a mystery.\r\n");
-                break;
-            case Past:
-                ch->restore(false);
-                ch->teleport_to(1561);
-                android_lose = false;
-                                ch->sendText("You wake up and realise that you died, but only in your mind.\r\n");
-                break;
-            case Newbie:
-                ch->restore(false);
-                ch->teleport_to(sensei::getStartRoom(ch->sensei));
-                                ch->sendText("\r\n@RYou should beware, when you reach level 9, you will actually die. So you\r\n"
-                                 "should learn to be more careful. Since when you die past that point and\r\n"
-                                 "actually reach the afterlife you need to realise that being revived will\r\n"
-                                 "not be very easy. So treat your character's dying with as much care as\r\n"
-                                 "possible.@n\r\n");
-                break;
+                else
+                {
+                    group_bonus(ch, 0);
+                }
+            }
+            ch->teleport_to(6000);
+            ch->ghostify();
+            break;
+        case Northran:
+            ch->restore(false);
+            ch->teleport_to(17900);
+            android_lose = false;
+            ch->sendText("You wake up and realise that you didn't die, how or why are a mystery.\r\n");
+            break;
+        case Past:
+            ch->restore(false);
+            ch->teleport_to(1561);
+            android_lose = false;
+            ch->sendText("You wake up and realise that you died, but only in your mind.\r\n");
+            break;
+        case Newbie:
+            ch->restore(false);
+            ch->teleport_to(sensei::getStartRoom(ch->sensei));
+            ch->sendText("\r\n@RYou should beware, when you reach level 9, you will actually die. So you\r\n"
+                         "should learn to be more careful. Since when you die past that point and\r\n"
+                         "actually reach the afterlife you need to realise that being revived will\r\n"
+                         "not be very easy. So treat your character's dying with as much care as\r\n"
+                         "possible.@n\r\n");
+            break;
         }
 
-        if (!IS_NPC(ch)) {
-            if (IS_ANDROID(ch) && ch->subrace != SubRace::android_model_absorb && android_lose && GET_UP(ch) > 5) {
+        if (!IS_NPC(ch))
+        {
+            if (IS_ANDROID(ch) && ch->subrace != SubRace::android_model_absorb && android_lose && GET_UP(ch) > 5)
+            {
                 int loss = GET_UP(ch) / 5;
                 ch->modBaseStat<int>("upgrade_points", -loss);
-                                ch->send_to("@rYou lose @R%s@r upgrade points!@n\r\n", add_commas(loss).c_str());
+                ch->send_to("@rYou lose @R%s@r upgrade points!@n\r\n", add_commas(loss).c_str());
             }
         }
         WAIT_STATE(ch, PULSE_VIOLENCE);
     }
 }
 
-void die(Character *ch, Character *killer) {
-    if (!IS_NPC(ch)) {
+void die(Character *ch, Character *killer)
+{
+    if (!IS_NPC(ch))
+    {
         ch->player_flags.set(PLR_HEALT, false);
         if ((IS_MAJIN(ch) || IS_BIO(ch)) &&
             ((ch->getCurVital(CharVital::lifeforce)) >= (ch->getEffectiveStat("lifeforce")) * 0.75 || (PLR_FLAGGED(ch, PLR_SELFD2) &&
-                                                             (ch->getCurVital(CharVital::lifeforce)) >= (ch->getEffectiveStat("lifeforce")) * 0.5))) {
+                                                                                                       (ch->getCurVital(CharVital::lifeforce)) >= (ch->getEffectiveStat("lifeforce")) * 0.5)))
+        {
             ch->modCurVitalDam(CharVital::lifeforce, 2);
             ch->modCurVitalDam(CharVital::health, 1);
             ch->player_flags.set(PLR_GOOP, true);
@@ -2107,7 +2532,8 @@ void die(Character *ch, Character *killer) {
             ch->setBaseStat<int>("gooptime", 32);
             return;
         }
-        if (PLR_FLAGGED(ch, PLR_IMMORTAL)) {
+        if (PLR_FLAGGED(ch, PLR_IMMORTAL))
+        {
             act("@c$n@w disappears right before dying. $n appears to be immortal.@n", true, ch, nullptr, nullptr,
                 TO_CHAR);
             act("@c$n@w disappears right before dying. $n appears to be immortal.@n.", true, ch, nullptr, nullptr,
@@ -2116,35 +2542,49 @@ void die(Character *ch, Character *killer) {
             ch->modCurVitalDam(CharVital::ki, 1);
             ch->modCurVitalDam(CharVital::stamina, 1);
             null_affect(ch, AFF_POISON);
-            if (GET_COND(ch, HUNGER) >= 0) {
+            if (GET_COND(ch, HUNGER) >= 0)
+            {
                 GET_COND(ch, HUNGER) = 48;
             }
-            if (GET_COND(ch, THIRST) >= 0) {
+            if (GET_COND(ch, THIRST) >= 0)
+            {
                 GET_COND(ch, THIRST) = 48;
             }
-            if (FIGHTING(ch)) {
+            if (FIGHTING(ch))
+            {
                 stop_fighting(ch);
             }
             ch->setBaseStat<int>("position", POS_SITTING);
             ch->teleport_to(sensei::getStartRoom(ch->sensei));
             return;
         }
-        for(auto f : {PLR_KILLER, PLR_THIEF}) ch->player_flags.set(f, false);
-        for(auto f : {AFF_KNOCKED, AFF_SLEEP, AFF_PARALYZE}) ch->affect_flags.set(f, false);
-        if (!AFF_FLAGGED(ch, AFF_SPIRIT) && !ch->location.getWhereFlag(WhereFlag::pendulum_past) && !ch->is_newbie()) {
-            if (ch->location.getVnum() >= 2002 && ch->location.getVnum() <= 2011) {
+        for (auto f : {PLR_KILLER, PLR_THIEF})
+            ch->player_flags.set(f, false);
+        for (auto f : {AFF_KNOCKED, AFF_SLEEP, AFF_PARALYZE})
+            ch->affect_flags.set(f, false);
+        if (!AFF_FLAGGED(ch, AFF_SPIRIT) && !ch->location.getWhereFlag(WhereFlag::pendulum_past) && !ch->is_newbie())
+        {
+            if (ch->location.getVnum() >= 2002 && ch->location.getVnum() <= 2011)
+            {
                 ch->setBaseStat("death_time", time(nullptr));
-            } else if (ch->location.getWhereFlag(WhereFlag::afterlife) || ch->location.getRoomFlag(ROOM_HELL)) {
-                                ch->sendText("Your soul is saved from destruction by King Yemma. Why? Who knows.\r\n");
-            } else if (IN_ARENA(ch)) {
+            }
+            else if (ch->location.getWhereFlag(WhereFlag::afterlife) || ch->location.getRoomFlag(ROOM_HELL))
+            {
+                ch->sendText("Your soul is saved from destruction by King Yemma. Why? Who knows.\r\n");
+            }
+            else if (IN_ARENA(ch))
+            {
                 cleanup_arena_watch(ch);
-                if (killer) {
+                if (killer)
+                {
                     cleanup_arena_watch(killer);
                     send_to_all("@R%s@r manages to defeat @R%s@r in the Arena!@n\r\n", GET_NAME(killer), GET_NAME(ch));
                     final_combat_resolve(killer);
                     final_combat_resolve(ch);
                     killer->teleport_to(17875);
-                } else {
+                }
+                else
+                {
                     send_to_all("@R%s@r dies in the water of the Arena and is disqualified!@n\r\n", GET_NAME(ch));
                 }
                 ch->clearLocation();
@@ -2153,168 +2593,237 @@ void die(Character *ch, Character *killer) {
                 ch->lookAtLocation();
                 final_combat_resolve(ch);
                 return;
-            } else {
-                if (killer && !IS_NPC(killer)) {
+            }
+            else
+            {
+                if (killer && !IS_NPC(killer))
+                {
                     ch->player_flags.set(PLR_PDEATH, true);
                 }
                 ch->setBaseStat("death_time", time(nullptr) + 28800);
                 ch->modBaseStat("death_count", 1);
             }
-            if (GET_COND(ch, HUNGER) >= 0) {
+            if (GET_COND(ch, HUNGER) >= 0)
+            {
                 GET_COND(ch, HUNGER) = 48;
             }
-            if (GET_COND(ch, THIRST) >= 0) {
+            if (GET_COND(ch, THIRST) >= 0)
+            {
                 GET_COND(ch, THIRST) = 48;
             }
         }
     }
 
-
     raw_kill(ch, killer);
 }
 
-static void perform_group_gain(Character *ch, int base, Character *victim) {
+static void perform_group_gain(Character *ch, int base, Character *victim)
+{
     int64_t share;
 
-    if (IN_ARENA(ch)) {
+    if (IN_ARENA(ch))
+    {
         return;
     }
     auto leader = ch->master ? ch->master : ch;
 
     /*share = MIN(CONFIG_MAX_EXP_GAIN, MAX(1, base * GET_LEVEL(ch)));*/
     share = MIN(2000000, base * GET_INT(ch));
-    if (!IS_NPC(ch)) {
-        if (GET_INT(ch) >= 100 && GET_MAX_HIT(ch) * .025 >= GET_MAX_HIT(victim)) {
+    if (!IS_NPC(ch))
+    {
+        if (GET_INT(ch) >= 100 && GET_MAX_HIT(ch) * .025 >= GET_MAX_HIT(victim))
+        {
             share *= .05;
-        } else if (GET_MAX_HIT(ch) * .025 >= GET_MAX_HIT(victim)) {
+        }
+        else if (GET_MAX_HIT(ch) * .025 >= GET_MAX_HIT(victim))
+        {
             share = 1;
-        } else if (GET_MAX_HIT(ch) * .05 >= GET_MAX_HIT(victim)) {
+        }
+        else if (GET_MAX_HIT(ch) * .05 >= GET_MAX_HIT(victim))
+        {
             share *= .05;
-        } else if (GET_MAX_HIT(ch) * .1 >= GET_MAX_HIT(victim)) {
+        }
+        else if (GET_MAX_HIT(ch) * .1 >= GET_MAX_HIT(victim))
+        {
             share *= .1;
-        } else if (GET_MAX_HIT(ch) * .15 >= GET_MAX_HIT(victim)) {
+        }
+        else if (GET_MAX_HIT(ch) * .15 >= GET_MAX_HIT(victim))
+        {
             share *= .15;
-        } else if (GET_MAX_HIT(ch) * .25 >= GET_MAX_HIT(victim)) {
+        }
+        else if (GET_MAX_HIT(ch) * .25 >= GET_MAX_HIT(victim))
+        {
             share *= .25;
-        } else if (GET_MAX_HIT(ch) * .5 >= GET_MAX_HIT(victim)) {
+        }
+        else if (GET_MAX_HIT(ch) * .5 >= GET_MAX_HIT(victim))
+        {
             share *= .5;
-        } else if (GET_MAX_HIT(ch) * .9 >= GET_MAX_HIT(victim)) {
+        }
+        else if (GET_MAX_HIT(ch) * .9 >= GET_MAX_HIT(victim))
+        {
             share *= .65;
-        } else if (GET_MAX_HIT(ch) >= GET_MAX_HIT(victim)) {
+        }
+        else if (GET_MAX_HIT(ch) >= GET_MAX_HIT(victim))
+        {
             share *= .7;
         }
     }
-    if (LASTHIT(victim) != 0 && LASTHIT(victim) != GET_IDNUM(ch)) {
+    if (LASTHIT(victim) != 0 && LASTHIT(victim) != GET_IDNUM(ch))
+    {
         struct follow_type *f;
         int checkit = false;
-        for (f = ch->followers; f; f = f->next) {
-            if (AFF_FLAGGED(f->follower, AFF_GROUP) && LASTHIT(victim) == GET_IDNUM(f->follower)) {
+        for (f = ch->followers; f; f = f->next)
+        {
+            if (AFF_FLAGGED(f->follower, AFF_GROUP) && LASTHIT(victim) == GET_IDNUM(f->follower))
+            {
                 checkit = true;
             }
         }
-        if (checkit == false && ch->master && GET_IDNUM(ch->master) == LASTHIT(victim)) {
+        if (checkit == false && ch->master && GET_IDNUM(ch->master) == LASTHIT(victim))
+        {
             checkit = true;
         }
-        if (checkit == false && ch->master) {
+        if (checkit == false && ch->master)
+        {
             Character *master = ch->master;
-            for (f = master->followers; f; f = f->next) {
-                if (f->follower != ch) {
-                    if (AFF_FLAGGED(f->follower, AFF_GROUP) && LASTHIT(victim) == GET_IDNUM(f->follower)) {
+            for (f = master->followers; f; f = f->next)
+            {
+                if (f->follower != ch)
+                {
+                    if (AFF_FLAGGED(f->follower, AFF_GROUP) && LASTHIT(victim) == GET_IDNUM(f->follower))
+                    {
                         checkit = true;
                     }
                 }
             }
         }
-        if (checkit == false) {
-                        ch->sendText("@RYou didn't do most of the work for this kill.@n\r\n");
+        if (checkit == false)
+        {
+            ch->sendText("@RYou didn't do most of the work for this kill.@n\r\n");
             share = 1;
         }
     }
-    if (IS_NPC(victim) && MOB_FLAGGED(victim, MOB_HUSK)) {
+    if (IS_NPC(victim) && MOB_FLAGGED(victim, MOB_HUSK))
+    {
         share /= 10;
     }
-    if (GET_BONUS(ch, BONUS_PRODIGY) > 0) {
+    if (GET_BONUS(ch, BONUS_PRODIGY) > 0)
+    {
         share = share + (share * .25);
     }
-    if (IS_SAIYAN(ch)) {
+    if (IS_SAIYAN(ch))
+    {
         share = share + (share * .50);
     }
-    if (IS_HALFBREED(ch)) {
+    if (IS_HALFBREED(ch))
+    {
         share = share + (share * .40);
     }
-    if (IS_ICER(ch)) {
+    if (IS_ICER(ch))
+    {
         share = share - (share * .20);
     }
-    if (GET_BONUS(ch, BONUS_LOYAL) > 0 && ch->master) {
+    if (GET_BONUS(ch, BONUS_LOYAL) > 0 && ch->master)
+    {
         share += share * 0.2;
     }
-    if (ch->master && ch->master != ch) {
+    if (ch->master && ch->master != ch)
+    {
         share += share * 0.15;
     }
-    if (MOB_FLAGGED(victim, MOB_KNOWKAIO)) {
+    if (MOB_FLAGGED(victim, MOB_KNOWKAIO))
+    {
         share += share * .25;
     }
     ch->modBaseStat<int>("group_kills", 1);
-    if ((GET_GROUPKILLS(ch) + 1) / 20 > share * 0.16) {
+    if ((GET_GROUPKILLS(ch) + 1) / 20 > share * 0.16)
+    {
         share += share * 0.16;
-    } else {
+    }
+    else
+    {
         share += (share * 0.02) * ((GET_GROUPKILLS(ch) + 1) / 20);
     }
-    if (group_bonus(ch, 2) == 2) {
-                ch->sendText("You receive a bonus from your group's leader! @D[@G+2 PS!@D]@n\r\n");
+    if (group_bonus(ch, 2) == 2)
+    {
+        ch->sendText("You receive a bonus from your group's leader! @D[@G+2 PS!@D]@n\r\n");
         ch->modPractices(2);
-    } else if (group_bonus(ch, 2) == 3) {
-                ch->send_to("You receive a bonus from your group's leader! @D[@G+5%s Exp!@D]@n\r\n", "%");
+    }
+    else if (group_bonus(ch, 2) == 3)
+    {
+        ch->send_to("You receive a bonus from your group's leader! @D[@G+5%s Exp!@D]@n\r\n", "%");
         share += share * 0.05;
-    } else if (group_bonus(ch, 2) == 5) {
+    }
+    else if (group_bonus(ch, 2) == 5)
+    {
         ch->modCurVitalDam(CharVital::ki, -.04);
-                ch->send_to("You receive a bonus from your group's leader! @D[@G4%s Ki Regenerated!@D]@n\r\n", "%");
-    } else if (group_bonus(ch, 2) == 6) {
+        ch->send_to("You receive a bonus from your group's leader! @D[@G4%s Ki Regenerated!@D]@n\r\n", "%");
+    }
+    else if (group_bonus(ch, 2) == 6)
+    {
         ch->modCurVitalDam(CharVital::ki, -.02);
         ch->modCurVitalDam(CharVital::stamina, -.02);
         ch->modCurVitalDam(CharVital::health, -.02);
-                ch->send_to("You receive a bonus from your group's leader! @D[@G2%s PL/ST/Ki Regenerated!@D]@n\r\n", "%");
-    } else if (group_bonus(ch, 2) == 7) {
-        if (IS_ANDROID(ch)) {
-            if (leader->subrace == SubRace::android_model_absorb) {
+        ch->send_to("You receive a bonus from your group's leader! @D[@G2%s PL/ST/Ki Regenerated!@D]@n\r\n", "%");
+    }
+    else if (group_bonus(ch, 2) == 7)
+    {
+        if (IS_ANDROID(ch))
+        {
+            if (leader->subrace == SubRace::android_model_absorb)
+            {
                 ch->modCurVitalDam(CharVital::ki, -.02);
                 ch->modCurVitalDam(CharVital::stamina, -.02);
-                                ch->send_to("You receive a bonus from your group's leader! @D[@G2%s PL/ST/Ki Recovered!@D]@n\r\n", "%");
-            } else if (leader->subrace == SubRace::android_model_repair) {
-                ch->modCurVitalDam(CharVital::health, -.02);
-                                ch->send_to("You receive a bonus from your group's leader! @D[@G5%s PL Repaired@D]@n\r\n", "%");
-            } else if (leader->subrace == SubRace::android_model_sense && !(ch->subrace == SubRace::android_model_absorb)) {
-                ch->modBaseStat<int>("upgrade_points", 5);
-                                ch->sendText("You receive a bonus from your group's leader! @D[@G+5 @mUpgrade Points@D]@n\r\n");
+                ch->send_to("You receive a bonus from your group's leader! @D[@G2%s PL/ST/Ki Recovered!@D]@n\r\n", "%");
             }
-        } else {
+            else if (leader->subrace == SubRace::android_model_repair)
+            {
+                ch->modCurVitalDam(CharVital::health, -.02);
+                ch->send_to("You receive a bonus from your group's leader! @D[@G5%s PL Repaired@D]@n\r\n", "%");
+            }
+            else if (leader->subrace == SubRace::android_model_sense && !(ch->subrace == SubRace::android_model_absorb))
+            {
+                ch->modBaseStat<int>("upgrade_points", 5);
+                ch->sendText("You receive a bonus from your group's leader! @D[@G+5 @mUpgrade Points@D]@n\r\n");
+            }
+        }
+        else
+        {
             ch->modCurVitalDam(CharVital::health, -.01);
             ch->modCurVitalDam(CharVital::ki, -.01);
             ch->modCurVitalDam(CharVital::stamina, -.01);
         }
-    } else if (group_bonus(ch, 2) == 11) {
+    }
+    else if (group_bonus(ch, 2) == 11)
+    {
         ch->modCurVitalDam(CharVital::stamina, -.04);
-                ch->send_to("You receive a bonus from your group's leader! @D[@G4%s ST Regenerated!@D]@n\r\n", "%");
-    } else if (group_bonus(ch, 2) == 13) {
-        if (GET_PHASE(leader) == 1) {
+        ch->send_to("You receive a bonus from your group's leader! @D[@G4%s ST Regenerated!@D]@n\r\n", "%");
+    }
+    else if (group_bonus(ch, 2) == 13)
+    {
+        if (GET_PHASE(leader) == 1)
+        {
             share += share * 0.05;
-                        ch->send_to("You receive a bonus from your group's leader! @D[@G+5%s Exp!@D]@n\r\n", "%");
-        } else if (GET_PHASE(leader) == 2) {
+            ch->send_to("You receive a bonus from your group's leader! @D[@G+5%s Exp!@D]@n\r\n", "%");
+        }
+        else if (GET_PHASE(leader) == 2)
+        {
             share += share * 0.1;
-                        ch->send_to("You receive a bonus from your group's leader! @D[@G+10%s Exp!@D]@n\r\n", "%");
+            ch->send_to("You receive a bonus from your group's leader! @D[@G+10%s Exp!@D]@n\r\n", "%");
         }
     }
     share = gear_exp(ch, share);
     if (share > 1)
-                ch->send_to("You receive your share of experience -- %s points.\r\n", add_commas(share).c_str());
+        ch->send_to("You receive your share of experience -- %s points.\r\n", add_commas(share).c_str());
     else
-                ch->sendText("You receive your share of experience -- one measly little point!\r\n");
+        ch->sendText("You receive your share of experience -- one measly little point!\r\n");
 
     ch->modExperience(share);
     /*change_alignment(ch, victim);*/
 }
 
-void group_gain(Character *ch, Character *victim) {
+void group_gain(Character *ch, Character *victim)
+{
     int tot_levels, tot_members;
     int64_t tot_gain, base;
     Character *k;
@@ -2323,26 +2832,34 @@ void group_gain(Character *ch, Character *victim) {
     if (!(k = ch->master))
         k = ch;
 
-    if (AFF_FLAGGED(k, AFF_GROUP) && (k->location == ch->location)) {
+    if (AFF_FLAGGED(k, AFF_GROUP) && (k->location == ch->location))
+    {
         tot_levels = GET_LEVEL(k);
         tot_members = 1;
-    } else {
+    }
+    else
+    {
         tot_levels = 0;
         tot_members = 0;
     }
 
     for (f = k->followers; f; f = f->next)
-        if (AFF_FLAGGED(f->follower, AFF_GROUP) && f->follower->location == ch->location) {
-            if (!IS_WEIGHTED(f->follower)) {
+        if (AFF_FLAGGED(f->follower, AFF_GROUP) && f->follower->location == ch->location)
+        {
+            if (!IS_WEIGHTED(f->follower))
+            {
                 tot_levels += GET_LEVEL(f->follower);
                 tot_members++;
-            } else if ((f->follower->getEffectiveStat<int64_t>("health")) >= (ch->getEffectiveStat<int64_t>("health")) * 0.5) {
+            }
+            else if ((f->follower->getEffectiveStat<int64_t>("health")) >= (ch->getEffectiveStat<int64_t>("health")) * 0.5)
+            {
                 tot_levels += GET_LEVEL(f->follower);
                 tot_members++;
             }
         }
 
-    if (tot_members == 1 || IN_ARENA(ch)) {
+    if (tot_members == 1 || IN_ARENA(ch))
+    {
         solo_gain(ch, victim);
         return;
     }
@@ -2354,15 +2871,17 @@ void group_gain(Character *ch, Character *victim) {
     if (!IS_NPC(victim))
         tot_gain = MIN(CONFIG_MAX_EXP_LOSS * 2, tot_gain);
 
-
-    if (tot_levels >= 1) {
+    if (tot_levels >= 1)
+    {
         base = MAX(1, tot_gain / tot_levels);
         int perc = 20 * tot_members;
-        if (perc >= 80) {
+        if (perc >= 80)
+        {
             perc = 60;
         }
         base += (base / 100) * perc;
-    } else
+    }
+    else
         base = 0;
 
     /*
@@ -2384,20 +2903,24 @@ void group_gain(Character *ch, Character *victim) {
      */
     perform_group_gain(k, base, victim);
 
-    for (f = k->followers; f; f = f->next) {
-        if (AFF_FLAGGED(f->follower, AFF_GROUP) && f->follower->location == ch->location) {
-            //if ((f->follower->getEffMaxPL()) >= GET_MAX_HIT(ch) * 0.5)
+    for (f = k->followers; f; f = f->next)
+    {
+        if (AFF_FLAGGED(f->follower, AFF_GROUP) && f->follower->location == ch->location)
+        {
+            // if ((f->follower->getEffMaxPL()) >= GET_MAX_HIT(ch) * 0.5)
             perform_group_gain(f->follower, base, victim);
         }
     }
 }
 
-
-void solo_gain(Character *ch, Character *victim) {
+void solo_gain(Character *ch, Character *victim)
+{
     return; // disabled for now.
 
-    if (IS_NPC(ch)) {
-        if (GET_ORIGINAL(ch)) {
+    if (IS_NPC(ch))
+    {
+        if (GET_ORIGINAL(ch))
+        {
             ch = GET_ORIGINAL(ch);
         }
     }
@@ -2405,62 +2928,86 @@ void solo_gain(Character *ch, Character *victim) {
 
     exp *= 0.25;
 
-
     /* Calculate level-difference penalty */
-    if (!IS_NPC(ch)) {
-        if (GET_LEVEL(ch) >= 100 && GET_MAX_HIT(ch) * .025 >= GET_MAX_HIT(victim)) {
+    if (!IS_NPC(ch))
+    {
+        if (GET_LEVEL(ch) >= 100 && GET_MAX_HIT(ch) * .025 >= GET_MAX_HIT(victim))
+        {
             exp *= 0.04;
-        } else if (GET_MAX_HIT(ch) * .025 >= GET_MAX_HIT(victim)) {
+        }
+        else if (GET_MAX_HIT(ch) * .025 >= GET_MAX_HIT(victim))
+        {
             exp = 1;
-        } else if (GET_MAX_HIT(ch) * .05 >= GET_MAX_HIT(victim)) {
+        }
+        else if (GET_MAX_HIT(ch) * .05 >= GET_MAX_HIT(victim))
+        {
             exp *= 0.05;
-        } else if (GET_MAX_HIT(ch) * .1 >= GET_MAX_HIT(victim)) {
+        }
+        else if (GET_MAX_HIT(ch) * .1 >= GET_MAX_HIT(victim))
+        {
             exp *= .1;
-        } else if (GET_MAX_HIT(ch) * .15 >= GET_MAX_HIT(victim)) {
+        }
+        else if (GET_MAX_HIT(ch) * .15 >= GET_MAX_HIT(victim))
+        {
             exp *= .15;
-        } else if (GET_MAX_HIT(ch) * .25 >= GET_MAX_HIT(victim)) {
+        }
+        else if (GET_MAX_HIT(ch) * .25 >= GET_MAX_HIT(victim))
+        {
             exp *= .25;
-        } else if (GET_MAX_HIT(ch) * .5 >= GET_MAX_HIT(victim)) {
+        }
+        else if (GET_MAX_HIT(ch) * .5 >= GET_MAX_HIT(victim))
+        {
             exp *= .5;
         }
     }
-    if (LASTHIT(victim) != 0 && LASTHIT(victim) != GET_IDNUM(ch)) {
-                ch->sendText("@RYou didn't do most of the work for this victory.@n\r\n");
+    if (LASTHIT(victim) != 0 && LASTHIT(victim) != GET_IDNUM(ch))
+    {
+        ch->sendText("@RYou didn't do most of the work for this victory.@n\r\n");
         exp = 1;
     }
-    if (IS_NPC(victim) && MOB_FLAGGED(victim, MOB_HUSK)) {
+    if (IS_NPC(victim) && MOB_FLAGGED(victim, MOB_HUSK))
+    {
         exp /= 10;
     }
-    if (GET_BONUS(ch, BONUS_PRODIGY) > 0) {
+    if (GET_BONUS(ch, BONUS_PRODIGY) > 0)
+    {
         exp = exp + (exp * .25);
     }
-    if (IS_SAIYAN(ch)) {
+    if (IS_SAIYAN(ch))
+    {
         exp = exp + (exp * .50);
     }
-    if (IS_HALFBREED(ch)) {
+    if (IS_HALFBREED(ch))
+    {
         exp = exp + (exp * .40);
     }
-    if (IS_ICER(ch)) {
+    if (IS_ICER(ch))
+    {
         exp = exp - (exp * .20);
     }
-    if (MOB_FLAGGED(victim, MOB_KNOWKAIO)) {
+    if (MOB_FLAGGED(victim, MOB_KNOWKAIO))
+    {
         exp += exp * .25;
     }
     exp = gear_exp(ch, exp);
     exp = MAX(exp, 1);
 
     if (exp > 1)
-                ch->send_to("You receive %s experience points.\r\n", add_commas(exp).c_str());
-    else {
-                ch->sendText("You receive one lousy experience point. That fight was hardly worth it...\r\n");
+        ch->send_to("You receive %s experience points.\r\n", add_commas(exp).c_str());
+    else
+    {
+        ch->sendText("You receive one lousy experience point. That fight was hardly worth it...\r\n");
     }
-    if (!IS_NPC(ch)) {
+    if (!IS_NPC(ch))
+    {
         ch->modExperience(exp);
     }
-    if (IS_NPC(victim)) {
+    if (IS_NPC(victim))
+    {
         victim->modExperience(-exp);
     }
-    if (!IS_NPC(victim)) {
+    if (!IS_NPC(victim))
+    {
         exp = exp / 5;
         victim->modExperience(-exp);
     }

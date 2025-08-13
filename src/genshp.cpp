@@ -19,7 +19,8 @@
 
 /*-------------------------------------------------------------------*/
 
-void copy_shop(struct shop_data *tshop, struct shop_data *fshop, int free_old_strings) {
+void copy_shop(struct shop_data *tshop, struct shop_data *fshop, int free_old_strings)
+{
     int i;
 
     /*
@@ -70,7 +71,8 @@ void copy_shop(struct shop_data *tshop, struct shop_data *fshop, int free_old_st
 /*
  * Copy a 'NOTHING' terminated integer array list.
  */
-void copy_list(IDXTYPE **tlist, IDXTYPE *flist) {
+void copy_list(IDXTYPE **tlist, IDXTYPE *flist)
+{
     int num_items, i;
 
     if (*tlist)
@@ -79,7 +81,8 @@ void copy_list(IDXTYPE **tlist, IDXTYPE *flist) {
     /*
      * Count number of entries.
      */
-    for (i = 0; flist[i] != NOTHING; i++);
+    for (i = 0; flist[i] != NOTHING; i++)
+        ;
     num_items = i + 1;
 
     /*
@@ -98,17 +101,18 @@ void copy_list(IDXTYPE **tlist, IDXTYPE *flist) {
 
 /*-------------------------------------------------------------------*/
 
-
 /*-------------------------------------------------------------------*/
 
-void add_to_type_list(struct shop_buy_data **list, struct shop_buy_data *newl) {
+void add_to_type_list(struct shop_buy_data **list, struct shop_buy_data *newl)
+{
     int i, num_items;
     struct shop_buy_data *nlist;
 
     /*
      * Count number of entries.
      */
-    for (i = 0; (*list)[i].type != NOTHING; i++);
+    for (i = 0; (*list)[i].type != NOTHING; i++)
+        ;
     num_items = i;
 
     /*
@@ -130,13 +134,15 @@ void add_to_type_list(struct shop_buy_data **list, struct shop_buy_data *newl) {
 
 /*-------------------------------------------------------------------*/
 
-void add_to_int_list(IDXTYPE **list, IDXTYPE newi) {
+void add_to_int_list(IDXTYPE **list, IDXTYPE newi)
+{
     IDXTYPE i, num_items, *nlist;
 
     /*
      * Count number of entries.
      */
-    for (i = 0; (*list)[i] != NOTHING; i++);
+    for (i = 0; (*list)[i] != NOTHING; i++)
+        ;
     num_items = i;
 
     /*
@@ -158,13 +164,15 @@ void add_to_int_list(IDXTYPE **list, IDXTYPE newi) {
 
 /*-------------------------------------------------------------------*/
 
-void remove_from_int_list(IDXTYPE **list, IDXTYPE num) {
+void remove_from_int_list(IDXTYPE **list, IDXTYPE num)
+{
     IDXTYPE i, num_items, *nlist;
 
     /*
      * Count number of entries.
      */
-    for (i = 0; (*list)[i] != NOTHING; i++);
+    for (i = 0; (*list)[i] != NOTHING; i++)
+        ;
 
     if (num < 0 || num >= i)
         return;
@@ -184,32 +192,40 @@ void remove_from_int_list(IDXTYPE **list, IDXTYPE num) {
 /*
  * Free all the notice character strings in a shop structure.
  */
-void free_shop_strings(struct shop_data *shop) {
-    if (S_NOITEM1(shop)) {
+void free_shop_strings(struct shop_data *shop)
+{
+    if (S_NOITEM1(shop))
+    {
         free(S_NOITEM1(shop));
         S_NOITEM1(shop) = nullptr;
     }
-    if (S_NOITEM2(shop)) {
+    if (S_NOITEM2(shop))
+    {
         free(S_NOITEM2(shop));
         S_NOITEM2(shop) = nullptr;
     }
-    if (S_NOCASH1(shop)) {
+    if (S_NOCASH1(shop))
+    {
         free(S_NOCASH1(shop));
         S_NOCASH1(shop) = nullptr;
     }
-    if (S_NOCASH2(shop)) {
+    if (S_NOCASH2(shop))
+    {
         free(S_NOCASH2(shop));
         S_NOCASH2(shop) = nullptr;
     }
-    if (S_NOBUY(shop)) {
+    if (S_NOBUY(shop))
+    {
         free(S_NOBUY(shop));
         S_NOBUY(shop) = nullptr;
     }
-    if (S_BUY(shop)) {
+    if (S_BUY(shop))
+    {
         free(S_BUY(shop));
         S_BUY(shop) = nullptr;
     }
-    if (S_SELL(shop)) {
+    if (S_SELL(shop))
+    {
         free(S_SELL(shop));
         S_SELL(shop) = nullptr;
     }
@@ -217,13 +233,13 @@ void free_shop_strings(struct shop_data *shop) {
 
 /*-------------------------------------------------------------------*/
 
-
 /*-------------------------------------------------------------------*/
 
 /*
  * Free up the whole shop structure and it's content.
  */
-void free_shop(struct shop_data *shop) {
+void free_shop(struct shop_data *shop)
+{
     free_shop_strings(shop);
 
     delete shop;
@@ -231,11 +247,12 @@ void free_shop(struct shop_data *shop) {
 
 /*-------------------------------------------------------------------*/
 
-/* returns the real number of the shop with given virtual number 
+/* returns the real number of the shop with given virtual number
  *
  * We take so good care to keep it sorted - let's use it :) - Welcor
  */
-shop_rnum real_shop(shop_vnum vnum) {
+shop_rnum real_shop(shop_vnum vnum)
+{
     return shop_index.count(vnum) ? vnum : NOTHING;
 }
 
@@ -244,7 +261,8 @@ shop_rnum real_shop(shop_vnum vnum) {
 /*
  * Generic string modifier for shop keeper messages.
  */
-void modify_string(char **str, char *new_s) {
+void modify_string(char **str, char *new_s)
+{
 
     char buf[MAX_STRING_LENGTH];
     char *pointer;
@@ -252,10 +270,12 @@ void modify_string(char **str, char *new_s) {
     /*
      * Check the '%s' is present, if not, add it.
      */
-    if (*new_s != '%') {
+    if (*new_s != '%')
+    {
         snprintf(buf, sizeof(buf), "%%s %s", new_s);
         pointer = buf;
-    } else
+    }
+    else
         pointer = new_s;
 
     if (*str)
@@ -265,13 +285,10 @@ void modify_string(char **str, char *new_s) {
 
 /*-------------------------------------------------------------------*/
 
-int add_shop(struct shop_data *nshp) {
+int add_shop(struct shop_data *nshp)
+{
     shop_rnum rshop;
-    zone_rnum rznum = real_zone_by_thing(S_NUM(nshp));
-    auto& z = zone_table.at(rznum);
-    z.shops.insert(S_NUM(nshp));
-    auto& sh = shop_index.at(S_NUM(nshp));
+    auto &sh = shop_index.at(S_NUM(nshp));
     copy_shop(&shop_index.at(rshop), nshp, false);
     return S_NUM(nshp);
 }
-

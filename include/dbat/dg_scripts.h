@@ -1,13 +1,13 @@
 /**************************************************************************
-*  File: dg_scripts.h                                                     *
-*  Usage: header file for script structures and constants, and            *
-*         function prototypes for dg_scripts.c                            *
-*                                                                         *
-*                                                                         *
-*  $Author: Mark A. Heilpern/egreen/Welcor $                              *
-*  $Date: 2004/10/11 12:07:00$                                            *
-*  $Revision: 1.0.14 $                                                    *
-**************************************************************************/
+ *  File: dg_scripts.h                                                     *
+ *  Usage: header file for script structures and constants, and            *
+ *         function prototypes for dg_scripts.c                            *
+ *                                                                         *
+ *                                                                         *
+ *  $Author: Mark A. Heilpern/egreen/Welcor $                              *
+ *  $Date: 2004/10/11 12:07:00$                                            *
+ *  $Revision: 1.0.14 $                                                    *
+ **************************************************************************/
 #pragma once
 
 #include "structs.h"
@@ -57,105 +57,102 @@ constexpr int DG_SPELL_LEVEL = 25;
 #define ACTOR_ROOM_IS_UID 1
 
 /* mob trigger types */
-#define MTRIG_GLOBAL           (1 << 0)      /* check even if zone empty   */
-#define MTRIG_RANDOM           (1 << 1)      /* checked randomly           */
-#define MTRIG_COMMAND          (1 << 2)         /* character types a command  */
-#define MTRIG_SPEECH           (1 << 3)         /* a char says a word/phrase  */
-#define MTRIG_ACT              (1 << 4)      /* word or phrase sent to act */
-#define MTRIG_DEATH            (1 << 5)      /* character dies             */
-#define MTRIG_GREET            (1 << 6)      /* something enters room seen */
-#define MTRIG_GREET_ALL        (1 << 7)      /* anything enters room       */
-#define MTRIG_ENTRY            (1 << 8)      /* the mob enters a room      */
-#define MTRIG_RECEIVE          (1 << 9)      /* character is given obj     */
-#define MTRIG_FIGHT            (1 << 10)     /* each pulse while fighting  */
-#define MTRIG_HITPRCNT         (1 << 11)     /* fighting and below some hp */
-#define MTRIG_BRIBE           (1 << 12)     /* coins are given to mob     */
-#define MTRIG_LOAD             (1 << 13)     /* the mob is loaded          */
-#define MTRIG_MEMORY           (1 << 14)     /* mob see's someone remembered */
-#define MTRIG_CAST             (1 << 15)     /* mob targetted by spell     */
-#define MTRIG_LEAVE            (1 << 16)     /* someone leaves room seen   */
-#define MTRIG_DOOR             (1 << 17)     /* door manipulated in room   */
+#define MTRIG_GLOBAL (1 << 0)    /* check even if zone empty   */
+#define MTRIG_RANDOM (1 << 1)    /* checked randomly           */
+#define MTRIG_COMMAND (1 << 2)   /* character types a command  */
+#define MTRIG_SPEECH (1 << 3)    /* a char says a word/phrase  */
+#define MTRIG_ACT (1 << 4)       /* word or phrase sent to act */
+#define MTRIG_DEATH (1 << 5)     /* character dies             */
+#define MTRIG_GREET (1 << 6)     /* something enters room seen */
+#define MTRIG_GREET_ALL (1 << 7) /* anything enters room       */
+#define MTRIG_ENTRY (1 << 8)     /* the mob enters a room      */
+#define MTRIG_RECEIVE (1 << 9)   /* character is given obj     */
+#define MTRIG_FIGHT (1 << 10)    /* each pulse while fighting  */
+#define MTRIG_HITPRCNT (1 << 11) /* fighting and below some hp */
+#define MTRIG_BRIBE (1 << 12)    /* coins are given to mob     */
+#define MTRIG_LOAD (1 << 13)     /* the mob is loaded          */
+#define MTRIG_MEMORY (1 << 14)   /* mob see's someone remembered */
+#define MTRIG_CAST (1 << 15)     /* mob targetted by spell     */
+#define MTRIG_LEAVE (1 << 16)    /* someone leaves room seen   */
+#define MTRIG_DOOR (1 << 17)     /* door manipulated in room   */
 
-#define MTRIG_TIME             (1 << 19)     /* trigger based on specific game hour */
-#define MTRIG_HOURLY             (1 << 20)     /* triggered every game hour */
-#define MTRIG_QUARTER             (1 << 21)     /* triggered every 15 game minutes */
+#define MTRIG_TIME (1 << 19)    /* trigger based on specific game hour */
+#define MTRIG_HOURLY (1 << 20)  /* triggered every game hour */
+#define MTRIG_QUARTER (1 << 21) /* triggered every 15 game minutes */
 
 /* obj trigger types */
-#define OTRIG_GLOBAL           (1 << 0)         /* unused                     */
-#define OTRIG_RANDOM           (1 << 1)         /* checked randomly           */
-#define OTRIG_COMMAND          (1 << 2)      /* character types a command  */
+#define OTRIG_GLOBAL (1 << 0)  /* unused                     */
+#define OTRIG_RANDOM (1 << 1)  /* checked randomly           */
+#define OTRIG_COMMAND (1 << 2) /* character types a command  */
 
-#define OTRIG_TIMER            (1 << 5)     /* item's timer expires       */
-#define OTRIG_GET              (1 << 6)     /* item is picked up          */
-#define OTRIG_DROP             (1 << 7)     /* character trys to drop obj */
-#define OTRIG_GIVE             (1 << 8)     /* character trys to give obj */
-#define OTRIG_WEAR             (1 << 9)     /* character trys to wear obj */
-#define OTRIG_REMOVE           (1 << 11)    /* character trys to remove obj */
+#define OTRIG_TIMER (1 << 5)   /* item's timer expires       */
+#define OTRIG_GET (1 << 6)     /* item is picked up          */
+#define OTRIG_DROP (1 << 7)    /* character trys to drop obj */
+#define OTRIG_GIVE (1 << 8)    /* character trys to give obj */
+#define OTRIG_WEAR (1 << 9)    /* character trys to wear obj */
+#define OTRIG_REMOVE (1 << 11) /* character trys to remove obj */
 
-#define OTRIG_LOAD             (1 << 13)    /* the object is loaded        */
+#define OTRIG_LOAD (1 << 13) /* the object is loaded        */
 
-#define OTRIG_CAST             (1 << 15)    /* object targetted by spell   */
-#define OTRIG_LEAVE            (1 << 16)    /* someone leaves room seen    */
+#define OTRIG_CAST (1 << 15)  /* object targetted by spell   */
+#define OTRIG_LEAVE (1 << 16) /* someone leaves room seen    */
 
-#define OTRIG_CONSUME          (1 << 18)    /* char tries to eat/drink obj */
-#define OTRIG_TIME             (1 << 19)     /* trigger based on specific game hour */
-#define OTRIG_HOURLY             (1 << 20)     /* triggered every game hour */
-#define OTRIG_QUARTER             (1 << 21)     /* triggered every 15 game minutes */
+#define OTRIG_CONSUME (1 << 18) /* char tries to eat/drink obj */
+#define OTRIG_TIME (1 << 19)    /* trigger based on specific game hour */
+#define OTRIG_HOURLY (1 << 20)  /* triggered every game hour */
+#define OTRIG_QUARTER (1 << 21) /* triggered every 15 game minutes */
 
 /* wld trigger types */
-#define WTRIG_GLOBAL           (1 << 0)      /* check even if zone empty   */
-#define WTRIG_RANDOM           (1 << 1)         /* checked randomly           */
-#define WTRIG_COMMAND          (1 << 2)         /* character types a command  */
-#define WTRIG_SPEECH           (1 << 3)      /* a char says word/phrase    */
+#define WTRIG_GLOBAL (1 << 0)  /* check even if zone empty   */
+#define WTRIG_RANDOM (1 << 1)  /* checked randomly           */
+#define WTRIG_COMMAND (1 << 2) /* character types a command  */
+#define WTRIG_SPEECH (1 << 3)  /* a char says word/phrase    */
 
-#define WTRIG_RESET            (1 << 5)      /* zone has been reset        */
-#define WTRIG_ENTER            (1 << 6)         /* character enters room      */
-#define WTRIG_DROP             (1 << 7)      /* something dropped in room  */
+#define WTRIG_RESET (1 << 5) /* zone has been reset        */
+#define WTRIG_ENTER (1 << 6) /* character enters room      */
+#define WTRIG_DROP (1 << 7)  /* something dropped in room  */
 
-#define WTRIG_CAST             (1 << 15)     /* spell cast in room */
-#define WTRIG_LEAVE            (1 << 16)     /* character leaves the room */
-#define WTRIG_DOOR             (1 << 17)     /* door manipulated in room  */
+#define WTRIG_CAST (1 << 15)  /* spell cast in room */
+#define WTRIG_LEAVE (1 << 16) /* character leaves the room */
+#define WTRIG_DOOR (1 << 17)  /* door manipulated in room  */
 
-#define WTRIG_TIME             (1 << 19)     /* trigger based on specific game hour */
-#define WTRIG_HOURLY             (1 << 20)     /* triggered every game hour */
-#define WTRIG_QUARTER             (1 << 21)     /* triggered every 15 game minutes */
+#define WTRIG_TIME (1 << 19)    /* trigger based on specific game hour */
+#define WTRIG_HOURLY (1 << 20)  /* triggered every game hour */
+#define WTRIG_QUARTER (1 << 21) /* triggered every 15 game minutes */
 
 /* obj command trigger types */
-#define OCMD_EQUIP             (1 << 0)         /* obj must be in char's equip */
-#define OCMD_INVEN             (1 << 1)         /* obj must be in char's inven */
-#define OCMD_ROOM              (1 << 2)         /* obj must be in char's room  */
+#define OCMD_EQUIP (1 << 0) /* obj must be in char's equip */
+#define OCMD_INVEN (1 << 1) /* obj must be in char's inven */
+#define OCMD_ROOM (1 << 2)  /* obj must be in char's room  */
 
 /* obj consume trigger commands */
 constexpr int OCMD_EAT = 1;
 constexpr int OCMD_DRINK = 2;
 constexpr int OCMD_QUAFF = 3;
 
-constexpr int TRIG_NEW = 0;         /* trigger starts from top  */
-constexpr int TRIG_RESTART = 1;         /* trigger restarting       */
-
+constexpr int TRIG_NEW = 0;     /* trigger starts from top  */
+constexpr int TRIG_RESTART = 1; /* trigger restarting       */
 
 /*
  * These are slightly off of PULSE_MOBILE so
  * everything isnt happening at the same time
  */
-#define PULSE_DG_SCRIPT         (13 RL_SEC)
+#define PULSE_DG_SCRIPT (13 RL_SEC)
 
+constexpr int MAX_SCRIPT_DEPTH = 10; /* maximum depth triggers can
+                recurse into each other */
 
-constexpr int MAX_SCRIPT_DEPTH = 10;          /* maximum depth triggers can
-					     recurse into each other */
-
-constexpr int SCRIPT_ERROR_CODE = -9999999;   /* this shouldn't happen too often */
+constexpr int SCRIPT_ERROR_CODE = -9999999; /* this shouldn't happen too often */
 
 /* one line of the trigger */
 
-
 /* used for actor memory triggers */
-struct script_memory {
-    int64_t id{};                /* id of who to remember */
-    char *cmd{};                /* command, or nullptr for generic */
+struct script_memory
+{
+    int64_t id{}; /* id of who to remember */
+    char *cmd{};  /* command, or nullptr for generic */
     struct script_memory *next{};
 };
-
 
 /* function prototypes from dg_triggers.c */
 extern char *one_phrase(char *arg, char *first_arg);
@@ -287,7 +284,7 @@ extern Object *get_obj_by_room(Room *room, char *name);
 
 extern int trgvar_in_room(room_vnum vnum);
 
-extern Object *get_obj_in_list(char *name, const std::vector<std::weak_ptr<Object>>& list);
+extern Object *get_obj_in_list(char *name, const std::vector<std::weak_ptr<Object>> &list);
 
 extern Object *get_object_in_equip(Character *ch, char *name);
 
@@ -301,11 +298,11 @@ extern void find_uid_name(char *uid, char *name, size_t nlen);
 
 extern void do_sstat(Character *ch, struct HasDgScripts *ud);
 
-extern void add_trigger(script_data *sc,  const std::shared_ptr<DgScript> t, int loc);
+extern void add_trigger(script_data *sc, const std::shared_ptr<DgScript> t, int loc);
 
 extern void script_vlog(const char *format, va_list args);
 
-extern void script_log(const char *format, ...) __attribute__ ((format (printf, 1, 2)));
+extern void script_log(const char *format, ...) __attribute__((format(printf, 1, 2)));
 
 extern char *matching_quote(char *p);
 
@@ -330,9 +327,8 @@ extern void dg_obj_trigger(char *line, ObjectPrototype *obj);
 
 extern void assign_triggers(struct HasDgScripts *i, UnitType type);
 
-
 /* From dg_variables.c */
-extern int item_in_list(char *item, const std::vector<std::weak_ptr<Object>>& list);
+extern int item_in_list(char *item, const std::vector<std::weak_ptr<Object>> &list);
 
 extern char *skill_percent(Character *ch, char *skill);
 
@@ -373,34 +369,33 @@ extern std::vector<ScriptLine> parse_script(const std::vector<std::string> &orig
 extern room_rnum obj_room(Object *obj);
 
 /* defines for valid_dg_target */
-#define DG_ALLOW_GODS (1<<0)
+#define DG_ALLOW_GODS (1 << 0)
 
 /* Macros for scripts */
 
-#define UID_CHAR   '#'
-#define GET_TRIG_NAME(t)          ((char*)(t)->proto->name.c_str())
-#define GET_TRIG_RNUM(t)          ((t)->getVnum())
-#define GET_TRIG_VNUM(t)           ((t)->getVnum())
-#define GET_TRIG_TYPE(t)          ((t)->getTriggerType())
-#define GET_TRIG_NARG(t)          ((t)->proto->narg)
-#define GET_TRIG_ARG(t)           ((char*)(t)->proto->arglist.c_str())
-#define GET_TRIG_VARS(t)      ((t)->variables)
+#define UID_CHAR '#'
+#define GET_TRIG_NAME(t) ((char *)(t)->proto->name.c_str())
+#define GET_TRIG_RNUM(t) ((t)->getVnum())
+#define GET_TRIG_VNUM(t) ((t)->getVnum())
+#define GET_TRIG_TYPE(t) ((t)->getTriggerType())
+#define GET_TRIG_NARG(t) ((t)->proto->narg)
+#define GET_TRIG_ARG(t) ((char *)(t)->proto->arglist.c_str())
+#define GET_TRIG_VARS(t) ((t)->variables)
 
-#define GET_TRIG_DEPTH(t)         ((t)->depth)
-#define GET_TRIG_LOOPS(t)         ((t)->loops)
+#define GET_TRIG_DEPTH(t) ((t)->depth)
+#define GET_TRIG_LOOPS(t) ((t)->loops)
 
+#define SCRIPT(o) ((o))
+#define SCRIPT_MEM(c) ((c)->memory)
 
-#define SCRIPT(o)          ((o))
-#define SCRIPT_MEM(c)      ((c)->memory)
+#define SCRIPT_TYPES(s) ((s)->trigger_types)
+#define TRIGGERS(s) ((s)->trig_list)
 
-#define SCRIPT_TYPES(s)          ((s)->trigger_types)
-#define TRIGGERS(s)          ((s)->trig_list)
+#define GET_SHORT(ch) ((ch)->getShortDescription())
 
-#define GET_SHORT(ch)    ((ch)->getShortDescription())
+#define SCRIPT_CHECK(go, type) ((go) && IS_SET(SCRIPT_TYPES((go)), type))
+#define TRIGGER_CHECK(t, type) (IS_SET(GET_TRIG_TYPE(t), (type)) && (t)->isReady())
 
-#define SCRIPT_CHECK(go, type)   ((go) && IS_SET(SCRIPT_TYPES((go)), type))
-#define TRIGGER_CHECK(t, type)   (IS_SET(GET_TRIG_TYPE(t), (type)) && (t)->isReady())
+// extern nlohmann::json serializeVars(struct trig_var_data *vd);
 
-//extern nlohmann::json serializeVars(struct trig_var_data *vd);
-
-//extern void deserializeVars(struct trig_var_data **vd, const nlohmann::json& j);
+// extern void deserializeVars(struct trig_var_data **vd, const nlohmann::json& j);

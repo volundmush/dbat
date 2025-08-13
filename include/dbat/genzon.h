@@ -8,10 +8,6 @@
 #include "structs.h"
 #include "db.h"
 
-extern zone_rnum create_new_zone(zone_vnum vzone_num, room_vnum bottom, room_vnum top, const char **error);
+extern zone_rnum create_new_zone(zone_vnum vzone_num, const char **error);
 
-extern int new_command(struct Zone *zone, int pos);
-
-extern void delete_zone_command(struct Zone *zone, int pos);
-
-extern zone_rnum real_zone_by_thing(room_vnum vznum);
+extern std::vector<Zone *> getZoneChildren(zone_vnum parent = NOTHING);

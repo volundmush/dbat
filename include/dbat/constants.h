@@ -1,15 +1,15 @@
 /* ************************************************************************
-*   File: constants.h                                   Part of CircleMUD *
-*  Usage: Header file for constants.                                      *
-*  All rights reserved.  See license for complete information.            *
-*                                                                         *
-*  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
-*  tbaMUD is based on CircleMUD and DikuMUD, Copyright (C) 1990, 1991.    *
-************************************************************************ */
+ *   File: constants.h                                   Part of CircleMUD *
+ *  Usage: Header file for constants.                                      *
+ *  All rights reserved.  See license for complete information.            *
+ *                                                                         *
+ *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
+ *  tbaMUD is based on CircleMUD and DikuMUD, Copyright (C) 1990, 1991.    *
+ ************************************************************************ */
 #pragma once
 
 #include "structs.h"
-#include "interpreter.h"    /* alias_data */
+#include "interpreter.h" /* alias_data */
 
 extern const char *circlemud_version;
 extern const char *oasisolc_version;
@@ -80,10 +80,12 @@ extern const char *song_types[];
 extern const char *list_bonus[];
 extern const int list_bonus_cost[];
 
-template<typename T>
-std::vector<std::string> getEnumNames() {
+template <typename T>
+std::vector<std::string> getEnumNames()
+{
     std::vector<std::string> names;
-    for (auto val : magic_enum::enum_values<T>()) {
+    for (auto val : magic_enum::enum_values<T>())
+    {
         names.emplace_back(magic_enum::enum_name(val));
     }
     return names;

@@ -9,7 +9,7 @@
 #include "structs.h"
 #include "db.h"
 
-#define STRING_TERMINATOR       '~'
+#define STRING_TERMINATOR '~'
 
 constexpr int CONFIG_GENOLC_MOBPROG = 0;
 
@@ -33,7 +33,8 @@ extern void free_ex_descriptions(struct extra_descr_data *head);
 
 extern int sprintascii(char *out, bitvector_t bits);
 
-struct save_list_data {
+struct save_list_data
+{
     zone_vnum zone;
     int type;
 };
@@ -48,14 +49,8 @@ constexpr int SL_WLD = 3;
 constexpr int SL_ZON = 4;
 constexpr int SL_CFG = 5;
 constexpr int SL_GLD = 6;
-#define SL_MAX    SL_GLD
-#define SL_ACT  SL_MAX + 1 /* must be above MAX */
-#define SL_HLP  SL_MAX + 2 /* must be above MAX */
+#define SL_MAX SL_GLD
+#define SL_ACT SL_MAX + 1 /* must be above MAX */
+#define SL_HLP SL_MAX + 2 /* must be above MAX */
 
-#define LIMIT(var, low, high)    std::clamp<int64_t>(var, low, high)
-
-extern room_vnum genolc_zone_bottom(zone_rnum rznum);
-
-extern room_vnum genolc_zonep_bottom(struct Zone *zone);
-
-extern void create_world_index(int znum, const char *type);
+#define LIMIT(var, low, high) std::clamp<int64_t>(var, low, high)

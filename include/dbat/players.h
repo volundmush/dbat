@@ -4,10 +4,9 @@
 
 // global variables
 
+Character *findPlayer(const std::string &name);
 
-Character *findPlayer(const std::string& name);
-
-OpResult<> validate_pc_name(const std::string& name);
+OpResult<> validate_pc_name(const std::string &name);
 
 extern bool canDeleteCharacter(std::weak_ptr<Character> ref);
 extern bool deleteUserAccount(vnum id);

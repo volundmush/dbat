@@ -28,7 +28,7 @@ void send_to_outdoor(fmt::string_view format, Args&&... args) {
         for(auto i = descriptor_list; i; i = i->next) {
             if(STATE(i) != CON_PLAYING || !(i->character)) continue;
             //If the character's current room isn't set as indoors, then send the message
-            if (i->character->location.getRoomFlag(ROOM_INDOORS)) continue;
+            if(!AWAKE(i->character) || !OUTSIDE(i->character)) continue;
             i->sendText(formatted_string);
         }
     }

@@ -1484,393 +1484,34 @@ void zone_update(uint64_t heartPulse, double deltaTime) {
 
 }
 
-#define ZCMD2 zone_table.at(zone).cmd[cmd_no]
-static void log_zone_error(zone_rnum zone, int cmd_no, const char *message) {
-    mudlog(NRM, ADMLVL_GOD, true, "SYSERR: zone file: %s", message);
-    mudlog(NRM, ADMLVL_GOD, true, "SYSERR: ...offending cmd: '%c' cmd in zone #%d, line %d",
-           ZCMD2.command, zone_table.at(zone).number, ZCMD2.line);
-}
 
-#define ZONE_ERROR(message) \
-    { log_zone_error(zone, cmd_no, message); last_cmd = 0; }
-
-
-static void do_reset_cmds(Zone &z) {
-    int cmd_no = 0, last_cmd = 0;
-    Character *mob = nullptr;
-    Object *obj, *obj_to;
-    room_vnum rvnum;
-    room_rnum rrnum;
-    Character *tmob = nullptr; /* for trigger assignment */
-    Object *tobj = nullptr;  /* for trigger assignment */
-    int mob_load = false;             /* ### */
-    int obj_load = false;             /* ### */
-    auto oproto = obj_proto.find(-1);
-    auto mproto = mob_proto.find(-1);
-    Room* room = nullptr;
-    auto zone = z.number;
-
-    for (auto &c : z.cmd)
-    {
-        cmd_no = c.line;
-        if (c.command == 'S')
-            break;
-
-        if (c.if_flag && !last_cmd && !mob_load && !obj_load)
-            continue;
-
-        if (!c.if_flag)
-        { /* ### */
-            mob_load = false;
-            obj_load = false;
-        }
-
-        /*  This is the list of actual zone commands.  If any new
-         *  zone commands are added to the game, be certain to update
-         *  the list of commands in load_zone() so that the counting
-         *  will still be correct. - ae.
-         */
-        try
-        {
-            switch (c.command)
-            {
-            case '*': /* ignore command */
-                last_cmd = 0;
-                break;
-
-            case 'M': /* read a mobile */
-                room = get_room(c.arg3);
-                if (mob_proto.contains(c.arg1) && (characterSubscriptions.count(fmt::format("vnum_{}", c.arg1)) < c.arg2) && room &&
-                    (rand_number(1, 100) >= c.arg5))
-                {
-                    int room_max = 0;
-                    Character *i;
-
-                    /* First find out how many mobs of VNUM are in the mud with this rooms */
-                    /* VNUM as a load point for max from room checks. */
-                    /* Let's only count if room_max is in use.  If left at zero, max_in_mud will handle*/
-
-                    if (c.arg4 > 0)
-                    {
-                        auto chars = characterSubscriptions.all(fmt::format("vnum_{}", c.arg1));
-                        for (auto i : filter_raw(chars))
-                        {
-                            if (MOB_LOADROOM(i) == c.arg3)
-                            {
-                                if (++room_max >= c.arg4)
-                                {
-                                    // no need to keep counting more at this point...
-                                    break;
-                                }
-                            }
-                            if (room_max >= c.arg4)
-                            {
-                                break;
-                            }
-                        }
-                        /* Break out if room_max has been met, ignore room_max if zero */
-                        if (room_max >= c.arg4)
-                        {
-                            last_cmd = 0;
-                            break;
-                        }
-                    }
-
-                    mob = read_mobile(c.arg1, REAL);
-                    /*  Set the mobs loadroom for room_max checks. */
-                    mob->setLocation(c.arg3);
-                    mob->setBaseStat("hometown", c.arg3);
-
-                    load_mtrigger(mob);
-                    tmob = mob;
-                    last_cmd = 1;
-                    mob_load = true;
-                }
-                else
-                    last_cmd = 0;
-                tobj = nullptr;
-                break;
-
-            case 'O': /* read an object */
-                room = get_room(c.arg3);
-                oproto = obj_proto.find(c.arg1);
-                if (oproto != obj_proto.end())
-                {
-                    if (oproto->second.type_flag == ItemType::hatch || oproto->second.type_flag == ItemType::control || oproto->second.type_flag == ItemType::window || oproto->second.type_flag == ItemType::vehicle)
-                    {
-                        c.arg2 = 1;
-                        c.arg4 = 1;
-                    }
-                }
-
-                if (obj_proto.contains(c.arg1) && objectSubscriptions.count(fmt::format("vnum_{}", c.arg1)) < c.arg2 &&
-                    room && (rand_number(1, 100) >= c.arg5))
-                {
-                    int room_max = 0;
-
-                    /* First find out how many obj of VNUM are in the mud with this rooms */
-                    /* VNUM as a load point for max from room checks. */
-                    /* Let's only count if room_max is in use.  If left at zero, max_in_mud will handle*/
-
-                    if (c.arg4 > 0)
-                    {   
-                        auto objects = objectSubscriptions.all(fmt::format("vnum_{}", c.arg1));
-                        for (auto k : filter_raw(objects))
-                        {
-                            if (OBJ_LOADROOM(k) == c.arg3 && (IN_ROOM(k) == c.arg3))
-                            {
-                                if (++room_max >= c.arg4)
-                                {
-                                    // no need to keep counting more at this point...
-                                    break;
-                                }
-                            }
-                            if (room_max >= c.arg4)
-                            {
-                                /* Get rid of it if room_max has been met. */
-                                break;
-                            }
-                        }
-                        if (room_max >= c.arg4)
-                        {
-                            /* Get rid of it if room_max has been met. */
-                            last_cmd = 0;
-                            break;
-                        }
-                    }
-
-                    obj = read_object(c.arg1, REAL);
-                    obj->setLocation(c.arg3);
-                    /* Set the loadroom for room_max checks */
-                    OBJ_LOADROOM(obj) = c.arg3;
-
-                    last_cmd = 1;
-                    load_otrigger(obj);
-                    tobj = obj;
-                    obj_load = true;
-                }
-                else
-                    last_cmd = 0;
-                tmob = nullptr;
-                break;
-
-            case 'P': /* object to object */
-                if (obj_proto.contains(c.arg1) && (objectSubscriptions.count(fmt::format("vnum_{}", c.arg1)) < c.arg2) &&
-                    obj_load && (rand_number(1, 100) >= c.arg5))
-                {
-
-                    if (!(obj_to = get_obj_num(c.arg3)))
-                    {
-                        ZONE_ERROR("target obj not found, command disabled");
-                        c.command = '*';
-                        break;
-                    }
-                    obj = read_object(c.arg1, REAL);
-                    obj_to->addToInventory(obj);
-                    last_cmd = 1;
-                    load_otrigger(obj);
-                    tobj = obj;
-                }
-                else
-                    last_cmd = 0;
-                tmob = nullptr;
-                break;
-
-            case 'G': /* obj_to_char */
-                if (!mob)
-                {
-                    ZONE_ERROR("attempt to give obj to non-existent mob, command disabled");
-                    c.command = '*';
-                    break;
-                }
-                if (obj_proto.contains(c.arg1) && (objectSubscriptions.count(fmt::format("vnum_{}", c.arg1)) < c.arg2) &&
-                    mob_load && (rand_number(1, 100) >= c.arg5))
-                {
-                    obj = read_object(c.arg1, REAL);
-                    mob->addToInventory(obj);
-                    if (GET_MOB_SPEC(mob) != shop_keeper)
-                    {
-                        randomize_eq(obj);
-                    }
-                    last_cmd = 1;
-                    load_otrigger(obj);
-                    tobj = obj;
-                }
-                else
-                    last_cmd = 0;
-                tmob = nullptr;
-                break;
-
-            case 'E': /* object to equipment list */
-                if (!mob)
-                {
-                    ZONE_ERROR("trying to equip non-existant mob, command disabled");
-                    c.command = '*';
-                    break;
-                }
-                if (obj_proto.contains(c.arg1) && (objectSubscriptions.count(fmt::format("vnum_{}", c.arg1)) < c.arg2) &&
-                    mob_load && (rand_number(1, 100) >= c.arg5))
-                {
-                    if (c.arg3 < 0 || c.arg3 >= NUM_WEARS)
-                    {
-                        ZONE_ERROR("invalid equipment pos number");
-                    }
-                    else
-                    {
-                        obj = read_object(c.arg1, REAL);
-                        obj->location.unit = mob->location.unit;
-                        load_otrigger(obj);
-                        if (wear_otrigger(obj, mob, c.arg3))
-                        {
-                            obj->location.unit = nullptr;
-                            equip_char(mob, obj, c.arg3);
-                        }
-                        else
-                            mob->addToInventory(obj);
-                        tobj = obj;
-                        last_cmd = 1;
-                    }
-                }
-                else
-                    last_cmd = 0;
-                tmob = nullptr;
-                break;
-
-            case 'R': /* rem obj from room */
-                if (obj = Location(get_room(c.arg1)).searchObjects(c.arg2))
-                    extract_obj(obj);
-                last_cmd = 1;
-                tmob = nullptr;
-                tobj = nullptr;
-                break;
-
-            case 'D': /* set state of door */
-                room = get_room(c.arg1);
-                if (!room || c.arg2 < 0 || c.arg2 >= NUM_OF_DIRS ||
-                    (!room->exits.count(static_cast<Direction>(c.arg2))))
-                {
-                    ZONE_ERROR("room or door does not exist, command disabled");
-                    c.command = '*';
-                }
-                else
-                    switch (c.arg3)
-                    {
-                    case 0:
-                        REMOVE_BIT(room->exits.at(static_cast<Direction>(c.arg2)).exit_info,
-                                   EX_LOCKED);
-                        REMOVE_BIT(room->exits.at(static_cast<Direction>(c.arg2)).exit_info,
-                                   EX_CLOSED);
-                        break;
-                    case 1:
-                        SET_BIT(room->exits.at(static_cast<Direction>(c.arg2)).exit_info,
-                                EX_CLOSED);
-                        REMOVE_BIT(room->exits.at(static_cast<Direction>(c.arg2)).exit_info,
-                                   EX_LOCKED);
-                        break;
-                    case 2:
-                        SET_BIT(room->exits.at(static_cast<Direction>(c.arg2)).exit_info,
-                                EX_LOCKED);
-                        SET_BIT(room->exits.at(static_cast<Direction>(c.arg2)).exit_info,
-                                EX_CLOSED);
-                        break;
-                    }
-                last_cmd = 1;
-                tmob = nullptr;
-                tobj = nullptr;
-                break;
-
-            case 'T': /* trigger command */
-                if (c.arg1 == static_cast<int>(MOB_TRIGGER) && tmob)
-                {
-                    add_trigger(SCRIPT(tmob), read_trigger(c.arg2), -1);
-                    last_cmd = 1;
-                }
-                else if (c.arg1 == static_cast<int>(OBJ_TRIGGER) && tobj)
-                {
-                    add_trigger(SCRIPT(tobj), read_trigger(c.arg2), -1);
-                    last_cmd = 1;
-                }
-                else if (c.arg1 == static_cast<int>(WLD_TRIGGER))
-                {
-                    room = get_room(c.arg3);
-                    if (!room)
-                    {
-                        ZONE_ERROR("Invalid room number in trigger assignment");
-                    }
-                    add_trigger(room, read_trigger(c.arg2), -1);
-                    last_cmd = 1;
-                }
-
-                break;
-
-            case 'V':
-                if (c.arg1 == static_cast<int>(MOB_TRIGGER) && tmob)
-                {
-                    if (!SCRIPT(tmob))
-                    {
-                        ZONE_ERROR("Attempt to give a variable to scriptless mobile");
-                    }
-                    else
-                        tmob->setVariable(c.sarg1, c.sarg2);
-                    last_cmd = 1;
-                }
-                else if (c.arg1 == static_cast<int>(OBJ_TRIGGER) && tobj)
-                {
-                    if (!SCRIPT(tobj))
-                    {
-                        ZONE_ERROR("Attempt to give variable to scriptless object");
-                    }
-                    else
-                        tobj->setVariable(c.sarg1, c.sarg2);
-                    last_cmd = 1;
-                }
-                else if (c.arg1 == static_cast<int>(WLD_TRIGGER))
-                {
-                    if (!get_room(c.arg3))
-                    {
-                        ZONE_ERROR("Invalid room number in variable assignment");
-                    }
-                    else
-                    {
-                        get_room(c.arg3)->setVariable(c.sarg1, c.sarg2);
-                        last_cmd = 1;
-                    }
-                }
-                break;
-
-            default:
-                ZONE_ERROR("unknown cmd in reset table; cmd disabled");
-                c.command = '*';
-                break;
-            }
-        }
-        catch (const std::exception &e)
-        {
-            basic_mud_log("Exception thrown in reset_zone '%d' line %d", zone, c.line);
-            shutdown_game(1);
-        }
-    }
-}
-
-static void do_reset_rooms(Zone &z) {
-    for (auto r : filter_raw(z.rooms))
-         reset_wtrigger(r);
+void reset_zone(zone_vnum vn) {
+    auto& z = zone_table.at(vn);
+    z.reset();
 }
 
 /* execute the reset command table of a given zone */
-void reset_zone(zone_rnum zone)
+void Zone::reset()
 {
-    auto& z = zone_table.at(zone);
-    z.age = 0;
+    age = 0;
 
-    if (!pre_reset(z.number))
+    if (!pre_reset(number))
     {
-        do_reset_cmds(z);
-        do_reset_rooms(z);
+        auto rms = rooms;
+        for(auto r : filter_raw(rms)) {
+            if(auto commands = r->resetCommands; !commands.empty()) {
+                Location l(r);
+                l.executeResetCommands(commands);
+            }
+        }
+        for(auto r : filter_raw(rms)) {
+            reset_wtrigger(r);
+        }
+        
     }
 
     // TODO: Split this off into subscriptions.
-    for (auto r : filter_raw(z.rooms))
+    for (auto r : filter_raw(rooms))
     {
 
         if (r->room_flags.get(ROOM_AURA) && rand_number(1, 5) >= 4)
@@ -1907,7 +1548,6 @@ void reset_zone(zone_rnum zone)
             r->ground_effect = 0;
         }
     }
-    post_reset(z.number);
 }
 
 void repairRoomDamage(uint64_t heartPulse, double deltaTime) {

@@ -7,4 +7,4 @@
 
 extern void affect_update(uint64_t heartPulse, double deltaTime);
 
-extern void affect_update_violence(uint64_t heartPulse, double deltaTime);      /* In magic.c */
+extern void affect_update_violence(uint64_t heartPulse, double deltaTime); /* In magic.c */

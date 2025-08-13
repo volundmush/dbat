@@ -1,12 +1,12 @@
 /* ************************************************************************
-*   File: spell_parser.c                                Part of CircleMUD *
-*  Usage: top-level magic routines; outside points of entry to magic sys. *
-*                                                                         *
-*  All rights reserved.  See license.doc for complete information.        *
-*                                                                         *
-*  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
-*  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
-************************************************************************ */
+ *   File: spell_parser.c                                Part of CircleMUD *
+ *  Usage: top-level magic routines; outside points of entry to magic sys. *
+ *                                                                         *
+ *  All rights reserved.  See license.doc for complete information.        *
+ *                                                                         *
+ *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
+ *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
+ ************************************************************************ */
 
 #include "dbat/spell_parser.h"
 #include "dbat/send.h"
@@ -41,91 +41,92 @@ void mag_assign_spells();
  * ample slots for skills.
  */
 
-struct syllable {
+struct syllable
+{
     const char *org;
     const char *news;
 };
 
-
 struct syllable syls[] = {
-        {" ",       " "},
-        {"ar",      "abra"},
-        {"ate",     "i"},
-        {"cau",     "kada"},
-        {"blind",   "nose"},
-        {"bur",     "mosa"},
-        {"cu",      "judi"},
-        {"de",      "oculo"},
-        {"dis",     "mar"},
-        {"ect",     "kamina"},
-        {"en",      "uns"},
-        {"gro",     "cra"},
-        {"light",   "dies"},
-        {"lo",      "hi"},
-        {"magi",    "kari"},
-        {"mon",     "bar"},
-        {"mor",     "zak"},
-        {"move",    "sido"},
-        {"ness",    "lacri"},
-        {"ning",    "illa"},
-        {"per",     "duda"},
-        {"ra",      "gru"},
-        {"re",      "candus"},
-        {"son",     "sabru"},
-        {"tect",    "infra"},
-        {"tri",     "cula"},
-        {"ven",     "nofo"},
-        {"word of", "inset"},
-        {"a",       "i"},
-        {"b",       "v"},
-        {"c",       "q"},
-        {"d",       "m"},
-        {"e",       "o"},
-        {"f",       "y"},
-        {"g",       "t"},
-        {"h",       "p"},
-        {"i",       "u"},
-        {"j",       "y"},
-        {"k",       "t"},
-        {"l",       "r"},
-        {"m",       "w"},
-        {"n",       "b"},
-        {"o",       "a"},
-        {"p",       "s"},
-        {"q",       "d"},
-        {"r",       "f"},
-        {"s",       "g"},
-        {"t",       "h"},
-        {"u",       "e"},
-        {"v",       "z"},
-        {"w",       "x"},
-        {"x",       "n"},
-        {"y",       "l"},
-        {"z",       "k"},
-        {"",        ""}
-};
+    {" ", " "},
+    {"ar", "abra"},
+    {"ate", "i"},
+    {"cau", "kada"},
+    {"blind", "nose"},
+    {"bur", "mosa"},
+    {"cu", "judi"},
+    {"de", "oculo"},
+    {"dis", "mar"},
+    {"ect", "kamina"},
+    {"en", "uns"},
+    {"gro", "cra"},
+    {"light", "dies"},
+    {"lo", "hi"},
+    {"magi", "kari"},
+    {"mon", "bar"},
+    {"mor", "zak"},
+    {"move", "sido"},
+    {"ness", "lacri"},
+    {"ning", "illa"},
+    {"per", "duda"},
+    {"ra", "gru"},
+    {"re", "candus"},
+    {"son", "sabru"},
+    {"tect", "infra"},
+    {"tri", "cula"},
+    {"ven", "nofo"},
+    {"word of", "inset"},
+    {"a", "i"},
+    {"b", "v"},
+    {"c", "q"},
+    {"d", "m"},
+    {"e", "o"},
+    {"f", "y"},
+    {"g", "t"},
+    {"h", "p"},
+    {"i", "u"},
+    {"j", "y"},
+    {"k", "t"},
+    {"l", "r"},
+    {"m", "w"},
+    {"n", "b"},
+    {"o", "a"},
+    {"p", "s"},
+    {"q", "d"},
+    {"r", "f"},
+    {"s", "g"},
+    {"t", "h"},
+    {"u", "e"},
+    {"v", "z"},
+    {"w", "x"},
+    {"x", "n"},
+    {"y", "l"},
+    {"z", "k"},
+    {"", ""}};
 
 const char *unused_spellname = "!UNUSED!"; /* So we can get &unused_spellname */
 
-int mag_manacost(Character *ch, int spellnum) {
+int mag_manacost(Character *ch, int spellnum)
+{
     return 0;
 }
 
-
-int mag_kicost(Character *ch, int spellnum) {
+int mag_kicost(Character *ch, int spellnum)
+{
     int i, min, tval;
     Sensei whichclass;
     return MAX(SINFO.ki_max - (SINFO.ki_change *
-                               (GET_LEVEL(ch) - SINFO.min_level[(int) GET_CLASS(ch)])),
+                               (GET_LEVEL(ch) - SINFO.min_level[(int)GET_CLASS(ch)])),
                SINFO.ki_min);
 }
 
-
-void mag_nextstrike(int level, Character *caster, int spellnum) {
+void mag_nextstrike(int level, Character *caster, int spellnum)
+{
     if (!caster)
         return;
-    if (caster->actq) {
-                caster->sendText("You can't perform more than one special attack at a time!");
+    if (caster->actq)
+    {
+        caster->sendText("You can't perform more than one special attack at a time!");
         return;
     }
     CREATE(caster->actq, struct queued_act, 1);
@@ -133,13 +134,13 @@ void mag_nextstrike(int level, Character *caster, int spellnum) {
     caster->actq->spellnum = spellnum;
 }
 
-
 /*
  * This function should be used anytime you are not 100% sure that you have
  * a valid spell/skill number.  A typical for() loop would not need to use
  * this because you can guarantee > 0 and < SKILL_TABLE_SIZE
  */
-const char *skill_name(int num) {
+const char *skill_name(int num)
+{
     if (num > 0 && num < SKILL_TABLE_SIZE)
         return (spell_info[num].name);
     else if (num == -1)
@@ -148,35 +149,39 @@ const char *skill_name(int num) {
         return ("UNDEFINED");
 }
 
-int find_skill_num(char *name, int sktype) {
+int find_skill_num(char *name, int sktype)
+{
     int skindex, ok;
     char *temp, *temp2;
     char first[256], first2[256], tempbuf[256];
 
-    for (skindex = 1; skindex < SKILL_TABLE_SIZE; skindex++) {
-        if (is_abbrev(name, spell_info[skindex].name) && (spell_info[skindex].skilltype & sktype)) {
+    for (skindex = 1; skindex < SKILL_TABLE_SIZE; skindex++)
+    {
+        if (is_abbrev(name, spell_info[skindex].name) && (spell_info[skindex].skilltype & sktype))
+        {
             return (skindex);
         }
 
         ok = true;
-        strlcpy(tempbuf, spell_info[skindex].name, sizeof(tempbuf));        /* strlcpy: OK */
+        strlcpy(tempbuf, spell_info[skindex].name, sizeof(tempbuf)); /* strlcpy: OK */
         temp = any_one_arg(tempbuf, first);
         temp2 = any_one_arg(name, first2);
-        while (*first && *first2 && ok) {
+        while (*first && *first2 && ok)
+        {
             if (!is_abbrev(first2, first))
                 ok = false;
             temp = any_one_arg(temp, first);
             temp2 = any_one_arg(temp2, first2);
         }
 
-        if (ok && !*first2 && (spell_info[skindex].skilltype & sktype)) {
+        if (ok && !*first2 && (spell_info[skindex].skilltype & sktype))
+        {
             return (skindex);
         }
     }
 
     return (-1);
 }
-
 
 /*
  * This function is the very heart of the entire magic system.  All
@@ -186,7 +191,8 @@ int find_skill_num(char *name, int sktype) {
  * Spellnum 0 is legal but silently ignored here, to make callers simpler.
  */
 int call_magic(Character *caster, Character *cvict,
-               Object *ovict, int spellnum, int level, int casttype, char *arg) {
+               Object *ovict, int spellnum, int level, int casttype, char *arg)
+{
     if (spellnum < 1 || spellnum > SKILL_TABLE_SIZE)
         return (0);
 
@@ -198,21 +204,23 @@ int call_magic(Character *caster, Character *cvict,
         return 0;
 
     if (caster->location.getRoomFlag(ROOM_PEACEFUL) && GET_ADMLEVEL(caster) < ADMLVL_IMPL &&
-        (SINFO.violent || IS_SET(SINFO.routines, MAG_DAMAGE))) {
-                caster->sendText("A flash of white light fills the room, dispelling your violent magic!\r\n");
+        (SINFO.violent || IS_SET(SINFO.routines, MAG_DAMAGE)))
+    {
+        caster->sendText("A flash of white light fills the room, dispelling your violent magic!\r\n");
         act("White light from no particular source suddenly fills the room, then vanishes.", false, caster, nullptr,
             nullptr, TO_ROOM);
         return (0);
     }
 
-    if (IS_SET(SINFO.routines, MAG_NEXTSTRIKE) && casttype != CAST_STRIKE) {
+    if (IS_SET(SINFO.routines, MAG_NEXTSTRIKE) && casttype != CAST_STRIKE)
+    {
         mag_nextstrike(level, caster, spellnum);
         return 1;
     }
 
     if (IS_SET(SINFO.routines, MAG_DAMAGE))
         if (mag_damage(level, caster, cvict, spellnum) == -1)
-            return (-1);    /* Successful and target died, don't cast again. */
+            return (-1); /* Successful and target died, don't cast again. */
 
     if (IS_SET(SINFO.routines, MAG_AFFECTS))
         mag_affects(level, caster, cvict, spellnum);
@@ -242,45 +250,45 @@ int call_magic(Character *caster, Character *cvict,
         mag_creations(level, caster, spellnum);
 
     if (IS_SET(SINFO.routines, MAG_MANUAL))
-        switch (spellnum) {
-            case SPELL_CHARM:
-                MANUAL_SPELL(spell_charm);
-                break;
-            case SPELL_CREATE_WATER:
-                MANUAL_SPELL(spell_create_water);
-                break;
-            case SPELL_DETECT_POISON:
-                MANUAL_SPELL(spell_detect_poison);
-                break;
-            case SPELL_ENCHANT_WEAPON:
-                MANUAL_SPELL(spell_enchant_weapon);
-                break;
-            case SPELL_IDENTIFY:
-                MANUAL_SPELL(spell_identify);
-                break;
-            case SPELL_LOCATE_OBJECT:
-                MANUAL_SPELL(spell_locate_object);
-                break;
-            case SPELL_SUMMON:
-                MANUAL_SPELL(spell_summon);
-                break;
-            case SPELL_WORD_OF_RECALL:
-                MANUAL_SPELL(spell_recall);
-                break;
-            case SPELL_TELEPORT:
-                MANUAL_SPELL(spell_teleport);
-                break;
-            case SPELL_PORTAL:
-                MANUAL_SPELL(spell_portal);
-                break;
-            case ART_ABUNDANT_STEP:
-                MANUAL_SPELL(art_abundant_step);
-                break;
+        switch (spellnum)
+        {
+        case SPELL_CHARM:
+            MANUAL_SPELL(spell_charm);
+            break;
+        case SPELL_CREATE_WATER:
+            MANUAL_SPELL(spell_create_water);
+            break;
+        case SPELL_DETECT_POISON:
+            MANUAL_SPELL(spell_detect_poison);
+            break;
+        case SPELL_ENCHANT_WEAPON:
+            MANUAL_SPELL(spell_enchant_weapon);
+            break;
+        case SPELL_IDENTIFY:
+            MANUAL_SPELL(spell_identify);
+            break;
+        case SPELL_LOCATE_OBJECT:
+            MANUAL_SPELL(spell_locate_object);
+            break;
+        case SPELL_SUMMON:
+            MANUAL_SPELL(spell_summon);
+            break;
+        case SPELL_WORD_OF_RECALL:
+            MANUAL_SPELL(spell_recall);
+            break;
+        case SPELL_TELEPORT:
+            MANUAL_SPELL(spell_teleport);
+            break;
+        case SPELL_PORTAL:
+            MANUAL_SPELL(spell_portal);
+            break;
+        case ART_ABUNDANT_STEP:
+            MANUAL_SPELL(art_abundant_step);
+            break;
         }
 
     if (IS_SET(SINFO.routines, MAG_AFFECTSV))
         mag_affectsv(level, caster, cvict, spellnum);
-
 
     return (1);
 }
@@ -300,7 +308,8 @@ int call_magic(Character *caster, Character *cvict,
  * files (this is a CircleMUD enhancement).
  */
 void mag_objectmagic(Character *ch, Object *obj,
-                     char *argument) {
+                     char *argument)
+{
     char arg[MAX_INPUT_LENGTH];
     int i, k;
     Character *tch = nullptr, *next_tch;
@@ -308,153 +317,175 @@ void mag_objectmagic(Character *ch, Object *obj,
 
     one_argument(argument, arg);
 
-    k = generic_find(arg, FIND_CHAR_ROOM | FIND_OBJ_INV | FIND_OBJ_ROOM |
-                          FIND_OBJ_EQUIP, ch, &tch, &tobj);
+    k = generic_find(arg, FIND_CHAR_ROOM | FIND_OBJ_INV | FIND_OBJ_ROOM | FIND_OBJ_EQUIP, ch, &tch, &tobj);
 
-    switch (GET_OBJ_TYPE(obj)) {
-        case ITEM_STAFF:
-            act("You tap $p three times on the ground.", false, ch, obj, nullptr, TO_CHAR);
-            if (auto ld = obj->getLookDescription(); ld)
-                act(ld, false, ch, obj, nullptr, TO_ROOM);
+    switch (GET_OBJ_TYPE(obj))
+    {
+    case ITEM_STAFF:
+        act("You tap $p three times on the ground.", false, ch, obj, nullptr, TO_CHAR);
+        if (auto ld = obj->getLookDescription(); ld)
+            act(ld, false, ch, obj, nullptr, TO_ROOM);
+        else
+            act("$n taps $p three times on the ground.", false, ch, obj, nullptr, TO_ROOM);
+
+        if (GET_OBJ_VAL(obj, VAL_STAFF_CHARGES) <= 0)
+        {
+            ch->sendText("It seems powerless.\r\n");
+            act("Nothing seems to happen.", false, ch, obj, nullptr, TO_ROOM);
+        }
+        else
+        {
+            MOD_OBJ_VAL(obj, VAL_STAFF_CHARGES, 1);
+            ch->affect_flags.set(AFF_NEXTNOACTION, true);
+            /* Level to cast spell at. */
+            k = GET_OBJ_VAL(obj, VAL_STAFF_LEVEL) ? GET_OBJ_VAL(obj, VAL_STAFF_LEVEL) : DEFAULT_STAFF_LVL;
+
+            /*
+             * Problem : Area/mass spells on staves can cause crashes.
+             * Solution: Remove the special nature of area/mass spells on staves.
+             * Problem : People like that behavior.
+             * Solution: We special case the area/mass spells here.
+             */
+            auto people = ch->location.getPeople();
+            if (HAS_SPELL_ROUTINE(GET_OBJ_VAL(obj, VAL_STAFF_SPELL), MAG_MASSES | MAG_AREAS))
+            {
+                i = people.size();
+                while (i-- > 0)
+                    call_magic(ch, nullptr, nullptr, GET_OBJ_VAL(obj, VAL_STAFF_SPELL), k, CAST_STAFF, nullptr);
+            }
             else
-                act("$n taps $p three times on the ground.", false, ch, obj, nullptr, TO_ROOM);
-
-            if (GET_OBJ_VAL(obj, VAL_STAFF_CHARGES) <= 0) {
-                                ch->sendText("It seems powerless.\r\n");
-                act("Nothing seems to happen.", false, ch, obj, nullptr, TO_ROOM);
-            } else {
-                MOD_OBJ_VAL(obj, VAL_STAFF_CHARGES, 1);
-                ch->affect_flags.set(AFF_NEXTNOACTION, true);
-                /* Level to cast spell at. */
-                k = GET_OBJ_VAL(obj, VAL_STAFF_LEVEL) ? GET_OBJ_VAL(obj, VAL_STAFF_LEVEL) : DEFAULT_STAFF_LVL;
-
-                /*
-                 * Problem : Area/mass spells on staves can cause crashes.
-                 * Solution: Remove the special nature of area/mass spells on staves.
-                 * Problem : People like that behavior.
-                 * Solution: We special case the area/mass spells here.
-                 */
-                auto people = ch->location.getPeople();
-                if (HAS_SPELL_ROUTINE(GET_OBJ_VAL(obj, VAL_STAFF_SPELL), MAG_MASSES | MAG_AREAS)) {
-                    i = people.size();
-                    while (i-- > 0)
-                        call_magic(ch, nullptr, nullptr, GET_OBJ_VAL(obj, VAL_STAFF_SPELL), k, CAST_STAFF, nullptr);
-                } else {
-                    for (auto blah : filter_raw(people)) {
-                        tch = blah;
-                        if (ch != tch)
-                            call_magic(ch, tch, nullptr, GET_OBJ_VAL(obj, VAL_STAFF_SPELL), k, CAST_STAFF, nullptr);
-                    }
+            {
+                for (auto blah : filter_raw(people))
+                {
+                    tch = blah;
+                    if (ch != tch)
+                        call_magic(ch, tch, nullptr, GET_OBJ_VAL(obj, VAL_STAFF_SPELL), k, CAST_STAFF, nullptr);
                 }
             }
-            break;
-        case ITEM_WAND:
-            if (k == FIND_CHAR_ROOM) {
-                if (tch == ch) {
-                    act("You point $p at yourself.", false, ch, obj, nullptr, TO_CHAR);
-                    act("$n points $p at $mself.", false, ch, obj, nullptr, TO_ROOM);
-                } else {
-                    act("You point $p at $N.", false, ch, obj, tch, TO_CHAR);
-                    if (auto ld = obj->getLookDescription(); ld)
-                        act(ld, false, ch, obj, tch, TO_ROOM);
-                    else
-                        act("$n points $p at $N.", true, ch, obj, tch, TO_ROOM);
-                }
-            } else if (tobj) {
-                act("You point $p at $P.", false, ch, obj, tobj, TO_CHAR);
+        }
+        break;
+    case ITEM_WAND:
+        if (k == FIND_CHAR_ROOM)
+        {
+            if (tch == ch)
+            {
+                act("You point $p at yourself.", false, ch, obj, nullptr, TO_CHAR);
+                act("$n points $p at $mself.", false, ch, obj, nullptr, TO_ROOM);
+            }
+            else
+            {
+                act("You point $p at $N.", false, ch, obj, tch, TO_CHAR);
                 if (auto ld = obj->getLookDescription(); ld)
-                    act(ld, false, ch, obj, tobj, TO_ROOM);
+                    act(ld, false, ch, obj, tch, TO_ROOM);
                 else
-                    act("$n points $p at $P.", true, ch, obj, tobj, TO_ROOM);
-            } else if (IS_SET(spell_info[GET_OBJ_VAL(obj, VAL_WAND_SPELL)].routines, MAG_AREAS | MAG_MASSES)) {
-                /* Wands with area spells don't need to be pointed. */
-                act("You point $p outward.", false, ch, obj, nullptr, TO_CHAR);
-                act("$n points $p outward.", true, ch, obj, nullptr, TO_ROOM);
-            } else {
-                act("At what should $p be pointed?", false, ch, obj, nullptr, TO_CHAR);
-                return;
+                    act("$n points $p at $N.", true, ch, obj, tch, TO_ROOM);
             }
-
-            if (GET_OBJ_VAL(obj, VAL_WAND_CHARGES) <= 0) {
-                                ch->sendText("It seems powerless.\r\n");
-                act("Nothing seems to happen.", false, ch, obj, nullptr, TO_ROOM);
-                return;
-            }
-            MOD_OBJ_VAL(obj, VAL_WAND_CHARGES, -1);
-            ch->affect_flags.set(AFF_NEXTNOACTION, true);
-            if (GET_OBJ_VAL(obj, VAL_WAND_LEVEL))
-                call_magic(ch, tch, tobj, GET_OBJ_VAL(obj, VAL_WAND_SPELL),
-                           GET_OBJ_VAL(obj, VAL_WAND_LEVEL), CAST_WAND, nullptr);
-            else
-                call_magic(ch, tch, tobj, GET_OBJ_VAL(obj, VAL_WAND_SPELL),
-                           DEFAULT_WAND_LVL, CAST_WAND, nullptr);
-            break;
-        case ITEM_SCROLL:
-            if (*arg) {
-                if (!k) {
-                    act("There is nothing to here to affect with $p.", false,
-                        ch, obj, nullptr, TO_CHAR);
-                    return;
-                }
-            } else
-                tch = ch;
-
-            act("You recite $p which dissolves.", true, ch, obj, nullptr, TO_CHAR);
+        }
+        else if (tobj)
+        {
+            act("You point $p at $P.", false, ch, obj, tobj, TO_CHAR);
             if (auto ld = obj->getLookDescription(); ld)
-                act(ld, false, ch, obj, tch, TO_ROOM);
+                act(ld, false, ch, obj, tobj, TO_ROOM);
             else
-                act("$n recites $p.", false, ch, obj, nullptr, TO_ROOM);
+                act("$n points $p at $P.", true, ch, obj, tobj, TO_ROOM);
+        }
+        else if (IS_SET(spell_info[GET_OBJ_VAL(obj, VAL_WAND_SPELL)].routines, MAG_AREAS | MAG_MASSES))
+        {
+            /* Wands with area spells don't need to be pointed. */
+            act("You point $p outward.", false, ch, obj, nullptr, TO_CHAR);
+            act("$n points $p outward.", true, ch, obj, nullptr, TO_ROOM);
+        }
+        else
+        {
+            act("At what should $p be pointed?", false, ch, obj, nullptr, TO_CHAR);
+            return;
+        }
 
-            ch->affect_flags.set(AFF_NEXTNOACTION, true);
-            for (i = 1; i <= 3; i++)
-                if (call_magic(ch, tch, tobj, GET_OBJ_VAL(obj, fmt::format("spell{}", i)),
-                               GET_OBJ_VAL(obj, VAL_SCROLL_LEVEL), CAST_SCROLL, nullptr) <= 0)
-                    break;
-
-            if (obj)
-                extract_obj(obj);
-            break;
-        case ITEM_POTION:
+        if (GET_OBJ_VAL(obj, VAL_WAND_CHARGES) <= 0)
+        {
+            ch->sendText("It seems powerless.\r\n");
+            act("Nothing seems to happen.", false, ch, obj, nullptr, TO_ROOM);
+            return;
+        }
+        MOD_OBJ_VAL(obj, VAL_WAND_CHARGES, -1);
+        ch->affect_flags.set(AFF_NEXTNOACTION, true);
+        if (GET_OBJ_VAL(obj, VAL_WAND_LEVEL))
+            call_magic(ch, tch, tobj, GET_OBJ_VAL(obj, VAL_WAND_SPELL),
+                       GET_OBJ_VAL(obj, VAL_WAND_LEVEL), CAST_WAND, nullptr);
+        else
+            call_magic(ch, tch, tobj, GET_OBJ_VAL(obj, VAL_WAND_SPELL),
+                       DEFAULT_WAND_LVL, CAST_WAND, nullptr);
+        break;
+    case ITEM_SCROLL:
+        if (*arg)
+        {
+            if (!k)
+            {
+                act("There is nothing to here to affect with $p.", false,
+                    ch, obj, nullptr, TO_CHAR);
+                return;
+            }
+        }
+        else
             tch = ch;
 
-            if (!consume_otrigger(obj, ch, OCMD_QUAFF))  /* check trigger */
-                return;
+        act("You recite $p which dissolves.", true, ch, obj, nullptr, TO_CHAR);
+        if (auto ld = obj->getLookDescription(); ld)
+            act(ld, false, ch, obj, tch, TO_ROOM);
+        else
+            act("$n recites $p.", false, ch, obj, nullptr, TO_ROOM);
 
-            act("You swallow $p.", false, ch, obj, nullptr, TO_CHAR);
-            if (auto ld = obj->getLookDescription(); ld)
-                act(ld, false, ch, obj, nullptr, TO_ROOM);
-            else
-                act("$n swallows $p.", true, ch, obj, nullptr, TO_ROOM);
+        ch->affect_flags.set(AFF_NEXTNOACTION, true);
+        for (i = 1; i <= 3; i++)
+            if (call_magic(ch, tch, tobj, GET_OBJ_VAL(obj, fmt::format("spell{}", i)),
+                           GET_OBJ_VAL(obj, VAL_SCROLL_LEVEL), CAST_SCROLL, nullptr) <= 0)
+                break;
 
-            ch->affect_flags.set(AFF_NEXTNOACTION, true);
-            for (i = 1; i <= 3; i++)
-                if (call_magic(ch, ch, nullptr, GET_OBJ_VAL(obj, fmt::format("spell{}", i)),
-                               GET_OBJ_VAL(obj, VAL_POTION_LEVEL), CAST_POTION, nullptr) <= 0)
-                    break;
+        if (obj)
+            extract_obj(obj);
+        break;
+    case ITEM_POTION:
+        tch = ch;
 
-            if (obj)
-                extract_obj(obj);
-            break;
-        default:
-            basic_mud_log("SYSERR: Unknown object_type %d in mag_objectmagic.",
-                GET_OBJ_TYPE(obj));
-            break;
+        if (!consume_otrigger(obj, ch, OCMD_QUAFF)) /* check trigger */
+            return;
+
+        act("You swallow $p.", false, ch, obj, nullptr, TO_CHAR);
+        if (auto ld = obj->getLookDescription(); ld)
+            act(ld, false, ch, obj, nullptr, TO_ROOM);
+        else
+            act("$n swallows $p.", true, ch, obj, nullptr, TO_ROOM);
+
+        ch->affect_flags.set(AFF_NEXTNOACTION, true);
+        for (i = 1; i <= 3; i++)
+            if (call_magic(ch, ch, nullptr, GET_OBJ_VAL(obj, fmt::format("spell{}", i)),
+                           GET_OBJ_VAL(obj, VAL_POTION_LEVEL), CAST_POTION, nullptr) <= 0)
+                break;
+
+        if (obj)
+            extract_obj(obj);
+        break;
+    default:
+        basic_mud_log("SYSERR: Unknown object_type %d in mag_objectmagic.",
+                      GET_OBJ_TYPE(obj));
+        break;
     }
 }
 
-
-
-void skill_race_class(int spell, int race, int learntype) {
+void skill_race_class(int spell, int race, int learntype)
+{
     int bad = 0;
 
-    if (spell < 0 || spell >= SKILL_TABLE_SIZE) {
+    if (spell < 0 || spell >= SKILL_TABLE_SIZE)
+    {
         basic_mud_log("SYSERR: attempting assign to illegal spellnum %d/%d", spell, SKILL_TABLE_SIZE);
         return;
     }
 
-    if (race < 0 || race >= NUM_RACES) {
+    if (race < 0 || race >= NUM_RACES)
+    {
         basic_mud_log("SYSERR: assigning '%s' to illegal race %d/%d.", skill_name(spell),
-            race, NUM_RACES - 1);
+                      race, NUM_RACES - 1);
         bad = 1;
     }
 
@@ -462,23 +493,27 @@ void skill_race_class(int spell, int race, int learntype) {
         spell_info[spell].race_can_learn[race] = learntype;
 }
 
-void spell_level(int spell, int chclass, int level) {
+void spell_level(int spell, int chclass, int level)
+{
     int bad = 0;
 
-    if (spell < 0 || spell > SKILL_TABLE_SIZE) {
+    if (spell < 0 || spell > SKILL_TABLE_SIZE)
+    {
         basic_mud_log("SYSERR: attempting assign to illegal spellnum %d/%d", spell, SKILL_TABLE_SIZE);
         return;
     }
 
-    if (chclass < 0 || chclass >= NUM_CLASSES) {
+    if (chclass < 0 || chclass >= NUM_CLASSES)
+    {
         basic_mud_log("SYSERR: assigning '%s' to illegal class %d/%d.", skill_name(spell),
-            chclass, NUM_CLASSES - 1);
+                      chclass, NUM_CLASSES - 1);
         bad = 1;
     }
 
-    if (level < 1) {
+    if (level < 1)
+    {
         basic_mud_log("SYSERR: assigning '%s' to illegal level %d.", skill_name(spell),
-            level);
+                      level);
         bad = 1;
     }
 
@@ -486,23 +521,27 @@ void spell_level(int spell, int chclass, int level) {
         spell_info[spell].min_level[chclass] = level;
 }
 
-void skill_class(int skill, int chclass, int learntype) {
+void skill_class(int skill, int chclass, int learntype)
+{
     int bad = 0;
 
-    if (skill < 0 || skill > SKILL_TABLE_SIZE) {
+    if (skill < 0 || skill > SKILL_TABLE_SIZE)
+    {
         basic_mud_log("SYSERR: attempting assign to illegal skillnum %d/%d", skill, SKILL_TABLE_SIZE);
         return;
     }
 
-    if (chclass < 0 || chclass >= NUM_CLASSES) {
+    if (chclass < 0 || chclass >= NUM_CLASSES)
+    {
         basic_mud_log("SYSERR: assigning '%s' to illegal class %d/%d.", skill_name(skill),
-            chclass, NUM_CLASSES - 1);
+                      chclass, NUM_CLASSES - 1);
         bad = 1;
     }
 
-    if (learntype < 0 || learntype > SKLEARN_CLASS) {
+    if (learntype < 0 || learntype > SKLEARN_CLASS)
+    {
         basic_mud_log("SYSERR: assigning skill '%s' illegal learn type %d for class %d.", skill_name(skill),
-            learntype, chclass);
+                      learntype, chclass);
         bad = 1;
     }
 
@@ -510,19 +549,20 @@ void skill_class(int skill, int chclass, int learntype) {
         spell_info[skill].can_learn_skill[chclass] = learntype;
 }
 
-int skill_type(int snum) {
+int skill_type(int snum)
+{
     return spell_info[snum].skilltype;
 }
 
-void set_skill_type(int snum, int sktype) {
+void set_skill_type(int snum, int sktype)
+{
     spell_info[snum].skilltype = sktype;
 }
 
-
 /* Assign the spells on boot up */
-void
-spello(int spl, const char *name, int max_mana, int min_mana, int mana_change, int minpos, int targets, int violent,
-       int routines, int save_flags, int comp_flags, const char *wearoff, int cmspell_level, int school, int domain) {
+void spello(int spl, const char *name, int max_mana, int min_mana, int mana_change, int minpos, int targets, int violent,
+            int routines, int save_flags, int comp_flags, const char *wearoff, int cmspell_level, int school, int domain)
+{
     int i;
 
     for (i = 0; i < NUM_CLASSES; i++)
@@ -550,9 +590,9 @@ spello(int spl, const char *name, int max_mana, int min_mana, int mana_change, i
     spell_info[spl].domain = domain;
 }
 
-
 void arto(int spl, const char *name, int max_ki, int min_ki, int ki_change, int minpos, int targets, int violent,
-          int routines, int save_flags, int comp_flags, const char *wearoff) {
+          int routines, int save_flags, int comp_flags, const char *wearoff)
+{
     spello(spl, name, 0, 0, 0, minpos, targets, violent, routines, save_flags, comp_flags, wearoff, 0, 0, 0);
     set_skill_type(spl, SKTYPE_ART);
     spell_info[spl].ki_max = max_ki;
@@ -560,11 +600,12 @@ void arto(int spl, const char *name, int max_ki, int min_ki, int ki_change, int 
     spell_info[spl].ki_change = ki_change;
 }
 
-
-void unused_spell(int spl) {
+void unused_spell(int spl)
+{
     int i;
 
-    for (i = 0; i < NUM_CLASSES; i++) {
+    for (i = 0; i < NUM_CLASSES; i++)
+    {
         spell_info[spl].min_level[i] = CONFIG_LEVEL_CAP;
         spell_info[spl].can_learn_skill[i] = SKLEARN_CROSSCLASS;
     }
@@ -590,8 +631,8 @@ void unused_spell(int spl) {
     spell_info[spl].domain = 0;
 }
 
-
-void skillo(int skill, const char *name, int flags) {
+void skillo(int skill, const char *name, int flags)
+{
     spello(skill, name, 0, 0, 0, 0, 0, 0, 0, 0, 0, nullptr, 0, 0, 0);
     spell_info[skill].skilltype = SKTYPE_SKILL;
     spell_info[skill].flags = flags;
@@ -645,7 +686,8 @@ void skillo(int skill, const char *name, int flags) {
  * or skill, look in class.c.  -JE 5 Feb 1996
  */
 
-void mag_assign_spells() {
+void mag_assign_spells()
+{
     int i;
 
     /* Do not change the loop below. */
@@ -1196,7 +1238,6 @@ void mag_assign_spells() {
            TAR_IGNORE, true, 0, 0, 0,
            nullptr,
            0, 0, 0);
-
 
     /*
      * Declaration of skills - this actually doesn't do anything except

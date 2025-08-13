@@ -3,15 +3,16 @@
 #include "structs.h"
 
 /* New Dynamic boards v2.4 -PjD (dughi@imaxx.net) */
-#define BOARD_DIRECTORY                "data/etc/boards" SLASH
-constexpr int MAX_MESSAGE_LENGTH = 4096;    /* arbitrary -- change if needed */
+#define BOARD_DIRECTORY "data/etc/boards" SLASH
+constexpr int MAX_MESSAGE_LENGTH = 4096; /* arbitrary -- change if needed */
 
-constexpr int BOARD_MAGIC = 1048575;    /* arbitrary number - see modify.c */
+constexpr int BOARD_MAGIC = 1048575; /* arbitrary number - see modify.c */
 
 /* Provides individual message structure */
 /* doubly linked so forward or back is relatively simple */
 
-struct board_msg {
+struct board_msg
+{
     long poster;
     time_t timestamp;
     char *subject;
@@ -24,18 +25,20 @@ struct board_msg {
 /* Defines what we require to generate a hash for lookup
    of a message given a reader */
 
-struct board_memory {
+struct board_memory
+{
     int timestamp;
     int reader;
     struct board_memory *next;
     char *name;
 };
 
-struct board_info {
-    int read_lvl;    /* min level to read messages on this board */
+struct board_info
+{
+    int read_lvl;     /* min level to read messages on this board */
     int write_lvl;    /* min level to write messages on this board */
-    int remove_lvl;    /* min level to remove messages from this board */
-    int num_messages;           /* num messages of this board */
+    int remove_lvl;   /* min level to remove messages from this board */
+    int num_messages; /* num messages of this board */
     int vnum;
     struct board_info *next;
     struct board_msg *messages;
@@ -56,7 +59,7 @@ struct board_info {
 #define BOARD_NEXT(i) ((i)->next)
 #define BOARD_MESSAGES(i) ((i)->messages)
 #define BOARD_MEMORY(i, j) ((i)->memory[j])
-#define BOARD_VERSION(i)     ((i)->version)
+#define BOARD_VERSION(i) ((i)->version)
 constexpr int CURRENT_BOARD_VER = 2;
 
 #define MESG_POSTER(i) ((i)->poster)
@@ -65,12 +68,12 @@ constexpr int CURRENT_BOARD_VER = 2;
 #define MESG_DATA(i) ((i)->data)
 #define MESG_NEXT(i) ((i)->next)
 #define MESG_PREV(i) ((i)->prev)
-#define MESG_POSTER_NAME(i)     ((i)->name)
+#define MESG_POSTER_NAME(i) ((i)->name)
 
 #define MEMORY_TIMESTAMP(i) ((i)->timestamp)
 #define MEMORY_READER(i) ((i)->reader)
 #define MEMORY_NEXT(i) ((i)->next)
-#define MEMORY_READER_NAME(i)     ((i)->name)
+#define MEMORY_READER_NAME(i) ((i)->name)
 
 extern void init_boards();
 

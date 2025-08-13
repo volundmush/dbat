@@ -4,7 +4,6 @@
 
 /* global variables */
 
-
 // functions
 extern void search_replace(char *string, const char *find, const char *replace);
 

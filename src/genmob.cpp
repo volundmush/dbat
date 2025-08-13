@@ -22,129 +22,123 @@
 #include "dbat/filter.h"
 
 /* From db.c */
-Character::Character() {
+Character::Character()
+{
     type = UnitType::character;
 }
 
 /* local functions */
 void extract_mobile_all(mob_vnum vnum);
 
-int add_mobile(CharacterPrototype *mob, mob_vnum vnum) {
+int add_mobile(CharacterPrototype *mob, mob_vnum vnum)
+{
     mob_vnum rnum, found = false;
     Character *live_mob;
 
     bool exists = mob_proto.contains(vnum);
 
-    if (exists) {
+    if (exists)
+    {
         /* Copy over the mobile and free() the old strings. */
         mob_proto.at(rnum) = *mob;
         basic_mud_log("GenOLC: add_mobile: Updated existing mobile #%d.", vnum);
-    } else {
+    }
+    else
+    {
         mob_proto[vnum] = *mob;
         auto &ix = mob_index[vnum];
         ix.vn = vnum;
-        auto zvnum = real_zone_by_thing(vnum);
-        auto& z = zone_table.at(zvnum);
-        z.mobiles.insert(vnum);
         basic_mud_log("GenOLC: add_mobile: Added mobile %d.", vnum);
     }
 
     return vnum;
 }
 
-
-void extract_mobile_all(mob_vnum vnum) {
+void extract_mobile_all(mob_vnum vnum)
+{
     auto mobs = characterSubscriptions.all(fmt::format("vnum_{}", vnum));
-    for (auto ch : filter_raw(mobs)) {
+    for (auto ch : filter_raw(mobs))
+    {
         extract_char(ch);
     }
 }
 
-int delete_mobile(mob_rnum refpt) {
+int delete_mobile(mob_rnum refpt)
+{
     Character *live_mob;
     int counter, cmd_no;
     mob_vnum vnum;
     zone_rnum zone;
 
-    if (!mob_proto.count(refpt)) {
+    if (!mob_proto.count(refpt))
+    {
         basic_mud_log("SYSERR: GenOLC: delete_mobile: Invalid rnum %d.", refpt);
         return NOBODY;
     }
 
     vnum = refpt;
     extract_mobile_all(vnum);
-    auto& z = zone_table.at(real_zone_by_thing(refpt));
-    z.mobiles.erase(refpt);
-
-    /* Update zone table.  */
-    for (auto &[zone, z] : zone_table) {
-        z.cmd.erase(std::remove_if(z.cmd.begin(), z.cmd.end(), [refpt](auto &cmd) { return cmd.command == 'M' && cmd.arg1 == refpt; }));
-    }
 
     /* Update shop keepers.  */
-    for (auto &sh : shop_index) {
+    for (auto &sh : shop_index)
+    {
         /* Find the shop for this keeper and reset it's keeper to
          * -1 to keep the shop so it could be assigned to someone else */
-        if (sh.second.keeper == refpt) {
+        if (sh.second.keeper == refpt)
+        {
             sh.second.keeper = NOBODY;
         }
     }
 
     /* Update guild masters */
-    for (auto &g : guild_index) {
+    for (auto &g : guild_index)
+    {
         /* Find the guild for this trainer and reset it's trainer to
          * -1 to keep the guild so it could be assigned to someone else */
-        if (g.second.keeper == refpt) {
+        if (g.second.keeper == refpt)
+        {
             g.second.keeper = NOBODY;
         }
     }
 
     mob_proto.erase(vnum);
     mob_index.erase(vnum);
-    save_mobiles(real_zone_by_thing(vnum));
 
     return refpt;
-}
-
-
-
-
-
-int save_mobiles(zone_rnum zone_num) {
-    return true;
 }
 
 #if CONFIG_GENOLC_MOBPROG
 int write_mobile_mobprog(mob_vnum mvnum, Character *mob, FILE *fd)
 {
-  char wmmarg[MAX_STRING_LENGTH], wmmcom[MAX_STRING_LENGTH];
-  MPROG_DATA *mob_prog;
+    char wmmarg[MAX_STRING_LENGTH], wmmcom[MAX_STRING_LENGTH];
+    MPROG_DATA *mob_prog;
 
-  for (mob_prog = GET_MPROG(mob); mob_prog; mob_prog = mob_prog->next) {
-    wmmarg[MAX_STRING_LENGTH - 1] = '\0';
-    wmmcom[MAX_STRING_LENGTH - 1] = '\0';
-    strip_cr(strncpy(wmmarg, mob_prog->arglist, MAX_STRING_LENGTH - 1));
-    strip_cr(strncpy(wmmcom, mob_prog->comlist, MAX_STRING_LENGTH - 1));
-    fprintf(fd,	"%s %s~\n"
-        "%s%c\n",
-    medit_get_mprog_type(mob_prog), wmmarg,
-    wmmcom, STRING_TERMINATOR
-    );
-    if (mob_prog->next == nullptr)
-      fputs("|\n", fd);
-  }
-  return TRUE;
+    for (mob_prog = GET_MPROG(mob); mob_prog; mob_prog = mob_prog->next)
+    {
+        wmmarg[MAX_STRING_LENGTH - 1] = '\0';
+        wmmcom[MAX_STRING_LENGTH - 1] = '\0';
+        strip_cr(strncpy(wmmarg, mob_prog->arglist, MAX_STRING_LENGTH - 1));
+        strip_cr(strncpy(wmmcom, mob_prog->comlist, MAX_STRING_LENGTH - 1));
+        fprintf(fd, "%s %s~\n"
+                    "%s%c\n",
+                medit_get_mprog_type(mob_prog), wmmarg,
+                wmmcom, STRING_TERMINATOR);
+        if (mob_prog->next == nullptr)
+            fputs("|\n", fd);
+    }
+    return TRUE;
 }
 #endif
 
-
-
-std::shared_ptr<Character> Character::shared() {
+std::shared_ptr<Character> Character::shared()
+{
     return shared_from_this();
 }
 
-void Character::activate() {
-    if(active) {
+void Character::activate()
+{
+    if (active)
+    {
         basic_mud_log("Attempted to activate an already active character.");
         return;
     }
@@ -152,77 +146,87 @@ void Character::activate() {
     std::unordered_set<std::string> services;
     auto sh = shared_from_this();
 
-    if(auto vn = getVnum(); mob_proto.contains(vn)) {
+    if (auto vn = getVnum(); mob_proto.contains(vn))
+    {
         services.insert(fmt::format("vnum_{}", vn));
     }
 
     assign_triggers(this, MOB_TRIGGER);
 
-    if(!scripts.empty()) {
+    if (!scripts.empty())
+    {
         activateScripts();
 
-        if(SCRIPT_TYPES(this) & MTRIG_RANDOM)
+        if (SCRIPT_TYPES(this) & MTRIG_RANDOM)
             services.insert("randomTriggers");
-        if(SCRIPT_TYPES(this) & MTRIG_TIME)
+        if (SCRIPT_TYPES(this) & MTRIG_TIME)
             services.insert("timeTriggers");
     }
 
-    if(!IS_NPC(this)) services.insert("players");
+    if (!IS_NPC(this))
+        services.insert("players");
 
-    if(PLR_FLAGGED(this, PLR_GOOP))
+    if (PLR_FLAGGED(this, PLR_GOOP))
         services.insert("goopTimeService");
-    if(AFF_FLAGGED(this, AFF_POISON)) 
+    if (AFF_FLAGGED(this, AFF_POISON))
         services.insert("poisoned");
-    if(PLR_FLAGGED(this, PLR_AURALIGHT))
+    if (PLR_FLAGGED(this, PLR_AURALIGHT))
         services.insert("auralight");
-    if(ABSORBING(this))
+    if (ABSORBING(this))
         services.insert("androidAbsorbSystem");
-    if(character_flags.get(CharacterFlag::powering_up))
+    if (character_flags.get(CharacterFlag::powering_up))
         services.insert("powerupService");
-    if(!isFullVital(CharVital::health))
+    if (!isFullVital(CharVital::health))
         services.insert("characterHealthRecovery");
-    if(!isFullVital(CharVital::ki))
+    if (!isFullVital(CharVital::ki))
         services.insert("characterKiRecovery");
-    if(!isFullVital(CharVital::stamina))
+    if (!isFullVital(CharVital::stamina))
         services.insert("characterStaminaRecovery");
-    if(!isFullVital(CharVital::lifeforce))
+    if (!isFullVital(CharVital::lifeforce))
         services.insert("characterLifeforceRecovery");
-    if(!IS_ANDROID(this) && GET_LIFEPERC(this) > 0) {
+    if (!IS_ANDROID(this) && GET_LIFEPERC(this) > 0)
+    {
         auto meter = getCurVitalMeterPercent(CharVital::health) * 100.0;
         auto perc = GET_LIFEPERC(this);
-        if(meter < perc) {
+        if (meter < perc)
+        {
             services.insert("lifeforceRecovery");
         }
     }
-    if(GET_CHARGE(this) || PLR_FLAGGED(this, PLR_CHARGE))
+    if (GET_CHARGE(this) || PLR_FLAGGED(this, PLR_CHARGE))
         services.insert("kiChargeSystem");
-    if(PLR_FLAGGED(this, PLR_FISHING))
+    if (PLR_FLAGGED(this, PLR_FISHING))
         services.insert("goneFishing");
-    if(form != Form::base || technique != Form::base)
+    if (form != Form::base || technique != Form::base)
         services.insert("transforms");
     services.insert("active");
 
-    if(affected) {
+    if (affected)
+    {
         services.insert("affected");
     }
 
-    if(affectedv) {
+    if (affectedv)
+    {
         services.insert("affectedv");
     }
 
-    for(const auto& s : services) characterSubscriptions.subscribe(s, sh);
+    for (const auto &s : services)
+        characterSubscriptions.subscribe(s, sh);
 
     activateInventory();
     activateEquipment();
 }
 
-
-void Character::deactivate() {
-    if(!active) return;
+void Character::deactivate()
+{
+    if (!active)
+        return;
     active = false;
     Character *temp = nullptr;
 
-    for(auto &[vn, sc] : scripts) {
+    for (auto &[vn, sc] : scripts)
+    {
         sc->deactivate();
     }
 
@@ -232,39 +236,50 @@ void Character::deactivate() {
     deactivateEquipment();
 }
 
-bool Character::isActive() const {
+bool Character::isActive() const
+{
     return active;
 }
 
-
-bool Character::isProvidingLight() {
-    if(!IS_NPC(this) && PLR_FLAGGED(this, PLR_AURALIGHT)) return true;
-    for(auto i = 0; i < NUM_WEARS; i++) if(auto e = GET_EQ(this, i); e) if(e->isProvidingLight()) return true;
+bool Character::isProvidingLight()
+{
+    if (!IS_NPC(this) && PLR_FLAGGED(this, PLR_AURALIGHT))
+        return true;
+    for (auto i = 0; i < NUM_WEARS; i++)
+        if (auto e = GET_EQ(this, i); e)
+            if (e->isProvidingLight())
+                return true;
     return false;
 }
 
-double Character::currentGravity() {
+double Character::currentGravity()
+{
     return location.getEnvironment(ENV_GRAVITY);
 }
 
-
-void Character::ageBy(double addedTime) {
+void Character::ageBy(double addedTime)
+{
     this->time.seconds_aged += addedTime;
 }
 
-void Character::setAge(double newAge) {
+void Character::setAge(double newAge)
+{
     this->time.seconds_aged = newAge * SECS_PER_GAME_YEAR;
 }
 
-CharacterPrototype* Character::getProto() const {
-    if(mob_proto.contains(vn)) {
+CharacterPrototype *Character::getProto() const
+{
+    if (mob_proto.contains(vn))
+    {
         return &mob_proto.at(vn);
     }
     return nullptr;
 }
 
-Character::~Character() {
-    if(title) free(title);
+Character::~Character()
+{
+    if (title)
+        free(title);
     struct affected_type *cmtemp;
 
     while (affected)
@@ -272,31 +287,35 @@ Character::~Character() {
 
     while (affectedv)
         REMOVE_FROM_LIST(affectedv, this->affectedv, next, cmtemp);
-    
+
     free_followers(followers);
 
     if (desc)
         desc->character = nullptr;
-    
-    extract_script(this, type);
 
+    extract_script(this, type);
 }
 
-const char* Character::getDgName() const {
+const char *Character::getDgName() const
+{
     return HasMudStrings::getName();
 }
 
-std::vector<trig_vnum> Character::getProtoScript() const {
+std::vector<trig_vnum> Character::getProtoScript() const
+{
     auto v = getVnum();
-    if(mob_proto.contains(v)) {
+    if (mob_proto.contains(v))
+    {
         return mob_proto.at(v).proto_script;
     }
     return {};
 }
 
-void Character::clearLocation() {
+void Character::clearLocation()
+{
     // Characters really shouldn't ever be anywhere else.
-    if(location.unit) {
+    if (location.unit)
+    {
         location.unit->removeFromContents(this);
     }
 }

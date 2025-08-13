@@ -14,13 +14,8 @@
 #include "dbat/guild.h"
 #include "dbat/constants.h"
 
-/* real zone of room/mobile/object/shop given */
-zone_rnum real_zone_by_thing(room_vnum vznum) {
-    for(auto &z : zone_table) if(vznum >= z.second.bot && vznum <= z.second.top) return z.first;
-    return NOWHERE;
-}
-
-zone_rnum create_new_zone(zone_vnum vzone_num, room_vnum bottom, room_vnum top, const char **error) {
+zone_rnum create_new_zone(zone_vnum vzone_num, const char **error)
+{
     FILE *fp;
     struct Zone *zone;
     int i;
@@ -31,21 +26,20 @@ zone_rnum create_new_zone(zone_vnum vzone_num, room_vnum bottom, room_vnum top, 
     {
         *error = "You can't make negative zones.\r\n";
         return NOWHERE;
-    } else if (bottom > top) {
-        *error = "Bottom room cannot be greater than top room.\r\n";
-        return NOWHERE;
     }
 
-    if(zone_table.count(vzone_num)) {
-            *error = "That virtual zone already exists.\r\n";
-            return NOWHERE;
-        }
+    if (zone_table.count(vzone_num))
+    {
+        *error = "That virtual zone already exists.\r\n";
+        return NOWHERE;
+    }
 
     /*
      * Create the zone file.
      */
     snprintf(buf, sizeof(buf), "%s%d.zon", ZON_PREFIX, vzone_num);
-    if (!(fp = fopen(buf, "w"))) {
+    if (!(fp = fopen(buf, "w")))
+    {
         mudlog(BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new zone file.");
         *error = "Could not write zone file.\r\n";
         return NOWHERE;
@@ -56,19 +50,21 @@ zone_rnum create_new_zone(zone_vnum vzone_num, room_vnum bottom, room_vnum top, 
      * Create the room file.
      */
     snprintf(buf, sizeof(buf), "%s%d.wld", WLD_PREFIX, vzone_num);
-    if (!(fp = fopen(buf, "w"))) {
+    if (!(fp = fopen(buf, "w")))
+    {
         mudlog(BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new world file.");
         *error = "Could not write world file.\r\n";
         return NOWHERE;
     }
-    fprintf(fp, "#%d\nThe Beginning~\nNot much here.\n~\n%d 0 0\nS\n$\n", bottom, vzone_num);
+    fprintf(fp, "\nThe Beginning~\nNot much here.\n~\n%d 0 0\nS\n$\n", vzone_num);
     fclose(fp);
 
     /*
      * Create the mobile file.
      */
     snprintf(buf, sizeof(buf), "%s%d.mob", MOB_PREFIX, vzone_num);
-    if (!(fp = fopen(buf, "w"))) {
+    if (!(fp = fopen(buf, "w")))
+    {
         mudlog(BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new mob file.");
         *error = "Could not write mobile file.\r\n";
         return NOWHERE;
@@ -80,7 +76,8 @@ zone_rnum create_new_zone(zone_vnum vzone_num, room_vnum bottom, room_vnum top, 
      * Create the object file.
      */
     snprintf(buf, sizeof(buf), "%s%d.obj", OBJ_PREFIX, vzone_num);
-    if (!(fp = fopen(buf, "w"))) {
+    if (!(fp = fopen(buf, "w")))
+    {
         mudlog(BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new obj file.");
         *error = "Could not write object file.\r\n";
         return NOWHERE;
@@ -92,7 +89,8 @@ zone_rnum create_new_zone(zone_vnum vzone_num, room_vnum bottom, room_vnum top, 
      * Create the shop file.
      */
     snprintf(buf, sizeof(buf), "%s%d.shp", SHP_PREFIX, vzone_num);
-    if (!(fp = fopen(buf, "w"))) {
+    if (!(fp = fopen(buf, "w")))
+    {
         mudlog(BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new shop file.");
         *error = "Could not write shop file.\r\n";
         return NOWHERE;
@@ -104,7 +102,8 @@ zone_rnum create_new_zone(zone_vnum vzone_num, room_vnum bottom, room_vnum top, 
      * Create the trigger file.
      */
     snprintf(buf, sizeof(buf), "%s%d.trg", TRG_PREFIX, vzone_num);
-    if (!(fp = fopen(buf, "w"))) {
+    if (!(fp = fopen(buf, "w")))
+    {
         mudlog(BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new trigger file");
         *error = "Could not write trigger file.\r\n";
         return NOWHERE;
@@ -116,24 +115,14 @@ zone_rnum create_new_zone(zone_vnum vzone_num, room_vnum bottom, room_vnum top, 
      * Create Gld file .
      */
     snprintf(buf, sizeof(buf), "%s/%i.gld", GLD_PREFIX, vzone_num);
-    if (!(fp = fopen(buf, "w"))) {
+    if (!(fp = fopen(buf, "w")))
+    {
         mudlog(BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new guild file");
         *error = "Could not write guild file.\r\n";
         return NOWHERE;
     }
     fprintf(fp, "$~\n");
     fclose(fp);
-
-    /*
-     * Update index files.
-     */
-    create_world_index(vzone_num, "zon");
-    create_world_index(vzone_num, "wld");
-    create_world_index(vzone_num, "mob");
-    create_world_index(vzone_num, "obj");
-    create_world_index(vzone_num, "shp");
-    create_world_index(vzone_num, "trg");
-    create_world_index(vzone_num, "gld");
 
     /*
      * Make a new zone in memory. This was the source of all the zedit new
@@ -145,176 +134,114 @@ zone_rnum create_new_zone(zone_vnum vzone_num, room_vnum bottom, room_vnum top, 
      * through top_of_zone (top_of_zone_table + 1 items) and a new one which
      * makes it top_of_zone_table + 2 elements large.
      */
-    auto& z = zone_table.at(vzone_num);
+    auto &z = zone_table.at(vzone_num);
     z.number = vzone_num;
-    
+
     /*
      * Ok, insert the new zone here.
      */
     z.name = "New Zone";
     z.number = vzone_num;
     z.builders = "None";
-#if _CIRCLEMUD >= CIRCLEMUD_VERSION(3, 0, 21)
-    z.bot = bottom;
-    z.top = top;
-#else
-    zone->top = (vzone_num * 100) + 99;
-#endif
     z.lifespan = 30;
     z.age = 0;
     z.reset_mode = 2;
-    z.min_level = 0;
-    z.max_level = ADMLVL_IMPL;
     /*
      * No zone commands, just terminate it with an 'S'
      */
-    auto &c = z.cmd.emplace_back();
-    c.command = 'S';
 
     return rznum;
 }
 
-/*-------------------------------------------------------------------*/
-
-void create_world_index(int znum, const char *type) {
-    FILE *newfile, *oldfile;
-    char new_name[32], old_name[32], *prefix;
-    int num, found = false;
-    char buf[MAX_STRING_LENGTH];
-    char buf1[MAX_STRING_LENGTH];
-
-    switch (*type) {
-        case 'z':
-            prefix = ZON_PREFIX;
-            break;
-        case 'w':
-            prefix = WLD_PREFIX;
-            break;
-        case 'o':
-            prefix = OBJ_PREFIX;
-            break;
-        case 'm':
-            prefix = MOB_PREFIX;
-            break;
-        case 's':
-            prefix = SHP_PREFIX;
-            break;
-        case 't':
-            prefix = TRG_PREFIX;
-            break;
-        case 'g':
-            prefix = GLD_PREFIX;
-            break;
-        default:
-            /*
-             * Caller messed up
-             */
-            return;
-    }
-
-    snprintf(old_name, sizeof(old_name), "%s/index", prefix);
-    snprintf(new_name, sizeof(new_name), "%s/newindex", prefix);
-
-    if (!(oldfile = fopen(old_name, "r"))) {
-        mudlog(BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Failed to open %s.", old_name);
-        return;
-    } else if (!(newfile = fopen(new_name, "w"))) {
-        mudlog(BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Failed to open %s.", new_name);
-        fclose(oldfile);
-        return;
-    }
-
-    /*
-     * Index contents must be in order: search through the old file for the
-     * right place, insert the new file, then copy the rest over.
-     */
-    snprintf(buf1, sizeof(buf1), "%d.%s", znum, type);
-    while (get_line(oldfile, buf)) {
-        if (*buf == '$') {
-            /*
-             * The following used to add a blank line, thanks to Brian Taylor for the fix... (Mythran)
-             */
-            fprintf(newfile, "%s", (!found ? strncat(buf1, "\n$\n", sizeof(buf1) - 1) : "$\n"));
-            break;
-        } else if (!found) {
-            sscanf(buf, "%d", &num);
-            if (num == znum) {
-                found = true;
-            } else if (num > znum) {
-                found = true;
-                fprintf(newfile, "%s\n", buf1);
-            }
-        }
-        fprintf(newfile, "%s\n", buf);
-    }
-
-    fclose(newfile);
-    fclose(oldfile);
-    /*
-     * Out with the old, in with the new.
-     */
-    remove(old_name);
-    rename(new_name, old_name);
-}
-
 
 /*-------------------------------------------------------------------*/
 
-/*
- * Error check user input and then add new (blank) command  
- */
-int new_command(struct Zone *zone, int pos) {
-    int subcmd = zone->cmd.size();
-    struct reset_com new_com;
-    new_com.command = 'N';
-
-    /* * Error check to ensure users hasn't given too large an index  */
-
-    if (pos < 0 || pos > subcmd)
-        return 0;
-    zone->cmd.insert(zone->cmd.begin()+pos, new_com);
-    return 1;
-}
-
-/*-------------------------------------------------------------------*/
-
-/*
- * Error check user input and then remove command  
- */
-void delete_zone_command(struct Zone *zone, int pos) {
-    zone->cmd.erase(zone->cmd.begin()+pos);
-}
-
-/*-------------------------------------------------------------------*/
-
-
-void Zone::remove_room_commands(room_vnum rv) {
-    room_vnum cmd_room = NOTHING;
-    for(auto &c : cmd) {
-        if(c.command == 'S') break;
-        switch(c.command) {
-            case 'M':
-            case 'O':
-            case 'T':
-            case 'V':
-                cmd_room = c.arg3;
-                break;
-            case 'D':
-            case 'R':
-                cmd_room = c.arg1;
-                break;
-            default:
-                break;
-        }
-        if(cmd_room == rv) c.command = 'X';
-    }
-    // now filter out any where c.command == 'X'
-    cmd.erase(std::remove_if(cmd.begin(), cmd.end(), [](const reset_com &c) { return c.command == 'X'; }), cmd.end());
-}
-
-void Zone::sendText(const std::string& txt) {
+void Zone::sendText(const std::string &txt)
+{
     for (auto i = descriptor_list; i; i = i->next)
         if (!i->connected && i->character && AWAKE(i->character) &&
             i->character->location.getZone() == this)
             i->sendText(txt);
+}
+
+std::vector<Zone *> Zone::getChildren() const
+{
+    std::vector<Zone *> out;
+    for (auto child : children)
+    {
+        if (auto z = zone_table.find(child); z != zone_table.end())
+        {
+            out.push_back(&z->second);
+        }
+    }
+    return out;
+}
+
+Zone *Zone::getParent() const
+{
+    if (parent == NOTHING)
+        return nullptr;
+    if (auto z = zone_table.find(parent); z != zone_table.end())
+    {
+        return &z->second;
+    }
+    return nullptr;
+}
+
+std::vector<Zone *> Zone::getAncestors() const
+{
+    std::vector<Zone *> ancestors;
+    if (auto p = getParent())
+    {
+        ancestors.push_back(p);
+        auto parentAncestors = p->getAncestors();
+        ancestors.insert(ancestors.end(), parentAncestors.begin(), parentAncestors.end());
+    }
+    return ancestors;
+}
+
+std::vector<Zone *> Zone::getDescendants() const
+{
+    std::vector<Zone *> descendants;
+    for (auto child : children)
+    {
+        if (auto z = zone_table.find(child); z != zone_table.end())
+        {
+            descendants.push_back(&z->second);
+            auto childDescendants = z->second.getDescendants();
+            descendants.insert(descendants.end(), childDescendants.begin(), childDescendants.end());
+        }
+    }
+    return descendants;
+}
+
+std::vector<Zone *> getZoneChildren(zone_vnum parent)
+{
+    // This function iterates through zone_table and returns all where
+    // z.parent matches our given. that means if we were given an empty
+    // parent then we return all which are empty (IE: the 'root zones')
+    // Since Zones keep track of their children, if we ARE given a parent
+    // we can simply iterate its children.
+
+    if (parent)
+    {
+        if (auto z = zone_table.find(parent); z != zone_table.end())
+        {
+            return z->second.getChildren();
+        }
+    }
+    else
+    {
+        std::vector<Zone *> out;
+        for (auto &[vnum, zone] : zone_table)
+        {
+            if (zone.parent == NOTHING)
+            {
+                out.emplace_back(&zone);
+            }
+        }
+        return out;
+    }
+
+    return {};
 }

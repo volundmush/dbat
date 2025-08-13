@@ -4,9 +4,9 @@
 constexpr int ALIAS_SIMPLE = 0;
 constexpr int ALIAS_COMPLEX = 1;
 
-#define ALIAS_SEP_CHAR    ';'
-#define ALIAS_VAR_CHAR    '$'
-#define ALIAS_GLOB_CHAR    '*'
+#define ALIAS_SEP_CHAR ';'
+#define ALIAS_VAR_CHAR '$'
+#define ALIAS_GLOB_CHAR '*'
 
 /*
  * SUBCOMMANDS
@@ -225,7 +225,6 @@ constexpr int SCMD_THATCH = 8;
 constexpr int SCMD_WEAVE = 9;
 constexpr int SCMD_FORGE = 10;
 
-
 constexpr int SCMD_MEMORIZE = 1;
 constexpr int SCMD_FORGET = 2;
 constexpr int SCMD_STOP = 3;
@@ -246,8 +245,8 @@ constexpr int SCMD_REDIT = 1;
 constexpr int SCMD_OEDIT = 2;
 constexpr int SCMD_MEDIT = 3;
 
-
-struct command_info {
+struct command_info
+{
     const char *command;
     const char *sort_as;
     int8_t minimum_position;

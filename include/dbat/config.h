@@ -2,8 +2,8 @@
 
 #include "structs.h"
 
-
-namespace config {
+namespace config
+{
     extern int heartbeatIntervalMillis;
     extern std::string hostAddress;
     extern uint16_t port;

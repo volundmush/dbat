@@ -36,7 +36,6 @@ extern int perf_skill(int skill);
 
 extern int search_help(const char *argument, int level);
 
-
 // commands
 extern ACMD(do_desc);
 

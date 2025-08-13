@@ -1,18 +1,18 @@
 /* ************************************************************************
-*   File: comm.h                                        Part of CircleMUD *
-*  Usage: header file: prototypes of public communication functions       *
-*                                                                         *
-*  All rights reserved.  See license.doc for complete information.        *
-*                                                                         *
-*  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
-*  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
-************************************************************************ */
+ *   File: comm.h                                        Part of CircleMUD *
+ *  Usage: header file: prototypes of public communication functions       *
+ *                                                                         *
+ *  All rights reserved.  See license.doc for complete information.        *
+ *                                                                         *
+ *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
+ *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
+ ************************************************************************ */
 #pragma once
 
 #include "structs.h"
 
 #if CIRCLE_GNU_LIBC_MEMORY_TRACK
-# include <mcheck.h>
+#include <mcheck.h>
 #endif
 
 /*
@@ -59,10 +59,10 @@ constexpr int TO_VICT = 2;
 constexpr int TO_NOTVICT = 3;
 constexpr int TO_CHAR = 4;
 constexpr int TO_GMOTE = 5;
-#define TO_SLEEP        (2 << 7)    /* to char, even if sleeping */
-#define DG_NO_TRIG      (2 << 8)    /* don't check act trigger   */
-#define TO_SNEAKRESIST  (2 << 9)    /* resisted sneaking roll    */
-#define TO_HIDERESIST   (2 << 10)    /* resisted hiding roll      */
+#define TO_SLEEP (2 << 7)       /* to char, even if sleeping */
+#define DG_NO_TRIG (2 << 8)     /* don't check act trigger   */
+#define TO_SNEAKRESIST (2 << 9) /* resisted sneaking roll    */
+#define TO_HIDERESIST (2 << 10) /* resisted hiding roll      */
 
 /* I/O functions */
 extern void write_to_q(const char *txt, struct txt_q *queue, int aliased);
@@ -100,12 +100,12 @@ extern void free_bufpool();
 
 extern void migrate_db();
 
-
-void broadcast(const std::string& txt);
+void broadcast(const std::string &txt);
 
 void shutdown_game(int code);
 
-namespace game {
+namespace game
+{
     void init();
     void init_locale();
     void init_database();

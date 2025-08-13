@@ -1,14 +1,14 @@
 /* ************************************************************************
-*  File: combat.h                    Part of Dragonball Advent Truth      *
-*  Usage: Combat utilities and common functions for act.offensive.c and   *
-*  act.attack.c                                                           *
-*                                                                         *
-*  All rights reserved to Iovan that are not due to anyone else.          *
-*                                                                         *
-*  This file was first written on 2011 and aside for a few instances only *
-*  contains code written by Iovan for use with the Real Dragonball Battle *
-*  System (RDBS) of the MUD Dragonball Advent Truth.                      *
-************************************************************************ */
+ *  File: combat.h                    Part of Dragonball Advent Truth      *
+ *  Usage: Combat utilities and common functions for act.offensive.c and   *
+ *  act.attack.c                                                           *
+ *                                                                         *
+ *  All rights reserved to Iovan that are not due to anyone else.          *
+ *                                                                         *
+ *  This file was first written on 2011 and aside for a few instances only *
+ *  contains code written by Iovan for use with the Real Dragonball Battle *
+ *  System (RDBS) of the MUD Dragonball Advent Truth.                      *
+ ************************************************************************ */
 #pragma once
 
 #include "structs.h"
@@ -117,4 +117,4 @@ extern void handle_multihit(Character *ch, Character *vict);
 
 extern int64_t armor_calc(Character *ch, int64_t dmg, int type);
 
-extern void giveRandomVital(Character* ch, int64_t pl, int64_t ki, int64_t st, int attrChance);
+extern void giveRandomVital(Character *ch, int64_t pl, int64_t ki, int64_t st, int attrChance);

@@ -1,20 +1,20 @@
-/***************************************************** 
-* maputils.h --- implementation file for ascii maps  * 
-*				     		     *
-* Kyle Goodwin, (c) 1998 All Rights Reserved         *
-* vbmasta@earthlink.net - Head Implemenor FirocMUD   *
-*			     			     *
-* Paolo Libardi - pinkpallin@libero.it		     *
-*****************************************************/
+/*****************************************************
+ * maputils.h --- implementation file for ascii maps  *
+ *				     		     *
+ * Kyle Goodwin, (c) 1998 All Rights Reserved         *
+ * vbmasta@earthlink.net - Head Implemenor FirocMUD   *
+ *			     			     *
+ * Paolo Libardi - pinkpallin@libero.it		     *
+ *****************************************************/
 #pragma once
 
 #include "structs.h"
 
-
 constexpr int MAP_ROWS = 199;
 constexpr int MAP_COLS = 199;
 
-struct mapstruct {
+struct mapstruct
+{
     int x;
     int y;
 };

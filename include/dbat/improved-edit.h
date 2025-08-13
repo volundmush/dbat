@@ -7,10 +7,9 @@
 
 #include "structs.h"
 
-
 #define CONFIG_IMPROVED_EDITOR 1
 
-#define using_improved_editor    CONFIG_IMPROVED_EDITOR
+#define using_improved_editor CONFIG_IMPROVED_EDITOR
 
 extern void parse_edit_action(int command, char *string, struct descriptor_data *d);
 
@@ -37,10 +36,10 @@ constexpr int PARSE_EDIT = 7;
 /*
  * Defines for the action variable.
  */
-constexpr int STRINGADD_OK = 0;    /* Just keep adding text.		*/
-constexpr int STRINGADD_SAVE = 1;    /* Save current text.			*/
-constexpr int STRINGADD_ABORT = 2;    /* Abort edit, restore old text.	*/
-constexpr int STRINGADD_ACTION = 4;    /* Editor action, don't append \r\n.	*/
+constexpr int STRINGADD_OK = 0;     /* Just keep adding text.		*/
+constexpr int STRINGADD_SAVE = 1;   /* Save current text.			*/
+constexpr int STRINGADD_ABORT = 2;  /* Abort edit, restore old text.	*/
+constexpr int STRINGADD_ACTION = 4; /* Editor action, don't append \r\n.	*/
 
 /* Settings for formatter. */
-#define FORMAT_INDENT    (1 << 0)
+#define FORMAT_INDENT (1 << 0)

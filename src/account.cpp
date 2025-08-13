@@ -7,26 +7,35 @@
 
 NegativeKeyGuardMap<vnum, Account> accounts;
 
-struct Account *findAccount(const std::string &name) {
-    for (auto &[aid, account] : accounts) {
-        if (boost::iequals(account.name, name)) {
+struct Account *findAccount(const std::string &name)
+{
+    for (auto &[aid, account] : accounts)
+    {
+        if (boost::iequals(account.name, name))
+        {
             return &account;
         }
     }
     return nullptr;
 }
 
-int Account::getNextID() {
+int Account::getNextID()
+{
     int id = 0;
-    while(accounts.contains(id)) id++;
+    while (accounts.contains(id))
+        id++;
     return id;
 }
 
-Account *createAccount(const std::string &name, const std::string &password) {
-    if(name.empty()) throw std::invalid_argument("Username cannot be blank.");
-    if(password.empty()) throw std::invalid_argument("Password cannot be blank.");
+Account *createAccount(const std::string &name, const std::string &password)
+{
+    if (name.empty())
+        throw std::invalid_argument("Username cannot be blank.");
+    if (password.empty())
+        throw std::invalid_argument("Password cannot be blank.");
 
-    if(auto found = findAccount(name); found) {
+    if (auto found = findAccount(name); found)
+    {
         throw std::invalid_argument("Username already exists.");
     }
 

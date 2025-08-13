@@ -6,7 +6,6 @@
 **                                                                          **
 *****************************************************************************/
 
-
 #include "dbat/feats.h"
 #include "dbat/send.h"
 #include "dbat/comm.h"
@@ -24,7 +23,6 @@ void list_feats_complete(Character *ch);
 
 int compare_feats(const void *x, const void *y);
 
-
 /* Global Variables and Structures */
 struct feat_info feat_list[NUM_FEATS_DEFINED + 1];
 int feat_sort_info[MAX_FEATS + 1];
@@ -32,37 +30,41 @@ char buf3[MAX_STRING_LENGTH];
 char buf4[MAX_STRING_LENGTH];
 
 /* External functions*/
-void feato(int featnum, char *name, int in_game, int can_learn, int can_stack) {
+void feato(int featnum, char *name, int in_game, int can_learn, int can_stack)
+{
     feat_list[featnum].name = name;
     feat_list[featnum].in_game = in_game;
     feat_list[featnum].can_learn = can_learn;
     feat_list[featnum].can_stack = can_stack;
 }
 
-void free_feats() {
+void free_feats()
+{
     /* Nothing to do right now */
 }
 
-void assign_feats() {
+void assign_feats()
+{
 
     int i;
 
     // Initialize the list of feats.
 
-    for (i = 0; i <= NUM_FEATS_DEFINED; i++) {
+    for (i = 0; i <= NUM_FEATS_DEFINED; i++)
+    {
         feat_list[i].name = "Unused Feat";
         feat_list[i].in_game = false;
         feat_list[i].can_learn = false;
         feat_list[i].can_stack = false;
     }
 
-// Below are the various feat initializations.
-// First parameter is the feat number, defined in feats.h
-// Second parameter is the displayed name of the feat and argument used to train it
-// Third parameter defines whether or not the feat is in the game or not, and thus can be learned and displayed
-// Fourth parameter defines whether or not the feat can be learned through a trainer or whether it is
-// a feat given automatically to certain classes or races.
-// Fifth parameter defines whether or not the feat can be learned multiple times.
+    // Below are the various feat initializations.
+    // First parameter is the feat number, defined in feats.h
+    // Second parameter is the displayed name of the feat and argument used to train it
+    // Third parameter defines whether or not the feat is in the game or not, and thus can be learned and displayed
+    // Fourth parameter defines whether or not the feat can be learned through a trainer or whether it is
+    // a feat given automatically to certain classes or races.
+    // Fifth parameter defines whether or not the feat can be learned multiple times.
 
     feato(FEAT_ALERTNESS, "alertness", true, false, false);
     feato(FEAT_ARMOR_PROFICIENCY_HEAVY, "heavy armor proficiency", false, true, false);
@@ -189,26 +191,31 @@ void assign_feats() {
 // The follwing function is used to check if the character satisfies the various prerequisite(s) (if any)
 // of a feat in order to learn it.
 
-int feat_is_available(Character *ch, int featnum, int iarg, char *sarg) {
+int feat_is_available(Character *ch, int featnum, int iarg, char *sarg)
+{
     return false;
 }
 
-int is_proficient_with_armor(const Character *ch, int cmarmor_type) {
+int is_proficient_with_armor(const Character *ch, int cmarmor_type)
+{
     return true;
 }
 
-int is_proficient_with_weapon(const Character *ch, int cmweapon_type) {
+int is_proficient_with_weapon(const Character *ch, int cmweapon_type)
+{
     return true;
 }
 
-int compare_feats(const void *x, const void *y) {
-    int a = *(const int *) x,
-            b = *(const int *) y;
+int compare_feats(const void *x, const void *y)
+{
+    int a = *(const int *)x,
+        b = *(const int *)y;
 
     return strcmp(feat_list[a].name, feat_list[b].name);
 }
 
-void sort_feats() {
+void sort_feats()
+{
     int a;
 
     /* initialize array, avoiding reserved. */
@@ -218,8 +225,8 @@ void sort_feats() {
     qsort(&feat_sort_info[1], NUM_FEATS_DEFINED, sizeof(int), compare_feats);
 }
 
-
-void list_feats_available(Character *ch) {
+void list_feats_available(Character *ch)
+{
     char buf[MAX_STRING_LENGTH], buf2[MAX_STRING_LENGTH];
     int i, sortpos;
     int none_shown = true;
@@ -232,20 +239,24 @@ void list_feats_available(Character *ch) {
 
     strcpy(buf2, buf);
 
-    for (sortpos = 1; sortpos <= NUM_FEATS_DEFINED; sortpos++) {
+    for (sortpos = 1; sortpos <= NUM_FEATS_DEFINED; sortpos++)
+    {
         i = feat_sort_info[sortpos];
-        if (strlen(buf2) >= MAX_STRING_LENGTH - 32) {
+        if (strlen(buf2) >= MAX_STRING_LENGTH - 32)
+        {
             strcat(buf2, "**OVERFLOW**\r\n");
             break;
         }
-        if (feat_is_available(ch, i, 0, nullptr) && feat_list[i].in_game && feat_list[i].can_learn) {
+        if (feat_is_available(ch, i, 0, nullptr) && feat_list[i].in_game && feat_list[i].can_learn)
+        {
             sprintf(buf, "%-20s\r\n", feat_list[i].name);
-            strcat(buf2, buf);        /* The above, @ should always be safe to do. */
+            strcat(buf2, buf); /* The above, @ should always be safe to do. */
             none_shown = false;
         }
     }
 
-    if (none_shown) {
+    if (none_shown)
+    {
         sprintf(buf, "There are no feats available for you to learn at this point.\r\n");
         strcat(buf2, buf);
     }
@@ -253,7 +264,8 @@ void list_feats_available(Character *ch) {
     ch->desc->send_to("%s", buf2);
 }
 
-void list_feats_complete(Character *ch) {
+void list_feats_complete(Character *ch)
+{
 
     char buf[MAX_STRING_LENGTH], buf2[MAX_STRING_LENGTH];
     int i, sortpos;
@@ -267,22 +279,26 @@ void list_feats_complete(Character *ch) {
 
     strcpy(buf2, buf);
 
-    for (sortpos = 1; sortpos <= NUM_FEATS_DEFINED; sortpos++) {
+    for (sortpos = 1; sortpos <= NUM_FEATS_DEFINED; sortpos++)
+    {
         i = feat_sort_info[sortpos];
-        if (strlen(buf2) >= MAX_STRING_LENGTH - 32) {
+        if (strlen(buf2) >= MAX_STRING_LENGTH - 32)
+        {
             strcat(buf2, "**OVERFLOW**\r\n");
             break;
         }
-//	sprintf(buf, "%s : %s\r\n", feat_list[i].name, feat_list[i].in_game ? "In Game" : "Not In Game");
-//	strcat(buf2, buf);
-        if (feat_list[i].in_game) {
+        //	sprintf(buf, "%s : %s\r\n", feat_list[i].name, feat_list[i].in_game ? "In Game" : "Not In Game");
+        //	strcat(buf2, buf);
+        if (feat_list[i].in_game)
+        {
             sprintf(buf, "%-20s\r\n", feat_list[i].name);
-            strcat(buf2, buf);        /* The above, @ should always be safe to do. */
+            strcat(buf2, buf); /* The above, @ should always be safe to do. */
             none_shown = false;
         }
     }
 
-    if (none_shown) {
+    if (none_shown)
+    {
         sprintf(buf, "There are currently no feats in the game.\r\n");
         strcat(buf2, buf);
     }
@@ -290,20 +306,23 @@ void list_feats_complete(Character *ch) {
     ch->desc->send_to("%s", buf2);
 }
 
-int find_feat_num(char *name) {
+int find_feat_num(char *name)
+{
     int ftindex, ok;
     char *temp, *temp2;
     char first[256], first2[256];
 
-    for (ftindex = 1; ftindex <= NUM_FEATS_DEFINED; ftindex++) {
+    for (ftindex = 1; ftindex <= NUM_FEATS_DEFINED; ftindex++)
+    {
         if (is_abbrev(name, feat_list[ftindex].name))
             return (ftindex);
 
         ok = true;
         /* It won't be changed, but other uses of this function elsewhere may. */
-        temp = any_one_arg((char *) feat_list[ftindex].name, first);
+        temp = any_one_arg((char *)feat_list[ftindex].name, first);
         temp2 = any_one_arg(name, first2);
-        while (*first && *first2 && ok) {
+        while (*first && *first2 && ok)
+        {
             if (!is_abbrev(first2, first))
                 ok = false;
             temp = any_one_arg(temp, first);
@@ -317,40 +336,48 @@ int find_feat_num(char *name) {
     return (-1);
 }
 
-ACMD(do_feats) {
+ACMD(do_feats)
+{
     char arg[80];
 
     one_argument(argument, arg);
 
-    if (is_abbrev(arg, "known") || !*arg) {
-                ch->sendText("Syntax is \"feats <available | complete | known>\".\r\n");
-        //list_feats_known(ch);
-    } else if (is_abbrev(arg, "available")) {
+    if (is_abbrev(arg, "known") || !*arg)
+    {
+        ch->sendText("Syntax is \"feats <available | complete | known>\".\r\n");
+        // list_feats_known(ch);
+    }
+    else if (is_abbrev(arg, "available"))
+    {
         list_feats_available(ch);
-    } else if (is_abbrev(arg, "complete")) {
+    }
+    else if (is_abbrev(arg, "complete"))
+    {
         list_feats_complete(ch);
     }
 }
 
-int feat_to_subfeat(int feat) {
-    switch (feat) {
-        case FEAT_IMPROVED_CRITICAL:
-            return CFEAT_IMPROVED_CRITICAL;
-        case FEAT_WEAPON_FINESSE:
-            return CFEAT_WEAPON_FINESSE;
-        case FEAT_WEAPON_FOCUS:
-            return CFEAT_WEAPON_FOCUS;
-        case FEAT_WEAPON_SPECIALIZATION:
-            return CFEAT_WEAPON_SPECIALIZATION;
-        case FEAT_GREATER_WEAPON_FOCUS:
-            return CFEAT_GREATER_WEAPON_FOCUS;
-        case FEAT_GREATER_WEAPON_SPECIALIZATION:
-            return CFEAT_GREATER_WEAPON_SPECIALIZATION;
-        case FEAT_SPELL_FOCUS:
-            return CFEAT_SPELL_FOCUS;
-        case FEAT_GREATER_SPELL_FOCUS:
-            return CFEAT_GREATER_SPELL_FOCUS;
-        default:
-            return -1;
+int feat_to_subfeat(int feat)
+{
+    switch (feat)
+    {
+    case FEAT_IMPROVED_CRITICAL:
+        return CFEAT_IMPROVED_CRITICAL;
+    case FEAT_WEAPON_FINESSE:
+        return CFEAT_WEAPON_FINESSE;
+    case FEAT_WEAPON_FOCUS:
+        return CFEAT_WEAPON_FOCUS;
+    case FEAT_WEAPON_SPECIALIZATION:
+        return CFEAT_WEAPON_SPECIALIZATION;
+    case FEAT_GREATER_WEAPON_FOCUS:
+        return CFEAT_GREATER_WEAPON_FOCUS;
+    case FEAT_GREATER_WEAPON_SPECIALIZATION:
+        return CFEAT_GREATER_WEAPON_SPECIALIZATION;
+    case FEAT_SPELL_FOCUS:
+        return CFEAT_SPELL_FOCUS;
+    case FEAT_GREATER_SPELL_FOCUS:
+        return CFEAT_GREATER_SPELL_FOCUS;
+    default:
+        return -1;
     }
 }

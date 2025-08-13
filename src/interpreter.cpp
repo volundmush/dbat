@@ -1,12 +1,12 @@
 /* ************************************************************************
-*   File: interpreter.c                                 Part of CircleMUD *
-*  Usage: parse user commands, search for specials, call ACMD functions   *
-*                                                                         *
-*  All rights reserved.  See license.doc for complete information.        *
-*                                                                         *
-*  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
-*  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
-************************************************************************ */
+ *   File: interpreter.c                                 Part of CircleMUD *
+ *  Usage: parse user commands, search for specials, call ACMD functions   *
+ *                                                                         *
+ *  All rights reserved.  See license.doc for complete information.        *
+ *                                                                         *
+ *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
+ *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
+ ************************************************************************ */
 #include <filesystem>
 #include <boost/algorithm/string.hpp>
 
@@ -44,8 +44,6 @@ int command_pass(char *cmd, Character *ch);
 
 void payout(int num);
 
-
-
 /* This is the Master Command List(tm).
 
  * You can put new commands in, take commands out, change the order
@@ -60,50 +58,49 @@ void payout(int num);
  */
 
 const char *fill[] =
-        {
-                "in",
-                "into",
-                "from",
-                "with",
-                "the",
-                "on",
-                "at",
-                "to",
-                "\n"
-        };
+    {
+        "in",
+        "into",
+        "from",
+        "with",
+        "the",
+        "on",
+        "at",
+        "to",
+        "\n"};
 
 const char *reserved[] =
-        {
-                "a",
-                "an",
-                "self",
-                "me",
-                "all",
-                "room",
-                "someone",
-                "something",
-                "\n"
-        };
-
+    {
+        "a",
+        "an",
+        "self",
+        "me",
+        "all",
+        "room",
+        "someone",
+        "something",
+        "\n"};
 
 /*
  * This is the actual command interpreter called from game_loop() in comm.c
  * It makes sure you are the proper level and position to execute the command,
  * then calls the appropriate function.
  */
-void command_interpreter(Character *ch, char *argument) {
+void command_interpreter(Character *ch, char *argument)
+{
     int cmd, length;
     int skip_ld = 0;
     char *line;
     char arg[MAX_INPUT_LENGTH];
 
-    switch (GET_POS(ch)) {
-        case POS_DEAD:
-        case POS_INCAP:
-        case POS_MORTALLYW:
-        case POS_STUNNED:
-            ch->setBaseStat<int>("position", POS_SITTING);
-            break;
+    switch (GET_POS(ch))
+    {
+    case POS_DEAD:
+    case POS_INCAP:
+    case POS_MORTALLYW:
+    case POS_STUNNED:
+        ch->setBaseStat<int>("position", POS_SITTING);
+        break;
     }
 
     /* just drop to next line for hitting CR */
@@ -112,43 +109,53 @@ void command_interpreter(Character *ch, char *argument) {
         return;
 
     /*
-   * special case to handle one-character, non-alphanumeric commands;
-   * requested by many people so "'hi" or ";godnet test" is possible.
-   * Patch sent by Eric Green and Stefan Wasilewski.
-   */
-    if (!isalpha(*argument)) {
+     * special case to handle one-character, non-alphanumeric commands;
+     * requested by many people so "'hi" or ";godnet test" is possible.
+     * Patch sent by Eric Green and Stefan Wasilewski.
+     */
+    if (!isalpha(*argument))
+    {
         arg[0] = argument[0];
         arg[1] = '\0';
         line = argument + 1;
-    } else
+    }
+    else
         line = any_one_arg(argument, arg);
 
-
-    if (!strcasecmp(arg, "-")) {
+    if (!strcasecmp(arg, "-"))
+    {
         return;
     }
     /* Since all command triggers check for valid_dg_target before acting, the levelcheck
-   * here has been removed.
-   */
+     * here has been removed.
+     */
     /* otherwise, find the command */
     {
-        int cont;                                            /* continue the command checks */
-        cont = command_wtrigger(ch, arg, line);              /* any world triggers ? */
-        if (!cont) cont = command_mtrigger(ch, arg, line);   /* any mobile triggers ? */
-        if (!cont) cont = command_otrigger(ch, arg, line);   /* any object triggers ? */
-        if (cont) return;                                    /* yes, command trigger took over */
+        int cont;                               /* continue the command checks */
+        cont = command_wtrigger(ch, arg, line); /* any world triggers ? */
+        if (!cont)
+            cont = command_mtrigger(ch, arg, line); /* any mobile triggers ? */
+        if (!cont)
+            cont = command_otrigger(ch, arg, line); /* any object triggers ? */
+        if (cont)
+            return; /* yes, command trigger took over */
     }
-    for (length = strlen(arg), cmd = 0; *complete_cmd_info[cmd].command != '\n'; cmd++) {
+    for (length = strlen(arg), cmd = 0; *complete_cmd_info[cmd].command != '\n'; cmd++)
+    {
         if (!strncmp(complete_cmd_info[cmd].command, arg, length))
             if (GET_LEVEL(ch) >= complete_cmd_info[cmd].minimum_level &&
                 GET_ADMLEVEL(ch) >= complete_cmd_info[cmd].minimum_admlevel)
                 break;
     }
-    
-    if(!IS_NPC(ch) && complete_cmd_info[cmd].wait_list == 1) {
-        if (ch->task != Task::nothing) {
-                        ch->sendText("Use '--' if you want to stop your current task.\r\n");
-        } else {
+
+    if (!IS_NPC(ch) && complete_cmd_info[cmd].wait_list == 1)
+    {
+        if (ch->task != Task::nothing)
+        {
+            ch->sendText("Use '--' if you want to stop your current task.\r\n");
+        }
+        else
+        {
             std::string ln = line;
             std::pair<int, std::string> pair = {cmd, ln};
             ch->wait_input_queue.emplace_back(pair);
@@ -158,29 +165,35 @@ void command_interpreter(Character *ch, char *argument) {
     }
 
     processCommand(ch, cmd, line);
-
 }
 
-void commandWaitQueue(uint64_t heartPulse, double deltaTime) {
+void commandWaitQueue(uint64_t heartPulse, double deltaTime)
+{
 
     auto sub = characterSubscriptions.all("commandWaitQueue");
 
-    for(auto ch : filter_raw(sub)) {
-        if(auto res = ch->modBaseStat("waitTime", -deltaTime); res <= 0.0) {
-            if(ch->task != Task::nothing) doContinuedTask(ch);
-            else if(!ch->wait_input_queue.empty()) {
+    for (auto ch : filter_raw(sub))
+    {
+        if (auto res = ch->modBaseStat("waitTime", -deltaTime); res <= 0.0)
+        {
+            if (ch->task != Task::nothing)
+                doContinuedTask(ch);
+            else if (!ch->wait_input_queue.empty())
+            {
                 auto command = ch->wait_input_queue.front();
                 ch->wait_input_queue.pop_front();
                 processCommand(ch, command.first, command.second);
             }
-            if(ch->getBaseStat("waitTime") <= 0.0 && ch->task == Task::nothing && ch->wait_input_queue.empty()) {
+            if (ch->getBaseStat("waitTime") <= 0.0 && ch->task == Task::nothing && ch->wait_input_queue.empty())
+            {
                 characterSubscriptions.unsubscribe("commandWaitQueue", ch);
             }
         }
     }
 }
 
-void processCommand(Character* ch, int cmd, std::string ln) {
+void processCommand(Character *ch, int cmd, std::string ln)
+{
     char blah[MAX_INPUT_LENGTH];
     int skip_ld = 0;
     char *line = ln.data();
@@ -189,89 +202,104 @@ void processCommand(Character* ch, int cmd, std::string ln) {
     if (!strcasecmp(blah, "throw"))
         ch->setBaseStat<int>("throws", rand_number(1, 3));
 
-
-    if (*complete_cmd_info[cmd].command == '\n') {
-                ch->sendText("Huh!?!\r\n");
+    if (*complete_cmd_info[cmd].command == '\n')
+    {
+        ch->sendText("Huh!?!\r\n");
         return;
     }
 
-        if (!complete_cmd_info[cmd].command_pointer) {
-                ch->sendText("Sorry, that command hasn't been implemented yet.\r\n");
+    if (!complete_cmd_info[cmd].command_pointer)
+    {
+        ch->sendText("Sorry, that command hasn't been implemented yet.\r\n");
         return;
     }
 
-    if (!command_pass(blah, ch) && GET_ADMLEVEL(ch) < 1) {
-                ch->sendText("It's unfortunate...\r\n");
+    if (!command_pass(blah, ch) && GET_ADMLEVEL(ch) < 1)
+    {
+        ch->sendText("It's unfortunate...\r\n");
         return;
     }
-        
 
-    if (check_disabled(&complete_cmd_info[cmd])) {
-                ch->sendText("This command has been temporarily disabled.\r\n");
+    if (check_disabled(&complete_cmd_info[cmd]))
+    {
+        ch->sendText("This command has been temporarily disabled.\r\n");
         return;
     }
-    
-    if(!IS_NPC(ch)) {
-        
-        if(GET_ADMLEVEL(ch) < ADMLVL_IMPL) {
-            if (PLR_FLAGGED(ch, PLR_GOOP)) {
-                                ch->sendText("You only have your internal thoughts until your body has finished regenerating!\r\n");
+
+    if (!IS_NPC(ch))
+    {
+
+        if (GET_ADMLEVEL(ch) < ADMLVL_IMPL)
+        {
+            if (PLR_FLAGGED(ch, PLR_GOOP))
+            {
+                ch->sendText("You only have your internal thoughts until your body has finished regenerating!\r\n");
                 return;
             }
 
-            if (PLR_FLAGGED(ch, PLR_FROZEN)) {
-                                ch->sendText("You try, but the mind-numbing cold prevents you...\r\n");
+            if (PLR_FLAGGED(ch, PLR_FROZEN))
+            {
+                ch->sendText("You try, but the mind-numbing cold prevents you...\r\n");
                 return;
             }
         }
 
-        if (PLR_FLAGGED(ch, PLR_SPIRAL)) {
-                        ch->sendText("You are occupied with your Spiral Comet attack!\r\n");
-            return;
-        }
-    } else {
-        if(complete_cmd_info[cmd].minimum_admlevel >= ADMLVL_IMMORT) {
-                        ch->sendText("You can't use immortal commands while switched.\r\n");
+        if (PLR_FLAGGED(ch, PLR_SPIRAL))
+        {
+            ch->sendText("You are occupied with your Spiral Comet attack!\r\n");
             return;
         }
     }
-    
-    if (auto minpos = complete_cmd_info[cmd].minimum_position; GET_POS(ch) < minpos && GET_POS(ch) != POS_FIGHTING) {
-        switch (GET_POS(ch)) {
-            case POS_DEAD:
-                                ch->send_to("Lie still; you are DEAD!!! :-(\r\n");
-                return;
-            case POS_INCAP:
-            case POS_MORTALLYW:
-                ch->sendText("You are in a pretty bad shape, unable to do anything!\r\n");
-                return;
-            case POS_STUNNED:
-                ch->sendText("All you can do right now is think about the stars!\r\n");
-                return;
-            case POS_SLEEPING:
-                ch->sendText("In your dreams, or what?\r\n");
-                return;
-            case POS_RESTING: 
-                command_interpreter(ch, "stand");
-                if(GET_POS(ch)!= POS_STANDING) {
-                    ch->sendText("Nah... You feel too relaxed to do that..\r\n");
-                    return;
-                
-                }
-                break;
-            case POS_SITTING:
-                command_interpreter(ch, "stand");
-                if(GET_POS(ch)!= POS_STANDING) {
-                    ch->sendText("Maybe you should get on your feet first?\r\n");
-                    return;
-                }
-            case POS_FIGHTING:
-                ch->sendText("No way!  You're fighting for your life!\r\n");
-                return;
+    else
+    {
+        if (complete_cmd_info[cmd].minimum_admlevel >= ADMLVL_IMMORT)
+        {
+            ch->sendText("You can't use immortal commands while switched.\r\n");
+            return;
         }
     }
-    if (no_specials || !special(ch, cmd, line)) {
-        if (!skip_ld) {
+
+    if (auto minpos = complete_cmd_info[cmd].minimum_position; GET_POS(ch) < minpos && GET_POS(ch) != POS_FIGHTING)
+    {
+        switch (GET_POS(ch))
+        {
+        case POS_DEAD:
+            ch->send_to("Lie still; you are DEAD!!! :-(\r\n");
+            return;
+        case POS_INCAP:
+        case POS_MORTALLYW:
+            ch->sendText("You are in a pretty bad shape, unable to do anything!\r\n");
+            return;
+        case POS_STUNNED:
+            ch->sendText("All you can do right now is think about the stars!\r\n");
+            return;
+        case POS_SLEEPING:
+            ch->sendText("In your dreams, or what?\r\n");
+            return;
+        case POS_RESTING:
+            command_interpreter(ch, "stand");
+            if (GET_POS(ch) != POS_STANDING)
+            {
+                ch->sendText("Nah... You feel too relaxed to do that..\r\n");
+                return;
+            }
+            break;
+        case POS_SITTING:
+            command_interpreter(ch, "stand");
+            if (GET_POS(ch) != POS_STANDING)
+            {
+                ch->sendText("Maybe you should get on your feet first?\r\n");
+                return;
+            }
+        case POS_FIGHTING:
+            ch->sendText("No way!  You're fighting for your life!\r\n");
+            return;
+        }
+    }
+    if (no_specials || !special(ch, cmd, line))
+    {
+        if (!skip_ld)
+        {
             ((*complete_cmd_info[cmd].command_pointer)(ch, line, cmd, complete_cmd_info[cmd].subcmd));
         }
     }
@@ -279,10 +307,11 @@ void processCommand(Character* ch, int cmd, std::string ln) {
 
 /**************************************************************************
  * Routines to handle aliasing                                             *
-  **************************************************************************/
+ **************************************************************************/
 
 /* The interface to the outside world: do_alias */
-ACMD(do_alias) {
+ACMD(do_alias)
+{
     char arg[MAX_INPUT_LENGTH];
     char *repl;
     struct alias_data *a, *temp;
@@ -290,18 +319,21 @@ ACMD(do_alias) {
     if (IS_NPC(ch))
         return;
 
-    auto& p = players.at(ch->id);
+    auto &p = players.at(ch->id);
 
     repl = any_one_arg(argument, arg);
 
-    if (!*arg) {            /* no argument specified -- list currently defined aliases */
+    if (!*arg)
+    { /* no argument specified -- list currently defined aliases */
         ch->sendText("Currently defined aliases:\r\n");
         int count = 0;
-        for(auto &a : p.aliases) {
+        for (auto &a : p.aliases)
+        {
             count++;
             ch->send_to("%-15s %s\r\n", a.name.c_str(), a.replacement.c_str());
         }
-        if(!count) {
+        if (!count)
+        {
             ch->sendText(" None.\r\n");
         }
         return;
@@ -309,23 +341,25 @@ ACMD(do_alias) {
     /* otherwise, add or remove aliases */
     /* is this an alias we've already defined? */
     auto &aliases = p.aliases;
-    auto find = std::find_if(aliases.begin(), aliases.end(), [&](const auto &a) {
-        return boost::iequals(a.name, arg);
-    });
+    auto find = std::find_if(aliases.begin(), aliases.end(), [&](const auto &a)
+                             { return boost::iequals(a.name, arg); });
 
     /* if no replacement string is specified, assume we want to delete */
-    if (!*repl) {
-        if(find == aliases.end())
+    if (!*repl)
+    {
+        if (find == aliases.end())
             ch->sendText("No such alias.\r\n");
-        else {
-			aliases.erase(find);
+        else
+        {
+            aliases.erase(find);
             ch->sendText("Alias deleted.\r\n");
         }
         return;
     }
 
     /* otherwise, either add or redefine an alias */
-    if (!strcasecmp(arg, "alias")) {
+    if (!strcasecmp(arg, "alias"))
+    {
         ch->sendText("You can't alias 'alias'.\r\n");
         return;
     }
@@ -333,12 +367,15 @@ ACMD(do_alias) {
     delete_doubledollar(repl);
     // type is ALIAS_SIMPLE if repl contains no ; otherwiise it's ALIAS_COMPLEX
     auto type = (strchr(repl, ALIAS_SEP_CHAR) || strchr(repl, ALIAS_VAR_CHAR)) ? ALIAS_COMPLEX : ALIAS_SIMPLE;
-    if(find != aliases.end()) {
+    if (find != aliases.end())
+    {
         find->name = arg;
         find->replacement = repl;
         find->type = type;
         ch->sendText("Alias redefined.\r\n");
-    } else {
+    }
+    else
+    {
         auto &a = aliases.emplace_back();
         a.name = arg;
         a.replacement = repl;
@@ -356,16 +393,18 @@ ACMD(do_alias) {
  */
 constexpr int NUM_TOKENS = 9;
 
-static void perform_complex_alias(struct descriptor_data *d, char *orig, struct alias_data *a) {
+static void perform_complex_alias(struct descriptor_data *d, char *orig, struct alias_data *a)
+{
     struct txt_q temp_queue;
     char *tokens[NUM_TOKENS], *temp, *write_point;
-    char buf2[MAX_RAW_INPUT_LENGTH], buf[MAX_RAW_INPUT_LENGTH];    /* raw? */
+    char buf2[MAX_RAW_INPUT_LENGTH], buf[MAX_RAW_INPUT_LENGTH]; /* raw? */
     int num_of_tokens = 0, num;
 
     /* First, parse the original string */
-    strcpy(buf2, orig);    /* strcpy: OK (orig:MAX_INPUT_LENGTH < buf2:MAX_RAW_INPUT_LENGTH) */
+    strcpy(buf2, orig); /* strcpy: OK (orig:MAX_INPUT_LENGTH < buf2:MAX_RAW_INPUT_LENGTH) */
     temp = strtok(buf2, " ");
-    while (temp && num_of_tokens < NUM_TOKENS) {
+    while (temp && num_of_tokens < NUM_TOKENS)
+    {
         tokens[num_of_tokens++] = temp;
         temp = strtok(nullptr, " ");
     }
@@ -375,24 +414,33 @@ static void perform_complex_alias(struct descriptor_data *d, char *orig, struct 
     temp_queue.head = temp_queue.tail = nullptr;
 
     /* now parse the alias */
-    auto r = (char*)a->replacement.c_str();
-    for (temp = r; *temp; temp++) {
-        if (*temp == ALIAS_SEP_CHAR) {
+    auto r = (char *)a->replacement.c_str();
+    for (temp = r; *temp; temp++)
+    {
+        if (*temp == ALIAS_SEP_CHAR)
+        {
             *write_point = '\0';
             buf[MAX_INPUT_LENGTH - 1] = '\0';
             write_to_q(buf, &temp_queue, 1);
             write_point = buf;
-        } else if (*temp == ALIAS_VAR_CHAR) {
+        }
+        else if (*temp == ALIAS_VAR_CHAR)
+        {
             temp++;
-            if ((num = *temp - '1') < num_of_tokens && num >= 0) {
-                strcpy(write_point, tokens[num]);    /* strcpy: OK */
+            if ((num = *temp - '1') < num_of_tokens && num >= 0)
+            {
+                strcpy(write_point, tokens[num]); /* strcpy: OK */
                 write_point += strlen(tokens[num]);
-            } else if (*temp == ALIAS_GLOB_CHAR) {
-                strcpy(write_point, orig);        /* strcpy: OK */
+            }
+            else if (*temp == ALIAS_GLOB_CHAR)
+            {
+                strcpy(write_point, orig); /* strcpy: OK */
                 write_point += strlen(orig);
-            } else if ((*(write_point++) = *temp) == '$')    /* redouble $ for act safety */
+            }
+            else if ((*(write_point++) = *temp) == '$') /* redouble $ for act safety */
                 *(write_point++) = '$';
-        } else
+        }
+        else
             *(write_point++) = *temp;
     }
 
@@ -401,10 +449,9 @@ static void perform_complex_alias(struct descriptor_data *d, char *orig, struct 
     write_to_q(buf, &temp_queue, 1);
 
     /* push our temp_queue on to the _front_ of the input queue */
-    for(auto q = temp_queue.head; q; q = q->next)
+    for (auto q = temp_queue.head; q; q = q->next)
         d->input_queue.emplace_back(q->text);
 }
-
 
 /*
  * Given a character and a string, perform alias replacement on it.
@@ -414,26 +461,29 @@ static void perform_complex_alias(struct descriptor_data *d, char *orig, struct 
  *   1: String was _not_ modified in place; rather, the expanded aliases
  *      have been placed at the front of the character's input queue.
  */
-void perform_alias(struct descriptor_data *d, char *orig) {
+void perform_alias(struct descriptor_data *d, char *orig)
+{
     char first_arg[MAX_INPUT_LENGTH], *ptr;
     struct alias_data *a, *tmp;
 
-    if(!d->character) {
+    if (!d->character)
+    {
         d->input_queue.emplace_back(orig);
         return;
     }
-
 
     /* Mobs don't have alaises. */
-    if (IS_NPC(d->character)) {
+    if (IS_NPC(d->character))
+    {
         d->input_queue.emplace_back(orig);
         return;
     }
-    auto& p = players.at(d->character->id);
+    auto &p = players.at(d->character->id);
     auto &aliases = p.aliases;
 
     /* bail out immediately if the guy doesn't have any aliases */
-    if (aliases.empty()) {
+    if (aliases.empty())
+    {
         d->input_queue.emplace_back(orig);
         return;
     }
@@ -442,29 +492,31 @@ void perform_alias(struct descriptor_data *d, char *orig) {
     ptr = any_one_arg(orig, first_arg);
 
     /* bail out if it's null */
-    if (!*first_arg) {
+    if (!*first_arg)
+    {
         d->input_queue.emplace_back(orig);
         return;
     }
 
-    auto find = std::find_if(aliases.begin(), aliases.end(), [&](const auto &a) {
-        return boost::iequals(a.name, first_arg);
-    });
+    auto find = std::find_if(aliases.begin(), aliases.end(), [&](const auto &a)
+                             { return boost::iequals(a.name, first_arg); });
 
     /* if the first arg is not an alias, return without doing anything */
-    if (find == aliases.end()) {
+    if (find == aliases.end())
+    {
         d->input_queue.emplace_back(orig);
         return;
     }
 
-    if (find->type == ALIAS_SIMPLE) {
+    if (find->type == ALIAS_SIMPLE)
+    {
         d->input_queue.emplace_back(find->replacement);
-    } else {
+    }
+    else
+    {
         perform_complex_alias(d, ptr, &*find);
     }
 }
-
-
 
 /***************************************************************************
  * Various other parsing utilities                                         *
@@ -476,15 +528,16 @@ void perform_alias(struct descriptor_data *d, char *orig) {
  * it to be returned.  Returns -1 if not found; 0..n otherwise.  Array
  * must be terminated with a '\n' so it knows to stop searching.
  */
-int search_block(char *arg, const char **list, int exact) {
+int search_block(char *arg, const char **list, int exact)
+{
     int i, l;
 
     /*  We used to have \r as the first character on certain array items to
-   *  prevent the explicit choice of that point.  It seems a bit silly to
-   *  dump control characters into arrays to prevent that, so we'll just
-   *  check in here to see if the first character of the argument is '!',
-   *  and if so, just blindly return a '-1' for not found. - ae.
-   */
+     *  prevent the explicit choice of that point.  It seems a bit silly to
+     *  dump control characters into arrays to prevent that, so we'll just
+     *  check in here to see if the first character of the argument is '!',
+     *  and if so, just blindly return a '-1' for not found. - ae.
+     */
     if (*arg == '!')
         return (-1);
 
@@ -492,14 +545,17 @@ int search_block(char *arg, const char **list, int exact) {
     for (l = 0; *(arg + l); l++)
         *(arg + l) = LOWER(*(arg + l));
 
-    if (exact) {
+    if (exact)
+    {
         for (i = 0; **(list + i) != '\n'; i++)
             if (!strcmp(arg, *(list + i)))
                 return (i);
-    } else {
+    }
+    else
+    {
         if (!l)
-            l = 1;            /* Avoid "" to match the first available
-				 * string */
+            l = 1; /* Avoid "" to match the first available
+                    * string */
         for (i = 0; **(list + i) != '\n'; i++)
             if (!strncmp(arg, *(list + i), l))
                 return (i);
@@ -508,7 +564,8 @@ int search_block(char *arg, const char **list, int exact) {
     return (-1);
 }
 
-int is_number(const char *str) {
+int is_number(const char *str)
+{
     while (*str)
         if (!isdigit(*(str++)))
             return (0);
@@ -519,10 +576,11 @@ int is_number(const char *str) {
 /*
  * Function to skip over the leading spaces of a string.
  */
-void skip_spaces(char **string) {
-    for (; **string && isspace(**string); (*string)++);
+void skip_spaces(char **string)
+{
+    for (; **string && isspace(**string); (*string)++)
+        ;
 }
-
 
 /*
  * Given a string, change all instances of double dollar signs ($$) to
@@ -535,7 +593,8 @@ void skip_spaces(char **string) {
  *
  * Modifies the string in-place.
  */
-char *delete_doubledollar(char *string) {
+char *delete_doubledollar(char *string)
+{
     char *ddread, *ddwrite;
 
     /* If the string has no dollar signs, return immediately */
@@ -545,8 +604,7 @@ char *delete_doubledollar(char *string) {
     /* Start from the location of the first dollar sign */
     ddread = ddwrite;
 
-
-    while (*ddread)   /* Until we reach the end of the string... */
+    while (*ddread)                              /* Until we reach the end of the string... */
         if ((*(ddwrite++) = *(ddread++)) == '$') /* copy one char */
             if (*ddread == '$')
                 ddread++; /* skip if we saw 2 $'s in a row */
@@ -556,29 +614,33 @@ char *delete_doubledollar(char *string) {
     return (string);
 }
 
-
-int fill_word(char *argument) {
+int fill_word(char *argument)
+{
     return (search_block(argument, fill, true) >= 0);
 }
 
-void topLoad() {
+void topLoad()
+{
     FILE *file;
     char fname[40], line[256], filler[50];
     int x = 0;
 
     /* Read Toplist File */
-    if (!get_filename(fname, sizeof(fname), INTRO_FILE, "toplist")) {
+    if (!get_filename(fname, sizeof(fname), INTRO_FILE, "toplist"))
+    {
         basic_mud_log("ERROR: Toplist file does not exist.");
         return;
-    } else if (!(file = fopen(fname, "r"))) {
+    }
+    else if (!(file = fopen(fname, "r")))
+    {
         basic_mud_log("ERROR: Toplist file does not exist.");
         return;
     }
 
-
     TOPLOADED = true;
 
-    while (!feof(file)) {
+    while (!feof(file))
+    {
         get_line(file, line);
         sscanf(line, "%s %" I64T "\n", filler, &toppoint[x]);
         topname[x] = strdup(filler);
@@ -589,11 +651,13 @@ void topLoad() {
 }
 
 /* Write the toplist to file */
-void topWrite(Character *ch) {
+void topWrite(Character *ch)
+{
     if (GET_ADMLEVEL(ch) > 0 || IS_NPC(ch))
         return;
 
-    if (TOPLOADED == false) {
+    if (TOPLOADED == false)
+    {
         return;
     }
 
@@ -604,15 +668,18 @@ void topWrite(Character *ch) {
     int x = 0, writeEm = false, placed = false, start = 0, finish = 25, location = -1;
     int progress = false;
 
-    if (!ch) {
+    if (!ch)
+    {
         return;
     }
 
-    if (!ch->desc || !GET_USER(ch)) {
+    if (!ch->desc || !GET_USER(ch))
+    {
         return;
     }
 
-    for (x = start; x < finish; x++) { /* Save the places as they are right now */
+    for (x = start; x < finish; x++)
+    { /* Save the places as they are right now */
         positions[x] = strdup(topname[x]);
         points[x] = toppoint[x];
     }
@@ -622,10 +689,14 @@ void topWrite(Character *ch) {
     start = 0;
     finish = 5;
 
-    for (x = start; x < finish; x++) { /* Save the new spots */
-        if (placed == false) { /* They Haven't Placed */
-            if (strcasecmp(topname[x], GET_NAME(ch))) { /* Name doesn't match */
-                if (GET_MAX_HIT(ch) > toppoint[x]) {
+    for (x = start; x < finish; x++)
+    { /* Save the new spots */
+        if (placed == false)
+        { /* They Haven't Placed */
+            if (strcasecmp(topname[x], GET_NAME(ch)))
+            { /* Name doesn't match */
+                if (GET_MAX_HIT(ch) > toppoint[x])
+                {
                     free(topname[x]);
                     toppoint[x] = GET_MAX_HIT(ch);
                     topname[x] = strdup(GET_NAME(ch));
@@ -633,18 +704,26 @@ void topWrite(Character *ch) {
                     writeEm = true;
                     location = x;
                 }
-            } else { /* This is their spot already */
+            }
+            else
+            { /* This is their spot already */
                 placed = true;
                 location = finish;
             }
-        } else { /* They have placed */
-            if (x < finish && location < finish) {
-                if (strcasecmp(positions[location], GET_NAME(ch))) { /* This isn't their old spot */
+        }
+        else
+        { /* They have placed */
+            if (x < finish && location < finish)
+            {
+                if (strcasecmp(positions[location], GET_NAME(ch)))
+                { /* This isn't their old spot */
                     free(topname[x]);
                     toppoint[x] = points[location];
                     topname[x] = strdup(positions[location]);
                     location += 1;
-                } else { /* This IS their old spot */
+                }
+                else
+                { /* This IS their old spot */
                     progress = true;
                     location += 1;
                     free(topname[x]);
@@ -656,9 +735,12 @@ void topWrite(Character *ch) {
         }
     } /* End Save New Spots*/
 
-    if (progress == true) {
+    if (progress == true)
+    {
         send_to_all("@D[@GToplist@W: @C%s @Whas moved up in rank in the powerlevel section.@D]\r\n", GET_NAME(ch));
-    } else if (placed == true && location != finish) {
+    }
+    else if (placed == true && location != finish)
+    {
         send_to_all("@D[@GToplist@W: @C%s @Whas placed in the powerlevel section.@D]\r\n", GET_NAME(ch));
     }
 
@@ -670,10 +752,14 @@ void topWrite(Character *ch) {
     start = 5;
     finish = 10;
 
-    for (x = start; x < finish; x++) { /* Save the new spots */
-        if (placed == false) { /* They Haven't Placed */
-            if (strcasecmp(topname[x], GET_NAME(ch))) { /* Name doesn't match */
-                if (GET_MAX_MANA(ch) > toppoint[x]) {
+    for (x = start; x < finish; x++)
+    { /* Save the new spots */
+        if (placed == false)
+        { /* They Haven't Placed */
+            if (strcasecmp(topname[x], GET_NAME(ch)))
+            { /* Name doesn't match */
+                if (GET_MAX_MANA(ch) > toppoint[x])
+                {
                     free(topname[x]);
                     toppoint[x] = GET_MAX_MANA(ch);
                     topname[x] = strdup(GET_NAME(ch));
@@ -681,18 +767,26 @@ void topWrite(Character *ch) {
                     writeEm = true;
                     location = x;
                 }
-            } else { /* This is their spot already */
+            }
+            else
+            { /* This is their spot already */
                 placed = true;
                 location = finish;
             }
-        } else { /* They have placed */
-            if (x < finish && location < finish) {
-                if (strcasecmp(positions[location], GET_NAME(ch))) { /* This isn't their old spot */
+        }
+        else
+        { /* They have placed */
+            if (x < finish && location < finish)
+            {
+                if (strcasecmp(positions[location], GET_NAME(ch)))
+                { /* This isn't their old spot */
                     free(topname[x]);
                     toppoint[x] = points[location];
                     topname[x] = strdup(positions[location]);
                     location += 1;
-                } else { /* This IS their old spot */
+                }
+                else
+                { /* This IS their old spot */
                     progress = true;
                     location += 1;
                     free(topname[x]);
@@ -704,9 +798,12 @@ void topWrite(Character *ch) {
         }
     } /* End Save New Spots*/
 
-    if (progress == true) {
+    if (progress == true)
+    {
         send_to_all("@D[@GToplist@W: @C%s @Whas moved up in rank in the ki section.@D]\r\n", GET_NAME(ch));
-    } else if (placed == true && location != finish) {
+    }
+    else if (placed == true && location != finish)
+    {
         send_to_all("@D[@GToplist@W: @C%s @Whas placed in the ki section.@D]\r\n", GET_NAME(ch));
     }
 
@@ -719,10 +816,14 @@ void topWrite(Character *ch) {
     start = 10;
     finish = 15;
 
-    for (x = start; x < finish; x++) { /* Save the new spots */
-        if (placed == false) { /* They Haven't Placed */
-            if (strcasecmp(topname[x], GET_NAME(ch))) { /* Name doesn't match */
-                if (GET_MAX_MOVE(ch) > toppoint[x]) {
+    for (x = start; x < finish; x++)
+    { /* Save the new spots */
+        if (placed == false)
+        { /* They Haven't Placed */
+            if (strcasecmp(topname[x], GET_NAME(ch)))
+            { /* Name doesn't match */
+                if (GET_MAX_MOVE(ch) > toppoint[x])
+                {
                     free(topname[x]);
                     toppoint[x] = GET_MAX_MOVE(ch);
                     topname[x] = strdup(GET_NAME(ch));
@@ -730,18 +831,26 @@ void topWrite(Character *ch) {
                     writeEm = true;
                     location = x;
                 }
-            } else { /* This is their spot already */
+            }
+            else
+            { /* This is their spot already */
                 placed = true;
                 location = finish;
             }
-        } else { /* They have placed */
-            if (x < finish && location < finish) {
-                if (strcasecmp(positions[location], GET_NAME(ch))) { /* This isn't their old spot */
+        }
+        else
+        { /* They have placed */
+            if (x < finish && location < finish)
+            {
+                if (strcasecmp(positions[location], GET_NAME(ch)))
+                { /* This isn't their old spot */
                     free(topname[x]);
                     toppoint[x] = points[location];
                     topname[x] = strdup(positions[location]);
                     location += 1;
-                } else { /* This IS their old spot */
+                }
+                else
+                { /* This IS their old spot */
                     progress = true;
                     location += 1;
                     free(topname[x]);
@@ -753,9 +862,12 @@ void topWrite(Character *ch) {
         }
     } /* End Save New Spots*/
 
-    if (progress == true) {
+    if (progress == true)
+    {
         send_to_all("@D[@GToplist@W: @C%s @Whas moved up in rank in the stamina section.@D]\r\n", GET_NAME(ch));
-    } else if (placed == true && location != finish) {
+    }
+    else if (placed == true && location != finish)
+    {
         send_to_all("@D[@GToplist@W: @C%s @Whas placed in the stamina section.@D]\r\n", GET_NAME(ch));
     }
 
@@ -768,10 +880,14 @@ void topWrite(Character *ch) {
     start = 15;
     finish = 20;
 
-    for (x = start; x < finish; x++) { /* Save the new spots */
-        if (placed == false) { /* They Haven't Placed */
-            if (strcasecmp(topname[x], GET_NAME(ch))) { /* Name doesn't match */
-                if (GET_BANK_GOLD(ch) + GET_GOLD(ch) > toppoint[x]) {
+    for (x = start; x < finish; x++)
+    { /* Save the new spots */
+        if (placed == false)
+        { /* They Haven't Placed */
+            if (strcasecmp(topname[x], GET_NAME(ch)))
+            { /* Name doesn't match */
+                if (GET_BANK_GOLD(ch) + GET_GOLD(ch) > toppoint[x])
+                {
                     free(topname[x]);
                     toppoint[x] = GET_BANK_GOLD(ch) + GET_GOLD(ch);
                     topname[x] = strdup(GET_NAME(ch));
@@ -779,18 +895,26 @@ void topWrite(Character *ch) {
                     writeEm = true;
                     location = x;
                 }
-            } else { /* This is their spot already */
+            }
+            else
+            { /* This is their spot already */
                 placed = true;
                 location = finish;
             }
-        } else { /* They have placed */
-            if (x < finish && location < finish) {
-                if (strcasecmp(positions[location], GET_NAME(ch))) { /* This isn't their old spot */
+        }
+        else
+        { /* They have placed */
+            if (x < finish && location < finish)
+            {
+                if (strcasecmp(positions[location], GET_NAME(ch)))
+                { /* This isn't their old spot */
                     free(topname[x]);
                     toppoint[x] = points[location];
                     topname[x] = strdup(positions[location]);
                     location += 1;
-                } else { /* This IS their old spot */
+                }
+                else
+                { /* This IS their old spot */
                     progress = true;
                     location += 1;
                     free(topname[x]);
@@ -802,9 +926,12 @@ void topWrite(Character *ch) {
         }
     } /* End Save New Spots*/
 
-    if (progress == true) {
+    if (progress == true)
+    {
         send_to_all("@D[@GToplist@W: @C%s @Whas moved up in rank in the zenni section.@D]\r\n", GET_NAME(ch));
-    } else if (placed == true && location != finish) {
+    }
+    else if (placed == true && location != finish)
+    {
         send_to_all("@D[@GToplist@W: @C%s @Whas placed in the zenni section.@D]\r\n", GET_NAME(ch));
     }
 
@@ -817,10 +944,14 @@ void topWrite(Character *ch) {
     start = 20;
     finish = 25;
 
-    for (x = start; x < finish; x++) { /* Save the new spots */
-        if (placed == false) { /* They Haven't Placed */
-            if (strcasecmp(topname[x], GET_USER(ch))) { /* Name doesn't match */
-                if (ch->getRPP() > toppoint[x]) {
+    for (x = start; x < finish; x++)
+    { /* Save the new spots */
+        if (placed == false)
+        { /* They Haven't Placed */
+            if (strcasecmp(topname[x], GET_USER(ch)))
+            { /* Name doesn't match */
+                if (ch->getRPP() > toppoint[x])
+                {
                     free(topname[x]);
                     toppoint[x] = ch->getRPP();
                     topname[x] = strdup(GET_USER(ch));
@@ -828,18 +959,26 @@ void topWrite(Character *ch) {
                     writeEm = true;
                     location = x;
                 }
-            } else { /* This is their spot already */
+            }
+            else
+            { /* This is their spot already */
                 placed = true;
                 location = finish;
             }
-        } else { /* They have placed */
-            if (x < finish && location < finish) {
-                if (strcasecmp(positions[location], GET_USER(ch))) { /* This isn't their old spot */
+        }
+        else
+        { /* They have placed */
+            if (x < finish && location < finish)
+            {
+                if (strcasecmp(positions[location], GET_USER(ch)))
+                { /* This isn't their old spot */
                     free(topname[x]);
                     toppoint[x] = points[location];
                     topname[x] = strdup(positions[location]);
                     location += 1;
-                } else { /* This IS their old spot */
+                }
+                else
+                { /* This IS their old spot */
                     progress = true;
                     location += 1;
                     free(topname[x]);
@@ -851,9 +990,12 @@ void topWrite(Character *ch) {
         }
     } /* End Save New Spots*/
 
-    if (progress == true) {
+    if (progress == true)
+    {
         send_to_all("@D[@GToplist@W: @C%s @Whas moved up in rank in the RPP section.@D]\r\n", GET_USER(ch));
-    } else if (placed == true && location != finish) {
+    }
+    else if (placed == true && location != finish)
+    {
         send_to_all("@D[@GToplist@W: @C%s @Whas placed in the RPP section.@D]\r\n", GET_USER(ch));
     }
 
@@ -861,20 +1003,24 @@ void topWrite(Character *ch) {
     placed = false;
     progress = false;
 
-    for (x = 0; x < 25; x++) {
+    for (x = 0; x < 25; x++)
+    {
         free(positions[x]);
     }
 
-    if (writeEm == true) {
+    if (writeEm == true)
+    {
         if (!get_filename(fname, sizeof(fname), INTRO_FILE, "toplist"))
             return;
 
-        if (!(fl = fopen(fname, "w"))) {
+        if (!(fl = fopen(fname, "w")))
+        {
             basic_mud_log("ERROR: could not save Toplist File, %s.", fname);
             return;
         }
         x = 0;
-        while (x < 25) {
+        while (x < 25)
+        {
             fprintf(fl, "%s %" I64T "\n", topname[x], toppoint[x]);
             x++;
         }
@@ -884,28 +1030,32 @@ void topWrite(Character *ch) {
     return;
 }
 
-int reserved_word(char *argument) {
+int reserved_word(char *argument)
+{
     return (search_block(argument, reserved, true) >= 0);
 }
-
 
 /*
  * copy the first non-fill-word, space-delimited argument of 'argument'
  * to 'first_arg'; return a pointer to the remainder of the string.
  */
-char *one_argument(const char *argument, char *first_arg) {
+char *one_argument(const char *argument, char *first_arg)
+{
     char *begin = first_arg;
 
-    if (!argument) {
+    if (!argument)
+    {
         *first_arg = '\0';
         return (nullptr);
     }
 
-    do {
+    do
+    {
         skip_spaces(&argument);
 
         first_arg = begin;
-        while (*argument && !isspace(*argument)) {
+        while (*argument && !isspace(*argument))
+        {
             *(first_arg++) = LOWER(*argument);
             argument++;
         }
@@ -916,25 +1066,30 @@ char *one_argument(const char *argument, char *first_arg) {
     return (argument);
 }
 
-
 /*
  * one_word is like any_one_arg, except that words in quotes ("") are
  * considered one word.
  *
  * No longer ignores fill words.  -dak, 6 Jan 2003.
  */
-char *one_word(char *argument, char *first_arg) {
+char *one_word(char *argument, char *first_arg)
+{
     skip_spaces(&argument);
 
-    if (*argument == '\"') {
+    if (*argument == '\"')
+    {
         argument++;
-        while (*argument && *argument != '\"') {
+        while (*argument && *argument != '\"')
+        {
             *(first_arg++) = LOWER(*argument);
             argument++;
         }
         argument++;
-    } else {
-        while (*argument && !isspace(*argument)) {
+    }
+    else
+    {
+        while (*argument && !isspace(*argument))
+        {
             *(first_arg++) = LOWER(*argument);
             argument++;
         }
@@ -944,12 +1099,13 @@ char *one_word(char *argument, char *first_arg) {
     return (argument);
 }
 
-
 /* same as one_argument except that it doesn't ignore fill words */
-char *any_one_arg(char *argument, char *first_arg) {
+char *any_one_arg(char *argument, char *first_arg)
+{
     skip_spaces(&argument);
 
-    while (*argument && !isspace(*argument)) {
+    while (*argument && !isspace(*argument))
+    {
         *(first_arg++) = LOWER(*argument);
         argument++;
     }
@@ -963,7 +1119,8 @@ char *any_one_arg(char *argument, char *first_arg) {
  * Same as one_argument except that it takes two args and returns the rest;
  * ignores fill words
  */
-char *two_arguments(char *argument, char *first_arg, char *second_arg) {
+char *two_arguments(char *argument, char *first_arg, char *second_arg)
+{
     return (one_argument(one_argument(argument, first_arg), second_arg)); /* :-);*/
 }
 
@@ -971,10 +1128,10 @@ char *two_arguments(char *argument, char *first_arg, char *second_arg) {
  * Same as two_arguments only, well you get the idea... - Iovan
  *
  */
-char *three_arguments(char *argument, char *first_arg, char *second_arg, char *third_arg) {
+char *three_arguments(char *argument, char *first_arg, char *second_arg, char *third_arg)
+{
     return (one_argument(one_argument(one_argument(argument, first_arg), second_arg), third_arg)); /* >.> */
 }
-
 
 /*
  * determine if a given string is an abbreviation of another
@@ -984,7 +1141,8 @@ char *three_arguments(char *argument, char *first_arg, char *second_arg, char *t
  *
  * returns 1 if arg1 is an abbreviation of arg2
  */
-int is_abbrev(const char *arg1, const char *arg2) {
+int is_abbrev(const char *arg1, const char *arg2)
+{
     if (!*arg1)
         return (0);
 
@@ -1003,18 +1161,19 @@ int is_abbrev(const char *arg1, const char *arg2) {
  *
  * NOTE: Requires sizeof(arg2) >= sizeof(string)
  */
-void half_chop(char *string, char *arg1, char *arg2) {
+void half_chop(char *string, char *arg1, char *arg2)
+{
     char *temp;
 
     temp = any_one_arg(string, arg1);
     skip_spaces(&temp);
     if (arg2 != temp)
-        strcpy(arg2, temp);    /* strcpy: OK (documentation) */
+        strcpy(arg2, temp); /* strcpy: OK (documentation) */
 }
 
-
 /* Used in specprocs, mostly.  (Exactly) matches "command" to cmd number */
-int find_command(const char *command) {
+int find_command(const char *command)
+{
     int cmd;
     for (cmd = 0; *complete_cmd_info[cmd].command != '\n'; cmd++)
         if (!strcmp(complete_cmd_info[cmd].command, command))
@@ -1022,15 +1181,16 @@ int find_command(const char *command) {
     return (-1);
 }
 
-
-int special(Character *ch, int cmd, char *arg) {
+int special(Character *ch, int cmd, char *arg)
+{
     /* special in room? */
     if (auto func = ch->location.getSpecialFunc(); func)
         if (auto r = ch->getRoom(); r && func(ch, r, cmd, arg))
             return 1;
 
     /* special in equipment list? */
-    for (auto& [slot, obj] : ch->getEquipment()) {
+    for (auto &[slot, obj] : ch->getEquipment())
+    {
         if (auto func = GET_OBJ_SPEC(obj); func)
             if (func(ch, obj, cmd, arg))
                 return 1;
@@ -1038,24 +1198,27 @@ int special(Character *ch, int cmd, char *arg) {
 
     /* special in inventory? */
     auto con = ch->getInventory();
-    for (auto obj : filter_raw(con)) {
+    for (auto obj : filter_raw(con))
+    {
         if (auto func = GET_OBJ_SPEC(obj))
             if (func(ch, obj, cmd, arg))
                 return 1;
     }
 
     /* special in mobile present? */
-    if(ch->location) {
+    if (ch->location)
+    {
         auto people = ch->location.getPeople();
         for (auto mob : filter_raw(people))
-        if (IS_NPC(mob) && !MOB_FLAGGED(mob, MOB_NOTDEADYET))
-            if (auto func = GET_MOB_SPEC(mob); func)
-                if(func(ch, mob, cmd, arg))
-                    return 1;
+            if (IS_NPC(mob) && !MOB_FLAGGED(mob, MOB_NOTDEADYET))
+                if (auto func = GET_MOB_SPEC(mob); func)
+                    if (func(ch, mob, cmd, arg))
+                        return 1;
 
         auto con = ch->location.getObjects();
-        for (auto obj : filter_raw(con)) {
-            if(auto func = GET_OBJ_SPEC(obj); func)
+        for (auto obj : filter_raw(con))
+        {
+            if (auto func = GET_OBJ_SPEC(obj); func)
                 if (func(ch, obj, cmd, arg))
                     return 1;
         }
@@ -1064,15 +1227,13 @@ int special(Character *ch, int cmd, char *arg) {
     return 0;
 }
 
-
-
 /* *************************************************************************
-*  Stuff for controlling the non-playing sockets (get name, pwd etc)       *
-************************************************************************* */
-
+ *  Stuff for controlling the non-playing sockets (get name, pwd etc)       *
+ ************************************************************************* */
 
 /* This function needs to die. */
-int _parse_name(char *arg, char *name) {
+int _parse_name(char *arg, char *name)
+{
     int i;
 
     skip_spaces(&arg);
@@ -1086,14 +1247,13 @@ int _parse_name(char *arg, char *name) {
     return (0);
 }
 
-
 constexpr int RECON = 1;
 constexpr int USURP = 2;
 constexpr int UNSWITCH = 3;
 
-
 /* load the player, put them in the right room - used by copyover_recover too */
-void enter_player_game(struct descriptor_data *d) {
+void enter_player_game(struct descriptor_data *d)
+{
     IDXTYPE load_room;
     Character *check;
 
@@ -1103,18 +1263,19 @@ void enter_player_game(struct descriptor_data *d) {
     racial_body_parts(d->character);
 
     if (PLR_FLAGGED(d->character, PLR_INVSTART))
-    d->character->setBaseStat("invis_level", GET_LEVEL(d->character));
+        d->character->setBaseStat("invis_level", GET_LEVEL(d->character));
 
     /*
-       * We have to place the character in a room before equipping them
-       * or equip_char() will gripe about the person in NOWHERE.
-       */
+     * We have to place the character in a room before equipping them
+     * or equip_char() will gripe about the person in NOWHERE.
+     */
 
     if ((load_room = GET_LOADROOM(d->character)) != NOWHERE)
         load_room = real_room(load_room);
 
     /* If char was saved with NOWHERE, or real_room above failed... */
-    if (load_room == NOWHERE) {
+    if (load_room == NOWHERE)
+    {
         if (GET_ADMLEVEL(d->character))
             load_room = real_room(CONFIG_IMMORTAL_START);
         else
@@ -1129,7 +1290,8 @@ void enter_player_game(struct descriptor_data *d) {
 
     /*load_char_pets(d->character);*/
     auto ac = characterSubscriptions.all("active");
-    for (auto check : filter_raw(ac)) {
+    for (auto check : filter_raw(ac))
+    {
         if (!check->master && IS_NPC(check) && check->getBaseStat<int>("master_id") == GET_IDNUM(d->character) &&
             AFF_FLAGGED(check, AFF_CHARM) && !circle_follow(check, d->character))
             add_follower(check, d->character);
@@ -1138,16 +1300,21 @@ void enter_player_game(struct descriptor_data *d) {
     d->character->setBaseStat("combine", -1);
     d->character->setBaseStat("sleeptime", 8);
     d->character->setBaseStat("food_rejuvenation", 2);
-    if (AFF_FLAGGED(d->character, AFF_FLYING)) {
+    if (AFF_FLAGGED(d->character, AFF_FLYING))
+    {
         d->character->setBaseStat<int>("altitude", 1);
-    } else {
+    }
+    else
+    {
         d->character->setBaseStat<int>("altitude", 0);
     }
 
-    for(auto f : {AFF_POSITION, AFF_SANCTUARY, AFF_ZANZOKEN}) d->character->affect_flags.set(f, false);
+    for (auto f : {AFF_POSITION, AFF_SANCTUARY, AFF_ZANZOKEN})
+        d->character->affect_flags.set(f, false);
     d->character->player_flags.set(PLR_KNOCKED, false);
 
-    if (IS_ANDROID(d->character) && !AFF_FLAGGED(d->character, AFF_INFRAVISION)) {
+    if (IS_ANDROID(d->character) && !AFF_FLAGGED(d->character, AFF_INFRAVISION))
+    {
         d->character->affect_flags.set(AFF_INFRAVISION, true);
     }
 
@@ -1156,26 +1323,36 @@ void enter_player_game(struct descriptor_data *d) {
     d->character->sits.reset();
     BLOCKED(d->character) = nullptr;
     BLOCKS(d->character) = nullptr;
-    for(const auto &s : {"spam", "rage_meter"}) d->character->setBaseStat(s, 0);
-    if (!d->character->affected) {
+    for (const auto &s : {"spam", "rage_meter"})
+        d->character->setBaseStat(s, 0);
+    if (!d->character->affected)
+    {
         d->character->affect_flags.set(AFF_HEALGLOW, false);
     }
-    if (AFF_FLAGGED(d->character, AFF_HAYASA)) {
+    if (AFF_FLAGGED(d->character, AFF_HAYASA))
+    {
         d->character->setBaseStat<int>("speedboost", GET_SPEEDCALC(d->character) * 0.5);
-    } else {
+    }
+    else
+    {
         d->character->setBaseStat<int>("speedboost", 0);
     }
 
     d->character->player_flags.set(PLR_HEALT, false);
 
-    if (GET_ADMLEVEL(d->character) > 0) {
+    if (GET_ADMLEVEL(d->character) > 0)
+    {
         d->level = 1;
     }
 
-    if (GET_CLAN(d->character) && !strstr(GET_CLAN(d->character), "None")) {
-        if (!clanIsMember(GET_CLAN(d->character), d->character)) {
-            if (!clanIsModerator(GET_CLAN(d->character), d->character)) {
-                if (!checkCLAN(d->character)) {
+    if (GET_CLAN(d->character) && !strstr(GET_CLAN(d->character), "None"))
+    {
+        if (!clanIsMember(GET_CLAN(d->character), d->character))
+        {
+            if (!clanIsModerator(GET_CLAN(d->character), d->character))
+            {
+                if (!checkCLAN(d->character))
+                {
                     d->sendText("Your clan no longer exists.\r\n");
                     GET_CLAN(d->character) = strdup("None.");
                 }
@@ -1183,30 +1360,41 @@ void enter_player_game(struct descriptor_data *d) {
         }
     }
 
-    if (IS_HOSHIJIN(d->character)) {
-        if (time_info.day <= 14) {
+    if (IS_HOSHIJIN(d->character))
+    {
+        if (time_info.day <= 14)
+        {
             star_phase(d->character, 1);
-        } else if (time_info.day <= 21) {
+        }
+        else if (time_info.day <= 21)
+        {
             star_phase(d->character, 2);
-        } else {
+        }
+        else
+        {
             star_phase(d->character, 0);
         }
     }
 
-    if (IS_ICER(d->character) && !GET_SKILL(d->character, SKILL_TAILWHIP)) {
+    if (IS_ICER(d->character) && !GET_SKILL(d->character, SKILL_TAILWHIP))
+    {
         int numb = rand_number(20, 30);
         SET_SKILL(d->character, SKILL_TAILWHIP, numb);
-    } else if (!IS_ICER(d->character) && GET_SKILL(d->character, SKILL_TAILWHIP)) {
+    }
+    else if (!IS_ICER(d->character) && GET_SKILL(d->character, SKILL_TAILWHIP))
+    {
         SET_SKILL(d->character, SKILL_TAILWHIP, 0);
     }
 
     if (d->character->mutations.get(Mutation::innate_telepathy) &&
-        !GET_SKILL(d->character, SKILL_TELEPATHY)) {
+        !GET_SKILL(d->character, SKILL_TELEPATHY))
+    {
         SET_SKILL(d->character, SKILL_TELEPATHY, 50);
     }
 
     if (d->character->bio_genomes.get(Race::kai) &&
-        !GET_SKILL(d->character, SKILL_TELEPATHY) && !GET_SKILL(d->character, SKILL_FOCUS)) {
+        !GET_SKILL(d->character, SKILL_TELEPATHY) && !GET_SKILL(d->character, SKILL_FOCUS))
+    {
         SET_SKILL(d->character, SKILL_TELEPATHY, 30);
         SET_SKILL(d->character, SKILL_FOCUS, 30);
     }
@@ -1214,74 +1402,103 @@ void enter_player_game(struct descriptor_data *d) {
     d->character->setBaseStat<int>("combo", -1);
 }
 
-int readUserIndex(char *name) {
+int readUserIndex(char *name)
+{
     char fname[40];
     FILE *fl;
 
     /* Read User Index */
-    if (!get_filename(fname, sizeof(fname), USER_FILE, name)) {
+    if (!get_filename(fname, sizeof(fname), USER_FILE, name))
+    {
         return 0;
-    } else if (!(fl = fopen(fname, "r"))) {
+    }
+    else if (!(fl = fopen(fname, "r")))
+    {
         return 0;
     }
     fclose(fl);
     return 1;
 }
 
-void payout(int num) {
+void payout(int num)
+{
 
     struct descriptor_data *k;
-    if (LASTPAYOUT == 0) {
-        LASTPAYOUT = time(nullptr) + 86400;
-        LASTPAYTYPE = num;
-    } else if (num > LASTPAYTYPE) {
-        LASTPAYOUT = time(nullptr) + 86400;
-        LASTPAYTYPE = num;
-    } else if (LASTPAYOUT <= time(nullptr)) {
+    if (LASTPAYOUT == 0)
+    {
         LASTPAYOUT = time(nullptr) + 86400;
         LASTPAYTYPE = num;
     }
-    for (k = descriptor_list; k; k = k->next) {
-        if (GET_ADMLEVEL(k->character) <= 0 && IS_PLAYING(k) && GET_RTIME(k->character) < LASTPAYOUT) {
-            if (num == 0) {
+    else if (num > LASTPAYTYPE)
+    {
+        LASTPAYOUT = time(nullptr) + 86400;
+        LASTPAYTYPE = num;
+    }
+    else if (LASTPAYOUT <= time(nullptr))
+    {
+        LASTPAYOUT = time(nullptr) + 86400;
+        LASTPAYTYPE = num;
+    }
+    for (k = descriptor_list; k; k = k->next)
+    {
+        if (GET_ADMLEVEL(k->character) <= 0 && IS_PLAYING(k) && GET_RTIME(k->character) < LASTPAYOUT)
+        {
+            if (num == 0)
+            {
                 k->account->modRPP(1);
-                                k->character->sendText("@D[@G+ 1 RPP@D] @cA total logon count within 4 of the highest has been achieved.@n\r\n");
-            } else if (num == 1) {
+                k->character->sendText("@D[@G+ 1 RPP@D] @cA total logon count within 4 of the highest has been achieved.@n\r\n");
+            }
+            else if (num == 1)
+            {
                 k->account->modRPP(2);
-                                k->character->sendText("@D[@G+ 2 RPP@D] @cThe total logon count has tied with the highest ever.@n\r\n");
-            } else {
+                k->character->sendText("@D[@G+ 2 RPP@D] @cThe total logon count has tied with the highest ever.@n\r\n");
+            }
+            else
+            {
                 k->account->modRPP(3);
-                                k->character->sendText("@D[@G+ 3 RPP@D] @cA new logon count record has been achieved!@n\r\n");
+                k->character->sendText("@D[@G+ 3 RPP@D] @cA new logon count record has been achieved!@n\r\n");
             }
             k->character->setBaseStat("rewtime", LASTPAYOUT);
         }
     }
 }
 
-int command_pass(char *cmd, Character *ch) {
+int command_pass(char *cmd, Character *ch)
+{
 
-    if (AFF_FLAGGED(ch, AFF_LIQUEFIED)) {
+    if (AFF_FLAGGED(ch, AFF_LIQUEFIED))
+    {
         if (strcasecmp(cmd, "liquefy") && strcasecmp(cmd, "ingest") && strcasecmp(cmd, "look") &&
             strcasecmp(cmd, "score") && strcasecmp(cmd, "ooc") && strcasecmp(cmd, "osay") && strcasecmp(cmd, "emote") &&
-            strcasecmp(cmd, "smote") && strcasecmp(cmd, "status")) {
-                        ch->sendText("You are not capable of performing that action while liquefied!\r\n");
+            strcasecmp(cmd, "smote") && strcasecmp(cmd, "status"))
+        {
+            ch->sendText("You are not capable of performing that action while liquefied!\r\n");
             return (false);
         }
-    } else if (IS_AFFECTED(ch, AFF_PARALYZE)) {
+    }
+    else if (IS_AFFECTED(ch, AFF_PARALYZE))
+    {
         if (strcasecmp(cmd, "look") && strcasecmp(cmd, "score") && strcasecmp(cmd, "ooc") && strcasecmp(cmd, "osay") &&
-            strcasecmp(cmd, "emote") && strcasecmp(cmd, "smote") && strcasecmp(cmd, "status")) {
-                        ch->sendText("You are not capable of performing that action while petrified!\r\n");
+            strcasecmp(cmd, "emote") && strcasecmp(cmd, "smote") && strcasecmp(cmd, "status"))
+        {
+            ch->sendText("You are not capable of performing that action while petrified!\r\n");
             return (false);
         }
-    } else if (IS_AFFECTED(ch, AFF_FROZEN)) {
+    }
+    else if (IS_AFFECTED(ch, AFF_FROZEN))
+    {
         if (strcasecmp(cmd, "look") && strcasecmp(cmd, "score") && strcasecmp(cmd, "ooc") && strcasecmp(cmd, "osay") &&
-            strcasecmp(cmd, "emote") && strcasecmp(cmd, "smote") && strcasecmp(cmd, "status")) {
-                        ch->sendText("You are not capable of performing that action while a frozen block of ice!\r\n");
+            strcasecmp(cmd, "emote") && strcasecmp(cmd, "smote") && strcasecmp(cmd, "status"))
+        {
+            ch->sendText("You are not capable of performing that action while a frozen block of ice!\r\n");
             return (false);
         }
-    } else if (IS_AFFECTED(ch, AFF_PARA) && GET_INT(ch) < rand_number(1, 60)) {
+    }
+    else if (IS_AFFECTED(ch, AFF_PARA) && GET_INT(ch) < rand_number(1, 60))
+    {
         if (strcasecmp(cmd, "look") && strcasecmp(cmd, "score") && strcasecmp(cmd, "ooc") && strcasecmp(cmd, "osay") &&
-            strcasecmp(cmd, "emote") && strcasecmp(cmd, "smote") && strcasecmp(cmd, "status")) {
+            strcasecmp(cmd, "emote") && strcasecmp(cmd, "smote") && strcasecmp(cmd, "status"))
+        {
             act("@yYou fail to overcome your paralysis!@n", true, ch, nullptr, nullptr, TO_CHAR);
             act("@Y$n @ystruggles with $s paralysis!@n", true, ch, nullptr, nullptr, TO_ROOM);
             return (false);
@@ -1291,23 +1508,29 @@ int command_pass(char *cmd, Character *ch) {
     return (true);
 }
 
-int lockRead(char *name) {
+int lockRead(char *name)
+{
     char fname[40], filler[50], line[256];
     int known = false;
     FILE *fl;
 
     /* Read Introduction File */
 
-    if (!get_filename(fname, sizeof(fname), INTRO_FILE, "lockout")) {
+    if (!get_filename(fname, sizeof(fname), INTRO_FILE, "lockout"))
+    {
         return 0;
-    } else if (!(fl = fopen(fname, "r"))) {
+    }
+    else if (!(fl = fopen(fname, "r")))
+    {
         return 0;
     }
 
-    while (!feof(fl)) {
+    while (!feof(fl))
+    {
         get_line(fl, line);
         sscanf(line, "%s\n", filler);
-        if (!strcasecmp(CAP(name), CAP(filler))) {
+        if (!strcasecmp(CAP(name), CAP(filler)))
+        {
             known = true;
         }
     }
@@ -1320,27 +1543,34 @@ int lockRead(char *name) {
 }
 
 /* For transfering money or doing things with an offline player */
-char *rIntro(Character *ch, char *arg) {
+char *rIntro(Character *ch, char *arg)
+{
     char fname[40], filler[50], scrap[100], line[256];
     static char name[80];
     int known = false;
     FILE *fl;
 
     /* Read Introduction File */
-    if (IS_NPC(ch)) {
+    if (IS_NPC(ch))
+    {
         return "NOTHING";
     }
 
-    if (!get_filename(fname, sizeof(fname), INTRO_FILE, GET_NAME(ch))) {
+    if (!get_filename(fname, sizeof(fname), INTRO_FILE, GET_NAME(ch)))
+    {
         return "NOTHING";
-    } else if (!(fl = fopen(fname, "r"))) {
+    }
+    else if (!(fl = fopen(fname, "r")))
+    {
         return "NOTHING";
     }
 
-    while (!feof(fl)) {
+    while (!feof(fl))
+    {
         get_line(fl, line);
         sscanf(line, "%s %s\n", filler, scrap);
-        if (!strcasecmp(arg, scrap)) {
+        if (!strcasecmp(arg, scrap))
+        {
             known = true;
             sprintf(name, "%s", filler);
         }
@@ -1353,21 +1583,24 @@ char *rIntro(Character *ch, char *arg) {
         return "NOTHING";
 }
 
+void fingerUser(Character *ch, struct Account *account)
+{
+    ch->send_to("@D[@gUsername   @D: @w%-30s@D]@n\r\n", account->name.c_str());
+    ch->send_to("@D[@gEmail      @D: @w%-30s@D]@n\r\n", account->email.c_str());
+    ch->send_to("@D[@gTotal Slots@D: @w%-30d@D]@n\r\n", account->slots);
+    ch->send_to("@D[@gRP Points  @D: @w%-30d@D]@n\r\n", account->rpp);
 
-void fingerUser(Character *ch, struct Account *account) {
-        ch->send_to("@D[@gUsername   @D: @w%-30s@D]@n\r\n", account->name.c_str());
-        ch->send_to("@D[@gEmail      @D: @w%-30s@D]@n\r\n", account->email.c_str());
-        ch->send_to("@D[@gTotal Slots@D: @w%-30d@D]@n\r\n", account->slots);
-        ch->send_to("@D[@gRP Points  @D: @w%-30d@D]@n\r\n", account->rpp);
-
-    if (GET_ADMLEVEL(ch) > 0) {
+    if (GET_ADMLEVEL(ch) > 0)
+    {
         int counter = 0;
-        for(auto ref : account->characters) {
+        for (auto ref : account->characters)
+        {
             auto p = players.find(ref);
-            if(p == players.end()) continue;
-                        ch->send_to("@D[@gCh. Slot %d @D: @w%-30s@D]@n\r\n", ++counter, p->second.character->getName());
+            if (p == players.end())
+                continue;
+            ch->send_to("@D[@gCh. Slot %d @D: @w%-30s@D]@n\r\n", ++counter, p->second.character->getName());
         }
-                ch->sendText("\n");
+        ch->sendText("\n");
     }
 }
 
@@ -1375,32 +1608,32 @@ void fingerUser(Character *ch, struct Account *account) {
  * Return 31 if selection is X                 *
  * Return other value if Bonus/Negative        */
 
-
 /* Handle CC point exchange for Bonus/negative */
 
-static struct {
+static struct
+{
     int state;
     void (*func)(struct descriptor_data *, char *);
 } olc_functions[] = {
-        {CON_OEDIT,    oedit_parse},
-        {CON_IEDIT,    oedit_parse},
-        {CON_ZEDIT,    zedit_parse},
-        {CON_SEDIT,    sedit_parse},
-        {CON_MEDIT,    medit_parse},
-        {CON_REDIT,    redit_parse},
-        {CON_CEDIT,    cedit_parse},
-        {CON_AEDIT,    aedit_parse},
-        {CON_ASSEDIT,  assedit_parse},
-        {CON_GEDIT,    gedit_parse},
-        {CON_LEVELUP,  levelup_parse},
-        {CON_HEDIT,    hedit_parse},
-        {CON_POBJ,     pobj_edit_parse},
-        {-1,           nullptr}
-};
+    {CON_OEDIT, oedit_parse},
+    {CON_IEDIT, oedit_parse},
+    {CON_ZEDIT, zedit_parse},
+    {CON_SEDIT, sedit_parse},
+    {CON_MEDIT, medit_parse},
+    {CON_REDIT, redit_parse},
+    {CON_CEDIT, cedit_parse},
+    {CON_AEDIT, aedit_parse},
+    {CON_ASSEDIT, assedit_parse},
+    {CON_GEDIT, gedit_parse},
+    {CON_LEVELUP, levelup_parse},
+    {CON_HEDIT, hedit_parse},
+    {CON_POBJ, pobj_edit_parse},
+    {-1, nullptr}};
 
 /* deal with newcomers and other non-playing sockets */
-void nanny(struct descriptor_data *d, char *arg) {
-    int load_result = -1;    /* Overloaded variable */
+void nanny(struct descriptor_data *d, char *arg)
+{
+    int load_result = -1; /* Overloaded variable */
     int total, rr, moveon = false, penalty = false;
     int player_i;
     int value, roll = rand_number(1, 6); /* For parse_bonuses */
@@ -1412,36 +1645,39 @@ void nanny(struct descriptor_data *d, char *arg) {
     skip_spaces(&arg);
 
     /*
-   * Quick check for the OLC states.
-   */
+     * Quick check for the OLC states.
+     */
     for (player_i = 0; olc_functions[player_i].state >= 0; player_i++)
-        if (STATE(d) == olc_functions[player_i].state) {
+        if (STATE(d) == olc_functions[player_i].state)
+        {
             /* send context-sensitive help if need be */
-            if (context_help(d, arg)) return;
+            if (context_help(d, arg))
+                return;
             (*olc_functions[player_i].func)(d, arg);
             return;
         }
 
     /* Not in OLC. */
-    switch (STATE(d)) {
+    switch (STATE(d))
+    {
 
-        case CON_CLOSE:
-        case CON_DISCONNECT:
-            break;
+    case CON_CLOSE:
+    case CON_DISCONNECT:
+        break;
 
-        case CON_ASSEDIT:
-            assedit_parse(d, arg);
-            break;
+    case CON_ASSEDIT:
+        assedit_parse(d, arg);
+        break;
 
-        case CON_GEDIT:
-            gedit_parse(d, arg);
-            break;
+    case CON_GEDIT:
+        gedit_parse(d, arg);
+        break;
 
-        default:
-            basic_mud_log("SYSERR: Nanny: illegal state of con'ness (%d) for '%s'; closing connection.",
-                STATE(d), d->character ? GET_NAME(d->character) : "<unknown>");
-            STATE(d) = CON_DISCONNECT;    /* Safest to do. */
-            break;
+    default:
+        basic_mud_log("SYSERR: Nanny: illegal state of con'ness (%d) for '%s'; closing connection.",
+                      STATE(d), d->character ? GET_NAME(d->character) : "<unknown>");
+        STATE(d) = CON_DISCONNECT; /* Safest to do. */
+        break;
     }
 }
 
@@ -1457,26 +1693,30 @@ void nanny(struct descriptor_data *d, char *arg) {
  *
  */
 
-ACMD(do_disable) {
+ACMD(do_disable)
+{
     int i, length;
     DISABLED_DATA *p, *temp;
 
-    if (IS_NPC(ch)) {
-                ch->sendText("Monsters can't disable commands, silly.\r\n");
+    if (IS_NPC(ch))
+    {
+        ch->sendText("Monsters can't disable commands, silly.\r\n");
         return;
     }
 
     skip_spaces(&argument);
 
-    if (!*argument) { /* Nothing specified. Show disabled commands. */
+    if (!*argument)
+    {                        /* Nothing specified. Show disabled commands. */
         if (!disabled_first) /* Any disabled at all ? */
-                        ch->sendText("There are no disabled commands.\r\n");
-        else {
-                        ch->sendText("Commands that are currently disabled:\r\n\r\n"
+            ch->sendText("There are no disabled commands.\r\n");
+        else
+        {
+            ch->sendText("Commands that are currently disabled:\r\n\r\n"
                          " Command       Disabled by     Level\r\n"
                          "-----------   --------------  -------\r\n");
             for (p = disabled_first; p; p = p->next)
-                                ch->send_to(" %-12s   %-12s    %3d\r\n", p->command->command, p->disabled_by, p->level);
+                ch->send_to(" %-12s   %-12s    %3d\r\n", p->command->command, p->disabled_by, p->level);
         }
         return;
     }
@@ -1486,23 +1726,26 @@ ACMD(do_disable) {
         if (!strncmp(argument, p->command->command, length))
             break;
 
-    if (p) { /* this command is disabled */
+    if (p)
+    { /* this command is disabled */
 
         /* Was it disabled by a higher level imm? */
-        if (GET_ADMLEVEL(ch) < p->level) {
-                        ch->sendText("This command was disabled by a higher power.\r\n");
+        if (GET_ADMLEVEL(ch) < p->level)
+        {
+            ch->sendText("This command was disabled by a higher power.\r\n");
             return;
         }
 
         REMOVE_FROM_LIST(p, disabled_first, next, temp);
-                ch->send_to("Command '%s' enabled.\r\n", p->command->command);
+        ch->send_to("Command '%s' enabled.\r\n", p->command->command);
         mudlog(BRF, ADMLVL_IMMORT, true, "(GC) %s has enabled the command '%s'.",
                GET_NAME(ch), p->command->command);
         free(p->disabled_by);
         free(p);
         save_disabled(); /* save to disk */
-
-    } else { /* not a disabled command, check if the command exists */
+    }
+    else
+    { /* not a disabled command, check if the command exists */
 
         for (length = strlen(argument), i = 0; *cmd_info[i].command != '\n'; i++)
             if (!strncmp(cmd_info[i].command, argument, length))
@@ -1511,13 +1754,15 @@ ACMD(do_disable) {
                     break;
 
         /*  Found?     */
-        if (*cmd_info[i].command == '\n') {
-                        ch->sendText("You don't know of any such command.\r\n");
+        if (*cmd_info[i].command == '\n')
+        {
+            ch->sendText("You don't know of any such command.\r\n");
             return;
         }
 
-        if (!strcmp(cmd_info[i].command, "disable")) {
-                        ch->sendText("You cannot disable the disable command.\r\n");
+        if (!strcmp(cmd_info[i].command, "disable"))
+        {
+            ch->sendText("You cannot disable the disable command.\r\n");
             return;
         }
 
@@ -1526,10 +1771,10 @@ ACMD(do_disable) {
         p->command = &cmd_info[i];
         p->disabled_by = strdup(GET_NAME(ch)); /* save name of disabler  */
         p->level = GET_ADMLEVEL(ch);           /* save level of disabler */
-        p->subcmd = cmd_info[i].subcmd;       /* the subcommand if any  */
+        p->subcmd = cmd_info[i].subcmd;        /* the subcommand if any  */
         p->next = disabled_first;
         disabled_first = p; /* add before the current first element */
-                ch->send_to("Command '%s' disabled.\r\n", p->command->command);
+        ch->send_to("Command '%s' disabled.\r\n", p->command->command);
         mudlog(BRF, ADMLVL_IMMORT, true, "(GC) %s has disabled the command '%s'.",
                GET_NAME(ch), p->command->command);
         save_disabled(); /* save to disk */
@@ -1537,7 +1782,8 @@ ACMD(do_disable) {
 }
 
 /* check if a command is disabled */
-int check_disabled(const struct command_info *command) {
+int check_disabled(const struct command_info *command)
+{
     DISABLED_DATA *p;
 
     for (p = disabled_first; p; p = p->next)
@@ -1549,7 +1795,8 @@ int check_disabled(const struct command_info *command) {
 }
 
 /* Load disabled commands */
-void load_disabled() {
+void load_disabled()
+{
     FILE *fp;
     DISABLED_DATA *p;
     int i;
@@ -1561,7 +1808,8 @@ void load_disabled() {
     if ((fp = fopen(DISABLED_FILE, "r")) == nullptr)
         return; /* No disabled file.. no disabled commands. */
 
-    while (get_line(fp, line)) {
+    while (get_line(fp, line))
+    {
         if (!strcasecmp(line, END_MARKER))
             break; /* break loop if we encounter the END_MARKER */
         CREATE(p, struct disabled_data, 1);
@@ -1570,10 +1818,13 @@ void load_disabled() {
         for (i = 0; *cmd_info[i].command != '\n'; i++)
             if (!strcasecmp(cmd_info[i].command, name))
                 break;
-        if (*cmd_info[i].command == '\n') { /* command does not exist? */
+        if (*cmd_info[i].command == '\n')
+        { /* command does not exist? */
             basic_mud_log("WARNING: load_disabled(): Skipping unknown disabled command - '%s'!", name);
             free(p);
-        } else { /* add new disabled command */
+        }
+        else
+        { /* add new disabled command */
             p->disabled_by = strdup(temp);
             p->command = &cmd_info[i];
             p->next = disabled_first;
@@ -1584,17 +1835,20 @@ void load_disabled() {
 }
 
 /* Save disabled commands */
-void save_disabled() {
+void save_disabled()
+{
     FILE *fp;
     DISABLED_DATA *p;
 
-    if (!disabled_first) {
+    if (!disabled_first)
+    {
         /* delete file if no commands are disabled */
         std::filesystem::remove(DISABLED_FILE);
         return;
     }
 
-    if ((fp = fopen(DISABLED_FILE, "w")) == nullptr) {
+    if ((fp = fopen(DISABLED_FILE, "w")) == nullptr)
+    {
         basic_mud_log("SYSERR: Could not open " DISABLED_FILE " for writing");
         return;
     }
@@ -1606,14 +1860,15 @@ void save_disabled() {
 }
 
 /* free all disabled commands from memory */
-void free_disabled() {
+void free_disabled()
+{
     DISABLED_DATA *p;
 
-    while (disabled_first) {
+    while (disabled_first)
+    {
         p = disabled_first;
         disabled_first = disabled_first->next;
         free(p->disabled_by);
         free(p);
     }
 }
-

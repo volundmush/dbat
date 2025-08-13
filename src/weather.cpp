@@ -1,12 +1,12 @@
 /* ************************************************************************
-*   File: weather.c                                     Part of CircleMUD *
-*  Usage: functions handling time and the weather                         *
-*                                                                         *
-*  All rights reserved.  See license.doc for complete information.        *
-*                                                                         *
-*  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
-*  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
-************************************************************************ */
+ *   File: weather.c                                     Part of CircleMUD *
+ *  Usage: functions handling time and the weather                         *
+ *                                                                         *
+ *  All rights reserved.  See license.doc for complete information.        *
+ *                                                                         *
+ *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
+ *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
+ ************************************************************************ */
 
 #include "dbat/weather.h"
 #include "dbat/send.h"
@@ -21,29 +21,41 @@
 
 static void phase_powerup(Character *ch, int type, int phase);
 
-static void grow_plants() {
+static void grow_plants()
+{
 
     auto sub = objectSubscriptions.all("growingPlants");
 
-    for (auto k : filter_raw(sub)) {
+    for (auto k : filter_raw(sub))
+    {
 
-        if (k->location.getRoomFlag(ROOM_GARDEN1) || k->location.getRoomFlag(ROOM_GARDEN2)) {
-            if (GET_OBJ_VAL(k, VAL_PLANT_WATERLEVEL) < 0 && GET_OBJ_VAL(k, VAL_PLANT_WATERLEVEL) > -10) {
-                if (MOD_OBJ_VAL(k, VAL_PLANT_WATERLEVEL, -1) > -10) {
+        if (k->location.getRoomFlag(ROOM_GARDEN1) || k->location.getRoomFlag(ROOM_GARDEN2))
+        {
+            if (GET_OBJ_VAL(k, VAL_PLANT_WATERLEVEL) < 0 && GET_OBJ_VAL(k, VAL_PLANT_WATERLEVEL) > -10)
+            {
+                if (MOD_OBJ_VAL(k, VAL_PLANT_WATERLEVEL, -1) > -10)
+                {
                     k->location.sendText(fmt::format("{}@y withers a bit.\r\n", k->getShortDescription()));
-                } else {
+                }
+                else
+                {
                     k->location.sendText(fmt::format("{}@y has withered to a dried up dead husk.\r\n", k->getShortDescription()));
                 }
-            } else if (GET_OBJ_VAL(k, VAL_PLANT_WATERLEVEL) >= 0) {
-                
+            }
+            else if (GET_OBJ_VAL(k, VAL_PLANT_WATERLEVEL) >= 0)
+            {
+
                 if (MOD_OBJ_VAL(k, VAL_PLANT_WATERLEVEL, -1) < GET_OBJ_VAL(k, VAL_PLANT_MATGOAL) &&
-                    GET_OBJ_VAL(k, VAL_PLANT_MATURITY) < GET_OBJ_VAL(k, VAL_PLANT_MAXMATURE)) {
-                    
-                    if (MOD_OBJ_VAL(k, VAL_PLANT_SOILQUALITY, 1) >= GET_OBJ_VAL(k, VAL_PLANT_MATGOAL)) {
+                    GET_OBJ_VAL(k, VAL_PLANT_MATURITY) < GET_OBJ_VAL(k, VAL_PLANT_MAXMATURE))
+                {
+
+                    if (MOD_OBJ_VAL(k, VAL_PLANT_SOILQUALITY, 1) >= GET_OBJ_VAL(k, VAL_PLANT_MATGOAL))
+                    {
                         SET_OBJ_VAL(k, VAL_PLANT_SOILQUALITY, 0);
                         MOD_OBJ_VAL(k, VAL_PLANT_MATURITY, 1);
                     }
-                    if (GET_OBJ_VAL(k, VAL_PLANT_MATURITY) >= GET_OBJ_VAL(k, VAL_PLANT_MAXMATURE)) {
+                    if (GET_OBJ_VAL(k, VAL_PLANT_MATURITY) >= GET_OBJ_VAL(k, VAL_PLANT_MAXMATURE))
+                    {
                         k->location.sendText(fmt::format("{}@G is now fully grown!@n\r\n", k->getShortDescription()));
                     }
                 }
@@ -52,8 +64,8 @@ static void grow_plants() {
     }
 }
 
-
-static void weather_change() {
+static void weather_change()
+{
     int diff, change;
     if ((time_info.month >= 9) && (time_info.month <= 16))
         diff = (weather_info.pressure > 985 ? -2 : 2);
@@ -72,171 +84,147 @@ static void weather_change() {
 
     change = 0;
 
-    switch (weather_info.sky) {
-        case SKY_CLOUDLESS:
-            if (weather_info.pressure < 990)
+    switch (weather_info.sky)
+    {
+    case SKY_CLOUDLESS:
+        if (weather_info.pressure < 990)
+            change = 1;
+        else if (weather_info.pressure < 1010)
+            if (dice(1, 4) == 1)
                 change = 1;
-            else if (weather_info.pressure < 1010)
-                if (dice(1, 4) == 1)
-                    change = 1;
-            break;
-        case SKY_CLOUDY:
-            if (weather_info.pressure < 970)
+        break;
+    case SKY_CLOUDY:
+        if (weather_info.pressure < 970)
+            change = 2;
+        else if (weather_info.pressure < 990)
+        {
+            if (dice(1, 4) == 1)
                 change = 2;
-            else if (weather_info.pressure < 990) {
-                if (dice(1, 4) == 1)
-                    change = 2;
-                else
-                    change = 0;
-            } else if (weather_info.pressure > 1030)
-                if (dice(1, 4) == 1)
-                    change = 3;
+            else
+                change = 0;
+        }
+        else if (weather_info.pressure > 1030)
+            if (dice(1, 4) == 1)
+                change = 3;
 
-            break;
-        case SKY_RAINING:
-            if (weather_info.pressure < 970) {
-                if (dice(1, 4) == 1)
-                    change = 4;
-                else
-                    change = 0;
-            } else if (weather_info.pressure > 1030)
+        break;
+    case SKY_RAINING:
+        if (weather_info.pressure < 970)
+        {
+            if (dice(1, 4) == 1)
+                change = 4;
+            else
+                change = 0;
+        }
+        else if (weather_info.pressure > 1030)
+            change = 5;
+        else if (weather_info.pressure > 1010)
+            if (dice(1, 4) == 1)
                 change = 5;
-            else if (weather_info.pressure > 1010)
-                if (dice(1, 4) == 1)
-                    change = 5;
 
-            break;
-        case SKY_LIGHTNING:
-            if (weather_info.pressure > 1010)
+        break;
+    case SKY_LIGHTNING:
+        if (weather_info.pressure > 1010)
+            change = 6;
+        else if (weather_info.pressure > 990)
+            if (dice(1, 4) == 1)
                 change = 6;
-            else if (weather_info.pressure > 990)
-                if (dice(1, 4) == 1)
-                    change = 6;
 
-            break;
-        default:
-            change = 0;
-            weather_info.sky = SKY_CLOUDLESS;
-            break;
+        break;
+    default:
+        change = 0;
+        weather_info.sky = SKY_CLOUDLESS;
+        break;
     }
 
-    switch (change) {
-        case 0:
-            break;
-        case 1:
-            send_to_outdoor("The sky starts to get cloudy.\r\n");
-            weather_info.sky = SKY_CLOUDY;
-            break;
-        case 2:
-            send_to_outdoor("It starts to rain.\r\n");
-            weather_info.sky = SKY_RAINING;
-            break;
-        case 3:
-            send_to_outdoor("The clouds disappear.\r\n");
-            weather_info.sky = SKY_CLOUDLESS;
-            break;
-        case 4:
-            send_to_outdoor("Lightning starts to show in the sky.\r\n");
-            weather_info.sky = SKY_LIGHTNING;
-            break;
-        case 5:
-            send_to_outdoor("The rain stops.\r\n");
-            weather_info.sky = SKY_CLOUDY;
-            break;
-        case 6:
-            send_to_outdoor("The lightning stops.\r\n");
-            weather_info.sky = SKY_RAINING;
-            break;
-        default:
-            break;
+    switch (change)
+    {
+    case 0:
+        break;
+    case 1:
+        send_to_outdoor("The sky starts to get cloudy.\r\n");
+        weather_info.sky = SKY_CLOUDY;
+        break;
+    case 2:
+        send_to_outdoor("It starts to rain.\r\n");
+        weather_info.sky = SKY_RAINING;
+        break;
+    case 3:
+        send_to_outdoor("The clouds disappear.\r\n");
+        weather_info.sky = SKY_CLOUDLESS;
+        break;
+    case 4:
+        send_to_outdoor("Lightning starts to show in the sky.\r\n");
+        weather_info.sky = SKY_LIGHTNING;
+        break;
+    case 5:
+        send_to_outdoor("The rain stops.\r\n");
+        weather_info.sky = SKY_CLOUDY;
+        break;
+    case 6:
+        send_to_outdoor("The lightning stops.\r\n");
+        weather_info.sky = SKY_RAINING;
+        break;
+    default:
+        break;
     }
 }
 
-void oozaru_revert(Character *ch) {
+void oozaru_revert(Character *ch)
+{
     if (!(ch->form == Form::oozaru || ch->form == Form::golden_oozaru || ch->form == Form::lycanthrope || ch->form == Form::alpha_lycanthrope))
         return;
 
     auto &data = ch->transforms[ch->form];
     data.vars["blutz"] = 0.0;
 
-    if(ch->form == Form::oozaru || ch->form == Form::golden_oozaru ) {
+    if (ch->form == Form::oozaru || ch->form == Form::golden_oozaru)
+    {
         act("@CYour body begins to shrink back to its normal form as the power of the Oozaru leaves you. You fall asleep shortly after returning to normal!@n",
             true, ch, nullptr, nullptr, TO_CHAR);
         act("@c$n@C's body begins to shrink and return to normal. Their giant ape features fading back into humanoid features until $e is left normal.@n",
             true, ch, nullptr, nullptr, TO_ROOM);
 
         ch->form = Form::base;
-    } else {
+    }
+    else
+    {
         act("@CYour body begins to shrink back to its lesser form as the power of the moon subsides!@n",
             true, ch, nullptr, nullptr, TO_CHAR);
         act("@c$n@C's body begins to shrink to a lesser form. Their animalistic features fading back and becoming less pronounced.@n",
             true, ch, nullptr, nullptr, TO_ROOM);
-        if(!ch->transforms.contains(Form::lesser_lycanthrope))
+        if (!ch->transforms.contains(Form::lesser_lycanthrope))
             ch->addTransform(Form::lesser_lycanthrope);
         ch->form = Form::lesser_lycanthrope;
     }
-
 }
 
-
 /* This controls the powering up of Hoshi-jin from their Eldritch Star */
-void star_phase(Character *ch, int type) {
+void star_phase(Character *ch, int type)
+{
     struct descriptor_data *d;
 
-    if (ch == nullptr) {
-        for (d = descriptor_list; d; d = d->next) {
-            if (!IS_PLAYING(d)) {
+    if (ch == nullptr)
+    {
+        for (d = descriptor_list; d; d = d->next)
+        {
+            if (!IS_PLAYING(d))
+            {
                 continue;
             }
-            if (IS_NPC(d->character)) {
+            if (IS_NPC(d->character))
+            {
                 continue;
             }
 
-            if (IS_HOSHIJIN(d->character)) {
+            if (IS_HOSHIJIN(d->character))
+            {
                 ch = d->character;
-                switch (type) {
-                    case 0:
-                        if (GET_PHASE(ch) > 0) {
-                            act("@WYour eyes and the glyphs on your skin slowly start to lose their glow. You feel the power received from the @GE@gl@Dd@wri@Dt@gc@Gh @YS@yta@Yr@W drain away from your body. It has apparently entered the @rDeath Phase@W of its cycle...@n",
-                                true, ch, nullptr, nullptr, TO_CHAR);
-                            act("@c$n@W's eyes and the glyphs on $s skin slowly start to lose their glow. You notice that $e seems weaker now for some reason.@n",
-                                true, ch, nullptr, nullptr, TO_ROOM);
-                            phase_powerup(ch, 0, GET_PHASE(ch));
-                        }
-                        break; // Drop Powerup
-                    case 1:
-                        if (GET_PHASE(ch) != 1) {
-                            act("@WYou suddenly feel a @RSURGE@W of power through your body. You feel the @GE@gl@Dd@wri@Dt@gc@Gh @YS@yta@Yr@W come into its @CBirth Phase@W and its power is flowing into your body! Finally your eyes and the glyphs on your skin begin to glow an electric @bb@Bl@Cue@W!@n",
-                                true, ch, nullptr, nullptr, TO_CHAR);
-                            act("@c$n@W suddenly seems to grow stronger for some reason. You notice $s eyes begin to glow an electric @bb@Bl@Cue@W. Suddenly glyphs start to appear all over $s skin and glow with the same light!@n",
-                                true, ch, nullptr, nullptr, TO_ROOM);
-                            phase_powerup(ch, 0, GET_PHASE(ch));
-                            phase_powerup(ch, 1, 1);
-                        }
-                        break; // Powerup Phase 1
-                    case 2:
-                        if (GET_PHASE(ch) != 2) {
-                            act("@WYou suddenly feel a @RSURGE@W of power through your body. You feel the @GE@gl@Dd@wri@Dt@gc@Gh @YS@yta@Yr@W come into its @GLife Phase@W and its power is flowing into your body! Finally your eyes and the glyphs on your skin begin to glow an fiery @Rr@re@Rd@W!@n",
-                                true, ch, nullptr, nullptr, TO_CHAR);
-                            act("@c$n@W suddenly seems to grow stronger for some reason. You notice $s eyes begin to glow a fiery @rR@Re@rd@W. Suddenly glyphs start to appear all over $s skin and glow with the same light!@n",
-                                true, ch, nullptr, nullptr, TO_ROOM);
-                            phase_powerup(ch, 0, GET_PHASE(ch));
-                            phase_powerup(ch, 1, 2);
-                        }
-                        break; // Powerup Phase 2
-                    default:
-                        send_to_imm("Strange Error in star_phase by: %s", GET_NAME(ch));
-                        break; // Error
-                }
-
-            } // End of is HOSHIJIN
-        } // End of descriptor_list for
-        return;
-    } else if (ch && !IS_NPC(ch)) {
-        if (IS_HOSHIJIN(ch)) {
-            switch (type) {
+                switch (type)
+                {
                 case 0:
-                    if (GET_PHASE(ch) > 0) {
+                    if (GET_PHASE(ch) > 0)
+                    {
                         act("@WYour eyes and the glyphs on your skin slowly start to lose their glow. You feel the power received from the @GE@gl@Dd@wri@Dt@gc@Gh @YS@yta@Yr@W drain away from your body. It has apparently entered the @rDeath Phase@W of its cycle...@n",
                             true, ch, nullptr, nullptr, TO_CHAR);
                         act("@c$n@W's eyes and the glyphs on $s skin slowly start to lose their glow. You notice that $e seems weaker now for some reason.@n",
@@ -245,7 +233,8 @@ void star_phase(Character *ch, int type) {
                     }
                     break; // Drop Powerup
                 case 1:
-                    if (GET_PHASE(ch) != 1) {
+                    if (GET_PHASE(ch) != 1)
+                    {
                         act("@WYou suddenly feel a @RSURGE@W of power through your body. You feel the @GE@gl@Dd@wri@Dt@gc@Gh @YS@yta@Yr@W come into its @CBirth Phase@W and its power is flowing into your body! Finally your eyes and the glyphs on your skin begin to glow an electric @bb@Bl@Cue@W!@n",
                             true, ch, nullptr, nullptr, TO_CHAR);
                         act("@c$n@W suddenly seems to grow stronger for some reason. You notice $s eyes begin to glow an electric @bb@Bl@Cue@W. Suddenly glyphs start to appear all over $s skin and glow with the same light!@n",
@@ -255,7 +244,8 @@ void star_phase(Character *ch, int type) {
                     }
                     break; // Powerup Phase 1
                 case 2:
-                    if (GET_PHASE(ch) != 2) {
+                    if (GET_PHASE(ch) != 2)
+                    {
                         act("@WYou suddenly feel a @RSURGE@W of power through your body. You feel the @GE@gl@Dd@wri@Dt@gc@Gh @YS@yta@Yr@W come into its @GLife Phase@W and its power is flowing into your body! Finally your eyes and the glyphs on your skin begin to glow an fiery @Rr@re@Rd@W!@n",
                             true, ch, nullptr, nullptr, TO_CHAR);
                         act("@c$n@W suddenly seems to grow stronger for some reason. You notice $s eyes begin to glow a fiery @rR@Re@rd@W. Suddenly glyphs start to appear all over $s skin and glow with the same light!@n",
@@ -267,10 +257,58 @@ void star_phase(Character *ch, int type) {
                 default:
                     send_to_imm("Strange Error in star_phase by: %s", GET_NAME(ch));
                     break; // Error
+                }
+
+            } // End of is HOSHIJIN
+        } // End of descriptor_list for
+        return;
+    }
+    else if (ch && !IS_NPC(ch))
+    {
+        if (IS_HOSHIJIN(ch))
+        {
+            switch (type)
+            {
+            case 0:
+                if (GET_PHASE(ch) > 0)
+                {
+                    act("@WYour eyes and the glyphs on your skin slowly start to lose their glow. You feel the power received from the @GE@gl@Dd@wri@Dt@gc@Gh @YS@yta@Yr@W drain away from your body. It has apparently entered the @rDeath Phase@W of its cycle...@n",
+                        true, ch, nullptr, nullptr, TO_CHAR);
+                    act("@c$n@W's eyes and the glyphs on $s skin slowly start to lose their glow. You notice that $e seems weaker now for some reason.@n",
+                        true, ch, nullptr, nullptr, TO_ROOM);
+                    phase_powerup(ch, 0, GET_PHASE(ch));
+                }
+                break; // Drop Powerup
+            case 1:
+                if (GET_PHASE(ch) != 1)
+                {
+                    act("@WYou suddenly feel a @RSURGE@W of power through your body. You feel the @GE@gl@Dd@wri@Dt@gc@Gh @YS@yta@Yr@W come into its @CBirth Phase@W and its power is flowing into your body! Finally your eyes and the glyphs on your skin begin to glow an electric @bb@Bl@Cue@W!@n",
+                        true, ch, nullptr, nullptr, TO_CHAR);
+                    act("@c$n@W suddenly seems to grow stronger for some reason. You notice $s eyes begin to glow an electric @bb@Bl@Cue@W. Suddenly glyphs start to appear all over $s skin and glow with the same light!@n",
+                        true, ch, nullptr, nullptr, TO_ROOM);
+                    phase_powerup(ch, 0, GET_PHASE(ch));
+                    phase_powerup(ch, 1, 1);
+                }
+                break; // Powerup Phase 1
+            case 2:
+                if (GET_PHASE(ch) != 2)
+                {
+                    act("@WYou suddenly feel a @RSURGE@W of power through your body. You feel the @GE@gl@Dd@wri@Dt@gc@Gh @YS@yta@Yr@W come into its @GLife Phase@W and its power is flowing into your body! Finally your eyes and the glyphs on your skin begin to glow an fiery @Rr@re@Rd@W!@n",
+                        true, ch, nullptr, nullptr, TO_CHAR);
+                    act("@c$n@W suddenly seems to grow stronger for some reason. You notice $s eyes begin to glow a fiery @rR@Re@rd@W. Suddenly glyphs start to appear all over $s skin and glow with the same light!@n",
+                        true, ch, nullptr, nullptr, TO_ROOM);
+                    phase_powerup(ch, 0, GET_PHASE(ch));
+                    phase_powerup(ch, 1, 2);
+                }
+                break; // Powerup Phase 2
+            default:
+                send_to_imm("Strange Error in star_phase by: %s", GET_NAME(ch));
+                break; // Error
             }
             return;
         } // End of is HOSHIJIN
-        else {
+        else
+        {
             return;
         }
     } // End of ch is/isn't nullptr
@@ -279,32 +317,38 @@ void star_phase(Character *ch, int type) {
 }
 
 /* This handles powering up a Hoshijin or powering them down */
-static void phase_powerup(Character *ch, int type, int phase) {
-    if (!ch) {
+static void phase_powerup(Character *ch, int type, int phase)
+{
+    if (!ch)
+    {
         return;
     }
-    if (IS_NPC(ch)) {
+    if (IS_NPC(ch))
+    {
         return;
     }
 
-    switch (phase) {
-        case 0:
-        case 1:
-        case 2:
-            break;
-        default:
-            send_to_imm("Error: phase_powerup called with GET_PHASE equal to zero by: %s", GET_NAME(ch));
-            return;
+    switch (phase)
+    {
+    case 0:
+    case 1:
+    case 2:
+        break;
+    default:
+        send_to_imm("Error: phase_powerup called with GET_PHASE equal to zero by: %s", GET_NAME(ch));
+        return;
     }
     // Deprecated: This code will remove any lingering AFF_STARPHASE from pre-3.0.
     null_affect(ch, AFF_STARPHASE);
     ch->setBaseStat<int>("starphase", phase);
 }
 
-static void advanceGrowth() {
+static void advanceGrowth()
+{
     struct descriptor_data *d;
     Character *tch;
-    for (d = descriptor_list; d; d = d->next) {
+    for (d = descriptor_list; d; d = d->next)
+    {
         if (!IS_PLAYING(d))
             continue;
         if (d->original)
@@ -316,99 +360,112 @@ static void advanceGrowth() {
     }
 }
 
-static void secondChanged() {
-
+static void secondChanged()
+{
 }
 
-static void minuteChanged() {
-    switch(time_info.minutes) {
-        case 0:
-        case 15:
-        case 30:
-        case 45:
-            check_interval_triggers(MTRIG_QUARTER);
+static void minuteChanged()
+{
+    switch (time_info.minutes)
+    {
+    case 0:
+    case 15:
+    case 30:
+    case 45:
+        check_interval_triggers(MTRIG_QUARTER);
         break;
-
     }
 }
 
-static void hourChanged() {
+static void hourChanged()
+{
     grow_plants();
     weather_change();
     check_time_triggers();
     check_interval_triggers(MTRIG_HOURLY);
     advanceGrowth();
 
-    switch (time_info.hours) {
-        case 4:
-            if (MOON_DATE) {
-                send_to_moon("The full moon disappears.\r\n");
-            } else if (time_info.day == 22) {
-                send_to_moon("The full moon disappears.\r\n");
-            }
-            break;
-        case 5:
-            weather_info.sunlight = SUN_RISE;
-            send_to_outdoor("The sun rises in the east.\r\n");
-            if (time_info.day <= 14) {
-                star_phase(nullptr, 1);
-            } else if (time_info.day <= 21) {
-                star_phase(nullptr, 2);
-            } else {
-                star_phase(nullptr, 0);
-            }
-            break;
-        case 6:
-            weather_info.sunlight = SUN_LIGHT;
-            send_to_outdoor("The day has begun.\r\n");
-            break;
-        case 19:
-            weather_info.sunlight = SUN_SET;
-            send_to_outdoor("The sun slowly disappears in the west.\r\n");
-            break;
-        case 20:
-            weather_info.sunlight = SUN_DARK;
-            send_to_outdoor("The night has begun.\r\n");
-            break;
-        case 21:
-            if (MOON_DATE) {
-                send_to_moon("The full moon has risen.\r\n");
-            }
-            break;
-        default:
-            break;
+    switch (time_info.hours)
+    {
+    case 4:
+        if (MOON_DATE)
+        {
+            send_to_moon("The full moon disappears.\r\n");
+        }
+        else if (time_info.day == 22)
+        {
+            send_to_moon("The full moon disappears.\r\n");
+        }
+        break;
+    case 5:
+        weather_info.sunlight = SUN_RISE;
+        send_to_outdoor("The sun rises in the east.\r\n");
+        if (time_info.day <= 14)
+        {
+            star_phase(nullptr, 1);
+        }
+        else if (time_info.day <= 21)
+        {
+            star_phase(nullptr, 2);
+        }
+        else
+        {
+            star_phase(nullptr, 0);
+        }
+        break;
+    case 6:
+        weather_info.sunlight = SUN_LIGHT;
+        send_to_outdoor("The day has begun.\r\n");
+        break;
+    case 19:
+        weather_info.sunlight = SUN_SET;
+        send_to_outdoor("The sun slowly disappears in the west.\r\n");
+        break;
+    case 20:
+        weather_info.sunlight = SUN_DARK;
+        send_to_outdoor("The night has begun.\r\n");
+        break;
+    case 21:
+        if (MOON_DATE)
+        {
+            send_to_moon("The full moon has risen.\r\n");
+        }
+        break;
+    default:
+        break;
     }
-
-
 }
 
-static void dayChanged() {
-
+static void dayChanged()
+{
 }
 
-static void monthChanged() {
-
+static void monthChanged()
+{
 }
 
-static void yearChanged() {
-
+static void yearChanged()
+{
 }
 
-static void ageAllCharacters(double addedTime) {
-    for(const auto &[id, p] : uniqueCharacters) {
+static void ageAllCharacters(double addedTime)
+{
+    for (const auto &[id, p] : uniqueCharacters)
+    {
         p->ageBy(addedTime);
     }
 }
 
-
-void advanceClock(uint64_t heartPulse, double deltaTime) {
+void advanceClock(uint64_t heartPulse, double deltaTime)
+{
     const auto addedTime = deltaTime * MUD_TIME_ACCELERATION;
     time_info.remainder += addedTime;
 
     const auto addedActualTime = deltaTime;
     era_uptime.remainder += addedActualTime;
 
-    while(time_info.remainder >= 1.0) {
+    while (time_info.remainder >= 1.0)
+    {
         bool secondChangedCheck = false;
         bool minuteChangedCheck = false;
         bool hourChangedCheck = false;
@@ -420,27 +477,32 @@ void advanceClock(uint64_t heartPulse, double deltaTime) {
         time_info.seconds++;
         secondChangedCheck = true;
 
-        if(time_info.seconds >= SECONDS_PER_MINUTE) {
+        if (time_info.seconds >= SECONDS_PER_MINUTE)
+        {
             time_info.seconds -= SECONDS_PER_MINUTE;
             time_info.minutes++;
             minuteChangedCheck = true;
 
-            if (time_info.minutes >= MINUTES_PER_HOUR) {
+            if (time_info.minutes >= MINUTES_PER_HOUR)
+            {
                 time_info.minutes -= MINUTES_PER_HOUR;
                 time_info.hours++;
                 hourChangedCheck = true;
 
-                if (time_info.hours >= HOURS_PER_DAY) {
+                if (time_info.hours >= HOURS_PER_DAY)
+                {
                     time_info.hours -= HOURS_PER_DAY;
                     time_info.day++;
                     dayChangedCheck = true;
 
-                    if (time_info.day >= DAYS_PER_MONTH) {
+                    if (time_info.day >= DAYS_PER_MONTH)
+                    {
                         time_info.day -= DAYS_PER_MONTH;
                         time_info.month++;
                         monthChangedCheck = true;
 
-                        if (time_info.month >= MONTHS_PER_YEAR) {
+                        if (time_info.month >= MONTHS_PER_YEAR)
+                        {
                             time_info.month -= MONTHS_PER_YEAR;
                             time_info.year++;
                             yearChangedCheck = true;
@@ -450,16 +512,22 @@ void advanceClock(uint64_t heartPulse, double deltaTime) {
             }
         }
 
-        if(secondChangedCheck) secondChanged();
-        if(minuteChangedCheck) minuteChanged();
-        if(hourChangedCheck) hourChanged();
-        if(dayChangedCheck) dayChanged();
-        if(monthChangedCheck) monthChanged();
-        if(yearChangedCheck) yearChanged();
-
+        if (secondChangedCheck)
+            secondChanged();
+        if (minuteChangedCheck)
+            minuteChanged();
+        if (hourChangedCheck)
+            hourChanged();
+        if (dayChangedCheck)
+            dayChanged();
+        if (monthChangedCheck)
+            monthChanged();
+        if (yearChangedCheck)
+            yearChanged();
     }
 
-    while(era_uptime.remainder >= 1.0) {
+    while (era_uptime.remainder >= 1.0)
+    {
         bool eraSecondChangedCheck = false;
         bool eraMinuteChangedCheck = false;
         bool eraHourChangedCheck = false;
@@ -471,27 +539,32 @@ void advanceClock(uint64_t heartPulse, double deltaTime) {
         era_uptime.seconds++;
         eraSecondChangedCheck = true;
 
-        if(era_uptime.seconds >= SECONDS_PER_MINUTE) {
+        if (era_uptime.seconds >= SECONDS_PER_MINUTE)
+        {
             era_uptime.seconds -= SECONDS_PER_MINUTE;
             era_uptime.minutes++;
             eraMinuteChangedCheck = true;
 
-            if (era_uptime.minutes >= MINUTES_PER_HOUR) {
+            if (era_uptime.minutes >= MINUTES_PER_HOUR)
+            {
                 era_uptime.minutes -= MINUTES_PER_HOUR;
                 era_uptime.hours++;
                 eraHourChangedCheck = true;
 
-                if (era_uptime.hours >= HOURS_PER_DAY) {
+                if (era_uptime.hours >= HOURS_PER_DAY)
+                {
                     era_uptime.hours -= HOURS_PER_DAY;
                     era_uptime.day++;
                     eraDayChangedCheck = true;
 
-                    if (era_uptime.day >= DAYS_PER_MONTH) {
+                    if (era_uptime.day >= DAYS_PER_MONTH)
+                    {
                         era_uptime.day -= DAYS_PER_MONTH;
                         era_uptime.month++;
                         eraMonthChangedCheck = true;
 
-                        if (era_uptime.month >= MONTHS_PER_YEAR) {
+                        if (era_uptime.month >= MONTHS_PER_YEAR)
+                        {
                             era_uptime.month -= MONTHS_PER_YEAR;
                             era_uptime.year++;
                             eraYearChangedCheck = true;
@@ -502,11 +575,11 @@ void advanceClock(uint64_t heartPulse, double deltaTime) {
         }
     }
 
-    //ageAllCharacters(addedTime);
-
+    // ageAllCharacters(addedTime);
 }
 
-int64_t time_info_data::current() {
+int64_t time_info_data::current()
+{
     int64_t s = 0;
 
     s += year * (int64_t)(SECS_PER_DAY * DAYS_PER_MONTH * MONTHS_PER_YEAR);
@@ -519,7 +592,8 @@ int64_t time_info_data::current() {
     return s;
 }
 
-time_info_data::time_info_data(int64_t timestamp) {
+time_info_data::time_info_data(int64_t timestamp)
+{
     // We have been given a number of seconds since year 0.
     // We must convert this to a year, month, day, hour, minute, second format.
     year = timestamp / (SECS_PER_DAY * DAYS_PER_MONTH * MONTHS_PER_YEAR);
@@ -535,6 +609,7 @@ time_info_data::time_info_data(int64_t timestamp) {
     seconds = timestamp;
 }
 
-int time_data::currentAge() {
+int time_data::currentAge()
+{
     return seconds_aged / SECS_PER_GAME_YEAR;
 }

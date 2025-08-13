@@ -493,8 +493,8 @@ namespace game {
 
     void init_zones() {
         for (auto &[vn, z] : zone_table) {
-            basic_mud_log("Resetting #%d: %s (rooms %d-%d).", vn, z.name.c_str(), z.bot, z.top);
-            reset_zone(vn);
+            basic_mud_log("Resetting #%d: %s.", vn, z.name.c_str());
+            z.reset();
         }
     }
 }

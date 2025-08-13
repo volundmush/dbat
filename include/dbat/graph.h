@@ -6,6 +6,6 @@
 #include "structs.h"
 
 // functions
-extern int find_first_step(Location& src, Location& target);
+extern int find_first_step(Location &src, Location &target);
 
 extern ACMD(do_track);

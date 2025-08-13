@@ -1,13 +1,13 @@
 /**************************************************************************
-*  File: dg_objcmd.c                                                      *
-*  Usage: contains the command_interpreter for objects,                   *
-*         object commands.                                                *
-*                                                                         *
-*                                                                         *
-*  $Author: galion/Mark A. Heilpern/egreen/Welcor $                       *
-*  $Date: 2004/10/11 12:07:00$                                            *
-*  $Revision: 1.0.14 $                                                    *
-**************************************************************************/
+ *  File: dg_objcmd.c                                                      *
+ *  Usage: contains the command_interpreter for objects,                   *
+ *         object commands.                                                *
+ *                                                                         *
+ *                                                                         *
+ *  $Author: galion/Mark A. Heilpern/egreen/Welcor $                       *
+ *  $Date: 2004/10/11 12:07:00$                                            *
+ *  $Revision: 1.0.14 $                                                    *
+ **************************************************************************/
 
 #include "dbat/structs.h"
 #include "dbat/screen.h"
@@ -23,8 +23,8 @@
 /*
  * Local functions
  */
-#define OCMD(name)  \
-   void (name)(Object *obj, char *argument, int cmd, int subcmd)
+#define OCMD(name) \
+    void(name)(Object * obj, char *argument, int cmd, int subcmd)
 
 void obj_log(Object *obj, const char *format, ...);
 
@@ -66,8 +66,8 @@ OCMD(do_oat);
 
 void obj_command_interpreter(Object *obj, char *argument);
 
-
-struct obj_command_info {
+struct obj_command_info
+{
     char *command;
 
     void (*command_pointer)(Object *obj, char *argument, int cmd, int subcmd);
@@ -75,14 +75,13 @@ struct obj_command_info {
     int subcmd;
 };
 
-
 /* do_osend */
 constexpr int SCMD_OSEND = 0;
 constexpr int SCMD_OECHOAROUND = 1;
 
-
 /* attaches object name and vnum to msg and sends it to script_log */
-void obj_log(Object *obj, const char *format, ...) {
+void obj_log(Object *obj, const char *format, ...)
+{
     va_list args;
     char output[MAX_STRING_LENGTH];
 
@@ -94,15 +93,16 @@ void obj_log(Object *obj, const char *format, ...) {
 }
 
 /* returns the real room number that the object or object's carrier is in */
-room_rnum obj_room(Object *obj) {
+room_rnum obj_room(Object *obj)
+{
     if (auto ab = obj->getAbsoluteRoom(); ab)
         return ab->getVnum();
     return NOWHERE;
 }
 
-
 /* returns the real room number, or NOWHERE if not found or invalid */
-room_rnum find_obj_target_room(Object *obj, char *rawroomstr) {
+room_rnum find_obj_target_room(Object *obj, char *rawroomstr)
+{
     int tmp;
     room_rnum location;
     Character *target_mob;
@@ -114,121 +114,146 @@ room_rnum find_obj_target_room(Object *obj, char *rawroomstr) {
     if (!*roomstr)
         return NOWHERE;
 
-    if (isdigit(*roomstr) && !strchr(roomstr, '.')) {
+    if (isdigit(*roomstr) && !strchr(roomstr, '.'))
+    {
         tmp = atoi(roomstr);
         if ((location = real_room(tmp)) == NOWHERE)
             return NOWHERE;
-    } else if ((target_mob = get_char_by_obj(obj, roomstr)))
+    }
+    else if ((target_mob = get_char_by_obj(obj, roomstr)))
         location = IN_ROOM(target_mob);
-    else if ((target_obj = get_obj_by_obj(obj, roomstr))) {
+    else if ((target_obj = get_obj_by_obj(obj, roomstr)))
+    {
         if (IN_ROOM(target_obj) != NOWHERE)
             location = IN_ROOM(target_obj);
         else
             return NOWHERE;
-    } else
+    }
+    else
         return NOWHERE;
 
     /* a room has been found.  Check for permission */
     if (ROOM_FLAGGED(location, ROOM_GODROOM) ||
-        #ifdef ROOM_IMPROOM
+#ifdef ROOM_IMPROOM
         ROOM_FLAGGED(location, ROOM_IMPROOM) ||
-        #endif
+#endif
         ROOM_FLAGGED(location, ROOM_PRIVATE))
         return NOWHERE;
 
     return location;
 }
 
-
-
 /* Object commands */
 
-OCMD(do_oecho) {
+OCMD(do_oecho)
+{
 
     skip_spaces(&argument);
 
     if (!*argument)
         obj_log(obj, "oecho called with no args");
 
-    else if (obj->location) {
+    else if (obj->location)
+    {
         obj->location.sendText(argument);
-    } else
+    }
+    else
         obj_log(obj, "oecho called by object in NOWHERE");
 }
 
-
-OCMD(do_oforce) {
+OCMD(do_oforce)
+{
     int room;
     char arg1[MAX_INPUT_LENGTH], *line;
 
     line = one_argument(argument, arg1);
 
-    if (!*arg1 || !*line) {
+    if (!*arg1 || !*line)
+    {
         obj_log(obj, "oforce called with too few args");
         return;
     }
 
-    if (!strcasecmp(arg1, "all")) {
+    if (!strcasecmp(arg1, "all"))
+    {
         if ((room = obj_room(obj)) == NOWHERE)
             obj_log(obj, "oforce called by object in NOWHERE");
-        else {
+        else
+        {
             auto people = get_room(room)->getPeople();
-            for (auto ch : filter_raw(people)) {
-                if (valid_dg_target(ch, 0)) {
+            for (auto ch : filter_raw(people))
+            {
+                if (valid_dg_target(ch, 0))
+                {
                     command_interpreter(ch, line);
                 }
             }
         }
-    } else {
-        if (auto ch = get_char_by_obj(obj, arg1); ch) {
-            if (valid_dg_target(ch, 0)) {
+    }
+    else
+    {
+        if (auto ch = get_char_by_obj(obj, arg1); ch)
+        {
+            if (valid_dg_target(ch, 0))
+            {
                 command_interpreter(ch, line);
             }
-        } else
+        }
+        else
             obj_log(obj, "oforce: no target found");
     }
 }
 
-OCMD(do_ozoneecho) {
-    int zone;
+OCMD(do_ozoneecho)
+{
     char room_number[MAX_INPUT_LENGTH], *msg;
 
     msg = any_one_arg(argument, room_number);
     skip_spaces(&msg);
 
     if (!*room_number || !*msg)
+    {
         obj_log(obj, "ozoneecho called with too few args");
-
-    else if ((zone = real_zone_by_thing(atoi(room_number))) == NOWHERE)
-        obj_log(obj, "ozoneecho called for nonexistant zone");
-
-    else {
-        zone_table.at(zone).send_to("%s\r\n", msg);
+        return;
     }
+
+    auto r = get_room(atoi(room_number));
+    if (!r)
+    {
+        obj_log(obj, "ozoneecho called for nonexistant zone");
+        return;
+    }
+
+    r->getZone()->send_to("%s\r\n", msg);
 }
 
-OCMD(do_osend) {
+OCMD(do_osend)
+{
     char buf[MAX_INPUT_LENGTH], *msg;
     Character *ch;
 
     msg = any_one_arg(argument, buf);
 
-    if (!*buf) {
+    if (!*buf)
+    {
         obj_log(obj, "osend called with no args");
         return;
     }
 
     skip_spaces(&msg);
 
-    if (!*msg) {
+    if (!*msg)
+    {
         obj_log(obj, "osend called without a message");
         return;
     }
 
-    if ((ch = get_char_by_obj(obj, buf))) {
+    if ((ch = get_char_by_obj(obj, buf)))
+    {
         if (subcmd == SCMD_OSEND)
             sub_write(msg, ch, true, TO_CHAR);
-        else if (subcmd == SCMD_OECHOAROUND) {
+        else if (subcmd == SCMD_OECHOAROUND)
+        {
             char buf[MAX_STRING_LENGTH];
 
             sprintf(buf, "%s", msg);
@@ -236,13 +261,15 @@ OCMD(do_osend) {
             act(buf, true, ch, nullptr, nullptr, TO_ROOM);
             /*sub_write(msg, ch, TRUE, TO_ROOM);*/
         }
-    } else
+    }
+    else
         obj_log(obj, "no target found for osend");
 }
 
 /* prints the message to everyone in the range of numbers */
 /* Thx to Jamie Nelson of 4D for this contribution */
-OCMD(do_orecho) {
+OCMD(do_orecho)
+{
     char start[MAX_INPUT_LENGTH], finish[MAX_INPUT_LENGTH], *msg;
 
     msg = two_arguments(argument, start, finish);
@@ -253,12 +280,11 @@ OCMD(do_orecho) {
         obj_log(obj, "orecho: too few args");
     else
         send_to_range(atoi(start), atoi(finish), "%s\r\n", msg);
-
 }
 
-
 /* set the object's timer value */
-OCMD(do_otimer) {
+OCMD(do_otimer)
+{
     char arg[MAX_INPUT_LENGTH];
 
     one_argument(argument, arg);
@@ -271,11 +297,11 @@ OCMD(do_otimer) {
         obj->setBaseStat("timer", atoi(arg));
 }
 
-
 /* transform into a different object */
 /* note: this shouldn't be used with containers unless both objects */
 /* are containers! */
-OCMD(do_otransform) {
+OCMD(do_otransform)
+{
     char arg[MAX_INPUT_LENGTH];
     Object *o, tmpobj;
     Character *wearer = nullptr;
@@ -290,14 +316,17 @@ OCMD(do_otransform) {
         obj_log(obj, "otransform: missing argument");
     else if (!isdigit(*arg))
         obj_log(obj, "otransform: bad argument");
-    else {
+    else
+    {
         o = read_object(atoi(arg), VIRTUAL);
-        if (o == nullptr) {
+        if (o == nullptr)
+        {
             obj_log(obj, "otransform: bad object vnum");
             return;
         }
 
-        if (auto wby = obj->getWornBy(); wby) {
+        if (auto wby = obj->getWornBy(); wby)
+        {
             pos = obj->getWornOn();
             wearer = wby;
             unequip_char(wearer, pos);
@@ -305,7 +334,8 @@ OCMD(do_otransform) {
 
         /* move new obj info over to old object and delete new obj */
 
-        if (wearer) {
+        if (wearer)
+        {
             equip_char(wearer, obj, pos);
         }
 
@@ -313,13 +343,15 @@ OCMD(do_otransform) {
     }
 }
 
-OCMD(do_dupe) {
+OCMD(do_dupe)
+{
 
     obj->item_flags.set(ITEM_DUPLICATE, true);
 }
 
 /* purge all objects an npcs in room, or specified object or mob */
-OCMD(do_opurge) {
+OCMD(do_opurge)
+{
     char arg[MAX_INPUT_LENGTH];
     Character *ch, *next_ch;
     Object *o, *next_obj;
@@ -327,17 +359,21 @@ OCMD(do_opurge) {
 
     one_argument(argument, arg);
 
-    if (!*arg) {
+    if (!*arg)
+    {
         /* purge all */
-        if ((rm = obj_room(obj)) != NOWHERE) {
+        if ((rm = obj_room(obj)) != NOWHERE)
+        {
             auto room = get_room(rm);
             auto people = room->getPeople();
-            for (auto ch : filter_raw(people)) {
+            for (auto ch : filter_raw(people))
+            {
                 if (IS_NPC(ch))
                     extract_char(ch);
             }
             auto con = room->getObjects();
-            for (auto o : filter_raw(con)) {
+            for (auto o : filter_raw(con))
+            {
                 if (o != obj)
                     extract_obj(o);
             }
@@ -347,19 +383,23 @@ OCMD(do_opurge) {
     } /* no arg */
 
     ch = get_char_by_obj(obj, arg);
-    if (!ch) {
+    if (!ch)
+    {
         o = get_obj_by_obj(obj, arg);
-        if (o) {
+        if (o)
+        {
             if (o == obj)
                 dg_owner_purged = 1;
             extract_obj(o);
-        } else
+        }
+        else
             obj_log(obj, "opurge: bad argument");
 
         return;
     }
 
-    if (!IS_NPC(ch)) {
+    if (!IS_NPC(ch))
+    {
         obj_log(obj, "opurge: purging a PC");
         return;
     }
@@ -367,40 +407,49 @@ OCMD(do_opurge) {
     extract_char(ch);
 }
 
-/* (ogoto) Written by Iovan -- 4/5/10 
+/* (ogoto) Written by Iovan -- 4/5/10
    Allows objects to move into specific rooms
    on their own.                             */
-OCMD(do_ogoto) {
+OCMD(do_ogoto)
+{
     room_rnum target;
     char arg1[MAX_INPUT_LENGTH];
 
     one_argument(argument, arg1);
 
-    if (!*arg1) {
+    if (!*arg1)
+    {
         obj_log(obj, "ogoto called with too few args");
         return;
     }
 
     target = find_obj_target_room(obj, arg1);
 
-    if (target == NOWHERE) {
+    if (target == NOWHERE)
+    {
         obj_log(obj, "ogoto target '%s' is an invalid room", arg1);
-    } else if (IN_ROOM(obj) == NOWHERE) {
+    }
+    else if (IN_ROOM(obj) == NOWHERE)
+    {
         obj_log(obj, "ogoto tried to leave nowhere");
-    } else {
+    }
+    else
+    {
         obj->clearLocation();
         obj->setLocation(target);
     }
 }
 
-OCMD(do_oteleport) {
+OCMD(do_oteleport)
+{
     Character *ch, *next_ch;
     room_rnum target;
     char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 
     two_arguments(argument, arg1, arg2);
 
-    if (!*arg1 || !*arg2) {
+    if (!*arg1 || !*arg2)
+    {
         obj_log(obj, "oteleport called with too few args");
         return;
     }
@@ -410,30 +459,37 @@ OCMD(do_oteleport) {
     if (target == NOWHERE)
         obj_log(obj, "oteleport target is an invalid room");
 
-    else if (!strcasecmp(arg1, "all")) {
+    else if (!strcasecmp(arg1, "all"))
+    {
         auto rm = obj->getAbsoluteLocation();
         auto people = rm.getPeople();
-        for (auto ch : filter_raw(people)) {
+        for (auto ch : filter_raw(people))
+        {
             if (!valid_dg_target(ch, DG_ALLOW_GODS))
                 continue;
             ch->clearLocation();
             ch->setLocation(target);
             enter_wtrigger(ch->getRoom(), ch, -1);
         }
-    } else {
-        if ((ch = get_char_by_obj(obj, arg1))) {
-            if (valid_dg_target(ch, DG_ALLOW_GODS)) {
+    }
+    else
+    {
+        if ((ch = get_char_by_obj(obj, arg1)))
+        {
+            if (valid_dg_target(ch, DG_ALLOW_GODS))
+            {
                 ch->clearLocation();
                 ch->setLocation(target);
                 enter_wtrigger(ch->getRoom(), ch, -1);
             }
-        } else
+        }
+        else
             obj_log(obj, "oteleport: no target found");
     }
 }
 
-
-OCMD(do_dgoload) {
+OCMD(do_dgoload)
+{
     char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
     int number = 0, room;
     Character *mob;
@@ -445,62 +501,79 @@ OCMD(do_dgoload) {
 
     target = two_arguments(argument, arg1, arg2);
 
-    if (!*arg1 || !*arg2 || !is_number(arg2) || ((number = atoi(arg2)) < 0)) {
+    if (!*arg1 || !*arg2 || !is_number(arg2) || ((number = atoi(arg2)) < 0))
+    {
         obj_log(obj, "oload: bad syntax");
         return;
     }
 
-    if ((room = obj_room(obj)) == NOWHERE) {
+    if ((room = obj_room(obj)) == NOWHERE)
+    {
         obj_log(obj, "oload: object in NOWHERE trying to load");
         return;
     }
 
     /* load mob to target room - Jamie Nelson, April 13 2004 */
-    if (is_abbrev(arg1, "mob")) {
+    if (is_abbrev(arg1, "mob"))
+    {
         room_rnum rnum;
-        if (!target || !*target) {
+        if (!target || !*target)
+        {
             rnum = room;
-        } else {
-            if (!isdigit(*target) || (rnum = real_room(atoi(target))) == NOWHERE) {
+        }
+        else
+        {
+            if (!isdigit(*target) || (rnum = real_room(atoi(target))) == NOWHERE)
+            {
                 obj_log(obj, "oload: room target vnum doesn't exist "
-                             "(loading mob vnum %d to room %s)", number, target);
+                             "(loading mob vnum %d to room %s)",
+                        number, target);
                 return;
             }
         }
-        if ((mob = read_mobile(number, VIRTUAL)) == nullptr) {
+        if ((mob = read_mobile(number, VIRTUAL)) == nullptr)
+        {
             obj_log(obj, "oload: bad mob vnum");
             return;
         }
         mob->setLocation(rnum);
 
-        if (SCRIPT(obj)) { /* It _should_ have, but it might be detached. */
+        if (SCRIPT(obj))
+        { /* It _should_ have, but it might be detached. */
             obj->setVariable("lastloaded", mob->getUID(true));
         }
 
         load_mtrigger(mob);
-    } else if (is_abbrev(arg1, "obj")) {
-        if ((object = read_object(number, VIRTUAL)) == nullptr) {
+    }
+    else if (is_abbrev(arg1, "obj"))
+    {
+        if ((object = read_object(number, VIRTUAL)) == nullptr)
+        {
             obj_log(obj, "oload: bad object vnum");
             return;
         }
 
-        if (SCRIPT(obj)) { /* It _should_ have, but it might be detached. */
+        if (SCRIPT(obj))
+        { /* It _should_ have, but it might be detached. */
             obj->setVariable("lastloaded", object->getUID(true));
         }
 
         /* special handling to make objects able to load on a person/in a container/worn etc. */
-        if (!target || !*target) {
+        if (!target || !*target)
+        {
             object->setLocation(room);
             load_otrigger(object);
             return;
         }
         two_arguments(target, arg1, arg2); /* recycling ... */
         tch = get_char_near_obj(obj, arg1);
-        if (tch) {
+        if (tch)
+        {
             if (arg2 && *arg2 &&
                 (pos = find_eq_pos_script(arg2)) >= 0 &&
                 !GET_EQ(tch, pos) &&
-                can_wear_on_pos(object, pos)) {
+                can_wear_on_pos(object, pos))
+            {
                 equip_char(tch, object, pos);
                 load_otrigger(object);
                 return;
@@ -510,7 +583,8 @@ OCMD(do_dgoload) {
             return;
         }
         cnt = get_obj_near_obj(obj, arg1);
-        if (cnt && GET_OBJ_TYPE(cnt) == ITEM_CONTAINER) {
+        if (cnt && GET_OBJ_TYPE(cnt) == ITEM_CONTAINER)
+        {
             cnt->addToInventory(object);
             load_otrigger(object);
             return;
@@ -519,12 +593,13 @@ OCMD(do_dgoload) {
         object->setLocation(room);
         load_otrigger(object);
         return;
-    } else
+    }
+    else
         obj_log(obj, "oload: bad type");
-
 }
 
-OCMD(do_odamage) {
+OCMD(do_odamage)
+{
     char name[MAX_INPUT_LENGTH], amount[MAX_INPUT_LENGTH];
     int dam = 0;
     Character *ch;
@@ -532,7 +607,8 @@ OCMD(do_odamage) {
     two_arguments(argument, name, amount);
 
     /* who cares if it's a number ? if not it'll just be 0 */
-    if (!*name || !*amount) {
+    if (!*name || !*amount)
+    {
         obj_log(obj, "odamage: bad syntax");
         return;
     }
@@ -540,73 +616,79 @@ OCMD(do_odamage) {
     dam = atoi(amount);
     ch = get_char_by_obj(obj, name);
 
-    if (!ch) {
+    if (!ch)
+    {
         obj_log(obj, "odamage: target not found");
         return;
     }
     script_damage(ch, dam);
 }
 
-
-OCMD(do_oasound) {
+OCMD(do_oasound)
+{
     room_rnum room;
 
     skip_spaces(&argument);
 
-    if (!*argument) {
+    if (!*argument)
+    {
         obj_log(obj, "oasound called with no args");
         return;
     }
 
-    if ((room = obj_room(obj)) == NOWHERE) {
+    if ((room = obj_room(obj)) == NOWHERE)
+    {
         obj_log(obj, "oasound called by object in NOWHERE");
         return;
     }
 
     auto r = get_room(room);
-    for (auto &[door, ex] : r->getDirections()) {
+    for (auto &[door, ex] : r->getDirections())
+    {
         ex.sendText(argument);
     }
 }
 
-
-OCMD(do_odoor) {
+OCMD(do_odoor)
+{
     char target[MAX_INPUT_LENGTH], direction[MAX_INPUT_LENGTH];
     char field[MAX_INPUT_LENGTH], *value;
     Room *rm;
     int dir, fd, to_room;
 
     const char *door_field[] = {
-            "purge",
-            "description",
-            "flags",
-            "key",
-            "name",
-            "room",
-            "\n"
-    };
-
+        "purge",
+        "description",
+        "flags",
+        "key",
+        "name",
+        "room",
+        "\n"};
 
     argument = two_arguments(argument, target, direction);
     value = one_argument(argument, field);
     skip_spaces(&value);
 
-    if (!*target || !*direction || !*field) {
+    if (!*target || !*direction || !*field)
+    {
         obj_log(obj, "odoor called with too few args");
         return;
     }
 
-    if ((rm = get_room(target)) == nullptr) {
+    if ((rm = get_room(target)) == nullptr)
+    {
         obj_log(obj, "odoor: invalid target");
         return;
     }
 
-    if ((dir = search_block(direction, dirs, false)) == -1) {
+    if ((dir = search_block(direction, dirs, false)) == -1)
+    {
         obj_log(obj, "odoor: invalid direction");
         return;
     }
 
-    if ((fd = search_block(field, door_field, false)) == -1) {
+    if ((fd = search_block(field, door_field, false)) == -1)
+    {
         obj_log(obj, "odoor: invalid field");
         return;
     }
@@ -614,47 +696,54 @@ OCMD(do_odoor) {
     auto newexit = rm->getDirection(cdir);
 
     /* purge exit */
-    if (fd == 0) {
-        if (newexit) {
+    if (fd == 0)
+    {
+        if (newexit)
+        {
             rm->deleteExit(cdir);
         }
-    } else {
-        if (!newexit) {
+    }
+    else
+    {
+        if (!newexit)
+        {
             newexit.emplace();
             newexit->dir = cdir;
         }
 
-        switch (fd) {
-            case 1:  /* description */
-                newexit->general_description = std::string(value) + "\r\n";
-                break;
-            case 2:  /* flags       */
-                newexit->exit_info = (int16_t) asciiflag_conv(value);
-                break;
-            case 3:  /* key         */
-                newexit->key = atoi(value);
-                break;
-            case 4:  /* name        */
-                newexit->keyword = value;
-                break;
-            case 5:  /* room        */
-                if ((to_room = real_room(atoi(value))) != NOWHERE)
-                    newexit->unit = get_room(to_room);
-                else
-                    obj_log(obj, "odoor: invalid door target");
-                break;
+        switch (fd)
+        {
+        case 1: /* description */
+            newexit->general_description = std::string(value) + "\r\n";
+            break;
+        case 2: /* flags       */
+            newexit->exit_info = (int16_t)asciiflag_conv(value);
+            break;
+        case 3: /* key         */
+            newexit->key = atoi(value);
+            break;
+        case 4: /* name        */
+            newexit->keyword = value;
+            break;
+        case 5: /* room        */
+            if ((to_room = real_room(atoi(value))) != NOWHERE)
+                newexit->unit = get_room(to_room);
+            else
+                obj_log(obj, "odoor: invalid door target");
+            break;
         }
         rm->replaceExit(*newexit);
     }
 }
 
-
-OCMD(do_osetval) {
+OCMD(do_osetval)
+{
     obj_log(obj, "osetval: this command is disabled");
 }
 
 /* submitted by PurpleOnyx - tkhasi@shadowglen.com*/
-OCMD(do_oat) {
+OCMD(do_oat)
+{
     room_rnum loc = NOWHERE;
     Character *ch;
     Object *object;
@@ -662,14 +751,16 @@ OCMD(do_oat) {
 
     command = any_one_arg(argument, arg);
 
-    if (!*arg) {
+    if (!*arg)
+    {
         obj_log(obj, "oat called with no args");
         return;
     }
 
     skip_spaces(&command);
 
-    if (!*command) {
+    if (!*command)
+    {
         obj_log(obj, "oat called without a command");
         return;
     }
@@ -679,7 +770,8 @@ OCMD(do_oat) {
     else if ((ch = get_char_by_obj(obj, arg)))
         loc = IN_ROOM(ch);
 
-    if (loc == NOWHERE) {
+    if (loc == NOWHERE)
+    {
         obj_log(obj, "oat: location not found (%s)", arg);
         return;
     }
@@ -695,35 +787,35 @@ OCMD(do_oat) {
 }
 
 const struct obj_command_info obj_cmd_info[] = {
-        {"RESERVED",     nullptr,       0},/* this must be first -- for specprocs */
+    {"RESERVED", nullptr, 0}, /* this must be first -- for specprocs */
 
-        {"oasound ",     do_oasound,    0},
-        {"oat ",         do_oat,        0},
-        {"odoor ",       do_odoor,      0},
-        {"odupe ",       do_dupe,       0},
-        {"odamage ",     do_odamage,    0},
-        {"oecho ",       do_oecho,      0},
-        {"oechoaround ", do_osend, SCMD_OECHOAROUND},
-        {"oforce ",      do_oforce,     0},
-        {"ogoto ",       do_ogoto,      0},
-        {"oload ",       do_dgoload,    0},
-        {"opurge ",      do_opurge,     0},
-        {"orecho ",      do_orecho,     0},
-        {"osend ",       do_osend, SCMD_OSEND},
-        {"osetval ",     do_osetval,    0},
-        {"oteleport ",   do_oteleport,  0},
-        {"otimer ",      do_otimer,     0},
-        {"otransform ",  do_otransform, 0},
-        {"ozoneecho ",   do_ozoneecho,  0}, /* fix by Rumble */
+    {"oasound ", do_oasound, 0},
+    {"oat ", do_oat, 0},
+    {"odoor ", do_odoor, 0},
+    {"odupe ", do_dupe, 0},
+    {"odamage ", do_odamage, 0},
+    {"oecho ", do_oecho, 0},
+    {"oechoaround ", do_osend, SCMD_OECHOAROUND},
+    {"oforce ", do_oforce, 0},
+    {"ogoto ", do_ogoto, 0},
+    {"oload ", do_dgoload, 0},
+    {"opurge ", do_opurge, 0},
+    {"orecho ", do_orecho, 0},
+    {"osend ", do_osend, SCMD_OSEND},
+    {"osetval ", do_osetval, 0},
+    {"oteleport ", do_oteleport, 0},
+    {"otimer ", do_otimer, 0},
+    {"otransform ", do_otransform, 0},
+    {"ozoneecho ", do_ozoneecho, 0}, /* fix by Rumble */
 
-        {"\n",           nullptr,       0}        /* this must be last */
+    {"\n", nullptr, 0} /* this must be last */
 };
-
 
 /*
  *  This is the command interpreter used by objects, called by script_driver.
  */
-void obj_command_interpreter(Object *obj, char *argument) {
+void obj_command_interpreter(Object *obj, char *argument)
+{
     int cmd, length;
     char *line, arg[MAX_INPUT_LENGTH];
 
@@ -735,7 +827,6 @@ void obj_command_interpreter(Object *obj, char *argument) {
 
     line = any_one_arg(argument, arg);
 
-
     /* find the command */
     for (length = strlen(arg), cmd = 0;
          *obj_cmd_info[cmd].command != '\n'; cmd++)
@@ -745,8 +836,7 @@ void obj_command_interpreter(Object *obj, char *argument) {
     if (*obj_cmd_info[cmd].command == '\n')
         obj_log(obj, "Unknown object cmd: '%s'", argument);
     else
-        ((*obj_cmd_info[cmd].command_pointer)
-                (obj, line, cmd, obj_cmd_info[cmd].subcmd));
+        ((*obj_cmd_info[cmd].command_pointer)(obj, line, cmd, obj_cmd_info[cmd].subcmd));
 }
 
 /*
@@ -779,31 +869,31 @@ if(%prt% == 20)
         eval rrt 20%rrt%
     end
 elseif(%prt% == 21)
-	if(%rrt <= 99)
-		eval rrt 210%random.99%
-	else
-		eval rrt 21%rrt%
-	end
+    if(%rrt <= 99)
+        eval rrt 210%random.99%
+    else
+        eval rrt 21%rrt%
+    end
 elseif(%prt% == 24)
-	if(%rrt <= 99)
-		eval rrt 240%random.99%
-	else
-		eval rrt 21%rrt%
-	end
+    if(%rrt <= 99)
+        eval rrt 240%random.99%
+    else
+        eval rrt 21%rrt%
+    end
 elseif(%prt% == 30)
-	if(%rrt <= 99)
-		eval rrt 300%random.99%
-	else
-		eval rrt 21%rrt%
-	end
+    if(%rrt <= 99)
+        eval rrt 300%random.99%
+    else
+        eval rrt 21%rrt%
+    end
 elseif(%prt% == 29)
-	if(%rrt <= 99)
-		eval rrt 290%random.99%
-	else
-		eval rrt 29%rrt%
-	end
+    if(%rrt <= 99)
+        eval rrt 290%random.99%
+    else
+        eval rrt 29%rrt%
+    end
 else
-	halt
+    halt
 end
 
 %echo% A bright light begins to cover the ship.

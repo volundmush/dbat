@@ -64,6 +64,16 @@
 #define TOROOM(room, dir) (get_room(room)->dir_option[dir] ? \
 get_room(room)->dir_option[dir]->to_room : NOWHERE)
 
+static std::unordered_map<zone_vnum, std::tuple<vnum, vnum>> zone_ranges;
+
+static std::unordered_map<zone_vnum, std::vector<reset_com>> oldResetCommands;
+
+/* real zone of room/mobile/object/shop given */
+zone_vnum zone_for_vnum(vnum vznum) {
+    for(auto &z : zone_ranges) if(vznum >= std::get<0>(z.second) && vznum <= std::get<1>(z.second)) return z.first;
+    return NOWHERE;
+}
+
 constexpr int DB_BOOT_WLD = 0;
 constexpr int DB_BOOT_MOB = 1;
 constexpr int DB_BOOT_OBJ = 2;
@@ -504,8 +514,6 @@ static void boot_the_guilds(FILE *gm_f, char *filename, int rec_count) {
             free(buf);        /* Plug memory leak! */
             top_guild = temp;
             auto &g = guild_index[temp];
-            auto &z = zone_table[real_zone_by_thing(temp)];
-            z.guilds.insert(temp);
 
             GM_NUM(top_guild) = temp;
 
@@ -593,8 +601,6 @@ static void boot_the_shops(FILE *shop_f, char *filename, int rec_count) {
             auto &sh = shop_index[temp];
             free(buf);        /* Plug memory leak! */
             sh.vnum = temp;
-            auto &z = zone_table.at(real_zone_by_thing(sh.vnum));
-            z.shops.insert(sh.vnum);
             top_shop = temp;
             while(true) {
                 read_line(shop_f, "%d", &shop_temp);
@@ -944,7 +950,7 @@ static void parse_room(FILE *fl, room_vnum virtual_nr) {
     /* This really had better fit or there are other problems. */
     snprintf(buf2, sizeof(buf2), "room #%d", virtual_nr);
 
-    auto zone = real_zone_by_thing(virtual_nr);
+    auto zone = zone_for_vnum(virtual_nr);
     if (zone == NOWHERE) {
         basic_mud_log("SYSERR: Room #%d is outside any zone.", virtual_nr);
         exit(1);
@@ -1350,8 +1356,6 @@ static int parse_mobile_from_file(FILE *mob_f, struct CharacterPrototype *ch, vn
     char line[READ_SIZE], *tmpptr, letter;
     char f1[128], f2[128], f3[128], f4[128], f5[128], f6[128];
     char f7[128], f8[128], buf2[128];
-    auto &z = zone_table[real_zone_by_thing(nr)];
-    z.mobiles.insert(nr);
     ch->vn = nr;
 
     /*
@@ -1636,8 +1640,6 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
         basic_mud_log("SYSERR: Null obj name or format error at or near %s", buf2);
         exit(1);
     }
-    auto &z = zone_table[real_zone_by_thing(nr)];
-    z.objects.insert(nr);
     tmpptr = o.short_description = fread_string(obj_f, buf2);
     if (tmpptr && *tmpptr)
         if (!strcasecmp(fname(tmpptr), "a") || !strcasecmp(fname(tmpptr), "an") ||
@@ -1903,6 +1905,8 @@ static int count_hash_records(FILE *fl) {
     return (count);
 }
 
+
+
 /* load the zone table and command tables */
 static void load_zones(FILE *fl, char *zonename) {
     int cmd_no = 0, num_of_cmds = 0, line_num = 0, tmp = 0, error = 0, arg_num = 0, version = 1;
@@ -1943,6 +1947,8 @@ static void load_zones(FILE *fl, char *zonename) {
         *ptr = '\0';
     z.name = buf;
 
+    vnum bot, top;
+
     line_num += get_line(fl, buf);
     bitvector_t zone_flags[4];
     if (version >= 2) {
@@ -1951,9 +1957,9 @@ static void load_zones(FILE *fl, char *zonename) {
         char zbuf2[MAX_STRING_LENGTH];
         char zbuf3[MAX_STRING_LENGTH];
         char zbuf4[MAX_STRING_LENGTH];
-
-        if (sscanf(buf, " %d %d %d %d %s %s %s %s %d %d", &z.bot, &z.top, &z.lifespan,
-                   &z.reset_mode, zbuf1, zbuf2, zbuf3, zbuf4, &z.min_level, &z.max_level) != 10) {
+        int min_level, max_level;
+        if (sscanf(buf, " %d %d %d %d %s %s %s %s %d %d", &bot, &top, &z.lifespan,
+                   &z.reset_mode, zbuf1, zbuf2, zbuf3, zbuf4, &min_level, &max_level) != 10) {
             basic_mud_log("SYSERR: Format error in 10-constant line of %s", zname);
             exit(1);
         }
@@ -1963,7 +1969,7 @@ static void load_zones(FILE *fl, char *zonename) {
         zone_flags[2] = asciiflag_conv(zbuf3);
         zone_flags[3] = asciiflag_conv(zbuf4);
 
-    } else if (sscanf(buf, " %d %d %d %d ", &z.bot, &z.top, &z.lifespan, &z.reset_mode) != 4) {
+    } else if (sscanf(buf, " %d %d %d %d ", &bot, &top, &z.lifespan, &z.reset_mode) != 4) {
         /*
      * This may be due to the fact that the zone has no builder.  So, we just attempt
      * to fix this by copying the previous 2 last reads into this variable and the
@@ -1971,7 +1977,7 @@ static void load_zones(FILE *fl, char *zonename) {
      */
         basic_mud_log("SYSERR: Format error in numeric constant line of %s, attempting to fix.", zname);
         char* zname = nullptr;
-        if (sscanf(zname, " %d %d %d %d ", &z.bot, &z.top, &z.lifespan, &z.reset_mode) != 4) {
+        if (sscanf(zname, " %d %d %d %d ", &bot, &top, &z.lifespan, &z.reset_mode) != 4) {
             basic_mud_log("SYSERR: Could not fix previous error, aborting game.");
             exit(1);
         } else {
@@ -1980,12 +1986,12 @@ static void load_zones(FILE *fl, char *zonename) {
             zone_fix = true;
         }
     }
-    if (z.bot > z.top) {
-        basic_mud_log("SYSERR: Zone %d bottom (%d) > top (%d).", z.number, z.bot, z.top);
-        exit(1);
-    }
+
+    auto &zr = zone_ranges[v] = {bot, top};
 
     for(auto i = 0; i < 128; i++) if(IS_SET_AR(zone_flags, i)) z.zone_flags.set(i);
+
+    auto &res = oldResetCommands[v];
 
     for (auto c = 0;true;c++) {
         get_line(fl, buf);
@@ -1995,7 +2001,7 @@ static void load_zones(FILE *fl, char *zonename) {
             break;
         }
 
-        auto &zc = z.cmd.emplace_back();
+        auto &zc = res.emplace_back();
         zc.command = buf[0];
 
         if(zc.command == 'V') { /* a string-arg command */
@@ -2025,6 +2031,7 @@ static void load_zones(FILE *fl, char *zonename) {
         }
         zc.line = c;
     }
+
 }
 
 static void discrete_load(FILE *fl, int mode, char *filename) {
@@ -3069,6 +3076,132 @@ static void link_exits() {
     }
 }
 
+struct ZoneHierarchy {
+    std::string name;
+    std::unordered_set<zone_vnum> children;
+};
+
+static const std::vector<ZoneHierarchy> zonesToLink = {
+    {"Earth", {2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 58, 67, 77, 130, 131, 134, 159, 162, 164, 195, 224}},
+    {"Vegeta", {22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33}},
+    {"Zenith", {34, 35, 196, 215}},
+    {"Majinton", {36, 37}},
+    {"Frigid", {40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 170}},
+    {"Namek", {59, 96, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 128, 132, 133, 144, 154, 260}},
+    {"Afterlife", {60, 61, 62, 63, 64, 65, 66, 68, 69, 70, 71, 72, 73, 74, 75, 217}},
+    {"Kanassa", {76, 149, 150, 151, 152, 153, 156}},
+    {"Cerria", {78, 79, 174, 175, 176}},
+    {"Konack", {80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 92, 93, 97, 98, 99, 127, 192, 193, 194}},
+    {"Aether", {120, 121, 122, 123, 124, 125, 155}},
+    {"Neo Nirvana", {135, 136, 137, 138, 139, 145, 146, 147, 148}},
+    {"Arlia", {160, 161, 165, 166, 167, 168, 169}},
+    {"Space", {200, 201, 202, 203, 204, 206, 207, 208, 205, 163, 171, 172, 173, 178, 212, 256}},
+    {"Yardrat", {140, 141, 142, 143}},
+};
+
+static void link_zones() {
+    int lastZoneID = 0;
+    for (const auto& zt : zonesToLink) {
+        auto newid = getNextID(lastZoneID, zone_table);
+        // I normally don't use the [] operator but in this case, I -want- it to get-or-create...
+        auto &z = zone_table[newid];
+        z.number = newid;
+        z.name = zt.name;
+        for(auto cvn : zt.children) {
+            if(auto zf = zone_table.find(cvn); zf != zone_table.end()) {
+                zf->second.parent = newid;
+                z.children.insert(cvn);
+            } else {
+                basic_mud_log("Warning: zone %d listed as child of %s but does not exist.", cvn, zt.name.c_str());
+            }
+        }
+    }
+}
+
+static void convert_reset_commands() {
+    for (const auto& [zone, commands] : oldResetCommands) {
+        for (const auto& cmd : commands) {
+            // Convert each command to the new format...
+            Room* r = nullptr;
+            switch(cmd.command) {
+                case 'M':
+                case 'O':
+                case 'T':
+                case 'V':
+                    r = get_room(cmd.arg3);
+                    break;
+                case 'D':
+                case 'R':
+                    r = get_room(cmd.arg1);
+                    break;
+            }
+
+            if(!r) continue;
+
+            auto &c = r->resetCommands.emplace_back();
+            c.if_flag = cmd.if_flag;
+
+            switch(cmd.command) {
+                case 'M':
+                    c.type = ResetCommandType::MOB;
+                    c.target = cmd.arg1;
+                    c.max = cmd.arg2;
+                    c.max_location = cmd.arg4;
+                    c.chance = 100 - cmd.arg5;
+                    break;
+                case 'G':
+                    c.type = ResetCommandType::GIVE;
+                    c.target = cmd.arg1;
+                    c.max = cmd.arg2;
+                    c.chance = 100 - cmd.arg5;
+                    break;
+                case 'O':
+                    c.type = ResetCommandType::OBJ;
+                    c.target = cmd.arg1;
+                    c.max = cmd.arg2;
+                    c.max_location = cmd.arg4;
+                    c.chance = 100 - cmd.arg5;
+                    break;
+                case 'E':
+                    c.type = ResetCommandType::EQUIP;
+                    c.target = cmd.arg1;
+                    c.max = cmd.arg2;
+                    c.ex = cmd.arg3;
+                    c.chance = 100 - cmd.arg5;
+                    break;
+                case 'P':
+                    c.type = ResetCommandType::PUT;
+                    c.target = cmd.arg1;
+                    c.ex = cmd.arg3;
+                    c.max = cmd.arg2;
+                    c.chance = 100 - cmd.arg5;
+                    break;
+                case 'R':
+                    c.type = ResetCommandType::REMOVE;
+                    c.target = cmd.arg1;
+                    break;
+                case 'D':
+                    c.type = ResetCommandType::DOOR;
+                    c.target = cmd.arg2;
+                    c.ex = cmd.arg3;
+                    break;
+                case 'T':
+                    c.type = ResetCommandType::TRIGGER;
+                    c.target = cmd.arg2;
+                    c.ex = cmd.arg1;
+                    break;
+                case 'V':
+                    c.type = ResetCommandType::VARIABLE;
+                    c.ex = cmd.arg1;
+                    c.key = cmd.sarg1;
+                    c.value = cmd.sarg2;
+                    break;
+            }
+
+        }
+    }
+}
+
 void boot_db_world_legacy() {
 
     basic_mud_log("Loading stat handlers...");
@@ -3078,6 +3211,9 @@ void boot_db_world_legacy() {
     basic_mud_log("Loading zone table.");
     index_boot(DB_BOOT_ZON);
 
+    // Generating new zones and linking parents/children...
+    link_zones();
+
     basic_mud_log("Loading triggers and generating index.");
     index_boot(DB_BOOT_TRG);
 
@@ -3085,6 +3221,8 @@ void boot_db_world_legacy() {
     index_boot(DB_BOOT_WLD);
 
     link_exits();
+
+    convert_reset_commands();
 
     basic_mud_log("Checking start rooms.");
     check_start_rooms();

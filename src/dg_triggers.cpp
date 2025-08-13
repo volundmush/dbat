@@ -1,17 +1,17 @@
 /**************************************************************************
-*  File: dg_triggers.c                                                    *
-*                                                                         *
-*  Usage: contains all the trigger functions for scripts.                 *
-*                                                                         *
-*  All rights reserved.  See license.doc for complete information.        *
-*                                                                         *
-*  Death's Gate MUD is based on CircleMUD, Copyright (C) 1993, 94.        *
-*  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
-*                                                                         *
-*  $Author: galion/Mark A. Heilpern/egreen/Welcor $                       *
-*  $Date: 2004/10/11 12:07:00$                                            *
-*  $Revision: 1.0.14 $                                                    *
-**************************************************************************/
+ *  File: dg_triggers.c                                                    *
+ *                                                                         *
+ *  Usage: contains all the trigger functions for scripts.                 *
+ *                                                                         *
+ *  All rights reserved.  See license.doc for complete information.        *
+ *                                                                         *
+ *  Death's Gate MUD is based on CircleMUD, Copyright (C) 1993, 94.        *
+ *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
+ *                                                                         *
+ *  $Author: galion/Mark A. Heilpern/egreen/Welcor $                       *
+ *  $Date: 2004/10/11 12:07:00$                                            *
+ *  $Revision: 1.0.14 $                                                    *
+ **************************************************************************/
 
 #include "dbat/structs.h"
 #include "dbat/dg_scripts.h"
@@ -31,17 +31,18 @@
  *  General functions used by several triggers
  */
 
-
 /*
  * Copy first phrase into first_arg, returns rest of string
  */
-char *one_phrase(char *arg, char *first_arg) {
+char *one_phrase(char *arg, char *first_arg)
+{
     skip_spaces(&arg);
 
     if (!*arg)
         *first_arg = '\0';
 
-    else if (*arg == '"') {
+    else if (*arg == '"')
+    {
         char *p, c;
 
         p = matching_quote(arg);
@@ -52,7 +53,9 @@ char *one_phrase(char *arg, char *first_arg) {
             return p;
         else
             return p + 1;
-    } else {
+    }
+    else
+    {
         char *s, *p;
 
         s = first_arg;
@@ -68,11 +71,12 @@ char *one_phrase(char *arg, char *first_arg) {
     return arg;
 }
 
-
-int is_substring(char *sub, char *string) {
+int is_substring(char *sub, char *string)
+{
     char *s;
 
-    if ((s = str_str(string, sub))) {
+    if ((s = str_str(string, sub)))
+    {
         int len = strlen(string);
         int sublen = strlen(sub);
 
@@ -88,16 +92,17 @@ int is_substring(char *sub, char *string) {
     return 0;
 }
 
-
 /*
  * return 1 if str contains a word or phrase from wordlist.
  * phrases are in double quotes (").
  * if wrdlist is nullptr, then return 1, if str is nullptr, return 0.
  */
-int word_check(char *str, char *wordlist) {
+int word_check(char *str, char *wordlist)
+{
     char words[MAX_INPUT_LENGTH], phrase[MAX_INPUT_LENGTH], *s;
 
-    if (*wordlist == '*') return 1;
+    if (*wordlist == '*')
+        return 1;
 
     strcpy(words, wordlist);
 
@@ -108,12 +113,12 @@ int word_check(char *str, char *wordlist) {
     return 0;
 }
 
-
 /*
  *  mob triggers
  */
 
-void random_mtrigger(Character *ch) {
+void random_mtrigger(Character *ch)
+{
 
     /*
      * This trigger is only called if a char is in the zone without nohassle.
@@ -123,24 +128,29 @@ void random_mtrigger(Character *ch) {
         return;
 
     std::vector<std::weak_ptr<DgScript>> scripts = ch->getScripts();
-    for (const auto& t : filter_shared(scripts)) {
+    for (const auto &t : filter_shared(scripts))
+    {
         if (TRIGGER_CHECK(t, MTRIG_RANDOM) &&
-            (rand_number(1, 100) <= GET_TRIG_NARG(t))) {
+            (rand_number(1, 100) <= GET_TRIG_NARG(t)))
+        {
             t->execute();
             break;
         }
     }
 }
 
-void bribe_mtrigger(Character *ch, Character *actor, int amount) {
+void bribe_mtrigger(Character *ch, Character *actor, int amount)
+{
     char buf[MAX_INPUT_LENGTH];
 
     if (!SCRIPT_CHECK(ch, MTRIG_BRIBE) || AFF_FLAGGED(ch, AFF_CHARM))
         return;
 
     auto scripts = ch->getScripts();
-    for (const auto& t : filter_shared(scripts)) {
-        if (TRIGGER_CHECK(t, MTRIG_BRIBE) && (amount >= GET_TRIG_NARG(t))) {
+    for (const auto &t : filter_shared(scripts))
+    {
+        if (TRIGGER_CHECK(t, MTRIG_BRIBE) && (amount >= GET_TRIG_NARG(t)))
+        {
             snprintf(buf, sizeof(buf), "%d", amount);
             t->setVariable("amount", buf);
             t->setVariable("actor", actor);
@@ -150,7 +160,8 @@ void bribe_mtrigger(Character *ch, Character *actor, int amount) {
     }
 }
 
-void greet_memory_mtrigger(Character *actor) {
+void greet_memory_mtrigger(Character *actor)
+{
     struct script_memory *mem;
     char buf[MAX_INPUT_LENGTH];
     int command_performed = 0;
@@ -159,26 +170,33 @@ void greet_memory_mtrigger(Character *actor) {
         return;
 
     auto people = actor->location.getPeople();
-    for (auto ch : filter_raw(people)) {
+    for (auto ch : filter_raw(people))
+    {
         if (!SCRIPT_MEM(ch) || !AWAKE(ch) || FIGHTING(ch) || (ch == actor) ||
             AFF_FLAGGED(ch, AFF_CHARM))
             continue;
         /* find memory line with command only */
-        for (mem = SCRIPT_MEM(ch); mem && SCRIPT_MEM(ch); mem = mem->next) {
-            if (((actor)->id) != mem->id) continue;
-            if (mem->cmd) {
+        for (mem = SCRIPT_MEM(ch); mem && SCRIPT_MEM(ch); mem = mem->next)
+        {
+            if (((actor)->id) != mem->id)
+                continue;
+            if (mem->cmd)
+            {
                 command_interpreter(ch, mem->cmd); /* no script */
                 command_performed = 1;
                 break;
             }
             /* if a command was not performed execute the memory script */
-            if (mem && !command_performed) {
+            if (mem && !command_performed)
+            {
                 auto scripts = ch->getScripts();
-                for (const auto& t: filter_shared(scripts)) {
+                for (const auto &t : filter_shared(scripts))
+                {
                     if (IS_SET(GET_TRIG_TYPE(t), MTRIG_MEMORY) &&
                         CAN_SEE(ch, actor) &&
                         t->isReady() &&
-                        rand_number(1, 100) <= GET_TRIG_NARG(t)) {
+                        rand_number(1, 100) <= GET_TRIG_NARG(t))
+                    {
                         t->setVariable("actor", actor);
                         t->execute();
                         break;
@@ -186,24 +204,30 @@ void greet_memory_mtrigger(Character *actor) {
                 }
             }
             /* delete the memory */
-            if (mem) {
-                if (SCRIPT_MEM(ch) == mem) {
+            if (mem)
+            {
+                if (SCRIPT_MEM(ch) == mem)
+                {
                     SCRIPT_MEM(ch) = mem->next;
-                } else {
+                }
+                else
+                {
                     struct script_memory *prev;
                     prev = SCRIPT_MEM(ch);
-                    while (prev->next != mem) prev = prev->next;
+                    while (prev->next != mem)
+                        prev = prev->next;
                     prev->next = mem->next;
                 }
-                if (mem->cmd) free(mem->cmd);
+                if (mem->cmd)
+                    free(mem->cmd);
                 free(mem);
             }
         }
     }
 }
 
-
-int greet_mtrigger(Character *actor, int dir) {
+int greet_mtrigger(Character *actor, int dir)
+{
     char buf[MAX_INPUT_LENGTH];
     int intermediate, final = true;
 
@@ -211,7 +235,8 @@ int greet_mtrigger(Character *actor, int dir) {
         return true;
 
     auto people = actor->location.getPeople();
-    for (auto ch : filter_raw(people)) {
+    for (auto ch : filter_raw(people))
+    {
         if (!SCRIPT_CHECK(ch, MTRIG_GREET | MTRIG_GREET_ALL) ||
             !AWAKE(ch) || FIGHTING(ch) || (ch == actor) ||
             AFF_FLAGGED(ch, AFF_CHARM))
@@ -220,17 +245,20 @@ int greet_mtrigger(Character *actor, int dir) {
             continue;
 
         auto scripts = ch->getScripts();
-        for (const auto& t: filter_shared(scripts)) {
+        for (const auto &t : filter_shared(scripts))
+        {
             if (((IS_SET(GET_TRIG_TYPE(t), MTRIG_GREET) && CAN_SEE(ch, actor)) ||
                  IS_SET(GET_TRIG_TYPE(t), MTRIG_GREET_ALL)) &&
-                t->isReady() && (rand_number(1, 100) <= GET_TRIG_NARG(t))) {
+                t->isReady() && (rand_number(1, 100) <= GET_TRIG_NARG(t)))
+            {
                 if (dir >= 0 && dir < NUM_OF_DIRS)
-                    t->setVariable("direction", (const char *) dirs[rev_dir[dir]]);
+                    t->setVariable("direction", (const char *)dirs[rev_dir[dir]]);
                 else
                     t->setVariable("direction", "none");
                 t->setVariable("actor", actor);
                 intermediate = t->execute();
-                if (!intermediate) final = false;
+                if (!intermediate)
+                    final = false;
                 continue;
             }
         }
@@ -238,8 +266,8 @@ int greet_mtrigger(Character *actor, int dir) {
     return final;
 }
 
-
-void entry_memory_mtrigger(Character *ch) {
+void entry_memory_mtrigger(Character *ch)
+{
     struct script_memory *mem;
     char buf[MAX_INPUT_LENGTH];
 
@@ -247,17 +275,25 @@ void entry_memory_mtrigger(Character *ch) {
         return;
 
     auto people = ch->location.getPeople();
-    for (auto actor : filter_raw(people)) {
-        if (actor != ch && SCRIPT_MEM(ch)) {
-            for (mem = SCRIPT_MEM(ch); mem && SCRIPT_MEM(ch); mem = mem->next) {
-                if (((actor)->id) == mem->id) {
+    for (auto actor : filter_raw(people))
+    {
+        if (actor != ch && SCRIPT_MEM(ch))
+        {
+            for (mem = SCRIPT_MEM(ch); mem && SCRIPT_MEM(ch); mem = mem->next)
+            {
+                if (((actor)->id) == mem->id)
+                {
                     struct script_memory *prev;
-                    if (mem->cmd) command_interpreter(ch, mem->cmd);
-                    else {
+                    if (mem->cmd)
+                        command_interpreter(ch, mem->cmd);
+                    else
+                    {
                         auto scripts = ch->getScripts();
-                        for (const auto& t: filter_shared(scripts)) {
+                        for (const auto &t : filter_shared(scripts))
+                        {
                             if (TRIGGER_CHECK(t, MTRIG_MEMORY) && (rand_number(1, 100) <=
-                                                                   GET_TRIG_NARG(t))) {
+                                                                   GET_TRIG_NARG(t)))
+                            {
                                 t->setVariable("actor", actor);
                                 t->execute();
                                 break;
@@ -265,14 +301,19 @@ void entry_memory_mtrigger(Character *ch) {
                         }
                     }
                     /* delete the memory */
-                    if (SCRIPT_MEM(ch) == mem) {
+                    if (SCRIPT_MEM(ch) == mem)
+                    {
                         SCRIPT_MEM(ch) = mem->next;
-                    } else {
+                    }
+                    else
+                    {
                         prev = SCRIPT_MEM(ch);
-                        while (prev->next != mem) prev = prev->next;
+                        while (prev->next != mem)
+                            prev = prev->next;
                         prev->next = mem->next;
                     }
-                    if (mem->cmd) free(mem->cmd);
+                    if (mem->cmd)
+                        free(mem->cmd);
                     free(mem);
                 }
             } /* for (mem =..... */
@@ -280,14 +321,17 @@ void entry_memory_mtrigger(Character *ch) {
     }
 }
 
-int entry_mtrigger(Character *ch) {
+int entry_mtrigger(Character *ch)
+{
 
     if (!SCRIPT_CHECK(ch, MTRIG_ENTRY) || AFF_FLAGGED(ch, AFF_CHARM))
         return 1;
 
     auto scripts = ch->getScripts();
-    for (const auto& t: filter_shared(scripts)) {
-        if (TRIGGER_CHECK(t, MTRIG_ENTRY) && (rand_number(1, 100) <= GET_TRIG_NARG(t))) {
+    for (const auto &t : filter_shared(scripts))
+    {
+        if (TRIGGER_CHECK(t, MTRIG_ENTRY) && (rand_number(1, 100) <= GET_TRIG_NARG(t)))
+        {
             return t->execute();
         }
     }
@@ -295,7 +339,8 @@ int entry_mtrigger(Character *ch) {
     return 1;
 }
 
-int command_mtrigger(Character *actor, char *cmd, char *argument) {
+int command_mtrigger(Character *actor, char *cmd, char *argument)
+{
     char buf[MAX_INPUT_LENGTH];
 
     /* prevent people we like from becoming trapped :P */
@@ -303,23 +348,28 @@ int command_mtrigger(Character *actor, char *cmd, char *argument) {
         return 0;
 
     auto people = actor->location.getPeople();
-    for (auto ch : filter_raw(people)) {
+    for (auto ch : filter_raw(people))
+    {
 
         if (SCRIPT_CHECK(ch, MTRIG_COMMAND) && !AFF_FLAGGED(ch, AFF_CHARM) &&
-            (actor != ch)) {
+            (actor != ch))
+        {
             auto scripts = ch->getScripts();
-            for (const auto& t: filter_shared(scripts)) {
+            for (const auto &t : filter_shared(scripts))
+            {
                 if (!TRIGGER_CHECK(t, MTRIG_COMMAND))
                     continue;
 
-                if (t->proto->arglist.empty()) {
+                if (t->proto->arglist.empty())
+                {
                     mudlog(NRM, ADMLVL_BUILDER, true, "SYSERR: Command Trigger #%d has no text argument!",
                            GET_TRIG_VNUM(t));
                     continue;
                 }
 
                 if (*GET_TRIG_ARG(t) == '*' ||
-                    !strncasecmp(GET_TRIG_ARG(t), cmd, strlen(GET_TRIG_ARG(t)))) {
+                    !strncasecmp(GET_TRIG_ARG(t), cmd, strlen(GET_TRIG_ARG(t))))
+                {
                     t->setVariable("actor", actor);
                     skip_spaces(&argument);
                     t->setVariable("arg", argument);
@@ -336,28 +386,33 @@ int command_mtrigger(Character *actor, char *cmd, char *argument) {
     return 0;
 }
 
-
-void speech_mtrigger(Character *actor, char *str) {
+void speech_mtrigger(Character *actor, char *str)
+{
     char buf[MAX_INPUT_LENGTH];
 
     auto people = actor->location.getPeople();
-    for (auto ch : filter_raw(people)) {
+    for (auto ch : filter_raw(people))
+    {
 
         if (SCRIPT_CHECK(ch, MTRIG_SPEECH) && AWAKE(ch) &&
-            !AFF_FLAGGED(ch, AFF_CHARM) && (actor != ch)) {
+            !AFF_FLAGGED(ch, AFF_CHARM) && (actor != ch))
+        {
             auto scripts = ch->getScripts();
-            for (const auto& t: filter_shared(scripts)) {
+            for (const auto &t : filter_shared(scripts))
+            {
                 if (!TRIGGER_CHECK(t, MTRIG_SPEECH))
                     continue;
 
-                if (t->proto->arglist.empty()) {
+                if (t->proto->arglist.empty())
+                {
                     mudlog(NRM, ADMLVL_BUILDER, true, "SYSERR: Speech Trigger #%d has no text argument!",
                            GET_TRIG_VNUM(t));
                     continue;
                 }
 
                 if (((GET_TRIG_NARG(t) && word_check(str, GET_TRIG_ARG(t))) ||
-                     (!GET_TRIG_NARG(t) && is_substring(GET_TRIG_ARG(t), str)))) {
+                     (!GET_TRIG_NARG(t) && is_substring(GET_TRIG_ARG(t), str))))
+                {
                     t->setVariable("actor", actor);
                     t->setVariable("speech", str);
                     t->execute();
@@ -368,26 +423,30 @@ void speech_mtrigger(Character *actor, char *str) {
     }
 }
 
-
 void act_mtrigger(Character *ch, char *str, Character *actor, Character *victim, Object *object,
-                  Object *target, char *arg) {
+                  Object *target, char *arg)
+{
     char buf[MAX_INPUT_LENGTH];
 
     if (SCRIPT_CHECK(ch, MTRIG_ACT) && !AFF_FLAGGED(ch, AFF_CHARM) &&
-        (actor != ch)) {
+        (actor != ch))
+    {
         auto scripts = ch->getScripts();
-        for (const auto& t: filter_shared(scripts)) {
+        for (const auto &t : filter_shared(scripts))
+        {
             if (!TRIGGER_CHECK(t, MTRIG_ACT))
                 continue;
 
-            if (t->proto->arglist.empty()) {
+            if (t->proto->arglist.empty())
+            {
                 mudlog(NRM, ADMLVL_BUILDER, true, "SYSERR: Act Trigger #%d has no text argument!",
                        GET_TRIG_VNUM(t));
                 continue;
             }
 
             if (((GET_TRIG_NARG(t) && word_check(str, GET_TRIG_ARG(t))) ||
-                 (!GET_TRIG_NARG(t) && is_substring(GET_TRIG_ARG(t), str)))) {
+                 (!GET_TRIG_NARG(t) && is_substring(GET_TRIG_ARG(t), str))))
+            {
                 if (actor)
                     t->setVariable("actor", actor);
                 if (victim)
@@ -396,7 +455,8 @@ void act_mtrigger(Character *ch, char *str, Character *actor, Character *victim,
                     t->setVariable("object", object);
                 if (target)
                     t->setVariable("target", target);
-                if (str) {
+                if (str)
+                {
                     /* we're guaranteed to have a string ending with \r\n\0 */
                     char *nstr = strdup(str), *fstr = nstr, *p = strchr(nstr, '\r');
                     skip_spaces(&nstr);
@@ -411,8 +471,8 @@ void act_mtrigger(Character *ch, char *str, Character *actor, Character *victim,
     }
 }
 
-
-void fight_mtrigger(Character *ch) {
+void fight_mtrigger(Character *ch)
+{
     Character *actor;
     char buf[MAX_INPUT_LENGTH];
 
@@ -421,9 +481,11 @@ void fight_mtrigger(Character *ch) {
         return;
 
     auto scripts = ch->getScripts();
-    for (const auto& t: filter_shared(scripts)) {
+    for (const auto &t : filter_shared(scripts))
+    {
         if (TRIGGER_CHECK(t, MTRIG_FIGHT) &&
-            (rand_number(1, 100) <= GET_TRIG_NARG(t))) {
+            (rand_number(1, 100) <= GET_TRIG_NARG(t)))
+        {
             actor = FIGHTING(ch);
             if (actor)
                 t->setVariable("actor", actor);
@@ -436,8 +498,8 @@ void fight_mtrigger(Character *ch) {
     }
 }
 
-
-void hitprcnt_mtrigger(Character *ch) {
+void hitprcnt_mtrigger(Character *ch)
+{
     Character *actor;
     char buf[MAX_INPUT_LENGTH];
 
@@ -446,9 +508,11 @@ void hitprcnt_mtrigger(Character *ch) {
         return;
 
     auto scripts = ch->getScripts();
-    for (const auto& t: filter_shared(scripts)) {
+    for (const auto &t : filter_shared(scripts))
+    {
         if (TRIGGER_CHECK(t, MTRIG_HITPRCNT) && GET_MAX_HIT(ch) &&
-            (GET_HIT(ch) <= (GET_MAX_HIT(ch) / 100) * GET_TRIG_NARG(t))) {
+            (GET_HIT(ch) <= (GET_MAX_HIT(ch) / 100) * GET_TRIG_NARG(t)))
+        {
 
             actor = FIGHTING(ch);
             t->setVariable("actor", actor);
@@ -458,8 +522,8 @@ void hitprcnt_mtrigger(Character *ch) {
     }
 }
 
-
-int receive_mtrigger(Character *ch, Character *actor, Object *obj) {
+int receive_mtrigger(Character *ch, Character *actor, Object *obj)
+{
     char buf[MAX_INPUT_LENGTH];
     int ret_val;
 
@@ -467,9 +531,11 @@ int receive_mtrigger(Character *ch, Character *actor, Object *obj) {
         return 1;
 
     auto scripts = ch->getScripts();
-    for (const auto& t: filter_shared(scripts)) {
+    for (const auto &t : filter_shared(scripts))
+    {
         if (TRIGGER_CHECK(t, MTRIG_RECEIVE) &&
-            (rand_number(1, 100) <= GET_TRIG_NARG(t))) {
+            (rand_number(1, 100) <= GET_TRIG_NARG(t)))
+        {
 
             t->setVariable("actor", actor);
             t->setVariable("object", obj);
@@ -484,17 +550,19 @@ int receive_mtrigger(Character *ch, Character *actor, Object *obj) {
     return 1;
 }
 
-
-int death_mtrigger(Character *ch, Character *actor) {
+int death_mtrigger(Character *ch, Character *actor)
+{
     char buf[MAX_INPUT_LENGTH];
 
     if (!SCRIPT_CHECK(ch, MTRIG_DEATH) || AFF_FLAGGED(ch, AFF_CHARM))
         return 1;
 
     auto scripts = ch->getScripts();
-    for (const auto& t: filter_shared(scripts)) {
+    for (const auto &t : filter_shared(scripts))
+    {
         if (TRIGGER_CHECK(t, MTRIG_DEATH) &&
-            (rand_number(1, 100) <= GET_TRIG_NARG(t))) {
+            (rand_number(1, 100) <= GET_TRIG_NARG(t)))
+        {
             if (actor)
                 t->setVariable("actor", actor);
             return t->execute();
@@ -504,30 +572,36 @@ int death_mtrigger(Character *ch, Character *actor) {
     return 1;
 }
 
-void load_mtrigger(Character *ch) {
+void load_mtrigger(Character *ch)
+{
     int result = 0;
 
     if (!SCRIPT_CHECK(ch, MTRIG_LOAD))
         return;
 
     auto scripts = ch->getScripts();
-    for (const auto& t: filter_shared(scripts)) {
+    for (const auto &t : filter_shared(scripts))
+    {
         if (TRIGGER_CHECK(t, MTRIG_LOAD) &&
-            (rand_number(1, 100) <= GET_TRIG_NARG(t))) {
+            (rand_number(1, 100) <= GET_TRIG_NARG(t)))
+        {
             result = t->execute();
             break;
         }
     }
-    if (result == SCRIPT_ERROR_CODE) {
+    if (result == SCRIPT_ERROR_CODE)
+    {
         /* we have recursed beyond reasonable depth */
         /* make sure this mob is the last one in the load chain */
-        if (auto vn = GET_MOB_RNUM(ch); vn != NOBODY) {
+        if (auto vn = GET_MOB_RNUM(ch); vn != NOBODY)
+        {
             mob_proto.at(vn).proto_script.clear();
         }
     }
 }
 
-int cast_mtrigger(Character *actor, Character *ch, int spellnum) {
+int cast_mtrigger(Character *actor, Character *ch, int spellnum)
+{
     char buf[MAX_INPUT_LENGTH];
 
     if (ch == nullptr)
@@ -537,13 +611,15 @@ int cast_mtrigger(Character *actor, Character *ch, int spellnum) {
         return 1;
 
     auto scripts = ch->getScripts();
-    for (const auto& t: filter_shared(scripts)) {
+    for (const auto &t : filter_shared(scripts))
+    {
         if (TRIGGER_CHECK(t, MTRIG_CAST) &&
-            (rand_number(1, 100) <= GET_TRIG_NARG(t))) {
+            (rand_number(1, 100) <= GET_TRIG_NARG(t)))
+        {
             t->setVariable("actor", actor);
             sprintf(buf, "%d", spellnum);
             t->setVariable("spell", buf);
-            t->setVariable("spellname", (const char *) skill_name(spellnum));
+            t->setVariable("spellname", (const char *)skill_name(spellnum));
             return t->execute();
         }
     }
@@ -551,24 +627,28 @@ int cast_mtrigger(Character *actor, Character *ch, int spellnum) {
     return 1;
 }
 
-int leave_mtrigger(Character *actor, int dir) {
+int leave_mtrigger(Character *actor, int dir)
+{
     char buf[MAX_INPUT_LENGTH];
 
     if (!valid_dg_target(actor, DG_ALLOW_GODS))
         return 1;
     auto people = actor->location.getPeople();
-    for (auto ch : filter_raw(people)) {
+    for (auto ch : filter_raw(people))
+    {
         if (!SCRIPT_CHECK(ch, MTRIG_LEAVE) ||
             !AWAKE(ch) || FIGHTING(ch) || (ch == actor) ||
             AFF_FLAGGED(ch, AFF_CHARM))
             continue;
 
         auto scripts = ch->getScripts();
-        for (const auto& t: filter_shared(scripts)) {
+        for (const auto &t : filter_shared(scripts))
+        {
             if ((IS_SET(GET_TRIG_TYPE(t), MTRIG_LEAVE)) &&
-                t->isReady() && (rand_number(1, 100) <= GET_TRIG_NARG(t))) {
+                t->isReady() && (rand_number(1, 100) <= GET_TRIG_NARG(t)))
+            {
                 if (dir >= 0 && dir < NUM_OF_DIRS)
-                    t->setVariable("direction", (const char *) dirs[dir]);
+                    t->setVariable("direction", (const char *)dirs[dir]);
                 else
                     t->setVariable("direction", "none");
                 t->setVariable("actor", actor);
@@ -579,22 +659,26 @@ int leave_mtrigger(Character *actor, int dir) {
     return 1;
 }
 
-int door_mtrigger(Character *actor, int subcmd, int dir) {
+int door_mtrigger(Character *actor, int subcmd, int dir)
+{
     char buf[MAX_INPUT_LENGTH];
     auto people = actor->location.getPeople();
-    for (auto ch : filter_raw(people)) {
+    for (auto ch : filter_raw(people))
+    {
         if (!SCRIPT_CHECK(ch, MTRIG_DOOR) ||
             !AWAKE(ch) || FIGHTING(ch) || (ch == actor) ||
             AFF_FLAGGED(ch, AFF_CHARM))
             continue;
 
         auto scripts = ch->getScripts();
-        for (const auto& t: filter_shared(scripts)) {
+        for (const auto &t : filter_shared(scripts))
+        {
             if (IS_SET(GET_TRIG_TYPE(t), MTRIG_DOOR) && CAN_SEE(ch, actor) &&
-                t->isReady() && (rand_number(1, 100) <= GET_TRIG_NARG(t))) {
-                t->setVariable("cmd", (const char *) cmd_door[subcmd]);
+                t->isReady() && (rand_number(1, 100) <= GET_TRIG_NARG(t)))
+            {
+                t->setVariable("cmd", (const char *)cmd_door[subcmd]);
                 if (dir >= 0 && dir < NUM_OF_DIRS)
-                    t->setVariable("direction", (const char *) dirs[dir]);
+                    t->setVariable("direction", (const char *)dirs[dir]);
                 else
                     t->setVariable("direction", "none");
                 t->setVariable("actor", actor);
@@ -605,7 +689,8 @@ int door_mtrigger(Character *actor, int subcmd, int dir) {
     return 1;
 }
 
-void time_mtrigger(Character *ch) {
+void time_mtrigger(Character *ch)
+{
     /*
      * This trigger is called if the hour is the same as specified in Narg.
      */
@@ -614,16 +699,19 @@ void time_mtrigger(Character *ch) {
         return;
 
     auto scripts = ch->getScripts();
-    for (const auto& t: filter_shared(scripts)) {
+    for (const auto &t : filter_shared(scripts))
+    {
         if (TRIGGER_CHECK(t, MTRIG_TIME) &&
-            (time_info.hours == GET_TRIG_NARG(t))) {
+            (time_info.hours == GET_TRIG_NARG(t)))
+        {
             t->execute();
             break;
         }
     }
 }
 
-void interval_mtrigger(Character *ch, int trigFlag) {
+void interval_mtrigger(Character *ch, int trigFlag)
+{
     /*
      * This trigger is called if the hour is the same as specified in Narg.
      */
@@ -632,11 +720,13 @@ void interval_mtrigger(Character *ch, int trigFlag) {
         return;
 
     auto scripts = ch->getScripts();
-    for (const auto& t: filter_shared(scripts)) {
-        if (TRIGGER_CHECK(t, trigFlag)) {
+    for (const auto &t : filter_shared(scripts))
+    {
+        if (TRIGGER_CHECK(t, trigFlag))
+        {
             t->execute();
             break;
-            }
+        }
     }
 }
 
@@ -644,30 +734,35 @@ void interval_mtrigger(Character *ch, int trigFlag) {
  *  object triggers
  */
 
-void random_otrigger(Object *obj) {
+void random_otrigger(Object *obj)
+{
 
     if (!SCRIPT_CHECK(obj, OTRIG_RANDOM))
         return;
 
     auto scripts = obj->getScripts();
-    for (const auto& t : filter_shared(scripts)) {
+    for (const auto &t : filter_shared(scripts))
+    {
         if (TRIGGER_CHECK(t, OTRIG_RANDOM) &&
-            (rand_number(1, 100) <= GET_TRIG_NARG(t))) {
+            (rand_number(1, 100) <= GET_TRIG_NARG(t)))
+        {
             t->execute();
             break;
         }
     }
 }
 
-
-void timer_otrigger(Object *obj) {
+void timer_otrigger(Object *obj)
+{
 
     if (!SCRIPT_CHECK(obj, OTRIG_TIMER))
         return;
 
     auto scripts = obj->getScripts();
-    for (const auto& t : filter_shared(scripts)) {
-        if (TRIGGER_CHECK(t, OTRIG_TIMER)) {
+    for (const auto &t : filter_shared(scripts))
+    {
+        if (TRIGGER_CHECK(t, OTRIG_TIMER))
+        {
             t->execute();
         }
     }
@@ -675,16 +770,18 @@ void timer_otrigger(Object *obj) {
     return;
 }
 
-
-int get_otrigger(Object *obj, Character *actor) {
+int get_otrigger(Object *obj, Character *actor)
+{
     char buf[MAX_INPUT_LENGTH];
     int ret_val;
     if (!SCRIPT_CHECK(obj, OTRIG_GET))
         return 1;
 
     auto scripts = obj->getScripts();
-    for (const auto& t : filter_shared(scripts)) {
-        if (TRIGGER_CHECK(t, OTRIG_GET) && (rand_number(1, 100) <= GET_TRIG_NARG(t))) {
+    for (const auto &t : filter_shared(scripts))
+    {
+        if (TRIGGER_CHECK(t, OTRIG_GET) && (rand_number(1, 100) <= GET_TRIG_NARG(t)))
+        {
             t->setVariable("actor", actor);
             ret_val = t->execute();
             /* don't allow a get to take place, if
@@ -701,26 +798,30 @@ int get_otrigger(Object *obj, Character *actor) {
     return 1;
 }
 
-
 /* checks for command trigger on specific object. assumes obj has cmd trig */
 int cmd_otrig(Object *obj, Character *actor, char *cmd,
-              char *argument, int type) {
+              char *argument, int type)
+{
     char buf[MAX_INPUT_LENGTH];
 
-    if (obj && SCRIPT_CHECK(obj, OTRIG_COMMAND)) {
+    if (obj && SCRIPT_CHECK(obj, OTRIG_COMMAND))
+    {
         auto scripts = obj->getScripts();
-        for (const auto& t : filter_shared(scripts)) {
+        for (const auto &t : filter_shared(scripts))
+        {
             if (!TRIGGER_CHECK(t, OTRIG_COMMAND))
                 continue;
 
             if (IS_SET(GET_TRIG_NARG(t), type) &&
-                (t->proto->arglist.empty())) {
+                (t->proto->arglist.empty()))
+            {
                 mudlog(NRM, ADMLVL_BUILDER, true, "SYSERR: O-Command Trigger #%d has no text argument!",
                        GET_TRIG_VNUM(t));
                 continue;
             }
 
-            if (IS_SET(GET_TRIG_NARG(t), type) && (*GET_TRIG_ARG(t) == '*' || !strncasecmp(GET_TRIG_ARG(t), cmd, strlen(GET_TRIG_ARG(t))))) {
+            if (IS_SET(GET_TRIG_NARG(t), type) && (*GET_TRIG_ARG(t) == '*' || !strncasecmp(GET_TRIG_ARG(t), cmd, strlen(GET_TRIG_ARG(t)))))
+            {
 
                 t->setVariable("actor", actor);
                 skip_spaces(&argument);
@@ -737,8 +838,8 @@ int cmd_otrig(Object *obj, Character *actor, char *cmd,
     return 0;
 }
 
-
-int command_otrigger(Character *actor, char *cmd, char *argument) {
+int command_otrigger(Character *actor, char *cmd, char *argument)
+{
 
     /* prevent people we like from becoming trapped :P */
     if (!valid_dg_target(actor, 0))
@@ -761,8 +862,8 @@ int command_otrigger(Character *actor, char *cmd, char *argument) {
     return 0;
 }
 
-
-int wear_otrigger(Object *obj, Character *actor, int where) {
+int wear_otrigger(Object *obj, Character *actor, int where)
+{
     char buf[MAX_INPUT_LENGTH];
     int ret_val;
 
@@ -770,8 +871,10 @@ int wear_otrigger(Object *obj, Character *actor, int where) {
         return 1;
 
     auto scripts = obj->getScripts();
-    for (const auto& t : filter_shared(scripts)) {
-        if (TRIGGER_CHECK(t, OTRIG_WEAR)) {
+    for (const auto &t : filter_shared(scripts))
+    {
+        if (TRIGGER_CHECK(t, OTRIG_WEAR))
+        {
             t->setVariable("actor", actor);
             ret_val = t->execute();
             /* don't allow a wear to take place, if
@@ -787,8 +890,8 @@ int wear_otrigger(Object *obj, Character *actor, int where) {
     return 1;
 }
 
-
-int remove_otrigger(Object *obj, Character *actor) {
+int remove_otrigger(Object *obj, Character *actor)
+{
     char buf[MAX_INPUT_LENGTH];
     int ret_val;
 
@@ -799,8 +902,10 @@ int remove_otrigger(Object *obj, Character *actor) {
         return 1;
 
     auto scripts = obj->getScripts();
-    for (const auto& t : filter_shared(scripts)) {
-        if (TRIGGER_CHECK(t, OTRIG_REMOVE)) {
+    for (const auto &t : filter_shared(scripts))
+    {
+        if (TRIGGER_CHECK(t, OTRIG_REMOVE))
+        {
             t->setVariable("actor", actor);
             ret_val = t->execute();
             /* don't allow a remove to take place, if
@@ -816,8 +921,8 @@ int remove_otrigger(Object *obj, Character *actor) {
     return 1;
 }
 
-
-int drop_otrigger(Object *obj, Character *actor) {
+int drop_otrigger(Object *obj, Character *actor)
+{
     char buf[MAX_INPUT_LENGTH];
     int ret_val;
 
@@ -825,8 +930,10 @@ int drop_otrigger(Object *obj, Character *actor) {
         return 1;
 
     auto scripts = obj->getScripts();
-    for (const auto& t : filter_shared(scripts)) {
-        if (TRIGGER_CHECK(t, OTRIG_DROP) && (rand_number(1, 100) <= GET_TRIG_NARG(t))) {
+    for (const auto &t : filter_shared(scripts))
+    {
+        if (TRIGGER_CHECK(t, OTRIG_DROP) && (rand_number(1, 100) <= GET_TRIG_NARG(t)))
+        {
             t->setVariable("actor", actor);
             ret_val = t->execute();
             /* don't allow a drop to take place, if
@@ -842,8 +949,8 @@ int drop_otrigger(Object *obj, Character *actor) {
     return 1;
 }
 
-
-int give_otrigger(Object *obj, Character *actor, Character *victim) {
+int give_otrigger(Object *obj, Character *actor, Character *victim)
+{
     char buf[MAX_INPUT_LENGTH];
     int ret_val;
 
@@ -851,8 +958,10 @@ int give_otrigger(Object *obj, Character *actor, Character *victim) {
         return 1;
 
     auto scripts = obj->getScripts();
-    for (const auto& t : filter_shared(scripts)) {
-        if (TRIGGER_CHECK(t, OTRIG_GIVE) && (rand_number(1, 100) <= GET_TRIG_NARG(t))) {
+    for (const auto &t : filter_shared(scripts))
+    {
+        if (TRIGGER_CHECK(t, OTRIG_GIVE) && (rand_number(1, 100) <= GET_TRIG_NARG(t)))
+        {
             t->setVariable("actor", actor);
             t->setVariable("victim", victim);
             ret_val = t->execute();
@@ -870,31 +979,37 @@ int give_otrigger(Object *obj, Character *actor, Character *victim) {
     return 1;
 }
 
-void load_otrigger(Object *obj) {
+void load_otrigger(Object *obj)
+{
     int result = 0;
 
     if (!SCRIPT_CHECK(obj, OTRIG_LOAD))
         return;
 
     auto scripts = obj->getScripts();
-    for (const auto& t : filter_shared(scripts)) {
+    for (const auto &t : filter_shared(scripts))
+    {
         if (TRIGGER_CHECK(t, OTRIG_LOAD) &&
-            (rand_number(1, 100) <= GET_TRIG_NARG(t))) {
+            (rand_number(1, 100) <= GET_TRIG_NARG(t)))
+        {
             result = t->execute();
             break;
         }
     }
-    if (result == SCRIPT_ERROR_CODE) {
+    if (result == SCRIPT_ERROR_CODE)
+    {
         /* we have recursed beyond reasonable depth */
         /* make sure this mob is the last one in the load chain */
         auto vn = GET_OBJ_RNUM(obj);
-        if (vn != NOTHING) {
+        if (vn != NOTHING)
+        {
             obj_proto.at(vn).proto_script.clear();
         }
     }
 }
 
-int cast_otrigger(Character *actor, Object *obj, int spellnum) {
+int cast_otrigger(Character *actor, Object *obj, int spellnum)
+{
     char buf[MAX_INPUT_LENGTH];
 
     if (obj == nullptr)
@@ -904,13 +1019,15 @@ int cast_otrigger(Character *actor, Object *obj, int spellnum) {
         return 1;
 
     auto scripts = obj->getScripts();
-    for (const auto& t : filter_shared(scripts)) {
+    for (const auto &t : filter_shared(scripts))
+    {
         if (TRIGGER_CHECK(t, OTRIG_CAST) &&
-            (rand_number(1, 100) <= GET_TRIG_NARG(t))) {
+            (rand_number(1, 100) <= GET_TRIG_NARG(t)))
+        {
             t->setVariable("actor", actor);
             sprintf(buf, "%d", spellnum);
             t->setVariable("spell", buf);
-            t->setVariable("spellname", (const char *) skill_name(spellnum));
+            t->setVariable("spellname", (const char *)skill_name(spellnum));
             return t->execute();
         }
     }
@@ -918,22 +1035,26 @@ int cast_otrigger(Character *actor, Object *obj, int spellnum) {
     return 1;
 }
 
-int leave_otrigger(Room *room, Character *actor, int dir) {
+int leave_otrigger(Room *room, Character *actor, int dir)
+{
     char buf[MAX_INPUT_LENGTH];
     int temp, final = 1;
 
     if (!valid_dg_target(actor, DG_ALLOW_GODS))
         return 1;
     auto con = room->getObjects();
-    for (auto obj : filter_raw(con)) {
+    for (auto obj : filter_raw(con))
+    {
         if (!SCRIPT_CHECK(obj, OTRIG_LEAVE))
             continue;
 
         auto scripts = obj->getScripts();
-        for (const auto& t : filter_shared(scripts)) {
-            if (TRIGGER_CHECK(t, OTRIG_LEAVE) && (rand_number(1, 100) <= GET_TRIG_NARG(t))) {
+        for (const auto &t : filter_shared(scripts))
+        {
+            if (TRIGGER_CHECK(t, OTRIG_LEAVE) && (rand_number(1, 100) <= GET_TRIG_NARG(t)))
+            {
                 if (dir >= 0 && dir < NUM_OF_DIRS)
-                    t->setVariable("direction", (const char *) dirs[dir]);
+                    t->setVariable("direction", (const char *)dirs[dir]);
                 else
                     t->setVariable("direction", "none");
                 t->setVariable("actor", actor);
@@ -947,7 +1068,8 @@ int leave_otrigger(Room *room, Character *actor, int dir) {
     return final;
 }
 
-int consume_otrigger(Object *obj, Character *actor, int cmd) {
+int consume_otrigger(Object *obj, Character *actor, int cmd)
+{
     char buf[MAX_INPUT_LENGTH];
     int ret_val;
 
@@ -955,19 +1077,22 @@ int consume_otrigger(Object *obj, Character *actor, int cmd) {
         return 1;
 
     auto scripts = obj->getScripts();
-    for (const auto& t : filter_shared(scripts)) {
-        if (TRIGGER_CHECK(t, OTRIG_CONSUME)) {
+    for (const auto &t : filter_shared(scripts))
+    {
+        if (TRIGGER_CHECK(t, OTRIG_CONSUME))
+        {
             t->setVariable("actor", actor);
-            switch (cmd) {
-                case OCMD_EAT:
-                    t->setVariable("command", "eat");
-                    break;
-                case OCMD_DRINK:
-                    t->setVariable("command", "drink");
-                    break;
-                case OCMD_QUAFF:
-                    t->setVariable("command", "quaff");
-                    break;
+            switch (cmd)
+            {
+            case OCMD_EAT:
+                t->setVariable("command", "eat");
+                break;
+            case OCMD_DRINK:
+                t->setVariable("command", "drink");
+                break;
+            case OCMD_QUAFF:
+                t->setVariable("command", "quaff");
+                break;
             }
             ret_val = t->execute();
             /* don't allow a wear to take place, if
@@ -983,16 +1108,19 @@ int consume_otrigger(Object *obj, Character *actor, int cmd) {
     return 1;
 }
 
-void time_otrigger(Object *obj) {
+void time_otrigger(Object *obj)
+{
     char buf[MAX_INPUT_LENGTH];
 
     if (!SCRIPT_CHECK(obj, OTRIG_TIME))
         return;
 
     auto scripts = obj->getScripts();
-    for (const auto& t : filter_shared(scripts)) {
+    for (const auto &t : filter_shared(scripts))
+    {
         if (TRIGGER_CHECK(t, OTRIG_TIME) &&
-            (time_info.hours == GET_TRIG_NARG(t))) {
+            (time_info.hours == GET_TRIG_NARG(t)))
+        {
             sprintf(buf, "%d", time_info.hours);
             t->setVariable("time", buf);
             t->execute();
@@ -1001,16 +1129,19 @@ void time_otrigger(Object *obj) {
     }
 }
 
-void interval_otrigger(Object *obj, int trigFlag) {
+void interval_otrigger(Object *obj, int trigFlag)
+{
     if (!SCRIPT_CHECK(obj, trigFlag))
         return;
 
     auto scripts = obj->getScripts();
-    for (const auto& t : filter_shared(scripts)) {
-        if (TRIGGER_CHECK(t, trigFlag)) {
+    for (const auto &t : filter_shared(scripts))
+    {
+        if (TRIGGER_CHECK(t, trigFlag))
+        {
             t->execute();
             break;
-            }
+        }
     }
 }
 
@@ -1018,49 +1149,57 @@ void interval_otrigger(Object *obj, int trigFlag) {
  *  world triggers
  */
 
-void reset_wtrigger(Room *room) {
+void reset_wtrigger(Room *room)
+{
 
     if (!SCRIPT_CHECK(room, WTRIG_RESET))
         return;
 
     auto scripts = room->getScripts();
-    for (const auto& t : filter_shared(scripts)) {
+    for (const auto &t : filter_shared(scripts))
+    {
         if (TRIGGER_CHECK(t, WTRIG_RESET) &&
-            (rand_number(1, 100) <= GET_TRIG_NARG(t))) {
+            (rand_number(1, 100) <= GET_TRIG_NARG(t)))
+        {
             t->execute();
             break;
         }
     }
 }
 
-void random_wtrigger(Room *room) {
+void random_wtrigger(Room *room)
+{
 
     if (!SCRIPT_CHECK(room, WTRIG_RANDOM))
         return;
 
     auto scripts = room->getScripts();
-    for (const auto& t : filter_shared(scripts)) {
+    for (const auto &t : filter_shared(scripts))
+    {
         if (TRIGGER_CHECK(t, WTRIG_RANDOM) &&
-            (rand_number(1, 100) <= GET_TRIG_NARG(t))) {
+            (rand_number(1, 100) <= GET_TRIG_NARG(t)))
+        {
             t->execute();
             break;
         }
     }
 }
 
-
-int enter_wtrigger(Room *room, Character *actor, int dir) {
+int enter_wtrigger(Room *room, Character *actor, int dir)
+{
     char buf[MAX_INPUT_LENGTH];
 
     if (!SCRIPT_CHECK(room, WTRIG_ENTER))
         return 1;
 
     auto scripts = room->getScripts();
-    for (const auto& t : filter_shared(scripts)) {
+    for (const auto &t : filter_shared(scripts))
+    {
         if (TRIGGER_CHECK(t, WTRIG_ENTER) &&
-            (rand_number(1, 100) <= GET_TRIG_NARG(t))) {
+            (rand_number(1, 100) <= GET_TRIG_NARG(t)))
+        {
             if (dir >= 0 && dir < NUM_OF_DIRS)
-                t->setVariable("direction", (const char *) dirs[rev_dir[dir]]);
+                t->setVariable("direction", (const char *)dirs[rev_dir[dir]]);
             else
                 t->setVariable("direction", "none");
             t->setVariable("actor", actor);
@@ -1071,8 +1210,8 @@ int enter_wtrigger(Room *room, Character *actor, int dir) {
     return 1;
 }
 
-
-int command_wtrigger(Character *actor, char *cmd, char *argument) {
+int command_wtrigger(Character *actor, char *cmd, char *argument)
+{
     char buf[MAX_INPUT_LENGTH];
 
     if (!actor || !SCRIPT_CHECK(actor->getRoom(), WTRIG_COMMAND))
@@ -1083,20 +1222,24 @@ int command_wtrigger(Character *actor, char *cmd, char *argument) {
         return 0;
 
     auto room = actor->getRoom();
-    if(!room) return 0;
+    if (!room)
+        return 0;
     auto scripts = room->getScripts();
-    for (const auto& t : filter_shared(scripts)) {
+    for (const auto &t : filter_shared(scripts))
+    {
         if (!TRIGGER_CHECK(t, WTRIG_COMMAND))
             continue;
 
-        if (t->proto->arglist.empty()) {
+        if (t->proto->arglist.empty())
+        {
             mudlog(NRM, ADMLVL_BUILDER, true, "SYSERR: W-Command Trigger #%d has no text argument!",
                    GET_TRIG_VNUM(t));
             continue;
         }
 
         if (*GET_TRIG_ARG(t) == '*' ||
-            !strncasecmp(GET_TRIG_ARG(t), cmd, strlen(GET_TRIG_ARG(t)))) {
+            !strncasecmp(GET_TRIG_ARG(t), cmd, strlen(GET_TRIG_ARG(t))))
+        {
             t->setVariable("actor", actor);
             skip_spaces(&argument);
             t->setVariable("arg", argument);
@@ -1110,8 +1253,8 @@ int command_wtrigger(Character *actor, char *cmd, char *argument) {
     return 0;
 }
 
-
-void speech_wtrigger(Character *actor, char *str) {
+void speech_wtrigger(Character *actor, char *str)
+{
     char buf[MAX_INPUT_LENGTH];
 
     if (!actor || !SCRIPT_CHECK(actor->getRoom(), WTRIG_SPEECH))
@@ -1119,11 +1262,13 @@ void speech_wtrigger(Character *actor, char *str) {
 
     auto room = actor->getRoom();
     auto scripts = room->getScripts();
-    for (const auto& t : filter_shared(scripts)) {
+    for (const auto &t : filter_shared(scripts))
+    {
         if (!TRIGGER_CHECK(t, WTRIG_SPEECH))
             continue;
 
-        if (t->proto->arglist.empty()) {
+        if (t->proto->arglist.empty())
+        {
             mudlog(NRM, ADMLVL_BUILDER, true, "SYSERR: W-Speech Trigger #%d has no text argument!",
                    GET_TRIG_VNUM(t));
             continue;
@@ -1131,7 +1276,8 @@ void speech_wtrigger(Character *actor, char *str) {
 
         if (*GET_TRIG_ARG(t) == '*' ||
             (GET_TRIG_NARG(t) && word_check(str, GET_TRIG_ARG(t))) ||
-            (!GET_TRIG_NARG(t) && is_substring(GET_TRIG_ARG(t), str))) {
+            (!GET_TRIG_NARG(t) && is_substring(GET_TRIG_ARG(t), str)))
+        {
             t->setVariable("actor", actor);
             t->setVariable("speech", str);
             t->execute();
@@ -1140,7 +1286,8 @@ void speech_wtrigger(Character *actor, char *str) {
     }
 }
 
-int drop_wtrigger(Object *obj, Character *actor) {
+int drop_wtrigger(Object *obj, Character *actor)
+{
     char buf[MAX_INPUT_LENGTH];
     int ret_val;
 
@@ -1149,9 +1296,10 @@ int drop_wtrigger(Object *obj, Character *actor) {
 
     auto room = actor->getRoom();
     auto scripts = room->getScripts();
-    for (const auto& t : filter_shared(scripts))
+    for (const auto &t : filter_shared(scripts))
         if (TRIGGER_CHECK(t, WTRIG_DROP) &&
-            (rand_number(1, 100) <= GET_TRIG_NARG(t))) {
+            (rand_number(1, 100) <= GET_TRIG_NARG(t)))
+        {
             t->setVariable("actor", actor);
             t->setVariable("object", obj);
             ret_val = t->execute();
@@ -1165,7 +1313,8 @@ int drop_wtrigger(Object *obj, Character *actor) {
     return 1;
 }
 
-int cast_wtrigger(Character *actor, Character *vict, Object *obj, int spellnum) {
+int cast_wtrigger(Character *actor, Character *vict, Object *obj, int spellnum)
+{
     char buf[MAX_INPUT_LENGTH];
 
     if (!actor || !SCRIPT_CHECK(actor->getRoom(), WTRIG_CAST))
@@ -1173,9 +1322,11 @@ int cast_wtrigger(Character *actor, Character *vict, Object *obj, int spellnum) 
 
     auto room = actor->getRoom();
     auto scripts = room->getScripts();
-    for (const auto& t : filter_shared(scripts)) {
+    for (const auto &t : filter_shared(scripts))
+    {
         if (TRIGGER_CHECK(t, WTRIG_CAST) &&
-            (rand_number(1, 100) <= GET_TRIG_NARG(t))) {
+            (rand_number(1, 100) <= GET_TRIG_NARG(t)))
+        {
 
             t->setVariable("actor", actor);
             if (vict)
@@ -1184,7 +1335,7 @@ int cast_wtrigger(Character *actor, Character *vict, Object *obj, int spellnum) 
                 t->setVariable("object", obj);
             sprintf(buf, "%d", spellnum);
             t->setVariable("spell", buf);
-            t->setVariable("spellname", (const char *) skill_name(spellnum));
+            t->setVariable("spellname", (const char *)skill_name(spellnum));
             return t->execute();
         }
     }
@@ -1192,8 +1343,8 @@ int cast_wtrigger(Character *actor, Character *vict, Object *obj, int spellnum) 
     return 1;
 }
 
-
-int leave_wtrigger(Room *room, Character *actor, int dir) {
+int leave_wtrigger(Room *room, Character *actor, int dir)
+{
     char buf[MAX_INPUT_LENGTH];
 
     if (!valid_dg_target(actor, DG_ALLOW_GODS))
@@ -1203,11 +1354,13 @@ int leave_wtrigger(Room *room, Character *actor, int dir) {
         return 1;
 
     auto scripts = room->getScripts();
-    for (const auto& t : filter_shared(scripts)) {
+    for (const auto &t : filter_shared(scripts))
+    {
         if (TRIGGER_CHECK(t, WTRIG_LEAVE) &&
-            (rand_number(1, 100) <= GET_TRIG_NARG(t))) {
+            (rand_number(1, 100) <= GET_TRIG_NARG(t)))
+        {
             if (dir >= 0 && dir < NUM_OF_DIRS)
-                t->setVariable("direction", (const char *) dirs[dir]);
+                t->setVariable("direction", (const char *)dirs[dir]);
             else
                 t->setVariable("direction", "none");
             t->setVariable("actor", actor);
@@ -1218,7 +1371,8 @@ int leave_wtrigger(Room *room, Character *actor, int dir) {
     return 1;
 }
 
-int door_wtrigger(Character *actor, int subcmd, int dir) {
+int door_wtrigger(Character *actor, int subcmd, int dir)
+{
     char buf[MAX_INPUT_LENGTH];
 
     if (!actor || !SCRIPT_CHECK(actor->getRoom(), WTRIG_DOOR))
@@ -1226,12 +1380,14 @@ int door_wtrigger(Character *actor, int subcmd, int dir) {
 
     auto room = actor->getRoom();
     auto scripts = room->getScripts();
-    for (const auto& t : filter_shared(scripts)) {
+    for (const auto &t : filter_shared(scripts))
+    {
         if (TRIGGER_CHECK(t, WTRIG_DOOR) &&
-            (rand_number(1, 100) <= GET_TRIG_NARG(t))) {
-            t->setVariable("cmd", (const char *) cmd_door[subcmd]);
+            (rand_number(1, 100) <= GET_TRIG_NARG(t)))
+        {
+            t->setVariable("cmd", (const char *)cmd_door[subcmd]);
             if (dir >= 0 && dir < NUM_OF_DIRS)
-                t->setVariable("direction", (const char *) dirs[dir]);
+                t->setVariable("direction", (const char *)dirs[dir]);
             else
                 t->setVariable("direction", "none");
             t->setVariable("actor", actor);
@@ -1242,16 +1398,19 @@ int door_wtrigger(Character *actor, int subcmd, int dir) {
     return 1;
 }
 
-void time_wtrigger(Room *room) {
+void time_wtrigger(Room *room)
+{
     char buf[MAX_INPUT_LENGTH];
 
     if (!SCRIPT_CHECK(room, WTRIG_TIME))
         return;
 
     auto scripts = room->getScripts();
-    for (const auto& t : filter_shared(scripts)) {
+    for (const auto &t : filter_shared(scripts))
+    {
         if (TRIGGER_CHECK(t, WTRIG_TIME) &&
-            (time_info.hours == GET_TRIG_NARG(t))) {
+            (time_info.hours == GET_TRIG_NARG(t)))
+        {
             sprintf(buf, "%d", time_info.hours);
             t->setVariable("time", buf);
             t->execute();
@@ -1260,15 +1419,18 @@ void time_wtrigger(Room *room) {
     }
 }
 
-void interval_wtrigger(Room *room, int trigFlag) {
+void interval_wtrigger(Room *room, int trigFlag)
+{
     if (!SCRIPT_CHECK(room, WTRIG_TIME))
         return;
 
     auto scripts = room->getScripts();
-    for (const auto& t : filter_shared(scripts)) {
-        if (TRIGGER_CHECK(t, WTRIG_TIME)) {
+    for (const auto &t : filter_shared(scripts))
+    {
+        if (TRIGGER_CHECK(t, WTRIG_TIME))
+        {
             t->execute();
             break;
-            }
+        }
     }
 }

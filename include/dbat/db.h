@@ -1,102 +1,100 @@
 /* ************************************************************************
-*   File: db.h                                          Part of CircleMUD *
-*  Usage: header file for database handling                               *
-*                                                                         *
-*  All rights reserved.  See license.doc for complete information.        *
-*                                                                         *
-*  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
-*  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
-************************************************************************ */
+ *   File: db.h                                          Part of CircleMUD *
+ *  Usage: header file for database handling                               *
+ *                                                                         *
+ *  All rights reserved.  See license.doc for complete information.        *
+ *                                                                         *
+ *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
+ *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
+ ************************************************************************ */
 #pragma once
 
 #include "structs.h"
 
+#define LIB_USER "data/user/"
+#define LIB_INTRO "data/intro/"
+#define LIB_SENSE "data/sense/"
+#define LIB_WORLD "data/world/"
+#define LIB_TEXT "data/text/"
+#define LIB_TEXT_HELP "data/text/help/"
+#define LIB_MISC "data/misc/"
+#define LIB_ETC "data/etc/"
+#define LIB_PLRTEXT "data/plrtext/"
+#define LIB_PLROBJS "data/plrobjs/"
+#define LIB_PLRVARS "data/plrvars/"
+#define LIB_PLRALIAS "data/plralias/"
+#define LIB_PLRFILES "data/plrfiles/"
+#define LIB_HOUSE "data/house/"
+#define LIB_PLRIMC "data/plrimc/"
+#define SLASH "/"
 
-#define LIB_USER        "data/user/"
-#define LIB_INTRO       "data/intro/"
-#define LIB_SENSE       "data/sense/"
-#define LIB_WORLD    "data/world/"
-#define LIB_TEXT    "data/text/"
-#define LIB_TEXT_HELP    "data/text/help/"
-#define LIB_MISC    "data/misc/"
-#define LIB_ETC        "data/etc/"
-#define LIB_PLRTEXT    "data/plrtext/"
-#define LIB_PLROBJS    "data/plrobjs/"
-#define LIB_PLRVARS    "data/plrvars/"
-#define LIB_PLRALIAS    "data/plralias/"
-#define LIB_PLRFILES    "data/plrfiles/"
-#define LIB_HOUSE    "data/house/"
-#define LIB_PLRIMC      "data/plrimc/"
-#define SLASH        "/"
-
-#define SUF_OBJS    "new"
-#define SUF_TEXT    "text"
-#define SUF_ALIAS    "alias"
-#define SUF_MEM            "mem"
-#define SUF_PLR            "plr"
-#define SUF_PET        "pet"
-#define SUF_IMC         "imc"
-#define SUF_USER        "usr"
-#define SUF_INTRO       "itr"
-#define SUF_SENSE       "sen"
-#define SUF_CUSTOM      "cus"
+#define SUF_OBJS "new"
+#define SUF_TEXT "text"
+#define SUF_ALIAS "alias"
+#define SUF_MEM "mem"
+#define SUF_PLR "plr"
+#define SUF_PET "pet"
+#define SUF_IMC "imc"
+#define SUF_USER "usr"
+#define SUF_INTRO "itr"
+#define SUF_SENSE "sen"
+#define SUF_CUSTOM "cus"
 
 /* names of various files and directories */
-#define INDEX_FILE    "index"        /* index of world files		*/
-#define MINDEX_FILE    "index.mini"    /* ... and for mini-mud-mode	*/
-#define WLD_PREFIX    LIB_WORLD "wld" SLASH    /* room definitions	*/
-#define MOB_PREFIX    LIB_WORLD "mob" SLASH    /* monster prototypes	*/
-#define OBJ_PREFIX    LIB_WORLD "obj" SLASH    /* object prototypes	*/
-#define ZON_PREFIX    LIB_WORLD "zon" SLASH    /* zon defs & command tables */
-#define SHP_PREFIX    LIB_WORLD "shp" SLASH    /* shop definitions	*/
-#define HLP_PREFIX    LIB_TEXT "help" SLASH    /* for HELP <keyword>	*/
-#define TRG_PREFIX    LIB_WORLD "trg" SLASH    /* trigger files	*/
-#define GLD_PREFIX    LIB_WORLD "gld" SLASH    /* guild files		*/
+#define INDEX_FILE "index"               /* index of world files		*/
+#define MINDEX_FILE "index.mini"         /* ... and for mini-mud-mode	*/
+#define WLD_PREFIX LIB_WORLD "wld" SLASH /* room definitions	*/
+#define MOB_PREFIX LIB_WORLD "mob" SLASH /* monster prototypes	*/
+#define OBJ_PREFIX LIB_WORLD "obj" SLASH /* object prototypes	*/
+#define ZON_PREFIX LIB_WORLD "zon" SLASH /* zon defs & command tables */
+#define SHP_PREFIX LIB_WORLD "shp" SLASH /* shop definitions	*/
+#define HLP_PREFIX LIB_TEXT "help" SLASH /* for HELP <keyword>	*/
+#define TRG_PREFIX LIB_WORLD "trg" SLASH /* trigger files	*/
+#define GLD_PREFIX LIB_WORLD "gld" SLASH /* guild files		*/
 
-#define CREDITS_FILE    LIB_TEXT "credits" /* for the 'credits' command	*/
-#define NEWS_FILE    LIB_TEXT "news"    /* for the 'news' command	*/
-#define MOTD_FILE    LIB_TEXT "motd"    /* messages of the day / mortal	*/
-#define IMOTD_FILE    LIB_TEXT "imotd"    /* messages of the day / immort	*/
-#define GREETINGS_FILE    LIB_TEXT "greetings"    /* The opening screen.	*/
-#define GREETANSI_FILE    LIB_TEXT "greetansi"    /* The opening screen.	*/
-#define HELP_PAGE_FILE    LIB_TEXT_HELP "screen"    /* for HELP <CR>	*/
-#define CONTEXT_HELP_FILE LIB_TEXT "contexthelp"    /* The opening screen.	*/
-#define INFO_FILE    LIB_TEXT "info"        /* for INFO		*/
-#define WIZLIST_FILE    LIB_TEXT "wizlist"    /* for WIZLIST		*/
-#define IMMLIST_FILE    LIB_TEXT "immlist"    /* for IMMLIST		*/
-#define BACKGROUND_FILE    LIB_TEXT "background"/* for the background story	*/
-#define POLICIES_FILE    LIB_TEXT "policies"  /* player policies/rules	*/
-#define HANDBOOK_FILE    LIB_TEXT "handbook"  /* handbook for new immorts	*/
-#define IHELP_PAGE_FILE    LIB_TEXT_HELP "iscreen"    /* for HELP <CR>	*/
-#define HELP_FILE       "help.hlp"
+#define CREDITS_FILE LIB_TEXT "credits"          /* for the 'credits' command	*/
+#define NEWS_FILE LIB_TEXT "news"                /* for the 'news' command	*/
+#define MOTD_FILE LIB_TEXT "motd"                /* messages of the day / mortal	*/
+#define IMOTD_FILE LIB_TEXT "imotd"              /* messages of the day / immort	*/
+#define GREETINGS_FILE LIB_TEXT "greetings"      /* The opening screen.	*/
+#define GREETANSI_FILE LIB_TEXT "greetansi"      /* The opening screen.	*/
+#define HELP_PAGE_FILE LIB_TEXT_HELP "screen"    /* for HELP <CR>	*/
+#define CONTEXT_HELP_FILE LIB_TEXT "contexthelp" /* The opening screen.	*/
+#define INFO_FILE LIB_TEXT "info"                /* for INFO		*/
+#define WIZLIST_FILE LIB_TEXT "wizlist"          /* for WIZLIST		*/
+#define IMMLIST_FILE LIB_TEXT "immlist"          /* for IMMLIST		*/
+#define BACKGROUND_FILE LIB_TEXT "background"    /* for the background story	*/
+#define POLICIES_FILE LIB_TEXT "policies"        /* player policies/rules	*/
+#define HANDBOOK_FILE LIB_TEXT "handbook"        /* handbook for new immorts	*/
+#define IHELP_PAGE_FILE LIB_TEXT_HELP "iscreen"  /* for HELP <CR>	*/
+#define HELP_FILE "help.hlp"
 #define MAP_FILE "data/surface.map" /* for the map command */
 
-#define IDEA_FILE    LIB_MISC "ideas"       /* for the 'idea'-command	*/
-#define TYPO_FILE    LIB_MISC "typos"       /*         'typo'		*/
-#define BUG_FILE    LIB_MISC "bugs"       /*         'bug'		*/
-#define REQUEST_FILE    LIB_MISC "request"  /*      RPP Requests         */
-#define CUSTOM_FILE     LIB_MISC "customs"  /*      Custom EQ            */
-#define MESS_FILE    LIB_MISC "messages" /* damage messages		*/
-#define SOCMESS_FILE    LIB_MISC "socials"  /* messages for social acts	*/
-#define SOCMESS_FILE_NEW LIB_MISC "socials.new"  /* messages for social acts with aedit patch*/
-#define XNAME_FILE    LIB_MISC "xnames"   /* invalid name substrings	*/
+#define IDEA_FILE LIB_MISC "ideas"              /* for the 'idea'-command	*/
+#define TYPO_FILE LIB_MISC "typos"              /*         'typo'		*/
+#define BUG_FILE LIB_MISC "bugs"                /*         'bug'		*/
+#define REQUEST_FILE LIB_MISC "request"         /*      RPP Requests         */
+#define CUSTOM_FILE LIB_MISC "customs"          /*      Custom EQ            */
+#define MESS_FILE LIB_MISC "messages"           /* damage messages		*/
+#define SOCMESS_FILE LIB_MISC "socials"         /* messages for social acts	*/
+#define SOCMESS_FILE_NEW LIB_MISC "socials.new" /* messages for social acts with aedit patch*/
+#define XNAME_FILE LIB_MISC "xnames"            /* invalid name substrings	*/
 
-#define CONFIG_FILE   LIB_ETC "config"      /* OasisOLC * GAME CONFIG FL */
-#define PLAYER_FILE    LIB_ETC "players"   /* the player database	*/
-#define MAIL_FILE    LIB_ETC "plrmail"   /* for the mudmail system	*/
-#define BAN_FILE    LIB_ETC "badsites"  /* for the siteban system	*/
-#define HCONTROL_FILE    LIB_ETC "hcontrol"  /* for the house system	*/
-#define TIME_FILE    LIB_ETC "time"       /* for calendar system	*/
-#define AUCTION_FILE    LIB_ETC "auction"   /* for the auction house system */
-#define ASSEMBLIES_FILE LIB_ETC "assemblies"/* for assemblies system 	*/
-#define LEVEL_CONFIG    LIB_ETC "levels"       /* set various level values  */
+#define CONFIG_FILE LIB_ETC "config"         /* OasisOLC * GAME CONFIG FL */
+#define PLAYER_FILE LIB_ETC "players"        /* the player database	*/
+#define MAIL_FILE LIB_ETC "plrmail"          /* for the mudmail system	*/
+#define BAN_FILE LIB_ETC "badsites"          /* for the siteban system	*/
+#define HCONTROL_FILE LIB_ETC "hcontrol"     /* for the house system	*/
+#define TIME_FILE LIB_ETC "time"             /* for calendar system	*/
+#define AUCTION_FILE LIB_ETC "auction"       /* for the auction house system */
+#define ASSEMBLIES_FILE LIB_ETC "assemblies" /* for assemblies system 	*/
+#define LEVEL_CONFIG LIB_ETC "levels"        /* set various level values  */
 
 /* new bitvector data for use in player_index_element */
-#define PINDEX_DELETED        (1 << 0)    /* deleted player	*/
-#define PINDEX_NODELETE        (1 << 1)    /* protected player	*/
-#define PINDEX_SELFDELETE    (1 << 2)    /* player is selfdeleting*/
-#define PINDEX_NOWIZLIST    (1 << 3)    /* Player shouldn't be on wizlist*/
-
+#define PINDEX_DELETED (1 << 0)    /* deleted player	*/
+#define PINDEX_NODELETE (1 << 1)   /* protected player	*/
+#define PINDEX_SELFDELETE (1 << 2) /* player is selfdeleting*/
+#define PINDEX_NOWIZLIST (1 << 3)  /* Player shouldn't be on wizlist*/
 
 // global variables
 
@@ -116,9 +114,9 @@ extern char *help, *ihelp, *credits, *news, *info, *wizlist, *immlist, *backgrou
 extern char *policies, *handbook, *motd, *imotd, *GREETINGS, *GREETANSI;
 extern int top_of_helpt, dballtime;
 extern int mini_mud, no_rent_check, no_mail;
-extern room_rnum r_mortal_start_room;    /* rnum of mortal start room	 */
-extern room_rnum r_immort_start_room;    /* rnum of immort start room	 */
-extern room_rnum r_frozen_start_room;    /* rnum of frozen start room	 */
+extern room_rnum r_mortal_start_room; /* rnum of mortal start room	 */
+extern room_rnum r_immort_start_room; /* rnum of immort start room	 */
+extern room_rnum r_frozen_start_room; /* rnum of frozen start room	 */
 
 extern time_t old_beginning_of_time;
 
@@ -155,7 +153,7 @@ extern void boot_db_sort();
 
 extern void boot_db_new();
 
-extern help_index_element* get_help(const std::string& name, int level);
+extern help_index_element *get_help(const std::string &name, int level);
 
 extern void zone_update(uint64_t heartPulse, double deltaTime);
 extern void repairRoomDamage(uint64_t heartPulse, double deltaTime);
@@ -220,7 +218,7 @@ extern int vnum_armortype(char *searchname, Character *ch);
 
 extern void migrate_db();
 
-extern Room* get_room(room_vnum vn);
+extern Room *get_room(room_vnum vn);
 
 constexpr int REAL = 0;
 constexpr int VIRTUAL = 1;
@@ -238,12 +236,11 @@ extern time_t boot_time;
 
 extern struct config_data config_info;
 
-
 // world data...
 extern NegativeKeyGuardMap<room_vnum, std::shared_ptr<Room>> world;
-extern struct time_info_data time_info;/* the infomation about the time    */
-extern struct time_info_data era_uptime;/* the infomation about the time    */
-extern struct weather_data weather_info;    /* the infomation about the weather */
+extern struct time_info_data time_info;  /* the infomation about the time    */
+extern struct time_info_data era_uptime; /* the infomation about the time    */
+extern struct weather_data weather_info; /* the infomation about the weather */
 
 extern NegativeKeyGuardUnorderedMap<int, std::shared_ptr<struct Entity>> units;
 
@@ -251,7 +248,7 @@ extern NegativeKeyGuardMap<room_vnum, std::shared_ptr<Room>> world;
 extern NegativeKeyGuardMap<zone_vnum, struct Zone> zone_table;
 
 extern struct descriptor_data *descriptor_list;
-extern NegativeKeyGuardMap<int64_t, struct descriptor_data*> sessions;
+extern NegativeKeyGuardMap<int64_t, struct descriptor_data *> sessions;
 
 extern NegativeKeyGuardMap<mob_vnum, struct index_data> mob_index;
 extern NegativeKeyGuardMap<mob_vnum, CharacterPrototype> mob_proto;
@@ -279,12 +276,11 @@ extern int64_t lastAccountID;
 
 int64_t getNextAccountID();
 
+bool isUID(const std::string &uid);
+std::shared_ptr<HasDgScripts> resolveUID(const std::string &uid);
 
-bool isUID(const std::string& uid);
-std::shared_ptr<HasDgScripts> resolveUID(const std::string& uid);
-
-bool isLocID(const std::string& lid);
-std::shared_ptr<AbstractLocation> resolveLocID(const std::string& lid);
+bool isLocID(const std::string &lid);
+std::shared_ptr<AbstractLocation> resolveLocID(const std::string &lid);
 
 extern Character *affect_list;
 extern Character *affectv_list;
@@ -294,7 +290,7 @@ extern SubscriptionManager<Object> objectSubscriptions;
 extern SubscriptionManager<Room> roomSubscriptions;
 extern SubscriptionManager<DgScript> triggerSubscriptions;
 
-extern int create_join_session(int account_id, int character_id, int64_t connection_id, const std::string& ip);
+extern int create_join_session(int account_id, int character_id, int64_t connection_id, const std::string &ip);
 
 extern struct social_messg *soc_mess_list;
 extern int top_of_socialt;
@@ -307,17 +303,17 @@ extern bitvector_t asciiflag_conv(char *flag);
 
 extern void reset_zone(zone_rnum zone);
 
-extern std::vector<CharacterPrototype*> collectNPCProtos(int start_vnum, int end_vnum);
-extern std::vector<ObjectPrototype*> collectItemProtos(int start_vnum, int end_vnum);
-extern std::vector<guild_data*> collectGuilds(int start_vnum, int end_vnum);
-extern std::vector<shop_data*> collectShops(int start_vnum, int end_vnum);
-extern std::vector<DgScriptPrototype*> collectTriggers(int start_vnum, int end_vnum);
+extern std::vector<CharacterPrototype *> collectNPCProtos(int start_vnum, int end_vnum);
+extern std::vector<ObjectPrototype *> collectItemProtos(int start_vnum, int end_vnum);
+extern std::vector<guild_data *> collectGuilds(int start_vnum, int end_vnum);
+extern std::vector<shop_data *> collectShops(int start_vnum, int end_vnum);
+extern std::vector<DgScriptPrototype *> collectTriggers(int start_vnum, int end_vnum);
 
 /* For disabled commands code by Erwin S. Andreasen, */
 /* ported to CircleMUD by Myrdred (Alexei Svitkine)  */
 
-#define DISABLED_FILE    "data/disabled.cmds"  /* disabled commands */
-#define END_MARKER    "END" /* for load_disabled() and save_disabled() */
+#define DISABLED_FILE "data/disabled.cmds" /* disabled commands */
+#define END_MARKER "END"                   /* for load_disabled() and save_disabled() */
 
 // commands
 extern ACMD(do_reboot);

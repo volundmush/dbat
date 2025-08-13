@@ -33,7 +33,7 @@
 #include "dbat/random.h"
 
 /* global variables */
-Object *obj_selling = nullptr; /* current object for sale */
+Object *obj_selling = nullptr;   /* current object for sale */
 Character *ch_selling = nullptr; /* current character selling obj */
 Character *ch_buying = nullptr;  /* current character buying the object */
 
@@ -3581,7 +3581,7 @@ ACMD(do_drink)
     if (IS_NPC(ch))
     { /* Cannot use GET_COND() on mobs. */
         act("$n@w drinks from $p.", true, ch, temp, nullptr, TO_ROOM);
-    temp->clearLocation();
+        temp->clearLocation();
         extract_obj(temp);
         return;
     }

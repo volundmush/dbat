@@ -14,7 +14,8 @@ extern int invalid_race(Character *ch, Object *obj);
 
 // C++ conversion
 
-namespace race {
+namespace race
+{
 
     extern std::string getName(Race id);
     extern std::string getAbbr(Race id);
@@ -38,6 +39,6 @@ namespace race {
     extern double getModifierExact(Character *ch, int location, int specific);
 
     extern std::vector<Race> filterRaces(std::function<bool(Race)> func);
-    extern std::optional<Race> findRace(const std::string& arg, std::function<bool(Race)> func);
+    extern std::optional<Race> findRace(const std::string &arg, std::function<bool(Race)> func);
 
 }

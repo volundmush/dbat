@@ -194,13 +194,21 @@ ASPELL(spell_locate_object)
         if (auto l = i->location)
         {
             ch->send_to(" is in %s.\r\n", l.getName());
-        } else if(auto c = i->getCarriedBy()) {
+        }
+        else if (auto c = i->getCarriedBy())
+        {
             ch->send_to(" is being carried by %s.\r\n", PERS(c, ch));
-        } else if(auto c = i->getWornBy()) {
+        }
+        else if (auto c = i->getWornBy())
+        {
             ch->send_to(" is being worn by %s.\r\n", PERS(c, ch));
-        } else if(auto o = i->getContainer()) {
+        }
+        else if (auto o = i->getContainer())
+        {
             ch->send_to(" is in %s.\r\n", o->getShortDescription());
-        } else {
+        }
+        else
+        {
             ch->sendText(" is in an unknown location.\r\n");
         }
 

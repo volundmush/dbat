@@ -61,9 +61,9 @@ static void perform_mortal_where(Character *ch, char *arg);
 
 static void perform_immort_where(Character *ch, char *arg);
 
-static void char_to_char(Character *i, Character *ch);
+static void diag_char_to_char(Character *i, Character *ch);
 
-static void obj_to_char(Object *obj, Character *ch);
+static void diag_obj_to_char(Object *obj, Character *ch);
 
 static void look_at_char(Character *i, Character *ch);
 
@@ -776,7 +776,7 @@ ACMD(do_post)
         }
         act("@WYou post $p@W on a nearby structure.@n", true, ch, obj, nullptr, TO_CHAR);
         act("@C$n@W posts $p@W on a nearby structure.@n", true, ch, obj, nullptr, TO_ROOM);
-    obj->clearLocation();
+        obj->clearLocation();
         obj->setLocation(ch);
         GET_OBJ_POSTTYPE(obj) = 1;
         return;
@@ -1933,7 +1933,7 @@ static void show_obj_to_char(Object *obj, Character *ch, int mode)
             ch->send_to("The weapon type of %s@n is '%s'.\r\n", GET_OBJ_SHORT(obj), weapon_disp[num]);
             ch->send_to("You could wield it %s.\r\n", wield_names[wield_type(get_size(ch), obj)]);
         }
-        ch->addToInventory(obj);
+        diag_obj_to_char(obj, ch);
         ch->send_to("It appears to be made of %s, and weighs %s", material_names[GET_OBJ_MATERIAL(obj)], add_commas(GET_OBJ_WEIGHT(obj)).c_str());
         break;
 
@@ -2094,7 +2094,7 @@ static void list_obj_to_char(const std::vector<std::weak_ptr<Object>> &list, Cha
         ch->sendText(" Nothing.\r\n");
 }
 
-static void obj_to_char(Object *obj, Character *ch)
+static void diag_obj_to_char(Object *obj, Character *ch)
 {
     struct
     {
@@ -2125,7 +2125,7 @@ static void obj_to_char(Object *obj, Character *ch)
     ch->send_to("\r\n%c%s %s\r\n", UPPER(*objs), objs + 1, diagnosis[ar_index].text);
 }
 
-static void char_to_char(Character *i, Character *ch)
+static void diag_char_to_char(Character *i, Character *ch)
 {
     struct
     {
@@ -2386,7 +2386,7 @@ static void look_at_char(Character *i, Character *ch)
             ch->sendText(" appears to be slightly older than you, and ");
         }
     }
-    char_to_char(i, ch);
+    diag_char_to_char(i, ch);
     found = false;
     for (j = 0; !found && j < NUM_WEARS; j++)
         if (GET_EQ(i, j) && CAN_SEE_OBJ(ch, GET_EQ(i, j)))
@@ -3847,7 +3847,7 @@ static void examine_equipped_item(Character *ch, Object *obj, const char *arg)
         {
             display_scroll(ch, obj);
         }
-        ch->addToInventory(obj);
+        diag_obj_to_char(obj, ch);
         ch->send_to("It appears to be made of %s", material_names[GET_OBJ_MATERIAL(obj)]);
     }
 }
@@ -3894,7 +3894,7 @@ static void examine_item(Character *ch, Object *obj, const char *arg)
                                                                                                    : "@r",
                         add_commas(GET_FUEL(obj)).c_str());
         }
-        ch->addToInventory(obj);
+        diag_obj_to_char(obj, ch);
         ch->send_to("It appears to be made of %s, and weighs %s", material_names[GET_OBJ_MATERIAL(obj)], add_commas(GET_OBJ_WEIGHT(obj)).c_str());
     }
 }
@@ -3902,10 +3902,10 @@ static void examine_item(Character *ch, Object *obj, const char *arg)
 static void handle_board_read(Character *ch, char *arg)
 {
     Object *obj = ch->searchInventory([](const auto &o)
-                                          { return GET_OBJ_TYPE(o) == ITEM_BOARD; });
+                                      { return GET_OBJ_TYPE(o) == ITEM_BOARD; });
     if (!obj)
         obj = ch->location.searchObjects([](const auto &o)
-                                      { return GET_OBJ_TYPE(o) == ITEM_BOARD; });
+                                         { return GET_OBJ_TYPE(o) == ITEM_BOARD; });
 
     if (!obj)
     {
@@ -4077,7 +4077,7 @@ static void look_out_window(Character *ch, const char *arg)
     }
     /* Look for any old window in the room */
     viewport = ch->location.searchObjects([&](auto obj)
-                                       { return GET_OBJ_TYPE(obj) == ITEM_WINDOW && isname("window", obj->getName()); });
+                                          { return GET_OBJ_TYPE(obj) == ITEM_WINDOW && isname("window", obj->getName()); });
 
     if (!viewport)
     {
@@ -6310,18 +6310,27 @@ static void print_object_location(int num, Object *obj, Character *ch,
 
     if (!obj->getProtoScript().empty())
         ch->send_to("%s", obj->scriptString().c_str());
-    
-    if(auto r = obj->getRoom()) {
+
+    if (auto r = obj->getRoom())
+    {
         ch->send_to("[%5d] %s\r\n", r->getVnum(), r->getName());
-    } else if(auto c = obj->getCarriedBy()) {
+    }
+    else if (auto c = obj->getCarriedBy())
+    {
         ch->send_to("carried by %s in room [%d]\r\n", PERS(c, ch), c->location.getVnum());
-    } else if(auto c = obj->getWornBy()) {
+    }
+    else if (auto c = obj->getWornBy())
+    {
         ch->send_to("worn by %s in room [%d]\r\n", PERS(c, ch), c->location.getVnum());
-    } else if(auto o = obj->getContainer()) {
+    }
+    else if (auto o = obj->getContainer())
+    {
         ch->send_to("inside %s%s\r\n", o->getShortDescription(), (recur ? ", which is" : " "));
         if (recur)
             print_object_location(0, o, ch, recur);
-    } else {
+    }
+    else
+    {
         ch->sendText("in an unknown location\r\n");
     }
 }
@@ -6511,7 +6520,7 @@ ACMD(do_diagnose)
     }
 
     ch->send_to("%s", HSSH(ch));
-    char_to_char(vict, ch);
+    diag_char_to_char(vict, ch);
 }
 
 static const char *ctypes[] = {

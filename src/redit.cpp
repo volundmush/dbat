@@ -33,12 +33,12 @@
 
 /*------------------------------------------------------------------------*/
 
-
 /*------------------------------------------------------------------------*\
   Utils and exported functions.
 \*------------------------------------------------------------------------*/
 
-ACMD(do_oasis_redit) {
+ACMD(do_oasis_redit)
+{
     char *buf3;
     char buf1[MAX_STRING_LENGTH];
     char buf2[MAX_STRING_LENGTH];
@@ -46,12 +46,14 @@ ACMD(do_oasis_redit) {
     struct descriptor_data *d;
 
     /* Parse any arguments. */
-    if (GET_ADMLEVEL(ch) > 0) {
+    if (GET_ADMLEVEL(ch) > 0)
+    {
         buf3 = two_arguments(argument, buf1, buf2);
     }
 
-    if (GET_ADMLEVEL(ch) < 1 && !ch->location.getRoomFlag(ROOM_CANREMODEL)) {
-                ch->sendText("You can not remodel this room.\r\n");
+    if (GET_ADMLEVEL(ch) < 1 && !ch->location.getRoomFlag(ROOM_CANREMODEL))
+    {
+        ch->sendText("You can not remodel this room.\r\n");
         return;
     }
 
@@ -60,10 +62,13 @@ ACMD(do_oasis_redit) {
 
     remove = ch->searchInventory(19094);
 
-    if (remove == nullptr && GET_ADMLEVEL(ch) < 1) {
-                ch->sendText("You do not have a R.A.D. Remodeling Assistance Droid.\r\n");
+    if (remove == nullptr && GET_ADMLEVEL(ch) < 1)
+    {
+        ch->sendText("You do not have a R.A.D. Remodeling Assistance Droid.\r\n");
         return;
-    } else if (GET_ADMLEVEL(ch) < 1) {
+    }
+    else if (GET_ADMLEVEL(ch) < 1)
+    {
         act("@GYou open up the computer panel on the droid and begin to program its remodeling routine.@n", true, ch,
             nullptr, nullptr, TO_CHAR);
         act("@g$n@G opens up a computer panel on some kind of small spherical droid and begins to program it.@n", true,
@@ -74,9 +79,11 @@ ACMD(do_oasis_redit) {
 
     if (!*buf1 || GET_ADMLEVEL(ch) < 1)
         number = ch->location.getVnum();
-    else if (!isdigit(*buf1)) {
-        if (strcasecmp("save", buf1) != 0) {
-                        ch->sendText("Yikes!  Stop that, someone will get hurt!\r\n");
+    else if (!isdigit(*buf1))
+    {
+        if (strcasecmp("save", buf1) != 0)
+        {
+            ch->sendText("Yikes!  Stop that, someone will get hurt!\r\n");
             return;
         }
 
@@ -84,17 +91,17 @@ ACMD(do_oasis_redit) {
 
         if (is_number(buf2))
             number = atoi(buf2);
-        else if (GET_OLC_ZONE(ch) >= 0) {
+        else if (GET_OLC_ZONE(ch) >= 0)
+        {
             zone_rnum zlok;
 
             if ((zlok = real_zone(GET_OLC_ZONE(ch))) == NOWHERE)
                 number = NOWHERE;
-            else
-                number = genolc_zone_bottom(zlok);
         }
 
-        if (number == NOWHERE) {
-                        ch->sendText("Save which zone?\r\n");
+        if (number == NOWHERE)
+        {
+            ch->sendText("Save which zone?\r\n");
             return;
         }
     }
@@ -106,10 +113,13 @@ ACMD(do_oasis_redit) {
         number = atoi(buf1);
 
     /* Check to make sure the room isn't already being edited. */
-    for (d = descriptor_list; d; d = d->next) {
-        if (STATE(d) == CON_REDIT) {
-            if (d->olc && OLC_NUM(d) == number) {
-                                ch->send_to("That room is currently being edited by %s.\r\n", PERS(d->character, ch));
+    for (d = descriptor_list; d; d = d->next)
+    {
+        if (STATE(d) == CON_REDIT)
+        {
+            if (d->olc && OLC_NUM(d) == number)
+            {
+                ch->send_to("That room is currently being edited by %s.\r\n", PERS(d->character, ch));
                 return;
             }
         }
@@ -119,7 +129,8 @@ ACMD(do_oasis_redit) {
     d = ch->desc;
 
     /* Give the descriptor an OLC structure. */
-    if (d->olc) {
+    if (d->olc)
+    {
         mudlog(BRF, ADMLVL_IMMORT, true, "SYSERR: do_oasis_redit: Player already had olc structure.");
         delete d->olc;
     }
@@ -128,29 +139,28 @@ ACMD(do_oasis_redit) {
     d->olc = new oasis_olc_data();
 
     /* Find the zone. */
-    OLC_ZNUM(d) = save ? real_zone(number) : real_zone_by_thing(number);
-    if (OLC_ZNUM(d) == NOWHERE) {
-                ch->sendText("Sorry, there is no zone for that number!\r\n");
+    OLC_ZNUM(d) = save ? real_zone(number) : NOWHERE;
+    if (OLC_ZNUM(d) == NOWHERE)
+    {
+        ch->sendText("Sorry, there is no zone for that number!\r\n");
         delete d->olc;
         d->olc = nullptr;
         return;
     }
-    auto& z = zone_table.at(OLC_ZNUM(d));
+
     /* Make sure the builder is allowed to modify this zone. */
-    if (!can_edit_zone(ch, OLC_ZNUM(d)) && remodeling == false) {
-        send_cannot_edit(ch, z.number);
+    if (!can_edit_zone(ch, NOWHERE) && remodeling == false)
+    {
+        send_cannot_edit(ch, NOWHERE);
         delete d->olc;
         d->olc = nullptr;
         return;
     }
 
-    if (save) {
-                ch->send_to("Saving all rooms in zone %d.\r\n", z.number);
-        mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), true, "OLC: %s saves room info for zone %d.", GET_NAME(ch),
-              z.number);
-
-        /* Save the rooms. */
-        save_rooms(OLC_ZNUM(d));
+    if (save)
+    {
+        ch->send_to("Saving all rooms\r\n");
+        mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), true, "OLC: %s saves room info.", GET_NAME(ch));
 
         /* Free the olc data from the descriptor. */
         delete d->olc;
@@ -170,11 +180,12 @@ ACMD(do_oasis_redit) {
     act("$n starts using OLC.", true, d->character, nullptr, nullptr, TO_ROOM);
     ch->player_flags.set(PLR_WRITING, true);
 
-    mudlog(BRF, ADMLVL_IMMORT, true, "OLC: %s starts editing zone %d allowed zone %d",
-           GET_NAME(ch), z.number, GET_OLC_ZONE(ch));
+    mudlog(BRF, ADMLVL_IMMORT, true, "OLC: %s starts editing",
+           GET_NAME(ch));
 }
 
-void redit_setup_new(struct descriptor_data *d) {
+void redit_setup_new(struct descriptor_data *d)
+{
     OLC_ROOM(d) = new Room();
 
     OLC_ROOM(d)->strings["name"] = "An unfinished room";
@@ -187,7 +198,8 @@ void redit_setup_new(struct descriptor_data *d) {
 
 /*------------------------------------------------------------------------*/
 
-void redit_setup_existing(struct descriptor_data *d, int real_num) {
+void redit_setup_existing(struct descriptor_data *d, int real_num)
+{
     int counter;
 
     /*
@@ -211,18 +223,21 @@ void redit_setup_existing(struct descriptor_data *d, int real_num) {
 
 /*------------------------------------------------------------------------*/
 
-void redit_save_internally(struct descriptor_data *d) {
+void redit_save_internally(struct descriptor_data *d)
+{
     int j, room_num, new_room = false;
     struct descriptor_data *dsc;
 
-    if (OLC_ROOM(d)->getVnum() == NOWHERE) {
+    if (OLC_ROOM(d)->getVnum() == NOWHERE)
+    {
         new_room = true;
     }
     OLC_ROOM(d)->vn = OLC_NUM(d);
     /* FIXME: Why is this not set elsewhere? */
 
-    if ((room_num = add_room(OLC_ROOM(d))) == NOWHERE) {
-    d->sendText("Something went wrong...\r\n");
+    if ((room_num = add_room(OLC_ROOM(d))) == NOWHERE)
+    {
+        d->sendText("Something went wrong...\r\n");
         basic_mud_log("SYSERR: redit_save_internally: Something failed! (%d)", room_num);
         return;
     }
@@ -233,48 +248,19 @@ void redit_save_internally(struct descriptor_data *d) {
     get_room(room_num)->proto_script = OLC_SCRIPT(d);
     assign_triggers(get_room(room_num), WLD_TRIGGER);
     /* end trigger update */
-
-    /* Don't adjust numbers on a room update. */
-    if (!new_room)
-        return;
-
-    /* Idea contributed by C.Raehl 4/27/99 */
-    for (dsc = descriptor_list; dsc; dsc = dsc->next) {
-        if (dsc == d)
-            continue;
-
-        if (STATE(dsc) == CON_ZEDIT) {
-            for (j = 0; OLC_ZONE(dsc)->cmd[j].command != 'S'; j++)
-                switch (OLC_ZONE(dsc)->cmd[j].command) {
-                    case 'O':
-                    case 'M':
-                    case 'T':
-                    case 'V':
-                        OLC_ZONE(dsc)->cmd[j].arg3 += (OLC_ZONE(dsc)->cmd[j].arg3 >= room_num);
-                        break;
-                    case 'D':
-                        OLC_ZONE(dsc)->cmd[j].arg2 += (OLC_ZONE(dsc)->cmd[j].arg2 >= room_num);
-                        /* Fall through */
-                    case 'R':
-                        OLC_ZONE(dsc)->cmd[j].arg1 += (OLC_ZONE(dsc)->cmd[j].arg1 >= room_num);
-                        break;
-                }
-        } else if (STATE(dsc) == CON_REDIT) {
-
-        }
-    }
 }
 
 /*------------------------------------------------------------------------*/
 
-void redit_save_to_disk(zone_vnum zone_num) {
-    save_rooms(zone_num);        /* :) */
+void redit_save_to_disk(zone_vnum zone_num)
+{
     update_space();
 }
 
 /*------------------------------------------------------------------------*/
 
-void free_room(Room *room) {
+void free_room(Room *room)
+{
     /* Free the strings (Mythran). */
     free_room_strings(room);
 
@@ -282,17 +268,18 @@ void free_room(Room *room) {
     room->proto_script.clear();
 
     /* Free the room. */
-    free(room);    /* XXX ? */
+    free(room); /* XXX ? */
 }
 
 /**************************************************************************
- Menu functions 
+ Menu functions
  **************************************************************************/
 
 /*
  * For extra descriptions.
  */
-void redit_disp_extradesc_menu(struct descriptor_data *d) {
+void redit_disp_extradesc_menu(struct descriptor_data *d)
+{
     struct extra_descr_data *extra_desc = OLC_DESC(d);
 
     clear_screen(d);
@@ -301,8 +288,7 @@ void redit_disp_extradesc_menu(struct descriptor_data *d) {
         "@g2@n) Description:\r\n@y%s\r\n"
         "@g3@n) Goto next description: ",
         extra_desc->keyword ? extra_desc->keyword : "<NONE>",
-        extra_desc->description ? extra_desc->description : "<NONE>"
-    );
+        extra_desc->description ? extra_desc->description : "<NONE>");
 
     d->sendText(!extra_desc->next ? "Not Set.\r\n" : "Set.\r\n");
     d->sendText("Enter choice (0 to quit) : ");
@@ -312,12 +298,14 @@ void redit_disp_extradesc_menu(struct descriptor_data *d) {
 /*
  * For exits.
  */
-void redit_disp_exit_menu(struct descriptor_data *d) {
+void redit_disp_exit_menu(struct descriptor_data *d)
+{
     char door_buf[40];
     /*
      * if exit doesn't exist, alloc/create it
      */
-    if (!OLC_EXIT(d)) {
+    if (!OLC_EXIT(d))
+    {
         OLC_EXIT(d).emplace();
         OLC_EXIT(d)->dir = static_cast<Direction>(OLC_VAL(d));
     }
@@ -339,8 +327,7 @@ void redit_disp_exit_menu(struct descriptor_data *d) {
         !OLC_EXIT(d)->general_description.empty() ? OLC_EXIT(d)->general_description : "<NONE>",
         !OLC_EXIT(d)->keyword.empty() ? OLC_EXIT(d)->keyword : "<NONE>",
         OLC_EXIT(d)->key != NOTHING ? OLC_EXIT(d)->key : -1,
-        door_buf, OLC_EXIT(d)->dclock, OLC_EXIT(d)->dchide
-    );
+        door_buf, OLC_EXIT(d)->dclock, OLC_EXIT(d)->dchide);
 
     OLC_MODE(d) = REDIT_EXIT_MENU;
 }
@@ -348,16 +335,18 @@ void redit_disp_exit_menu(struct descriptor_data *d) {
 /*
  * For exit flags.
  */
-void redit_disp_exit_flag_menu(struct descriptor_data *d) {
+void redit_disp_exit_flag_menu(struct descriptor_data *d)
+{
     char bits[MAX_INPUT_LENGTH];
     int counter, columns = 0;
 
     clear_screen(d);
-    for (counter = 0; counter < NUM_EXIT_FLAGS; counter++) {
-    d->send_to("@g%2d@n) %-20.20s%s",
-           counter + 1,
-           exit_bits[counter],
-           !(++columns % 2) ? "\r\n" : "");
+    for (counter = 0; counter < NUM_EXIT_FLAGS; counter++)
+    {
+        d->send_to("@g%2d@n) %-20.20s%s",
+                   counter + 1,
+                   exit_bits[counter],
+                   !(++columns % 2) ? "\r\n" : "");
     }
     sprintbit(OLC_EXIT(d)->exit_info, exit_bits, bits, sizeof(bits));
     d->send_to("\r\nExit flags: @c%s@n\r\nEnter exit flags, 0 to quit : ", bits);
@@ -367,14 +356,16 @@ void redit_disp_exit_flag_menu(struct descriptor_data *d) {
 /*
  * For room flags.
  */
-void redit_disp_flag_menu(struct descriptor_data *d) {
+void redit_disp_flag_menu(struct descriptor_data *d)
+{
     char bits[MAX_STRING_LENGTH];
     int counter, columns = 0;
 
     clear_screen(d);
-    for (counter = 0; counter < NUM_ROOM_FLAGS; counter++) {
-    d->send_to("@g%2d@n) %-20.20s%s", counter + 1,
-            room_bits[counter], !(++columns % 2) ? "\r\n" : "");
+    for (counter = 0; counter < NUM_ROOM_FLAGS; counter++)
+    {
+        d->send_to("@g%2d@n) %-20.20s%s", counter + 1,
+                   room_bits[counter], !(++columns % 2) ? "\r\n" : "");
     }
     sprintf(bits, "%s", OLC_ROOM(d)->room_flags.getFlagNames().c_str());
     d->send_to("\r\nRoom flags: @c%s@n\r\nEnter room flags, 0 to quit : ", bits);
@@ -384,13 +375,15 @@ void redit_disp_flag_menu(struct descriptor_data *d) {
 /*
  * For sector type.
  */
-void redit_disp_sector_menu(struct descriptor_data *d) {
+void redit_disp_sector_menu(struct descriptor_data *d)
+{
     int counter, columns = 0;
 
     clear_screen(d);
-    for (counter = 0; counter < NUM_ROOM_SECTORS; counter++) {
-    d->send_to("@g%2d@n) %-20.20s%s", counter,
-            sector_types[counter], !(++columns % 3) ? "\r\n" : "");
+    for (counter = 0; counter < NUM_ROOM_SECTORS; counter++)
+    {
+        d->send_to("@g%2d@n) %-20.20s%s", counter,
+                   sector_types[counter], !(++columns % 3) ? "\r\n" : "");
     }
     d->sendText("\r\nEnter sector type : ");
     OLC_MODE(d) = REDIT_SECTOR;
@@ -399,7 +392,8 @@ void redit_disp_sector_menu(struct descriptor_data *d) {
 /*
  * The main menu.
  */
-void redit_disp_menu(struct descriptor_data *d) {
+void redit_disp_menu(struct descriptor_data *d)
+{
     char buf1[MAX_STRING_LENGTH];
     char buf2[MAX_STRING_LENGTH];
     Room *room;
@@ -409,56 +403,58 @@ void redit_disp_menu(struct descriptor_data *d) {
 
     sprintf(buf1, "%s", room->room_flags.getFlagNames().c_str());
     sprinttype(static_cast<int>(room->sector_type), sector_types, buf2, sizeof(buf2));
-    auto& z = zone_table.at(OLC_ZNUM(d));
+    auto &z = zone_table.at(OLC_ZNUM(d));
     auto &ex = OLC_ROOM(d)->exits;
-    if (GET_ADMLEVEL(d->character) > 0) {
-    d->send_to(
-                        "-- Room number : [@c%d@n]  	Room zone: [@c%d@n]\r\n"
-                        "@g1@n) Name        : @y%s\r\n"
-                        "@g2@n) Description :\r\n@y%s"
-                        "@g3@n) Room flags  : @c%s\r\n"
-                        "@g4@n) Sector type : @c%s\r\n"
-                        "@g5@n) Exit north  : [@c%6d@n],  @gB@n) Exit northwest : [@c%6d@n]\r\n"
-                        "@g6@n) Exit east   : [@c%6d@n],  @gC@n) Exit northeast : [@c%6d@n]\r\n"
-                        "@g7@n) Exit south  : [@c%6d@n],  @gD@n) Exit southeast : [@c%6d@n]\r\n"
-                        "@g8@n) Exit west   : [@c%6d@n],  @gE@n) Exit southwest : [@c%6d@n]\r\n"
-                        "@g9@n) Exit up     : [@c%6d@n],  @gF@n) Exit in        : [@c%6d@n]\r\n"
-                        "@gA@n) Exit down   : [@c%6d@n],  @gG@n) Exit out       : [@c%6d@n]\r\n"
-                        "@gH@n) Extra descriptions menu\r\n"
-                        "@gW@n) Copy Room\r\n"
-                        "@gX@n) Delete Room\r\n"
-                        "@gS@n) Script      : @c%s\r\n"
-                        "@gZ@n) Wiznet      :\r\n"
-                        "@gQ@n) Quit\r\n"
-                        "Enter choice : ",
+    if (GET_ADMLEVEL(d->character) > 0)
+    {
+        d->send_to(
+            "-- Room number : [@c%d@n]  	Room zone: [@c%d@n]\r\n"
+            "@g1@n) Name        : @y%s\r\n"
+            "@g2@n) Description :\r\n@y%s"
+            "@g3@n) Room flags  : @c%s\r\n"
+            "@g4@n) Sector type : @c%s\r\n"
+            "@g5@n) Exit north  : [@c%6d@n],  @gB@n) Exit northwest : [@c%6d@n]\r\n"
+            "@g6@n) Exit east   : [@c%6d@n],  @gC@n) Exit northeast : [@c%6d@n]\r\n"
+            "@g7@n) Exit south  : [@c%6d@n],  @gD@n) Exit southeast : [@c%6d@n]\r\n"
+            "@g8@n) Exit west   : [@c%6d@n],  @gE@n) Exit southwest : [@c%6d@n]\r\n"
+            "@g9@n) Exit up     : [@c%6d@n],  @gF@n) Exit in        : [@c%6d@n]\r\n"
+            "@gA@n) Exit down   : [@c%6d@n],  @gG@n) Exit out       : [@c%6d@n]\r\n"
+            "@gH@n) Extra descriptions menu\r\n"
+            "@gW@n) Copy Room\r\n"
+            "@gX@n) Delete Room\r\n"
+            "@gS@n) Script      : @c%s\r\n"
+            "@gZ@n) Wiznet      :\r\n"
+            "@gQ@n) Quit\r\n"
+            "Enter choice : ",
 
-                        OLC_NUM(d), z.number, room->getName(),
-                        room->getLookDescription(), buf1, buf2,
-                        ex.contains(Direction::north) ? ex.at(Direction::north).getVnum() : -1,
-                        ex.contains(Direction::northwest) ? ex.at(Direction::northwest).getVnum() : -1,
-                        ex.contains(Direction::east) ? ex.at(Direction::east).getVnum() : -1,
-                        ex.contains(Direction::northeast) ? ex.at(Direction::northeast).getVnum() : -1,
-                        ex.contains(Direction::south) ? ex.at(Direction::south).getVnum() : -1,
-                        ex.contains(Direction::southeast) ? ex.at(Direction::southeast).getVnum() : -1,
-                        ex.contains(Direction::west) ? ex.at(Direction::west).getVnum() : -1,
-                        ex.contains(Direction::southwest) ? ex.at(Direction::southwest).getVnum() : -1,
-                        ex.contains(Direction::up) ? ex.at(Direction::up).getVnum() : -1,
-                        ex.contains(Direction::inside) ? ex.at(Direction::inside).getVnum() : -1,
-                        ex.contains(Direction::down) ? ex.at(Direction::down).getVnum() : -1,
-                        ex.contains(Direction::outside) ? ex.at(Direction::outside).getVnum() : -1,
-                        !OLC_SCRIPT(d).empty() ? "Set." : "Not Set."
-        );
-    } else {
-    d->send_to(
-                        "-- Room number : [@c%d@n]    Room zone: [@c%d@n]\r\n"
-                        "@g1@n) Location Designation (Room Name)        : @y%s\r\n"
-                        "@g2@n) Remodeling Routine (Room Description)   :\r\n@y%s"
-                        "@gH@n) Extra descriptions menu\r\n"
-                        "@gQ@n) Quit\r\n"
-                        "Enter choice : ",
+            OLC_NUM(d), z.number, room->getName(),
+            room->getLookDescription(), buf1, buf2,
+            ex.contains(Direction::north) ? ex.at(Direction::north).getVnum() : -1,
+            ex.contains(Direction::northwest) ? ex.at(Direction::northwest).getVnum() : -1,
+            ex.contains(Direction::east) ? ex.at(Direction::east).getVnum() : -1,
+            ex.contains(Direction::northeast) ? ex.at(Direction::northeast).getVnum() : -1,
+            ex.contains(Direction::south) ? ex.at(Direction::south).getVnum() : -1,
+            ex.contains(Direction::southeast) ? ex.at(Direction::southeast).getVnum() : -1,
+            ex.contains(Direction::west) ? ex.at(Direction::west).getVnum() : -1,
+            ex.contains(Direction::southwest) ? ex.at(Direction::southwest).getVnum() : -1,
+            ex.contains(Direction::up) ? ex.at(Direction::up).getVnum() : -1,
+            ex.contains(Direction::inside) ? ex.at(Direction::inside).getVnum() : -1,
+            ex.contains(Direction::down) ? ex.at(Direction::down).getVnum() : -1,
+            ex.contains(Direction::outside) ? ex.at(Direction::outside).getVnum() : -1,
+            !OLC_SCRIPT(d).empty() ? "Set." : "Not Set.");
+    }
+    else
+    {
+        d->send_to(
+            "-- Room number : [@c%d@n]    Room zone: [@c%d@n]\r\n"
+            "@g1@n) Location Designation (Room Name)        : @y%s\r\n"
+            "@g2@n) Remodeling Routine (Room Description)   :\r\n@y%s"
+            "@gH@n) Extra descriptions menu\r\n"
+            "@gQ@n) Quit\r\n"
+            "Enter choice : ",
 
-                        OLC_NUM(d), z.number, room->getName(),
-                        room->getLookDescription());
+            OLC_NUM(d), z.number, room->getName(),
+            room->getLookDescription());
     }
 
     OLC_MODE(d) = REDIT_MAIN_MENU;
@@ -468,548 +464,610 @@ void redit_disp_menu(struct descriptor_data *d) {
   The main loop
  **************************************************************************/
 
-void redit_parse(struct descriptor_data *d, char *arg) {
+void redit_parse(struct descriptor_data *d, char *arg)
+{
     int number;
     char *oldtext = nullptr;
 
-    switch (OLC_MODE(d)) {
-        case REDIT_CONFIRM_SAVESTRING:
-            switch (*arg) {
-                case 'y':
-                case 'Y':
-                    redit_save_internally(d);
-                    mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(d->character)), true,
-                           "OLC: %s edits room %d.", GET_NAME(d->character), OLC_NUM(d));
-                    if (CONFIG_OLC_SAVE) {
-                        redit_save_to_disk(real_zone_by_thing(OLC_NUM(d)));
-                        if (GET_ADMLEVEL(d->character) < 1) {
-                            d->send_to(
-                                            "@GThe remodeling droid quickly launches about with remodeling the room to your specifications. It seems to finish in no time at all...@n\r\n");
-                            act("@GThe remodeling droid quickly launches about with remodeling the room as to @g$n's@G specifications. It seems to finish in no time at all...@n",
-                                true, d->character, nullptr, nullptr, TO_ROOM);
-                        } else {
-                            d->sendText("Room saved to disk.\r\n");
-                        }
-                    } else
-                        d->sendText("Room saved to memory.\r\n");
-                    /* Free everything. */
-                    cleanup_olc(d, CLEANUP_ALL);
-                    break;
-                case 'n':
-                case 'N':
-                    /* If not saving, we must free the script_proto list. We do so by
-                     * assigning it to the edited room and letting free_room in
-                     * cleanup_olc handle it. */
-                    OLC_ROOM(d)->proto_script = OLC_SCRIPT(d);
-                    cleanup_olc(d, CLEANUP_ALL);
-                    if (GET_ADMLEVEL(d->character) < 1) {
-                        d->send_to(
-                                        "@GYou close the droids interface and put it back among the rest of your things.@n\r\n");
-                        act("@g$n@G stops typing information into the droid in $s hands and closes it back up.@n\r\n",
-                            true, d->character, nullptr, nullptr, TO_ROOM);
-                        Object *obj;
-                        obj = read_object(19094, VIRTUAL);
-                        d->character->addToInventory(obj);
-                    }
-                    break;
-                default:
-                    d->sendText("Invalid choice!\r\nDo you wish to save your changes ? : ");
-                    break;
-            }
-            return;
-
-        case REDIT_MAIN_MENU:
-            switch (*arg) {
-                case 'q':
-                case 'Q':
-                    if (OLC_VAL(d)) { /* Something has been modified. */
-                        d->sendText("Do you wish to save your changes? : ");
-                        OLC_MODE(d) = REDIT_CONFIRM_SAVESTRING;
-                    } else
-                        cleanup_olc(d, CLEANUP_ALL);
-                    return;
-                case '1':
-                    if (GET_ADMLEVEL(d->character) < 1) {
-                        d->sendText("Enter Location Name:\r\n");
-                    } else {
-                        d->sendText("Enter Room Name:-\r\n] ");
-                    }
-                    OLC_MODE(d) = REDIT_NAME;
-                    break;
-                case '2':
-                    OLC_MODE(d) = REDIT_DESC;
-                    clear_screen(d);
-                    send_editor_help(d);
-                    if (GET_ADMLEVEL(d->character) < 1) {
-                        d->sendText("Set Remodel Parameters (Enter Room Description):-\r\n] ");
-                    } else {
-                        d->sendText("Enter room description:\r\n\r\n");
-                    }
-
-                    if (auto ld = OLC_ROOM(d)->getLookDescription(); ld) {
-                        d->send_to("%s", ld);
-                    }
-                    string_write(d, &OLC_ROOM(d)->strings["look_description"], MAX_ROOM_DESC, 0, OLC_ROOM(d)->strings["look_description"]);
-                    OLC_VAL(d) = 1;
-                    break;
-                case '3':
-                    if (GET_ADMLEVEL(d->character) < 1) {
-                        d->sendText("That options isn't available to non-builders.\r\n");
-                        break;
-                    }
-                    redit_disp_flag_menu(d);
-                    break;
-                case '4':
-                    if (GET_ADMLEVEL(d->character) < 1) {
-                        d->sendText("That options isn't available to non-builders.\r\n");
-                        break;
-                    }
-                    redit_disp_sector_menu(d);
-                    break;
-                case '5':
-                    if (GET_ADMLEVEL(d->character) < 1) {
-                        d->sendText("That options isn't available to non-builders.\r\n");
-                        break;
-                    }
-                    OLC_VAL(d) = NORTH;
-                    redit_disp_exit_menu(d);
-                    break;
-                case '6':
-                    if (GET_ADMLEVEL(d->character) < 1) {
-                        d->sendText("That options isn't available to non-builders.\r\n");
-                        break;
-                    }
-                    OLC_VAL(d) = EAST;
-                    redit_disp_exit_menu(d);
-                    break;
-                case '7':
-                    if (GET_ADMLEVEL(d->character) < 1) {
-                        d->sendText("That options isn't available to non-builders.\r\n");
-                        break;
-                    }
-                    OLC_VAL(d) = SOUTH;
-                    redit_disp_exit_menu(d);
-                    break;
-                case '8':
-                    if (GET_ADMLEVEL(d->character) < 1) {
-                        d->sendText("That options isn't available to non-builders.\r\n");
-                        break;
-                    }
-                    OLC_VAL(d) = WEST;
-                    redit_disp_exit_menu(d);
-                    break;
-                case '9':
-                    if (GET_ADMLEVEL(d->character) < 1) {
-                        d->sendText("That options isn't available to non-builders.\r\n");
-                        break;
-                    }
-                    OLC_VAL(d) = UP;
-                    redit_disp_exit_menu(d);
-                    break;
-                case 'a':
-                case 'A':
-                    if (GET_ADMLEVEL(d->character) < 1) {
-                        d->sendText("That options isn't available to non-builders.\r\n");
-                        break;
-                    }
-                    OLC_VAL(d) = DOWN;
-                    redit_disp_exit_menu(d);
-                    break;
-                case 'b':
-                case 'B':
-                    if (GET_ADMLEVEL(d->character) < 1) {
-                        d->sendText("That options isn't available to non-builders.\r\n");
-                        break;
-                    }
-                    OLC_VAL(d) = NORTHWEST;
-                    redit_disp_exit_menu(d);
-                    break;
-                case 'c':
-                case 'C':
-                    if (GET_ADMLEVEL(d->character) < 1) {
-                        d->sendText("That options isn't available to non-builders.\r\n");
-                        break;
-                    }
-                    OLC_VAL(d) = NORTHEAST;
-                    redit_disp_exit_menu(d);
-                    break;
-                case 'd':
-                case 'D':
-                    if (GET_ADMLEVEL(d->character) < 1) {
-                        d->sendText("That options isn't available to non-builders.\r\n");
-                        break;
-                    }
-                    OLC_VAL(d) = SOUTHEAST;
-                    redit_disp_exit_menu(d);
-                    break;
-                case 'e':
-                case 'E':
-                    if (GET_ADMLEVEL(d->character) < 1) {
-                        d->sendText("That options isn't available to non-builders.\r\n");
-                        break;
-                    }
-                    OLC_VAL(d) = SOUTHWEST;
-                    redit_disp_exit_menu(d);
-                    break;
-                case 'f':
-                case 'F':
-                    if (GET_ADMLEVEL(d->character) < 1) {
-                        d->sendText("That options isn't available to non-builders.\r\n");
-                        break;
-                    }
-                    OLC_VAL(d) = INDIR;
-                    redit_disp_exit_menu(d);
-                    break;
-                case 'g':
-                case 'G':
-                    if (GET_ADMLEVEL(d->character) < 1) {
-                        d->sendText("That options isn't available to non-builders.\r\n");
-                        break;
-                    }
-                    OLC_VAL(d) = OUTDIR;
-                    redit_disp_exit_menu(d);
-                    break;
-                case 'h':
-                case 'H':
-                    /*
-                     * If the extra description doesn't exist.
-                     */
-                    //if (!OLC_ROOM(d)->ex_description)
-                    //    CREATE(OLC_ROOM(d)->ex_description, struct extra_descr_data, 1);
-                    //OLC_DESC(d) = OLC_ROOM(d)->ex_description;
-                    //redit_disp_extradesc_menu(d);
-                    break;
-                case 'w':
-                case 'W':
-                    if (GET_ADMLEVEL(d->character) < 1) {
-                        d->sendText("That options isn't available to non-builders.\r\n");
-                        break;
-                    }
-                    d->sendText("Disabled for the time being!");
-                    /*OLC_MODE(d) = REDIT_COPY;*/
-                    break;
-                case 'x':
-                case 'X':
-                    if (GET_ADMLEVEL(d->character) < 1) {
-                        d->sendText("That options isn't available to non-builders.\r\n");
-                        break;
-                    }
-                    /* Delete the room, prompt first. */
-                    d->sendText("Are you sure you want to delete this room? ");
-                    OLC_MODE(d) = REDIT_DELETE;
-                    break;
-                case 'Z':
-                case 'z':
-                    if (GET_ADMLEVEL(d->character) < 1) {
-                        d->sendText("That options isn't available to non-builders.\r\n");
-                        break;
-                    }
-                    search_replace(arg, "z ", "");
-                    do_wiznet(d->character, arg, 0, 0);
-                    break;
-                default:
-                    d->sendText("Invalid choice!");
-                    redit_disp_menu(d);
-                    break;
-            }
-            return;
-
-        case REDIT_NAME:
-            if (!genolc_checkstring(d, arg))
-                break;
-            arg[MAX_ROOM_NAME] = '\0';
-            OLC_ROOM(d)->strings["name"] = arg;
-            break;
-
-        case REDIT_DESC:
-            /*
-             * We will NEVER get here, we hope.
-             */
-            mudlog(BRF, ADMLVL_BUILDER, true, "SYSERR: Reached REDIT_DESC case in parse_redit().");
-            d->sendText("Oops, in REDIT_DESC.\r\n");
-            break;
-
-        case REDIT_FLAGS:
-            number = atoi(arg);
-            if (number < 0 || number > NUM_ROOM_FLAGS) {
-                d->sendText("That is not a valid choice!\r\n");
-                redit_disp_flag_menu(d);
-            } else if (number == 0)
-                break;
-            else {
-                /*
-                 * Toggle the bit.
-                 */
-                OLC_ROOM(d)->room_flags.toggle(number-1);
-                redit_disp_flag_menu(d);
-            }
-            return;
-
-        case REDIT_SECTOR:
-            number = atoi(arg);
-            if (number < 0 || number >= NUM_ROOM_SECTORS) {
-                d->sendText("Invalid choice!");
-                redit_disp_sector_menu(d);
-                return;
-            }
-            OLC_ROOM(d)->sector_type = static_cast<SectorType>(number);
-            break;
-
-        case REDIT_EXIT_MENU:
-            switch (*arg) {
-                case '0':
-                    if(OLC_EXIT(d)) {
-                        OLC_ROOM(d)->replaceExit(*OLC_EXIT(d));
-                        OLC_EXIT(d).reset();
-                    }
-                    break;
-                case '1':
-                    OLC_MODE(d) = REDIT_EXIT_NUMBER;
-                    d->sendText("Exit to room number : ");
-                    return;
-                case '2':
-                    OLC_MODE(d) = REDIT_EXIT_DESCRIPTION;
-                    send_editor_help(d);
-                    d->sendText("Enter exit description:\r\n\r\n");
-                    if (!OLC_EXIT(d)->general_description.empty()) {
-                        d->send_to("%s", OLC_EXIT(d)->general_description);
-                    }
-                    string_write(d, &OLC_EXIT(d)->general_description, MAX_EXIT_DESC, 0, OLC_EXIT(d)->general_description);
-                    return;
-                case '3':
-                    OLC_MODE(d) = REDIT_EXIT_KEYWORD;
-                    d->sendText("Enter keywords : ");
-                    return;
-                case '4':
-                    OLC_MODE(d) = REDIT_EXIT_KEY;
-                    d->sendText("Enter key number : ");
-                    return;
-                case '5':
-                    OLC_MODE(d) = REDIT_EXIT_DOORFLAGS;
-                    redit_disp_exit_flag_menu(d);
-                    return;
-                case '6':
-                    /*
-                     * Delete an exit.
-                     */
-                    OLC_ROOM(d)->deleteExit(static_cast<Direction>(OLC_VAL(d)));
-                    OLC_EXIT(d).reset();
-                    break;
-                case '7':
-                    OLC_MODE(d) = REDIT_EXIT_DCLOCK;
-                    d->sendText("Enter lock DC number : ");
-                    return;
-                case '8':
-                    OLC_MODE(d) = REDIT_EXIT_DCHIDE;
-                    d->sendText("Enter door search DC number : ");
-                    return;
-                case '9':
-                    OLC_MODE(d) = REDIT_EXIT_DCSKILL;
-                    d->sendText("Enter skill to be checked to pass through exit : ");
-                    return;
-                case 'a':
-                case 'A':
-                    OLC_MODE(d) = REDIT_EXIT_DCMOVE;
-                    d->sendText("Enter DC for skill required to pass through exit : ");
-                    return;
-                case 'b':
-                case 'B':
-                    OLC_MODE(d) = REDIT_EXIT_SAVETYPE;
-                    d->sendText("Enter the SAVE TYPE for failed skill checks : ");
-                    return;
-                case 'c':
-                case 'C':
-                    OLC_MODE(d) = REDIT_EXIT_DCSAVE;
-                    d->sendText("Enter the DC to beat for SAVE from failed skill checks : ");
-                    return;
-                case 'd':
-                case 'D':
-                    OLC_MODE(d) = REDIT_EXIT_FAILROOM;
-                    d->sendText("Enter the room to send play to for minor save failure : ");
-                    return;
-                case 'e':
-                case 'E':
-                    OLC_MODE(d) = REDIT_EXIT_TOTALFAILROOM;
-                    d->sendText("Enter the room to send play to for major save failure : ");
-                    return;
-                default:
-                    d->sendText("Try again : ");
-                    return;
-            }
-            break;
-
-        case REDIT_EXIT_NUMBER:
-            if ((number = atoi(arg)) != -1)
-                if ((number = real_room(number)) == NOWHERE) {
-                    d->sendText("That room does not exist, try again : ");
-                    return;
+    switch (OLC_MODE(d))
+    {
+    case REDIT_CONFIRM_SAVESTRING:
+        switch (*arg)
+        {
+        case 'y':
+        case 'Y':
+            redit_save_internally(d);
+            mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(d->character)), true,
+                   "OLC: %s edits room %d.", GET_NAME(d->character), OLC_NUM(d));
+            if (CONFIG_OLC_SAVE)
+            {
+                update_space();
+                if (GET_ADMLEVEL(d->character) < 1)
+                {
+                    d->send_to(
+                        "@GThe remodeling droid quickly launches about with remodeling the room to your specifications. It seems to finish in no time at all...@n\r\n");
+                    act("@GThe remodeling droid quickly launches about with remodeling the room as to @g$n's@G specifications. It seems to finish in no time at all...@n",
+                        true, d->character, nullptr, nullptr, TO_ROOM);
                 }
-            OLC_EXIT(d)->unit = get_room(number);
-            redit_disp_exit_menu(d);
-            return;
-
-        case REDIT_EXIT_DESCRIPTION:
-            /*
-             * We should NEVER get here, hopefully.
-             */
-            mudlog(BRF, ADMLVL_BUILDER, true, "SYSERR: Reached REDIT_EXIT_DESC case in parse_redit");
-            d->sendText("Oops, in REDIT_EXIT_DESCRIPTION.\r\n");
-            break;
-
-        case REDIT_EXIT_KEYWORD:
-            OLC_EXIT(d)->keyword = arg;
-            redit_disp_exit_menu(d);
-            return;
-
-        case REDIT_EXIT_KEY:
-            number = atoi(arg);
-            if (number < 0)
-                OLC_EXIT(d)->key = NOTHING;
-            else
-                OLC_EXIT(d)->key = number;
-            redit_disp_exit_menu(d);
-            return;
-
-        case REDIT_EXIT_DOORFLAGS:
-            number = atoi(arg);
-            if (number < 0 || number > NUM_EXIT_FLAGS) {
-                d->sendText("That's not a valid choice!\r\n");
-                redit_disp_exit_flag_menu(d);
-            } else if (number == 0) {
-                redit_disp_exit_menu(d);
-            } else {
-                /* Toggle the bit. */
-                TOGGLE_BIT(OLC_EXIT(d)->exit_info, 1 << (number - 1));
-                redit_disp_exit_flag_menu(d);
-            }
-            return;
-
-        case REDIT_EXTRADESC_KEY:
-            if (genolc_checkstring(d, arg)) {
-                if (OLC_DESC(d)->keyword)
-                    free(OLC_DESC(d)->keyword);
-                OLC_DESC(d)->keyword = str_udup(arg);
-            }
-            redit_disp_extradesc_menu(d);
-            return;
-
-        case REDIT_EXTRADESC_MENU:
-            switch ((number = atoi(arg))) {
-                case 0:
-                    /*
-                     * If something got left out, delete the extra description
-                     * when backing out to the menu.
-                     */
-                    //if (OLC_DESC(d)->keyword == nullptr || OLC_DESC(d)->description == nullptr) {
-                      //  struct extra_descr_data *temp;
-                       // if (OLC_DESC(d)->keyword)
-                       //     free(OLC_DESC(d)->keyword);
-                       // if (OLC_DESC(d)->description)
-                       //     free(OLC_DESC(d)->description);
-
-                        /*
-                         * Clean up pointers.
-                         */
-                        //REMOVE_FROM_LIST(OLC_DESC(d), OLC_ROOM(d)->ex_description, next, temp);
-                        //free(OLC_DESC(d));
-                   // }
-                    break;
-                case 1:
-                    OLC_MODE(d) = REDIT_EXTRADESC_KEY;
-                    d->sendText("Enter keywords, separated by spaces : ");
-                    return;
-                case 2:
-                    OLC_MODE(d) = REDIT_EXTRADESC_DESCRIPTION;
-                    send_editor_help(d);
-                    d->sendText("Enter extra description:\r\n\r\n");
-                    if (OLC_DESC(d)->description) {
-                        d->send_to("%s", OLC_DESC(d)->description);
-                        oldtext = strdup(OLC_DESC(d)->description);
-                    }
-                    string_write(d, &OLC_DESC(d)->description, MAX_MESSAGE_LENGTH, 0, oldtext);
-                    return;
-                case 3:
-                    if (OLC_DESC(d)->keyword == nullptr || OLC_DESC(d)->description == nullptr) {
-                        d->send_to(
-                                        "You can't edit the next extra description without completing this one.\r\n");
-                        redit_disp_extradesc_menu(d);
-                    } else {
-                        struct extra_descr_data *new_extra;
-
-                        if (OLC_DESC(d)->next)
-                            OLC_DESC(d) = OLC_DESC(d)->next;
-                        else {
-                            /*
-                             * Make new extra description and attach at end.
-                             */
-                            CREATE(new_extra, struct extra_descr_data, 1);
-                            OLC_DESC(d)->next = new_extra;
-                            OLC_DESC(d) = new_extra;
-                        }
-                        redit_disp_extradesc_menu(d);
-                    }
-                    return;
-            }
-            break;
-
-        case REDIT_COPY:
-            if ((number = real_room(atoi(arg))) != NOWHERE) {
-                redit_setup_existing(d, number);
-            } else
-                d->sendText("That room does not exist.\r\n");
-            break;
-
-        case REDIT_DELETE:
-            if (*arg == 'y' || *arg == 'Y') {
-                if (delete_room(real_room(OLC_ROOM(d)->getVnum())))
-                    d->sendText("Room deleted.\r\n");
                 else
-                    d->sendText("Couldn't delete the room!\r\n");
-
-                cleanup_olc(d, CLEANUP_ALL);
-                return;
-            } else if (*arg == 'n' || *arg == 'N') {
-                redit_disp_menu(d);
-                OLC_MODE(d) = REDIT_MAIN_MENU;
-                return;
-            } else
-                d->sendText("Please answer 'Y' or 'N': ");
-
+                {
+                    d->sendText("Room saved to disk.\r\n");
+                }
+            }
+            else
+                d->sendText("Room saved to memory.\r\n");
+            /* Free everything. */
+            cleanup_olc(d, CLEANUP_ALL);
             break;
-
-        case REDIT_EXIT_DCLOCK:
-            number = atoi(arg);
-            if (number < 0)
-                OLC_EXIT(d)->dclock = NOTHING;
-            else
-                OLC_EXIT(d)->dclock = number;
-            redit_disp_exit_menu(d);
-            return;
-
-        case REDIT_EXIT_DCHIDE:
-            number = atoi(arg);
-            if (number < 0)
-                OLC_EXIT(d)->dchide = NOTHING;
-            else
-                OLC_EXIT(d)->dchide = number;
-            redit_disp_exit_menu(d);
-            return;
-
-        case REDIT_EXIT_DCSKILL:
-        case REDIT_EXIT_DCMOVE:
-        case REDIT_EXIT_SAVETYPE:
-        case REDIT_EXIT_DCSAVE:
-        case REDIT_EXIT_FAILROOM:
-        case REDIT_EXIT_TOTALFAILROOM:
-            redit_disp_exit_menu(d);
-            return;
-
+        case 'n':
+        case 'N':
+            /* If not saving, we must free the script_proto list. We do so by
+             * assigning it to the edited room and letting free_room in
+             * cleanup_olc handle it. */
+            OLC_ROOM(d)->proto_script = OLC_SCRIPT(d);
+            cleanup_olc(d, CLEANUP_ALL);
+            if (GET_ADMLEVEL(d->character) < 1)
+            {
+                d->send_to(
+                    "@GYou close the droids interface and put it back among the rest of your things.@n\r\n");
+                act("@g$n@G stops typing information into the droid in $s hands and closes it back up.@n\r\n",
+                    true, d->character, nullptr, nullptr, TO_ROOM);
+                Object *obj;
+                obj = read_object(19094, VIRTUAL);
+                d->character->addToInventory(obj);
+            }
+            break;
         default:
-            /*
-             * We should never get here.
-             */
-            mudlog(BRF, ADMLVL_BUILDER, true, "SYSERR: Reached default case in parse_redit");
+            d->sendText("Invalid choice!\r\nDo you wish to save your changes ? : ");
             break;
+        }
+        return;
+
+    case REDIT_MAIN_MENU:
+        switch (*arg)
+        {
+        case 'q':
+        case 'Q':
+            if (OLC_VAL(d))
+            { /* Something has been modified. */
+                d->sendText("Do you wish to save your changes? : ");
+                OLC_MODE(d) = REDIT_CONFIRM_SAVESTRING;
+            }
+            else
+                cleanup_olc(d, CLEANUP_ALL);
+            return;
+        case '1':
+            if (GET_ADMLEVEL(d->character) < 1)
+            {
+                d->sendText("Enter Location Name:\r\n");
+            }
+            else
+            {
+                d->sendText("Enter Room Name:-\r\n] ");
+            }
+            OLC_MODE(d) = REDIT_NAME;
+            break;
+        case '2':
+            OLC_MODE(d) = REDIT_DESC;
+            clear_screen(d);
+            send_editor_help(d);
+            if (GET_ADMLEVEL(d->character) < 1)
+            {
+                d->sendText("Set Remodel Parameters (Enter Room Description):-\r\n] ");
+            }
+            else
+            {
+                d->sendText("Enter room description:\r\n\r\n");
+            }
+
+            if (auto ld = OLC_ROOM(d)->getLookDescription(); ld)
+            {
+                d->send_to("%s", ld);
+            }
+            string_write(d, &OLC_ROOM(d)->strings["look_description"], MAX_ROOM_DESC, 0, OLC_ROOM(d)->strings["look_description"]);
+            OLC_VAL(d) = 1;
+            break;
+        case '3':
+            if (GET_ADMLEVEL(d->character) < 1)
+            {
+                d->sendText("That options isn't available to non-builders.\r\n");
+                break;
+            }
+            redit_disp_flag_menu(d);
+            break;
+        case '4':
+            if (GET_ADMLEVEL(d->character) < 1)
+            {
+                d->sendText("That options isn't available to non-builders.\r\n");
+                break;
+            }
+            redit_disp_sector_menu(d);
+            break;
+        case '5':
+            if (GET_ADMLEVEL(d->character) < 1)
+            {
+                d->sendText("That options isn't available to non-builders.\r\n");
+                break;
+            }
+            OLC_VAL(d) = NORTH;
+            redit_disp_exit_menu(d);
+            break;
+        case '6':
+            if (GET_ADMLEVEL(d->character) < 1)
+            {
+                d->sendText("That options isn't available to non-builders.\r\n");
+                break;
+            }
+            OLC_VAL(d) = EAST;
+            redit_disp_exit_menu(d);
+            break;
+        case '7':
+            if (GET_ADMLEVEL(d->character) < 1)
+            {
+                d->sendText("That options isn't available to non-builders.\r\n");
+                break;
+            }
+            OLC_VAL(d) = SOUTH;
+            redit_disp_exit_menu(d);
+            break;
+        case '8':
+            if (GET_ADMLEVEL(d->character) < 1)
+            {
+                d->sendText("That options isn't available to non-builders.\r\n");
+                break;
+            }
+            OLC_VAL(d) = WEST;
+            redit_disp_exit_menu(d);
+            break;
+        case '9':
+            if (GET_ADMLEVEL(d->character) < 1)
+            {
+                d->sendText("That options isn't available to non-builders.\r\n");
+                break;
+            }
+            OLC_VAL(d) = UP;
+            redit_disp_exit_menu(d);
+            break;
+        case 'a':
+        case 'A':
+            if (GET_ADMLEVEL(d->character) < 1)
+            {
+                d->sendText("That options isn't available to non-builders.\r\n");
+                break;
+            }
+            OLC_VAL(d) = DOWN;
+            redit_disp_exit_menu(d);
+            break;
+        case 'b':
+        case 'B':
+            if (GET_ADMLEVEL(d->character) < 1)
+            {
+                d->sendText("That options isn't available to non-builders.\r\n");
+                break;
+            }
+            OLC_VAL(d) = NORTHWEST;
+            redit_disp_exit_menu(d);
+            break;
+        case 'c':
+        case 'C':
+            if (GET_ADMLEVEL(d->character) < 1)
+            {
+                d->sendText("That options isn't available to non-builders.\r\n");
+                break;
+            }
+            OLC_VAL(d) = NORTHEAST;
+            redit_disp_exit_menu(d);
+            break;
+        case 'd':
+        case 'D':
+            if (GET_ADMLEVEL(d->character) < 1)
+            {
+                d->sendText("That options isn't available to non-builders.\r\n");
+                break;
+            }
+            OLC_VAL(d) = SOUTHEAST;
+            redit_disp_exit_menu(d);
+            break;
+        case 'e':
+        case 'E':
+            if (GET_ADMLEVEL(d->character) < 1)
+            {
+                d->sendText("That options isn't available to non-builders.\r\n");
+                break;
+            }
+            OLC_VAL(d) = SOUTHWEST;
+            redit_disp_exit_menu(d);
+            break;
+        case 'f':
+        case 'F':
+            if (GET_ADMLEVEL(d->character) < 1)
+            {
+                d->sendText("That options isn't available to non-builders.\r\n");
+                break;
+            }
+            OLC_VAL(d) = INDIR;
+            redit_disp_exit_menu(d);
+            break;
+        case 'g':
+        case 'G':
+            if (GET_ADMLEVEL(d->character) < 1)
+            {
+                d->sendText("That options isn't available to non-builders.\r\n");
+                break;
+            }
+            OLC_VAL(d) = OUTDIR;
+            redit_disp_exit_menu(d);
+            break;
+        case 'h':
+        case 'H':
+            /*
+             * If the extra description doesn't exist.
+             */
+            // if (!OLC_ROOM(d)->ex_description)
+            //     CREATE(OLC_ROOM(d)->ex_description, struct extra_descr_data, 1);
+            // OLC_DESC(d) = OLC_ROOM(d)->ex_description;
+            // redit_disp_extradesc_menu(d);
+            break;
+        case 'w':
+        case 'W':
+            if (GET_ADMLEVEL(d->character) < 1)
+            {
+                d->sendText("That options isn't available to non-builders.\r\n");
+                break;
+            }
+            d->sendText("Disabled for the time being!");
+            /*OLC_MODE(d) = REDIT_COPY;*/
+            break;
+        case 'x':
+        case 'X':
+            if (GET_ADMLEVEL(d->character) < 1)
+            {
+                d->sendText("That options isn't available to non-builders.\r\n");
+                break;
+            }
+            /* Delete the room, prompt first. */
+            d->sendText("Are you sure you want to delete this room? ");
+            OLC_MODE(d) = REDIT_DELETE;
+            break;
+        case 'Z':
+        case 'z':
+            if (GET_ADMLEVEL(d->character) < 1)
+            {
+                d->sendText("That options isn't available to non-builders.\r\n");
+                break;
+            }
+            search_replace(arg, "z ", "");
+            do_wiznet(d->character, arg, 0, 0);
+            break;
+        default:
+            d->sendText("Invalid choice!");
+            redit_disp_menu(d);
+            break;
+        }
+        return;
+
+    case REDIT_NAME:
+        if (!genolc_checkstring(d, arg))
+            break;
+        arg[MAX_ROOM_NAME] = '\0';
+        OLC_ROOM(d)->strings["name"] = arg;
+        break;
+
+    case REDIT_DESC:
+        /*
+         * We will NEVER get here, we hope.
+         */
+        mudlog(BRF, ADMLVL_BUILDER, true, "SYSERR: Reached REDIT_DESC case in parse_redit().");
+        d->sendText("Oops, in REDIT_DESC.\r\n");
+        break;
+
+    case REDIT_FLAGS:
+        number = atoi(arg);
+        if (number < 0 || number > NUM_ROOM_FLAGS)
+        {
+            d->sendText("That is not a valid choice!\r\n");
+            redit_disp_flag_menu(d);
+        }
+        else if (number == 0)
+            break;
+        else
+        {
+            /*
+             * Toggle the bit.
+             */
+            OLC_ROOM(d)->room_flags.toggle(number - 1);
+            redit_disp_flag_menu(d);
+        }
+        return;
+
+    case REDIT_SECTOR:
+        number = atoi(arg);
+        if (number < 0 || number >= NUM_ROOM_SECTORS)
+        {
+            d->sendText("Invalid choice!");
+            redit_disp_sector_menu(d);
+            return;
+        }
+        OLC_ROOM(d)->sector_type = static_cast<SectorType>(number);
+        break;
+
+    case REDIT_EXIT_MENU:
+        switch (*arg)
+        {
+        case '0':
+            if (OLC_EXIT(d))
+            {
+                OLC_ROOM(d)->replaceExit(*OLC_EXIT(d));
+                OLC_EXIT(d).reset();
+            }
+            break;
+        case '1':
+            OLC_MODE(d) = REDIT_EXIT_NUMBER;
+            d->sendText("Exit to room number : ");
+            return;
+        case '2':
+            OLC_MODE(d) = REDIT_EXIT_DESCRIPTION;
+            send_editor_help(d);
+            d->sendText("Enter exit description:\r\n\r\n");
+            if (!OLC_EXIT(d)->general_description.empty())
+            {
+                d->send_to("%s", OLC_EXIT(d)->general_description);
+            }
+            string_write(d, &OLC_EXIT(d)->general_description, MAX_EXIT_DESC, 0, OLC_EXIT(d)->general_description);
+            return;
+        case '3':
+            OLC_MODE(d) = REDIT_EXIT_KEYWORD;
+            d->sendText("Enter keywords : ");
+            return;
+        case '4':
+            OLC_MODE(d) = REDIT_EXIT_KEY;
+            d->sendText("Enter key number : ");
+            return;
+        case '5':
+            OLC_MODE(d) = REDIT_EXIT_DOORFLAGS;
+            redit_disp_exit_flag_menu(d);
+            return;
+        case '6':
+            /*
+             * Delete an exit.
+             */
+            OLC_ROOM(d)->deleteExit(static_cast<Direction>(OLC_VAL(d)));
+            OLC_EXIT(d).reset();
+            break;
+        case '7':
+            OLC_MODE(d) = REDIT_EXIT_DCLOCK;
+            d->sendText("Enter lock DC number : ");
+            return;
+        case '8':
+            OLC_MODE(d) = REDIT_EXIT_DCHIDE;
+            d->sendText("Enter door search DC number : ");
+            return;
+        case '9':
+            OLC_MODE(d) = REDIT_EXIT_DCSKILL;
+            d->sendText("Enter skill to be checked to pass through exit : ");
+            return;
+        case 'a':
+        case 'A':
+            OLC_MODE(d) = REDIT_EXIT_DCMOVE;
+            d->sendText("Enter DC for skill required to pass through exit : ");
+            return;
+        case 'b':
+        case 'B':
+            OLC_MODE(d) = REDIT_EXIT_SAVETYPE;
+            d->sendText("Enter the SAVE TYPE for failed skill checks : ");
+            return;
+        case 'c':
+        case 'C':
+            OLC_MODE(d) = REDIT_EXIT_DCSAVE;
+            d->sendText("Enter the DC to beat for SAVE from failed skill checks : ");
+            return;
+        case 'd':
+        case 'D':
+            OLC_MODE(d) = REDIT_EXIT_FAILROOM;
+            d->sendText("Enter the room to send play to for minor save failure : ");
+            return;
+        case 'e':
+        case 'E':
+            OLC_MODE(d) = REDIT_EXIT_TOTALFAILROOM;
+            d->sendText("Enter the room to send play to for major save failure : ");
+            return;
+        default:
+            d->sendText("Try again : ");
+            return;
+        }
+        break;
+
+    case REDIT_EXIT_NUMBER:
+        if ((number = atoi(arg)) != -1)
+            if ((number = real_room(number)) == NOWHERE)
+            {
+                d->sendText("That room does not exist, try again : ");
+                return;
+            }
+        OLC_EXIT(d)->unit = get_room(number);
+        redit_disp_exit_menu(d);
+        return;
+
+    case REDIT_EXIT_DESCRIPTION:
+        /*
+         * We should NEVER get here, hopefully.
+         */
+        mudlog(BRF, ADMLVL_BUILDER, true, "SYSERR: Reached REDIT_EXIT_DESC case in parse_redit");
+        d->sendText("Oops, in REDIT_EXIT_DESCRIPTION.\r\n");
+        break;
+
+    case REDIT_EXIT_KEYWORD:
+        OLC_EXIT(d)->keyword = arg;
+        redit_disp_exit_menu(d);
+        return;
+
+    case REDIT_EXIT_KEY:
+        number = atoi(arg);
+        if (number < 0)
+            OLC_EXIT(d)->key = NOTHING;
+        else
+            OLC_EXIT(d)->key = number;
+        redit_disp_exit_menu(d);
+        return;
+
+    case REDIT_EXIT_DOORFLAGS:
+        number = atoi(arg);
+        if (number < 0 || number > NUM_EXIT_FLAGS)
+        {
+            d->sendText("That's not a valid choice!\r\n");
+            redit_disp_exit_flag_menu(d);
+        }
+        else if (number == 0)
+        {
+            redit_disp_exit_menu(d);
+        }
+        else
+        {
+            /* Toggle the bit. */
+            TOGGLE_BIT(OLC_EXIT(d)->exit_info, 1 << (number - 1));
+            redit_disp_exit_flag_menu(d);
+        }
+        return;
+
+    case REDIT_EXTRADESC_KEY:
+        if (genolc_checkstring(d, arg))
+        {
+            if (OLC_DESC(d)->keyword)
+                free(OLC_DESC(d)->keyword);
+            OLC_DESC(d)->keyword = str_udup(arg);
+        }
+        redit_disp_extradesc_menu(d);
+        return;
+
+    case REDIT_EXTRADESC_MENU:
+        switch ((number = atoi(arg)))
+        {
+        case 0:
+            /*
+             * If something got left out, delete the extra description
+             * when backing out to the menu.
+             */
+            // if (OLC_DESC(d)->keyword == nullptr || OLC_DESC(d)->description == nullptr) {
+            //   struct extra_descr_data *temp;
+            //  if (OLC_DESC(d)->keyword)
+            //      free(OLC_DESC(d)->keyword);
+            //  if (OLC_DESC(d)->description)
+            //      free(OLC_DESC(d)->description);
+
+            /*
+             * Clean up pointers.
+             */
+            // REMOVE_FROM_LIST(OLC_DESC(d), OLC_ROOM(d)->ex_description, next, temp);
+            // free(OLC_DESC(d));
+            // }
+            break;
+        case 1:
+            OLC_MODE(d) = REDIT_EXTRADESC_KEY;
+            d->sendText("Enter keywords, separated by spaces : ");
+            return;
+        case 2:
+            OLC_MODE(d) = REDIT_EXTRADESC_DESCRIPTION;
+            send_editor_help(d);
+            d->sendText("Enter extra description:\r\n\r\n");
+            if (OLC_DESC(d)->description)
+            {
+                d->send_to("%s", OLC_DESC(d)->description);
+                oldtext = strdup(OLC_DESC(d)->description);
+            }
+            string_write(d, &OLC_DESC(d)->description, MAX_MESSAGE_LENGTH, 0, oldtext);
+            return;
+        case 3:
+            if (OLC_DESC(d)->keyword == nullptr || OLC_DESC(d)->description == nullptr)
+            {
+                d->send_to(
+                    "You can't edit the next extra description without completing this one.\r\n");
+                redit_disp_extradesc_menu(d);
+            }
+            else
+            {
+                struct extra_descr_data *new_extra;
+
+                if (OLC_DESC(d)->next)
+                    OLC_DESC(d) = OLC_DESC(d)->next;
+                else
+                {
+                    /*
+                     * Make new extra description and attach at end.
+                     */
+                    CREATE(new_extra, struct extra_descr_data, 1);
+                    OLC_DESC(d)->next = new_extra;
+                    OLC_DESC(d) = new_extra;
+                }
+                redit_disp_extradesc_menu(d);
+            }
+            return;
+        }
+        break;
+
+    case REDIT_COPY:
+        if ((number = real_room(atoi(arg))) != NOWHERE)
+        {
+            redit_setup_existing(d, number);
+        }
+        else
+            d->sendText("That room does not exist.\r\n");
+        break;
+
+    case REDIT_DELETE:
+        if (*arg == 'y' || *arg == 'Y')
+        {
+            if (delete_room(real_room(OLC_ROOM(d)->getVnum())))
+                d->sendText("Room deleted.\r\n");
+            else
+                d->sendText("Couldn't delete the room!\r\n");
+
+            cleanup_olc(d, CLEANUP_ALL);
+            return;
+        }
+        else if (*arg == 'n' || *arg == 'N')
+        {
+            redit_disp_menu(d);
+            OLC_MODE(d) = REDIT_MAIN_MENU;
+            return;
+        }
+        else
+            d->sendText("Please answer 'Y' or 'N': ");
+
+        break;
+
+    case REDIT_EXIT_DCLOCK:
+        number = atoi(arg);
+        if (number < 0)
+            OLC_EXIT(d)->dclock = NOTHING;
+        else
+            OLC_EXIT(d)->dclock = number;
+        redit_disp_exit_menu(d);
+        return;
+
+    case REDIT_EXIT_DCHIDE:
+        number = atoi(arg);
+        if (number < 0)
+            OLC_EXIT(d)->dchide = NOTHING;
+        else
+            OLC_EXIT(d)->dchide = number;
+        redit_disp_exit_menu(d);
+        return;
+
+    case REDIT_EXIT_DCSKILL:
+    case REDIT_EXIT_DCMOVE:
+    case REDIT_EXIT_SAVETYPE:
+    case REDIT_EXIT_DCSAVE:
+    case REDIT_EXIT_FAILROOM:
+    case REDIT_EXIT_TOTALFAILROOM:
+        redit_disp_exit_menu(d);
+        return;
+
+    default:
+        /*
+         * We should never get here.
+         */
+        mudlog(BRF, ADMLVL_BUILDER, true, "SYSERR: Reached default case in parse_redit");
+        break;
     }
     /*
      * If we get this far, something has been changed.
@@ -1018,16 +1076,18 @@ void redit_parse(struct descriptor_data *d, char *arg) {
     redit_disp_menu(d);
 }
 
-void redit_string_cleanup(struct descriptor_data *d, int terminator) {
-    switch (OLC_MODE(d)) {
-        case REDIT_DESC:
-            redit_disp_menu(d);
-            break;
-        case REDIT_EXIT_DESCRIPTION:
-            redit_disp_exit_menu(d);
-            break;
-        case REDIT_EXTRADESC_DESCRIPTION:
-            redit_disp_extradesc_menu(d);
-            break;
+void redit_string_cleanup(struct descriptor_data *d, int terminator)
+{
+    switch (OLC_MODE(d))
+    {
+    case REDIT_DESC:
+        redit_disp_menu(d);
+        break;
+    case REDIT_EXIT_DESCRIPTION:
+        redit_disp_exit_menu(d);
+        break;
+    case REDIT_EXTRADESC_DESCRIPTION:
+        redit_disp_extradesc_menu(d);
+        break;
     }
 }

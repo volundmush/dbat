@@ -5,7 +5,6 @@
 
 // global variables
 
-
 // functions
 extern void do_start(Character *ch);
 
@@ -29,7 +28,8 @@ extern int highest_skill_value(int level, int type, int skill);
 
 extern time_t birth_age(Character *ch);
 
-namespace sensei {
+namespace sensei
+{
 
     extern std::string getName(Sensei id);
     extern std::string getAbbr(Sensei id);
@@ -41,6 +41,6 @@ namespace sensei {
 
     extern double getModifier(Character *ch, int location, int specific = 0);
     extern std::vector<Sensei> filterSenseis(std::function<bool(Sensei)> func);
-    extern std::optional<Sensei> findSensei(const std::string& arg, const std::function<bool(Sensei)>& func);
+    extern std::optional<Sensei> findSensei(const std::string &arg, const std::function<bool(Sensei)> &func);
     extern bool exists(Sensei id);
 }

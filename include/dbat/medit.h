@@ -5,6 +5,5 @@
 
 #include "structs.h"
 
-
 // commands
 extern ACMD(do_oasis_medit);

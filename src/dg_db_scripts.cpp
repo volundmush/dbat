@@ -37,9 +37,6 @@ void parse_trigger(FILE *trig_f, trig_vnum nr) {
 
     trig->vn = nr;
 
-    auto& z = zone_table.at(real_zone_by_thing(nr));
-    z.triggers.insert(nr);
-
     snprintf(errors, sizeof(errors), "trig vnum %d", nr);
 
     char *buf = fread_string(trig_f, errors);

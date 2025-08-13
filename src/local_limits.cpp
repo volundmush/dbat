@@ -1135,23 +1135,34 @@ void corpseRotService(uint64_t heartPulse, double deltaTime)
 
             if (auto con = j->getInventory(); !con.empty())
             {
-                if(j->location) {
-                    for(auto jj : filter_raw(con)) {
+                if (j->location)
+                {
+                    for (auto jj : filter_raw(con))
+                    {
                         jj->clearLocation();
                         jj->setLocation(j->location);
                     }
-                } else if(auto c = j->getCarriedBy()) {
-                    for(auto jj : filter_raw(con)) {
+                }
+                else if (auto c = j->getCarriedBy())
+                {
+                    for (auto jj : filter_raw(con))
+                    {
                         jj->clearLocation();
                         c->addToInventory(jj);
                     }
-                } else if(auto c = j->getWornBy()) {
-                    for(auto jj : filter_raw(con)) {
+                }
+                else if (auto c = j->getWornBy())
+                {
+                    for (auto jj : filter_raw(con))
+                    {
                         jj->clearLocation();
                         c->addToInventory(jj);
                     }
-                } else if(auto o = j->getContainer()) {
-                    for(auto jj : filter_raw(con)) {
+                }
+                else if (auto o = j->getContainer())
+                {
+                    for (auto jj : filter_raw(con))
+                    {
                         jj->clearLocation();
                         o->addToInventory(jj);
                     }

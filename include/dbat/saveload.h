@@ -150,6 +150,9 @@ void from_json(const json& j, FlagHandler<Enum>& m)
     }
 }
 
+void to_json(json& j, const Location& l);
+void from_json(const json& j, Location& l);
+
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(mob_special_data, attack_type, default_pos, damnodice, damsizedice)
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(time_data, birth, created, maxage, logon, played, seconds_aged)
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(time_info_data, remainder, seconds, minutes, hours, day, month, year)
@@ -164,15 +167,20 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(HasExtraDescriptions, extra_desc
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(HasMudStrings, strings)
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(HasVnum, vn)
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(HasVariables, variables)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(HasLocation, location, registeredLocations)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ResetCommand, type, if_flag, target, max, max_location, ex, chance, key, value)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(HasResetCommands, resetCommands)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(Zone, number, parent, name, builders, lifespan, age, reset_mode, zone_flags)
 
 void to_json(json& j, const struct help_index_element& r);
 void from_json(const json& j, struct help_index_element& r);
 
 void to_json(json& j, const reset_com& r);
 void from_json(const json& j, reset_com& r);
-
+/*
 void to_json(json& j, const Zone& z);
 void from_json(const json& j, Zone& z);
+*/
 
 void to_json(json& j, const affect_t& a);
 void from_json(const json& j, affect_t& a);

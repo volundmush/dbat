@@ -1,18 +1,18 @@
 /* ************************************************************************
-*   File: handler.h                                     Part of CircleMUD *
-*  Usage: header file: prototypes of handling and utility functions       *
-*                                                                         *
-*  All rights reserved.  See license.doc for complete information.        *
-*                                                                         *
-*  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
-*  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
-************************************************************************ */
+ *   File: handler.h                                     Part of CircleMUD *
+ *  Usage: header file: prototypes of handling and utility functions       *
+ *                                                                         *
+ *  All rights reserved.  See license.doc for complete information.        *
+ *                                                                         *
+ *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
+ *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
+ ************************************************************************ */
 #pragma once
 
 #include "structs.h"
 
 /* handling the affected-structures */
-extern void update_char_objects(Character *ch);    /* handler.c */
+extern void update_char_objects(Character *ch); /* handler.c */
 extern void item_check(Object *object, Character *ch);
 
 extern void affect_total(Character *ch);
@@ -40,7 +40,6 @@ extern void affectv_remove(Character *ch, struct affected_type *af);
 extern void affectv_to_char(Character *ch, struct affected_type *af);
 
 extern void affectv_from_char(Character *ch, int type);
-
 
 /* utility */
 const char *money_desc(int amount);
@@ -93,12 +92,11 @@ Object *get_obj_in_list_vis(Character *ch, const char *name, int *number, const 
 
 Object *get_obj_vis(Character *ch, char *name, int *num);
 
-Object *get_obj_in_equip_vis(Character *ch, char *arg, int *number, const std::map<int, Object*>& equipment);
+Object *get_obj_in_equip_vis(Character *ch, char *arg, int *number, const std::map<int, Object *> &equipment);
 
-extern int get_obj_pos_in_equip_vis(Character *ch, char *arg, int *num, const std::map<int, Object*>& equipment);
+extern int get_obj_pos_in_equip_vis(Character *ch, char *arg, int *num, const std::map<int, Object *> &equipment);
 
 extern int find_eq_pos(Character *ch, Object *obj, char *arg);
-
 
 /* find all dots */
 
@@ -108,15 +106,14 @@ constexpr int FIND_INDIV = 0;
 constexpr int FIND_ALL = 1;
 constexpr int FIND_ALLDOT = 2;
 
-
 /* Generic Find */
 
 extern int generic_find(const char *arg, bitvector_t bitvector, Character *ch,
                         Character **tar_ch, Object **tar_obj);
 
-#define FIND_CHAR_ROOM     (1 << 0)
-#define FIND_CHAR_WORLD    (1 << 1)
-#define FIND_OBJ_INV       (1 << 2)
-#define FIND_OBJ_ROOM      (1 << 3)
-#define FIND_OBJ_WORLD     (1 << 4)
-#define FIND_OBJ_EQUIP     (1 << 5)
+#define FIND_CHAR_ROOM (1 << 0)
+#define FIND_CHAR_WORLD (1 << 1)
+#define FIND_OBJ_INV (1 << 2)
+#define FIND_OBJ_ROOM (1 << 3)
+#define FIND_OBJ_WORLD (1 << 4)
+#define FIND_OBJ_EQUIP (1 << 5)

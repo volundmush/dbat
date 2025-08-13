@@ -2,11 +2,15 @@
 
 #include "boost/algorithm/string.hpp"
 
-namespace skill {
+namespace skill
+{
 
-    std::string getName(Skill skill) {
-        if(skill == Skill::throw_object) return "throw";
-        if(skill == Skill::kamehameha) return "KameHameHa";
+    std::string getName(Skill skill)
+    {
+        if (skill == Skill::throw_object)
+            return "throw";
+        if (skill == Skill::kamehameha)
+            return "KameHameHa";
         auto ename = magic_enum::enum_name(skill);
         std::string name(ename);
         // replace underscores with spaces
@@ -14,13 +18,15 @@ namespace skill {
         // capitalize all words.
         std::vector<std::string> words;
         boost::split(words, name, boost::is_any_of(" "));
-        for(auto& word: words) {
+        for (auto &word : words)
+        {
             word[0] = std::toupper(word[0]);
         }
         return boost::join(words, " ");
     }
 
-    struct skill_affect_type {
+    struct skill_affect_type
+    {
         int location{};
         double modifier{0.0};
         int specific{-1};
@@ -29,27 +35,35 @@ namespace skill {
 
     std::unordered_map<Skill, std::vector<skill_affect_type>> skillAffects = {};
 
-    double getModifier(Character* ch, Skill skill, int location, int specific) {
+    double getModifier(Character *ch, Skill skill, int location, int specific)
+    {
         double out = 0.0;
-        if (auto found = skillAffects.find(skill); found != skillAffects.end()) {
-            for (auto& affect: found->second) {
-                if (affect.location == location) {if(specific != -1 && specific != affect.specific) continue;
+        if (auto found = skillAffects.find(skill); found != skillAffects.end())
+        {
+            for (auto &affect : found->second)
+            {
+                if (affect.location == location)
+                {
+                    if (specific != -1 && specific != affect.specific)
+                        continue;
                     out += affect.modifier;
-                    if(affect.func) {
+                    if (affect.func)
+                    {
                         out += affect.func(ch);
                     }
                 }
             }
-
         }
 
         return out;
     }
 
-    double getModifiers(Character* ch, int location, int specific) {
+    double getModifiers(Character *ch, int location, int specific)
+    {
         double out = 0.0;
-        for(auto &[id, data] : ch->skill) {
-            if(data.level > 0)
+        for (auto &[id, data] : ch->skill)
+        {
+            if (data.level > 0)
                 out += getModifier(ch, static_cast<Skill>(id), location, specific);
         }
         return out;

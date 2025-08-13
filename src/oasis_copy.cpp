@@ -27,10 +27,7 @@
 
 room_vnum redit_find_new_vnum(zone_rnum zone);
 
-
 /* External Functions */
-
-
 
 void redit_save_internally(struct descriptor_data *d);
 
@@ -50,20 +47,21 @@ void medit_setup_existing(struct descriptor_data *d, int rnum);
 
 void sedit_setup_existing(struct descriptor_data *d, vnum rshop_num);
 
-
 /***********************************************************
-* This function makes use of the high level OLC functions  *
-* to copy most types of mud objects. The type of data is   *
-* determined by the subcmd variable and the functions are  *
-* looked up in a table.                                    *
-***********************************************************/
-ACMD(do_oasis_copy) {
+ * This function makes use of the high level OLC functions  *
+ * to copy most types of mud objects. The type of data is   *
+ * determined by the subcmd variable and the functions are  *
+ * looked up in a table.                                    *
+ ***********************************************************/
+ACMD(do_oasis_copy)
+{
     int i, src_vnum, src_rnum, dst_vnum, dst_rnum;
     char buf1[MAX_INPUT_LENGTH];
     char buf2[MAX_INPUT_LENGTH];
     struct descriptor_data *d;
 
-    struct {
+    struct
+    {
         int con_type;
 
         IDXTYPE (*binary_search)(IDXTYPE vnum);
@@ -75,12 +73,11 @@ ACMD(do_oasis_copy) {
         const char *command;
         const char *text;
     } oasis_copy_info[] = {
-            {CON_REDIT,    real_room,    redit_save_internally, redit_setup_existing,    "rcopy", "room"},
-            {CON_OEDIT,    real_object,  oedit_save_internally, oedit_setup_existing,    "ocopy", "object"},
-            {CON_MEDIT,    real_mobile,  medit_save_internally, medit_setup_existing,    "mcopy", "mobile"},
-            {CON_SEDIT,    real_shop,    sedit_save_internally, sedit_setup_existing,    "scopy", "shop"},
-            {-1,           nullptr,      nullptr,               nullptr,                 "\n",    "\n"}
-    };
+        {CON_REDIT, real_room, redit_save_internally, redit_setup_existing, "rcopy", "room"},
+        {CON_OEDIT, real_object, oedit_save_internally, oedit_setup_existing, "ocopy", "object"},
+        {CON_MEDIT, real_mobile, medit_save_internally, medit_setup_existing, "mcopy", "mobile"},
+        {CON_SEDIT, real_shop, sedit_save_internally, sedit_setup_existing, "scopy", "shop"},
+        {-1, nullptr, nullptr, nullptr, "\n", "\n"}};
 
     /* Find the given connection type in the table (passed in subcmd). */
     for (i = 0; *(oasis_copy_info[i].text) != '\n'; i++)
@@ -98,8 +95,9 @@ ACMD(do_oasis_copy) {
     two_arguments(argument, buf1, buf2);
 
     /* Both arguments are required and they must be numeric. */
-    if (!*buf1 || !*buf2 || (!is_number(buf1) || !is_number(buf2))) {
-                ch->send_to("Syntax: %s <source vnum> <target vnum>\r\n", oasis_copy_info[i].command);
+    if (!*buf1 || !*buf2 || (!is_number(buf1) || !is_number(buf2)))
+    {
+        ch->send_to("Syntax: %s <source vnum> <target vnum>\r\n", oasis_copy_info[i].command);
         return;
     }
 
@@ -108,24 +106,29 @@ ACMD(do_oasis_copy) {
     /* to the builder's designated OLC zone. */
     src_vnum = atoi(buf1);
     src_rnum = (*oasis_copy_info[i].binary_search)(src_vnum);
-    if (src_rnum == NOWHERE) {
-                ch->send_to("The source %s (#%d) does not exist.\r\n", oasis_copy_info[i].text, src_vnum);
+    if (src_rnum == NOWHERE)
+    {
+        ch->send_to("The source %s (#%d) does not exist.\r\n", oasis_copy_info[i].text, src_vnum);
         return;
     }
 
     /* Don't copy if the target already exists. */
     dst_vnum = atoi(buf2);
     dst_rnum = (*oasis_copy_info[i].binary_search)(dst_vnum);
-    if (dst_rnum != NOWHERE) {
-                ch->send_to("The target %s (#%d) already exists.\r\n", oasis_copy_info[i].text, dst_vnum);
+    if (dst_rnum != NOWHERE)
+    {
+        ch->send_to("The target %s (#%d) already exists.\r\n", oasis_copy_info[i].text, dst_vnum);
         return;
     }
 
     /* Check that whatever it is isn't already being edited. */
-    for (d = descriptor_list; d; d = d->next) {
-        if (STATE(d) == subcmd) {
-            if (d->olc && OLC_NUM(d) == dst_vnum) {
-                                ch->send_to("The target %s (#%d) is currently being edited by %s.\r\n", oasis_copy_info[i].text, dst_vnum, GET_NAME(d->character));
+    for (d = descriptor_list; d; d = d->next)
+    {
+        if (STATE(d) == subcmd)
+        {
+            if (d->olc && OLC_NUM(d) == dst_vnum)
+            {
+                ch->send_to("The target %s (#%d) is currently being edited by %s.\r\n", oasis_copy_info[i].text, dst_vnum, GET_NAME(d->character));
                 return;
             }
         }
@@ -134,7 +137,8 @@ ACMD(do_oasis_copy) {
     d = ch->desc;
 
     /* Give the descriptor an OLC structure. */
-    if (d->olc) {
+    if (d->olc)
+    {
         mudlog(BRF, ADMLVL_IMMORT, true, "SYSERR: do_oasis_copy: Player already had olc structure.");
         delete d->olc;
     }
@@ -142,17 +146,10 @@ ACMD(do_oasis_copy) {
     /* Create the OLC structure. */
     d->olc = new oasis_olc_data();
 
-    /* Find the zone. */
-    if ((OLC_ZNUM(d) = real_zone_by_thing(dst_vnum)) == NOWHERE) {
-                ch->send_to("Sorry, there is no zone for the given vnum (#%d)!\r\n", dst_vnum);
-        delete d->olc;
-        d->olc = nullptr;
-        return;
-    }
-
     /* Make sure the builder is allowed to modify the target zone. */
-    if (!can_edit_zone(ch, OLC_ZNUM(d))) {
-        send_cannot_edit(ch, zone_table.at(OLC_ZNUM(d)).number);
+    if (!can_edit_zone(ch, NOWHERE))
+    {
+        send_cannot_edit(ch, NOWHERE);
         delete d->olc;
         d->olc = nullptr;
         return;
@@ -162,20 +159,21 @@ ACMD(do_oasis_copy) {
     OLC_NUM(d) = dst_vnum;
 
     /* Perform the copy. */
-        ch->send_to("Copying %s: source: #%d, dest: #%d.\r\n", oasis_copy_info[i].text, src_vnum, dst_vnum);
+    ch->send_to("Copying %s: source: #%d, dest: #%d.\r\n", oasis_copy_info[i].text, src_vnum, dst_vnum);
     (*oasis_copy_info[i].setup_existing)(d, src_rnum);
     (*oasis_copy_info[i].save_func)(d);
 
     /* Currently CLEANUP_ALL should be used for everything. */
     cleanup_olc(d, CLEANUP_ALL);
-        ch->sendText("Done.\r\n");
+    ch->sendText("Done.\r\n");
 }
 
 /******************************************************************************/
 /** Commands                                                                 **/
 /******************************************************************************/
 
-ACMD(do_dig) {
+ACMD(do_dig)
+{
     char sdir[MAX_INPUT_LENGTH], sroom[MAX_INPUT_LENGTH], *new_room_name;
     room_vnum rvnum = NOWHERE;
     room_rnum rrnum = NOWHERE;
@@ -188,9 +186,10 @@ ACMD(do_dig) {
     skip_spaces(&new_room_name);
 
     /* Can't dig if we don't know where to go. */
-    if (!*sdir || !*sroom) {
-                ch->sendText("Format: tunnel <direction> <room> - to create an exit\r\n"
-                         "        tunnel <direction> -1     - to delete an exit\r\n");
+    if (!*sdir || !*sroom)
+    {
+        ch->sendText("Format: tunnel <direction> <room> - to create an exit\r\n"
+                     "        tunnel <direction> -1     - to delete an exit\r\n");
         return;
     }
 
@@ -198,19 +197,21 @@ ACMD(do_dig) {
     if (rawvnum == -1)
         rvnum = NOWHERE;
     else
-        rvnum = (room_vnum) rawvnum;
+        rvnum = (room_vnum)rawvnum;
     rrnum = real_room(rvnum);
     if ((dir = search_block(sdir, abbr_dirs, false)) < 0)
         dir = search_block(sdir, dirs, false);
-    
+
     zone = ch->location.getZone()->number;
 
-    if (dir < 0) {
-                ch->send_to("Cannot create an exit to the '%s'.\r\n", sdir);
+    if (dir < 0)
+    {
+        ch->send_to("Cannot create an exit to the '%s'.\r\n", sdir);
         return;
     }
     /* Make sure that the builder has access to the zone he's in. */
-    if ((zone == NOWHERE) || !can_edit_zone(ch, zone)) {
+    if ((zone == NOWHERE) || !can_edit_zone(ch, zone))
+    {
         send_cannot_edit(ch, zone);
         return;
     }
@@ -218,8 +219,9 @@ ACMD(do_dig) {
      * Lets not allow digging to limbo.
      * After all, it'd just get us more errors on 'show errors'
      */
-    if (rvnum == 0) {
-                ch->sendText("The target exists, but you can't dig to limbo!\r\n");
+    if (rvnum == 0)
+    {
+        ch->sendText("The target exists, but you can't dig to limbo!\r\n");
         return;
     }
 
@@ -231,44 +233,52 @@ ACMD(do_dig) {
     /*
      * target room == -1 removes the exit
      */
-    if (rvnum == NOTHING) {
-        if (e) {
+    if (rvnum == NOTHING)
+    {
+        if (e)
+        {
             ch->location.deleteExit(direction);
-                        ch->send_to("You remove the exit to the %s.\r\n", dirs[dir]);
+            ch->send_to("You remove the exit to the %s.\r\n", dirs[dir]);
             return;
         }
-                ch->send_to("There is no exit to the %s.\r\n"
-                         "No exit removed.\r\n", dirs[dir]);
+        ch->send_to("There is no exit to the %s.\r\n"
+                    "No exit removed.\r\n",
+                    dirs[dir]);
         return;
     }
     /*
      * Can't dig in a direction, if it's already a door.
      */
-    if (e) {
-                ch->send_to("There already is an exit to the %s.\r\n", dirs[dir]);
+    if (e)
+    {
+        ch->send_to("There already is an exit to the %s.\r\n", dirs[dir]);
         return;
     }
 
     /* Make sure that the builder has access to the zone he's linking to. */
-    zone = real_zone_by_thing(rvnum);
-    if (zone == NOWHERE) {
-                ch->sendText("You cannot link to a non-existing zone!\r\n");
+    auto z = ch->location.getZone();
+    if (!z)
+    {
+        ch->sendText("You cannot link to a non-existing zone!\r\n");
         return;
     }
-    if (!can_edit_zone(ch, zone)) {
-        send_cannot_edit(ch, zone);
+    if (!can_edit_zone(ch, NOWHERE))
+    {
+        send_cannot_edit(ch, NOWHERE);
         return;
     }
     /*
      * Now we know the builder is allowed to make the link
      */
     /* If the room doesn't exist, create it.*/
-    if (rrnum == NOWHERE) {
+    if (rrnum == NOWHERE)
+    {
         /*
          * Give the descriptor an olc struct.
          * This way we can let redit_save_internally handle the room adding.
          */
-        if (d->olc) {
+        if (d->olc)
+        {
             mudlog(BRF, ADMLVL_IMMORT, true, "SYSERR: do_dig: Player already had olc structure.");
             delete d->olc;
         }
@@ -276,7 +286,7 @@ ACMD(do_dig) {
         OLC_ZNUM(d) = zone;
         OLC_NUM(d) = rvnum;
         OLC_ROOM(d) = new Room();
-
+        OLC_ROOM(d)->zone = z;
 
         /* Copy the room's name. */
         if (*new_room_name)
@@ -286,7 +296,6 @@ ACMD(do_dig) {
 
         /* Copy the room's description.*/
         OLC_ROOM(d)->strings["look_description"] = "You are in an unfinished room.\r\n";
-        OLC_ROOM(d)->zone = &zone_table.at(OLC_ZNUM(d));
 
         /*
          * Save the new room to memory.
@@ -295,7 +304,7 @@ ACMD(do_dig) {
         redit_save_internally(d);
         OLC_VAL(d) = 0;
 
-                ch->send_to("New room (%d) created.\r\n", rvnum);
+        ch->send_to("New room (%d) created.\r\n", rvnum);
         cleanup_olc(d, CLEANUP_ALL);
         update_space();
         /*
@@ -307,15 +316,14 @@ ACMD(do_dig) {
     /*
      * Now dig.
      */
-    
+
     auto droom = get_room(rrnum);
     Destination dest;
     dest.dir = direction;
     dest.unit = droom;
     ch->location.replaceExit(dest);
 
-        ch->send_to("You make an exit %s to room %d (%s).\r\n", dirs[dir], rvnum, droom->getName());
-    
+    ch->send_to("You make an exit %s to room %d (%s).\r\n", dirs[dir], rvnum, droom->getName());
 
     /*
      * check if we can dig from there to here.
@@ -325,8 +333,9 @@ ACMD(do_dig) {
     auto e2 = r2->getDirection(rdir);
 
     if (e2)
-                ch->send_to("You cannot dig from %d to here. The target room already has an exit to the %s.\r\n", rvnum, dirs[rev_dir[dir]]);
-    else {
+        ch->send_to("You cannot dig from %d to here. The target room already has an exit to the %s.\r\n", rvnum, dirs[rev_dir[dir]]);
+    else
+    {
         Destination dest2;
         dest2.dir = rdir;
         dest2.unit = r2;
@@ -334,7 +343,8 @@ ACMD(do_dig) {
     }
 }
 
-ACMD(do_rcopy) {
+ACMD(do_rcopy)
+{
     room_vnum rvnum;
     room_rnum rrnum;
     room_rnum trnum;
@@ -347,37 +357,45 @@ ACMD(do_rcopy) {
 
     two_arguments(argument, arg, arg2);
 
-    if (!arg || !*arg) {
-                ch->sendText("Syntax: rclone <base rnum> <target rnum>\r\nOr be in the room you wish to be the target and provide base vnum.\r\n");
+    if (!arg || !*arg)
+    {
+        ch->sendText("Syntax: rclone <base rnum> <target rnum>\r\nOr be in the room you wish to be the target and provide base vnum.\r\n");
         return;
     }
 
-    if (!arg2 || !*arg2) {
+    if (!arg2 || !*arg2)
+    {
         tvnum = atoi(arg);
         rvnum = ch->location.getVnum();
-    } else if (arg2 || *arg2) {
+    }
+    else if (arg2 || *arg2)
+    {
         rvnum = atoi(arg2);
         tvnum = atoi(arg);
     }
 
-    if (rvnum == 0 || tvnum == 0) {
-                ch->sendText("The void is fine as it is, try again.\r\n");
+    if (rvnum == 0 || tvnum == 0)
+    {
+        ch->sendText("The void is fine as it is, try again.\r\n");
         return;
     }
-    if (rvnum == tvnum) {
-                ch->sendText("Don't copy a room to its self!\r\n");
+    if (rvnum == tvnum)
+    {
+        ch->sendText("Don't copy a room to its self!\r\n");
         return;
     }
 
     trnum = real_room(tvnum);
     rrnum = real_room(rvnum);
 
-    if (trnum == NOWHERE) {
-                ch->send_to("Could not find base room: %d\r\n", tvnum);
+    if (trnum == NOWHERE)
+    {
+        ch->send_to("Could not find base room: %d\r\n", tvnum);
         return;
     }
-    if (rrnum == NOWHERE) {
-                ch->send_to("Could not find target room: %d\r\n", rvnum);
+    if (rrnum == NOWHERE)
+    {
+        ch->send_to("Could not find target room: %d\r\n", rvnum);
         return;
     }
 
@@ -385,8 +403,9 @@ ACMD(do_rcopy) {
     auto tn = get_room(trnum);
 
     zone = rn->zone->number;
-    if ((zone == NOWHERE) || !can_edit_zone(ch, zone)) {
-                ch->sendText("\r\n");
+    if ((zone == NOWHERE) || !can_edit_zone(ch, zone))
+    {
+        ch->sendText("\r\n");
         send_cannot_edit(ch, zone);
         return;
     }
@@ -398,41 +417,45 @@ ACMD(do_rcopy) {
     /* Finally copy over room flags */
     get_room(rrnum)->room_flags = get_room(trnum)->room_flags;
     send_to_imm("Log: %s has copied room [%d] to room [%d].", GET_NAME(ch), tvnum, rvnum);
-        ch->send_to("Room [%d] copied to room [%d].\r\n", tvnum, rvnum);
+    ch->send_to("Room [%d] copied to room [%d].\r\n", tvnum, rvnum);
 }
 
 /****************************************************************************
-* BuildWalk - OasisOLC Extension by D. Tyler Barnes                         *
-****************************************************************************/
+ * BuildWalk - OasisOLC Extension by D. Tyler Barnes                         *
+ ****************************************************************************/
 
 /* For buildwalk. Finds the next free vnum in the zone */
-room_vnum redit_find_new_vnum(zone_rnum zone) {
-    auto& z = zone_table.at(zone);
-    for(auto i = z.bot; i < z.top; i++) {
-        if(!world.count(i)) return i;
-    }
-    return NOWHERE;
+room_vnum redit_find_new_vnum(zone_rnum zone)
+{
+    static int lastRoomID = 0;
+    return getNextID(lastRoomID, world);
 }
 
-int buildwalk(Character *ch, int dir) {
+int buildwalk(Character *ch, int dir)
+{
     char buf[MAX_INPUT_LENGTH];
     room_vnum vnum;
     room_rnum rnum;
 
     if (!IS_NPC(ch) && PRF_FLAGGED(ch, PRF_BUILDWALK) &&
-        GET_ADMLEVEL(ch) >= ADMLVL_IMMORT) {
+        GET_ADMLEVEL(ch) >= ADMLVL_IMMORT)
+    {
 
-        if (!can_edit_zone(ch, ch->location.getZone()->number)) {
+        if (!can_edit_zone(ch, ch->location.getZone()->number))
+        {
             send_cannot_edit(ch, ch->location.getZone()->number);
-        } else if ((vnum = redit_find_new_vnum(ch->location.getZone()->number)) == NOWHERE)
-                        ch->sendText("No free vnums are available in this zone!\r\n");
-        else {
+        }
+        else if ((vnum = redit_find_new_vnum(ch->location.getZone()->number)) == NOWHERE)
+            ch->sendText("No free vnums are available in this zone!\r\n");
+        else
+        {
             struct descriptor_data *d = ch->desc;
             /*
              * Give the descriptor an olc struct.
              * This way we can let redit_save_internally handle the room adding.
              */
-            if (d->olc) {
+            if (d->olc)
+            {
                 mudlog(BRF, ADMLVL_IMMORT, true, "SYSERR: buildwalk(): Player already had olc structure.");
                 delete d->olc;
             }
@@ -468,14 +491,12 @@ int buildwalk(Character *ch, int dir) {
             dest.replaceExit(rdest);
 
             /* Report room creation to user */
-                        ch->send_to("@yRoom #%d created by BuildWalk.@n\r\n", vnum);
+            ch->send_to("@yRoom #%d created by BuildWalk.@n\r\n", vnum);
             cleanup_olc(d, CLEANUP_STRUCTS);
             update_space();
             return (1);
-
         }
     }
 
     return (0);
 }
-

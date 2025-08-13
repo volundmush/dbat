@@ -30,8 +30,6 @@ struct gauntlet_mob {
 /* Reset functions */
 extern bool pre_reset(zone_vnum znum);
 
-extern void post_reset(zone_vnum znum);
-
 /* Zone pre-reset functions */
 extern bool prereset_gauntlet_zone();
 

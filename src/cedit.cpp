@@ -24,9 +24,16 @@ void free_config(struct config_data *data);
 /** Internal Macros                                                          **/
 /******************************************************************************/
 
-#define CHECK_VAR(var)  ((var) ? "Yes" : "No")
-#define TOGGLE_VAR(var)    if (var == true) { var = false; } else { var = true; }
-
+#define CHECK_VAR(var) ((var) ? "Yes" : "No")
+#define TOGGLE_VAR(var) \
+    if (var == true)    \
+    {                   \
+        var = false;    \
+    }                   \
+    else                \
+    {                   \
+        var = true;     \
+    }
 
 /******************************************************************************/
 /** Internal Functions                                                       **/
@@ -44,7 +51,8 @@ void reassign_rooms();
 /******************************************************************************/
 /** Routines                                                                 **/
 /******************************************************************************/
-ACMD(do_oasis_cedit) {
+ACMD(do_oasis_cedit)
+{
     struct descriptor_data *d;
     char buf1[MAX_STRING_LENGTH];
 
@@ -53,14 +61,16 @@ ACMD(do_oasis_cedit) {
     /****************************************************************************/
     one_argument(argument, buf1);
 
-    if (GET_ADMLEVEL(ch) < 5) {
-                ch->sendText("You can't modify the game configuration.\r\n");
+    if (GET_ADMLEVEL(ch) < 5)
+    {
+        ch->sendText("You can't modify the game configuration.\r\n");
         return;
     }
 
     d = ch->desc;
 
-    if (!*buf1) {
+    if (!*buf1)
+    {
         d->olc = new oasis_olc_data();
         OLC_ZONE(d) = nullptr;
         cedit_setup(d);
@@ -71,12 +81,14 @@ ACMD(do_oasis_cedit) {
         mudlog(BRF, ADMLVL_IMMORT, true,
                "OLC: %s starts editing the game configuration.", GET_NAME(ch));
         return;
-    } else if (strcasecmp("save", buf1) != 0) {
-                ch->sendText("Yikes!  Stop that, someone will get hurt!\r\n");
+    }
+    else if (strcasecmp("save", buf1) != 0)
+    {
+        ch->sendText("Yikes!  Stop that, someone will get hurt!\r\n");
         return;
     }
 
-        ch->sendText("Saving the game configuration.\r\n");
+    ch->sendText("Saving the game configuration.\r\n");
     mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), true,
            "OLC: %s saves the game configuration.", GET_NAME(ch));
 
@@ -85,7 +97,8 @@ ACMD(do_oasis_cedit) {
 
 /*-------------------------------------------------------------------*/
 
-void cedit_setup(struct descriptor_data *d) {
+void cedit_setup(struct descriptor_data *d)
+{
     /****************************************************************************/
     /** Create the config_data struct.                                         **/
     /****************************************************************************/
@@ -170,7 +183,6 @@ void cedit_setup(struct descriptor_data *d) {
     OLC_CONFIG(d)->advance.allow_multiclass = CONFIG_ALLOW_MULTICLASS;
     OLC_CONFIG(d)->advance.allow_prestige = CONFIG_ALLOW_PRESTIGE;
 
-
     /****************************************************************************/
     /** Allocate space for the strings.                                        **/
     /****************************************************************************/
@@ -231,7 +243,8 @@ void cedit_setup(struct descriptor_data *d) {
 
 /******************************************************************************/
 
-void cedit_save_internally(struct descriptor_data *d) {
+void cedit_save_internally(struct descriptor_data *d)
+{
     bool copyover_needed = false;
     /* see if we need to reassign spec procs on rooms */
     int reassign = (CONFIG_DTS_ARE_DUMPS != OLC_CONFIG(d)->play.dts_are_dumps);
@@ -334,7 +347,6 @@ void cedit_save_internally(struct descriptor_data *d) {
     else
         CONFIG_DFLT_IP = nullptr;
 
-
     if (CONFIG_DFLT_DIR)
         free(CONFIG_DFLT_DIR);
     if (OLC_CONFIG(d)->operation.DFLT_DIR)
@@ -398,10 +410,10 @@ void cedit_save_internally(struct descriptor_data *d) {
     CONFIG_CREATION_METHOD = OLC_CONFIG(d)->creation.method;
 }
 
-
 /******************************************************************************/
 
-void cedit_save_to_disk() {
+void cedit_save_to_disk()
+{
     /****************************************************************************/
     /** Just call save_config and get it over with.                            **/
     /****************************************************************************/
@@ -410,11 +422,13 @@ void cedit_save_to_disk() {
 
 /******************************************************************************/
 
-int save_config(IDXTYPE nowhere) {
+int save_config(IDXTYPE nowhere)
+{
     FILE *fl;
     char buf[MAX_STRING_LENGTH];
 
-    if (!(fl = fopen(CONFIG_CONFFILE, "w"))) {
+    if (!(fl = fopen(CONFIG_CONFFILE, "w")))
+    {
         perror("SYSERR: save_config");
         return (false);
     }
@@ -430,82 +444,107 @@ int save_config(IDXTYPE nowhere) {
             "* -----------------------------------------------------------------------\n"
             "* Lines starting with * are comments, and are not parsed.\n"
             "* -----------------------------------------------------------------------\n\n"
-            "* [ Game Play Options ]\n"
-    );
+            "* [ Game Play Options ]\n");
 
     fprintf(fl, "* Is player killing allowed on the mud?\n"
-                "pk_allowed = %d\n\n", CONFIG_PK_ALLOWED);
+                "pk_allowed = %d\n\n",
+            CONFIG_PK_ALLOWED);
     fprintf(fl, "* Is player thieving allowed on the mud?\n"
-                "pt_allowed = %d\n\n", CONFIG_PT_ALLOWED);
+                "pt_allowed = %d\n\n",
+            CONFIG_PT_ALLOWED);
     fprintf(fl, "* What is the minimum level a player can shout/gossip/etc?\n"
-                "level_can_shout = %d\n\n", CONFIG_LEVEL_CAN_SHOUT);
+                "level_can_shout = %d\n\n",
+            CONFIG_LEVEL_CAN_SHOUT);
     fprintf(fl, "* How many movement points does shouting cost the player?\n"
-                "holler_move_cost = %d\n\n", CONFIG_HOLLER_MOVE_COST);
+                "holler_move_cost = %d\n\n",
+            CONFIG_HOLLER_MOVE_COST);
     fprintf(fl, "* How many players can fit in a tunnel?\n"
-                "tunnel_size = %d\n\n", CONFIG_TUNNEL_SIZE);
+                "tunnel_size = %d\n\n",
+            CONFIG_TUNNEL_SIZE);
     fprintf(fl, "* Maximum experience gainable per kill?\n"
-                "max_exp_gain = %d\n\n", CONFIG_MAX_EXP_GAIN);
+                "max_exp_gain = %d\n\n",
+            CONFIG_MAX_EXP_GAIN);
     fprintf(fl, "* Maximum experience loseable per death?\n"
-                "max_exp_loss = %d\n\n", CONFIG_MAX_EXP_LOSS);
+                "max_exp_loss = %d\n\n",
+            CONFIG_MAX_EXP_LOSS);
     fprintf(fl, "* Number of tics before NPC corpses decompose.\n"
-                "max_npc_corpse_time = %d\n\n", CONFIG_MAX_NPC_CORPSE_TIME);
+                "max_npc_corpse_time = %d\n\n",
+            CONFIG_MAX_NPC_CORPSE_TIME);
     fprintf(fl, "* Number of tics before PC corpses decompose.\n"
-                "max_pc_corpse_time = %d\n\n", CONFIG_MAX_PC_CORPSE_TIME);
+                "max_pc_corpse_time = %d\n\n",
+            CONFIG_MAX_PC_CORPSE_TIME);
     fprintf(fl, "* Number of tics before a PC is sent to the void.\n"
-                "idle_void = %d\n\n", CONFIG_IDLE_VOID);
+                "idle_void = %d\n\n",
+            CONFIG_IDLE_VOID);
     fprintf(fl, "* Number of tics before a PC is autorented.\n"
-                "idle_rent_time = %d\n\n", CONFIG_IDLE_RENT_TIME);
+                "idle_rent_time = %d\n\n",
+            CONFIG_IDLE_RENT_TIME);
     fprintf(fl, "* Admin level and above of players whom are immune to idle penalties.\n"
-                "idle_max_level = %d\n\n", CONFIG_IDLE_MAX_LEVEL);
+                "idle_max_level = %d\n\n",
+            CONFIG_IDLE_MAX_LEVEL);
     fprintf(fl, "* Should the items in death traps be junked automatically?\n"
-                "dts_are_dumps = %d\n\n", CONFIG_DTS_ARE_DUMPS);
+                "dts_are_dumps = %d\n\n",
+            CONFIG_DTS_ARE_DUMPS);
     fprintf(fl, "* When an immortal loads an object, should it load into their inventory?\n"
-                "load_into_inventory = %d\n\n", CONFIG_LOAD_INVENTORY);
+                "load_into_inventory = %d\n\n",
+            CONFIG_LOAD_INVENTORY);
     fprintf(fl, "* Should PC's be able to track through hidden or closed doors?\n"
-                "track_through_doors = %d\n\n", CONFIG_TRACK_T_DOORS);
+                "track_through_doors = %d\n\n",
+            CONFIG_TRACK_T_DOORS);
     fprintf(fl, "* What is the level that cannot be attained?\n"
-                "level_cap = %d\n\n", CONFIG_LEVEL_CAP);
+                "level_cap = %d\n\n",
+            CONFIG_LEVEL_CAP);
     fprintf(fl, "* Stack mobiles when showing contents of rooms?\n"
-                "stack_mobs = %d\n\n", CONFIG_STACK_MOBS);
+                "stack_mobs = %d\n\n",
+            CONFIG_STACK_MOBS);
     fprintf(fl, "* Stack objects when showing contents of rooms?\n"
-                "stack_objs = %d\n\n", CONFIG_STACK_OBJS);
+                "stack_objs = %d\n\n",
+            CONFIG_STACK_OBJS);
     fprintf(fl, "* Allow aggressive mobs to attack other mobs?\n"
-                "mob_fighting = %d\n\n", CONFIG_MOB_FIGHTING);
+                "mob_fighting = %d\n\n",
+            CONFIG_MOB_FIGHTING);
     fprintf(fl, "* Should closed doors be shown on autoexit / exit?\n"
-                "disp_closed_doors = %d\n\n", CONFIG_DISP_CLOSED_DOORS);
+                "disp_closed_doors = %d\n\n",
+            CONFIG_DISP_CLOSED_DOORS);
     fprintf(fl, "* Should players be able to reroll stats at creation?\n"
-                "reroll_stats = %d\n\n", CONFIG_REROLL_PLAYER_CREATION);
+                "reroll_stats = %d\n\n",
+            CONFIG_REROLL_PLAYER_CREATION);
     fprintf(fl, "* How many points in players initial points pool if using point pool creation?\n"
-                "initial_points = %d\n\n", CONFIG_INITIAL_POINTS_POOL);
+                "initial_points = %d\n\n",
+            CONFIG_INITIAL_POINTS_POOL);
     fprintf(fl, "* Should compression be used if the client supports it?\n"
-                "compression = %d\n\n", CONFIG_ENABLE_COMPRESSION);
+                "compression = %d\n\n",
+            CONFIG_ENABLE_COMPRESSION);
     fprintf(fl, "* Should spoken languages be used?\n"
-                "enable_languages = %d\n\n", CONFIG_ENABLE_LANGUAGES);
+                "enable_languages = %d\n\n",
+            CONFIG_ENABLE_LANGUAGES);
     fprintf(fl, "* Should all items be treated as unique?\n"
-                "all_items_unique = %d\n\n", CONFIG_ALL_ITEMS_UNIQUE);
+                "all_items_unique = %d\n\n",
+            CONFIG_ALL_ITEMS_UNIQUE);
     fprintf(fl, "* Amount of in game experience multiplier.\n"
-                "exp_multiplier = %.2f\n\n", CONFIG_EXP_MULTIPLIER);
-
+                "exp_multiplier = %.2f\n\n",
+            CONFIG_EXP_MULTIPLIER);
 
     strcpy(buf, CONFIG_OK);
     strip_cr(buf);
 
     fprintf(fl, "* Text sent to players when OK is all that is needed.\n"
-                "ok = %s\n\n", buf);
+                "ok = %s\n\n",
+            buf);
 
     strcpy(buf, CONFIG_NOPERSON);
     strip_cr(buf);
 
     fprintf(fl, "* Text sent to players when noone is available.\n"
-                "noperson = %s\n\n", buf);
+                "noperson = %s\n\n",
+            buf);
 
     strcpy(buf, CONFIG_NOEFFECT);
     strip_cr(buf);
 
     fprintf(fl, "* Text sent to players when an effect fails.\n"
-                "noeffect = %s\n", buf);
-
-
+                "noeffect = %s\n",
+            buf);
 
     /************************************************************************
      ** RENT / CRASHSAVE OPTIONS					         **
@@ -514,26 +553,32 @@ int save_config(IDXTYPE nowhere) {
 
     fprintf(fl, "* Should the MUD allow you to 'rent' for free?  (i.e. if you just quit,\n"
                 "* your objects are saved at no cost, as in Merc-type MUDs.)\n"
-                "free_rent = %d\n\n", CONFIG_FREE_RENT);
+                "free_rent = %d\n\n",
+            CONFIG_FREE_RENT);
 
     fprintf(fl, "* Maximum number of items players are allowed to rent.\n"
-                "max_obj_save = %d\n\n", CONFIG_MAX_OBJ_SAVE);
+                "max_obj_save = %d\n\n",
+            CONFIG_MAX_OBJ_SAVE);
 
     fprintf(fl, "* Receptionist's surcharge on top of item costs.\n"
-                "min_rent_cost = %d\n\n", CONFIG_MIN_RENT_COST);
+                "min_rent_cost = %d\n\n",
+            CONFIG_MIN_RENT_COST);
 
     fprintf(fl, "* Should the game automatically save people?\n"
-                "auto_save = %d\n\n", CONFIG_AUTO_SAVE);
+                "auto_save = %d\n\n",
+            CONFIG_AUTO_SAVE);
 
     fprintf(fl, "* If auto_save = 1, how often (in minutes) should the game save people's objects?\n"
-                "autosave_time = %d\n\n", CONFIG_AUTOSAVE_TIME);
+                "autosave_time = %d\n\n",
+            CONFIG_AUTOSAVE_TIME);
 
     fprintf(fl, "* Lifetime of crashfiles and force-rent (idlesave) files in days.\n"
-                "crash_file_timeout = %d\n\n", CONFIG_CRASH_TIMEOUT);
+                "crash_file_timeout = %d\n\n",
+            CONFIG_CRASH_TIMEOUT);
 
     fprintf(fl, "* Lifetime of normal rent files in days.\n"
-                "rent_file_timeout = %d\n\n", CONFIG_RENT_TIMEOUT);
-
+                "rent_file_timeout = %d\n\n",
+            CONFIG_RENT_TIMEOUT);
 
     /************************************************************************
      ** ROOM NUMBERS						  	 **
@@ -541,13 +586,16 @@ int save_config(IDXTYPE nowhere) {
     fprintf(fl, "\n\n\n* [ Room Numbers ]\n");
 
     fprintf(fl, "* The virtual number of the room that mortals should enter at.\n"
-                "mortal_start_room = %d\n\n", CONFIG_MORTAL_START);
+                "mortal_start_room = %d\n\n",
+            CONFIG_MORTAL_START);
 
     fprintf(fl, "* The virtual number of the room that immorts should enter at.\n"
-                "immort_start_room = %d\n\n", CONFIG_IMMORTAL_START);
+                "immort_start_room = %d\n\n",
+            CONFIG_IMMORTAL_START);
 
     fprintf(fl, "* The virtual number of the room that frozen people should enter at.\n"
-                "frozen_start_room = %d\n\n", CONFIG_FROZEN_START);
+                "frozen_start_room = %d\n\n",
+            CONFIG_FROZEN_START);
 
     fprintf(fl, "* The virtual numbers of the donation rooms.  Note: Add donation rooms\n"
                 "* sequentially (1 & 2 before 3). If you don't, you might not be able to\n"
@@ -559,7 +607,6 @@ int save_config(IDXTYPE nowhere) {
             CONFIG_DON_ROOM_2 != NOWHERE ? CONFIG_DON_ROOM_2 : -1,
             CONFIG_DON_ROOM_3 != NOWHERE ? CONFIG_DON_ROOM_3 : -1);
 
-
     fprintf(fl, "\n\n\n* [ Game Operation Options ]\n");
 
     fprintf(fl, "* This is the default port on which the game should run if no port is\n"
@@ -570,27 +617,32 @@ int save_config(IDXTYPE nowhere) {
                 "DFLT_PORT = %d\n\n",
             CONFIG_DFLT_PORT);
 
-    if (CONFIG_DFLT_IP) {
+    if (CONFIG_DFLT_IP)
+    {
         strcpy(buf, CONFIG_DFLT_IP);
         strip_cr(buf);
 
         fprintf(fl, "* IP address to which the MUD should bind.\nDFLT_IP = %s\n\n", buf);
     }
 
-    if (CONFIG_DFLT_DIR) {
+    if (CONFIG_DFLT_DIR)
+    {
         strcpy(buf, CONFIG_DFLT_DIR);
         strip_cr(buf);
 
         fprintf(fl, "* default directory to use as data directory.\n"
-                    "DFLT_DIR = %s\n\n", buf);
+                    "DFLT_DIR = %s\n\n",
+                buf);
     }
 
-    if (CONFIG_LOGNAME) {
+    if (CONFIG_LOGNAME)
+    {
         strcpy(buf, CONFIG_LOGNAME);
         strip_cr(buf);
 
         fprintf(fl, "* What file to log messages to (ex: 'log/syslog').\n"
-                    "LOGNAME = %s\n\n", buf);
+                    "LOGNAME = %s\n\n",
+                buf);
     }
 
     fprintf(fl, "* Maximum number of players allowed before game starts to turn people away.\n"
@@ -622,27 +674,32 @@ int save_config(IDXTYPE nowhere) {
                 "auto_save_olc = %d\n\n",
             CONFIG_OLC_SAVE);
 
-    if (CONFIG_MENU) {
+    if (CONFIG_MENU)
+    {
         strcpy(buf, CONFIG_MENU);
         strip_cr(buf);
 
         fprintf(fl, "* The entrance/exit menu.\n"
-                    "MENU = \n%s~\n\n", buf);
+                    "MENU = \n%s~\n\n",
+                buf);
     }
 
-    if (CONFIG_WELC_MESSG) {
+    if (CONFIG_WELC_MESSG)
+    {
         strcpy(buf, CONFIG_WELC_MESSG);
         strip_cr(buf);
 
         fprintf(fl, "* The welcome message.\nWELC_MESSG = \n%s~\n\n", buf);
     }
 
-    if (CONFIG_START_MESSG) {
+    if (CONFIG_START_MESSG)
+    {
         strcpy(buf, CONFIG_START_MESSG);
         strip_cr(buf);
 
         fprintf(fl, "* NEWBIE start message.\n"
-                    "START_MESSG = \n%s~\n\n", buf);
+                    "START_MESSG = \n%s~\n\n",
+                buf);
     }
 
     fprintf(fl, "* Is the IMC global channel enabled (1) or not (0).\n"
@@ -720,13 +777,14 @@ int save_config(IDXTYPE nowhere) {
 }
 
 /**************************************************************************
- Menu functions 
+ Menu functions
  **************************************************************************/
 
 /*
- * the main menu 
+ * the main menu
  */
-void cedit_disp_menu(struct descriptor_data *d) {
+void cedit_disp_menu(struct descriptor_data *d)
+{
     clear_screen(d);
 
     /*
@@ -743,1498 +801,1626 @@ void cedit_disp_menu(struct descriptor_data *d) {
         "@WR@B) @CRoom Numbers\r\n"
         "@WT@B) @CGame Tick Options\r\n"
         "@WQ@B) @CQuit\r\n"
-        "@WEnter your choice : @n"
-    );
+        "@WEnter your choice : @n");
 
     OLC_MODE(d) = CEDIT_MAIN_MENU;
 }
 
 /*-------------------------------------------------------------------*/
 
-void cedit_disp_game_play_options(struct descriptor_data *d) {
+void cedit_disp_game_play_options(struct descriptor_data *d)
+{
     clear_screen(d);
 
     d->send_to("\r\n\r\n"
-                       "@WA@B) @CPlayer Killing Allowed  : @c%s\r\n"
-                       "@WB@B) @CPlayer Thieving Allowed : @c%s\r\n"
-                       "@WC@B) @CMinimum Level To Shout  : @c%d\r\n"
-                       "@WD@B) @CHoller Move Cost        : @c%d\r\n"
-                       "@WE@B) @CTunnel Size             : @c%d\r\n"
-                       "@WF@B) @CMaximum Experience Gain : @c%d\r\n"
-                       "@WG@B) @CMaximum Experience Loss : @c%d\r\n"
-                       "@WH@B) @CMax Time for NPC Corpse : @c%d\r\n"
-                       "@WI@B) @CMax Time for PC Corpse  : @c%d\r\n"
-                       "@WJ@B) @CTics before PC sent to void : @c%d\r\n"
-                       "@WK@B) @CTics before PC is autosaved : @c%d\r\n"
-                       "@WL@B) @CLevel Immune To IDLE        : @c%d\r\n"
-                       "@WM@B) @CDeath Traps Junk Items      : @c%s\r\n"
-                       "@WN@B) @CObjects Load Into Inventory : @c%s\r\n"
-                       "@WO@B) @CTrack Through Doors         : @c%s\r\n"
-                       "@WP@B) @CDisplay Closed Doors        : @c%s\r\n"
-                       "@WR@B) @CUnattainable Level          : @c%d\r\n"
-                       "@WS@B) @CTreat all Objects as Unique : @c%s\r\n"
-                       "@WT@B) @CExperience multiplier       : @c%.2f\r\n"
-                       "@W1@B) @CStack Mobiles in room descs : @c%s\r\n"
-                       "@W2@B) @CStack Objects in room descs : @c%s\r\n"
-                       "@W3@B) @CAllow mobs to fight mobs    : @c%s\r\n"
-                       "@W4@B) @COK Message Text         : @c%s"
-                       "@W5@B) @CNOPERSON Message Text   : @c%s"
-                       "@W6@B) @CNOEFFECT Message Text   : @c%s"
-                       "@W8@B) @CAllow MCCP2 stream compression (recommended): @c%s\r\n"
-                       "@W9@B) @CAllow spoken languages : @c%s\r\n"
-                       "@WQ@B) @CExit To The Main Menu\r\n"
-                       "@WEnter your choice : @n",
-                    CHECK_VAR(OLC_CONFIG(d)->play.pk_allowed),
-                    CHECK_VAR(OLC_CONFIG(d)->play.pt_allowed),
-                    OLC_CONFIG(d)->play.level_can_shout,
-                    OLC_CONFIG(d)->play.holler_move_cost,
-                    OLC_CONFIG(d)->play.tunnel_size,
-                    OLC_CONFIG(d)->play.max_exp_gain,
-                    OLC_CONFIG(d)->play.max_exp_loss,
-                    OLC_CONFIG(d)->play.max_npc_corpse_time,
-                    OLC_CONFIG(d)->play.max_pc_corpse_time,
+               "@WA@B) @CPlayer Killing Allowed  : @c%s\r\n"
+               "@WB@B) @CPlayer Thieving Allowed : @c%s\r\n"
+               "@WC@B) @CMinimum Level To Shout  : @c%d\r\n"
+               "@WD@B) @CHoller Move Cost        : @c%d\r\n"
+               "@WE@B) @CTunnel Size             : @c%d\r\n"
+               "@WF@B) @CMaximum Experience Gain : @c%d\r\n"
+               "@WG@B) @CMaximum Experience Loss : @c%d\r\n"
+               "@WH@B) @CMax Time for NPC Corpse : @c%d\r\n"
+               "@WI@B) @CMax Time for PC Corpse  : @c%d\r\n"
+               "@WJ@B) @CTics before PC sent to void : @c%d\r\n"
+               "@WK@B) @CTics before PC is autosaved : @c%d\r\n"
+               "@WL@B) @CLevel Immune To IDLE        : @c%d\r\n"
+               "@WM@B) @CDeath Traps Junk Items      : @c%s\r\n"
+               "@WN@B) @CObjects Load Into Inventory : @c%s\r\n"
+               "@WO@B) @CTrack Through Doors         : @c%s\r\n"
+               "@WP@B) @CDisplay Closed Doors        : @c%s\r\n"
+               "@WR@B) @CUnattainable Level          : @c%d\r\n"
+               "@WS@B) @CTreat all Objects as Unique : @c%s\r\n"
+               "@WT@B) @CExperience multiplier       : @c%.2f\r\n"
+               "@W1@B) @CStack Mobiles in room descs : @c%s\r\n"
+               "@W2@B) @CStack Objects in room descs : @c%s\r\n"
+               "@W3@B) @CAllow mobs to fight mobs    : @c%s\r\n"
+               "@W4@B) @COK Message Text         : @c%s"
+               "@W5@B) @CNOPERSON Message Text   : @c%s"
+               "@W6@B) @CNOEFFECT Message Text   : @c%s"
+               "@W8@B) @CAllow MCCP2 stream compression (recommended): @c%s\r\n"
+               "@W9@B) @CAllow spoken languages : @c%s\r\n"
+               "@WQ@B) @CExit To The Main Menu\r\n"
+               "@WEnter your choice : @n",
+               CHECK_VAR(OLC_CONFIG(d)->play.pk_allowed),
+               CHECK_VAR(OLC_CONFIG(d)->play.pt_allowed),
+               OLC_CONFIG(d)->play.level_can_shout,
+               OLC_CONFIG(d)->play.holler_move_cost,
+               OLC_CONFIG(d)->play.tunnel_size,
+               OLC_CONFIG(d)->play.max_exp_gain,
+               OLC_CONFIG(d)->play.max_exp_loss,
+               OLC_CONFIG(d)->play.max_npc_corpse_time,
+               OLC_CONFIG(d)->play.max_pc_corpse_time,
 
-                    OLC_CONFIG(d)->play.idle_void,
-                    OLC_CONFIG(d)->play.idle_rent_time,
-                    OLC_CONFIG(d)->play.idle_max_level,
-                    CHECK_VAR(OLC_CONFIG(d)->play.dts_are_dumps),
-                    CHECK_VAR(OLC_CONFIG(d)->play.load_into_inventory),
-                    CHECK_VAR(OLC_CONFIG(d)->play.track_through_doors),
-                    CHECK_VAR(OLC_CONFIG(d)->play.disp_closed_doors),
-                    OLC_CONFIG(d)->play.level_cap,
-                    CHECK_VAR(OLC_CONFIG(d)->play.all_items_unique),
-                    OLC_CONFIG(d)->play.exp_multiplier,
-                    CHECK_VAR(OLC_CONFIG(d)->play.stack_mobs),
-                    CHECK_VAR(OLC_CONFIG(d)->play.stack_objs),
-                    CHECK_VAR(OLC_CONFIG(d)->play.mob_fighting),
-                    OLC_CONFIG(d)->play.OK,
-                    OLC_CONFIG(d)->play.NOPERSON,
-                    OLC_CONFIG(d)->play.NOEFFECT,
-                    CHECK_VAR(OLC_CONFIG(d)->play.enable_compression),
-                    CHECK_VAR(OLC_CONFIG(d)->play.enable_languages)
-    );
+               OLC_CONFIG(d)->play.idle_void,
+               OLC_CONFIG(d)->play.idle_rent_time,
+               OLC_CONFIG(d)->play.idle_max_level,
+               CHECK_VAR(OLC_CONFIG(d)->play.dts_are_dumps),
+               CHECK_VAR(OLC_CONFIG(d)->play.load_into_inventory),
+               CHECK_VAR(OLC_CONFIG(d)->play.track_through_doors),
+               CHECK_VAR(OLC_CONFIG(d)->play.disp_closed_doors),
+               OLC_CONFIG(d)->play.level_cap,
+               CHECK_VAR(OLC_CONFIG(d)->play.all_items_unique),
+               OLC_CONFIG(d)->play.exp_multiplier,
+               CHECK_VAR(OLC_CONFIG(d)->play.stack_mobs),
+               CHECK_VAR(OLC_CONFIG(d)->play.stack_objs),
+               CHECK_VAR(OLC_CONFIG(d)->play.mob_fighting),
+               OLC_CONFIG(d)->play.OK,
+               OLC_CONFIG(d)->play.NOPERSON,
+               OLC_CONFIG(d)->play.NOEFFECT,
+               CHECK_VAR(OLC_CONFIG(d)->play.enable_compression),
+               CHECK_VAR(OLC_CONFIG(d)->play.enable_languages));
 
     OLC_MODE(d) = CEDIT_GAME_OPTIONS_MENU;
 }
 
 /*-------------------------------------------------------------------*/
 
-void cedit_disp_crash_save_options(struct descriptor_data *d) {
+void cedit_disp_crash_save_options(struct descriptor_data *d)
+{
     clear_screen(d);
 
     d->send_to("\r\n\r\n"
-                       "@WA@B) @CFree Rent          : @c%s\r\n"
-                       "@WB@B) @CMax Objects Saved  : @c%d\r\n"
-                       "@WC@B) @CMinimum Rent Cost  : @c%d\r\n"
-                       "@WD@B) @CAuto Save          : @c%s\r\n"
-                       "@WE@B) @CAuto Save Time     : @c%d minute(s)\r\n"
-                       "@WF@B) @CCrash File Timeout : @c%d day(s)\r\n"
-                       "@WG@B) @CRent File Timeout  : @c%d day(s)\r\n"
-                       "@WQ@B) @CExit To The Main Menu\r\n"
-                       "@WEnter your choice : @n",
-                    CHECK_VAR(OLC_CONFIG(d)->csd.free_rent),
-                    OLC_CONFIG(d)->csd.max_obj_save,
-                    OLC_CONFIG(d)->csd.min_rent_cost,
-                    CHECK_VAR(OLC_CONFIG(d)->csd.auto_save),
-                    OLC_CONFIG(d)->csd.autosave_time,
-                    OLC_CONFIG(d)->csd.crash_file_timeout,
-                    OLC_CONFIG(d)->csd.rent_file_timeout
-    );
+               "@WA@B) @CFree Rent          : @c%s\r\n"
+               "@WB@B) @CMax Objects Saved  : @c%d\r\n"
+               "@WC@B) @CMinimum Rent Cost  : @c%d\r\n"
+               "@WD@B) @CAuto Save          : @c%s\r\n"
+               "@WE@B) @CAuto Save Time     : @c%d minute(s)\r\n"
+               "@WF@B) @CCrash File Timeout : @c%d day(s)\r\n"
+               "@WG@B) @CRent File Timeout  : @c%d day(s)\r\n"
+               "@WQ@B) @CExit To The Main Menu\r\n"
+               "@WEnter your choice : @n",
+               CHECK_VAR(OLC_CONFIG(d)->csd.free_rent),
+               OLC_CONFIG(d)->csd.max_obj_save,
+               OLC_CONFIG(d)->csd.min_rent_cost,
+               CHECK_VAR(OLC_CONFIG(d)->csd.auto_save),
+               OLC_CONFIG(d)->csd.autosave_time,
+               OLC_CONFIG(d)->csd.crash_file_timeout,
+               OLC_CONFIG(d)->csd.rent_file_timeout);
 
     OLC_MODE(d) = CEDIT_CRASHSAVE_OPTIONS_MENU;
 }
 
 /*-------------------------------------------------------------------*/
 
-void cedit_disp_room_numbers(struct descriptor_data *d) {
+void cedit_disp_room_numbers(struct descriptor_data *d)
+{
     clear_screen(d);
 
     d->send_to("\r\n\r\n"
-                       "@WA@B) @CMortal Start Room   : @c%d\r\n"
-                       "@WB@B) @CImmortal Start Room : @c%d\r\n"
-                       "@WC@B) @CFrozen Start Room   : @c%d\r\n"
-                       "@W1@B) @CDonation Room #1    : @c%d\r\n"
-                       "@W2@B) @CDonation Room #2    : @c%d\r\n"
-                       "@W3@B) @CDonation Room #3    : @c%d\r\n"
-                       "@WQ@B) @CExit To The Main Menu\r\n"
-                       "@WEnter your choice : @n",
-                    OLC_CONFIG(d)->room_nums.mortal_start_room,
-                    OLC_CONFIG(d)->room_nums.immort_start_room,
-                    OLC_CONFIG(d)->room_nums.frozen_start_room,
-                    OLC_CONFIG(d)->room_nums.donation_room_1,
-                    OLC_CONFIG(d)->room_nums.donation_room_2,
-                    OLC_CONFIG(d)->room_nums.donation_room_3
-    );
+               "@WA@B) @CMortal Start Room   : @c%d\r\n"
+               "@WB@B) @CImmortal Start Room : @c%d\r\n"
+               "@WC@B) @CFrozen Start Room   : @c%d\r\n"
+               "@W1@B) @CDonation Room #1    : @c%d\r\n"
+               "@W2@B) @CDonation Room #2    : @c%d\r\n"
+               "@W3@B) @CDonation Room #3    : @c%d\r\n"
+               "@WQ@B) @CExit To The Main Menu\r\n"
+               "@WEnter your choice : @n",
+               OLC_CONFIG(d)->room_nums.mortal_start_room,
+               OLC_CONFIG(d)->room_nums.immort_start_room,
+               OLC_CONFIG(d)->room_nums.frozen_start_room,
+               OLC_CONFIG(d)->room_nums.donation_room_1,
+               OLC_CONFIG(d)->room_nums.donation_room_2,
+               OLC_CONFIG(d)->room_nums.donation_room_3);
 
     OLC_MODE(d) = CEDIT_ROOM_NUMBERS_MENU;
 }
 
-
 /*-------------------------------------------------------------------*/
 
-void cedit_disp_operation_options(struct descriptor_data *d) {
+void cedit_disp_operation_options(struct descriptor_data *d)
+{
     clear_screen(d);
 
     d->send_to("\r\n\r\n"
-                       "@WA@B) @CDefault Port : @c%d\r\n"
-                       "@WB@B) @CDefault IP   : @c%s\r\n"
-                       "@WC@B) @CDefault Directory   : @c%s\r\n"
-                       "@WD@B) @CLogfile Name        : @c%s\r\n"
-                       "@WE@B) @CMax Players         : @c%d\r\n"
-                       "@WF@B) @CMax Filesize        : @c%d\r\n"
-                       "@WG@B) @CMax Bad Pws         : @c%d\r\n"
-                       "@WH@B) @CSite Ok Everyone    : @c%s\r\n"
-                       "@WI@B) @CName Server Is Slow : @c%s\r\n"
-                       "@WJ@B) @CUse new socials file: @c%s\r\n"
-                       "@WK@B) @COLC autosave to disk: @c%s\r\n"
-                       "@WL@B) @CMain Menu           : \r\n@n%s@n\r\n"
-                       "@WM@B) @CWelcome Message     : \r\n@n%s@n\r\n"
-                       "@WN@B) @CStart Message       : \r\n@n%s@n\r\n"
-                       "@WO@B) @CIMC Enabled         : @c%s@n\r\n"
-                       "@WQ@B) @CExit To The Main Menu\r\n"
-                       "@WEnter your choice : @n",
-                    OLC_CONFIG(d)->operation.DFLT_PORT,
-                    OLC_CONFIG(d)->operation.DFLT_IP ? OLC_CONFIG(d)->operation.DFLT_IP : "<None>",
-                    OLC_CONFIG(d)->operation.DFLT_DIR ? OLC_CONFIG(d)->operation.DFLT_DIR : "<None>",
-                    OLC_CONFIG(d)->operation.LOGNAME ? OLC_CONFIG(d)->operation.LOGNAME : "<None>",
-                    OLC_CONFIG(d)->operation.max_playing,
-                    OLC_CONFIG(d)->operation.max_filesize,
-                    OLC_CONFIG(d)->operation.max_bad_pws,
-                    YESNO(OLC_CONFIG(d)->operation.siteok_everyone),
-                    YESNO(OLC_CONFIG(d)->operation.nameserver_is_slow),
-                    YESNO(OLC_CONFIG(d)->operation.use_new_socials),
-                    YESNO(OLC_CONFIG(d)->operation.auto_save_olc),
-                    OLC_CONFIG(d)->operation.MENU ? OLC_CONFIG(d)->operation.MENU : "<None>",
-                    OLC_CONFIG(d)->operation.WELC_MESSG ? OLC_CONFIG(d)->operation.WELC_MESSG : "<None>",
-                    OLC_CONFIG(d)->operation.START_MESSG ? OLC_CONFIG(d)->operation.START_MESSG : "<None>",
-                    YESNO(OLC_CONFIG(d)->operation.imc_enabled)
-    );
+               "@WA@B) @CDefault Port : @c%d\r\n"
+               "@WB@B) @CDefault IP   : @c%s\r\n"
+               "@WC@B) @CDefault Directory   : @c%s\r\n"
+               "@WD@B) @CLogfile Name        : @c%s\r\n"
+               "@WE@B) @CMax Players         : @c%d\r\n"
+               "@WF@B) @CMax Filesize        : @c%d\r\n"
+               "@WG@B) @CMax Bad Pws         : @c%d\r\n"
+               "@WH@B) @CSite Ok Everyone    : @c%s\r\n"
+               "@WI@B) @CName Server Is Slow : @c%s\r\n"
+               "@WJ@B) @CUse new socials file: @c%s\r\n"
+               "@WK@B) @COLC autosave to disk: @c%s\r\n"
+               "@WL@B) @CMain Menu           : \r\n@n%s@n\r\n"
+               "@WM@B) @CWelcome Message     : \r\n@n%s@n\r\n"
+               "@WN@B) @CStart Message       : \r\n@n%s@n\r\n"
+               "@WO@B) @CIMC Enabled         : @c%s@n\r\n"
+               "@WQ@B) @CExit To The Main Menu\r\n"
+               "@WEnter your choice : @n",
+               OLC_CONFIG(d)->operation.DFLT_PORT,
+               OLC_CONFIG(d)->operation.DFLT_IP ? OLC_CONFIG(d)->operation.DFLT_IP : "<None>",
+               OLC_CONFIG(d)->operation.DFLT_DIR ? OLC_CONFIG(d)->operation.DFLT_DIR : "<None>",
+               OLC_CONFIG(d)->operation.LOGNAME ? OLC_CONFIG(d)->operation.LOGNAME : "<None>",
+               OLC_CONFIG(d)->operation.max_playing,
+               OLC_CONFIG(d)->operation.max_filesize,
+               OLC_CONFIG(d)->operation.max_bad_pws,
+               YESNO(OLC_CONFIG(d)->operation.siteok_everyone),
+               YESNO(OLC_CONFIG(d)->operation.nameserver_is_slow),
+               YESNO(OLC_CONFIG(d)->operation.use_new_socials),
+               YESNO(OLC_CONFIG(d)->operation.auto_save_olc),
+               OLC_CONFIG(d)->operation.MENU ? OLC_CONFIG(d)->operation.MENU : "<None>",
+               OLC_CONFIG(d)->operation.WELC_MESSG ? OLC_CONFIG(d)->operation.WELC_MESSG : "<None>",
+               OLC_CONFIG(d)->operation.START_MESSG ? OLC_CONFIG(d)->operation.START_MESSG : "<None>",
+               YESNO(OLC_CONFIG(d)->operation.imc_enabled));
 
     OLC_MODE(d) = CEDIT_OPERATION_OPTIONS_MENU;
 }
 
-
 /*-------------------------------------------------------------------*/
 
-void cedit_disp_autowiz_options(struct descriptor_data *d) {
+void cedit_disp_autowiz_options(struct descriptor_data *d)
+{
     clear_screen(d);
 
     d->send_to("\r\n\r\n"
-                       "@WA@B) @CUse the autowiz        : @c%s\r\n"
-                       "@WB@B) @CMinimum wizlist level  : @c%d\r\n"
-                       "@WQ@B) @CExit To The Main Menu\r\n"
-                       "@WEnter your choice : @n",
-                    CHECK_VAR(OLC_CONFIG(d)->autowiz.use_autowiz),
-                    OLC_CONFIG(d)->autowiz.min_wizlist_lev
-    );
+               "@WA@B) @CUse the autowiz        : @c%s\r\n"
+               "@WB@B) @CMinimum wizlist level  : @c%d\r\n"
+               "@WQ@B) @CExit To The Main Menu\r\n"
+               "@WEnter your choice : @n",
+               CHECK_VAR(OLC_CONFIG(d)->autowiz.use_autowiz),
+               OLC_CONFIG(d)->autowiz.min_wizlist_lev);
 
     OLC_MODE(d) = CEDIT_AUTOWIZ_OPTIONS_MENU;
 }
 
-
 /*-------------------------------------------------------------------*/
 
-void cedit_disp_advance_options(struct descriptor_data *d) {
+void cedit_disp_advance_options(struct descriptor_data *d)
+{
     clear_screen(d);
 
     d->send_to("\r\n\r\n"
-                       "@WA@B) @CAllow multiclass       : @c%s\r\n"
-                       "@WB@B) @CAllow Prestige Classes : @c%s\r\n"
-                       "@WQ@B) @CExit To The Main Menu\r\n"
-                       "@WEnter your choice : @n",
-                    CHECK_VAR(OLC_CONFIG(d)->advance.allow_multiclass),
-                    CHECK_VAR(OLC_CONFIG(d)->advance.allow_prestige)
-    );
+               "@WA@B) @CAllow multiclass       : @c%s\r\n"
+               "@WB@B) @CAllow Prestige Classes : @c%s\r\n"
+               "@WQ@B) @CExit To The Main Menu\r\n"
+               "@WEnter your choice : @n",
+               CHECK_VAR(OLC_CONFIG(d)->advance.allow_multiclass),
+               CHECK_VAR(OLC_CONFIG(d)->advance.allow_prestige));
 
     OLC_MODE(d) = CEDIT_ADVANCE_OPTIONS_MENU;
 }
 
 /*-------------------------------------------------------------------*/
 
-void cedit_disp_ticks_menu(struct descriptor_data *d) {
+void cedit_disp_ticks_menu(struct descriptor_data *d)
+{
     clear_screen(d);
 
     d->send_to("\r\n\r\n"
-                       "@WA@B) @CPulse Violence Time  : @c%d\r\n"
-                       "@WB@B) @CMobile Action Time   : @c%d\r\n"
-                       "@WC@B) @CZone Time            : @c%d\r\n"
-                       "@WD@B) @CAutosave Time        : @c%d\r\n"
-                       "@WE@B) @CIdle Password Time   : @c%d\r\n"
-                       "@WF@B) @CSanity Check Time    : @c%d\r\n"
-                       "@WG@B) @CUsage Check Time     : @c%d\r\n"
-                       "@WH@B) @CTimesave Time        : @c%d\r\n"
-                       "@WI@B) @CCurrents Update Time : @c%d\r\n"
-                       "@WQ@B) @CExit To The Main Menu\r\n"
-                       "@WEnter your choice : @n",
-                    OLC_CONFIG(d)->ticks.pulse_violence,
-                    OLC_CONFIG(d)->ticks.pulse_mobile,
-                    OLC_CONFIG(d)->ticks.pulse_zone,
-                    OLC_CONFIG(d)->ticks.pulse_autosave,
-                    OLC_CONFIG(d)->ticks.pulse_idlepwd,
-                    OLC_CONFIG(d)->ticks.pulse_sanity,
-                    OLC_CONFIG(d)->ticks.pulse_usage,
-                    OLC_CONFIG(d)->ticks.pulse_timesave,
-                    OLC_CONFIG(d)->ticks.pulse_current
-    );
+               "@WA@B) @CPulse Violence Time  : @c%d\r\n"
+               "@WB@B) @CMobile Action Time   : @c%d\r\n"
+               "@WC@B) @CZone Time            : @c%d\r\n"
+               "@WD@B) @CAutosave Time        : @c%d\r\n"
+               "@WE@B) @CIdle Password Time   : @c%d\r\n"
+               "@WF@B) @CSanity Check Time    : @c%d\r\n"
+               "@WG@B) @CUsage Check Time     : @c%d\r\n"
+               "@WH@B) @CTimesave Time        : @c%d\r\n"
+               "@WI@B) @CCurrents Update Time : @c%d\r\n"
+               "@WQ@B) @CExit To The Main Menu\r\n"
+               "@WEnter your choice : @n",
+               OLC_CONFIG(d)->ticks.pulse_violence,
+               OLC_CONFIG(d)->ticks.pulse_mobile,
+               OLC_CONFIG(d)->ticks.pulse_zone,
+               OLC_CONFIG(d)->ticks.pulse_autosave,
+               OLC_CONFIG(d)->ticks.pulse_idlepwd,
+               OLC_CONFIG(d)->ticks.pulse_sanity,
+               OLC_CONFIG(d)->ticks.pulse_usage,
+               OLC_CONFIG(d)->ticks.pulse_timesave,
+               OLC_CONFIG(d)->ticks.pulse_current);
 
     OLC_MODE(d) = CEDIT_TICKS_OPTIONS_MENU;
 }
 
 /*-------------------------------------------------------------------*/
 
-void cedit_disp_creation_options(struct descriptor_data *d) {
+void cedit_disp_creation_options(struct descriptor_data *d)
+{
     clear_screen(d);
 
     d->send_to("\r\n\r\n"
-                       "@WA@B) @CCharacter Creation Method : @c%d \r\n"
-                       "   %s\r\n"
-                       "@WB@B) @CPlayers can reroll stats on creation : @c%s\r\n"
-                       "@WC@B) @CNumber of points in initial points pool for pool generation methods : @c%d \r\n"
-                       "@WQ@B) @CExit To The Main Menu\r\n"
-                       "@WEnter your choice : @n",
-                    OLC_CONFIG(d)->creation.method,
-                    creation_methods[(int) OLC_CONFIG(d)->creation.method],
-                    CHECK_VAR(OLC_CONFIG(d)->play.reroll_player),
-                    OLC_CONFIG(d)->play.initial_points);
+               "@WA@B) @CCharacter Creation Method : @c%d \r\n"
+               "   %s\r\n"
+               "@WB@B) @CPlayers can reroll stats on creation : @c%s\r\n"
+               "@WC@B) @CNumber of points in initial points pool for pool generation methods : @c%d \r\n"
+               "@WQ@B) @CExit To The Main Menu\r\n"
+               "@WEnter your choice : @n",
+               OLC_CONFIG(d)->creation.method,
+               creation_methods[(int)OLC_CONFIG(d)->creation.method],
+               CHECK_VAR(OLC_CONFIG(d)->play.reroll_player),
+               OLC_CONFIG(d)->play.initial_points);
     OLC_MODE(d) = CEDIT_CREATION_OPTIONS_MENU;
 }
 
-void cedit_disp_creation_menu(struct descriptor_data *d) {
+void cedit_disp_creation_menu(struct descriptor_data *d)
+{
     int i;
     char buf[MAX_INPUT_LENGTH];
 
     clear_screen(d);
-    for (i = 0; i < NUM_CREATION_METHODS; i++) {
+    for (i = 0; i < NUM_CREATION_METHODS; i++)
+    {
         sprintf(buf, "@W%d@B) @C%s@n\r\n", i, creation_methods[i]);
-    d->send_to("%s", buf);
+        d->send_to("%s", buf);
     }
     d->sendText("Choose character creation type: ");
     OLC_MODE(d) = CEDIT_CREATION_MENU;
 }
 
-
-void cedit_disp_points_menu(struct descriptor_data *d) {
+void cedit_disp_points_menu(struct descriptor_data *d)
+{
 
     d->sendText("Enter size of initial points pool. (0 or greater). ");
     OLC_MODE(d) = CEDIT_POINTS_MENU;
 }
-
 
 /*-------------------------------------------------------------------*/
 /**************************************************************************
   The GARGANTAUN event handler
  **************************************************************************/
 
-void cedit_parse(struct descriptor_data *d, char *arg) {
+void cedit_parse(struct descriptor_data *d, char *arg)
+{
     char *oldtext = nullptr;
 
-    switch (OLC_MODE(d)) {
-        case CEDIT_CONFIRM_SAVESTRING:
-            switch (*arg) {
-                case 'y':
-                case 'Y':
-                    cedit_save_internally(d);
-                    mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(d->character)), true,
-                           "OLC: %s modifies the game configuration.", GET_NAME(d->character));
-                    cleanup_olc(d, CLEANUP_CONFIG);
-                    if (CONFIG_AUTO_SAVE) {
-                        cedit_save_to_disk();
-                        d->sendText("Game configuration saved to disk.\r\n");
-                    } else
-                        d->sendText("Game configuration saved to memory.\r\n");
-                    return;
-                case 'n':
-                case 'N':
-                    d->sendText("Game configuration not saved to memory.\r\n");
-                    cleanup_olc(d, CLEANUP_CONFIG);
-                    return;
-                default :
-                    d->sendText("\r\nThat is an invalid choice!\r\n");
-                    d->sendText("Do you wish to save your changes? : ");
-                    return;
+    switch (OLC_MODE(d))
+    {
+    case CEDIT_CONFIRM_SAVESTRING:
+        switch (*arg)
+        {
+        case 'y':
+        case 'Y':
+            cedit_save_internally(d);
+            mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(d->character)), true,
+                   "OLC: %s modifies the game configuration.", GET_NAME(d->character));
+            cleanup_olc(d, CLEANUP_CONFIG);
+            if (CONFIG_AUTO_SAVE)
+            {
+                cedit_save_to_disk();
+                d->sendText("Game configuration saved to disk.\r\n");
             }
+            else
+                d->sendText("Game configuration saved to memory.\r\n");
+            return;
+        case 'n':
+        case 'N':
+            d->sendText("Game configuration not saved to memory.\r\n");
+            cleanup_olc(d, CLEANUP_CONFIG);
+            return;
+        default:
+            d->sendText("\r\nThat is an invalid choice!\r\n");
+            d->sendText("Do you wish to save your changes? : ");
+            return;
+        }
 
-/*-------------------------------------------------------------------*/
+        /*-------------------------------------------------------------------*/
 
-        case CEDIT_MAIN_MENU:
-            switch (*arg) {
-                case 'g':
-                case 'G':
-                    cedit_disp_game_play_options(d);
-                    OLC_MODE(d) = CEDIT_GAME_OPTIONS_MENU;
-                    break;
-
-                case 'c':
-                case 'C':
-                    cedit_disp_crash_save_options(d);
-                    OLC_MODE(d) = CEDIT_CRASHSAVE_OPTIONS_MENU;
-                    break;
-
-                case 'r':
-                case 'R':
-                    cedit_disp_room_numbers(d);
-                    OLC_MODE(d) = CEDIT_ROOM_NUMBERS_MENU;
-                    break;
-
-                case 'o':
-                case 'O':
-                    cedit_disp_operation_options(d);
-                    OLC_MODE(d) = CEDIT_OPERATION_OPTIONS_MENU;
-                    break;
-
-                case 'a':
-                case 'A':
-                    cedit_disp_autowiz_options(d);
-                    OLC_MODE(d) = CEDIT_AUTOWIZ_OPTIONS_MENU;
-                    break;
-
-                case 'd':
-                case 'D':
-                    cedit_disp_advance_options(d);
-                    OLC_MODE(d) = CEDIT_ADVANCE_OPTIONS_MENU;
-                    break;
-
-                case 't':
-                case 'T':
-                    cedit_disp_ticks_menu(d);
-                    OLC_MODE(d) = CEDIT_TICKS_OPTIONS_MENU;
-                    break;
-
-                case 'q':
-                case 'Q':
-                    d->sendText("Do you wish to save your changes? : ");
-                    OLC_MODE(d) = CEDIT_CONFIRM_SAVESTRING;
-                    break;
-
-                case 'n':
-                case 'N':
-                    cedit_disp_creation_options(d);
-                    OLC_MODE(d) = CEDIT_CREATION_OPTIONS_MENU;
-                    break;
-
-                default:
-                    d->sendText("That is an invalid choice!\r\n");
-                    cedit_disp_menu(d);
-                    break;
-            }
+    case CEDIT_MAIN_MENU:
+        switch (*arg)
+        {
+        case 'g':
+        case 'G':
+            cedit_disp_game_play_options(d);
+            OLC_MODE(d) = CEDIT_GAME_OPTIONS_MENU;
             break;
 
-
-/*-------------------------------------------------------------------*/
-
-        case CEDIT_GAME_OPTIONS_MENU:
-            switch (*arg) {
-                case 'a':
-                case 'A':
-                    TOGGLE_VAR(OLC_CONFIG(d)->play.pk_allowed);
-                    break;
-
-                case 'b':
-                case 'B':
-                    TOGGLE_VAR(OLC_CONFIG(d)->play.pt_allowed);
-                    break;
-
-                case 'c':
-                case 'C':
-                    d->sendText("Enter the minimum level a player must be to shout, gossip, etc : ");
-                    OLC_MODE(d) = CEDIT_LEVEL_CAN_SHOUT;
-                    return;
-
-                case 'd':
-                case 'D':
-                    d->sendText("Enter the amount it costs (in move points) to holler : ");
-                    OLC_MODE(d) = CEDIT_HOLLER_MOVE_COST;
-                    return;
-
-                case 'e':
-                case 'E':
-                    d->sendText("Enter the maximum number of people allowed in a tunnel : ");
-                    OLC_MODE(d) = CEDIT_TUNNEL_SIZE;
-                    return;
-
-                case 'f':
-                case 'F':
-                    d->sendText("Enter the maximum gain of experience per kill for players : ");
-                    OLC_MODE(d) = CEDIT_MAX_EXP_GAIN;
-                    return;
-
-                case 'g':
-                case 'G':
-                    d->sendText("Enter the maximum loss of experience per death for players : ");
-                    OLC_MODE(d) = CEDIT_MAX_EXP_LOSS;
-                    return;
-
-                case 'h':
-                case 'H':
-                    d->sendText("Enter the number of tics before NPC corpses decompose : ");
-                    OLC_MODE(d) = CEDIT_MAX_NPC_CORPSE_TIME;
-                    return;
-
-                case 'i':
-                case 'I':
-                    d->sendText("Enter the number of tics before PC corpses decompose : ");
-                    OLC_MODE(d) = CEDIT_MAX_PC_CORPSE_TIME;
-                    return;
-
-                case 'j':
-                case 'J':
-                    d->sendText("Enter the number of tics before PC's are sent to the void (idle) : ");
-                    OLC_MODE(d) = CEDIT_IDLE_VOID;
-                    return;
-
-                case 'k':
-                case 'K':
-                    d->sendText("Enter the number of tics before PC's are automatically rented and forced to quit : ");
-                    OLC_MODE(d) = CEDIT_IDLE_RENT_TIME;
-                    return;
-
-                case 'l':
-                case 'L':
-                    d->sendText("Enter the level a player must be to become immune to IDLE : ");
-                    OLC_MODE(d) = CEDIT_IDLE_MAX_LEVEL;
-                    return;
-
-                case 'm':
-                case 'M':
-                    TOGGLE_VAR(OLC_CONFIG(d)->play.dts_are_dumps);
-                    break;
-
-                case 'n':
-                case 'N':
-                    TOGGLE_VAR(OLC_CONFIG(d)->play.load_into_inventory);
-                    break;
-
-                case 'o':
-                case 'O':
-                    TOGGLE_VAR(OLC_CONFIG(d)->play.track_through_doors);
-                    break;
-
-                case 'p':
-                case 'P':
-                    TOGGLE_VAR(OLC_CONFIG(d)->play.disp_closed_doors);
-                    break;
-
-                case 'r':
-                case 'R':
-                    d->sendText("Enter the number a character cannot level to : ");
-                    OLC_MODE(d) = CEDIT_LEVEL_CAP;
-                    return;
-
-                case 's':
-                case 'S':
-                    TOGGLE_VAR(OLC_CONFIG(d)->play.all_items_unique);
-                    break;
-
-                case 't':
-                case 'T':
-                    d->sendText("Enter the multiplier a player will recieve to experience gained : ");
-                    OLC_MODE(d) = CEDIT_EXP_MULTIPLIER;
-                    return;
-
-                case '1':
-                    TOGGLE_VAR(OLC_CONFIG(d)->play.stack_mobs);
-                    break;
-
-                case '2':
-                    TOGGLE_VAR(OLC_CONFIG(d)->play.stack_objs);
-                    break;
-
-                case '3':
-                    TOGGLE_VAR(OLC_CONFIG(d)->play.mob_fighting);
-                    break;
-
-                case '4':
-                    d->sendText("Enter the OK message : ");
-                    OLC_MODE(d) = CEDIT_OK;
-                    return;
-
-                case '5':
-                    d->sendText("Enter the NOPERSON message : ");
-                    OLC_MODE(d) = CEDIT_NOPERSON;
-                    return;
-
-                case '6':
-                    d->sendText("Enter the NOEFFECT message : ");
-                    OLC_MODE(d) = CEDIT_NOEFFECT;
-                    return;
-
-                case '8':
-                    TOGGLE_VAR(OLC_CONFIG(d)->play.enable_compression);
-                    break;
-
-                case '9':
-                    TOGGLE_VAR(OLC_CONFIG(d)->play.enable_languages);
-                    break;
-
-                case 'q':
-                case 'Q':
-                    cedit_disp_menu(d);
-                    return;
-
-                default:
-                    d->sendText("\r\nThat is an invalid choice!\r\n");
-                    cedit_disp_game_play_options(d);
-            }
-
-            cedit_disp_game_play_options(d);
-            return;
-
-            /*-------------------------------------------------------------------*/
-
-        case CEDIT_CRASHSAVE_OPTIONS_MENU:
-            switch (*arg) {
-                case 'a':
-                case 'A':
-                    TOGGLE_VAR(OLC_CONFIG(d)->csd.free_rent);
-                    break;
-
-                case 'b':
-                case 'B':
-                    d->sendText("Enter the maximum number of items players can rent : ");
-                    OLC_MODE(d) = CEDIT_MAX_OBJ_SAVE;
-                    return;
-
-                case 'c':
-                case 'C':
-                    d->sendText("Enter the surcharge on top of item costs : ");
-                    OLC_MODE(d) = CEDIT_MIN_RENT_COST;
-                    return;
-
-                case 'd':
-                case 'D':
-                    TOGGLE_VAR(OLC_CONFIG(d)->csd.auto_save);
-                    break;
-
-                case 'e':
-                case 'E':
-                    d->sendText("Enter how often (in minutes) should the MUD save players : ");
-                    OLC_MODE(d) = CEDIT_AUTOSAVE_TIME;
-                    return;
-
-                case 'f':
-                case 'F':
-                    d->sendText("Enter the lifetime of crash and idlesave files (days) : ");
-                    OLC_MODE(d) = CEDIT_CRASH_FILE_TIMEOUT;
-                    return;
-
-                case 'g':
-                case 'G':
-                    d->sendText("Enter the lifetime of normal rent files (days) : ");
-                    OLC_MODE(d) = CEDIT_RENT_FILE_TIMEOUT;
-                    return;
-
-                case 'q':
-                case 'Q':
-                    cedit_disp_menu(d);
-                    return;
-
-                default:
-                    d->sendText("\r\nThat is an invalid choice!\r\n");
-            }
-
+        case 'c':
+        case 'C':
             cedit_disp_crash_save_options(d);
-            return;
+            OLC_MODE(d) = CEDIT_CRASHSAVE_OPTIONS_MENU;
+            break;
 
-            /*-------------------------------------------------------------------*/
-
-        case CEDIT_ROOM_NUMBERS_MENU:
-            switch (*arg) {
-                case 'a':
-                case 'A':
-                    d->sendText("Enter the room's vnum where mortals should load into : ");
-                    OLC_MODE(d) = CEDIT_MORTAL_START_ROOM;
-                    return;
-
-                case 'b':
-                case 'B':
-                    d->sendText("Enter the room's vnum where immortals should load into : ");
-                    OLC_MODE(d) = CEDIT_IMMORT_START_ROOM;
-                    return;
-
-                case 'c':
-                case 'C':
-                    d->sendText("Enter the room's vnum where frozen people should load into : ");
-                    OLC_MODE(d) = CEDIT_FROZEN_START_ROOM;
-                    return;
-
-                case '1':
-                    d->sendText("Enter the vnum for donation room #1 : ");
-                    OLC_MODE(d) = CEDIT_DONATION_ROOM_1;
-                    return;
-
-                case '2':
-                    d->sendText("Enter the vnum for donation room #2 : ");
-                    OLC_MODE(d) = CEDIT_DONATION_ROOM_2;
-                    return;
-
-                case '3':
-                    d->sendText("Enter the vnum for donation room #3 : ");
-                    OLC_MODE(d) = CEDIT_DONATION_ROOM_3;
-                    return;
-
-                case 'q':
-                case 'Q':
-                    cedit_disp_menu(d);
-                    return;
-
-                default:
-                    d->sendText("\r\nThat is an invalid choice!\r\n");
-            }
-
+        case 'r':
+        case 'R':
             cedit_disp_room_numbers(d);
-            return;
+            OLC_MODE(d) = CEDIT_ROOM_NUMBERS_MENU;
+            break;
 
-            /*-------------------------------------------------------------------*/
-
-        case CEDIT_OPERATION_OPTIONS_MENU:
-            switch (*arg) {
-                case 'a':
-                case 'A':
-                    d->sendText("Enter the default port number : ");
-                    OLC_MODE(d) = CEDIT_DFLT_PORT;
-                    return;
-
-                case 'b':
-                case 'B':
-                    d->sendText("Enter the default IP Address : ");
-                    OLC_MODE(d) = CEDIT_DFLT_IP;
-                    return;
-
-                case 'c':
-                case 'C':
-                    d->sendText("Enter the default directory : ");
-                    OLC_MODE(d) = CEDIT_DFLT_DIR;
-                    return;
-
-                case 'd':
-                case 'D':
-                    d->sendText("Enter the name of the logfile : ");
-                    OLC_MODE(d) = CEDIT_LOGNAME;
-                    return;
-
-                case 'e':
-                case 'E':
-                    d->sendText("Enter the maximum number of players : ");
-                    OLC_MODE(d) = CEDIT_MAX_PLAYING;
-                    return;
-
-                case 'f':
-                case 'F':
-                    d->sendText("Enter the maximum size of the logs : ");
-                    OLC_MODE(d) = CEDIT_MAX_FILESIZE;
-                    return;
-
-                case 'g':
-                case 'G':
-                    d->sendText("Enter the maximum number of password attempts : ");
-                    OLC_MODE(d) = CEDIT_MAX_BAD_PWS;
-                    return;
-
-                case 'h':
-                case 'H':
-                    TOGGLE_VAR(OLC_CONFIG(d)->operation.siteok_everyone);
-                    break;
-
-                case 'i':
-                case 'I':
-                    TOGGLE_VAR(OLC_CONFIG(d)->operation.nameserver_is_slow);
-                    break;
-
-                case 'j':
-                case 'J':
-                    TOGGLE_VAR(OLC_CONFIG(d)->operation.use_new_socials);
-                                        d->character->sendText("Please note that using the stock social file will disable AEDIT.\r\n");
-                    break;
-
-                case 'k':
-                case 'K':
-                    TOGGLE_VAR(OLC_CONFIG(d)->operation.auto_save_olc);
-                    break;
-
-                case 'l':
-                case 'L':
-                    OLC_MODE(d) = CEDIT_MENU;
-                    clear_screen(d);
-                    send_editor_help(d);
-                    d->sendText("Enter the new MENU :\r\n\r\n");
-
-                    if (OLC_CONFIG(d)->operation.MENU) {
-                        d->send_to("%s", OLC_CONFIG(d)->operation.MENU);
-                        oldtext = strdup(OLC_CONFIG(d)->operation.MENU);
-                    }
-
-                    string_write(d, &OLC_CONFIG(d)->operation.MENU, MAX_INPUT_LENGTH, 0, oldtext);
-                    return;
-
-                case 'm':
-                case 'M':
-                    OLC_MODE(d) = CEDIT_WELC_MESSG;
-                    clear_screen(d);
-                    send_editor_help(d);
-                    d->sendText("Enter the new welcome message :\r\n\r\n");
-
-                    if (OLC_CONFIG(d)->operation.WELC_MESSG) {
-                        d->send_to("%s", OLC_CONFIG(d)->operation.WELC_MESSG);
-                        oldtext = str_udup(OLC_CONFIG(d)->operation.WELC_MESSG);
-                    }
-
-                    string_write(d, &OLC_CONFIG(d)->operation.WELC_MESSG, MAX_INPUT_LENGTH, 0, oldtext);
-                    return;
-
-                case 'n':
-                case 'N':
-                    OLC_MODE(d) = CEDIT_START_MESSG;
-                    clear_screen(d);
-                    send_editor_help(d);
-                    d->sendText("Enter the new newbie start message :\r\n\r\n");
-
-                    if (OLC_CONFIG(d)->operation.START_MESSG) {
-                        d->send_to("%s", OLC_CONFIG(d)->operation.START_MESSG);
-                        oldtext = strdup(OLC_CONFIG(d)->operation.START_MESSG);
-                    }
-
-                    string_write(d, &OLC_CONFIG(d)->operation.START_MESSG, MAX_INPUT_LENGTH, 0, oldtext);
-                    return;
-                case 'o':
-                case 'O':
-                    TOGGLE_VAR(OLC_CONFIG(d)->operation.imc_enabled);
-                    break;
-
-                case 'q':
-                case 'Q':
-                    cedit_disp_menu(d);
-                    return;
-
-                default:
-                    d->sendText("\r\nThat is an invalid choice!\r\n");
-            }
-
+        case 'o':
+        case 'O':
             cedit_disp_operation_options(d);
-            return;
+            OLC_MODE(d) = CEDIT_OPERATION_OPTIONS_MENU;
+            break;
 
-            /*-------------------------------------------------------------------*/
-
-        case CEDIT_AUTOWIZ_OPTIONS_MENU:
-            switch (*arg) {
-                case 'a':
-                case 'A':
-                    TOGGLE_VAR(OLC_CONFIG(d)->autowiz.use_autowiz);
-                    break;
-
-                case 'b':
-                case 'B':
-                    d->sendText("Enter the minimum level for players to appear on the wizlist : ");
-                    OLC_MODE(d) = CEDIT_MIN_WIZLIST_LEV;
-                    return;
-
-                case 'q':
-                case 'Q':
-                    cedit_disp_menu(d);
-                    return;
-
-                default:
-                    d->sendText("\r\nThat is an invalid choice!\r\n");
-            }
-
+        case 'a':
+        case 'A':
             cedit_disp_autowiz_options(d);
-            return;
+            OLC_MODE(d) = CEDIT_AUTOWIZ_OPTIONS_MENU;
+            break;
 
-            /*-------------------------------------------------------------------*/
-
-        case CEDIT_ADVANCE_OPTIONS_MENU:
-            switch (*arg) {
-                case 'a':
-                case 'A':
-                    TOGGLE_VAR(OLC_CONFIG(d)->advance.allow_multiclass);
-                    break;
-
-                case 'b':
-                case 'B':
-                    TOGGLE_VAR(OLC_CONFIG(d)->advance.allow_prestige);
-                    break;
-
-                case 'q':
-                case 'Q':
-                    cedit_disp_menu(d);
-                    return;
-
-                default:
-                    d->sendText("\r\nThat is an invalid choice!\r\n");
-            }
-
+        case 'd':
+        case 'D':
             cedit_disp_advance_options(d);
-            return;
+            OLC_MODE(d) = CEDIT_ADVANCE_OPTIONS_MENU;
+            break;
 
-            /*------------------------------------------------------------------*/
-
-        case CEDIT_TICKS_OPTIONS_MENU:
-            switch (*arg) {
-                case 'a':
-                case 'A':
-                    d->sendText("Enter the Speed of the violence system (1 - 10) 10 = Slowest : ");
-                    OLC_MODE(d) = CEDIT_PULSE_VIOLENCE;
-                    return;
-
-                case 'b':
-                case 'B':
-                    d->sendText("Enter the Speed of the Mobile Actions (1 - 20) 20 = Slowest : ");
-                    OLC_MODE(d) = CEDIT_PULSE_MOBILE;
-                    return;
-
-                case 'c':
-                case 'C':
-                    d->sendText("Enter Zone update time : ");
-                    OLC_MODE(d) = CEDIT_PULSE_ZONE;
-                    return;
-
-                case 'd':
-                case 'D':
-                    d->sendText("Enter time for autosaving : ");
-                    OLC_MODE(d) = CEDIT_PULSE_AUTOSAVE;
-                    return;
-
-                case 'e':
-                case 'E':
-                    d->sendText("Enter the time to kill connection waiting for password : ");
-                    OLC_MODE(d) = CEDIT_PULSE_IDLEPWD;
-                    return;
-
-                case 'f':
-                case 'F':
-                    d->sendText("Enter the maximum size of the logs : ");
-                    OLC_MODE(d) = CEDIT_PULSE_SANITY;
-                    return;
-
-                case 'g':
-                case 'G':
-                    d->sendText("Enter the maximum number of password attempts : ");
-                    OLC_MODE(d) = CEDIT_PULSE_USAGE;
-                    return;
-
-                case 'h':
-                case 'H':
-                    d->sendText("Enter timesave : ");
-                    OLC_MODE(d) = CEDIT_PULSE_TIMESAVE;
-                    return;
-
-                case 'i':
-                case 'I':
-                    d->sendText("Enter Current update time : ");
-                    OLC_MODE(d) = CEDIT_PULSE_CURRENT;
-                    return;
-
-                case 'q':
-                case 'Q':
-                    cedit_disp_menu(d);
-                    return;
-
-                default:
-                    d->sendText("\r\nThat is an invalid choice!\r\n");
-            }
-
-
+        case 't':
+        case 'T':
             cedit_disp_ticks_menu(d);
-            return;
-
-            /*-------------------------------------------------------------------*/
-
-        case CEDIT_LEVEL_CAN_SHOUT:
-            if (!*arg) {
-                d->sendText(
-                                "That is an invalid choice!\r\n"
-                                "Enter the minimum level a player must be to shout, gossip, etc : ");
-            } else {
-                OLC_CONFIG(d)->play.level_can_shout = atoi(arg);
-                cedit_disp_game_play_options(d);
-            }
+            OLC_MODE(d) = CEDIT_TICKS_OPTIONS_MENU;
             break;
 
-/*-------------------------------------------------------------------*/
-
-        case CEDIT_HOLLER_MOVE_COST:
-            if (!*arg) {
-                d->sendText(
-                                "That is an invalid choice!\r\n"
-                                "Enter the amount it costs (in move points) to holler : ");
-            } else {
-                OLC_CONFIG(d)->play.holler_move_cost = atoi(arg);
-                cedit_disp_game_play_options(d);
-            }
+        case 'q':
+        case 'Q':
+            d->sendText("Do you wish to save your changes? : ");
+            OLC_MODE(d) = CEDIT_CONFIRM_SAVESTRING;
             break;
 
-/*-------------------------------------------------------------------*/
-
-        case CEDIT_TUNNEL_SIZE:
-            if (!*arg) {
-                d->sendText(
-                                "That is an invalid choice!\r\n"
-                                "Enter the maximum number of people allowed in a tunnel : ");
-            } else {
-                OLC_CONFIG(d)->play.tunnel_size = atoi(arg);
-                cedit_disp_game_play_options(d);
-            }
+        case 'n':
+        case 'N':
+            cedit_disp_creation_options(d);
+            OLC_MODE(d) = CEDIT_CREATION_OPTIONS_MENU;
             break;
-
-/*-------------------------------------------------------------------*/
-
-        case CEDIT_MAX_EXP_GAIN:
-            if (*arg)
-                OLC_CONFIG(d)->play.max_exp_gain = atoi(arg);
-
-            cedit_disp_game_play_options(d);
-            break;
-
-/*-------------------------------------------------------------------*/
-
-        case CEDIT_MAX_EXP_LOSS:
-            if (*arg)
-                OLC_CONFIG(d)->play.max_exp_loss = atoi(arg);
-
-            cedit_disp_game_play_options(d);
-            break;
-
-
-/*-------------------------------------------------------------------*/
-
-        case CEDIT_MAX_NPC_CORPSE_TIME:
-            if (!*arg) {
-                d->sendText(
-                                "That is an invalid choice!\r\n"
-                                "Enter the number of tics before NPC corpses decompose : ");
-            } else {
-                OLC_CONFIG(d)->play.max_npc_corpse_time = atoi(arg);
-                cedit_disp_game_play_options(d);
-            }
-            break;
-
-/*-------------------------------------------------------------------*/
-
-        case CEDIT_MAX_PC_CORPSE_TIME:
-            if (!*arg) {
-                d->sendText(
-                                "That is an invalid choice!\r\n"
-                                "Enter the number of tics before PC corpses decompose : ");
-            } else {
-                OLC_CONFIG(d)->play.max_pc_corpse_time = atoi(arg);
-                cedit_disp_game_play_options(d);
-            }
-            break;
-
-/*-------------------------------------------------------------------*/
-
-        case CEDIT_IDLE_VOID:
-            if (!*arg) {
-                d->sendText(
-                                "That is an invalid choice!\r\n"
-                                "Enter the number of tics before PC's are sent to the void (idle) : ");
-            } else {
-                OLC_CONFIG(d)->play.idle_void = atoi(arg);
-                cedit_disp_game_play_options(d);
-            }
-            break;
-
-/*-------------------------------------------------------------------*/
-
-        case CEDIT_IDLE_RENT_TIME:
-            if (!*arg) {
-                d->sendText(
-                                "That is an invalid choice!\r\n"
-                                "Enter the number of tics before PC's are automatically rented and forced to quit : ");
-            } else {
-                OLC_CONFIG(d)->play.idle_rent_time = atoi(arg);
-                cedit_disp_game_play_options(d);
-            }
-            break;
-
-/*-------------------------------------------------------------------*/
-
-        case CEDIT_IDLE_MAX_LEVEL:
-            if (!*arg) {
-                d->sendText(
-                                "That is an invalid choice!\r\n"
-                                "Enter the level a player must be to become immune to IDLE : ");
-            } else {
-                OLC_CONFIG(d)->play.idle_max_level = atoi(arg);
-                cedit_disp_game_play_options(d);
-            }
-            break;
-
-/*-------------------------------------------------------------------*/
-
-        case CEDIT_LEVEL_CAP:
-            if (!*arg) {
-                d->sendText(
-                                "That is an invalid choice!\r\n"
-                                "Enter the level a player cannot reach : ");
-            } else {
-                OLC_CONFIG(d)->play.level_cap = atoi(arg);
-                cedit_disp_game_play_options(d);
-            }
-            break;
-
-/*-------------------------------------------------------------------*/
-
-        case CEDIT_OK:
-            if (!genolc_checkstring(d, arg))
-                break;
-
-            if (OLC_CONFIG(d)->play.OK)
-                free(OLC_CONFIG(d)->play.OK);
-
-            OLC_CONFIG(d)->play.OK = str_udup(arg);
-            strcat(OLC_CONFIG(d)->play.OK, "\r\n");
-
-            cedit_disp_game_play_options(d);
-            break;
-
-/*-------------------------------------------------------------------*/
-
-        case CEDIT_NOPERSON:
-            if (!genolc_checkstring(d, arg))
-                break;
-
-            if (OLC_CONFIG(d)->play.NOPERSON)
-                free(OLC_CONFIG(d)->play.NOPERSON);
-
-            OLC_CONFIG(d)->play.NOPERSON = str_udup(arg);
-            strcat(OLC_CONFIG(d)->play.NOPERSON, "\r\n");
-
-            cedit_disp_game_play_options(d);
-            break;
-
-/*-------------------------------------------------------------------*/
-
-        case CEDIT_NOEFFECT:
-            if (!genolc_checkstring(d, arg))
-                break;
-
-            if (OLC_CONFIG(d)->play.NOEFFECT)
-                free(OLC_CONFIG(d)->play.NOEFFECT);
-
-            OLC_CONFIG(d)->play.NOEFFECT = str_udup(arg);
-            strcat(OLC_CONFIG(d)->play.NOEFFECT, "\r\n");
-
-            cedit_disp_game_play_options(d);
-            break;
-
-/*-------------------------------------------------------------------*/
-
-        case CEDIT_MAX_OBJ_SAVE:
-            if (!*arg) {
-                d->sendText(
-                                "That is an invalid choice!\r\n"
-                                "Enter the maximum objects a player can save : ");
-            } else {
-                OLC_CONFIG(d)->csd.max_obj_save = atoi(arg);
-                cedit_disp_crash_save_options(d);
-            }
-            break;
-
-/*-------------------------------------------------------------------*/
-
-        case CEDIT_MIN_RENT_COST:
-            if (!*arg) {
-                d->sendText(
-                                "That is an invalid choice!\r\n"
-                                "Enter the minimum amount it costs to rent : ");
-            } else {
-                OLC_CONFIG(d)->csd.min_rent_cost = atoi(arg);
-                cedit_disp_crash_save_options(d);
-            }
-            break;
-
-/*-------------------------------------------------------------------*/
-
-        case CEDIT_AUTOSAVE_TIME:
-            if (!*arg) {
-                d->sendText(
-                                "That is an invalid choice!\r\n"
-                                "Enter the interval for player's being autosaved : ");
-            } else {
-                OLC_CONFIG(d)->csd.autosave_time = atoi(arg);
-                cedit_disp_crash_save_options(d);
-            }
-            break;
-
-/*-------------------------------------------------------------------*/
-
-        case CEDIT_CRASH_FILE_TIMEOUT:
-            if (!*arg) {
-                d->sendText(
-                                "That is an invalid choice!\r\n"
-                                "Enter the lifetime of crash and idlesave files (days) : ");
-            } else {
-                OLC_CONFIG(d)->csd.crash_file_timeout = atoi(arg);
-                cedit_disp_crash_save_options(d);
-            }
-            break;
-
-/*-------------------------------------------------------------------*/
-
-        case CEDIT_RENT_FILE_TIMEOUT:
-            if (!*arg) {
-                d->sendText(
-                                "That is an invalid choice!\r\n"
-                                "Enter the lifetime of rent files (days) : ");
-            } else {
-                OLC_CONFIG(d)->csd.rent_file_timeout = atoi(arg);
-                cedit_disp_crash_save_options(d);
-            }
-            break;
-
-/*-------------------------------------------------------------------*/
-
-        case CEDIT_MORTAL_START_ROOM:
-            if (!*arg) {
-                d->sendText(
-                                "That is an invalid choice!\r\n"
-                                "Enter the room's vnum where mortals should load into : ");
-            } else if (real_room(atoi(arg)) == NOWHERE) {
-                d->sendText(
-                                "That room doesn't exist!\r\n"
-                                "Enter the room's vnum where mortals should load into : ");
-            } else {
-                OLC_CONFIG(d)->room_nums.mortal_start_room = atoi(arg);
-                cedit_disp_room_numbers(d);
-            }
-            break;
-
-/*-------------------------------------------------------------------*/
-
-        case CEDIT_IMMORT_START_ROOM:
-            if (!*arg) {
-                d->sendText(
-                                "That is an invalid choice!\r\n"
-                                "Enter the room's vnum where immortals should load into : ");
-            } else if (real_room(atoi(arg)) == NOWHERE) {
-                d->sendText(
-                                "That room doesn't exist!\r\n"
-                                "Enter the room's vnum where immortals should load into : ");
-            } else {
-                OLC_CONFIG(d)->room_nums.immort_start_room = atoi(arg);
-                cedit_disp_room_numbers(d);
-            }
-            break;
-
-/*-------------------------------------------------------------------*/
-
-        case CEDIT_FROZEN_START_ROOM:
-            if (!*arg) {
-                d->sendText(
-                                "That is an invalid choice!\r\n"
-                                "Enter the room's vnum where frozen people should load into : ");
-            } else if (real_room(atoi(arg)) == NOWHERE) {
-                d->sendText(
-                                "That room doesn't exist!\r\n"
-                                "Enter the room's vnum where frozen people should load into : ");
-            } else {
-                OLC_CONFIG(d)->room_nums.frozen_start_room = atoi(arg);
-                cedit_disp_room_numbers(d);
-            }
-            break;
-
-/*-------------------------------------------------------------------*/
-
-        case CEDIT_DONATION_ROOM_1:
-            if (!*arg) {
-                d->sendText(
-                                "That is an invalid choice!\r\n"
-                                "Enter the vnum for donation room #1 : ");
-            } else if (real_room(atoi(arg)) == NOWHERE) {
-                d->sendText(
-                                "That room doesn't exist!\r\n"
-                                "Enter the vnum for donation room #1 : ");
-            } else {
-                OLC_CONFIG(d)->room_nums.donation_room_1 = atoi(arg);
-                cedit_disp_room_numbers(d);
-            }
-            break;
-
-/*-------------------------------------------------------------------*/
-
-        case CEDIT_DONATION_ROOM_2:
-            if (!*arg) {
-                d->sendText(
-                                "That is an invalid choice!\r\n"
-                                "Enter the vnum for donation room #2 : ");
-            } else if (real_room(atoi(arg)) == NOWHERE) {
-                d->sendText(
-                                "That room doesn't exist!\r\n"
-                                "Enter the vnum for donation room #2 : ");
-            } else {
-                OLC_CONFIG(d)->room_nums.donation_room_2 = atoi(arg);
-                cedit_disp_room_numbers(d);
-            }
-            break;
-
-/*-------------------------------------------------------------------*/
-
-        case CEDIT_DONATION_ROOM_3:
-            if (!*arg) {
-                d->sendText(
-                                "That is an invalid choice!\r\n"
-                                "Enter the vnum for donation room #3 : ");
-            } else if (real_room(atoi(arg)) == NOWHERE) {
-                d->sendText(
-                                "That room doesn't exist!\r\n"
-                                "Enter the vnum for donation room #3 : ");
-            } else {
-                OLC_CONFIG(d)->room_nums.donation_room_3 = atoi(arg);
-                cedit_disp_room_numbers(d);
-            }
-            break;
-
-/*-------------------------------------------------------------------*/
-
-        case CEDIT_DFLT_PORT:
-            OLC_CONFIG(d)->operation.DFLT_PORT = atoi(arg);
-            cedit_disp_operation_options(d);
-            break;
-
-/*-------------------------------------------------------------------*/
-
-        case CEDIT_DFLT_IP:
-            if (!*arg) {
-                d->sendText(
-                                "That is an invalid choice!\r\n"
-                                "Enter the default ip address : ");
-            } else {
-                OLC_CONFIG(d)->operation.DFLT_IP = str_udup(arg);
-                cedit_disp_operation_options(d);
-            }
-            break;
-
-/*-------------------------------------------------------------------*/
-
-        case CEDIT_DFLT_DIR:
-            if (!*arg) {
-                d->sendText(
-                                "That is an invalid choice!\r\n"
-                                "Enter the default directory : ");
-            } else {
-                OLC_CONFIG(d)->operation.DFLT_DIR = str_udup(arg);
-                cedit_disp_operation_options(d);
-            }
-            break;
-
-/*-------------------------------------------------------------------*/
-
-        case CEDIT_LOGNAME:
-            if (!*arg) {
-                d->sendText(
-                                "That is an invalid choice!\r\n"
-                                "Enter the name of the logfile : ");
-            } else {
-                OLC_CONFIG(d)->operation.LOGNAME = str_udup(arg);
-                cedit_disp_operation_options(d);
-            }
-            break;
-
-/*-------------------------------------------------------------------*/
-
-        case CEDIT_MAX_PLAYING:
-            OLC_CONFIG(d)->operation.max_playing = atoi(arg);
-            cedit_disp_operation_options(d);
-            break;
-
-/*-------------------------------------------------------------------*/
-
-        case CEDIT_MAX_FILESIZE:
-            OLC_CONFIG(d)->operation.max_filesize = atoi(arg);
-            cedit_disp_operation_options(d);
-            break;
-
-/*-------------------------------------------------------------------*/
-
-        case CEDIT_MAX_BAD_PWS:
-            OLC_CONFIG(d)->operation.max_bad_pws = atoi(arg);
-            cedit_disp_operation_options(d);
-            break;
-
-/*-------------------------------------------------------------------*/
-
-        case CEDIT_MIN_WIZLIST_LEV:
-            if (atoi(arg) > ADMLVL_IMPL) {
-                d->send_to(
-                                "The minimum wizlist level can't be greater than %d.\r\n"
-                                "Enter the minimum level for players to appear on the wizlist : ", ADMLVL_IMPL);
-            } else {
-                OLC_CONFIG(d)->autowiz.min_wizlist_lev = atoi(arg);
-                cedit_disp_autowiz_options(d);
-            }
-            break;
-
-/*-------------------------------------------------------------------*/
-
-        case CEDIT_PULSE_VIOLENCE:
-            if (!isdigit(*arg) || atoi(arg) < 0 || atoi(arg) > 10) {
-                d->sendText("Please enter a number between 0 - 10.\r\n");
-                cedit_disp_ticks_menu(d);
-            } else {
-                OLC_CONFIG(d)->ticks.pulse_violence = atoi(arg);
-                cedit_disp_ticks_menu(d);
-            }
-            break;
-
-/*-------------------------------------------------------------------*/
-        case CEDIT_PULSE_MOBILE:
-            if (!isdigit(*arg) || atoi(arg) < 0 || atoi(arg) > 20) {
-                d->sendText("Please enter a number between 0 - 20.\r\n");
-                cedit_disp_ticks_menu(d);
-            } else {
-                OLC_CONFIG(d)->ticks.pulse_mobile = atoi(arg);
-                cedit_disp_ticks_menu(d);
-            }
-            break;
-
-/*-------------------------------------------------------------------*/
-        case CEDIT_PULSE_IDLEPWD:
-            if (!isdigit(*arg) || atoi(arg) < 0 || atoi(arg) > 30) {
-                d->sendText("Please enter a number between 0 - 30.\r\n");
-                cedit_disp_ticks_menu(d);
-            } else {
-                OLC_CONFIG(d)->ticks.pulse_idlepwd = atoi(arg);
-                cedit_disp_ticks_menu(d);
-            }
-            break;
-
-/*-------------------------------------------------------------------*/
-        case CEDIT_PULSE_ZONE:
-            if (!isdigit(*arg) || atoi(arg) < 0 || atoi(arg) > 20) {
-                d->sendText("Please enter a number between 0 - 20.\r\n");
-                cedit_disp_ticks_menu(d);
-            } else {
-                OLC_CONFIG(d)->ticks.pulse_zone = atoi(arg);
-                cedit_disp_ticks_menu(d);
-            }
-            break;
-
-/*-------------------------------------------------------------------*/
-        case CEDIT_PULSE_AUTOSAVE:
-            if (!isdigit(*arg) || atoi(arg) < 0 || atoi(arg) > 100) {
-                d->sendText("Please enter a number between 0 - 100.\r\n");
-                cedit_disp_ticks_menu(d);
-            } else {
-                OLC_CONFIG(d)->ticks.pulse_autosave = atoi(arg);
-                cedit_disp_ticks_menu(d);
-            }
-            break;
-
-/*-------------------------------------------------------------------*/
-        case CEDIT_PULSE_CURRENT:
-            if (!isdigit(*arg) || atoi(arg) < 0 || atoi(arg) > 30) {
-                d->sendText("Please enter a number between 0 - 30.\r\n");
-                cedit_disp_ticks_menu(d);
-            } else {
-                OLC_CONFIG(d)->ticks.pulse_current = atoi(arg);
-                cedit_disp_ticks_menu(d);
-            }
-            break;
-
-/*-------------------------------------------------------------------*/
-        case CEDIT_PULSE_SANITY:
-            if (!isdigit(*arg) || atoi(arg) < 0 || atoi(arg) > 50) {
-                d->sendText("Please enter a number between 0 - 50.\r\n");
-                cedit_disp_ticks_menu(d);
-            } else {
-                OLC_CONFIG(d)->ticks.pulse_sanity = atoi(arg);
-                cedit_disp_ticks_menu(d);
-            }
-            break;
-
-/*-------------------------------------------------------------------*/
-        case CEDIT_PULSE_USAGE:
-            if (!isdigit(*arg) || atoi(arg) < 0 || atoi(arg) > 10) {
-                d->sendText("Please enter a number between 0 - 10.\r\n");
-                cedit_disp_ticks_menu(d);
-            } else {
-                OLC_CONFIG(d)->ticks.pulse_usage = atoi(arg);
-                cedit_disp_ticks_menu(d);
-            }
-            break;
-
-/*-------------------------------------------------------------------*/
-
-        case CEDIT_EXP_MULTIPLIER:
-            if (*arg)
-                OLC_CONFIG(d)->play.exp_multiplier = atof(arg);
-
-            cedit_disp_game_play_options(d);
-            break;
-
-/*-------------------------------------------------------------------*/
-
-        case CEDIT_CREATION_OPTIONS_MENU:
-            switch (*arg) {
-                case 'a':
-                case 'A':
-                    cedit_disp_creation_menu(d);
-                    OLC_MODE(d) = CEDIT_CREATION_MENU;
-                    break;
-
-                case 'b':
-                case 'B':
-                    TOGGLE_VAR(OLC_CONFIG(d)->play.reroll_player);
-                    cedit_disp_creation_options(d);
-                    break;
-                case 'c':
-                case 'C':
-                    cedit_disp_points_menu(d);
-                    OLC_MODE(d) = CEDIT_POINTS_MENU;
-                    break;
-                case 'q':
-                case 'Q':
-                    cedit_disp_menu(d);
-                    return;
-
-                default:
-                    d->sendText("\r\nThat is an invalid choice!\r\n");
-                    cedit_disp_creation_menu(d);
-            }
-            return;
-
-            /*------------------------------------------------------------------*/
-
-        case CEDIT_CREATION_MENU:
-            if (!isdigit(*arg) || atoi(arg) < 0 || atoi(arg) > NUM_CREATION_METHODS - 1) {
-                d->send_to("Please enter a number between 0 - %d.\r\n", NUM_CREATION_METHODS - 1);
-                cedit_disp_creation_menu(d);
-            } else {
-                OLC_CONFIG(d)->creation.method = atoi(arg);
-                //OLC_CONFIG(d)->ticks.pulse_usage = atoi(arg);
-                cedit_disp_creation_options(d);
-            }
-            break;
-
-            /*------------------------------------------------------------------*/
-
-        case CEDIT_POINTS_MENU:
-            if (!isdigit(*arg) || atoi(arg) < 0) {
-                d->sendText("Please enter a number 0 or higher.\r\n");
-                cedit_disp_points_menu(d);
-            } else {
-                OLC_CONFIG(d)->play.initial_points = atoi(arg);
-                cedit_disp_creation_options(d);
-            }
-            break;
-
-            /*------------------------------------------------------------------*/
 
         default:
-            /*
-             * We should never get here, but just in case...
-             */
-            cleanup_olc(d, CLEANUP_CONFIG);
-            mudlog(BRF, ADMLVL_BUILDER, true, "SYSERR: OLC: cedit_parse(): Reached default case!");
-            d->sendText("Oops...\r\n");
+            d->sendText("That is an invalid choice!\r\n");
+            cedit_disp_menu(d);
             break;
+        }
+        break;
+
+        /*-------------------------------------------------------------------*/
+
+    case CEDIT_GAME_OPTIONS_MENU:
+        switch (*arg)
+        {
+        case 'a':
+        case 'A':
+            TOGGLE_VAR(OLC_CONFIG(d)->play.pk_allowed);
+            break;
+
+        case 'b':
+        case 'B':
+            TOGGLE_VAR(OLC_CONFIG(d)->play.pt_allowed);
+            break;
+
+        case 'c':
+        case 'C':
+            d->sendText("Enter the minimum level a player must be to shout, gossip, etc : ");
+            OLC_MODE(d) = CEDIT_LEVEL_CAN_SHOUT;
+            return;
+
+        case 'd':
+        case 'D':
+            d->sendText("Enter the amount it costs (in move points) to holler : ");
+            OLC_MODE(d) = CEDIT_HOLLER_MOVE_COST;
+            return;
+
+        case 'e':
+        case 'E':
+            d->sendText("Enter the maximum number of people allowed in a tunnel : ");
+            OLC_MODE(d) = CEDIT_TUNNEL_SIZE;
+            return;
+
+        case 'f':
+        case 'F':
+            d->sendText("Enter the maximum gain of experience per kill for players : ");
+            OLC_MODE(d) = CEDIT_MAX_EXP_GAIN;
+            return;
+
+        case 'g':
+        case 'G':
+            d->sendText("Enter the maximum loss of experience per death for players : ");
+            OLC_MODE(d) = CEDIT_MAX_EXP_LOSS;
+            return;
+
+        case 'h':
+        case 'H':
+            d->sendText("Enter the number of tics before NPC corpses decompose : ");
+            OLC_MODE(d) = CEDIT_MAX_NPC_CORPSE_TIME;
+            return;
+
+        case 'i':
+        case 'I':
+            d->sendText("Enter the number of tics before PC corpses decompose : ");
+            OLC_MODE(d) = CEDIT_MAX_PC_CORPSE_TIME;
+            return;
+
+        case 'j':
+        case 'J':
+            d->sendText("Enter the number of tics before PC's are sent to the void (idle) : ");
+            OLC_MODE(d) = CEDIT_IDLE_VOID;
+            return;
+
+        case 'k':
+        case 'K':
+            d->sendText("Enter the number of tics before PC's are automatically rented and forced to quit : ");
+            OLC_MODE(d) = CEDIT_IDLE_RENT_TIME;
+            return;
+
+        case 'l':
+        case 'L':
+            d->sendText("Enter the level a player must be to become immune to IDLE : ");
+            OLC_MODE(d) = CEDIT_IDLE_MAX_LEVEL;
+            return;
+
+        case 'm':
+        case 'M':
+            TOGGLE_VAR(OLC_CONFIG(d)->play.dts_are_dumps);
+            break;
+
+        case 'n':
+        case 'N':
+            TOGGLE_VAR(OLC_CONFIG(d)->play.load_into_inventory);
+            break;
+
+        case 'o':
+        case 'O':
+            TOGGLE_VAR(OLC_CONFIG(d)->play.track_through_doors);
+            break;
+
+        case 'p':
+        case 'P':
+            TOGGLE_VAR(OLC_CONFIG(d)->play.disp_closed_doors);
+            break;
+
+        case 'r':
+        case 'R':
+            d->sendText("Enter the number a character cannot level to : ");
+            OLC_MODE(d) = CEDIT_LEVEL_CAP;
+            return;
+
+        case 's':
+        case 'S':
+            TOGGLE_VAR(OLC_CONFIG(d)->play.all_items_unique);
+            break;
+
+        case 't':
+        case 'T':
+            d->sendText("Enter the multiplier a player will recieve to experience gained : ");
+            OLC_MODE(d) = CEDIT_EXP_MULTIPLIER;
+            return;
+
+        case '1':
+            TOGGLE_VAR(OLC_CONFIG(d)->play.stack_mobs);
+            break;
+
+        case '2':
+            TOGGLE_VAR(OLC_CONFIG(d)->play.stack_objs);
+            break;
+
+        case '3':
+            TOGGLE_VAR(OLC_CONFIG(d)->play.mob_fighting);
+            break;
+
+        case '4':
+            d->sendText("Enter the OK message : ");
+            OLC_MODE(d) = CEDIT_OK;
+            return;
+
+        case '5':
+            d->sendText("Enter the NOPERSON message : ");
+            OLC_MODE(d) = CEDIT_NOPERSON;
+            return;
+
+        case '6':
+            d->sendText("Enter the NOEFFECT message : ");
+            OLC_MODE(d) = CEDIT_NOEFFECT;
+            return;
+
+        case '8':
+            TOGGLE_VAR(OLC_CONFIG(d)->play.enable_compression);
+            break;
+
+        case '9':
+            TOGGLE_VAR(OLC_CONFIG(d)->play.enable_languages);
+            break;
+
+        case 'q':
+        case 'Q':
+            cedit_disp_menu(d);
+            return;
+
+        default:
+            d->sendText("\r\nThat is an invalid choice!\r\n");
+            cedit_disp_game_play_options(d);
+        }
+
+        cedit_disp_game_play_options(d);
+        return;
+
+        /*-------------------------------------------------------------------*/
+
+    case CEDIT_CRASHSAVE_OPTIONS_MENU:
+        switch (*arg)
+        {
+        case 'a':
+        case 'A':
+            TOGGLE_VAR(OLC_CONFIG(d)->csd.free_rent);
+            break;
+
+        case 'b':
+        case 'B':
+            d->sendText("Enter the maximum number of items players can rent : ");
+            OLC_MODE(d) = CEDIT_MAX_OBJ_SAVE;
+            return;
+
+        case 'c':
+        case 'C':
+            d->sendText("Enter the surcharge on top of item costs : ");
+            OLC_MODE(d) = CEDIT_MIN_RENT_COST;
+            return;
+
+        case 'd':
+        case 'D':
+            TOGGLE_VAR(OLC_CONFIG(d)->csd.auto_save);
+            break;
+
+        case 'e':
+        case 'E':
+            d->sendText("Enter how often (in minutes) should the MUD save players : ");
+            OLC_MODE(d) = CEDIT_AUTOSAVE_TIME;
+            return;
+
+        case 'f':
+        case 'F':
+            d->sendText("Enter the lifetime of crash and idlesave files (days) : ");
+            OLC_MODE(d) = CEDIT_CRASH_FILE_TIMEOUT;
+            return;
+
+        case 'g':
+        case 'G':
+            d->sendText("Enter the lifetime of normal rent files (days) : ");
+            OLC_MODE(d) = CEDIT_RENT_FILE_TIMEOUT;
+            return;
+
+        case 'q':
+        case 'Q':
+            cedit_disp_menu(d);
+            return;
+
+        default:
+            d->sendText("\r\nThat is an invalid choice!\r\n");
+        }
+
+        cedit_disp_crash_save_options(d);
+        return;
+
+        /*-------------------------------------------------------------------*/
+
+    case CEDIT_ROOM_NUMBERS_MENU:
+        switch (*arg)
+        {
+        case 'a':
+        case 'A':
+            d->sendText("Enter the room's vnum where mortals should load into : ");
+            OLC_MODE(d) = CEDIT_MORTAL_START_ROOM;
+            return;
+
+        case 'b':
+        case 'B':
+            d->sendText("Enter the room's vnum where immortals should load into : ");
+            OLC_MODE(d) = CEDIT_IMMORT_START_ROOM;
+            return;
+
+        case 'c':
+        case 'C':
+            d->sendText("Enter the room's vnum where frozen people should load into : ");
+            OLC_MODE(d) = CEDIT_FROZEN_START_ROOM;
+            return;
+
+        case '1':
+            d->sendText("Enter the vnum for donation room #1 : ");
+            OLC_MODE(d) = CEDIT_DONATION_ROOM_1;
+            return;
+
+        case '2':
+            d->sendText("Enter the vnum for donation room #2 : ");
+            OLC_MODE(d) = CEDIT_DONATION_ROOM_2;
+            return;
+
+        case '3':
+            d->sendText("Enter the vnum for donation room #3 : ");
+            OLC_MODE(d) = CEDIT_DONATION_ROOM_3;
+            return;
+
+        case 'q':
+        case 'Q':
+            cedit_disp_menu(d);
+            return;
+
+        default:
+            d->sendText("\r\nThat is an invalid choice!\r\n");
+        }
+
+        cedit_disp_room_numbers(d);
+        return;
+
+        /*-------------------------------------------------------------------*/
+
+    case CEDIT_OPERATION_OPTIONS_MENU:
+        switch (*arg)
+        {
+        case 'a':
+        case 'A':
+            d->sendText("Enter the default port number : ");
+            OLC_MODE(d) = CEDIT_DFLT_PORT;
+            return;
+
+        case 'b':
+        case 'B':
+            d->sendText("Enter the default IP Address : ");
+            OLC_MODE(d) = CEDIT_DFLT_IP;
+            return;
+
+        case 'c':
+        case 'C':
+            d->sendText("Enter the default directory : ");
+            OLC_MODE(d) = CEDIT_DFLT_DIR;
+            return;
+
+        case 'd':
+        case 'D':
+            d->sendText("Enter the name of the logfile : ");
+            OLC_MODE(d) = CEDIT_LOGNAME;
+            return;
+
+        case 'e':
+        case 'E':
+            d->sendText("Enter the maximum number of players : ");
+            OLC_MODE(d) = CEDIT_MAX_PLAYING;
+            return;
+
+        case 'f':
+        case 'F':
+            d->sendText("Enter the maximum size of the logs : ");
+            OLC_MODE(d) = CEDIT_MAX_FILESIZE;
+            return;
+
+        case 'g':
+        case 'G':
+            d->sendText("Enter the maximum number of password attempts : ");
+            OLC_MODE(d) = CEDIT_MAX_BAD_PWS;
+            return;
+
+        case 'h':
+        case 'H':
+            TOGGLE_VAR(OLC_CONFIG(d)->operation.siteok_everyone);
+            break;
+
+        case 'i':
+        case 'I':
+            TOGGLE_VAR(OLC_CONFIG(d)->operation.nameserver_is_slow);
+            break;
+
+        case 'j':
+        case 'J':
+            TOGGLE_VAR(OLC_CONFIG(d)->operation.use_new_socials);
+            d->character->sendText("Please note that using the stock social file will disable AEDIT.\r\n");
+            break;
+
+        case 'k':
+        case 'K':
+            TOGGLE_VAR(OLC_CONFIG(d)->operation.auto_save_olc);
+            break;
+
+        case 'l':
+        case 'L':
+            OLC_MODE(d) = CEDIT_MENU;
+            clear_screen(d);
+            send_editor_help(d);
+            d->sendText("Enter the new MENU :\r\n\r\n");
+
+            if (OLC_CONFIG(d)->operation.MENU)
+            {
+                d->send_to("%s", OLC_CONFIG(d)->operation.MENU);
+                oldtext = strdup(OLC_CONFIG(d)->operation.MENU);
+            }
+
+            string_write(d, &OLC_CONFIG(d)->operation.MENU, MAX_INPUT_LENGTH, 0, oldtext);
+            return;
+
+        case 'm':
+        case 'M':
+            OLC_MODE(d) = CEDIT_WELC_MESSG;
+            clear_screen(d);
+            send_editor_help(d);
+            d->sendText("Enter the new welcome message :\r\n\r\n");
+
+            if (OLC_CONFIG(d)->operation.WELC_MESSG)
+            {
+                d->send_to("%s", OLC_CONFIG(d)->operation.WELC_MESSG);
+                oldtext = str_udup(OLC_CONFIG(d)->operation.WELC_MESSG);
+            }
+
+            string_write(d, &OLC_CONFIG(d)->operation.WELC_MESSG, MAX_INPUT_LENGTH, 0, oldtext);
+            return;
+
+        case 'n':
+        case 'N':
+            OLC_MODE(d) = CEDIT_START_MESSG;
+            clear_screen(d);
+            send_editor_help(d);
+            d->sendText("Enter the new newbie start message :\r\n\r\n");
+
+            if (OLC_CONFIG(d)->operation.START_MESSG)
+            {
+                d->send_to("%s", OLC_CONFIG(d)->operation.START_MESSG);
+                oldtext = strdup(OLC_CONFIG(d)->operation.START_MESSG);
+            }
+
+            string_write(d, &OLC_CONFIG(d)->operation.START_MESSG, MAX_INPUT_LENGTH, 0, oldtext);
+            return;
+        case 'o':
+        case 'O':
+            TOGGLE_VAR(OLC_CONFIG(d)->operation.imc_enabled);
+            break;
+
+        case 'q':
+        case 'Q':
+            cedit_disp_menu(d);
+            return;
+
+        default:
+            d->sendText("\r\nThat is an invalid choice!\r\n");
+        }
+
+        cedit_disp_operation_options(d);
+        return;
+
+        /*-------------------------------------------------------------------*/
+
+    case CEDIT_AUTOWIZ_OPTIONS_MENU:
+        switch (*arg)
+        {
+        case 'a':
+        case 'A':
+            TOGGLE_VAR(OLC_CONFIG(d)->autowiz.use_autowiz);
+            break;
+
+        case 'b':
+        case 'B':
+            d->sendText("Enter the minimum level for players to appear on the wizlist : ");
+            OLC_MODE(d) = CEDIT_MIN_WIZLIST_LEV;
+            return;
+
+        case 'q':
+        case 'Q':
+            cedit_disp_menu(d);
+            return;
+
+        default:
+            d->sendText("\r\nThat is an invalid choice!\r\n");
+        }
+
+        cedit_disp_autowiz_options(d);
+        return;
+
+        /*-------------------------------------------------------------------*/
+
+    case CEDIT_ADVANCE_OPTIONS_MENU:
+        switch (*arg)
+        {
+        case 'a':
+        case 'A':
+            TOGGLE_VAR(OLC_CONFIG(d)->advance.allow_multiclass);
+            break;
+
+        case 'b':
+        case 'B':
+            TOGGLE_VAR(OLC_CONFIG(d)->advance.allow_prestige);
+            break;
+
+        case 'q':
+        case 'Q':
+            cedit_disp_menu(d);
+            return;
+
+        default:
+            d->sendText("\r\nThat is an invalid choice!\r\n");
+        }
+
+        cedit_disp_advance_options(d);
+        return;
+
+        /*------------------------------------------------------------------*/
+
+    case CEDIT_TICKS_OPTIONS_MENU:
+        switch (*arg)
+        {
+        case 'a':
+        case 'A':
+            d->sendText("Enter the Speed of the violence system (1 - 10) 10 = Slowest : ");
+            OLC_MODE(d) = CEDIT_PULSE_VIOLENCE;
+            return;
+
+        case 'b':
+        case 'B':
+            d->sendText("Enter the Speed of the Mobile Actions (1 - 20) 20 = Slowest : ");
+            OLC_MODE(d) = CEDIT_PULSE_MOBILE;
+            return;
+
+        case 'c':
+        case 'C':
+            d->sendText("Enter Zone update time : ");
+            OLC_MODE(d) = CEDIT_PULSE_ZONE;
+            return;
+
+        case 'd':
+        case 'D':
+            d->sendText("Enter time for autosaving : ");
+            OLC_MODE(d) = CEDIT_PULSE_AUTOSAVE;
+            return;
+
+        case 'e':
+        case 'E':
+            d->sendText("Enter the time to kill connection waiting for password : ");
+            OLC_MODE(d) = CEDIT_PULSE_IDLEPWD;
+            return;
+
+        case 'f':
+        case 'F':
+            d->sendText("Enter the maximum size of the logs : ");
+            OLC_MODE(d) = CEDIT_PULSE_SANITY;
+            return;
+
+        case 'g':
+        case 'G':
+            d->sendText("Enter the maximum number of password attempts : ");
+            OLC_MODE(d) = CEDIT_PULSE_USAGE;
+            return;
+
+        case 'h':
+        case 'H':
+            d->sendText("Enter timesave : ");
+            OLC_MODE(d) = CEDIT_PULSE_TIMESAVE;
+            return;
+
+        case 'i':
+        case 'I':
+            d->sendText("Enter Current update time : ");
+            OLC_MODE(d) = CEDIT_PULSE_CURRENT;
+            return;
+
+        case 'q':
+        case 'Q':
+            cedit_disp_menu(d);
+            return;
+
+        default:
+            d->sendText("\r\nThat is an invalid choice!\r\n");
+        }
+
+        cedit_disp_ticks_menu(d);
+        return;
+
+        /*-------------------------------------------------------------------*/
+
+    case CEDIT_LEVEL_CAN_SHOUT:
+        if (!*arg)
+        {
+            d->sendText(
+                "That is an invalid choice!\r\n"
+                "Enter the minimum level a player must be to shout, gossip, etc : ");
+        }
+        else
+        {
+            OLC_CONFIG(d)->play.level_can_shout = atoi(arg);
+            cedit_disp_game_play_options(d);
+        }
+        break;
+
+        /*-------------------------------------------------------------------*/
+
+    case CEDIT_HOLLER_MOVE_COST:
+        if (!*arg)
+        {
+            d->sendText(
+                "That is an invalid choice!\r\n"
+                "Enter the amount it costs (in move points) to holler : ");
+        }
+        else
+        {
+            OLC_CONFIG(d)->play.holler_move_cost = atoi(arg);
+            cedit_disp_game_play_options(d);
+        }
+        break;
+
+        /*-------------------------------------------------------------------*/
+
+    case CEDIT_TUNNEL_SIZE:
+        if (!*arg)
+        {
+            d->sendText(
+                "That is an invalid choice!\r\n"
+                "Enter the maximum number of people allowed in a tunnel : ");
+        }
+        else
+        {
+            OLC_CONFIG(d)->play.tunnel_size = atoi(arg);
+            cedit_disp_game_play_options(d);
+        }
+        break;
+
+        /*-------------------------------------------------------------------*/
+
+    case CEDIT_MAX_EXP_GAIN:
+        if (*arg)
+            OLC_CONFIG(d)->play.max_exp_gain = atoi(arg);
+
+        cedit_disp_game_play_options(d);
+        break;
+
+        /*-------------------------------------------------------------------*/
+
+    case CEDIT_MAX_EXP_LOSS:
+        if (*arg)
+            OLC_CONFIG(d)->play.max_exp_loss = atoi(arg);
+
+        cedit_disp_game_play_options(d);
+        break;
+
+        /*-------------------------------------------------------------------*/
+
+    case CEDIT_MAX_NPC_CORPSE_TIME:
+        if (!*arg)
+        {
+            d->sendText(
+                "That is an invalid choice!\r\n"
+                "Enter the number of tics before NPC corpses decompose : ");
+        }
+        else
+        {
+            OLC_CONFIG(d)->play.max_npc_corpse_time = atoi(arg);
+            cedit_disp_game_play_options(d);
+        }
+        break;
+
+        /*-------------------------------------------------------------------*/
+
+    case CEDIT_MAX_PC_CORPSE_TIME:
+        if (!*arg)
+        {
+            d->sendText(
+                "That is an invalid choice!\r\n"
+                "Enter the number of tics before PC corpses decompose : ");
+        }
+        else
+        {
+            OLC_CONFIG(d)->play.max_pc_corpse_time = atoi(arg);
+            cedit_disp_game_play_options(d);
+        }
+        break;
+
+        /*-------------------------------------------------------------------*/
+
+    case CEDIT_IDLE_VOID:
+        if (!*arg)
+        {
+            d->sendText(
+                "That is an invalid choice!\r\n"
+                "Enter the number of tics before PC's are sent to the void (idle) : ");
+        }
+        else
+        {
+            OLC_CONFIG(d)->play.idle_void = atoi(arg);
+            cedit_disp_game_play_options(d);
+        }
+        break;
+
+        /*-------------------------------------------------------------------*/
+
+    case CEDIT_IDLE_RENT_TIME:
+        if (!*arg)
+        {
+            d->sendText(
+                "That is an invalid choice!\r\n"
+                "Enter the number of tics before PC's are automatically rented and forced to quit : ");
+        }
+        else
+        {
+            OLC_CONFIG(d)->play.idle_rent_time = atoi(arg);
+            cedit_disp_game_play_options(d);
+        }
+        break;
+
+        /*-------------------------------------------------------------------*/
+
+    case CEDIT_IDLE_MAX_LEVEL:
+        if (!*arg)
+        {
+            d->sendText(
+                "That is an invalid choice!\r\n"
+                "Enter the level a player must be to become immune to IDLE : ");
+        }
+        else
+        {
+            OLC_CONFIG(d)->play.idle_max_level = atoi(arg);
+            cedit_disp_game_play_options(d);
+        }
+        break;
+
+        /*-------------------------------------------------------------------*/
+
+    case CEDIT_LEVEL_CAP:
+        if (!*arg)
+        {
+            d->sendText(
+                "That is an invalid choice!\r\n"
+                "Enter the level a player cannot reach : ");
+        }
+        else
+        {
+            OLC_CONFIG(d)->play.level_cap = atoi(arg);
+            cedit_disp_game_play_options(d);
+        }
+        break;
+
+        /*-------------------------------------------------------------------*/
+
+    case CEDIT_OK:
+        if (!genolc_checkstring(d, arg))
+            break;
+
+        if (OLC_CONFIG(d)->play.OK)
+            free(OLC_CONFIG(d)->play.OK);
+
+        OLC_CONFIG(d)->play.OK = str_udup(arg);
+        strcat(OLC_CONFIG(d)->play.OK, "\r\n");
+
+        cedit_disp_game_play_options(d);
+        break;
+
+        /*-------------------------------------------------------------------*/
+
+    case CEDIT_NOPERSON:
+        if (!genolc_checkstring(d, arg))
+            break;
+
+        if (OLC_CONFIG(d)->play.NOPERSON)
+            free(OLC_CONFIG(d)->play.NOPERSON);
+
+        OLC_CONFIG(d)->play.NOPERSON = str_udup(arg);
+        strcat(OLC_CONFIG(d)->play.NOPERSON, "\r\n");
+
+        cedit_disp_game_play_options(d);
+        break;
+
+        /*-------------------------------------------------------------------*/
+
+    case CEDIT_NOEFFECT:
+        if (!genolc_checkstring(d, arg))
+            break;
+
+        if (OLC_CONFIG(d)->play.NOEFFECT)
+            free(OLC_CONFIG(d)->play.NOEFFECT);
+
+        OLC_CONFIG(d)->play.NOEFFECT = str_udup(arg);
+        strcat(OLC_CONFIG(d)->play.NOEFFECT, "\r\n");
+
+        cedit_disp_game_play_options(d);
+        break;
+
+        /*-------------------------------------------------------------------*/
+
+    case CEDIT_MAX_OBJ_SAVE:
+        if (!*arg)
+        {
+            d->sendText(
+                "That is an invalid choice!\r\n"
+                "Enter the maximum objects a player can save : ");
+        }
+        else
+        {
+            OLC_CONFIG(d)->csd.max_obj_save = atoi(arg);
+            cedit_disp_crash_save_options(d);
+        }
+        break;
+
+        /*-------------------------------------------------------------------*/
+
+    case CEDIT_MIN_RENT_COST:
+        if (!*arg)
+        {
+            d->sendText(
+                "That is an invalid choice!\r\n"
+                "Enter the minimum amount it costs to rent : ");
+        }
+        else
+        {
+            OLC_CONFIG(d)->csd.min_rent_cost = atoi(arg);
+            cedit_disp_crash_save_options(d);
+        }
+        break;
+
+        /*-------------------------------------------------------------------*/
+
+    case CEDIT_AUTOSAVE_TIME:
+        if (!*arg)
+        {
+            d->sendText(
+                "That is an invalid choice!\r\n"
+                "Enter the interval for player's being autosaved : ");
+        }
+        else
+        {
+            OLC_CONFIG(d)->csd.autosave_time = atoi(arg);
+            cedit_disp_crash_save_options(d);
+        }
+        break;
+
+        /*-------------------------------------------------------------------*/
+
+    case CEDIT_CRASH_FILE_TIMEOUT:
+        if (!*arg)
+        {
+            d->sendText(
+                "That is an invalid choice!\r\n"
+                "Enter the lifetime of crash and idlesave files (days) : ");
+        }
+        else
+        {
+            OLC_CONFIG(d)->csd.crash_file_timeout = atoi(arg);
+            cedit_disp_crash_save_options(d);
+        }
+        break;
+
+        /*-------------------------------------------------------------------*/
+
+    case CEDIT_RENT_FILE_TIMEOUT:
+        if (!*arg)
+        {
+            d->sendText(
+                "That is an invalid choice!\r\n"
+                "Enter the lifetime of rent files (days) : ");
+        }
+        else
+        {
+            OLC_CONFIG(d)->csd.rent_file_timeout = atoi(arg);
+            cedit_disp_crash_save_options(d);
+        }
+        break;
+
+        /*-------------------------------------------------------------------*/
+
+    case CEDIT_MORTAL_START_ROOM:
+        if (!*arg)
+        {
+            d->sendText(
+                "That is an invalid choice!\r\n"
+                "Enter the room's vnum where mortals should load into : ");
+        }
+        else if (real_room(atoi(arg)) == NOWHERE)
+        {
+            d->sendText(
+                "That room doesn't exist!\r\n"
+                "Enter the room's vnum where mortals should load into : ");
+        }
+        else
+        {
+            OLC_CONFIG(d)->room_nums.mortal_start_room = atoi(arg);
+            cedit_disp_room_numbers(d);
+        }
+        break;
+
+        /*-------------------------------------------------------------------*/
+
+    case CEDIT_IMMORT_START_ROOM:
+        if (!*arg)
+        {
+            d->sendText(
+                "That is an invalid choice!\r\n"
+                "Enter the room's vnum where immortals should load into : ");
+        }
+        else if (real_room(atoi(arg)) == NOWHERE)
+        {
+            d->sendText(
+                "That room doesn't exist!\r\n"
+                "Enter the room's vnum where immortals should load into : ");
+        }
+        else
+        {
+            OLC_CONFIG(d)->room_nums.immort_start_room = atoi(arg);
+            cedit_disp_room_numbers(d);
+        }
+        break;
+
+        /*-------------------------------------------------------------------*/
+
+    case CEDIT_FROZEN_START_ROOM:
+        if (!*arg)
+        {
+            d->sendText(
+                "That is an invalid choice!\r\n"
+                "Enter the room's vnum where frozen people should load into : ");
+        }
+        else if (real_room(atoi(arg)) == NOWHERE)
+        {
+            d->sendText(
+                "That room doesn't exist!\r\n"
+                "Enter the room's vnum where frozen people should load into : ");
+        }
+        else
+        {
+            OLC_CONFIG(d)->room_nums.frozen_start_room = atoi(arg);
+            cedit_disp_room_numbers(d);
+        }
+        break;
+
+        /*-------------------------------------------------------------------*/
+
+    case CEDIT_DONATION_ROOM_1:
+        if (!*arg)
+        {
+            d->sendText(
+                "That is an invalid choice!\r\n"
+                "Enter the vnum for donation room #1 : ");
+        }
+        else if (real_room(atoi(arg)) == NOWHERE)
+        {
+            d->sendText(
+                "That room doesn't exist!\r\n"
+                "Enter the vnum for donation room #1 : ");
+        }
+        else
+        {
+            OLC_CONFIG(d)->room_nums.donation_room_1 = atoi(arg);
+            cedit_disp_room_numbers(d);
+        }
+        break;
+
+        /*-------------------------------------------------------------------*/
+
+    case CEDIT_DONATION_ROOM_2:
+        if (!*arg)
+        {
+            d->sendText(
+                "That is an invalid choice!\r\n"
+                "Enter the vnum for donation room #2 : ");
+        }
+        else if (real_room(atoi(arg)) == NOWHERE)
+        {
+            d->sendText(
+                "That room doesn't exist!\r\n"
+                "Enter the vnum for donation room #2 : ");
+        }
+        else
+        {
+            OLC_CONFIG(d)->room_nums.donation_room_2 = atoi(arg);
+            cedit_disp_room_numbers(d);
+        }
+        break;
+
+        /*-------------------------------------------------------------------*/
+
+    case CEDIT_DONATION_ROOM_3:
+        if (!*arg)
+        {
+            d->sendText(
+                "That is an invalid choice!\r\n"
+                "Enter the vnum for donation room #3 : ");
+        }
+        else if (real_room(atoi(arg)) == NOWHERE)
+        {
+            d->sendText(
+                "That room doesn't exist!\r\n"
+                "Enter the vnum for donation room #3 : ");
+        }
+        else
+        {
+            OLC_CONFIG(d)->room_nums.donation_room_3 = atoi(arg);
+            cedit_disp_room_numbers(d);
+        }
+        break;
+
+        /*-------------------------------------------------------------------*/
+
+    case CEDIT_DFLT_PORT:
+        OLC_CONFIG(d)->operation.DFLT_PORT = atoi(arg);
+        cedit_disp_operation_options(d);
+        break;
+
+        /*-------------------------------------------------------------------*/
+
+    case CEDIT_DFLT_IP:
+        if (!*arg)
+        {
+            d->sendText(
+                "That is an invalid choice!\r\n"
+                "Enter the default ip address : ");
+        }
+        else
+        {
+            OLC_CONFIG(d)->operation.DFLT_IP = str_udup(arg);
+            cedit_disp_operation_options(d);
+        }
+        break;
+
+        /*-------------------------------------------------------------------*/
+
+    case CEDIT_DFLT_DIR:
+        if (!*arg)
+        {
+            d->sendText(
+                "That is an invalid choice!\r\n"
+                "Enter the default directory : ");
+        }
+        else
+        {
+            OLC_CONFIG(d)->operation.DFLT_DIR = str_udup(arg);
+            cedit_disp_operation_options(d);
+        }
+        break;
+
+        /*-------------------------------------------------------------------*/
+
+    case CEDIT_LOGNAME:
+        if (!*arg)
+        {
+            d->sendText(
+                "That is an invalid choice!\r\n"
+                "Enter the name of the logfile : ");
+        }
+        else
+        {
+            OLC_CONFIG(d)->operation.LOGNAME = str_udup(arg);
+            cedit_disp_operation_options(d);
+        }
+        break;
+
+        /*-------------------------------------------------------------------*/
+
+    case CEDIT_MAX_PLAYING:
+        OLC_CONFIG(d)->operation.max_playing = atoi(arg);
+        cedit_disp_operation_options(d);
+        break;
+
+        /*-------------------------------------------------------------------*/
+
+    case CEDIT_MAX_FILESIZE:
+        OLC_CONFIG(d)->operation.max_filesize = atoi(arg);
+        cedit_disp_operation_options(d);
+        break;
+
+        /*-------------------------------------------------------------------*/
+
+    case CEDIT_MAX_BAD_PWS:
+        OLC_CONFIG(d)->operation.max_bad_pws = atoi(arg);
+        cedit_disp_operation_options(d);
+        break;
+
+        /*-------------------------------------------------------------------*/
+
+    case CEDIT_MIN_WIZLIST_LEV:
+        if (atoi(arg) > ADMLVL_IMPL)
+        {
+            d->send_to(
+                "The minimum wizlist level can't be greater than %d.\r\n"
+                "Enter the minimum level for players to appear on the wizlist : ",
+                ADMLVL_IMPL);
+        }
+        else
+        {
+            OLC_CONFIG(d)->autowiz.min_wizlist_lev = atoi(arg);
+            cedit_disp_autowiz_options(d);
+        }
+        break;
+
+        /*-------------------------------------------------------------------*/
+
+    case CEDIT_PULSE_VIOLENCE:
+        if (!isdigit(*arg) || atoi(arg) < 0 || atoi(arg) > 10)
+        {
+            d->sendText("Please enter a number between 0 - 10.\r\n");
+            cedit_disp_ticks_menu(d);
+        }
+        else
+        {
+            OLC_CONFIG(d)->ticks.pulse_violence = atoi(arg);
+            cedit_disp_ticks_menu(d);
+        }
+        break;
+
+        /*-------------------------------------------------------------------*/
+    case CEDIT_PULSE_MOBILE:
+        if (!isdigit(*arg) || atoi(arg) < 0 || atoi(arg) > 20)
+        {
+            d->sendText("Please enter a number between 0 - 20.\r\n");
+            cedit_disp_ticks_menu(d);
+        }
+        else
+        {
+            OLC_CONFIG(d)->ticks.pulse_mobile = atoi(arg);
+            cedit_disp_ticks_menu(d);
+        }
+        break;
+
+        /*-------------------------------------------------------------------*/
+    case CEDIT_PULSE_IDLEPWD:
+        if (!isdigit(*arg) || atoi(arg) < 0 || atoi(arg) > 30)
+        {
+            d->sendText("Please enter a number between 0 - 30.\r\n");
+            cedit_disp_ticks_menu(d);
+        }
+        else
+        {
+            OLC_CONFIG(d)->ticks.pulse_idlepwd = atoi(arg);
+            cedit_disp_ticks_menu(d);
+        }
+        break;
+
+        /*-------------------------------------------------------------------*/
+    case CEDIT_PULSE_ZONE:
+        if (!isdigit(*arg) || atoi(arg) < 0 || atoi(arg) > 20)
+        {
+            d->sendText("Please enter a number between 0 - 20.\r\n");
+            cedit_disp_ticks_menu(d);
+        }
+        else
+        {
+            OLC_CONFIG(d)->ticks.pulse_zone = atoi(arg);
+            cedit_disp_ticks_menu(d);
+        }
+        break;
+
+        /*-------------------------------------------------------------------*/
+    case CEDIT_PULSE_AUTOSAVE:
+        if (!isdigit(*arg) || atoi(arg) < 0 || atoi(arg) > 100)
+        {
+            d->sendText("Please enter a number between 0 - 100.\r\n");
+            cedit_disp_ticks_menu(d);
+        }
+        else
+        {
+            OLC_CONFIG(d)->ticks.pulse_autosave = atoi(arg);
+            cedit_disp_ticks_menu(d);
+        }
+        break;
+
+        /*-------------------------------------------------------------------*/
+    case CEDIT_PULSE_CURRENT:
+        if (!isdigit(*arg) || atoi(arg) < 0 || atoi(arg) > 30)
+        {
+            d->sendText("Please enter a number between 0 - 30.\r\n");
+            cedit_disp_ticks_menu(d);
+        }
+        else
+        {
+            OLC_CONFIG(d)->ticks.pulse_current = atoi(arg);
+            cedit_disp_ticks_menu(d);
+        }
+        break;
+
+        /*-------------------------------------------------------------------*/
+    case CEDIT_PULSE_SANITY:
+        if (!isdigit(*arg) || atoi(arg) < 0 || atoi(arg) > 50)
+        {
+            d->sendText("Please enter a number between 0 - 50.\r\n");
+            cedit_disp_ticks_menu(d);
+        }
+        else
+        {
+            OLC_CONFIG(d)->ticks.pulse_sanity = atoi(arg);
+            cedit_disp_ticks_menu(d);
+        }
+        break;
+
+        /*-------------------------------------------------------------------*/
+    case CEDIT_PULSE_USAGE:
+        if (!isdigit(*arg) || atoi(arg) < 0 || atoi(arg) > 10)
+        {
+            d->sendText("Please enter a number between 0 - 10.\r\n");
+            cedit_disp_ticks_menu(d);
+        }
+        else
+        {
+            OLC_CONFIG(d)->ticks.pulse_usage = atoi(arg);
+            cedit_disp_ticks_menu(d);
+        }
+        break;
+
+        /*-------------------------------------------------------------------*/
+
+    case CEDIT_EXP_MULTIPLIER:
+        if (*arg)
+            OLC_CONFIG(d)->play.exp_multiplier = atof(arg);
+
+        cedit_disp_game_play_options(d);
+        break;
+
+        /*-------------------------------------------------------------------*/
+
+    case CEDIT_CREATION_OPTIONS_MENU:
+        switch (*arg)
+        {
+        case 'a':
+        case 'A':
+            cedit_disp_creation_menu(d);
+            OLC_MODE(d) = CEDIT_CREATION_MENU;
+            break;
+
+        case 'b':
+        case 'B':
+            TOGGLE_VAR(OLC_CONFIG(d)->play.reroll_player);
+            cedit_disp_creation_options(d);
+            break;
+        case 'c':
+        case 'C':
+            cedit_disp_points_menu(d);
+            OLC_MODE(d) = CEDIT_POINTS_MENU;
+            break;
+        case 'q':
+        case 'Q':
+            cedit_disp_menu(d);
+            return;
+
+        default:
+            d->sendText("\r\nThat is an invalid choice!\r\n");
+            cedit_disp_creation_menu(d);
+        }
+        return;
+
+        /*------------------------------------------------------------------*/
+
+    case CEDIT_CREATION_MENU:
+        if (!isdigit(*arg) || atoi(arg) < 0 || atoi(arg) > NUM_CREATION_METHODS - 1)
+        {
+            d->send_to("Please enter a number between 0 - %d.\r\n", NUM_CREATION_METHODS - 1);
+            cedit_disp_creation_menu(d);
+        }
+        else
+        {
+            OLC_CONFIG(d)->creation.method = atoi(arg);
+            // OLC_CONFIG(d)->ticks.pulse_usage = atoi(arg);
+            cedit_disp_creation_options(d);
+        }
+        break;
+
+        /*------------------------------------------------------------------*/
+
+    case CEDIT_POINTS_MENU:
+        if (!isdigit(*arg) || atoi(arg) < 0)
+        {
+            d->sendText("Please enter a number 0 or higher.\r\n");
+            cedit_disp_points_menu(d);
+        }
+        else
+        {
+            OLC_CONFIG(d)->play.initial_points = atoi(arg);
+            cedit_disp_creation_options(d);
+        }
+        break;
+
+        /*------------------------------------------------------------------*/
+
+    default:
+        /*
+         * We should never get here, but just in case...
+         */
+        cleanup_olc(d, CLEANUP_CONFIG);
+        mudlog(BRF, ADMLVL_BUILDER, true, "SYSERR: OLC: cedit_parse(): Reached default case!");
+        d->sendText("Oops...\r\n");
+        break;
     }
 }
 
 /*
- * End of parse_cedit()  
+ * End of parse_cedit()
  */
-void reassign_rooms() {
+void reassign_rooms()
+{
 
     /* remove old funcs */
     for (auto &[vn, r] : world)
@@ -2244,12 +2430,14 @@ void reassign_rooms() {
     assign_rooms();
 }
 
-void cedit_string_cleanup(struct descriptor_data *d, int terminator) {
-    switch (OLC_MODE(d)) {
-        case CEDIT_MENU:
-        case CEDIT_WELC_MESSG:
-        case CEDIT_START_MESSG:
-            cedit_disp_operation_options(d);
-            break;
+void cedit_string_cleanup(struct descriptor_data *d, int terminator)
+{
+    switch (OLC_MODE(d))
+    {
+    case CEDIT_MENU:
+    case CEDIT_WELC_MESSG:
+    case CEDIT_START_MESSG:
+        cedit_disp_operation_options(d);
+        break;
     }
 }

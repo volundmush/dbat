@@ -1,12 +1,12 @@
 /* ************************************************************************
-*   File: mail.h                                        Part of CircleMUD *
-*  Usage: header file for mail system                                     *
-*                                                                         *
-*  All rights reserved.  See license.doc for complete information.        *
-*                                                                         *
-*  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
-*  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
-************************************************************************ */
+ *   File: mail.h                                        Part of CircleMUD *
+ *  Usage: header file for mail system                                     *
+ *                                                                         *
+ *  All rights reserved.  See license.doc for complete information.        *
+ *                                                                         *
+ *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
+ *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
+ ************************************************************************ */
 #pragma once
 
 #include "structs.h"
@@ -69,11 +69,12 @@ constexpr int DELETED_BLOCK = -3;
  * header block when booting mail system.
  */
 
-struct header_data_type {
-    long next_block;        /* if header block, link to next block	*/
-    long from;            /* idnum of the mail's sender		*/
-    long to;            /* idnum of mail's recipient		*/
-    time_t mail_time;        /* when was the letter mailed?		*/
+struct header_data_type
+{
+    long next_block;  /* if header block, link to next block	*/
+    long from;        /* idnum of the mail's sender		*/
+    long to;          /* idnum of mail's recipient		*/
+    time_t mail_time; /* when was the letter mailed?		*/
 };
 
 /* size of the data part of a header block */
@@ -86,32 +87,36 @@ struct header_data_type {
 /* note that an extra space is allowed in all string fields for the
    terminating null character.  */
 
-struct header_block_type_d {
-    long block_type;        /* is this a header or data block?	*/
-    struct header_data_type header_data;    /* other header data		*/
+struct header_block_type_d
+{
+    long block_type;                     /* is this a header or data block?	*/
+    struct header_data_type header_data; /* other header data		*/
     char txt[HEADER_BLOCK_DATASIZE + 1]; /* actual text plus 1 for null	*/
 };
 
-struct data_block_type_d {
-    long block_type;        /* -1 if header block, -2 if last data block
-      				   in mail, otherwise a link to the next */
+struct data_block_type_d
+{
+    long block_type;                   /* -1 if header block, -2 if last data block
+                                  in mail, otherwise a link to the next */
     char txt[DATA_BLOCK_DATASIZE + 1]; /* actual text plus 1 for null	*/
 };
 
 typedef struct header_block_type_d header_block_type;
 typedef struct data_block_type_d data_block_type;
 
-struct position_list_type_d {
+struct position_list_type_d
+{
     long position;
     struct position_list_type_d *next;
 };
 
 typedef struct position_list_type_d position_list_type;
 
-struct mail_index_type_d {
-    long recipient;            /* who is this mail for?	*/
-    position_list_type *list_start;    /* list of mail positions	*/
-    struct mail_index_type_d *next;    /* link to next one		*/
+struct mail_index_type_d
+{
+    long recipient;                 /* who is this mail for?	*/
+    position_list_type *list_start; /* list of mail positions	*/
+    struct mail_index_type_d *next; /* link to next one		*/
 };
 
 typedef struct mail_index_type_d mail_index_type;
