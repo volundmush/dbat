@@ -64,6 +64,34 @@
 #define TOROOM(room, dir) (get_room(room)->dir_option[dir] ? \
 get_room(room)->dir_option[dir]->to_room : NOWHERE)
 
+/* structure for the reset commands */
+struct reset_com {
+    char command{};   /* current command                      */
+
+    bool if_flag{};    /* if TRUE: exe only if preceding exe'd */
+    int arg1{};        /*                                      */
+    int arg2{};        /* Arguments to the command             */
+    int arg3{};        /*                                      */
+    int arg4{};        /* room_max  default 0			*/
+    int arg5{};           /* percentages variable                 */
+    int line{};        /* line number this command appears on  */
+    std::string sarg1;        /* string argument                      */
+    std::string sarg2;        /* string argument                      */
+
+    /*
+     *  Commands:              *
+     *  'M': Read a mobile     *
+     *  'O': Read an object    *
+     *  'G': Give obj to mob   *
+     *  'P': Put obj in obj    *
+     *  'G': Obj to char       *
+     *  'E': Obj to char equip *
+     *  'D': Set state of door *
+     *  'T': Trigger command   *
+     *  'V': Assign a variable *
+    */
+};
+
 static std::unordered_map<zone_vnum, std::tuple<vnum, vnum>> zone_ranges;
 
 static std::unordered_map<zone_vnum, std::vector<reset_com>> oldResetCommands;

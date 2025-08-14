@@ -171,19 +171,14 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(HasLocation, location, registere
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ResetCommand, type, if_flag, target, max, max_location, ex, chance, key, value)
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(HasResetCommands, resetCommands)
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(Zone, number, parent, name, builders, lifespan, age, reset_mode, zone_flags)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(affect_t, location, modifier, specific)
 
 void to_json(json& j, const struct help_index_element& r);
 void from_json(const json& j, struct help_index_element& r);
-
-void to_json(json& j, const reset_com& r);
-void from_json(const json& j, reset_com& r);
 /*
 void to_json(json& j, const Zone& z);
 void from_json(const json& j, Zone& z);
 */
-
-void to_json(json& j, const affect_t& a);
-void from_json(const json& j, affect_t& a);
 
 void to_json(json& j, const Account& a);
 void from_json(const json& j, Account& a);

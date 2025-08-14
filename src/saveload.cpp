@@ -112,53 +112,6 @@ void from_json(const json &j, std::bitset<N> &bs)
     }
 }
 
-// zone_data and reset_com serialize/deserialize...
-void to_json(json &j, const reset_com &r)
-{
-    std::string cmd;
-    cmd.push_back(r.command);
-    j["command"] = cmd;
-
-    if (r.if_flag)
-        j["if_flag"] = r.if_flag;
-    if (r.arg1)
-        j["arg1"] = r.arg1;
-    if (r.arg2)
-        j["arg2"] = r.arg2;
-    if (r.arg3)
-        j["arg3"] = r.arg3;
-    if (r.arg4)
-        j["arg4"] = r.arg4;
-    if (r.arg5)
-        j["arg5"] = r.arg5;
-    if (!r.sarg1.empty())
-        j["sarg1"] = r.sarg1;
-    if (!r.sarg2.empty())
-        j["sarg2"] = r.sarg2;
-}
-
-void from_json(const json &j, reset_com &r)
-{
-    if (j.contains("command"))
-        r.command = j["command"].get<std::string>()[0];
-    if (j.contains("if_flag"))
-        r.if_flag = j["if_flag"];
-    if (j.contains("arg1"))
-        r.arg1 = j["arg1"];
-    if (j.contains("arg2"))
-        r.arg2 = j["arg2"];
-    if (j.contains("arg3"))
-        r.arg3 = j["arg3"];
-    if (j.contains("arg4"))
-        r.arg4 = j["arg4"];
-    if (j.contains("arg5"))
-        r.arg5 = j["arg5"];
-    if (j.contains("sarg1"))
-        r.sarg1 = j["sarg1"];
-    if (j.contains("sarg2"))
-        r.sarg2 = j["sarg2"];
-}
-
 /*
 void to_json(json &j, const Zone &z)
 {
@@ -235,27 +188,6 @@ static void dump_zones(const std::filesystem::path &loc)
     dump_to_file(loc, "zones.json", j);
 }
 
-// affect_t serialize/deserialize...
-
-void to_json(json &j, const affect_t &a)
-{
-    if (a.location)
-        j["location"] = a.location;
-    if (a.modifier != 0.0)
-        j["modifier"] = a.modifier;
-    if (a.specific)
-        j["specific"] = a.specific;
-}
-
-void from_json(const json &j, affect_t &a)
-{
-    if (j.contains("location"))
-        a.location = j.at("location");
-    if (j.contains("modifier"))
-        a.modifier = j.at("modifier");
-    if (j.contains("specific"))
-        a.specific = j.at("specific");
-}
 
 // account_data serialize/deserialize...
 void to_json(json &j, const Account &a)
