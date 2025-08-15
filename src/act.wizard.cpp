@@ -1142,13 +1142,23 @@ ACMD(do_at)
 ACMD(do_goto)
 {
     char buf[MAX_STRING_LENGTH];
-    room_rnum location;
 
-    if ((location = find_target_room(ch, argument)) == NOWHERE)
+    Location loc;
+
+    if(argument && boost::icontains(argument, ":")) {
+        loc = resolveLocID(argument);
+        if(!loc) {
+            ch->sendText("No location exists with that LocID.\r\n");
+            return;
+        }
+    } else if (auto location = find_target_room(ch, argument); location != NOWHERE) {
+        loc = Location(location);
+    } else
         return;
+    
     if (PLR_FLAGGED(ch, PLR_HEALT))
     {
-        ch->sendText("They are inside a healing tank!\r\n");
+        ch->sendText("You are inside a healing tank!\r\n");
         return;
     }
 
@@ -1156,7 +1166,7 @@ ACMD(do_goto)
     act(buf, true, ch, nullptr, nullptr, TO_ROOM);
 
     ch->leaveLocation();
-    ch->moveToLocation(location);
+    ch->moveToLocation(loc);
 
     snprintf(buf, sizeof(buf), "$n %s", POOFIN(ch) ? POOFIN(ch) : "appears with an ear-splitting bang.");
     act(buf, true, ch, nullptr, nullptr, TO_ROOM);

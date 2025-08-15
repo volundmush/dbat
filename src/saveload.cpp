@@ -836,45 +836,17 @@ void from_json(const json &j, ThingPrototype &u)
 
 void to_json(json &j, const Location &loc)
 {
-    if (loc)
-        j["loc"] = loc.getLocID();
-    else
-    {
-        throw std::runtime_error("Location has no unit.");
-    }
-    j["position"] = loc.position;
+    j["locID"] = loc.getLocID();
 }
 
 void from_json(const json &j, Location &loc)
 {
-    try
-    {
-        if (j.contains("loc"))
-        {
-            auto u = j.at("loc").get<std::string>();
-            auto locid = resolveLocID(u);
-            if (locid)
-                loc.al = locid;
-            else
-            {
-                throw std::runtime_error(fmt::format("Location has invalid unit: {}", u));
-            }
-        }
-        else
-        {
-            throw std::runtime_error("Location JSON does not contain 'uid'.");
-        }
-        loc.position = j["position"];
-    }
-    catch (const std::exception &e)
-    {
-        throw std::runtime_error(fmt::format("Error parsing Location JSON: {}\r\nJSON DATA: {}", e.what(), jdumps(j)));
-    }
+    loc = Location(j["locID"].get<std::string>());
 }
 
 void to_json(json &j, const HasLocation &hl) {
     if(hl.location) {
-        j["loc"] = hl.location.getLocID();
+        j["location"] = hl.location;
     }
     if(!hl.registeredLocations.empty()) {
         j["registeredLocations"] = hl.registeredLocations;
@@ -882,8 +854,8 @@ void to_json(json &j, const HasLocation &hl) {
 }
 
 void from_json(const json &j, HasLocation &hl) {
-    if(j.contains("loc")) {
-        hl.location = j["loc"].get<Location>();
+    if(j.contains("location")) {
+        hl.location = j["location"].get<Location>();
     }
     if(j.contains("registeredLocations")) {
         hl.registeredLocations = j["registeredLocations"].get<std::unordered_map<std::string, Location>>();
@@ -1060,9 +1032,9 @@ void load_structures_finish(const std::filesystem::path &loc)
             j.at("tileOverrides").get_to(to);
         }
 
-        if (j.contains("hasLocation"))
+        if (j.contains("HasLocation"))
         {
-            from_json(j["hasLocation"], *cf->second);
+            from_json(j["HasLocation"], *cf->second);
             Location l = cf->second->location;
             if(l) {
                 cf->second->moveToLocation(l);
@@ -1146,7 +1118,7 @@ static void dump_structures(const std::filesystem::path &loc)
         j["id"] = r->id;
         j["data"] = *r;
         to_json(j3, static_cast<const HasLocation&>(*r));
-        j["hasLocation"] = j3;
+        j["HasLocation"] = j3;
         jdata.push_back(j);
     }
     dump_to_file(loc, "structures.json", jdata);
@@ -1390,8 +1362,8 @@ void load_items_finish(const std::filesystem::path &loc)
             {
                 if(j.contains("relations"))
                     deserialize_obj_relations(i.get(), j["relations"]);
-                if(j.contains("hasLocation")) {
-                    from_json(j["hasLocation"], *i);
+                if(j.contains("HasLocation")) {
+                    from_json(j["HasLocation"], *i);
                     Location l = i->location;
                     if(l) {
                         cf->second->moveToLocation(l);
@@ -1414,7 +1386,7 @@ static void dump_items(const std::filesystem::path &loc)
         j2["data"] = *r;
         j2["relations"] = serialize_obj_relations(r.get());
         to_json(j3, static_cast<const HasLocation&>(*r));
-        j2["hasLocation"] = j3;
+        j2["HasLocation"] = j3;
         j.push_back(j2);
     }
     dump_to_file(loc, "items.json", j);
@@ -1576,10 +1548,7 @@ void to_json(json& j, const GridShared& p) {
     if(p.maxZ) j["maxZ"] = p.maxZ.value();
 
     for(const auto& [coor, over] : p.tileOverrides) {
-        json tileJson;
-        tileJson["coor"] = coor;
-        tileJson["over"] = over;
-        j["tileOverrides"].push_back(tileJson);
+        if(over) j["tileOverrides"].push_back(std::make_pair(coor, over));
     }
 }
 
@@ -1942,7 +1911,7 @@ static void dump_characters(const std::filesystem::path &loc)
         j2["data"] = *r;
 
         to_json(j3, static_cast<const HasLocation&>(*r));
-        j2["hasLocation"] = j3;
+        j2["HasLocation"] = j3;
         j.push_back(j2);
     }
     dump_to_file(loc, "characters.json", j);
@@ -1983,19 +1952,15 @@ void load_characters_finish(const std::filesystem::path &loc)
 {
     for (auto j : load_from_file(loc, "characters.json"))
     {
-        if (!j.contains("location"))
-        {
-            // this can happen with PCs.
-            continue;
-        }
         auto id = j["id"].get<int64_t>();
+        if(!j.contains("HasLocation")) continue;
 
         // basic_mud_log("Finishing Character %d", id);
         if (auto cf = uniqueCharacters.find(id); cf != uniqueCharacters.end())
         {
-            Location loc;
-            j.at("location").get_to(loc);
-            cf->second->moveToLocation(loc);
+            auto ch = cf->second;
+            auto hl = j["HasLocation"];
+            hl.get_to(static_cast<HasLocation&>(*ch));
         }
     }
 }

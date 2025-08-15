@@ -1,6 +1,12 @@
 #include "dbat/structs.h"
 #include "dbat/constants.h"
 
+TileOverride::operator bool() const
+{
+    // A TileOverride is considered "valid" if it has at least one of the following:
+    return sectorType.has_value() || !strings.empty() || roomFlags.count() || whereFlags.count() || !exits.empty() || damage != 0 || groundEffect != 0 || !environment.empty() || !exits.empty();
+}
+
 // Helper to fetch or create a TileOverride entry.
 static inline TileOverride &ensure_tile(std::unordered_map<Coordinates, TileOverride> &map, const Coordinates &c)
 {
@@ -22,6 +28,45 @@ static inline TileOverride *find_tile_nc(std::unordered_map<Coordinates, TileOve
     return &it->second;
 }
 
+bool AbstractGridArea::validCoordinates(const Coordinates& coor) const {
+
+    // check if dest is within bounds. return std::nullopt if not.
+    if (maxX && coor.x > *maxX)
+        return false;
+    if (maxY && coor.y > *maxY)
+        return false;
+    if (maxZ && coor.z > *maxZ)
+        return false;
+    if (minX && coor.x < *minX)
+        return false;
+    if (minY && coor.y < *minY)
+        return false;
+    if (minZ && coor.z < *minZ)
+        return false;
+
+    if (auto it = tileOverrides.find(coor); it != tileOverrides.end() && it->second.sectorType)
+    {
+        // If the tile we're on has a sector type override.
+        // This means it exists.
+        return true;
+    }
+
+    // next we check the default tile types...
+    if (coor.z == 0 && defaultGroundSector)
+    {
+        return true;
+    }
+    if (coor.z < 0 && defaultUnderSector)
+    {
+        return true;
+    }
+    if (coor.z > 0 && defaultSkySector)
+    {
+        return true;
+    }
+    return false;
+}
+
 std::optional<Destination> AbstractGridArea::getDirection(const Coordinates &coor, Direction dir)
 {
     // First check for an override...
@@ -40,6 +85,13 @@ std::optional<Destination> AbstractGridArea::getDirection(const Coordinates &coo
     // if it exists and is navigable. If so, we'll create a Destination
     // dynamically.
 
+    switch(dir) {
+        case Direction::inside:
+        case Direction::outside:
+            // These directions are not valid for grid areas.
+            return std::nullopt;
+    }
+
     // Apply our direction
     Destination dest;
     dest.al = getSharedAbstractLocation();
@@ -47,41 +99,9 @@ std::optional<Destination> AbstractGridArea::getDirection(const Coordinates &coo
     dest.position.apply(dir);
     dest.dir = dir;
 
-    // check if dest is within bounds. return std::nullopt if not.
-    if (maxX && dest.position.x > *maxX)
-        return std::nullopt;
-    if (maxY && dest.position.y > *maxY)
-        return std::nullopt;
-    if (maxZ && dest.position.z > *maxZ)
-        return std::nullopt;
-    if (minX && dest.position.x < *minX)
-        return std::nullopt;
-    if (minY && dest.position.y < *minY)
-        return std::nullopt;
-    if (minZ && dest.position.z < *minZ)
-        return std::nullopt;
-
-    if (it != tileOverrides.end() && it->second.sectorType)
-    {
-        // If the tile we're on has a sector type override.
-        // This means it exists.
+    if(validCoordinates(dest.position)) {
         return dest;
     }
-
-    // next we check the default tile types...
-    if (dest.position.z == 0 && defaultGroundSector)
-    {
-        return dest;
-    }
-    if (dest.position.z < 0 && defaultUnderSector)
-    {
-        return dest;
-    }
-    if (dest.position.z > 0 && defaultSkySector)
-    {
-        return dest;
-    }
-
     return std::nullopt;
 }
 

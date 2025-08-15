@@ -288,7 +288,7 @@ static void generate_multiform(Character *ch, int count)
             clone->limb_condition[l] = ch->limb_condition[l];
         }
 
-        ch->clones.push_back(clone->shared());
+        ch->clones.add(clone->shared_from_this());
 
         GET_ORIGINAL(clone) = ch;
         clone->moveToLocation(ch);

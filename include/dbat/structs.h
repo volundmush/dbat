@@ -389,6 +389,7 @@ struct Location {
     Location(Room* room);
     Location(Character* ch);
     Location(const std::shared_ptr<Room>& room);
+    Location(const std::string& txt);
     std::weak_ptr<AbstractLocation> al{};  // What unit contains this unit (room, area, char, obj)
     Coordinates position;
     bool operator==(const Location& other) const;
@@ -426,6 +427,8 @@ struct Location {
     void setWhereFlag(WhereFlag flag, bool value = true) const;
     bool toggleWhereFlag(WhereFlag flag) const;
     bool getWhereFlag(WhereFlag flag) const;
+    FlagHandler<RoomFlag>& getRoomFlags();
+    FlagHandler<WhereFlag>& getWhereFlags();
 
     std::string getUID(bool active = false) const;
 
@@ -928,10 +931,11 @@ struct AbstractLocation {
     virtual void onAddToContents(const Coordinates& coor, const std::shared_ptr<HasLocation>& hl);
     virtual void onRemoveFromContents(const std::shared_ptr<HasLocation>& hl);
 
-    virtual void displayLookFor(const Coordinates& coor, Character* viewer);
+    virtual bool validCoordinates(const Coordinates& coor) const;
 };
 
 struct TileOverride : public HasResetCommands {
+    explicit operator bool() const;
     std::unordered_map<std::string, std::string> strings;
     std::optional<SectorType> sectorType;
     FlagHandler<RoomFlag> roomFlags;
@@ -966,6 +970,7 @@ struct AbstractGridArea : public AbstractLocation, public GridShared, public Has
 
     // location_data overrides (most implemented generically here). Subclasses still provide getZone().
 
+    bool validCoordinates(const Coordinates& coor) const override;
     const std::vector<ExtraDescription>& getExtraDescription(const Coordinates& coor) const override;
     const char* getName(const Coordinates& coor) const override;
     const char* getLookDescription(const Coordinates& coor) const override;
@@ -1534,10 +1539,10 @@ struct Character : public HasID, public HasLocation, public HasEquipment, public
     struct Character *defender{};
     struct Character *defending{};
     struct Character *poisonby{};
-    std::list<std::weak_ptr<Character>> poisoned;
+    WeakBag<Character> poisoned;
     struct Character *original{};
 
-    std::list<std::weak_ptr<Character>> clones{};
+    WeakBag<Character> clones{};
     std::map<Skill, skill_data> skill;
 
     FlagHandler<CharacterFlag> character_flags{};

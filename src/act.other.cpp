@@ -7507,7 +7507,7 @@ ACMD(do_focus)
                 else
                 {
                     vict->poisonby = ch;
-                    ch->poisoned.push_back(vict->shared());
+                    ch->poisoned.add(vict->shared_from_this());
                     if (GET_CHARGE(ch) > 0)
                     {
                         ch->sendText("You lose your concentration and release your charged ki!\r\n");

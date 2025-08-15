@@ -4,6 +4,8 @@
 #include "dbat/utils.h"
 #include "dbat/constants.h"
 #include "dbat/fight.h"
+#include "dbat/planet.h"
+#include "dbat/act.informative.h"
 
 bool Coordinates::operator==(const Coordinates &other) const
 {
@@ -77,6 +79,11 @@ Location::Location(Character *ch)
     *this = ch->location;
 }
 
+Location::Location(const std::string& txt)
+{
+    *this = resolveLocID(txt);
+}
+
 bool Location::operator==(const Location &other) const
 {
     if(al.expired() || other.al.expired())
@@ -113,7 +120,10 @@ bool Location::operator==(const room_vnum rv) const
 // the bool operator for ...
 Location::operator bool() const
 {
-    return !al.expired();
+    if(auto a = al.lock()) {
+        return a->validCoordinates(position);
+    }
+    return false;
 }
 
 vnum Location::getVnum() const
@@ -136,7 +146,7 @@ Zone *Location::getZone() const
 
 std::string Location::getLocID() const
 {
-    if(auto a = al.lock()) return a->getLocID();
+    if(auto a = al.lock()) return fmt::format("{}:{}:{}:{}", a->getLocID(), position.x, position.y, position.z);
 
     return "";
 }
@@ -577,8 +587,411 @@ void Location::executeResetCommands(const std::vector<ResetCommand> &cmds)
     }
 }
 
-void Location::displayLookFor(Character* viewer) {
-    if(auto a = al.lock()) {
-        a->displayLookFor(position, viewer);
+FlagHandler<RoomFlag>& Location::getRoomFlags()
+{
+    if (auto a = al.lock())
+    {
+        return a->getRoomFlags(position);
+    }
+    static FlagHandler<RoomFlag> standby;
+    return standby;
+}
+
+FlagHandler<WhereFlag>& Location::getWhereFlags()
+{
+    if (auto a = al.lock())
+    {
+        return a->getWhereFlags(position);
+    }
+    static FlagHandler<WhereFlag> standby;
+    return standby;
+}
+
+
+static void display_room_flags(Location& loc, Character *ch)
+{
+    char buf[MAX_STRING_LENGTH], buf2[MAX_STRING_LENGTH], buf3[MAX_STRING_LENGTH];
+
+    sprintf(buf, "%s", loc.getRoomFlags().getFlagNames().c_str());
+    sprinttype(static_cast<int>(loc.getSectorType()), sector_types, buf2, sizeof(buf2));
+
+    if (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_NODEC))
+    {
+        ch->sendText("\r\n@wO----------------------------------------------------------------------O@n\r\n");
+    }
+
+    ch->send_to("@wLocation: @G%-70s@w\r\n", loc.getName());
+
+    if(auto r = dynamic_cast<Room*>(loc.al.lock().get()); r)
+    {
+        if (auto sc = r->getScripts(); !sc.empty())
+        {
+            ch->sendText("@D[@GTriggers");
+            for (auto t : filter_shared(sc))
+                ch->send_to(" %d", t->getVnum());
+            ch->sendText("@D] ");
+        }
+    }
+
+    double grav = loc.getEnvironment(ENV_GRAVITY);
+    auto g = fmt::format("{}", grav);
+    snprintf(buf3, sizeof(buf3), "@D[ @G%s@D] @wSector: @D[ @G%s @D] @wVnum: @D[@G%s@D]@n Gravity: @D[@G%sx@D]@n", buf, buf2, loc.getLocID().c_str(), g.c_str());
+    ch->send_to("@wFlags: %-70s@w\r\n", buf3);
+
+    if (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_NODEC))
+    {
+        ch->sendText("@wO----------------------------------------------------------------------O@n\r\n");
+    }
+}
+
+static void display_special_room_descriptions(Location& loc, Character *ch)
+{
+    auto &rf = loc.getRoomFlags();
+
+    if (rf.get(ROOM_REGEN))
+    {
+        ch->sendText("@CA feeling of calm and relaxation fills this room.@n\r\n");
+    }
+    if (rf.get(ROOM_AURA))
+    {
+        ch->sendText("@GAn aura of @gregeneration@G surrounds this area.@n\r\n");
+    }
+    if (loc.getWhereFlag(WhereFlag::hyperbolic_time_chamber))
+    {
+        ch->sendText("@rThis room feels like it operates in a different time frame.@n\r\n");
+    }
+}
+
+static void display_dimension_info(Location& loc, Character *ch)
+{
+    if (loc.getWhereFlag(WhereFlag::neo_nirvana))
+    {
+        ch->sendText("@wPlanet: @WNeo Nirvana@n\r\n");
+    }
+    else if (loc.getWhereFlag(WhereFlag::afterlife))
+    {
+        ch->sendText("@wDimension: @yA@Yf@yt@Ye@yr@Yl@yi@Yf@ye@n\r\n");
+    }
+    else if (loc.getRoomFlag(ROOM_HELL))
+    {
+        ch->sendText("@wDimension: @RPunishment Hell@n\r\n");
+    }
+    else if (loc.getWhereFlag(WhereFlag::afterlife_hell))
+    {
+        ch->sendText("@wDimension: @RH@re@Dl@Rl@n\r\n");
+    }
+}
+
+static void display_room_info(Location& loc, Character *ch)
+{
+    if (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_NODEC))
+    {
+        ch->sendText("@wO----------------------------------------------------------------------O@n\r\n");
+    }
+
+    ch->send_to("@wLocation: %-70s@n\r\n", loc.getName());
+
+    if (auto planet = getPlanet(loc.getVnum()); planet)
+    {
+        ch->send_to("@wPlanet: @G%s@n\r\n", getPlanetColorName(planet.value()).c_str());
+    }
+    else
+    {
+        display_dimension_info(loc, ch);
+    }
+
+    double grav = loc.getEnvironment(ENV_GRAVITY);
+    if (grav <= 1.0)
+    {
+        ch->sendText("@wGravity: @WNormal@n\r\n");
+    }
+    else
+    {
+        auto g = fmt::format("{}", grav);
+        ch->send_to("@wGravity: @W%sx@n\r\n", g.c_str());
+    }
+
+    display_special_room_descriptions(loc, ch);
+
+    if (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_NODEC))
+    {
+        ch->sendText("@wO----------------------------------------------------------------------O@n\r\n");
+    }
+}
+
+static void display_damage_description(Character *ch, int dmg, const char *surface)
+{
+    if (dmg <= 2)
+    {
+        ch->send_to("@wA small hole with chunks of debris that can be seen scarring the %s.@n", surface);
+    }
+    else if (dmg <= 4)
+    {
+        ch->send_to("@wA couple small holes with chunks of debris that can be seen scarring the %s.@n", surface);
+    }
+    else if (dmg <= 6)
+    {
+        ch->send_to("@wA few small holes with chunks of debris that can be seen scarring the %s.@n", surface);
+    }
+    else if (dmg <= 10)
+    {
+        ch->send_to("@wThere are several small holes with chunks of debris that can be seen scarring the %s.@n", surface);
+    }
+    else if (dmg <= 20)
+    {
+        ch->send_to("@wMany holes fill the %s of this area, many of which have burn marks.@n", surface);
+    }
+    else if (dmg <= 30)
+    {
+        ch->send_to("@wThe %s is severely damaged with many large holes.@n", surface);
+    }
+    else if (dmg <= 50)
+    {
+        ch->sendText("@wBattle damage covers the entire area. Displayed as a tribute to the battles that have been waged here.@n");
+    }
+    else if (dmg <= 75)
+    {
+        ch->sendText("@wThis entire area is falling apart, it has been damaged so badly.@n");
+    }
+    else if (dmg <= 99)
+    {
+        ch->sendText("@wThis area cannot withstand much more damage. Everything has been damaged so badly it is hard to recognize any particular details about their former quality.@n");
+    }
+    else if (dmg >= 100)
+    {
+        ch->sendText("@wThis area is completely destroyed. Nothing is recognizable. Chunks of debris litter the ground, filling up holes, and overflowing onto what is left of the ground. A haze of smoke is wafting through the air, creating a chilling atmosphere.@n");
+    }
+}
+
+static void display_damage_description_forest(Character *ch, int dmg)
+{
+    if (dmg <= 2)
+    {
+        ch->sendText("@wA small tree sits in a little crater here.@n");
+    }
+    else if (dmg <= 4)
+    {
+        ch->sendText("@wTrees have been uprooted by craters in the ground.@n");
+    }
+    else if (dmg <= 6)
+    {
+        ch->sendText("@wSeveral trees have been reduced to chunks of debris and are laying in a few craters here.@n");
+    }
+    else if (dmg <= 10)
+    {
+        ch->sendText("@wA large patch of trees have been destroyed and are laying in craters here.@n");
+    }
+    else if (dmg <= 20)
+    {
+        ch->sendText("@wSeveral craters have merged into one large crater in one part of this forest.@n");
+    }
+    else if (dmg <= 30)
+    {
+        ch->sendText("@wThe open sky can easily be seen through a hole of trees destroyed and resting at the bottom of several craters here.@n");
+    }
+    else if (dmg <= 50)
+    {
+        ch->sendText("@wA good deal of burning tree pieces can be found strewn across the cratered ground here.@n");
+    }
+    else if (dmg <= 75)
+    {
+        ch->sendText("@wVery few trees are left standing in this area, replaced instead by large craters.@n");
+    }
+    else if (dmg <= 99)
+    {
+        ch->sendText("@wSingle solitary trees can be found still standing here or there in the area. The rest have been almost completely obliterated in recent conflicts.@n");
+    }
+    else if (dmg >= 100)
+    {
+        ch->sendText("@wOne massive crater fills this area. This desolate crater leaves no evidence of what used to be found in the area. Smoke slowly wafts into the sky from the central point of the crater, creating an oppressive atmosphere.@n");
+    }
+}
+
+static void display_damage_description_mountain(Character *ch, int dmg)
+{
+    if (dmg <= 2)
+    {
+        ch->sendText("@wA small crater has been burned into the side of this mountain.@n");
+    }
+    else if (dmg <= 4)
+    {
+        ch->sendText("@wA couple craters have been burned into the side of this mountain.@n");
+    }
+    else if (dmg <= 6)
+    {
+        ch->sendText("@wBurned bits of boulders can be seen lying at the bottom of a few nearby craters.@n");
+    }
+    else if (dmg <= 10)
+    {
+        ch->sendText("@wSeveral bad craters can be seen in the side of the mountain here.@n");
+    }
+    else if (dmg <= 20)
+    {
+        ch->sendText("@wLarge boulders have rolled down the mountainside and collected in many nearby craters.@n");
+    }
+    else if (dmg <= 30)
+    {
+        ch->sendText("@wMany craters are covering the mountainside here.@n");
+    }
+    else if (dmg <= 50)
+    {
+        ch->sendText("@wThe mountain side has partially collapsed, shedding rubble down towards its base.@n");
+    }
+    else if (dmg <= 75)
+    {
+        ch->sendText("@wA peak of the mountain has been blown off, leaving behind a smoldering tip.@n");
+    }
+    else if (dmg <= 99)
+    {
+        ch->sendText("@wThe mountainside here has completely collapsed, shedding dangerous rubble down to its base.@n");
+    }
+    else if (dmg >= 100)
+    {
+        ch->sendText("@wHalf the mountain has been blown away, leaving a scarred and jagged rock in its place. Billowing smoke wafts up from several parts of the mountain, filling the nearby skies and blotting out the sun.@n");
+    }
+}
+
+static void display_room_damage_description(Location& loc, Character *ch)
+{
+    auto dmg = loc.getDamage();
+    auto sect = static_cast<int>(loc.getSectorType());
+    auto sunk = loc.getEnvironment(ENV_WATER) >= 100.0;
+
+    if ((!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_BRIEF)) || loc.getRoomFlag(ROOM_DEATH))
+    {
+        if (dmg <= 99 || (dmg == 100 && (sect == SECT_WATER_SWIM || sunk || sect == SECT_FLYING || sect == SECT_SHOP || sect == SECT_IMPORTANT)))
+        {
+            std::string ldesc(loc.getLookDescription());
+            if(!ldesc.ends_with("\r\n")) ldesc += "\r\n";
+            ch->send_to("@w%s@n", ldesc);
+        }
+
+        if (dmg > 0)
+        {
+            ch->sendText("\r\n");
+            switch (sect)
+            {
+            case SECT_INSIDE:
+                display_damage_description(ch, dmg, "floor");
+                break;
+            case SECT_CITY:
+            case SECT_FIELD:
+            case SECT_HILLS:
+            case SECT_IMPORTANT:
+                display_damage_description(ch, dmg, "ground");
+                break;
+            case SECT_FOREST:
+                display_damage_description_forest(ch, dmg);
+                break;
+            case SECT_MOUNTAIN:
+                display_damage_description_mountain(ch, dmg);
+                break;
+            default:
+                break;
+            }
+            ch->sendText("\r\n");
+        }
+
+        auto ge = loc.getGroundEffect();
+
+        if (ge >= 1 && ge <= 5)
+        {
+            ch->sendText("@rLava@w is pooling in some places here...@n\r\n");
+        }
+        else if (ge >= 6)
+        {
+            ch->sendText("@RLava@r covers pretty much the entire area!@n\r\n");
+        }
+        else if (ge < 0)
+        {
+            ch->sendText("@cThe entire area is flooded with a @Cmystical@c cube of @Bwater!@n\r\n");
+        }
+    }
+}
+
+static void display_garden_info(Location& loc, Character *ch)
+{
+    auto con = loc.getObjects();
+    auto &rf = loc.getRoomFlags();
+    if (rf.get(ROOM_GARDEN1))
+    {
+        ch->send_to("@D[@GPlants Planted@D: @g%d@W, @GMAX@D: @R8@D]@n\r\n", con.size());
+    }
+    else if (rf.get(ROOM_GARDEN2))
+    {
+        ch->send_to("@D[@GPlants Planted@D: @g%d@W, @GMAX@D: @R20@D]@n\r\n", con.size());
+    }
+    else if (rf.get(ROOM_HOUSE))
+    {
+        ch->send_to("@D[@GItems Stored@D: @g%d@D]@n\r\n", con.size());
+    }
+}
+
+void Location::displayLookFor(Character* ch) {
+    if (!ch->desc)
+        return;
+    
+    auto a = al.lock();
+    if(!a) {
+        ch->sendText("You can't see anything here.");
+        return;
+    }
+
+    if (AFF_FLAGGED(ch, AFF_BLIND))
+    {
+        ch->sendText("You see nothing but infinite darkness...\r\n");
+        return;
+    }
+
+    if (PLR_FLAGGED(ch, PLR_EYEC))
+    {
+        ch->sendText("You can't see a damned thing, your eyes are closed!\r\n");
+        return;
+    }
+
+    if (PRF_FLAGGED(ch, PRF_ROOMFLAGS))
+    {
+        display_room_flags(*this, ch);
+    }
+    else
+    {
+        display_room_info(*this, ch);
+    }
+
+    display_room_damage_description(*this, ch);
+
+    /* autoexits */
+    if (!IS_NPC(ch))
+    {
+
+        if (PRF_FLAGGED(ch, PRF_NODEC))
+        {
+            do_auto_exits2(*this, ch);
+        }
+        else
+        {
+            do_auto_exits(*this, ch, EXIT_LEV(ch));
+        }
+    }
+
+    display_garden_info(*this, ch);
+
+    // retrieve all entities at these coordinates.
+    auto con = a->getContents<HasLocation>(position);
+    auto sh = ch->shared_from_this();
+    std::map<std::string, std::vector<std::weak_ptr<HasLocation>>> categorized_contents;
+    for (const auto& hl : filter_shared(con)) {
+        // Filter by visibility...
+        if((hl != sh) && hl->getLocationVisibleTo(ch))
+            categorized_contents[hl->getLocationDisplayCategory(ch)].emplace_back(hl);
+    }
+
+    for(auto& [cat, entities] : categorized_contents) {
+        // it's impossible for entities to be empty here...
+        ch->sendFmt("    {}:\r\n", cat);
+        for(auto ent : filter_raw(entities)) {
+            ent->displayLocationInfo(ch);
+            ch->sendText("@n");
+        }
     }
 }

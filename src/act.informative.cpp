@@ -35,7 +35,7 @@
 #include "dbat/random.h"
 
 /* local functions */
-static void gen_map(Character *ch, int num);
+static void gen_map(const Location& loc, Character *ch, int num);
 
 static void see_plant(Object *obj, Character *ch);
 
@@ -1238,7 +1238,7 @@ static void map_draw_room(char map[9][10], int x, int y, Destination &node, Char
 
 ACMD(do_map)
 {
-    gen_map(ch, 1);
+    gen_map(ch->location, ch, 1);
 }
 
 static void print_map_key(Character *ch)
@@ -1297,7 +1297,7 @@ static void print_map_line(Character *ch, int key, const char *buf)
     }
 }
 
-static void gen_map(Character *ch, int num)
+static void gen_map(const Location& loc, Character *ch, int num)
 {
     char map[9][10] = {{'-'}, {'-'}};
     char buf2[MAX_INPUT_LENGTH];
@@ -1310,12 +1310,12 @@ static void gen_map(Character *ch, int num)
     initialize_map(map);
     // Create a fake Destination for our start node.
     Destination start;
-    start.al = ch->location.al;
-    start.position = ch->location.position;
+    start.al = loc.al;
+    start.position = loc.position;
 
     map_draw_room(map, 4, 4, start, ch);
 
-    auto exits = ch->location.getExits();
+    auto exits = start.getExits();
 
     for (auto &[door, e] : exits)
     {
@@ -1352,6 +1352,14 @@ static void gen_map(Character *ch, int num)
     map[4][4] = 'x';
 
     int key = 0;
+    auto goodexit = [&exits](Direction dir)
+    {
+        return exits.contains(dir) && !EXIT_FLAGGED(&exits.at(dir), EX_SECRET);
+    };
+    auto isclosed = [&exits](Direction dir) {
+        return EXIT_FLAGGED(&exits.at(dir), EX_CLOSED);
+    };
+
     for (int i = 2; i < 9; i++)
     {
         if (i > 6)
@@ -1361,29 +1369,29 @@ static void gen_map(Character *ch, int num)
         {
         case 2:
             sprintf(buf2, "@w       @w|%s@w|           %s",
-                    exits.contains(Direction::north) && !EXIT_FLAGGED(&exits.at(Direction::north), EX_SECRET) ? (EXIT_FLAGGED(&exits.at(Direction::north), EX_CLOSED) ? " @rN " : " @CN ") : "   ", map[i]);
+                    goodexit(Direction::north) ? (isclosed(Direction::north) ? " @rN " : " @CN ") : "   ", map[i]);
             break;
         case 3:
             sprintf(buf2, "@w @w|%s@w| |%s@w| |%s@w|     %s",
-                    exits.contains(Direction::northwest) && !EXIT_FLAGGED(&exits.at(Direction::northwest), EX_SECRET) ? (EXIT_FLAGGED(&exits.at(Direction::northwest), EX_CLOSED) ? " @rNW" : " @CNW") : "   ",
-                    exits.contains(Direction::up) && !EXIT_FLAGGED(&exits.at(Direction::up), EX_SECRET) ? (EXIT_FLAGGED(&exits.at(Direction::up), EX_CLOSED) ? " @yU " : " @YU ") : "   ",
-                    exits.contains(Direction::northeast) && !EXIT_FLAGGED(&exits.at(Direction::northeast), EX_SECRET) ? (EXIT_FLAGGED(&exits.at(Direction::northeast), EX_CLOSED) ? "@rNE " : "@CNE ") : "   ", map[i]);
+                    goodexit(Direction::northwest) ? (isclosed(Direction::northwest) ? " @rNW" : " @CNW") : "   ",
+                    goodexit(Direction::up) ? (isclosed(Direction::up) ? " @yU " : " @YU ") : "   ",
+                    goodexit(Direction::northeast) ? (isclosed(Direction::northeast) ? "@rNE " : "@CNE ") : "   ", map[i]);
             break;
         case 4:
             sprintf(buf2, "@w @w|%s@w| |%s@w| |%s@w|     %s",
-                    exits.contains(Direction::west) && !EXIT_FLAGGED(&exits.at(Direction::west), EX_SECRET) ? (EXIT_FLAGGED(&exits.at(Direction::west), EX_CLOSED) ? "  @rW" : "  @CW") : "   ",
-                    exits.contains(Direction::down) && !EXIT_FLAGGED(&exits.at(Direction::down), EX_SECRET) ? (EXIT_FLAGGED(&exits.at(Direction::down), EX_CLOSED) ? " @rI " : " @mI ") : (exits.contains(Direction::outside) && !EXIT_FLAGGED(&exits.at(Direction::outside), EX_SECRET) ? (EXIT_FLAGGED(&exits.at(Direction::outside), EX_CLOSED) ? "@rOUT" : "@mOUT") : "@r{ }"),
-                    exits.contains(Direction::east) && !EXIT_FLAGGED(&exits.at(Direction::east), EX_SECRET) ? (EXIT_FLAGGED(&exits.at(Direction::east), EX_CLOSED) ? "@rE  " : "@CE  ") : "   ", map[i]);
+                    goodexit(Direction::west) ? (isclosed(Direction::west) ? "  @rW" : "  @CW") : "   ",
+                    goodexit(Direction::inside) ? (isclosed(Direction::inside) ? " @rI " : " @mI ") : (goodexit(Direction::outside) ? (isclosed(Direction::outside) ? "@rOUT" : "@mOUT") : "@r{ }"),
+                    goodexit(Direction::east) ? (isclosed(Direction::east) ? "@rE  " : "@CE  ") : "   ", map[i]);
             break;
         case 5:
             sprintf(buf2, "@w @w|%s@w| |%s@w| |%s@w|     %s",
-                    exits.contains(Direction::southwest) && !EXIT_FLAGGED(&exits.at(Direction::southwest), EX_SECRET) ? (EXIT_FLAGGED(&exits.at(Direction::southwest), EX_CLOSED) ? " @rSW" : " @CSW") : "   ",
-                    exits.contains(Direction::down) && !EXIT_FLAGGED(&exits.at(Direction::down), EX_SECRET) ? (EXIT_FLAGGED(&exits.at(Direction::down), EX_CLOSED) ? " @yD " : " @YD ") : "   ",
-                    exits.contains(Direction::southeast) && !EXIT_FLAGGED(&exits.at(Direction::southeast), EX_SECRET) ? (EXIT_FLAGGED(&exits.at(Direction::southeast), EX_CLOSED) ? "@rSE " : "@CSE ") : "   ", map[i]);
+                    goodexit(Direction::southwest) ? (isclosed(Direction::southwest) ? " @rSW" : " @CSW") : "   ",
+                    goodexit(Direction::down) ? (isclosed(Direction::down) ? " @yD " : " @YD ") : "   ",
+                    goodexit(Direction::southeast) ? (isclosed(Direction::southeast) ? "@rSE " : "@CSE ") : "   ", map[i]);
             break;
         case 6:
             sprintf(buf2, "@w       @w|%s@w|           %s",
-                    exits.contains(Direction::south) && !EXIT_FLAGGED(&exits.at(Direction::south), EX_SECRET) ? (EXIT_FLAGGED(&exits.at(Direction::south), EX_CLOSED) ? " @rS " : " @CS ") : "   ", map[i]);
+                    goodexit(Direction::south) ? (isclosed(Direction::south) ? " @rS " : " @CS ") : "   ", map[i]);
             break;
         }
 
@@ -2987,7 +2995,7 @@ void do_auto_exits(const Location& loc, Character *ch, int exit_mode)
         ch->sendText("@D------------------------------------------------------------------------@n\r\n");
         ch->sendText("@w      Compass           Auto-Map            Map Key\r\n");
         ch->sendText("@R     ---------         ----------   -----------------------------\r\n");
-        gen_map(ch, 0);
+        gen_map(loc, ch, 0);
         ch->sendText("@D------------------------------------------------------------------------@n\r\n");
     }
 

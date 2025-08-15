@@ -2140,7 +2140,7 @@ static void final_combat_resolve(Character *ch)
     }
     if (!IS_NPC(ch) && !ch->clones.empty())
     {
-        auto clones = ch->clones;
+        auto clones = ch->clones.snapshot_weak();
         for (auto c : filter_raw(clones))
         {
             handle_multi_merge(c);

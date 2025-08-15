@@ -46,18 +46,17 @@ void Character::activate()
     if (auto vn = getVnum(); mob_proto.contains(vn))
     {
         services.insert(fmt::format("vnum_{}", vn));
-    }
+        assign_triggers(this, MOB_TRIGGER);
 
-    assign_triggers(this, MOB_TRIGGER);
+        if (!scripts.empty())
+        {
+            activateScripts();
 
-    if (!scripts.empty())
-    {
-        activateScripts();
-
-        if (SCRIPT_TYPES(this) & MTRIG_RANDOM)
-            services.insert("randomTriggers");
-        if (SCRIPT_TYPES(this) & MTRIG_TIME)
-            services.insert("timeTriggers");
+            if (SCRIPT_TYPES(this) & MTRIG_RANDOM)
+                services.insert("randomTriggers");
+            if (SCRIPT_TYPES(this) & MTRIG_TIME)
+                services.insert("timeTriggers");
+        }
     }
 
     if (!IS_NPC(this))
@@ -968,20 +967,9 @@ void Character::login()
     {
         this->send_to("%s", CONFIG_START_MESSG);
     }
-    if (this->location.getVnum() <= 1 && GET_LOADROOM(this) != NOWHERE)
-    {
-        this->leaveLocation();
-        this->moveToLocation(GET_LOADROOM(this));
-    }
-    else if (this->location.getVnum() <= 1)
-    {
-        this->leaveLocation();
-        this->moveToLocation(300);
-    }
-    else
-    {
-        this->lookAtLocation();
-    }
+
+    this->lookAtLocation();
+
     if (has_mail(GET_IDNUM(this)))
         this->sendText("\r\nYou have mail waiting.\r\n");
     if (GET_ADMLEVEL(this) >= 1 && BOARDNEWIMM > GET_BOARD(this, 1))

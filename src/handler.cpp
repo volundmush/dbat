@@ -690,18 +690,11 @@ void extract_char_final(Character *ch)
     Object *obj;
     int i;
 
-    if (IN_ROOM(ch) == NOWHERE)
+    if (!ch->location)
     {
         basic_mud_log("SYSERR: NOWHERE extracting char %s. (%s, extract_char_final)",
                       GET_NAME(ch), __FILE__);
         shutdown_game(1);
-    }
-
-    if (!IS_NPC(ch))
-    {
-        // PCs have a very complicated set of places they're not allowed to log off from.
-        // If they do, somehow, then this function will ensure they show up somewhere sane.
-        ch->setBaseStat("load_room", ch->normalizeLoadRoom(IN_ROOM(ch)));
     }
 
     /*
@@ -732,11 +725,10 @@ void extract_char_final(Character *ch)
     if (auto original = GET_ORIGINAL(ch); original)
     {
         auto shared = ch->shared();
-        original->clones.remove_if([shared](auto &c)
-                                   { return c.expired() || c.lock() == shared; });
+        original->clones.remove(shared);
     }
 
-    if (auto clones = ch->clones; !clones.empty())
+    if (auto clones = ch->clones.snapshot_weak(); !clones.empty())
     {
         for (auto c : filter_raw(clones))
         {
@@ -746,27 +738,27 @@ void extract_char_final(Character *ch)
 
     purge_homing(ch);
 
-    if (MINDLINK(ch))
+    if (auto ml = MINDLINK(ch))
     {
-        MINDLINK(MINDLINK(ch)) = nullptr;
+        MINDLINK(ml) = nullptr;
         MINDLINK(ch) = nullptr;
     }
 
-    if (GRAPPLING(ch))
+    if (auto grap = GRAPPLING(ch))
     {
-        act("@WYou stop grappling with @C$N@W!@n", true, ch, nullptr, GRAPPLING(ch), TO_CHAR);
-        act("@C$n@W stops grappling with @c$N@W!@n", true, ch, nullptr, GRAPPLING(ch), TO_ROOM);
-        GRAPPLING(ch)->setBaseStat<int>("grapple_type", -1);
-        GRAPPLED(GRAPPLING(ch)) = nullptr;
+        act("@WYou stop grappling with @C$N@W!@n", true, ch, nullptr, grap, TO_CHAR);
+        act("@C$n@W stops grappling with @c$N@W!@n", true, ch, nullptr, grap, TO_ROOM);
+        grap->setBaseStat<int>("grapple_type", -1);
+        GRAPPLED(grap) = nullptr;
         GRAPPLING(ch) = nullptr;
         ch->setBaseStat<int>("grapple_type", -1);
     }
-    if (GRAPPLED(ch))
+    if (auto grap = GRAPPLED(ch))
     {
-        act("@WYou stop being grappled with by @C$N@W!@n", true, ch, nullptr, GRAPPLED(ch), TO_CHAR);
-        act("@C$n@W stops being grappled with by @c$N@W!@n", true, ch, nullptr, GRAPPLED(ch), TO_ROOM);
-        GRAPPLED(ch)->setBaseStat<int>("grapple_type", -1);
-        GRAPPLING(GRAPPLED(ch)) = nullptr;
+        act("@WYou stop being grappled with by @C$N@W!@n", true, ch, nullptr, grap, TO_CHAR);
+        act("@C$n@W stops being grappled with by @c$N@W!@n", true, ch, nullptr, grap, TO_ROOM);
+        grap->setBaseStat<int>("grapple_type", -1);
+        GRAPPLING(grap) = nullptr;
         GRAPPLED(ch) = nullptr;
         ch->setBaseStat<int>("grapple_type", -1);
     }
@@ -784,65 +776,61 @@ void extract_char_final(Character *ch)
     if (ch->poisonby)
     {
         auto shared = ch->shared();
-        ch->poisonby->poisoned.remove_if([shared](auto &c)
-                                         { return c.expired() || c.lock() == shared; });
+        ch->poisonby->poisoned.remove(shared);
         ch->poisonby = nullptr;
     }
 
-    for (auto c : ch->poisoned)
+    for (auto c : ch->poisoned.snapshot_shared())
     {
-        if (auto c2 = c.lock(); c2)
-        {
-            c2->poisonby = nullptr;
-        }
+        c->poisonby = nullptr;
     }
-    ch->poisoned.clear();
+    ch->poisoned.items.clear();
 
-    if (DRAGGING(ch))
+    if (auto drg = DRAGGING(ch))
     {
-        act("@WYou stop dragging @C$N@W!@n", true, ch, nullptr, DRAGGING(ch), TO_CHAR);
-        act("@C$n@W stops dragging @c$N@W!@n", true, ch, nullptr, DRAGGING(ch), TO_ROOM);
-        DRAGGED(DRAGGING(ch)) = nullptr;
+        act("@WYou stop dragging @C$N@W!@n", true, ch, nullptr, drg, TO_CHAR);
+        act("@C$n@W stops dragging @c$N@W!@n", true, ch, nullptr, drg, TO_ROOM);
+        DRAGGED(drg) = nullptr;
         DRAGGING(ch) = nullptr;
     }
 
-    if (DRAGGED(ch))
+    if (auto dr = DRAGGED(ch))
     {
-        act("@WYou stop being dragged by @C$N@W!@n", true, ch, nullptr, DRAGGED(ch), TO_CHAR);
-        act("@C$n@W stops being dragged by @c$N@W!@n", true, ch, nullptr, DRAGGED(ch), TO_ROOM);
-        DRAGGING(DRAGGED(ch)) = nullptr;
+        act("@WYou stop being dragged by @C$N@W!@n", true, ch, nullptr, dr, TO_CHAR);
+        act("@C$n@W stops being dragged by @c$N@W!@n", true, ch, nullptr, dr, TO_ROOM);
+        DRAGGING(dr) = nullptr;
         DRAGGED(ch) = nullptr;
     }
 
-    if (GET_DEFENDER(ch))
+    if (auto def = GET_DEFENDER(ch))
     {
-        GET_DEFENDING(GET_DEFENDER(ch)) = nullptr;
+        GET_DEFENDING(def) = nullptr;
         GET_DEFENDER(ch) = nullptr;
     }
-    if (GET_DEFENDING(ch))
+    if (auto def = GET_DEFENDING(ch))
     {
-        GET_DEFENDER(GET_DEFENDING(ch)) = nullptr;
+        GET_DEFENDER(def) = nullptr;
         GET_DEFENDING(ch) = nullptr;
     }
 
-    if (BLOCKED(ch))
+    if (auto blk = BLOCKED(ch))
     {
-        BLOCKS(BLOCKED(ch)) = nullptr;
+        BLOCKS(blk) = nullptr;
         BLOCKED(ch) = nullptr;
     }
-    if (BLOCKS(ch))
+    if (auto bl = BLOCKS(ch))
     {
-        BLOCKED(BLOCKS(ch)) = nullptr;
+        BLOCKED(bl) = nullptr;
         BLOCKS(ch) = nullptr;
     }
-    if (ABSORBING(ch))
+    if (auto ab = ABSORBING(ch))
     {
-        ABSORBBY(ABSORBING(ch)) = nullptr;
+        ABSORBBY(ab) = nullptr;
         ABSORBING(ch) = nullptr;
     }
-    if (ABSORBBY(ch))
+    if (auto aby = ABSORBBY(ch))
     {
-        ABSORBING(ABSORBBY(ch)) = nullptr;
+        ABSORBING(aby) = nullptr;
         ABSORBBY(ch) = nullptr;
     }
 
@@ -850,7 +838,7 @@ void extract_char_final(Character *ch)
     if (IS_NPC(ch))
     {
         auto con = ch->getInventory();
-        for (auto obj : filter_raw(con))
+        for (auto obj : filter_shared(con))
         {
             obj->clearLocation();
             obj->moveToLocation(ch);
@@ -873,7 +861,7 @@ void extract_char_final(Character *ch)
             stop_fighting(k);
     }
 
-    ch->leaveLocation();
+    
 
     /* If there's a descriptor, they're in the menu now. */
     if (ch->desc)
@@ -884,6 +872,7 @@ void extract_char_final(Character *ch)
     ch->deactivate();
     if (IS_NPC(ch))
     {
+        ch->leaveLocation();
         auto id = ch->id;
         uniqueCharacters.erase(id);
     }
@@ -914,11 +903,12 @@ void extract_char(Character *ch)
 
     for (auto foll = ch->followers; foll; foll = foll->next)
     {
-        if (IS_NPC(foll->follower) && AFF_FLAGGED(foll->follower, AFF_CHARM) &&
-            (foll->follower->location == ch->location || IN_ROOM(ch) == 1))
+        auto f = foll->follower;
+        if (IS_NPC(f) && AFF_FLAGGED(f, AFF_CHARM) &&
+            (f->location == ch->location || IN_ROOM(ch) == 1))
         {
             /* transfer objects to char, if any */
-            auto con = foll->follower->getInventory();
+            auto con = f->getInventory();
             for (auto obj : filter_shared(con))
             {
                 obj->clearLocation();
@@ -926,13 +916,13 @@ void extract_char(Character *ch)
             }
 
             /* transfer equipment to char, if any */
-            for (auto &[slot, obj] : foll->follower->getEquipment())
+            for (auto &[slot, obj] : f->getEquipment())
             {
-                auto un = unequip_char(foll->follower, slot);
+                auto un = unequip_char(f, slot);
                 ch->addToInventory(un);
             }
 
-            extract_char(foll->follower);
+            extract_char(f);
         }
     }
 }

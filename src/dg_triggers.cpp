@@ -1037,6 +1037,7 @@ int cast_otrigger(Character *actor, Object *obj, int spellnum)
 
 int leave_otrigger(Room *room, Character *actor, int dir)
 {
+    if(!room) return 1;
     char buf[MAX_INPUT_LENGTH];
     int temp, final = 1;
 
@@ -1151,6 +1152,7 @@ void interval_otrigger(Object *obj, int trigFlag)
 
 void reset_wtrigger(Room *room)
 {
+    if(!room) return;
 
     if (!SCRIPT_CHECK(room, WTRIG_RESET))
         return;
@@ -1169,6 +1171,7 @@ void reset_wtrigger(Room *room)
 
 void random_wtrigger(Room *room)
 {
+    if(!room) return;
 
     if (!SCRIPT_CHECK(room, WTRIG_RANDOM))
         return;
@@ -1187,6 +1190,7 @@ void random_wtrigger(Room *room)
 
 int enter_wtrigger(Room *room, Character *actor, int dir)
 {
+    if(!room) return 1;
     char buf[MAX_INPUT_LENGTH];
 
     if (!SCRIPT_CHECK(room, WTRIG_ENTER))
@@ -1345,6 +1349,7 @@ int cast_wtrigger(Character *actor, Character *vict, Object *obj, int spellnum)
 
 int leave_wtrigger(Room *room, Character *actor, int dir)
 {
+    if(!room) return 1;
     char buf[MAX_INPUT_LENGTH];
 
     if (!valid_dg_target(actor, DG_ALLOW_GODS))
@@ -1400,6 +1405,7 @@ int door_wtrigger(Character *actor, int subcmd, int dir)
 
 void time_wtrigger(Room *room)
 {
+    if(!room) return;
     char buf[MAX_INPUT_LENGTH];
 
     if (!SCRIPT_CHECK(room, WTRIG_TIME))
@@ -1421,6 +1427,7 @@ void time_wtrigger(Room *room)
 
 void interval_wtrigger(Room *room, int trigFlag)
 {
+    if(!room) return;
     if (!SCRIPT_CHECK(room, WTRIG_TIME))
         return;
 

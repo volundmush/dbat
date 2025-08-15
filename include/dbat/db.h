@@ -285,7 +285,7 @@ bool isUID(const std::string &uid);
 std::shared_ptr<HasDgScripts> resolveUID(const std::string &uid);
 
 bool isLocID(const std::string &lid);
-std::shared_ptr<AbstractLocation> resolveLocID(const std::string &lid);
+Location resolveLocID(const std::string& lid);
 
 extern Character *affect_list;
 extern Character *affectv_list;

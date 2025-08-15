@@ -3100,7 +3100,8 @@ void House_boot() {
 
 static void link_exits() {
     for (const auto& [room, dir, target] : room_directions) {
-        room->exits.at(dir).al = get_room(target)->shared_from_this();
+        if(auto r = get_room(target))
+            room->exits.at(dir).al = r->shared_from_this();
     }
 }
 
@@ -3236,6 +3237,15 @@ static void create_area() {
     areas[a->vn] = a;
     a->strings["name"] = "Test Area";
     a->defaultGroundSector = SectorType::inside;
+    a->defaultUnderSector = SectorType::lava;
+    a->defaultSkySector = SectorType::flying;
+    a->minX = -3;
+    a->maxX = 3;
+    a->minY = -3;
+    a->maxY = 3;
+    a->minZ = -3;
+    a->maxZ = 3;
+
     auto &z = zone_table[1];
     a->zone.reset(&z);
     auto p = findPlayer("Wayland");

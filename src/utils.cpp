@@ -635,8 +635,7 @@ void null_affect(Character *ch, int aff_flag)
         if (ch->poisonby)
         {
             auto shared = ch->shared();
-            ch->poisonby->poisoned.remove_if([shared](auto &p)
-                                             { return p.expired() || p.lock() == shared; });
+            ch->poisonby->poisoned.remove(shared);
             ch->poisonby = nullptr;
         }
     }

@@ -2254,42 +2254,64 @@ std::shared_ptr<HasDgScripts> resolveUID(const std::string& uid) {
     return nullptr;
 }
 
-// ^#(?<id>\d+)(?::(?<generation>\d+)?)?
 static std::regex lid_regex(R"(^(R|A|S):(\d+)(:(\d+):(\d+):(\d+))?)", std::regex::icase);
 
 bool isLocID(const std::string& lid) {
     return std::regex_match(lid, lid_regex);
 }
 
-std::shared_ptr<AbstractLocation> resolveLocID(const std::string& lid) {
+Location resolveLocID(const std::string& lid) {
     // First we need to check if it matches or not.
     std::smatch match;
 
-    if(!std::regex_search(lid, match, lid_regex)) {
-        return nullptr;
+    Location out;
+
+    auto trimmed = boost::trim_copy(lid);
+
+    if(is_number(trimmed.c_str()))
+        if(auto i = atoi(trimmed.c_str()); i != -1) {
+            // we were given a plain number. this could be a room.
+            if(auto find = world.find(i); find != world.end()) {
+                out.al = find->second;
+                return out;
+            }
+        }
+
+    if(!std::regex_search(trimmed, match, lid_regex)) {
+        return out;
     }
 
     std::string letter = match[1].str();// First capture group
     int64_t id = std::stoll(match[2].str()); // Second capture group
+    std::string xStr = match[4].str();
+    std::string yStr = match[5].str();
+    std::string zStr = match[6].str();
+
+    if(!xStr.empty()) out.position.x = atoi(xStr.c_str());
+    if(!yStr.empty()) out.position.y = atoi(yStr.c_str());
+    if(!zStr.empty()) out.position.z = atoi(zStr.c_str());
 
     if(letter == "R") {
         // Room
         if(auto find = world.find(id); find != world.end()) {
-            return find->second;
+            out.al = find->second;
+            return out;
         }
     } else if(letter == "A") {
         // Area.
         if(auto find = areas.find(id); find != areas.end()) {
-            return find->second;
+            out.al = find->second;
+            return out;
         }
     } else if(letter == "S") {
         // Structure
         if(auto find = structures.find(id); find != structures.end()) {
-            return find->second;
+            out.al = find->second;
+            return out;
         }
     }
 
-    return nullptr;
+    return out;
 }
 
 int create_join_session(int account_id, int character_id, int64_t connection_id, const std::string& ip) {

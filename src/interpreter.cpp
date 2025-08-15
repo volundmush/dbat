@@ -1254,152 +1254,146 @@ constexpr int UNSWITCH = 3;
 /* load the player, put them in the right room - used by copyover_recover too */
 void enter_player_game(struct descriptor_data *d)
 {
-    IDXTYPE load_room;
-    Character *check;
 
-    d->character->timer = 0;
-    reset_char(d->character);
+    auto ch = d->character;
 
-    racial_body_parts(d->character);
+    ch->timer = 0;
+    reset_char(ch);
 
-    if (PLR_FLAGGED(d->character, PLR_INVSTART))
-        d->character->setBaseStat("invis_level", GET_LEVEL(d->character));
+    racial_body_parts(ch);
 
-    /*
-     * We have to place the character in a room before equipping them
-     * or equip_char() will gripe about the person in NOWHERE.
-     */
+    if (PLR_FLAGGED(ch, PLR_INVSTART))
+        ch->setBaseStat("invis_level", GET_LEVEL(ch));
 
-    if ((load_room = GET_LOADROOM(d->character)) != NOWHERE)
-        load_room = real_room(load_room);
-
-    /* If char was saved with NOWHERE, or real_room above failed... */
-    if (load_room == NOWHERE)
-    {
-        if (GET_ADMLEVEL(d->character))
-            load_room = real_room(CONFIG_IMMORTAL_START);
-        else
-            load_room = real_room(CONFIG_MORTAL_START);
+    ch->activate();
+    if(!ch->location) {
+        // They don't have a valid location. This could be because the previous
+        // was deleted, or they are new.
+        vnum load_room = GET_ADMLEVEL(ch) > 0 ? CONFIG_IMMORTAL_START : CONFIG_MORTAL_START;
+        Location loc(load_room);
+        ch->moveToLocation(loc);
+    } else if(auto r = ch->getRoom()) {
+        auto normalized = ch->normalizeLoadRoom(r->getVnum());
+        if(normalized != r->getVnum()) {
+            // The room was normalized, so we need to move the character.
+            Location loc(normalized);
+            ch->leaveLocation();
+            ch->moveToLocation(loc);
+        }
     }
 
-    if (PLR_FLAGGED(d->character, PLR_FROZEN))
-        load_room = real_room(CONFIG_FROZEN_START);
-
-    d->character->activate();
-    d->character->moveToLocation(load_room);
-
-    /*load_char_pets(d->character);*/
+    /*load_char_pets(ch);*/
     auto ac = characterSubscriptions.all("active");
     for (auto check : filter_raw(ac))
     {
-        if (!check->master && IS_NPC(check) && check->getBaseStat<int>("master_id") == GET_IDNUM(d->character) &&
-            AFF_FLAGGED(check, AFF_CHARM) && !circle_follow(check, d->character))
-            add_follower(check, d->character);
+        if (!check->master && IS_NPC(check) && check->getBaseStat<int>("master_id") == GET_IDNUM(ch) &&
+            AFF_FLAGGED(check, AFF_CHARM) && !circle_follow(check, ch))
+            add_follower(check, ch);
     }
 
-    d->character->setBaseStat("combine", -1);
-    d->character->setBaseStat("sleeptime", 8);
-    d->character->setBaseStat("food_rejuvenation", 2);
-    if (AFF_FLAGGED(d->character, AFF_FLYING))
+    ch->setBaseStat("combine", -1);
+    ch->setBaseStat("sleeptime", 8);
+    ch->setBaseStat("food_rejuvenation", 2);
+    if (AFF_FLAGGED(ch, AFF_FLYING))
     {
-        d->character->setBaseStat<int>("altitude", 1);
+        ch->setBaseStat<int>("altitude", 1);
     }
     else
     {
-        d->character->setBaseStat<int>("altitude", 0);
+        ch->setBaseStat<int>("altitude", 0);
     }
 
     for (auto f : {AFF_POSITION, AFF_SANCTUARY, AFF_ZANZOKEN})
-        d->character->affect_flags.set(f, false);
-    d->character->player_flags.set(PLR_KNOCKED, false);
+        ch->affect_flags.set(f, false);
+    ch->player_flags.set(PLR_KNOCKED, false);
 
-    if (IS_ANDROID(d->character) && !AFF_FLAGGED(d->character, AFF_INFRAVISION))
+    if (IS_ANDROID(ch) && !AFF_FLAGGED(ch, AFF_INFRAVISION))
     {
-        d->character->affect_flags.set(AFF_INFRAVISION, true);
+        ch->affect_flags.set(AFF_INFRAVISION, true);
     }
 
-    ABSORBING(d->character) = nullptr;
-    ABSORBBY(d->character) = nullptr;
-    d->character->sits.reset();
-    BLOCKED(d->character) = nullptr;
-    BLOCKS(d->character) = nullptr;
+    ABSORBING(ch) = nullptr;
+    ABSORBBY(ch) = nullptr;
+    ch->sits.reset();
+    BLOCKED(ch) = nullptr;
+    BLOCKS(ch) = nullptr;
     for (const auto &s : {"spam", "rage_meter"})
-        d->character->setBaseStat(s, 0);
-    if (!d->character->affected)
+        ch->setBaseStat(s, 0);
+    if (!ch->affected)
     {
-        d->character->affect_flags.set(AFF_HEALGLOW, false);
+        ch->affect_flags.set(AFF_HEALGLOW, false);
     }
-    if (AFF_FLAGGED(d->character, AFF_HAYASA))
+    if (AFF_FLAGGED(ch, AFF_HAYASA))
     {
-        d->character->setBaseStat<int>("speedboost", GET_SPEEDCALC(d->character) * 0.5);
+        ch->setBaseStat<int>("speedboost", GET_SPEEDCALC(ch) * 0.5);
     }
     else
     {
-        d->character->setBaseStat<int>("speedboost", 0);
+        ch->setBaseStat<int>("speedboost", 0);
     }
 
-    d->character->player_flags.set(PLR_HEALT, false);
+    ch->player_flags.set(PLR_HEALT, false);
 
-    if (GET_ADMLEVEL(d->character) > 0)
+    if (GET_ADMLEVEL(ch) > 0)
     {
         d->level = 1;
     }
 
-    if (GET_CLAN(d->character) && !strstr(GET_CLAN(d->character), "None"))
+    if (GET_CLAN(ch) && !strstr(GET_CLAN(ch), "None"))
     {
-        if (!clanIsMember(GET_CLAN(d->character), d->character))
+        if (!clanIsMember(GET_CLAN(ch), ch))
         {
-            if (!clanIsModerator(GET_CLAN(d->character), d->character))
+            if (!clanIsModerator(GET_CLAN(ch), ch))
             {
-                if (!checkCLAN(d->character))
+                if (!checkCLAN(ch))
                 {
-                    d->sendText("Your clan no longer exists.\r\n");
-                    GET_CLAN(d->character) = strdup("None.");
+                    ch->sendText("Your clan no longer exists.\r\n");
+                    GET_CLAN(ch) = strdup("None.");
                 }
             }
         }
     }
 
-    if (IS_HOSHIJIN(d->character))
+    if (IS_HOSHIJIN(ch))
     {
         if (time_info.day <= 14)
         {
-            star_phase(d->character, 1);
+            star_phase(ch, 1);
         }
         else if (time_info.day <= 21)
         {
-            star_phase(d->character, 2);
+            star_phase(ch, 2);
         }
         else
         {
-            star_phase(d->character, 0);
+            star_phase(ch, 0);
         }
     }
 
-    if (IS_ICER(d->character) && !GET_SKILL(d->character, SKILL_TAILWHIP))
+    if (IS_ICER(ch) && !GET_SKILL(ch, SKILL_TAILWHIP))
     {
         int numb = rand_number(20, 30);
-        SET_SKILL(d->character, SKILL_TAILWHIP, numb);
+        SET_SKILL(ch, SKILL_TAILWHIP, numb);
     }
-    else if (!IS_ICER(d->character) && GET_SKILL(d->character, SKILL_TAILWHIP))
+    else if (!IS_ICER(ch) && GET_SKILL(ch, SKILL_TAILWHIP))
     {
-        SET_SKILL(d->character, SKILL_TAILWHIP, 0);
+        SET_SKILL(ch, SKILL_TAILWHIP, 0);
     }
 
-    if (d->character->mutations.get(Mutation::innate_telepathy) &&
-        !GET_SKILL(d->character, SKILL_TELEPATHY))
+    if (ch->mutations.get(Mutation::innate_telepathy) &&
+        !GET_SKILL(ch, SKILL_TELEPATHY))
     {
-        SET_SKILL(d->character, SKILL_TELEPATHY, 50);
+        SET_SKILL(ch, SKILL_TELEPATHY, 50);
     }
 
-    if (d->character->bio_genomes.get(Race::kai) &&
-        !GET_SKILL(d->character, SKILL_TELEPATHY) && !GET_SKILL(d->character, SKILL_FOCUS))
+    if (ch->bio_genomes.get(Race::kai) &&
+        !GET_SKILL(ch, SKILL_TELEPATHY) && !GET_SKILL(ch, SKILL_FOCUS))
     {
-        SET_SKILL(d->character, SKILL_TELEPATHY, 30);
-        SET_SKILL(d->character, SKILL_FOCUS, 30);
+        SET_SKILL(ch, SKILL_TELEPATHY, 30);
+        SET_SKILL(ch, SKILL_FOCUS, 30);
     }
 
-    d->character->setBaseStat<int>("combo", -1);
+    ch->setBaseStat<int>("combo", -1);
 }
 
 int readUserIndex(char *name)
