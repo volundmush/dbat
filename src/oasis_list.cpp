@@ -120,7 +120,7 @@ ACMD(do_oasis_links)
     }
     else
     {
-        zvnum = atol(arg);
+        zvnum = atoi(arg);
     }
 
     auto z = zone_table.find(zvnum);
@@ -131,7 +131,8 @@ ACMD(do_oasis_links)
     }
 
     ch->send_to("Zone %d is linked to the following zones:\r\n", z->second.number);
-    for (auto r : filter_raw(z->second.rooms))
+    auto rcopy = z->second.rooms.snapshot_weak();
+    for (auto r : filter_raw(rcopy))
     {
 
         for (auto &[d, e] : r->getDirections())
@@ -171,7 +172,7 @@ void list_rooms(Character *ch, zone_vnum vmin, zone_vnum vmax)
         ch->send_to("[@g%-5d@n] @[1]%-*s@n %s", vn, count_color_chars(r->getName()) + 44, r->getName(), sString.c_str());
         for (auto &[d, e] : r->getDirections())
         {
-            if (e.getZone() != r->zone)
+            if (e.getZone() != r->getZone())
                 ch->send_to("(@y%d@n)", e.getVnum());
         }
 
@@ -357,7 +358,7 @@ void print_zone(Character *ch, zone_vnum vnum)
     }
     auto &z = zone_table.at(vnum);
     sprintf(bits, "%s", z.zone_flags.getFlagNames().c_str());
-    size_rooms = z.rooms.size();
+    size_rooms = z.rooms.live_count();
     ;
 
     /****************************************************************************/

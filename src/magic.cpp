@@ -1010,7 +1010,7 @@ void mag_summons(int level, Character *ch, Object *obj, int spellnum, char *arg)
             ch->sendText("You don't quite remember how to summon that creature.\r\n");
             return;
         }
-        mob->setLocation(ch);
+        mob->moveToLocation(ch);
         if (affs)
             mag_affects(level, ch, mob, spellnum);
         if (affvs)

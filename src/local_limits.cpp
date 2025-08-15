@@ -558,7 +558,7 @@ static void check_idling(Character *ch)
 
             act("$n disappears into the void.", true, ch, nullptr, nullptr, TO_ROOM);
                         ch->sendText("You have been idle, and are pulled into a void.\r\n");
-            ch->clearLocation();
+            ch->leaveLocation();
             char_to_room(ch, 1);
         } else if (ch->timer > CONFIG_IDLE_RENT_TIME && IN_ROOM(ch) == 1) {
                         ch->sendText("You are idle and are extracted safely from the game.\r\n");
@@ -1140,7 +1140,7 @@ void corpseRotService(uint64_t heartPulse, double deltaTime)
                     for (auto jj : filter_raw(con))
                     {
                         jj->clearLocation();
-                        jj->setLocation(j->location);
+                        jj->moveToLocation(j->location);
                     }
                 }
                 else if (auto c = j->getCarriedBy())
@@ -1503,9 +1503,9 @@ void point_update(uint64_t heartPulse, double deltaTime)
         if (z.playersInZone.empty())
             continue;
 
-        for (const auto &l : {z.playersInZone, z.npcsInZone})
+        for (auto &l : {&z.playersInZone, &z.npcsInZone})
         {
-            auto copy = l;
+            auto copy = l->snapshot_weak();
             for (auto i : filter_raw(copy))
             {
                 if (processed.contains(i->id))
@@ -1648,7 +1648,7 @@ void point_update(uint64_t heartPulse, double deltaTime)
                 }
             }
 
-            auto items = z.objectsInZone;
+            auto items = z.objectsInZone.snapshot_weak();
             for (auto j : filter_raw(items))
             {
                 if (processed.contains(j->id))

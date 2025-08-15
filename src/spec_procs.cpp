@@ -208,8 +208,8 @@ SPECIAL(gauntlet_room) /* Jamdog - 13th Feb 2006 */
         if (FIGHTING(ch))
         {
             /* OK, player has had enough - position is already stored, so throw them back to the start */
-            ch->clearLocation();
-            ch->setLocation(gauntlet_info[0][1]);
+            ch->leaveLocation();
+            ch->moveToLocation(gauntlet_info[0][1]);
             act("$n suddenly appears looking relieved after $s trial in the Gauntlet", false, ch, nullptr, ch,
                 TO_NOTVICT);
             act("You are returned to the start of the Gauntlet", false, ch, nullptr, ch, TO_VICT);
@@ -513,7 +513,7 @@ SPECIAL(pet_shops)
             /* free(pet->description); don't free the prototype! */
             pet->strings["look_description"] = buf;
         }
-        pet->setLocation(ch);
+        pet->moveToLocation(ch);
         add_follower(pet, ch);
         pet->setBaseStat("master_id", GET_IDNUM(ch));
 
@@ -539,7 +539,7 @@ SPECIAL(auction)
     if (CMD_IS("cancel"))
     {
         Destination des;
-        des.unit = get_room(auct_room);
+        des.al = get_room(auct_room)->shared_from_this();
         auto con = des.getObjects();
         for (auto obj : filter_raw(con))
         {
@@ -592,7 +592,7 @@ SPECIAL(auction)
         struct descriptor_data *d;
         int founded = false;
         Destination des;
-        des.unit = get_room(auct_room);
+        des.al = get_room(auct_room)->shared_from_this();
         auto con = des.getObjects();
         for (auto obj : filter_raw(con))
         {
@@ -720,7 +720,7 @@ SPECIAL(auction)
         GET_AUCTIME(obj2) = time(nullptr);
         GET_CURBID(obj2) = -1;
         obj2->clearLocation();
-        obj2->setLocation(auct_room);
+        obj2->moveToLocation(auct_room);
         auc_save();
         ch->send_to("You place %s on auction for %s zenni.\r\n", obj2->getShortDescription(), add_commas(GET_BID(obj2)).c_str());
         basic_mud_log("AUCTION: %s places %s on auction for %s", GET_NAME(ch), obj2->getShortDescription(),

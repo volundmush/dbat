@@ -992,9 +992,9 @@ static void parse_room(FILE *fl, room_vnum virtual_nr) {
     auto sh = std::make_shared<Room>();
     auto r = sh.get();
     world.emplace(virtual_nr, sh);
-    z.rooms.push_back(sh);
+    z.rooms.add(sh);
 
-    r->zone = &z;
+    r->zone.reset(&z);
     r->vn = virtual_nr;
     r->strings["name"] = fread_string(fl, buf2);
     r->strings["look_description"] = fread_string(fl, buf2);
@@ -2800,7 +2800,7 @@ static void handle_ships(Object *object, Room *room) {
             (GET_OBJ_VNUM(object) <= 19199 && GET_OBJ_VNUM(object) >= 19100)) {
             int hnum = GET_OBJ_VAL(object, VAL_HATCH_DEST);
             Object *house = read_object(hnum, VIRTUAL);
-            house->setLocation(GET_OBJ_VAL(object, VAL_HATCH_LOCATION));
+            house->moveToLocation(GET_OBJ_VAL(object, VAL_HATCH_LOCATION));
             int newval = GET_OBJ_VAL(object, VAL_CONTAINER_FLAGS) | CONT_CLOSED | CONT_LOCKED;
             SET_OBJ_VAL(object, VAL_CONTAINER_FLAGS, newval);
         }
@@ -2814,7 +2814,7 @@ static void handle_ships(Object *object, Room *room) {
                 if(!vehicle) {
                     basic_mud_log("SYSERR: Vehicle %d not found for hatch %d", GET_OBJ_VAL(object, VAL_HATCH_DEST), GET_OBJ_VNUM(object));
                 } else {
-                    vehicle->setLocation(GET_OBJ_VAL(object, VAL_HATCH_EXTROOM));
+                    vehicle->moveToLocation(GET_OBJ_VAL(object, VAL_HATCH_EXTROOM));
                     if (auto ld = object->getLookDescription(); ld) {
                         if (strlen(ld)) {
                             char nick[MAX_INPUT_LENGTH], nick2[MAX_INPUT_LENGTH], nick3[MAX_INPUT_LENGTH];
@@ -3035,7 +3035,7 @@ int House_load(room_vnum rvnum) {
             if (temp != nullptr) {
                 num_objs++;
                 auto r = get_room(rrnum);
-                temp->setLocation(r);
+                temp->moveToLocation(r);
                 handle_ships(temp, r);
             }
 
@@ -3100,7 +3100,7 @@ void House_boot() {
 
 static void link_exits() {
     for (const auto& [room, dir, target] : room_directions) {
-        room->exits.at(dir).unit = get_room(target);
+        room->exits.at(dir).al = get_room(target)->shared_from_this();
     }
 }
 
@@ -3230,6 +3230,20 @@ static void convert_reset_commands() {
     }
 }
 
+static void create_area() {
+    auto a = std::make_shared<Area>();
+    a->vn = 1;
+    areas[a->vn] = a;
+    a->strings["name"] = "Test Area";
+    a->defaultGroundSector = SectorType::inside;
+    auto &z = zone_table[1];
+    a->zone.reset(&z);
+    auto p = findPlayer("Wayland");
+    Location loc;
+    loc.al = a;
+    p->moveToLocation(loc);
+}
+
 void boot_db_world_legacy() {
 
     basic_mud_log("Loading stat handlers...");
@@ -3270,6 +3284,8 @@ void boot_db_world_legacy() {
     basic_mud_log("Loading guild masters.");
     index_boot(DB_BOOT_GLD);
     boot_db_shadow();
+
+
 }
 
 static void index_boot_help();
@@ -4140,6 +4156,8 @@ void run_migration() {
     load_config();
     game::init_locale();
     migrate_db();
+    // let's experiment here...
+    create_area();
     runSave();
     destroy_db();
 }

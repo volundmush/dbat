@@ -31,7 +31,7 @@
 #include "dbat/account.h"
 #include "dbat/improved-edit.h"
 #include "dbat/transformation.h"
-#include "dbat/area.h"
+#include "dbat/planet.h"
 #include "dbat/random.h"
 
 /* local functions */
@@ -49,8 +49,6 @@ static int sort_commands_helper(const void *a, const void *b);
 
 static void print_object_location(int num, Object *obj, Character *ch, int recur);
 
-static void show_obj_to_char(Object *obj, Character *ch, int mode);
-
 static void list_obj_to_char(const std::vector<std::weak_ptr<Object>> &list, Character *ch, int mode, int show);
 
 static void trans_check(Character *ch, Character *vict);
@@ -67,8 +65,6 @@ static void diag_obj_to_char(Object *obj, Character *ch);
 
 static void look_at_char(Character *i, Character *ch);
 
-static void list_one_char(Character *i, Character *ch);
-
 static void list_char_to_char(const std::vector<std::weak_ptr<Character>> &list, Character *ch);
 
 static void look_in_direction(Character *ch, int dir);
@@ -80,10 +76,6 @@ static void look_out_window(Character *ch, const char *arg);
 static void look_at_target(Character *ch, char *arg, int read);
 
 static void search_in_direction(Character *ch, int dir);
-
-static void do_auto_exits(Room *room, Character *ch, int exit_mode);
-
-static void do_auto_exits2(room_rnum target_room, Character *ch);
 
 static void display_spells(Character *ch, Object *obj);
 
@@ -619,7 +611,7 @@ ACMD(do_shuffle)
     for (auto obj2 : filter_raw(con2))
     {
         obj2->clearLocation();
-        obj2->setLocation(48);
+        obj2->moveToLocation(48);
     }
     while (count > 0)
     {
@@ -777,7 +769,7 @@ ACMD(do_post)
         act("@WYou post $p@W on a nearby structure.@n", true, ch, obj, nullptr, TO_CHAR);
         act("@C$n@W posts $p@W on a nearby structure.@n", true, ch, obj, nullptr, TO_ROOM);
         obj->clearLocation();
-        obj->setLocation(ch);
+        obj->moveToLocation(ch);
         GET_OBJ_POSTTYPE(obj) = 1;
         return;
     }
@@ -805,7 +797,7 @@ ACMD(do_post)
     ch->send_to("@WYou post %s@W on %s@W.@n\r\n", obj->getShortDescription(), obj2->getShortDescription());
     act(buf, true, ch, nullptr, nullptr, TO_ROOM);
     obj->clearLocation();
-    obj->setLocation(ch);
+    obj->moveToLocation(ch);
     GET_OBJ_POSTTYPE(obj) = 2;
     GET_OBJ_POSTED(obj) = obj2;
     GET_OBJ_POSTED(obj2) = obj;
@@ -921,7 +913,7 @@ ACMD(do_nickname)
                     extract_obj(k);
                     auto was_in = ship2->location;
                     ship2->clearLocation();
-                    ship2->setLocation(was_in);
+                    ship2->moveToLocation(was_in);
                 }
             }
         }
@@ -1318,7 +1310,7 @@ static void gen_map(Character *ch, int num)
     initialize_map(map);
     // Create a fake Destination for our start node.
     Destination start;
-    start.unit = ch->location.unit;
+    start.al = ch->location.al;
     start.position = ch->location.position;
 
     map_draw_room(map, 4, 4, start, ch);
@@ -1432,7 +1424,7 @@ static void display_scroll(Character *ch, Object *obj)
     return;
 }
 
-static void show_obj_to_char(Object *obj, Character *ch, int mode)
+void show_obj_to_char(Object *obj, Character *ch, int mode)
 {
     if (!obj || !ch)
     {
@@ -2479,7 +2471,7 @@ static void look_at_char(Character *i, Character *ch)
     }
 }
 
-static void list_one_char(Character *i, Character *ch)
+void list_one_char(Character *i, Character *ch)
 {
     Object *chair = nullptr;
     int count = false;
@@ -2972,14 +2964,14 @@ static void list_char_to_char(const std::vector<std::weak_ptr<Character>> &list,
     }
 }
 
-static void do_auto_exits(Room *room, Character *ch, int exit_mode)
+void do_auto_exits(const Location& loc, Character *ch, int exit_mode)
 {
     const int MAX_DIRS = 12;
     const char *dirNames[MAX_DIRS] = {"Northwest", "North", "Northeast", "East", "Southeast", "South", "Southwest", "West", "Up", "Down", "Inside", "Outside"};
     const char *mapKey[MAX_DIRS] = {"dlist1", "dlist2", "dlist3", "dlist4", "dlist5", "dlist6", "dlist7", "dlist8", "dlist9", "dlist10", "dlist11", "dlist12"};
     std::map<int, std::string> exitStrings;
 
-    bool space = (room->sector_type == SectorType::space && room->getVnum() >= 20000);
+    bool space = (loc.getSectorType() == SectorType::space && loc.getVnum() >= 20000);
     bool has_light = ch->isProvidingLight();
     bool admVision = ADM_FLAGGED(ch, ADM_SEESECRET) || GET_ADMLEVEL(ch) > 4;
 
@@ -2988,9 +2980,9 @@ static void do_auto_exits(Room *room, Character *ch, int exit_mode)
         ch->sendText("@D------------------------------------------------------------------------@n\r\n");
     }
 
-    auto loc = ch->location;
+    auto cloc = ch->location;
 
-    if (exit_mode == EXIT_NORMAL && !space && loc == room)
+    if (exit_mode == EXIT_NORMAL && !space && cloc == loc)
     {
         ch->sendText("@D------------------------------------------------------------------------@n\r\n");
         ch->sendText("@w      Compass           Auto-Map            Map Key\r\n");
@@ -3002,12 +2994,12 @@ static void do_auto_exits(Room *room, Character *ch, int exit_mode)
     if (exit_mode == EXIT_NORMAL && space)
     {
         ch->sendText("@D------------------------------[@CRadar@D]---------------------------------@n\r\n");
-        printmap(room->getVnum(), ch, 1, -1);
+        printmap(loc.getVnum(), ch, 1, -1);
         ch->sendText("     @D[@wTurn autoexit complete on for directions instead of radar@D]@n\r\n");
         ch->sendText("@D------------------------------------------------------------------------@n\r\n");
     }
 
-    if (exit_mode == EXIT_COMPLETE || (exit_mode == EXIT_NORMAL && !space && loc != room))
+    if (exit_mode == EXIT_COMPLETE || (exit_mode == EXIT_NORMAL && !space && cloc != loc))
     {
         ch->sendText("@D----------------------------[@gObvious Exits@D]-----------------------------@n\r\n");
 
@@ -3023,7 +3015,7 @@ static void do_auto_exits(Room *room, Character *ch, int exit_mode)
             return;
         }
 
-        for (auto &[d, e] : room->getDirections())
+        for (auto &[d, e] : loc.getExits())
         {
             auto door = static_cast<int>(d);
             if (admVision || (!IS_SET(e.exit_info, EX_CLOSED)))
@@ -3084,58 +3076,58 @@ static void do_auto_exits(Room *room, Character *ch, int exit_mode)
 
         ch->sendText("@D------------------------------------------------------------------------@n\r\n");
 
-        if (room->room_flags.get(ROOM_HOUSE))
+        if (loc.getRoomFlag(ROOM_HOUSE))
         {
-            auto con = room->getObjects().size();
-            if (!room->room_flags.get(ROOM_GARDEN1) && !room->room_flags.get(ROOM_GARDEN2))
+            auto con = loc.getObjects().size();
+            if (!loc.getRoomFlag(ROOM_GARDEN1) && !loc.getRoomFlag(ROOM_GARDEN2))
             {
                 ch->send_to("@D[@GItems Stored@D: @g%d@D]@n\r\n", con);
             }
-            else if (room->room_flags.get(ROOM_GARDEN1) && !room->room_flags.get(ROOM_GARDEN2))
+            else if (loc.getRoomFlag(ROOM_GARDEN1) && !loc.getRoomFlag(ROOM_GARDEN2))
             {
                 ch->send_to("@D[@GPlants Planted@D: @g%d@W, @GMAX@D: @R8@D]@n\r\n", con);
             }
-            else if (!room->room_flags.get(ROOM_GARDEN1) && room->room_flags.get(ROOM_GARDEN2))
+            else if (!loc.getRoomFlag(ROOM_GARDEN1) && loc.getRoomFlag(ROOM_GARDEN2))
             {
                 ch->send_to("@D[@GPlants Planted@D: @g%d@W, @GMAX@D: @R20@D]@n\r\n", con);
             }
         }
 
-        if (GET_RADAR1(ch) == room->getVnum() && GET_RADAR2(ch) == room->getVnum() && GET_RADAR3(ch) != room->getVnum())
+        if (GET_RADAR1(ch) == loc.getVnum() && GET_RADAR2(ch) == loc.getVnum() && GET_RADAR3(ch) != loc.getVnum())
         {
             ch->sendText("@CTwo of your buoys are floating here.@n\r\n");
         }
-        else if ((GET_RADAR1(ch) == room->getVnum() && GET_RADAR2(ch) != room->getVnum() && GET_RADAR3(ch) == room->getVnum()) ||
-                 (GET_RADAR1(ch) != room->getVnum() && GET_RADAR2(ch) == room->getVnum() && GET_RADAR3(ch) == room->getVnum()))
+        else if ((GET_RADAR1(ch) == loc.getVnum() && GET_RADAR2(ch) != loc.getVnum() && GET_RADAR3(ch) == loc.getVnum()) ||
+                 (GET_RADAR1(ch) != loc.getVnum() && GET_RADAR2(ch) == loc.getVnum() && GET_RADAR3(ch) == loc.getVnum()))
         {
             ch->sendText("@CTwo of your buoys are floating here.@n\r\n");
         }
-        else if (GET_RADAR1(ch) == room->getVnum() && GET_RADAR2(ch) == room->getVnum() && GET_RADAR3(ch) == room->getVnum())
+        else if (GET_RADAR1(ch) == loc.getVnum() && GET_RADAR2(ch) == loc.getVnum() && GET_RADAR3(ch) == loc.getVnum())
         {
             ch->sendText("@CAll three of your buoys are floating here. Why?@n\r\n");
         }
-        else if (GET_RADAR1(ch) == room->getVnum())
+        else if (GET_RADAR1(ch) == loc.getVnum())
         {
             ch->sendText("@CYour @cBuoy #1@C is floating here.@n\r\n");
         }
-        else if (GET_RADAR2(ch) == room->getVnum())
+        else if (GET_RADAR2(ch) == loc.getVnum())
         {
             ch->sendText("@CYour @cBuoy #2@C is floating here.@n\r\n");
         }
-        else if (GET_RADAR3(ch) == room->getVnum())
+        else if (GET_RADAR3(ch) == loc.getVnum())
         {
             ch->sendText("@CYour @cBuoy #3@C is floating here.@n\r\n");
         }
     }
 }
 
-static void do_auto_exits2(Room *room, Character *ch)
+void do_auto_exits2(const Location& loc, Character *ch)
 {
     int door, slen = 0;
 
     ch->sendText("\nExits: ");
 
-    for (auto &[d, e] : room->getDirections())
+    for (auto &[d, e] : loc.getExits())
     {
         if (EXIT_FLAGGED(&e, EX_CLOSED))
             continue;
@@ -3154,11 +3146,11 @@ ACMD(do_exits)
     /* Why duplicate code? */
     if (!PRF_FLAGGED(ch, PRF_NODEC))
     {
-        do_auto_exits(ch->getRoom(), ch, EXIT_COMPLETE);
+        do_auto_exits(ch->location, ch, EXIT_COMPLETE);
     }
     else
     {
-        do_auto_exits2(ch->getRoom(), ch);
+        do_auto_exits2(ch->location, ch);
     }
 }
 
@@ -3617,7 +3609,7 @@ static void handle_portal(Character *ch, Object *obj)
         int portal_appear = GET_OBJ_VAL(obj, VAL_PORTAL_APPEAR);
 
         Destination d;
-        d.unit = get_room(GET_OBJ_VAL(obj, VAL_PORTAL_DEST));
+        d.al = get_room(GET_OBJ_VAL(obj, VAL_PORTAL_DEST))->shared_from_this();
 
         if (portal_appear < 0)
         {
@@ -3650,7 +3642,7 @@ static void handle_vehicle(Character *ch, Object *obj)
     }
 
     Destination d;
-    d.unit = get_room(GET_OBJ_VAL(obj, VAL_VEHICLE_DEST));
+    d.al = get_room(GET_OBJ_VAL(obj, VAL_VEHICLE_DEST))->shared_from_this();
 
     if (!d)
     {
@@ -4128,7 +4120,8 @@ static void look_out_window(Character *ch, const char *arg)
     else
         act("$n looks out the window.", true, ch, nullptr, nullptr, TO_ROOM);
     ch->sendText("You look outside and see:\r\n");
-    ch->lookAtLocation(target_room);
+    Location loc(target_room);
+    ch->lookAtLocation(loc);
 }
 
 ACMD(do_finger)

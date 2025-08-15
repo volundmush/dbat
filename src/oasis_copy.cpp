@@ -286,7 +286,7 @@ ACMD(do_dig)
         OLC_ZNUM(d) = zone;
         OLC_NUM(d) = rvnum;
         OLC_ROOM(d) = new Room();
-        OLC_ROOM(d)->zone = z;
+        OLC_ROOM(d)->zone.reset(z);
 
         /* Copy the room's name. */
         if (*new_room_name)
@@ -320,7 +320,7 @@ ACMD(do_dig)
     auto droom = get_room(rrnum);
     Destination dest;
     dest.dir = direction;
-    dest.unit = droom;
+    dest.al = droom->shared_from_this();
     ch->location.replaceExit(dest);
 
     ch->send_to("You make an exit %s to room %d (%s).\r\n", dirs[dir], rvnum, droom->getName());
@@ -338,7 +338,7 @@ ACMD(do_dig)
     {
         Destination dest2;
         dest2.dir = rdir;
-        dest2.unit = r2;
+        dest2.al = r2->shared_from_this();
         dest.replaceExit(dest2);
     }
 }
@@ -469,7 +469,7 @@ int buildwalk(Character *ch, int dir)
 
             sprintf(buf, "This unfinished room was created by %s.\r\n", GET_NAME(ch));
             OLC_ROOM(d)->strings["look_description"] = buf;
-            OLC_ROOM(d)->zone = &zone_table.at(OLC_ZNUM(d));
+            OLC_ROOM(d)->zone.reset(&zone_table.at(OLC_ZNUM(d)));
 
             /*
              * Save the new room to memory.
@@ -482,11 +482,11 @@ int buildwalk(Character *ch, int dir)
             auto r = get_room(vnum);
             Destination dest, rdest;
             dest.dir = static_cast<Direction>(dir);
-            dest.unit = r;
+            dest.al = r->shared_from_this();
             ch->location.replaceExit(dest);
 
             rdest.dir = static_cast<Direction>(rev_dir[dir]);
-            rdest.unit = ch->location.unit;
+            rdest.al = ch->location.al;
             rdest.position = ch->location.position;
             dest.replaceExit(rdest);
 

@@ -1768,7 +1768,7 @@ void show_shops(Character *ch, char *arg)
             }
         }
         else if (is_number(arg))
-            shop_nr = atol(arg);
+            shop_nr = atoi(arg);
         else
             shop_nr = NOTHING;
 

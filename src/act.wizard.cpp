@@ -819,8 +819,8 @@ ACMD(do_recall)
         act("$n disappears in a burst of light!", false, ch, nullptr, nullptr, TO_ROOM);
         if (real_room(2) != NOWHERE)
         {
-            ch->clearLocation();
-            ch->setLocation(2);
+            ch->leaveLocation();
+            ch->moveToLocation(2);
             ch->lookAtLocation();
             ch->setBaseStat("load_room", ch->location.getVnum());
         }
@@ -1127,15 +1127,15 @@ ACMD(do_at)
 
     /* a location has been found. */
     auto original_loc = ch->location;
-    ch->clearLocation();
-    ch->setLocation(location);
+    ch->leaveLocation();
+    ch->moveToLocation(location);
     command_interpreter(ch, command);
 
     /* check if the char is still there */
     if (ch->location == location)
     {
-        ch->clearLocation();
-        ch->setLocation(original_loc);
+        ch->leaveLocation();
+        ch->moveToLocation(original_loc);
     }
 }
 
@@ -1155,8 +1155,8 @@ ACMD(do_goto)
     snprintf(buf, sizeof(buf), "$n %s", POOFOUT(ch) ? POOFOUT(ch) : "disappears in a puff of smoke.");
     act(buf, true, ch, nullptr, nullptr, TO_ROOM);
 
-    ch->clearLocation();
-    ch->setLocation(location);
+    ch->leaveLocation();
+    ch->moveToLocation(location);
 
     snprintf(buf, sizeof(buf), "$n %s", POOFIN(ch) ? POOFIN(ch) : "appears with an ear-splitting bang.");
     act(buf, true, ch, nullptr, nullptr, TO_ROOM);
@@ -1193,8 +1193,8 @@ ACMD(do_trans)
                 return;
             }
             act("$n disappears in a mushroom cloud.", false, victim, nullptr, nullptr, TO_ROOM);
-            victim->clearLocation();
-            victim->setLocation(ch);
+            victim->leaveLocation();
+            victim->moveToLocation(ch);
             act("$n arrives from a puff of smoke.", false, victim, nullptr, nullptr, TO_ROOM);
             act("$n has transferred you!", false, ch, nullptr, victim, TO_VICT);
             victim->lookAtLocation();
@@ -1216,8 +1216,8 @@ ACMD(do_trans)
                 if (GET_ADMLEVEL(victim) >= GET_ADMLEVEL(ch))
                     continue;
                 act("$n disappears in a mushroom cloud.", false, victim, nullptr, nullptr, TO_ROOM);
-                victim->clearLocation();
-                victim->setLocation(ch);
+                victim->leaveLocation();
+                victim->moveToLocation(ch);
                 act("$n arrives from a puff of smoke.", false, victim, nullptr, nullptr, TO_ROOM);
                 act("$n has transferred you!", false, ch, nullptr, victim, TO_VICT);
                 victim->lookAtLocation();
@@ -1254,8 +1254,8 @@ ACMD(do_teleport)
         }
         ch->send_to("%s", CONFIG_OK);
         act("$n disappears in a puff of smoke.", false, victim, nullptr, nullptr, TO_ROOM);
-        victim->clearLocation();
-        victim->setLocation(target);
+        victim->leaveLocation();
+        victim->moveToLocation(target);
         act("$n arrives from a puff of smoke.", false, victim, nullptr, nullptr, TO_ROOM);
         act("$n has teleported you!", false, ch, nullptr, (char *)victim, TO_VICT);
         victim->lookAtLocation();
@@ -2264,7 +2264,7 @@ ACMD(do_load)
         for (i = 0; i < n; i++)
         {
             mob = read_mobile(r_num, REAL);
-            mob->setLocation(ch);
+            mob->moveToLocation(ch);
 
             act("$n makes a quaint, magical gesture with one hand.", true, ch, nullptr, nullptr, TO_ROOM);
             act("$n has created $N!", false, ch, nullptr, mob, TO_ROOM);
@@ -2293,7 +2293,7 @@ ACMD(do_load)
             if (CONFIG_LOAD_INVENTORY)
                 ch->addToInventory(obj);
             else
-                obj->setLocation(ch);
+                obj->moveToLocation(ch);
             act("$n makes a strange magical gesture.", true, ch, nullptr, nullptr, TO_ROOM);
             act("$n has created $p!", false, ch, obj, nullptr, TO_ROOM);
             act("You create $p.", false, ch, obj, nullptr, TO_CHAR);
@@ -2332,7 +2332,7 @@ ACMD(do_vstat)
             return;
         }
         mob = read_mobile(r_num, REAL);
-        mob->setLocation(0);
+        mob->moveToLocation(0);
         do_stat_character(ch, mob);
         extract_char(mob);
     }
@@ -3399,7 +3399,7 @@ ACMD(do_zreset)
         i = ch->location.getZone()->number;
     else
     {
-        i = atol(arg);
+        i = atoi(arg);
     }
     if (!zone_table.count(i) || !(can_edit_zone(ch, i) || GET_ADMLEVEL(ch) > ADMLVL_IMMORT))
     {
@@ -3543,7 +3543,7 @@ static size_t print_zone_to_buf(char *bufptr, size_t left, zone_rnum zone, int l
                        z.age, z.lifespan,
                        z.reset_mode);
 
-        auto j = z.rooms.size();
+        auto j = z.rooms.live_count();
 
         tmp += snprintf(bufptr + tmp, left - tmp,
                         "       Zone stats:\r\n"
@@ -4298,8 +4298,8 @@ affect_total(vict);
             ch->sendText("No room exists with that number.\r\n");
             return (0);
         }
-        vict->clearLocation();
-        vict->setLocation(rnum);
+        vict->leaveLocation();
+        vict->moveToLocation(rnum);
         break;
     case 36:
         vict->pref_flags.toggle(PRF_ROOMFLAGS);
@@ -4795,8 +4795,9 @@ ACMD(do_zpurge)
     }
 
     auto &z = zone_table.at(zone);
+    auto zr = z.rooms.snapshot_weak();
 
-    for (auto r : filter_raw(z.rooms))
+    for (auto r : filter_raw(zr))
     {
         auto people = r->getPeople();
         for (auto mob : filter_raw(people))
@@ -5114,14 +5115,15 @@ ACMD(do_zcheck)
     /************** Check rooms *****************/
     ch->sendText("\r\nChecking Rooms for limits...\r\n");
 
-    for (auto r : filter_raw(z.rooms))
+    auto zr = z.rooms.snapshot_weak();
+    for (auto r : filter_raw(zr))
     {
         for (auto &[d, e] : r->getDirections())
         {
             /*check for exit, but ignore off limits if you're in an offlimit zone*/
             auto j = static_cast<int>(d);
             auto ez = e.getZone();
-            if (ez == r->zone)
+            if (ez == r->getZone())
                 continue;
 
             for (k = 0; offlimit_zones[k] != -1; k++)
@@ -5164,7 +5166,8 @@ ACMD(do_zcheck)
         }
     } /*checking rooms*/
 
-    for (auto i : filter_raw(z.rooms))
+    auto zro = z.rooms.snapshot_weak();
+    for (auto i : filter_raw(zro))
     {
         m++;
         if (i->exits.empty())
@@ -5191,7 +5194,8 @@ static void mob_checkload(Character *ch, mob_vnum mvnum)
 
     for (auto &[zvn, z] : zone_table)
     {
-        for(auto r : filter_raw(z.rooms)) {
+        auto zro = z.rooms.snapshot_weak();
+        for(auto r : filter_raw(zro)) {
             for (auto c : r->resetCommands)
             {
                 if (c.type != ResetCommandType::MOB)

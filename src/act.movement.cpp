@@ -23,7 +23,7 @@
 #include "dbat/local_limits.h"
 #include "dbat/constants.h"
 #include "dbat/act.informative.h"
-#include "dbat/area.h"
+#include "dbat/planet.h"
 #include "dbat/partial.h"
 
 /* local functions */
@@ -68,14 +68,14 @@ void handle_teleport(Character *ch, Character *tar, int location)
 
     if (location != 0)
     { /* Teleport to a particular room */
-        ch->clearLocation();
-        ch->setLocation(location);
+        ch->leaveLocation();
+        ch->moveToLocation(location);
         success = true;
     }
     else if (tar)
     { /* Teleport to a particular character */
-        ch->clearLocation();
-        ch->setLocation(tar);
+        ch->leaveLocation();
+        ch->moveToLocation(tar);
         success = true;
     }
 
@@ -84,29 +84,29 @@ void handle_teleport(Character *ch, Character *tar, int location)
         act("@w$n@w appears in an instant out of nowhere!@n", true, ch, nullptr, nullptr, TO_ROOM);
         if (auto drg = DRAGGING(ch); drg && !IS_NPC(drg))
         {
-            drg->clearLocation();
-            drg->setLocation(ch);
+            drg->leaveLocation();
+            drg->moveToLocation(ch);
             act("@w$n@w appears in an instant out of nowhere being dragged by $N!@n", true, drg, nullptr, ch,
                 TO_NOTVICT);
         }
         if (auto grap = GRAPPLING(ch); grap && !IS_NPC(grap))
         {
-            grap->clearLocation();
-            grap->setLocation(ch);
+            grap->leaveLocation();
+            grap->moveToLocation(ch);
             act("@w$n@w appears in an instant out of nowhere being grappled by $N!@n", true, grap, nullptr, ch,
                 TO_NOTVICT);
         }
         if (auto carry = CARRYING(ch))
         {
-            carry->clearLocation();
-            carry->setLocation(ch);
+            carry->leaveLocation();
+            carry->moveToLocation(ch);
             act("@w$n@w appears in an instant out of nowhere being carried by $N!@n", true, carry, nullptr, ch,
                 TO_NOTVICT);
         }
         if (auto grap = GRAPPLED(ch); grap && !IS_NPC(grap))
         {
-            grap->clearLocation();
-            grap->setLocation(ch);
+            grap->leaveLocation();
+            grap->moveToLocation(ch);
             act("@w$n@w appears in an instant out of nowhere being grappled by $N!@n", true, grap, nullptr, ch,
                 TO_NOTVICT);
         }
@@ -331,8 +331,8 @@ ACMD(do_land)
     char sendback[MAX_INPUT_LENGTH];
     sprintf(sendback, "@C$n@Y flies down through the atmosphere toward @G%s@Y!@n", landName.c_str());
     act(sendback, true, ch, nullptr, nullptr, TO_ROOM);
-    ch->clearLocation();
-    ch->setLocation(landroom);
+    ch->leaveLocation();
+    ch->moveToLocation(landroom);
     fly_planet(landing, "can be seen landing from space nearby!@n\r\n", ch);
     send_to_sense(1, "landing on the planet", ch);
     send_to_scouter("A powerlevel signal has been detected landing on the planet", ch, 0, 1);
@@ -715,8 +715,8 @@ int do_simple_move(Character *ch, int dir, int need_specials_check)
         act("@C$n@w carries @c$N@w with $m.@n", true, ch, nullptr, CARRYING(ch), TO_ROOM);
     }
     ch->affect_flags.set(AFF_PURSUIT, true);
-    ch->clearLocation();
-    ch->setLocation(e);
+    ch->leaveLocation();
+    ch->moveToLocation(e);
     if ((ch->location.getZone() != was_in.getZone()) && !IS_NPC(ch) && !IS_ANDROID(ch))
     {
         send_to_sense(0, "You sense someone", ch);
@@ -728,8 +728,8 @@ int do_simple_move(Character *ch, int dir, int need_specials_check)
     /* see if an entry trigger disallows the move */
     if (!entry_mtrigger(ch) || !enter_wtrigger(ch->getRoom(), ch, dir))
     {
-        ch->clearLocation();
-        ch->setLocation(was_in);
+        ch->leaveLocation();
+        ch->moveToLocation(was_in);
         ch->affect_flags.set(AFF_PURSUIT, false);
         return 0;
     }
@@ -753,12 +753,12 @@ int do_simple_move(Character *ch, int dir, int need_specials_check)
     {
         act("@wYou drag @C$N@w with you.@n", true, ch, nullptr, dragging, TO_CHAR);
         act("@C$n@w drags @c$N@w with $m.@n", true, ch, nullptr, dragging, TO_ROOM);
-        dragging->clearLocation();
-        dragging->setLocation(ch);
+        dragging->leaveLocation();
+        dragging->moveToLocation(ch);
         if (auto sits = SITS(dragging); sits)
         {
             sits->clearLocation();
-            sits->setLocation(ch);
+            sits->moveToLocation(ch);
         }
         if (!AFF_FLAGGED(dragging, AFF_KNOCKED) && !AFF_FLAGGED(dragging, AFF_SLEEP) && rand_number(1, 3))
         {
@@ -773,8 +773,8 @@ int do_simple_move(Character *ch, int dir, int need_specials_check)
     {
         act("@wYou carry @C$N@w with you.@n", true, ch, nullptr, carrying, TO_CHAR);
         act("@C$n@w carries @c$N@w with $m.@n", true, ch, nullptr, carrying, TO_ROOM);
-        carrying->clearLocation();
-        carrying->setLocation(ch);
+        carrying->leaveLocation();
+        carrying->moveToLocation(ch);
         if (!AFF_FLAGGED(carrying, AFF_KNOCKED) && !AFF_FLAGGED(carrying, AFF_SLEEP) && rand_number(1, 3))
         {
             carrying->sendText("You feel your sleeping body being moved.\r\n");
@@ -829,8 +829,8 @@ int do_simple_move(Character *ch, int dir, int need_specials_check)
     entry_memory_mtrigger(ch);
     if (!greet_mtrigger(ch, dir))
     {
-        ch->clearLocation();
-        ch->setLocation(was_in);
+        ch->leaveLocation();
+        ch->moveToLocation(was_in);
         ch->lookAtLocation();
     }
     else
@@ -1472,8 +1472,8 @@ static void do_doorcmd(Character *ch, Object *obj, int door, int scmd)
         if (auto pdest = real_room(GET_OBJ_VAL(obj, VAL_PORTAL_DEST)) != NOWHERE)
         {
             num = IN_ROOM(ch);
-            ch->clearLocation();
-            ch->setLocation(pdest);
+            ch->leaveLocation();
+            ch->moveToLocation(pdest);
         }
         auto ishatch = [](const auto &o)
         {
@@ -1530,8 +1530,8 @@ static void do_doorcmd(Character *ch, Object *obj, int door, int scmd)
             if ((obj) && GET_OBJ_TYPE(obj) == ITEM_VEHICLE && (hatch))
             {
                 OPEN_DOOR(IN_ROOM(ch), hatch, door);
-                ch->clearLocation();
-                ch->setLocation(num);
+                ch->leaveLocation();
+                ch->moveToLocation(num);
                 if (GET_OBJ_VNUM(obj) > 19199)
                 {
                     ch->location.sendText("@wThe ship hatch opens slowly and settles onto the ground.\r\n");
@@ -1592,8 +1592,8 @@ static void do_doorcmd(Character *ch, Object *obj, int door, int scmd)
             if ((obj) && GET_OBJ_TYPE(obj) == ITEM_VEHICLE && (hatch))
             {
                 CLOSE_DOOR(IN_ROOM(ch), hatch, door);
-                ch->clearLocation();
-                ch->setLocation(num);
+                ch->leaveLocation();
+                ch->moveToLocation(num);
                 if (GET_OBJ_VNUM(obj) > 19199)
                 {
                     ch->location.sendText("@wThe ship hatch slowly closes, sealing the ship.\r\n");
@@ -1640,8 +1640,8 @@ static void do_doorcmd(Character *ch, Object *obj, int door, int scmd)
             if ((obj) && GET_OBJ_TYPE(obj) == ITEM_VEHICLE && (hatch))
             {
                 LOCK_DOOR(IN_ROOM(ch), hatch, door);
-                ch->clearLocation();
-                ch->setLocation(num);
+                ch->leaveLocation();
+                ch->moveToLocation(num);
                 hatch = NULL;
             }
         }
@@ -1672,8 +1672,8 @@ static void do_doorcmd(Character *ch, Object *obj, int door, int scmd)
             if ((obj) && GET_OBJ_TYPE(obj) == ITEM_VEHICLE && (hatch))
             {
                 UNLOCK_DOOR(IN_ROOM(ch), hatch, door);
-                ch->clearLocation();
-                ch->setLocation(num);
+                ch->leaveLocation();
+                ch->moveToLocation(num);
                 hatch = NULL;
             }
         }
@@ -1894,7 +1894,7 @@ static int do_simple_enter(Character *ch, Object *obj, int need_specials_check)
     int need_movement = 0;
 
     Destination d;
-    d.unit = get_room(dest_room);
+    d.al = get_room(dest_room)->shared_from_this();
 
     /* charmed? */
     if (AFF_FLAGGED(ch, AFF_CHARM) && ch->master &&
@@ -1952,15 +1952,15 @@ static int do_simple_enter(Character *ch, Object *obj, int need_specials_check)
     {
         act("@C$n@w carries @c$N@w with $m.@n", true, ch, nullptr, CARRYING(ch), TO_ROOM);
     }
-    ch->clearLocation();
-    ch->setLocation(d);
+    ch->leaveLocation();
+    ch->moveToLocation(d);
 
     /* move them first, then move them back if they aren't allowed to go. */
     /* see if an entry trigger disallows the move */
     if (!entry_mtrigger(ch))
     {
-        ch->clearLocation();
-        ch->setLocation(was_in);
+        ch->leaveLocation();
+        ch->moveToLocation(was_in);
         return 0;
     }
 
@@ -1980,12 +1980,12 @@ static int do_simple_enter(Character *ch, Object *obj, int need_specials_check)
                 set_fighting(drg, ch);
             }
         }
-        drg->clearLocation();
-        drg->setLocation(ch);
+        drg->leaveLocation();
+        drg->moveToLocation(ch);
         if (auto s = SITS(drg))
         {
             s->clearLocation();
-            s->setLocation(ch);
+            s->moveToLocation(ch);
         }
     }
     if (auto carry = CARRYING(ch); carry)
@@ -1996,12 +1996,12 @@ static int do_simple_enter(Character *ch, Object *obj, int need_specials_check)
         {
             carry->sendText("You feel your sleeping body being moved.\r\n");
         }
-        carry->clearLocation();
-        carry->setLocation(ch);
+        carry->leaveLocation();
+        carry->moveToLocation(ch);
         if (auto s = SITS(carry); s)
         {
             s->clearLocation();
-            s->setLocation(ch);
+            s->moveToLocation(ch);
         }
     }
 
@@ -2176,7 +2176,7 @@ static int do_simple_leave(Character *ch, Object *obj, int need_specials_check)
     }
 
     Destination d;
-    d.unit = get_room(dest_room);
+    d.al = get_room(dest_room)->shared_from_this();
 
     /* charmed? */
     if (AFF_FLAGGED(ch, AFF_CHARM) && ch->master &&
@@ -2223,15 +2223,15 @@ static int do_simple_leave(Character *ch, Object *obj, int need_specials_check)
     {
         act("@C$n@w carries @c$N@w with $m.@n", true, ch, nullptr, car, TO_ROOM);
     }
-    ch->clearLocation();
-    ch->setLocation(d);
+    ch->leaveLocation();
+    ch->moveToLocation(d);
 
     /* move them first, then move them back if they aren't allowed to go. */
     /* see if an entry trigger disallows the move */
     if (!entry_mtrigger(ch))
     {
-        ch->clearLocation();
-        ch->setLocation(was_in);
+        ch->leaveLocation();
+        ch->moveToLocation(was_in);
         return 0;
     }
 
@@ -2247,12 +2247,12 @@ static int do_simple_leave(Character *ch, Object *obj, int need_specials_check)
     {
         act("@wYou drag @C$N@w with you.@n", true, ch, nullptr, drg, TO_CHAR);
         act("@C$n@w drags @c$N@w with $m.@n", true, ch, nullptr, drg, TO_ROOM);
-        drg->clearLocation();
-        drg->setLocation(ch);
+        drg->leaveLocation();
+        drg->moveToLocation(ch);
         if (auto si = SITS(drg))
         {
             si->clearLocation();
-            si->setLocation(ch);
+            si->moveToLocation(ch);
         }
         if (!AFF_FLAGGED(drg, AFF_KNOCKED) && !AFF_FLAGGED(drg, AFF_SLEEP) && rand_number(1, 3))
         {
@@ -2267,12 +2267,12 @@ static int do_simple_leave(Character *ch, Object *obj, int need_specials_check)
     {
         act("@wYou carry @C$N@w with you.@n", true, ch, nullptr, car, TO_CHAR);
         act("@C$n@w carries @c$N@w with $m.@n", true, ch, nullptr, car, TO_ROOM);
-        car->clearLocation();
-        car->setLocation(ch);
+        car->leaveLocation();
+        car->moveToLocation(ch);
         if (auto si = SITS(car))
         {
             si->clearLocation();
-            si->setLocation(ch);
+            si->moveToLocation(ch);
         }
         if (!AFF_FLAGGED(car, AFF_KNOCKED) && !AFF_FLAGGED(car, AFF_SLEEP) && rand_number(1, 3))
         {
@@ -2373,12 +2373,12 @@ static void handle_fall(Character *ch)
     ex = EXIT(ch, 5);
     while (ex && ch->location.getTileType() == SECT_FLYING)
     {
-        ch->clearLocation();
-        ch->setLocation(*ex);
+        ch->leaveLocation();
+        ch->moveToLocation(*ex);
         if (auto carrying = CARRYING(ch))
         {
-            carrying->clearLocation();
-            carrying->setLocation(*ex);
+            carrying->leaveLocation();
+            carrying->moveToLocation(*ex);
         }
         if (!EXIT(ch, 5) || ch->location.getTileType() != SECT_FLYING)
         {
@@ -2496,8 +2496,8 @@ static void handle_fly_space(Character *ch)
         true, ch, nullptr, nullptr, TO_CHAR);
     act("@C$n blasts off from the ground and rockets through the air. You quickly lose sight of $m as $e continues upward!@n",
         true, ch, nullptr, nullptr, TO_ROOM);
-    ch->clearLocation();
-    ch->setLocation(dest);
+    ch->leaveLocation();
+    ch->moveToLocation(dest);
     if (planet)
     {
         act("@C$n blasts up from the atmosphere below and then comes to a stop.@n", true, ch, nullptr, nullptr,

@@ -853,14 +853,14 @@ void extract_char_final(Character *ch)
         for (auto obj : filter_raw(con))
         {
             obj->clearLocation();
-            obj->setLocation(ch);
+            obj->moveToLocation(ch);
         }
 
         /* transfer equipment to room, if any */
         for (auto &[slot, o] : ch->getEquipment())
         {
             unequip_char(ch, slot);
-            o->setLocation(ch);
+            o->moveToLocation(ch);
         }
     }
 
@@ -873,7 +873,7 @@ void extract_char_final(Character *ch)
             stop_fighting(k);
     }
 
-    ch->clearLocation();
+    ch->leaveLocation();
 
     /* If there's a descriptor, they're in the menu now. */
     if (ch->desc)

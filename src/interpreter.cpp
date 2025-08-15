@@ -1286,7 +1286,7 @@ void enter_player_game(struct descriptor_data *d)
         load_room = real_room(CONFIG_FROZEN_START);
 
     d->character->activate();
-    d->character->setLocation(load_room);
+    d->character->moveToLocation(load_room);
 
     /*load_char_pets(d->character);*/
     auto ac = characterSubscriptions.all("active");

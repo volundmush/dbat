@@ -22,6 +22,8 @@ struct HasExtraDescriptions;
 struct HasLocation;
 struct HasInventory;
 struct HasEquipment;
+struct Area;
+struct Structure;
 
 typedef HasDgScripts script_data;
 

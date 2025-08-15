@@ -72,8 +72,8 @@ ASPELL(spell_recall)
         return;
 
     act("$n disappears.", true, victim, nullptr, nullptr, TO_ROOM);
-    victim->clearLocation();
-    victim->setLocation(CONFIG_MORTAL_START);
+    victim->leaveLocation();
+    victim->moveToLocation(CONFIG_MORTAL_START);
     act("$n appears in the middle of the room.", true, victim, nullptr, nullptr, TO_ROOM);
     victim->lookAtLocation();
     entry_memory_mtrigger(victim);
@@ -95,8 +95,8 @@ ASPELL(spell_teleport)
 
     act("$n slowly fades out of existence and is gone.",
         false, victim, nullptr, nullptr, TO_ROOM);
-    victim->clearLocation();
-    victim->setLocation(to_room);
+    victim->leaveLocation();
+    victim->moveToLocation(to_room);
     act("$n slowly fades into existence.", false, victim, nullptr, nullptr, TO_ROOM);
     victim->lookAtLocation();
     entry_memory_mtrigger(victim);
@@ -151,8 +151,8 @@ ASPELL(spell_summon)
 
     act("$n disappears suddenly.", true, victim, nullptr, nullptr, TO_ROOM);
 
-    victim->clearLocation();
-    victim->setLocation(ch);
+    victim->leaveLocation();
+    victim->moveToLocation(ch);
 
     act("$n arrives suddenly.", true, victim, nullptr, nullptr, TO_ROOM);
     act("$n has summoned you!", false, ch, nullptr, victim, TO_VICT);
@@ -499,7 +499,7 @@ ASPELL(spell_portal)
     SET_OBJ_VAL(portal, VAL_ALL_HEALTH, 100);
     SET_OBJ_VAL(portal, VAL_ALL_MAXHEALTH, 100);
     portal->setBaseStat<int>("timer", level / 10);
-    portal->setLocation(ch);
+    portal->moveToLocation(ch);
     act("$n opens a portal in thin air.",
         true, ch, nullptr, nullptr, TO_ROOM);
     act("You open a portal out of thin air.",
@@ -510,7 +510,7 @@ ASPELL(spell_portal)
     SET_OBJ_VAL(tportal, VAL_ALL_HEALTH, 100);
     SET_OBJ_VAL(tportal, VAL_ALL_MAXHEALTH, 100);
     tportal->setBaseStat<int>("timer", level / 10);
-    tportal->setLocation(victim);
+    tportal->moveToLocation(victim);
     act("A shimmering portal appears out of thin air.",
         true, victim, nullptr, nullptr, TO_ROOM);
     act("A shimmering portal opens here for you.",

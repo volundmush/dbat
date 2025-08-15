@@ -291,7 +291,7 @@ static void generate_multiform(Character *ch, int count)
         ch->clones.push_back(clone->shared());
 
         GET_ORIGINAL(clone) = ch;
-        clone->setLocation(ch);
+        clone->moveToLocation(ch);
         add_follower(clone, ch);
     }
 }
@@ -540,8 +540,8 @@ static void resolve_song(Character *ch)
                             nullptr, vict, TO_VICT);
                         act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", true, ch,
                             nullptr, vict, TO_NOTVICT);
-                        vict->clearLocation();
-                        vict->setLocation(300);
+                        vict->leaveLocation();
+                        vict->moveToLocation(300);
                     }
                 }
             }
@@ -561,8 +561,8 @@ static void resolve_song(Character *ch)
                             nullptr, vict, TO_VICT);
                         act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", true, ch,
                             nullptr, vict, TO_NOTVICT);
-                        vict->clearLocation();
-                        vict->setLocation(2234);
+                        vict->leaveLocation();
+                        vict->moveToLocation(2234);
                     }
                 }
             }
@@ -582,8 +582,8 @@ static void resolve_song(Character *ch)
                             nullptr, vict, TO_VICT);
                         act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", true, ch,
                             nullptr, vict, TO_NOTVICT);
-                        vict->clearLocation();
-                        vict->setLocation(4047);
+                        vict->leaveLocation();
+                        vict->moveToLocation(4047);
                     }
                 }
             }
@@ -603,8 +603,8 @@ static void resolve_song(Character *ch)
                             nullptr, vict, TO_VICT);
                         act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", true, ch,
                             nullptr, vict, TO_NOTVICT);
-                        vict->clearLocation();
-                        vict->setLocation(8003);
+                        vict->leaveLocation();
+                        vict->moveToLocation(8003);
                     }
                 }
             }
@@ -624,8 +624,8 @@ static void resolve_song(Character *ch)
                             nullptr, vict, TO_VICT);
                         act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", true, ch,
                             nullptr, vict, TO_NOTVICT);
-                        vict->clearLocation();
-                        vict->setLocation(10182);
+                        vict->leaveLocation();
+                        vict->moveToLocation(10182);
                     }
                 }
             }
@@ -645,8 +645,8 @@ static void resolve_song(Character *ch)
                             nullptr, vict, TO_VICT);
                         act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", true, ch,
                             nullptr, vict, TO_NOTVICT);
-                        vict->clearLocation();
-                        vict->setLocation(16087);
+                        vict->leaveLocation();
+                        vict->moveToLocation(16087);
                     }
                 }
             }
@@ -666,8 +666,8 @@ static void resolve_song(Character *ch)
                             nullptr, vict, TO_VICT);
                         act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", true, ch,
                             nullptr, vict, TO_NOTVICT);
-                        vict->clearLocation();
-                        vict->setLocation(12025);
+                        vict->leaveLocation();
+                        vict->moveToLocation(12025);
                     }
                 }
             }
@@ -687,8 +687,8 @@ static void resolve_song(Character *ch)
                             nullptr, vict, TO_VICT);
                         act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", true, ch,
                             nullptr, vict, TO_NOTVICT);
-                        vict->clearLocation();
-                        vict->setLocation(14910);
+                        vict->leaveLocation();
+                        vict->moveToLocation(14910);
                     }
                 }
             }
@@ -740,57 +740,57 @@ static void resolve_song(Character *ch)
         switch ((int)GET_SONG(ch))
         {
         case SONG_TELEPORT_EARTH:
-            ch->clearLocation();
-            ch->setLocation(300);
+            ch->leaveLocation();
+            ch->moveToLocation(300);
             ch->setBaseStat<int>("mystic_melody", 0);
             act("@CFinally as the last of your comrades has been teleported you teleport yourself to Earth and stop your song.@n",
                 true, ch, nullptr, nullptr, TO_CHAR);
             break;
         case SONG_TELEPORT_VEGETA:
-            ch->clearLocation();
-            ch->setLocation(2234);
+            ch->leaveLocation();
+            ch->moveToLocation(2234);
             ch->setBaseStat<int>("mystic_melody", 0);
             act("@CFinally as the last of your comrades has been teleported you teleport yourself to Vegeta and stop your song.@n",
                 true, ch, nullptr, nullptr, TO_CHAR);
             break;
         case SONG_TELEPORT_FRIGID:
-            ch->clearLocation();
-            ch->setLocation(4047);
+            ch->leaveLocation();
+            ch->moveToLocation(4047);
             ch->setBaseStat<int>("mystic_melody", 0);
             act("@CFinally as the last of your comrades has been teleported you teleport yourself to Frigid and stop your song.@n",
                 true, ch, nullptr, nullptr, TO_CHAR);
             break;
         case SONG_TELEPORT_NAMEK:
-            ch->clearLocation();
-            ch->setLocation(10182);
+            ch->leaveLocation();
+            ch->moveToLocation(10182);
             ch->setBaseStat<int>("mystic_melody", 0);
             act("@CFinally as the last of your comrades has been teleported you teleport yourself to Namek and stop your song.@n",
                 true, ch, nullptr, nullptr, TO_CHAR);
             break;
         case SONG_TELEPORT_KANASSA:
-            ch->clearLocation();
-            ch->setLocation(14910);
+            ch->leaveLocation();
+            ch->moveToLocation(14910);
             ch->setBaseStat<int>("mystic_melody", 0);
             act("@CFinally as the last of your comrades has been teleported you teleport yourself to Kanassa and stop your song.@n",
                 true, ch, nullptr, nullptr, TO_CHAR);
             break;
         case SONG_TELEPORT_AETHER:
-            ch->clearLocation();
-            ch->setLocation(12025);
+            ch->leaveLocation();
+            ch->moveToLocation(12025);
             ch->setBaseStat<int>("mystic_melody", 0);
             act("@CFinally as the last of your comrades has been teleported you teleport yourself to Aether and stop your song.@n",
                 true, ch, nullptr, nullptr, TO_CHAR);
             break;
         case SONG_TELEPORT_ARLIA:
-            ch->clearLocation();
-            ch->setLocation(16087);
+            ch->leaveLocation();
+            ch->moveToLocation(16087);
             ch->setBaseStat<int>("mystic_melody", 0);
             act("@CFinally as the last of your comrades has been teleported you teleport yourself to Arlia and stop your song.@n",
                 true, ch, nullptr, nullptr, TO_CHAR);
             break;
         case SONG_TELEPORT_KONACK:
-            ch->clearLocation();
-            ch->setLocation(8003);
+            ch->leaveLocation();
+            ch->moveToLocation(8003);
             ch->setBaseStat<int>("mystic_melody", 0);
             act("@CFinally as the last of your comrades has been teleported you teleport yourself to Konack and stop your song.@n",
                 true, ch, nullptr, nullptr, TO_CHAR);
@@ -1964,7 +1964,7 @@ static void catch_fish(Character *ch, int quality)
     fish->modBaseStat<weight_t>("weight", weight);
 
     SET_OBJ_VAL(pole, VAL_FISHPOLE_BAIT, 0);
-    fish->setLocation(ch);
+    fish->moveToLocation(ch);
     do_get(ch, "fish", 0, 0);
     ch->send_to("@D[@cFish Weight@D: @G%" I64T "@D]@n\r\n", GET_OBJ_WEIGHT(fish));
     ch->player_flags.set(PLR_FISHING, false);
@@ -2811,7 +2811,7 @@ ACMD(do_ashcloud)
     act("@r$n@R takes a handful of ashes and $e breathes ki infused flames at the pile of ashes! The flames and ashes mix and fill the surrounding area with a hot burning ash!@n",
         true, ch, nullptr, nullptr, TO_ROOM);
     ashcloud = read_object(1306, VIRTUAL);
-    ashcloud->setLocation(ch);
+    ashcloud->moveToLocation(ch);
     extract_obj(ash);
     ashcloud->setBaseStat("timer", otimer);
     ashcloud->setBaseStat("cost", ocost);
@@ -3423,7 +3423,7 @@ ACMD(do_hydromancy)
         {
             ch->sendText("You are unable to hold it and so let it go at your feet.\r\n");
             act("@C$n@w drops an ice spike.@n", true, ch, nullptr, nullptr, TO_ROOM);
-            obj->setLocation(ch);
+            obj->moveToLocation(ch);
         }
         improve_skill(ch, SKILL_STYLE, 1);
         ch->setBaseStat("concentrate_cooldown", 10);
@@ -4002,8 +4002,8 @@ ACMD(do_bury)
                 act("@C$n@Y starts digging in a spot of soft sand. Once $e has an appropriately sized hole $e drops @G$p@Y in and then covers it.@n",
                     true, ch, obj, nullptr, TO_ROOM);
             }
-            obj->clearLocation();
-            obj->setLocation(ch->location);
+            obj->leaveLocation();
+            obj->moveToLocation(ch->location);
             obj->item_flags.set(ITEM_BURIED, true);
         }
     }
@@ -4077,9 +4077,10 @@ ACMD(do_arena)
             ch->sendText("You are not even watching anyone in the arena.\r\n");
             return;
         }
-        else if (arena_watch(ch) != NOWHERE)
+        else if (auto aw = arena_watch(ch); aw != NOWHERE)
         {
-            ch->lookAtLocation(arena_watch(ch));
+            Location loc(aw);
+            ch->lookAtLocation(loc);
         }
     }
     else if (!strcasecmp(arg, "scan"))
@@ -4390,7 +4391,7 @@ ACMD(do_silk)
                 else
                 {
                     weaved = read_object(16705, VIRTUAL);
-                    weaved->setLocation(ch);
+                    weaved->moveToLocation(ch);
                     if (GET_OBJ_VNUM(obj) == 16708)
                     {
                         armor *= 20;
@@ -4470,7 +4471,7 @@ ACMD(do_silk)
                 else
                 {
                     weaved = read_object(16706, VIRTUAL);
-                    weaved->setLocation(ch);
+                    weaved->moveToLocation(ch);
                     if (GET_OBJ_VNUM(obj) == 16708)
                     {
                         armor *= 20;
@@ -4550,7 +4551,7 @@ ACMD(do_silk)
                 else
                 {
                     weaved = read_object(16707, VIRTUAL);
-                    weaved->setLocation(ch);
+                    weaved->moveToLocation(ch);
                     if (GET_OBJ_VNUM(obj) == 16708)
                     {
                         armor *= 20;
@@ -4663,7 +4664,7 @@ ACMD(do_silk)
             if (super == true)
             {
                 obj = read_object(16708, VIRTUAL);
-                obj->setLocation(ch);
+                obj->moveToLocation(ch);
                 act("@YYou concentrate your ki into your silk sacs and begin to spit silk out of your mouth. You gently weave the silk and in no time at all you have a $p@Y piled at your feet!@n",
                     true, ch, obj, nullptr, TO_CHAR);
                 ch->sendText("@YIt's SUPER grand!@n\r\n");
@@ -4674,7 +4675,7 @@ ACMD(do_silk)
             else if (prob > perc && prob >= 100)
             { /* Second Best Quality */
                 obj = read_object(16700, VIRTUAL);
-                obj->setLocation(ch);
+                obj->moveToLocation(ch);
                 act("@WYou concentrate your ki into your silk sacs and begin to spit silk out of your mouth. You gently weave the silk and in no time at all you have a $p@W piled at your feet!@n",
                     true, ch, obj, nullptr, TO_CHAR);
                 act("@C$n@W seems to concentrate for a moment before spitting out a golden colored silk from $s mouth. Gently $e weaves the silk and in no time at all $e has a $p@W piled at $s feet!@n",
@@ -4684,7 +4685,7 @@ ACMD(do_silk)
             else if (prob > perc && prob >= 90)
             { /* Great Quality */
                 obj = read_object(16701, VIRTUAL);
-                obj->setLocation(ch);
+                obj->moveToLocation(ch);
                 act("@WYou concentrate your ki into your silk sacs and begin to spit silk out of your mouth. You gently weave the silk and in no time at all you have a $p@W piled at your feet!@n",
                     true, ch, obj, nullptr, TO_CHAR);
                 act("@C$n@W seems to concentrate for a moment before spitting out a golden colored silk from $s mouth. Gently $e weaves the silk and in no time at all $e has a $p@W piled at $s feet!@n",
@@ -4694,7 +4695,7 @@ ACMD(do_silk)
             else if (prob > perc && prob >= 80)
             { /* Good Quality */
                 obj = read_object(16702, VIRTUAL);
-                obj->setLocation(ch);
+                obj->moveToLocation(ch);
                 act("@WYou concentrate your ki into your silk sacs and begin to spit silk out of your mouth. You gently weave the silk and in no time at all you have a $p@W piled at your feet!@n",
                     true, ch, obj, nullptr, TO_CHAR);
                 act("@C$n@W seems to concentrate for a moment before spitting out a golden colored silk from $s mouth. Gently $e weaves the silk and in no time at all $e has a $p@W piled at $s feet!@n",
@@ -4704,7 +4705,7 @@ ACMD(do_silk)
             else if (prob > perc && prob >= 50)
             { /* Decent Quality */
                 obj = read_object(16703, VIRTUAL);
-                obj->setLocation(ch);
+                obj->moveToLocation(ch);
                 act("@WYou concentrate your ki into your silk sacs and begin to spit silk out of your mouth. You gently weave the silk and in no time at all you have a $p@W piled at your feet!@n",
                     true, ch, obj, nullptr, TO_CHAR);
                 act("@C$n@W seems to concentrate for a moment before spitting out a golden colored silk from $s mouth. Gently $e weaves the silk and in no time at all $e has a $p@W piled at $s feet!@n",
@@ -4714,7 +4715,7 @@ ACMD(do_silk)
             else if (prob > perc)
             { /* Bad Quality */
                 obj = read_object(16704, VIRTUAL);
-                obj->setLocation(ch);
+                obj->moveToLocation(ch);
                 act("@WYou concentrate your ki into your silk sacs and begin to spit silk out of your mouth. You gently weave the silk and in no time at all you have a $p@W piled at your feet!@n",
                     true, ch, obj, nullptr, TO_CHAR);
                 act("@C$n@W seems to concentrate for a moment before spitting out a golden colored silk from $s mouth. Gently $e weaves the silk and in no time at all $e has a $p@W piled at $s feet!@n",
@@ -6174,8 +6175,8 @@ ACMD(do_warppool)
             act("@c$n@C reaches $s hand out and begins to swirl nearby water with it. The water that is being swirled begins to glow @wbright@B blue@C and has a distinct separation from the rest of the waters. Suddenly @c$n@C vanishes into this water! A moment later the waters return to normal.@n",
                 true, ch, nullptr, nullptr, TO_ROOM);
             improve_skill(ch, SKILL_WARP, 1);
-            ch->clearLocation();
-            ch->setLocation(850);
+            ch->leaveLocation();
+            ch->moveToLocation(850);
             act("@CSuddenly a large whirlpool of flashing water begins to form nearby. After a few seconds @c$n@C pops out of the center of the pool! The water then return to normal a moment laterr...@n",
                 true, ch, nullptr, nullptr, TO_ROOM);
             ch->modCurVital(CharVital::ki, -cost);
@@ -6199,8 +6200,8 @@ ACMD(do_warppool)
             act("@c$n@C reaches $s hand out and begins to swirl nearby water with it. The water that is being swirled begins to glow @wbright@B blue@C and has a distinct separation from the rest of the waters. Suddenly @c$n@C vanishes into this water! A moment later the waters return to normal.@n",
                 true, ch, nullptr, nullptr, TO_ROOM);
             improve_skill(ch, SKILL_WARP, 1);
-            ch->clearLocation();
-            ch->setLocation(4609);
+            ch->leaveLocation();
+            ch->moveToLocation(4609);
             act("@CSuddenly a large whirlpool of flashing water begins to form nearby. After a few seconds @c$n@C pops out of the center of the pool! The water then return to normal a moment laterr...@n",
                 true, ch, nullptr, nullptr, TO_ROOM);
             ch->modCurVital(CharVital::ki, -cost);
@@ -6224,8 +6225,8 @@ ACMD(do_warppool)
             act("@c$n@C reaches $s hand out and begins to swirl nearby water with it. The water that is being swirled begins to glow @wbright@B blue@C and has a distinct separation from the rest of the waters. Suddenly @c$n@C vanishes into this water! A moment later the waters return to normal.@n",
                 true, ch, nullptr, nullptr, TO_ROOM);
             improve_skill(ch, SKILL_WARP, 1);
-            ch->clearLocation();
-            ch->setLocation(10904);
+            ch->leaveLocation();
+            ch->moveToLocation(10904);
             act("@CSuddenly a large whirlpool of flashing water begins to form nearby. After a few seconds @c$n@C pops out of the center of the pool! The water then return to normal a moment laterr...@n",
                 true, ch, nullptr, nullptr, TO_ROOM);
             ch->modCurVital(CharVital::ki, -cost);
@@ -6249,8 +6250,8 @@ ACMD(do_warppool)
             act("@c$n@C reaches $s hand out and begins to swirl nearby water with it. The water that is being swirled begins to glow @wbright@B blue@C and has a distinct separation from the rest of the waters. Suddenly @c$n@C vanishes into this water! A moment later the waters return to normal.@n",
                 true, ch, nullptr, nullptr, TO_ROOM);
             improve_skill(ch, SKILL_WARP, 1);
-            ch->clearLocation();
-            ch->setLocation(15100);
+            ch->leaveLocation();
+            ch->moveToLocation(15100);
             act("@CSuddenly a large whirlpool of flashing water begins to form nearby. After a few seconds @c$n@C pops out of the center of the pool! The water then return to normal a moment laterr...@n",
                 true, ch, nullptr, nullptr, TO_ROOM);
             ch->modCurVital(CharVital::ki, -cost);
@@ -6274,8 +6275,8 @@ ACMD(do_warppool)
             act("@c$n@C reaches $s hand out and begins to swirl nearby water with it. The water that is being swirled begins to glow @wbright@B blue@C and has a distinct separation from the rest of the waters. Suddenly @c$n@C vanishes into this water! A moment later the waters return to normal.@n",
                 true, ch, nullptr, nullptr, TO_ROOM);
             improve_skill(ch, SKILL_WARP, 1);
-            ch->clearLocation();
-            ch->setLocation(12252);
+            ch->leaveLocation();
+            ch->moveToLocation(12252);
             act("@CSuddenly a large whirlpool of flashing water begins to form nearby. After a few seconds @c$n@C pops out of the center of the pool! The water then return to normal a moment laterr...@n",
                 true, ch, nullptr, nullptr, TO_ROOM);
             ch->modCurVital(CharVital::ki, -cost);
@@ -6404,9 +6405,9 @@ ACMD(do_obstruct)
     Object *obj2, *obj3;
 
     obj2 = read_object(79, VIRTUAL);
-    obj2->setLocation(dest);
+    obj2->moveToLocation(dest);
     obj3 = read_object(79, VIRTUAL);
-    obj3->setLocation(ch);
+    obj3->moveToLocation(ch);
 
     int64_t strength = (((GET_INT(ch) * skill) * GET_WIS(ch)) * 20) + (GET_MAX_MANA(ch) * 0.001);
 
@@ -6729,7 +6730,7 @@ ACMD(do_spoil)
     SET_OBJ_VAL(body_part, VAL_ALL_MAXHEALTH, 1);
     body_part->setBaseStat<weight_t>("weight", rand_number(4, 10));
     body_part->setBaseStat<int>("cost_per_day", 0);
-    body_part->setLocation(ch);
+    body_part->moveToLocation(ch);
     body_part->clearLocation();
     ch->addToInventory(body_part);
 }

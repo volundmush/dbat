@@ -426,7 +426,7 @@ void handle_disarm(Character *ch, Character *vict)
             if (GET_OBJ_VNUM(obj) != 20098)
             {
                 obj->clearLocation();
-                obj->setLocation(ch);
+                obj->moveToLocation(ch);
             }
         }
         else if (GET_EQ(ch, WEAR_WIELD1) && handled == true)
@@ -459,7 +459,7 @@ void handle_disarm(Character *ch, Character *vict)
             if (GET_OBJ_VNUM(obj) != 20098)
             {
                 obj->clearLocation();
-                obj->setLocation(ch);
+                obj->moveToLocation(ch);
             }
         }
     }
@@ -2535,7 +2535,7 @@ void homing_update(uint64_t heartPulse, double deltaTime)
                 act("@wThe $p@w pursues after you!@n", true, vict, k, nullptr, TO_CHAR);
                 act("@wThe $p@W pursues after @C$n@w!@n", true, vict, k, nullptr, TO_ROOM);
                 k->clearLocation();
-                k->setLocation(vict);
+                k->moveToLocation(vict);
                 continue;
             }
             else
@@ -3549,7 +3549,7 @@ void dodge_ki(Character *ch, Character *vict, int type, int type2, int skill, in
             }
 
             obj = read_object(num, VIRTUAL);
-            obj->setLocation(ch);
+            obj->moveToLocation(ch);
 
             TARGET(obj) = vict;
             obj->setBaseStat("kicharge", damtype(ch, type2, skill, .2));
@@ -3605,7 +3605,7 @@ void dodge_ki(Character *ch, Character *vict, int type, int type2, int skill, in
         }
 
         obj = read_object(num, VIRTUAL);
-        obj->setLocation(ch);
+        obj->moveToLocation(ch);
 
         TARGET(obj) = vict;
         obj->setBaseStat("kicharge", damtype(ch, type2, skill, .3));
@@ -5897,7 +5897,7 @@ void hurt(int limb, int chance, Character *ch, Character *vict, Object *obj, int
                 for (auto rew : filter_raw(con))
                 {
                     rew->clearLocation();
-                    rew->setLocation(vict);
+                    rew->moveToLocation(vict);
                     founded = 1;
                 }
                 if (founded == 1)
@@ -5945,11 +5945,11 @@ void hurt(int limb, int chance, Character *ch, Character *vict, Object *obj, int
             if (IN_ARENA(vict))
             {
                 send_to_all("@R%s@r manages to defeat @R%s@r in the Arena!@n\r\n", GET_NAME(ch), GET_NAME(vict));
-                ch->clearLocation();
-                ch->setLocation(17875);
+                ch->leaveLocation();
+                ch->moveToLocation(17875);
                 ch->lookAtLocation();
-                vict->clearLocation();
-                vict->setLocation(17875);
+                vict->leaveLocation();
+                vict->moveToLocation(17875);
                 vict->setCurVital(CharVital::health, 1);
                 vict->lookAtLocation();
                 if (FIGHTING(vict))
@@ -5983,8 +5983,8 @@ void hurt(int limb, int chance, Character *ch, Character *vict, Object *obj, int
                     stop_fighting(ch);
                 }
                 vict->setBaseStat<int>("position", POS_SITTING);
-                vict->clearLocation();
-                vict->setLocation(sensei::getStartRoom(vict->sensei));
+                vict->leaveLocation();
+                vict->moveToLocation(sensei::getStartRoom(vict->sensei));
             }
             return;
         }

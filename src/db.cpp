@@ -60,13 +60,17 @@ bool gameIsLoading = true;
 bool saveAll = false;
 bool isMigrating = false;
 
-int64_t lastCharacterID{0}, lastObjectID{0}, lastAccountID{0};
+int64_t lastCharacterID{0}, lastObjectID{0}, lastAccountID{0}, lastStructureID{0};
 
 struct config_data config_info; /* Game configuration list.    */
 
 // The global database of entities.
 NegativeKeyGuardUnorderedMap<int, std::shared_ptr<Entity>> units;
 NegativeKeyGuardMap<room_vnum, std::shared_ptr<Room>> world;
+NegativeKeyGuardUnorderedMap<int, std::shared_ptr<Area>> areas;
+NegativeKeyGuardUnorderedMap<int, std::shared_ptr<Structure>> structures;
+NegativeKeyGuardUnorderedMap<int, GridTemplate> gridTemplates;
+
 NegativeKeyGuardUnorderedMap<int64_t, std::shared_ptr<Character>> uniqueCharacters;
 NegativeKeyGuardUnorderedMap<int64_t, std::shared_ptr<Object>> uniqueObjects;
 
@@ -344,6 +348,9 @@ void boot_db_world() {
     basic_mud_log("Loading stat handlers...");
     init_stat_handlers();
 
+    basic_mud_log("Loading global data...");
+    load_globaldata(latest);
+
     basic_mud_log("Loading Zones...");
     load_zones(latest);
 
@@ -359,6 +366,12 @@ void boot_db_world() {
     basic_mud_log("Loading rooms.");
     load_rooms(latest);
 
+    basic_mud_log("Loading Grid Templates...");
+    load_grid_templates(latest);
+
+    basic_mud_log("Loading areas initial...");
+    load_areas_initial(latest);
+
     basic_mud_log("Loading shops.");
     load_shops(latest);
 
@@ -368,9 +381,6 @@ void boot_db_world() {
     basic_mud_log("Loading exits.");
     load_exits(latest);
 
-    basic_mud_log("Loading global data...");
-    load_globaldata(latest);
-
     basic_mud_log("Loading accounts.");
     load_accounts(latest);
 
@@ -379,6 +389,15 @@ void boot_db_world() {
 
     basic_mud_log("Loading characters initial...");
     load_characters_initial(latest);
+
+    basic_mud_log("Loading areas finish...");
+    load_areas_finish(latest);
+
+    basic_mud_log("Loading structures initial...");
+    load_structures_initial(latest);
+
+    basic_mud_log("Loading structures finish...");
+    load_structures_finish(latest);
 
     basic_mud_log("Loading items initial...");
     load_items_initial(latest);
@@ -723,7 +742,7 @@ bitvector_t asciiflag_conv(char *flag) {
     }
 
     if (is_num)
-        flags = atol(flag);
+        flags = atoi(flag);
 
     return (flags);
 }
@@ -1497,7 +1516,7 @@ void Zone::reset()
 
     if (!pre_reset(number))
     {
-        auto rms = rooms;
+        auto rms = rooms.snapshot_weak();
         for(auto r : filter_raw(rms)) {
             if(auto commands = r->resetCommands; !commands.empty()) {
                 Location l(r);
@@ -1511,7 +1530,8 @@ void Zone::reset()
     }
 
     // TODO: Split this off into subscriptions.
-    for (auto r : filter_raw(rooms))
+    auto rms = rooms.snapshot_weak();
+    for (auto r : filter_raw(rms))
     {
 
         if (r->room_flags.get(ROOM_AURA) && rand_number(1, 5) >= 4)
@@ -2235,7 +2255,7 @@ std::shared_ptr<HasDgScripts> resolveUID(const std::string& uid) {
 }
 
 // ^#(?<id>\d+)(?::(?<generation>\d+)?)?
-static std::regex lid_regex(R"(^(R):(\d+)(:(\d+):(\d+):(\d+))?)", std::regex::icase);
+static std::regex lid_regex(R"(^(R|A|S):(\d+)(:(\d+):(\d+):(\d+))?)", std::regex::icase);
 
 bool isLocID(const std::string& lid) {
     return std::regex_match(lid, lid_regex);
@@ -2255,6 +2275,16 @@ std::shared_ptr<AbstractLocation> resolveLocID(const std::string& lid) {
     if(letter == "R") {
         // Room
         if(auto find = world.find(id); find != world.end()) {
+            return find->second;
+        }
+    } else if(letter == "A") {
+        // Area.
+        if(auto find = areas.find(id); find != areas.end()) {
+            return find->second;
+        }
+    } else if(letter == "S") {
+        // Structure
+        if(auto find = structures.find(id); find != structures.end()) {
             return find->second;
         }
     }

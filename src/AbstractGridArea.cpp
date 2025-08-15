@@ -42,7 +42,7 @@ std::optional<Destination> AbstractGridArea::getDirection(const Coordinates &coo
 
     // Apply our direction
     Destination dest;
-    dest.unit = this;
+    dest.al = getSharedAbstractLocation();
     dest.position = coor;
     dest.position.apply(dir);
     dest.dir = dir;
@@ -130,46 +130,16 @@ const char *AbstractGridArea::getLookDescription(const Coordinates &coor) const
     return HasMudStrings::getLookDescription();
 }
 
-void AbstractGridArea::setRoomFlag(const Coordinates &coor, RoomFlag flag, bool value)
+FlagHandler<RoomFlag>& AbstractGridArea::getRoomFlags(const Coordinates& coor)
 {
     auto &t = ensure_tile(tileOverrides, coor);
-    t.roomFlags.set(flag, value);
+    return t.roomFlags;
 }
 
-bool AbstractGridArea::toggleRoomFlag(const Coordinates &coor, RoomFlag flag)
+FlagHandler<WhereFlag>& AbstractGridArea::getWhereFlags(const Coordinates& coor)
 {
     auto &t = ensure_tile(tileOverrides, coor);
-    return t.roomFlags.toggle(flag);
-}
-
-bool AbstractGridArea::getRoomFlag(const Coordinates &coor, RoomFlag flag) const
-{
-    if (auto t = find_tile(tileOverrides, coor))
-    {
-        return t->roomFlags.get(flag);
-    }
-    return false;
-}
-
-void AbstractGridArea::setWhereFlag(const Coordinates &coor, WhereFlag flag, bool value)
-{
-    auto &t = ensure_tile(tileOverrides, coor);
-    t.whereFlags.set(flag, value);
-}
-
-bool AbstractGridArea::toggleWhereFlag(const Coordinates &coor, WhereFlag flag)
-{
-    auto &t = ensure_tile(tileOverrides, coor);
-    return t.whereFlags.toggle(flag);
-}
-
-bool AbstractGridArea::getWhereFlag(const Coordinates &coor, WhereFlag flag) const
-{
-    if (auto t = find_tile(tileOverrides, coor))
-    {
-        return t->whereFlags.get(flag);
-    }
-    return false;
+    return t.whereFlags;
 }
 
 SectorType AbstractGridArea::getSectorType(const Coordinates &coor) const
@@ -189,7 +159,7 @@ SectorType AbstractGridArea::getSectorType(const Coordinates &coor) const
     return SectorType::inside; // mandated fallback
 }
 
-void AbstractGridArea::broadcastAt(const Coordinates &coor, const std::string &message) const
+void AbstractGridArea::broadcastAt(const Coordinates &coor, const std::string &message)
 {
     auto people = getPeople(coor);
     for (const auto &wp : people)

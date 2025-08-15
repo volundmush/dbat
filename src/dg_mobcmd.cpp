@@ -143,8 +143,8 @@ ACMD(do_masound)
     {
         if (ex == loc)
             continue;
-        ch->clearLocation();
-        ch->setLocation(ex);
+        ch->leaveLocation();
+        ch->moveToLocation(ex);
         sub_write(argument, ch, true, TO_ROOM);
         counter++;
     }
@@ -152,8 +152,8 @@ ACMD(do_masound)
     if (counter > 0)
     {
         // put the mob back where it started.
-        ch->clearLocation();
-        ch->setLocation(loc);
+        ch->leaveLocation();
+        ch->moveToLocation(loc);
     }
 }
 
@@ -540,7 +540,7 @@ ACMD(do_mload)
             mob_log(ch, "mload: bad mob vnum");
             return;
         }
-        mob->setLocation(rnum);
+        mob->moveToLocation(rnum);
         if (SCRIPT(ch))
         { /* It _should_ have, but it might be detached. */
             ch->setVariable("lastloaded", mob->getUID(true));
@@ -568,7 +568,7 @@ ACMD(do_mload)
             }
             else
             {
-                object->setLocation(ch);
+                object->moveToLocation(ch);
             }
             load_otrigger(object);
             return;
@@ -598,7 +598,7 @@ ACMD(do_mload)
             return;
         }
         /* neither char nor container found - just dump it in room */
-        object->setLocation(ch);
+        object->moveToLocation(ch);
         load_otrigger(object);
         return;
     }
@@ -724,8 +724,8 @@ ACMD(do_mgoto)
     if (FIGHTING(ch))
         stop_fighting(ch);
 
-    ch->clearLocation();
-    ch->setLocation(location);
+    ch->leaveLocation();
+    ch->moveToLocation(location);
     enter_wtrigger(ch->getRoom(), ch, -1);
 }
 
@@ -759,15 +759,15 @@ ACMD(do_mat)
     }
 
     auto original = ch->location;
-    ch->clearLocation();
-    ch->setLocation(location);
+    ch->leaveLocation();
+    ch->moveToLocation(location);
     command_interpreter(ch, argument);
 
     /* See if 'ch' still exists before continuing! Handles 'at XXXX quit' case. */
     if (ch->location == location)
     {
-        ch->clearLocation();
-        ch->setLocation(original);
+        ch->leaveLocation();
+        ch->moveToLocation(original);
     }
 }
 
@@ -820,8 +820,8 @@ ACMD(do_mteleport)
 
             if (valid_dg_target(vict, DG_ALLOW_GODS))
             {
-                vict->clearLocation();
-                vict->setLocation(target);
+                vict->leaveLocation();
+                vict->moveToLocation(target);
                 enter_wtrigger(ch->getRoom(), ch, -1);
             }
         }
@@ -844,8 +844,8 @@ ACMD(do_mteleport)
 
         if (valid_dg_target(ch, DG_ALLOW_GODS))
         {
-            vict->clearLocation();
-            vict->setLocation(target);
+            vict->leaveLocation();
+            vict->moveToLocation(target);
             enter_wtrigger(ch->getRoom(), ch, -1);
         }
     }
@@ -1316,7 +1316,7 @@ ACMD(do_mdoor)
             break;
         case 5: /* room        */
             if ((to_room = real_room(atoi(value))) != NOWHERE)
-                newexit->unit = get_room(to_room);
+                newexit->al = get_room(to_room)->shared_from_this();
             else
                 mob_log(ch, "mdoor: invalid door target");
             break;

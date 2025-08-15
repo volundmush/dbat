@@ -1,5 +1,4 @@
 #pragma once
-//#include "conf.h"
 #include "typestubs.h"
 
 // Some C libraires
@@ -42,6 +41,7 @@
 #include <stdexcept>
 #include <type_traits>
 #include <iostream>
+#include <experimental/memory>
 
 #define FMT_HEADER_ONLY
 #include "fmt/format.h"

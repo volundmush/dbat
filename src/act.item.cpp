@@ -716,7 +716,7 @@ ACMD(do_garden)
                 act("@g$n@G digs a proper sized hole in a planter and plants @g$p@G in it.@n", true, ch, obj, nullptr,
                     TO_ROOM);
                 obj->clearLocation();
-                obj->setLocation(ch);
+                obj->moveToLocation(ch);
                 ch->modCurVital(CharVital::stamina, -cost);
                 SET_OBJ_VAL(obj, VAL_PLANT_MAXMATURE, 6);
                 SET_OBJ_VAL(obj, VAL_PLANT_MATGOAL, 200);
@@ -848,14 +848,14 @@ ACMD(do_pack)
             {
                 extract_obj(obj);
                 packed = read_object(19085, VIRTUAL);
-                packed->setLocation(ch);
+                packed->moveToLocation(ch);
             }
             else
             {
                 int fnum = GET_OBJ_VNUM(obj) - 10;
                 packed = read_object(fnum, VIRTUAL);
                 extract_obj(obj);
-                packed->setLocation(ch);
+                packed->moveToLocation(ch);
             }
             return;
         }
@@ -952,7 +952,7 @@ ACMD(do_pack)
                     }
                 }
                 auto money_obj = create_money(money);
-                money_obj->setLocation(ch);
+                money_obj->moveToLocation(ch);
                 extract_obj(obj);
                 return;
             }
@@ -1087,7 +1087,7 @@ ACMD(do_deploy)
                 true, ch, furn, nullptr, TO_CHAR);
             act("@c$n@C clicks a capsule's button and tosses it to the floor. A puff of smoke erupts immediately and quickly dissipates to reveal, $p@C.@n",
                 true, ch, furn, nullptr, TO_ROOM);
-            furn->setLocation(ch);
+            furn->moveToLocation(ch);
             extract_obj(obj);
             return;
         }
@@ -1156,7 +1156,7 @@ ACMD(do_deploy)
         else
             SET_OBJ_VAL(door, VAL_HATCH_DEST, 18802);
         SET_OBJ_VAL(door, VAL_HATCH_DCSKILL, rnum);
-        door->setLocation(rnum);
+        door->moveToLocation(rnum);
         Object *key = read_object(rnum, VIRTUAL);
         ch->addToInventory(key);
         act("@WYou click the capsule and toss it to the ground. A large cloud of smoke erupts from the capsule and after it clears a house is visible in its place!@n",
@@ -1164,7 +1164,7 @@ ACMD(do_deploy)
         act("@C$n@W clicks a capsule and then tosses it to the ground. A large cloud of smoke erupts from the capsule and after it clears a house is visible in its place!@n",
             true, ch, nullptr, nullptr, TO_ROOM);
         Object *foun = read_object(18803, VIRTUAL);
-        foun->setLocation(rnum + 1);
+        foun->moveToLocation(rnum + 1);
         extract_obj(obj);
     }
     else
@@ -1417,7 +1417,7 @@ void loadDragonball(int vnum, int &foundFlag, bool &hunter1, bool &hunter2)
                 if ((r_num = real_mobile(DBALL_HUNTER1_VNUM)) == NOBODY)
                     return;
                 hunter = read_mobile(r_num, REAL);
-                hunter->setLocation(room);
+                hunter->moveToLocation(room);
                 hunter1 = true;
                 DBALL_HUNTER1 = room;
             }
@@ -1426,7 +1426,7 @@ void loadDragonball(int vnum, int &foundFlag, bool &hunter1, bool &hunter2)
                 if ((r_num = real_mobile(DBALL_HUNTER2_VNUM)) == NOBODY)
                     return;
                 hunter = read_mobile(r_num, REAL);
-                hunter->setLocation(room);
+                hunter->moveToLocation(room);
                 hunter2 = true;
                 DBALL_HUNTER2 = room;
             }
@@ -1436,7 +1436,7 @@ void loadDragonball(int vnum, int &foundFlag, bool &hunter1, bool &hunter2)
         else
         {
             k = read_object(vnum, VIRTUAL);
-            k->setLocation(room);
+            k->moveToLocation(room);
         }
     }
 }
@@ -2142,7 +2142,7 @@ ACMD(do_assemble)
     }
     else
     {
-        pObject->setLocation(ch);
+        pObject->moveToLocation(ch);
         pObject->setBaseStat<int>("timer", (GET_SKILL(ch, SKILL_SURVIVAL) * 0.12));
     }
 }
@@ -2234,7 +2234,7 @@ static void perform_put(Character *ch, Object *obj,
             (GET_OBJ_TYPE(cont) == ITEM_VEHICLE))
         {
             obj->clearLocation();
-            obj->setLocation(GET_OBJ_VAL(cont, VAL_CONTAINER_CAPACITY));
+            obj->moveToLocation(GET_OBJ_VAL(cont, VAL_CONTAINER_CAPACITY));
             if (GET_OBJ_TYPE(cont) == ITEM_PORTAL)
             {
                 act("What? $U$p disappears from $P in a puff of smoke!",
@@ -2391,7 +2391,7 @@ static void get_check_money(Character *ch, Object *obj)
         int diff = 0;
         diff = (GET_GOLD(ch) + value) - GOLD_CARRY(ch);
         obj = create_money(diff);
-        obj->setLocation(ch);
+        obj->moveToLocation(ch);
         ch->setBaseStat("money_carried", GOLD_CARRY(ch));
         return;
     }
@@ -2781,7 +2781,7 @@ static void perform_drop_gold(Character *ch, int amount,
                 ch->sendText("You throw some zenni into the air where it disappears in a puff of smoke!\r\n");
                 act("$n throws some gold into the air where it disappears in a puff of smoke!",
                     false, ch, nullptr, nullptr, TO_ROOM);
-                obj->setLocation(RDR);
+                obj->moveToLocation(RDR);
                 act("$p suddenly appears in a puff of orange smoke!", 0, nullptr, obj, nullptr, TO_ROOM);
             }
             else
@@ -2804,7 +2804,7 @@ static void perform_drop_gold(Character *ch, int amount,
                 act(buf, true, ch, nullptr, nullptr, TO_ROOM);
 
                 ch->sendText("You drop some zenni.\r\n");
-                obj->setLocation(ch);
+                obj->moveToLocation(ch);
                 if (GET_ADMLEVEL(ch) > 0)
                 {
                     send_to_imm("IMM DROP: %s dropped %s in room [%d]", GET_NAME(ch), obj->getShortDescription(),
@@ -2928,7 +2928,7 @@ static int perform_drop(Character *ch, Object *obj,
         {
             act("$p plops down on some cooled lava!", false, ch, obj, nullptr, TO_CHAR);
             act("$p plops down on some cooled lava!", false, ch, obj, nullptr, TO_ROOM);
-            obj->setLocation(ch);
+            obj->moveToLocation(ch);
             if (GET_ADMLEVEL(ch) > 0)
             {
                 send_to_imm("IMM DROP: %s dropped %s in room [%d]", GET_NAME(ch), obj->getShortDescription(),
@@ -2939,7 +2939,7 @@ static int perform_drop(Character *ch, Object *obj,
         }
         else
         {
-            obj->setLocation(ch);
+            obj->moveToLocation(ch);
             if (GET_ADMLEVEL(ch) > 0)
             {
                 send_to_imm("IMM DROP: %s dropped %s in room [%d]", GET_NAME(ch), obj->getShortDescription(),
@@ -2950,7 +2950,7 @@ static int perform_drop(Character *ch, Object *obj,
         }
         return (0);
     case SCMD_DONATE:
-        obj->setLocation(RDR);
+        obj->moveToLocation(RDR);
         act("$p suddenly appears in a puff a smoke!", false, nullptr, obj, nullptr, TO_ROOM);
         return (0);
     case SCMD_JUNK:
@@ -3148,7 +3148,7 @@ static void perform_give(Character *ch, Character *vict,
             act("$n@n drops $p because you can't carry anymore.", true, ch, obj, vict, TO_VICT);
             act("$n@n drops $p on the ground since $N's unable to carry it.", true, ch, obj, vict, TO_NOTVICT);
             obj->clearLocation();
-            obj->setLocation(ch);
+            obj->moveToLocation(ch);
         }
         return;
     }
@@ -3166,7 +3166,7 @@ static void perform_give(Character *ch, Character *vict,
             act("$n@n drops $p because you can't carry anymore.", true, ch, obj, vict, TO_VICT);
             act("$n@n drops $p on the ground since $N's unable to carry it.", true, ch, obj, vict, TO_NOTVICT);
             obj->clearLocation();
-            obj->setLocation(ch);
+            obj->moveToLocation(ch);
         }
         return;
     }
@@ -3178,7 +3178,7 @@ static void perform_give(Character *ch, Character *vict,
             act("$n@n drops $p because you can't carry anymore.", true, ch, obj, vict, TO_VICT);
             act("$n@n drops $p on the ground since $N's unable to carry it.", true, ch, obj, vict, TO_NOTVICT);
             obj->clearLocation();
-            obj->setLocation(ch);
+            obj->moveToLocation(ch);
         }
         return;
     }

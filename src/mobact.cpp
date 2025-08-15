@@ -69,7 +69,7 @@ void mobile_activity(uint64_t heartPulse, double deltaTime)
             continue;
 
         // copy the set.
-        auto npclist = z.npcsInZone;
+        auto npclist = z.npcsInZone.snapshot_weak();
 
         for (auto ch : filter_raw(npclist))
         {

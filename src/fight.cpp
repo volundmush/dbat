@@ -928,7 +928,7 @@ void remove_limb(Character *vict, int num)
         SET_OBJ_VAL(body_part, v, 100);
     }
     body_part->setBaseStat<weight_t>("weight", rand_number(4, 10));
-    body_part->setLocation(vict);
+    body_part->moveToLocation(vict);
 }
 
 /* Weapon attack texts */
@@ -1755,7 +1755,7 @@ static void make_pcorpse(Character *ch)
         while (ashcount--)
         {
             auto ashes = read_object(1305, VIRTUAL);
-            ashes->setLocation(ch);
+            ashes->moveToLocation(ch);
         }
     }
 
@@ -1803,7 +1803,7 @@ static void make_pcorpse(Character *ch)
         ch->setBaseStat("money_carried", 0);
     }
 
-    corpse->setLocation(ch);
+    corpse->moveToLocation(ch);
 }
 
 /* This handles how corpses are viewed. How many limbs they have. If they were *
@@ -1949,23 +1949,23 @@ static void make_corpse(Character *ch, Character *tch)
         if (rand_number(1, 3) == 2)
         {
             ashes = read_object(1305, VIRTUAL);
-            ashes->setLocation(ch);
+            ashes->moveToLocation(ch);
             ashes = read_object(1305, VIRTUAL);
-            ashes->setLocation(ch);
+            ashes->moveToLocation(ch);
             ashes = read_object(1305, VIRTUAL);
-            ashes->setLocation(ch);
+            ashes->moveToLocation(ch);
         }
         else if (rand_number(1, 2) == 2)
         {
             ashes = read_object(1305, VIRTUAL);
-            ashes->setLocation(ch);
+            ashes->moveToLocation(ch);
             ashes = read_object(1305, VIRTUAL);
-            ashes->setLocation(ch);
+            ashes->moveToLocation(ch);
         }
         else
         {
             ashes = read_object(1305, VIRTUAL);
-            ashes->setLocation(ch);
+            ashes->moveToLocation(ch);
         }
     }
 
@@ -2094,7 +2094,7 @@ static void make_corpse(Character *ch, Character *tch)
             ch->setBaseStat("money_carried", 0);
         }
     }
-    corpse->setLocation(ch);
+    corpse->moveToLocation(ch);
 }
 
 void loadmap(Character *ch)
@@ -2352,7 +2352,7 @@ void raw_kill(Character *ch, Character *killer)
             ch->location.sendText("@YThe one star dragon ball falls to the ground!@n\r\n");
 
             obj = read_object(20, VIRTUAL);
-            obj->setLocation(ch);
+            obj->moveToLocation(ch);
             shadowed = true;
         }
         else if (IS_SHADOW_DRAGON2(ch))
@@ -2362,7 +2362,7 @@ void raw_kill(Character *ch, Character *killer)
             ch->location.sendText("@YThe two star dragon ball falls to the ground!@n\r\n");
 
             obj = read_object(21, VIRTUAL);
-            obj->setLocation(ch);
+            obj->moveToLocation(ch);
             shadowed = true;
         }
         else if (IS_SHADOW_DRAGON3(ch))
@@ -2372,7 +2372,7 @@ void raw_kill(Character *ch, Character *killer)
             ch->location.sendText("@YThe three star dragon ball falls to the ground!@n\r\n");
 
             obj = read_object(22, VIRTUAL);
-            obj->setLocation(ch);
+            obj->moveToLocation(ch);
             shadowed = true;
         }
         else if (IS_SHADOW_DRAGON4(ch))
@@ -2382,7 +2382,7 @@ void raw_kill(Character *ch, Character *killer)
             ch->location.sendText("@YThe four star dragon ball falls to the ground!@n\r\n");
 
             obj = read_object(23, VIRTUAL);
-            obj->setLocation(ch);
+            obj->moveToLocation(ch);
             shadowed = true;
         }
         else if (IS_SHADOW_DRAGON5(ch))
@@ -2392,7 +2392,7 @@ void raw_kill(Character *ch, Character *killer)
             ch->location.sendText("@YThe five star dragon ball falls to the ground!@n\r\n");
 
             obj = read_object(24, VIRTUAL);
-            obj->setLocation(ch);
+            obj->moveToLocation(ch);
             shadowed = true;
         }
         else if (IS_SHADOW_DRAGON6(ch))
@@ -2402,7 +2402,7 @@ void raw_kill(Character *ch, Character *killer)
             ch->location.sendText("@YThe six star dragon ball falls to the ground!@n\r\n");
 
             obj = read_object(25, VIRTUAL);
-            obj->setLocation(ch);
+            obj->moveToLocation(ch);
             shadowed = true;
         }
         else if (IS_SHADOW_DRAGON7(ch))
@@ -2412,7 +2412,7 @@ void raw_kill(Character *ch, Character *killer)
             ch->location.sendText("@YThe seven star dragon ball falls to the ground!@n\r\n");
 
             obj = read_object(26, VIRTUAL);
-            obj->setLocation(ch);
+            obj->moveToLocation(ch);
             shadowed = true;
         }
         make_corpse(ch, killer);
@@ -2587,8 +2587,8 @@ void die(Character *ch, Character *killer)
                 {
                     send_to_all("@R%s@r dies in the water of the Arena and is disqualified!@n\r\n", GET_NAME(ch));
                 }
-                ch->clearLocation();
-                ch->setLocation(17875);
+                ch->leaveLocation();
+                ch->moveToLocation(17875);
                 ch->modCurVitalDam(CharVital::health, 1);
                 ch->lookAtLocation();
                 final_combat_resolve(ch);

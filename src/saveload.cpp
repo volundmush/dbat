@@ -379,7 +379,7 @@ void load_dgscripts(const std::filesystem::path &loc)
             auto r = std::make_shared<DgScript>();
             d["data"].get_to(*r);
             u->scripts.emplace(vn, r);
-            r->owner = u.get();
+            r->owner.reset(u.get());
             u->trigger_types |= GET_TRIG_TYPE(r);
         }
     }
@@ -396,7 +396,7 @@ void load_dgscripts(const std::filesystem::path &loc)
             auto r = std::make_shared<DgScript>();
             d["data"].get_to(*r);
             u->scripts.emplace(vn, r);
-            r->owner = u.get();
+            r->owner.reset(u.get());
             u->trigger_types |= GET_TRIG_TYPE(r);
         }
     }
@@ -413,7 +413,7 @@ void load_dgscripts(const std::filesystem::path &loc)
             auto r = std::make_shared<DgScript>();
             d["data"].get_to(*r);
             u->scripts.emplace(vn, r);
-            r->owner = u.get();
+            r->owner.reset(u.get());
             u->trigger_types |= GET_TRIG_TYPE(r);
         }
     }
@@ -730,6 +730,10 @@ void load_globaldata(const std::filesystem::path &loc)
     {
         j["lastObjectID"].get_to(lastObjectID);
     }
+    if (j.contains("lastStructureID"))
+    {
+        j["lastStructureID"].get_to(lastStructureID);
+    }
 }
 
 void dump_globaldata(const std::filesystem::path &loc)
@@ -742,6 +746,7 @@ void dump_globaldata(const std::filesystem::path &loc)
     j["lastCharacterID"] = lastCharacterID;
     j["lastAccountID"] = lastAccountID;
     j["lastObjectID"] = lastObjectID;
+    j["lastStructureID"] = lastStructureID;
 
     dump_to_file(loc, "globaldata.json", j);
 }
@@ -849,7 +854,7 @@ void from_json(const json &j, Location &loc)
             auto u = j.at("loc").get<std::string>();
             auto locid = resolveLocID(u);
             if (locid)
-                loc.unit = locid.get();
+                loc.al = locid;
             else
             {
                 throw std::runtime_error(fmt::format("Location has invalid unit: {}", u));
@@ -864,6 +869,24 @@ void from_json(const json &j, Location &loc)
     catch (const std::exception &e)
     {
         throw std::runtime_error(fmt::format("Error parsing Location JSON: {}\r\nJSON DATA: {}", e.what(), jdumps(j)));
+    }
+}
+
+void to_json(json &j, const HasLocation &hl) {
+    if(hl.location) {
+        j["loc"] = hl.location.getLocID();
+    }
+    if(!hl.registeredLocations.empty()) {
+        j["registeredLocations"] = hl.registeredLocations;
+    }
+}
+
+void from_json(const json &j, HasLocation &hl) {
+    if(j.contains("loc")) {
+        hl.location = j["loc"].get<Location>();
+    }
+    if(j.contains("registeredLocations")) {
+        hl.registeredLocations = j["registeredLocations"].get<std::unordered_map<std::string, Location>>();
     }
 }
 
@@ -918,18 +941,13 @@ void from_json(const json &j, Destination &e)
 void to_json(json &j, const Room &r)
 {
     // we need to call the to_json for unit_data...
-    to_json(j, static_cast<const HasVnum &>(r));
-    to_json(j, static_cast<const HasVariables &>(r));
+    to_json(j, static_cast<const HasDgScripts &>(r));
     to_json(j, static_cast<const HasMudStrings &>(r));
     to_json(j, static_cast<const HasExtraDescriptions &>(r));
     to_json(j, static_cast<const HasResetCommands &>(r));
+    to_json(j, static_cast<const HasZone &>(r));
     // to_json(j, static_cast<const HasStats&>(r));
     // to_json(j, static_cast<const HasAffectFlags&>(r));
-
-    if (r.running_scripts)
-        j["running_scripts"] = r.running_scripts.value();
-
-    j["zone"] = r.zone->number;
 
     j["sector_type"] = r.sector_type;
 
@@ -946,22 +964,13 @@ void to_json(json &j, const Room &r)
 void from_json(const json &j, Room &r)
 {
     // call the from_json of unit_data...
-    from_json(j, static_cast<HasVnum &>(r));
-    from_json(j, static_cast<HasVariables &>(r));
+    from_json(j, static_cast<HasDgScripts &>(r));
     from_json(j, static_cast<HasMudStrings &>(r));
     from_json(j, static_cast<HasExtraDescriptions &>(r));
     from_json(j, static_cast<HasResetCommands &>(r));
+    from_json(j, static_cast<HasZone &>(r));
     // from_json(j, static_cast<HasStats&>(r));
     // from_json(j, static_cast<HasAffectFlags&>(r));
-
-    if (j.contains("running_scripts"))
-    {
-        r.running_scripts.emplace();
-        j["running_scripts"].get_to(r.running_scripts.value());
-    }
-
-    if (j.contains("zone"))
-        r.zone = &(zone_table.at(j["zone"].get<zone_vnum>()));
 
     if (j.contains("sector_type"))
         r.sector_type = j["sector_type"];
@@ -984,8 +993,81 @@ void load_rooms(const std::filesystem::path &loc)
         auto r = std::make_shared<Room>();
         j.get_to(*r);
         world.emplace(vn, r);
-        r->zone->rooms.push_back(r);
+        r->zone->rooms.add(r);
         r->activate();
+    }
+}
+
+void load_areas_initial(const std::filesystem::path &loc)
+{
+    for (auto j : load_from_file(loc, "areas.json"))
+    {
+        auto vn = j["vn"].get<int>();
+        auto r = std::make_shared<Area>();
+        j.get_to(*r);
+        areas.emplace(vn, r);
+    }
+}
+
+void load_areas_finish(const std::filesystem::path &loc)
+{
+    for (auto j : load_from_file(loc, "areas.json"))
+    {   
+        if(!j.contains("tileOverrides"))
+            continue;
+
+        auto vn = j["vn"].get<int>();
+        if(auto cf = areas.find(vn); cf != areas.end())
+        {
+            auto &to = cf->second->tileOverrides;
+            j.at("tileOverrides").get_to(to);
+        }
+
+    }
+}
+
+void load_grid_templates(const std::filesystem::path &loc)
+{
+    for (auto j : load_from_file(loc, "gridTemplates.json"))
+    {
+        auto vn = j["vn"].get<int>();
+        auto p = gridTemplates.emplace(vn, j);
+    }
+}
+
+void load_structures_initial(const std::filesystem::path &loc)
+{
+    for (auto j : load_from_file(loc, "structures.json"))
+    {
+        auto id = j["id"].get<int64_t>();
+        auto r = std::make_shared<Structure>();
+        j.get_to(*r);
+        structures.emplace(id, r);
+    }
+}
+
+void load_structures_finish(const std::filesystem::path &loc)
+{
+    for (auto j : load_from_file(loc, "structures.json"))
+    {
+        auto id = j["id"].get<int>();
+
+        auto cf = structures.find(id);
+        if(cf == structures.end()) continue;
+
+        if(j.contains("tileOverrides")) {
+            auto &to = cf->second->tileOverrides;
+            j.at("tileOverrides").get_to(to);
+        }
+
+        if (j.contains("hasLocation"))
+        {
+            from_json(j["hasLocation"], *cf->second);
+            Location l = cf->second->location;
+            if(l) {
+                cf->second->moveToLocation(l);
+            }
+        }
     }
 }
 
@@ -1031,6 +1113,45 @@ static void dump_rooms(const std::filesystem::path &loc)
     dump_to_file(loc, "rooms.json", rooms);
 }
 
+static void dump_grid_templates(const std::filesystem::path &loc)
+{
+    json jdata;
+
+    for (auto &[v, r] : gridTemplates)
+    {
+        jdata.push_back(r);
+    }
+    dump_to_file(loc, "gridTemplates.json", jdata);
+}
+
+static void dump_areas(const std::filesystem::path &loc)
+{
+    json jdata;
+
+    for (auto &[v, r] : areas)
+    {
+        jdata.push_back(*r);
+    }
+    dump_to_file(loc, "areas.json", jdata);
+}
+
+static void dump_structures(const std::filesystem::path &loc)
+{
+    json jdata;
+
+    for (auto &[v, r] : structures)
+    {   
+        auto j = json::object();
+        auto j3 = json::object();
+        j["id"] = r->id;
+        j["data"] = *r;
+        to_json(j3, static_cast<const HasLocation&>(*r));
+        j["hasLocation"] = j3;
+        jdata.push_back(j);
+    }
+    dump_to_file(loc, "structures.json", jdata);
+}
+
 // Object serialize/deserialize...
 
 void to_json(json &j, const ObjectPrototype &o)
@@ -1055,9 +1176,8 @@ void to_json(json &j, const ObjectPrototype &o)
 void to_json(json &j, const Object &o)
 {
     to_json(j, static_cast<const HasID &>(o));
-    to_json(j, static_cast<const HasVnum &>(o));
+    to_json(j, static_cast<const HasDgScripts &>(o));
     to_json(j, static_cast<const picky_data &>(o));
-    to_json(j, static_cast<const HasVariables &>(o));
     to_json(j, static_cast<const HasMudStrings &>(o));
     to_json(j, static_cast<const HasExtraDescriptions &>(o));
     to_json(j, static_cast<const HasStats &>(o));
@@ -1134,8 +1254,7 @@ void from_json(const json &j, Object &o)
 {
     from_json(j, static_cast<picky_data &>(o));
     from_json(j, static_cast<HasID &>(o));
-    from_json(j, static_cast<HasVnum &>(o));
-    from_json(j, static_cast<HasVariables &>(o));
+    from_json(j, static_cast<HasDgScripts &>(o));
     from_json(j, static_cast<HasMudStrings &>(o));
     from_json(j, static_cast<HasExtraDescriptions &>(o));
     from_json(j, static_cast<HasStats &>(o));
@@ -1210,10 +1329,6 @@ static json serialize_obj_relations(const Object *o)
     {
         j["container"] = c->id;
     }
-    else if (auto l = o->location)
-    {
-        j["location"] = l;
-    }
     else if (auto c = o->getCarriedBy())
     {
         j["carried_by"] = c->id;
@@ -1237,33 +1352,26 @@ static void deserialize_obj_relations(Object *o, const json &j)
     }
     if (j.contains("fellow_wall"))
     {
-        auto check = uniqueObjects.find(j["fellow_wall"].get<int64_t>());
+        auto check = uniqueObjects.find(j["fellow_wall"].get<int>());
         if (check != uniqueObjects.end())
             o->fellow_wall = check->second.get();
     }
 
-    if (j.contains("location"))
+    if (j.contains("container"))
     {
-        auto jloc = j["location"];
-        Location loc;
-        jloc.get_to(loc);
-        o->setLocation(loc);
-    }
-    else if (j.contains("container"))
-    {
-        auto check = uniqueObjects.find(j["container"].get<int64_t>());
+        auto check = uniqueObjects.find(j["container"].get<int>());
         if (check != uniqueObjects.end())
             check->second->addToInventory(o);
     }
     else if (j.contains("carried_by"))
     {
-        auto check = uniqueCharacters.find(j["carried_by"].get<int64_t>());
+        auto check = uniqueCharacters.find(j["carried_by"].get<int>());
         if (check != uniqueCharacters.end())
             check->second->addToInventory(o);
     }
     else if (j.contains("worn_by"))
     {
-        auto check = uniqueCharacters.find(j["worn_by"].get<int64_t>());
+        auto check = uniqueCharacters.find(j["worn_by"].get<int>());
         if (check != uniqueCharacters.end())
         {
             check->second->addToEquip(o, j["worn_on"].get<int>());
@@ -1275,12 +1383,20 @@ void load_items_finish(const std::filesystem::path &loc)
 {
     for (auto j : load_from_file(loc, "items.json"))
     {
-        auto id = j["id"].get<int64_t>();
+        auto id = j["id"].get<int>();
         if (auto cf = uniqueObjects.find(id); cf != uniqueObjects.end())
         {
             if (auto i = cf->second)
             {
-                deserialize_obj_relations(i.get(), j["relations"]);
+                if(j.contains("relations"))
+                    deserialize_obj_relations(i.get(), j["relations"]);
+                if(j.contains("hasLocation")) {
+                    from_json(j["hasLocation"], *i);
+                    Location l = i->location;
+                    if(l) {
+                        cf->second->moveToLocation(l);
+                    }
+                }
             }
         }
     }
@@ -1293,9 +1409,12 @@ static void dump_items(const std::filesystem::path &loc)
     for (auto &[v, r] : uniqueObjects)
     {
         json j2;
+        auto j3 = json::object();
         j2["id"] = v;
         j2["data"] = *r;
         j2["relations"] = serialize_obj_relations(r.get());
+        to_json(j3, static_cast<const HasLocation&>(*r));
+        j2["hasLocation"] = j3;
         j.push_back(j2);
     }
     dump_to_file(loc, "items.json", j);
@@ -1390,6 +1509,137 @@ void to_json(json &j, const CharacterPrototype &c)
         j["mob_specials"] = ms;
 }
 
+void to_json(json& j, const HasZone& p) {
+    if(p.zone) j["zone"] = p.zone->number;
+}
+
+void from_json(const json& j, HasZone& p) {
+    if (j.contains("zone"))
+        p.zone.reset(&zone_table.at(j["zone"].get<zone_vnum>()));
+}
+
+void to_json(json& j, const HasDgScripts& p) {
+    to_json(j, static_cast<const HasVariables&>(p));
+    to_json(j, static_cast<const HasVnum&>(p));
+    j["type"] = p.type;
+    if(p.running_scripts) j["running_scripts"] = *p.running_scripts;
+}
+
+void from_json(const json& j, HasDgScripts& p) {
+    from_json(j, static_cast<HasVariables&>(p));
+    from_json(j, static_cast<HasVnum&>(p));
+    if (j.contains("type"))
+        p.type = j["type"];
+    if (j.contains("running_scripts"))
+        p.running_scripts = j["running_scripts"].get<std::vector<vnum>>();
+}
+
+void to_json(json& j, const TileOverride& p) {
+    to_json(j, static_cast<const HasResetCommands&>(p));
+    j["strings"] = p.strings;
+    j["roomFlags"] = p.roomFlags;
+    j["whereFlags"] = p.whereFlags;
+    j["damage"] = p.damage;
+    j["groundEffect"] = p.groundEffect;
+    j["environment"] = p.environment;
+    j["exits"] = p.exits;
+}
+
+void from_json(const json& j, TileOverride& p) {
+    from_json(j, static_cast<HasResetCommands&>(p));
+    if (j.contains("strings"))
+        p.strings = j["strings"].get<std::unordered_map<std::string, std::string>>();
+    if (j.contains("roomFlags"))
+        p.roomFlags = j["roomFlags"].get<FlagHandler<RoomFlag>>();
+    if (j.contains("whereFlags"))
+        p.whereFlags = j["whereFlags"].get<FlagHandler<WhereFlag>>();
+    if (j.contains("damage"))
+        p.damage = j["damage"].get<int>();
+    if (j.contains("groundEffect"))
+        p.groundEffect = j["groundEffect"].get<int>();
+    if (j.contains("environment"))
+        p.environment = j["environment"].get<std::unordered_map<int, double>>();
+    if (j.contains("exits"))
+        p.exits = j["exits"].get<std::map<Direction, Destination>>();
+}
+
+void to_json(json& j, const GridShared& p) {
+    to_json(j, static_cast<const HasMudStrings&>(p));
+    if(p.defaultGroundSector) j["defaultGroundSector"] = p.defaultGroundSector.value();
+    if(p.defaultUnderSector) j["defaultUnderSector"] = p.defaultUnderSector.value();
+    if(p.defaultSkySector) j["defaultSkySector"] = p.defaultSkySector.value();
+    if(p.minX) j["minX"] = p.minX.value();
+    if(p.minY) j["minY"] = p.minY.value();
+    if(p.minZ) j["minZ"] = p.minZ.value();
+    if(p.maxX) j["maxX"] = p.maxX.value();
+    if(p.maxY) j["maxY"] = p.maxY.value();
+    if(p.maxZ) j["maxZ"] = p.maxZ.value();
+
+    for(const auto& [coor, over] : p.tileOverrides) {
+        json tileJson;
+        tileJson["coor"] = coor;
+        tileJson["over"] = over;
+        j["tileOverrides"].push_back(tileJson);
+    }
+}
+
+void from_json(const json& j, GridShared& p) {
+    from_json(j, static_cast<HasMudStrings&>(p));
+    if (j.contains("defaultGroundSector"))
+        p.defaultGroundSector = j["defaultGroundSector"].get<SectorType>();
+    if (j.contains("defaultUnderSector"))
+        p.defaultUnderSector = j["defaultUnderSector"].get<SectorType>();
+    if (j.contains("defaultSkySector"))
+        p.defaultSkySector = j["defaultSkySector"].get<SectorType>();
+    if (j.contains("minX"))
+        p.minX = j["minX"].get<int>();
+    if (j.contains("minY"))
+        p.minY = j["minY"].get<int>();
+    if (j.contains("minZ"))
+        p.minZ = j["minZ"].get<int>();
+    if (j.contains("maxX"))
+        p.maxX = j["maxX"].get<int>();
+    if (j.contains("maxY"))
+        p.maxY = j["maxY"].get<int>();
+    if (j.contains("maxZ"))
+        p.maxZ = j["maxZ"].get<int>();
+}
+
+void to_json(json& j, const GridTemplate& p) {
+    to_json(j, static_cast<const GridShared&>(p));
+    to_json(j, static_cast<const HasVnum&>(p));
+
+}
+
+void from_json(const json& j, GridTemplate& p) {
+    from_json(j, static_cast<GridShared&>(p));
+    from_json(j, static_cast<HasVnum&>(p));
+}
+
+void to_json(json& j, const Area& p) {
+    to_json(j, static_cast<const GridShared&>(p));
+    to_json(j, static_cast<const HasVnum&>(p));
+    to_json(j, static_cast<const HasZone&>(p));
+
+}
+
+void from_json(const json& j, Area& p) {
+    from_json(j, static_cast<GridShared&>(p));
+    from_json(j, static_cast<HasVnum&>(p));
+    from_json(j, static_cast<HasZone&>(p));
+}
+
+void to_json(json& j, const Structure& p) {
+    to_json(j, static_cast<const GridShared&>(p));
+    to_json(j, static_cast<const HasID&>(p));
+
+}
+
+void from_json(const json& j, Structure& p) {
+    from_json(j, static_cast<GridShared&>(p));
+    from_json(j, static_cast<HasID&>(p));
+}
+
 void from_json(const json &j, CharacterPrototype &c)
 {
     from_json(j, static_cast<ThingPrototype &>(c));
@@ -1418,8 +1668,7 @@ void from_json(const json &j, CharacterPrototype &c)
 void to_json(json &j, const Character &c)
 {
     to_json(j, static_cast<const HasID &>(c));
-    to_json(j, static_cast<const HasVnum &>(c));
-    to_json(j, static_cast<const HasVariables &>(c));
+    to_json(j, static_cast<const HasDgScripts &>(c));
     to_json(j, static_cast<const HasMudStrings &>(c));
     // to_json(j, static_cast<const HasExtraDescriptions&>(c));
     to_json(j, static_cast<const HasStats &>(c));
@@ -1542,8 +1791,7 @@ void to_json(json &j, const Character &c)
 void from_json(const json &j, Character &c)
 {
     from_json(j, static_cast<HasID &>(c));
-    from_json(j, static_cast<HasVnum &>(c));
-    from_json(j, static_cast<HasVariables &>(c));
+    from_json(j, static_cast<HasDgScripts &>(c));
     from_json(j, static_cast<HasMudStrings &>(c));
     // from_json(j, static_cast<HasExtraDescriptions&>(c));
     from_json(j, static_cast<HasStats &>(c));
@@ -1682,40 +1930,19 @@ void from_json(const json &j, Character &c)
         c.permForms = j["permForms"].get<std::unordered_set<Form>>();
 }
 
-static json serialize_char_location(Character *ch)
-{
-    auto j = json::object();
-
-    // PCs have special handling. NPCs just use the normal approach.
-    if (!IS_NPC(ch))
-    {
-        auto r = ch->location.getVnum() != NOWHERE ? ch->location.getVnum() : ch->getBaseStat<room_vnum>("was_in_room");
-        if (!ch->desc)
-        {
-            r = ch->getBaseStat<room_vnum>("load_room");
-        }
-        j["load_room"] = ch->normalizeLoadRoom(r);
-    }
-
-    return j;
-}
-
 static void dump_characters(const std::filesystem::path &loc)
 {
-    json j;
+    json j = json::array();
 
     for (auto &[v, r] : uniqueCharacters)
     {
-        json j2;
+        json j2 = json::object();
+        auto j3 = json::object();
         j2["id"] = v;
         j2["data"] = *r;
-        if (r->location)
-        {
-            // PCs who aren't logged in won't have a valid location.
-            // So we only care about those who do.
-            j2["location"] = r->location;
-        }
-        // j2["relations"] = r->serializeRelations();
+
+        to_json(j3, static_cast<const HasLocation&>(*r));
+        j2["hasLocation"] = j3;
         j.push_back(j2);
     }
     dump_to_file(loc, "characters.json", j);
@@ -1768,7 +1995,7 @@ void load_characters_finish(const std::filesystem::path &loc)
         {
             Location loc;
             j.at("location").get_to(loc);
-            cf->second->setLocation(loc);
+            cf->second->moveToLocation(loc);
         }
     }
 }
@@ -2118,10 +2345,10 @@ void runSave()
         std::vector<std::thread> threads;
         for (const auto func : {dump_accounts, dump_characters,
                                 dump_players, dump_dgscripts, dump_help, dump_assemblies,
-                                dump_items, dump_globaldata,
+                                dump_items, dump_globaldata, dump_grid_templates,
                                 dump_rooms, dump_exits, dump_item_prototypes,
-                                dump_npc_prototypes, dump_shops,
-                                dump_guilds, dump_zones,
+                                dump_npc_prototypes, dump_shops, dump_areas,
+                                dump_guilds, dump_zones, dump_structures,
                                 dump_dgscript_prototypes})
         {
             threads.emplace_back([func, &tempPath]()

@@ -1,7 +1,6 @@
 //
 // Created by basti on 10/24/2021.
 //
-#include <boost/algorithm/string.hpp>
 
 #include "dbat/structs.h"
 #include "dbat/races.h"
@@ -22,6 +21,192 @@
 #include "dbat/weather.h"
 #include "dbat/attack.h"
 #include "dbat/modifiers.h"
+
+Character::Character()
+{
+    type = UnitType::character;
+}
+
+std::shared_ptr<Character> Character::shared()
+{
+    return shared_from_this();
+}
+
+void Character::activate()
+{
+    if (active)
+    {
+        basic_mud_log("Attempted to activate an already active character.");
+        return;
+    }
+    active = true;
+    std::unordered_set<std::string> services;
+    auto sh = shared_from_this();
+
+    if (auto vn = getVnum(); mob_proto.contains(vn))
+    {
+        services.insert(fmt::format("vnum_{}", vn));
+    }
+
+    assign_triggers(this, MOB_TRIGGER);
+
+    if (!scripts.empty())
+    {
+        activateScripts();
+
+        if (SCRIPT_TYPES(this) & MTRIG_RANDOM)
+            services.insert("randomTriggers");
+        if (SCRIPT_TYPES(this) & MTRIG_TIME)
+            services.insert("timeTriggers");
+    }
+
+    if (!IS_NPC(this))
+        services.insert("players");
+
+    if (PLR_FLAGGED(this, PLR_GOOP))
+        services.insert("goopTimeService");
+    if (AFF_FLAGGED(this, AFF_POISON))
+        services.insert("poisoned");
+    if (PLR_FLAGGED(this, PLR_AURALIGHT))
+        services.insert("auralight");
+    if (ABSORBING(this))
+        services.insert("androidAbsorbSystem");
+    if (character_flags.get(CharacterFlag::powering_up))
+        services.insert("powerupService");
+    if (!isFullVital(CharVital::health))
+        services.insert("characterHealthRecovery");
+    if (!isFullVital(CharVital::ki))
+        services.insert("characterKiRecovery");
+    if (!isFullVital(CharVital::stamina))
+        services.insert("characterStaminaRecovery");
+    if (!isFullVital(CharVital::lifeforce))
+        services.insert("characterLifeforceRecovery");
+    if (!IS_ANDROID(this) && GET_LIFEPERC(this) > 0)
+    {
+        auto meter = getCurVitalMeterPercent(CharVital::health) * 100.0;
+        auto perc = GET_LIFEPERC(this);
+        if (meter < perc)
+        {
+            services.insert("lifeforceRecovery");
+        }
+    }
+    if (GET_CHARGE(this) || PLR_FLAGGED(this, PLR_CHARGE))
+        services.insert("kiChargeSystem");
+    if (PLR_FLAGGED(this, PLR_FISHING))
+        services.insert("goneFishing");
+    if (form != Form::base || technique != Form::base)
+        services.insert("transforms");
+    services.insert("active");
+
+    if (affected)
+    {
+        services.insert("affected");
+    }
+
+    if (affectedv)
+    {
+        services.insert("affectedv");
+    }
+
+    for (const auto &s : services)
+        characterSubscriptions.subscribe(s, sh);
+
+    activateInventory();
+    activateEquipment();
+}
+
+void Character::deactivate()
+{
+    if (!active)
+        return;
+    active = false;
+    Character *temp = nullptr;
+
+    for (auto &[vn, sc] : scripts)
+    {
+        sc->deactivate();
+    }
+
+    auto sh = shared_from_this();
+    characterSubscriptions.unsubscribeFromAll(sh);
+    deactivateInventory();
+    deactivateEquipment();
+}
+
+bool Character::isActive() const
+{
+    return active;
+}
+
+bool Character::isProvidingLight()
+{
+    if (!IS_NPC(this) && PLR_FLAGGED(this, PLR_AURALIGHT))
+        return true;
+    for (auto i = 0; i < NUM_WEARS; i++)
+        if (auto e = GET_EQ(this, i); e)
+            if (e->isProvidingLight())
+                return true;
+    return false;
+}
+
+double Character::currentGravity()
+{
+    return location.getEnvironment(ENV_GRAVITY);
+}
+
+void Character::ageBy(double addedTime)
+{
+    this->time.seconds_aged += addedTime;
+}
+
+void Character::setAge(double newAge)
+{
+    this->time.seconds_aged = newAge * SECS_PER_GAME_YEAR;
+}
+
+CharacterPrototype *Character::getProto() const
+{
+    if (mob_proto.contains(vn))
+    {
+        return &mob_proto.at(vn);
+    }
+    return nullptr;
+}
+
+Character::~Character()
+{
+    if (title)
+        free(title);
+    struct affected_type *cmtemp;
+
+    while (affected)
+        REMOVE_FROM_LIST(affected, this->affected, next, cmtemp);
+
+    while (affectedv)
+        REMOVE_FROM_LIST(affectedv, this->affectedv, next, cmtemp);
+
+    free_followers(followers);
+
+    if (desc)
+        desc->character = nullptr;
+
+    extract_script(this, type);
+}
+
+const char *Character::getDgName() const
+{
+    return HasMudStrings::getName();
+}
+
+std::vector<trig_vnum> Character::getProtoScript() const
+{
+    auto v = getVnum();
+    if (mob_proto.contains(v))
+    {
+        return mob_proto.at(v).proto_script;
+    }
+    return {};
+}
 
 std::string Character::juggleRaceName(bool capitalized)
 {
@@ -63,12 +248,9 @@ void Character::restore(bool announce)
     restoreVital(CharVital::ki);
 }
 
-void Character::lookAtLocation(const Location &loc)
+void Character::lookAtLocation(Location &loc)
 {
-    if (auto r = getRoom())
-    {
-        look_at_room(r, this, 0);
-    }
+    loc.displayLookFor(this);
 }
 
 void Character::lookAtLocation()
@@ -86,15 +268,15 @@ void Character::resurrect(ResurrectionMode mode)
         affect_flags.set(f, false);
     player_flags.set(PLR_PDEATH, false);
     // Send them to their starting room and have them 'look'.
-    this->clearLocation();
+    this->leaveLocation();
     auto droom = GET_DROOM(this);
     if (droom != NOWHERE && droom != 0 && droom != 1)
     {
-        setLocation(droom);
+        moveToLocation(droom);
     }
     else
     {
-        setLocation(sensei::getStartRoom(sensei));
+        moveToLocation(sensei::getStartRoom(sensei));
     }
     lookAtLocation();
 
@@ -186,8 +368,8 @@ void Character::ghostify()
 
 void Character::teleport_to(room_vnum rnum)
 {
-    this->clearLocation();
-    this->setLocation(rnum);
+    this->leaveLocation();
+    this->moveToLocation(rnum);
     lookAtLocation();
     update_pos(this);
 }
@@ -788,13 +970,13 @@ void Character::login()
     }
     if (this->location.getVnum() <= 1 && GET_LOADROOM(this) != NOWHERE)
     {
-        this->clearLocation();
-        this->setLocation(GET_LOADROOM(this));
+        this->leaveLocation();
+        this->moveToLocation(GET_LOADROOM(this));
     }
     else if (this->location.getVnum() <= 1)
     {
-        this->clearLocation();
-        this->setLocation(300);
+        this->leaveLocation();
+        this->moveToLocation(300);
     }
     else
     {
@@ -1476,28 +1658,64 @@ void Character::onRemoveFromInventory(const std::shared_ptr<Object> &obj)
     obj->worn_on = -1;
 }
 
-void Character::onAddToLocation(const Location &loc)
+void Character::onMoveToLocation(const Location &loc)
 {
+    auto z = loc.getZone();
+    auto sh = shared_from_this();
+    if (IS_NPC(this))
+    {
+        z->npcsInZone.add(sh);
+    }
+    else
+    {
+        z->playersInZone.add(sh);
+        if (pref_flags.get(PRF_ARENAWATCH))
+        {
+            pref_flags.set(PRF_ARENAWATCH, false);
+            setBaseStat<room_vnum>("arena_watch", -1);
+        }
+    }
+
+
 }
 
-void Character::onRemoveFromLocation(const Location &loc)
+void Character::onLeaveLocation(const Location &loc)
 {
+    /* Stop fighting now, if we left. */
+    if (FIGHTING(this) && location != FIGHTING(this)->location && !affect_flags.get(AFF_PURSUIT))
+    {
+        stop_fighting(FIGHTING(this));
+        stop_fighting(this);
+    }
 }
 
 void Character::onLocationChanged(const Location &oldloc, const Location &newloc)
 {
+
 }
 
-void Character::addToLocation(const Location &loc)
-{
-    if (!loc.unit)
-        return;
-    loc.unit->addToContents(loc.position, shared_from_this());
+std::shared_ptr<HasLocation> Character::getSharedHasLocation() {
+    return shared_from_this();
 }
 
-void Character::removeFromLocation()
-{
-    if (!location.unit)
-        return;
-    location.unit->removeFromContents(shared_from_this());
+bool Character::isActiveInLocation() const {
+    return isActive();
+}
+
+std::string Character::getLocationDisplayCategory(Character* viewer) const {
+    if(!IS_NPC(this)) return "Players";
+    switch(race) {
+        case Race::animal:
+        case Race::saiba:
+        case Race::dragon:
+            return "Creatures";
+        case Race::mechanical:
+            return "Robots";
+        default:
+            return "People";
+    }
+}
+
+void Character::displayLocationInfo(Character* viewer) {
+    list_one_char(this, viewer);
 }

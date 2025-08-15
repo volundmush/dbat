@@ -340,7 +340,7 @@ WCMD(do_wdoor)
             break;
         case 5: /* room        */
             if ((to_room = real_room(atoi(value))) != NOWHERE)
-                newexit->unit = get_room(to_room);
+                newexit->al = get_room(to_room)->shared_from_this();
             else
                 wld_log(room, "wdoor: invalid door target");
             break;
@@ -380,8 +380,8 @@ WCMD(do_wteleport)
         {
             if (!valid_dg_target(ch, DG_ALLOW_GODS))
                 continue;
-            ch->clearLocation();
-            ch->setLocation(target);
+            ch->leaveLocation();
+            ch->moveToLocation(target);
             enter_wtrigger(target, ch, -1);
         }
     }
@@ -391,8 +391,8 @@ WCMD(do_wteleport)
         {
             if (valid_dg_target(ch, DG_ALLOW_GODS))
             {
-                ch->clearLocation();
-                ch->setLocation(target);
+                ch->leaveLocation();
+                ch->moveToLocation(target);
                 enter_wtrigger(target, ch, -1);
             }
         }
@@ -539,7 +539,7 @@ WCMD(do_wload)
             wld_log(room, "mload: bad mob vnum");
             return;
         }
-        mob->setLocation(rnum);
+        mob->moveToLocation(rnum);
         if (SCRIPT(room))
         { /* It _should_ have, but it might be detached. */
             room->setVariable("lastloaded", mob->getUID(true));
@@ -556,7 +556,7 @@ WCMD(do_wload)
         /* special handling to make objects able to load on a person/in a container/worn etc. */
         if (!target || !*target)
         {
-            object->setLocation(room);
+            object->moveToLocation(room);
             if (SCRIPT(room))
             { /* It _should_ have, but it might be detached. */
                 room->setVariable("lastloaded", object->getUID(true));
@@ -590,7 +590,7 @@ WCMD(do_wload)
             return;
         }
         /* neither char nor container found - just dump it in room */
-        object->setLocation(room);
+        object->moveToLocation(room);
         load_otrigger(object);
         return;
     }

@@ -185,7 +185,7 @@ bool assemblyCheckComponents(long lVnum, Character *pCharacter, int extract_yes)
         if (pAssembly->pComponents[i].bExtract && bOk && extract_yes == true)
             extract_obj(ppComponentObjects[i]);
         else if (pAssembly->pComponents[i].bInRoom)
-            ppComponentObjects[i]->setLocation(pCharacter);
+            ppComponentObjects[i]->moveToLocation(pCharacter);
         else
             pCharacter->addToInventory(ppComponentObjects[i]);
     }

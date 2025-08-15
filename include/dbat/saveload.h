@@ -28,6 +28,11 @@ void load_shops(const std::filesystem::path& loc);
 void load_guilds(const std::filesystem::path& loc);
 void load_rooms(const std::filesystem::path& loc);
 void load_exits(const std::filesystem::path& loc);
+void load_areas_initial(const std::filesystem::path& loc);
+void load_areas_finish(const std::filesystem::path& loc);
+void load_grid_templates(const std::filesystem::path& loc);
+void load_structures_initial(const std::filesystem::path& loc);
+void load_structures_finish(const std::filesystem::path& loc);
 
 void load_item_prototypes(const std::filesystem::path& loc);
 void load_items_initial(const std::filesystem::path& loc);
@@ -227,3 +232,24 @@ void to_json(json& j, const Character& c);
 
 void to_json(json& j, const PlayerData& p);
 void from_json(const json& j, PlayerData& p);
+
+void to_json(json& j, const HasZone& p);
+void from_json(const json& j, HasZone& p);
+
+void to_json(json& j, const GridShared& p);
+void from_json(const json& j, GridShared& p);
+
+void to_json(json& j, const TileOverride& p);
+void from_json(const json& j, TileOverride& p);
+
+void to_json(json& j, const GridTemplate& p);
+void from_json(const json& j, GridTemplate& p);
+
+void to_json(json& j, const Area& p);
+void from_json(const json& j, Area& p);
+
+void to_json(json& j, const Structure& p);
+void from_json(const json& j, Structure& p);
+
+void to_json(json& j, const HasDgScripts& p);
+void from_json(const json& j, HasDgScripts& p);

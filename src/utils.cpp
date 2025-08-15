@@ -26,7 +26,7 @@
 #include "dbat/screen.h"
 #include "dbat/players.h"
 #include "dbat/act.other.h"
-#include "dbat/area.h"
+#include "dbat/planet.h"
 #include "dbat/random.h"
 #include "dbat/send.h"
 
@@ -939,8 +939,8 @@ int roll_pursue(Character *ch, Character *vict)
     if (skill > perc)
     {
         act("@C$n@R pursues after the fleeing @c$N@R!@n", true, ch, nullptr, vict, TO_NOTVICT);
-        ch->clearLocation();
-        ch->setLocation(vict);
+        ch->leaveLocation();
+        ch->moveToLocation(vict);
         act("@GYou pursue right after @c$N@G!@n", true, ch, nullptr, vict, TO_CHAR);
         act("@C$n@R pursues after you!@n", true, ch, nullptr, vict, TO_VICT);
         act("@C$n@R pursues after the fleeing @c$N@R!@n", true, ch, nullptr, vict, TO_NOTVICT);
@@ -959,8 +959,8 @@ int roll_pursue(Character *ch, Character *vict)
                     act("You follow $N.", true, k->follower, nullptr, ch, TO_CHAR);
                     act("$n follows after $N.", true, k->follower, nullptr, ch, TO_NOTVICT);
                     act("$n follows after you.", true, k->follower, nullptr, ch, TO_VICT);
-                    k->follower->clearLocation();
-                    k->follower->setLocation(ch);
+                    k->follower->leaveLocation();
+                    k->follower->moveToLocation(ch);
                 }
             }
         }
@@ -1060,7 +1060,7 @@ void broken_update(uint64_t heartPulse, double deltaTime)
         {
             k->location.sendText("@GThe damaged ATM spits out some money while flashing ERROR on its screen!@n\r\n");
             money = create_money(rand_number(1, 30));
-            money->setLocation(k->location);
+            money->moveToLocation(k->location);
         }
         else if (health <= 99 && dice < 4)
         {

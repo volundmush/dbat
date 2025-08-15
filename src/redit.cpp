@@ -884,7 +884,7 @@ void redit_parse(struct descriptor_data *d, char *arg)
                 d->sendText("That room does not exist, try again : ");
                 return;
             }
-        OLC_EXIT(d)->unit = get_room(number);
+        OLC_EXIT(d)->al = get_room(number)->shared_from_this();
         redit_disp_exit_menu(d);
         return;
 

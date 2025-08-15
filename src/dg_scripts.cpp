@@ -418,10 +418,6 @@ Object *get_obj_near_obj(Object *obj, char *name)
     if ((i = get_obj_in_list(name, obj->getInventory())))
         return i;
 
-    /* or outside ? */
-    if (!obj->location.unit)
-        return nullptr;
-
     if (auto o = obj->getContainer())
     {
         if (*name == UID_CHAR)
@@ -594,9 +590,6 @@ Object *get_obj_by_obj(Object *obj, char *name)
 
     if (i = get_obj_in_list(name, obj->getInventory()))
         return i;
-
-    if (!obj->location.unit)
-        return nullptr;
 
     if (auto o = obj->getContainer())
     {
@@ -1051,7 +1044,7 @@ void add_trigger(script_data *sc, const std::shared_ptr<DgScript> t, int loc)
     SCRIPT_TYPES(sc) |= GET_TRIG_TYPE(t);
 
     sc->scripts.emplace(tvn, t);
-    t->owner = sc;
+    t->owner.reset(sc);
     t->activate();
 }
 
@@ -2866,13 +2859,13 @@ int DgScript::execute()
     switch (owner->type)
     {
     case UnitType::character:
-        sh = ((Character *)owner)->shared();
+        sh = ((Character *)owner.get())->shared();
         break;
     case UnitType::object:
-        sh = ((Object *)owner)->shared();
+        sh = ((Object *)owner.get())->shared();
         break;
     case UnitType::room:
-        sh = ((Room *)owner)->shared();
+        sh = ((Room *)owner.get())->shared();
         break;
     default:
         throw DgScriptError("Invalid owner type for script execution.");
@@ -3253,7 +3246,7 @@ std::string DgScript::evaluateExpression(const std::string &expr)
 {
     char buf[MAX_STRING_LENGTH];
 
-    eval_expr((char *)expr.c_str(), buf, owner, owner, this, proto->attach_type);
+    eval_expr((char *)expr.c_str(), buf, owner.get(), owner.get(), this, proto->attach_type);
     return std::string(buf);
 }
 
@@ -3261,7 +3254,7 @@ bool DgScript::evaluateComparison(const std::string &left, const std::string &ri
 {
     char buf[MAX_STRING_LENGTH];
 
-    eval_op((char *)op.c_str(), (char *)left.c_str(), (char *)right.c_str(), buf, owner, owner, this);
+    eval_op((char *)op.c_str(), (char *)left.c_str(), (char *)right.c_str(), buf, owner.get(), owner.get(), this);
     return truthy(std::string(buf));
 }
 
@@ -3275,7 +3268,7 @@ std::string DgScript::substituteVariables(const std::string &raw_text)
 {
     char buf[MAX_STRING_LENGTH];
 
-    var_subst(owner, owner, this, proto->attach_type, (char *)raw_text.c_str(), buf);
+    var_subst(owner.get(), owner.get(), this, proto->attach_type, (char *)raw_text.c_str(), buf);
 
     return std::string(buf);
 }
@@ -3318,7 +3311,7 @@ void DgScript::processCommand(const std::string &raw_text)
     if (boost::iequals(cmd, "eval"))
     {
         // Handle eval command
-        process_eval(owner, owner, this, proto->attach_type, (char *)full_command.c_str());
+        process_eval(owner.get(), owner.get(), this, proto->attach_type, (char *)full_command.c_str());
     }
     else if (boost::iequals(cmd, "nop"))
     {
@@ -3327,12 +3320,12 @@ void DgScript::processCommand(const std::string &raw_text)
     else if (boost::iequals(cmd, "extract"))
     {
         // Handle extract command
-        extract_value(owner, this, (char *)full_command.c_str());
+        extract_value(owner.get(), this, (char *)full_command.c_str());
     }
     else if (boost::iequals(cmd, "dg_letter"))
     {
         // Handle dg_letter command
-        dg_letter_value(owner, this, (char *)full_command.c_str());
+        dg_letter_value(owner.get(), this, (char *)full_command.c_str());
     }
     else if (boost::iequals(cmd, "halt"))
     {
@@ -3341,27 +3334,27 @@ void DgScript::processCommand(const std::string &raw_text)
     }
     else if (boost::iequals(cmd, "dg_cast"))
     {
-        do_dg_cast(owner, owner, this, proto->attach_type, (char *)full_command.c_str());
+        do_dg_cast(owner.get(), owner.get(), this, proto->attach_type, (char *)full_command.c_str());
     }
     else if (boost::iequals(cmd, "dg_affect"))
     {
-        do_dg_affect(owner, owner, this, proto->attach_type, (char *)full_command.c_str());
+        do_dg_affect(owner.get(), owner.get(), this, proto->attach_type, (char *)full_command.c_str());
     }
     else if (boost::iequals(cmd, "global"))
     {
-        process_global(owner, this, (char *)full_command.c_str(), 0);
+        process_global(owner.get(), this, (char *)full_command.c_str(), 0);
     }
     else if (boost::iequals(cmd, "context"))
     {
-        process_context(owner, this, (char *)full_command.c_str());
+        process_context(owner.get(), this, (char *)full_command.c_str());
     }
     else if (boost::iequals(cmd, "remote"))
     {
-        process_remote(owner, this, (char *)full_command.c_str());
+        process_remote(owner.get(), this, (char *)full_command.c_str());
     }
     else if (boost::iequals(cmd, "rdelete"))
     {
-        process_rdelete(owner, this, (char *)full_command.c_str());
+        process_rdelete(owner.get(), this, (char *)full_command.c_str());
     }
     else if (boost::iequals(cmd, "return"))
     {
@@ -3369,24 +3362,24 @@ void DgScript::processCommand(const std::string &raw_text)
     }
     else if (boost::iequals(cmd, "set"))
     {
-        process_set(owner, this, (char *)full_command.c_str());
+        process_set(owner.get(), this, (char *)full_command.c_str());
     }
     else if (boost::iequals(cmd, "unset"))
     {
-        process_unset(owner, this, (char *)full_command.c_str());
+        process_unset(owner.get(), this, (char *)full_command.c_str());
     }
     else if (boost::iequals(cmd, "wait"))
     {
-        process_wait(owner, this, proto->attach_type,
+        process_wait(owner.get(), this, proto->attach_type,
                      (char *)full_command.c_str(), nullptr);
     }
     else if (boost::iequals(cmd, "attach"))
     {
-        process_attach(owner, owner, this, proto->attach_type, (char *)full_command.c_str());
+        process_attach(owner.get(), owner.get(), this, proto->attach_type, (char *)full_command.c_str());
     }
     else if (boost::iequals(cmd, "detach"))
     {
-        process_detach(owner, owner, this, proto->attach_type, (char *)full_command.c_str());
+        process_detach(owner.get(), owner.get(), this, proto->attach_type, (char *)full_command.c_str());
     }
     else if (boost::iequals(cmd, "version"))
     {
@@ -3398,13 +3391,13 @@ void DgScript::processCommand(const std::string &raw_text)
         switch (proto->attach_type)
         {
         case MOB_TRIGGER:
-            command_interpreter((Character *)owner, (char *)full_command.c_str());
+            command_interpreter((Character *)owner.get(), (char *)full_command.c_str());
             break;
         case OBJ_TRIGGER:
-            obj_command_interpreter((Object *)owner, (char *)full_command.c_str());
+            obj_command_interpreter((Object *)owner.get(), (char *)full_command.c_str());
             break;
         case WLD_TRIGGER:
-            wld_command_interpreter((Room *)owner, (char *)full_command.c_str());
+            wld_command_interpreter((Room *)owner.get(), (char *)full_command.c_str());
             break;
         }
     }

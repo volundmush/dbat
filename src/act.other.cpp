@@ -3305,7 +3305,7 @@ ACMD(do_telepathy)
         }
         else
         {
-            ch->lookAtLocation(vict);
+            ch->lookAtLocation(vict->location);
             ch->sendText("You see all this through their eyes!\r\n");
             if (GET_INT(vict) > GET_INT(ch))
             {
@@ -4681,7 +4681,7 @@ ACMD(do_form)
         else
         {
             obj = read_object(87, VIRTUAL);
-            obj->setLocation(ch);
+            obj->moveToLocation(ch);
             obj->size = static_cast<Size>(get_size(ch));
             reveal_hiding(ch, 0);
             ch->setBaseStat("concentrate_cooldown", 10);
@@ -4719,7 +4719,7 @@ ACMD(do_form)
         else
         {
             obj = read_object(86, VIRTUAL);
-            obj->setLocation(ch);
+            obj->moveToLocation(ch);
             obj->size = static_cast<Size>(get_size(ch));
             reveal_hiding(ch, 0);
             ch->setBaseStat("concentrate_cooldown", 10);
@@ -8789,7 +8789,7 @@ void load_shadow_dragons()
         {
             auto mob = read_mobile(vnum, VIRTUAL);
             auto room = real_room(location);
-            mob->setLocation(location);
+            mob->moveToLocation(location);
         }
     }
 
@@ -8811,8 +8811,8 @@ void handleShenronAppearance(int &DRAGONC)
         break;
     case 290:
         r->sendText("@WThe lightning takes shape and slowly the Eternal Dragon, Shenron, can be made out from the glow!@n\r\n");
-        EDRAGON->clearLocation();
-        EDRAGON->setLocation(DRAGONR);
+        EDRAGON->leaveLocation();
+        EDRAGON->moveToLocation(DRAGONR);
         break;
     case 285:
         send_to_planet(0, WhereFlag::planet_earth, "@DThe lightning stops suddenly, but the sky remains mostly dark.@n\r\n");
@@ -8870,7 +8870,7 @@ void summonShadowDragons()
     for (auto &[vn, location] : sds)
     {
         auto m = read_mobile(vn, VIRTUAL);
-        m->setLocation(location);
+        m->moveToLocation(location);
     }
 }
 
@@ -8939,7 +8939,7 @@ ACMD(do_summon)
         send_to_imm("Shenron doesn't exist!");
         return;
     }
-    dragon->setLocation(0);
+    dragon->moveToLocation(0);
 
     reveal_hiding(ch, 0);
     act("@WYou place the dragon balls on the ground and with both hands outstretched towards them you say '@CArise Eternal Dragon Shenron!@W'@n",
@@ -10733,7 +10733,7 @@ ACMD(do_quit)
         ch->sendText("@RYou feel like the mind that is linked with yours is preventing you from quiting!@n\r\n");
         if (IN_ROOM(MINDLINK(ch)) != NOWHERE)
         {
-            ch->lookAtLocation(MINDLINK(ch));
+            ch->lookAtLocation(MINDLINK(ch)->location);
             ch->sendText("You get an impression of where this interference is originating from.\r\n");
         }
         return;
@@ -12816,8 +12816,8 @@ ACMD(do_resurrect)
 
     if (rm != NOWHERE)
     {
-        ch->clearLocation();
-        ch->setLocation(rm);
+        ch->leaveLocation();
+        ch->moveToLocation(rm);
         ch->lookAtLocation();
     }
 

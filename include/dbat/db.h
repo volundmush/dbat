@@ -242,6 +242,10 @@ extern struct time_info_data time_info;  /* the infomation about the time    */
 extern struct time_info_data era_uptime; /* the infomation about the time    */
 extern struct weather_data weather_info; /* the infomation about the weather */
 
+extern NegativeKeyGuardUnorderedMap<int, std::shared_ptr<Area>> areas;
+extern NegativeKeyGuardUnorderedMap<int, std::shared_ptr<Structure>> structures;
+extern NegativeKeyGuardUnorderedMap<int, GridTemplate> gridTemplates;
+
 extern NegativeKeyGuardUnorderedMap<int, std::shared_ptr<struct Entity>> units;
 
 extern NegativeKeyGuardMap<room_vnum, std::shared_ptr<Room>> world;
@@ -273,6 +277,7 @@ extern NegativeKeyGuardMap<int64_t, PlayerData> players;
 extern int64_t lastCharacterID;
 extern int64_t lastObjectID;
 extern int64_t lastAccountID;
+extern int64_t lastStructureID;
 
 int64_t getNextAccountID();
 

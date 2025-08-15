@@ -555,8 +555,8 @@ ACMD(do_say)
                                 {
                                     droom = c->setBaseStat("death_room", 300);
                                 }
-                                c->clearLocation();
-                                ch->setLocation(droom);
+                                c->leaveLocation();
+                                ch->moveToLocation(droom);
                                 c->lookAtLocation();
                                 c->sendText("@wYou smile as the golden halo above your head disappears! You have returned to life where you had last died!@n\r\n");
                                 for (auto f : {AFF_SPIRIT, AFF_ETHEREAL})

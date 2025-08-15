@@ -18,7 +18,7 @@
 #include "dbat/class.h"
 #include "dbat/races.h"
 #include "dbat/act.informative.h"
-#include "dbat/area.h"
+#include "dbat/planet.h"
 #include "dbat/partial.h"
 
 #ifndef EXITN
@@ -104,8 +104,8 @@ static void drive_into_vehicle(Character *ch, Object *vehicle, char *arg)
                               vehicle_in_out->getShortDescription());
 
     auto was_in = vehicle->location;
-    vehicle->clearLocation();
-    vehicle->setLocation(is_going_to);
+    vehicle->leaveLocation();
+    vehicle->moveToLocation(is_going_to);
     auto is_in = vehicle->location;
     if (ch->desc)
         act("", true, ch, nullptr, nullptr, TO_ROOM);
@@ -137,8 +137,8 @@ static void drive_outof_vehicle(Character *ch, Object *vehicle)
     vehicle->location.send_to("%s @wexits %s.\r\n", vehicle->getShortDescription(),
                               vehicle_in_out->getShortDescription());
 
-    vehicle->clearLocation();
-    vehicle->setLocation(vehicle_in_out->location);
+    vehicle->leaveLocation();
+    vehicle->moveToLocation(vehicle_in_out->location);
 
     if (ch->desc)
         act("@wThe @De@Wn@wg@Di@wn@We@Ds@w of the ship @rr@Ro@ra@Rr@w as it moves.", true, ch, nullptr, nullptr,
@@ -190,8 +190,8 @@ void drive_in_direction(Character *ch, Object *vehicle, int dir)
 
     vehicle->location.send_to("%s @wflies %s.\r\n", vehicle->getShortDescription(), dirs[dir]);
 
-    vehicle->clearLocation();
-    vehicle->setLocation(dest);
+    vehicle->leaveLocation();
+    vehicle->moveToLocation(dest);
 
     Object *controls;
     if ((controls = find_control(ch)))
@@ -213,7 +213,7 @@ void drive_in_direction(Character *ch, Object *vehicle, int dir)
 
     Object *hatch = nullptr;
     Destination des;
-    des.unit = get_room(GET_OBJ_VAL(vehicle, VAL_VEHICLE_DEST));
+    des.al = get_room(GET_OBJ_VAL(vehicle, VAL_VEHICLE_DEST))->shared_from_this();
     auto con = des.getObjects();
 
     for (auto h : filter_raw(con))
@@ -263,8 +263,8 @@ static void warp_ship_to_location(Character *ch, Object *vehicle, int room_vnum)
         true, ch, nullptr, nullptr, TO_ROOM);
     vehicle->location.send_to("%s @Bbegins to glow bright blue before disappearing in a flash of light!@n\r\n",
                               vehicle->getShortDescription());
-    vehicle->clearLocation();
-    vehicle->setLocation(room_vnum);
+    vehicle->leaveLocation();
+    vehicle->moveToLocation(room_vnum);
     vehicle->location.send_to("@BSuddenly in a flash of blue light @n%s @B appears instantly!@n\r\n",
                               vehicle->getShortDescription());
 }
@@ -609,8 +609,8 @@ static void handle_drive_land(Character *ch, Object *vehicle, const std::string 
     act("@wThe ship has landed.@n", false, ch, 0, 0, TO_CHAR);
     act("@wThe ship has landed.@n", false, ch, 0, 0, TO_ROOM);
 
-    vehicle->clearLocation();
-    vehicle->setLocation(landroom);
+    vehicle->leaveLocation();
+    vehicle->moveToLocation(landroom);
 
     char buf3[MAX_INPUT_LENGTH];
     sprintf(buf3, "%s @wcomes in from above and slowly settles on the ground.@n\r\n", vehicle->getShortDescription());
@@ -656,8 +656,8 @@ static void handle_drive_launch(Character *ch, Object *vehicle, Object *controls
         }
     }
 
-    vehicle->clearLocation();
-    vehicle->setLocation(dest);
+    vehicle->leaveLocation();
+    vehicle->moveToLocation(dest);
     ch->lookAtLocation(vehicle->location);
     ch->send_to("@RFUEL@D: %s%s@n\r\n", GET_FUEL(controls) >= 200 ? "@G" : GET_FUEL(controls) >= 100 ? "@Y"
                                                                                                      : "@r",

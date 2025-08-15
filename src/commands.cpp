@@ -2,7 +2,7 @@
 #include "dbat/structs.h"
 #include "dbat/act.movement.h"
 #include "dbat/act.informative.h"
-#include "dbat/area.h"
+#include "dbat/planet.h"
 #include "dbat/tedit.h"
 
 

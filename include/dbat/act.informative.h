@@ -21,6 +21,8 @@ extern int readIntro(Character *ch, Character *vict);
 extern int check_disabled(const struct command_info *command);
 
 extern void sort_commands();
+extern void do_auto_exits(const Location& loc, Character *ch, int exit_mode);
+extern void do_auto_exits2(const Location& loc, Character *ch);
 
 extern char *find_exdesc(char *word, const std::vector<ExtraDescription> &list);
 extern char *find_exdesc(char *word, struct extra_descr_data *list);
@@ -28,6 +30,9 @@ extern char *find_exdesc(char *word, struct extra_descr_data *list);
 extern void add_history(Character *ch, char *str, int type);
 
 extern void introWrite(Character *ch, Character *vict, char *name);
+
+extern void list_one_char(Character *i, Character *ch);
+extern void show_obj_to_char(Object *obj, Character *ch, int mode);
 
 extern void look_at_room(Room *rm, Character *ch, int ignore_brief);
 extern void look_at_room(room_rnum target_room, Character *ch, int ignore_brief);

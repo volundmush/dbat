@@ -199,10 +199,11 @@ struct Zone {
      *   1: Reset if no PC's are located in zone.
      *   2: Just reset.
      */
-    std::list<std::weak_ptr<Room>> rooms;
-    std::list<std::weak_ptr<Character>> npcsInZone;
-    std::list<std::weak_ptr<Character>> playersInZone;
-    std::list<std::weak_ptr<Object>> objectsInZone;
+    WeakBag<Room> rooms;
+    WeakBag<Character> npcsInZone;
+    WeakBag<Character> playersInZone;
+    WeakBag<Object> objectsInZone;
+    WeakBag<Structure> structuresInZone;
 
     void sendText(const std::string &txt);
 
@@ -335,7 +336,7 @@ struct DgScript : public HasVariables, public HasSubscriptions, std::enable_shar
     std::vector<DepthType> depth_stack{};
     int current_line{};
     double waiting{0.0};    /* event to pause the trigger      */
-    HasDgScripts* owner{};
+    std::experimental::observer_ptr<HasDgScripts> owner{};
 
     bool active{false};
     void activate();
@@ -387,11 +388,14 @@ struct Location {
     Location(room_vnum rv);
     Location(Room* room);
     Location(Character* ch);
-    AbstractLocation* unit{nullptr};  // What unit contains this unit (room, area, char, obj)
+    Location(const std::shared_ptr<Room>& room);
+    std::weak_ptr<AbstractLocation> al{};  // What unit contains this unit (room, area, char, obj)
     Coordinates position;
     bool operator==(const Location& other) const;
     bool operator==(const room_vnum rv) const;
     bool operator==(const Room* room) const;
+    bool operator==(const std::shared_ptr<Room>& room) const;
+    
     
     // Conversion to bool - returns true if location is valid. currently means it is a room.
     explicit operator bool() const;
@@ -471,8 +475,8 @@ struct Location {
 
     SpecialFunc getSpecialFunc() const;
 
-    bool getIsDark() const;
-    int getCookElement() const;
+    bool getIsDark();
+    int getCookElement();
 
     void traverseObjects(const std::function<void(Object*)> &func, bool recurse = true);
     struct Object* searchObjects(const std::function<bool(Object*)> &func, bool recurse = true);
@@ -487,6 +491,8 @@ struct Location {
     void deleteExit(Direction dir);
 
     void executeResetCommands(const std::vector<ResetCommand>& cmds);
+
+    void displayLookFor(Character* viewer);
 
 };
 
@@ -557,25 +563,34 @@ struct HasLocation {
     struct Room* getRoom() const;
     room_vnum getRoomVnum() const;
 
-    // TODO: Remove setLocation.
-    void setLocation(const Location& loc);
-    virtual void addToLocation(const Location& loc) = 0;
-    virtual void onAddToLocation(const Location& loc) = 0;
-    virtual void removeFromLocation() = 0;
-    virtual void onRemoveFromLocation(const Location& loc) = 0;
-    virtual void onLocationChanged(const Location& oldloc, const Location& newloc) = 0;
+    virtual bool isActiveInLocation() const = 0;
+
+    virtual std::shared_ptr<HasLocation> getSharedHasLocation() = 0;
+
+    void moveToLocation(const Location& loc);
+    void leaveLocation();
+    
+    // virtual hooks
+    virtual void onMoveToLocation(const Location& loc);
+    virtual void onLeaveLocation(const Location& loc);
+    virtual void onLocationChanged(const Location& oldloc, const Location& newloc);
+
+    // information rendering and interactivity...
+
+    // the keywords used for things like 'look' and 'get'.
+    //virtual std::vector<std::string> getInteractivityKeywords(Character* viewer) = 0;
+
+    // When categorizing this thing in a Look display, what should it show under?
+    // Should be plural. Example: Creatures, Items, Vehicles, Furniture, etc.
+    virtual std::string getLocationDisplayCategory(Character* viewer) const = 0;
+
+    // Display information about the thing in its current information. used for 'room displays.'
+    // Currently doesn't return anything because lots of old code directly calls viewer->sendText()...
+    virtual void displayLocationInfo(Character* viewer) = 0;
+
+    virtual bool getLocationVisibleTo(Character* viewer);
 };
 
-struct AbstractThing {
-    
-    // the *Location methods are used for handling database alterations, not logic.
-    
-    virtual void setLocation(const AbstractThing* td) = 0;
-    virtual void setLocation(room_vnum rv) = 0;
-    virtual void setLocation(Room* room) = 0;
-    virtual void clearLocation() = 0;
-
-};
 
 // Characters and Objects have inventories.
 // Only Objects can be in inventories.
@@ -707,13 +722,15 @@ struct Object : public HasID, public HasLocation, public HasInventory, public Ha
 
     Location getAbsoluteLocation() const;
 
-    void addToLocation(const Location& loc) override;
-    void removeFromLocation() override;
+    void clearLocation();
+
+    bool isActiveInLocation() const override;
+    void displayLocationInfo(Character* viewer) override;
+    std::string getLocationDisplayCategory(Character* viewer) const override;
+    std::shared_ptr<HasLocation> getSharedHasLocation() override;
 
     void onAddToInventory(const std::shared_ptr<Object>& obj) override;
     void onRemoveFromInventory(const std::shared_ptr<Object>& obj) override;
-
-    void clearLocation();
 
     std::shared_ptr<Object> shared();
 
@@ -758,8 +775,8 @@ struct Object : public HasID, public HasLocation, public HasInventory, public Ha
     bool isProvidingLight();
     double currentGravity();
 
-    void onAddToLocation(const Location& loc) override;
-    void onRemoveFromLocation(const Location& loc) override;
+    void onMoveToLocation(const Location& loc) override;
+    void onLeaveLocation(const Location& loc) override;
     void onLocationChanged(const Location& oldloc, const Location& newloc) override;
 
     template<typename R = double>
@@ -813,44 +830,76 @@ struct Destination : public Location {
 };
 
 struct AbstractLocation {
+    WeakBag<HasLocation> contents;
 
-    std::list<std::weak_ptr<Character>> people;
-    std::list<std::weak_ptr<Object>> objects;
+    template<typename T>
+    std::vector<std::weak_ptr<T>> getContents() {
+        std::vector<std::weak_ptr<T>> result;
+        auto snap = contents.snapshot_shared();
+        for (const auto& ptr : snap) {
+            if(auto item = std::dynamic_pointer_cast<T>(ptr)) {
+                if (item->isActiveInLocation()) {
+                    result.push_back(item);
+                }
+            }
+        }
+        return result;
+    }
 
+    template<typename T>
+    std::vector<std::weak_ptr<T>> getContents(const Coordinates& coor) {
+        std::vector<std::weak_ptr<T>> result;
+        auto snap = contents.snapshot_shared();
+        for (const auto& ptr : snap) {
+            if(auto item = std::dynamic_pointer_cast<T>(ptr)) {
+                if (item->isActiveInLocation() && item->location.position == coor) {
+                    result.push_back(item);
+                }
+            }
+        }
+        return result;
+    }
+
+    virtual std::shared_ptr<AbstractLocation> getSharedAbstractLocation() = 0;
+
+    virtual std::string getLocID() const = 0;
     virtual vnum getLocVnum() const = 0;
-    virtual Zone* getZone() const = 0;
+    virtual Zone* getLocZone() const = 0;
 
     virtual const char* getName(const Coordinates& coor) const = 0;
     virtual const char* getLookDescription(const Coordinates& coor) const = 0; // New
-    virtual bool getIsDark(const Coordinates& coor) const;
+    virtual bool getIsDark(const Coordinates& coor);
 
     virtual const std::vector<ExtraDescription>& getExtraDescription(const Coordinates& coor) const;
 
-    std::vector<std::weak_ptr<Object>> getObjects() const;
-    std::vector<std::weak_ptr<Character>> getPeople() const;
+    std::vector<std::weak_ptr<Object>> getObjects();
+    std::vector<std::weak_ptr<Character>> getPeople();
 
-    virtual std::vector<std::weak_ptr<Object>> getObjects(const Coordinates& coor) const;
-    virtual std::vector<std::weak_ptr<Character>> getPeople(const Coordinates& coor) const;
+    virtual std::vector<std::weak_ptr<Structure>> getStructures(const Coordinates& coor);
+    virtual std::vector<std::weak_ptr<Object>> getObjects(const Coordinates& coor);
+    virtual std::vector<std::weak_ptr<Character>> getPeople(const Coordinates& coor);
 
     virtual std::optional<Destination> getDirection(const Coordinates& coor, Direction dir) = 0;
     virtual std::map<Direction, Destination> getDirections(const Coordinates& coor) = 0;
 
-    virtual void setRoomFlag(const Coordinates& coor, RoomFlag flag, bool value = true) = 0;
-    virtual bool toggleRoomFlag(const Coordinates& coor, RoomFlag flag) = 0;
-    virtual bool getRoomFlag(const Coordinates& coor, RoomFlag flag) const = 0;
+    virtual FlagHandler<RoomFlag>& getRoomFlags(const Coordinates& coor) = 0;
+    void setRoomFlag(const Coordinates& coor, RoomFlag flag, bool value = true);
+    bool toggleRoomFlag(const Coordinates& coor, RoomFlag flag);
+    bool getRoomFlag(const Coordinates& coor, RoomFlag flag);
 
     // these are overloadable but base implementations just call the RoomFlag variants.
-    virtual void setRoomFlag(const Coordinates& coor, int flag, bool value = true);
-    virtual bool toggleRoomFlag(const Coordinates& coor, int flag);
-    virtual bool getRoomFlag(const Coordinates& coor, int flag) const;
+    void setRoomFlag(const Coordinates& coor, int flag, bool value = true);
+    bool toggleRoomFlag(const Coordinates& coor, int flag);
+    bool getRoomFlag(const Coordinates& coor, int flag);
 
-    virtual void setWhereFlag(const Coordinates& coor, WhereFlag flag, bool value = true) = 0;
-    virtual bool toggleWhereFlag(const Coordinates& coor, WhereFlag flag) = 0;
-    virtual bool getWhereFlag(const Coordinates& coor, WhereFlag flag) const = 0;
+    virtual FlagHandler<WhereFlag>& getWhereFlags(const Coordinates& coor) = 0;
+    virtual void setWhereFlag(const Coordinates& coor, WhereFlag flag, bool value = true);
+    virtual bool toggleWhereFlag(const Coordinates& coor, WhereFlag flag);
+    virtual bool getWhereFlag(const Coordinates& coor, WhereFlag flag);
 
     virtual SectorType getSectorType(const Coordinates& coor) const = 0;
 
-    virtual void broadcastAt(const Coordinates& coor, const std::string& message) const = 0;
+    virtual void broadcastAt(const Coordinates& coor, const std::string& message) = 0;
 
     virtual int getDamage(const Coordinates& coor) const = 0;
     virtual int setDamage(const Coordinates& coor, int amount) = 0;
@@ -867,26 +916,19 @@ struct AbstractLocation {
     virtual double modEnvironment(const Coordinates& coor, int type, double value) = 0;
     virtual void clearEnvironment(const Coordinates& coor, int type) = 0;
 
-    int getCookElement(const Coordinates& coor) const;
+    int getCookElement(const Coordinates& coor);
 
     // tools for editing the location.
     virtual void replaceExit(const Coordinates& coor, const Destination& dest);
     virtual void deleteExit(const Coordinates& coor, Direction dir);
 
-    void addToContents(const Coordinates& coor, const std::shared_ptr<Character>& ch);
-    void addToContents(const Coordinates& coor, const std::shared_ptr<Object>& obj);
-    void removeFromContents(const std::shared_ptr<Character>& ch);
-    void removeFromContents(const std::shared_ptr<Object>& obj);
+    void addToContents(const Coordinates& coor, const std::shared_ptr<HasLocation>& hl);
+    void removeFromContents(const std::shared_ptr<HasLocation>& hl);
 
-    void addToContents(const Coordinates& coor, Character* ch);
-    void addToContents(const Coordinates& coor, Object* obj);
-    void removeFromContents(Character* ch);
-    void removeFromContents(Object* obj);
+    virtual void onAddToContents(const Coordinates& coor, const std::shared_ptr<HasLocation>& hl);
+    virtual void onRemoveFromContents(const std::shared_ptr<HasLocation>& hl);
 
-    virtual void onAddToContents(const Coordinates& coor, const std::shared_ptr<Character>& ch) = 0;
-    virtual void onAddToContents(const Coordinates& coor, const std::shared_ptr<Object>& obj) = 0;
-    virtual void onRemoveFromContents(const std::shared_ptr<Character>& ch) = 0;
-    virtual void onRemoveFromContents(const std::shared_ptr<Object>& obj) = 0;
+    virtual void displayLookFor(const Coordinates& coor, Character* viewer);
 };
 
 struct TileOverride : public HasResetCommands {
@@ -900,7 +942,9 @@ struct TileOverride : public HasResetCommands {
     std::map<Direction, Destination> exits;
 };
 
-struct AbstractGridArea : public AbstractLocation, public HasMudStrings {
+struct GridShared : public HasMudStrings {
+    using HasMudStrings::getName;
+    using HasMudStrings::getLookDescription;
 
     // the default sector type for undefined tiles.
     // if left empty, the tiles are completely impassable / void.
@@ -912,23 +956,25 @@ struct AbstractGridArea : public AbstractLocation, public HasMudStrings {
     std::optional<int32_t> minX, maxX, minY, maxY, minZ, maxZ;
 
     std::unordered_map<Coordinates, TileOverride> tileOverrides;
+};
+
+struct GridTemplate : public GridShared, public HasVnum {
+    // used for defining grid templates.
+};
+
+struct AbstractGridArea : public AbstractLocation, public GridShared, public HasSubscriptions {
 
     // location_data overrides (most implemented generically here). Subclasses still provide getZone().
-    Zone* getZone() const override = 0; // still pure virtual; concrete grid instances decide zone binding.
 
     const std::vector<ExtraDescription>& getExtraDescription(const Coordinates& coor) const override;
     const char* getName(const Coordinates& coor) const override;
     const char* getLookDescription(const Coordinates& coor) const override;
     std::optional<Destination> getDirection(const Coordinates& coor, Direction dir) override;
     std::map<Direction, Destination> getDirections(const Coordinates& coor) override;
-    void setRoomFlag(const Coordinates& coor, RoomFlag flag, bool value = true) override;
-    bool toggleRoomFlag(const Coordinates& coor, RoomFlag flag) override;
-    bool getRoomFlag(const Coordinates& coor, RoomFlag flag) const override;
-    void setWhereFlag(const Coordinates& coor, WhereFlag flag, bool value = true) override;
-    bool toggleWhereFlag(const Coordinates& coor, WhereFlag flag) override;
-    bool getWhereFlag(const Coordinates& coor, WhereFlag flag) const override;
+    FlagHandler<RoomFlag>& getRoomFlags(const Coordinates& coor) override;
+    FlagHandler<WhereFlag>& getWhereFlags(const Coordinates& coor) override;
     SectorType getSectorType(const Coordinates& coor) const override;
-    void broadcastAt(const Coordinates& coor, const std::string& message) const override;
+    void broadcastAt(const Coordinates& coor, const std::string& message) override;
     int getDamage(const Coordinates& coor) const override;
     int setDamage(const Coordinates& coor, int amount) override;
     int modDamage(const Coordinates& coor, int amount) override;
@@ -947,13 +993,40 @@ struct AbstractGridArea : public AbstractLocation, public HasMudStrings {
 
 };
 
+struct HasZone {
+    Zone* getZone() const;
+    std::experimental::observer_ptr<Zone> zone{nullptr};
+};
+
+struct Area : public AbstractGridArea, public HasVnum, public HasZone, std::enable_shared_from_this<Area> {
+    std::string getLocID() const override;
+    vnum getLocVnum() const override;
+    Zone* getLocZone() const override;
+    std::shared_ptr<AbstractLocation> getSharedAbstractLocation() override;
+
+};
+
+struct Structure : public AbstractGridArea, public HasID, public HasLocation, std::enable_shared_from_this<Structure> {
+    std::string getLocID() const override;
+    vnum getLocVnum() const override;
+    Zone* getLocZone() const override;
+    std::string getLocationDisplayCategory(Character* viewer) const override;
+    std::shared_ptr<AbstractLocation> getSharedAbstractLocation() override;
+
+    bool isActiveInLocation() const override;
+    void displayLocationInfo(Character* viewer) override;
+    std::shared_ptr<HasLocation> getSharedHasLocation() override;
+
+};
 
 /* ================== Memory Structure for room ======================= */
-struct Room : public AbstractLocation, public HasDgScripts, public HasMudStrings, public HasExtraDescriptions, public HasSubscriptions, public HasResetCommands, std::enable_shared_from_this<Room> {
+struct Room : public AbstractLocation, public HasZone, public HasDgScripts, public HasMudStrings, public HasExtraDescriptions, public HasSubscriptions, public HasResetCommands, std::enable_shared_from_this<Room> {
     Room();
 
     vnum getLocVnum() const override;
-    Zone *zone{nullptr};
+    std::string getLocID() const override;
+
+    std::shared_ptr<AbstractLocation> getSharedAbstractLocation() override;
 
     using HasMudStrings::getName;
     using HasMudStrings::getLookDescription;
@@ -1058,27 +1131,19 @@ struct Room : public AbstractLocation, public HasDgScripts, public HasMudStrings
     std::optional<Destination> getDirection(Direction dir) const;
     std::map<Direction, Destination> getDirections() const;
 
-    void onAddToContents(const Coordinates& coor, const std::shared_ptr<Character>& ch) override;
-    void onAddToContents(const Coordinates& coor, const std::shared_ptr<Object>& obj) override;
-
-    void onRemoveFromContents(const std::shared_ptr<Character>& ch) override;
-    void onRemoveFromContents(const std::shared_ptr<Object>& obj) override;
-
     // overrides for location_data...
-    Zone* getZone() const override;
+    Zone* getLocZone() const override;
     const std::vector<ExtraDescription>& getExtraDescription(const Coordinates& coor) const override;
     const char* getName(const Coordinates& coor) const override;
     const char* getLookDescription(const Coordinates& coor) const override;
     std::optional<Destination> getDirection(const Coordinates& coor, Direction dir) override;
     std::map<Direction, Destination> getDirections(const Coordinates& coor) override;
-    void setRoomFlag(const Coordinates& coor, RoomFlag flag, bool value = true) override;
-    bool toggleRoomFlag(const Coordinates& coor, RoomFlag flag) override;
-    bool getRoomFlag(const Coordinates& coor, RoomFlag flag) const override;
-    void setWhereFlag(const Coordinates& coor, WhereFlag flag, bool value = true) override;
-    bool toggleWhereFlag(const Coordinates& coor, WhereFlag flag) override;
-    bool getWhereFlag(const Coordinates& coor, WhereFlag flag) const override;
+
+    FlagHandler<RoomFlag>& getRoomFlags(const Coordinates& coor) override;
+    FlagHandler<WhereFlag>& getWhereFlags(const Coordinates& coor) override;
+
     SectorType getSectorType(const Coordinates& coor) const override;
-    void broadcastAt(const Coordinates& coor, const std::string& message) const override;
+    void broadcastAt(const Coordinates& coor, const std::string& message) override;
     int getDamage(const Coordinates& coor) const override;
     int setDamage(const Coordinates& coor, int amount) override;
     int modDamage(const Coordinates& coor, int amount) override;
@@ -1302,10 +1367,13 @@ struct Character : public HasID, public HasLocation, public HasEquipment, public
 
     CharacterPrototype* getProto() const;
 
-    void addToLocation(const Location& loc) override;
-    void removeFromLocation() override;
-    void onAddToLocation(const Location& loc) override;
-    void onRemoveFromLocation(const Location& loc) override;
+    bool isActiveInLocation() const override;
+    std::shared_ptr<HasLocation> getSharedHasLocation();
+    void displayLocationInfo(Character* viewer) override;
+    std::string getLocationDisplayCategory(Character* viewer) const override;
+
+    void onMoveToLocation(const Location& loc) override;
+    void onLeaveLocation(const Location& loc) override;
     void onLocationChanged(const Location& oldloc, const Location& newloc) override;
 
     void sendText(const std::string& txt);
@@ -1355,10 +1423,8 @@ struct Character : public HasID, public HasLocation, public HasEquipment, public
     void onAddToEquip(const std::shared_ptr<Object>& obj, int slot) override;
     void onRemoveFromEquip(const std::shared_ptr<Object>& obj, int slot) override;
 
-    void clearLocation();
-
     void lookAtLocation();
-    void lookAtLocation(const Location& loc);
+    void lookAtLocation(Location& loc);
 
     std::shared_ptr<Character> shared();
 

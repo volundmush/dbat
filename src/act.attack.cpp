@@ -557,7 +557,7 @@ ACMD(do_throw)
                 pcost(ch, 0, stcost / 2);
                 pcost(vict, 0, GET_MAX_HIT(vict) / 200);
                 obj->clearLocation();
-                obj->setLocation(vict);
+                obj->moveToLocation(vict);
                 return;
             }
 
@@ -592,7 +592,7 @@ ACMD(do_throw)
                 ch->setBaseStat<int>("last_attack", -50);
                 hurt(0, 0, ch, vict, nullptr, 0, 0);
                 obj->clearLocation();
-                obj->setLocation(vict);
+                obj->moveToLocation(vict);
                 ch->modCurVital(CharVital::stamina, -((GET_MAX_HIT(ch) / 200) + GET_OBJ_WEIGHT(obj)));
                 if (!GET_EQ(ch, WEAR_WIELD1) && !GET_EQ(ch, WEAR_WIELD2))
                     perc += 20;
@@ -746,7 +746,7 @@ ACMD(do_throw)
             }
             hurt(0, 0, ch, vict, nullptr, damage, 0);
             obj->clearLocation();
-            obj->setLocation(vict);
+            obj->moveToLocation(vict);
 
             ch->modCurVital(CharVital::stamina, -((GET_MAX_HIT(ch) / 200) + GET_OBJ_WEIGHT(obj)));
             if (!GET_EQ(ch, WEAR_WIELD1) && !GET_EQ(ch, WEAR_WIELD2))

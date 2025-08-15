@@ -207,7 +207,7 @@ ACMD(do_geno)
     }
 
     obj = read_object(83, VIRTUAL);
-    obj->setLocation(vict);
+    obj->moveToLocation(vict);
     objectSubscriptions.subscribe("hugeKiAttacks", obj);
 
     ch->modBaseStat<int64_t>("charge", GET_MAX_HIT(ch) / 10);
@@ -346,7 +346,7 @@ ACMD(do_genki)
     Object *obj;
 
     obj = read_object(82, VIRTUAL);
-    obj->setLocation(vict);
+    obj->moveToLocation(vict);
 
     TARGET(obj) = vict;
     obj->setBaseStat("kicharge", damtype(ch, 40, prob, attperc));

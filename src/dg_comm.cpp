@@ -21,7 +21,7 @@
 #include "dbat/graph.h"
 #include "dbat/spells.h"
 #include "dbat/handler.h"
-#include "dbat/area.h"
+#include "dbat/planet.h"
 
 /* local functions */
 void sub_write_to_char(Character *ch, char *tokens[], void *otokens[], char type[]);

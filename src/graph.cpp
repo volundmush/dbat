@@ -221,7 +221,7 @@ ACMD(do_sradar)
     auto find = planetLocations.find(argstr);
     if (find != planetLocations.end())
     {
-        endLoc.unit = get_room(find->second);
+        endLoc.al = get_room(find->second)->shared_from_this();
         dir = find_first_step(startLoc, endLoc);
         sprintf(planet, "%s", argstr.c_str());
     }
@@ -232,7 +232,7 @@ ACMD(do_sradar)
             auto room = get_room(GET_RADAR1(ch));
             if (room)
             {
-                endLoc.unit = room;
+                endLoc.al = room->shared_from_this();
                 dir = find_first_step(startLoc, endLoc);
             }
             else
@@ -246,7 +246,7 @@ ACMD(do_sradar)
             auto room = get_room(GET_RADAR2(ch));
             if (room)
             {
-                endLoc.unit = room;
+                endLoc.al = room->shared_from_this();
                 dir = find_first_step(startLoc, endLoc);
             }
             else
@@ -260,7 +260,7 @@ ACMD(do_sradar)
             auto room = get_room(GET_RADAR3(ch));
             if (room)
             {
-                endLoc.unit = room;
+                endLoc.al = room->shared_from_this();
                 dir = find_first_step(startLoc, endLoc);
             }
             else

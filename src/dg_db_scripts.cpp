@@ -240,7 +240,7 @@ void assign_triggers(HasDgScripts *i, UnitType type) {
             auto t = read_trigger(tvn);
             SCRIPT_TYPES(i) |= GET_TRIG_TYPE(t);
             i->scripts.emplace(t->getVnum(), t);
-            t->owner = i;
+            t->owner.reset(i);
             t->activate();
        }
    }

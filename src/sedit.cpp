@@ -762,7 +762,7 @@ void sedit_parse(struct descriptor_data *d, char *arg)
         sedit_products_menu(d);
         return;
     case SEDIT_DELETE_PRODUCT:
-        OLC_SHOP(d)->remove_product(atol(arg));
+        OLC_SHOP(d)->remove_product(atoi(arg));
         sedit_products_menu(d);
         return;
     case SEDIT_NEW_ROOM:

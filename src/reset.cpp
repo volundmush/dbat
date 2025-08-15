@@ -95,7 +95,7 @@ bool prereset_gauntlet_zone()
                     if ((mob = read_mobile(gauntlet_mobs[i].vmob, VIRTUAL)))
                     {
                         /* And put it in the room */
-                        mob->setLocation(gauntlet_mobs[i].vroom);
+                        mob->moveToLocation(gauntlet_mobs[i].vroom);
                         basic_mud_log("Special Reset: zone %d: Gauntlet mob reset (%d, %s)", RESET_GAUNTLET,
                                       gauntlet_mobs[i].vmob, GET_NAME(mob));
                     }

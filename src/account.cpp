@@ -21,10 +21,8 @@ struct Account *findAccount(const std::string &name)
 
 int Account::getNextID()
 {
-    int id = 0;
-    while (accounts.contains(id))
-        id++;
-    return id;
+    static int lastAccountID = 0;
+    return ::getNextID(lastAccountID, accounts);
 }
 
 Account *createAccount(const std::string &name, const std::string &password)

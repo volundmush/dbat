@@ -133,7 +133,7 @@ void do_dg_cast(void *go, script_data *sc, DgScript *trig,
             caster->strings["short_description"] = ((Object *) go)->getShortDescription();
         else if (type == WLD_TRIGGER)
             caster->strings["short_description"] = "The gods";
-        caster->setLocation(caster_room);
+        caster->moveToLocation(caster_room);
         call_magic(caster, tch, tobj, spellnum, DG_SPELL_LEVEL, CAST_SPELL, t);
         extract_char(caster);
     } else

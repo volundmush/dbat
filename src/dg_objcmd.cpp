@@ -436,7 +436,7 @@ OCMD(do_ogoto)
     else
     {
         obj->clearLocation();
-        obj->setLocation(target);
+        obj->moveToLocation(target);
     }
 }
 
@@ -467,8 +467,8 @@ OCMD(do_oteleport)
         {
             if (!valid_dg_target(ch, DG_ALLOW_GODS))
                 continue;
-            ch->clearLocation();
-            ch->setLocation(target);
+            ch->leaveLocation();
+            ch->moveToLocation(target);
             enter_wtrigger(ch->getRoom(), ch, -1);
         }
     }
@@ -478,8 +478,8 @@ OCMD(do_oteleport)
         {
             if (valid_dg_target(ch, DG_ALLOW_GODS))
             {
-                ch->clearLocation();
-                ch->setLocation(target);
+                ch->leaveLocation();
+                ch->moveToLocation(target);
                 enter_wtrigger(ch->getRoom(), ch, -1);
             }
         }
@@ -536,7 +536,7 @@ OCMD(do_dgoload)
             obj_log(obj, "oload: bad mob vnum");
             return;
         }
-        mob->setLocation(rnum);
+        mob->moveToLocation(rnum);
 
         if (SCRIPT(obj))
         { /* It _should_ have, but it might be detached. */
@@ -561,7 +561,7 @@ OCMD(do_dgoload)
         /* special handling to make objects able to load on a person/in a container/worn etc. */
         if (!target || !*target)
         {
-            object->setLocation(room);
+            object->moveToLocation(room);
             load_otrigger(object);
             return;
         }
@@ -590,7 +590,7 @@ OCMD(do_dgoload)
             return;
         }
         /* neither char nor container found - just dump it in room */
-        object->setLocation(room);
+        object->moveToLocation(room);
         load_otrigger(object);
         return;
     }
@@ -727,7 +727,7 @@ OCMD(do_odoor)
             break;
         case 5: /* room        */
             if ((to_room = real_room(atoi(value))) != NOWHERE)
-                newexit->unit = get_room(to_room);
+                newexit->al = get_room(to_room)->shared_from_this();
             else
                 obj_log(obj, "odoor: invalid door target");
             break;
@@ -779,7 +779,7 @@ OCMD(do_oat)
     if (!(object = read_object(GET_OBJ_VNUM(obj), VIRTUAL)))
         return;
 
-    object->setLocation(loc);
+    object->moveToLocation(loc);
     obj_command_interpreter(object, command);
 
     if (IN_ROOM(object) == loc)
