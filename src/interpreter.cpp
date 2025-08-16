@@ -7,9 +7,6 @@
  *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
  *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
  ************************************************************************ */
-#include <filesystem>
-#include <boost/algorithm/string.hpp>
-
 #include "dbat/interpreter.h"
 #include "dbat/comm.h"
 #include "dbat/db.h"
@@ -31,6 +28,34 @@
 #include "dbat/obj_edit.h"
 #include "dbat/commands.h"
 #include "dbat/act.wizard.h"
+
+static std::regex cmd_regex(R"(^([A-Za-z0-9-.]+)(?:\/([A-Za-z0-9-.]+)(?:\:([A-Za-z0-9-.]+))?)?(?:\s+(.*)?)?)", std::regex::icase);
+
+std::optional<CommandData> matchCommand(const std::string& txt) {
+    std::smatch match;
+    if (std::regex_match(txt, match, cmd_regex)) {
+        CommandData cmd_data;
+        cmd_data.cmd = match[1];
+        cmd_data.switch_type = match[2];
+        cmd_data.switch_mod = match[3];
+        cmd_data.full_args = match[4];
+        boost::trim(cmd_data.full_args);
+        cmd_data.equals_present = boost::icontains(cmd_data.full_args, "=");
+        if(cmd_data.equals_present) {
+            auto pos = cmd_data.full_args.find('=');
+            cmd_data.lsargs = cmd_data.full_args.substr(0, pos);
+            cmd_data.rsargs = cmd_data.full_args.substr(pos + 1);
+        } else {
+            cmd_data.lsargs = cmd_data.full_args;
+            cmd_data.rsargs.clear();
+        }
+        boost::trim(cmd_data.rsargs);
+        boost::trim(cmd_data.lsargs);
+
+        return cmd_data;
+    }
+    return std::nullopt;
+}
 
 /* local global variables */
 DISABLED_DATA *disabled_first = nullptr;
@@ -90,8 +115,6 @@ void command_interpreter(Character *ch, char *argument)
 {
     int cmd, length;
     int skip_ld = 0;
-    char *line;
-    char arg[MAX_INPUT_LENGTH];
 
     switch (GET_POS(ch))
     {
@@ -107,25 +130,16 @@ void command_interpreter(Character *ch, char *argument)
     skip_spaces(&argument);
     if (!*argument)
         return;
-
-    /*
-     * special case to handle one-character, non-alphanumeric commands;
-     * requested by many people so "'hi" or ";godnet test" is possible.
-     * Patch sent by Eric Green and Stefan Wasilewski.
-     */
-    if (!isalpha(*argument))
-    {
-        arg[0] = argument[0];
-        arg[1] = '\0';
-        line = argument + 1;
-    }
-    else
-        line = any_one_arg(argument, arg);
-
-    if (!strcasecmp(arg, "-"))
-    {
+    
+    auto cmd_op = matchCommand(argument);
+    if(!cmd_op) {
+        ch->sendText("Invalid command format.\r\n");
         return;
     }
+    auto cdata = cmd_op.value();
+    char* arg = (char*)cdata.cmd.c_str();
+    char* line = (char*)cdata.full_args.c_str();
+
     /* Since all command triggers check for valid_dg_target before acting, the levelcheck
      * here has been removed.
      */
@@ -140,15 +154,16 @@ void command_interpreter(Character *ch, char *argument)
         if (cont)
             return; /* yes, command trigger took over */
     }
-    for (length = strlen(arg), cmd = 0; *complete_cmd_info[cmd].command != '\n'; cmd++)
-    {
-        if (!strncmp(complete_cmd_info[cmd].command, arg, length))
-            if (GET_LEVEL(ch) >= complete_cmd_info[cmd].minimum_level &&
-                GET_ADMLEVEL(ch) >= complete_cmd_info[cmd].minimum_admlevel)
-                break;
+
+    cmd = matchCommand(ch, cdata.cmd);
+    if(cmd < 0) {
+        ch->sendText("Command not found.\r\n");
+        return;
     }
 
-    if (!IS_NPC(ch) && complete_cmd_info[cmd].wait_list == 1)
+    auto &cm = complete_cmd_info[cmd];
+
+    if (!IS_NPC(ch) && cm.wait_list == 1)
     {
         if (ch->task != Task::nothing)
         {
@@ -156,15 +171,13 @@ void command_interpreter(Character *ch, char *argument)
         }
         else
         {
-            std::string ln = line;
-            std::pair<int, std::string> pair = {cmd, ln};
-            ch->wait_input_queue.emplace_back(pair);
+            ch->wait_input_queue.emplace_back(cmd, cdata);
             characterSubscriptions.subscribe("commandWaitQueue", ch);
         }
         return;
     }
 
-    processCommand(ch, cmd, line);
+    processCommand(ch, cmd, line, cdata);
 }
 
 void commandWaitQueue(uint64_t heartPulse, double deltaTime)
@@ -180,9 +193,9 @@ void commandWaitQueue(uint64_t heartPulse, double deltaTime)
                 doContinuedTask(ch);
             else if (!ch->wait_input_queue.empty())
             {
-                auto command = ch->wait_input_queue.front();
+                auto [cmd, cdata] = ch->wait_input_queue.front();
                 ch->wait_input_queue.pop_front();
-                processCommand(ch, command.first, command.second);
+                processCommand(ch, cmd, cdata.full_args, cdata);
             }
             if (ch->getBaseStat("waitTime") <= 0.0 && ch->task == Task::nothing && ch->wait_input_queue.empty())
             {
@@ -192,23 +205,25 @@ void commandWaitQueue(uint64_t heartPulse, double deltaTime)
     }
 }
 
-void processCommand(Character *ch, int cmd, std::string ln)
+void processCommand(Character *ch, int cmd, std::string ln, CommandData cd)
 {
     char blah[MAX_INPUT_LENGTH];
     int skip_ld = 0;
     char *line = ln.data();
 
-    sprintf(blah, "%s", complete_cmd_info[cmd].command);
+    auto cm = complete_cmd_info[cmd];
+
+    sprintf(blah, "%s", cm.command);
     if (!strcasecmp(blah, "throw"))
         ch->setBaseStat<int>("throws", rand_number(1, 3));
 
-    if (*complete_cmd_info[cmd].command == '\n')
+    if (*cm.command == '\n')
     {
         ch->sendText("Huh!?!\r\n");
         return;
     }
 
-    if (!complete_cmd_info[cmd].command_pointer)
+    if (!cm.command_pointer)
     {
         ch->sendText("Sorry, that command hasn't been implemented yet.\r\n");
         return;
@@ -220,7 +235,7 @@ void processCommand(Character *ch, int cmd, std::string ln)
         return;
     }
 
-    if (check_disabled(&complete_cmd_info[cmd]))
+    if (check_disabled(&cm))
     {
         ch->sendText("This command has been temporarily disabled.\r\n");
         return;
@@ -252,14 +267,14 @@ void processCommand(Character *ch, int cmd, std::string ln)
     }
     else
     {
-        if (complete_cmd_info[cmd].minimum_admlevel >= ADMLVL_IMMORT)
+        if (cm.minimum_admlevel >= ADMLVL_IMMORT)
         {
             ch->sendText("You can't use immortal commands while switched.\r\n");
             return;
         }
     }
 
-    if (auto minpos = complete_cmd_info[cmd].minimum_position; GET_POS(ch) < minpos && GET_POS(ch) != POS_FIGHTING)
+    if (auto minpos = cm.minimum_position; GET_POS(ch) < minpos && GET_POS(ch) != POS_FIGHTING)
     {
         switch (GET_POS(ch))
         {
@@ -285,7 +300,7 @@ void processCommand(Character *ch, int cmd, std::string ln)
             }
             break;
         case POS_SITTING:
-            command_interpreter(ch, "stand");
+            do_stand(ch, "stand", 0, 0);
             if (GET_POS(ch) != POS_STANDING)
             {
                 ch->sendText("Maybe you should get on your feet first?\r\n");
@@ -300,7 +315,7 @@ void processCommand(Character *ch, int cmd, std::string ln)
     {
         if (!skip_ld)
         {
-            ((*complete_cmd_info[cmd].command_pointer)(ch, line, cmd, complete_cmd_info[cmd].subcmd));
+            ((*cm.command_pointer)(ch, line, cmd, cm.subcmd, cd));
         }
     }
 }

@@ -9,6 +9,7 @@
 ************************************************************************ */
 #pragma once
 #include "dbat/templates.h"
+#include "dbat/commands.h"
 
 // IMPORTANT: Do not use data structures/fields that are not part of the
 // C++ standard library. This allows us to keep things neat and clean for
@@ -143,8 +144,6 @@ struct SpawnRegistry {
     std::weak_ptr<Character> lastChar;
 };
 
-struct Location;
-
 struct ResetCommand {
     ResetCommandType type;  /* Type of reset command */
     bool if_flag{false};         /* If TRUE: execute only if preceding executed */
@@ -168,14 +167,13 @@ struct HasResetCommands {
     std::string printResetCommands() const;
 };
 
-
-
 struct Zone {
-    zone_vnum number{};        /* virtual number of this zone	  */
+    zone_vnum number{NOTHING};        /* virtual number of this zone	  */
 
     zone_vnum parent{NOTHING};
     std::unordered_set<zone_vnum> children;
 
+    std::vector<Zone*> getChain();
     std::vector<Zone*> getAncestors() const;
     std::vector<Zone*> getDescendants() const;
     std::vector<Zone*> getChildren() const;
@@ -186,10 +184,10 @@ struct Zone {
     std::string name{};            /* name of this zone                  */
     std::string builders{};          /* namelist of builders allowed to    */
     /* modify this zone.		  */
-    int lifespan{};           /* how long between resets (minutes)  */
-    double age{};                /* current age of this zone (minutes) */
+    int lifespan{5};           /* how long between resets (minutes)  */
+    double age{};                /* current age of this zone (seconds) */
 
-    int reset_mode{};         /* conditions for reset (see below)   */
+    int reset_mode{2};         /* conditions for reset (see below)   */
 
     FlagHandler<ZoneFlag> zone_flags{};          /* Flags for the zone.                */
 
@@ -234,13 +232,34 @@ struct Zone {
             return 0;
         }
     }
+
+    Result<bool> canBeDeletedBy(Character* ch);
+
+    // if a room in this or a child zone is OUTDOORS, the "fly space"
+    // or "pilot launch" commands will take you here.
+    // Stores a LocID like R:50 or A:10:0:0:9
+    // the actor will look up the zone chain until it either finds a
+    // launchDestination or runs out of Zones to check.
+    std::string launchDestination{};
+
+    // Landing spots for the zone. If you're IN launchDestination...
+    // Then these are a combination of name->LocID landing spots
+    // to display.
+    std::unordered_map<std::string, std::string> landingSpots;
+    // Specifically for ships landing.
+    std::unordered_map<std::string, std::string> dockingSpots;
 };
 
-struct cmdlist_element {
-    char *cmd{};                /* one line of a trigger */
-    struct cmdlist_element *original{};
-    struct cmdlist_element *next{};
+template <>
+struct fmt::formatter<Zone> {
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+
+    template <typename FormatContext>
+    auto format(const Zone& z, FormatContext& ctx) {
+        return fmt::format_to(ctx.out(), "Zone {} '{}'", z.number, z.name);
+    }
 };
+
 
 struct HasVariables {
     std::unordered_map<std::string, std::string> variables; // Subscriptions to services.
@@ -301,6 +320,16 @@ struct DgScriptPrototype {
 
     std::string scriptString() const;
     void setBody(const std::string& body);
+};
+
+template <>
+struct fmt::formatter<DgScriptPrototype> {
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+
+    template <typename FormatContext>
+    auto format(const DgScriptPrototype& z, FormatContext& ctx) {
+        return fmt::format_to(ctx.out(), "({}) DgScript {} '{}'", z.attach_type, z.vn, z.name);
+    }
 };
 
 using DepthType = std::tuple<ScriptLineType, int, bool, std::string>;
@@ -368,6 +397,16 @@ private:
     std::string substituteVariables(const std::string& cmd);
 };
 
+template <>
+struct fmt::formatter<DgScript> {
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+
+    template <typename FormatContext>
+    auto format(const DgScript& z, FormatContext& ctx) {
+        return fmt::format_to(ctx.out(), "({}) DgScript {} '{}'", z.getAttachType(), z.getVnum(), z.proto->name);
+    }
+};
+
 
 struct picky_data {
     std::unordered_set<MoralAlign> only_alignment, not_alignment;    /* Neutral, lawful, etc.		*/
@@ -381,6 +420,16 @@ struct Coordinates {
     bool operator==(const Coordinates& other) const;
 
     void apply(Direction dir);
+};
+
+template <>
+struct fmt::formatter<Coordinates> {
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+
+    template <typename FormatContext>
+    auto format(const Coordinates& z, FormatContext& ctx) {
+        return fmt::format_to(ctx.out(), "{}:{}:{}", z.x, z.y, z.z);
+    }
 };
 
 struct Location {
@@ -497,6 +546,17 @@ struct Location {
 
     void displayLookFor(Character* viewer);
 
+    bool buildwalk(Character* ch, Direction dir);
+};
+
+template <>
+struct fmt::formatter<Location> {
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+
+    template <typename FormatContext>
+    auto format(const Location& z, FormatContext& ctx) {
+        return fmt::format_to(ctx.out(), "{}", z.getLocID());
+    }
 };
 
 namespace std {
@@ -699,6 +759,16 @@ struct ObjectPrototype : public ThingPrototype, public picky_data {
     }
 };
 
+template <>
+struct fmt::formatter<ObjectPrototype> {
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+
+    template <typename FormatContext>
+    auto format(const ObjectPrototype& z, FormatContext& ctx) {
+        return fmt::format_to(ctx.out(), "ObjectPrototype {} '{}'", z.vn, z.short_description ? z.short_description : "<unnamed>");
+    }
+};
+
 /* ================== Memory Structure for Objects ================== */
 struct Object : public HasID, public HasLocation, public HasInventory, public HasExtraDescriptions, public HasDgScripts, public HasMudStrings, public HasAffectFlags, public HasSubscriptions, public HasStats,public picky_data, std::enable_shared_from_this<Object> {
     Object();
@@ -812,6 +882,17 @@ struct Object : public HasID, public HasLocation, public HasInventory, public Ha
         return itemStats.getEffective<R>(this, stat);
     }
 };
+
+template <>
+struct fmt::formatter<Object> {
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+
+    template <typename FormatContext>
+    auto format(const Object& z, FormatContext& ctx) {
+        return fmt::format_to(ctx.out(), "[VN{}] Object {} '{}'", z.vn, z.id, z.getShortDescription());
+    }
+};
+
 /* ======================================================================= */
 
 /* room-related structures ************************************************/
@@ -822,6 +903,7 @@ struct Destination : public Location {
     std::string general_description{};       /* When look DIR.			*/
     std::string keyword{};        /* for open/close			*/
 
+    FlagHandler<ExitFlag> exit_flags{}; /* Exit flags			*/
     int16_t exit_info{};        /* Exit info			*/
 
     obj_vnum key{NOTHING};        /* Key's number (-1 for no key)		*/
@@ -829,7 +911,20 @@ struct Destination : public Location {
     int dclock{};            /* DC to pick the lock			*/
     int dchide{};            /* DC to find hidden			*/
 
+    // this field deliberately not serialized.
+    bool generated{false};
+
     std::optional<Destination> getReverse() const;
+};
+
+template <>
+struct fmt::formatter<Destination> {
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+
+    template <typename FormatContext>
+    auto format(const Destination& z, FormatContext& ctx) {
+        return fmt::format_to(ctx.out(), "{} Exit {} to {}", z.generated ? "Generated" : "Direct", z.dir, z.getLocID());
+    }
 };
 
 struct AbstractLocation {
@@ -932,6 +1027,8 @@ struct AbstractLocation {
     virtual void onRemoveFromContents(const std::shared_ptr<HasLocation>& hl);
 
     virtual bool validCoordinates(const Coordinates& coor) const;
+
+    virtual bool buildwalk(const Coordinates& coor, Character* ch, Direction dir);
 };
 
 struct TileOverride : public HasResetCommands {
@@ -995,6 +1092,8 @@ struct AbstractGridArea : public AbstractLocation, public GridShared, public Has
 
     void replaceExit(const Coordinates& coor, const Destination& dest) override;
     void deleteExit(const Coordinates& coor, Direction dir) override;
+
+    bool buildwalk(const Coordinates& coor, Character* ch, Direction dir) override;
 
 };
 
@@ -1095,7 +1194,7 @@ struct Room : public AbstractLocation, public HasZone, public HasDgScripts, publ
 
     std::shared_ptr<Room> shared();
 
-    std::optional<std::string> dgCallMember(const std::string& member, const std::string& arg);
+    std::optional<std::string> dgCallMember(const std::string& member, const std::string& arg) override;
 
     double getEnvironment(int type) const;
     double setEnvironment(int type, double value);
@@ -1165,6 +1264,18 @@ struct Room : public AbstractLocation, public HasZone, public HasDgScripts, publ
     void replaceExit(const Coordinates& coor, const Destination& dest) override;
     void deleteExit(const Coordinates& coor, Direction dir) override;
 
+    bool buildwalk(const Coordinates& coor, Character* ch, Direction dir) override;
+
+};
+
+template <>
+struct fmt::formatter<Room> {
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+
+    template <typename FormatContext>
+    auto format(const Room& z, FormatContext& ctx) {
+        return fmt::format_to(ctx.out(), "Room {} '{}'", z.getVnum(), z.getName());
+    }
 };
 
 /* ====================================================================== */
@@ -1362,6 +1473,8 @@ struct Character : public HasID, public HasLocation, public HasEquipment, public
 
     Character& operator=(CharacterPrototype& proto);
 
+    bool isPC{false};
+
     const char* getDgName() const override;
     std::vector<trig_vnum> getProtoScript() const override;
     void activate();
@@ -1444,7 +1557,7 @@ struct Character : public HasID, public HasLocation, public HasEquipment, public
     std::string getAppearance(Appearance type, bool withTransform = true);
     const char* getAppearanceStr(Appearance type);
 
-    std::list<std::pair<int, std::string>> wait_input_queue;
+    std::list<std::pair<int, CommandData>> wait_input_queue;
     Task task{Task::nothing};
     void setTask(Task t);
     struct craftTask craftingTask;

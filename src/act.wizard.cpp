@@ -4437,26 +4437,25 @@ affect_total(vict);
 
     case 52:
     {
-        std::optional<Race> chosen_race;
+        std::function<bool(Race)> check;
 
         if (IS_NPC(vict))
         {
-            auto check = [ch](Race id)
+            check = [ch](Race id)
             { return race::getValidSexes(id).contains(GET_SEX(ch)); };
-            chosen_race = race::findRace(val_arg, check);
         }
         else
         {
-            auto check = [ch](Race id)
+            check = [ch](Race id)
             { return race::getValidSexes(id).contains(GET_SEX(ch)) && race::isPlayable(id); };
-            chosen_race = chosen_race = race::findRace(val_arg, check);
         }
-        if (!chosen_race)
-        {
-            ch->sendText("That is not a valid race for them. Try changing sex first.\r\n");
-            return (0);
+        auto choices = getEnumMap<Race>(check);
+        auto res = partialMatch(val_arg, choices, false);
+        if(!res) {
+            ch->sendText(res.err);
+            return 0;
         }
-        vict->race = chosen_race.value();
+        vict->race = res.value()->second;
         racial_body_parts(vict);
     }
     break;
@@ -5552,4 +5551,378 @@ ACMD(do_boom)
     }
 
     send_to_outdoor("%s shakes the world with a mighty boom!\r\n", GET_NAME(ch));
+}
+
+enum class ZoneOp
+{
+    Create,
+    Delete,
+    Rename,
+    Desc,
+    Reset,
+    Flags,
+    Parent,
+    List,
+    Help,
+    AddRooms,
+    Examine
+};
+
+static const std::unordered_map<std::string, ZoneOp> kOps{
+    {"create", ZoneOp::Create},
+    {"delete", ZoneOp::Delete},
+    {"rename", ZoneOp::Rename},
+    {"reset",  ZoneOp::Reset},
+    {"flags",  ZoneOp::Flags},
+    {"parent", ZoneOp::Parent},
+    {"list",   ZoneOp::List},
+    {"help",   ZoneOp::Help},
+    {"addrooms", ZoneOp::AddRooms},
+    {"examine", ZoneOp::Examine}
+};
+
+static const std::string mushZoneHelp = R"(
+MUSH-style Zone Editor Commands:
+  Alias: .z
+
+  .zone <id>
+       Examine a zone.
+
+  .zone/create <name>[=<parent ID>] 
+       Create a new zone with optional parent.
+  
+  .zone/delete <id>=YES
+       Delete a zone. It must be totally empty.
+
+  .zone/rename <id>=<new>
+       Rename a zone.
+
+  .zone/reset <id>
+       Reset a zone.
+
+  .zone/flags <id>=[[+|-]flag...]
+       Set zone flags. Example: .zone/flags 50=+dark -cave
+
+  .zone/parent <id>=<new parent id> | NONE
+       Set or clear zone parent.
+
+  .zone/list
+       List all zones.
+
+  .zone/help
+       Show this help.
+
+  .zone/addrooms <id>=[<number>|<from>-<to>]...
+       Add rooms to a zone. example: .zone/addrooms 50=20 21 99-120
+
+)";
+
+ACMD(do_mush_zone) {
+
+    auto op = cdata.switch_type;
+    if(op.empty()) op = "examine";
+
+    auto oper = partialMatch(op, kOps);
+
+    if(!oper) {
+        ch->sendFmt(oper.err);
+        return;
+    }
+
+    auto operation = oper.value()->second;
+    switch(operation) {
+        case ZoneOp::Create: {
+            auto res = validateZoneName(cdata.lsargs);
+            if(!res) {
+                ch->sendText(res.err);
+                return;
+            }
+            Zone* parent = nullptr;
+            if(!cdata.rsargs.empty()) {
+                auto parentRes = getZone(cdata.rsargs, ch);
+                if(!parentRes) {
+                    ch->sendText(parentRes.err);
+                    return;
+                }
+                parent = parentRes.value();
+            }
+            auto newid = getNextID(lastZoneID, zone_table);
+            auto &z = zone_table.emplace(newid, Zone{}).first->second;
+            z.name = res.value();
+            z.number = newid;
+            if(parent) {
+                z.parent = parent->number;
+                parent->children.insert(newid);
+                ch->sendFmt("{} created. Its parent is {}'\r\n", z, *parent);
+            } else {
+                ch->sendFmt("{} created. It has no parent.\r\n", z);
+            }
+            return;
+        }
+        case ZoneOp::Delete: {
+            auto zRes = getZone(cdata.lsargs, ch);
+            if(!zRes) {
+                ch->sendText(zRes.err);
+                return;
+            }
+            auto z = zRes.value();
+            auto zCan = z->canBeDeletedBy(ch);
+            if(!zCan) {
+                ch->sendText(zCan.err);
+                return;
+            }
+            // TODO: finish sanitizing zone deletion.
+            //zone_table.erase(z->number);
+            //ch->sendFmt("Zone {} '{}' deleted.\r\n", z->number, z->name);
+            return;
+        }
+        case ZoneOp::Rename: {
+            auto res = getZone(cdata.lsargs, ch);
+            if(!res) {
+                ch->sendText(res.err);
+                return;
+            }
+            auto z = res.value();
+            auto oldname = z->name;
+            auto nameRes = validateZoneName(cdata.rsargs);
+            if(!nameRes) {
+                ch->sendText(nameRes.err);
+                return;
+            }
+            z->name = nameRes.value();
+            ch->sendFmt("Renamed, now {}. Old name was: {}\r\n", *z, oldname);
+            return;
+        }
+        case ZoneOp::Reset: {
+            auto res = getZone(cdata.lsargs, ch);
+            if(!res) {
+                ch->sendText(res.err);
+                return;
+            }
+            auto z = res.value();
+            z->reset();
+            ch->sendFmt("{} reset.\r\n", *z);
+            return;
+        }
+        case ZoneOp::Flags: {
+            auto res = getZone(cdata.lsargs, ch);
+            if(!res) {
+                ch->sendText(res.err);
+                return;
+            }
+            auto z = res.value();
+            if(cdata.rsargs.empty()) {
+                ch->sendFmt("Current flags: {}\r\n", z->zone_flags.getFlagNames());
+                return;
+            }
+            auto results = z->zone_flags.applyChanges(cdata.rsargs);
+            ch->sendText(results.printResults());
+            return;
+        }
+        case ZoneOp::List:
+            list_zones(ch);
+            return;
+        case ZoneOp::Examine: {
+            auto res = getZone(cdata.lsargs, ch);
+            if(!res) {
+                ch->sendText(res.err);
+                return;
+            }
+            auto z = res.value();
+            print_zone(ch, z->number);
+            return;
+        }
+        case ZoneOp::Parent: {
+            auto res = getZone(cdata.lsargs, ch);
+            if(!res) {
+                ch->sendText(res.err);
+                return;
+            }
+            auto z = res.value();
+            if(cdata.rsargs.empty()) {
+                ch->sendText("Set parent to what? Use NONE to clear.");
+                return;
+            }
+            if(boost::iequals(cdata.rsargs, "NONE")) {
+                auto par = z->getParent();
+                if(!par) {
+                    ch->sendText("This zone has no parent.\r\n");
+                    return;
+                }
+                par->children.erase(z->number);
+                z->parent = NOTHING;
+                ch->sendFmt("{} parent cleared.", *z);
+                return;
+            }
+            return;
+        }
+        case ZoneOp::AddRooms: {
+            auto res = getZone(cdata.lsargs, ch);
+            if(!res) {
+                ch->sendText(res.err);
+                return;
+            }
+            auto z = res.value();
+            // the lsargs should be a space-delimited sequence of numbers >0...
+            auto ranges = parseRanges<room_vnum>(cdata.rsargs);
+            if(!ranges) {
+                ch->sendText(ranges.err);
+                return;
+            }
+            for(auto i : ranges.value()) {
+                auto r = get_room(i);
+                if(!r) {
+                    ch->sendFmt("Room {} does not exist.\r\n", i);
+                    continue;
+                }
+                auto sh = r->shared_from_this();
+                if(auto already_zone = sh->getZone(); already_zone) {
+                    already_zone->rooms.remove(sh);
+                }
+                z->rooms.add(sh);
+                sh->zone.reset(z);
+                ch->sendFmt("Added {} to {}\r\n", *r, *z);
+            }
+        }
+        case ZoneOp::Help: {
+            ch->sendText(mushExitsHelp);
+            return;
+        }
+        default:
+            ch->sendText("Oops?!\r\n");
+            break;
+    }
+
+}
+
+static const std::string mushExitsHelp = R"(
+MUSH-style Exits Editor
+=============================================================================
+The following exit directions are available:
+- north, east, south, west, up, down, northeast, southeast, southwest, 
+- northwest, inside, outside
+
+This command always targets the exits in your current location.
+
+A LocationID is a string representing the unique identifier for a location.
+The first letter is the type (R = Room, A = Area, S = Structure)
+It's followed by a : then the ID of that thing.
+Non-Rooms use a coordinate system.
+So, a Room might be R:50 and an Area location could be A:2:3:9:-2
+
+It is usually more efficient to use buildwalk to create lots of connected
+rooms. This command is for performing specific edits like setting keys.
+
+It is not recommended to override auto-generated exits in grid areas that
+simply connect coordinates. It could become very confusing.
+
+Alias: .ex
+
+.exit
+    Display exits in current location.
+    Automatically generated exits in grid areas will be marked out.
+
+.exit/destination <direction>=<LocationID>
+    Create/open or re-link an exit.
+    In a grid area this will create an exit override that can lead anywhere, 
+    but this is best used only on edges. The automapper will become very
+    confused otherwise if default bounds are in play.
+
+.exit/key <direction>=<key vnum>
+   The object vnum that'll be used as a key. 
+   Set to NONE or -1 to clear.
+
+.exit/dclock <direction>=<difficulty>
+    The difficulty number for picking the lock. 0 by default.
+
+.exit/dchide <direction>=<difficulty>
+    How easy it is to search for the exit if hidden. 0 By default.
+
+.exit/flags <direction>=<flagset>...
+    Choices: isdoor, closed, locked, pickproof, secret
+    Flagset can look like: +isdoor +closed -secret
+
+.exit/clear <direction>
+    Delete/close/wipe an exit.
+    This won't do anything in a grid area where you're in default 
+    bounds without overrides.
+
+.exit/help
+    Display this help text.
+
+)";
+
+// TODO: Replace ExitInfo with ExitFlags.
+
+enum class ExitOp : uint8_t
+{
+    List,
+    Destination,
+    Key,
+    DCLock,
+    DCHide,
+    Flags,
+    Clear,
+    Help
+};
+
+static class std::unordered_map<std::string, ExitOp> kExitOps{
+    {"list", ExitOp::List},
+    {"destination", ExitOp::Destination},
+    {"key", ExitOp::Key},
+    {"dclock", ExitOp::DCLock},
+    {"dchide", ExitOp::DCHide},
+    {"flags", ExitOp::Flags},
+    {"clear", ExitOp::Clear},
+    {"help", ExitOp::Help}
+};
+
+ACMD(do_mush_exits) {
+    auto op = cdata.switch_type;
+    if(op.empty()) op = "examine";
+
+    auto oper = partialMatch(op, kExitOps);
+
+    if(!oper) {
+        ch->sendFmt(oper.err);
+        return;
+    }
+
+    auto operation = oper.value()->second;
+
+    switch(operation) {
+        case ExitOp::Help:
+            ch->sendText(mushExitsHelp);
+            return;
+        case ExitOp::List: {
+            ch->sendText("Exits:\r\n");
+            for(auto &[d, e] : ch->location.getExits()) {
+                ch->sendFmt("{}\r\n", e);
+            }
+            return;
+        }
+        case ExitOp::Clear: {
+            auto emap = getEnumMap<Direction>();
+            auto dirRes = partialMatch(cdata.lsargs, emap);
+            if(!dirRes) {
+                ch->sendFmt(dirRes.err);
+                return;
+            }
+            auto dir = dirRes.value()->second;
+            auto ex = ch->location.getExit(dir);
+            if(!ex) {
+                ch->sendFmt("There is no {} exit.\r\n", dir);
+                return;
+            }
+            if(ex->generated) {
+                ch->sendFmt("You cannot clear the generated {} exit.\r\n", dir);
+                return;
+            }
+            auto e = ex.value();
+            ch->sendFmt("Clearing exit {}:\r\n", dir);
+            ch->location.deleteExit(dir);
+            return;
+        }
+    }
+
 }

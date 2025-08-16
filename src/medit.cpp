@@ -841,12 +841,12 @@ void medit_parse(struct descriptor_data *d, char *arg)
 
     case MEDIT_CLASS:
     {
-        auto sensei = static_cast<Sensei>(i);
+        auto sensei = magic_enum::enum_cast<Sensei>(i);
         // Check if the sensei requested exists
-        if (sensei::exists(sensei))
+        if (!sensei)
         {
             // Set the mob's Sensei to the chosen sensei
-            OLC_MOB(d)->sensei = sensei;
+            OLC_MOB(d)->sensei = sensei.value();
         }
         else
         {
@@ -887,13 +887,13 @@ void medit_parse(struct descriptor_data *d, char *arg)
 
     case MEDIT_RACE:
     {
-        auto chosen_race = static_cast<Race>(i);
-        if (!race::exists(chosen_race))
+        auto chosen_race = magic_enum::enum_cast<Race>(i);
+        if (!chosen_race)
         {
             d->sendText("That's not a race!");
             break;
         }
-        OLC_MOB(d)->race = chosen_race;
+        OLC_MOB(d)->race = chosen_race.value();
         /*  Change racial size based on race choice. */
         OLC_MOB(d)->size = static_cast<Size>(race::getSize(OLC_MOB(d)->race));
     }

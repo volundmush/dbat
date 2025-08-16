@@ -76,6 +76,7 @@ std::optional<Destination> AbstractGridArea::getDirection(const Coordinates &coo
         auto dit = it->second.exits.find(dir);
         if (dit != it->second.exits.end())
         {
+            dit->second.generated = false;
             return dit->second;
         }
     }
@@ -98,6 +99,7 @@ std::optional<Destination> AbstractGridArea::getDirection(const Coordinates &coo
     dest.position = coor;
     dest.position.apply(dir);
     dest.dir = dir;
+    dest.generated = true;
 
     if(validCoordinates(dest.position)) {
         return dest;
@@ -280,4 +282,29 @@ void AbstractGridArea::deleteExit(const Coordinates &coor, Direction dir)
     {
         t->exits.erase(dir); // idempotent
     }
+}
+
+
+bool AbstractGridArea::buildwalk(const Coordinates& coor, Character* ch, Direction dir) {
+    // by the time we reach this function, all permission checks have already been carried out.
+
+    if(validCoordinates(coor)) {
+        ch->sendText("You cannot buildwalk in a tile that already exists.\r\n");
+        return false;
+    }
+    auto t = ensure_tile(tileOverrides, coor);
+    if(t.sectorType) {
+        ch->sendText("You cannot buildwalk in a tile that already has a sector type.\r\n");
+        return false;
+    }
+
+    if(coor.z == 0) {
+        t.sectorType = defaultGroundSector ? *defaultGroundSector : SectorType::inside;
+    } else if(coor.z > 0) {
+        t.sectorType = defaultSkySector ? *defaultSkySector : SectorType::inside;
+    } else if(coor.z < 0) {
+        t.sectorType = defaultUnderSector ? *defaultUnderSector : SectorType::inside;
+    }
+
+    return true;
 }

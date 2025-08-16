@@ -146,7 +146,13 @@ Zone *Location::getZone() const
 
 std::string Location::getLocID() const
 {
-    if(auto a = al.lock()) return fmt::format("{}:{}:{}:{}", a->getLocID(), position.x, position.y, position.z);
+    if(auto a = al.lock()) {
+        auto alid = a->getLocID();
+        if(position.x != 0 || position.y != 0 || position.z != 0) {
+            return fmt::format("{}:{}:{}:{}", alid, position.x, position.y, position.z);
+        }
+        return a->getLocID();
+    }
 
     return "";
 }
@@ -608,7 +614,7 @@ FlagHandler<WhereFlag>& Location::getWhereFlags()
 }
 
 
-static void display_room_flags(Location& loc, Character *ch)
+static void display_room_flags(Location& loc, Character *ch, const std::vector<Zone*>& zones)
 {
     char buf[MAX_STRING_LENGTH], buf2[MAX_STRING_LENGTH], buf3[MAX_STRING_LENGTH];
 
@@ -619,6 +625,13 @@ static void display_room_flags(Location& loc, Character *ch)
     {
         ch->sendText("\r\n@wO----------------------------------------------------------------------O@n\r\n");
     }
+
+    std::vector<std::string> zoneNames;
+    for(const auto& zone : boost::adaptors::reverse(zones)) {
+        zoneNames.push_back(fmt::format("{}@n", zone->name));
+    }
+
+    ch->sendFmt("@wRegion:@n {}@n\r\n", fmt::join(zoneNames, " -> "));
 
     ch->send_to("@wLocation: @G%-70s@w\r\n", loc.getName());
 
@@ -662,43 +675,20 @@ static void display_special_room_descriptions(Location& loc, Character *ch)
     }
 }
 
-static void display_dimension_info(Location& loc, Character *ch)
-{
-    if (loc.getWhereFlag(WhereFlag::neo_nirvana))
-    {
-        ch->sendText("@wPlanet: @WNeo Nirvana@n\r\n");
-    }
-    else if (loc.getWhereFlag(WhereFlag::afterlife))
-    {
-        ch->sendText("@wDimension: @yA@Yf@yt@Ye@yr@Yl@yi@Yf@ye@n\r\n");
-    }
-    else if (loc.getRoomFlag(ROOM_HELL))
-    {
-        ch->sendText("@wDimension: @RPunishment Hell@n\r\n");
-    }
-    else if (loc.getWhereFlag(WhereFlag::afterlife_hell))
-    {
-        ch->sendText("@wDimension: @RH@re@Dl@Rl@n\r\n");
-    }
-}
-
-static void display_room_info(Location& loc, Character *ch)
+static void display_room_info(Location& loc, Character *ch, const std::vector<Zone*>& zones)
 {
     if (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_NODEC))
     {
         ch->sendText("@wO----------------------------------------------------------------------O@n\r\n");
     }
 
-    ch->send_to("@wLocation: %-70s@n\r\n", loc.getName());
+    std::vector<std::string> zoneNames;
+    for(const auto& zone : boost::adaptors::reverse(zones)) {
+        zoneNames.push_back(fmt::format("{}@n", zone->name));
+    }
 
-    if (auto planet = getPlanet(loc.getVnum()); planet)
-    {
-        ch->send_to("@wPlanet: @G%s@n\r\n", getPlanetColorName(planet.value()).c_str());
-    }
-    else
-    {
-        display_dimension_info(loc, ch);
-    }
+    ch->sendFmt("@wRegion:@n {}@n\r\n", fmt::join(zoneNames, " -> "));
+    ch->send_to("@wLocation: %-70s@n\r\n", loc.getName());
 
     double grav = loc.getEnvironment(ENV_GRAVITY);
     if (grav <= 1.0)
@@ -949,30 +939,61 @@ void Location::displayLookFor(Character* ch) {
         return;
     }
 
+    auto z = getZone();
+    auto zones = z->getChain();
+
     if (PRF_FLAGGED(ch, PRF_ROOMFLAGS))
     {
-        display_room_flags(*this, ch);
+        display_room_flags(*this, ch, zones);
     }
     else
     {
-        display_room_info(*this, ch);
+        display_room_info(*this, ch, zones);
     }
 
     display_room_damage_description(*this, ch);
 
     /* autoexits */
-    if (!IS_NPC(ch))
+    if (PRF_FLAGGED(ch, PRF_NODEC))
     {
-
-        if (PRF_FLAGGED(ch, PRF_NODEC))
-        {
-            do_auto_exits2(*this, ch);
-        }
-        else
-        {
-            do_auto_exits(*this, ch, EXIT_LEV(ch));
-        }
+        do_auto_exits2(*this, ch);
     }
+    else
+    {
+        do_auto_exits(*this, ch, EXIT_LEV(ch));
+    }
+
+    auto validSpots = [](const auto& locs) {
+        std::unordered_map<std::string, Location> valid;
+        for(const auto& [key, locid] : locs) {
+            if(auto l = resolveLocID(locid); l) {
+                valid[key] = l;
+            }
+        }
+        return valid;
+    };
+
+    auto locid = getLocID();
+    auto root_zone = zones.back();
+    if(root_zone->launchDestination == locid) {
+        // we are in the orbit of a place.
+        ch->sendFmt("@wYou are in low orbit above {}@n\r\n", root_zone->name);
+        if(ch->location.getLocID().starts_with("S")) {
+            // viewer is in a spaceship. We'll display docking spots.
+            auto docking_spots = validSpots(root_zone->dockingSpots);
+            ch->sendText("@wDocking Spots (for pilot land):@n\r\n");
+            for(const auto& [key, loc] : docking_spots) {
+                ch->sendFmt("{}\r\n", key);
+            }
+        } else {
+            // viewer is not in a spaceship. We'll display landing spots.
+            auto landing_spots = validSpots(root_zone->landingSpots);
+            ch->sendText("@wLanding Spots (for land):@n\r\n");
+            for(const auto& [key, loc] : landing_spots) {
+                ch->sendFmt("{}\r\n", key);
+            }
+    }
+}
 
     display_garden_info(*this, ch);
 
@@ -994,4 +1015,11 @@ void Location::displayLookFor(Character* ch) {
             ch->sendText("@n");
         }
     }
+}
+
+bool Location::buildwalk(Character* ch, Direction dir) {
+    if(auto a = al.lock()) {
+        return a->buildwalk(position, ch, dir);
+    }
+    return false;
 }

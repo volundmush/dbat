@@ -17,8 +17,4 @@ static void hedit_save_internally(struct descriptor_data *);
 
 extern void hedit_string_cleanup(struct descriptor_data *, int);
 
-extern ACMD(do_oasis_hedit);
 
-extern ACMD(do_helpcheck);
-
-extern ACMD(do_hindex);

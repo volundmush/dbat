@@ -17,8 +17,4 @@ Object *find_hatch_by_vnum(int vnum);
 
 
 // commands
-extern ACMD(do_warp);
 
-extern ACMD(do_drive);
-
-extern ACMD(do_ship_fire);

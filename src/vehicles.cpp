@@ -586,12 +586,12 @@ static void handle_drive_land(Character *ch, Object *vehicle, const std::string 
     room_vnum landing = NOWHERE;
     std::string landName = "UNKNOWN";
 
-    if (auto matched = partialMatch(pad, pads.begin(), pads.end(), false, [](const auto &p)
+    if (auto matched = partialMatch(pad, pads, false, [](const auto &p)
                                     { return p.first; });
-        matched != pads.end())
+        matched)
     {
-        landing = matched->second;
-        landName = matched->first;
+        landing = matched.value()->second;
+        landName = matched.value()->first;
     }
 
     auto landroom = get_room(landing);

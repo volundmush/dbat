@@ -423,13 +423,15 @@ ACMD(do_mimic)
         ch->mimic.reset();
     }
 
-    auto chosen_race = race::findRace(arg, check);
+    auto choices = getEnumMap<Race>(check);
+    auto chosen_race = partialMatch(arg, choices, false);
     if (!chosen_race)
     {
+        ch->sendText(chosen_race.err);
         ch->sendText("That is not a race you can change into. Enter mimic without arugments for the mimic menu.\r\n");
         return;
     }
-    auto race = chosen_race.value();
+    auto race = chosen_race.value()->second;
 
     int prob = GET_SKILL(ch, SKILL_MIMIC), perc = axion_dice(0);
     double mult = 1 / prob;

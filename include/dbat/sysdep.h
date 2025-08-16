@@ -42,6 +42,8 @@
 #include <type_traits>
 #include <iostream>
 #include <experimental/memory>
+#include <filesystem>
+#include <regex>
 
 #define FMT_HEADER_ONLY
 #include "fmt/format.h"
@@ -49,6 +51,7 @@
 #include "fmt/ranges.h"
 
 #include <boost/algorithm/string.hpp>
+#include <boost/range/adaptor/reversed.hpp>
 #include "magic_enum/magic_enum_all.hpp"
 
 // #include "entt/entt.hpp"
@@ -89,11 +92,29 @@ typedef vnum guild_rnum;
  */
 typedef uint32_t bitvector_t;
 
-typedef void(*CommandFunc)(Character *ch, char *argument, int cmd, int subcmd);
+struct CommandData {
+    std::string cmd;
+    std::string switch_type;
+    std::string switch_mod;
+    std::string full_args;
+    std::string lsargs;
+    std::string rsargs;
+    bool equals_present;
+    std::unordered_map<std::string, std::string> variables;
+};
+
+class CommandError : public std::runtime_error {
+public:
+    explicit CommandError(const std::string& message)
+        : std::runtime_error(message) {}
+};
+
+typedef void(*CommandFunc)(Character *ch, char *argument, int cmd, int subcmd, CommandData cdata);
 
 typedef int(*SpecialFunc)(Character *ch, HasDgScripts *me, int cmd, char *argument);
 
-#define ACMD(name) void (name)(Character *ch, char *argument, int cmd, int subcmd)
+#define ACMD(name) void (name)(Character *ch, char *argument, int cmd, int subcmd, CommandData cdata)
+#define DECCMD(name) void (name)(Character *ch, char *argument, int cmd, int subcmd, CommandData cdata = {})
 #define SPECIAL(name) int (name)(Character *ch, HasDgScripts *me, int cmd, char *argument)
 
 template<typename T = bool>

@@ -310,12 +310,12 @@ ACMD(do_land)
     room_vnum landing = NOWHERE;
     std::string landName = "UNKNOWN";
 
-    if (auto matched = partialMatch(argument, landLocations.begin(), landLocations.end(), false, [](const auto &p)
+    if (auto matched = partialMatch(argument, landLocations, false, [](const auto &p)
                                     { return p.first; });
-        matched != landLocations.end())
+        matched)
     {
-        landing = matched->second;
-        landName = matched->first;
+        landing = matched.value()->second;
+        landName = matched.value()->first;
     }
 
     auto landroom = get_room(landing);
@@ -875,7 +875,7 @@ int perform_move(Character *ch, int dir, int need_specials_check)
 
     auto ex = EXIT(ch, dir);
 
-    if ((!ex && !buildwalk(ch, dir)) ||
+    if ((!ex && !ch->location.buildwalk(ch, static_cast<Direction>(dir))) ||
         (EXIT_FLAGGED(ex, EX_SECRET) && (EXIT_FLAGGED(ex, EX_CLOSED))))
     {
         ch->sendText("Alas, you cannot go that way...\r\n");

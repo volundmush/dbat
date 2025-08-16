@@ -734,6 +734,32 @@ void load_globaldata(const std::filesystem::path &loc)
     {
         j["lastStructureID"].get_to(lastStructureID);
     }
+    if (j.contains("lastGridTemplateID"))
+    {
+        j["lastGridTemplateID"].get_to(lastGridTemplateID);
+    }
+    if (j.contains("lastAreaID"))
+    {
+        j["lastAreaID"].get_to(lastAreaID);
+    }
+    if (j.contains("lastRoomID"))
+    {
+        j["lastRoomID"].get_to(lastRoomID);
+    }
+    if (j.contains("lastShopID"))
+    {
+        j["lastShopID"].get_to(lastShopID);
+    }
+    if (j.contains("lastGuildID"))
+    {
+        j["lastGuildID"].get_to(lastGuildID);
+    }
+    
+    if (j.contains("lastScriptID"))
+    {
+        j["lastScriptID"].get_to(lastScriptID);
+    }
+    
 }
 
 void dump_globaldata(const std::filesystem::path &loc)
@@ -747,6 +773,13 @@ void dump_globaldata(const std::filesystem::path &loc)
     j["lastAccountID"] = lastAccountID;
     j["lastObjectID"] = lastObjectID;
     j["lastStructureID"] = lastStructureID;
+    j["lastAreaID"] = lastAreaID;
+    j["lastGridTemplateID"] = lastGridTemplateID;
+    j["lastRoomID"] = lastRoomID;
+    j["lastZoneID"] = lastZoneID;
+    j["lastShopID"] = lastShopID;
+    j["lastGuildID"] = lastGuildID;
+    j["lastScriptID"] = lastScriptID;
 
     dump_to_file(loc, "globaldata.json", j);
 }
@@ -1643,6 +1676,8 @@ void to_json(json &j, const Character &c)
     to_json(j, static_cast<const HasStats &>(c));
     to_json(j, static_cast<const HasAffectFlags &>(c));
 
+    if(c.isPC) j["isPC"] = c.isPC;
+
     if (c.running_scripts)
         j["running_scripts"] = c.running_scripts.value();
 
@@ -1765,6 +1800,10 @@ void from_json(const json &j, Character &c)
     // from_json(j, static_cast<HasExtraDescriptions&>(c));
     from_json(j, static_cast<HasStats &>(c));
     from_json(j, static_cast<HasAffectFlags &>(c));
+
+    if(j.contains("isPC")) {
+        c.isPC = j["isPC"];
+    }
 
     if (j.contains("running_scripts"))
     {
@@ -2249,6 +2288,7 @@ PlayerData *create_player_character(int account_id, const json &j)
     p.character = ch.get();
     p.name = j.at("name").get<std::string>();
     ch->strings["name"] = p.name;
+    ch->isPC = true;
 
     acc.characters.push_back(ch->id);
 

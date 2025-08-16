@@ -27,44 +27,6 @@
 
 extern bitvector_t asciiflag_conv(char *flag);
 
-/* local functions */
-void parse_trigger(FILE *trig_f, trig_vnum nr) {
-    int t[2], k, attach_type;
-    char line[256], *cmds, *s, flags[256], errors[MAX_INPUT_LENGTH];
-    struct cmdlist_element *cle;
-    auto &idx = trig_index[nr];
-    auto *trig = &idx;
-
-    trig->vn = nr;
-
-    snprintf(errors, sizeof(errors), "trig vnum %d", nr);
-
-    char *buf = fread_string(trig_f, errors);
-
-    trig->name = buf;
-
-    get_line(trig_f, line);
-    k = sscanf(line, "%d %s %d", &attach_type, flags, t);
-    trig->attach_type = static_cast<UnitType>(attach_type);
-    trig->trigger_type = (long) asciiflag_conv(flags);
-    trig->narg = (k == 3) ? t[0] : 0;
-
-    buf = fread_string(trig_f, errors);
-
-    trig->arglist = buf ? buf : "";
-
-    free(buf);
-
-    cmds = s = fread_string(trig_f, errors);
-
-    std::vector<std::string> lines;
-    boost::split_regex(lines, cmds, boost::regex("\r\n|\r|\n"));
-
-    trig->lines = parse_script(lines);
-
-    free(cmds);
-}
-
 /*
  * create a new trigger from a prototype.
  * nr is the real number of the trigger.

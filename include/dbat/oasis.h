@@ -500,14 +500,12 @@ constexpr int HSEDIT_BUILDER = 22;
 
 extern void clear_screen(struct descriptor_data *);
 
-extern ACMD(do_oasis);
+
 
 /*
  * Prototypes, to be moved later.
  */
-extern ACMD(do_oasis_list);
 
-extern ACMD(do_oasis_links);
 
 extern void medit_free_mobile(CharacterPrototype *mob);
 
@@ -542,8 +540,6 @@ extern void medit_disp_menu(struct descriptor_data *d);
 extern void medit_parse(struct descriptor_data *d, char *arg);
 
 extern void medit_string_cleanup(struct descriptor_data *d, int terminator);
-
-extern ACMD(do_oasis_medit);
 
 extern void oedit_setup_new(struct descriptor_data *d);
 
@@ -595,7 +591,7 @@ extern void oedit_disp_perm_menu(struct descriptor_data *d);
 
 extern void oedit_string_cleanup(struct descriptor_data *d, int terminator);
 
-extern ACMD(do_oasis_oedit);
+
 
 extern void oedit_disp_use_menu(struct descriptor_data *d);
 
@@ -629,8 +625,6 @@ extern void redit_parse(struct descriptor_data *d, char *arg);
 
 extern void free_room(Room *room);
 
-extern ACMD(do_oasis_redit);
-
 extern void sedit_setup_new(struct descriptor_data *d);
 
 extern void sedit_setup_existing(struct descriptor_data *d, vnum rshop_num);
@@ -655,7 +649,7 @@ extern void sedit_disp_menu(struct descriptor_data *d);
 
 extern void sedit_parse(struct descriptor_data *d, char *arg);
 
-extern ACMD(do_oasis_sedit);
+
 
 extern void gedit_setup_new(struct descriptor_data *d);
 
@@ -674,8 +668,6 @@ extern void gedit_save_to_disk(int num);
 extern void copy_guild(struct guild_data *tgm, struct guild_data *fgm);
 
 extern void gedit_modify_string(std::string &str, char *new_g);
-
-extern ACMD(do_oasis_gedit);
 
 extern void zedit_setup(struct descriptor_data *d, int room_num);
 
@@ -701,7 +693,7 @@ extern void zedit_parse(struct descriptor_data *d, char *arg);
 
 extern void zedit_disp_flag_menu(struct descriptor_data *d);
 
-extern ACMD(do_oasis_zedit);
+
 
 extern void cedit_setup(struct descriptor_data *d);
 
@@ -711,7 +703,7 @@ extern void cedit_save_to_disk();
 
 extern void cedit_string_cleanup(struct descriptor_data *d, int terminator);
 
-extern ACMD(do_oasis_cedit);
+
 
 extern void trigedit_parse(struct descriptor_data *d, char *arg);
 
@@ -719,7 +711,6 @@ extern void trigedit_setup_existing(struct descriptor_data *d, int rtrg_num);
 
 extern void trigedit_setup_new(struct descriptor_data *d);
 
-extern ACMD(do_oasis_trigedit);
 
 extern void aedit_disp_menu(struct descriptor_data *d);
 
@@ -735,15 +726,11 @@ extern void aedit_save_internally(struct descriptor_data *d);
 
 extern void free_action(struct social_messg *mess);
 
-extern ACMD(do_oasis_aedit);
-
 extern void hedit_parse(struct descriptor_data *d, char *arg);
 
 extern void hedit_string_cleanup(struct descriptor_data *d, int terminator);
 
 extern void free_help(struct help_index_element *help);
-
-extern ACMD(do_oasis_hedit);
 
 extern int parse_stats(struct descriptor_data *d, char *arg);
 

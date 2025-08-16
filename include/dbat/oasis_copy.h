@@ -4,8 +4,3 @@
 #pragma once
 
 #include "structs.h"
-
-extern int buildwalk(Character *ch, int dir);
-
-// commands
-extern ACMD(do_dig);

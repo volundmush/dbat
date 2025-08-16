@@ -60,16 +60,17 @@ bool gameIsLoading = true;
 bool saveAll = false;
 bool isMigrating = false;
 
-int64_t lastCharacterID{0}, lastObjectID{0}, lastAccountID{0}, lastStructureID{0};
+int64_t lastCharacterID{0}, lastObjectID{0}, lastAccountID{0}, lastStructureID{0}, lastAreaID{0}, lastGridTemplateID{0};
+int lastRoomID{0}, lastZoneID{0}, lastShopID{0}, lastGuildID{0}, lastScriptID{0};
 
 struct config_data config_info; /* Game configuration list.    */
 
 // The global database of entities.
-NegativeKeyGuardUnorderedMap<int, std::shared_ptr<Entity>> units;
+
 NegativeKeyGuardMap<room_vnum, std::shared_ptr<Room>> world;
-NegativeKeyGuardUnorderedMap<int, std::shared_ptr<Area>> areas;
-NegativeKeyGuardUnorderedMap<int, std::shared_ptr<Structure>> structures;
-NegativeKeyGuardUnorderedMap<int, GridTemplate> gridTemplates;
+NegativeKeyGuardUnorderedMap<int64_t, std::shared_ptr<Area>> areas;
+NegativeKeyGuardUnorderedMap<int64_t, std::shared_ptr<Structure>> structures;
+NegativeKeyGuardUnorderedMap<int64_t, GridTemplate> gridTemplates;
 
 NegativeKeyGuardUnorderedMap<int64_t, std::shared_ptr<Character>> uniqueCharacters;
 NegativeKeyGuardUnorderedMap<int64_t, std::shared_ptr<Object>> uniqueObjects;
@@ -2253,6 +2254,8 @@ std::shared_ptr<HasDgScripts> resolveUID(const std::string& uid) {
 
     return nullptr;
 }
+
+std::regex parseRangeRegex(R"(^(\d+)(-(\d+))?$)", std::regex::icase);
 
 static std::regex lid_regex(R"(^(R|A|S):(\d+)(:(\d+):(\d+):(\d+))?)", std::regex::icase);
 

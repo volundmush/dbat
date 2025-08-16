@@ -1143,3 +1143,13 @@ extern bool is_all_alpha(const std::string& str);
 extern void doContinuedTask(Character* ch);
 
 extern std::string format_double(double value);
+
+Result<int> parseIDNumber(std::string_view arg, std::string_view context);
+Result<int> getZoneID(std::string_view arg, bool exists = false);
+Result<Zone*> getZone(std::string_view arg, Character* ch);
+Result<std::string> validateZoneName(std::string_view arg, bool checkExists = false, zone_vnum exclude = NOTHING);
+
+Result<int> getRoomID(std::string_view arg, bool exists = false);
+
+Result<Room*> getRoom(std::string_view arg, Character* ch);
+

@@ -22,7 +22,7 @@ extern void perform_alias(struct descriptor_data *d, char *orig);
 
 extern void commandWaitQueue(uint64_t heartPulse, double deltaTime);
 
-void processCommand(Character *ch, int cmd, std::string arg);
+void processCommand(Character *ch, int cmd, std::string arg, CommandData cd);
 
 extern void topLoad(void);
 

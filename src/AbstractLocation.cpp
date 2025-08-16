@@ -186,3 +186,7 @@ bool AbstractLocation::getWhereFlag(const Coordinates &coor, WhereFlag flag)
 bool AbstractLocation::validCoordinates(const Coordinates& coor) const {
     return true;
 }
+
+bool AbstractLocation::buildwalk(const Coordinates& coor, Character* ch, Direction dir) {
+    return false;
+}

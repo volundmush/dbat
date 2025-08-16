@@ -1568,7 +1568,6 @@ ACMD(do_gen_comm)
 
     if (subcmd == SCMD_GEMOTE)
     {
-        ACMD(do_gmote);
         if (*argument == '*' || *argument == ':')
             do_gmote(ch, argument + 1, 0, 1);
         else

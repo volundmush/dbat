@@ -316,8 +316,6 @@ extern void process_eval(HasDgScripts *go, script_data *sc, DgScript *trig,
                          UnitType type, char *cmd);
 
 /* from dg_db_scripts.c */
-extern void parse_trigger(FILE *trig_f, trig_vnum nr);
-
 std::shared_ptr<DgScript> read_trigger(int nr);
 
 extern void dg_read_trigger(FILE *fp, struct HasDgScripts *proto, UnitType type);

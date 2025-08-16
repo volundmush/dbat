@@ -123,10 +123,6 @@ extern time_t old_beginning_of_time;
 /* public procedures in db.c */
 extern void auc_load(Object *obj);
 
-void create_schema();
-
-void dump_state();
-
 extern void boot_world();
 
 extern int is_empty(zone_rnum zone_nr);
@@ -242,11 +238,9 @@ extern struct time_info_data time_info;  /* the infomation about the time    */
 extern struct time_info_data era_uptime; /* the infomation about the time    */
 extern struct weather_data weather_info; /* the infomation about the weather */
 
-extern NegativeKeyGuardUnorderedMap<int, std::shared_ptr<Area>> areas;
-extern NegativeKeyGuardUnorderedMap<int, std::shared_ptr<Structure>> structures;
-extern NegativeKeyGuardUnorderedMap<int, GridTemplate> gridTemplates;
-
-extern NegativeKeyGuardUnorderedMap<int, std::shared_ptr<struct Entity>> units;
+extern NegativeKeyGuardUnorderedMap<int64_t, std::shared_ptr<Area>> areas;
+extern NegativeKeyGuardUnorderedMap<int64_t, std::shared_ptr<Structure>> structures;
+extern NegativeKeyGuardUnorderedMap<int64_t, GridTemplate> gridTemplates;
 
 extern NegativeKeyGuardMap<room_vnum, std::shared_ptr<Room>> world;
 extern NegativeKeyGuardMap<zone_vnum, struct Zone> zone_table;
@@ -278,6 +272,14 @@ extern int64_t lastCharacterID;
 extern int64_t lastObjectID;
 extern int64_t lastAccountID;
 extern int64_t lastStructureID;
+extern int64_t lastAreaID;
+extern int64_t lastGridTemplateID;
+
+extern int lastRoomID;
+extern int lastZoneID;
+extern int lastShopID;
+extern int lastGuildID;
+extern int lastScriptID;
 
 int64_t getNextAccountID();
 
@@ -321,4 +323,4 @@ extern std::vector<DgScriptPrototype *> collectTriggers(int start_vnum, int end_
 #define END_MARKER "END"                   /* for load_disabled() and save_disabled() */
 
 // commands
-extern ACMD(do_reboot);
+

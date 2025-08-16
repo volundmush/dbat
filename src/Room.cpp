@@ -11,6 +11,7 @@
 #include "dbat/filter.h"
 #include "dbat/dg_scripts.h"
 #include "dbat/send.h"
+#include "dbat/act.wizard.h"
 
 Room::Room() : AbstractLocation()
 {
@@ -457,4 +458,31 @@ FlagHandler<WhereFlag>& Room::getWhereFlags(const Coordinates &coor)
 FlagHandler<RoomFlag>& Room::getRoomFlags(const Coordinates &coor)
 {
     return room_flags;
+}
+
+bool Room::buildwalk(const Coordinates& coor, Character* ch, Direction dir) {
+    // by the time we reach this function, all permission checks have already been carried out.
+
+    auto r = std::make_shared<Room>();
+    r->vn = getNextID(lastRoomID, world);
+    r->strings["name"] = "New BuildWalk Room";
+    r->strings["look_description"] = fmt::format("This unfinished room was created by {}.\r\n", ch->getName());
+    r->zone = zone;
+
+    world[r->vn] = r;
+
+    Destination dest, rdest;
+    dest.dir = dir;
+    dest.al = r;
+    ch->location.replaceExit(dest);
+
+    rdest.dir = static_cast<Direction>(rev_dir[static_cast<int>(dir)]);
+    rdest.al = ch->location.al;
+    rdest.position = ch->location.position;
+    dest.replaceExit(rdest);
+
+    ch->send_to("@yRoom #%d created by BuildWalk.@n\r\n", r->vn);
+    update_space();
+
+    return true;
 }

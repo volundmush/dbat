@@ -295,18 +295,6 @@ namespace race
         return playable.contains(id);
     }
 
-    static std::vector<Race> all_races = {
-        Race::human, Race::saiyan, Race::icer, Race::konatsu, Race::namekian, Race::mutant,
-        Race::kanassan, Race::halfbreed, Race::bio_android, Race::android, Race::demon, Race::majin,
-        Race::kai, Race::tuffle, Race::hoshijin, Race::animal, Race::saiba, Race::serpent, Race::ogre,
-        Race::yardratian, Race::arlian, Race::dragon, Race::mechanical, Race::spirit};
-
-    bool exists(Race id)
-    {
-        auto find = std::find(all_races.begin(), all_races.end(), id);
-        return find != all_races.end();
-    }
-
     bool isValidGenome(Race id)
     {
         switch (id)
@@ -542,23 +530,8 @@ namespace race
 
     std::vector<Race> filterRaces(std::function<bool(Race)> func)
     {
-        std::vector<Race> out;
-        std::copy_if(all_races.begin(), all_races.end(), std::back_inserter(out), func);
-
-        return out;
+        return getEnumList<Race>(func);
     };
-
-    std::optional<Race> findRace(const std::string &arg, std::function<bool(Race)> func)
-    {
-        for (auto r : all_races)
-        {
-            if (!func(r))
-                continue;
-            if (boost::iequals(arg, getName(r)))
-                return r;
-        }
-        return {};
-    }
 
     std::string defaultAppearance(Character *ch, Appearance type)
     {

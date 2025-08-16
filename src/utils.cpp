@@ -3625,3 +3625,90 @@ std::string format_double(double value)
         return fmt::format("{:.2f}", value);
     }
 }
+
+Result<int> parseIDNumber(std::string_view arg, std::string_view context) {
+    if(arg.empty()) {
+        return Err("No {} ID provided.\r\n", context);
+    }
+    try {
+        auto id = std::stoi(std::string(arg));
+        return Ok(id);
+    } catch (const std::invalid_argument&) {
+        return Err("Invalid {} ID: {}", context, arg);
+    } catch(const std::out_of_range&) {
+        return Err("{} ID out of range: {}", context, arg);
+    }
+}
+
+Result<int> getZoneID(std::string_view arg, bool exists) {
+    auto resId = parseIDNumber(arg, "Zone");
+    if (!resId) {
+        return resId;
+    }
+    if(exists && !zone_table.count(resId.value())) {
+        return Err("Zone {} does not exist.\r\n", resId.value());
+    }
+    return resId;
+}
+
+Result<Zone*> getZone(std::string_view arg, Character* ch) {
+    if(boost::iequals(arg, "here")) {
+        if(auto z = ch->location.getZone()) {
+            return Ok(z);
+        }
+        return Err("You are not in a Zone, somehow. How the hell did that happen?\r\n");
+    }
+    auto res = getZoneID(arg, true);
+    if (!res) return Err(res.err);
+
+    if (auto zone = zone_table.find(res.value()); zone != zone_table.end()) {
+        return Ok(&zone->second);
+    }
+    return Err("Zone {} does not exist.\r\n", res.value());
+    
+}
+
+Result<std::string> validateZoneName(std::string_view arg, bool checkExists, zone_vnum exclude) {
+    auto trimmed = boost::trim_copy(std::string(arg));
+    if (trimmed.empty()) {
+        return Err("No zone name provided.\r\n");
+    }
+    if (checkExists) {
+        for(const auto& [vn, z] : zone_table) {
+            if(vn == exclude) continue;
+            if(boost::iequals(trimmed, z.name)) {
+                return Err("Zone '{}' already exists.\r\n", trimmed);
+            }
+        }
+    }
+    return Ok(trimmed);
+}
+
+Result<int> getRoomID(std::string_view arg, bool exists) {
+    auto resId = parseIDNumber(arg, "Room");
+    if (!resId) {
+        return resId;
+    }
+    if(exists && !world.count(resId.value())) {
+        return Err("Room {} does not exist.\r\n", resId.value());
+    }
+    return resId;
+}
+
+Result<Room*> getRoom(std::string_view arg, Character* ch) {
+    if(boost::iequals(arg, "here")) {
+        if(auto r = dynamic_cast<Room*>(ch->location.al.lock().get())) {
+            return Ok(r);
+        }
+        return Err("You are not in a Room.\r\n");
+    }
+    auto res = getRoomID(arg, true);
+    if (!res) return Err(res.err);
+
+    if (auto room = world.find(res.value()); room != world.end()) {
+        auto r = room->second.get();
+        return Ok(r);
+    }
+    return Err("Room {} does not exist.\r\n", res.value());
+
+}

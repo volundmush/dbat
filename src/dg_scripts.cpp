@@ -46,8 +46,7 @@ void eval_expr(char *line, char *result, HasDgScripts *go, script_data *sc,
 int eval_lhs_op_rhs(char *expr, char *result, HasDgScripts *go, script_data *sc,
                     DgScript *trig, UnitType type);
 
-void process_wait(HasDgScripts *go, DgScript *trig, UnitType type, char *cmd,
-                  struct cmdlist_element *cl);
+void process_wait(HasDgScripts *go, DgScript *trig, UnitType type, char *cmd);
 
 void process_set(script_data *sc, DgScript *trig, char *cmd);
 
@@ -72,12 +71,6 @@ void process_context(script_data *sc, DgScript *trig, char *cmd);
 void extract_value(script_data *sc, DgScript *trig, char *cmd);
 
 void dg_letter_value(script_data *sc, DgScript *trig, char *cmd);
-
-struct cmdlist_element *
-find_case(DgScript *trig, struct cmdlist_element *cl,
-          HasDgScripts *go, script_data *sc, UnitType type, char *cond);
-
-struct cmdlist_element *find_done(struct cmdlist_element *cl);
 
 int fgetline(FILE *file, char *p);
 
@@ -1792,8 +1785,7 @@ int eval_lhs_op_rhs(char *expr, char *result, HasDgScripts *go, script_data *sc,
  */
 
 /* processes any 'wait' commands in a trigger */
-void process_wait(HasDgScripts *go, DgScript *trig, UnitType type, char *cmd,
-                  struct cmdlist_element *cl)
+void process_wait(HasDgScripts *go, DgScript *trig, UnitType type, char *cmd)
 {
     char buf[MAX_INPUT_LENGTH], *arg;
     struct wait_event_data *wait_event_obj;
@@ -1806,8 +1798,8 @@ void process_wait(HasDgScripts *go, DgScript *trig, UnitType type, char *cmd,
 
     if (!*arg)
     {
-        script_log("Trigger: %s, VNum %d. wait w/o an arg: '%s'",
-                   GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), cl->cmd);
+        script_log("Trigger: %s, VNum %d.",
+                   GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig));
         return;
     }
 
@@ -2526,77 +2518,7 @@ ACMD(do_tstat)
         ch->sendText("Usage: tstat <vnum>\r\n");
 }
 
-/*
- * scans for a case/default instance
- * returns the line containg the correct case instance, or the last
- * line of the trigger if not found.
- */
-struct cmdlist_element *
-find_case(DgScript *trig, struct cmdlist_element *cl,
-          HasDgScripts *go, script_data *sc, UnitType type, char *cond)
-{
-    char result[MAX_INPUT_LENGTH];
-    struct cmdlist_element *c;
-    char *p, *buf;
 
-    eval_expr(cond, result, go, sc, trig, type);
-
-    if (!(cl->next))
-        return cl;
-
-    for (c = cl->next; c->next; c = c->next)
-    {
-        for (p = c->cmd; *p && isspace(*p); p++)
-            ;
-
-        if (!strncasecmp("while ", p, 6) || !strncasecmp("switch", p, 6))
-            c = find_done(c);
-        else if (!strncasecmp("case ", p, 5))
-        {
-            buf = (char *)malloc(MAX_STRING_LENGTH);
-            eval_op("==", result, p + 5, buf, go, sc, trig);
-            if (*buf && *buf != '0')
-            {
-                free(buf);
-                return c;
-            }
-            free(buf);
-        }
-        else if (!strncasecmp("default", p, 7))
-            return c;
-        else if (!strncasecmp("done", p, 3))
-            return c;
-    }
-    return c;
-}
-
-/*
- * scans for end of while/switch-blocks.
- * returns the line containg 'end', or the last
- * line of the trigger if not found.
- * Malformed scripts may cause nullptr to be returned.
- */
-struct cmdlist_element *find_done(struct cmdlist_element *cl)
-{
-    struct cmdlist_element *c;
-    char *p;
-
-    if (!cl || !(cl->next))
-        return cl;
-
-    for (c = cl->next; c && c->next; c = c->next)
-    {
-        for (p = c->cmd; *p && isspace(*p); p++)
-            ;
-
-        if (!strncasecmp("while ", p, 6) || !strncasecmp("switch ", p, 7))
-            c = find_done(c);
-        else if (!strncasecmp("done", p, 3))
-            return c;
-    }
-
-    return c;
-}
 
 /* read a line in from a file, return the number of chars read */
 int fgetline(FILE *file, char *p)
@@ -3371,7 +3293,7 @@ void DgScript::processCommand(const std::string &raw_text)
     else if (boost::iequals(cmd, "wait"))
     {
         process_wait(owner.get(), this, proto->attach_type,
-                     (char *)full_command.c_str(), nullptr);
+                     (char *)full_command.c_str());
     }
     else if (boost::iequals(cmd, "attach"))
     {

@@ -17,30 +17,3 @@ extern int do_simple_move(Character *ch, int dir, int need_specials_check);
 extern int perform_move(Character *ch, int dir, int need_specials_check);
 
 // commands
-extern ACMD(do_gen_door);
-
-extern ACMD(do_enter);
-
-extern ACMD(do_leave);
-
-extern ACMD(do_stand);
-
-extern ACMD(do_fly);
-
-extern ACMD(do_sit);
-
-extern ACMD(do_rest);
-
-extern ACMD(do_sleep);
-
-extern ACMD(do_wake);
-
-extern ACMD(do_follow);
-
-extern ACMD(do_flee);
-
-extern ACMD(do_carry);
-
-extern ACMD(do_land);
-
-extern ACMD(do_move);

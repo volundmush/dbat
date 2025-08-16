@@ -259,3 +259,778 @@ struct command_info
 
 extern const struct command_info cmd_info[];
 extern struct command_info *complete_cmd_info;
+
+extern int matchCommand(Character* ch, const std::string& cmd);
+
+extern DECCMD(do_oasis);
+extern DECCMD(do_oasis_list);
+extern DECCMD(do_oasis_links);
+extern DECCMD(do_oasis_oedit);
+extern DECCMD(do_oasis_redit);
+extern DECCMD(do_oasis_sedit);
+extern DECCMD(do_oasis_gedit);
+extern DECCMD(do_oasis_zedit);
+extern DECCMD(do_oasis_cedit);
+extern DECCMD(do_oasis_trigedit);
+extern DECCMD(do_oasis_aedit);
+extern DECCMD(do_oasis_hedit);
+extern DECCMD(do_oasis_medit);
+extern DECCMD(do_skillset);
+extern DECCMD(do_helpcheck);
+extern DECCMD(do_hindex);
+extern DECCMD(do_track);
+extern DECCMD(do_kousengan);
+
+extern DECCMD(do_heal);
+
+extern DECCMD(do_trip);
+
+extern DECCMD(do_koteiru);
+
+extern DECCMD(do_razor);
+
+extern DECCMD(do_spike);
+
+extern DECCMD(do_ddslash);
+
+extern DECCMD(do_kakusanha);
+
+extern DECCMD(do_psyblast);
+
+extern DECCMD(do_punch);
+
+extern DECCMD(do_powerup);
+
+extern DECCMD(do_srepair);
+
+extern DECCMD(do_absorb);
+
+extern DECCMD(do_kaioken);
+
+extern DECCMD(do_strike);
+
+extern DECCMD(do_kick);
+
+extern DECCMD(do_elbow);
+
+extern DECCMD(do_knee);
+
+extern DECCMD(do_uppercut);
+
+extern DECCMD(do_roundhouse);
+
+extern DECCMD(do_heeldrop);
+
+extern DECCMD(do_slam);
+
+extern DECCMD(do_tailwhip);
+
+extern DECCMD(do_head);
+
+extern DECCMD(do_bite);
+
+extern DECCMD(do_ram);
+
+extern DECCMD(do_breath);
+
+extern DECCMD(do_kiball);
+
+extern DECCMD(do_kiblast);
+
+extern DECCMD(do_beam);
+
+extern DECCMD(do_renzo);
+
+extern DECCMD(do_tsuihidan);
+
+extern DECCMD(do_shogekiha);
+
+extern DECCMD(do_kamehameha);
+
+extern DECCMD(do_galikgun);
+
+extern DECCMD(do_masenko);
+
+extern DECCMD(do_hellspear);
+
+extern DECCMD(do_hellflash);
+
+extern DECCMD(do_dualbeam);
+
+extern DECCMD(do_honoo);
+
+extern DECCMD(do_pbarrage);
+
+extern DECCMD(do_tslash);
+
+extern DECCMD(do_pslash);
+
+extern DECCMD(do_crusher);
+
+extern DECCMD(do_eraser);
+
+extern DECCMD(do_spiral);
+
+extern DECCMD(do_tribeam);
+
+extern DECCMD(do_dodonpa);
+
+extern DECCMD(do_hass);
+
+extern DECCMD(do_zanzoken);
+
+extern DECCMD(do_deathball);
+
+extern DECCMD(do_deathbeam);
+
+extern DECCMD(do_kienzan);
+
+extern DECCMD(do_bigbang);
+
+extern DECCMD(do_final);
+
+extern DECCMD(do_sbc);
+
+extern DECCMD(do_scatter);
+
+extern DECCMD(do_nova);
+
+extern DECCMD(do_breaker);
+
+extern DECCMD(do_seishou);
+
+extern DECCMD(do_ensnare);
+
+extern DECCMD(do_barrier);
+
+extern DECCMD(do_attack);
+
+extern DECCMD(do_stand);
+
+extern DECCMD(do_fly);
+
+extern DECCMD(do_wake);
+
+extern DECCMD(do_flee);
+
+extern DECCMD(do_get);
+
+extern DECCMD(do_split);
+
+extern DECCMD(do_sac);
+
+extern DECCMD(do_transform);
+
+extern DECCMD(do_escape);
+
+extern DECCMD(do_balefire);
+
+extern DECCMD(do_blessedhammer);
+
+extern DECCMD(do_reboot);
+
+extern DECCMD(do_assedit);
+
+extern DECCMD(do_action);
+
+extern DECCMD(do_insult);
+
+extern DECCMD(do_gmote);
+
+extern DECCMD(do_gen_comm);
+
+extern DECCMD(do_charge);
+
+extern DECCMD(do_wear);
+
+extern DECCMD(do_quit);
+
+extern DECCMD(do_save);
+
+extern DECCMD(do_not_here);
+
+extern DECCMD(do_hide);
+
+extern DECCMD(do_steal);
+
+extern DECCMD(do_practice);
+
+extern DECCMD(do_visible);
+
+extern DECCMD(do_title);
+
+extern DECCMD(do_group);
+
+extern DECCMD(do_ungroup);
+
+extern DECCMD(do_report);
+
+extern DECCMD(do_use);
+
+extern DECCMD(do_value);
+
+extern DECCMD(do_display);
+
+extern DECCMD(do_gen_write);
+
+extern DECCMD(do_gen_tog);
+
+extern DECCMD(do_file);
+
+extern DECCMD(do_scribe);
+
+extern DECCMD(do_scouter);
+
+extern DECCMD(do_snet);
+
+extern DECCMD(do_spar);
+
+extern DECCMD(do_pushup);
+
+extern DECCMD(do_situp);
+
+extern DECCMD(do_summon);
+
+extern DECCMD(do_instant);
+
+extern DECCMD(do_solar);
+
+extern DECCMD(do_eyec);
+
+extern DECCMD(do_eavesdrop);
+
+extern DECCMD(do_disguise);
+
+extern DECCMD(do_appraise);
+
+extern DECCMD(do_forgery);
+
+extern DECCMD(do_plant);
+
+extern DECCMD(do_focus);
+
+extern DECCMD(do_regenerate);
+
+extern DECCMD(do_ingest);
+
+extern DECCMD(do_upgrade);
+
+extern DECCMD(do_recharge);
+
+extern DECCMD(do_form);
+
+extern DECCMD(do_spit);
+
+extern DECCMD(do_majinize);
+
+extern DECCMD(do_potential);
+
+extern DECCMD(do_telepathy);
+
+extern DECCMD(do_fury);
+
+extern DECCMD(do_pose);
+
+extern DECCMD(do_implant);
+
+extern DECCMD(do_suppress);
+
+extern DECCMD(do_drag);
+
+extern DECCMD(do_stop);
+
+extern DECCMD(do_future);
+
+extern DECCMD(do_candy);
+
+extern DECCMD(do_kura);
+
+extern DECCMD(do_taisha);
+
+extern DECCMD(do_paralyze);
+
+extern DECCMD(do_infuse);
+
+extern DECCMD(do_rip);
+
+extern DECCMD(do_train);
+
+extern DECCMD(do_grapple);
+
+extern DECCMD(do_willpower);
+
+extern DECCMD(do_commune);
+
+extern DECCMD(do_rpp);
+
+extern DECCMD(do_meditate);
+
+extern DECCMD(do_aura);
+
+extern DECCMD(do_think);
+
+extern DECCMD(do_block);
+
+extern DECCMD(do_compare);
+
+extern DECCMD(do_break);
+
+extern DECCMD(do_fix);
+
+extern DECCMD(do_resurrect);
+
+extern DECCMD(do_clan);
+
+extern DECCMD(do_aid);
+
+extern DECCMD(do_assist);
+
+extern DECCMD(do_kill);
+
+extern DECCMD(do_attack2);
+
+extern DECCMD(do_rogafufuken);
+
+extern DECCMD(do_baku);
+
+extern DECCMD(do_spiritball);
+
+extern DECCMD(do_genki);
+
+extern DECCMD(do_geno);
+
+extern DECCMD(do_rescue);
+
+extern DECCMD(do_gen_door);
+
+extern DECCMD(do_enter);
+
+extern DECCMD(do_leave);
+
+extern DECCMD(do_sit);
+
+extern DECCMD(do_rest);
+
+extern DECCMD(do_sleep);
+
+extern DECCMD(do_follow);
+
+extern DECCMD(do_carry);
+
+extern DECCMD(do_land);
+
+extern DECCMD(do_move);
+
+extern DECCMD(do_spoil);
+
+extern DECCMD(do_feed);
+
+extern DECCMD(do_beacon);
+
+extern DECCMD(do_dimizu);
+
+extern DECCMD(do_obstruct);
+
+extern DECCMD(do_warppool);
+
+extern DECCMD(do_fireshield);
+
+extern DECCMD(do_cook);
+
+extern DECCMD(do_adrenaline);
+
+extern DECCMD(do_arena);
+
+extern DECCMD(do_bury);
+
+extern DECCMD(do_hayasa);
+
+extern DECCMD(do_instill);
+
+extern DECCMD(do_kanso);
+
+extern DECCMD(do_hydromancy);
+
+extern DECCMD(do_channel);
+
+extern DECCMD(do_shimmer);
+
+extern DECCMD(do_metamorph);
+
+extern DECCMD(do_amnisiac);
+
+extern DECCMD(do_healglow);
+
+extern DECCMD(do_resize);
+
+extern DECCMD(do_scry);
+
+extern DECCMD(do_runic);
+
+extern DECCMD(do_extract);
+
+extern DECCMD(do_fish);
+
+extern DECCMD(do_defend);
+
+extern DECCMD(do_lifeforce);
+
+extern DECCMD(do_liquefy);
+
+extern DECCMD(do_shell);
+
+extern DECCMD(do_moondust);
+
+extern DECCMD(do_preference);
+
+extern DECCMD(do_song);
+
+extern DECCMD(do_multiform);
+
+extern DECCMD(do_spiritcontrol);
+
+extern DECCMD(do_ashcloud);
+
+extern DECCMD(do_silk);
+
+extern DECCMD(do_auction);
+
+extern DECCMD(do_bid);
+
+extern DECCMD(do_assemble);
+
+extern DECCMD(do_remove);
+
+extern DECCMD(do_put);
+
+extern DECCMD(do_drop);
+
+extern DECCMD(do_give);
+
+extern DECCMD(do_drink);
+
+extern DECCMD(do_eat);
+
+extern DECCMD(do_pour);
+
+extern DECCMD(do_wield);
+
+extern DECCMD(do_grab);
+
+extern DECCMD(do_twohand);
+
+extern DECCMD(do_deploy);
+
+extern DECCMD(do_pack);
+
+extern DECCMD(do_garden);
+
+extern DECCMD(do_refuel);
+
+extern DECCMD(do_desc);
+
+extern DECCMD(do_look);
+
+extern DECCMD(do_examine);
+
+extern DECCMD(do_gold);
+
+extern DECCMD(do_score);
+
+extern DECCMD(do_status);
+
+extern DECCMD(do_inventory);
+
+extern DECCMD(do_equipment);
+
+extern DECCMD(do_time);
+
+extern DECCMD(do_weather);
+
+extern DECCMD(do_help);
+
+extern DECCMD(do_who);
+
+extern DECCMD(do_users);
+
+extern DECCMD(do_gen_ps);
+
+extern DECCMD(do_where);
+
+extern DECCMD(do_levels);
+
+extern DECCMD(do_consider);
+
+extern DECCMD(do_diagnose);
+
+extern DECCMD(do_color);
+
+extern DECCMD(do_toggle);
+
+extern DECCMD(do_commands);
+
+extern DECCMD(do_exits);
+
+extern DECCMD(do_autoexit);
+
+extern DECCMD(do_history);
+
+extern DECCMD(do_map);
+
+extern DECCMD(do_rptrans);
+
+extern DECCMD(do_finger);
+
+extern DECCMD(do_perf);
+
+extern DECCMD(do_nickname);
+
+extern DECCMD(do_table);
+
+extern DECCMD(do_play);
+
+extern DECCMD(do_post);
+
+extern DECCMD(do_hand);
+
+extern DECCMD(do_shuffle);
+
+extern DECCMD(do_draw);
+
+extern DECCMD(do_kyodaika);
+
+extern DECCMD(do_mimic);
+
+extern DECCMD(do_rdisplay);
+
+extern DECCMD(do_evolve);
+
+extern DECCMD(do_showoff);
+
+extern DECCMD(do_intro);
+
+extern DECCMD(do_scan);
+
+extern DECCMD(do_toplist);
+
+extern DECCMD(do_whois);
+
+extern DECCMD(do_oaffects);
+
+extern DECCMD(do_warp);
+
+extern DECCMD(do_drive);
+
+extern DECCMD(do_ship_fire);
+
+extern DECCMD(do_tedit);
+
+extern DECCMD(do_dig);
+
+extern DECCMD(do_ban);
+
+extern DECCMD(do_unban);
+
+extern DECCMD(do_echo);
+
+extern DECCMD(do_send);
+
+extern DECCMD(do_at);
+
+extern DECCMD(do_goto);
+
+extern DECCMD(do_trans);
+
+extern DECCMD(do_teleport);
+
+extern DECCMD(do_vnum);
+
+extern DECCMD(do_stat);
+
+extern DECCMD(do_shutdown);
+
+extern DECCMD(do_recall);
+
+extern DECCMD(do_snoop);
+
+extern DECCMD(do_switch);
+
+extern DECCMD(do_return);
+
+extern DECCMD(do_load);
+
+extern DECCMD(do_vstat);
+
+extern DECCMD(do_purge);
+
+extern DECCMD(do_syslog);
+
+extern DECCMD(do_advance);
+
+extern DECCMD(do_restore);
+
+extern DECCMD(do_invis);
+
+extern DECCMD(do_gecho);
+
+extern DECCMD(do_poofset);
+
+extern DECCMD(do_dc);
+
+extern DECCMD(do_wizlock);
+
+extern DECCMD(do_date);
+
+extern DECCMD(do_last);
+
+extern DECCMD(do_force);
+
+extern DECCMD(do_wiznet);
+
+extern DECCMD(do_zreset);
+
+extern DECCMD(do_wizutil);
+
+extern DECCMD(do_show);
+
+extern DECCMD(do_set);
+
+extern DECCMD(do_saveall);
+
+extern DECCMD(do_wizupdate);
+
+extern DECCMD(do_chown);
+
+extern DECCMD(do_zpurge);
+
+extern DECCMD(do_zcheck);
+
+extern DECCMD(do_checkloadstatus);
+
+extern DECCMD(do_spells);
+
+extern DECCMD(do_finddoor);
+
+extern DECCMD(do_interest);
+
+extern DECCMD(do_transobj);
+
+extern DECCMD(do_permission);
+
+extern DECCMD(do_reward);
+
+extern DECCMD(do_approve);
+
+extern DECCMD(do_newsedit);
+
+extern DECCMD(do_news);
+
+extern DECCMD(do_lag);
+
+extern DECCMD(do_hell);
+
+extern DECCMD(do_varstat);
+
+extern DECCMD(do_handout);
+
+extern DECCMD(do_ginfo);
+
+extern DECCMD(do_plist);
+
+extern DECCMD(do_peace);
+
+extern DECCMD(do_raise);
+
+extern DECCMD(do_boom);
+
+// For administrating Zones.
+extern DECCMD(do_mush_zone);
+// for administrating reset commands.
+extern DECCMD(do_mush_reset);
+// For administrating room flags.
+extern DECCMD(do_mush_roomflag);
+// for administrating where flags
+extern DECCMD(do_mush_whereflag);
+// for administrating exits/directions.
+extern DECCMD(do_mush_exit);
+// for administrating other fields...
+extern DECCMD(do_mush_here);
+
+extern DECCMD(do_say);
+
+extern DECCMD(do_gsay);
+
+extern DECCMD(do_tell);
+
+extern DECCMD(do_reply);
+
+extern DECCMD(do_respond);
+
+extern DECCMD(do_spec_comm);
+
+extern DECCMD(do_write);
+
+extern DECCMD(do_page);
+
+extern DECCMD(do_qcomm);
+
+extern DECCMD(do_voice);
+
+extern DECCMD(do_languages);
+
+extern DECCMD(do_osay);
+
+extern DECCMD(do_alias);
+extern DECCMD(do_astat);
+extern DECCMD(do_bash);
+extern DECCMD(do_combine);
+extern DECCMD(do_combo);
+extern DECCMD(do_copyover);
+extern DECCMD(do_disable);
+extern DECCMD(do_energize);
+extern DECCMD(do_findkey);
+extern DECCMD(do_hspiral);
+extern DECCMD(do_iedit);
+extern DECCMD(do_lightgrenade);
+extern DECCMD(do_malice);
+extern DECCMD(do_nogrow);
+extern DECCMD(do_show_save_list);
+extern DECCMD(do_pgrant);
+extern DECCMD(do_rpreward);
+extern DECCMD(do_eratime);
+extern DECCMD(do_sradar);
+extern DECCMD(do_restring);
+extern DECCMD(do_rcopy);
+extern DECCMD(do_selfd);
+extern DECCMD(do_skills);
+extern DECCMD(do_sunder);
+extern DECCMD(do_tailhide);
+extern DECCMD(do_teach);
+extern DECCMD(do_throw);
+extern DECCMD(do_zen);
+extern DECCMD(do_attach);
+extern DECCMD(do_detach);
+extern DECCMD(do_radar);
+extern DECCMD(do_tstat);
+extern DECCMD(do_masound);
+extern DECCMD(do_mheal);
+extern DECCMD(do_mkill);
+extern DECCMD(do_mjunk);
+extern DECCMD(do_mdamage);
+extern DECCMD(do_mdoor);
+extern DECCMD(do_mecho);
+extern DECCMD(do_mechoaround);
+extern DECCMD(do_msend);
+extern DECCMD(do_mload);
+extern DECCMD(do_mpurge);
+extern DECCMD(do_mgoto);
+extern DECCMD(do_mat);
+extern DECCMD(do_mteleport);
+extern DECCMD(do_mforce);
+extern DECCMD(do_mremember);
+extern DECCMD(do_mforget);
+extern DECCMD(do_mtransform);
+extern DECCMD(do_mzoneecho);
+extern DECCMD(do_vdelete);
+extern DECCMD(do_mfollow);
+extern DECCMD(do_maddtransform);

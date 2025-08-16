@@ -92,7 +92,8 @@
             "typeinfo": "cpp",
             "valarray": "cpp",
             "variant": "cpp",
-            "strstream": "cpp"
+            "strstream": "cpp",
+            "filesystem": "cpp"
         }
     },
     "extensions": {

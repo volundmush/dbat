@@ -14,6 +14,4 @@ extern void Free_Invalid_List();
 
 extern void Read_Invalid_List();
 
-extern ACMD(do_ban);
 
-extern ACMD(do_unban);

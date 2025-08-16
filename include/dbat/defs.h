@@ -704,7 +704,18 @@ enum class ZoneFlag : uint8_t
     closed = 0,
     no_immortal = 1,
     quest = 2,
-    dragon_balls = 3
+    dragon_balls = 3,
+    planet = 4,
+    ether_stream = 5,
+    has_moon = 6
+};
+
+enum class ExitFlag : uint8_t {
+    isdoor = 0,
+    closed = 1,
+    locked = 2,
+    pickproof = 3,
+    secret = 4
 };
 
 /* Exit info: used in Room.dir_option.exit_info */

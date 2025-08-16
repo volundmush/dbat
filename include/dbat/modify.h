@@ -16,4 +16,4 @@ extern void std_string_add(struct descriptor_data *d, char *str);
 // Helper functions for std::string editor (static functions don't need external declarations)
 
 // commands
-extern ACMD(do_skillset);
+

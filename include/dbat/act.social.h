@@ -16,8 +16,4 @@ extern char *fread_action(FILE *fl, int nr);
 extern void create_command_list(void);
 
 // commands
-extern ACMD(do_action);
 
-extern ACMD(do_insult);
-
-extern ACMD(do_gmote);

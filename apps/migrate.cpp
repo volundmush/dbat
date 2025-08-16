@@ -8,6 +8,8 @@
 #include <cstdlib>
 
 #include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/regex.hpp>
+#include <regex>
 
 #include "dbat/comm.h"
 #include "dbat/utils.h"
@@ -2062,6 +2064,50 @@ static void load_zones(FILE *fl, char *zonename) {
 
 }
 
+struct cmdlist_element {
+    char *cmd{};                /* one line of a trigger */
+    struct cmdlist_element *original{};
+    struct cmdlist_element *next{};
+};
+
+/* local functions */
+static void parse_trigger(FILE *trig_f, trig_vnum nr) {
+    int t[2], k, attach_type;
+    char line[256], *cmds, *s, flags[256], errors[MAX_INPUT_LENGTH];
+    struct cmdlist_element *cle;
+    auto &idx = trig_index[nr];
+    auto *trig = &idx;
+
+    trig->vn = nr;
+
+    snprintf(errors, sizeof(errors), "trig vnum %d", nr);
+
+    char *buf = fread_string(trig_f, errors);
+
+    trig->name = buf;
+
+    get_line(trig_f, line);
+    k = sscanf(line, "%d %s %d", &attach_type, flags, t);
+    trig->attach_type = static_cast<UnitType>(attach_type);
+    trig->trigger_type = (long) asciiflag_conv(flags);
+    trig->narg = (k == 3) ? t[0] : 0;
+
+    buf = fread_string(trig_f, errors);
+
+    trig->arglist = buf ? buf : "";
+
+    free(buf);
+
+    cmds = s = fread_string(trig_f, errors);
+
+    std::vector<std::string> lines;
+    boost::split_regex(lines, cmds, boost::regex("\r\n|\r|\n"));
+
+    trig->lines = parse_script(lines);
+
+    free(cmds);
+}
+
 static void discrete_load(FILE *fl, int mode, char *filename) {
     int nr = -1, last;
     char line[READ_SIZE];
@@ -3105,27 +3151,281 @@ static void link_exits() {
     }
 }
 
+using land_spots = std::vector<std::pair<std::string, room_vnum>>;
+
+
+static const land_spots land_earth = {
+    {"Nexus City", 300},
+    {"South Ocean", 800},
+    {"Nexus Field", 1150},
+    {"Cherry Blossom Mountain", 1180},
+    {"Sandy Desert", 1287},
+    {"Northern Plains", 1428},
+    {"Korin's Tower", 1456},
+    {"Kami's Lookout", 1506},
+    {"Shadow Forest", 1636},
+    {"Decrepit Area", 1710},
+    {"West City", 19510},
+    {"Hercule Beach", 2141},
+    {"Satan City", 13020},
+};
+
+static const land_spots land_frigid = {
+    {"Ice Crown City", 4264},
+    {"Ice Highway", 4300},
+    {"Topica Snowfield", 4351},
+    {"Glug's Volcano", 4400},
+    {"Platonic Sea", 4600},
+    {"Slave City", 4800},
+    {"Acturian Woods", 5100},
+    {"Desolate Demesne", 5150},
+    {"Chateau Ishran", 5165},
+    {"Wyrm Spine Mountain", 5200},
+    {"Cloud Ruler Temple", 5500},
+    {"Koltoan Mine", 4944},
+};
+
+static const land_spots land_konack = {
+    {"Tiranoc City", 8006},
+    {"Great Oroist Temple", 8300},
+    {"Elzthuan Forest", 8400},
+    {"Mazori Farm", 8447},
+    {"Dres", 8500},
+    {"Colvian Farm", 8600},
+    {"St Alucia", 8700},
+    {"Meridius Memorial", 8800},
+    {"Desert of Illusion", 8900},
+    {"Plains of Confusion", 8954},
+    {"Turlon Fair", 9200},
+    {"Wetlands", 9700},
+    {"Kerberos", 9855},
+    {"Shaeras Mansion", 9864},
+    {"Slavinus Ravine", 9900},
+    {"Furian Citadel", 9949},
+};
+
+static const land_spots land_vegeta = {
+    {"Vegetos City", 2226},
+    {"Blood Dunes", 2600},
+    {"Ancestral Mountains", 2616},
+    {"Destopa Swamp", 2709},
+    {"Pride Forest", 2800},
+    {"Pride Tower", 2899},
+    {"Ruby Cave", 2615},
+};
+
+static const land_spots land_namek = {
+    {"Senzu Village", 11600},
+    {"Guru's House", 10182},
+    {"Crystalline Cave", 10474},
+    {"Elder Village", 13300},
+    {"Frieza's Ship", 10203},
+    {"Kakureta Village", 10922},
+};
+
+static const land_spots land_aether = {
+    {"Haven City", 12010},
+    {"Serenity Lake", 12103},
+    {"Kaiju Forest", 12300},
+    {"Ortusian Temple", 12400},
+    {"Silent Glade", 12480},
+};
+
+static const land_spots land_yardrat = {
+    {"Yardra City", 14008},
+    {"Jade Forest", 14100},
+    {"Jade Cliffs", 14200},
+    {"Mount Valaria", 14300},
+};
+
+static const land_spots land_kanassa = {
+    {"Aquis City", 14904},
+    {"Yunkai Pirate Base", 15655},
+};
+
+static const land_spots land_cerria = {
+    {"Cerria Colony", 17531},
+    {"Crystalline Forest", 7950},
+    {"Fistarl Volcano", 17420},
+};
+
+static const land_spots land_arlia = {
+    {"Janacre", 16009},
+    {"Arlian Wasteland", 16544},
+    {"Arlia Mine", 16600},
+};
+
+static const land_spots land_zenith = {
+    {"Utatlan City", 3412},
+    {"Zenith Jungle", 3520},
+    {"Ancient Castle", 19600},
+};
+
+static const land_spots dock_earth = {
+    {"1", 409},
+    {"2", 411},
+    {"3", 412},
+    {"4", 410},
+    {"Nexus City", 300},
+    {"South Ocean", 800},
+    {"Nexus Field", 1150},
+    {"Cherry Blossom Mountain", 1180},
+    {"Sandy Desert", 1287},
+    {"Northern Plains", 1428},
+    {"Korin's Tower", 1456},
+    {"Kami's Lookout", 1506},
+    {"Shadow Forest", 1600},
+    {"Decrepit Area", 1710},
+    {"West City", 19510},
+    {"Hercule Beach", 2141},
+    {"Satan City", 13020},
+};
+
+static const land_spots dock_frigid = {
+    {"1", 4264},
+    {"2", 4263},
+    {"3", 4261},
+    {"4", 4262},
+    {"Ice Crown City", 4264},
+    {"Ice Highway", 4300},
+    {"Topica Snowfield", 4351},
+    {"Glug's Volcano", 4400},
+    {"Platonic Sea", 4600},
+    {"Slave City", 4800},
+    {"Acturian Woods", 5100},
+    {"Desolate Demesne", 5150},
+    {"Chateau Ishran", 5165},
+    {"Wyrm Spine Mountain", 5200},
+    {"Cloud Ruler Temple", 5500},
+    {"Koltoan Mine", 4944},
+};
+
+static const land_spots dock_konack = {
+    {"1", 8195},
+    {"2", 8196},
+    {"3", 8197},
+    {"4", 8198},
+    {"Tiranoc City", 8006},
+    {"Great Oroist Temple", 8300},
+    {"Elzthuan Forest", 8400},
+    {"Mazori Farm", 8447},
+    {"Dres", 8500},
+    {"Colvian Farm", 8600},
+    {"St Alucia", 8700},
+    {"Meridius Memorial", 8800},
+    {"Desert of Illusion", 8900},
+    {"Plains of Confusion", 8954},
+    {"Turlon Fair", 9200},
+    {"Wetlands", 9700},
+    {"Kerberos", 9855},
+    {"Shaeras Mansion", 9864},
+    {"Slavinus Ravine", 9900},
+    {"Furian Citadel", 9949},
+};
+
+static const land_spots dock_vegeta = {
+    {"1", 2319},
+    {"2", 2318},
+    {"3", 2320},
+    {"4", 2322},
+    {"Vegetos City", 2226},
+    {"Blood Dunes", 2600},
+    {"Ancestral Mountains", 2616},
+    {"Destopa Swamp", 2709},
+    {"Pride Forest", 2800},
+    {"Pride Tower", 2899},
+    {"Ruby Cave", 2615},
+};
+
+static const land_spots dock_namek = {
+    {"1", 11628},
+    {"2", 11629},
+    {"3", 11630},
+    {"4", 11627},
+    {"Senzu Village", 11600},
+    {"Guru's House", 10182},
+    {"Crystalline Cave", 10474},
+    {"Elder Village", 13300},
+    {"Frieza's Ship", 10203},
+    {"Kakureta Village", 10922},
+};
+
+static const land_spots dock_aether = {
+    {"1", 12003},
+    {"2", 12004},
+    {"3", 12006},
+    {"4", 12005},
+    {"Haven City", 12010},
+    {"Serenity Lake", 12103},
+    {"Kaiju Forest", 12300},
+    {"Ortusian Temple", 12400},
+    {"Silent Glade", 12480},
+};
+
+static const land_spots dock_yardrat = {
+    {"1", 14003},
+    {"2", 14004},
+    {"3", 14005},
+    {"4", 14006},
+    {"Yardra City", 14008},
+    {"Jade Forest", 14100},
+    {"Jade Cliffs", 14200},
+    {"Mount Valaria", 14300},
+};
+
+static const land_spots dock_kanassa = {
+    {"Aquis City", 14904},
+    {"Yunkai Pirate Base", 15655},
+};
+
+static const land_spots dock_cerria = {
+    {"Cerria Colony", 17531},
+    {"Crystalline Forest", 7950},
+    {"Fistarl Volcano", 17420},
+};
+
+static const land_spots dock_arlia = {
+    {"1", 16065},
+    {"2", 16066},
+    {"3", 16067},
+    {"4", 16068},
+    {"Janacre", 16009},
+    {"Arlian Wasteland", 16544},
+    {"Arlia Mine", 16600},
+    {"Kemabra Wastes", 16816},
+};
+
+static const land_spots dock_zenith = {
+    {"Utatlan City", 3412},
+    {"Zenith Jungle", 3520},
+    {"Ancient Castle", 19600},
+};
+
 struct ZoneHierarchy {
-    std::string name;
-    std::unordered_set<zone_vnum> children;
+    std::string name{};
+    std::unordered_set<zone_vnum> children{};
+    std::string orbit{};
+    std::unordered_set<ZoneFlag> flagsToAdd{};
+    land_spots landSpots{};
+    land_spots dockSpots{};
 };
 
 static const std::vector<ZoneHierarchy> zonesToLink = {
-    {"Earth", {2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 58, 67, 77, 130, 131, 134, 159, 162, 164, 195, 224}},
-    {"Vegeta", {22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33}},
-    {"Zenith", {34, 35, 196, 215}},
-    {"Majinton", {36, 37}},
-    {"Frigid", {40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 170}},
-    {"Namek", {59, 96, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 128, 132, 133, 144, 154, 260}},
-    {"Afterlife", {60, 61, 62, 63, 64, 65, 66, 68, 69, 70, 71, 72, 73, 74, 75, 217}},
-    {"Kanassa", {76, 149, 150, 151, 152, 153, 156}},
-    {"Cerria", {78, 79, 174, 175, 176}},
-    {"Konack", {80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 92, 93, 97, 98, 99, 127, 192, 193, 194}},
-    {"Aether", {120, 121, 122, 123, 124, 125, 155}},
-    {"Neo Nirvana", {135, 136, 137, 138, 139, 145, 146, 147, 148}},
-    {"Arlia", {160, 161, 165, 166, 167, 168, 169}},
-    {"Space", {200, 201, 202, 203, 204, 206, 207, 208, 205, 163, 171, 172, 173, 178, 212, 256}},
-    {"Yardrat", {140, 141, 142, 143}},
+    {"@GEarth@n", {2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 58, 67, 77, 130, 131, 134, 159, 162, 164, 195, 224}, "R:50", {ZoneFlag::ether_stream, ZoneFlag::has_moon}, land_earth, dock_earth},
+    {"@YVegeta@n", {22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33}, "R:53", {}, land_vegeta, dock_vegeta},
+    {"@BZenith@n", {34, 35, 196, 215}, "R:57", {ZoneFlag::ether_stream}, land_zenith, dock_zenith},
+    {"Majinton", {36, 37}, {}, {}, {}, {}},
+    {"@CFrigid@n", {40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 170}, "R:51", {ZoneFlag::has_moon}, land_frigid, dock_frigid},
+    {"@gNamek@n", {59, 96, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 128, 132, 133, 144, 154, 260}, "R:54", {ZoneFlag::ether_stream}, land_namek, dock_namek},
+    {"Afterlife", {60, 61, 62, 63, 64, 65, 66, 68, 69, 70, 71, 72, 73, 74, 75, 217}, {}, {}, {}, {}},
+    {"@BKanassa@n", {76, 149, 150, 151, 152, 153, 156}, "R:58", {}, land_kanassa, dock_kanassa},
+    {"@RCerria@n", {78, 79, 174, 175, 176}, "R:198", {}, land_cerria, dock_cerria},
+    {"@MKonack@n", {80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 92, 93, 97, 98, 99, 127, 192, 193, 194}, "R:52", {}, land_konack, dock_konack},
+    {"@MAether@n", {120, 121, 122, 123, 124, 125, 155}, "R:55", {ZoneFlag::ether_stream, ZoneFlag::has_moon}, land_aether, dock_aether},
+    {"Neo Nirvana", {135, 136, 137, 138, 139, 145, 146, 147, 148}, {}, {}, {}, {}},
+    {"@GArlia@n", {160, 161, 165, 166, 167, 168, 169}, "R:59", {}, land_arlia, dock_arlia},
+    {"Space", {200, 201, 202, 203, 204, 206, 207, 208, 205, 163, 171, 172, 173, 178, 212, 256}, {}, {}, {}, {}},
+    {"@mYardrat@n", {140, 141, 142, 143}, "R:56", {}, land_yardrat, dock_yardrat},
 };
 
 static void link_zones() {
@@ -3143,6 +3443,26 @@ static void link_zones() {
             } else {
                 basic_mud_log("Warning: zone %d listed as child of %s but does not exist.", cvn, zt.name.c_str());
             }
+        }
+        if(auto oloc = resolveLocID(zt.orbit)) {
+            z.launchDestination = oloc.getLocID();
+            if(auto r = dynamic_cast<Room*>(oloc.al.lock().get())) {
+                auto oldz = r->getZone();
+                oldz->rooms.remove(r->shared_from_this());
+                r->zone.reset(&z);
+                z.rooms.add(r->shared_from_this());
+            } else {
+                basic_mud_log("Warning: Orbit location %s for zone %s is not a room.", zt.orbit.c_str(), zt.name.c_str());
+            }
+        }
+        for(const auto &zf : zt.flagsToAdd) {
+            z.zone_flags.set(zf);
+        }
+        for(const auto &[k, v] : zt.landSpots) {
+            z.landingSpots[k] = std::format("R:{}", v);
+        }
+        for(const auto& [k, v] : zt.dockSpots) {
+            z.dockingSpots[k] = std::format("R:{}", v);
         }
     }
 }
@@ -3245,6 +3565,10 @@ static void create_area() {
     a->maxY = 3;
     a->minZ = -3;
     a->maxZ = 3;
+    Destination d;
+    d.al = get_room(300)->shared_from_this();
+    d.dir = Direction::north;
+    a->replaceExit({0,0,0}, d);
 
     auto &z = zone_table[1];
     a->zone.reset(&z);
@@ -3263,14 +3587,14 @@ void boot_db_world_legacy() {
     basic_mud_log("Loading zone table.");
     index_boot(DB_BOOT_ZON);
 
-    // Generating new zones and linking parents/children...
-    link_zones();
-
     basic_mud_log("Loading triggers and generating index.");
     index_boot(DB_BOOT_TRG);
 
     basic_mud_log("Loading rooms.");
     index_boot(DB_BOOT_WLD);
+
+    // Generating new zones and linking parents/children...
+    link_zones();
 
     link_exits();
 

@@ -1191,18 +1191,15 @@ void characterVitalsRecovery(uint64_t heartPulse, double deltaTime)
             universalPerc += 20.0;
         }
 
-        if (auto r = ch->getRoom(); r)
-        {
-            // regen rooms (or destroyed rooms, with the right bonus) grant a huge boost.
-            if (ROOM_FLAGGED(r, ROOM_REGEN) || (GET_BONUS(ch, BONUS_DESTROYER) > 0 && r->getDamage() >= 75))
-                universalPerc += 2.0;
+        // regen rooms (or destroyed rooms, with the right bonus) grant a huge boost.
+        if (ch->location.getRoomFlag(ROOM_REGEN) || (GET_BONUS(ch, BONUS_DESTROYER) > 0 && ch->location.getDamage() >= 75))
+            universalPerc += 2.0;
 
-            if (ROOM_FLAGGED(r, ROOM_BEDROOM))
-                universalPerc += 0.25;
+        if (ch->location.getRoomFlag(ROOM_BEDROOM))
+            universalPerc += 0.25;
 
-            if (ch->location.getCookElement() == 1)
-                universalPerc += 2.0;
-        }
+        if (ch->location.getCookElement() == 1)
+            universalPerc += 2.0;
 
         return universalPerc;
     };

@@ -6,4 +6,4 @@
 #include "structs.h"
 
 // Commands
-extern ACMD(do_oasis_sedit);
+

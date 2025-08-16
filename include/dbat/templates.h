@@ -14,6 +14,189 @@ enum class NumberType {
     DECIMAL = 1
 };
 
+// helper template that uses std::optional to maybe return a value, or a useful error.
+struct res_error_t { };
+inline constexpr res_error_t Error{};
+
+template <typename T>
+struct Result {
+    std::optional<T> _value;
+    std::string err;
+
+    // ctors
+    Result() = default;
+    Result(T v) : _value(std::move(v)) {}
+    Result(res_error_t, std::string e) : _value(std::nullopt), err(std::move(e)) {}
+
+    // static helpers
+    static Result ok(T v) { return Result{std::move(v)}; }
+    static Result error(std::string e) { return Result{Error, std::move(e)}; }
+
+    // status
+    bool has_value() const noexcept { return _value.has_value(); }
+    explicit operator bool() const noexcept { return has_value(); }
+
+    // accessors
+    T& value() & { return _value.value(); }
+    const T& value() const & { return _value.value(); }
+    T&& value() && { return std::move(_value).value(); }
+
+    const std::string& error() const & { return err; }
+
+    // convenience
+    T value_or(T def) const { return _value.value_or(std::move(def)); }
+};
+
+// Free-function helpers so T can be deduced at call-site
+template <class T>
+Result<T> Ok(T v) { return Result<T>::ok(std::move(v)); }
+
+// ----- Err builder so you don't have to write Err<int>(...) -----
+struct ErrBuilder {
+    std::string msg;
+    template <class T>
+    operator Result<T>() const { return Result<T>::error(msg); }
+};
+
+// Variadic Err that formats the message (compile-time checked with fmt)
+template <class... Args>
+ErrBuilder Err(fmt::format_string<Args...> fmtstr, Args&&... args) {
+    return ErrBuilder{ fmt::format(fmtstr, std::forward<Args>(args)...) };
+}
+
+// Also allow a plain string (no formatting)
+inline ErrBuilder Err(std::string s) { return ErrBuilder{ std::move(s) }; }
+inline ErrBuilder Err(const char* s) { return ErrBuilder{ std::string{s} }; }
+
+// default key extractor -> std::string
+struct default_key_t {
+  template <class T>
+  std::string operator()(const T& v) const {
+    using U = std::decay_t<T>;
+    if constexpr (std::is_same_v<U, std::string>) {
+      return v;
+    } else if constexpr (std::is_arithmetic_v<U>) {
+      return std::to_string(v);
+    } else if constexpr (requires { v.first; }) {           // pairs / map values
+      return (*this)(v.first);
+    } else if constexpr (requires { std::string{v}; }) {    // anything convertible to string
+      return std::string{v};
+    } else {
+      static_assert(sizeof(T) == 0,
+        "No default key for this type. Provide a key extractor returning std::string.");
+    }
+  }
+};
+
+// ^(\d+)(-(\d+))?$
+extern std::regex parseRangeRegex;
+
+template<typename T, typename Container = std::vector<T>>
+requires std::is_arithmetic_v<T>
+Result<Container> parseRanges(std::string_view txt) {
+    Container out;
+
+    std::smatch match;
+
+    // we are given a sequence that looks like 5 7 9 20-25
+    // and if given that, should return {5, 7, 9, 20, 21, 22, 23, 24, 25}
+
+    std::vector<std::string> parts;
+    boost::split(parts, txt, boost::is_any_of(" "), boost::token_compress_on);
+
+    for (const auto& part : parts) {
+        if(!std::regex_search(part, match, parseRangeRegex)) {
+            return Err("Invalid range part: '{}'", part);
+        }
+        // get first number...
+        int first = std::stoi(match[1].str());
+        if (match[3].matched) {
+            int last = std::stoi(match[3].str());
+            for (int i = first; i <= last; ++i) {
+                out.push_back(i);
+            }
+        } else {
+            out.push_back(first);
+        }
+    }
+
+    return Ok(std::move(out));
+}
+
+template <class Range,
+          class KeyFn = default_key_t>
+auto partialMatch(const std::string& match_text,
+                  Range&& range,
+                  bool exact = false,
+                  KeyFn key = {}) 
+  -> Result<std::ranges::iterator_t<Range>>
+{
+  using std::begin; using std::end;
+  using It = std::ranges::iterator_t<Range>;
+
+  // collect (key, iterator) so we can return the iterator directly
+  std::vector<std::pair<std::string, It>> items;
+  for (It it = begin(range); it != end(range); ++it) {
+    items.emplace_back(key(*it), it);
+  }
+
+  std::sort(items.begin(), items.end(),
+            [](auto& a, auto& b) { return a.first < b.first; });
+
+  for (auto& [k, it] : items) {
+    if (boost::iequals(k, match_text) ||
+        (!exact && boost::istarts_with(k, match_text))) {
+      return Ok(it);
+    }
+  }
+
+  // build "choices" string
+  std::string choices;
+  for (size_t i = 0; i < items.size(); ++i) {
+    if (i) choices += ", ";
+    choices += items[i].first;
+  }
+  return Err("No match found for '{}'. Choices are: {}\r\n",
+                          match_text, choices);
+}
+
+template<typename FlagEnum, typename MapType = std::unordered_map<std::string, FlagEnum>>
+requires std::is_enum_v<FlagEnum>
+auto getEnumMap(const std::function<bool(FlagEnum v)>& filter = {}) {
+    MapType flag_map;
+    for (auto val : magic_enum::enum_values<FlagEnum>())
+    {
+        if(filter && !filter(val)) continue;
+        auto vname = std::string(magic_enum::enum_name(val));
+        flag_map[vname] = val;
+    }
+    return flag_map;
+}
+
+template<typename FlagEnum, typename ListType = std::vector<FlagEnum>>
+requires std::is_enum_v<FlagEnum>
+auto getEnumList(const std::function<bool(FlagEnum v)>& filter = {}) {
+    ListType flag_list;
+    for (auto val : magic_enum::enum_values<FlagEnum>())
+    {
+        if(filter && !filter(val)) continue;
+        flag_list.emplace_back(val);
+    }
+    return flag_list;
+}
+
+template<typename FlagEnum, typename ListType = std::vector<std::string>>
+requires std::is_enum_v<FlagEnum>
+auto getEnumNameList(const std::function<bool(FlagEnum v)>& filter = {}) {
+    ListType flag_list;
+    for (auto val : magic_enum::enum_values<FlagEnum>())
+    {
+        if(filter && !filter(val)) continue;
+        flag_list.emplace_back(magic_enum::enum_name(val));
+    }
+    return flag_list;
+}
+
 template<typename T>
 std::optional<double> getterStatFunc(T* obj, const std::string& stat_name) {
     // Use the appropriate method to get the stat value
@@ -382,6 +565,29 @@ extern StatHandler<ObjectPrototype> itemProtoStats;
 
 extern void init_stat_handlers();
 
+template<typename FlagEnum>
+requires std::is_enum_v<FlagEnum>
+struct FlagChangeResults {
+    std::unordered_set<FlagEnum> added;
+    std::unordered_set<FlagEnum> removed;
+    std::unordered_set<std::string> errors;
+
+    std::string printResults() {
+        std::string result;
+        for(const auto& flag : added) {
+            result += fmt::format("  + {}\r\n", magic_enum::enum_name(flag));
+        }
+        for(const auto& flag : removed) {
+            result += fmt::format("  - {}\r\n", magic_enum::enum_name(flag));
+        }
+        for(const auto& error : errors) {
+            result += fmt::format("  ! {}\r\n", error);
+        }
+        return result;
+    }
+
+};
+
 // Generic helper to get a flag.
 template<typename FlagEnum>
 requires std::is_enum_v<FlagEnum>
@@ -456,6 +662,10 @@ public:
         return flags.size();
     }
 
+    std::unordered_map<std::string, FlagEnum> getFlagMap() const {
+        return ::getEnumMap<FlagEnum>();
+    }
+
     std::vector<std::string> getAllFlags() const {
         std::vector<std::string> flag_names;
         for (const auto& flag : flags) {
@@ -466,6 +676,49 @@ public:
 
     std::string getFlagNames(const std::string& delim = ", ") const {
         return fmt::format("{}", fmt::join(getAllFlags(), delim));
+    }
+
+    FlagChangeResults<FlagEnum> applyChanges(const std::string& txt) {
+        FlagChangeResults<FlagEnum> results;
+        auto fmap = getFlagMap();
+        // the input txt looks like:
+        // +flag1 -flag2 flag3...
+        // If no prefix present, assume +.
+
+        auto findFlag = [&](const std::string& name) {
+            return partialMatch(name, fmap, false, [](const auto& pair) {
+                return pair.first;
+            });
+        };
+
+        std::istringstream iss(txt);
+        std::string token;
+        while (iss >> token) {
+            if(token.starts_with("-")) {
+                if (auto flag = findFlag(token.substr(1)); flag) {
+                    results.removed.insert(flag.value()->second);
+                    set(flag.value()->second, false);
+                } else {
+                    results.errors.insert(fmt::format("Unknown flag: {}", token));
+                }
+            } else if(token.starts_with("+")) {
+                if (auto flag = findFlag(token.substr(1)); flag) {
+                    results.added.insert(flag.value()->second);
+                    set(flag.value()->second, true);
+                } else {
+                    results.errors.insert(fmt::format("Unknown flag: {}", token));
+                }
+            } else {
+                if (auto flag = findFlag(token); flag) {
+                    results.added.insert(flag.value()->second);
+                    set(flag.value()->second, true);
+                } else {
+                    results.errors.insert(fmt::format("Unknown flag: {}", token));
+                }
+            }
+        }
+
+        return results;
     }
 };
 
@@ -687,3 +940,5 @@ struct WeakBag {
         return true;
     }
 };
+
+

@@ -39,6 +39,5 @@ namespace race
     extern double getModifierExact(Character *ch, int location, int specific);
 
     extern std::vector<Race> filterRaces(std::function<bool(Race)> func);
-    extern std::optional<Race> findRace(const std::string &arg, std::function<bool(Race)> func);
 
 }

@@ -17,4 +17,4 @@ extern void aedit_save_internally(struct descriptor_data *d);
 extern int aedit_find_command(const char *txt);
 
 // commands
-extern ACMD(do_oasis_aedit);
+

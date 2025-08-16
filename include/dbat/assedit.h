@@ -19,4 +19,4 @@ extern void nodigit(struct descriptor_data *d);
 
 extern void assedit_parse(struct descriptor_data *d, char *arg);
 
-extern ACMD(do_assedit);
+

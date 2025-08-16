@@ -358,8 +358,7 @@ void print_zone(Character *ch, zone_vnum vnum)
     }
     auto &z = zone_table.at(vnum);
     sprintf(bits, "%s", z.zone_flags.getFlagNames().c_str());
-    size_rooms = z.rooms.live_count();
-    ;
+    auto rooms = z.rooms.snapshot_shared();
 
     /****************************************************************************/
     /** Display all of the zone information at once.                           **/
@@ -373,7 +372,14 @@ void print_zone(Character *ch, zone_vnum vnum)
                 "@gZone Flags     = @c%s\r\n"
                 "@gSize\r\n"
                 "@g   Rooms       = @c%ld\r\n",
-                z.number, z.name, z.builders, z.lifespan, z.age, z.reset_mode ? ((z.reset_mode == 1) ? "Reset when no players are in zone." : "Normal reset.") : "Never reset", bits, size_rooms);
+                z.number, z.name, z.builders, z.lifespan, z.age, z.reset_mode ? ((z.reset_mode == 1) ? "Reset when no players are in zone." : "Normal reset.") : "Never reset", bits, rooms.size());
+
+    if(!rooms.empty()) {
+        ch->send_to("@gRoom List:\r\n");
+        for(auto &r : rooms) {
+            ch->send_to("    @g%-5d@n) @c%s\r\n", r->getVnum(), r->getName());
+        }
+    }
 }
 
 /* List code by Ronald Evers - dlanor@xs4all.nl */
