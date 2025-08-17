@@ -1431,19 +1431,6 @@ void descriptor_data::sendText(const std::string& txt) {
     output += txt;
 }
 
-
-void free_bufpool() {
-    struct txt_block *tmp;
-
-    while (bufpool) {
-        tmp = bufpool->next;
-        if (bufpool->text)
-            free(bufpool->text);
-        free(bufpool);
-        bufpool = tmp;
-    }
-}
-
 /* ******************************************************************
 *  socket handling                                                  *
 ****************************************************************** */

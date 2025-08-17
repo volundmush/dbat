@@ -178,7 +178,6 @@ static void convert_room(Room& r) {
 }
 
 static void convert_character(CharacterPrototype *c) {
-    c->character_flags.set(CharacterFlag::is_npc, true);
     c->character_flags.set(CharacterFlag::tail, race::hasTail(c->race));
 
     if(c->mob_flags.get(31)) {
@@ -190,9 +189,7 @@ static void convert_character(CharacterPrototype *c) {
 }
 
 static void convert_character(Character *c) {
-    auto npc = c->mob_flags.get(static_cast<MobFlag>(3)) || c->character_flags.get(CharacterFlag::is_npc);
-    if(npc) {
-        c->character_flags.set(CharacterFlag::is_npc, true);
+    if(!c->isPC) {
         c->character_flags.set(CharacterFlag::tail, race::hasTail(c->race));
 
         if(c->mob_flags.get(31)) {
@@ -888,6 +885,9 @@ static int inv_backup(struct Character *ch) {
 
 static std::vector<std::tuple<Room*, Direction, room_vnum>> room_directions;
 
+
+
+
 /* read direction data */
 static void setup_dir(FILE *fl, Room *r, int dir) {
     int t[11] = {0}, retval = 0;
@@ -924,16 +924,22 @@ static void setup_dir(FILE *fl, Room *r, int dir) {
         exit(1);
     } else if (bitwarning == false) {
 
-        if (t[0] == 1)
-            d->exit_info = EX_ISDOOR;
-        else if (t[0] == 2)
-            d->exit_info = EX_ISDOOR | EX_PICKPROOF;
-        else if (t[0] == 3)
-            d->exit_info = EX_ISDOOR | EX_SECRET;
-        else if (t[0] == 4)
-            d->exit_info = EX_ISDOOR | EX_PICKPROOF | EX_SECRET;
-        else
-            d->exit_info = 0;
+        if (t[0] == 1) {
+            d->exit_flags.set(ExitFlag::isdoor);
+        }
+        else if (t[0] == 2) {
+            d->exit_flags.set(ExitFlag::isdoor);
+            d->exit_flags.set(ExitFlag::pickproof);
+        }
+        else if (t[0] == 3) {
+            d->exit_flags.set(ExitFlag::isdoor);
+            d->exit_flags.set(ExitFlag::secret);
+        }
+        else if (t[0] == 4) {
+            d->exit_flags.set(ExitFlag::isdoor);
+            d->exit_flags.set(ExitFlag::pickproof);
+            d->exit_flags.set(ExitFlag::secret);
+        }
 
         d->key = real_object(t[1]);
         
@@ -1438,7 +1444,6 @@ static int parse_mobile_from_file(FILE *mob_f, struct CharacterPrototype *ch, vn
         exit(1);
     }
 
-    ch->character_flags.set(CharacterFlag::is_npc, true);
     if (MOB_FLAGGED(ch, MOB_NOTDEADYET)) {
         /* Rather bad to load mobiles with this bit already set. */
         basic_mud_log("SYSERR: Mob #%d has reserved bit MOB_NOTDEADYET set.", nr);
@@ -3762,6 +3767,7 @@ void migrate_characters() {
             continue;
         }
         auto ch = sh.get();
+        ch->isPC = true;
         convert_character(ch);
         auto id = getNextID(lastCharacterID, uniqueCharacters);
         auto &p = players[id];

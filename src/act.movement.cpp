@@ -1368,7 +1368,7 @@ static void OPEN_DOOR(room_vnum room, Object *obj, int door)
         auto cdir = static_cast<Direction>(door);
         if (!r->exits.contains(cdir))
             return;
-        REMOVE_BIT(r->exits.at(cdir).exit_info, EX_CLOSED);
+        r->exits.at(cdir).exit_flags.set(EX_CLOSED, false);
     }
 }
 
@@ -1388,7 +1388,7 @@ static void CLOSE_DOOR(room_vnum room, Object *obj, int door)
         auto cdir = static_cast<Direction>(door);
         if (!r->exits.contains(cdir))
             return;
-        SET_BIT(r->exits.at(cdir).exit_info, EX_CLOSED);
+        r->exits.at(cdir).exit_flags.set(EX_CLOSED);
     }
 }
 
@@ -1408,7 +1408,7 @@ static void LOCK_DOOR(room_vnum room, Object *obj, int door)
         auto cdir = static_cast<Direction>(door);
         if (!r->exits.contains(cdir))
             return;
-        SET_BIT(r->exits.at(cdir).exit_info, EX_LOCKED);
+        r->exits.at(cdir).exit_flags.set(EX_LOCKED);
     }
 }
 
@@ -1428,7 +1428,7 @@ static void UNLOCK_DOOR(room_vnum room, Object *obj, int door)
         auto cdir = static_cast<Direction>(door);
         if (!r->exits.contains(cdir))
             return;
-        REMOVE_BIT(r->exits.at(cdir).exit_info, EX_LOCKED);
+        r->exits.at(cdir).exit_flags.set(EX_LOCKED, false);
     }
 }
 
@@ -1448,7 +1448,7 @@ static void TOGGLE_LOCK(room_vnum room, Object *obj, int door)
         auto cdir = static_cast<Direction>(door);
         if (!r->exits.contains(cdir))
             return;
-        TOGGLE_BIT(r->exits.at(cdir).exit_info, EX_LOCKED);
+        r->exits.at(cdir).exit_flags.toggle(EX_LOCKED);
     }
 }
 

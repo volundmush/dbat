@@ -3626,31 +3626,6 @@ std::string format_double(double value)
     }
 }
 
-Result<int> parseIDNumber(std::string_view arg, std::string_view context) {
-    if(arg.empty()) {
-        return Err("No {} ID provided.\r\n", context);
-    }
-    try {
-        auto id = std::stoi(std::string(arg));
-        return Ok(id);
-    } catch (const std::invalid_argument&) {
-        return Err("Invalid {} ID: {}", context, arg);
-    } catch(const std::out_of_range&) {
-        return Err("{} ID out of range: {}", context, arg);
-    }
-}
-
-Result<int> getZoneID(std::string_view arg, bool exists) {
-    auto resId = parseIDNumber(arg, "Zone");
-    if (!resId) {
-        return resId;
-    }
-    if(exists && !zone_table.count(resId.value())) {
-        return Err("Zone {} does not exist.\r\n", resId.value());
-    }
-    return resId;
-}
-
 Result<Zone*> getZone(std::string_view arg, Character* ch) {
     if(boost::iequals(arg, "here")) {
         if(auto z = ch->location.getZone()) {
@@ -3658,14 +3633,13 @@ Result<Zone*> getZone(std::string_view arg, Character* ch) {
         }
         return Err("You are not in a Zone, somehow. How the hell did that happen?\r\n");
     }
-    auto res = getZoneID(arg, true);
+    auto res = parseNumber<zone_vnum>(arg, "Zone ID");
     if (!res) return Err(res.err);
 
     if (auto zone = zone_table.find(res.value()); zone != zone_table.end()) {
         return Ok(&zone->second);
     }
     return Err("Zone {} does not exist.\r\n", res.value());
-    
 }
 
 Result<std::string> validateZoneName(std::string_view arg, bool checkExists, zone_vnum exclude) {
@@ -3684,16 +3658,6 @@ Result<std::string> validateZoneName(std::string_view arg, bool checkExists, zon
     return Ok(trimmed);
 }
 
-Result<int> getRoomID(std::string_view arg, bool exists) {
-    auto resId = parseIDNumber(arg, "Room");
-    if (!resId) {
-        return resId;
-    }
-    if(exists && !world.count(resId.value())) {
-        return Err("Room {} does not exist.\r\n", resId.value());
-    }
-    return resId;
-}
 
 Result<Room*> getRoom(std::string_view arg, Character* ch) {
     if(boost::iequals(arg, "here")) {
@@ -3702,7 +3666,7 @@ Result<Room*> getRoom(std::string_view arg, Character* ch) {
         }
         return Err("You are not in a Room.\r\n");
     }
-    auto res = getRoomID(arg, true);
+    auto res = parseNumber(arg, "Room ID");
     if (!res) return Err(res.err);
 
     if (auto room = world.find(res.value()); room != world.end()) {
@@ -3711,4 +3675,425 @@ Result<Room*> getRoom(std::string_view arg, Character* ch) {
     }
     return Err("Room {} does not exist.\r\n", res.value());
 
+}
+
+Result<Location> getLocation(std::string_view arg, Character* ch) {
+    if(boost::iequals(arg, "here")) {
+        if(auto loc = ch->location) {
+            return Ok(loc);
+        }
+        return Err("You are not in a Location, somehow. How the hell did that happen?\r\n");
+    }
+    if(auto res = resolveLocID(std::string(arg))) {
+        return Ok(res);
+    }
+    return Err("Location {} does not exist.\r\n", arg);
+}
+
+std::string ansiSafeString(std::string_view arg) {
+    std::string out(arg);
+    boost::trim(out);
+    if(out.contains("@") && !out.ends_with("@n")) out += "@n";
+    return out;
+}
+
+std::string replaceStringLine(std::string_view arg, bool enforceNewLine) {
+    std::string out;
+    // @- = \t
+    // @/ = \r\n
+
+    bool escaped = false;
+
+    for (char c : arg) {
+        if (c == '@' && !escaped) {
+            escaped = true;
+        } else {
+            if (escaped) {
+                if (c == '-') {
+                    out += "\t";
+                } else if (c == '/') {
+                    out += "\r\n";
+                } else {
+                    out += '@';
+                    out += c;
+                }
+                escaped = false;
+            } else {
+                out += c;
+            }
+        }
+    }
+
+    // ensure that ANSI strings don't bleed.
+    boost::trim_right(out); // Trim trailing whitespace
+    if(out.contains("@") && !out.ends_with("@n")) out += "@n";
+    if(enforceNewLine && !out.ends_with("\r\n")) out += "\r\n";
+
+    return out;
+}
+
+/*
+MOB,<vnum>,<MaxSpawn>,<MaxWorld>,<chance>,<if>
+    Places a mob in the location.
+OBJ,<vnum>,<MaxSpawn>,<MaxWorld>,<chance>,<if>
+    Places an object in the location.
+GIVE,<vnum>,<targetVnum>,<chance>,<if>
+    Gives an object to the last MOB <targetVnum> spawned in this sequence.
+EQUIP,<vnum>,<slot>,<chance>,<if>
+    Attempts to equip the last spawned mob with OBJ <vnum>. It will go to
+    inventory if that fails.
+    // TODO: Command for viewing slot choices.
+PUT,<vnum>,<targetVnum>,<chance>,<if>
+    Puts object in the inventory of the last OBJ <targetVnum> spawned in this
+    sequence.
+REMOVE,<vnum>
+    Remove one instance of OBJ <vnum> if present.
+DOOR,<direction>,<state>
+    If exit in <direction> exists, set its state.
+    See .choices/direction for Directions.
+    <state>: 0 = open, 1 = closed, 2 = closed and locked.
+TRIGGER,<vnum>,<type>
+    Assign DgScript <vnum> to <type>. 0 = character, 1 = object, 2 = room.
+    Will target the last spawned obj/character as appropriate.
+VARIABLE,<type>,<name>,<value>
+    Set a script variable to the <type> same as TRIGGER sort.
+    Name should be alphanumeric with no spaces like "gotfood".
+    Commas are not supported in the <value>
+*/
+Result<ResetCommand> parseResetCommand(std::vector<std::string> sequence) {
+    for(auto& s : sequence) {
+        boost::trim(s);
+    }
+
+    if(sequence.size() < 2) {
+        return Err("Not enough arguments for reset command.\r\n");
+    }
+
+    auto resType = chooseEnum<ResetCommandType>(sequence[0], "reset command type");
+    if(!resType) {
+        return Err(resType.err);
+    }
+
+    ResetCommand cmd;
+    cmd.type = resType.value();
+    int argsNeeded = 0;
+
+    switch(cmd.type) {
+        case ResetCommandType::MOB:
+        case ResetCommandType::OBJ:
+            argsNeeded = 6;
+            break;
+        case ResetCommandType::GIVE:
+        case ResetCommandType::EQUIP:
+        case ResetCommandType::PUT:
+            argsNeeded = 5;
+            break;
+        case ResetCommandType::VARIABLE:
+            argsNeeded = 4;
+            break;
+        case ResetCommandType::DOOR:
+        case ResetCommandType::TRIGGER:
+            argsNeeded = 3;
+            break;
+        case ResetCommandType::REMOVE:
+            argsNeeded = 2;
+            break;
+    }
+
+    // Do a -1 offset because we don't present the first as counting.
+    if(sequence.size() < argsNeeded) {
+        return Err("Not enough arguments for reset command type '{}'. Expected {} but got {}.\r\n",
+                   cmd.type, argsNeeded - 1, sequence.size() - 1);
+    }
+
+    switch(cmd.type) {
+        case ResetCommandType::REMOVE: {
+            auto ovnRes = parseNumber<obj_vnum>(sequence[1], "object vnum");
+            if(!ovnRes) {
+                return Err(ovnRes.err);
+            }
+            auto vn = ovnRes.value();
+            if(!obj_proto.contains(vn)) {
+                return Err("ObjectPrototype {} not found.\r\n", vn);
+            }
+            cmd.target = vn;
+            return Ok(cmd);
+        }
+        case ResetCommandType::DOOR: {
+            auto dirRes = chooseEnum<Direction>(sequence[1], "direction");
+            if(!dirRes) {
+                return Err(dirRes.err);
+            }
+            auto dir = dirRes.value();
+            cmd.target = static_cast<int>(dir);
+
+            auto stateRes = parseNumber(sequence[2], "door state");
+            if(!stateRes) {
+                return Err(stateRes.err);
+            }
+            if(stateRes.value() < 0 || stateRes.value() > 2) {
+                return Err("Door state must be 0 (open), 1 (closed), or 2 (closed and locked).\r\n");
+            }
+            cmd.ex = stateRes.value();
+            return Ok(cmd);
+        }
+        case ResetCommandType::TRIGGER: {
+            auto vnRes = parseNumber<obj_vnum>(sequence[1], "vnum");
+            if(!vnRes) {
+                return Err(vnRes.err);
+            }
+            auto vn = vnRes.value();
+            if(!trig_index.contains(vn)) {
+                return Err("ObjectPrototype {} not found.\r\n", vn);
+            }
+            cmd.target = vn;
+
+            auto typeRes = parseNumber(sequence[2], "trigger type");
+            if(!typeRes) {
+                return Err(typeRes.err);
+            }
+            if(typeRes.value() < 0 || typeRes.value() > 2) {
+                return Err("Type must be 0 (character), 1 (object), or 2 (room).\r\n");
+            }
+            cmd.ex = static_cast<int>(typeRes.value());
+            return Ok(cmd);
+        }
+        case ResetCommandType::VARIABLE: {
+            auto typeRes = parseNumber(sequence[1], "trigger type");
+            if(!typeRes) {
+                return Err(typeRes.err);
+            }
+            if(typeRes.value() < 0 || typeRes.value() > 2) {
+                return Err("Type must be 0 (character), 1 (object), or 2 (room).\r\n");
+            }
+            auto type = typeRes.value();
+            cmd.ex = type;
+            if(sequence[2].empty()) {
+                return Err("Variable name cannot be empty.\r\n");
+            }
+            cmd.key = sequence[2];
+            if(sequence[3].empty()) {
+                return Err("Variable value cannot be empty.\r\n");
+            }
+            cmd.value = sequence[3];
+            return Ok(cmd);
+        }
+        case ResetCommandType::OBJ: {
+            auto ovnRes = parseNumber<obj_vnum>(sequence[1], "object vnum");
+            if(!ovnRes) {
+                return Err(ovnRes.err);
+            }
+            auto ovn = ovnRes.value();
+            if(!obj_proto.contains(ovn)) {
+                return Err("ObjectPrototype {} not found.\r\n", ovn);
+            }
+            cmd.target = ovn;
+
+            auto maxSpawnRes = parseNumber(sequence[2], "MaxSpawn");
+            if(!maxSpawnRes) {
+                return Err(maxSpawnRes.err);
+            }
+            auto maxSpawn = maxSpawnRes.value();
+            if(maxSpawn < 0) {
+                return Err("MaxSpawn must be a non-negative number.\r\n");
+            }
+            cmd.max_location = maxSpawn;
+
+            auto maxWorldRes = parseNumber(sequence[3], "MaxWorld");
+            if(!maxWorldRes) {
+                return Err(maxWorldRes.err);
+            }
+            auto maxWorld = maxWorldRes.value();
+            if(maxWorld < 0) {
+                return Err("MaxWorld must be a non-negative number.\r\n");
+            }
+            cmd.max = maxWorld;
+
+            auto chanceRes = parseNumber(sequence[4], "Chance");
+            if(!chanceRes) {
+                return Err(chanceRes.err);
+            }
+            auto chance = chanceRes.value();
+            if(chance < 0 || chance > 100) {
+                return Err("Chance must be between 0 and 100.\r\n");
+            }
+            cmd.chance = chance;
+
+            auto ifRes = parseNumber(sequence[5], "If");
+            if(!ifRes) {
+                return Err(ifRes.err);
+            }
+            cmd.if_flag = ifRes.value() ? 1 : 0;
+
+            return Ok(cmd);
+        }
+        case ResetCommandType::MOB: {
+            auto mvnRes = parseNumber<mob_vnum>(sequence[1], "mob vnum");
+            if(!mvnRes) {
+                return Err(mvnRes.err);
+            }
+            auto mvn = mvnRes.value();
+            if(!mob_proto.contains(mvn)) {
+                return Err("MobPrototype {} not found.\r\n", mvn);
+            }
+            cmd.target = mvn;
+
+            auto maxSpawnRes = parseNumber(sequence[2], "MaxSpawn");
+            if(!maxSpawnRes) {
+                return Err(maxSpawnRes.err);
+            }
+            auto maxSpawn = maxSpawnRes.value();
+            if(maxSpawn < 0) {
+                return Err("MaxSpawn must be a non-negative number.\r\n");
+            }
+            cmd.max_location = maxSpawn;
+
+            auto maxWorldRes = parseNumber(sequence[3], "MaxWorld");
+            if(!maxWorldRes) {
+                return Err(maxWorldRes.err);
+            }
+            auto maxWorld = maxWorldRes.value();
+            if(maxWorld < 0) {
+                return Err("MaxWorld must be a non-negative number.\r\n");
+            }
+            cmd.max = maxWorld;
+
+            auto chanceRes = parseNumber(sequence[4], "Chance");
+            if(!chanceRes) {
+                return Err(chanceRes.err);
+            }
+            auto chance = chanceRes.value();
+            if(chance < 0 || chance > 100) {
+                return Err("Chance must be between 0 and 100.\r\n");
+            }
+            cmd.chance = chance;
+
+            auto ifRes = parseNumber(sequence[5], "If");
+            if(!ifRes) {
+                return Err(ifRes.err);
+            }
+            cmd.if_flag = ifRes.value() ? 1 : 0;
+
+            return Ok(cmd);
+        }
+        case ResetCommandType::GIVE: {
+            auto ovnRes = parseNumber<obj_vnum>(sequence[1], "object vnum");
+            if(!ovnRes) {
+                return Err(ovnRes.err);
+            }
+            auto ovn = ovnRes.value();
+            if(!obj_proto.contains(ovn)) {
+                return Err("ObjectPrototype {} not found.\r\n", ovn);
+            }
+            cmd.target = ovn;
+
+            auto targetVnRes = parseNumber<mob_vnum>(sequence[2], "target mob vnum");
+            if(!targetVnRes) {
+                return Err(targetVnRes.err);
+            }
+            auto targetVn = targetVnRes.value();
+            if(!mob_proto.contains(targetVn)) {
+                return Err("MobPrototype {} not found.\r\n", targetVn);
+            }
+            cmd.ex = targetVn;
+
+            auto chanceRes = parseNumber(sequence[3], "Chance");
+            if(!chanceRes) {
+                return Err(chanceRes.err);
+            }
+            auto chance = chanceRes.value();
+            if(chance < 0 || chance > 100) {
+                return Err("Chance must be between 0 and 100.\r\n");
+            }
+            cmd.chance = chance;
+
+            auto ifRes = parseNumber(sequence[4], "If");
+            if(!ifRes) {
+                return Err(ifRes.err);
+            }
+            cmd.if_flag = ifRes.value() ? 1 : 0;
+
+            return Ok(cmd);
+        }
+        case ResetCommandType::EQUIP: {
+            auto ovnRes = parseNumber<obj_vnum>(sequence[1], "object vnum");
+            if(!ovnRes) {
+                return Err(ovnRes.err);
+            }
+            auto ovn = ovnRes.value();
+            if(!obj_proto.contains(ovn)) {
+                return Err("ObjectPrototype {} not found.\r\n", ovn);
+            }
+            cmd.target = ovn;
+
+            auto slotRes = chooseEnum<WearSlot>(sequence[2], "wear location");
+            if(!slotRes) {
+                return Err(slotRes.err);
+            }
+            auto slot = slotRes.value();
+            if(slot == WearSlot::Inventory) {
+                return Err("Cannot equip items in inventory slot.\r\n");
+            }
+            cmd.ex = static_cast<int>(slot);
+
+            auto chanceRes = parseNumber(sequence[3], "Chance");
+            if(!chanceRes) {
+                return Err(chanceRes.err);
+            }
+            auto chance = chanceRes.value();
+            if(chance < 0 || chance > 100) {
+                return Err("Chance must be between 0 and 100.\r\n");
+            }
+            cmd.chance = chance;
+
+            auto ifRes = parseNumber(sequence[4], "If");
+            if(!ifRes) {
+                return Err(ifRes.err);
+            }
+            cmd.if_flag = ifRes.value() ? 1 : 0;
+
+            return Ok(cmd);
+        }
+        case ResetCommandType::PUT: {
+            auto ovnRes = parseNumber<obj_vnum>(sequence[1], "object vnum");
+            if(!ovnRes) {
+                return Err(ovnRes.err);
+            }
+            auto ovn = ovnRes.value();
+            if(!obj_proto.contains(ovn)) {
+                return Err("ObjectPrototype {} not found.\r\n", ovn);
+            }
+            cmd.target = ovn;
+
+            auto containerRes = parseNumber<obj_vnum>(sequence[2], "container vnum");
+            if(!containerRes) {
+                return Err(containerRes.err);
+            }
+            auto container = containerRes.value();
+            if(!obj_proto.contains(container)) {
+                return Err("ObjectPrototype {} not found.\r\n", container);
+            }
+            cmd.ex = container;
+
+            auto chanceRes = parseNumber(sequence[3], "Chance");
+            if(!chanceRes) {
+                return Err(chanceRes.err);
+            }
+            auto chance = chanceRes.value();
+            if(chance < 0 || chance > 100) {
+                return Err("Chance must be between 0 and 100.\r\n");
+            }
+            cmd.chance = chance;
+
+            auto ifRes = parseNumber(sequence[4], "If");
+            if(!ifRes) {
+                return Err(ifRes.err);
+            }
+            cmd.if_flag = ifRes.value() ? 1 : 0;
+
+            return Ok(cmd);
+        }
+    }
+
+    return Err("We shouldn't ever reach this. Contact staff.\r\n");
 }

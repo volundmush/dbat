@@ -330,7 +330,7 @@ WCMD(do_wdoor)
             newexit->general_description = std::string(value) + "\r\n";
             break;
         case 2: /* flags       */
-            newexit->exit_info = (int16_t)asciiflag_conv(value);
+            newexit->legacyExitFlags(asciiflag_conv(value));
             break;
         case 3: /* key         */
             newexit->key = atoi(value);
@@ -339,8 +339,9 @@ WCMD(do_wdoor)
             newexit->keyword = value;
             break;
         case 5: /* room        */
-            if ((to_room = real_room(atoi(value))) != NOWHERE)
-                newexit->al = get_room(to_room)->shared_from_this();
+            if (auto loc = resolveLocID(value)) {
+                *newexit = loc;
+            }
             else
                 wld_log(room, "wdoor: invalid door target");
             break;

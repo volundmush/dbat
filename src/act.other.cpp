@@ -7975,7 +7975,7 @@ ACMD(do_eavesdrop)
     }
     if (auto ex = EXIT(ch, dir); ex)
     {
-        if (IS_SET(ex->exit_info, EX_CLOSED) && !ex->keyword.empty())
+    if (ex->exit_flags[EX_CLOSED] && !ex->keyword.empty())
         {
             sprintf(buf, "The %s is closed.\r\n", fname(ex->keyword.c_str()));
             ch->sendText(buf);

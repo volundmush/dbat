@@ -220,8 +220,6 @@ void init_mobile(CharacterPrototype *mob)
 
     mob->setBaseStat("weight", rand_number(100, 200));
     mob->setBaseStat("height", rand_number(100, 200));
-
-    mob->character_flags.set(CharacterFlag::is_npc, true);
 }
 
 /*-------------------------------------------------------------------*/
@@ -493,7 +491,6 @@ void medit_parse(struct descriptor_data *d, char *arg)
         /*
          * Ensure mob has MOB_ISNPC set or things will go pear shaped.
          */
-        OLC_MOB(d)->character_flags.set(CharacterFlag::is_npc, true);
         switch (*arg)
         {
         case 'y':

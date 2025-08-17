@@ -37,7 +37,7 @@ struct PathNode
     {
         if (!exit)
             return false;
-        if (!CONFIG_TRACK_T_DOORS && IS_SET(exit.exit_info, EX_CLOSED))
+    if (!CONFIG_TRACK_T_DOORS && exit.exit_flags[EX_CLOSED])
             return {};
         if (exit.getRoomFlag(ROOM_NOTRACK))
             return {};

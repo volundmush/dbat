@@ -903,19 +903,8 @@ void to_json(json &j, const Destination &e)
         j["general_description"] = e.general_description;
     if (!e.keyword.empty())
         j["keyword"] = e.keyword;
-    if (e.exit_info)
-    {
-        j["exit_info"] = e.exit_info;
-        for (auto i = 0; i < NUM_EXIT_FLAGS; i++)
-        {
-            if (IS_SET(e.exit_info, 1 << i))
-            {
-                auto key = std::string(exit_bits[i]);
-                boost::to_lower(key);
-                j["exit_flags"].push_back(key);
-            }
-        }
-    }
+    // legacy exit_info omitted in new serialization; exit_flags used instead
+    if(e.exit_flags) j["exit_flags"] = e.exit_flags;
     if (e.key > 0)
         j["key"] = e.key;
     if (e.dclock)
@@ -933,8 +922,8 @@ void from_json(const json &j, Destination &e)
         e.general_description = j["general_description"].get<std::string>();
     if (j.contains("keyword"))
         e.keyword = j["keyword"].get<std::string>();
-    if (j.contains("exit_info"))
-        e.exit_info = j["exit_info"].get<int16_t>();
+    if (j.contains("exit_flags"))
+        e.exit_flags = j["exit_flags"].get<FlagHandler<ExitFlag>>();
     if (j.contains("key"))
         e.key = j["key"];
     if (j.contains("dclock"))

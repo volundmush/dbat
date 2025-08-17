@@ -273,7 +273,9 @@ void AbstractGridArea::clearEnvironment(const Coordinates &coor, int type)
 void AbstractGridArea::replaceExit(const Coordinates &coor, const Destination &dest)
 {
     auto &t = ensure_tile(tileOverrides, coor);
-    t.exits[dest.dir] = dest;
+    auto d = dest;
+    d.generated = false;
+    t.exits[dest.dir] = std::move(d);
 }
 
 void AbstractGridArea::deleteExit(const Coordinates &coor, Direction dir)

@@ -44,6 +44,7 @@
 #include <experimental/memory>
 #include <filesystem>
 #include <regex>
+#include <charconv>
 
 #define FMT_HEADER_ONLY
 #include "fmt/format.h"

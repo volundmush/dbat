@@ -162,6 +162,16 @@ struct ResetCommand {
     std::string print() const;
 };
 
+template <>
+struct fmt::formatter<ResetCommand> {
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+
+    template <typename FormatContext>
+    auto format(const ResetCommand& z, FormatContext& ctx) {
+        return fmt::format_to(ctx.out(), "{}", z.print());
+    }
+};
+
 struct HasResetCommands {
     std::vector<ResetCommand> resetCommands;
     std::string printResetCommands() const;
@@ -213,7 +223,7 @@ struct Zone {
             sendText(formatted_string);
         }
         catch(const fmt::format_error& e) {
-            basic_mud_log("SYSERR: Format error in zone_data::sendFmt: %s", e.what());
+            basic_mud_log("SYSERR: Format error in Zone::sendFmt: %s", e.what());
             basic_mud_log("Template was: %s", format.data());
         }
     }
@@ -227,7 +237,7 @@ struct Zone {
             return formatted_string.size();
         }
         catch(const fmt::format_error& e) {
-            basic_mud_log("SYSERR: Format error in zone_data::send_to: %s", e.what());
+            basic_mud_log("SYSERR: Format error in Zone::send_to: %s", e.what());
             basic_mud_log("Template was: %s", format.data());
             return 0;
         }
@@ -235,7 +245,7 @@ struct Zone {
 
     Result<bool> canBeDeletedBy(Character* ch);
 
-    // if a room in this or a child zone is OUTDOORS, the "fly space"
+    // if a room in this or a descendant zone is OUTDOORS, the "fly space"
     // or "pilot launch" commands will take you here.
     // Stores a LocID like R:50 or A:10:0:0:9
     // the actor will look up the zone chain until it either finds a
@@ -445,8 +455,10 @@ struct Location {
     bool operator==(const room_vnum rv) const;
     bool operator==(const Room* room) const;
     bool operator==(const std::shared_ptr<Room>& room) const;
-    
-    
+
+    std::string renderDiagnostics(Character *ch) const;
+    void setString(const std::string& txt, const std::string& val);
+
     // Conversion to bool - returns true if location is valid. currently means it is a room.
     explicit operator bool() const;
  
@@ -519,6 +531,7 @@ struct Location {
     int modDamage(int amount);
 
     SectorType getSectorType() const;
+    void setSectorType(SectorType type);
     int getTileType() const;
 
     int getGroundEffect() const;
@@ -541,6 +554,9 @@ struct Location {
     // location editing
     void replaceExit(const Destination& dest);
     void deleteExit(Direction dir);
+
+    std::vector<ResetCommand> getResetCommands() const;
+    void setResetCommands(const std::vector<ResetCommand>& cmds);
 
     void executeResetCommands(const std::vector<ResetCommand>& cmds);
 
@@ -898,13 +914,13 @@ struct fmt::formatter<Object> {
 /* room-related structures ************************************************/
 
 struct Destination : public Location {
+    using Location::operator=;
     Direction dir{Direction::north}; /* Direction of the exit */
 
     std::string general_description{};       /* When look DIR.			*/
     std::string keyword{};        /* for open/close			*/
 
     FlagHandler<ExitFlag> exit_flags{}; /* Exit flags			*/
-    int16_t exit_info{};        /* Exit info			*/
 
     obj_vnum key{NOTHING};        /* Key's number (-1 for no key)		*/
 
@@ -915,6 +931,8 @@ struct Destination : public Location {
     bool generated{false};
 
     std::optional<Destination> getReverse() const;
+
+    void legacyExitFlags(int flags);
 };
 
 template <>

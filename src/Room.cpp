@@ -125,8 +125,7 @@ std::optional<std::string> Room::dgCallMember(const std::string &member, const s
                 return fmt::format("{}", ex->key);
             else if (!strcasecmp(arg.c_str(), "bits"))
             {
-                sprintbit(ex->exit_info, exit_bits, bitholder, MAX_STRING_LENGTH);
-                return bitholder;
+                return ex->exit_flags.getFlagNames();
             }
             else if (!strcasecmp(arg.c_str(), "room"))
             {
@@ -135,8 +134,7 @@ std::optional<std::string> Room::dgCallMember(const std::string &member, const s
         }
         else /* no subfield - default to bits */
         {
-            sprintbit(ex->exit_info, exit_bits, bitholder, MAX_STRING_LENGTH);
-            return bitholder;
+            return ex->exit_flags.getFlagNames();
         }
     }
 

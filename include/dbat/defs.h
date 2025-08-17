@@ -719,11 +719,11 @@ enum class ExitFlag : uint8_t {
 };
 
 /* Exit info: used in Room.dir_option.exit_info */
-constexpr int EX_ISDOOR = (1 << 0);    /* Exit is a door		*/
-constexpr int EX_CLOSED = (1 << 1);    /* The door is closed	*/
-constexpr int EX_LOCKED = (1 << 2);    /* The door is locked	*/
-constexpr int EX_PICKPROOF = (1 << 3); /* Lock can't be picked	*/
-constexpr int EX_SECRET = (1 << 4);    /* The door is hidden        */
+constexpr ExitFlag EX_ISDOOR = ExitFlag::isdoor;    /* Exit is a door		*/
+constexpr ExitFlag EX_CLOSED = ExitFlag::closed;    /* The door is closed	*/
+constexpr ExitFlag EX_LOCKED = ExitFlag::locked;    /* The door is locked	*/
+constexpr ExitFlag EX_PICKPROOF = ExitFlag::pickproof; /* Lock can't be picked	*/
+constexpr ExitFlag EX_SECRET = ExitFlag::secret;    /* The door is hidden        */
 
 constexpr int NUM_EXIT_FLAGS = 5;
 
@@ -955,7 +955,6 @@ constexpr int AUC_BID = 10;
 
 enum class CharacterFlag : uint8_t
 {
-    is_npc = 0,
     tail = 1,
     cyber_right_arm = 2, // Cybernetic Right Arm
     cyber_left_arm = 3,  // Cybernetic Left Arm
@@ -1562,6 +1561,31 @@ constexpr int WEAR_EAR_R = 19;
 constexpr int WEAR_EAR_L = 20;
 constexpr int WEAR_SH = 21;
 constexpr int WEAR_EYE = 22;
+
+enum class WearSlot : uint8_t {
+    Inventory = 0, // not actually equipped, but signifies that something can be in an inventory.
+    RightFinger = 1,
+    LeftFinger = 2,
+    Neck1 = 3,
+    Neck2 = 4,
+    Body = 5,
+    Head = 6,
+    Legs = 7,
+    Feet = 8,
+    Hands = 9,
+    Arms = 10,
+    About = 12,
+    Waist = 13,
+    RightWrist = 14,
+    LeftWrist = 15,
+    Wield1 = 16,
+    Wield2 = 17,
+    Backpack = 18,
+    RightEar = 19,
+    LeftEar = 20,
+    Shield = 21,
+    Eyes = 22
+};
 
 constexpr int NUM_WEARS = 23; /* This must be the # of eq positions!! */
 

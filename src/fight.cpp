@@ -841,7 +841,7 @@ void impact_sound(Character *ch, const char *mssg)
 {
     for (auto &[dir, e] : ch->location.getExits())
     {
-        if (IS_SET(e.exit_info, EX_CLOSED))
+        if (e.exit_flags[EX_CLOSED])
             continue;
         e.sendText(mssg);
     }
@@ -2122,7 +2122,7 @@ void death_cry(Character *ch)
 {
     for (auto &[dir, e] : ch->location.getExits())
     {
-        if (IS_SET(e.exit_info, EX_CLOSED))
+        if (e.exit_flags[EX_CLOSED])
             continue;
         e.sendText("Your blood freezes as you hear someone's death cry.\r\n");
     }

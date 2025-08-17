@@ -147,7 +147,7 @@ static void drive_outof_vehicle(Character *ch, Object *vehicle)
     ch->lookAtLocation(vehicle->location);
     for (auto &[door, e] : vehicle->location.getExits())
     {
-        if (IS_SET(e.exit_info, EX_CLOSED))
+        if (e.exit_flags[EX_CLOSED])
             continue;
         e.sendText("@wThe @De@Wn@wg@Di@wn@We@Ds@w of the ship @rr@Ro@ra@Rr@w as it moves.\r\n");
     }
@@ -172,7 +172,7 @@ void drive_in_direction(Character *ch, Object *vehicle, int dir)
         return;
     }
 
-    if (IS_SET(dest.exit_info, EX_CLOSED))
+    if (dest.exit_flags[EX_CLOSED])
     {
         if (!dest.keyword.empty())
             ch->send_to("@wThe %s seems to be closed.\r\n", fname(dest.keyword.c_str()));
@@ -240,7 +240,7 @@ void drive_in_direction(Character *ch, Object *vehicle, int dir)
 
     for (auto &[door, e] : vehicle->location.getExits())
     {
-        if (IS_SET(e.exit_info, EX_CLOSED))
+        if (e.exit_flags[EX_CLOSED])
             continue;
         e.sendText("@wThe @De@Wn@wg@Di@wn@We@Ds@w of the ship @rr@Ro@ra@Rr@w as it moves.\r\n");
     }

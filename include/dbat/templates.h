@@ -123,9 +123,36 @@ Result<Container> parseRanges(std::string_view txt) {
     return Ok(std::move(out));
 }
 
+template<typename T = int>
+requires std::is_arithmetic_v<T>
+Result<T> parseNumber(std::string_view arg, std::string_view context, T min_value = T{}) {
+    if (arg.empty()) {
+        return Err("No {} provided.\r\n", context);
+    }
+
+    T value{};
+    auto [ptr, ec] = std::from_chars(arg.data(), arg.data() + arg.size(), value);
+
+    if (ec == std::errc::invalid_argument) {
+        return Err("Invalid {}: {}\r\n", context, arg);
+    } else if (ec == std::errc::result_out_of_range) {
+        return Err("{} out of range: {}\r\n", context, arg);
+    } else if (ptr != arg.data() + arg.size()) {
+        return Err("Invalid trailing characters in {}: {}\r\n", context, arg);
+    }
+
+    if (value < min_value) {
+        return Err("{} must be at least {}\r\n", context, min_value);
+    }
+
+    return Ok(value);
+}
+
+
+
 template <class Range,
           class KeyFn = default_key_t>
-auto partialMatch(const std::string& match_text,
+auto partialMatch(std::string_view match_text,
                   Range&& range,
                   bool exact = false,
                   KeyFn key = {}) 
@@ -156,8 +183,7 @@ auto partialMatch(const std::string& match_text,
     if (i) choices += ", ";
     choices += items[i].first;
   }
-  return Err("No match found for '{}'. Choices are: {}\r\n",
-                          match_text, choices);
+  return Err("Choices are: {}\r\n", match_text, choices);
 }
 
 template<typename FlagEnum, typename MapType = std::unordered_map<std::string, FlagEnum>>
@@ -195,6 +221,18 @@ auto getEnumNameList(const std::function<bool(FlagEnum v)>& filter = {}) {
         flag_list.emplace_back(magic_enum::enum_name(val));
     }
     return flag_list;
+}
+
+template<typename T>
+requires std::is_enum_v<T>
+Result<T> chooseEnum(std::string_view arg, std::string_view context, const std::function<bool(T)> filter = {}) {
+    auto emap = getEnumMap<T>(filter);
+
+    auto res = partialMatch(arg, emap);
+    if(!res) {
+        return Err("No match found for {} '{}'. {}", context, arg, res.err);
+    }
+    return Ok(res.value()->second);
 }
 
 template<typename T>

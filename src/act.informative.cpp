@@ -1221,8 +1221,8 @@ static void map_draw_room(char map[9][10], int x, int y, Destination &node, Char
 
     for (auto &[door, e] : node.getExits())
     {
-        bool isClosed = IS_SET(e.exit_info, EX_CLOSED);
-        bool isSecret = IS_SET(e.exit_info, EX_SECRET);
+    bool isClosed = e.exit_flags[EX_CLOSED];
+    bool isSecret = e.exit_flags[EX_SECRET];
 
         if (isClosed && !isSecret)
         {
@@ -1312,8 +1312,7 @@ static void gen_map(const Location& loc, Character *ch, int num)
     initialize_map(map);
     // Create a fake Destination for our start node.
     Destination start;
-    start.al = loc.al;
-    start.position = loc.position;
+    start = loc;
 
     map_draw_room(map, 4, 4, start, ch);
 
@@ -3028,7 +3027,7 @@ void do_auto_exits(const Location& loc, Character *ch, int exit_mode)
         for (auto &[d, e] : loc.getExits())
         {
             auto door = static_cast<int>(d);
-            if (admVision || (!IS_SET(e.exit_info, EX_CLOSED)))
+            if (admVision || (!e.exit_flags[EX_CLOSED]))
             {
                 std::string exitStr;
                 std::string direction = dirs[door];
@@ -3043,7 +3042,7 @@ void do_auto_exits(const Location& loc, Character *ch, int exit_mode)
                     exitStr = fmt::format("@c{} @D-@w {}.\r\n", direction, (e.getIsDark() && !CAN_SEE_IN_DARK(ch) && !has_light) ? "@bToo dark to tell.@w" : e.getName());
                 }
 
-                if (IS_SET(e.exit_info, EX_ISDOOR) || IS_SET(e.exit_info, EX_SECRET))
+                if (e.exit_flags[EX_ISDOOR] || e.exit_flags[EX_SECRET])
                 {
                     if (fname(e.keyword.c_str()) == nullptr)
                     {
@@ -3052,17 +3051,17 @@ void do_auto_exits(const Location& loc, Character *ch, int exit_mode)
                         return;
                     }
                     exitStr += fmt::format("The {}{} {} {} {}{}.\r\n",
-                                           IS_SET(e.exit_info, EX_SECRET) ? "@rsecret@w " : "",
+                                           e.exit_flags[EX_SECRET] ? "@rsecret@w " : "",
                                            (!e.keyword.empty() && strcasecmp(fname(e.keyword.c_str()), "undefined")) ? fname(e.keyword.c_str()) : "opening",
                                            strstr(fname(e.keyword.c_str()), "s ") ? "are" : "is",
-                                           IS_SET(e.exit_info, EX_CLOSED) ? "closed" : "open",
-                                           IS_SET(e.exit_info, EX_LOCKED) ? "and locked" : "and unlocked",
-                                           IS_SET(e.exit_info, EX_PICKPROOF) ? " (pickproof)" : "");
+                                           e.exit_flags[EX_CLOSED] ? "closed" : "open",
+                                           e.exit_flags[EX_LOCKED] ? "and locked" : "and unlocked",
+                                           e.exit_flags[EX_PICKPROOF] ? " (pickproof)" : "");
                 }
 
                 exitStrings[door] = exitStr;
             }
-            else if (CONFIG_DISP_CLOSED_DOORS && !IS_SET(e.exit_info, EX_SECRET))
+            else if (CONFIG_DISP_CLOSED_DOORS && !e.exit_flags[EX_SECRET])
             {
                 std::string direction = dirs[door];
                 direction[0] = toupper(direction[0]);
@@ -7119,7 +7118,7 @@ ACMD(do_scan)
 
         if (!dest)
             continue;
-        if (IS_SET(dest.exit_info, EX_CLOSED))
+    if (dest.exit_flags[EX_CLOSED])
             continue;
 
         ch->sendText("@w-----------------------------------------@n\r\n");
@@ -7145,7 +7144,7 @@ ACMD(do_scan)
         auto &dest2 = d2.value();
         if (!dest2)
             continue;
-        if (IS_SET(dest2.exit_info, EX_CLOSED))
+    if (dest2.exit_flags[EX_CLOSED])
             continue;
 
         if (!dest2.getIsDark())

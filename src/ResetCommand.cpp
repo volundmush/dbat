@@ -279,16 +279,16 @@ static bool resetDoor(Location &loc, SpawnRegistry &reg, int dir, int state)
         switch (state)
         {
         case 0:
-            REMOVE_BIT(dest->exit_info, EX_LOCKED);
-            REMOVE_BIT(dest->exit_info, EX_CLOSED);
+            dest->exit_flags.set(EX_LOCKED, false);
+            dest->exit_flags.set(EX_CLOSED, false);
             break;
         case 1:
-            SET_BIT(dest->exit_info, EX_CLOSED);
-            REMOVE_BIT(dest->exit_info, EX_LOCKED);
+            dest->exit_flags.set(EX_CLOSED);
+            dest->exit_flags.set(EX_LOCKED, false);
             break;
         case 2:
-            SET_BIT(dest->exit_info, EX_LOCKED);
-            SET_BIT(dest->exit_info, EX_CLOSED);
+            dest->exit_flags.set(EX_LOCKED);
+            dest->exit_flags.set(EX_CLOSED);
             break;
         default:
             // this shouldn't happen... it's a fail condition.
@@ -340,7 +340,7 @@ static bool resetTrigger(Location &loc, SpawnRegistry &reg, trig_vnum target, in
     return false;
 }
 
-static bool resetVariable(Location &loc, SpawnRegistry &reg, trig_vnum target, int extype, const std::string &key, const std::string &value)
+static bool resetVariable(Location &loc, SpawnRegistry &reg, int extype, const std::string &key, const std::string &value)
 {
     auto u = static_cast<UnitType>(extype);
     switch (u)
@@ -399,7 +399,7 @@ bool ResetCommand::executeAt(Location &loc, SpawnRegistry &reg) const
     case ResetCommandType::TRIGGER:
         return resetTrigger(loc, reg, target, ex);
     case ResetCommandType::VARIABLE:
-        return resetVariable(loc, reg, target, ex, key, value);
+        return resetVariable(loc, reg, ex, key, value);
     }
     return false;
 }

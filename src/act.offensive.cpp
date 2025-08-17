@@ -1380,8 +1380,8 @@ ACMD(do_flee)
         {
             attempt = rand_number(0, NUM_OF_DIRS - 1); /* Select a random direction */
         }
-        auto att = ch->location.getExit(static_cast<Direction>(attempt));
-        if (att && !IS_SET(att->exit_info, EX_CLOSED))
+    auto att = ch->location.getExit(static_cast<Direction>(attempt));
+    if (att && !att->exit_flags[EX_CLOSED])
         {
             act("$n panics, and attempts to flee!", true, ch, nullptr, nullptr, TO_ROOM);
             if (IS_NPC(ch) && att->getRoomFlag(ROOM_NOMOB))

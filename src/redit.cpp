@@ -301,16 +301,15 @@ void redit_disp_extradesc_menu(struct descriptor_data *d)
 void redit_disp_exit_menu(struct descriptor_data *d)
 {
     char door_buf[40];
+    auto e = OLC_EXIT(d);
     /*
      * if exit doesn't exist, alloc/create it
      */
-    if (!OLC_EXIT(d))
+    if (!e)
     {
-        OLC_EXIT(d).emplace();
-        OLC_EXIT(d)->dir = static_cast<Direction>(OLC_VAL(d));
+        e.emplace();
+        e->dir = static_cast<Direction>(OLC_VAL(d));
     }
-
-    sprintbit(OLC_EXIT(d)->exit_info, exit_bits, door_buf, sizeof(door_buf));
 
     clear_screen(d);
     d->send_to(
@@ -323,11 +322,11 @@ void redit_disp_exit_menu(struct descriptor_data *d)
         "@g7@n) DC Lock\t\t: @c%d\r\n"
         "@g8@n) DC Hide     \t\t: @c%d\r\n"
         "Enter choice, 0 to quit : ",
-        OLC_EXIT(d)->getVnum(),
-        !OLC_EXIT(d)->general_description.empty() ? OLC_EXIT(d)->general_description : "<NONE>",
-        !OLC_EXIT(d)->keyword.empty() ? OLC_EXIT(d)->keyword : "<NONE>",
-        OLC_EXIT(d)->key != NOTHING ? OLC_EXIT(d)->key : -1,
-        door_buf, OLC_EXIT(d)->dclock, OLC_EXIT(d)->dchide);
+        e->getVnum(),
+        !e->general_description.empty() ? e->general_description : "<NONE>",
+        !e->keyword.empty() ? e->keyword : "<NONE>",
+        e->key != NOTHING ? e->key : -1,
+        e->exit_flags.getFlagNames(), e->dclock, e->dchide);
 
     OLC_MODE(d) = REDIT_EXIT_MENU;
 }
@@ -341,15 +340,7 @@ void redit_disp_exit_flag_menu(struct descriptor_data *d)
     int counter, columns = 0;
 
     clear_screen(d);
-    for (counter = 0; counter < NUM_EXIT_FLAGS; counter++)
-    {
-        d->send_to("@g%2d@n) %-20.20s%s",
-                   counter + 1,
-                   exit_bits[counter],
-                   !(++columns % 2) ? "\r\n" : "");
-    }
-    sprintbit(OLC_EXIT(d)->exit_info, exit_bits, bits, sizeof(bits));
-    d->send_to("\r\nExit flags: @c%s@n\r\nEnter exit flags, 0 to quit : ", bits);
+    d->send_to("\r\nExit flags: @c%s@n\r\nEnter exit flags, 0 to quit : ", OLC_EXIT(d)->exit_flags.getFlagNames());
     OLC_MODE(d) = REDIT_EXIT_DOORFLAGS;
 }
 
@@ -924,7 +915,7 @@ void redit_parse(struct descriptor_data *d, char *arg)
         else
         {
             /* Toggle the bit. */
-            TOGGLE_BIT(OLC_EXIT(d)->exit_info, 1 << (number - 1));
+            OLC_EXIT(d)->exit_flags.toggle(number-1);
             redit_disp_exit_flag_menu(d);
         }
         return;

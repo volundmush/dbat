@@ -150,7 +150,7 @@ void mobile_activity(uint64_t heartPulse, double deltaTime)
 
                 for (auto &[i, dir] : ch->location.getExits())
                 {
-                    if (IS_SET(dir.exit_info, EX_CLOSED))
+                    if (dir.exit_flags[EX_CLOSED])
                         continue;
 
                     if (dir.getRoomFlag(ROOM_NOMOB))

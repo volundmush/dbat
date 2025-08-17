@@ -382,7 +382,7 @@ constexpr double SECS_PER_GAME_YEAR = (SECS_PER_MONTH*MONTHS_PER_YEAR);
  * See http://www.circlemud.org/~greerga/todo/todo.009 to eliminate MOB_ISNPC.
  * IS_MOB() acts as a VALID_MOB_RNUM()-like function.
  */
-#define IS_NPC(ch)    ((ch)->character_flags.get(CharacterFlag::is_npc))
+#define IS_NPC(ch)    (!(ch)->isPC)
 #define IS_MOB(ch)    (IS_NPC(ch) && mob_proto.count(GET_MOB_RNUM(ch)))
 
 template<typename T>
@@ -408,7 +408,7 @@ bool OBJWEAR_FLAGGED(T *obj, int flag) {
     return obj->wear_flags.get(static_cast<WearFlag>(flag));
 }
 
-#define EXIT_FLAGGED(exit, flag) (IS_SET((exit)->exit_info, (flag)))
+#define EXIT_FLAGGED(exit, flag) ((exit)->exit_flags[(flag)])
 extern bool OBJAFF_FLAGGED(Object *obj, int flag);
 #define OBJVAL_FLAGGED(obj, flag) (IS_SET(GET_OBJ_VAL((obj), VAL_CONTAINER_FLAGS), (flag)))
 
@@ -1144,12 +1144,13 @@ extern void doContinuedTask(Character* ch);
 
 extern std::string format_double(double value);
 
-Result<int> parseIDNumber(std::string_view arg, std::string_view context);
-Result<int> getZoneID(std::string_view arg, bool exists = false);
-Result<Zone*> getZone(std::string_view arg, Character* ch);
-Result<std::string> validateZoneName(std::string_view arg, bool checkExists = false, zone_vnum exclude = NOTHING);
+extern Result<Zone*> getZone(std::string_view arg, Character* ch);
+extern Result<std::string> validateZoneName(std::string_view arg, bool checkExists = false, zone_vnum exclude = NOTHING);
+extern Result<Room*> getRoom(std::string_view arg, Character* ch);
 
-Result<int> getRoomID(std::string_view arg, bool exists = false);
+extern Result<Location> getLocation(std::string_view arg, Character* ch);
 
-Result<Room*> getRoom(std::string_view arg, Character* ch);
+extern std::string ansiSafeString(std::string_view arg);
+extern std::string replaceStringLine(std::string_view arg, bool enforceNewLine = true);
 
+extern Result<ResetCommand> parseResetCommand(std::vector<std::string> seq);

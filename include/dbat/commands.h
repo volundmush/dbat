@@ -948,13 +948,11 @@ extern DECCMD(do_mush_zone);
 // for administrating reset commands.
 extern DECCMD(do_mush_reset);
 // For administrating room flags.
-extern DECCMD(do_mush_roomflag);
-// for administrating where flags
-extern DECCMD(do_mush_whereflag);
 // for administrating exits/directions.
 extern DECCMD(do_mush_exit);
 // for administrating other fields...
-extern DECCMD(do_mush_here);
+extern DECCMD(do_mush_location);
+extern DECCMD(do_mush_choices);
 
 extern DECCMD(do_say);
 
