@@ -31,9 +31,9 @@ room_rnum add_room(Room *room)
 
     auto vn = room->getVnum();
 
-    if (world.contains(vn))
+    if (Room::registry.contains(vn))
     {
-        auto ro = world.at(vn).get();
+        auto ro = Room::registry.at(vn).get();
         extract_script(ro, WLD_TRIGGER);
         copy_room(ro, room);
         basic_mud_log("GenOLC: add_room: Updated existing room #%d.", vn);
@@ -41,7 +41,7 @@ room_rnum add_room(Room *room)
         return i;
     }
     auto sh = std::shared_ptr<Room>(room);
-    world.emplace(vn, sh);
+    Room::registry.emplace(vn, sh);
     basic_mud_log("GenOLC: add_room: Added room %d.", vn);
 
     /*
@@ -60,7 +60,7 @@ int delete_room(room_rnum rnum)
     Object *obj, *next_obj;
     Room *room;
 
-    if (!world.count(rnum)) /* Can't delete void yet. */
+    if (!Room::registry.contains(rnum)) /* Can't delete void yet. */
         return false;
 
     if (rnum <= 0)
@@ -97,13 +97,13 @@ int delete_room(room_rnum rnum)
      * extract the people, mobs, and objects here.
      */
 
-    auto con = room->getObjects();
+    auto con = room->getObjects().snapshot_weak();
     for (auto obj : filter_raw(con))
     {
         obj->leaveLocation();
         obj->moveToLocation(0);
     }
-    auto people = room->getPeople();
+    auto people = room->getPeople().snapshot_weak();
     for (auto ppl : filter_raw(people))
     {
         ppl->leaveLocation();
@@ -118,7 +118,7 @@ int delete_room(room_rnum rnum)
      * Also fix all the exits pointing to rooms above this.
      */
 
-    for (auto &[vn, r] : world)
+    for (auto &[vn, r] : Room::registry)
     {
     };
 
@@ -130,7 +130,7 @@ int delete_room(room_rnum rnum)
         sh.in_room.erase(rnum);
     }
 
-    world.erase(rnum);
+    Room::registry.erase(rnum);
     return true;
 }
 

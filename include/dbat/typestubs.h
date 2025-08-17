@@ -25,6 +25,10 @@ struct HasEquipment;
 struct Area;
 struct Structure;
 struct Location;
+struct Shape;
+struct AbstractGridArea;
+struct ShapeBase;
+struct GridTemplate;
 
 typedef HasDgScripts script_data;
 

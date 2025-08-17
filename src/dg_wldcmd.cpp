@@ -339,7 +339,7 @@ WCMD(do_wdoor)
             newexit->keyword = value;
             break;
         case 5: /* room        */
-            if (auto loc = resolveLocID(value)) {
+            if (auto loc = Location(value)) {
                 *newexit = loc;
             }
             else
@@ -376,7 +376,7 @@ WCMD(do_wteleport)
             wld_log(room, "wteleport all target is itself");
             return;
         }
-        auto people = room->getPeople();
+        auto people = room->getPeople().snapshot_weak();
         for (auto ch : filter_raw(people))
         {
             if (!valid_dg_target(ch, DG_ALLOW_GODS))
@@ -416,7 +416,7 @@ WCMD(do_wforce)
 
     if (!strcasecmp(arg1, "all"))
     {
-        auto people = room->getPeople();
+        auto people = room->getPeople().snapshot_weak();
         for (auto ch : filter_raw(people))
         {
 
@@ -452,14 +452,14 @@ WCMD(do_wpurge)
     if (!*arg)
     {
         /* purge all */
-        auto people = room->getPeople();
+        auto people = room->getPeople().snapshot_weak();
         for (auto ch : filter_raw(people))
         {
             if (IS_NPC(ch))
                 extract_char(ch);
         }
 
-        auto con = room->getObjects();
+        auto con = room->getObjects().snapshot_weak();
         for (auto obj : filter_raw(con))
         {
             extract_obj(obj);

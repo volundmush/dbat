@@ -7,56 +7,6 @@
 #include "dbat/planet.h"
 #include "dbat/act.informative.h"
 
-bool Coordinates::operator==(const Coordinates &other) const
-{
-    return x == other.x && y == other.y && z == other.z;
-}
-
-void Coordinates::apply(Direction dir)
-{
-    switch (dir)
-    {
-    case Direction::north:
-        y += 1;
-        break;
-    case Direction::east:
-        x += 1;
-        break;
-    case Direction::south:
-        y -= 1;
-        break;
-    case Direction::west:
-        x -= 1;
-        break;
-    case Direction::up:
-        z += 1;
-        break;
-    case Direction::down:
-        z -= 1;
-        break;
-    case Direction::northeast:
-        x += 1;
-        y += 1;
-        break;
-    case Direction::southeast:
-        x += 1;
-        y -= 1;
-        break;
-    case Direction::southwest:
-        x -= 1;
-        y -= 1;
-        break;
-    case Direction::northwest:
-        x -= 1;
-        y += 1;
-        break;
-    case Direction::inside:
-    case Direction::outside:
-        // No movement for inside/outside
-        break;
-    }
-}
-
 Location::Location(room_vnum rv)
 {
     al = get_room(rv)->shared_from_this();
@@ -79,9 +29,91 @@ Location::Location(Character *ch)
     *this = ch->location;
 }
 
-Location::Location(const std::string& txt)
+static std::regex lid_regex(R"(^(R|A|S):(\d+)(:(\d+):(\d+):(\d+))?)", std::regex::icase);
+
+
+Location::Location(const std::string& lid)
 {
-    *this = resolveLocID(txt);
+    std::smatch match;
+    auto trimmed = boost::trim_copy(lid);
+
+    if(is_number(trimmed.c_str()))
+        if(auto i = atoi(trimmed.c_str()); i != -1) {
+            // we were given a plain number. this could be a room.
+            if(auto find = Room::registry.find(i); find != Room::registry.end()) {
+                al = find->second;
+                locationID = getLocID();
+                return;
+            }
+        }
+
+    if(!std::regex_search(trimmed, match, lid_regex)) {
+        return;
+    }
+
+    std::string letter = match[1].str();// First capture group
+    int64_t id = std::stoll(match[2].str()); // Second capture group
+    std::string xStr = match[4].str();
+    std::string yStr = match[5].str();
+    std::string zStr = match[6].str();
+
+    if(!xStr.empty()) position.x = atoi(xStr.c_str());
+    if(!yStr.empty()) position.y = atoi(yStr.c_str());
+    if(!zStr.empty()) position.z = atoi(zStr.c_str());
+
+    if(letter == "R") {
+        // Room
+        if(auto find = Room::registry.find(id); find != Room::registry.end()) {
+            al = find->second;
+            locationID = getLocID();
+            return;
+        }
+    } else if(letter == "A") {
+        // Area.
+        if(auto find = areas.find(id); find != areas.end()) {
+            al = find->second;
+            locationID = getLocID();
+            return;
+        }
+    } else if(letter == "S") {
+        // Structure
+        if(auto find = structures.find(id); find != structures.end()) {
+            al = find->second;
+            locationID = getLocID();
+            return;
+        }
+    }
+}
+
+Location& Location::operator=(room_vnum rv)
+{
+    if(auto r = get_room(rv)) {
+        al = r->shared_from_this();
+        position = Coordinates{0, 0, 0};
+    } else {
+        al.reset();
+    }
+    return *this;
+}
+
+Location& Location::operator=(Room* room) {
+    if(room) {
+        al = room->shared_from_this();
+        position = Coordinates{0, 0, 0};
+    } else {
+        al.reset();
+    }
+    return *this;
+}
+
+Location& Location::operator=(const std::shared_ptr<Room>& room) {
+    if(room) {
+        al = room;
+        position = Coordinates{0, 0, 0};
+    } else {
+        al.reset();
+    }
+    return *this;
 }
 
 bool Location::operator==(const Location &other) const
@@ -117,10 +149,27 @@ bool Location::operator==(const room_vnum rv) const
     return false;
 }
 
+AbstractLocation* Location::getLoc() const {
+    if(auto a = al.lock()) {
+        return a.get();
+    }
+
+    if(auto res = Location(locationID)) {
+        al = res.al;
+        position = res.position;
+        locationID = res.locationID;
+        if(auto a = al.lock()) {
+            return a.get();
+        }
+    }
+
+    return nullptr;
+}
+
 // the bool operator for ...
 Location::operator bool() const
 {
-    if(auto a = al.lock()) {
+    if(auto a = getLoc()) {
         return a->validCoordinates(position);
     }
     return false;
@@ -128,7 +177,7 @@ Location::operator bool() const
 
 vnum Location::getVnum() const
 {
-    if (auto a = al.lock())
+    if (auto a = getLoc())
     {
         return a->getLocVnum();
     }
@@ -137,7 +186,7 @@ vnum Location::getVnum() const
 
 Zone *Location::getZone() const
 {
-    if (auto a = al.lock())
+    if (auto a = getLoc())
     {
         return a->getLocZone();
     }
@@ -146,7 +195,7 @@ Zone *Location::getZone() const
 
 std::string Location::getLocID() const
 {
-    if(auto a = al.lock()) {
+    if(auto a = getLoc()) {
         auto alid = a->getLocID();
         if(position.x != 0 || position.y != 0 || position.z != 0) {
             return fmt::format("{}:{}:{}:{}", alid, position.x, position.y, position.z);
@@ -159,7 +208,7 @@ std::string Location::getLocID() const
 
 const char *Location::getName() const
 {
-    if (auto a = al.lock())
+    if (auto a = getLoc())
     {
         return a->getName(position);
     }
@@ -168,7 +217,7 @@ const char *Location::getName() const
 
 const char *Location::getLookDescription() const
 {
-    if (auto a = al.lock())
+    if (auto a = getLoc())
     {
         return a->getLookDescription(position);
     }
@@ -177,14 +226,14 @@ const char *Location::getLookDescription() const
 
 std::optional<Destination> Location::getExit(Direction dir) const
 {
-    if (auto a = al.lock())
+    if (auto a = getLoc())
         return a->getDirection(position, dir);
     return std::nullopt;
 }
 
 std::map<Direction, Destination> Location::getExits() const
 {
-    if (auto a = al.lock())
+    if (auto a = getLoc())
     {
         return a->getDirections(position);
     }
@@ -193,7 +242,7 @@ std::map<Direction, Destination> Location::getExits() const
 
 const std::vector<ExtraDescription> &Location::getExtraDescription() const
 {
-    if (auto a = al.lock())
+    if (auto a = getLoc())
     {
         return a->getExtraDescription(position);
     }
@@ -203,7 +252,7 @@ const std::vector<ExtraDescription> &Location::getExtraDescription() const
 
 double Location::getEnvironment(int type) const
 {
-    if (auto a = al.lock())
+    if (auto a = getLoc())
     {
         return a->getEnvironment(position, type);
     }
@@ -212,7 +261,7 @@ double Location::getEnvironment(int type) const
 
 double Location::setEnvironment(int type, double value)
 {
-    if (auto a = al.lock())
+    if (auto a = getLoc())
     {
         return a->setEnvironment(position, type, value);
     }
@@ -221,7 +270,7 @@ double Location::setEnvironment(int type, double value)
 
 double Location::modEnvironment(int type, double value)
 {
-    if (auto a = al.lock())
+    if (auto a = getLoc())
     {
         return a->modEnvironment(position, type, value);
     }
@@ -230,40 +279,40 @@ double Location::modEnvironment(int type, double value)
 
 void Location::clearEnvironment(int type)
 {
-    if (auto a = al.lock())
+    if (auto a = getLoc())
     {
         a->clearEnvironment(position, type);
     }
 }
 
-void Location::setRoomFlag(int flag, bool value) const
+void Location::setRoomFlag(int flag, bool value)
 {
-    if (auto a = al.lock())
+    if (auto a = getLoc())
     {
         a->setRoomFlag(position, flag, value);
     }
 }
 
-void Location::setRoomFlag(RoomFlag flag, bool value) const
+void Location::setRoomFlag(RoomFlag flag, bool value)
 {
-    if (auto a = al.lock())
+    if (auto a = getLoc())
     {
         a->setRoomFlag(position, flag, value);
     }
 }
 
-bool Location::toggleRoomFlag(int flag) const
+bool Location::toggleRoomFlag(int flag)
 {
-    if (auto a = al.lock())
+    if (auto a = getLoc())
     {
         return a->toggleRoomFlag(position, flag);
     }
     return false;
 }
 
-bool Location::toggleRoomFlag(RoomFlag flag) const
+bool Location::toggleRoomFlag(RoomFlag flag)
 {
-    if (auto a = al.lock())
+    if (auto a = getLoc())
     {
         return a->toggleRoomFlag(position, flag);
     }
@@ -272,7 +321,7 @@ bool Location::toggleRoomFlag(RoomFlag flag) const
 
 bool Location::getRoomFlag(int flag) const
 {
-    if (auto a = al.lock())
+    if (auto a = getLoc())
     {
         return a->getRoomFlag(position, flag);
     }
@@ -281,24 +330,24 @@ bool Location::getRoomFlag(int flag) const
 
 bool Location::getRoomFlag(RoomFlag flag) const
 {
-    if (auto a = al.lock())
+    if (auto a = getLoc())
     {
         return a->getRoomFlag(position, flag);
     }
     return false;
 }
 
-void Location::setWhereFlag(WhereFlag flag, bool value) const
+void Location::setWhereFlag(WhereFlag flag, bool value)
 {
-    if (auto a = al.lock())
+    if (auto a = getLoc())
     {
         a->setWhereFlag(position, flag, value);
     }
 }
 
-bool Location::toggleWhereFlag(WhereFlag flag) const
+bool Location::toggleWhereFlag(WhereFlag flag)
 {
-    if (auto a = al.lock())
+    if (auto a = getLoc())
     {
         return a->toggleWhereFlag(position, flag);
     }
@@ -307,7 +356,7 @@ bool Location::toggleWhereFlag(WhereFlag flag) const
 
 bool Location::getWhereFlag(WhereFlag flag) const
 {
-    if (auto a = al.lock())
+    if (auto a = getLoc())
     {
         return a->getWhereFlag(position, flag);
     }
@@ -316,17 +365,17 @@ bool Location::getWhereFlag(WhereFlag flag) const
 
 std::string Location::getUID(bool active) const
 {
-    if(auto a = al.lock())
-        if (auto r = std::dynamic_pointer_cast<Room>(a); r)
+    if(auto a = getLoc())
+        if (auto r = dynamic_cast<Room*>(a))
         {
             return r->getUID(active);
         }
     return "";
 }
 
-void Location::sendText(const std::string &message) const
+void Location::sendText(const std::string &message)
 {
-    if (auto a = al.lock())
+    if (auto a = getLoc())
     {
         a->broadcastAt(position, message);
     }
@@ -334,25 +383,34 @@ void Location::sendText(const std::string &message) const
 
 std::vector<std::weak_ptr<Object>> Location::getObjects() const
 {
-    if (auto a = al.lock())
+    if (auto a = getLoc())
     {
-        return a->getObjects(position);
+        return a->getObjects(position).snapshot_weak();
     }
     return {};
 }
 
 std::vector<std::weak_ptr<Character>> Location::getPeople() const
 {
-    if (auto a = al.lock())
+    if (auto a = getLoc())
     {
-        return a->getPeople(position);
+        return a->getPeople(position).snapshot_weak();
+    }
+    return {};
+}
+
+std::vector<std::weak_ptr<Structure>> Location::getStructures() const
+{
+    if (auto a = getLoc())
+    {
+        return a->getStructures(position).snapshot_weak();
     }
     return {};
 }
 
 int Location::getDamage() const
 {
-    if (auto a = al.lock())
+    if (auto a = getLoc())
     {
         return a->getDamage(position);
     }
@@ -361,7 +419,7 @@ int Location::getDamage() const
 
 void Location::setDamage(int value)
 {
-    if (auto a = al.lock())
+    if (auto a = getLoc())
     {
         a->setDamage(position, value);
     }
@@ -369,7 +427,7 @@ void Location::setDamage(int value)
 
 int Location::modDamage(int value)
 {
-    if (auto a = al.lock())
+    if (auto a = getLoc())
     {
         return a->modDamage(position, value);
     }
@@ -378,7 +436,7 @@ int Location::modDamage(int value)
 
 SectorType Location::getSectorType() const
 {
-    if (auto a = al.lock())
+    if (auto a = getLoc())
     {
         return a->getSectorType(position);
     }
@@ -392,7 +450,7 @@ int Location::getTileType() const
 
 int Location::getGroundEffect() const
 {
-    if (auto a = al.lock())
+    if (auto a = getLoc())
     {
         return a->getGroundEffect(position);
     }
@@ -401,7 +459,7 @@ int Location::getGroundEffect() const
 
 void Location::setGroundEffect(int value)
 {
-    if (auto a = al.lock())
+    if (auto a = getLoc())
     {
         a->setGroundEffect(position, value);
     }
@@ -409,16 +467,16 @@ void Location::setGroundEffect(int value)
 
 int Location::modGroundEffect(int value)
 {
-    if (auto a = al.lock())
+    if (auto a = getLoc())
     {
         return a->modGroundEffect(position, value);
     }
     return 0;
 }
 
-SpecialFunc Location::getSpecialFunc() const
+SpecialFunc Location::getSpecialFunc()
 {
-    if (auto a = al.lock())
+    if (auto a = getLoc())
     {
         return a->getSpecialFunc(position);
     }
@@ -427,14 +485,14 @@ SpecialFunc Location::getSpecialFunc() const
 
 bool Location::getIsDark()
 {
-    if (auto a = al.lock())
+    if (auto a = getLoc())
     {
         return a->getIsDark(position);
     }
     return false;
 }
 
-int Location::countPlayers() const
+int Location::countPlayers()
 {
     int total = 0;
     auto people = getPeople();
@@ -446,7 +504,7 @@ int Location::countPlayers() const
     return total;
 }
 
-bool Location::canGo(int dir) const
+bool Location::canGo(int dir)
 {
     auto ex = getExit(static_cast<Direction>(dir));
     if (!ex)
@@ -456,7 +514,7 @@ bool Location::canGo(int dir) const
 
 int Location::getCookElement()
 {
-    if (auto a = al.lock())
+    if (auto a = getLoc())
     {
         return a->getCookElement(position);
     }
@@ -582,13 +640,13 @@ void Destination::legacyExitFlags(int flags) {
 
 void Location::deleteExit(Direction dir)
 {
-    if(auto a = al.lock())
+    if(auto a = getLoc())
         a->deleteExit(position, dir);
 }
 
 void Location::replaceExit(const Destination &dest)
 {
-    if (auto a = al.lock())
+    if (auto a = getLoc())
     {
         a->replaceExit(position, dest);
     }
@@ -608,7 +666,7 @@ void Location::executeResetCommands(const std::vector<ResetCommand> &cmds)
 
 FlagHandler<RoomFlag>& Location::getRoomFlags()
 {
-    if (auto a = al.lock())
+    if (auto a = getLoc())
     {
         return a->getRoomFlags(position);
     }
@@ -618,7 +676,7 @@ FlagHandler<RoomFlag>& Location::getRoomFlags()
 
 FlagHandler<WhereFlag>& Location::getWhereFlags()
 {
-    if (auto a = al.lock())
+    if (auto a = getLoc())
     {
         return a->getWhereFlags(position);
     }
@@ -648,7 +706,7 @@ static void display_room_flags(Location& loc, Character *ch, const std::vector<Z
 
     ch->send_to("@wLocation: @G%-70s@w\r\n", loc.getName());
 
-    if(auto r = dynamic_cast<Room*>(loc.al.lock().get()); r)
+    if(auto r = dynamic_cast<Room*>(loc.getLoc()); r)
     {
         if (auto sc = r->getScripts(); !sc.empty())
         {
@@ -934,7 +992,7 @@ void Location::displayLookFor(Character* ch) {
     if (!ch->desc)
         return;
     
-    auto a = al.lock();
+    auto a = getLoc();
     if(!a) {
         ch->sendText("You can't see anything here.");
         return;
@@ -979,7 +1037,7 @@ void Location::displayLookFor(Character* ch) {
     auto validSpots = [](const auto& locs) {
         std::unordered_map<std::string, Location> valid;
         for(const auto& [key, locid] : locs) {
-            if(auto l = resolveLocID(locid); l) {
+            if(auto l = Location(locid); l) {
                 valid[key] = l;
             }
         }
@@ -1011,7 +1069,7 @@ void Location::displayLookFor(Character* ch) {
     display_garden_info(*this, ch);
 
     // retrieve all entities at these coordinates.
-    auto con = a->getContents<HasLocation>(position);
+    auto con = a->getContents<HasLocation>(position).snapshot_weak();
     auto sh = ch->shared_from_this();
     std::map<std::string, std::vector<std::weak_ptr<HasLocation>>> categorized_contents;
     for (const auto& hl : filter_shared(con)) {
@@ -1031,8 +1089,31 @@ void Location::displayLookFor(Character* ch) {
 }
 
 bool Location::buildwalk(Character* ch, Direction dir) {
-    if(auto a = al.lock()) {
+    if(auto a = getLoc()) {
         return a->buildwalk(position, ch, dir);
     }
     return false;
+}
+
+void Location::setResetCommands(const std::vector<ResetCommand>& commands) {
+    if(auto a = getLoc()) {
+        a->setResetCommands(position, commands);
+    }
+}
+
+std::vector<ResetCommand> Location::getResetCommands() const {
+    if(auto a = getLoc()) return a->getResetCommands(position);
+    return {};
+}
+
+void Location::setSectorType(SectorType type) {
+    if(auto a = getLoc()) a->setSectorType(position, type);
+}
+
+void Location::setString(const std::string& txt, const std::string& value) {
+    if(auto a = getLoc()) a->setString(position, txt, value);
+}
+
+std::string Location::renderDiagnostics(Character* viewer) const {
+    return {};
 }

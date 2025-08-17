@@ -192,7 +192,7 @@ ACMD(do_multiform)
         }
         for (const auto &m : multis)
         {
-            handle_multi_merge(m);
+            m->mergeClones();
         }
         return;
     }
@@ -296,21 +296,7 @@ static void generate_multiform(Character *ch, int count)
     }
 }
 
-void handle_multi_merge(Character *form)
-{
-    Character *ch = GET_ORIGINAL(form);
 
-    if (!ch)
-    {
-        extract_char(form);
-        return;
-    }
-
-    ch->sendText("@YYou merge with one of your forms!@n\r\n");
-    act("@y$n@Y merges with one of his multiforms!@n\r\n", true, ch, nullptr, nullptr, TO_ROOM);
-
-    extract_char(form);
-}
 
 void handle_songs(uint64_t heartPulse, double deltaTime)
 {

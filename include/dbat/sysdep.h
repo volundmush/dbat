@@ -45,6 +45,7 @@
 #include <filesystem>
 #include <regex>
 #include <charconv>
+#include <variant>
 
 #define FMT_HEADER_ONLY
 #include "fmt/format.h"

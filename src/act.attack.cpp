@@ -130,11 +130,9 @@ ACMD(do_combine)
                 {
                     ch->sendText("You stop your preparations to combine your attack with a group attack.\r\n");
                     ch->master->send_to("@Y%s@C is no longer prepared to combine an attack with the group!@n\r\n", get_i_name(ch->master, ch));
-                    for (f = ch->master->followers; f; f = f->next)
-                    {
-                        if (ch != f->follower)
-                            f->follower->send_to("@Y%s@C is no longer prepared to combine an attack with the group!@n\r\n", get_i_name(f->follower, ch));
-                    }
+                    ch->master->followers.for_each([&](auto f) {
+                        if (ch != f) f->send_to("@Y%s@C is no longer prepared to combine an attack with the group!@n\r\n", get_i_name(f, ch));
+                    });
                     ch->setBaseStat("combine", -1);
                     return;
                 }
@@ -205,18 +203,13 @@ ACMD(do_combine)
                     return;
                 }
                 ch->setBaseStat("combine", temp);
-                for (f = ch->followers; f; f = f->next)
-                {
-                    if (!AFF_FLAGGED(f->follower, AFF_GROUP))
-                    {
-                        continue;
-                    }
-                    else if (GET_COMBINE(f->follower) != -1 &&
-                             GET_CHARGE(f->follower) >= GET_MAX_MANA(f->follower) * 0.05)
+                ch->followers.for_each([&](Character* f) {
+                    if (!AFF_FLAGGED(f, AFF_GROUP)) return;
+                    if (GET_COMBINE(f) != -1 && (GET_CHARGE(f) >= (GET_MAX_MANA(f) * 0.05)))
                     {
                         fire = true;
                     }
-                } /* End follow for statement */
+                });
                 if (fire == true)
                 {
                     combine_attacks(ch, vict);
@@ -235,11 +228,10 @@ ACMD(do_combine)
                     act("@C$n@c appears to be concentrating hard and focusing $s energy!@n\r\n", true, ch, nullptr,
                         nullptr, TO_ROOM);
                     ch->master->send_to("@BCOMBINE@c: @Y%s@C has prepared to combine a @c'@G%s@c'@C with the next group attack!@n\r\n", get_i_name(ch->master, ch), attack_names[temp]);
-                    for (f = ch->master->followers; f; f = f->next)
-                    {
-                        if (ch != f->follower)
-                            f->follower->send_to("@BCOMBINE@c: @Y%s@C has prepared to combine a @c'@G%s@c'@C with the next group attack!@n\r\n", get_i_name(f->follower, ch), attack_names[temp]);
-                    }
+                    ch->master->followers.for_each([&](auto f) {
+                        if (ch != f)
+                            f->send_to("@BCOMBINE@c: @Y%s@C has prepared to combine a @c'@G%s@c'@C with the next group attack!@n\r\n", get_i_name(f, ch), attack_names[temp]);
+                    });
                     ch->setBaseStat("combine", temp);
                 }
                 else

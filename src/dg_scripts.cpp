@@ -125,7 +125,7 @@ int trgvar_in_room(room_vnum vnum)
         return (-1);
     }
 
-    return get_room(rnum)->getPeople().size();
+    return get_room(rnum)->getPeople().live_count();
 }
 
 Object *get_obj_in_list(char *name, const std::vector<std::weak_ptr<Object>> &list)
@@ -354,7 +354,7 @@ Character *get_char_near_obj(Object *obj, char *name)
         room_rnum num;
         if ((num = obj_room(obj)) != NOWHERE)
         {
-            auto people = get_room(num)->getPeople();
+            auto people = get_room(num)->getPeople().snapshot_weak();
             for (auto ch : filter_raw(people))
                 if (isname(name, ch->getName()) &&
                     valid_dg_target(ch, DG_ALLOW_GODS))
@@ -385,7 +385,7 @@ Character *get_char_in_room(Room *room, char *name)
     }
     else
     {
-        auto people = room->getPeople();
+        auto people = room->getPeople().snapshot_weak();
         for (auto ch : filter_raw(people))
             if (isname(name, ch->getName()) &&
                 valid_dg_target(ch, DG_ALLOW_GODS))
@@ -441,11 +441,11 @@ Object *get_obj_near_obj(Object *obj, char *name)
     if ((rm = obj_room(obj)) != NOWHERE)
     {
         /* check the floor */
-        if ((i = get_obj_in_list(name, get_room(rm)->getObjects())))
+        if ((i = get_obj_in_list(name, get_room(rm)->getObjects().snapshot_weak())))
             return i;
 
         /* check peoples' inventory */
-        auto people = get_room(rm)->getPeople();
+        auto people = get_room(rm)->getPeople().snapshot_weak();
         for (auto ch : filter_raw(people))
             if ((i = get_object_in_equip(ch, name)))
                 return i;
@@ -545,7 +545,7 @@ Character *get_char_by_room(Room *room, char *name)
     }
     else
     {
-        auto people = room->getPeople();
+        auto people = room->getPeople().snapshot_weak();
         for (auto ch : filter_raw(people))
             if (isname(name, ch->getName()) &&
                 valid_dg_target(ch, DG_ALLOW_GODS))
@@ -599,7 +599,7 @@ Object *get_obj_by_obj(Object *obj, char *name)
     }
 
     if (((rm = obj_room(obj)) != NOWHERE) &&
-        (i = get_obj_in_list(name, get_room(rm)->getObjects())))
+        (i = get_obj_in_list(name, get_room(rm)->getObjects().snapshot_weak())))
         return i;
 
     return get_obj(name);
@@ -617,14 +617,14 @@ Object *get_obj_in_room(Room *room, char *name)
         auto o = std::dynamic_pointer_cast<Object>(uidResult).get();
         if (!o)
             return nullptr;
-        auto con = room->getObjects();
+        auto con = room->getObjects().snapshot_weak();
         for (auto obj : filter_raw(con))
             if (o == obj)
                 return obj;
     }
     else
     {
-        auto con = room->getObjects();
+        auto con = room->getObjects().snapshot_weak();
         for (auto obj : filter_raw(con))
             if (isname(name, obj->getName()))
                 return obj;
@@ -643,7 +643,7 @@ Object *get_obj_by_room(Room *room, char *name)
         return std::dynamic_pointer_cast<Object>(uidResult).get();
     }
 
-    auto con = room->getObjects();
+    auto con = room->getObjects().snapshot_weak();
     for (auto obj : filter_raw(con))
         if (isname(name, obj->getName()))
             return obj;
@@ -755,7 +755,7 @@ void check_interval_triggers(int trigFlag)
             interval_otrigger(obj, trigFlag);
     }
 
-    for (auto &[vn, r] : world)
+    for (auto &[vn, r] : Room::registry)
     {
         auto sc = SCRIPT(r);
 

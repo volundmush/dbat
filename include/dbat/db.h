@@ -166,8 +166,6 @@ extern void free_extra_descriptions(struct extra_descr_data *edesc);
 
 extern void free_text_files();
 
-extern void free_followers(struct follow_type *k);
-
 extern void load_disabled();
 
 extern void save_disabled();
@@ -233,7 +231,6 @@ extern time_t boot_time;
 extern struct config_data config_info;
 
 // world data...
-extern NegativeKeyGuardMap<room_vnum, std::shared_ptr<Room>> world;
 extern struct time_info_data time_info;  /* the infomation about the time    */
 extern struct time_info_data era_uptime; /* the infomation about the time    */
 extern struct weather_data weather_info; /* the infomation about the weather */
@@ -242,7 +239,6 @@ extern NegativeKeyGuardUnorderedMap<int64_t, std::shared_ptr<Area>> areas;
 extern NegativeKeyGuardUnorderedMap<int64_t, std::shared_ptr<Structure>> structures;
 extern NegativeKeyGuardUnorderedMap<int64_t, GridTemplate> gridTemplates;
 
-extern NegativeKeyGuardMap<room_vnum, std::shared_ptr<Room>> world;
 extern NegativeKeyGuardMap<zone_vnum, struct Zone> zone_table;
 
 extern struct descriptor_data *descriptor_list;
@@ -251,13 +247,11 @@ extern NegativeKeyGuardMap<int64_t, struct descriptor_data *> sessions;
 extern NegativeKeyGuardMap<mob_vnum, struct index_data> mob_index;
 extern NegativeKeyGuardMap<mob_vnum, CharacterPrototype> mob_proto;
 
-extern NegativeKeyGuardUnorderedMap<int64_t, std::shared_ptr<Character>> uniqueCharacters;
 extern std::vector<std::weak_ptr<Character>> getAllCharacters();
 
 extern NegativeKeyGuardMap<obj_vnum, struct index_data> obj_index;
 extern NegativeKeyGuardMap<obj_vnum, ObjectPrototype> obj_proto;
 
-extern NegativeKeyGuardUnorderedMap<int64_t, std::shared_ptr<Object>> uniqueObjects;
 extern std::vector<std::weak_ptr<Object>> getAllObjects();
 
 extern NegativeKeyGuardMap<trig_vnum, DgScriptPrototype> trig_index;
@@ -285,9 +279,6 @@ int64_t getNextAccountID();
 
 bool isUID(const std::string &uid);
 std::shared_ptr<HasDgScripts> resolveUID(const std::string &uid);
-
-bool isLocID(const std::string &lid);
-Location resolveLocID(const std::string& lid);
 
 extern Character *affect_list;
 extern Character *affectv_list;

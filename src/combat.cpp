@@ -646,39 +646,32 @@ void combine_attacks(Character *ch, Character *vict)
         ch->setBaseStat<int64_t>("charge", 0);
     }
 
-    for (f = ch->followers; f; f = f->next)
-    {
-        if (!AFF_FLAGGED(f->follower, AFF_GROUP))
-        {
-            continue;
-        }
-        else
-        {
-            if (GET_COMBINE(f->follower) != GET_COMBINE(ch))
+    ch->followers.for_each([&](Character* f) {
+        if (!AFF_FLAGGED(f, AFF_GROUP)) return;
+        if (GET_COMBINE(f) != GET_COMBINE(ch))
             {
                 same = false;
             }
-            if (GET_CHARGE(f->follower) >= GET_MAX_MANA(f->follower) * maxki)
+            if (GET_CHARGE(f) >= GET_MAX_MANA(f) * maxki)
             {
-                totki += GET_MAX_MANA(f->follower) * maxki;
-                f->follower->modBaseStat<int64_t>("charge", -(GET_MAX_MANA(f->follower) * maxki));
+                totki += GET_MAX_MANA(f) * maxki;
+                f->modBaseStat<int64_t>("charge", -(GET_MAX_MANA(f) * maxki));
             }
             else
             {
-                totki += GET_CHARGE(f->follower);
-                f->follower->setBaseStat<int64_t>("charge", 0);
+                totki += GET_CHARGE(f);
+                f->setBaseStat<int64_t>("charge", 0);
             }
             totalmem += 1;
-            attavg += GET_SKILL(f->follower, attack_skills[GET_COMBINE(f->follower)]);
+            attavg += GET_SKILL(f, attack_skills[GET_COMBINE(f)]);
             char folbuf[MAX_INPUT_LENGTH], folbuf2[MAX_INPUT_LENGTH];
             sprintf(folbuf, "@Y$n@W times and merges $s @B'@R%s@B'@W into the group attack!@n",
-                    attack_names_comp[GET_COMBINE(f->follower)]);
+                    attack_names_comp[GET_COMBINE(f)]);
             sprintf(folbuf2, "@WYou time and merge your @B'@R%s@B'@W into the group attack!@n",
-                    attack_names_comp[GET_COMBINE(f->follower)]);
-            act(folbuf, true, f->follower, nullptr, nullptr, TO_ROOM);
-            act(folbuf2, true, f->follower, nullptr, nullptr, TO_CHAR);
-        }
-    }
+                    attack_names_comp[GET_COMBINE(f)]);
+            act(folbuf, true, f, nullptr, nullptr, TO_ROOM);
+            act(folbuf2, true, f, nullptr, nullptr, TO_CHAR);
+    });
 
     totki += bonus;
     if (same == true)
@@ -736,10 +729,9 @@ void combine_attacks(Character *ch, Character *vict)
     hurt(0, 0, ch, vict, nullptr, totki, 1);
     if (same == true)
     {
-        for (f = ch->followers; f; f = f->next)
-        {
-            f->follower->sendText("@YS@yy@Yn@ye@Yr@yg@Yi@ys@Yt@yi@Yc @yB@Yo@yn@Yu@ys@Y!@n\r\n");
-        }
+        ch->followers.for_each([&](auto f) {
+            f->sendText("@YS@yy@Yn@ye@Yr@yg@Yi@ys@Yt@yi@Yc @yB@Yo@yn@Yu@ys@Y!@n\r\n");
+        });
         ch->sendText("@YS@yy@Yn@ye@Yr@yg@Yi@ys@Yt@yi@Yc @yB@Yo@yn@Yu@ys@Y!@n\r\n");
     }
 }

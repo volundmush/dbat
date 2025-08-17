@@ -13,6 +13,8 @@
 #include "dbat/send.h"
 #include "dbat/act.wizard.h"
 
+NegativeKeyGuardUnorderedMap<int, std::shared_ptr<Room>> Room::registry;
+
 Room::Room() : AbstractLocation()
 {
     type = UnitType::room;
@@ -184,7 +186,7 @@ double Room::getEnvironment(int type) const
     {
         // check for a gravity generator...
         // bypass const deliberately here...
-        auto con = ((Room*)this)->getObjects();
+        auto con = ((Room*)this)->getObjects().snapshot_weak();
         for (auto c : filter_raw(con))
         {
             if (auto g = c->getBaseStat("gravity"); g > 0.0)
@@ -338,10 +340,9 @@ SectorType Room::getSectorType(const Coordinates &coor) const
 void Room::broadcastAt(const Coordinates &coor, const std::string &message)
 {
     auto people = getPeople(coor);
-    for (const auto &c : filter_shared(people))
-    {
-        c->sendText(message.c_str());
-    }
+    people.for_each([&](auto c) {
+        c->sendText(message);
+    });
 }
 
 int Room::getDamage(const Coordinates &coor) const
@@ -396,7 +397,7 @@ void Room::clearEnvironment(const Coordinates &coor, int type)
 
 void Room::sendText(const std::string &txt)
 {
-    auto people = getPeople();
+    auto people = getPeople().snapshot_weak();
     for (auto i : filter_raw(people))
     {
         i->sendText(txt);
@@ -462,25 +463,39 @@ bool Room::buildwalk(const Coordinates& coor, Character* ch, Direction dir) {
     // by the time we reach this function, all permission checks have already been carried out.
 
     auto r = std::make_shared<Room>();
-    r->vn = getNextID(lastRoomID, world);
+    r->vn = getNextID(lastRoomID, Room::registry);
     r->strings["name"] = "New BuildWalk Room";
     r->strings["look_description"] = fmt::format("This unfinished room was created by {}.\r\n", ch->getName());
     r->zone = zone;
 
-    world[r->vn] = r;
+    Room::registry[r->vn] = r;
 
-    Destination dest, rdest;
+    Destination dest(r), rdest(ch->location);
     dest.dir = dir;
-    dest.al = r;
     ch->location.replaceExit(dest);
 
     rdest.dir = static_cast<Direction>(rev_dir[static_cast<int>(dir)]);
-    rdest.al = ch->location.al;
-    rdest.position = ch->location.position;
+
     dest.replaceExit(rdest);
 
     ch->send_to("@yRoom #%d created by BuildWalk.@n\r\n", r->vn);
     update_space();
 
     return true;
+}
+
+void Room::setString(const Coordinates& coor, const std::string& name, const std::string& value) {
+    strings[name] = value;
+}
+
+void Room::setResetCommands(const Coordinates& coor, const std::vector<ResetCommand>& cmds) {
+    resetCommands = cmds;
+}
+
+void Room::setSectorType(const Coordinates& coor, SectorType type) {
+    sector_type = type;
+}
+
+std::vector<ResetCommand> Room::getResetCommands(const Coordinates& coor) {
+    return resetCommands;
 }

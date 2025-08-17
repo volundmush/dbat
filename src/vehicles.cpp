@@ -212,8 +212,8 @@ void drive_in_direction(Character *ch, Object *vehicle, int dir)
     }
 
     Object *hatch = nullptr;
-    Destination des;
-    des.al = get_room(GET_OBJ_VAL(vehicle, VAL_VEHICLE_DEST))->shared_from_this();
+    auto desroom = get_room(GET_OBJ_VAL(vehicle, VAL_VEHICLE_DEST));
+    Destination des(desroom);
     auto con = des.getObjects();
 
     for (auto h : filter_raw(con))

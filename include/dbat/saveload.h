@@ -155,8 +155,6 @@ void from_json(const json& j, FlagHandler<Enum>& m)
     }
 }
 
-void to_json(json& j, const Location& l);
-void from_json(const json& j, Location& l);
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(mob_special_data, attack_type, default_pos, damnodice, damsizedice)
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(time_data, birth, created, maxage, logon, played, seconds_aged)
@@ -172,14 +170,25 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(HasExtraDescriptions, extra_desc
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(HasMudStrings, strings)
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(HasVnum, vn)
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(HasVariables, variables)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(Location, locationID, position)
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(HasLocation, location, registeredLocations)
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ResetCommand, type, if_flag, target, max, max_location, ex, chance, key, value)
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(HasResetCommands, resetCommands)
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(Zone, number, parent, name, builders, lifespan, age, reset_mode, zone_flags, launchDestination, landingSpots, dockingSpots)
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(affect_t, location, modifier, specific)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(RoundDim, center, radius, zMin, zMax, r2)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(AABB, min, max)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(BoxDim, box)
+
+void to_json(json& j, const ShapeBase& p);
+void from_json(const json& j, ShapeBase& p);
+
+void to_json(json& j, const Shape& p);
+void from_json(const json& j, Shape& p);
 
 void to_json(json& j, const struct help_index_element& r);
 void from_json(const json& j, struct help_index_element& r);
+
 /*
 void to_json(json& j, const Zone& z);
 void from_json(const json& j, Zone& z);
@@ -235,9 +244,6 @@ void from_json(const json& j, PlayerData& p);
 
 void to_json(json& j, const HasZone& p);
 void from_json(const json& j, HasZone& p);
-
-void to_json(json& j, const GridShared& p);
-void from_json(const json& j, GridShared& p);
 
 void to_json(json& j, const TileOverride& p);
 void from_json(const json& j, TileOverride& p);

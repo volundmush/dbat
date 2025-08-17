@@ -59,12 +59,11 @@ int group_bonus(Character *ch, int type)
     if (!AFF_FLAGGED(ch, AFF_GROUP))
         return (false);
 
-    if (ch->followers)
+    if (auto foll = ch->followers.snapshot_weak(); !foll.empty())
     {
-        for (k = ch->followers; k; k = next)
+        for (auto k : filter_raw(foll))
         {
-            next = k->next;
-            if (!AFF_FLAGGED(k->follower, AFF_GROUP))
+            if (!AFF_FLAGGED(k, AFF_GROUP))
             {
                 continue;
             }
@@ -72,14 +71,14 @@ int group_bonus(Character *ch, int type)
             {
                 if (type == 0)
                 {
-                    k->follower->modCurVitalDam(CharVital::lifeforce, -.25);
-                    k->follower->sendText("@CIncensed by the death of your comrade your life force swells!@n");
+                    k->modCurVitalDam(CharVital::lifeforce, -.25);
+                    k->sendText("@CIncensed by the death of your comrade your life force swells!@n");
                     return (true);
                 }
                 else if (type == 1)
                 {
-                    k->follower->modCurVitalDam(CharVital::lifeforce, -.4);
-                    k->follower->sendText("@CIncensed by the death of your comrade your life force swells!@n");
+                    k->modCurVitalDam(CharVital::lifeforce, -.4);
+                    k->sendText("@CIncensed by the death of your comrade your life force swells!@n");
                     return (true);
                 }
                 else if (type == 2)
@@ -2138,14 +2137,8 @@ static void final_combat_resolve(Character *ch)
         ch->sits.reset();
         chair->sitting.reset();
     }
-    if (!IS_NPC(ch) && !ch->clones.empty())
-    {
-        auto clones = ch->clones.snapshot_weak();
-        for (auto c : filter_raw(clones))
-        {
-            handle_multi_merge(c);
-        }
-    }
+    ch->mergeClones();
+
     if (CARRYING(ch))
     {
         carry_drop(ch, 2);
@@ -2672,13 +2665,12 @@ static void perform_group_gain(Character *ch, int base, Character *victim)
     {
         struct follow_type *f;
         int checkit = false;
-        for (f = ch->followers; f; f = f->next)
-        {
-            if (AFF_FLAGGED(f->follower, AFF_GROUP) && LASTHIT(victim) == GET_IDNUM(f->follower))
+        ch->followers.for_each([&](auto f) {
+            if (AFF_FLAGGED(f, AFF_GROUP) && LASTHIT(victim) == GET_IDNUM(f))
             {
                 checkit = true;
             }
-        }
+        });
         if (checkit == false && ch->master && GET_IDNUM(ch->master) == LASTHIT(victim))
         {
             checkit = true;
@@ -2686,16 +2678,15 @@ static void perform_group_gain(Character *ch, int base, Character *victim)
         if (checkit == false && ch->master)
         {
             Character *master = ch->master;
-            for (f = master->followers; f; f = f->next)
-            {
-                if (f->follower != ch)
+            master->followers.for_each([&](Character* f) {
+                if (f != ch)
                 {
-                    if (AFF_FLAGGED(f->follower, AFF_GROUP) && LASTHIT(victim) == GET_IDNUM(f->follower))
+                    if (AFF_FLAGGED(f, AFF_GROUP) && LASTHIT(victim) == GET_IDNUM(f))
                     {
                         checkit = true;
                     }
                 }
-            }
+            });
         }
         if (checkit == false)
         {
@@ -2843,20 +2834,22 @@ void group_gain(Character *ch, Character *victim)
         tot_members = 0;
     }
 
-    for (f = k->followers; f; f = f->next)
-        if (AFF_FLAGGED(f->follower, AFF_GROUP) && f->follower->location == ch->location)
+    k->followers.for_each([&](Character* f) {
+        if (AFF_FLAGGED(f, AFF_GROUP) && f->location == ch->location)
         {
-            if (!IS_WEIGHTED(f->follower))
+            if (!IS_WEIGHTED(f))
             {
-                tot_levels += GET_LEVEL(f->follower);
+                tot_levels += GET_LEVEL(f);
                 tot_members++;
             }
-            else if ((f->follower->getEffectiveStat<int64_t>("health")) >= (ch->getEffectiveStat<int64_t>("health")) * 0.5)
+            else if ((f->getEffectiveStat<int64_t>("health")) >= (ch->getEffectiveStat<int64_t>("health")) * 0.5)
             {
-                tot_levels += GET_LEVEL(f->follower);
+                tot_levels += GET_LEVEL(f);
                 tot_members++;
             }
         }
+    });
+        
 
     if (tot_members == 1 || IN_ARENA(ch))
     {
@@ -2903,14 +2896,13 @@ void group_gain(Character *ch, Character *victim)
      */
     perform_group_gain(k, base, victim);
 
-    for (f = k->followers; f; f = f->next)
-    {
-        if (AFF_FLAGGED(f->follower, AFF_GROUP) && f->follower->location == ch->location)
+    k->followers.for_each([&](auto f) {
+        if (AFF_FLAGGED(f, AFF_GROUP) && f->location == ch->location)
         {
             // if ((f->follower->getEffMaxPL()) >= GET_MAX_HIT(ch) * 0.5)
-            perform_group_gain(f->follower, base, victim);
+            perform_group_gain(f, base, victim);
         }
-    }
+    });
 }
 
 void solo_gain(Character *ch, Character *victim)

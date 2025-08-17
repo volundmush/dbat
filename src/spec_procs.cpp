@@ -84,7 +84,7 @@ int num_players_in_room(room_vnum room)
         return 0;
 
     int num_players = 0;
-    auto p = r->getPeople();
+    auto p = r->getPeople().snapshot_weak();
     for (auto ch : filter_raw(p))
     {
         if (IS_NPC(ch))
@@ -100,7 +100,7 @@ bool check_mob_in_room(mob_vnum mob, room_vnum room)
 {
     if (auto r = get_room(room); r)
     {
-        auto p = r->getPeople();
+        auto p = r->getPeople().snapshot_weak();
         for (auto ch : filter_raw(p))
             if (ch->getVnum() == mob)
                 return true;
@@ -253,7 +253,7 @@ SPECIAL(gauntlet_room) /* Jamdog - 13th Feb 2006 */
                     nomob = true;
 
                     /* Check the next room for players and ensure mob is waiting */
-                    auto pg = get_room(real_room(gauntlet_info[i + 1][1]))->getPeople();
+                    auto pg = get_room(real_room(gauntlet_info[i + 1][1]))->getPeople().snapshot_weak();
                     for (auto tch : filter_raw(pg))
                     {
                         if (!IS_NPC(tch))
@@ -393,7 +393,7 @@ SPECIAL(gauntlet_rest) /* Jamdog - 20th Feb 2007 */
                 nomob = true;
 
                 /* Check the next room for players and ensure mob is waiting */
-                auto pg = get_room(real_room(gauntlet_info[i][1]))->getPeople();
+                auto pg = get_room(real_room(gauntlet_info[i][1]))->getPeople().snapshot_weak();
                 for (auto tch : filter_raw(pg))
                 {
                     if (!IS_NPC(tch))
@@ -472,7 +472,7 @@ SPECIAL(pet_shops)
     if (CMD_IS("list"))
     {
         ch->sendText("Available pets are:\r\n");
-        auto pcon = get_room(pet_room)->getPeople();
+        auto pcon = get_room(pet_room)->getPeople().snapshot_weak();
         for (auto pet : filter_raw(pcon))
         {
             /* No, you can't have the Implementor as a pet if he's in there. */
@@ -538,8 +538,8 @@ SPECIAL(auction)
 
     if (CMD_IS("cancel"))
     {
-        Destination des;
-        des.al = get_room(auct_room)->shared_from_this();
+        auto aroom = get_room(auct_room);
+        Destination des(aroom);
         auto con = des.getObjects();
         for (auto obj : filter_raw(con))
         {
@@ -591,8 +591,8 @@ SPECIAL(auction)
     {
         struct descriptor_data *d;
         int founded = false;
-        Destination des;
-        des.al = get_room(auct_room)->shared_from_this();
+        auto aroom = get_room(auct_room);
+        Destination des(aroom);
         auto con = des.getObjects();
         for (auto obj : filter_raw(con))
         {
@@ -816,8 +816,8 @@ SPECIAL(healtank)
             act("@C$n@w steps inside the healing tank and puts on its breathing mask. A water like solution pours over $s body until the tank is full.@n",
                 true, ch, nullptr, nullptr, TO_ROOM);
             ch->player_flags.set(PLR_HEALT, true);
-            ch->sits = htank->shared();
-            htank->sitting = ch->shared();
+            ch->sits = htank->shared_from_this();
+            htank->sitting = ch->shared_from_this();
             objectSubscriptions.subscribe("healTankService", htank);
             return (true);
 

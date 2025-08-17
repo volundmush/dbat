@@ -2,8 +2,6 @@
 
 #include "structs.h"
 
-extern void handle_multi_merge(Character *form);
-
 extern void handle_songs(uint64_t heartPulse, double deltaTime);
 
 extern void fish_update(uint64_t heartPulse, double deltaTime);

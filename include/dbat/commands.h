@@ -953,6 +953,9 @@ extern DECCMD(do_mush_exit);
 // for administrating other fields...
 extern DECCMD(do_mush_location);
 extern DECCMD(do_mush_choices);
+extern DECCMD(do_mush_room);
+extern DECCMD(do_mush_area);
+extern DECCMD(do_mush_structure);
 
 extern DECCMD(do_say);
 

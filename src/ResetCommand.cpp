@@ -326,9 +326,9 @@ static bool resetTrigger(Location &loc, SpawnRegistry &reg, trig_vnum target, in
     }
     case UnitType::room:
     {   
-        if(auto a = loc.al.lock())
+        if(auto a = loc.getLoc())
         {
-            if (auto r = dynamic_cast<Room*>(a.get()))
+            if (auto r = dynamic_cast<Room*>(a))
             {
                 add_trigger(r, read_trigger(target), -1);
                 return true;
@@ -364,9 +364,9 @@ static bool resetVariable(Location &loc, SpawnRegistry &reg, int extype, const s
     }
     case UnitType::room:
     {
-        if(auto a = loc.al.lock())
+        if(auto a = loc.getLoc())
         {
-            if (auto r = dynamic_cast<Room *>(a.get()))
+            if (auto r = dynamic_cast<Room *>(a))
             {
                 r->setVariable(key, value);
                 return true;

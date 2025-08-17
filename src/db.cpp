@@ -67,13 +67,9 @@ struct config_data config_info; /* Game configuration list.    */
 
 // The global database of entities.
 
-NegativeKeyGuardMap<room_vnum, std::shared_ptr<Room>> world;
 NegativeKeyGuardUnorderedMap<int64_t, std::shared_ptr<Area>> areas;
 NegativeKeyGuardUnorderedMap<int64_t, std::shared_ptr<Structure>> structures;
 NegativeKeyGuardUnorderedMap<int64_t, GridTemplate> gridTemplates;
-
-NegativeKeyGuardUnorderedMap<int64_t, std::shared_ptr<Character>> uniqueCharacters;
-NegativeKeyGuardUnorderedMap<int64_t, std::shared_ptr<Object>> uniqueObjects;
 
 Character *affect_list = nullptr; /* global linked list of chars with affects */
 Character *affectv_list = nullptr; /* global linked list of chars with round-based affects */
@@ -93,9 +89,9 @@ NegativeKeyGuardMap<int64_t, struct descriptor_data*> sessions;
 
 std::vector<std::weak_ptr<Character>> getAllCharacters() {
     std::vector<std::weak_ptr<Character>> out;
-    out.reserve(uniqueCharacters.size());
+    out.reserve(Character::registry.size());
 
-    for(const auto&[id, ent] : uniqueCharacters)
+    for(const auto&[id, ent] : Character::registry)
         out.emplace_back(ent);
 
     return out;
@@ -103,16 +99,16 @@ std::vector<std::weak_ptr<Character>> getAllCharacters() {
 
 std::vector<std::weak_ptr<Object>> getAllObjects() {
     std::vector<std::weak_ptr<Object>> out;
-    out.reserve(uniqueObjects.size());
+    out.reserve(Object::registry.size());
 
-    for(const auto&[id, ent] : uniqueObjects)
+    for(const auto&[id, ent] : Object::registry)
         out.emplace_back(ent);
 
     return out;
 }
 
 Room* get_room(room_vnum vn) {
-    if(auto it = world.find(vn); it != world.end())
+    if(auto it = Room::registry.find(vn); it != Room::registry.end())
         return it->second.get();
     return nullptr;
 }
@@ -120,19 +116,19 @@ Room* get_room(room_vnum vn) {
 int dg_owner_purged;            /* For control of scripts */
 
 void destroy_db() {
-    for(auto &[id, ent] : uniqueCharacters) {
+    for(auto &[id, ent] : Character::registry) {
         if(ent) ent->deactivate();
     }
-    uniqueCharacters.clear();
-    for(auto &[id, ent] : uniqueObjects) {
+    Character::registry.clear();
+    for(auto &[id, ent] : Object::registry) {
         if(ent) ent->deactivate();
     }
-    uniqueObjects.clear();
+    Object::registry.clear();
 
-    for(auto &[id, ent] : world) {
+    for(auto &[id, ent] : Room::registry) {
         if(ent) ent->deactivate();
     }
-    world.clear();
+    Room::registry.clear();
     
 }
 
@@ -299,14 +295,14 @@ ACMD(do_reboot) {
 
 static void db_load_activate_entities() {
     // activate all items which ended up "in the world".
-    for(auto &[id, r] : world) {
+    for(auto &[id, r] : Room::registry) {
         assign_triggers(r.get(), WLD_TRIGGER);
         r->activateScripts();
-        auto con = r->getObjects();
+        auto con = r->getObjects().snapshot_weak();
         for(auto o : filter_raw(con)) {
             o->activate();
         }
-        auto people = r->getPeople();
+        auto people = r->getPeople().snapshot_weak();
         for(auto c : filter_raw(people)) {
             if(IS_NPC(c)) {
                 c->activate();
@@ -602,7 +598,7 @@ void auc_save() {
     if ((fl = fopen(AUCTION_FILE, "w")) == nullptr)
         basic_mud_log("SYSERR: Can't write to '%s' auction file.", AUCTION_FILE);
     else {
-        auto con = get_room(80)->getObjects();
+        auto con = get_room(80)->getObjects().snapshot_weak();
         for (auto obj : filter_raw(con)) {
             fprintf(fl, "%ld %s %ld %ld %d %d %ld\n", obj->id, GET_AUCTERN(obj), GET_AUCTER(obj),
                         GET_CURBID(obj), GET_STARTBID(obj), GET_BID(obj), GET_AUCTIME(obj));
@@ -867,8 +863,8 @@ Character *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
     auto mob = sh.get();
 
     *mob = proto->second;
-    mob->id = getNextID(lastCharacterID, uniqueCharacters);
-    uniqueCharacters.emplace(mob->id, sh);
+    mob->id = getNextID(lastCharacterID, Character::registry);
+    Character::registry.emplace(mob->id, sh);
 
     mob->activate();
 
@@ -1407,8 +1403,8 @@ char *sprintuniques(int low, int high) {
 /* create an object, and add it to the object list */
 Object *create_obj() {
     auto sh = std::make_shared<Object>();
-    sh->id = getNextID(lastObjectID, uniqueObjects);
-    uniqueObjects.emplace(sh->id, sh);
+    sh->id = getNextID(lastObjectID, Object::registry);
+    Object::registry.emplace(sh->id, sh);
     sh->activate();
     assign_triggers(sh.get(), OBJ_TRIGGER);
     return sh.get();
@@ -1433,8 +1429,8 @@ Object *read_object(obj_vnum nr, int type) /* and obj_rnum */
     *obj = proto->second;
 
     OBJ_LOADROOM(obj) = NOWHERE;
-    obj->id = getNextID(lastObjectID, uniqueObjects);
-    uniqueObjects.emplace(obj->id, sh);
+    obj->id = getNextID(lastObjectID, Object::registry);
+    Object::registry.emplace(obj->id, sh);
 
     
     if (nr == 65) {
@@ -1517,24 +1513,21 @@ void Zone::reset()
 
     if (!pre_reset(number))
     {
-        auto rms = rooms.snapshot_weak();
-        for(auto r : filter_raw(rms)) {
+        rooms.for_each([](auto r) {
             if(auto commands = r->resetCommands; !commands.empty()) {
                 Location l(r);
                 l.executeResetCommands(commands);
             }
-        }
-        for(auto r : filter_raw(rms)) {
+        });
+
+        rooms.for_each([](auto r) {
             reset_wtrigger(r);
-        }
+        });
         
     }
 
-    // TODO: Split this off into subscriptions.
-    auto rms = rooms.snapshot_weak();
-    for (auto r : filter_raw(rms))
-    {
-
+    // TODO: Split this off into a function or something based off Location...
+    rooms.for_each([](auto r) {
         if (r->room_flags.get(ROOM_AURA) && rand_number(1, 5) >= 4)
         {
             r->sendText("The aura of regeneration covering the surrounding area disappears.\r\n");
@@ -1568,7 +1561,7 @@ void Zone::reset()
             r->sendText("The water has cooled the lava and it has become solid rock.\r\n");
             r->ground_effect = 0;
         }
-    }
+    });
 }
 
 void repairRoomDamage(uint64_t heartPulse, double deltaTime) {
@@ -1641,17 +1634,6 @@ char *fread_string(FILE *fl, const char *error) {
     return (strlen(buf) ? strdup(buf) : nullptr);
 }
 
-/* Called to free all allocated follow_type structs - Update by Jamie Nelson */
-void free_followers(struct follow_type *k) {
-    if (!k)
-        return;
-
-    if (k->next)
-        free_followers(k->next);
-
-    k->follower = nullptr;
-    free(k);
-}
 
 /*
  * Steps:
@@ -1707,7 +1689,7 @@ static int file_to_string(const char *name, char *buf) {
 void reset_char(Character *ch) {
     int i;
 
-    ch->followers = nullptr;
+    ch->followers.clear();
     ch->master = nullptr;
     FIGHTING(ch) = nullptr;
     ch->setBaseStat("position", POS_STANDING);
@@ -1760,7 +1742,7 @@ void init_char(Character *ch) {
 
 /* returns the real number of the room with given virtual number */
 room_rnum real_room(room_vnum vnum) {
-    return world.contains(vnum) ? vnum : NOWHERE;
+    return Room::registry.contains(vnum) ? vnum : NOWHERE;
 }
 
 
@@ -2234,19 +2216,19 @@ std::shared_ptr<HasDgScripts> resolveUID(const std::string& uid) {
 
     if(letter == "R") {
         // Room
-        if(auto find = world.find(id); find != world.end()) {
+        if(auto find = Room::registry.find(id); find != Room::registry.end()) {
             if(active && !find->second->isActive()) return nullptr;
             return find->second;
         }
     } else if(letter == "O") {
         // Object
-        if(auto find = uniqueObjects.find(id); find != uniqueObjects.end()) {
+        if(auto find = Object::registry.find(id); find != Object::registry.end()) {
             if(active && !find->second->isActive()) return nullptr;
             return find->second;
         }
     } else if(letter == "C") {
         // Character
-        if(auto find = uniqueCharacters.find(id); find != uniqueCharacters.end()) {
+        if(auto find = Character::registry.find(id); find != Character::registry.end()) {
             if(active && !find->second->isActive()) return nullptr;
             return find->second;
         }
@@ -2257,72 +2239,12 @@ std::shared_ptr<HasDgScripts> resolveUID(const std::string& uid) {
 
 std::regex parseRangeRegex(R"(^(\d+)(-(\d+))?$)", std::regex::icase);
 
-static std::regex lid_regex(R"(^(R|A|S):(\d+)(:(\d+):(\d+):(\d+))?)", std::regex::icase);
-
-bool isLocID(const std::string& lid) {
-    return std::regex_match(lid, lid_regex);
-}
-
-Location resolveLocID(const std::string& lid) {
-    // First we need to check if it matches or not.
-    std::smatch match;
-
-    Location out;
-
-    auto trimmed = boost::trim_copy(lid);
-
-    if(is_number(trimmed.c_str()))
-        if(auto i = atoi(trimmed.c_str()); i != -1) {
-            // we were given a plain number. this could be a room.
-            if(auto find = world.find(i); find != world.end()) {
-                out.al = find->second;
-                return out;
-            }
-        }
-
-    if(!std::regex_search(trimmed, match, lid_regex)) {
-        return out;
-    }
-
-    std::string letter = match[1].str();// First capture group
-    int64_t id = std::stoll(match[2].str()); // Second capture group
-    std::string xStr = match[4].str();
-    std::string yStr = match[5].str();
-    std::string zStr = match[6].str();
-
-    if(!xStr.empty()) out.position.x = atoi(xStr.c_str());
-    if(!yStr.empty()) out.position.y = atoi(yStr.c_str());
-    if(!zStr.empty()) out.position.z = atoi(zStr.c_str());
-
-    if(letter == "R") {
-        // Room
-        if(auto find = world.find(id); find != world.end()) {
-            out.al = find->second;
-            return out;
-        }
-    } else if(letter == "A") {
-        // Area.
-        if(auto find = areas.find(id); find != areas.end()) {
-            out.al = find->second;
-            return out;
-        }
-    } else if(letter == "S") {
-        // Structure
-        if(auto find = structures.find(id); find != structures.end()) {
-            out.al = find->second;
-            return out;
-        }
-    }
-
-    return out;
-}
-
 int create_join_session(int account_id, int character_id, int64_t connection_id, const std::string& ip) {
     auto acc_found = accounts.find(account_id);
     if(acc_found == accounts.end()) return -1;
     auto &acc = acc_found->second;
-    auto ch_found = uniqueCharacters.find(character_id);
-    if(ch_found == uniqueCharacters.end()) return -1;
+    auto ch_found = Character::registry.find(character_id);
+    if(ch_found == Character::registry.end()) return -1;
     auto &ch = ch_found->second;
     ch->player_flags.set(PLR_NOTDEADYET, false);
     auto exist_sess = sessions.find(character_id);

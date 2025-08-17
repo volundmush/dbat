@@ -920,7 +920,35 @@ struct WeakBag {
     void for_each(F&& f, bool do_prune = true) {
         for (auto it = items.begin(); it != items.end(); ) {
             if (auto sp = it->lock()) {
-                f(sp.get(), sp);      // pass raw* and shared_ptr<T>
+                f(sp.get());      // pass raw* and shared_ptr<T>
+                ++it;
+            } else if (do_prune) {
+                it = items.erase(it);
+            } else {
+                ++it;
+            }
+        }
+    }
+
+    // cannot prune, but allows iteration and removals simultaneously.
+    template <class F>
+    void for_each_safe(F&& f) {
+        auto safe_items = items;
+        for (auto it = safe_items.begin(); it != safe_items.end(); ) {
+            if (auto sp = it->lock()) {
+                f(sp.get());      // pass raw* and shared_ptr<T>
+                ++it;
+            } else {
+                ++it;
+            }
+        }
+    }
+
+    template <class F>
+    void for_each_shared(F&& f, bool do_prune = true) {
+        for (auto it = items.begin(); it != items.end(); ) {
+            if (auto sp = it->lock()) {
+                f(sp);      // pass raw* and shared_ptr<T>
                 ++it;
             } else if (do_prune) {
                 it = items.erase(it);
@@ -977,6 +1005,106 @@ struct WeakBag {
         }
         return true;
     }
+
+    void clear() {
+        items.clear();
+    }
+
+    operator bool() const {
+        return !empty();
+    }
+
+    T* head() const {
+        for (const auto& w : items) {
+            if (auto sp = w.lock()) return sp.get();
+        }
+        return nullptr;
+    }
 };
 
 
+template<class T, class Id = int64_t>
+struct Handle {
+    Id id{NOTHING}; // stable identifier
+    mutable std::weak_ptr<T> cache;          // lazily filled
+
+    // Lock the handle: fast if cache live, else resolve from the registry.
+    std::shared_ptr<T> lock() const {
+        if (auto sp = cache.lock()) return sp;
+        if(auto found = T::registry.find(id); found != T::registry.end()) {
+            auto sp = found->second; // your global registry API
+            cache = sp;  // cache for next time
+            return sp;
+        }
+        return {};
+    }
+
+    void reset() {
+        cache.reset();
+        id = NOTHING;
+    }
+
+    bool empty() const { return !lock(); }
+
+    operator bool() const {
+        return lock() ? true : false;
+    }
+
+    Handle<T, Id>& operator=(const std::shared_ptr<T>& sp) {
+        if(sp) {
+            cache = sp;
+            id = sp->id;
+        } else {
+            cache.reset();
+            id = NOTHING;
+        }
+        return *this;
+    }
+
+    Handle<T, Id>& operator=(const Handle<T, Id>& other) {
+        if (this != &other) {
+            id = other.id;
+            cache = other.cache;
+        }
+        return *this;
+    }
+
+    Handle<T, Id>& operator=(T* other) {
+        if(other) {
+            cache = other->shared_from_this();
+            id = other->id;
+        } else {
+            cache.reset();
+            id = NOTHING;
+        }
+        return *this;
+    }
+
+    Handle<T, Id>& operator=(Id newId) {
+        id = newId;
+        cache.reset();
+        return *this;
+    }
+
+    bool operator==(Id otherId) const {
+        return id == otherId;
+    }
+
+    bool operator==(T* other) const {
+        if (auto sp = lock()) {
+            return sp.get() == other;
+        }
+        return false;
+    }
+
+    bool operator==(const std::shared_ptr<T>& other) const {
+        if (auto sp = lock()) {
+            return sp == other;
+        }
+        return false;
+    }
+};
+
+using CharacterHandle = Handle<Character>;
+using ObjectHandle = Handle<Object>;
+using RoomHandle = Handle<Room, int>;

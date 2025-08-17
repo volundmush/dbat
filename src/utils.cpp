@@ -58,17 +58,14 @@ void dispel_ash(Character *ch)
 int has_group(Character *ch)
 {
 
-    struct follow_type *k, *next;
-
     if (!AFF_FLAGGED(ch, AFF_GROUP))
         return (false);
 
-    if (ch->followers)
+    if (auto foll = ch->followers.snapshot_shared(); !foll.empty())
     {
-        for (k = ch->followers; k; k = next)
+        for (auto k : foll)
         {
-            next = k->next;
-            if (!AFF_FLAGGED(k->follower, AFF_GROUP))
+            if (!k->affect_flags.get(AFF_GROUP))
             {
                 continue;
             }
@@ -95,7 +92,7 @@ const char *report_party_health(Character *ch)
     if (!ch->followers && !ch->master)
         return ("");
 
-    struct follow_type *k, *next;
+
     int count = 0, stam1 = 8, stam2 = 8, stam3 = 8, stam4 = 8, plc1 = 4, plc2 = 4, plc3 = 4, plc4 = 4;
     Character *party1 = nullptr, *party2 = nullptr, *party3 = nullptr, *party4 = nullptr;
     int64_t plperc1 = 0, plperc2 = 0, plperc3 = 0, plperc4 = 0;
@@ -127,20 +124,19 @@ const char *report_party_health(Character *ch)
                             "@G", /* 6/7 */
                             "@g", /* 7/7 */
                             "@w"};
-
-    if (ch->followers)
+    
+    if (auto foll = ch->followers.snapshot_weak(); !foll.empty())
     {
-        for (k = ch->followers; k; k = next)
+        for (auto k : filter_raw(foll))
         {
-            next = k->next;
-            if (!AFF_FLAGGED(k->follower, AFF_GROUP))
+            if (!AFF_FLAGGED(k, AFF_GROUP))
                 continue;
-            if (k->follower != ch)
+            if (k != ch)
             {
                 count += 1;
                 if (count == 1)
                 {
-                    party1 = k->follower;
+                    party1 = k;
                     plperc1 = (GET_HIT(party1) * 100) / GET_MAX_HIT(party1);
                     kiperc1 = (GET_CHARGE(party1) * 100) / GET_MAX_MANA(party1);
 
@@ -188,7 +184,7 @@ const char *report_party_health(Character *ch)
                 }
                 else if (count == 2)
                 {
-                    party2 = k->follower;
+                    party2 = k;
                     plperc2 = (GET_HIT(party2) * 100) / GET_MAX_HIT(party2);
                     kiperc2 = (GET_CHARGE(party2) * 100) / GET_MAX_MANA(party2);
 
@@ -236,7 +232,7 @@ const char *report_party_health(Character *ch)
                 }
                 else if (count == 3)
                 {
-                    party3 = k->follower;
+                    party3 = k;
                     plperc3 = (GET_HIT(party3) * 100) / GET_MAX_HIT(party3);
                     kiperc3 = (GET_CHARGE(party3) * 100) / GET_MAX_MANA(party3);
 
@@ -284,7 +280,7 @@ const char *report_party_health(Character *ch)
                 }
                 else if (count == 4)
                 {
-                    party4 = k->follower;
+                    party4 = k;
                     plperc4 = (GET_HIT(party4) * 100) / GET_MAX_HIT(party4);
                     kiperc4 = (GET_CHARGE(party4) * 100) / GET_MAX_MANA(party4);
 
@@ -401,17 +397,17 @@ const char *report_party_health(Character *ch)
         }
         count = 1;
 
-        for (k = party1->followers; k; k = next)
+        if(auto pfoll = party1->followers.snapshot_weak(); !pfoll.empty())
+        for (auto k : filter_raw(pfoll))
         {
-            next = k->next;
-            if (!AFF_FLAGGED(k->follower, AFF_GROUP))
+            if (!AFF_FLAGGED(k, AFF_GROUP))
                 continue;
-            if (k->follower != ch)
+            if (k != ch)
             {
                 count += 1;
                 if (count == 2)
                 {
-                    party2 = k->follower;
+                    party2 = k;
                     plperc2 = (GET_HIT(party2) * 100) / GET_MAX_HIT(party2);
                     kiperc2 = (GET_CHARGE(party2) * 100) / GET_MAX_MANA(party2);
 
@@ -459,7 +455,7 @@ const char *report_party_health(Character *ch)
                 }
                 else if (count == 3)
                 {
-                    party3 = k->follower;
+                    party3 = k;
                     plperc3 = (GET_HIT(party3) * 100) / GET_MAX_HIT(party3);
                     kiperc3 = (GET_CHARGE(party3) * 100) / GET_MAX_MANA(party3);
 
@@ -507,7 +503,7 @@ const char *report_party_health(Character *ch)
                 }
                 else if (count == 4)
                 {
-                    party4 = k->follower;
+                    party4 = k;
                     plperc4 = (GET_HIT(party4) * 100) / GET_MAX_HIT(party4);
                     kiperc4 = (GET_CHARGE(party4) * 100) / GET_MAX_MANA(party4);
 
@@ -939,30 +935,25 @@ int roll_pursue(Character *ch, Character *vict)
     {
         act("@C$n@R pursues after the fleeing @c$N@R!@n", true, ch, nullptr, vict, TO_NOTVICT);
         ch->leaveLocation();
-        ch->moveToLocation(vict);
+        ch->moveToLocation(vict->location);
         act("@GYou pursue right after @c$N@G!@n", true, ch, nullptr, vict, TO_CHAR);
         act("@C$n@R pursues after you!@n", true, ch, nullptr, vict, TO_VICT);
         act("@C$n@R pursues after the fleeing @c$N@R!@n", true, ch, nullptr, vict, TO_NOTVICT);
 
         struct follow_type *k, *next;
-
-        if (ch->followers)
-        {
-            for (k = ch->followers; k; k = next)
-            {
-                next = k->next;
-                if ((k->follower->location == ch->location) && (GET_POS(k->follower) >= POS_STANDING) &&
+        
+        ch->followers.for_each([&](Character* k) {
+            if ((k->location == ch->location) && (GET_POS(k) >= POS_STANDING) &&
                     (!AFF_FLAGGED(ch, AFF_ZANZOKEN) ||
-                     (AFF_FLAGGED(ch, AFF_GROUP) && AFF_FLAGGED(k->follower, AFF_GROUP))))
+                     (AFF_FLAGGED(ch, AFF_GROUP) && AFF_FLAGGED(k, AFF_GROUP))))
                 {
-                    act("You follow $N.", true, k->follower, nullptr, ch, TO_CHAR);
-                    act("$n follows after $N.", true, k->follower, nullptr, ch, TO_NOTVICT);
-                    act("$n follows after you.", true, k->follower, nullptr, ch, TO_VICT);
-                    k->follower->leaveLocation();
-                    k->follower->moveToLocation(ch);
+                    act("You follow $N.", true, k, nullptr, ch, TO_CHAR);
+                    act("$n follows after $N.", true, k, nullptr, ch, TO_NOTVICT);
+                    act("$n follows after you.", true, k, nullptr, ch, TO_VICT);
+                    k->leaveLocation();
+                    k->moveToLocation(ch->location);
                 }
-            }
-        }
+        });
         vict->affect_flags.set(AFF_PURSUIT, false);
         return (true);
     }
@@ -2858,23 +2849,8 @@ void stop_follower(Character *ch)
 
     if (has_group(ch))
         ch->setBaseStat<int>("group_kills", 0);
-
-    if (ch->master->followers->follower == ch)
-    { /* Head of follower-list? */
-        k = ch->master->followers;
-        ch->master->followers = k->next;
-        free(k);
-    }
-    else
-    { /* locate follower who is not head of list */
-        for (k = ch->master->followers; k->next->follower != ch; k = k->next)
-            ;
-
-        j = k->next;
-        k->next = j->next;
-        free(j);
-    }
-
+    
+    ch->master->followers.remove(ch->shared_from_this());
     ch->master = nullptr;
 }
 
@@ -2884,57 +2860,41 @@ int num_followers_charmed(Character *ch)
     int total = 0;
 
     /* Summoned creatures don't count against total */
-    for (lackey = ch->followers; lackey; lackey = lackey->next)
-        if (AFF_FLAGGED(lackey->follower, AFF_CHARM) &&
-            !AFF_FLAGGED(lackey->follower, AFF_SUMMONED) &&
-            lackey->follower->master == ch)
+    ch->followers.for_each([&](auto lackey) {
+        if (AFF_FLAGGED(lackey, AFF_CHARM) &&
+            !AFF_FLAGGED(lackey, AFF_SUMMONED) &&
+            lackey->master == ch)
             total++;
+    });
 
     return (total);
 }
 
 void switch_leader(Character *old, Character *new_leader)
 {
-    struct follow_type *f;
-    Character *tch = nullptr;
-
-    for (f = old->followers; f; f = f->next)
-    {
-        if (f->follower == new_leader)
-        {
-            tch = new_leader;
-            stop_follower(tch);
-        }
-        if (f->follower != new_leader)
-        {
-            tch = f->follower;
-            stop_follower(tch);
-            add_follower(tch, new_leader);
-        }
-    }
+    auto grabFollowers = old->followers;
+    grabFollowers.remove(new_leader->shared_from_this());
+    grabFollowers.add(old->shared_from_this());
+    grabFollowers.for_each([&](auto f) {
+        f->master = new_leader;
+    });
+    old->followers.clear();
+    new_leader->followers = std::move(grabFollowers);
 }
 
 /* Called when a character that follows/is followed dies */
 void die_follower(Character *ch)
 {
-    struct follow_type *j, *k;
 
     if (ch->master)
         stop_follower(ch);
-
-    for (k = ch->followers; k; k = j)
-    {
-        j = k->next;
-        stop_follower(k->follower);
-    }
+    ch->followers.for_each_safe([&](Character* k) {stop_follower(k);});
 }
 
 /* Do NOT call this before having checked if a circle of followers */
 /* will arise. CH will follow leader                               */
 void add_follower(Character *ch, Character *leader)
 {
-    struct follow_type *k;
-
     if (ch->master)
     {
         core_dump();
@@ -2943,11 +2903,7 @@ void add_follower(Character *ch, Character *leader)
 
     ch->master = leader;
 
-    CREATE(k, struct follow_type, 1);
-
-    k->follower = ch;
-    k->next = leader->followers;
-    leader->followers = k;
+    leader->followers.add(ch->shared_from_this());
 
     act("You now follow $N.", false, ch, nullptr, leader, TO_CHAR);
     if (IN_ROOM(ch) != NOWHERE && IN_ROOM(leader) != NOWHERE && CAN_SEE(leader, ch))
@@ -3661,7 +3617,7 @@ Result<std::string> validateZoneName(std::string_view arg, bool checkExists, zon
 
 Result<Room*> getRoom(std::string_view arg, Character* ch) {
     if(boost::iequals(arg, "here")) {
-        if(auto r = dynamic_cast<Room*>(ch->location.al.lock().get())) {
+        if(auto r = dynamic_cast<Room*>(ch->location.getLoc())) {
             return Ok(r);
         }
         return Err("You are not in a Room.\r\n");
@@ -3669,7 +3625,7 @@ Result<Room*> getRoom(std::string_view arg, Character* ch) {
     auto res = parseNumber(arg, "Room ID");
     if (!res) return Err(res.err);
 
-    if (auto room = world.find(res.value()); room != world.end()) {
+    if (auto room = Room::registry.find(res.value()); room != Room::registry.end()) {
         auto r = room->second.get();
         return Ok(r);
     }
@@ -3684,7 +3640,7 @@ Result<Location> getLocation(std::string_view arg, Character* ch) {
         }
         return Err("You are not in a Location, somehow. How the hell did that happen?\r\n");
     }
-    if(auto res = resolveLocID(std::string(arg))) {
+    if(auto res = Location(std::string(arg))) {
         return Ok(res);
     }
     return Err("Location {} does not exist.\r\n", arg);

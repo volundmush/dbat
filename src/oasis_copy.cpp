@@ -318,9 +318,8 @@ ACMD(do_dig)
      */
 
     auto droom = get_room(rrnum);
-    Destination dest;
+    Destination dest(droom);
     dest.dir = direction;
-    dest.al = droom->shared_from_this();
     ch->location.replaceExit(dest);
 
     ch->send_to("You make an exit %s to room %d (%s).\r\n", dirs[dir], rvnum, droom->getName());
@@ -336,9 +335,8 @@ ACMD(do_dig)
         ch->send_to("You cannot dig from %d to here. The target room already has an exit to the %s.\r\n", rvnum, dirs[rev_dir[dir]]);
     else
     {
-        Destination dest2;
+        Destination dest2(r2);
         dest2.dir = rdir;
-        dest2.al = r2->shared_from_this();
         dest.replaceExit(dest2);
     }
 }
@@ -428,5 +426,5 @@ ACMD(do_rcopy)
 room_vnum redit_find_new_vnum(zone_rnum zone)
 {
     static int lastRoomID = 0;
-    return getNextID(lastRoomID, world);
+    return getNextID(lastRoomID, Room::registry);
 }

@@ -691,7 +691,7 @@ static void boot_the_shops(FILE *shop_f, char *filename, int rec_count) {
             while(true) {
                 read_line(shop_f, "%d", &shop_temp);
                 if(shop_temp == -1) break;
-                if(world.contains(shop_temp)) sh.in_room.insert(shop_temp);
+                if(Room::registry.contains(shop_temp)) sh.in_room.insert(shop_temp);
 
             }
 
@@ -992,14 +992,14 @@ static void parse_room(FILE *fl, room_vnum virtual_nr) {
         exit(1);
     }
 
-    if(world.count(virtual_nr)) {
+    if(Room::registry.count(virtual_nr)) {
         basic_mud_log("SYSERR: Room #%d already exists, cannot parse!", virtual_nr);
         exit(1);
     }
     auto &z = zone_table.at(zone);
     auto sh = std::make_shared<Room>();
     auto r = sh.get();
-    world.emplace(virtual_nr, sh);
+    Room::registry.emplace(virtual_nr, sh);
     z.rooms.add(sh);
 
     r->zone.reset(&z);
@@ -2910,7 +2910,7 @@ int House_load(room_vnum rvnum) {
     struct extra_descr_data *new_descr;
     room_rnum rrnum = rvnum;
 
-    if (!world.contains(rvnum))
+    if (!Room::registry.contains(rvnum))
         return 0;
 
     if (!House_get_filename(rvnum, cmfname, sizeof(cmfname)))
@@ -3142,7 +3142,7 @@ void House_boot() {
         if (feof(fl))
             break;
 
-        if (world.contains(temp_house.vn))
+        if (Room::registry.contains(temp_house.vn))
             House_load(temp_house.vn);
     }
 
@@ -3152,7 +3152,7 @@ void House_boot() {
 static void link_exits() {
     for (const auto& [room, dir, target] : room_directions) {
         if(auto r = get_room(target))
-            room->exits.at(dir).al = r->shared_from_this();
+            room->exits.at(dir) = r;
     }
 }
 
@@ -3449,9 +3449,9 @@ static void link_zones() {
                 basic_mud_log("Warning: zone %d listed as child of %s but does not exist.", cvn, zt.name.c_str());
             }
         }
-        if(auto oloc = resolveLocID(zt.orbit)) {
+        if(auto oloc = Location(zt.orbit)) {
             z.launchDestination = oloc.getLocID();
-            if(auto r = dynamic_cast<Room*>(oloc.al.lock().get())) {
+            if(auto r = dynamic_cast<Room*>(oloc.getLoc())) {
                 auto oldz = r->getZone();
                 oldz->rooms.remove(r->shared_from_this());
                 r->zone.reset(&z);
@@ -3561,19 +3561,7 @@ static void create_area() {
     a->vn = 1;
     areas[a->vn] = a;
     a->strings["name"] = "Test Area";
-    a->defaultGroundSector = SectorType::inside;
-    a->defaultUnderSector = SectorType::lava;
-    a->defaultSkySector = SectorType::flying;
-    a->minX = -3;
-    a->maxX = 3;
-    a->minY = -3;
-    a->maxY = 3;
-    a->minZ = -3;
-    a->maxZ = 3;
-    Destination d;
-    d.al = get_room(300)->shared_from_this();
-    d.dir = Direction::north;
-    a->replaceExit({0,0,0}, d);
+
 
     auto &z = zone_table[1];
     a->zone.reset(&z);
@@ -3769,7 +3757,7 @@ void migrate_characters() {
         auto ch = sh.get();
         ch->isPC = true;
         convert_character(ch);
-        auto id = getNextID(lastCharacterID, uniqueCharacters);
+        auto id = getNextID(lastCharacterID, Character::registry);
         auto &p = players[id];
         p.id = id;
         ch->id = id;
@@ -3781,7 +3769,7 @@ void migrate_characters() {
         a.characters.emplace_back(ch->id);
         auto lroom = ch->getBaseStat<room_vnum>("load_room");
         ch->setBaseStat<room_vnum>("was_in_room", lroom);
-        uniqueCharacters.emplace(id, sh);
+        Character::registry.emplace(id, sh);
     }
 
     // migrate sense files...
@@ -4462,7 +4450,7 @@ void migrate_data() {
 
     basic_mud_log("Converting Item Instances...");
 
-    for(auto &[id, ent] : uniqueObjects) {
+    for(auto &[id, ent] : Object::registry) {
         migrate_obj_data(ent.get());
     }
 
@@ -4470,7 +4458,7 @@ void migrate_data() {
         //migrate_char_data(&ent);
     }
 
-    for(auto &[id, ent] : uniqueCharacters) {
+    for(auto &[id, ent] : Character::registry) {
         migrate_char_data(ent.get());
     }
 

@@ -617,7 +617,7 @@ ACMD(do_shuffle)
     }
     while (count > 0)
     {
-        auto con = get_room(48)->getObjects();
+        auto con = get_room(48)->getObjects().snapshot_weak();
         for (auto obj2 : filter_raw(con))
         {
             if (!OBJ_FLAGGED(obj2, ITEM_CARD))
@@ -3506,7 +3506,7 @@ static void display_room_damage_description(Room *rm, Character *ch)
 
 static void display_garden_info(Room *rm, Character *ch)
 {
-    auto con = rm->getObjects();
+    auto con = rm->getObjects().snapshot_weak();
     if (rm->room_flags.get(ROOM_GARDEN1))
     {
         ch->send_to("@D[@GPlants Planted@D: @g%d@W, @GMAX@D: @R8@D]@n\r\n", con.size());
@@ -3570,8 +3570,8 @@ void look_at_room(Room *rm, Character *ch, int ignore_brief)
     }
 
     display_garden_info(rm, ch);
-    list_obj_to_char(rm->getObjects(), ch, SHOW_OBJ_LONG, false);
-    list_char_to_char(rm->getPeople(), ch);
+    list_obj_to_char(rm->getObjects().snapshot_weak(), ch, SHOW_OBJ_LONG, false);
+    list_char_to_char(rm->getPeople().snapshot_weak(), ch);
 }
 
 static void look_in_direction(Character *ch, int dir)
@@ -3617,8 +3617,7 @@ static void handle_portal(Character *ch, Object *obj)
     {
         int portal_appear = GET_OBJ_VAL(obj, VAL_PORTAL_APPEAR);
 
-        Destination d;
-        d.al = get_room(GET_OBJ_VAL(obj, VAL_PORTAL_DEST))->shared_from_this();
+        Destination d(GET_OBJ_VAL(obj, VAL_PORTAL_DEST));
 
         if (portal_appear < 0)
         {
@@ -3650,8 +3649,7 @@ static void handle_vehicle(Character *ch, Object *obj)
         return;
     }
 
-    Destination d;
-    d.al = get_room(GET_OBJ_VAL(obj, VAL_VEHICLE_DEST))->shared_from_this();
+    Destination d(GET_OBJ_VAL(obj, VAL_VEHICLE_DEST));
 
     if (!d)
     {

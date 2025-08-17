@@ -796,12 +796,11 @@ ACMD(do_gsay)
                 act(blah, true, ch, nullptr, k, TO_VICT);
             }
         }
-        for (f = k->followers; f; f = f->next)
-            if (AFF_FLAGGED(f->follower, AFF_GROUP) && (f->follower != ch) && AWAKE(f->follower))
-            {
-                if (!IS_NPC(ch) && !IS_NPC(f->follower) && CONFIG_ENABLE_LANGUAGES)
+        k->followers.for_each([&](Character* f) {
+            if(!(AFF_FLAGGED(f, AFF_GROUP) && (f != ch) && AWAKE(f))) return;
+            if (!IS_NPC(ch) && !IS_NPC(f) && CONFIG_ENABLE_LANGUAGES)
                 {
-                    garble_text(buf, GET_SKILL(f->follower, SPEAKING(ch)), SPEAKING(ch));
+                    garble_text(buf, GET_SKILL(f, SPEAKING(ch)), SPEAKING(ch));
                 }
                 else
                 {
@@ -809,13 +808,13 @@ ACMD(do_gsay)
                 }
                 if (CONFIG_ENABLE_LANGUAGES)
                 {
-                    f->follower->send_to("%s@W tells the group%s @W'%s@W'@n\r\n", CAN_SEE(f->follower, ch) ? GET_NAME(ch) : "Someone", GET_SKILL(f->follower, SPEAKING(ch)) ? "," : ", in an unfamiliar tongue,", buf);
+                    f->send_to("%s@W tells the group%s @W'%s@W'@n\r\n", CAN_SEE(f, ch) ? GET_NAME(ch) : "Someone", GET_SKILL(f, SPEAKING(ch)) ? "," : ", in an unfamiliar tongue,", buf);
                 }
                 else
                 {
-                    act(blah, true, ch, nullptr, f->follower, TO_VICT | TO_SLEEP);
+                    act(blah, true, ch, nullptr, f, TO_VICT | TO_SLEEP);
                 }
-            }
+        });
 
         if (PRF_FLAGGED(ch, PRF_NOREPEAT))
             ch->send_to("%s", CONFIG_OK);
@@ -1014,8 +1013,8 @@ ACMD(do_reply)
          *      hear tells anyway. :) -gg 2/24/98
          */
 
-        auto find = uniqueCharacters.find(GET_LAST_TELL(ch));
-        if (find == uniqueCharacters.end())
+        auto find = Character::registry.find(GET_LAST_TELL(ch));
+        if (find == Character::registry.end())
         {
             ch->sendText("They are no longer playing.\r\n");
         }

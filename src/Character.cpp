@@ -22,6 +22,8 @@
 #include "dbat/attack.h"
 #include "dbat/modifiers.h"
 
+NegativeKeyGuardUnorderedMap<int64_t, std::shared_ptr<Character>> Character::registry;
+
 Character::Character()
 {
     type = UnitType::character;
@@ -184,7 +186,13 @@ Character::~Character()
     while (affectedv)
         REMOVE_FROM_LIST(affectedv, this->affectedv, next, cmtemp);
 
-    free_followers(followers);
+    followers.for_each([&](auto f) {
+        if (f->master == this)
+        {
+            f->master = nullptr;
+        }
+    });
+    followers.clear();
 
     if (desc)
         desc->character = nullptr;
@@ -1706,4 +1714,29 @@ std::string Character::getLocationDisplayCategory(Character* viewer) const {
 
 void Character::displayLocationInfo(Character* viewer) {
     list_one_char(this, viewer);
+}
+
+static void handle_multi_merge(Character *form)
+{
+    Character *ch = GET_ORIGINAL(form);
+
+    if (!ch)
+    {
+        extract_char(form);
+        return;
+    }
+
+    ch->sendText("@YYou merge with one of your forms!@n\r\n");
+    act("@y$n@Y merges with one of his multiforms!@n\r\n", true, ch, nullptr, nullptr, TO_ROOM);
+
+    extract_char(form);
+}
+
+void Character::mergeClones() {
+    if (auto clo = clones)
+    {
+        clo.for_each([&](auto c) {
+            handle_multi_merge(c);
+        });
+    }
 }

@@ -370,7 +370,7 @@ constexpr double SECS_PER_GAME_YEAR = (SECS_PER_MONTH*MONTHS_PER_YEAR);
 #define PRF_FLAGS(ch)    ((ch)->pref)
 #define AFF_FLAGS(ch)    ((ch)->affect_flags)
 #define ADM_FLAGS(ch)    ((ch)->admflags)
-#define ROOM_FLAGS(loc)    (world.at((loc)).room_flags)
+#define ROOM_FLAGS(loc)    (Room::registry.at((loc)).room_flags)
 #define SPELL_ROUTINES(spl)    (spell_info[spl].routines)
 #define ZONE_FLAGS(rnum)       (zone_table.at((rnum)).zone_flags)
 #define ZONE_MINLVL(rnum)      (zone_table.at((rnum)).min_level)
@@ -441,7 +441,7 @@ extern bool OBJ_FLAGGED(Object *obj, int flag);
 #define IS_DARK(room)    room_is_dark((room))
 #define IS_LIGHT(room)  (!IS_DARK(room))
 
-#define VALID_ROOM_RNUM(rnum)    (world.contains(rnum) > 0 && rnum != NOWHERE)
+#define VALID_ROOM_RNUM(rnum)    (Room::registry.contains(rnum) > 0 && rnum != NOWHERE)
 #define GET_ROOM_VNUM(rnum) (VALID_ROOM_RNUM(rnum) ? (rnum) : NOWHERE)
 #define GET_ROOM_SPEC(room) \
     (VALID_ROOM_RNUM(room) ? get_room((room))->func : nullptr)

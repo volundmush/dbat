@@ -450,7 +450,7 @@ static void yearChanged()
 
 static void ageAllCharacters(double addedTime)
 {
-    for (const auto &[id, p] : uniqueCharacters)
+    for (const auto &[id, p] : Character::registry)
     {
         p->ageBy(addedTime);
     }

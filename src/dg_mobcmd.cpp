@@ -1315,7 +1315,7 @@ ACMD(do_mdoor)
             newexit->keyword = value;
             break;
         case 5: /* room        */
-            if (auto loc = resolveLocID(value)) {
+            if (auto loc = Location(value)) {
                 *newexit = loc;
             }
             else
@@ -1371,21 +1371,7 @@ ACMD(do_mfollow)
     /* stop following someone else first */
     if (ch->master)
     {
-        if (ch->master->followers->follower == ch)
-        { /* Head of follower-list? */
-            k = ch->master->followers;
-            ch->master->followers = k->next;
-            free(k);
-        }
-        else
-        { /* locate follower who is not head of list */
-            for (k = ch->master->followers; k->next->follower != ch; k = k->next)
-                ;
-
-            j = k->next;
-            k->next = j->next;
-            free(j);
-        }
+        ch->master->followers.remove(ch->shared_from_this());
         ch->master = nullptr;
     }
 
@@ -1400,11 +1386,7 @@ ACMD(do_mfollow)
 
     ch->master = leader;
 
-    CREATE(k, struct follow_type, 1);
-
-    k->follower = ch;
-    k->next = leader->followers;
-    leader->followers = k;
+    leader->followers.add(ch->shared_from_this());
 }
 
 /* prints the message to everyone in the range of numbers */

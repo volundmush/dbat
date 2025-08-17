@@ -850,7 +850,6 @@ int do_simple_move(Character *ch, int dir, int need_specials_check)
 int perform_move(Character *ch, int dir, int need_specials_check)
 {
     room_rnum was_in;
-    struct follow_type *k, *next;
 
     if (GRAPPLING(ch) || GRAPPLED(ch))
     {
@@ -910,45 +909,44 @@ int perform_move(Character *ch, int dir, int need_specials_check)
     if (!do_simple_move(ch, dir, need_specials_check))
         return 0;
 
-    for (k = ch->followers; k; k = next)
-    {
-        next = k->next;
-        if ((IN_ROOM(k->follower) == was_in) &&
-            (GET_POS(k->follower) >= POS_STANDING) &&
+    ch->followers.for_each([&](Character *k) {
+                if ((IN_ROOM(k) == was_in) &&
+            (GET_POS(k) >= POS_STANDING) &&
             (!AFF_FLAGGED(ch, AFF_ZANZOKEN) ||
-             (AFF_FLAGGED(ch, AFF_GROUP) && AFF_FLAGGED(k->follower, AFF_GROUP))))
+             (AFF_FLAGGED(ch, AFF_GROUP) && AFF_FLAGGED(k, AFF_GROUP))))
         {
-            act("You follow $N.\r\n", false, k->follower, nullptr, ch, TO_CHAR);
-            perform_move(k->follower, dir, 1);
+            act("You follow $N.\r\n", false, k, nullptr, ch, TO_CHAR);
+            perform_move(k, dir, 1);
         }
-        else if ((IN_ROOM(k->follower) == was_in) &&
-                 (GET_POS(k->follower) >= POS_STANDING) &&
-                 (AFF_FLAGGED(ch, AFF_ZANZOKEN) && AFF_FLAGGED(k->follower, AFF_ZANZOKEN)) &&
-                 (!AFF_FLAGGED(ch, AFF_GROUP) || !AFF_FLAGGED(k->follower, AFF_GROUP)))
+        else if ((IN_ROOM(k) == was_in) &&
+                 (GET_POS(k) >= POS_STANDING) &&
+                 (AFF_FLAGGED(ch, AFF_ZANZOKEN) && AFF_FLAGGED(k, AFF_ZANZOKEN)) &&
+                 (!AFF_FLAGGED(ch, AFF_GROUP) || !AFF_FLAGGED(k, AFF_GROUP)))
         {
-            act("$N tries to zanzoken and escape, but your zanzoken matches $S!\r\n", false, k->follower, nullptr,
+            act("$N tries to zanzoken and escape, but your zanzoken matches $S!\r\n", false, k, nullptr,
                 ch, TO_CHAR);
-            act("$N tries to zanzoken and escape, but $n's zanzoken matches $S!\r\n", false, k->follower, nullptr,
+            act("$N tries to zanzoken and escape, but $n's zanzoken matches $S!\r\n", false, k, nullptr,
                 ch, TO_NOTVICT);
-            act("You zanzoken to try and escape, but $n's zanzoken matches yours!\r\n", false, k->follower, nullptr,
+            act("You zanzoken to try and escape, but $n's zanzoken matches yours!\r\n", false, k, nullptr,
                 ch, TO_VICT);
-            for (auto c : {ch, k->follower})
+            for (auto c : {ch, k})
                 c->affect_flags.set(AFF_ZANZOKEN, false);
-            perform_move(k->follower, dir, 1);
+            perform_move(k, dir, 1);
         }
-        else if ((IN_ROOM(k->follower) == was_in) &&
-                 (GET_POS(k->follower) >= POS_STANDING) &&
-                 (AFF_FLAGGED(ch, AFF_ZANZOKEN) && !AFF_FLAGGED(k->follower, AFF_ZANZOKEN)))
+        else if ((IN_ROOM(k) == was_in) &&
+                 (GET_POS(k) >= POS_STANDING) &&
+                 (AFF_FLAGGED(ch, AFF_ZANZOKEN) && !AFF_FLAGGED(k, AFF_ZANZOKEN)))
         {
-            act("You try to follow $N, but $E disappears in a flash of movement!\r\n", false, k->follower, nullptr,
+            act("You try to follow $N, but $E disappears in a flash of movement!\r\n", false, k, nullptr,
                 ch, TO_CHAR);
-            act("$n tries to follow $N, but $E disappears in a flash of movement!\r\n", false, k->follower, nullptr,
+            act("$n tries to follow $N, but $E disappears in a flash of movement!\r\n", false, k, nullptr,
                 ch, TO_NOTVICT);
-            act("$n tries to follow you, but you manage to zanzoken away!\r\n", false, k->follower, nullptr, ch,
+            act("$n tries to follow you, but you manage to zanzoken away!\r\n", false, k, nullptr, ch,
                 TO_VICT);
             ch->affect_flags.set(AFF_ZANZOKEN, false);
         }
-    }
+
+    });
     return 1;
 }
 
@@ -2039,7 +2037,7 @@ static int perform_enter_obj(Character *ch, Object *obj, int need_specials_check
             {
                 int filled = false;
                 auto dest = get_room(GET_OBJ_VAL(obj, VAL_PORTAL_DEST));
-                auto people = dest->getPeople();
+                auto people = dest->getPeople().snapshot_weak();
                 for (auto tch : filter_raw(people))
                 {
                     filled = true;
@@ -2052,13 +2050,13 @@ static int perform_enter_obj(Character *ch, Object *obj, int need_specials_check
                 }
             }
             if ((could_move = do_simple_enter(ch, obj, need_specials_check)))
-                for (k = ch->followers; k; k = k->next)
-                    if ((IN_ROOM(k->follower) == was_in) &&
-                        (GET_POS(k->follower) >= POS_STANDING))
+                ch->followers.for_each([&](Character* k) {
+                    if ((IN_ROOM(k) == was_in) && (GET_POS(k) >= POS_STANDING))
                     {
-                        act("You follow $N.\r\n", false, k->follower, nullptr, ch, TO_CHAR);
-                        perform_enter_obj(k->follower, obj, 1);
+                        act("You follow $N.\r\n", false, k, nullptr, ch, TO_CHAR);
+                        perform_enter_obj(k, obj, 1);
                     }
+                });        
         }
         else
         {
@@ -2175,8 +2173,7 @@ static int do_simple_leave(Character *ch, Object *obj, int need_specials_check)
         }
     }
 
-    Destination d;
-    d.al = get_room(dest_room)->shared_from_this();
+    Destination d(dest_room);
 
     /* charmed? */
     if (AFF_FLAGGED(ch, AFF_CHARM) && ch->master &&
@@ -2302,7 +2299,7 @@ static int perform_leave_obj(Character *ch, Object *obj, int need_specials_check
 {
     room_rnum was_in = IN_ROOM(ch);
     int could_move = false;
-    struct follow_type *k;
+
 
     if (GRAPPLING(ch) || GRAPPLED(ch))
     {
@@ -2318,13 +2315,15 @@ static int perform_leave_obj(Character *ch, Object *obj, int need_specials_check
     {
         if (GET_OBJ_VAL(obj, VAL_HATCH_DEST) != NOWHERE)
             if ((could_move = do_simple_leave(ch, obj, need_specials_check)))
-                for (k = ch->followers; k; k = k->next)
-                    if ((IN_ROOM(k->follower) == was_in) &&
-                        (GET_POS(k->follower) >= POS_STANDING))
+                ch->followers.for_each([&](Character* k) {
+                    if ((IN_ROOM(k) == was_in) &&
+                        (GET_POS(k) >= POS_STANDING))
                     {
-                        act("You follow $N.\r\n", false, k->follower, nullptr, ch, TO_CHAR);
-                        perform_leave_obj(k->follower, obj, 1);
+                        act("You follow $N.\r\n", false, k, nullptr, ch, TO_CHAR);
+                        perform_leave_obj(k, obj, 1);
                     }
+                });
+                    
     }
     return could_move;
 }

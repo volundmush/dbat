@@ -131,19 +131,16 @@ ACMD(do_oasis_links)
     }
 
     ch->send_to("Zone %d is linked to the following zones:\r\n", z->second.number);
-    auto rcopy = z->second.rooms.snapshot_weak();
-    for (auto r : filter_raw(rcopy))
-    {
-
+    z->second.rooms.for_each([&](auto r) {
         for (auto &[d, e] : r->getDirections())
         {
             auto z2 = e.getZone();
             if (z2->number == zvnum)
-                continue;
+                return;
 
             ch->send_to("%3d %-30s at %5d (%-5s) ---> %5d\r\n", z2->number, z2->name, nr, dirs[static_cast<int>(d)], e.getVnum());
         }
-    }
+    });
 }
 
 /******************************************************************************/
@@ -160,7 +157,7 @@ void list_rooms(Character *ch, zone_vnum vmin, zone_vnum vmax)
     ch->sendText("@nVNum    Room Name                                Exits\r\n"
                  "------- ---------------------------------------- -----@n\r\n");
 
-    for (auto &[vn, r] : world)
+    for (auto &[vn, r] : Room::registry)
     {
         if (vn < vmin || vn > vmax)
             continue;
@@ -358,7 +355,6 @@ void print_zone(Character *ch, zone_vnum vnum)
     }
     auto &z = zone_table.at(vnum);
     sprintf(bits, "%s", z.zone_flags.getFlagNames().c_str());
-    auto rooms = z.rooms.snapshot_shared();
 
     /****************************************************************************/
     /** Display all of the zone information at once.                           **/
@@ -372,13 +368,14 @@ void print_zone(Character *ch, zone_vnum vnum)
                 "@gZone Flags     = @c%s\r\n"
                 "@gSize\r\n"
                 "@g   Rooms       = @c%ld\r\n",
-                z.number, z.name, z.builders, z.lifespan, z.age, z.reset_mode ? ((z.reset_mode == 1) ? "Reset when no players are in zone." : "Normal reset.") : "Never reset", bits, rooms.size());
+                z.number, z.name, z.builders, z.lifespan, z.age, z.reset_mode ? ((z.reset_mode == 1) ? "Reset when no players are in zone." : "Normal reset.") : "Never reset", bits, z.rooms.live_count());
 
-    if(!rooms.empty()) {
+    
+    if(z.rooms) {
         ch->send_to("@gRoom List:\r\n");
-        for(auto &r : rooms) {
+        z.rooms.for_each([&](auto r) {
             ch->send_to("    @g%-5d@n) @c%s\r\n", r->getVnum(), r->getName());
-        }
+        });
     }
 }
 

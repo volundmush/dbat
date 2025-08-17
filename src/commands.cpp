@@ -581,6 +581,7 @@ const struct command_info cmd_info[] = {
     {".exit", ".ex", POS_DEAD, do_mush_exit, -1, ADMLVL_BUILDER, 0, 0},
     {".location", ".lo", POS_DEAD, do_mush_location, -1, ADMLVL_BUILDER, 0, 0},
     {".choices", ".ch", POS_DEAD, do_mush_choices, -1, ADMLVL_BUILDER, 0, 0},
+    {".reset", ".res", POS_DEAD, do_mush_reset, -1, ADMLVL_BUILDER, 0, 0},
     {"\n", "zzzzzzz", 0, nullptr, 0, ADMLVL_NONE, 0, 0}}; /* this must be last */
 
 int matchCommand(Character *ch, const std::string &cmd)

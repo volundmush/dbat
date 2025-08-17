@@ -1043,7 +1043,7 @@ int leave_otrigger(Room *room, Character *actor, int dir)
 
     if (!valid_dg_target(actor, DG_ALLOW_GODS))
         return 1;
-    auto con = room->getObjects();
+    auto con = room->getObjects().snapshot_weak();
     for (auto obj : filter_raw(con))
     {
         if (!SCRIPT_CHECK(obj, OTRIG_LEAVE))

@@ -106,13 +106,13 @@ void dg_read_trigger(FILE *fp, HasDgScripts *proto, UnitType type) {
             mob_proto.at(proto->getVnum()).proto_script.push_back(rnum);
             break;
         case WLD_TRIGGER:
-            if(!world.contains(proto->getVnum())) {
+            if(!Room::registry.contains(proto->getVnum())) {
                 mudlog(BRF, ADMLVL_BUILDER, true,
                        "SYSERR: dg_read_trigger: Trigger vnum #%d asked for but non-existant! (room:%d)",
                        vnum, GET_ROOM_VNUM(static_cast<Room *>(proto)->getVnum()));
                 return;
             }
-            world.at(proto->getVnum())->proto_script.push_back(rnum);
+            Room::registry.at(proto->getVnum())->proto_script.push_back(rnum);
             break;
         default:
             mudlog(BRF, ADMLVL_BUILDER, true,

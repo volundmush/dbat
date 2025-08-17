@@ -658,18 +658,16 @@ void mag_groups(int level, Character *ch, int spellnum)
         k = ch->master;
     else
         k = ch;
-    for (f = k->followers; f; f = f_next)
-    {
-        f_next = f->next;
-        tch = f->follower;
-        if (tch->location != ch->location)
-            continue;
-        if (!AFF_FLAGGED(tch, AFF_GROUP))
-            continue;
-        if (ch == tch)
-            continue;
-        perform_mag_groups(level, ch, tch, spellnum);
-    }
+    
+    k->followers.for_each([&](auto f) {
+        if (f->location != ch->location)
+            return;
+        if (!AFF_FLAGGED(f, AFF_GROUP))
+            return;
+        if (ch == f)
+            return;
+        perform_mag_groups(level, ch, f, spellnum);
+    });
 
     if ((k != ch) && AFF_FLAGGED(k, AFF_GROUP))
         perform_mag_groups(level, ch, k, spellnum);

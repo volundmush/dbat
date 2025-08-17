@@ -8,27 +8,27 @@
 #include "dbat/planet.h"
 #include "dbat/act.informative.h"
 
-std::vector<std::weak_ptr<Object>> AbstractLocation::getObjects()
+WeakBag<Object> AbstractLocation::getObjects()
 {
     return getContents<Object>();
 }
 
-std::vector<std::weak_ptr<Character>> AbstractLocation::getPeople()
+WeakBag<Character> AbstractLocation::getPeople()
 {
     return getContents<Character>();
 }
 
-std::vector<std::weak_ptr<Object>> AbstractLocation::getObjects(const Coordinates &coor)
+WeakBag<Object> AbstractLocation::getObjects(const Coordinates &coor)
 {
     return getContents<Object>(coor);
 }
 
-std::vector<std::weak_ptr<Structure>> AbstractLocation::getStructures(const Coordinates &coor)
+WeakBag<Structure> AbstractLocation::getStructures(const Coordinates &coor)
 {
     return getContents<Structure>(coor);
 }
 
-std::vector<std::weak_ptr<Character>> AbstractLocation::getPeople(const Coordinates &coor)
+WeakBag<Character> AbstractLocation::getPeople(const Coordinates &coor)
 {
     return getContents<Character>(coor);
 }
@@ -51,7 +51,7 @@ bool AbstractLocation::getRoomFlag(const Coordinates &coor, int flag)
 int AbstractLocation::getCookElement(const Coordinates &coor)
 {
     int found = 0;
-    auto con = getObjects(coor);
+    auto con = getObjects(coor).snapshot_weak();
     for (auto obj : filter_raw(con))
     {
         if (GET_OBJ_TYPE(obj) == ITEM_CAMPFIRE)
@@ -75,7 +75,7 @@ bool AbstractLocation::getIsDark(const Coordinates &coor)
 {
     return false; // temporarily disabled.
 
-    auto pe = getPeople(coor);
+    auto pe = getPeople(coor).snapshot_weak();
     for (auto c : filter_raw(pe))
     {
         if (c->isProvidingLight())
@@ -131,8 +131,6 @@ void AbstractLocation::deleteExit(const Coordinates &coor, Direction dir)
 void AbstractLocation::addToContents(const Coordinates &coor, const std::shared_ptr<HasLocation> &hl)
 {
     contents.add(hl);
-    hl->location.al = getSharedAbstractLocation();
-    hl->location.position = coor;
     onAddToContents(coor, hl);
 }
 
@@ -144,7 +142,6 @@ void AbstractLocation::onAddToContents(const Coordinates& coor, const std::share
 void AbstractLocation::removeFromContents(const std::shared_ptr<HasLocation> &hl)
 {
     contents.remove(hl);
-    hl->location = {};
     onRemoveFromContents(hl);
 }
 

@@ -781,7 +781,7 @@ ACMD(do_finddoor)
     {
         len = snprintf(buf, sizeof(buf), "Doors unlocked by key [%d] %s are:\r\n",
                        vnum, sdesc.c_str());
-        for (auto &[vn, r] : world)
+        for (auto &[vn, r] : Room::registry)
         {
             for (auto &[d, e] : r->getDirections())
             {
@@ -1147,7 +1147,7 @@ ACMD(do_goto)
 
     if (argument && boost::icontains(argument, ":"))
     {
-        loc = resolveLocID(argument);
+        loc = Location(argument);
         if (!loc)
         {
             ch->sendText("No location exists with that LocID.\r\n");
@@ -1356,7 +1356,8 @@ static void do_stat_room(Character *ch, Room *rm)
 
     ch->sendText("Chars present:");
     column = 14; /* ^^^ strlen ^^^ */
-    auto people = rm->getPeople();
+    Location lrm(rm);
+    auto people = lrm.getPeople();
     auto sz = people.size();
     int i2 = 0;
     found = false;
@@ -1375,7 +1376,7 @@ static void do_stat_room(Character *ch, Room *rm)
         }
     }
 
-    auto con = rm->getObjects();
+    auto con = lrm.getObjects();
     sz = con.size();
 
     if (sz)
@@ -1767,20 +1768,22 @@ static void do_stat_character(Character *ch, Character *k)
         ch->send_to("Hunger: %d, Thirst: %d, Drunk: %d\r\n", GET_COND(k, HUNGER), GET_COND(k, THIRST), GET_COND(k, DRUNK));
 
     column = ch->send_to("Master is: %s, Followers are:", k->master ? GET_NAME(k->master) : "<none>");
-    if (!k->followers)
+    auto fol_count = k->followers.live_count();
+    if (!fol_count)
         ch->sendText(" <none>\r\n");
     else
     {
-        for (fol = k->followers; fol; fol = fol->next)
-        {
-            column += ch->send_to("%s %s", found++ ? "," : "", PERS(fol->follower, ch));
+        int cur_count = 0;
+        k->followers.for_each([&](Character* fol) {
+            column += ch->send_to("%s %s", found++ ? "," : "", PERS(fol, ch));
             if (column >= 62)
             {
-                ch->send_to("%s\r\n", fol->next ? "," : "");
+                ch->send_to("%s\r\n", (cur_count < fol_count) ? "," : "");
                 found = false;
                 column = 0;
+                cur_count++;
             }
-        }
+        });
         if (column != 0)
             ch->sendText("\r\n");
     }
@@ -1849,8 +1852,8 @@ static void do_stat_character(Character *ch, Character *k)
             ch->sendText("Script memory:\r\n  Remember             Command\r\n");
             while (mem)
             {
-                auto find = uniqueCharacters.find(mem->id);
-                if (find == uniqueCharacters.end())
+                auto find = Character::registry.find(mem->id);
+                if (find == Character::registry.end())
                 {
                     ch->sendText("  ** Corrupted!\r\n");
                 }
@@ -3705,9 +3708,9 @@ ACMD(do_show)
     case 4:
         i = 0;
         j = 0;
-        k = uniqueObjects.size();
+        k = Object::registry.size();
         con = sessions.size();
-        for (auto &[id, ent] : uniqueCharacters)
+        for (auto &[id, ent] : Character::registry)
         {
             vict = ent.get();
             if (IS_NPC(vict))
@@ -3732,13 +3735,13 @@ ACMD(do_show)
                     "  @Y%5s@W Mob ki attacks this boot\r\n"
                     "  @Y%5s@W Asssassins Generated@n\r\n"
                     "  @Y%5d@W Wish Selfishness Meter@n\r\n",
-                    i, con, players.size(), j, mob_proto.size(), k, obj_proto.size(), world.size(), zone_table.size(), trig_index.size(), buf_largecount, buf_switches, buf_overflows, add_commas(mob_specials_used).c_str(), add_commas(number_of_assassins).c_str(), SELFISHMETER);
+                    i, con, players.size(), j, mob_proto.size(), k, obj_proto.size(), Room::registry.size(), zone_table.size(), trig_index.size(), buf_largecount, buf_switches, buf_overflows, add_commas(mob_specials_used).c_str(), add_commas(number_of_assassins).c_str(), SELFISHMETER);
         break;
 
         /* show errors */
     case 5:
         len = strlcpy(buf, "Errant Rooms\r\n------------\r\n", sizeof(buf));
-        for (auto &[vn, r] : world)
+        for (auto &[vn, r] : Room::registry)
         {
             for (auto &[d, e] : r->getDirections())
             {
@@ -3771,7 +3774,7 @@ ACMD(do_show)
     case 7:
         j = 0;
         len = strlcpy(buf, "Godrooms\r\n--------------------------\r\n", sizeof(buf));
-        for (auto &[vn, r] : world)
+        for (auto &[vn, r] : Room::registry)
             if (ROOM_FLAGGED(r.get(), ROOM_GODROOM))
             {
                 nlen = snprintf(buf + len, sizeof(buf) - len, "%2d: [%5d] %s\r\n", ++j, vn,
@@ -4520,7 +4523,7 @@ affect_total(vict);
         break;
 
     case 67:
-        if (!world.contains(value))
+        if (!Room::registry.contains(value))
         {
             ch->sendText("There is no such room.\r\n");
             return (0);
@@ -4807,23 +4810,20 @@ ACMD(do_zpurge)
     }
 
     auto &z = zone_table.at(zone);
-    auto zr = z.rooms.snapshot_weak();
-
-    for (auto r : filter_raw(zr))
-    {
-        auto people = r->getPeople();
+    z.rooms.for_each([](Room* r) {
+        auto people = r->getPeople().snapshot_weak();
         for (auto mob : filter_raw(people))
         {
             if (!IS_NPC(mob))
                 continue;
             extract_char(mob);
         }
-        auto con = r->getObjects();
+        auto con = r->getObjects().snapshot_weak();
         for (auto obj : filter_raw(con))
         {
             extract_obj(obj);
         }
-    }
+    });
 
     ch->send_to("All mobiles and objects in zone %d purged.\r\n", zone);
     mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "(GC) %s has purged zone %d.", GET_NAME(ch), zone);
@@ -5127,9 +5127,7 @@ ACMD(do_zcheck)
     /************** Check rooms *****************/
     ch->sendText("\r\nChecking Rooms for limits...\r\n");
 
-    auto zr = z.rooms.snapshot_weak();
-    for (auto r : filter_raw(zr))
-    {
+    z.rooms.for_each([&](auto r) {
         for (auto &[d, e] : r->getDirections())
         {
             /*check for exit, but ignore off limits if you're in an offlimit zone*/
@@ -5176,15 +5174,13 @@ ACMD(do_zcheck)
             len = 0;
             found = 0;
         }
-    } /*checking rooms*/
+    });
 
-    auto zro = z.rooms.snapshot_weak();
-    for (auto i : filter_raw(zro))
-    {
+    z.rooms.for_each([&](auto i) {
         m++;
         if (i->exits.empty())
             l++;
-    }
+    });
     if (l * 3 > m)
         ch->sendText("More than 1/3 of the rooms are not linked.\r\n");
 }
@@ -5206,9 +5202,7 @@ static void mob_checkload(Character *ch, mob_vnum mvnum)
 
     for (auto &[zvn, z] : zone_table)
     {
-        auto zro = z.rooms.snapshot_weak();
-        for (auto r : filter_raw(zro))
-        {
+        z.rooms.for_each([&](auto r) {
             for (auto c : r->resetCommands)
             {
                 if (c.type != ResetCommandType::MOB)
@@ -5223,7 +5217,7 @@ static void mob_checkload(Character *ch, mob_vnum mvnum)
                 }
                 count += 1;
             }
-        }
+        });
     }
     if (count > 0)
         ch->send_to("@D[@nTotal counted: %s.@D]@n\r\n", add_commas(count).c_str());
@@ -5251,7 +5245,7 @@ static void obj_checkload(Character *ch, obj_vnum ovnum)
 
     ch->send_to("Checking load info for the obj [%d] %s...\r\n", ovnum, obj->second.short_description);
 
-    for (auto &[vn, r] : world)
+    for (auto &[vn, r] : Room::registry)
     {
         lastroom = r.get();
         lastroom_v = r->getVnum();
@@ -5357,7 +5351,7 @@ static void trg_checkload(Character *ch, trig_vnum tvnum)
 
     ch->send_to("Checking load info for the %s trigger [%d] '%s':\r\n", trg->second.attach_type == MOB_TRIGGER ? "mobile" : (trg->second.attach_type == OBJ_TRIGGER ? "object" : "room"), tvnum, trg->second.name);
 
-    for (auto &[zvn, r] : world)
+    for (auto &[zvn, r] : Room::registry)
     {
         lastroom_v = r->getVnum();
         for (auto &c : r->resetCommands)
@@ -5441,7 +5435,7 @@ static void trg_checkload(Character *ch, trig_vnum tvnum)
         found = 1;
     }
 
-    for (auto &[vn, r] : world)
+    for (auto &[vn, r] : Room::registry)
     {
         auto find = std::find(r->proto_script.begin(), r->proto_script.end(), tvnum);
         if (find == r->proto_script.end())
@@ -5909,7 +5903,7 @@ ACMD(do_mush_zone)
                 ch->sendFmt("Current landing spots:\r\n");
                 for (const auto &[dir, loc] : z->landingSpots)
                 {
-                    auto l = resolveLocID(loc);
+                    auto l = Location(loc);
                     ch->sendFmt("  {}: {}\r\n", dir, l);
                 }
             }
@@ -5962,7 +5956,7 @@ ACMD(do_mush_zone)
                 ch->sendFmt("Current docking spots:\r\n");
                 for (const auto &[dir, loc] : z->dockingSpots)
                 {
-                    auto l = resolveLocID(loc);
+                    auto l = Location(loc);
                     ch->sendFmt("  {}: {}\r\n", dir, l);
                 }
             }

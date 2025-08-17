@@ -11332,27 +11332,25 @@ static void print_group(Character *ch)
             act(buf, false, ch, nullptr, k, TO_CHAR);
         }
 
-        for (f = k->followers; f; f = f->next)
-        {
-            if (!AFF_FLAGGED(f->follower, AFF_GROUP))
-                continue;
+        k->followers.for_each([&](Character* f) {
+            if (!AFF_FLAGGED(f, AFF_GROUP)) return;
             ch->sendText("@D----------------@n\r\n");
-            if (GET_HIT(f->follower) > (GET_MAX_HIT(f->follower) - (f->follower->getEffectiveStat("weight_carried"))) / 10)
+            if (GET_HIT(f) > (GET_MAX_HIT(f) - (f->getEffectiveStat("weight_carried"))) / 10)
             {
                 snprintf(buf, sizeof(buf),
                          "@gF@D: @w$N @W- @D[@RPL@Y: @c%s @CKi@Y: @c%s @GST@Y: @c%s@D] [@w%2d %s %s@D]",
-                         add_commas(GET_HIT(f->follower)).c_str(), add_commas((f->follower->getCurVital(CharVital::ki))).c_str(), add_commas((f->follower->getCurVital(CharVital::stamina))).c_str(),
-                         GET_LEVEL(f->follower), CLASS_ABBR(f->follower), race::getAbbr(f->follower->race).c_str());
+                         add_commas(GET_HIT(f)).c_str(), add_commas((f->getCurVital(CharVital::ki))).c_str(), add_commas((f->getCurVital(CharVital::stamina))).c_str(),
+                         GET_LEVEL(f), CLASS_ABBR(f), race::getAbbr(f->race).c_str());
             }
-            if (GET_HIT(f->follower) <= (GET_MAX_HIT(f->follower) - (f->follower->getEffectiveStat("weight_carried"))) / 10)
+            if (GET_HIT(f) <= (GET_MAX_HIT(f) - (f->getEffectiveStat("weight_carried"))) / 10)
             {
                 snprintf(buf, sizeof(buf),
                          "@gF@D: @w$N @W- @D[@RPL@Y: @r%s @CKi@Y: @c%s @GST@Y: @c%s@D] [@w%2d %s %s@D]",
-                         add_commas(GET_HIT(f->follower)).c_str(), add_commas((f->follower->getCurVital(CharVital::ki))).c_str(), add_commas((f->follower->getCurVital(CharVital::stamina))).c_str(),
-                         GET_LEVEL(f->follower), CLASS_ABBR(f->follower), race::getAbbr(f->follower->race).c_str());
+                         add_commas(GET_HIT(f)).c_str(), add_commas((f->getCurVital(CharVital::ki))).c_str(), add_commas((f->getCurVital(CharVital::stamina))).c_str(),
+                         GET_LEVEL(f), CLASS_ABBR(f), race::getAbbr(f->race).c_str());
             }
-            act(buf, false, ch, nullptr, f->follower, TO_CHAR);
-        }
+            act(buf, false, ch, nullptr, f, TO_CHAR);
+        });
         ch->sendText("@D----------------@n\r\n");
     }
 }
@@ -11391,38 +11389,36 @@ ACMD(do_group)
     highpl = (ch->getEffectiveStat<int64_t>("health"));
     lowpl = (ch->getEffectiveStat<int64_t>("health"));
 
-    for (found = 0, f = ch->followers; f; f = f->next)
-    {
-        if (AFF_FLAGGED(f->follower, AFF_GROUP))
+    found = 0;
+    ch->followers.for_each([&](Character* f) {
+        if(!AFF_FLAGGED(f, AFF_GROUP)) return;
+        if (GET_LEVEL(f) > highlvl)
         {
-            if (GET_LEVEL(f->follower) > highlvl)
-            {
-                highlvl = GET_LEVEL(f->follower);
-            }
-            if (GET_LEVEL(f->follower) < lowlvl)
-            {
-                lowlvl = GET_LEVEL(f->follower);
-            }
+            highlvl = GET_LEVEL(f);
         }
-    }
+        if (GET_LEVEL(f) < lowlvl)
+        {
+            lowlvl = GET_LEVEL(f);
+        }
+    });
 
     int foundwas = 0;
 
     if (!strcasecmp(buf, "all"))
     {
         perform_group(ch, ch, GET_LEVEL(ch), GET_LEVEL(ch), highpl, lowpl);
-        for (found = 0, f = ch->followers; f; f = f->next)
-        {
+        found = 0;
+        ch->followers.for_each([&](Character* f) {
             foundwas = found;
-            found += perform_group(ch, f->follower, highlvl, lowlvl, highpl, lowpl);
+            found += perform_group(ch, f, highlvl, lowlvl, highpl, lowpl);
             if (found > foundwas)
             {
-                if (GET_LEVEL(f->follower) > highlvl)
-                    highlvl = GET_LEVEL(f->follower);
-                else if (GET_LEVEL(f->follower) < lowlvl)
-                    lowlvl = GET_LEVEL(f->follower);
+                if (GET_LEVEL(f) > highlvl)
+                    highlvl = GET_LEVEL(f);
+                else if (GET_LEVEL(f) < lowlvl)
+                    lowlvl = GET_LEVEL(f);
             }
-        }
+        });
         if (!found)
             ch->sendText("Everyone following you is already in your group.\r\n");
         return;
@@ -11470,18 +11466,14 @@ ACMD(do_ungroup)
             return;
         }
 
-        for (f = ch->followers; f; f = next_fol)
-        {
-            next_fol = f->next;
-            if (AFF_FLAGGED(f->follower, AFF_GROUP))
-            {
-                f->follower->affect_flags.set(AFF_GROUP, false);
-                act("$N has disbanded the group.", true, f->follower, nullptr, ch, TO_CHAR);
-                f->follower->setBaseStat<int>("group_kills", 0);
-                if (!AFF_FLAGGED(f->follower, AFF_CHARM))
-                    stop_follower(f->follower);
-            }
-        }
+        ch->followers.for_each_safe([&](Character* f) {
+            if(!AFF_FLAGGED(f, AFF_GROUP)) return;
+            f->affect_flags.set(AFF_GROUP, false);
+            act("$N has disbanded the group.", true, f, nullptr, ch, TO_CHAR);
+            f->setBaseStat<int>("group_kills", 0);
+            if (!AFF_FLAGGED(f, AFF_CHARM))
+                stop_follower(f);
+        });
 
         ch->affect_flags.set(AFF_GROUP, false);
         ch->setBaseStat<int>("group_kills", 0);
@@ -11535,9 +11527,10 @@ ACMD(do_report)
 
     k = (ch->master ? ch->master : ch);
 
-    for (f = k->followers; f; f = f->next)
-        if (AFF_FLAGGED(f->follower, AFF_GROUP) && f->follower != ch)
-            act(buf, true, ch, nullptr, f->follower, TO_VICT);
+    k->followers.for_each([&](auto f) {
+        if (AFF_FLAGGED(f, AFF_GROUP) && f != ch)
+            act(buf, true, ch, nullptr, f, TO_VICT);
+    });
 
     if (k != ch)
         act(buf, true, ch, nullptr, k, TO_VICT);
@@ -11579,11 +11572,12 @@ ACMD(do_split)
         else
             num = 0;
 
-        for (f = k->followers; f; f = f->next)
-            if (AFF_FLAGGED(f->follower, AFF_GROUP) &&
-                (!IS_NPC(f->follower)) && f->follower != ch &&
-                (f->follower->location == ch->location))
+        k->followers.for_each([&](auto f) {
+            if (AFF_FLAGGED(f, AFF_GROUP) &&
+                (!IS_NPC(f)) && f != ch &&
+                (f->location == ch->location))
                 num++;
+        });
 
         if (num > 0 && AFF_FLAGGED(ch, AFF_GROUP))
         {
@@ -11614,18 +11608,16 @@ ACMD(do_split)
             k->send_to("%s", buf);
         }
 
-        for (f = k->followers; f; f = f->next)
-        {
-            if (AFF_FLAGGED(f->follower, AFF_GROUP) &&
-                (!IS_NPC(f->follower)) &&
-                (f->follower->location == ch->location) &&
-                f->follower != ch)
+        k->followers.for_each([&](auto f) {
+            if (AFF_FLAGGED(f, AFF_GROUP) &&
+                (!IS_NPC(f)) &&
+                (f->location == ch->location) &&
+                f != ch)
             {
-
-                f->follower->modBaseStat("money_carried", share);
-                f->follower->send_to("%s", buf);
+                f->modBaseStat("money_carried", share);
+                f->send_to("%s", buf);
             }
-        }
+        });
         ch->send_to("You split %d zenni among %d members -- %d zenni each.\r\n", amount, num, share);
 
         if (rest)

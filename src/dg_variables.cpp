@@ -481,7 +481,7 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
                     else
                     {
                         i = 0;
-                        auto people = get_room(rrnum)->getPeople();
+                        auto people = get_room(rrnum)->getPeople().snapshot_weak();
                         for (auto ch : filter_raw(people))
                             if (GET_MOB_VNUM(ch) == mvnum)
                                 i++;
@@ -511,7 +511,7 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
                     else
                     {
                         /* item_in_list looks within containers as well. */
-                        snprintf(str, slen, "%d", item_in_list(subfield, get_room(rrnum)->getObjects()));
+                        snprintf(str, slen, "%d", item_in_list(subfield, Location(rrnum).getObjects()));
                     }
                 }
             }
@@ -537,7 +537,7 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
                     }
                     else if (type == OBJ_TRIGGER)
                     {
-                        auto people = get_room(obj_room((Object *)go))->getPeople();
+                        auto people = get_room(obj_room((Object *)go))->getPeople().snapshot_weak();
                         for (auto c : filter_raw(people))
                             if (valid_dg_target(c, DG_ALLOW_GODS))
                             {
@@ -548,7 +548,7 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
                     }
                     else if (type == WLD_TRIGGER)
                     {
-                        auto people = ((Room *)go)->getPeople();
+                        auto people = ((Room *)go)->getPeople().snapshot_weak();
                         for (auto c : filter_raw(people))
                             if (valid_dg_target(c, DG_ALLOW_GODS))
                             {
@@ -756,10 +756,10 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
                 }
                 else if (!strcasecmp(field, "follower"))
                 {
-                    if (!c->followers || !c->followers->follower)
+                    if (!c->followers)
                         *str = '\0';
                     else
-                        snprintf(str, slen, "%s", ((c->followers->follower)->getUID(true).c_str()));
+                        snprintf(str, slen, "%s", ((c->followers.head())->getUID(true).c_str()));
                 }
                 break;
             case 'h':
@@ -1466,7 +1466,7 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
             {
                 if (subfield && *subfield)
                 {
-                    auto con = r->getObjects();
+                    auto con = r->getObjects().snapshot_weak();
                     for (auto obj : filter_raw(con))
                     {
                         if (GET_OBJ_VNUM(obj) == atof(subfield))
@@ -1481,7 +1481,7 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
                 }
                 else
                 { /* no arg given */
-                    if (auto con = r->getObjects(); !con.empty())
+                    if (auto con = r->getObjects().snapshot_weak(); !con.empty())
                     {
                         for (auto obj : filter_raw(con))
                         {
@@ -1497,7 +1497,7 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
             }
             else if (!strcasecmp(field, "people"))
             {
-                if (auto people = r->getPeople(); !people.empty())
+                if (auto people = r->getPeople().snapshot_weak(); !people.empty())
                 {
                     for (auto p : filter_raw(people))
                     {

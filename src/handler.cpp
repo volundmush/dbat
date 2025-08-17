@@ -574,7 +574,7 @@ Character *get_char_room(char *name, int *number, room_rnum room)
     if (*number == 0)
         return nullptr;
 
-    auto people = get_room(room)->getPeople();
+    auto people = get_room(room)->getPeople().snapshot_weak();
     for (auto i : filter_raw(people))
     {
         if (isname(name, i->getName()))
@@ -630,7 +630,7 @@ void extract_obj(Object *obj)
 
     auto id = obj->id;
 
-    uniqueObjects.erase(id);
+    Object::registry.erase(id);
 }
 
 static void update_object(Object *obj, int use)
@@ -728,13 +728,7 @@ void extract_char_final(Character *ch)
         original->clones.remove(shared);
     }
 
-    if (auto clones = ch->clones.snapshot_weak(); !clones.empty())
-    {
-        for (auto c : filter_raw(clones))
-        {
-            handle_multi_merge(c);
-        }
-    }
+    ch->mergeClones();
 
     purge_homing(ch);
 
@@ -780,11 +774,10 @@ void extract_char_final(Character *ch)
         ch->poisonby = nullptr;
     }
 
-    for (auto c : ch->poisoned.snapshot_shared())
-    {
+    ch->poisoned.for_each([&](Character* c) {
         c->poisonby = nullptr;
-    }
-    ch->poisoned.items.clear();
+    });
+    ch->poisoned.clear();
 
     if (auto drg = DRAGGING(ch))
     {
@@ -874,7 +867,7 @@ void extract_char_final(Character *ch)
     {
         ch->leaveLocation();
         auto id = ch->id;
-        uniqueCharacters.erase(id);
+        Character::registry.erase(id);
     }
 }
 
@@ -900,31 +893,29 @@ void extract_char(Character *ch)
     }
 
     extractions_pending.insert(ch);
+    
+    if(auto foll = ch->followers)
+        foll.for_each([&](auto f) {
+            if (IS_NPC(f) && AFF_FLAGGED(f, AFF_CHARM) && (f->location == ch->location || IN_ROOM(ch) == 1))
+                {
+                    /* transfer objects to char, if any */
+                    auto con = f->getInventory();
+                    for (auto obj : filter_shared(con))
+                    {
+                        obj->clearLocation();
+                        ch->addToInventory(obj);
+                    }
 
-    for (auto foll = ch->followers; foll; foll = foll->next)
-    {
-        auto f = foll->follower;
-        if (IS_NPC(f) && AFF_FLAGGED(f, AFF_CHARM) &&
-            (f->location == ch->location || IN_ROOM(ch) == 1))
-        {
-            /* transfer objects to char, if any */
-            auto con = f->getInventory();
-            for (auto obj : filter_shared(con))
-            {
-                obj->clearLocation();
-                ch->addToInventory(obj);
-            }
+                    /* transfer equipment to char, if any */
+                    for (auto &[slot, obj] : f->getEquipment())
+                    {
+                        auto un = unequip_char(f, slot);
+                        ch->addToInventory(un);
+                    }
 
-            /* transfer equipment to char, if any */
-            for (auto &[slot, obj] : f->getEquipment())
-            {
-                auto un = unequip_char(f, slot);
-                ch->addToInventory(un);
-            }
-
-            extract_char(f);
-        }
-    }
+                    extract_char(f);
+                }
+        });
 }
 
 /*

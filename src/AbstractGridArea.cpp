@@ -4,7 +4,7 @@
 TileOverride::operator bool() const
 {
     // A TileOverride is considered "valid" if it has at least one of the following:
-    return sectorType.has_value() || !strings.empty() || roomFlags.count() || whereFlags.count() || !exits.empty() || damage != 0 || groundEffect != 0 || !environment.empty() || !exits.empty();
+    return sectorType.has_value() || !strings.empty() || roomFlags.count() || whereFlags.count() || !exits.empty() || damage != 0 || groundEffect != 0 || !exits.empty();
 }
 
 // Helper to fetch or create a TileOverride entry.
@@ -28,22 +28,103 @@ static inline TileOverride *find_tile_nc(std::unordered_map<Coordinates, TileOve
     return &it->second;
 }
 
+static inline int floor_div_bucket(int v, int B) {
+    // floor division that works for negatives too
+    return (v >= 0) ? (v / B) : ((v - (B - 1)) / B);
+}
+
+static inline void indexIntoBuckets(
+    std::unordered_map<BucketKey, std::vector<Shape*>>& buckets,
+    int bucketSize,
+    Shape* s)
+{
+    if (bucketSize <= 0 || !s) return;
+    const auto& a = s->aabb();
+    const int bx0 = floor_div_bucket(a.min.x, bucketSize);
+    const int by0 = floor_div_bucket(a.min.y, bucketSize);
+    const int bz0 = floor_div_bucket(a.min.z, bucketSize);
+    const int bx1 = floor_div_bucket(a.max.x, bucketSize);
+    const int by1 = floor_div_bucket(a.max.y, bucketSize);
+    const int bz1 = floor_div_bucket(a.max.z, bucketSize);
+
+    for (int bx = bx0; bx <= bx1; ++bx)
+    for (int by = by0; by <= by1; ++by)
+    for (int bz = bz0; bz <= bz1; ++bz) {
+        buckets[{bx,by,bz}].push_back(s);
+    }
+}
+
+void AbstractGridArea::rebuildShapeIndex() {
+    // clear derived structures
+    buckets.clear();
+    byPriority.clear();
+    byPriority.reserve(shapes.size());
+
+    // recompute cached AABBs and collect pointers
+    for (auto& [_, up] : shapes) {
+        Shape& s = *up;
+        s.reComputeAABB();
+        byPriority.push_back(&s);
+    }
+
+    // sort: higher priority first; for ties, newer (higher seq) wins
+    std::sort(byPriority.begin(), byPriority.end(),
+              [](const Shape* a, const Shape* b){
+                  if (a->priority != b->priority) return a->priority > b->priority;
+                  return a->seq > b->seq; // "last write wins"
+              });
+
+    // fill spatial buckets
+    if (bucketSize > 0) {
+        for (auto* s : byPriority) {
+            indexIntoBuckets(buckets, bucketSize, s);
+        }
+    }
+}
+
+AbstractGridArea& AbstractGridArea::operator=(const GridTemplate& other) {
+    strings = other.strings;
+    shapes.clear();
+    for(const auto& [name, shapeBase] : other.shapes) {
+        shapes[name] = std::make_unique<Shape>(shapeBase);
+    }
+    rebuildShapeIndex();
+    return *this;
+}
+
+ Shape* AbstractGridArea::topShapeAt(const Coordinates& c) const {
+
+    auto fromBuckets = [&]() -> Shape* {
+        if (bucketSize <= 0) return nullptr;
+        auto toB = [&](int v){ return (v>=0 ? v : v - (bucketSize-1)) / bucketSize; };
+        BucketKey k{ toB(c.x), toB(c.y), toB(c.z) };
+        auto it = buckets.find(k);
+        if (it == buckets.end()) return nullptr;
+
+        Shape* best = nullptr;
+        for (auto* s : it->second) {
+            if (!s->aabb().contains(c)) continue;
+            if (!s->contains(c)) continue;
+            if (!best ||
+                s->priority > best->priority ||
+               (s->priority == best->priority && s->seq > best->seq)) { // last-wins
+                best = s;
+            }
+        }
+        return best;
+    };
+
+    if (auto* picked = fromBuckets()) return picked;
+
+    // Fallback: linear by priority order
+    for (auto* s : byPriority) {
+        if (s->aabb().contains(c) && s->contains(c)) return s;
+    }
+    return nullptr;
+}
+
 bool AbstractGridArea::validCoordinates(const Coordinates& coor) const {
-
-    // check if dest is within bounds. return std::nullopt if not.
-    if (maxX && coor.x > *maxX)
-        return false;
-    if (maxY && coor.y > *maxY)
-        return false;
-    if (maxZ && coor.z > *maxZ)
-        return false;
-    if (minX && coor.x < *minX)
-        return false;
-    if (minY && coor.y < *minY)
-        return false;
-    if (minZ && coor.z < *minZ)
-        return false;
-
+    
     if (auto it = tileOverrides.find(coor); it != tileOverrides.end() && it->second.sectorType)
     {
         // If the tile we're on has a sector type override.
@@ -51,19 +132,11 @@ bool AbstractGridArea::validCoordinates(const Coordinates& coor) const {
         return true;
     }
 
-    // next we check the default tile types...
-    if (coor.z == 0 && defaultGroundSector)
-    {
+    if(auto shp = topShapeAt(coor)) {
+        // If there's a shape at this coordinate, it exists.
         return true;
     }
-    if (coor.z < 0 && defaultUnderSector)
-    {
-        return true;
-    }
-    if (coor.z > 0 && defaultSkySector)
-    {
-        return true;
-    }
+
     return false;
 }
 
@@ -166,29 +239,23 @@ FlagHandler<WhereFlag>& AbstractGridArea::getWhereFlags(const Coordinates& coor)
 
 SectorType AbstractGridArea::getSectorType(const Coordinates &coor) const
 {
+    // This should only be called on a coordinate that definitely exists.
+
     if (auto t = find_tile(tileOverrides, coor))
     {
         if (t->sectorType)
             return *t->sectorType;
     }
-    // Default logic by z level
-    if (coor.z == 0 && defaultGroundSector)
-        return *defaultGroundSector;
-    if (coor.z < 0 && defaultUnderSector)
-        return *defaultUnderSector;
-    if (coor.z > 0 && defaultSkySector)
-        return *defaultSkySector;
+    if(auto shp = topShapeAt(coor)) {
+        return shp->sectorType;
+    }
     return SectorType::inside; // mandated fallback
 }
 
 void AbstractGridArea::broadcastAt(const Coordinates &coor, const std::string &message)
 {
     auto people = getPeople(coor);
-    for (const auto &wp : people)
-    {
-        if (auto c = wp.lock())
-            c->sendText(message);
-    }
+    people.for_each([&](auto c) {c->sendText(message);});
 }
 
 int AbstractGridArea::getDamage(const Coordinates &coor) const
@@ -239,35 +306,22 @@ SpecialFunc AbstractGridArea::getSpecialFunc(const Coordinates &coor) const
 
 double AbstractGridArea::getEnvironment(const Coordinates &coor, int type) const
 {
-    if (auto t = find_tile(tileOverrides, coor))
-    {
-        if (auto it = t->environment.find(type); it != t->environment.end())
-            return it->second;
-    }
     return 0.0;
 }
 
 double AbstractGridArea::setEnvironment(const Coordinates &coor, int type, double value)
 {
-    auto &t = ensure_tile(tileOverrides, coor);
-    t.environment[type] = value;
     return value;
 }
 
 double AbstractGridArea::modEnvironment(const Coordinates &coor, int type, double value)
 {
-    auto &t = ensure_tile(tileOverrides, coor);
-    double &ref = t.environment[type];
-    ref += value;
-    return ref;
+    return value;
 }
 
 void AbstractGridArea::clearEnvironment(const Coordinates &coor, int type)
 {
-    if (auto t = find_tile_nc(tileOverrides, coor))
-    {
-        t->environment.erase(type);
-    }
+
 }
 
 void AbstractGridArea::replaceExit(const Coordinates &coor, const Destination &dest)
@@ -300,13 +354,27 @@ bool AbstractGridArea::buildwalk(const Coordinates& coor, Character* ch, Directi
         return false;
     }
 
-    if(coor.z == 0) {
-        t.sectorType = defaultGroundSector ? *defaultGroundSector : SectorType::inside;
-    } else if(coor.z > 0) {
-        t.sectorType = defaultSkySector ? *defaultSkySector : SectorType::inside;
-    } else if(coor.z < 0) {
-        t.sectorType = defaultUnderSector ? *defaultUnderSector : SectorType::inside;
-    }
+    t.sectorType = SectorType::inside;
 
     return true;
+}
+
+void AbstractGridArea::setString(const Coordinates& coor, const std::string& name, const std::string& value) {
+    auto &t = ensure_tile(tileOverrides, coor);
+    t.strings[name] = value;
+}
+
+void AbstractGridArea::setResetCommands(const Coordinates& coor, const std::vector<ResetCommand>& cmds) {
+    auto &t = ensure_tile(tileOverrides, coor);
+    t.resetCommands = cmds;
+}
+
+void AbstractGridArea::setSectorType(const Coordinates& coor, SectorType type) {
+    auto &t = ensure_tile(tileOverrides, coor);
+    t.sectorType = type;
+}
+
+std::vector<ResetCommand> AbstractGridArea::getResetCommands(const Coordinates& coor) {
+    auto &t = ensure_tile(tileOverrides, coor);
+    return t.resetCommands;
 }

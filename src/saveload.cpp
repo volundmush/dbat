@@ -371,7 +371,7 @@ void load_dgscripts(const std::filesystem::path &loc)
     {
         auto id = j["id"].get<int64_t>();
 
-        auto u = uniqueCharacters.at(id);
+        auto u = Character::registry.at(id);
 
         for (auto d : j["scripts"])
         {
@@ -388,7 +388,7 @@ void load_dgscripts(const std::filesystem::path &loc)
     {
         auto id = j["id"].get<int64_t>();
 
-        auto u = uniqueObjects.at(id);
+        auto u = Object::registry.at(id);
 
         for (auto d : j["scripts"])
         {
@@ -405,7 +405,7 @@ void load_dgscripts(const std::filesystem::path &loc)
     {
         auto id = j["vn"].get<int64_t>();
 
-        auto u = world.at(id);
+        auto u = Room::registry.at(id);
 
         for (auto d : j["scripts"])
         {
@@ -423,7 +423,7 @@ static void dump_dgscripts(const std::filesystem::path &loc)
 {
     json jr, jo, jc;
 
-    for (auto &[id, u] : world)
+    for (auto &[id, u] : Room::registry)
     {
         if (u->scripts.empty())
             continue; // Skip units without scripts
@@ -439,7 +439,7 @@ static void dump_dgscripts(const std::filesystem::path &loc)
         jr.push_back(j2);
     }
 
-    for (auto &[id, u] : uniqueObjects)
+    for (auto &[id, u] : Object::registry)
     {
         if (u->scripts.empty())
             continue; // Skip units without scripts
@@ -455,7 +455,7 @@ static void dump_dgscripts(const std::filesystem::path &loc)
         jo.push_back(j2);
     }
 
-    for (auto &[id, u] : uniqueCharacters)
+    for (auto &[id, u] : Character::registry)
     {
         if (u->scripts.empty())
             continue; // Skip units without scripts
@@ -867,15 +867,6 @@ void from_json(const json &j, ThingPrototype &u)
     }
 }
 
-void to_json(json &j, const Location &loc)
-{
-    j["locID"] = loc.getLocID();
-}
-
-void from_json(const json &j, Location &loc)
-{
-    loc = Location(j["locID"].get<std::string>());
-}
 
 void to_json(json &j, const HasLocation &hl) {
     if(hl.location) {
@@ -891,7 +882,7 @@ void from_json(const json &j, HasLocation &hl) {
         hl.location = j["location"].get<Location>();
     }
     if(j.contains("registeredLocations")) {
-        hl.registeredLocations = j["registeredLocations"].get<std::unordered_map<std::string, Location>>();
+        j.at("registeredLocations").get_to(hl.registeredLocations);
     }
 }
 
@@ -986,7 +977,7 @@ void load_rooms(const std::filesystem::path &loc)
         auto vn = j["vn"].get<int64_t>();
         auto r = std::make_shared<Room>();
         j.get_to(*r);
-        world.emplace(vn, r);
+        Room::registry.emplace(vn, r);
         r->zone->rooms.add(r);
         r->activate();
     }
@@ -1081,7 +1072,7 @@ static void dump_exits(const std::filesystem::path &loc)
 {
     json exits;
 
-    for (auto &[v, r] : world)
+    for (auto &[v, r] : Room::registry)
     {
 
         for (auto &[d, e] : r->getDirections())
@@ -1100,7 +1091,7 @@ static void dump_rooms(const std::filesystem::path &loc)
 {
     json rooms;
 
-    for (auto &[v, r] : world)
+    for (auto &[v, r] : Room::registry)
     {
         rooms.push_back(*r);
     }
@@ -1306,9 +1297,9 @@ void load_items_initial(const std::filesystem::path &loc)
         auto data = j["data"];
         auto sh = std::make_shared<Object>();
         data.get_to(*sh);
-        uniqueObjects.emplace(id, sh);
+        Object::registry.emplace(id, sh);
     }
-    basic_mud_log("Loaded %d items", uniqueObjects.size());
+    basic_mud_log("Loaded %d items", Object::registry.size());
 }
 
 static json serialize_obj_relations(const Object *o)
@@ -1340,33 +1331,33 @@ static void deserialize_obj_relations(Object *o, const json &j)
 {
     if (j.contains("posted_to"))
     {
-        auto check = uniqueObjects.find(j["posted_to"].get<int64_t>());
-        if (check != uniqueObjects.end())
+        auto check = Object::registry.find(j["posted_to"].get<int64_t>());
+        if (check != Object::registry.end())
             o->posted_to = check->second.get();
     }
     if (j.contains("fellow_wall"))
     {
-        auto check = uniqueObjects.find(j["fellow_wall"].get<int>());
-        if (check != uniqueObjects.end())
+        auto check = Object::registry.find(j["fellow_wall"].get<int>());
+        if (check != Object::registry.end())
             o->fellow_wall = check->second.get();
     }
 
     if (j.contains("container"))
     {
-        auto check = uniqueObjects.find(j["container"].get<int>());
-        if (check != uniqueObjects.end())
+        auto check = Character::registry.find(j["container"].get<int>());
+        if (check != Character::registry.end())
             check->second->addToInventory(o);
     }
     else if (j.contains("carried_by"))
     {
-        auto check = uniqueCharacters.find(j["carried_by"].get<int>());
-        if (check != uniqueCharacters.end())
+        auto check = Character::registry.find(j["carried_by"].get<int>());
+        if (check != Character::registry.end())
             check->second->addToInventory(o);
     }
     else if (j.contains("worn_by"))
     {
-        auto check = uniqueCharacters.find(j["worn_by"].get<int>());
-        if (check != uniqueCharacters.end())
+        auto check = Character::registry.find(j["worn_by"].get<int>());
+        if (check != Character::registry.end())
         {
             check->second->addToEquip(o, j["worn_on"].get<int>());
         }
@@ -1378,7 +1369,7 @@ void load_items_finish(const std::filesystem::path &loc)
     for (auto j : load_from_file(loc, "items.json"))
     {
         auto id = j["id"].get<int>();
-        if (auto cf = uniqueObjects.find(id); cf != uniqueObjects.end())
+        if (auto cf = Object::registry.find(id); cf != Object::registry.end())
         {
             if (auto i = cf->second)
             {
@@ -1400,7 +1391,7 @@ static void dump_items(const std::filesystem::path &loc)
 {
     json j;
 
-    for (auto &[v, r] : uniqueObjects)
+    for (auto &[v, r] : Object::registry)
     {
         json j2;
         auto j3 = json::object();
@@ -1535,7 +1526,6 @@ void to_json(json& j, const TileOverride& p) {
     j["whereFlags"] = p.whereFlags;
     j["damage"] = p.damage;
     j["groundEffect"] = p.groundEffect;
-    j["environment"] = p.environment;
     j["exits"] = p.exits;
 }
 
@@ -1551,83 +1541,72 @@ void from_json(const json& j, TileOverride& p) {
         p.damage = j["damage"].get<int>();
     if (j.contains("groundEffect"))
         p.groundEffect = j["groundEffect"].get<int>();
-    if (j.contains("environment"))
-        p.environment = j["environment"].get<std::unordered_map<int, double>>();
     if (j.contains("exits"))
         p.exits = j["exits"].get<std::map<Direction, Destination>>();
 }
 
-void to_json(json& j, const GridShared& p) {
-    to_json(j, static_cast<const HasMudStrings&>(p));
-    if(p.defaultGroundSector) j["defaultGroundSector"] = p.defaultGroundSector.value();
-    if(p.defaultUnderSector) j["defaultUnderSector"] = p.defaultUnderSector.value();
-    if(p.defaultSkySector) j["defaultSkySector"] = p.defaultSkySector.value();
-    if(p.minX) j["minX"] = p.minX.value();
-    if(p.minY) j["minY"] = p.minY.value();
-    if(p.minZ) j["minZ"] = p.minZ.value();
-    if(p.maxX) j["maxX"] = p.maxX.value();
-    if(p.maxY) j["maxY"] = p.maxY.value();
-    if(p.maxZ) j["maxZ"] = p.maxZ.value();
-
-    for(const auto& [coor, over] : p.tileOverrides) {
-        if(over) j["tileOverrides"].push_back(std::make_pair(coor, over));
-    }
-}
-
-void from_json(const json& j, GridShared& p) {
-    from_json(j, static_cast<HasMudStrings&>(p));
-    if (j.contains("defaultGroundSector"))
-        p.defaultGroundSector = j["defaultGroundSector"].get<SectorType>();
-    if (j.contains("defaultUnderSector"))
-        p.defaultUnderSector = j["defaultUnderSector"].get<SectorType>();
-    if (j.contains("defaultSkySector"))
-        p.defaultSkySector = j["defaultSkySector"].get<SectorType>();
-    if (j.contains("minX"))
-        p.minX = j["minX"].get<int>();
-    if (j.contains("minY"))
-        p.minY = j["minY"].get<int>();
-    if (j.contains("minZ"))
-        p.minZ = j["minZ"].get<int>();
-    if (j.contains("maxX"))
-        p.maxX = j["maxX"].get<int>();
-    if (j.contains("maxY"))
-        p.maxY = j["maxY"].get<int>();
-    if (j.contains("maxZ"))
-        p.maxZ = j["maxZ"].get<int>();
-}
 
 void to_json(json& j, const GridTemplate& p) {
-    to_json(j, static_cast<const GridShared&>(p));
+    to_json(j, static_cast<const HasMudStrings&>(p));
     to_json(j, static_cast<const HasVnum&>(p));
+    if(!p.shapes.empty()) j["shapes"] = p.shapes;
+    if(!p.tileOverrides.empty()) j["tileOverrides"] = p.tileOverrides;
 
 }
 
 void from_json(const json& j, GridTemplate& p) {
-    from_json(j, static_cast<GridShared&>(p));
+    from_json(j, static_cast<HasMudStrings&>(p));
     from_json(j, static_cast<HasVnum&>(p));
+    if(j.contains("shapes")) j.at("shapes").get_to(p.shapes);
+    if(j.contains("tileOverrides")) j.at("tileOverrides").get_to(p.tileOverrides);
+}
+
+void to_json(json& j, const AbstractGridArea& p) {
+    to_json(j, static_cast<const HasMudStrings&>(p));
+    if(!p.shapes.empty()) {
+        auto j2 = json::object();
+        for(auto& [name, ptr] : p.shapes) {
+            j2[name] = *ptr;
+        }
+        j["shapes"] = j2;
+    }
+    if(!p.tileOverrides.empty()) j["tileOverrides"] = p.tileOverrides;
+}
+
+void from_json(const json& j, AbstractGridArea& p) {
+    from_json(j, static_cast<HasMudStrings&>(p));
+    if(j.contains("shapes")) {
+        // we have an object of key->data and need to use make_unique on data...
+        for (auto& [key, value] : j.at("shapes").get<json::object_t>()) {
+            Shape s{};
+            value.get_to(s);
+            p.shapes[key] = std::make_unique<Shape>(std::move(s));
+        }
+    }
+    if(j.contains("tileOverrides")) j.at("tileOverrides").get_to(p.tileOverrides);
 }
 
 void to_json(json& j, const Area& p) {
-    to_json(j, static_cast<const GridShared&>(p));
+    to_json(j, static_cast<const AbstractGridArea&>(p));
     to_json(j, static_cast<const HasVnum&>(p));
     to_json(j, static_cast<const HasZone&>(p));
 
 }
 
 void from_json(const json& j, Area& p) {
-    from_json(j, static_cast<GridShared&>(p));
+    from_json(j, static_cast<AbstractGridArea&>(p));
     from_json(j, static_cast<HasVnum&>(p));
     from_json(j, static_cast<HasZone&>(p));
 }
 
 void to_json(json& j, const Structure& p) {
-    to_json(j, static_cast<const GridShared&>(p));
+    to_json(j, static_cast<const AbstractGridArea&>(p));
     to_json(j, static_cast<const HasID&>(p));
 
 }
 
 void from_json(const json& j, Structure& p) {
-    from_json(j, static_cast<GridShared&>(p));
+    from_json(j, static_cast<AbstractGridArea&>(p));
     from_json(j, static_cast<HasID&>(p));
 }
 
@@ -1931,7 +1910,7 @@ static void dump_characters(const std::filesystem::path &loc)
 {
     json j = json::array();
 
-    for (auto &[v, r] : uniqueCharacters)
+    for (auto &[v, r] : Character::registry)
     {
         json j2 = json::object();
         auto j3 = json::object();
@@ -1972,7 +1951,7 @@ void load_characters_initial(const std::filesystem::path &loc)
         {
             isPlayer->second.character = c.get();
         }
-        uniqueCharacters.emplace(id, c);
+        Character::registry.emplace(id, c);
     }
 }
 
@@ -1984,7 +1963,7 @@ void load_characters_finish(const std::filesystem::path &loc)
         if(!j.contains("HasLocation")) continue;
 
         // basic_mud_log("Finishing Character %d", id);
-        if (auto cf = uniqueCharacters.find(id); cf != uniqueCharacters.end())
+        if (auto cf = Character::registry.find(id); cf != Character::registry.end())
         {
             auto ch = cf->second;
             auto hl = j["HasLocation"];
@@ -2147,6 +2126,52 @@ static void cleanup_state()
     }
 }
 
+
+void to_json(json &j, const ShapeBase &p)
+{
+    j["type"] = p.type;
+    j["priority"] = p.priority;
+    j["sectorType"] = p.sectorType;
+    if(!p.name.empty()) j["name"] = p.name;
+    if(!p.description.empty()) j["description"] = p.description;
+    j["geom"] = std::visit([](auto const& g) {
+        return json(g); // relies on to_json for BoxDim / RoundDim
+    }, p.geom);
+}
+
+void from_json(const json &j, ShapeBase &r) {
+    if(j.contains("type")) r.type = j["type"].get<ShapeType>();
+    if(j.contains("priority")) r.priority = j["priority"].get<int>();
+    if(j.contains("sectorType")) r.sectorType = j["sectorType"].get<SectorType>();
+    if(j.contains("name")) r.name = j["name"].get<std::string>();
+    if(j.contains("description")) r.description = j["description"].get<std::string>();
+    if (j.contains("geom")) {
+        const auto& g = j.at("geom");
+        switch (r.type) { // <- r.type (not p.type)
+            case ShapeType::Box:
+                r.geom = g.get<BoxDim>();
+                break;
+            case ShapeType::Round:
+                r.geom = g.get<RoundDim>();
+                break;
+        }
+    } else {
+        // optional: default the variant based on type
+        switch (r.type) {
+            case ShapeType::Box:   r.geom = BoxDim{};   break;
+            case ShapeType::Round: r.geom = RoundDim{}; break;
+        }
+    }
+}
+
+void to_json(json &j, const Shape &p) {
+    to_json(j, static_cast<const ShapeBase&>(p));
+}
+
+void from_json(const json &j, Shape &r) {
+    from_json(j, static_cast<ShapeBase&>(r));
+}
+
 void to_json(json &j, const struct help_index_element &r)
 {
     if (r.index && strlen(r.index))
@@ -2270,7 +2295,7 @@ PlayerData *create_player_character(int account_id, const json &j)
 {
     auto &acc = accounts[account_id];
     auto ch = std::make_shared<Character>();
-    ch->id = getNextID(lastCharacterID, uniqueCharacters);
+    ch->id = getNextID(lastCharacterID, Character::registry);
     auto &p = players[ch->id];
     p.id = ch->id;
     p.account = &acc;
@@ -2300,7 +2325,7 @@ PlayerData *create_player_character(int account_id, const json &j)
         ch->player_flags.set(PlayerFlag::forgetting_skill);
     }
 
-    uniqueCharacters.emplace(ch->id, ch);
+    Character::registry.emplace(ch->id, ch);
 
     init_char(ch.get());
 

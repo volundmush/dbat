@@ -428,6 +428,7 @@ struct Coordinates {
     int32_t x{0}, y{0}, z{0};
 
     bool operator==(const Coordinates& other) const;
+    explicit operator bool() const;
 
     void apply(Direction dir);
 };
@@ -449,8 +450,17 @@ struct Location {
     Location(Character* ch);
     Location(const std::shared_ptr<Room>& room);
     Location(const std::string& txt);
-    std::weak_ptr<AbstractLocation> al{};  // What unit contains this unit (room, area, char, obj)
-    Coordinates position;
+
+    Location& operator=(room_vnum rv);
+    Location& operator=(Room* room);
+    Location& operator=(const std::shared_ptr<Room>& room);
+
+    AbstractLocation* getLoc() const;
+
+    mutable std::string locationID{};
+    mutable Coordinates position{};
+    mutable std::weak_ptr<AbstractLocation> al{};  // What unit contains this unit (room, area, char, obj)
+    
     bool operator==(const Location& other) const;
     bool operator==(const room_vnum rv) const;
     bool operator==(const Room* room) const;
@@ -472,28 +482,28 @@ struct Location {
     std::optional<Destination> getExit(Direction dir) const;
     std::map<Direction, Destination> getExits() const;
 
-    virtual const std::vector<ExtraDescription>& getExtraDescription() const; // Returns the extra description data.
+    const std::vector<ExtraDescription>& getExtraDescription() const; // Returns the extra description data.
 
     double getEnvironment(int type) const;
     double setEnvironment(int type, double value);
     double modEnvironment(int type, double value);
     void clearEnvironment(int type);
 
-    void setRoomFlag(int flag, bool value = true) const;
-    void setRoomFlag(RoomFlag flag, bool value = true) const;
-    bool toggleRoomFlag(int flag) const;
-    bool toggleRoomFlag(RoomFlag flag) const;
+    void setRoomFlag(int flag, bool value = true);
+    void setRoomFlag(RoomFlag flag, bool value = true);
+    bool toggleRoomFlag(int flag);
+    bool toggleRoomFlag(RoomFlag flag);
     bool getRoomFlag(int flag) const;
     bool getRoomFlag(RoomFlag flag) const;
-    void setWhereFlag(WhereFlag flag, bool value = true) const;
-    bool toggleWhereFlag(WhereFlag flag) const;
+    void setWhereFlag(WhereFlag flag, bool value = true);
+    bool toggleWhereFlag(WhereFlag flag);
     bool getWhereFlag(WhereFlag flag) const;
     FlagHandler<RoomFlag>& getRoomFlags();
     FlagHandler<WhereFlag>& getWhereFlags();
 
     std::string getUID(bool active = false) const;
 
-    void sendText(const std::string& message) const;
+    void sendText(const std::string& message);
     
     template<typename... Args>
     void sendFmt(fmt::string_view format, Args&&... args) {
@@ -525,6 +535,7 @@ struct Location {
 
     std::vector<std::weak_ptr<Object>> getObjects() const;
     std::vector<std::weak_ptr<Character>> getPeople() const;
+    std::vector<std::weak_ptr<Structure>> getStructures() const;
 
     int getDamage() const;
     void setDamage(int amount);
@@ -538,7 +549,7 @@ struct Location {
     void setGroundEffect(int val);
     int modGroundEffect(int val);
 
-    SpecialFunc getSpecialFunc() const;
+    SpecialFunc getSpecialFunc();
 
     bool getIsDark();
     int getCookElement();
@@ -548,8 +559,8 @@ struct Location {
     struct Object* searchObjects(obj_vnum vnum, bool working = true, bool recurse = true);
     std::unordered_set<struct Object*> gatherFromObjects(const std::function<bool(Object*)> &func, bool recurse = true);
 
-    int countPlayers() const;
-    bool canGo(int dir) const;
+    int countPlayers();
+    bool canGo(int dir);
 
     // location editing
     void replaceExit(const Destination& dest);
@@ -639,8 +650,8 @@ struct HasLocation {
 
     std::unordered_map<std::string, Location> registeredLocations;
 
-    struct Room* getRoom() const;
-    room_vnum getRoomVnum() const;
+    struct Room* getRoom();
+    room_vnum getRoomVnum();
 
     virtual bool isActiveInLocation() const = 0;
 
@@ -648,6 +659,7 @@ struct HasLocation {
 
     void moveToLocation(const Location& loc);
     void leaveLocation();
+    void updateLocation();
     
     // virtual hooks
     virtual void onMoveToLocation(const Location& loc);
@@ -787,6 +799,7 @@ struct fmt::formatter<ObjectPrototype> {
 
 /* ================== Memory Structure for Objects ================== */
 struct Object : public HasID, public HasLocation, public HasInventory, public HasExtraDescriptions, public HasDgScripts, public HasMudStrings, public HasAffectFlags, public HasSubscriptions, public HasStats,public picky_data, std::enable_shared_from_this<Object> {
+    static NegativeKeyGuardUnorderedMap<int64_t, std::shared_ptr<Object>> registry;
     Object();
     ~Object();
     Object& operator=(const ObjectPrototype& proto);
@@ -809,7 +822,7 @@ struct Object : public HasID, public HasLocation, public HasInventory, public Ha
     struct Room* getAbsoluteRoom();
     bool isWorking();
 
-    Location getAbsoluteLocation() const;
+    Location getAbsoluteLocation();
 
     void clearLocation();
 
@@ -914,7 +927,10 @@ struct fmt::formatter<Object> {
 /* room-related structures ************************************************/
 
 struct Destination : public Location {
+    using Location::Location;
     using Location::operator=;
+    Destination() = default;
+    Destination(const Location& loc) : Location(loc) {}
     Direction dir{Direction::north}; /* Direction of the exit */
 
     std::string general_description{};       /* When look DIR.			*/
@@ -949,30 +965,28 @@ struct AbstractLocation {
     WeakBag<HasLocation> contents;
 
     template<typename T>
-    std::vector<std::weak_ptr<T>> getContents() {
-        std::vector<std::weak_ptr<T>> result;
-        auto snap = contents.snapshot_shared();
-        for (const auto& ptr : snap) {
-            if(auto item = std::dynamic_pointer_cast<T>(ptr)) {
+    auto getContents() {
+        WeakBag<T> result;
+        contents.for_each_shared([&](const auto& hl) {
+            if(auto item = std::dynamic_pointer_cast<T>(hl)) {
                 if (item->isActiveInLocation()) {
-                    result.push_back(item);
+                    result.add(item);
                 }
             }
-        }
+        });
         return result;
     }
 
     template<typename T>
-    std::vector<std::weak_ptr<T>> getContents(const Coordinates& coor) {
-        std::vector<std::weak_ptr<T>> result;
-        auto snap = contents.snapshot_shared();
-        for (const auto& ptr : snap) {
+    WeakBag<T> getContents(const Coordinates& coor) {
+        WeakBag<T> result;
+        contents.for_each_shared([&](const auto& ptr) {
             if(auto item = std::dynamic_pointer_cast<T>(ptr)) {
                 if (item->isActiveInLocation() && item->location.position == coor) {
-                    result.push_back(item);
+                    result.add(item);
                 }
             }
-        }
+        });
         return result;
     }
 
@@ -988,12 +1002,13 @@ struct AbstractLocation {
 
     virtual const std::vector<ExtraDescription>& getExtraDescription(const Coordinates& coor) const;
 
-    std::vector<std::weak_ptr<Object>> getObjects();
-    std::vector<std::weak_ptr<Character>> getPeople();
+    WeakBag<Object> getObjects();
+    WeakBag<Character> getPeople();
+    WeakBag<Structure> getStructures();
 
-    virtual std::vector<std::weak_ptr<Structure>> getStructures(const Coordinates& coor);
-    virtual std::vector<std::weak_ptr<Object>> getObjects(const Coordinates& coor);
-    virtual std::vector<std::weak_ptr<Character>> getPeople(const Coordinates& coor);
+    virtual WeakBag<Structure> getStructures(const Coordinates& coor);
+    virtual WeakBag<Object> getObjects(const Coordinates& coor);
+    virtual WeakBag<Character> getPeople(const Coordinates& coor);
 
     virtual std::optional<Destination> getDirection(const Coordinates& coor, Direction dir) = 0;
     virtual std::map<Direction, Destination> getDirections(const Coordinates& coor) = 0;
@@ -1047,6 +1062,11 @@ struct AbstractLocation {
     virtual bool validCoordinates(const Coordinates& coor) const;
 
     virtual bool buildwalk(const Coordinates& coor, Character* ch, Direction dir);
+
+    virtual void setString(const Coordinates& coor, const std::string& name, const std::string& value) = 0;
+    virtual void setSectorType(const Coordinates& coor, SectorType type) = 0;
+    virtual std::vector<ResetCommand> getResetCommands(const Coordinates& coor) = 0;
+    virtual void setResetCommands(const Coordinates& coor, const std::vector<ResetCommand>& cmds) = 0;
 };
 
 struct TileOverride : public HasResetCommands {
@@ -1057,33 +1077,154 @@ struct TileOverride : public HasResetCommands {
     FlagHandler<WhereFlag> whereFlags;
     int damage{0};
     int groundEffect{0};
-    std::unordered_map<int, double> environment;
     std::map<Direction, Destination> exits;
 };
 
-struct GridShared : public HasMudStrings {
+enum class ShapeType : uint8_t {
+    Box = 0,
+    Round = 1
+};
+
+struct AABB {
+    Coordinates min; // inclusive
+    Coordinates max; // inclusive
+    bool contains(const Coordinates& c) const noexcept {
+        return (c.x >= min.x && c.x <= max.x &&
+                c.y >= min.y && c.y <= max.y &&
+                c.z >= min.z && c.z <= max.z);
+    }
+};
+
+// ---------- Box geometry ----------
+struct BoxDim {
+    AABB box;
+
+    static BoxDim fromCorners(Coordinates a, Coordinates b) noexcept {
+        Coordinates lo{ std::min(a.x,b.x), std::min(a.y,b.y), std::min(a.z,b.z) };
+        Coordinates hi{ std::max(a.x,b.x), std::max(a.y,b.y), std::max(a.z,b.z) };
+        return BoxDim{ AABB{ lo, hi } };
+    }
+
+    // size is a count of tiles (>=1). Even sizes extend “more” toward + side; consistent > symmetric.
+    static BoxDim fromCenter(Coordinates c, int sx, int sy, int sz = 1) noexcept {
+        auto span = [](int c, int s){ int min = c - s/2; return std::pair{min, min + s - 1}; };
+        auto [minx,maxx] = span(c.x, sx);
+        auto [miny,maxy] = span(c.y, sy);
+        auto [minz,maxz] = span(c.z, sz);
+        return BoxDim{ AABB{ {minx,miny,minz}, {maxx,maxy,maxz} } };
+    }
+
+    bool contains(const Coordinates& c) const noexcept {
+        return box.contains(c);
+    }
+};
+
+// ---------- Round geometry (disk/cylinder in Z) ----------
+struct RoundDim {
+    Coordinates center;
+    int radius = 0;   // tiles
+    int zMin = 0;     // inclusive
+    int zMax = 0;     // inclusive
+    int r2  = 0;      // cached radius^2
+
+    static RoundDim disk(Coordinates c, int r, int zMin, int zMax) noexcept {
+        RoundDim d{c, r, zMin, zMax, r*r};
+        return d;
+    }
+
+    AABB bounds() const noexcept {
+        return AABB{
+            { center.x - radius, center.y - radius, zMin },
+            { center.x + radius, center.y + radius, zMax }
+        };
+    }
+
+    bool contains(const Coordinates& c) const noexcept {
+        if (c.z < zMin || c.z > zMax) return false;
+        auto dx = c.x - center.x;
+        auto dy = c.y - center.y;
+        return (dx*dx + dy*dy) <= r2;
+    }
+};
+
+// the serializable data for shapes.
+struct ShapeBase {
+    ShapeBase& operator=(const Shape& other);
+    ShapeType type{ShapeType::Box};
+    int priority{0};
+    SectorType sectorType{SectorType::inside};
+    std::string name{};
+    std::string description{};
+    std::variant<BoxDim, RoundDim> geom;
+};
+
+// This is used for defining "areas" for re-use.
+// We can both create Areas/Structures from them, and save one to them.
+struct GridTemplate : public HasMudStrings, public HasVnum {
+    // used for defining grid templates.
+    GridTemplate& operator=(const AbstractGridArea& other);
     using HasMudStrings::getName;
     using HasMudStrings::getLookDescription;
 
-    // the default sector type for undefined tiles.
-    // if left empty, the tiles are completely impassable / void.
-    // defaultGroundSector covers z = 0, defaultUnderSector covers z < 0, and defaultSkySector covers z > 0
-    std::optional<SectorType> defaultGroundSector, defaultUnderSector, defaultSkySector;
-    // The minimum and maximum coordinates for the grid area.
-    // It will 'expand' using the default tiles.
-    // This doesn't use more RAM unless a point of interest is created at those coordinates.
-    std::optional<int32_t> minX, maxX, minY, maxY, minZ, maxZ;
-
+    std::unordered_map<std::string, ShapeBase> shapes;
     std::unordered_map<Coordinates, TileOverride> tileOverrides;
 };
 
-struct GridTemplate : public GridShared, public HasVnum {
-    // used for defining grid templates.
+// The shape that's used for instances.
+struct Shape : public ShapeBase {
+    using ShapeBase::operator=;
+    Shape() = default;
+    explicit Shape(const ShapeBase& b);
+    int seq{0};
+
+    // Fast reject
+    AABB aabb() const noexcept { return cachedAabb; }
+    bool contains(const Coordinates& c) const noexcept;
+    void reComputeAABB();
+    AABB cachedAabb;      // filled on add/update
 };
 
-struct AbstractGridArea : public AbstractLocation, public GridShared, public HasSubscriptions {
+struct BucketKey {
+    int bx, by, bz;
+    bool operator==(const BucketKey& o) const noexcept {
+        return bx==o.bx && by==o.by && bz==o.bz;
+    }
+};
 
-    // location_data overrides (most implemented generically here). Subclasses still provide getZone().
+namespace std {
+    template<>
+    struct hash<BucketKey> {
+        std::size_t operator()(const BucketKey& coord) const noexcept {
+            // decent 3D hash
+            uint64_t h = 1469598103934665603ull;
+            auto mix=[&](int v){ h ^= uint64_t(uint32_t(v)); h *= 1099511628211ull; };
+            mix(coord.bx); mix(coord.by); mix(coord.bz); return size_t(h);
+        }
+    };
+}
+
+
+struct AbstractGridArea : public HasMudStrings, public AbstractLocation, public HasSubscriptions {
+    AbstractGridArea& operator=(const GridTemplate& other);
+    using HasMudStrings::getName;
+    using HasMudStrings::getLookDescription;
+
+    std::unordered_map<std::string, std::unique_ptr<Shape>> shapes;
+    mutable std::unordered_map<Coordinates, TileOverride> tileOverrides;
+
+    std::vector<Shape*> byPriority;
+    
+    int bucketSize = 32; // tiles per bucket edge
+    std::unordered_map<BucketKey, std::vector<Shape*>> buckets;
+
+    // --- Bookkeeping for stable tie-break
+    uint64_t nextSeq = 1; // incremented on add
+    void rebuildShapeIndex();
+
+    Shape* topShapeAt(const Coordinates& coor) const;
+
+    // Nearly-complete AbstractLocation implementation on AbstractGridArea. Child classes still need further
+    // specialization.
 
     bool validCoordinates(const Coordinates& coor) const override;
     const std::vector<ExtraDescription>& getExtraDescription(const Coordinates& coor) const override;
@@ -1112,6 +1253,11 @@ struct AbstractGridArea : public AbstractLocation, public GridShared, public Has
     void deleteExit(const Coordinates& coor, Direction dir) override;
 
     bool buildwalk(const Coordinates& coor, Character* ch, Direction dir) override;
+
+    void setString(const Coordinates& coor, const std::string& name, const std::string& value) override;
+    void setResetCommands(const Coordinates& coor, const std::vector<ResetCommand>& cmds) override;
+    std::vector<ResetCommand> getResetCommands(const Coordinates& coor) override;
+    void setSectorType(const Coordinates& coor, SectorType type) override;
 
 };
 
@@ -1143,6 +1289,8 @@ struct Structure : public AbstractGridArea, public HasID, public HasLocation, st
 
 /* ================== Memory Structure for room ======================= */
 struct Room : public AbstractLocation, public HasZone, public HasDgScripts, public HasMudStrings, public HasExtraDescriptions, public HasSubscriptions, public HasResetCommands, std::enable_shared_from_this<Room> {
+    static NegativeKeyGuardUnorderedMap<int, std::shared_ptr<Room>> registry;
+    
     Room();
 
     vnum getLocVnum() const override;
@@ -1284,6 +1432,11 @@ struct Room : public AbstractLocation, public HasZone, public HasDgScripts, publ
 
     bool buildwalk(const Coordinates& coor, Character* ch, Direction dir) override;
 
+    void setString(const Coordinates& coor, const std::string& name, const std::string& value) override;
+    void setResetCommands(const Coordinates& coor, const std::vector<ResetCommand>& cmds) override;
+    std::vector<ResetCommand> getResetCommands(const Coordinates& coor) override;
+    void setSectorType(const Coordinates& coor, SectorType type) override;
+
 };
 
 template <>
@@ -1353,12 +1506,6 @@ struct mob_special_data {
 struct queued_act {
     int level;
     int spellnum;
-};
-
-/* Structure used for chars following other chars */
-struct follow_type {
-    struct Character *follower;
-    struct follow_type *next;
 };
 
 
@@ -1485,6 +1632,8 @@ struct CharacterPrototype : public ThingPrototype {
 
 /* ================== Structure for player/non-player ===================== */
 struct Character : public HasID, public HasLocation, public HasEquipment, public HasInventory, public HasMudStrings, public HasDgScripts, public HasAffectFlags, public HasSubscriptions, public HasStats, std::enable_shared_from_this<Character> {
+    static NegativeKeyGuardUnorderedMap<int64_t, std::shared_ptr<Character>> registry;
+
     Character();
     ~Character();
     // this constructor below is to be used only for the mob_proto map.
@@ -1638,8 +1787,6 @@ struct Character : public HasID, public HasLocation, public HasEquipment, public
     /* Equipment array			*/
     struct Object *equipment[NUM_WEARS]{};
 
-    
-
     struct descriptor_data *desc{};    /* nullptr for mobiles			*/
 
     struct script_memory *memory{};    /* for mob memory triggers		*/
@@ -1649,11 +1796,11 @@ struct Character : public HasID, public HasLocation, public HasEquipment, public
     struct Character *next_affectv{};
     /* For round based affect wearoff	*/
 
-    struct follow_type *followers{};/* List of chars followers		*/
-    std::weak_ptr<Object> sits{};      /* What am I sitting on? */
-
+    struct Character *master{};    /* Who is char following? */
+    WeakBag<Character> followers{}; /* List of chars followers. master is the reverse */
+    
+    Handle<Object> sits{};      /* What am I sitting on? */
     struct Character *fighting{};    /* Opponent				*/
-    struct Character *master{};    /* Who is char following?		*/
     
     struct Character *blocks{};    /* Who am I blocking?    */
     struct Character *blocked{};   /* Who is blocking me?    */
@@ -1674,6 +1821,7 @@ struct Character : public HasID, public HasLocation, public HasEquipment, public
     struct Character *original{};
 
     WeakBag<Character> clones{};
+    void mergeClones();
     std::map<Skill, skill_data> skill;
 
     FlagHandler<CharacterFlag> character_flags{};

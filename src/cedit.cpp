@@ -2423,7 +2423,7 @@ void reassign_rooms()
 {
 
     /* remove old funcs */
-    for (auto &[vn, r] : world)
+    for (auto &[vn, r] : Room::registry)
         r->func = nullptr;
 
     /* reassign spec_procs */

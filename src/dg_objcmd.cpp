@@ -180,7 +180,7 @@ OCMD(do_oforce)
             obj_log(obj, "oforce called by object in NOWHERE");
         else
         {
-            auto people = get_room(room)->getPeople();
+            auto people = get_room(room)->getPeople().snapshot_weak();
             for (auto ch : filter_raw(people))
             {
                 if (valid_dg_target(ch, 0))
@@ -365,13 +365,13 @@ OCMD(do_opurge)
         if ((rm = obj_room(obj)) != NOWHERE)
         {
             auto room = get_room(rm);
-            auto people = room->getPeople();
+            auto people = room->getPeople().snapshot_weak();
             for (auto ch : filter_raw(people))
             {
                 if (IS_NPC(ch))
                     extract_char(ch);
             }
-            auto con = room->getObjects();
+            auto con = room->getObjects().snapshot_weak();
             for (auto o : filter_raw(con))
             {
                 if (o != obj)
@@ -726,7 +726,7 @@ OCMD(do_odoor)
             newexit->keyword = value;
             break;
         case 5: /* room        */
-            if (auto loc = resolveLocID(value)) {
+            if (auto loc = Location(value)) {
                 *newexit = loc;
             }
             else

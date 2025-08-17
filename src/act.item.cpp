@@ -898,7 +898,7 @@ ACMD(do_pack)
                     while (count < 4)
                     {
                         auto r = get_room(rnum);
-                        auto con = r->getObjects();
+                        auto con = r->getObjects().snapshot_weak();
                         for (auto o : filter_raw(con))
                             extract_obj(o);
                         count++;
@@ -912,7 +912,7 @@ ACMD(do_pack)
                     while (count < 4)
                     {
                         auto r = get_room(rnum);
-                        auto con = r->getObjects();
+                        auto con = r->getObjects().snapshot_weak();
                         for (auto o : filter_raw(con))
                             extract_obj(o);
                         count++;
@@ -926,7 +926,7 @@ ACMD(do_pack)
                     while (count < 4)
                     {
                         auto r = get_room(rnum);
-                        auto con = r->getObjects();
+                        auto con = r->getObjects().snapshot_weak();
                         for (auto o : filter_raw(con))
                             extract_obj(o);
                         count++;
@@ -1630,7 +1630,7 @@ ACMD(do_bid)
         ch->sendText("Syntax: bid [ list | # ] (amt)\r\nOr...\r\nSyntax: bid appraise (list number)\r\n");
         return;
     }
-    auto con = get_room(auct_room)->getObjects();
+    auto con = get_room(auct_room)->getObjects().snapshot_weak();
     for (auto obj : filter_raw(con))
     {
         list++;
@@ -1642,7 +1642,7 @@ ACMD(do_bid)
     {
         ch->sendText("@Y                                   Auction@n\r\n");
         ch->sendText("@c------------------------------------------------------------------------------@n\r\n");
-        auto con = get_room(auct_room)->getObjects();
+        auto con = get_room(auct_room)->getObjects().snapshot_weak();
         for (auto obj : filter_raw(con))
         {
             if (GET_AUCTER(obj) <= 0)
@@ -1689,7 +1689,7 @@ ACMD(do_bid)
             return;
         }
 
-        auto con = get_room(auct_room)->getObjects();
+        auto con = get_room(auct_room)->getObjects().snapshot_weak();
         for (auto obj : filter_raw(con))
         {
             if (GET_AUCTER(obj) <= 0)
@@ -1822,7 +1822,7 @@ ACMD(do_bid)
             ch->sendText("That item number is not found.\r\n");
             return;
         }
-        auto con = get_room(auct_room)->getObjects();
+        auto con = Location(auct_room).getObjects();
         for (auto obj : filter_raw(con))
         {
             if (GET_AUCTER(obj) <= 0)

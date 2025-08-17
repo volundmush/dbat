@@ -9,6 +9,8 @@
 #include "dbat/dg_scripts.h"
 #include "dbat/act.informative.h"
 
+NegativeKeyGuardUnorderedMap<int64_t, std::shared_ptr<Object>> Object::registry;
+
 Object::Object()
 {
     type = UnitType::object;
@@ -219,7 +221,7 @@ std::string Object::getUID(bool active) const
     return fmt::format("#O{}{}", id, active ? "!" : "");
 }
 
-Location Object::getAbsoluteLocation() const
+Location Object::getAbsoluteLocation()
 {
     if (location)
     {

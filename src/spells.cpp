@@ -90,7 +90,7 @@ ASPELL(spell_teleport)
 
     do
     {
-        to_room = Random::get(world)->second.get();
+        to_room = Random::get(Room::registry)->second.get();
     } while (to_room->room_flags.get(ROOM_PRIVATE) || to_room->room_flags.get(ROOM_GODROOM));
 
     act("$n slowly fades out of existence and is gone.",
