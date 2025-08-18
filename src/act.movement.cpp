@@ -873,9 +873,22 @@ int perform_move(Character *ch, int dir, int need_specials_check)
         return 0;
 
     auto ex = EXIT(ch, dir);
+    if(!ex) {
+        if(ch->location.buildwalk(ch, static_cast<Direction>(dir)))
+        {
+            ex = EXIT(ch, dir);
+        } else {
+            ch->sendText("Alas, you cannot go that way...\r\n");
+            return 0;
+        }
+    }
 
-    if ((!ex && !ch->location.buildwalk(ch, static_cast<Direction>(dir))) ||
-        (EXIT_FLAGGED(ex, EX_SECRET) && (EXIT_FLAGGED(ex, EX_CLOSED))))
+    if(!ex) {
+        ch->sendText("Alas, you cannot go that way...\r\n");
+        return 0;
+    }
+
+    if ((EXIT_FLAGGED(ex, EX_SECRET) && (EXIT_FLAGGED(ex, EX_CLOSED))))
     {
         ch->sendText("Alas, you cannot go that way...\r\n");
         return 0;

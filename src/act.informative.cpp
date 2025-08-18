@@ -33,6 +33,7 @@
 #include "dbat/transformation.h"
 #include "dbat/planet.h"
 #include "dbat/random.h"
+#include "dbat/graph.h"
 
 /* local functions */
 static void gen_map(const Location& loc, Character *ch, int num);
@@ -1243,22 +1244,28 @@ ACMD(do_map)
     gen_map(ch->location, ch, 1);
 }
 
+static const std::vector<std::string> MapKey = {
+    "@W               @D-[@CArea Map@D]-",
+    "@D-------------------------------------------@w",
+    "@WC = City, @wI@W = Inside, @GP@W = Plain, @gF@W = Forest",
+    "@DM@W = Mountain, @yH@W = Hills, @CS@W = Sky, @BW@W = Water",
+    "@bU@W = Underwater, @m$@W = Shop, @m#@W = Important,",
+    "@YD@W = Desert, @c~@W = Shallow Water, @4 @n@W = Lava,",
+    "@WLastly @RX@W = You.",
+    "@D-------------------------------------------",
+    "@D                  @CNorth@w",
+    "@D                    @c^@w",
+    "@D             @CWest @c< O > @CEast@w",
+    "@D                    @cv@w",
+    "@D                  @CSouth@w",
+    "@D                ---------@w"
+};
+
 static void print_map_key(Character *ch)
 {
-    ch->sendText("@W               @D-[@CArea Map@D]-\r\n");
-    ch->sendText("@D-------------------------------------------@w\r\n");
-    ch->sendText("@WC = City, @wI@W = Inside, @GP@W = Plain, @gF@W = Forest\r\n");
-    ch->sendText("@DM@W = Mountain, @yH@W = Hills, @CS@W = Sky, @BW@W = Water\r\n");
-    ch->sendText("@bU@W = Underwater, @m$@W = Shop, @m#@W = Important,\r\n");
-    ch->sendText("@YD@W = Desert, @c~@W = Shallow Water, @4 @n@W = Lava,\r\n");
-    ch->sendText("@WLastly @RX@W = You.\r\n");
-    ch->sendText("@D-------------------------------------------\r\n");
-    ch->sendText("@D                  @CNorth@w\r\n");
-    ch->sendText("@D                    @c^@w\r\n");
-    ch->sendText("@D             @CWest @c< O > @CEast@w\r\n");
-    ch->sendText("@D                    @cv@w\r\n");
-    ch->sendText("@D                  @CSouth@w\r\n");
-    ch->sendText("@D                ---------@w\r\n");
+    for(const auto&s : MapKey) {
+        ch->sendFmt("{}\r\n", s);
+    }
 }
 
 static void initialize_map(char map[9][10])
@@ -1280,14 +1287,16 @@ static void replace_map_symbols(char *buf)
     }
 }
 
+static const char *key_strings[] = {
+    "    @WC: City, @wI@W: Inside, @GP@W: Plain@n\r\n",
+    "    @gF@W: Forest, @DM@W: Mountain, @yH@W: Hills@n\r\n",
+    "    @CS@W: Sky, @BW@W: Water, @bU@W: Underwater@n\r\n",
+    "    @m$@W: Shop, @m#@W: Important, @YD@W: Desert@n\r\n",
+    "    @c~@W: Shallow Water, @4 @n@W: Lava, @RX@W: You@n\r\n"};
+
 static void print_map_line(Character *ch, int key, const char *buf)
 {
-    const char *key_strings[] = {
-        "    @WC: City, @wI@W: Inside, @GP@W: Plain@n\r\n",
-        "    @gF@W: Forest, @DM@W: Mountain, @yH@W: Hills@n\r\n",
-        "    @CS@W: Sky, @BW@W: Water, @bU@W: Underwater@n\r\n",
-        "    @m$@W: Shop, @m#@W: Important, @YD@W: Desert@n\r\n",
-        "    @c~@W: Shallow Water, @4 @n@W: Lava, @RX@W: You@n\r\n"};
+
 
     if (key < 5)
     {
@@ -1298,6 +1307,83 @@ static void print_map_line(Character *ch, int key, const char *buf)
         ch->sendText(buf);
     }
 }
+
+static const std::string compassTemplate = R"(        | {N} |
+| {NW:>2}| | {U} | |{NE:<2} |
+| {W:>2}| |@R\{@n{C}@R\}@n| |{E:<2} |
+| {SW:>2}| | {S} | |{SE:<2} |
+        | {D} |
+)";
+
+
+static std::vector<std::string> renderCompassLines(const Location& loc, Character *ch) {
+    auto exits = loc.getExits();
+    fmt::dynamic_format_arg_store<fmt::format_context> store;
+    std::unordered_map<std::string, std::string> compassSpots;
+
+    auto isClosed = [](Destination& e) {
+        return e.exit_flags[EX_CLOSED];
+    };
+
+    for(auto& [d, e] : exits) {
+        if(e.exit_flags[EX_SECRET]) {
+            continue; // Skip secret exits
+        }
+        switch(d) {
+            case Direction::north:
+                compassSpots["N"] = isClosed(e) ? "@rN@n" : "@CN@n";
+                break;
+            case Direction::northwest:
+                compassSpots["NW"] = isClosed(e) ? "@rNW@n" : "@CNW@n";
+                break;
+            case Direction::northeast:
+                compassSpots["NE"] = isClosed(e) ? "@rNE@n" : "@CNE@n";
+                break;
+            case Direction::southwest:
+                compassSpots["SW"] = isClosed(e) ? "@rSW@n" : "@CSW@n";
+                break;
+            case Direction::southeast:
+                compassSpots["SE"] = isClosed(e) ? "@rSE@n" : "@CSE@n";
+                break;
+            case Direction::south:
+                compassSpots["S"] = isClosed(e) ? "@rS@n" : "@CS@n";
+                break;
+            case Direction::east:
+                compassSpots["E"] = isClosed(e) ? "@rE@n" : "@CE@n";
+                break;
+            case Direction::west:
+                compassSpots["W"] = isClosed(e) ? "@rW@n" : "@CW@n";
+                break;
+            case Direction::up:
+                compassSpots["U"] = isClosed(e) ? "@yU@n" : "@YU@n";
+                break;
+            case Direction::down:
+                compassSpots["D"] = isClosed(e) ? "@yD@n" : "@YD@n";
+                break;
+            case Direction::inside:
+                if(compassSpots.contains("C")) compassSpots["C"] = isClosed(e) ? "@rB@n" : "@mB@n";
+                else compassSpots["C"] = isClosed(e) ? "@rI@n" : "@mI@n";
+                break;
+            case Direction::outside:
+                if(compassSpots.contains("C")) compassSpots["C"] = isClosed(e) ? "@rB@n" : "@mB@n";
+                else compassSpots["C"] = isClosed(e) ? "@rO@n" : "@mO@n";
+                break;
+        }
+    }
+
+    for(const auto& [key, val] : compassSpots) {
+        store.push_back(fmt::arg(key.c_str(), val));
+    }
+
+    auto formatted = fmt::vformat(compassTemplate, store);
+
+    std::vector<std::string> split;
+    boost::split(split, formatted, boost::is_any_of("\r\n"));
+    return std::move(split);
+}
+
+
+
 
 static void gen_map(const Location& loc, Character *ch, int num)
 {

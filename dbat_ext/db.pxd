@@ -19,17 +19,14 @@ cdef extern from "dbat/db.h":
     int getNextAccountID()
 
     void load_config()
-    map[int, shared_ptr[structs.Room]] world
     structs.Room* get_room(int vn)
 
     map[int, structs.Zone] zone_table
     map[int, structs.CharacterPrototype] mob_proto
     map[int, structs.ObjectPrototype] obj_proto
 
-    unordered_map[int, shared_ptr[structs.Character]] uniqueCharacters
     vector[weak_ptr[structs.Character]] getAllCharacters()
 
-    map[int, shared_ptr[structs.Object]] uniqueObjects
     vector[weak_ptr[structs.Object]] getAllObjects()
 
     map[int, structs.Account] accounts

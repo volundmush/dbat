@@ -49,3 +49,10 @@ void Coordinates::apply(Direction dir)
         break;
     }
 }
+
+Coordinates Coordinates::get_direction_offset(Direction dir)
+{
+    auto offset = *this;
+    offset.apply(dir);
+    return offset;
+}

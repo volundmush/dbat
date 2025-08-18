@@ -3556,18 +3556,80 @@ static void convert_reset_commands() {
     }
 }
 
+struct PlanetCenterPoint {
+    std::string name{};
+    room_vnum vn{NOTHING};
+    std::string tilePrint;
+    int radius{0};
+};
+
+static const std::vector<PlanetCenterPoint> centerPoints = {
+    {"earth", 40979, "@gE@n", 5},
+    {"vegeta", 32365, "@yV@n", 5},
+    {"frigid", 30889, "@cF@n", 5},
+    {"namek", 42880, "@GN@n", 5},
+    {"konack", 27065, "@MK@n", 5},
+    {"aether", 41959, "@bA@n", 5},
+    {"yardrat", 34899, "@mY@n", 5},
+    {"kanassa", 53859, "@cK@n", 5},
+    {"cerria", 59071, "@mC@n", 5},
+    {"arlia", 52434, "@MA@n", 5},
+    {"zenith", 50772, "@CZ@n", 2},
+};
+
+
+Coordinates getSpaceCoordinate(room_vnum vn)
+{
+    for (int row = 0; row < 200; ++row) {
+        for (int col = 0; col < 200; ++col) {
+            if (mapnums[row][col] == vn) {
+                Coordinates out;
+                // Cartesian mapping:
+                // - origin at center (MAP_W/2, MAP_H/2)
+                // - +x to the right, +y up (so rows are inverted)
+                out.x = col - (200 / 2);   // range: [-100, 99]
+                out.y = (200 / 2) - row;   // range: [100, -99]
+                out.z = 0;                   // space plane is z = 0
+                return out;
+            }
+        }
+    }
+
+    // You said vn is guaranteed to exist; this is just a safety fallback.
+    return Coordinates{0,0,0};
+}
+
 static void create_area() {
     auto a = std::make_shared<Area>();
     a->vn = 1;
     areas[a->vn] = a;
-    a->strings["name"] = "Test Area";
+    a->strings["name"] = "Space";
 
+    auto dim = BoxDim::fromCenter({}, 200, 200);
+    auto s = std::make_unique<Shape>();
+    s->geom = dim;
+    s->type = ShapeType::Box;
+    s->sectorType = SectorType::space;
+    a->shapes["space"] = std::move(s);
+
+    for(const auto& cp : centerPoints) {
+        auto coor = getSpaceCoordinate(cp.vn);
+        auto rd = RoundDim::disk(coor, cp.radius, 0, 0);
+        auto s = std::make_unique<Shape>();
+        s->type = ShapeType::Round;
+        s->geom = rd;
+        s->priority = 1;
+        a->shapes[cp.name] = std::move(s);
+    }
+    a->rebuildShapeIndex();
 
     auto &z = zone_table[1];
     a->zone.reset(&z);
     auto p = findPlayer("Wayland");
     Location loc;
     loc.al = a;
+    // set to Earth...
+    loc.position = getSpaceCoordinate(40979);
     p->moveToLocation(loc);
 }
 

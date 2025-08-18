@@ -246,6 +246,7 @@ cdef extern from "dbat/structs.h":
         bool isProvidingLight()
         double currentGravity()
     
+    cdef unordered_map[int64_t, shared_ptr[Object]] Object_registry "Object::registry"
 
     cdef cppclass Destination(Location):
         string general_description
@@ -279,6 +280,8 @@ cdef extern from "dbat/structs.h":
         double modEnvironment(int type, double value)
         void clearEnvironment(int type)
         unordered_map[int, double] environment
+
+    cdef unordered_map[int, shared_ptr[Room]] Room_registry "Room::registry"
 
     cdef cppclass time_info_data:
         double remainder
@@ -336,6 +339,8 @@ cdef extern from "dbat/structs.h":
     cdef cppclass Character(AbstractThing):
         shared_ptr[Character] shared()
         char* title
+    
+    cdef unordered_map[int64_t, shared_ptr[Character]] Character_registry "Character::registry"
 
     cdef struct weather_data:
         pass

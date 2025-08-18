@@ -51,6 +51,7 @@
 #include "fmt/format.h"
 #include "fmt/printf.h"
 #include "fmt/ranges.h"
+#include "fmt/args.h"
 
 #include <boost/algorithm/string.hpp>
 #include <boost/range/adaptor/reversed.hpp>

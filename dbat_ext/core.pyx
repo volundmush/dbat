@@ -51,17 +51,17 @@ cdef class RoomDB:
         return orjson.loads(self._dump(r))
 
     def __iter__(self) -> typing.AsyncGenerator[dict, None]:
-        for vn in db.world:
+        for vn in structs.Room_registry:
             yield orjson.loads(self._dump(vn.second.get()))
     
     def __len__(self) -> int:
-        return db.world.size()
+        return structs.Room_registry.size()
     
     def __contains__(self, vn: int) -> bool:
-        return db.world.find(vn) != db.world.end()
+        return structs.Room_registry.find(vn) != structs.Room_registry.end()
     
     def keys(self) -> typing.AsyncGenerator[int, None]:
-        for vn in db.world:
+        for vn in structs.Room_registry:
             yield vn.first
 
 

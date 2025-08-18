@@ -7,9 +7,7 @@
  *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
  *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
  ************************************************************************ */
-#include <boost/algorithm/string.hpp>
 #include <queue>
-
 #include "dbat/graph.h"
 #include "dbat/send.h"
 #include "dbat/comm.h"
@@ -111,6 +109,77 @@ std::optional<std::vector<PathNode>> find_bfs_path(Location &src, Location &targ
 
     // No path found.
     return std::nullopt;
+}
+
+/* 
+This also does a Breadth-First traversal but the goal isn't to find a destination, but to gather our surroundings
+based on coordinates. The first time we visit a given coordinate it 'wins', we will not be overwriting it in the
+output.
+
+This will ultimately be used for rendering a tilemap.
+*/
+std::unordered_map<Coordinates, Destination> gatherSurroundings(const Location& loc, Character *ch, int minX = -4, int maxX = 4, int minY = -4, int maxY = 4, const std::function<bool(const Destination&, Character*)> is_valid) {
+    std::unordered_map<Coordinates, Destination> tiles;
+
+    // Although we're given a start location with its own coordinates, we can't rely on it because ROOMS don't use them.
+    // So we'll be determining relative coordinates based on what DIRECTIONS we go. IE: going North is y+1.
+    // Coordinates::apply(dir) will modify the Coordinates object appropriately while Coordinates::get_direction_offset(dir)
+    // returns a new Coordinates object with the modified offset.
+    Coordinates start{0,0,0};
+
+    auto filterDirections = [&](Coordinates current, const Location& l) {
+        std::unordered_map<Direction, std::tuple<Coordinates, Destination>> filtered;
+        for (const auto& [dir, dest] : l.getExits())
+        {
+            // We want to skip inside/outside directions
+            // and up/down as they don't fit on a flat map.
+            switch(dir) {
+                case Direction::outside:
+                case Direction::inside:
+                case Direction::up:
+                case Direction::down:
+                    continue;
+            }
+
+            // stay in bounds...
+            Coordinates newCoor = current.get_direction_offset(dir);
+            if(newCoor.x < minX || newCoor.x > maxX || newCoor.y < minY || newCoor.y > maxY)
+                continue;
+
+            // don't revisit coordinates we've already been to.
+            if(tiles.contains(newCoor))
+                continue;
+
+            // if we're provided with a filter func, use it here.
+            if(is_valid && !is_valid(dest, ch))
+                continue;
+
+            filtered[dir] = {newCoor, dest};
+        }
+        return filtered;
+    };
+
+    // BFS setup
+    tiles[start] = loc;
+
+    std::queue<std::pair<Coordinates, Destination>> frontier;
+    frontier.push({start, loc});
+
+    while (!frontier.empty())
+    {
+        auto [current, location] = frontier.front();
+        frontier.pop();
+
+        for (const auto& [dir, dt] : filterDirections(current, location))
+        {
+            auto [coor, dest] = dt;
+
+            tiles[coor] = dest;
+            frontier.push({coor, dest});
+        }
+    }
+
+    return tiles;
 }
 
 int find_first_step(Location &src, Location &target)

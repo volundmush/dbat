@@ -991,6 +991,7 @@ void load_areas_initial(const std::filesystem::path &loc)
         auto r = std::make_shared<Area>();
         j.get_to(*r);
         areas.emplace(vn, r);
+        r->rebuildShapeIndex();
     }
 }
 
@@ -1028,6 +1029,7 @@ void load_structures_initial(const std::filesystem::path &loc)
         auto r = std::make_shared<Structure>();
         j.get_to(*r);
         structures.emplace(id, r);
+        r->rebuildShapeIndex();
     }
 }
 
@@ -2137,6 +2139,7 @@ void to_json(json &j, const ShapeBase &p)
     j["geom"] = std::visit([](auto const& g) {
         return json(g); // relies on to_json for BoxDim / RoundDim
     }, p.geom);
+    if(!p.tileDisplay.empty()) j["tileDisplay"] = p.tileDisplay;
 }
 
 void from_json(const json &j, ShapeBase &r) {
@@ -2162,6 +2165,7 @@ void from_json(const json &j, ShapeBase &r) {
             case ShapeType::Round: r.geom = RoundDim{}; break;
         }
     }
+    if(j.contains("tileDisplay")) r.tileDisplay = j["tileDisplay"];
 }
 
 void to_json(json &j, const Shape &p) {

@@ -431,6 +431,7 @@ struct Coordinates {
     explicit operator bool() const;
 
     void apply(Direction dir);
+    Coordinates get_direction_offset(Direction dir);
 };
 
 template <>
@@ -1078,6 +1079,8 @@ struct TileOverride : public HasResetCommands {
     int damage{0};
     int groundEffect{0};
     std::map<Direction, Destination> exits;
+    // an override to display tiles differently than SectorType
+    std::string tileDisplay{};
 };
 
 enum class ShapeType : uint8_t {
@@ -1156,6 +1159,8 @@ struct ShapeBase {
     std::string name{};
     std::string description{};
     std::variant<BoxDim, RoundDim> geom;
+    // an override to display tiles differently.
+    std::string tileDisplay{};
 };
 
 // This is used for defining "areas" for re-use.
