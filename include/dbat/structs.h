@@ -101,6 +101,7 @@ struct Account {
     std::vector<std::string> customs;
     std::vector<int> characters;
     std::unordered_set<descriptor_data*> descriptors;
+    // this is used by Cython.
     std::unordered_map<int64_t, std::string> connections;
 
     void modRPP(int amt);
@@ -192,6 +193,7 @@ struct Zone {
     void reset();
 
     std::string name{};            /* name of this zone                  */
+    std::string colorName{};   // color name to display.
     std::string builders{};          /* namelist of builders allowed to    */
     /* modify this zone.		  */
     int lifespan{5};           /* how long between resets (minutes)  */
@@ -208,6 +210,7 @@ struct Zone {
      *   2: Just reset.
      */
     WeakBag<Room> rooms;
+    WeakBag<Area> areas;
     WeakBag<Character> npcsInZone;
     WeakBag<Character> playersInZone;
     WeakBag<Object> objectsInZone;
@@ -1718,7 +1721,6 @@ struct Character : public HasID, public HasLocation, public HasEquipment, public
 
     std::shared_ptr<Character> shared();
 
-    char *title{};
     Race race{Race::spirit};
     std::optional<SubRace> subrace{};
     Sensei sensei{Sensei::commoner};
@@ -1789,9 +1791,6 @@ struct Character : public HasID, public HasLocation, public HasEquipment, public
     /* affected by what combat spells	*/
     struct queued_act *actq{};    /* queued spells / other actions	*/
 
-    /* Equipment array			*/
-    struct Object *equipment[NUM_WEARS]{};
-
     struct descriptor_data *desc{};    /* nullptr for mobiles			*/
 
     struct script_memory *memory{};    /* for mob memory triggers		*/
@@ -1856,8 +1855,6 @@ struct Character : public HasID, public HasLocation, public HasEquipment, public
     std::optional<Race> mimic{};
 
     /* All below added by Iovan for sure o.o */
-    char *clan{};
-    int crank{}; // clan rank
     char *voice{}; /* PC's snet voice */
     char *feature{};
     char *temp_prompt{};

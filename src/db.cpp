@@ -41,7 +41,6 @@
 #include "dbat/guild.h"
 #include "dbat/handler.h"
 #include "dbat/mail.h"
-#include "dbat/clan.h"
 #include "dbat/boards.h"
 #include "dbat/constants.h"
 #include "dbat/spells.h"
@@ -511,11 +510,6 @@ void boot_db_socials() {
     boot_social_messages();
 }
 
-void boot_db_clans() {
-    basic_mud_log("Loading Clans.");
-    clanBoot();
-}
-
 void boot_db_commands() {
     basic_mud_log("Building command list.");
     create_command_list(); /* aedit patch -- M. Scott */
@@ -579,7 +573,6 @@ void boot_db_new() {
     boot_db_world();
     boot_db_mail();
     boot_db_socials();
-    boot_db_clans();
     boot_db_commands();
     boot_db_help();
     boot_db_specials();
@@ -1513,7 +1506,7 @@ void Zone::reset()
 
     if (!pre_reset(number))
     {
-        rooms.for_each([](auto r) {
+        rooms.for_each_shared([](auto r) {
             if(auto commands = r->resetCommands; !commands.empty()) {
                 Location l(r);
                 l.executeResetCommands(commands);
@@ -1522,6 +1515,18 @@ void Zone::reset()
 
         rooms.for_each([](auto r) {
             reset_wtrigger(r);
+        });
+
+        areas.for_each_shared([](auto a) {
+            Location loc;
+            loc.al = a;
+            for(auto& [coor, to] : a->tileOverrides) {
+                if(auto commands = to.resetCommands; !commands.empty()) {
+                    loc.position = coor;
+                    loc.locationID = loc.getLocID();
+                    loc.executeResetCommands(commands);
+                }
+            }
         });
         
     }
@@ -1707,7 +1712,6 @@ void init_char(Character *ch) {
     int i;
 
     ch->setBaseStat("money_carried", 1500);
-    GET_CLAN(ch) = strdup("None.");
     ch->setBaseStat("practices", 600);
 
 

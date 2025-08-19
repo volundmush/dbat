@@ -87,7 +87,6 @@ const struct command_info cmd_info[] = {
     {"check", "ch", POS_STANDING, do_not_here, 1, ADMLVL_NONE, 0, 0},
     {"checkload", "checkl", POS_DEAD, do_checkloadstatus, 0, ADMLVL_GOD, 0, 0},
     {"chown", "cho", POS_DEAD, do_chown, 1, ADMLVL_IMPL, 0, 0},
-    {"clan", "cla", POS_DEAD, do_clan, 0, ADMLVL_NONE, 0, 0},
     {"clear", "cle", POS_DEAD, do_gen_ps, 0, ADMLVL_NONE, SCMD_CLEAR, 0},
     {"close", "cl", POS_SITTING, do_gen_door, 0, ADMLVL_NONE, SCMD_CLOSE, 0},
     {"closeeyes", "closeey", POS_RESTING, do_eyec, 0, ADMLVL_NONE, 0, 1},

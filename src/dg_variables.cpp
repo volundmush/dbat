@@ -685,10 +685,7 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
                 }
                 else if (!strcasecmp(field, "clan"))
                 {
-                    if (GET_CLAN(c) && strstr(GET_CLAN(c), subfield))
-                        strcpy(str, "1");
-                    else
-                        strcpy(str, "0");
+                    strcpy(str, "0");
                 }
                 else if (!strcasecmp(field, "class"))
                 {

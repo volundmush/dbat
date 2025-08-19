@@ -176,8 +176,6 @@ CharacterPrototype *Character::getProto() const
 
 Character::~Character()
 {
-    if (title)
-        free(title);
     struct affected_type *cmtemp;
 
     while (affected)

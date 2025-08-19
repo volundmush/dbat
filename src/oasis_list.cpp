@@ -308,7 +308,7 @@ void list_zones(Character *ch)
             if (depth > 0)
                 linePrefix += (isLast ? "`-" : "|-");
 
-            ch->sendFmt("{}[@g{:3d}@n] @c{}@n\r\n", linePrefix, z->number, z->name);
+            ch->sendFmt("{}[@g{:3d}@n] @c{} [Rooms: {}] [Areas: {}]@n\r\n", linePrefix, z->number, z->name, z->rooms.live_count(), z->areas.live_count());
 
             auto children = z->getChildren();
             if (children.empty())
@@ -374,7 +374,14 @@ void print_zone(Character *ch, zone_vnum vnum)
     if(z.rooms) {
         ch->send_to("@gRoom List:\r\n");
         z.rooms.for_each([&](auto r) {
-            ch->send_to("    @g%-5d@n) @c%s\r\n", r->getVnum(), r->getName());
+            ch->sendFmt("    @g{}@n) @c{}{}{}\r\n", r->getVnum(), r->getName(), r->proto_script.empty() ? "" : fmt::format(" {}", r->scriptString()), r->resetCommands.empty() ? "" : fmt::format(" [ResetCommands: {}]", r->resetCommands.size()));
+        });
+    }
+
+    if(z.areas) {
+        ch->send_to("@gAreas:\r\n");
+        z.areas.for_each([&](auto a) {
+            ch->sendFmt("    @g{}@n) @c{}@n\r\n", a->getVnum(), a->getName());
         });
     }
 }

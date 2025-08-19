@@ -992,6 +992,8 @@ void load_areas_initial(const std::filesystem::path &loc)
         j.get_to(*r);
         areas.emplace(vn, r);
         r->rebuildShapeIndex();
+        auto z = r->getZone();
+        z->areas.add(r);
     }
 }
 
@@ -1671,8 +1673,6 @@ void to_json(json &j, const Character &c)
             j["bodyparts"].push_back(i);
         }
 
-    if (c.title && strlen(c.title))
-        j["title"] = c.title;
     j["race"] = c.race;
     j["sensei"] = c.sensei;
 
@@ -1731,8 +1731,6 @@ void to_json(json &j, const Character &c)
             j["lboard"].push_back(std::make_pair(i, c.lboard[i]));
     }
 
-    if (c.clan && strlen(c.clan))
-        j["clan"] = c.clan;
     if (c.mutations)
         j["mutations"] = c.mutations;
     if (c.bio_genomes)
@@ -1786,8 +1784,6 @@ void from_json(const json &j, Character &c)
     if (j.contains("appearances"))
         c.appearances = j["appearances"];
 
-    if (j.contains("title"))
-        c.title = strdup(j["title"].get<std::string>().c_str());
     if (j.contains("race"))
         c.race = j["race"];
 
@@ -1863,11 +1859,6 @@ void from_json(const json &j, Character &c)
             c.lboard[i[0].get<int>()] = i[1];
         }
     }
-
-    if (j.contains("clan"))
-        c.clan = strdup(j["clan"].get<std::string>().c_str());
-    if (j.contains("crank"))
-        c.crank = j["crank"];
 
     if (j.contains("conditions"))
     {

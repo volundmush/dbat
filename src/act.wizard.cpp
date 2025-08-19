@@ -1658,7 +1658,7 @@ static void do_stat_character(Character *ch, Character *k)
     }
     else
 
-        ch->send_to("Title: %s\r\n", k->title ? k->title : "<None>");
+        ch->sendFmt("Title: {}\r\n", k->getString("title"));
 
     ch->send_to("L-Des: %s@n", k->getRoomDescription() ? k->getRoomDescription() : "<None>\r\n");
     snprintf(buf, sizeof(buf), "%s", sensei::getName(k->sensei).c_str());

@@ -459,10 +459,8 @@ extern bool OBJ_FLAGGED(Object *obj, int flag);
 #define GET_AGE(ch)     ((ch)->time.currentAge())
 
 #define GET_PC_NAME(ch)    ((ch)->getName())
-#define GET_NAME(ch)    (IS_NPC(ch) ? \
-             (ch)->getShortDescription() : GET_PC_NAME(ch))
-#define GET_TITLE(ch)   ((ch)->desc ? ((ch)->desc->title ? (ch)->desc->title : "[Unset Title]") : "@D[@GNew User@D]")
-#define GET_USER_TITLE(d) ((d)->title)
+#define GET_NAME(ch)    (IS_NPC(ch) ? (ch)->getShortDescription() : GET_PC_NAME(ch))
+#define GET_TITLE(ch)   ((ch)->getString("title").empty() ? "[Unset Title]" : (char*)((ch)->getString("title").data()))
 #define GET_PHASE(ch)   ((ch)->getBaseStat<int>("starphase"))
 #define GET_MIMIC(ch)   ((ch)->mimic ? (ch)->mimic->getID()+1 : 0)
 #define GET_VOICE(ch)   ((ch)->voice)

@@ -37,7 +37,6 @@
 #include "dbat/combat.h"
 #include "dbat/fight.h"
 #include "dbat/local_limits.h"
-#include "dbat/clan.h"
 #include "dbat/mail.h"
 #include "dbat/constants.h"
 #include "dbat/screen.h"
@@ -287,7 +286,6 @@ static std::vector<GameSystem> gameSystems = {
         GameSystem("point_update", 100.0, point_update),
         GameSystem("player_misc_update", 100.0, player_misc_update),
         GameSystem("kaioken_update", 100.0, kaioken_update),
-        GameSystem("clan_update", 60.0, clan_update),
         GameSystem("record_usage", 5.0, record_usage),
         GameSystem("save_mud_time", 30.0, saveMudTimeWrapper),
         GameSystem("extract_pending_chars", 0.0, extract_pending_chars),

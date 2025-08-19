@@ -579,8 +579,6 @@ extern DECCMD(do_fix);
 
 extern DECCMD(do_resurrect);
 
-extern DECCMD(do_clan);
-
 extern DECCMD(do_aid);
 
 extern DECCMD(do_assist);

@@ -160,8 +160,6 @@ Character &Character::operator=(CharacterPrototype &other)
     mob_flags = other.mob_flags;
     bio_genomes = other.bio_genomes;
     mutations = other.mutations;
-    clan = other.clan ? strdup(other.clan) : nullptr;
-    crank = other.crank;
     size = other.size;
 
     return *this;

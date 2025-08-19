@@ -54,7 +54,6 @@ it.
 #include "dbat/interpreter.h"
 #include "dbat/handler.h"
 #include "dbat/improved-edit.h"
-#include "dbat/clan.h"
 #include "dbat/dg_comm.h"
 #include "dbat/config.h"
 
@@ -492,16 +491,6 @@ void show_board(obj_vnum board_vnum, Character *ch) {
     } else {
         obj = read_object(board_vnum, REAL);
         bnum = GET_OBJ_VNUM(obj);
-        char clan[120];
-        if (OBJ_FLAGGED(obj, ITEM_CBOARD)) {
-            if (GET_CLAN(ch)) {
-                sprintf(clan, "%s", GET_CLAN(ch));
-            }
-            if (!strstr(obj->getLookDescription(), clan)) {
-                                ch->sendText("You are incapable of reading this board!\r\n");
-                return;
-            }
-        }
                 ch->send_to("@W                  This is the %20s\r\n", obj->getShortDescription());
                 ch->sendText("@rO@b============================================================================@rO@n\n"
                          "     @D[@GX@D] means you have read the message, @D[@RX@D] means you have not.\r\n"
@@ -610,16 +599,6 @@ void board_display_msg(obj_vnum board_vnum, Character *ch, int arg) {
     } else {
         obj = read_object(board_vnum, REAL);
         bnum = GET_OBJ_VNUM(obj);
-        char clan[200];
-        if (OBJ_FLAGGED(obj, ITEM_CBOARD)) {
-            if (GET_CLAN(ch)) {
-                sprintf(clan, "%s", GET_CLAN(ch));
-            }
-            if (!strstr(obj->getLookDescription(), clan)) {
-                                ch->sendText("You are incapable of reading this board!\r\n");
-                return;
-            }
-        }
         extract_obj(obj);
     }
 
@@ -1016,26 +995,11 @@ void remove_board_msg(obj_vnum board_vnum, Character *ch, int arg) {
         basic_mud_log("Board doesn't exists! Weird.");
         return;
     } else {
-        char clan[120];
-        obj = read_object(board_vnum, REAL);
-        if (OBJ_FLAGGED(obj, ITEM_CBOARD)) {
-            if (GET_CLAN(ch)) {
-                sprintf(clan, "%s", GET_CLAN(ch));
-            }
-            if (clanIsModerator(clan, ch) && strstr(obj->getLookDescription(), clan)) {
-                                ch->sendText("Exercising your clan leader powers....\r\n");
-            } else if (GET_ADMLEVEL(ch) < REMOVE_LVL(thisboard) && strcmp(GET_NAME(ch), MESG_POSTER_NAME(cur))) {
+        if (GET_ADMLEVEL(ch) < REMOVE_LVL(thisboard) && strcmp(GET_NAME(ch), MESG_POSTER_NAME(cur))) {
                                 ch->sendText("You can't remove other people's messages.\r\n");
                 extract_obj(obj);
                 return;
             }
-        } else if (!OBJ_FLAGGED(obj, ITEM_CBOARD)) {
-            if (GET_ADMLEVEL(ch) < REMOVE_LVL(thisboard) && strcmp(GET_NAME(ch), MESG_POSTER_NAME(cur))) {
-                                ch->sendText("You can't remove other people's messages.\r\n");
-                extract_obj(obj);
-                return;
-            }
-        }
         extract_obj(obj);
     }
 

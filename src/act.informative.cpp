@@ -26,7 +26,6 @@
 #include "dbat/screen.h"
 #include "dbat/mail.h"
 #include "dbat/guild.h"
-#include "dbat/clan.h"
 #include "dbat/players.h"
 #include "dbat/account.h"
 #include "dbat/improved-edit.h"
@@ -2364,19 +2363,6 @@ static void look_at_char(Character *i, Character *ch)
         }
     }
     ch->sendText("\r\n");
-    if (GET_CLAN(i) && !strstr(GET_CLAN(i), "None"))
-    {
-        sprintf(buf, "%s", GET_CLAN(i));
-        clan = true;
-    }
-    if (GET_CLAN(i) == nullptr)
-    {
-        clan = false;
-    }
-    if (!IS_NPC(i))
-    {
-        ch->send_to("            @D[@mClan        @D: @W%-20s@D]@n\r\n", clan ? buf : "None.");
-    }
     if (!IS_NPC(i))
     {
         ch->sendText("\r\n         @D----------------------------------------@n\r\n");
@@ -4757,10 +4743,6 @@ ACMD(do_score)
             }
 
             ch->send_to("  @D| @CModel@D: %15s@D,    @CUGP@D: @G%15s@D,  @CVersion@D: @r%-12s@D|@n\n", model, absorb > 0 ? "@RN/A" : add_commas(GET_UP(ch)).c_str(), version);
-        }
-        if (GET_CLAN(ch))
-        {
-            ch->send_to("  @D|  @CClan@D: @W%-64s@D|@n\n", GET_CLAN(ch));
         }
         ch->send_to("  @D|  @CRace@D: @W%10s@D,  @CSensei@D: @W%15s@D,     @CArt@D: @W%-17s@D|@n\n", race::getName(ch->race), sensei::getName(ch->sensei).c_str(), sensei::getStyle(ch->sensei).c_str());
         ch->send_to("  @D|@CGender@D: @W%10s@D,  @C  Size@D: @W%15s@D,  @C Align@D: @W%-17s@D|@n\n", genders[static_cast<int>(GET_SEX(ch))], size_names[get_size(ch)], disp_align(ch));
@@ -7456,23 +7438,6 @@ ACMD(do_whois)
         return;
     }
 
-    if (GET_CLAN(victim))
-    {
-        if (!strstr(GET_CLAN(victim), "None"))
-        {
-            sprintf(buf, "%s", GET_CLAN(victim));
-            clan = true;
-        }
-        if (strstr(GET_CLAN(victim), "Applying"))
-        {
-            sprintf(buf, "%s", GET_CLAN(victim));
-            clan = true;
-        }
-    }
-    if (GET_CLAN(victim) == nullptr || strstr(GET_CLAN(victim), "None"))
-    {
-        clan = false;
-    }
     ch->sendText("@D~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~@n\r\n");
     if (GET_ADMLEVEL(victim) >= ADMLVL_IMMORT)
     {
@@ -7483,13 +7448,6 @@ ACMD(do_whois)
     else
     {
         ch->send_to("@cName  @D: @w%s\r\n@cSensei@D: @w%s\r\n@cRace  @D: @w%s\r\n@cTitle @D: @w%s@n\r\n@cClan  @D: @w%s@n\r\n", GET_NAME(victim), sensei::getName(victim->sensei), race::getName(victim->race), GET_TITLE(victim), clan ? buf : "None.");
-        if (clan == true && !strstr(GET_CLAN(victim), "Applying"))
-        {
-            if (checkCLAN(victim) == true)
-            {
-                clanRANKD(GET_CLAN(victim), ch, victim);
-            }
-        }
     }
     ch->sendText("@D~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~@n\r\n");
 }

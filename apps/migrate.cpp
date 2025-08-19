@@ -2512,7 +2512,6 @@ static int load_char(const char *name, struct Character *ch) {
         /* character initializations */
         /* initializations necessary to keep some things straight */
 
-        GET_CLAN(ch) = strdup("None.");
         ch->setBaseStat("weight", PFDEF_WEIGHT);
 
         ch->setBaseStat("bless_level", PFDEF_HEIGHT);
@@ -2581,8 +2580,8 @@ static int load_char(const char *name, struct Character *ch) {
 
                 case 'C':
                     if (!strcmp(tag, "Cha ")) ch->setBaseStat("speed", atoi(line));
-                    else if (!strcmp(tag, "Clan")) GET_CLAN(ch) = strdup(line);
-                    else if (!strcmp(tag, "Clar")) GET_CRANK(ch) = atoi(line);
+                    else if (!strcmp(tag, "Clan")) ;
+                    else if (!strcmp(tag, "Clar")) ;
                     else if (!strcmp(tag, "Clas")) {
                         auto sen = atoi(line)+1;
                         if(sen > 14) sen = 0;
@@ -4013,7 +4012,6 @@ static void boot_db_legacy() {
     index_boot_help();
     boot_db_mail();
     boot_db_socials();
-    boot_db_clans();
     boot_db_commands();
     boot_db_specials();
     assemblyBootAssemblies();
