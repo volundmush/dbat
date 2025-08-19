@@ -3556,6 +3556,69 @@ static void convert_reset_commands() {
     }
 }
 
+static const std::unordered_map<WhereFlag, std::string> spacetiles = {
+    {WhereFlag::earth_orbit, "@GE@n"},
+    {WhereFlag::cerria_orbit, "@MC@n"},
+    {WhereFlag::frigid_orbit, "@CF@n"},
+    {WhereFlag::namek_orbit, "@gN@n"},
+    {WhereFlag::konack_orbit, "@mK@n"},
+    {WhereFlag::aether_orbit, "@BA@n"},
+    {WhereFlag::yardrat_orbit, "@MY@n"},
+    {WhereFlag::kanassa_orbit, "@CK@n"},
+    {WhereFlag::cerria_orbit, "@MC@n"},
+    {WhereFlag::arlia_orbit, "@m@n"},
+    {WhereFlag::zenith_orbit, "@CZ@n"},
+    {WhereFlag::vegeta_orbit, "@YV@n"},
+    {WhereFlag::nebula, "@m&@n"},
+    {WhereFlag::asteroid, "@y:@n"},
+    {WhereFlag::wormhole, "@b*@n"},
+    {WhereFlag::space_station, "@DS@n"},
+    {WhereFlag::star, "@yX@n"}
+};
+
+static std::string renderSpace() {
+    std::string output;
+    for (int row = 0; row < 200; ++row) {
+        for (int col = 0; col < 200; ++col) {
+            auto vn = mapnums[row][col];
+            if(vn == NOTHING) {
+                output += " ";
+                continue;
+            }
+            auto r = get_room(vn);
+            if(!r) {
+                output += " ";
+                continue;
+            }
+            bool found = false;
+            for(const auto& [flag, tile] : spacetiles) {
+                if(r->where_flags[flag]) {
+                    output += tile;
+                    found = true;
+                    break;
+                }
+            }
+            if(!found) {
+                output += " ";
+            }
+
+        }
+        output += "\r\n";
+    }
+    return output;
+}
+
+static void printSpace() {
+    auto space = renderSpace();
+    std::filesystem::path spaceFile = "space.txt";
+    std::ofstream ofs(spaceFile);
+    if (ofs) {
+        ofs << processColors(space, true, nullptr);
+    }
+    ofs.close();
+}
+
+
 struct PlanetCenterPoint {
     std::string name{};
     room_vnum vn{NOTHING};
@@ -3564,56 +3627,68 @@ struct PlanetCenterPoint {
 };
 
 static const std::vector<PlanetCenterPoint> centerPoints = {
-    {"earth", 40979, "@gE@n", 5},
-    {"vegeta", 32365, "@yV@n", 5},
-    {"frigid", 30889, "@cF@n", 5},
-    {"namek", 42880, "@GN@n", 5},
-    {"konack", 27065, "@MK@n", 5},
-    {"aether", 41959, "@bA@n", 5},
-    {"yardrat", 34899, "@mY@n", 5},
-    {"kanassa", 53859, "@cK@n", 5},
-    {"cerria", 59071, "@mC@n", 5},
-    {"arlia", 52434, "@MA@n", 5},
+    {"earth", 40979, "@gE@n", 3},
+    {"vegeta", 32365, "@yV@n", 3},
+    {"frigid", 30889, "@cF@n", 3},
+    {"namek", 42880, "@GN@n", 3},
+    {"konack", 27065, "@MK@n", 3},
+    {"aether", 41959, "@bA@n", 3},
+    {"yardrat", 34899, "@mY@n", 3},
+    {"kanassa", 53859, "@cK@n", 3},
+    {"cerria", 59071, "@mC@n", 3},
+    {"arlia", 52434, "@MA@n", 3},
     {"zenith", 50772, "@CZ@n", 2},
 };
 
+static std::unordered_map<room_vnum, Coordinates> spaceCoordinates;
 
-Coordinates getSpaceCoordinate(room_vnum vn)
+void calculateSpaceCoordinates()
 {
     for (int row = 0; row < 200; ++row) {
         for (int col = 0; col < 200; ++col) {
-            if (mapnums[row][col] == vn) {
-                Coordinates out;
-                // Cartesian mapping:
-                // - origin at center (MAP_W/2, MAP_H/2)
-                // - +x to the right, +y up (so rows are inverted)
-                out.x = col - (200 / 2);   // range: [-100, 99]
-                out.y = (200 / 2) - row;   // range: [100, -99]
-                out.z = 0;                   // space plane is z = 0
-                return out;
-            }
+            auto vn = mapnums[row][col];
+            Coordinates out;
+            // Cartesian mapping:
+            // - origin at center (MAP_W/2, MAP_H/2)
+            // - +x to the right, +y up (so rows are inverted)
+            out.x = col - (200 / 2);   // range: [-100, 99]
+            out.y = (200 / 2) - row;   // range: [100, -99]
+            out.z = 0;                   // space plane is z = 0
+            spaceCoordinates[vn] = out;
         }
     }
-
-    // You said vn is guaranteed to exist; this is just a safety fallback.
-    return Coordinates{0,0,0};
 }
 
-static void create_area() {
+static const std::unordered_map<WhereFlag, std::string> extraTiles = {
+    {WhereFlag::nebula, "@m&@n"},
+    {WhereFlag::asteroid, "@y:@n"},
+    {WhereFlag::wormhole, "@b@1*@n"},
+    {WhereFlag::space_station, "@DS@n"},
+    {WhereFlag::star, "@6 @n"}
+};
+
+static void migrate_space() {
+    calculateSpaceCoordinates();
     auto a = std::make_shared<Area>();
     a->vn = 1;
     areas[a->vn] = a;
     a->strings["name"] = "Space";
+    // Assign zone.
+    auto &z = zone_table.at(232);
+    a->zone.reset(&z);
 
     auto dim = BoxDim::fromCenter({}, 200, 200);
     auto s = std::make_unique<Shape>();
     s->geom = dim;
     s->type = ShapeType::Box;
     s->sectorType = SectorType::space;
+    s->name = "@WDepths of Space@n";
+    auto sdesc = " @DThis dark void has very little light.  The light it does have comes from\r\ndistant astral bodies such as stars or planets.  Occasional clouds of gas,\r\nasteroids, or comets can be seen.  Other than that it is empty blackness for\r\nthousands upon thousands of miles in every direction.  @n\r\n";
+    s->description = sdesc;
     a->shapes["space"] = std::move(s);
 
     for(const auto& cp : centerPoints) {
-        auto coor = getSpaceCoordinate(cp.vn);
+        auto coor = spaceCoordinates.at(cp.vn);
         auto rd = RoundDim::disk(coor, cp.radius, 0, 0);
         auto s = std::make_unique<Shape>();
         s->type = ShapeType::Round;
@@ -3623,14 +3698,264 @@ static void create_area() {
     }
     a->rebuildShapeIndex();
 
-    auto &z = zone_table[1];
-    a->zone.reset(&z);
+    basic_mud_log("Re-linking Space exits...");
+    for(auto &[vn, r] : Room::registry) {
+        auto find = spaceCoordinates.find(vn);
+        if(find != spaceCoordinates.end()) {
+            // we're working on a room that exists in the old space map.
+            // our goals: scan for exits that don't lead to anything in
+            // spaceCoordinates. If we find such, we need to create mirroring
+            // exits in the new Space Area at those coordinates.
+
+            for(const auto& [dir, dest] : r->getDirections()) {
+                if(auto r2 = dynamic_cast<Room*>(dest.getLoc()); r2) {
+                    // it's a room (of course it is! but we had to be sure.)
+                    if(auto find2 = spaceCoordinates.find(r2->getVnum()); find2 == spaceCoordinates.end()) {
+                         // This exit that's in space leads to not-space.
+                         // grab a tileOverride from new Space for these new-Space coordinates...
+                         auto &t = a->tileOverrides[find->second];
+                         t.exits[dir] = dest;
+                         basic_mud_log("Created mirroring exit from A:1:%s to %s.", fmt::format("{}", find->second), fmt::format("{}", *r2));
+                    }
+                }
+            }
+
+            // copy reset commands if need be... now amoebas and grosnak and etc will spawn in new-space.
+            if(!r->resetCommands.empty()) {
+                // copy the reset commands to a tileOverride...
+                auto &t = a->tileOverrides[find->second];
+                t.resetCommands = r->resetCommands;
+            }
+
+            if(!boost::iequals(r->strings["name"], "@WDepths of Space@n")) {
+                auto &t = a->tileOverrides[find->second];
+                t.strings["name"] = r->strings["name"];
+            }
+            if(!boost::iequals(r->strings["look_description"], sdesc)) {
+                auto &t = a->tileOverrides[find->second];
+                t.strings["look_description"] = r->strings["look_description"];
+            }
+
+            for(const auto& [wf, over] : extraTiles) {
+                if(r->where_flags[wf]) {
+                    auto &t = a->tileOverrides[find->second];
+                    t.tileDisplay = over;
+                    break;
+                }
+            }
+
+            // Still need to deal with the darned stars properly. A direct tile copy works fine for now.
+            
+        } else {
+            // We're working on a room that doesn't exist in the old space map.
+            // Our goals: scan for exits that lead to space and re-link them
+            // to the new Space Area's corresponding coordinates.
+
+            for(const auto& [dir, dest] : r->getDirections()) {
+                if(auto spaceroom = dynamic_cast<Room*>(dest.getLoc()); spaceroom) {
+                    auto svn = spaceroom->getVnum();
+                    if(auto find2 = spaceCoordinates.find(svn); find2 != spaceCoordinates.end()) {
+                        Destination newdest = dest;
+                        newdest.al = a;
+                        newdest.position = find2->second;
+                        newdest.locationID = newdest.getLocID();
+                        r->exits[dir] = newdest;
+                        basic_mud_log("Re-Linked Legacy Room exit %s in %s to %s.", fmt::format("{}", dir), fmt::format("{}", *r), fmt::format("{}", newdest));
+                    }
+                }
+            }
+        }
+    }
+
+    auto replaceScriptLine = [&](trig_vnum vn, std::vector<std::pair<int, std::string>> patches) {
+        if(auto found = trig_index.find(vn); found != trig_index.end()) {
+            for(auto& [line, newText] : patches) {
+                if(line < 0 || line >= found->second.lines.size()) {
+                    basic_mud_log("Warning: Attempted to replace line %d in trigger %d but it does not exist.", line, vn);
+                    continue;
+                }
+                // Replace the line with the new text.
+                found->second.lines[line] = {ScriptLineType::COMMAND, newText};
+            }
+        }
+    };
+
+    auto makeID = [&](room_vnum vn) {
+        return fmt::format("A:1:{}", spaceCoordinates.at(vn));
+    };
+
+    auto makeRoute = [&](const std::string& txt, room_vnum vn) {
+        return fmt::format("set {} {}", txt, makeID(vn));
+    };
+
+    std::vector<std::pair<int, std::string>> falconPatches = {
+        {30, makeRoute("thirdplanetorbit", 33385)},
+        {37, makeRoute("route1s1", 35780)},
+        {38, makeRoute("route1s2", 35751)},
+        {39, makeRoute("route1s3", 35687)},
+        {40, makeRoute("route1s4", 40475)},
+        {41, makeRoute("route2s1", 42899)},
+        {42, makeRoute("route2s2", 42923)},
+        {43, makeRoute("route2s3", 42956)},
+        {44, makeRoute("route2s4", 42975)},
+        {45, makeRoute("route3s1", 37686)},
+        {46, makeRoute("route3s2", 33286)},
+        {47, makeRoute("route3s3", 33336)},
+        {48, makeRoute("route3s4", 33365)},
+        {49, makeRoute("route4s1", 35385)},
+        {50, makeRoute("route4s2", 37385)},
+        {51, makeRoute("route4s3", 39014)},
+        {52, makeRoute("route4s4", 40182)}
+    };
+    replaceScriptLine(3900, falconPatches);
+
+    std::vector<std::pair<int, std::string>> simurghPatches = {
+        {30, makeRoute("thirdplanetorbit", 33385)},
+        {37, makeRoute("route1s1", 35781)},
+        {38, makeRoute("route1s2", 35752)},
+        {39, makeRoute("route1s3", 35681)},
+        {40, makeRoute("route1s4", 40471)},
+        {41, makeRoute("route2s1", 32341)},
+        {42, makeRoute("route2s2", 35141)},
+        {43, makeRoute("route2s3", 37652)},
+        {44, makeRoute("route2s4", 37671)},
+        {45, makeRoute("route3s1", 29055)},
+        {46, makeRoute("route3s2", 32144)},
+        {47, makeRoute("route3s3", 33351)},
+        {48, makeRoute("route3s4", 33370)},
+        {49, makeRoute("route4s1", 33365)},
+        {50, makeRoute("route4s2", 33339)},
+        {51, makeRoute("route4s3", 33304)},
+        {52, makeRoute("route4s4", 40344)}
+    };
+    replaceScriptLine(3905, simurghPatches);
+
+    std::vector<std::pair<int, std::string>> zypherPatches = {
+        {27, makeRoute("secondplanetorbit", 33385)},
+        {30, makeRoute("thirdplanetorbit", 41490)},
+        {37, makeRoute("route1s1", 32961)},
+        {38, makeRoute("route1s2", 33333)},
+        {39, makeRoute("route1s3", 33570)},
+        {40, makeRoute("route1s4", 33370)},
+        {41, makeRoute("route2s1", 32343)},
+        {42, makeRoute("route2s2", 35143)},
+        {43, makeRoute("route2s3", 37653)},
+        {44, makeRoute("route2s4", 37673)},
+        {45, makeRoute("route3s1", 42893)},
+        {46, makeRoute("route3s2", 42923)},
+        {47, makeRoute("route3s3", 42953)},
+        {48, makeRoute("route3s4", 42973)}
+    };
+    replaceScriptLine(3906, zypherPatches);
+
+    std::vector<std::pair<int, std::string>> valkyriePatches = {
+        {30, makeRoute("thirdplanetorbit", 33385)},
+        {37, makeRoute("route1s1", 42974)},
+        {38, makeRoute("route1s2", 42954)},
+        {39, makeRoute("route1s3", 42924)},
+        {40, makeRoute("route1s4", 42894)},
+        {41, makeRoute("route2s1", 40182)},
+        {42, makeRoute("route2s2", 39014)},
+        {43, makeRoute("route2s3", 37385)},
+        {44, makeRoute("route2s4", 35385)},
+        {45, makeRoute("route3s1", 33369)},
+        {46, makeRoute("route3s2", 33350)},
+        {47, makeRoute("route3s3", 33311)},
+        {48, makeRoute("route3s4", 32355)}
+    };
+    replaceScriptLine(3911, valkyriePatches);
+
+    std::vector<std::pair<int, std::string>> phoenixPatches = {
+        {28, makeRoute("secondplanetorbit", 33385)},
+        {35, makeRoute("route1s1", 32961)},
+        {36, makeRoute("route1s2", 33333)},
+        {37, makeRoute("route1s3", 33570)},
+        {38, makeRoute("route1s4", 33370)},
+        {39, makeRoute("route2s1", 32343)},
+        {40, makeRoute("route2s2", 35143)},
+        {41, makeRoute("route2s3", 37653)},
+        {42, makeRoute("route2s4", 37673)}
+    };
+    replaceScriptLine(3916, phoenixPatches);
+
+    std::vector<std::pair<int, std::string>> merganserPatches = {
+        {28, makeRoute("secondplanetorbit", 33385)},
+        {35, makeRoute("route1s1", 32355)},
+        {36, makeRoute("route1s2", 33311)},
+        {37, makeRoute("route1s3", 33350)},
+        {38, makeRoute("route1s4", 43369)},
+        {39, makeRoute("route2s1", 43369)},
+        {40, makeRoute("route2s2", 33350)},
+        {41, makeRoute("route2s3", 33311)},
+        {42, makeRoute("route2s4", 32355)}
+    };
+
+    replaceScriptLine(3921, merganserPatches);
+
+    std::vector<std::pair<int, std::string>> wraithPatches = {
+        {28, makeRoute("secondplanetorbit", 33385)},
+        {35, makeRoute("route1s1", 37686)},
+        {36, makeRoute("route1s2", 33286)},
+        {37, makeRoute("route1s3", 33336)},
+        {38, makeRoute("route1s4", 33365)},
+        {39, makeRoute("route2s1", 33365)},
+        {40, makeRoute("route2s2", 33336)},
+        {41, makeRoute("route2s3", 33286)},
+        {42, makeRoute("route2s4", 37686)}
+    };
+
+    replaceScriptLine(3926, wraithPatches);
+
+    std::vector<std::pair<int, std::string>> ghostPatches = {
+        {28, makeRoute("secondplanetorbit", 33385)},
+        {35, makeRoute("route1s1", 29055)},
+        {36, makeRoute("route1s2", 32144)},
+        {37, makeRoute("route1s3", 33351)},
+        {38, makeRoute("route1s4", 33370)},
+        {39, makeRoute("route2s1", 33370)},
+        {40, makeRoute("route2s2", 33351)},
+        {41, makeRoute("route2s3", 32144)},
+        {42, makeRoute("route2s4", 29055)}
+    };
+    replaceScriptLine(3931, ghostPatches);
+
+    std::vector<std::pair<int, std::string>> wispPatches = {
+        {28, makeRoute("secondplanetorbit", 33385)},
+        {35, makeRoute("route1s1", 40344)},
+        {36, makeRoute("route1s2", 33304)},
+        {37, makeRoute("route1s3", 33339)},
+        {38, makeRoute("route1s4", 33365)},
+        {39, makeRoute("route2s1", 33365)},
+        {40, makeRoute("route2s2", 33339)},
+        {41, makeRoute("route2s3", 33304)},
+        {42, makeRoute("route2s4", 40344)}
+    };
+    replaceScriptLine(3936, wispPatches);
+
+    std::vector<std::pair<int, std::string>> eaglePatches = {
+        {28, makeRoute("secondplanetorbit", 33385)},
+        {35, makeRoute("route1s1", 32961)},
+        {36, makeRoute("route1s2", 33333)},
+        {37, makeRoute("route1s3", 33570)},
+        {38, makeRoute("route1s4", 33370)},
+        {39, makeRoute("route2s1", 33370)},
+        {40, makeRoute("route2s2", 33570)},
+        {41, makeRoute("route2s3", 33333)},
+        {42, makeRoute("route2s4", 32961)}
+    };
+
+    replaceScriptLine(3941, eaglePatches);
+
     auto p = findPlayer("Wayland");
     Location loc;
     loc.al = a;
     // set to Earth...
-    loc.position = getSpaceCoordinate(40979);
+    loc.position = spaceCoordinates.at(40979);
     p->moveToLocation(loc);
+
+
+    // delete old space grid, let's see what happens...
+    for(const auto&[vn, coor] : spaceCoordinates) Room::registry.erase(vn);
 }
 
 void boot_db_world_legacy() {
@@ -4547,7 +4872,8 @@ void run_migration() {
     game::init_locale();
     migrate_db();
     // let's experiment here...
-    create_area();
+    migrate_space();
+    printSpace();
     runSave();
     destroy_db();
 }

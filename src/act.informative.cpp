@@ -1382,8 +1382,18 @@ static std::vector<std::string> renderCompassLines(const Location& loc, Characte
     return std::move(split);
 }
 
+static std::unordered_map<Coordinates, std::string> renderTileMap(const Location& loc, Character *ch, int minX, int maxX, int minY, int maxY, const std::function<bool(const Destination&, Character*)> is_valid, const std::function<std::string(const Destination&, Character*)> renderer)
+{
+    auto gathered = gatherSurroundings(loc, ch, minX, maxX, minY, maxY, is_valid);
 
+    std::unordered_map<Coordinates, std::string> rendered;
 
+    for(const auto& [coord, dest] : gathered) {
+        rendered[coord] = renderer(dest, ch);
+    }
+
+    return rendered;
+}
 
 static void gen_map(const Location& loc, Character *ch, int num)
 {

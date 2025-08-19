@@ -711,6 +711,14 @@ ACMD(do_mgoto)
         return;
     }
 
+    if(auto loc = Location(arg)) {
+        if (FIGHTING(ch))
+            stop_fighting(ch);
+        ch->leaveLocation();
+        ch->moveToLocation(loc);
+        return;
+    }
+
     if ((location = find_target_room(ch, arg)) == NOWHERE && GET_MOB_VNUM(ch) != 3)
     {
         mob_log(ch, "mgoto: invalid location");

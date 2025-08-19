@@ -56,3 +56,8 @@ Coordinates Coordinates::get_direction_offset(Direction dir)
     offset.apply(dir);
     return offset;
 }
+
+Coordinates::operator bool() const
+{
+    return x != 0 || y != 0 || z != 0;
+}

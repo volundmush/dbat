@@ -118,7 +118,7 @@ output.
 
 This will ultimately be used for rendering a tilemap.
 */
-std::unordered_map<Coordinates, Destination> gatherSurroundings(const Location& loc, Character *ch, int minX = -4, int maxX = 4, int minY = -4, int maxY = 4, const std::function<bool(const Destination&, Character*)> is_valid) {
+std::unordered_map<Coordinates, Destination> gatherSurroundings(const Location& loc, Character *ch, int minX, int maxX, int minY, int maxY, const std::function<bool(const Destination&, Character*)> is_valid) {
     std::unordered_map<Coordinates, Destination> tiles;
 
     // Although we're given a start location with its own coordinates, we can't rely on it because ROOMS don't use them.

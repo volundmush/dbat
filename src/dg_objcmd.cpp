@@ -423,6 +423,12 @@ OCMD(do_ogoto)
         return;
     }
 
+    if(auto loc = Location(arg1)) {
+        obj->clearLocation();
+        obj->moveToLocation(loc);
+        return;
+    }
+
     target = find_obj_target_room(obj, arg1);
 
     if (target == NOWHERE)

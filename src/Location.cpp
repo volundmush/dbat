@@ -30,13 +30,14 @@ Location::Location(Character *ch)
     *this = ch->location;
 }
 
-static std::regex lid_regex(R"(^(R|A|S):(\d+)(:(\d+):(\d+):(\d+))?)", std::regex::icase);
+static std::regex lid_regex(R"(^(R|A|S):(\d+)(:(-?\d+):(-?\d+):(-?\d+))?)", std::regex::icase);
 
 
 Location::Location(const std::string& lid)
 {
     std::smatch match;
     auto trimmed = boost::trim_copy(lid);
+    boost::to_upper(trimmed);
 
     if(is_number(trimmed.c_str()))
         if(auto i = atoi(trimmed.c_str()); i != -1) {
@@ -91,6 +92,7 @@ Location& Location::operator=(room_vnum rv)
     if(auto r = get_room(rv)) {
         al = r->shared_from_this();
         position = Coordinates{0, 0, 0};
+        locationID = getLocID();
     } else {
         al.reset();
     }
@@ -101,6 +103,7 @@ Location& Location::operator=(Room* room) {
     if(room) {
         al = room->shared_from_this();
         position = Coordinates{0, 0, 0};
+        locationID = getLocID();
     } else {
         al.reset();
     }
@@ -111,6 +114,7 @@ Location& Location::operator=(const std::shared_ptr<Room>& room) {
     if(room) {
         al = room;
         position = Coordinates{0, 0, 0};
+        locationID = getLocID();
     } else {
         al.reset();
     }
@@ -198,10 +202,10 @@ std::string Location::getLocID() const
 {
     if(auto a = getLoc()) {
         auto alid = a->getLocID();
-        if(position.x != 0 || position.y != 0 || position.z != 0) {
-            return fmt::format("{}:{}:{}:{}", alid, position.x, position.y, position.z);
+        if(position) {
+            return fmt::format("{}:{}", alid, position);
         }
-        return a->getLocID();
+        return alid;
     }
 
     return "";
@@ -1090,6 +1094,7 @@ void Location::displayLookFor(Character* ch) {
 }
 
 bool Location::buildwalk(Character* ch, Direction dir) {
+    if(!ch->pref_flags.get(PRF_BUILDWALK)) return false;
     if(auto a = getLoc()) {
         return a->buildwalk(position, ch, dir);
     }
