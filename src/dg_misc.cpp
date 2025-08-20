@@ -6,7 +6,12 @@
 *  $Date: 2004/10/11 12:07:00$                                            *
 *  $Revision: 1.0.14 $                                                    *
 **************************************************************************/
-
+#include "dbat/DgScript.h"
+#include "dbat/DgScriptPrototype.h"
+#include "dbat/Character.h"
+#include "dbat/Object.h"
+#include "dbat/Location.h"
+#include "dbat/affect.h"
 #include "dbat/structs.h"
 #include "dbat/dg_scripts.h"
 #include "dbat/send.h"
@@ -184,8 +189,8 @@ void do_dg_affect(void *go, script_data *sc, DgScript *trig, UnitType script_typ
 
     /* find the property -- first search apply_types */
     i = 0;
-    while (strcasecmp(apply_types[i], "\n")) {
-        if (!strcasecmp(apply_types[i], property)) {
+    while (!boost::iequals(apply_types[i], "\n")) {
+        if (boost::iequals(apply_types[i], property)) {
             type = APPLY_TYPE;
             break;
         }
@@ -194,8 +199,8 @@ void do_dg_affect(void *go, script_data *sc, DgScript *trig, UnitType script_typ
 
     if (!type) { /* search affect_types now */
         i = 0;
-        while (strcasecmp(affected_bits[i], "\n")) {
-            if (!strcasecmp(affected_bits[i], property)) {
+        while (!boost::iequals(affected_bits[i], "\n")) {
+            if (boost::iequals(affected_bits[i], property)) {
                 type = AFFECT_TYPE;
                 break;
             }
@@ -218,7 +223,7 @@ void do_dg_affect(void *go, script_data *sc, DgScript *trig, UnitType script_typ
         return;
     }
 
-    if (!strcasecmp(value_p, "off")) {
+    if (boost::iequals(value_p, "off")) {
         affect_from_char(ch, SPELL_DG_AFFECT);
         return;
     }

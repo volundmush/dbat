@@ -1,10 +1,14 @@
-#include "dbat/structs.h"
+#include "dbat/Room.h"
+#include "dbat/Destination.h"
+#include "dbat/Object.h"
+#include "dbat/Descriptor.h"
+#include "dbat/Character.h"
 #include "dbat/genwld.h"
 #include "dbat/utils.h"
 #include "dbat/db.h"
 #include "dbat/handler.h"
 #include "dbat/genolc.h"
-#include "dbat/shop.h"
+#include "dbat/Shop.h"
 #include "dbat/constants.h"
 #include "dbat/planet.h"
 #include "dbat/constants.h"
@@ -119,17 +123,17 @@ std::optional<std::string> Room::dgCallMember(const std::string &member, const s
         }
         if (!arg.empty())
         {
-            if (!strcasecmp(arg.c_str(), "vnum"))
+            if (boost::iequals(arg.c_str(), "vnum"))
             {
                 return fmt::format("{}", ex->getVnum());
             }
-            else if (!strcasecmp(arg.c_str(), "key"))
+            else if (boost::iequals(arg.c_str(), "key"))
                 return fmt::format("{}", ex->key);
-            else if (!strcasecmp(arg.c_str(), "bits"))
+            else if (boost::iequals(arg.c_str(), "bits"))
             {
                 return ex->exit_flags.getFlagNames();
             }
-            else if (!strcasecmp(arg.c_str(), "room"))
+            else if (boost::iequals(arg.c_str(), "room"))
             {
                 return fmt::format("{}", ex->getUID(true));
             }
@@ -417,7 +421,7 @@ void Room::sendText(const std::string &txt)
         }
         if (auto eaves = GET_EAVESDROP(d->character); eaves > 0)
         {
-            int roll = rand_number(1, 101);
+            int roll = Random::get<int>(1, 101);
             if (eaves == vn && GET_SKILL(d->character, SKILL_EAVESDROP) > roll)
             {
                 d->sendText("@c-----Eavesdrop-----@n\r\n%s\r\n@c-----Eavesdrop-----@n\r\n" + txt);

@@ -6,6 +6,11 @@
  *				     		     *
  * Paolo Libardi - pinkpallin@libero.it		     *
  *****************************************************/
+#include "dbat/Character.h"
+#include "dbat/Object.h"
+#include "dbat/Destination.h"
+#include "dbat/Zone.h"
+#include "dbat/Room.h"
 #include "dbat/maputils.h"
 #include "dbat/send.h"
 #include "dbat/comm.h"
@@ -148,8 +153,8 @@ char *getmapchar(int rnum, Character *ch, int start, int vnum)
             }
             else
             {
-                int color = rand_number(1, 30);
-                int rnd = rand_number(1, 40);
+                int color = Random::get<int>(1, 30);
+                int rnd = Random::get<int>(1, 40);
                 if (rnd == 2)
                 {
                     sprintf(mapchar, "%s. ", color > 15 ? "@w" : (color >= 7 ? "@Y" : (color > 3 ? "@R" : "@B")));

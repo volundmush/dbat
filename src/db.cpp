@@ -7,20 +7,17 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
-
-#include <fstream>
-#include <regex>
-#include <thread>
-
-#include "fmt/core.h"
-#include <filesystem>
-
-#include <boost/algorithm/string.hpp>
 #include <boost/iostreams/filtering_streambuf.hpp>
 #include <boost/iostreams/filter/gzip.hpp>
 
-#include "magic_enum/magic_enum_all.hpp"
-
+#include "dbat/Character.h"
+#include "dbat/Object.h"
+#include "dbat/Room.h"
+#include "dbat/Descriptor.h"
+#include "dbat/Zone.h"
+#include "dbat/CharacterPrototype.h"
+#include "dbat/ObjectPrototype.h"
+#include "dbat/Area.h"
 #include "dbat/db.h"
 #include "dbat/send.h"
 #include "dbat/feats.h"
@@ -37,8 +34,8 @@
 #include "dbat/dg_scripts.h"
 #include "dbat/interpreter.h"
 #include "dbat/genolc.h"
-#include "dbat/shop.h"
-#include "dbat/guild.h"
+#include "dbat/Shop.h"
+#include "dbat/Guild.h"
 #include "dbat/handler.h"
 #include "dbat/mail.h"
 #include "dbat/boards.h"
@@ -46,7 +43,7 @@
 #include "dbat/spells.h"
 #include "dbat/races.h"
 #include "dbat/genobj.h"
-#include "dbat/account.h"
+#include "dbat/Account.h"
 #include "dbat/maputils.h"
 #include "dbat/saveload.h"
 
@@ -244,14 +241,14 @@ static void dragon_level(Character *ch) {
     if (level > 0 && count > 0) {
         level = level / count;
     } else {
-        level = rand_number(60, 110);
+        level = Random::get<int>(60, 110);
     }
 
     if (level < 50) {
-        level = rand_number(40, 60);
+        level = Random::get<int>(40, 60);
     }
 
-    ch->setBaseStat<int>("level", level + rand_number(5, 20));
+    ch->setBaseStat<int>("level", level + Random::get<int>(5, 20));
 }
 
 
@@ -862,27 +859,27 @@ Character *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
     mob->activate();
 
     if (!(IS_HOSHIJIN(mob) && GET_SEX(mob) == SEX_MALE)) {
-        //setNumsTo[CharAppearance::hair_length] = rand_number(0, 4);
-        //setNumsTo[CharAppearance::hair_color] = rand_number(1, 13);
-        //setNumsTo[CharAppearance::hair_style] = rand_number(1, 11);
+        //setNumsTo[CharAppearance::hair_length] = Random::get<int>(0, 4);
+        //setNumsTo[CharAppearance::hair_color] = Random::get<int>(1, 13);
+        //setNumsTo[CharAppearance::hair_style] = Random::get<int>(1, 11);
     }
 
-    //setNumsTo[CharAppearance::eye_color] = rand_number(0, 11);
+    //setNumsTo[CharAppearance::eye_color] = Random::get<int>(0, 11);
 
     if (!IS_HUMAN(mob) && !IS_SAIYAN(mob) && !IS_HALFBREED(mob) && !IS_NAMEK(mob)) {
-        //setNumsTo[CharAppearance::skin_color] = rand_number(0, 11);
+        //setNumsTo[CharAppearance::skin_color] = Random::get<int>(0, 11);
     }
     if (IS_NAMEK(mob)) {
         //setNumsTo[CharAppearance::skin_color] = 2;
     }
     if (IS_HUMAN(mob) || IS_SAIYAN(mob) || IS_HALFBREED(mob)) {
         /*
-        if (rand_number(1, 5) <= 2) {
-            setNumsTo[CharAppearance::skin_color] = rand_number(0, 1);
-        } else if (rand_number(1, 5) <= 4) {
-            setNumsTo[CharAppearance::skin_color] = rand_number(4, 5);
-        } else if (rand_number(1, 5) <= 5) {
-            setNumsTo[CharAppearance::skin_color] = rand_number(9, 10);
+        if (Random::get<int>(1, 5) <= 2) {
+            setNumsTo[CharAppearance::skin_color] = Random::get<int>(0, 1);
+        } else if (Random::get<int>(1, 5) <= 4) {
+            setNumsTo[CharAppearance::skin_color] = Random::get<int>(4, 5);
+        } else if (Random::get<int>(1, 5) <= 5) {
+            setNumsTo[CharAppearance::skin_color] = Random::get<int>(9, 10);
         }
             */
     }
@@ -899,182 +896,182 @@ Character *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
 
     switch (GET_LEVEL(mob)) {
         case 1:
-            mult = rand_number(50, 80);
+            mult = Random::get<int>(50, 80);
             break;
         case 2:
-            mult = rand_number(90, 120);
+            mult = Random::get<int>(90, 120);
             break;
         case 3:
-            mult = rand_number(100, 140);
+            mult = Random::get<int>(100, 140);
             break;
         case 4:
-            mult = rand_number(120, 180);
+            mult = Random::get<int>(120, 180);
             break;
         case 5:
-            mult = rand_number(200, 250);
+            mult = Random::get<int>(200, 250);
             break;
         case 6:
-            mult = rand_number(240, 300);
+            mult = Random::get<int>(240, 300);
             break;
         case 7:
-            mult = rand_number(280, 350);
+            mult = Random::get<int>(280, 350);
             break;
         case 8:
-            mult = rand_number(320, 400);
+            mult = Random::get<int>(320, 400);
             break;
         case 9:
-            mult = rand_number(380, 480);
+            mult = Random::get<int>(380, 480);
             break;
         case 10:
-            mult = rand_number(500, 600);
+            mult = Random::get<int>(500, 600);
             break;
         case 11:
         case 12:
         case 13:
         case 14:
         case 15:
-            mult = rand_number(1200, 1600);
+            mult = Random::get<int>(1200, 1600);
             break;
         case 16:
         case 17:
         case 18:
         case 19:
         case 20:
-            mult = rand_number(2400, 3000);
+            mult = Random::get<int>(2400, 3000);
             break;
         case 21:
         case 22:
         case 23:
         case 24:
         case 25:
-            mult = rand_number(5500, 8000);
+            mult = Random::get<int>(5500, 8000);
             break;
         case 26:
         case 27:
         case 28:
         case 29:
         case 30:
-            mult = rand_number(10000, 14000);
+            mult = Random::get<int>(10000, 14000);
             break;
         case 31:
         case 32:
         case 33:
         case 34:
         case 35:
-            mult = rand_number(16000, 20000);
+            mult = Random::get<int>(16000, 20000);
             break;
         case 36:
         case 37:
         case 38:
         case 39:
         case 40:
-            mult = rand_number(22000, 30000);
+            mult = Random::get<int>(22000, 30000);
             break;
         case 41:
         case 42:
         case 43:
         case 44:
         case 45:
-            mult = rand_number(50000, 70000);
+            mult = Random::get<int>(50000, 70000);
             break;
         case 46:
         case 47:
         case 48:
         case 49:
         case 50:
-            mult = rand_number(95000, 140000);
+            mult = Random::get<int>(95000, 140000);
             break;
         case 51:
         case 52:
         case 53:
         case 54:
         case 55:
-            mult = rand_number(180000, 250000);
+            mult = Random::get<int>(180000, 250000);
             break;
         case 56:
         case 57:
         case 58:
         case 59:
         case 60:
-            mult = rand_number(400000, 480000);
+            mult = Random::get<int>(400000, 480000);
             break;
         case 61:
         case 62:
         case 63:
         case 64:
         case 65:
-            mult = rand_number(700000, 900000);
+            mult = Random::get<int>(700000, 900000);
             break;
         case 66:
         case 67:
         case 68:
         case 69:
         case 70:
-            mult = rand_number(1400000, 1600000);
+            mult = Random::get<int>(1400000, 1600000);
             break;
         case 71:
         case 72:
         case 73:
         case 74:
         case 75:
-            mult = rand_number(2200000, 2500000);
+            mult = Random::get<int>(2200000, 2500000);
             break;
         case 76:
         case 77:
         case 78:
         case 79:
         case 80:
-            mult = rand_number(3000000, 3500000);
+            mult = Random::get<int>(3000000, 3500000);
             break;
         case 81:
         case 82:
         case 83:
         case 84:
         case 85:
-            mult = rand_number(4250000, 4750000);
+            mult = Random::get<int>(4250000, 4750000);
             break;
         case 86:
         case 87:
         case 88:
         case 89:
         case 90:
-            mult = rand_number(6500000, 8500000);
+            mult = Random::get<int>(6500000, 8500000);
             break;
         case 91:
         case 92:
         case 93:
         case 94:
         case 95:
-            mult = rand_number(15000000, 18000000);
+            mult = Random::get<int>(15000000, 18000000);
             break;
         case 96:
         case 97:
         case 98:
         case 99:
         case 100:
-            mult = rand_number(22000000, 30000000);
+            mult = Random::get<int>(22000000, 30000000);
             break;
         case 101:
-            mult = rand_number(32000000, 40000000);
+            mult = Random::get<int>(32000000, 40000000);
             break;
         case 102:
-            mult = rand_number(42000000, 55000000);
+            mult = Random::get<int>(42000000, 55000000);
             break;
         case 103:
-            mult = rand_number(80000000, 95000000);
+            mult = Random::get<int>(80000000, 95000000);
             break;
         case 104:
-            mult = rand_number(150000000, 200000000);
+            mult = Random::get<int>(150000000, 200000000);
             break;
         case 105:
-            mult = rand_number(220000000, 250000000);
+            mult = Random::get<int>(220000000, 250000000);
             break;
         case 106:
         case 107:
         case 108:
         case 109:
         case 110:
-            mult = rand_number(500000000, 750000000);
+            mult = Random::get<int>(500000000, 750000000);
             break;
         case 111:
         case 112:
@@ -1086,13 +1083,13 @@ Character *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
         case 118:
         case 119:
         case 120:
-            mult = rand_number(800000000, 900000000);
+            mult = Random::get<int>(800000000, 900000000);
             break;
         default:
             if (GET_LEVEL(mob) >= 150) {
-                mult = rand_number(1500000000, 2000000000);
+                mult = Random::get<int>(1500000000, 2000000000);
             } else {
-                mult = rand_number(1250000000, 1500000000);
+                mult = Random::get<int>(1250000000, 1500000000);
             }
             break;
     }
@@ -1117,7 +1114,7 @@ Character *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
 
     if (GET_MOB_VNUM(mob) == 2245) {
         for(auto c : {"health", "ki", "stamina"}) {
-            mob->setBaseStat(c, rand_number(1, 4));
+            mob->setBaseStat(c, Random::get<int>(1, 4));
         }
     }
 
@@ -1128,119 +1125,119 @@ Character *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
         case 3:
         case 4:
         case 5:
-            base = rand_number(80, 120);
+            base = Random::get<int>(80, 120);
             break;
         case 6:
-            base = rand_number(200, 280);
+            base = Random::get<int>(200, 280);
             break;
         case 7:
-            base = rand_number(250, 350);
+            base = Random::get<int>(250, 350);
             break;
         case 8:
-            base = rand_number(275, 375);
+            base = Random::get<int>(275, 375);
             break;
         case 9:
-            base = rand_number(300, 400);
+            base = Random::get<int>(300, 400);
             break;
         case 10:
-            base = rand_number(325, 450);
+            base = Random::get<int>(325, 450);
             break;
         case 11:
         case 12:
         case 13:
         case 14:
         case 15:
-            base = rand_number(500, 700);
+            base = Random::get<int>(500, 700);
             break;
         case 16:
         case 17:
         case 18:
         case 19:
         case 20:
-            base = rand_number(700, 1000);
+            base = Random::get<int>(700, 1000);
             break;
         case 21:
         case 22:
         case 23:
         case 24:
         case 25:
-            base = rand_number(1000, 1200);
+            base = Random::get<int>(1000, 1200);
             break;
         case 26:
         case 27:
         case 28:
         case 29:
         case 30:
-            base = rand_number(1200, 1400);
+            base = Random::get<int>(1200, 1400);
             break;
         case 31:
         case 32:
         case 33:
         case 34:
         case 35:
-            base = rand_number(1400, 1600);
+            base = Random::get<int>(1400, 1600);
             break;
         case 36:
         case 37:
         case 38:
         case 39:
         case 40:
-            base = rand_number(1600, 1800);
+            base = Random::get<int>(1600, 1800);
             break;
         case 41:
         case 42:
         case 43:
         case 44:
         case 45:
-            base = rand_number(1800, 2000);
+            base = Random::get<int>(1800, 2000);
             break;
         case 46:
         case 47:
         case 48:
         case 49:
         case 50:
-            base = rand_number(2000, 2200);
+            base = Random::get<int>(2000, 2200);
             break;
         case 51:
         case 52:
         case 53:
         case 54:
         case 55:
-            base = rand_number(2200, 2500);
+            base = Random::get<int>(2200, 2500);
             break;
         case 56:
         case 57:
         case 58:
         case 59:
         case 60:
-            base = rand_number(2500, 2800);
+            base = Random::get<int>(2500, 2800);
             break;
         case 61:
         case 62:
         case 63:
         case 64:
         case 65:
-            base = rand_number(2800, 3000);
+            base = Random::get<int>(2800, 3000);
             break;
         case 66:
         case 67:
         case 68:
         case 69:
         case 70:
-            base = rand_number(3000, 3200);
+            base = Random::get<int>(3000, 3200);
             break;
         case 71:
         case 72:
         case 73:
         case 74:
         case 75:
-            base = rand_number(3200, 3500);
+            base = Random::get<int>(3200, 3500);
             break;
         case 76:
         case 77:
         case 78:
         case 79:
-            base = rand_number(3500, 3800);
+            base = Random::get<int>(3500, 3800);
             break;
         case 80:
         case 81:
@@ -1248,75 +1245,75 @@ Character *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
         case 83:
         case 84:
         case 85:
-            base = rand_number(4000, 4500);
+            base = Random::get<int>(4000, 4500);
             break;
         case 86:
         case 87:
         case 88:
         case 89:
         case 90:
-            base = rand_number(4500, 5500);
+            base = Random::get<int>(4500, 5500);
             break;
         case 91:
         case 92:
         case 93:
         case 94:
         case 95:
-            base = rand_number(5500, 7000);
+            base = Random::get<int>(5500, 7000);
             break;
         case 96:
         case 97:
         case 98:
         case 99:
-            base = rand_number(8000, 10000);
+            base = Random::get<int>(8000, 10000);
             break;
         case 100:
-            base = rand_number(10000, 15000);
+            base = Random::get<int>(10000, 15000);
             break;
         case 101:
-            base = rand_number(15000, 25000);
+            base = Random::get<int>(15000, 25000);
             break;
         case 102:
-            base = rand_number(35000, 40000);
+            base = Random::get<int>(35000, 40000);
             break;
         case 103:
-            base = rand_number(40000, 50000);
+            base = Random::get<int>(40000, 50000);
             break;
         case 104:
-            base = rand_number(60000, 80000);
+            base = Random::get<int>(60000, 80000);
             break;
         case 105:
-            base = rand_number(80000, 100000);
+            base = Random::get<int>(80000, 100000);
             break;
         default:
-            base = rand_number(130000, 180000);
+            base = Random::get<int>(130000, 180000);
             break;
     }
 
     auto money = GET_GOLD(mob);
     if (money <= 0 && !MOB_FLAGGED(mob, MOB_DUMMY)) {
         if (GET_LEVEL(mob) < 4) {
-            money = GET_LEVEL(mob) * rand_number(1, 2);
+            money = GET_LEVEL(mob) * Random::get<int>(1, 2);
         } else if (GET_LEVEL(mob) < 10) {
-            money = (GET_LEVEL(mob) * rand_number(1, 2)) - 1;
+            money = (GET_LEVEL(mob) * Random::get<int>(1, 2)) - 1;
         } else if (GET_LEVEL(mob) < 20) {
-            money = (GET_LEVEL(mob) * rand_number(1, 3)) - 2;
+            money = (GET_LEVEL(mob) * Random::get<int>(1, 3)) - 2;
         } else if (GET_LEVEL(mob) < 30) {
-            money = (GET_LEVEL(mob) * rand_number(1, 3)) - 4;
+            money = (GET_LEVEL(mob) * Random::get<int>(1, 3)) - 4;
         } else if (GET_LEVEL(mob) < 40) {
-            money = (GET_LEVEL(mob) * rand_number(1, 3)) - 6;
+            money = (GET_LEVEL(mob) * Random::get<int>(1, 3)) - 6;
         } else if (GET_LEVEL(mob) < 50) {
-            money = (GET_LEVEL(mob) * rand_number(2, 3)) - 25;
+            money = (GET_LEVEL(mob) * Random::get<int>(2, 3)) - 25;
         } else if (GET_LEVEL(mob) < 60) {
-            money = (GET_LEVEL(mob) * rand_number(2, 3)) - 40;
+            money = (GET_LEVEL(mob) * Random::get<int>(2, 3)) - 40;
         } else if (GET_LEVEL(mob) < 70) {
-            money = (GET_LEVEL(mob) * rand_number(2, 3)) - 50;
+            money = (GET_LEVEL(mob) * Random::get<int>(2, 3)) - 50;
         } else if (GET_LEVEL(mob) < 80) {
-            money = (GET_LEVEL(mob) * rand_number(2, 4)) - 60;
+            money = (GET_LEVEL(mob) * Random::get<int>(2, 4)) - 60;
         } else if (GET_LEVEL(mob) < 90) {
-            money = (GET_LEVEL(mob) * rand_number(2, 4)) - 70;
+            money = (GET_LEVEL(mob) * Random::get<int>(2, 4)) - 70;
         } else {
-            money = (GET_LEVEL(mob) * rand_number(3, 4)) - 85;
+            money = (GET_LEVEL(mob) * Random::get<int>(3, 4)) - 85;
         }
         if (!IS_HUMANOID(mob)) {
             money = GET_GOLD(mob) * 0.5;
@@ -1533,7 +1530,7 @@ void Zone::reset()
 
     // TODO: Split this off into a function or something based off Location...
     rooms.for_each([](auto r) {
-        if (r->room_flags.get(ROOM_AURA) && rand_number(1, 5) >= 4)
+        if (r->room_flags.get(ROOM_AURA) && Random::get<int>(1, 5) >= 4)
         {
             r->sendText("The aura of regeneration covering the surrounding area disappears.\r\n");
             r->room_flags.set(ROOM_AURA, false);
@@ -1555,12 +1552,12 @@ void Zone::reset()
             r->ground_effect = 0;
         }
 
-        if (r->ground_effect >= 1 && rand_number(1, 4) == 4 && !r->getEnvironment(ENV_WATER) >= 100.0 && r->sector_type != SectorType::lava)
+        if (r->ground_effect >= 1 && Random::get<int>(1, 4) == 4 && !r->getEnvironment(ENV_WATER) >= 100.0 && r->sector_type != SectorType::lava)
         {
             r->sendText("The lava has cooled and become solid rock.\r\n");
             r->ground_effect = 0;
         }
-        else if (r->ground_effect >= 1 && rand_number(1, 2) == 2 && r->getEnvironment(ENV_WATER) >= 100.0 &&
+        else if (r->ground_effect >= 1 && Random::get<int>(1, 2) == 2 && r->getEnvironment(ENV_WATER) >= 100.0 &&
                  r->sector_type != SectorType::lava)
         {
             r->sendText("The water has cooled the lava and it has become solid rock.\r\n");
@@ -1575,9 +1572,9 @@ void repairRoomDamage(uint64_t heartPulse, double deltaTime) {
 
         if(auto dmg = room->getDamage(); dmg > 0) {
             int toRepair = 0;
-            if(dmg >= 100) toRepair = rand_number(5, 10);
-            else if(dmg >= 10) toRepair = rand_number(1, 10);
-            else if(dmg > 1) toRepair = rand_number(1, dmg);
+            if(dmg >= 100) toRepair = Random::get<int>(5, 10);
+            else if(dmg >= 10) toRepair = Random::get<int>(1, 10);
+            else if(dmg > 1) toRepair = Random::get<int>(1, dmg);
             else toRepair = 1;
             room->modDamage(-toRepair);
             room->sendText("The area gets rebuilt a little.\r\n");
@@ -1938,116 +1935,116 @@ void load_config() {
         num = atoi(line);
         fum = atof(line);
 
-        switch (LOWER(*tag)) {
+        switch (tolower(*tag)) {
             case 'a':
-                if (!strcasecmp(tag, "auto_save"))
+                if (boost::iequals(tag, "auto_save"))
                     CONFIG_AUTO_SAVE = num;
-                else if (!strcasecmp(tag, "autosave_time"))
+                else if (boost::iequals(tag, "autosave_time"))
                     CONFIG_AUTOSAVE_TIME = num;
-                else if (!strcasecmp(tag, "auto_save_olc"))
+                else if (boost::iequals(tag, "auto_save_olc"))
                     CONFIG_OLC_SAVE = num;
-                else if (!strcasecmp(tag, "allow_multiclass"))
+                else if (boost::iequals(tag, "allow_multiclass"))
                     CONFIG_ALLOW_MULTICLASS = num;
-                else if (!strcasecmp(tag, "allow_prestige"))
+                else if (boost::iequals(tag, "allow_prestige"))
                     CONFIG_ALLOW_PRESTIGE = num;
-                else if (!strcasecmp(tag, "auto_level"))
+                else if (boost::iequals(tag, "auto_level"))
                     basic_mud_log("ignoring obsolete config option auto_level");
-                else if (!strcasecmp(tag, "all_items_unique"))
+                else if (boost::iequals(tag, "all_items_unique"))
                     CONFIG_ALL_ITEMS_UNIQUE = num;
                 break;
 
             case 'c':
-                if (!strcasecmp(tag, "crash_file_timeout"))
+                if (boost::iequals(tag, "crash_file_timeout"))
                     CONFIG_CRASH_TIMEOUT = num;
-                else if (!strcasecmp(tag, "compression")) {
+                else if (boost::iequals(tag, "compression")) {
                     CONFIG_ENABLE_COMPRESSION = num;
                 }
                 break;
 
             case 'd':
-                if (!strcasecmp(tag, "disp_closed_doors"))
+                if (boost::iequals(tag, "disp_closed_doors"))
                     CONFIG_DISP_CLOSED_DOORS = num;
-                else if (!strcasecmp(tag, "dts_are_dumps"))
+                else if (boost::iequals(tag, "dts_are_dumps"))
                     CONFIG_DTS_ARE_DUMPS = num;
-                else if (!strcasecmp(tag, "donation_room_1"))
+                else if (boost::iequals(tag, "donation_room_1"))
                     if (num == -1)
                         CONFIG_DON_ROOM_1 = NOWHERE;
                     else
                         CONFIG_DON_ROOM_1 = num;
-                else if (!strcasecmp(tag, "donation_room_2"))
+                else if (boost::iequals(tag, "donation_room_2"))
                     if (num == -1)
                         CONFIG_DON_ROOM_2 = NOWHERE;
                     else
                         CONFIG_DON_ROOM_2 = num;
-                else if (!strcasecmp(tag, "donation_room_3"))
+                else if (boost::iequals(tag, "donation_room_3"))
                     if (num == -1)
                         CONFIG_DON_ROOM_3 = NOWHERE;
                     else
                         CONFIG_DON_ROOM_3 = num;
-                else if (!strcasecmp(tag, "dflt_dir")) {
+                else if (boost::iequals(tag, "dflt_dir")) {
                     if (CONFIG_DFLT_DIR)
                         free(CONFIG_DFLT_DIR);
                     if (line && *line)
                         CONFIG_DFLT_DIR = strdup(line);
                     else
                         CONFIG_DFLT_DIR = strdup("data");
-                } else if (!strcasecmp(tag, "dflt_ip")) {
+                } else if (boost::iequals(tag, "dflt_ip")) {
                     if (CONFIG_DFLT_IP)
                         free(CONFIG_DFLT_IP);
                     if (line && *line)
                         CONFIG_DFLT_IP = strdup(line);
                     else
                         CONFIG_DFLT_IP = nullptr;
-                } else if (!strcasecmp(tag, "dflt_port"))
+                } else if (boost::iequals(tag, "dflt_port"))
                     CONFIG_DFLT_PORT = num;
                 break;
 
             case 'e':
-                if (!strcasecmp(tag, "enable_languages"))
+                if (boost::iequals(tag, "enable_languages"))
                     CONFIG_ENABLE_LANGUAGES = num;
-                else if (!strcasecmp(tag, "exp_multiplier"))
+                else if (boost::iequals(tag, "exp_multiplier"))
                     CONFIG_EXP_MULTIPLIER = fum;
                 break;
 
             case 'f':
-                if (!strcasecmp(tag, "free_rent"))
+                if (boost::iequals(tag, "free_rent"))
                     CONFIG_FREE_RENT = num;
-                else if (!strcasecmp(tag, "frozen_start_room"))
+                else if (boost::iequals(tag, "frozen_start_room"))
                     CONFIG_FROZEN_START = num;
                 break;
 
             case 'h':
-                if (!strcasecmp(tag, "holler_move_cost"))
+                if (boost::iequals(tag, "holler_move_cost"))
                     CONFIG_HOLLER_MOVE_COST = num;
                 break;
 
             case 'i':
-                if (!strcasecmp(tag, "idle_void"))
+                if (boost::iequals(tag, "idle_void"))
                     CONFIG_IDLE_VOID = num;
-                else if (!strcasecmp(tag, "idle_rent_time"))
+                else if (boost::iequals(tag, "idle_rent_time"))
                     CONFIG_IDLE_RENT_TIME = num;
-                else if (!strcasecmp(tag, "idle_max_level")) {
+                else if (boost::iequals(tag, "idle_max_level")) {
                     if (num >= CONFIG_LEVEL_CAP)
                         num += 1 - CONFIG_LEVEL_CAP;
                     CONFIG_IDLE_MAX_LEVEL = num;
-                } else if (!strcasecmp(tag, "immort_level_ok"))
+                } else if (boost::iequals(tag, "immort_level_ok"))
                     basic_mud_log("Ignoring immort_level_ok obsolete config");
-                else if (!strcasecmp(tag, "immort_start_room"))
+                else if (boost::iequals(tag, "immort_start_room"))
                     CONFIG_IMMORTAL_START = num;
-                else if (!strcasecmp(tag, "imc_enabled"))
+                else if (boost::iequals(tag, "imc_enabled"))
                     CONFIG_IMC_ENABLED = num;
-                else if (!strcasecmp(tag, "initial_points"))
+                else if (boost::iequals(tag, "initial_points"))
                     CONFIG_INITIAL_POINTS_POOL = num;
                 break;
 
             case 'l':
-                if (!strcasecmp(tag, "level_can_shout"))
+                if (boost::iequals(tag, "level_can_shout"))
                     CONFIG_LEVEL_CAN_SHOUT = num;
-                else if (!strcasecmp(tag, "level_cap"))
+                else if (boost::iequals(tag, "level_cap"))
                     CONFIG_LEVEL_CAP = num;
-                else if (!strcasecmp(tag, "load_into_inventory"))
+                else if (boost::iequals(tag, "load_into_inventory"))
                     CONFIG_LOAD_INVENTORY = num;
-                else if (!strcasecmp(tag, "logname")) {
+                else if (boost::iequals(tag, "logname")) {
                     if (CONFIG_LOGNAME)
                         free(CONFIG_LOGNAME);
                     if (line && *line)
@@ -2058,51 +2055,51 @@ void load_config() {
                 break;
 
             case 'm':
-                if (!strcasecmp(tag, "max_bad_pws"))
+                if (boost::iequals(tag, "max_bad_pws"))
                     CONFIG_MAX_BAD_PWS = num;
-                else if (!strcasecmp(tag, "max_exp_gain"))
+                else if (boost::iequals(tag, "max_exp_gain"))
                     CONFIG_MAX_EXP_GAIN = num;
-                else if (!strcasecmp(tag, "max_exp_loss"))
+                else if (boost::iequals(tag, "max_exp_loss"))
                     CONFIG_MAX_EXP_LOSS = num;
-                else if (!strcasecmp(tag, "max_filesize"))
+                else if (boost::iequals(tag, "max_filesize"))
                     CONFIG_MAX_FILESIZE = num;
-                else if (!strcasecmp(tag, "max_npc_corpse_time"))
+                else if (boost::iequals(tag, "max_npc_corpse_time"))
                     CONFIG_MAX_NPC_CORPSE_TIME = num;
-                else if (!strcasecmp(tag, "max_obj_save"))
+                else if (boost::iequals(tag, "max_obj_save"))
                     CONFIG_MAX_OBJ_SAVE = num;
-                else if (!strcasecmp(tag, "max_pc_corpse_time"))
+                else if (boost::iequals(tag, "max_pc_corpse_time"))
                     CONFIG_MAX_PC_CORPSE_TIME = num;
-                else if (!strcasecmp(tag, "max_playing"))
+                else if (boost::iequals(tag, "max_playing"))
                     CONFIG_MAX_PLAYING = num;
-                else if (!strcasecmp(tag, "menu")) {
+                else if (boost::iequals(tag, "menu")) {
                     if (CONFIG_MENU)
                         free(CONFIG_MENU);
                     strncpy(buf, "Reading menu in load_config()", sizeof(buf));
                     CONFIG_MENU = fread_string(fl, buf);
-                } else if (!strcasecmp(tag, "min_rent_cost"))
+                } else if (boost::iequals(tag, "min_rent_cost"))
                     CONFIG_MIN_RENT_COST = num;
-                else if (!strcasecmp(tag, "min_wizlist_lev")) {
+                else if (boost::iequals(tag, "min_wizlist_lev")) {
                     if (num >= CONFIG_LEVEL_CAP)
                         num += 1 - CONFIG_LEVEL_CAP;
                     CONFIG_MIN_WIZLIST_LEV = num;
-                } else if (!strcasecmp(tag, "mob_fighting"))
+                } else if (boost::iequals(tag, "mob_fighting"))
                     CONFIG_MOB_FIGHTING = num;
-                else if (!strcasecmp(tag, "mortal_start_room"))
+                else if (boost::iequals(tag, "mortal_start_room"))
                     CONFIG_MORTAL_START = num;
-                else if (!strcasecmp(tag, "method"))
+                else if (boost::iequals(tag, "method"))
                     CONFIG_CREATION_METHOD = num;
                 break;
 
             case 'n':
-                if (!strcasecmp(tag, "nameserver_is_slow"))
+                if (boost::iequals(tag, "nameserver_is_slow"))
                     CONFIG_NS_IS_SLOW = num;
-                else if (!strcasecmp(tag, "noperson")) {
+                else if (boost::iequals(tag, "noperson")) {
                     char tmp[READ_SIZE];
                     if (CONFIG_NOPERSON)
                         free(CONFIG_NOPERSON);
                     snprintf(tmp, sizeof(tmp), "%s\r\n", line);
                     CONFIG_NOPERSON = strdup(tmp);
-                } else if (!strcasecmp(tag, "noeffect")) {
+                } else if (boost::iequals(tag, "noeffect")) {
                     char tmp[READ_SIZE];
                     if (CONFIG_NOEFFECT)
                         free(CONFIG_NOEFFECT);
@@ -2112,7 +2109,7 @@ void load_config() {
                 break;
 
             case 'o':
-                if (!strcasecmp(tag, "ok")) {
+                if (boost::iequals(tag, "ok")) {
                     char tmp[READ_SIZE];
                     if (CONFIG_OK)
                         free(CONFIG_OK);
@@ -2122,67 +2119,67 @@ void load_config() {
                 break;
 
             case 'p':
-                if (!strcasecmp(tag, "pk_allowed"))
+                if (boost::iequals(tag, "pk_allowed"))
                     CONFIG_PK_ALLOWED = num;
-                else if (!strcasecmp(tag, "pt_allowed"))
+                else if (boost::iequals(tag, "pt_allowed"))
                     CONFIG_PT_ALLOWED = num;
-                else if (!strcasecmp(tag, "pulse_viol"))
+                else if (boost::iequals(tag, "pulse_viol"))
                     CONFIG_PULSE_VIOLENCE = num;
-                else if (!strcasecmp(tag, "pulse_mobile"))
+                else if (boost::iequals(tag, "pulse_mobile"))
                     CONFIG_PULSE_MOBILE = num;
-                else if (!strcasecmp(tag, "pulse_current"))
+                else if (boost::iequals(tag, "pulse_current"))
                     CONFIG_PULSE_CURRENT = num;
-                else if (!strcasecmp(tag, "pulse_zone"))
+                else if (boost::iequals(tag, "pulse_zone"))
                     CONFIG_PULSE_ZONE = num;
-                else if (!strcasecmp(tag, "pulse_autosave"))
+                else if (boost::iequals(tag, "pulse_autosave"))
                     CONFIG_PULSE_AUTOSAVE = num;
-                else if (!strcasecmp(tag, "pulse_usage"))
+                else if (boost::iequals(tag, "pulse_usage"))
                     CONFIG_PULSE_USAGE = num;
-                else if (!strcasecmp(tag, "pulse_sanity"))
+                else if (boost::iequals(tag, "pulse_sanity"))
                     CONFIG_PULSE_SANITY = num;
-                else if (!strcasecmp(tag, "pulse_timesave"))
+                else if (boost::iequals(tag, "pulse_timesave"))
                     CONFIG_PULSE_TIMESAVE = num;
-                else if (!strcasecmp(tag, "pulse_idlepwd"))
+                else if (boost::iequals(tag, "pulse_idlepwd"))
                     CONFIG_PULSE_IDLEPWD = num;
                 break;
 
             case 'r':
-                if (!strcasecmp(tag, "rent_file_timeout"))
+                if (boost::iequals(tag, "rent_file_timeout"))
                     CONFIG_RENT_TIMEOUT = num;
-                else if (!strcasecmp(tag, "reroll_stats"))
+                else if (boost::iequals(tag, "reroll_stats"))
                     CONFIG_REROLL_PLAYER_CREATION = num;
                 break;
 
             case 's':
-                if (!strcasecmp(tag, "siteok_everyone"))
+                if (boost::iequals(tag, "siteok_everyone"))
                     CONFIG_SITEOK_ALL = num;
-                else if (!strcasecmp(tag, "start_messg")) {
+                else if (boost::iequals(tag, "start_messg")) {
                     strncpy(buf, "Reading start message in load_config()", sizeof(buf));
                     if (CONFIG_START_MESSG)
                         free(CONFIG_START_MESSG);
                     CONFIG_START_MESSG = fread_string(fl, buf);
-                } else if (!strcasecmp(tag, "stack_mobs"))
+                } else if (boost::iequals(tag, "stack_mobs"))
                     CONFIG_STACK_MOBS = num;
-                else if (!strcasecmp(tag, "stack_objs"))
+                else if (boost::iequals(tag, "stack_objs"))
                     CONFIG_STACK_OBJS = num;
                 break;
 
             case 't':
-                if (!strcasecmp(tag, "tunnel_size"))
+                if (boost::iequals(tag, "tunnel_size"))
                     CONFIG_TUNNEL_SIZE = num;
-                else if (!strcasecmp(tag, "track_through_doors"))
+                else if (boost::iequals(tag, "track_through_doors"))
                     CONFIG_TRACK_T_DOORS = num;
                 break;
 
             case 'u':
-                if (!strcasecmp(tag, "use_autowiz"))
+                if (boost::iequals(tag, "use_autowiz"))
                     CONFIG_USE_AUTOWIZ = num;
-                else if (!strcasecmp(tag, "use_new_socials"))
+                else if (boost::iequals(tag, "use_new_socials"))
                     CONFIG_NEW_SOCIALS = num;
                 break;
 
             case 'w':
-                if (!strcasecmp(tag, "welc_messg")) {
+                if (boost::iequals(tag, "welc_messg")) {
                     strncpy(buf, "Reading welcome message in load_config()", sizeof(buf));
                     if (CONFIG_WELC_MESSG)
                         free(CONFIG_WELC_MESSG);

@@ -4,12 +4,16 @@
  * Copyright 1996 by Harvey Gilpin					*
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
+#include "dbat/Room.h"
+#include "dbat/Character.h"
+#include "dbat/Object.h"
+#include "dbat/Destination.h"
 #include "dbat/genwld.h"
 #include "dbat/utils.h"
 #include "dbat/db.h"
 #include "dbat/handler.h"
 #include "dbat/genolc.h"
-#include "dbat/shop.h"
+#include "dbat/Shop.h"
 #include "dbat/constants.h"
 #include "dbat/planet.h"
 #include "dbat/constants.h"

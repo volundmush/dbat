@@ -1,7 +1,6 @@
-#include <stdexcept>
-#include <boost/algorithm/string.hpp>
 
-#include "dbat/account.h"
+
+#include "dbat/Account.h"
 #include "dbat/db.h"
 #include "dbat/utils.h"
 
@@ -46,4 +45,13 @@ Account *createAccount(const std::string &name, const std::string &password)
     a.last_login = time(nullptr);
 
     return findAccount(name);
+}
+
+void Account::modRPP(int amt)
+{
+    rpp += amt;
+    if (rpp < 0)
+    {
+        rpp = 0;
+    }
 }

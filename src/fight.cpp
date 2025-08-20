@@ -7,7 +7,14 @@
  *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
  *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
  ************************************************************************ */
-
+#include "dbat/Character.h"
+#include "dbat/Object.h"
+#include "dbat/Room.h"
+#include "dbat/Zone.h"
+#include "dbat/Destination.h"
+#include "dbat/DgScript.h"
+#include "dbat/Descriptor.h"
+#include "dbat/commands.h"
 #include "dbat/fight.h"
 #include "dbat/dg_comm.h"
 #include "dbat/act.attack.h"
@@ -275,7 +282,7 @@ static int pick_n_throw(Character *ch, char *buf)
 {
     char buf2[MAX_INPUT_LENGTH], buf3[MAX_INPUT_LENGTH];
 
-    if (rand_number(1, 20) < 18)
+    if (Random::get<int>(1, 20) < 18)
     {
         return (false);
     }
@@ -297,14 +304,14 @@ static int pick_n_throw(Character *ch, char *buf)
 static void mob_attack(Character *ch, char *buf)
 {
 
-    int power = rand_number(1, 5);
+    int power = Random::get<int>(1, 5);
     int bonus = GET_LEVEL(ch) * 0.1;
     int special = 0;
     char buf2[MAX_INPUT_LENGTH];
 
     power += bonus;
 
-    if (rand_number(1, 4) == 4)
+    if (Random::get<int>(1, 4) == 4)
         power += 10;
 
     if (power > 20)
@@ -321,7 +328,7 @@ static void mob_attack(Character *ch, char *buf)
             GET_MOB_VNUM(ch) == 85 || GET_MOB_VNUM(ch) == 86 || GET_MOB_VNUM(ch) == 87)
         {
             dragonpass = true;
-            special = rand_number(40, 100);
+            special = Random::get<int>(40, 100);
         }
         else
         {
@@ -339,7 +346,7 @@ static void mob_attack(Character *ch, char *buf)
 
     if ((ch->getCurVital(CharVital::ki)) >= GET_MAX_MANA(ch) * 0.05 && IS_HUMANOID(ch) && (!IS_DRAGON(ch) || dragonpass == true))
     {
-        if (ch->getBaseStat<int>("mobcharge") <= 0 && rand_number(1, 10) >= 8)
+        if (ch->getBaseStat<int>("mobcharge") <= 0 && Random::get<int>(1, 10) >= 8)
         {
             act("@wAn aura flares up around @R$n@w!@n", true, ch, nullptr, nullptr, TO_ROOM);
             ch->modBaseStat<int>("mobcharge", 1);
@@ -378,20 +385,20 @@ static void mob_attack(Character *ch, char *buf)
         else if (special < 100)
         { /* Normal physical attack */
             if (IS_ANDROID(ch) && ch->subrace == SubRace::android_model_repair && GET_HIT(ch) <= (ch->getEffectiveStat<int64_t>("health")) * 0.5 &&
-                rand_number(1, 20) >= 16)
+                Random::get<int>(1, 20) >= 16)
             {
                 do_srepair(ch, nullptr, 0, 0);
             }
-            else if (IS_ANDROID(ch) && ch->subrace == SubRace::android_model_absorb && rand_number(1, 20) >= 19)
+            else if (IS_ANDROID(ch) && ch->subrace == SubRace::android_model_absorb && Random::get<int>(1, 20) >= 19)
             {
                 do_absorb(ch, buf2, 0, 0);
             }
             else if ((IS_BIO(ch) || IS_MAJIN(ch)) && GET_HIT(ch) <= (ch->getEffectiveStat<int64_t>("health")) * 0.5 &&
-                     rand_number(1, 20) >= 17)
+                     Random::get<int>(1, 20) >= 17)
             {
                 do_regenerate(ch, "25", 0, 0);
             }
-            else if (IS_NAMEK(ch) && GET_HIT(ch) <= (ch->getEffectiveStat<int64_t>("health")) * 0.5 && rand_number(1, 20) == 20)
+            else if (IS_NAMEK(ch) && GET_HIT(ch) <= (ch->getEffectiveStat<int64_t>("health")) * 0.5 && Random::get<int>(1, 20) == 20)
             {
                 do_regenerate(ch, "25", 0, 0);
             }
@@ -399,15 +406,15 @@ static void mob_attack(Character *ch, char *buf)
             {
                 /* This determines if they throw and also handles it */
             }
-            else if (MOB_FLAGGED(ch, MOB_KNOWKAIO) && rand_number(1, 50) >= 46)
+            else if (MOB_FLAGGED(ch, MOB_KNOWKAIO) && Random::get<int>(1, 50) >= 46)
             {
-                if (rand_number(1, 10) == 10)
+                if (Random::get<int>(1, 10) == 10)
                 {
                     ch->addTransform(Form::kaioken);
                     ch->technique = Form::kaioken;
                     ch->transforms[Form::kaioken].grade = 5;
                 }
-                else if (rand_number(1, 10) >= 8)
+                else if (Random::get<int>(1, 10) >= 8)
                 {
                     ch->addTransform(Form::kaioken);
                     ch->technique = Form::kaioken;
@@ -431,9 +438,9 @@ static void mob_attack(Character *ch, char *buf)
                 case 5:
                     if (GET_EQ(ch, WEAR_WIELD1))
                         do_attack(ch, buf, 0, 0);
-                    else if (rand_number(1, 5) == 5)
+                    else if (Random::get<int>(1, 5) == 5)
                         do_kick(ch, buf, 0, 0);
-                    else if (rand_number(1, 10) == 10)
+                    else if (Random::get<int>(1, 10) == 10)
                         do_elbow(ch, buf, 0, 0);
                     else
                         do_punch(ch, buf, 0, 0);
@@ -443,51 +450,51 @@ static void mob_attack(Character *ch, char *buf)
                 case 8:
                     if (GET_EQ(ch, WEAR_WIELD1))
                         do_attack(ch, buf, 0, 0);
-                    else if (rand_number(1, 5) == 5)
+                    else if (Random::get<int>(1, 5) == 5)
                         do_punch(ch, buf, 0, 0);
-                    else if (rand_number(1, 10) == 10)
+                    else if (Random::get<int>(1, 10) == 10)
                         do_knee(ch, buf, 0, 0);
                     else
                         do_kick(ch, buf, 0, 0);
                     break;
                 case 9:
                 case 10:
-                    if (rand_number(1, 5) == 5)
+                    if (Random::get<int>(1, 5) == 5)
                         do_knee(ch, buf, 0, 0);
-                    else if (rand_number(1, 10) == 10)
+                    else if (Random::get<int>(1, 10) == 10)
                         do_uppercut(ch, buf, 0, 0);
                     else
                         do_elbow(ch, buf, 0, 0);
                     break;
                 case 11:
                 case 12:
-                    if (rand_number(1, 5) == 5)
+                    if (Random::get<int>(1, 5) == 5)
                         do_elbow(ch, buf, 0, 0);
-                    else if (rand_number(1, 10) == 10)
+                    else if (Random::get<int>(1, 10) == 10)
                         do_roundhouse(ch, buf, 0, 0);
-                    else if (rand_number(1, 8) == 8)
+                    else if (Random::get<int>(1, 8) == 8)
                         do_trip(ch, buf, 0, 0);
                     else
                         do_knee(ch, buf, 0, 0);
                     break;
                 case 13:
                 case 14:
-                    if ((IS_BARDOCK(ch) || IS_KURZAK(ch)) && rand_number(1, 2) == 2)
+                    if ((IS_BARDOCK(ch) || IS_KURZAK(ch)) && Random::get<int>(1, 2) == 2)
                         do_head(ch, buf, 0, 0);
-                    else if ((IS_ICER(ch) || IS_BIO(ch)) && rand_number(1, 2) == 2)
+                    else if ((IS_ICER(ch) || IS_BIO(ch)) && Random::get<int>(1, 2) == 2)
                         do_tailwhip(ch, buf, 0, 0);
-                    else if (rand_number(1, 8) == 8)
+                    else if (Random::get<int>(1, 8) == 8)
                         do_trip(ch, buf, 0, 0);
                     else
                         do_uppercut(ch, buf, 0, 0);
                     break;
                 case 15:
                 case 16:
-                    if ((IS_BARDOCK(ch) || IS_KURZAK(ch)) && rand_number(1, 2) == 2)
+                    if ((IS_BARDOCK(ch) || IS_KURZAK(ch)) && Random::get<int>(1, 2) == 2)
                         do_head(ch, buf, 0, 0);
-                    else if ((IS_ICER(ch) || IS_BIO(ch)) && rand_number(1, 2) == 2)
+                    else if ((IS_ICER(ch) || IS_BIO(ch)) && Random::get<int>(1, 2) == 2)
                         do_tailwhip(ch, buf, 0, 0);
-                    else if (rand_number(1, 8) >= 7)
+                    else if (Random::get<int>(1, 8) >= 7)
                         do_trip(ch, buf, 0, 0);
                     else
                         do_roundhouse(ch, buf, 0, 0);
@@ -537,7 +544,7 @@ static void mob_attack(Character *ch, char *buf)
             case 11:
                 if (special > 80)
                     do_zanzoken(ch, buf, 0, 0);
-                if (IS_DRAGON(ch) && rand_number(1, 4) == 4)
+                if (IS_DRAGON(ch) && Random::get<int>(1, 4) == 4)
                 {
                     do_breath(ch, buf, 0, 0);
                 }
@@ -555,7 +562,7 @@ static void mob_attack(Character *ch, char *buf)
             case 14:
                 if (special > 80)
                     do_zanzoken(ch, buf, 0, 0);
-                if (IS_DRAGON(ch) && rand_number(1, 4) == 4)
+                if (IS_DRAGON(ch) && Random::get<int>(1, 4) == 4)
                 {
                     do_breath(ch, buf, 0, 0);
                 }
@@ -570,7 +577,7 @@ static void mob_attack(Character *ch, char *buf)
                 break;
             case 15:
             case 16:
-                if (IS_DRAGON(ch) && rand_number(1, 4) == 4)
+                if (IS_DRAGON(ch) && Random::get<int>(1, 4) == 4)
                 {
                     do_breath(ch, buf, 0, 0);
                 }
@@ -585,7 +592,7 @@ static void mob_attack(Character *ch, char *buf)
                 break;
             case 17:
             case 18:
-                if (IS_DRAGON(ch) && rand_number(1, 4) == 4)
+                if (IS_DRAGON(ch) && Random::get<int>(1, 4) == 4)
                 {
                     do_breath(ch, buf, 0, 0);
                 }
@@ -773,17 +780,17 @@ static void mob_attack(Character *ch, char *buf)
     }
     else if (!IS_HUMANOID(ch) || dragonpass == false)
     { /* Is not a humanoid mob */
-        if (IS_SERPENT(ch) && rand_number(1, 5) == 5)
+        if (IS_SERPENT(ch) && Random::get<int>(1, 5) == 5)
         {
             do_strike(ch, buf, 0, 0);
         }
-        else if (IS_DRAGON(ch) && rand_number(1, 12) >= 10 && GET_MOB_VNUM(ch) != 17917)
+        else if (IS_DRAGON(ch) && Random::get<int>(1, 12) >= 10 && GET_MOB_VNUM(ch) != 17917)
         {
             do_breath(ch, buf, 0, 0);
         }
         else
         {
-            if (rand_number(1, 10) >= 7 && GET_LEVEL(ch) >= 10)
+            if (Random::get<int>(1, 10) >= 7 && GET_LEVEL(ch) >= 10)
             {
                 do_ram(ch, buf, 0, 0);
             }
@@ -926,7 +933,7 @@ void remove_limb(Character *vict, int num)
     {
         SET_OBJ_VAL(body_part, v, 100);
     }
-    body_part->setBaseStat<weight_t>("weight", rand_number(4, 10));
+    body_part->setBaseStat<weight_t>("weight", Random::get<int>(4, 10));
     body_part->moveToLocation(vict);
 }
 
@@ -973,7 +980,7 @@ void powerupService(uint64_t heartPulse, double deltaTime)
             continue;
         }
 
-        if (rand_number(1, 3) != 3)
+        if (Random::get<int>(1, 3) != 3)
             continue;
 
         bool stopPowerup = false;
@@ -1058,7 +1065,7 @@ void lifeforceSystem(uint64_t heartPulse, double deltaTime)
     for (auto ch : filter_raw(subs))
     {
 
-        if (rand_number(1, 15) < 14)
+        if (Random::get<int>(1, 15) < 14)
             continue;
         auto threshold = (AFF_FLAGGED(ch, AFF_HEALGLOW) || IS_KANASSAN(ch)) ? 0.03 : 0.05;
         auto curperc = ch->getCurVitalMeterPercent(CharVital::lifeforce);
@@ -1150,7 +1157,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime)
 
         if (!AFF_FLAGGED(ch, AFF_POSITION))
         {
-            if (roll_balance(ch) > axion_dice(0) && rand_number(1, 10) >= 7)
+            if (roll_balance(ch) > axion_dice(0) && Random::get<int>(1, 10) >= 7)
             {
                 if (FIGHTING(ch))
                 {
@@ -1189,7 +1196,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime)
                 ch->affect_flags.set(AFF_POSITION, false);
             }
         }
-        if (GRAPPLING(ch) && GRAPTYPE(ch) == 2 && rand_number(1, 11) >= 8)
+        if (GRAPPLING(ch) && GRAPTYPE(ch) == 2 && Random::get<int>(1, 11) >= 8)
         {
             if ((((ch)->grappling)->getCurVital(CharVital::stamina)) >= GET_MAX_MOVE(GRAPPLING(ch)) / 8)
             {
@@ -1211,7 +1218,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime)
                 ch->setBaseStat<int>("grapple_type", -1);
             }
         }
-        else if (GRAPPLING(ch) && GRAPTYPE(ch) == 4 && rand_number(1, 12) >= 8)
+        else if (GRAPPLING(ch) && GRAPTYPE(ch) == 4 && Random::get<int>(1, 12) >= 8)
         {
             act("@WYou crush @C$N@W some more!@n", true, ch, nullptr, GRAPPLING(ch), TO_CHAR);
             act("@C$n@W crushes YOU@W some more!@n", true, ch, nullptr, GRAPPLING(ch), TO_VICT);
@@ -1219,7 +1226,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime)
             int64_t damg = GET_STR(ch) * (10 + (GET_MAX_HIT(ch) * 0.005));
             hurt(0, 0, ch, GRAPPLING(ch), nullptr, damg, 0);
         }
-        if (GRAPPLED(ch) && rand_number(1, 2) == 2)
+        if (GRAPPLED(ch) && Random::get<int>(1, 2) == 2)
         {
             ch->sendText("@CTry 'escape' to break free from the hold!@n\r\n");
         }
@@ -1243,31 +1250,31 @@ void fight_stack(uint64_t heartPulse, double deltaTime)
         if (IS_NPC(ch) && GET_HIT(ch) < GET_MAX_HIT(ch) / 10 && GET_HIT(ch) > 0 && FIGHTING(ch) &&
             !MOB_FLAGGED(ch, MOB_SENTINEL))
         {
-            if (rand_number(1, 30) >= 25 && GET_POS(ch) > POS_SITTING)
+            if (Random::get<int>(1, 30) >= 25 && GET_POS(ch) > POS_SITTING)
             {
                 do_flee(ch, nullptr, 0, 0);
             }
         }
-        if (ch->mutations.get(Mutation::limb_regeneration) && rand_number(1, 200) >= 175)
+        if (ch->mutations.get(Mutation::limb_regeneration) && Random::get<int>(1, 200) >= 175)
         {
             mutant_limb_regen(ch);
         }
-        if (!IS_NPC(ch) && PLR_FLAGGED(ch, PLR_DISGUISED) && GET_SKILL(ch, SKILL_DISGUISE) < rand_number(1, 125))
+        if (!IS_NPC(ch) && PLR_FLAGGED(ch, PLR_DISGUISED) && GET_SKILL(ch, SKILL_DISGUISE) < Random::get<int>(1, 125))
         {
             ch->sendText("Your disguise comes off because of your swift movements!\r\n");
             ch->player_flags.set(PLR_DISGUISED, false);
             act("@W$n's@W disguise comes off because of $s swift movements!@n", false, ch, nullptr, nullptr, TO_ROOM);
         }
-        if (IS_NPC(ch) && AFF_FLAGGED(ch, AFF_BLIND) && rand_number(1, 200) >= 190)
+        if (IS_NPC(ch) && AFF_FLAGGED(ch, AFF_BLIND) && Random::get<int>(1, 200) >= 190)
         {
             act("@W$n@W is no longer blind.@n", false, ch, nullptr, nullptr, TO_ROOM);
             ch->affect_flags.set(AFF_BLIND, false);
         }
 
-        if (AFF_FLAGGED(ch, AFF_KNOCKED) && rand_number(1, 200) >= 195)
+        if (AFF_FLAGGED(ch, AFF_KNOCKED) && Random::get<int>(1, 200) >= 195)
         {
             ch->cureStatusKnockedOut(true);
-            if (IS_NPC(ch) && rand_number(1, 20) >= 12)
+            if (IS_NPC(ch) && Random::get<int>(1, 20) >= 12)
             {
                 act("@W$n@W stands up.@n", false, ch, nullptr, nullptr, TO_ROOM);
                 ch->setBaseStat<int>("position", POS_STANDING);
@@ -1282,7 +1289,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime)
             }
         }
         /* Mobile Defense System */
-        if (IS_NPC(ch) && GRAPPLED(ch) && !MOB_FLAGGED(ch, MOB_DUMMY) && rand_number(1, 5) >= 4)
+        if (IS_NPC(ch) && GRAPPLED(ch) && !MOB_FLAGGED(ch, MOB_DUMMY) && Random::get<int>(1, 5) >= 4)
         {
             do_escape(ch, nullptr, 0, 0);
             continue;
@@ -1309,7 +1316,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime)
             if (AFF_FLAGGED(FIGHTING(ch), AFF_FLYING) && !IS_HUMANOID(ch) && !AFF_FLAGGED(ch, AFF_FLYING) &&
                 GET_POS(ch) > POS_RESTING)
             {
-                if (rand_number(1, 30) >= 22 && !block_calc(ch))
+                if (Random::get<int>(1, 30) >= 22 && !block_calc(ch))
                 {
                     act("$n@G flees in terror and you lose sight of $m!", true, ch, nullptr, nullptr, TO_ROOM);
                     auto con = ch->getInventory();
@@ -1322,7 +1329,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime)
             }
             if (AFF_FLAGGED(FIGHTING(ch), AFF_FLYING) && IS_HUMANOID(ch) && GET_LEVEL(ch) <= 10)
             {
-                if (rand_number(1, 30) >= 22 && !block_calc(ch))
+                if (Random::get<int>(1, 30) >= 22 && !block_calc(ch))
                 {
                     act("$n@G turns and runs away. You lose sight of $m!", true, ch, nullptr, nullptr, TO_ROOM);
                     auto con = ch->getInventory();
@@ -1342,7 +1349,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime)
                 do_stand(ch, nullptr, 0, 0);
                 continue;
             }
-            if (IS_AFFECTED(ch, AFF_PARA) && IS_NPC(ch) && GET_INT(ch) + 10 < rand_number(1, 60))
+            if (IS_AFFECTED(ch, AFF_PARA) && IS_NPC(ch) && GET_INT(ch) + 10 < Random::get<int>(1, 60))
             {
                 act("@yYou fail to overcome your paralysis!@n", true, ch, nullptr, nullptr, TO_CHAR);
                 act("@Y$n @ystruggles with $s paralysis!@n", true, ch, nullptr, nullptr, TO_ROOM);
@@ -1363,7 +1370,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime)
                 GET_POS(ch) != POS_SITTING && GET_POS(ch) != POS_RESTING && GET_POS(ch) != POS_SLEEPING)
             {
 
-                if (IS_NPC(ch) && rand_number(1, 30) <= 12)
+                if (IS_NPC(ch) && Random::get<int>(1, 30) <= 12)
                     continue;
 
                 mob_attack(ch, buf);
@@ -1496,7 +1503,7 @@ void kiChargeSystem(uint64_t heartPulse, double deltaTime)
             {
                 ch->modCurVital(CharVital::ki, -((GET_MAX_MANA(ch) * 0.01) * perc) + 1);
                 ch->modBaseStat<int64_t>("charge", ((GET_MAX_MANA(ch) * 0.01) * perc) + 1);
-                switch (rand_number(1, 3))
+                switch (Random::get<int>(1, 3))
                 {
                 case 1:
                     act("$n@w's aura ripples magnificantly while growing brighter!@n", true, ch, nullptr,
@@ -1553,7 +1560,7 @@ void kiChargeSystem(uint64_t heartPulse, double deltaTime)
         if ((GET_POS(ch) == POS_SLEEPING || GET_POS(ch) == POS_RESTING))
         {
             ch->sendText("You stop charging and release all your pent up energy!\r\n");
-            switch (rand_number(1, 3))
+            switch (Random::get<int>(1, 3))
             {
             case 1:
                 act("$n@w's aura disappears.@n", true, ch, nullptr, nullptr, TO_ROOM);
@@ -1575,10 +1582,10 @@ void kiChargeSystem(uint64_t heartPulse, double deltaTime)
         }
         auto docharge = PLR_FLAGGED(ch, PLR_CHARGE);
         auto prefki = GET_PREFERENCE(ch) == PREFERENCE_KI;
-        if (docharge && GET_BONUS(ch, BONUS_UNFOCUSED) > 0 && rand_number(1, 80) >= 70)
+        if (docharge && GET_BONUS(ch, BONUS_UNFOCUSED) > 0 && Random::get<int>(1, 80) >= 70)
         {
             ch->sendText("You lose concentration due to your unfocused mind and release your charged energy!\r\n");
-            switch (rand_number(1, 3))
+            switch (Random::get<int>(1, 3))
             {
             case 1:
                 act("$n@w's aura disappears.@n", true, ch, nullptr, nullptr, TO_ROOM);
@@ -1602,14 +1609,14 @@ void kiChargeSystem(uint64_t heartPulse, double deltaTime)
         {
             improve_skill(ch, SKILL_CONCENTRATION, 1);
         }
-        if (!docharge && rand_number(1, 40) >= 38 && !FIGHTING(ch) &&
+        if (!docharge && Random::get<int>(1, 40) >= 38 && !FIGHTING(ch) &&
             (!prefki || GET_CHARGE(ch) > GET_MAX_MANA(ch) * 0.1))
         {
             if (GET_CHARGE(ch) >= GET_MAX_MANA(ch) / 100 && axion_dice(-10) > ch->getEffectiveStat("intelligence"))
             {
                 int64_t loss = 0;
                 ch->sendText("You lose some of your energy slowly.\r\n");
-                switch (rand_number(1, 3))
+                switch (Random::get<int>(1, 3))
                 {
                 case 1:
                     act("$n@w's aura flickers weakly.@n", true, ch, nullptr, nullptr, TO_ROOM);
@@ -1750,7 +1757,7 @@ static void make_pcorpse(Character *ch)
     if (AFF_FLAGGED(ch, AFF_ASHED))
     {
         act("@WSome ashes fall off the corpse.@n", true, ch, nullptr, nullptr, TO_ROOM);
-        int ashcount = rand_number(1, 3);
+        int ashcount = Random::get<int>(1, 3);
         while (ashcount--)
         {
             auto ashes = read_object(1305, VIRTUAL);
@@ -1945,7 +1952,7 @@ static void make_corpse(Character *ch, Character *tch)
     {
         act("@WSome ashes fall off the corpse.@n", true, ch, nullptr, nullptr, TO_ROOM);
         Object *ashes;
-        if (rand_number(1, 3) == 2)
+        if (Random::get<int>(1, 3) == 2)
         {
             ashes = read_object(1305, VIRTUAL);
             ashes->moveToLocation(ch);
@@ -1954,7 +1961,7 @@ static void make_corpse(Character *ch, Character *tch)
             ashes = read_object(1305, VIRTUAL);
             ashes->moveToLocation(ch);
         }
-        else if (rand_number(1, 2) == 2)
+        else if (Random::get<int>(1, 2) == 2)
         {
             ashes = read_object(1305, VIRTUAL);
             ashes->moveToLocation(ch);
@@ -2002,7 +2009,7 @@ static void make_corpse(Character *ch, Character *tch)
                     repeats = 2;
                 }
 
-                if (chance && rand_number(1, 10) > 5)
+                if (chance && Random::get<int>(1, 10) > 5)
                 {
                     repeats += 1;
                 }
@@ -2044,7 +2051,7 @@ static void make_corpse(Character *ch, Character *tch)
     if (IS_NPC(ch))
         corpse->setBaseStat<int>("timer", CONFIG_MAX_NPC_CORPSE_TIME);
     else
-        corpse->setBaseStat<int>("timer", rand_number(CONFIG_MAX_PC_CORPSE_TIME / 2, CONFIG_MAX_PC_CORPSE_TIME));
+        corpse->setBaseStat<int>("timer", Random::get<int>(CONFIG_MAX_PC_CORPSE_TIME / 2, CONFIG_MAX_PC_CORPSE_TIME));
 
     if (MOB_FLAGGED(ch, MOB_HUSK))
     {
@@ -2225,9 +2232,9 @@ void raw_kill(Character *ch, Character *killer)
             send_to_imm("[PK] %s killed %s at room [%d]\r\n", GET_NAME(killer), GET_NAME(ch),
                         killer->location.getVnum());
         }
-        if ((IS_SAIYAN(killer) && rand_number(1, 2) == 2) || !IS_SAIYAN(killer))
+        if ((IS_SAIYAN(killer) && Random::get<int>(1, 2) == 2) || !IS_SAIYAN(killer))
         {
-            if (rand_number(1, 6) >= 5 &&
+            if (Random::get<int>(1, 6) >= 5 &&
                 (level_exp(killer, GET_LEVEL(killer) + 1) - GET_EXP(killer) > 0 || GET_LEVEL(killer) == 100))
             {
                 int psreward = GET_WIS(killer) * 0.35;
@@ -2620,8 +2627,7 @@ static void perform_group_gain(Character *ch, int base, Character *victim)
     }
     auto leader = ch->master ? ch->master : ch;
 
-    /*share = MIN(CONFIG_MAX_EXP_GAIN, MAX(1, base * GET_LEVEL(ch)));*/
-    share = MIN(2000000, base * GET_INT(ch));
+    share = std::min<int64_t>(2000000, base * GET_INT(ch));
     if (!IS_NPC(ch))
     {
         if (GET_INT(ch) >= 100 && GET_MAX_HIT(ch) * .025 >= GET_MAX_HIT(victim))
@@ -2862,11 +2868,11 @@ void group_gain(Character *ch, Character *victim)
 
     /* prevent illegal xp creation when killing players */
     if (!IS_NPC(victim))
-        tot_gain = MIN(CONFIG_MAX_EXP_LOSS * 2, tot_gain);
+        tot_gain = std::min<int64_t>(CONFIG_MAX_EXP_LOSS * 2, tot_gain);
 
     if (tot_levels >= 1)
     {
-        base = MAX(1, tot_gain / tot_levels);
+        base = std::max<int64_t>(1, tot_gain / tot_levels);
         int perc = 20 * tot_members;
         if (perc >= 80)
         {
@@ -2916,7 +2922,7 @@ void solo_gain(Character *ch, Character *victim)
             ch = GET_ORIGINAL(ch);
         }
     }
-    int64_t exp = MIN(2000000, GET_EXP(victim));
+    int64_t exp = std::min<int64_t>(2000000, GET_EXP(victim));
 
     exp *= 0.25;
 
@@ -2982,7 +2988,7 @@ void solo_gain(Character *ch, Character *victim)
         exp += exp * .25;
     }
     exp = gear_exp(ch, exp);
-    exp = MAX(exp, 1);
+    exp = std::max<int64_t>(exp, 1);
 
     if (exp > 1)
         ch->send_to("You receive %s experience points.\r\n", add_commas(exp).c_str());

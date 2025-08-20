@@ -7,6 +7,11 @@
  *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
  *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
  ************************************************************************ */
+#include "dbat/Character.h"
+#include "dbat/Object.h"
+#include "dbat/Room.h"
+#include "dbat/Descriptor.h"
+#include "dbat/Destination.h"
 #include "dbat/handler.h"
 #include "dbat/send.h"
 #include "dbat/comm.h"
@@ -18,7 +23,6 @@
 #include "dbat/feats.h"
 #include "dbat/races.h"
 #include "dbat/class.h"
-
 #include "dbat/fight.h"
 #include "dbat/races.h"
 #include "dbat/act.informative.h"
@@ -115,7 +119,7 @@ int is_name(const char *str, const char *namelist)
             if (!*curstr || *curname == ' ')
                 break;
 
-            if (LOWER(*curstr) != LOWER(*curname))
+            if (tolower(*curstr) != tolower(*curname))
                 break;
         }
 
@@ -162,7 +166,7 @@ int isname(const char *str, const char *namelist)
         return 0;
     }
 
-    if (!strcasecmp(str, namelist))
+    if (boost::iequals(str, namelist))
     { /* the easy way */
         return 1;
     }
@@ -964,11 +968,11 @@ Character *get_player_vis(Character *ch, char *name, int *number, int inroom)
             continue;
         if (GET_ADMLEVEL(ch) < 1 && GET_ADMLEVEL(i) < 1 && !IS_NPC(ch) && !IS_NPC(i))
         {
-            if (strcasecmp(RACE(i), name) && !strstr(RACE(i), name))
+            if (!boost::iequals(RACE(i), name) && !strstr(RACE(i), name))
             {
                 if (readIntro(ch, i) == 1)
                 {
-                    if (strcasecmp(get_i_name(ch, i), name) && !strstr(get_i_name(ch, i), name))
+                    if (!boost::iequals(get_i_name(ch, i), name) && !strstr(get_i_name(ch, i), name))
                     {
                         continue;
                     }
@@ -981,13 +985,13 @@ Character *get_player_vis(Character *ch, char *name, int *number, int inroom)
         }
         if ((GET_ADMLEVEL(ch) >= 1 || GET_ADMLEVEL(i) >= 1 || IS_NPC(ch) || IS_NPC(i)))
         {
-            if (strcasecmp(i->getName(), name) && !strstr(i->getName(), name))
+            if (!boost::iequals(i->getName(), name) && !strstr(i->getName(), name))
             {
-                if (strcasecmp(RACE(i), name) && !strstr(RACE(i), name))
+                if (!boost::iequals(RACE(i), name) && !strstr(RACE(i), name))
                 {
                     if (!IS_NPC(ch) && !IS_NPC(i) && readIntro(ch, i) == 1)
                     {
-                        if (strcasecmp(get_i_name(ch, i), name) && !strstr(get_i_name(ch, i), name))
+                        if (!boost::iequals(get_i_name(ch, i), name) && !strstr(get_i_name(ch, i), name))
                         {
                             continue;
                         }
@@ -999,7 +1003,7 @@ Character *get_player_vis(Character *ch, char *name, int *number, int inroom)
                 }
             }
         }
-        if (!CAN_SEE(ch, i))
+    if (!ch->canSee(i))
             continue;
         if (--(*number) != 0)
             continue;
@@ -1021,7 +1025,7 @@ Character *get_char_room_vis(Character *ch, char *name, int *number)
     }
 
     /* JE 7/18/94 :-) :-) */
-    if (!strcasecmp(name, "self") || !strcasecmp(name, "me"))
+    if (boost::iequals(name, "self") || boost::iequals(name, "me"))
         return (ch);
 
     /* 0.<name> means PC with name */
@@ -1030,58 +1034,58 @@ Character *get_char_room_vis(Character *ch, char *name, int *number)
     auto people = ch->location.getPeople();
     for (auto i : filter_raw(people))
     {
-        if (!strcasecmp(name, "last") && LASTHIT(i) != 0 && LASTHIT(i) == GET_IDNUM(ch))
+        if (boost::iequals(name, "last") && LASTHIT(i) != 0 && LASTHIT(i) == GET_IDNUM(ch))
         {
-            if (CAN_SEE(ch, i))
+            if (ch->canSee(i))
                 if (--(*number) == 0)
                     return (i);
         }
         else if (isname(name, i->getName()) && (IS_NPC(i) || IS_NPC(ch) || GET_ADMLEVEL(i) > 0 || GET_ADMLEVEL(ch) > 0) &&
                  i != ch)
         {
-            if (CAN_SEE(ch, i))
+            if (ch->canSee(i))
                 if (--(*number) == 0)
                     return (i);
         }
         else if (isname(name, i->getName()) && i == ch)
         {
-            if (CAN_SEE(ch, i))
+            if (ch->canSee(i))
                 if (--(*number) == 0)
                     return (i);
         }
-        else if (!IS_NPC(i) && !IS_NPC(ch) && !strcasecmp(get_i_name(ch, i), CAP(name)) && i != ch)
+        else if (!IS_NPC(i) && !IS_NPC(ch) && boost::iequals(get_i_name(ch, i), CAP(name)) && i != ch)
         {
-            if (CAN_SEE(ch, i))
+            if (ch->canSee(i))
                 if (--(*number) == 0)
                     return (i);
         }
         else if (!IS_NPC(i) && !IS_NPC(ch) && strstr(get_i_name(ch, i), CAP(name)) && i != ch)
         {
-            if (CAN_SEE(ch, i))
+            if (ch->canSee(i))
                 if (--(*number) == 0)
                     return (i);
         }
         else if (!IS_NPC(i) && !(strcmp(RACE(i), CAP(name))) && i != ch)
         {
-            if (CAN_SEE(ch, i))
+            if (ch->canSee(i))
                 if (--(*number) == 0)
                     return (i);
         }
         else if (!IS_NPC(i) && strstr(RACE(i), CAP(name)) && i != ch)
         {
-            if (CAN_SEE(ch, i))
+            if (ch->canSee(i))
                 if (--(*number) == 0)
                     return (i);
         }
         else if (!IS_NPC(i) && !(strcmp(RACE(i), name)) && i != ch)
         {
-            if (CAN_SEE(ch, i))
+            if (ch->canSee(i))
                 if (--(*number) == 0)
                     return (i);
         }
         else if (!IS_NPC(i) && strstr(RACE(i), name) && i != ch)
         {
-            if (CAN_SEE(ch, i))
+            if (ch->canSee(i))
                 if (--(*number) == 0)
                     return (i);
         }
@@ -1113,11 +1117,11 @@ Character *get_char_world_vis(Character *ch, char *name, int *number)
             continue;
         if (GET_ADMLEVEL(ch) < 1 && GET_ADMLEVEL(i) < 1 && !IS_NPC(ch) && !IS_NPC(i))
         {
-            if (strcasecmp(RACE(i), name) && !strstr(RACE(i), name))
+            if (!boost::iequals(RACE(i), name) && !strstr(RACE(i), name))
             {
                 if (readIntro(ch, i) == 1)
                 {
-                    if (strcasecmp(get_i_name(ch, i), name) && !strstr(get_i_name(ch, i), name))
+                    if (!boost::iequals(get_i_name(ch, i), name) && !strstr(get_i_name(ch, i), name))
                     {
                         continue;
                     }
@@ -1130,13 +1134,13 @@ Character *get_char_world_vis(Character *ch, char *name, int *number)
         }
         if ((GET_ADMLEVEL(ch) >= 1 || GET_ADMLEVEL(i) >= 1 || IS_NPC(ch) || IS_NPC(i)))
         {
-            if (strcasecmp(i->getName(), name) && !strstr(i->getName(), name))
+            if (!boost::iequals(i->getName(), name) && !strstr(i->getName(), name))
             {
-                if (strcasecmp(RACE(i), name) && !strstr(RACE(i), name))
+                if (!boost::iequals(RACE(i), name) && !strstr(RACE(i), name))
                 {
                     if (!IS_NPC(ch) && !IS_NPC(i) && readIntro(ch, i) == 1)
                     {
-                        if (strcasecmp(get_i_name(ch, i), name) && !strstr(get_i_name(ch, i), name))
+                        if (!boost::iequals(get_i_name(ch, i), name) && !strstr(get_i_name(ch, i), name))
                         {
                             continue;
                         }
@@ -1148,8 +1152,6 @@ Character *get_char_world_vis(Character *ch, char *name, int *number)
                 }
             }
         }
-        /*if (!CAN_SEE(ch, i))
-          continue;*/
         if (--(*number) != 0)
             continue;
 
@@ -1184,7 +1186,7 @@ Object *get_obj_in_list_vis(Character *ch, const char *name, int *number, const 
     for (auto i : filter_raw(list))
     {
         if (isname(name, i->getName()))
-            if (CAN_SEE_OBJ(ch, i) || (GET_OBJ_TYPE(i) == ITEM_LIGHT))
+            if (ch->canSee(i) || (GET_OBJ_TYPE(i) == ITEM_LIGHT))
                 if (--(*number) == 0)
                     return i;
     }
@@ -1220,7 +1222,7 @@ Object *get_obj_vis(Character *ch, char *name, int *number)
     for (auto i : filter_raw(ao))
     {
         if (isname(name, i->getName()))
-            if (CAN_SEE_OBJ(ch, i))
+            if (ch->canSee(i))
                 if (--(*number) == 0)
                     return (i);
     }
@@ -1242,7 +1244,7 @@ Object *get_obj_in_equip_vis(Character *ch, char *arg, int *number, const std::m
         return (nullptr);
 
     for (const auto &[slot, obj] : equipment)
-        if (obj && CAN_SEE_OBJ(ch, obj) && isname(arg, obj->getName()))
+    if (obj && ch->canSee(obj) && isname(arg, obj->getName()))
             if (--(*number) == 0)
                 return obj;
 
@@ -1263,7 +1265,7 @@ int get_obj_pos_in_equip_vis(Character *ch, char *arg, int *number, const std::m
         return -1;
 
     for (const auto &[slot, obj] : equipment)
-        if (obj && CAN_SEE_OBJ(ch, obj) && isname(arg, obj->getName()))
+    if (obj && ch->canSee(obj) && isname(arg, obj->getName()))
             if (--(*number) == 0)
                 return slot;
 
@@ -1343,7 +1345,7 @@ Object *create_money(int amount)
             snprintf(buf, sizeof(buf), "It looks to be about %d zenni.", 100 * (amount / 100));
         else if (amount < 100000)
             snprintf(buf, sizeof(buf), "You guess there is, maybe, %d zenni.",
-                     1000 * ((amount / 1000) + rand_number(0, (amount / 1000))));
+                     1000 * ((amount / 1000) + Random::get<int>(0, (amount / 1000))));
         else
             strcpy(buf, "There are is LOT of zenni."); /* strcpy: OK (is < 200) */
         ex.description = buf;

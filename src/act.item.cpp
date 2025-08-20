@@ -7,8 +7,11 @@
  *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
  *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
  ************************************************************************ */
-#include <algorithm>
-
+#include "dbat/Character.h"
+#include "dbat/Object.h"
+#include "dbat/Room.h"
+#include "dbat/Destination.h"
+#include "dbat/Descriptor.h"
 #include "dbat/act.item.h"
 #include "dbat/vehicles.h"
 #include "dbat/dg_comm.h"
@@ -25,12 +28,12 @@
 #include "dbat/handler.h"
 #include "dbat/class.h"
 #include "dbat/feats.h"
-#include "dbat/guild.h"
+#include "dbat/Guild.h"
 #include "dbat/constants.h"
 #include "dbat/genzon.h"
 #include "dbat/dg_scripts.h"
 #include "dbat/boards.h"
-#include "dbat/random.h"
+#include "dbat/ansi.h"
 
 /* global variables */
 Object *obj_selling = nullptr;   /* current object for sale */
@@ -186,7 +189,7 @@ static int can_harvest(Object *plant)
 
 static void harvest_plant(Character *ch, Object *plant)
 {
-    int extract = false, reward = rand_number(5, 15), count = reward;
+    int extract = false, reward = Random::get<int>(5, 15), count = reward;
     Object *fruit = nullptr;
 
     if (GET_OBJ_VAL(plant, VAL_PLANT_SOILQUALITY) > 7)
@@ -347,7 +350,7 @@ static void harvest_plant(Character *ch, Object *plant)
         extract = true;
         break;
     case 17222:
-        reward += rand_number(1, 3);
+        reward += Random::get<int>(1, 3);
         count = reward;
         while (count > 0)
         {
@@ -423,7 +426,7 @@ ACMD(do_garden)
 
     if (!GET_SKILL(ch, SKILL_GARDENING) && slot_count(ch) + 1 <= GET_SLOTS(ch))
     {
-        int numb = rand_number(8, 16);
+        int numb = Random::get<int>(8, 16);
         SET_SKILL(ch, SKILL_GARDENING, numb);
         ch->sendText("@GYou learn the very basics of gardening.\r\n");
     }
@@ -435,7 +438,7 @@ ACMD(do_garden)
 
     if (*arg)
     {
-        if (!strcasecmp(arg, "collect"))
+        if (boost::iequals(arg, "collect"))
         {
             Object *obj2, *shovel = nullptr, *next_obj;
             int found = false;
@@ -472,7 +475,7 @@ ACMD(do_garden)
                     nullptr, nullptr, TO_CHAR);
                 act("@w$n@y sinks $s shovel into the soft ground and manages to dig up a pile of good soil!@n", true,
                     ch, nullptr, nullptr, TO_ROOM);
-                SET_OBJ_VAL(soil, VAL_OTHER_SOILQUALITY, rand_number(5, 7));
+                SET_OBJ_VAL(soil, VAL_OTHER_SOILQUALITY, Random::get<int>(5, 7));
                 WAIT_STATE(ch, PULSE_4SEC);
                 return;
             }
@@ -484,7 +487,7 @@ ACMD(do_garden)
                     nullptr, nullptr, TO_CHAR);
                 act("@w$n@y sinks $s shovel into the soft ground and manages to dig up a pile of soil!@n", true, ch,
                     nullptr, nullptr, TO_ROOM);
-                SET_OBJ_VAL(soil, VAL_OTHER_SOILQUALITY, rand_number(0, 4));
+                SET_OBJ_VAL(soil, VAL_OTHER_SOILQUALITY, Random::get<int>(0, 4));
                 WAIT_STATE(ch, PULSE_4SEC);
                 return;
             }
@@ -504,7 +507,7 @@ ACMD(do_garden)
         return;
     }
 
-    if (!strcasecmp(arg2, "plant"))
+    if (boost::iequals(arg2, "plant"))
     {
         if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->getInventory())))
         {
@@ -528,7 +531,7 @@ ACMD(do_garden)
         return;
     }
 
-    int64_t cost = (GET_MAX_MOVE(ch) * 0.005) + rand_number(50, 150);
+    int64_t cost = (GET_MAX_MOVE(ch) * 0.005) + Random::get<int>(50, 150);
     int skill = GET_SKILL(ch, SKILL_GARDENING);
 
     if ((ch->getCurVital(CharVital::stamina)) < cost)
@@ -538,7 +541,7 @@ ACMD(do_garden)
     }
     else
     {
-        if (!strcasecmp(arg2, "water"))
+        if (boost::iequals(arg2, "water"))
         {
             Object *obj2, *water = nullptr, *next_obj;
             int found = false;
@@ -592,7 +595,7 @@ ACMD(do_garden)
                 return;
             }
         }
-        else if (!strcasecmp(arg2, "harvest"))
+        else if (boost::iequals(arg2, "harvest"))
         {
             Object *obj2, *clippers = nullptr, *next_obj;
             int found = false;
@@ -645,7 +648,7 @@ ACMD(do_garden)
                 return;
             }
         }
-        else if (!strcasecmp(arg2, "dig"))
+        else if (boost::iequals(arg2, "dig"))
         {
             Object *obj2, *shovel = nullptr, *next_obj;
             int found = false;
@@ -668,7 +671,7 @@ ACMD(do_garden)
                 return;
             }
         }
-        else if (!strcasecmp(arg2, "plant"))
+        else if (boost::iequals(arg2, "plant"))
         {
             Object *obj2, *shovel, *next_obj;
             int found = false;
@@ -755,7 +758,7 @@ ACMD(do_garden)
                 improve_skill(ch, SKILL_GARDENING, 0);
             }
         }
-        else if (!strcasecmp(arg2, "pick"))
+        else if (boost::iequals(arg2, "pick"))
         {
             if (!OBJ_FLAGGED(obj, ITEM_MATURE))
             {
@@ -866,7 +869,7 @@ ACMD(do_pack)
                 ch->sendText("This will sell off your house and delete everything inside. Are you sure? If you are then enter the command again with a yes at the end.\nSyntax: pack (house) yes\r\n");
                 return;
             }
-            else if (strcasecmp(arg2, "yes"))
+            else if (!boost::iequals(arg2, "yes"))
             {
                 ch->sendText("This will sell off your house and delete everything inside. Are you sure? If you are then enter the command again with a yes at the end.\nSyntax: pack (house) yes\r\n");
                 return;
@@ -1389,7 +1392,7 @@ void loadDragonball(int vnum, int &foundFlag, bool &hunter1, bool &hunter2)
     {
         bool load = false;
         int room = 0;
-        int num = rand_number(200, 20000);
+        int num = Random::get<int>(200, 20000);
         mob_rnum r_num;
         Character *hunter = nullptr;
         Object *k = nullptr;
@@ -1407,10 +1410,10 @@ void loadDragonball(int vnum, int &foundFlag, bool &hunter1, bool &hunter2)
                     load = true;
                 }
             }
-            num = rand_number(200, 20000);
+            num = Random::get<int>(200, 20000);
         }
 
-        if (rand_number(1, 10) > 8)
+        if (Random::get<int>(1, 10) > 8)
         {
             if (!hunter1)
             {
@@ -1638,7 +1641,7 @@ ACMD(do_bid)
     masterList = list;
     list = 0;
 
-    if (!strcasecmp(arg, "list"))
+    if (boost::iequals(arg, "list"))
     {
         ch->sendText("@Y                                   Auction@n\r\n");
         ch->sendText("@c------------------------------------------------------------------------------@n\r\n");
@@ -1674,7 +1677,7 @@ ACMD(do_bid)
         }
         ch->sendText("@c------------------------------------------------------------------------------@n\r\n");
     }
-    else if (!strcasecmp(arg, "appraise"))
+    else if (boost::iequals(arg, "appraise"))
     {
         if (!*arg2)
         {
@@ -1715,7 +1718,7 @@ ACMD(do_bid)
                 return;
             }
             improve_skill(ch, SKILL_APPRAISE, 1);
-            if (GET_SKILL(ch, SKILL_APPRAISE) < rand_number(1, 101))
+            if (GET_SKILL(ch, SKILL_APPRAISE) < Random::get<int>(1, 101))
             {
                 ch->send_to("You look at the images for %s and fail to perceive its worth..\r\n", obj2->getShortDescription());
                 act("@c$n@w looks stumped about something they viewed on their scouter screen.@n", true, ch, nullptr,
@@ -2087,7 +2090,7 @@ ACMD(do_assemble)
         ch->sendText("You can't do that in space.");
         return;
     }
-    else if (!GET_SKILL(ch, SKILL_SURVIVAL) && !strcasecmp(arg2, "campfire"))
+    else if (!GET_SKILL(ch, SKILL_SURVIVAL) && boost::iequals(arg2, "campfire"))
     {
         ch->sendText("You know nothing about building campfires.\r\n");
         return;
@@ -2102,7 +2105,7 @@ ACMD(do_assemble)
         }
     }
 
-    if (strcasecmp(arg2, "campfire"))
+    if (!boost::iequals(arg2, "campfire"))
     {
         if (ch->location.getWhereFlag(WhereFlag::space) || ch->location.getTileType() == SECT_WATER_NOSWIM || ch->location.getEnvironment(ENV_WATER) >= 100.0)
         {
@@ -2315,7 +2318,7 @@ ACMD(do_put)
                 int transferred = 0;
                 for (auto obj : filter_raw(con))
                 {
-                    if ((CAN_SEE_OBJ(ch, obj) || GET_OBJ_TYPE(obj) == ITEM_LIGHT) && isname(theobj, obj->getName()))
+                    if ((ch->canSee(obj) || GET_OBJ_TYPE(obj) == ITEM_LIGHT) && isname(theobj, obj->getName()))
                     {
                         if (obj == cont)
                         {
@@ -2338,7 +2341,7 @@ ACMD(do_put)
                 auto con = ch->getInventory();
                 for (auto obj : filter_raw(con))
                 {
-                    if (obj != cont && CAN_SEE_OBJ(ch, obj) && (obj_dotmode == FIND_ALL || isname(theobj, obj->getName())))
+                    if (obj != cont && ch->canSee(obj) && (obj_dotmode == FIND_ALL || isname(theobj, obj->getName())))
                     {
                         found = 1;
                         perform_put(ch, obj, cont);
@@ -2483,7 +2486,7 @@ static void get_from_container(Character *ch, Object *cont,
         int transferred = 0;
         for (auto obj : filter_raw(con))
         {
-            if (CAN_SEE_OBJ(ch, obj) && isname(arg, obj->getName()))
+            if (ch->canSee(obj) && isname(arg, obj->getName()))
             {
                 if (transferred >= howmany)
                     break;
@@ -2508,7 +2511,7 @@ static void get_from_container(Character *ch, Object *cont,
         auto con = cont->getInventory();
         for (auto obj : filter_raw(con))
         {
-            if (CAN_SEE_OBJ(ch, obj) && (obj_dotmode == FIND_ALL || isname(arg, obj->getName())))
+            if (ch->canSee(obj) && (obj_dotmode == FIND_ALL || isname(arg, obj->getName())))
             {
                 found = 1;
                 perform_get_from_container(ch, obj, cont, mode);
@@ -2625,7 +2628,7 @@ static void get_from_room(Character *ch, char *arg, int howmany)
         int transferred = 0;
         for (auto obj : filter_raw(con))
         {
-            if (CAN_SEE_OBJ(ch, obj) && isname(arg, obj->getName()))
+            if (ch->canSee(obj) && isname(arg, obj->getName()))
             {
                 if (transferred >= howmany)
                     break;
@@ -2648,7 +2651,7 @@ static void get_from_room(Character *ch, char *arg, int howmany)
         auto loco = ch->location.getObjects();
         for (auto obj : filter_raw(loco))
         {
-            if (CAN_SEE_OBJ(ch, obj) && (dotmode == FIND_ALL || isname(arg, obj->getName())))
+            if (ch->canSee(obj) && (dotmode == FIND_ALL || isname(arg, obj->getName())))
             {
                 found = 1;
                 perform_get_from_room(ch, obj);
@@ -2720,7 +2723,7 @@ ACMD(do_get)
             }
             auto con = ch->getInventory();
             for (auto cont : filter_raw(con))
-                if (CAN_SEE_OBJ(ch, cont) &&
+                if (ch->canSee(cont) &&
                     (cont_dotmode == FIND_ALL || isname(arg2, cont->getName())))
                 {
                     if (GET_OBJ_TYPE(cont) == ITEM_CONTAINER)
@@ -2736,7 +2739,7 @@ ACMD(do_get)
                 }
             auto loco = ch->location.getObjects();
             for (auto cont : filter_raw(loco))
-                if (CAN_SEE_OBJ(ch, cont) &&
+                if (ch->canSee(cont) &&
                     (cont_dotmode == FIND_ALL || isname(arg2, cont->getName())))
                 {
                     if (GET_OBJ_TYPE(cont) == ITEM_CONTAINER)
@@ -2954,7 +2957,7 @@ static int perform_drop(Character *ch, Object *obj,
         act("$p suddenly appears in a puff a smoke!", false, nullptr, obj, nullptr, TO_ROOM);
         return (0);
     case SCMD_JUNK:
-        value = MAX(1, MIN(200, GET_OBJ_COST(obj) / 16));
+        value = std::clamp(GET_OBJ_COST(obj) / 16, 1, 200);
         extract_obj(obj);
         return (value);
     default:
@@ -3003,7 +3006,7 @@ ACMD(do_drop)
         num_don_rooms = (CONFIG_DON_ROOM_1 != NOWHERE) * 2 +
                         (CONFIG_DON_ROOM_2 != NOWHERE) +
                         (CONFIG_DON_ROOM_3 != NOWHERE) + 1;
-        switch (rand_number(0, num_don_rooms))
+        switch (Random::get<int>(0, num_don_rooms))
         {
         case 0:
             mode = SCMD_JUNK;
@@ -3041,7 +3044,7 @@ ACMD(do_drop)
     {
         multi = atoi(arg);
         one_argument(argument, arg);
-        if (!strcasecmp("zenni", arg) || !strcasecmp("gold", arg))
+        if (boost::iequals("zenni", arg) || boost::iequals("gold", arg))
             perform_drop_gold(ch, multi, mode, RDR);
         else if (multi <= 0)
             ch->sendText("Yeah, that makes sense.\r\n");
@@ -3052,7 +3055,7 @@ ACMD(do_drop)
             auto con = ch->getInventory();
             for (auto obj : filter_raw(con))
             {
-                if (CAN_SEE_OBJ(ch, obj) && isname(arg, obj->getName()))
+                if (ch->canSee(obj) && isname(arg, obj->getName()))
                 {
                     amount += perform_drop(ch, obj, mode, sname, RDR);
                     if (--multi <= 0)
@@ -3103,7 +3106,7 @@ ACMD(do_drop)
             for (auto obj : filter_raw(con))
             {
                 if (isname(arg, obj->getName()))
-                    if (CAN_SEE_OBJ(ch, obj) || (GET_OBJ_TYPE(obj) == ITEM_LIGHT))
+                    if (ch->canSee(obj) || (GET_OBJ_TYPE(obj) == ITEM_LIGHT))
                     {
                         amount += perform_drop(ch, obj, mode, sname, RDR);
                     }
@@ -3293,7 +3296,7 @@ ACMD(do_give)
     {
         amount = atoi(arg);
         argument = one_argument(argument, arg);
-        if (!strcasecmp("zenni", arg) || !strcasecmp("gold", arg))
+        if (boost::iequals("zenni", arg) || boost::iequals("gold", arg))
         {
             one_argument(argument, arg);
             if ((vict = give_find_vict(ch, arg)))
@@ -3318,7 +3321,7 @@ ACMD(do_give)
         int given = 0;
         for (auto obj : filter_raw(con))
         {
-            if (CAN_SEE_OBJ(ch, obj) || GET_OBJ_TYPE(obj) == ITEM_LIGHT && isname(arg, obj->getName()))
+            if (ch->canSee(obj) || GET_OBJ_TYPE(obj) == ITEM_LIGHT && isname(arg, obj->getName()))
             {
                 perform_give(ch, vict, obj);
                 if (GET_ADMLEVEL(ch) > 0 && !IS_NPC(vict))
@@ -3376,7 +3379,7 @@ ACMD(do_give)
             {
                 for (auto obj : filter_raw(con))
                 {
-                    if (CAN_SEE_OBJ(ch, obj) &&
+                    if (ch->canSee(obj) &&
                         ((dotmode == FIND_ALL || isname(arg, obj->getName()))))
                     {
                         perform_give(ch, vict, obj);
@@ -3488,7 +3491,7 @@ ACMD(do_drink)
                 subcmd != SCMD_SIP)
             {
 
-                ch->modCurVital(CharVital::ki, ((GET_MAX_MANA(ch) * 0.005) + (GET_WIS(ch) * rand_number(80, 100))) *
+                ch->modCurVital(CharVital::ki, ((GET_MAX_MANA(ch) * 0.005) + (GET_WIS(ch) * Random::get<int>(80, 100))) *
                                                    GET_SKILL(ch, SKILL_WELLSPRING));
 
                 ch->sendText("You feel your ki return to full strength.\r\n");
@@ -3510,7 +3513,7 @@ ACMD(do_drink)
                 gain_condition(ch, THIRST, 1);
                 if (GET_SKILL(ch, SKILL_WELLSPRING) && !ch->isFullVital(CharVital::ki) && wasthirsty <= 30 && subcmd != SCMD_SIP)
                 {
-                    if (ch->modCurVital(CharVital::ki, ((GET_MAX_MANA(ch) * 0.005) + (GET_WIS(ch) * rand_number(80, 100))) *
+                    if (ch->modCurVital(CharVital::ki, ((GET_MAX_MANA(ch) * 0.005) + (GET_WIS(ch) * Random::get<int>(80, 100))) *
                                                            GET_SKILL(ch, SKILL_WELLSPRING)) == ch->getEffectiveStat<int64_t>("ki"))
                     {
                         ch->sendText("You feel your ki return to full strength.\r\n");
@@ -3615,7 +3618,7 @@ ACMD(do_drink)
         /* if (drink_aff[GET_OBJ_VAL(temp, VAL_DRINKCON_LIQUID)][DRUNK] > 0)
       amount = (25 - GET_COND(ch, THIRST)) / drink_aff[GET_OBJ_VAL(temp, VAL_DRINKCON_LIQUID)][DRUNK];
     else
-      amount = rand_number(3, 10);*/
+      amount = Random::get<int>(3, 10);*/
 
         amount = 4;
     }
@@ -3631,14 +3634,14 @@ ACMD(do_drink)
         amount = 1;
     }
 
-    amount = MIN(amount, GET_OBJ_VAL(temp, VAL_DRINKCON_HOWFULL));
+    amount = std::min<int>(amount, GET_OBJ_VAL(temp, VAL_DRINKCON_HOWFULL));
 
     /* You can't subtract more than the object weighs
      Objects that are eternal (max capacity -1) don't get a
      weight subtracted */
     if (GET_OBJ_VAL(temp, VAL_DRINKCON_CAPACITY) > 0)
     {
-        weight = MIN(amount, GET_OBJ_WEIGHT(temp));
+        weight = std::min<int>(amount, GET_OBJ_WEIGHT(temp));
         weight_change_object(temp, -weight); /* Subtract amount */
     }
 
@@ -3658,7 +3661,7 @@ ACMD(do_drink)
             GET_OBJ_VAL(temp, VAL_DRINKCON_LIQUID) == 15)
         {
 
-            if (ch->modCurVital(CharVital::ki, ((GET_MAX_MANA(ch) * 0.005) + (GET_WIS(ch) * rand_number(80, 100))) *
+            if (ch->modCurVital(CharVital::ki, ((GET_MAX_MANA(ch) * 0.005) + (GET_WIS(ch) * Random::get<int>(80, 100))) *
                                                    GET_SKILL(ch, SKILL_WELLSPRING)) == ch->getEffectiveStat<int64_t>("ki"))
             {
                 ch->sendText("You feel your ki return to full strength.\r\n");
@@ -4076,7 +4079,7 @@ ACMD(do_pour)
             ch->sendText("Where do you want it?  Out or in what?\r\n");
             return;
         }
-        if (!strcasecmp(arg2, "out"))
+        if (boost::iequals(arg2, "out"))
         {
             if (GET_OBJ_VAL(from_obj, VAL_DRINKCON_CAPACITY) > 0)
             {
@@ -4499,7 +4502,7 @@ ACMD(do_wear)
         auto con = ch->getInventory();
         for (auto obj : filter_raw(con))
         {
-            if (CAN_SEE_OBJ(ch, obj) && (where = find_eq_pos(ch, obj, nullptr)) >= 0)
+            if (ch->canSee(obj) && (where = find_eq_pos(ch, obj, nullptr)) >= 0)
             {
                 if (GET_WIS(ch) < GET_OBJ_LEVEL(obj))
                 {
@@ -4538,7 +4541,7 @@ ACMD(do_wear)
         int found = 0;
         for (auto obj : filter_raw(con))
         {
-            if (!(CAN_SEE_OBJ(ch, obj) && isname(arg1, obj->getName())))
+            if (!(ch->canSee(obj) && isname(arg1, obj->getName())))
                 continue;
             found++;
             if (GET_WIS(ch) < GET_OBJ_LEVEL(obj))
@@ -4765,7 +4768,7 @@ ACMD(do_remove)
             found = 0;
             for (i = 0; i < NUM_WEARS; i++)
             {
-                if (GET_EQ(ch, i) && CAN_SEE_OBJ(ch, GET_EQ(ch, i)) &&
+                if (GET_EQ(ch, i) && ch->canSee(GET_EQ(ch, i)) &&
                     isname(arg, GET_EQ(ch, i)->getName()))
                 {
                     perform_remove(ch, i);
@@ -4827,7 +4830,7 @@ ACMD(do_sac)
 
     if (!IS_CORPSE(j))
     {
-        switch (rand_number(0, 5))
+        switch (Random::get<int>(0, 5))
         {
         case 0:
             ch->send_to("You sacrifice %s to the Gods.\r\nYou receive one zenni for your humility.\r\n", GET_OBJ_SHORT(j));
@@ -4906,13 +4909,6 @@ int64_t max_carry_weight(Character *ch)
 {
     int64_t abil;
     int total;
-    /*  abil = MAX(0, MIN(100, GET_STR(ch)));
-      total = 1;
-      while (abil > 30) {
-        abil -= 10;
-        total *= 4;
-      }*/
-
     abil = (GET_MAX_HIT(ch) / 200) + (GET_STR(ch) * 50);
     total = 1;
     return (total * abil);

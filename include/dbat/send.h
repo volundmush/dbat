@@ -1,6 +1,9 @@
 #pragma once
-#include "dbat/utils.h"
-#include "dbat/filter.h"
+#include "Descriptor.h"
+#include "Character.h"
+#include "Room.h"
+#include "utils.h"
+#include "filter.h"
 
 template<typename... Args>
 void send_to_all(fmt::string_view format, Args&&... args) {

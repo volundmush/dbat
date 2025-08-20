@@ -3,10 +3,12 @@
 improved-edit.c		Routines specific to the improved editor.
 
 */
+#include "dbat/Descriptor.h"
 #include "dbat/improved-edit.h"
 #include "dbat/send.h"
 #include "dbat/comm.h"
 #include "dbat/interpreter.h"
+#include "dbat/ansi.h"
 
 int format_script(struct descriptor_data *d);
 
@@ -151,7 +153,7 @@ void parse_edit_action(int command, char *string, struct descriptor_data *d)
             break;
         }
         /* in case line_low is negative or zero */
-        line_low = MAX(1, line_low);
+        line_low = std::max(1, line_low);
 
         switch (sscanf((indent ? string + 1 : string), " %d - %d ", &line_low, &line_high))
         {
@@ -172,7 +174,7 @@ void parse_edit_action(int command, char *string, struct descriptor_data *d)
             break;
         }
         /* in case line_low is negative or zero */
-        line_low = MAX(1, line_low);
+        line_low = std::max(1, line_low);
 
         /* if format_text is void, remove the surrouding if() */
         if (format_text(d->str, flags, d, d->max_str, line_low, line_high))
@@ -773,7 +775,7 @@ int format_text(char **ptr_string, int mode, struct descriptor_data *d, unsigned
 
     if (strlen(formatted) + 1 > maxlen)
         formatted[maxlen - 1] = '\0';
-    RECREATE(*ptr_string, char, MIN(maxlen, strlen(formatted) + 1));
+    RECREATE(*ptr_string, char, std::min<int>(maxlen, strlen(formatted) + 1));
     strcpy(*ptr_string, formatted);
     return 1;
 }

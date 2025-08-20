@@ -6,6 +6,10 @@
  *  Made for Oasis OLC                                                   *
  *  Copyright 1996 Harvey Gilpin.                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+#include "dbat/Descriptor.h"
+#include "dbat/Character.h"
+#include "dbat/Zone.h"
+#include "dbat/CharacterPrototype.h"
 #include "dbat/gedit.h"
 #include "dbat/genzon.h"
 #include "dbat/act.informative.h"
@@ -18,7 +22,7 @@
 #include "dbat/spells.h"
 #include "dbat/feats.h"
 #include "dbat/genolc.h"
-#include "dbat/shop.h"
+#include "dbat/Shop.h"
 
 /*
  * Should check more things.
@@ -59,7 +63,7 @@ ACMD(do_oasis_gedit)
     }
     else if (!isdigit(*buf1))
     {
-        if (strcasecmp("save", buf1) != 0)
+        if (!boost::iequals("save", buf1) != 0)
         {
             ch->sendText("Yikes!  Stop that, someone will get hurt!\r\n");
             return;
@@ -99,7 +103,7 @@ ACMD(do_oasis_gedit)
         {
             if (d->olc && OLC_NUM(d) == number)
             {
-                ch->send_to("That guild is currently being edited by %s.\r\n", PERS(d->character, ch));
+                ch->send_to("That guild is currently being edited by %s.\r\n", d->character->displayNameFor(ch));
                 return;
             }
         }
@@ -440,7 +444,7 @@ void gedit_parse(struct descriptor_data *d, char *arg)
         case 'Y':
             d->character->sendText("Saving Guild to memory.\r\n");
             gedit_save_internally(d);
-            mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(d->character)), true,
+            mudlog(CMP, std::max(ADMLVL_BUILDER, GET_INVIS_LEV(d->character)), true,
                    "OLC: %s edits guild %d", GET_NAME(d->character), OLC_NUM(d));
             if (CONFIG_OLC_SAVE)
             {
@@ -591,21 +595,20 @@ void gedit_parse(struct descriptor_data *d, char *arg)
     case GEDIT_NO_TRAIN:
         if ((i = LIMIT(atoi(arg), 0, NUM_TRADERS - 1)) > 0)
         {
-            // TOGGLE_BIT_AR(G_WITH_WHO(OLC_GUILD(d)), i - 1);
             gedit_no_train_menu(d);
             return;
         }
         break;
 
     case GEDIT_MINLVL:
-        G_MINLVL(OLC_GUILD(d)) = MAX(atoi(arg), 0);
+        G_MINLVL(OLC_GUILD(d)) = std::max(atoi(arg), 0);
         break;
 
     case GEDIT_SELECT_SPELLS:
         i = atoi(arg);
         if (i == 0)
             break;
-        i = MAX(1, MIN(i, SKILL_TABLE_SIZE));
+        i = std::clamp(i, 1, SKILL_TABLE_SIZE);
         OLC_GUILD(d)->toggle_skill(i);
         gedit_select_spells_menu(d);
         return;
@@ -614,7 +617,7 @@ void gedit_parse(struct descriptor_data *d, char *arg)
         i = atoi(arg);
         if (i == 0)
             break;
-        i = MAX(1, MIN(i, NUM_FEATS_DEFINED));
+        i = std::clamp(i, 1, NUM_FEATS_DEFINED);
         OLC_GUILD(d)->toggle_feat(i);
         gedit_select_feats_menu(d);
         return;
@@ -623,7 +626,7 @@ void gedit_parse(struct descriptor_data *d, char *arg)
         i = atoi(arg);
         if (i == 0)
             break;
-        i = MAX(1, MIN(i, SKILL_TABLE_SIZE));
+        i = std::clamp(i, 1, SKILL_TABLE_SIZE);
         OLC_GUILD(d)->toggle_skill(i);
         gedit_select_skills_menu(d);
         return;
@@ -632,7 +635,7 @@ void gedit_parse(struct descriptor_data *d, char *arg)
         i = atoi(arg);
         if (i == 0)
             break;
-        i = MAX(1, MIN(i, SKILL_TABLE_SIZE));
+        i = std::clamp(i, 1, SKILL_TABLE_SIZE);
         OLC_GUILD(d)->toggle_feat(i);
         gedit_select_wp_menu(d);
         return;
@@ -641,7 +644,7 @@ void gedit_parse(struct descriptor_data *d, char *arg)
         i = atoi(arg);
         if (i == 0)
             break;
-        i = MAX(1, MIN(i, SKILL_TABLE_SIZE));
+        i = std::clamp(i, 1, SKILL_TABLE_SIZE);
         OLC_GUILD(d)->toggle_skill(i);
         gedit_select_lang_menu(d);
         return;

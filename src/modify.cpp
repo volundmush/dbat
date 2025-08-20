@@ -7,7 +7,8 @@
  *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
  *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
  ************************************************************************ */
-
+#include "dbat/Descriptor.h"
+#include "dbat/Character.h"
 #include "dbat/modify.h"
 #include "dbat/send.h"
 #include "dbat/interpreter.h"
@@ -20,16 +21,10 @@
 #include "dbat/improved-edit.h"
 #include "dbat/oasis.h"
 #include "dbat/tedit.h"
-#include "dbat/shop.h"
-#include "dbat/guild.h"
+#include "dbat/Shop.h"
+#include "dbat/Guild.h"
 #include "dbat/spell_parser.h"
 #include "dbat/dg_scripts.h"
-
-#include <string>
-#include <vector>
-#include <sstream>
-#include <algorithm>
-#include <boost/algorithm/string.hpp>
 
 /* local functions */
 
@@ -1115,7 +1110,7 @@ ACMD(do_skillset)
     /* Locate the last quote and lowercase the magic words (if any) */
 
     for (qend = 1; argument[qend] && argument[qend] != '\''; qend++)
-        argument[qend] = LOWER(argument[qend]);
+        argument[qend] = tolower(argument[qend]);
 
     if (argument[qend] != '\'')
     {

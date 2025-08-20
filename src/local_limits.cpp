@@ -7,7 +7,11 @@
  *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
  *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
  ************************************************************************ */
-
+#include "dbat/Character.h"
+#include "dbat/Object.h"
+#include "dbat/Room.h"
+#include "dbat/Zone.h"
+#include "dbat/Location.h"
 #include "dbat/local_limits.h"
 #include "dbat/send.h"
 #include "dbat/spells.h"
@@ -20,7 +24,6 @@
 #include "dbat/constants.h"
 #include "dbat/class.h"
 #include "dbat/fight.h"
-
 #include "dbat/handler.h"
 #include "dbat/dg_scripts.h"
 
@@ -167,7 +170,7 @@ static void update_flags(Character *ch)
         return;
     }
 
-    if (GET_BONUS(ch, BONUS_LATE) && GET_POS(ch) == POS_SLEEPING && rand_number(1, 3) == 3)
+    if (GET_BONUS(ch, BONUS_LATE) && GET_POS(ch) == POS_SLEEPING && Random::get<int>(1, 3) == 3)
     {
         if (GET_HIT(ch) >= (ch->getEffectiveStat<int64_t>("health")) && (ch->getCurVital(CharVital::stamina)) >= GET_MAX_MOVE(ch) &&
             (ch->getCurVital(CharVital::ki)) >= GET_MAX_MANA(ch))
@@ -185,17 +188,17 @@ static void update_flags(Character *ch)
 
     barrier_shed(ch);
 
-    if (AFF_FLAGGED(ch, AFF_FIRESHIELD) && !FIGHTING(ch) && rand_number(1, 101) > GET_SKILL(ch, SKILL_FIRESHIELD))
+    if (AFF_FLAGGED(ch, AFF_FIRESHIELD) && !FIGHTING(ch) && Random::get<int>(1, 101) > GET_SKILL(ch, SKILL_FIRESHIELD))
     {
         ch->sendText("Your fireshield disappears.\r\n");
         ch->affect_flags.set(AFF_FIRESHIELD, false);
     }
-    if (AFF_FLAGGED(ch, AFF_ZANZOKEN) && !FIGHTING(ch) && rand_number(1, 3) == 2)
+    if (AFF_FLAGGED(ch, AFF_ZANZOKEN) && !FIGHTING(ch) && Random::get<int>(1, 3) == 2)
     {
         ch->sendText("You lose concentration and no longer are ready to zanzoken.\r\n");
         ch->affect_flags.set(AFF_ZANZOKEN, false);
     }
-    if (AFF_FLAGGED(ch, AFF_ENSNARED) && rand_number(1, 3) == 2)
+    if (AFF_FLAGGED(ch, AFF_ENSNARED) && Random::get<int>(1, 3) == 2)
     {
         ch->sendText("The silk ensnaring your arms disolves enough for you to break it!\r\n");
         ch->affect_flags.set(AFF_ENSNARED, false);
@@ -221,14 +224,14 @@ static void update_flags(Character *ch)
         }
     }
 
-    if (AFF_FLAGGED(ch, AFF_MBREAK) && rand_number(1, 3 + sick_fail) == 2)
+    if (AFF_FLAGGED(ch, AFF_MBREAK) && Random::get<int>(1, 3 + sick_fail) == 2)
     {
         ch->sendText("@wYour mind is no longer in turmoil, you can charge ki again.@n\r\n");
         ch->affect_flags.set(AFF_MBREAK, false);
         if (GET_SKILL(ch, SKILL_TELEPATHY) <= 0)
         {
-            bool condition1 = rand_number(1, 2) == 2;
-            bool condition2 = rand_number(1, 20) == 1;
+            bool condition1 = Random::get<int>(1, 2) == 2;
+            bool condition2 = Random::get<int>(1, 20) == 1;
             if (condition1 || condition2)
             {
                 ch->sendText("@RYour senses are still a little addled... (-2 Int and Wis for 6 game hours.)@n\r\n");
@@ -236,7 +239,7 @@ static void update_flags(Character *ch)
             }
         }
     }
-    if (AFF_FLAGGED(ch, AFF_SHOCKED) && rand_number(1, 4) == 4)
+    if (AFF_FLAGGED(ch, AFF_SHOCKED) && Random::get<int>(1, 4) == 4)
     {
         ch->sendText("@wYour mind is no longer shocked.@n\r\n");
         if (GET_SKILL(ch, SKILL_TELEPATHY) > 0)
@@ -245,7 +248,7 @@ static void update_flags(Character *ch)
             improve_skill(ch, SKILL_TELEPATHY, 0);
             while (stop == false)
             {
-                if (rand_number(1, 8) == 5)
+                if (Random::get<int>(1, 8) == 5)
                     stop = true;
                 else
                     improve_skill(ch, SKILL_TELEPATHY, 0);
@@ -255,13 +258,13 @@ static void update_flags(Character *ch)
         }
         ch->affect_flags.set(AFF_SHOCKED, false);
     }
-    if (AFF_FLAGGED(ch, AFF_FROZEN) && rand_number(1, 2) == 2)
+    if (AFF_FLAGGED(ch, AFF_FROZEN) && Random::get<int>(1, 2) == 2)
     {
         ch->sendText("@wYou realize you have thawed enough and break out of the ice holding you prisoner!\r\n");
         act("$n@W breaks out of the ice holding $m prisoner!", true, ch, nullptr, nullptr, TO_ROOM);
         ch->affect_flags.set(AFF_FROZEN, false);
     }
-    if (AFF_FLAGGED(ch, AFF_WITHER) && rand_number(1, 6 + sick_fail) == 2)
+    if (AFF_FLAGGED(ch, AFF_WITHER) && Random::get<int>(1, 6 + sick_fail) == 2)
     {
         ch->sendText("@wYour body returns to normal and you beat the withering that plagued you.\r\n");
         act("$n@W's looks more fit now.", true, ch, nullptr, nullptr, TO_ROOM);
@@ -360,7 +363,7 @@ void gain_condition(Character *ch, int condition, int value)
 
         // For food with a negative value we roll survival. On a success it cannot reduce the condition below 0
         if (!AFF_FLAGGED(ch, AFF_SPIRIT) &&
-            (!GET_SKILL(ch, SKILL_SURVIVAL) || (GET_SKILL(ch, SKILL_SURVIVAL) < rand_number(1, 140))))
+            (!GET_SKILL(ch, SKILL_SURVIVAL) || (GET_SKILL(ch, SKILL_SURVIVAL) < Random::get<int>(1, 140))))
         {
             if (value <= 0)
             {
@@ -765,7 +768,7 @@ void androidAbsorbSystem(uint64_t heartPulse, double deltaTime)
                 ABSORBING(ch) = nullptr;
             }
         }
-        if (IS_ANDROID(ch) && victim && rand_number(1, 9) >= 6)
+        if (IS_ANDROID(ch) && victim && Random::get<int>(1, 9) >= 6)
         {
             if (((ch->absorbing)->getCurVital(CharVital::stamina)) > (GET_MAX_MOVE(ch) / 15) ||
                 ((ch->absorbing)->getCurVital(CharVital::ki)) > (GET_MAX_MANA(ch) / 15))
@@ -819,14 +822,14 @@ void androidAbsorbSystem(uint64_t heartPulse, double deltaTime)
                 auto dWis = GET_WIS(ch);
                 if (sum)
                 {
-                    if (rand_number(1, 8) >= 6)
+                    if (Random::get<int>(1, 8) >= 6)
                     {
 
-                        int gain = rand_number(dCon / 2, dCon * 3) +
+                        int gain = Random::get<int>(dCon / 2, dCon * 3) +
                                    (dCon * 18);
                         if (dCon > 30)
                         {
-                            gain += rand_number(dCon * 2, dCon * 4) +
+                            gain += Random::get<int>(dCon * 2, dCon * 4) +
                                     (dCon * 50);
                         }
                         if (dCon > 60)
@@ -856,13 +859,13 @@ void androidAbsorbSystem(uint64_t heartPulse, double deltaTime)
                 }
                 if (mum)
                 {
-                    if (rand_number(1, 8) >= 6)
+                    if (Random::get<int>(1, 8) >= 6)
                     {
-                        int gain = rand_number(dCon / 2, dCon * 3) +
+                        int gain = Random::get<int>(dCon / 2, dCon * 3) +
                                    (dCon * 18);
                         if (dCon > 30)
                         {
-                            gain += rand_number(dCon * 2, dCon * 4) +
+                            gain += Random::get<int>(dCon * 2, dCon * 4) +
                                     (dCon * 50);
                         }
                         if (dCon > 60)
@@ -892,13 +895,13 @@ void androidAbsorbSystem(uint64_t heartPulse, double deltaTime)
                 }
                 if (ium)
                 {
-                    if (rand_number(1, 8) >= 6)
+                    if (Random::get<int>(1, 8) >= 6)
                     {
-                        int gain = rand_number(dWis / 2, dWis * 3) +
+                        int gain = Random::get<int>(dWis / 2, dWis * 3) +
                                    (dWis * 18);
                         if (dWis > 30)
                         {
-                            gain += rand_number(dWis * 2, dWis * 4) +
+                            gain += Random::get<int>(dWis * 2, dWis * 4) +
                                     (dWis * 50);
                         }
                         if (dWis > 60)
@@ -928,7 +931,7 @@ void androidAbsorbSystem(uint64_t heartPulse, double deltaTime)
                 }
                 if (!sum)
                 {
-                    if (rand_number(1, 8) >= 6)
+                    if (Random::get<int>(1, 8) >= 6)
                     {
                         int gain = 1;
                         ch->send_to("@gYou gain +@G%d@g permanent health. You may need to level.@n\r\n", gain);
@@ -937,7 +940,7 @@ void androidAbsorbSystem(uint64_t heartPulse, double deltaTime)
                 }
                 if (!mum)
                 {
-                    if (rand_number(1, 8) >= 6)
+                    if (Random::get<int>(1, 8) >= 6)
                     {
                         int gain = 1;
                         ch->send_to("@gYou gain +@G%d@g permanent stamina. You may need to level.@n\r\n", gain);
@@ -946,7 +949,7 @@ void androidAbsorbSystem(uint64_t heartPulse, double deltaTime)
                 }
                 if (!ium)
                 {
-                    if (rand_number(1, 8) >= 6)
+                    if (Random::get<int>(1, 8) >= 6)
                     {
                         int gain = 1;
                         ch->send_to("@gYou gain +@G%d@g permanent ki. You may need to level.@n\r\n", gain);
@@ -1317,16 +1320,16 @@ void hunger_update(uint64_t heartPulse, double deltaTime)
         // making it so that you don't get hungry/thirsty if you're just leisurely idling, rping, etc.
         if (!i->isFullVital(CharVital::health))
         {
-            if (rand_number(1, 2) == 2)
+            if (Random::get<int>(1, 2) == 2)
             {
                 gain_condition(i, HUNGER, -1);
             }
-            if (rand_number(1, 2) == 2)
+            if (Random::get<int>(1, 2) == 2)
             {
                 gain_condition(i, THIRST, -1);
             }
         }
-        if (rand_number(1, 2) == 2)
+        if (Random::get<int>(1, 2) == 2)
         {
             gain_condition(i, DRUNK, -1);
         }
@@ -1350,7 +1353,7 @@ void relax_update(uint64_t heartPulse, double deltaTime)
         {
             i->modBaseStat("relax_count", -3);
         }
-        else if (GET_RELAXCOUNT(i) > 0 && rand_number(1, 3) == 3)
+        else if (GET_RELAXCOUNT(i) > 0 && Random::get<int>(1, 3) == 3)
         {
             i->modBaseStat("relax_count", -2);
         }
@@ -1410,7 +1413,7 @@ void player_misc_update(uint64_t heartPulse, double deltaTime)
         }
         if (sleeptime < 8 && GET_POS(i) == POS_SLEEPING)
         {
-            i->modBaseStat("sleeptime", rand_number(2, 4));
+            i->modBaseStat("sleeptime", Random::get<int>(2, 4));
         }
         heal_limb(i);
 
@@ -1431,7 +1434,7 @@ void kaioken_update(uint64_t heartPulse, double deltaTime)
         if (kaioken > 0)
         {
             improve_skill(i, SKILL_KAIOKEN, -1);
-            if ((GET_SKILL(i, SKILL_KAIOKEN) < rand_number(1, x) || (i->getCurVital(CharVital::stamina)) <= GET_MAX_MOVE(i) / 10))
+            if ((GET_SKILL(i, SKILL_KAIOKEN) < Random::get<int>(1, x) || (i->getCurVital(CharVital::stamina)) <= GET_MAX_MOVE(i) / 10))
                 i->remove_kaioken(2);
         }
     }
@@ -1531,7 +1534,7 @@ void point_update(uint64_t heartPulse, double deltaTime)
 
                     if (AFF_FLAGGED(i, AFF_BURNED))
                     {
-                        if (rand_number(1, 5) >= 4)
+                        if (Random::get<int>(1, 5) >= 4)
                         {
                             i->sendText("Your burns are healed now.\r\n");
                             act("$n@w's burns are now healed.@n", true, i, nullptr, nullptr, TO_ROOM);
@@ -1597,7 +1600,7 @@ void point_update(uint64_t heartPulse, double deltaTime)
                     {
                         act("@rYour legs are burned by the lava!@n", true, i, nullptr, nullptr, TO_CHAR);
                         act("@R$n@r's legs are burned by the lava!@n", true, i, nullptr, nullptr, TO_ROOM);
-                        if (IS_NPC(i) && IS_HUMANOID(i) && rand_number(1, 2) == 2)
+                        if (IS_NPC(i) && IS_HUMANOID(i) && Random::get<int>(1, 2) == 2)
                         {
                             do_fly(i, nullptr, 0, 0);
                         }
@@ -1684,7 +1687,7 @@ void point_update(uint64_t heartPulse, double deltaTime)
                 }
                 else if (OBJ_FLAGGED(j, ITEM_ICE))
                 {
-                    if (GET_OBJ_VNUM(j) == 79 && rand_number(1, 2) == 2)
+                    if (GET_OBJ_VNUM(j) == 79 && Random::get<int>(1, 2) == 2)
                     {
                         if (j->location.getGroundEffect() >= 1 && j->location.getGroundEffect() <= 5)
                         {

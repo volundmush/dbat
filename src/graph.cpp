@@ -7,7 +7,10 @@
  *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
  *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
  ************************************************************************ */
-#include <queue>
+#include "dbat/Character.h"
+#include "dbat/Object.h"
+#include "dbat/Destination.h"
+#include "dbat/Descriptor.h"
 #include "dbat/graph.h"
 #include "dbat/send.h"
 #include "dbat/comm.h"
@@ -296,7 +299,7 @@ ACMD(do_sradar)
     }
     else
     {
-        if (!strcasecmp(arg, "buoy1"))
+        if (boost::iequals(arg, "buoy1"))
         {
             auto room = get_room(GET_RADAR1(ch));
             if (room)
@@ -310,7 +313,7 @@ ACMD(do_sradar)
                 return;
             }
         }
-        else if (!strcasecmp(arg, "buoy2"))
+        else if (boost::iequals(arg, "buoy2"))
         {
             auto room = get_room(GET_RADAR2(ch));
             if (room)
@@ -324,7 +327,7 @@ ACMD(do_sradar)
                 return;
             }
         }
-        else if (!strcasecmp(arg, "buoy3"))
+        else if (boost::iequals(arg, "buoy3"))
         {
             auto room = get_room(GET_RADAR3(ch));
             if (room)
@@ -570,7 +573,7 @@ ACMD(do_track)
     }
 
     /* Scanning the entire planet. */
-    if (!strcasecmp(arg, "scan"))
+    if (boost::iequals(arg, "scan"))
     {
         for (i = descriptor_list; i; i = i->next)
         {
@@ -665,13 +668,13 @@ ACMD(do_track)
     else
     {
 
-        if (GET_SKILL(ch, SKILL_SENSE) < rand_number(1, 101))
+        if (GET_SKILL(ch, SKILL_SENSE) < Random::get<int>(1, 101))
         {
             int tries = 10;
             /* Find a random direction. :) */
             do
             {
-                dir = rand_number(0, NUM_OF_DIRS - 1);
+                dir = Random::get<int>(0, NUM_OF_DIRS - 1);
             } while (!ch->location.canGo(dir) && --tries);
             ch->send_to("You sense them %s faintly from here, but are unsure....\r\n", dirs[dir]);
             improve_skill(ch, SKILL_SENSE, 1);

@@ -1,6 +1,7 @@
-#include "dbat/structs.h"
-#include <functional>
-#include "dbat/structs.h"
+#include "dbat/AbstractLocation.h"
+#include "dbat/Object.h"
+#include "dbat/Character.h"
+#include "dbat/Structure.h"
 #include "dbat/filter.h"
 #include "dbat/utils.h"
 #include "dbat/constants.h"

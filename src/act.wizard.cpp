@@ -7,8 +7,14 @@
  *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
  *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
  ************************************************************************ */
-
-#include <fstream>
+#include "dbat/Character.h"
+#include "dbat/Object.h"
+#include "dbat/Room.h"
+#include "dbat/Destination.h"
+#include "dbat/Descriptor.h"
+#include "dbat/ObjectPrototype.h"
+#include "dbat/CharacterPrototype.h"
+#include "dbat/Zone.h"
 #include "dbat/act.wizard.h"
 #include "dbat/interpreter.h"
 #include "dbat/send.h"
@@ -34,10 +40,11 @@
 #include "dbat/genolc.h"
 #include "dbat/screen.h"
 #include "dbat/local_limits.h"
-#include "dbat/shop.h"
-#include "dbat/guild.h"
+#include "dbat/Shop.h"
+#include "dbat/Guild.h"
 #include "dbat/spell_parser.h"
 #include "dbat/transformation.h"
+#include "dbat/ansi.h"
 
 /* local variables */
 static int copyover_timer = 0; /* for timed copyovers */
@@ -92,7 +99,7 @@ ACMD(do_lag)
 
     for (d = descriptor_list; d; d = d->next)
     {
-        if (!strcasecmp(GET_NAME(d->character), arg))
+        if (boost::iequals(GET_NAME(d->character), arg))
         {
             if (GET_ADMLEVEL(d->character) > GET_ADMLEVEL(ch))
             {
@@ -221,7 +228,7 @@ ACMD(do_news)
                                         "%s\n@w--------------------------------------------------------------\n", line);
                                 sprintf(lastline, "%s", line);
                             }
-                            else if (!strcasecmp(line, lastline))
+                            else if (boost::iequals(line, lastline))
                             {
                                 continue;
                             }
@@ -241,7 +248,7 @@ ACMD(do_news)
         } /* End of main read while */
         fclose(fl);
     }
-    else if (!strcasecmp(arg, "list"))
+    else if (boost::iequals(arg, "list"))
     {
         while (!feof(fl))
         {
@@ -577,20 +584,20 @@ ACMD(do_permission)
         return;
     }
 
-    if (!*arg2 && !strcasecmp("unrestrict", arg))
+    if (!*arg2 && boost::iequals("unrestrict", arg))
     {
         ch->sendText("You want to unrestrict which race? @Gsaiyan @nor @Gmajin@n?\r\n");
         return;
     }
-    if (!strcasecmp("unrestrict", arg))
+    if (boost::iequals("unrestrict", arg))
     {
-        if (!strcasecmp("saiyan", arg2))
+        if (boost::iequals("saiyan", arg2))
         {
             ch->sendText("You have unrestricted saiyans for the very next character creation.\r\n");
             send_to_imm("PERMISSION: %s unrestricted saiyans.", GET_NAME(ch));
             SAIYAN_ALLOWED = true;
         }
-        else if (!strcasecmp("majin", arg2))
+        else if (boost::iequals("majin", arg2))
         {
             ch->sendText("You have unrestricted majins for the very next character creation.\r\n");
             send_to_imm("PERMISSION: %s unrestricted majins.", GET_NAME(ch));
@@ -602,7 +609,7 @@ ACMD(do_permission)
             return;
         }
     }
-    else if (!strcasecmp("restrict", arg))
+    else if (boost::iequals("restrict", arg))
     {
         ch->sendText("You have restricted character creation to standard race slection.\r\n");
         send_to_imm("PERMISSION: %s restricted races again.", GET_NAME(ch));
@@ -643,7 +650,7 @@ ACMD(do_transobj)
         ch->sendText("You want to send what?\r\n");
         return;
     }
-    else if (!strcasecmp("all", arg2))
+    else if (boost::iequals("all", arg2))
     {
         int num = GET_OBJ_VNUM(obj);
         Object *obj2 = nullptr;
@@ -841,15 +848,15 @@ ACMD(do_hell)
         return;
     }
 
-    if (!strcasecmp(arg, "Iovan") || !strcasecmp(arg, "iovan") || !strcasecmp(arg, "Fahl") ||
-        !strcasecmp(arg, "fahl") || !strcasecmp(arg, "Xyron") || !strcasecmp(arg, "xyron") ||
-        !strcasecmp(arg, "Samael") || !strcasecmp(arg, "samael"))
+    if (boost::iequals(arg, "Iovan") || boost::iequals(arg, "iovan") || boost::iequals(arg, "Fahl") ||
+        boost::iequals(arg, "fahl") || boost::iequals(arg, "Xyron") || boost::iequals(arg, "xyron") ||
+        boost::iequals(arg, "Samael") || boost::iequals(arg, "samael"))
     {
         ch->sendText("What are you smoking? You can't lockout senior imms.\r\n");
         return;
     }
 
-    if (!strcasecmp(arg, "list"))
+    if (boost::iequals(arg, "list"))
     {
         print_lockout(ch);
         return;
@@ -1189,7 +1196,7 @@ ACMD(do_trans)
     one_argument(argument, buf);
     if (!*buf)
         ch->sendText("Whom do you wish to transfer?\r\n");
-    else if (strcasecmp("all", buf))
+    else if (!boost::iequals("all", buf))
     {
         if (!(victim = get_char_vis(ch, buf, nullptr, FIND_CHAR_WORLD)))
             ch->send_to("%s", CONFIG_NOPERSON);
@@ -1364,7 +1371,7 @@ static void do_stat_room(Character *ch, Room *rm)
     for (auto k : filter_raw(people))
     {
         i2++;
-        if (!CAN_SEE(ch, k))
+    if (!ch->canSee(k))
             continue;
 
         column += ch->send_to("%s @y%s@n(%s)", found++ ? "," : "", GET_NAME(k), !IS_NPC(k) ? "PC" : (!IS_MOB(k) ? "NPC" : "MOB"));
@@ -1388,7 +1395,7 @@ static void do_stat_room(Character *ch, Room *rm)
         for (auto j : filter_raw(con))
         {
             i2++;
-            if (!CAN_SEE_OBJ(ch, j))
+            if (!ch->canSee(j))
                 continue;
 
             column += ch->send_to("%s %s", found++ ? "," : "", j->getShortDescription());
@@ -1775,7 +1782,7 @@ static void do_stat_character(Character *ch, Character *k)
     {
         int cur_count = 0;
         k->followers.for_each([&](Character* fol) {
-            column += ch->send_to("%s %s", found++ ? "," : "", PERS(fol, ch));
+            column += ch->send_to("%s %s", found++ ? "," : "", fol->displayNameFor(ch));
             if (column >= 62)
             {
                 ch->send_to("%s\r\n", (cur_count < fol_count) ? "," : "");
@@ -2078,7 +2085,7 @@ ACMD(do_shutdown)
         send_to_all("Shutting down.\r\n");
         circle_shutdown = 1;
     }
-    else if (!strcasecmp(arg, "now"))
+    else if (boost::iequals(arg, "now"))
     {
         basic_mud_log("(GC) Shutdown NOW by %s.", GET_NAME(ch));
         send_to_all("Rebooting.. come back in a minute or two.\r\n");
@@ -2617,7 +2624,7 @@ ACMD(do_purge)
 
             if (!IS_NPC(vict))
             {
-                mudlog(BRF, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "(GC) %s has purged %s.", GET_NAME(ch),
+                mudlog(BRF, std::max(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "(GC) %s has purged %s.", GET_NAME(ch),
                        GET_NAME(vict));
                 log_imm_action("PURGED: %s burned %s's sorry ass off the MUD!", GET_NAME(ch), GET_NAME(vict));
                 if (vict->desc)
@@ -2845,7 +2852,7 @@ ACMD(do_advance)
     }
     else if ((newlevel = atoi(level)) <= 0)
     {
-        if (!strcasecmp("demote", level))
+        if (boost::iequals("demote", level))
         {
             victim->setBaseStat<int>("level", 1);
             victim->setBaseStat("health", 150);
@@ -3229,7 +3236,7 @@ ACMD(do_force)
 
     if (!*arg || !*to_force)
         ch->sendText("Whom do you wish to force do what?\r\n");
-    else if (!ADM_FLAGGED(ch, ADM_FORCEMASS) || (strcasecmp("all", arg) && strcasecmp("room", arg)))
+    else if (!ADM_FLAGGED(ch, ADM_FORCEMASS) || (!boost::iequals("all", arg) && !boost::iequals("room", arg)))
     {
         if (!(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_WORLD)))
             ch->send_to("%s", CONFIG_NOPERSON);
@@ -3239,15 +3246,15 @@ ACMD(do_force)
         {
             ch->send_to("%s", CONFIG_OK);
             act(buf1, true, ch, nullptr, vict, TO_VICT);
-            mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "(GC) %s forced %s to %s", GET_NAME(ch),
+            mudlog(NRM, std::max(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "(GC) %s forced %s to %s", GET_NAME(ch),
                    GET_NAME(vict), to_force);
             command_interpreter(vict, to_force);
         }
     }
-    else if (!strcasecmp("room", arg))
+    else if (boost::iequals("room", arg))
     {
         ch->send_to("%s", CONFIG_OK);
-        mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "(GC) %s forced room %d to %s",
+        mudlog(NRM, std::max(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "(GC) %s forced room %d to %s",
                GET_NAME(ch), ch->location.getVnum(), to_force);
         auto people = ch->location.getPeople();
         for (auto target : filter_raw(people))
@@ -3262,7 +3269,7 @@ ACMD(do_force)
     else
     { /* force all */
         ch->send_to("%s", CONFIG_OK);
-        mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "(GC) %s forced all to %s", GET_NAME(ch), to_force);
+        mudlog(NRM, std::max(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "(GC) %s forced all to %s", GET_NAME(ch), to_force);
 
         for (i = descriptor_list; i; i = next_desc)
         {
@@ -3303,7 +3310,7 @@ ACMD(do_wiznet)
         if (is_number(buf1))
         {
             half_chop(argument + 1, buf1, argument);
-            level = MAX(atoi(buf1), ADMLVL_IMMORT);
+            level = std::max(atoi(buf1), ADMLVL_IMMORT);
             if (level > GET_ADMLEVEL(ch))
             {
                 ch->sendText("You can't wizline above your own level.\r\n");
@@ -3320,7 +3327,7 @@ ACMD(do_wiznet)
         {
             if (STATE(d) != CON_PLAYING || GET_ADMLEVEL(d->character) < ADMLVL_IMMORT)
                 continue;
-            if (!CAN_SEE(ch, d->character))
+            if (!ch->canSee(d->character))
                 continue;
 
             ch->send_to("  %-*s%s%s%s\r\n", MAX_NAME_LENGTH, GET_NAME(d->character), PLR_FLAGGED(d->character, PLR_WRITING) ? " (Writing)" : "", PLR_FLAGGED(d->character, PLR_MAILING) ? " (Writing mail)" : "", PRF_FLAGGED(d->character, PRF_NOWIZ) ? " (Offline)" : "");
@@ -3363,7 +3370,7 @@ ACMD(do_wiznet)
             (!PRF_FLAGGED(d->character, PRF_NOWIZ)) &&
             (!PLR_FLAGGED(d->character, PLR_WRITING | PLR_MAILING)) && (d != ch->desc || !(PRF_FLAGGED(d->character, PRF_NOREPEAT))))
         {
-            if (CAN_SEE(d->character, ch))
+            if (d->character->canSee(ch))
             {
                 msg = strdup(buf1);
                 d->character->send_to("%s", buf1);
@@ -3406,7 +3413,7 @@ ACMD(do_zreset)
                 }
             }
             ch->sendText("Reset world.\r\n");
-            mudlog(NRM, MAX(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), true, "(GC) %s reset all MUD zones.", GET_NAME(ch));
+            mudlog(NRM, std::max(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), true, "(GC) %s reset all MUD zones.", GET_NAME(ch));
             log_imm_action("RESET: %s has reset all MUD zones.", GET_NAME(ch));
             return;
         }
@@ -3425,7 +3432,7 @@ ACMD(do_zreset)
     auto &z = zone_table.at(i);
     reset_zone(z.number);
     ch->send_to("Reset zone #%d: %s.\r\n", z.number, z.name.c_str());
-    mudlog(NRM, MAX(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), true, "(GC) %s reset zone %d (%s)", GET_NAME(ch),
+    mudlog(NRM, std::max(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), true, "(GC) %s reset zone %d (%s)", GET_NAME(ch),
            z.number, z.name.c_str());
     log_imm_action("RESET: %s has reset zone #%d: %s.", GET_NAME(ch), z.number, z.name.c_str());
 }
@@ -3469,18 +3476,18 @@ ACMD(do_wizutil)
                 vict->player_flags.set(f, false);
             ch->sendText("Pardoned.\r\n");
             vict->sendText("You have been pardoned by the Gods!\r\n");
-            mudlog(BRF, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "(GC) %s pardoned by %s", GET_NAME(vict),
+            mudlog(BRF, std::max(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "(GC) %s pardoned by %s", GET_NAME(vict),
                    GET_NAME(ch));
             break;
         case SCMD_NOTITLE:
             result = vict->player_flags.toggle(PLR_NOTITLE);
-            mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "(GC) Notitle %s for %s by %s.",
+            mudlog(NRM, std::max(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "(GC) Notitle %s for %s by %s.",
                    ONOFF(result), GET_NAME(vict), GET_NAME(ch));
             ch->send_to("(GC) Notitle %s for %s by %s.\r\n", ONOFF(result), GET_NAME(vict), GET_NAME(ch));
             break;
         case SCMD_SQUELCH:
             result = vict->player_flags.toggle(PLR_NOSHOUT);
-            mudlog(BRF, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "(GC) Squelch %s for %s by %s.",
+            mudlog(BRF, std::max(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "(GC) Squelch %s for %s by %s.",
                    ONOFF(result), GET_NAME(vict), GET_NAME(ch));
             ch->send_to("(GC) Mute turned %s for %s by %s.\r\n", ONOFF(result), GET_NAME(vict), GET_NAME(ch));
             send_to_all("@D[@RMUTE@D] @C%s@W has had mute turned @r%s@W by @C%s@W.\r\n", GET_NAME(vict),
@@ -3507,7 +3514,7 @@ ACMD(do_wizutil)
             vict->sendText("A bitter wind suddenly rises and drains every erg of heat from your body!\r\nYou feel frozen!\r\n");
             ch->sendText("Frozen.\r\n");
             act("A sudden cold wind conjured from nowhere freezes $n!", false, vict, nullptr, nullptr, TO_ROOM);
-            mudlog(BRF, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "(GC) %s frozen by %s.", GET_NAME(vict),
+            mudlog(BRF, std::max(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "(GC) %s frozen by %s.", GET_NAME(vict),
                    GET_NAME(ch));
             break;
         case SCMD_THAW:
@@ -3521,7 +3528,7 @@ ACMD(do_wizutil)
                 ch->send_to("Sorry, a level %d God froze %s... you can't unfreeze %s.\r\n", GET_FREEZE_LEV(vict), GET_NAME(vict), HMHR(vict));
                 return;
             }
-            mudlog(BRF, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "(GC) %s un-frozen by %s.", GET_NAME(vict),
+            mudlog(BRF, std::max(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "(GC) %s un-frozen by %s.", GET_NAME(vict),
                    GET_NAME(ch));
             vict->player_flags.set(PLR_FROZEN, false);
             vict->sendText("A fireball suddenly explodes in front of you, melting the ice!\r\nYou feel thawed.\r\n");
@@ -3715,7 +3722,7 @@ ACMD(do_show)
             vict = ent.get();
             if (IS_NPC(vict))
                 j++;
-            else if (CAN_SEE(ch, vict))
+            else if (ch->canSee(vict))
             {
                 i++;
                 if (vict->desc)
@@ -3806,7 +3813,7 @@ ACMD(do_show)
                 continue;
             if (STATE(d) != CON_PLAYING || GET_ADMLEVEL(ch) < GET_ADMLEVEL(d->character))
                 continue;
-            if (!CAN_SEE(ch, d->character) || IN_ROOM(d->character) == NOWHERE)
+            if (!ch->canSee(d->character) || IN_ROOM(d->character) == NOWHERE)
                 continue;
             i++;
             ch->send_to("%-10s - snooped by %s.\r\n", GET_NAME(d->snooping->character), GET_NAME(d->character));
@@ -4117,39 +4124,39 @@ static int perform_set(Character *ch, Character *vict, int mode,
         ch->send_to("Nosummon %s for %s.\r\n", ONOFF(!on), GET_NAME(vict));
         break;
     case 4:
-        mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set maxpl for %s.", GET_NAME(ch),
+        mudlog(NRM, std::max(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set maxpl for %s.", GET_NAME(ch),
                GET_NAME(vict));
         log_imm_action("SET: %s has set maxpl for %s.", GET_NAME(ch), GET_NAME(vict));
         break;
     case 5:
-        mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set maxki for %s.", GET_NAME(ch),
+        mudlog(NRM, std::max(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set maxki for %s.", GET_NAME(ch),
                GET_NAME(vict));
         log_imm_action("SET: %s has set maxki for %s.", GET_NAME(ch), GET_NAME(vict));
         break;
     case 6:
-        mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set maxsta for %s.", GET_NAME(ch),
+        mudlog(NRM, std::max(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set maxsta for %s.", GET_NAME(ch),
                GET_NAME(vict));
         log_imm_action("SET: %s has set maxsta for %s.", GET_NAME(ch), GET_NAME(vict));
         break;
     case 7:
-        mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set pl for %s.", GET_NAME(ch),
+        mudlog(NRM, std::max(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set pl for %s.", GET_NAME(ch),
                GET_NAME(vict));
         log_imm_action("SET: %s has set pl for %s.", GET_NAME(ch), GET_NAME(vict));
         break;
     case 8:
         affect_total(vict);
-        mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set ki for %s.", GET_NAME(ch),
+        mudlog(NRM, std::max(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set ki for %s.", GET_NAME(ch),
                GET_NAME(vict));
         log_imm_action("SET: %s has set ki for %s.", GET_NAME(ch), GET_NAME(vict));
         break;
     case 9:
-        mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set st for %s.", GET_NAME(ch),
+        mudlog(NRM, std::max(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set st for %s.", GET_NAME(ch),
                GET_NAME(vict));
         log_imm_action("SET: %s has set st for %s.", GET_NAME(ch), GET_NAME(vict));
         break;
     case 10:
         vict->setBaseStat("good_evil", RANGE(-1000, 1000));
-        mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set align for %s.", GET_NAME(ch),
+        mudlog(NRM, std::max(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set align for %s.", GET_NAME(ch),
                GET_NAME(vict));
         log_imm_action("SET: %s has set align for %s.", GET_NAME(ch), GET_NAME(vict));
         affect_total(vict);
@@ -4157,7 +4164,7 @@ static int perform_set(Character *ch, Character *vict, int mode,
     case 11:
         RANGE(0, 100);
         vict->setBaseStat("strength", value);
-        mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set str for %s.", GET_NAME(ch),
+        mudlog(NRM, std::max(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set str for %s.", GET_NAME(ch),
                GET_NAME(vict));
         log_imm_action("SET: %s has set str for %s.", GET_NAME(ch), GET_NAME(vict));
         affect_total(vict);
@@ -4172,7 +4179,7 @@ affect_total(vict);
     case 13:
         RANGE(0, 100);
         vict->setBaseStat("intelligence", value);
-        mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set intel for %s.", GET_NAME(ch),
+        mudlog(NRM, std::max(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set intel for %s.", GET_NAME(ch),
                GET_NAME(vict));
         log_imm_action("SET: %s has set intel for %s.", GET_NAME(ch), GET_NAME(vict));
         affect_total(vict);
@@ -4180,7 +4187,7 @@ affect_total(vict);
     case 14:
         RANGE(0, 100);
         vict->setBaseStat("wisdom", value);
-        mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set wis for %s.", GET_NAME(ch),
+        mudlog(NRM, std::max(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set wis for %s.", GET_NAME(ch),
                GET_NAME(vict));
         log_imm_action("SET: %s has set wis for %s.", GET_NAME(ch), GET_NAME(vict));
         affect_total(vict);
@@ -4188,7 +4195,7 @@ affect_total(vict);
     case 15:
         RANGE(0, 100);
         vict->setBaseStat("agility", value);
-        mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set dex for %s.", GET_NAME(ch),
+        mudlog(NRM, std::max(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set dex for %s.", GET_NAME(ch),
                GET_NAME(vict));
         log_imm_action("SET: %s has set dex for %s.", GET_NAME(ch), GET_NAME(vict));
         affect_total(vict);
@@ -4196,7 +4203,7 @@ affect_total(vict);
     case 16:
         RANGE(0, 100);
         vict->setBaseStat("constitution", value);
-        mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set con for %s.", GET_NAME(ch),
+        mudlog(NRM, std::max(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set con for %s.", GET_NAME(ch),
                GET_NAME(vict));
         log_imm_action("SET: %s has set con for %s.", GET_NAME(ch), GET_NAME(vict));
         affect_total(vict);
@@ -4204,33 +4211,33 @@ affect_total(vict);
     case 17:
         RANGE(0, 100);
         vict->setBaseStat("speed", value);
-        mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set speed for %s.", GET_NAME(ch),
+        mudlog(NRM, std::max(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set speed for %s.", GET_NAME(ch),
                GET_NAME(vict));
         log_imm_action("SET: %s has set speed for %s.", GET_NAME(ch), GET_NAME(vict));
         affect_total(vict);
         break;
     case 18:
         vict->setBaseStat("armor_innate", RANGE(-100, 500));
-        mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set armor index for %s.", GET_NAME(ch),
+        mudlog(NRM, std::max(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set armor index for %s.", GET_NAME(ch),
                GET_NAME(vict));
         log_imm_action("SET: %s has set armor index for %s.", GET_NAME(ch), GET_NAME(vict));
         affect_total(vict);
         break;
     case 19:
         vict->setBaseStat("money_carried", RANGE(0, 100000000));
-        mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set zenni for %s.", GET_NAME(ch),
+        mudlog(NRM, std::max(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set zenni for %s.", GET_NAME(ch),
                GET_NAME(vict));
         log_imm_action("SET: %s has set zenni for %s.", GET_NAME(ch), GET_NAME(vict));
         break;
     case 20:
         vict->setBaseStat("money_bank", RANGE(0, 100000000));
-        mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set bank for %s.", GET_NAME(ch),
+        mudlog(NRM, std::max(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set bank for %s.", GET_NAME(ch),
                GET_NAME(vict));
         log_imm_action("SET: %s has set bank for %s.", GET_NAME(ch), GET_NAME(vict));
         break;
     case 21:
         vict->setExperience(RANGE(0, 50000000));
-        mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set exp for %s.", GET_NAME(ch),
+        mudlog(NRM, std::max(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set exp for %s.", GET_NAME(ch),
                GET_NAME(vict));
         log_imm_action("SET: %s has set exp for %s.", GET_NAME(ch), GET_NAME(vict));
         break;
@@ -4268,14 +4275,14 @@ affect_total(vict);
     case 27:
     case 28:
         vict->modPractices(RANGE(0, 10000));
-        mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set PS for %s.", GET_NAME(ch),
+        mudlog(NRM, std::max(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set PS for %s.", GET_NAME(ch),
                GET_NAME(vict));
         log_imm_action("SET: %s has set PS for %s.", GET_NAME(ch), GET_NAME(vict));
         break;
     case 29:
     case 30:
     case 31:
-        if (!strcasecmp(val_arg, "off"))
+        if (boost::iequals(val_arg, "off"))
         {
             GET_COND(vict, (mode - 29)) = -1; /* warning: magic number here */
             ch->send_to("%s's %s now off.\r\n", GET_NAME(vict), set_fields[mode].cmd);
@@ -4305,7 +4312,7 @@ affect_total(vict);
             ch->sendText("You can't do that.\r\n");
             return (0);
         }
-        value = MAX(0, value);
+        value = std::max<int64_t>(0, value);
         vict->setBaseStat<int>("level", value);
         break;
     case 35:
@@ -4343,7 +4350,7 @@ affect_total(vict);
         vict->pref_flags.toggle(PRF_QUEST);
         break;
     case 42:
-        if (!strcasecmp(val_arg, "off"))
+        if (boost::iequals(val_arg, "off"))
         {
             vict->player_flags.set(PLR_LOADROOM, false);
             vict->setBaseStat("load_room", NOWHERE);
@@ -4503,21 +4510,21 @@ affect_total(vict);
 
     case 64:
         vict->setBaseStat("health", value);
-        mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set basepl for %s.", GET_NAME(ch),
+        mudlog(NRM, std::max(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set basepl for %s.", GET_NAME(ch),
                GET_NAME(vict));
         log_imm_action("SET: %s has set basepl for %s.", GET_NAME(ch), GET_NAME(vict));
         break;
 
     case 65:
         vict->setBaseStat("ki", value);
-        mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set baseki for %s.", GET_NAME(ch),
+        mudlog(NRM, std::max(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set baseki for %s.", GET_NAME(ch),
                GET_NAME(vict));
         log_imm_action("SET: %s has set baseki for %s.", GET_NAME(ch), GET_NAME(vict));
         break;
 
     case 66:
         vict->setBaseStat("stamina", value);
-        mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set basest for %s.", GET_NAME(ch),
+        mudlog(NRM, std::max(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set basest for %s.", GET_NAME(ch),
                GET_NAME(vict));
         log_imm_action("SET: %s has set basest for %s.", GET_NAME(ch), GET_NAME(vict));
         break;
@@ -4533,14 +4540,14 @@ affect_total(vict);
 
     case 68:
         vict->setBaseStat<int>("absorbs", RANGE(0, 3));
-        mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set absorbs for %s.", GET_NAME(ch),
+        mudlog(NRM, std::max(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set absorbs for %s.", GET_NAME(ch),
                GET_NAME(vict));
         log_imm_action("SET: %s has set absorbs for %s.", GET_NAME(ch), GET_NAME(vict));
         break;
 
     case 69:
         vict->modBaseStat<int>("upgrade_points", RANGE(1, 1000));
-        mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set upgrade points for %s.",
+        mudlog(NRM, std::max(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set upgrade points for %s.",
                GET_NAME(ch), GET_NAME(vict));
         log_imm_action("SET: %s has set upgrade points for %s.", GET_NAME(ch), GET_NAME(vict));
         break;
@@ -4552,7 +4559,7 @@ affect_total(vict);
         break;
     case 74:
         vict->setBaseStat<int>("death_count", RANGE(-1000, 1000));
-        mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set death count for %s.", GET_NAME(ch),
+        mudlog(NRM, std::max(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set death count for %s.", GET_NAME(ch),
                GET_NAME(vict));
         log_imm_action("SET: %s has set death count for %s.", GET_NAME(ch), GET_NAME(vict));
         break;
@@ -4571,7 +4578,7 @@ affect_total(vict);
         break;
     case 78:
         vict->setBaseStat<int>("skill_slots", RANGE(1, 1000));
-        mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set skill slots for %s.", GET_NAME(ch),
+        mudlog(NRM, std::max(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set skill slots for %s.", GET_NAME(ch),
                GET_NAME(vict));
         log_imm_action("SET: %s has set skill slots for %s.", GET_NAME(ch), GET_NAME(vict));
         break;
@@ -4581,7 +4588,7 @@ affect_total(vict);
         break;
 
     case 80:
-        mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set transformation class for %s.",
+        mudlog(NRM, std::max(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set transformation class for %s.",
                GET_NAME(ch), GET_NAME(vict));
         log_imm_action("SET: %s has set transformation class for %s.", GET_NAME(ch), GET_NAME(vict));
         break;
@@ -4611,12 +4618,12 @@ ACMD(do_set)
 
     half_chop(argument, name, buf);
 
-    if (!strcasecmp(name, "player"))
+    if (boost::iequals(name, "player"))
     {
         is_player = 1;
         half_chop(buf, name, buf);
     }
-    else if (!strcasecmp(name, "mob"))
+    else if (boost::iequals(name, "mob"))
         half_chop(buf, name, buf);
 
     half_chop(buf, field, buf);
@@ -4768,7 +4775,7 @@ ACMD(do_chown)
     {
         for (i = 0; i < NUM_WEARS; i++)
         {
-            if (GET_EQ(victim, i) && CAN_SEE_OBJ(ch, GET_EQ(victim, i)) &&
+            if (GET_EQ(victim, i) && ch->canSee(GET_EQ(victim, i)) &&
                 isname(buf2, GET_EQ(victim, i)->getName()))
             {
                 auto un = unequip_char(victim, i);
@@ -4826,7 +4833,7 @@ ACMD(do_zpurge)
     });
 
     ch->send_to("All mobiles and objects in zone %d purged.\r\n", zone);
-    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "(GC) %s has purged zone %d.", GET_NAME(ch), zone);
+    mudlog(NRM, std::max(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "(GC) %s has purged zone %d.", GET_NAME(ch), zone);
 }
 
 /******************************************************************************/
@@ -5460,19 +5467,19 @@ ACMD(do_checkloadstatus)
         return;
     }
 
-    if (LOWER(*buf1) == 'm')
+    if (tolower(*buf1) == 'm')
     {
         mob_checkload(ch, atoi(buf2));
         return;
     }
 
-    if (LOWER(*buf1) == 'o')
+    if (tolower(*buf1) == 'o')
     {
         obj_checkload(ch, atoi(buf2));
         return;
     }
 
-    if (LOWER(*buf1) == 't')
+    if (tolower(*buf1) == 't')
     {
         trg_checkload(ch, atoi(buf2));
         return;

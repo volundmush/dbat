@@ -7,8 +7,8 @@
  *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
  *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
  ************************************************************************ */
-#include <boost/algorithm/string.hpp>
-
+#include "dbat/Character.h"
+#include "dbat/Account.h"
 #include "dbat/players.h"
 #include "dbat/utils.h"
 #include "dbat/db.h"
@@ -16,7 +16,6 @@
 #include "dbat/dg_scripts.h"
 #include "dbat/class.h"
 #include "dbat/ban.h"
-#include "dbat/account.h"
 #include "dbat/filter.h"
 
 long get_id_by_name(const char *name)

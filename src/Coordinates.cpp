@@ -1,4 +1,4 @@
-#include "dbat/structs.h"
+#include "dbat/Coordinates.h"
 
 bool Coordinates::operator==(const Coordinates &other) const
 {

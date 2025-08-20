@@ -7,13 +7,13 @@
  *  $Date: 2004/10/11 12:07:00$                                            *
  *  $Revision: 1.0.14 $                                                    *
  **************************************************************************/
-#include <filesystem>
-#include <charconv>
-
-#include <boost/algorithm/string.hpp>
-#include <boost/algorithm/string/regex.hpp>
-#include <regex>
-
+#include "dbat/Character.h"
+#include "dbat/Object.h"
+#include "dbat/Room.h"
+#include "dbat/Zone.h"
+#include "dbat/Destination.h"
+#include "dbat/DgScript.h"
+#include "dbat/Descriptor.h"
 #include "dbat/dg_scripts.h"
 #include "dbat/act.wizard.h"
 #include "dbat/dg_event.h"
@@ -95,12 +95,12 @@ char *str_str(char *cs, char *ct)
     {
         t = ct;
 
-        while (*cs && (LOWER(*cs) != LOWER(*t)))
+        while (*cs && (tolower(*cs) != tolower(*t)))
             cs++;
 
         s = cs;
 
-        while (*t && *cs && (LOWER(*cs) == LOWER(*t)))
+        while (*t && *cs && (tolower(*cs) == tolower(*t)))
         {
             t++;
             cs++;
@@ -244,7 +244,7 @@ int find_eq_pos_script(char *arg)
 
     for (i = 0; eq_pos[i].where != -1; i++)
     {
-        if (!strcasecmp(eq_pos[i].pos, arg))
+        if (boost::iequals(eq_pos[i].pos, arg))
             return eq_pos[i].where;
     }
     return (-1);
@@ -404,7 +404,7 @@ Object *get_obj_near_obj(Object *obj, char *name)
     room_vnum rm;
     int32_t id;
 
-    if (!strcasecmp(name, "self") || !strcasecmp(name, "me"))
+    if (boost::iequals(name, "self") || boost::iequals(name, "me"))
         return obj;
 
     /* is it inside ? */
@@ -578,7 +578,7 @@ Object *get_obj_by_obj(Object *obj, char *name)
         return std::dynamic_pointer_cast<Object>(uidResult).get();
     }
 
-    if (!strcasecmp(name, "self") || !strcasecmp(name, "me"))
+    if (boost::iequals(name, "self") || boost::iequals(name, "me"))
         return obj;
 
     if (i = get_obj_in_list(name, obj->getInventory()))
@@ -1280,7 +1280,7 @@ ACMD(do_detach)
     /* vnum of mob/obj, if given */
     num_arg = atoi(arg2);
 
-    if (!strcasecmp(arg1, "room") || !strcasecmp(arg1, "wtr"))
+    if (boost::iequals(arg1, "room") || boost::iequals(arg1, "wtr"))
     {
         room = ch->getRoom();
         if (!can_edit_zone(ch, room->zone->number))
@@ -1290,7 +1290,7 @@ ACMD(do_detach)
         }
         if (!SCRIPT(room))
             ch->sendText("This room does not have any triggers.\r\n");
-        else if (!strcasecmp(arg2, "all"))
+        else if (boost::iequals(arg2, "all"))
         {
             extract_script(room, WLD_TRIGGER);
             ch->sendText("All triggers removed from room.\r\n");
@@ -1308,7 +1308,7 @@ ACMD(do_detach)
     }
     else
     {
-        if (is_abbrev(arg1, "mobile") || !strcasecmp(arg1, "mtr"))
+        if (is_abbrev(arg1, "mobile") || boost::iequals(arg1, "mtr"))
         {
             victim = get_char_vis(ch, arg2, nullptr, FIND_CHAR_WORLD);
             if (!victim)
@@ -1333,7 +1333,7 @@ ACMD(do_detach)
             else
                 trigger = arg3;
         }
-        else if (is_abbrev(arg1, "object") || !strcasecmp(arg1, "otr"))
+        else if (is_abbrev(arg1, "object") || boost::iequals(arg1, "otr"))
         {
             object = get_obj_vis(ch, arg2, nullptr);
             if (!object)
@@ -1384,7 +1384,7 @@ ACMD(do_detach)
                 ch->sendText("You can only detach triggers in your own zone\r\n");
                 return;
             }
-            else if (trigger && !strcasecmp(trigger, "all"))
+            else if (trigger && boost::iequals(trigger, "all"))
             {
                 extract_script(victim, MOB_TRIGGER);
                 ch->send_to("All triggers removed from %s.\r\n", GET_SHORT(victim));
@@ -1410,7 +1410,7 @@ ACMD(do_detach)
                 ch->sendText("You can only detach triggers in your own zone\r\n");
                 return;
             }
-            else if (trigger && !strcasecmp(trigger, "all"))
+            else if (trigger && boost::iequals(trigger, "all"))
             {
                 extract_script(object, OBJ_TRIGGER);
                 ch->send_to("All triggers removed from %s.\r\n", object->getShortDescription() ? object->getShortDescription() : object->getName());
@@ -1603,27 +1603,27 @@ void eval_op(char *op, char *lhs, char *rhs, char *result, HasDgScripts *go,
     }
     else if (!strcmp("==", op))
     {
-        sprintf(result, "%d", !strcasecmp(lhs, rhs));
+        sprintf(result, "%d", boost::iequals(lhs, rhs));
     }
     else if (!strcmp("!=", op))
     {
-        sprintf(result, "%d", strcasecmp(lhs, rhs));
+        sprintf(result, "%d", !boost::iequals(lhs, rhs));
     }
     else if (!strcmp("<=", op))
     {
-        sprintf(result, "%d", strcasecmp(lhs, rhs) <= 0);
+        sprintf(result, "%d", !boost::iequals(lhs, rhs) <= 0);
     }
     else if (!strcmp(">=", op))
     {
-        sprintf(result, "%d", strcasecmp(lhs, rhs) <= 0);
+        sprintf(result, "%d", !boost::iequals(lhs, rhs) <= 0);
     }
     else if (!strcmp("<", op))
     {
-        sprintf(result, "%d", strcasecmp(lhs, rhs) < 0);
+        sprintf(result, "%d", !boost::iequals(lhs, rhs) < 0);
     }
     else if (!strcmp(">", op))
     {
-        sprintf(result, "%d", strcasecmp(lhs, rhs) > 0);
+        sprintf(result, "%d", !boost::iequals(lhs, rhs) > 0);
     }
     else if (!strcmp("/=", op))
         sprintf(result, "%c", str_str(lhs, rhs) ? '1' : '0');
@@ -2548,76 +2548,8 @@ constexpr int BUCKET_COUNT = 64;
 // to recognize an empty bucket
 constexpr int UID_OUT_OF_RANGE = 1000000000;
 
-int check_flags_by_name_ar(bitvector_t *array, int numflags, char *search, const char *namelist[])
-{
-    int i, item = -1;
 
-    for (i = 0; i < numflags && item < 0; i++)
-        if (!strcmp(search, namelist[i]))
-            item = i;
 
-    if (item < 0)
-        return false;
-
-    if (IS_SET_AR(array, item))
-        return item;
-
-    return false;
-}
-
-// Note: Trigger instances are meant to be set all active or inactive on a per room/character/item basis,
-// not individually.
-void DgScript::activate()
-{
-    if (active)
-    {
-        return;
-    }
-    active = true;
-    auto sh = shared_from_this();
-    std::unordered_set<std::string> services;
-    services.insert("active");
-    services.insert(fmt::format("vnum_{}", getVnum()));
-    if (waiting != 0.0)
-    {
-        services.insert("waiting");
-    }
-    for (const auto &s : services)
-    {
-        triggerSubscriptions.subscribe(s, sh);
-    }
-}
-
-void DgScript::deactivate()
-{
-    if (!active)
-    {
-        return;
-    }
-    active = false;
-    auto sh = shared_from_this();
-    triggerSubscriptions.unsubscribeFromAll(sh);
-}
-
-int DgScript::getVnum() const
-{
-    return proto->vn;
-}
-
-UnitType DgScript::getAttachType() const
-{
-    return proto->attach_type;
-}
-
-long DgScript::getTriggerType() const
-{
-    return proto->trigger_type;
-}
-
-DgScript::DgScript(const DgScriptPrototype &other) : DgScript()
-{
-    proto = (DgScriptPrototype *)&other;
-}
 
 ScriptLine DgScriptPrototype::getLine(int line) const
 {
@@ -2728,6 +2660,63 @@ std::vector<ScriptLine> parse_script(const std::vector<std::string> &orig)
     }
     return result;
 }
+
+
+
+// Note: Trigger instances are meant to be set all active or inactive on a per room/character/item basis,
+// not individually.
+void DgScript::activate()
+{
+    if (active)
+    {
+        return;
+    }
+    active = true;
+    auto sh = shared_from_this();
+    std::unordered_set<std::string> services;
+    services.insert("active");
+    services.insert(fmt::format("vnum_{}", getVnum()));
+    if (waiting != 0.0)
+    {
+        services.insert("waiting");
+    }
+    for (const auto &s : services)
+    {
+        triggerSubscriptions.subscribe(s, sh);
+    }
+}
+
+void DgScript::deactivate()
+{
+    if (!active)
+    {
+        return;
+    }
+    active = false;
+    auto sh = shared_from_this();
+    triggerSubscriptions.unsubscribeFromAll(sh);
+}
+
+int DgScript::getVnum() const
+{
+    return proto->vn;
+}
+
+UnitType DgScript::getAttachType() const
+{
+    return proto->attach_type;
+}
+
+long DgScript::getTriggerType() const
+{
+    return proto->trigger_type;
+}
+
+DgScript::DgScript(const DgScriptPrototype &other) : DgScript()
+{
+    proto = (DgScriptPrototype *)&other;
+}
+
 
 void DgScript::reset()
 {
@@ -3322,63 +3311,5 @@ void DgScript::processCommand(const std::string &raw_text)
             wld_command_interpreter((Room *)owner.get(), (char *)full_command.c_str());
             break;
         }
-    }
-}
-
-std::vector<trig_vnum> HasDgScripts::getScriptOrder()
-{
-    if (running_scripts.has_value())
-    {
-        return *running_scripts;
-    }
-    return getProtoScript();
-}
-
-std::vector<std::weak_ptr<DgScript>> HasDgScripts::getScripts()
-{
-    std::vector<std::weak_ptr<DgScript>> out;
-    auto proto = getScriptOrder();
-    out.reserve(scripts.size() + proto.size());
-    for (const auto &v : proto)
-    {
-        if (auto it = scripts.find(v); it != scripts.end())
-        {
-            out.push_back(it->second);
-        }
-        else
-        {
-            // basic_mud_log("Warning: script vnum %d not found in scripts map for %s", v, getDgName());
-        }
-    }
-    return out;
-}
-
-std::string HasDgScripts::scriptString() const
-{
-    std::vector<std::string> vnums;
-    for (auto p : getProtoScript())
-        vnums.emplace_back(std::move(std::to_string(p)));
-
-    return fmt::format("@D[@wT{}@D]@n", fmt::join(vnums, ","));
-}
-
-std::optional<std::string> HasDgScripts::dgCallMember(const std::string &member, const std::string &arg)
-{
-    return std::nullopt;
-}
-
-void HasDgScripts::activateScripts()
-{
-    for (auto &[vn, t] : scripts)
-    {
-        t->activate();
-    }
-}
-
-void HasDgScripts::deactivateScripts()
-{
-    for (auto &[vn, t] : scripts)
-    {
-        t->deactivate();
     }
 }

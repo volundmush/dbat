@@ -1,23 +1,20 @@
-#include <fstream>
-#include <thread>
-#include <iostream>
-
-#include <boost/algorithm/string.hpp>
 #include <boost/iostreams/filtering_streambuf.hpp>
 #include <boost/iostreams/filter/gzip.hpp>
-#include "fmt/core.h"
-
-#include "magic_enum/magic_enum_all.hpp"
 
 #include "dbat/saveload.h"
+#include "dbat/ObjectPrototype.h"
+#include "dbat/CharacterPrototype.h"
+#include "dbat/Area.h"
+#include "dbat/Structure.h"
+#include "dbat/affect.h"
 #include "dbat/config.h"
 #include "dbat/send.h"
 #include "dbat/players.h"
 #include "dbat/db.h"
-#include "dbat/account.h"
+#include "dbat/Account.h"
 #include "dbat/dg_scripts.h"
-#include "dbat/guild.h"
-#include "dbat/shop.h"
+#include "dbat/Guild.h"
+#include "dbat/Shop.h"
 #include "dbat/constants.h"
 #include "dbat/races.h"
 #include "dbat/class.h"

@@ -7,6 +7,12 @@
  *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
  *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
  ************************************************************************ */
+#include "dbat/Character.h"
+#include "dbat/Object.h"
+#include "dbat/Room.h"
+#include "dbat/Destination.h"
+#include "dbat/Descriptor.h"
+#include "dbat/Zone.h"
 #include "dbat/act.movement.h"
 #include "dbat/dg_comm.h"
 #include "dbat/vehicles.h"
@@ -18,7 +24,7 @@
 #include "dbat/fight.h"
 #include "dbat/spells.h"
 #include "dbat/oasis.h"
-#include "dbat/guild.h"
+#include "dbat/Guild.h"
 #include "dbat/dg_scripts.h"
 #include "dbat/local_limits.h"
 #include "dbat/constants.h"
@@ -685,9 +691,9 @@ int do_simple_move(Character *ch, int dir, int need_specials_check)
         else
         {
             ch->sendText("@GYou learn the very basics of moving silently.@n\r\n");
-            SET_SKILL(ch, SKILL_MOVE_SILENTLY, rand_number(5, 10));
+            SET_SKILL(ch, SKILL_MOVE_SILENTLY, Random::get<int>(5, 10));
             act(buf2, true, ch, nullptr, nullptr, TO_ROOM | TO_SNEAKRESIST);
-            if (GET_DEX(ch) < rand_number(1, 30))
+            if (GET_DEX(ch) < Random::get<int>(1, 30))
             {
                 WAIT_STATE(ch, PULSE_1SEC);
             }
@@ -760,7 +766,7 @@ int do_simple_move(Character *ch, int dir, int need_specials_check)
             sits->clearLocation();
             sits->moveToLocation(ch);
         }
-        if (!AFF_FLAGGED(dragging, AFF_KNOCKED) && !AFF_FLAGGED(dragging, AFF_SLEEP) && rand_number(1, 3))
+        if (!AFF_FLAGGED(dragging, AFF_KNOCKED) && !AFF_FLAGGED(dragging, AFF_SLEEP) && Random::get<int>(1, 3))
         {
             dragging->sendText("You feel your sleeping body being moved.\r\n");
             if (IS_NPC(dragging) && !FIGHTING(dragging))
@@ -775,7 +781,7 @@ int do_simple_move(Character *ch, int dir, int need_specials_check)
         act("@C$n@w carries @c$N@w with $m.@n", true, ch, nullptr, carrying, TO_ROOM);
         carrying->leaveLocation();
         carrying->moveToLocation(ch);
-        if (!AFF_FLAGGED(carrying, AFF_KNOCKED) && !AFF_FLAGGED(carrying, AFF_SLEEP) && rand_number(1, 3))
+        if (!AFF_FLAGGED(carrying, AFF_KNOCKED) && !AFF_FLAGGED(carrying, AFF_SLEEP) && Random::get<int>(1, 3))
         {
             carrying->sendText("You feel your sleeping body being moved.\r\n");
         }
@@ -785,7 +791,7 @@ int do_simple_move(Character *ch, int dir, int need_specials_check)
     {
         ch->lookAtLocation();
         if (AFF_FLAGGED(ch, AFF_SNEAK) && !IS_NPC(ch) && GET_SKILL(ch, SKILL_MOVE_SILENTLY) &&
-            GET_SKILL(ch, SKILL_MOVE_SILENTLY) < rand_number(1, 101))
+            GET_SKILL(ch, SKILL_MOVE_SILENTLY) < Random::get<int>(1, 101))
         {
             ch->sendText("@wYou make a noise as you arrive and are no longer sneaking!@n\r\n");
             act("@c$n@w makes a noise revealing $s sneaking!@n", true, ch, nullptr, nullptr, TO_ROOM | TO_SNEAKRESIST);
@@ -800,7 +806,7 @@ int do_simple_move(Character *ch, int dir, int need_specials_check)
         {
             act("@rYour legs are burned by the lava!@n", true, ch, nullptr, nullptr, TO_CHAR);
             act("@R$n@r's legs are burned by the lava!@n", true, ch, nullptr, nullptr, TO_ROOM);
-            if (IS_NPC(ch) && IS_HUMANOID(ch) && rand_number(1, 2) == 2)
+            if (IS_NPC(ch) && IS_HUMANOID(ch) && Random::get<int>(1, 2) == 2)
             {
                 do_fly(ch, nullptr, 0, 0);
             }
@@ -1010,7 +1016,7 @@ ACMD(do_move)
         return;
     }
 
-    if (GET_COND(ch, DRUNK) > 4 && (rand_number(1, 9) + GET_COND(ch, DRUNK)) >= rand_number(14, 20))
+    if (GET_COND(ch, DRUNK) > 4 && (Random::get<int>(1, 9) + GET_COND(ch, DRUNK)) >= Random::get<int>(14, 20))
     {
         ch->sendText("You wobble around and then fall on your ass.\r\n");
         act("@C$n@W wobbles around before falling on $s ass@n.", true, ch, nullptr, nullptr, TO_ROOM);
@@ -1169,7 +1175,7 @@ ACMD(do_move)
             if (GET_LIMBCOND(ch, 1) < 50)
             {
                 ch->sendText("@RYour left arm is damaged by the forced use!@n\r\n");
-                GET_LIMBCOND(ch, 1) -= rand_number(1, 5);
+                GET_LIMBCOND(ch, 1) -= Random::get<int>(1, 5);
                 if (GET_LIMBCOND(ch, 0) <= 0)
                 {
                     act("@RYour left arm falls apart!@n", true, ch, nullptr, nullptr, TO_CHAR);
@@ -1186,7 +1192,7 @@ ACMD(do_move)
             if (GET_LIMBCOND(ch, 0) < 50)
             {
                 ch->sendText("@RYour right arm is damaged by the forced use!@n\r\n");
-                GET_LIMBCOND(ch, 0) -= rand_number(1, 5);
+                GET_LIMBCOND(ch, 0) -= Random::get<int>(1, 5);
                 if (GET_LIMBCOND(ch, 0) <= 0)
                 {
                     act("@RYour right arm falls apart!@n", true, ch, nullptr, nullptr, TO_CHAR);
@@ -1202,7 +1208,7 @@ ACMD(do_move)
             if (GET_LIMBCOND(ch, 1) < 50)
             {
                 ch->sendText("@RYour left arm is damaged by the forced use!@n\r\n");
-                GET_LIMBCOND(ch, 1) -= rand_number(1, 5);
+                GET_LIMBCOND(ch, 1) -= Random::get<int>(1, 5);
                 if (GET_LIMBCOND(ch, 1) <= 0)
                 {
                     act("@RYour left arm falls apart!@n", true, ch, nullptr, nullptr, TO_CHAR);
@@ -1212,7 +1218,7 @@ ACMD(do_move)
             if (GET_LIMBCOND(ch, 0) < 50)
             {
                 ch->sendText("@RYour right arm is damaged by the forced use!@n\r\n");
-                GET_LIMBCOND(ch, 0) -= rand_number(1, 5);
+                GET_LIMBCOND(ch, 0) -= Random::get<int>(1, 5);
                 if (GET_LIMBCOND(ch, 0) <= 0)
                 {
                     act("@RYour right arm falls apart!@n", true, ch, nullptr, nullptr, TO_CHAR);
@@ -1228,7 +1234,7 @@ ACMD(do_move)
             if (GET_LIMBCOND(ch, 3) < 50)
             {
                 ch->sendText("@RYour left leg is damaged by the forced use!@n\r\n");
-                GET_LIMBCOND(ch, 3) -= rand_number(1, 5);
+                GET_LIMBCOND(ch, 3) -= Random::get<int>(1, 5);
                 if (GET_LIMBCOND(ch, 3) <= 0)
                 {
                     act("@RYour left leg falls apart!@n", true, ch, nullptr, nullptr, TO_CHAR);
@@ -1244,7 +1250,7 @@ ACMD(do_move)
             if (GET_LIMBCOND(ch, 2) < 50)
             {
                 ch->sendText("@RYour right leg is damaged by the forced use!@n\r\n");
-                GET_LIMBCOND(ch, 2) -= rand_number(1, 5);
+                GET_LIMBCOND(ch, 2) -= Random::get<int>(1, 5);
                 if (GET_LIMBCOND(ch, 2) <= 0)
                 {
                     act("@RYour right leg falls apart!@n", true, ch, nullptr, nullptr, TO_CHAR);
@@ -1772,7 +1778,7 @@ static int ok_pick(Character *ch, obj_vnum keynum, int pickproof, int dclock, in
     skill_lvl = roll_skill(ch, SKILL_OPEN_LOCK);
     if (dclock == 0)
     {
-        dclock = rand_number(1, 101);
+        dclock = Random::get<int>(1, 101);
     }
 
     if (keynum == NOTHING)
@@ -1840,7 +1846,7 @@ ACMD(do_gen_door)
     skip_spaces(&argument);
     if (!*argument)
     {
-        ch->send_to("%c%s what?\r\n", UPPER(*cmd_door[subcmd]), cmd_door[subcmd] + 1);
+        ch->send_to("%c%s what?\r\n", toupper(*cmd_door[subcmd]), cmd_door[subcmd] + 1);
         return;
     }
     two_arguments(argument, type, dir);
@@ -1983,7 +1989,7 @@ static int do_simple_enter(Character *ch, Object *obj, int need_specials_check)
     {
         act("@wYou drag @C$N@w with you.@n", true, ch, nullptr, drg, TO_CHAR);
         act("@C$n@w drags @c$N@w with $m.@n", true, ch, nullptr, drg, TO_ROOM);
-        if (!AFF_FLAGGED(drg, AFF_KNOCKED) && !AFF_FLAGGED(drg, AFF_SLEEP) && rand_number(1, 3))
+        if (!AFF_FLAGGED(drg, AFF_KNOCKED) && !AFF_FLAGGED(drg, AFF_SLEEP) && Random::get<int>(1, 3))
         {
             drg->sendText("You feel your sleeping body being moved.\r\n");
             if (IS_NPC(drg) && !FIGHTING(drg))
@@ -2003,7 +2009,7 @@ static int do_simple_enter(Character *ch, Object *obj, int need_specials_check)
     {
         act("@wYou carry @C$N@w with you.@n", true, ch, nullptr, carry, TO_CHAR);
         act("@C$n@w carries @c$N@w with $m.@n", true, ch, nullptr, carry, TO_ROOM);
-        if (!AFF_FLAGGED(carry, AFF_KNOCKED) && !AFF_FLAGGED(carry, AFF_SLEEP) && rand_number(1, 3))
+        if (!AFF_FLAGGED(carry, AFF_KNOCKED) && !AFF_FLAGGED(carry, AFF_SLEEP) && Random::get<int>(1, 3))
         {
             carry->sendText("You feel your sleeping body being moved.\r\n");
         }
@@ -2264,7 +2270,7 @@ static int do_simple_leave(Character *ch, Object *obj, int need_specials_check)
             si->clearLocation();
             si->moveToLocation(ch);
         }
-        if (!AFF_FLAGGED(drg, AFF_KNOCKED) && !AFF_FLAGGED(drg, AFF_SLEEP) && rand_number(1, 3))
+        if (!AFF_FLAGGED(drg, AFF_KNOCKED) && !AFF_FLAGGED(drg, AFF_SLEEP) && Random::get<int>(1, 3))
         {
             drg->sendText("You feel your sleeping body being moved.\r\n");
             if (IS_NPC(drg) && !FIGHTING(drg))
@@ -2284,7 +2290,7 @@ static int do_simple_leave(Character *ch, Object *obj, int need_specials_check)
             si->clearLocation();
             si->moveToLocation(ch);
         }
-        if (!AFF_FLAGGED(car, AFF_KNOCKED) && !AFF_FLAGGED(car, AFF_SLEEP) && rand_number(1, 3))
+        if (!AFF_FLAGGED(car, AFF_KNOCKED) && !AFF_FLAGGED(car, AFF_SLEEP) && Random::get<int>(1, 3))
         {
             car->sendText("You feel your sleeping body being moved.\r\n");
         }
@@ -2351,7 +2357,7 @@ ACMD(do_leave)
 
     auto leave_obj = [ch](const auto &o)
     {
-        return CAN_SEE_OBJ(ch, o) && GET_OBJ_TYPE(o) == ITEM_HATCH || GET_OBJ_TYPE(o) == ITEM_PORTAL;
+    return ch->canSee(o) && GET_OBJ_TYPE(o) == ITEM_HATCH || GET_OBJ_TYPE(o) == ITEM_PORTAL;
     };
 
     if (auto obj = ch->location.searchObjects(leave_obj))
@@ -2570,7 +2576,7 @@ ACMD(do_fly)
         return;
 
     // Handle specific flight commands
-    if (!strcasecmp("space", arg))
+    if (boost::iequals("space", arg))
     {
         handle_fly_space(ch);
         return;
@@ -2601,7 +2607,7 @@ ACMD(do_fly)
         return true;
     };
 
-    if (!strcasecmp("high", arg))
+    if (boost::iequals("high", arg))
     {
         if (!ki_check("fly high"))
             return;

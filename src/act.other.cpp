@@ -7,8 +7,13 @@
  *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
  *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
  **************************************************************************/
-#include <boost/algorithm/string.hpp>
-
+#include "dbat/Character.h"
+#include "dbat/CharacterPrototype.h"
+#include "dbat/Object.h"
+#include "dbat/Room.h"
+#include "dbat/Destination.h"
+#include "dbat/Descriptor.h"
+#include "dbat/Zone.h"
 #include "dbat/act.other.h"
 #include "dbat/send.h"
 #include "dbat/comm.h"
@@ -30,13 +35,12 @@
 #include "dbat/transformation.h"
 #include "dbat/class.h"
 #include "dbat/constants.h"
-#include "dbat/shop.h"
+#include "dbat/Shop.h"
 #include "dbat/feats.h"
-#include "dbat/guild.h"
+#include "dbat/Guild.h"
 #include "dbat/dg_scripts.h"
 #include "dbat/mail.h"
 #include "dbat/players.h"
-#include "dbat/random.h"
 
 /* local functions */
 static int has_scanner(Character *ch);
@@ -264,27 +268,27 @@ ACMD(do_rpp)
                     ch->sendText("What do you want to change your alignment to? (evil, sorta-evil, neutral, sorta-good, good)");
                     return;
                 }
-                if (!strcasecmp(arg2, "evil"))
+                if (boost::iequals(arg2, "evil"))
                 {
                     ch->sendText("You change your alignment to Evil.\r\n");
                     ch->setBaseStat("good_evil", -750);
                 }
-                else if (!strcasecmp(arg2, "sorta-evil"))
+                else if (boost::iequals(arg2, "sorta-evil"))
                 {
                     ch->sendText("You change your alignment to Sorta Evil.\r\n");
                     ch->setBaseStat("good_evil", -50);
                 }
-                else if (!strcasecmp(arg2, "neutral"))
+                else if (boost::iequals(arg2, "neutral"))
                 {
                     ch->sendText("You change your alignment to Neutral.\r\n");
                     ch->setBaseStat("good_evil", 0);
                 }
-                else if (!strcasecmp(arg2, "sorta-good"))
+                else if (boost::iequals(arg2, "sorta-good"))
                 {
                     ch->sendText("You change your alignment to Sorta Good.\r\n");
                     ch->setBaseStat("good_evil", 51);
                 }
-                else if (!strcasecmp(arg2, "good"))
+                else if (boost::iequals(arg2, "good"))
                 {
                     ch->sendText("You change your alignment to Good.\r\n");
                     ch->setBaseStat("good_evil", 300);
@@ -420,31 +424,31 @@ ACMD(do_rpp)
                 }
                 /*
                 appearance_t newAura = 0;
-                if (!strcasecmp(arg2, "white")) {
+                if (boost::iequals(arg2, "white")) {
                     newAura = 0;
                                         ch->sendText("You change your aura to white.\r\n");
-                } else if (!strcasecmp(arg2, "blue")) {
+                } else if (boost::iequals(arg2, "blue")) {
                     newAura = 1;
                                         ch->sendText("You change your aura to blue.\r\n");
-                } else if (!strcasecmp(arg2, "red")) {
+                } else if (boost::iequals(arg2, "red")) {
                     newAura = 2;
                                         ch->sendText("You change your aura to red.\r\n");
-                } else if (!strcasecmp(arg2, "green")) {
+                } else if (boost::iequals(arg2, "green")) {
                     newAura = 3;
                                         ch->sendText("You change your aura to green.\r\n");
-                } else if (!strcasecmp(arg2, "pink")) {
+                } else if (boost::iequals(arg2, "pink")) {
                     newAura = 4;
                                         ch->sendText("You change your aura to pink.\r\n");
-                } else if (!strcasecmp(arg2, "purple")) {
+                } else if (boost::iequals(arg2, "purple")) {
                     newAura = 5;
                                         ch->sendText("You change your aura to purple.\r\n");
-                } else if (!strcasecmp(arg2, "yellow")) {
+                } else if (boost::iequals(arg2, "yellow")) {
                     newAura = 6;
                                         ch->sendText("You change your aura to yellow.\r\n");
-                } else if (!strcasecmp(arg2, "black")) {
+                } else if (boost::iequals(arg2, "black")) {
                     newAura = 7;
                                         ch->sendText("You change your aura to black.\r\n");
-                } else if (!strcasecmp(arg2, "orange")) {
+                } else if (boost::iequals(arg2, "orange")) {
                     newAura = 8;
                                         ch->sendText("You change your aura to orange.\r\n");
                 } else {
@@ -810,7 +814,7 @@ ACMD(do_willpower)
     }
 
     ch->setExperience(0);
-    if (rand_number(10, 100) - GET_INT(ch) > 60)
+    if (Random::get<int>(10, 100) - GET_INT(ch) > 60)
     {
         reveal_hiding(ch, 0);
         act("@WYou focus all your knowledge and will on breaking free. Dark purple energy swirls around your body and the M on your forehead burns brightly. After a few moments you give up, having failed to overcome the majinization!@n",
@@ -940,8 +944,8 @@ ACMD(do_grapple)
 
     int pass = false;
 
-    if (!strcasecmp("hold", arg2) || !strcasecmp("choke", arg2) || !strcasecmp("grab", arg2) ||
-        !strcasecmp("wrap", arg2))
+    if (boost::iequals("hold", arg2) || boost::iequals("choke", arg2) || boost::iequals("grab", arg2) ||
+        boost::iequals("wrap", arg2))
     {
         pass = true;
         int perc = GET_SKILL(ch, SKILL_GRAPPLE), prob = axion_dice(0), cost = GET_MAX_MOVE(ch) / 100;
@@ -952,12 +956,12 @@ ACMD(do_grapple)
             return;
         }
 
-        if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) &&
+        if (((!IS_NPC(vict) && IS_ICER(vict) && Random::get<int>(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) &&
             (vict->getCurVital(CharVital::stamina)) >= 1 && GET_POS(vict) != POS_SLEEPING)
         {
-            if (!AFF_FLAGGED(ch, AFF_ZANZOKEN) || (AFF_FLAGGED(ch, AFF_ZANZOKEN) && GET_SPEEDI(ch) + rand_number(1, 5) <
+            if (!AFF_FLAGGED(ch, AFF_ZANZOKEN) || (AFF_FLAGGED(ch, AFF_ZANZOKEN) && GET_SPEEDI(ch) + Random::get<int>(1, 5) <
                                                                                         GET_SPEEDI(vict) +
-                                                                                            rand_number(1, 5)))
+                                                                                            Random::get<int>(1, 5)))
             {
                 reveal_hiding(ch, 0);
                 act("@C$N@c disappears, avoiding your grapple attempt before reappearing!@n", false, ch, nullptr, vict,
@@ -1018,7 +1022,7 @@ ACMD(do_grapple)
             return;
         }
         else if ((GET_HIT(ch) * 0.01) * GET_STR(ch) < (GET_HIT(vict) * 0.01) * GET_STR(vict) &&
-                 rand_number(1, 4) == 1)
+                 Random::get<int>(1, 4) == 1)
         {
             reveal_hiding(ch, 0);
             act("@RYou try to grapple with @r$N@R, but $E manages to overpower you!@n", true, ch, nullptr, vict,
@@ -1044,12 +1048,12 @@ ACMD(do_grapple)
             WAIT_STATE(ch, PULSE_4SEC);
             return;
         }
-        else if (!HAS_ARMS(vict) && !strcasecmp("grab", arg2))
+        else if (!HAS_ARMS(vict) && boost::iequals("grab", arg2))
         {
             ch->sendText("They don't even have an arm to grab onto!\r\n");
             return;
         }
-        else if (!strcasecmp("hold", arg2))
+        else if (boost::iequals("hold", arg2))
         {
             reveal_hiding(ch, 0);
             act("@RYou rush at @r$N@R and manage to get $M in a hold from behind!@n", true, ch, nullptr, vict, TO_CHAR);
@@ -1070,7 +1074,7 @@ ACMD(do_grapple)
             WAIT_STATE(ch, PULSE_4SEC);
             return;
         }
-        else if (!strcasecmp("choke", arg2))
+        else if (boost::iequals("choke", arg2))
         {
             reveal_hiding(ch, 0);
             act("@RYou rush at @r$N@R and manage to grab $S throat with both hands!@n", true, ch, nullptr, vict,
@@ -1092,7 +1096,7 @@ ACMD(do_grapple)
             WAIT_STATE(ch, PULSE_4SEC);
             return;
         }
-        else if (!strcasecmp("wrap", arg2))
+        else if (boost::iequals("wrap", arg2))
         {
             if (!IS_MAJIN(ch))
             {
@@ -1119,7 +1123,7 @@ ACMD(do_grapple)
             WAIT_STATE(ch, PULSE_4SEC);
             return;
         }
-        else if (!strcasecmp("grab", arg2))
+        else if (boost::iequals("grab", arg2))
         {
             reveal_hiding(ch, 0);
             act("@RYou rush at @r$N@R and manage to lock your arm onto $S!@n", true, ch, nullptr, vict, TO_CHAR);
@@ -1170,11 +1174,11 @@ ACMD(do_trip)
         return;
     }
 
-    int perc = init_skill(ch, SKILL_TRIP), prob = rand_number(1, 114);
+    int perc = init_skill(ch, SKILL_TRIP), prob = Random::get<int>(1, 114);
 
     if (perc == 0)
     {
-        perc = GET_DEX(ch) + rand_number(1, 10);
+        perc = GET_DEX(ch) + Random::get<int>(1, 10);
     }
 
     vict = nullptr;
@@ -1449,7 +1453,7 @@ ACMD(do_train)
     int nega_trait = -1;
     int needed = 0;
 
-    if (!strcasecmp("str", arg))
+    if (boost::iequals("str", arg))
     {
         attr = CharAttribute::strength;
         train = CharTrain::strength;
@@ -1458,7 +1462,7 @@ ACMD(do_train)
         nega_trait = BONUS_WIMP;
         needed = strcap;
     }
-    else if (!strcasecmp("spd", arg))
+    else if (boost::iequals("spd", arg))
     {
         attr = CharAttribute::speed;
         train = CharTrain::speed;
@@ -1467,7 +1471,7 @@ ACMD(do_train)
         nega_trait = BONUS_SLOW;
         needed = spdcap;
     }
-    else if (!strcasecmp("con", arg))
+    else if (boost::iequals("con", arg))
     {
         attr = CharAttribute::constitution;
         train = CharTrain::constitution;
@@ -1476,7 +1480,7 @@ ACMD(do_train)
         nega_trait = BONUS_FRAIL;
         needed = concap;
     }
-    else if (!strcasecmp("agl", arg))
+    else if (boost::iequals("agl", arg))
     {
         attr = CharAttribute::agility;
         train = CharTrain::agility;
@@ -1485,7 +1489,7 @@ ACMD(do_train)
         nega_trait = BONUS_CLUMSY;
         needed = aglcap;
     }
-    else if (!strcasecmp("int", arg))
+    else if (boost::iequals("int", arg))
     {
         attr = CharAttribute::intelligence;
         train = CharTrain::intelligence;
@@ -1494,7 +1498,7 @@ ACMD(do_train)
         nega_trait = BONUS_DULL;
         needed = intcap;
     }
-    else if (!strcasecmp("wis", arg))
+    else if (boost::iequals("wis", arg))
     {
         attr = CharAttribute::wisdom;
         train = CharTrain::wisdom;
@@ -1796,7 +1800,7 @@ void trainProgress(Character *ch)
     /* what training message is displayed? */
     reveal_hiding(ch, 0);
 
-    auto msg_case = rand_number(1, 3);
+    auto msg_case = Random::get<int>(1, 3);
 
     switch (attr)
     {
@@ -2404,7 +2408,7 @@ ACMD(do_candy)
         return;
     }
 
-    if (rand_number(1, 6) == 6)
+    if (Random::get<int>(1, 6) == 6)
     {
         ch->modCurVitalDam(CharVital::ki, 0.0667);
         reveal_hiding(ch, 0);
@@ -2624,7 +2628,7 @@ ACMD(do_drag)
         act("@C$n@W grabs and starts dragging @c$N@W.@n", true, ch, nullptr, vict, TO_NOTVICT);
         DRAGGING(ch) = vict;
         DRAGGED(vict) = ch;
-        if (!AFF_FLAGGED(vict, AFF_KNOCKED) && !AFF_FLAGGED(vict, AFF_SLEEP) && rand_number(1, 3))
+        if (!AFF_FLAGGED(vict, AFF_KNOCKED) && !AFF_FLAGGED(vict, AFF_SLEEP) && Random::get<int>(1, 3))
         {
             vict->sendText("You feel your sleeping body being moved.\r\n");
             if (IS_NPC(vict) && !FIGHTING(vict))
@@ -2686,7 +2690,7 @@ ACMD(do_suppress)
         return;
     }
 
-    if (!strcasecmp(arg, "release"))
+    if (boost::iequals(arg, "release"))
     {
         if (GET_SUPPRESS(ch))
         {
@@ -3007,7 +3011,7 @@ ACMD(do_pose)
     }
 
     int prob = GET_SKILL(ch, SKILL_POSE);
-    int perc = rand_number(1, 70);
+    int perc = Random::get<int>(1, 70);
 
     if (AFF_FLAGGED(ch, AFF_POSE))
     {
@@ -3028,7 +3032,7 @@ ACMD(do_pose)
     }
 
     reveal_hiding(ch, 0);
-    switch (rand_number(1, 4))
+    switch (Random::get<int>(1, 4))
     {
     case 1:
         act("@WYou turn around with your back to everyone. You bend forward dramatically and put your head between your legs!@n",
@@ -3110,7 +3114,7 @@ ACMD(do_fury)
         }
         ch->setBaseStat("fury", 0);
     }
-    else if (!strcasecmp(arg, "attack"))
+    else if (boost::iequals(arg, "attack"))
     {
         ch->setBaseStat("fury", 50);
     }
@@ -3155,7 +3159,7 @@ void hint_system(Character *ch, int num)
                              "Found a bug or have a suggestion? Log into our forums and post in the relevant section."};
     if (num == 0)
     {
-        num = rand_number(0, 21);
+        num = Random::get<int>(0, 21);
     }
 
     if (!IS_ANDROID(ch) && !IS_NAMEK(ch))
@@ -3403,7 +3407,7 @@ ACMD(do_telepathy)
                 ch->modCurVitalDam(CharVital::ki, 0.025);
                 act("@wYou attempt to read $N's@w mind, but fail to see it clearly.@n", true, ch, nullptr, vict,
                     TO_CHAR);
-                if (rand_number(1, 15) >= 14 && !AFF_FLAGGED(ch, AFF_SHOCKED))
+                if (Random::get<int>(1, 15) >= 14 && !AFF_FLAGGED(ch, AFF_SHOCKED))
                 {
                     act("@MYour mind has been shocked!@n", true, ch, nullptr, nullptr, TO_CHAR);
                     ch->affect_flags.set(AFF_SHOCKED, true);
@@ -3414,7 +3418,7 @@ ACMD(do_telepathy)
                 }
                 return;
             }
-            else if (GET_SKILL(vict, SKILL_TELEPATHY) >= GET_SKILL(ch, SKILL_TELEPATHY) && rand_number(1, 2) == 2)
+            else if (GET_SKILL(vict, SKILL_TELEPATHY) >= GET_SKILL(ch, SKILL_TELEPATHY) && Random::get<int>(1, 2) == 2)
             {
                 ch->modCurVitalDam(CharVital::ki, 0.025);
                 act("@wYou fail to read @c$N's@w mind and they seemed to have noticed the attempt!@n", true, ch,
@@ -3831,7 +3835,7 @@ ACMD(do_spit)
     else
     {
         af.type = SPELL_PARALYZE;
-        af.duration = rand_number(1, 2);
+        af.duration = Random::get<int>(1, 2);
         af.modifier = 0;
         af.location = APPLY_NONE;
         af.bitvector = AFF_PARALYZE;
@@ -4088,15 +4092,15 @@ ACMD(do_form)
             }
             else if (*arg2)
             {
-                if (!strcasecmp(arg2, "highest") && skill >= 100)
+                if (boost::iequals(arg2, "highest") && skill >= 100)
                 {
                     level = 4;
                 }
-                else if (!strcasecmp(arg2, "high") && skill >= 75)
+                else if (boost::iequals(arg2, "high") && skill >= 75)
                 {
                     level = 3;
                 }
-                else if (!strcasecmp(arg2, "mid") && skill >= 50)
+                else if (boost::iequals(arg2, "mid") && skill >= 50)
                 {
                     level = 2;
                 }
@@ -4149,15 +4153,15 @@ ACMD(do_form)
             }
             else if (*arg2)
             {
-                if (!strcasecmp(arg2, "highest") && skill >= 100)
+                if (boost::iequals(arg2, "highest") && skill >= 100)
                 {
                     level = 4;
                 }
-                else if (!strcasecmp(arg2, "high") && skill >= 75)
+                else if (boost::iequals(arg2, "high") && skill >= 75)
                 {
                     level = 3;
                 }
-                else if (!strcasecmp(arg2, "mid") && skill >= 50)
+                else if (boost::iequals(arg2, "mid") && skill >= 50)
                 {
                     level = 2;
                 }
@@ -4273,19 +4277,19 @@ ACMD(do_form)
             }
             else if (*arg3)
             {
-                if (!strcasecmp(arg3, "highest") && skill >= 100)
+                if (boost::iequals(arg3, "highest") && skill >= 100)
                 {
                     level = 5;
                 }
-                else if (!strcasecmp(arg3, "higher") && skill >= 75)
+                else if (boost::iequals(arg3, "higher") && skill >= 75)
                 {
                     level = 4;
                 }
-                else if (!strcasecmp(arg3, "high") && skill >= 50)
+                else if (boost::iequals(arg3, "high") && skill >= 50)
                 {
                     level = 3;
                 }
-                else if (!strcasecmp(arg3, "mid") && skill >= 30)
+                else if (boost::iequals(arg3, "mid") && skill >= 30)
                 {
                     level = 2;
                 }
@@ -4294,7 +4298,7 @@ ACMD(do_form)
                     level = 1;
                 }
             }
-            if (!strcasecmp(arg2, "sword"))
+            if (boost::iequals(arg2, "sword"))
             {
                 if (level == 5)
                 {
@@ -4317,7 +4321,7 @@ ACMD(do_form)
                     obj = read_object(90, VIRTUAL);
                 }
             }
-            else if (!strcasecmp(arg2, "dagger"))
+            else if (boost::iequals(arg2, "dagger"))
             {
                 if (level == 5)
                 {
@@ -4340,7 +4344,7 @@ ACMD(do_form)
                     obj = read_object(1536, VIRTUAL);
                 }
             }
-            else if (!strcasecmp(arg2, "club"))
+            else if (boost::iequals(arg2, "club"))
             {
                 if (level == 5)
                 {
@@ -4363,7 +4367,7 @@ ACMD(do_form)
                     obj = read_object(1541, VIRTUAL);
                 }
             }
-            else if (!strcasecmp(arg2, "spear"))
+            else if (boost::iequals(arg2, "spear"))
             {
                 if (level == 5)
                 {
@@ -4386,7 +4390,7 @@ ACMD(do_form)
                     obj = read_object(1546, VIRTUAL);
                 }
             }
-            else if (!strcasecmp(arg2, "gun"))
+            else if (boost::iequals(arg2, "gun"))
             {
                 if (level == 5)
                 {
@@ -4919,7 +4923,7 @@ ACMD(do_srepair)
                 ch->sendText("You are fully repaired now.\r\n");
             }
 
-            if (!IS_NPC(ch) && rand_number(1, 3) == 2 && (ch->getCurVital(CharVital::ki)) < GET_MAX_MANA(ch))
+            if (!IS_NPC(ch) && Random::get<int>(1, 3) == 2 && (ch->getCurVital(CharVital::ki)) < GET_MAX_MANA(ch))
             {
                 ch->sendText("@GThe repairs have managed to relink power reserves and boost your current energy level.@n\r\n");
                 ch->modCurVital(CharVital::ki, cost);
@@ -4961,7 +4965,7 @@ ACMD(do_upgrade)
         return;
     }
 
-    if (!strcasecmp("augment", arg))
+    if (boost::iequals("augment", arg))
     {
         Object *obj = nullptr;
         int64_t gain = 0;
@@ -5013,7 +5017,7 @@ ACMD(do_upgrade)
                 }
                 break;
             }
-            if (!strcasecmp("health", arg2))
+            if (boost::iequals("health", arg2))
             {
                 obj->clearLocation();
                 extract_obj(obj);
@@ -5024,7 +5028,7 @@ ACMD(do_upgrade)
                 ch->send_to("@gGain @D[@G+%s@D]\r\n", add_commas(gain).c_str());
                 return;
             }
-            else if (!strcasecmp("ki", arg2))
+            else if (boost::iequals("ki", arg2))
             {
                 obj->clearLocation();
                 extract_obj(obj);
@@ -5034,7 +5038,7 @@ ACMD(do_upgrade)
                 ch->send_to("@gGain @D[@G+%s@D]\r\n", add_commas(gain).c_str());
                 return;
             }
-            else if (!strcasecmp("stamina", arg2))
+            else if (boost::iequals("stamina", arg2))
             {
                 obj->clearLocation();
                 extract_obj(obj);
@@ -5065,26 +5069,26 @@ ACMD(do_upgrade)
         return;
     }
 
-    if (!*arg2 && (!strcasecmp("health", arg) || !strcasecmp("ki", arg) || !strcasecmp("stamina", arg)))
+    if (!*arg2 && (boost::iequals("health", arg) || boost::iequals("ki", arg) || boost::iequals("stamina", arg)))
     {
         ch->send_to("How many times do you want to increase %s?", arg);
         return;
     }
 
-    if (atoi(arg2) <= 0 && (!strcasecmp("health", arg) || !strcasecmp("ki", arg) || !strcasecmp("stamina", arg)))
+    if (atoi(arg2) <= 0 && (boost::iequals("health", arg) || boost::iequals("ki", arg) || boost::iequals("stamina", arg)))
     {
         ch->sendText("It needs to be between 1-1000\r\n");
         return;
     }
 
     if (atoi(arg2) > 1000 &&
-        (!strcasecmp("health", arg) || !strcasecmp("ki", arg) || !strcasecmp("stamina", arg)))
+        (boost::iequals("health", arg) || boost::iequals("ki", arg) || boost::iequals("stamina", arg)))
     {
         ch->sendText("It needs to be between 1-1000\r\n");
         return;
     }
 
-    if (!strcasecmp("health", arg))
+    if (boost::iequals("health", arg))
     {
         count = atoi(arg2);
         auto chCon = GET_CON(ch);
@@ -5142,7 +5146,7 @@ ACMD(do_upgrade)
             ch->gainBaseStat("health", bonus);
         }
     }
-    else if (!strcasecmp("ki", arg))
+    else if (boost::iequals("ki", arg))
     {
         count = atoi(arg2);
         auto chWis = GET_WIS(ch);
@@ -5200,7 +5204,7 @@ ACMD(do_upgrade)
             ch->gainBaseStat("ki", bonus);
         }
     }
-    else if (!strcasecmp("stamina", arg))
+    else if (boost::iequals("stamina", arg))
     {
         count = atoi(arg2);
         auto chCon = GET_CON(ch);
@@ -5344,7 +5348,7 @@ ACMD(do_ingest)
             WAIT_STATE(ch, PULSE_3SEC);
             return;
         }
-        if (GET_SPEEDI(ch) + rand_number(1, 5) < GET_SPEEDI(ch) + rand_number(1, 5))
+        if (GET_SPEEDI(ch) + Random::get<int>(1, 5) < GET_SPEEDI(ch) + Random::get<int>(1, 5))
         {
             act("@WYou fling a piece of goo at @c$N@W, and try to ingest $M! $E manages to avoid your blob of goo though!@n",
                 true, ch, nullptr, vict, TO_CHAR);
@@ -5377,12 +5381,12 @@ ACMD(do_ingest)
                 vict->player_flags.set(PLR_ABSORBED, true);
             }
             ch->send_to("@D[@mINGEST@D] @rPL@W: @D(@y%s@D) @cKi@W: @D(@y%s@D) @gSt@W: @D(@y%s@D)@n\r\n", add_commas(pl).c_str(), add_commas(ki).c_str(), add_commas(stam).c_str());
-            if (rand_number(1, 3) == 3)
+            if (Random::get<int>(1, 3) == 3)
             {
                 ch->send_to("You get %s's eye color.\r\n", GET_NAME(vict));
                 // ch->set(CharAppearance::eye_color, GET_EYE(vict));
             }
-            else if (rand_number(1, 3) == 3)
+            else if (Random::get<int>(1, 3) == 3)
             {
                 ch->send_to("%s changes your height.\r\n", GET_NAME(vict));
                 if (GET_PC_HEIGHT(ch) > GET_PC_HEIGHT(vict))
@@ -5398,7 +5402,7 @@ ACMD(do_ingest)
                     ch->setBaseStat("height", GET_PC_HEIGHT(vict));
                 }
             }
-            else if (rand_number(1, 3) == 3)
+            else if (Random::get<int>(1, 3) == 3)
             {
                 ch->send_to("%s changes your weight.\r\n", GET_NAME(vict));
                 auto chw = ch->getBaseStat("weight");
@@ -5577,7 +5581,7 @@ ACMD(do_absorb)
             act("@C$n@w rushes at @c$N@W and tries to grab $M, but @c$N@W manages to avoid @c$n@W!@n", true, ch,
                 nullptr, vict, TO_NOTVICT);
             improve_skill(ch, SKILL_ABSORB, 1);
-            if (IS_NPC(vict) && IS_HUMANOID(vict) && rand_number(1, 3) == 3)
+            if (IS_NPC(vict) && IS_HUMANOID(vict) && Random::get<int>(1, 3) == 3)
             {
                 if (FIGHTING(ch) == nullptr)
                 {
@@ -5681,7 +5685,7 @@ ACMD(do_absorb)
     } // End of bio absorb
     else if (IS_BIO(ch) && !(strcmp(arg, "extract")))
     {
-        int failthresh = rand_number(1, 125);
+        int failthresh = Random::get<int>(1, 125);
         if (GET_CON(vict) > 99)
         {
             failthresh += (GET_CON(vict) - 95) * 2;
@@ -5745,9 +5749,9 @@ ACMD(do_absorb)
             int64_t ki = (vict->getBaseStat<int64_t>("ki")) / 12000;
             int64_t pl = (vict->getBaseStat<int64_t>("health")) / 12000;
             auto chCon = GET_CON(ch);
-            stam *= rand_number(chCon / 8, chCon / 4) * ch->getPotential();
-            pl *= rand_number(chCon / 8, chCon / 4) * ch->getPotential();
-            ki *= rand_number(chCon / 8, chCon / 4) * ch->getPotential();
+            stam *= Random::get<int>(chCon / 8, chCon / 4) * ch->getPotential();
+            pl *= Random::get<int>(chCon / 8, chCon / 4) * ch->getPotential();
+            ki *= Random::get<int>(chCon / 8, chCon / 4) * ch->getPotential();
             stam = std::min<int64_t>(stam, 1500000L);
             ki = std::min<int64_t>(ki, 1500000L);
             pl = std::min<int64_t>(pl, 1500000L);
@@ -5793,35 +5797,35 @@ ACMD(do_escape)
         int skill = GET_SKILL(ABSORBBY(ch), SKILL_ABSORB);
         if (GET_HIT(ch) > GET_HIT(ABSORBBY(ch)) * 10)
         {
-            num += rand_number(10, 15);
+            num += Random::get<int>(10, 15);
         }
         else if (GET_HIT(ch) > GET_HIT(ABSORBBY(ch)) * 5)
         {
-            num += rand_number(6, 10);
+            num += Random::get<int>(6, 10);
         }
         else if (GET_HIT(ch) > GET_HIT(ABSORBBY(ch)) * 2)
         {
-            num += rand_number(4, 8);
+            num += Random::get<int>(4, 8);
         }
         else if (GET_HIT(ch) > GET_HIT(ABSORBBY(ch)))
         {
-            num += rand_number(2, 5);
+            num += Random::get<int>(2, 5);
         }
         else if (GET_HIT(ch) * 10 <= GET_HIT(ABSORBBY(ch)))
         {
-            skill -= rand_number(10, 15);
+            skill -= Random::get<int>(10, 15);
         }
         else if (GET_HIT(ch) * 5 <= GET_HIT(ABSORBBY(ch)))
         {
-            skill -= rand_number(6, 10);
+            skill -= Random::get<int>(6, 10);
         }
         else if (GET_HIT(ch) * 2 <= GET_HIT(ABSORBBY(ch)))
         {
-            skill -= rand_number(4, 8);
+            skill -= Random::get<int>(4, 8);
         }
         else if (GET_HIT(ch) < GET_HIT(ABSORBBY(ch)))
         {
-            skill -= rand_number(2, 5);
+            skill -= Random::get<int>(2, 5);
         }
         if (num > skill)
         {
@@ -5844,7 +5848,7 @@ ACMD(do_escape)
             act("@c$N@W struggles to break loose of @C$n's@W hold!@n", true, ABSORBBY(ch), nullptr, ch, TO_NOTVICT);
             act("@WYou struggle to break loose of @C$n's@W hold!@n", true, ABSORBBY(ch), nullptr, ch, TO_VICT);
             act("@c$N@W struggles to break loose of your hold!@n", true, ABSORBBY(ch), nullptr, ch, TO_CHAR);
-            if (rand_number(1, 3) == 3)
+            if (Random::get<int>(1, 3) == 3)
             {
                 int64_t dmg = GET_MAX_HIT(ch) * 0.025;
                 hurt(0, 0, ch, ABSORBBY(ch), nullptr, dmg, 0);
@@ -5866,35 +5870,35 @@ ACMD(do_escape)
         int skill = GET_SKILL(GRAPPLED(ch), SKILL_GRAPPLE);
         if (GET_HIT(ch) > GET_HIT(GRAPPLED(ch)) * 10)
         {
-            num += rand_number(10, 15);
+            num += Random::get<int>(10, 15);
         }
         else if (GET_HIT(ch) > GET_HIT(GRAPPLED(ch)) * 5)
         {
-            num += rand_number(6, 10);
+            num += Random::get<int>(6, 10);
         }
         else if (GET_HIT(ch) > GET_HIT(GRAPPLED(ch)) * 2)
         {
-            num += rand_number(4, 8);
+            num += Random::get<int>(4, 8);
         }
         else if (GET_HIT(ch) > GET_HIT(GRAPPLED(ch)))
         {
-            num += rand_number(2, 5);
+            num += Random::get<int>(2, 5);
         }
         else if (GET_HIT(ch) * 10 <= GET_HIT(GRAPPLED(ch)))
         {
-            skill -= rand_number(10, 15);
+            skill -= Random::get<int>(10, 15);
         }
         else if (GET_HIT(ch) * 5 <= GET_HIT(GRAPPLED(ch)))
         {
-            skill -= rand_number(6, 10);
+            skill -= Random::get<int>(6, 10);
         }
         else if (GET_HIT(ch) * 2 <= GET_HIT(GRAPPLED(ch)))
         {
-            skill -= rand_number(4, 8);
+            skill -= Random::get<int>(4, 8);
         }
         else if (GET_HIT(ch) < GET_HIT(GRAPPLED(ch)))
         {
-            skill -= rand_number(2, 5);
+            skill -= Random::get<int>(2, 5);
         }
 
         if (num > skill)
@@ -5935,7 +5939,7 @@ ACMD(do_escape)
             act("@c$N@W struggles to break loose of @C$n's@W hold!@n", true, GRAPPLED(ch), nullptr, ch, TO_NOTVICT);
             act("@WYou struggle to break loose of @C$n's@W hold!@n", true, GRAPPLED(ch), nullptr, ch, TO_VICT);
             act("@c$N@W struggles to break loose of your hold!@n", true, GRAPPLED(ch), nullptr, ch, TO_CHAR);
-            if (rand_number(1, 3) == 3)
+            if (Random::get<int>(1, 3) == 3)
             {
                 int64_t dmg = GET_MAX_HIT(ch) * 0.025;
                 hurt(0, 0, ch, GRAPPLED(ch), nullptr, dmg, 0);
@@ -6489,7 +6493,7 @@ ACMD(do_focus)
                 act("You focus ki into your mind, awakening it to cosmic wisdom!", true, ch, nullptr, nullptr, TO_CHAR);
                 act("$n focuses ki into $s mind, awakening it to cosmic wisdom!", true, ch, nullptr, nullptr, TO_ROOM);
                 if (IS_JINTO(ch) && level_exp(ch, GET_WIS(ch) + 1) - GET_EXP(ch) > 0 &&
-                    GET_PRACTICES(ch) >= 15 && rand_number(1, 4) >= 3)
+                    GET_PRACTICES(ch) >= 15 && Random::get<int>(1, 4) >= 3)
                 {
                     int64_t gain = 0;
                     ch->modPractices(-15);
@@ -6580,7 +6584,7 @@ ACMD(do_focus)
                     act("$n focuses ki into $N's mind, awakening it to cosmic wisdom!", true, ch, nullptr, vict,
                         TO_NOTVICT);
                     if (IS_JINTO(ch) && level_exp(vict, GET_INT(vict) + 1) - GET_EXP(vict) > 0 &&
-                        GET_PRACTICES(ch) >= 15 && rand_number(1, 4) >= 3)
+                        GET_PRACTICES(ch) >= 15 && Random::get<int>(1, 4) >= 3)
                     {
                         int64_t gain = 0;
                         ch->modPractices(-15);
@@ -6721,7 +6725,7 @@ ACMD(do_focus)
                         AFF_FLAGGED(ch, AFF_GROUP) && AFF_FLAGGED(vict, AFF_GROUP))
                     {
                         if (IS_KAI(ch) && level_exp(ch, GET_INT(ch) + 1) - GET_EXP(ch) > 0 &&
-                            rand_number(1, 3) == 3)
+                            Random::get<int>(1, 3) == 3)
                         {
                             ch->modExperience(level_exp(ch, GET_INT(ch) + 1) * 0.05);
                         }
@@ -6846,7 +6850,7 @@ ACMD(do_focus)
                         AFF_FLAGGED(ch, AFF_GROUP) && AFF_FLAGGED(vict, AFF_GROUP))
                     {
                         if (IS_KAI(ch) && level_exp(ch, GET_INT(ch) + 1) - GET_EXP(ch) > 0 &&
-                            rand_number(1, 3) == 3)
+                            Random::get<int>(1, 3) == 3)
                         {
                             ch->modExperience(level_exp(ch, GET_INT(ch) + 1) * 0.05);
                         }
@@ -7181,7 +7185,7 @@ ACMD(do_focus)
                 return;
             }
             else if (GET_SKILL(ch, SKILL_YOIK) < axion_dice(0) ||
-                     (GET_INT(ch) + rand_number(1, 3) < GET_INT(vict) + rand_number(1, 5)))
+                     (GET_INT(ch) + Random::get<int>(1, 3) < GET_INT(vict) + Random::get<int>(1, 5)))
             {
                 ch->modCurVitalDam(CharVital::ki, 0.05);
                 reveal_hiding(ch, 0);
@@ -7195,7 +7199,7 @@ ACMD(do_focus)
             }
             else
             {
-                int duration = rand_number(1, 2);
+                int duration = Random::get<int>(1, 2);
                 /* Str , Con, Int, Agl, Wis, Spd */
                 assign_affect(vict, AFF_SLEEP, SKILL_YOIK, duration, 0, 0, 0, 0, 0, 0);
                 ch->modCurVitalDam(CharVital::ki, 0.05);
@@ -7559,13 +7563,13 @@ ACMD(do_plant)
         return;
     }
 
-    roll = roll_skill(ch, SKILL_SLEIGHT_OF_HAND) + rand_number(1, 3);
-    fail = rand_number(1, 105);
+    roll = roll_skill(ch, SKILL_SLEIGHT_OF_HAND) + Random::get<int>(1, 3);
+    fail = Random::get<int>(1, 105);
 
     if (GET_POS(vict) < POS_SLEEPING)
         detect = 0;
     else
-        detect = (roll_skill(vict, SKILL_SPOT) + rand_number(1, 3));
+        detect = (roll_skill(vict, SKILL_SPOT) + Random::get<int>(1, 3));
 
     /* NO NO With Imp's and Shopkeepers, and if player planting is not allowed */
     if ((ADM_FLAGGED(vict, ADM_NOSTEAL) || GET_MOB_SPEC(vict) == shop_keeper) && GET_ADMLEVEL(ch) < 5)
@@ -7714,7 +7718,7 @@ ACMD(do_forgery)
     improve_skill(ch, SKILL_FORGERY, 1);
     if (GET_SKILL(ch, SKILL_FORGERY) < axion_dice(0))
     {
-        if (rand_number(1, 10) >= 9)
+        if (Random::get<int>(1, 10) >= 9)
         { /* Uh oh */
             ch->send_to("In the middle of creating a forgery of %s you screw up. The fabrication unit built into the forgery kit melts and bonds with the original. You clumsy mistake with the Estex Titanium drill has broken both.\r\n", obj2->getShortDescription());
             extract_obj(obj4);
@@ -7736,7 +7740,7 @@ ACMD(do_forgery)
 
     /* Set Object Variables */
     obj3->item_flags.set(ITEM_FORGED, true);
-    obj3->setBaseStat<weight_t>("weight", rand_number(GET_OBJ_WEIGHT(obj3) / 2, GET_OBJ_WEIGHT(obj3)));
+    obj3->setBaseStat<weight_t>("weight", Random::get<int>(GET_OBJ_WEIGHT(obj3) / 2, GET_OBJ_WEIGHT(obj3)));
 
     obj4->clearLocation();
     extract_obj(obj4);
@@ -8135,7 +8139,7 @@ ACMD(do_solar)
     }
 
     prob = GET_SKILL(ch, SKILL_SOLARF);
-    perc = rand_number(0, 101);
+    perc = Random::get<int>(0, 101);
 
     if (prob >= 75)
     {
@@ -8234,7 +8238,7 @@ ACMD(do_heal)
     }
 
     prob = init_skill(ch, SKILL_HEAL);
-    perc = rand_number(0, 110);
+    perc = Random::get<int>(0, 110);
 
     if (prob >= 100)
     {
@@ -8458,7 +8462,7 @@ ACMD(do_barrier)
         return;
     }
 
-    if (AFF_FLAGGED(ch, AFF_SANCTUARY) && !strcasecmp("release", arg))
+    if (AFF_FLAGGED(ch, AFF_SANCTUARY) && boost::iequals("release", arg))
     {
         act("@BYou dispel your barrier, releasing its energy.@n", true, ch, nullptr, nullptr, TO_CHAR);
         act("@B$n@B dispels $s barrier, releasing its energy.@n", true, ch, nullptr, nullptr, TO_ROOM);
@@ -8466,7 +8470,7 @@ ACMD(do_barrier)
         ch->affect_flags.set(AFF_SANCTUARY, false);
         return;
     }
-    else if (!strcasecmp("release", arg))
+    else if (boost::iequals("release", arg))
     {
         ch->sendText("You don't have a barrier.\r\n");
         return;
@@ -8651,27 +8655,27 @@ ACMD(do_instant)
     skill = GET_SKILL(ch, SKILL_INSTANTT);
     skill_num = SKILL_INSTANTT;
 
-    if (!strcasecmp(arg, "planet-earth"))
+    if (boost::iequals(arg, "planet-earth"))
     {
         location = 300;
     }
-    else if (!strcasecmp(arg, "planet-namek"))
+    else if (boost::iequals(arg, "planet-namek"))
     {
         location = 10222;
     }
-    else if (!strcasecmp(arg, "planet-frigid"))
+    else if (boost::iequals(arg, "planet-frigid"))
     {
         location = 4017;
     }
-    else if (!strcasecmp(arg, "planet-vegeta"))
+    else if (boost::iequals(arg, "planet-vegeta"))
     {
         location = 2200;
     }
-    else if (!strcasecmp(arg, "planet-konack"))
+    else if (boost::iequals(arg, "planet-konack"))
     {
         location = 8006;
     }
-    else if (!strcasecmp(arg, "planet-aether"))
+    else if (boost::iequals(arg, "planet-aether"))
     {
         location = 12024;
     }
@@ -8683,7 +8687,7 @@ ACMD(do_instant)
         return;
     }
 
-    if (skill < perc || (FIGHTING(ch) && rand_number(1, 2) <= 1))
+    if (skill < perc || (FIGHTING(ch) && Random::get<int>(1, 2) <= 1))
     {
         if (tar)
         {
@@ -8844,7 +8848,7 @@ void handleShenronAppearance(int &DRAGONC)
 
 bool placeShadowDragon(int &location)
 {
-    int num = rand_number(200, 20000);
+    int num = Random::get<int>(200, 20000);
     while (real_room(num) == NOWHERE || !(WHERE_FLAGGED(real_room(num), WhereFlag::planet_earth) ||
                                           WHERE_FLAGGED(real_room(num), WhereFlag::planet_vegeta) ||
                                           WHERE_FLAGGED(real_room(num), WhereFlag::planet_frigid) ||
@@ -8853,7 +8857,7 @@ bool placeShadowDragon(int &location)
                                           WHERE_FLAGGED(real_room(num), WhereFlag::planet_konack) ||
                                           WHERE_FLAGGED(real_room(num), WhereFlag::planet_yardrat)))
     {
-        num = rand_number(200, 20000);
+        num = Random::get<int>(200, 20000);
     }
     location = num;
     return true;
@@ -8996,7 +9000,7 @@ ACMD(do_transform)
     int64_t beforeKi = ch->getEffectiveStat<int64_t>("ki");
 
     // check for revert.
-    if (!strcasecmp("revert", arg))
+    if (boost::iequals("revert", arg))
     {
         // Check if we can revert.
         if (ch->form == Form::base && ch->technique == Form::base)
@@ -9396,7 +9400,7 @@ ACMD(do_meditate)
         }
     }
 
-    if (!strcasecmp(arg, "expand"))
+    if (boost::iequals(arg, "expand"))
     {
         int cost = 3500;
         if (IS_SAIYAN(ch))
@@ -9425,7 +9429,7 @@ ACMD(do_meditate)
         }
         return;
     }
-    else if (!strcasecmp(arg, "break"))
+    else if (boost::iequals(arg, "break"))
     {
         if (MINDLINK(ch) == nullptr)
         {
@@ -9442,7 +9446,7 @@ ACMD(do_meditate)
             ch->sendText("You do not have enough ki to manage a break.\r\n");
             return;
         }
-        else if (GET_INT(ch) + rand_number(-5, 10) >=
+        else if (GET_INT(ch) + Random::get<int>(-5, 10) >=
                  GET_INT(MINDLINK(ch)) + (GET_SKILL(MINDLINK(ch), SKILL_TELEPATHY) * 0.1))
         {
             act("@rYou manage to break the mind link between you and @R$N@r!@n", false, ch, nullptr, MINDLINK(ch),
@@ -9654,7 +9658,7 @@ void meditateProgress(Character *ch)
             bonus = 3;
         }
     }
-    if (bonus > 0 && IS_DEMON(ch) && rand_number(1, 100) >= 80)
+    if (bonus > 0 && IS_DEMON(ch) && Random::get<int>(1, 100) >= 80)
     {
         ch->send_to("Your spirit magnifies the strength of your body! @D[@G+%s@D]@n\r\n", add_commas(bonus / 2).c_str());
         ch->gainBaseStat("health", bonus / 2);
@@ -10022,7 +10026,7 @@ void base_update(uint64_t heartPulse, double deltaTime)
         {
             pcoun += 1;
         }
-        if (!IS_NPC(d->character) && rand_number(1, 15) >= 14)
+        if (!IS_NPC(d->character) && Random::get<int>(1, 15) >= 14)
         {
             ash_burn(d->character);
         }
@@ -10111,7 +10115,7 @@ void base_update(uint64_t heartPulse, double deltaTime)
         }
         if (PLR_FLAGGED(d->character, PLR_SELFD) && !PLR_FLAGGED(d->character, PLR_SELFD2))
         {
-            if (rand_number(4, 100) < GET_SKILL(d->character, SKILL_SELFD))
+            if (Random::get<int>(4, 100) < GET_SKILL(d->character, SKILL_SELFD))
             {
                 d->character->sendText("You feel you are ready to self destruct!\r\n");
                 d->character->player_flags.set(PLR_SELFD2, true);
@@ -10138,11 +10142,11 @@ void base_update(uint64_t heartPulse, double deltaTime)
         {
             check_eq(d->character);
         }
-        if (!IS_NPC(d->character) && d->character->location.getGroundEffect() >= 1 && rand_number(1, 100) >= 96)
+        if (!IS_NPC(d->character) && d->character->location.getGroundEffect() >= 1 && Random::get<int>(1, 100) >= 96)
         {
             if (d->character->location.getGroundEffect() <= 4)
             {
-                switch (rand_number(1, 4))
+                switch (Random::get<int>(1, 4))
                 {
                 case 1:
                     act("@RLava spews up violently from the cracks in the ground!@n", false, d->character, nullptr,
@@ -10281,7 +10285,7 @@ ACMD(do_snet)
         }
     }
 
-    if (!strcasecmp(arg, "check"))
+    if (boost::iequals(arg, "check"))
     {
         ch->send_to("Your personal scouter number is: %d\r\n", ((ch)->id));
         return;
@@ -10310,7 +10314,7 @@ ACMD(do_snet)
         {
             obj->setBaseStat("scoutfreq", 1);
         }
-        if (!strcasecmp(arg, "*") && call <= -1)
+        if (boost::iequals(arg, "*") && call <= -1)
         {
             global = true;
         }
@@ -10510,7 +10514,7 @@ ACMD(do_scouter)
         return;
     }
     reveal_hiding(ch, 3);
-    if (!strcasecmp("scan", arg))
+    if (boost::iequals("scan", arg))
     {
         for (i = descriptor_list; i; i = i->next)
         {
@@ -10624,7 +10628,7 @@ ACMD(do_scouter)
     }
     else if (IS_NPC(vict))
     {
-        ch->send_to("@D|@1@CC@c@1ha@1@Cr@c@1ge@1@Cd Ki @1@D: @Y%21s@n@D|@n\r\n", add_commas(vict->getBaseStat<int>("mobcharge") * rand_number(GET_INT(ch) * 50, GET_INT(ch) * 200)).c_str());
+        ch->send_to("@D|@1@CC@c@1ha@1@Cr@c@1ge@1@Cd Ki @1@D: @Y%21s@n@D|@n\r\n", add_commas(vict->getBaseStat<int>("mobcharge") * Random::get<int>(GET_INT(ch) * 50, GET_INT(ch) * 200)).c_str());
     }
     if (percent < 10)
         ch->send_to("@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D: @Y%21s@n@D|@n\r\n", "Exhausted");
@@ -10760,7 +10764,7 @@ ACMD(do_quit)
     else
     {
         act("$n has left the game.", true, ch, nullptr, nullptr, TO_ROOM);
-        mudlog(NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), true, "%s has quit the game.", GET_NAME(ch));
+        mudlog(NRM, std::max(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), true, "%s has quit the game.", GET_NAME(ch));
         ch->sendText("Goodbye, friend.. Come back soon!\r\n");
         if (ch->followers || ch->master)
             die_follower(ch);
@@ -10879,7 +10883,7 @@ ACMD(do_steal)
     }
     else
     {
-        perc = rand_number(GET_INT(vict), GET_INT(vict) + 10);
+        perc = Random::get<int>(GET_INT(vict), GET_INT(vict) + 10);
         if (IS_NPC(vict))
             perc += GET_LEVEL(vict) * 0.25;
     }
@@ -10893,8 +10897,8 @@ ACMD(do_steal)
 
     prob += GET_DEX(ch);
 
-    perc += rand_number(-5, 5); /* Random factor */
-    prob += rand_number(-5, 5); /* Random factor */
+    perc += Random::get<int>(-5, 5); /* Random factor */
+    prob += Random::get<int>(-5, 5); /* Random factor */
 
     if (axion_dice(0) > 100 && GET_POS(vict) != POS_SLEEPING)
     { /* Unlucky! */
@@ -10923,7 +10927,7 @@ ACMD(do_steal)
     }
     else
     { /* Ok it wasn't a critical failure... */
-        if (!strcasecmp(arg, "zenni"))
+        if (boost::iequals(arg, "zenni"))
         { /* MOOLA! */
             if (prob > perc)
             {
@@ -10931,7 +10935,7 @@ ACMD(do_steal)
                 {
                     if (GET_GOLD(vict) > 100)
                     {
-                        gold = (GET_GOLD(vict) / 100) * rand_number(1, 10);
+                        gold = (GET_GOLD(vict) / 100) * Random::get<int>(1, 10);
                     }
                     else
                     {
@@ -10947,7 +10951,7 @@ ACMD(do_steal)
                     if (!IS_NPC(vict))
                     {
                         vict->player_flags.set(PLR_STOLEN, true);
-                        mudlog(NRM, MAX(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), true,
+                        mudlog(NRM, std::max(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), true,
                                "THEFT: %s has stolen %s zenni@n from %s", GET_NAME(ch), add_commas(gold).c_str(),
                                GET_NAME(vict));
                     }
@@ -10961,7 +10965,7 @@ ACMD(do_steal)
                         reveal_hiding(ch, 0);
                         act("@R$n@r just stole zenni from @R$N@r!@n", true, ch, nullptr, vict, TO_ROOM);
                         vict->sendText("You feel like something may be missing...\r\n");
-                        if (IS_NPC(vict) && rand_number(1, 3) == 3)
+                        if (IS_NPC(vict) && Random::get<int>(1, 3) == 3)
                         {
                             set_fighting(vict, ch);
                         }
@@ -10998,7 +11002,7 @@ ACMD(do_steal)
             {
                 for (eq_pos = 0; eq_pos < NUM_WEARS; eq_pos++)
                     if (GET_EQ(vict, eq_pos) && (isname(arg, GET_EQ(vict, eq_pos)->getName())) &&
-                        CAN_SEE_OBJ(ch, GET_EQ(vict, eq_pos)))
+                        ch->canSee(GET_EQ(vict, eq_pos)))
                     {
                         obj = GET_EQ(vict, eq_pos);
                         break;
@@ -11129,7 +11133,7 @@ ACMD(do_steal)
                     if (!IS_NPC(vict))
                     {
                         vict->player_flags.set(PLR_STOLEN, true);
-                        mudlog(NRM, MAX(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), true, "THEFT: %s has stolen %s@n from %s",
+                        mudlog(NRM, std::max(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), true, "THEFT: %s has stolen %s@n from %s",
                                GET_NAME(ch), obj->getShortDescription(), GET_NAME(vict));
                     }
                     if (axion_dice(0) > prob)
@@ -11138,7 +11142,7 @@ ACMD(do_steal)
                         ch->sendText("You think that your movements might have been a bit obvious.\r\n");
                         act("@R$n@r just stole $p@r from @R$N@r!@n", true, ch, obj, vict, TO_ROOM);
                         vict->sendText("You feel like something may be missing...\r\n");
-                        if (IS_NPC(vict) && rand_number(1, 3) == 3)
+                        if (IS_NPC(vict) && Random::get<int>(1, 3) == 3)
                         {
                             set_fighting(vict, ch);
                         }
@@ -11255,7 +11259,7 @@ ACMD(do_title)
 static int
 perform_group(Character *ch, Character *vict, int highlvl, int lowlvl, int64_t highpl, int64_t lowpl)
 {
-    if (AFF_FLAGGED(vict, AFF_GROUP) || !CAN_SEE(ch, vict))
+    if (AFF_FLAGGED(vict, AFF_GROUP) || !ch->canSee(vict))
         return (0);
 
     if (GET_BONUS(vict, BONUS_LONER) > 0)
@@ -11403,7 +11407,7 @@ ACMD(do_group)
 
     int foundwas = 0;
 
-    if (!strcasecmp(buf, "all"))
+    if (boost::iequals(buf, "all"))
     {
         perform_group(ch, ch, GET_LEVEL(ch), GET_LEVEL(ch), highpl, lowpl);
         found = 0;
@@ -11778,17 +11782,17 @@ ACMD(do_use)
 
                 if (GET_HIT(ch) <= (ch->getEffectiveStat<int64_t>("health")) * 0.99)
                 {
-                    ch->modCurVital(CharVital::health, large_rand((ch->getEffectiveStat<int64_t>("health")) * 0.08, (ch->getEffectiveStat<int64_t>("health")) * 0.16));
+                    ch->modCurVital(CharVital::health, Random::get<int64_t>((ch->getEffectiveStat<int64_t>("health")) * 0.08, (ch->getEffectiveStat<int64_t>("health")) * 0.16));
                     refreshed = true;
                 }
                 else if ((ch->getCurVital(CharVital::ki)) <= (ch->getEffectiveStat<int64_t>("health")) * 0.99)
                 {
-                    ch->modCurVital(CharVital::ki, large_rand(GET_MAX_MANA(ch) * 0.08, GET_MAX_MANA(ch) * 0.16));
+                    ch->modCurVital(CharVital::ki, Random::get<int64_t>(GET_MAX_MANA(ch) * 0.08, GET_MAX_MANA(ch) * 0.16));
                     refreshed = true;
                 }
                 else if ((ch->getCurVital(CharVital::stamina)) <= GET_MAX_MOVE(ch) * 0.99)
                 {
-                    ch->modCurVital(CharVital::stamina, large_rand(GET_MAX_MOVE(ch) * 0.08, GET_MAX_MOVE(ch) * 0.16));
+                    ch->modCurVital(CharVital::stamina, Random::get<int64_t>(GET_MAX_MOVE(ch) * 0.08, GET_MAX_MOVE(ch) * 0.16));
                     refreshed = true;
                 }
                 if (refreshed == true)
@@ -11891,33 +11895,29 @@ ACMD(do_display)
     auto allPrefs = {PRF_DISPHP, PRF_DISPKI, PRF_DISPMOVE, PRF_DISPTNL, PRF_FURY, PRF_DISTIME, PRF_DISGOLD, PRF_DISPRAC,
                      PRF_DISHUTH, PRF_DISPERC, PRF_FORM, PRF_TECH};
 
-    if (!strcasecmp(argument, "transforms"))
+    if (boost::iequals(argument, "transforms"))
     {
         ch->pref_flags.toggle(PRF_FORM);
         ch->pref_flags.toggle(PRF_TECH);
         return;
     }
 
-    if (!strcasecmp(argument, "on") || !strcasecmp(argument, "all"))
+    if (boost::iequals(argument, "on") || boost::iequals(argument, "all"))
     {
         for (auto f : allPrefs)
             ch->pref_flags.set(f, true);
     }
-    else if (!strcasecmp(argument, "off") || !strcasecmp(argument, "none"))
+    else if (boost::iequals(argument, "off") || boost::iequals(argument, "none"))
     {
         for (auto f : allPrefs)
             ch->pref_flags.set(f, false);
     }
     else
     {
-        /*REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_DISPHP);
-    REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_DISPMOVE);
-    REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_DISPTNL);
-    REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_DISPKI);*/
 
         for (i = 0; i < strlen(argument); i++)
         {
-            switch (LOWER(argument[i]))
+            switch (tolower(argument[i]))
             {
             case 'p':
                 ch->pref_flags.toggle(PRF_DISPHP);
@@ -12258,7 +12258,7 @@ ACMD(do_gen_tog)
         if (!GET_SKILL(ch, SKILL_HIDE) && slot_count(ch) + 1 <= GET_SLOTS(ch))
         {
             ch->sendText("@GYou learn the very minimal basics to hiding.@n\r\n");
-            SET_SKILL(ch, SKILL_HIDE, rand_number(1, 5));
+            SET_SKILL(ch, SKILL_HIDE, Random::get<int>(1, 5));
         }
         else if (!GET_SKILL(ch, SKILL_HIDE) && slot_count(ch) + 1 > GET_SLOTS(ch))
         {
@@ -12425,7 +12425,7 @@ ACMD(do_file)
         return;
     }
 
-    if (!strcasecmp(field, "request"))
+    if (boost::iequals(field, "request"))
     {
         GET_BOARD(ch, 2) = time(nullptr);
     }
@@ -12451,7 +12451,7 @@ ACMD(do_file)
     }
     rewind(req_file);
 
-    req_lines = MIN(MIN(req_lines, num_lines), 5000);
+    req_lines = std::min(std::min(req_lines, num_lines), 5000);
 
     buf[0] = '\0';
 
@@ -12589,7 +12589,7 @@ ACMD(do_fix)
         return;
     }
 
-    if (!strcasecmp("self", arg))
+    if (boost::iequals("self", arg))
     {
         if (!IS_ANDROID(ch))
         {
@@ -12689,7 +12689,7 @@ ACMD(do_fix)
             ch->player_flags.set(PLR_REPLEARN, true);
             ch->modExperience(gain);
         }
-        else if (rand_number(2, 12) >= 10 && PLR_FLAGGED(ch, PLR_REPLEARN))
+        else if (Random::get<int>(2, 12) >= 10 && PLR_FLAGGED(ch, PLR_REPLEARN))
         {
             ch->player_flags.set(PLR_REPLEARN, false);
             ch->sendText("@mYou think you might be on to something...@n\r\n");
@@ -12843,22 +12843,22 @@ ACMD(do_aid)
         return;
     }
 
-    if (!strcasecmp(arg, "adrenex"))
+    if (boost::iequals(arg, "adrenex"))
     {
         num = 380;
         num2 = 381;
     }
-    else if (!strcasecmp(arg, "antitoxin"))
+    else if (boost::iequals(arg, "antitoxin"))
     {
         num = 380;
         num2 = 383;
     }
-    else if (!strcasecmp(arg, "salve"))
+    else if (boost::iequals(arg, "salve"))
     {
         num = 380;
         num2 = 382;
     }
-    else if (!strcasecmp(arg, "formula-82"))
+    else if (boost::iequals(arg, "formula-82"))
     {
         num = 380;
         num2 = 385;
@@ -13102,7 +13102,7 @@ ACMD(do_aura)
         return;
     }
 
-    if (!strcasecmp(arg, "light"))
+    if (boost::iequals(arg, "light"))
     {
         if (GET_SKILL(ch, SKILL_FOCUS) < 75 || GET_SKILL(ch, SKILL_CONCENTRATION) < 75)
         {

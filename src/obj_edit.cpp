@@ -5,8 +5,10 @@
  *  This is an original file created by me for Dragonball Advent Truth     *
  *  to house all player level object editing functions -- Iovan 1/6/13     *
  ************************************************************************ */
-#define __OBJ_EDIT_C__
-
+#include "dbat/Descriptor.h"
+#include "dbat/Object.h"
+#include "dbat/Character.h"
+#include "dbat/Account.h"
 #include "dbat/obj_edit.h"
 #include "dbat/send.h"
 #include "dbat/comm.h"
@@ -226,8 +228,8 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg)
                 d->sendText("Save current changes and be charged?\r\nYes or No\r\n");
                 return;
             }
-            else if (!strcasecmp(arg, "yes") || !strcasecmp(arg, "Yes") || !strcasecmp(arg, "y") ||
-                     !strcasecmp(arg, "Y"))
+            else if (boost::iequals(arg, "yes") || boost::iequals(arg, "Yes") || boost::iequals(arg, "y") ||
+                     boost::iequals(arg, "Y"))
             {
                 obj = d->obj_point;
 
@@ -252,8 +254,8 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg)
                             obj->getShortDescription(), d->obj_was);
                 STATE(d) = CON_PLAYING;
             }
-            else if (!strcasecmp(arg, "No") || !strcasecmp(arg, "no") || !strcasecmp(arg, "n") ||
-                     !strcasecmp(arg, "N"))
+            else if (boost::iequals(arg, "No") || boost::iequals(arg, "no") || boost::iequals(arg, "n") ||
+                     boost::iequals(arg, "N"))
             {
                 d->sendText("Canceling purchase at no cost.\r\n");
                 send_to_imm("Restring Eq: %s has canceled their equipment restring.", GET_NAME(d->character));
@@ -496,7 +498,7 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg)
                 d->sendText("@wPurchase this custom piece? (Y or N)@n\r\n");
                 return;
             }
-            else if (!strcasecmp(arg, "y") || !strcasecmp(arg, "Y"))
+            else if (boost::iequals(arg, "y") || boost::iequals(arg, "Y"))
             {
                 d->sendText("@wPurchase complete.@n\r\n");
                 STATE(d) = CON_PLAYING;
@@ -608,7 +610,7 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg)
                 d->account->customs.emplace_back(obj->getShortDescription());
                 log_custom(d, obj);
             }
-            else if (!strcasecmp(arg, "n") || !strcasecmp(arg, "N"))
+            else if (boost::iequals(arg, "n") || boost::iequals(arg, "N"))
             {
                 d->sendText("Canceling purchase at no cost.\r\n");
                 send_to_imm("Custom Eq: %s has canceled their custom eq construction.", GET_NAME(d->character));

@@ -5,7 +5,11 @@
 /** Copyright 1997-2001 George Greer (greerga@circlemud.org)                 **/
 /** Copyright 2002 Kip Potter [Mythran] (kip_potter@hotmail.com)             **/
 /******************************************************************************/
-
+#include "dbat/Descriptor.h"
+#include "dbat/Character.h"
+#include "dbat/Zone.h"
+#include "dbat/Room.h"
+#include "dbat/Destination.h"
 #include "dbat/oasis.h"
 #include "dbat/oasis_copy.h"
 #include "dbat/dg_comm.h"

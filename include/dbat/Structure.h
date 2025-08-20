@@ -1,0 +1,16 @@
+#pragma once
+#include "AbstractGridArea.h"
+#include "HasLocation.h"
+
+struct Structure : public AbstractGridArea, public HasID, public HasLocation, std::enable_shared_from_this<Structure> {
+    std::string getLocID() const override;
+    vnum getLocVnum() const override;
+    Zone* getLocZone() const override;
+    std::string getLocationDisplayCategory(Character* viewer) const override;
+    std::shared_ptr<AbstractLocation> getSharedAbstractLocation() override;
+
+    bool isActiveInLocation() const override;
+    void displayLocationInfo(Character* viewer) override;
+    std::shared_ptr<HasLocation> getSharedHasLocation() override;
+
+};

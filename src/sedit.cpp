@@ -3,14 +3,20 @@
  * Copyright 1996 Harvey Gilpin						*
  * Copyright 1997-2001 George Greer (greerga@circlemud.org)		*
  ************************************************************************/
-#include <iostream>
-
+#include "dbat/Shop.h"
+#include "dbat/Object.h"
+#include "dbat/ObjectPrototype.h"
+#include "dbat/Descriptor.h"
+#include "dbat/Zone.h"
+#include "dbat/Character.h"
+#include "dbat/CharacterPrototype.h"
+#include "dbat/Room.h"
 #include "dbat/sedit.h"
 #include "dbat/send.h"
 #include "dbat/comm.h"
 #include "dbat/interpreter.h"
 #include "dbat/db.h"
-#include "dbat/shop.h"
+#include "dbat/Shop.h"
 #include "dbat/genolc.h"
 #include "dbat/genshp.h"
 #include "dbat/genzon.h"
@@ -51,7 +57,7 @@ ACMD(do_oasis_sedit)
     }
     else if (!isdigit(*buf1))
     {
-        if (strcasecmp("save", buf1) != 0)
+        if (!boost::iequals("save", buf1) != 0)
         {
             ch->sendText("Yikes!  Stop that, someone will get hurt!\r\n");
             return;
@@ -91,7 +97,7 @@ ACMD(do_oasis_sedit)
         {
             if (d->olc && OLC_NUM(d) == number)
             {
-                ch->send_to("That shop is currently being edited by %s.\r\n", PERS(d->character, ch));
+                ch->send_to("That shop is currently being edited by %s.\r\n", d->character->displayNameFor(ch));
                 return;
             }
         }
@@ -132,7 +138,7 @@ ACMD(do_oasis_sedit)
     if (save)
     {
         ch->send_to("Saving all shops.\r\n");
-        mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), true,
+        mudlog(CMP, std::max(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), true,
                "OLC: %s saves shop info.",
                GET_NAME(ch));
 
@@ -467,7 +473,7 @@ void sedit_parse(struct descriptor_data *d, char *arg)
         case 'y':
         case 'Y':
             sedit_save_internally(d);
-            mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(d->character)), true,
+            mudlog(CMP, std::max(ADMLVL_BUILDER, GET_INVIS_LEV(d->character)), true,
                    "OLC: %s edits shop %d", GET_NAME(d->character), OLC_NUM(d));
             cleanup_olc(d, CLEANUP_STRUCTS);
             return;
@@ -791,7 +797,6 @@ void sedit_parse(struct descriptor_data *d, char *arg)
     case SEDIT_NOTRADE:
         if ((i = LIMIT(atoi(arg), 0, NUM_TRADERS)) > 0)
         {
-            // TOGGLE_BIT_AR(S_NOTRADE(OLC_SHOP(d)), i - 1);
             sedit_no_trade_menu(d);
             return;
         }

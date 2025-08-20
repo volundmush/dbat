@@ -1,10 +1,13 @@
-#include "dbat/structs.h"
+#include "dbat/Object.h"
+#include "dbat/ObjectPrototype.h"
+#include "dbat/Character.h"
+#include "dbat/Zone.h"
 #include "dbat/class.h"
 #include "dbat/genolc.h"
 #include "dbat/genzon.h"
 #include "dbat/utils.h"
 #include "dbat/handler.h"
-#include "dbat/shop.h"
+#include "dbat/Shop.h"
 #include "dbat/filter.h"
 #include "dbat/dg_scripts.h"
 #include "dbat/act.informative.h"
@@ -308,4 +311,47 @@ void Object::clearLocation() {
 
 std::shared_ptr<HasLocation> Object::getSharedHasLocation() {
     return shared_from_this();
+}
+
+void Object::commit_iedit(const ObjectPrototype &other)
+{
+    operator=(other);
+
+    // Set the unique save flag
+    item_flags.set(ITEM_UNIQUE_SAVE);
+}
+
+Object &Object::operator=(const ObjectPrototype &other)
+{
+    // basic proto data fields
+    vn = other.vn;
+    if (other.name)
+        strings["name"] = other.name;
+    if (other.room_description)
+        strings["room_description"] = other.room_description;
+    if (other.look_description)
+        strings["look_description"] = other.look_description;
+    if (other.short_description)
+        strings["short_description"] = other.short_description;
+    affect_flags = other.affect_flags;
+    stats = other.stats;
+    extra_descriptions.clear();
+    if (other.ex_description)
+    {
+        for (auto e = other.ex_description; e; e = e->next)
+        {
+            auto &ex = extra_descriptions.emplace_back();
+            ex.keyword = e->keyword;
+            ex.description = e->description;
+        }
+    }
+
+    // item proto data fields
+    type_flag = other.type_flag;
+    affected = other.affected;
+    wear_flags = other.wear_flags;
+    item_flags = other.item_flags;
+    size = other.size;
+
+    return *this;
 }

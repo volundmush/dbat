@@ -4,7 +4,11 @@
  *  Copyright 1996 Harvey Gilpin					*
  *  Copyright 1997-2001 George Greer (greerga@circlemud.org)		*
  ************************************************************************/
-#include <iostream>
+#include "dbat/Character.h"
+#include "dbat/Room.h"
+#include "dbat/Destination.h"
+#include "dbat/Descriptor.h"
+#include "dbat/Zone.h"
 
 #include "dbat/structs.h"
 #include "dbat/send.h"
@@ -81,7 +85,7 @@ ACMD(do_oasis_redit)
         number = ch->location.getVnum();
     else if (!isdigit(*buf1))
     {
-        if (strcasecmp("save", buf1) != 0)
+        if (!boost::iequals("save", buf1) != 0)
         {
             ch->sendText("Yikes!  Stop that, someone will get hurt!\r\n");
             return;
@@ -119,7 +123,7 @@ ACMD(do_oasis_redit)
         {
             if (d->olc && OLC_NUM(d) == number)
             {
-                ch->send_to("That room is currently being edited by %s.\r\n", PERS(d->character, ch));
+                ch->send_to("That room is currently being edited by %s.\r\n", d->character->displayNameFor(ch));
                 return;
             }
         }
@@ -160,7 +164,7 @@ ACMD(do_oasis_redit)
     if (save)
     {
         ch->send_to("Saving all rooms\r\n");
-        mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), true, "OLC: %s saves room info.", GET_NAME(ch));
+        mudlog(CMP, std::max(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), true, "OLC: %s saves room info.", GET_NAME(ch));
 
         /* Free the olc data from the descriptor. */
         delete d->olc;
@@ -468,7 +472,7 @@ void redit_parse(struct descriptor_data *d, char *arg)
         case 'y':
         case 'Y':
             redit_save_internally(d);
-            mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(d->character)), true,
+            mudlog(CMP, std::max(ADMLVL_BUILDER, GET_INVIS_LEV(d->character)), true,
                    "OLC: %s edits room %d.", GET_NAME(d->character), OLC_NUM(d));
             if (CONFIG_OLC_SAVE)
             {

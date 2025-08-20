@@ -1,4 +1,4 @@
-#include "dbat/structs.h"
+#include "dbat/AbstractGridArea.h"
 
 GridTemplate& GridTemplate::operator=(const AbstractGridArea& other) {
     this->strings = other.strings;

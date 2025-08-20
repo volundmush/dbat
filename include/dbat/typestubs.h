@@ -29,6 +29,7 @@ struct Shape;
 struct AbstractGridArea;
 struct ShapeBase;
 struct GridTemplate;
+struct ExtraDescription;
 
 typedef HasDgScripts script_data;
 

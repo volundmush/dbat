@@ -44,8 +44,12 @@ it.
     similar fashion.
 
 */
-#include <filesystem>
-
+#include "dbat/Character.h"
+#include "dbat/Object.h"
+#include "dbat/ObjectPrototype.h"
+#include "dbat/Room.h"
+#include "dbat/Destination.h"
+#include "dbat/Descriptor.h"
 #include "dbat/boards.h"
 #include "dbat/send.h"
 #include "dbat/comm.h"
@@ -791,7 +795,7 @@ void write_board_message(obj_vnum board_vnum, Character *ch, char *arg) {
     MESG_NEXT(message) = nullptr;
     MESG_PREV(message) = nullptr;
     MESG_DATA(message) = nullptr;
-    BOARD_MNUM(thisboard) = MAX(BOARD_MNUM(thisboard) + 1, 1);
+    BOARD_MNUM(thisboard) = std::max(BOARD_MNUM(thisboard) + 1, 1);
 
     MESG_NEXT(message) = BOARD_MESSAGES(thisboard);
 

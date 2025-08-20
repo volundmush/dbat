@@ -1,7 +1,4 @@
-//
-// Created by volund on 11/4/21.
-//
-
+#include "dbat/Character.h"
 #include "dbat/techniques.h"
 #include "dbat/structs.h"
 #include "dbat/send.h"
@@ -11,11 +8,11 @@
 
 bool tech_handle_zanzoken(Character *ch, Character *vict, const std::string &name)
 {
-    if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) &&
+    if (((!IS_NPC(vict) && IS_ICER(vict) && Random::get<int>(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) &&
         (vict->getCurVital(CharVital::stamina)) >= 1 && GET_POS(vict) != POS_SLEEPING)
     {
-        if (!AFF_FLAGGED(ch, AFF_ZANZOKEN) || (AFF_FLAGGED(ch, AFF_ZANZOKEN) && GET_SPEEDI(ch) + rand_number(1, 5) <
-                                                                                    GET_SPEEDI(vict) + rand_number(1, 5)))
+        if (!AFF_FLAGGED(ch, AFF_ZANZOKEN) || (AFF_FLAGGED(ch, AFF_ZANZOKEN) && GET_SPEEDI(ch) + Random::get<int>(1, 5) <
+                                                                                    GET_SPEEDI(vict) + Random::get<int>(1, 5)))
         {
             auto msg = fmt::format("@C$N@c disappears, avoiding your {} before reappearing!@n", name);
             act(msg.c_str(), true, ch, nullptr, vict, TO_CHAR);
@@ -143,7 +140,7 @@ void tech_handle_fireshield(Character *ch, Character *vict, const std::string &p
 
 bool tech_handle_android_absorb(Character *ch, Character *vict)
 {
-    if (IS_ANDROID(vict) && HAS_ARMS(vict) && GET_SKILL(vict, SKILL_ABSORB) > rand_number(1, 140))
+    if (IS_ANDROID(vict) && HAS_ARMS(vict) && GET_SKILL(vict, SKILL_ABSORB) > Random::get<int>(1, 140))
     {
         act("@C$N@W absorbs your ki attack and all your charged ki with $S hand!@n", true, ch, nullptr, vict, TO_CHAR);
         act("@WYou absorb @C$n's@W ki attack and all $s charged ki with your hand!@n", true, ch, nullptr, vict,

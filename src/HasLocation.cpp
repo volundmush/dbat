@@ -1,4 +1,6 @@
-#include "dbat/structs.h"
+#include "dbat/HasLocation.h"
+#include "dbat/Room.h"
+#include "dbat/Location.h"
 
 
 Room *HasLocation::getRoom()

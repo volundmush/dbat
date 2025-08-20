@@ -1,3 +1,4 @@
+
 #include <filesystem>
 #include <memory>
 #include <iostream>
@@ -11,6 +12,15 @@
 #include <boost/algorithm/string/regex.hpp>
 #include <regex>
 
+#include "dbat/Zone.h"
+#include "dbat/Character.h"
+#include "dbat/CharacterPrototype.h"
+#include "dbat/Object.h"
+#include "dbat/ObjectPrototype.h"
+#include "dbat/DgScriptPrototype.h"
+#include "dbat/Room.h"
+#include "dbat/Destination.h"
+#include "dbat/Area.h"
 #include "dbat/comm.h"
 #include "dbat/utils.h"
 #include "dbat/dg_scripts.h"
@@ -20,18 +30,31 @@
 #include "dbat/config.h"
 #include "dbat/class.h"
 #include "dbat/players.h"
-#include "dbat/account.h"
+#include "dbat/Account.h"
 #include "dbat/act.item.h"
 #include "dbat/pfdefaults.h"
 #include "dbat/spell_parser.h"
-#include "dbat/shop.h"
-#include "dbat/guild.h"
+#include "dbat/Shop.h"
+#include "dbat/Guild.h"
 #include "dbat/genobj.h"
 #include "dbat/saveload.h"
-#include "dbat/random.h"
 #include "dbat/assedit.h"
 #include "dbat/assemblies.h"
 #include "dbat/vehicles.h"
+#include "dbat/ansi.h"
+
+#define Q_FIELD(x)  ((int) (x) / 32)
+#define Q_BIT(x)    (1 << ((x) % 32))
+
+#define IS_SET_AR(var, bit)       ((var)[Q_FIELD(bit)] & Q_BIT(bit))
+#define SET_BIT_AR(var, bit)      ((var)[Q_FIELD(bit)] |= Q_BIT(bit))
+#define REMOVE_BIT_AR(var, bit)   ((var)[Q_FIELD(bit)] &= ~Q_BIT(bit))
+#define TOGGLE_BIT_AR(var, bit)   ((var)[Q_FIELD(bit)] = \
+                                   (var)[Q_FIELD(bit)] ^ Q_BIT(bit))
+#define IS_SET(flag, bit)  ((flag) & (bit))
+#define SET_BIT(var, bit)  ((var) |= (bit))
+#define REMOVE_BIT(var, bit)  ((var) &= ~(bit))
+#define TOGGLE_BIT(var, bit) ((var) ^= (bit))
 
 #define RENT_FACTOR    1
 #define CRYO_FACTOR    4
@@ -1180,7 +1203,7 @@ static int parse_simple_mob(FILE *mob_f, struct CharacterPrototype *ch, mob_vnum
     if (!value && !matched && !strcasecmp(keyword, test) && (matched = true))
 
 #define RANGE(low, high)    \
-    (num_arg = MAX((low), MIN((high), (num_arg))))
+    (num_arg = std::clamp(num_arg, low, high))
 
 static void interpret_espec(const char *keyword, const char *value, struct CharacterPrototype *ch, mob_vnum nr) {
     int num_arg = 0, matched = false;
@@ -1299,62 +1322,62 @@ static void mob_stats(struct CharacterPrototype *mob) {
     std::unordered_map<std::string, int> setTo;
 
     if (!IS_HUMANOID(mob)) {
-        setTo["strength"] = rand_number(start, finish);
-        setTo["intelligence"] = rand_number(start, finish) - 30;
-        setTo["wisdom"] = rand_number(start, finish) - 30;
-        setTo["agility"] = rand_number(start + 5, finish);
-        setTo["constitution"] = rand_number(start + 5, finish);
-        setTo["speed"] = rand_number(start, finish);
+        setTo["strength"] = Random::get<int>(start, finish);
+        setTo["intelligence"] = Random::get<int>(start, finish) - 30;
+        setTo["wisdom"] = Random::get<int>(start, finish) - 30;
+        setTo["agility"] = Random::get<int>(start + 5, finish);
+        setTo["constitution"] = Random::get<int>(start + 5, finish);
+        setTo["speed"] = Random::get<int>(start, finish);
     } else {
         if (IS_SAIYAN(mob)) {
-            setTo["strength"] = rand_number(start + 10, finish);
-            setTo["intelligence"] = rand_number(start, finish - 10);
-            setTo["wisdom"] = rand_number(start, finish - 5);
-            setTo["agility"] = rand_number(start, finish);
-            setTo["constitution"] = rand_number(start + 5, finish);
-            setTo["speed"] = rand_number(start + 5, finish);
+            setTo["strength"] = Random::get<int>(start + 10, finish);
+            setTo["intelligence"] = Random::get<int>(start, finish - 10);
+            setTo["wisdom"] = Random::get<int>(start, finish - 5);
+            setTo["agility"] = Random::get<int>(start, finish);
+            setTo["constitution"] = Random::get<int>(start + 5, finish);
+            setTo["speed"] = Random::get<int>(start + 5, finish);
         } else if (IS_KONATSU(mob)) {
-            setTo["strength"] = rand_number(start, finish - 10);
-            setTo["intelligence"] = rand_number(start, finish);
-            setTo["wisdom"] = rand_number(start, finish);
-            setTo["agility"] = rand_number(start + 10, finish);
-            setTo["constitution"] = rand_number(start, finish);
-            setTo["speed"] = rand_number(start, finish);
+            setTo["strength"] = Random::get<int>(start, finish - 10);
+            setTo["intelligence"] = Random::get<int>(start, finish);
+            setTo["wisdom"] = Random::get<int>(start, finish);
+            setTo["agility"] = Random::get<int>(start + 10, finish);
+            setTo["constitution"] = Random::get<int>(start, finish);
+            setTo["speed"] = Random::get<int>(start, finish);
         } else if (IS_ANDROID(mob)) {
-            setTo["strength"] = rand_number(start, finish);
-            setTo["intelligence"] = rand_number(start, finish);
-            setTo["wisdom"] = rand_number(start, finish - 10);
-            setTo["agility"] = rand_number(start, finish);
-            setTo["constitution"] = rand_number(start, finish);
-            setTo["speed"] = rand_number(start, finish);
+            setTo["strength"] = Random::get<int>(start, finish);
+            setTo["intelligence"] = Random::get<int>(start, finish);
+            setTo["wisdom"] = Random::get<int>(start, finish - 10);
+            setTo["agility"] = Random::get<int>(start, finish);
+            setTo["constitution"] = Random::get<int>(start, finish);
+            setTo["speed"] = Random::get<int>(start, finish);
         } else if (IS_MAJIN(mob)) {
-            setTo["strength"] = rand_number(start, finish);
-            setTo["intelligence"] = rand_number(start, finish - 10);
-            setTo["wisdom"] = rand_number(start, finish - 5);
-            setTo["agility"] = rand_number(start, finish);
-            setTo["constitution"] = rand_number(start + 15, finish);
-            setTo["speed"] = rand_number(start, finish);
+            setTo["strength"] = Random::get<int>(start, finish);
+            setTo["intelligence"] = Random::get<int>(start, finish - 10);
+            setTo["wisdom"] = Random::get<int>(start, finish - 5);
+            setTo["agility"] = Random::get<int>(start, finish);
+            setTo["constitution"] = Random::get<int>(start + 15, finish);
+            setTo["speed"] = Random::get<int>(start, finish);
         } else if (IS_TRUFFLE(mob)) {
-            setTo["strength"] = rand_number(start, finish - 10);
-            setTo["intelligence"] = rand_number(start + 15, finish);
-            setTo["wisdom"] = rand_number(start, finish);
-            setTo["agility"] = rand_number(start, finish);
-            setTo["constitution"] = rand_number(start, finish);
-            setTo["speed"] = rand_number(start, finish);
+            setTo["strength"] = Random::get<int>(start, finish - 10);
+            setTo["intelligence"] = Random::get<int>(start + 15, finish);
+            setTo["wisdom"] = Random::get<int>(start, finish);
+            setTo["agility"] = Random::get<int>(start, finish);
+            setTo["constitution"] = Random::get<int>(start, finish);
+            setTo["speed"] = Random::get<int>(start, finish);
         } else if (IS_ICER(mob)) {
-            setTo["strength"] = rand_number(start + 5, finish);
-            setTo["intelligence"] = rand_number(start, finish);
-            setTo["wisdom"] = rand_number(start, finish);
-            setTo["agility"] = rand_number(start, finish);
-            setTo["constitution"] = rand_number(start, finish);
-            setTo["speed"] = rand_number(start + 10, finish);
+            setTo["strength"] = Random::get<int>(start + 5, finish);
+            setTo["intelligence"] = Random::get<int>(start, finish);
+            setTo["wisdom"] = Random::get<int>(start, finish);
+            setTo["agility"] = Random::get<int>(start, finish);
+            setTo["constitution"] = Random::get<int>(start, finish);
+            setTo["speed"] = Random::get<int>(start + 10, finish);
         } else {
-            setTo["strength"] = rand_number(start, finish);
-            setTo["intelligence"] = rand_number(start, finish);
-            setTo["wisdom"] = rand_number(start, finish);
-            setTo["agility"] = rand_number(start, finish);
-            setTo["constitution"] = rand_number(start, finish);
-            setTo["speed"] = rand_number(start, finish);
+            setTo["strength"] = Random::get<int>(start, finish);
+            setTo["intelligence"] = Random::get<int>(start, finish);
+            setTo["wisdom"] = Random::get<int>(start, finish);
+            setTo["agility"] = Random::get<int>(start, finish);
+            setTo["constitution"] = Random::get<int>(start, finish);
+            setTo["speed"] = Random::get<int>(start, finish);
         }
     }
 
@@ -1362,7 +1385,7 @@ static void mob_stats(struct CharacterPrototype *mob) {
         if(val > 100) {
             val = 100;
         } else if(val < 5) {
-            val = rand_number(5, 8);
+            val = Random::get<int>(5, 8);
         }
         mob->setBaseStat(attr, val);
     }
@@ -1408,7 +1431,7 @@ static int parse_mobile_from_file(FILE *mob_f, struct CharacterPrototype *ch, vn
     if (tmpptr && *tmpptr)
         if (!strcasecmp(fname(tmpptr), "a") || !strcasecmp(fname(tmpptr), "an") ||
             !strcasecmp(fname(tmpptr), "the"))
-            *tmpptr = LOWER(*tmpptr);
+            *tmpptr = tolower(*tmpptr);
     ch->room_description = fread_string(mob_f, buf2);
     ch->look_description = fread_string(mob_f, buf2);
 
@@ -1459,7 +1482,7 @@ static int parse_mobile_from_file(FILE *mob_f, struct CharacterPrototype *ch, vn
    *   SET_BIT_AR(MOB_FLAGS(ch), MOB_AUTOBALANCE);
    * } */
 
-    switch (UPPER(letter)) {
+    switch (toupper(letter)) {
         case 'S':    /* Simple monsters */
             parse_simple_mob(mob_f, ch, nr);
             break;
@@ -1679,7 +1702,7 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
     if (tmpptr && *tmpptr)
         if (!strcasecmp(fname(tmpptr), "a") || !strcasecmp(fname(tmpptr), "an") ||
             !strcasecmp(fname(tmpptr), "the"))
-            *tmpptr = LOWER(*tmpptr);
+            *tmpptr = tolower(*tmpptr);
 
     tmpptr = o.room_description = fread_string(obj_f, buf2);
     if (tmpptr && *tmpptr)

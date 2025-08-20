@@ -7,7 +7,10 @@
  *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
  *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
  ************************************************************************ */
-
+#include "dbat/Character.h"
+#include "dbat/Object.h"
+#include "dbat/Room.h"
+#include "dbat/Descriptor.h"
 #include "dbat/weather.h"
 #include "dbat/send.h"
 #include "dbat/comm.h"
@@ -74,13 +77,13 @@ static void weather_change()
 
     weather_info.change += (dice(1, 4) * diff + dice(2, 6) - dice(2, 6));
 
-    weather_info.change = MIN(weather_info.change, 12);
-    weather_info.change = MAX(weather_info.change, -12);
+    weather_info.change = std::min(weather_info.change, 12);
+    weather_info.change = std::max(weather_info.change, -12);
 
     weather_info.pressure += weather_info.change;
 
-    weather_info.pressure = MIN(weather_info.pressure, 1040);
-    weather_info.pressure = MAX(weather_info.pressure, 960);
+    weather_info.pressure = std::min(weather_info.pressure, 1040);
+    weather_info.pressure = std::max(weather_info.pressure, 960);
 
     change = 0;
 

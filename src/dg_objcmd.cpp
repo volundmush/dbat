@@ -8,7 +8,12 @@
  *  $Date: 2004/10/11 12:07:00$                                            *
  *  $Revision: 1.0.14 $                                                    *
  **************************************************************************/
-
+#include "dbat/Object.h"
+#include "dbat/Character.h"
+#include "dbat/Room.h"
+#include "dbat/Descriptor.h"
+#include "dbat/Zone.h"
+#include "dbat/Destination.h"
 #include "dbat/structs.h"
 #include "dbat/screen.h"
 #include "dbat/dg_scripts.h"
@@ -174,7 +179,7 @@ OCMD(do_oforce)
         return;
     }
 
-    if (!strcasecmp(arg1, "all"))
+    if (boost::iequals(arg1, "all"))
     {
         if ((room = obj_room(obj)) == NOWHERE)
             obj_log(obj, "oforce called by object in NOWHERE");
@@ -465,7 +470,7 @@ OCMD(do_oteleport)
     if (target == NOWHERE)
         obj_log(obj, "oteleport target is an invalid room");
 
-    else if (!strcasecmp(arg1, "all"))
+    else if (boost::iequals(arg1, "all"))
     {
         auto rm = obj->getAbsoluteLocation();
         auto people = rm.getPeople();

@@ -3,7 +3,10 @@
  * Copyright 1996 Harvey Gilpin						*
  * Copyright 1997-2001 George Greer (greerga@circlemud.org)		*
  ************************************************************************/
-
+#include "dbat/Descriptor.h"
+#include "dbat/CharacterPrototype.h"
+#include "dbat/Character.h"
+#include "dbat/Zone.h"
 #include "dbat/medit.h"
 #include "dbat/interpreter.h"
 #include "dbat/comm.h"
@@ -52,7 +55,7 @@ ACMD(do_oasis_medit)
     }
     else if (!isdigit(*buf1))
     {
-        if (strcasecmp("save", buf1) != 0)
+        if (!boost::iequals("save", buf1) != 0)
         {
             ch->sendText("Yikes!  Stop that, someone will get hurt!\r\n");
             return;
@@ -130,7 +133,7 @@ ACMD(do_oasis_medit)
     {
         auto &z = zone_table.at(OLC_ZNUM(d));
         ch->send_to("Saving all mobiles in zone %d.\r\n", z.number);
-        mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), true,
+        mudlog(CMP, std::max(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), true,
                "OLC: %s saves mobile info for zone %d.",
                GET_NAME(ch), z.number);
 
@@ -218,8 +221,8 @@ void init_mobile(CharacterPrototype *mob)
 {
     GET_NDD(mob) = 0;
 
-    mob->setBaseStat("weight", rand_number(100, 200));
-    mob->setBaseStat("height", rand_number(100, 200));
+    mob->setBaseStat("weight", Random::get<int>(100, 200));
+    mob->setBaseStat("height", Random::get<int>(100, 200));
 }
 
 /*-------------------------------------------------------------------*/
@@ -499,7 +502,7 @@ void medit_parse(struct descriptor_data *d, char *arg)
              * Save the mob in memory and to disk.
              */
             medit_save_internally(d);
-            mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(d->character)), true,
+            mudlog(CMP, std::max(ADMLVL_BUILDER, GET_INVIS_LEV(d->character)), true,
                    "OLC: %s edits mob %d", GET_NAME(d->character), OLC_NUM(d));
             if (CONFIG_OLC_SAVE)
             {

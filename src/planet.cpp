@@ -1,3 +1,5 @@
+#include "dbat/Character.h"
+#include "dbat/Room.h"
 #include "dbat/planet.h"
 #include "dbat/db.h"
 #include "dbat/comm.h"

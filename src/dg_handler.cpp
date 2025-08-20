@@ -12,13 +12,7 @@
 *  $Date: 2004/10/11 12:07:00$                                            *
 *  $Revision: 1.0.14 $                                                    *
 ***************************************************************************/
-
-#include "dbat/structs.h"
-#include "dbat/dg_scripts.h"
-#include "dbat/utils.h"
-#include "dbat/db.h"
-#include "dbat/handler.h"
-#include "dbat/dg_event.h"
+#include "dbat/HasDgScripts.h"
 
 
 /* remove all triggers from a mob/obj/room */

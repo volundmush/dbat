@@ -14,9 +14,12 @@
  * you should go through this entire file from beginning to end and add
  * the appropriate new special cases for your new class.
  */
-#include <utility>
-#include <boost/algorithm/string.hpp>
 
+#include "dbat/Character.h"
+#include "dbat/Object.h"
+#include "dbat/Room.h"
+#include "dbat/Destination.h"
+#include "dbat/Descriptor.h"
 #include "dbat/class.h"
 #include "dbat/db.h"
 #include "dbat/send.h"
@@ -30,7 +33,6 @@
 #include "dbat/act.wizard.h"
 #include "dbat/dg_comm.h"
 #include "dbat/act.other.h"
-#include "dbat/random.h"
 
 /*
  * The code to interpret a class letter -- used in interpreter.c when a
@@ -298,56 +300,56 @@ void do_start(Character *ch)
     {
         if (IS_HUMAN(ch))
         {
-            punch = rand_number(5, 15);
+            punch = Random::get<int>(5, 15);
             SET_SKILL(ch, SKILL_BUILD, punch);
         }
         if (IS_TRUFFLE(ch))
         {
-            punch = rand_number(15, 25);
+            punch = Random::get<int>(15, 25);
             SET_SKILL(ch, SKILL_BUILD, punch);
         }
         if (IS_KONATSU(ch))
         {
-            punch = rand_number(50, 60);
+            punch = Random::get<int>(50, 60);
             SET_SKILL(ch, SKILL_SWORD, punch);
-            punch = rand_number(10, 30);
+            punch = Random::get<int>(10, 30);
             SET_SKILL(ch, SKILL_MOVE_SILENTLY, punch);
-            punch = rand_number(10, 30);
+            punch = Random::get<int>(10, 30);
             SET_SKILL(ch, SKILL_HIDE, punch);
         }
         if (IS_TAPION(ch) || IS_GINYU(ch) || IS_DABURA(ch) || IS_KURZAK(ch))
         {
-            punch = rand_number(30, 40);
+            punch = Random::get<int>(30, 40);
             if (IS_KURZAK(ch) || IS_TAPION(ch))
             {
-                punch += rand_number(5, 10);
+                punch += Random::get<int>(5, 10);
             }
             SET_SKILL(ch, SKILL_THROW, punch);
         }
         if (IS_KAI(ch) || IS_KANASSAN(ch))
         {
-            punch = rand_number(40, 60);
+            punch = Random::get<int>(40, 60);
             SET_SKILL(ch, SKILL_FOCUS, punch);
         }
         if (IS_KANASSAN(ch))
         {
-            punch = rand_number(40, 60);
+            punch = Random::get<int>(40, 60);
             SET_SKILL(ch, SKILL_CONCENTRATION, punch);
         }
         if (IS_KAI(ch))
         {
-            punch = rand_number(30, 50);
+            punch = Random::get<int>(30, 50);
             SET_SKILL(ch, SKILL_HEAL, punch);
         }
         if (IS_DEMON(ch))
         {
-            punch = rand_number(50, 60);
+            punch = Random::get<int>(50, 60);
             SET_SKILL(ch, SKILL_SPEAR, punch);
             SET_SKILL(ch, SKILL_HONOO, punch);
         }
 
         punch = 0;
-        punch = rand_number(50, 70);
+        punch = Random::get<int>(50, 70);
         SET_SKILL(ch, SKILL_PUNCH, GET_SKILL_BASE(ch, SKILL_PUNCH) + punch);
     } /* End CC skills */
     else
@@ -357,32 +359,32 @@ void do_start(Character *ch)
 
     if (IS_KAI(ch) || IS_KANASSAN(ch))
     {
-        punch = rand_number(15, 30);
+        punch = Random::get<int>(15, 30);
         SET_SKILL(ch, SKILL_TELEPATHY, punch);
     }
     if (IS_MAJIN(ch) || IS_NAMEK(ch) || IS_BIO(ch))
     {
-        punch = rand_number(10, 16);
+        punch = Random::get<int>(10, 16);
         SET_SKILL(ch, SKILL_REGENERATE, punch);
     }
     if (IS_ANDROID(ch) && ch->subrace == SubRace::android_model_absorb)
     {
-        punch = rand_number(25, 35);
+        punch = Random::get<int>(25, 35);
         SET_SKILL(ch, SKILL_ABSORB, punch);
     }
     if (IS_BIO(ch))
     {
-        punch = rand_number(15, 25);
+        punch = Random::get<int>(15, 25);
         SET_SKILL(ch, SKILL_ABSORB, punch);
     }
     if (IS_ARLIAN(ch))
     {
-        punch = rand_number(30, 50);
+        punch = Random::get<int>(30, 50);
         SET_SKILL(ch, SKILL_SEISHOU, punch);
     }
     if (IS_ICER(ch))
     {
-        punch = rand_number(20, 30);
+        punch = Random::get<int>(20, 30);
         SET_SKILL(ch, SKILL_TAILWHIP, punch);
     }
 
@@ -430,11 +432,11 @@ void do_start(Character *ch)
     if (IS_TAPION(ch) || IS_GINYU(ch))
     {
         obj_vnums.push_back(19050);
-        if (rand_number(1, 2) == 2)
+        if (Random::get<int>(1, 2) == 2)
         {
             obj_vnums.push_back(19050);
         }
-        if (rand_number(1, 2) == 2)
+        if (Random::get<int>(1, 2) == 2)
         {
             obj_vnums.push_back(19050);
         }
@@ -460,7 +462,7 @@ void do_start(Character *ch)
         SET_SKILL(ch, SKILL_SENSE, 100);
         for (const auto &s : {"health", "ki", "stamina"})
         {
-            ch->gainBaseStat(s, rand_number(400, 500));
+            ch->gainBaseStat(s, Random::get<int>(400, 500));
         }
     }
 
@@ -691,7 +693,7 @@ void advance_level(Character *ch)
         add_hp *= .75;
         if (add_hp < 300000)
         {
-            add_hp = rand_number(300000, 330000);
+            add_hp = Random::get<int>(300000, 330000);
         }
     }
     else if (add_hp >= 600000 && add_hp < 1000000)
@@ -699,7 +701,7 @@ void advance_level(Character *ch)
         add_hp *= .70;
         if (add_hp < 600000)
         {
-            add_hp = rand_number(600000, 650000);
+            add_hp = Random::get<int>(600000, 650000);
         }
     }
     else if (add_hp >= 1000000 && add_hp < 2000000)
@@ -707,7 +709,7 @@ void advance_level(Character *ch)
         add_hp *= .65;
         if (add_hp < 1000000)
         {
-            add_hp = rand_number(1000000, 1250000);
+            add_hp = Random::get<int>(1000000, 1250000);
         }
     }
     else if (add_hp >= 2000000)
@@ -715,7 +717,7 @@ void advance_level(Character *ch)
         add_hp *= .45;
         if (add_hp < 2000000)
         {
-            add_hp = rand_number(2000000, 2250000);
+            add_hp = Random::get<int>(2000000, 2250000);
         }
     }
     if (add_hp >= 15000000)
@@ -727,7 +729,7 @@ void advance_level(Character *ch)
         add_move *= .75;
         if (add_move < 300000)
         {
-            add_move = rand_number(300000, 330000);
+            add_move = Random::get<int>(300000, 330000);
         }
     }
     else if (add_move >= 600000 && add_move < 1000000)
@@ -735,7 +737,7 @@ void advance_level(Character *ch)
         add_move *= .70;
         if (add_move < 600000)
         {
-            add_move = rand_number(600000, 650000);
+            add_move = Random::get<int>(600000, 650000);
         }
     }
     else if (add_move >= 1000000 && add_move < 2000000)
@@ -743,7 +745,7 @@ void advance_level(Character *ch)
         add_move *= .65;
         if (add_move < 1000000)
         {
-            add_move = rand_number(1000000, 1250000);
+            add_move = Random::get<int>(1000000, 1250000);
         }
     }
     else if (add_move >= 2000000)
@@ -751,7 +753,7 @@ void advance_level(Character *ch)
         add_move *= .45;
         if (add_move < 2000000)
         {
-            add_move = rand_number(2000000, 2250000);
+            add_move = Random::get<int>(2000000, 2250000);
         }
     }
     if (add_move >= 15000000)
@@ -763,7 +765,7 @@ void advance_level(Character *ch)
         add_mana *= .75;
         if (add_mana < 300000)
         {
-            add_mana = rand_number(300000, 330000);
+            add_mana = Random::get<int>(300000, 330000);
         }
     }
     else if (add_mana >= 600000 && add_mana < 1000000)
@@ -771,7 +773,7 @@ void advance_level(Character *ch)
         add_mana *= .70;
         if (add_mana < 600000)
         {
-            add_mana = rand_number(600000, 650000);
+            add_mana = Random::get<int>(600000, 650000);
         }
     }
     else if (add_mana >= 1000000 && add_mana < 2000000)
@@ -779,7 +781,7 @@ void advance_level(Character *ch)
         add_mana *= .65;
         if (add_mana < 1000000)
         {
-            add_mana = rand_number(1000000, 1250000);
+            add_mana = Random::get<int>(1000000, 1250000);
         }
     }
     else if (add_mana >= 2000000)
@@ -787,7 +789,7 @@ void advance_level(Character *ch)
         add_mana *= .45;
         if (add_mana < 2000000)
         {
-            add_mana = rand_number(2000000, 2250000);
+            add_mana = Random::get<int>(2000000, 2250000);
         }
     }
     if (add_mana >= 15000000)
@@ -797,64 +799,64 @@ void advance_level(Character *ch)
     switch (lvl)
     {
     case 5:
-        add_hp += rand_number(600, 1000);
-        add_move += rand_number(600, 1000);
-        add_mana += rand_number(600, 1000);
+        add_hp += Random::get<int>(600, 1000);
+        add_move += Random::get<int>(600, 1000);
+        add_mana += Random::get<int>(600, 1000);
         break;
     case 10:
-        add_hp += rand_number(5000, 8000);
-        add_move += rand_number(5000, 8000);
-        add_mana += rand_number(5000, 8000);
+        add_hp += Random::get<int>(5000, 8000);
+        add_move += Random::get<int>(5000, 8000);
+        add_mana += Random::get<int>(5000, 8000);
         break;
     case 20:
-        add_hp += rand_number(15000, 18000);
-        add_move += rand_number(15000, 18000);
-        add_mana += rand_number(15000, 18000);
+        add_hp += Random::get<int>(15000, 18000);
+        add_move += Random::get<int>(15000, 18000);
+        add_mana += Random::get<int>(15000, 18000);
         break;
     case 30:
-        add_hp += rand_number(20000, 30000);
-        add_move += rand_number(20000, 30000);
-        add_mana += rand_number(20000, 30000);
+        add_hp += Random::get<int>(20000, 30000);
+        add_move += Random::get<int>(20000, 30000);
+        add_mana += Random::get<int>(20000, 30000);
         break;
     case 40:
-        add_hp += rand_number(50000, 60000);
-        add_move += rand_number(50000, 60000);
-        add_mana += rand_number(50000, 60000);
+        add_hp += Random::get<int>(50000, 60000);
+        add_move += Random::get<int>(50000, 60000);
+        add_mana += Random::get<int>(50000, 60000);
         break;
     case 50:
-        add_hp += rand_number(60000, 70000);
-        add_move += rand_number(60000, 70000);
-        add_mana += rand_number(60000, 70000);
+        add_hp += Random::get<int>(60000, 70000);
+        add_move += Random::get<int>(60000, 70000);
+        add_mana += Random::get<int>(60000, 70000);
         break;
     case 60:
-        add_hp += rand_number(80000, 100000);
-        add_move += rand_number(80000, 100000);
-        add_mana += rand_number(80000, 100000);
+        add_hp += Random::get<int>(80000, 100000);
+        add_move += Random::get<int>(80000, 100000);
+        add_mana += Random::get<int>(80000, 100000);
         break;
     case 70:
-        add_hp += rand_number(100000, 150000);
-        add_move += rand_number(100000, 150000);
-        add_mana += rand_number(100000, 150000);
+        add_hp += Random::get<int>(100000, 150000);
+        add_move += Random::get<int>(100000, 150000);
+        add_mana += Random::get<int>(100000, 150000);
         break;
     case 80:
-        add_hp += rand_number(150000, 200000);
-        add_move += rand_number(150000, 200000);
-        add_mana += rand_number(150000, 200000);
+        add_hp += Random::get<int>(150000, 200000);
+        add_move += Random::get<int>(150000, 200000);
+        add_mana += Random::get<int>(150000, 200000);
         break;
     case 90:
-        add_hp += rand_number(150000, 200000);
-        add_move += rand_number(150000, 200000);
-        add_mana += rand_number(150000, 200000);
+        add_hp += Random::get<int>(150000, 200000);
+        add_move += Random::get<int>(150000, 200000);
+        add_mana += Random::get<int>(150000, 200000);
         break;
     case 99:
-        add_hp += rand_number(1500000, 2000000);
-        add_move += rand_number(1500000, 2000000);
-        add_mana += rand_number(1500000, 2000000);
+        add_hp += Random::get<int>(1500000, 2000000);
+        add_move += Random::get<int>(1500000, 2000000);
+        add_mana += Random::get<int>(1500000, 2000000);
         break;
     case 100:
-        add_hp += rand_number(5000000, 6000000);
-        add_move += rand_number(5000000, 6000000);
-        add_mana += rand_number(5000000, 6000000);
+        add_hp += Random::get<int>(5000000, 6000000);
+        add_move += Random::get<int>(5000000, 6000000);
+        add_mana += Random::get<int>(5000000, 6000000);
         break;
     }
     /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
@@ -875,7 +877,7 @@ void advance_level(Character *ch)
     }
     else
     {
-        ch->gainBaseStat("health", rand_number(1, 20));
+        ch->gainBaseStat("health", Random::get<int>(1, 20));
 
         for (auto c : {"health", "ki", "stamina"})
         {
@@ -896,10 +898,10 @@ void advance_level(Character *ch)
     }
 
     /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
-    if (rand_number(1, 4) == 4)
+    if (Random::get<int>(1, 4) == 4)
     {
         ch->sendText("@D[@mPractice Session Bonus!@D]@n\r\n");
-        add_prac += rand_number(4, 12);
+        add_prac += Random::get<int>(4, 12);
     }
 
     if ((IS_DEMON(ch) || IS_KANASSAN(ch)) && lvl > 80)
@@ -954,12 +956,12 @@ void advance_level(Character *ch)
         ch->modBaseStat<int>("skill_slots", 1);
         ch->sendText("@CYou feel like you could remember a new skill!@n\r\n");
     }
-    if (IS_NAMEK(ch) && rand_number(1, 100) <= 5)
+    if (IS_NAMEK(ch) && Random::get<int>(1, 100) <= 5)
     {
         ch->modBaseStat<int>("skill_slots", 1);
         ch->sendText("@CYou feel as though you could learn another skill.@n\r\n");
     }
-    if (IS_ICER(ch) && rand_number(1, 100) <= 25)
+    if (IS_ICER(ch) && Random::get<int>(1, 100) <= 25)
     {
         bring_to_cap(ch);
         ch->sendText("@GYou feel your body obtain its current optimal strength!@n\r\n");
@@ -990,7 +992,7 @@ void advance_level(Character *ch)
         {
             while (raise == false)
             {
-                if (auto agi = ch->getBaseStat("agility"); agi < 100 && rand_number(1, 2) == 2 && stat_fail != 1)
+                if (auto agi = ch->getBaseStat("agility"); agi < 100 && Random::get<int>(1, 2) == 2 && stat_fail != 1)
                 {
                     if (agi < 45 || GET_BONUS(ch, BONUS_CLUMSY) <= 0)
                     {
@@ -1028,7 +1030,7 @@ void advance_level(Character *ch)
         {
             while (raise == false)
             {
-                if (auto con = ch->getBaseStat("constitution"); con < 100 && rand_number(1, 2) == 2 && stat_fail != 1)
+                if (auto con = ch->getBaseStat("constitution"); con < 100 && Random::get<int>(1, 2) == 2 && stat_fail != 1)
                 {
                     if (con < 45 || GET_BONUS(ch, BONUS_FRAIL) <= 0)
                     {
@@ -1066,7 +1068,7 @@ void advance_level(Character *ch)
         {
             while (raise == false)
             {
-                if (auto str = ch->getBaseStat("strength"); str < 100 && rand_number(1, 2) == 2 && stat_fail != 1)
+                if (auto str = ch->getBaseStat("strength"); str < 100 && Random::get<int>(1, 2) == 2 && stat_fail != 1)
                 {
                     if (str < 45 || GET_BONUS(ch, BONUS_WIMP) <= 0)
                     {
@@ -1105,7 +1107,7 @@ void advance_level(Character *ch)
     strcat(buf, ".\r\n");
     ch->send_to("%s", buf);
 
-    if (GET_SKILL(ch, SKILL_POTENTIAL) && rand_number(1, 4) == 4)
+    if (GET_SKILL(ch, SKILL_POTENTIAL) && Random::get<int>(1, 4) == 4)
     {
         ch->sendText("You can now perform another Potential Release.\r\n");
         ch->modBaseStat<int>("boosts", 1);
@@ -1499,7 +1501,7 @@ int8_t dex_mod_capped(Character *ch)
     armor = GET_EQ(ch, WEAR_BODY);
     if (armor && GET_OBJ_TYPE(armor) == ITEM_ARMOR)
     {
-        mod = MIN(mod, GET_OBJ_VAL(armor, VAL_ARMOR_MAXDEXMOD));
+        mod = std::min<int8_t>(mod, GET_OBJ_VAL(armor, VAL_ARMOR_MAXDEXMOD));
     }
     return mod;
 }
@@ -1568,7 +1570,7 @@ time_t birth_age(Character *ch)
 {
     int tmp;
 
-    tmp = rand_number(16, 18);
+    tmp = Random::get<int>(16, 18);
 
     return tmp;
 }

@@ -7,9 +7,11 @@
  *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
  *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
  ************************************************************************ */
-#include <filesystem>
-#include <fstream>
-#include <boost/algorithm/string.hpp>
+#include "dbat/Character.h"
+#include "dbat/Object.h"
+#include "dbat/Room.h"
+#include "dbat/Destination.h"
+#include "dbat/Descriptor.h"
 #include "dbat/ban.h"
 #include "dbat/send.h"
 #include "dbat/comm.h"
@@ -83,11 +85,11 @@ int isbanned(char *hostname)
 
     i = 0;
     for (nextchar = hostname; *nextchar; nextchar++)
-        *nextchar = LOWER(*nextchar);
+        *nextchar = tolower(*nextchar);
 
     for (banned_node = ban_list; banned_node; banned_node = banned_node->next)
         if (strstr(hostname, banned_node->site)) /* if hostname is a substring */
-            i = MAX(i, banned_node->type);
+            i = std::max(i, banned_node->type);
 
     return (i);
 }
@@ -156,14 +158,14 @@ ACMD(do_ban)
         ch->sendText("Usage: ban {all | select | new} site_name\r\n");
         return;
     }
-    if (!(!strcasecmp(flag, "select") || !strcasecmp(flag, "all") || !strcasecmp(flag, "new")))
+    if (!(boost::iequals(flag, "select") || boost::iequals(flag, "all") || boost::iequals(flag, "new")))
     {
         ch->sendText("Flag must be ALL, SELECT, or NEW.\r\n");
         return;
     }
     for (ban_node = ban_list; ban_node; ban_node = ban_node->next)
     {
-        if (!strcasecmp(ban_node->site, site))
+        if (boost::iequals(ban_node->site, site))
         {
             ch->sendText("That site has already been banned -- unban it to change the ban type.\r\n");
             return;
@@ -173,20 +175,20 @@ ACMD(do_ban)
     CREATE(ban_node, struct ban_list_element, 1);
     strncpy(ban_node->site, site, BANNED_SITE_LENGTH); /* strncpy: OK (b_n->site:BANNED_SITE_LENGTH+1) */
     for (nextchar = ban_node->site; *nextchar; nextchar++)
-        *nextchar = LOWER(*nextchar);
+        *nextchar = tolower(*nextchar);
     ban_node->site[BANNED_SITE_LENGTH] = '\0';
     strncpy(ban_node->name, GET_NAME(ch), MAX_NAME_LENGTH); /* strncpy: OK (b_n->size:MAX_NAME_LENGTH+1) */
     ban_node->name[MAX_NAME_LENGTH] = '\0';
     ban_node->date = time(nullptr);
 
     for (i = BAN_NEW; i <= BAN_ALL; i++)
-        if (!strcasecmp(flag, ban_types[i]))
+        if (boost::iequals(flag, ban_types[i]))
             ban_node->type = i;
 
     ban_node->next = ban_list;
     ban_list = ban_node;
 
-    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "%s has banned %s for %s players.",
+    mudlog(NRM, std::max(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "%s has banned %s for %s players.",
            GET_NAME(ch), site, ban_types[ban_node->type]);
     ch->sendText("Site banned.\r\n");
     write_ban_list();
@@ -209,7 +211,7 @@ ACMD(do_unban)
     ban_node = ban_list;
     while (ban_node && !found)
     {
-        if (!strcasecmp(ban_node->site, site))
+        if (boost::iequals(ban_node->site, site))
             found = 1;
         else
             ban_node = ban_node->next;
@@ -222,7 +224,7 @@ ACMD(do_unban)
     }
     REMOVE_FROM_LIST(ban_node, ban_list, next, temp);
     ch->sendText("Site unbanned.\r\n");
-    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "%s removed the %s-player ban on %s.",
+    mudlog(NRM, std::max(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "%s removed the %s-player ban on %s.",
            GET_NAME(ch), ban_types[ban_node->type], ban_node->site);
 
     free(ban_node);

@@ -4,7 +4,7 @@
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
 #include "dbat/gengld.h"
-#include "dbat/shop.h"
+#include "dbat/Shop.h"
 #include "dbat/genolc.h"
 #include "dbat/genzon.h"
 #include "dbat/utils.h"

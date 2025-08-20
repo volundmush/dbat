@@ -1,22 +1,45 @@
-/* ************************************************************************
-*   File: shop.h                                        Part of CircleMUD *
-*  Usage: shop file definitions, structures, constants                    *
-*                                                                         *
-*  All rights reserved.  See license.doc for complete information.        *
-*                                                                         *
-*  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
-*  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
-************************************************************************ */
 #pragma once
+#include "templates.h"
+#include "HasOrganizationInfo.h"
 
-#include "structs.h"
+struct shop_buy_data {
+    int type{};
+    std::string keywords{};
+};
+
+struct shop_data : public org_data {
+    ~shop_data();
+    void add_product(obj_vnum v);
+    void remove_product(obj_vnum v);
+    std::vector<obj_vnum> producing{};        /* Which item to produce (virtual)	*/
+    float profit_buy{};        /* Factor to multiply cost with		*/
+    float profit_sell{};        /* Factor to multiply cost with		*/
+    std::vector<shop_buy_data> type{};    /* Which items to trade			*/
+    char *no_such_item1{};        /* Message if keeper hasn't got an item	*/
+    char *no_such_item2{};        /* Message if player hasn't got an item	*/
+    char *missing_cash1{};        /* Message if keeper hasn't got cash	*/
+    char *missing_cash2{};        /* Message if player hasn't got cash	*/
+    char *do_not_buy{};        /* If keeper dosn't buy such things	*/
+    char *message_buy{};        /* Message when player buys item	*/
+    char *message_sell{};        /* Message when player sells item	*/
+    int temper1{};        /* How does keeper react if no money	*/
+    FlagHandler<ShopFlag> shop_flags{};    /* Can attack? Use bank? Cast here?	*/
+
+    std::unordered_set<room_vnum> in_room;        /* Where is the shop?			*/
+    int open1{}, open2{};        /* When does the shop open?		*/
+    int close1{}, close2{};    /* When does the shop close?		*/
+    int bankAccount{};        /* Store all gold over 15000 (disabled)	*/
+    int lastsort{};        /* How many items are sorted in inven?	*/
+
+    bool isProducing(obj_vnum vn);
+    void runPurge();
+};
+
 
 extern void shop_purge(uint64_t heartPulse, double deltaTime);
 
 #define BUY_TYPE(i)        ((i).type)
 #define BUY_WORD(i)        ((i).keywords.c_str())
-
-
 
 
 constexpr int MAX_TRADE = 5;    /* List maximums for compatibility	*/

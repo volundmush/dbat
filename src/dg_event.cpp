@@ -1,3 +1,4 @@
+#include "dbat/DgScript.h"
 #include "dbat/dg_event.h"
 #include "dbat/dg_scripts.h"
 #include "dbat/filter.h"

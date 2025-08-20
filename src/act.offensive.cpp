@@ -7,9 +7,14 @@
  *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
  *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
  ************************************************************************ */
-
+#include "dbat/Character.h"
+#include "dbat/Object.h"
+#include "dbat/Room.h"
+#include "dbat/Destination.h"
+#include "dbat/Descriptor.h"
 #include "dbat/act.offensive.h"
 #include "dbat/act.attack.h"
+#include "dbat/act.movement.h"
 #include "dbat/interpreter.h"
 #include "dbat/combat.h"
 #include "dbat/comm.h"
@@ -18,7 +23,7 @@
 #include "dbat/handler.h"
 #include "dbat/constants.h"
 #include "dbat/fight.h"
-#include "dbat/guild.h"
+#include "dbat/Guild.h"
 #include "dbat/class.h"
 #include "dbat/techniques.h"
 #include "dbat/attack.h"
@@ -175,7 +180,7 @@ ACMD(do_geno)
     }
 
     prob = init_skill(ch, SKILL_GENOCIDE); /* Set skill value */
-    perc = rand_number(1, 115);
+    perc = Random::get<int>(1, 115);
 
     if (prob < perc - 20)
     {
@@ -298,7 +303,7 @@ ACMD(do_genki)
     }
 
     prob = init_skill(ch, SKILL_GENKIDAMA); /* Set skill value */
-    perc = rand_number(1, 115);
+    perc = Random::get<int>(1, 115);
 
     if (prob < perc - 20)
     {
@@ -718,7 +723,7 @@ ACMD(do_blessedhammer)
                 /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
                 break;
             }
-            if (!AFF_FLAGGED(vict, AFF_BURNED) && rand_number(1, 4) == 3 && !IS_DEMON(vict))
+            if (!AFF_FLAGGED(vict, AFF_BURNED) && Random::get<int>(1, 4) == 3 && !IS_DEMON(vict))
             {
                 vict->sendText("@RYou are burned by the attack!@n\r\n");
                 ch->sendText("@RThey are burned by the attack!@n\r\n");
@@ -949,15 +954,15 @@ ACMD(do_charge)
         ch->sendText("[ 1 - 100 | cancel | release]\r\n");
         return;
     }
-    else if (!strcasecmp("release", arg) && (PLR_FLAGGED(ch, PLR_CHARGE) && GET_CHARGE(ch) <= 0))
+    else if (boost::iequals("release", arg) && (PLR_FLAGGED(ch, PLR_CHARGE) && GET_CHARGE(ch) <= 0))
     {
         ch->sendText("Try cancel instead, you have nothing charged up yet!\r\n");
         return;
     }
-    else if (!strcasecmp("release", arg) && (PLR_FLAGGED(ch, PLR_CHARGE) && GET_CHARGE(ch) > 0))
+    else if (boost::iequals("release", arg) && (PLR_FLAGGED(ch, PLR_CHARGE) && GET_CHARGE(ch) > 0))
     {
         ch->sendText("You stop charging and release your pent up energy.\r\n");
-        switch (rand_number(1, 3))
+        switch (Random::get<int>(1, 3))
         {
         case 1:
             act("$n@w's aura disappears.@n", true, ch, nullptr, nullptr, TO_ROOM);
@@ -980,10 +985,10 @@ ACMD(do_charge)
         characterSubscriptions.unsubscribe("kiLeakingSystem", ch);
         return;
     }
-    else if (!strcasecmp("release", arg) && GET_CHARGE(ch) > 0)
+    else if (boost::iequals("release", arg) && GET_CHARGE(ch) > 0)
     {
         ch->sendText("You release your pent up energy.\r\n");
-        switch (rand_number(1, 3))
+        switch (Random::get<int>(1, 3))
         {
         case 1:
             act("$n@w's aura disappears.@n", true, ch, nullptr, nullptr, TO_ROOM);
@@ -1005,10 +1010,10 @@ ACMD(do_charge)
         characterSubscriptions.unsubscribe("kiLeakingSystem", ch);
         return;
     }
-    else if (!strcasecmp("cancel", arg) && PLR_FLAGGED(ch, PLR_CHARGE))
+    else if (boost::iequals("cancel", arg) && PLR_FLAGGED(ch, PLR_CHARGE))
     {
         ch->sendText("You stop charging.\r\n");
-        switch (rand_number(1, 3))
+        switch (Random::get<int>(1, 3))
         {
         case 1:
             act("$n@w's aura disappears.@n", true, ch, nullptr, nullptr, TO_ROOM);
@@ -1028,7 +1033,7 @@ ACMD(do_charge)
         characterSubscriptions.unsubscribe("chargeMoreKi", ch);
         return;
     }
-    else if (!strcasecmp("cancel", arg) && !PLR_FLAGGED(ch, PLR_CHARGE))
+    else if (boost::iequals("cancel", arg) && !PLR_FLAGGED(ch, PLR_CHARGE))
     {
         ch->sendText("You are not even charging!\r\n");
         return;
@@ -1059,7 +1064,7 @@ ACMD(do_charge)
             else if (chance > 15)
                 chance = 15;
 
-            if (chance > rand_number(1, 100))
+            if (chance > Random::get<int>(1, 100))
             {
                 ch->sendText("The rush of ki that you try to pool temporarily overwhelms you and you lose control!\r\n");
                 null_affect(ch, AFF_SPIRITCONTROL);
@@ -1197,7 +1202,7 @@ ACMD(do_rescue)
         {
             mobbonus = GET_SPEEDI(ch) * 0.2;
         }
-        if (GET_SPEEDI(ch) + mobbonus < GET_SPEEDI(opponent) && rand_number(1, 3) != 3)
+        if (GET_SPEEDI(ch) + mobbonus < GET_SPEEDI(opponent) && Random::get<int>(1, 3) != 3)
         {
             act("@GYou leap towards @g$N@G and try to rescue $M but are too slow!@n", true, ch, nullptr, helpee,
                 TO_CHAR);
@@ -1211,8 +1216,8 @@ ACMD(do_rescue)
         act("@g$n@G leaps in front of you! You are rescued!@n", true, ch, nullptr, helpee, TO_VICT);
         act("@g$n@G leaps in front of @g$N@G and rescues $M!@n", true, ch, nullptr, helpee, TO_NOTVICT);
         stop_fighting(opponent);
-        hurt(0, 0, ch, opponent, nullptr, rand_number(1, GET_STR(ch)), 1);
-        hurt(0, 0, opponent, ch, nullptr, rand_number(1, GET_STR(ch)), 1);
+        hurt(0, 0, ch, opponent, nullptr, Random::get<int>(1, GET_STR(ch)), 1);
+        hurt(0, 0, opponent, ch, nullptr, Random::get<int>(1, GET_STR(ch)), 1);
         return;
     }
 }
@@ -1257,7 +1262,7 @@ ACMD(do_assist)
 
         if (!opponent)
             act("But nobody is fighting $M!", true, ch, nullptr, helpee, TO_CHAR);
-        else if (!CAN_SEE(ch, opponent))
+    else if (!ch->canSee(opponent))
             act("You can't see who is fighting $M!", true, ch, nullptr, helpee, TO_CHAR);
         /* prevent accidental pkill */
         else
@@ -1373,12 +1378,12 @@ ACMD(do_flee)
             }
             else
             {
-                attempt = rand_number(0, NUM_OF_DIRS - 1); /* Select a random direction */
+                attempt = Random::get<int>(0, NUM_OF_DIRS - 1); /* Select a random direction */
             }
         }
         if (!*arg)
         {
-            attempt = rand_number(0, NUM_OF_DIRS - 1); /* Select a random direction */
+            attempt = Random::get<int>(0, NUM_OF_DIRS - 1); /* Select a random direction */
         }
     auto att = ch->location.getExit(static_cast<Direction>(attempt));
     if (att && !att->exit_flags[EX_CLOSED])

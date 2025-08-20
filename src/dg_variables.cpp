@@ -7,8 +7,15 @@
  *  $Date: 2004/10/11 12:07:00 $                                           *
  *  $Revision: 1.0.14 $                                                    *
  **************************************************************************/
-#include <boost/algorithm/string.hpp>
-
+#include "dbat/Character.h"
+#include "dbat/Object.h"
+#include "dbat/Room.h"
+#include "dbat/DgScript.h"
+#include "dbat/DgScriptPrototype.h"
+#include "dbat/ObjectPrototype.h"
+#include "dbat/CharacterPrototype.h"
+#include "dbat/Location.h"
+#include "dbat/Zone.h"
 #include "dbat/structs.h"
 #include "dbat/dg_scripts.h"
 #include "dbat/send.h"
@@ -23,7 +30,6 @@
 #include "dbat/oasis.h"
 #include "dbat/class.h"
 #include "dbat/races.h"
-#include "dbat/random.h"
 
 /* Utility functions */
 
@@ -134,14 +140,14 @@ int text_processed(char *field, char *subfield, char *value,
     char *p, *p2;
     char tmpvar[MAX_STRING_LENGTH];
 
-    if (!strcasecmp(field, "strlen"))
+    if (boost::iequals(field, "strlen"))
     { /* strlen    */
         char limit[200];
         sprintf(limit, "%" SZT, strlen(value));
         snprintf(str, slen, "%d", atoi(limit));
         return true;
     }
-    else if (!strcasecmp(field, "trim"))
+    else if (boost::iequals(field, "trim"))
     { /* trim      */
         /* trim whitespace from ends */
         snprintf(tmpvar, sizeof(tmpvar) - 1, "%s", value); /* -1 to use later*/
@@ -160,7 +166,7 @@ int text_processed(char *field, char *subfield, char *value,
         snprintf(str, slen, "%s", p);
         return true;
     }
-    else if (!strcasecmp(field, "contains"))
+    else if (boost::iequals(field, "contains"))
     { /* contains  */
         if (str_str(value, subfield))
             strcpy(str, "1");
@@ -168,7 +174,7 @@ int text_processed(char *field, char *subfield, char *value,
             strcpy(str, "0");
         return true;
     }
-    else if (!strcasecmp(field, "car"))
+    else if (boost::iequals(field, "car"))
     { /* car       */
         char *car = value;
         while (*car && !isspace(*car))
@@ -176,7 +182,7 @@ int text_processed(char *field, char *subfield, char *value,
         *str = '\0';
         return true;
     }
-    else if (!strcasecmp(field, "cdr"))
+    else if (boost::iequals(field, "cdr"))
     { /* cdr       */
         char *cdr = value;
         while (*cdr && !isspace(*cdr))
@@ -187,7 +193,7 @@ int text_processed(char *field, char *subfield, char *value,
         snprintf(str, slen, "%s", cdr);
         return true;
     }
-    else if (!strcasecmp(field, "charat"))
+    else if (boost::iequals(field, "charat"))
     { /* CharAt    */
         size_t len = strlen(value), dgindex = atoi(subfield);
         if (dgindex > len || dgindex < 1)
@@ -196,7 +202,7 @@ int text_processed(char *field, char *subfield, char *value,
             snprintf(str, slen, "%c", value[dgindex - 1]);
         return true;
     }
-    else if (!strcasecmp(field, "mudcommand"))
+    else if (boost::iequals(field, "mudcommand"))
     {
         /* find the mud command returned from this text */
         /* NOTE: you may need to replace "cmd_info" with "complete_cmd_info", */
@@ -272,46 +278,46 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
         else
         {
             auto col = static_cast<int>(type);
-            if (!strcasecmp(var, "self"))
+            if (boost::iequals(var, "self"))
             {
                 auto uid = unit->getUID(true);
                 snprintf(str, slen, "%s", uid.c_str());
             }
-            else if (!strcasecmp(var, "global"))
+            else if (boost::iequals(var, "global"))
             {
                 /* so "remote varname %global%" will work */
                 snprintf(str, slen, "%s", get_room(0)->getUID(true).c_str());
                 return;
             }
-            else if (!strcasecmp(var, "ctime"))
+            else if (boost::iequals(var, "ctime"))
                 snprintf(str, slen, "%ld", time(nullptr));
-            else if (!strcasecmp(var, "door"))
+            else if (boost::iequals(var, "door"))
                 snprintf(str, slen, "%s", door[col]);
-            else if (!strcasecmp(var, "force"))
+            else if (boost::iequals(var, "force"))
                 snprintf(str, slen, "%s", force[col]);
-            else if (!strcasecmp(var, "load"))
+            else if (boost::iequals(var, "load"))
                 snprintf(str, slen, "%s", load[col]);
-            else if (!strcasecmp(var, "purge"))
+            else if (boost::iequals(var, "purge"))
                 snprintf(str, slen, "%s", purge[col]);
-            else if (!strcasecmp(var, "teleport"))
+            else if (boost::iequals(var, "teleport"))
                 snprintf(str, slen, "%s", teleport[col]);
-            else if (!strcasecmp(var, "damage"))
+            else if (boost::iequals(var, "damage"))
                 snprintf(str, slen, "%s", xdamage[col]);
-            else if (!strcasecmp(var, "send"))
+            else if (boost::iequals(var, "send"))
                 snprintf(str, slen, "%s", send_cmd[col]);
-            else if (!strcasecmp(var, "echo"))
+            else if (boost::iequals(var, "echo"))
                 snprintf(str, slen, "%s", echo_cmd[col]);
-            else if (!strcasecmp(var, "echoaround"))
+            else if (boost::iequals(var, "echoaround"))
                 snprintf(str, slen, "%s", echoaround_cmd[col]);
-            else if (!strcasecmp(var, "zoneecho"))
+            else if (boost::iequals(var, "zoneecho"))
                 snprintf(str, slen, "%s", zoneecho[col]);
-            else if (!strcasecmp(var, "asound"))
+            else if (boost::iequals(var, "asound"))
                 snprintf(str, slen, "%s", asound[col]);
-            else if (!strcasecmp(var, "at"))
+            else if (boost::iequals(var, "at"))
                 snprintf(str, slen, "%s", at[col]);
-            else if (!strcasecmp(var, "transform"))
+            else if (boost::iequals(var, "transform"))
                 snprintf(str, slen, "%s", transform[col]);
-            else if (!strcasecmp(var, "recho"))
+            else if (boost::iequals(var, "recho"))
                 snprintf(str, slen, "%s", recho[col]);
             else
                 *str = '\0';
@@ -376,7 +382,7 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
         }
         else
         {
-            if (!strcasecmp(var, "self"))
+            if (boost::iequals(var, "self"))
             {
                 c = nullptr;
                 r = nullptr;
@@ -394,7 +400,7 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
                     break;
                 }
             }
-            else if (!strcasecmp(var, "global"))
+            else if (boost::iequals(var, "global"))
             {
                 script_data *thescript = SCRIPT(get_room(0));
                 *str = '\0';
@@ -404,7 +410,7 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
                     return;
                 }
                 for (const auto &[key, val] : thescript->variables)
-                    if (!strcasecmp(key.c_str(), field))
+                    if (boost::iequals(key.c_str(), field))
                     {
                         found = val;
                         break;
@@ -415,24 +421,24 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
 
                 return;
             }
-            else if (!strcasecmp(var, "people"))
+            else if (boost::iequals(var, "people"))
             {
                 snprintf(str, slen, "%d", ((num = atoi(field)) > 0) ? trgvar_in_room(num) : 0);
                 return;
             }
-            else if (!strcasecmp(var, "time"))
+            else if (boost::iequals(var, "time"))
             {
-                if (!strcasecmp(field, "hour"))
+                if (boost::iequals(field, "hour"))
                     snprintf(str, slen, "%d", time_info.hours);
-                else if (!strcasecmp(field, "minute"))
+                else if (boost::iequals(field, "minute"))
                     snprintf(str, slen, "%d", time_info.minutes);
-                else if (!strcasecmp(field, "second"))
+                else if (boost::iequals(field, "second"))
                     snprintf(str, slen, "%d", time_info.seconds);
-                else if (!strcasecmp(field, "day"))
+                else if (boost::iequals(field, "day"))
                     snprintf(str, slen, "%d", time_info.day + 1);
-                else if (!strcasecmp(field, "month"))
+                else if (boost::iequals(field, "month"))
                     snprintf(str, slen, "%d", time_info.month + 1);
-                else if (!strcasecmp(field, "year"))
+                else if (boost::iequals(field, "year"))
                     snprintf(str, slen, "%ld", time_info.year);
                 else
                     *str = '\0';
@@ -460,7 +466,7 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
             **/
 
             /* addition inspired by Jamie Nelson - mordecai@xtra.co.nz */
-            else if (!strcasecmp(var, "findmob"))
+            else if (boost::iequals(var, "findmob"))
             {
                 if (!field || !*field || !subfield || !*subfield)
                 {
@@ -491,7 +497,7 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
                 }
             }
             /* addition inspired by Jamie Nelson - mordecai@xtra.co.nz */
-            else if (!strcasecmp(var, "findobj"))
+            else if (boost::iequals(var, "findobj"))
             {
                 if (!field || !*field || !subfield || !*subfield)
                 {
@@ -515,9 +521,9 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
                     }
                 }
             }
-            else if (!strcasecmp(var, "random"))
+            else if (boost::iequals(var, "random"))
             {
-                if (!strcasecmp(field, "char"))
+                if (boost::iequals(field, "char"))
                 {
                     rndm = nullptr;
                     count = 0;
@@ -528,9 +534,9 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
                         auto people = ch->location.getPeople();
                         for (auto c : filter_raw(people))
                             if ((c != ch) && valid_dg_target(c, DG_ALLOW_GODS) &&
-                                CAN_SEE(ch, c))
+                                ch->canSee(c))
                             {
-                                if (!rand_number(0, count))
+                                if (!Random::get<int>(0, count))
                                     rndm = c;
                                 count++;
                             }
@@ -541,7 +547,7 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
                         for (auto c : filter_raw(people))
                             if (valid_dg_target(c, DG_ALLOW_GODS))
                             {
-                                if (!rand_number(0, count))
+                                if (!Random::get<int>(0, count))
                                     rndm = c;
                                 count++;
                             }
@@ -553,7 +559,7 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
                             if (valid_dg_target(c, DG_ALLOW_GODS))
                             {
 
-                                if (!rand_number(0, count))
+                                if (!Random::get<int>(0, count))
                                     rndm = c;
                                 count++;
                             }
@@ -564,7 +570,7 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
                     else
                         *str = '\0';
                 }
-                else if (!strcasecmp(field, "dir"))
+                else if (boost::iequals(field, "dir"))
                 {
                     room_rnum in_room = NOWHERE;
 
@@ -603,7 +609,7 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
                     }
                 }
                 else
-                    snprintf(str, slen, "%d", ((num = atoi(field)) > 0) ? rand_number(1, num) : 0);
+                    snprintf(str, slen, "%d", ((num = atoi(field)) > 0) ? Random::get<int>(1, num) : 0);
 
                 return;
             }
@@ -618,7 +624,7 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
         if (c)
         {
 
-            if (!strcasecmp(field, "global"))
+            if (boost::iequals(field, "global"))
             { /* get global of something else */
                 if (IS_NPC(c))
                 {
@@ -635,14 +641,14 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
                 return;
             }
 
-            switch (LOWER(*field))
+            switch (tolower(*field))
             {
             case 'a':
-                if (!strcasecmp(field, "aaaaa"))
+                if (boost::iequals(field, "aaaaa"))
                 {
                     strcpy(str, "0");
                 }
-                else if (!strcasecmp(field, "affect"))
+                else if (boost::iequals(field, "affect"))
                 {
                     if (subfield && *subfield)
                     {
@@ -655,10 +661,10 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
                     else
                         strcpy(str, "0");
                 }
-                else if (!strcasecmp(field, "alias"))
+                else if (boost::iequals(field, "alias"))
                     snprintf(str, slen, "%s", GET_PC_NAME(c));
 
-                else if (!strcasecmp(field, "align"))
+                else if (boost::iequals(field, "align"))
                 {
                     if (subfield && *subfield)
                     {
@@ -669,25 +675,25 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
                 }
                 break;
             case 'c':
-                if (!strcasecmp(field, "canbeseen"))
+                if (boost::iequals(field, "canbeseen"))
                 {
-                    if ((type == MOB_TRIGGER) && !CAN_SEE(((Character *)go), c))
+                    if ((type == MOB_TRIGGER) && !((Character *)go)->canSee(c))
                         strcpy(str, "0");
                     else
                         strcpy(str, "1");
                 }
-                else if (!strcasecmp(field, "carry"))
+                else if (boost::iequals(field, "carry"))
                 {
                     if (!IS_NPC(c) && CARRYING(c))
                         strcpy(str, "1");
                     else
                         strcpy(str, "0");
                 }
-                else if (!strcasecmp(field, "clan"))
+                else if (boost::iequals(field, "clan"))
                 {
                     strcpy(str, "0");
                 }
-                else if (!strcasecmp(field, "class"))
+                else if (boost::iequals(field, "class"))
                 {
                     if (!IS_NPC(c))
                         snprintf(str, slen, "%s", sensei::getName(c->sensei).c_str());
@@ -696,11 +702,11 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
                 }
                 break;
             case 'd':
-                if (!strcasecmp(field, "death"))
+                if (boost::iequals(field, "death"))
                 {
                     snprintf(str, slen, "%ld", GET_DTIME(c));
                 }
-                else if (!strcasecmp(field, "drag"))
+                else if (boost::iequals(field, "drag"))
                 {
                     if (!IS_NPC(c) && DRAGGING(c))
                         strcpy(str, "1");
@@ -709,7 +715,7 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
                 }
                 break;
             case 'e':
-                if (!strcasecmp(field, "eq"))
+                if (boost::iequals(field, "eq"))
                 {
                     int pos;
                     if (!subfield || !*subfield)
@@ -732,7 +738,7 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
                     else
                         snprintf(str, slen, "%s", ((((c)->getEquipSlot(pos)))->getUID(true).c_str()));
                 }
-                if (!strcasecmp(field, "exp"))
+                if (boost::iequals(field, "exp"))
                 {
                     if (subfield && *subfield)
                     {
@@ -744,14 +750,14 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
                 }
                 break;
             case 'f':
-                if (!strcasecmp(field, "fighting"))
+                if (boost::iequals(field, "fighting"))
                 {
                     if (FIGHTING(c))
                         snprintf(str, slen, "%s", ((((c)->fighting))->getUID(true).c_str()));
                     else
                         *str = '\0';
                 }
-                else if (!strcasecmp(field, "follower"))
+                else if (boost::iequals(field, "follower"))
                 {
                     if (!c->followers)
                         *str = '\0';
@@ -760,23 +766,23 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
                 }
                 break;
             case 'h':
-                if (!strcasecmp(field, "has_item"))
+                if (boost::iequals(field, "has_item"))
                 {
                     if (!(subfield && *subfield))
                         *str = '\0';
                     else
                         snprintf(str, slen, "%d", char_has_item(subfield, c));
                 }
-                else if (!strcasecmp(field, "hisher"))
+                else if (boost::iequals(field, "hisher"))
                     snprintf(str, slen, "%s", HSHR(c));
 
-                else if (!strcasecmp(field, "heshe"))
+                else if (boost::iequals(field, "heshe"))
                     snprintf(str, slen, "%s", HSSH(c));
 
-                else if (!strcasecmp(field, "himher"))
+                else if (boost::iequals(field, "himher"))
                     snprintf(str, slen, "%s", HMHR(c));
 
-                else if (!strcasecmp(field, "hitp"))
+                else if (boost::iequals(field, "hitp"))
                 {
                     if (subfield && *subfield)
                     {
@@ -796,15 +802,15 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
                 }
                 break;
             case 'i':
-                if (!strcasecmp(field, "id"))
+                if (boost::iequals(field, "id"))
                     snprintf(str, slen, "%s", c->getUID(true).c_str());
 
                 /* new check for pc/npc status */
-                else if (!strcasecmp(field, "is_pc"))
+                else if (boost::iequals(field, "is_pc"))
                 {
                     strcpy(str, !IS_NPC(c) ? "1" : "0");
                 }
-                else if (!strcasecmp(field, "inventory"))
+                else if (boost::iequals(field, "inventory"))
                 {
                     if (subfield && *subfield)
                     {
@@ -835,11 +841,11 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
                 }
                 break;
             case 'l':
-                if (!strcasecmp(field, "level"))
+                if (boost::iequals(field, "level"))
                     snprintf(str, slen, "%d", GET_LEVEL(c));
                 break;
             case 'm':
-                if (!strcasecmp(field, "maxhitp"))
+                if (boost::iequals(field, "maxhitp"))
                 {
                     if (subfield && *subfield)
                     {
@@ -848,7 +854,7 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
                     }
                     snprintf(str, slen, "%" I64T "", GET_MAX_HIT(c));
                 }
-                else if (!strcasecmp(field, "mana"))
+                else if (boost::iequals(field, "mana"))
                 {
                     if (subfield && *subfield)
                     {
@@ -864,7 +870,7 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
                     }
                     snprintf(str, slen, "%" I64T "", (c->getCurVital(CharVital::ki)));
                 }
-                else if (!strcasecmp(field, "maxmana"))
+                else if (boost::iequals(field, "maxmana"))
                 {
                     if (subfield && *subfield)
                     {
@@ -873,7 +879,7 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
                     }
                     snprintf(str, slen, "%" I64T "", GET_MAX_MANA(c));
                 }
-                else if (!strcasecmp(field, "move"))
+                else if (boost::iequals(field, "move"))
                 {
                     if (subfield && *subfield)
                     {
@@ -889,7 +895,7 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
                     }
                     snprintf(str, slen, "%" I64T "", (c->getCurVital(CharVital::stamina)));
                 }
-                else if (!strcasecmp(field, "maxmove"))
+                else if (boost::iequals(field, "maxmove"))
                 {
                     if (subfield && *subfield)
                     {
@@ -898,7 +904,7 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
                     }
                     snprintf(str, slen, "%" I64T "", GET_MAX_MOVE(c));
                 }
-                else if (!strcasecmp(field, "master"))
+                else if (boost::iequals(field, "master"))
                 {
                     if (!c->master)
                         *str = '\0';
@@ -907,11 +913,11 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
                 }
                 break;
             case 'n':
-                if (!strcasecmp(field, "name"))
+                if (boost::iequals(field, "name"))
                 {
                     snprintf(str, slen, "%s", GET_NAME(c));
                 }
-                else if (!strcasecmp(field, "next_in_room"))
+                else if (boost::iequals(field, "next_in_room"))
                 {
                     if (auto people = c->location.getPeople(); !people.empty())
                     {
@@ -936,7 +942,7 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
             case 'p':
                 /* Thanks to Christian Ejlertsen for this idea
                    And to Ken Ray for speeding the implementation up :)*/
-                if (!strcasecmp(field, "pos"))
+                if (boost::iequals(field, "pos"))
                 {
                     if (subfield && *subfield)
                     {
@@ -952,7 +958,7 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
                     }
                     snprintf(str, slen, "%s", position_types[GET_POS(c)]);
                 }
-                else if (!strcasecmp(field, "prac"))
+                else if (boost::iequals(field, "prac"))
                 {
                     if (IS_NPC(c))
                     {
@@ -968,7 +974,7 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
                     }
                     snprintf(str, slen, "%d", GET_PRACTICES(c));
                 }
-                else if (!strcasecmp(field, "plr"))
+                else if (boost::iequals(field, "plr"))
                 {
                     if (subfield && *subfield)
                     {
@@ -981,7 +987,7 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
                     else
                         strcpy(str, "0");
                 }
-                else if (!strcasecmp(field, "pref"))
+                else if (boost::iequals(field, "pref"))
                 {
                     if (subfield && *subfield)
                     {
@@ -996,7 +1002,7 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
                 }
                 break;
             case 'r':
-                if (!strcasecmp(field, "room"))
+                if (boost::iequals(field, "room"))
                 { /* in NOWHERE, return the void */
 /* see note in dg_scripts.h */
 #ifdef ACTOR_ROOM_IS_UID
@@ -1009,12 +1015,12 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
 #endif
                 }
 #ifdef GET_RACE
-                else if (!strcasecmp(field, "race"))
+                else if (boost::iequals(field, "race"))
                 {
                     snprintf(str, slen, "%s", race::getName(c->race).c_str());
                 }
 #endif
-                else if (!strcasecmp(field, "rpp"))
+                else if (boost::iequals(field, "rpp"))
                 {
                     if (subfield && *subfield)
                     {
@@ -1027,10 +1033,10 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
 
                 break;
             case 's':
-                if (!strcasecmp(field, "sex"))
+                if (boost::iequals(field, "sex"))
                     snprintf(str, slen, "%s", genders[(int)GET_SEX(c)]);
 
-                else if (!strcasecmp(field, "size"))
+                else if (boost::iequals(field, "size"))
                 {
                     if (subfield && *subfield)
                     {
@@ -1042,10 +1048,10 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
                     }
                     sprinttype(get_size(c), size_names, str, slen);
                 }
-                else if (!strcasecmp(field, "skill"))
+                else if (boost::iequals(field, "skill"))
                     snprintf(str, slen, "%s", skill_percent(c, subfield));
 
-                else if (!strcasecmp(field, "skillset"))
+                else if (boost::iequals(field, "skillset"))
                 {
                     if (!IS_NPC(c) && subfield && *subfield)
                     {
@@ -1066,13 +1072,13 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
                 }
                 break;
             case 't':
-                if (!strcasecmp(field, "tnl"))
+                if (boost::iequals(field, "tnl"))
                 {
                     snprintf(str, slen, "%ld", level_exp(c, GET_LEVEL(c) + 1));
                 }
                 break;
             case 'v':
-                if (!strcasecmp(field, "vnum"))
+                if (boost::iequals(field, "vnum"))
                 {
                     if (subfield && *subfield)
                     {
@@ -1091,14 +1097,14 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
                             strcpy(str, "-1");
                     }
                 }
-                else if (!strcasecmp(field, "varexists"))
+                else if (boost::iequals(field, "varexists"))
                 {
                     snprintf(str, slen, "%d", c->variables.contains(subfield));
                 }
 
                 break;
             case 'w':
-                if (!strcasecmp(field, "weight"))
+                if (boost::iequals(field, "weight"))
                     snprintf(str, slen, "%s", fmt::format("{}", c->getEffectiveStat("weight")).c_str());
 
                 break;
@@ -1124,10 +1130,10 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
         {
 
             *str = '\x1';
-            switch (LOWER(*field))
+            switch (tolower(*field))
             {
             case 'a':
-                if (!strcasecmp(field, "affects"))
+                if (boost::iequals(field, "affects"))
                 {
                     if (subfield && *subfield)
                     {
@@ -1141,7 +1147,7 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
                 }
                 break;
             case 'c':
-                if (!strcasecmp(field, "cost"))
+                if (boost::iequals(field, "cost"))
                 {
                     if (subfield && *subfield)
                     {
@@ -1150,7 +1156,7 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
                     }
                     snprintf(str, slen, "%d", GET_OBJ_COST(o));
                 }
-                else if (!strcasecmp(field, "cost_per_day"))
+                else if (boost::iequals(field, "cost_per_day"))
                 {
                     if (subfield && *subfield)
                     {
@@ -1159,14 +1165,14 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
                     }
                     snprintf(str, slen, "%d", GET_OBJ_RENT(o));
                 }
-                else if (!strcasecmp(field, "carried_by"))
+                else if (boost::iequals(field, "carried_by"))
                 {
                     if (auto carriedby = o->getCarriedBy(); carriedby)
                         snprintf(str, slen, "%s", carriedby->getUID(true).c_str());
                     else
                         *str = '\0';
                 }
-                else if (!strcasecmp(field, "contents"))
+                else if (boost::iequals(field, "contents"))
                 {
                     if (auto con = o->getInventory(); !con.empty())
                     {
@@ -1180,7 +1186,7 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
                         *str = '\0';
                 }
                 /* thanks to Jamie Nelson (Mordecai of 4 Dimensions MUD) */
-                else if (!strcasecmp(field, "count"))
+                else if (boost::iequals(field, "count"))
                 {
                     if (GET_OBJ_TYPE(o) == ITEM_CONTAINER)
                         snprintf(str, slen, "%d", item_in_list(subfield, o->getInventory()));
@@ -1189,7 +1195,7 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
                 }
                 break;
             case 'e':
-                if (!strcasecmp(field, "extra"))
+                if (boost::iequals(field, "extra"))
                 {
                     if (subfield && *subfield)
                     {
@@ -1208,14 +1214,14 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
                 break;
             case 'h':
                 /* thanks to Jamie Nelson (Mordecai of 4 Dimensions MUD) */
-                if (!strcasecmp(field, "has_in"))
+                if (boost::iequals(field, "has_in"))
                 {
                     if (GET_OBJ_TYPE(o) == ITEM_CONTAINER)
                         snprintf(str, slen, "%s", (item_in_list(subfield, o->getInventory()) ? "1" : "0"));
                     else
                         strcpy(str, "0");
                 }
-                if (!strcasecmp(field, "health"))
+                if (boost::iequals(field, "health"))
                 {
                     if (subfield && *subfield)
                     {
@@ -1228,21 +1234,21 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
                 }
                 break;
             case 'i':
-                if (!strcasecmp(field, "id"))
+                if (boost::iequals(field, "id"))
                     snprintf(str, slen, "%s", o->getUID(true).c_str());
 
-                else if (!strcasecmp(field, "is_inroom"))
+                else if (boost::iequals(field, "is_inroom"))
                 {
                     if (auto roomFound = o->getRoom(); roomFound)
                         snprintf(str, slen, "%s", roomFound->getUID(true).c_str());
                     else
                         *str = '\0';
                 }
-                else if (!strcasecmp(field, "is_pc"))
+                else if (boost::iequals(field, "is_pc"))
                 {
                     strcpy(str, "-1");
                 }
-                else if (!strcasecmp(field, "itemflag"))
+                else if (boost::iequals(field, "itemflag"))
                 {
                     if (subfield && *subfield)
                     {
@@ -1257,12 +1263,12 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
                 }
                 break;
             case 'l':
-                if (!strcasecmp(field, "level"))
+                if (boost::iequals(field, "level"))
                     snprintf(str, slen, "%d", GET_OBJ_LEVEL(o));
                 break;
 
             case 'n':
-                if (!strcasecmp(field, "name"))
+                if (boost::iequals(field, "name"))
                 {
                     if (!subfield || !*subfield)
                         snprintf(str, slen, "%s", o->getName());
@@ -1273,7 +1279,7 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
                         o->strings["name"] = blah;
                     }
                 }
-                else if (!strcasecmp(field, "next_in_list"))
+                else if (boost::iequals(field, "next_in_list"))
                 {
                     if (auto con = o->location.getObjects(); !con.empty())
                     {
@@ -1298,7 +1304,7 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
                 }
                 break;
             case 'r':
-                if (!strcasecmp(field, "room"))
+                if (boost::iequals(field, "room"))
                 {
                     if (auto roomFound = get_room(obj_room(o)); roomFound)
                         snprintf(str, slen, "%s", roomFound->getUID(true).c_str());
@@ -1307,7 +1313,7 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
                 }
                 break;
             case 's':
-                if (!strcasecmp(field, "shortdesc"))
+                if (boost::iequals(field, "shortdesc"))
                 {
                     if (!subfield || !*subfield)
                         snprintf(str, slen, "%s", o->getShortDescription());
@@ -1318,7 +1324,7 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
                         o->strings["short_description"] = blah;
                     }
                 }
-                else if (!strcasecmp(field, "setaffects"))
+                else if (boost::iequals(field, "setaffects"))
                 {
                     if (subfield && *subfield)
                     {
@@ -1331,7 +1337,7 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
                         }
                     }
                 }
-                else if (!strcasecmp(field, "setextra"))
+                else if (boost::iequals(field, "setextra"))
                 {
                     if (subfield && *subfield)
                     {
@@ -1344,7 +1350,7 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
                         }
                     }
                 }
-                else if (!strcasecmp(field, "size"))
+                else if (boost::iequals(field, "size"))
                 {
                     if (subfield && *subfield)
                     {
@@ -1358,14 +1364,14 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
                 }
                 break;
             case 't':
-                if (!strcasecmp(field, "type"))
+                if (boost::iequals(field, "type"))
                     sprinttype(GET_OBJ_TYPE(o), item_types, str, slen);
 
-                else if (!strcasecmp(field, "timer"))
+                else if (boost::iequals(field, "timer"))
                     snprintf(str, slen, "%d", GET_OBJ_TIMER(o));
                 break;
             case 'v':
-                if (!strcasecmp(field, "vnum"))
+                if (boost::iequals(field, "vnum"))
                     if (subfield && *subfield)
                     {
                         snprintf(str, slen, "%d", (int)(GET_OBJ_VNUM(o) == atof(subfield)));
@@ -1374,11 +1380,11 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
                     {
                         snprintf(str, slen, "%d", GET_OBJ_VNUM(o));
                     }
-                else if (!strcasecmp(field, "value") && subfield && *subfield)
+                else if (boost::iequals(field, "value") && subfield && *subfield)
                     snprintf(str, slen, "%ld", GET_OBJ_VAL(o, subfield));
                 break;
             case 'w':
-                if (!strcasecmp(field, "weight"))
+                if (boost::iequals(field, "weight"))
                 {
                     if (subfield && *subfield)
                     {
@@ -1394,7 +1400,7 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
                     }
                     snprintf(str, slen, "%s", fmt::format("{}", GET_OBJ_WEIGHT(o)).c_str());
                 }
-                else if (!strcasecmp(field, "worn_by"))
+                else if (boost::iequals(field, "worn_by"))
                 {
                     if (auto worn = o->getWornBy())
                         snprintf(str, slen, "%s", worn->getUID(true).c_str());
@@ -1413,7 +1419,7 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
                 else
                 {
                     *str = '\0';
-                    if (strcasecmp(GET_TRIG_NAME(trig), "Rename Object"))
+                    if (!boost::iequals(GET_TRIG_NAME(trig), "Rename Object"))
                     {
                         script_log("Trigger: %s, VNum %d, type: %d. unknown object field: '%s'",
                                    GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), static_cast<int>(type), field);
@@ -1439,16 +1445,16 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
                 else
                     *str = '\0';
             }
-            else if (!strcasecmp(field, "name"))
+            else if (boost::iequals(field, "name"))
                 snprintf(str, slen, "%s", r->getName());
 
-            else if (!strcasecmp(field, "sector"))
+            else if (boost::iequals(field, "sector"))
                 sprinttype(static_cast<int>(r->sector_type), sector_types, str, slen);
 
-            else if (!strcasecmp(field, "gravity"))
+            else if (boost::iequals(field, "gravity"))
                 snprintf(str, slen, "%d", (int)r->getEnvironment(ENV_GRAVITY));
 
-            else if (!strcasecmp(field, "vnum"))
+            else if (boost::iequals(field, "vnum"))
             {
                 if (subfield && *subfield)
                 {
@@ -1459,7 +1465,7 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
                     snprintf(str, slen, "%d", r->getVnum());
                 }
             }
-            else if (!strcasecmp(field, "contents"))
+            else if (boost::iequals(field, "contents"))
             {
                 if (subfield && *subfield)
                 {
@@ -1492,7 +1498,7 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
                     }
                 }
             }
-            else if (!strcasecmp(field, "people"))
+            else if (boost::iequals(field, "people"))
             {
                 if (auto people = r->getPeople().snapshot_weak(); !people.empty())
                 {
@@ -1505,14 +1511,14 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
                 *str = '\0';
                 return;
             }
-            else if (!strcasecmp(field, "id"))
+            else if (boost::iequals(field, "id"))
             {
                 if (r->getVnum() != NOWHERE)
                     snprintf(str, slen, "%s", r->getUID(true).c_str());
                 else
                     *str = '\0';
             }
-            else if (!strcasecmp(field, "weather"))
+            else if (boost::iequals(field, "weather"))
             {
                 const char *sky_look[] = {
                     "sunny",
@@ -1525,18 +1531,18 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
                 else
                     *str = '\0';
             }
-            else if (!strcasecmp(field, "fishing"))
+            else if (boost::iequals(field, "fishing"))
             {
                 if (ROOM_FLAGGED(r, ROOM_FISHING))
                     snprintf(str, slen, "1");
                 else
                     snprintf(str, slen, "0");
             }
-            else if (!strcasecmp(field, "zonenumber"))
+            else if (boost::iequals(field, "zonenumber"))
                 snprintf(str, slen, "%d", r->zone->number);
-            else if (!strcasecmp(field, "zonename"))
+            else if (boost::iequals(field, "zonename"))
                 snprintf(str, slen, "%s", r->zone->name.c_str());
-            else if (!strcasecmp(field, "roomflag"))
+            else if (boost::iequals(field, "roomflag"))
             {
                 if (subfield && *subfield)
                 {

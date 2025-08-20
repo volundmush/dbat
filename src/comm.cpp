@@ -7,13 +7,12 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
-#include <filesystem>
-#include <fstream>
-#include <thread>
-#include <locale>
-#include <chrono>
-#include <iostream>
-
+#include "dbat/Character.h"
+#include "dbat/Object.h"
+#include "dbat/Room.h"
+#include "dbat/Destination.h"
+#include "dbat/Descriptor.h"
+#include "dbat/Zone.h"
 #include "dbat/comm.h"
 #include "dbat/send.h"
 #include "dbat/config.h"
@@ -42,12 +41,12 @@
 #include "dbat/screen.h"
 
 #include "dbat/players.h"
-#include "dbat/account.h"
+#include "dbat/Account.h"
 #include "dbat/transformation.h"
 #include "dbat/db.h"
 
 #include "dbat/transformation.h"
-#include "dbat/shop.h"
+#include "dbat/Shop.h"
 
 #include "dbat/saveload.h"
 
@@ -1611,6 +1610,8 @@ const char *ACTNULL = "<nullptr>";
 #define CHECK_NULL(pointer, expression) \
   if ((pointer) == nullptr) i = ACTNULL; else i = (expression);
 
+#define ANA(obj) (strchr("aeiouAEIOU", *(obj)->getName()) ? "An" : "A")
+#define SANA(obj) (strchr("aeiouAEIOU", *(obj)->getName()) ? "an" : "a")
 
 /* higher-level communication: the act() function */
 void perform_act(const char *orig, Character *ch, Object *obj, const void *vict_obj, Character *to) {
@@ -1623,57 +1624,99 @@ void perform_act(const char *orig, Character *ch, Object *obj, const void *vict_
 
     buf = lbuf;
 
+    std::string scratch;
+
     for (;;) {
         if (*orig == '$') {
             switch (*(++orig)) {
                 case 'n':
-                    i = PERS(ch, to);
+                    scratch = ch->displayNameFor(to);
+                    i = scratch.c_str();
                     break;
-                case 'N':
-                    CHECK_NULL(vict_obj, PERS((Character *) vict_obj, to));
-                    dg_victim = (Character *) vict_obj;
+                case 'N': {
+                    dg_victim = static_cast<Character*>((void*)vict_obj);
+                    if(dg_victim) {
+                        scratch = dg_victim->displayNameFor(to);
+                        i = scratch.c_str();
+                    } else {
+                        i = ACTNULL;
+                    }
+                }
                     break;
                 case 'm':
                     i = HMHR(ch);
                     break;
-                case 'M':
-                    CHECK_NULL(vict_obj, HMHR((Character *) vict_obj));
-                    dg_victim = (Character *) vict_obj;
+                case 'M': {
+                    dg_victim = static_cast<Character*>((void*)vict_obj);
+                    if(dg_victim) {
+                        i = HMHR(dg_victim);
+                    } else {
+                        i = ACTNULL;
+                    }
+                }
                     break;
                 case 's':
                     i = HSHR(ch);
                     break;
                 case 'S':
-                    CHECK_NULL(vict_obj, HSHR((Character *) vict_obj));
-                    dg_victim = (Character *) vict_obj;
+                {
+                    dg_victim = static_cast<Character*>((void*)vict_obj);
+                    if(dg_victim) {
+                        i = HSHR(dg_victim);
+                    } else {
+                        i = ACTNULL;
+                    }
+                }
                     break;
                 case 'e':
                     i = HSSH(ch);
                     break;
-                case 'E':
-                    CHECK_NULL(vict_obj, HSSH((Character *) vict_obj));
-                    dg_victim = (Character *) vict_obj;
+                case 'E':{
+                    dg_victim = static_cast<Character*>((void*)vict_obj);
+                    if(dg_victim) {
+                        i = HSSH(dg_victim);
+                    } else {
+                        i = ACTNULL;
+                    }
+                }
                     break;
                 case 'o':
                     CHECK_NULL(obj, OBJN(obj, to));
                     break;
-                case 'O':
-                    CHECK_NULL(vict_obj, OBJN((Object *) vict_obj, to));
-                    dg_target = (Object *) vict_obj;
+                case 'O': {
+                    dg_target = static_cast<Object*>((void*)vict_obj);
+                    if(dg_target) {
+                        i = OBJN(dg_target, to);
+                    } else {
+                        i = ACTNULL;
+                    }
+                }
                     break;
                 case 'p':
                     CHECK_NULL(obj, OBJS(obj, to));
                     break;
                 case 'P':
-                    CHECK_NULL(vict_obj, OBJS((Object *) vict_obj, to));
-                    dg_target = (Object *) vict_obj;
+                {
+                    dg_target = static_cast<Object*>((void*)vict_obj);
+                    if(dg_target) {
+                        i = OBJS(dg_target, to);
+                    } else {
+                        i = ACTNULL;
+                    }
+                }
                     break;
                 case 'a':
                     CHECK_NULL(obj, SANA(obj));
                     break;
                 case 'A':
-                    CHECK_NULL(vict_obj, SANA((Object *) vict_obj));
-                    dg_target = (Object *) vict_obj;
+                    {
+                    dg_target = static_cast<Object*>((void*)vict_obj);
+                    if(dg_target) {
+                        i = SANA(dg_target);
+                    } else {
+                        i = ACTNULL;
+                    }
+                }
                     break;
                 case 'T':
                     CHECK_NULL(vict_obj, (char *) vict_obj);
@@ -1689,7 +1732,7 @@ void perform_act(const char *orig, Character *ch, Object *obj, const void *vict_
                 case 'u':
                     for (j = buf; j > lbuf && !isspace((int) *(j - 1)); j--);
                     if (j != buf)
-                        *j = UPPER(*j);
+                        *j = toupper(*j);
                     i = "";
                     break;
                     /* uppercase next word */
@@ -1706,7 +1749,7 @@ void perform_act(const char *orig, Character *ch, Object *obj, const void *vict_
             }
             while ((*buf = *(i++))) {
                 if (uppercasenext && !isspace((int) *buf)) {
-                    *buf = UPPER(*buf);
+                    *buf = toupper(*buf);
                     uppercasenext = false;
                 }
                 buf++;
@@ -1715,7 +1758,7 @@ void perform_act(const char *orig, Character *ch, Object *obj, const void *vict_
         } else if (!(*(buf++) = *(orig++))) {
             break;
         } else if (uppercasenext && !isspace((int) *(buf - 1))) {
-            *(buf - 1) = UPPER(*(buf - 1));
+            *(buf - 1) = toupper(*(buf - 1));
             uppercasenext = false;
         }
     }
@@ -1849,7 +1892,7 @@ char *act(const char *str, int hide_invisible, Character *ch,
                 }
             }
             if (auto eaves = GET_EAVESDROP(d->character); eaves > 0) {
-                int roll = rand_number(1, 101);
+                int roll = Random::get<int>(1, 101);
                 if (!resskill || (roll_skill(d->character, resskill) >= dcval)) {
                     if (ch != nullptr && eaves == ch->location.getVnum() &&
                         GET_SKILL(d->character, SKILL_EAVESDROP) > roll) {
@@ -1871,7 +1914,7 @@ char *act(const char *str, int hide_invisible, Character *ch,
     for (auto target : filter_raw(to)) {
         if (!SENDOK(target) || (target == ch))
             continue;
-        if (hide_invisible && ch && !CAN_SEE(target, ch))
+    if (hide_invisible && ch && !target->canSee(ch))
             continue;
         if (type != TO_ROOM && target == vict_obj)
             continue;

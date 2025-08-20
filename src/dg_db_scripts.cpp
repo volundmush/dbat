@@ -12,10 +12,11 @@
 *  $Date: 2004/10/11 12:07:00$                                            *
 *  $Revision: 1.0.14 $                                                    *
 ************************************************************************ */
-#include <boost/algorithm/string.hpp>
-#include <boost/algorithm/string/regex.hpp>
-#include <regex>
-
+#include "dbat/Character.h"
+#include "dbat/Object.h"
+#include "dbat/Room.h"
+#include "dbat/ObjectPrototype.h"
+#include "dbat/CharacterPrototype.h"
 #include "dbat/structs.h"
 #include "dbat/dg_scripts.h"
 #include "dbat/utils.h"

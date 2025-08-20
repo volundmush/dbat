@@ -7,11 +7,13 @@
  *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
  *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
  ************************************************************************ */
-#include <exception>
-#include <iostream>
-
-#include <boost/algorithm/string.hpp>
-
+#include "dbat/Character.h"
+#include "dbat/Object.h"
+#include "dbat/Zone.h"
+#include "dbat/Descriptor.h"
+#include "dbat/Room.h"
+#include "dbat/ObjectPrototype.h"
+#include "dbat/CharacterPrototype.h"
 #include "dbat/utils.h"
 #include "dbat/comm.h"
 #include "dbat/handler.h"
@@ -27,8 +29,8 @@
 #include "dbat/players.h"
 #include "dbat/act.other.h"
 #include "dbat/planet.h"
-#include "dbat/random.h"
 #include "dbat/send.h"
+#include "dbat/ansi.h"
 
 /* local functions */
 char commastring[MAX_STRING_LENGTH];
@@ -610,7 +612,7 @@ int roll_aff_duration(int num, int add)
     int finish = num / 10;
     int outcome = add;
 
-    outcome += rand_number(start, finish);
+    outcome += Random::get<int>(start, finish);
 
     return (outcome);
 }
@@ -733,7 +735,7 @@ int sec_roll_check(Character *ch)
 
     figure = 10 + (GET_CHA(ch) * 1.6);
 
-    chance = axion_dice(0) + axion_dice(0) + rand_number(0, 20);
+    chance = axion_dice(0) + axion_dice(0) + Random::get<int>(0, 20);
 
     if (figure >= chance)
         outcome = 1;
@@ -763,9 +765,9 @@ int64_t physical_cost(Character *ch, int skill)
     else if (skill == SKILL_SLAM)
         result = GET_MAX_HIT(ch) / 90;
 
-    int cou1 = 1 + rand_number(1, 20), cou2 = cou1 + rand_number(1, 6);
+    int cou1 = 1 + Random::get<int>(1, 20), cou2 = cou1 + Random::get<int>(1, 6);
 
-    result += rand_number(cou1, cou2);
+    result += Random::get<int>(cou1, cou2);
 
     if (GET_SKILL_BASE(ch, SKILL_STYLE) >= 100)
     {
@@ -977,7 +979,7 @@ void broken_update(uint64_t heartPulse, double deltaTime)
     Object *k, *money;
 
     int rand_gravity[14] = {0, 10, 20, 30, 40, 50, 100, 200, 300, 400, 500, 1000, 5000, 10000};
-    int dice = rand_number(2, 12), grav_roll = 0, grav_change = false, health = 0;
+    int dice = Random::get<int>(2, 12), grav_roll = 0, grav_change = false, health = 0;
 
     // Gravity generators
     auto gens = objectSubscriptions.all("vnum_11");
@@ -988,14 +990,14 @@ void broken_update(uint64_t heartPulse, double deltaTime)
             continue;
         }
 
-        if (rand_number(1, 2) == 2)
+        if (Random::get<int>(1, 2) == 2)
         {
             continue;
         }
 
         health = GET_OBJ_VAL(k, VAL_ALL_HEALTH); // Indicated the health of the object in question
 
-        grav_roll = rand_number(0, 13);
+        grav_roll = Random::get<int>(0, 13);
         if (health <= 10)
         {
             grav_change = true;
@@ -1018,7 +1020,7 @@ void broken_update(uint64_t heartPulse, double deltaTime)
             k->setBaseStat<weight_t>("weight", rand_gravity[grav_roll]);
             k->location.sendText("@RThe gravity generator malfunctions! The gravity level has changed!@n\r\n");
         }
-        dice = rand_number(2, 12); // Reset the dice
+        dice = Random::get<int>(2, 12); // Reset the dice
     }
 
     // ATMS
@@ -1030,14 +1032,14 @@ void broken_update(uint64_t heartPulse, double deltaTime)
             continue;
         }
 
-        if (rand_number(1, 2) == 2)
+        if (Random::get<int>(1, 2) == 2)
         {
             continue;
         }
 
         health = GET_OBJ_VAL(k, VAL_ALL_HEALTH); // Indicated the health of the object in question
 
-        dice = rand_number(2, 12); // Reset the dice
+        dice = Random::get<int>(2, 12); // Reset the dice
         if (health <= 10)
         {
             k->location.sendText("@RThe ATM machine shoots smoking bills from its money slot. The bills burn up as they float through the air!@n\r\n");
@@ -1049,7 +1051,7 @@ void broken_update(uint64_t heartPulse, double deltaTime)
         else if (health <= 80 && dice == 4)
         {
             k->location.sendText("@GThe damaged ATM spits out some money while flashing ERROR on its screen!@n\r\n");
-            money = create_money(rand_number(1, 30));
+            money = create_money(Random::get<int>(1, 30));
             money->moveToLocation(k->location);
         }
         else if (health <= 99 && dice < 4)
@@ -1057,7 +1059,7 @@ void broken_update(uint64_t heartPulse, double deltaTime)
             k->location.sendText("@RThe ATM machine emits a loud grinding sound from inside.@n\r\n");
         }
 
-        dice = rand_number(2, 12); // Reset the dice
+        dice = Random::get<int>(2, 12); // Reset the dice
     } /* End For */
 }
 
@@ -1083,7 +1085,7 @@ void randomize_eq(Object *obj)
         if (aff.location != APPLY_CATTR_BASE)
             continue;
         int value = aff.modifier;
-        int roll = rand_number(2, 12);
+        int roll = Random::get<int>(2, 12);
         if (roll == 12)
         {
             value += 3;
@@ -1130,7 +1132,7 @@ void randomize_eq(Object *obj)
         }
     }
 
-    int dice = rand_number(2, 12);
+    int dice = Random::get<int>(2, 12);
     if (dice >= 10)
     {
         obj->item_flags.set(ITEM_SLOT2, true);
@@ -1545,7 +1547,7 @@ void reveal_hiding(Character *ch, int type)
     if (IS_NPC(ch) || !AFF_FLAGGED(ch, AFF_HIDE))
         return;
 
-    int rand1 = rand_number(-5, 5), rand2 = rand_number(-5, 5), bonus = 0;
+    int rand1 = Random::get<int>(-5, 5), rand2 = Random::get<int>(-5, 5), bonus = 0;
 
     if (AFF_FLAGGED(ch, AFF_LIQUEFIED))
     {
@@ -1654,14 +1656,14 @@ int block_calc(Character *ch)
     {
         if (!AFF_FLAGGED(blocker, AFF_BLIND) && !PLR_FLAGGED(blocker, PLR_EYEC))
         {
-            int minimum = GET_CHA(blocker) + rand_number(5, 20);
+            int minimum = GET_CHA(blocker) + Random::get<int>(5, 20);
             if (minimum > 100)
             {
                 minimum = 100;
             }
             if (!GET_SKILL(ch, SKILL_ESCAPE_ARTIST) || (GET_SKILL(ch, SKILL_ESCAPE_ARTIST) &&
                                                         GET_SKILL(ch, SKILL_ESCAPE_ARTIST) <
-                                                            rand_number(minimum, 120)))
+                                                            Random::get<int>(minimum, 120)))
             {
                 act("$n tries to leave, but can't outrun $N!", true, ch, nullptr, blocker, TO_NOTVICT);
                 act("$n tries to leave, but can't outrun you!", true, ch, nullptr, blocker, TO_VICT);
@@ -1936,7 +1938,7 @@ void mob_talk(Character *ch, const char *speech)
         {
             auto vict = tch;
             stop = mob_respond(ch, vict, speech);
-            if (rand_number(1, 2) == 2)
+            if (Random::get<int>(1, 2) == 2)
             {
                 stop = 0;
             }
@@ -1984,7 +1986,7 @@ int mob_respond(Character *ch, Character *vict, const char *speech)
                 vict->location.sendText("\r\n");
                 if (IS_HUMAN(vict) || IS_HALFBREED(vict))
                 {
-                    switch (rand_number(1, 4))
+                    switch (Random::get<int>(1, 4))
                     {
                     case 1:
                         act("@w$n@W says, '@CYes, hello to you as well $N.@W'@n", true, vict, nullptr, ch, TO_ROOM);
@@ -2003,7 +2005,7 @@ int mob_respond(Character *ch, Character *vict, const char *speech)
                 } /* End Human Section */
                 else if (IS_SAIYAN(vict))
                 {
-                    switch (rand_number(1, 4))
+                    switch (Random::get<int>(1, 4))
                     {
                     case 1:
                         act("@w$n@W says, '@CHmph, hi.@W'@n", true, vict, nullptr, ch, TO_ROOM);
@@ -2023,7 +2025,7 @@ int mob_respond(Character *ch, Character *vict, const char *speech)
                 } /* End Saiyan Section */
                 else if (IS_ICER(vict))
                 {
-                    switch (rand_number(1, 4))
+                    switch (Random::get<int>(1, 4))
                     {
                     case 1:
                         act("@w$n@W says, '@CHa ha... Yes, hello.@W'@n", true, vict, nullptr, ch, TO_ROOM);
@@ -2043,7 +2045,7 @@ int mob_respond(Character *ch, Character *vict, const char *speech)
                 } /* End Icer Section */
                 else if (IS_KONATSU(vict))
                 {
-                    switch (rand_number(1, 4))
+                    switch (Random::get<int>(1, 4))
                     {
                     case 1:
                         act("@w$n@W says, '@CGreetings, $N, may your travels be well.@W'@n", true, vict, nullptr,
@@ -2062,7 +2064,7 @@ int mob_respond(Character *ch, Character *vict, const char *speech)
                 } /* End Konatsu Section */
                 else if (IS_NAMEK(vict))
                 {
-                    switch (rand_number(1, 4))
+                    switch (Random::get<int>(1, 4))
                     {
                     case 1:
                         act("@w$n@W says, '@CHello.@W'@n", true, vict, nullptr, ch, TO_ROOM);
@@ -2082,7 +2084,7 @@ int mob_respond(Character *ch, Character *vict, const char *speech)
                 } /* End Namek Section */
                 else if (IS_ARLIAN(vict))
                 {
-                    switch (rand_number(1, 4))
+                    switch (Random::get<int>(1, 4))
                     {
                     case 1:
                         act("@w$n@W says, '@CPeace, stranger.@W'@n", true, vict, nullptr, ch, TO_ROOM);
@@ -2105,7 +2107,7 @@ int mob_respond(Character *ch, Character *vict, const char *speech)
                 } /* End Android Section */
                 else if (IS_MAJIN(vict))
                 {
-                    switch (rand_number(1, 2))
+                    switch (Random::get<int>(1, 2))
                     {
                     case 1:
                         act("@w$n@W says, '@CHa ha...@W'@n", true, vict, nullptr, ch, TO_ROOM);
@@ -2118,7 +2120,7 @@ int mob_respond(Character *ch, Character *vict, const char *speech)
                 } /* End MAJIN Section */
                 else if (IS_TRUFFLE(vict))
                 {
-                    switch (rand_number(1, 3))
+                    switch (Random::get<int>(1, 3))
                     {
                     case 1:
                         if (IS_SAIYAN(ch))
@@ -2481,7 +2483,7 @@ void improve_skill(Character *ch, int skill, int num)
 
     roll = std::max(roll, 300);
 
-    if (rand_number(1, roll) > ((GET_INT(ch) * 2) + GET_WIS(ch)))
+    if (Random::get<int>(1, roll) > ((GET_INT(ch) * 2) + GET_WIS(ch)))
     {
         return;
     }
@@ -2568,50 +2570,6 @@ void improve_skill(Character *ch, int skill, int num)
     }
 }
 
-namespace
-{
-    std::random_device _device;
-    std::mt19937 _generator(_device());
-
-}
-
-/* creates a random number in long long int */
-int64_t large_rand(int64_t from, int64_t to)
-{
-    /* error checking in case people call this incorrectly */
-    if (from > to)
-    {
-        int64_t tmp = from;
-        from = to;
-        to = tmp;
-    }
-    std::uniform_int_distribution<int64_t> _distribution(from, to);
-
-    /* This should always be of the form:
-     *
-     *    ((float)(to - from + 1) * rand() / (float)(RAND_MAX + from) + from);
-     *
-     * if you are using rand() due to historical non-randomness of the
-     * lower bits in older implementations.  We always use circle_random()
-     * though, which shouldn't have that problem. Mean and standard
-     * deviation of both are identical (within the realm of statistical
-     * identity) if the rand() implementation is non-broken.  */
-    return _distribution(_generator);
-}
-
-/* creates a random number in interval [from;to] */
-int rand_number(int from, int to)
-{
-    /* error checking in case people call this incorrectly */
-    if (from > to)
-    {
-        int tmp = from;
-        from = to;
-        to = tmp;
-    }
-    // To make it inclusive of the last number.
-    return rand() % (to - from + 1) + from;
-}
 
 /* Axion engine dice function */
 int axion_dice(int adjust)
@@ -2619,8 +2577,8 @@ int axion_dice(int adjust)
 
     int die1 = 0, die2 = 0, roll = 0;
 
-    die1 = rand_number(1, 60);
-    die2 = rand_number(1, 60);
+    die1 = Random::get<int>(1, 60);
+    die2 = Random::get<int>(1, 60);
 
     roll = (die1 + die2) + adjust;
 
@@ -2639,22 +2597,11 @@ int dice(int num, int size)
         return (0);
 
     while (num-- > 0)
-        sum += rand_number(1, size);
+        sum += Random::get<int>(1, size);
 
     return (sum);
 }
 
-/* Be wary of sign issues with this. */
-int64_t MIN(int64_t a, int64_t b)
-{
-    return std::min(a, b);
-}
-
-/* Be wary of sign issues with this. */
-int64_t MAX(int64_t a, int64_t b)
-{
-    return std::max(a, b);
-}
 
 char *CAP(char *txt)
 {
@@ -2662,7 +2609,7 @@ char *CAP(char *txt)
     for (i = 0; txt[i] != '\0' && (txt[i] == '@' && IS_COLOR_CHAR(txt[i + 1])); i += 2)
         ;
 
-    txt[i] = UPPER(txt[i]);
+    txt[i] = toupper(txt[i]);
     return (txt);
 }
 
@@ -2673,7 +2620,7 @@ char *strlwr(char *s)
         char *p;
 
         for (p = s; *p; ++p)
-            *p = LOWER(*p);
+            *p = tolower(*p);
     }
     return s;
 }
@@ -2906,7 +2853,7 @@ void add_follower(Character *ch, Character *leader)
     leader->followers.add(ch->shared_from_this());
 
     act("You now follow $N.", false, ch, nullptr, leader, TO_CHAR);
-    if (IN_ROOM(ch) != NOWHERE && IN_ROOM(leader) != NOWHERE && CAN_SEE(leader, ch))
+    if (IN_ROOM(ch) != NOWHERE && IN_ROOM(leader) != NOWHERE && leader->canSee(ch))
     {
         act("$n starts following you.", true, ch, nullptr, leader, TO_VICT);
         act("\r\n$n starts to follow $N.", true, ch, nullptr, leader, TO_NOTVICT);
@@ -3009,9 +2956,9 @@ int get_filename(char *filename, size_t fbufsize, int mode, const char *orig_nam
 
     strlcpy(name, orig_name, sizeof(name));
     for (ptr = name; *ptr; ptr++)
-        *ptr = LOWER(*ptr);
+        *ptr = tolower(*ptr);
 
-    switch (LOWER(*name))
+    switch (tolower(*name))
     {
     case 'a':
     case 'b':
@@ -3058,22 +3005,12 @@ int get_filename(char *filename, size_t fbufsize, int mode, const char *orig_nam
     return (1);
 }
 
-/* This function (derived from basic fork(); abort(); idea by Erwin S.
- * Andreasen) causes your MUD to dump core (assuming you can) but
- * continue running.  The core dump will allow post-mortem debugging
- * that is less severe than assert();  Don't call this directly as
- * core_dump_unix() but as simply 'core_dump()' so that it will be
- * excluded from systems not supporting them. (e.g. Windows '95).
- *
- * You still want to call abort() or exit(1) for
- * non-recoverable errors, of course...
- *
- * XXX: Wonder if flushing streams includes sockets?  */
-FILE *player_fl;
 
 void core_dump_real(const char *who, int line)
 {
-    /* log("SYSERR: Assertion failed at %s:%d!", who, line); */
+    throw std::runtime_error(
+        fmt::format("Core dump requested by {} at line {} in file {}",
+                    who, line, __FILE__));
 }
 
 // A C++ version of proc_color from comm.c. it returns the colored string.
@@ -3237,7 +3174,7 @@ void admin_set(Character *ch, int value)
         return;
     if (GET_ADMLEVEL(ch) < value)
     { /* Promotion */
-        mudlog(BRF, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), true,
+        mudlog(BRF, std::max(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), true,
                "%s promoted from %s to %s", GET_NAME(ch), admin_level_names[GET_ADMLEVEL(ch)],
                admin_level_names[value]);
         while (GET_ADMLEVEL(ch) < value)
@@ -3262,7 +3199,7 @@ void admin_set(Character *ch, int value)
     }
     if (GET_ADMLEVEL(ch) > value)
     { /* Demotion */
-        mudlog(BRF, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), true,
+        mudlog(BRF, std::max(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), true,
                "%s demoted from %s to %s", GET_NAME(ch), admin_level_names[GET_ADMLEVEL(ch)],
                admin_level_names[value]);
         while (GET_ADMLEVEL(ch) > value)
@@ -3297,7 +3234,7 @@ int levenshtein_distance(char *s1, char *s2)
         d[0][j] = j;
     for (i = 1; i <= s1_len; i++)
         for (j = 1; j <= s2_len; j++)
-            d[i][j] = MIN(d[i - 1][j] + 1, MIN(d[i][j - 1] + 1,
+            d[i][j] = std::min(d[i - 1][j] + 1, std::min(d[i][j - 1] + 1,
                                                d[i - 1][j - 1] + ((s1[i - 1] == s2[j - 1]) ? 0 : 1)));
 
     i = d[s1_len][s2_len];
@@ -3688,368 +3625,3 @@ std::string replaceStringLine(std::string_view arg, bool enforceNewLine) {
     return out;
 }
 
-/*
-MOB,<vnum>,<MaxSpawn>,<MaxWorld>,<chance>,<if>
-    Places a mob in the location.
-OBJ,<vnum>,<MaxSpawn>,<MaxWorld>,<chance>,<if>
-    Places an object in the location.
-GIVE,<vnum>,<targetVnum>,<chance>,<if>
-    Gives an object to the last MOB <targetVnum> spawned in this sequence.
-EQUIP,<vnum>,<slot>,<chance>,<if>
-    Attempts to equip the last spawned mob with OBJ <vnum>. It will go to
-    inventory if that fails.
-    // TODO: Command for viewing slot choices.
-PUT,<vnum>,<targetVnum>,<chance>,<if>
-    Puts object in the inventory of the last OBJ <targetVnum> spawned in this
-    sequence.
-REMOVE,<vnum>
-    Remove one instance of OBJ <vnum> if present.
-DOOR,<direction>,<state>
-    If exit in <direction> exists, set its state.
-    See .choices/direction for Directions.
-    <state>: 0 = open, 1 = closed, 2 = closed and locked.
-TRIGGER,<vnum>,<type>
-    Assign DgScript <vnum> to <type>. 0 = character, 1 = object, 2 = room.
-    Will target the last spawned obj/character as appropriate.
-VARIABLE,<type>,<name>,<value>
-    Set a script variable to the <type> same as TRIGGER sort.
-    Name should be alphanumeric with no spaces like "gotfood".
-    Commas are not supported in the <value>
-*/
-Result<ResetCommand> parseResetCommand(std::vector<std::string> sequence) {
-    for(auto& s : sequence) {
-        boost::trim(s);
-    }
-
-    if(sequence.size() < 2) {
-        return Err("Not enough arguments for reset command.\r\n");
-    }
-
-    auto resType = chooseEnum<ResetCommandType>(sequence[0], "reset command type");
-    if(!resType) {
-        return Err(resType.err);
-    }
-
-    ResetCommand cmd;
-    cmd.type = resType.value();
-    int argsNeeded = 0;
-
-    switch(cmd.type) {
-        case ResetCommandType::MOB:
-        case ResetCommandType::OBJ:
-            argsNeeded = 6;
-            break;
-        case ResetCommandType::GIVE:
-        case ResetCommandType::EQUIP:
-        case ResetCommandType::PUT:
-            argsNeeded = 5;
-            break;
-        case ResetCommandType::VARIABLE:
-            argsNeeded = 4;
-            break;
-        case ResetCommandType::DOOR:
-        case ResetCommandType::TRIGGER:
-            argsNeeded = 3;
-            break;
-        case ResetCommandType::REMOVE:
-            argsNeeded = 2;
-            break;
-    }
-
-    // Do a -1 offset because we don't present the first as counting.
-    if(sequence.size() < argsNeeded) {
-        return Err("Not enough arguments for reset command type '{}'. Expected {} but got {}.\r\n",
-                   cmd.type, argsNeeded - 1, sequence.size() - 1);
-    }
-
-    switch(cmd.type) {
-        case ResetCommandType::REMOVE: {
-            auto ovnRes = parseNumber<obj_vnum>(sequence[1], "object vnum");
-            if(!ovnRes) {
-                return Err(ovnRes.err);
-            }
-            auto vn = ovnRes.value();
-            if(!obj_proto.contains(vn)) {
-                return Err("ObjectPrototype {} not found.\r\n", vn);
-            }
-            cmd.target = vn;
-            return Ok(cmd);
-        }
-        case ResetCommandType::DOOR: {
-            auto dirRes = chooseEnum<Direction>(sequence[1], "direction");
-            if(!dirRes) {
-                return Err(dirRes.err);
-            }
-            auto dir = dirRes.value();
-            cmd.target = static_cast<int>(dir);
-
-            auto stateRes = parseNumber(sequence[2], "door state");
-            if(!stateRes) {
-                return Err(stateRes.err);
-            }
-            if(stateRes.value() < 0 || stateRes.value() > 2) {
-                return Err("Door state must be 0 (open), 1 (closed), or 2 (closed and locked).\r\n");
-            }
-            cmd.ex = stateRes.value();
-            return Ok(cmd);
-        }
-        case ResetCommandType::TRIGGER: {
-            auto vnRes = parseNumber<obj_vnum>(sequence[1], "vnum");
-            if(!vnRes) {
-                return Err(vnRes.err);
-            }
-            auto vn = vnRes.value();
-            if(!trig_index.contains(vn)) {
-                return Err("ObjectPrototype {} not found.\r\n", vn);
-            }
-            cmd.target = vn;
-
-            auto typeRes = parseNumber(sequence[2], "trigger type");
-            if(!typeRes) {
-                return Err(typeRes.err);
-            }
-            if(typeRes.value() < 0 || typeRes.value() > 2) {
-                return Err("Type must be 0 (character), 1 (object), or 2 (room).\r\n");
-            }
-            cmd.ex = static_cast<int>(typeRes.value());
-            return Ok(cmd);
-        }
-        case ResetCommandType::VARIABLE: {
-            auto typeRes = parseNumber(sequence[1], "trigger type");
-            if(!typeRes) {
-                return Err(typeRes.err);
-            }
-            if(typeRes.value() < 0 || typeRes.value() > 2) {
-                return Err("Type must be 0 (character), 1 (object), or 2 (room).\r\n");
-            }
-            auto type = typeRes.value();
-            cmd.ex = type;
-            if(sequence[2].empty()) {
-                return Err("Variable name cannot be empty.\r\n");
-            }
-            cmd.key = sequence[2];
-            if(sequence[3].empty()) {
-                return Err("Variable value cannot be empty.\r\n");
-            }
-            cmd.value = sequence[3];
-            return Ok(cmd);
-        }
-        case ResetCommandType::OBJ: {
-            auto ovnRes = parseNumber<obj_vnum>(sequence[1], "object vnum");
-            if(!ovnRes) {
-                return Err(ovnRes.err);
-            }
-            auto ovn = ovnRes.value();
-            if(!obj_proto.contains(ovn)) {
-                return Err("ObjectPrototype {} not found.\r\n", ovn);
-            }
-            cmd.target = ovn;
-
-            auto maxSpawnRes = parseNumber(sequence[2], "MaxSpawn");
-            if(!maxSpawnRes) {
-                return Err(maxSpawnRes.err);
-            }
-            auto maxSpawn = maxSpawnRes.value();
-            if(maxSpawn < 0) {
-                return Err("MaxSpawn must be a non-negative number.\r\n");
-            }
-            cmd.max_location = maxSpawn;
-
-            auto maxWorldRes = parseNumber(sequence[3], "MaxWorld");
-            if(!maxWorldRes) {
-                return Err(maxWorldRes.err);
-            }
-            auto maxWorld = maxWorldRes.value();
-            if(maxWorld < 0) {
-                return Err("MaxWorld must be a non-negative number.\r\n");
-            }
-            cmd.max = maxWorld;
-
-            auto chanceRes = parseNumber(sequence[4], "Chance");
-            if(!chanceRes) {
-                return Err(chanceRes.err);
-            }
-            auto chance = chanceRes.value();
-            if(chance < 0 || chance > 100) {
-                return Err("Chance must be between 0 and 100.\r\n");
-            }
-            cmd.chance = chance;
-
-            auto ifRes = parseNumber(sequence[5], "If");
-            if(!ifRes) {
-                return Err(ifRes.err);
-            }
-            cmd.if_flag = ifRes.value() ? 1 : 0;
-
-            return Ok(cmd);
-        }
-        case ResetCommandType::MOB: {
-            auto mvnRes = parseNumber<mob_vnum>(sequence[1], "mob vnum");
-            if(!mvnRes) {
-                return Err(mvnRes.err);
-            }
-            auto mvn = mvnRes.value();
-            if(!mob_proto.contains(mvn)) {
-                return Err("MobPrototype {} not found.\r\n", mvn);
-            }
-            cmd.target = mvn;
-
-            auto maxSpawnRes = parseNumber(sequence[2], "MaxSpawn");
-            if(!maxSpawnRes) {
-                return Err(maxSpawnRes.err);
-            }
-            auto maxSpawn = maxSpawnRes.value();
-            if(maxSpawn < 0) {
-                return Err("MaxSpawn must be a non-negative number.\r\n");
-            }
-            cmd.max_location = maxSpawn;
-
-            auto maxWorldRes = parseNumber(sequence[3], "MaxWorld");
-            if(!maxWorldRes) {
-                return Err(maxWorldRes.err);
-            }
-            auto maxWorld = maxWorldRes.value();
-            if(maxWorld < 0) {
-                return Err("MaxWorld must be a non-negative number.\r\n");
-            }
-            cmd.max = maxWorld;
-
-            auto chanceRes = parseNumber(sequence[4], "Chance");
-            if(!chanceRes) {
-                return Err(chanceRes.err);
-            }
-            auto chance = chanceRes.value();
-            if(chance < 0 || chance > 100) {
-                return Err("Chance must be between 0 and 100.\r\n");
-            }
-            cmd.chance = chance;
-
-            auto ifRes = parseNumber(sequence[5], "If");
-            if(!ifRes) {
-                return Err(ifRes.err);
-            }
-            cmd.if_flag = ifRes.value() ? 1 : 0;
-
-            return Ok(cmd);
-        }
-        case ResetCommandType::GIVE: {
-            auto ovnRes = parseNumber<obj_vnum>(sequence[1], "object vnum");
-            if(!ovnRes) {
-                return Err(ovnRes.err);
-            }
-            auto ovn = ovnRes.value();
-            if(!obj_proto.contains(ovn)) {
-                return Err("ObjectPrototype {} not found.\r\n", ovn);
-            }
-            cmd.target = ovn;
-
-            auto targetVnRes = parseNumber<mob_vnum>(sequence[2], "target mob vnum");
-            if(!targetVnRes) {
-                return Err(targetVnRes.err);
-            }
-            auto targetVn = targetVnRes.value();
-            if(!mob_proto.contains(targetVn)) {
-                return Err("MobPrototype {} not found.\r\n", targetVn);
-            }
-            cmd.ex = targetVn;
-
-            auto chanceRes = parseNumber(sequence[3], "Chance");
-            if(!chanceRes) {
-                return Err(chanceRes.err);
-            }
-            auto chance = chanceRes.value();
-            if(chance < 0 || chance > 100) {
-                return Err("Chance must be between 0 and 100.\r\n");
-            }
-            cmd.chance = chance;
-
-            auto ifRes = parseNumber(sequence[4], "If");
-            if(!ifRes) {
-                return Err(ifRes.err);
-            }
-            cmd.if_flag = ifRes.value() ? 1 : 0;
-
-            return Ok(cmd);
-        }
-        case ResetCommandType::EQUIP: {
-            auto ovnRes = parseNumber<obj_vnum>(sequence[1], "object vnum");
-            if(!ovnRes) {
-                return Err(ovnRes.err);
-            }
-            auto ovn = ovnRes.value();
-            if(!obj_proto.contains(ovn)) {
-                return Err("ObjectPrototype {} not found.\r\n", ovn);
-            }
-            cmd.target = ovn;
-
-            auto slotRes = chooseEnum<WearSlot>(sequence[2], "wear location");
-            if(!slotRes) {
-                return Err(slotRes.err);
-            }
-            auto slot = slotRes.value();
-            if(slot == WearSlot::Inventory) {
-                return Err("Cannot equip items in inventory slot.\r\n");
-            }
-            cmd.ex = static_cast<int>(slot);
-
-            auto chanceRes = parseNumber(sequence[3], "Chance");
-            if(!chanceRes) {
-                return Err(chanceRes.err);
-            }
-            auto chance = chanceRes.value();
-            if(chance < 0 || chance > 100) {
-                return Err("Chance must be between 0 and 100.\r\n");
-            }
-            cmd.chance = chance;
-
-            auto ifRes = parseNumber(sequence[4], "If");
-            if(!ifRes) {
-                return Err(ifRes.err);
-            }
-            cmd.if_flag = ifRes.value() ? 1 : 0;
-
-            return Ok(cmd);
-        }
-        case ResetCommandType::PUT: {
-            auto ovnRes = parseNumber<obj_vnum>(sequence[1], "object vnum");
-            if(!ovnRes) {
-                return Err(ovnRes.err);
-            }
-            auto ovn = ovnRes.value();
-            if(!obj_proto.contains(ovn)) {
-                return Err("ObjectPrototype {} not found.\r\n", ovn);
-            }
-            cmd.target = ovn;
-
-            auto containerRes = parseNumber<obj_vnum>(sequence[2], "container vnum");
-            if(!containerRes) {
-                return Err(containerRes.err);
-            }
-            auto container = containerRes.value();
-            if(!obj_proto.contains(container)) {
-                return Err("ObjectPrototype {} not found.\r\n", container);
-            }
-            cmd.ex = container;
-
-            auto chanceRes = parseNumber(sequence[3], "Chance");
-            if(!chanceRes) {
-                return Err(chanceRes.err);
-            }
-            auto chance = chanceRes.value();
-            if(chance < 0 || chance > 100) {
-                return Err("Chance must be between 0 and 100.\r\n");
-            }
-            cmd.chance = chance;
-
-            auto ifRes = parseNumber(sequence[4], "If");
-            if(!ifRes) {
-                return Err(ifRes.err);
-            }
-            cmd.if_flag = ifRes.value() ? 1 : 0;
-
-            return Ok(cmd);
-        }
-    }
-
-    return Err("We shouldn't ever reach this. Contact staff.\r\n");
-}

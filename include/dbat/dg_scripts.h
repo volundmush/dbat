@@ -9,7 +9,7 @@
  *  $Revision: 1.0.14 $                                                    *
  **************************************************************************/
 #pragma once
-
+#include "DgScriptPrototype.h"
 #include "structs.h"
 #include "db.h"
 #include "genzon.h"
@@ -358,8 +358,6 @@ extern void send_char_pos(Character *ch, int dam);
 extern int valid_dg_target(Character *ch, int bitvector);
 
 extern void script_damage(Character *vict, int dam);
-
-extern int check_flags_by_name_ar(bitvector_t *array, int numflags, char *search, const char *namelist[]);
 
 extern std::vector<ScriptLine> parse_script(const std::vector<std::string> &orig);
 

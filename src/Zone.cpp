@@ -1,4 +1,7 @@
-#include "dbat/structs.h"
+#include "dbat/Zone.h"
+#include "dbat/Room.h"
+#include "dbat/Descriptor.h"
+#include "dbat/Character.h"
 #include "dbat/db.h"
 #include "dbat/utils.h"
 
@@ -107,4 +110,8 @@ std::vector<Zone *> Zone::getDescendants() const
 
 Result<bool> Zone::canBeDeletedBy(Character* ch) {
     return Err("Not implemented yet.");
+}
+
+Zone* HasZone::getZone() const {
+    return zone.get();
 }

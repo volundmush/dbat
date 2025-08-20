@@ -13,6 +13,9 @@
 Written by Jeremy Elson (jelson@circlemud.org)
 
 *************************************************************************/
+#include "dbat/Character.h"
+#include "dbat/Object.h"
+#include "dbat/Descriptor.h"
 #include "dbat/mail.h"
 #include "dbat/send.h"
 #include "dbat/comm.h"

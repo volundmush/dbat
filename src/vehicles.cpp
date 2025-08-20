@@ -8,6 +8,11 @@
  *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.              *
  *  Vehicle.c written by Chris Jacobson <fear@athenet.net>		 *
  *************************************************************************/
+#include "dbat/Object.h"
+#include "dbat/Character.h"
+#include "dbat/Destination.h"
+#include "dbat/Descriptor.h"
+#include "dbat/Room.h"
 #include "dbat/vehicles.h"
 #include "dbat/send.h"
 #include "dbat/comm.h"
@@ -45,7 +50,7 @@ Object *find_hatch_by_vnum(int vnum)
 Object *find_control(Character *ch)
 {
     auto iscontrol = [ch](Object *o)
-    { return CAN_SEE_OBJ(ch, o) && GET_OBJ_TYPE(o) == ITEM_CONTROL; };
+    { return ch->canSee(o) && GET_OBJ_TYPE(o) == ITEM_CONTROL; };
 
     auto controls = ch->location.searchObjects(iscontrol);
     if (!controls)
@@ -322,23 +327,23 @@ static bool validate_warp_conditions(Character *ch, Object *vehicle, const char 
 
 static int get_warp_destination(const char *arg, Character *ch)
 {
-    if (!strcasecmp(arg, "earth"))
+    if (boost::iequals(arg, "earth"))
         return 40979;
-    if (!strcasecmp(arg, "namek"))
+    if (boost::iequals(arg, "namek"))
         return 42880;
-    if (!strcasecmp(arg, "frigid"))
+    if (boost::iequals(arg, "frigid"))
         return 30889;
-    if (!strcasecmp(arg, "konack"))
+    if (boost::iequals(arg, "konack"))
         return 27065;
-    if (!strcasecmp(arg, "vegeta"))
+    if (boost::iequals(arg, "vegeta"))
         return 32365;
-    if (!strcasecmp(arg, "aether"))
+    if (boost::iequals(arg, "aether"))
         return 41959;
-    if (!strcasecmp(arg, "buoy1"))
+    if (boost::iequals(arg, "buoy1"))
         return GET_RADAR1(ch) > 0 ? GET_RADAR1(ch) : NOWHERE;
-    if (!strcasecmp(arg, "buoy2"))
+    if (boost::iequals(arg, "buoy2"))
         return GET_RADAR2(ch) > 0 ? GET_RADAR2(ch) : NOWHERE;
-    if (!strcasecmp(arg, "buoy3"))
+    if (boost::iequals(arg, "buoy3"))
         return GET_RADAR3(ch) > 0 ? GET_RADAR3(ch) : NOWHERE;
 
     return NOWHERE;
@@ -710,13 +715,13 @@ ACMD(do_drive)
 
     half_chop(argument, arg, arg2);
 
-    if (!strcasecmp(arg, "ready"))
+    if (boost::iequals(arg, "ready"))
     {
         handle_pilot_ready(ch);
         return;
     }
 
-    if (!strcasecmp(arg, "unready"))
+    if (boost::iequals(arg, "unready"))
     {
         handle_pilot_unready(ch);
         return;
@@ -756,7 +761,7 @@ ACMD(do_ship_fire)
         {
             if (GET_OBJ_TYPE(obj) == ITEM_VEHICLE && obj != vehicle)
             {
-                if (!strcasecmp(arg1, obj->getName()))
+                if (boost::iequals(arg1, obj->getName()))
                 {
                     obj2 = obj;
                     shot = true;

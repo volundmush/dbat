@@ -7,7 +7,8 @@
  *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
  *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
  ************************************************************************ */
-
+#include "dbat/Character.h"
+#include "dbat/Object.h"
 #include "dbat/spell_parser.h"
 #include "dbat/send.h"
 #include "dbat/interpreter.h"
@@ -115,7 +116,7 @@ int mag_kicost(Character *ch, int spellnum)
 {
     int i, min, tval;
     Sensei whichclass;
-    return MAX(SINFO.ki_max - (SINFO.ki_change *
+    return std::max(SINFO.ki_max - (SINFO.ki_change *
                                (GET_LEVEL(ch) - SINFO.min_level[(int)GET_CLASS(ch)])),
                SINFO.ki_min);
 }

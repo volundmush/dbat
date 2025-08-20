@@ -4,8 +4,8 @@
  * Copyright 1996 by Harvey Gilpin					*
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
-#define __GENOLC_C__
-
+#include "dbat/HasExtraDescriptions.h"
+#include "dbat/Character.h"
 #include "dbat/genolc.h"
 #include "dbat/gengld.h"
 #include "dbat/cedit.h"

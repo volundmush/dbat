@@ -11,7 +11,13 @@
 /***
  * The entire shop rewrite for Circle 3.0 was done by Jeff Fink.  Thanks Jeff!
  ***/
-#include "dbat/shop.h"
+#include "dbat/Shop.h"
+#include "dbat/Character.h"
+#include "dbat/Object.h"
+#include "dbat/ObjectPrototype.h"
+#include "dbat/CharacterPrototype.h"
+#include "dbat/Room.h"
+#include "dbat/Descriptor.h"
 #include "dbat/comm.h"
 #include "dbat/handler.h"
 #include "dbat/db.h"
@@ -29,6 +35,7 @@
 #include "dbat/genzon.h"
 #include "dbat/genshp.h"
 #include "dbat/filter.h"
+#include "dbat/ansi.h"
 
 /* Forward/External function declarations */
 static void sort_keeper_objs(Character *keeper, vnum shop_nr);
@@ -210,7 +217,7 @@ static int is_ok_char(Character *keeper, Character *ch, vnum shop_nr)
 {
     char buf[MAX_INPUT_LENGTH];
 
-    if (!CAN_SEE(keeper, ch))
+    if (!keeper->canSee(ch))
     {
         char actbuf[MAX_INPUT_LENGTH] = MSG_NO_SEE_CHAR;
         do_say(keeper, actbuf, cmd_say, 0);
@@ -398,7 +405,7 @@ static int evaluate_expression(Object *obj, char *expr)
                 strncpy(name, end, ptr - end); /* strncpy: OK (name/end:MAX_STRING_LENGTH) */
                 name[ptr - end] = '\0';
                 for (eindex = 0; *extra_bits[eindex] != '\n'; eindex++)
-                    if (!strcasecmp(name, extra_bits[eindex]))
+                    if (boost::iequals(name, extra_bits[eindex]))
                     {
                         push(&vals, OBJ_FLAGGED(obj, eindex));
                         break;
@@ -475,17 +482,8 @@ static int same_obj(Object *obj1, Object *obj2)
     if (GET_OBJ_COST(obj1) != GET_OBJ_COST(obj2))
         return (false);
 
-    for (i = 0; i < EF_ARRAY_MAX; i++)
-    {
-        ef1 = GET_OBJ_EXTRA_AR(obj1, i);
-        ef2 = GET_OBJ_EXTRA_AR(obj2, i);
-        if (i == Q_FIELD(ITEM_UNIQUE_SAVE))
-        {
-            ef1 &= ~Q_BIT(ITEM_UNIQUE_SAVE);
-            ef2 &= ~Q_BIT(ITEM_UNIQUE_SAVE);
-        }
-        if (ef1 != ef2)
-            return (false);
+    for(auto o : {obj1, obj2}) {
+        if(o->item_flags.get(ITEM_UNIQUE_SAVE)) return false;
     }
 
     for (aindex = 0; aindex < MAX_OBJ_AFFECT; aindex++)
@@ -567,7 +565,7 @@ static Object *get_slide_obj_vis(Character *ch, char *name,
 
     for (auto i : filter_raw(list))
         if (isname(tmp, i->getName()))
-            if (CAN_SEE_OBJ(ch, i) && !same_obj(last_match, i))
+            if (ch->canSee(i) && !same_obj(last_match, i))
             {
                 if (j == number)
                     return (i);
@@ -593,7 +591,7 @@ static Object *get_hash_obj_vis(Character *ch, char *name,
 
     Object *last_obj = nullptr;
     for (auto loop : filter_raw(list))
-        if (CAN_SEE_OBJ(ch, loop) && GET_OBJ_COST(loop) > 0)
+    if (ch->canSee(loop) && GET_OBJ_COST(loop) > 0)
             if (!same_obj(last_obj, loop))
             {
                 if (--qindex == 0)
@@ -778,7 +776,7 @@ static void shopping_app(char *arg, Character *ch, Character *keeper, vnum shop_
         return;
     }
     improve_skill(ch, SKILL_APPRAISE, 1);
-    if (GET_SKILL(ch, SKILL_APPRAISE) < rand_number(1, 101))
+    if (GET_SKILL(ch, SKILL_APPRAISE) < Random::get<int>(1, 101))
     {
         ch->send_to("@wYou were completely stumped about the worth of %s@n\r\n", obj->getShortDescription());
         WAIT_STATE(ch, PULSE_2SEC);
@@ -1178,7 +1176,7 @@ static void shopping_sell(char *arg, Character *ch, Character *keeper, vnum shop
 
     if (GET_GOLD(keeper) < MIN_OUTSIDE_BANK)
     {
-        goldamt = MIN(MAX_OUTSIDE_BANK - GET_GOLD(keeper), SHOP_BANK(shop_nr));
+        goldamt = std::min<int>(MAX_OUTSIDE_BANK - GET_GOLD(keeper), SHOP_BANK(shop_nr));
         SHOP_BANK(shop_nr) -= goldamt;
         keeper->modBaseStat("money_carried", goldamt);
     }
@@ -1284,7 +1282,7 @@ static void shopping_list(char *arg, Character *ch, Character *keeper, vnum shop
                   sizeof(buf));
     if (auto con = keeper->getInventory(); !con.empty())
         for (auto obj : filter_raw(con))
-            if (CAN_SEE_OBJ(ch, obj) && GET_OBJ_COST(obj) > 0)
+            if (ch->canSee(obj) && GET_OBJ_COST(obj) > 0)
             {
                 if (!last_obj)
                 {
@@ -1750,7 +1748,7 @@ void show_shops(Character *ch, char *arg)
         list_all_shops(ch);
     else
     {
-        if (!strcasecmp(arg, "."))
+        if (boost::iequals(arg, "."))
         {
             for (auto &sh : shop_index)
             {

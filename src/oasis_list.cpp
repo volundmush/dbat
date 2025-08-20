@@ -5,19 +5,27 @@
 /** Copyright 1997-2001 George Greer (greerga@circlemud.org)                 **/
 /** Copyright 2002 Kip Potter [Mythran] (kip_potter@hotmail.com)             **/
 /******************************************************************************/
-
+#include "dbat/Character.h"
+#include "dbat/Room.h"
+#include "dbat/Zone.h"
+#include "dbat/CharacterPrototype.h"
+#include "dbat/ObjectPrototype.h"
+#include "dbat/Destination.h"
+#include "dbat/Area.h"
+#include "dbat/Structure.h"
 #include "dbat/structs.h"
 #include "dbat/send.h"
 #include "dbat/comm.h"
 #include "dbat/interpreter.h"
 #include "dbat/db.h"
 #include "dbat/oasis.h"
-#include "dbat/shop.h"
+#include "dbat/Shop.h"
 #include "dbat/constants.h"
 #include "dbat/dg_scripts.h"
-#include "dbat/guild.h"
+#include "dbat/Guild.h"
 #include "dbat/races.h"
 #include "dbat/class.h"
+#include "dbat/ansi.h"
 
 static void list_triggers(Character *ch, trig_vnum vmin, trig_vnum vmax);
 void list_guilds(Character *ch, guild_vnum vmin, guild_vnum vmax);

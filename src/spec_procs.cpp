@@ -7,8 +7,12 @@
  *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
  *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
  ************************************************************************ */
-#include <boost/algorithm/string.hpp>
-
+#include "dbat/Character.h"
+#include "dbat/Object.h"
+#include "dbat/Room.h"
+#include "dbat/Destination.h"
+#include "dbat/Descriptor.h"
+#include "dbat/Account.h"
 #include "dbat/spec_procs.h"
 #include "dbat/send.h"
 #include "dbat/comm.h"
@@ -21,7 +25,7 @@
 #include "dbat/act.movement.h"
 #include "dbat/act.item.h"
 #include "dbat/act.social.h"
-#include "dbat/guild.h"
+#include "dbat/Guild.h"
 #include "dbat/races.h"
 #include "dbat/act.comm.h"
 #include "dbat/class.h"
@@ -54,7 +58,7 @@ SPECIAL(dump)
     for (auto k : filter_raw(con))
     {
         act("$p vanishes in a puff of smoke!", false, nullptr, k, nullptr, TO_ROOM);
-        value += MAX(1, MIN(50, GET_OBJ_COST(k) / 10));
+        value += std::clamp<int>(GET_OBJ_COST(k) / 10, 1, 50);
         extract_obj(k);
     }
 
@@ -436,10 +440,10 @@ void npc_steal(Character *ch, Character *victim)
         return;
     if (ADM_FLAGGED(victim, ADM_NOSTEAL))
         return;
-    if (!CAN_SEE(ch, victim))
+    if (!ch->canSee(victim))
         return;
 
-    if (AWAKE(victim) && (rand_number(0, GET_LEVEL(ch)) == 0))
+    if (AWAKE(victim) && (Random::get<int>(0, GET_LEVEL(ch)) == 0))
     {
         act("You discover that $n has $s hands in your wallet.", false, ch, nullptr, victim, TO_VICT);
         act("$n tries to steal zenni from $N.", true, ch, nullptr, victim, TO_NOTVICT);
@@ -447,7 +451,7 @@ void npc_steal(Character *ch, Character *victim)
     else
     {
         /* Steal some gold coins */
-        gold = (GET_GOLD(victim) * rand_number(1, 10)) / 100;
+        gold = (GET_GOLD(victim) * Random::get<int>(1, 10)) / 100;
         if (gold > 0)
         {
             ch->modBaseStat("money_carried", gold);
@@ -770,7 +774,7 @@ SPECIAL(healtank)
             return (true);
         }
 
-        if (!strcasecmp("enter", arg))
+        if (boost::iequals("enter", arg))
         {
             if (PLR_FLAGGED(ch, PLR_HEALT))
             {
@@ -823,7 +827,7 @@ SPECIAL(healtank)
 
         } // End of Enter argument
 
-        else if (!strcasecmp("exit", arg))
+        else if (boost::iequals("exit", arg))
         {
             if (!PLR_FLAGGED(ch, PLR_HEALT))
             {
@@ -838,7 +842,7 @@ SPECIAL(healtank)
             return (true);
         } // End of Exit argument
 
-        else if (!strcasecmp("check", arg))
+        else if (boost::iequals("check", arg))
         {
             int en = std::floor(htank->getBaseStat("energy"));
             if (en < 200 && en > 0)
@@ -904,7 +908,7 @@ SPECIAL(augmenter)
             ch->sendText("\r\n");
             return (true);
         }
-        else if (!strcasecmp("strength", arg) || !strcasecmp("str", arg))
+        else if (boost::iequals("strength", arg) || boost::iequals("str", arg))
         {
             if (strength >= 100)
                 ch->sendText("Your strength is already as high as it can possibly go.\r\n");
@@ -920,7 +924,7 @@ SPECIAL(augmenter)
                 ch->modBaseStat("money_carried", -strcost);
             }
         }
-        else if (!strcasecmp("intelligence", arg) || !strcasecmp("int", arg))
+        else if (boost::iequals("intelligence", arg) || boost::iequals("int", arg))
         {
             if (intel >= 100)
                 ch->sendText("Your intelligence is already as high as it can possibly go.\r\n");
@@ -936,7 +940,7 @@ SPECIAL(augmenter)
                 ch->modBaseStat("money_carried", -intcost);
             }
         }
-        else if (!strcasecmp("constitution", arg) || !strcasecmp("con", arg))
+        else if (boost::iequals("constitution", arg) || boost::iequals("con", arg))
         {
             if (consti >= 100)
                 ch->sendText("Your constitution is already as high as it can possibly go.\r\n");
@@ -952,7 +956,7 @@ SPECIAL(augmenter)
                 ch->modBaseStat("money_carried", -concost);
             }
         }
-        else if (!strcasecmp("speed", arg) || !strcasecmp("spe", arg))
+        else if (boost::iequals("speed", arg) || boost::iequals("spe", arg))
         {
             if (speed >= 100)
                 ch->sendText("Your speed is already as high as it can possibly go.\r\n");
@@ -968,7 +972,7 @@ SPECIAL(augmenter)
                 ch->modBaseStat("money_carried", -specost);
             }
         }
-        else if (!strcasecmp("agility", arg) || !strcasecmp("agi", arg))
+        else if (boost::iequals("agility", arg) || boost::iequals("agi", arg))
         {
             if (agility >= 100)
                 ch->sendText("Your agility is already as high as it can possibly go.\r\n");
@@ -984,7 +988,7 @@ SPECIAL(augmenter)
                 ch->modBaseStat("money_carried", -agicost);
             }
         }
-        else if (!strcasecmp("wisdom", arg) || !strcasecmp("wis", arg))
+        else if (boost::iequals("wisdom", arg) || boost::iequals("wis", arg))
         {
             if (wisdom >= 100)
                 ch->sendText("Your wisdom how somehow been measured is already as high as it can possibly go.\r\n");
@@ -1205,7 +1209,7 @@ SPECIAL(bank)
             }
             vict->modBaseStat("money_bank", amount);
             ch->modBaseStat("money_bank", -(amount + (amount / 100)));
-            mudlog(NRM, MAX(ADMLVL_IMPL, GET_INVIS_LEV(ch)), true, "EXCHANGE: %s gave %s zenni to user %s",
+            mudlog(NRM, std::max(ADMLVL_IMPL, GET_INVIS_LEV(ch)), true, "EXCHANGE: %s gave %s zenni to user %s",
                    GET_NAME(ch), add_commas(amount).c_str(), GET_NAME(vict));
         }
         else

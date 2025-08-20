@@ -8,7 +8,11 @@
  *  $Date: 2004/10/11 12:07:00$                                            *
  *  $Revision: 1.0.14 $                                                    *
  **************************************************************************/
-
+#include "dbat/Character.h"
+#include "dbat/Object.h"
+#include "dbat/Room.h"
+#include "dbat/Destination.h"
+#include "dbat/Zone.h"
 #include "dbat/structs.h"
 #include "dbat/dg_scripts.h"
 #include "dbat/send.h"
@@ -108,7 +112,7 @@ WCMD(do_weffect)
     nr = num;
     target = real_room(nr);
 
-    if (!strcasecmp(arg, "gravity"))
+    if (boost::iequals(arg, "gravity"))
     { /* Set gravity */
         if (num < 0 || num > 10000)
         {
@@ -123,7 +127,7 @@ WCMD(do_weffect)
                 room->setEnvironment(ENV_GRAVITY, num);
         }
     }
-    else if (!strcasecmp(arg, "light"))
+    else if (boost::iequals(arg, "light"))
     {
         if (target == NOWHERE)
         {
@@ -135,7 +139,7 @@ WCMD(do_weffect)
             room->room_flags.toggle(ROOM_INDOORS);
         }
     }
-    else if (!strcasecmp(arg, "lava"))
+    else if (boost::iequals(arg, "lava"))
     {
         if (target == NOWHERE)
         {
@@ -369,7 +373,7 @@ WCMD(do_wteleport)
     if (!target)
         wld_log(room, "wteleport target is an invalid room");
 
-    else if (!strcasecmp(arg1, "all"))
+    else if (boost::iequals(arg1, "all"))
     {
         if (nr == room->getVnum())
         {
@@ -414,7 +418,7 @@ WCMD(do_wforce)
         return;
     }
 
-    if (!strcasecmp(arg1, "all"))
+    if (boost::iequals(arg1, "all"))
     {
         auto people = room->getPeople().snapshot_weak();
         for (auto ch : filter_raw(people))

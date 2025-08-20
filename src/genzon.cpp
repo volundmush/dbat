@@ -3,15 +3,14 @@
  * Copyright 1996 by Harvey Gilpin					*
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
-
-#include <fstream>
+#include "dbat/Zone.h"
 #include "dbat/genzon.h"
 #include "dbat/utils.h"
 
 #include "dbat/genolc.h"
 #include "dbat/dg_scripts.h"
-#include "dbat/shop.h"
-#include "dbat/guild.h"
+#include "dbat/Shop.h"
+#include "dbat/Guild.h"
 #include "dbat/constants.h"
 
 zone_rnum create_new_zone(zone_vnum vzone_num, const char **error)

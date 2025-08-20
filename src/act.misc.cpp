@@ -11,8 +11,12 @@
  *  original credits maintained where relevant for act.other.c as this is  *
  *  practically an act.other.c part two - Iovan 3/20/2011                  *
  ************************************************************************ */
-#include <boost/algorithm/string.hpp>
-
+#include "dbat/Character.h"
+#include "dbat/Object.h"
+#include "dbat/ObjectPrototype.h"
+#include "dbat/Room.h"
+#include "dbat/Destination.h"
+#include "dbat/Descriptor.h"
 #include "dbat/act.misc.h"
 #include "dbat/dg_comm.h"
 #include "dbat/act.wizard.h"
@@ -67,7 +71,7 @@ ACMD(do_spiritcontrol)
     act("@YYou concentrate and quantify every last bit of your spiritual and mental energies. You have full control of them and can bring them forth in an instant.@n",
         true, ch, nullptr, nullptr, TO_CHAR);
     act("@y$n@Y seems to concentrate hard for a moment.@n", true, ch, nullptr, nullptr, TO_ROOM);
-    int duration = rand_number(2, 4);
+    int duration = Random::get<int>(2, 4);
     assign_affect(ch, AFF_SPIRITCONTROL, SKILL_SPIRITCONTROL, duration, 0, 0, 0, 0, 0, 0);
 }
 
@@ -183,7 +187,7 @@ ACMD(do_multiform)
     char arg[MAX_INPUT_LENGTH];
     one_argument(argument, arg);
 
-    if (!strcasecmp(arg, "merge"))
+    if (boost::iequals(arg, "merge"))
     {
         if (multis.empty())
         {
@@ -197,7 +201,7 @@ ACMD(do_multiform)
         return;
     }
 
-    if (strcasecmp(arg, "split"))
+    if (!boost::iequals(arg, "split"))
     {
         ch->sendText("Huh? Try help multiform\r\n");
         return;
@@ -208,7 +212,7 @@ ACMD(do_multiform)
 
     if (FIGHTING(ch))
     {
-        penalty = rand_number(8, 15);
+        penalty = Random::get<int>(8, 15);
     }
 
     int roll = axion_dice(penalty);
@@ -833,22 +837,22 @@ ACMD(do_song)
     }
     int64_t cost = GET_MAX_MANA(ch) * 0.01;
     int modifier = 1;
-    if (!strcasecmp(arg, "shielding"))
+    if (boost::iequals(arg, "shielding"))
     {
         modifier = 20;
         cost *= modifier;
     }
-    else if (!strcasecmp(arg, "teleport"))
+    else if (boost::iequals(arg, "teleport"))
     {
         modifier = 50;
         cost *= modifier;
     }
-    else if (!strcasecmp(arg, "shadow"))
+    else if (boost::iequals(arg, "shadow"))
     {
         modifier = 8;
         cost *= modifier;
     }
-    else if (!strcasecmp(arg, "safety"))
+    else if (boost::iequals(arg, "safety"))
     {
         modifier = 3;
         cost *= modifier;
@@ -928,35 +932,35 @@ ACMD(do_song)
             return;
         }
 
-        if (!strcasecmp(arg2, "earth"))
+        if (boost::iequals(arg2, "earth"))
         {
             ch->setBaseStat<int>("mystic_melody", SONG_TELEPORT_EARTH);
         }
-        else if (!strcasecmp(arg2, "frigid"))
+        else if (boost::iequals(arg2, "frigid"))
         {
             ch->setBaseStat<int>("mystic_melody", SONG_TELEPORT_FRIGID);
         }
-        else if (!strcasecmp(arg2, "vegeta"))
+        else if (boost::iequals(arg2, "vegeta"))
         {
             ch->setBaseStat<int>("mystic_melody", SONG_TELEPORT_VEGETA);
         }
-        else if (!strcasecmp(arg2, "namek"))
+        else if (boost::iequals(arg2, "namek"))
         {
             ch->setBaseStat<int>("mystic_melody", SONG_TELEPORT_NAMEK);
         }
-        else if (!strcasecmp(arg2, "arlia"))
+        else if (boost::iequals(arg2, "arlia"))
         {
             ch->setBaseStat<int>("mystic_melody", SONG_TELEPORT_ARLIA);
         }
-        else if (!strcasecmp(arg2, "kanassa"))
+        else if (boost::iequals(arg2, "kanassa"))
         {
             ch->setBaseStat<int>("mystic_melody", SONG_TELEPORT_KANASSA);
         }
-        else if (!strcasecmp(arg2, "konack"))
+        else if (boost::iequals(arg2, "konack"))
         {
             ch->setBaseStat<int>("mystic_melody", SONG_TELEPORT_KONACK);
         }
-        else if (!strcasecmp(arg2, "aether"))
+        else if (boost::iequals(arg2, "aether"))
         {
             ch->setBaseStat<int>("mystic_melody", SONG_TELEPORT_AETHER);
         }
@@ -1017,22 +1021,22 @@ ACMD(do_preference)
         return;
     }
 
-    if (!strcasecmp(arg, "throw")) {
+    if (boost::iequals(arg, "throw")) {
                 ch->sendText("You will now favor throwing weapons as fighting specialization. You're sure to nail it.\r\n");
         ch->setBaseStat("preference", PREFERENCE_THROWING);
         auto &s = ch->skill[SKILL_THROW];
         if(s.level <= 90) s.level += 10;
         else if(s.level < 100) s.level = 100;
         return;
-    } else if (!strcasecmp(arg, "hand")) {
+    } else if (boost::iequals(arg, "hand")) {
                 ch->sendText("You will now favor your body as your fighting specialization. Your body is ready.\r\n");
         ch->setBaseStat("preference", PREFERENCE_H2H);
         return;
-    } else if (!strcasecmp(arg, "ki")) {
+    } else if (boost::iequals(arg, "ki")) {
                 ch->sendText("You will now favor your ki energy as your fighting specialization. I expect more than a few smoldering craters.\r\n");
         ch->setBaseStat("preference", PREFERENCE_KI);
         return;
-    } else if (!strcasecmp(arg, "weapon")) {
+    } else if (boost::iequals(arg, "weapon")) {
                 ch->sendText("You will now favor your weapons as your fighting specialization. Let the blood fly!\r\n");
         ch->setBaseStat("preference", PREFERENCE_WEAPON);
         return;
@@ -1077,7 +1081,7 @@ ACMD(do_moondust)
 
     int chance = axion_dice(0);
 
-    if (chance > GET_WIS(ch) + rand_number(1, 10))
+    if (chance > GET_WIS(ch) + Random::get<int>(1, 10))
     {
         act("@GYou spread your wings and begin to concentrate. Your wings begin to glow a soft sea green color. As you prepare to release a cloud of your charged wing dust you lose focus and the power you had begun to charge into your wings dissipates.@n",
             true, ch, nullptr, nullptr, TO_CHAR);
@@ -1150,7 +1154,7 @@ ACMD(do_shell)
         return;
     }
 
-    if (axion_dice(0) > GET_CON(ch) + rand_number(1, 10))
+    if (axion_dice(0) > GET_CON(ch) + Random::get<int>(1, 10))
     {
         act("@mYou crouch down and begin to focus on your body's carapace cells encouraging them to multiply! However your control is lacking and you ultimately fail to grow your armor very much.@n",
             true, ch, nullptr, nullptr, TO_CHAR);
@@ -1206,7 +1210,7 @@ ACMD(do_liquefy)
         return;
     }
 
-    if (!strcasecmp(arg, "hide"))
+    if (boost::iequals(arg, "hide"))
     {
         if (GRAPPLED(ch))
         {
@@ -1242,7 +1246,7 @@ ACMD(do_liquefy)
         ch->affect_flags.set(AFF_HIDE, true);
         return;
     }
-    else if (!strcasecmp(arg, "explode"))
+    else if (boost::iequals(arg, "explode"))
     {
         Character *vict;
         if (GRAPPLED(ch))
@@ -1447,7 +1451,7 @@ ACMD(do_fish)
         return;
     }
 
-    if (!strcasecmp(arg, "cast"))
+    if (boost::iequals(arg, "cast"))
     {
         if (PLR_FLAGGED(ch, PLR_FISHING))
         {
@@ -1492,13 +1496,13 @@ ACMD(do_fish)
                 true, ch, nullptr, nullptr, TO_CHAR);
             act("@c$n@C pulls $s arm back and then springs it foward, casting the line of $s fishing pole into the water.@n",
                 true, ch, nullptr, nullptr, TO_ROOM);
-            auto dis = ch->setBaseStat("fish_distance", rand_number(30, 80));
+            auto dis = ch->setBaseStat("fish_distance", Random::get<int>(30, 80));
             ch->player_flags.set(PLR_FISHING, true);
             ch->send_to("@D[@wDistance@D: @Y%d@D]@n\r\n", dis);
             return;
         }
     }
-    else if (!strcasecmp(arg, "hook"))
+    else if (boost::iequals(arg, "hook"))
     {
         if (!PLR_FLAGGED(ch, PLR_FISHING))
         {
@@ -1541,7 +1545,7 @@ ACMD(do_fish)
             return;
         }
     }
-    else if (!strcasecmp(arg, "reel"))
+    else if (boost::iequals(arg, "reel"))
     {
         if (!PLR_FLAGGED(ch, PLR_FISHING))
         {
@@ -1573,7 +1577,7 @@ ACMD(do_fish)
             return;
         }
     }
-    else if (!strcasecmp(arg, "apply"))
+    else if (boost::iequals(arg, "apply"))
     {
         if (!GET_EQ(ch, WEAR_WIELD2))
         {
@@ -1624,7 +1628,7 @@ ACMD(do_fish)
             } /* End Applying bait */
         } /* end has pole */
     }
-    else if (!strcasecmp(arg, "stop"))
+    else if (boost::iequals(arg, "stop"))
     {
         if (!PLR_FLAGGED(ch, PLR_FISHING))
         {
@@ -1688,44 +1692,44 @@ void fish_update(uint64_t heartPulse, double deltaTime)
             ch = i;
             if (GET_FISHD(ch) <= 0 && GET_FISHSTATE(ch) == FISH_REELING)
             { /* We've caught it */
-                if (GET_POLE_BONUS(ch) >= rand_number(60, 100))
+                if (GET_POLE_BONUS(ch) >= Random::get<int>(60, 100))
                 {
-                    quality = rand_number(0, 3) + rand_number(0, 3) + rand_number(0, 3);
+                    quality = Random::get<int>(0, 3) + Random::get<int>(0, 3) + Random::get<int>(0, 3);
                 }
-                else if (GET_POLE_BONUS(ch) >= rand_number(45, 60))
+                else if (GET_POLE_BONUS(ch) >= Random::get<int>(45, 60))
                 {
-                    quality = rand_number(0, 3) + rand_number(0, 3);
+                    quality = Random::get<int>(0, 3) + Random::get<int>(0, 3);
                 }
                 else
                 {
-                    quality = rand_number(0, 3);
+                    quality = Random::get<int>(0, 3);
                 }
                 catch_fish(ch, quality);
             }
-            else if (rand_number(1, 5) >= 3)
+            else if (Random::get<int>(1, 5) >= 3)
             { /* Reeling section */
                 auto fstate = GET_FISHSTATE(ch);
-                if (fstate == FISH_REELING && rand_number(1, 100) <= 80)
+                if (fstate == FISH_REELING && Random::get<int>(1, 100) <= 80)
                 {
                     int reduceBy = 0;
                     if (GET_POLE_BONUS(ch) >= 80)
                     {
-                        reduceBy = rand_number(6, 10);
+                        reduceBy = Random::get<int>(6, 10);
                     }
                     else if (GET_POLE_BONUS(ch) >= 40)
                     {
-                        reduceBy = rand_number(5, 8);
+                        reduceBy = Random::get<int>(5, 8);
                     }
                     else
                     {
-                        reduceBy = rand_number(1, 4);
+                        reduceBy = Random::get<int>(1, 4);
                     }
                     ch->modBaseStat("fish_distance", -reduceBy);
                     act("@CYou reel the line on your pole some.@n", true, ch, nullptr, nullptr, TO_CHAR);
                     act("@c$n@C reels the line on $s pole slowly.@n", true, ch, nullptr, nullptr, TO_ROOM);
                     ch->send_to("@D[@wDistance@D: @Y%d@D]@n\r\n", GET_FISHD(ch) > 0 ? GET_FISHD(ch) : 0);
                 }
-                else if (fstate == FISH_REELING && rand_number(1, 58) <= 55)
+                else if (fstate == FISH_REELING && Random::get<int>(1, 58) <= 55)
                 {
                     act("@CYou struggle as the fish fights against your attempts to reel it in!@n", true, ch,
                         nullptr, nullptr, TO_CHAR);
@@ -1747,7 +1751,7 @@ void fish_update(uint64_t heartPulse, double deltaTime)
                         SET_OBJ_VAL(pole, VAL_FISHPOLE_BAIT, 0);
                     }
                 }
-                else if (fstate == FISH_HOOKED && rand_number(1, 20) >= 12)
+                else if (fstate == FISH_HOOKED && Random::get<int>(1, 20) >= 12)
                 {
                     act("@CYou feel the line go slack and realize you've lost the fish! You reel your line back in...@n",
                         true, ch, nullptr, nullptr, TO_CHAR);
@@ -1757,14 +1761,14 @@ void fish_update(uint64_t heartPulse, double deltaTime)
                     ch->player_flags.set(PLR_FISHING, false);
                     characterSubscriptions.unsubscribe("goneFishing", i);
                 }
-                else if (fstate == FISH_BITE && rand_number(1, 20) >= 12)
+                else if (fstate == FISH_BITE && Random::get<int>(1, 20) >= 12)
                 {
                     act("@CYou feel as if the fish has stopped biting...@n", true, ch, nullptr, nullptr, TO_CHAR);
                     ch->setBaseStat("fish_state", FISH_NOFISH);
                 }
                 else if (fstate != FISH_HOOKED && fstate != FISH_BITE &&
-                         ((ch->location.getRoomFlag(ROOM_FISHFRESH) && rand_number(1, 10) >= 8) ||
-                          (!ch->location.getRoomFlag(ROOM_FISHFRESH) && rand_number(1, 20) >= 18)))
+                         ((ch->location.getRoomFlag(ROOM_FISHFRESH) && Random::get<int>(1, 10) >= 8) ||
+                          (!ch->location.getRoomFlag(ROOM_FISHFRESH) && Random::get<int>(1, 20) >= 18)))
                 {
                     act("@CYou feel a fish biting on your line! Better @Ghook@C it!@n", true, ch, nullptr, nullptr,
                         TO_CHAR);
@@ -1791,7 +1795,7 @@ static void catch_fish(Character *ch, int quality)
     {
         if (ch->location.getWhereFlag(WhereFlag::planet_earth))
         {
-            switch (rand_number(1, 10))
+            switch (Random::get<int>(1, 10))
             {
             case 1:
             case 2:
@@ -1815,7 +1819,7 @@ static void catch_fish(Character *ch, int quality)
         }
         else if (ch->location.getWhereFlag(WhereFlag::planet_aether))
         {
-            switch (rand_number(1, 10))
+            switch (Random::get<int>(1, 10))
             {
             case 1:
             case 2:
@@ -1842,7 +1846,7 @@ static void catch_fish(Character *ch, int quality)
     {
         if (ch->location.getWhereFlag(WhereFlag::planet_earth))
         {
-            switch (rand_number(1, 10))
+            switch (Random::get<int>(1, 10))
             {
             case 1:
             case 2:
@@ -1866,7 +1870,7 @@ static void catch_fish(Character *ch, int quality)
         }
         else if (ch->location.getWhereFlag(WhereFlag::planet_namek))
         {
-            switch (rand_number(1, 10))
+            switch (Random::get<int>(1, 10))
             {
             case 1:
             case 2:
@@ -1905,9 +1909,9 @@ static void catch_fish(Character *ch, int quality)
 
     int weight = 1;
 
-    if (quality <= 0 && rand_number(1, 20) >= 17)
+    if (quality <= 0 && Random::get<int>(1, 20) >= 17)
     {
-        quality += rand_number(2, 7);
+        quality += Random::get<int>(2, 7);
     }
 
     Object *pole = GET_EQ(ch, WEAR_WIELD2);
@@ -1925,23 +1929,23 @@ static void catch_fish(Character *ch, int quality)
     {
     case 0:
     case 1:
-        weight = rand_number(0, 2);
+        weight = Random::get<int>(0, 2);
         break;
     case 2:
     case 3:
-        weight = rand_number(3, 4);
+        weight = Random::get<int>(3, 4);
         fish->modBaseStat("cost", fish->getBaseStat("cost") * 0.20);
         MOD_OBJ_VAL(fish, VAL_FOOD_FOODVAL, 1);
         break;
     case 4:
     case 5:
     case 6:
-        weight = rand_number(5, 9);
+        weight = Random::get<int>(5, 9);
         fish->modBaseStat("cost", fish->getBaseStat("cost") * 0.5);
         MOD_OBJ_VAL(fish, VAL_FOOD_FOODVAL, 3);
         break;
     default:
-        weight = rand_number(10, 15);
+        weight = Random::get<int>(10, 15);
         fish->modBaseStat("cost", fish->getBaseStat("cost") * 2);
         MOD_OBJ_VAL(fish, VAL_FOOD_FOODVAL, 5);
         break;
@@ -1982,7 +1986,7 @@ ACMD(do_extract)
         return;
     }
 
-    if (!strcasecmp(arg, "combine"))
+    if (boost::iequals(arg, "combine"))
     {
         if (!(obj = get_obj_in_list_vis(ch, arg2, nullptr, ch->getInventory())))
         {
@@ -2105,7 +2109,7 @@ ACMD(do_extract)
                 act("@C$n@W takes a hold of the @G$p@W and begins to strip it of its leaves. Once it has been stripped $e bundles up the leaves in $s hands and begins to squeeze ink carefully from the leaves into a bottle.@n",
                     true, ch, obj, nullptr, TO_ROOM);
                 extract_obj(obj);
-                MOD_OBJ_VAL(bottle, VAL_OTHER_SERAF, rand_number(4, 6));
+                MOD_OBJ_VAL(bottle, VAL_OTHER_SERAF, Random::get<int>(4, 6));
                 if (GET_OBJ_VAL(bottle, VAL_OTHER_SERAF) >= 24)
                 {
                     Object *filled = read_object(3424, VIRTUAL);
@@ -2201,7 +2205,7 @@ ACMD(do_runic)
         ch->sendText("You do not have enough ki to write runes.\r\n");
         return;
     }
-    else if (skill + bonus < axion_dice(0) && rand_number(1, 5) == 5)
+    else if (skill + bonus < axion_dice(0) && Random::get<int>(1, 5) == 5)
     {
         act("@BYou dip your brush into the ink, but as you infuse your ki you balance the flow wrong and end up destroying the ink bottle!@n",
             true, ch, nullptr, nullptr, TO_CHAR);
@@ -2221,12 +2225,12 @@ ACMD(do_runic)
         act("@b$n@B dips $s runic brush into a bottle filled with shimmering ink. @b$n@B appears to concentrate for a moment before some ink evaporates. Strange...@n",
             true, ch, nullptr, nullptr, TO_ROOM);
         improve_skill(ch, SKILL_RUNIC, 1);
-        if (MOD_OBJ_VAL(bottle, VAL_OTHER_SERAF, -rand_number(1, 3)) < 0)
+        if (MOD_OBJ_VAL(bottle, VAL_OTHER_SERAF, -Random::get<int>(1, 3)) < 0)
             SET_OBJ_VAL(bottle, VAL_OTHER_SERAF, 0);
         WAIT_STATE(ch, PULSE_3SEC);
         return;
     }
-    else if (!strcasecmp(arg2, "kenaz") || !strcasecmp(arg2, "Kenaz"))
+    else if (boost::iequals(arg2, "kenaz") || boost::iequals(arg2, "Kenaz"))
     {
         inkcost += 1;
         if (vict == ch)
@@ -2275,7 +2279,7 @@ ACMD(do_runic)
         WAIT_STATE(ch, PULSE_3SEC);
         return;
     }
-    else if (!strcasecmp(arg2, "algiz") || !strcasecmp(arg2, "Algiz"))
+    else if (boost::iequals(arg2, "algiz") || boost::iequals(arg2, "Algiz"))
     {
         inkcost += 2;
         if (amount < inkcost)
@@ -2329,7 +2333,7 @@ ACMD(do_runic)
         WAIT_STATE(ch, PULSE_3SEC);
         return;
     }
-    else if (!strcasecmp(arg2, "oagaz") || !strcasecmp(arg2, "Oagaz"))
+    else if (boost::iequals(arg2, "oagaz") || boost::iequals(arg2, "Oagaz"))
     {
         inkcost += 3;
         if (amount < inkcost)
@@ -2358,7 +2362,7 @@ ACMD(do_runic)
             }
         }
     }
-    else if (!strcasecmp(arg2, "laguz") || !strcasecmp(arg2, "Laguz"))
+    else if (boost::iequals(arg2, "laguz") || boost::iequals(arg2, "Laguz"))
     {
         inkcost += 4;
         if (amount < inkcost)
@@ -2412,7 +2416,7 @@ ACMD(do_runic)
         WAIT_STATE(ch, PULSE_3SEC);
         return;
     }
-    else if (!strcasecmp(arg2, "wunjo") || !strcasecmp(arg2, "Wunjo"))
+    else if (boost::iequals(arg2, "wunjo") || boost::iequals(arg2, "Wunjo"))
     {
         inkcost += 4;
         if (amount < inkcost)
@@ -2466,7 +2470,7 @@ ACMD(do_runic)
         WAIT_STATE(ch, PULSE_3SEC);
         return;
     }
-    else if (!strcasecmp(arg2, "purisaz") || !strcasecmp(arg2, "Purisaz"))
+    else if (boost::iequals(arg2, "purisaz") || boost::iequals(arg2, "Purisaz"))
     {
         inkcost += 4;
         if (amount < inkcost)
@@ -2520,7 +2524,7 @@ ACMD(do_runic)
         WAIT_STATE(ch, PULSE_3SEC);
         return;
     }
-    else if (!strcasecmp(arg2, "gebo") || !strcasecmp(arg2, "Gebo"))
+    else if (boost::iequals(arg2, "gebo") || boost::iequals(arg2, "Gebo"))
     {
         inkcost += 10;
         if (amount < inkcost)
@@ -2580,7 +2584,7 @@ ACMD(do_runic)
 ACMD(do_scry)
 {
 
-    if (strcasecmp(GET_NAME(ch), "Galeos"))
+    if (!boost::iequals(GET_NAME(ch), "Galeos"))
     {
         ch->sendText("You do not know how to perform that technique.\r\n");
         return;
@@ -2860,7 +2864,7 @@ ACMD(do_resize)
                     ch->sendText("You do not have enough stamina to resize this object at this time.\r\n");
                     return;
                 }
-                else if (!strcasecmp(arg2, "small"))
+                else if (boost::iequals(arg2, "small"))
                 {
                     if (GET_OBJ_SIZE(obj) == SIZE_SMALL)
                     {
@@ -2875,7 +2879,7 @@ ACMD(do_resize)
                         ch->modCurVital(CharVital::stamina, -(GET_OBJ_WEIGHT(obj) + (GET_MAX_MOVE(ch) / 40)));
                     }
                 }
-                else if (!strcasecmp(arg2, "medium"))
+                else if (boost::iequals(arg2, "medium"))
                 {
                     if (GET_OBJ_SIZE(obj) == SIZE_MEDIUM)
                     {
@@ -2979,7 +2983,7 @@ ACMD(do_healglow)
             act("@c$n@C places $s hands on @c$N's@C body. Slowly a strong blue glow glistens and shines across $S skin!@n",
                 true, ch, nullptr, vict, TO_NOTVICT);
             int duration = (GET_SKILL(ch, SKILL_HEALGLOW) * 0.1);
-            duration += rand_number(-2, 1);
+            duration += Random::get<int>(-2, 1);
             if (duration <= 0)
                 duration = 1;
             assign_affect(ch, AFF_HEALGLOW, SKILL_HEALGLOW, duration, 0, 0, 0, 0, 0, 0);
@@ -2992,7 +2996,7 @@ ACMD(do_healglow)
 ACMD(do_amnisiac)
 {
 
-    if (strcasecmp(GET_NAME(ch), "Kanashimi"))
+    if (!boost::iequals(GET_NAME(ch), "Kanashimi"))
     {
         ch->sendText("You do not know how to perform that technique.\r\n");
         return;
@@ -3075,7 +3079,7 @@ ACMD(do_shimmer)
             ch->sendText("You stop watching the arena action.\r\n");
         }
     }
-    if (strcasecmp(GET_NAME(ch), "Anubis"))
+    if (!boost::iequals(GET_NAME(ch), "Anubis"))
     {
         ch->sendText("You do not even know how to perform that skill!\r\n");
         return;
@@ -3113,31 +3117,31 @@ ACMD(do_shimmer)
     perc = axion_dice(0);
     skill = 100;
 
-    if (!strcasecmp(arg, "planet-earth"))
+    if (boost::iequals(arg, "planet-earth"))
     {
         location = 300;
     }
-    else if (!strcasecmp(arg, "planet-namek"))
+    else if (boost::iequals(arg, "planet-namek"))
     {
         location = 10222;
     }
-    else if (!strcasecmp(arg, "planet-frigid"))
+    else if (boost::iequals(arg, "planet-frigid"))
     {
         location = 4017;
     }
-    else if (!strcasecmp(arg, "planet-vegeta"))
+    else if (boost::iequals(arg, "planet-vegeta"))
     {
         location = 2200;
     }
-    else if (!strcasecmp(arg, "planet-konack"))
+    else if (boost::iequals(arg, "planet-konack"))
     {
         location = 8006;
     }
-    else if (!strcasecmp(arg, "planet-aether"))
+    else if (boost::iequals(arg, "planet-aether"))
     {
         location = 12024;
     }
-    else if (!strcasecmp(arg, "afterlife"))
+    else if (boost::iequals(arg, "afterlife"))
     {
         location = 6000;
     }
@@ -3149,7 +3153,7 @@ ACMD(do_shimmer)
         return;
     }
 
-    if (skill < perc || (FIGHTING(ch) && rand_number(1, 2) <= 1))
+    if (skill < perc || (FIGHTING(ch) && Random::get<int>(1, 2) <= 1))
     {
         if (tar)
         {
@@ -3362,7 +3366,7 @@ ACMD(do_hydromancy)
 
     int attempt = 0;
 
-    if (!strcasecmp(arg, "spike"))
+    if (boost::iequals(arg, "spike"))
     {
         Object *obj;
 
@@ -3414,7 +3418,7 @@ ACMD(do_hydromancy)
         improve_skill(ch, SKILL_STYLE, 1);
         ch->setBaseStat("concentrate_cooldown", 10);
     }
-    else if (!strcasecmp(arg, "flood"))
+    else if (boost::iequals(arg, "flood"))
     {
         if (!*arg2)
         {
@@ -3528,7 +3532,7 @@ ACMD(do_kanso)
     if (IS_NPC(ch)) /* No mobs */
         return;
 
-    if (strcasecmp(GET_NAME(ch), "Levanthoth"))
+    if (!boost::iequals(GET_NAME(ch), "Levanthoth"))
     { /* NOT the right player */
         ch->sendText("You do not know how to perform that technique. \r\n");
         return;
@@ -3558,7 +3562,7 @@ ACMD(do_kanso)
 
     int64_t cost = GET_MAX_MANA(ch) / GET_INT(ch);
     int dice = axion_dice(-5), skill = GET_INT(ch), pdice = axion_dice(0);
-    int dam = rand_number(1, 4);
+    int dam = Random::get<int>(1, 4);
     struct affected_type af;
 
     /* Bonus based on wisdom */
@@ -3625,7 +3629,7 @@ ACMD(do_kanso)
             act("@R$N@Wis paralyzed by the attack!@n", true, ch, nullptr, vict,
                 TO_NOTVICT); /* Message everyone else sees */
             af.type = SKILL_PARALYZE;
-            af.duration = rand_number(1, 3);
+            af.duration = Random::get<int>(1, 3);
             af.modifier = 0;
             af.location = APPLY_NONE;
             af.bitvector = AFF_PARA;
@@ -3955,7 +3959,7 @@ ACMD(do_bury)
     fobj = ch->location.searchObjects([&](const auto obj)
                                       { return OBJ_FLAGGED(obj, ITEM_BURIED); });
 
-    if (!strcasecmp(arg, "bury"))
+    if (boost::iequals(arg, "bury"))
     {
         if (!*arg2)
         {
@@ -3993,7 +3997,7 @@ ACMD(do_bury)
             obj->item_flags.set(ITEM_BURIED, true);
         }
     }
-    else if (!strcasecmp(arg, "uncover"))
+    else if (boost::iequals(arg, "uncover"))
     {
         if (fobj == nullptr)
         {
@@ -4044,7 +4048,7 @@ ACMD(do_arena)
         ch->sendText("Syntax: arena (fighter number of participant)\r\n        arena look\r\n        arena scan\r\n        arena stop\r\n");
         return;
     }
-    else if (!strcasecmp(arg, "stop"))
+    else if (boost::iequals(arg, "stop"))
     {
         ch->sendText("You stop viewing what's going on in the arena.\r\n");
         ch->pref_flags.set(PRF_ARENAWATCH, false);
@@ -4056,7 +4060,7 @@ ACMD(do_arena)
         ch->sendText("You are not close enough to the arena floor to see it.\r\n");
         return;
     }
-    else if (!strcasecmp(arg, "look"))
+    else if (boost::iequals(arg, "look"))
     {
         if (!PRF_FLAGGED(ch, PRF_ARENAWATCH))
         {
@@ -4069,7 +4073,7 @@ ACMD(do_arena)
             ch->lookAtLocation(loc);
         }
     }
-    else if (!strcasecmp(arg, "scan"))
+    else if (boost::iequals(arg, "scan"))
     {
         if (ch->location.getVnum() == 17875)
         {
@@ -4225,7 +4229,7 @@ ACMD(do_ensnare)
         }
         else if (AFF_FLAGGED(vict, AFF_ZANZOKEN) && AFF_FLAGGED(ch, AFF_ZANZOKEN))
         {
-            if (GET_SPEEDI(ch) + rand_number(1, 100) < GET_SPEEDI(vict) + rand_number(1, 100))
+            if (GET_SPEEDI(ch) + Random::get<int>(1, 100) < GET_SPEEDI(vict) + Random::get<int>(1, 100))
             {
                 act("@WYou unwind your bundle of silk and grab a loose end of it. Splitting that end to reveal the sticky innards of the strand you swing the strand at @c$N@W! You both zanzoken! Unfortunately @c$N@W manages to avoid it and you lose the bundle...@n",
                     true, ch, nullptr, vict, TO_CHAR);
@@ -4269,7 +4273,7 @@ ACMD(do_ensnare)
             improve_skill(ch, SKILL_ENSNARE, 0);
             ch->affect_flags.set(AFF_ZANZOKEN, false);
         }
-        else if (GET_SPEEDI(ch) + rand_number(1, 100) < GET_SPEEDI(vict) + rand_number(1, 100))
+        else if (GET_SPEEDI(ch) + Random::get<int>(1, 100) < GET_SPEEDI(vict) + Random::get<int>(1, 100))
         {
             act("@WYou unwind your bundle of silk and grab a loose end of it. Splitting that end to reveal the sticky innards of the strand you swing the strand at @c$N@W! Unfortunately @c$N@W manages to avoid it and you lose the bundle...@n",
                 true, ch, nullptr, vict, TO_CHAR);
@@ -4329,7 +4333,7 @@ ACMD(do_silk)
     char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 
     two_arguments(argument, arg, arg2);
-    int prob = GET_SKILL(ch, SKILL_SILK), perc = rand_number(1, 120);
+    int prob = GET_SKILL(ch, SKILL_SILK), perc = Random::get<int>(1, 120);
 
     if (!*arg)
     {
@@ -4337,7 +4341,7 @@ ACMD(do_silk)
         return;
     }
 
-    if (!strcasecmp(arg, "weave"))
+    if (boost::iequals(arg, "weave"))
     {
 
         if (!*arg2)
@@ -4362,7 +4366,7 @@ ACMD(do_silk)
         }
         else
         {
-            if (!strcasecmp(arg2, "head"))
+            if (boost::iequals(arg2, "head"))
             {
                 if (prob <= perc)
                 {
@@ -4442,7 +4446,7 @@ ACMD(do_silk)
                     WAIT_STATE(ch, PULSE_4SEC);
                 }
             }
-            else if (!strcasecmp(arg2, "wrist"))
+            else if (boost::iequals(arg2, "wrist"))
             {
                 if (prob <= perc)
                 {
@@ -4522,7 +4526,7 @@ ACMD(do_silk)
                     WAIT_STATE(ch, PULSE_4SEC);
                 }
             }
-            else if (!strcasecmp(arg2, "belt"))
+            else if (boost::iequals(arg2, "belt"))
             {
                 if (prob <= perc)
                 {
@@ -4610,7 +4614,7 @@ ACMD(do_silk)
             return;
         } ////
     }
-    else if (!strcasecmp(arg, "bundle"))
+    else if (boost::iequals(arg, "bundle"))
     {
         int64_t cost = ((GET_MAX_MANA(ch) * 0.01) * (prob * 0.20)) + (GET_INT(ch) * GET_WIS(ch));
 
@@ -4622,7 +4626,7 @@ ACMD(do_silk)
         else
         {
             WAIT_STATE(ch, PULSE_3SEC);
-            int super = false, superoll = rand_number(1, 100);
+            int super = false, superoll = Random::get<int>(1, 100);
             if (IS_KURZAK(ch))
             {
                 if (GET_SKILL(ch, SKILL_SILK) >= 100)
@@ -4763,7 +4767,7 @@ ACMD(do_adrenaline)
 
             int64_t trade = ch->getBaseStat<int64_t>("stamina") * percent;
 
-            if (!strcasecmp(arg, "pl"))
+            if (boost::iequals(arg, "pl"))
             {
                 act("@GYou focus your mind and begin to overwork your powerful adrenal glands and your wounds begin to heal!@n",
                     true, ch, nullptr, nullptr, TO_CHAR);
@@ -4774,7 +4778,7 @@ ACMD(do_adrenaline)
                 ch->modCurVital(CharVital::health, trade);
                 ch->modCurVital(CharVital::stamina, -trade);
             }
-            else if (!strcasecmp(arg, "ki"))
+            else if (boost::iequals(arg, "ki"))
             {
                 act("@GYou focus your mind and begin to overwork your powerful adrenal glands and you feel your ki replenish!@n",
                     true, ch, nullptr, nullptr, TO_CHAR);
@@ -6118,32 +6122,32 @@ ACMD(do_warppool)
         return;
     }
 
-    if (!strcasecmp("earth", arg) && ch->location.getWhereFlag(WhereFlag::planet_earth))
+    if (boost::iequals("earth", arg) && ch->location.getWhereFlag(WhereFlag::planet_earth))
     {
         ch->sendText("You are already on Earth!\r\n");
         return;
     }
-    else if (!strcasecmp("frigid", arg) && ch->location.getWhereFlag(WhereFlag::planet_frigid))
+    else if (boost::iequals("frigid", arg) && ch->location.getWhereFlag(WhereFlag::planet_frigid))
     {
         ch->sendText("You are already on Frigid!\r\n");
         return;
     }
-    else if (!strcasecmp("kanassa", arg) && ch->location.getWhereFlag(WhereFlag::planet_kanassa))
+    else if (boost::iequals("kanassa", arg) && ch->location.getWhereFlag(WhereFlag::planet_kanassa))
     {
         ch->sendText("You are already on Kanasssa!\r\n");
         return;
     }
-    else if (!strcasecmp("namek", arg) && ch->location.getWhereFlag(WhereFlag::planet_namek))
+    else if (boost::iequals("namek", arg) && ch->location.getWhereFlag(WhereFlag::planet_namek))
     {
         ch->sendText("You are already on Namek!\r\n");
         return;
     }
-    else if (!strcasecmp("aether", arg) && ch->location.getWhereFlag(WhereFlag::planet_aether))
+    else if (boost::iequals("aether", arg) && ch->location.getWhereFlag(WhereFlag::planet_aether))
     {
         ch->sendText("You are already on Aether!\r\n");
         return;
     }
-    else if (!strcasecmp("earth", arg))
+    else if (boost::iequals("earth", arg))
     {
         if (prob > perc)
         {
@@ -6168,7 +6172,7 @@ ACMD(do_warppool)
             ch->modCurVital(CharVital::ki, -cost);
         }
     }
-    else if (!strcasecmp("frigid", arg))
+    else if (boost::iequals("frigid", arg))
     {
         if (prob > perc)
         {
@@ -6193,7 +6197,7 @@ ACMD(do_warppool)
             ch->modCurVital(CharVital::ki, -cost);
         }
     }
-    else if (!strcasecmp("namek", arg))
+    else if (boost::iequals("namek", arg))
     {
         if (prob > perc)
         {
@@ -6218,7 +6222,7 @@ ACMD(do_warppool)
             ch->modCurVital(CharVital::ki, -cost);
         }
     }
-    else if (!strcasecmp("kanassa", arg))
+    else if (boost::iequals("kanassa", arg))
     {
         if (prob > perc)
         {
@@ -6243,7 +6247,7 @@ ACMD(do_warppool)
             ch->modCurVital(CharVital::ki, -cost);
         }
     }
-    else if (!strcasecmp("aether", arg))
+    else if (boost::iequals("aether", arg))
     {
         if (prob > perc)
         {
@@ -6714,7 +6718,7 @@ ACMD(do_spoil)
     body_part->item_flags.set(ITEM_UNIQUE_SAVE, true);
     SET_OBJ_VAL(body_part, VAL_ALL_HEALTH, 1);
     SET_OBJ_VAL(body_part, VAL_ALL_MAXHEALTH, 1);
-    body_part->setBaseStat<weight_t>("weight", rand_number(4, 10));
+    body_part->setBaseStat<weight_t>("weight", Random::get<int>(4, 10));
     body_part->setBaseStat<int>("cost_per_day", 0);
     body_part->moveToLocation(ch);
     body_part->clearLocation();

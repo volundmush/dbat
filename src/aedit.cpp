@@ -5,7 +5,11 @@
  * for use with OasisOLC
  * ftpable from ftp.circlemud.org:/pub/CircleMUD/contrib/code
  */
-
+#include "dbat/Character.h"
+#include "dbat/Object.h"
+#include "dbat/Room.h"
+#include "dbat/Destination.h"
+#include "dbat/Descriptor.h"
 #include "dbat/aedit.h"
 #include "dbat/act.informative.h"
 #include "dbat/act.social.h"
@@ -51,8 +55,8 @@ ACMD(do_oasis_aedit) {
 
     d = ch->desc;
 
-    if (!strcasecmp("save", arg)) {
-        mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), true, "OLC: %s saves socials.", GET_NAME(ch));
+    if (boost::iequals("save", arg)) {
+        mudlog(CMP, std::max(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), true, "OLC: %s saves socials.", GET_NAME(ch));
                 ch->sendText("Writing social file..\r\n");
         aedit_save_to_disk(d);
                 ch->sendText("Done.\r\n");

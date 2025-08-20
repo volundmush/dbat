@@ -13,6 +13,10 @@
  *   credits found in act.offensive.c except for the commands added in-    *
  *                                                   ~~Iovan               *
  ************************************************************************ */
+#include "dbat/Character.h"
+#include "dbat/Object.h"
+#include "dbat/Location.h"
+#include "dbat/Room.h"
 #include "dbat/act.attack.h"
 #include "dbat/attack.h"
 #include "dbat/fight.h"
@@ -49,7 +53,7 @@ ACMD(do_energize)
     {
         if (GET_SKILL(ch, SKILL_FOCUS) >= 30)
         {
-            int result = rand_number(10, 14);
+            int result = Random::get<int>(10, 14);
             SET_SKILL(ch, SKILL_ENERGIZE, result);
             ch->sendText("You learn the basics for energizing thrown weapons! Now use the energize command again.\r\n");
             return;
@@ -119,7 +123,7 @@ ACMD(do_combine)
         }
         else
         {
-            if (!strcasecmp(arg, "stop") && ch->master)
+            if (boost::iequals(arg, "stop") && ch->master)
             {
                 if (GET_COMBINE(ch) == -1)
                 {
@@ -137,7 +141,7 @@ ACMD(do_combine)
                     return;
                 }
             }
-            else if (!strcasecmp(arg, "stop") && !ch->master)
+            else if (boost::iequals(arg, "stop") && !ch->master)
             {
                 ch->sendText("You do not need to stop as you haven't prepared anything.\r\n");
                 return;
@@ -441,42 +445,42 @@ ACMD(do_throw)
             }
             if (GET_OBJ_VAL(obj, VAL_ALL_MATERIAL) == MATERIAL_STEEL)
             {
-                odam = rand_number(5, 30);
+                odam = Random::get<int>(5, 30);
             }
             else if (GET_OBJ_VAL(obj, VAL_ALL_MATERIAL) == MATERIAL_IRON)
             {
-                odam = rand_number(18, 50);
+                odam = Random::get<int>(18, 50);
             }
             else if (GET_OBJ_VAL(obj, VAL_ALL_MATERIAL) == MATERIAL_MITHRIL)
             {
-                odam = rand_number(5, 15);
+                odam = Random::get<int>(5, 15);
             }
             else if (GET_OBJ_VAL(obj, VAL_ALL_MATERIAL) == MATERIAL_KACHIN)
             {
-                odam = rand_number(5, 15);
+                odam = Random::get<int>(5, 15);
             }
             else if (GET_OBJ_VAL(obj, VAL_ALL_MATERIAL) == MATERIAL_STONE)
             {
-                odam = rand_number(20, 50);
+                odam = Random::get<int>(20, 50);
             }
             else if (GET_OBJ_VAL(obj, VAL_ALL_MATERIAL) == MATERIAL_DIAMOND)
             {
-                odam = rand_number(5, 20);
+                odam = Random::get<int>(5, 20);
             }
             else if (GET_OBJ_VAL(obj, VAL_ALL_MATERIAL) == MATERIAL_ENERGY)
             {
-                if (rand_number(1, 2) == 2)
+                if (Random::get<int>(1, 2) == 2)
                 {
                     odam = 0;
                 }
                 else
                 {
-                    odam = rand_number(1, 3);
+                    odam = Random::get<int>(1, 3);
                 }
             }
             else
             {
-                odam = rand_number(90, 100);
+                odam = Random::get<int>(90, 100);
             }
             if (!OBJ_FLAGGED(obj, ITEM_THROW))
             {
@@ -486,8 +490,8 @@ ACMD(do_throw)
             }
             else
             {
-                odam = rand_number(0, 1);
-                damage += GET_STR(ch) * GET_DEX(ch) + rand_number(1, 20);
+                odam = Random::get<int>(0, 1);
+                damage += GET_STR(ch) * GET_DEX(ch) + Random::get<int>(1, 20);
                 damage += wlvl * (damage * 0.1);
             }
 
@@ -529,7 +533,7 @@ ACMD(do_throw)
             prob = axion_dice(penalty);
             if (*arg3)
             {
-                if (!strcasecmp(arg3, "1") || !strcasecmp(arg3, "single"))
+                if (boost::iequals(arg3, "1") || boost::iequals(arg3, "single"))
                 {
                     multithrow = false;
                 }
@@ -778,7 +782,7 @@ ACMD(do_throw)
             return;
         }
 
-        if (GET_SPEEDI(tch) < GET_SPEEDI(ch) && rand_number(1, 106) < GET_SKILL(ch, SKILL_THROW))
+        if (GET_SPEEDI(tch) < GET_SPEEDI(ch) && Random::get<int>(1, 106) < GET_SKILL(ch, SKILL_THROW))
         {
             grab = true;
         }
@@ -814,7 +818,7 @@ ACMD(do_throw)
             damage += gravity * (gravity / 2);
             perc = init_skill(ch, SKILL_THROW);
             perc2 = init_skill(vict, SKILL_DODGE);
-            prob = rand_number(1, 106);
+            prob = Random::get<int>(1, 106);
             if (perc - (perc2 / 10) < prob)
             {
                 if (perc2 > 0)
@@ -935,7 +939,7 @@ ACMD(do_selfd)
 
     if (!GET_SKILL(ch, SKILL_SELFD))
     {
-        int num = rand_number(10, 20);
+        int num = Random::get<int>(10, 20);
         SET_SKILL(ch, SKILL_SELFD, num);
     }
 
@@ -999,7 +1003,7 @@ ACMD(do_selfd)
         {
             die(ch, nullptr);
         }
-        int num = rand_number(10, 20) + GET_SKILL(ch, SKILL_SELFD);
+        int num = Random::get<int>(10, 20) + GET_SKILL(ch, SKILL_SELFD);
         if (GET_SKILL(ch, SKILL_SELFD) + num <= 100)
         {
             SET_SKILL(ch, SKILL_SELFD, num);
@@ -1053,7 +1057,7 @@ ACMD(do_selfd)
         die(ch, nullptr);
         ch->player_flags.set(PLR_SELFD, false);
         ch->player_flags.set(PLR_SELFD2, false);
-        int num = rand_number(10, 20) + GET_SKILL(ch, SKILL_SELFD);
+        int num = Random::get<int>(10, 20) + GET_SKILL(ch, SKILL_SELFD);
         if (GET_SKILL(ch, SKILL_SELFD) + num <= 100)
         {
             SET_SKILL(ch, SKILL_SELFD, num);

@@ -1,7 +1,6 @@
-#include <iostream>
-#include <iomanip>
-#include <boost/algorithm/string.hpp>
-
+#include "dbat/Character.h"
+#include "dbat/Object.h"
+#include "dbat/Zone.h"
 #include "dbat/transformation.h"
 #include "dbat/comm.h"
 #include "dbat/send.h"
@@ -9,8 +8,8 @@
 #include "dbat/genzon.h"
 #include "dbat/dg_comm.h"
 #include "dbat/dg_scripts.h"
-#include <dbat/combat.h>
-#include <dbat/attack.h>
+#include "dbat/combat.h"
+#include "dbat/attack.h"
 
 namespace trans
 {

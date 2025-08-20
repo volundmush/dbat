@@ -7,7 +7,11 @@
  *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
  *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
  ************************************************************************ */
-
+#include "dbat/Character.h"
+#include "dbat/Zone.h"
+#include "dbat/CharacterPrototype.h"
+#include "dbat/Object.h"
+#include "dbat/Destination.h"
 #include "dbat/mobact.h"
 #include "dbat/utils.h"
 #include "dbat/db.h"
@@ -15,7 +19,7 @@
 #include "dbat/interpreter.h"
 #include "dbat/handler.h"
 #include "dbat/spells.h"
-#include "dbat/shop.h"
+#include "dbat/Shop.h"
 #include "dbat/combat.h"
 #include "dbat/act.offensive.h"
 #include "dbat/act.movement.h"
@@ -24,7 +28,6 @@
 #include "dbat/act.social.h"
 #include "dbat/spec_procs.h"
 #include "dbat/class.h"
-#include "dbat/random.h"
 #include "dbat/filter.h"
 
 #define MOB_AGGR_TO_ALIGN (MOB_AGGR_EVIL | MOB_AGGR_NEUTRAL | MOB_AGGR_GOOD)
@@ -52,6 +55,11 @@ static const std::vector<std::string> scavengerTalk = {
     "$n@W says, '@CWho would leave this here? Oh well..@W'@n",
     "$n@W says, '@CI always wanted one of these.@W'@n",
     "$n@W looks around quickly to see if anyone is paying attention.@n"};
+
+#define CAN_CARRY_OBJ(ch, obj) ((ch)->canCarryWeight((obj)) && ((IS_CARRYING_N(ch) + 1) <= CAN_CARRY_N(ch)))
+
+#define CAN_GET_OBJ(ch, obj) (CAN_WEAR((obj), ITEM_WEAR_TAKE) && !SITTING(obj) && CAN_CARRY_OBJ((ch),(obj)) && (ch)->canSee(obj))
+
 
 void mobile_activity(uint64_t heartPulse, double deltaTime)
 {
@@ -111,7 +119,7 @@ void mobile_activity(uint64_t heartPulse, double deltaTime)
             if (IS_HUMANOID(ch) && !FIGHTING(ch) && !MOB_FLAGGED(ch, MOB_NOSCAVENGER) && !MOB_FLAGGED(ch, MOB_NOKILL) && (!player_present(ch) || axion_dice(0) > 118))
             {
                 auto con = ch->location.getObjects();
-                if (!con.empty() && rand_number(1, 100) >= 95)
+                if (!con.empty() && Random::get<int>(1, 100) >= 95)
                 {
                     max = 1;
                     best_obj = nullptr;
@@ -135,7 +143,7 @@ void mobile_activity(uint64_t heartPulse, double deltaTime)
             /* Mob Movement */
             start = std::chrono::high_resolution_clock::now();
             if (!MOB_FLAGGED(ch, MOB_SENTINEL) &&
-                rand_number(1, 2) == 2 &&
+                Random::get<int>(1, 2) == 2 &&
                 !IS_AFFECTED(ch, AFF_PARALYZE) &&
                 block_calc(ch) &&
                 (GET_POS(ch) == POS_STANDING) &&
@@ -211,7 +219,7 @@ void mobile_activity(uint64_t heartPulse, double deltaTime)
             /* Aggressive Mobs */
             if (MOB_FLAGGED(ch, MOB_AGGRESSIVE) && !IS_AFFECTED(ch, AFF_PARALYZE))
             {
-                int spot_roll = rand_number(1, GET_LEVEL(ch) + 10);
+                int spot_roll = Random::get<int>(1, GET_LEVEL(ch) + 10);
                 found = false;
                 auto people = ch->location.getPeople();
                 for (auto v : filter_raw(people))
@@ -221,7 +229,7 @@ void mobile_activity(uint64_t heartPulse, double deltaTime)
                         continue;
                     else if (FIGHTING(ch))
                         continue;
-                    else if (!CAN_SEE(ch, vict))
+                    else if (!ch->canSee(vict))
                         continue;
                     else if (IS_NPC(vict))
                         continue;
@@ -311,7 +319,7 @@ void mobile_activity(uint64_t heartPulse, double deltaTime)
 
             start = std::chrono::high_resolution_clock::now();
             // Clones help their original in a fight.
-            if (GET_ORIGINAL(ch) && rand_number(1, 5) >= 4)
+            if (GET_ORIGINAL(ch) && Random::get<int>(1, 5) >= 4)
             {
                 auto original = GET_ORIGINAL(ch);
 
@@ -321,11 +329,11 @@ void mobile_activity(uint64_t heartPulse, double deltaTime)
                     auto targ = FIGHTING(original);
 
                     sprintf(target, "%s", targ->getName());
-                    if (rand_number(1, 5) >= 4)
+                    if (Random::get<int>(1, 5) >= 4)
                     {
                         do_kick(ch, target, 0, 0);
                     }
-                    else if (rand_number(1, 5) >= 4)
+                    else if (Random::get<int>(1, 5) >= 4)
                     {
                         do_elbow(ch, target, 0, 0);
                     }
@@ -364,13 +372,13 @@ void mobile_activity(uint64_t heartPulse, double deltaTime)
                             else
                             {
                                 do_rescue(ch, buf, 0, 0);
-                                if (rand_number(1, 6) == 2)
+                                if (Random::get<int>(1, 6) == 2)
                                 {
                                     char tar[MAX_INPUT_LENGTH];
                                     sprintf(tar, "%s", GET_NAME(FIGHTING(vict)));
                                     do_kiblast(ch, tar, 0, 0);
                                 }
-                                else if (rand_number(1, 6) >= 4)
+                                else if (Random::get<int>(1, 6) >= 4)
                                 {
                                     char tar[MAX_INPUT_LENGTH];
                                     sprintf(tar, "%s", GET_NAME(FIGHTING(vict)));
@@ -390,7 +398,7 @@ void mobile_activity(uint64_t heartPulse, double deltaTime)
             }
 
             /* Help those under attack! */ /* - temporarily disabled by the first false check */
-            if (false && !FIGHTING(ch) && rand_number(1, 20) >= 14 && IS_HUMANOID(ch) && !MOB_FLAGGED(ch, MOB_NOKILL))
+            if (false && !FIGHTING(ch) && Random::get<int>(1, 20) >= 14 && IS_HUMANOID(ch) && !MOB_FLAGGED(ch, MOB_NOKILL))
             {
                 Character *vict, *next_v;
                 int done = false;
@@ -424,11 +432,11 @@ void mobile_activity(uint64_t heartPulse, double deltaTime)
 
             start = std::chrono::high_resolution_clock::now();
             /* Absorb protection */
-            if (ABSORBBY(ch) && rand_number(1, 3) == 3)
+            if (ABSORBBY(ch) && Random::get<int>(1, 3) == 3)
             {
                 do_escape(ch, nullptr, 0, 0);
             }
-            if (GET_POS(ch) == POS_SLEEPING && rand_number(1, 3) == 3)
+            if (GET_POS(ch) == POS_SLEEPING && Random::get<int>(1, 3) == 3)
             {
                 do_wake(ch, nullptr, 0, 0);
             }
@@ -442,7 +450,7 @@ void mobile_activity(uint64_t heartPulse, double deltaTime)
                 auto people = ch->location.getPeople();
                 for (auto vict : filter_raw(people))
                 {
-                    if (IS_NPC(vict) || !CAN_SEE(ch, vict) || PRF_FLAGGED(vict, PRF_NOHASSLE))
+                    if (IS_NPC(vict) || !ch->canSee(vict) || PRF_FLAGGED(vict, PRF_NOHASSLE))
                         continue;
                     if (FIGHTING(ch))
                         continue;
@@ -468,7 +476,7 @@ void mobile_activity(uint64_t heartPulse, double deltaTime)
             mobTimings["mob_memory"] += std::chrono::duration<double>(end - start).count();
 
             start = std::chrono::high_resolution_clock::now();
-            if (FIGHTING(ch) && rand_number(1, 30) >= 25)
+            if (FIGHTING(ch) && Random::get<int>(1, 30) >= 25)
             {
                 mob_taunt(ch);
             }

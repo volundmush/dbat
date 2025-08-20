@@ -1,6 +1,5 @@
 #include "dbat/skill.h"
-
-#include "boost/algorithm/string.hpp"
+#include "dbat/Character.h"
 
 namespace skill
 {

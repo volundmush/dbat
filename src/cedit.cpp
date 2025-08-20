@@ -3,7 +3,11 @@
  * Copyright 2002-2003 Kip Potter   (kip_potter@hotmail.com)            *
  * A graphical in-game game configuration utility for OasisOLC.         *
  ************************************************************************/
-
+#include "dbat/Character.h"
+#include "dbat/Object.h"
+#include "dbat/Room.h"
+#include "dbat/Destination.h"
+#include "dbat/Descriptor.h"
 #include "dbat/cedit.h"
 #include "dbat/send.h"
 #include "dbat/comm.h"
@@ -82,14 +86,14 @@ ACMD(do_oasis_cedit)
                "OLC: %s starts editing the game configuration.", GET_NAME(ch));
         return;
     }
-    else if (strcasecmp("save", buf1) != 0)
+    else if (!boost::iequals("save", buf1) != 0)
     {
         ch->sendText("Yikes!  Stop that, someone will get hurt!\r\n");
         return;
     }
 
     ch->sendText("Saving the game configuration.\r\n");
-    mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), true,
+    mudlog(CMP, std::max(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), true,
            "OLC: %s saves the game configuration.", GET_NAME(ch));
 
     cedit_save_to_disk();
@@ -1093,7 +1097,7 @@ void cedit_parse(struct descriptor_data *d, char *arg)
         case 'y':
         case 'Y':
             cedit_save_internally(d);
-            mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(d->character)), true,
+            mudlog(CMP, std::max(ADMLVL_BUILDER, GET_INVIS_LEV(d->character)), true,
                    "OLC: %s modifies the game configuration.", GET_NAME(d->character));
             cleanup_olc(d, CLEANUP_CONFIG);
             if (CONFIG_AUTO_SAVE)

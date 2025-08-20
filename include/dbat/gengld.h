@@ -6,7 +6,7 @@
 #pragma once
 
 #include "structs.h"
-#include "guild.h"
+#include "Guild.h"
 
 extern void copy_guild(struct guild_data *tguild, struct guild_data *fguild);
 

@@ -5,7 +5,12 @@
  * -------------------------------------------------------------------- *
  * 1999 July 25 caminturn@earthlink.net                                *
  * ******************************************************************** */
-
+#include "dbat/Character.h"
+#include "dbat/Object.h"
+#include "dbat/ObjectPrototype.h"
+#include "dbat/Room.h"
+#include "dbat/Destination.h"
+#include "dbat/Descriptor.h"
 #include "dbat/assedit.h"
 #include "dbat/send.h"
 #include "dbat/db.h"

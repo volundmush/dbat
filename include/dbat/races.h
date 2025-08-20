@@ -6,11 +6,13 @@
 extern const struct guild_info_type guild_info[6];
 
 // functions
-extern void racial_body_parts(Character *ch);
 
-extern void set_height_and_weight_by_race(Character *ch);
 
 extern int invalid_race(Character *ch, Object *obj);
+
+// size helpers (previously only defined in races.cpp)
+
+extern int get_size_bonus(int sz);
 
 // C++ conversion
 

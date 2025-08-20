@@ -2,7 +2,8 @@
  * The functions below this point is handling the context sensitive help system
  * If you add more olc options, be sure to add a case for it here. - Welcor
  */
-
+#include "dbat/Character.h"
+#include "dbat/Descriptor.h"
 #include "dbat/context_help.h"
 #include "dbat/act.informative.h"
 #include "dbat/oasis.h"

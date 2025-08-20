@@ -4,20 +4,25 @@
  * Copyright 1996 by Harvey Gilpin					*
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
-
+#include "dbat/Descriptor.h"
+#include "dbat/Zone.h"
+#include "dbat/Character.h"
+#include "dbat/CharacterPrototype.h"
+#include "dbat/ObjectPrototype.h"
+#include "dbat/Room.h"
 #include "dbat/structs.h"
 #include "dbat/send.h"
 #include "dbat/interpreter.h"
 #include "dbat/comm.h"
 #include "dbat/db.h"
-#include "dbat/shop.h"
+#include "dbat/Shop.h"
 #include "dbat/genmob.h"
 #include "dbat/genshp.h"
 #include "dbat/genzon.h"
 #include "dbat/genobj.h"
 #include "dbat/oasis.h"
 #include "dbat/handler.h"
-#include "dbat/guild.h"
+#include "dbat/Guild.h"
 
 /******************************************************************************/
 /** Internal Data Structures                                                 **/

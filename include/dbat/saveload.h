@@ -1,9 +1,13 @@
 #pragma once
-#include <filesystem>
-#include <cxxabi.h>
+#include "dbat/Character.h"
+#include "dbat/Object.h"
+#include "dbat/HasZone.h"
+#include "dbat/Zone.h"
+#include "dbat/AbstractGridArea.h"
+#include "dbat/Shop.h"
+#include "dbat/Guild.h"
 #include "dbat/structs.h"
 #include "dbat/json.h"
-#include "magic_enum/magic_enum_all.hpp"
 
 inline std::string demangle(const char* mangled_name) {
     int status = -1;

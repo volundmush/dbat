@@ -3,7 +3,7 @@
  * Copyright 1996 by Harvey Gilpin					*
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
-
+#include "dbat/Shop.h"
 #include "dbat/genshp.h"
 #include "dbat/utils.h"
 #include "dbat/db.h"

@@ -7,7 +7,10 @@
  * Written by Jason Goodwin.   jgoodwin@expert.cc.purdue.edu               *
  ************************************************************************ */
 
-#include "dbat/guild.h"
+#include "dbat/Guild.h"
+#include "dbat/Character.h"
+#include "dbat/Descriptor.h"
+#include "dbat/CharacterPrototype.h"
 #include "dbat/send.h"
 #include "dbat/spells.h"
 #include "dbat/comm.h"
@@ -18,7 +21,7 @@
 #include "dbat/feats.h"
 #include "dbat/act.comm.h"
 #include "dbat/handler.h"
-#include "dbat/shop.h"
+#include "dbat/Shop.h"
 #include "dbat/class.h"
 #include "dbat/constants.h"
 #include "dbat/genzon.h"
@@ -143,7 +146,7 @@ void handle_ingest_learn(Character *ch, Character *vict)
         if (((i >= 481 && i <= 489) || i == 517 || i == 535) &&
             ((GET_SKILL_BASE(ch, i) <= 0) && GET_SKILL_BASE(vict, i) > 0))
         {
-            SET_SKILL(ch, i, GET_SKILL_BASE(ch, i) + rand_number(10, 25));
+            SET_SKILL(ch, i, GET_SKILL_BASE(ch, i) + Random::get<int>(10, 25));
             ch->send_to("@YYou learned @y%s@Y from ingesting your target!@n\r\n", spell_info[i].name);
             ch->modBaseStat<int>("skill_slots", 1);
             ch->setBaseStat<int>("ingest_learned", 1);
@@ -197,7 +200,7 @@ ACMD(do_teach)
     if (GET_SKILL_BASE(ch, skill) >= 103)
     {
         cost = cost * 0.5;
-        if (rand_number(1, 4) == 4)
+        if (Random::get<int>(1, 4) == 4)
         {
             free = true;
         }
@@ -521,7 +524,7 @@ int is_guild_ok_char(Character *keeper, Character *ch, int guild_nr)
 {
     char buf[200];
 
-    if (!(CAN_SEE(keeper, ch)))
+    if (!(keeper->canSee(ch)))
     {
         do_say(keeper, MSG_TRAINER_NO_SEE_CH, cmd_say, 0);
         return (false);
@@ -1125,7 +1128,7 @@ void handle_practice(Character *keeper, int guild_nr, Character *ch, char *argum
                             ch->sendText("You practice and master the basics!\r\n");
                         else
                             ch->send_to("You practice the basics of %s\r\n", sensei::getStyle(ch->sensei));
-                        SET_SKILL(ch, skill_num, GET_SKILL_BASE(ch, skill_num) + rand_number(10, 25));
+                        SET_SKILL(ch, skill_num, GET_SKILL_BASE(ch, skill_num) + Random::get<int>(10, 25));
                         ch->modPractices(-pointcost);
                         if (GET_FORGETING(ch) != 0 && GET_SKILL_BASE(ch, GET_FORGETING(ch)) < 30)
                         {

@@ -5,7 +5,8 @@
 ** Created Thursday, September 5, 2002                                      **
 **                                                                          **
 *****************************************************************************/
-
+#include "dbat/Character.h"
+#include "dbat/Descriptor.h"
 #include "dbat/feats.h"
 #include "dbat/send.h"
 #include "dbat/comm.h"

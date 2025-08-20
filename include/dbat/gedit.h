@@ -1,7 +1,7 @@
 #pragma once
 
 #include "structs.h"
-#include "guild.h"
+#include "Guild.h"
 
 extern void gedit_setup_new(struct descriptor_data *d);
 

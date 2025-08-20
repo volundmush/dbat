@@ -9,7 +9,8 @@
  *  InfoTechMUD is based on CircleMUD, Copyright (C) 1993, 1994.           *
  *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
  **************************************************************************/
-
+#include "dbat/Descriptor.h"
+#include "dbat/Character.h"
 #include "dbat/hedit.h"
 #include "dbat/comm.h"
 #include "dbat/interpreter.h"
@@ -45,7 +46,7 @@ ACMD(do_oasis_hedit)
         return;
     }
 
-    if (GET_ADMLEVEL(ch) < 4 && (!strcasecmp("Tepsih", GET_NAME(ch)) && !strcasecmp("Rogoshen", GET_NAME(ch))))
+    if (GET_ADMLEVEL(ch) < 4 && (boost::iequals("Tepsih", GET_NAME(ch)) && boost::iequals("Rogoshen", GET_NAME(ch))))
     {
         ch->sendText("Sorry you are incapable of editing help files at this time.\r\n");
         return;
@@ -61,9 +62,9 @@ ACMD(do_oasis_hedit)
 
     d = ch->desc;
 
-    if (!strcasecmp("save", arg))
+    if (boost::iequals("save", arg))
     {
-        mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), true, "OLC: %s saves help files.",
+        mudlog(CMP, std::max(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), true, "OLC: %s saves help files.",
                GET_NAME(ch));
         hedit_save_to_disk(d);
         ch->sendText("Saving help files.\r\n");

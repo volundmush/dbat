@@ -5,6 +5,12 @@
  * -------------------------------------------------------------------- *
  * 1999 MAY 07 gdavis/azrael@laker.net Initial implementation.         *
  * ******************************************************************** */
+#include "dbat/Character.h"
+#include "dbat/Object.h"
+#include "dbat/ObjectPrototype.h"
+#include "dbat/Room.h"
+#include "dbat/Destination.h"
+#include "dbat/Descriptor.h"
 #include "dbat/assemblies.h"
 #include "dbat/send.h"
 #include "dbat/comm.h"

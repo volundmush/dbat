@@ -2596,3 +2596,113 @@ enum class UnitType : uint8_t
 constexpr UnitType MOB_TRIGGER = UnitType::character;
 constexpr UnitType OBJ_TRIGGER = UnitType::object;
 constexpr UnitType WLD_TRIGGER = UnitType::room;
+
+
+/* various constants *****************************************************/
+
+/* defines for mudlog() */
+constexpr int OFF = 0;
+constexpr int BRF = 1;
+constexpr int NRM = 2;
+constexpr int CMP = 3;
+
+/* get_filename() */
+constexpr int CRASH_FILE = 0;
+constexpr int ETEXT_FILE = 1;
+constexpr int ALIAS_FILE = 2;
+constexpr int SCRIPT_VARS_FILE = 3;
+constexpr int NEW_OBJ_FILES = 4;
+constexpr int PLR_FILE = 5;
+constexpr int PET_FILE = 6;
+constexpr int IMC_FILE = 7; /**< The IMC2 Data for players */
+constexpr int USER_FILE = 8; /* User Account System */
+constexpr int INTRO_FILE = 9;
+constexpr int SENSE_FILE = 10;
+constexpr int CUSTOME_FILE = 11;
+constexpr int MAX_FILES = 12;
+
+/* breadth-first searching */
+constexpr int BFS_ERROR = -1;
+constexpr int BFS_ALREADY_THERE = -2;
+constexpr int BFS_TO_FAR = -3;
+constexpr int BFS_NO_PATH = -4;
+
+/*
+ * XXX: These constants should be configurable. See act.informative.c
+ *	and utils.c for other places to change.
+ */
+/* mud-life time */
+
+constexpr double MUD_TIME_ACCELERATION = 12.0;  // 12 MUD seconds pass per real second.
+
+constexpr double SECONDS_PER_MINUTE = 60.0;
+constexpr double MINUTES_PER_HOUR = 60.0;
+constexpr double HOURS_PER_DAY = 24.0;
+constexpr double DAYS_PER_WEEK = 7.0;
+constexpr double DAYS_PER_MONTH = 30.0;
+constexpr double MONTHS_PER_YEAR = 12.0;
+constexpr double DAYS_PER_YEAR = 365.0;
+
+constexpr double SECS_PER_MINUTE = SECONDS_PER_MINUTE;
+constexpr double SECS_PER_HOUR =  (SECONDS_PER_MINUTE*MINUTES_PER_HOUR);
+constexpr double SECS_PER_DAY =   (SECS_PER_HOUR*HOURS_PER_DAY);
+constexpr double SECS_PER_WEEK =  (SECS_PER_DAY*DAYS_PER_WEEK);
+constexpr double SECS_PER_MONTH = (SECS_PER_DAY*DAYS_PER_MONTH);
+constexpr double SECS_PER_YEAR =  (SECS_PER_DAY*DAYS_PER_YEAR);
+constexpr double SECS_PER_GAME_YEAR = (SECS_PER_MONTH*MONTHS_PER_YEAR);
+
+#define IS_SET(flag, bit)  ((flag) & (bit))
+#define SET_BIT(var, bit)  ((var) |= (bit))
+#define REMOVE_BIT(var, bit)  ((var) &= ~(bit))
+#define TOGGLE_BIT(var, bit) ((var) ^= (bit))
+
+#define REMOVE_FROM_LIST(item, head, next, cmtemp)    \
+   if ((item) == (head))        \
+      (head) = (item)->next;        \
+   else {                \
+      (cmtemp) = head;            \
+      while ((cmtemp) && ((cmtemp)->next != (item))) \
+     (cmtemp) = (cmtemp)->next;        \
+      if (cmtemp)                \
+         (cmtemp)->next = (item)->next;    \
+   }                    \
+
+#define REMOVE_FROM_DOUBLE_LIST(item, head, next, prev)\
+      if((item) == (head))            \
+      {                        \
+            (head) = (item)->next;        \
+            if(head) (head)->prev = nullptr;        \
+      }                        \
+      else                    \
+      {                        \
+        temp = head;                \
+          while(temp && (temp->next != (item)))    \
+            temp = temp->next;            \
+             if(temp)                \
+            {                    \
+               temp->next = (item)->next;        \
+               if((item)->next)            \
+                (item)->next->prev = temp;    \
+            }                    \
+      }                        \
+
+#define CIRCLEMUD_VERSION(major, minor, patchlevel) \
+    (((major) << 16) + ((minor) << 8) + (patchlevel))
+
+#define CREATE(result, type, number)  do {\
+    if ((number) * sizeof(type) <= 0)    \
+        basic_mud_log("SYSERR: Zero bytes or less requested at %s:%d.", __FILE__, __LINE__);    \
+    if (!((result) = (type *) calloc ((number), sizeof(type))))    \
+        { perror("SYSERR: malloc failure"); abort(); } } while(0)
+
+#define RECREATE(result, type, number) do {\
+  if (!((result) = (type *) realloc ((result), sizeof(type) * (number))))\
+        { perror("SYSERR: realloc failure"); abort(); } } while(0)
+
+#define YESNO(a) ((a) ? "YES" : "NO")
+#define ONOFF(a) ((a) ? "ON" : "OFF")
+
+#define ISNEWL(ch) ((ch) == '\n' || (ch) == '\r')
+
+/* See also: ANA, SANA */
+#define AN(string) (strchr("aeiouAEIOU", *(string)) ? "an" : "a")

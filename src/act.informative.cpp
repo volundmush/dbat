@@ -7,6 +7,12 @@
  *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
  *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
  ************************************************************************ */
+#include "dbat/Character.h"
+#include "dbat/Object.h"
+#include "dbat/Room.h"
+#include "dbat/Destination.h"
+#include "dbat/Descriptor.h"
+#include "dbat/ObjectPrototype.h"
 #include "dbat/act.informative.h"
 #include "dbat/act.wizard.h"
 #include "dbat/vehicles.h"
@@ -25,13 +31,12 @@
 #include "dbat/boards.h"
 #include "dbat/screen.h"
 #include "dbat/mail.h"
-#include "dbat/guild.h"
+#include "dbat/Guild.h"
 #include "dbat/players.h"
-#include "dbat/account.h"
+#include "dbat/Account.h"
 #include "dbat/improved-edit.h"
 #include "dbat/transformation.h"
 #include "dbat/planet.h"
-#include "dbat/random.h"
 #include "dbat/graph.h"
 
 /* local functions */
@@ -127,8 +132,8 @@ ACMD(do_evolve)
 
     auto findCost = [&arg](const EvolutionCost &cost)
     {
-        return !strcasecmp(arg, cost.name) || (!strcasecmp(arg, "hp") && !strcasecmp(cost.name, "health")) ||
-               (!strcasecmp(arg, "st") && !strcasecmp(cost.name, "stamina"));
+        return boost::iequals(arg, cost.name) || (boost::iequals(arg, "hp") && boost::iequals(cost.name, "health")) ||
+               (boost::iequals(arg, "st") && boost::iequals(cost.name, "stamina"));
     };
 
     auto it = std::find_if(evolutionCosts.begin(), evolutionCosts.end(), findCost);
@@ -337,7 +342,7 @@ static void search_room(Character *ch)
     auto loco = ch->location.getObjects();
     for (auto obj : filter_raw(loco))
     {
-        if (OBJ_FLAGGED(obj, ITEM_BURIED) && perc * bonus > rand_number(50, 200))
+        if (OBJ_FLAGGED(obj, ITEM_BURIED) && perc * bonus > Random::get<int>(50, 200))
         {
             act("@YYou uncover @y$p@Y, which had been burried here.@n", true, ch, obj, nullptr, TO_CHAR);
             act("@y$n@Y uncovers @y$p@Y, which had burried here.@n", true, ch, obj, nullptr, TO_ROOM);
@@ -409,7 +414,7 @@ ACMD(do_mimic)
         return;
     }
 
-    if (!strcasecmp(arg, "stop"))
+    if (boost::iequals(arg, "stop"))
     {
         if (!ch->mimic)
         {
@@ -624,7 +629,7 @@ ACMD(do_shuffle)
             {
                 continue;
             }
-            if (count > 1 && rand_number(1, 4) == 3)
+            if (count > 1 && Random::get<int>(1, 4) == 3)
             {
                 count -= 1;
                 obj2->clearLocation();
@@ -658,7 +663,7 @@ ACMD(do_hand)
         return;
     }
 
-    if (!strcasecmp("look", arg))
+    if (boost::iequals("look", arg))
     {
         ch->sendText("@CYour hand contains:\r\n@D---------------------------@n\r\n");
         auto con = ch->getInventory();
@@ -692,7 +697,7 @@ ACMD(do_hand)
             act(buf, true, ch, nullptr, nullptr, TO_ROOM);
         }
     }
-    else if (!strcasecmp("show", arg))
+    else if (boost::iequals("show", arg))
     {
         ch->sendText("You show off your hand to the room.\r\n");
         act("@C$n's hand contains:\r\n@D---------------------------@n", true, ch, nullptr, nullptr, TO_ROOM);
@@ -873,7 +878,7 @@ ACMD(do_nickname)
         return;
     }
 
-    if (strcasecmp(arg, "ship"))
+    if (!boost::iequals(arg, "ship"))
     {
         if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->getInventory())))
         {
@@ -887,7 +892,7 @@ ACMD(do_nickname)
         return;
     }
 
-    if (!strcasecmp(arg, "ship"))
+    if (boost::iequals(arg, "ship"))
     {
         Object *ship = nullptr, *next_obj = nullptr, *ship2 = nullptr;
         int found = false;
@@ -1544,7 +1549,7 @@ void show_obj_to_char(Object *obj, Character *ch, int mode)
 
     int spotted = false;
 
-    if (GET_SKILL(ch, SKILL_SPOT) > rand_number(20, 110))
+    if (GET_SKILL(ch, SKILL_SPOT) > Random::get<int>(20, 110))
     {
         spotted = true;
     }
@@ -1835,7 +1840,7 @@ void show_obj_to_char(Object *obj, Character *ch, int mode)
 
                 snprintf(notebuf, sizeof(notebuf), "There is something written on it:\r\n\r\n%s",
                          ld);
-                ch->desc->sendText(notebuf);
+                ch->sendText(notebuf);
             }
             else
                 ch->sendText("There appears to be nothing written on it.\r\n");
@@ -2103,7 +2108,7 @@ static int show_obj_modifiers(Object *obj, Character *ch)
     }
     if (KICHARGE(obj) > 0)
     {
-        int num = (KIDIST(obj) * 20) + rand_number(1, 5);
+        int num = (KIDIST(obj) * 20) + Random::get<int>(1, 5);
         ch->send_to(" %d meters away", num);
         found++;
     }
@@ -2171,13 +2176,13 @@ static void list_obj_to_char(const std::vector<std::weak_ptr<Object>> &list, Cha
 
     for (auto i : filter_raw(list))
     {
-        if (i->getRoomDescription() == nullptr || strcasecmp(i->getRoomDescription(), "undefined") == 0)
+        if (i->getRoomDescription() == nullptr || !boost::iequals(i->getRoomDescription(), "undefined") == 0)
             continue;
 
         num = 0;
         d = i;
 
-        if (CAN_SEE_OBJ(ch, d) &&
+    if (ch->canSee(d) &&
                 ((*d->getRoomDescription() != '.' && *d->getShortDescription() != '.') || PRF_FLAGGED(ch, PRF_HOLYLIGHT)) ||
             (GET_OBJ_TYPE(d) == ITEM_LIGHT))
         {
@@ -2218,7 +2223,7 @@ static void diag_obj_to_char(Object *obj, Character *ch)
         if (percent >= diagnosis[ar_index].percent)
             break;
 
-    ch->send_to("\r\n%c%s %s\r\n", UPPER(*objs), objs + 1, diagnosis[ar_index].text);
+    ch->send_to("\r\n%c%s %s\r\n", toupper(*objs), objs + 1, diagnosis[ar_index].text);
 }
 
 static void diag_char_to_char(Character *i, Character *ch)
@@ -2381,9 +2386,9 @@ static void look_at_char(Character *i, Character *ch)
     else if (ch == i || IS_NPC(i))
     {
         if (GET_SEX(i) == SEX_NEUTRAL)
-            ch->send_to("%c%s appears to be %s %s, ", UPPER(*GET_NAME(i)), GET_NAME(i) + 1, AN(RACE(i)), LRACE(i));
+            ch->send_to("%c%s appears to be %s %s, ", toupper(*GET_NAME(i)), GET_NAME(i) + 1, AN(RACE(i)), LRACE(i));
         else
-            ch->send_to("%c%s appears to be %s %s %s, ", UPPER(*GET_NAME(i)), GET_NAME(i) + 1, AN(MAFE(i)), MAFE(i), LRACE(i));
+            ch->send_to("%c%s appears to be %s %s %s, ", toupper(*GET_NAME(i)), GET_NAME(i) + 1, AN(MAFE(i)), MAFE(i), LRACE(i));
     }
     else
     {
@@ -2472,7 +2477,7 @@ static void look_at_char(Character *i, Character *ch)
     diag_char_to_char(i, ch);
     found = false;
     for (j = 0; !found && j < NUM_WEARS; j++)
-        if (GET_EQ(i, j) && CAN_SEE_OBJ(ch, GET_EQ(i, j)))
+    if (GET_EQ(i, j) && ch->canSee(GET_EQ(i, j)))
             found = true;
 
     if (found && (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_NOEQSEE)))
@@ -2487,7 +2492,7 @@ static void look_at_char(Character *i, Character *ch)
             act("The disguised person is using:", false, i, nullptr, ch, TO_VICT);
         }
         for (j = 0; j < NUM_WEARS; j++)
-            if (GET_EQ(i, j) && CAN_SEE_OBJ(ch, GET_EQ(i, j)) && (j != WEAR_WIELD1 && j != WEAR_WIELD2))
+            if (GET_EQ(i, j) && ch->canSee(GET_EQ(i, j)) && (j != WEAR_WIELD1 && j != WEAR_WIELD2))
             {
                 ch->send_to("%s", wear_where[j]);
                 show_obj_to_char(GET_EQ(i, j), ch, SHOW_OBJ_SHORT);
@@ -2502,7 +2507,7 @@ static void look_at_char(Character *i, Character *ch)
                     }
                 }
             }
-            else if (GET_EQ(i, j) && CAN_SEE_OBJ(ch, GET_EQ(i, j)) && (!PLR_FLAGGED(i, PLR_THANDW)))
+            else if (GET_EQ(i, j) && ch->canSee(GET_EQ(i, j)) && (!PLR_FLAGGED(i, PLR_THANDW)))
             {
                 ch->send_to("%s", wear_where[j]);
                 show_obj_to_char(GET_EQ(i, j), ch, SHOW_OBJ_SHORT);
@@ -2517,7 +2522,7 @@ static void look_at_char(Character *i, Character *ch)
                     }
                 }
             }
-            else if (GET_EQ(i, j) && CAN_SEE_OBJ(ch, GET_EQ(i, j)) && (PLR_FLAGGED(i, PLR_THANDW)))
+            else if (GET_EQ(i, j) && ch->canSee(GET_EQ(i, j)) && (PLR_FLAGGED(i, PLR_THANDW)))
             {
                 ch->sendText("@c<@CWielded by B. Hands@c>@n ");
                 show_obj_to_char(GET_EQ(i, j), ch, SHOW_OBJ_SHORT);
@@ -2527,14 +2532,14 @@ static void look_at_char(Character *i, Character *ch)
     {
         found = false;
         act("\r\nYou attempt to peek at $s inventory:", false, i, nullptr, ch, TO_VICT);
-        if (CAN_SEE(i, ch))
+    if (i->canSee(ch))
             act("$n tries to evaluate what you have in your inventory.", true, ch, nullptr, i, TO_VICT);
         if (GET_SKILL(ch, SKILL_KEEN) > axion_dice(0) && (!IS_NPC(i) || GET_ADMLEVEL(ch) > 1))
         {
             auto con = i->getInventory();
             for (auto tmp_obj : filter_raw(con))
             {
-                if (CAN_SEE_OBJ(ch, tmp_obj) && (ADM_FLAGGED(ch, ADM_SEEINV) || (rand_number(0, 20) < GET_WIS(ch))))
+                if (ch->canSee(tmp_obj) && (ADM_FLAGGED(ch, ADM_SEEINV) || (Random::get<int>(0, 20) < GET_WIS(ch))))
                 {
                     show_obj_to_char(tmp_obj, ch, SHOW_OBJ_SHORT);
                     found = true;
@@ -2549,7 +2554,7 @@ static void look_at_char(Character *i, Character *ch)
         else
         {
             act("You are unsure about $s inventory.", false, i, nullptr, ch, TO_VICT);
-            if (CAN_SEE(i, ch))
+            if (i->canSee(ch))
                 act("$n didn't seem to get a good enough look.", true, ch, nullptr, i, TO_VICT);
             improve_skill(ch, SKILL_KEEN, 1);
             return;
@@ -2647,31 +2652,31 @@ void list_one_char(Character *i, Character *ch)
     }
 
     if (IS_NPC(i) && !FIGHTING(i) && GET_POS(i) != POS_SITTING && GET_POS(i) != POS_SLEEPING)
-        ch->send_to("@w%c%s", UPPER(*i->getShortDescription()), i->getShortDescription() + 1);
+        ch->send_to("@w%c%s", toupper(*i->getShortDescription()), i->getShortDescription() + 1);
     else if (IS_NPC(i) && GRAPPLED(i) && GRAPPLED(i) == ch)
-        ch->send_to("@w%c%s is being grappled with by YOU!", UPPER(*i->getShortDescription()), i->getShortDescription() + 1);
+        ch->send_to("@w%c%s is being grappled with by YOU!", toupper(*i->getShortDescription()), i->getShortDescription() + 1);
     else if (IS_NPC(i) && GRAPPLED(i) && GRAPPLED(i) != ch)
-        ch->send_to("@w%c%s is being absorbed from by %s!", UPPER(*i->getShortDescription()), i->getShortDescription() + 1, readIntro(ch, GRAPPLED(i)) == 1 ? get_i_name(ch, GRAPPLED(i)) : AN(RACE(GRAPPLED(i))));
+        ch->send_to("@w%c%s is being absorbed from by %s!", toupper(*i->getShortDescription()), i->getShortDescription() + 1, readIntro(ch, GRAPPLED(i)) == 1 ? get_i_name(ch, GRAPPLED(i)) : AN(RACE(GRAPPLED(i))));
     else if (IS_NPC(i) && ABSORBBY(i) && ABSORBBY(i) == ch)
-        ch->send_to("@w%c%s is being absorbed from by YOU!", UPPER(*i->getShortDescription()), i->getShortDescription() + 1);
+        ch->send_to("@w%c%s is being absorbed from by YOU!", toupper(*i->getShortDescription()), i->getShortDescription() + 1);
     else if (IS_NPC(i) && ABSORBBY(i) && ABSORBBY(i) != ch)
-        ch->send_to("@w%c%s is being absorbed from by %s!", UPPER(*i->getShortDescription()), i->getShortDescription() + 1, readIntro(ch, ABSORBBY(i)) == 1 ? get_i_name(ch, ABSORBBY(i)) : AN(RACE(ABSORBBY(i))));
+        ch->send_to("@w%c%s is being absorbed from by %s!", toupper(*i->getShortDescription()), i->getShortDescription() + 1, readIntro(ch, ABSORBBY(i)) == 1 ? get_i_name(ch, ABSORBBY(i)) : AN(RACE(ABSORBBY(i))));
     else if (IS_NPC(i) && FIGHTING(i) && FIGHTING(i) != ch && GET_POS(i) != POS_SITTING && GET_POS(i) != POS_SLEEPING &&
              i->isSparring())
-        ch->send_to("@w%c%s is sparring with %s!", UPPER(*i->getShortDescription()), i->getShortDescription() + 1, GET_ADMLEVEL(ch) ? GET_NAME(FIGHTING(i)) : (readIntro(ch, FIGHTING(i)) == 1 ? get_i_name(ch, FIGHTING(i)) : LRACE(FIGHTING(i))));
+        ch->send_to("@w%c%s is sparring with %s!", toupper(*i->getShortDescription()), i->getShortDescription() + 1, GET_ADMLEVEL(ch) ? GET_NAME(FIGHTING(i)) : (readIntro(ch, FIGHTING(i)) == 1 ? get_i_name(ch, FIGHTING(i)) : LRACE(FIGHTING(i))));
     else if (IS_NPC(i) && FIGHTING(i) && i->isSparring() && FIGHTING(i) == ch && GET_POS(i) != POS_SITTING &&
              GET_POS(i) != POS_SLEEPING)
-        ch->send_to("@w%c%s is sparring with you!", UPPER(*i->getShortDescription()), i->getShortDescription() + 1);
+        ch->send_to("@w%c%s is sparring with you!", toupper(*i->getShortDescription()), i->getShortDescription() + 1);
     else if (IS_NPC(i) && FIGHTING(i) && FIGHTING(i) != ch && GET_POS(i) != POS_SITTING && GET_POS(i) != POS_SLEEPING)
-        ch->send_to("@w%c%s is fighting %s!", UPPER(*i->getShortDescription()), i->getShortDescription() + 1, GET_ADMLEVEL(ch) ? GET_NAME(FIGHTING(i)) : (readIntro(ch, FIGHTING(i)) == 1 ? get_i_name(ch, FIGHTING(i)) : LRACE(FIGHTING(i))));
+        ch->send_to("@w%c%s is fighting %s!", toupper(*i->getShortDescription()), i->getShortDescription() + 1, GET_ADMLEVEL(ch) ? GET_NAME(FIGHTING(i)) : (readIntro(ch, FIGHTING(i)) == 1 ? get_i_name(ch, FIGHTING(i)) : LRACE(FIGHTING(i))));
     else if (IS_NPC(i) && FIGHTING(i) && FIGHTING(i) == ch && GET_POS(i) != POS_SITTING && GET_POS(i) != POS_SLEEPING)
-        ch->send_to("@w%c%s is fighting YOU!", UPPER(*i->getShortDescription()), i->getShortDescription() + 1);
+        ch->send_to("@w%c%s is fighting YOU!", toupper(*i->getShortDescription()), i->getShortDescription() + 1);
     else if (IS_NPC(i) && FIGHTING(i) && GET_POS(i) == POS_SITTING)
-        ch->send_to("@w%c%s is sitting here.", UPPER(*i->getShortDescription()), i->getShortDescription() + 1);
+        ch->send_to("@w%c%s is sitting here.", toupper(*i->getShortDescription()), i->getShortDescription() + 1);
     else if (IS_NPC(i) && FIGHTING(i) && GET_POS(i) == POS_SLEEPING)
-        ch->send_to("@w%c%s is sleeping here.", UPPER(*i->getShortDescription()), i->getShortDescription() + 1);
+        ch->send_to("@w%c%s is sleeping here.", toupper(*i->getShortDescription()), i->getShortDescription() + 1);
     else if (IS_NPC(i))
-        ch->send_to("@w%c%s", UPPER(*i->getShortDescription()), i->getShortDescription() + 1);
+        ch->send_to("@w%c%s", toupper(*i->getShortDescription()), i->getShortDescription() + 1);
     else if (!IS_NPC(i))
     {
         if (IS_MAJIN(i) && AFF_FLAGGED(i, AFF_LIQUEFIED))
@@ -3027,7 +3032,7 @@ static void list_char_to_char(const std::vector<std::weak_ptr<Character>> &list,
             continue;
         }
 
-        if (CAN_SEE(ch, i))
+    if (ch->canSee(i))
         {
             auto num = 0;
 
@@ -3134,7 +3139,7 @@ void do_auto_exits(const Location& loc, Character *ch, int exit_mode)
                     }
                     exitStr += fmt::format("The {}{} {} {} {}{}.\r\n",
                                            e.exit_flags[EX_SECRET] ? "@rsecret@w " : "",
-                                           (!e.keyword.empty() && strcasecmp(fname(e.keyword.c_str()), "undefined")) ? fname(e.keyword.c_str()) : "opening",
+                                           (!e.keyword.empty() && !boost::iequals(fname(e.keyword.c_str()), "undefined")) ? fname(e.keyword.c_str()) : "opening",
                                            strstr(fname(e.keyword.c_str()), "s ") ? "are" : "is",
                                            e.exit_flags[EX_CLOSED] ? "closed" : "open",
                                            e.exit_flags[EX_LOCKED] ? "and locked" : "and unlocked",
@@ -3149,7 +3154,7 @@ void do_auto_exits(const Location& loc, Character *ch, int exit_mode)
                 direction[0] = toupper(direction[0]);
                 exitStrings[door] = fmt::format("@c{} @D-@w The {} appears @rclosed.@n\r\n",
                                                 direction,
-                                                (!e.keyword.empty() && strcasecmp(fname(e.keyword.c_str()), "undefined")) ? fname(e.keyword.c_str()) : "opening");
+                                                (!e.keyword.empty() && !boost::iequals(fname(e.keyword.c_str()), "undefined")) ? fname(e.keyword.c_str()) : "opening");
             }
         }
 
@@ -4028,7 +4033,7 @@ static bool handle_exdesc_look(Character *ch, char *arg, const std::vector<Extra
     {
         if (match_exdesc(arg, i))
         {
-            ch->desc->sendText(i.description.c_str());
+            ch->sendText(i.description);
             return true;
         }
     }
@@ -4041,7 +4046,7 @@ static void handle_look_in_inventory(Character *ch, char *arg)
     for (int j = 0; j < NUM_WEARS; j++)
     {
         Object *eq = GET_EQ(ch, j);
-        if (eq && CAN_SEE_OBJ(ch, eq) && handle_exdesc_look(ch, arg, eq->getExtraDescription(), eq))
+    if (eq && ch->canSee(eq) && handle_exdesc_look(ch, arg, eq->getExtraDescription(), eq))
         {
             examine_equipped_item(ch, eq, arg);
             return;
@@ -4050,7 +4055,7 @@ static void handle_look_in_inventory(Character *ch, char *arg)
     auto con = ch->getInventory();
     for (auto obj : filter_raw(con))
     {
-        if (CAN_SEE_OBJ(ch, obj) && handle_exdesc_look(ch, arg, obj->getExtraDescription(), obj))
+    if (ch->canSee(obj) && handle_exdesc_look(ch, arg, obj->getExtraDescription(), obj))
         {
             examine_item(ch, obj, arg);
             return;
@@ -4059,7 +4064,7 @@ static void handle_look_in_inventory(Character *ch, char *arg)
     auto loco = ch->location.getObjects();
     for (auto obj : filter_raw(loco))
     {
-        if (CAN_SEE_OBJ(ch, obj) && handle_exdesc_look(ch, arg, obj->getExtraDescription(), obj))
+    if (ch->canSee(obj) && handle_exdesc_look(ch, arg, obj->getExtraDescription(), obj))
         {
             examine_item(ch, obj, arg);
             return;
@@ -4278,7 +4283,7 @@ ACMD(do_rptrans)
             continue;
         if (STATE(k) != CON_PLAYING)
             continue;
-        if (!strcasecmp(k->account->name.c_str(), arg))
+        if (boost::iequals(k->account->name.c_str(), arg))
             vict = k->character;
     }
     if (vict == nullptr)
@@ -4291,7 +4296,7 @@ ACMD(do_rptrans)
     }
     ch->modRPP(-amt);
     ch->send_to("@WYou exchange @C%d@W RPP to user @c%s@W for a warm fuzzy feeling.\r\n", amt, CAP(arg));
-    mudlog(NRM, MAX(ADMLVL_IMPL, GET_INVIS_LEV(ch)), true, "EXCHANGE: %s gave %d RPP to user %s", GET_NAME(ch), amt,
+    mudlog(NRM, std::max(ADMLVL_IMPL, GET_INVIS_LEV(ch)), true, "EXCHANGE: %s gave %d RPP to user %s", GET_NAME(ch), amt,
            arg);
 }
 
@@ -5262,7 +5267,7 @@ ACMD(do_status)
             ch->sendText("You are sitting.\r\n");
             break;
         case POS_FIGHTING:
-            ch->send_to("You are fighting %s.\r\n", FIGHTING(ch) ? PERS(FIGHTING(ch), ch) : "thin air");
+            ch->send_to("You are fighting %s.\r\n", FIGHTING(ch) ? FIGHTING(ch)->displayNameFor(ch) : "thin air");
             break;
         case POS_STANDING:
             ch->sendText("You are standing.\r\n");
@@ -5344,112 +5349,112 @@ ACMD(do_status)
             int lasttype = 0;
             for (aff = ch->affected; aff; aff = aff->next)
             {
-                if (!strcasecmp(skill_name(aff->type), "runic") && aff->type != lasttype)
+                if (boost::iequals(skill_name(aff->type), "runic") && aff->type != lasttype)
                 {
                     lasttype = aff->type;
                     ch->send_to("Your Kenaz rune is still in effect! (%2d Mud Hours)\r\n", aff->duration + 1);
                 }
-                if (!strcasecmp(skill_name(aff->type), "punch") && aff->type != lasttype)
+                if (boost::iequals(skill_name(aff->type), "punch") && aff->type != lasttype)
                 {
                     lasttype = aff->type;
                     ch->send_to("Your Algiz rune is still in effect! (%2d Mud Hours)\r\n", aff->duration + 1);
                 }
-                if (!strcasecmp(skill_name(aff->type), "knee") && aff->type != lasttype)
+                if (boost::iequals(skill_name(aff->type), "knee") && aff->type != lasttype)
                 {
                     lasttype = aff->type;
                     ch->send_to("Your Oagaz rune is still in effect! (%2d Mud Hours)\r\n", aff->duration + 1);
                 }
-                if (!strcasecmp(skill_name(aff->type), "slam") && aff->type != lasttype)
+                if (boost::iequals(skill_name(aff->type), "slam") && aff->type != lasttype)
                 {
                     lasttype = aff->type;
                     ch->send_to("Your Wunjo rune is still in effect! (%2d Mud Hours)\r\n", aff->duration + 1);
                 }
-                if (!strcasecmp(skill_name(aff->type), "heeldrop") && aff->type != lasttype)
+                if (boost::iequals(skill_name(aff->type), "heeldrop") && aff->type != lasttype)
                 {
                     lasttype = aff->type;
                     ch->send_to("Your Purisaz rune is still in effect! (%2d Mud Hours)\r\n", aff->duration + 1);
                 }
-                if (!strcasecmp(skill_name(aff->type), "special beam cannon") && aff->type != lasttype)
+                if (boost::iequals(skill_name(aff->type), "special beam cannon") && aff->type != lasttype)
                 {
                     lasttype = aff->type;
                     ch->send_to("Your Laguz rune is still in effect! (%2d Mud Hours)\r\n", aff->duration + 1);
                 }
-                if (!strcasecmp(skill_name(aff->type), "might") && aff->type != lasttype)
+                if (boost::iequals(skill_name(aff->type), "might") && aff->type != lasttype)
                 {
                     lasttype = aff->type;
                     ch->send_to("Your muscles are pumped! (%2d Mud Hours)\r\n", aff->duration + 1);
                 }
-                if (!strcasecmp(skill_name(aff->type), "flex") && aff->type != lasttype)
+                if (boost::iequals(skill_name(aff->type), "flex") && aff->type != lasttype)
                 {
                     lasttype = aff->type;
                     ch->send_to("You are more agile right now! (%2d Mud Hours)\r\n", aff->duration + 1);
                 }
-                if (!strcasecmp(skill_name(aff->type), "bless") && aff->type != lasttype)
+                if (boost::iequals(skill_name(aff->type), "bless") && aff->type != lasttype)
                 {
                     lasttype = aff->type;
                     ch->send_to("You have been blessed! (%2d Mud Hours)\r\n", aff->duration + 1);
                 }
-                if (!strcasecmp(skill_name(aff->type), "curse") && aff->type != lasttype)
+                if (boost::iequals(skill_name(aff->type), "curse") && aff->type != lasttype)
                 {
                     lasttype = aff->type;
                     ch->send_to("You have been cursed! (%2d Mud Hours)\r\n", aff->duration + 1);
                 }
-                if (!strcasecmp(skill_name(aff->type), "healing glow") && aff->type != lasttype)
+                if (boost::iequals(skill_name(aff->type), "healing glow") && aff->type != lasttype)
                 {
                     lasttype = aff->type;
                     ch->send_to("You have a healing glow enveloping your body! (%2d Mud Hours)\r\n", aff->duration + 1);
                 }
-                if (!strcasecmp(skill_name(aff->type), "genius") && aff->type != lasttype)
+                if (boost::iequals(skill_name(aff->type), "genius") && aff->type != lasttype)
                 {
                     lasttype = aff->type;
                     ch->send_to("You are smarter right now! (%2d Mud Hours)\r\n", aff->duration + 1);
                 }
-                if (!strcasecmp(skill_name(aff->type), "enlighten") && aff->type != lasttype)
+                if (boost::iequals(skill_name(aff->type), "enlighten") && aff->type != lasttype)
                 {
                     lasttype = aff->type;
                     ch->send_to("You are wiser right now! (%2d Mud Hours)\r\n", aff->duration + 1);
                 }
-                if (!strcasecmp(skill_name(aff->type), "yoikominminken") && aff->type != lasttype)
+                if (boost::iequals(skill_name(aff->type), "yoikominminken") && aff->type != lasttype)
                 {
                     lasttype = aff->type;
                     ch->send_to("You have been lulled to sleep! (%2d Mud Hours)\r\n", aff->duration + 1);
                 }
-                if (!strcasecmp(skill_name(aff->type), "solar flare") && aff->type != lasttype)
+                if (boost::iequals(skill_name(aff->type), "solar flare") && aff->type != lasttype)
                 {
                     lasttype = aff->type;
                     ch->send_to("You have been blinded! (%2d Mud Hours)\r\n", aff->duration + 1);
                 }
-                if (!strcasecmp(skill_name(aff->type), "spirit control") && aff->type != lasttype)
+                if (boost::iequals(skill_name(aff->type), "spirit control") && aff->type != lasttype)
                 {
                     lasttype = aff->type;
                     ch->send_to("You have full control of your spirit! (%2d Mud Hours)\r\n", aff->duration + 1);
                 }
-                if (!strcasecmp(skill_name(aff->type), "!UNUSED!") && aff->type != lasttype)
+                if (boost::iequals(skill_name(aff->type), "!UNUSED!") && aff->type != lasttype)
                 {
                     lasttype = aff->type;
                     ch->send_to("You feel poison burning through your blood! (%2d Mud Hours)\r\n", aff->duration + 1);
                 }
-                if (!strcasecmp(skill_name(aff->type), "tough skin") && aff->type != lasttype)
+                if (boost::iequals(skill_name(aff->type), "tough skin") && aff->type != lasttype)
                 {
                     lasttype = aff->type;
                     ch->send_to("You have toughened skin right now! (%2d Mud Hours)\r\n", aff->duration + 1);
                 }
-                if (!strcasecmp(skill_name(aff->type), "poison") && aff->type != lasttype)
+                if (boost::iequals(skill_name(aff->type), "poison") && aff->type != lasttype)
                 {
                     lasttype = aff->type;
                     ch->send_to("You have been poisoned! (%2d Mud Hours)\r\n", aff->duration + 1);
                 }
-                if (!strcasecmp(skill_name(aff->type), "warp pool") && aff->type != lasttype)
+                if (boost::iequals(skill_name(aff->type), "warp pool") && aff->type != lasttype)
                 {
                     lasttype = aff->type;
                     ch->send_to("Weakened State! (%2d Mud Hours)\r\n", aff->duration + 1);
                 }
-                if (!strcasecmp(skill_name(aff->type), "dark metamorphosis") && aff->type != lasttype)
+                if (boost::iequals(skill_name(aff->type), "dark metamorphosis") && aff->type != lasttype)
                 {
                     lasttype = aff->type;
                     ch->send_to("Your Dark Metamorphosis is still in effect. (%2d Mud Hours)\r\n", aff->duration + 1);
                 }
-                if (!strcasecmp(skill_name(aff->type), "hayasa") && aff->type != lasttype)
+                if (boost::iequals(skill_name(aff->type), "hayasa") && aff->type != lasttype)
                 {
                     lasttype = aff->type;
                     ch->send_to("Your body has been infused to move faster! (%2d Mud Hours)\r\n", aff->duration + 1);
@@ -5525,7 +5530,7 @@ ACMD(do_status)
         ch->sendText("@D<@b--------------------------------------------------------------@D>@n\r\n");
         ch->sendText("To view your bonus/negative traits enter: status traits\r\n");
     }
-    else if (!strcasecmp(arg, "traits"))
+    else if (boost::iequals(arg, "traits"))
     {
         bonus_status(ch);
     }
@@ -5672,7 +5677,7 @@ ACMD(do_equipment)
     {
         if (auto equipment = GET_EQ(ch, i); equipment)
         {
-            if (CAN_SEE_OBJ(ch, equipment))
+            if (ch->canSee(equipment))
             {
                 if (i != WEAR_WIELD1 && i != WEAR_WIELD2)
                 {
@@ -5840,7 +5845,7 @@ ACMD(do_help)
         ch->sendText("There is no help on that word.\r\n");
         if (GET_ADMLEVEL(ch) < 3)
         {
-            mudlog(NRM, MAX(ADMLVL_IMPL, GET_INVIS_LEV(ch)), true, "%s tried to get help on %s", GET_NAME(ch),
+            mudlog(NRM, std::max(ADMLVL_IMPL, GET_INVIS_LEV(ch)), true, "%s tried to get help on %s", GET_NAME(ch),
                    argument);
         }
         for (i = 0; i <= top_of_helpt; i++)
@@ -5930,12 +5935,12 @@ ACMD(do_who)
         else
             line_color = "@w";
 
-        if (CAN_SEE(ch, tch) && IS_PLAYING(d))
+    if (ch->canSee(tch) && IS_PLAYING(d))
         {
-            if (*name_search && strcasecmp(GET_NAME(tch), name_search) &&
+            if (*name_search && !boost::iequals(GET_NAME(tch), name_search) &&
                 !strstr(GET_TITLE(tch), name_search))
                 continue;
-            if (!CAN_SEE(ch, tch) || GET_LEVEL(tch) < low || GET_LEVEL(tch) > high)
+            if (!ch->canSee(tch) || GET_LEVEL(tch) < low || GET_LEVEL(tch) > high)
                 continue;
             if (outlaws && !PLR_FLAGGED(tch, PLR_KILLER) && !PLR_FLAGGED(tch, PLR_THIEF))
                 continue;
@@ -5981,10 +5986,10 @@ ACMD(do_who)
                 continue;
             if (!IS_PLAYING(d))
                 continue;
-            if (*name_search && strcasecmp(GET_NAME(tch), name_search) &&
+            if (*name_search && !boost::iequals(GET_NAME(tch), name_search) &&
                 !strstr(GET_TITLE(tch), name_search))
                 continue;
-            if (!CAN_SEE(ch, tch) || GET_LEVEL(tch) < low || GET_LEVEL(tch) > high)
+            if (!ch->canSee(tch) || GET_LEVEL(tch) < low || GET_LEVEL(tch) > high)
                 continue;
             if (outlaws && !PLR_FLAGGED(tch, PLR_KILLER) && !PLR_FLAGGED(tch, PLR_THIEF))
                 continue;
@@ -6198,9 +6203,9 @@ ACMD(do_users)
 
             if (*host_search && !strstr(d->host, host_search))
                 continue;
-            if (*name_search && strcasecmp(GET_NAME(tch), name_search))
+            if (*name_search && !boost::iequals(GET_NAME(tch), name_search))
                 continue;
-            if (!CAN_SEE(ch, tch) || GET_LEVEL(tch) < low || GET_LEVEL(tch) > high)
+            if (!ch->canSee(tch) || GET_LEVEL(tch) < low || GET_LEVEL(tch) > high)
                 continue;
             if (PRF_FLAGGED(tch, PRF_HIDE) && tch != ch && GET_ADMLEVEL(ch) < ADMLVL_IMMORT)
             {
@@ -6246,7 +6251,7 @@ ACMD(do_users)
             strcpy(line, line2);
         }
         if (STATE(d) != CON_PLAYING ||
-            (STATE(d) == CON_PLAYING && CAN_SEE(ch, d->character)))
+            (STATE(d) == CON_PLAYING && ch->canSee(d->character)))
         {
             ch->send_to("%s", line);
             num_can_see++;
@@ -6352,7 +6357,7 @@ static void perform_mortal_where(Character *ch, char *arg)
             if ((i = (d->original ? d->original : d->character)) == nullptr)
                 continue;
             auto room = i->getRoom();
-            if (!room || !CAN_SEE(ch, i))
+            if (!room || !ch->canSee(i))
                 continue;
             if (ch->getRoom()->zone != room->zone)
                 continue;
@@ -6367,7 +6372,7 @@ static void perform_mortal_where(Character *ch, char *arg)
             auto room = i->getRoom();
             if (!room || i == ch)
                 continue;
-            if (!CAN_SEE(ch, i) || room->zone != ch->getRoom()->zone)
+            if (!ch->canSee(i) || room->zone != ch->getRoom()->zone)
                 continue;
             if (!isname(arg, i->getName()))
                 continue;
@@ -6395,11 +6400,11 @@ static void print_object_location(int num, Object *obj, Character *ch,
     }
     else if (auto c = obj->getCarriedBy())
     {
-        ch->send_to("carried by %s in room [%d]\r\n", PERS(c, ch), c->location.getVnum());
+        ch->send_to("carried by %s in room [%d]\r\n", c->displayNameFor(ch), c->location.getVnum());
     }
     else if (auto c = obj->getWornBy())
     {
-        ch->send_to("worn by %s in room [%d]\r\n", PERS(c, ch), c->location.getVnum());
+        ch->send_to("worn by %s in room [%d]\r\n", c->displayNameFor(ch), c->location.getVnum());
     }
     else if (auto o = obj->getContainer())
     {
@@ -6423,7 +6428,7 @@ static void perform_immort_where(Character *ch, char *arg)
 
     if (!*arg)
     {
-        mudlog(NRM, MAX(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), true,
+        mudlog(NRM, std::max(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), true,
                "GODCMD: %s has checked where to check player locations", GET_NAME(ch));
         ch->sendText("Players                  Vnum    Planet        Location\r\n-------                 ------   ----------    ----------------\r\n");
         for (d = descriptor_list; d; d = d->next)
@@ -6438,7 +6443,7 @@ static void perform_immort_where(Character *ch, char *arg)
                     planet = {};
                 }
                 i = (d->original ? d->original : d->character);
-                if (i && CAN_SEE(ch, i) && i->location)
+                if (i && ch->canSee(i) && i->location)
                 {
                     if (d->original)
                         ch->send_to("%-20s - [%5d]   %s (in %s)\r\n", GET_NAME(i), d->character->location.getVnum(), d->character->location.getName(), GET_NAME(d->character));
@@ -6452,12 +6457,12 @@ static void perform_immort_where(Character *ch, char *arg)
     }
     else
     {
-        mudlog(NRM, MAX(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), true, "GODCMD: %s has checked where for the location of %s",
+        mudlog(NRM, std::max(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), true, "GODCMD: %s has checked where for the location of %s",
                GET_NAME(ch), arg);
         auto ac = characterSubscriptions.all("active");
         for (auto i : filter_raw(ac))
         {
-            if (CAN_SEE(ch, i) && i->location && isname(arg, i->getName()))
+            if (ch->canSee(i) && i->location && isname(arg, i->getName()))
             {
                 found = 1;
                 ch->send_to("M%3d. %-25s - [%5d] %-25s", ++num, GET_NAME(i), i->location.getVnum(), i->getRoom()->getName());
@@ -6472,7 +6477,7 @@ static void perform_immort_where(Character *ch, char *arg)
         auto ao = objectSubscriptions.all("active");
         for (auto k : filter_raw(ao))
         {
-            if (CAN_SEE_OBJ(ch, k) && isname(arg, k->getName()))
+            if (ch->canSee(k) && isname(arg, k->getName()))
             {
                 found = 1;
                 print_object_location(++num, k, ch, true);
@@ -7511,9 +7516,9 @@ ACMD(do_oaffects)
 
     int location = -1;
     int i = 0;
-    while (strcasecmp(apply_types[i], "\n"))
+    while (!boost::iequals(apply_types[i], "\n"))
     {
-        if (!strcasecmp(apply_types[i], arg))
+        if (boost::iequals(apply_types[i], arg))
         {
             location = i;
             break;

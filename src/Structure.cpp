@@ -1,4 +1,4 @@
-#include "dbat/structs.h"
+#include "dbat/Structure.h"
 
 std::string Structure::getLocID() const {
     return fmt::format("{}:{}", "S", id);

@@ -7,6 +7,7 @@
 #pragma once
 
 #include "structs.h"
+#include "Destination.h"
 
 //constexpr int _OASISOLC = 0;x206   /* 2.0.6 */
 /*

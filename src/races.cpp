@@ -1,6 +1,5 @@
-#include <utility>
-
-#include <boost/algorithm/string.hpp>
+#include "dbat/Character.h"
+#include "dbat/Object.h"
 
 #include "dbat/races.h"
 #include "dbat/utils.h"

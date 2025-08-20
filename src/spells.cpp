@@ -7,7 +7,10 @@
  *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
  *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
  ************************************************************************ */
-
+#include "dbat/Object.h"
+#include "dbat/Character.h"
+#include "dbat/Room.h"
+#include "dbat/Zone.h"
 #include "dbat/structs.h"
 #include "dbat/send.h"
 #include "dbat/comm.h"
@@ -25,7 +28,6 @@
 #include "dbat/races.h"
 #include "dbat/act.informative.h"
 #include "dbat/class.h"
-#include "dbat/random.h"
 
 /* external variables */
 
@@ -39,7 +41,6 @@ ASPELL(spell_create_water)
 
     if (ch == nullptr || obj == nullptr)
         return;
-    /* level = MAX(MIN(level, LVL_IMPL), 1);	 - not used */
 
     if (GET_OBJ_TYPE(obj) == ITEM_DRINKCON)
     {
@@ -51,7 +52,7 @@ ASPELL(spell_create_water)
         }
         else
         {
-            water = MAX(GET_OBJ_VAL(obj, VAL_DRINKCON_CAPACITY) - GET_OBJ_VAL(obj, VAL_DRINKCON_HOWFULL), 0);
+            water = std::max<int>(GET_OBJ_VAL(obj, VAL_DRINKCON_CAPACITY) - GET_OBJ_VAL(obj, VAL_DRINKCON_HOWFULL), 0);
             if (water > 0)
             {
                 if (GET_OBJ_VAL(obj, VAL_DRINKCON_HOWFULL) >= 0)
@@ -189,7 +190,7 @@ ASPELL(spell_locate_object)
         if (!isname(name, i->getName()))
             continue;
 
-        ch->send_to("%c%s", UPPER(*i->getShortDescription()), (i->getShortDescription()) + 1);
+        ch->send_to("%c%s", toupper(*i->getShortDescription()), (i->getShortDescription()) + 1);
 
         if (auto l = i->location)
         {
@@ -197,11 +198,11 @@ ASPELL(spell_locate_object)
         }
         else if (auto c = i->getCarriedBy())
         {
-            ch->send_to(" is being carried by %s.\r\n", PERS(c, ch));
+            ch->send_to(" is being carried by %s.\r\n", c->displayNameFor(ch));
         }
         else if (auto c = i->getWornBy())
         {
-            ch->send_to(" is being worn by %s.\r\n", PERS(c, ch));
+            ch->send_to(" is being worn by %s.\r\n", c->displayNameFor(ch));
         }
         else if (auto o = i->getContainer())
         {
@@ -241,7 +242,7 @@ ASPELL(spell_charm)
     /* player charming another player - no legal reason for this */
     else if (!CONFIG_PK_ALLOWED && !IS_NPC(victim))
         ch->sendText("You fail - shouldn't be doing it anyway.\r\n");
-    else if (IS_SAIYAN(victim) && rand_number(1, 100) <= 90)
+    else if (IS_SAIYAN(victim) && Random::get<int>(1, 100) <= 90)
         ch->sendText("Your victim resists!\r\n");
     else if (circle_follow(victim, ch))
         ch->sendText("Sorry, following in circles cannot be allowed.\r\n");
@@ -553,31 +554,31 @@ int roll_skill(Character *ch, int snum)
         int numb = 0;
         if (GET_LEVEL(ch) <= 10)
         {
-            numb = rand_number(15, 30);
+            numb = Random::get<int>(15, 30);
         }
         if (GET_LEVEL(ch) <= 20)
         {
-            numb = rand_number(20, 40);
+            numb = Random::get<int>(20, 40);
         }
         if (GET_LEVEL(ch) <= 30)
         {
-            numb = rand_number(40, 60);
+            numb = Random::get<int>(40, 60);
         }
         if (GET_LEVEL(ch) <= 60)
         {
-            numb = rand_number(60, 80);
+            numb = Random::get<int>(60, 80);
         }
         if (GET_LEVEL(ch) <= 80)
         {
-            numb = rand_number(70, 90);
+            numb = Random::get<int>(70, 90);
         }
         if (GET_LEVEL(ch) <= 90)
         {
-            numb = rand_number(80, 95);
+            numb = Random::get<int>(80, 95);
         }
         if (GET_LEVEL(ch) <= 100)
         {
-            numb = rand_number(90, 100);
+            numb = Random::get<int>(90, 100);
         }
         skval = numb;
     }
@@ -596,7 +597,7 @@ int roll_skill(Character *ch, int snum)
          * kind of save called after roll_skill.
          */
 
-        return roll + rand_number(1, 20);
+        return roll + Random::get<int>(1, 20);
     }
     else if (IS_SET(spell_info[snum].skilltype, SKTYPE_SKILL))
     {
@@ -623,7 +624,7 @@ int roll_skill(Character *ch, int snum)
                 roll -= GET_ARMORCHECKALL(ch);
             else if (IS_SET(spell_info[snum].flags, SKFLAG_ARMORBAD))
                 roll -= GET_ARMORCHECK(ch);
-            return roll + rand_number(1, 20);
+            return roll + Random::get<int>(1, 20);
         }
     }
     else

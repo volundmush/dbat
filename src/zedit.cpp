@@ -3,7 +3,9 @@
  * Copyright 1996 Harvey Gilpin						*
  * Copyright 1997-2001 George Greer (greerga@circlemud.org)		*
  ************************************************************************/
-
+#include "dbat/Character.h"
+#include "dbat/Descriptor.h"
+#include "dbat/Zone.h"
 #include "dbat/structs.h"
 #include "dbat/comm.h"
 #include "dbat/interpreter.h"
@@ -40,7 +42,7 @@ ACMD(do_oasis_zedit)
         number = ch->location.getVnum();
     else if (!isdigit(*buf1))
     {
-        if (strcasecmp("save", buf1) == 0)
+        if (!boost::iequals("save", buf1) == 0)
         {
             save = true;
 
@@ -62,7 +64,7 @@ ACMD(do_oasis_zedit)
         }
         else if (GET_ADMLEVEL(ch) >= ADMLVL_IMPL)
         {
-            if (strcasecmp("new", buf1) || !buf3 || !*buf3)
+            if (!boost::iequals("new", buf1) || !buf3 || !*buf3)
                 ch->sendText("Format: zedit new <zone number> <bottom-room> "
                              "<upper-room>\r\n");
             else
@@ -105,7 +107,7 @@ ACMD(do_oasis_zedit)
         {
             if (d->olc && OLC_NUM(d) == number)
             {
-                ch->send_to("That zone is currently being edited by %s.\r\n", PERS(d->character, ch));
+                ch->send_to("That zone is currently being edited by %s.\r\n", d->character->displayNameFor(ch));
                 return;
             }
         }
@@ -163,7 +165,7 @@ ACMD(do_oasis_zedit)
     if (save)
     {
         ch->send_to("Saving all zone information for zone %d.\r\n", z.number);
-        mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), true,
+        mudlog(CMP, std::max(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), true,
                "OLC: %s saves zone information for zone %d.", GET_NAME(ch),
                z.number);
 
@@ -274,7 +276,7 @@ void zedit_new_zone(Character *ch, zone_vnum vzone_num)
         return;
     }
 
-    mudlog(BRF, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), true, "OLC: %s creates new zone #%d", GET_NAME(ch), vzone_num);
+    mudlog(BRF, std::max(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), true, "OLC: %s creates new zone #%d", GET_NAME(ch), vzone_num);
     ch->desc->sendText("Zone created successfully.\r\n");
 }
 
@@ -419,7 +421,7 @@ void zedit_parse(struct descriptor_data *d, char *arg)
             else
                 d->sendText("Saving zone info in memory.\r\n");
 
-            mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(d->character)), true,
+            mudlog(CMP, std::max(ADMLVL_BUILDER, GET_INVIS_LEV(d->character)), true,
                    "OLC: %s edits zone info for room %d.", GET_NAME(d->character), OLC_NUM(d));
             /* FALL THROUGH */
         case 'n':

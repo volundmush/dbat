@@ -34,7 +34,12 @@
  *  $Date: 2004/10/11 12:07:00$                                            *
  *  $Revision: 1.0.14 $                                                    *
  **************************************************************************/
-
+#include "dbat/Object.h"
+#include "dbat/Room.h"
+#include "dbat/Character.h"
+#include "dbat/Descriptor.h"
+#include "dbat/Zone.h"
+#include "dbat/Destination.h"
 #include "dbat/structs.h"
 #include "dbat/dg_scripts.h"
 #include "dbat/db.h"
@@ -182,15 +187,15 @@ ACMD(do_mheal)
 
     amount = GET_MAX_HIT(ch) * perc;
 
-    if (!strcasecmp(arg, "pl"))
+    if (boost::iequals(arg, "pl"))
     {
         ch->modCurVitalDam(CharVital::health, -num);
     }
-    else if (!strcasecmp(arg, "ki"))
+    else if (boost::iequals(arg, "ki"))
     {
         ch->modCurVitalDam(CharVital::ki, -num);
     }
-    else if (!strcasecmp(arg, "st"))
+    else if (boost::iequals(arg, "st"))
     {
         ch->modCurVitalDam(CharVital::stamina, -num);
     }
@@ -254,7 +259,7 @@ ACMD(do_mkill)
     sprintf(buf, "%s", GET_NAME(victim));
     if (IS_HUMANOID(ch))
     {
-        switch (rand_number(1, 7))
+        switch (Random::get<int>(1, 7))
         {
         case 1:
             do_punch(ch, buf, 0, 0);
@@ -312,7 +317,7 @@ ACMD(do_mjunk)
         return;
     }
 
-    if (!strcasecmp(arg, "all"))
+    if (boost::iequals(arg, "all"))
         junk_all = 1;
 
     if ((find_all_dots(arg) != FIND_INDIV) && !junk_all)
@@ -814,7 +819,7 @@ ACMD(do_mteleport)
         return;
     }
 
-    if (!strcasecmp(arg1, "all"))
+    if (boost::iequals(arg1, "all"))
     {
         if (target == IN_ROOM(ch))
         {
@@ -928,7 +933,7 @@ ACMD(do_mforce)
         return;
     }
 
-    if (!strcasecmp(arg, "all"))
+    if (boost::iequals(arg, "all"))
     {
         struct descriptor_data *i;
         Character *vch;
@@ -939,7 +944,7 @@ ACMD(do_mforce)
                 (i->character->location == ch->location))
             {
                 vch = i->character;
-                if (GET_LEVEL(vch) < GET_LEVEL(ch) && CAN_SEE(ch, vch) &&
+                if (GET_LEVEL(vch) < GET_LEVEL(ch) && ch->canSee(vch) &&
                     valid_dg_target(vch, 0))
                 {
                     command_interpreter(vch, argument);

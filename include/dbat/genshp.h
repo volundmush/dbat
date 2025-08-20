@@ -6,7 +6,7 @@
 #pragma once
 
 #include "structs.h"
-#include "shop.h"
+#include "Shop.h"
 
 extern void copy_shop(struct shop_data *tshop, struct shop_data *fshop, int free_old_strings);
 

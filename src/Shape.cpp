@@ -1,4 +1,4 @@
-#include "dbat/structs.h"
+#include "dbat/AbstractGridArea.h"
 
 
 static inline AABB computeAabb(const std::variant<BoxDim, RoundDim>& g) {

@@ -7,6 +7,14 @@
  *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
  *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
  ************************************************************************ */
+#include "dbat/Character.h"
+#include "dbat/CharacterPrototype.h"
+#include "dbat/Object.h"
+#include "dbat/ObjectPrototype.h"
+#include "dbat/Descriptor.h"
+#include "dbat/Room.h"
+#include "dbat/Account.h"
+#include "dbat/Location.h"
 #include "dbat/interpreter.h"
 #include "dbat/comm.h"
 #include "dbat/db.h"
@@ -16,7 +24,7 @@
 #include "dbat/mail.h"
 #include "dbat/oasis.h"
 #include "dbat/dg_scripts.h"
-#include "dbat/guild.h"
+#include "dbat/Guild.h"
 #include "dbat/class.h"
 #include "dbat/races.h"
 #include "dbat/config.h"
@@ -213,8 +221,8 @@ void processCommand(Character *ch, int cmd, std::string ln, CommandData cd)
     auto cm = complete_cmd_info[cmd];
 
     sprintf(blah, "%s", cm.command);
-    if (!strcasecmp(blah, "throw"))
-        ch->setBaseStat<int>("throws", rand_number(1, 3));
+    if (boost::iequals(blah, "throw"))
+        ch->setBaseStat<int>("throws", Random::get<int>(1, 3));
 
     if (*cm.command == '\n')
     {
@@ -372,7 +380,7 @@ ACMD(do_alias)
     }
 
     /* otherwise, either add or redefine an alias */
-    if (!strcasecmp(arg, "alias"))
+    if (boost::iequals(arg, "alias"))
     {
         ch->sendText("You can't alias 'alias'.\r\n");
         return;
@@ -557,7 +565,7 @@ int search_block(char *arg, const char **list, int exact)
 
     /* Make into lower case, and get length of string */
     for (l = 0; *(arg + l); l++)
-        *(arg + l) = LOWER(*(arg + l));
+        *(arg + l) = tolower(*(arg + l));
 
     if (exact)
     {
@@ -707,7 +715,7 @@ void topWrite(Character *ch)
     { /* Save the new spots */
         if (placed == false)
         { /* They Haven't Placed */
-            if (strcasecmp(topname[x], GET_NAME(ch)))
+            if (!boost::iequals(topname[x], GET_NAME(ch)))
             { /* Name doesn't match */
                 if (GET_MAX_HIT(ch) > toppoint[x])
                 {
@@ -729,7 +737,7 @@ void topWrite(Character *ch)
         { /* They have placed */
             if (x < finish && location < finish)
             {
-                if (strcasecmp(positions[location], GET_NAME(ch)))
+                if (!boost::iequals(positions[location], GET_NAME(ch)))
                 { /* This isn't their old spot */
                     free(topname[x]);
                     toppoint[x] = points[location];
@@ -770,7 +778,7 @@ void topWrite(Character *ch)
     { /* Save the new spots */
         if (placed == false)
         { /* They Haven't Placed */
-            if (strcasecmp(topname[x], GET_NAME(ch)))
+            if (!boost::iequals(topname[x], GET_NAME(ch)))
             { /* Name doesn't match */
                 if (GET_MAX_MANA(ch) > toppoint[x])
                 {
@@ -792,7 +800,7 @@ void topWrite(Character *ch)
         { /* They have placed */
             if (x < finish && location < finish)
             {
-                if (strcasecmp(positions[location], GET_NAME(ch)))
+                if (!boost::iequals(positions[location], GET_NAME(ch)))
                 { /* This isn't their old spot */
                     free(topname[x]);
                     toppoint[x] = points[location];
@@ -834,7 +842,7 @@ void topWrite(Character *ch)
     { /* Save the new spots */
         if (placed == false)
         { /* They Haven't Placed */
-            if (strcasecmp(topname[x], GET_NAME(ch)))
+            if (!boost::iequals(topname[x], GET_NAME(ch)))
             { /* Name doesn't match */
                 if (GET_MAX_MOVE(ch) > toppoint[x])
                 {
@@ -856,7 +864,7 @@ void topWrite(Character *ch)
         { /* They have placed */
             if (x < finish && location < finish)
             {
-                if (strcasecmp(positions[location], GET_NAME(ch)))
+                if (!boost::iequals(positions[location], GET_NAME(ch)))
                 { /* This isn't their old spot */
                     free(topname[x]);
                     toppoint[x] = points[location];
@@ -898,7 +906,7 @@ void topWrite(Character *ch)
     { /* Save the new spots */
         if (placed == false)
         { /* They Haven't Placed */
-            if (strcasecmp(topname[x], GET_NAME(ch)))
+            if (!boost::iequals(topname[x], GET_NAME(ch)))
             { /* Name doesn't match */
                 if (GET_BANK_GOLD(ch) + GET_GOLD(ch) > toppoint[x])
                 {
@@ -920,7 +928,7 @@ void topWrite(Character *ch)
         { /* They have placed */
             if (x < finish && location < finish)
             {
-                if (strcasecmp(positions[location], GET_NAME(ch)))
+                if (!boost::iequals(positions[location], GET_NAME(ch)))
                 { /* This isn't their old spot */
                     free(topname[x]);
                     toppoint[x] = points[location];
@@ -962,7 +970,7 @@ void topWrite(Character *ch)
     { /* Save the new spots */
         if (placed == false)
         { /* They Haven't Placed */
-            if (strcasecmp(topname[x], GET_USER(ch)))
+            if (!boost::iequals(topname[x], GET_USER(ch)))
             { /* Name doesn't match */
                 if (ch->getRPP() > toppoint[x])
                 {
@@ -984,7 +992,7 @@ void topWrite(Character *ch)
         { /* They have placed */
             if (x < finish && location < finish)
             {
-                if (strcasecmp(positions[location], GET_USER(ch)))
+                if (!boost::iequals(positions[location], GET_USER(ch)))
                 { /* This isn't their old spot */
                     free(topname[x]);
                     toppoint[x] = points[location];
@@ -1070,7 +1078,7 @@ char *one_argument(const char *argument, char *first_arg)
         first_arg = begin;
         while (*argument && !isspace(*argument))
         {
-            *(first_arg++) = LOWER(*argument);
+            *(first_arg++) = tolower(*argument);
             argument++;
         }
 
@@ -1095,7 +1103,7 @@ char *one_word(char *argument, char *first_arg)
         argument++;
         while (*argument && *argument != '\"')
         {
-            *(first_arg++) = LOWER(*argument);
+            *(first_arg++) = tolower(*argument);
             argument++;
         }
         argument++;
@@ -1104,7 +1112,7 @@ char *one_word(char *argument, char *first_arg)
     {
         while (*argument && !isspace(*argument))
         {
-            *(first_arg++) = LOWER(*argument);
+            *(first_arg++) = tolower(*argument);
             argument++;
         }
     }
@@ -1120,7 +1128,7 @@ char *any_one_arg(char *argument, char *first_arg)
 
     while (*argument && !isspace(*argument))
     {
-        *(first_arg++) = LOWER(*argument);
+        *(first_arg++) = tolower(*argument);
         argument++;
     }
 
@@ -1161,7 +1169,7 @@ int is_abbrev(const char *arg1, const char *arg2)
         return (0);
 
     for (; *arg1 && *arg2; arg1++, arg2++)
-        if (LOWER(*arg1) != LOWER(*arg2))
+        if (tolower(*arg1) != tolower(*arg2))
             return (0);
 
     if (!*arg1)
@@ -1371,7 +1379,7 @@ void enter_player_game(struct descriptor_data *d)
 
     if (IS_ICER(ch) && !GET_SKILL(ch, SKILL_TAILWHIP))
     {
-        int numb = rand_number(20, 30);
+        int numb = Random::get<int>(20, 30);
         SET_SKILL(ch, SKILL_TAILWHIP, numb);
     }
     else if (!IS_ICER(ch) && GET_SKILL(ch, SKILL_TAILWHIP))
@@ -1461,9 +1469,9 @@ int command_pass(char *cmd, Character *ch)
 
     if (AFF_FLAGGED(ch, AFF_LIQUEFIED))
     {
-        if (strcasecmp(cmd, "liquefy") && strcasecmp(cmd, "ingest") && strcasecmp(cmd, "look") &&
-            strcasecmp(cmd, "score") && strcasecmp(cmd, "ooc") && strcasecmp(cmd, "osay") && strcasecmp(cmd, "emote") &&
-            strcasecmp(cmd, "smote") && strcasecmp(cmd, "status"))
+        if (!boost::iequals(cmd, "liquefy") && !boost::iequals(cmd, "ingest") && !boost::iequals(cmd, "look") &&
+            !boost::iequals(cmd, "score") && !boost::iequals(cmd, "ooc") && !boost::iequals(cmd, "osay") && !boost::iequals(cmd, "emote") &&
+            !boost::iequals(cmd, "smote") && !boost::iequals(cmd, "status"))
         {
             ch->sendText("You are not capable of performing that action while liquefied!\r\n");
             return (false);
@@ -1471,8 +1479,8 @@ int command_pass(char *cmd, Character *ch)
     }
     else if (IS_AFFECTED(ch, AFF_PARALYZE))
     {
-        if (strcasecmp(cmd, "look") && strcasecmp(cmd, "score") && strcasecmp(cmd, "ooc") && strcasecmp(cmd, "osay") &&
-            strcasecmp(cmd, "emote") && strcasecmp(cmd, "smote") && strcasecmp(cmd, "status"))
+        if (!boost::iequals(cmd, "look") && !boost::iequals(cmd, "score") && !boost::iequals(cmd, "ooc") && !boost::iequals(cmd, "osay") &&
+            !boost::iequals(cmd, "emote") && !boost::iequals(cmd, "smote") && !boost::iequals(cmd, "status"))
         {
             ch->sendText("You are not capable of performing that action while petrified!\r\n");
             return (false);
@@ -1480,17 +1488,17 @@ int command_pass(char *cmd, Character *ch)
     }
     else if (IS_AFFECTED(ch, AFF_FROZEN))
     {
-        if (strcasecmp(cmd, "look") && strcasecmp(cmd, "score") && strcasecmp(cmd, "ooc") && strcasecmp(cmd, "osay") &&
-            strcasecmp(cmd, "emote") && strcasecmp(cmd, "smote") && strcasecmp(cmd, "status"))
+        if (!boost::iequals(cmd, "look") && !boost::iequals(cmd, "score") && !boost::iequals(cmd, "ooc") && !boost::iequals(cmd, "osay") &&
+            !boost::iequals(cmd, "emote") && !boost::iequals(cmd, "smote") && !boost::iequals(cmd, "status"))
         {
             ch->sendText("You are not capable of performing that action while a frozen block of ice!\r\n");
             return (false);
         }
     }
-    else if (IS_AFFECTED(ch, AFF_PARA) && GET_INT(ch) < rand_number(1, 60))
+    else if (IS_AFFECTED(ch, AFF_PARA) && GET_INT(ch) < Random::get<int>(1, 60))
     {
-        if (strcasecmp(cmd, "look") && strcasecmp(cmd, "score") && strcasecmp(cmd, "ooc") && strcasecmp(cmd, "osay") &&
-            strcasecmp(cmd, "emote") && strcasecmp(cmd, "smote") && strcasecmp(cmd, "status"))
+        if (!boost::iequals(cmd, "look") && !boost::iequals(cmd, "score") && !boost::iequals(cmd, "ooc") && !boost::iequals(cmd, "osay") &&
+            !boost::iequals(cmd, "emote") && !boost::iequals(cmd, "smote") && !boost::iequals(cmd, "status"))
         {
             act("@yYou fail to overcome your paralysis!@n", true, ch, nullptr, nullptr, TO_CHAR);
             act("@Y$n @ystruggles with $s paralysis!@n", true, ch, nullptr, nullptr, TO_ROOM);
@@ -1522,7 +1530,7 @@ int lockRead(char *name)
     {
         get_line(fl, line);
         sscanf(line, "%s\n", filler);
-        if (!strcasecmp(CAP(name), CAP(filler)))
+        if (boost::iequals(CAP(name), CAP(filler)))
         {
             known = true;
         }
@@ -1562,7 +1570,7 @@ char *rIntro(Character *ch, char *arg)
     {
         get_line(fl, line);
         sscanf(line, "%s %s\n", filler, scrap);
-        if (!strcasecmp(arg, scrap))
+        if (boost::iequals(arg, scrap))
         {
             known = true;
             sprintf(name, "%s", filler);
@@ -1629,7 +1637,7 @@ void nanny(struct descriptor_data *d, char *arg)
     int load_result = -1; /* Overloaded variable */
     int total, rr, moveon = false, penalty = false;
     int player_i;
-    int value, roll = rand_number(1, 6); /* For parse_bonuses */
+    int value, roll = Random::get<int>(1, 6); /* For parse_bonuses */
     struct descriptor_data *k;
 
     int count = 0, oldcount = HIGHPCOUNT;
@@ -1803,13 +1811,13 @@ void load_disabled()
 
     while (get_line(fp, line))
     {
-        if (!strcasecmp(line, END_MARKER))
+        if (boost::iequals(line, END_MARKER))
             break; /* break loop if we encounter the END_MARKER */
         CREATE(p, struct disabled_data, 1);
         sscanf(line, "%s %d %hd %s", name, &(p->subcmd), &(p->level), temp);
         /* Find the command in the table */
         for (i = 0; *cmd_info[i].command != '\n'; i++)
-            if (!strcasecmp(cmd_info[i].command, name))
+            if (boost::iequals(cmd_info[i].command, name))
                 break;
         if (*cmd_info[i].command == '\n')
         { /* command does not exist? */

@@ -8,6 +8,11 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
+#include "dbat/Character.h"
+#include "dbat/Object.h"
+#include "dbat/Room.h"
+#include "dbat/Destination.h"
+#include "dbat/Descriptor.h"
 #include "dbat/act.social.h"
 #include "dbat/comm.h"
 #include "dbat/send.h"
@@ -127,7 +132,7 @@ ACMD(do_insult)
             {
                 ch->send_to("You insult %s.\r\n", GET_NAME(victim));
 
-                switch (rand_number(0, 2))
+                switch (Random::get<int>(0, 2))
                 {
                 case 0:
                     if (GET_SEX(ch) == SEX_MALE)
@@ -321,7 +326,7 @@ void create_command_list()
     {
         k = j;
         for (i = j + 1; i <= top_of_socialt; i++)
-            if (strcasecmp(soc_mess_list[i].sort_as, soc_mess_list[k].sort_as) < 0)
+            if (!boost::iequals(soc_mess_list[i].sort_as, soc_mess_list[k].sort_as) < 0)
                 k = i;
         if (j != k)
         {

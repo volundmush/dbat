@@ -4,7 +4,8 @@
  *
  * XXX: This needs Oasis-ifying.
  */
-
+#include "dbat/Descriptor.h"
+#include "dbat/Character.h"
 #include "dbat/structs.h"
 #include "dbat/send.h"
 #include "dbat/interpreter.h"

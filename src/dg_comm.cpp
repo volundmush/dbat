@@ -12,6 +12,10 @@
 *  $Date: 2004/10/11 12:07:00$                                            *
 *  $Revision: 1.0.14 $                                                    *
 ************************************************************************ */
+#include "dbat/Character.h"
+#include "dbat/Object.h"
+#include "dbat/Descriptor.h"
+#include "dbat/Zone.h"
 #include "dbat/dg_comm.h"
 #include "dbat/act.informative.h"
 #include "dbat/send.h"
@@ -40,7 +44,7 @@ char *any_one_name(char *argument, char *first_arg) {
          *argument && !isspace(*argument) &&
          (!ispunct(*argument) || *argument == '#' || *argument == '-');
          arg++, argument++)
-        *arg = LOWER(*argument);
+        *arg = tolower(*argument);
     *arg = '\0';
 
     return argument;
@@ -51,6 +55,7 @@ void sub_write_to_char(Character *ch, char *tokens[],
                        void *otokens[], char type[]) {
     char sb[MAX_STRING_LENGTH];
     int i;
+    std::string scratch;
 
     strcpy(sb, "");
 
@@ -63,8 +68,11 @@ void sub_write_to_char(Character *ch, char *tokens[],
                     strcat(sb, "someone");
                 else if ((Character *) otokens[i] == ch)
                     strcat(sb, "you");
-                else
-                    strcat(sb, PERS((Character *) otokens[i], ch));
+                else {
+                    auto cha = ((Character*)otokens[i]);
+                    scratch = cha->displayNameFor(ch);
+                    strcat(sb, scratch.c_str());
+                }
                 break;
 
             case '|':
@@ -73,13 +81,15 @@ void sub_write_to_char(Character *ch, char *tokens[],
                 else if ((Character *) otokens[i] == ch)
                     strcat(sb, "your");
                 else {
-                    strcat(sb, PERS((Character *) otokens[i], ch));
+                    auto cha = ((Character*)otokens[i]);
+                    scratch = cha->displayNameFor(ch);
+                    strcat(sb, scratch.c_str());
                     strcat(sb, "'s");
                 }
                 break;
 
             case '^':
-                if (!otokens[i] || !CAN_SEE(ch, (Character *) otokens[i]))
+                if (!otokens[i] || !ch->canSee((Character *) otokens[i]))
                     strcat(sb, "its");
                 else if (otokens[i] == ch)
                     strcat(sb, "your");
@@ -88,7 +98,7 @@ void sub_write_to_char(Character *ch, char *tokens[],
                 break;
 
             case '&':
-                if (!otokens[i] || !CAN_SEE(ch, (Character *) otokens[i]))
+                if (!otokens[i] || !ch->canSee((Character *) otokens[i]))
                     strcat(sb, "it");
                 else if (otokens[i] == ch)
                     strcat(sb, "you");
@@ -97,7 +107,7 @@ void sub_write_to_char(Character *ch, char *tokens[],
                 break;
 
             case '*':
-                if (!otokens[i] || !CAN_SEE(ch, (Character *) otokens[i]))
+                if (!otokens[i] || !ch->canSee((Character *) otokens[i]))
                     strcat(sb, "it");
                 else if (otokens[i] == ch)
                     strcat(sb, "you");

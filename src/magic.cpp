@@ -7,7 +7,11 @@
  *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
  *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
  ************************************************************************ */
-
+#include "dbat/Character.h"
+#include "dbat/Object.h"
+#include "dbat/CharacterPrototype.h"
+#include "dbat/Location.h"
+#include "dbat/affect.h"
 #include "dbat/magic.h"
 #include "dbat/send.h"
 #include "dbat/comm.h"
@@ -90,7 +94,7 @@ int mag_materials(Character *ch, int item0, int item1, int item2, int extract, i
     {
         if (verbose)
         {
-            switch (rand_number(0, 2))
+            switch (Random::get<int>(0, 2))
             {
             case 0:
                 ch->sendText("A wart sprouts on your nose.\r\n");
@@ -135,7 +139,7 @@ int mag_newsaves(Character *ch, Character *victim, int spellnum, int level, int 
         stype = SAVING_WILL;
     else
         return false;
-    total = rand_number(1, 20);
+    total = Random::get<int>(1, 20);
     dc = spell_info[spellnum].spell_level + level + ability_mod_value(cast_stat);
     if (ch)
     {
@@ -164,7 +168,7 @@ int mag_damage(int level, Character *ch, Character *victim,
     {
     /* Mostly mages */
     case SPELL_MAGIC_MISSILE:
-        dam = dice(MIN(level, 5), 4) + MIN(level, 5);
+        dam = dice(std::min(level, 5), 4) + std::min(level, 5);
         break;
 
     case SPELL_CHILL_TOUCH: /* chill touch also has an affect */
@@ -172,16 +176,16 @@ int mag_damage(int level, Character *ch, Character *victim,
         break;
 
     case SPELL_BURNING_HANDS:
-        dam = dice(MIN(level, 5), 4);
+        dam = dice(std::min(level, 5), 4);
         break;
 
     case SPELL_SHOCKING_GRASP:
-        dam = dice(1, 8) + MIN(level, 20);
+        dam = dice(1, 8) + std::min(level, 20);
         break;
 
     case SPELL_LIGHTNING_BOLT:
     case SPELL_FIREBALL:
-        dam = dice(MIN(level, 10), 6);
+        dam = dice(std::min(level, 10), 6);
         break;
 
     case SPELL_COLOR_SPRAY:
@@ -218,7 +222,7 @@ int mag_damage(int level, Character *ch, Character *victim,
         break;
 
     case SPELL_CALL_LIGHTNING:
-        dam = dice(MIN(level, 10), 10);
+        dam = dice(std::min(level, 10), 10);
         break;
 
     case SPELL_HARM:
@@ -238,10 +242,10 @@ int mag_damage(int level, Character *ch, Character *victim,
         break;
 
     case SPELL_INFLICT_LIGHT:
-        dam = dice(1, 8) + MIN(level, 5);
+        dam = dice(1, 8) + std::min(level, 5);
         break;
     case SPELL_INFLICT_CRITIC:
-        dam = dice(4, 8) + MIN(level, 20);
+        dam = dice(4, 8) + std::min(level, 20);
         break;
 
     case SPELL_ACID_SPLASH:
@@ -265,7 +269,7 @@ int mag_damage(int level, Character *ch, Character *victim,
         break;
 
     case SPELL_CONE_OF_COLD:
-        dam = dice(MIN(level, 15), 6);
+        dam = dice(std::min(level, 15), 6);
         break;
 
     } /* switch(spellnum) */
@@ -552,7 +556,7 @@ void mag_affects(int level, Character *ch, Character *victim,
         af[0].location = APPLY_CATTR_BASE;
         af[0].specific = static_cast<int>(CharAttribute::strength);
         af[0].duration = level;
-        af[0].modifier = 1 + (rand_number(1, 4));
+        af[0].modifier = 1 + (Random::get<int>(1, 4));
         accum_duration = false;
         accum_affect = false;
         to_vict = "You feel stronger!";
@@ -969,10 +973,10 @@ void mag_summons(int level, Character *ch, Object *obj, int spellnum, char *arg)
                     num = 1;
                     break;
                 case 2:
-                    num = rand_number(1, 3);
+                    num = Random::get<int>(1, 3);
                     break;
                 default:
-                    num = rand_number(1, 4) + 1;
+                    num = Random::get<int>(1, 4) + 1;
                     break;
                 }
             }
@@ -988,7 +992,7 @@ void mag_summons(int level, Character *ch, Object *obj, int spellnum, char *arg)
                 return;
             }
             count--;
-            mob_num = monsum_list[lev - 1][j][rand_number(0, count)];
+            mob_num = monsum_list[lev - 1][j][Random::get<int>(0, count)];
         }
         break;
 
@@ -1047,11 +1051,11 @@ void mag_points(int level, Character *ch, Character *victim,
     switch (spellnum)
     {
     case SPELL_CURE_LIGHT:
-        healing = dice(1, 8) + MIN(level, 5);
+        healing = dice(1, 8) + std::min(level, 5);
         victim->sendText("You feel better.\r\n");
         break;
     case SPELL_CURE_CRITIC:
-        healing = dice(4, 8) + MIN(level, 20);
+        healing = dice(4, 8) + std::min(level, 20);
         victim->sendText("You feel a lot better!\r\n");
         break;
     case SPELL_HEAL:
@@ -1073,7 +1077,7 @@ void mag_points(int level, Character *ch, Character *victim,
 
     case ART_WHOLENESS_OF_BODY:
         healing = GET_MAX_HIT(victim) - GET_HIT(victim);
-        healing = MAX(0, healing);
+        healing = std::max(0, healing);
         tmp = GET_KI(ch) / 2;
         if (tmp > healing)
             tmp = healing;
@@ -1210,7 +1214,6 @@ void mag_creations(int level, Character *ch, int spellnum)
 
     if (ch == nullptr)
         return;
-    /* level = MAX(MIN(level, LVL_IMPL), 1); - Hm, not used. */
 
     switch (spellnum)
     {
@@ -1277,9 +1280,7 @@ void affect_update_violence(uint64_t heartPulse, double deltaTime)
                 if (af->type == ART_QUIVERING_PALM)
                 {
                     maxdam = GET_HIT(i) + 8;
-                    dam = GET_MAX_HIT(i) * 3 / 4;
-                    dam = MIN(dam, maxdam);
-                    dam = MAX(0, dam);
+                    dam = std::clamp<int>(GET_MAX_HIT(i) * 3 / 4, 0, maxdam);
                     basic_mud_log("Creeping death strike doing %d dam", dam);
                 }
                 affectv_remove(i, af);
@@ -1345,7 +1346,7 @@ void mag_affectsv(int level, Character *ch, Character *victim,
             ch->sendText("They are too high level for that.\r\n");
             return;
         }
-        af[0].duration = MAX(6, 20 - level);
+        af[0].duration = std::max(6, 20 - level);
         af[0].bitvector = AFF_CDEATH;
         accum_duration = false;
         to_vict = "You feel death closing in.";

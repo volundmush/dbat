@@ -1,5 +1,9 @@
-#include <boost/algorithm/string.hpp>
-
+#include "dbat/Character.h"
+#include "dbat/Object.h"
+#include "dbat/Room.h"
+#include "dbat/Destination.h"
+#include "dbat/Descriptor.h"
+#include "dbat/act.movement.h"
 #include "dbat/attack.h"
 #include "dbat/combat.h"
 #include "dbat/send.h"
@@ -8,8 +12,7 @@
 #include "dbat/class.h"
 #include "dbat/races.h"
 #include "dbat/fight.h"
-#include "dbat/guild.h"
-#include "dbat/random.h"
+#include "dbat/Guild.h"
 
 namespace atk
 {
@@ -246,7 +249,7 @@ namespace atk
 
         if (isKiAttack() && !isPhysical())
         {
-            if (IS_ICER(user) && rand_number(1, 30) >= 28)
+            if (IS_ICER(user) && Random::get<int>(1, 30) >= 28)
             {
                 actUser("@C$N@c disappears, avoiding the attack before reappearing elsewhere!@n");
                 actVictim("@cYou disappear, avoiding the attack before reappearing elsewhere!@n");
@@ -526,7 +529,7 @@ namespace atk
     {
         auto name = bodyParts[limb];
         user->sendText(fmt::format("Using your broken {} has damaged it more!@n\r\n", name).c_str());
-        GET_LIMBCOND(user, limb) -= rand_number(3, 5);
+        GET_LIMBCOND(user, limb) -= Random::get<int>(3, 5);
         if (GET_LIMBCOND(user, limb) < 0)
         {
             act(fmt::format("@RYour {} has fallen apart!@n", name).c_str(), true, user, nullptr, nullptr, TO_CHAR);
@@ -1127,7 +1130,7 @@ namespace atk
     void Roundhouse::handleHitspot()
     {
         LegAttack::handleHitspot();
-        if (hitspot == 2 && !AFF_FLAGGED(victim, AFF_FLYING) && GET_POS(victim) == POS_STANDING && rand_number(1, 8) >= 7)
+        if (hitspot == 2 && !AFF_FLAGGED(victim, AFF_FLYING) && GET_POS(victim) == POS_STANDING && Random::get<int>(1, 8) >= 7)
         {
             handle_knockdown(victim);
         }
@@ -1236,7 +1239,7 @@ namespace atk
                 calcDamage *= calc_critical(user, 2);
             }
             if (!AFF_FLAGGED(victim, AFF_KNOCKED) &&
-                (rand_number(1, 8) >= 7 && (GET_HIT(victim) > GET_HIT(user) / 5) &&
+                (Random::get<int>(1, 8) >= 7 && (GET_HIT(victim) > GET_HIT(user) / 5) &&
                  !AFF_FLAGGED(victim, AFF_SANCTUARY)))
             {
                 act("@C$N@W is knocked out!@n", true, user, nullptr, victim, TO_CHAR);
@@ -1301,7 +1304,7 @@ namespace atk
                     tile != SECT_WATER_SWIM && tile != SECT_WATER_NOSWIM)
                 {
                     impact_sound(user, "@wA loud roar is heard nearby!@n\r\n");
-                    switch (rand_number(1, 8))
+                    switch (Random::get<int>(1, 8))
                     {
                     case 1:
                         act("Debris is thrown into the air and showers down thunderously!", true, user,
@@ -1312,7 +1315,7 @@ namespace atk
                             victim, TO_ROOM);
                         break;
                     case 2:
-                        if (rand_number(1, 4) == 4 && victim->location.getGroundEffect() == 0)
+                        if (Random::get<int>(1, 4) == 4 && victim->location.getGroundEffect() == 0)
                         {
                             victim->location.setGroundEffect(1);
                             act("Lava leaks up through cracks in the crater!", true, user, nullptr, victim,
@@ -1351,7 +1354,7 @@ namespace atk
                 }
                 if (tile == SECT_UNDERWATER)
                 {
-                    switch (rand_number(1, 3))
+                    switch (Random::get<int>(1, 3))
                     {
                     case 1:
                         act("The water churns violently!", true, user, nullptr, victim, TO_CHAR);
@@ -1370,7 +1373,7 @@ namespace atk
                 }
                 if (tile == SECT_WATER_SWIM || tile == SECT_WATER_NOSWIM)
                 {
-                    switch (rand_number(1, 3))
+                    switch (Random::get<int>(1, 3))
                     {
                     case 1:
                         act("A huge column of water erupts from the impact!", true, user, nullptr, victim,
@@ -1397,7 +1400,7 @@ namespace atk
                 if (tile == SECT_INSIDE)
                 {
                     impact_sound(user, "@wA loud roar is heard nearby!@n\r\n");
-                    switch (rand_number(1, 8))
+                    switch (Random::get<int>(1, 8))
                     {
                     case 1:
                         act("Debris is thrown into the air and showers down thunderously!", true, user,
@@ -1482,7 +1485,7 @@ namespace atk
         case 2:
             calcDamage *= calc_critical(user, 0);
             if (!AFF_FLAGGED(victim, AFF_KNOCKED) &&
-                (rand_number(1, 8) >= 7 && (GET_HIT(victim) > GET_HIT(user) / 5) &&
+                (Random::get<int>(1, 8) >= 7 && (GET_HIT(victim) > GET_HIT(user) / 5) &&
                  !AFF_FLAGGED(victim, AFF_SANCTUARY)))
             {
                 act("@C$N@W is knocked out!@n", true, user, nullptr, victim, TO_CHAR);
@@ -1617,7 +1620,7 @@ namespace atk
             break;
         case 2:
             if (!AFF_FLAGGED(victim, AFF_KNOCKED) &&
-                (rand_number(1, 7) >= 4 && (GET_HIT(victim) > GET_HIT(user) / 5) &&
+                (Random::get<int>(1, 7) >= 4 && (GET_HIT(victim) > GET_HIT(user) / 5) &&
                  !AFF_FLAGGED(victim, AFF_SANCTUARY)))
             {
                 act("@C$N@W is knocked out!@n", true, user, nullptr, victim, TO_CHAR);
@@ -1850,7 +1853,7 @@ namespace atk
     // Kiball
     void KiBall::processAttack()
     {
-        int mult_roll = rand_number(1, 100), mult_count = 1, mult_chance = 0;
+        int mult_roll = Random::get<int>(1, 100), mult_count = 1, mult_chance = 0;
 
         if (initSkill >= 100)
         {
@@ -1866,7 +1869,7 @@ namespace atk
         }
 
         if (mult_roll <= mult_chance)
-            mult_count = rand_number(2, 3);
+            mult_count = Random::get<int>(2, 3);
 
         while (mult_count > 0)
         {
@@ -1951,7 +1954,7 @@ namespace atk
 
     void KiBlast::attackPostprocess()
     {
-        int mastery = rand_number(1, 100), master_pass = false, chance = 0;
+        int mastery = Random::get<int>(1, 100), master_pass = false, chance = 0;
 
         if (initSkill >= 100)
             chance = 30;
@@ -2043,7 +2046,7 @@ namespace atk
 
     void Beam::attackPostprocess()
     {
-        int master_roll = rand_number(1, 100), master_chance = 0, master_pass = false;
+        int master_roll = Random::get<int>(1, 100), master_chance = 0, master_pass = false;
 
         if (initSkill >= 100)
             master_chance = 20;
@@ -2057,7 +2060,7 @@ namespace atk
 
         if (GET_HIT(victim) > 0 && calcDamage > GET_MAX_HIT(victim) / 4 && master_pass == true)
         {
-            int attempt = rand_number(0, NUM_OF_DIRS); /* Select a random direction */
+            int attempt = Random::get<int>(0, NUM_OF_DIRS); /* Select a random direction */
             int count = 0;
             while (count < 12)
             {
@@ -2130,7 +2133,7 @@ namespace atk
 
     void Tsuihidan::attackPostprocess()
     {
-        int master_roll = rand_number(1, 100), master_chance = 0, master_pass = false;
+        int master_roll = Random::get<int>(1, 100), master_chance = 0, master_pass = false;
 
         if (initSkill >= 100)
             master_chance = 20;
@@ -2175,9 +2178,9 @@ namespace atk
                 count += 40;
             }
         }
-        if (rand_number(1, 5) >= 5)
+        if (Random::get<int>(1, 5) >= 5)
         { /* Random boost or neg for everyone */
-            count += rand_number(-15, 25);
+            count += Random::get<int>(-15, 25);
         }
 
         double dodgeChance = ((double)currentDodgeCheck / 5.0) * ((double)axion_dice(0) / 120.0) * (1.0 + victim->getAffectModifier(APPLY_COMBAT_MULT, static_cast<int>(ComStat::dodge)));
@@ -2202,7 +2205,7 @@ namespace atk
 
     double Renzo::getKiEfficiency()
     {
-        int master_roll = rand_number(1, 100), master_chance = 0, half_chance = 0, master_pass = 0;
+        int master_roll = Random::get<int>(1, 100), master_chance = 0, half_chance = 0, master_pass = 0;
 
         if (initSkill >= 100)
         {
@@ -2295,7 +2298,7 @@ namespace atk
 
     void Shogekiha::attackPostprocess()
     {
-        int master_roll = rand_number(1, 100), master_chance = 0, master_pass = false;
+        int master_roll = Random::get<int>(1, 100), master_chance = 0, master_pass = false;
 
         if (initSkill >= 100)
             master_chance = 20;
@@ -2521,7 +2524,7 @@ namespace atk
     // Dodonpa
     void Dodonpa::attackPostprocess()
     {
-        if (rand_number(1, 3) == 2)
+        if (Random::get<int>(1, 3) == 2)
         {
             victim->modCurVital(CharVital::ki, -(calcDamage / 4));
             victim->sendText("@RYou feel some of your ki drained away by the attack!@n\r\n");
@@ -2760,9 +2763,9 @@ namespace atk
             break;
         case 4:
             calcDamage *= calc_critical(user, 1);
-            if (rand_number(1, 100) >= 70 && !IS_NPC(victim) && !AFF_FLAGGED(victim, AFF_SANCTUARY))
+            if (Random::get<int>(1, 100) >= 70 && !IS_NPC(victim) && !AFF_FLAGGED(victim, AFF_SANCTUARY))
             {
-                if (GET_LIMBCOND(victim, 1) > 0 && !user->isSparring() && rand_number(1, 1) == 2)
+                if (GET_LIMBCOND(victim, 1) > 0 && !user->isSparring() && Random::get<int>(1, 1) == 2)
                 {
                     act("@RYour attack severs $N's left arm!@n", true, user, nullptr, victim, TO_CHAR);
                     act("@R$n's attack severs your left arm!@n", true, user, nullptr, victim, TO_VICT);
@@ -2782,9 +2785,9 @@ namespace atk
             break;
         case 5:
             calcDamage *= calc_critical(user, 1);
-            if (rand_number(1, 100) >= 70 && !IS_NPC(victim) && !AFF_FLAGGED(victim, AFF_SANCTUARY))
+            if (Random::get<int>(1, 100) >= 70 && !IS_NPC(victim) && !AFF_FLAGGED(victim, AFF_SANCTUARY))
             {
-                if (GET_LIMBCOND(victim, 3) > 0 && !user->isSparring() && rand_number(1, 1) == 2)
+                if (GET_LIMBCOND(victim, 3) > 0 && !user->isSparring() && Random::get<int>(1, 1) == 2)
                 {
                     act("@RYour attack severs $N's left leg!@n", true, user, nullptr, victim, TO_CHAR);
                     act("@R$n's attack severs your left leg!@n", true, user, nullptr, victim, TO_VICT);
@@ -2835,7 +2838,7 @@ namespace atk
     // PsychicBlast
     void PsychicBlast::attackPostprocess()
     {
-        if (GET_CHARGE(victim) > 0 && rand_number(1, 3) == 2)
+        if (GET_CHARGE(victim) > 0 && Random::get<int>(1, 3) == 2)
         {
             victim->modBaseStat<int64_t>("charge", -(calcDamage / 5));
             if (GET_CHARGE(victim) < 0)
@@ -2845,7 +2848,7 @@ namespace atk
             victim->sendText("@RYou lose some of your charged ki!@n\r\n");
         }
 
-        if (!AFF_FLAGGED(victim, AFF_SHOCKED) && rand_number(1, 4) == 4 && !AFF_FLAGGED(victim, AFF_SANCTUARY))
+        if (!AFF_FLAGGED(victim, AFF_SHOCKED) && Random::get<int>(1, 4) == 4 && !AFF_FLAGGED(victim, AFF_SANCTUARY))
         {
             act("@MYour mind has been shocked!@n", true, victim, nullptr, nullptr, TO_CHAR);
             act("@M$n@m's mind has been shocked!@n", true, victim, nullptr, nullptr, TO_ROOM);
@@ -2899,7 +2902,7 @@ namespace atk
 
     void Honoo::attackPostprocess()
     {
-        if (!AFF_FLAGGED(victim, AFF_BURNED) && rand_number(1, 4) == 3 && !IS_DEMON(victim) &&
+        if (!AFF_FLAGGED(victim, AFF_BURNED) && Random::get<int>(1, 4) == 3 && !IS_DEMON(victim) &&
             !GET_BONUS(victim, BONUS_FIREPROOF))
         {
             victim->sendText("@RYou are burned by the attack!@n\r\n");
@@ -3005,21 +3008,21 @@ namespace atk
     {
         if (initSkill >= 100)
         {
-            if (rand_number(1, 100) >= 60)
+            if (Random::get<int>(1, 100) >= 60)
             {
                 hitspot = 2;
             }
         }
         else if (initSkill >= 60)
         {
-            if (rand_number(1, 100) >= 80)
+            if (Random::get<int>(1, 100) >= 80)
             {
                 hitspot = 2;
             }
         }
         else if (initSkill >= 40)
         {
-            if (rand_number(1, 100) >= 95)
+            if (Random::get<int>(1, 100) >= 95)
             {
                 hitspot = 2;
             }
@@ -3129,9 +3132,9 @@ namespace atk
             break;
         case 4:
             calcDamage *= calc_critical(user, 1);
-            if (rand_number(1, 100) >= 70 && !IS_NPC(victim) && !AFF_FLAGGED(victim, AFF_SANCTUARY))
+            if (Random::get<int>(1, 100) >= 70 && !IS_NPC(victim) && !AFF_FLAGGED(victim, AFF_SANCTUARY))
             {
-                if (GET_LIMBCOND(victim, 1) > 0 && !user->isSparring() && rand_number(1, 1) == 2)
+                if (GET_LIMBCOND(victim, 1) > 0 && !user->isSparring() && Random::get<int>(1, 1) == 2)
                 {
                     act("@RYour attack severes $N's left arm!@n", true, user, nullptr, victim, TO_CHAR);
                     act("@R$n's attack severes your left arm!@n", true, user, nullptr, victim, TO_VICT);
@@ -3151,9 +3154,9 @@ namespace atk
             break;
         case 5:
             calcDamage *= calc_critical(user, 1);
-            if (rand_number(1, 100) >= 70 && !IS_NPC(victim) && !AFF_FLAGGED(victim, AFF_SANCTUARY))
+            if (Random::get<int>(1, 100) >= 70 && !IS_NPC(victim) && !AFF_FLAGGED(victim, AFF_SANCTUARY))
             {
-                if (GET_LIMBCOND(victim, 3) > 0 && !user->isSparring() && rand_number(1, 1) == 2)
+                if (GET_LIMBCOND(victim, 3) > 0 && !user->isSparring() && Random::get<int>(1, 1) == 2)
                 {
                     act("@RYour attack severes $N's left leg!@n", true, user, nullptr, victim, TO_CHAR);
                     act("@R$n's attack severes your left leg!@n", true, user, nullptr, victim, TO_VICT);
@@ -3276,7 +3279,7 @@ namespace atk
     // PsychicBarrage
     void PsychicBarrage::attackPostprocess()
     {
-        if (!AFF_FLAGGED(victim, AFF_MBREAK) && rand_number(1, 4) == 4 && !AFF_FLAGGED(victim, AFF_SANCTUARY))
+        if (!AFF_FLAGGED(victim, AFF_MBREAK) && Random::get<int>(1, 4) == 4 && !AFF_FLAGGED(victim, AFF_SANCTUARY))
         {
             act("@mYour mind's eye has been shattered, you can't charge ki until you recover!@n", true, victim,
                 nullptr, nullptr,
@@ -3284,7 +3287,7 @@ namespace atk
             act("@M$n@m's mind has been damaged by the attack!@n", true, victim, nullptr, nullptr, TO_ROOM);
             victim->affect_flags.set(AFF_MBREAK, true);
         }
-        else if (!AFF_FLAGGED(victim, AFF_SHOCKED) && rand_number(1, 4) == 4 && !AFF_FLAGGED(victim, AFF_SANCTUARY))
+        else if (!AFF_FLAGGED(victim, AFF_SHOCKED) && Random::get<int>(1, 4) == 4 && !AFF_FLAGGED(victim, AFF_SANCTUARY))
         {
             act("@MYour mind has been shocked!@n", true, victim, nullptr, nullptr, TO_CHAR);
             act("@M$n@m's mind has been shocked!@n", true, victim, nullptr, nullptr, TO_ROOM);
@@ -3410,7 +3413,7 @@ namespace atk
 
     void PhoenixSlash::attackPostprocess()
     {
-        if (!AFF_FLAGGED(victim, AFF_BURNED) && rand_number(1, 4) == 4 && !IS_DEMON(victim) &&
+        if (!AFF_FLAGGED(victim, AFF_BURNED) && Random::get<int>(1, 4) == 4 && !IS_DEMON(victim) &&
             !GET_BONUS(victim, BONUS_FIREPROOF))
         {
             victim->sendText("@RYou are burned by the attack!@n\r\n");
@@ -3680,7 +3683,7 @@ namespace atk
 
     void DarknessDragonSlash::attackPostprocess()
     {
-        if (rand_number(1, 3) == 3 && !AFF_FLAGGED(victim, AFF_BLIND))
+        if (Random::get<int>(1, 3) == 3 && !AFF_FLAGGED(victim, AFF_BLIND))
         {
             act("@mYou are struck blind temporarily!@n", true, victim, nullptr, nullptr, TO_CHAR);
             act("@c$n@m is struck blind by the attack!@n", true, victim, nullptr, nullptr, TO_ROOM);
@@ -3730,7 +3733,7 @@ namespace atk
     // CrusherBall
     void CrusherBall::attackPostprocess()
     {
-        if (rand_number(1, 3) == 3)
+        if (Random::get<int>(1, 3) == 3)
         {
             tech_handle_crashdown(user, victim);
         }
@@ -3816,7 +3819,7 @@ namespace atk
 
     void Kousengan::attackPostprocess()
     {
-        if (!AFF_FLAGGED(victim, AFF_BURNED) && rand_number(1, 4) == 3 && !IS_DEMON(victim))
+        if (!AFF_FLAGGED(victim, AFF_BURNED) && Random::get<int>(1, 4) == 3 && !IS_DEMON(victim))
         {
             victim->sendText("@RYou are burned by the attack!@n\r\n");
             user->sendText("@RThey are burned by the attack!@n\r\n");
@@ -3892,9 +3895,9 @@ namespace atk
             break;
         case 4:
             calcDamage *= calc_critical(user, 1);
-            if (rand_number(1, 100) >= 70 && !IS_NPC(victim) && !AFF_FLAGGED(victim, AFF_SANCTUARY))
+            if (Random::get<int>(1, 100) >= 70 && !IS_NPC(victim) && !AFF_FLAGGED(victim, AFF_SANCTUARY))
             {
-                if (GET_LIMBCOND(victim, 1) > 0 && !user->isSparring() && rand_number(1, 1) == 2)
+                if (GET_LIMBCOND(victim, 1) > 0 && !user->isSparring() && Random::get<int>(1, 1) == 2)
                 {
                     act("@RYour attack severs $N's left arm!@n", true, user, nullptr, victim, TO_CHAR);
                     act("@R$n's attack severs your left arm!@n", true, user, nullptr, victim, TO_VICT);
@@ -3914,9 +3917,9 @@ namespace atk
             break;
         case 5:
             calcDamage *= calc_critical(user, 1);
-            if (rand_number(1, 100) >= 70 && !IS_NPC(victim) && !AFF_FLAGGED(victim, AFF_SANCTUARY))
+            if (Random::get<int>(1, 100) >= 70 && !IS_NPC(victim) && !AFF_FLAGGED(victim, AFF_SANCTUARY))
             {
-                if (GET_LIMBCOND(victim, 3) > 0 && !user->isSparring() && rand_number(1, 1) == 2)
+                if (GET_LIMBCOND(victim, 3) > 0 && !user->isSparring() && Random::get<int>(1, 1) == 2)
                 {
                     act("@RYour attack severs $N's left leg!@n", true, user, nullptr, victim, TO_CHAR);
                     act("@R$n's attack severs your left leg!@n", true, user, nullptr, victim, TO_VICT);
@@ -4041,7 +4044,7 @@ namespace atk
 
     void SeishouEnko::handleHitspot()
     {
-        if (rand_number(1, 3) == 3)
+        if (Random::get<int>(1, 3) == 3)
             hitspot = 2;
         if (hitspot == 1)
             hitspot = 2;
@@ -4145,7 +4148,7 @@ namespace atk
 
     void WaterRazor::handleHitspot()
     {
-        if (rand_number(1, 3) == 3)
+        if (Random::get<int>(1, 3) == 3)
             hitspot = 2;
         if (hitspot == 1)
             hitspot = 2;
@@ -4239,7 +4242,7 @@ namespace atk
         case 2:
             calcDamage *= (calc_critical(user, 0));
             if (!AFF_FLAGGED(victim, AFF_KNOCKED) &&
-                (rand_number(1, 3) >= 2 && (GET_HIT(victim) > GET_HIT(user) / 5) &&
+                (Random::get<int>(1, 3) >= 2 && (GET_HIT(victim) > GET_HIT(user) / 5) &&
                  !AFF_FLAGGED(victim, AFF_SANCTUARY)))
             {
                 act("@C$N@W is knocked out!@n", true, user, nullptr, victim, TO_CHAR);
@@ -4318,7 +4321,7 @@ namespace atk
         {
             if (GET_HIT(victim) > 1)
             {
-                if (rand_number(1, 4) == 1 && !AFF_FLAGGED(victim, AFF_FROZEN) && !IS_DEMON(victim))
+                if (Random::get<int>(1, 4) == 1 && !AFF_FLAGGED(victim, AFF_FROZEN) && !IS_DEMON(victim))
                 {
                     act("@CYour body completely freezes!@n", true, victim, nullptr, nullptr, TO_CHAR);
                     act("@c$n's@C body completely freezes!@n", true, victim, nullptr, nullptr, TO_ROOM);
@@ -4497,7 +4500,7 @@ namespace atk
     // FireBreath
     void FireBreath::attackPostprocess()
     {
-        if (!AFF_FLAGGED(victim, AFF_BURNED) && rand_number(1, 4) == 3 && !IS_DEMON(victim) &&
+        if (!AFF_FLAGGED(victim, AFF_BURNED) && Random::get<int>(1, 4) == 3 && !IS_DEMON(victim) &&
             !GET_BONUS(victim, BONUS_FIREPROOF))
         {
             victim->sendText("@RYou are burned by the attack!@n\r\n");
@@ -4607,7 +4610,7 @@ namespace atk
     // SunderingForce
     int SunderingForce::limbhurtChance()
     {
-        int chance = rand_number(2, 12);
+        int chance = Random::get<int>(2, 12);
 
         if (chance >= 10)
             return 160;
@@ -4650,10 +4653,10 @@ namespace atk
     // Bash
     void Bash::attackPostprocess()
     {
-        if (victim && rand_number(1, 5) >= 4)
+        if (victim && Random::get<int>(1, 5) >= 4)
             tech_handle_crashdown(victim, user);
 
-        if (rand_number(1, 5) >= 5)
+        if (Random::get<int>(1, 5) >= 5)
             tech_handle_crashdown(user, victim);
     }
 
@@ -4694,7 +4697,7 @@ namespace atk
     {
         if (!IS_NPC(user) && IS_MUTANT(user))
         {
-            if (axion_dice(0) > GET_CON(victim) && rand_number(1, 5) == 5)
+            if (axion_dice(0) > GET_CON(victim) && Random::get<int>(1, 5) == 5)
             {
                 act("@R$N@r was poisoned by your bite!@n", true, user, nullptr, victim, TO_CHAR);
                 act("@rYou were poisoned by the bite!@n", true, user, nullptr, victim, TO_VICT);
@@ -4997,7 +5000,7 @@ namespace atk
             if (tile != SECT_INSIDE)
             {
                 impact_sound(user, "@wA loud roar is heard nearby!@n\r\n");
-                switch (rand_number(1, 8))
+                switch (Random::get<int>(1, 8))
                 {
                 case 1:
                     act("Debris is thrown into the air and showers down thunderously!", true, user, nullptr, nullptr,
@@ -5006,7 +5009,7 @@ namespace atk
                         TO_ROOM);
                     break;
                 case 2:
-                    if (rand_number(1, 4) == 4 && user->location.getGroundEffect() == 0)
+                    if (Random::get<int>(1, 4) == 4 && user->location.getGroundEffect() == 0)
                     {
                         user->location.setGroundEffect(5);
                         act("Lava spews up through cracks in the ground, roaring into the sky as a large column of molten rock!",
@@ -5044,7 +5047,7 @@ namespace atk
             }
             if (tile == SECT_UNDERWATER)
             {
-                switch (rand_number(1, 3))
+                switch (Random::get<int>(1, 3))
                 {
                 case 1:
                     act("The water churns violently!", true, user, nullptr, nullptr, TO_CHAR);
@@ -5062,7 +5065,7 @@ namespace atk
             }
             if (tile == SECT_WATER_SWIM || tile == SECT_WATER_NOSWIM)
             {
-                switch (rand_number(1, 3))
+                switch (Random::get<int>(1, 3))
                 {
                 case 1:
                     act("A huge column of water erupts from the impact!", true, user, nullptr, nullptr, TO_CHAR);
@@ -5087,7 +5090,7 @@ namespace atk
             if (tile == SECT_INSIDE)
             {
                 impact_sound(user, "@wA loud roar is heard nearby!@n\r\n");
-                switch (rand_number(1, 8))
+                switch (Random::get<int>(1, 8))
                 {
                 case 1:
                     act("Debris is thrown into the air and showers down thunderously!", true, user, nullptr, nullptr,
@@ -5167,7 +5170,7 @@ namespace atk
 
     void LightGrenade::attackPostprocess()
     {
-        if (!AFF_FLAGGED(victim, AFF_FLYING) && GET_POS(victim) == POS_STANDING && rand_number(1, 4) == 4)
+        if (!AFF_FLAGGED(victim, AFF_FLYING) && GET_POS(victim) == POS_STANDING && Random::get<int>(1, 4) == 4)
         {
             handle_knockdown(victim);
         }
@@ -5398,7 +5401,7 @@ namespace atk
             {
                 if (!GET_SKILL(user, SKILL_TWOHAND) && slot_count(user) + 1 <= GET_SLOTS(user))
                 {
-                    int numb = rand_number(10, 15);
+                    int numb = Random::get<int>(10, 15);
                     SET_SKILL(user, SKILL_TWOHAND, numb);
                     user->sendText("@GYou learn the very basics of two-handing your weapon!@n\r\n");
                 }
@@ -5413,7 +5416,7 @@ namespace atk
             if (!GET_SKILL(user, SKILL_DUALWIELD) && slot_count(user) + 1 <= GET_SLOTS(user) &&
                 (GET_OBJ_TYPE(GET_EQ(user, WEAR_WIELD2)) != ITEM_LIGHT))
             {
-                int numb = rand_number(10, 15);
+                int numb = Random::get<int>(10, 15);
                 SET_SKILL(user, SKILL_DUALWIELD, numb);
                 user->sendText("@GYou learn the very basics of dual-wielding!@n\r\n");
             }

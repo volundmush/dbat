@@ -1,5 +1,7 @@
-#include "dbat/structs.h"
 #include "dbat/constants.h"
+#include "dbat/AbstractGridArea.h"
+#include "dbat/Destination.h"
+#include "dbat/Character.h"
 
 TileOverride::operator bool() const
 {

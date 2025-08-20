@@ -7,6 +7,12 @@
  *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
  *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
  ************************************************************************ */
+#include "dbat/Character.h"
+#include "dbat/Object.h"
+#include "dbat/Location.h"
+#include "dbat/Room.h"
+#include "dbat/Descriptor.h"
+#include "dbat/Account.h"
 #include "dbat/act.comm.h"
 #include "dbat/dg_comm.h"
 #include "dbat/send.h"
@@ -175,7 +181,7 @@ static void garble_text(char *string, int known, int lang)
     {
         if (isalpha(string[i]) && (!known))
         {
-            string[i] = letters[rand_number(0, (int)strlen(letters) - 1)];
+            string[i] = letters[Random::get<int>(0, (int)strlen(letters) - 1)];
         }
     }
 }
@@ -360,7 +366,7 @@ ACMD(do_say)
                             {
                                 dr->send_to("@wShenron says, '@CYour wish has been granted, %s now has more knowledge!%s@w'@n\r\n",
                                             GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
-                                wch->modPractices(rand_number(2000, 5000));
+                                wch->modPractices(Random::get<int>(2000, 5000));
                                 granted = true;
                                 SELFISHMETER += 1;
                                 mudlog(NRM, ADMLVL_GOD, true, "Shenron: %s has made a knowledge wish on %s.",
@@ -481,7 +487,7 @@ ACMD(do_say)
                             {
                                 dr->send_to("@wShenron says, '@CYour wish has been granted, %s has more skill!%s@w'@n\r\n",
                                             GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
-                                int roll = rand_number(1, 3);
+                                int roll = Random::get<int>(1, 3);
                                 wch->send_to("@GYou suddenly feel like you could learn %d more skills!@n\r\n", roll);
                                 wch->modBaseStat<int>("skill_slots", roll);
                                 granted = true;
@@ -789,7 +795,7 @@ ACMD(do_gsay)
         {
             if (CONFIG_ENABLE_LANGUAGES)
             {
-                k->send_to("%s@W tells the group%s @W'@G%s@W'@n\r\n", CAN_SEE(k, ch) ? GET_NAME(ch) : "Someone", GET_SKILL(k, SPEAKING(ch)) ? "," : ", in an unfamiliar tongue,", buf);
+                k->send_to("%s@W tells the group%s @W'@G%s@W'@n\r\n", k->canSee(ch) ? GET_NAME(ch) : "Someone", GET_SKILL(k, SPEAKING(ch)) ? "," : ", in an unfamiliar tongue,", buf);
             }
             else
             {
@@ -808,7 +814,7 @@ ACMD(do_gsay)
                 }
                 if (CONFIG_ENABLE_LANGUAGES)
                 {
-                    f->send_to("%s@W tells the group%s @W'%s@W'@n\r\n", CAN_SEE(f, ch) ? GET_NAME(ch) : "Someone", GET_SKILL(f, SPEAKING(ch)) ? "," : ", in an unfamiliar tongue,", buf);
+                    f->send_to("%s@W tells the group%s @W'%s@W'@n\r\n", f->canSee(ch) ? GET_NAME(ch) : "Someone", GET_SKILL(f, SPEAKING(ch)) ? "," : ", in an unfamiliar tongue,", buf);
                 }
                 else
                 {
@@ -832,7 +838,7 @@ static void perform_tell(Character *ch, Character *vict, char *arg)
     if (CONFIG_ENABLE_LANGUAGES)
     {
         snprintf(buf2, sizeof(buf2), "@[13]%s tells you%s '%s@[13]'@n\r\n",
-                 CAN_SEE(vict, ch) ? GET_NAME(ch) : "Someone",
+                 (vict->canSee(ch) ? GET_NAME(ch) : "Someone"),
                  GET_SKILL(vict, SPEAKING(ch)) ? "," : ", in an unfamiliar tongue,", buf);
         vict->send_to("%s", buf2);
         add_history(vict, buf2, HIST_TELL);
@@ -954,13 +960,13 @@ ACMD(do_tell)
                 continue;
             if (!k->account)
                 continue;
-            if (found == false && !IS_NPC(ch) && (!strcasecmp(k->account->name.c_str(), buf) || strstr(k->account->name.c_str(), buf)))
+            if (found == false && !IS_NPC(ch) && (boost::iequals(k->account->name.c_str(), buf) || strstr(k->account->name.c_str(), buf)))
             {
                 vict = k->character;
                 found = true;
             }
             else if (!IS_NPC(ch) && found == false &&
-                     (!strcasecmp(GET_NAME(k->character), buf) || strstr(GET_NAME(k->character), buf)) &&
+                     (boost::iequals(GET_NAME(k->character), buf) || strstr(GET_NAME(k->character), buf)) &&
                      GET_ADMLEVEL(k->character) > 0)
             {
                 vict = k->character;
@@ -1130,8 +1136,8 @@ static void handle_whisper(char *buf, Character *ch, Character *vict)
         if (GET_SKILL(tch, SKILL_LISTEN))
         {
             int skill = GET_SKILL(tch, SKILL_LISTEN);
-            int roll1 = rand_number(10, 30);
-            int roll = rand_number(roll1, 110);
+            int roll1 = Random::get<int>(10, 30);
+            int roll = Random::get<int>(roll1, 110);
 
             if (skill >= roll)
             {
@@ -1163,7 +1169,7 @@ static char *overhear(char *buf, int type)
     switch (type)
     {
     case 0:
-        if (rand_number(1, 10) >= 5)
+        if (Random::get<int>(1, 10) >= 5)
         {
             search_replace(buf, "a", "..");
             search_replace(buf, "A", "..");
@@ -1188,7 +1194,7 @@ static char *overhear(char *buf, int type)
             search_replace(buf, "w", "..");
             search_replace(buf, "W", "..");
         }
-        else if (rand_number(1, 10) >= 5)
+        else if (Random::get<int>(1, 10) >= 5)
         {
             search_replace(buf, "e", "..");
             search_replace(buf, "E", "..");
@@ -1237,7 +1243,7 @@ static char *overhear(char *buf, int type)
         return buf;
         break;
     case 1:
-        if (rand_number(1, 10) >= 5)
+        if (Random::get<int>(1, 10) >= 5)
         {
             search_replace(buf, "b", "..");
             search_replace(buf, "B", "..");
@@ -1252,7 +1258,7 @@ static char *overhear(char *buf, int type)
             search_replace(buf, "k", "..");
             search_replace(buf, "K", "..");
         }
-        else if (rand_number(1, 10) >= 5)
+        else if (Random::get<int>(1, 10) >= 5)
         {
             search_replace(buf, "d", "..");
             search_replace(buf, "D", "..");
@@ -1281,7 +1287,7 @@ static char *overhear(char *buf, int type)
         return buf;
         break;
     case 2:
-        if (rand_number(1, 10) >= 5)
+        if (Random::get<int>(1, 10) >= 5)
         {
             search_replace(buf, "q", "..");
             search_replace(buf, "Q", "..");
@@ -1292,7 +1298,7 @@ static char *overhear(char *buf, int type)
             search_replace(buf, "g", "..");
             search_replace(buf, "G", "..");
         }
-        else if (rand_number(1, 10) >= 5)
+        else if (Random::get<int>(1, 10) >= 5)
         {
             search_replace(buf, "a", "..");
             search_replace(buf, "A", "..");
@@ -1397,7 +1403,7 @@ ACMD(do_write)
             ch->send_to("You can't write with %s %s alone.\r\n", AN(papername), papername);
             return;
         }
-        if (!CAN_SEE_OBJ(ch, GET_EQ(ch, WEAR_WIELD2)))
+    if (!ch->canSee(GET_EQ(ch, WEAR_WIELD2)))
         {
             ch->sendText("The stuff in your hand is invisible!  Yeech!!\r\n");
             return;
@@ -1450,7 +1456,7 @@ ACMD(do_page)
         char buf[MAX_STRING_LENGTH];
 
         snprintf(buf, sizeof(buf), "\007\007*$n* %s", buf2);
-        if (!strcasecmp(arg, "all"))
+        if (boost::iequals(arg, "all"))
         {
             if (ADM_FLAGGED(ch, ADM_TELLALL))
             {
@@ -1704,7 +1710,7 @@ ACMD(do_qcomm)
     skip_spaces(&argument);
 
     if (!*argument)
-        ch->send_to("%c%s?  Yes, fine, %s we must, but WHAT??\r\n", UPPER(*CMD_NAME), CMD_NAME + 1, CMD_NAME);
+        ch->send_to("%c%s?  Yes, fine, %s we must, but WHAT??\r\n", toupper(*CMD_NAME), CMD_NAME + 1, CMD_NAME);
     else
     {
         char buf[MAX_STRING_LENGTH];

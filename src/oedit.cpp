@@ -4,8 +4,10 @@
  * Copyright 1996 by Harvey Gilpin					*
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
-#include <iostream>
-
+#include "dbat/Descriptor.h"
+#include "dbat/Object.h"
+#include "dbat/ObjectPrototype.h"
+#include "dbat/Character.h"
 #include "dbat/structs.h"
 #include "dbat/comm.h"
 #include "dbat/interpreter.h"
@@ -15,7 +17,7 @@
 #include "dbat/handler.h"
 #include "dbat/boards.h"
 #include "dbat/constants.h"
-#include "dbat/shop.h"
+#include "dbat/Shop.h"
 #include "dbat/genolc.h"
 #include "dbat/genobj.h"
 #include "dbat/genzon.h"
@@ -63,7 +65,7 @@ ACMD(do_oasis_oedit)
     }
     else if (!isdigit(*buf1))
     {
-        if (strcasecmp("save", buf1) != 0)
+        if (!boost::iequals("save", buf1) != 0)
         {
             ch->sendText("Yikes!  Stop that, someone will get hurt!\r\n");
             return;
@@ -103,7 +105,7 @@ ACMD(do_oasis_oedit)
         {
             if (d->olc && OLC_NUM(d) == number)
             {
-                ch->send_to("That object is currently being edited by %s.\r\n", PERS(d->character, ch));
+                ch->send_to("That object is currently being edited by %s.\r\n", d->character->displayNameFor(ch));
                 return;
             }
         }
@@ -162,7 +164,7 @@ ACMD(do_oasis_oedit)
     /****************************************************************************/
     if (save)
     {
-        mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), true,
+        mudlog(CMP, std::max(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), true,
                "OLC: %s saves object info", GET_NAME(ch));
 
         /**************************************************************************/
@@ -964,7 +966,7 @@ void oedit_parse(struct descriptor_data *d, char *arg)
         case 'y':
         case 'Y':
             oedit_save_internally(d);
-            mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(d->character)), true,
+            mudlog(CMP, std::max(ADMLVL_BUILDER, GET_INVIS_LEV(d->character)), true,
                    "OLC: %s edits obj %d", GET_NAME(d->character), OLC_NUM(d));
             if (CONFIG_OLC_SAVE)
             {
@@ -1062,7 +1064,7 @@ void oedit_parse(struct descriptor_data *d, char *arg)
                     assign_triggers(OLC_IOBJ(d), OBJ_TRIGGER);
                 }
                 /* Xap - ought to save the old pointer, free after assignment I suppose */
-                mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(d->character)), true,
+                mudlog(CMP, std::max(ADMLVL_BUILDER, GET_INVIS_LEV(d->character)), true,
                        "OLC: %s iedit a unique #%d", GET_NAME(d->character), GET_OBJ_VNUM(obj));
                 if (d->character)
                 {
@@ -1293,7 +1295,7 @@ void oedit_parse(struct descriptor_data *d, char *arg)
         break;
 
     case OEDIT_LEVEL:
-        OLC_OBJ(d)->setBaseStat("level", MAX(atoi(arg), 0));
+        OLC_OBJ(d)->setBaseStat("level", std::max(atoi(arg), 0));
         break;
 
     case OEDIT_MATERIAL:

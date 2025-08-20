@@ -1,4 +1,4 @@
-#include "dbat/structs.h"
+#include "dbat/Area.h"
 
 std::string Area::getLocID() const {
     return fmt::format("{}:{}", "A", getVnum());

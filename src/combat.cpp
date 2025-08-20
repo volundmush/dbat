@@ -9,7 +9,12 @@
  *  contains code written by Iovan for use with the Real Dragonball Battle *
  *  System (RDBS) of the MUD Dragonball Advent Truth.                      *
  ************************************************************************ */
-
+#include "dbat/Character.h"
+#include "dbat/Object.h"
+#include "dbat/Room.h"
+#include "dbat/Destination.h"
+#include "dbat/Descriptor.h"
+#include "dbat/Zone.h"
 #include "dbat/combat.h"
 #include "dbat/act.movement.h"
 #include "dbat/act.item.h"
@@ -27,7 +32,6 @@
 #include "dbat/class.h"
 #include "dbat/techniques.h"
 #include "dbat/act.informative.h"
-#include "dbat/random.h"
 
 /* local functions */
 void damage_weapon(Character *ch, Object *obj, Character *vict)
@@ -129,7 +133,7 @@ void damage_weapon(Character *ch, Object *obj, Character *vict)
     {
         result += 3;
     }
-    else if (AFF_FLAGGED(ch, AFF_BLESS) && rand_number(1, 3) == 3)
+    else if (AFF_FLAGGED(ch, AFF_BLESS) && Random::get<int>(1, 3) == 3)
     {
         if (result > 1)
         {
@@ -193,9 +197,9 @@ void handle_multihit(Character *ch, Character *vict)
     int perc = GET_DEX(ch), prob = GET_DEX(vict);
 
     /* Let's give the victim a bit of automatic favor due to "luck" */
-    prob += rand_number(1, 15);
+    prob += Random::get<int>(1, 15);
     /* Some otherwise inclined "luck" for the attacker */
-    perc += rand_number(-5, 5);
+    perc += Random::get<int>(-5, 5);
 
     if (ch->getBaseStat<int>("throws") >= 3)
     {
@@ -329,7 +333,7 @@ void handle_multihit(Character *ch, Character *vict)
             }
             else
             {
-                if (rand_number(1, 3) == 2 && GET_SKILL(ch, SKILL_KICK) > 0)
+                if (Random::get<int>(1, 3) == 2 && GET_SKILL(ch, SKILL_KICK) > 0)
                 {
                     sprintf(buf, "%s", GET_NAME(vict));
                     do_kick(ch, buf, 0, 0);
@@ -352,8 +356,8 @@ int handle_defender(Character *vict, Character *ch)
     if (GET_DEFENDER(vict))
     {
         Character *def = GET_DEFENDER(vict);
-        int64_t defnum = (GET_SPEEDI(def) * 0.01) * rand_number(-10, 10);
-        int64_t chnum = (GET_SPEEDI(ch) * 0.01) * rand_number(-5, 10);
+        int64_t defnum = (GET_SPEEDI(def) * 0.01) * Random::get<int>(-10, 10);
+        int64_t chnum = (GET_SPEEDI(ch) * 0.01) * Random::get<int>(-5, 10);
         if (GET_SPEEDI(def) + defnum > GET_SPEEDI(ch) + chnum && def->location == vict->location &&
             GET_POS(def) > POS_SITTING)
         {
@@ -382,7 +386,7 @@ int handle_defender(Character *vict, Character *ch)
 void handle_disarm(Character *ch, Character *vict)
 {
 
-    int roll1 = rand_number(-10, 10), roll2 = rand_number(-10, 10), handled = false;
+    int roll1 = Random::get<int>(-10, 10), roll2 = Random::get<int>(-10, 10), handled = false;
     roll1 += GET_STR(ch) + GET_DEX(ch);
     roll2 += GET_STR(vict) + GET_DEX(vict);
 
@@ -394,11 +398,11 @@ void handle_disarm(Character *ch, Character *vict)
         }
     }
 
-    if (rand_number(1, 100) <= 50 && !IS_KONATSU(ch))
+    if (Random::get<int>(1, 100) <= 50 && !IS_KONATSU(ch))
     {
         roll1 = -500;
     }
-    else if (rand_number(1, 100) <= 75)
+    else if (Random::get<int>(1, 100) <= 75)
     {
         roll1 *= 1.5;
     }
@@ -699,7 +703,7 @@ void combine_attacks(Character *ch, Character *vict)
     }
     if (burn == true)
     {
-        if (!AFF_FLAGGED(vict, AFF_BURNED) && rand_number(1, 4) == 3 && !IS_DEMON(vict) &&
+        if (!AFF_FLAGGED(vict, AFF_BURNED) && Random::get<int>(1, 4) == 3 && !IS_DEMON(vict) &&
             !GET_BONUS(vict, BONUS_FIREPROOF))
         {
             vict->sendText("@RYou are burned by the attack!@n\r\n");
@@ -719,7 +723,7 @@ void combine_attacks(Character *ch, Character *vict)
     }
     if (shocked == true)
     {
-        if (!AFF_FLAGGED(vict, AFF_SHOCKED) && rand_number(1, 4) == 4 && !AFF_FLAGGED(vict, AFF_SANCTUARY))
+        if (!AFF_FLAGGED(vict, AFF_SHOCKED) && Random::get<int>(1, 4) == 4 && !AFF_FLAGGED(vict, AFF_SANCTUARY))
         {
             act("@MYour mind has been shocked!@n", true, vict, nullptr, nullptr, TO_CHAR);
             act("@M$n@m's mind has been shocked!@n", true, vict, nullptr, nullptr, TO_ROOM);
@@ -809,23 +813,23 @@ int roll_balance(Character *ch)
     {
         if (GET_LEVEL(ch) >= 100)
         {
-            chance = rand_number(80, 100);
+            chance = Random::get<int>(80, 100);
         }
         else if (GET_LEVEL(ch) >= 80)
         {
-            chance = rand_number(75, 90);
+            chance = Random::get<int>(75, 90);
         }
         else if (GET_LEVEL(ch) >= 70)
         {
-            chance = rand_number(70, 80);
+            chance = Random::get<int>(70, 80);
         }
         else if (GET_LEVEL(ch) >= 60)
         {
-            chance = rand_number(65, 75);
+            chance = Random::get<int>(65, 75);
         }
         else if (GET_LEVEL(ch) >= 50)
         {
-            chance = rand_number(50, 60);
+            chance = Random::get<int>(50, 60);
         }
     }
     else
@@ -847,23 +851,23 @@ void handle_knockdown(Character *ch)
     {
         if (GET_LEVEL(ch) >= 100)
         {
-            chance = rand_number(35, 45);
+            chance = Random::get<int>(35, 45);
         }
         else if (GET_LEVEL(ch) >= 90)
         {
-            chance = rand_number(25, 35);
+            chance = Random::get<int>(25, 35);
         }
         else if (GET_LEVEL(ch) >= 70)
         {
-            chance = rand_number(15, 25);
+            chance = Random::get<int>(15, 25);
         }
         else if (GET_LEVEL(ch) >= 50)
         {
-            chance = rand_number(10, 15);
+            chance = Random::get<int>(10, 15);
         }
         else if (GET_LEVEL(ch) >= 30)
         {
-            chance = rand_number(5, 10);
+            chance = Random::get<int>(5, 10);
         }
     }
     else
@@ -891,11 +895,11 @@ int boom_headshot(Character *ch)
 
     int skill = GET_SKILL_BASE(ch, SKILL_TWOHAND);
 
-    if (skill >= 100 && rand_number(1, 5) >= 3)
+    if (skill >= 100 && Random::get<int>(1, 5) >= 3)
         return (1);
-    else if (skill < 100 && skill >= 75 && rand_number(1, 5) == 5)
+    else if (skill < 100 && skill >= 75 && Random::get<int>(1, 5) == 5)
         return (1);
-    else if (skill < 75 && skill >= 50 && rand_number(1, 6) == 6)
+    else if (skill < 75 && skill >= 50 && Random::get<int>(1, 6) == 6)
         return (1);
     else
         return (0);
@@ -981,7 +985,7 @@ void club_stamina(Character *ch, Character *vict, int wlvl, int64_t dmg)
 int backstab(Character *ch, Character *vict, int wlvl, int64_t dmg)
 {
 
-    int chance = 0, roll_to_beat = rand_number(1, 100);
+    int chance = 0, roll_to_beat = Random::get<int>(1, 100);
     double bonus = 0.0;
 
     if (GET_BACKSTAB_COOL(ch) > 0)
@@ -1026,9 +1030,9 @@ int backstab(Character *ch, Character *vict, int wlvl, int64_t dmg)
     if (chance >= roll_to_beat)
     {
         int attacker_roll =
-            GET_SKILL(ch, SKILL_MOVE_SILENTLY) + GET_SKILL(ch, SKILL_SPOT) + GET_DEX(ch) + rand_number(-5, 5);
+            GET_SKILL(ch, SKILL_MOVE_SILENTLY) + GET_SKILL(ch, SKILL_SPOT) + GET_DEX(ch) + Random::get<int>(-5, 5);
         int defender_roll =
-            GET_SKILL(vict, SKILL_SPOT) + GET_SKILL(vict, SKILL_LISTEN) + GET_DEX(ch) + rand_number(-5, 5);
+            GET_SKILL(vict, SKILL_SPOT) + GET_SKILL(vict, SKILL_LISTEN) + GET_DEX(ch) + Random::get<int>(-5, 5);
 
         if (attacker_roll > defender_roll)
         {
@@ -1054,7 +1058,7 @@ void cut_limb(Character *ch, Character *vict, int wlvl, int hitspot)
 {
 
     int chance = 0, decap = 0, decapitate = false;
-    int roll_to_beat = rand_number(1, 10000);
+    int roll_to_beat = Random::get<int>(1, 10000);
 
     if (wlvl == 1)
     {
@@ -1134,7 +1138,7 @@ void cut_limb(Character *ch, Character *vict, int wlvl, int hitspot)
     }
     else
     { /* We've only succeeded in removing a limb. */
-        if (HAS_ARMS(vict) && rand_number(1, 2) == 2)
+        if (HAS_ARMS(vict) && Random::get<int>(1, 2) == 2)
         {
             if (GET_LIMBCOND(vict, 1) > 0)
             {
@@ -1330,7 +1334,7 @@ int64_t advanced_energy(Character *ch, int64_t dmg)
 
         if (rate > 0.00)
         {
-            if (GET_CHARGE(ch) > 0 && rand_number(1, 100) <= 10)
+            if (GET_CHARGE(ch) > 0 && Random::get<int>(1, 100) <= 10)
             {
                 act("@MThe attack causes your weak control to slip and you are shocked by your own charged energy!@n",
                     true, ch, nullptr, nullptr, TO_CHAR);
@@ -1366,7 +1370,7 @@ int roll_accuracy(Character *ch, int skill, bool kiatt)
 
     if (skill < 40)
     {
-        skill += rand_number(3, 10);
+        skill += Random::get<int>(3, 10);
     }
 
     return (skill);
@@ -1375,7 +1379,7 @@ int roll_accuracy(Character *ch, int skill, bool kiatt)
 long double calc_critical(Character *ch, int loc)
 {
 
-    int roll = rand_number(1, 100);
+    int roll = Random::get<int>(1, 100);
     long double multi = 1;
 
     if (loc == 0)
@@ -1435,9 +1439,9 @@ int roll_hitloc(Character *ch, Character *vict, int skill)
     if (IS_NPC(ch))
     {
         if (GET_LEVEL(ch) > 100)
-            skill = rand_number(GET_LEVEL(ch), GET_LEVEL(ch) + 10);
+            skill = Random::get<int>(GET_LEVEL(ch), GET_LEVEL(ch) + 10);
         else
-            skill = rand_number(GET_LEVEL(ch), 100);
+            skill = Random::get<int>(GET_LEVEL(ch), 100);
     }
 
     if (IS_DABURA(ch) && !IS_NPC(ch))
@@ -1446,27 +1450,27 @@ int roll_hitloc(Character *ch, Character *vict, int skill)
             critmax -= 200;
     }
 
-    critical = rand_number(80, critmax);
+    critical = Random::get<int>(80, critmax);
 
     if (skill >= critical)
     {
         location = 2;
     }
-    else if (skill >= rand_number(50, 750))
+    else if (skill >= Random::get<int>(50, 750))
     {
         location = 2;
     }
-    else if (skill >= rand_number(50, 350))
+    else if (skill >= Random::get<int>(50, 350))
     {
         location = 1;
     }
-    else if (skill >= rand_number(30, 200))
+    else if (skill >= Random::get<int>(30, 200))
     {
         location = 3;
     }
     else
     {
-        location = rand_number(4, 5);
+        location = Random::get<int>(4, 5);
     }
 
     if (location == 4 && GET_LIMBCOND(vict, 0) <= 0 && GET_LIMBCOND(vict, 1) <= 0)
@@ -1693,23 +1697,23 @@ void hurt_limb(Character *ch, Character *vict, int chance, int area, int64_t pow
 
     if (power > (vict->getEffectiveStat<int64_t>("health")) * 0.5)
     {
-        dmg = rand_number(25, 40);
+        dmg = Random::get<int>(25, 40);
     }
     else if (power > (vict->getEffectiveStat<int64_t>("health")) * 0.25)
     {
-        dmg = rand_number(15, 24);
+        dmg = Random::get<int>(15, 24);
     }
     else if (power > (vict->getEffectiveStat<int64_t>("health")) * 0.10)
     {
-        dmg = rand_number(8, 14);
+        dmg = Random::get<int>(8, 14);
     }
     else if (power > (vict->getEffectiveStat<int64_t>("health")) * 0.05)
     {
-        dmg = rand_number(4, 7);
+        dmg = Random::get<int>(4, 7);
     }
     else
     {
-        dmg = rand_number(1, 3);
+        dmg = Random::get<int>(1, 3);
         ;
     }
 
@@ -1735,7 +1739,7 @@ void hurt_limb(Character *ch, Character *vict, int chance, int area, int64_t pow
     }
     else if (GET_ARMOR(vict) > 5000)
     {
-        dmg -= rand_number(0, 1);
+        dmg -= Random::get<int>(0, 1);
     }
 
     if (dmg <= 0)
@@ -1837,7 +1841,7 @@ void dam_eq_loc(Character *vict, int area)
     switch (area)
     {
     case 1:
-        num = rand_number(1, 8);
+        num = Random::get<int>(1, 8);
         switch (num)
         {
         case 1:
@@ -1863,7 +1867,7 @@ void dam_eq_loc(Character *vict, int area)
         }
         break;
     case 2:
-        num = rand_number(1, 3);
+        num = Random::get<int>(1, 3);
         switch (num)
         {
         case 1:
@@ -1878,7 +1882,7 @@ void dam_eq_loc(Character *vict, int area)
         }
         break;
     case 3:
-        num = rand_number(1, 6);
+        num = Random::get<int>(1, 6);
         switch (num)
         {
         case 1:
@@ -1902,7 +1906,7 @@ void dam_eq_loc(Character *vict, int area)
         }
         break;
     case 4:
-        num = rand_number(1, 4);
+        num = Random::get<int>(1, 4);
         switch (num)
         {
         case 1:
@@ -1929,7 +1933,7 @@ void dam_eq_loc(Character *vict, int area)
 void damage_eq(Character *vict, int location)
 {
 
-    if (GET_EQ(vict, location) && rand_number(1, 20) >= 19 && !AFF_FLAGGED(vict, AFF_SANCTUARY))
+    if (GET_EQ(vict, location) && Random::get<int>(1, 20) >= 19 && !AFF_FLAGGED(vict, AFF_SANCTUARY))
     {
         Object *eq = GET_EQ(vict, location);
         if (OBJ_FLAGGED(eq, ITEM_UNBREAKABLE))
@@ -1937,7 +1941,7 @@ void damage_eq(Character *vict, int location)
             return;
         }
 
-        int loss = rand_number(2, 5);
+        int loss = Random::get<int>(2, 5);
 
         if (GET_OBJ_VNUM(eq) == 20099 || GET_OBJ_VNUM(eq) == 20098)
             loss = 1;
@@ -1946,7 +1950,7 @@ void damage_eq(Character *vict, int location)
         {
             loss *= 3;
         }
-        else if (AFF_FLAGGED(vict, AFF_BLESS) && rand_number(1, 3) == 3)
+        else if (AFF_FLAGGED(vict, AFF_BLESS) && Random::get<int>(1, 3) == 3)
         {
             loss = 1;
         }
@@ -2104,7 +2108,7 @@ void huge_update(uint64_t heartPulse, double deltaTime)
                                 continue;
                             }
                             dge = handle_dodge(vict);
-                            if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) ||
+                            if (((!IS_NPC(vict) && IS_ICER(vict) && Random::get<int>(1, 30) >= 28) ||
                                  AFF_FLAGGED(vict, AFF_ZANZOKEN)) &&
                                 (vict->getCurVital(CharVital::stamina)) >= 1 && GET_POS(vict) != POS_SLEEPING)
                             {
@@ -2117,7 +2121,7 @@ void huge_update(uint64_t heartPulse, double deltaTime)
                                 hurt(0, 0, ch, vict, nullptr, 0, 1);
                                 continue;
                             }
-                            else if (dge + rand_number(-10, 5) > skill)
+                            else if (dge + Random::get<int>(-10, 5) > skill)
                             {
                                 act("@c$N@W manages to escape the explosion!@n", true, ch, nullptr, vict, TO_CHAR);
                                 act("@WYou manage to escape the explosion!@n", true, ch, nullptr, vict, TO_VICT);
@@ -2219,7 +2223,7 @@ void huge_update(uint64_t heartPulse, double deltaTime)
                             continue;
                         }
                         dge = handle_dodge(vict);
-                        if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) ||
+                        if (((!IS_NPC(vict) && IS_ICER(vict) && Random::get<int>(1, 30) >= 28) ||
                              AFF_FLAGGED(vict, AFF_ZANZOKEN)) &&
                             (vict->getCurVital(CharVital::stamina)) >= 1 && GET_POS(vict) != POS_SLEEPING)
                         {
@@ -2231,7 +2235,7 @@ void huge_update(uint64_t heartPulse, double deltaTime)
                             hurt(0, 0, ch, vict, nullptr, 0, 1);
                             continue;
                         }
-                        else if (dge + rand_number(-10, 5) > skill)
+                        else if (dge + Random::get<int>(-10, 5) > skill)
                         {
                             act("@c$N@W manages to escape the explosion!@n", true, ch, nullptr, vict, TO_CHAR);
                             act("@WYou manage to escape the explosion!@n", true, ch, nullptr, vict, TO_VICT);
@@ -2329,7 +2333,7 @@ void huge_update(uint64_t heartPulse, double deltaTime)
                                 continue;
                             }
                             dge = handle_dodge(vict);
-                            if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) ||
+                            if (((!IS_NPC(vict) && IS_ICER(vict) && Random::get<int>(1, 30) >= 28) ||
                                  AFF_FLAGGED(vict, AFF_ZANZOKEN)) &&
                                 (vict->getCurVital(CharVital::stamina)) >= 1 && GET_POS(vict) != POS_SLEEPING)
                             {
@@ -2341,7 +2345,7 @@ void huge_update(uint64_t heartPulse, double deltaTime)
                                 pcost(vict, 0, GET_MAX_HIT(vict) / 200);
                                 continue;
                             }
-                            else if (dge + rand_number(-10, 5) > skill)
+                            else if (dge + Random::get<int>(-10, 5) > skill)
                             {
                                 act("@c$N@W manages to escape the explosion!@n", true, ch, nullptr, vict, TO_CHAR);
                                 act("@WYou manage to escape the explosion!@n", true, ch, nullptr, vict, TO_VICT);
@@ -2442,7 +2446,7 @@ void huge_update(uint64_t heartPulse, double deltaTime)
                             continue;
                         }
                         dge = handle_dodge(vict);
-                        if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) ||
+                        if (((!IS_NPC(vict) && IS_ICER(vict) && Random::get<int>(1, 30) >= 28) ||
                              AFF_FLAGGED(vict, AFF_ZANZOKEN)) &&
                             (vict->getCurVital(CharVital::stamina)) >= 1 && GET_POS(vict) != POS_SLEEPING)
                         {
@@ -2453,7 +2457,7 @@ void huge_update(uint64_t heartPulse, double deltaTime)
                             pcost(vict, 0, GET_MAX_HIT(vict) / 200);
                             continue;
                         }
-                        else if (dge + rand_number(-10, 5) > skill)
+                        else if (dge + Random::get<int>(-10, 5) > skill)
                         {
                             act("@c$N@W manages to escape the explosion!@n", true, ch, nullptr, vict, TO_CHAR);
                             act("@WYou manage to escape the explosion!@n", true, ch, nullptr, vict, TO_VICT);
@@ -2536,7 +2540,7 @@ void homing_update(uint64_t heartPulse, double deltaTime)
                     TO_CHAR);
                 act("@RThe $p@R makes a tight turn and rockets straight for @r$n@n", true, vict, k, nullptr,
                     TO_ROOM);
-                if (handle_parry(vict) < rand_number(1, 140))
+                if (handle_parry(vict) < Random::get<int>(1, 140))
                 {
                     act("@rThe $p@r slams into your body, exploding in a flash of bright light!@n", true, vict, k,
                         nullptr, TO_CHAR);
@@ -2547,7 +2551,7 @@ void homing_update(uint64_t heartPulse, double deltaTime)
                     hurt(0, 0, ch, vict, nullptr, dmg, 1);
                     continue;
                 }
-                else if (rand_number(1, 3) > 1)
+                else if (Random::get<int>(1, 3) > 1)
                 {
                     act("@wYou manage to deflect the $p@W sending it flying away and depleting some of its energy.@n",
                         true, vict, k, nullptr, TO_CHAR);
@@ -2593,7 +2597,7 @@ void homing_update(uint64_t heartPulse, double deltaTime)
                 act("@RYou move your hand and direct $p@R after @r$N@R!@n", true, ch, k, vict, TO_CHAR);
                 act("@r$n@R moves $s hand and directs $p@R after YOU!@n", true, ch, k, vict, TO_VICT);
                 act("@r$n@R moves $s hand and directs $p@R after @r$N@R!@n", true, ch, k, vict, TO_NOTVICT);
-                if (handle_parry(vict) < rand_number(1, 140))
+                if (handle_parry(vict) < Random::get<int>(1, 140))
                 {
                     if (GET_OBJ_VNUM(k) != 84)
                     {
@@ -2633,7 +2637,7 @@ void homing_update(uint64_t heartPulse, double deltaTime)
                         }
                         else if (dmg > GET_MAX_HIT(vict) / 5 && (IS_MAJIN(vict) || IS_BIO(vict)))
                         {
-                            if (GET_SKILL(vict, SKILL_REGENERATE) > rand_number(1, 101) &&
+                            if (GET_SKILL(vict, SKILL_REGENERATE) > Random::get<int>(1, 101) &&
                                 (vict->getCurVital(CharVital::ki)) >= GET_MAX_MANA(vict) / 40)
                             {
                                 act("@R$N@r is cut in half by the attack but regenerates a moment later!@n", true,
@@ -2647,7 +2651,7 @@ void homing_update(uint64_t heartPulse, double deltaTime)
                             }
                             else if (dmg > GET_MAX_HIT(vict) / 5 && (IS_MAJIN(vict) || IS_BIO(vict)))
                             {
-                                if (GET_SKILL(vict, SKILL_REGENERATE) > rand_number(1, 101) &&
+                                if (GET_SKILL(vict, SKILL_REGENERATE) > Random::get<int>(1, 101) &&
                                     (vict->getCurVital(CharVital::ki)) >= GET_MAX_MANA(vict) / 40)
                                 {
                                     act("@R$N@r is cut in half by the attack but regenerates a moment later!@n",
@@ -2697,7 +2701,7 @@ void homing_update(uint64_t heartPulse, double deltaTime)
                     }
                     continue;
                 }
-                else if (rand_number(1, 3) > 1)
+                else if (Random::get<int>(1, 3) > 1)
                 {
                     act("@wYou manage to deflect the $p@W sending it flying away and depleting some of its energy.@n",
                         true, vict, k, nullptr, TO_CHAR);
@@ -2735,7 +2739,7 @@ int limb_ok(Character *ch, int type)
 {
     if (IS_NPC(ch))
     {
-        if (AFF_FLAGGED(ch, AFF_ENSNARED) && rand_number(1, 100) <= 90)
+        if (AFF_FLAGGED(ch, AFF_ENSNARED) && Random::get<int>(1, 100) <= 90)
         {
             return false;
         }
@@ -2765,7 +2769,7 @@ int limb_ok(Character *ch, int type)
             ch->sendText("You have no available arms!\r\n");
             return false;
         }
-        if (AFF_FLAGGED(ch, AFF_ENSNARED) && rand_number(1, 100) <= 90)
+        if (AFF_FLAGGED(ch, AFF_ENSNARED) && Random::get<int>(1, 100) <= 90)
         {
             ch->sendText("You are unable to move your arms while bound by this strong silk!\r\n");
             WAIT_STATE(ch, PULSE_1SEC);
@@ -2830,43 +2834,43 @@ int init_skill(Character *ch, int snum)
 
     if (l <= 10)
     {
-        return rand_number(30, 50);
+        return Random::get<int>(30, 50);
     }
     else if (l <= 20)
     {
-        return rand_number(45, 65);
+        return Random::get<int>(45, 65);
     }
     else if (l <= 30)
     {
-        return rand_number(55, 70);
+        return Random::get<int>(55, 70);
     }
     else if (l <= 50)
     {
-        return rand_number(65, 80);
+        return Random::get<int>(65, 80);
     }
     else if (l <= 70)
     {
-        return rand_number(75, 90);
+        return Random::get<int>(75, 90);
     }
     else if (l <= 80)
     {
-        return rand_number(85, 100);
+        return Random::get<int>(85, 100);
     }
     else if (l <= 90)
     {
-        return rand_number(90, 100);
+        return Random::get<int>(90, 100);
     }
     else if (l <= 100)
     {
-        return rand_number(95, 100);
+        return Random::get<int>(95, 100);
     }
     else if (l <= 110)
     {
-        return rand_number(95, 105);
+        return Random::get<int>(95, 105);
     }
     else
     {
-        return rand_number(100, 110);
+        return Random::get<int>(100, 110);
     }
 }
 
@@ -2922,29 +2926,29 @@ int handle_block(Character *ch)
 
             if (top < 5)
                 top = 6;
-            return (rand_number(5, top));
+            return (Random::get<int>(5, top));
         }
         else
         { /* Intelligent Skills Mobs */
             if (GET_LEVEL(ch) >= 110)
             {
-                return (rand_number(95, 105));
+                return (Random::get<int>(95, 105));
             }
             else if (GET_LEVEL(ch) >= 100)
             {
-                return (rand_number(85, 95));
+                return (Random::get<int>(85, 95));
             }
             else if (GET_LEVEL(ch) >= 90)
             {
-                return (rand_number(70, 85));
+                return (Random::get<int>(70, 85));
             }
             else if (GET_LEVEL(ch) >= 75)
             {
-                return (rand_number(50, 70));
+                return (Random::get<int>(50, 70));
             }
             else if (GET_LEVEL(ch) >= 40)
             {
-                return (rand_number(40, 50));
+                return (Random::get<int>(40, 50));
             }
             else
             {
@@ -2952,7 +2956,7 @@ int handle_block(Character *ch)
 
                 if (top < 15)
                     top = 16;
-                return (rand_number(15, top));
+                return (Random::get<int>(15, top));
             }
         }
     }
@@ -3046,29 +3050,29 @@ int handle_dodge(Character *ch)
 
             if (top < 5)
                 top = 6;
-            return (rand_number(5, top));
+            return (Random::get<int>(5, top));
         }
         else
         { /* Intelligent Skills Mobs */
             if (GET_LEVEL(ch) >= 110)
             {
-                return (rand_number(95, 105));
+                return (Random::get<int>(95, 105));
             }
             else if (GET_LEVEL(ch) >= 100)
             {
-                return (rand_number(75, 95));
+                return (Random::get<int>(75, 95));
             }
             else if (GET_LEVEL(ch) >= 90)
             {
-                return (rand_number(50, 85));
+                return (Random::get<int>(50, 85));
             }
             else if (GET_LEVEL(ch) >= 75)
             {
-                return (rand_number(30, 70));
+                return (Random::get<int>(30, 70));
             }
             else if (GET_LEVEL(ch) >= 40)
             {
-                return (rand_number(20, 50));
+                return (Random::get<int>(20, 50));
             }
             else
             {
@@ -3076,7 +3080,7 @@ int handle_dodge(Character *ch)
 
                 if (top < 15)
                     top = 16;
-                return (rand_number(15, top));
+                return (Random::get<int>(15, top));
             }
         }
     }
@@ -3149,7 +3153,7 @@ void handle_defense(Character *vict, int *pry, int *blk, int *dge)
         {
             *pry = 110;
         }
-        if (PLR_FLAGGED(vict, PLR_GOOP) && rand_number(1, 100) >= 15)
+        if (PLR_FLAGGED(vict, PLR_GOOP) && Random::get<int>(1, 100) >= 15)
         {
             *dge += 100;
             *blk += 100;
@@ -3182,9 +3186,9 @@ void parry_ki(double attperc, Character *ch, Character *vict, char sname[1000], 
         if (!can_kill(ch, tch, nullptr, 1))
             continue;
 
-        if (rand_number(1, 101) >= 90 && foundv == false)
+        if (Random::get<int>(1, 101) >= 90 && foundv == false)
         {
-            if (handle_parry(tch) > rand_number(1, 140))
+            if (handle_parry(tch) > Random::get<int>(1, 140))
             {
                 sprintf(buf, "@C$N@W deflects your %s, sending it flying away!@n", sname);
                 sprintf(buf2, "@WYou deflect @C$n's@W %s sending it flying away!@n", sname);
@@ -3222,7 +3226,7 @@ void parry_ki(double attperc, Character *ch, Character *vict, char sname[1000], 
             continue;
         if (foundo == true)
             continue;
-        if (rand_number(1, 101) >= 80)
+        if (Random::get<int>(1, 101) >= 80)
         {
             foundo = true;
             sprintf(buf,
@@ -3251,7 +3255,7 @@ void parry_ki(double attperc, Character *ch, Character *vict, char sname[1000], 
         if (!tiles.contains(tile))
         {
             impact_sound(ch, "@wA loud roar is heard nearby!@n\r\n");
-            switch (rand_number(1, 8))
+            switch (Random::get<int>(1, 8))
             {
             case 1:
                 act("Debris is thrown into the air and showers down thunderously!", true, ch, nullptr, vict,
@@ -3260,7 +3264,7 @@ void parry_ki(double attperc, Character *ch, Character *vict, char sname[1000], 
                     TO_ROOM);
                 break;
             case 2:
-                if (rand_number(1, 4) == 4 && vict->location.getGroundEffect() == 0)
+                if (Random::get<int>(1, 4) == 4 && vict->location.getGroundEffect() == 0)
                 {
                     vict->location.setGroundEffect(1);
                     act("Lava spews up through cracks in the ground, roaring into the sky as a large column of molten rock!",
@@ -3294,7 +3298,7 @@ void parry_ki(double attperc, Character *ch, Character *vict, char sname[1000], 
         }
         if (tile == SECT_UNDERWATER)
         {
-            switch (rand_number(1, 3))
+            switch (Random::get<int>(1, 3))
             {
             case 1:
                 act("The water churns violently!", true, ch, nullptr, vict, TO_CHAR);
@@ -3312,7 +3316,7 @@ void parry_ki(double attperc, Character *ch, Character *vict, char sname[1000], 
         }
         if (tile == SECT_WATER_SWIM || tile == SECT_WATER_NOSWIM)
         {
-            switch (rand_number(1, 3))
+            switch (Random::get<int>(1, 3))
             {
             case 1:
                 act("A huge column of water erupts from the impact!", true, ch, nullptr, vict, TO_CHAR);
@@ -3333,7 +3337,7 @@ void parry_ki(double attperc, Character *ch, Character *vict, char sname[1000], 
         if (tile == SECT_INSIDE)
         {
             impact_sound(ch, "@wA loud roar is heard nearby!@n\r\n");
-            switch (rand_number(1, 8))
+            switch (Random::get<int>(1, 8))
             {
             case 1:
                 act("Debris is thrown into the air and showers down thunderously!", true, ch, nullptr, vict,
@@ -3390,7 +3394,7 @@ void dodge_ki(Character *ch, Character *vict, int type, int type2, int skill, in
         if (tile != SECT_INSIDE)
         {
             impact_sound(ch, "@wA loud roar is heard nearby!@n\r\n");
-            switch (rand_number(1, 8))
+            switch (Random::get<int>(1, 8))
             {
             case 1:
                 act("Debris is thrown into the air and showers down thunderously!", true, ch, nullptr, vict,
@@ -3399,7 +3403,7 @@ void dodge_ki(Character *ch, Character *vict, int type, int type2, int skill, in
                     TO_ROOM);
                 break;
             case 2:
-                if (rand_number(1, 4) == 4 && vict->location.getGroundEffect() == 0)
+                if (Random::get<int>(1, 4) == 4 && vict->location.getGroundEffect() == 0)
                 {
                     vict->location.setGroundEffect(1);
                     act("Lava spews up through cracks in the ground, roaring into the sky as a large column of molten rock!",
@@ -3433,7 +3437,7 @@ void dodge_ki(Character *ch, Character *vict, int type, int type2, int skill, in
         }
         if (tile == SECT_UNDERWATER)
         {
-            switch (rand_number(1, 3))
+            switch (Random::get<int>(1, 3))
             {
             case 1:
                 act("The water churns violently!", true, ch, nullptr, vict, TO_CHAR);
@@ -3451,7 +3455,7 @@ void dodge_ki(Character *ch, Character *vict, int type, int type2, int skill, in
         }
         if (tile == SECT_WATER_SWIM || tile == SECT_WATER_NOSWIM)
         {
-            switch (rand_number(1, 3))
+            switch (Random::get<int>(1, 3))
             {
             case 1:
                 act("A huge column of water erupts from the impact!", true, ch, nullptr, vict, TO_CHAR);
@@ -3472,7 +3476,7 @@ void dodge_ki(Character *ch, Character *vict, int type, int type2, int skill, in
         if (tile == SECT_INSIDE)
         {
             impact_sound(ch, "@wA loud roar is heard nearby!@n\r\n");
-            switch (rand_number(1, 8))
+            switch (Random::get<int>(1, 8))
             {
             case 1:
                 act("Debris is thrown into the air and showers down thunderously!", true, ch, nullptr, vict,
@@ -3520,7 +3524,7 @@ void dodge_ki(Character *ch, Character *vict, int type, int type2, int skill, in
     }
     if (type == 1)
     {
-        if (rand_number(1, 3) != 2)
+        if (Random::get<int>(1, 3) != 2)
         {
             act("@RIt turns around at the last second and begins to pursue @r$N@R!@n", true, ch, nullptr, vict,
                 TO_CHAR);
@@ -3559,7 +3563,7 @@ void dodge_ki(Character *ch, Character *vict, int type, int type2, int skill, in
     {
         if (skill2 == 481)
         {
-            int chance = rand_number(25, 50), prob = axion_dice(0);
+            int chance = Random::get<int>(25, 50), prob = axion_dice(0);
             if (GET_SKILL(ch, SKILL_KIENZAN) >= 100)
             {
                 chance += chance * 0.8;
@@ -3885,13 +3889,13 @@ int64_t damtype(Character *ch, int type, int skill, double percent)
         case 5:
         case 6:
         case 8:
-            dam = large_rand(cou1, cou2);
+            dam = Random::get<int64_t>(cou1, cou2);
             dam += GET_STR(ch) * (dam * 0.005);
             break;
         case 51:
         case 52:
         case 56: /* TAILWHIP */
-            dam = large_rand(cou1, cou2);
+            dam = Random::get<int64_t>(cou1, cou2);
             dam += GET_STR(ch) * 100;
             dam += GET_STR(ch) * (dam * 0.005);
             break;
@@ -4326,7 +4330,7 @@ int64_t damtype(Character *ch, int type, int skill, double percent)
         act("Your rage magnifies your attack power!", true, ch, nullptr, nullptr, TO_CHAR);
         act("Swirling energy flows around $n as $e releases $s rage in the attack!", true, ch, nullptr, nullptr,
             TO_ROOM);
-        if (rand_number(1, 10) >= 7)
+        if (Random::get<int>(1, 10) >= 7)
         {
             ch->sendText("You feel less angry.\r\n");
             ch->affect_flags.set(PLR_FURY, false);
@@ -4381,7 +4385,7 @@ void saiyan_gain(Character *ch, Character *vict)
         return;
     }
 
-    if (rand_number(1, 22) >= 8)
+    if (Random::get<int>(1, 22) >= 8)
     {
         return;
     }
@@ -4471,16 +4475,16 @@ static void spar_helper(Character *ch, Character *vict, int type, int64_t dmg)
     // If damage is greater than a tenth of the opponents health, there's a greater chance to proc the spar gains
     if (dmg > GET_MAX_HIT(vict) / 3)
     {
-        chance = rand_number(20, 100);
+        chance = Random::get<int>(20, 100);
         attrChance = 10;
     }
     else if (dmg >= GET_MAX_HIT(vict) / 10)
     {
-        chance = rand_number(20, 100);
+        chance = Random::get<int>(20, 100);
     }
     else
     {
-        chance = rand_number(1, 50);
+        chance = Random::get<int>(1, 50);
     }
 
     // The chance is reduced if you keep farming in one area via Relaxcount
@@ -4522,20 +4526,20 @@ static void spar_helper(Character *ch, Character *vict, int type, int64_t dmg)
             gmult *= 1.25;
             pscost += 1;
         }
-        pl = large_rand(gmult * .8, gmult * 1.2);
-        ki = large_rand(gmult * .8, gmult * 1.2);
-        st = large_rand(gmult * .8, gmult * 1.2);
+        pl = Random::get<int64_t>(gmult * .8, gmult * 1.2);
+        ki = Random::get<int64_t>(gmult * .8, gmult * 1.2);
+        st = Random::get<int64_t>(gmult * .8, gmult * 1.2);
     }
     else
     {
-        pl = large_rand(gmult * .4, gmult * .8);
-        ki = large_rand(gmult * .4, gmult * .8);
-        st = large_rand(gmult * .4, gmult * .8);
+        pl = Random::get<int64_t>(gmult * .4, gmult * .8);
+        ki = Random::get<int64_t>(gmult * .4, gmult * .8);
+        st = Random::get<int64_t>(gmult * .4, gmult * .8);
     }
 
     // Logic for earning xp through sparring, based on the character's level, the curve is roughly exponential
     auto chCon = GET_CON(ch);
-    if (chance >= rand_number(40, 75))
+    if (chance >= Random::get<int>(40, 75))
     {
 
         bool isLethal = !(ch->isSparring() && vict->isSparring());
@@ -4585,7 +4589,7 @@ static void spar_helper(Character *ch, Character *vict, int type, int64_t dmg)
             // Rewarded if your opponent is fighting for the kill
             float deadlyBonus = isLethal ? 2 : 1;
 
-            gaincalc = large_rand(deadlyBonus, 1.4 * deadlyBonus);
+            gaincalc = Random::get<int64_t>(deadlyBonus, 1.4 * deadlyBonus);
             gaincalc = gear_exp(ch, gaincalc);
         }
         if (vict)
@@ -4688,7 +4692,7 @@ void giveRandomVital(Character *ch, int64_t pl, int64_t ki, int64_t st, int attr
                 ch->gainBaseStat("health", pl);
                 if (axion_dice(0) <= attrChance)
                 {
-                    int rand = rand_number(1, 2);
+                    int rand = Random::get<int>(1, 2);
                     std::string val;
                     if (rand == 1)
                     {
@@ -4709,7 +4713,7 @@ void giveRandomVital(Character *ch, int64_t pl, int64_t ki, int64_t st, int attr
                 ch->gainBaseStat("ki", ki);
                 if (axion_dice(0) <= attrChance)
                 {
-                    int rand = rand_number(1, 2);
+                    int rand = Random::get<int>(1, 2);
                     std::string val;
                     if (rand == 1)
                     {
@@ -4730,7 +4734,7 @@ void giveRandomVital(Character *ch, int64_t pl, int64_t ki, int64_t st, int attr
                 ch->gainBaseStat("stamina", st);
                 if (axion_dice(0) <= attrChance)
                 {
-                    int rand = rand_number(1, 2);
+                    int rand = Random::get<int>(1, 2);
                     std::string val;
                     if (rand == 1)
                     {
@@ -4747,7 +4751,7 @@ void giveRandomVital(Character *ch, int64_t pl, int64_t ki, int64_t st, int attr
                 }
                 break;
             }
-        } while (rand_number(1, 3) == 3);
+        } while (Random::get<int>(1, 3) == 3);
     }
     else
     {
@@ -5458,12 +5462,12 @@ void hurt(int limb, int chance, Character *ch, Character *vict, Object *obj, int
                 vict->affect_flags.set(AFF_SANCTUARY, false);
             }
         }
-        if (AFF_FLAGGED(vict, AFF_FIRESHIELD) && rand_number(1, 200) < GET_SKILL(vict, SKILL_FIRESHIELD))
+        if (AFF_FLAGGED(vict, AFF_FIRESHIELD) && Random::get<int>(1, 200) < GET_SKILL(vict, SKILL_FIRESHIELD))
         {
             act("@c$N's@C fireshield repels the damage!@n", true, ch, nullptr, vict, TO_CHAR);
             act("@CYour fireshield repels the damage!@n", true, ch, nullptr, vict, TO_VICT);
             act("@c$N's@C fireshield repels the damage!@n", true, ch, nullptr, vict, TO_NOTVICT);
-            if (rand_number(1, 3) == 3)
+            if (Random::get<int>(1, 3) == 3)
             {
                 act("@c$N's@C fireshield disappears...@n", true, ch, nullptr, vict, TO_CHAR);
                 act("@CYour fireshield disappears...@n", true, ch, nullptr, vict, TO_VICT);
@@ -5651,10 +5655,10 @@ void hurt(int limb, int chance, Character *ch, Character *vict, Object *obj, int
 
         if (!IS_NPC(vict) && GET_SKILL(vict, SKILL_ARMOR))
         {
-            int nanite = GET_SKILL(vict, SKILL_ARMOR), perc = rand_number(1, 220);
+            int nanite = GET_SKILL(vict, SKILL_ARMOR), perc = Random::get<int>(1, 220);
             if (vict->subrace == SubRace::android_model_sense)
             {
-                perc = rand_number(1, 176);
+                perc = Random::get<int>(1, 176);
             }
             if (nanite >= perc)
             {
@@ -5728,17 +5732,17 @@ void hurt(int limb, int chance, Character *ch, Character *vict, Object *obj, int
         {
             vict->setBaseStat("lasthit", GET_IDNUM(ch));
         }
-        if (AFF_FLAGGED(vict, AFF_SLEEP) && rand_number(1, 2) == 2)
+        if (AFF_FLAGGED(vict, AFF_SLEEP) && Random::get<int>(1, 2) == 2)
         {
             affect_from_char(vict, SPELL_SLEEP);
             act("@c$N@W seems to be more aware now.@n", true, ch, nullptr, vict, TO_CHAR);
             act("@WYou are no longer so sleepy.@n", true, ch, nullptr, vict, TO_VICT);
             act("@c$N@W seems to be more aware now.@n", true, ch, nullptr, vict, TO_NOTVICT);
         }
-        if (AFF_FLAGGED(vict, AFF_KNOCKED) && rand_number(1, 12) >= 11)
+        if (AFF_FLAGGED(vict, AFF_KNOCKED) && Random::get<int>(1, 12) >= 11)
         {
             vict->cureStatusKnockedOut(true);
-            if (IS_NPC(vict) && rand_number(1, 20) >= 12)
+            if (IS_NPC(vict) && Random::get<int>(1, 20) >= 12)
             {
                 act("@W$n@W stands up.@n", false, vict, nullptr, nullptr, TO_ROOM);
                 vict->setBaseStat<int>("position", POS_STANDING);
@@ -5831,7 +5835,7 @@ void hurt(int limb, int chance, Character *ch, Character *vict, Object *obj, int
             gain /= 2;
         }
 
-        if (CARRYING(vict) && dmg > (((vict->getEffectiveStat<int64_t>("health"))) * 0.01) && rand_number(1, 10) >= 8)
+        if (CARRYING(vict) && dmg > (((vict->getEffectiveStat<int64_t>("health"))) * 0.01) && Random::get<int>(1, 10) >= 8)
         {
             carry_drop(vict, 2);
         }
@@ -6062,14 +6066,14 @@ void hurt(int limb, int chance, Character *ch, Character *vict, Object *obj, int
                 }
                 if (!ch->isSparring() && IS_NPC(vict))
                 {
-                    if (type == 0 && rand_number(1, 100) >= 97)
+                    if (type == 0 && Random::get<int>(1, 100) >= 97)
                     {
                         ch->sendText("@YY@yo@Yu @yg@Ya@yi@Yn@y s@Yo@ym@Ye @yb@Yo@yn@Yu@ys @Ye@yx@Yp@ye@Yr@yi@Ye@yn@Yc@ye@Y!@n\r\n");
                         gain = gain * 0.05;
                         gain += 1;
                         ch->modExperience(gain);
                     }
-                    else if (type != 0 && rand_number(1, 100) >= 93)
+                    else if (type != 0 && Random::get<int>(1, 100) >= 93)
                     {
                         gain = gain * 0.05;
                         gain += 1;
@@ -6566,25 +6570,25 @@ int handle_parry(Character *ch)
          **/
         if (!IS_HUMANOID(ch))
         {
-            return (rand_number(0, 5));
+            return (Random::get<int>(0, 5));
         }
         else
         {
             if (GET_LEVEL(ch) >= 110)
             {
-                return (rand_number(90, 105));
+                return (Random::get<int>(90, 105));
             }
             else if (GET_LEVEL(ch) >= 100)
             {
-                return (rand_number(85, 95));
+                return (Random::get<int>(85, 95));
             }
             else if (GET_LEVEL(ch) >= 80)
             {
-                return (rand_number(70, 85));
+                return (Random::get<int>(70, 85));
             }
             else if (GET_LEVEL(ch) >= 40)
             {
-                return (rand_number(50, 70));
+                return (Random::get<int>(50, 70));
             }
             else
             {
@@ -6592,7 +6596,7 @@ int handle_parry(Character *ch)
 
                 if (top < 15)
                     top = 16;
-                return (rand_number(15, top));
+                return (Random::get<int>(15, top));
             }
         }
     }
@@ -6701,11 +6705,11 @@ int handle_combo(Character *ch, Character *vict)
         chance -= 5;
     }
 
-    if (COMBO(ch) <= -1 && rand_number(1, 100) > chance)
+    if (COMBO(ch) <= -1 && Random::get<int>(1, 100) > chance)
     {
         while (success == false)
         {
-            switch (rand_number(1, 24))
+            switch (Random::get<int>(1, 24))
             {
             case 1:
             case 2:
@@ -6797,7 +6801,7 @@ int handle_combo(Character *ch, Character *vict)
         {
             if (COMBHITS(ch) >= 20)
             { /* We're kicking ass! */
-                switch (rand_number(1, 34))
+                switch (Random::get<int>(1, 34))
                 {
                 case 1:
                 case 2:
@@ -6856,19 +6860,19 @@ int handle_combo(Character *ch, Character *vict)
                 case 27:
                 case 28:
                 case 29:
-                    if (GET_SKILL(ch, SKILL_BASH) > 0 && rand_number(1, 2) == 2)
+                    if (GET_SKILL(ch, SKILL_BASH) > 0 && Random::get<int>(1, 2) == 2)
                     {
                         ch->send_to("@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try bash@G!@n\r\n", COMBHITS(ch));
                         ch->setBaseStat("combo", 51);
                         success = true;
                     }
-                    else if (GET_SKILL(ch, SKILL_TAILWHIP) > 0 && rand_number(1, 2) == 2)
+                    else if (GET_SKILL(ch, SKILL_TAILWHIP) > 0 && Random::get<int>(1, 2) == 2)
                     {
                         ch->send_to("@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rtailwhip@G!@n\r\n", COMBHITS(ch));
                         ch->setBaseStat("combo", 56);
                         success = true;
                     }
-                    else if (GET_SKILL(ch, SKILL_HEADBUTT) > 0 && rand_number(1, 2) == 2)
+                    else if (GET_SKILL(ch, SKILL_HEADBUTT) > 0 && Random::get<int>(1, 2) == 2)
                     {
                         ch->send_to("@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rheadbutt@G!@n\r\n", COMBHITS(ch));
                         ch->setBaseStat("combo", 52);
@@ -6886,19 +6890,19 @@ int handle_combo(Character *ch, Character *vict)
                 case 32:
                 case 33:
                 case 34:
-                    if (GET_SKILL(ch, SKILL_BASH) > 0 && rand_number(1, 2) == 2)
+                    if (GET_SKILL(ch, SKILL_BASH) > 0 && Random::get<int>(1, 2) == 2)
                     {
                         ch->send_to("@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try bash@G!@n\r\n", COMBHITS(ch));
                         ch->setBaseStat("combo", 51);
                         success = true;
                     }
-                    else if (GET_SKILL(ch, SKILL_TAILWHIP) > 0 && rand_number(1, 2) == 2)
+                    else if (GET_SKILL(ch, SKILL_TAILWHIP) > 0 && Random::get<int>(1, 2) == 2)
                     {
                         ch->send_to("@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rtailwhip@G!@n\r\n", COMBHITS(ch));
                         ch->setBaseStat("combo", 56);
                         success = true;
                     }
-                    else if (GET_SKILL(ch, SKILL_HEADBUTT) > 0 && rand_number(1, 2) == 2)
+                    else if (GET_SKILL(ch, SKILL_HEADBUTT) > 0 && Random::get<int>(1, 2) == 2)
                     {
                         ch->send_to("@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rheadbutt@G!@n\r\n", COMBHITS(ch));
                         ch->setBaseStat("combo", 52);
@@ -6915,7 +6919,7 @@ int handle_combo(Character *ch, Character *vict)
             }
             else if (COMBHITS(ch) >= 15)
             { /* We're doing good! */
-                switch (rand_number(1, 36))
+                switch (Random::get<int>(1, 36))
                 {
                 case 1:
                 case 2:
@@ -6992,19 +6996,19 @@ int handle_combo(Character *ch, Character *vict)
                     }
                     break;
                 case 35:
-                    if (GET_SKILL(ch, SKILL_BASH) > 0 && rand_number(1, 2) == 2)
+                    if (GET_SKILL(ch, SKILL_BASH) > 0 && Random::get<int>(1, 2) == 2)
                     {
                         ch->send_to("@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try bash@G!@n\r\n", COMBHITS(ch));
                         ch->setBaseStat("combo", 51);
                         success = true;
                     }
-                    else if (GET_SKILL(ch, SKILL_TAILWHIP) > 0 && rand_number(1, 2) == 2)
+                    else if (GET_SKILL(ch, SKILL_TAILWHIP) > 0 && Random::get<int>(1, 2) == 2)
                     {
                         ch->send_to("@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rtailwhip@G!@n\r\n", COMBHITS(ch));
                         ch->setBaseStat("combo", 56);
                         success = true;
                     }
-                    else if (GET_SKILL(ch, SKILL_HEADBUTT) > 0 && rand_number(1, 2) == 2)
+                    else if (GET_SKILL(ch, SKILL_HEADBUTT) > 0 && Random::get<int>(1, 2) == 2)
                     {
                         ch->send_to("@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rheadbutt@G!@n\r\n", COMBHITS(ch));
                         ch->setBaseStat("combo", 52);
@@ -7018,19 +7022,19 @@ int handle_combo(Character *ch, Character *vict)
                     }
                     break;
                 case 36:
-                    if (GET_SKILL(ch, SKILL_BASH) > 0 && rand_number(1, 2) == 2)
+                    if (GET_SKILL(ch, SKILL_BASH) > 0 && Random::get<int>(1, 2) == 2)
                     {
                         ch->send_to("@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try bash@G!@n\r\n", COMBHITS(ch));
                         ch->setBaseStat("combo", 51);
                         success = true;
                     }
-                    else if (GET_SKILL(ch, SKILL_TAILWHIP) > 0 && rand_number(1, 2) == 2)
+                    else if (GET_SKILL(ch, SKILL_TAILWHIP) > 0 && Random::get<int>(1, 2) == 2)
                     {
                         ch->send_to("@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rtailwhip@G!@n\r\n", COMBHITS(ch));
                         ch->setBaseStat("combo", 56);
                         success = true;
                     }
-                    else if (GET_SKILL(ch, SKILL_HEADBUTT) > 0 && rand_number(1, 2) == 2)
+                    else if (GET_SKILL(ch, SKILL_HEADBUTT) > 0 && Random::get<int>(1, 2) == 2)
                     {
                         ch->send_to("@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rheadbutt@G!@n\r\n", COMBHITS(ch));
                         ch->setBaseStat("combo", 52);
@@ -7047,7 +7051,7 @@ int handle_combo(Character *ch, Character *vict)
             }
             else if (COMBHITS(ch) >= 10)
             { /* We're on a roll */
-                switch (rand_number(1, 34))
+                switch (Random::get<int>(1, 34))
                 {
                 case 1:
                 case 2:
@@ -7124,19 +7128,19 @@ int handle_combo(Character *ch, Character *vict)
                     break;
                 case 32:
                 case 33:
-                    if (GET_SKILL(ch, SKILL_BASH) > 0 && rand_number(1, 2) == 2)
+                    if (GET_SKILL(ch, SKILL_BASH) > 0 && Random::get<int>(1, 2) == 2)
                     {
                         ch->send_to("@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try bash@G!@n\r\n", COMBHITS(ch));
                         ch->setBaseStat("combo", 51);
                         success = true;
                     }
-                    else if (GET_SKILL(ch, SKILL_TAILWHIP) > 0 && rand_number(1, 2) == 2)
+                    else if (GET_SKILL(ch, SKILL_TAILWHIP) > 0 && Random::get<int>(1, 2) == 2)
                     {
                         ch->send_to("@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rtailwhip@G!@n\r\n", COMBHITS(ch));
                         ch->setBaseStat("combo", 56);
                         success = true;
                     }
-                    else if (GET_SKILL(ch, SKILL_HEADBUTT) > 0 && rand_number(1, 2) == 2)
+                    else if (GET_SKILL(ch, SKILL_HEADBUTT) > 0 && Random::get<int>(1, 2) == 2)
                     {
                         ch->send_to("@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rheadbutt@G!@n\r\n", COMBHITS(ch));
                         ch->setBaseStat("combo", 52);
@@ -7150,19 +7154,19 @@ int handle_combo(Character *ch, Character *vict)
                     }
                     break;
                 case 34:
-                    if (GET_SKILL(ch, SKILL_BASH) > 0 && rand_number(1, 2) == 2)
+                    if (GET_SKILL(ch, SKILL_BASH) > 0 && Random::get<int>(1, 2) == 2)
                     {
                         ch->send_to("@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try bash@G!@n\r\n", COMBHITS(ch));
                         ch->setBaseStat("combo", 51);
                         success = true;
                     }
-                    else if (GET_SKILL(ch, SKILL_TAILWHIP) > 0 && rand_number(1, 2) == 2)
+                    else if (GET_SKILL(ch, SKILL_TAILWHIP) > 0 && Random::get<int>(1, 2) == 2)
                     {
                         ch->send_to("@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rtailwhip@G!@n\r\n", COMBHITS(ch));
                         ch->setBaseStat("combo", 56);
                         success = true;
                     }
-                    else if (GET_SKILL(ch, SKILL_HEADBUTT) > 0 && rand_number(1, 2) == 2)
+                    else if (GET_SKILL(ch, SKILL_HEADBUTT) > 0 && Random::get<int>(1, 2) == 2)
                     {
                         ch->send_to("@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rheadbutt@G!@n\r\n", COMBHITS(ch));
                         ch->setBaseStat("combo", 52);
@@ -7179,7 +7183,7 @@ int handle_combo(Character *ch, Character *vict)
             }
             else if (COMBHITS(ch) >= 5)
             { /* We're staring off well */
-                switch (rand_number(1, 30))
+                switch (Random::get<int>(1, 30))
                 {
                 case 1:
                 case 2:
@@ -7257,7 +7261,7 @@ int handle_combo(Character *ch, Character *vict)
             }
             else
             { /* We just the combo not long ago */
-                switch (rand_number(1, 30))
+                switch (Random::get<int>(1, 30))
                 {
                 case 1:
                 case 2:
@@ -7414,7 +7418,7 @@ void handle_spiral(Character *ch, Character *vict, int skill, int first)
         {
             if ((vict->getCurVital(CharVital::stamina)) > 0)
             {
-                if (blk > rand_number(1, 130))
+                if (blk > Random::get<int>(1, 130))
                 {
                     act("@C$N@W moves quickly and blocks your Spiral Comet blast!@n", false, ch, nullptr, vict,
                         TO_CHAR);
@@ -7428,7 +7432,7 @@ void handle_spiral(Character *ch, Character *vict, int skill, int first)
                     hurt(0, 0, ch, vict, nullptr, dmg, 1);
                     return;
                 }
-                else if (dge > rand_number(1, 130))
+                else if (dge > Random::get<int>(1, 130))
                 {
                     act("@C$N@W manages to dodge your Spiral Comet blast, letting it slam into the surroundings!@n",
                         false, ch, nullptr, vict, TO_CHAR);
@@ -7482,7 +7486,7 @@ void handle_spiral(Character *ch, Character *vict, int skill, int first)
             {
                 dmg = damtype(ch, 45, skill, .01);
             }
-            switch (rand_number(1, 5))
+            switch (Random::get<int>(1, 5))
             {
             case 1:
                 act("@WYou launch a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at @c$N@W! It slams into $S chest and explodes!@n",
@@ -7557,7 +7561,7 @@ void handle_death_msg(Character *ch, Character *vict, int type)
             tile != SECT_WATER_NOSWIM && !vict->location.getWhereFlag(WhereFlag::space) &&
             tile != SECT_FLYING)
         {
-            switch (rand_number(1, 5))
+            switch (Random::get<int>(1, 5))
             {
             case 1:
                 act("@R$N@r coughs up blood before falling to the ground dead.@n", true, ch, nullptr, vict,
@@ -7603,7 +7607,7 @@ void handle_death_msg(Character *ch, Character *vict, int type)
         }
         else if (tile == SECT_WATER_SWIM || tile == SECT_WATER_NOSWIM)
         {
-            switch (rand_number(1, 5))
+            switch (Random::get<int>(1, 5))
             {
             case 1:
                 act("@R$N@r coughs up blood and dies before falling down to the water. A large splash accompanies $S body hitting the water!@n",
@@ -7655,7 +7659,7 @@ void handle_death_msg(Character *ch, Character *vict, int type)
         }
         else if (vict->location.getWhereFlag(WhereFlag::space))
         {
-            switch (rand_number(1, 5))
+            switch (Random::get<int>(1, 5))
             {
             case 1:
                 act("@R$N@r coughs up blood and dies. The blood freezes and floats freely through space...@n", true,
@@ -7706,7 +7710,7 @@ void handle_death_msg(Character *ch, Character *vict, int type)
         }
         else if (tile == SECT_FLYING)
         {
-            switch (rand_number(1, 5))
+            switch (Random::get<int>(1, 5))
             {
             case 1:
                 act("@R$N@r coughs up blood before $s corpse starts to fall to the ground far below.@n", true, ch,
@@ -7757,7 +7761,7 @@ void handle_death_msg(Character *ch, Character *vict, int type)
         }
         else
         {
-            switch (rand_number(1, 5))
+            switch (Random::get<int>(1, 5))
             {
             case 1:
                 act("@R$N@r coughs up blood before $s corpse starts to float limply in the water.@n", true, ch,
@@ -7813,7 +7817,7 @@ void handle_death_msg(Character *ch, Character *vict, int type)
             tile != SECT_WATER_NOSWIM && !vict->location.getWhereFlag(WhereFlag::space) &&
             tile != SECT_FLYING)
         {
-            switch (rand_number(1, 5))
+            switch (Random::get<int>(1, 5))
             {
             case 1:
                 act("@R$N@r explodes and chunks of $M shower to the ground.@n", true, ch, nullptr, vict, TO_CHAR);
@@ -7854,7 +7858,7 @@ void handle_death_msg(Character *ch, Character *vict, int type)
         }
         else if (tile == SECT_WATER_SWIM || tile == SECT_WATER_NOSWIM)
         {
-            switch (rand_number(1, 5))
+            switch (Random::get<int>(1, 5))
             {
             case 1:
                 act("@R$N@r explodes and chunks of $M shower to the ground.@n", true, ch, nullptr, vict, TO_CHAR);
@@ -7895,7 +7899,7 @@ void handle_death_msg(Character *ch, Character *vict, int type)
         }
         else if (vict->location.getWhereFlag(WhereFlag::space))
         {
-            switch (rand_number(1, 5))
+            switch (Random::get<int>(1, 5))
             {
             case 1:
                 act("@R$N@r explodes and chunks of $M shower out into every direction of space.@n", true, ch,
@@ -7936,7 +7940,7 @@ void handle_death_msg(Character *ch, Character *vict, int type)
         }
         else if (tile == SECT_FLYING)
         {
-            switch (rand_number(1, 5))
+            switch (Random::get<int>(1, 5))
             {
             case 1:
                 act("@R$N@r explodes and chunks of $M shower towards the ground far below.@n", true, ch, nullptr,
@@ -7981,7 +7985,7 @@ void handle_death_msg(Character *ch, Character *vict, int type)
         }
         else
         {
-            switch (rand_number(1, 5))
+            switch (Random::get<int>(1, 5))
             {
             case 1:
                 act("@R$N@r explodes and chunks of $M float freely through the water.@n", true, ch, nullptr, vict,

@@ -2,7 +2,12 @@
 // Created by basti on 10/24/2021.
 //
 
-#include "dbat/structs.h"
+#include "dbat/Character.h"
+#include "dbat/CharacterPrototype.h"
+#include "dbat/Object.h"
+#include "dbat/Descriptor.h"
+#include "dbat/Zone.h"
+#include "dbat/Account.h"
 #include "dbat/races.h"
 #include "dbat/send.h"
 #include "dbat/spells.h"
@@ -347,7 +352,7 @@ void Character::resurrect(ResurrectionMode mode)
 
         if (losschance >= 100)
         {
-            int psloss = rand_number(100, 300);
+            int psloss = Random::get<int>(100, 300);
             modPractices(-psloss);
             this->send_to("@R...and a loss of @r%d@R PS!@n", psloss);
         }
@@ -490,7 +495,7 @@ bool Character::hasGravAcclim(int grav)
 
 void Character::raiseGravAcclim()
 {
-    if (rand_number(1, 140) >= getEffectiveStat("strength"))
+    if (Random::get<int>(1, 140) >= getEffectiveStat("strength"))
     {
         auto gravity = location.getEnvironment(ENV_GRAVITY);
 
@@ -791,7 +796,7 @@ void Character::attemptLimitBreak()
 {
     if (form == Form::base)
         return;
-    if (transforms[form].time_spent_in_form > 50000 && rand_number(0, 1000) == 1000)
+    if (transforms[form].time_spent_in_form > 50000 && Random::get<int>(0, 1000) == 1000)
     {
         transforms[form].limit_broken = true;
         modCurVitalDam(CharVital::health, -0.35);
@@ -888,14 +893,6 @@ int Character::getRPP()
     return p.account->rpp;
 }
 
-void Account::modRPP(int amt)
-{
-    rpp += amt;
-    if (rpp < 0)
-    {
-        rpp = 0;
-    }
-}
 
 void Character::modRPP(int amt)
 {
@@ -924,7 +921,7 @@ void Character::login()
     enter_player_game(desc);
     this->send_to("%s", CONFIG_WELC_MESSG);
     ::act("$n has entered the game.", true, this, nullptr, nullptr, TO_ROOM);
-    mudlog(NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(this)), true, "%s has entered the game.", GET_NAME(this));
+    mudlog(NRM, std::max(ADMLVL_IMMORT, GET_INVIS_LEV(this)), true, "%s has entered the game.", GET_NAME(this));
     /*~~~ For PCOUNT and HIGHPCOUNT ~~~*/
     auto count = 0;
     auto oldcount = HIGHPCOUNT;
@@ -1354,7 +1351,7 @@ int64_t Character::modExperience(int64_t value, bool applyBonuses)
                     diff = diff * 1.2;
                 }
 
-                if (rand_number(1, 5) >= 2)
+                if (Random::get<int>(1, 5) >= 2)
                 {
                     if (IS_HUMAN(this))
                     {
@@ -1366,7 +1363,7 @@ int64_t Character::modExperience(int64_t value, bool applyBonuses)
                     }
                     this->send_to("@D[@G+@Y%s @RPL@D]@n ", add_commas(diff).c_str());
                 }
-                if (rand_number(1, 5) >= 2)
+                if (Random::get<int>(1, 5) >= 2)
                 {
                     if (IS_HALFBREED(this))
                     {
@@ -1378,7 +1375,7 @@ int64_t Character::modExperience(int64_t value, bool applyBonuses)
                     }
                     this->send_to("@D[@G+@Y%s @gSTA@D]@n ", add_commas(diff).c_str());
                 }
-                if (rand_number(1, 5) >= 2)
+                if (Random::get<int>(1, 5) >= 2)
                 {
                     this->gainBaseStat("ki", diff);
                     this->send_to("@D[@G+@Y%s @CKi@D]@n", add_commas(diff).c_str());
@@ -1543,9 +1540,9 @@ std::optional<std::string> Character::dgCallMember(const std::string &member, co
     {
         if (!arg.empty())
         {
-            if (!strcasecmp("on", arg.c_str()))
+            if (boost::iequals("on", arg.c_str()))
                 player_flags.set(pf->second, true);
-            else if (!strcasecmp("off", arg.c_str()))
+            else if (boost::iequals("off", arg.c_str()))
                 player_flags.set(pf->second, false);
         }
         return player_flags.get(pf->second) ? "1" : "0";
@@ -1737,4 +1734,155 @@ void Character::mergeClones() {
             handle_multi_merge(c);
         });
     }
+}
+
+Character &Character::operator=(CharacterPrototype &other)
+{
+    // basic proto data fields
+    vn = other.vn;
+    if (other.name)
+        strings["name"] = other.name;
+    if (other.room_description)
+        strings["room_description"] = other.room_description;
+    if (other.look_description)
+        strings["look_description"] = other.look_description;
+    if (other.short_description)
+        strings["short_description"] = other.short_description;
+    affect_flags = other.affect_flags;
+    stats = other.stats;
+
+    // item proto data fields
+    race = other.race;
+    subrace = other.subrace;
+    sensei = other.sensei;
+    sex = other.sex;
+    mob_specials = other.mob_specials;
+    character_flags = other.character_flags;
+    mob_flags = other.mob_flags;
+    bio_genomes = other.bio_genomes;
+    mutations = other.mutations;
+    size = other.size;
+
+    return *this;
+}
+
+bool Character::canSeeInDark() const {
+    if(player_flags.get(PRF_HOLYLIGHT)) return true;
+    if(affect_flags.get(AFF_INFRAVISION)) return true;
+    if(mutations.get(Mutation::infravision)) return true;
+    return false;
+}
+
+bool Character::canSee(Character *other, bool skipLightCheck)
+{
+    // can always see yourself.
+    if (this == other)
+        return true;
+
+    auto myAdminLevel = getBaseStat<int>("admin_level");
+    auto otherInvisLevel = other->getBaseStat<int>("invis_level");
+
+    // if the other has imm invisibility at a higher level,
+    // no chance of seeing them even with holylight.
+    if(myAdminLevel < otherInvisLevel)
+        return false;
+
+    // anyone with holylight (ADMIN VISION) set can always see anything.
+    if(player_flags.get(PRF_HOLYLIGHT)) 
+        return true;
+
+    // respect hidden without holylight on...
+    if(other->affect_flags.get(AFF_HIDE) && myAdminLevel <= 0)
+        return false;
+
+    // Can only detect the invisible if we have detect invisible.
+    if(other->affect_flags.get(AFF_INVISIBLE) && !affect_flags.get(AFF_DETECT_INVIS))
+        return false;
+
+    // cannot see them if the area is dark...
+    if(!skipLightCheck) {
+        if(!canSeeInDark() && other->location.getIsDark())
+            return false;
+    }
+
+    // huh. I guess we can see them. cool.
+    return true;
+}
+
+bool Character::canSee(Object *obj, bool skipLightCheck)
+{
+
+    // Admin vision can always see anything.
+    if(player_flags.get(PRF_HOLYLIGHT))
+        return true;
+
+    // can only ever see invisible items if you have detect_invis
+    if(obj->item_flags.get(ITEM_INVISIBLE) && !affect_flags.get(AFF_DETECT_INVIS))
+        return false;
+
+    
+    if(auto wornby = obj->getWornBy()) {
+        // You can always see your own equipment.
+        if(wornby == this) return true;
+        // but if someone else is wearing it then you also need to be able to see them!
+        else return canSee(wornby, skipLightCheck);
+    }
+    
+    if(auto carriedby = obj->getCarriedBy()) {
+        if(carriedby == this) return true;
+        else return canSee(carriedby, skipLightCheck);
+    }
+
+    // If the object is in a container you have to be able to see the container.
+    // There shouldn't be any reason you wouldn't be able to if you got this far,
+    // but let's just be triple-sure and see what happens.
+    if(auto containedby = obj->getContainer()) {
+        return canSee(containedby, skipLightCheck);
+    }
+
+    // The object must be in an AbstractLocation, so the only check left is darkness.
+
+    // cannot see them if the area is dark...
+    if(!skipLightCheck) {
+        if(!canSeeInDark() && obj->location.getIsDark())
+            return false;
+    }
+
+    return true;
+}
+
+std::string Character::displayNameFor(Character* viewer)
+{
+    // 1) Disguise gate: if I'm disguised and the viewer is a normal PC, show only race.
+    const bool iAmDisguised = this->player_flags.get(PLR_DISGUISED);
+    const bool viewerIsAdmin = viewer && viewer->getBaseStat<int>("admin_level") > 0;
+    const bool viewerIsNpc   = viewer && IS_NPC(viewer);
+
+    if (iAmDisguised && !(viewerIsAdmin || viewerIsNpc)) {
+        return race::getName(this->race); // e.g., "Saiyan", etc.
+    }
+
+    // 2) Visibility gate
+    if (viewer && !viewer->canSee(const_cast<Character*>(this))) {
+        return "Someone";
+    }
+
+    // 3) Introduction gate (does viewer know me?)
+    const bool samePerson = (viewer == this);
+    const bool eitherAdmin = viewerIsAdmin || (this->getBaseStat<int>("admin_level") > 0);
+    const bool eitherNpc   = viewerIsNpc   || IS_NPC(this);
+    const bool viewerKnowsMe = samePerson || readIntro(this, viewer) == 1 || eitherAdmin || eitherNpc;
+
+    if (viewerKnowsMe) {
+        // 4) Name selection: real name for wiz/NPC/self; otherwise the viewer-specific dub.
+        const bool wizView = samePerson || eitherAdmin || eitherNpc;
+        if (wizView) {
+            return GET_NAME(this);      // canonical name
+        } else {
+            return get_i_name(viewer, this); // viewer’s dubbed name for me
+        }
+    }
+
+    // 5) Fallback: generic description
+    return introd_calc(this);
 }

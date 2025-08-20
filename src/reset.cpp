@@ -8,7 +8,7 @@
  *  Copyright (C) 2007 Stefan Cole (a.k.a. Jamdog)                        *
  *  To see this in action, check out AderonMUD                            *
  ************************************************************************ */
-
+#include "dbat/Character.h"
 #include "dbat/structs.h"
 #include "dbat/utils.h"
 #include "dbat/db.h"
