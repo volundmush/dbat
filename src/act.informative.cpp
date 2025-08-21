@@ -37,6 +37,7 @@
 #include "dbat/improved-edit.h"
 #include "dbat/transformation.h"
 #include "dbat/planet.h"
+#include "dbat/random.h"
 #include "dbat/graph.h"
 
 /* local functions */
@@ -342,7 +343,7 @@ static void search_room(Character *ch)
     auto loco = ch->location.getObjects();
     for (auto obj : filter_raw(loco))
     {
-        if (OBJ_FLAGGED(obj, ITEM_BURIED) && perc * bonus > Random::get<int>(50, 200))
+        if (OBJ_FLAGGED(obj, ITEM_BURIED) && perc * bonus > rand_number(50, 200))
         {
             act("@YYou uncover @y$p@Y, which had been burried here.@n", true, ch, obj, nullptr, TO_CHAR);
             act("@y$n@Y uncovers @y$p@Y, which had burried here.@n", true, ch, obj, nullptr, TO_ROOM);
@@ -629,7 +630,7 @@ ACMD(do_shuffle)
             {
                 continue;
             }
-            if (count > 1 && Random::get<int>(1, 4) == 3)
+            if (count > 1 && rand_number(1, 4) == 3)
             {
                 count -= 1;
                 obj2->clearLocation();
@@ -1549,7 +1550,7 @@ void show_obj_to_char(Object *obj, Character *ch, int mode)
 
     int spotted = false;
 
-    if (GET_SKILL(ch, SKILL_SPOT) > Random::get<int>(20, 110))
+    if (GET_SKILL(ch, SKILL_SPOT) > rand_number(20, 110))
     {
         spotted = true;
     }
@@ -2108,7 +2109,7 @@ static int show_obj_modifiers(Object *obj, Character *ch)
     }
     if (KICHARGE(obj) > 0)
     {
-        int num = (KIDIST(obj) * 20) + Random::get<int>(1, 5);
+        int num = (KIDIST(obj) * 20) + rand_number(1, 5);
         ch->send_to(" %d meters away", num);
         found++;
     }
@@ -2223,7 +2224,7 @@ static void diag_obj_to_char(Object *obj, Character *ch)
         if (percent >= diagnosis[ar_index].percent)
             break;
 
-    ch->send_to("\r\n%c%s %s\r\n", toupper(*objs), objs + 1, diagnosis[ar_index].text);
+    ch->send_to("\r\n%c%s %s\r\n", UPPER(*objs), objs + 1, diagnosis[ar_index].text);
 }
 
 static void diag_char_to_char(Character *i, Character *ch)
@@ -2386,9 +2387,9 @@ static void look_at_char(Character *i, Character *ch)
     else if (ch == i || IS_NPC(i))
     {
         if (GET_SEX(i) == SEX_NEUTRAL)
-            ch->send_to("%c%s appears to be %s %s, ", toupper(*GET_NAME(i)), GET_NAME(i) + 1, AN(RACE(i)), LRACE(i));
+            ch->send_to("%c%s appears to be %s %s, ", UPPER(*GET_NAME(i)), GET_NAME(i) + 1, AN(RACE(i)), LRACE(i));
         else
-            ch->send_to("%c%s appears to be %s %s %s, ", toupper(*GET_NAME(i)), GET_NAME(i) + 1, AN(MAFE(i)), MAFE(i), LRACE(i));
+            ch->send_to("%c%s appears to be %s %s %s, ", UPPER(*GET_NAME(i)), GET_NAME(i) + 1, AN(MAFE(i)), MAFE(i), LRACE(i));
     }
     else
     {
@@ -2539,7 +2540,7 @@ static void look_at_char(Character *i, Character *ch)
             auto con = i->getInventory();
             for (auto tmp_obj : filter_raw(con))
             {
-                if (ch->canSee(tmp_obj) && (ADM_FLAGGED(ch, ADM_SEEINV) || (Random::get<int>(0, 20) < GET_WIS(ch))))
+                if (ch->canSee(tmp_obj) && (ADM_FLAGGED(ch, ADM_SEEINV) || (rand_number(0, 20) < GET_WIS(ch))))
                 {
                     show_obj_to_char(tmp_obj, ch, SHOW_OBJ_SHORT);
                     found = true;
@@ -2652,31 +2653,31 @@ void list_one_char(Character *i, Character *ch)
     }
 
     if (IS_NPC(i) && !FIGHTING(i) && GET_POS(i) != POS_SITTING && GET_POS(i) != POS_SLEEPING)
-        ch->send_to("@w%c%s", toupper(*i->getShortDescription()), i->getShortDescription() + 1);
+        ch->send_to("@w%c%s", UPPER(*i->getShortDescription()), i->getShortDescription() + 1);
     else if (IS_NPC(i) && GRAPPLED(i) && GRAPPLED(i) == ch)
-        ch->send_to("@w%c%s is being grappled with by YOU!", toupper(*i->getShortDescription()), i->getShortDescription() + 1);
+        ch->send_to("@w%c%s is being grappled with by YOU!", UPPER(*i->getShortDescription()), i->getShortDescription() + 1);
     else if (IS_NPC(i) && GRAPPLED(i) && GRAPPLED(i) != ch)
-        ch->send_to("@w%c%s is being absorbed from by %s!", toupper(*i->getShortDescription()), i->getShortDescription() + 1, readIntro(ch, GRAPPLED(i)) == 1 ? get_i_name(ch, GRAPPLED(i)) : AN(RACE(GRAPPLED(i))));
+        ch->send_to("@w%c%s is being absorbed from by %s!", UPPER(*i->getShortDescription()), i->getShortDescription() + 1, readIntro(ch, GRAPPLED(i)) == 1 ? get_i_name(ch, GRAPPLED(i)) : AN(RACE(GRAPPLED(i))));
     else if (IS_NPC(i) && ABSORBBY(i) && ABSORBBY(i) == ch)
-        ch->send_to("@w%c%s is being absorbed from by YOU!", toupper(*i->getShortDescription()), i->getShortDescription() + 1);
+        ch->send_to("@w%c%s is being absorbed from by YOU!", UPPER(*i->getShortDescription()), i->getShortDescription() + 1);
     else if (IS_NPC(i) && ABSORBBY(i) && ABSORBBY(i) != ch)
-        ch->send_to("@w%c%s is being absorbed from by %s!", toupper(*i->getShortDescription()), i->getShortDescription() + 1, readIntro(ch, ABSORBBY(i)) == 1 ? get_i_name(ch, ABSORBBY(i)) : AN(RACE(ABSORBBY(i))));
+        ch->send_to("@w%c%s is being absorbed from by %s!", UPPER(*i->getShortDescription()), i->getShortDescription() + 1, readIntro(ch, ABSORBBY(i)) == 1 ? get_i_name(ch, ABSORBBY(i)) : AN(RACE(ABSORBBY(i))));
     else if (IS_NPC(i) && FIGHTING(i) && FIGHTING(i) != ch && GET_POS(i) != POS_SITTING && GET_POS(i) != POS_SLEEPING &&
              i->isSparring())
-        ch->send_to("@w%c%s is sparring with %s!", toupper(*i->getShortDescription()), i->getShortDescription() + 1, GET_ADMLEVEL(ch) ? GET_NAME(FIGHTING(i)) : (readIntro(ch, FIGHTING(i)) == 1 ? get_i_name(ch, FIGHTING(i)) : LRACE(FIGHTING(i))));
+        ch->send_to("@w%c%s is sparring with %s!", UPPER(*i->getShortDescription()), i->getShortDescription() + 1, GET_ADMLEVEL(ch) ? GET_NAME(FIGHTING(i)) : (readIntro(ch, FIGHTING(i)) == 1 ? get_i_name(ch, FIGHTING(i)) : LRACE(FIGHTING(i))));
     else if (IS_NPC(i) && FIGHTING(i) && i->isSparring() && FIGHTING(i) == ch && GET_POS(i) != POS_SITTING &&
              GET_POS(i) != POS_SLEEPING)
-        ch->send_to("@w%c%s is sparring with you!", toupper(*i->getShortDescription()), i->getShortDescription() + 1);
+        ch->send_to("@w%c%s is sparring with you!", UPPER(*i->getShortDescription()), i->getShortDescription() + 1);
     else if (IS_NPC(i) && FIGHTING(i) && FIGHTING(i) != ch && GET_POS(i) != POS_SITTING && GET_POS(i) != POS_SLEEPING)
-        ch->send_to("@w%c%s is fighting %s!", toupper(*i->getShortDescription()), i->getShortDescription() + 1, GET_ADMLEVEL(ch) ? GET_NAME(FIGHTING(i)) : (readIntro(ch, FIGHTING(i)) == 1 ? get_i_name(ch, FIGHTING(i)) : LRACE(FIGHTING(i))));
+        ch->send_to("@w%c%s is fighting %s!", UPPER(*i->getShortDescription()), i->getShortDescription() + 1, GET_ADMLEVEL(ch) ? GET_NAME(FIGHTING(i)) : (readIntro(ch, FIGHTING(i)) == 1 ? get_i_name(ch, FIGHTING(i)) : LRACE(FIGHTING(i))));
     else if (IS_NPC(i) && FIGHTING(i) && FIGHTING(i) == ch && GET_POS(i) != POS_SITTING && GET_POS(i) != POS_SLEEPING)
-        ch->send_to("@w%c%s is fighting YOU!", toupper(*i->getShortDescription()), i->getShortDescription() + 1);
+        ch->send_to("@w%c%s is fighting YOU!", UPPER(*i->getShortDescription()), i->getShortDescription() + 1);
     else if (IS_NPC(i) && FIGHTING(i) && GET_POS(i) == POS_SITTING)
-        ch->send_to("@w%c%s is sitting here.", toupper(*i->getShortDescription()), i->getShortDescription() + 1);
+        ch->send_to("@w%c%s is sitting here.", UPPER(*i->getShortDescription()), i->getShortDescription() + 1);
     else if (IS_NPC(i) && FIGHTING(i) && GET_POS(i) == POS_SLEEPING)
-        ch->send_to("@w%c%s is sleeping here.", toupper(*i->getShortDescription()), i->getShortDescription() + 1);
+        ch->send_to("@w%c%s is sleeping here.", UPPER(*i->getShortDescription()), i->getShortDescription() + 1);
     else if (IS_NPC(i))
-        ch->send_to("@w%c%s", toupper(*i->getShortDescription()), i->getShortDescription() + 1);
+        ch->send_to("@w%c%s", UPPER(*i->getShortDescription()), i->getShortDescription() + 1);
     else if (!IS_NPC(i))
     {
         if (IS_MAJIN(i) && AFF_FLAGGED(i, AFF_LIQUEFIED))

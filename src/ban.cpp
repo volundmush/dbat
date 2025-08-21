@@ -18,6 +18,7 @@
 #include "dbat/interpreter.h"
 #include "dbat/handler.h"
 #include "dbat/db.h"
+#include "dbat/constants.h"
 
 /* local globals */
 struct ban_list_element *ban_list = nullptr;

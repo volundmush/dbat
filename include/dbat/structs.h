@@ -11,24 +11,6 @@
 
 #include "templates.h"
 
-typedef struct assembly_data ASSEMBLY;
-typedef struct component_data COMPONENT;
-
-struct assembly_data {
-    long lVnum;                  /* Vnum of the object assembled. */
-    long lNumComponents;         /* Number of components. */
-    unsigned char uchAssemblyType;        /* Type of assembly (ASSM_xxx).
-*/
-    struct component_data *pComponents;          /* Array of component info. */
-};
-
-/* Assembly component structure definition. */
-struct component_data {
-    bool bExtract;               /* Extract the object after use. */
-    bool bInRoom;                /* Component in room, not inven. */
-    long lVnum;                  /* Vnum of the component object. */
-};
-
 /**********************************************************************
 * Structures                                                          *
 **********************************************************************/
@@ -83,7 +65,6 @@ struct social_messg {
     char *others_obj_found;
 };
 
-
 struct weather_data {
     int pressure{};    /* How is the pressure ( Mb ) */
     int change{};    /* How fast and what way does it change. */
@@ -91,12 +72,6 @@ struct weather_data {
     int sunlight{};    /* And how much sun. */
 };
 
-
-/*
- * Element in monster and object index-tables.
- *
- * NOTE: Assumes sizeof(mob_vnum) >= sizeof(obj_vnum)
- */
 struct index_data {
     mob_vnum vn{NOTHING};    /* virtual number of this mob/obj		*/
     SpecialFunc func;
@@ -105,16 +80,6 @@ struct index_data {
     struct DgScript *proto;     /* for triggers... the trigger     */
 };
 
-
-/*
- * Config structs
- * 
- */
-
-/*
-* The game configuration structure used for configurating the game play
-* variables.
-*/
 struct game_data {
     int pk_allowed;         /* Is player killing allowed? 	  */
     int pt_allowed;         /* Is player thieving allowed?	  */
@@ -148,9 +113,6 @@ struct game_data {
 };
 
 
-/*
- * The rent and crashsave options.
- */
 struct crash_save_data {
     int free_rent;          /* Should the MUD allow rent for free?  */
     int max_obj_save;       /* Max items players can rent.          */
@@ -162,9 +124,6 @@ struct crash_save_data {
 };
 
 
-/*
- * The room numbers. 
- */
 struct room_numbers {
     room_vnum mortal_start_room;    /* vnum of room that mortals enter at.  */
     room_vnum immort_start_room;  /* vnum of room that immorts enter at.  */
@@ -174,10 +133,6 @@ struct room_numbers {
     room_vnum donation_room_3;    /* vnum of donation room #3.	        */
 };
 
-
-/*
- * The game operational constants.
- */
 struct game_operation {
     uint16_t DFLT_PORT;      /* The default port to run the game.  */
     char *DFLT_IP;            /* Bind to all interfaces.		  */
@@ -204,9 +159,6 @@ struct autowiz_data {
     int min_wizlist_lev;    /* Minimun level to show on wizlist.	*/
 };
 
-/* This is for the tick system.
- *
- */
 
 struct tick_data {
     int pulse_violence;
@@ -220,24 +172,17 @@ struct tick_data {
     int pulse_current;
 };
 
-/*
- * The character advancement (leveling) options.
- */
+
 struct advance_data {
     int allow_multiclass; /* Allow advancement in multiple classes     */
     int allow_prestige;   /* Allow advancement in prestige classes     */
 };
 
-/*
- * The new character creation method options.
- */
 struct creation_data {
     int method; /* What method to use for new character creation */
 };
 
-/*
- * The main configuration structure;
- */
+
 struct config_data {
     char *CONFFILE;    /* config file path	 */
     struct game_data play;        /* play related config   */
@@ -250,9 +195,6 @@ struct config_data {
     struct creation_data creation;    /* char creation method	 */
 };
 
-/*
- * Data about character aging
- */
 struct aging_data {
     int adult;        /* Adulthood */
     int classdice[3][2];    /* Dice info for starting age based on class age type */
@@ -279,12 +221,10 @@ struct help_index_element {
 };
 
 
-
 typedef struct disabled_data DISABLED_DATA;
 
-extern DISABLED_DATA *disabled_first; /* interpreter.c */
+extern DISABLED_DATA *disabled_first;
 
-/* one disabled command */
 struct disabled_data {
     DISABLED_DATA *next;                /* pointer to next node          */
     struct command_info const *command; /* pointer to the command struct */

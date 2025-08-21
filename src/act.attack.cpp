@@ -17,7 +17,7 @@
 #include "dbat/Object.h"
 #include "dbat/Location.h"
 #include "dbat/Room.h"
-#include "dbat/act.attack.h"
+#include "dbat/commands.h"
 #include "dbat/attack.h"
 #include "dbat/fight.h"
 #include "dbat/dg_comm.h"

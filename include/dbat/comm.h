@@ -52,15 +52,15 @@ typedef void (*send_close_t)(int character_id);
 extern distribute_output_t g_distribute_output;
 extern send_close_t g_send_close;
 
-constexpr int TO_ROOM = 1;
-constexpr int TO_VICT = 2;
-constexpr int TO_NOTVICT = 3;
-constexpr int TO_CHAR = 4;
-constexpr int TO_GMOTE = 5;
-#define TO_SLEEP (2 << 7)       /* to char, even if sleeping */
-#define DG_NO_TRIG (2 << 8)     /* don't check act trigger   */
-#define TO_SNEAKRESIST (2 << 9) /* resisted sneaking roll    */
-#define TO_HIDERESIST (2 << 10) /* resisted hiding roll      */
+constexpr bitvector_t TO_ROOM = 1;
+constexpr bitvector_t TO_VICT = 2;
+constexpr bitvector_t TO_NOTVICT = 3;
+constexpr bitvector_t TO_CHAR = 4;
+constexpr bitvector_t TO_GMOTE = 5;
+constexpr bitvector_t TO_SLEEP = (2 << 7);
+constexpr bitvector_t DG_NO_TRIG =  (2 << 8);     /* don't check act trigger   */
+constexpr bitvector_t TO_SNEAKRESIST = (2 << 9); /* resisted sneaking roll    */
+constexpr bitvector_t TO_HIDERESIST = (2 << 10); /* resisted hiding roll      */
 
 /* I/O functions */
 extern void write_to_q(const char *txt, struct txt_q *queue, int aliased);

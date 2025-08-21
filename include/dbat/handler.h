@@ -29,11 +29,9 @@ extern bool affected_by_spell(Character *ch, int type);
 
 extern bool affectedv_by_spell(Character *ch, int type);
 
-extern void affect_join(Character *ch, struct affected_type *af,
-                        bool add_dur, bool avg_dur, bool add_mod, bool avg_mod);
+extern void affect_join(Character *ch, struct affected_type *af, bool add_dur, bool avg_dur, bool add_mod, bool avg_mod);
 
-extern void affectv_join(Character *ch, struct affected_type *af,
-                         bool add_dur, bool avg_dur, bool add_mod, bool avg_mod);
+extern void affectv_join(Character *ch, struct affected_type *af, bool add_dur, bool avg_dur, bool add_mod, bool avg_mod);
 
 extern void affectv_remove(Character *ch, struct affected_type *af);
 
@@ -111,9 +109,9 @@ constexpr int FIND_ALLDOT = 2;
 extern int generic_find(const char *arg, bitvector_t bitvector, Character *ch,
                         Character **tar_ch, Object **tar_obj);
 
-#define FIND_CHAR_ROOM (1 << 0)
-#define FIND_CHAR_WORLD (1 << 1)
-#define FIND_OBJ_INV (1 << 2)
-#define FIND_OBJ_ROOM (1 << 3)
-#define FIND_OBJ_WORLD (1 << 4)
-#define FIND_OBJ_EQUIP (1 << 5)
+constexpr bitvector_t FIND_CHAR_ROOM = (1 << 0);
+constexpr bitvector_t FIND_CHAR_WORLD = (1 << 1);
+constexpr bitvector_t FIND_OBJ_INV = (1 << 2);
+constexpr bitvector_t FIND_OBJ_ROOM = (1 << 3);
+constexpr bitvector_t FIND_OBJ_WORLD = (1 << 4);
+constexpr bitvector_t FIND_OBJ_EQUIP = (1 << 5);

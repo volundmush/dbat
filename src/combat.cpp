@@ -20,7 +20,7 @@
 #include "dbat/act.item.h"
 #include "dbat/mobact.h"
 #include "dbat/fight.h"
-#include "dbat/act.attack.h"
+#include "dbat/commands.h"
 #include "dbat/dg_comm.h"
 #include "dbat/send.h"
 #include "dbat/comm.h"

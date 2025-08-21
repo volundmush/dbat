@@ -17,7 +17,7 @@
 #include "dbat/commands.h"
 #include "dbat/fight.h"
 #include "dbat/dg_comm.h"
-#include "dbat/act.attack.h"
+#include "dbat/commands.h"
 #include "dbat/act.other.h"
 #include "dbat/act.misc.h"
 #include "dbat/act.movement.h"

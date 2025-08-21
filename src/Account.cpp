@@ -1,8 +1,5 @@
-
-
+#include "dbat/templates.h"
 #include "dbat/Account.h"
-#include "dbat/db.h"
-#include "dbat/utils.h"
 
 NegativeKeyGuardMap<vnum, Account> accounts;
 

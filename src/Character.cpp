@@ -9,7 +9,6 @@
 #include "dbat/Zone.h"
 #include "dbat/Account.h"
 #include "dbat/races.h"
-#include "dbat/send.h"
 #include "dbat/spells.h"
 #include "dbat/comm.h"
 #include "dbat/class.h"
@@ -21,10 +20,8 @@
 #include "dbat/dg_comm.h"
 #include "dbat/dg_scripts.h"
 #include "dbat/interpreter.h"
-#include "dbat/players.h"
 #include "dbat/transformation.h"
 #include "dbat/weather.h"
-#include "dbat/attack.h"
 #include "dbat/modifiers.h"
 
 NegativeKeyGuardUnorderedMap<int64_t, std::shared_ptr<Character>> Character::registry;

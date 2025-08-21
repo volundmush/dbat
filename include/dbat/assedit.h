@@ -1,6 +1,6 @@
 #pragma once
 
-#include "structs.h"
+#include "assemblies.h"
 
 extern long g_lNumAssemblies;
 extern ASSEMBLY *g_pAssemblyTable;

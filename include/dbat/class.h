@@ -1,9 +1,5 @@
 #pragma once
-
-#include "structs.h"
-#include "races.h"
-
-// global variables
+#include "sysdep.h"
 
 // functions
 extern void do_start(Character *ch);

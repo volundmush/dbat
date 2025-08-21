@@ -13,7 +13,7 @@
 #include "dbat/Destination.h"
 #include "dbat/Descriptor.h"
 #include "dbat/act.offensive.h"
-#include "dbat/act.attack.h"
+#include "dbat/commands.h"
 #include "dbat/act.movement.h"
 #include "dbat/interpreter.h"
 #include "dbat/combat.h"
