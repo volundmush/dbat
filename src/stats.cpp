@@ -195,9 +195,9 @@ static void init_char_stats_vitals()
             .setOnChangeFunc([recoveryKey](Character *target, const std::string &stat_name, double old_value, double new_value)
                              {
                 if (new_value > 0.0 && old_value <= 0.0) {
-                    characterSubscriptions.subscribe(recoveryKey, target->shared());
+                    characterSubscriptions.subscribe(recoveryKey, target->shared_from_this());
                 } else if (new_value <= 0.0 && old_value > 0.0) {
-                    characterSubscriptions.unsubscribe(recoveryKey, target->shared());
+                    characterSubscriptions.unsubscribe(recoveryKey, target->shared_from_this());
                 } });
     }
 
@@ -208,14 +208,14 @@ static void init_char_stats_vitals()
             auto lifeperc = GET_LIFEPERC(target);
             auto perc = (1.0 - new_value) * 100.0;
             if(new_value > 0.0 && old_value <= 0.0) {
-                characterSubscriptions.subscribe("characterHealthRecovery", target->shared());
+                characterSubscriptions.subscribe("characterHealthRecovery", target->shared_from_this());
                 if(!IS_ANDROID(target) && (lifeperc > 0) && (perc < lifeperc)) {
-                    characterSubscriptions.subscribe("lifeforceSystem", target->shared());
+                    characterSubscriptions.subscribe("lifeforceSystem", target->shared_from_this());
                 }
             } else if(new_value <= 0.0 && old_value > 0.0) {
-                characterSubscriptions.unsubscribe("characterHealthRecovery", target->shared());
+                characterSubscriptions.unsubscribe("characterHealthRecovery", target->shared_from_this());
                 if(!IS_ANDROID(target) && (lifeperc > 0) && (perc >= lifeperc)) {
-                    characterSubscriptions.unsubscribe("lifeforceSystem", target->shared());
+                    characterSubscriptions.unsubscribe("lifeforceSystem", target->shared_from_this());
                 }
             } });
 }
@@ -403,9 +403,9 @@ static void init_char_stats_misc()
             auto lifeperc = new_value;
             auto perc = target->getCurVitalMeterPercent(CharVital::health) * 100.0;
             if(perc < lifeperc) {
-                characterSubscriptions.subscribe("lifeforceSystem", target->shared());
+                characterSubscriptions.subscribe("lifeforceSystem", target->shared_from_this());
             } else {
-                characterSubscriptions.unsubscribe("lifeforceSystem", target->shared());
+                characterSubscriptions.unsubscribe("lifeforceSystem", target->shared_from_this());
             } });
 
     charStats.addStat("absorbs")

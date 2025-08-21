@@ -4,6 +4,7 @@
 #include "dbat/Destination.h"
 #include "dbat/Descriptor.h"
 #include "dbat/attack.h"
+#include "dbat/act.movement.h"
 #include "dbat/combat.h"
 #include "dbat/send.h"
 #include "dbat/comm.h"

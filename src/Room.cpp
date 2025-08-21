@@ -28,10 +28,6 @@ Room::Room() : AbstractLocation()
  * This function will copy the strings so be sure you free your own
  * copies of the description, title, and such.
  */
-std::shared_ptr<Room> Room::shared()
-{
-    return shared_from_this();
-}
 
 std::string Room::getUID(bool active) const
 {
@@ -147,116 +143,7 @@ std::optional<std::string> Room::dgCallMember(const std::string &member, const s
     return {};
 }
 
-double Room::setEnvironment(int type, double value)
-{
-    environment[type] = value;
-    return value;
-}
 
-double Room::modEnvironment(int type, double value)
-{
-    environment[type] += value;
-    return environment[type];
-}
-
-void Room::clearEnvironment(int type)
-{
-    environment.erase(type);
-}
-
-static const std::vector<std::pair<std::pair<room_vnum, room_vnum>, double>> gravityRanges = {
-    // North Kai's Planet
-    {{6100, 6138}, 10.0},
-
-    // Personal Pocket Dimensions
-    {{18900, 19899}, 1000.0},
-
-    // HBTC / Room of Spirit and Time - various ranges
-    {{64000, 64006}, 100.0},
-    {{64007, 64016}, 300.0},
-    {{64017, 64030}, 500.0},
-    {{64031, 64048}, 1000.0},
-    {{64049, 64070}, 5000.0},
-    {{64071, 64096}, 10000.0},
-    {{64097, 64097}, 1000.0},
-};
-
-double Room::getEnvironment(int type) const
-{
-    auto planet = getPlanet(getVnum());
-    switch (type)
-    {
-    case ENV_GRAVITY:
-    {
-        // check for a gravity generator...
-        // bypass const deliberately here...
-        auto con = ((Room*)this)->getObjects().snapshot_weak();
-        for (auto c : filter_raw(con))
-        {
-            if (auto g = c->getBaseStat("gravity"); g > 0.0)
-                return g;
-        }
-
-        // check gravityRanges
-        for (const auto &[range, grav] : gravityRanges)
-        {
-            if (vn >= range.first && vn <= range.second)
-            {
-                return grav;
-            }
-        }
-
-        if (environment.contains(type))
-            return environment.at(type);
-
-        if (planet)
-        {
-            if (auto a = getPlanetEnvironment(planet.value(), type); a)
-            {
-                return a.value();
-            }
-        }
-
-        return 1.0;
-    }
-
-    case ENV_WATER:
-        if (ground_effect < 0)
-            return 100.0;
-        switch (static_cast<int>(sector_type))
-        {
-        case SECT_WATER_SWIM:
-            return 50.0;
-        case SECT_WATER_NOSWIM:
-            return 75.0;
-        case SECT_UNDERWATER:
-            return 100.0;
-        }
-        break;
-    case ENV_MOONLIGHT:
-    {
-        if (!planet)
-            return -1;
-        if (where_flags[WhereFlag::space])
-            return -1;
-        for (auto f : {ROOM_INDOORS, ROOM_UNDERGROUND})
-            if (room_flags.get(f))
-                return -1;
-        if (inside_sectors.contains(static_cast<int>(sector_type)))
-            return -1;
-        return getPlanetEnvironment(planet.value(), type).value();
-    }
-    case ENV_ETHER_STREAM:
-    {
-        if (!planet)
-            return 0.0;
-        return getPlanetEnvironment(planet.value(), type).value();
-    }
-    }
-    if (environment.contains(type))
-        return environment.at(type);
-    return 0.0;
-}
 
 vnum Room::getLocVnum() const
 {
@@ -382,21 +269,64 @@ SpecialFunc Room::getSpecialFunc(const Coordinates &coor) const
     return func;
 }
 
-double Room::getEnvironment(const Coordinates &coor, int type) const
+
+static const std::vector<std::pair<std::pair<room_vnum, room_vnum>, double>> gravityRanges = {
+    // North Kai's Planet
+    {{6100, 6138}, 10.0},
+
+    // Personal Pocket Dimensions
+    {{18900, 19899}, 1000.0},
+
+    // HBTC / Room of Spirit and Time - various ranges
+    {{64000, 64006}, 100.0},
+    {{64007, 64016}, 300.0},
+    {{64017, 64030}, 500.0},
+    {{64031, 64048}, 1000.0},
+    {{64049, 64070}, 5000.0},
+    {{64071, 64096}, 10000.0},
+    {{64097, 64097}, 1000.0},
+};
+
+std::optional<double> Room::getEnvironment(const Coordinates &coor, int type) const
 {
-    return getEnvironment(type);
-}
-double Room::setEnvironment(const Coordinates &coor, int type, double value)
-{
-    return setEnvironment(type, value);
-}
-double Room::modEnvironment(const Coordinates &coor, int type, double value)
-{
-    return modEnvironment(type, value);
-}
-void Room::clearEnvironment(const Coordinates &coor, int type)
-{
-    clearEnvironment(type);
+    switch (type)
+    {
+    case ENV_GRAVITY:
+    {
+        // check for a gravity generator...
+        // bypass const deliberately here...
+        auto con = ((Room*)this)->getObjects().snapshot_weak();
+        for (auto c : filter_raw(con))
+        {
+            if (auto g = c->getBaseStat("gravity"); g > 0.0)
+                return g;
+        }
+
+        // check gravityRanges
+        for (const auto &[range, grav] : gravityRanges)
+        {
+            if (vn >= range.first && vn <= range.second)
+            {
+                return grav;
+            }
+        }
+    }
+
+    case ENV_WATER:
+        if (ground_effect < 0)
+            return 100.0;
+        switch (static_cast<int>(sector_type))
+        {
+        case SECT_WATER_SWIM:
+            return 50.0;
+        case SECT_WATER_NOSWIM:
+            return 75.0;
+        case SECT_UNDERWATER:
+            return 100.0;
+        }
+        break;
+    }
+    return {};
 }
 
 void Room::sendText(const std::string &txt)

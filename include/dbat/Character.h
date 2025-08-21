@@ -14,9 +14,9 @@ struct PlayerData {
     struct Account *account{};
     struct Character *character{};
     std::vector<struct alias_data> aliases;    /* Character's aliases                  */
-    std::unordered_set<int> sense_player;
+    std::unordered_set<int64_t> sense_player;
     std::unordered_set<mob_vnum> sense_memory;
-    std::map<int, std::string> dub_names;
+    std::map<int64_t, std::string> dub_names;
     char *color_choices[NUM_COLOR]{}; /* Choices for custom colors		*/
     struct txt_block *comm_hist[NUM_HIST]{}; /* Player's communications history     */
 };
@@ -102,8 +102,6 @@ struct Character : public HasID, public HasLocation, public HasEquipment, public
 
     void lookAtLocation();
     void lookAtLocation(Location& loc);
-
-    std::shared_ptr<Character> shared();
 
     Race race{Race::spirit};
     std::optional<SubRace> subrace{};

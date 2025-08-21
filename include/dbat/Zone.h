@@ -26,6 +26,11 @@ struct Zone {
     int reset_mode{2};         /* conditions for reset (see below)   */
 
     FlagHandler<ZoneFlag> zone_flags{};          /* Flags for the zone.                */
+    bool getZoneFlag(ZoneFlag flag, bool checkAncestors = false) const;
+
+    std::unordered_map<int, double> environment;
+
+    double getEnvironment(int type, bool checkAncestors = false) const;
 
     /*
      * Reset mode:

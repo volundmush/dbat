@@ -5726,7 +5726,7 @@ void hurt(int limb, int chance, Character *ch, Character *vict, Object *obj, int
 
         if (IS_HUMANOID(vict) && !IS_NPC(ch) && IS_NPC(vict) && (!ch->isSparring() || !vict->isSparring()))
         {
-            vict->mob_specials.memory.push_back(ch->shared());
+            vict->mob_specials.memory.push_back(ch->shared_from_this());
         }
         if (IS_NPC(vict) && GET_HIT(vict) > ((vict->getEffectiveStat<int64_t>("health"))) / 4)
         {

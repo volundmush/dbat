@@ -9,7 +9,7 @@
 #include "HasPicky.h"
 #include "affect.h"
 
-struct Object : public HasID, public HasLocation, public HasInventory, public HasExtraDescriptions, public HasDgScripts, public HasMudStrings, public HasAffectFlags, public HasSubscriptions, public HasStats,public HasPicky, std::enable_shared_from_this<Object> {
+struct Object : public HasID, public HasLocation, public HasInventory, public HasExtraDescriptions, public HasDgScripts, public HasMudStrings, public HasAffectFlags, public HasSubscriptions, public HasStats, public HasPicky, public std::enable_shared_from_this<Object> {
     static NegativeKeyGuardUnorderedMap<int64_t, std::shared_ptr<Object>> registry;
     Object();
     ~Object();
@@ -45,10 +45,6 @@ struct Object : public HasID, public HasLocation, public HasInventory, public Ha
     void onAddToInventory(const std::shared_ptr<Object>& obj) override;
     void onRemoveFromInventory(const std::shared_ptr<Object>& obj) override;
 
-    std::shared_ptr<Object> shared();
-
-    room_vnum room_loaded{NOWHERE};    /* Room loaded in, for room_max checks	*/
-
     /* arbitrary named doubles */
     ItemType type_flag{ItemType::unknown};      /* Type of item                        */
     
@@ -72,18 +68,25 @@ struct Object : public HasID, public HasLocation, public HasInventory, public Ha
     int16_t getWornOn() const;
 
     std::weak_ptr<Character> sitting{};       /* Who is sitting on me? */
+
+    // used for ki attacks
     struct Character *user{};
     struct Character *target{};
-    char *auctname{};
+
+    // for notes
     struct Object *posted_to{};
+    int posttype{};
+    // for icewalls
     struct Object *fellow_wall{};
 
+    // auction data...
+    char *auctname{};
     int64_t aucter{};
     int64_t curBidder{};
     time_t aucTime{};
     int bid{};
     int startbid{};
-    int posttype{};
+    
 
     bool isProvidingLight();
     double currentGravity();
@@ -135,8 +138,6 @@ struct fmt::formatter<Object> {
 
 
 #define VALID_OBJ_RNUM(obj)    (obj_proto.contains(GET_OBJ_RNUM(obj)))
-
-
 
 #define GET_OBJ_LEVEL(obj)      ((obj)->getBaseStat<int>("level"))
 #define GET_OBJ_PERM(obj)       ((obj)->affect_flags)
@@ -191,8 +192,5 @@ extern void randomize_eq(Object *obj);
 #define OBJS(obj, vict) ((vict)->canSee((obj)) ? (obj)->getShortDescription()  : "something")
 
 #define OBJN(obj, vict) ((vict)->canSee((obj)) ? fname((obj)->getName()) : "something")
-
-#define OBJ_LOADROOM(obj)     ((obj)->room_loaded)
-
 
 extern int wield_type(int chsize, Object *weap);

@@ -1464,7 +1464,8 @@ static void do_stat_object(Character *ch, Object *j)
 
     ch->send_to("Object Hit Points: [ @g%3d@n/@g%3d@n]\r\n", GET_OBJ_VAL(j, VAL_ALL_HEALTH), GET_OBJ_VAL(j, VAL_ALL_MAXHEALTH));
 
-    ch->send_to("Object loaded in room: @y%d@n\r\n", OBJ_LOADROOM(j));
+    if(j->registeredLocations.contains("spawn"))
+        ch->send_to("Object loaded in room: @y%d@n\r\n", j->registeredLocations.at("spawn"));
 
     ch->send_to("Object Material: @y%s@n\r\n", material_names[GET_OBJ_MATERIAL(j)]);
 

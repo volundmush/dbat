@@ -167,7 +167,7 @@ bool Account::canBeDeleted()
         auto ch = find->second.character;
         if (!ch)
             continue;
-        auto shared = ch->shared();
+        auto shared = ch->shared_from_this();
         if (!canDeleteCharacter(shared))
             return false;
     }
@@ -193,7 +193,7 @@ bool deleteUserAccount(vnum id)
             continue;
         if (auto ch = found->second.character; ch)
         {
-            if (canDeleteCharacter(ch->shared()))
+            if (canDeleteCharacter(ch->shared_from_this()))
                 return false;
         }
     }
@@ -205,7 +205,7 @@ bool deleteUserAccount(vnum id)
             continue;
         if (auto ch = found->second.character; ch)
         {
-            deletePlayerCharacter(ch->shared());
+            deletePlayerCharacter(ch->shared_from_this());
         }
     }
 

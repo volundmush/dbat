@@ -1418,7 +1418,6 @@ Object *read_object(obj_vnum nr, int type) /* and obj_rnum */
     // the operator= will copy the prototype data into the new object.
     *obj = proto->second;
 
-    OBJ_LOADROOM(obj) = NOWHERE;
     obj->id = getNextID(lastObjectID, Object::registry);
     Object::registry.emplace(obj->id, sh);
 
@@ -1552,12 +1551,12 @@ void Zone::reset()
             r->ground_effect = 0;
         }
 
-        if (r->ground_effect >= 1 && Random::get<int>(1, 4) == 4 && !r->getEnvironment(ENV_WATER) >= 100.0 && r->sector_type != SectorType::lava)
+        if (r->ground_effect >= 1 && Random::get<int>(1, 4) == 4 && !r->getEnvironment(Coordinates{}, ENV_WATER) >= 100.0 && r->sector_type != SectorType::lava)
         {
             r->sendText("The lava has cooled and become solid rock.\r\n");
             r->ground_effect = 0;
         }
-        else if (r->ground_effect >= 1 && Random::get<int>(1, 2) == 2 && r->getEnvironment(ENV_WATER) >= 100.0 &&
+        else if (r->ground_effect >= 1 && Random::get<int>(1, 2) == 2 && r->getEnvironment(Coordinates{}, ENV_WATER) >= 100.0 &&
                  r->sector_type != SectorType::lava)
         {
             r->sendText("The water has cooled the lava and it has become solid rock.\r\n");

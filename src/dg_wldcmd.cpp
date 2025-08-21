@@ -119,13 +119,6 @@ WCMD(do_weffect)
             wld_log(room, "weffect setting out of bounds, 0 - 10000 only.");
             return;
         }
-        else
-        {
-            if (num == 0)
-                room->clearEnvironment(ENV_GRAVITY);
-            else
-                room->setEnvironment(ENV_GRAVITY, num);
-        }
     }
     else if (boost::iequals(arg, "light"))
     {

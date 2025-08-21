@@ -86,10 +86,7 @@ struct AbstractLocation {
 
     virtual SpecialFunc getSpecialFunc(const Coordinates& coor) const = 0;
 
-    virtual double getEnvironment(const Coordinates& coor, int type) const = 0;
-    virtual double setEnvironment(const Coordinates& coor, int type, double value) = 0;
-    virtual double modEnvironment(const Coordinates& coor, int type, double value) = 0;
-    virtual void clearEnvironment(const Coordinates& coor, int type) = 0;
+    virtual std::optional<double> getEnvironment(const Coordinates& coor, int type) const;
 
     int getCookElement(const Coordinates& coor);
 

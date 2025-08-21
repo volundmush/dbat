@@ -2770,13 +2770,13 @@ int DgScript::execute()
     switch (owner->type)
     {
     case UnitType::character:
-        sh = ((Character *)owner.get())->shared();
+        sh = ((Character *)owner.get())->shared_from_this();
         break;
     case UnitType::object:
-        sh = ((Object *)owner.get())->shared();
+        sh = ((Object *)owner.get())->shared_from_this();
         break;
     case UnitType::room:
-        sh = ((Room *)owner.get())->shared();
+        sh = ((Room *)owner.get())->shared_from_this();
         break;
     default:
         throw DgScriptError("Invalid owner type for script execution.");

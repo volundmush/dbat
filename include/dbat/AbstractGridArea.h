@@ -182,11 +182,6 @@ struct AbstractGridArea : public HasMudStrings, public AbstractLocation, public 
     int modGroundEffect(const Coordinates& coor, int val) override;
     SpecialFunc getSpecialFunc(const Coordinates& coor) const override;
 
-    double getEnvironment(const Coordinates& coor, int type) const override;
-    double setEnvironment(const Coordinates& coor, int type, double value) override;
-    double modEnvironment(const Coordinates& coor, int type, double value) override;
-    void clearEnvironment(const Coordinates& coor, int type) override;
-
     void replaceExit(const Coordinates& coor, const Destination& dest) override;
     void deleteExit(const Coordinates& coor, Direction dir) override;
 

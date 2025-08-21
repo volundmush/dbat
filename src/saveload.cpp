@@ -1184,9 +1184,6 @@ void to_json(json &j, const Object &o)
             continue;
         j["affected"].push_back(i);
     }
-
-    if (get_room(o.room_loaded))
-        j["room_loaded"] = o.room_loaded;
 }
 
 void from_json(const json &j, ObjectPrototype &o)
@@ -1270,9 +1267,6 @@ void from_json(const json &j, Object &o)
             counter++;
         }
     }
-
-    if (j.contains("room_loaded"))
-        o.room_loaded = j["room_loaded"];
 }
 
 void load_item_prototypes(const std::filesystem::path &loc)

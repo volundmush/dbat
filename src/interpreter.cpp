@@ -1073,7 +1073,7 @@ char *one_argument(const char *argument, char *first_arg)
 
     do
     {
-        skip_spaces(&argument);
+        skip_spaces((char**)&argument);
 
         first_arg = begin;
         while (*argument && !isspace(*argument))
@@ -1085,7 +1085,7 @@ char *one_argument(const char *argument, char *first_arg)
         *first_arg = '\0';
     } while (fill_word(begin));
 
-    return (argument);
+    return (char*)argument;
 }
 
 /*

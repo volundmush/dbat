@@ -265,35 +265,14 @@ double Location::getEnvironment(int type) const
 {
     if (auto a = getLoc())
     {
-        return a->getEnvironment(position, type);
+        auto res = a->getEnvironment(position, type);
+        if(res) {
+            return res.value();
+        }
+        auto z = getZone();
+        return z->getEnvironment(type, true);
     }
     return 0.0;
-}
-
-double Location::setEnvironment(int type, double value)
-{
-    if (auto a = getLoc())
-    {
-        return a->setEnvironment(position, type, value);
-    }
-    return 0.0;
-}
-
-double Location::modEnvironment(int type, double value)
-{
-    if (auto a = getLoc())
-    {
-        return a->modEnvironment(position, type, value);
-    }
-    return 0.0;
-}
-
-void Location::clearEnvironment(int type)
-{
-    if (auto a = getLoc())
-    {
-        a->clearEnvironment(position, type);
-    }
 }
 
 void Location::setRoomFlag(int flag, bool value)

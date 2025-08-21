@@ -8,6 +8,7 @@
 #include "dbat/Descriptor.h"
 #include "dbat/Zone.h"
 #include "dbat/Account.h"
+#include "dbat/Room.h"
 #include "dbat/races.h"
 #include "dbat/spells.h"
 #include "dbat/comm.h"
@@ -23,6 +24,8 @@
 #include "dbat/transformation.h"
 #include "dbat/weather.h"
 #include "dbat/modifiers.h"
+#include "dbat/handler.h"
+#include "dbat/utils.h"
 
 NegativeKeyGuardUnorderedMap<int64_t, std::shared_ptr<Character>> Character::registry;
 
@@ -31,10 +34,6 @@ Character::Character()
     type = UnitType::character;
 }
 
-std::shared_ptr<Character> Character::shared()
-{
-    return shared_from_this();
-}
 
 void Character::activate()
 {
@@ -1214,7 +1213,7 @@ room_vnum Character::normalizeLoadRoom(room_vnum in)
     // Personal Pocket Dimensions
     // if (room >= 19800 && room <= 19899) {
     // lroom = room;
-    //}
+    //
     // those stuck in the pendulum room past get returned to Kami's Lookout.
     if (WHERE_FLAGGED(room, WhereFlag::pendulum_past))
     {
@@ -1635,7 +1634,7 @@ void Character::onRemoveFromEquip(const std::shared_ptr<Object> &obj, int slot)
 void Character::onAddToInventory(const std::shared_ptr<Object> &obj)
 {
     obj->container.reset();
-    obj->carrier = shared();
+    obj->carrier = shared_from_this();
     obj->worn_on = -1;
 }
 

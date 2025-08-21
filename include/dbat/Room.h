@@ -27,7 +27,6 @@ struct Room : public AbstractLocation, public HasZone, public HasDgScripts, publ
     std::vector<trig_vnum> proto_script; /* list of default triggers  */
     std::vector<trig_vnum> getProtoScript() const override;
 
-    int deathtrap_timer{};                   /* For timed Dt's                     */
     int damage{};                     /* How damaged the room is            */
     int ground_effect{};            /* Effect of ground destruction       */
     
@@ -74,15 +73,7 @@ struct Room : public AbstractLocation, public HasZone, public HasDgScripts, publ
     void deleteExit(Direction dir);
     void replaceExit(const Destination& dest);
 
-    std::shared_ptr<Room> shared();
-
     std::optional<std::string> dgCallMember(const std::string& member, const std::string& arg) override;
-
-    double getEnvironment(int type) const;
-    double setEnvironment(int type, double value);
-    double modEnvironment(int type, double value);
-    void clearEnvironment(int type);
-    std::unordered_map<int, double> environment;
 
     template<typename R = double>
     R getBaseStat(const std::string& stat) {
@@ -138,10 +129,7 @@ struct Room : public AbstractLocation, public HasZone, public HasDgScripts, publ
     int modGroundEffect(const Coordinates& coor, int val) override;
     SpecialFunc getSpecialFunc(const Coordinates& coor) const override;
 
-    double getEnvironment(const Coordinates& coor, int type) const override;
-    double setEnvironment(const Coordinates& coor, int type, double value) override;
-    double modEnvironment(const Coordinates& coor, int type, double value) override;
-    void clearEnvironment(const Coordinates& coor, int type) override;
+    std::optional<double> getEnvironment(const Coordinates& coor, int type) const override;
 
     void replaceExit(const Coordinates& coor, const Destination& dest) override;
     void deleteExit(const Coordinates& coor, Direction dir) override;

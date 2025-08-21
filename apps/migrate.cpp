@@ -1053,9 +1053,6 @@ static void parse_room(FILE *fl, room_vnum virtual_nr) {
         exit(1);
     }
 
-    r->func = nullptr;
-    r->deathtrap_timer = -1;
-
     snprintf(buf, sizeof(buf), "SYSERR: Format error in room #%d (expecting D/E/S)", virtual_nr);
     convert_room(*r);
     while(true) {

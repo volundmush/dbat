@@ -306,26 +306,6 @@ SpecialFunc AbstractGridArea::getSpecialFunc(const Coordinates &coor) const
     return nullptr; // grid tiles do not have special procs (yet)
 }
 
-double AbstractGridArea::getEnvironment(const Coordinates &coor, int type) const
-{
-    return 0.0;
-}
-
-double AbstractGridArea::setEnvironment(const Coordinates &coor, int type, double value)
-{
-    return value;
-}
-
-double AbstractGridArea::modEnvironment(const Coordinates &coor, int type, double value)
-{
-    return value;
-}
-
-void AbstractGridArea::clearEnvironment(const Coordinates &coor, int type)
-{
-
-}
-
 void AbstractGridArea::replaceExit(const Coordinates &coor, const Destination &dest)
 {
     auto &t = ensure_tile(tileOverrides, coor);

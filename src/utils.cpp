@@ -632,7 +632,7 @@ void null_affect(Character *ch, int aff_flag)
     {
         if (ch->poisonby)
         {
-            auto shared = ch->shared();
+            auto shared = ch->shared_from_this();
             ch->poisonby->poisoned.remove(shared);
             ch->poisonby = nullptr;
         }
@@ -1959,7 +1959,7 @@ bool spar_friendly(Character *ch, Character *npc)
         return true;
     }
 
-    auto shared = ch->shared();
+    auto shared = ch->shared_from_this();
     auto find = std::find_if(npc->mob_specials.memory.begin(), npc->mob_specials.memory.end(), [shared](const auto &mem)
                              { return mem.lock() == shared; });
 

@@ -37,7 +37,6 @@
 #include "dbat/improved-edit.h"
 #include "dbat/transformation.h"
 #include "dbat/planet.h"
-#include "dbat/random.h"
 #include "dbat/graph.h"
 
 /* local functions */
@@ -343,7 +342,7 @@ static void search_room(Character *ch)
     auto loco = ch->location.getObjects();
     for (auto obj : filter_raw(loco))
     {
-        if (OBJ_FLAGGED(obj, ITEM_BURIED) && perc * bonus > rand_number(50, 200))
+        if (OBJ_FLAGGED(obj, ITEM_BURIED) && perc * bonus > Random::get<int>(50, 200))
         {
             act("@YYou uncover @y$p@Y, which had been burried here.@n", true, ch, obj, nullptr, TO_CHAR);
             act("@y$n@Y uncovers @y$p@Y, which had burried here.@n", true, ch, obj, nullptr, TO_ROOM);
@@ -630,7 +629,7 @@ ACMD(do_shuffle)
             {
                 continue;
             }
-            if (count > 1 && rand_number(1, 4) == 3)
+            if (count > 1 && Random::get<int>(1, 4) == 3)
             {
                 count -= 1;
                 obj2->clearLocation();
@@ -1550,7 +1549,7 @@ void show_obj_to_char(Object *obj, Character *ch, int mode)
 
     int spotted = false;
 
-    if (GET_SKILL(ch, SKILL_SPOT) > rand_number(20, 110))
+    if (GET_SKILL(ch, SKILL_SPOT) > Random::get<int>(20, 110))
     {
         spotted = true;
     }
@@ -2109,7 +2108,7 @@ static int show_obj_modifiers(Object *obj, Character *ch)
     }
     if (KICHARGE(obj) > 0)
     {
-        int num = (KIDIST(obj) * 20) + rand_number(1, 5);
+        int num = (KIDIST(obj) * 20) + Random::get<int>(1, 5);
         ch->send_to(" %d meters away", num);
         found++;
     }
@@ -2224,7 +2223,7 @@ static void diag_obj_to_char(Object *obj, Character *ch)
         if (percent >= diagnosis[ar_index].percent)
             break;
 
-    ch->send_to("\r\n%c%s %s\r\n", UPPER(*objs), objs + 1, diagnosis[ar_index].text);
+    ch->send_to("\r\n%c%s %s\r\n", toupper(*objs), objs + 1, diagnosis[ar_index].text);
 }
 
 static void diag_char_to_char(Character *i, Character *ch)
@@ -2387,9 +2386,9 @@ static void look_at_char(Character *i, Character *ch)
     else if (ch == i || IS_NPC(i))
     {
         if (GET_SEX(i) == SEX_NEUTRAL)
-            ch->send_to("%c%s appears to be %s %s, ", UPPER(*GET_NAME(i)), GET_NAME(i) + 1, AN(RACE(i)), LRACE(i));
+            ch->send_to("%c%s appears to be %s %s, ", toupper(*GET_NAME(i)), GET_NAME(i) + 1, AN(RACE(i)), LRACE(i));
         else
-            ch->send_to("%c%s appears to be %s %s %s, ", UPPER(*GET_NAME(i)), GET_NAME(i) + 1, AN(MAFE(i)), MAFE(i), LRACE(i));
+            ch->send_to("%c%s appears to be %s %s %s, ", toupper(*GET_NAME(i)), GET_NAME(i) + 1, AN(MAFE(i)), MAFE(i), LRACE(i));
     }
     else
     {
@@ -2540,7 +2539,7 @@ static void look_at_char(Character *i, Character *ch)
             auto con = i->getInventory();
             for (auto tmp_obj : filter_raw(con))
             {
-                if (ch->canSee(tmp_obj) && (ADM_FLAGGED(ch, ADM_SEEINV) || (rand_number(0, 20) < GET_WIS(ch))))
+                if (ch->canSee(tmp_obj) && (ADM_FLAGGED(ch, ADM_SEEINV) || (Random::get<int>(0, 20) < GET_WIS(ch))))
                 {
                     show_obj_to_char(tmp_obj, ch, SHOW_OBJ_SHORT);
                     found = true;
@@ -2653,31 +2652,31 @@ void list_one_char(Character *i, Character *ch)
     }
 
     if (IS_NPC(i) && !FIGHTING(i) && GET_POS(i) != POS_SITTING && GET_POS(i) != POS_SLEEPING)
-        ch->send_to("@w%c%s", UPPER(*i->getShortDescription()), i->getShortDescription() + 1);
+        ch->send_to("@w%c%s", toupper(*i->getShortDescription()), i->getShortDescription() + 1);
     else if (IS_NPC(i) && GRAPPLED(i) && GRAPPLED(i) == ch)
-        ch->send_to("@w%c%s is being grappled with by YOU!", UPPER(*i->getShortDescription()), i->getShortDescription() + 1);
+        ch->send_to("@w%c%s is being grappled with by YOU!", toupper(*i->getShortDescription()), i->getShortDescription() + 1);
     else if (IS_NPC(i) && GRAPPLED(i) && GRAPPLED(i) != ch)
-        ch->send_to("@w%c%s is being absorbed from by %s!", UPPER(*i->getShortDescription()), i->getShortDescription() + 1, readIntro(ch, GRAPPLED(i)) == 1 ? get_i_name(ch, GRAPPLED(i)) : AN(RACE(GRAPPLED(i))));
+        ch->send_to("@w%c%s is being absorbed from by %s!", toupper(*i->getShortDescription()), i->getShortDescription() + 1, readIntro(ch, GRAPPLED(i)) == 1 ? get_i_name(ch, GRAPPLED(i)) : AN(RACE(GRAPPLED(i))));
     else if (IS_NPC(i) && ABSORBBY(i) && ABSORBBY(i) == ch)
-        ch->send_to("@w%c%s is being absorbed from by YOU!", UPPER(*i->getShortDescription()), i->getShortDescription() + 1);
+        ch->send_to("@w%c%s is being absorbed from by YOU!", toupper(*i->getShortDescription()), i->getShortDescription() + 1);
     else if (IS_NPC(i) && ABSORBBY(i) && ABSORBBY(i) != ch)
-        ch->send_to("@w%c%s is being absorbed from by %s!", UPPER(*i->getShortDescription()), i->getShortDescription() + 1, readIntro(ch, ABSORBBY(i)) == 1 ? get_i_name(ch, ABSORBBY(i)) : AN(RACE(ABSORBBY(i))));
+        ch->send_to("@w%c%s is being absorbed from by %s!", toupper(*i->getShortDescription()), i->getShortDescription() + 1, readIntro(ch, ABSORBBY(i)) == 1 ? get_i_name(ch, ABSORBBY(i)) : AN(RACE(ABSORBBY(i))));
     else if (IS_NPC(i) && FIGHTING(i) && FIGHTING(i) != ch && GET_POS(i) != POS_SITTING && GET_POS(i) != POS_SLEEPING &&
              i->isSparring())
-        ch->send_to("@w%c%s is sparring with %s!", UPPER(*i->getShortDescription()), i->getShortDescription() + 1, GET_ADMLEVEL(ch) ? GET_NAME(FIGHTING(i)) : (readIntro(ch, FIGHTING(i)) == 1 ? get_i_name(ch, FIGHTING(i)) : LRACE(FIGHTING(i))));
+        ch->send_to("@w%c%s is sparring with %s!", toupper(*i->getShortDescription()), i->getShortDescription() + 1, GET_ADMLEVEL(ch) ? GET_NAME(FIGHTING(i)) : (readIntro(ch, FIGHTING(i)) == 1 ? get_i_name(ch, FIGHTING(i)) : LRACE(FIGHTING(i))));
     else if (IS_NPC(i) && FIGHTING(i) && i->isSparring() && FIGHTING(i) == ch && GET_POS(i) != POS_SITTING &&
              GET_POS(i) != POS_SLEEPING)
-        ch->send_to("@w%c%s is sparring with you!", UPPER(*i->getShortDescription()), i->getShortDescription() + 1);
+        ch->send_to("@w%c%s is sparring with you!", toupper(*i->getShortDescription()), i->getShortDescription() + 1);
     else if (IS_NPC(i) && FIGHTING(i) && FIGHTING(i) != ch && GET_POS(i) != POS_SITTING && GET_POS(i) != POS_SLEEPING)
-        ch->send_to("@w%c%s is fighting %s!", UPPER(*i->getShortDescription()), i->getShortDescription() + 1, GET_ADMLEVEL(ch) ? GET_NAME(FIGHTING(i)) : (readIntro(ch, FIGHTING(i)) == 1 ? get_i_name(ch, FIGHTING(i)) : LRACE(FIGHTING(i))));
+        ch->send_to("@w%c%s is fighting %s!", toupper(*i->getShortDescription()), i->getShortDescription() + 1, GET_ADMLEVEL(ch) ? GET_NAME(FIGHTING(i)) : (readIntro(ch, FIGHTING(i)) == 1 ? get_i_name(ch, FIGHTING(i)) : LRACE(FIGHTING(i))));
     else if (IS_NPC(i) && FIGHTING(i) && FIGHTING(i) == ch && GET_POS(i) != POS_SITTING && GET_POS(i) != POS_SLEEPING)
-        ch->send_to("@w%c%s is fighting YOU!", UPPER(*i->getShortDescription()), i->getShortDescription() + 1);
+        ch->send_to("@w%c%s is fighting YOU!", toupper(*i->getShortDescription()), i->getShortDescription() + 1);
     else if (IS_NPC(i) && FIGHTING(i) && GET_POS(i) == POS_SITTING)
-        ch->send_to("@w%c%s is sitting here.", UPPER(*i->getShortDescription()), i->getShortDescription() + 1);
+        ch->send_to("@w%c%s is sitting here.", toupper(*i->getShortDescription()), i->getShortDescription() + 1);
     else if (IS_NPC(i) && FIGHTING(i) && GET_POS(i) == POS_SLEEPING)
-        ch->send_to("@w%c%s is sleeping here.", UPPER(*i->getShortDescription()), i->getShortDescription() + 1);
+        ch->send_to("@w%c%s is sleeping here.", toupper(*i->getShortDescription()), i->getShortDescription() + 1);
     else if (IS_NPC(i))
-        ch->send_to("@w%c%s", UPPER(*i->getShortDescription()), i->getShortDescription() + 1);
+        ch->send_to("@w%c%s", toupper(*i->getShortDescription()), i->getShortDescription() + 1);
     else if (!IS_NPC(i))
     {
         if (IS_MAJIN(i) && AFF_FLAGGED(i, AFF_LIQUEFIED))
@@ -3290,376 +3289,6 @@ ACMD(do_autoexit)
         break;
     }
     ch->send_to("Your @rautoexit level@n is now %s.\r\n", exitlevels[EXIT_LEV(ch)]);
-}
-
-void look_at_room(room_rnum target_room, Character *ch, int ignore_brief)
-{
-    Room *rm = get_room(target_room);
-    look_at_room(rm, ch, ignore_brief);
-}
-
-static void display_room_info(Room *rm, Character *ch);
-
-static void display_dimension_info(Room *rm, Character *ch)
-{
-    if (rm->where_flags.get(WhereFlag::neo_nirvana))
-    {
-        ch->sendText("@wPlanet: @WNeo Nirvana@n\r\n");
-    }
-    else if (rm->where_flags.get(WhereFlag::afterlife))
-    {
-        ch->sendText("@wDimension: @yA@Yf@yt@Ye@yr@Yl@yi@Yf@ye@n\r\n");
-    }
-    else if (rm->room_flags.get(ROOM_HELL))
-    {
-        ch->sendText("@wDimension: @RPunishment Hell@n\r\n");
-    }
-    else if (rm->where_flags.get(WhereFlag::afterlife_hell))
-    {
-        ch->sendText("@wDimension: @RH@re@Dl@Rl@n\r\n");
-    }
-}
-
-static void display_special_room_descriptions(Room *rm, Character *ch)
-{
-    if (rm->room_flags.get(ROOM_REGEN))
-    {
-        ch->sendText("@CA feeling of calm and relaxation fills this room.@n\r\n");
-    }
-    if (rm->room_flags.get(ROOM_AURA))
-    {
-        ch->sendText("@GAn aura of @gregeneration@G surrounds this area.@n\r\n");
-    }
-    if (rm->where_flags.get(WhereFlag::hyperbolic_time_chamber))
-    {
-        ch->sendText("@rThis room feels like it operates in a different time frame.@n\r\n");
-    }
-}
-
-static void display_room_info(Room *rm, Character *ch)
-{
-    if (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_NODEC))
-    {
-        ch->sendText("@wO----------------------------------------------------------------------O@n\r\n");
-    }
-
-    ch->send_to("@wLocation: %-70s@n\r\n", rm->getName());
-
-    if (auto planet = getPlanet(ch->location.getVnum()); planet)
-    {
-        ch->send_to("@wPlanet: @G%s@n\r\n", getPlanetColorName(planet.value()).c_str());
-    }
-    else
-    {
-        display_dimension_info(rm, ch);
-    }
-
-    double grav = rm->getEnvironment(ENV_GRAVITY);
-    if (grav <= 1.0)
-    {
-        ch->sendText("@wGravity: @WNormal@n\r\n");
-    }
-    else
-    {
-        auto g = fmt::format("{}", grav);
-        ch->send_to("@wGravity: @W%sx@n\r\n", g.c_str());
-    }
-
-    display_special_room_descriptions(rm, ch);
-
-    if (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_NODEC))
-    {
-        ch->sendText("@wO----------------------------------------------------------------------O@n\r\n");
-    }
-}
-
-static void display_room_flags(Room *rm, Character *ch)
-{
-    char buf[MAX_STRING_LENGTH], buf2[MAX_STRING_LENGTH], buf3[MAX_STRING_LENGTH];
-
-    sprintf(buf, "%s", rm->room_flags.getFlagNames().c_str());
-    sprinttype(static_cast<int>(rm->sector_type), sector_types, buf2, sizeof(buf2));
-
-    if (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_NODEC))
-    {
-        ch->sendText("\r\n@wO----------------------------------------------------------------------O@n\r\n");
-    }
-
-    ch->send_to("@wLocation: @G%-70s@w\r\n", rm->getName());
-
-    if (auto sc = rm->getScripts(); !sc.empty())
-    {
-        ch->sendText("@D[@GTriggers");
-        for (auto t : filter_shared(sc))
-            ch->send_to(" %d", GET_TRIG_VNUM(t));
-        ch->sendText("@D] ");
-    }
-
-    double grav = rm->getEnvironment(ENV_GRAVITY);
-    auto g = fmt::format("{}", grav);
-    snprintf(buf3, sizeof(buf3), "@D[ @G%s@D] @wSector: @D[ @G%s @D] @wVnum: @D[@G%5d@D]@n Gravity: @D[@G%sx@D]@n", buf, buf2, rm->getVnum(), g.c_str());
-    ch->send_to("@wFlags: %-70s@w\r\n", buf3);
-
-    if (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_NODEC))
-    {
-        ch->sendText("@wO----------------------------------------------------------------------O@n\r\n");
-    }
-}
-
-static void display_damage_description(Character *ch, int dmg, const char *surface)
-{
-    if (dmg <= 2)
-    {
-        ch->send_to("@wA small hole with chunks of debris that can be seen scarring the %s.@n", surface);
-    }
-    else if (dmg <= 4)
-    {
-        ch->send_to("@wA couple small holes with chunks of debris that can be seen scarring the %s.@n", surface);
-    }
-    else if (dmg <= 6)
-    {
-        ch->send_to("@wA few small holes with chunks of debris that can be seen scarring the %s.@n", surface);
-    }
-    else if (dmg <= 10)
-    {
-        ch->send_to("@wThere are several small holes with chunks of debris that can be seen scarring the %s.@n", surface);
-    }
-    else if (dmg <= 20)
-    {
-        ch->send_to("@wMany holes fill the %s of this area, many of which have burn marks.@n", surface);
-    }
-    else if (dmg <= 30)
-    {
-        ch->send_to("@wThe %s is severely damaged with many large holes.@n", surface);
-    }
-    else if (dmg <= 50)
-    {
-        ch->sendText("@wBattle damage covers the entire area. Displayed as a tribute to the battles that have been waged here.@n");
-    }
-    else if (dmg <= 75)
-    {
-        ch->sendText("@wThis entire area is falling apart, it has been damaged so badly.@n");
-    }
-    else if (dmg <= 99)
-    {
-        ch->sendText("@wThis area cannot withstand much more damage. Everything has been damaged so badly it is hard to recognize any particular details about their former quality.@n");
-    }
-    else if (dmg >= 100)
-    {
-        ch->sendText("@wThis area is completely destroyed. Nothing is recognizable. Chunks of debris litter the ground, filling up holes, and overflowing onto what is left of the ground. A haze of smoke is wafting through the air, creating a chilling atmosphere.@n");
-    }
-}
-
-static void display_damage_description_forest(Character *ch, int dmg)
-{
-    if (dmg <= 2)
-    {
-        ch->sendText("@wA small tree sits in a little crater here.@n");
-    }
-    else if (dmg <= 4)
-    {
-        ch->sendText("@wTrees have been uprooted by craters in the ground.@n");
-    }
-    else if (dmg <= 6)
-    {
-        ch->sendText("@wSeveral trees have been reduced to chunks of debris and are laying in a few craters here.@n");
-    }
-    else if (dmg <= 10)
-    {
-        ch->sendText("@wA large patch of trees have been destroyed and are laying in craters here.@n");
-    }
-    else if (dmg <= 20)
-    {
-        ch->sendText("@wSeveral craters have merged into one large crater in one part of this forest.@n");
-    }
-    else if (dmg <= 30)
-    {
-        ch->sendText("@wThe open sky can easily be seen through a hole of trees destroyed and resting at the bottom of several craters here.@n");
-    }
-    else if (dmg <= 50)
-    {
-        ch->sendText("@wA good deal of burning tree pieces can be found strewn across the cratered ground here.@n");
-    }
-    else if (dmg <= 75)
-    {
-        ch->sendText("@wVery few trees are left standing in this area, replaced instead by large craters.@n");
-    }
-    else if (dmg <= 99)
-    {
-        ch->sendText("@wSingle solitary trees can be found still standing here or there in the area. The rest have been almost completely obliterated in recent conflicts.@n");
-    }
-    else if (dmg >= 100)
-    {
-        ch->sendText("@wOne massive crater fills this area. This desolate crater leaves no evidence of what used to be found in the area. Smoke slowly wafts into the sky from the central point of the crater, creating an oppressive atmosphere.@n");
-    }
-}
-
-static void display_damage_description_mountain(Character *ch, int dmg)
-{
-    if (dmg <= 2)
-    {
-        ch->sendText("@wA small crater has been burned into the side of this mountain.@n");
-    }
-    else if (dmg <= 4)
-    {
-        ch->sendText("@wA couple craters have been burned into the side of this mountain.@n");
-    }
-    else if (dmg <= 6)
-    {
-        ch->sendText("@wBurned bits of boulders can be seen lying at the bottom of a few nearby craters.@n");
-    }
-    else if (dmg <= 10)
-    {
-        ch->sendText("@wSeveral bad craters can be seen in the side of the mountain here.@n");
-    }
-    else if (dmg <= 20)
-    {
-        ch->sendText("@wLarge boulders have rolled down the mountainside and collected in many nearby craters.@n");
-    }
-    else if (dmg <= 30)
-    {
-        ch->sendText("@wMany craters are covering the mountainside here.@n");
-    }
-    else if (dmg <= 50)
-    {
-        ch->sendText("@wThe mountain side has partially collapsed, shedding rubble down towards its base.@n");
-    }
-    else if (dmg <= 75)
-    {
-        ch->sendText("@wA peak of the mountain has been blown off, leaving behind a smoldering tip.@n");
-    }
-    else if (dmg <= 99)
-    {
-        ch->sendText("@wThe mountainside here has completely collapsed, shedding dangerous rubble down to its base.@n");
-    }
-    else if (dmg >= 100)
-    {
-        ch->sendText("@wHalf the mountain has been blown away, leaving a scarred and jagged rock in its place. Billowing smoke wafts up from several parts of the mountain, filling the nearby skies and blotting out the sun.@n");
-    }
-}
-
-static void display_room_damage_description(Room *rm, Character *ch)
-{
-    auto dmg = rm->getDamage();
-    auto sect = static_cast<int>(rm->sector_type);
-    auto sunk = rm->getEnvironment(ENV_WATER) >= 100.0;
-
-    if ((!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_BRIEF)) || rm->room_flags.get(ROOM_DEATH))
-    {
-        if (dmg <= 99 || (dmg == 100 && (sect == SECT_WATER_SWIM || sunk || sect == SECT_FLYING || sect == SECT_SHOP || sect == SECT_IMPORTANT)))
-        {
-            ch->send_to("@w%s@n", rm->getLookDescription());
-        }
-
-        if (dmg > 0)
-        {
-            ch->sendText("\r\n");
-            switch (sect)
-            {
-            case SECT_INSIDE:
-                display_damage_description(ch, dmg, "floor");
-                break;
-            case SECT_CITY:
-            case SECT_FIELD:
-            case SECT_HILLS:
-            case SECT_IMPORTANT:
-                display_damage_description(ch, dmg, "ground");
-                break;
-            case SECT_FOREST:
-                display_damage_description_forest(ch, dmg);
-                break;
-            case SECT_MOUNTAIN:
-                display_damage_description_mountain(ch, dmg);
-                break;
-            default:
-                break;
-            }
-            ch->sendText("\r\n");
-        }
-
-        if (rm->ground_effect >= 1 && rm->ground_effect <= 5)
-        {
-            ch->sendText("@rLava@w is pooling in some places here...@n\r\n");
-        }
-        else if (rm->ground_effect >= 6)
-        {
-            ch->sendText("@RLava@r covers pretty much the entire area!@n\r\n");
-        }
-        else if (rm->ground_effect < 0)
-        {
-            ch->sendText("@cThe entire area is flooded with a @Cmystical@c cube of @Bwater!@n\r\n");
-        }
-    }
-}
-
-static void display_garden_info(Room *rm, Character *ch)
-{
-    auto con = rm->getObjects().snapshot_weak();
-    if (rm->room_flags.get(ROOM_GARDEN1))
-    {
-        ch->send_to("@D[@GPlants Planted@D: @g%d@W, @GMAX@D: @R8@D]@n\r\n", con.size());
-    }
-    else if (rm->room_flags.get(ROOM_GARDEN2))
-    {
-        ch->send_to("@D[@GPlants Planted@D: @g%d@W, @GMAX@D: @R20@D]@n\r\n", con.size());
-    }
-    else if (rm->room_flags.get(ROOM_HOUSE))
-    {
-        ch->send_to("@D[@GItems Stored@D: @g%d@D]@n\r\n", con.size());
-    }
-}
-
-void look_at_room(Room *rm, Character *ch, int ignore_brief)
-{
-    if (!ch->desc)
-        return;
-
-    /*
-    if (IS_DARK(rm->getVnum()) && !CAN_SEE_IN_DARK(ch) && !PLR_FLAGGED(ch, PLR_AURALIGHT)) {
-                ch->sendText("It's too dark to make out much detail...\r\n");
-        return;
-    }
-    */
-
-    if (AFF_FLAGGED(ch, AFF_BLIND))
-    {
-        ch->sendText("You see nothing but infinite darkness...\r\n");
-        return;
-    }
-
-    if (PLR_FLAGGED(ch, PLR_EYEC))
-    {
-        ch->sendText("You can't see a damned thing, your eyes are closed!\r\n");
-        return;
-    }
-
-    if (PRF_FLAGGED(ch, PRF_ROOMFLAGS))
-    {
-        display_room_flags(rm, ch);
-    }
-    else
-    {
-        display_room_info(rm, ch);
-    }
-
-    display_room_damage_description(rm, ch);
-
-    /* autoexits */
-    if (!IS_NPC(ch))
-    {
-        if (PRF_FLAGGED(ch, PRF_NODEC))
-        {
-            do_auto_exits2(rm, ch);
-        }
-        else
-        {
-            do_auto_exits(rm, ch, EXIT_LEV(ch));
-        }
-    }
-
-    display_garden_info(rm, ch);
-    list_obj_to_char(rm->getObjects().snapshot_weak(), ch, SHOW_OBJ_LONG, false);
-    list_char_to_char(rm->getPeople().snapshot_weak(), ch);
 }
 
 static void look_in_direction(Character *ch, int dir)
@@ -4797,12 +4426,7 @@ ACMD(do_score)
         ch->sendText("  @cO@D-----------------------------@D[   @cOther    @D]-----------------------------@cO@n\n");
         ch->sendText("                @D<@YZenni@D>                    <@rInventory Weight@D>@n\n");
         ch->send_to("      @D[   @CCarried@D| @W%-15s@D] [   @CCarried@D| @W%-15s@D]@n\n", add_commas(GET_GOLD(ch)).c_str(), add_commas((ch->getEffectiveStat("weight_carried"))).c_str());
-        double gravity = 1.0;
-
-        if (auto room = ch->getRoom(); room)
-        {
-            gravity = room->getEnvironment(ENV_GRAVITY);
-        }
+        double gravity = ch->location.getEnvironment(ENV_GRAVITY);
         std::string grav = gravity > 1.0 ? fmt::format("(Gravity:", gravity) : "";
         ch->send_to("      @D[      @CBank@D| @W%-15s@D] [ @CMax Carry@D| @W%-15s@D]@n %s\n", add_commas(GET_BANK_GOLD(ch)).c_str(), add_commas(CAN_CARRY_W(ch)).c_str(), grav.c_str());
 

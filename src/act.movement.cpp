@@ -2830,8 +2830,8 @@ ACMD(do_sit)
         act("You sit down on $p.", false, ch, chair, nullptr, TO_CHAR);
         act("$n sits down on $p.", false, ch, chair, nullptr, TO_ROOM);
         ch->setBaseStat("combo", POS_SITTING);
-        ch->sits = chair->shared();
-        chair->sitting = ch->shared();
+        ch->sits = chair->shared_from_this();
+        chair->sitting = ch->shared_from_this();
         break;
     case POS_SITTING:
         ch->sendText("You should stand up first.\r\n");
@@ -2994,8 +2994,8 @@ ACMD(do_rest)
         reveal_hiding(ch, 0);
         act("You lay down and rest on $p.", true, ch, chair, nullptr, TO_CHAR);
         act("$n lays down and rests on $p.", true, ch, chair, nullptr, TO_ROOM);
-        ch->sits = chair->shared();
-        chair->sitting = ch->shared();
+        ch->sits = chair->shared_from_this();
+        chair->sitting = ch->shared_from_this();
         ch->setBaseStat("combo", POS_RESTING);
         ch->removeLimitBreak();
         break;
@@ -3218,8 +3218,8 @@ ACMD(do_sleep)
             ch->setBaseStat("stupidkiss", 0);
             ch->sendText("You forget about that stupid kiss.\r\n");
         }
-        ch->sits = chair->shared();
-        chair->sitting = ch->shared();
+        ch->sits = chair->shared_from_this();
+        chair->sitting = ch->shared_from_this();
         ch->setBaseStat("combo", POS_SLEEPING);
         break;
     case POS_SLEEPING:

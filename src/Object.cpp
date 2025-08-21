@@ -19,10 +19,6 @@ Object::Object()
     type = UnitType::object;
 }
 
-std::shared_ptr<Object> Object::shared()
-{
-    return shared_from_this();
-}
 
 void Object::activate()
 {
@@ -257,6 +253,8 @@ void Object::onLeaveLocation(const Location &loc)
     auto z = loc.getZone();
     auto sh = shared_from_this();
     z->objectsInZone.remove(sh);
+    // clear the spawn data.
+    registeredLocations.erase("spawn");
 
     if (type_flag == ItemType::plant)
         objectSubscriptions.unsubscribe("growingPlants", sh);

@@ -34,9 +34,6 @@ extern void introWrite(Character *ch, Character *vict, char *name);
 extern void list_one_char(Character *i, Character *ch);
 extern void show_obj_to_char(Object *obj, Character *ch, int mode);
 
-extern void look_at_room(Room *rm, Character *ch, int ignore_brief);
-extern void look_at_room(room_rnum target_room, Character *ch, int ignore_brief);
-
 extern int perf_skill(int skill);
 
 extern int search_help(const char *argument, int level);

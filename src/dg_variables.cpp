@@ -1451,8 +1451,10 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
             else if (boost::iequals(field, "sector"))
                 sprinttype(static_cast<int>(r->sector_type), sector_types, str, slen);
 
-            else if (boost::iequals(field, "gravity"))
-                snprintf(str, slen, "%d", (int)r->getEnvironment(ENV_GRAVITY));
+            else if (boost::iequals(field, "gravity")) {
+                Location loc(r);
+                snprintf(str, slen, "%d", (int)loc.getEnvironment(ENV_GRAVITY));
+            }
 
             else if (boost::iequals(field, "vnum"))
             {

@@ -28,7 +28,7 @@ Object *HasEquipment::getEquipSlot(int slot) const
 
 void HasEquipment::addToEquip(Object *obj, int slot)
 {
-    addToEquip(obj->shared(), slot);
+    addToEquip(obj->shared_from_this(), slot);
 }
 
 void HasEquipment::addToEquip(const std::shared_ptr<Object> &obj, int slot)
@@ -55,7 +55,7 @@ void HasEquipment::removeFromEquip(int slot)
 
 void HasEquipment::removeFromEquip(Object *obj)
 {
-    removeFromEquip(obj->shared());
+    removeFromEquip(obj->shared_from_this());
 }
 
 void HasEquipment::removeFromEquip(const std::shared_ptr<Object> &obj)

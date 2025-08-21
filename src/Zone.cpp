@@ -115,3 +115,43 @@ Result<bool> Zone::canBeDeletedBy(Character* ch) {
 Zone* HasZone::getZone() const {
     return zone.get();
 }
+
+bool Zone::getZoneFlag(ZoneFlag zf, bool checkAncestors) const {
+    if (zone_flags.get(zf)) return true;
+    if (checkAncestors) {
+        if (auto p = getParent()) {
+            return p->getZoneFlag(zf, true);
+        }
+    }
+    return false;
+}
+
+double Zone::getEnvironment(int type, bool checkAncestors) const {
+    if (environment.contains(type)) {
+        return environment.at(type);
+    }
+
+    if(checkAncestors) {
+        if (auto p = getParent()) {
+            return p->getEnvironment(type, true);
+        }
+    }
+    
+    switch(type) {
+        case ENV_GRAVITY:
+            // gravity defaults to 1.0 unless manually overriden by Zone rules.
+            return 1.0;
+        case ENV_ETHER_STREAM:
+            return zone_flags.get(ZoneFlag::ether_stream) ? 100.0 : 0.0;
+        case ENV_MOONLIGHT: {
+            if(zone_flags.get(ZoneFlag::has_moon)) {
+                return MOON_TIMECHECK() ? 100.0 : 0.00;
+            }
+            return -1.0;
+        }
+        default:
+            return 0.0;
+    }
+
+    return 0.0;
+}

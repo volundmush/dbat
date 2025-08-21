@@ -309,7 +309,7 @@ void affect_to_char(Character *ch, struct affected_type *af)
 
     if (!ch->affected)
     {
-        characterSubscriptions.subscribe("affected", ch->shared());
+        characterSubscriptions.subscribe("affected", ch->shared_from_this());
     }
     *affected_alloc = *af;
     affected_alloc->next = ch->affected;
@@ -340,7 +340,7 @@ void affect_remove(Character *ch, struct affected_type *af)
     affect_total(ch);
     if (!ch->affected)
     {
-        characterSubscriptions.unsubscribe("affected", ch->shared());
+        characterSubscriptions.unsubscribe("affected", ch->shared_from_this());
     }
 }
 
@@ -429,7 +429,7 @@ void affect_join(Character *ch, struct affected_type *af,
     }
     if (!found)
         affect_to_char(ch, af);
-    characterSubscriptions.subscribe("affected", ch->shared());
+    characterSubscriptions.subscribe("affected", ch->shared_from_this());
 }
 
 /* Return the effect of a piece of armor in position eq_pos */
@@ -728,7 +728,7 @@ void extract_char_final(Character *ch)
 
     if (auto original = GET_ORIGINAL(ch); original)
     {
-        auto shared = ch->shared();
+        auto shared = ch->shared_from_this();
         original->clones.remove(shared);
     }
 
@@ -773,7 +773,7 @@ void extract_char_final(Character *ch)
 
     if (ch->poisonby)
     {
-        auto shared = ch->shared();
+        auto shared = ch->shared_from_this();
         ch->poisonby->poisoned.remove(shared);
         ch->poisonby = nullptr;
     }
@@ -1177,7 +1177,7 @@ Object *get_obj_in_list_vis(Character *ch, const char *name, int *number, const 
     if (!number)
     {
         number = &num;
-        num = get_number(&name);
+        num = get_number((char**)&name);
     }
 
     if (*number == 0)

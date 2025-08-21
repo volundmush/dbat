@@ -4,7 +4,7 @@
 
 void HasInventory::addToInventory(Object *obj)
 {
-    addToInventory(obj->shared());
+    addToInventory(obj->shared_from_this());
 }
 
 void HasInventory::addToInventory(const std::shared_ptr<Object> &obj)
@@ -15,7 +15,7 @@ void HasInventory::addToInventory(const std::shared_ptr<Object> &obj)
 
 void HasInventory::removeFromInventory(Object *obj)
 {
-    removeFromInventory(obj->shared());
+    removeFromInventory(obj->shared_from_this());
 }
 
 void HasInventory::removeFromInventory(const std::shared_ptr<Object> &obj)

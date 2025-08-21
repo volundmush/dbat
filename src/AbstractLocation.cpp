@@ -66,6 +66,11 @@ int AbstractLocation::getCookElement(const Coordinates &coor)
     return found;
 }
 
+std::optional<double> AbstractLocation::getEnvironment(const Coordinates &coor, int type) const
+{
+    return std::nullopt;
+}
+
 const std::vector<ExtraDescription> &AbstractLocation::getExtraDescription(const Coordinates &coor) const
 {
     static std::vector<ExtraDescription> extraDescriptions;
