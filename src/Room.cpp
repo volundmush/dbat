@@ -228,6 +228,8 @@ SectorType Room::getSectorType(const Coordinates &coor) const
     return sector_type;
 }
 
+
+
 void Room::broadcastAt(const Coordinates &coor, const std::string &message)
 {
     auto people = getPeople(coor);

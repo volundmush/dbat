@@ -204,11 +204,11 @@ void from_json(const json& j, Account& a);
 void to_json(json& j, const DgScript& t);
 void from_json(const json& j, DgScript& t);
 
-void to_json(json&j, const shop_data& s);
-void from_json(const json& j, shop_data& s);
+void to_json(json&j, const Shop& s);
+void from_json(const json& j, Shop& s);
 
-void to_json(json& j, const guild_data& g);
-void from_json(const json& j, guild_data& g);
+void to_json(json& j, const Guild& g);
+void from_json(const json& j, Guild& g);
 
 void to_json(json& j, const Destination &e);
 void from_json(const json& j, Destination &e);

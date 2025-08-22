@@ -18,17 +18,26 @@ Location::Location(room_vnum rv)
 {
     al = get_room(rv)->shared_from_this();
     position = Coordinates{0, 0, 0};
+    locationID = getLocID();
 }
 
-Location::Location(Room *room) : Location(room->shared_from_this())
+Location::Location(Room *room) : Location()
 {
-    
+    if(room) {
+        al = room->shared_from_this();
+        position = Coordinates{0, 0, 0};
+        locationID = getLocID();
+    } else {
+        al.reset();
+        locationID.clear();
+    }
 }
 
 Location::Location(const std::shared_ptr<Room>& room)
 {
     al = room;
     position = Coordinates{0, 0, 0};
+    locationID = getLocID();
 }
 
 Location::Location(Character *ch)
@@ -431,6 +440,15 @@ SectorType Location::getSectorType() const
         return a->getSectorType(position);
     }
     return SectorType::inside;
+}
+
+std::optional<std::string> Location::getTileDisplayOverride() const
+{
+    if (auto a = getLoc())
+    {
+        return a->getTileDisplayOverride(position);
+    }
+    return std::nullopt;
 }
 
 int Location::getTileType() const

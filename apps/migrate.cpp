@@ -3646,17 +3646,17 @@ struct PlanetCenterPoint {
 };
 
 static const std::vector<PlanetCenterPoint> centerPoints = {
-    {"earth", 40979, "@gE@n", 3},
-    {"vegeta", 32365, "@yV@n", 3},
-    {"frigid", 30889, "@cF@n", 3},
-    {"namek", 42880, "@GN@n", 3},
-    {"konack", 27065, "@MK@n", 3},
-    {"aether", 41959, "@bA@n", 3},
-    {"yardrat", 34899, "@mY@n", 3},
-    {"kanassa", 53859, "@cK@n", 3},
-    {"cerria", 59071, "@mC@n", 3},
-    {"arlia", 52434, "@MA@n", 3},
-    {"zenith", 50772, "@CZ@n", 2},
+    {"earth", 40979, "@GE@n", 2},
+    {"vegeta", 32365, "@YV@n", 2},
+    {"frigid", 30889, "@CF@n", 2},
+    {"namek", 42880, "@gN@n", 2},
+    {"konack", 27065, "@mK@n", 2},
+    {"aether", 41959, "@BA@n", 2},
+    {"yardrat", 34899, "@MY@n", 2},
+    {"kanassa", 53859, "@CK@n", 2},
+    {"cerria", 59071, "@MC@n", 2},
+    {"arlia", 52434, "@mA@n", 2},
+    {"zenith", 50772, "@cZ@n", 1},
 };
 
 static std::unordered_map<room_vnum, Coordinates> spaceCoordinates;
@@ -3695,6 +3695,7 @@ static void migrate_space() {
     // Assign zone.
     auto &z = zone_table.at(232);
     a->zone.reset(&z);
+    z.environment[ENV_GRAVITY] = 0.0;
 
     auto dim = BoxDim::fromCenter({}, 200, 200);
     auto s = std::make_unique<Shape>();
@@ -3706,6 +3707,7 @@ static void migrate_space() {
     s->description = sdesc;
     a->shapes["space"] = std::move(s);
 
+
     for(const auto& cp : centerPoints) {
         auto coor = spaceCoordinates.at(cp.vn);
         auto rd = RoundDim::disk(coor, cp.radius, 0, 0);
@@ -3713,6 +3715,8 @@ static void migrate_space() {
         s->type = ShapeType::Round;
         s->geom = rd;
         s->priority = 1;
+        s->tileDisplay = cp.tilePrint;
+        s->sectorType = SectorType::space;
         a->shapes[cp.name] = std::move(s);
     }
     a->rebuildShapeIndex();

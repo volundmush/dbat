@@ -173,6 +173,7 @@ struct AbstractGridArea : public HasMudStrings, public AbstractLocation, public 
     FlagHandler<RoomFlag>& getRoomFlags(const Coordinates& coor) override;
     FlagHandler<WhereFlag>& getWhereFlags(const Coordinates& coor) override;
     SectorType getSectorType(const Coordinates& coor) const override;
+    std::optional<std::string> getTileDisplayOverride(const Coordinates& coor) const override;
     void broadcastAt(const Coordinates& coor, const std::string& message) override;
     int getDamage(const Coordinates& coor) const override;
     int setDamage(const Coordinates& coor, int amount) override;

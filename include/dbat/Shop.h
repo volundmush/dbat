@@ -7,8 +7,8 @@ struct shop_buy_data {
     std::string keywords{};
 };
 
-struct shop_data : public org_data {
-    ~shop_data();
+struct Shop : public org_data {
+    ~Shop();
     void add_product(obj_vnum v);
     void remove_product(obj_vnum v);
     std::vector<obj_vnum> producing{};        /* Which item to produce (virtual)	*/

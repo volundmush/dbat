@@ -41,26 +41,8 @@ cdef extern from "dbat/saveload.h":
     void to_json(json& j, const structs.CharacterPrototype& h)
     void from_json(const json& j, structs.CharacterPrototype& m)
 
-    void to_json(json& j, const structs.mob_special_data& m)
-    void from_json(const json& j, structs.mob_special_data& m)
-
-    void to_json(json& j, const structs.time_data &t)
-    void from_json(const json& j, structs.time_data &t)
-
-    void to_json(json& j, const structs.time_info_data &t)
-    void from_json(const json& j, structs.time_info_data &t)
-
-    void to_json(json& j, const structs.weather_data &w)
-    void from_json(const json& j, structs.weather_data &w)
-
-    void to_json(json& j, const structs.reset_com& r)
-    void from_json(const json& j, structs.reset_com& r)
-
     void to_json(json& j, const structs.Zone& z)
     void from_json(const json& j, structs.Zone& z)
-
-    void to_json(json& j, const structs.affect_t& a)
-    void from_json(const json& j, structs.affect_t& a)
 
     void to_json(json& j, const structs.Account& a)
     void from_json(const json& j, structs.Account& a)
@@ -71,17 +53,11 @@ cdef extern from "dbat/saveload.h":
     void to_json(json& j, const structs.DgScript& t)
     void from_json(const json& j, structs.DgScript& t)
 
-    void to_json(json& j, const structs.shop_buy_data& b)
-    void from_json(const json& j, structs.shop_buy_data& b)
+    void to_json(json&j, const structs.Shop& s)
+    void from_json(const json& j, structs.Shop& s)
 
-    void to_json(json&j, const structs.shop_data& s)
-    void from_json(const json& j, structs.shop_data& s)
-
-    void to_json(json& j, const structs.guild_data& g)
-    void from_json(const json& j, structs.guild_data& g)
-
-    void to_json(json& j, const structs.Entity& u)
-    void from_json(const json& j, structs.Entity& u)
+    void to_json(json& j, const structs.Guild& g)
+    void from_json(const json& j, structs.Guild& g)
 
     void to_json(json& j, const structs.Destination &e)
     void from_json(const json& j, structs.Destination &e)
@@ -91,18 +67,6 @@ cdef extern from "dbat/saveload.h":
 
     void to_json(json& j, const structs.Object& o)
     void from_json(const json& j, structs.Object& o)
-
-    void to_json(json& j, const structs.skill_data& s)
-    void from_json(const json& j, structs.skill_data& s)
-
-    void to_json(json& j, const structs.alias_data& a)
-    void from_json(const json& j, structs.alias_data& a)
-
-    void to_json(json& j, const structs.trans_data& t)
-    void from_json(const json& j, structs.trans_data& t)
-
-    void to_json(json& j, const structs.affected_type& a)
-    void from_json(const json& j, structs.affected_type& a)
 
     void to_json(json& j, const structs.Character& c)
     void from_json(const json& j, structs.Character& c)

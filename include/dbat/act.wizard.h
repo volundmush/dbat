@@ -11,6 +11,8 @@ extern void update_space(void);
 
 extern room_rnum find_target_room(Character *ch, char *rawroomstr);
 
+extern Location find_target_location(Character *ch, char *rawroomstr);
+
 extern void perform_immort_vis(Character *ch);
 
 extern void snoop_check(Character *ch);

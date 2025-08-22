@@ -41,7 +41,7 @@
 static void sort_keeper_objs(Character *keeper, vnum shop_nr);
 
 /* Local variables */
-NegativeKeyGuardMap<shop_vnum, struct shop_data> shop_index;
+NegativeKeyGuardMap<shop_vnum, struct Shop> shop_index;
 shop_vnum top_shop = NOTHING;
 int cmd_say, cmd_tell, cmd_emote, cmd_slap, cmd_puke;
 
@@ -1779,17 +1779,17 @@ void show_shops(Character *ch, char *arg)
     }
 }
 
-shop_data::~shop_data()
+Shop::~Shop()
 {
     free_shop_strings(this);
 }
 
-void shop_data::add_product(obj_vnum v)
+void Shop::add_product(obj_vnum v)
 {
     producing.push_back(v);
 }
 
-void shop_data::remove_product(obj_vnum v)
+void Shop::remove_product(obj_vnum v)
 {
     std::remove_if(producing.begin(), producing.end(), [&](obj_vnum &o)
                    { return o == v; });
@@ -1800,7 +1800,7 @@ std::vector<std::weak_ptr<Character>> org_data::getKeepers()
     return characterSubscriptions.all(fmt::format("vnum_{}", keeper));
 }
 
-bool shop_data::isProducing(obj_vnum vn)
+bool Shop::isProducing(obj_vnum vn)
 {
     if (auto found = std::find(producing.begin(), producing.end(), vn); found != producing.end())
     {
@@ -1809,7 +1809,7 @@ bool shop_data::isProducing(obj_vnum vn)
     return false;
 }
 
-void shop_data::runPurge()
+void Shop::runPurge()
 {
     auto keepers = getKeepers();
     for (auto keeper : filter_raw(keepers))

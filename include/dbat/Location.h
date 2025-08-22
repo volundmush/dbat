@@ -103,6 +103,7 @@ struct Location {
     int modDamage(int amount);
 
     SectorType getSectorType() const;
+    std::optional<std::string> getTileDisplayOverride() const;
     void setSectorType(SectorType type);
     int getTileType() const;
 

@@ -74,6 +74,8 @@ struct AbstractLocation {
 
     virtual SectorType getSectorType(const Coordinates& coor) const = 0;
 
+    virtual std::optional<std::string> getTileDisplayOverride(const Coordinates& coor) const;
+
     virtual void broadcastAt(const Coordinates& coor, const std::string& message) = 0;
 
     virtual int getDamage(const Coordinates& coor) const = 0;

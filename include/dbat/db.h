@@ -256,8 +256,8 @@ extern std::vector<std::weak_ptr<Object>> getAllObjects();
 extern NegativeKeyGuardMap<trig_vnum, DgScriptPrototype> trig_index;
 
 extern NegativeKeyGuardMap<vnum, Account> accounts;
-extern NegativeKeyGuardMap<shop_vnum, struct shop_data> shop_index;
-extern NegativeKeyGuardMap<guild_vnum, struct guild_data> guild_index;
+extern NegativeKeyGuardMap<shop_vnum, struct Shop> shop_index;
+extern NegativeKeyGuardMap<guild_vnum, struct Guild> guild_index;
 
 extern NegativeKeyGuardMap<int64_t, PlayerData> players;
 
@@ -302,8 +302,8 @@ extern void reset_zone(zone_rnum zone);
 
 extern std::vector<CharacterPrototype *> collectNPCProtos(int start_vnum, int end_vnum);
 extern std::vector<ObjectPrototype *> collectItemProtos(int start_vnum, int end_vnum);
-extern std::vector<guild_data *> collectGuilds(int start_vnum, int end_vnum);
-extern std::vector<shop_data *> collectShops(int start_vnum, int end_vnum);
+extern std::vector<Guild *> collectGuilds(int start_vnum, int end_vnum);
+extern std::vector<Shop *> collectShops(int start_vnum, int end_vnum);
 extern std::vector<DgScriptPrototype *> collectTriggers(int start_vnum, int end_vnum);
 
 /* For disabled commands code by Erwin S. Andreasen, */

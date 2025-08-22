@@ -29,7 +29,7 @@
 /* Local variables */
 int spell_sort_info[SKILL_TABLE_SIZE + 1];
 guild_vnum top_guild = NOTHING;
-NegativeKeyGuardMap<guild_vnum, struct guild_data> guild_index;
+NegativeKeyGuardMap<guild_vnum, struct Guild> guild_index;
 
 char *guild_customer_string(int guild_nr, int detailed);
 
@@ -1534,7 +1534,7 @@ void list_guilds(Character *ch, guild_vnum vmin, guild_vnum vmax)
 {
     int i, counter = 0;
 
-    auto glist = [&](const guild_data &g)
+    auto glist = [&](const Guild &g)
     {
         counter++;
 
@@ -1567,13 +1567,13 @@ void levelup_parse(struct descriptor_data *d, char *arg)
 {
 }
 
-void guild_data::toggle_skill(uint16_t skill_id)
+void Guild::toggle_skill(uint16_t skill_id)
 {
     auto sk = static_cast<Skill>(skill_id);
     skills.toggle(skill_id);
 }
 
-void guild_data::toggle_feat(uint16_t skill_id)
+void Guild::toggle_feat(uint16_t skill_id)
 {
     if (feats.count(skill_id))
     {

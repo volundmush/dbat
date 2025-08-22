@@ -351,8 +351,17 @@ struct Character : public HasID, public HasLocation, public HasEquipment, public
 
 };
 
-#define IS_NPC(ch)    (!(ch)->isPC)
-#define IS_MOB(ch)    (IS_NPC(ch) && mob_proto.count(GET_MOB_RNUM(ch)))
+inline bool IS_NPC(const Character* ch) {
+    return !ch->isPC;
+}
+
+inline bool IS_PC(const Character* ch) {
+    return ch->isPC;
+}
+
+inline bool IS_MOB(const Character* ch) {
+    return ch->getProto() ? true : false;
+}
 
 
 #define IS_AFFECTED(ch, skill) (AFF_FLAGGED((ch), (skill)))

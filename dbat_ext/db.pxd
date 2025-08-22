@@ -35,8 +35,8 @@ cdef extern from "dbat/db.h":
 
     structs.help_index_element* get_help(const string& name, int)
 
-    map[int, structs.shop_data] shop_index
-    map[int, structs.guild_data] guild_index
+    map[int, structs.Shop] shop_index
+    map[int, structs.Guild] guild_index
     map[int, structs.DgScriptPrototype] trig_index
     map[int64_t, structs.PlayerData] players
     map[int64_t, structs.descriptor_data*] sessions
@@ -59,7 +59,7 @@ cdef extern from "dbat/comm.h":
     cdef distribute_output_t g_distribute_output
     cdef send_close_t g_send_close
 
-cdef extern from "dbat/utils.h":
+cdef extern from "dbat/ansi.h":
     string processColors(const string &txt, int parse, char **choices)
 
 cdef extern from "dbat/constants.h":

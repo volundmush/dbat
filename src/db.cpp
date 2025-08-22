@@ -2298,11 +2298,11 @@ std::vector<ObjectPrototype*> collectItemProtos(int start_vnum, int end_vnum) {
     return collectObjectsInRange(start_vnum, end_vnum, obj_proto);
 }
 
-std::vector<guild_data*> collectGuilds(int start_vnum, int end_vnum) {
+std::vector<Guild*> collectGuilds(int start_vnum, int end_vnum) {
     return collectObjectsInRange(start_vnum, end_vnum, guild_index);
 }
 
-std::vector<shop_data*> collectShops(int start_vnum, int end_vnum) {
+std::vector<Shop*> collectShops(int start_vnum, int end_vnum) {
     return collectObjectsInRange(start_vnum, end_vnum, shop_index);
 }
 

@@ -1111,6 +1111,10 @@ room_rnum find_target_room(Character *ch, char *rawroomstr)
     return (NOWHERE);
 }
 
+Location find_target_location(Character *ch, char *rawroomstr) {
+    
+}
+
 ACMD(do_at)
 {
     room_vnum location;
@@ -1465,7 +1469,7 @@ static void do_stat_object(Character *ch, Object *j)
     ch->send_to("Object Hit Points: [ @g%3d@n/@g%3d@n]\r\n", GET_OBJ_VAL(j, VAL_ALL_HEALTH), GET_OBJ_VAL(j, VAL_ALL_MAXHEALTH));
 
     if(j->registeredLocations.contains("spawn"))
-        ch->send_to("Object loaded in room: @y%d@n\r\n", j->registeredLocations.at("spawn"));
+        ch->sendFmt("Object loaded in room: @y{}@n\r\n", j->registeredLocations.at("spawn"));
 
     ch->send_to("Object Material: @y%s@n\r\n", material_names[GET_OBJ_MATERIAL(j)]);
 

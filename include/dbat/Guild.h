@@ -9,7 +9,7 @@ struct guild_info_type {
     int direction;
 };
 
-struct guild_data : public org_data {
+struct Guild : public org_data {
     void toggle_skill(uint16_t skill_id);
     void toggle_feat(uint16_t skill_id);
     FlagHandler<Skill> skills;  /* array to keep track of which feats things we'll train */

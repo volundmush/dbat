@@ -185,6 +185,11 @@ bool AbstractLocation::getWhereFlag(const Coordinates &coor, WhereFlag flag)
     return getWhereFlags(coor).get(flag);
 }
 
+std::optional<std::string> AbstractLocation::getTileDisplayOverride(const Coordinates &coor) const
+{
+    return std::nullopt;
+}
+
 
 bool AbstractLocation::validCoordinates(const Coordinates& coor) const {
     return true;

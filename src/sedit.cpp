@@ -173,7 +173,7 @@ ACMD(do_oasis_sedit)
 
 void sedit_setup_new(struct descriptor_data *d)
 {
-    auto shop = new shop_data();
+    auto shop = new Shop();
     /*
      * Fill in some default values.
      */
@@ -213,7 +213,7 @@ void sedit_setup_existing(struct descriptor_data *d, vnum rshop_num)
     /*
      * Create a scratch shop structure.
      */
-    OLC_SHOP(d) = new shop_data();
+    OLC_SHOP(d) = new Shop();
 
     /* don't waste time trying to free nullptr strings -- Welcor */
     copy_shop(OLC_SHOP(d), &shop_index.at(rshop_num), false);
@@ -225,7 +225,7 @@ void sedit_setup_existing(struct descriptor_data *d, vnum rshop_num)
 
 void sedit_products_menu(struct descriptor_data *d)
 {
-    struct shop_data *shop;
+    struct Shop *shop;
 
     shop = OLC_SHOP(d);
 
@@ -250,7 +250,7 @@ void sedit_products_menu(struct descriptor_data *d)
 
 void sedit_compact_rooms_menu(struct descriptor_data *d)
 {
-    struct shop_data *shop;
+    struct Shop *shop;
     int i, count = 0;
 
     shop = OLC_SHOP(d);
@@ -275,7 +275,7 @@ void sedit_compact_rooms_menu(struct descriptor_data *d)
 
 void sedit_rooms_menu(struct descriptor_data *d)
 {
-    struct shop_data *shop;
+    struct Shop *shop;
     int i = 0;
 
     shop = OLC_SHOP(d);
@@ -309,7 +309,7 @@ void sedit_rooms_menu(struct descriptor_data *d)
 
 void sedit_namelist_menu(struct descriptor_data *d)
 {
-    struct shop_data *shop;
+    struct Shop *shop;
     int i;
 
     shop = OLC_SHOP(d);
@@ -373,7 +373,7 @@ void sedit_no_trade_menu(struct descriptor_data *d)
 
 void sedit_types_menu(struct descriptor_data *d)
 {
-    struct shop_data *shop;
+    struct Shop *shop;
     int i, count = 0;
 
     shop = OLC_SHOP(d);
@@ -397,7 +397,7 @@ void sedit_disp_menu(struct descriptor_data *d)
 {
     char buf1[MAX_STRING_LENGTH];
     char buf2[MAX_STRING_LENGTH];
-    struct shop_data *shop;
+    struct Shop *shop;
 
     shop = OLC_SHOP(d);
 

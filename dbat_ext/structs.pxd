@@ -43,7 +43,7 @@ cdef extern from "dbat/Account.h":
         bool checkPassword(const string& password)
         bool setPassword(const string& password)
 
-cdef extern from "dbat/DgScriptPrototype":
+cdef extern from "dbat/DgScriptPrototype.h":
     cdef cppclass DgScriptPrototype:
         pass
 

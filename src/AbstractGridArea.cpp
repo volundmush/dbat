@@ -210,6 +210,11 @@ const char *AbstractGridArea::getName(const Coordinates &coor) const
             return it->second.c_str();
         }
     }
+
+    if(auto shp = topShapeAt(coor)) {
+        if(!shp->name.empty()) return shp->name.c_str();
+    }
+
     // Fallback to unit base name.
     return HasMudStrings::getName();
 }
@@ -222,6 +227,9 @@ const char *AbstractGridArea::getLookDescription(const Coordinates &coor) const
         {
             return it->second.c_str();
         }
+    }
+    if(auto shp = topShapeAt(coor)) {
+        if(!shp->description.empty()) return shp->description.c_str();
     }
     // Fallback to base unit look description.
     return HasMudStrings::getLookDescription();
@@ -252,6 +260,18 @@ SectorType AbstractGridArea::getSectorType(const Coordinates &coor) const
         return shp->sectorType;
     }
     return SectorType::inside; // mandated fallback
+}
+
+std::optional<std::string> AbstractGridArea::getTileDisplayOverride(const Coordinates &coor) const
+{
+    if (auto t = find_tile(tileOverrides, coor))
+    {
+        if(!t->tileDisplay.empty()) return t->tileDisplay;
+    }
+    if(auto shp = topShapeAt(coor); shp && !shp->tileDisplay.empty()) {
+        return shp->tileDisplay;
+    }
+    return std::nullopt;
 }
 
 void AbstractGridArea::broadcastAt(const Coordinates &coor, const std::string &message)

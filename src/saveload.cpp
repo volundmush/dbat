@@ -522,7 +522,7 @@ void from_json(const json &j, org_data &o)
 }
 
 // shops serialize/deserialize...
-void to_json(json &j, const shop_data &s)
+void to_json(json &j, const Shop &s)
 {
     to_json(j, static_cast<org_data>(s));
 
@@ -567,7 +567,7 @@ void to_json(json &j, const shop_data &s)
         j["lastsort"] = s.lastsort;
 }
 
-void from_json(const json &j, shop_data &s)
+void from_json(const json &j, Shop &s)
 {
     from_json(j, static_cast<org_data &>(s));
     if (j.contains("producing"))
@@ -639,7 +639,7 @@ static void dump_shops(const std::filesystem::path &loc)
 }
 
 // guilds serialize/deserialize...
-void to_json(json &j, const guild_data &g)
+void to_json(json &j, const Guild &g)
 {
     to_json(j, static_cast<org_data>(g));
     if (g.skills)
@@ -660,7 +660,7 @@ void to_json(json &j, const guild_data &g)
         j["close"] = g.close;
 }
 
-void from_json(const json &j, guild_data &g)
+void from_json(const json &j, Guild &g)
 {
     from_json(j, static_cast<org_data &>(g));
     if (j.contains("skills"))
@@ -1522,6 +1522,8 @@ void to_json(json& j, const TileOverride& p) {
     j["damage"] = p.damage;
     j["groundEffect"] = p.groundEffect;
     j["exits"] = p.exits;
+    if(!p.tileDisplay.empty()) j["tileDisplay"] = p.tileDisplay;
+
 }
 
 void from_json(const json& j, TileOverride& p) {
@@ -1538,6 +1540,7 @@ void from_json(const json& j, TileOverride& p) {
         p.groundEffect = j["groundEffect"].get<int>();
     if (j.contains("exits"))
         p.exits = j["exits"].get<std::map<Direction, Destination>>();
+    if(j.contains("tileDisplay")) p.tileDisplay = j["tileDisplay"].get<std::string>();
 }
 
 
@@ -2315,7 +2318,7 @@ PlayerData *create_player_character(int account_id, const json &j)
 
     init_char(ch.get());
 
-    send_to_imm("New character created, %s, by user, %s.", GET_NAME(ch), acc.name.c_str());
+    send_to_imm("New character created, %s, by user, %s.", GET_NAME(ch.get()), acc.name.c_str());
 
     return &p;
 }

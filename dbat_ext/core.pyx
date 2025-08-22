@@ -17,7 +17,7 @@ from libcpp.vector cimport vector
 
 cimport structs
 cimport db
-from structs cimport Entity, AbstractThing, Room, Character, Object, Account, help_index_element, ObjectPrototype, CharacterPrototype
+from structs cimport Room, Character, Object, Account, help_index_element, ObjectPrototype, CharacterPrototype
 from saveload cimport jdumps, jloads, jobject, to_json, from_json, runSave, create_player_character
 
 def load_db():
@@ -129,7 +129,7 @@ mob_proto_db = MobilePrototypeDB()
 
 cdef class ShopDB:
     
-    cdef string _dump(self, structs.shop_data& s):
+    cdef string _dump(self, structs.Shop& s):
         j = jobject()
         to_json(j, s)
         return jdumps(j)
@@ -159,7 +159,7 @@ shop_db = ShopDB()
 
 cdef class GuildDB:
     
-    cdef string _dump(self, structs.guild_data& g):
+    cdef string _dump(self, structs.Guild& g):
         j = jobject()
         to_json(j, g)
         return jdumps(j)

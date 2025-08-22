@@ -174,7 +174,7 @@ static bool resetGiveObj(Location &loc, SpawnRegistry &reg, obj_vnum target, int
     {
         return false;
     }
-    if (auto mob = reg.lastChar.lock())
+    if (auto mob = reg.lastChar.lock().get())
     {
         auto obj = read_object(target, VIRTUAL);
         mob->addToInventory(obj);

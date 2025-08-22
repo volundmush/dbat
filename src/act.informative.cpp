@@ -38,6 +38,7 @@
 #include "dbat/transformation.h"
 #include "dbat/planet.h"
 #include "dbat/graph.h"
+#include "dbat/ansi.h"
 
 /* local functions */
 static void gen_map(const Location& loc, Character *ch, int num);
@@ -1312,13 +1313,11 @@ static void print_map_line(Character *ch, int key, const char *buf)
     }
 }
 
-static const std::string compassTemplate = R"(        | {N} |
-| {NW:>2}| | {U} | |{NE:<2} |
-| {W:>2}| |@R\{@n{C}@R\}@n| |{E:<2} |
-| {SW:>2}| | {S} | |{SE:<2} |
-        | {D} |
-)";
-
+static const std::string compassTemplate = R"(@n      | {N} |
+@n| {NW}| | {U} | |{NE} |
+@n| {W}| | {C} | |{E} |
+@n| {SW}| | {D} | |{SE} |
+@n      | {S} |)";
 
 static std::vector<std::string> renderCompassLines(const Location& loc, Character *ch) {
     auto exits = loc.getExits();
@@ -1328,6 +1327,14 @@ static std::vector<std::string> renderCompassLines(const Location& loc, Characte
     auto isClosed = [](Destination& e) {
         return e.exit_flags[EX_CLOSED];
     };
+
+    // prevent crash by filling everything with a blank.
+    for(const auto& s : {"N", "U", "S", "D", "C"}) {
+        compassSpots[s] = " ";
+    }
+    for(const auto& s : {"SE", "SW", "NW", "NE", "W", "E"}) {
+        compassSpots[s] = "  "; // gets two blank spaces.
+    }
 
     for(auto& [d, e] : exits) {
         if(e.exit_flags[EX_SECRET]) {
@@ -1353,10 +1360,10 @@ static std::vector<std::string> renderCompassLines(const Location& loc, Characte
                 compassSpots["S"] = isClosed(e) ? "@rS@n" : "@CS@n";
                 break;
             case Direction::east:
-                compassSpots["E"] = isClosed(e) ? "@rE@n" : "@CE@n";
+                compassSpots["E"] = isClosed(e) ? "@rE@n " : "@CE@n ";
                 break;
             case Direction::west:
-                compassSpots["W"] = isClosed(e) ? "@rW@n" : "@CW@n";
+                compassSpots["W"] = isClosed(e) ? " @rW@n" : " @CW@n";
                 break;
             case Direction::up:
                 compassSpots["U"] = isClosed(e) ? "@yU@n" : "@YU@n";
@@ -1365,12 +1372,10 @@ static std::vector<std::string> renderCompassLines(const Location& loc, Characte
                 compassSpots["D"] = isClosed(e) ? "@yD@n" : "@YD@n";
                 break;
             case Direction::inside:
-                if(compassSpots.contains("C")) compassSpots["C"] = isClosed(e) ? "@rB@n" : "@mB@n";
-                else compassSpots["C"] = isClosed(e) ? "@rI@n" : "@mI@n";
+                compassSpots["C"] = isClosed(e) ? "@rI@n" : "@mI@n";
                 break;
             case Direction::outside:
-                if(compassSpots.contains("C")) compassSpots["C"] = isClosed(e) ? "@rB@n" : "@mB@n";
-                else compassSpots["C"] = isClosed(e) ? "@rO@n" : "@mO@n";
+                compassSpots["C"] = isClosed(e) ? "@rO@n" : "@mO@n";
                 break;
         }
     }
@@ -1386,133 +1391,135 @@ static std::vector<std::string> renderCompassLines(const Location& loc, Characte
     return std::move(split);
 }
 
-static std::unordered_map<Coordinates, std::string> renderTileMap(const Location& loc, Character *ch, int minX, int maxX, int minY, int maxY, const std::function<bool(const Destination&, Character*)> is_valid, const std::function<std::string(const Destination&, Character*)> renderer)
+static std::unordered_map<Coordinates, std::string> renderTileMap(const Location& loc, Character *ch, int minX, int maxX, int minY, int maxY, const std::function<bool(const Destination&, Character*)> is_valid, const std::function<std::string(const Destination&, const Coordinates& coor, Character*)> renderer)
 {
     auto gathered = gatherSurroundings(loc, ch, minX, maxX, minY, maxY, is_valid);
 
     std::unordered_map<Coordinates, std::string> rendered;
 
     for(const auto& [coord, dest] : gathered) {
-        rendered[coord] = renderer(dest, ch);
+        rendered[coord] = renderer(dest, coord, ch);
     }
 
     return rendered;
 }
 
+
+static std::vector<std::string> printTileMap(const std::unordered_map<Coordinates, std::string>& tileMap, int minX, int maxX, int minY, int maxY)
+{
+    std::vector<std::string> output;
+    Coordinates current;
+    for (int y = maxY; y >= minY; --y) {
+        auto& line = output.emplace_back();
+        for (int x = minX; x <= maxX; ++x) {
+            current.x = x;
+            current.y = y;
+            if (auto it = tileMap.find(current); it != tileMap.end()) {
+                line += it->second;
+            } else {
+                line += " ";
+            }
+        }
+    }
+    return output;
+}
+
+static const std::unordered_map<SectorType, std::string> tileStrings = {
+    {SectorType::inside,       "@wI@W"},   // Inside
+    {SectorType::city,         "@WC@W"},   // City
+    {SectorType::field,        "@GP@W"},   // Plain/Field
+    {SectorType::forest,       "@gF@W"},   // Forest
+    {SectorType::hills,        "@yH@W"},   // Hills
+    {SectorType::mountain,     "@DM@W"},   // Mountain
+    {SectorType::water_swim,   "@c~@W"},   // Shallow water
+    {SectorType::water_noswim, "@BW@W"},   // Deep water / need boat
+    {SectorType::flying,       "@CS@W"},   // Sky
+    {SectorType::underwater,   "@bU@W"},   // Underwater
+    {SectorType::shop,         "@m$@W"},   // Shop
+    {SectorType::important,    "@m#@W"},   // Important
+    {SectorType::desert,       "@YD@W"},   // Desert
+    {SectorType::space,        " "},   // Space (not in legend; star on black as a reasonable default)
+    {SectorType::lava,         "@4 @n@W"}, // Lava (red space, then reset)
+};
+
+static void ensureColumns(std::vector<std::string>& lines, int length, int lineCount) {
+    for(auto& l : lines) {
+        auto len = processColors(l, false, nullptr).size();
+        if(len < length) {
+            l += std::string(length - len, ' ');
+        }
+    }
+    while(lines.size() < lineCount) {
+        lines.emplace_back(std::string(length, ' '));
+    }
+}
+
+static std::vector<std::string> tileKey = {
+    "@WC: City, @wI@W: Inside, @GP@W: Plain@n",
+    "@gF@W: Forest, @DM@W: Mountain, @yH@W: Hills@",
+    "@CS@W: Sky, @BW@W: Water, @bU@W: Underwater@n",
+    "@m$@W: Shop, @m#@W: Important, @YD@W: Desert@n",
+    "@c~@W: Shallow Water, @4 @n@W: Lava, @RX@W: You@n"
+};
+
+static const std::vector<std::string> randomStarColors = {
+    "Y",
+    "W",
+//    "G",
+    "C",
+    "B",
+//    "M",
+    "R"
+};
+
 static void gen_map(const Location& loc, Character *ch, int num)
 {
-    char map[9][10] = {{'-'}, {'-'}};
-    char buf2[MAX_INPUT_LENGTH];
 
-    if (num == 1)
-    {
-        print_map_key(ch);
-    }
+    auto compassLines = renderCompassLines(loc, ch);
 
-    initialize_map(map);
-    // Create a fake Destination for our start node.
-    Destination start;
-    start = loc;
-
-    map_draw_room(map, 4, 4, start, ch);
-
-    auto exits = start.getExits();
-
-    for (auto &[door, e] : exits)
-    {
-
-        switch (door)
-        {
-        case Direction::north:
-            map_draw_room(map, 4, 3, e, ch);
-            break;
-        case Direction::east:
-            map_draw_room(map, 5, 4, e, ch);
-            break;
-        case Direction::south:
-            map_draw_room(map, 4, 5, e, ch);
-            break;
-        case Direction::west:
-            map_draw_room(map, 3, 4, e, ch);
-            break;
-        case Direction::northeast:
-            map_draw_room(map, 5, 3, e, ch);
-            break;
-        case Direction::northwest:
-            map_draw_room(map, 3, 3, e, ch);
-            break;
-        case Direction::southeast:
-            map_draw_room(map, 5, 5, e, ch);
-            break;
-        case Direction::southwest:
-            map_draw_room(map, 3, 5, e, ch);
-            break;
+    auto renderer = [](const Destination& d, const Coordinates& coor, Character* c) -> std::string {
+        if(!coor) return "@RX@n"; // override for origin point.
+        if(auto s = d.getTileDisplayOverride()) return *s;
+        auto sect = d.getSectorType();
+        if(sect == SectorType::space) {
+            if(Random::get<int>(0, 100) <= 8) {
+                // 8% chance of seeing a 'random star'.
+                auto rcolor = Random::get(randomStarColors);
+                return fmt::format("@{}.@n", *rcolor); // star in color.
+            }
         }
-    }
-
-    map[4][4] = 'x';
-
-    int key = 0;
-    auto goodexit = [&exits](Direction dir)
-    {
-        return exits.contains(dir) && !EXIT_FLAGGED(&exits.at(dir), EX_SECRET);
-    };
-    auto isclosed = [&exits](Direction dir) {
-        return EXIT_FLAGGED(&exits.at(dir), EX_CLOSED);
+        if(auto find = tileStrings.find(sect); find != tileStrings.end()) {
+            return find->second;
+        }
+        return "?"; // ultimate fallback this should never happen.
     };
 
-    for (int i = 2; i < 9; i++)
-    {
-        if (i > 6)
-            continue;
+    auto traverseRules = [](const Destination& d, Character* c) -> bool {
+        return !(d.exit_flags[EX_SECRET] || d.exit_flags[EX_CLOSED]);
+    };
 
-        switch (i)
-        {
-        case 2:
-            sprintf(buf2, "@w       @w|%s@w|           %s",
-                    goodexit(Direction::north) ? (isclosed(Direction::north) ? " @rN " : " @CN ") : "   ", map[i]);
-            break;
-        case 3:
-            sprintf(buf2, "@w @w|%s@w| |%s@w| |%s@w|     %s",
-                    goodexit(Direction::northwest) ? (isclosed(Direction::northwest) ? " @rNW" : " @CNW") : "   ",
-                    goodexit(Direction::up) ? (isclosed(Direction::up) ? " @yU " : " @YU ") : "   ",
-                    goodexit(Direction::northeast) ? (isclosed(Direction::northeast) ? "@rNE " : "@CNE ") : "   ", map[i]);
-            break;
-        case 4:
-            sprintf(buf2, "@w @w|%s@w| |%s@w| |%s@w|     %s",
-                    goodexit(Direction::west) ? (isclosed(Direction::west) ? "  @rW" : "  @CW") : "   ",
-                    goodexit(Direction::inside) ? (isclosed(Direction::inside) ? " @rI " : " @mI ") : (goodexit(Direction::outside) ? (isclosed(Direction::outside) ? "@rOUT" : "@mOUT") : "@r{ }"),
-                    goodexit(Direction::east) ? (isclosed(Direction::east) ? "@rE  " : "@CE  ") : "   ", map[i]);
-            break;
-        case 5:
-            sprintf(buf2, "@w @w|%s@w| |%s@w| |%s@w|     %s",
-                    goodexit(Direction::southwest) ? (isclosed(Direction::southwest) ? " @rSW" : " @CSW") : "   ",
-                    goodexit(Direction::down) ? (isclosed(Direction::down) ? " @yD " : " @YD ") : "   ",
-                    goodexit(Direction::southeast) ? (isclosed(Direction::southeast) ? "@rSE " : "@CSE ") : "   ", map[i]);
-            break;
-        case 6:
-            sprintf(buf2, "@w       @w|%s@w|           %s",
-                    goodexit(Direction::south) ? (isclosed(Direction::south) ? " @rS " : " @CS ") : "   ", map[i]);
-            break;
-        }
+    auto tileMap = renderTileMap(loc, ch, -9, 9, -4, 4, traverseRules, renderer);
+    auto tileMapLines = printTileMap(tileMap, -6, 6, -2, 2);
 
-        replace_map_symbols(buf2);
+    auto keyLines = tileKey;
 
-        if (num != 1)
-        {
-            print_map_line(ch, key, buf2);
-            key++;
-        }
-        else
-        {
-            ch->sendText(buf2);
-        }
+    auto totalLines = std::max({tileMapLines.size(), keyLines.size(), compassLines.size()});
+    ensureColumns(compassLines, 22, totalLines);
+    ensureColumns(tileMapLines, 22, totalLines);
+    ensureColumns(keyLines, 10, totalLines);
+
+    auto output = std::vector<std::string>();
+    for (size_t i = 0; i < totalLines; ++i) {
+        auto &line = output.emplace_back();
+        line += compassLines[i];
+        line += tileMapLines[i];
+        line += keyLines[i];
     }
 
-    if (num == 1)
-    {
-        ch->sendText("@D                ---------@w\r\n");
+    for(auto &line : output) {
+        ch->sendFmt("{}\r\n", line);
     }
+
 }
 
 static void display_spells(Character *ch, Object *obj)
@@ -3081,8 +3088,8 @@ void do_auto_exits(const Location& loc, Character *ch, int exit_mode)
     if (exit_mode == EXIT_NORMAL && !space && cloc == loc)
     {
         ch->sendText("@D------------------------------------------------------------------------@n\r\n");
-        ch->sendText("@w      Compass           Auto-Map            Map Key\r\n");
-        ch->sendText("@R     ---------         ----------   -----------------------------\r\n");
+        ch->sendText("@w      Compass           Auto-Map                    Map Key\r\n");
+        ch->sendText("@R-----------------     -------------         -----------------------------\r\n");
         gen_map(loc, ch, 0);
         ch->sendText("@D------------------------------------------------------------------------@n\r\n");
     }
@@ -3766,7 +3773,7 @@ static void look_out_window(Character *ch, const char *arg)
     room_rnum target_room = NOWHERE;
     int bits, door;
 
-    auto r = ch->getRoom();
+    Location target;
 
     /* First, lets find something to look out of or through. */
     if (*arg)
@@ -3814,27 +3821,27 @@ static void look_out_window(Character *ch, const char *arg)
         if (GET_OBJ_VAL(viewport, VAL_WINDOW_DEFAULT_ROOM) < 0)
         {
             /* Look for the default "outside" room */
-            for (auto &[d, e] : r->getDirections())
+            for (auto &[d, e] : ch->location.getExits())
             {
                 if (!e.getRoomFlag(ROOM_INDOORS))
                 {
-                    target_room = e.getVnum();
+                    target = e;
                     break;
                 }
             }
         }
         else
         {
-            target_room = real_room(GET_OBJ_VAL(viewport, VAL_WINDOW_DEFAULT_ROOM));
+            target = GET_OBJ_VAL(viewport, VAL_WINDOW_DEFAULT_ROOM);
         }
     }
     else
     {
         /* We are looking out of a vehicle */
         if ((vehicle = find_vehicle_by_vnum(GET_OBJ_VAL(viewport, VAL_WINDOW_VIEWPORT))))
-            target_room = IN_ROOM(vehicle);
+            target = vehicle->location;
     }
-    if (target_room == NOWHERE)
+    if (!target)
     {
         ch->sendText("You don't seem to be able to see outside.\r\n");
         return;
@@ -3844,8 +3851,7 @@ static void look_out_window(Character *ch, const char *arg)
     else
         act("$n looks out the window.", true, ch, nullptr, nullptr, TO_ROOM);
     ch->sendText("You look outside and see:\r\n");
-    Location loc(target_room);
-    ch->lookAtLocation(loc);
+    ch->lookAtLocation(target);
 }
 
 ACMD(do_finger)

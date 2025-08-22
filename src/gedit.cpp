@@ -170,7 +170,7 @@ ACMD(do_oasis_gedit)
 
 void gedit_setup_new(struct descriptor_data *d)
 {
-    auto guilddata = new guild_data();
+    auto guilddata = new Guild();
 
     /*. Some default strings . */
     G_NO_SKILL(guilddata) = strdup("%s Sorry, but I don't know that one.");
@@ -185,7 +185,7 @@ void gedit_setup_new(struct descriptor_data *d)
 void gedit_setup_existing(struct descriptor_data *d, int rgm_num)
 {
     /*. Alloc some guild shaped space . */
-    OLC_GUILD(d) = new guild_data();
+    OLC_GUILD(d) = new Guild();
     copy_guild(OLC_GUILD(d), &guild_index.at(rgm_num));
     gedit_disp_menu(d);
 }
@@ -232,7 +232,7 @@ void gedit_select_skills_menu(struct descriptor_data *d)
 void gedit_select_spells_menu(struct descriptor_data *d)
 {
     int i, j = 0, found = 0;
-    struct guild_data *guilddata;
+    struct Guild *guilddata;
 
     guilddata = OLC_GUILD(d);
     clear_screen(d);
@@ -358,7 +358,7 @@ void gedit_no_train_menu(struct descriptor_data *d)
 {
     char bits[MAX_STRING_LENGTH];
     int i, count = 0;
-    struct guild_data *guilddata;
+    struct Guild *guilddata;
 
     guilddata = OLC_GUILD(d);
     clear_screen(d);
@@ -379,7 +379,7 @@ void gedit_no_train_menu(struct descriptor_data *d)
 
 void gedit_disp_menu(struct descriptor_data *d)
 {
-    struct guild_data *guilddata;
+    struct Guild *guilddata;
     char buf1[MAX_STRING_LENGTH];
 
     guilddata = OLC_GUILD(d);
