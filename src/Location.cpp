@@ -686,12 +686,7 @@ static void display_room_flags(Location& loc, Character *ch, const std::vector<Z
         ch->sendText("\r\n@wO----------------------------------------------------------------------O@n\r\n");
     }
 
-    std::vector<std::string> zoneNames;
-    for(const auto& zone : boost::adaptors::reverse(zones)) {
-        zoneNames.push_back(fmt::format("{}@n", zone->displayNameFor(ch)));
-    }
-
-    ch->sendFmt("@wRegion:@n {}@n\r\n", fmt::join(zoneNames, " -> "));
+    ch->sendFmt("@wRegion:@n {}@n\r\n", renderZoneChain(zones, ch));
 
     ch->send_to("@wLocation: @G%-70s@w\r\n", loc.getName());
 
@@ -742,12 +737,7 @@ static void display_room_info(Location& loc, Character *ch, const std::vector<Zo
         ch->sendText("@wO----------------------------------------------------------------------O@n\r\n");
     }
 
-    std::vector<std::string> zoneNames;
-    for(const auto& zone : boost::adaptors::reverse(zones)) {
-        zoneNames.push_back(fmt::format("{}@n", zone->displayNameFor(ch)));
-    }
-
-    ch->sendFmt("@wRegion:@n {}@n\r\n", fmt::join(zoneNames, " -> "));
+    ch->sendFmt("@wRegion:@n {}@n\r\n", renderZoneChain(zones, ch));
     ch->send_to("@wLocation: %-70s@n\r\n", loc.getName());
 
     double grav = loc.getEnvironment(ENV_GRAVITY);
@@ -1001,6 +991,7 @@ void Location::displayLookFor(Character* ch) {
 
     auto z = getZone();
     auto zones = z->getChain();
+    std::reverse(zones.begin(), zones.end());
 
     if (PRF_FLAGGED(ch, PRF_ROOMFLAGS))
     {
@@ -1023,37 +1014,15 @@ void Location::displayLookFor(Character* ch) {
         do_auto_exits(*this, ch, EXIT_LEV(ch));
     }
 
-    auto validSpots = [](const auto& locs) {
-        std::unordered_map<std::string, Location> valid;
-        for(const auto& [key, locid] : locs) {
-            if(auto l = Location(locid); l) {
-                valid[key] = l;
-            }
-        }
-        return valid;
-    };
-
-    auto locid = getLocID();
-    auto root_zone = zones.back();
-    if(root_zone->launchDestination == locid) {
+    auto launch = getLaunchDestination();
+    auto root_zone = zones.front();
+    if(launch == *this) {
         // we are in the orbit of a place.
         ch->sendFmt("@wYou are in low orbit above {}@n\r\n", root_zone->name);
-        if(ch->location.getLocID().starts_with("S")) {
-            // viewer is in a spaceship. We'll display docking spots.
-            auto docking_spots = validSpots(root_zone->dockingSpots);
-            ch->sendText("@wDocking Spots (for pilot land):@n\r\n");
-            for(const auto& [key, loc] : docking_spots) {
-                ch->sendFmt("{}\r\n", key);
-            }
-        } else {
-            // viewer is not in a spaceship. We'll display landing spots.
-            auto landing_spots = validSpots(root_zone->landingSpots);
-            ch->sendText("@wLanding Spots (for land):@n\r\n");
-            for(const auto& [key, loc] : landing_spots) {
-                ch->sendFmt("{}\r\n", key);
-            }
+        // ship or just flying?
+        auto spots = ch->location.getLocID().starts_with("S") ? root_zone->getDockingSpots() : root_zone->getLandingSpots();
+        displayLandSpots(ch, root_zone->name, spots);
     }
-}
 
     display_garden_info(*this, ch);
 
