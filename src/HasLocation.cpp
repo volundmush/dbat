@@ -22,8 +22,10 @@ room_vnum HasLocation::getRoomVnum()
 }
 
 void HasLocation::updateLocation() {
-    if (auto a = location.getLoc()) {
-        a->addToContents(location.position, getSharedHasLocation());
+    Location loc = location;
+    if (auto a = loc.getLoc()) {
+        a->addToContents(loc.position, getSharedHasLocation());
+        onMoveToLocation(loc);
     }
 }
 
@@ -35,11 +37,13 @@ void HasLocation::moveToLocation(const Location& loc) {
 }
 
 void HasLocation::leaveLocation()
-{
-    if (auto a = location.getLoc()) {
+{   
+    Location loc = location;
+    if (auto a = loc.getLoc()) {
         location.al.reset();
         location.position = {};
         a->removeFromContents(getSharedHasLocation());
+        onLeaveLocation(loc);
     } else {
         location.al.reset();
         location.position = {};
@@ -51,13 +55,13 @@ bool HasLocation::getLocationVisibleTo(Character* viewer) {
 }
 
 void HasLocation::onMoveToLocation(const Location& loc) {
-    
+    // default implementation does nothing.
 }
 
 void HasLocation::onLeaveLocation(const Location& loc) {
-    
+    // default implementation does nothing.
 }
 
 void HasLocation::onLocationChanged(const Location& oldloc, const Location& newloc) {
-
+    // this isn't used yet.
 }

@@ -25,12 +25,4 @@ constexpr room_vnum ORBIT_CERRIA = 198;
 constexpr room_vnum ORBIT_ARLIA = 59;
 constexpr room_vnum ORBIT_ZENITH = 57;
 
-extern std::optional<WhereFlag> checkOrbit(const room_vnum room);
-extern std::optional<WhereFlag> getPlanet(const room_vnum room);
-extern std::string getPlanetName(const WhereFlag planet);
-extern std::string getPlanetColorName(const WhereFlag planet);
-extern std::optional<double> getPlanetEnvironment(const WhereFlag planet, const int environment);
-extern room_vnum getPlanetOrbit(const WhereFlag planet);
-extern std::vector<std::pair<std::string, room_vnum>> getPlanetLandspots(const WhereFlag orbit);
-extern std::vector<std::pair<std::string, room_vnum>> getPlanetSpacepads(const WhereFlag orbit);
-extern void displayLandSpots(Character *ch, const std::string &planet_name, const std::vector<std::pair<std::string, room_vnum>> &locations);
+extern void displayLandSpots(Character *ch, std::string_view planet_name, const std::map<std::string, Location> &locations);

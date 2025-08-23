@@ -2345,7 +2345,7 @@ int planet_check(Character *ch, Character *vict)
         return false;
     }
 
-    return getPlanet(ch->location.getVnum()) == getPlanet(vict->location.getVnum());
+    return ch->location.getZone()->getRoot() == vict->location.getZone()->getRoot();
 }
 
 void purge_homing(Character *ch)

@@ -202,234 +202,137 @@ void sub_write(char *arg, Character *ch, int8_t find_invis, int targets) {
     }
 }
 
-void fly_planet(room_vnum roomVnum, const char *messg, Character *ch) {
-    if (!messg || !*messg)
-        return;
 
-    auto planet = getPlanet(ch->location.getVnum());
+void Zone::actToOutside(Character *source, const char* messg, bool childrenOnly) {
+    auto func = [&](Character *ch) {
+        if(ch == source) return;
+        if(ch->location == source->location) return;
+        if(!AWAKE(ch)) return;
+        if(!OUTSIDE(ch)) return;
+        act(messg, true, source, nullptr, ch, TO_VICT);
+    };
 
-    if(!planet) {
-        return;
-    }
+    if(childrenOnly) {
+        for(auto z : getChildren()) z->for_each_listening(func);
+    } else for_each_listening(func);
+}
 
-    for(auto i = descriptor_list; i; i = i->next) {
-        if(!i->connected) continue;
-        if(!i->character) continue;
-        if(!AWAKE(i->character)) continue;
-        if(IN_ROOM(i->character) == NOWHERE) continue;
-        if(!OUTSIDE(i->character)) continue;
+void Zone::sendToSense(Character *source, const char* messg, bool childrenOnly) {
+    auto zchain = source->location.getZone()->getChain();
+    // reverse the zchain....
+    std::reverse(zchain.begin(), zchain.end());
 
-        if(planet != getPlanet(i->character->location.getVnum())) continue;
+    auto func = [&](Character* ch) {
+        if (ch == source) return;
+        if(ch->location == source->location) return;
+        if(!AWAKE(ch)) return;
+        if (!GET_SKILL(ch, SKILL_SENSE)) return;
 
-        if (PLR_FLAGGED(i->character, PLR_DISGUISED)) {
-            i->send_to("A disguised figure %s", messg);
+        auto alignAura = source->otherSenseAlign(ch);
+        auto power = source->otherSensePower(ch);
+
+        std::string name = "someone";
+        if(source->isPC) {
+            auto recognize = read_sense_memory(source, ch);
+            if(recognize) {
+                if(readIntro(ch, source) == 1) {
+                    name = get_i_name(source, ch);
+                }
+            } else {
+                name = "someone familiar";
+            }
         } else {
-            i->send_to("%s%s %s", readIntro(i->character, ch) == 1 ? "" : "A ",
-                       get_i_name(i->character, ch), messg);
+            name = source->getShortDescription();
         }
+        
+
+        if(boost::icontains(messg, "landing")) {
+            auto dest = renderZoneChain(zchain, ch);
+            ch->sendFmt("@nYou sense {}@n, who is {} and has {}, {}! They appear to have landed at...{}@n\r\n",
+                        name, power, alignAura, messg, dest);
+        } else {
+            ch->sendFmt("@nYou sense {}@n, who is {} and has {}, {}!@n\r\n",
+                        name, power, alignAura, messg);
+        }
+    };
+
+    if(childrenOnly) {
+        for(auto z : getChildren()) z->for_each_listening(func);
     }
-}
-
-void fly_zone(Zone *zone, char *messg, Character *ch) {
-    if (!messg || !*messg)
-        return;
-
-    for (auto i = descriptor_list; i; i = i->next) {
-        if (!i->connected && i->character && AWAKE(i->character) && OUTSIDE(i->character) &&
-            (i->character->location.getZone() == zone) && i->character != ch) {
-            if (PLR_FLAGGED(i->character, PLR_DISGUISED)) {
-                i->send_to("A disguised figure %s", messg);
-            } else {
-                i->send_to("%s%s %s", readIntro(i->character, ch) == 1 ? "" : "A ",
-                           get_i_name(i->character, ch), messg);
-            }
-        }
-    }
-}
-
-void fly_zone(zone_rnum zone, char *messg, Character *ch) {
-    auto &z = zone_table.at(zone);
-    fly_zone(&z, messg, ch);
-}
-
-void send_to_sense(int type, const char *messg, Character *ch) {
-    if (!messg || !*messg)
-        return;
-
-    auto planet = getPlanet(ch->location.getVnum());
-    if(!planet && type == 0) {
-        return;
-    }
-
-    for (auto i = descriptor_list; i; i = i->next) {
-        if (STATE(i) != CON_PLAYING) {
-            continue;
-        }
-        auto tch = i->character;
-        if (tch == ch) {
-            continue;
-        }
-        if (ch->location == tch->location)
-            continue;
-        auto obj = GET_EQ(tch, WEAR_EYE);
-        if (!GET_SKILL(tch, SKILL_SENSE)) {
-            continue;
-        }
-        if(auto p = getPlanet(tch->location.getVnum()); type == 0) {
-            if (!p) {
-                continue;
-            }
-        }
-        if (obj && type == 0) {
-            continue;
-        }
-        if (IS_ANDROID(ch)) {
-            continue;
-        }
-
-        auto hitch = GET_HIT(ch);
-        auto thitch = GET_HIT(tch);
-        if (hitch < (thitch * 0.001) + 1)
-            continue;
-
-        if (type == 0) {
-            auto maxch = GET_MAX_HIT(ch);
-            auto maxtch = GET_MAX_HIT(tch);
-            if (maxch > maxtch) {
-                i->send_to("%s who is stronger than you. They are nearby.\r\n", messg);
-            } else if (maxch >= maxtch * .9) {
-                i->send_to("%s who is near your strength. They are nearby.\r\n", messg);
-            } else if (maxch >= maxtch * .6) {
-                i->send_to("%s who is a good bit weaker than you. They are nearby.\r\n", messg);
-            } else if (maxch >= maxtch * .4) {
-                i->send_to("%s who is a lot weaker than you. They are nearby.\r\n", messg);
-            }
-            if (readIntro(tch, ch) == 1) {
-                i->send_to("@YYou recognise this signal as @y%s@Y!@n\r\n", get_i_name(tch, ch));
-            } else if (read_sense_memory(ch, tch)) {
-                i->sendText("@YYou recognise this signal, but don't seem to know their name.@n\r\n");
-            }
-        } else if (planet_check(ch, tch)) {
-            char power[MAX_INPUT_LENGTH];
-            char align[MAX_INPUT_LENGTH];
-            if (hitch > thitch * 10) {
-                sprintf(power, ", who is @Runbelievably stronger@Y than you");
-            } else if (hitch > thitch * 5) {
-                sprintf(power, ", who is much @Rstronger@Y than you");
-            } else if (hitch > thitch * 2) {
-                sprintf(power, ", who is more than twice as @Rstrong@Y as you");
-            } else if (hitch > thitch) {
-                sprintf(power, ", who is somewhat @mstronger@Y than you");
-            } else if (hitch * 10 < thitch) {
-                sprintf(power, ", who is @Munbelievably weaker@Y than you");
-            } else if (hitch * 5 < thitch) {
-                sprintf(power, ", who is much @Mweaker@Y than you");
-            } else if (hitch * 2 < thitch) {
-                sprintf(power, ", who is more than twice as @Mweak@Y as you");
-            } else if (hitch < thitch) {
-                sprintf(power, ", who is somewhat @Wweaker@Y than you");
-            } else {
-                sprintf(power, ", who is close to @Cequal@Y with you");
-            }
-            auto al = GET_ALIGNMENT(ch);
-            if (al >= 1000) {
-                sprintf(align, ", with a @wsaintly@Y aura,");
-            } else if (al >= 500) {
-                sprintf(align, ", with a very @Cgood@Y aura,");
-            } else if (al >= 200) {
-                sprintf(align, ", with a @cgood@Y aura,");
-            } else if (al > -100) {
-                sprintf(align, ", with a near @Wneutral@Y aura,");
-            } else if (al > -200) {
-                sprintf(align, ", with a sorta @revil@Y aura,");
-            } else if (al > -500) {
-                sprintf(align, ", with an @revil@Y aura,");
-            } else if (al > -900) {
-                sprintf(align, ", with a @rvery evil@Y aura,");
-            } else {
-                sprintf(align, ", with a @rd@De@Wv@wil@Wi@Ds@rh@Y aura,");
-            }
-            if (strstr(messg, "land"))
-                i->send_to("@YYou sense %s%s%s %s! They appear to have landed at...@G%s@n\r\n",
-                            readIntro(tch, ch) == 1 ? get_i_name(tch, ch) : "someone", power, align, messg, sense_location(ch));
-            else
-                i->send_to("@YYou sense %s%s%s %s!@n\r\n",
-                            readIntro(tch, ch) == 1 ? get_i_name(tch, ch) : "someone", power, align, messg);
-        }
-    }
+    else for_each_listening(func);
 }
 
 void send_to_scouter(const char *messg, Character *ch, int num, int type) {
     if (!messg || !*messg)
         return;
+    
+    if (IS_ANDROID(ch)) return;
 
-    auto planet = getPlanet(ch->location.getVnum());
+    auto planet = ch->location.getZone()->getRoot();
     if(!planet && type == 0) {
         return;
     }
 
     auto pl = ch->getPL();
-    auto senseLoc = sense_location(ch);
-    
-    for (auto i = descriptor_list; i; i = i->next) {
-        if (STATE(i) != CON_PLAYING) {
-            continue;
-        }
-        auto tch = i->character;
-        auto obj = GET_EQ(tch, WEAR_EYE);
-        if (tch == ch) continue;
-        if(!AWAKE(tch)) continue;
 
-        if(auto p = getPlanet(tch->location.getVnum()); type == 0) {
-            if (!p) {
-                continue;
-            }
-        }
+    auto zchain = ch->location.getZone()->getChain();
+    std::reverse(zchain.begin(), zchain.end());
+
+    planet->for_each_listening([&](Character *tch) {
+        if (tch == ch) return;
+        if(tch->location == ch->location) return;
+        if (!AWAKE(tch)) return;
 
         if (GET_INVIS_LEV(ch) > GET_ADMLEVEL(tch)) {
-            continue;
+            return;
         }
-        if (IS_ANDROID(ch)) continue;
+        
+        auto obj = GET_EQ(tch, WEAR_EYE);
+        if (!obj) return;
 
-        if (!obj) continue;
-        if (ch->location == tch->location) continue;
+        if (type == 0 && num == 1) {
+            tch->sendText("@D[@GBlip@D]@r Rising Powerlevel Detected@D:@Y ??????????\r\n");
+            return;
+        }
+
+        std::string senseLoc = renderZoneChain(zchain, tch);
 
         auto scoutVal = obj->getBaseStat<int64_t>(VAL_WORN_SCOUTER);
         if (type == 0) {
             if (num == 1) {
                 if (pl >= scoutVal) {
-                    i->sendText("@D[@GBlip@D]@r Rising Powerlevel Detected@D:@Y ??????????\r\n");
+                    tch->sendText("@D[@GBlip@D]@r Rising Powerlevel Detected@D:@Y ??????????\r\n");
                 } else {
-                    i->send_to("%s@n", messg);
+                    tch->send_to("%s@n", messg);
                 }
             } else {
                 if (pl >= scoutVal) {
-                    i->sendText("@D[@GBlip@D]@r Nearby Powerlevel Detected@D:@Y ??????????\r\n");
+                    tch->sendText("@D[@GBlip@D]@r Nearby Powerlevel Detected@D:@Y ??????????\r\n");
                 } else {
-                    i->send_to("%s\r\n", messg);
+                    tch->send_to("%s\r\n", messg);
                 }
             }
         } else if (type == 1 && GET_SKILL(tch, SKILL_SENSE) < 20) {
             if (pl >= scoutVal) {
-                i->send_to("@D[@GBlip@D]@w %s. @RPL@D:@Y ??????????\r\n", messg);
+                tch->send_to("@D[@GBlip@D]@w %s. @RPL@D:@Y ??????????\r\n", messg);
             } else {
-                i->send_to("@D[Blip@D]@w %s. @RPL@D:@Y %s@n\r\n\r\n", messg, add_commas(pl).c_str());
+                tch->send_to("@D[Blip@D]@w %s. @RPL@D:@Y %s@n\r\n\r\n", messg, add_commas(pl).c_str());
             }
         } else if (type == 2 && GET_SKILL(tch, SKILL_SENSE) < 20) {
             if (pl >= scoutVal) {
-                i->send_to("@D[@GBlip@D]@w %s at... @G%s. @RPL@D:@Y ??????????\r\n", messg, senseLoc);
+                tch->send_to("@D[@GBlip@D]@w %s at... @G%s. @RPL@D:@Y ??????????\r\n", messg, senseLoc);
             } else {
-                i->send_to("@D[Blip@D]@w %s at... @G%s. @RPL@D:@Y %s@n\r\n\r\n", messg, senseLoc,
+                tch->send_to("@D[Blip@D]@w %s at... @G%s. @RPL@D:@Y %s@n\r\n\r\n", messg, senseLoc,
                            add_commas(pl).c_str());
             }
         }
-    }
+    });
 }
 
 void send_to_worlds(Character *ch) {
     char message[MAX_INPUT_LENGTH];
 
-    auto maxh = GET_MAX_HIT(ch);
+    auto maxh = ch->getPL();
 
     if (maxh > 2000000000) {
         sprintf(message, "@RThe whole planet begins to quake violently as if the world is ending!@n\r\n");
@@ -445,14 +348,12 @@ void send_to_worlds(Character *ch) {
         return;
     }
 
-    auto p = getPlanet(ch->location.getVnum());
+    auto p = ch->location.getZone()->getRoot();
     if(!p) return;
 
-    for (auto i = descriptor_list; i; i = i->next) {
-        if (STATE(i) != CON_PLAYING) {
-            continue;
-        }
-        if(p != getPlanet(i->character->location.getVnum())) continue;
-                i->character->send_to("%s", message);
-    }
+    p->for_each_listening([&](Character *c) {
+        if(ch == c) return;
+        if(!AWAKE(c)) return;
+        c->send_to("%s", message);
+    });
 }

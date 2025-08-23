@@ -136,6 +136,9 @@ struct Location {
     void displayLookFor(Character* viewer);
 
     bool buildwalk(Character* ch, Direction dir);
+
+    Location getLaunchDestination();
+    Zone* getLandZone();
 };
 
 template <>

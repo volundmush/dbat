@@ -912,6 +912,16 @@ void Character::modPractices(int amt)
     modBaseStat("practices", amt);
 }
 
+void Character::stopListening() {
+    if(auto z = location.getZone())
+        z->listeningInZone.remove(shared_from_this());
+}
+
+void Character::startListening() {
+    if(auto z = location.getZone())
+        z->listeningInZone.add(shared_from_this());
+}
+
 void Character::login()
 {
     enter_player_game(desc);
@@ -1027,7 +1037,7 @@ void Character::login()
     if (!IS_ANDROID(this))
     {
         char buf3[MAX_INPUT_LENGTH];
-        send_to_sense(0, "You sense someone appear suddenly", this);
+        location.getZone()->sendToSense(this, "appear suddenly nearby");
         sprintf(buf3,
                 "@D[@GBlip@D]@Y %s\r\n@RSomeone has suddenly entered your scouter detection range!@n.",
                 add_commas(GET_HIT(this)).c_str());
@@ -1649,6 +1659,7 @@ void Character::onMoveToLocation(const Location &loc)
 {
     auto z = loc.getZone();
     auto sh = shared_from_this();
+    if(desc) z->listeningInZone.add(sh);
     if (IS_NPC(this))
     {
         z->npcsInZone.add(sh);
@@ -1661,9 +1672,11 @@ void Character::onMoveToLocation(const Location &loc)
             pref_flags.set(PRF_ARENAWATCH, false);
             setBaseStat<room_vnum>("arena_watch", -1);
         }
+        auto &p = players.at(id);
+        for(auto zc : z->getChain()) {
+            p.known_zones.insert(zc->number);
+        }
     }
-
-
 }
 
 void Character::onLeaveLocation(const Location &loc)
@@ -1673,6 +1686,16 @@ void Character::onLeaveLocation(const Location &loc)
     {
         stop_fighting(FIGHTING(this));
         stop_fighting(this);
+    }
+    auto oldz = loc.getZone();
+    if(oldz) {
+        auto sh = shared_from_this();
+        if(desc) oldz->listeningInZone.remove(sh);
+        if (IS_NPC(this)) {
+            oldz->npcsInZone.remove(sh);
+        } else {
+            oldz->playersInZone.remove(sh);
+        }
     }
 }
 
@@ -1881,4 +1904,51 @@ std::string Character::displayNameFor(Character* viewer)
 
     // 5) Fallback: generic description
     return introd_calc(this);
+}
+
+std::string_view Character::otherSenseAlign(Character *other) {
+    auto al = GET_ALIGNMENT(this);
+
+    if (al >= 1000) {
+        return "a @wsaintly@Y aura";
+    } else if (al >= 500) {
+        return "a very @Cgood@Y aura";
+    } else if (al >= 200) {
+        return "a @cgood@Y aura";
+    } else if (al > -100) {
+        return "a near @Wneutral@Y aura";
+    } else if (al > -200) {
+        return "a sorta @revil@Y aura";
+    } else if (al > -500) {
+        return "an @revil@Y aura";
+    } else if (al > -900) {
+        return "a @rvery evil@Y aura";
+    } else {
+        return "a @rd@De@Wv@wil@Wi@Ds@rh@Y aura,";
+    }
+}
+
+std::string_view Character::otherSensePower(Character *other) {
+    auto mypl = getPL();
+    auto opl = other->getPL();
+
+    if (mypl > opl * 10) {
+        return "@Runbelievably stronger@n than you";
+    } else if (mypl > opl * 5) {
+        return "@Rmuch stronger@n than you";
+    } else if (mypl > opl * 2) {
+        return "@Rmore than twice your strength@n";
+    } else if (mypl > opl) {
+        return "@msomewhat stronger@n than you";
+    } else if (mypl * 10 < opl) {
+        return "@Munbelievably weaker@n than you";
+    } else if (mypl * 5 < opl) {
+        return "@Mmuch weaker@n than you";
+    } else if (mypl * 2 < opl) {
+        return "@Mmore than twice as weak@n as you";
+    } else if (mypl < opl) {
+        return "@Wsomewhat weaker@n than you";
+    } else {
+        return "@Croughly equal@Y with you";
+    }
 }

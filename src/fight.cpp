@@ -1017,7 +1017,7 @@ void powerupService(uint64_t heartPulse, double deltaTime)
             act("@R$n stops powering up in a flash of light!@n", true, ch, nullptr, nullptr, TO_ROOM);
             if (!IS_NPC(ch))
             {
-                send_to_sense(0, "You sense someone stop powering up", ch);
+                ch->location.getZone()->sendToSense(ch, "stop powering up");
                 sprintf(buf3, "@D[@GBlip@D]@r Rising Powerlevel Final@D: [@Y%s@D]", add_commas(GET_HIT(ch)).c_str());
                 send_to_scouter(buf3, ch, 1, 0);
             }
@@ -1048,7 +1048,8 @@ void powerupService(uint64_t heartPulse, double deltaTime)
 
             if (!IS_NPC(ch))
             {
-                send_to_sense(0, "You sense someone powering up", ch);
+                if(auto z = ch->location.getZone()->getRoot())
+                    z->sendToSense(ch, "powering up");
                 send_to_worlds(ch);
                 sprintf(buf3, "@D[@GBlip@D]@r Rising Powerlevel Detected@D: [@Y%s@D]", add_commas(GET_HIT(ch)).c_str());
                 send_to_scouter(buf3, ch, 1, 0);

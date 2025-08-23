@@ -13,6 +13,7 @@
 #include "dbat/Destination.h"
 #include "dbat/Descriptor.h"
 #include "dbat/Room.h"
+#include "dbat/Zone.h"
 #include "dbat/vehicles.h"
 #include "dbat/send.h"
 #include "dbat/comm.h"
@@ -564,16 +565,15 @@ static void handle_drive_direction(Character *ch, Object *vehicle, int dir, int 
 
 static void handle_drive_land(Character *ch, Object *vehicle, const std::string &pad)
 {
-    auto rvn = vehicle->location.getVnum();
-    auto planet = checkOrbit(rvn);
+    auto lz = vehicle->location.getLandZone();
 
-    if (!planet)
+    if (!lz)
     {
         ch->sendText("@wYou are not orbiting a planet.\r\n");
         return;
     }
 
-    auto pads = getPlanetSpacepads(planet.value());
+    auto pads = lz->getDockingSpots();
 
     if (pads.empty())
     {
@@ -584,24 +584,20 @@ static void handle_drive_land(Character *ch, Object *vehicle, const std::string 
     if (pad.empty())
     {
         ch->sendText("Land where?\r\n");
-        displayLandSpots(ch, getPlanetColorName(planet.value()), pads);
+        displayLandSpots(ch, lz->name, pads);
         return;
     }
 
-    room_vnum landing = NOWHERE;
+    Location landing;
     std::string landName = "UNKNOWN";
 
-    if (auto matched = partialMatch(pad, pads, false, [](const auto &p)
-                                    { return p.first; });
-        matched)
+    if (auto matched = partialMatch(pad, pads, false))
     {
         landing = matched.value()->second;
         landName = matched.value()->first;
     }
 
-    auto landroom = get_room(landing);
-
-    if (!landroom)
+    if (!landing)
     {
         ch->sendText("You can't land there.\r\n");
         return;
@@ -615,24 +611,24 @@ static void handle_drive_land(Character *ch, Object *vehicle, const std::string 
     act("@wThe ship has landed.@n", false, ch, 0, 0, TO_ROOM);
 
     vehicle->leaveLocation();
-    vehicle->moveToLocation(landroom);
+    vehicle->moveToLocation(landing);
 
     char buf3[MAX_INPUT_LENGTH];
     sprintf(buf3, "%s @wcomes in from above and slowly settles on the ground.@n\r\n", vehicle->getShortDescription());
     ch->lookAtLocation(vehicle->location);
-    landroom->sendText(buf3);
+    landing.sendText(buf3);
 }
 
 static void handle_drive_launch(Character *ch, Object *vehicle, Object *controls)
 {
-    auto planet = getPlanet(vehicle->location.getVnum());
-    if (!planet)
+    auto lz = vehicle->location.getLandZone();
+    if (!lz)
     {
         ch->sendText("@wYou are not on a planet.@n\r\n");
         return;
     }
-    auto dest = getPlanetOrbit(planet.value());
-    if (dest == NOWHERE)
+    auto dest = vehicle->location.getLaunchDestination();
+    if (!dest)
     {
         ch->sendText("@wYou are not on a planet.@n\r\n");
         return;

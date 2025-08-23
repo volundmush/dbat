@@ -17,6 +17,7 @@ struct PlayerData {
     std::unordered_set<int64_t> sense_player;
     std::unordered_set<mob_vnum> sense_memory;
     std::map<int64_t, std::string> dub_names;
+    std::unordered_set<zone_vnum> known_zones;
     char *color_choices[NUM_COLOR]{}; /* Choices for custom colors		*/
     struct txt_block *comm_hist[NUM_HIST]{}; /* Player's communications history     */
 };
@@ -85,6 +86,9 @@ struct Character : public HasID, public HasLocation, public HasEquipment, public
     }
 
     void login();
+
+    void startListening();
+    void stopListening();
 
     bool active{false};
     bool isActive() const override;
@@ -348,6 +352,9 @@ struct Character : public HasID, public HasLocation, public HasEquipment, public
     bool canSee(Object *target, bool skipLightCheck = false);
     
     std::string displayNameFor(Character* viewer);
+
+    std::string_view otherSensePower(Character* other);
+    std::string_view otherSenseAlign(Character* other);
 
 };
 

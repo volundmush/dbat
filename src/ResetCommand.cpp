@@ -45,23 +45,23 @@ std::string ResetCommand::print() const
     switch (type)
     {
     case ResetCommandType::MOB:
-        return fmt::sprintf("%sLoad MOB %s@y [@c%d@y], MaxSpawn : %d, MaxLoc : %d, Chance : %d\r\n", if_flag ? " then " : "", getMobShort(target), target, max, max_location, chance);
+        return fmt::sprintf("%sLoad MOB %s@y [@c%d@y], MaxSpawn : %d, MaxLoc : %d, Chance : %d", if_flag ? " then " : "", getMobShort(target), target, max, max_location, chance);
     case ResetCommandType::OBJ:
-        return fmt::sprintf("%sLoad OBJ %s@y [@c%d@y], MaxSpawn : %d, MaxLoc : %d, Chance : %d\r\n", if_flag ? " then " : "", getObjShort(target), target, max, max_location, chance);
+        return fmt::sprintf("%sLoad OBJ %s@y [@c%d@y], MaxSpawn : %d, MaxLoc : %d, Chance : %d", if_flag ? " then " : "", getObjShort(target), target, max, max_location, chance);
     case ResetCommandType::GIVE:
-        return fmt::sprintf("%sGive OBJ %s@y [@c%d@y] to MOB %s@y [@c%d@y], Chance : %d\r\n", if_flag ? " then " : "", getObjShort(target), target, getMobShort(ex), ex, chance);
+        return fmt::sprintf("%sGive OBJ %s@y [@c%d@y] to MOB %s@y [@c%d@y], Chance : %d", if_flag ? " then " : "", getObjShort(target), target, getMobShort(ex), ex, chance);
     case ResetCommandType::EQUIP:
-        return fmt::sprintf("%sEquip MOB %s@y [@c%d@y] with OBJ %s@y [@c%d@y], Chance : %d\r\n", if_flag ? " then " : "", getMobShort(target), target, getObjShort(ex), ex, chance);
+        return fmt::sprintf("%sEquip MOB %s@y [@c%d@y] with OBJ %s@y [@c%d@y], Chance : %d", if_flag ? " then " : "", getMobShort(target), target, getObjShort(ex), ex, chance);
     case ResetCommandType::PUT:
-        return fmt::sprintf("%sPut OBJ %s@y [@c%d@y] in OBJ %s@y [@c%d@y], Chance : %d\r\n", if_flag ? " then " : "", getObjShort(target), target, getObjShort(ex), ex, chance);
+        return fmt::sprintf("%sPut OBJ %s@y [@c%d@y] in OBJ %s@y [@c%d@y], Chance : %d", if_flag ? " then " : "", getObjShort(target), target, getObjShort(ex), ex, chance);
     case ResetCommandType::REMOVE:
-        return fmt::sprintf("%sRemove OBJ %s@y [@c%d@y] from location.\r\n", if_flag ? " then " : "", getObjShort(target), target);
+        return fmt::sprintf("%sRemove OBJ %s@y [@c%d@y] from location.", if_flag ? " then " : "", getObjShort(target), target);
     case ResetCommandType::DOOR:
         return fmt::sprintf("%sSet door %s as %s.\r\n", if_flag ? " then " : "", dirs[target], ex ? ((ex == 1) ? "closed" : "locked") : "open");
     case ResetCommandType::TRIGGER:
-        return fmt::sprintf("%sAttach trigger @c%s@y [@c%d@y] to %s\r\n", if_flag ? " then " : "", getTrigName(target), target, ((ex == static_cast<int>(MOB_TRIGGER)) ? "mobile" : ((ex == static_cast<int>(OBJ_TRIGGER)) ? "object" : ((ex == static_cast<int>(WLD_TRIGGER)) ? "room" : "????"))));
+        return fmt::sprintf("%sAttach trigger @c%s@y [@c%d@y] to %s", if_flag ? " then " : "", getTrigName(target), target, ((ex == static_cast<int>(MOB_TRIGGER)) ? "mobile" : ((ex == static_cast<int>(OBJ_TRIGGER)) ? "object" : ((ex == static_cast<int>(WLD_TRIGGER)) ? "room" : "????"))));
     case ResetCommandType::VARIABLE:
-        return fmt::sprintf("%sAssign global %s:%d to %s = %s\r\n", if_flag ? " then " : "", key.c_str(), ex, ((ex == static_cast<int>(MOB_TRIGGER)) ? "mobile" : ((ex == static_cast<int>(OBJ_TRIGGER)) ? "object" : ((ex == static_cast<int>(WLD_TRIGGER)) ? "room" : "????"))), value.c_str());
+        return fmt::sprintf("%sAssign global %s:%d to %s = %s", if_flag ? " then " : "", key.c_str(), ex, ((ex == static_cast<int>(MOB_TRIGGER)) ? "mobile" : ((ex == static_cast<int>(OBJ_TRIGGER)) ? "object" : ((ex == static_cast<int>(WLD_TRIGGER)) ? "room" : "????"))), value.c_str());
     }
     return "";
 }

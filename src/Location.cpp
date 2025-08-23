@@ -688,7 +688,7 @@ static void display_room_flags(Location& loc, Character *ch, const std::vector<Z
 
     std::vector<std::string> zoneNames;
     for(const auto& zone : boost::adaptors::reverse(zones)) {
-        zoneNames.push_back(fmt::format("{}@n", zone->name));
+        zoneNames.push_back(fmt::format("{}@n", zone->displayNameFor(ch)));
     }
 
     ch->sendFmt("@wRegion:@n {}@n\r\n", fmt::join(zoneNames, " -> "));
@@ -708,7 +708,7 @@ static void display_room_flags(Location& loc, Character *ch, const std::vector<Z
 
     double grav = loc.getEnvironment(ENV_GRAVITY);
     auto g = fmt::format("{}", grav);
-    snprintf(buf3, sizeof(buf3), "@D[ @G%s@D] @wSector: @D[ @G%s @D] @wVnum: @D[@G%s@D]@n Gravity: @D[@G%sx@D]@n", buf, buf2, loc.getLocID().c_str(), g.c_str());
+    snprintf(buf3, sizeof(buf3), "@D[ @G%s@D] @wSector: @D[ @G%s @D] @LocationID: @D[@G%s@D]@n Gravity: @D[@G%sx@D]@n", buf, buf2, loc.getLocID().c_str(), g.c_str());
     ch->send_to("@wFlags: %-70s@w\r\n", buf3);
 
     if (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_NODEC))
@@ -744,7 +744,7 @@ static void display_room_info(Location& loc, Character *ch, const std::vector<Zo
 
     std::vector<std::string> zoneNames;
     for(const auto& zone : boost::adaptors::reverse(zones)) {
-        zoneNames.push_back(fmt::format("{}@n", zone->name));
+        zoneNames.push_back(fmt::format("{}@n", zone->displayNameFor(ch)));
     }
 
     ch->sendFmt("@wRegion:@n {}@n\r\n", fmt::join(zoneNames, " -> "));
@@ -1083,6 +1083,33 @@ bool Location::buildwalk(Character* ch, Direction dir) {
         return a->buildwalk(position, ch, dir);
     }
     return false;
+}
+
+Location Location::getLaunchDestination() {
+    auto z = getZone();
+    while(z) {
+        if(!z->launchDestination.empty()) {
+            if(auto loc = Location(z->launchDestination)) return loc;
+        }
+        z = z->getParent();
+    }
+    // ultimate fallback; invalid/empty location.
+    return Location();
+}
+
+Zone* Location::getLandZone() {
+    // retrieves the Zone that should be checked for landing destinations.
+    auto z = getZone();
+    while(z) {
+        if(!z->launchDestination.empty()) {
+            if(auto loc = Location(z->launchDestination)) {
+                return z;
+            }
+        }
+        z = z->getParent();
+    }
+    // ultimate fallback; invalid/empty zone.
+    return nullptr;
 }
 
 void Location::setResetCommands(const std::vector<ResetCommand>& commands) {

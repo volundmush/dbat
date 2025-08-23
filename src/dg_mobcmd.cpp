@@ -697,7 +697,7 @@ ACMD(do_mpurge)
 ACMD(do_mgoto)
 {
     char arg[MAX_INPUT_LENGTH];
-    room_rnum location;
+    Location location;
 
     if (!MOB_OR_IMPL(ch))
     {
@@ -724,12 +724,12 @@ ACMD(do_mgoto)
         return;
     }
 
-    if ((location = find_target_room(ch, arg)) == NOWHERE && GET_MOB_VNUM(ch) != 3)
+    if (!(location = find_target_location(ch, arg)) && GET_MOB_VNUM(ch) != 3)
     {
         mob_log(ch, "mgoto: invalid location");
         return;
     }
-    else if ((location = find_target_room(ch, arg)) == NOWHERE)
+    else if (!(location = find_target_location(ch, arg)))
     {
         return;
     }
@@ -746,7 +746,7 @@ ACMD(do_mgoto)
 ACMD(do_mat)
 {
     char arg[MAX_INPUT_LENGTH];
-    room_vnum location;
+    Location location;
 
     if (!MOB_OR_IMPL(ch))
     {
@@ -765,7 +765,7 @@ ACMD(do_mat)
         return;
     }
 
-    if ((location = find_target_room(ch, arg)) == NOWHERE)
+    if (!(location = find_target_location(ch, arg)))
     {
         mob_log(ch, "mat: invalid location");
         return;
@@ -791,7 +791,7 @@ ACMD(do_mat)
 ACMD(do_mteleport)
 {
     char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
-    room_rnum target;
+    Location target;
     Character *vict, *next_ch;
 
     if (!MOB_OR_IMPL(ch))
@@ -811,9 +811,9 @@ ACMD(do_mteleport)
         return;
     }
 
-    target = find_target_room(ch, arg2);
+    target = find_target_location(ch, arg2);
 
-    if (target == NOWHERE)
+    if (!target)
     {
         mob_log(ch, "mteleport target is an invalid room");
         return;
@@ -821,7 +821,7 @@ ACMD(do_mteleport)
 
     if (boost::iequals(arg1, "all"))
     {
-        if (target == IN_ROOM(ch))
+        if (target == ch->location)
         {
             mob_log(ch, "mteleport all target is itself");
             return;

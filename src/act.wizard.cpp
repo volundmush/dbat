@@ -1112,12 +1112,63 @@ room_rnum find_target_room(Character *ch, char *rawroomstr)
 }
 
 Location find_target_location(Character *ch, char *rawroomstr) {
-    
+    char roomstr[MAX_INPUT_LENGTH];
+
+    one_argument(rawroomstr, roomstr);
+
+    if (!*roomstr)
+    {
+        ch->sendText("You must supply a LocationID or name.\r\n");
+        return {};
+    }
+
+    if (isdigit(*roomstr) && !strchr(roomstr, '.'))
+    {
+        if (auto loc = Location(roomstr))
+        {
+            return loc;
+        }
+        ch->sendText("No Location exists with that number.\r\n");
+        return {};
+    }
+    else
+    {
+        Character *target_mob;
+        Object *target_obj;
+        char *mobobjstr = roomstr;
+
+        auto num = get_number(&mobobjstr);
+        if ((target_mob = get_char_vis(ch, mobobjstr, &num, FIND_CHAR_WORLD)))
+        {
+            if (!target_mob->location)
+            {
+                ch->sendText("That character is currently lost.\r\n");
+                return {};
+            }
+            return target_mob->location;
+        }
+        else if ((target_obj = get_obj_vis(ch, mobobjstr, &num)))
+        {
+            auto loc = target_obj->getAbsoluteLocation();
+
+            if (!loc)
+            {
+                ch->sendText("That object is currently not in a room.\r\n");
+                return {};
+            }
+            return loc;
+        }
+
+        ch->sendText("Nothing exists by that name.\r\n");
+        return {};
+    }
+
+   return {};
 }
 
 ACMD(do_at)
 {
-    room_vnum location;
+    Location location;
     char command[MAX_INPUT_LENGTH], buf[MAX_INPUT_LENGTH];
 
     half_chop(argument, buf, command);
@@ -1133,7 +1184,7 @@ ACMD(do_at)
         return;
     }
 
-    if ((location = find_target_room(ch, buf)) == NOWHERE)
+    if (!(location = find_target_location(ch, buf)))
         return;
 
     /* a location has been found. */
@@ -1165,12 +1216,10 @@ ACMD(do_goto)
             return;
         }
     }
-    else if (auto location = find_target_room(ch, argument); location != NOWHERE)
+    else if (!(loc = find_target_location(ch, argument)))
     {
-        loc = Location(location);
-    }
-    else
         return;
+    }
 
     if (PLR_FLAGGED(ch, PLR_HEALT))
     {
@@ -1257,7 +1306,7 @@ ACMD(do_teleport)
 {
     char buf[MAX_INPUT_LENGTH], buf2[MAX_INPUT_LENGTH];
     Character *victim;
-    room_rnum target;
+    Location target;
 
     two_arguments(argument, buf, buf2);
 
@@ -1271,7 +1320,7 @@ ACMD(do_teleport)
         ch->sendText("Maybe you shouldn't do that.\r\n");
     else if (!*buf2)
         ch->sendText("Where do you wish to send this person?\r\n");
-    else if ((target = find_target_room(ch, buf2)) != NOWHERE)
+    else if ((target = find_target_location(ch, buf2)))
     {
         if (PLR_FLAGGED(victim, PLR_HEALT))
         {
@@ -2211,12 +2260,21 @@ ACMD(do_switch)
 
         victim->desc = ch->desc;
         ch->desc = nullptr;
+
+        // alter Zone listening indexes.
+        ch->stopListening();
+        victim->startListening();
     }
 }
 
 ACMD(do_return)
 {
-    if (ch->desc && ch->desc->original)
+    auto desc = ch->desc;
+    if (!desc)
+        return;
+    
+    auto victim = desc->original;
+    if (victim)
     {
         ch->sendText("You return to your original body.\r\n");
 
@@ -2229,19 +2287,22 @@ ACMD(do_return)
          * close() will damage our character's pointer to our descriptor
          * (which is assigned below in this function). 12/17/99
          */
-        if (ch->desc->original->desc)
+        if (victim->desc)
         {
-            ch->desc->original->desc->character = nullptr;
-            STATE(ch->desc->original->desc) = CON_DISCONNECT;
+            victim->desc->character = nullptr;
+            STATE(victim->desc) = CON_DISCONNECT;
         }
 
         /* Now our descriptor points to our original body. */
-        ch->desc->character = ch->desc->original;
-        ch->desc->original = nullptr;
+        desc->character = desc->original;
+        desc->original = nullptr;
 
         /* And our body's pointer to descriptor now points to our descriptor. */
-        ch->desc->character->desc = ch->desc;
-        ch->desc = nullptr;
+        desc->character->desc = desc;
+        desc = nullptr;
+
+        victim->stopListening();
+        ch->startListening();
     }
 }
 
@@ -5628,8 +5689,8 @@ Alias: .z
 .zone/help
     Show this help.
 
-.zone/addrooms <id>=[<number>|<from>-<to>]...
-    Add rooms to a zone. example: .zone/addrooms 50=20 21 99-120
+.zone/addrooms [<number>|<from>-<to>]...=<id>
+    Add rooms to a zone. example: .zone/addrooms 20 21 99-120=50
 
 See .location/help for information on LocationIDs.
 
@@ -5641,11 +5702,11 @@ look up the ancestor chain to find the first with a valid entry.
 
 .zone/dock <id>=<name>,<LocationID> | NONE
    Set or remove a named landing spot for ships.
-   <name> is CASE SENSITIVE.
+   <name> is CASE SENSITIVE when setting/clearing.
 
 .zone/land <id>=<name>,<LocationID> | NONE
    Set or remove a named landing spot for characters.
-   <name> is CASE SENSITIVE.
+   <name> is CASE SENSITIVE when setting/clearing.
 
 Note: For this to work, the launch destination needs to be a member of
 that particular zone. Otherwise, the dock and land locations won't be
@@ -5819,11 +5880,26 @@ ACMD(do_mush_zone)
             ch->sendFmt("{} parent cleared.", *z);
             return;
         }
+        auto parentRes = getZone(cdata.rsargs, ch);
+        if (!parentRes)
+        {
+            ch->sendText(parentRes.err);
+            return;
+        }
+        auto parent = parentRes.value();
+        if(auto par = z->getParent())
+        {
+            par->children.erase(z->number);
+            z->parent = NOTHING;
+        }
+        z->parent = parent->number;
+        parent->children.insert(z->number);
+        ch->sendFmt("{} parent set to: {}", *z, *parent);
         return;
     }
     case ZoneOp::AddRooms:
     {
-        auto res = getZone(cdata.lsargs, ch);
+        auto res = getZone(cdata.rsargs, ch);
         if (!res)
         {
             ch->sendText(res.err);
@@ -5831,7 +5907,7 @@ ACMD(do_mush_zone)
         }
         auto z = res.value();
         // the lsargs should be a space-delimited sequence of numbers >0...
-        auto ranges = parseRanges<room_vnum>(cdata.rsargs);
+        auto ranges = parseRanges<room_vnum>(cdata.lsargs);
         if (!ranges)
         {
             ch->sendText(ranges.err);
@@ -6703,8 +6779,9 @@ ACMD(do_mush_reset) {
                 return;
             }
             int line = 0;
+            ch->sendText("Reset Commands for here:\r\n");
             for(auto &c : rcm) {
-                ch->sendFmt("{}: {}\r\n", line++, c);
+                ch->sendFmt("{}: {}@n\r\n", line++, c);
             }
             return;
         }

@@ -1495,75 +1495,7 @@ void reset_zone(zone_vnum vn) {
     z.reset();
 }
 
-/* execute the reset command table of a given zone */
-void Zone::reset()
-{
-    age = 0;
 
-    if (!pre_reset(number))
-    {
-        rooms.for_each_shared([](auto r) {
-            if(auto commands = r->resetCommands; !commands.empty()) {
-                Location l(r);
-                l.executeResetCommands(commands);
-            }
-        });
-
-        rooms.for_each([](auto r) {
-            reset_wtrigger(r);
-        });
-
-        areas.for_each_shared([](auto a) {
-            Location loc;
-            loc.al = a;
-            for(auto& [coor, to] : a->tileOverrides) {
-                if(auto commands = to.resetCommands; !commands.empty()) {
-                    loc.position = coor;
-                    loc.locationID = loc.getLocID();
-                    loc.executeResetCommands(commands);
-                }
-            }
-        });
-        
-    }
-
-    // TODO: Split this off into a function or something based off Location...
-    rooms.for_each([](auto r) {
-        if (r->room_flags.get(ROOM_AURA) && Random::get<int>(1, 5) >= 4)
-        {
-            r->sendText("The aura of regeneration covering the surrounding area disappears.\r\n");
-            r->room_flags.set(ROOM_AURA, false);
-        }
-
-        if (r->sector_type == SectorType::lava)
-        {
-            r->ground_effect = 5;
-        }
-
-        if (r->ground_effect < -1)
-        {
-            r->sendText("The area loses some of the water flooding it.\r\n");
-            r->ground_effect += 1;
-        }
-        else if (r->ground_effect == -1)
-        {
-            r->sendText("The area loses the last of the water flooding it in one large rush.\r\n");
-            r->ground_effect = 0;
-        }
-
-        if (r->ground_effect >= 1 && Random::get<int>(1, 4) == 4 && !r->getEnvironment(Coordinates{}, ENV_WATER) >= 100.0 && r->sector_type != SectorType::lava)
-        {
-            r->sendText("The lava has cooled and become solid rock.\r\n");
-            r->ground_effect = 0;
-        }
-        else if (r->ground_effect >= 1 && Random::get<int>(1, 2) == 2 && r->getEnvironment(Coordinates{}, ENV_WATER) >= 100.0 &&
-                 r->sector_type != SectorType::lava)
-        {
-            r->sendText("The water has cooled the lava and it has become solid rock.\r\n");
-            r->ground_effect = 0;
-        }
-    });
-}
 
 void repairRoomDamage(uint64_t heartPulse, double deltaTime) {
     auto subs = roomSubscriptions.all("repairRoomDamage");

@@ -274,11 +274,11 @@ void carry_drop(Character *ch, int type)
 ACMD(do_land)
 {
 
-    auto inroom = ch->location.getVnum();
-    skip_spaces(&argument);
-    auto planet = checkOrbit(inroom);
+    auto lz = ch->location.getLandZone();
 
-    if (!planet && !*argument)
+    skip_spaces(&argument);
+
+    if (!lz && !*argument)
     {
         if (ch->affect_flags.get(AFF_FLYING))
         {
@@ -291,42 +291,30 @@ ACMD(do_land)
         return;
     }
 
-    std::vector<std::pair<std::string, room_vnum>> landLocations;
-
-    if (planet)
-    {
-        landLocations = getPlanetLandspots(planet.value());
+    if(!lz) {
+        ch->sendText("You are not in the lower atmosphere of a planet!\r\n");
+        return;
     }
+
+    auto landLocations = lz->getLandingSpots();
 
     if (!*argument)
     {
-        if (planet && !landLocations.empty())
-        {
-            ch->sendText("Land where?\n");
-            displayLandSpots(ch, getPlanetColorName(planet.value()), landLocations);
-            return;
-        }
-        else
-        {
-            ch->sendText("You are not even in the lower atmosphere of a planet!\r\n");
-            return;
-        }
+        ch->sendText("Land where?\n");
+        displayLandSpots(ch, lz->name, landLocations);
+        return;
     }
 
-    room_vnum landing = NOWHERE;
+    Location landing;
     std::string landName = "UNKNOWN";
 
-    if (auto matched = partialMatch(argument, landLocations, false, [](const auto &p)
-                                    { return p.first; });
-        matched)
+    if (auto matched = partialMatch(argument, landLocations, false))
     {
         landing = matched.value()->second;
         landName = matched.value()->first;
     }
 
-    auto landroom = get_room(landing);
-
-    if (!landroom)
+    if (!landing)
     {
         ch->sendText("You can't land there.\r\n");
         return;
@@ -338,12 +326,21 @@ ACMD(do_land)
     sprintf(sendback, "@C$n@Y flies down through the atmosphere toward @G%s@Y!@n", landName.c_str());
     act(sendback, true, ch, nullptr, nullptr, TO_ROOM);
     ch->leaveLocation();
-    ch->moveToLocation(landroom);
-    fly_planet(landing, "can be seen landing from space nearby!@n\r\n", ch);
-    send_to_sense(1, "landing on the planet", ch);
+    ch->moveToLocation(landing);
+
+    lz->for_each_listening([&](Character *c) {
+        if(c->location == landing) return; // Don't message people who are at the landing place.
+        if(!OUTSIDE(c)) return; // can't see it.
+        if(!AWAKE(c)) return; // not conscious
+        act("$n can be seen landing from space nearby!", true, ch, nullptr, c, TO_VICT);
+    });
+
+    lz->sendToSense(ch, "landing on the planet");
     send_to_scouter("A powerlevel signal has been detected landing on the planet", ch, 0, 1);
     act("$n comes down from high above in the sky and quickly lands on the ground.", true, ch, nullptr, nullptr,
         TO_ROOM);
+    
+    ch->lookAtLocation();
 }
 
 /* simple function to determine if char can walk on water */
@@ -723,9 +720,10 @@ int do_simple_move(Character *ch, int dir, int need_specials_check)
     ch->affect_flags.set(AFF_PURSUIT, true);
     ch->leaveLocation();
     ch->moveToLocation(e);
-    if ((ch->location.getZone() != was_in.getZone()) && !IS_NPC(ch) && !IS_ANDROID(ch))
+    auto z2 = ch->location.getZone();
+    if ((z2 != was_in.getZone()) && !IS_NPC(ch) && !IS_ANDROID(ch))
     {
-        send_to_sense(0, "You sense someone", ch);
+        z2->sendToSense(ch, "nearby");
         sprintf(buf3, "@D[@GBlip@D]@Y %s\r\n@RSomeone has entered your scouter detection range@n.",
                 add_commas(ch->getPL()).c_str());
         send_to_scouter(buf3, ch, 0, 0);
@@ -2239,6 +2237,7 @@ static int do_simple_leave(Character *ch, Object *obj, int need_specials_check)
     {
         act("@C$n@w carries @c$N@w with $m.@n", true, ch, nullptr, car, TO_ROOM);
     }
+    auto oldloc = ch->location;
     ch->leaveLocation();
     ch->moveToLocation(d);
 
@@ -2297,7 +2296,7 @@ static int do_simple_leave(Character *ch, Object *obj, int need_specials_check)
     }
 
     char buf3[MAX_STRING_LENGTH];
-    send_to_sense(0, "You sense someone ", ch);
+    oldloc.getZone()->sendToSense(ch, "approaching nearby", ch);
     sprintf(buf3, "@D[@GBlip@D]@Y %s\r\n@RSomeone has entered your scouter detection range.@n",
             add_commas(ch->getPL()).c_str());
     send_to_scouter(buf3, ch, 0, 0);
@@ -2478,20 +2477,13 @@ static void handle_fly_space(Character *ch)
         return;
     }
 
-    auto planet = getPlanet(ch->location.getVnum());
-    if (!planet)
+    auto dest = ch->location.getLaunchDestination();
+    if (!dest)
     {
         ch->sendText("You can't fly to space from here!");
         return;
     }
-
-    auto dest = getPlanetOrbit(planet.value());
-
-    if (dest == NOWHERE)
-    {
-        ch->sendText("You can't fly to space from here!");
-        return;
-    }
+    auto z = dest.getZone();
 
     reveal_hiding(ch, 0);
     ch->setBaseStat<int>("altitude", 2);
@@ -2503,12 +2495,9 @@ static void handle_fly_space(Character *ch)
     ch->setBaseStat<int>("altitude", 0);
     ch->affect_flags.set(AFF_FLYING, false);
 
-    if (planet)
-    {
-        fly_planet(IN_ROOM(ch), "can be seen blasting off into space!@n\r\n", ch);
-        send_to_sense(1, "leaving the planet", ch);
-        send_to_scouter("A powerlevel signal has left the planet", ch, 0, 2);
-    }
+    z->actToOutside(ch, "@C$n can be seen blasting off into space!@n", true);
+    z->sendToSense(ch, "leaving the planet", true);
+    send_to_scouter("A powerlevel signal has left the planet", ch, 0, 2);
 
     act("@CYou blast off from the ground and rocket through the air. Your speed increases until you manage to reach the brink of space!@n",
         true, ch, nullptr, nullptr, TO_CHAR);
@@ -2516,12 +2505,12 @@ static void handle_fly_space(Character *ch)
         true, ch, nullptr, nullptr, TO_ROOM);
     ch->leaveLocation();
     ch->moveToLocation(dest);
-    if (planet)
-    {
-        act("@C$n blasts up from the atmosphere below and then comes to a stop.@n", true, ch, nullptr, nullptr,
+    act("@C$n blasts up from below and then comes to a stop.@n", true, ch, nullptr, nullptr,
             TO_ROOM);
-        ch->sendText("@mOOC: Use the command 'land' to return to the planet from here.@n\r\n");
-    }
+
+    auto landing = z->getLandingSpots();
+    if(!landing.empty()) 
+        ch->sendText("@mOOC: Use the command 'land' to see where you can land from here.@n\r\n");
 
     if (!IS_ANDROID(ch))
     {

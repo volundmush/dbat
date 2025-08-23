@@ -13,6 +13,8 @@ struct Zone {
     std::vector<Zone*> getDescendants() const;
     std::vector<Zone*> getChildren() const;
     Zone* getParent() const;
+    Zone* getUpZone(int upwards = 1);
+    Zone* getRoot();
 
     void reset();
 
@@ -32,6 +34,8 @@ struct Zone {
 
     double getEnvironment(int type, bool checkAncestors = false) const;
 
+    std::string displayNameFor(Character *ch);
+
     /*
      * Reset mode:
      *   0: Don't reset, and don't update age.
@@ -42,8 +46,76 @@ struct Zone {
     WeakBag<Area> areas;
     WeakBag<Character> npcsInZone;
     WeakBag<Character> playersInZone;
+    WeakBag<Character> listeningInZone;
     WeakBag<Object> objectsInZone;
     WeakBag<Structure> structuresInZone;
+
+    template<class F>
+    void for_each_room(F&& func, bool descend = true) {
+        rooms.for_each(func);
+        if(descend)
+            for(auto child : getChildren())
+                child->for_each_room(func, descend); 
+    }
+
+    template<class F>
+    void for_each_player(F&& func, bool descend = true) {
+        playersInZone.for_each(func);
+        if(descend)
+            for(auto child : getChildren())
+                child->for_each_player(func, descend);
+    }
+
+    template<class F>
+    void for_each_listening(F&& func, bool descend = true) {
+        listeningInZone.for_each(func);
+        if(descend)
+            for(auto child : getChildren())
+                child->for_each_listening(func, descend);
+    }
+
+    template<class F>
+    void for_each_npc(F&& func, bool descend = true) {
+        npcsInZone.for_each(func);
+        if(descend)
+            for(auto child : getChildren())
+                child->for_each_npc(func, descend);
+    }
+
+    template<class F>
+    void for_each_character(F&& func, bool descend = true) {
+        npcsInZone.for_each(func);
+        playersInZone.for_each(func);
+        if(descend)
+            for(auto child : getChildren()) {
+                child->for_each_npc(func, descend);
+                child->for_each_player(func, descend);
+            }
+    }
+
+    template<class F>
+    void for_each_object(F&& func, bool descend = true) {
+        objectsInZone.for_each(func);
+        if(descend)
+            for(auto child : getChildren())
+                child->for_each_object(func, descend);
+    }
+
+    template<class F>
+    void for_each_area(F&& func, bool descend = true) {
+        areas.for_each(func);
+        if(descend)
+            for(auto child : getChildren())
+                child->for_each_area(func, descend);
+    }
+
+    template<class F>
+    void for_each_structure(F&& func, bool descend = true) {
+        structuresInZone.for_each(func);
+        if(descend)
+            for(auto child : getChildren())
+                child->for_each_structure(func, descend);
+    }
 
     void sendText(const std::string &txt);
 
@@ -90,6 +162,12 @@ struct Zone {
     std::unordered_map<std::string, std::string> landingSpots;
     // Specifically for ships landing.
     std::unordered_map<std::string, std::string> dockingSpots;
+
+    std::map<std::string, Location> getLandingSpots();
+    std::map<std::string, Location> getDockingSpots();
+
+    void sendToSense(Character *source, const char* messg, bool childrenOnly = false);
+    void actToOutside(Character *source, const char* messg, bool childrenOnly = false);
 };
 
 template <>
@@ -106,3 +184,12 @@ struct fmt::formatter<Zone> {
 #define ZONE_MINLVL(rnum)      (zone_table.at((rnum)).min_level)
 #define ZONE_MAXLVL(rnum)      (zone_table.at((rnum)).max_level)
 #define ZONE_FLAGGED(rnum, flag)   (zone_table.at((rnum)).zone_flags.get((flag)))
+
+template<typename T>
+std::string renderZoneChain(T& iter, Character *viewer, std::string_view delim = " ->") {
+    std::vector<std::string> chain;
+    for (auto& zone : iter) {
+        chain.push_back(zone->displayNameFor(viewer));
+    }
+    return fmt::format("{}", fmt::join(chain, delim));
+}

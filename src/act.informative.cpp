@@ -6055,7 +6055,6 @@ static void perform_immort_where(Character *ch, char *arg)
     Object *k;
     struct descriptor_data *d;
     int num = 0, num2 = 0, found = 0;
-    std::optional<WhereFlag> planet;
 
     if (!*arg)
     {
@@ -6065,23 +6064,14 @@ static void perform_immort_where(Character *ch, char *arg)
         for (d = descriptor_list; d; d = d->next)
             if (IS_PLAYING(d))
             {
-                if (d->character->location)
-                {
-                    planet = getPlanet(d->character->location.getVnum());
-                }
-                else
-                {
-                    planet = {};
-                }
                 i = (d->original ? d->original : d->character);
                 if (i && ch->canSee(i) && i->location)
                 {
                     if (d->original)
-                        ch->send_to("%-20s - [%5d]   %s (in %s)\r\n", GET_NAME(i), d->character->location.getVnum(), d->character->location.getName(), GET_NAME(d->character));
+                        ch->sendFmt("{} - {} (in {})\r\n", GET_NAME(i), d->character->location, d->character->location.getName(), GET_NAME(d->character));
                     else
                     {
-                        std::string locName = getPlanetName(planet.value());
-                        ch->send_to("%-20s - [%5d]   %-14s %s\r\n", GET_NAME(i), i->location.getVnum(), locName.c_str(), i->location.getName());
+                        ch->sendFmt("{} - {} {}\r\n", GET_NAME(i), i->location, i->location.getName());
                     }
                 }
             }
@@ -6096,7 +6086,7 @@ static void perform_immort_where(Character *ch, char *arg)
             if (ch->canSee(i) && i->location && isname(arg, i->getName()))
             {
                 found = 1;
-                ch->send_to("M%3d. %-25s - [%5d] %-25s", ++num, GET_NAME(i), i->location.getVnum(), i->getRoom()->getName());
+                ch->sendFmt("M{}. {} - [{}] {}", ++num, GET_NAME(i), i->location, i->location.getName());
                 if (IS_NPC(i) && !i->scripts.empty())
                 {
                     auto t = i->scriptString();

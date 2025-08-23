@@ -2,8 +2,40 @@
 #include "dbat/Room.h"
 #include "dbat/Descriptor.h"
 #include "dbat/Character.h"
+#include "dbat/Area.h"
 #include "dbat/db.h"
 #include "dbat/utils.h"
+#include "dbat/reset.h"
+#include "dbat/dg_scripts.h"
+
+std::string Zone::displayNameFor(Character *ch) {
+    
+    std::string out;
+    auto alevel = GET_ADMLEVEL(ch);
+    auto isbuilder = alevel >= ADMLVL_BUILDER;
+    if(isbuilder) {
+        out += fmt::format("@W[{}]@n ", number);
+    }
+    std::string disp;
+    if(colorName.empty()) {
+        disp = name;
+    } else {
+        disp = colorName;
+    }
+    if(ch->isPC && !isbuilder) {
+        auto &p = players.at(ch->id);
+        if(p.known_zones.contains(number)) {
+            out += disp;
+        } else {
+            out += "???";
+        }
+    }
+    else {
+        out += disp;
+    }
+
+    return out;
+}
 
 std::vector<Zone *> getZoneChildren(zone_vnum parent)
 {
@@ -68,6 +100,23 @@ Zone *Zone::getParent() const
     return nullptr;
 }
 
+
+Zone* Zone::getUpZone(int upwards)
+{
+    if (upwards <= 0) return this;
+    if (auto p = getParent()) {
+        return p->getUpZone(upwards - 1);
+    }
+    return this; // no parent, so we are the topmost zone.
+}
+
+Zone* Zone::getRoot() {
+    if (auto p = getParent()) {
+        return p->getRoot();
+    }
+    return this;
+}
+
 std::vector<Zone *> Zone::getAncestors() const
 {
     std::vector<Zone *> ancestors;
@@ -106,6 +155,25 @@ std::vector<Zone *> Zone::getDescendants() const
         }
     }
     return descendants;
+}
+
+static std::map<std::string, Location>
+filterLocations(const std::unordered_map<std::string, std::string>& locations) {
+    std::map<std::string, Location> out;
+    for (const auto& [name, locid] : locations) {
+        if (Location loc(locid); loc) {         // see note below about `if (loc)`
+            out.emplace(name, std::move(loc));  // construct in-place; move the value
+        }
+    }
+    return out;                                 // let NRVO/move happen
+}
+
+std::map<std::string, Location> Zone::getLandingSpots() {
+    return filterLocations(landingSpots);       // elided
+}
+
+std::map<std::string, Location> Zone::getDockingSpots() {
+    return filterLocations(dockingSpots);       // elided
 }
 
 Result<bool> Zone::canBeDeletedBy(Character* ch) {
@@ -155,3 +223,74 @@ double Zone::getEnvironment(int type, bool checkAncestors) const {
 
     return 0.0;
 }
+
+/* execute the reset command table of a given zone */
+void Zone::reset()
+{
+    age = 0;
+
+    if (!pre_reset(number))
+    {
+        rooms.for_each_shared([](auto r) {
+            if(auto commands = r->resetCommands; !commands.empty()) {
+                Location l(r);
+                l.executeResetCommands(commands);
+            }
+        });
+
+        rooms.for_each([](auto r) {
+            reset_wtrigger(r);
+        });
+
+        areas.for_each_shared([](auto a) {
+            Location loc;
+            loc.al = a;
+            for(auto& [coor, to] : a->tileOverrides) {
+                if(auto commands = to.resetCommands; !commands.empty()) {
+                    loc.position = coor;
+                    loc.locationID = loc.getLocID();
+                    loc.executeResetCommands(commands);
+                }
+            }
+        });
+        
+    }
+
+    // TODO: Split this off into a function or something based off Location...
+    rooms.for_each([](auto r) {
+        if (r->room_flags.get(ROOM_AURA) && Random::get<int>(1, 5) >= 4)
+        {
+            r->sendText("The aura of regeneration covering the surrounding area disappears.\r\n");
+            r->room_flags.set(ROOM_AURA, false);
+        }
+
+        if (r->sector_type == SectorType::lava)
+        {
+            r->ground_effect = 5;
+        }
+
+        if (r->ground_effect < -1)
+        {
+            r->sendText("The area loses some of the water flooding it.\r\n");
+            r->ground_effect += 1;
+        }
+        else if (r->ground_effect == -1)
+        {
+            r->sendText("The area loses the last of the water flooding it in one large rush.\r\n");
+            r->ground_effect = 0;
+        }
+
+        if (r->ground_effect >= 1 && Random::get<int>(1, 4) == 4 && !r->getEnvironment(Coordinates{}, ENV_WATER) >= 100.0 && r->sector_type != SectorType::lava)
+        {
+            r->sendText("The lava has cooled and become solid rock.\r\n");
+            r->ground_effect = 0;
+        }
+        else if (r->ground_effect >= 1 && Random::get<int>(1, 2) == 2 && r->getEnvironment(Coordinates{}, ENV_WATER) >= 100.0 &&
+                 r->sector_type != SectorType::lava)
+        {
+            r->sendText("The water has cooled the lava and it has become solid rock.\r\n");
+            r->ground_effect = 0;
+        }
+    });
+}
+
