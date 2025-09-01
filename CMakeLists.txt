@@ -44,6 +44,18 @@ if(UNIX AND NOT APPLE)
   set(MATH_LIB m)
 endif()
 
+# Fallback: if the detected GNU C++ toolchain doesn't list libstdc++ among
+# its implicit link libraries (common with partial/manual installs), add it
+# to the standard C++ link line so executables link cleanly without per-target
+# workarounds. This has no effect on toolchains that already inject it.
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  list(FIND CMAKE_CXX_IMPLICIT_LINK_LIBRARIES "stdc++" _has_stdcxx)
+  if(_has_stdcxx EQUAL -1)
+    message(STATUS "GNU toolchain missing implicit libstdc++; adding -lstdc++ to CMAKE_CXX_STANDARD_LIBRARIES")
+    set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_CXX_STANDARD_LIBRARIES} -lstdc++")
+  endif()
+endif()
+
 CPMFindPackage(NAME fmt                   GITHUB_REPOSITORY fmtlib/fmt            GIT_TAG 11.2.0)
 CPMFindPackage(NAME nlohmann_json         GITHUB_REPOSITORY nlohmann/json         VERSION 3.12.0)
 CPMFindPackage(NAME magic_enum            GITHUB_REPOSITORY Neargye/magic_enum    VERSION 0.9.7)
@@ -59,50 +71,18 @@ add_subdirectory(apps/migrate)
 # Python/Cython extension (built when scikit-build-core drives the build,
 # or if you pass -DDBAT_BUILD_PYTHON=ON manually)
 # =====================================================================
-# scikit-build / scikit-build-core set SKBUILD=ON; default the option from that.
-option(DBAT_BUILD_PYTHON "Build the Python extension" ${SKBUILD})
+# Prefer enabling by default when building under scikit-build-core. Some
+# frontends set SKBUILD as an environment variable; consult both env and var.
+set(_dbat_build_python_default OFF)
+if(DEFINED SKBUILD AND SKBUILD)
+  set(_dbat_build_python_default ON)
+elseif(DEFINED ENV{SKBUILD} AND NOT "$ENV{SKBUILD}" STREQUAL "")
+  set(_dbat_build_python_default ON)
+endif()
+option(DBAT_BUILD_PYTHON "Build the Python extension" ${_dbat_build_python_default})
+message(STATUS "DBAT_BUILD_PYTHON=${DBAT_BUILD_PYTHON}")
 
 if(DBAT_BUILD_PYTHON)
-  message(STATUS "Configuring Python/Cython extension")
-
-  # Python dev + module support (gives Python_add_library and Python::Module)
-  find_package(Python REQUIRED COMPONENTS Interpreter Development.Module)  # CMake's FindPython
-
-  # Cython helpers (from cython-cmake). You can keep it as a build req, or vendor the CMake files.
-  # If you want to vendor later: `pipx run cython-cmake vendor cmake` and then
-  #   list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
-  find_package(Cython MODULE REQUIRED)     # provides Cython::Cython and UseCython.cmake
-  include(UseCython)                       # provides cython_transpile(...)
-
-  # Transpile the .pyx to a C++ source in the build dir.
-  # LANGUAGE CXX ensures a .cxx is produced; OUTPUT_VARIABLE gives us the file path.
-  cython_transpile(${CMAKE_SOURCE_DIR}/dbat_ext/core.pyx
-                   LANGUAGE CXX
-                   OUTPUT_VARIABLE DBAT_EXT_CXX)
-
-  # Build a Python extension module with the correct SOABI/suffix
-  Python_add_library(dbat_ext MODULE "${DBAT_EXT_CXX}" WITH_SOABI)
-
-  # Keep the usual target wiring – link to your CMake targets, not raw -l flags
-  target_link_libraries(dbat_ext
-    PRIVATE
-      dbat::dbat
-      fmt::fmt
-      Boost::regex
-      Boost::iostreams
-      ZLIB::ZLIB
-  )
-
-  # Make sure we compile with the same standard/features as the rest
-  target_compile_features(dbat_ext PRIVATE cxx_std_23)
-
-  # If dbat exports public headers properly, you don't need this.
-  # If not, add your include dirs here, e.g.:
-  # target_include_directories(dbat_ext PRIVATE ${PROJECT_SOURCE_DIR}/libs/dbat/include)
-
-  # On some platforms CMake will add "lib" to MODULE libs; keep the Pythonic name.
-  set_target_properties(dbat_ext PROPERTIES PREFIX "" OUTPUT_NAME "dbat_ext")
-
-  # Install into the wheel at the package root (importable as `import dbat_ext`)
-  install(TARGETS dbat_ext DESTINATION ${SKBUILD_PROJECT_NAME})
+  message(STATUS "Adding subdirectory libs/ext for Python/Cython extension")
+  add_subdirectory(libs/ext)
 endif()
