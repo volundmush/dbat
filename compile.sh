@@ -21,13 +21,4 @@ exit 1
 ;;
 esac
 
-rm -f *.so
-rm -f dbat_ext/*.cpp
-
-OUTFOLDER=build
-
-mkdir -p $OUTFOLDER
-cmake -S . -B $OUTFOLDER -G Ninja -D CMAKE_BUILD_TYPE=$MODE
-cmake --build $OUTFOLDER -- -j $(nproc)
-
-python setup.py build_ext --inplace
+pip install -v --config-settings=cmake.build-type=$MODE .

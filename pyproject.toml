@@ -1,0 +1,12 @@
+[build-system]
+requires = ["scikit-build-core>=0.10", "cython>=3.0", "cython-cmake>=0.2"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "dbat_ext"
+version = "0.1.0"
+requires-python = ">=3.12"
+
+[tool.scikit-build]
+# (optional) if your CMakeLists.txt is at repo root
+wheel.py-api = "cp312"   # or omit to use default ABI-tagged build
