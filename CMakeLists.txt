@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 4.1.1)
-project(circle)
+project(circle LANGUAGES C CXX)
 
 # ---------------- basics (yours) ----------------
 set(CPM_DOWNLOAD_VERSION 0.42.0)
@@ -38,6 +38,11 @@ set(BUILD_TESTING OFF)
 # ---------------- deps (yours) ----------------
 find_package(Boost CONFIG REQUIRED COMPONENTS regex iostreams)
 find_package(ZLIB REQUIRED)
+find_package(Threads REQUIRED)
+
+if(UNIX AND NOT APPLE)
+  set(MATH_LIB m)
+endif()
 
 CPMFindPackage(NAME fmt                   GITHUB_REPOSITORY fmtlib/fmt            GIT_TAG 11.2.0)
 CPMFindPackage(NAME nlohmann_json         GITHUB_REPOSITORY nlohmann/json         VERSION 3.12.0)

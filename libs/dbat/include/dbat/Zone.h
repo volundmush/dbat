@@ -175,7 +175,7 @@ struct fmt::formatter<Zone> {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
 
     template <typename FormatContext>
-    auto format(const Zone& z, FormatContext& ctx) {
+    auto format(const Zone& z, FormatContext& ctx) const {
         return fmt::format_to(ctx.out(), "Zone {} '{}'", z.number, z.name);
     }
 };

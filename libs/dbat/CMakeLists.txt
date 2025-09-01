@@ -37,6 +37,9 @@ target_link_libraries(dbat
     effolkronium_random
     nlohmann_json
     ZLIB::ZLIB
+    Boost::regex
+    Threads::Threads
+    ${MATH_LIB}
   PRIVATE
     Boost::iostreams
 )

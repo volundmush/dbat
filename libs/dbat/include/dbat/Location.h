@@ -146,7 +146,7 @@ struct fmt::formatter<Location> {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
 
     template <typename FormatContext>
-    auto format(const Location& z, FormatContext& ctx) {
+    auto format(const Location& z, FormatContext& ctx) const {
         return fmt::format_to(ctx.out(), "{}", z.getLocID());
     }
 };

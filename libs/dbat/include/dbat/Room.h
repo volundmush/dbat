@@ -148,7 +148,7 @@ struct fmt::formatter<Room> {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
 
     template <typename FormatContext>
-    auto format(const Room& z, FormatContext& ctx) {
+    auto format(const Room& z, FormatContext& ctx) const {
         return fmt::format_to(ctx.out(), "Room {} '{}'", z.getVnum(), z.getName());
     }
 };

@@ -37,7 +37,7 @@ struct fmt::formatter<ObjectPrototype> {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
 
     template <typename FormatContext>
-    auto format(const ObjectPrototype& z, FormatContext& ctx) {
+    auto format(const ObjectPrototype& z, FormatContext& ctx) const {
         return fmt::format_to(ctx.out(), "ObjectPrototype {} '{}'", z.vn, z.short_description ? z.short_description : "<unnamed>");
     }
 };

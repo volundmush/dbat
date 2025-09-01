@@ -28,7 +28,7 @@
 #include "dbat/planet.h"
 
 /* local functions */
-void sub_write_to_char(Character *ch, char *tokens[], void *otokens[], char type[]);
+void sub_write_to_char(Character *ch, char *tokens[], void *otokens[], unsigned char type[]);
 
 
 /* same as any_one_arg except that it stops at punctuation */
@@ -52,7 +52,7 @@ char *any_one_name(char *argument, char *first_arg) {
 
 
 void sub_write_to_char(Character *ch, char *tokens[],
-                       void *otokens[], char type[]) {
+                       void *otokens[], unsigned char type[]) {
     char sb[MAX_STRING_LENGTH];
     int i;
     std::string scratch;
@@ -62,7 +62,7 @@ void sub_write_to_char(Character *ch, char *tokens[],
     for (i = 0; tokens[i + 1]; i++) {
         strcat(sb, tokens[i]);
 
-        switch (type[i]) {
+    switch (type[i]) {
             case '~':
                 if (!otokens[i])
                     strcat(sb, "someone");
@@ -115,7 +115,7 @@ void sub_write_to_char(Character *ch, char *tokens[],
                     strcat(sb, HMHR((Character *) otokens[i]));
                 break;
 
-            case '¨':
+            case 0xA8: // '¨' diaeresis as single-byte 0xA8 token
                 if (!otokens[i])
                     strcat(sb, "something");
                 else
@@ -133,7 +133,8 @@ void sub_write_to_char(Character *ch, char *tokens[],
 
 void sub_write(char *arg, Character *ch, int8_t find_invis, int targets) {
     char str[MAX_INPUT_LENGTH * 2];
-    char type[MAX_INPUT_LENGTH], name[MAX_INPUT_LENGTH];
+    unsigned char type[MAX_INPUT_LENGTH];
+    char name[MAX_INPUT_LENGTH];
     char *tokens[MAX_INPUT_LENGTH], *s, *p;
     void *otokens[MAX_INPUT_LENGTH];
     Character *to;
@@ -147,14 +148,14 @@ void sub_write(char *arg, Character *ch, int8_t find_invis, int targets) {
     tokens[0] = str;
 
     for (i = 0, p = arg, s = str; *p;) {
-        switch (*p) {
+    switch ((unsigned char)*p) {
             case '~':
             case '|':
             case '^':
             case '&':
             case '*':
                 /* get Character, move to next token */
-                type[i] = *p;
+                type[i] = static_cast<unsigned char>(*p);
                 *s = '\0';
                 p = any_one_name(++p, name);
                 otokens[i] =
@@ -163,9 +164,9 @@ void sub_write(char *arg, Character *ch, int8_t find_invis, int targets) {
                 tokens[++i] = ++s;
                 break;
 
-            case '¨':
+            case 0xA8: // '¨' diaeresis as single-byte 0xA8 token
                 /* get Object, move to next token */
-                type[i] = *p;
+                type[i] = static_cast<unsigned char>(*p);
                 *s = '\0';
                 p = any_one_name(++p, name);
 

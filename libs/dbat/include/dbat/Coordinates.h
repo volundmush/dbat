@@ -17,7 +17,7 @@ struct fmt::formatter<Coordinates> {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
 
     template <typename FormatContext>
-    auto format(const Coordinates& z, FormatContext& ctx) {
+    auto format(const Coordinates& z, FormatContext& ctx) const {
         return fmt::format_to(ctx.out(), "{}:{}:{}", z.x, z.y, z.z);
     }
 };
