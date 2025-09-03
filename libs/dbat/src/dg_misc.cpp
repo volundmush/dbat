@@ -12,7 +12,6 @@
 #include "dbat/Object.h"
 #include "dbat/Location.h"
 #include "dbat/affect.h"
-#include "dbat/structs.h"
 #include "dbat/dg_scripts.h"
 #include "dbat/send.h"
 #include "dbat/comm.h"

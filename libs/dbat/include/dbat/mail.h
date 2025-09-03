@@ -8,8 +8,8 @@
  *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
  ************************************************************************ */
 #pragma once
-
-#include "structs.h"
+#include <ctime>
+#include "Command.h"
 
 /* ****** MUD MAIL SYSTEM HEADER FILE **********************
  ***     written by Jeremy Elson (jelson@circlemud.org) ***

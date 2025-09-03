@@ -5,8 +5,9 @@
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
 #pragma once
+#include "Typedefs.h"
 
-#include "structs.h"
+struct Room;
 
 extern room_rnum add_room(Room *);
 

@@ -3,7 +3,6 @@
 //
 #pragma once
 
-#include "structs.h"
 #include "spells.h"
 
 // global variables

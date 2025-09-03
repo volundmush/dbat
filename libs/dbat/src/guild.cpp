@@ -29,7 +29,7 @@
 /* Local variables */
 int spell_sort_info[SKILL_TABLE_SIZE + 1];
 guild_vnum top_guild = NOTHING;
-NegativeKeyGuardMap<guild_vnum, struct Guild> guild_index;
+std::map<guild_vnum, struct Guild> guild_index;
 
 char *guild_customer_string(int guild_nr, int detailed);
 

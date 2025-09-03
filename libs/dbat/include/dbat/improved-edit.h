@@ -5,7 +5,8 @@
  */
 #pragma once
 
-#include "structs.h"
+struct descriptor_data;
+
 
 #define CONFIG_IMPROVED_EDITOR 1
 

@@ -12,7 +12,6 @@
 #include "dbat/fight.h"
 #include "dbat/planet.h"
 #include "dbat/act.informative.h"
-#include "dbat/graph.h"
 
 Location::Location(room_vnum rv)
 {

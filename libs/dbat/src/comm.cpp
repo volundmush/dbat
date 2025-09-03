@@ -17,7 +17,6 @@
 #include "dbat/send.h"
 #include "dbat/config.h"
 #include "dbat/maputils.h"
-#include "dbat/ban.h"
 #include "dbat/weather.h"
 #include "dbat/act.wizard.h"
 #include "dbat/act.misc.h"

@@ -3,8 +3,6 @@
 //
 #pragma once
 
-#include "structs.h"
-
 extern void assign_mobiles();
 
 extern void assign_objects();

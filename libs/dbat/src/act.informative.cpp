@@ -37,7 +37,6 @@
 #include "dbat/improved-edit.h"
 #include "dbat/transformation.h"
 #include "dbat/planet.h"
-#include "dbat/graph.h"
 #include "dbat/ansi.h"
 
 /* local functions */
@@ -5891,6 +5890,9 @@ ACMD(do_users)
 
     ch->send_to("\r\n%d visible sockets connected.\r\n", num_can_see);
 }
+
+#define CWG_VERSION "CWG Rasputin - 3.5.31"
+#define DBAT_VERSION "DBAT - 3.0"
 
 /* Generic page_string function for displaying text */
 ACMD(do_gen_ps)

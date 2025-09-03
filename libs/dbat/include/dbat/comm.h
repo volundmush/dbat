@@ -8,8 +8,13 @@
  *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
  ************************************************************************ */
 #pragma once
+#include <cstdint>
+#include <string>
 
-#include "structs.h"
+#include "Typedefs.h"
+
+struct Character;
+struct Object;
 
 #if CIRCLE_GNU_LIBC_MEMORY_TRACK
 #include <mcheck.h>
@@ -34,8 +39,6 @@ constexpr int NUM_RESERVED_DESCS = 8;
 void enter_player_game(struct descriptor_data *d);
 
 extern int arena_watch(Character *ch);
-
-extern void setup_log();
 
 extern char *act(const char *str, int hide_invisible, Character *ch, Object *obj, const void *vict_obj, int type);
 
@@ -93,8 +96,6 @@ extern int process_output(struct descriptor_data *t);
 extern void record_usage(uint64_t heartPulse, double deltaTime);
 
 extern char *make_prompt(struct descriptor_data *point);
-
-extern void migrate_db();
 
 void broadcast(const std::string &txt);
 

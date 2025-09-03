@@ -93,7 +93,10 @@
             "valarray": "cpp",
             "variant": "cpp",
             "strstream": "cpp",
-            "filesystem": "cpp"
+            "filesystem": "cpp",
+            "coroutine": "cpp",
+            "csetjmp": "cpp",
+            "text_encoding": "cpp"
         }
     },
     "extensions": {

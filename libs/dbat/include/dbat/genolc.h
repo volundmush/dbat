@@ -5,9 +5,12 @@
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
 #pragma once
+#include <list>
 
-#include "structs.h"
-#include "db.h"
+#include "Typedefs.h"
+
+struct descriptor_data;
+struct extra_descr_data;
 
 #define STRING_TERMINATOR '~'
 

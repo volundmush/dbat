@@ -454,12 +454,12 @@ Result<ResetCommand> parseResetCommand(std::vector<std::string> sequence) {
     }
 
     if(sequence.size() < 2) {
-        return Err("Not enough arguments for reset command.\r\n");
+        return err("Not enough arguments for reset command.\r\n");
     }
 
     auto resType = chooseEnum<ResetCommandType>(sequence[0], "reset command type");
     if(!resType) {
-        return Err(resType.err);
+        return err(resType.err);
     }
 
     ResetCommand cmd;
@@ -490,7 +490,7 @@ Result<ResetCommand> parseResetCommand(std::vector<std::string> sequence) {
 
     // Do a -1 offset because we don't present the first as counting.
     if(sequence.size() < argsNeeded) {
-        return Err("Not enough arguments for reset command type '{}'. Expected {} but got {}.\r\n",
+        return err("Not enough arguments for reset command type '{}'. Expected {} but got {}.\r\n",
                    cmd.type, argsNeeded - 1, sequence.size() - 1);
     }
 
@@ -498,290 +498,290 @@ Result<ResetCommand> parseResetCommand(std::vector<std::string> sequence) {
         case ResetCommandType::REMOVE: {
             auto ovnRes = parseNumber<obj_vnum>(sequence[1], "object vnum");
             if(!ovnRes) {
-                return Err(ovnRes.err);
+                return err(ovnRes.err);
             }
             auto vn = ovnRes.value();
             if(!obj_proto.contains(vn)) {
-                return Err("ObjectPrototype {} not found.\r\n", vn);
+                return err("ObjectPrototype {} not found.\r\n", vn);
             }
             cmd.target = vn;
-            return Ok(cmd);
+            return cmd;
         }
         case ResetCommandType::DOOR: {
             auto dirRes = chooseEnum<Direction>(sequence[1], "direction");
             if(!dirRes) {
-                return Err(dirRes.err);
+                return err(dirRes.err);
             }
             auto dir = dirRes.value();
             cmd.target = static_cast<int>(dir);
 
             auto stateRes = parseNumber(sequence[2], "door state");
             if(!stateRes) {
-                return Err(stateRes.err);
+                return err(stateRes.err);
             }
             if(stateRes.value() < 0 || stateRes.value() > 2) {
-                return Err("Door state must be 0 (open), 1 (closed), or 2 (closed and locked).\r\n");
+                return err("Door state must be 0 (open), 1 (closed), or 2 (closed and locked).\r\n");
             }
             cmd.ex = stateRes.value();
-            return Ok(cmd);
+            return cmd;
         }
         case ResetCommandType::TRIGGER: {
             auto vnRes = parseNumber<obj_vnum>(sequence[1], "vnum");
             if(!vnRes) {
-                return Err(vnRes.err);
+                return err(vnRes.err);
             }
             auto vn = vnRes.value();
             if(!trig_index.contains(vn)) {
-                return Err("ObjectPrototype {} not found.\r\n", vn);
+                return err("ObjectPrototype {} not found.\r\n", vn);
             }
             cmd.target = vn;
 
             auto typeRes = parseNumber(sequence[2], "trigger type");
             if(!typeRes) {
-                return Err(typeRes.err);
+                return err(typeRes.err);
             }
             if(typeRes.value() < 0 || typeRes.value() > 2) {
-                return Err("Type must be 0 (character), 1 (object), or 2 (room).\r\n");
+                return err("Type must be 0 (character), 1 (object), or 2 (room).\r\n");
             }
             cmd.ex = static_cast<int>(typeRes.value());
-            return Ok(cmd);
+            return cmd;
         }
         case ResetCommandType::VARIABLE: {
             auto typeRes = parseNumber(sequence[1], "trigger type");
             if(!typeRes) {
-                return Err(typeRes.err);
+                return err(typeRes.err);
             }
             if(typeRes.value() < 0 || typeRes.value() > 2) {
-                return Err("Type must be 0 (character), 1 (object), or 2 (room).\r\n");
+                return err("Type must be 0 (character), 1 (object), or 2 (room).\r\n");
             }
             auto type = typeRes.value();
             cmd.ex = type;
             if(sequence[2].empty()) {
-                return Err("Variable name cannot be empty.\r\n");
+                return err("Variable name cannot be empty.\r\n");
             }
             cmd.key = sequence[2];
             if(sequence[3].empty()) {
-                return Err("Variable value cannot be empty.\r\n");
+                return err("Variable value cannot be empty.\r\n");
             }
             cmd.value = sequence[3];
-            return Ok(cmd);
+            return cmd;
         }
         case ResetCommandType::OBJ: {
             auto ovnRes = parseNumber<obj_vnum>(sequence[1], "object vnum");
             if(!ovnRes) {
-                return Err(ovnRes.err);
+                return err(ovnRes.err);
             }
             auto ovn = ovnRes.value();
             if(!obj_proto.contains(ovn)) {
-                return Err("ObjectPrototype {} not found.\r\n", ovn);
+                return err("ObjectPrototype {} not found.\r\n", ovn);
             }
             cmd.target = ovn;
 
             auto maxSpawnRes = parseNumber(sequence[2], "MaxSpawn");
             if(!maxSpawnRes) {
-                return Err(maxSpawnRes.err);
+                return err(maxSpawnRes.err);
             }
             auto maxSpawn = maxSpawnRes.value();
             if(maxSpawn < 0) {
-                return Err("MaxSpawn must be a non-negative number.\r\n");
+                return err("MaxSpawn must be a non-negative number.\r\n");
             }
             cmd.max_location = maxSpawn;
 
             auto maxWorldRes = parseNumber(sequence[3], "MaxWorld");
             if(!maxWorldRes) {
-                return Err(maxWorldRes.err);
+                return err(maxWorldRes.err);
             }
             auto maxWorld = maxWorldRes.value();
             if(maxWorld < 0) {
-                return Err("MaxWorld must be a non-negative number.\r\n");
+                return err("MaxWorld must be a non-negative number.\r\n");
             }
             cmd.max = maxWorld;
 
             auto chanceRes = parseNumber(sequence[4], "Chance");
             if(!chanceRes) {
-                return Err(chanceRes.err);
+                return err(chanceRes.err);
             }
             auto chance = chanceRes.value();
             if(chance < 0 || chance > 100) {
-                return Err("Chance must be between 0 and 100.\r\n");
+                return err("Chance must be between 0 and 100.\r\n");
             }
             cmd.chance = chance;
 
             auto ifRes = parseNumber(sequence[5], "If");
             if(!ifRes) {
-                return Err(ifRes.err);
+                return err(ifRes.err);
             }
             cmd.if_flag = ifRes.value() ? 1 : 0;
 
-            return Ok(cmd);
+            return cmd;
         }
         case ResetCommandType::MOB: {
             auto mvnRes = parseNumber<mob_vnum>(sequence[1], "mob vnum");
             if(!mvnRes) {
-                return Err(mvnRes.err);
+                return err(mvnRes.err);
             }
             auto mvn = mvnRes.value();
             if(!mob_proto.contains(mvn)) {
-                return Err("MobPrototype {} not found.\r\n", mvn);
+                return err("MobPrototype {} not found.\r\n", mvn);
             }
             cmd.target = mvn;
 
             auto maxSpawnRes = parseNumber(sequence[2], "MaxSpawn");
             if(!maxSpawnRes) {
-                return Err(maxSpawnRes.err);
+                return err(maxSpawnRes.err);
             }
             auto maxSpawn = maxSpawnRes.value();
             if(maxSpawn < 0) {
-                return Err("MaxSpawn must be a non-negative number.\r\n");
+                return err("MaxSpawn must be a non-negative number.\r\n");
             }
             cmd.max_location = maxSpawn;
 
             auto maxWorldRes = parseNumber(sequence[3], "MaxWorld");
             if(!maxWorldRes) {
-                return Err(maxWorldRes.err);
+                return err(maxWorldRes.err);
             }
             auto maxWorld = maxWorldRes.value();
             if(maxWorld < 0) {
-                return Err("MaxWorld must be a non-negative number.\r\n");
+                return err("MaxWorld must be a non-negative number.\r\n");
             }
             cmd.max = maxWorld;
 
             auto chanceRes = parseNumber(sequence[4], "Chance");
             if(!chanceRes) {
-                return Err(chanceRes.err);
+                return err(chanceRes.err);
             }
             auto chance = chanceRes.value();
             if(chance < 0 || chance > 100) {
-                return Err("Chance must be between 0 and 100.\r\n");
+                return err("Chance must be between 0 and 100.\r\n");
             }
             cmd.chance = chance;
 
             auto ifRes = parseNumber(sequence[5], "If");
             if(!ifRes) {
-                return Err(ifRes.err);
+                return err(ifRes.err);
             }
             cmd.if_flag = ifRes.value() ? 1 : 0;
 
-            return Ok(cmd);
+            return cmd;
         }
         case ResetCommandType::GIVE: {
             auto ovnRes = parseNumber<obj_vnum>(sequence[1], "object vnum");
             if(!ovnRes) {
-                return Err(ovnRes.err);
+                return err(ovnRes.err);
             }
             auto ovn = ovnRes.value();
             if(!obj_proto.contains(ovn)) {
-                return Err("ObjectPrototype {} not found.\r\n", ovn);
+                return err("ObjectPrototype {} not found.\r\n", ovn);
             }
             cmd.target = ovn;
 
             auto targetVnRes = parseNumber<mob_vnum>(sequence[2], "target mob vnum");
             if(!targetVnRes) {
-                return Err(targetVnRes.err);
+                return err(targetVnRes.err);
             }
             auto targetVn = targetVnRes.value();
             if(!mob_proto.contains(targetVn)) {
-                return Err("MobPrototype {} not found.\r\n", targetVn);
+                return err("MobPrototype {} not found.\r\n", targetVn);
             }
             cmd.ex = targetVn;
 
             auto chanceRes = parseNumber(sequence[3], "Chance");
             if(!chanceRes) {
-                return Err(chanceRes.err);
+                return err(chanceRes.err);
             }
             auto chance = chanceRes.value();
             if(chance < 0 || chance > 100) {
-                return Err("Chance must be between 0 and 100.\r\n");
+                return err("Chance must be between 0 and 100.\r\n");
             }
             cmd.chance = chance;
 
             auto ifRes = parseNumber(sequence[4], "If");
             if(!ifRes) {
-                return Err(ifRes.err);
+                return err(ifRes.err);
             }
             cmd.if_flag = ifRes.value() ? 1 : 0;
 
-            return Ok(cmd);
+            return cmd;
         }
         case ResetCommandType::EQUIP: {
             auto ovnRes = parseNumber<obj_vnum>(sequence[1], "object vnum");
             if(!ovnRes) {
-                return Err(ovnRes.err);
+                return err(ovnRes.err);
             }
             auto ovn = ovnRes.value();
             if(!obj_proto.contains(ovn)) {
-                return Err("ObjectPrototype {} not found.\r\n", ovn);
+                return err("ObjectPrototype {} not found.\r\n", ovn);
             }
             cmd.target = ovn;
 
             auto slotRes = chooseEnum<WearSlot>(sequence[2], "wear location");
             if(!slotRes) {
-                return Err(slotRes.err);
+                return err(slotRes.err);
             }
             auto slot = slotRes.value();
             if(slot == WearSlot::Inventory) {
-                return Err("Cannot equip items in inventory slot.\r\n");
+                return err("Cannot equip items in inventory slot.\r\n");
             }
             cmd.ex = static_cast<int>(slot);
 
             auto chanceRes = parseNumber(sequence[3], "Chance");
             if(!chanceRes) {
-                return Err(chanceRes.err);
+                return err(chanceRes.err);
             }
             auto chance = chanceRes.value();
             if(chance < 0 || chance > 100) {
-                return Err("Chance must be between 0 and 100.\r\n");
+                return err("Chance must be between 0 and 100.\r\n");
             }
             cmd.chance = chance;
 
             auto ifRes = parseNumber(sequence[4], "If");
             if(!ifRes) {
-                return Err(ifRes.err);
+                return err(ifRes.err);
             }
             cmd.if_flag = ifRes.value() ? 1 : 0;
 
-            return Ok(cmd);
+            return cmd;
         }
         case ResetCommandType::PUT: {
             auto ovnRes = parseNumber<obj_vnum>(sequence[1], "object vnum");
             if(!ovnRes) {
-                return Err(ovnRes.err);
+                return err(ovnRes.err);
             }
             auto ovn = ovnRes.value();
             if(!obj_proto.contains(ovn)) {
-                return Err("ObjectPrototype {} not found.\r\n", ovn);
+                return err("ObjectPrototype {} not found.\r\n", ovn);
             }
             cmd.target = ovn;
 
             auto containerRes = parseNumber<obj_vnum>(sequence[2], "container vnum");
             if(!containerRes) {
-                return Err(containerRes.err);
+                return err(containerRes.err);
             }
             auto container = containerRes.value();
             if(!obj_proto.contains(container)) {
-                return Err("ObjectPrototype {} not found.\r\n", container);
+                return err("ObjectPrototype {} not found.\r\n", container);
             }
             cmd.ex = container;
 
             auto chanceRes = parseNumber(sequence[3], "Chance");
             if(!chanceRes) {
-                return Err(chanceRes.err);
+                return err(chanceRes.err);
             }
             auto chance = chanceRes.value();
             if(chance < 0 || chance > 100) {
-                return Err("Chance must be between 0 and 100.\r\n");
+                return err("Chance must be between 0 and 100.\r\n");
             }
             cmd.chance = chance;
 
             auto ifRes = parseNumber(sequence[4], "If");
             if(!ifRes) {
-                return Err(ifRes.err);
+                return err(ifRes.err);
             }
             cmd.if_flag = ifRes.value() ? 1 : 0;
 
-            return Ok(cmd);
+            return cmd;
         }
     }
 
-    return Err("We shouldn't ever reach this. Contact staff.\r\n");
+    return err("We shouldn't ever reach this. Contact staff.\r\n");
 }

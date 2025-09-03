@@ -1,5 +1,11 @@
 #pragma once
-#include "templates.h"
+#include <string>
+#include <unordered_set>
+
+#include "Typedefs.h"
+
+#include "const/AffectFlag.h"
+#include "Flags.h"
 
 struct HasSubscriptions {
     std::unordered_set<std::string> subscriptions{}; // Subscriptions to services.

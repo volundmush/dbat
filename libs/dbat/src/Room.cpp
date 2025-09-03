@@ -17,7 +17,7 @@
 #include "dbat/send.h"
 #include "dbat/act.wizard.h"
 
-NegativeKeyGuardUnorderedMap<int, std::shared_ptr<Room>> Room::registry;
+std::unordered_map<int, std::shared_ptr<Room>> Room::registry;
 
 Room::Room() : AbstractLocation()
 {

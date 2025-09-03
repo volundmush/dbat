@@ -1,5 +1,7 @@
 #pragma once
-#include "sysdep.h"
+#include <experimental/memory>
+
+struct Zone;
 
 struct HasZone {
     Zone* getZone() const;

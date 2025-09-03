@@ -10,7 +10,6 @@
  **************************************************************************/
 #pragma once
 #include "DgScriptPrototype.h"
-#include "structs.h"
 #include "db.h"
 #include "genzon.h"
 #include "oasis.h"

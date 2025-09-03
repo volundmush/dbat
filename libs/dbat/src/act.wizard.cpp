@@ -7,6 +7,7 @@
  *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
  *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
  ************************************************************************ */
+#include "dbat/Log.h"
 #include "dbat/Character.h"
 #include "dbat/Object.h"
 #include "dbat/Room.h"
@@ -3922,7 +3923,7 @@ ACMD(do_show)
             low = -1;
             high = 9999999;
         }
-        strp = sprintuniques(low, high);
+        strp = "Disabled";
         if (ch->desc)
             ch->desc->send_to("%s", strp);
         free(strp);

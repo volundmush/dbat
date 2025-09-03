@@ -28,7 +28,6 @@
 #include "dbat/act.informative.h"
 #include "dbat/act.movement.h"
 #include "dbat/obj_edit.h"
-#include "dbat/graph.h"
 #include "dbat/spells.h"
 #include "dbat/interpreter.h"
 #include "dbat/fight.h"

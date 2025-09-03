@@ -5,8 +5,11 @@
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
 #pragma once
+#include "Typedefs.h"
+struct Character;
+struct Object;
+struct ObjectPrototype;
 
-#include "structs.h"
 extern void auto_equip(Character *ch, Object *obj, int location);
 
 extern int update_objects(ObjectPrototype *refobj);

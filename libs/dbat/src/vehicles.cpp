@@ -25,7 +25,6 @@
 #include "dbat/races.h"
 #include "dbat/act.informative.h"
 #include "dbat/planet.h"
-#include "dbat/partial.h"
 
 #ifndef EXITN
 #define EXITN(room, door) (get_room(room)->dir_option[door])

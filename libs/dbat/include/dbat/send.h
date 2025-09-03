@@ -1,9 +1,13 @@
 #pragma once
+#include "Log.h"
 #include "Descriptor.h"
 #include "Character.h"
 #include "Room.h"
 #include "utils.h"
 #include "filter.h"
+
+#include "const/ConnectionState.h"
+#include "const/Environment.h"
 
 template<typename... Args>
 void send_to_all(fmt::string_view format, Args&&... args) {
@@ -17,8 +21,8 @@ void send_to_all(fmt::string_view format, Args&&... args) {
         }
     }
     catch(const std::exception &e) {
-        basic_mud_log("SYSERR: Format error in send_to_all: %s", e.what());
-        basic_mud_log("Template was: %s", format.data());
+        LERROR("SYSERR: Format error in send_to_all: %s", e.what());
+        LERROR("Template was: %s", format.data());
     }
 }
 
@@ -36,8 +40,8 @@ void send_to_outdoor(fmt::string_view format, Args&&... args) {
         }
     }
     catch(const std::exception &e) {
-        basic_mud_log("SYSERR: Format error in send_to_outdoor: %s", e.what());
-        basic_mud_log("Template was: %s", format.data());
+        LERROR("SYSERR: Format error in send_to_outdoor: %s", e.what());
+        LERROR("Template was: %s", format.data());
     }
 }
 
@@ -54,8 +58,8 @@ void send_to_moon(fmt::string_view format, Args&&... args) {
         }
     }
     catch(const std::exception &e) {
-        basic_mud_log("SYSERR: Format error in send_to_moon: %s", e.what());
-        basic_mud_log("Template was: %s", format.data());
+        LERROR("SYSERR: Format error in send_to_moon: %s", e.what());
+        LERROR("Template was: %s", format.data());
     }
 }
 
@@ -76,8 +80,8 @@ void send_to_planet(int type, WhereFlag planet, fmt::string_view format, Args&&.
         }
     }
     catch(const std::exception &e) {
-        basic_mud_log("SYSERR: Format error in send_to_planet: %s", e.what());
-        basic_mud_log("Template was: %s", format.data());
+        LERROR("SYSERR: Format error in send_to_planet: %s", e.what());
+        LERROR("Template was: %s", format.data());
     }
 }
 
@@ -85,7 +89,7 @@ void send_to_planet(int type, WhereFlag planet, fmt::string_view format, Args&&.
 template<typename... Args>
 void send_to_range(room_vnum start, room_vnum finish, fmt::string_view format, Args&&... args) {
     if (start > finish) {
-        basic_mud_log("send_to_range passed start room value greater then finish.");
+        LERROR("send_to_range passed start room value greater then finish.");
         return;
     }
 
@@ -100,8 +104,8 @@ void send_to_range(room_vnum start, room_vnum finish, fmt::string_view format, A
         }
     }
     catch(const std::exception &e) {
-        basic_mud_log("SYSERR: Format error in send_to_imm: %s", e.what());
-        basic_mud_log("Template was: %s", format.data());
+        LERROR("SYSERR: Format error in send_to_imm: %s", e.what());
+        LERROR("Template was: %s", format.data());
     }
 
     
@@ -123,11 +127,11 @@ void send_to_imm(fmt::string_view format, Args&&... args) {
             i->output += formatted_string;
             i->output += " ]@n\r\n";
         }
-        basic_mud_log("%s", formatted_string.c_str());
+        LERROR("%s", formatted_string.c_str());
     }
     catch(const std::exception &e) {
-        basic_mud_log("SYSERR: Format error in send_to_imm: %s", e.what());
-        basic_mud_log("Template was: %s", format.data());
+        LERROR("SYSERR: Format error in send_to_imm: %s", e.what());
+        LERROR("Template was: %s", format.data());
     }
 }
 
@@ -148,8 +152,8 @@ void game_info(fmt::string_view format, Args&&... args) {
         }
     }
     catch(const std::exception &e) {
-        basic_mud_log("SYSERR: Format error in game_info: %s", e.what());
-        basic_mud_log("Template was: %s", format.data());
+        LERROR("SYSERR: Format error in game_info: %s", e.what());
+        LERROR("Template was: %s", format.data());
     }
 
 }

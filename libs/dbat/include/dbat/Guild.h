@@ -1,7 +1,13 @@
 #pragma once
-#include "templates.h"
+#include <map>
+#include <memory>
+
 #include "HasOrganizationInfo.h"
 
+#include "const/Skill.h"
+#include "const/Max.h"
+
+#include "Flags.h"
 
 struct guild_info_type {
     int pc_class;
@@ -21,17 +27,17 @@ struct Guild : public org_data {
     std::unordered_set<uint8_t> feats;  /* array to keep track of which feats things we'll train */
 };
 
-#define GM_NUM(i) (guild_index.at((i)).vnum)
-#define GM_TRAINER(i) (guild_index.at((i)).keeper)
-#define GM_OPEN(i) (guild_index.at((i)).open)
-#define GM_CLOSE(i) (guild_index.at((i)).close)
-#define GM_CHARGE(i) (guild_index.at((i)).charge)
-#define GM_MINLVL(i) (guild_index.at((i)).minlvl)
-#define GM_WITH_WHO(i) (guild_index.at((i)).with_who)
-#define GM_NO_SKILL(i) (guild_index.at((i)).no_such_skill)
-#define GM_NO_GOLD(i) (guild_index.at((i)).not_enough_gold)
-#define GM_COST(i, j, k) (int)(GM_CHARGE(i) * spell_info[j].min_level[(int)GET_CLASS(k)])
-#define GM_FUNC(i) (guild_index.at((i)).func)
+#define GM_NUM(i) guild_index.at(i).vnum
+#define GM_TRAINER(i) guild_index.at(i).keeper
+#define GM_OPEN(i) (guild_index.at(i).open)
+#define GM_CLOSE(i) (guild_index.at(i).close)
+#define GM_CHARGE(i) (guild_index.at(i).charge)
+#define GM_MINLVL(i) (guild_index.at(i).minlvl)
+#define GM_WITH_WHO(i) (guild_index.at(i).with_who)
+#define GM_NO_SKILL(i) (guild_index.at(i).no_such_skill)
+#define GM_NO_GOLD(i) (guild_index.at(i).not_enough_gold)
+#define GM_COST(i, j, k) (int)(GM_CHARGE(i) * spell_info[j].min_level[intGET_CLASS(k)])
+#define GM_FUNC(i) guild_index.at((i)).func
 
 extern guild_vnum top_guild;
 extern int spell_sort_info[SKILL_TABLE_SIZE + 1];
@@ -55,3 +61,5 @@ extern void assign_the_guilds();
 
 /*. External . */
 extern SPECIAL(guild);
+
+extern std::map<guild_vnum, std::shared_ptr<Guild>> guild_index;

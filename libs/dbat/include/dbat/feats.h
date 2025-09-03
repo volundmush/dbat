@@ -7,8 +7,6 @@
 ***********************************************************************/
 #pragma once
 
-#include "structs.h"
-
 /* Functions defined in feats.c */
 extern int is_proficient_with_armor(const Character *ch, int armor_type);
 

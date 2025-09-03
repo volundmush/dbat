@@ -1,6 +1,8 @@
 #pragma once
+#include <cstdint>
 
-#include "structs.h"
+struct Character;
+struct Object;
 
 /* act.item.c */
 // global variables

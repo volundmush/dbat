@@ -1,6 +1,9 @@
 #pragma once
-
-#include "structs.h"
+#include <unordered_set>
+#include "const/Max.h"
+#include "Typedefs.h"
+struct Character;
+struct Object;
 
 // variables
 extern const room_vnum freeres[NUM_ALIGNS];

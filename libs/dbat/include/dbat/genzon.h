@@ -4,10 +4,11 @@
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
 #pragma once
+#include <vector>
+#include "Typedefs.h"
 
-#include "structs.h"
-#include "db.h"
+struct Zone;
 
 extern zone_rnum create_new_zone(zone_vnum vzone_num, const char **error);
 
-extern std::vector<Zone *> getZoneChildren(zone_vnum parent = NOTHING);
+extern std::vector<Zone*> getZoneChildren(zone_vnum parent = NOTHING);

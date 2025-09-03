@@ -1,11 +1,17 @@
 #pragma once
+#include "Log.h"
 #include "AbstractLocation.h"
 #include "HasDgScripts.h"
 #include "HasZone.h"
 #include "HasMudStrings.h"
+#include "StatHandler.h"
+
+struct Room;
+
+extern StatHandler<Room> roomStats;
 
 struct Room : public AbstractLocation, public HasZone, public HasDgScripts, public HasMudStrings, public HasExtraDescriptions, public HasSubscriptions, public HasResetCommands, std::enable_shared_from_this<Room> {
-    static NegativeKeyGuardUnorderedMap<int, std::shared_ptr<Room>> registry;
+    static std::unordered_map<int, std::shared_ptr<Room>> registry;
     
     Room();
 
@@ -49,8 +55,8 @@ struct Room : public AbstractLocation, public HasZone, public HasDgScripts, publ
             sendText(formatted_string);
         }
         catch(const fmt::format_error& e) {
-            basic_mud_log("SYSERR: Format error in Room::sendFmt: %s", e.what());
-            basic_mud_log("Template was: %s", format.data());
+            LERROR("SYSERR: Format error in Room::sendFmt: %s", e.what());
+            LERROR("Template was: %s", format.data());
         }
     }
 
@@ -64,8 +70,8 @@ struct Room : public AbstractLocation, public HasZone, public HasDgScripts, publ
             return formatted_string.size();
         }
         catch(const fmt::format_error& e) {
-            basic_mud_log("SYSERR: Format error in Room::send_to: %s", e.what());
-            basic_mud_log("Template was: %s", format.data());
+            LERROR("SYSERR: Format error in Room::send_to: %s", e.what());
+            LERROR("Template was: %s", format.data());
             return 0;
         }
     }
@@ -180,3 +186,11 @@ extern bool ROOM_FLAGGED(Room *loc, int flag);
 #define ROOM_FLAGS(loc)    (Room::registry.at((loc)).room_flags)
 
 extern const char* sense_location_name(room_vnum roomnum);
+
+extern Room *get_room(room_vnum vn);
+
+extern SubscriptionManager<Room> roomSubscriptions;
+
+extern void repairRoomDamage(uint64_t heartPulse, double deltaTime);
+
+extern room_rnum real_room(room_vnum vnum);

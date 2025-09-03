@@ -1,0 +1,94 @@
+#pragma once
+#include <cstdint>
+
+enum class PlayerFlag : uint8_t
+{
+    player_killer = 0,        // Player is a player-killer
+    player_thief = 1,         // Player is a player-thief
+    frozen = 2,               // Player is frozen
+    writing = 4,              // Player writing (board/mail/olc)
+    mailing = 5,              // Player is writing mail
+    site_ok = 7,              // Player has been site-cleared
+    no_shout = 8,             // Player not allowed to shout/goss
+    no_title = 9,             // Player not allowed to set title
+    loadroom = 11,            // Player uses nonstandard loadroom
+    no_wizlist = 12,          // Player shouldn't be on wizlist
+    no_delete = 13,           // Player shouldn't be deleted
+    wiz_invisible_start = 14, // Player should enter game wizinvis
+    not_dead_yet = 16,        // (R) Player being extracted.
+    piloting = 31,            // Player is sitting in the pilots chair
+    skillp = 32,              // Player made a good choice in CC
+    charging = 34,            // Player is charging
+    knocked_out = 45,         // Knocked OUT
+    immortal = 51,            // The player is immortal
+    eyes_closed = 52,         // The player has their eyes closed
+    disguised = 53,           // The player is disguised
+    bandaged = 54,            // The player has been bandaged
+    healing_tank = 56,        // Is inside a healing tank
+    halfbreed_fury = 57,      // Is in fury mode
+    ginyu_fighting_pose = 58, // Ginyu Pose Effect
+    absorbed = 60,
+    killed_by_player = 62,
+    two_hand_wielding = 63,
+    self_destruct_1 = 64,
+    self_dextruct_2 = 65,
+    spiral = 66,
+    biography_approved = 67,
+    repair_learn = 69,
+    forgetting_skill = 70,
+    transmission = 71,
+    fishing = 72,
+    majin_goop_state = 73,
+    multihit = 74,
+    aura_light = 75,
+    room_display = 76,
+    stolen = 77,
+    tail_hide = 78,     // Hides tail for S & HB
+    no_regrow_tail = 79 // Halt Growth for S & HB
+};
+
+/* Player flags: used by Character.act */
+constexpr int PLR_KILLER = 0;      /* Player is a player-killer        */
+constexpr int PLR_THIEF = 1;       /* Player is a player-thief         */
+constexpr int PLR_FROZEN = 2;      /* Player is frozen                 */
+constexpr int PLR_WRITING = 4;     /* Player writing (board/mail/olc)  */
+constexpr int PLR_MAILING = 5;     /* Player is writing mail           */
+constexpr int PLR_NOSHOUT = 8;     /* Player not allowed to shout/goss */
+constexpr int PLR_NOTITLE = 9;     /* Player not allowed to set title  */
+constexpr int PLR_DELETED = 10;    /* Player deleted - space reusable  */
+constexpr int PLR_LOADROOM = 11;   /* Player uses nonstandard loadroom */
+constexpr int PLR_NOWIZLIST = 12;  /* Player shouldn't be on wizlist  	*/
+constexpr int PLR_NODELETE = 13;   /* Player shouldn't be deleted     	*/
+constexpr int PLR_INVSTART = 14;   /* Player should enter game wizinvis*/
+constexpr int PLR_CRYO = 15;       /* Player is cryo-saved (purge prog)*/
+constexpr int PLR_NOTDEADYET = 16; /* (R) Player being extracted.     	*/
+constexpr int PLR_PILOTING = 31;   /* Player is sitting in the pilots chair */
+constexpr int PLR_SKILLP = 32;     /* Player made a good choice in CC  */
+constexpr int PLR_CHARGE = 34;     /* Player is charging               */
+constexpr int PLR_KNOCKED = 45;    /* Knocked OUT                      */
+constexpr int PLR_FPSSJ = 50;      /* Full Power Super Saiyan          */
+constexpr int PLR_IMMORTAL = 51;   /* The player is immortal           */
+constexpr int PLR_EYEC = 52;       /* The player has their eyes closed */
+constexpr int PLR_DISGUISED = 53;  /* The player is disguised          */
+constexpr int PLR_BANDAGED = 54;   /* THe player has been bandaged     */
+constexpr int PLR_HEALT = 56;      /* Is inside a healing tank         */
+constexpr int PLR_FURY = 57;       /* Is in fury mode                  */
+constexpr int PLR_POSE = 58;       /* Ginyu Pose Effect                */
+constexpr int PLR_ABSORBED = 60;
+constexpr int PLR_PDEATH = 62;
+constexpr int PLR_THANDW = 63;
+constexpr int PLR_SELFD = 64;
+constexpr int PLR_SELFD2 = 65;
+constexpr int PLR_SPIRAL = 66;
+constexpr int PLR_BIOGR = 67;
+constexpr int PLR_REPLEARN = 69;
+constexpr int PLR_FORGET = 70;
+constexpr int PLR_TRANSMISSION = 71;
+constexpr int PLR_FISHING = 72;
+constexpr int PLR_GOOP = 73;
+constexpr int PLR_MULTIHIT = 74;
+constexpr int PLR_AURALIGHT = 75;
+constexpr int PLR_RDISPLAY = 76;
+constexpr int PLR_STOLEN = 77;
+constexpr int PLR_TAILHIDE = 78; /* Hides tail for S & HB            */
+constexpr int PLR_NOGROW = 79;   /* Halt Growth for S & HB           */

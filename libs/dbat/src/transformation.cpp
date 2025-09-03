@@ -11,6 +11,10 @@
 #include "dbat/combat.h"
 #include "dbat/attack.h"
 
+constexpr int MASTERY_THRESHOLD = 5000;
+constexpr int LIMIT_THRESHOLD = 100000;
+constexpr int LIMITBREAK_THRESHOLD = 5000000;
+
 namespace trans
 {
     static std::string getCustomName(Character *ch, Form form)

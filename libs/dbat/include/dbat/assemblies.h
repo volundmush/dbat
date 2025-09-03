@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sysdep.h"
+struct Character;
 
 typedef struct assembly_data ASSEMBLY;
 typedef struct component_data COMPONENT;

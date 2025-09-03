@@ -1,5 +1,27 @@
 #pragma once
-#include "templates.h"
+#include <cstdint>
+#include <list>
+#include <memory>
+#include <string>
+#include <vector>
+#include <unordered_map>
+#include <functional>
+
+#include "const/Appearance.h"
+#include "const/Position.h"
+
+#include "const/Race.h"
+#include "const/Sensei.h"
+#include "const/Sex.h"
+#include "const/CharacterFlag.h"
+#include "const/MobFlag.h"
+#include "const/AdminFlag.h"
+#include "const/Mutation.h"
+#include "const/Size.h"
+#include "Flags.h"
+
+struct CharacterPrototype;
+struct Character;
 
 /* These data contain information about a players time data */
 struct time_data {
@@ -144,3 +166,16 @@ extern bool AFF_FLAGGED(CharacterPrototype *ch, int flag);
 extern bool PLR_FLAGGED(Character *ch, int flag);
 extern bool PRF_FLAGGED(Character *ch, int flag);
 extern bool ADM_FLAGGED(Character *ch, int flag);
+
+struct CharacterBase {
+    Race race{Race::human};
+    std::optional<SubRace> subrace{};
+    Sensei sensei{Sensei::commoner};
+    Sex sex{Sex::male};
+    struct mob_special_data mob_specials{};
+    Size size{Size::medium};
+    FlagHandler<CharacterFlag> character_flags{};
+    FlagHandler<MobFlag> mob_flags{};
+    FlagHandler<Race> bio_genomes{};
+    FlagHandler<Mutation> mutations{};
+};

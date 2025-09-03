@@ -1,5 +1,9 @@
 #pragma once
-#include "sysdep.h"
+#include <string>
+#include <vector>
+
+// TODO: investigate replacing these with just a std::pair<std::string, std;:string>
+// and returning a std::span<std::pair<std::string_view, std::string_view>>
 
 /* Extra description: used in objects, mobiles, and rooms */
 struct extra_descr_data {
@@ -19,3 +23,5 @@ struct HasExtraDescriptions {
     const std::vector<ExtraDescription>& getExtraDescription() const; // Returns the extra description data.    
     std::vector<ExtraDescription> extra_descriptions; // Extra descriptions for this unit.
 };
+
+extern void free_extra_descriptions(struct extra_descr_data *edesc);

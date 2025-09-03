@@ -9,3 +9,5 @@ struct Area : public AbstractGridArea, public HasVnum, public HasZone, std::enab
     std::shared_ptr<AbstractLocation> getSharedAbstractLocation() override;
 
 };
+
+extern std::unordered_map<int64_t, std::shared_ptr<Area>> areas;

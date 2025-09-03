@@ -1,9 +1,22 @@
 #pragma once
-#include "templates.h"
+#include <map>
+#include <optional>
+
+#include "const/RoomFlag.h"
+#include "const/WhereFlag.h"
+
+#include "Flags.h"
+#include "Command.h"
+
+#include "WeakBag.h"
 #include "Coordinates.h"
 #include "HasExtraDescriptions.h"
 #include "HasResetCommands.h"
 #include "Destination.h"
+
+struct HasLocation;
+struct Zone;
+struct Structure;
 
 struct AbstractLocation {
     WeakBag<HasLocation> contents;

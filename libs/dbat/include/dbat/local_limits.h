@@ -2,8 +2,9 @@
 // Created by volund on 10/20/21.
 //
 #pragma once
+#include <cstdint>
 
-#include "structs.h"
+struct Character;
 
 // functions
 extern void reboot_wizlists();

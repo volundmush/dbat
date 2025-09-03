@@ -1,4 +1,7 @@
 #pragma once
+#include <unordered_map>
+#include <memory>
+
 #include "AbstractGridArea.h"
 #include "HasLocation.h"
 
@@ -14,3 +17,5 @@ struct Structure : public AbstractGridArea, public HasID, public HasLocation, st
     std::shared_ptr<HasLocation> getSharedHasLocation() override;
 
 };
+
+extern std::unordered_map<int64_t, std::shared_ptr<Structure>> structures;

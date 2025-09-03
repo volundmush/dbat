@@ -1,6 +1,5 @@
 #include "dbat/Object.h"
 #include "dbat/Character.h"
-#include "dbat/structs.h"
 #include "dbat/send.h"
 
 int findItemApplySlot(Object *pObject, int location) {

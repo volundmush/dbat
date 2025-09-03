@@ -1,6 +1,19 @@
 #pragma once
-#include "templates.h"
+#include <map>
 
+#include "Log.h"
+#include "const/ZoneFlag.h"
+#include "Flags.h"
+#include "Typedefs.h"
+#include "WeakBag.h"
+#include "Result.h"
+#include "Location.h"
+
+struct Character;
+struct Room;
+struct Object;
+struct Area;
+struct Structure;
 
 struct Zone {
     zone_vnum number{NOTHING};        /* virtual number of this zone	  */
@@ -127,8 +140,8 @@ struct Zone {
             sendText(formatted_string);
         }
         catch(const fmt::format_error& e) {
-            basic_mud_log("SYSERR: Format error in Zone::sendFmt: %s", e.what());
-            basic_mud_log("Template was: %s", format.data());
+            LERROR("SYSERR: Format error in Zone::sendFmt: %s", e.what());
+            LERROR("Template was: %s", format.data());
         }
     }
 
@@ -141,8 +154,8 @@ struct Zone {
             return formatted_string.size();
         }
         catch(const fmt::format_error& e) {
-            basic_mud_log("SYSERR: Format error in Zone::send_to: %s", e.what());
-            basic_mud_log("Template was: %s", format.data());
+            LERROR("SYSERR: Format error in Zone::send_to: %s", e.what());
+            LERROR("Template was: %s", format.data());
             return 0;
         }
     }
@@ -170,15 +183,9 @@ struct Zone {
     void actToOutside(Character *source, const char* messg, bool childrenOnly = false);
 };
 
-template <>
-struct fmt::formatter<Zone> {
-    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
-
-    template <typename FormatContext>
-    auto format(const Zone& z, FormatContext& ctx) const {
-        return fmt::format_to(ctx.out(), "Zone {} '{}'", z.number, z.name);
-    }
-};
+inline std::string format_as(const Zone& z) {
+    return fmt::format("Zone {} '{}'", z.number, z.name);
+}
 
 #define ZONE_FLAGS(rnum)       (zone_table.at((rnum)).zone_flags)
 #define ZONE_MINLVL(rnum)      (zone_table.at((rnum)).min_level)
@@ -193,3 +200,15 @@ std::string renderZoneChain(T& iter, Character *viewer, std::string_view delim =
     }
     return fmt::format("{}", fmt::join(chain, delim));
 }
+
+extern std::unordered_set<zone_vnum> zone_reset_queue;
+
+extern std::map<zone_vnum, std::shared_ptr<Zone>> zone_table;
+
+extern void reset_zone(zone_rnum zone);
+
+extern void zone_update(uint64_t heartPulse, double deltaTime);
+
+extern int is_empty(zone_rnum zone_nr);
+
+extern zone_rnum real_zone(zone_vnum vnum);

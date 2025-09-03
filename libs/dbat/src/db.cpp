@@ -63,25 +63,25 @@ struct config_data config_info; /* Game configuration list.    */
 
 // The global database of entities.
 
-NegativeKeyGuardUnorderedMap<int64_t, std::shared_ptr<Area>> areas;
-NegativeKeyGuardUnorderedMap<int64_t, std::shared_ptr<Structure>> structures;
-NegativeKeyGuardUnorderedMap<int64_t, GridTemplate> gridTemplates;
+std::unordered_map<int64_t, std::shared_ptr<Area>> areas;
+std::unordered_map<int64_t, std::shared_ptr<Structure>> structures;
+std::unordered_map<int64_t, GridTemplate> gridTemplates;
 
 Character *affect_list = nullptr; /* global linked list of chars with affects */
 Character *affectv_list = nullptr; /* global linked list of chars with round-based affects */
-NegativeKeyGuardMap<mob_vnum, struct index_data> mob_index;    /* index table for mobile file	 */
-NegativeKeyGuardMap<mob_vnum, CharacterPrototype> mob_proto;    /* prototypes for mobs		 */
+std::map<mob_vnum, struct index_data> mob_index;    /* index table for mobile file	 */
+std::map<mob_vnum, CharacterPrototype> mob_proto;    /* prototypes for mobs		 */
 
-NegativeKeyGuardMap<obj_vnum, struct index_data> obj_index;    /* index table for object file	 */
-NegativeKeyGuardMap<obj_vnum, ObjectPrototype> obj_proto;    /* prototypes for objs		 */
+std::map<obj_vnum, struct index_data> obj_index;    /* index table for object file	 */
+std::map<obj_vnum, ObjectPrototype> obj_proto;    /* prototypes for objs		 */
 
-NegativeKeyGuardMap<zone_vnum, struct Zone> zone_table;    /* zone table			 */
+std::map<zone_vnum, struct Zone> zone_table;    /* zone table			 */
 
-NegativeKeyGuardMap<trig_vnum, DgScriptPrototype> trig_index; /* index table for triggers      */
+std::map<trig_vnum, DgScriptPrototype> trig_index; /* index table for triggers      */
 
-NegativeKeyGuardMap<int64_t, PlayerData> players;
+std::map<int64_t, PlayerData> players;
 
-NegativeKeyGuardMap<int64_t, struct descriptor_data*> sessions;
+std::map<int64_t, struct descriptor_data*> sessions;
 
 std::vector<std::weak_ptr<Character>> getAllCharacters() {
     std::vector<std::weak_ptr<Character>> out;
@@ -1385,9 +1385,6 @@ Character *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
     return mob;
 }
 
-char *sprintuniques(int low, int high) {
-    return strdup("Temporarily disabled.");
-}
 
 
 /* create an object, and add it to the object list */
@@ -2169,7 +2166,7 @@ std::shared_ptr<HasDgScripts> resolveUID(const std::string& uid) {
     return nullptr;
 }
 
-std::regex parseRangeRegex(R"(^(\d+)(-(\d+))?$)", std::regex::icase);
+
 
 int create_join_session(int account_id, int character_id, int64_t connection_id, const std::string& ip) {
     auto acc_found = accounts.find(account_id);

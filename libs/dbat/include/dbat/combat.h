@@ -10,8 +10,10 @@
  *  System (RDBS) of the MUD Dragonball Advent Truth.                      *
  ************************************************************************ */
 #pragma once
+#include <cstdint>
 
-#include "structs.h"
+struct Character;
+struct Object;
 
 /* combat.c functions */
 extern void homing_update(uint64_t heartPulse, double deltaTime);

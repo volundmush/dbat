@@ -1,5 +1,11 @@
 #pragma once
-#include "defs.h"
+#include <unordered_set>
+#include "const/Race.h"
+#include "const/Sensei.h"
+#include "const/CharacterProperties.h"
+// #include "Flags.h"
+
+// TODO: Replace these std::unordered_set's with FlagHandler<T>
 
 struct HasPicky {
     std::unordered_set<MoralAlign> only_alignment, not_alignment;    /* Neutral, lawful, etc.		*/

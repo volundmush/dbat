@@ -1,5 +1,9 @@
 #pragma once
+#include <memory>
+#include "Typedefs.h"
+#include "Command.h"
 #include "HasPicky.h"
+
 
 struct HasOrganizationInfo : public HasPicky {
     int vnum{NOTHING};        /* Virtual number of this shop		*/

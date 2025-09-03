@@ -2,6 +2,8 @@
 
 #include "assemblies.h"
 
+struct descriptor_data;
+
 extern long g_lNumAssemblies;
 extern ASSEMBLY *g_pAssemblyTable;
 

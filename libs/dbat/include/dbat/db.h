@@ -1,15 +1,24 @@
-/* ************************************************************************
- *   File: db.h                                          Part of CircleMUD *
- *  Usage: header file for database handling                               *
- *                                                                         *
- *  All rights reserved.  See license.doc for complete information.        *
- *                                                                         *
- *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
- *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
- ************************************************************************ */
 #pragma once
+#include <memory>
+#include <vector>
+#include <map>
+#include "Typedefs.h"
+#include "Command.h"
 
-#include "structs.h"
+// Function to collect pointers to objects within a vnum range from a map
+template<typename T>
+std::vector<T*> collectObjectsInRange(int start_vnum, int end_vnum, const std::map<int, T>& object_map) {
+    std::vector<T*> result;
+    
+    for (int vnum = start_vnum; vnum <= end_vnum; ++vnum) {
+        auto it = object_map.find(vnum);
+        if (it != object_map.end()) {
+            result.push_back(const_cast<T*>(&it->second));
+        }
+    }
+    
+    return result;
+}
 
 #define LIB_USER "data/user/"
 #define LIB_INTRO "data/intro/"
@@ -98,21 +107,16 @@
 
 // global variables
 
-extern struct time_info_data old_time_info; /* UNUSED (to be removed) the infomation about the time    */
-
-extern std::unordered_set<zone_vnum> zone_reset_queue;
+extern bool isMigrating;
 
 extern bool gameIsLoading;
 extern bool saveAll;
 
-extern Character *EDRAGON;
-extern int WISH[2];
-extern int DRAGONR, DRAGONZ, DRAGONC, SHENRON;
 extern int circle_restrict;
-extern struct help_index_element *help_table;
+
 extern char *help, *ihelp, *credits, *news, *info, *wizlist, *immlist, *background;
 extern char *policies, *handbook, *motd, *imotd, *GREETINGS, *GREETANSI;
-extern int top_of_helpt, dballtime;
+
 extern int mini_mud, no_rent_check, no_mail;
 extern room_rnum r_mortal_start_room; /* rnum of mortal start room	 */
 extern room_rnum r_immort_start_room; /* rnum of immort start room	 */
@@ -121,97 +125,15 @@ extern room_rnum r_frozen_start_room; /* rnum of frozen start room	 */
 extern time_t old_beginning_of_time;
 
 /* public procedures in db.c */
-extern void auc_load(Object *obj);
-
-extern void boot_world();
-
-extern int is_empty(zone_rnum zone_nr);
-
-extern void check_start_rooms();
-extern void boot_db_textfiles();
-extern void boot_db_time();
-extern void boot_db_spellfeats();
-extern void boot_db_world();
-extern void boot_db_help();
-extern void boot_db_mail();
-extern void boot_db_socials();
-extern void boot_db_commands();
-extern void boot_db_specials();
-extern void boot_db_sort();
-extern void boot_db_boards();
-extern void boot_db_banned();
-extern void boot_db_rent();
-extern void boot_db_houses();
-extern void boot_db_shadow();
-extern void boot_db_spacemap();
-extern void boot_db_sort();
-
-extern void boot_db_new();
-
-extern help_index_element *get_help(const std::string &name, int level);
-
-extern void zone_update(uint64_t heartPulse, double deltaTime);
-extern void repairRoomDamage(uint64_t heartPulse, double deltaTime);
-
 extern char *fread_string(FILE *fl, const char *error);
 
-extern long get_id_by_name(const char *name);
 
-extern char *get_name_by_id(long id);
-
-extern void save_mud_time(struct time_info_data *when);
-
-extern void free_extra_descriptions(struct extra_descr_data *edesc);
 
 extern void free_text_files();
 
-extern void load_disabled();
-
-extern void save_disabled();
-
-extern void free_disabled();
-
-extern void free_help_table();
-
 extern void auc_save();
 
-extern void load_config();
-
 extern void destroy_db();
-
-extern zone_rnum real_zone(zone_vnum vnum);
-
-extern room_rnum real_room(room_vnum vnum);
-
-extern mob_rnum real_mobile(mob_vnum vnum);
-
-extern obj_rnum real_object(obj_vnum vnum);
-
-extern void init_char(Character *ch);
-
-Character *read_mobile(mob_vnum nr, int type);
-
-extern int vnum_mobile(char *searchname, Character *ch);
-
-extern void reset_char(Character *ch);
-
-Object *create_obj();
-
-Object *read_object(obj_vnum nr, int type);
-
-extern int vnum_object(char *searchname, Character *ch);
-
-extern char *sprintuniques(int low, int high);
-
-extern int vnum_material(char *searchname, Character *ch);
-
-extern int vnum_weapontype(char *searchname, Character *ch);
-
-extern int vnum_armortype(char *searchname, Character *ch);
-
-extern void migrate_db();
-
-extern Room *get_room(room_vnum vn);
 
 constexpr int REAL = 0;
 constexpr int VIRTUAL = 1;
@@ -222,75 +144,15 @@ constexpr int BAN_NEW = 1;
 constexpr int BAN_SELECT = 2;
 constexpr int BAN_ALL = 3;
 
-extern std::vector<obj_vnum> dbVnums;
-
 /* global buffering system */
-extern time_t boot_time;
-
-extern struct config_data config_info;
-
-// world data...
-extern struct time_info_data time_info;  /* the infomation about the time    */
-extern struct time_info_data era_uptime; /* the infomation about the time    */
-extern struct weather_data weather_info; /* the infomation about the weather */
-
-extern NegativeKeyGuardUnorderedMap<int64_t, std::shared_ptr<Area>> areas;
-extern NegativeKeyGuardUnorderedMap<int64_t, std::shared_ptr<Structure>> structures;
-extern NegativeKeyGuardUnorderedMap<int64_t, GridTemplate> gridTemplates;
-
-extern NegativeKeyGuardMap<zone_vnum, struct Zone> zone_table;
-
-extern struct descriptor_data *descriptor_list;
-extern NegativeKeyGuardMap<int64_t, struct descriptor_data *> sessions;
-
-extern NegativeKeyGuardMap<mob_vnum, struct index_data> mob_index;
-extern NegativeKeyGuardMap<mob_vnum, CharacterPrototype> mob_proto;
-
-extern std::vector<std::weak_ptr<Character>> getAllCharacters();
-
-extern NegativeKeyGuardMap<obj_vnum, struct index_data> obj_index;
-extern NegativeKeyGuardMap<obj_vnum, ObjectPrototype> obj_proto;
-
-extern std::vector<std::weak_ptr<Object>> getAllObjects();
-
-extern NegativeKeyGuardMap<trig_vnum, DgScriptPrototype> trig_index;
-
-extern NegativeKeyGuardMap<vnum, Account> accounts;
-extern NegativeKeyGuardMap<shop_vnum, struct Shop> shop_index;
-extern NegativeKeyGuardMap<guild_vnum, struct Guild> guild_index;
-
-extern NegativeKeyGuardMap<int64_t, PlayerData> players;
-
-extern int64_t lastCharacterID;
-extern int64_t lastObjectID;
-extern int64_t lastAccountID;
-extern int64_t lastStructureID;
-extern int64_t lastAreaID;
-extern int64_t lastGridTemplateID;
-
-extern int lastRoomID;
-extern int lastZoneID;
-extern int lastShopID;
-extern int lastGuildID;
-extern int lastScriptID;
 
 int64_t getNextAccountID();
 
-bool isUID(const std::string &uid);
-std::shared_ptr<HasDgScripts> resolveUID(const std::string &uid);
 
-extern Character *affect_list;
-extern Character *affectv_list;
-
-extern SubscriptionManager<Character> characterSubscriptions;
-extern SubscriptionManager<Object> objectSubscriptions;
-extern SubscriptionManager<Room> roomSubscriptions;
-extern SubscriptionManager<DgScript> triggerSubscriptions;
 
 extern int create_join_session(int account_id, int character_id, int64_t connection_id, const std::string &ip);
 
-extern struct social_messg *soc_mess_list;
-extern int top_of_socialt;
+
 
 extern int dg_owner_purged;
 
@@ -298,13 +160,7 @@ extern void strip_string(char *buffer);
 
 extern bitvector_t asciiflag_conv(char *flag);
 
-extern void reset_zone(zone_rnum zone);
 
-extern std::vector<CharacterPrototype *> collectNPCProtos(int start_vnum, int end_vnum);
-extern std::vector<ObjectPrototype *> collectItemProtos(int start_vnum, int end_vnum);
-extern std::vector<Guild *> collectGuilds(int start_vnum, int end_vnum);
-extern std::vector<Shop *> collectShops(int start_vnum, int end_vnum);
-extern std::vector<DgScriptPrototype *> collectTriggers(int start_vnum, int end_vnum);
 
 /* For disabled commands code by Erwin S. Andreasen, */
 /* ported to CircleMUD by Myrdred (Alexei Svitkine)  */

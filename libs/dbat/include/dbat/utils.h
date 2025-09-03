@@ -8,13 +8,74 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
+#include "Log.h"
 #include "db.h"
+#include "config.h"
 #include "races.h"
 #include "handler.h"
 #include "spells.h"
 #include "comm.h"
+#include "Result.h"
+
+#include "Location.h"
 
 constexpr int READ_SIZE = 256;
+
+#define IS_SET(flag, bit)  ((flag) & (bit))
+#define SET_BIT(var, bit)  ((var) |= (bit))
+#define REMOVE_BIT(var, bit)  ((var) &= ~(bit))
+#define TOGGLE_BIT(var, bit) ((var) ^= (bit))
+
+#define REMOVE_FROM_LIST(item, head, next, cmtemp)    \
+   if ((item) == (head))        \
+      (head) = (item)->next;        \
+   else {                \
+      (cmtemp) = head;            \
+      while ((cmtemp) && ((cmtemp)->next != (item))) \
+     (cmtemp) = (cmtemp)->next;        \
+      if (cmtemp)                \
+         (cmtemp)->next = (item)->next;    \
+   }                    \
+
+#define REMOVE_FROM_DOUBLE_LIST(item, head, next, prev)\
+      if((item) == (head))            \
+      {                        \
+            (head) = (item)->next;        \
+            if(head) (head)->prev = nullptr;        \
+      }                        \
+      else                    \
+      {                        \
+        temp = head;                \
+          while(temp && (temp->next != (item)))    \
+            temp = temp->next;            \
+             if(temp)                \
+            {                    \
+               temp->next = (item)->next;        \
+               if((item)->next)            \
+                (item)->next->prev = temp;    \
+            }                    \
+      }                        \
+
+#define CIRCLEMUD_VERSION(major, minor, patchlevel) \
+    (((major) << 16) + ((minor) << 8) + (patchlevel))
+
+#define CREATE(result, type, number)  do {\
+    if ((number) * sizeof(type) <= 0)    \
+        LERROR("SYSERR: Zero bytes or less requested at %s:%d.", __FILE__, __LINE__);    \
+    if (!((result) = (type *) calloc ((number), sizeof(type))))    \
+        { perror("SYSERR: malloc failure"); abort(); } } while(0)
+
+#define RECREATE(result, type, number) do {\
+  if (!((result) = (type *) realloc ((result), sizeof(type) * (number))))\
+        { perror("SYSERR: realloc failure"); abort(); } } while(0)
+
+#define YESNO(a) ((a) ? "YES" : "NO")
+#define ONOFF(a) ((a) ? "ON" : "OFF")
+
+#define ISNEWL(ch) ((ch) == '\n' || (ch) == '\r')
+
+/* See also: ANA, SANA */
+#define AN(string) (strchr("aeiouAEIOU", *(string)) ? "an" : "a")
 
 /* public functions in utils.c */
 extern char *strlwr(char *s);
@@ -33,6 +94,11 @@ extern void basic_mud_vlog(const char *format, va_list args);
 
 extern int touch(const char *path);
 
+/* defines for mudlog() */
+constexpr int OFF = 0;
+constexpr int BRF = 1;
+constexpr int NRM = 2;
+constexpr int CMP = 3;
 extern void mudlog(int type, int level, int file, const char *str, ...) __attribute__ ((format (printf, 4, 5)));
 
 extern int dice(int number, int size);

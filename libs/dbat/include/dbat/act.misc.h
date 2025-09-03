@@ -1,6 +1,6 @@
 #pragma once
-
-#include "structs.h"
+#include <cstdint>
+struct Character;
 
 extern void handle_songs(uint64_t heartPulse, double deltaTime);
 

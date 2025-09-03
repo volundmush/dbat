@@ -1,6 +1,20 @@
 #pragma once
-#include "templates.h"
+#include <map>
+
 #include "HasOrganizationInfo.h"
+
+#include "const/Max.h"
+#include "Flags.h"
+
+struct Object;
+
+enum class ShopFlag : uint8_t
+{
+    start_fight = 0,
+    bank_money = 1,
+    allow_steal = 2,
+    no_broken = 3
+};
 
 struct shop_buy_data {
     int type{};
@@ -138,3 +152,5 @@ extern void show_shops(Character *ch, char *arg);
 
 // special
 extern SPECIAL(shop_keeper);
+
+extern std::map<shop_vnum, std::shared_ptr<Shop>> shop_index;

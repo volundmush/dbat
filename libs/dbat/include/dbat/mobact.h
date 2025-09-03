@@ -2,9 +2,8 @@
 // Created by volund on 10/20/21.
 //
 #pragma once
-
-#include "structs.h"
-
+#include <cstdint>
+struct Character;
 
 // functions
 extern void mobile_activity(uint64_t heartPulse, double deltaTime);

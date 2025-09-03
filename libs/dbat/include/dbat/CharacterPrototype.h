@@ -1,20 +1,14 @@
 #pragma once
+#include <map>
+#include <memory>
+
+#include "Typedefs.h"
 #include "ThingPrototype.h"
 #include "CharacterShared.h"
 
-struct CharacterPrototype : public ThingPrototype {
-    Race race{Race::human};
-    std::optional<SubRace> subrace{};
-    Sensei sensei{Sensei::commoner};
-    Sex sex{Sex::male};
-    struct mob_special_data mob_specials{};
-    Size size{Size::undefined};
-    FlagHandler<CharacterFlag> character_flags{};
-    FlagHandler<MobFlag> mob_flags{};
-    FlagHandler<Race> bio_genomes{};
-    FlagHandler<Mutation> mutations{};
-    char *clan{};
-    int crank{}; // clan rank
+
+struct CharacterPrototype : public CharacterBase, public ThingPrototype {
+
 
     template<typename R = double>
     R getBaseStat(const std::string& stat) {
@@ -31,3 +25,10 @@ struct CharacterPrototype : public ThingPrototype {
         return npcProtoStats.modBase<R>(this, stat, val);
     }
 };
+
+extern std::map<mob_vnum, struct index_data> mob_index;
+extern std::map<mob_vnum, std::shared_ptr<CharacterPrototype>> mob_proto;
+
+extern int vnum_mobile(char *searchname, Character *ch);
+
+extern mob_rnum real_mobile(mob_vnum vnum);

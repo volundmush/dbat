@@ -1,6 +1,13 @@
 #pragma once
+#include <unordered_set>
+#include <functional>
+#include <string>
+#include <vector>
 
-#include "structs.h"
+#include "const/Race.h"
+#include "const/Appearance.h"
+
+struct Character;
 
 // global variables
 extern const struct guild_info_type guild_info[6];

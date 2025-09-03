@@ -1,4 +1,6 @@
 #pragma once
+#include <variant>
+
 #include "AbstractLocation.h"
 #include "HasMisc.h"
 #include "HasMudStrings.h"
@@ -83,6 +85,8 @@ struct RoundDim {
     }
 };
 
+struct Shape;
+
 // the serializable data for shapes.
 struct ShapeBase {
     ShapeBase& operator=(const Shape& other);
@@ -95,6 +99,8 @@ struct ShapeBase {
     // an override to display tiles differently.
     std::string tileDisplay{};
 };
+
+struct AbstractGridArea;
 
 // This is used for defining "areas" for re-use.
 // We can both create Areas/Structures from them, and save one to them.
@@ -194,3 +200,5 @@ struct AbstractGridArea : public HasMudStrings, public AbstractLocation, public 
     void setSectorType(const Coordinates& coor, SectorType type) override;
 
 };
+
+extern std::unordered_map<int64_t, std::shared_ptr<GridTemplate>> gridTemplates;

@@ -1,11 +1,18 @@
 #pragma once
+#include <memory>
+#include <experimental/memory>
+#include <magic_enum/magic_enum_format.hpp>
+#include "DgScriptPrototype.h"
 #include "HasVariables.h"
 #include "HasMisc.h"
-#include "DgScriptPrototype.h"
+#include "SubscriptionManager.h"
+
+
+struct HasDgScripts;
 
 using DepthType = std::tuple<ScriptLineType, int, bool, std::string>;
 
-enum class DgScriptState : uint8_t {
+enum class DgScriptState : std::uint8_t {
     READY = 0,
     RUNNING = 1,
     WAITING = 2,
@@ -64,12 +71,8 @@ private:
     std::string substituteVariables(const std::string& cmd);
 };
 
-template <>
-struct fmt::formatter<DgScript> {
-    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+inline std::string format_as(const DgScript& z) {
+    return fmt::format("({}) DgScript {} '{}'", magic_enum::enum_name(z.getAttachType()), z.getVnum(), z.proto->name);
+}
 
-    template <typename FormatContext>
-    auto format(const DgScript& z, FormatContext& ctx) {
-        return fmt::format_to(ctx.out(), "({}) DgScript {} '{}'", z.getAttachType(), z.getVnum(), z.proto->name);
-    }
-};
+extern SubscriptionManager<DgScript> triggerSubscriptions;

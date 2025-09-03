@@ -1,6 +1,13 @@
 #pragma once
+#include <vector>
 
-#include "structs.h"
+#include "const/Max.h"
+#include "HasExtraDescriptions.h"
+
+struct Character;
+struct Location;
+struct command_info;
+struct Object;
 
 // defines
 constexpr int MAX_PORTAL_TYPES = 6;

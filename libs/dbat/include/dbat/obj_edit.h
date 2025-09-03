@@ -9,7 +9,7 @@
 ************************************************************************ */
 #pragma once
 
-#include "structs.h"
+struct descriptor_data;
 
 
 /* obj_edit.c functions */

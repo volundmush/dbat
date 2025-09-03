@@ -8,12 +8,11 @@
  *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
  ************************************************************************ */
 #pragma once
-
-#include "structs.h"
+#include <cstdint>
 #include "commands.h"
 
-#define CMD_NAME (complete_cmd_info[cmd].command)
-#define CMD_IS(cmd_name) (!strcmp(cmd_name, complete_cmd_info[cmd].command))
+#define CMD_NAME complete_cmd_info[cmd].command
+#define CMD_IS(cmd_name) !strcmp(cmd_name, complete_cmd_info[cmd].command)
 #define IS_MOVE(cmdnum) (complete_cmd_info[cmdnum].command_pointer == do_move)
 
 extern const char *list_bonus[];

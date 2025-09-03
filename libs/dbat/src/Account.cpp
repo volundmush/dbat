@@ -1,15 +1,19 @@
-#include "dbat/templates.h"
-#include "dbat/Account.h"
+#include <ctime>
+#include <boost/algorithm/string.hpp>
 
-NegativeKeyGuardMap<vnum, Account> accounts;
+#include "dbat/Account.h"
+#include "dbat/ID.h"
+
+
+std::map<vnum, std::shared_ptr<Account>> accounts;
 
 struct Account *findAccount(const std::string &name)
 {
     for (auto &[aid, account] : accounts)
     {
-        if (boost::iequals(account.name, name))
+        if (boost::iequals(account->name, name))
         {
-            return &account;
+            return account.get();
         }
     }
     return nullptr;
@@ -34,14 +38,15 @@ Account *createAccount(const std::string &name, const std::string &password)
     }
 
     auto nextId = Account::getNextID();
-    auto a = accounts[nextId];
-    a.name = name;
-    a.id = nextId;
-    a.password = password;
-    a.created = time(nullptr);
-    a.last_login = time(nullptr);
+    auto a = std::make_shared<Account>();
+    accounts[nextId] = a;
+    a->name = name;
+    a->id = nextId;
+    a->password = password;
+    a->created = time(nullptr);
+    a->last_login = time(nullptr);
 
-    return findAccount(name);
+    a.get();
 }
 
 void Account::modRPP(int amt)

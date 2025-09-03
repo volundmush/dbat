@@ -22,7 +22,6 @@
 #include "dbat/races.h"
 #include "dbat/comm.h"
 #include "dbat/dg_scripts.h"
-#include "dbat/graph.h"
 #include "dbat/spells.h"
 #include "dbat/handler.h"
 #include "dbat/planet.h"

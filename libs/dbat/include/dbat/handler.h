@@ -8,8 +8,15 @@
  *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
  ************************************************************************ */
 #pragma once
+#include <map>
+#include <vector>
+#include <memory>
 
-#include "structs.h"
+struct Character;
+struct Object;
+struct affected_type;
+
+#include "Typedefs.h"
 
 /* handling the affected-structures */
 extern void update_char_objects(Character *ch); /* handler.c */

@@ -2,9 +2,8 @@
 // Created by basti on 10/21/2021.
 //
 #pragma once
-
-#include "structs.h"
-
+#include <string>
+struct descriptor_data;
 
 // functions
 extern void smash_tilde(char *str);

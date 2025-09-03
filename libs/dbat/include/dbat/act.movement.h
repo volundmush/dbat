@@ -1,6 +1,7 @@
 #pragma once
 
-#include "structs.h"
+#include "const/Max.h"
+struct Character;
 
 // global variables
 extern const char *cmd_door[NUM_DOOR_CMD];

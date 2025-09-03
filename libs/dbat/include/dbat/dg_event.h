@@ -13,7 +13,6 @@
  *  $Revision: 1.0.14 $                                                    *
  ************************************************************************ */
 #pragma once
-#include "structs.h"
 
 /********** Event related section *********/
 /* - events - function protos need by other modules */

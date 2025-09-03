@@ -3,7 +3,7 @@
 //
 #pragma once
 
-#include "structs.h"
+struct Character;
 
 // functions
 extern void send_to_scouter(const char *messg, Character *ch, int num, int type);

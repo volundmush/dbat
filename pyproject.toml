@@ -8,5 +8,9 @@ version = "0.1.0"
 requires-python = ">=3.12"
 
 [tool.scikit-build]
+# Keep CMake/Ninja build state across runs for fast incremental builds
+# The wheel_tag component isolates builds by Python/ABI/platform automatically.
+build-dir = "build/py-{wheel_tag}"
+
 # (optional) if your CMakeLists.txt is at repo root
 wheel.py-api = "cp312"   # or omit to use default ABI-tagged build

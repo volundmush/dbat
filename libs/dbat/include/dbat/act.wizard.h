@@ -1,8 +1,7 @@
 #pragma once
+#include <cstdint>
 
-#include "structs.h"
-
-/* global variables */
+struct Character;
 
 // functions
 extern void search_replace(char *string, const char *find, const char *replace);

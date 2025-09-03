@@ -1,6 +1,11 @@
 #pragma once
+#include <cstdint>
+#include <cstdio>
+#include <time.h>
 
-#include "structs.h"
+#include "Typedefs.h"
+struct Character;
+
 
 /* New Dynamic boards v2.4 -PjD (dughi@imaxx.net) */
 #define BOARD_DIRECTORY "data/etc/boards" SLASH

@@ -1,9 +1,6 @@
-//
-// Created by volund on 10/20/21.
-//
 #pragma once
+struct descriptor_data;
 
-#include "structs.h"
 
 extern void hedit_parse(struct descriptor_data *, char *);
 

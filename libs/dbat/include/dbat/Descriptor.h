@@ -1,6 +1,19 @@
 #pragma once
-#include "sysdep.h"
-#include "defs.h"
+#include <cstdint>
+#include <map>
+#include <unordered_map>
+#include <string>
+#include <list>
+
+#include "Log.h"
+
+#include "const/ConnectionState.h"
+#include "const/Max.h"
+
+struct Object;
+struct Character;
+struct oasis_olc_data;
+struct Account;
 
 struct txt_block {
     char *text;
@@ -69,8 +82,8 @@ struct descriptor_data {
             sendText(formatted_string);
         }
         catch(const fmt::format_error& e) {
-            basic_mud_log("SYSERR: Format error in descriptor_data::sendFmt: %s", e.what());
-            basic_mud_log("Template was: %s", format.data());
+            LERROR("SYSERR: Format error in descriptor_data::sendFmt: %s", e.what());
+            LERROR("Template was: %s", format.data());
         }
     }
 
@@ -83,8 +96,8 @@ struct descriptor_data {
             return formatted_string.size();
         }
         catch(const fmt::format_error& e) {
-            basic_mud_log("SYSERR: Format error in descriptor_data::send_to: %s", e.what());
-            basic_mud_log("Template was: %s", format.data());
+            LERROR("SYSERR: Format error in descriptor_data::send_to: %s", e.what());
+            LERROR("Template was: %s", format.data());
             return 0;
         }
     }
@@ -100,3 +113,6 @@ struct descriptor_data {
                         STATE(d) == CON_POBJ)
 #define IS_INMENU(d)    (STATE(d) == CON_MENU || STATE(d) == CON_EXDESC || STATE(d) == CON_UMENU || STATE(d) == CON_GET_USER || STATE(d) == CON_GET_EMAIL || STATE(d) == CON_CHPWD_GETOLD || STATE(d) == CON_CHPWD_GETNEW || STATE(d) == CON_CHPWD_VRFY || STATE(d) == CON_DELCNF1 || STATE(d) == CON_DELCNF2 || STATE(d) == CON_QRACE || STATE(d) == CON_QCLASS || STATE(d) == CON_CLASS_HELP || STATE(d) == CON_RACE_HELP || STATE(d) == CON_BONUS || STATE(d) == CON_NEGATIVE || STATE(d) == CON_DISTFEA || STATE(d) == CON_HW || STATE(d) == CON_AURA)
 #define STATE(d)    ((d)->connected)
+
+extern struct descriptor_data *descriptor_list;
+extern std::map<int64_t, struct descriptor_data *> sessions;

@@ -17,7 +17,6 @@
 #include "dbat/Room.h"
 #include "dbat/ObjectPrototype.h"
 #include "dbat/CharacterPrototype.h"
-#include "dbat/structs.h"
 #include "dbat/dg_scripts.h"
 #include "dbat/utils.h"
 #include "dbat/db.h"

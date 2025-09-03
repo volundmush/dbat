@@ -20,6 +20,8 @@
 #include "dbat/interpreter.h"
 #include "dbat/handler.h"
 
+#include "dbat/Social.h"
+
 /* local functions */
 char *fread_action(FILE *fl, int nr);
 

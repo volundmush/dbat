@@ -1,5 +1,7 @@
 #pragma once
-#include "sysdep.h"
+#include <string>
+#include <string_view>
+#include <unordered_map>
 
 struct HasMudStrings {
     // make it virtual.

@@ -1,5 +1,7 @@
 #pragma once
-#include "dbat/structs.h"
+#include <string>
+
+#include "const/Skill.h"
 
 namespace skill {
     extern std::string getName(Skill form);

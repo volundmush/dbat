@@ -3522,65 +3522,65 @@ std::string format_double(double value)
 Result<Zone*> getZone(std::string_view arg, Character* ch) {
     if(boost::iequals(arg, "here")) {
         if(auto z = ch->location.getZone()) {
-            return Ok(z);
+            return z;
         }
-        return Err("You are not in a Zone, somehow. How the hell did that happen?\r\n");
+        return err("You are not in a Zone, somehow. How the hell did that happen?\r\n");
     }
     auto res = parseNumber<zone_vnum>(arg, "Zone ID");
-    if (!res) return Err(res.err);
+    if (!res) return err(res.err);
 
     if (auto zone = zone_table.find(res.value()); zone != zone_table.end()) {
-        return Ok(&zone->second);
+        return &zone->second;
     }
-    return Err("Zone {} does not exist.\r\n", res.value());
+    return err("Zone {} does not exist.\r\n", res.value());
 }
 
 Result<std::string> validateZoneName(std::string_view arg, bool checkExists, zone_vnum exclude) {
     auto trimmed = boost::trim_copy(std::string(arg));
     if (trimmed.empty()) {
-        return Err("No zone name provided.\r\n");
+        return err("No zone name provided.\r\n");
     }
     if (checkExists) {
         for(const auto& [vn, z] : zone_table) {
             if(vn == exclude) continue;
             if(boost::iequals(trimmed, z.name)) {
-                return Err("Zone '{}' already exists.\r\n", trimmed);
+                return err("Zone '{}' already exists.\r\n", trimmed);
             }
         }
     }
-    return Ok(trimmed);
+    return trimmed;
 }
 
 
 Result<Room*> getRoom(std::string_view arg, Character* ch) {
     if(boost::iequals(arg, "here")) {
         if(auto r = dynamic_cast<Room*>(ch->location.getLoc())) {
-            return Ok(r);
+            return r;
         }
-        return Err("You are not in a Room.\r\n");
+        return err("You are not in a Room.\r\n");
     }
     auto res = parseNumber(arg, "Room ID");
-    if (!res) return Err(res.err);
+    if (!res) return err(res.err);
 
     if (auto room = Room::registry.find(res.value()); room != Room::registry.end()) {
         auto r = room->second.get();
-        return Ok(r);
+        return r;
     }
-    return Err("Room {} does not exist.\r\n", res.value());
+    return err("Room {} does not exist.\r\n", res.value());
 
 }
 
 Result<Location> getLocation(std::string_view arg, Character* ch) {
     if(boost::iequals(arg, "here")) {
         if(auto loc = ch->location) {
-            return Ok(loc);
+            return loc;
         }
-        return Err("You are not in a Location, somehow. How the hell did that happen?\r\n");
+        return err("You are not in a Location, somehow. How the hell did that happen?\r\n");
     }
     if(auto res = Location(std::string(arg))) {
-        return Ok(res);
+        return res;
     }
-    return Err("Location {} does not exist.\r\n", arg);
+    return err("Location {} does not exist.\r\n", arg);
 }
 
 std::string ansiSafeString(std::string_view arg) {

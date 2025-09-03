@@ -11,7 +11,6 @@
 #include "dbat/Character.h"
 #include "dbat/CharacterPrototype.h"
 #include "dbat/Room.h"
-#include "dbat/sedit.h"
 #include "dbat/send.h"
 #include "dbat/comm.h"
 #include "dbat/interpreter.h"

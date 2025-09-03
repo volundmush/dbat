@@ -10,6 +10,7 @@
 
 #include "dbat/constants.h"
 #include "dbat/races.h"
+#include "dbat/const/Direction.h"
 
 const char *circlemud_version = "CircleMUD, version 3.1";
 
@@ -1393,58 +1394,6 @@ const char *admin_level_names[ADMLVL_IMPL + 2] = {
 };
 
 
-/* Derived from the SRD under OGL, see ../doc/srd.txt for information */
-const struct aging_data racial_aging_data[NUM_RACES] = {
-/*                   adult	start1	start2	start3	middle	old	vener.	maxdice	*/
-/* HUMAN        */ {15,  {{1, 4}, {1, 6}, {2,  6}}, 35,  53,  70,  {2, 20}},
-/* ELF          */
-                   {110, {{4, 6}, {6, 6}, {10, 6}}, 175, 263, 350, {4, 100}},
-/* GNOME        */
-                   {40,  {{4, 6}, {6, 6}, {9,  6}}, 100, 150, 200, {3, 100}},
-/* DWARF        */
-                   {40,  {{3, 6}, {5, 6}, {7,  6}}, 125, 188, 250, {2, 100}},
-/* HALF_ELF     */
-                   {20,  {{1, 6}, {2, 6}, {3,  6}}, 62,  93,  125, {3, 20}},
-/* HALFLING     */
-                   {20,  {{2, 4}, {3, 6}, {4,  6}}, 50,  75,  100, {5, 20}},
-/* DROW_ELF     */
-                   {110, {{4, 6}, {6, 6}, {10, 6}}, 175, 263, 350, {4, 100}},
-/* HALF_ORC     */
-                   {14,  {{1, 4}, {1, 6}, {2,  6}}, 30,  45,  60,  {2, 10}},
-/* ANIMAL       */
-                   {14,  {{1, 4}, {1, 6}, {2,  6}}, 30,  45,  60,  {2, 10}},
-/* CONSTRUCT    */
-                   {110, {{4, 6}, {6, 6}, {10, 6}}, 175, 263, 350, {4, 100}},
-/* DEMON        */
-                   {110, {{4, 6}, {6, 6}, {10, 6}}, 175, 263, 350, {4, 100}},
-/* DRAGON       */
-                   {110, {{4, 6}, {6, 6}, {10, 6}}, 175, 263, 350, {4, 100}},
-/* FISH         */
-                   {14,  {{1, 4}, {1, 6}, {2,  6}}, 30,  45,  60,  {2, 10}},
-/* GIANT        */
-                   {15,  {{1, 4}, {1, 6}, {2,  6}}, 35,  53,  70,  {2, 20}},
-/* GOBLIN       */
-                   {14,  {{1, 4}, {1, 6}, {2,  6}}, 30,  45,  60,  {2, 10}},
-/* INSECT       */
-                   {14,  {{1, 4}, {1, 6}, {2,  6}}, 30,  45,  60,  {2, 10}},
-/* ORC          */
-                   {14,  {{1, 4}, {1, 6}, {2,  6}}, 30,  45,  60,  {2, 10}},
-/* SNAKE        */
-                   {14,  {{1, 4}, {1, 6}, {2,  6}}, 30,  45,  60,  {2, 10}},
-/* TROLL        */
-                   {14,  {{1, 4}, {1, 6}, {2,  6}}, 30,  45,  60,  {2, 10}},
-/* MINOTAUR     */
-                   {110, {{4, 6}, {6, 6}, {10, 6}}, 175, 263, 350, {4, 100}},
-/* KOBOLD       */
-                   {14,  {{1, 4}, {1, 6}, {2,  6}}, 30,  45,  60,  {2, 10}},
-/* LIZARDFOLK   */
-                   {110, {{4, 6}, {6, 6}, {10, 6}}, 175, 263, 350, {4, 100}},
-/* WARHOST      */
-                   {110, {{4, 6}, {6, 6}, {10, 6}}, 175, 263, 350, {4, 100}},
-/* FAERIE       */
-                   {110, {{4, 6}, {6, 6}, {10, 6}}, 175, 263, 350, {4, 100}},
-};
-
 
 /* Administrative flags */
 const char *admin_flag_names[] = {
@@ -1506,16 +1455,6 @@ const char *cchoice_names[NUM_COLOR + 1] = {
 };
 
 /* --- End of constants arrays. --- */
-
-/*
- * Various arrays we count so we can check the world files.  These
- * must be at the bottom of the file so they're pre-declared.
- */
-size_t room_bits_count = sizeof(room_bits) / sizeof(room_bits[0]) - 1,
-        action_bits_count = sizeof(action_bits) / sizeof(action_bits[0]) - 1,
-        affected_bits_count = sizeof(affected_bits) / sizeof(affected_bits[0]) - 1,
-        extra_bits_count = sizeof(extra_bits) / sizeof(extra_bits[0]) - 1,
-        wear_bits_count = sizeof(wear_bits) / sizeof(wear_bits[0]) - 1;
 
 const char *creation_methods[NUM_CREATION_METHODS + 1] =
         {
@@ -1669,142 +1608,3 @@ const int list_bonus_cost[] = {
         6, /* Negative 51 */
 };
 
-
-std::vector<std::string> getRaceNames() {
-        return getEnumNames<Race>();
-}
-
-std::vector<std::string> getSenseiNames() {
-        return getEnumNames<Sensei>();
-}
-
-std::vector<std::string> getFormNames() {
-        return getEnumNames<Form>();
-}
-
-std::vector<std::string> getSkillNames() {
-        return getEnumNames<Skill>();
-}
-
-std::vector<std::string> getRoomFlagNames() {
-        return getEnumNames<RoomFlag>();
-}
-
-std::vector<std::string> getSectorTypeNames() {
-        return getEnumNames<SectorType>();
-}
-
-std::vector<std::string> getSizeNames() {
-        return getEnumNames<Size>();
-}
-
-std::vector<std::string> getPlayerFlagNames() {
-        return getEnumNames<PlayerFlag>();
-}
-
-std::vector<std::string> getMobFlagNames() {
-        return getEnumNames<MobFlag>();
-}
-
-std::vector<std::string> getPrefFlagNames() {
-        return getEnumNames<PrefFlag>();
-}
-
-std::vector<std::string> getAffectFlagNames() {
-        return getEnumNames<AffectFlag>();
-}
-
-std::vector<std::string> getItemTypeNames() {
-        return getEnumNames<ItemType>();
-}
-
-std::vector<std::string> getWearFlagNames() {
-        return getEnumNames<WearFlag>();
-}
-
-std::vector<std::string> getItemFlagNames() {
-        return getEnumNames<ItemFlag>();
-}
-
-std::vector<std::string> getAdminFlagNames() {
-        return getEnumNames<AdminFlag>();
-}
-
-std::vector<std::string> getDirectionNames() {
-        return getEnumNames<Direction>();
-}
-
-std::vector<std::string> getAttributeNames() {
-        return getEnumNames<CharAttribute>();
-}
-
-std::vector<std::string> getAttributeTrainNames() {
-        return getEnumNames<CharTrain>();
-}
-
-std::vector<std::string> getAppearanceNames() {
-        return getEnumNames<Appearance>();
-}
-
-std::vector<std::string> getAlignNames() {
-        return getEnumNames<CharAlign>();
-}
-
-std::vector<std::string> getMoneyNames() {
-        return getEnumNames<CharMoney>();
-}
-
-std::vector<std::string> getVitalNames() {
-        return getEnumNames<CharVital>();
-}
-
-std::vector<std::string> getStatNames() {
-        return getEnumNames<CharStat>();
-}
-
-std::vector<std::string> getDimNames() {
-        return getEnumNames<CharDim>();
-}
-
-std::vector<std::string> getComStatNames() {
-        return getEnumNames<ComStat>();
-}
-
-std::vector<std::string> getShopFlagNames() {
-        return getEnumNames<ShopFlag>();
-}
-
-std::vector<std::string> getCharacterFlagNames() {
-        return getEnumNames<CharacterFlag>();
-}
-
-std::vector<std::string> getZoneFlagNames() {
-        return getEnumNames<ZoneFlag>();
-}
-
-std::vector<std::string> getWhereFlagNames() {
-        return getEnumNames<WhereFlag>();
-}
-
-std::vector<std::string> getSexNames() {
-        return getEnumNames<Sex>();
-}
-
-std::vector<std::string> getMutationNames() {
-        return getEnumNames<Mutation>();
-}
-
-std::vector<std::string> getSubRaceNames() {
-        return getEnumNames<SubRace>();
-}
-
-std::vector<std::string> getBioGenomeNames() {
-        std::vector<std::string> out;
-        for (auto val : magic_enum::enum_values<Race>()) {
-                if(race::isValidGenome(val)) {
-                        out.emplace_back(magic_enum::enum_name(val));
-                }
-        }
-        
-        return out;
-}

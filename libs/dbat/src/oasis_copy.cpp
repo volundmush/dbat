@@ -11,7 +11,6 @@
 #include "dbat/Room.h"
 #include "dbat/Destination.h"
 #include "dbat/oasis.h"
-#include "dbat/oasis_copy.h"
 #include "dbat/dg_comm.h"
 #include "dbat/act.wizard.h"
 #include "dbat/send.h"

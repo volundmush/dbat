@@ -1,5 +1,14 @@
 #pragma once
-#include "sysdep.h"
+#include <string>
+#include <vector>
+#include <memory>
+#include <map>
+#include <unordered_map>
+#include <unordered_set>
+
+#include "Typedefs.h"
+
+struct descriptor_data;
 
 struct Account {
     Account() = default;
@@ -30,6 +39,8 @@ struct Account {
     static int getNextID();
 
 };
+
+extern std::map<vnum, std::shared_ptr<Account>> accounts;
 
 struct Account *findAccount(const std::string &name);
 

@@ -1,7 +1,6 @@
 #pragma once
-
-#include "structs.h"
-
+#include "Typedefs.h"
+#include "Command.h"
 
 // functions
 extern void npc_steal(Character *ch, Character *victim);

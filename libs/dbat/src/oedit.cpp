@@ -8,7 +8,6 @@
 #include "dbat/Object.h"
 #include "dbat/ObjectPrototype.h"
 #include "dbat/Character.h"
-#include "dbat/structs.h"
 #include "dbat/comm.h"
 #include "dbat/interpreter.h"
 #include "dbat/spells.h"

@@ -1,5 +1,9 @@
 #pragma once
-#include "structs.h"
+#include <map>
+#include <string_view>
+#include "Location.h"
+#include "Typedefs.h"
+struct Character;
 
 constexpr int PLANET_EARTH = 1;
 constexpr int PLANET_VEGETA = 2;

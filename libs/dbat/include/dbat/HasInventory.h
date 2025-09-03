@@ -1,5 +1,13 @@
 #pragma once
-#include "sysdep.h"
+#include <vector>
+#include <list>
+#include <unordered_set>
+#include <memory>
+#include <functional>
+
+#include "Typedefs.h"
+
+struct Object;
 
 // Characters and Objects have inventories.
 // Only Objects can be in inventories.

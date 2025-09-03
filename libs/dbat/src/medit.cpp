@@ -7,7 +7,6 @@
 #include "dbat/CharacterPrototype.h"
 #include "dbat/Character.h"
 #include "dbat/Zone.h"
-#include "dbat/medit.h"
 #include "dbat/interpreter.h"
 #include "dbat/comm.h"
 #include "dbat/send.h"

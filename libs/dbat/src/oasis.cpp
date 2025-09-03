@@ -10,7 +10,6 @@
 #include "dbat/CharacterPrototype.h"
 #include "dbat/ObjectPrototype.h"
 #include "dbat/Room.h"
-#include "dbat/structs.h"
 #include "dbat/send.h"
 #include "dbat/interpreter.h"
 #include "dbat/comm.h"

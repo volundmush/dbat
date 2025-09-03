@@ -1,5 +1,4 @@
 #include "dbat/affect.h"
-#include "dbat/structs.h"
 #include "dbat/constants.h"
 #include "dbat/spells.h"
 

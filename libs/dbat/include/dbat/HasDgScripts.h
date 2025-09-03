@@ -1,6 +1,5 @@
 #pragma once
 #include "DgScript.h"
-#include "defs.h"
 #include "HasVariables.h"
 #include "HasMisc.h"
 

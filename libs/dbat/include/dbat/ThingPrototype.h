@@ -1,5 +1,12 @@
 #pragma once
-#include "templates.h"
+#include <vector>
+#include <unordered_map>
+#include <string>
+
+#include "Typedefs.h"
+#include "const/AffectFlag.h"
+#include "Flags.h"
+
 
 struct ThingPrototype {
     virtual ~ThingPrototype();

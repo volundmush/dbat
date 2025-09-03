@@ -1,5 +1,7 @@
 #pragma once
-#include "sysdep.h"
+#include <string>
+#include <unordered_map>
+#include <optional>
 
 struct HasVariables {
     std::unordered_map<std::string, std::string> variables; // Subscriptions to services.

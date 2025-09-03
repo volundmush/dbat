@@ -16,7 +16,6 @@
 #include "dbat/act.movement.h"
 #include "dbat/dg_comm.h"
 #include "dbat/vehicles.h"
-#include "dbat/oasis_copy.h"
 #include "dbat/handler.h"
 #include "dbat/send.h"
 #include "dbat/comm.h"
@@ -30,7 +29,6 @@
 #include "dbat/constants.h"
 #include "dbat/act.informative.h"
 #include "dbat/planet.h"
-#include "dbat/partial.h"
 
 /* local functions */
 static void handle_fall(Character *ch);

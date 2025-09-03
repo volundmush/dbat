@@ -1,4 +1,9 @@
 #pragma once
+#include <vector>
+#include <map>
+#include <string>
+#include <optional>
+
 #include "spells.h"
 
 struct Character;

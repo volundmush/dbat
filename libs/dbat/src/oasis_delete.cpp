@@ -17,7 +17,6 @@
    +-----------------------------------------------------------------------+
 */
 
-#include "dbat/structs.h"
 #include "dbat/utils.h"
 #include "dbat/oasis.h"
 

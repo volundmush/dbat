@@ -1,6 +1,9 @@
 #pragma once
-#include "sysdep.h"
-#include "defs.h"
+#include <cstdint>
+#include <functional>
+#include <fmt/format.h>
+
+#include "const/Direction.h"
 
 struct Coordinates {
     int32_t x{0}, y{0}, z{0};
@@ -12,15 +15,9 @@ struct Coordinates {
     Coordinates get_direction_offset(Direction dir);
 };
 
-template <>
-struct fmt::formatter<Coordinates> {
-    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
-
-    template <typename FormatContext>
-    auto format(const Coordinates& z, FormatContext& ctx) const {
-        return fmt::format_to(ctx.out(), "{}:{}:{}", z.x, z.y, z.z);
-    }
-};
+inline std::string format_as(const Coordinates& coor) {
+    return fmt::format("{}:{}:{}", coor.x, coor.y, coor.z);
+}
 
 namespace std {
     template<>

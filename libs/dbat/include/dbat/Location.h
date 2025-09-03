@@ -1,8 +1,29 @@
 #pragma once
-#include "templates.h"
-#include "HasExtraDescriptions.h"
+#include <memory>
+#include <optional>
+#include <map>
+
+#include "const/RoomFlag.h"
+#include "const/WhereFlag.h"
+#include "const/SectorType.h"
+
+#include "Typedefs.h"
 #include "Coordinates.h"
+#include "Flags.h"
+#include "Command.h"
+
+#include "HasExtraDescriptions.h"
+
 #include "HasResetCommands.h"
+
+#include "Log.h"
+
+struct Room;
+struct Character;
+struct AbstractLocation;
+struct Zone;
+struct Destination;
+struct Structure;
 
 struct Location {
     Location() = default;
@@ -74,8 +95,8 @@ struct Location {
             sendText(formatted_string);
         }
         catch(const fmt::format_error& e) {
-            basic_mud_log("SYSERR: Format error in Location::sendFmt: %s", e.what());
-            basic_mud_log("Template was: %s", format.data());
+            LERROR("SYSERR: Format error in Location::sendFmt: %s", e.what());
+            LERROR("Template was: %s", format.data());
         }
     }
 
@@ -88,8 +109,8 @@ struct Location {
             return formatted_string.size();
         }
         catch(const fmt::format_error& e) {
-            basic_mud_log("SYSERR: Format error in Location::send_to: %s", e.what());
-            basic_mud_log("Template was: %s", format.data());
+            LERROR("SYSERR: Format error in Location::send_to: %s", e.what());
+            LERROR("Template was: %s", format.data());
             return 0;
         }
     }
@@ -141,15 +162,10 @@ struct Location {
     Zone* getLandZone();
 };
 
-template <>
-struct fmt::formatter<Location> {
-    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+inline std::string format_as(const Location& loc) {
+    return fmt::format("{}", loc.getLocID());
+}
 
-    template <typename FormatContext>
-    auto format(const Location& z, FormatContext& ctx) const {
-        return fmt::format_to(ctx.out(), "{}", z.getLocID());
-    }
-};
 
 namespace std {
     template<>

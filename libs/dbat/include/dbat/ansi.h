@@ -1,4 +1,5 @@
-#include "sysdep.h"
+#pragma once
+#include <string>
 
 extern int count_color_chars(const char *string);
 

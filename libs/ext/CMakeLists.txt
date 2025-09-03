@@ -1,18 +1,28 @@
 # Python dev + module support (gives Python_add_library and Python::Module)
   find_package(Python REQUIRED COMPONENTS Interpreter Development.Module)  # CMake's FindPython
 
-  # Cython helpers (from cython-cmake). You can keep it as a build req, or vendor the CMake files.
-  # If you want to vendor later: `pipx run cython-cmake vendor cmake` and then
-  #   list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
-  find_package(Cython MODULE REQUIRED)     # provides Cython::Cython and UseCython.cmake
-  include(UseCython)                       # provides cython_transpile(...)
-
-  # Transpile the .pyx to a C++ source in the build dir.
-  # LANGUAGE CXX ensures a .cxx is produced; OUTPUT_VARIABLE gives us the file path.
-  message(STATUS "Cython: transpiling ${CMAKE_CURRENT_SOURCE_DIR}/dbat_ext.pyx")
-  cython_transpile(dbat_ext.pyx
-                   LANGUAGE CXX
-                   OUTPUT_VARIABLE DBAT_EXT_CORE)
+  # Try cython-cmake if available; otherwise fall back to calling the cython CLI.
+  set(DBAT_EXT_CORE "")
+  find_package(Cython MODULE QUIET)
+  if(Cython_FOUND)
+    include(UseCython)
+    message(STATUS "Cython: transpiling ${CMAKE_CURRENT_SOURCE_DIR}/dbat_ext.pyx (UseCython)")
+    cython_transpile(dbat_ext.pyx LANGUAGE CXX OUTPUT_VARIABLE DBAT_EXT_CORE)
+  else()
+    message(STATUS "Cython: cython-cmake not found; using CLI fallback")
+    find_program(CYTHON_EXECUTABLE NAMES cython3 cython)
+    if(NOT CYTHON_EXECUTABLE)
+      message(FATAL_ERROR "Cython executable not found. Please install 'cython' in your environment.")
+    endif()
+    set(DBAT_EXT_CORE "${CMAKE_CURRENT_BINARY_DIR}/dbat_ext.cxx")
+    add_custom_command(
+      OUTPUT "${DBAT_EXT_CORE}"
+      COMMAND "${CYTHON_EXECUTABLE}" -3 --cplus -o "${DBAT_EXT_CORE}" "${CMAKE_CURRENT_SOURCE_DIR}/dbat_ext.pyx"
+      DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/dbat_ext.pyx"
+      COMMENT "Cython (fallback): generating ${DBAT_EXT_CORE} from dbat_ext.pyx"
+      VERBATIM
+    )
+  endif()
 
   # Build a Python extension module with the correct SOABI/suffix
   # Build extension from core.pyx; its Cython module name is "core",

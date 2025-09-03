@@ -1,8 +1,18 @@
 #pragma once
-#include "sysdep.h"
-#include "defs.h"
+#include <cstdint>
+#include <tuple>
+#include <vector>
+#include <string>
+#include <map>
+#include <memory>
+#include <magic_enum/magic_enum_format.hpp>
+#include <fmt/format.h>
 
-enum class ScriptLineType : uint8_t {
+#include "const/UnitType.h"
+
+#include "Typedefs.h"
+
+enum class ScriptLineType : std::uint8_t {
     COMMAND = 0,
     IF = 1,
     ELSEIF = 2,
@@ -34,12 +44,8 @@ struct DgScriptPrototype {
     void setBody(const std::string& body);
 };
 
-template <>
-struct fmt::formatter<DgScriptPrototype> {
-    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+inline std::string format_as(const DgScriptPrototype& dg) {
+    return fmt::format("({}) DgScriptPrototype {} '{}'", magic_enum::enum_name(dg.attach_type), dg.vn, dg.name);
+}
 
-    template <typename FormatContext>
-    auto format(const DgScriptPrototype& z, FormatContext& ctx) {
-        return fmt::format_to(ctx.out(), "({}) DgScript {} '{}'", z.attach_type, z.vn, z.name);
-    }
-};
+extern std::map<trig_vnum, std::shared_ptr<DgScriptPrototype>> trig_index;

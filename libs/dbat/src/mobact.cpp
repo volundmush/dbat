@@ -21,7 +21,6 @@
 #include "dbat/spells.h"
 #include "dbat/Shop.h"
 #include "dbat/combat.h"
-#include "dbat/act.offensive.h"
 #include "dbat/act.movement.h"
 #include "dbat/act.other.h"
 #include "dbat/act.item.h"

@@ -6,8 +6,10 @@
 #include "dbat/AbstractGridArea.h"
 #include "dbat/Shop.h"
 #include "dbat/Guild.h"
-#include "dbat/structs.h"
 #include "dbat/json.h"
+#include "dbat/TimeInfo.h"
+#include "dbat/ThingPrototype.h"
+#include "dbat/weather.h"
 
 inline std::string demangle(const char* mangled_name) {
     int status = -1;

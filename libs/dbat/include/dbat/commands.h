@@ -1,5 +1,8 @@
 #pragma once
-#include "sysdep.h"
+#include "Command.h"
+
+struct Object;
+struct Character;
 
 constexpr int ALIAS_SIMPLE = 0;
 constexpr int ALIAS_COMPLEX = 1;

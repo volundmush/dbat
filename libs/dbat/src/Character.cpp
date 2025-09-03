@@ -23,11 +23,10 @@
 #include "dbat/interpreter.h"
 #include "dbat/transformation.h"
 #include "dbat/weather.h"
-#include "dbat/modifiers.h"
 #include "dbat/handler.h"
 #include "dbat/utils.h"
 
-NegativeKeyGuardUnorderedMap<int64_t, std::shared_ptr<Character>> Character::registry;
+std::unordered_map<int64_t, std::shared_ptr<Character>> Character::registry;
 
 Character::Character()
 {

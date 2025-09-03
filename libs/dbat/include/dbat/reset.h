@@ -10,7 +10,7 @@
 ************************************************************************ */
 #pragma once
 
-#include "structs.h"
+#include "Typedefs.h"
 
 /* returned by pre-reset function */
 constexpr int PERFORM_NORMAL_RESET = 0;

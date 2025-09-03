@@ -1,5 +1,56 @@
 #pragma once
-#include "sysdep.h"
+#include <cstdint>
+#include <string>
+#include <vector>
+#include <functional>
+#include <unordered_map>
+
+#include "Typedefs.h"
+
+struct Character;
+
+/* Modifier constants used with obj affects ('A' fields) */
+constexpr int APPLY_NONE = 0; /* No effect */
+
+constexpr int APPLY_CATTR_BASE = 1;      /* Bitwise: Flat Modifier applied to Attribute base */
+constexpr int APPLY_CATTR_MULT = 2;      /* Bitwise: Modifier for Attribute mult */
+constexpr int APPLY_CATTR_POST = 3;      /* Bitwise: Flat modifier added after mult.  */
+constexpr int APPLY_CATTR_GAIN_MULT = 4; /* bitwise: other stats gain multiplier */
+
+constexpr int APPLY_CVIT_BASE = 5;       /* Bitwise: Flat modifier applied to vital base */
+constexpr int APPLY_CVIT_MULT = 6;       /* Bitwise: modifier for vitals mult */
+constexpr int APPLY_CVIT_POST = 7;       /* Bitwise: flat modifier applied after mult */
+constexpr int APPLY_CVIT_GAIN_MULT = 8;  /* Bitwise: base gains multiplier */
+constexpr int APPLY_CVIT_REGEN_MULT = 9; /* Bitwise: regen multiplier */
+constexpr int APPLY_CVIT_DOT_MULT = 10;  /* Bitwise: damage over time multiplier */
+
+constexpr int APPLY_CSTAT_BASE = 11;      /* bitwise: other stats base */
+constexpr int APPLY_CSTAT_MULT = 12;      /* bitwise: other stats multiplier */
+constexpr int APPLY_CSTAT_POST = 13;      /* bitwise: flat modifier applied after mult */
+constexpr int APPLY_CSTAT_GAIN_MULT = 14; /* bitwise: other stats gain multiplier */
+
+constexpr int APPLY_CDIM_BASE = 15; /* bitwise: character dimension base */
+constexpr int APPLY_CDIM_MULT = 16; /* bitwise: character dimension multiplier */
+constexpr int APPLY_CDIM_POST = 17; /* bitwise: flat modifier applied after mult */
+
+constexpr int APPLY_COMBAT_BASE = 18; /* bitwise: combat base bonuses */
+constexpr int APPLY_COMBAT_MULT = 19; /* bitwise: combat multiplicative bonuses */
+
+constexpr int APPLY_DTYPE_RES = 20; /* bitwise: damage type resistance */
+constexpr int APPLY_DTYPE_BON = 21; /* bitwise: damage type bonuses */
+
+constexpr int APPLY_ATKTIER_RES = 22;       /* bitwise: attack tier resistance */
+constexpr int APPLY_ATKTIER_BON = 23;       /* bitwise: attack tier bonuses */
+constexpr int APPLY_TRANS_UPKEEP_CVIT = 24; /* bitwise: cvitals cost modifier for transformations */
+
+constexpr int APPLY_SKILL = 25; /* !bitwise: Apply to a specific skill    */
+
+constexpr int APPLY_CDER_BASE = 26; /* bitwise: character derived base */
+constexpr int APPLY_CDER_MULT = 27; /* bitwise: character derived multiplier */
+constexpr int APPLY_CDER_POST = 28; /* bitwise: character derived post multiplier */
+
+constexpr int CDER_CARRY_CAPACITY = 1 << 0;
+
 
 struct affect_t {
     // DO NOT CHANGE THE ORDER OF THESE FIELDS.
@@ -30,3 +81,5 @@ struct affected_type : affect_t {
     bitvector_t bitvector{}; /* Tells which bits to set (AFF_XXX) */
     struct affected_type *next{};
 };
+
+extern std::unordered_map<int, std::vector<character_affect_type>> pos_affects;

@@ -1,6 +1,5 @@
 #include "dbat/Character.h"
 #include "dbat/techniques.h"
-#include "dbat/structs.h"
 #include "dbat/send.h"
 #include "dbat/combat.h"
 #include "dbat/comm.h"

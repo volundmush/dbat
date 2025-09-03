@@ -1013,27 +1013,6 @@ void cedit_disp_ticks_menu(struct descriptor_data *d)
 {
     clear_screen(d);
 
-    d->send_to("\r\n\r\n"
-               "@WA@B) @CPulse Violence Time  : @c%d\r\n"
-               "@WB@B) @CMobile Action Time   : @c%d\r\n"
-               "@WC@B) @CZone Time            : @c%d\r\n"
-               "@WD@B) @CAutosave Time        : @c%d\r\n"
-               "@WE@B) @CIdle Password Time   : @c%d\r\n"
-               "@WF@B) @CSanity Check Time    : @c%d\r\n"
-               "@WG@B) @CUsage Check Time     : @c%d\r\n"
-               "@WH@B) @CTimesave Time        : @c%d\r\n"
-               "@WI@B) @CCurrents Update Time : @c%d\r\n"
-               "@WQ@B) @CExit To The Main Menu\r\n"
-               "@WEnter your choice : @n",
-               OLC_CONFIG(d)->ticks.pulse_violence,
-               OLC_CONFIG(d)->ticks.pulse_mobile,
-               OLC_CONFIG(d)->ticks.pulse_zone,
-               OLC_CONFIG(d)->ticks.pulse_autosave,
-               OLC_CONFIG(d)->ticks.pulse_idlepwd,
-               OLC_CONFIG(d)->ticks.pulse_sanity,
-               OLC_CONFIG(d)->ticks.pulse_usage,
-               OLC_CONFIG(d)->ticks.pulse_timesave,
-               OLC_CONFIG(d)->ticks.pulse_current);
 
     OLC_MODE(d) = CEDIT_TICKS_OPTIONS_MENU;
 }
@@ -1045,14 +1024,10 @@ void cedit_disp_creation_options(struct descriptor_data *d)
     clear_screen(d);
 
     d->send_to("\r\n\r\n"
-               "@WA@B) @CCharacter Creation Method : @c%d \r\n"
-               "   %s\r\n"
                "@WB@B) @CPlayers can reroll stats on creation : @c%s\r\n"
                "@WC@B) @CNumber of points in initial points pool for pool generation methods : @c%d \r\n"
                "@WQ@B) @CExit To The Main Menu\r\n"
                "@WEnter your choice : @n",
-               OLC_CONFIG(d)->creation.method,
-               creation_methods[(int)OLC_CONFIG(d)->creation.method],
                CHECK_VAR(OLC_CONFIG(d)->play.reroll_player),
                OLC_CONFIG(d)->play.initial_points);
     OLC_MODE(d) = CEDIT_CREATION_OPTIONS_MENU;

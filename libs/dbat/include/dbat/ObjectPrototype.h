@@ -1,21 +1,25 @@
 #pragma once
+#include <map>
+#include <memory>
+#include "Typedefs.h"
+
 #include "ObjectShared.h"
 #include "ThingPrototype.h"
 #include "HasPicky.h"
 #include "affect.h"
 
-struct ObjectPrototype : public ThingPrototype, public picky_data {
+#include "StatHandler.h"
+
+struct ObjectPrototype;
+
+extern StatHandler<ObjectPrototype> itemProtoStats;
+
+struct ObjectPrototype : public ObjectBase, public ThingPrototype, public picky_data {
     ObjectPrototype() = default;
     ObjectPrototype(const Object& other);
     
     ObjectPrototype& operator=(const ObjectPrototype& other);
 
-    ItemType type_flag{ItemType::unknown};      /* Type of item                        */
-    std::array<affected_type, MAX_OBJ_AFFECT> affected;  /* affects */
-    FlagHandler<WearFlag> wear_flags{}; /* Where you can wear it     */
-    FlagHandler<ItemFlag> item_flags{}; /* If it hums, glows, etc.  */
-    Size size{Size::medium};           /* Size class of object                */
-    
     template<typename R = double>
     R getBaseStat(const std::string& stat) {
         return itemProtoStats.getBase<R>(this, stat);
@@ -32,12 +36,16 @@ struct ObjectPrototype : public ThingPrototype, public picky_data {
     }
 };
 
-template <>
-struct fmt::formatter<ObjectPrototype> {
-    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+inline std::string format_as(const ObjectPrototype& z) {
+    return fmt::format("ObjectPrototype {} '{}'", z.vn, z.short_description ? z.short_description : "<unnamed>");
+}
 
-    template <typename FormatContext>
-    auto format(const ObjectPrototype& z, FormatContext& ctx) const {
-        return fmt::format_to(ctx.out(), "ObjectPrototype {} '{}'", z.vn, z.short_description ? z.short_description : "<unnamed>");
-    }
-};
+extern std::map<obj_vnum, struct index_data> obj_index;
+extern std::map<obj_vnum, std::shared_ptr<ObjectPrototype>> obj_proto;
+
+extern int vnum_object(char *searchname, Character *ch);
+extern int vnum_material(char *searchname, Character *ch);
+extern int vnum_weapontype(char *searchname, Character *ch);
+extern int vnum_armortype(char *searchname, Character *ch);
+
+extern obj_rnum real_object(obj_vnum vnum);

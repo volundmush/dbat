@@ -5,9 +5,23 @@
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
 #pragma once
+#include <optional>
+#include <vector>
 
-#include "structs.h"
 #include "Destination.h"
+
+struct Zone;
+struct Shop;
+struct config_data;
+struct social_messg;
+struct extra_descr_data;
+struct Character;
+struct ObjectPrototype;
+struct CharacterPrototype;
+struct assembly_data;
+struct Guild;
+struct help_index_element;
+struct DgScriptPrototype;
 
 //constexpr int _OASISOLC = 0;x206   /* 2.0.6 */
 /*
@@ -92,6 +106,8 @@ extern void send_cannot_edit(Character *ch, zone_vnum zone);
 /*
  * The following defines used to be in config.c.
  */
+
+
 
 struct oasis_olc_data {
     int mode;                      /* how to parse input       */

@@ -12,7 +12,6 @@
 #include "dbat/Room.h"
 #include "dbat/Destination.h"
 #include "dbat/Descriptor.h"
-#include "dbat/act.offensive.h"
 #include "dbat/commands.h"
 #include "dbat/act.movement.h"
 #include "dbat/interpreter.h"
@@ -27,6 +26,8 @@
 #include "dbat/class.h"
 #include "dbat/techniques.h"
 #include "dbat/attack.h"
+
+#include "dbat/Random.h"
 
 /* Combat commands below this line */
 

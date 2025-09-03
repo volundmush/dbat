@@ -1,6 +1,6 @@
 #pragma once
 
-#include "structs.h"
+struct descriptor_data;
 
 extern void aedit_disp_menu(struct descriptor_data *d);
 

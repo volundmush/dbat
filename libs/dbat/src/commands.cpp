@@ -1,6 +1,5 @@
 #include "dbat/Character.h"
 #include "dbat/commands.h"
-#include "dbat/structs.h"
 #include "dbat/act.movement.h"
 #include "dbat/act.informative.h"
 #include "dbat/planet.h"

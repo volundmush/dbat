@@ -57,11 +57,13 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 endif()
 
 CPMFindPackage(NAME fmt                   GITHUB_REPOSITORY fmtlib/fmt            GIT_TAG 11.2.0)
+CPMFindPackage(NAME spdlog                GITHUB_REPOSITORY gabime/spdlog         VERSION 1.15.3)
 CPMFindPackage(NAME nlohmann_json         GITHUB_REPOSITORY nlohmann/json         VERSION 3.12.0)
 CPMFindPackage(NAME magic_enum            GITHUB_REPOSITORY Neargye/magic_enum    VERSION 0.9.7)
 CPMFindPackage(NAME EnTT                  GITHUB_REPOSITORY skypjack/entt         VERSION 3.15.0)
 CPMFindPackage(NAME effolkronium_random   GITHUB_REPOSITORY volundmush/random     GIT_TAG master
                OPTIONS "Random_BuildTests OFF")
+
 
 # ---------------- your native targets ----------------
 add_subdirectory(libs/dbat)

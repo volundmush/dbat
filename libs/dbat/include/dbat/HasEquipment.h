@@ -1,5 +1,12 @@
 #pragma once
-#include "sysdep.h"
+#include <map>
+#include <memory>
+#include <functional>
+#include <unordered_set>
+
+#include "Typedefs.h"
+
+struct Object;
 
 // Characters have Equipment. Perhaps Objects will too soon.
 struct HasEquipment {

@@ -41,7 +41,7 @@
 static void sort_keeper_objs(Character *keeper, vnum shop_nr);
 
 /* Local variables */
-NegativeKeyGuardMap<shop_vnum, struct Shop> shop_index;
+std::map<shop_vnum, struct Shop> shop_index;
 shop_vnum top_shop = NOTHING;
 int cmd_say, cmd_tell, cmd_emote, cmd_slap, cmd_puke;
 

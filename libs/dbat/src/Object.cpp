@@ -12,7 +12,7 @@
 #include "dbat/dg_scripts.h"
 #include "dbat/act.informative.h"
 
-NegativeKeyGuardUnorderedMap<int64_t, std::shared_ptr<Object>> Object::registry;
+std::unordered_map<int64_t, std::shared_ptr<Object>> Object::registry;
 
 Object::Object()
 {

@@ -1,6 +1,9 @@
 #pragma once
-#include "structs.h"
-#include "dbat/attack.h"
+#include <unordered_set>
+#include "attack.h"
+
+#include "const/Form.h"
+#include "const/Appearance.h"
 
 namespace trans
 {

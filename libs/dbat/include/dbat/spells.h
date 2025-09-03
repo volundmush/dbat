@@ -8,8 +8,11 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 #pragma once
-#include "defs.h"
+#include <cstdint>
+#include "const/Max.h"
 
+struct Character;
+struct Object;
 
 constexpr int DEFAULT_STAFF_LVL = 12;
 constexpr int DEFAULT_WAND_LVL = 12;

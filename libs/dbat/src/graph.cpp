@@ -11,7 +11,6 @@
 #include "dbat/Object.h"
 #include "dbat/Destination.h"
 #include "dbat/Descriptor.h"
-#include "dbat/graph.h"
 #include "dbat/send.h"
 #include "dbat/comm.h"
 #include "dbat/interpreter.h"

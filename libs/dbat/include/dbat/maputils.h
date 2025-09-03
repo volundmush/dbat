@@ -7,8 +7,7 @@
  * Paolo Libardi - pinkpallin@libero.it		     *
  *****************************************************/
 #pragma once
-
-#include "structs.h"
+struct Character;
 
 constexpr int MAP_ROWS = 199;
 constexpr int MAP_COLS = 199;

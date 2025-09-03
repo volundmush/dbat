@@ -1,7 +1,8 @@
 #pragma once
+#include <string>
 
-#include "sysdep.h"
-#include "typestubs.h"
+struct Character;
+struct Object;
 
 extern bool tech_handle_android_absorb(Character *ch, Character *vict);
 

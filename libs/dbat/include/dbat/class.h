@@ -1,5 +1,18 @@
 #pragma once
-#include "sysdep.h"
+#include <cstdint>
+#include <time.h>
+#include <vector>
+#include <functional>
+#include <string>
+#include <optional>
+
+#include "const/Sensei.h"
+#include "const/Race.h"
+
+#include "Typedefs.h"
+
+struct Character;
+struct Object;
 
 // functions
 extern void do_start(Character *ch);
