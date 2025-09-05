@@ -1,4 +1,3 @@
-
 #include <filesystem>
 #include <memory>
 #include <iostream>
@@ -3440,8 +3439,8 @@ static void link_zones() {
     int lastZoneID = 0;
     for (const auto& zt : zonesToLink) {
         auto newid = getNextID(lastZoneID, zone_table);
-        // I normally don't use the [] operator but in this case, I -want- it to get-or-create...
-        auto &z = zone_table[newid];
+        auto z = std::make_shared<Zone>();
+        zone_table[newid] = z;
         z->number = newid;
         z->name = zt.name;
         for(auto cvn : zt.children) {

@@ -18,18 +18,6 @@
 
 namespace mud::log
 {
-
-    enum class Level
-    {
-        trace = SPDLOG_LEVEL_TRACE,
-        debug = SPDLOG_LEVEL_DEBUG,
-        info = SPDLOG_LEVEL_INFO,
-        warn = SPDLOG_LEVEL_WARN,
-        error = SPDLOG_LEVEL_ERROR,
-        critical = SPDLOG_LEVEL_CRITICAL,
-        off = SPDLOG_LEVEL_OFF
-    };
-
     struct Options
     {
         // Where to write logs:
@@ -42,8 +30,8 @@ namespace mud::log
 
         // Behavior:
         bool async = true;
-        Level level = Level::info;
-        Level flush_on = Level::warn;
+        int level = SPDLOG_LEVEL_INFO;
+        int flush_on = SPDLOG_LEVEL_WARN;
         std::string pattern = "[%Y-%m-%d %H:%M:%S.%e] [%t] [%^%l%$] %v";
         bool enable_backtrace = true;
         int backtrace_lines = 64;
@@ -53,11 +41,11 @@ namespace mud::log
     void init(const Options &opts = {});
 
     // Change level at runtime (e.g., from an admin command).
-    void set_level(Level lvl);
+    void set_level(int lvl);
 
     // ---- Primary API (fmt-style, compile-time checked) ----
     template <typename... Args>
-    inline void log(std::source_location loc, Level lvl,
+    inline void log(std::source_location loc, int lvl,
                     fmt::format_string<Args...> fmtstr,
                     Args &&...args)
     {
@@ -77,7 +65,7 @@ namespace mud::log
 
     // Runtime format string (keeps your current call sites happy)
     template <typename... Args>
-    inline void log_runtime(std::source_location loc, Level lvl,
+    inline void log_runtime(std::source_location loc, int lvl,
                             fmt::string_view fmt_str_or_msg,
                             Args &&...args)
     {
@@ -95,61 +83,37 @@ namespace mud::log
             std::forward<Args>(args)...);
     }
 
-    // Convenience wrappers
-    template <typename... Args>
-    inline void trace(fmt::format_string<Args...> s, Args &&...a) { log(std::source_location::current(), Level::trace, s, std::forward<Args>(a)...); }
-    template <typename... Args>
-    inline void debug(fmt::format_string<Args...> s, Args &&...a) { log(std::source_location::current(), Level::debug, s, std::forward<Args>(a)...); }
-    template <typename... Args>
-    inline void info(fmt::format_string<Args...> s, Args &&...a) { log(std::source_location::current(), Level::info, s, std::forward<Args>(a)...); }
-    template <typename... Args>
-    inline void warn(fmt::format_string<Args...> s, Args &&...a) { log(std::source_location::current(), Level::warn, s, std::forward<Args>(a)...); }
-    template <typename... Args>
-    inline void error(fmt::format_string<Args...> s, Args &&...a) { log(std::source_location::current(), Level::error, s, std::forward<Args>(a)...); }
-    template <typename... Args>
-    inline void crit(fmt::format_string<Args...> s, Args &&...a) { log(std::source_location::current(), Level::critical, s, std::forward<Args>(a)...); }
-
     // ---- Compatibility shims ----
 }
+
+// ---- Handy macros (capture source location automatically) ----
+// These mirror spdlog's active-level gating if you set SPDLOG_ACTIVE_LEVEL.
+#define LTRACE(...) ::mud::log::log(std::source_location::current(), SPDLOG_LEVEL_TRACE, __VA_ARGS__)
+#define LDEBUG(...) ::mud::log::log(std::source_location::current(), SPDLOG_LEVEL_DEBUG, __VA_ARGS__)
+#define LINFO(...) ::mud::log::log(std::source_location::current(), SPDLOG_LEVEL_INFO, __VA_ARGS__)
+#define LWARN(...) ::mud::log::log(std::source_location::current(), SPDLOG_LEVEL_WARN, __VA_ARGS__)
+#define LERROR(...) ::mud::log::log(std::source_location::current(), SPDLOG_LEVEL_ERROR, __VA_ARGS__)
+#define LCRIT(...) ::mud::log::log(std::source_location::current(), SPDLOG_LEVEL_CRITICAL, __VA_ARGS__)
+
 // Legacy printf-style logger kept intact (formats with fmt::sprintf)
 template <typename... Args>
-inline void basic_mud_log(fmt::string_view printf_style_fmt, Args &&...args)
+inline void basic_mud_log_helper(std::source_location loc, fmt::string_view printf_style_fmt, Args &&...args)
 {
     try
     {
         std::string line = fmt::sprintf(printf_style_fmt, std::forward<Args>(args)...);
         if (!line.empty())
             // Use compile-time-checked formatting to write the final string
-            mud::log::info("{}", line);
+            mud::log::log(loc, SPDLOG_LEVEL_INFO, "{}", line);
     }
     catch (const std::exception &e)
     {
-        mud::log::error("SYSERR: Format error in basic_mud_log: {} (template: {})", e.what(), printf_style_fmt);
+        mud::log::log(loc, SPDLOG_LEVEL_ERROR, "SYSERR: Format error in basic_mud_log: {} (template: {})", e.what(), printf_style_fmt);
     }
 }
 
-// Your fmt-style variant can forward directly
-template <typename... Args>
-inline void template_mud_log(fmt::string_view fmt_style_fmt, Args &&...args)
-{
-    try
-    {
-        mud::log::info(fmt_style_fmt, std::forward<Args>(args)...);
-    }
-    catch (const std::exception &e)
-    {
-        mud::log::error("SYSERR: Format error in template_mud_log: {} (template: {})", e.what(), fmt_style_fmt);
-    }
-}
+#define basic_mud_log(...) ::basic_mud_log_helper(std::source_location::current(), __VA_ARGS__)
 
-// ---- Handy macros (capture source location automatically) ----
-// These mirror spdlog's active-level gating if you set SPDLOG_ACTIVE_LEVEL.
-#define LTRACE(...) ::mud::log::trace(__VA_ARGS__)
-#define LDEBUG(...) ::mud::log::debug(__VA_ARGS__)
-#define LINFO(...) ::mud::log::info(__VA_ARGS__)
-#define LWARN(...) ::mud::log::warn(__VA_ARGS__)
-#define LERROR(...) ::mud::log::error(__VA_ARGS__)
-#define LCRIT(...) ::mud::log::crit(__VA_ARGS__)
 
 // Log once or every N helper macros (simple, thread-safe enough for logs)
 #define LOG_WARN_ONCE(msg, ...)                \

@@ -52,7 +52,7 @@ void init(const Options& opts) {
     spdlog::register_logger(logger);
 }
 
-void set_level(Level lvl) {
+void set_level(int lvl) {
     if (auto* lg = spdlog::default_logger_raw()) {
         lg->set_level(static_cast<spdlog::level::level_enum>(lvl));
     }

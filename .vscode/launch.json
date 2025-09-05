@@ -45,7 +45,7 @@
             "name": "DBAT: (GDB) Migrate",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/compiled/migrate",
+            "program": "${workspaceFolder}/compiled/dbat_migrate",
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [{
