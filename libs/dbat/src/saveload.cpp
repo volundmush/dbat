@@ -228,7 +228,7 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(AABB, min, max)
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(BoxDim, box)
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(skill_data, level, perfs)
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(alias_data, name, replacement, type)
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(help_index_element, index, keywords, entry, duplicate, min_level)
+
 
 void to_json(json& j, const HasDgScripts& p);
 void from_json(const json& j, HasDgScripts& p);
@@ -427,6 +427,28 @@ void from_json(const json &j, Account &a)
     // Directly deserialize the vector<int> field.
     if (j.contains("characters"))
         a.characters = j["characters"].get<std::vector<int>>();
+}
+
+void to_json(json &j, const help_index_element &a)
+{
+    j["index"] = a.index;
+    if (!a.keywords.empty())
+        j["keywords"] = a.keywords;
+    if (!a.entry.empty())
+        j["entry"] = a.entry;
+    if (a.duplicate != NOTHING)
+        j["duplicate"] = a.duplicate;
+    if (a.min_level != 0)
+        j["min_level"] = a.min_level;
+}
+
+void from_json(const json &j, help_index_element &a)
+{
+    if (j.contains("index")) j.at("index").get_to(a.index);
+    if (j.contains("keywords")) j.at("keywords").get_to(a.keywords);
+    if (j.contains("entry")) j.at("entry").get_to(a.entry);
+    if (j.contains("duplicate")) j.at("duplicate").get_to(a.duplicate);
+    if (j.contains("min_level")) j.at("min_level").get_to(a.min_level);
 }
 
 static void dump_accounts(const std::filesystem::path &loc)

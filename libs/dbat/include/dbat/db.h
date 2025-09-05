@@ -158,3 +158,4 @@ extern bitvector_t asciiflag_conv(char *flag);
 
 // commands
 
+extern void load_config();

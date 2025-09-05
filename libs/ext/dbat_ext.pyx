@@ -10,14 +10,13 @@ import dbat
 from dbat.events.circle import CircleText
 
 from cython.operator cimport dereference as deref, preincrement as inc
-from libcpp.memory cimport shared_ptr
+from libcpp.memory cimport shared_ptr, make_shared
 from libcpp.string cimport string
 from libcpp.vector cimport vector
 
 
-cimport structs
 cimport db
-from structs cimport Room, Character, Object, Account, help_index_element, ObjectPrototype, CharacterPrototype
+from db cimport Room, Character, Object, Account, help_index_element, ObjectPrototype, CharacterPrototype
 from saveload cimport jdumps, jloads, jobject, to_json, from_json, runSave, create_player_character
 
 def load_db():
@@ -51,17 +50,17 @@ cdef class RoomDB:
         return orjson.loads(self._dump(r))
 
     def __iter__(self) -> typing.AsyncGenerator[dict, None]:
-        for vn in structs.Room_registry:
+        for vn in db.Room_registry:
             yield orjson.loads(self._dump(vn.second.get()))
     
     def __len__(self) -> int:
-        return structs.Room_registry.size()
+        return db.Room_registry.size()
     
     def __contains__(self, vn: int) -> bool:
-        return structs.Room_registry.find(vn) != structs.Room_registry.end()
+        return db.Room_registry.find(vn) != db.Room_registry.end()
     
     def keys(self) -> typing.AsyncGenerator[int, None]:
-        for vn in structs.Room_registry:
+        for vn in db.Room_registry:
             yield vn.first
 
 
@@ -69,9 +68,9 @@ room_db = RoomDB()
 
 cdef class ObjectPrototypeDB:
     
-    cdef string _dump(self, ObjectPrototype& o):
+    cdef string _dump(self, ObjectPrototype* o):
         j = jobject()
-        to_json(j, o)
+        to_json(j, deref(o))
         return jdumps(j)
 
     def __getitem__(self, vn: int) -> dict:
@@ -79,12 +78,12 @@ cdef class ObjectPrototypeDB:
         if o == db.obj_proto.end():
             raise ValueError(f"Object {vn} not found.")
         res = deref(o)
-        return orjson.loads(self._dump(res.second))
+        return orjson.loads(self._dump(res.second.get()))
 
     def __iter__(self) -> typing.AsyncGenerator[dict, None]:
         for vn in db.obj_proto:
-            yield orjson.loads(self._dump(vn.second))
-    
+            yield orjson.loads(self._dump(vn.second.get()))
+
     def __len__(self) -> int:
         return db.obj_proto.size()
     
@@ -99,9 +98,9 @@ obj_proto_db = ObjectPrototypeDB()
 
 cdef class MobilePrototypeDB:
 
-    cdef string _dump(self, CharacterPrototype& c):
+    cdef string _dump(self, CharacterPrototype* c):
         j = jobject()
-        to_json(j, c)
+        to_json(j, deref(c))
         return jdumps(j)
 
     def __getitem__(self, vn: int) -> dict:
@@ -109,12 +108,12 @@ cdef class MobilePrototypeDB:
         if c == db.mob_proto.end():
             raise ValueError(f"Mobile {vn} not found.")
         res = deref(c)
-        return orjson.loads(self._dump(res.second))
+        return orjson.loads(self._dump(res.second.get()))
 
     def __iter__(self) -> typing.AsyncGenerator[dict, None]:
         for vn in db.mob_proto:
-            yield orjson.loads(self._dump(vn.second))
-    
+            yield orjson.loads(self._dump(vn.second.get()))
+
     def __len__(self) -> int:
         return db.mob_proto.size()
     
@@ -129,9 +128,9 @@ mob_proto_db = MobilePrototypeDB()
 
 cdef class ShopDB:
     
-    cdef string _dump(self, structs.Shop& s):
+    cdef string _dump(self, db.Shop* s):
         j = jobject()
-        to_json(j, s)
+        to_json(j, deref(s))
         return jdumps(j)
 
     def __getitem__(self, vn: int) -> dict:
@@ -139,11 +138,11 @@ cdef class ShopDB:
         if s == db.shop_index.end():
             raise ValueError(f"Shop {vn} not found.")
         res = deref(s)
-        return orjson.loads(self._dump(res.second))
+        return orjson.loads(self._dump(res.second.get()))
     
     def __iter__(self) -> typing.AsyncGenerator[dict, None]:
         for vn in db.shop_index:
-            yield orjson.loads(self._dump(vn.second))
+            yield orjson.loads(self._dump(vn.second.get()))
     
     def __len__(self) -> int:
         return db.shop_index.size()
@@ -159,9 +158,9 @@ shop_db = ShopDB()
 
 cdef class GuildDB:
     
-    cdef string _dump(self, structs.Guild& g):
+    cdef string _dump(self, db.Guild* g):
         j = jobject()
-        to_json(j, g)
+        to_json(j, deref(g))
         return jdumps(j)
 
     def __getitem__(self, vn: int) -> dict:
@@ -169,11 +168,11 @@ cdef class GuildDB:
         if g == db.guild_index.end():
             raise ValueError(f"Guild {vn} not found.")
         res = deref(g)
-        return orjson.loads(self._dump(res.second))
-    
+        return orjson.loads(self._dump(res.second.get()))
+
     def __iter__(self) -> typing.AsyncGenerator[dict, None]:
         for vn in db.guild_index:
-            yield orjson.loads(self._dump(vn.second))
+            yield orjson.loads(self._dump(vn.second.get()))
     
     def __len__(self) -> int:
         return db.guild_index.size()
@@ -188,10 +187,10 @@ cdef class GuildDB:
 guild_db = GuildDB()
 
 cdef class ScriptDB:
-    
-    cdef string _dump(self, structs.DgScriptPrototype& i):
+
+    cdef string _dump(self, db.DgScriptPrototype* i):
         j = jobject()
-        to_json(j, i)
+        to_json(j, deref(i))
         return jdumps(j)
 
     def __getitem__(self, vn: int) -> dict:
@@ -199,12 +198,12 @@ cdef class ScriptDB:
         if i == db.trig_index.end():
             raise ValueError(f"Script {vn} not found.")
         res = deref(i)
-        return orjson.loads(self._dump(res.second))
+        return orjson.loads(self._dump(res.second.get()))
 
     def __iter__(self) -> typing.AsyncGenerator[dict, None]:
         for vn in db.trig_index:
-            yield orjson.loads(self._dump(vn.second))
-    
+            yield orjson.loads(self._dump(vn.second.get()))
+
     def __len__(self) -> int:
         return db.trig_index.size()
     
@@ -222,9 +221,9 @@ script_db = ScriptDB()
 
 cdef class AccountDB:
     
-    cdef string _dump(self, Account& a):
+    cdef string _dump(self, Account* a):
         j = jobject()
-        to_json(j, a)
+        to_json(j, deref(a))
         return jdumps(j)
 
     def __getitem__(self, vn: int) -> dict:
@@ -232,12 +231,12 @@ cdef class AccountDB:
         if a == db.accounts.end():
             raise ValueError(f"Account {vn} not found.")
         res = deref(a)
-        return orjson.loads(self._dump(res.second))
-    
+        return orjson.loads(self._dump(res.second.get()))
+
     def __iter__(self) -> typing.AsyncGenerator[dict, None]:
         for vn in db.accounts:
-            yield orjson.loads(self._dump(vn.second))
-    
+            yield orjson.loads(self._dump(vn.second.get()))
+
     def __len__(self) -> int:
         return db.accounts.size()
     
@@ -257,29 +256,30 @@ cdef class AccountDB:
         # now we'll turn it into a nlohmann::json...
         j = jloads(serialized)
         # and insert into the accounts map.
-        a = db.accounts[id]
-        from_json(j, a)
+        cdef shared_ptr[Account] a = make_shared[Account]()
+        ab = a.get()
+        from_json(j, deref(ab))
         db.accounts[id] = a
-        return orjson.loads(self._dump(a))
+        return orjson.loads(self._dump(a.get()))
     
     def update(self, id: int, data: dict):
         found = db.accounts.find(id)
         if found == db.accounts.end():
             raise ValueError(f"Account {id} not found.")
-        a = deref(found).second
+        cdef shared_ptr[Account] a = deref(found).second
         serialized = orjson.dumps(data)
         j = jloads(serialized)
-        from_json(j, a)
-        return orjson.loads(self._dump(a))
+        from_json(j, deref(a.get()))
+        return orjson.loads(self._dump(a.get()))
 
 
 account_db = AccountDB()
 
 cdef class PlayerDB:
     
-    cdef string _dump(self, structs.PlayerData& p):
+    cdef string _dump(self, db.PlayerData* p):
         j = jobject()
-        to_json(j, p)
+        to_json(j, deref(p))
         return jdumps(j)
 
     def __getitem__(self, vn: int) -> dict:
@@ -287,12 +287,12 @@ cdef class PlayerDB:
         if p == db.players.end():
             raise ValueError(f"Player {vn} not found.")
         res = deref(p)
-        return orjson.loads(self._dump(res.second))
+        return orjson.loads(self._dump(res.second.get()))
     
     def __iter__(self) -> typing.AsyncGenerator[dict, None]:
         for vn in db.players:
-            yield orjson.loads(self._dump(vn.second))
-    
+            yield orjson.loads(self._dump(vn.second.get()))
+
     def __len__(self) -> int:
         return db.players.size()
     
@@ -304,8 +304,8 @@ cdef class PlayerDB:
             yield vn.first
     
     def create_character(self, user, data):
-        result = create_player_character(user.id, jloads(data.model_dump_json().encode("utf-8")))
-        return orjson.loads(self._dump(deref(result)))
+        new_player = create_player_character(user.id, jloads(data.model_dump_json().encode("utf-8")))
+        return orjson.loads(self._dump(new_player))
 
 player_db = PlayerDB()
 

@@ -8,6 +8,7 @@
 #include "dbat/json.h"
 #include "dbat/TimeInfo.h"
 #include "dbat/ThingPrototype.h"
+#include "dbat/Help.h"
 
 extern PlayerData* create_player_character(int account_id, const json &j);
 
@@ -41,6 +42,9 @@ void load_players(const std::filesystem::path& loc);
 void load_help(const std::filesystem::path& loc);
 
 void load_assemblies(const std::filesystem::path& loc);
+
+void to_json(json& j, const help_index_element& a);
+void from_json(const json& j, help_index_element& a);
 
 void to_json(json& j, const Account& a);
 void from_json(const json& j, Account& a);

@@ -169,4 +169,3 @@ extern int enable_compression, enable_languages, all_items_unique, method;
 
 extern float exp_multiplier;
 
-extern void load_config();
