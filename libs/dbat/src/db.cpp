@@ -1037,12 +1037,10 @@ void zone_update(uint64_t heartPulse, double deltaTime) {
 
 }
 
-
 void reset_zone(zone_vnum vn) {
     auto& z = zone_table.at(vn);
-    z.reset();
+    z->reset();
 }
-
 
 
 void repairRoomDamage(uint64_t heartPulse, double deltaTime) {
