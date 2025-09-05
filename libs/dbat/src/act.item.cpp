@@ -7,9 +7,9 @@
  *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
  *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
  ************************************************************************ */
-#include "dbat/Character.h"
-#include "dbat/Object.h"
-#include "dbat/Room.h"
+#include "dbat/CharacterUtils.h"
+#include "dbat/ObjectUtils.h"
+#include "dbat/RoomUtils.h"
 #include "dbat/Destination.h"
 #include "dbat/Descriptor.h"
 #include "dbat/act.item.h"
@@ -30,10 +30,31 @@
 #include "dbat/feats.h"
 #include "dbat/Guild.h"
 #include "dbat/constants.h"
-#include "dbat/genzon.h"
 #include "dbat/dg_scripts.h"
 #include "dbat/boards.h"
 #include "dbat/ansi.h"
+#include "dbat/utils.h"
+#include "dbat/filter.h"
+
+#include "dbat/players.h"
+
+#include "dbat/Random.h"
+
+#include "dbat/DragonBall.h"
+
+#include "dbat/CharacterPrototype.h"
+
+#include "dbat/HasExtraDescriptions.h"
+
+#include "dbat/const/AuctionState.h"
+#include "dbat/const/Pulse.h"
+#include "dbat/const/WearSlot.h"
+#include "dbat/const/ItemValues.h"
+#include "dbat/const/ContainerFlag.h"
+#include "dbat/const/Condition.h"
+#include "dbat/const/Recipe.h"
+#include "dbat/const/Environment.h"
+
 
 /* global variables */
 Object *obj_selling = nullptr;   /* current object for sale */
@@ -98,8 +119,6 @@ static bool has_housekey(Character *ch, Object *obj);
 static void harvest_plant(Character *ch, Object *plant);
 
 static int can_harvest(Object *plant);
-
-static char *find_exdesc_keywords(char *word, struct extra_descr_data *list);
 
 /* local variables */
 static char buf[MAX_STRING_LENGTH];
@@ -2581,35 +2600,15 @@ int perform_get_from_room(Character *ch, Object *obj)
     return (0);
 }
 
-static char *find_exdesc_keywords(char *word, struct extra_descr_data *list)
-{
-    struct extra_descr_data *i;
-
-    for (i = list; i; i = i->next)
-        if (isname(word, i->keyword))
-            return (i->keyword);
-
-    return (nullptr);
-}
-
-static char *find_exdesc_keywords(char *word, const std::vector<ExtraDescription> &list)
-{
-    for (const auto &i : list)
-    {
-        if (isname(word, i.keyword.c_str()))
-            return (char *)i.keyword.c_str();
-    }
-    return nullptr;
-}
-
 static void get_from_room(Character *ch, char *arg, int howmany)
 {
     Object *obj, *next_obj;
     int dotmode, found = 0;
     char *descword;
+    auto exd = ch->location.getExtraDescription();
 
     /* Are they trying to take something in a room extra description? */
-    if (find_exdesc(arg, ch->location.getExtraDescription()))
+    if (find_exdesc(arg, exd))
     {
         ch->send_to("You can't take %s %s.\r\n", AN(arg), arg);
         return;
@@ -2619,9 +2618,9 @@ static void get_from_room(Character *ch, char *arg, int howmany)
 
     if (dotmode == FIND_INDIV)
     {
-        if ((descword = find_exdesc_keywords(arg, ch->location.getExtraDescription())))
+        if (auto dw = find_exdesc(arg, exd))
         {
-            ch->send_to("%s: you can't take that!\r\n", fname(descword));
+            ch->send_to("%s: you can't take that!\r\n", dw->first);
             return;
         }
         auto con = ch->location.getObjects();

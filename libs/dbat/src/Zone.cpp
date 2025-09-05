@@ -1,12 +1,22 @@
 #include "dbat/Zone.h"
-#include "dbat/Room.h"
+#include "dbat/RoomUtils.h"
 #include "dbat/Descriptor.h"
-#include "dbat/Character.h"
+#include "dbat/CharacterUtils.h"
 #include "dbat/Area.h"
+#include "dbat/Random.h"
+
 #include "dbat/db.h"
 #include "dbat/utils.h"
 #include "dbat/reset.h"
 #include "dbat/dg_scripts.h"
+
+#include "dbat/const/AdminLevel.h"
+#include "dbat/const/Environment.h"
+
+#include "dbat/players.h"
+
+std::map<zone_vnum, std::shared_ptr<Zone>> zone_table;    /* zone table			 */
+std::unordered_set<zone_vnum> zone_reset_queue;
 
 std::string Zone::displayNameFor(Character *ch) {
     
@@ -23,8 +33,8 @@ std::string Zone::displayNameFor(Character *ch) {
         disp = colorName;
     }
     if(ch->isPC && !isbuilder) {
-        auto &p = players.at(ch->id);
-        if(p.known_zones.contains(number)) {
+        auto p = players.at(ch->id);
+        if(p->known_zones.contains(number)) {
             out += disp;
         } else {
             out += "???";
@@ -49,7 +59,7 @@ std::vector<Zone *> getZoneChildren(zone_vnum parent)
     {
         if (auto z = zone_table.find(parent); z != zone_table.end())
         {
-            return z->second.getChildren();
+            return z->second->getChildren();
         }
     }
     else
@@ -57,9 +67,9 @@ std::vector<Zone *> getZoneChildren(zone_vnum parent)
         std::vector<Zone *> out;
         for (auto &[vnum, zone] : zone_table)
         {
-            if (zone.parent == NOTHING)
+            if (zone->parent == NOTHING)
             {
-                out.emplace_back(&zone);
+                out.emplace_back(zone.get());
             }
         }
         return out;
@@ -83,7 +93,7 @@ std::vector<Zone *> Zone::getChildren() const
     {
         if (auto z = zone_table.find(child); z != zone_table.end())
         {
-            out.push_back(&z->second);
+            out.push_back(z->second.get());
         }
     }
     return out;
@@ -95,7 +105,7 @@ Zone *Zone::getParent() const
         return nullptr;
     if (auto z = zone_table.find(parent); z != zone_table.end())
     {
-        return &z->second;
+        return z->second.get();
     }
     return nullptr;
 }
@@ -149,8 +159,8 @@ std::vector<Zone *> Zone::getDescendants() const
     {
         if (auto z = zone_table.find(child); z != zone_table.end())
         {
-            descendants.push_back(&z->second);
-            auto childDescendants = z->second.getDescendants();
+            descendants.push_back(z->second.get());
+            auto childDescendants = z->second->getDescendants();
             descendants.insert(descendants.end(), childDescendants.begin(), childDescendants.end());
         }
     }
@@ -177,7 +187,7 @@ std::map<std::string, Location> Zone::getDockingSpots() {
 }
 
 Result<bool> Zone::canBeDeletedBy(Character* ch) {
-    return Err("Not implemented yet.");
+    return err("Not implemented yet.");
 }
 
 Zone* HasZone::getZone() const {

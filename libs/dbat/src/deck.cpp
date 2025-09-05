@@ -1,6 +1,10 @@
-#include "dbat/Object.h"
-#include "dbat/Character.h"
+#include "dbat/ObjectUtils.h"
+#include "dbat/CharacterUtils.h"
 #include "dbat/send.h"
+#include "dbat/Random.h"
+#include "dbat/utils.h"
+
+#include "dbat/const/Skill.h"
 
 int findItemApplySlot(Object *pObject, int location) {
     for (int i = 0; i < MAX_OBJ_AFFECT ; i++) {

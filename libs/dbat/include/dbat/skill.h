@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 
+struct Character;
 #include "const/Skill.h"
 
 namespace skill {

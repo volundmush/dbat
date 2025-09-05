@@ -1,6 +1,5 @@
 #pragma once
 
-constexpr int MEAL_LAST = 1234;
 constexpr int NUM_EXIT_FLAGS = 5;
 
 constexpr int NUM_ROOM_SECTORS = 15;

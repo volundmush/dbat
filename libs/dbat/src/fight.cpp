@@ -7,9 +7,9 @@
  *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
  *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
  ************************************************************************ */
-#include "dbat/Character.h"
-#include "dbat/Object.h"
-#include "dbat/Room.h"
+#include "dbat/CharacterUtils.h"
+#include "dbat/ObjectUtils.h"
+#include "dbat/RoomUtils.h"
 #include "dbat/Zone.h"
 #include "dbat/Destination.h"
 #include "dbat/DgScript.h"
@@ -33,6 +33,15 @@
 #include "dbat/dg_scripts.h"
 #include "dbat/act.informative.h"
 #include "dbat/transformation.h"
+#include "dbat/Random.h"
+#include "dbat/filter.h"
+#include "dbat/utils.h"
+#include "dbat/DragonBall.h"
+#include "dbat/const/WearSlot.h"
+#include "dbat/const/CombatPreference.h"
+#include "dbat/const/DeathType.h"
+#include "dbat/const/Condition.h"
+#include "dbat/const/Pulse.h"
 
 /* Structures */
 
@@ -838,7 +847,6 @@ static void shadow_dragons_live()
     if (value == 0)
     {
         SELFISHMETER = 0;
-        save_mud_time(&time_info);
     }
 }
 
@@ -2513,7 +2521,7 @@ void raw_kill(Character *ch, Character *killer)
                 ch->send_to("@rYou lose @R%s@r upgrade points!@n\r\n", add_commas(loss).c_str());
             }
         }
-        WAIT_STATE(ch, PULSE_VIOLENCE);
+        WAIT_STATE(ch, PULSE_2SEC);
     }
 }
 

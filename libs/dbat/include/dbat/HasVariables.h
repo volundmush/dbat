@@ -6,28 +6,16 @@
 struct HasVariables {
     std::unordered_map<std::string, std::string> variables; // Subscriptions to services.
 
-    std::optional<std::string> getVariable(const std::string &key) const {
-        if(auto it = variables.find(key); it != variables.end()) {
-            return it->second;
-        }
-        return std::nullopt;
-    }
+    std::optional<std::string> getVariable(std::string_view key) const;
 
-    void setVariable(const std::string &key, const std::string &value) {
-        variables[key] = value;
-    }
+    void setVariable(std::string_view key, std::string_view value);
 
     template<typename T>
-    requires (!std::is_convertible_v<T, const char*>)
-    void setVariable(const std::string &key, T u) {
-        variables[key] = u->getUID(true);
+    void setUID(std::string_view key, T u) {
+        variables[std::string(key)] = u->getUID(true);
     }
 
-    bool hasVariable(const std::string &key) const {
-        return variables.find(key) != variables.end();
-    }
+    bool hasVariable(std::string_view key) const;
 
-    bool eraseVariable(const std::string &key) {
-        return variables.erase(key) > 0;
-    }
+    bool eraseVariable(std::string_view key);
 };

@@ -2,7 +2,7 @@
 #include <map>
 #include <memory>
 #include "Typedefs.h"
-
+#include "Command.h"
 #include "ObjectShared.h"
 #include "ThingPrototype.h"
 #include "HasPicky.h"
@@ -34,13 +34,14 @@ struct ObjectPrototype : public ObjectBase, public ThingPrototype, public picky_
     R modBaseStat(const std::string& stat, double val) {
         return itemProtoStats.modBase<R>(this, stat, val);
     }
+
+    SpecialFunc func{nullptr};
 };
 
 inline std::string format_as(const ObjectPrototype& z) {
     return fmt::format("ObjectPrototype {} '{}'", z.vn, z.short_description ? z.short_description : "<unnamed>");
 }
 
-extern std::map<obj_vnum, struct index_data> obj_index;
 extern std::map<obj_vnum, std::shared_ptr<ObjectPrototype>> obj_proto;
 
 extern int vnum_object(char *searchname, Character *ch);

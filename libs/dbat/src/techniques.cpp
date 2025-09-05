@@ -1,9 +1,12 @@
-#include "dbat/Character.h"
+#include "dbat/CharacterUtils.h"
 #include "dbat/techniques.h"
 #include "dbat/send.h"
 #include "dbat/combat.h"
 #include "dbat/comm.h"
 #include "dbat/spells.h"
+#include "dbat/Random.h"
+#include "dbat/utils.h"
+#include "dbat/handler.h"
 
 bool tech_handle_zanzoken(Character *ch, Character *vict, const std::string &name)
 {

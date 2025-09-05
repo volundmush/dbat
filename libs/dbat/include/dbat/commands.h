@@ -263,9 +263,8 @@ struct command_info
 extern const struct command_info cmd_info[];
 extern struct command_info *complete_cmd_info;
 
-extern int matchCommand(Character* ch, const std::string& cmd);
+extern int matchCommand(Character* ch, std::string_view cmd);
 
-extern DECCMD(do_oasis);
 extern DECCMD(do_oasis_list);
 extern DECCMD(do_oasis_links);
 extern DECCMD(do_oasis_oedit);
@@ -279,8 +278,6 @@ extern DECCMD(do_oasis_aedit);
 extern DECCMD(do_oasis_hedit);
 extern DECCMD(do_oasis_medit);
 extern DECCMD(do_skillset);
-extern DECCMD(do_helpcheck);
-extern DECCMD(do_hindex);
 extern DECCMD(do_track);
 extern DECCMD(do_kousengan);
 
@@ -431,8 +428,6 @@ extern DECCMD(do_balefire);
 extern DECCMD(do_blessedhammer);
 
 extern DECCMD(do_reboot);
-
-extern DECCMD(do_assedit);
 
 extern DECCMD(do_action);
 
@@ -824,13 +819,7 @@ extern DECCMD(do_drive);
 
 extern DECCMD(do_ship_fire);
 
-extern DECCMD(do_tedit);
-
 extern DECCMD(do_dig);
-
-extern DECCMD(do_ban);
-
-extern DECCMD(do_unban);
 
 extern DECCMD(do_echo);
 
@@ -983,20 +972,16 @@ extern DECCMD(do_languages);
 extern DECCMD(do_osay);
 
 extern DECCMD(do_alias);
-extern DECCMD(do_astat);
 extern DECCMD(do_bash);
 extern DECCMD(do_combine);
 extern DECCMD(do_combo);
 extern DECCMD(do_copyover);
-extern DECCMD(do_disable);
 extern DECCMD(do_energize);
 extern DECCMD(do_findkey);
 extern DECCMD(do_hspiral);
-extern DECCMD(do_iedit);
 extern DECCMD(do_lightgrenade);
 extern DECCMD(do_malice);
 extern DECCMD(do_nogrow);
-extern DECCMD(do_show_save_list);
 extern DECCMD(do_pgrant);
 extern DECCMD(do_rpreward);
 extern DECCMD(do_eratime);

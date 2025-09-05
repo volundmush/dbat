@@ -221,23 +221,6 @@ bool ETHER_STREAM(Character *ch);
 #define CONFIG_USE_AUTOWIZ      config_info.autowiz.use_autowiz
 #define CONFIG_MIN_WIZLIST_LEV  config_info.autowiz.min_wizlist_lev
 
-/** Character Advancement **/
-#define CONFIG_ALLOW_MULTICLASS    config_info.advance.allow_multiclass
-#define CONFIG_ALLOW_PRESTIGE    config_info.advance.allow_prestige
-
-/** For tick system **/
-#define CONFIG_PULSE_VIOLENCE    config_info.ticks.pulse_violence
-#define CONFIG_PULSE_MOBILE    config_info.ticks.pulse_mobile
-#define CONFIG_PULSE_ZONE    config_info.ticks.pulse_zone
-#define CONFIG_PULSE_AUTOSAVE    config_info.ticks.pulse_autosave
-#define CONFIG_PULSE_IDLEPWD    config_info.ticks.pulse_idlepwd
-#define CONFIG_PULSE_SANITY    config_info.ticks.pulse_sanity
-#define CONFIG_PULSE_USAGE    config_info.ticks.pulse_usage
-#define CONFIG_PULSE_TIMESAVE    config_info.ticks.pulse_timesave
-#define CONFIG_PULSE_CURRENT    config_info.ticks.pulse_current
-
-/** Character Creation Method **/
-#define CONFIG_CREATION_METHOD    config_info.creation.method
 
 
 
@@ -247,8 +230,7 @@ bool ETHER_STREAM(Character *ch);
 /* Added by Dynamic Boards v2.4 - PjD (dughi@imaxx.net)          */
 
 
-
-extern int levenshtein_distance(char *s1, char *s2);
+extern int levenshtein_distance(std::string_view s1, std::string_view s2);
 
 template<size_t N>
 int check_flags_by_name_ar(const std::bitset<N>& bitvector, int numflags, char *search, const char *namelist[]) {
@@ -291,3 +273,5 @@ extern Result<Location> getLocation(std::string_view arg, Character* ch);
 extern std::string ansiSafeString(std::string_view arg);
 extern std::string replaceStringLine(std::string_view arg, bool enforceNewLine = true);
 
+int file_to_string_alloc(const char *name, char **buf);
+int file_to_string(const char *name, char *buf);

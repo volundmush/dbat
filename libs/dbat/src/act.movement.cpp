@@ -7,9 +7,9 @@
  *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
  *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
  ************************************************************************ */
-#include "dbat/Character.h"
-#include "dbat/Object.h"
-#include "dbat/Room.h"
+#include "dbat/CharacterUtils.h"
+#include "dbat/ObjectUtils.h"
+#include "dbat/RoomUtils.h"
 #include "dbat/Destination.h"
 #include "dbat/Descriptor.h"
 #include "dbat/Zone.h"
@@ -22,13 +22,22 @@
 #include "dbat/interpreter.h"
 #include "dbat/fight.h"
 #include "dbat/spells.h"
-#include "dbat/oasis.h"
 #include "dbat/Guild.h"
 #include "dbat/dg_scripts.h"
 #include "dbat/local_limits.h"
 #include "dbat/constants.h"
 #include "dbat/act.informative.h"
 #include "dbat/planet.h"
+#include "dbat/config.h"
+#include "dbat/utils.h"
+#include "dbat/filter.h"
+
+#include "dbat/const/Pulse.h"
+#include "dbat/const/Environment.h"
+#include "dbat/const/ContainerFlag.h"
+#include "dbat/const/Condition.h"
+
+#include "dbat/Random.h"
 
 /* local functions */
 static void handle_fall(Character *ch);
@@ -657,14 +666,6 @@ int do_simple_move(Character *ch, int dir, int need_specials_check)
         return (0);
     }
 
-    /* No low level immortal scouting */
-    if ((GET_ADMLEVEL(ch) >= ADMLVL_IMMORT && GET_ADMLEVEL(ch) < ADMLVL_GOD) &&
-        !can_edit_zone(ch, z->number) && z->zone_flags.get(ZONE_QUEST))
-    {
-        ch->sendText("This is a Quest zone.\r\n");
-        return (0);
-    }
-
     /* Now we know we're allowed to go into the room. */
     if (!ADM_FLAGGED(ch, ADM_WALKANYWHERE) && !IS_NPC(ch) && !AFF_FLAGGED(ch, AFF_FLYING))
     {
@@ -890,13 +891,13 @@ int perform_move(Character *ch, int dir, int need_specials_check)
         return 0;
     }
 
-    if ((EXIT_FLAGGED(ex, EX_SECRET) && (EXIT_FLAGGED(ex, EX_CLOSED))))
+    if ((ex->exit_flags[EX_SECRET] && (ex->exit_flags[EX_CLOSED])))
     {
         ch->sendText("Alas, you cannot go that way...\r\n");
         return 0;
     }
 
-    if (EXIT_FLAGGED(ex, EX_CLOSED))
+    if (ex->exit_flags[EX_CLOSED])
     {
         if (!ex->keyword.empty())
             ch->send_to("The %s seems to be closed.\r\n", fname(ex->keyword.c_str()));
@@ -2133,7 +2134,7 @@ ACMD(do_enter)
         /* try to locate an entrance */
         for (auto &[door, e] : ch->location.getExits())
         {
-            if (!EXIT_FLAGGED(&e, EX_CLOSED) && e.getRoomFlag(ROOM_INDOORS))
+            if (!e.exit_flags[EX_CLOSED] && e.getRoomFlag(ROOM_INDOORS))
             {
                 move_dir = static_cast<int>(door);
                 break;
@@ -2371,7 +2372,7 @@ ACMD(do_leave)
 
     for (auto &[door, ex] : ch->location.getExits())
     {
-        if (!EXIT_FLAGGED(&ex, EX_CLOSED) && !ex.getRoomFlag(ROOM_INDOORS))
+        if (!ex.exit_flags[EX_CLOSED] && !ex.getRoomFlag(ROOM_INDOORS))
         {
             perform_move(ch, static_cast<int>(door), 1);
             return;

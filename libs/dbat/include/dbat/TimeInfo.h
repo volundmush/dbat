@@ -16,5 +16,3 @@ struct time_info_data {
 extern struct time_info_data time_info;  /* the infomation about the time    */
 extern struct time_info_data era_uptime; /* the infomation about the time    */
 extern struct time_info_data old_time_info; /* UNUSED (to be removed) the infomation about the time    */
-
-extern void save_mud_time(struct time_info_data *when);

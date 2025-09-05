@@ -3,7 +3,8 @@
 #include "dbat/act.movement.h"
 #include "dbat/act.informative.h"
 #include "dbat/planet.h"
-#include "dbat/tedit.h"
+
+#include "dbat/const/AdminLevel.h"
 
 struct command_info *complete_cmd_info;
 
@@ -34,7 +35,6 @@ const struct command_info cmd_info[] = {
     {"at", "at", POS_DEAD, do_at, 0, ADMLVL_BUILDER, 0, 0},
     {"adrenaline", "adrenalin", POS_DEAD, do_adrenaline, 0, ADMLVL_NONE, 0, 1},
     {"advance", "adv", POS_DEAD, do_advance, 0, ADMLVL_GOD, 0, 1},
-    {"aedit", "aed", POS_DEAD, do_oasis, 0, ADMLVL_BUILDER, SCMD_OASIS_AEDIT, 0},
     {"alias", "ali", POS_DEAD, do_alias, 0, ADMLVL_NONE, 0, 0},
     {"afk", "afk", POS_DEAD, do_gen_tog, 0, ADMLVL_NONE, SCMD_AFK, 0},
     {"aid", "aid", POS_STANDING, do_aid, 0, ADMLVL_NONE, 0, 1},
@@ -43,9 +43,7 @@ const struct command_info cmd_info[] = {
     {"approve", "approve", POS_STANDING, do_approve, 0, ADMLVL_IMMORT, 0, 0},
     {"arena", "aren", POS_RESTING, do_arena, 0, ADMLVL_NONE, 0, 0},
     {"ashcloud", "ashclou", POS_RESTING, do_ashcloud, 0, ADMLVL_NONE, 0, 1},
-    {"assedit", "assed", POS_STANDING, do_assedit, 0, ADMLVL_GOD, 0, 0},
     {"assist", "assis", POS_STANDING, do_assist, 0, ADMLVL_NONE, 0, 0},
-    {"astat", "ast", POS_DEAD, do_astat, 0, ADMLVL_GOD, 0, 0},
     {"ask", "ask", POS_RESTING, do_spec_comm, 0, ADMLVL_NONE, SCMD_ASK, 0},
     {"attack", "attack", POS_FIGHTING, do_attack, 0, 0, 0, 1},
     {"auction", "auctio", POS_RESTING, do_not_here, 0, 0, 0, 0},
@@ -57,7 +55,6 @@ const struct command_info cmd_info[] = {
     {"autosplit", "autosp", POS_DEAD, do_gen_tog, 0, ADMLVL_IMMORT, SCMD_AUTOSPLIT, 0},
 
     {"bakuhatsuha", "baku", POS_FIGHTING, do_baku, 0, 0, 0, 1},
-    {"ban", "ban", POS_DEAD, do_ban, 0, ADMLVL_VICE, 0, 0},
     {"balance", "bal", POS_STANDING, do_not_here, 1, ADMLVL_NONE, 0, 1},
     {"balefire", "balef", POS_FIGHTING, do_balefire, 0, ADMLVL_NONE, 0, 1},
     {"barrage", "barrage", POS_FIGHTING, do_pbarrage, 0, ADMLVL_NONE, 0, 1},
@@ -81,7 +78,6 @@ const struct command_info cmd_info[] = {
     {"candy", "cand", POS_FIGHTING, do_candy, 0, 0, 0, 1},
     {"carry", "carr", POS_STANDING, do_carry, 0, 0, 0, 0},
     {"carve", "carv", POS_SLEEPING, do_gen_tog, 0, 0, SCMD_CARVE, 0},
-    {"cedit", "cedit", POS_DEAD, do_oasis, 0, ADMLVL_IMPL, SCMD_OASIS_CEDIT, 0},
     {"channel", "channe", POS_FIGHTING, do_channel, 0, 0, 0, 0},
     {"charge", "char", POS_FIGHTING, do_charge, 0, 0, 0, 1},
     {"check", "ch", POS_STANDING, do_not_here, 1, ADMLVL_NONE, 0, 0},
@@ -119,7 +115,6 @@ const struct command_info cmd_info[] = {
     {"deposit", "depo", POS_STANDING, do_not_here, 1, ADMLVL_NONE, 0, 0},
     {"diagnose", "diagnos", POS_RESTING, do_diagnose, 0, ADMLVL_NONE, 0, 1},
     {"dimizu", "dimizu", POS_STANDING, do_dimizu, 0, 0, 0, 0},
-    {"disable", "disa", POS_DEAD, do_disable, 0, ADMLVL_VICE, 0, 0},
     {"disguise", "disguis", POS_DEAD, do_disguise, 0, 0, 0, 1},
     {"dig", "dig", POS_DEAD, do_bury, 0, ADMLVL_NONE, 0, 0},
     {"display", "disp", POS_DEAD, do_display, 0, ADMLVL_NONE, 0, 0},
@@ -178,10 +173,8 @@ const struct command_info cmd_info[] = {
     {"genocide", "genocid", POS_FIGHTING, do_geno, 0, ADMLVL_NONE, 0, 1},
     {"get", "get", POS_RESTING, do_get, 0, ADMLVL_NONE, 0, 0},
     {"gecho", "gecho", POS_DEAD, do_gecho, 0, ADMLVL_BUILDER, 0, 0},
-    {"gedit", "gedit", POS_DEAD, do_oasis, 0, ADMLVL_BUILDER, SCMD_OASIS_GEDIT, 0},
     {"gemote", "gem", POS_SLEEPING, do_gen_comm, 0, ADMLVL_NONE, SCMD_GEMOTE, 0},
     {"generator", "genr", POS_STANDING, do_not_here, 1, ADMLVL_NONE, 0, 0},
-    {"glist", "glist", POS_SLEEPING, do_oasis, 0, ADMLVL_BUILDER, SCMD_OASIS_GLIST, 0},
     {"give", "giv", POS_RESTING, do_give, 0, ADMLVL_NONE, 0, 0},
     {"goto", "go", POS_SLEEPING, do_goto, 0, ADMLVL_IMMORT, 0, 0},
     {"gold", "gol", POS_RESTING, do_gold, 0, ADMLVL_NONE, 0, 0},
@@ -206,9 +199,6 @@ const struct command_info cmd_info[] = {
     {"hellflash", "hellflas", POS_FIGHTING, do_hellflash, 0, ADMLVL_NONE, 0, 1},
     {"hellspear", "hellspea", POS_FIGHTING, do_hellspear, 0, ADMLVL_NONE, 0, 1},
     {"help", "h", POS_DEAD, do_help, 0, ADMLVL_NONE, 0, 0},
-    {"hedit", "hedit", POS_DEAD, do_oasis, 0, ADMLVL_IMMORT, SCMD_OASIS_HEDIT, 0},
-    {"hindex", "hind", POS_DEAD, do_hindex, 0, ADMLVL_NONE, 0, 0},
-    {"helpcheck", "helpch", POS_DEAD, do_helpcheck, 0, ADMLVL_NONE, 0, 0},
     {"handbook", "handb", POS_DEAD, do_gen_ps, 0, ADMLVL_IMMORT, SCMD_HANDBOOK, 0},
     {"hide", "hide", POS_RESTING, do_gen_tog, 1, ADMLVL_NONE, SCMD_HIDE, 0},
     {"hints", "hints", POS_DEAD, do_gen_tog, 0, ADMLVL_NONE, SCMD_HINTS, 0},
@@ -216,7 +206,6 @@ const struct command_info cmd_info[] = {
     {"hold", "hold", POS_RESTING, do_grab, 1, ADMLVL_NONE, 0, 0},
     {"holylight", "holy", POS_DEAD, do_gen_tog, 0, ADMLVL_IMMORT, SCMD_HOLYLIGHT, 0},
     {"honoo", "hono", POS_FIGHTING, do_honoo, 0, ADMLVL_NONE, 0, 1},
-    {"hsedit", "hsedit", POS_DEAD, do_oasis, 0, ADMLVL_BUILDER, SCMD_OASIS_HSEDIT, 0},
     {"hspiral", "hspira", POS_FIGHTING, do_hspiral, 0, ADMLVL_NONE, 0, 1},
     {"htank", "htan", POS_STANDING, do_not_here, 1, ADMLVL_NONE, 0, 0},
     {"hydromancy", "hydrom", POS_STANDING, do_hydromancy, 0, ADMLVL_NONE, 0, 1},
@@ -235,7 +224,6 @@ const struct command_info cmd_info[] = {
     /*{ "insult"   , "insult"	, POS_RESTING , do_insult   , 0, ADMLVL_NONE	, 0 },*/
     {"inventory", "inv", POS_DEAD, do_inventory, 0, ADMLVL_NONE, 0, 0},
     {"interest", "inter", POS_DEAD, do_interest, 0, ADMLVL_IMPL, 0, 0},
-    {"iedit", "ie", POS_DEAD, do_iedit, 0, ADMLVL_IMPL, 0, 0},
     {"invis", "invi", POS_DEAD, do_invis, 0, ADMLVL_IMMORT, 0, 0},
     {"iwarp", "iwarp", POS_RESTING, do_warp, 0, ADMLVL_NONE, 0, 0},
 
@@ -266,7 +254,6 @@ const struct command_info cmd_info[] = {
     {"light", "ligh", POS_STANDING, do_lightgrenade, 0, ADMLVL_NONE, 0, 0},
     {"list", "lis", POS_STANDING, do_not_here, 0, ADMLVL_NONE, 0, 0},
     {"life", "lif", POS_SLEEPING, do_lifeforce, 0, ADMLVL_NONE, 0, 0},
-    {"links", "lin", POS_DEAD, do_oasis, 0, ADMLVL_BUILDER, SCMD_OASIS_LINKS, 0},
     {"liquefy", "liquef", POS_SLEEPING, do_liquefy, 0, ADMLVL_NONE, 0, 1},
     {"lkeep", "lkee", POS_DEAD, do_gen_tog, 0, ADMLVL_NONE, SCMD_LKEEP, 0},
     {"lock", "loc", POS_SITTING, do_gen_door, 0, ADMLVL_NONE, SCMD_LOCK, 0},
@@ -280,10 +267,8 @@ const struct command_info cmd_info[] = {
     {"mail", "mail", POS_STANDING, do_not_here, 2, ADMLVL_NONE, 0, 0},
     {"map", "map", POS_STANDING, do_map, 0, ADMLVL_NONE, 0, 0},
     /*{ "mcopy"    , "mcopy"	, POS_DEAD    , do_oasis_copy, 0, ADMLVL_GOD	, SCMD_MEDIT },*/
-    {"medit", "medit", POS_DEAD, do_oasis, 0, ADMLVL_IMMORT, SCMD_OASIS_MEDIT, 0},
     {"meditate", "medita", POS_SITTING, do_meditate, 0, ADMLVL_NONE, 0, 1},
     {"mimic", "mimi", POS_STANDING, do_mimic, 0, ADMLVL_NONE, 0, 0},
-    {"mlist", "mlist", POS_DEAD, do_oasis, 0, ADMLVL_IMMORT, SCMD_OASIS_MLIST, 0},
     {"moondust", "moondus", POS_STANDING, do_moondust, 0, ADMLVL_NONE, 0, 1},
     {"multiform", "multifor", POS_STANDING, do_multiform, 0, ADMLVL_NONE, 0, 1},
     {"mute", "mute", POS_DEAD, do_wizutil, 0, ADMLVL_IMMORT, SCMD_SQUELCH, 0},
@@ -317,9 +302,6 @@ const struct command_info cmd_info[] = {
     {"ooc", "ooc", POS_SLEEPING, do_gen_comm, 0, ADMLVL_NONE, SCMD_GOSSIP, 0},
     {"offer", "off", POS_STANDING, do_not_here, 1, ADMLVL_NONE, 0, 0},
     {"open", "ope", POS_SITTING, do_gen_door, 0, ADMLVL_NONE, SCMD_OPEN, 0},
-    {"olc", "olc", POS_DEAD, do_show_save_list, 0, ADMLVL_IMMORT, 0, 0},
-    {"olist", "olist", POS_DEAD, do_oasis, 0, ADMLVL_IMMORT, SCMD_OASIS_OLIST, 0},
-    {"oedit", "oedit", POS_DEAD, do_oasis, 0, ADMLVL_IMMORT, SCMD_OASIS_OEDIT, 0},
     {"osay", "osay", POS_RESTING, do_osay, 0, ADMLVL_NONE, 0, 0},
 
     {"pack", "pac", POS_STANDING, do_pack, 0, 0, 0, 0},
@@ -343,7 +325,6 @@ const struct command_info cmd_info[] = {
     {"pour", "pour", POS_STANDING, do_pour, 0, ADMLVL_NONE, SCMD_POUR, 0},
     {"powerup", "poweru", POS_FIGHTING, do_powerup, 0, ADMLVL_NONE, 0, 1},
     {"preference", "preferenc", POS_DEAD, do_preference, 0, ADMLVL_NONE, 0, 0},
-    {"program", "progra", POS_DEAD, do_oasis, 0, ADMLVL_NONE, SCMD_OASIS_REDIT, 0},
     {"prompt", "pro", POS_DEAD, do_display, 0, ADMLVL_NONE, 0, 0},
     {"practice", "pra", POS_RESTING, do_practice, 1, ADMLVL_NONE, 0, 0},
     {"psychic", "psychi", POS_FIGHTING, do_psyblast, 0, ADMLVL_NONE, 0, 1},
@@ -385,9 +366,7 @@ const struct command_info cmd_info[] = {
     {"respond", "resp", POS_RESTING, do_respond, 1, ADMLVL_NONE, 0, 0},
     {"restore", "resto", POS_DEAD, do_restore, 0, ADMLVL_GOD, 0, 0},
     {"return", "retu", POS_DEAD, do_return, 0, ADMLVL_NONE, 0, 0},
-    {"redit", "redit", POS_DEAD, do_oasis, 0, ADMLVL_IMMORT, SCMD_OASIS_REDIT, 0},
     {"rip", "ri", POS_DEAD, do_rip, 0, ADMLVL_NONE, 0, 1},
-    {"rlist", "rlist", POS_DEAD, do_oasis, 0, ADMLVL_IMMORT, SCMD_OASIS_RLIST, 0},
     {"rogafufuken", "rogafu", POS_FIGHTING, do_rogafufuken, 0, ADMLVL_NONE, 0, 1},
     {"roomflags", "roomf", POS_DEAD, do_gen_tog, 0, ADMLVL_IMMORT, SCMD_ROOMFLAGS, 0},
     {"roundhouse", "roundhou", POS_FIGHTING, do_roundhouse, 0, ADMLVL_NONE, 0, 1},
@@ -414,7 +393,6 @@ const struct command_info cmd_info[] = {
     {"search", "sea", POS_STANDING, do_look, 0, ADMLVL_NONE, SCMD_SEARCH, 0},
     {"sell", "sell", POS_STANDING, do_not_here, 0, ADMLVL_NONE, 0, 0},
     {"selfdestruct", "selfdest", POS_STANDING, do_selfd, 0, ADMLVL_NONE, 0, 1},
-    {"sedit", "sedit", POS_DEAD, do_oasis, 0, ADMLVL_IMMORT, SCMD_OASIS_SEDIT, 0},
     {"send", "send", POS_SLEEPING, do_send, 0, ADMLVL_GOD, 0, 0},
     {"sense", "sense", POS_RESTING, do_track, 0, ADMLVL_NONE, 0, 0},
     {"set", "set", POS_DEAD, do_set, 0, ADMLVL_IMMORT, 0, 0},
@@ -430,7 +408,6 @@ const struct command_info cmd_info[] = {
     {"skillset", "skillset", POS_SLEEPING, do_skillset, 0, 5, 0, 0},
     {"slam", "sla", POS_FIGHTING, do_slam, 0, ADMLVL_NONE, 0, 1},
     {"sleep", "sl", POS_SLEEPING, do_sleep, 0, ADMLVL_NONE, 0, 1},
-    {"slist", "slist", POS_SLEEPING, do_oasis, 0, ADMLVL_IMMORT, SCMD_OASIS_SLIST, 0},
     {"slowns", "slowns", POS_DEAD, do_gen_tog, 0, ADMLVL_IMPL, SCMD_SLOWNS, 0},
     {"smote", "sm", POS_RESTING, do_echo, 1, ADMLVL_NONE, SCMD_SMOTE, 0},
     {"sneak", "sneak", POS_STANDING, do_gen_tog, 1, ADMLVL_NONE, SCMD_SNEAK, 1},
@@ -473,7 +450,6 @@ const struct command_info cmd_info[] = {
     {"taste", "tas", POS_RESTING, do_eat, 0, ADMLVL_NONE, SCMD_TASTE, 0},
     {"teleport", "tele", POS_DEAD, do_teleport, 0, ADMLVL_IMMORT, 0, 0},
     {"telepathy", "telepa", POS_DEAD, do_telepathy, 0, ADMLVL_NONE, 0, 0},
-    {"tedit", "tedit", POS_DEAD, do_tedit, 0, ADMLVL_GRGOD, 0, 0},
     {"test", "test", POS_DEAD, do_gen_tog, 0, ADMLVL_BUILDER, SCMD_TEST, 0},
     {"thaw", "thaw", POS_DEAD, do_wizutil, 0, ADMLVL_IMMORT, SCMD_THAW, 0},
     {"think", "thin", POS_DEAD, do_think, 0, ADMLVL_NONE, 0, 0},
@@ -488,7 +464,6 @@ const struct command_info cmd_info[] = {
     {"transform", "transform", POS_FIGHTING, do_transform, 0, ADMLVL_NONE, 0, 1},
     {"transo", "trans", POS_STANDING, do_transobj, 0, 5, 0, 0},
     {"tribeam", "tribe", POS_FIGHTING, do_tribeam, 0, ADMLVL_NONE, 0, 1},
-    {"trigedit", "trigedit", POS_DEAD, do_oasis, 0, ADMLVL_IMMORT, SCMD_OASIS_TRIGEDIT, 0},
     {"trip", "trip", POS_FIGHTING, do_trip, 0, ADMLVL_NONE, 0, 1},
     {"tsuihidan", "tsuihida", POS_FIGHTING, do_tsuihidan, 0, ADMLVL_NONE, 0, 1},
     {"tunnel", "tunne", POS_DEAD, do_dig, 0, ADMLVL_IMMORT, 0, 0},
@@ -498,7 +473,6 @@ const struct command_info cmd_info[] = {
 
     {"unlock", "unlock", POS_SITTING, do_gen_door, 0, ADMLVL_NONE, SCMD_UNLOCK, 0},
     {"ungroup", "ungroup", POS_DEAD, do_ungroup, 0, ADMLVL_NONE, 0, 0},
-    {"unban", "unban", POS_DEAD, do_unban, 0, ADMLVL_GRGOD, 0, 0},
     {"unaffect", "unaffect", POS_DEAD, do_wizutil, 0, ADMLVL_GOD, SCMD_UNAFFECT, 0},
     {"uppercut", "upperc", POS_FIGHTING, do_uppercut, 0, ADMLVL_NONE, 0, 1},
     {"upgrade", "upgrad", POS_RESTING, do_upgrade, 0, ADMLVL_NONE, 0, 0},
@@ -544,15 +518,12 @@ const struct command_info cmd_info[] = {
     {"zen", "ze", POS_FIGHTING, do_zen, 0, ADMLVL_NONE, 0, 1},
     {"zcheck", "zcheck", POS_DEAD, do_zcheck, 0, ADMLVL_GOD, 0, 0},
     {"zreset", "zreset", POS_DEAD, do_zreset, 0, ADMLVL_IMMORT, 0, 0},
-    {"zedit", "zedit", POS_DEAD, do_oasis, 0, ADMLVL_IMMORT, SCMD_OASIS_ZEDIT, 0},
-    {"zlist", "zlist", POS_DEAD, do_oasis, 0, ADMLVL_IMMORT, SCMD_OASIS_ZLIST, 0},
     {"zpurge", "zpurge", POS_DEAD, do_zpurge, 0, ADMLVL_GRGOD, 0, 0},
 
     /* DG trigger commands */
     {"attach", "attach", POS_DEAD, do_attach, 0, ADMLVL_BUILDER, 0, 0},
     {"detach", "detach", POS_DEAD, do_detach, 0, ADMLVL_BUILDER, 0, 0},
     {"detect", "detec", POS_STANDING, do_radar, 0, ADMLVL_NONE, 0, 0},
-    {"tlist", "tlist", POS_DEAD, do_oasis, 0, ADMLVL_IMMORT, SCMD_OASIS_TLIST, 0},
     {"tstat", "tstat", POS_DEAD, do_tstat, 0, ADMLVL_IMMORT, 0, 0},
     {"masound", "masound", POS_DEAD, do_masound, -1, ADMLVL_NONE, 0, 0},
     {"mheal", "mhea", POS_SITTING, do_mheal, -1, ADMLVL_NONE, 0, 0},
@@ -583,7 +554,7 @@ const struct command_info cmd_info[] = {
     {".reset", ".res", POS_DEAD, do_mush_reset, -1, ADMLVL_BUILDER, 0, 0},
     {"\n", "zzzzzzz", 0, nullptr, 0, ADMLVL_NONE, 0, 0}}; /* this must be last */
 
-int matchCommand(Character *ch, const std::string &cmd)
+int matchCommand(Character *ch, std::string_view cmd)
 {
         for (auto i = 0;; i++)
         {

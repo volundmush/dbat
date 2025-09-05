@@ -12,9 +12,9 @@
 *  $Date: 2004/10/11 12:07:00$                                            *
 *  $Revision: 1.0.14 $                                                    *
 ************************************************************************ */
-#include "dbat/Character.h"
-#include "dbat/Object.h"
-#include "dbat/Room.h"
+#include "dbat/CharacterUtils.h"
+#include "dbat/ObjectUtils.h"
+#include "dbat/RoomUtils.h"
 #include "dbat/ObjectPrototype.h"
 #include "dbat/CharacterPrototype.h"
 #include "dbat/dg_scripts.h"
@@ -36,7 +36,7 @@ std::shared_ptr<DgScript> read_trigger(int nr) {
     auto idx = trig_index.find(nr);
     if(idx == trig_index.end()) return nullptr;
 
-    auto sh = std::make_shared<DgScript>(idx->second);
+    auto sh = std::make_shared<DgScript>(*(idx->second.get()));
 
     return sh;
 }
@@ -94,7 +94,7 @@ void dg_read_trigger(FILE *fp, HasDgScripts *proto, UnitType type) {
                        vnum, static_cast<Object*>(proto)->getName(), proto->getVnum());
                 return;
             }
-            obj_proto.at(proto->getVnum()).proto_script.push_back(rnum);
+            obj_proto.at(proto->getVnum())->proto_script.push_back(rnum);
             break;
         case MOB_TRIGGER:
             if(!mob_proto.contains(proto->getVnum())) {
@@ -103,7 +103,7 @@ void dg_read_trigger(FILE *fp, HasDgScripts *proto, UnitType type) {
                        vnum, GET_NAME(static_cast<Character *>(proto)), GET_MOB_VNUM(static_cast<Character *>(proto)));
                 return;
             }
-            mob_proto.at(proto->getVnum()).proto_script.push_back(rnum);
+            mob_proto.at(proto->getVnum())->proto_script.push_back(rnum);
             break;
         case WLD_TRIGGER:
             if(!Room::registry.contains(proto->getVnum())) {

@@ -36,9 +36,14 @@ inline std::string format_as(const Destination& d) {
     return fmt::format("{} Exit {} to {}", d.generated ? "Generated" : "Direct", magic_enum::enum_name(d.dir), d.getLocID());
 }
 
-#define EXIT(ch, door)  ((ch)->location.getExit(static_cast<Direction>((door))))
-#define W_EXIT(room, num)     (get_room((room))->exits.contains(static_cast<Direction>((num))))
-#define EXIT_FLAGGED(exit, flag) ((exit)->exit_flags[(flag)])
+#define EXIT(ch, door)  ch->location.getExit(static_cast<Direction>(door))
+#define W_EXIT(room, num)     get_room(room)->exits.contains(static_cast<Direction>(num))
+#define EXIT_FLAGGED(exit, flag) exit->exit_flags[flag]
+
+constexpr int BFS_ALREADY_THERE = -1;
+constexpr int BFS_NO_PATH = -2;
+constexpr int BFS_ERROR = -3;
+constexpr int BFS_TOO_FAR = -4;
 
 extern int find_first_step(Location &src, Location &target);
 

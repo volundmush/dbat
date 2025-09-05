@@ -6,8 +6,10 @@
 
 #include "const/Race.h"
 #include "const/Appearance.h"
+#include "const/Sex.h"
 
 struct Character;
+struct Object;
 
 // global variables
 extern const struct guild_info_type guild_info[6];

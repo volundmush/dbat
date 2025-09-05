@@ -8,9 +8,9 @@
  *  $Date: 2004/10/11 12:07:00$                                            *
  *  $Revision: 1.0.14 $                                                    *
  **************************************************************************/
-#include "dbat/Object.h"
-#include "dbat/Character.h"
-#include "dbat/Room.h"
+#include "dbat/ObjectUtils.h"
+#include "dbat/CharacterUtils.h"
+#include "dbat/RoomUtils.h"
 #include "dbat/Descriptor.h"
 #include "dbat/Zone.h"
 #include "dbat/Destination.h"
@@ -23,6 +23,7 @@
 #include "dbat/db.h"
 #include "dbat/constants.h"
 #include "dbat/act.wizard.h"
+#include "dbat/filter.h"
 
 /*
  * Local functions

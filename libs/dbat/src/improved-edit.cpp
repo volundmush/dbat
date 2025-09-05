@@ -9,6 +9,9 @@ improved-edit.c		Routines specific to the improved editor.
 #include "dbat/comm.h"
 #include "dbat/interpreter.h"
 #include "dbat/ansi.h"
+#include "dbat/utils.h"
+
+#include "dbat/const/AdminLevel.h"
 
 int format_script(struct descriptor_data *d);
 

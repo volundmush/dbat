@@ -7,10 +7,11 @@
  *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
  *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
  ************************************************************************ */
+#include <sys/param.h>
 #include "dbat/Log.h"
-#include "dbat/Character.h"
-#include "dbat/Object.h"
-#include "dbat/Room.h"
+#include "dbat/CharacterUtils.h"
+#include "dbat/ObjectUtils.h"
+#include "dbat/RoomUtils.h"
 #include "dbat/Destination.h"
 #include "dbat/Descriptor.h"
 #include "dbat/ObjectPrototype.h"
@@ -38,7 +39,6 @@
 #include "dbat/improved-edit.h"
 #include "dbat/feats.h"
 #include "dbat/fight.h"
-#include "dbat/genolc.h"
 #include "dbat/screen.h"
 #include "dbat/local_limits.h"
 #include "dbat/Shop.h"
@@ -46,6 +46,44 @@
 #include "dbat/spell_parser.h"
 #include "dbat/transformation.h"
 #include "dbat/ansi.h"
+#include "dbat/config.h"
+#include "dbat/utils.h"
+#include "dbat/filter.h"
+
+#include "dbat/ID.h"
+#include "dbat/UID.h"
+#include "dbat/Parse.h"
+#include "dbat/TimeInfo.h"
+#include "dbat/DragonBall.h"
+#include "dbat/Startup.h"
+
+#include "dbat/const/Pulse.h"
+#include "dbat/const/Condition.h"
+#include "dbat/const/Race.h"
+#include "dbat/const/Sensei.h"
+#include "dbat/const/Form.h"
+#include "dbat/const/WhereFlag.h"
+#include "dbat/const/RoomFlag.h"
+#include "dbat/const/ZoneFlag.h"
+#include "dbat/const/ExitFlag.h"
+#include "dbat/const/SectorType.h"
+#include "dbat/const/Size.h"
+#include "dbat/const/Sex.h"
+#include "dbat/const/Appearance.h"
+#include "dbat/const/CharacterFlag.h"
+#include "dbat/const/PlayerFlag.h"
+#include "dbat/const/MobFlag.h"
+#include "dbat/const/PrefFlag.h"
+#include "dbat/const/AffectFlag.h"
+#include "dbat/const/ItemType.h"
+#include "dbat/const/WearFlag.h"
+#include "dbat/const/WearSlot.h"
+#include "dbat/const/ItemFlag.h"
+#include "dbat/const/AdminFlag.h"
+#include "dbat/const/Direction.h"
+#include "dbat/const/Filename.h"
+#include "dbat/const/ChatHistory.h"
+
 
 /* local variables */
 static int copyover_timer = 0; /* for timed copyovers */
@@ -428,7 +466,7 @@ ACMD(do_newsedit)
     ch->desc->newsbuf = strdup(argument);
     TOP_OF_NEWS = lookup;
     LASTNEWS = lookup;
-    string_write(ch->desc, fields[0].buffer, 2000, 0, backstr);
+    //string_write(ch->desc, fields[0].buffer, 2000, 0, backstr);
     STATE(ch->desc) = CON_NEWSEDIT;
 }
 
@@ -771,7 +809,7 @@ ACMD(do_finddoor)
             return;
         }
         auto &o = obj_proto.at(vnum);
-        sdesc = o.short_description;
+        sdesc = o->short_description;
     }
     else
     {
@@ -1092,12 +1130,6 @@ room_rnum find_target_room(Character *ch, char *rawroomstr)
 
     rm = get_room(location);
 
-    if ((!can_edit_zone(ch, rm->zone->number) && GET_ADMLEVEL(ch) < ADMLVL_GOD) && rm->zone->zone_flags.get(ZONE_QUEST))
-    {
-        ch->sendText("This target is in a quest zone.\r\n");
-        return (NOWHERE);
-    }
-
     if ((GET_ADMLEVEL(ch) < ADMLVL_VICE) && rm->zone->zone_flags.get(ZONE_NOIMMORT))
     {
         ch->sendText("This target is in a zone closed to all.\r\n");
@@ -1410,7 +1442,7 @@ static void do_stat_room(Character *ch, Room *rm)
         ch->sendText("Extra descs:");
         for (const auto &ex : exd)
         {
-            ch->send_to(" [@c%s@n]", ex.keyword.c_str());
+            ch->send_to(" [@c%s@n]", ex.first);
         }
         ch->sendText("\r\n");
     }
@@ -1533,22 +1565,19 @@ static void do_stat_object(Character *ch, Object *j)
         ch->sendText("Extra descs:");
         for (const auto &ex : j->getExtraDescription())
         {
-            ch->send_to(" [@g%s@n]", ex.keyword.c_str());
+            ch->send_to(" [@g%s@n]", ex.first);
         }
         ch->sendText("\r\n");
     }
 
-    sprintf(buf, "%s", GET_OBJ_WEAR(j).getFlagNames().c_str());
-    ch->send_to("Can be worn on: %s\r\n", buf);
+    ch->send_to("Can be worn on: %s\r\n", GET_OBJ_WEAR(j).getFlagNames());
 
-    sprintf(buf, "%s", GET_OBJ_PERM(j).getFlagNames().c_str());
-    ch->send_to("Set char bits : %s\r\n", buf);
+    ch->send_to("Set char bits : %s\r\n", GET_OBJ_PERM(j).getFlagNames());
 
-    sprintf(buf, "%s", GET_OBJ_EXTRA(j).getFlagNames().c_str());
-    ch->send_to("Extra flags   : %s\r\n", buf);
+    ch->send_to("Extra flags   : %s\r\n", GET_OBJ_EXTRA(j).getFlagNames());
 
-    auto wString = fmt::format("{}", GET_OBJ_WEIGHT(j));
-    ch->send_to("Weight: %s, Value: %d, Cost/day: %d, Timer: %d, Min Level: %d\r\n", wString.c_str(), GET_OBJ_COST(j), GET_OBJ_RENT(j), GET_OBJ_TIMER(j), GET_OBJ_LEVEL(j));
+    ch->send_to("Weight: %f, Value: %d, Cost/day: %d, Timer: %d, Min Level: %d\r\n", 
+        GET_OBJ_WEIGHT(j), GET_OBJ_COST(j), GET_OBJ_RENT(j), GET_OBJ_TIMER(j), GET_OBJ_LEVEL(j));
 
     /*
      * NOTE: In order to make it this far, we must already be able to see the
@@ -1739,7 +1768,7 @@ static void do_stat_character(Character *ch, Character *k)
 
         if (auto find = players.find(k->id); find != players.end())
         {
-            ch->send_to("@YOwned by User@D: [@C%s@D]@n\r\n", find->second.account->name.c_str());
+            ch->send_to("@YOwned by User@D: [@C%s@D]@n\r\n", find->second->account->name.c_str());
         }
         if (!IS_NPC(k))
         {
@@ -1748,18 +1777,6 @@ static void do_stat_character(Character *ch, Character *k)
 
         ch->send_to("Hometown: [%d], Align: [%4d], Ethic: [%4d]", GET_HOME(k), GET_ALIGNMENT(k), GET_ETHIC_ALIGNMENT(k));
 
-        /*. Display OLC zone for immorts .*/
-        if (GET_ADMLEVEL(k) >= ADMLVL_BUILDER)
-        {
-            if (GET_OLC_ZONE(k) == AEDIT_PERMISSION)
-                ch->sendText(", OLC[@cActions@n]");
-            else if (GET_OLC_ZONE(k) == HEDIT_PERMISSION)
-                ch->sendText(", OLC[@cHedit@n]");
-            else if (GET_OLC_ZONE(k) == NOWHERE)
-                ch->sendText(", OLC[@cOFF@n]");
-            else
-                ch->send_to(", OLC: [@c%d@n]", GET_OLC_ZONE(k));
-        }
         ch->sendText("\r\n");
     }
     ch->send_to("Str: [@c%d@n]  Int: [@c%d@n]  Wis: [@c%d@n]  "
@@ -1803,7 +1820,7 @@ static void do_stat_character(Character *ch, Character *k)
 
     if (IS_MOB(k))
     {
-        ch->send_to("Mob Spec-Proc: %s, NPC Bare Hand Dam: %dd%d\r\n", (mob_index.at(GET_MOB_RNUM(k)).func ? "Exists" : "None"), k->mob_specials.damnodice, k->mob_specials.damsizedice);
+        ch->send_to("Mob Spec-Proc: %s, NPC Bare Hand Dam: %dd%d\r\n", (GET_MOB_SPEC(k) ? "Exists" : "None"), k->mob_specials.damnodice, k->mob_specials.damsizedice);
         ch->send_to("Average damage per round %.1f (%.1f [BHD] + %d [STR MOD] + %d [DMG MOD])\r\n", (((k->mob_specials.damsizedice) + 1) / 2.0) * (k->mob_specials.damnodice) + ability_mod_value(GET_STR(k)) + GET_DAMAGE_MOD(k), (((k->mob_specials.damsizedice) + 1) / 2.0) * (k->mob_specials.damnodice), ability_mod_value(GET_STR(k)), GET_DAMAGE_MOD(k));
     }
 
@@ -3491,17 +3508,17 @@ ACMD(do_zreset)
     {
         i = atoi(arg);
     }
-    if (!zone_table.count(i) || !(can_edit_zone(ch, i) || GET_ADMLEVEL(ch) > ADMLVL_IMMORT))
+    if (!zone_table.count(i) || !(GET_ADMLEVEL(ch) > ADMLVL_IMMORT))
     {
         ch->send_to("You do not have permission to reset this zone. Try %d.\r\n", GET_OLC_ZONE(ch));
         return;
     }
-    auto &z = zone_table.at(i);
-    reset_zone(z.number);
-    ch->send_to("Reset zone #%d: %s.\r\n", z.number, z.name.c_str());
+    auto z = zone_table.at(i);
+    reset_zone(z->number);
+    ch->send_to("Reset zone #%d: %s.\r\n", z->number, z->name.c_str());
     mudlog(NRM, std::max(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), true, "(GC) %s reset zone %d (%s)", GET_NAME(ch),
-           z.number, z.name.c_str());
-    log_imm_action("RESET: %s has reset zone #%d: %s.", GET_NAME(ch), z.number, z.name.c_str());
+           z->number, z->name.c_str());
+    log_imm_action("RESET: %s has reset zone #%d: %s.", GET_NAME(ch), z->number, z->name.c_str());
 }
 
 /*
@@ -3623,17 +3640,17 @@ ACMD(do_wizutil)
 static size_t print_zone_to_buf(char *bufptr, size_t left, zone_rnum zone, int listall)
 {
     size_t tmp;
-    auto &z = zone_table.at(zone);
+    auto z = zone_table.at(zone);
     if (listall)
     {
 
         tmp = snprintf(bufptr, left,
                        "%3d %-30.30s By: %-10.10s Age: %3f; Reset: %3d (%1d)\r\n",
-                       z.number, z.name.c_str(), z.builders.c_str(),
-                       z.age, z.lifespan,
-                       z.reset_mode);
+                       z->number, z->name.c_str(), z->builders.c_str(),
+                       z->age, z->lifespan,
+                       z->reset_mode);
 
-        auto j = z.rooms.live_count();
+        auto j = z->rooms.live_count();
 
         tmp += snprintf(bufptr + tmp, left - tmp,
                         "       Zone stats:\r\n"
@@ -3645,9 +3662,9 @@ static size_t print_zone_to_buf(char *bufptr, size_t left, zone_rnum zone, int l
     }
 
     return snprintf(bufptr, left,
-                    "%3d %-*s By: %-10.10s\r\n", z.number,
-                    count_color_chars(z.name.c_str()) + 30, z.name.c_str(),
-                    z.builders.c_str());
+                    "%3d %-*s By: %-10.10s\r\n", z->number,
+                    count_color_chars(z->name.c_str()) + 30, z->name.c_str(),
+                    z->builders.c_str());
 }
 
 ACMD(do_show)
@@ -4211,7 +4228,6 @@ static int perform_set(Character *ch, Character *vict, int mode,
         log_imm_action("SET: %s has set pl for %s.", GET_NAME(ch), GET_NAME(vict));
         break;
     case 8:
-        affect_total(vict);
         mudlog(NRM, std::max(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set ki for %s.", GET_NAME(ch),
                GET_NAME(vict));
         log_imm_action("SET: %s has set ki for %s.", GET_NAME(ch), GET_NAME(vict));
@@ -4222,11 +4238,10 @@ static int perform_set(Character *ch, Character *vict, int mode,
         log_imm_action("SET: %s has set st for %s.", GET_NAME(ch), GET_NAME(vict));
         break;
     case 10:
-        vict->setBaseStat("good_evil", RANGE(-1000, 1000));
+        vict->setBaseStat("good_evil", std::clamp<int>(value, -1000, 1000));
         mudlog(NRM, std::max(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set align for %s.", GET_NAME(ch),
                GET_NAME(vict));
         log_imm_action("SET: %s has set align for %s.", GET_NAME(ch), GET_NAME(vict));
-        affect_total(vict);
         break;
     case 11:
         RANGE(0, 100);
@@ -4234,22 +4249,16 @@ static int perform_set(Character *ch, Character *vict, int mode,
         mudlog(NRM, std::max(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set str for %s.", GET_NAME(ch),
                GET_NAME(vict));
         log_imm_action("SET: %s has set str for %s.", GET_NAME(ch), GET_NAME(vict));
-        affect_total(vict);
         break;
     case 12:
         ch->sendText("Setting str_add does nothing now.\r\n");
-        /* vict->real_abils.str_add = RANGE(0, 100);
-if (value > 0)
-  vict->real_abils.str = 18;
-affect_total(vict);
-   break; */
+        break;
     case 13:
         RANGE(0, 100);
         vict->setBaseStat("intelligence", value);
         mudlog(NRM, std::max(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set intel for %s.", GET_NAME(ch),
                GET_NAME(vict));
         log_imm_action("SET: %s has set intel for %s.", GET_NAME(ch), GET_NAME(vict));
-        affect_total(vict);
         break;
     case 14:
         RANGE(0, 100);
@@ -4257,7 +4266,6 @@ affect_total(vict);
         mudlog(NRM, std::max(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set wis for %s.", GET_NAME(ch),
                GET_NAME(vict));
         log_imm_action("SET: %s has set wis for %s.", GET_NAME(ch), GET_NAME(vict));
-        affect_total(vict);
         break;
     case 15:
         RANGE(0, 100);
@@ -4265,7 +4273,6 @@ affect_total(vict);
         mudlog(NRM, std::max(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set dex for %s.", GET_NAME(ch),
                GET_NAME(vict));
         log_imm_action("SET: %s has set dex for %s.", GET_NAME(ch), GET_NAME(vict));
-        affect_total(vict);
         break;
     case 16:
         RANGE(0, 100);
@@ -4273,7 +4280,6 @@ affect_total(vict);
         mudlog(NRM, std::max(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set con for %s.", GET_NAME(ch),
                GET_NAME(vict));
         log_imm_action("SET: %s has set con for %s.", GET_NAME(ch), GET_NAME(vict));
-        affect_total(vict);
         break;
     case 17:
         RANGE(0, 100);
@@ -4281,14 +4287,12 @@ affect_total(vict);
         mudlog(NRM, std::max(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set speed for %s.", GET_NAME(ch),
                GET_NAME(vict));
         log_imm_action("SET: %s has set speed for %s.", GET_NAME(ch), GET_NAME(vict));
-        affect_total(vict);
         break;
     case 18:
         vict->setBaseStat("armor_innate", RANGE(-100, 500));
         mudlog(NRM, std::max(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set armor index for %s.", GET_NAME(ch),
                GET_NAME(vict));
         log_imm_action("SET: %s has set armor index for %s.", GET_NAME(ch), GET_NAME(vict));
-        affect_total(vict);
         break;
     case 19:
         vict->setBaseStat("money_carried", RANGE(0, 100000000));
@@ -4313,7 +4317,6 @@ affect_total(vict);
         break;
     case 23:
         vict->setBaseStat("damage_mod", RANGE(-20, 20));
-        affect_total(vict);
         break;
     case 24:
         if (GET_ADMLEVEL(ch) < ADMLVL_IMPL && ch != vict)
@@ -4491,20 +4494,14 @@ affect_total(vict);
 
     case 49: /* Blame/Thank Rick Glover. :) */
         vict->setBaseStat("height", value);
-        affect_total(vict);
         break;
 
     case 50:
         vict->setBaseStat("weight", value);
-        affect_total(vict);
         break;
 
     case 51:
-        if (is_abbrev(val_arg, "socials") || is_abbrev(val_arg, "actions"))
-            vict->setBaseStat<int>("olc_zone", AEDIT_PERMISSION);
-        else if (is_abbrev(val_arg, "hedit"))
-            vict->setBaseStat<int>("olc_zone", HEDIT_PERMISSION);
-        else if (is_abbrev(val_arg, "off"))
+        if (is_abbrev(val_arg, "off"))
             vict->setBaseStat<int>("olc_zone", NOWHERE);
         else if (!is_number(val_arg))
         {
@@ -4532,7 +4529,7 @@ affect_total(vict);
         auto res = chooseEnum<Race>(std::string(val_arg), "Race", check);
         if (!res)
         {
-            ch->sendText(res.err);
+            ch->sendText(res.error());
             return 0;
         }
         vict->race = res.value();
@@ -4548,15 +4545,6 @@ affect_total(vict);
 
     case 55:
         vict->setBaseStat("law_chaos", RANGE(-1000, 1000));
-        affect_total(vict);
-        break;
-
-    case 56:
-        affect_total(vict);
-        break;
-
-    case 57:
-        affect_total(vict);
         break;
 
     case 58:
@@ -4736,13 +4724,7 @@ ACMD(do_set)
 
 ACMD(do_saveall)
 {
-    if (GET_ADMLEVEL(ch) < ADMLVL_BUILDER)
-        ch->sendText("You are not holy enough to use this privelege.\r\n");
-    else
-    {
-        save_all();
-        ch->sendText("World and house files saved.\r\n");
-    }
+    ch->sendText("World and house files saved.\r\n");
 }
 
 #define PLIST_FORMAT \
@@ -4877,14 +4859,14 @@ ACMD(do_zpurge)
 
     auto zone = !*arg ? ch->location.getZone()->number : atoi(arg);
 
-    if (!zone_table.count(zone) || !can_edit_zone(ch, zone))
+    if (!zone_table.count(zone))
     {
         ch->send_to("You cannot purge that zone. Try %d.\r\n", GET_OLC_ZONE(ch));
         return;
     }
 
     auto &z = zone_table.at(zone);
-    z.rooms.for_each([](Room* r) {
+    z->rooms.for_each([](Room* r) {
         auto people = r->getPeople().snapshot_weak();
         for (auto mob : filter_raw(people))
         {
@@ -4990,7 +4972,7 @@ ACMD(do_zcheck)
         return;
     }
     else
-        ch->send_to("Checking zone %d!\r\n", z.number);
+        ch->send_to("Checking zone %d!\r\n", z->number);
 
     /*
     ch->sendText("Checking Mobs for limits...\r\n");
@@ -5201,7 +5183,7 @@ ACMD(do_zcheck)
     /************** Check rooms *****************/
     ch->sendText("\r\nChecking Rooms for limits...\r\n");
 
-    z.rooms.for_each([&](auto r) {
+    z->rooms.for_each([&](auto r) {
         for (auto &[d, e] : r->getDirections())
         {
             /*check for exit, but ignore off limits if you're in an offlimit zone*/
@@ -5250,7 +5232,7 @@ ACMD(do_zcheck)
         }
     });
 
-    z.rooms.for_each([&](auto i) {
+    z->rooms.for_each([&](auto i) {
         m++;
         if (i->exits.empty())
             l++;
@@ -5272,11 +5254,11 @@ static void mob_checkload(Character *ch, mob_vnum mvnum)
         return;
     }
 
-    ch->send_to("Checking load info for the mob [%d] %s...\r\n", mvnum, find->second.short_description);
+    ch->send_to("Checking load info for the mob [%d] %s...\r\n", mvnum, find->second->short_description);
 
     for (auto &[zvn, z] : zone_table)
     {
-        z.rooms.for_each([&](auto r) {
+        z->rooms.for_each([&](auto r) {
             for (auto c : r->resetCommands)
             {
                 if (c.type != ResetCommandType::MOB)
@@ -5317,7 +5299,7 @@ static void obj_checkload(Character *ch, obj_vnum ovnum)
         return;
     }
 
-    ch->send_to("Checking load info for the obj [%d] %s...\r\n", ovnum, obj->second.short_description);
+    ch->send_to("Checking load info for the obj [%d] %s...\r\n", ovnum, obj->second->short_description);
 
     for (auto &[vn, r] : Room::registry)
     {
@@ -5360,7 +5342,7 @@ static void obj_checkload(Character *ch, obj_vnum ovnum)
                 {
                     if (lastmob != mob_proto.end())
                     {
-                        ch->send_to("  [%5d] %s (Given to %s [%d][%d Max])\r\n", lastroom_v, lastroom->getName(), lastmob->second.short_description, lastmob->first, c.max);
+                        ch->send_to("  [%5d] %s (Given to %s [%d][%d Max])\r\n", lastroom_v, lastroom->getName(), lastmob->second->short_description, lastmob->first, c.max);
                     }
                     else if (lastmob == mob_proto.end())
                     {
@@ -5374,7 +5356,7 @@ static void obj_checkload(Character *ch, obj_vnum ovnum)
                 {
                     if (lastmob != mob_proto.end())
                     {
-                        ch->send_to("  [%5d] %s (Equipped to %s [%d] at %s [%d Max])\r\n", lastroom_v, lastroom->getName(), lastmob->second.short_description, lastmob->first, equipment_types[c.ex], c.max);
+                        ch->send_to("  [%5d] %s (Equipped to %s [%d] at %s [%d Max])\r\n", lastroom_v, lastroom->getName(), lastmob->second->short_description, lastmob->first, equipment_types[c.ex], c.max);
                     }
                     else
                     {
@@ -5423,7 +5405,7 @@ static void trg_checkload(Character *ch, trig_vnum tvnum)
         return;
     }
 
-    ch->send_to("Checking load info for the %s trigger [%d] '%s':\r\n", trg->second.attach_type == MOB_TRIGGER ? "mobile" : (trg->second.attach_type == OBJ_TRIGGER ? "object" : "room"), tvnum, trg->second.name);
+    ch->send_to("Checking load info for the %s trigger [%d] '%s':\r\n", trg->second->attach_type == MOB_TRIGGER ? "mobile" : (trg->second->attach_type == OBJ_TRIGGER ? "object" : "room"), tvnum, trg->second->name);
 
     for (auto &[zvn, r] : Room::registry)
     {
@@ -5459,7 +5441,7 @@ static void trg_checkload(Character *ch, trig_vnum tvnum)
                     lastmob = mob_proto.find(lastmob_v);
                     if (lastmob != mob_proto.end())
                     {
-                        ch->send_to("mob [%5d] %-60s (zedit room %5d)\r\n", lastmob->first, lastmob->second.short_description, lastroom_v);
+                        ch->send_to("mob [%5d] %-60s (zedit room %5d)\r\n", lastmob->first, lastmob->second->short_description, lastroom_v);
                     }
                     else
                     {
@@ -5473,7 +5455,7 @@ static void trg_checkload(Character *ch, trig_vnum tvnum)
                     lastobj = obj_proto.find(lastobj_v);
                     if (lastobj != obj_proto.end())
                     {
-                        ch->send_to("obj [%5d] %-60s  (zedit room %d)\r\n", lastobj_v, lastobj->second.short_description, lastroom_v);
+                        ch->send_to("obj [%5d] %-60s  (zedit room %d)\r\n", lastobj_v, lastobj->second->short_description, lastroom_v);
                     }
                     else
                     {
@@ -5493,19 +5475,19 @@ static void trg_checkload(Character *ch, trig_vnum tvnum)
 
     for (auto &[vn, m] : mob_proto)
     {
-        auto find = std::find(m.proto_script.begin(), m.proto_script.end(), tvnum);
-        if (find == m.proto_script.end())
+        auto find = std::find(m->proto_script.begin(), m->proto_script.end(), tvnum);
+        if (find == m->proto_script.end())
             continue;
-        ch->send_to("mob [%5d] %s\r\n", vn, m.short_description);
+        ch->send_to("mob [%5d] %s\r\n", vn, m->short_description);
         found = 1;
     }
 
     for (auto &[vn, o] : obj_proto)
     {
-        auto find = std::find(o.proto_script.begin(), o.proto_script.end(), tvnum);
-        if (find == o.proto_script.end())
+        auto find = std::find(o->proto_script.begin(), o->proto_script.end(), tvnum);
+        if (find == o->proto_script.end())
             continue;
-        ch->send_to("obj [%5d] %s\r\n", vn, o.short_description);
+        ch->send_to("obj [%5d] %s\r\n", vn, o->short_description);
         found = 1;
     }
 
@@ -5726,7 +5708,7 @@ ACMD(do_mush_zone)
 
     if (!oper)
     {
-        ch->sendFmt(oper.err);
+        ch->sendFmt(oper.error());
         return;
     }
 
@@ -5738,7 +5720,7 @@ ACMD(do_mush_zone)
         auto res = validateZoneName(cdata.lsargs);
         if (!res)
         {
-            ch->sendText(res.err);
+            ch->sendText(res.error());
             return;
         }
         Zone *parent = nullptr;
@@ -5747,24 +5729,25 @@ ACMD(do_mush_zone)
             auto parentRes = getZone(cdata.rsargs, ch);
             if (!parentRes)
             {
-                ch->sendText(parentRes.err);
+                ch->sendText(parentRes.error());
                 return;
             }
             parent = parentRes.value();
         }
         auto newid = getNextID(lastZoneID, zone_table);
-        auto &z = zone_table.emplace(newid, Zone{}).first->second;
-        z.name = res.value();
-        z.number = newid;
+        auto z = std::make_shared<Zone>();
+        zone_table.emplace(newid, z);
+        z->name = res.value();
+        z->number = newid;
         if (parent)
         {
-            z.parent = parent->number;
+            z->parent = parent->number;
             parent->children.insert(newid);
-            ch->sendFmt("{} created. Its parent is {}'\r\n", z, *parent);
+            ch->sendFmt("{} created. Its parent is {}'\r\n", *z, *parent);
         }
         else
         {
-            ch->sendFmt("{} created. It has no parent.\r\n", z);
+            ch->sendFmt("{} created. It has no parent.\r\n", *z);
         }
         return;
     }
@@ -5773,14 +5756,14 @@ ACMD(do_mush_zone)
         auto zRes = getZone(cdata.lsargs, ch);
         if (!zRes)
         {
-            ch->sendText(zRes.err);
+            ch->sendText(zRes.error());
             return;
         }
         auto z = zRes.value();
         auto zCan = z->canBeDeletedBy(ch);
         if (!zCan)
         {
-            ch->sendText(zCan.err);
+            ch->sendText(zCan.error());
             return;
         }
         // TODO: finish sanitizing zone deletion.
@@ -5793,7 +5776,7 @@ ACMD(do_mush_zone)
         auto res = getZone(cdata.lsargs, ch);
         if (!res)
         {
-            ch->sendText(res.err);
+            ch->sendText(res.error());
             return;
         }
         auto z = res.value();
@@ -5801,7 +5784,7 @@ ACMD(do_mush_zone)
         auto nameRes = validateZoneName(cdata.rsargs);
         if (!nameRes)
         {
-            ch->sendText(nameRes.err);
+            ch->sendText(nameRes.error());
             return;
         }
         z->name = nameRes.value();
@@ -5813,7 +5796,7 @@ ACMD(do_mush_zone)
         auto res = getZone(cdata.lsargs, ch);
         if (!res)
         {
-            ch->sendText(res.err);
+            ch->sendText(res.error());
             return;
         }
         auto z = res.value();
@@ -5826,7 +5809,7 @@ ACMD(do_mush_zone)
         auto res = getZone(cdata.lsargs, ch);
         if (!res)
         {
-            ch->sendText(res.err);
+            ch->sendText(res.error());
             return;
         }
         auto z = res.value();
@@ -5835,7 +5818,7 @@ ACMD(do_mush_zone)
             ch->sendFmt("Current flags: {}\r\n", z->zone_flags.getFlagNames());
             return;
         }
-        auto results = z->zone_flags.applyChanges(cdata.rsargs);
+        auto results = z->zone_flags.applyChanges(std::string(cdata.rsargs));
         ch->sendText(results.printResults());
         return;
     }
@@ -5847,7 +5830,7 @@ ACMD(do_mush_zone)
         auto res = getZone(cdata.lsargs, ch);
         if (!res)
         {
-            ch->sendText(res.err);
+            ch->sendText(res.error());
             return;
         }
         auto z = res.value();
@@ -5859,7 +5842,7 @@ ACMD(do_mush_zone)
         auto res = getZone(cdata.lsargs, ch);
         if (!res)
         {
-            ch->sendText(res.err);
+            ch->sendText(res.error());
             return;
         }
         auto z = res.value();
@@ -5884,7 +5867,7 @@ ACMD(do_mush_zone)
         auto parentRes = getZone(cdata.rsargs, ch);
         if (!parentRes)
         {
-            ch->sendText(parentRes.err);
+            ch->sendText(parentRes.error());
             return;
         }
         auto parent = parentRes.value();
@@ -5903,7 +5886,7 @@ ACMD(do_mush_zone)
         auto res = getZone(cdata.rsargs, ch);
         if (!res)
         {
-            ch->sendText(res.err);
+            ch->sendText(res.error());
             return;
         }
         auto z = res.value();
@@ -5911,7 +5894,7 @@ ACMD(do_mush_zone)
         auto ranges = parseRanges<room_vnum>(cdata.lsargs);
         if (!ranges)
         {
-            ch->sendText(ranges.err);
+            ch->sendText(ranges.error());
             return;
         }
         for (auto i : ranges.value())
@@ -5942,7 +5925,7 @@ ACMD(do_mush_zone)
         auto res = getZone(cdata.lsargs, ch);
         if (!res)
         {
-            ch->sendText(res.err);
+            ch->sendText(res.error());
             return;
         }
         auto z = res.value();
@@ -5967,7 +5950,7 @@ ACMD(do_mush_zone)
         auto locRes = getLocation(cdata.rsargs, ch);
         if (!locRes)
         {
-            ch->sendText(locRes.err);
+            ch->sendText(locRes.error());
             return;
         }
         auto loc = locRes.value();
@@ -5981,7 +5964,7 @@ ACMD(do_mush_zone)
         auto res = getZone(cdata.lsargs, ch);
         if (!res)
         {
-            ch->sendText(res.err);
+            ch->sendText(res.error());
             return;
         }
         auto z = res.value();
@@ -6022,7 +6005,7 @@ ACMD(do_mush_zone)
         auto locRes = getLocation(split[1], ch);
         if (!locRes)
         {
-            ch->sendText(locRes.err);
+            ch->sendText(locRes.error());
             return;
         }
         auto loc = locRes.value();
@@ -6034,7 +6017,7 @@ ACMD(do_mush_zone)
         auto res = getZone(cdata.lsargs, ch);
         if (!res)
         {
-            ch->sendText(res.err);
+            ch->sendText(res.error());
             return;
         }
         auto z = res.value();
@@ -6075,7 +6058,7 @@ ACMD(do_mush_zone)
         auto locRes = getLocation(split[1], ch);
         if (!locRes)
         {
-            ch->sendText(locRes.err);
+            ch->sendText(locRes.error());
             return;
         }
         auto loc = locRes.value();
@@ -6176,7 +6159,7 @@ ACMD(do_mush_exit)
 
     if (!oper)
     {
-        ch->sendFmt(oper.err);
+        ch->sendFmt(oper.error());
         return;
     }
 
@@ -6201,7 +6184,7 @@ ACMD(do_mush_exit)
         auto dirRes = chooseEnum<Direction>(cdata.lsargs, "Direction");
         if (!dirRes)
         {
-            ch->sendText(dirRes.err);
+            ch->sendText(dirRes.error());
             return;
         }
         auto dir = dirRes.value();
@@ -6226,7 +6209,7 @@ ACMD(do_mush_exit)
         auto dirRes = chooseEnum<Direction>(cdata.lsargs, "Direction");
         if (!dirRes)
         {
-            ch->sendText(dirRes.err);
+            ch->sendText(dirRes.error());
             return;
         }
         auto dir = dirRes.value();
@@ -6236,7 +6219,7 @@ ACMD(do_mush_exit)
         auto locRes = getLocation(cdata.rsargs, ch);
         if (!locRes)
         {
-            ch->sendText(locRes.err);
+            ch->sendText(locRes.error());
             return;
         }
         if (!ex)
@@ -6258,7 +6241,7 @@ ACMD(do_mush_exit)
         auto dirRes = chooseEnum<Direction>(cdata.lsargs, "Direction");
         if (!dirRes)
         {
-            ch->sendText(dirRes.err);
+            ch->sendText(dirRes.error());
             return;
         }
         auto dir = dirRes.value();
@@ -6278,7 +6261,7 @@ ACMD(do_mush_exit)
         auto numRes = parseNumber<obj_vnum>(cdata.rsargs, "Object ID");
         if (!numRes)
         {
-            ch->sendText(numRes.err);
+            ch->sendText(numRes.error());
             return;
         }
         auto ov = numRes.value();
@@ -6289,7 +6272,7 @@ ACMD(do_mush_exit)
             return;
         }
         ex->key = numRes.value();
-        ch->sendFmt("{} Key set to: {}\r\n", *ex, found->second);
+        ch->sendFmt("{} Key set to: {}\r\n", *ex, *found->second);
         return;
     }
     case ExitOp::Flags:
@@ -6297,7 +6280,7 @@ ACMD(do_mush_exit)
         auto dirRes = chooseEnum<Direction>(cdata.lsargs, "Direction");
         if (!dirRes)
         {
-            ch->sendText(dirRes.err);
+            ch->sendText(dirRes.error());
             return;
         }
         auto dir = dirRes.value();
@@ -6314,7 +6297,7 @@ ACMD(do_mush_exit)
             ch->sendFmt("Current flags: {}\r\n", ex->exit_flags.getFlagNames());
             return;
         }
-        auto results = ex->exit_flags.applyChanges(cdata.rsargs);
+        auto results = ex->exit_flags.applyChanges(std::string(cdata.rsargs));
         ch->sendText(results.printResults());
         return;
     }
@@ -6323,7 +6306,7 @@ ACMD(do_mush_exit)
         auto dirRes = chooseEnum<Direction>(cdata.lsargs, "Direction");
         if (!dirRes)
         {
-            ch->sendText(dirRes.err);
+            ch->sendText(dirRes.error());
             return;
         }
         auto dir = dirRes.value();
@@ -6338,7 +6321,7 @@ ACMD(do_mush_exit)
         auto resNum = parseNumber(cdata.rsargs, "DC Lock");
         if (!resNum)
         {
-            ch->sendText(resNum.err);
+            ch->sendText(resNum.error());
             return;
         }
         ex->dclock = resNum.value();
@@ -6350,7 +6333,7 @@ ACMD(do_mush_exit)
         auto dirRes = chooseEnum<Direction>(cdata.lsargs, "Direction");
         if (!dirRes)
         {
-            ch->sendText(dirRes.err);
+            ch->sendText(dirRes.error());
             return;
         }
         auto dir = dirRes.value();
@@ -6365,7 +6348,7 @@ ACMD(do_mush_exit)
         auto resNum = parseNumber(cdata.rsargs, "DC Hide");
         if (!resNum)
         {
-            ch->sendText(resNum.err);
+            ch->sendText(resNum.error());
             return;
         }
         ex->dchide = resNum.value();
@@ -6414,7 +6397,7 @@ ACMD(do_mush_choices)
 
     if (!oper)
     {
-        ch->sendFmt(oper.err);
+        ch->sendFmt(oper.error());
         return;
     }
 
@@ -6423,70 +6406,70 @@ ACMD(do_mush_choices)
     switch (choice)
     {
     case ChoiceOp::Sensei:
-        ch->sendFmt("Sensei Choices: {}", fmt::join(getEnumNames<Sensei>(), ", "));
+        ch->sendFmt("Sensei Choices: {}", fmt::join(getEnumNameList<Sensei>(), ", "));
         return;
     case ChoiceOp::Race:
-        ch->sendFmt("Race Choices: {}", fmt::join(getEnumNames<Race>(), ", "));
+        ch->sendFmt("Race Choices: {}", fmt::join(getEnumNameList<Race>(), ", "));
         return;
     case ChoiceOp::Form:
-        ch->sendFmt("Form Choices: {}", fmt::join(getEnumNames<Form>(), ", "));
+        ch->sendFmt("Form Choices: {}", fmt::join(getEnumNameList<Form>(), ", "));
         return;
     case ChoiceOp::WhereFlag:
-        ch->sendFmt("Where Flag Choices: {}", fmt::join(getEnumNames<WhereFlag>(), ", "));
+        ch->sendFmt("Where Flag Choices: {}", fmt::join(getEnumNameList<WhereFlag>(), ", "));
         return;
     case ChoiceOp::RoomFlag:
-        ch->sendFmt("Room Flag Choices: {}", fmt::join(getEnumNames<RoomFlag>(), ", "));
+        ch->sendFmt("Room Flag Choices: {}", fmt::join(getEnumNameList<RoomFlag>(), ", "));
         return;
     case ChoiceOp::ZoneFlag:
-        ch->sendFmt("Zone Flag Choices: {}", fmt::join(getEnumNames<ZoneFlag>(), ", "));
+        ch->sendFmt("Zone Flag Choices: {}", fmt::join(getEnumNameList<ZoneFlag>(), ", "));
         return;
     case ChoiceOp::ExitFlag:
-        ch->sendFmt("Exit Flag Choices: {}", fmt::join(getEnumNames<ExitFlag>(), ", "));
+        ch->sendFmt("Exit Flag Choices: {}", fmt::join(getEnumNameList<ExitFlag>(), ", "));
         return;
     case ChoiceOp::SectorType:
-        ch->sendFmt("Sector Type Choices: {}", fmt::join(getEnumNames<SectorType>(), ", "));
+        ch->sendFmt("Sector Type Choices: {}", fmt::join(getEnumNameList<SectorType>(), ", "));
         return;
     case ChoiceOp::Size:
-        ch->sendFmt("Size Choices: {}", fmt::join(getEnumNames<Size>(), ", "));
+        ch->sendFmt("Size Choices: {}", fmt::join(getEnumNameList<Size>(), ", "));
         return;
     case ChoiceOp::Sex:
-        ch->sendFmt("Sex Choices: {}", fmt::join(getEnumNames<Sex>(), ", "));
+        ch->sendFmt("Sex Choices: {}", fmt::join(getEnumNameList<Sex>(), ", "));
         return;
     case ChoiceOp::Appearance:
-        ch->sendFmt("Appearance Choices: {}", fmt::join(getEnumNames<Appearance>(), ", "));
+        ch->sendFmt("Appearance Choices: {}", fmt::join(getEnumNameList<Appearance>(), ", "));
         return;
     case ChoiceOp::CharacterFlag:
-        ch->sendFmt("Character Flag Choices: {}", fmt::join(getEnumNames<CharacterFlag>(), ", "));
+        ch->sendFmt("Character Flag Choices: {}", fmt::join(getEnumNameList<CharacterFlag>(), ", "));
         return;
     case ChoiceOp::PlayerFlag:
-        ch->sendFmt("Player Flag Choices: {}", fmt::join(getEnumNames<PlayerFlag>(), ", "));
+        ch->sendFmt("Player Flag Choices: {}", fmt::join(getEnumNameList<PlayerFlag>(), ", "));
         return;
     case ChoiceOp::MobFlag:
-        ch->sendFmt("Mob Flag Choices: {}", fmt::join(getEnumNames<MobFlag>(), ", "));
+        ch->sendFmt("Mob Flag Choices: {}", fmt::join(getEnumNameList<MobFlag>(), ", "));
         return;
     case ChoiceOp::PrefFlag:
-        ch->sendFmt("Pref Flag Choices: {}", fmt::join(getEnumNames<PrefFlag>(), ", "));
+        ch->sendFmt("Pref Flag Choices: {}", fmt::join(getEnumNameList<PrefFlag>(), ", "));
         return;
     case ChoiceOp::AffectFlag:
-        ch->sendFmt("Affect Flag Choices: {}", fmt::join(getEnumNames<AffectFlag>(), ", "));
+        ch->sendFmt("Affect Flag Choices: {}", fmt::join(getEnumNameList<AffectFlag>(), ", "));
         return;
     case ChoiceOp::ItemType:
-        ch->sendFmt("Item Type Choices: {}", fmt::join(getEnumNames<ItemType>(), ", "));
+        ch->sendFmt("Item Type Choices: {}", fmt::join(getEnumNameList<ItemType>(), ", "));
         return;
     case ChoiceOp::WearFlag:
-        ch->sendFmt("Wear Flag Choices: {}", fmt::join(getEnumNames<WearFlag>(), ", "));
+        ch->sendFmt("Wear Flag Choices: {}", fmt::join(getEnumNameList<WearFlag>(), ", "));
         return;
     case ChoiceOp::WearSlot:
-        ch->sendFmt("Wear Slot Choices: {}", fmt::join(getEnumNames<WearSlot>(), ", "));
+        ch->sendFmt("Wear Slot Choices: {}", fmt::join(getEnumNameList<WearSlot>(), ", "));
         return;
     case ChoiceOp::ItemFlag:
-        ch->sendFmt("Item Flag Choices: {}", fmt::join(getEnumNames<ItemFlag>(), ", "));
+        ch->sendFmt("Item Flag Choices: {}", fmt::join(getEnumNameList<ItemFlag>(), ", "));
         return;
     case ChoiceOp::AdminFlag:
-        ch->sendFmt("Admin Flag Choices: {}", fmt::join(getEnumNames<AdminFlag>(), ", "));
+        ch->sendFmt("Admin Flag Choices: {}", fmt::join(getEnumNameList<AdminFlag>(), ", "));
         return;
     case ChoiceOp::Direction:
-        ch->sendFmt("Direction Choices: {}", fmt::join(getEnumNames<Direction>(), ", "));
+        ch->sendFmt("Direction Choices: {}", fmt::join(getEnumNameList<Direction>(), ", "));
         return;
     }
 }
@@ -6548,7 +6531,7 @@ ACMD(do_mush_location)
 
     if (!oper)
     {
-        ch->sendFmt(oper.err);
+        ch->sendFmt(oper.error());
         return;
     }
 
@@ -6561,7 +6544,7 @@ ACMD(do_mush_location)
         case LocationOp::Examine: {
             auto locRes = getLocation(cdata.lsargs.empty() ? "here" : cdata.lsargs, ch);
             if (!locRes) {
-                ch->sendText(locRes.err);
+                ch->sendText(locRes.error());
                 return;
             }
             auto loc = locRes.value();
@@ -6571,7 +6554,7 @@ ACMD(do_mush_location)
         case LocationOp::Name: {
             auto locRes = getLocation(cdata.lsargs, ch);
             if (!locRes) {
-                ch->sendText(locRes.err);
+                ch->sendText(locRes.error());
                 return;
             }
             auto loc = locRes.value();
@@ -6584,14 +6567,14 @@ ACMD(do_mush_location)
                 ch->sendFmt("{} Name cleared.\r\n", loc);
                 return;
             }
-            loc.setString("name", cdata.rsargs);
+            loc.setString("name", std::string(cdata.rsargs));
             ch->sendFmt("{} Name set to: {}\r\n", loc, loc.getName());
             return;
         }
         case LocationOp::Description: {
             auto locRes = getLocation(cdata.lsargs, ch);
             if (!locRes) {
-                ch->sendText(locRes.err);
+                ch->sendText(locRes.error());
                 return;
             }
             auto loc = locRes.value();
@@ -6604,14 +6587,14 @@ ACMD(do_mush_location)
                 ch->sendFmt("{} Look description cleared.\r\n", loc);
                 return;
             }
-            loc.setString("look_description", cdata.rsargs);
+            loc.setString("look_description", std::string(cdata.rsargs));
             ch->sendFmt("{} Look description set to: {}\r\n", loc, loc.getLookDescription());
             return;
         }
         case LocationOp::Sector: {
             auto locRes = getLocation(cdata.lsargs, ch);
             if (!locRes) {
-                ch->sendText(locRes.err);
+                ch->sendText(locRes.error());
                 return;
             }
             auto loc = locRes.value();
@@ -6621,7 +6604,7 @@ ACMD(do_mush_location)
             }
             auto sectorRes = chooseEnum<SectorType>(cdata.rsargs, "Sector Type");
             if (!sectorRes) {
-                ch->sendText(sectorRes.err);
+                ch->sendText(sectorRes.error());
                 return;
             }
             auto sec = sectorRes.value();
@@ -6632,7 +6615,7 @@ ACMD(do_mush_location)
         case LocationOp::Flags: {
             auto locRes = getLocation(cdata.lsargs, ch);
             if (!locRes) {
-                ch->sendText(locRes.err);
+                ch->sendText(locRes.error());
                 return;
             }
             auto loc = locRes.value();
@@ -6646,7 +6629,7 @@ ACMD(do_mush_location)
                 ch->sendFmt("{} Flags cleared.\r\n", loc);
                 return;
             }
-            auto results = cf.applyChanges(cdata.rsargs);
+            auto results = cf.applyChanges(std::string(cdata.rsargs));
             ch->sendText(results.printResults());
             return;
         }
@@ -6751,7 +6734,7 @@ ACMD(do_mush_reset) {
 
     if (!oper)
     {
-        ch->sendFmt(oper.err);
+        ch->sendFmt(oper.error());
         return;
     }
 
@@ -6770,7 +6753,7 @@ ACMD(do_mush_reset) {
         case ResOp::Examine: {
             auto locRes = getLocation(cdata.lsargs.empty() ? "here" : cdata.lsargs, ch);
             if (!locRes) {
-                ch->sendText(locRes.err);
+                ch->sendText(locRes.error());
                 return;
             }
             auto loc = locRes.value();
@@ -6789,7 +6772,7 @@ ACMD(do_mush_reset) {
         case ResOp::Add: {
             auto locRes = getLocation(cdata.lsargs.empty() ? "here" : cdata.lsargs, ch);
             if (!locRes) {
-                ch->sendText(locRes.err);
+                ch->sendText(locRes.error());
                 return;
             }
             auto loc = locRes.value();
@@ -6797,7 +6780,7 @@ ACMD(do_mush_reset) {
             // we already did the argument split earlier...
             auto cmdRes = parseResetCommand(split);
             if(!cmdRes) {
-                ch->sendText(cmdRes.err);
+                ch->sendText(cmdRes.error());
                 return;
             }
             rcm.emplace_back(cmdRes.value());
@@ -6812,7 +6795,7 @@ ACMD(do_mush_reset) {
             }
             auto locRes = getLocation(split[0], ch);
             if (!locRes) {
-                ch->sendText(locRes.err);
+                ch->sendText(locRes.error());
                 return;
             }
             auto loc = locRes.value();
@@ -6835,7 +6818,7 @@ ACMD(do_mush_reset) {
             }
             auto locRes = getLocation(split[0], ch);
             if (!locRes) {
-                ch->sendText(locRes.err);
+                ch->sendText(locRes.error());
                 return;
             }
             auto loc = locRes.value();
@@ -6847,7 +6830,7 @@ ACMD(do_mush_reset) {
             }
             auto cmdRes = parseResetCommand(cmdArgs);
             if(!cmdRes) {
-                ch->sendText(cmdRes.err);
+                ch->sendText(cmdRes.error());
                 return;
             }
             rcm.insert(rcm.begin() + index, cmdRes.value());
@@ -6858,7 +6841,7 @@ ACMD(do_mush_reset) {
         case ResOp::Execute: {
             auto locRes = getLocation(cdata.lsargs.empty() ? "here" : cdata.lsargs, ch);
             if (!locRes) {
-                ch->sendText(locRes.err);
+                ch->sendText(locRes.error());
                 return;
             }
             auto loc = locRes.value();
@@ -6872,4 +6855,14 @@ ACMD(do_mush_reset) {
             return;
         }
     }
+}
+
+ACMD(do_dig)
+{
+
+}
+
+ACMD(do_rcopy)
+{
+    
 }

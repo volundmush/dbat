@@ -9,11 +9,18 @@
  *  $Revision: 1.0.14 $                                                    *
  **************************************************************************/
 #pragma once
+#include <cstdarg>
+#include <variant>
+#include "Log.h"
+#include "Command.h"
 #include "DgScriptPrototype.h"
 #include "db.h"
-#include "genzon.h"
-#include "oasis.h"
-#include <variant>
+
+struct Object;
+struct Character;
+struct Room;
+struct DgScript;
+struct ObjectPrototype;
 
 #ifdef _MSC_VER
 #define __attribute__(a)
@@ -201,11 +208,11 @@ extern int remove_otrigger(Object *obj, Character *actor);
 extern int cmd_otrig(Object *obj, Character *actor, char *cmd,
                      char *argument, int type);
 
-extern int command_mtrigger(Character *actor, char *cmd, char *argument);
+extern int command_mtrigger(Character *actor, std::string_view cmd, std::string_view argument);
 
-extern int command_otrigger(Character *actor, char *cmd, char *argument);
+extern int command_otrigger(Character *actor, std::string_view cmd, std::string_view argument);
 
-extern int command_wtrigger(Character *actor, char *cmd, char *argument);
+extern int command_wtrigger(Character *actor, std::string_view cmd, std::string_view argument);
 
 extern int death_mtrigger(Character *ch, Character *actor);
 
@@ -297,7 +304,7 @@ extern void find_uid_name(char *uid, char *name, size_t nlen);
 
 extern void do_sstat(Character *ch, struct HasDgScripts *ud);
 
-extern void add_trigger(script_data *sc, const std::shared_ptr<DgScript> t, int loc);
+extern void add_trigger(HasDgScripts *sc, const std::shared_ptr<DgScript> t, int loc);
 
 extern void script_vlog(const char *format, va_list args);
 
@@ -311,7 +318,7 @@ Room *dg_room_of_obj(Object *obj);
 /* Thanks to Chris Gilbert for reminding me that there are other options. */
 extern trig_rnum real_trigger(trig_vnum vnum);
 
-extern void process_eval(HasDgScripts *go, script_data *sc, DgScript *trig,
+extern void process_eval(HasDgScripts *go, HasDgScripts *sc, DgScript *trig,
                          UnitType type, char *cmd);
 
 /* from dg_db_scripts.c */
@@ -331,10 +338,10 @@ extern char *skill_percent(Character *ch, char *skill);
 
 extern int char_has_item(char *item, Character *ch);
 
-extern void var_subst(HasDgScripts *go, script_data *sc, DgScript *trig,
+extern void var_subst(HasDgScripts *go, HasDgScripts *sc, DgScript *trig,
                       UnitType type, char *line, char *buf);
 
-extern void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig,
+extern void find_replacement(HasDgScripts *go, HasDgScripts *sc, DgScript *trig,
                              UnitType type, char *var, char *field, char *subfield, char *str, size_t slen);
 
 /* From dg_handler.c */
@@ -346,10 +353,10 @@ extern char *any_one_name(char *argument, char *first_arg);
 extern void sub_write(char *arg, Character *ch, int8_t find_invis, int targets);
 
 /* from dg_misc.c */
-extern void do_dg_cast(void *go, script_data *sc, DgScript *trig,
+extern void do_dg_cast(void *go, HasDgScripts *sc, DgScript *trig,
                        UnitType type, char *cmd);
 
-extern void do_dg_affect(void *go, script_data *sc, DgScript *trig,
+extern void do_dg_affect(void *go, HasDgScripts *sc, DgScript *trig,
                          UnitType type, char *cmd);
 
 extern void send_char_pos(Character *ch, int dam);

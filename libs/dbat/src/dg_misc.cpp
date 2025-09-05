@@ -8,8 +8,8 @@
 **************************************************************************/
 #include "dbat/DgScript.h"
 #include "dbat/DgScriptPrototype.h"
-#include "dbat/Character.h"
-#include "dbat/Object.h"
+#include "dbat/CharacterUtils.h"
+#include "dbat/ObjectUtils.h"
 #include "dbat/Location.h"
 #include "dbat/affect.h"
 #include "dbat/dg_scripts.h"
@@ -22,6 +22,7 @@
 #include "dbat/spells.h"
 #include "dbat/constants.h"
 #include "dbat/fight.h"
+#include "dbat/utils.h"
 
 /* copied from spell_parser.c: */
 #define SINFO spell_info[spellnum]
@@ -35,7 +36,7 @@
 /* LIMITATION: a target MUST exist for the spell unless the spell is   */
 /* set to TAR_IGNORE. Also, group spells are not permitted             */
 /* code borrowed from do_cast() */
-void do_dg_cast(void *go, script_data *sc, DgScript *trig,
+void do_dg_cast(void *go, HasDgScripts *sc, DgScript *trig,
                 UnitType type, char *cmd) {
     Character *caster = nullptr;
     Character *tch = nullptr;
@@ -153,7 +154,7 @@ void do_dg_cast(void *go, script_data *sc, DgScript *trig,
 constexpr int APPLY_TYPE = 1;
 constexpr int AFFECT_TYPE = 2;
 
-void do_dg_affect(void *go, script_data *sc, DgScript *trig, UnitType script_type, char *cmd) {
+void do_dg_affect(void *go, HasDgScripts *sc, DgScript *trig, UnitType script_type, char *cmd) {
     Character *ch = nullptr;
     int value = 0, duration = 0;
     char junk[MAX_INPUT_LENGTH]; /* will be set to "dg_affect" */

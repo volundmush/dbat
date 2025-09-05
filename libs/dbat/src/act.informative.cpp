@@ -7,17 +7,31 @@
  *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
  *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
  ************************************************************************ */
-#include "dbat/Character.h"
-#include "dbat/Object.h"
-#include "dbat/Room.h"
+#include "dbat/Log.h"
+#include <fmt/args.h>
+
+#include "dbat/act.informative.h"
+#include "dbat/act.wizard.h"
+#include "dbat/act.item.h"
+#include "dbat/act.social.h"
+
+#include "dbat/CharacterUtils.h"
+#include "dbat/ObjectUtils.h"
+#include "dbat/RoomUtils.h"
 #include "dbat/Destination.h"
 #include "dbat/Descriptor.h"
 #include "dbat/ObjectPrototype.h"
-#include "dbat/act.informative.h"
-#include "dbat/act.wizard.h"
+#include "dbat/TimeInfo.h"
+
+#include "dbat/Random.h"
+#include "dbat/weather.h"
+#include "dbat/utils.h"
+#include "dbat/filter.h"
+
+#include "dbat/interpreter.h"
+
 #include "dbat/vehicles.h"
-#include "dbat/act.item.h"
-#include "dbat/act.social.h"
+
 #include "dbat/maputils.h"
 #include "dbat/config.h"
 #include "dbat/send.h"
@@ -38,6 +52,20 @@
 #include "dbat/transformation.h"
 #include "dbat/planet.h"
 #include "dbat/ansi.h"
+
+#include "dbat/Help.h"
+
+#include "dbat/const/Pulse.h"
+#include "dbat/const/ContainerFlag.h"
+#include "dbat/const/MaterialType.h"
+#include "dbat/const/WearSlot.h"
+#include "dbat/const/Condition.h"
+#include "dbat/const/ChatHistory.h"
+#include "dbat/const/Environment.h"
+#include "dbat/const/Filename.h"
+
+#include "dbat/const/AutoExit.h"
+#include "dbat/const/CombatPreference.h"
 
 /* local functions */
 static void gen_map(const Location& loc, Character *ch, int num);
@@ -261,22 +289,12 @@ static double terrain_bonus(Character *ch)
     return (bonus);
 }
 
-static bool match_exdesc(const char *word, const ExtraDescription &exdesc)
+static bool match_exdesc(const char *word, const ExtraDescriptionView &exdesc)
 {
-    if (exdesc.keyword.starts_with("."))
-        return isname(word, exdesc.keyword.c_str() + 1);
+    if (exdesc.first.starts_with("."))
+        return isname(word, exdesc.first.substr(1));
     else
-        return isname(word, exdesc.keyword.c_str());
-}
-
-char *find_exdesc(char *word, const std::vector<ExtraDescription> &list)
-{
-    for (const auto &i : list)
-    {
-        if (match_exdesc(word, i))
-            return ((char *)i.description.c_str());
-    }
-    return nullptr;
+        return isname(word, exdesc.first);
 }
 
 /* This is used to find hidden people in a room with search - Iovan 12/16/2012 */
@@ -432,7 +450,7 @@ ACMD(do_mimic)
     auto chosen_race = partialMatch(arg, choices, false);
     if (!chosen_race)
     {
-        ch->sendText(chosen_race.err);
+        ch->sendText(chosen_race.error());
         ch->sendText("That is not a race you can change into. Enter mimic without arugments for the mimic menu.\r\n");
         return;
     }
@@ -1009,14 +1027,14 @@ int readIntro(Character *ch, Character *vict)
 
     auto &p = players.at(ch->id);
 
-    return p.dub_names.contains(vict->id);
+    return p->dub_names.contains(vict->id);
 }
 
 void introWrite(Character *ch, Character *vict, char *name)
 {
     std::string n(name);
     auto &p = players.at(ch->id);
-    p.dub_names[vict->id] = n;
+    p->dub_names[vict->id] = n;
 }
 
 ACMD(do_intro)
@@ -3231,7 +3249,7 @@ void do_auto_exits2(const Location& loc, Character *ch)
 
     for (auto &[d, e] : loc.getExits())
     {
-        if (EXIT_FLAGGED(&e, EX_CLOSED))
+        if (e.exit_flags[EX_CLOSED])
             continue;
 
         door = static_cast<int>(d);
@@ -3311,12 +3329,11 @@ static void look_in_direction(Character *ch, int dir)
 
     bool canSeeRoom = false;
 
-    if (EXIT_FLAGGED(ex, EX_ISDOOR) && !ex->keyword.empty())
+    if (ex->exit_flags[EX_ISDOOR] && !ex->keyword.empty())
     {
-        if (!EXIT_FLAGGED(ex, EX_SECRET) &&
-            EXIT_FLAGGED(ex, EX_CLOSED))
+        if (!ex->exit_flags[EX_SECRET] && ex->exit_flags[EX_CLOSED])
             ch->send_to("The %s is closed.\r\n", fname(ex->keyword.c_str()));
-        else if (!EXIT_FLAGGED(ex, EX_CLOSED))
+        else if (!ex->exit_flags[EX_CLOSED])
         {
             ch->send_to("The %s is open.\r\n", fname(ex->keyword.c_str()));
             canSeeRoom = true;
@@ -3495,7 +3512,9 @@ static void look_in_obj(Character *ch, char *arg)
         return;
     }
 
-    if (find_exdesc(arg, obj->getExtraDescription()) && !bits)
+    auto exd = obj->getExtraDescription();
+
+    if (find_exdesc(arg, exd) && !bits)
     {
         ch->sendText("There's nothing inside that!\r\n");
         return;
@@ -3531,18 +3550,6 @@ static void look_in_obj(Character *ch, char *arg)
         ch->sendText("There's nothing inside that!\r\n");
         break;
     }
-}
-
-char *find_exdesc(char *word, struct extra_descr_data *list)
-{
-    struct extra_descr_data *i;
-
-    for (i = list; i; i = i->next)
-        /*if (isname(word, i->keyword))*/
-        if (*i->keyword == '.' ? isname(word, i->keyword + 1) : isname(word, i->keyword))
-            return (i->description);
-
-    return nullptr;
 }
 
 /*
@@ -3659,7 +3666,7 @@ static void handle_board_read(Character *ch, char *arg)
     }
 }
 
-static bool handle_exdesc_look(Character *ch, char *arg, const std::vector<ExtraDescription> &ex_desc_list, Object *obj)
+static bool handle_exdesc_look(Character *ch, char *arg, const std::vector<ExtraDescriptionView> &ex_desc_list, Object *obj)
 {
     char *desc;
     int fnum = get_number(&arg);
@@ -3669,7 +3676,7 @@ static bool handle_exdesc_look(Character *ch, char *arg, const std::vector<Extra
     {
         if (match_exdesc(arg, i))
         {
-            ch->sendText(i.description);
+            ch->sendText(i.second);
             return true;
         }
     }
@@ -3725,7 +3732,9 @@ static void handle_look(Character *ch, char *arg)
         return;
     }
 
-    if (!handle_exdesc_look(ch, arg, ch->location.getExtraDescription(), nullptr))
+    auto exd = ch->location.getExtraDescription();
+
+    if (!handle_exdesc_look(ch, arg, exd, nullptr))
     {
         handle_look_in_inventory(ch, arg);
     }
@@ -4225,16 +4234,18 @@ ACMD(do_look)
         return;
     }
 
+    auto exd = ch->location.getExtraDescription();
+
     if (is_abbrev(arg, "around"))
     {
         struct extra_descr_data *i;
         int found = 0;
 
-        for (const auto &ex : ch->location.getExtraDescription())
+        for (const auto &ex : exd)
         {
-            if (!ex.keyword.starts_with("."))
+            if (!ex.first.starts_with("."))
             {
-                ch->send_to("%s%s:\r\n%s", (found ? "\r\n" : ""), ex.keyword.c_str(), ex.description.c_str());
+                ch->send_to("%s%s:\r\n%s", (found ? "\r\n" : ""), ex.first, ex.second);
                 found = 1;
             }
         }
@@ -4243,7 +4254,7 @@ ACMD(do_look)
         return;
     }
 
-    if (find_exdesc(arg, ch->location.getExtraDescription()))
+    if (find_exdesc(arg, exd))
     {
         look_at_target(ch, arg, 0);
         return;
@@ -5405,38 +5416,7 @@ static void space_to_minus(char *str)
         *str = '-';
 }
 
-int search_help(const char *argument, int level)
-{
-    int chk, bot, top, mid, minlen;
 
-    bot = 0;
-    top = top_of_helpt;
-    minlen = strlen(argument);
-
-    while (bot <= top)
-    {
-        mid = (bot + top) / 2;
-
-        if (!(chk = strncasecmp(argument, help_table[mid].keywords, minlen)))
-        {
-            while ((mid > 0) && !strncasecmp(argument, help_table[mid - 1].keywords, minlen))
-                mid--;
-
-            while (level < help_table[mid].min_level && mid < (bot + top) / 2)
-                mid++;
-
-            if (strncasecmp(argument, help_table[mid].keywords, minlen))
-                break;
-
-            return mid;
-        }
-        else if (chk > 0)
-            bot = mid + 1;
-        else
-            top = mid - 1;
-    }
-    return NOWHERE;
-}
 
 ACMD(do_help)
 {
@@ -5448,7 +5428,7 @@ ACMD(do_help)
 
     skip_spaces(&argument);
 
-    if (!help_table)
+    if (help_table.empty())
     {
         ch->sendText("No help available.\r\n");
         return;
@@ -5478,36 +5458,37 @@ ACMD(do_help)
             mudlog(NRM, std::max(ADMLVL_IMPL, GET_INVIS_LEV(ch)), true, "%s tried to get help on %s", GET_NAME(ch),
                    argument);
         }
-        for (i = 0; i <= top_of_helpt; i++)
+        for (auto &h : help_table)
         {
-            if (help_table[i].min_level > GET_ADMLEVEL(ch))
-                continue;
+            if (h.min_level > GET_ADMLEVEL(ch)) continue;
             /* To help narrow down results, if they don't start with the same letters, move on */
-            if (*argument != *help_table[i].keywords)
-                continue;
-            if (levenshtein_distance(argument, help_table[i].keywords) <= 2)
+            if (!boost::istarts_with(h.keywords, argument)) continue;
+            if (levenshtein_distance(argument, h.keywords) <= 2)
             {
                 if (!found)
                 {
                     ch->sendText("\r\nDid you mean:\r\n");
                     found = 1;
                 }
-                ch->send_to("  %s\r\n", help_table[i].keywords);
+                ch->send_to("  %s\r\n", h.keywords);
             }
         }
         return;
     }
-    if (help_table[mid].min_level > GET_ADMLEVEL(ch))
+
+    auto &hm = help_table[mid];
+
+    if (hm.min_level > GET_ADMLEVEL(ch))
     {
         ch->sendText("There is no help on that word.\r\n");
         return;
     }
-    sprintf(buf, "@b~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~@n\n");
-    sprintf(buf + strlen(buf), "%s", help_table[mid].entry);
-    sprintf(buf + strlen(buf), "@b~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~@n\n");
+    ch->sendText("@b~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~@n\r\n");
+    ch->sendText(hm.entry);
+    ch->sendText("@b~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~@n\r\n");
     if (GET_ADMLEVEL(ch) > 0)
     {
-        sprintf(buf + strlen(buf), "@WHelp File Level@w: @D(@R%d@D)@n\n", help_table[mid].min_level);
+        sprintf(buf + strlen(buf), "@WHelp File Level@w: @D(@R%d@D)@n\r\n", hm.min_level);
     }
     ch->desc->send_to("%s", buf);
 }
@@ -5663,8 +5644,6 @@ ACMD(do_who)
 
                 if (PLR_FLAGGED(tch, PLR_MAILING))
                     ch->sendText(" (mailing)");
-                else if (d->olc)
-                    ch->sendText(" (OLC)");
                 else if (PLR_FLAGGED(tch, PLR_WRITING))
                     ch->sendText(" (writing)");
 
@@ -6663,10 +6642,7 @@ ACMD(do_commands)
                                     complete_cmd_info[i].command_pointer == do_insult))
             continue;
 
-        if (check_disabled(&complete_cmd_info[i]))
-            sprintf(arg, "(%s)", complete_cmd_info[i].command);
-        else
-            sprintf(arg, "%s", complete_cmd_info[i].command);
+        sprintf(arg, "%s", complete_cmd_info[i].command);
 
         ch->send_to("%-11s%s", arg, no++ % 7 == 0 ? "\r\n" : "");
     }
@@ -6713,10 +6689,10 @@ ACMD(do_history)
         return;
     }
 
-    if (p.comm_hist[type] && p.comm_hist[type]->text && *p.comm_hist[type]->text)
+    if (p->comm_hist[type] && p->comm_hist[type]->text && *p->comm_hist[type]->text)
     {
         struct txt_block *tmp;
-        for (tmp = p.comm_hist[type]; tmp; tmp = tmp->next)
+        for (tmp = p->comm_hist[type]; tmp; tmp = tmp->next)
             ch->send_to("%s", tmp->text);
     }
     else
@@ -6735,7 +6711,7 @@ void add_history(Character *ch, char *str, int type)
 
     auto &p = players.at(ch->id);
 
-    tmp = p.comm_hist[type];
+    tmp = p->comm_hist[type];
     ct = time(nullptr);
     strftime(time_str, sizeof(time_str), "%H:%M ", localtime(&ct));
 
@@ -6743,8 +6719,8 @@ void add_history(Character *ch, char *str, int type)
 
     if (!tmp)
     {
-        CREATE(p.comm_hist[type], struct txt_block, 1);
-        p.comm_hist[type]->text = strdup(buf);
+        CREATE(p->comm_hist[type], struct txt_block, 1);
+        p->comm_hist[type]->text = strdup(buf);
     }
     else
     {
@@ -6753,13 +6729,13 @@ void add_history(Character *ch, char *str, int type)
         CREATE(tmp->next, struct txt_block, 1);
         tmp->next->text = strdup(buf);
 
-        for (tmp = p.comm_hist[type]; tmp; tmp = tmp->next, i++)
+        for (tmp = p->comm_hist[type]; tmp; tmp = tmp->next, i++)
             ;
 
-        for (; i > HIST_LENGTH && p.comm_hist[type]; i--)
+        for (; i > HIST_LENGTH && p->comm_hist[type]; i--)
         {
-            tmp = p.comm_hist[type];
-            p.comm_hist[type] = tmp->next;
+            tmp = p->comm_hist[type];
+            p->comm_hist[type] = tmp->next;
             if (tmp->text)
                 free(tmp->text);
             free(tmp);
@@ -7114,14 +7090,14 @@ static void search_in_direction(Character *ch, int dir)
         check = true;
 
     if (!dest.general_description.empty() &&
-        !EXIT_FLAGGED(&dest, EX_SECRET))
+        !dest.exit_flags[EX_SECRET])
         ch->sendText(dest.general_description.c_str());
-    else if (!EXIT_FLAGGED(&dest, EX_SECRET))
+    else if (!dest.exit_flags[EX_SECRET])
         ch->sendText("There is a normal exit there.\r\n");
-    else if (EXIT_FLAGGED(&dest, EX_ISDOOR) &&
-             EXIT_FLAGGED(&dest, EX_SECRET) &&
+    else if (dest.exit_flags[EX_ISDOOR] &&
+             dest.exit_flags[EX_SECRET] &&
              !dest.keyword.empty() && (check == true))
-        ch->send_to("There is a hidden door keyword: '%s' %sthere.\r\n", fname(dest.keyword.c_str()), (EXIT_FLAGGED(&dest, EX_CLOSED)) ? "" : "open ");
+        ch->send_to("There is a hidden door keyword: '%s' %sthere.\r\n", fname(dest.keyword.c_str()), (dest.exit_flags[EX_CLOSED]) ? "" : "open ");
     else
         ch->sendText("There is no exit there.\r\n");
 }
@@ -7160,7 +7136,7 @@ ACMD(do_oaffects)
     for (auto &[vn, o] : obj_proto)
     {
         bool found = false;
-        for (auto &aff : o.affected)
+        for (auto &aff : o->affected)
         {
             if (aff.location == location)
             {
@@ -7170,7 +7146,7 @@ ACMD(do_oaffects)
         }
         if (!found)
             continue;
-        ch->send_to("[%d] %s\r\n", vn, o.short_description);
+        ch->send_to("[%d] %s\r\n", vn, o->short_description);
         counter++;
     }
     if (!counter)

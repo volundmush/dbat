@@ -1,5 +1,7 @@
 #include "dbat/Area.h"
 
+std::unordered_map<int64_t, std::shared_ptr<Area>> areas;
+
 std::string Area::getLocID() const {
     return fmt::format("{}:{}", "A", getVnum());
 }

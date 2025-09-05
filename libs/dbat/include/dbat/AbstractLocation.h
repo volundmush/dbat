@@ -57,7 +57,7 @@ struct AbstractLocation {
     virtual const char* getLookDescription(const Coordinates& coor) const = 0; // New
     virtual bool getIsDark(const Coordinates& coor);
 
-    virtual const std::vector<ExtraDescription>& getExtraDescription(const Coordinates& coor) const;
+    virtual ExtraDescriptionViews getExtraDescription(const Coordinates& coor) const;
 
     WeakBag<Object> getObjects();
     WeakBag<Character> getPeople();

@@ -1,6 +1,6 @@
-#include "dbat/Character.h"
-#include "dbat/Object.h"
-#include "dbat/Room.h"
+#include "dbat/CharacterUtils.h"
+#include "dbat/ObjectUtils.h"
+#include "dbat/RoomUtils.h"
 #include "dbat/Destination.h"
 #include "dbat/Descriptor.h"
 #include "dbat/attack.h"
@@ -12,7 +12,13 @@
 #include "dbat/class.h"
 #include "dbat/races.h"
 #include "dbat/fight.h"
+#include "dbat/utils.h"
 #include "dbat/Guild.h"
+#include "dbat/TimeInfo.h"
+
+#include "dbat/const/WearSlot.h"
+
+#include "dbat/Random.h"
 
 namespace atk
 {

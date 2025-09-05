@@ -7,9 +7,9 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
-#include "dbat/Character.h"
-#include "dbat/Object.h"
-#include "dbat/Room.h"
+#include "dbat/CharacterUtils.h"
+#include "dbat/ObjectUtils.h"
+#include "dbat/RoomUtils.h"
 #include "dbat/Destination.h"
 #include "dbat/Descriptor.h"
 #include "dbat/Zone.h"
@@ -30,7 +30,6 @@
 #include "dbat/dg_event.h"
 #include "dbat/mobact.h"
 #include "dbat/magic.h"
-#include "dbat/genolc.h"
 #include "dbat/class.h"
 #include "dbat/combat.h"
 #include "dbat/fight.h"
@@ -38,6 +37,11 @@
 #include "dbat/mail.h"
 #include "dbat/constants.h"
 #include "dbat/screen.h"
+#include "dbat/utils.h"
+#include "dbat/filter.h"
+
+#include "dbat/Startup.h"
+#include "dbat/Random.h"
 
 #include "dbat/players.h"
 #include "dbat/Account.h"
@@ -48,6 +52,10 @@
 #include "dbat/Shop.h"
 
 #include "dbat/saveload.h"
+
+#include "dbat/const/Condition.h"
+#include "dbat/const/ColorCustom.h"
+#include "dbat/const/ChatHistory.h"
 
 /* local globals */
 struct descriptor_data *descriptor_list = nullptr;        /* master desc list */
@@ -80,153 +88,6 @@ void broadcast(const std::string& txt) {
 
 }
 
-void signal_handler(int signal) {
-    // Process the signal
-    switch(signal) {
-        case SIGUSR1:
-            circle_shutdown = 1;
-            circle_reboot = 1;
-            break;
-        case SIGUSR2:
-            circle_shutdown = 1;
-            circle_reboot = 2;
-            break;
-        default:
-            basic_mud_log("Unexpected signal: %d", signal);
-    }
-}
-
-
-void copyover_recover_final() {
-    struct descriptor_data *next_d;
-    for(auto d = descriptor_list; d; d = next_d) {
-        next_d = d->next;
-        if(STATE(d) != CON_COPYOVER) continue;
-
-		auto accID = d->obj_editval;
-        auto playerID = d->id;
-        room_vnum room = d->obj_type;
-
-        d->obj_editflag = 0;
-        d->obj_type = 0;
-
-        auto accFind = accounts.find(accID);
-
-        if(accFind == accounts.end()) {
-            basic_mud_log("recoverConnection: user %d not found.", accID);
-            close_socket(d);
-            continue;
-        }
-        d->account = &accFind->second;
-        d->account->descriptors.insert(d);
-
-        auto playFind = players.find(playerID);
-        if(playFind == players.end()) {
-            basic_mud_log("recoverConnection: character %d not found.", playerID);
-            close_socket(d);
-            continue;
-        }
-        auto c = d->character = playFind->second.character;
-        c->desc = d;
-
-        c->setBaseStat("load_room", room);
-        for(auto f : {PLR_WRITING, PLR_MAILING, PLR_CRYO}) c->player_flags.set(f, false);
-
-    d->sendText("@rThe world comes back into focus... has something changed?@n\r\n");
-
-        if (AFF_FLAGGED(d->character, AFF_HAYASA)) {
-            d->character->setBaseStat<int>("speedboost", GET_SPEEDCALC(d->character) * 0.5);
-        }
-    }
-}
-
-/* Reload players after a copyover */
-void copyover_recover() {
-    basic_mud_log("Copyover recovery initiated");
-    std::ifstream fp(COPYOVER_FILE);
-
-    if(!fp.is_open()) {
-        basic_mud_log("Copyover file not found. Exiting.\r\n");
-        shutdown_game(1);
-    }
-
-    nlohmann::json j;
-    fp >> j;
-    fp.close();
-
-    // erase the file.
-    std::filesystem::remove(COPYOVER_FILE);
-
-    // rebuild descriptor data...
-    if(j.contains("descriptors")) {
-        for(const auto &jd : j["descriptors"]) {
-            auto d = new descriptor_data();
-            d->obj_editval = jd["user"];
-            d->id = jd["character"];
-            d->connected = CON_COPYOVER;
-            d->obj_type = NOWHERE;
-            if(jd.contains("in_room")) d->obj_type = jd["in_room"].get<room_vnum>();
-            if(jd.contains("connections")) {
-                {
-                    for(const auto& jc : jd["connections"]) {
-
-                    }
-                }
-            }
-            sessions[d->id] = d;
-
-            d->next = descriptor_list;
-            descriptor_list = d;
-        }
-    }
-}
-
-
-static void performReboot(int mode) {
-    char buf[100], buf2[100];
-
-    std::ofstream fp(COPYOVER_FILE);
-
-    if (!fp.is_open()) {
-        send_to_imm("Copyover file not writeable, aborted.\r\n");
-        circle_reboot = 0;
-        return;
-    }
-
-    broadcast("\t@RThe universe stops for a moment as space and time fold.@n\r\n");
-    // Flush all pending output and otherwise get connections ready for a copyover.
-
-    nlohmann::json j;
-
-
-
-    /* For each descriptor/connection, halt them and save state. */
-    for (auto &[cid, d] : sessions) {
-        nlohmann::json jd;
-        if(d->conns.empty()) continue;
-
-        for(auto &[cid, c] : d->conns) {
-            //jd["connections"].push_back(c->connId);
-        }
-        auto och = d->character;
-
-        jd["user"] = d->account->id;
-        jd["character"] = och->id;
-
-        auto r = IN_ROOM(och);
-        auto w = och->getBaseStat("was_in_room");
-        if(r > 1) {
-            jd["in_room"] = r;
-        } else if(r <= 1 && w > 1) {
-        	jd["in_room"] = w;
-        }
-
-        j["descriptors"].push_back(jd);
-    }
-
-    fp << jdumps(j) << std::endl;
-    fp.close();
-}
 
 static std::vector<std::pair<std::string, double>> timings;
 
@@ -240,10 +101,6 @@ struct GameSystem {
     std::function<void(uint64_t, double)> func;
     double countdown{0.0};
 };
-
-static void saveMudTimeWrapper(uint64_t heartBeat, double deltaTime) {
-    save_mud_time(&time_info);
-}
 
 
 static std::vector<GameSystem> gameSystems = {
@@ -285,7 +142,6 @@ static std::vector<GameSystem> gameSystems = {
         GameSystem("player_misc_update", 100.0, player_misc_update),
         GameSystem("kaioken_update", 100.0, kaioken_update),
         GameSystem("record_usage", 5.0, record_usage),
-        GameSystem("save_mud_time", 30.0, saveMudTimeWrapper),
         GameSystem("extract_pending_chars", 0.0, extract_pending_chars),
 };
 
@@ -447,19 +303,6 @@ void runOneLoop(double deltaTime) {
         timings.emplace_back("close sockets", std::chrono::duration<double>(end - start).count());
     }
 
-    /* Check for any signals we may have received. */
-    if (reread_wizlist) {
-        reread_wizlist = false;
-        mudlog(CMP, ADMLVL_IMMORT, true, "Signal received - rereading wizlists.");
-        reboot_wizlists();
-    }
-    if (emergency_unban) {
-        emergency_unban = false;
-        mudlog(BRF, ADMLVL_IMMORT, true, "Received SIGUSR2 - completely unrestricting game (emergent)");
-        ban_list = nullptr;
-        circle_restrict = 0;
-    }
-
     tics_passed++;
 }
 
@@ -469,15 +312,8 @@ namespace game {
         game::init_locale();
         game::init_database();
         game::init_zones();
-        game::init_copyover();
     }
 
-    void init_copyover() {
-        if(std::filesystem::exists(COPYOVER_FILE)) {
-            copyover_recover();
-            copyover_recover_final();
-        }
-    }
 
     void init_locale() {
         std::locale::global(std::locale("en_US.UTF-8"));
@@ -489,7 +325,7 @@ namespace game {
 
     void init_zones() {
         for (auto &[vn, z] : zone_table) {
-            basic_mud_log("Resetting #%d: %s.", vn, z.name.c_str());
+            basic_mud_log("Resetting #%d: %s.", vn, z->name.c_str());
             z.reset();
         }
     }
@@ -1423,7 +1259,7 @@ size_t proc_colors(char *txt, size_t maxlen, int parse, char **choices) {
 
 
 
-void descriptor_data::sendText(const std::string& txt) {
+void descriptor_data::sendText(std::string_view txt) {
     output += txt;
 }
 
@@ -1535,23 +1371,6 @@ void close_socket(struct descriptor_data *d) {
         free(d->obj_short);
     if (d->obj_long)
         free(d->obj_long);
-
-    /*. Kill any OLC stuff .*/
-    switch (d->connected) {
-        case CON_OEDIT:
-        case CON_IEDIT:
-        case CON_REDIT:
-        case CON_ZEDIT:
-        case CON_MEDIT:
-        case CON_SEDIT:
-        case CON_TEDIT:
-        case CON_AEDIT:
-        case CON_TRIGEDIT:
-            cleanup_olc(d, CLEANUP_ALL);
-            break;
-        default:
-            break;
-    }
 
     if(d->account) {
         d->account->descriptors.erase(d);
@@ -1963,8 +1782,6 @@ void descriptor_data::handle_input() {
     else if(std_str) {
         std_string_add(this, comm);
     }
-    else if (STATE(this) != CON_PLAYING) /* In menus, etc. */
-        nanny(this, comm);
     else {            /* else: we're playing normally. */
         try {
             command_interpreter(character, comm); /* Send it to interpreter */

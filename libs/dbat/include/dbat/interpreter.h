@@ -21,7 +21,7 @@ extern void perform_alias(struct descriptor_data *d, char *orig);
 
 extern void commandWaitQueue(uint64_t heartPulse, double deltaTime);
 
-void processCommand(Character *ch, int cmd, std::string arg, CommandData cd);
+void processCommand(Character *ch, int cmd, CommandData cd);
 
 extern void topLoad(void);
 
@@ -54,8 +54,6 @@ extern char *three_arguments(char *argument, char *first_arg, char *second_arg, 
 extern int fill_word(char *argument);
 
 extern void half_chop(char *string, char *arg1, char *arg2);
-
-extern void nanny(struct descriptor_data *d, char *arg);
 
 extern int is_abbrev(const char *arg1, const char *arg2);
 

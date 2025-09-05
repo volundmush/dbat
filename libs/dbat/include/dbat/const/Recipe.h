@@ -59,6 +59,7 @@ constexpr int RECIPE_CARAMBOLA_BREAD = 18;
 
 /* Completed Meal Object Vnums */
 constexpr int MEAL_START = 1220;
+
 constexpr int MEAL_TOMATO_SOUP = 1220;
 constexpr int MEAL_STEAK = 1221;
 constexpr int MEAL_POTATO_SOUP = 1222;
@@ -77,3 +78,4 @@ constexpr int MEAL_SALAD = 1234;
 constexpr int MEAL_APPLEPLUM = 1235;
 constexpr int MEAL_FBERRY_MUFFIN = 1236;
 constexpr int MEAL_CARAMBOLA_BREAD = 1237;
+constexpr int MEAL_LAST = 1234;

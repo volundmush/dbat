@@ -171,7 +171,7 @@ struct AbstractGridArea : public HasMudStrings, public AbstractLocation, public 
     // specialization.
 
     bool validCoordinates(const Coordinates& coor) const override;
-    const std::vector<ExtraDescription>& getExtraDescription(const Coordinates& coor) const override;
+    ExtraDescriptionViews getExtraDescription(const Coordinates& coor) const override;
     const char* getName(const Coordinates& coor) const override;
     const char* getLookDescription(const Coordinates& coor) const override;
     std::optional<Destination> getDirection(const Coordinates& coor, Direction dir) override;

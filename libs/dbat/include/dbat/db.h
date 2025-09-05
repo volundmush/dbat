@@ -6,19 +6,7 @@
 #include "Command.h"
 
 // Function to collect pointers to objects within a vnum range from a map
-template<typename T>
-std::vector<T*> collectObjectsInRange(int start_vnum, int end_vnum, const std::map<int, T>& object_map) {
-    std::vector<T*> result;
-    
-    for (int vnum = start_vnum; vnum <= end_vnum; ++vnum) {
-        auto it = object_map.find(vnum);
-        if (it != object_map.end()) {
-            result.push_back(const_cast<T*>(&it->second));
-        }
-    }
-    
-    return result;
-}
+
 
 #define LIB_USER "data/user/"
 #define LIB_INTRO "data/intro/"

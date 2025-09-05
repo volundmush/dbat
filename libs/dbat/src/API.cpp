@@ -1,3 +1,4 @@
+#include <map>
 #include "dbat/API.h"
 #include "dbat/Enum.h"
 
@@ -20,6 +21,19 @@
 #include "dbat/const/AdminFlag.h"
 #include "dbat/const/Direction.h"
 #include "dbat/const/CharacterProperties.h"
+#include "dbat/const/ZoneFlag.h"
+#include "dbat/const/WhereFlag.h"
+#include "dbat/const/Mutation.h"
+#include "dbat/const/Appearance.h"
+#include "dbat/const/ShopFlag.h"
+
+#include "dbat/races.h"
+
+#include "dbat/CharacterPrototype.h"
+#include "dbat/ObjectPrototype.h"
+#include "dbat/Shop.h"
+#include "dbat/Guild.h"
+#include "dbat/DgScriptPrototype.h"
 
 
 
@@ -160,4 +174,38 @@ std::vector<std::string> getBioGenomeNames() {
         }
         
         return out;
+}
+
+template<typename T>
+std::vector<T*> collectObjectsInRange(int start_vnum, int end_vnum, const std::map<int, std::shared_ptr<T>>& object_map) {
+    std::vector<T*> result;
+    
+    for (int vnum = start_vnum; vnum <= end_vnum; ++vnum) {
+        auto it = object_map.find(vnum);
+        if (it != object_map.end()) {
+            result.push_back(const_cast<T*>(it->second.get()));
+        }
+    }
+    
+    return result;
+}
+
+std::vector<CharacterPrototype*> collectNPCProtos(int start_vnum, int end_vnum) {
+    return collectObjectsInRange(start_vnum, end_vnum, mob_proto);
+}
+
+std::vector<ObjectPrototype*> collectItemProtos(int start_vnum, int end_vnum) {
+    return collectObjectsInRange(start_vnum, end_vnum, obj_proto);
+}
+
+std::vector<Guild*> collectGuilds(int start_vnum, int end_vnum) {
+    return collectObjectsInRange(start_vnum, end_vnum, guild_index);
+}
+
+std::vector<Shop*> collectShops(int start_vnum, int end_vnum) {
+    return collectObjectsInRange(start_vnum, end_vnum, shop_index);
+}
+
+std::vector<DgScriptPrototype*> collectTriggers(int start_vnum, int end_vnum) {
+    return collectObjectsInRange(start_vnum, end_vnum, trig_index);
 }

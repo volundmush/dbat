@@ -8,7 +8,7 @@
  ************************************************************************ */
 
 #include "dbat/Guild.h"
-#include "dbat/Character.h"
+#include "dbat/CharacterUtils.h"
 #include "dbat/Descriptor.h"
 #include "dbat/CharacterPrototype.h"
 #include "dbat/send.h"
@@ -16,7 +16,6 @@
 #include "dbat/comm.h"
 #include "dbat/db.h"
 #include "dbat/interpreter.h"
-#include "dbat/gengld.h"
 #include "dbat/local_limits.h"
 #include "dbat/feats.h"
 #include "dbat/act.comm.h"
@@ -24,12 +23,14 @@
 #include "dbat/Shop.h"
 #include "dbat/class.h"
 #include "dbat/constants.h"
-#include "dbat/genzon.h"
+#include "dbat/utils.h"
+#include "dbat/Random.h"
+#include "dbat/TimeInfo.h"
 
 /* Local variables */
 int spell_sort_info[SKILL_TABLE_SIZE + 1];
 guild_vnum top_guild = NOTHING;
-std::map<guild_vnum, struct Guild> guild_index;
+std::map<guild_vnum, std::shared_ptr<Guild>> guild_index;
 
 char *guild_customer_string(int guild_nr, int detailed);
 
@@ -508,14 +509,13 @@ int is_guild_open(Character *keeper, int guild_nr, int msg)
     char buf[200];
     *buf = 0;
 
-    if (GM_OPEN(guild_nr) > time_info.hours &&
-        GM_CLOSE(guild_nr) < time_info.hours)
-        strlcpy(buf, MSG_TRAINER_NOT_OPEN, sizeof(buf));
+    
 
-    if (!*buf)
-        return (true);
-    if (msg)
-        do_say(keeper, buf, cmd_tell, 0);
+    if (!(GM_OPEN(guild_nr) > time_info.hours && GM_CLOSE(guild_nr) < time_info.hours))
+        return true;
+
+    std::string message(MSG_TRAINER_NOT_OPEN);
+    do_say(keeper, (char*)message.c_str(), cmd_tell, 0);
 
     return (false);
 }
@@ -526,7 +526,8 @@ int is_guild_ok_char(Character *keeper, Character *ch, int guild_nr)
 
     if (!(keeper->canSee(ch)))
     {
-        do_say(keeper, MSG_TRAINER_NO_SEE_CH, cmd_say, 0);
+        std::string message(MSG_TRAINER_NO_SEE_CH);
+        do_say(keeper, (char*)message.c_str(), cmd_say, 0);
         return (false);
     }
 
@@ -540,9 +541,9 @@ int is_guild_ok_char(Character *keeper, Character *ch, int guild_nr)
 
     auto &g = guild_index.at(guild_nr);
 
-    if ((IS_GOOD(ch) && g.not_alignment.contains(MoralAlign::good)) ||
-        (IS_EVIL(ch) && g.not_alignment.contains(MoralAlign::evil)) ||
-        (IS_NEUTRAL(ch) && g.not_alignment.contains(MoralAlign::neutral)))
+    if ((IS_GOOD(ch) && g->not_alignment.contains(MoralAlign::good)) ||
+        (IS_EVIL(ch) && g->not_alignment.contains(MoralAlign::evil)) ||
+        (IS_NEUTRAL(ch) && g->not_alignment.contains(MoralAlign::neutral)))
     {
         snprintf(buf, sizeof(buf), "%s %s",
                  GET_NAME(ch), MSG_TRAINER_DISLIKE_ALIGN);
@@ -553,7 +554,7 @@ int is_guild_ok_char(Character *keeper, Character *ch, int guild_nr)
     if (IS_NPC(ch))
         return (false);
 
-    if (g.not_sensei.contains(ch->sensei))
+    if (g->not_sensei.contains(ch->sensei))
     {
         snprintf(buf, sizeof(buf), "%s %s",
                  GET_NAME(ch), MSG_TRAINER_DISLIKE_CLASS);
@@ -561,7 +562,7 @@ int is_guild_ok_char(Character *keeper, Character *ch, int guild_nr)
         return (false);
     }
 
-    for (auto &cl : g.only_sensei)
+    for (auto &cl : g->only_sensei)
     {
         if (cl != ch->sensei)
         {
@@ -571,7 +572,7 @@ int is_guild_ok_char(Character *keeper, Character *ch, int guild_nr)
         }
     }
 
-    if (g.not_race.contains(ch->race))
+    if (g->not_race.contains(ch->race))
     {
         snprintf(buf, sizeof(buf), "%s %s",
                  GET_NAME(ch), MSG_TRAINER_DISLIKE_RACE);
@@ -579,7 +580,7 @@ int is_guild_ok_char(Character *keeper, Character *ch, int guild_nr)
         return (false);
     }
 
-    for (auto &r : g.only_race)
+    for (auto &r : g->only_race)
     {
         if (r != ch->race)
         {
@@ -602,12 +603,12 @@ int is_guild_ok(Character *keeper, Character *ch, int guild_nr)
 
 int does_guild_know(int guild_nr, int i)
 {
-    return guild_index.at(guild_nr).skills.get(i);
+    return guild_index.at(guild_nr)->skills.get(i);
 }
 
 int does_guild_know_feat(int guild_nr, int i)
 {
-    return guild_index.at(guild_nr).feats.count(i);
+    return guild_index.at(guild_nr)->feats.count(i);
 }
 
 void sort_spells()
@@ -939,7 +940,7 @@ void handle_grand(Character *keeper, int guild_nr, Character *ch, char *argument
 
     if (!(does_guild_know(guild_nr, skill_num)))
     {
-        snprintf(buf, sizeof(buf), guild_index.at(guild_nr).no_such_skill.c_str(), GET_NAME(ch));
+        snprintf(buf, sizeof(buf), guild_index.at(guild_nr)->no_such_skill.c_str(), GET_NAME(ch));
         do_tell(keeper, buf, cmd_tell, 0);
         return;
     }
@@ -1021,7 +1022,7 @@ void handle_practice(Character *keeper, int guild_nr, Character *ch, char *argum
     /****  Does the GM know the skill the player wants to learn?  ****/
     if (!(does_guild_know(guild_nr, skill_num)))
     {
-        snprintf(buf, sizeof(buf), guild_index.at(guild_nr).no_such_skill.c_str(), GET_NAME(ch));
+        snprintf(buf, sizeof(buf), guild_index.at(guild_nr)->no_such_skill.c_str(), GET_NAME(ch));
         do_tell(keeper, buf, cmd_tell, 0);
         return;
     }
@@ -1035,7 +1036,7 @@ void handle_practice(Character *keeper, int guild_nr, Character *ch, char *argum
         switch (learntype)
         {
         case SKLEARN_CANT:
-            snprintf(buf, sizeof(buf), guild_index.at(guild_nr).no_such_skill.c_str(), GET_NAME(ch));
+            snprintf(buf, sizeof(buf), guild_index.at(guild_nr)->no_such_skill.c_str(), GET_NAME(ch));
             do_tell(keeper, buf, cmd_tell, 0);
             return;
         case SKLEARN_CROSSCLASS:
@@ -1211,7 +1212,7 @@ void handle_practice(Character *keeper, int guild_nr, Character *ch, char *argum
     }
     else
     {
-        snprintf(buf, sizeof(buf), guild_index.at(guild_nr).no_such_skill.c_str(), GET_NAME(ch));
+        snprintf(buf, sizeof(buf), guild_index.at(guild_nr)->no_such_skill.c_str(), GET_NAME(ch));
         do_tell(keeper, buf, cmd_tell, 0);
     }
 }
@@ -1365,7 +1366,7 @@ SPECIAL(guild)
         {nullptr, nullptr}};
 
     for (auto &[vn, g] : guild_index)
-        if (g.keeper == keeper->getVnum())
+        if (g->keeper == keeper->getVnum())
         {
             guild_nr = vn;
             break;
@@ -1409,19 +1410,17 @@ void assign_the_guilds()
 
     for (auto &[vn, g] : guild_index)
     {
-        if (!mob_proto.contains(g.keeper))
+        if (!mob_proto.contains(g->keeper))
         {
-            basic_mud_log("Guild %d has an invalid keeper vnum %d.", vn, g.keeper);
+            basic_mud_log("Guild %d has an invalid keeper vnum %d.", vn, g->keeper);
             continue;
         }
 
-        auto &gm = mob_index.at(g.keeper);
-        auto &p = mob_proto.at(g.keeper);
+        auto &gm = mob_proto.at(g->keeper);
+        if (gm->func && gm->func != guild)
+            g->func = gm->func;
 
-        if (gm.func && gm.func != guild)
-            g.func = gm.func;
-
-        gm.func = guild;
+        gm->func = guild;
     }
 }
 
@@ -1430,7 +1429,7 @@ char *guild_customer_string(int guild_nr, int detailed)
     static char buf[MAX_STRING_LENGTH];
     auto &sh = guild_index.at(guild_nr);
 
-    snprintf(buf, sizeof(buf), "%s", sh.customerString().c_str());
+    snprintf(buf, sizeof(buf), "%s", sh->customerString().c_str());
 
     return buf;
 }
@@ -1461,13 +1460,13 @@ void list_all_guilds(Character *ch)
             len += headerlen;
         }
 
-        if (g.keeper == NOBODY)
+        if (g->keeper == NOBODY)
             strcpy(buf1, "<NONE>"); /* strcpy: OK (for 'buf1 >= 7') */
         else
-            sprintf(buf1, "%6d", g.keeper); /* sprintf: OK (for 'buf1 >= 11', 32-bit int) */
+            sprintf(buf1, "%6d", g->keeper); /* sprintf: OK (for 'buf1 >= 11', 32-bit int) */
 
         len += snprintf(buf + len, sizeof(buf) - len, "%6d	%s		%5.2f	%s\r\n",
-                        gm_nr, buf1, g.charge, guild_customer_string(gm_nr, false));
+                        gm_nr, buf1, g->charge, guild_customer_string(gm_nr, false));
     }
 
     ch->desc->send_to("%s", buf);
@@ -1544,7 +1543,7 @@ void list_guilds(Character *ch, guild_vnum vmin, guild_vnum vmax)
         /** Retrieve the list of rooms for this guild.                         **/
         /************************************************************************/
 
-        ch->send_to(" @c[@y%d@c]@y %s@n", (g.keeper == NOBODY) ? -1 : g.keeper, (mob_proto.contains(g.keeper)) ? "" : mob_proto.at(g.keeper).short_description);
+        ch->send_to(" @c[@y%d@c]@y %s@n", (g.keeper == NOBODY) ? -1 : g.keeper, (mob_proto.contains(g.keeper)) ? "" : mob_proto.at(g.keeper)->short_description);
 
         ch->sendText("\r\n");
     };
@@ -1556,7 +1555,7 @@ void list_guilds(Character *ch, guild_vnum vmin, guild_vnum vmax)
     {
         if (vn < vmin || vn > vmax)
             continue;
-        glist(g);
+        glist(*(g.get()));
     }
 
     if (counter == 0)

@@ -7,9 +7,9 @@
  *  $Date: 2004/10/11 12:07:00$                                            *
  *  $Revision: 1.0.14 $                                                    *
  **************************************************************************/
-#include "dbat/Character.h"
-#include "dbat/Object.h"
-#include "dbat/Room.h"
+#include "dbat/CharacterUtils.h"
+#include "dbat/ObjectUtils.h"
+#include "dbat/RoomUtils.h"
 #include "dbat/Zone.h"
 #include "dbat/Destination.h"
 #include "dbat/DgScript.h"
@@ -23,54 +23,65 @@
 #include "dbat/constants.h"
 #include "dbat/comm.h"
 #include "dbat/players.h"
+#include "dbat/filter.h"
+#include "dbat/utils.h"
+#include "dbat/TimeInfo.h"
+#include "dbat/weather.h"
+
+#include "dbat/UID.h"
+#include "dbat/const/WearSlot.h"
+
+#include <boost/algorithm/string/regex.hpp>
+
+SubscriptionManager<DgScript> triggerSubscriptions;
 
 #define PULSES_PER_MUD_HOUR (SECS_PER_MUD_HOUR * PASSES_PER_SEC)
 
 /* Local functions not used elsewhere */
 void do_stat_trigger(Character *ch, DgScriptPrototype *trig);
 
-void script_stat(Character *ch, script_data *sc);
+void script_stat(Character *ch, HasDgScripts *sc);
 
-int remove_trigger(script_data *sc, char *name);
+int remove_trigger(HasDgScripts *sc, char *name);
 
 bool is_num(const std::string &arg);
 
 void eval_op(char *op, char *lhs, char *rhs, char *result, HasDgScripts *go,
-             script_data *sc, DgScript *trig);
+             HasDgScripts *sc, DgScript *trig);
 
 char *matching_paren(char *p);
 
-void eval_expr(char *line, char *result, HasDgScripts *go, script_data *sc,
+void eval_expr(char *line, char *result, HasDgScripts *go, HasDgScripts *sc,
                DgScript *trig, UnitType type);
 
-int eval_lhs_op_rhs(char *expr, char *result, HasDgScripts *go, script_data *sc,
+int eval_lhs_op_rhs(char *expr, char *result, HasDgScripts *go, HasDgScripts *sc,
                     DgScript *trig, UnitType type);
 
 void process_wait(HasDgScripts *go, DgScript *trig, UnitType type, char *cmd);
 
-void process_set(script_data *sc, DgScript *trig, char *cmd);
+void process_set(HasDgScripts *sc, DgScript *trig, char *cmd);
 
-void process_attach(HasDgScripts *go, script_data *sc, DgScript *trig,
+void process_attach(HasDgScripts *go, HasDgScripts *sc, DgScript *trig,
                     UnitType type, char *cmd);
 
-void process_detach(HasDgScripts *go, script_data *sc, DgScript *trig,
+void process_detach(HasDgScripts *go, HasDgScripts *sc, DgScript *trig,
                     UnitType type, char *cmd);
 
 int process_return(DgScript *trig, char *cmd);
 
-void process_unset(script_data *sc, DgScript *trig, char *cmd);
+void process_unset(HasDgScripts *sc, DgScript *trig, char *cmd);
 
-void process_remote(script_data *sc, DgScript *trig, char *cmd);
+void process_remote(HasDgScripts *sc, DgScript *trig, char *cmd);
 
-void process_rdelete(script_data *sc, DgScript *trig, char *cmd);
+void process_rdelete(HasDgScripts *sc, DgScript *trig, char *cmd);
 
-void process_global(script_data *sc, DgScript *trig, char *cmd, long id);
+void process_global(HasDgScripts *sc, DgScript *trig, char *cmd, long id);
 
-void process_context(script_data *sc, DgScript *trig, char *cmd);
+void process_context(HasDgScripts *sc, DgScript *trig, char *cmd);
 
-void extract_value(script_data *sc, DgScript *trig, char *cmd);
+void extract_value(HasDgScripts *sc, DgScript *trig, char *cmd);
 
-void dg_letter_value(script_data *sc, DgScript *trig, char *cmd);
+void dg_letter_value(HasDgScripts *sc, DgScript *trig, char *cmd);
 
 int fgetline(FILE *file, char *p);
 
@@ -662,7 +673,7 @@ Object *get_obj_by_room(Room *room, char *name)
 void script_trigger_check(uint64_t heartPulse, double deltaTime)
 {
     int nr;
-    script_data *sc;
+    HasDgScripts *sc;
 
     auto crandsubs = characterSubscriptions.all("randomTriggers");
     for (auto ch : filter_raw(crandsubs))
@@ -699,7 +710,7 @@ void script_trigger_check(uint64_t heartPulse, double deltaTime)
 void check_time_triggers()
 {
     int nr;
-    script_data *sc;
+    HasDgScripts *sc;
 
     auto ctimesubs = characterSubscriptions.all("timeTriggers");
     for (auto ch : filter_raw(ctimesubs))
@@ -904,7 +915,7 @@ void find_uid_name(char *uid, char *name, size_t nlen)
 }
 
 /* general function to display stats on script sc */
-void script_stat(Character *ch, script_data *sc)
+void script_stat(Character *ch, HasDgScripts *sc)
 {
     struct trig_var_data *tv;
     char name[MAX_INPUT_LENGTH];
@@ -1000,7 +1011,7 @@ void do_sstat(Character *ch, struct HasDgScripts *ud)
  * adds the trigger t to script sc in in location loc.  loc = -1 means
  * add to the end, loc = 0 means add before all other triggers.
  */
-void add_trigger(script_data *sc, const std::shared_ptr<DgScript> t, int loc)
+void add_trigger(HasDgScripts *sc, const std::shared_ptr<DgScript> t, int loc)
 {
 
     auto tvn = t->getVnum();
@@ -1091,11 +1102,6 @@ ACMD(do_attach)
             ch->sendText("Players can't have scripts.\r\n");
             return;
         }
-        if (!can_edit_zone(ch, ch->location.getZone()->number))
-        {
-            ch->sendText("You can only attach triggers in your own zone\r\n");
-            return;
-        }
         /* have a valid mob, now get trigger */
         rn = real_trigger(tn);
         if ((rn == NOTHING) || !(trig = read_trigger(rn)))
@@ -1118,12 +1124,6 @@ ACMD(do_attach)
         if (!object)
         {
             ch->sendText("That object does not exist.\r\n");
-            return;
-        }
-
-        if (!can_edit_zone(ch, ch->location.getZone()->number))
-        {
-            ch->sendText("You can only attach triggers in your own zone\r\n");
             return;
         }
         /* have a valid obj, now get trigger */
@@ -1152,12 +1152,6 @@ ACMD(do_attach)
             ch->sendText("You need to supply a room number or . for current room.\r\n");
             return;
         }
-
-        if (!can_edit_zone(ch, get_room(rnum)->zone->number))
-        {
-            ch->sendText("You can only attach triggers in your own zone\r\n");
-            return;
-        }
         /* have a valid room, now get trigger */
         rn = real_trigger(tn);
         if ((rn == NOTHING) || !(trig = read_trigger(rn)))
@@ -1184,7 +1178,7 @@ ACMD(do_attach)
  *  you might need to check to see if all the triggers were removed after
  *  this function returns, in order to remove the script.
  */
-int remove_trigger(script_data *sc, char *name)
+int remove_trigger(HasDgScripts *sc, char *name)
 {
     std::shared_ptr<DgScript> j;
     int num = 0, string = false, n;
@@ -1283,11 +1277,6 @@ ACMD(do_detach)
     if (boost::iequals(arg1, "room") || boost::iequals(arg1, "wtr"))
     {
         room = ch->getRoom();
-        if (!can_edit_zone(ch, room->zone->number))
-        {
-            ch->sendText("You can only detach triggers in your own zone\r\n");
-            return;
-        }
         if (!SCRIPT(room))
             ch->sendText("This room does not have any triggers.\r\n");
         else if (boost::iequals(arg2, "all"))
@@ -1379,11 +1368,6 @@ ACMD(do_detach)
 
             else if (!SCRIPT(victim))
                 ch->sendText("That mob doesn't have any triggers.\r\n");
-            else if (!can_edit_zone(ch, NOWHERE))
-            {
-                ch->sendText("You can only detach triggers in your own zone\r\n");
-                return;
-            }
             else if (trigger && boost::iequals(trigger, "all"))
             {
                 extract_script(victim, MOB_TRIGGER);
@@ -1405,11 +1389,6 @@ ACMD(do_detach)
             if (!SCRIPT(object))
                 ch->sendText("That object doesn't have any triggers.\r\n");
 
-            else if (!can_edit_zone(ch, NOWHERE))
-            {
-                ch->sendText("You can only detach triggers in your own zone\r\n");
-                return;
-            }
             else if (trigger && boost::iequals(trigger, "all"))
             {
                 extract_script(object, OBJ_TRIGGER);
@@ -1560,7 +1539,7 @@ static bool check_truthy(const char *txt)
 
 /* evaluates 'lhs op rhs', and copies to result */
 void eval_op(char *op, char *lhs, char *rhs, char *result, HasDgScripts *go,
-             script_data *sc, DgScript *trig)
+             HasDgScripts *sc, DgScript *trig)
 {
     unsigned char *p;
     int n;
@@ -1677,7 +1656,7 @@ char *matching_paren(char *p)
 }
 
 /* evaluates line, and returns answer in result */
-void eval_expr(char *line, char *result, HasDgScripts *go, script_data *sc,
+void eval_expr(char *line, char *result, HasDgScripts *go, HasDgScripts *sc,
                DgScript *trig, UnitType type)
 {
     char expr[MAX_INPUT_LENGTH], *p;
@@ -1703,7 +1682,7 @@ void eval_expr(char *line, char *result, HasDgScripts *go, script_data *sc,
  * evaluates expr if it is in the form lhs op rhs, and copies
  * answer in result.  returns 1 if expr is evaluated, else 0
  */
-int eval_lhs_op_rhs(char *expr, char *result, HasDgScripts *go, script_data *sc,
+int eval_lhs_op_rhs(char *expr, char *result, HasDgScripts *go, HasDgScripts *sc,
                     DgScript *trig, UnitType type)
 {
     char *p, *tokens[MAX_INPUT_LENGTH];
@@ -1862,7 +1841,7 @@ void process_wait(HasDgScripts *go, DgScript *trig, UnitType type, char *cmd)
 }
 
 /* processes a script set command */
-void process_set(script_data *sc, DgScript *trig, char *cmd)
+void process_set(HasDgScripts *sc, DgScript *trig, char *cmd)
 {
     char arg[MAX_INPUT_LENGTH], name[MAX_INPUT_LENGTH], *value;
 
@@ -1881,7 +1860,7 @@ void process_set(script_data *sc, DgScript *trig, char *cmd)
 }
 
 /* processes a script eval command */
-void process_eval(HasDgScripts *go, script_data *sc, DgScript *trig,
+void process_eval(HasDgScripts *go, HasDgScripts *sc, DgScript *trig,
                   UnitType type, char *cmd)
 {
     char arg[MAX_INPUT_LENGTH], name[MAX_INPUT_LENGTH];
@@ -1911,7 +1890,7 @@ void process_eval(HasDgScripts *go, script_data *sc, DgScript *trig,
 }
 
 /* script attaching a trigger to something */
-void process_attach(HasDgScripts *go, script_data *sc, DgScript *trig,
+void process_attach(HasDgScripts *go, HasDgScripts *sc, DgScript *trig,
                     UnitType type, char *cmd)
 {
     char arg[MAX_INPUT_LENGTH], trignum_s[MAX_INPUT_LENGTH];
@@ -1999,7 +1978,7 @@ void process_attach(HasDgScripts *go, script_data *sc, DgScript *trig,
 }
 
 /* script detaching a trigger from something */
-void process_detach(HasDgScripts *go, script_data *sc, DgScript *trig,
+void process_detach(HasDgScripts *go, HasDgScripts *sc, DgScript *trig,
                     UnitType type, char *cmd)
 {
     char arg[MAX_INPUT_LENGTH], trignum_s[MAX_INPUT_LENGTH];
@@ -2133,7 +2112,7 @@ int process_return(DgScript *trig, char *cmd)
  * removes a variable from the global vars of sc,
  * or the local vars of trig if not found in global list.
  */
-void process_unset(script_data *sc, DgScript *trig, char *cmd)
+void process_unset(HasDgScripts *sc, DgScript *trig, char *cmd)
 {
     char arg[MAX_INPUT_LENGTH], *var;
 
@@ -2160,10 +2139,10 @@ void process_unset(script_data *sc, DgScript *trig, char *cmd)
  * copy a locally owned variable to the globals of another script
  *     'remote <variable_name> <uid>'
  */
-void process_remote(script_data *sc, DgScript *trig, char *cmd)
+void process_remote(HasDgScripts *sc, DgScript *trig, char *cmd)
 {
     struct trig_var_data *vd;
-    script_data *sc_remote = nullptr;
+    HasDgScripts *sc_remote = nullptr;
     char *line, *var, *uid_p;
     char arg[MAX_INPUT_LENGTH], buf[MAX_INPUT_LENGTH], buf2[MAX_INPUT_LENGTH];
     long uid, context;
@@ -2216,7 +2195,7 @@ void process_remote(script_data *sc, DgScript *trig, char *cmd)
 ACMD(do_vdelete)
 {
     struct trig_var_data *vd, *vd_prev = nullptr;
-    script_data *sc_remote = nullptr;
+    HasDgScripts *sc_remote = nullptr;
     char *var, *uid_p;
     char buf[MAX_INPUT_LENGTH], buf2[MAX_INPUT_LENGTH];
     long uid, context;
@@ -2299,10 +2278,10 @@ int perform_set_dg_var(Character *ch, Character *vict, char *val_arg)
  * delete a variable from the globals of another script
  *     'rdelete <variable_name> <uid>'
  */
-void process_rdelete(script_data *sc, DgScript *trig, char *cmd)
+void process_rdelete(HasDgScripts *sc, DgScript *trig, char *cmd)
 {
     struct trig_var_data *vd, *vd_prev = nullptr;
-    script_data *sc_remote = nullptr;
+    HasDgScripts *sc_remote = nullptr;
     char *line, *var, *uid_p;
     char arg[MAX_INPUT_LENGTH], buf[MAX_STRING_LENGTH], buf2[MAX_STRING_LENGTH];
     long uid, context;
@@ -2348,7 +2327,7 @@ void process_rdelete(script_data *sc, DgScript *trig, char *cmd)
 /*
  * makes a local variable into a global variable
  */
-void process_global(script_data *sc, DgScript *trig, char *cmd, long id)
+void process_global(HasDgScripts *sc, DgScript *trig, char *cmd, long id)
 {
     struct trig_var_data *vd;
     char arg[MAX_INPUT_LENGTH], *var;
@@ -2376,7 +2355,7 @@ void process_global(script_data *sc, DgScript *trig, char *cmd, long id)
 }
 
 /* set the current context for a script */
-void process_context(script_data *sc, DgScript *trig, char *cmd)
+void process_context(HasDgScripts *sc, DgScript *trig, char *cmd)
 {
     char arg[MAX_INPUT_LENGTH], *var;
 
@@ -2392,7 +2371,7 @@ void process_context(script_data *sc, DgScript *trig, char *cmd)
     }
 }
 
-void extract_value(script_data *sc, DgScript *trig, char *cmd)
+void extract_value(HasDgScripts *sc, DgScript *trig, char *cmd)
 {
     char buf[MAX_INPUT_LENGTH], buf2[MAX_INPUT_LENGTH];
     char *buf3;
@@ -2438,7 +2417,7 @@ void extract_value(script_data *sc, DgScript *trig, char *cmd)
 
 */
 
-void dg_letter_value(script_data *sc, DgScript *trig, char *cmd)
+void dg_letter_value(HasDgScripts *sc, DgScript *trig, char *cmd)
 {
     // set the letter/number at position 'num' as the variable.
     char junk[MAX_INPUT_LENGTH];
@@ -2512,7 +2491,7 @@ ACMD(do_tstat)
             return;
         }
 
-        do_stat_trigger(ch, &trig_index.at(rnum));
+        do_stat_trigger(ch, trig_index.at(rnum).get());
     }
     else
         ch->sendText("Usage: tstat <vnum>\r\n");

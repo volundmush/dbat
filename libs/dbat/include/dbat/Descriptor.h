@@ -6,13 +6,13 @@
 #include <list>
 
 #include "Log.h"
+#include "Typedefs.h"
 
 #include "const/ConnectionState.h"
 #include "const/Max.h"
 
 struct Object;
 struct Character;
-struct oasis_olc_data;
 struct Account;
 
 struct txt_block {
@@ -53,7 +53,6 @@ struct descriptor_data {
     struct descriptor_data *snooping{}; /* Who is this char snooping	*/
     struct descriptor_data *snoop_by{}; /* And who is snooping this char	*/
     struct descriptor_data *next{}; /* link to next descriptor		*/
-    struct oasis_olc_data *olc{};   /* OLC info                            */
     struct Account *account{}; /* Account info                        */
     int level{};
     char *newsbuf{};
@@ -72,7 +71,7 @@ struct descriptor_data {
     void handle_input();
     void start();
     void handleLostLastConnection(bool graceful);
-    void sendText(const std::string &txt);
+    void sendText(std::string_view txt);
 
     template<typename... Args>
     void sendFmt(fmt::string_view format, Args&&... args) {

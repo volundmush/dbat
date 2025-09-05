@@ -44,12 +44,15 @@ it.
     similar fashion.
 
 */
-#include "dbat/Character.h"
-#include "dbat/Object.h"
+#include <filesystem>
+#include <sys/stat.h>
+#include "dbat/CharacterUtils.h"
+#include "dbat/ObjectUtils.h"
 #include "dbat/ObjectPrototype.h"
-#include "dbat/Room.h"
+#include "dbat/RoomUtils.h"
 #include "dbat/Destination.h"
 #include "dbat/Descriptor.h"
+
 #include "dbat/boards.h"
 #include "dbat/send.h"
 #include "dbat/comm.h"
@@ -60,6 +63,9 @@ it.
 #include "dbat/improved-edit.h"
 #include "dbat/dg_comm.h"
 #include "dbat/config.h"
+#include "dbat/utils.h"
+
+#include "dbat/players.h"
 
 
 struct board_info *bboards = nullptr;  /* our global board structure */
@@ -132,7 +138,7 @@ struct board_info *create_new_board(obj_vnum board_vnum) {
         WRITE_LVL(temp) = CONFIG_LEVEL_CAP;
         REMOVE_LVL(temp) = CONFIG_LEVEL_CAP;
     } else {
-        obj = &(obj_proto.at(board_vnum));
+        obj = obj_proto.at(board_vnum).get();
         READ_LVL(temp) = GET_OBJ_VAL(obj, VAL_BOARD_READ);
         WRITE_LVL(temp) = GET_OBJ_VAL(obj, VAL_BOARD_WRITE);
         REMOVE_LVL(temp) = GET_OBJ_VAL(obj, VAL_BOARD_ERASE);
@@ -262,7 +268,7 @@ struct board_info *load_board(obj_vnum board_vnum) {
         BOARD_VERSION(temp_board) = t[4];
         basic_mud_log("Board vnum %d, Version %d", BOARD_VNUM(temp_board), BOARD_VERSION(temp_board));
     } else {
-        obj = &(obj_proto.at(board_vnum));
+        obj = obj_proto.at(board_vnum).get();
         /* double check one or two things */
         if (t[0] != GET_OBJ_VAL(obj, VAL_BOARD_READ) ||
             t[1] != GET_OBJ_VAL(obj, VAL_BOARD_WRITE) ||
@@ -807,7 +813,7 @@ void write_board_message(obj_vnum board_vnum, Character *ch, char *arg) {
         ch->sendText("Write your message.  (/s saves /h for help)\r\n");
 
     ch->player_flags.set(PLR_WRITING, true);
-    string_write(ch->desc, &(MESG_DATA(message)), MAX_MESSAGE_LENGTH, board_vnum + BOARD_MAGIC, nullptr);
+    //string_write(ch->desc, &(MESG_DATA(message)), MAX_MESSAGE_LENGTH, board_vnum + BOARD_MAGIC, nullptr);
     if (board_vnum == 3092) {
         BOARDNEWMORT = time(nullptr);
     }
@@ -820,7 +826,7 @@ void write_board_message(obj_vnum board_vnum, Character *ch, char *arg) {
     if (board_vnum == 3090) {
         BOARDNEWBUI = time(nullptr);
     }
-    save_mud_time(&time_info);
+
     struct descriptor_data *d;
 
     for (d = descriptor_list; d; d = d->next) {
@@ -907,7 +913,7 @@ void board_respond(long board_vnum, Character *ch, int mnum) {
     ch->desc->backstr = strdup(number);
     ch->desc->send_to("%s", number);
 
-    string_write(ch->desc, &(MESG_DATA(message)), MAX_MESSAGE_LENGTH, board_vnum + BOARD_MAGIC, nullptr);
+    //string_write(ch->desc, &(MESG_DATA(message)), MAX_MESSAGE_LENGTH, board_vnum + BOARD_MAGIC, nullptr);
     if (board_vnum == 3092) {
         BOARDNEWMORT = time(nullptr);
     }
@@ -920,7 +926,7 @@ void board_respond(long board_vnum, Character *ch, int mnum) {
     if (board_vnum == 3090) {
         BOARDNEWBUI = time(nullptr);
     }
-    save_mud_time(&time_info);
+
     struct descriptor_data *d;
 
     for (d = descriptor_list; d; d = d->next) {

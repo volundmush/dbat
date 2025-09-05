@@ -15,9 +15,9 @@
  * the appropriate new special cases for your new class.
  */
 
-#include "dbat/Character.h"
-#include "dbat/Object.h"
-#include "dbat/Room.h"
+#include "dbat/CharacterUtils.h"
+#include "dbat/ObjectUtils.h"
+#include "dbat/RoomUtils.h"
 #include "dbat/Destination.h"
 #include "dbat/Descriptor.h"
 #include "dbat/class.h"
@@ -29,10 +29,17 @@
 #include "dbat/constants.h"
 #include "dbat/handler.h"
 #include "dbat/feats.h"
-#include "dbat/oasis.h"
 #include "dbat/act.wizard.h"
 #include "dbat/dg_comm.h"
 #include "dbat/act.other.h"
+#include "dbat/config.h"
+#include "dbat/utils.h"
+#include "dbat/Random.h"
+
+#include "dbat/const/Max.h"
+#include "dbat/const/Condition.h"
+#include "dbat/const/LegacyBonus.h"
+#include "dbat/const/WearSlot.h"
 
 /*
  * The code to interpret a class letter -- used in interpreter.c when a
@@ -169,19 +176,7 @@ static const int race_template[NUM_RACES][6] = {
 
 void cedit_creation(Character *ch)
 {
-    switch (CONFIG_CREATION_METHOD)
-    {
-    case CEDIT_CREATION_METHOD_3: /* Points Pool */
-        break;
-    case CEDIT_CREATION_METHOD_4: /* Racial based template */
-        break;
-    case CEDIT_CREATION_METHOD_5: /* Class based template */
-        break;
-    case CEDIT_CREATION_METHOD_2: /* Random rolls, player can adjust */
-    case CEDIT_CREATION_METHOD_1: /* Standard random roll, system assigned */
-    default:
-        break;
-    }
+
     racial_body_parts(ch);
 }
 

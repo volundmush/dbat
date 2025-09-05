@@ -116,7 +116,7 @@ struct Room : public AbstractLocation, public HasZone, public HasDgScripts, publ
 
     // overrides for location_data...
     Zone* getLocZone() const override;
-    const std::vector<ExtraDescription>& getExtraDescription(const Coordinates& coor) const override;
+    ExtraDescriptionViews getExtraDescription(const Coordinates& coor) const override;
     const char* getName(const Coordinates& coor) const override;
     const char* getLookDescription(const Coordinates& coor) const override;
     std::optional<Destination> getDirection(const Coordinates& coor, Direction dir) override;
@@ -149,48 +149,8 @@ struct Room : public AbstractLocation, public HasZone, public HasDgScripts, publ
 
 };
 
-template <>
-struct fmt::formatter<Room> {
-    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
-
-    template <typename FormatContext>
-    auto format(const Room& z, FormatContext& ctx) const {
-        return fmt::format_to(ctx.out(), "Room {} '{}'", z.getVnum(), z.getName());
-    }
-};
-
-extern bool WHERE_FLAGGED(room_vnum loc, WhereFlag flag);
-extern bool WHERE_FLAGGED(Room *loc, WhereFlag flag);
-extern bool ROOM_FLAGGED(room_vnum loc, int flag);
-extern bool ROOM_FLAGGED(Room *loc, int flag);
-
-#define SECT(room)    (VALID_ROOM_RNUM(room) ? \
-                get_room((room))->sector_type : SECT_INSIDE)
-#define ROOM_DAMAGE(room)   (get_room((room))->getDamage())
-#define ROOM_EFFECT(room)   (get_room((room))->geffect)
-#define ROOM_GRAVITY(room)  (get_room((room))->getGravity())
-#define SUNKEN(room)    (ROOM_EFFECT(room) < 0 || SECT(room) == SECT_UNDERWATER)
-
-#define IS_DARK(room)    room_is_dark((room))
-#define IS_LIGHT(room)  (!IS_DARK(room))
-
-#define VALID_ROOM_RNUM(rnum)    (Room::registry.contains(rnum) > 0 && rnum != NOWHERE)
-#define GET_ROOM_VNUM(rnum) (VALID_ROOM_RNUM(rnum) ? (rnum) : NOWHERE)
-#define GET_ROOM_SPEC(room) \
-    (VALID_ROOM_RNUM(room) ? get_room((room))->func : nullptr)
-
-    /* Minor Planet Defines */
-#define PLANET_ZENITH(room) ((GET_ROOM_VNUM(room) >= 3400 && GET_ROOM_VNUM(room) <= 3599) || (GET_ROOM_VNUM(room) >= 62900 && GET_ROOM_VNUM(room) <= 62999) || \
-                (GET_ROOM_VNUM(room) == 19600))
-
-#define ROOM_FLAGS(loc)    (Room::registry.at((loc)).room_flags)
-
-extern const char* sense_location_name(room_vnum roomnum);
-
-extern Room *get_room(room_vnum vn);
+inline std::string format_as(const Room& r) {
+    return fmt::format("Room {} '{}'", r.getVnum(), r.getName());
+}
 
 extern SubscriptionManager<Room> roomSubscriptions;
-
-extern void repairRoomDamage(uint64_t heartPulse, double deltaTime);
-
-extern room_rnum real_room(room_vnum vnum);

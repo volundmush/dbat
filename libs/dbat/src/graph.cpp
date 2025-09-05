@@ -7,8 +7,10 @@
  *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
  *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
  ************************************************************************ */
-#include "dbat/Character.h"
-#include "dbat/Object.h"
+#include <queue>
+#include "dbat/CharacterUtils.h"
+#include "dbat/ObjectUtils.h"
+#include "dbat/RoomUtils.h"
 #include "dbat/Destination.h"
 #include "dbat/Descriptor.h"
 #include "dbat/send.h"
@@ -21,6 +23,12 @@
 #include "dbat/maputils.h"
 #include "dbat/vehicles.h"
 #include "dbat/act.informative.h"
+#include "dbat/utils.h"
+#include "dbat/Random.h"
+#include "dbat/DragonBall.h"
+
+#include "dbat/const/Pulse.h"
+#include "dbat/const/ExitFlag.h"
 
 /* local functions */
 
@@ -187,8 +195,7 @@ std::unordered_map<Coordinates, Destination> gatherSurroundings(const Location& 
 int find_first_step(Location &src, Location &target)
 {
     // Assume these constants are defined:
-    constexpr int BFS_ALREADY_THERE = -1;
-    constexpr int BFS_NO_PATH = -2;
+
 
     auto path_opt = find_bfs_path(src, target, {});
     if (!path_opt.has_value())
@@ -704,7 +711,7 @@ ACMD(do_track)
                 ch->sendText("You can't sense their powerlevel as they are a machine.\r\n");
             }
             break;
-        case BFS_TO_FAR:
+        case BFS_TOO_FAR:
             ch->send_to("You are too far to sense %s accurately from here.\r\n", HMHR(vict));
             break;
         case BFS_NO_PATH:

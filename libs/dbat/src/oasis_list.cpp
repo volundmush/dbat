@@ -5,8 +5,9 @@
 /** Copyright 1997-2001 George Greer (greerga@circlemud.org)                 **/
 /** Copyright 2002 Kip Potter [Mythran] (kip_potter@hotmail.com)             **/
 /******************************************************************************/
-#include "dbat/Character.h"
-#include "dbat/Room.h"
+#include "dbat/CharacterUtils.h"
+#include "dbat/ObjectUtils.h"
+#include "dbat/RoomUtils.h"
 #include "dbat/Zone.h"
 #include "dbat/CharacterPrototype.h"
 #include "dbat/ObjectPrototype.h"
@@ -17,7 +18,6 @@
 #include "dbat/comm.h"
 #include "dbat/interpreter.h"
 #include "dbat/db.h"
-#include "dbat/oasis.h"
 #include "dbat/Shop.h"
 #include "dbat/constants.h"
 #include "dbat/dg_scripts.h"
@@ -25,9 +25,17 @@
 #include "dbat/races.h"
 #include "dbat/class.h"
 #include "dbat/ansi.h"
+#include "dbat/utils.h"
+
+#include "dbat/const/AdminLevel.h"
 
 static void list_triggers(Character *ch, trig_vnum vmin, trig_vnum vmax);
 void list_guilds(Character *ch, guild_vnum vmin, guild_vnum vmax);
+void list_zones(Character *ch);
+void list_rooms(Character *ch, room_vnum vmin, room_vnum vmax);
+void list_objects(Character *ch, obj_vnum vmin, obj_vnum vmax);
+void list_mobiles(Character *ch, mob_vnum vmin, mob_vnum vmax);
+void list_shops(Character *ch, shop_vnum vmin, shop_vnum vmax);
 
 /******************************************************************************/
 /** Ingame Commands                                                          **/
@@ -137,8 +145,8 @@ ACMD(do_oasis_links)
         return;
     }
 
-    ch->send_to("Zone %d is linked to the following zones:\r\n", z->second.number);
-    z->second.rooms.for_each([&](auto r) {
+    ch->send_to("Zone %d is linked to the following zones:\r\n", z->second->number);
+    z->second->rooms.for_each([&](auto r) {
         for (auto &[d, e] : r->getDirections())
         {
             auto z2 = e.getZone();
@@ -204,11 +212,11 @@ void list_mobiles(Character *ch, zone_vnum vmin, zone_vnum vmax)
         if (vn < vmin || vn > vmax)
             continue;
         counter++;
-        auto sString = !m.proto_script.empty() ? fmt::format(" {}", m.scriptString()) : "";
+        auto sString = !m->proto_script.empty() ? fmt::format(" {}", m->scriptString()) : "";
         ch->send_to("@g%4d@n);[@g%-5d@n] @[3]%-*s @C%-9s @c%-9s @y[%4d]@n %s\r\n",
-                    vn, characterSubscriptions.count(fmt::format("vnum_{}", vn)), count_color_chars(m.short_description) + 30,
-                    m.short_description, TRUE_RACE(&m), sensei::getName(m.sensei).c_str(),
-                    m.getBaseStat<int>("level"),
+                    vn, characterSubscriptions.count(fmt::format("vnum_{}", vn)), count_color_chars(m->short_description) + 30,
+                    m->short_description, TRUE_RACE(m), sensei::getName(m->sensei).c_str(),
+                    m->getBaseStat<int>("level"),
                     sString.c_str());
     }
 
@@ -234,10 +242,10 @@ void list_objects(Character *ch, room_vnum vmin, room_vnum vmax)
             continue;
 
         counter++;
-        auto sString = !o.proto_script.empty() ? fmt::format(" {}", o.scriptString()) : "";
+        auto sString = !o->proto_script.empty() ? fmt::format(" {}", o->scriptString()) : "";
         ch->send_to("@g%4d@n);[@g%-5d@n] @[2]%-*s @y[%s]@n%s\r\n",
-                    vn, objectSubscriptions.count(fmt::format("vnum_{}", vn)), count_color_chars(o.short_description) + 44,
-                    o.short_description, magic_enum::enum_name(o.type_flag).data(),
+                    vn, objectSubscriptions.count(fmt::format("vnum_{}", vn)), count_color_chars(o->short_description) + 44,
+                    o->short_description, magic_enum::enum_name(o->type_flag).data(),
                     sString.c_str());
     }
 
@@ -269,7 +277,7 @@ void list_shops(Character *ch, shop_vnum vmin, shop_vnum vmax)
         /** Retrieve the list of rooms for this shop.                          **/
         /************************************************************************/
         j = 0;
-        for (auto r : sh.in_room)
+        for (auto r : sh->in_room)
             ch->send_to("%s@c[@y%d@c]@n", (j++ % 8 == 0) ? "\r\n              " : " ", r);
 
         if (j == 0)
@@ -299,8 +307,8 @@ void list_zones(Character *ch)
     roots.reserve(zone_table.size());
     for (auto &p : zone_table)
     {
-        if (p.second.parent == NOTHING)
-            roots.push_back(&p.second);
+        if (p.second->parent == NOTHING)
+            roots.push_back(p.second.get());
     }
     std::sort(roots.begin(), roots.end(), [](const Zone *a, const Zone *b)
               { return a->number < b->number; });
@@ -361,7 +369,7 @@ void print_zone(Character *ch, zone_vnum vnum)
         return;
     }
     auto &z = zone_table.at(vnum);
-    sprintf(bits, "%s", z.zone_flags.getFlagNames().c_str());
+    sprintf(bits, "%s", z->zone_flags.getFlagNames().c_str());
 
     /****************************************************************************/
     /** Display all of the zone information at once.                           **/
@@ -375,19 +383,19 @@ void print_zone(Character *ch, zone_vnum vnum)
                 "@gZone Flags     = @c%s\r\n"
                 "@gSize\r\n"
                 "@g   Rooms       = @c%ld\r\n",
-                z.number, z.name, z.builders, z.lifespan, z.age, z.reset_mode ? ((z.reset_mode == 1) ? "Reset when no players are in zone." : "Normal reset.") : "Never reset", bits, z.rooms.live_count());
+                z->number, z->name, z->builders, z->lifespan, z->age, z->reset_mode ? ((z->reset_mode == 1) ? "Reset when no players are in zone." : "Normal reset.") : "Never reset", bits, z->rooms.live_count());
 
-    
-    if(z.rooms) {
+
+    if(z->rooms) {
         ch->send_to("@gRoom List:\r\n");
-        z.rooms.for_each([&](auto r) {
+        z->rooms.for_each([&](auto r) {
             ch->sendFmt("    @g{}@n) @c{}{}{}\r\n", r->getVnum(), r->getName(), r->proto_script.empty() ? "" : fmt::format(" {}", r->scriptString()), r->resetCommands.empty() ? "" : fmt::format(" [ResetCommands: {}]", r->resetCommands.size()));
         });
     }
 
-    if(z.areas) {
+    if(z->areas) {
         ch->send_to("@gAreas:\r\n");
-        z.areas.for_each([&](auto a) {
+        z->areas.for_each([&](auto a) {
             ch->sendFmt("    @g{}@n) @c{}@n\r\n", a->getVnum(), a->getName());
         });
     }
@@ -412,21 +420,21 @@ static void list_triggers(Character *ch, trig_vnum vmin, trig_vnum vmax)
         counter++;
 
         ch->send_to("%4d);[@g%5d@n] @[1]%-45.45s ",
-                    counter, vn, t.name);
+                    counter, vn, t->name);
 
-        if (t.attach_type == OBJ_TRIGGER)
+        if (t->attach_type == OBJ_TRIGGER)
         {
-            sprintbit(t.trigger_type, otrig_types, trgtypes, sizeof(trgtypes));
+            sprintbit(t->trigger_type, otrig_types, trgtypes, sizeof(trgtypes));
             ch->send_to("obj @y%s@n\r\n", trgtypes);
         }
-        else if (t.attach_type == WLD_TRIGGER)
+        else if (t->attach_type == WLD_TRIGGER)
         {
-            sprintbit(t.trigger_type, wtrig_types, trgtypes, sizeof(trgtypes));
+            sprintbit(t->trigger_type, wtrig_types, trgtypes, sizeof(trgtypes));
             ch->send_to("wld @y%s@n\r\n", trgtypes);
         }
         else
         {
-            sprintbit(t.trigger_type, trig_types, trgtypes, sizeof(trgtypes));
+            sprintbit(t->trigger_type, trig_types, trgtypes, sizeof(trgtypes));
             ch->send_to("mob @y%s@n\r\n", trgtypes);
         }
     }

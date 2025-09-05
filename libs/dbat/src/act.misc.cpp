@@ -11,16 +11,19 @@
  *  original credits maintained where relevant for act.other.c as this is  *
  *  practically an act.other.c part two - Iovan 3/20/2011                  *
  ************************************************************************ */
-#include "dbat/Character.h"
-#include "dbat/Object.h"
+#include "dbat/Command.h"
+#include "dbat/CharacterUtils.h"
+#include "dbat/ObjectUtils.h"
 #include "dbat/ObjectPrototype.h"
-#include "dbat/Room.h"
+#include "dbat/CharacterPrototype.h"
+#include "dbat/RoomUtils.h"
 #include "dbat/Destination.h"
 #include "dbat/Descriptor.h"
 #include "dbat/act.misc.h"
 #include "dbat/dg_comm.h"
 #include "dbat/act.wizard.h"
 #include "dbat/act.movement.h"
+#include "dbat/interpreter.h"
 #include "dbat/send.h"
 #include "dbat/spells.h"
 #include "dbat/comm.h"
@@ -31,6 +34,18 @@
 #include "dbat/fight.h"
 #include "dbat/class.h"
 #include "dbat/act.informative.h"
+#include "dbat/utils.h"
+#include "dbat/filter.h"
+
+#include "dbat/Random.h"
+
+#include "dbat/const/Fish.h"
+#include "dbat/const/Song.h"
+#include "dbat/const/Pulse.h"
+#include "dbat/const/WearSlot.h"
+#include "dbat/const/Condition.h"
+#include "dbat/const/Recipe.h"
+#include "dbat/const/Environment.h"
 
 /* local functions  */
 static void generate_multiform(Character *ch, int count);
@@ -3441,7 +3456,7 @@ ACMD(do_hydromancy)
             ch->sendText("You can not flood the water that direction!\r\n");
             return;
         }
-        if (EXIT_FLAGGED(&dest, EX_CLOSED))
+        if (dest.exit_flags[EX_CLOSED])
         {
             ch->sendText("You can not flood the water that direction!\r\n");
             return;
@@ -5034,8 +5049,8 @@ void handle_rpp_store(Character *ch, int choice)
             break;
         case 8:
         {
-            auto &o = obj_proto.at(1126);
-            if (!ch->canCarryWeight(o.getBaseStat("weight")))
+            auto o = obj_proto.at(1126);
+            if (!ch->canCarryWeight(o->getBaseStat("weight")))
             {
                 ch->sendText("You can not carry that much weight at this moment.\r\n");
             }

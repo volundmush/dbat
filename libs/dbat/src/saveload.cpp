@@ -1,9 +1,13 @@
+#include <fstream>
 #include <boost/iostreams/filtering_streambuf.hpp>
 #include <boost/iostreams/filter/gzip.hpp>
 
 #include "dbat/saveload.h"
 #include "dbat/ObjectPrototype.h"
 #include "dbat/CharacterPrototype.h"
+#include "dbat/CharacterUtils.h"
+#include "dbat/ObjectUtils.h"
+#include "dbat/RoomUtils.h"
 #include "dbat/Area.h"
 #include "dbat/Structure.h"
 #include "dbat/affect.h"
@@ -20,7 +24,19 @@
 #include "dbat/class.h"
 #include "dbat/json.h"
 #include "dbat/assemblies.h"
-#include "dbat/assedit.h"
+#include "dbat/ID.h"
+#include "dbat/TimeInfo.h"
+#include "dbat/weather.h"
+#include "dbat/Help.h"
+#include "dbat/utils.h"
+
+inline std::string demangle(const char* mangled_name) {
+    int status = -1;
+    char* demangled = abi::__cxa_demangle(mangled_name, nullptr, nullptr, &status);
+    std::string result = (status == 0 && demangled != nullptr) ? demangled : mangled_name;
+    std::free(demangled);
+    return result;
+}
 
 // dump and load routines...
 static void dump_to_file(const std::filesystem::path &loc, const std::string &name, const json &data)
@@ -78,6 +94,159 @@ static json load_from_file(const std::filesystem::path &loc, const std::string &
     }
     return j;
 }
+
+template<typename T>
+requires std::is_enum_v<T>
+void to_json(json& j, const T& a) {
+    j = magic_enum::enum_name(a);
+}
+
+template<typename T>
+requires std::is_enum_v<T>
+void from_json(const json& j, T& a) {
+    auto name = j.get<std::string>();
+    auto op = magic_enum::enum_cast<T>(name);
+    if(op.has_value())
+        a = op.value();
+    else
+        throw std::invalid_argument("Invalid enum value: " + name +
+            " for enum type: " + demangle(typeid(T).name()));
+}
+
+template <typename Enum, typename Value>
+requires std::is_enum_v<Enum>
+void to_json(json& j, const std::map<Enum, Value>& m)
+{
+    j = json::object();
+    for (auto const& [key, val] : m) {
+        // Convert Enum -> string via magic_enum
+        std::string key_str = std::string(magic_enum::enum_name(key));
+        if(key_str.empty()) continue;
+        j[key_str] = val; // This calls to_json on 'val' if it’s a type with a known converter
+    }
+}
+
+template <typename Enum, typename Value>
+requires std::is_enum_v<Enum>
+void from_json(const json& j, std::map<Enum, Value>& m)
+{
+    m.clear();
+    for (auto const& [key_str, value_json] : j.items()) {
+        // Convert string -> Enum
+        auto maybe = magic_enum::enum_cast<Enum>(key_str);
+        if (!maybe.has_value()) {
+            if(typeid(Enum) == typeid(Skill)) continue;
+            throw std::invalid_argument("Invalid enum key: " + key_str
+            + " for enum type: " + demangle(typeid(Enum).name()));
+        }
+        m[maybe.value()] = value_json.get<Value>();
+    }
+}
+
+template <typename Enum, typename Value>
+requires std::is_enum_v<Enum>
+void to_json(json& j, const std::unordered_map<Enum, Value>& m)
+{
+    j = json::object();
+    for (auto const& [key, val] : m) {
+        // Convert Enum -> string via magic_enum
+        std::string key_str = std::string(magic_enum::enum_name(key));
+        if(key_str.empty()) continue;
+        j[key_str] = val; // This calls to_json on 'val' if it’s a type with a known converter
+    }
+}
+
+template <typename Enum, typename Value>
+requires std::is_enum_v<Enum>
+void from_json(const json& j, std::unordered_map<Enum, Value>& m)
+{
+    m.clear();
+    for (auto const& [key_str, value_json] : j.items()) {
+        // Convert string -> Enum
+        auto maybe = magic_enum::enum_cast<Enum>(key_str);
+        if (!maybe.has_value()) {
+            if(typeid(Enum) == typeid(Skill)) continue;
+            throw std::invalid_argument("Invalid enum key: " + key_str
+                + " for enum type: " + demangle(typeid(Enum).name()));
+        }
+        m[maybe.value()] = value_json.get<Value>();
+    }
+}
+
+template <typename Enum>
+requires std::is_enum_v<Enum>
+void to_json(json& j, const FlagHandler<Enum>& m)
+{
+    j = json::array();
+    for (auto const& key : m.getAll()) {
+        // Convert Enum -> string via magic_enum
+        std::string key_str = std::string(magic_enum::enum_name(key));
+        if(key_str.empty()) continue;
+        j.push_back(key_str); // This calls to_json on 'val' if it’s a type with a known converter
+    }
+}
+
+template <typename Enum>
+requires std::is_enum_v<Enum>
+void from_json(const json& j, FlagHandler<Enum>& m)
+{
+    m.clear();
+    for (auto const& key_str : j) {
+        // Convert string -> Enum
+        auto key = key_str.get<std::string>();
+        auto maybe = magic_enum::enum_cast<Enum>(key);
+        if (!maybe.has_value()) {
+            if(typeid(Enum) == typeid(Skill)) continue;
+            throw std::invalid_argument("Invalid enum key: " + key
+                + " for enum type: " + demangle(typeid(Enum).name()));
+        }
+        m.set(maybe.value());
+    }
+}
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(mob_special_data, attack_type, default_pos, damnodice, damsizedice)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(time_data, birth, created, maxage, logon, played, seconds_aged)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(time_info_data, remainder, seconds, minutes, hours, day, month, year)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(weather_data, pressure, change, sky, sunlight)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(shop_buy_data, type, keywords)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(Coordinates, x, y, z)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(HasAffectFlags, affect_flags)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(HasStats, stats)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(HasID, id)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(HasExtraDescriptions, extra_descriptions)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(HasMudStrings, strings)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(HasVnum, vn)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(HasVariables, variables)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(Location, locationID, position)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(HasLocation, location, registeredLocations)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ResetCommand, type, if_flag, target, max, max_location, ex, chance, key, value)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(HasResetCommands, resetCommands)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(Zone, number, parent, name, builders, lifespan, age, reset_mode, zone_flags, launchDestination, landingSpots, dockingSpots)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(affect_t, location, modifier, specific)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(RoundDim, center, radius, zMin, zMax, r2)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(AABB, min, max)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(BoxDim, box)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(skill_data, level, perfs)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(alias_data, name, replacement, type)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(help_index_element, index, keywords, entry, duplicate, min_level)
+
+void to_json(json& j, const HasDgScripts& p);
+void from_json(const json& j, HasDgScripts& p);
+
+void to_json(json& j, const HasZone& p);
+void from_json(const json& j, HasZone& p);
+
+void to_json(json& j, const trans_data& t);
+void from_json(const json& j, trans_data& t);
+
+void to_json(json& j, const affected_type& a);
+void from_json(const json& j, affected_type& a);
+
+void to_json(json& j, const ShapeBase& p);
+void from_json(const json& j, ShapeBase& p);
+
+void to_json(json& j, const Shape& p);
+void from_json(const json& j, Shape& p);
 
 // helper type save/load...
 template <std::size_t N>
@@ -154,21 +323,23 @@ void load_zones(const std::filesystem::path &loc)
     for (auto j : load_from_file(loc, "zones.json"))
     {
         auto id = j.at("number").get<int64_t>();
-        zone_table.emplace(id, j);
+        auto z = std::make_shared<Zone>();
+        j.get_to(*z);
+        zone_table.emplace(id, z);
     }
 
     for (auto &[v, z] : zone_table)
     {
-        if (z.parent != NOTHING)
+        if (z->parent != NOTHING)
         {
-            auto it = zone_table.find(z.parent);
+            auto it = zone_table.find(z->parent);
             if (it != zone_table.end())
             {
-                it->second.children.insert(v);
+                it->second->children.insert(v);
             }
             else
             {
-                basic_mud_log("Warning: zone %d has parent %d which does not exist.", z.number, z.parent);
+                basic_mud_log("Warning: zone %d has parent %d which does not exist.", z->number, z->parent);
             }
         }
     }
@@ -180,7 +351,7 @@ static void dump_zones(const std::filesystem::path &loc)
 
     for (auto &[v, z] : zone_table)
     {
-        j.push_back(z);
+        j.push_back(*z);
     }
     dump_to_file(loc, "zones.json", j);
 }
@@ -264,7 +435,7 @@ static void dump_accounts(const std::filesystem::path &loc)
 
     for (auto &[v, r] : accounts)
     {
-        j.push_back(r);
+        j.push_back(*r);
     }
 
     dump_to_file(loc, "accounts.json", j);
@@ -275,7 +446,9 @@ void load_accounts(const std::filesystem::path &loc)
     for (auto acc : load_from_file(loc, "accounts.json"))
     {
         auto vn = acc.at("id").get<int64_t>();
-        accounts.emplace(vn, acc);
+        auto a = std::make_shared<Account>();
+        acc.get_to(*a);
+        accounts.emplace(vn, a);
     }
 }
 
@@ -327,7 +500,7 @@ void to_json(json &j, const DgScript &t)
 void from_json(const json &j, DgScript &t)
 {
     auto vn = j["vn"].get<int>();
-    t.proto = &trig_index.at(vn);
+    t.proto = trig_index.at(vn).get();
 
     if (j.contains("state"))
         t.state = j["state"].get<DgScriptState>();
@@ -347,8 +520,9 @@ void load_dgscript_prototypes(const std::filesystem::path &loc)
     for (auto j : load_from_file(loc, "dgScriptPrototypes.json"))
     {
         auto id = j["vn"].get<int64_t>();
-        auto &t = trig_index[id];
-        j.get_to(t);
+        auto t = std::make_shared<DgScriptPrototype>();
+        j.get_to(*t);
+        trig_index.emplace(id, t);
     }
 }
 
@@ -357,7 +531,7 @@ static void dump_dgscript_prototypes(const std::filesystem::path &loc)
     json j;
     for (auto &[v, t] : trig_index)
     {
-        j.push_back(t);
+        j.push_back(*t);
     }
     dump_to_file(loc, "dgScriptPrototypes.json", j);
 }
@@ -402,7 +576,7 @@ void load_dgscripts(const std::filesystem::path &loc)
     {
         auto id = j["vn"].get<int64_t>();
 
-        auto u = Room::registry.at(id);
+        auto u = Room::registry.at(id).get();
 
         for (auto d : j["scripts"])
         {
@@ -410,7 +584,7 @@ void load_dgscripts(const std::filesystem::path &loc)
             auto r = std::make_shared<DgScript>();
             d["data"].get_to(*r);
             u->scripts.emplace(vn, r);
-            r->owner.reset(u.get());
+            r->owner.reset(u);
             u->trigger_types |= GET_TRIG_TYPE(r);
         }
     }
@@ -534,19 +708,19 @@ void to_json(json &j, const Shop &s)
         j["profit_sell"] = s.profit_sell;
     if (!s.type.empty())
         j["type"] = s.type;
-    if (s.no_such_item1 && strlen(s.no_such_item1))
+    if (!s.no_such_item1.empty())
         j["no_such_item1"] = s.no_such_item1;
-    if (s.no_such_item2 && strlen(s.no_such_item2))
+    if (!s.no_such_item2.empty())
         j["no_such_item2"] = s.no_such_item2;
-    if (s.missing_cash1 && strlen(s.missing_cash1))
+    if (!s.missing_cash1.empty())
         j["missing_cash1"] = s.missing_cash1;
-    if (s.missing_cash2 && strlen(s.missing_cash2))
+    if (!s.missing_cash2.empty())
         j["missing_cash2"] = s.missing_cash2;
-    if (s.do_not_buy && strlen(s.do_not_buy))
+    if (!s.do_not_buy.empty())
         j["do_not_buy"] = s.do_not_buy;
-    if (s.message_buy && strlen(s.message_buy))
+    if (!s.message_buy.empty())
         j["message_buy"] = s.message_buy;
-    if (s.message_sell && strlen(s.message_sell))
+    if (!s.message_sell.empty())
         j["message_sell"] = s.message_sell;
     if (s.temper1)
         j["temper1"] = s.temper1;
@@ -579,19 +753,19 @@ void from_json(const json &j, Shop &s)
     if (j.contains("type"))
         s.type = j["type"];
     if (j.contains("no_such_item1"))
-        s.no_such_item1 = strdup(j["no_such_item1"].get<std::string>().c_str());
+        j.at("no_such_item1").get_to(s.no_such_item1);
     if (j.contains("no_such_item2"))
-        s.no_such_item2 = strdup(j["no_such_item2"].get<std::string>().c_str());
+        j.at("no_such_item2").get_to(s.no_such_item2);
     if (j.contains("missing_cash1"))
-        s.missing_cash1 = strdup(j["missing_cash1"].get<std::string>().c_str());
+        j.at("missing_cash1").get_to(s.missing_cash1);
     if (j.contains("missing_cash2"))
-        s.missing_cash2 = strdup(j["missing_cash2"].get<std::string>().c_str());
+        j.at("missing_cash2").get_to(s.missing_cash2);
     if (j.contains("do_not_buy"))
-        s.do_not_buy = strdup(j["do_not_buy"].get<std::string>().c_str());
+        j.at("do_not_buy").get_to(s.do_not_buy);
     if (j.contains("message_buy"))
-        s.message_buy = strdup(j["message_buy"].get<std::string>().c_str());
+        j.at("message_buy").get_to(s.message_buy);
     if (j.contains("message_sell"))
-        s.message_sell = strdup(j["message_sell"].get<std::string>().c_str());
+        j.at("message_sell").get_to(s.message_sell);
     if (j.contains("temper1"))
         s.temper1 = j["temper1"];
 
@@ -624,7 +798,9 @@ void load_shops(const std::filesystem::path &loc)
     for (auto j : load_from_file(loc, "shops.json"))
     {
         auto id = j["vnum"].get<int64_t>();
-        shop_index.emplace(id, j);
+        auto s = std::make_shared<Shop>();
+        j.get_to(*s);
+        shop_index.emplace(id, s);
     }
 }
 
@@ -633,7 +809,7 @@ static void dump_shops(const std::filesystem::path &loc)
     json j;
     for (auto &[v, s] : shop_index)
     {
-        j.push_back(s);
+        j.push_back(*s);
     }
     dump_to_file(loc, "shops.json", j);
 }
@@ -686,7 +862,7 @@ static void dump_guilds(const std::filesystem::path &loc)
     json j;
     for (auto &[v, g] : guild_index)
     {
-        j.push_back(g);
+        j.push_back(*g);
     }
     dump_to_file(loc, "guilds.json", j);
 }
@@ -696,7 +872,9 @@ void load_guilds(const std::filesystem::path &loc)
     for (auto j : load_from_file(loc, "guilds.json"))
     {
         auto id = j["vnum"].get<int64_t>();
-        guild_index.emplace(id, j);
+        auto g = std::make_shared<Guild>();
+        j.get_to(*g);
+        guild_index.emplace(id, g);
     }
 }
 
@@ -781,21 +959,6 @@ void dump_globaldata(const std::filesystem::path &loc)
     dump_to_file(loc, "globaldata.json", j);
 }
 
-void to_json(json &j, const struct extra_descr_data &e)
-{
-    if (e.keyword && strlen(e.keyword))
-        j["keyword"] = e.keyword;
-    if (e.description && strlen(e.description))
-        j["description"] = e.description;
-}
-
-void from_json(const json &j, struct extra_descr_data &e)
-{
-    if (j.contains("keyword"))
-        e.keyword = strdup(j["keyword"].get<std::string>().c_str());
-    if (j.contains("description"))
-        e.description = strdup(j["description"].get<std::string>().c_str());
-}
 
 void to_json(json &j, const ThingPrototype &u)
 {
@@ -808,13 +971,7 @@ void to_json(json &j, const ThingPrototype &u)
         j["look_description"] = u.look_description;
     if (u.short_description && strlen(u.short_description))
         j["short_description"] = u.short_description;
-    for (auto ex = u.ex_description; ex; ex = ex->next)
-    {
-        if (ex->keyword && strlen(ex->keyword) && ex->description && strlen(ex->description))
-        {
-            j["ex_description"].push_back(*ex);
-        }
-    }
+    if(!u.extra_descriptions.empty()) j["extra_descriptions"] = u.extra_descriptions;
     if (!u.proto_script.empty())
         j["proto_script"] = u.proto_script;
     if (!u.stats.empty())
@@ -835,17 +992,8 @@ void from_json(const json &j, ThingPrototype &u)
     if (j.contains("short_description"))
         u.short_description = strdup(j["short_description"].get<std::string>().c_str());
 
-    if (j.contains("ex_description"))
-    {
-        auto &e = j["ex_description"];
-        for (auto ex = e.rbegin(); ex != e.rend(); ex++)
-        {
-            auto new_ex = new extra_descr_data();
-            ex->get_to(*new_ex);
-            new_ex->next = u.ex_description;
-            u.ex_description = new_ex;
-        }
-    }
+    if (j.contains("extra_descriptions"))
+        j["extra_descriptions"].get_to(u.extra_descriptions);
 
     if (j.contains("proto_script"))
     {
@@ -1016,7 +1164,9 @@ void load_grid_templates(const std::filesystem::path &loc)
     for (auto j : load_from_file(loc, "gridTemplates.json"))
     {
         auto vn = j["vn"].get<int>();
-        auto p = gridTemplates.emplace(vn, j);
+        auto t = std::make_shared<GridTemplate>();
+        j.get_to(*t);
+        auto p = gridTemplates.emplace(vn, t);
     }
 }
 
@@ -1105,7 +1255,7 @@ static void dump_grid_templates(const std::filesystem::path &loc)
 
     for (auto &[v, r] : gridTemplates)
     {
-        jdata.push_back(r);
+        jdata.push_back(*r);
     }
     dump_to_file(loc, "gridTemplates.json", jdata);
 }
@@ -1207,27 +1357,27 @@ void from_json(const json &j, ObjectPrototype &o)
             counter++;
         }
     }
-
-    if ((GET_OBJ_TYPE(&o) == ITEM_PORTAL ||
-         GET_OBJ_TYPE(&o) == ITEM_HATCH) &&
-        (!GET_OBJ_VAL(&o, VAL_DOOR_DCLOCK) ||
-         !GET_OBJ_VAL(&o, VAL_DOOR_DCHIDE)))
+    auto otype = static_cast<int>(o.type_flag);
+    if ((otype == ITEM_PORTAL ||
+         otype == ITEM_HATCH) &&
+        (!o.getBaseStat<int>(VAL_DOOR_DCLOCK) ||
+         !o.getBaseStat<int>(VAL_DOOR_DCHIDE)))
     {
         for (const auto v : {VAL_DOOR_DCLOCK, VAL_DOOR_DCHIDE})
         {
-            SET_OBJ_VAL(&o, v, 20);
+            o.setBaseStat(v, 20);
         }
     }
 
     /* check to make sure that weight of containers exceeds curr. quantity */
-    if (GET_OBJ_TYPE(&o) == ITEM_DRINKCON ||
-        GET_OBJ_TYPE(&o) == ITEM_FOUNTAIN)
+    if (otype == ITEM_DRINKCON ||
+        otype == ITEM_FOUNTAIN)
     {
-        if (GET_OBJ_WEIGHT(&o) < GET_OBJ_VAL(&o, VAL_FOUNTAIN_HOWFULL))
-            o.setBaseStat<weight_t>("weight", GET_OBJ_VAL(&o, VAL_FOUNTAIN_HOWFULL) + 5);
+        if (o.getBaseStat("weight") < o.getBaseStat(VAL_FOUNTAIN_HOWFULL))
+            o.setBaseStat<weight_t>("weight", o.getBaseStat(VAL_FOUNTAIN_HOWFULL) + 5);
     }
     /* *** make sure portal objects have their timer set correctly *** */
-    if (GET_OBJ_TYPE(&o) == ITEM_PORTAL)
+    if (otype == ITEM_PORTAL)
     {
         o.setBaseStat<int>("timer", -1);
     }
@@ -1274,13 +1424,9 @@ void load_item_prototypes(const std::filesystem::path &loc)
     for (auto j : load_from_file(loc, "itemPrototypes.json"))
     {
         auto id = j["vn"].get<int64_t>();
-        if (id <= 0)
-        {
-            throw std::runtime_error("Invalid item prototype vnum: " + std::to_string(id));
-        }
-        auto p = obj_proto.emplace(id, j);
-        auto &i = obj_index[id];
-        i.vn = id;
+        auto i = std::make_shared<ObjectPrototype>();
+        j.get_to(*i);
+        auto p = obj_proto.emplace(id, i);
     }
 }
 
@@ -1405,11 +1551,7 @@ static void dump_item_prototypes(const std::filesystem::path &loc)
     json j;
     for (auto &[v, o] : obj_proto)
     {
-        if (v <= 0)
-            throw std::runtime_error("Invalid item prototype vnum: " + std::to_string(v));
-        if (o.vn <= 0)
-            throw std::runtime_error("Invalid item prototype vn: " + std::to_string(o.vn));
-        j.push_back(o);
+        j.push_back(*o);
     }
     dump_to_file(loc, "itemPrototypes.json", j);
 }
@@ -1495,7 +1637,7 @@ void to_json(json& j, const HasZone& p) {
 
 void from_json(const json& j, HasZone& p) {
     if (j.contains("zone"))
-        p.zone.reset(&zone_table.at(j["zone"].get<zone_vnum>()));
+        p.zone.reset(zone_table.at(j["zone"].get<zone_vnum>()).get());
 }
 
 void to_json(json& j, const HasDgScripts& p) {
@@ -1917,11 +2059,7 @@ static void dump_npc_prototypes(const std::filesystem::path &loc)
 
     for (auto &[v, n] : mob_proto)
     {
-        if (v <= 0)
-            throw std::runtime_error("Invalid NPC prototype vnum: " + std::to_string(v));
-        if (n.vn <= 0)
-            throw std::runtime_error("Invalid NPC prototype vn: " + std::to_string(n.vn));
-        j.push_back(n);
+        j.push_back(*n);
     }
     dump_to_file(loc, "npcPrototypes.json", j);
 }
@@ -1936,7 +2074,7 @@ void load_characters_initial(const std::filesystem::path &loc)
         j["data"].get_to(*c);
         if (auto isPlayer = players.find(id); isPlayer != players.end())
         {
-            isPlayer->second.character = c.get();
+            isPlayer->second->character = c.get();
         }
         Character::registry.emplace(id, c);
     }
@@ -1968,9 +2106,9 @@ void load_npc_prototypes(const std::filesystem::path &loc)
         {
             throw std::runtime_error("Invalid NPC prototype vnum: " + std::to_string(id));
         }
-        auto p = mob_proto.emplace(id, j);
-        auto &i = mob_index[id];
-        i.vn = id;
+        auto n = std::make_shared<CharacterPrototype>();
+        j.get_to(*n);
+        auto p = mob_proto.emplace(id, n);
     }
 }
 
@@ -2018,7 +2156,7 @@ void from_json(const json &j, PlayerData &p)
         auto accID = j["account"].get<vnum>();
         auto accFind = accounts.find(accID);
         if (accFind != accounts.end())
-            p.account = &accFind->second;
+            p.account = accFind->second.get();
     }
 
     if (j.contains("aliases"))
@@ -2068,7 +2206,7 @@ static void dump_players(const std::filesystem::path &loc)
 
     for (auto &[v, r] : players)
     {
-        j.push_back(r);
+        j.push_back(*r);
     }
     dump_to_file(loc, "players.json", j);
 }
@@ -2078,7 +2216,9 @@ void load_players(const std::filesystem::path &loc)
     for (auto j : load_from_file(loc, "players.json"))
     {
         auto id = j["id"].get<int64_t>();
-        players.emplace(id, j);
+        auto p = std::make_shared<PlayerData>();
+        j.get_to(*p);
+        players.emplace(id, p);
     }
 }
 
@@ -2161,71 +2301,17 @@ void from_json(const json &j, Shape &r) {
     from_json(j, static_cast<ShapeBase&>(r));
 }
 
-void to_json(json &j, const struct help_index_element &r)
-{
-    if (r.index && strlen(r.index))
-        j["index"] = r.index;
-    if (r.keywords && strlen(r.keywords))
-        j["keywords"] = r.keywords;
-    if (r.entry && strlen(r.entry))
-        j["entry"] = r.entry;
-    if (r.duplicate)
-        j["duplicate"] = r.duplicate;
-    if (r.min_level)
-        j["min_level"] = r.min_level;
-}
-
-void from_json(const json &j, struct help_index_element &r)
-{
-    if (j.contains("index"))
-    {
-        auto s = j["index"].get<std::string>();
-        if (r.index)
-            free(r.index);
-        r.index = strdup(s.c_str());
-    }
-    if (j.contains("keywords"))
-    {
-        auto s = j["keywords"].get<std::string>();
-        if (r.keywords)
-            free(r.keywords);
-        r.keywords = strdup(s.c_str());
-    }
-    if (j.contains("entry"))
-    {
-        auto s = j["entry"].get<std::string>();
-        if (r.entry)
-            free(r.entry);
-        r.entry = strdup(s.c_str());
-    }
-    if (j.contains("duplicate"))
-        r.duplicate = j["duplicate"].get<int>();
-    if (j.contains("min_level"))
-        r.min_level = j["min_level"].get<int>();
-}
-
 static void dump_help(const std::filesystem::path &loc)
 {
     auto j = json::array();
-    for (auto i = 0; i < top_of_helpt; i++)
-    {
-        j.push_back(help_table[i]);
-    }
+    to_json(j, help_table);
     dump_to_file(loc, "help.json", j);
 }
 
 void load_help(const std::filesystem::path &loc)
 {
     auto data = load_from_file(loc, "help.json");
-    top_of_helpt = data.size();
-
-    // allocate the help_table with the size of top_of_helpt
-    CREATE(help_table, struct help_index_element, top_of_helpt);
-    auto i = 0;
-    for (auto j : data)
-    {
-        from_json(j, help_table[i++]);
-    }
+    data.get_to(help_table);
 }
 
 static void dump_assemblies(const std::filesystem::path &loc)
@@ -2282,18 +2368,19 @@ void load_assemblies(const std::filesystem::path &loc)
 // Everything should be already validated several times over.
 PlayerData *create_player_character(int account_id, const json &j)
 {
-    auto &acc = accounts[account_id];
+    auto &acc = accounts.at(account_id);
     auto ch = std::make_shared<Character>();
     ch->id = getNextID(lastCharacterID, Character::registry);
-    auto &p = players[ch->id];
-    p.id = ch->id;
-    p.account = &acc;
-    p.character = ch.get();
-    p.name = j.at("name").get<std::string>();
-    ch->strings["name"] = p.name;
+    auto p = std::make_shared<PlayerData>();
+    players.emplace(ch->id, p);
+    p->id = ch->id;
+    p->account = acc.get();
+    p->character = ch.get();
+    p->name = j.at("name").get<std::string>();
+    ch->strings["name"] = p->name;
     ch->isPC = true;
 
-    acc.characters.push_back(ch->id);
+    acc->characters.push_back(ch->id);
 
     if (j.contains("sex"))
         ch->sex = j["sex"];
@@ -2318,9 +2405,9 @@ PlayerData *create_player_character(int account_id, const json &j)
 
     init_char(ch.get());
 
-    send_to_imm("New character created, %s, by user, %s.", GET_NAME(ch.get()), acc.name.c_str());
+    send_to_imm("New character created, %s, by user, %s.", GET_NAME(ch.get()), acc->name.c_str());
 
-    return &p;
+    return p.get();
 }
 
 void runSave()
@@ -2410,12 +2497,13 @@ void rest_post_script(int accountID, int scriptID, const std::string &data)
         auto &trig = trig_index.at(scriptID);
         // TODO: Post the data to the trigger
 
-        basic_mud_log("%s updated DgScript %d: '%s'", acc.name.c_str(), scriptID, trig.name);
+        basic_mud_log("%s updated DgScript %d: '%s'", acc->name.c_str(), scriptID, trig->name);
     }
     else
     {
-        auto &trig = trig_index[scriptID];
-        j.get_to(trig);
-        basic_mud_log("%s created DgScript %d: '%s'", acc.name.c_str(), scriptID, trig.name);
+        auto t = std::make_shared<DgScriptPrototype>();
+        j.get_to(*t);
+        trig_index.emplace(scriptID, t);
+        basic_mud_log("%s created DgScript %d: '%s'", acc->name.c_str(), scriptID, t->name);
     }
 }

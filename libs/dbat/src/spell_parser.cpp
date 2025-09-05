@@ -7,8 +7,8 @@
  *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
  *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
  ************************************************************************ */
-#include "dbat/Character.h"
-#include "dbat/Object.h"
+#include "dbat/CharacterUtils.h"
+#include "dbat/ObjectUtils.h"
 #include "dbat/spell_parser.h"
 #include "dbat/send.h"
 #include "dbat/interpreter.h"
@@ -20,6 +20,11 @@
 #include "dbat/fight.h"
 #include "dbat/act.other.h"
 #include "dbat/class.h"
+#include "dbat/utils.h"
+
+#include "dbat/const/AdminLevel.h"
+#include "dbat/const/Domain.h"
+#include "dbat/const/School.h"
 
 /* extern globals */
 

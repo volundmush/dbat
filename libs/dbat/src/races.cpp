@@ -1,7 +1,8 @@
-#include "dbat/Character.h"
-#include "dbat/Object.h"
-
 #include "dbat/races.h"
+#include "dbat/CharacterUtils.h"
+#include "dbat/ObjectUtils.h"
+
+
 #include "dbat/utils.h"
 #include "dbat/interpreter.h"
 #include "dbat/spells.h"
@@ -9,6 +10,10 @@
 #include "dbat/class.h"
 #include "dbat/fight.h"
 #include "dbat/weather.h"
+
+#include "dbat/const/AdminLevel.h"
+#include "dbat/const/Wield.h"
+#include "dbat/const/Environment.h"
 
 const char *race_abbrevs[NUM_RACES + 1] = {
     "Hum",

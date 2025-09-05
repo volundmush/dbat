@@ -7,9 +7,9 @@
  *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
  *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
  ************************************************************************ */
-#include "dbat/Character.h"
-#include "dbat/Object.h"
-#include "dbat/Room.h"
+#include "dbat/CharacterUtils.h"
+#include "dbat/ObjectUtils.h"
+#include "dbat/RoomUtils.h"
 #include "dbat/Destination.h"
 #include "dbat/Descriptor.h"
 #include "dbat/Account.h"
@@ -31,6 +31,12 @@
 #include "dbat/class.h"
 #include "dbat/players.h"
 #include "dbat/act.informative.h"
+#include "dbat/filter.h"
+#include "dbat/Random.h"
+#include "dbat/utils.h"
+
+#include "dbat/const/Gauntlet.h"
+#include "dbat/const/WearSlot.h"
 
 /* local functions */
 
@@ -334,9 +340,10 @@ SPECIAL(gauntlet_end) /* Jamdog - 20th Feb 2007 */
     if (IS_NPC(ch))   /* Mobs can move about - Jamdog 20th July 2006   */
         return false; /* This also allows following pets!              */
 
-    if (!EXIT(ch, cmd - 1))
+    auto ex = EXIT(ch, cmd - 1);
+    if (!ex)
         return false;
-    if (EXIT_FLAGGED(EXIT(ch, cmd - 1), EX_CLOSED))
+    if (ex->exit_flags[EX_CLOSED])
         return false;
 
     for (i = 0; gauntlet_info[i][0] != -1; i++)
@@ -387,12 +394,13 @@ SPECIAL(gauntlet_rest) /* Jamdog - 20th Feb 2007 */
     {
         for (door = 0; door < NUM_OF_DIRS; door++)
         {
-            if (!EXIT(ch, door))
+            auto ex = EXIT(ch, door);
+            if (!ex)
                 continue;
-            if (EXIT_FLAGGED(EXIT(ch, door), EX_CLOSED))
+            if (ex->exit_flags[EX_CLOSED])
                 continue;
 
-            if ((EXIT(ch, door) == gauntlet_info[i][1]) && (door == (cmd - 1)))
+            if ((ex == gauntlet_info[i][1]) && (door == (cmd - 1)))
             {
                 nomob = true;
 
@@ -1199,7 +1207,7 @@ SPECIAL(bank)
             }
             auto id = vict->id;
             auto &p = players.at(id);
-            auto &c = p.account->characters;
+            auto &c = p->account->characters;
             auto found = std::find_if(c.begin(), c.end(), [&](auto i)
                                       { return i == id; });
             if (found != c.end())

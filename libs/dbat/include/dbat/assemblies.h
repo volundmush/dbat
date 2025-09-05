@@ -5,6 +5,8 @@ struct Character;
 typedef struct assembly_data ASSEMBLY;
 typedef struct component_data COMPONENT;
 
+
+
 struct assembly_data {
     long lVnum;                  /* Vnum of the object assembled. */
     long lNumComponents;         /* Number of components. */
@@ -19,6 +21,9 @@ struct component_data {
     bool bInRoom;                /* Component in room, not inven. */
     long lVnum;                  /* Vnum of the component object. */
 };
+
+extern long g_lNumAssemblies;
+extern ASSEMBLY *g_pAssemblyTable;
 
 /* ******************************************************************** *
  * Preprocessor constants.                                             *

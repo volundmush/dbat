@@ -1,18 +1,18 @@
-#include "dbat/Object.h"
+#include "dbat/ObjectUtils.h"
 #include "dbat/ObjectPrototype.h"
-#include "dbat/Character.h"
+#include "dbat/CharacterUtils.h"
 #include "dbat/Zone.h"
 #include "dbat/class.h"
-#include "dbat/genolc.h"
-#include "dbat/genzon.h"
 #include "dbat/utils.h"
 #include "dbat/handler.h"
 #include "dbat/Shop.h"
 #include "dbat/filter.h"
 #include "dbat/dg_scripts.h"
 #include "dbat/act.informative.h"
+#include "dbat/const/Environment.h"
 
 std::unordered_map<int64_t, std::shared_ptr<Object>> Object::registry;
+SubscriptionManager<Object> objectSubscriptions;
 
 Object::Object()
 {
@@ -151,7 +151,7 @@ std::vector<trig_vnum> Object::getProtoScript() const
     auto v = getVnum();
     if (obj_proto.contains(v))
     {
-        return obj_proto.at(v).proto_script;
+        return obj_proto.at(v)->proto_script;
     }
     return {};
 }
@@ -160,7 +160,7 @@ ObjectPrototype *Object::getProto() const
 {
     if (obj_proto.contains(vn))
     {
-        return &obj_proto.at(vn);
+        return obj_proto.at(vn).get();
     }
     return nullptr;
 }
@@ -333,16 +333,7 @@ Object &Object::operator=(const ObjectPrototype &other)
         strings["short_description"] = other.short_description;
     affect_flags = other.affect_flags;
     stats = other.stats;
-    extra_descriptions.clear();
-    if (other.ex_description)
-    {
-        for (auto e = other.ex_description; e; e = e->next)
-        {
-            auto &ex = extra_descriptions.emplace_back();
-            ex.keyword = e->keyword;
-            ex.description = e->description;
-        }
-    }
+    extra_descriptions = other.extra_descriptions;
 
     // item proto data fields
     type_flag = other.type_flag;

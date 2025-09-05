@@ -5,10 +5,9 @@
  * -------------------------------------------------------------------- *
  * 1999 MAY 07 gdavis/azrael@laker.net Initial implementation.         *
  * ******************************************************************** */
-#include "dbat/Character.h"
-#include "dbat/Object.h"
-#include "dbat/ObjectPrototype.h"
-#include "dbat/Room.h"
+#include "dbat/CharacterUtils.h"
+#include "dbat/ObjectUtils.h"
+#include "dbat/RoomUtils.h"
 #include "dbat/Destination.h"
 #include "dbat/Descriptor.h"
 #include "dbat/assemblies.h"
@@ -16,6 +15,7 @@
 #include "dbat/comm.h"
 #include "dbat/handler.h"
 #include "dbat/constants.h"
+#include "dbat/utils.h"
 
 /* Local global variables. */
 long g_lNumAssemblies = 0;
@@ -55,11 +55,11 @@ void assemblyListToChar(Character *pCharacter, int type)
         }
         else
         {
-            if (type == 0 || type == static_cast<int>(obj_proto.at(lRnum).type_flag))
+            if (type == 0 || type == static_cast<int>(obj_proto.at(lRnum)->type_flag))
             {
                 sprinttype(g_pAssemblyTable[i].uchAssemblyType, AssemblyTypes, szAssmType, sizeof(szAssmType));
                 sprintf(szBuffer, "[%5ld] %s (%s)\r\n", g_pAssemblyTable[i].lVnum,
-                        obj_proto.at(lRnum).short_description, szAssmType);
+                        obj_proto.at(lRnum)->short_description, szAssmType);
                 pCharacter->sendText(szBuffer);
 
                 if (GET_ADMLEVEL(pCharacter) > 0)
@@ -76,7 +76,7 @@ void assemblyListToChar(Character *pCharacter, int type)
                         {
                             sprintf(szBuffer, " %5ld: %-20.20s Extract=%-3.3s InRoom=%-3.3s\r\n",
                                     +g_pAssemblyTable[i].pComponents[j].lVnum,
-                                    obj_proto.at(lRnum).short_description,
+                                    obj_proto.at(lRnum)->short_description,
                                     (g_pAssemblyTable[i].pComponents[j].bExtract ? "Yes" : "No"),
                                     (g_pAssemblyTable[i].pComponents[j].bInRoom ? "Yes" : "No"));
                             pCharacter->sendText(szBuffer);
@@ -396,7 +396,7 @@ long assemblyFindAssembly(const char *pszAssemblyName)
     {
         if ((lRnum = real_object(g_pAssemblyTable[i].lVnum)) < 0)
             basic_mud_log("SYSERR: assemblyFindAssembly(): Invalid vnum #%ld in assembly table.", g_pAssemblyTable[i].lVnum);
-        else if (isname(pszAssemblyName, obj_proto.at(lRnum).name))
+        else if (isname(pszAssemblyName, obj_proto.at(lRnum)->name))
             return (g_pAssemblyTable[i].lVnum);
     }
 

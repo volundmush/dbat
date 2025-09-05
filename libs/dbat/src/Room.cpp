@@ -2,12 +2,10 @@
 #include "dbat/Destination.h"
 #include "dbat/Object.h"
 #include "dbat/Descriptor.h"
-#include "dbat/Character.h"
-#include "dbat/genwld.h"
+#include "dbat/CharacterUtils.h"
 #include "dbat/utils.h"
 #include "dbat/db.h"
 #include "dbat/handler.h"
-#include "dbat/genolc.h"
 #include "dbat/Shop.h"
 #include "dbat/constants.h"
 #include "dbat/planet.h"
@@ -16,8 +14,12 @@
 #include "dbat/dg_scripts.h"
 #include "dbat/send.h"
 #include "dbat/act.wizard.h"
+#include "dbat/Random.h"
+#include "dbat/const/Environment.h"
+#include "dbat/ID.h"
 
 std::unordered_map<int, std::shared_ptr<Room>> Room::registry;
+SubscriptionManager<Room> roomSubscriptions;
 
 Room::Room() : AbstractLocation()
 {
@@ -168,7 +170,7 @@ std::vector<trig_vnum> Room::getProtoScript() const
 // Also, since unit_data::getName() takes no arguments, you cannot overload it with a const Coordinates&
 // unless you want to provide a new interface. If you want to call the base version, do:
 
-const std::vector<ExtraDescription> &Room::getExtraDescription(const Coordinates &coor) const
+ExtraDescriptionViews Room::getExtraDescription(const Coordinates &coor) const
 {
     return HasExtraDescriptions::getExtraDescription();
 }

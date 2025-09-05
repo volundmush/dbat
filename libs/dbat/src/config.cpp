@@ -16,6 +16,7 @@
 
 #include "dbat/config.h"
 #include "dbat/interpreter.h"    /* alias_data definition for structs.h */
+#include "dbat/const/AdminLevel.h"
 
 /*
  * Update:  The following constants and variables are now the default values
@@ -115,24 +116,7 @@ int HIGHPCOUNT = 0;
 time_t PCOUNTDATE = 0;
 time_t PCOUNTDAY = 0;
 /* This is for the dragon ball system */
-int SELFISHMETER = 0;
-int SHADOW_DRAGON1 = -1;
-int SHADOW_DRAGON2 = -1;
-int SHADOW_DRAGON3 = -1;
-int SHADOW_DRAGON4 = -1;
-int SHADOW_DRAGON5 = -1;
-int SHADOW_DRAGON6 = -1;
-int SHADOW_DRAGON7 = -1;
 
-int DBALL_HUNTER1 = -1;
-int DBALL_HUNTER2 = -1;
-int DBALL_HUNTER3 = -1;
-int DBALL_HUNTER4 = -1;
-
-int DBALL_HUNTER1_VNUM = 88;
-int DBALL_HUNTER2_VNUM = 89;
-int DBALL_HUNTER3_VNUM = 0;
-int DBALL_HUNTER4_VNUM = 0;
 /* End dragon ball system stuff       */
 
 /*  how many people can get into a tunnel?  The default is two, but there
@@ -141,12 +125,12 @@ int DBALL_HUNTER4_VNUM = 0;
 int tunnel_size = 2;
 
 /* exp change limits */
-int max_exp_gain = 1000000;    /* max gainable per kill */
-int max_exp_loss = 250000;    /* max losable per death */
+int max_exp_gain = 100000000;    /* max gainable per kill */
+int max_exp_loss = 5000000;    /* max losable per death */
 
 /* number of tics (usually 75 seconds) before PC/NPC corpses decompose */
-int max_npc_corpse_time = 5;
-int max_pc_corpse_time = 10;
+int max_npc_corpse_time = 6;
+int max_pc_corpse_time = 12;
 
 /* How many ticks before a player is sent to the void or idle-rented. */
 int idle_void = 8;
@@ -179,7 +163,7 @@ int pulse_current = 10;
  * able to carry around things like boards.  That's not necessarily a bad
  * thing, but this will be left at a default of 'NO' for historic reasons.
  */
-int load_into_inventory = false;
+int load_into_inventory = true;
 
 /* "okay" etc. */
 const char *OK = "Okay.\r\n";
@@ -202,7 +186,7 @@ int track_through_doors = true;
  * You should set this to whatever is appropriate for your doing your
  * highest level areas without much difficulty. No risk, no reward.
  */
-int level_cap = 101;
+int level_cap = 106;
 
 /*
  * This enables object stacking - in the same manner as mob stacking, rather
@@ -224,7 +208,7 @@ int show_mob_stacking = true;
  *  This allows aggressive mobs to initiate a fight with other mobs. A
  *  value of 0 means standard behaviour.
  */
-int mob_fighting = false;
+int mob_fighting = true;
 
 /* IMC Option - is IMC turned on? */
 int imc_is_enabled = false;
@@ -268,7 +252,7 @@ int crash_file_timeout = 10;
 int rent_file_timeout = 30;
 
 /* Do you want to automatically wipe players who've been gone too long? */
-int auto_pwipe = true;
+int auto_pwipe = false;
 
 /* Autowipe deletion criteria
    This struct holds information used to determine which players to wipe
@@ -309,7 +293,7 @@ int selfdelete_fastwipe = true;
 room_vnum death_start_room = 6000;
 
 /* virtual number of room that mortals should enter at */
-room_vnum mortal_start_room = 2;
+room_vnum mortal_start_room = 100;
 
 /* virtual number of room that immorts should enter at by default */
 room_vnum immort_start_room = 2;
@@ -322,9 +306,9 @@ room_vnum frozen_start_room = 2;
  * do_drop of act.item.c if you change the number of non-NOWHERE
  * donation rooms.
  */
-room_vnum donation_room_1 = 3063;
-room_vnum donation_room_2 = NOWHERE;    /* unused - room for expansion */
-room_vnum donation_room_3 = NOWHERE;    /* unused - room for expansion */
+room_vnum donation_room_1 = 6;
+room_vnum donation_room_2 = 5;    /* unused - room for expansion */
+room_vnum donation_room_3 = 5;    /* unused - room for expansion */
 
 
 /****************************************************************************/
@@ -381,7 +365,7 @@ const char *LOGNAME = nullptr;
 int max_playing = 300;
 
 /* maximum size of bug, typo and idea files in bytes (to prevent bombing) */
-int max_filesize = 50000;
+int max_filesize = 100000;
 
 /* maximum number of password attempts before disconnection */
 int max_bad_pws = 3;
@@ -432,27 +416,25 @@ int auto_save_olc = 1;
 int use_new_socials = 1;
 
 const char *MENU =
-        "\r\n"
-        "@GWelcome to @YCircleMUD!@n\r\n"
-        "@B0@W) @CExit from @YCircleMUD.@n\r\n"
-        "@B1@W) @CEnter the game.@n\r\n"
-        "@B2@W) @CEnter description.@n\r\n"
-        "@B3@W) @CGame Info (Please Read)@n\r\n"
-        "@B4@W) @CChange password.@n\r\n"
-        "@B5@W) @CDelete this character.@n\r\n"
-        "\r\n"
-        "   @WMake your choice: @n";
+"@WWelcome to @DD@wr@ca@Cg@Y(@R*@Y)@Dn@Cb@Da@cl@Cl @DA@wd@cv@Ce@Wnt @DT@wr@cu@Ct@Wh@n\r\n"
+"@r-----------------------------------@n\r\n"
+"@W0@B) @CExit from @DD@wr@ca@Cg@Y(@R*@Y)@Dn@Cb@Da@cl@Cl @DA@wd@cv@Ce@Wnt @DT@wr@cu@Ct@Wh@n\r\n"
+"@W1@B) @CEnter the game.\r\n"
+"@W2@B) @CEnter description.\r\n"
+"@W3@B) @CReturn to @D(@RUser Menu@D)@n\r\n"
+"@W4@B) @CDelete this character.\r\n\r\n"
+"  @D[@w Make your choice@D ]@n\r\n";
 
 
 const char *WELC_MESSG =
         "\r\n"
-        "Welcome to the land of CircleMUD!  May your visit here be... Interesting."
-        "\r\n\r\n";
+        "@WWelcome to @DD@wr@ca@Cg@Y(@R*@Y)@Dn@Cb@Da@cl@Cl @DA@wd@cv@Ce@Wnt @DT@wr@cu@Ct@Wh!@n\r\n";
 
 const char *START_MESSG =
-        "Welcome.  This is your new CircleMUD character!  You can now earn gold,\r\n"
-        "gain experience, find weapons and equipment, and much more -- while\r\n"
-        "meeting people from around the world!\r\n";
+        "@WWelcome.  This is your new @DD@wr@ca@Cg@Y(@R*@Y)@Dn@Cb@Da@cl@Cl @DA@wd@cv@Ce@Wnt @DT@wr@cu@Ct@Wh character.  You can now\r\n"
+"earn zenni, gain experience, find equipment, explore the vast reaches of the\r\n"
+"galaxy, fight for justice or self, and live out your most entertaining\r\n"
+"Dragonball Z fantasies.  @n\r\n";
 
 /****************************************************************************/
 /****************************************************************************/

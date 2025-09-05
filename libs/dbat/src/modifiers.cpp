@@ -2,6 +2,12 @@
 #include "dbat/constants.h"
 #include "dbat/spells.h"
 
+#include "dbat/const/Position.h"
+#include "dbat/const/CharacterProperties.h"
+
+#include <magic_enum/magic_enum.hpp>
+#include <magic_enum/magic_enum_utility.hpp>
+
 extern std::unordered_map<int, std::vector<character_affect_type>> pos_affects;
 
 std::string affect_t::locName()

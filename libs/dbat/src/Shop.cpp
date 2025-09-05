@@ -12,11 +12,11 @@
  * The entire shop rewrite for Circle 3.0 was done by Jeff Fink.  Thanks Jeff!
  ***/
 #include "dbat/Shop.h"
-#include "dbat/Character.h"
-#include "dbat/Object.h"
+#include "dbat/CharacterUtils.h"
+#include "dbat/ObjectUtils.h"
 #include "dbat/ObjectPrototype.h"
 #include "dbat/CharacterPrototype.h"
-#include "dbat/Room.h"
+#include "dbat/RoomUtils.h"
 #include "dbat/Descriptor.h"
 #include "dbat/comm.h"
 #include "dbat/handler.h"
@@ -32,16 +32,18 @@
 #include "dbat/dg_comm.h"
 #include "dbat/act.other.h"
 #include "dbat/class.h"
-#include "dbat/genzon.h"
-#include "dbat/genshp.h"
 #include "dbat/filter.h"
 #include "dbat/ansi.h"
+#include "dbat/utils.h"
+#include "dbat/TimeInfo.h"
+#include "dbat/Random.h"
+#include "dbat/const/Pulse.h"
 
 /* Forward/External function declarations */
 static void sort_keeper_objs(Character *keeper, vnum shop_nr);
 
 /* Local variables */
-std::map<shop_vnum, struct Shop> shop_index;
+std::map<shop_vnum, std::shared_ptr<Shop>> shop_index;
 shop_vnum top_shop = NOTHING;
 int cmd_say, cmd_tell, cmd_emote, cmd_slap, cmd_puke;
 
@@ -219,8 +221,8 @@ static int is_ok_char(Character *keeper, Character *ch, vnum shop_nr)
 
     if (!keeper->canSee(ch))
     {
-        char actbuf[MAX_INPUT_LENGTH] = MSG_NO_SEE_CHAR;
-        do_say(keeper, actbuf, cmd_say, 0);
+        std::string message(MSG_NO_SEE_CHAR);
+        do_say(keeper, (char*)message.c_str(), cmd_say, 0);
         return (false);
     }
     if (ADM_FLAGGED(ch, ADM_ALLSHOPS))
@@ -229,47 +231,47 @@ static int is_ok_char(Character *keeper, Character *ch, vnum shop_nr)
     auto &sh = shop_index.at(shop_nr);
 
     auto align = GET_ALIGNMENT(ch);
-    if (align == 0 && sh.not_alignment.contains(MoralAlign::neutral) || align > 0 && sh.not_alignment.contains(MoralAlign::good) || align < 0 && sh.not_alignment.contains(MoralAlign::evil))
+    if (align == 0 && sh->not_alignment.contains(MoralAlign::neutral) || align > 0 && sh->not_alignment.contains(MoralAlign::good) || align < 0 && sh->not_alignment.contains(MoralAlign::evil))
     {
-        snprintf(buf, sizeof(buf), "%s %s", GET_NAME(ch), MSG_NO_SELL_ALIGN);
-        do_tell(keeper, buf, cmd_tell, 0);
+        auto message = fmt::format("{} {}", GET_NAME(ch), MSG_NO_SELL_ALIGN);
+        do_tell(keeper, (char*)message.c_str(), cmd_tell, 0);
         return (false);
     }
 
     if (IS_NPC(ch))
         return (true);
 
-    if (sh.not_sensei.contains(ch->sensei))
+    if (sh->not_sensei.contains(ch->sensei))
     {
-        snprintf(buf, sizeof(buf), "%s %s", GET_NAME(ch), MSG_NO_SELL_CLASS);
-        do_tell(keeper, buf, cmd_tell, 0);
+        auto message = fmt::format("{} {}", GET_NAME(ch), MSG_NO_SELL_CLASS);
+        do_tell(keeper, (char*)message.c_str(), cmd_tell, 0);
         return (false);
     }
 
-    for (auto &cl : sh.only_sensei)
+    for (auto &cl : sh->only_sensei)
     {
         if (cl != ch->sensei)
         {
-            snprintf(buf, sizeof(buf), "%s %s", GET_NAME(ch), MSG_NO_SELL_CLASS);
-            do_tell(keeper, buf, cmd_tell, 0);
+            auto message = fmt::format("{} {}", GET_NAME(ch), MSG_NO_SELL_CLASS);
+            do_tell(keeper, (char*)message.c_str(), cmd_tell, 0);
             return (false);
         }
     }
 
-    for (auto &race : sh.only_race)
+    for (auto &race : sh->only_race)
     {
         if (race != ch->race)
         {
-            snprintf(buf, sizeof(buf), "%s %s", GET_NAME(ch), MSG_NO_SELL_RACE);
-            do_tell(keeper, buf, cmd_tell, 0);
+            auto message = fmt::format("{} {}", GET_NAME(ch), MSG_NO_SELL_RACE);
+            do_tell(keeper, (char*)message.c_str(), cmd_tell, 0);
             return (false);
         }
     }
 
-    if (sh.not_race.contains(ch->race))
+    if (sh->not_race.contains(ch->race))
     {
-        snprintf(buf, sizeof(buf), "%s %s", GET_NAME(ch), MSG_NO_SELL_RACE);
-        do_tell(keeper, buf, cmd_tell, 0);
+        auto message = fmt::format("{} {}", GET_NAME(ch), MSG_NO_SELL_RACE);
+        do_tell(keeper, (char*)message.c_str(), cmd_tell, 0);
         return (false);
     }
 
@@ -282,16 +284,16 @@ static int is_ok_obj(Character *keeper, Character *ch, Object *obj, vnum shop_nr
 
     auto &sh = shop_index.at(shop_nr);
 
-    if (OBJ_FLAGGED(obj, ITEM_BROKEN) && sh.shop_flags.get(ShopFlag::no_broken))
+    if (OBJ_FLAGGED(obj, ITEM_BROKEN) && sh->shop_flags.get(ShopFlag::no_broken))
     {
-        snprintf(buf, sizeof(buf), "%s %s", GET_NAME(ch), MSG_NO_BUY_BROKEN);
-        do_tell(keeper, buf, cmd_tell, 0);
+        auto message = fmt::format("{} {}", GET_NAME(ch), MSG_NO_BUY_BROKEN);
+        do_tell(keeper, (char*)message.c_str(), cmd_tell, 0);
         return (false);
     }
     if (OBJ_FLAGGED(obj, ITEM_FORGED))
     {
-        snprintf(buf, sizeof(buf), "%s that piece of junk is an obvious forgery!", GET_NAME(ch));
-        do_tell(keeper, buf, cmd_tell, 0);
+        auto message = fmt::format("{} that piece of junk is an obvious forgery!", GET_NAME(ch));
+        do_tell(keeper, (char*)message.c_str(), cmd_tell, 0);
         return (false);
     }
 
@@ -300,22 +302,21 @@ static int is_ok_obj(Character *keeper, Character *ch, Object *obj, vnum shop_nr
 
 static int is_open(Character *keeper, vnum shop_nr, int msg)
 {
-    char buf[MAX_INPUT_LENGTH];
+    std::string message;
 
-    *buf = '\0';
     if (SHOP_OPEN1(shop_nr) > time_info.hours)
-        strlcpy(buf, MSG_NOT_OPEN_YET, sizeof(buf));
+        message = MSG_NOT_OPEN_YET;
     else if (SHOP_CLOSE1(shop_nr) < time_info.hours)
     {
         if (SHOP_OPEN2(shop_nr) > time_info.hours)
-            strlcpy(buf, MSG_NOT_REOPEN_YET, sizeof(buf));
+            message = MSG_NOT_REOPEN_YET;
         else if (SHOP_CLOSE2(shop_nr) < time_info.hours)
-            strlcpy(buf, MSG_CLOSED_FOR_DAY, sizeof(buf));
+            message = MSG_CLOSED_FOR_DAY;
     }
-    if (!*buf)
+    if (message.empty())
         return (true);
     if (msg)
-        do_say(keeper, buf, cmd_tell, 0);
+        do_say(keeper, (char*)message.c_str(), cmd_tell, 0);
     return (false);
 }
 
@@ -455,14 +456,14 @@ static int trade_with(Object *item, vnum shop_nr)
         return (OBJECT_NOTOK);
     auto &shop = shop_index.at(shop_nr);
 
-    for (const auto &product : shop.type)
+    for (const auto &product : shop->type)
         if (product.type == GET_OBJ_TYPE(item))
         {
             if (GET_OBJ_VAL(item, VAL_WAND_CHARGES) == 0 &&
                 (GET_OBJ_TYPE(item) == ITEM_WAND ||
                  GET_OBJ_TYPE(item) == ITEM_STAFF))
                 return (OBJECT_DEAD);
-            else if (evaluate_expression(item, (char *)SHOP_BUYWORD(shop_nr, counter)))
+            else if (evaluate_expression(item, (char*)product.keywords.c_str()))
                 return (OBJECT_OK);
         }
     return (OBJECT_NOTOK);
@@ -502,9 +503,9 @@ int shop_producing(Object *item, vnum shop_nr)
         return (false);
     auto &shop = shop_index.at(shop_nr);
 
-    auto find = std::ranges::find_if(shop.producing, [&](const auto &product)
+    auto find = std::ranges::find_if(shop->producing, [&](const auto &product)
                                      { return (product == item->getVnum()); });
-    return (find != shop.producing.end());
+    return (find != shop->producing.end());
 }
 
 static int transaction_amt(char *arg)
@@ -620,8 +621,7 @@ static Object *get_purchase_obj(Character *ch, char *arg,
             {
                 char buf[MAX_INPUT_LENGTH];
 
-                snprintf(buf, sizeof(buf), shop_index.at(shop_nr).no_such_item1, GET_NAME(ch));
-                do_tell(keeper, buf, cmd_tell, 0);
+                do_tell(keeper, (char*)shop_index.at(shop_nr)->no_such_item1.c_str(), cmd_tell, 0);
             }
             return (nullptr);
         }
@@ -924,9 +924,10 @@ static void shopping_buy(char *arg, Character *ch, Character *keeper, vnum shop_
         char actbuf[MAX_INPUT_LENGTH];
 
         auto &sh = shop_index.at(shop_nr);
+        
+        std::string message = !sh->missing_cash2.empty() ? sh->missing_cash2 : "You can't afford that!";
 
-        snprintf(actbuf, sizeof(actbuf), sh.missing_cash2 ? sh.missing_cash2 : "You can't afford that!", GET_NAME(ch));
-        do_tell(keeper, actbuf, cmd_tell, 0);
+        do_tell(keeper, (char*)message.c_str(), cmd_tell, 0);
 
         switch (SHOP_BROKE_TEMPER(shop_nr))
         {
@@ -1020,12 +1021,11 @@ static void shopping_buy(char *arg, Character *ch, Character *keeper, vnum shop_
     snprintf(tempbuf, sizeof(tempbuf), "$n buys %s.", tempstr);
     act(tempbuf, false, ch, obj, nullptr, TO_ROOM);
 
-    snprintf(tempbuf, sizeof(tempbuf), shop_index.at(shop_nr).message_buy, GET_NAME(ch), goldamt);
-    do_tell(keeper, tempbuf, cmd_tell, 0);
+    do_tell(keeper, (char*)shop_index.at(shop_nr)->message_buy.c_str(), cmd_tell, 0);
 
     ch->send_to("You now have %s.\r\n", tempstr);
     auto &sh = shop_index.at(shop_nr);
-    if (sh.shop_flags.get(ShopFlag::bank_money))
+    if (sh->shop_flags.get(ShopFlag::bank_money))
         if (GET_GOLD(keeper) > MAX_OUTSIDE_BANK)
         {
             SHOP_BANK(shop_nr) += (GET_GOLD(keeper) - MAX_OUTSIDE_BANK);
@@ -1046,8 +1046,7 @@ get_selling_obj(Character *ch, char *name, Character *keeper, vnum shop_nr, int 
         {
             char tbuf[MAX_INPUT_LENGTH];
 
-            snprintf(tbuf, sizeof(tbuf), shop_index.at(shop_nr).no_such_item2, GET_NAME(ch));
-            do_tell(keeper, tbuf, cmd_tell, 0);
+            do_tell(keeper, (char*)shop_index.at(shop_nr)->no_such_item2.c_str(), cmd_tell, 0);
         }
         return (nullptr);
     }
@@ -1063,7 +1062,7 @@ get_selling_obj(Character *ch, char *name, Character *keeper, vnum shop_nr, int 
         snprintf(buf, sizeof(buf), "%s You've got to be kidding, that thing is worthless!", GET_NAME(ch));
         break;
     case OBJECT_NOTOK:
-        snprintf(buf, sizeof(buf), shop_index.at(shop_nr).do_not_buy, GET_NAME(ch));
+        snprintf(buf, sizeof(buf), shop_index.at(shop_nr)->do_not_buy.c_str(), GET_NAME(ch));
         break;
     case OBJECT_DEAD:
         snprintf(buf, sizeof(buf), "%s %s", GET_NAME(ch), MSG_NO_USED_WANDSTAFF);
@@ -1126,7 +1125,7 @@ static void shopping_sell(char *arg, Character *ch, Character *keeper, vnum shop
     {
         char buf[MAX_INPUT_LENGTH];
 
-        snprintf(buf, sizeof(buf), shop_index.at(shop_nr).missing_cash1, GET_NAME(ch));
+        snprintf(buf, sizeof(buf), shop_index.at(shop_nr)->missing_cash1.c_str(), GET_NAME(ch));
         do_tell(keeper, buf, cmd_tell, 0);
         return;
     }
@@ -1158,7 +1157,7 @@ static void shopping_sell(char *arg, Character *ch, Character *keeper, vnum shop
     snprintf(tempbuf, sizeof(tempbuf), "$n sells something to %s.\r\n", GET_NAME(keeper));
     act(tempbuf, false, ch, obj, nullptr, TO_ROOM);
 
-    snprintf(tempbuf, sizeof(tempbuf), shop_index.at(shop_nr).message_sell, GET_NAME(ch), goldamt);
+    snprintf(tempbuf, sizeof(tempbuf), shop_index.at(shop_nr)->message_sell.c_str(), GET_NAME(ch), goldamt);
     do_tell(keeper, tempbuf, cmd_tell, 0);
 
     ch->send_to("The shopkeeper gives you %s zenni.\r\n", add_commas(goldamt).c_str());
@@ -1336,7 +1335,7 @@ int ok_shop_room(vnum shop_nr, room_vnum room)
     int mindex;
     auto &sh = shop_index.at(shop_nr);
 
-    return sh.in_room.contains(room);
+    return sh->in_room.contains(room);
 }
 
 SPECIAL(shop_keeper)
@@ -1346,7 +1345,7 @@ SPECIAL(shop_keeper)
 
     for (auto &[nr, sh] : shop_index)
     {
-        if (sh.keeper == keeper->getVnum())
+        if (sh->keeper == keeper->getVnum())
         {
             shop_nr = nr;
             break;
@@ -1358,8 +1357,8 @@ SPECIAL(shop_keeper)
 
     auto &sh = shop_index.at(shop_nr);
 
-    if (sh.func) /* Check secondary function */
-        if (sh.func(ch, me, cmd, argument))
+    if (sh->func) /* Check secondary function */
+        if (sh->func(ch, me, cmd, argument))
             return (true);
 
     if (keeper == ch)
@@ -1378,7 +1377,7 @@ SPECIAL(shop_keeper)
     {
         char argm[MAX_INPUT_LENGTH];
 
-        if (!sh.shop_flags.get(ShopFlag::allow_steal))
+        if (!sh->shop_flags.get(ShopFlag::allow_steal))
         {
             snprintf(argm, sizeof(argm), "$N shouts '%s'", MSG_NO_STEAL_HERE);
             act(argm, false, ch, nullptr, keeper, TO_CHAR);
@@ -1425,7 +1424,7 @@ int ok_damage_shopkeeper(Character *ch, Character *victim)
 {
     shop_vnum sindex;
 
-    if (!IS_MOB(victim) || mob_index.at(GET_MOB_RNUM(victim)).func != shop_keeper)
+    if (!IS_MOB(victim) || mob_proto.at(GET_MOB_RNUM(victim))->func != shop_keeper)
         return (true);
 
     /* Prevent "invincible" shopkeepers if they're charmed. */
@@ -1434,7 +1433,7 @@ int ok_damage_shopkeeper(Character *ch, Character *victim)
 
     for (auto &[sindex, sh] : shop_index)
     {
-        if (GET_MOB_RNUM(victim) == sh.keeper && !sh.shop_flags.get(ShopFlag::start_fight))
+        if (GET_MOB_RNUM(victim) == sh->keeper && !sh->shop_flags.get(ShopFlag::start_fight))
         {
             char buf[MAX_INPUT_LENGTH];
 
@@ -1459,17 +1458,17 @@ void assign_the_shopkeepers()
 
     for (auto &[vn, sh] : shop_index)
     {
-        if (!mob_index.contains(sh.keeper))
+        if (!mob_proto.contains(sh->keeper))
         {
-            basic_mud_log("SYSERR: Shop %d has an invalid keeper: %d", sh.vnum, sh.keeper);
+            basic_mud_log("SYSERR: Shop %d has an invalid keeper: %d", sh->vnum, sh->keeper);
             continue;
         }
-        auto &mi = mob_index.at(sh.keeper);
+        auto &mi = mob_proto.at(sh->keeper);
         /* Having SHOP_FUNC() as 'shop_keeper' will cause infinite recursion. */
-        if (mi.func && mi.func != shop_keeper)
-            sh.func = mi.func;
+        if (mi->func && mi->func != shop_keeper)
+            sh->func = mi->func;
 
-        mi.func = shop_keeper;
+        mi->func = shop_keeper;
     }
 }
 
@@ -1545,7 +1544,7 @@ static char *customer_string(vnum shop_nr, int detailed)
     static char buf[MAX_STRING_LENGTH];
     auto &sh = shop_index.at(shop_nr);
 
-    snprintf(buf, sizeof(buf), "%s", sh.customerString().c_str());
+    snprintf(buf, sizeof(buf), "%s", sh->customerString().c_str());
 
     return buf;
 }
@@ -1578,18 +1577,18 @@ static void list_all_shops(Character *ch)
             len += headerlen;
         }
 
-        if (sh.keeper == NOBODY)
+        if (sh->keeper == NOBODY)
         {
             strcpy(buf1, "<NONE>"); /* strcpy: OK (for 'buf1 >= 7') */
         }
         else
         {
-            sprintf(buf1, "%6d", sh.keeper); /* sprintf: OK (for 'buf1 >= 11', 32-bit int) */
+            sprintf(buf1, "%6d", sh->keeper); /* sprintf: OK (for 'buf1 >= 11', 32-bit int) */
         }
 
-        auto first = sh.in_room.begin();
+        auto first = sh->in_room.begin();
         auto in_room = NOWHERE;
-        if (first != sh.in_room.end())
+        if (first != sh->in_room.end())
             in_room = *first;
 
         len += snprintf(buf + len, sizeof(buf) - len,
@@ -1615,7 +1614,7 @@ static void list_detailed_shop(Character *ch, vnum shop_nr)
     column = 12; /* ^^^ strlen ^^^ */
     sindex = 0;  /* initialize before using in loop */
     auto &sh = shop_index.at(shop_nr);
-    for (auto r : sh.in_room)
+    for (auto r : sh->in_room)
     {
         char buf1[128];
         int linelen, temp;
@@ -1646,15 +1645,15 @@ static void list_detailed_shop(Character *ch, vnum shop_nr)
         column += linelen;
         sindex++;
     }
-    if (sh.in_room.empty())
+    if (sh->in_room.empty())
         ch->sendText("Rooms:      None!");
 
     ch->sendText("\r\nShopkeeper: ");
-    if (sh.keeper != NOBODY)
+    if (sh->keeper != NOBODY)
     {
-        ch->send_to("%s (#%d), Special Function: %s\r\n", mob_proto.at(SHOP_KEEPER(shop_nr)).short_description, sh.keeper, YESNO(SHOP_FUNC(shop_nr)));
+        ch->send_to("%s (#%d), Special Function: %s\r\n", mob_proto.at(SHOP_KEEPER(shop_nr))->short_description, sh->keeper, YESNO(SHOP_FUNC(shop_nr)));
 
-        if ((k = get_char_num(sh.keeper)))
+        if ((k = get_char_num(sh->keeper)))
             ch->send_to("Coins:      [%9d], Bank: [%9d] (Total: %d)\r\n", GET_GOLD(k), SHOP_BANK(shop_nr), GET_GOLD(k) + SHOP_BANK(shop_nr));
     }
     else
@@ -1665,7 +1664,7 @@ static void list_detailed_shop(Character *ch, vnum shop_nr)
     ch->sendText("Produces:   ");
     column = 12; /* ^^^ strlen ^^^ */
     sindex = 0;
-    for (auto &p : sh.producing)
+    for (auto &p : sh->producing)
     {
         if (!obj_proto.contains(p))
             continue;
@@ -1678,7 +1677,7 @@ static void list_detailed_shop(Character *ch, vnum shop_nr)
             column += 2;
         }
         linelen = snprintf(buf1, sizeof(buf1), "%s (#%d)",
-                           obj_proto.at(p).short_description,
+                           obj_proto.at(p)->short_description,
                            p);
 
         /* Implementing word-wrapping: assumes screen-size == 80 */
@@ -1699,7 +1698,7 @@ static void list_detailed_shop(Character *ch, vnum shop_nr)
     ch->sendText("\r\nBuys:       ");
     column = 12; /* ^^^ strlen ^^^ */
     sindex = 0;
-    for (auto &t : sh.type)
+    for (auto &t : sh->type)
     {
         char buf1[128];
         size_t linelen;
@@ -1735,7 +1734,7 @@ static void list_detailed_shop(Character *ch, vnum shop_nr)
     /* Need a local buffer. */
     {
         char buf1[MAX_STRING_LENGTH];
-        sprintf(buf1, "%s", shop_index.at(shop_nr).shop_flags.getFlagNames().c_str());
+        sprintf(buf1, "%s", shop_index.at(shop_nr)->shop_flags.getFlagNames().c_str());
         ch->send_to("Bits:       %s\r\n", buf1);
     }
 }
@@ -1777,11 +1776,6 @@ void show_shops(Character *ch, char *arg)
         }
         list_detailed_shop(ch, shop_nr);
     }
-}
-
-Shop::~Shop()
-{
-    free_shop_strings(this);
 }
 
 void Shop::add_product(obj_vnum v)
@@ -1830,6 +1824,6 @@ void shop_purge(uint64_t heartPulse, double deltaTime)
 {
     for (auto &[vn, shop] : shop_index)
     {
-        shop.runPurge();
+        shop->runPurge();
     }
 }

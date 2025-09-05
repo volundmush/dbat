@@ -1,106 +1,10 @@
-/************************************************************************
- * Generic OLC Library - Objects / genobj.c			v1.0	*
- * Original author: Levork						*
- * Copyright 1996 by Harvey Gilpin					*
- * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
- ************************************************************************/
-#include "dbat/ObjectPrototype.h"
-#include "dbat/Object.h"
-#include "dbat/Character.h"
-#include "dbat/genobj.h"
-
-#include "dbat/class.h"
-#include "dbat/genolc.h"
-#include "dbat/genzon.h"
+#include "dbat/ObjectUtils.h"
+#include "dbat/CharacterUtils.h"
+#include "dbat/const/WearSlot.h"
 #include "dbat/utils.h"
-#include "dbat/handler.h"
-#include "dbat/Shop.h"
-#include "dbat/filter.h"
-#include "dbat/dg_scripts.h"
+#include "dbat/class.h"
 
-
-
-obj_rnum add_object(ObjectPrototype *newobj, obj_vnum ovnum)
-{
-    int found = NOTHING;
-
-    /*
-     * Write object to internal tables.
-     */
-    bool exists = obj_proto.contains(ovnum);
-    auto &obj = obj_proto.at(ovnum);
-    obj = *newobj;
-    if (exists)
-    {
-        basic_mud_log("GenOLC: add_object: Updated existing object #%d (%s).", ovnum, obj.short_description);
-        update_objects(&obj);
-    }
-    else
-    {
-        basic_mud_log("GenOLC: add_object: Added object #%d (%s).", ovnum, obj.short_description);
-    }
-
-    return ovnum;
-}
-
-/* ------------------------------------------------------------------------------------------------------------------------------ */
-
-/*
- * Fix all existing objects to have these values.
- * We need to run through each and every object currently in the
- * game to see which ones are pointing to this prototype.
- * if object is pointing to this prototype, then we need to replace it
- * with the new one.
- */
-int update_objects(ObjectPrototype *refobj)
-{
-    int count = 0;
-
-    auto objects = objectSubscriptions.all(fmt::format("vnum_{}", refobj->vn));
-    for (auto obj : filter_raw(objects))
-    {
-        count++;
-        assign_triggers(obj, OBJ_TRIGGER);
-    }
-
-    return count;
-}
-
-/*
- * For object instances that are not the prototype.
- */
-
-int delete_object(obj_rnum rnum)
-{
-    obj_rnum i;
-    Object *tmp;
-    int shop, j, zone, cmd_no;
-
-    if (!obj_proto.count(rnum))
-        return NOTHING;
-
-    auto obj = &obj_proto.at(rnum);
-
-    /* This is something you might want to read about in the logs. */
-    basic_mud_log("GenOLC: delete_object: Deleting object #%d (%s).", obj->vn, obj->short_description);
-    auto allobj = objectSubscriptions.all(fmt::format("vnum_{}", obj->vn));
-    for (auto tmp : filter_raw(allobj))
-    {
-
-        /* Remove from object_list, etc. - handles weight changes, and similar. */
-        extract_obj(tmp);
-    }
-
-    /* Make sure all are removed. */
-
-    assert(objectSubscriptions.count(fmt::format("vnum_{}", rnum)) == 0);
-    obj_proto.erase(rnum);
-    obj_index.erase(rnum);
-
-    return rnum;
-}
-
-
+#include "dbat/const/AdminLevel.h"
 
 constexpr int LOC_INVENTORY = 0;
 void auto_equip(Character *ch, Object *obj, int location)
@@ -219,4 +123,3 @@ void auto_equip(Character *ch, Object *obj, int location)
     if (location <= 0) /* Inventory */
         ch->addToInventory(obj);
 }
-

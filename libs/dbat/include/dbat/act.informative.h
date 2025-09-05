@@ -2,7 +2,6 @@
 #include <vector>
 
 #include "const/Max.h"
-#include "HasExtraDescriptions.h"
 
 struct Character;
 struct Location;
@@ -25,14 +24,9 @@ extern char *default_color_choices[NUM_COLOR + 1];
 // functions
 extern int readIntro(Character *ch, Character *vict);
 
-extern int check_disabled(const struct command_info *command);
-
 extern void sort_commands();
 extern void do_auto_exits(const Location& loc, Character *ch, int exit_mode);
 extern void do_auto_exits2(const Location& loc, Character *ch);
-
-extern char *find_exdesc(char *word, const std::vector<ExtraDescription> &list);
-extern char *find_exdesc(char *word, struct extra_descr_data *list);
 
 extern void add_history(Character *ch, char *str, int type);
 
@@ -42,7 +36,5 @@ extern void list_one_char(Character *i, Character *ch);
 extern void show_obj_to_char(Object *obj, Character *ch, int mode);
 
 extern int perf_skill(int skill);
-
-extern int search_help(const char *argument, int level);
 
 // commands

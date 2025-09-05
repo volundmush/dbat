@@ -46,7 +46,7 @@ Account *createAccount(const std::string &name, const std::string &password)
     a->created = time(nullptr);
     a->last_login = time(nullptr);
 
-    a.get();
+    return a.get();
 }
 
 void Account::modRPP(int amt)

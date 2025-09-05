@@ -1,13 +1,9 @@
 #include "dbat/AbstractLocation.h"
-#include "dbat/Object.h"
+#include "dbat/filter.h"
+#include "dbat/ObjectUtils.h"
 #include "dbat/Character.h"
 #include "dbat/Structure.h"
-#include "dbat/filter.h"
-#include "dbat/utils.h"
-#include "dbat/constants.h"
-#include "dbat/fight.h"
-#include "dbat/planet.h"
-#include "dbat/act.informative.h"
+#include "dbat/weather.h"
 
 WeakBag<Object> AbstractLocation::getObjects()
 {
@@ -71,9 +67,9 @@ std::optional<double> AbstractLocation::getEnvironment(const Coordinates &coor, 
     return std::nullopt;
 }
 
-const std::vector<ExtraDescription> &AbstractLocation::getExtraDescription(const Coordinates &coor) const
+ExtraDescriptionViews AbstractLocation::getExtraDescription(const Coordinates &coor) const
 {
-    static std::vector<ExtraDescription> extraDescriptions;
+    static ExtraDescriptionViews extraDescriptions;
     return extraDescriptions;
 }
 

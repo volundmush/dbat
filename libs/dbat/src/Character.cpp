@@ -2,13 +2,13 @@
 // Created by basti on 10/24/2021.
 //
 
-#include "dbat/Character.h"
+#include "dbat/CharacterUtils.h"
 #include "dbat/CharacterPrototype.h"
-#include "dbat/Object.h"
+#include "dbat/ObjectUtils.h"
 #include "dbat/Descriptor.h"
 #include "dbat/Zone.h"
 #include "dbat/Account.h"
-#include "dbat/Room.h"
+#include "dbat/RoomUtils.h"
 #include "dbat/races.h"
 #include "dbat/spells.h"
 #include "dbat/comm.h"
@@ -26,7 +26,17 @@
 #include "dbat/handler.h"
 #include "dbat/utils.h"
 
+#include "dbat/Random.h"
+#include "dbat/TimeInfo.h"
+#include "dbat/players.h"
+
+#include "dbat/const/Condition.h"
+#include "dbat/const/WearSlot.h"
+#include "dbat/const/Environment.h"
+#include "dbat/const/AdminLevel.h"
+
 std::unordered_map<int64_t, std::shared_ptr<Character>> Character::registry;
+SubscriptionManager<Character> characterSubscriptions;
 
 Character::Character()
 {
@@ -169,7 +179,7 @@ CharacterPrototype *Character::getProto() const
 {
     if (mob_proto.contains(vn))
     {
-        return &mob_proto.at(vn);
+        return mob_proto.at(vn).get();
     }
     return nullptr;
 }
@@ -208,7 +218,7 @@ std::vector<trig_vnum> Character::getProtoScript() const
     auto v = getVnum();
     if (mob_proto.contains(v))
     {
-        return mob_proto.at(v).proto_script;
+        return mob_proto.at(v)->proto_script;
     }
     return {};
 }
@@ -885,7 +895,7 @@ int Character::getRPP()
 
     auto &p = players.at(id);
 
-    return p.account->rpp;
+    return p->account->rpp;
 }
 
 
@@ -898,7 +908,7 @@ void Character::modRPP(int amt)
 
     auto &p = players.at(id);
 
-    p.account->modRPP(amt);
+    p->account->modRPP(amt);
 }
 
 int Character::getPractices()
@@ -1599,7 +1609,7 @@ const char *Character::getAppearanceStr(Appearance type)
     return buf;
 }
 
-void Character::sendText(const std::string &txt)
+void Character::sendText(std::string_view txt)
 {
     if (!desc)
         return;
@@ -1673,7 +1683,7 @@ void Character::onMoveToLocation(const Location &loc)
         }
         auto &p = players.at(id);
         for(auto zc : z->getChain()) {
-            p.known_zones.insert(zc->number);
+            p->known_zones.insert(zc->number);
         }
     }
 }

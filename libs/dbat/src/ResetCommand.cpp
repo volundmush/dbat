@@ -1,23 +1,27 @@
 #include "dbat/HasResetCommands.h"
-#include "dbat/Character.h"
-#include "dbat/Object.h"
+#include "dbat/CharacterUtils.h"
+#include "dbat/ObjectUtils.h"
 #include "dbat/ObjectPrototype.h"
 #include "dbat/CharacterPrototype.h"
 #include "dbat/Destination.h"
-#include "dbat/Room.h"
+#include "dbat/RoomUtils.h"
 #include "dbat/filter.h"
 #include "dbat/db.h"
 #include "dbat/constants.h"
 #include "dbat/utils.h"
 #include "dbat/dg_scripts.h"
 #include "dbat/Shop.h"
+#include "dbat/Random.h"
+#include "dbat/Parse.h"
+#include "dbat/Enum.h"
 
+#include "dbat/const/WearSlot.h"
 
 static const char *getObjShort(obj_vnum target)
 {
     if (auto found = obj_proto.find(target); found != obj_proto.end())
     {
-        return found->second.short_description;
+        return found->second->short_description;
     }
     return "???";
 }
@@ -26,7 +30,7 @@ static const char *getMobShort(mob_vnum target)
 {
     if (auto found = mob_proto.find(target); found != mob_proto.end())
     {
-        return found->second.short_description;
+        return found->second->short_description;
     }
     return "???";
 }
@@ -35,7 +39,7 @@ static const char *getTrigName(trig_vnum target)
 {
     if (auto found = trig_index.find(target); found != trig_index.end())
     {
-        return found->second.name.c_str();
+        return found->second->name.c_str();
     }
     return "???";
 }
@@ -459,7 +463,7 @@ Result<ResetCommand> parseResetCommand(std::vector<std::string> sequence) {
 
     auto resType = chooseEnum<ResetCommandType>(sequence[0], "reset command type");
     if(!resType) {
-        return err(resType.err);
+        return err(resType.error());
     }
 
     ResetCommand cmd;
@@ -498,7 +502,7 @@ Result<ResetCommand> parseResetCommand(std::vector<std::string> sequence) {
         case ResetCommandType::REMOVE: {
             auto ovnRes = parseNumber<obj_vnum>(sequence[1], "object vnum");
             if(!ovnRes) {
-                return err(ovnRes.err);
+                return err(ovnRes.error());
             }
             auto vn = ovnRes.value();
             if(!obj_proto.contains(vn)) {
@@ -510,14 +514,14 @@ Result<ResetCommand> parseResetCommand(std::vector<std::string> sequence) {
         case ResetCommandType::DOOR: {
             auto dirRes = chooseEnum<Direction>(sequence[1], "direction");
             if(!dirRes) {
-                return err(dirRes.err);
+                return err(dirRes.error());
             }
             auto dir = dirRes.value();
             cmd.target = static_cast<int>(dir);
 
             auto stateRes = parseNumber(sequence[2], "door state");
             if(!stateRes) {
-                return err(stateRes.err);
+                return err(stateRes.error());
             }
             if(stateRes.value() < 0 || stateRes.value() > 2) {
                 return err("Door state must be 0 (open), 1 (closed), or 2 (closed and locked).\r\n");
@@ -528,7 +532,7 @@ Result<ResetCommand> parseResetCommand(std::vector<std::string> sequence) {
         case ResetCommandType::TRIGGER: {
             auto vnRes = parseNumber<obj_vnum>(sequence[1], "vnum");
             if(!vnRes) {
-                return err(vnRes.err);
+                return err(vnRes.error());
             }
             auto vn = vnRes.value();
             if(!trig_index.contains(vn)) {
@@ -538,7 +542,7 @@ Result<ResetCommand> parseResetCommand(std::vector<std::string> sequence) {
 
             auto typeRes = parseNumber(sequence[2], "trigger type");
             if(!typeRes) {
-                return err(typeRes.err);
+                return err(typeRes.error());
             }
             if(typeRes.value() < 0 || typeRes.value() > 2) {
                 return err("Type must be 0 (character), 1 (object), or 2 (room).\r\n");
@@ -549,7 +553,7 @@ Result<ResetCommand> parseResetCommand(std::vector<std::string> sequence) {
         case ResetCommandType::VARIABLE: {
             auto typeRes = parseNumber(sequence[1], "trigger type");
             if(!typeRes) {
-                return err(typeRes.err);
+                return err(typeRes.error());
             }
             if(typeRes.value() < 0 || typeRes.value() > 2) {
                 return err("Type must be 0 (character), 1 (object), or 2 (room).\r\n");
@@ -569,7 +573,7 @@ Result<ResetCommand> parseResetCommand(std::vector<std::string> sequence) {
         case ResetCommandType::OBJ: {
             auto ovnRes = parseNumber<obj_vnum>(sequence[1], "object vnum");
             if(!ovnRes) {
-                return err(ovnRes.err);
+                return err(ovnRes.error());
             }
             auto ovn = ovnRes.value();
             if(!obj_proto.contains(ovn)) {
@@ -579,7 +583,7 @@ Result<ResetCommand> parseResetCommand(std::vector<std::string> sequence) {
 
             auto maxSpawnRes = parseNumber(sequence[2], "MaxSpawn");
             if(!maxSpawnRes) {
-                return err(maxSpawnRes.err);
+                return err(maxSpawnRes.error());
             }
             auto maxSpawn = maxSpawnRes.value();
             if(maxSpawn < 0) {
@@ -589,7 +593,7 @@ Result<ResetCommand> parseResetCommand(std::vector<std::string> sequence) {
 
             auto maxWorldRes = parseNumber(sequence[3], "MaxWorld");
             if(!maxWorldRes) {
-                return err(maxWorldRes.err);
+                return err(maxWorldRes.error());
             }
             auto maxWorld = maxWorldRes.value();
             if(maxWorld < 0) {
@@ -599,7 +603,7 @@ Result<ResetCommand> parseResetCommand(std::vector<std::string> sequence) {
 
             auto chanceRes = parseNumber(sequence[4], "Chance");
             if(!chanceRes) {
-                return err(chanceRes.err);
+                return err(chanceRes.error());
             }
             auto chance = chanceRes.value();
             if(chance < 0 || chance > 100) {
@@ -609,7 +613,7 @@ Result<ResetCommand> parseResetCommand(std::vector<std::string> sequence) {
 
             auto ifRes = parseNumber(sequence[5], "If");
             if(!ifRes) {
-                return err(ifRes.err);
+                return err(ifRes.error());
             }
             cmd.if_flag = ifRes.value() ? 1 : 0;
 
@@ -618,7 +622,7 @@ Result<ResetCommand> parseResetCommand(std::vector<std::string> sequence) {
         case ResetCommandType::MOB: {
             auto mvnRes = parseNumber<mob_vnum>(sequence[1], "mob vnum");
             if(!mvnRes) {
-                return err(mvnRes.err);
+                return err(mvnRes.error());
             }
             auto mvn = mvnRes.value();
             if(!mob_proto.contains(mvn)) {
@@ -628,7 +632,7 @@ Result<ResetCommand> parseResetCommand(std::vector<std::string> sequence) {
 
             auto maxSpawnRes = parseNumber(sequence[2], "MaxSpawn");
             if(!maxSpawnRes) {
-                return err(maxSpawnRes.err);
+                return err(maxSpawnRes.error());
             }
             auto maxSpawn = maxSpawnRes.value();
             if(maxSpawn < 0) {
@@ -638,7 +642,7 @@ Result<ResetCommand> parseResetCommand(std::vector<std::string> sequence) {
 
             auto maxWorldRes = parseNumber(sequence[3], "MaxWorld");
             if(!maxWorldRes) {
-                return err(maxWorldRes.err);
+                return err(maxWorldRes.error());
             }
             auto maxWorld = maxWorldRes.value();
             if(maxWorld < 0) {
@@ -648,7 +652,7 @@ Result<ResetCommand> parseResetCommand(std::vector<std::string> sequence) {
 
             auto chanceRes = parseNumber(sequence[4], "Chance");
             if(!chanceRes) {
-                return err(chanceRes.err);
+                return err(chanceRes.error());
             }
             auto chance = chanceRes.value();
             if(chance < 0 || chance > 100) {
@@ -658,7 +662,7 @@ Result<ResetCommand> parseResetCommand(std::vector<std::string> sequence) {
 
             auto ifRes = parseNumber(sequence[5], "If");
             if(!ifRes) {
-                return err(ifRes.err);
+                return err(ifRes.error());
             }
             cmd.if_flag = ifRes.value() ? 1 : 0;
 
@@ -667,7 +671,7 @@ Result<ResetCommand> parseResetCommand(std::vector<std::string> sequence) {
         case ResetCommandType::GIVE: {
             auto ovnRes = parseNumber<obj_vnum>(sequence[1], "object vnum");
             if(!ovnRes) {
-                return err(ovnRes.err);
+                return err(ovnRes.error());
             }
             auto ovn = ovnRes.value();
             if(!obj_proto.contains(ovn)) {
@@ -677,7 +681,7 @@ Result<ResetCommand> parseResetCommand(std::vector<std::string> sequence) {
 
             auto targetVnRes = parseNumber<mob_vnum>(sequence[2], "target mob vnum");
             if(!targetVnRes) {
-                return err(targetVnRes.err);
+                return err(targetVnRes.error());
             }
             auto targetVn = targetVnRes.value();
             if(!mob_proto.contains(targetVn)) {
@@ -687,7 +691,7 @@ Result<ResetCommand> parseResetCommand(std::vector<std::string> sequence) {
 
             auto chanceRes = parseNumber(sequence[3], "Chance");
             if(!chanceRes) {
-                return err(chanceRes.err);
+                return err(chanceRes.error());
             }
             auto chance = chanceRes.value();
             if(chance < 0 || chance > 100) {
@@ -697,7 +701,7 @@ Result<ResetCommand> parseResetCommand(std::vector<std::string> sequence) {
 
             auto ifRes = parseNumber(sequence[4], "If");
             if(!ifRes) {
-                return err(ifRes.err);
+                return err(ifRes.error());
             }
             cmd.if_flag = ifRes.value() ? 1 : 0;
 
@@ -706,7 +710,7 @@ Result<ResetCommand> parseResetCommand(std::vector<std::string> sequence) {
         case ResetCommandType::EQUIP: {
             auto ovnRes = parseNumber<obj_vnum>(sequence[1], "object vnum");
             if(!ovnRes) {
-                return err(ovnRes.err);
+                return err(ovnRes.error());
             }
             auto ovn = ovnRes.value();
             if(!obj_proto.contains(ovn)) {
@@ -716,7 +720,7 @@ Result<ResetCommand> parseResetCommand(std::vector<std::string> sequence) {
 
             auto slotRes = chooseEnum<WearSlot>(sequence[2], "wear location");
             if(!slotRes) {
-                return err(slotRes.err);
+                return err(slotRes.error());
             }
             auto slot = slotRes.value();
             if(slot == WearSlot::Inventory) {
@@ -726,7 +730,7 @@ Result<ResetCommand> parseResetCommand(std::vector<std::string> sequence) {
 
             auto chanceRes = parseNumber(sequence[3], "Chance");
             if(!chanceRes) {
-                return err(chanceRes.err);
+                return err(chanceRes.error());
             }
             auto chance = chanceRes.value();
             if(chance < 0 || chance > 100) {
@@ -736,7 +740,7 @@ Result<ResetCommand> parseResetCommand(std::vector<std::string> sequence) {
 
             auto ifRes = parseNumber(sequence[4], "If");
             if(!ifRes) {
-                return err(ifRes.err);
+                return err(ifRes.error());
             }
             cmd.if_flag = ifRes.value() ? 1 : 0;
 
@@ -745,7 +749,7 @@ Result<ResetCommand> parseResetCommand(std::vector<std::string> sequence) {
         case ResetCommandType::PUT: {
             auto ovnRes = parseNumber<obj_vnum>(sequence[1], "object vnum");
             if(!ovnRes) {
-                return err(ovnRes.err);
+                return err(ovnRes.error());
             }
             auto ovn = ovnRes.value();
             if(!obj_proto.contains(ovn)) {
@@ -755,7 +759,7 @@ Result<ResetCommand> parseResetCommand(std::vector<std::string> sequence) {
 
             auto containerRes = parseNumber<obj_vnum>(sequence[2], "container vnum");
             if(!containerRes) {
-                return err(containerRes.err);
+                return err(containerRes.error());
             }
             auto container = containerRes.value();
             if(!obj_proto.contains(container)) {
@@ -765,7 +769,7 @@ Result<ResetCommand> parseResetCommand(std::vector<std::string> sequence) {
 
             auto chanceRes = parseNumber(sequence[3], "Chance");
             if(!chanceRes) {
-                return err(chanceRes.err);
+                return err(chanceRes.error());
             }
             auto chance = chanceRes.value();
             if(chance < 0 || chance > 100) {
@@ -775,7 +779,7 @@ Result<ResetCommand> parseResetCommand(std::vector<std::string> sequence) {
 
             auto ifRes = parseNumber(sequence[4], "If");
             if(!ifRes) {
-                return err(ifRes.err);
+                return err(ifRes.error());
             }
             cmd.if_flag = ifRes.value() ? 1 : 0;
 

@@ -7,12 +7,10 @@
  *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
  *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
  ************************************************************************ */
-#include "dbat/Character.h"
-#include "dbat/CharacterPrototype.h"
-#include "dbat/Object.h"
-#include "dbat/ObjectPrototype.h"
+#include "dbat/CharacterUtils.h"
+#include "dbat/ObjectUtils.h"
 #include "dbat/Descriptor.h"
-#include "dbat/Room.h"
+#include "dbat/RoomUtils.h"
 #include "dbat/Account.h"
 #include "dbat/Location.h"
 #include "dbat/interpreter.h"
@@ -22,7 +20,6 @@
 #include "dbat/spells.h"
 #include "dbat/handler.h"
 #include "dbat/mail.h"
-#include "dbat/oasis.h"
 #include "dbat/dg_scripts.h"
 #include "dbat/Guild.h"
 #include "dbat/class.h"
@@ -31,41 +28,18 @@
 #include "dbat/weather.h"
 #include "dbat/act.informative.h"
 #include "dbat/players.h"
-#include "dbat/assedit.h"
 #include "dbat/obj_edit.h"
 #include "dbat/commands.h"
 #include "dbat/act.wizard.h"
+#include "dbat/Command.h"
+#include "dbat/utils.h"
+#include "dbat/filter.h"
+#include "dbat/Random.h"
+#include "dbat/TimeInfo.h"
 
-static std::regex cmd_regex(R"(^([A-Za-z0-9-.]+)(?:\/([A-Za-z0-9-.]+)(?:\:([A-Za-z0-9-.]+))?)?(?:\s+(.*)?)?)", std::regex::icase);
-
-std::optional<CommandData> matchCommand(const std::string& txt) {
-    std::smatch match;
-    if (std::regex_match(txt, match, cmd_regex)) {
-        CommandData cmd_data;
-        cmd_data.cmd = match[1];
-        cmd_data.switch_type = match[2];
-        cmd_data.switch_mod = match[3];
-        cmd_data.full_args = match[4];
-        boost::trim(cmd_data.full_args);
-        cmd_data.equals_present = boost::icontains(cmd_data.full_args, "=");
-        if(cmd_data.equals_present) {
-            auto pos = cmd_data.full_args.find('=');
-            cmd_data.lsargs = cmd_data.full_args.substr(0, pos);
-            cmd_data.rsargs = cmd_data.full_args.substr(pos + 1);
-        } else {
-            cmd_data.lsargs = cmd_data.full_args;
-            cmd_data.rsargs.clear();
-        }
-        boost::trim(cmd_data.rsargs);
-        boost::trim(cmd_data.lsargs);
-
-        return cmd_data;
-    }
-    return std::nullopt;
-}
-
-/* local global variables */
-DISABLED_DATA *disabled_first = nullptr;
+#include "dbat/const/AdminLevel.h"
+#include "dbat/const/Position.h"
+#include "dbat/const/Filename.h"
 
 /* local functions */
 void perform_complex_alias(struct txt_q *input_q, char *orig, struct alias_data *a);
@@ -138,14 +112,7 @@ void command_interpreter(Character *ch, char *argument)
     if (!*argument)
         return;
     
-    auto cmd_op = matchCommand(argument);
-    if(!cmd_op) {
-        ch->sendText("Invalid command format.\r\n");
-        return;
-    }
-    auto cdata = cmd_op.value();
-    char* arg = (char*)cdata.cmd.c_str();
-    char* line = (char*)cdata.full_args.c_str();
+    auto cdata = CommandData(argument);
 
     /* Since all command triggers check for valid_dg_target before acting, the levelcheck
      * here has been removed.
@@ -153,11 +120,11 @@ void command_interpreter(Character *ch, char *argument)
     /* otherwise, find the command */
     {
         int cont;                               /* continue the command checks */
-        cont = command_wtrigger(ch, arg, line); /* any world triggers ? */
+        cont = command_wtrigger(ch, cdata.cmd, cdata.argument); /* any world triggers ? */
         if (!cont)
-            cont = command_mtrigger(ch, arg, line); /* any mobile triggers ? */
+            cont = command_mtrigger(ch, cdata.cmd, cdata.argument); /* any mobile triggers ? */
         if (!cont)
-            cont = command_otrigger(ch, arg, line); /* any object triggers ? */
+            cont = command_otrigger(ch, cdata.cmd, cdata.argument); /* any object triggers ? */
         if (cont)
             return; /* yes, command trigger took over */
     }
@@ -184,7 +151,7 @@ void command_interpreter(Character *ch, char *argument)
         return;
     }
 
-    processCommand(ch, cmd, line, cdata);
+    processCommand(ch, cmd, cdata);
 }
 
 void commandWaitQueue(uint64_t heartPulse, double deltaTime)
@@ -202,7 +169,7 @@ void commandWaitQueue(uint64_t heartPulse, double deltaTime)
             {
                 auto [cmd, cdata] = ch->wait_input_queue.front();
                 ch->wait_input_queue.pop_front();
-                processCommand(ch, cmd, cdata.full_args, cdata);
+                processCommand(ch, cmd, cdata);
             }
             if (ch->getBaseStat("waitTime") <= 0.0 && ch->task == Task::nothing && ch->wait_input_queue.empty())
             {
@@ -212,11 +179,13 @@ void commandWaitQueue(uint64_t heartPulse, double deltaTime)
     }
 }
 
-void processCommand(Character *ch, int cmd, std::string ln, CommandData cd)
+void processCommand(Character *ch, int cmd, CommandData cd)
 {
     char blah[MAX_INPUT_LENGTH];
     int skip_ld = 0;
-    char *line = ln.data();
+
+    std::string line_str = cd.getOriginal();
+    auto line = (char*)line_str.c_str();
 
     auto cm = complete_cmd_info[cmd];
 
@@ -239,12 +208,6 @@ void processCommand(Character *ch, int cmd, std::string ln, CommandData cd)
     if (!command_pass(blah, ch) && GET_ADMLEVEL(ch) < 1)
     {
         ch->sendText("It's unfortunate...\r\n");
-        return;
-    }
-
-    if (check_disabled(&cm))
-    {
-        ch->sendText("This command has been temporarily disabled.\r\n");
         return;
     }
 
@@ -299,7 +262,7 @@ void processCommand(Character *ch, int cmd, std::string ln, CommandData cd)
             ch->sendText("In your dreams, or what?\r\n");
             return;
         case POS_RESTING:
-            command_interpreter(ch, "stand");
+            do_stand(ch, "stand", 0, 0);
             if (GET_POS(ch) != POS_STANDING)
             {
                 ch->sendText("Nah... You feel too relaxed to do that..\r\n");
@@ -349,7 +312,7 @@ ACMD(do_alias)
     { /* no argument specified -- list currently defined aliases */
         ch->sendText("Currently defined aliases:\r\n");
         int count = 0;
-        for (auto &a : p.aliases)
+        for (auto &a : p->aliases)
         {
             count++;
             ch->send_to("%-15s %s\r\n", a.name.c_str(), a.replacement.c_str());
@@ -362,7 +325,7 @@ ACMD(do_alias)
     }
     /* otherwise, add or remove aliases */
     /* is this an alias we've already defined? */
-    auto &aliases = p.aliases;
+    auto &aliases = p->aliases;
     auto find = std::find_if(aliases.begin(), aliases.end(), [&](const auto &a)
                              { return boost::iequals(a.name, arg); });
 
@@ -501,7 +464,7 @@ void perform_alias(struct descriptor_data *d, char *orig)
         return;
     }
     auto &p = players.at(d->character->id);
-    auto &aliases = p.aliases;
+    auto &aliases = p->aliases;
 
     /* bail out immediately if the guy doesn't have any aliases */
     if (aliases.empty())
@@ -1599,277 +1562,8 @@ void fingerUser(Character *ch, struct Account *account)
             auto p = players.find(ref);
             if (p == players.end())
                 continue;
-            ch->send_to("@D[@gCh. Slot %d @D: @w%-30s@D]@n\r\n", ++counter, p->second.character->getName());
+            ch->send_to("@D[@gCh. Slot %d @D: @w%-30s@D]@n\r\n", ++counter, p->second->character->getName());
         }
         ch->sendText("\n");
-    }
-}
-
-/* Return -1 if not an acceptable menu option *
- * Return 31 if selection is X                 *
- * Return other value if Bonus/Negative        */
-
-/* Handle CC point exchange for Bonus/negative */
-
-static struct
-{
-    int state;
-    void (*func)(struct descriptor_data *, char *);
-} olc_functions[] = {
-    {CON_OEDIT, oedit_parse},
-    {CON_IEDIT, oedit_parse},
-    {CON_ZEDIT, zedit_parse},
-    {CON_SEDIT, sedit_parse},
-    {CON_MEDIT, medit_parse},
-    {CON_REDIT, redit_parse},
-    {CON_CEDIT, cedit_parse},
-    {CON_AEDIT, aedit_parse},
-    {CON_ASSEDIT, assedit_parse},
-    {CON_GEDIT, gedit_parse},
-    {CON_LEVELUP, levelup_parse},
-    {CON_HEDIT, hedit_parse},
-    {CON_POBJ, pobj_edit_parse},
-    {-1, nullptr}};
-
-/* deal with newcomers and other non-playing sockets */
-void nanny(struct descriptor_data *d, char *arg)
-{
-    int load_result = -1; /* Overloaded variable */
-    int total, rr, moveon = false, penalty = false;
-    int player_i;
-    int value, roll = Random::get<int>(1, 6); /* For parse_bonuses */
-    struct descriptor_data *k;
-
-    int count = 0, oldcount = HIGHPCOUNT;
-    /* OasisOLC states */
-
-    skip_spaces(&arg);
-
-    /*
-     * Quick check for the OLC states.
-     */
-    for (player_i = 0; olc_functions[player_i].state >= 0; player_i++)
-        if (STATE(d) == olc_functions[player_i].state)
-        {
-            /* send context-sensitive help if need be */
-            if (context_help(d, arg))
-                return;
-            (*olc_functions[player_i].func)(d, arg);
-            return;
-        }
-
-    /* Not in OLC. */
-    switch (STATE(d))
-    {
-
-    case CON_CLOSE:
-    case CON_DISCONNECT:
-        break;
-
-    case CON_ASSEDIT:
-        assedit_parse(d, arg);
-        break;
-
-    case CON_GEDIT:
-        gedit_parse(d, arg);
-        break;
-
-    default:
-        basic_mud_log("SYSERR: Nanny: illegal state of con'ness (%d) for '%s'; closing connection.",
-                      STATE(d), d->character ? GET_NAME(d->character) : "<unknown>");
-        STATE(d) = CON_DISCONNECT; /* Safest to do. */
-        break;
-    }
-}
-
-/*
- * Code to disable or enable buggy commands on the run, saving
- * a list of disabled commands to disk. Originally created by
- * Erwin S. Andreasen (erwin@andreasen.org) for Merc. Ported to
- * CircleMUD by Alexei Svitkine (Myrdred), isvitkin@sympatico.ca.
- *
- * Syntax is:
- *   disable - shows disabled commands
- *   disable <command> - toggles disable status of command
- *
- */
-
-ACMD(do_disable)
-{
-    int i, length;
-    DISABLED_DATA *p, *temp;
-
-    if (IS_NPC(ch))
-    {
-        ch->sendText("Monsters can't disable commands, silly.\r\n");
-        return;
-    }
-
-    skip_spaces(&argument);
-
-    if (!*argument)
-    {                        /* Nothing specified. Show disabled commands. */
-        if (!disabled_first) /* Any disabled at all ? */
-            ch->sendText("There are no disabled commands.\r\n");
-        else
-        {
-            ch->sendText("Commands that are currently disabled:\r\n\r\n"
-                         " Command       Disabled by     Level\r\n"
-                         "-----------   --------------  -------\r\n");
-            for (p = disabled_first; p; p = p->next)
-                ch->send_to(" %-12s   %-12s    %3d\r\n", p->command->command, p->disabled_by, p->level);
-        }
-        return;
-    }
-
-    /* command given - first check if it is one of the disabled commands */
-    for (length = strlen(argument), p = disabled_first; p; p = p->next)
-        if (!strncmp(argument, p->command->command, length))
-            break;
-
-    if (p)
-    { /* this command is disabled */
-
-        /* Was it disabled by a higher level imm? */
-        if (GET_ADMLEVEL(ch) < p->level)
-        {
-            ch->sendText("This command was disabled by a higher power.\r\n");
-            return;
-        }
-
-        REMOVE_FROM_LIST(p, disabled_first, next, temp);
-        ch->send_to("Command '%s' enabled.\r\n", p->command->command);
-        mudlog(BRF, ADMLVL_IMMORT, true, "(GC) %s has enabled the command '%s'.",
-               GET_NAME(ch), p->command->command);
-        free(p->disabled_by);
-        free(p);
-        save_disabled(); /* save to disk */
-    }
-    else
-    { /* not a disabled command, check if the command exists */
-
-        for (length = strlen(argument), i = 0; *cmd_info[i].command != '\n'; i++)
-            if (!strncmp(cmd_info[i].command, argument, length))
-                if (GET_LEVEL(ch) >= cmd_info[i].minimum_level &&
-                    GET_ADMLEVEL(ch) >= cmd_info[i].minimum_admlevel)
-                    break;
-
-        /*  Found?     */
-        if (*cmd_info[i].command == '\n')
-        {
-            ch->sendText("You don't know of any such command.\r\n");
-            return;
-        }
-
-        if (!strcmp(cmd_info[i].command, "disable"))
-        {
-            ch->sendText("You cannot disable the disable command.\r\n");
-            return;
-        }
-
-        /* Disable the command */
-        CREATE(p, struct disabled_data, 1);
-        p->command = &cmd_info[i];
-        p->disabled_by = strdup(GET_NAME(ch)); /* save name of disabler  */
-        p->level = GET_ADMLEVEL(ch);           /* save level of disabler */
-        p->subcmd = cmd_info[i].subcmd;        /* the subcommand if any  */
-        p->next = disabled_first;
-        disabled_first = p; /* add before the current first element */
-        ch->send_to("Command '%s' disabled.\r\n", p->command->command);
-        mudlog(BRF, ADMLVL_IMMORT, true, "(GC) %s has disabled the command '%s'.",
-               GET_NAME(ch), p->command->command);
-        save_disabled(); /* save to disk */
-    }
-}
-
-/* check if a command is disabled */
-int check_disabled(const struct command_info *command)
-{
-    DISABLED_DATA *p;
-
-    for (p = disabled_first; p; p = p->next)
-        if (p->command->command_pointer == command->command_pointer)
-            if (p->command->subcmd == command->subcmd)
-                return true;
-
-    return false;
-}
-
-/* Load disabled commands */
-void load_disabled()
-{
-    FILE *fp;
-    DISABLED_DATA *p;
-    int i;
-    char line[READ_SIZE], name[MAX_INPUT_LENGTH], temp[MAX_INPUT_LENGTH];
-
-    if (disabled_first)
-        free_disabled();
-
-    if ((fp = fopen(DISABLED_FILE, "r")) == nullptr)
-        return; /* No disabled file.. no disabled commands. */
-
-    while (get_line(fp, line))
-    {
-        if (boost::iequals(line, END_MARKER))
-            break; /* break loop if we encounter the END_MARKER */
-        CREATE(p, struct disabled_data, 1);
-        sscanf(line, "%s %d %hd %s", name, &(p->subcmd), &(p->level), temp);
-        /* Find the command in the table */
-        for (i = 0; *cmd_info[i].command != '\n'; i++)
-            if (boost::iequals(cmd_info[i].command, name))
-                break;
-        if (*cmd_info[i].command == '\n')
-        { /* command does not exist? */
-            basic_mud_log("WARNING: load_disabled(): Skipping unknown disabled command - '%s'!", name);
-            free(p);
-        }
-        else
-        { /* add new disabled command */
-            p->disabled_by = strdup(temp);
-            p->command = &cmd_info[i];
-            p->next = disabled_first;
-            disabled_first = p;
-        }
-    }
-    fclose(fp);
-}
-
-/* Save disabled commands */
-void save_disabled()
-{
-    FILE *fp;
-    DISABLED_DATA *p;
-
-    if (!disabled_first)
-    {
-        /* delete file if no commands are disabled */
-        std::filesystem::remove(DISABLED_FILE);
-        return;
-    }
-
-    if ((fp = fopen(DISABLED_FILE, "w")) == nullptr)
-    {
-        basic_mud_log("SYSERR: Could not open " DISABLED_FILE " for writing");
-        return;
-    }
-
-    for (p = disabled_first; p; p = p->next)
-        fprintf(fp, "%s %d %d %s\n", p->command->command, p->subcmd, p->level, p->disabled_by);
-    fprintf(fp, "%s\n", END_MARKER);
-    fclose(fp);
-}
-
-/* free all disabled commands from memory */
-void free_disabled()
-{
-    DISABLED_DATA *p;
-
-    while (disabled_first)
-    {
-        p = disabled_first;
-        disabled_first = disabled_first->next;
-        free(p->disabled_by);
-        free(p);
     }
 }

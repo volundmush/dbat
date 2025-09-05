@@ -7,9 +7,9 @@
  *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
  *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
  ************************************************************************ */
-#include "dbat/Character.h"
-#include "dbat/Object.h"
-#include "dbat/Room.h"
+#include "dbat/CharacterUtils.h"
+#include "dbat/ObjectUtils.h"
+#include "dbat/RoomUtils.h"
 #include "dbat/Descriptor.h"
 #include "dbat/weather.h"
 #include "dbat/send.h"
@@ -21,6 +21,11 @@
 #include "dbat/races.h"
 #include "dbat/dg_scripts.h"
 #include "dbat/transformation.h"
+#include "dbat/filter.h"
+#include "dbat/TimeInfo.h"
+#include "dbat/utils.h"
+
+struct weather_data weather_info;    /* the infomation about the weather */
 
 static void phase_powerup(Character *ch, int type, int phase);
 

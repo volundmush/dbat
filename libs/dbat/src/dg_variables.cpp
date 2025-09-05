@@ -7,9 +7,9 @@
  *  $Date: 2004/10/11 12:07:00 $                                           *
  *  $Revision: 1.0.14 $                                                    *
  **************************************************************************/
-#include "dbat/Character.h"
-#include "dbat/Object.h"
-#include "dbat/Room.h"
+#include "dbat/CharacterUtils.h"
+#include "dbat/ObjectUtils.h"
+#include "dbat/RoomUtils.h"
 #include "dbat/DgScript.h"
 #include "dbat/DgScriptPrototype.h"
 #include "dbat/ObjectPrototype.h"
@@ -26,9 +26,16 @@
 #include "dbat/screen.h"
 #include "dbat/constants.h"
 #include "dbat/spells.h"
-#include "dbat/oasis.h"
 #include "dbat/class.h"
 #include "dbat/races.h"
+#include "dbat/TimeInfo.h"
+#include "dbat/UID.h"
+#include "dbat/filter.h"
+#include "dbat/Random.h"
+#include "dbat/utils.h"
+#include "dbat/weather.h"
+
+#include "dbat/const/Environment.h"
 
 /* Utility functions */
 
@@ -242,7 +249,7 @@ static char *transform[] = {"mtransform ", "otransform ", "wecho "};
 static char *recho[] = {"mrecho ", "orecho ", "wrecho "};
 
 /* sets str to be the value of var.field */
-void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitType type, char *var, char *field, char *subfield,
+void find_replacement(HasDgScripts *go, HasDgScripts *sc, DgScript *trig, UnitType type, char *var, char *field, char *subfield,
                       char *str, size_t slen)
 {
 
@@ -401,7 +408,7 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
             }
             else if (boost::iequals(var, "global"))
             {
-                script_data *thescript = SCRIPT(get_room(0));
+                HasDgScripts *thescript = SCRIPT(get_room(0));
                 *str = '\0';
                 if (!thescript)
                 {
@@ -582,7 +589,7 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
                         in_room = obj_room((Object *)go);
                         break;
                     case MOB_TRIGGER:
-                        in_room = IN_ROOM((Character *)go);
+                        in_room = IN_ROOM(((Character *)go));
                         break;
                     }
                     if (in_room == NOWHERE)
@@ -1136,7 +1143,7 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
                 {
                     if (subfield && *subfield)
                     {
-                        if (check_flags_by_name_ar(GET_OBJ_PERM(o).getAll(), NUM_AFF_FLAGS, subfield, affected_bits) > 0)
+                        if (check_flags_by_name_ar(GET_OBJ_PERM(o).getAllAsSet(), NUM_AFF_FLAGS, subfield, affected_bits) > 0)
                             snprintf(str, slen, "1");
                         else
                             snprintf(str, slen, "0");
@@ -1198,7 +1205,7 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
                 {
                     if (subfield && *subfield)
                     {
-                        if (check_flags_by_name_ar(GET_OBJ_EXTRA(o).getAll(), NUM_ITEM_FLAGS, subfield, extra_bits) > 0)
+                        if (check_flags_by_name_ar(GET_OBJ_EXTRA(o).getAllAsSet(), NUM_ITEM_FLAGS, subfield, extra_bits) > 0)
                             snprintf(str, slen, "1");
                         else
                             snprintf(str, slen, "0");
@@ -1328,7 +1335,7 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
                     if (subfield && *subfield)
                     {
                         int ns;
-                        if ((ns = check_flags_by_name_ar(GET_OBJ_PERM(o).getAll(), NUM_AFF_FLAGS, subfield, affected_bits)) >
+                        if ((ns = check_flags_by_name_ar(GET_OBJ_PERM(o).getAllAsSet(), NUM_AFF_FLAGS, subfield, affected_bits)) >
                             0)
                         {
                             o->affect_flags.toggle(ns);
@@ -1341,7 +1348,7 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
                     if (subfield && *subfield)
                     {
                         int ns;
-                        if ((ns = check_flags_by_name_ar(GET_OBJ_EXTRA(o).getAll(), NUM_ITEM_FLAGS, subfield, extra_bits)) >
+                        if ((ns = check_flags_by_name_ar(GET_OBJ_EXTRA(o).getAllAsSet(), NUM_ITEM_FLAGS, subfield, extra_bits)) >
                             0)
                         {
                             o->item_flags.toggle(ns);
@@ -1547,7 +1554,7 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
             {
                 if (subfield && *subfield)
                 {
-                    if (check_flags_by_name_ar(r->room_flags.getAll(), NUM_ROOM_FLAGS, subfield, room_bits) > 0)
+                    if (check_flags_by_name_ar(r->room_flags.getAllAsSet(), NUM_ROOM_FLAGS, subfield, room_bits) > 0)
                         snprintf(str, slen, "1");
                     else
                         snprintf(str, slen, "0");
@@ -1586,7 +1593,7 @@ void find_replacement(HasDgScripts *go, script_data *sc, DgScript *trig, UnitTyp
  */
 
 /* substitutes any variables into line and returns it as buf */
-void var_subst(HasDgScripts *go, script_data *sc, DgScript *trig,
+void var_subst(HasDgScripts *go, HasDgScripts *sc, DgScript *trig,
                UnitType type, char *line, char *buf)
 {
     char tmp[MAX_INPUT_LENGTH], repl_str[MAX_INPUT_LENGTH];

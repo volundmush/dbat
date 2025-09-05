@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <magic_enum/magic_enum.hpp>
 
 enum class Skill : uint16_t
 {

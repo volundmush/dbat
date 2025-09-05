@@ -7,9 +7,9 @@
  *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
  *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
  ************************************************************************ */
-#include "dbat/Object.h"
-#include "dbat/Character.h"
-#include "dbat/Room.h"
+#include "dbat/ObjectUtils.h"
+#include "dbat/CharacterUtils.h"
+#include "dbat/RoomUtils.h"
 #include "dbat/Zone.h"
 #include "dbat/send.h"
 #include "dbat/comm.h"
@@ -20,13 +20,17 @@
 #include "dbat/interpreter.h"
 #include "dbat/dg_scripts.h"
 #include "dbat/feats.h"
-#include "dbat/oasis.h"
 #include "dbat/config.h"
 #include "dbat/act.item.h"
 #include "dbat/act.movement.h"
 #include "dbat/races.h"
 #include "dbat/act.informative.h"
 #include "dbat/class.h"
+#include "dbat/utils.h"
+#include "dbat/Random.h"
+#include "dbat/filter.h"
+
+#include "dbat/const/LiquidType.h"
 
 /* external variables */
 
@@ -474,12 +478,6 @@ ASPELL(spell_portal)
     auto z = rm.getZone();
 
     auto &zf = z->zone_flags;
-
-    if (!can_edit_zone(ch, z->number) && zf.get(ZONE_QUEST))
-    {
-        ch->sendText("That target is in a quest zone.\r\n");
-        return;
-    }
 
     if (zf.get(ZONE_CLOSED) && GET_ADMLEVEL(ch) < ADMLVL_IMMORT)
     {

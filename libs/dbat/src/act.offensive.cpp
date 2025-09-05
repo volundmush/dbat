@@ -7,9 +7,9 @@
  *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
  *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
  ************************************************************************ */
-#include "dbat/Character.h"
-#include "dbat/Object.h"
-#include "dbat/Room.h"
+#include "dbat/CharacterUtils.h"
+#include "dbat/ObjectUtils.h"
+#include "dbat/RoomUtils.h"
 #include "dbat/Destination.h"
 #include "dbat/Descriptor.h"
 #include "dbat/commands.h"
@@ -26,8 +26,13 @@
 #include "dbat/class.h"
 #include "dbat/techniques.h"
 #include "dbat/attack.h"
+#include "dbat/utils.h"
+#include "dbat/filter.h"
 
 #include "dbat/Random.h"
+
+#include "dbat/const/WearSlot.h"
+#include "dbat/const/Pulse.h"
 
 /* Combat commands below this line */
 

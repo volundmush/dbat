@@ -4,17 +4,11 @@
 #include "HasOrganizationInfo.h"
 
 #include "const/Max.h"
+#include "const/ItemType.h"
+#include "const/ShopFlag.h"
 #include "Flags.h"
 
 struct Object;
-
-enum class ShopFlag : uint8_t
-{
-    start_fight = 0,
-    bank_money = 1,
-    allow_steal = 2,
-    no_broken = 3
-};
 
 struct shop_buy_data {
     int type{};
@@ -22,20 +16,19 @@ struct shop_buy_data {
 };
 
 struct Shop : public org_data {
-    ~Shop();
     void add_product(obj_vnum v);
     void remove_product(obj_vnum v);
     std::vector<obj_vnum> producing{};        /* Which item to produce (virtual)	*/
     float profit_buy{};        /* Factor to multiply cost with		*/
     float profit_sell{};        /* Factor to multiply cost with		*/
-    std::vector<shop_buy_data> type{};    /* Which items to trade			*/
-    char *no_such_item1{};        /* Message if keeper hasn't got an item	*/
-    char *no_such_item2{};        /* Message if player hasn't got an item	*/
-    char *missing_cash1{};        /* Message if keeper hasn't got cash	*/
-    char *missing_cash2{};        /* Message if player hasn't got cash	*/
-    char *do_not_buy{};        /* If keeper dosn't buy such things	*/
-    char *message_buy{};        /* Message when player buys item	*/
-    char *message_sell{};        /* Message when player sells item	*/
+    std::vector<shop_buy_data> type{};
+    std::string no_such_item1{};        /* Message if keeper hasn't got an item	*/
+    std::string no_such_item2{};        /* Message if player hasn't got an item	*/
+    std::string missing_cash1{};        /* Message if keeper hasn't got cash	*/
+    std::string missing_cash2{};        /* Message if player hasn't got cash	*/
+    std::string do_not_buy{};        /* If keeper dosn't buy such things	*/
+    std::string message_buy{};        /* Message when player buys item	*/
+    std::string message_sell{};        /* Message when player sells item	*/
     int temper1{};        /* How does keeper react if no money	*/
     FlagHandler<ShopFlag> shop_flags{};    /* Can attack? Use bank? Cast here?	*/
 
@@ -51,9 +44,6 @@ struct Shop : public org_data {
 
 
 extern void shop_purge(uint64_t heartPulse, double deltaTime);
-
-#define BUY_TYPE(i)        ((i).type)
-#define BUY_WORD(i)        ((i).keywords.c_str())
 
 
 constexpr int MAX_TRADE = 5;    /* List maximums for compatibility	*/
@@ -99,39 +89,37 @@ constexpr int OPER_NOT = 4;
 constexpr int MAX_OPER = 4;
 
 
-#define SHOP_NUM(i)        (shop_index.at((i)).vnum)
-#define SHOP_KEEPER(i)        (shop_index.at((i)).keeper)
-#define SHOP_OPEN1(i)        (shop_index.at((i)).open1)
-#define SHOP_CLOSE1(i)        (shop_index.at((i)).close1)
-#define SHOP_OPEN2(i)        (shop_index.at((i)).open2)
-#define SHOP_CLOSE2(i)        (shop_index.at((i)).close2)
-#define SHOP_ROOM(i, num)    (shop_index.at((i)).in_room[(num)])
-#define SHOP_BUYTYPE(i, num)    (BUY_TYPE(shop_index.at((i)).type[(num)]))
-#define SHOP_BUYWORD(i, num)    (BUY_WORD(shop_index.at((i)).type[(num)]))
-#define SHOP_PRODUCT(i, num)    (shop_index.at((i)).producing[(num)])
-#define SHOP_BANK(i)        (shop_index.at((i)).bankAccount)
-#define SHOP_BROKE_TEMPER(i)    (shop_index.at((i)).temper1)
-#define SHOP_BITVECTOR(i)    (shop_index.at((i)).bitvector)
-#define SHOP_TRADE_WITH(i)    (shop_index.at((i)).with_who)
-#define SHOP_SORT(i)        (shop_index.at((i)).lastsort)
-#define SHOP_BUYPROFIT(i)    (shop_index.at((i)).profit_buy)
-#define SHOP_SELLPROFIT(i)    (shop_index.at((i)).profit_sell)
-#define SHOP_FUNC(i)        (shop_index.at((i)).func)
+#define SHOP_NUM(i)        shop_index.at(i)->vnum
+#define SHOP_KEEPER(i)        shop_index.at(i)->keeper
+#define SHOP_OPEN1(i)        shop_index.at(i)->open1
+#define SHOP_CLOSE1(i)        shop_index.at(i)->close1
+#define SHOP_OPEN2(i)        shop_index.at(i)->open2
+#define SHOP_CLOSE2(i)        shop_index.at(i)->close2
+#define SHOP_ROOM(i, num)    shop_index.at(i)->in_room[num]
+#define SHOP_PRODUCT(i, num)    shop_index.at(i)->producing(num)
+#define SHOP_BANK(i)        shop_index.at(i)->bankAccount
+#define SHOP_BROKE_TEMPER(i)    shop_index.at(i)->temper1
+#define SHOP_BITVECTOR(i)    shop_index.at(i)->bitvector
+#define SHOP_TRADE_WITH(i)    shop_index.at(i)->with_who
+#define SHOP_SORT(i)        shop_index.at(i)->lastsort
+#define SHOP_BUYPROFIT(i)    shop_index.at(i)->profit_buy
+#define SHOP_SELLPROFIT(i)    shop_index.at(i)->profit_sell
+#define SHOP_FUNC(i)        shop_index.at(i)->func
 
 constexpr int MIN_OUTSIDE_BANK = 5000;
 constexpr int MAX_OUTSIDE_BANK = 15000;
 
-#define MSG_NOT_OPEN_YET    "Come back later!"
-#define MSG_NOT_REOPEN_YET    "Sorry, we have closed, but come back later."
-#define MSG_CLOSED_FOR_DAY    "Sorry, come back tomorrow."
-#define MSG_NO_STEAL_HERE    "$n is a bloody thief!"
-#define MSG_NO_SEE_CHAR        "I don't trade with someone I can't see!"
-#define MSG_NO_SELL_ALIGN    "Get out of here before I call the guards!"
-#define MSG_NO_SELL_CLASS    "We don't serve your kind here!"
-#define MSG_NO_SELL_RACE        "Get lost! We don't serve you kind here!"
-#define MSG_NO_USED_WANDSTAFF    "I don't buy used up wands or staves!"
-#define MSG_CANT_KILL_KEEPER    "Get out of here before I call the guards!"
-#define MSG_NO_BUY_BROKEN    "Sorry, but I don't deal in broken items."
+constexpr std::string_view MSG_NOT_OPEN_YET = "Come back later!";
+constexpr std::string_view MSG_NOT_REOPEN_YET = "Sorry, we have closed, but come back later.";
+constexpr std::string_view MSG_CLOSED_FOR_DAY = "Sorry, come back tomorrow.";
+constexpr std::string_view MSG_NO_STEAL_HERE = "$n is a bloody thief!";
+constexpr std::string_view MSG_NO_SEE_CHAR = "I don't trade with someone I can't see!";
+constexpr std::string_view MSG_NO_SELL_ALIGN = "Get out of here before I call the guards!";
+constexpr std::string_view MSG_NO_SELL_CLASS = "We don't serve your kind here!";
+constexpr std::string_view MSG_NO_SELL_RACE = "Get lost! We don't serve you kind here!";
+constexpr std::string_view MSG_NO_USED_WANDSTAFF = "I don't buy used up wands or staves!";
+constexpr std::string_view MSG_CANT_KILL_KEEPER = "Get out of here before I call the guards!";
+constexpr std::string_view MSG_NO_BUY_BROKEN = "Sorry, but I don't deal in broken items.";
 
 // global variables
 extern const char *trade_letters[NUM_TRADERS + 1];

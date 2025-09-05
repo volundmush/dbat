@@ -45,6 +45,7 @@ std::vector<std::string> getSubRaceNames();
 
 
 
+
 extern std::vector<CharacterPrototype *> collectNPCProtos(int start_vnum, int end_vnum);
 extern std::vector<ObjectPrototype *> collectItemProtos(int start_vnum, int end_vnum);
 extern std::vector<Guild *> collectGuilds(int start_vnum, int end_vnum);

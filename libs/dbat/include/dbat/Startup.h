@@ -1,10 +1,8 @@
 #pragma once
 #include <ctime>
 
-extern void boot_world();
 extern void check_start_rooms();
 extern void boot_db_textfiles();
-extern void boot_db_time();
 extern void boot_db_spellfeats();
 extern void boot_db_world();
 extern void boot_db_help();
@@ -14,9 +12,6 @@ extern void boot_db_commands();
 extern void boot_db_specials();
 extern void boot_db_sort();
 extern void boot_db_boards();
-extern void boot_db_banned();
-extern void boot_db_rent();
-extern void boot_db_houses();
 extern void boot_db_shadow();
 extern void boot_db_spacemap();
 extern void boot_db_sort();

@@ -7,7 +7,7 @@
  *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
  *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
  ************************************************************************ */
-#include "dbat/Character.h"
+#include "dbat/CharacterUtils.h"
 #include "dbat/Account.h"
 #include "dbat/players.h"
 #include "dbat/utils.h"
@@ -16,6 +16,8 @@
 #include "dbat/dg_scripts.h"
 #include "dbat/class.h"
 #include "dbat/filter.h"
+
+std::map<int64_t, std::shared_ptr<PlayerData>> players;
 
 long get_id_by_name(const char *name)
 {
@@ -31,7 +33,7 @@ char *get_name_by_id(long id)
     auto find = players.find(id);
     if (find == players.end())
         return nullptr;
-    sprintf(buf, "%s", find->second.name.c_str());
+    sprintf(buf, "%s", find->second->name.c_str());
     return buf;
 }
 
@@ -49,9 +51,9 @@ Character *findPlayer(const std::string &name)
 {
     for (auto &player : players)
     {
-        if (boost::iequals(player.second.name, name))
+        if (boost::iequals(player.second->name, name))
         {
-            return player.second.character;
+            return player.second->character;
         }
     }
     return nullptr;
@@ -75,14 +77,6 @@ Result<std::string> validate_pc_name(const std::string &name)
 
     if (!is_all_alpha(n))
         return err("No special symbols or numbers in names, please.");
-    // And nothing from our badnames list...
-    for (auto &badname : invalid_list)
-    {
-        if (boost::iequals(n, badname))
-        {
-            return err("That name is disallowed. Nothing profane, lame, or conflicting with an official character please.");
-        }
-    }
 
     return n;
 }
@@ -130,7 +124,7 @@ void deletePlayerCharacter(std::weak_ptr<Character> ref)
     characterSubscriptions.unsubscribeFromAll(ch);
 
     // Get a copy of player_data
-    PlayerData pdata = players.at(ch->id);
+    auto pdata = players.at(ch->id);
 
     // Erase the character from the players map.
     players.erase(ch->id);
@@ -138,12 +132,12 @@ void deletePlayerCharacter(std::weak_ptr<Character> ref)
     for (auto &[id, pd] : players)
     {
         // cleanups....
-        pd.sense_player.erase(ch->id);
-        pd.dub_names.erase(ch->id);
+        pd->sense_player.erase(ch->id);
+        pd->dub_names.erase(ch->id);
     }
 
     // Now we'll deal with the account.
-    auto acc = pdata.account;
+    auto acc = pdata->account;
 
     // Remove the character from the account's list. That means we'll need to remove the matching ch->id from the vector.
     acc->characters.erase(std::remove_if(acc->characters.begin(), acc->characters.end(), [ch](const auto &c)
@@ -163,7 +157,7 @@ bool Account::canBeDeleted()
         auto find = players.find(ref);
         if (find == players.end())
             continue;
-        auto ch = find->second.character;
+        auto ch = find->second->character;
         if (!ch)
             continue;
         auto shared = ch->shared_from_this();
@@ -179,18 +173,18 @@ bool deleteUserAccount(vnum id)
         return false;
     auto &acc = accounts.at(id);
 
-    auto descs = acc.descriptors;
+    auto descs = acc->descriptors;
     for (auto d : descs)
         close_socket(d);
 
-    auto cha = acc.characters;
+    auto cha = acc->characters;
 
     for (const auto &ref : cha)
     {
         auto found = players.find(ref);
         if (found == players.end())
             continue;
-        if (auto ch = found->second.character; ch)
+        if (auto ch = found->second->character; ch)
         {
             if (canDeleteCharacter(ch->shared_from_this()))
                 return false;
@@ -202,7 +196,7 @@ bool deleteUserAccount(vnum id)
         auto found = players.find(c);
         if (found == players.end())
             continue;
-        if (auto ch = found->second.character; ch)
+        if (auto ch = found->second->character; ch)
         {
             deletePlayerCharacter(ch->shared_from_this());
         }

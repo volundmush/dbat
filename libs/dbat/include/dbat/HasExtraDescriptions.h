@@ -1,27 +1,19 @@
 #pragma once
 #include <string>
 #include <vector>
+#include <optional>
+#include <span>
 
-// TODO: investigate replacing these with just a std::pair<std::string, std;:string>
-// and returning a std::span<std::pair<std::string_view, std::string_view>>
+using ExtraDescription = std::pair<std::string, std::string>;
+using ExtraDescriptions = std::vector<ExtraDescription>;
 
-/* Extra description: used in objects, mobiles, and rooms */
-struct extra_descr_data {
-    char *keyword;                 /* Keyword in look/examine          */
-    char *description;             /* What to see                      */
-    struct extra_descr_data *next; /* Next in list                     */
-};
-
-// new variant of extra_descr_data that uses std::string
-struct ExtraDescription {
-    std::string keyword;          /* Keyword in look/examine          */
-    std::string description;      /* What to see                      */
-};
+using ExtraDescriptionView = std::pair<std::string_view, std::string_view>;
+using ExtraDescriptionViews = std::vector<ExtraDescriptionView>;
 
 
 struct HasExtraDescriptions {
-    const std::vector<ExtraDescription>& getExtraDescription() const; // Returns the extra description data.    
-    std::vector<ExtraDescription> extra_descriptions; // Extra descriptions for this unit.
+    ExtraDescriptionViews getExtraDescription() const; // Returns the extra description data.
+    ExtraDescriptions extra_descriptions; // Extra descriptions for this unit.
 };
-
-extern void free_extra_descriptions(struct extra_descr_data *edesc);
+std::optional<ExtraDescriptionView> find_exdesc(std::string_view word, std::span<ExtraDescriptionView> hed);
+std::optional<ExtraDescriptionView> find_exdesc(std::string_view word, HasExtraDescriptions* hed);

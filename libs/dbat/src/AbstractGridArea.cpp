@@ -3,6 +3,8 @@
 #include "dbat/Destination.h"
 #include "dbat/Character.h"
 
+std::unordered_map<int64_t, std::shared_ptr<GridTemplate>> gridTemplates;
+
 TileOverride::operator bool() const
 {
     // A TileOverride is considered "valid" if it has at least one of the following:
@@ -195,9 +197,9 @@ std::map<Direction, Destination> AbstractGridArea::getDirections(const Coordinat
     return out;
 }
 
-const std::vector<ExtraDescription> &AbstractGridArea::getExtraDescription(const Coordinates &coor) const
+ExtraDescriptionViews AbstractGridArea::getExtraDescription(const Coordinates &coor) const
 {
-    static const std::vector<ExtraDescription> empty; // Grid areas do not support per-tile extra descriptions yet.
+    static ExtraDescriptionViews empty; // Grid areas do not support per-tile extra descriptions yet.
     return empty;
 }
 

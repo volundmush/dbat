@@ -12,8 +12,8 @@
 *  $Date: 2004/10/11 12:07:00$                                            *
 *  $Revision: 1.0.14 $                                                    *
 ************************************************************************ */
-#include "dbat/Character.h"
-#include "dbat/Object.h"
+#include "dbat/CharacterUtils.h"
+#include "dbat/ObjectUtils.h"
 #include "dbat/Descriptor.h"
 #include "dbat/Zone.h"
 #include "dbat/dg_comm.h"
@@ -25,6 +25,13 @@
 #include "dbat/spells.h"
 #include "dbat/handler.h"
 #include "dbat/planet.h"
+
+#include "dbat/utils.h"
+#include "dbat/filter.h"
+
+#include "dbat/const/Max.h"
+#include "dbat/const/WearSlot.h"
+#include "dbat/const/ItemValues.h"
 
 /* local functions */
 void sub_write_to_char(Character *ch, char *tokens[], void *otokens[], unsigned char type[]);
@@ -61,15 +68,17 @@ void sub_write_to_char(Character *ch, char *tokens[],
     for (i = 0; tokens[i + 1]; i++) {
         strcat(sb, tokens[i]);
 
+        auto ctoken = static_cast<Character*>(otokens[i]);
+        auto itoken = static_cast<Object*>(otokens[i]);
+
     switch (type[i]) {
             case '~':
                 if (!otokens[i])
                     strcat(sb, "someone");
-                else if ((Character *) otokens[i] == ch)
+                else if (ctoken == ch)
                     strcat(sb, "you");
                 else {
-                    auto cha = ((Character*)otokens[i]);
-                    scratch = cha->displayNameFor(ch);
+                    scratch = ctoken->displayNameFor(ch);
                     strcat(sb, scratch.c_str());
                 }
                 break;
@@ -77,48 +86,46 @@ void sub_write_to_char(Character *ch, char *tokens[],
             case '|':
                 if (!otokens[i])
                     strcat(sb, "someone's");
-                else if ((Character *) otokens[i] == ch)
+                else if (ctoken == ch)
                     strcat(sb, "your");
                 else {
-                    auto cha = ((Character*)otokens[i]);
-                    scratch = cha->displayNameFor(ch);
+                    scratch = ctoken->displayNameFor(ch);
                     strcat(sb, scratch.c_str());
                     strcat(sb, "'s");
                 }
                 break;
 
             case '^':
-                if (!otokens[i] || !ch->canSee((Character *) otokens[i]))
+                if (!otokens[i] || !ch->canSee(ctoken))
                     strcat(sb, "its");
-                else if (otokens[i] == ch)
+                else if (ctoken == ch)
                     strcat(sb, "your");
                 else
-                    strcat(sb, HSHR((Character *) otokens[i]));
                 break;
 
             case '&':
-                if (!otokens[i] || !ch->canSee((Character *) otokens[i]))
+                if (!ctoken || !ch->canSee(ctoken))
                     strcat(sb, "it");
-                else if (otokens[i] == ch)
+                else if (ctoken == ch)
                     strcat(sb, "you");
                 else
-                    strcat(sb, HSSH((Character *) otokens[i]));
+                    strcat(sb, HSSH(ctoken));
                 break;
 
             case '*':
-                if (!otokens[i] || !ch->canSee((Character *) otokens[i]))
+                if (!ctoken || !ch->canSee(ctoken))
                     strcat(sb, "it");
-                else if (otokens[i] == ch)
+                else if (ctoken == ch)
                     strcat(sb, "you");
                 else
-                    strcat(sb, HMHR((Character *) otokens[i]));
+                    strcat(sb, HMHR(ctoken));
                 break;
 
             case 0xA8: // '¨' diaeresis as single-byte 0xA8 token
-                if (!otokens[i])
+                if (!itoken)
                     strcat(sb, "something");
                 else
-                    strcat(sb, OBJS(((Object *) otokens[i]), ch));
+                    strcat(sb, OBJS(itoken, ch));
                 break;
         }
     }

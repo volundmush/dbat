@@ -7,12 +7,12 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
-#include <boost/iostreams/filtering_streambuf.hpp>
-#include <boost/iostreams/filter/gzip.hpp>
+#include <fstream>
 
-#include "dbat/Character.h"
-#include "dbat/Object.h"
-#include "dbat/Room.h"
+#include "dbat/Log.h"
+#include "dbat/CharacterUtils.h"
+#include "dbat/ObjectUtils.h"
+#include "dbat/RoomUtils.h"
 #include "dbat/Descriptor.h"
 #include "dbat/Zone.h"
 #include "dbat/CharacterPrototype.h"
@@ -33,7 +33,6 @@
 #include "dbat/comm.h"
 #include "dbat/dg_scripts.h"
 #include "dbat/interpreter.h"
-#include "dbat/genolc.h"
 #include "dbat/Shop.h"
 #include "dbat/Guild.h"
 #include "dbat/handler.h"
@@ -42,10 +41,15 @@
 #include "dbat/constants.h"
 #include "dbat/spells.h"
 #include "dbat/races.h"
-#include "dbat/genobj.h"
 #include "dbat/Account.h"
 #include "dbat/maputils.h"
 #include "dbat/saveload.h"
+#include "dbat/filter.h"
+#include "dbat/utils.h"
+
+#include "dbat/Random.h"
+#include "dbat/ID.h"
+#include "dbat/Help.h"
 
 
 /**************************************************************************
@@ -56,32 +60,14 @@ bool gameIsLoading = true;
 bool saveAll = false;
 bool isMigrating = false;
 
-int64_t lastCharacterID{0}, lastObjectID{0}, lastAccountID{0}, lastStructureID{0}, lastAreaID{0}, lastGridTemplateID{0};
-int lastRoomID{0}, lastZoneID{0}, lastShopID{0}, lastGuildID{0}, lastScriptID{0};
 
 struct config_data config_info; /* Game configuration list.    */
 
 // The global database of entities.
 
-std::unordered_map<int64_t, std::shared_ptr<Area>> areas;
-std::unordered_map<int64_t, std::shared_ptr<Structure>> structures;
-std::unordered_map<int64_t, GridTemplate> gridTemplates;
 
 Character *affect_list = nullptr; /* global linked list of chars with affects */
 Character *affectv_list = nullptr; /* global linked list of chars with round-based affects */
-std::map<mob_vnum, struct index_data> mob_index;    /* index table for mobile file	 */
-std::map<mob_vnum, CharacterPrototype> mob_proto;    /* prototypes for mobs		 */
-
-std::map<obj_vnum, struct index_data> obj_index;    /* index table for object file	 */
-std::map<obj_vnum, ObjectPrototype> obj_proto;    /* prototypes for objs		 */
-
-std::map<zone_vnum, struct Zone> zone_table;    /* zone table			 */
-
-std::map<trig_vnum, DgScriptPrototype> trig_index; /* index table for triggers      */
-
-std::map<int64_t, PlayerData> players;
-
-std::map<int64_t, struct descriptor_data*> sessions;
 
 std::vector<std::weak_ptr<Character>> getAllCharacters() {
     std::vector<std::weak_ptr<Character>> out;
@@ -133,13 +119,7 @@ int mini_mud = 0;        /* mini-mud mode?		 */
 int no_rent_check = 0;        /* skip rent check on boot?	 */
 time_t boot_time = 0;        /* time of mud boot		 */
 int circle_restrict = 0;    /* level of game restriction	 */
-int dballtime = 0;              /* used by dragonball load system*/
-int SHENRON = false;            /* Shenron has been summoned     */
-int DRAGONR = 0;                /* Room Shenron has been summoned to */
-int DRAGONZ = 0;                /* Zone Shenron has been summoned to */
-int WISH[2] = {0, 0};           /* Keeps track of wishes granted */
-int DRAGONC = 0;                /* Keeps count of Shenron's remaining time */
-Character *EDRAGON = nullptr;      /* This is Shenron when he is loaded */
+
 room_rnum r_mortal_start_room;    /* rnum of mortal start room	 */
 room_rnum r_immort_start_room;    /* rnum of immort start room	 */
 room_rnum r_frozen_start_room;    /* rnum of frozen start room	 */
@@ -160,31 +140,9 @@ char *handbook = nullptr;        /* handbook for new immortals	 */
 char *policies = nullptr;        /* policies page		 */
 char *ihelp = nullptr;        /* help screen (immortals)	 */
 
-struct help_index_element *help_table = nullptr;    /* the help table	 */
-int top_of_helpt = 0;
-
-struct social_messg *soc_mess_list = nullptr;      /* list of socials */
-int top_of_socialt = -1;                        /* number of socials */
-
-struct time_info_data old_time_info;/* the infomation about the time    */
-struct time_info_data time_info;/* the infomation about the time    */
-struct time_info_data era_uptime;/* the infomation about how long the server has been up    */
-struct weather_data weather_info;    /* the infomation about the weather */
-std::unordered_set<zone_vnum> zone_reset_queue;
-
-std::vector<obj_vnum> dbVnums = {20, 21, 22, 23, 24, 25, 26};
-
-SubscriptionManager<Character> characterSubscriptions;
-SubscriptionManager<Object> objectSubscriptions;
-SubscriptionManager<Room> roomSubscriptions;
-SubscriptionManager<DgScript> triggerSubscriptions;
 
 /* local functions */
 static void dragon_level(Character *ch);
-
-static int file_to_string(const char *name, char *buf);
-
-static int file_to_string_alloc(const char *name, char **buf);
 
 static int count_alias_records(FILE *fl);
 
@@ -192,17 +150,9 @@ static void get_one_line(FILE *fl, char *buf);
 
 static void log_zone_error(zone_rnum zone, int cmd_no, const char *message);
 
-static void reset_time();
 
-void mag_assign_spells();
 
 void create_command_list();
-
-void sort_spells();
-
-void load_banned();
-
-void Read_Invalid_List();
 
 void memorize_add(Character *ch, int spellnum, int timer);
 
@@ -210,21 +160,8 @@ void free_feats();
 
 void free_assemblies();
 
-// sticking this here for a quick use of get_help...
-extern int search_help(const char *argument, int level);
 
 /* external vars */
-
-struct help_index_element *get_help(const std::string &name, int level) {
-    if (!help_table || name.empty())
-        return nullptr;
-
-    if(auto idx = search_help(name.c_str(), level); idx != NOTHING) {
-        return &help_table[idx];
-    }
-    
-    return nullptr;
-}
 
 
 static void dragon_level(Character *ch) {
@@ -289,164 +226,6 @@ ACMD(do_reboot) {
 }
 
 
-static void db_load_activate_entities() {
-    // activate all items which ended up "in the world".
-    for(auto &[id, r] : Room::registry) {
-        assign_triggers(r.get(), WLD_TRIGGER);
-        r->activateScripts();
-        auto con = r->getObjects().snapshot_weak();
-        for(auto o : filter_raw(con)) {
-            o->activate();
-        }
-        auto people = r->getPeople().snapshot_weak();
-        for(auto c : filter_raw(people)) {
-            if(IS_NPC(c)) {
-                c->activate();
-            }
-        }
-    }
-}
-
-
-static std::vector<std::filesystem::path> getDumpFiles() {
-    std::filesystem::path dir = "data/dumps"; // Change to your directory
-    std::vector<std::filesystem::path> directories;
-
-    auto pattern = "dump-";
-    for (const auto& entry : std::filesystem::directory_iterator(dir)) {
-        if (entry.is_directory() && entry.path().filename().string().starts_with(pattern)) {
-            directories.push_back(entry.path());
-        }
-    }
-
-    // Sorting lexicographically in descending order to get the newest first
-    // Assumes the naming convention ensures that lexicographical order matches chronological order.
-
-    std::sort(directories.begin(), directories.end(), std::greater<>());
-    return directories;
-}
-
-void boot_db_world() {
-
-    auto dumps = getDumpFiles();
-    if (!dumps.empty()) {
-        std::cout << "Newest state dump: " << dumps.front() << '\n';
-    } else {
-        std::cout << "No matching state dumps found.\n";
-        return;
-    }
-
-    auto latest = dumps.front();
-
-    basic_mud_log("Loading stat handlers...");
-    init_stat_handlers();
-
-    basic_mud_log("Loading global data...");
-    load_globaldata(latest);
-
-    basic_mud_log("Loading Zones...");
-    load_zones(latest);
-
-    basic_mud_log("Loading DgScripts and generating index.");
-    load_dgscript_prototypes(latest);
-
-    basic_mud_log("Loading mobs and generating index.");
-    load_npc_prototypes(latest);
-
-    basic_mud_log("Loading objs and generating index.");
-    load_item_prototypes(latest);
-
-    basic_mud_log("Loading rooms.");
-    load_rooms(latest);
-
-    basic_mud_log("Loading Grid Templates...");
-    load_grid_templates(latest);
-
-    basic_mud_log("Loading areas initial...");
-    load_areas_initial(latest);
-
-    basic_mud_log("Loading shops.");
-    load_shops(latest);
-
-    basic_mud_log("Loading guild masters.");
-    load_guilds(latest);
-
-    basic_mud_log("Loading exits.");
-    load_exits(latest);
-
-    basic_mud_log("Loading accounts.");
-    load_accounts(latest);
-
-    basic_mud_log("Loading players.");
-    load_players(latest);
-
-    basic_mud_log("Loading characters initial...");
-    load_characters_initial(latest);
-
-    basic_mud_log("Loading areas finish...");
-    load_areas_finish(latest);
-
-    basic_mud_log("Loading structures initial...");
-    load_structures_initial(latest);
-
-    basic_mud_log("Loading structures finish...");
-    load_structures_finish(latest);
-
-    basic_mud_log("Loading items initial...");
-    load_items_initial(latest);
-
-    // Now that all of the game entities have been spawned, we can finish loading
-    // relations between them.
-
-    basic_mud_log("Loading characters finish...");
-    load_characters_finish(latest);
-
-    basic_mud_log("Loading items finish...");
-    load_items_finish(latest);
-
-    basic_mud_log("Loading dgscript instances...");
-    load_dgscripts(latest);
-
-    basic_mud_log("Running activation of entities...");
-    db_load_activate_entities();
-
-    basic_mud_log("Checking start rooms.");
-    check_start_rooms();
-
-    basic_mud_log("Loading disabled commands list...");
-    load_disabled();
-
-    basic_mud_log("Loading help entries.");
-    load_help(latest);
-
-    basic_mud_log("Loading assemblies.");
-    load_assemblies(latest);
-
-    boot_db_shadow();
-}
-
-void boot_db_shadow() {
-    if (SELFISHMETER >= 10) {
-        basic_mud_log("Loading Shadow Dragons.");
-        load_shadow_dragons();
-    }
-}
-
-
-
-void free_extra_descriptions(struct extra_descr_data *edesc) {
-    struct extra_descr_data *enext;
-
-    for (; edesc; edesc = enext) {
-        enext = edesc->next;
-
-        free(edesc->keyword);
-        free(edesc->description);
-        free(edesc);
-    }
-}
-
-
 /* Free the world, in a memory allocation sense. */
 
 /* You can define this to anything you want; 1 would work but it would
@@ -459,126 +238,6 @@ void free_extra_descriptions(struct extra_descr_data *edesc) {
      - Elie Rosenblum Dec. 12 2003 */
 constexpr int NUM_OBJ_UNIQUE_POOLS = 5000;
 
-void boot_db_textfiles() {
-    basic_mud_log("Reading news, credits, help, ihelp, bground, info & motds.");
-    file_to_string_alloc(NEWS_FILE, &news);
-    file_to_string_alloc(CREDITS_FILE, &credits);
-    file_to_string_alloc(MOTD_FILE, &motd);
-    file_to_string_alloc(IMOTD_FILE, &imotd);
-    file_to_string_alloc(HELP_PAGE_FILE, &help);
-    file_to_string_alloc(INFO_FILE, &info);
-    file_to_string_alloc(WIZLIST_FILE, &wizlist);
-    file_to_string_alloc(IMMLIST_FILE, &immlist);
-    file_to_string_alloc(POLICIES_FILE, &policies);
-    file_to_string_alloc(HANDBOOK_FILE, &handbook);
-    file_to_string_alloc(BACKGROUND_FILE, &background);
-    file_to_string_alloc(IHELP_PAGE_FILE, &ihelp);
-    file_to_string_alloc(GREETINGS_FILE, &GREETINGS);
-    file_to_string_alloc(GREETANSI_FILE, &GREETANSI);
-}
-
-void boot_db_time() {
-    basic_mud_log("Resetting the game time:");
-    reset_time();
-}
-
-void boot_db_spellfeats() {
-    basic_mud_log("Loading spell definitions.");
-    mag_assign_spells();
-
-    basic_mud_log("Loading feats.");
-    assign_feats();
-}
-
-void boot_db_help() {
-    basic_mud_log("Setting up context sensitive help system for OLC");
-    boot_context_help();
-}
-
-void boot_db_mail() {
-    basic_mud_log("Booting mail system.");
-    if (!scan_file()) {
-        basic_mud_log("    Mail boot failed -- Mail system disabled");
-    }
-}
-
-void boot_db_socials() {
-    basic_mud_log("Loading social messages.");
-    boot_social_messages();
-}
-
-void boot_db_commands() {
-    basic_mud_log("Building command list.");
-    create_command_list(); /* aedit patch -- M. Scott */
-}
-
-void boot_db_specials() {
-    basic_mud_log("Assigning function pointers:");
-    basic_mud_log("   Mobiles.");
-    assign_mobiles();
-    basic_mud_log("   Shopkeepers.");
-    assign_the_shopkeepers();
-    basic_mud_log("   Objects.");
-    assign_objects();
-    basic_mud_log("   Rooms.");
-    assign_rooms();
-    basic_mud_log("   Guildmasters.");
-    assign_the_guilds();
-}
-
-
-void boot_db_sort() {
-    basic_mud_log("Sorting command list and spells.");
-    sort_commands();
-    sort_spells();
-    sort_feats();
-}
-
-void boot_db_boards() {
-    basic_mud_log("Booting boards system.");
-    init_boards();
-}
-
-void boot_db_banned() {
-    basic_mud_log("Reading banned site and invalid-name list.");
-    load_banned();
-    Read_Invalid_List();
-}
-
-
-void boot_db_spacemap() {
-    FILE *mapfile = fopen(MAP_FILE, "r");
-    int rowcounter, colcounter;
-    int vnum_read;
-    for (rowcounter = 0; rowcounter <= MAP_ROWS; rowcounter++) {
-        for (colcounter = 0; colcounter <= MAP_COLS; colcounter++) {
-            fscanf(mapfile, "%d", &vnum_read);
-            mapnums[rowcounter][colcounter] = real_room(vnum_read);
-        }
-    }
-    fclose(mapfile);
-}
-
-
-/* body of the booting system */
-
-
-void boot_db_new() {
-    boot_db_time();
-    boot_db_textfiles();
-    boot_db_spellfeats();
-    boot_db_world();
-    boot_db_mail();
-    boot_db_socials();
-    boot_db_commands();
-    boot_db_help();
-    boot_db_specials();
-    boot_db_sort();
-    boot_db_boards();
-    boot_db_banned();
-    boot_db_spacemap();
-    topLoad();
-}
 
 
 /* save the auction file */
@@ -627,92 +286,6 @@ void auc_load(Object *obj) {
 
 time_t old_beginning_of_time;
 
-/* reset the time in the game from file */
-static void reset_time() {
-    time_t beginning_of_time = 0;
-    FILE *bgtime;
-
-    if ((bgtime = fopen(TIME_FILE, "r")) == nullptr)
-        basic_mud_log("SYSERR: Can't read from '%s' time file.", TIME_FILE);
-    else {
-        fscanf(bgtime, "%ld\n", &beginning_of_time);
-        fscanf(bgtime, "%ld\n", &NEWSUPDATE);
-        fscanf(bgtime, "%ld\n", &BOARDNEWMORT);
-        fscanf(bgtime, "%ld\n", &BOARDNEWDUO);
-        fscanf(bgtime, "%ld\n", &BOARDNEWCOD);
-        fscanf(bgtime, "%ld\n", &BOARDNEWBUI);
-        fscanf(bgtime, "%ld\n", &BOARDNEWIMM);
-        fscanf(bgtime, "%ld\n", &INTERESTTIME);
-        fscanf(bgtime, "%ld\n", &LASTINTEREST);
-        fscanf(bgtime, "%d\n", &HIGHPCOUNT);
-        fscanf(bgtime, "%ld\n", &PCOUNTDATE);
-        fscanf(bgtime, "%d\n", &WISHTIME);
-        fscanf(bgtime, "%d\n", &PCOUNT);
-        fscanf(bgtime, "%ld\n", &LASTPAYOUT);
-        fscanf(bgtime, "%d\n", &LASTPAYTYPE);
-        fscanf(bgtime, "%d\n", &LASTNEWS);
-        fscanf(bgtime, "%d\n", &dballtime);
-        fscanf(bgtime, "%d\n", &SELFISHMETER);
-        fscanf(bgtime, "%d\n", &SHADOW_DRAGON1);
-        fscanf(bgtime, "%d\n", &SHADOW_DRAGON2);
-        fscanf(bgtime, "%d\n", &SHADOW_DRAGON3);
-        fscanf(bgtime, "%d\n", &SHADOW_DRAGON4);
-        fscanf(bgtime, "%d\n", &SHADOW_DRAGON5);
-        fscanf(bgtime, "%d\n", &SHADOW_DRAGON6);
-        fscanf(bgtime, "%d\n", &SHADOW_DRAGON7);
-        fscanf(bgtime, "%d\n", &ERAPLAYERS);
-        fclose(bgtime);
-    }
-
-    if (dballtime == 0)
-        dballtime = 604800;
-
-    if (beginning_of_time == 0)
-        beginning_of_time = 650336715;
-    old_beginning_of_time = beginning_of_time;
-
-}
-
-
-/* Write the time in 'when' to the MUD-time file. */
-void save_mud_time(struct time_info_data *when) {
-    FILE *bgtime;
-
-    if ((bgtime = fopen(TIME_FILE, "w")) == nullptr)
-        basic_mud_log("SYSERR: Can't write to '%s' time file.", TIME_FILE);
-    else {
-        fprintf(bgtime, "%ld\n", mud_time_to_secs(when));
-        fprintf(bgtime, "%ld\n", NEWSUPDATE);
-        fprintf(bgtime, "%ld\n", BOARDNEWMORT);
-        fprintf(bgtime, "%ld\n", BOARDNEWDUO);
-        fprintf(bgtime, "%ld\n", BOARDNEWCOD);
-        fprintf(bgtime, "%ld\n", BOARDNEWBUI);
-        fprintf(bgtime, "%ld\n", BOARDNEWIMM);
-        fprintf(bgtime, "%ld\n", INTERESTTIME);
-        fprintf(bgtime, "%ld\n", LASTINTEREST);
-        fprintf(bgtime, "%d\n", HIGHPCOUNT);
-        fprintf(bgtime, "%ld\n", PCOUNTDATE);
-        fprintf(bgtime, "%d\n", WISHTIME);
-        fprintf(bgtime, "%d\n", PCOUNT);
-        fprintf(bgtime, "%ld\n", LASTPAYOUT);
-        fprintf(bgtime, "%d\n", LASTPAYTYPE);
-        fprintf(bgtime, "%d\n", LASTNEWS);
-        fprintf(bgtime, "%d\n", dballtime);
-        fprintf(bgtime, "%d\n", SELFISHMETER);
-        fprintf(bgtime, "%d\n", SHADOW_DRAGON1);
-        fprintf(bgtime, "%d\n", SHADOW_DRAGON2);
-        fprintf(bgtime, "%d\n", SHADOW_DRAGON3);
-        fprintf(bgtime, "%d\n", SHADOW_DRAGON4);
-        fprintf(bgtime, "%d\n", SHADOW_DRAGON5);
-        fprintf(bgtime, "%d\n", SHADOW_DRAGON6);
-        fprintf(bgtime, "%d\n", SHADOW_DRAGON7);
-        fprintf(bgtime, "%d\n", ERAPLAYERS);
-        fclose(bgtime);
-    }
-}
-
-
-
 bitvector_t asciiflag_conv(char *flag) {
     bitvector_t flags = 0;
     int is_num = true;
@@ -752,28 +325,6 @@ void check_start_rooms() {
     }
 }
 
-
-void free_help(struct help_index_element *cmhelp) {
-    if (cmhelp->keywords)
-        free(cmhelp->keywords);
-    if (cmhelp->entry && !cmhelp->duplicate)
-        free(cmhelp->entry);
-
-    free(cmhelp);
-}
-
-void free_help_table() {
-    if (help_table) {
-        int hp;
-        for (hp = 0; hp < top_of_helpt; hp++) {
-            free_help(&help_table[hp]);
-        }
-        free(help_table);
-        help_table = nullptr;
-    }
-    top_of_helpt = 0;
-}
-
 /*************************************************************************
 *  procedures for resetting, both play-time and boot-time	 	 *
 *************************************************************************/
@@ -782,8 +333,8 @@ int vnum_mobile(char *searchname, Character *ch) {
     int found = 0;
 
     for (auto &[vn, m] : mob_proto)
-        if (isname(searchname, m.name))
-                        ch->send_to("%3d. [%5d] %-40s %s\r\n", ++found, vn, m.short_description, !m.proto_script.empty() ? m.scriptString().c_str() : "");
+        if (isname(searchname, m->name))
+                        ch->send_to("%3d. [%5d] %-40s %s\r\n", ++found, vn, m->short_description, !m->proto_script.empty() ? m->scriptString().c_str() : "");
 
     return (found);
 }
@@ -793,8 +344,8 @@ int vnum_object(char *searchname, Character *ch) {
     int found = 0;
 
     for (auto &o : obj_proto)
-        if (isname(searchname, o.second.name))
-                        ch->send_to("%3d. [%5d] %-40s %s\r\n", ++found, o.first, o.second.short_description, !o.second.proto_script.empty() ? o.second.scriptString().c_str() : "");
+        if (isname(searchname, o.second->name))
+                        ch->send_to("%3d. [%5d] %-40s %s\r\n", ++found, o.first, o.second->short_description, !o.second->proto_script.empty() ? o.second->scriptString().c_str() : "");
 
     return (found);
 }
@@ -804,8 +355,8 @@ int vnum_material(char *searchname, Character *ch) {
     int found = 0;
 
     for (auto &o : obj_proto)
-        if (isname(searchname, material_names[o.second.getBaseStat<int>(VAL_ALL_MATERIAL)])) {
-                        ch->send_to("%3d. [%5d] %-40s %s\r\n", ++found, o.first, o.second.short_description, !o.second.proto_script.empty() ? o.second.scriptString().c_str() : "");
+        if (isname(searchname, material_names[o.second->getBaseStat<int>(VAL_ALL_MATERIAL)])) {
+                        ch->send_to("%3d. [%5d] %-40s %s\r\n", ++found, o.first, o.second->short_description, !o.second->proto_script.empty() ? o.second->scriptString().c_str() : "");
         }
 
     return (found);
@@ -816,9 +367,9 @@ int vnum_weapontype(char *searchname, Character *ch) {
     int found = 0;
 
     for (auto &o : obj_proto)
-        if (o.second.type_flag == ItemType::weapon) {
-            if (isname(searchname, weapon_type[o.second.getBaseStat<int>(VAL_WEAPON_SKILL)])) {
-                                ch->send_to("%3d. [%5d] %-40s %s\r\n", ++found, o.first, o.second.short_description, !o.second.proto_script.empty() ? o.second.scriptString().c_str() : "");
+        if (o.second->type_flag == ItemType::weapon) {
+            if (isname(searchname, weapon_type[o.second->getBaseStat<int>(VAL_WEAPON_SKILL)])) {
+                                ch->send_to("%3d. [%5d] %-40s %s\r\n", ++found, o.first, o.second->short_description, !o.second->proto_script.empty() ? o.second->scriptString().c_str() : "");
             }
         }
 
@@ -830,9 +381,9 @@ int vnum_armortype(char *searchname, Character *ch) {
     int found = 0;
 
     for (auto &o : obj_proto)
-        if (o.second.type_flag == ItemType::armor) {
-            if (isname(searchname, armor_type[o.second.getBaseStat<int>(VAL_ARMOR_SKILL)])) {
-                                ch->send_to("%3d. [%5d] %-40s %s\r\n", ++found, o.first, o.second.short_description, !o.second.proto_script.empty() ? o.second.scriptString().c_str() : "");
+        if (o.second->type_flag == ItemType::armor) {
+            if (isname(searchname, armor_type[o.second->getBaseStat<int>(VAL_ARMOR_SKILL)])) {
+                                ch->send_to("%3d. [%5d] %-40s %s\r\n", ++found, o.first, o.second->short_description, !o.second->proto_script.empty() ? o.second->scriptString().c_str() : "");
             }
         }
 
@@ -852,7 +403,7 @@ Character *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
     auto sh = std::make_shared<Character>();
     auto mob = sh.get();
 
-    *mob = proto->second;
+    *mob = *(proto->second);
     mob->id = getNextID(lastCharacterID, Character::registry);
     Character::registry.emplace(mob->id, sh);
 
@@ -1413,7 +964,7 @@ Object *read_object(obj_vnum nr, int type) /* and obj_rnum */
     auto sh = std::make_shared<Object>();
     auto obj = sh.get();
     // the operator= will copy the prototype data into the new object.
-    *obj = proto->second;
+    *obj = *(proto->second);
 
     obj->id = getNextID(lastObjectID, Object::registry);
     Object::registry.emplace(obj->id, sh);
@@ -1443,18 +994,18 @@ static std::deque<zone_vnum> zonesToUpdate;
 void zone_update(uint64_t heartPulse, double deltaTime) {
 
     for (auto &[vn, z] : zone_table) {
-        z.age += deltaTime;
-        auto secs = (z.lifespan * 60.0);
-        if(z.age < secs) continue;
+        z->age += deltaTime;
+        auto secs = (z->lifespan * 60.0);
+        if(z->age < secs) continue;
 
         bool doReset = false;
-        switch(z.reset_mode) {
+        switch(z->reset_mode) {
             case 0:
                 // Never reset.
             break;
             case 1:
                 // reset only if zone is empty.
-                if(z.playersInZone.empty()) doReset = true;
+                if(z->playersInZone.empty()) doReset = true;
             break;
             case 2:
                 // Always reset.
@@ -1467,7 +1018,7 @@ void zone_update(uint64_t heartPulse, double deltaTime) {
         if(doReset) {
             zonesToUpdate.emplace_back(vn);
 
-            z.age -= secs;
+            z->age -= secs;
 
             break;
         }
@@ -1479,7 +1030,7 @@ void zone_update(uint64_t heartPulse, double deltaTime) {
         auto& z = zone_table.at(vn);
         reset_zone(vn);
         mudlog(CMP, ADMLVL_GOD, false, "Auto zone reset: %s (Zone %d)",
-               z.name.c_str(), vn);
+               z->name.c_str(), vn);
         zonesToUpdate.pop_front();
         break;
     }
@@ -1513,7 +1064,7 @@ void repairRoomDamage(uint64_t heartPulse, double deltaTime) {
 
 /* for use in reset_zone; return TRUE if zone 'nr' is free of PC's  */
 int is_empty(zone_rnum zone_nr) {
-    return zone_table.at(zone_nr).playersInZone.empty();
+    return zone_table.at(zone_nr)->playersInZone.empty();
 }
 
 
@@ -1582,37 +1133,6 @@ char *fread_string(FILE *fl, const char *error) {
  * If someone is reading a global copy we're trying to
  * replace, give everybody using it a different copy so
  * as to avoid special cases.
- */
-static int file_to_string_alloc(const char *name, char **buf) {
-    int temppage;
-    char temp[MAX_STRING_LENGTH];
-
-    /* Lets not free() what used to be there unless we succeeded. */
-    if (file_to_string(name, temp) < 0)
-        return (-1);
-
-    if (*buf)
-        free(*buf);
-
-    *buf = strdup(temp);
-    return (0);
-}
-
-
-/* read contents of a text file, and place in buf */
-static int file_to_string(const char *name, char *buf) {
-    try {
-        std::ifstream f(name);
-        std::string out;
-        // read all of f to out.
-        std::getline(f, out, '\0');
-        boost::trim_right(out);
-        strcpy(buf, out.c_str());
-        return 0;
-    } catch (std::exception &e) {
-        return -1;
-    }
-}
 
 
 /* clear some of the the working variables of a char */
@@ -1813,360 +1333,11 @@ void load_default_config() {
     CONFIG_USE_AUTOWIZ = use_autowiz;
     CONFIG_MIN_WIZLIST_LEV = min_wizlist_lev;
 
-    /****************************************************************************/
-    /** Character advancement options.                                         **/
-    /****************************************************************************/
-    CONFIG_ALLOW_MULTICLASS = allow_multiclass;
-    CONFIG_ALLOW_PRESTIGE = allow_prestige;
-
-    /****************************************************************************/
-    /** ticks menu                                                             **/
-    /****************************************************************************/
-    CONFIG_PULSE_VIOLENCE = pulse_violence;
-    CONFIG_PULSE_MOBILE = pulse_mobile;
-    CONFIG_PULSE_ZONE = pulse_zone;
-    CONFIG_PULSE_CURRENT = pulse_current;
-    CONFIG_PULSE_SANITY = pulse_sanity;
-    CONFIG_PULSE_IDLEPWD = pulse_idlepwd;
-    CONFIG_PULSE_AUTOSAVE = pulse_autosave;
-    CONFIG_PULSE_USAGE = pulse_usage;
-    CONFIG_PULSE_TIMESAVE = pulse_timesave;
-
-    /****************************************************************************/
-    /** Character Creation Method                                              **/
-    /****************************************************************************/
-    CONFIG_CREATION_METHOD = method;
 }
 
 void load_config() {
-    FILE *fl;
-    char line[MAX_STRING_LENGTH];
-    char tag[MAX_INPUT_LENGTH];
-    int num;
-    float fum;
-    char buf[MAX_INPUT_LENGTH];
-
     load_default_config();
-
-    snprintf(buf, sizeof(buf), "%s/%s", "data", "etc/config");
-    if (!(fl = fopen(buf, "r"))) {
-        snprintf(buf, sizeof(buf), "Game Config File: %s", buf);
-        perror(buf);
-        return;
-    }
-
-    /****************************************************************************/
-    /** Load the game configuration file.                                      **/
-    /****************************************************************************/
-    while (get_line(fl, line)) {
-        split_argument(line, tag);
-        num = atoi(line);
-        fum = atof(line);
-
-        switch (tolower(*tag)) {
-            case 'a':
-                if (boost::iequals(tag, "auto_save"))
-                    CONFIG_AUTO_SAVE = num;
-                else if (boost::iequals(tag, "autosave_time"))
-                    CONFIG_AUTOSAVE_TIME = num;
-                else if (boost::iequals(tag, "auto_save_olc"))
-                    CONFIG_OLC_SAVE = num;
-                else if (boost::iequals(tag, "allow_multiclass"))
-                    CONFIG_ALLOW_MULTICLASS = num;
-                else if (boost::iequals(tag, "allow_prestige"))
-                    CONFIG_ALLOW_PRESTIGE = num;
-                else if (boost::iequals(tag, "auto_level"))
-                    basic_mud_log("ignoring obsolete config option auto_level");
-                else if (boost::iequals(tag, "all_items_unique"))
-                    CONFIG_ALL_ITEMS_UNIQUE = num;
-                break;
-
-            case 'c':
-                if (boost::iequals(tag, "crash_file_timeout"))
-                    CONFIG_CRASH_TIMEOUT = num;
-                else if (boost::iequals(tag, "compression")) {
-                    CONFIG_ENABLE_COMPRESSION = num;
-                }
-                break;
-
-            case 'd':
-                if (boost::iequals(tag, "disp_closed_doors"))
-                    CONFIG_DISP_CLOSED_DOORS = num;
-                else if (boost::iequals(tag, "dts_are_dumps"))
-                    CONFIG_DTS_ARE_DUMPS = num;
-                else if (boost::iequals(tag, "donation_room_1"))
-                    if (num == -1)
-                        CONFIG_DON_ROOM_1 = NOWHERE;
-                    else
-                        CONFIG_DON_ROOM_1 = num;
-                else if (boost::iequals(tag, "donation_room_2"))
-                    if (num == -1)
-                        CONFIG_DON_ROOM_2 = NOWHERE;
-                    else
-                        CONFIG_DON_ROOM_2 = num;
-                else if (boost::iequals(tag, "donation_room_3"))
-                    if (num == -1)
-                        CONFIG_DON_ROOM_3 = NOWHERE;
-                    else
-                        CONFIG_DON_ROOM_3 = num;
-                else if (boost::iequals(tag, "dflt_dir")) {
-                    if (CONFIG_DFLT_DIR)
-                        free(CONFIG_DFLT_DIR);
-                    if (line && *line)
-                        CONFIG_DFLT_DIR = strdup(line);
-                    else
-                        CONFIG_DFLT_DIR = strdup("data");
-                } else if (boost::iequals(tag, "dflt_ip")) {
-                    if (CONFIG_DFLT_IP)
-                        free(CONFIG_DFLT_IP);
-                    if (line && *line)
-                        CONFIG_DFLT_IP = strdup(line);
-                    else
-                        CONFIG_DFLT_IP = nullptr;
-                } else if (boost::iequals(tag, "dflt_port"))
-                    CONFIG_DFLT_PORT = num;
-                break;
-
-            case 'e':
-                if (boost::iequals(tag, "enable_languages"))
-                    CONFIG_ENABLE_LANGUAGES = num;
-                else if (boost::iequals(tag, "exp_multiplier"))
-                    CONFIG_EXP_MULTIPLIER = fum;
-                break;
-
-            case 'f':
-                if (boost::iequals(tag, "free_rent"))
-                    CONFIG_FREE_RENT = num;
-                else if (boost::iequals(tag, "frozen_start_room"))
-                    CONFIG_FROZEN_START = num;
-                break;
-
-            case 'h':
-                if (boost::iequals(tag, "holler_move_cost"))
-                    CONFIG_HOLLER_MOVE_COST = num;
-                break;
-
-            case 'i':
-                if (boost::iequals(tag, "idle_void"))
-                    CONFIG_IDLE_VOID = num;
-                else if (boost::iequals(tag, "idle_rent_time"))
-                    CONFIG_IDLE_RENT_TIME = num;
-                else if (boost::iequals(tag, "idle_max_level")) {
-                    if (num >= CONFIG_LEVEL_CAP)
-                        num += 1 - CONFIG_LEVEL_CAP;
-                    CONFIG_IDLE_MAX_LEVEL = num;
-                } else if (boost::iequals(tag, "immort_level_ok"))
-                    basic_mud_log("Ignoring immort_level_ok obsolete config");
-                else if (boost::iequals(tag, "immort_start_room"))
-                    CONFIG_IMMORTAL_START = num;
-                else if (boost::iequals(tag, "imc_enabled"))
-                    CONFIG_IMC_ENABLED = num;
-                else if (boost::iequals(tag, "initial_points"))
-                    CONFIG_INITIAL_POINTS_POOL = num;
-                break;
-
-            case 'l':
-                if (boost::iequals(tag, "level_can_shout"))
-                    CONFIG_LEVEL_CAN_SHOUT = num;
-                else if (boost::iequals(tag, "level_cap"))
-                    CONFIG_LEVEL_CAP = num;
-                else if (boost::iequals(tag, "load_into_inventory"))
-                    CONFIG_LOAD_INVENTORY = num;
-                else if (boost::iequals(tag, "logname")) {
-                    if (CONFIG_LOGNAME)
-                        free(CONFIG_LOGNAME);
-                    if (line && *line)
-                        CONFIG_LOGNAME = strdup(line);
-                    else
-                        CONFIG_LOGNAME = nullptr;
-                }
-                break;
-
-            case 'm':
-                if (boost::iequals(tag, "max_bad_pws"))
-                    CONFIG_MAX_BAD_PWS = num;
-                else if (boost::iequals(tag, "max_exp_gain"))
-                    CONFIG_MAX_EXP_GAIN = num;
-                else if (boost::iequals(tag, "max_exp_loss"))
-                    CONFIG_MAX_EXP_LOSS = num;
-                else if (boost::iequals(tag, "max_filesize"))
-                    CONFIG_MAX_FILESIZE = num;
-                else if (boost::iequals(tag, "max_npc_corpse_time"))
-                    CONFIG_MAX_NPC_CORPSE_TIME = num;
-                else if (boost::iequals(tag, "max_obj_save"))
-                    CONFIG_MAX_OBJ_SAVE = num;
-                else if (boost::iequals(tag, "max_pc_corpse_time"))
-                    CONFIG_MAX_PC_CORPSE_TIME = num;
-                else if (boost::iequals(tag, "max_playing"))
-                    CONFIG_MAX_PLAYING = num;
-                else if (boost::iequals(tag, "menu")) {
-                    if (CONFIG_MENU)
-                        free(CONFIG_MENU);
-                    strncpy(buf, "Reading menu in load_config()", sizeof(buf));
-                    CONFIG_MENU = fread_string(fl, buf);
-                } else if (boost::iequals(tag, "min_rent_cost"))
-                    CONFIG_MIN_RENT_COST = num;
-                else if (boost::iequals(tag, "min_wizlist_lev")) {
-                    if (num >= CONFIG_LEVEL_CAP)
-                        num += 1 - CONFIG_LEVEL_CAP;
-                    CONFIG_MIN_WIZLIST_LEV = num;
-                } else if (boost::iequals(tag, "mob_fighting"))
-                    CONFIG_MOB_FIGHTING = num;
-                else if (boost::iequals(tag, "mortal_start_room"))
-                    CONFIG_MORTAL_START = num;
-                else if (boost::iequals(tag, "method"))
-                    CONFIG_CREATION_METHOD = num;
-                break;
-
-            case 'n':
-                if (boost::iequals(tag, "nameserver_is_slow"))
-                    CONFIG_NS_IS_SLOW = num;
-                else if (boost::iequals(tag, "noperson")) {
-                    char tmp[READ_SIZE];
-                    if (CONFIG_NOPERSON)
-                        free(CONFIG_NOPERSON);
-                    snprintf(tmp, sizeof(tmp), "%s\r\n", line);
-                    CONFIG_NOPERSON = strdup(tmp);
-                } else if (boost::iequals(tag, "noeffect")) {
-                    char tmp[READ_SIZE];
-                    if (CONFIG_NOEFFECT)
-                        free(CONFIG_NOEFFECT);
-                    snprintf(tmp, sizeof(tmp), "%s\r\n", line);
-                    CONFIG_NOEFFECT = strdup(tmp);
-                }
-                break;
-
-            case 'o':
-                if (boost::iequals(tag, "ok")) {
-                    char tmp[READ_SIZE];
-                    if (CONFIG_OK)
-                        free(CONFIG_OK);
-                    snprintf(tmp, sizeof(tmp), "%s\r\n", line);
-                    CONFIG_OK = strdup(tmp);
-                }
-                break;
-
-            case 'p':
-                if (boost::iequals(tag, "pk_allowed"))
-                    CONFIG_PK_ALLOWED = num;
-                else if (boost::iequals(tag, "pt_allowed"))
-                    CONFIG_PT_ALLOWED = num;
-                else if (boost::iequals(tag, "pulse_viol"))
-                    CONFIG_PULSE_VIOLENCE = num;
-                else if (boost::iequals(tag, "pulse_mobile"))
-                    CONFIG_PULSE_MOBILE = num;
-                else if (boost::iequals(tag, "pulse_current"))
-                    CONFIG_PULSE_CURRENT = num;
-                else if (boost::iequals(tag, "pulse_zone"))
-                    CONFIG_PULSE_ZONE = num;
-                else if (boost::iequals(tag, "pulse_autosave"))
-                    CONFIG_PULSE_AUTOSAVE = num;
-                else if (boost::iequals(tag, "pulse_usage"))
-                    CONFIG_PULSE_USAGE = num;
-                else if (boost::iequals(tag, "pulse_sanity"))
-                    CONFIG_PULSE_SANITY = num;
-                else if (boost::iequals(tag, "pulse_timesave"))
-                    CONFIG_PULSE_TIMESAVE = num;
-                else if (boost::iequals(tag, "pulse_idlepwd"))
-                    CONFIG_PULSE_IDLEPWD = num;
-                break;
-
-            case 'r':
-                if (boost::iequals(tag, "rent_file_timeout"))
-                    CONFIG_RENT_TIMEOUT = num;
-                else if (boost::iequals(tag, "reroll_stats"))
-                    CONFIG_REROLL_PLAYER_CREATION = num;
-                break;
-
-            case 's':
-                if (boost::iequals(tag, "siteok_everyone"))
-                    CONFIG_SITEOK_ALL = num;
-                else if (boost::iequals(tag, "start_messg")) {
-                    strncpy(buf, "Reading start message in load_config()", sizeof(buf));
-                    if (CONFIG_START_MESSG)
-                        free(CONFIG_START_MESSG);
-                    CONFIG_START_MESSG = fread_string(fl, buf);
-                } else if (boost::iequals(tag, "stack_mobs"))
-                    CONFIG_STACK_MOBS = num;
-                else if (boost::iequals(tag, "stack_objs"))
-                    CONFIG_STACK_OBJS = num;
-                break;
-
-            case 't':
-                if (boost::iequals(tag, "tunnel_size"))
-                    CONFIG_TUNNEL_SIZE = num;
-                else if (boost::iequals(tag, "track_through_doors"))
-                    CONFIG_TRACK_T_DOORS = num;
-                break;
-
-            case 'u':
-                if (boost::iequals(tag, "use_autowiz"))
-                    CONFIG_USE_AUTOWIZ = num;
-                else if (boost::iequals(tag, "use_new_socials"))
-                    CONFIG_NEW_SOCIALS = num;
-                break;
-
-            case 'w':
-                if (boost::iequals(tag, "welc_messg")) {
-                    strncpy(buf, "Reading welcome message in load_config()", sizeof(buf));
-                    if (CONFIG_WELC_MESSG)
-                        free(CONFIG_WELC_MESSG);
-                    CONFIG_WELC_MESSG = fread_string(fl, buf);
-                }
-                break;
-
-            default:
-                break;
-        }
-    }
-
-    fclose(fl);
 }
-
-// ^#(?<id>\d+)(?::(?<generation>\d+)?)?
-static std::regex uid_regex(R"(^#(R|O|C)(\d+)(!)?)", std::regex::icase);
-
-bool isUID(const std::string& uid) {
-    return std::regex_match(uid, uid_regex);
-}
-
-std::shared_ptr<HasDgScripts> resolveUID(const std::string& uid) {
-    // First we need to check if it matches or not.
-    std::smatch match;
-
-    if(!std::regex_search(uid, match, uid_regex)) {
-        return nullptr;
-    }
-
-    std::string letter = match[1].str();// First capture group
-    boost::to_upper(letter);
-    int64_t id = std::stoll(match[2].str()); // Second capture group
-    bool active = match[3].matched; // Third capture group
-
-    if(letter == "R") {
-        // Room
-        if(auto find = Room::registry.find(id); find != Room::registry.end()) {
-            if(active && !find->second->isActive()) return nullptr;
-            return find->second;
-        }
-    } else if(letter == "O") {
-        // Object
-        if(auto find = Object::registry.find(id); find != Object::registry.end()) {
-            if(active && !find->second->isActive()) return nullptr;
-            return find->second;
-        }
-    } else if(letter == "C") {
-        // Character
-        if(auto find = Character::registry.find(id); find != Character::registry.end()) {
-            if(active && !find->second->isActive()) return nullptr;
-            return find->second;
-        }
-    }
-
-    return nullptr;
-}
-
-
 
 int create_join_session(int account_id, int character_id, int64_t connection_id, const std::string& ip) {
     auto acc_found = accounts.find(account_id);
@@ -2188,15 +1359,15 @@ int create_join_session(int account_id, int character_id, int64_t connection_id,
                         ch.get()->send_to("Another connection is now linked to %s, from %s.\r\n", ch->getName(), ip);
         }
         sess->conns.emplace(connection_id, ip);
-        acc.descriptors.insert(sess);
+        acc->descriptors.insert(sess);
         return sess->conns.size();
     } else {
         // no session exists. We'll have to create one.
-        if(acc.admin_level < 1) {
+        if(acc->admin_level < 1) {
             // non-admins can only have one character active at once.
             // Scan acc.descriptors for any with a character that isn't
             // this character_id.
-            for(auto desc : acc.descriptors) {
+            for(auto desc : acc->descriptors) {
                 if(desc->id != character_id) {
                     return -2;
                 }
@@ -2207,36 +1378,16 @@ int create_join_session(int account_id, int character_id, int64_t connection_id,
         STATE(desc) = CON_LOGIN;
         desc->character = ch.get();
         ch->desc = desc;
-        desc->account = &acc;
+        desc->account = acc.get();
         desc->id = character_id;
         desc->conns.emplace(connection_id, ip);
-        acc.descriptors.insert(desc);
+        acc->descriptors.insert(desc);
         sessions.emplace(character_id, desc);
         desc->next = descriptor_list;
         descriptor_list = desc;
                 ch.get()->send_to("You have connected to %s from %s.\r\n", ch->getName(), ip);
         return 1;
     }
-}
-
-std::vector<CharacterPrototype*> collectNPCProtos(int start_vnum, int end_vnum) {
-    return collectObjectsInRange(start_vnum, end_vnum, mob_proto);
-}
-
-std::vector<ObjectPrototype*> collectItemProtos(int start_vnum, int end_vnum) {
-    return collectObjectsInRange(start_vnum, end_vnum, obj_proto);
-}
-
-std::vector<Guild*> collectGuilds(int start_vnum, int end_vnum) {
-    return collectObjectsInRange(start_vnum, end_vnum, guild_index);
-}
-
-std::vector<Shop*> collectShops(int start_vnum, int end_vnum) {
-    return collectObjectsInRange(start_vnum, end_vnum, shop_index);
-}
-
-std::vector<DgScriptPrototype*> collectTriggers(int start_vnum, int end_vnum) {
-    return collectObjectsInRange(start_vnum, end_vnum, trig_index);
 }
 
 int64_t getNextAccountID() {

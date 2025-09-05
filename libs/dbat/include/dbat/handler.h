@@ -11,6 +11,7 @@
 #include <map>
 #include <vector>
 #include <memory>
+#include <span>
 
 struct Character;
 struct Object;
@@ -21,8 +22,6 @@ struct affected_type;
 /* handling the affected-structures */
 extern void update_char_objects(Character *ch); /* handler.c */
 extern void item_check(Object *object, Character *ch);
-
-extern void affect_total(Character *ch);
 
 extern void affect_modify(Character *ch, int loc, int mod, int spec, long bitv, bool add);
 
@@ -51,7 +50,9 @@ const char *money_desc(int amount);
 
 Object *create_money(int amount);
 
-extern int isname(const char *str, const char *namelist);
+extern bool isname(std::string_view needle, std::span<std::string_view> haystack);
+
+extern bool isname(std::string_view needle, std::string_view haystack);
 
 extern int is_name(const char *str, const char *namelist);
 

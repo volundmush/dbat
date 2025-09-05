@@ -8,7 +8,7 @@
  *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
  ************************************************************************ */
 #include "dbat/Descriptor.h"
-#include "dbat/Character.h"
+#include "dbat/CharacterUtils.h"
 #include "dbat/modify.h"
 #include "dbat/send.h"
 #include "dbat/interpreter.h"
@@ -19,12 +19,13 @@
 #include "dbat/mail.h"
 #include "dbat/boards.h"
 #include "dbat/improved-edit.h"
-#include "dbat/oasis.h"
-#include "dbat/tedit.h"
 #include "dbat/Shop.h"
 #include "dbat/Guild.h"
 #include "dbat/spell_parser.h"
 #include "dbat/dg_scripts.h"
+#include "dbat/utils.h"
+
+#include "dbat/const/AdminLevel.h"
 
 /* local functions */
 
@@ -117,29 +118,6 @@ static void smash_numb(char *str)
 #endif
 }
 
-/*
- * Basic API function to start writing somewhere.
- *
- * 'data' isn't used in stock CircleMUD but you can use it to pass whatever
- * else you may want through it.  The improved editor patch when updated
- * could use it to pass the old text buffer, for instance.
- */
-void string_write(struct descriptor_data *d, char **writeto, size_t len, long mailto, void *data)
-{
-    if (d->character && !IS_NPC(d->character))
-        d->character->player_flags.set(PLR_WRITING, true);
-
-    if (using_improved_editor)
-        d->backstr = (char *)data;
-    else if (data)
-        free(data);
-
-    d->str = writeto;
-    d->std_str = nullptr;
-    d->max_str = len;
-    d->mail_to = mailto;
-}
-
 void string_write(struct descriptor_data *d, std::string *writeto, size_t len, long mailto, std::string backup)
 {
     if (d->character && !IS_NPC(d->character))
@@ -152,23 +130,6 @@ void string_write(struct descriptor_data *d, std::string *writeto, size_t len, l
     d->mail_to = mailto;
 }
 
-struct
-{
-    int mode;
-
-    void (*func)(struct descriptor_data *dsc, int todo);
-} cleanup_modes[] = {
-    {CON_CEDIT, cedit_string_cleanup},
-    {CON_MEDIT, medit_string_cleanup},
-    {CON_OEDIT, oedit_string_cleanup},
-    {CON_REDIT, redit_string_cleanup},
-    {CON_TEDIT, tedit_string_cleanup},
-    {CON_EXDESC, exdesc_string_cleanup},
-    {CON_PLAYING, playing_string_cleanup},
-    {CON_IEDIT, oedit_string_cleanup},
-    {CON_HEDIT, hedit_string_cleanup},
-    {CON_NEWSEDIT, news_string_cleanup},
-    {-1, nullptr}};
 
 // Helper functions for std::string editor
 
@@ -815,11 +776,6 @@ void std_string_add(struct descriptor_data *d, char *str)
 
     if (action == STRINGADD_SAVE || action == STRINGADD_ABORT)
     {
-        int i;
-
-        for (i = 0; cleanup_modes[i].func; i++)
-            if (STATE(d) == cleanup_modes[i].mode)
-                (*cleanup_modes[i].func)(d, action);
 
         /* Common post cleanup code. */
         d->str = nullptr;
@@ -942,11 +898,6 @@ void string_add(struct descriptor_data *d, char *str)
 
     if (action == STRINGADD_SAVE || action == STRINGADD_ABORT)
     {
-        int i;
-
-        for (i = 0; cleanup_modes[i].func; i++)
-            if (STATE(d) == cleanup_modes[i].mode)
-                (*cleanup_modes[i].func)(d, action);
 
         /* Common post cleanup code. */
         d->str = nullptr;

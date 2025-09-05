@@ -7,10 +7,11 @@
  *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
  *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
  **************************************************************************/
-#include "dbat/Character.h"
+#include <sys/stat.h>
+#include "dbat/CharacterUtils.h"
 #include "dbat/CharacterPrototype.h"
-#include "dbat/Object.h"
-#include "dbat/Room.h"
+#include "dbat/ObjectUtils.h"
+#include "dbat/RoomUtils.h"
 #include "dbat/Destination.h"
 #include "dbat/Descriptor.h"
 #include "dbat/Zone.h"
@@ -40,6 +41,18 @@
 #include "dbat/dg_scripts.h"
 #include "dbat/mail.h"
 #include "dbat/players.h"
+#include "dbat/utils.h"
+#include "dbat/DragonBall.h"
+#include "dbat/Random.h"
+#include "dbat/filter.h"
+
+#include "dbat/const/Pulse.h"
+#include "dbat/const/LegacyBonus.h"
+#include "dbat/const/ChatHistory.h"
+#include "dbat/const/MaterialType.h"
+#include "dbat/const/WearSlot.h"
+#include "dbat/const/AuctionState.h"
+#include "dbat/const/CombatPreference.h"
 
 /* local functions */
 static int has_scanner(Character *ch);
@@ -700,14 +713,12 @@ ACMD(do_rpp)
             fprintf(fl, "@D[@cName@W: @C%-20s @cRequest@W: @Y%-20s@D]\n", GET_NAME(ch), "House");
             send_to_imm("RPP Request: %s paid for house", GET_NAME(ch));
             BOARDNEWCOD = time(nullptr);
-            save_mud_time(&time_info);
         }
         else if (selection == 2)
         {
             fprintf(fl, "@D[@cName@W: @C%-20s @cRequest@W: @Y%-20s@D]\n", GET_NAME(ch), "Custom Skill");
             send_to_imm("RPP Request: %s paid for Custom Skill, uhoh spaggettios", GET_NAME(ch));
             BOARDNEWCOD = time(nullptr);
-            save_mud_time(&time_info);
         }
         ch->modRPP(-pay);
         ch->send_to("@R%d@W RPP paid for your selection. An immortal will address the request soon enough. Be patient.@n\r\n", pay);
@@ -8794,8 +8805,6 @@ void load_shadow_dragons()
             mob->moveToLocation(location);
         }
     }
-
-    save_mud_time(&time_info);
 }
 
 void handleShenronAppearance(int &DRAGONC)
@@ -8839,7 +8848,6 @@ void handleShenronAppearance(int &DRAGONC)
         send_to_planet(0, WhereFlag::planet_earth, "@DThe sky grows brighter again as the clouds disappear magicly.@n\r\n");
         extract_char(EDRAGON);
         SHENRON = false;
-        save_mud_time(&time_info);
         break;
     }
     DRAGONC--;
@@ -10006,7 +10014,6 @@ void base_update(uint64_t heartPulse, double deltaTime)
     {
         INTERESTTIME = time(nullptr) + 86400;
         LASTINTEREST = time(nullptr);
-        save_mud_time(&time_info);
         cash = true;
         countch = true;
     }
@@ -12753,10 +12760,6 @@ static int spell_in_scroll(Object *obj, int spellnum)
 
 static int spell_in_domain(Character *ch, int spellnum)
 {
-    if (spell_info[spellnum].domain == DOMAIN_UNDEFINED)
-    {
-        return false;
-    }
 
     return true;
 }

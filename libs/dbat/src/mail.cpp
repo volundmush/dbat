@@ -13,8 +13,8 @@
 Written by Jeremy Elson (jelson@circlemud.org)
 
 *************************************************************************/
-#include "dbat/Character.h"
-#include "dbat/Object.h"
+#include "dbat/CharacterUtils.h"
+#include "dbat/ObjectUtils.h"
 #include "dbat/Descriptor.h"
 #include "dbat/mail.h"
 #include "dbat/send.h"
@@ -24,6 +24,10 @@ Written by Jeremy Elson (jelson@circlemud.org)
 #include "dbat/handler.h"
 #include "dbat/improved-edit.h"
 #include "dbat/players.h"
+#include "dbat/utils.h"
+
+#include "dbat/const/MaterialType.h"
+#include "dbat/const/AdminLevel.h"
 
 /* local globals */
 static mail_index_type *mail_index = nullptr;   /* list of recs in the mail file  */
@@ -620,8 +624,8 @@ void postmaster_send_mail(Character *ch, Character *mailman,
     ch->player_flags.set(PLR_MAILING, true);
 
     /* Start writing! */
-    CREATE(mailwrite, char *, 1);
-    string_write(ch->desc, mailwrite, MAX_MAIL_SIZE, recipient, nullptr);
+    //CREATE(mailwrite, char *, 1);
+    //string_write(ch->desc, mailwrite, MAX_MAIL_SIZE, recipient, nullptr);
 }
 
 void postmaster_check_mail(Character *ch, Character *mailman,

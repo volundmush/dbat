@@ -1,17 +1,21 @@
+#include <regex>
 #include "dbat/Location.h"
-#include "dbat/Room.h"
-#include "dbat/Character.h"
+#include "dbat/RoomUtils.h"
+#include "dbat/CharacterUtils.h"
 #include "dbat/Area.h"
 #include "dbat/Structure.h"
 #include "dbat/Destination.h"
 #include "dbat/Zone.h"
-#include "dbat/Object.h"
+#include "dbat/ObjectUtils.h"
 #include "dbat/filter.h"
 #include "dbat/utils.h"
 #include "dbat/constants.h"
 #include "dbat/fight.h"
 #include "dbat/planet.h"
+#include "dbat/interpreter.h"
 #include "dbat/act.informative.h"
+#include "dbat/const/AutoExit.h"
+#include "dbat/const/Environment.h"
 
 Location::Location(room_vnum rv)
 {
@@ -259,13 +263,13 @@ std::map<Direction, Destination> Location::getExits() const
     return {};
 }
 
-const std::vector<ExtraDescription> &Location::getExtraDescription() const
+ExtraDescriptionViews Location::getExtraDescription() const
 {
     if (auto a = getLoc())
     {
         return a->getExtraDescription(position);
     }
-    static std::vector<ExtraDescription> empty;
+    static ExtraDescriptionViews empty;
     return empty;
 }
 

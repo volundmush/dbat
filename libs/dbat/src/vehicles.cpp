@@ -8,11 +8,11 @@
  *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.              *
  *  Vehicle.c written by Chris Jacobson <fear@athenet.net>		 *
  *************************************************************************/
-#include "dbat/Object.h"
-#include "dbat/Character.h"
+#include "dbat/ObjectUtils.h"
+#include "dbat/CharacterUtils.h"
 #include "dbat/Destination.h"
 #include "dbat/Descriptor.h"
-#include "dbat/Room.h"
+#include "dbat/RoomUtils.h"
 #include "dbat/Zone.h"
 #include "dbat/vehicles.h"
 #include "dbat/send.h"
@@ -25,6 +25,10 @@
 #include "dbat/races.h"
 #include "dbat/act.informative.h"
 #include "dbat/planet.h"
+#include "dbat/utils.h"
+#include "dbat/filter.h"
+
+#include "dbat/const/Pulse.h"
 
 #ifndef EXITN
 #define EXITN(room, door) (get_room(room)->dir_option[door])

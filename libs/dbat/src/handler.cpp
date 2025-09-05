@@ -7,9 +7,9 @@
  *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
  *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
  ************************************************************************ */
-#include "dbat/Character.h"
-#include "dbat/Object.h"
-#include "dbat/Room.h"
+#include "dbat/CharacterUtils.h"
+#include "dbat/ObjectUtils.h"
+#include "dbat/RoomUtils.h"
 #include "dbat/Descriptor.h"
 #include "dbat/Destination.h"
 #include "dbat/handler.h"
@@ -30,6 +30,12 @@
 #include "dbat/act.movement.h"
 #include "dbat/players.h"
 #include "dbat/mobact.h"
+#include "dbat/filter.h"
+#include "dbat/utils.h"
+#include "dbat/Random.h"
+
+#include "dbat/const/WearSlot.h"
+#include "dbat/const/MaterialType.h"
 
 /* local vars */
 static std::unordered_set<Character *> extractions_pending;
@@ -74,8 +80,8 @@ const char *get_i_name(Character *ch, Character *vict)
 
     auto &p = players.at(ch->id);
 
-    auto found = p.dub_names.find(vict->id);
-    if (found == p.dub_names.end())
+    auto found = p->dub_names.find(vict->id);
+    if (found == p->dub_names.end())
         return RACE(vict);
 
     // print *found to name and return buf pointer.
@@ -155,40 +161,30 @@ static char *mystrsep(char **stringp, const char *delim)
     return start;
 }
 
-int isname(const char *str, const char *namelist)
-{
-    char *newlist;
-    char *curtok;
-    static char newlistbuf[MAX_STRING_LENGTH];
-
-    if (!str || !*str || !namelist || !*namelist)
-    {
-        return 0;
-    }
-
-    if (boost::iequals(str, namelist))
-    { /* the easy way */
-        return 1;
-    }
-
-    strlcpy(newlistbuf, namelist, sizeof(newlistbuf));
-    newlist = newlistbuf;
-    for (curtok = mystrsep(&newlist, WHITESPACE); curtok; curtok = mystrsep(&newlist, WHITESPACE))
-    {
-        if (curtok && is_abbrev(str, curtok))
-        {
-            /* Don't allow abbreviated numbers, only alpha names need abbreviation */
-            /* This, I just consider a bug fix, because abbreviating numbers is just*/
-            /* asking for trouble. IE: 100 would return true on 1000 --Sryth*/
-            if (isdigit(*str) && (atoi(str) != atoi(curtok)))
-            {
-                return 0;
-            }
-            return 1;
+bool isname(std::string_view needle, std::span<std::string_view> haystack) {
+    for (const auto& kw : haystack) {
+        if (std::all_of(kw.begin(), kw.end(), ::isdigit)) continue;
+        if (boost::istarts_with(kw, needle)) {
+            return true;
         }
     }
-    return 0;
+
+    return false;
 }
+
+bool isname(std::string_view needle, std::string_view haystack) {
+
+    // if seeking is a number we return false...
+    if (std::all_of(needle.begin(), needle.end(), ::isdigit)) {
+        return false;
+    }
+
+    std::vector<std::string_view> keywords;
+    boost::split(keywords, haystack, boost::is_space(), boost::token_compress_on);
+
+    return isname(needle, keywords);
+}
+
 
 void aff_apply_modify(Character *ch, int loc, int mod, int spec, char *msg)
 {
@@ -253,53 +249,6 @@ void affect_modify_ar(Character *ch, int loc, int mod, int spec, const std::unor
     aff_apply_modify(ch, loc, mod, spec, "affect_modify_ar");
 }
 
-/* This updates a character by subtracting everything he is affected by */
-/* restoring original abilities, and then affecting all again           */
-void affect_total(Character *ch)
-{
-    struct affected_type *af;
-    int i, j;
-
-    for (const auto &s : {"spellfail", "armorcheck", "armorcheckall"})
-    {
-        ch->setBaseStat(s, 0.0);
-    }
-
-    for (i = 0; i < NUM_WEARS; i++)
-    {
-        if (GET_EQ(ch, i))
-            for (j = 0; j < MAX_OBJ_AFFECT; j++)
-                affect_modify_ar(ch, GET_EQ(ch, i)->affected[j].location,
-                                 GET_EQ(ch, i)->affected[j].modifier,
-                                 GET_EQ(ch, i)->affected[j].specific,
-                                 GET_OBJ_PERM(GET_EQ(ch, i)).getAll(), false);
-    }
-
-    for (af = ch->affected; af; af = af->next)
-        affect_modify(ch, af->location, af->modifier, af->specific, af->bitvector, false);
-
-    for (i = 0; i < NUM_WEARS; i++)
-    {
-        if (GET_EQ(ch, i))
-        {
-            if (GET_OBJ_TYPE(GET_EQ(ch, i)) == ITEM_ARMOR)
-            {
-                ch->modBaseStat("spellfail", GET_OBJ_VAL(GET_EQ(ch, i), VAL_ARMOR_SPELLFAIL));
-                ch->modBaseStat("armorcheck", GET_OBJ_VAL(GET_EQ(ch, i), VAL_ARMOR_CHECK));
-                if (!is_proficient_with_armor(ch, GET_OBJ_VAL(GET_EQ(ch, i), VAL_ARMOR_SKILL)))
-                    ch->modBaseStat("armorcheck", GET_OBJ_VAL(GET_EQ(ch, i), VAL_ARMOR_CHECK));
-            }
-            for (j = 0; j < MAX_OBJ_AFFECT; j++)
-                affect_modify_ar(ch, GET_EQ(ch, i)->affected[j].location,
-                                 GET_EQ(ch, i)->affected[j].modifier,
-                                 GET_EQ(ch, i)->affected[j].specific,
-                                 GET_OBJ_PERM(GET_EQ(ch, i)).getAll(), true);
-        }
-    }
-
-    for (af = ch->affected; af; af = af->next)
-        affect_modify(ch, af->location, af->modifier, af->specific, af->bitvector, true);
-}
 
 /* Insert an affect_type in a Character structure
    Automatically sets apropriate bits and apply's */
@@ -316,7 +265,6 @@ void affect_to_char(Character *ch, struct affected_type *af)
     ch->affected = affected_alloc;
 
     affect_modify(ch, af->location, af->modifier, af->specific, af->bitvector, true);
-    affect_total(ch);
 }
 
 /*
@@ -337,7 +285,6 @@ void affect_remove(Character *ch, struct affected_type *af)
     affect_modify(ch, af->location, af->modifier, af->specific, af->bitvector, false);
     REMOVE_FROM_LIST(af, ch->affected, next, cmtemp);
     delete af;
-    affect_total(ch);
     if (!ch->affected)
     {
         characterSubscriptions.unsubscribe("affected", ch->shared_from_this());
@@ -1322,14 +1269,14 @@ Object *create_money(int amount)
     }
     auto obj = create_obj();
     auto &ex = obj->extra_descriptions.emplace_back();
-    ex.keyword = "zenni money";
+    ex.first = "zenni money";
 
     obj->strings["name"] = "zenni money";
     if (amount == 1)
     {
         obj->strings["short_description"] = "a single zenni";
         obj->strings["room_description"] = "One miserable zenni is lying here";
-        ex.description = "It's just one miserable little zenni.";
+        ex.second = "It's just one miserable little zenni.";
     }
     else
     {
@@ -1348,7 +1295,7 @@ Object *create_money(int amount)
                      1000 * ((amount / 1000) + Random::get<int>(0, (amount / 1000))));
         else
             strcpy(buf, "There are is LOT of zenni."); /* strcpy: OK (is < 200) */
-        ex.description = buf;
+        ex.second = buf;
     }
 
     obj->type_flag = ItemType::money;
@@ -1470,7 +1417,6 @@ void affectv_to_char(Character *ch, struct affected_type *af)
     ch->affectedv = affected_alloc;
 
     affect_modify(ch, af->location, af->modifier, af->specific, af->bitvector, true);
-    affect_total(ch);
 }
 
 void affectv_remove(Character *ch, struct affected_type *af)
@@ -1486,7 +1432,6 @@ void affectv_remove(Character *ch, struct affected_type *af)
     affect_modify(ch, af->location, af->modifier, af->specific, af->bitvector, false);
     REMOVE_FROM_LIST(af, ch->affectedv, next, cmtemp);
     free(af);
-    affect_total(ch);
     if (!ch->affectedv)
     {
         characterSubscriptions.unsubscribe("affectedv", ch);
@@ -1554,7 +1499,7 @@ void item_check(Object *object, Character *ch)
 {
     int where = 0;
 
-    if (IS_HUMANOID(ch) && !(mob_index.at(GET_MOB_RNUM(ch)).func == shop_keeper))
+    if (IS_HUMANOID(ch) && !(GET_MOB_SPEC(ch) == shop_keeper))
     {
         if (invalid_align(ch, object) || invalid_class(ch, object))
             return;

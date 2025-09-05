@@ -1,15 +1,19 @@
-#include "dbat/Character.h"
-#include "dbat/Object.h"
+#include "dbat/CharacterUtils.h"
+#include "dbat/ObjectUtils.h"
 #include "dbat/Zone.h"
 #include "dbat/transformation.h"
 #include "dbat/comm.h"
 #include "dbat/send.h"
 #include "dbat/weather.h"
-#include "dbat/genzon.h"
 #include "dbat/dg_comm.h"
 #include "dbat/dg_scripts.h"
 #include "dbat/combat.h"
 #include "dbat/attack.h"
+#include "dbat/handler.h"
+#include "dbat/utils.h"
+#include "dbat/filter.h"
+
+#include "dbat/const/Environment.h"
 
 constexpr int MASTERY_THRESHOLD = 5000;
 constexpr int LIMIT_THRESHOLD = 100000;

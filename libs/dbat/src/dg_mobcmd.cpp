@@ -34,9 +34,9 @@
  *  $Date: 2004/10/11 12:07:00$                                            *
  *  $Revision: 1.0.14 $                                                    *
  **************************************************************************/
-#include "dbat/Object.h"
-#include "dbat/Room.h"
-#include "dbat/Character.h"
+#include "dbat/ObjectUtils.h"
+#include "dbat/RoomUtils.h"
+#include "dbat/CharacterUtils.h"
 #include "dbat/Descriptor.h"
 #include "dbat/Zone.h"
 #include "dbat/Destination.h"
@@ -50,6 +50,9 @@
 #include "dbat/act.wizard.h"
 #include "dbat/fight.h"
 #include "dbat/transformation.h"
+#include "dbat/filter.h"
+#include "dbat/utils.h"
+#include "dbat/Random.h"
 
 /*
  * Local functions.

@@ -7,11 +7,17 @@
  *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
  *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
  ************************************************************************ */
-#include "dbat/Character.h"
-#include "dbat/Object.h"
+#include <cstdarg>
+#include <fstream>
+#include <string_view>
+#include <vector>
+#include <algorithm>
+#include <cstddef>
+#include "dbat/CharacterUtils.h"
+#include "dbat/ObjectUtils.h"
 #include "dbat/Zone.h"
 #include "dbat/Descriptor.h"
-#include "dbat/Room.h"
+#include "dbat/RoomUtils.h"
 #include "dbat/ObjectPrototype.h"
 #include "dbat/CharacterPrototype.h"
 #include "dbat/utils.h"
@@ -22,7 +28,6 @@
 #include "dbat/fight.h"
 #include "dbat/class.h"
 #include "dbat/feats.h"
-#include "dbat/genzon.h"
 #include "dbat/constants.h"
 #include "dbat/act.informative.h"
 #include "dbat/screen.h"
@@ -31,6 +36,16 @@
 #include "dbat/planet.h"
 #include "dbat/send.h"
 #include "dbat/ansi.h"
+#include "dbat/filter.h"
+#include "dbat/Random.h"
+#include "dbat/weather.h"
+#include "dbat/TimeInfo.h"
+#include "dbat/Parse.h"
+
+#include "dbat/const/Pulse.h"
+#include "dbat/const/Environment.h"
+#include "dbat/const/ColorCustom.h"
+#include "dbat/const/Filename.h"
 
 /* local functions */
 char commastring[MAX_STRING_LENGTH];
@@ -871,11 +886,11 @@ int read_sense_memory(Character *ch, Character *vict)
 
     if (IS_NPC(vict))
     {
-        return p.sense_memory.contains(vict->getVnum());
+        return p->sense_memory.contains(vict->getVnum());
     }
     else
     {
-        return p.sense_player.contains(vict->id);
+        return p->sense_player.contains(vict->id);
     }
 }
 
@@ -893,11 +908,11 @@ void sense_memory_write(Character *ch, Character *vict)
 
     if (IS_NPC(vict))
     {
-        p.sense_memory.insert(vict->getVnum());
+        p->sense_memory.insert(vict->getVnum());
     }
     else
     {
-        p.sense_player.insert(vict->id);
+        p->sense_player.insert(vict->id);
     }
 }
 
@@ -2643,7 +2658,7 @@ void basic_mud_vlog(const char *format, va_list args)
 
     char *buf = new char[size + 1];
     vsnprintf(buf, size + 1, format, args);
-    std::cout << buf << std::endl;
+    basic_mud_log("%s :: %s", time_s, buf);
     delete[] buf;
 }
 
@@ -3218,32 +3233,34 @@ void admin_set(Character *ch, int value)
     }
 }
 
-int levenshtein_distance(char *s1, char *s2)
-{
-    int s1_len = strlen(s1), s2_len = strlen(s2);
-    int **d, i, j;
+int levenshtein_distance(std::string_view s1, std::string_view s2) {
+    const std::size_t s1_len = s1.size();
+    const std::size_t s2_len = s2.size();
 
-    CREATE(d, int *, s1_len + 1);
-    for (i = 0; i <= s1_len; i++)
-    {
-        CREATE(d[i], int, s2_len + 1);
-        d[i][0] = i;
+    // 2D matrix stored as a single vector for cache locality
+    std::vector<int> d((s1_len + 1) * (s2_len + 1));
+
+    auto at = [&](std::size_t i, std::size_t j) -> int& {
+        return d[i * (s2_len + 1) + j];
+    };
+
+    for (std::size_t i = 0; i <= s1_len; ++i)
+        at(i, 0) = static_cast<int>(i);
+
+    for (std::size_t j = 0; j <= s2_len; ++j)
+        at(0, j) = static_cast<int>(j);
+
+    for (std::size_t i = 1; i <= s1_len; ++i) {
+        for (std::size_t j = 1; j <= s2_len; ++j) {
+            at(i, j) = std::min({
+                at(i - 1, j) + 1,                  // deletion
+                at(i, j - 1) + 1,                  // insertion
+                at(i - 1, j - 1) + (s1[i - 1] == s2[j - 1] ? 0 : 1) // substitution
+            });
+        }
     }
 
-    for (j = 0; j <= s2_len; j++)
-        d[0][j] = j;
-    for (i = 1; i <= s1_len; i++)
-        for (j = 1; j <= s2_len; j++)
-            d[i][j] = std::min(d[i - 1][j] + 1, std::min(d[i][j - 1] + 1,
-                                               d[i - 1][j - 1] + ((s1[i - 1] == s2[j - 1]) ? 0 : 1)));
-
-    i = d[s1_len][s2_len];
-
-    for (j = 0; j <= s1_len; j++)
-        free(d[j]);
-    free(d);
-
-    return i;
+    return at(s1_len, s2_len);
 }
 
 int count_color_chars(const char *string)
@@ -3527,10 +3544,10 @@ Result<Zone*> getZone(std::string_view arg, Character* ch) {
         return err("You are not in a Zone, somehow. How the hell did that happen?\r\n");
     }
     auto res = parseNumber<zone_vnum>(arg, "Zone ID");
-    if (!res) return err(res.err);
+    if (!res) return err(res.error());
 
     if (auto zone = zone_table.find(res.value()); zone != zone_table.end()) {
-        return &zone->second;
+        return zone->second.get();
     }
     return err("Zone {} does not exist.\r\n", res.value());
 }
@@ -3543,7 +3560,7 @@ Result<std::string> validateZoneName(std::string_view arg, bool checkExists, zon
     if (checkExists) {
         for(const auto& [vn, z] : zone_table) {
             if(vn == exclude) continue;
-            if(boost::iequals(trimmed, z.name)) {
+            if(boost::iequals(trimmed, z->name)) {
                 return err("Zone '{}' already exists.\r\n", trimmed);
             }
         }
@@ -3560,7 +3577,7 @@ Result<Room*> getRoom(std::string_view arg, Character* ch) {
         return err("You are not in a Room.\r\n");
     }
     auto res = parseNumber(arg, "Room ID");
-    if (!res) return err(res.err);
+    if (!res) return err(res.error());
 
     if (auto room = Room::registry.find(res.value()); room != Room::registry.end()) {
         auto r = room->second.get();
@@ -3625,3 +3642,31 @@ std::string replaceStringLine(std::string_view arg, bool enforceNewLine) {
     return out;
 }
 
+int file_to_string(const char *name, char *buf) {
+    try {
+        std::ifstream f(name);
+        std::string out;
+        // read all of f to out.
+        std::getline(f, out, '\0');
+        boost::trim_right(out);
+        strcpy(buf, out.c_str());
+        return 0;
+    } catch (std::exception &e) {
+        return -1;
+    }
+}
+
+int file_to_string_alloc(const char *name, char **buf) {
+    int temppage;
+    char temp[MAX_STRING_LENGTH];
+
+    /* Lets not free() what used to be there unless we succeeded. */
+    if (file_to_string(name, temp) < 0)
+        return (-1);
+
+    if (*buf)
+        free(*buf);
+
+    *buf = strdup(temp);
+    return (0);
+}

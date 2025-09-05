@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <type_traits>
 
 extern int64_t lastCharacterID;
 extern int64_t lastObjectID;
@@ -15,9 +16,8 @@ extern int lastGuildID;
 extern int lastScriptID;
 
 template <class Counter, class Container>
+requires std::is_arithmetic<Counter>::value && requires (Container c, Counter i) { c.contains(i); }
 Counter getNextID(Counter& counter, const Container& cont) {
-    static_assert(std::is_arithmetic_v<Counter>,
-                  "Counter must be a numeric type");
     while(cont.contains(counter)) counter++;
     return counter;
 };

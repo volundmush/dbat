@@ -7,9 +7,9 @@
  *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
  *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
  ************************************************************************ */
-#include "dbat/Character.h"
-#include "dbat/Object.h"
-#include "dbat/Room.h"
+#include "dbat/CharacterUtils.h"
+#include "dbat/ObjectUtils.h"
+#include "dbat/RoomUtils.h"
 #include "dbat/Zone.h"
 #include "dbat/Location.h"
 #include "dbat/local_limits.h"
@@ -26,6 +26,16 @@
 #include "dbat/fight.h"
 #include "dbat/handler.h"
 #include "dbat/dg_scripts.h"
+#include "dbat/utils.h"
+#include "dbat/filter.h"
+#include "dbat/Random.h"
+
+#include "dbat/commands.h"
+
+#include "dbat/const/Skill.h"
+#include "dbat/const/Condition.h"
+#include "dbat/const/Environment.h"
+#include "dbat/const/CombatPreference.h"
 
 /* local defines */
 constexpr int sick_fail = 2;
@@ -1500,10 +1510,10 @@ void point_update(uint64_t heartPulse, double deltaTime)
 
     for (auto &[vn, z] : zone_table)
     {
-        if (z.playersInZone.empty())
+        if (z->playersInZone.empty())
             continue;
 
-        for (auto &l : {&z.playersInZone, &z.npcsInZone})
+        for (auto &l : {&z->playersInZone, &z->npcsInZone})
         {
             auto copy = l->snapshot_weak();
             for (auto i : filter_raw(copy))
@@ -1648,7 +1658,7 @@ void point_update(uint64_t heartPulse, double deltaTime)
                 }
             }
 
-            auto items = z.objectsInZone.snapshot_weak();
+            auto items = z->objectsInZone.snapshot_weak();
             for (auto j : filter_raw(items))
             {
                 if (processed.contains(j->id))

@@ -360,25 +360,5 @@ ACMD(do_feats)
 
 int feat_to_subfeat(int feat)
 {
-    switch (feat)
-    {
-    case FEAT_IMPROVED_CRITICAL:
-        return CFEAT_IMPROVED_CRITICAL;
-    case FEAT_WEAPON_FINESSE:
-        return CFEAT_WEAPON_FINESSE;
-    case FEAT_WEAPON_FOCUS:
-        return CFEAT_WEAPON_FOCUS;
-    case FEAT_WEAPON_SPECIALIZATION:
-        return CFEAT_WEAPON_SPECIALIZATION;
-    case FEAT_GREATER_WEAPON_FOCUS:
-        return CFEAT_GREATER_WEAPON_FOCUS;
-    case FEAT_GREATER_WEAPON_SPECIALIZATION:
-        return CFEAT_GREATER_WEAPON_SPECIALIZATION;
-    case FEAT_SPELL_FOCUS:
-        return CFEAT_SPELL_FOCUS;
-    case FEAT_GREATER_SPELL_FOCUS:
-        return CFEAT_GREATER_SPELL_FOCUS;
-    default:
-        return -1;
-    }
+    return -1;
 }

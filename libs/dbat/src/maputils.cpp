@@ -6,17 +6,19 @@
  *				     		     *
  * Paolo Libardi - pinkpallin@libero.it		     *
  *****************************************************/
-#include "dbat/Character.h"
-#include "dbat/Object.h"
+#include "dbat/CharacterUtils.h"
+#include "dbat/ObjectUtils.h"
 #include "dbat/Destination.h"
 #include "dbat/Zone.h"
-#include "dbat/Room.h"
+#include "dbat/RoomUtils.h"
 #include "dbat/maputils.h"
 #include "dbat/send.h"
 #include "dbat/comm.h"
 #include "dbat/interpreter.h"
 #include "dbat/db.h"
 #include "dbat/vehicles.h"
+#include "dbat/filter.h"
+#include "dbat/Random.h"
 
 int mapnums[MAP_ROWS + 1][MAP_COLS + 1];
 

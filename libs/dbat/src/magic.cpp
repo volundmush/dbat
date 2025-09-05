@@ -7,8 +7,8 @@
  *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
  *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
  ************************************************************************ */
-#include "dbat/Character.h"
-#include "dbat/Object.h"
+#include "dbat/CharacterUtils.h"
+#include "dbat/ObjectUtils.h"
 #include "dbat/CharacterPrototype.h"
 #include "dbat/Location.h"
 #include "dbat/affect.h"
@@ -24,6 +24,11 @@
 #include "dbat/feats.h"
 #include "dbat/mobact.h"
 #include "dbat/fight.h"
+#include "dbat/filter.h"
+#include "dbat/Random.h"
+#include "dbat/utils.h"
+#include "dbat/const/Condition.h"
+#include "dbat/const/WearSlot.h"
 
 /* local functions */
 int mag_materials(Character *ch, int item0, int item1, int item2, int extract, int verbose);
@@ -952,7 +957,7 @@ void mag_summons(int level, Character *ch, Object *obj, int spellnum, char *arg)
                     mob_num = monsum_list[i][j][count];
                     if (real_mobile(mob_num) == NOBODY)
                         mob_num = NOBODY;
-                    else if (!is_name(buf2, mob_proto.at(real_mobile(mob_num)).name))
+                    else if (!is_name(buf2, mob_proto.at(real_mobile(mob_num))->name))
                         mob_num = NOBODY;
                     else
                         break;

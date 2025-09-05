@@ -1,38 +1,46 @@
 #pragma once
 #include <string>
 #include <string_view>
-#include <span>
+#include <vector>
 #include <unordered_map>
 #include <stdexcept>
 
-struct CommandData {
+class CommandData {
+    const std::string _original;
+
+    public:
     CommandData() = default;
     CommandData(std::string_view command_line);
-    const std::string _original;
+    
+    std::string getOriginal() const { return _original; }
     std::string_view cmd;
     std::string_view switch_type;
     std::string_view switch_mod;
     std::string_view argument;
+    std::vector<std::string_view> arguments;
     std::string_view lsargs;
     std::string_view rsargs;
-    std::span<std::string_view> args, lhslist, rhslist;
+    std::vector<std::string_view> args, lhslist, rhslist, lhscomm, rhscomm;
     bool equals_present;
     std::unordered_map<std::string, std::string> variables;
 };
 
 class CommandError : public std::runtime_error {
 public:
-    explicit CommandError(const std::string& message)
-        : std::runtime_error(message) {}
+    explicit CommandError(const std::string& message) : std::runtime_error(message) {}
 };
 
 struct Character;
 struct HasDgScripts;
-struct script_data;
 
 typedef void(*CommandFunc)(Character *ch, char *argument, int cmd, int subcmd, CommandData cdata);
 
 typedef int(*SpecialFunc)(Character *ch, HasDgScripts *me, int cmd, char *argument);
+
+struct SpecialFuncStorage {
+    SpecialFunc func;
+    char *farg;         /* string argument for special function     */
+};
 
 #define ACMD(name) void (name)(Character *ch, char *argument, int cmd, int subcmd, CommandData cdata)
 #define DECCMD(name) void (name)(Character *ch, char *argument, int cmd, int subcmd, CommandData cdata = {})

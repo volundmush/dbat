@@ -52,7 +52,7 @@ Result<T> chooseEnum(std::string_view arg, std::string_view context, const std::
 
     auto res = partialMatch(arg, emap);
     if(!res) {
-        return err("No match found for {} '{}'. {}", context, arg, res.err);
+        return err("No match found for {} '{}'. {}", context, arg, res.error());
     }
     return res.value()->second;
 }

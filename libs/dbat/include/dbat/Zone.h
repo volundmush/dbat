@@ -212,3 +212,8 @@ extern void zone_update(uint64_t heartPulse, double deltaTime);
 extern int is_empty(zone_rnum zone_nr);
 
 extern zone_rnum real_zone(zone_vnum vnum);
+
+extern std::vector<Zone*> getZoneChildren(zone_vnum parent = NOTHING);
+
+void print_zone(Character *ch, zone_vnum vnum);
+void list_zones(Character *ch);

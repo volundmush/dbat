@@ -12,9 +12,9 @@
  *  $Date: 2004/10/11 12:07:00$                                            *
  *  $Revision: 1.0.14 $                                                    *
  **************************************************************************/
-#include "dbat/Character.h"
-#include "dbat/Object.h"
-#include "dbat/Room.h"
+#include "dbat/CharacterUtils.h"
+#include "dbat/ObjectUtils.h"
+#include "dbat/RoomUtils.h"
 #include "dbat/DgScript.h"
 #include "dbat/DgScriptPrototype.h"
 #include "dbat/ObjectPrototype.h"
@@ -25,12 +25,15 @@
 #include "dbat/interpreter.h"
 #include "dbat/handler.h"
 #include "dbat/db.h"
-#include "dbat/oasis.h"
 #include "dbat/constants.h"
 #include "dbat/spell_parser.h"
 #include "dbat/act.movement.h"
 #include "dbat/spells.h"
 #include "dbat/filter.h"
+#include "dbat/utils.h"
+#include "dbat/TimeInfo.h"
+
+#include "dbat/Random.h"
 
 /*
  *  General functions used by several triggers
@@ -158,7 +161,7 @@ void bribe_mtrigger(Character *ch, Character *actor, int amount)
         {
             snprintf(buf, sizeof(buf), "%d", amount);
             t->setVariable("amount", buf);
-            t->setVariable("actor", actor);
+            t->setUID("actor", actor);
             t->execute();
             break;
         }
@@ -202,7 +205,7 @@ void greet_memory_mtrigger(Character *actor)
                         t->isReady() &&
                         Random::get<int>(1, 100) <= GET_TRIG_NARG(t))
                     {
-                        t->setVariable("actor", actor);
+                        t->setUID("actor", actor);
                         t->execute();
                         break;
                     }
@@ -260,7 +263,7 @@ int greet_mtrigger(Character *actor, int dir)
                     t->setVariable("direction", (const char *)dirs[rev_dir[dir]]);
                 else
                     t->setVariable("direction", "none");
-                t->setVariable("actor", actor);
+                t->setUID("actor", actor);
                 intermediate = t->execute();
                 if (!intermediate)
                     final = false;
@@ -299,7 +302,7 @@ void entry_memory_mtrigger(Character *ch)
                             if (TRIGGER_CHECK(t, MTRIG_MEMORY) && (Random::get<int>(1, 100) <=
                                                                    GET_TRIG_NARG(t)))
                             {
-                                t->setVariable("actor", actor);
+                                t->setUID("actor", actor);
                                 t->execute();
                                 break;
                             }
@@ -344,7 +347,7 @@ int entry_mtrigger(Character *ch)
     return 1;
 }
 
-int command_mtrigger(Character *actor, char *cmd, char *argument)
+int command_mtrigger(Character *actor, std::string_view cmd, std::string_view argument)
 {
     char buf[MAX_INPUT_LENGTH];
 
@@ -372,13 +375,10 @@ int command_mtrigger(Character *actor, char *cmd, char *argument)
                     continue;
                 }
 
-                if (*GET_TRIG_ARG(t) == '*' ||
-                    !strncasecmp(GET_TRIG_ARG(t), cmd, strlen(GET_TRIG_ARG(t))))
+                if (*GET_TRIG_ARG(t) == '*' || boost::iequals(cmd, GET_TRIG_ARG(t)))
                 {
-                    t->setVariable("actor", actor);
-                    skip_spaces(&argument);
+                    t->setUID("actor", actor);
                     t->setVariable("arg", argument);
-                    skip_spaces(&cmd);
                     t->setVariable("cmd", cmd);
 
                     if (t->execute())
@@ -418,7 +418,7 @@ void speech_mtrigger(Character *actor, char *str)
                 if (((GET_TRIG_NARG(t) && word_check(str, GET_TRIG_ARG(t))) ||
                      (!GET_TRIG_NARG(t) && is_substring(GET_TRIG_ARG(t), str))))
                 {
-                    t->setVariable("actor", actor);
+                    t->setUID("actor", actor);
                     t->setVariable("speech", str);
                     t->execute();
                     break;
@@ -453,13 +453,13 @@ void act_mtrigger(Character *ch, char *str, Character *actor, Character *victim,
                  (!GET_TRIG_NARG(t) && is_substring(GET_TRIG_ARG(t), str))))
             {
                 if (actor)
-                    t->setVariable("actor", actor);
+                    t->setUID("actor", actor);
                 if (victim)
-                    t->setVariable("victim", victim);
+                    t->setUID("victim", victim);
                 if (object)
-                    t->setVariable("object", object);
+                    t->setUID("object", object);
                 if (target)
-                    t->setVariable("target", target);
+                    t->setUID("target", target);
                 if (str)
                 {
                     /* we're guaranteed to have a string ending with \r\n\0 */
@@ -493,7 +493,7 @@ void fight_mtrigger(Character *ch)
         {
             actor = FIGHTING(ch);
             if (actor)
-                t->setVariable("actor", actor);
+                t->setUID("actor", actor);
             else
                 t->setVariable("actor", "nobody");
 
@@ -520,7 +520,7 @@ void hitprcnt_mtrigger(Character *ch)
         {
 
             actor = FIGHTING(ch);
-            t->setVariable("actor", actor);
+            t->setUID("actor", actor);
             t->execute();
             break;
         }
@@ -542,8 +542,8 @@ int receive_mtrigger(Character *ch, Character *actor, Object *obj)
             (Random::get<int>(1, 100) <= GET_TRIG_NARG(t)))
         {
 
-            t->setVariable("actor", actor);
-            t->setVariable("object", obj);
+            t->setUID("actor", actor);
+            t->setUID("object", obj);
             ret_val = t->execute();
             if (DEAD(actor) || DEAD(ch) || obj->getCarriedBy() != actor)
                 return 0;
@@ -569,7 +569,7 @@ int death_mtrigger(Character *ch, Character *actor)
             (Random::get<int>(1, 100) <= GET_TRIG_NARG(t)))
         {
             if (actor)
-                t->setVariable("actor", actor);
+                t->setUID("actor", actor);
             return t->execute();
         }
     }
@@ -600,7 +600,7 @@ void load_mtrigger(Character *ch)
         /* make sure this mob is the last one in the load chain */
         if (auto vn = GET_MOB_RNUM(ch); vn != NOBODY)
         {
-            mob_proto.at(vn).proto_script.clear();
+            mob_proto.at(vn)->proto_script.clear();
         }
     }
 }
@@ -621,7 +621,7 @@ int cast_mtrigger(Character *actor, Character *ch, int spellnum)
         if (TRIGGER_CHECK(t, MTRIG_CAST) &&
             (Random::get<int>(1, 100) <= GET_TRIG_NARG(t)))
         {
-            t->setVariable("actor", actor);
+            t->setUID("actor", actor);
             sprintf(buf, "%d", spellnum);
             t->setVariable("spell", buf);
             t->setVariable("spellname", (const char *)skill_name(spellnum));
@@ -656,7 +656,7 @@ int leave_mtrigger(Character *actor, int dir)
                     t->setVariable("direction", (const char *)dirs[dir]);
                 else
                     t->setVariable("direction", "none");
-                t->setVariable("actor", actor);
+                t->setUID("actor", actor);
                 return t->execute();
             }
         }
@@ -686,7 +686,7 @@ int door_mtrigger(Character *actor, int subcmd, int dir)
                     t->setVariable("direction", (const char *)dirs[dir]);
                 else
                     t->setVariable("direction", "none");
-                t->setVariable("actor", actor);
+                t->setUID("actor", actor);
                 return t->execute();
             }
         }
@@ -787,7 +787,7 @@ int get_otrigger(Object *obj, Character *actor)
     {
         if (TRIGGER_CHECK(t, OTRIG_GET) && (Random::get<int>(1, 100) <= GET_TRIG_NARG(t)))
         {
-            t->setVariable("actor", actor);
+            t->setUID("actor", actor);
             ret_val = t->execute();
             /* don't allow a get to take place, if
              * a) the actor is killed (the mud would choke on obj_to_char).
@@ -804,8 +804,7 @@ int get_otrigger(Object *obj, Character *actor)
 }
 
 /* checks for command trigger on specific object. assumes obj has cmd trig */
-int cmd_otrig(Object *obj, Character *actor, char *cmd,
-              char *argument, int type)
+int cmd_otrig(Object *obj, Character *actor, std::string_view cmd, std::string_view argument, int type)
 {
     char buf[MAX_INPUT_LENGTH];
 
@@ -825,13 +824,11 @@ int cmd_otrig(Object *obj, Character *actor, char *cmd,
                 continue;
             }
 
-            if (IS_SET(GET_TRIG_NARG(t), type) && (*GET_TRIG_ARG(t) == '*' || !strncasecmp(GET_TRIG_ARG(t), cmd, strlen(GET_TRIG_ARG(t)))))
+            if (IS_SET(GET_TRIG_NARG(t), type) && (*GET_TRIG_ARG(t) == '*' || boost::iequals(cmd, GET_TRIG_ARG(t))))
             {
 
-                t->setVariable("actor", actor);
-                skip_spaces(&argument);
+                t->setUID("actor", actor);
                 t->setVariable("arg", argument);
-                skip_spaces(&cmd);
                 t->setVariable("cmd", cmd);
 
                 if (t->execute())
@@ -843,7 +840,7 @@ int cmd_otrig(Object *obj, Character *actor, char *cmd,
     return 0;
 }
 
-int command_otrigger(Character *actor, char *cmd, char *argument)
+int command_otrigger(Character *actor, std::string_view cmd, std::string_view argument)
 {
 
     /* prevent people we like from becoming trapped :P */
@@ -880,7 +877,7 @@ int wear_otrigger(Object *obj, Character *actor, int where)
     {
         if (TRIGGER_CHECK(t, OTRIG_WEAR))
         {
-            t->setVariable("actor", actor);
+            t->setUID("actor", actor);
             ret_val = t->execute();
             /* don't allow a wear to take place, if
              * the object is purged.
@@ -911,7 +908,7 @@ int remove_otrigger(Object *obj, Character *actor)
     {
         if (TRIGGER_CHECK(t, OTRIG_REMOVE))
         {
-            t->setVariable("actor", actor);
+            t->setUID("actor", actor);
             ret_val = t->execute();
             /* don't allow a remove to take place, if
              * the object is purged.
@@ -939,7 +936,7 @@ int drop_otrigger(Object *obj, Character *actor)
     {
         if (TRIGGER_CHECK(t, OTRIG_DROP) && (Random::get<int>(1, 100) <= GET_TRIG_NARG(t)))
         {
-            t->setVariable("actor", actor);
+            t->setUID("actor", actor);
             ret_val = t->execute();
             /* don't allow a drop to take place, if
              * the object is purged (nothing to drop).
@@ -967,8 +964,8 @@ int give_otrigger(Object *obj, Character *actor, Character *victim)
     {
         if (TRIGGER_CHECK(t, OTRIG_GIVE) && (Random::get<int>(1, 100) <= GET_TRIG_NARG(t)))
         {
-            t->setVariable("actor", actor);
-            t->setVariable("victim", victim);
+            t->setUID("actor", actor);
+            t->setUID("victim", victim);
             ret_val = t->execute();
             /* don't allow a give to take place, if
              * a) the object is purged.
@@ -1008,7 +1005,7 @@ void load_otrigger(Object *obj)
         auto vn = GET_OBJ_RNUM(obj);
         if (vn != NOTHING)
         {
-            obj_proto.at(vn).proto_script.clear();
+            obj_proto.at(vn)->proto_script.clear();
         }
     }
 }
@@ -1029,7 +1026,7 @@ int cast_otrigger(Character *actor, Object *obj, int spellnum)
         if (TRIGGER_CHECK(t, OTRIG_CAST) &&
             (Random::get<int>(1, 100) <= GET_TRIG_NARG(t)))
         {
-            t->setVariable("actor", actor);
+            t->setUID("actor", actor);
             sprintf(buf, "%d", spellnum);
             t->setVariable("spell", buf);
             t->setVariable("spellname", (const char *)skill_name(spellnum));
@@ -1063,7 +1060,7 @@ int leave_otrigger(Room *room, Character *actor, int dir)
                     t->setVariable("direction", (const char *)dirs[dir]);
                 else
                     t->setVariable("direction", "none");
-                t->setVariable("actor", actor);
+                t->setUID("actor", actor);
                 temp = t->execute();
                 if (temp == 0)
                     final = 0;
@@ -1087,7 +1084,7 @@ int consume_otrigger(Object *obj, Character *actor, int cmd)
     {
         if (TRIGGER_CHECK(t, OTRIG_CONSUME))
         {
-            t->setVariable("actor", actor);
+            t->setUID("actor", actor);
             switch (cmd)
             {
             case OCMD_EAT:
@@ -1211,7 +1208,7 @@ int enter_wtrigger(Room *room, Character *actor, int dir)
                 t->setVariable("direction", (const char *)dirs[rev_dir[dir]]);
             else
                 t->setVariable("direction", "none");
-            t->setVariable("actor", actor);
+            t->setUID("actor", actor);
             return t->execute();
         }
     }
@@ -1219,7 +1216,7 @@ int enter_wtrigger(Room *room, Character *actor, int dir)
     return 1;
 }
 
-int command_wtrigger(Character *actor, char *cmd, char *argument)
+int command_wtrigger(Character *actor, std::string_view cmd, std::string_view argument)
 {
     char buf[MAX_INPUT_LENGTH];
 
@@ -1246,13 +1243,10 @@ int command_wtrigger(Character *actor, char *cmd, char *argument)
             continue;
         }
 
-        if (*GET_TRIG_ARG(t) == '*' ||
-            !strncasecmp(GET_TRIG_ARG(t), cmd, strlen(GET_TRIG_ARG(t))))
+        if (*GET_TRIG_ARG(t) == '*' || boost::iequals(cmd, GET_TRIG_ARG(t)))
         {
-            t->setVariable("actor", actor);
-            skip_spaces(&argument);
+            t->setUID("actor", actor);
             t->setVariable("arg", argument);
-            skip_spaces(&cmd);
             t->setVariable("cmd", cmd);
 
             return t->execute();
@@ -1287,7 +1281,7 @@ void speech_wtrigger(Character *actor, char *str)
             (GET_TRIG_NARG(t) && word_check(str, GET_TRIG_ARG(t))) ||
             (!GET_TRIG_NARG(t) && is_substring(GET_TRIG_ARG(t), str)))
         {
-            t->setVariable("actor", actor);
+            t->setUID("actor", actor);
             t->setVariable("speech", str);
             t->execute();
             break;
@@ -1309,8 +1303,8 @@ int drop_wtrigger(Object *obj, Character *actor)
         if (TRIGGER_CHECK(t, WTRIG_DROP) &&
             (Random::get<int>(1, 100) <= GET_TRIG_NARG(t)))
         {
-            t->setVariable("actor", actor);
-            t->setVariable("object", obj);
+            t->setUID("actor", actor);
+            t->setUID("object", obj);
             ret_val = t->execute();
             if (obj->getCarriedBy() != actor)
                 return 0;
@@ -1337,11 +1331,11 @@ int cast_wtrigger(Character *actor, Character *vict, Object *obj, int spellnum)
             (Random::get<int>(1, 100) <= GET_TRIG_NARG(t)))
         {
 
-            t->setVariable("actor", actor);
+            t->setUID("actor", actor);
             if (vict)
-                t->setVariable("victim", vict);
+                t->setUID("victim", vict);
             if (obj)
-                t->setVariable("object", obj);
+                t->setUID("object", obj);
             sprintf(buf, "%d", spellnum);
             t->setVariable("spell", buf);
             t->setVariable("spellname", (const char *)skill_name(spellnum));
@@ -1373,7 +1367,7 @@ int leave_wtrigger(Room *room, Character *actor, int dir)
                 t->setVariable("direction", (const char *)dirs[dir]);
             else
                 t->setVariable("direction", "none");
-            t->setVariable("actor", actor);
+            t->setUID("actor", actor);
             return t->execute();
         }
     }
@@ -1400,7 +1394,7 @@ int door_wtrigger(Character *actor, int subcmd, int dir)
                 t->setVariable("direction", (const char *)dirs[dir]);
             else
                 t->setVariable("direction", "none");
-            t->setVariable("actor", actor);
+            t->setUID("actor", actor);
             return t->execute();
         }
     }

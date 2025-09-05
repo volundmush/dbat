@@ -6,8 +6,8 @@
  *  to house all player level object editing functions -- Iovan 1/6/13     *
  ************************************************************************ */
 #include "dbat/Descriptor.h"
-#include "dbat/Object.h"
-#include "dbat/Character.h"
+#include "dbat/ObjectUtils.h"
+#include "dbat/CharacterUtils.h"
 #include "dbat/Account.h"
 #include "dbat/obj_edit.h"
 #include "dbat/send.h"

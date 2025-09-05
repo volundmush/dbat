@@ -13,19 +13,18 @@
 #include <regex>
 
 #include "dbat/Zone.h"
-#include "dbat/Character.h"
+#include "dbat/CharacterUtils.h"
 #include "dbat/CharacterPrototype.h"
-#include "dbat/Object.h"
+#include "dbat/ObjectUtils.h"
 #include "dbat/ObjectPrototype.h"
 #include "dbat/DgScriptPrototype.h"
-#include "dbat/Room.h"
+#include "dbat/RoomUtils.h"
 #include "dbat/Destination.h"
 #include "dbat/Area.h"
 #include "dbat/comm.h"
 #include "dbat/utils.h"
 #include "dbat/dg_scripts.h"
 #include "dbat/constants.h"
-#include "dbat/genolc.h"
 #include "dbat/maputils.h"
 #include "dbat/config.h"
 #include "dbat/class.h"
@@ -36,12 +35,22 @@
 #include "dbat/spell_parser.h"
 #include "dbat/Shop.h"
 #include "dbat/Guild.h"
-#include "dbat/genobj.h"
 #include "dbat/saveload.h"
-#include "dbat/assedit.h"
 #include "dbat/assemblies.h"
 #include "dbat/vehicles.h"
 #include "dbat/ansi.h"
+#include "dbat/Help.h"
+#include "dbat/utils.h"
+#include "dbat/interpreter.h"
+#include "dbat/Random.h"
+#include "dbat/ID.h"
+#include "dbat/Startup.h"
+
+#include "dbat/const/Max.h"
+#include "dbat/const/Filename.h"
+#include "dbat/const/Condition.h"
+#include "dbat/const/ContainerFlag.h"
+#include "dbat/const/Environment.h"
 
 #define Q_FIELD(x)  ((int) (x) / 32)
 #define Q_BIT(x)    (1 << ((x) % 32))
@@ -289,12 +298,12 @@ static void load_help(FILE *fl, char *name) {
         }
 
         el.duplicate = 0;
-        el.entry = strdup(entry);
+        el.entry = entry;
         scan = one_word(key, next_key);
 
         while (*next_key) {
-            el.keywords = strdup(next_key);
-            help_table[top_of_helpt++] = el;
+            el.keywords = next_key;
+            help_table.emplace_back(el);
             el.duplicate++;
             scan = one_word(scan, next_key);
         }
@@ -563,7 +572,8 @@ static void boot_the_guilds(FILE *gm_f, char *filename, int rec_count) {
             snprintf(buf2, sizeof(buf2), "GM #%d in GM file %s", temp, filename);
             free(buf);        /* Plug memory leak! */
             top_guild = temp;
-            auto &g = guild_index[temp];
+            auto g = std::make_shared<Guild>();
+            guild_index[temp] = g;
 
             GM_NUM(top_guild) = temp;
 
@@ -571,12 +581,12 @@ static void boot_the_guilds(FILE *gm_f, char *filename, int rec_count) {
             rv = sscanf(buf3, "%d %d", &t1, &t2);
             while (t1 > -1) {
                 if (rv == 1) { /* old style guilds, only skills */
-                    g.skills.set(t1);
+                    g->skills.set(t1);
                 } else if (rv == 2) { /* new style guilds, skills and feats */
                     if (t2 == 1) {
-                        g.skills.set(t1);
+                        g->skills.set(t1);
                     } else if (t2 == 2) {
-                        g.feats.insert(t1);
+                        g->feats.insert(t1);
                     } else {
                         basic_mud_log("SYSERR: Invalid 2nd arg in guild file!");
                         exit(1);
@@ -588,24 +598,24 @@ static void boot_the_guilds(FILE *gm_f, char *filename, int rec_count) {
                 get_line(gm_f, buf3);
                 rv = sscanf(buf3, "%d %d", &t1, &t2);
             }
-            read_guild_line(gm_f, "%f", &g.charge, "GM_CHARGE");
-            g.no_such_skill = fread_string(gm_f, buf2);
-            g.not_enough_gold = fread_string(gm_f, buf2);
+            read_guild_line(gm_f, "%f", &g->charge, "GM_CHARGE");
+            g->no_such_skill = fread_string(gm_f, buf2);
+            g->not_enough_gold = fread_string(gm_f, buf2);
 
-            read_guild_line(gm_f, "%d", &g.minlvl, "GM_MINLVL");
-            read_guild_line(gm_f, "%d", &g.keeper, "GM_TRAINER");
+            read_guild_line(gm_f, "%d", &g->minlvl, "GM_MINLVL");
+            read_guild_line(gm_f, "%d", &g->keeper, "GM_TRAINER");
 
             bitvector_t with_who[4];
             read_guild_line(gm_f, "%d", &with_who[0], "GM_WITH_WHO");
 
-            read_guild_line(gm_f, "%d", &g.open, "GM_OPEN");
-            read_guild_line(gm_f, "%d", &g.close, "GM_CLOSE");
+            read_guild_line(gm_f, "%d", &g->open, "GM_OPEN");
+            read_guild_line(gm_f, "%d", &g->close, "GM_CLOSE");
 
             CREATE(buf, char, READ_SIZE);
             get_line(gm_f, buf);
             if (buf && *buf != '#' && *buf != '$') {
                 p = buf;
-                for (temp = 1; temp < GW_ARRAY_MAX; temp++) {
+                for (temp = 1; temp < 4; temp++) {
                     if (!p || !*p)
                         break;
                     if (sscanf(p, "%d", &val) != 1) {
@@ -623,7 +633,7 @@ static void boot_the_guilds(FILE *gm_f, char *filename, int rec_count) {
                 free(buf);
                 buf = fread_string(gm_f, buf2);
             }
-        handle_org_who(g, with_who);
+        handle_org_who(*g, with_who);
         } else {
             if (*buf == '$')        /* EOF */
                 done = true;
@@ -648,15 +658,16 @@ static void boot_the_shops(FILE *shop_f, char *filename, int rec_count) {
         if (*buf == '#') {        /* New shop */
             sscanf(buf, "#%d\n", &temp);
             snprintf(buf2, sizeof(buf2)-1, "shop #%d in shop file %s", temp, filename);
-            auto &sh = shop_index[temp];
+            auto sh = std::make_shared<Shop>();
+            shop_index[temp] = sh;
             free(buf);        /* Plug memory leak! */
-            sh.vnum = temp;
+            sh->vnum = temp;
             top_shop = temp;
             while(true) {
                 read_line(shop_f, "%d", &shop_temp);
                 if(shop_temp == -1) break;
                 temp = (shop_vnum)shop_temp;
-                if(obj_index.count(temp)) sh.producing.push_back(temp);
+                if(obj_proto.count(temp)) sh->producing.push_back(temp);
             }
 
             read_line(shop_f, "%f", &SHOP_BUYPROFIT(top_shop));
@@ -665,35 +676,35 @@ static void boot_the_shops(FILE *shop_f, char *filename, int rec_count) {
             while(true) {
                 read_line(shop_f, "%d", &shop_temp);
                 if(shop_temp == -1) break;
-                auto &t = sh.type.emplace_back();
+                auto &t = sh->type.emplace_back();
                 t.type = shop_temp;
             }
 
-            sh.no_such_item1 = read_shop_message(0, SHOP_NUM(top_shop), shop_f, buf2);
-            sh.no_such_item2 = read_shop_message(1, SHOP_NUM(top_shop), shop_f, buf2);
-            sh.do_not_buy = read_shop_message(2, SHOP_NUM(top_shop), shop_f, buf2);
-            sh.missing_cash1 = read_shop_message(3, SHOP_NUM(top_shop), shop_f, buf2);
-            sh.missing_cash2 = read_shop_message(4, SHOP_NUM(top_shop), shop_f, buf2);
-            sh.message_buy = read_shop_message(5, SHOP_NUM(top_shop), shop_f, buf2);
-            sh.message_sell = read_shop_message(6, SHOP_NUM(top_shop), shop_f, buf2);
+            sh->no_such_item1 = read_shop_message(0, SHOP_NUM(top_shop), shop_f, buf2);
+            sh->no_such_item2 = read_shop_message(1, SHOP_NUM(top_shop), shop_f, buf2);
+            sh->do_not_buy = read_shop_message(2, SHOP_NUM(top_shop), shop_f, buf2);
+            sh->missing_cash1 = read_shop_message(3, SHOP_NUM(top_shop), shop_f, buf2);
+            sh->missing_cash2 = read_shop_message(4, SHOP_NUM(top_shop), shop_f, buf2);
+            sh->message_buy = read_shop_message(5, SHOP_NUM(top_shop), shop_f, buf2);
+            sh->message_sell = read_shop_message(6, SHOP_NUM(top_shop), shop_f, buf2);
             read_line(shop_f, "%d", &SHOP_BROKE_TEMPER(top_shop));
             
             bitvector_t bitvector;
             read_line(shop_f, "%d", &bitvector);
             for(auto i = 0; i < 2; i++) {
                 if(IS_SET(bitvector, 1 << i)) {
-                    sh.shop_flags.set(static_cast<ShopFlag>(i));
+                    sh->shop_flags.set(static_cast<ShopFlag>(i));
                 }
             }
 
             read_line(shop_f, "%d", &SHOP_KEEPER(top_shop));
 
-            bitvector_t with_who[SW_ARRAY_MAX];
+            bitvector_t with_who[4];
 
             CREATE(buf, char, READ_SIZE);
             get_line(shop_f, buf);
             p = buf;
-            for (temp = 0; temp < SW_ARRAY_MAX; temp++) {
+            for (temp = 0; temp < 4; temp++) {
                 if (!p || !*p)
                     break;
                 if (sscanf(p, "%d", &count) != 1) {
@@ -709,12 +720,12 @@ static void boot_the_shops(FILE *shop_f, char *filename, int rec_count) {
                 }
             }
             free(buf);
-            handle_org_who(sh, with_who);
+            handle_org_who(*sh, with_who);
 
             while(true) {
                 read_line(shop_f, "%d", &shop_temp);
                 if(shop_temp == -1) break;
-                if(Room::registry.contains(shop_temp)) sh.in_room.insert(shop_temp);
+                if(Room::registry.contains(shop_temp)) sh->in_room.insert(shop_temp);
 
             }
 
@@ -1023,9 +1034,9 @@ static void parse_room(FILE *fl, room_vnum virtual_nr) {
     auto sh = std::make_shared<Room>();
     auto r = sh.get();
     Room::registry.emplace(virtual_nr, sh);
-    z.rooms.add(sh);
+    z->rooms.add(sh);
 
-    r->zone.reset(&z);
+    r->zone.reset(z.get());
     r->vn = virtual_nr;
     r->strings["name"] = fread_string(fl, buf2);
     r->strings["look_description"] = fread_string(fl, buf2);
@@ -1066,10 +1077,10 @@ static void parse_room(FILE *fl, room_vnum virtual_nr) {
                 break;
             case 'E': {
                 auto &ex = r->extra_descriptions.emplace_back();
-                ex.keyword = fread_string(fl, buf2);
-                ex.description = fread_string(fl, buf2);
-                if(!ex.description.ends_with("\r\n")) {
-                    ex.description += "\r\n"; /* ensure it ends with \r\n */
+                ex.first = fread_string(fl, buf2);
+                ex.second = fread_string(fl, buf2);
+                if(!ex.second.ends_with("\r\n")) {
+                    ex.second += "\r\n"; /* ensure it ends with \r\n */
                 }
             }
                 break;
@@ -1515,12 +1526,11 @@ static int parse_mobile_from_file(FILE *mob_f, struct CharacterPrototype *ch, vn
 
 
 static void parse_mobile(FILE *mob_f, mob_vnum nr) {
-    auto &idx = mob_index[nr];
-    idx.vn = nr;
 
-    auto &m = mob_proto[nr];
+    auto sh = std::make_shared<CharacterPrototype>();
+    mob_proto[nr] = sh;
 
-    if (parse_mobile_from_file(mob_f, &m, nr)) {
+    if (parse_mobile_from_file(mob_f, sh.get(), nr)) {
 
     } else { /* We used to exit in the file reading code, but now we do it here */
         exit(1);
@@ -1682,29 +1692,28 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
     char f9[READ_SIZE], f10[READ_SIZE], f11[READ_SIZE], f12[READ_SIZE];
     struct extra_descr_data *new_descr;
 
-    auto &o = obj_proto[nr];
-    auto &idx = obj_index[nr];
+    auto o = std::make_shared<ObjectPrototype>();
+    obj_proto[nr] = o;
 
-    idx.vn = nr;
-    o.vn = nr;
+    o->vn = nr;
 
     sprintf(buf2, "object #%d", nr);    /* sprintf: OK (for 'buf2 >= 19') */
 
     /* *** string data *** */
-    if ((o.name = fread_string(obj_f, buf2)) == nullptr) {
+    if ((o->name = fread_string(obj_f, buf2)) == nullptr) {
         basic_mud_log("SYSERR: Null obj name or format error at or near %s", buf2);
         exit(1);
     }
-    tmpptr = o.short_description = fread_string(obj_f, buf2);
+    tmpptr = o->short_description = fread_string(obj_f, buf2);
     if (tmpptr && *tmpptr)
         if (!strcasecmp(fname(tmpptr), "a") || !strcasecmp(fname(tmpptr), "an") ||
             !strcasecmp(fname(tmpptr), "the"))
             *tmpptr = tolower(*tmpptr);
 
-    tmpptr = o.room_description = fread_string(obj_f, buf2);
+    tmpptr = o->room_description = fread_string(obj_f, buf2);
     if (tmpptr && *tmpptr)
         CAP(tmpptr);
-    o.look_description = fread_string(obj_f, buf2);
+    o->look_description = fread_string(obj_f, buf2);
 
     /* *** numeric data *** */
     if (!get_line(obj_f, line)) {
@@ -1719,19 +1728,19 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
         extraFlags[1] = asciiflag_conv(f2);
         extraFlags[2] = asciiflag_conv(f3);
         extraFlags[3] = asciiflag_conv(f4);
-        for(auto i = 0; i < 128; i++) if(IS_SET_AR(extraFlags, i)) o.item_flags.set(i);
+        for(auto i = 0; i < 128; i++) if(IS_SET_AR(extraFlags, i)) o->item_flags.set(i);
 
         wearFlags[0] = asciiflag_conv(f5);
         wearFlags[1] = asciiflag_conv(f6);
         wearFlags[2] = asciiflag_conv(f7);
         wearFlags[3] = asciiflag_conv(f8);
-        for(auto i = 0; i < NUM_ITEM_WEARS; i++) if(IS_SET_AR(wearFlags, i)) o.wear_flags.set(i);
+        for(auto i = 0; i < NUM_ITEM_WEARS; i++) if(IS_SET_AR(wearFlags, i)) o->wear_flags.set(i);
 
         permFlags[0] = asciiflag_conv(f9);
         permFlags[1] = asciiflag_conv(f10);
         permFlags[2] = asciiflag_conv(f11);
         permFlags[3] = asciiflag_conv(f12);
-        for(auto i = 0; i < 128; i++) if(IS_SET_AR(permFlags, i)) o.affect_flags.set(i);
+        for(auto i = 0; i < 128; i++) if(IS_SET_AR(permFlags, i)) o->affect_flags.set(i);
 
     } else {
         basic_mud_log("SYSERR: Format error in first numeric line (expecting 13 args, got %d), %s", retval, buf2);
@@ -1739,7 +1748,7 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
     }
 
     /* Object flags checked in check_object(). */
-    o.type_flag = static_cast<ItemType>(t[0]);
+    o->type_flag = static_cast<ItemType>(t[0]);
 
     if (!get_line(obj_f, line)) {
         basic_mud_log("SYSERR: Expecting second numeric line of %s, but file ended!", buf2);
@@ -1757,14 +1766,14 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
         exit(1);
     }
 
-    obj_values(&o, t);
+    obj_values(o.get(), t);
 
-    if ((GET_OBJ_TYPE(&o) == ITEM_PORTAL || \
-       GET_OBJ_TYPE(&o) == ITEM_HATCH) && \
-       (!GET_OBJ_VAL(&o, VAL_DOOR_DCLOCK) || \
-        !GET_OBJ_VAL(&o, VAL_DOOR_DCHIDE))) {
-        SET_OBJ_VAL(&o, VAL_DOOR_DCLOCK, 20);
-        SET_OBJ_VAL(&o, VAL_DOOR_DCHIDE, 20);
+    if ((GET_OBJ_TYPE(o) == ITEM_PORTAL || \
+       GET_OBJ_TYPE(o) == ITEM_HATCH) && \
+       (!o->getBaseStat(VAL_DOOR_DCLOCK) || \
+        !o->getBaseStat(VAL_DOOR_DCHIDE))) {
+        o->setBaseStat(VAL_DOOR_DCLOCK, 20);
+        o->setBaseStat(VAL_DOOR_DCHIDE, 20);
         if (bitsavetodisk) {
             converting = true;
         }
@@ -1792,28 +1801,29 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
             exit(1);
         }
     }
-    o.setBaseStat<weight_t>("weight", t[0]);
-    o.setBaseStat("cost", t[1]);
-    o.setBaseStat("cost_per_day", t[2]);
-    o.setBaseStat("level", t[3]);
+    o->setBaseStat<weight_t>("weight", t[0]);
+    o->setBaseStat("cost", t[1]);
+    o->setBaseStat("cost_per_day", t[2]);
+    o->setBaseStat("level", t[3]);
 
     /* check to make sure that weight of containers exceeds curr. quantity */
-    if (GET_OBJ_TYPE(&o) == ITEM_DRINKCON ||
-        GET_OBJ_TYPE(&o) == ITEM_FOUNTAIN) {
-        if (GET_OBJ_WEIGHT(&o) < GET_OBJ_VAL(&o, VAL_CONTAINER_FLAGS))
-            o.setBaseStat<weight_t>("weight", GET_OBJ_VAL(&o, VAL_CONTAINER_FLAGS) + 5);
+    if (GET_OBJ_TYPE(o) == ITEM_DRINKCON ||
+        GET_OBJ_TYPE(o) == ITEM_FOUNTAIN) {
+        if (GET_OBJ_WEIGHT(o) < o->getBaseStat(VAL_CONTAINER_FLAGS))
+            o->setBaseStat<weight_t>("weight", o->getBaseStat(VAL_CONTAINER_FLAGS) + 5);
     }
     /* *** make sure portal objects have their timer set correctly *** */
-    if (GET_OBJ_TYPE(&o) == ITEM_PORTAL) {
-        o.setBaseStat("timer", -1);
+    if (GET_OBJ_TYPE(o) == ITEM_PORTAL) {
+        o->setBaseStat("timer", -1);
     }
 
     /* *** extra descriptions and affect fields *** */
 
     for (j = 0; j < MAX_OBJ_AFFECT; j++) {
-        o.affected[j].location = APPLY_NONE;
-        o.affected[j].modifier = 0;
-        o.affected[j].specific = 0;
+        auto &aj = o->affected[j];
+        aj.location = APPLY_NONE;
+        aj.modifier = 0;
+        aj.specific = 0;
     }
 
     strcat(buf2, ", after numeric constants\n"    /* strcat: OK (for 'buf2 >= 87') */
@@ -1826,12 +1836,11 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
             exit(1);
         }
         switch (*line) {
-            case 'E':
-                CREATE(new_descr, struct extra_descr_data, 1);
-                new_descr->keyword = fread_string(obj_f, buf2);
-                new_descr->description = fread_string(obj_f, buf2);
-                new_descr->next = o.ex_description;
-                o.ex_description = new_descr;
+            case 'E': {
+                auto &exd = o->extra_descriptions.emplace_back();
+                exd.first = fread_string(obj_f, buf2);
+                exd.second = fread_string(obj_f, buf2);
+            }
                 break;
             case 'A':
                 if (j >= MAX_OBJ_AFFECT) {
@@ -1854,9 +1863,9 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
                     }
                 }
 
-                o.affected[j].location = t[0];
-                o.affected[j].modifier = t[1];
-                o.affected[j].specific = t[2];
+                o->affected[j].location = t[0];
+                o->affected[j].modifier = t[1];
+                o->affected[j].specific = t[2];
                 j++;
                 break;
             case 'S':  /* Spells for Spellbooks*/
@@ -1880,7 +1889,7 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
                 j++;
                 break;
             case 'T':  /* DG triggers */
-                dg_obj_trigger(line, &o);
+                dg_obj_trigger(line, o.get());
                 break;
             case 'Z':
                 if (!get_line(obj_f, line)) {
@@ -1894,12 +1903,12 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
                         "...offending line: '%s'", buf2, line);
                     exit(1);
                 }
-                o.size = static_cast<Size>(t[0]);
+                o->size = static_cast<Size>(t[0]);
                 break;
             case '$':
             case '#':
                 /* Objects that set CHARM on players are bad. */
-                o.affect_flags.set(AFF_CHARM, false);
+                o->affect_flags.set(AFF_CHARM, false);
                 return (line);
             default:
                 basic_mud_log("SYSERR: Format error in (%c): %s", *line, buf2);
@@ -1989,18 +1998,19 @@ static void load_zones(FILE *fl, char *zonename) {
     }
     snprintf(buf2, sizeof(buf2)-1, "beginning of zone #%d", v);
 
-    auto &z = zone_table[v];
-    z.number = v;
+    auto z = std::make_shared<Zone>();
+    zone_table[v] = z;
+    z->number = v;
 
     line_num += get_line(fl, buf);
     if ((ptr = strchr(buf, '~')) != nullptr)    /* take off the '~' if it's there */
         *ptr = '\0';
-    z.builders = buf;
+    z->builders = buf;
 
     line_num += get_line(fl, buf);
     if ((ptr = strchr(buf, '~')) != nullptr)    /* take off the '~' if it's there */
         *ptr = '\0';
-    z.name = buf;
+    z->name = buf;
 
     vnum bot, top;
 
@@ -2013,8 +2023,8 @@ static void load_zones(FILE *fl, char *zonename) {
         char zbuf3[MAX_STRING_LENGTH];
         char zbuf4[MAX_STRING_LENGTH];
         int min_level, max_level;
-        if (sscanf(buf, " %d %d %d %d %s %s %s %s %d %d", &bot, &top, &z.lifespan,
-                   &z.reset_mode, zbuf1, zbuf2, zbuf3, zbuf4, &min_level, &max_level) != 10) {
+        if (sscanf(buf, " %d %d %d %d %s %s %s %s %d %d", &bot, &top, &z->lifespan,
+                   &z->reset_mode, zbuf1, zbuf2, zbuf3, zbuf4, &min_level, &max_level) != 10) {
             basic_mud_log("SYSERR: Format error in 10-constant line of %s", zname);
             exit(1);
         }
@@ -2024,7 +2034,7 @@ static void load_zones(FILE *fl, char *zonename) {
         zone_flags[2] = asciiflag_conv(zbuf3);
         zone_flags[3] = asciiflag_conv(zbuf4);
 
-    } else if (sscanf(buf, " %d %d %d %d ", &bot, &top, &z.lifespan, &z.reset_mode) != 4) {
+    } else if (sscanf(buf, " %d %d %d %d ", &bot, &top, &z->lifespan, &z->reset_mode) != 4) {
         /*
      * This may be due to the fact that the zone has no builder.  So, we just attempt
      * to fix this by copying the previous 2 last reads into this variable and the
@@ -2032,19 +2042,19 @@ static void load_zones(FILE *fl, char *zonename) {
      */
         basic_mud_log("SYSERR: Format error in numeric constant line of %s, attempting to fix.", zname);
         char* zname = nullptr;
-        if (sscanf(zname, " %d %d %d %d ", &bot, &top, &z.lifespan, &z.reset_mode) != 4) {
+        if (sscanf(zname, " %d %d %d %d ", &bot, &top, &z->lifespan, &z->reset_mode) != 4) {
             basic_mud_log("SYSERR: Could not fix previous error, aborting game.");
             exit(1);
         } else {
             //if(zname) z.name = zname;
-            z.builders = "None.";
+            z->builders = "None.";
             zone_fix = true;
         }
     }
 
     auto &zr = zone_ranges[v] = {bot, top};
 
-    for(auto i = 0; i < 128; i++) if(IS_SET_AR(zone_flags, i)) z.zone_flags.set(i);
+    for(auto i = 0; i < 128; i++) if(IS_SET_AR(zone_flags, i)) z->zone_flags.set(i);
 
     auto &res = oldResetCommands[v];
 
@@ -2100,8 +2110,9 @@ static void parse_trigger(FILE *trig_f, trig_vnum nr) {
     int t[2], k, attach_type;
     char line[256], *cmds, *s, flags[256], errors[MAX_INPUT_LENGTH];
     struct cmdlist_element *cle;
-    auto &idx = trig_index[nr];
-    auto *trig = &idx;
+
+    auto trig = std::make_shared<DgScriptPrototype>();
+    trig_index[nr] = trig;
 
     trig->vn = nr;
 
@@ -2274,33 +2285,6 @@ static void index_boot(int mode) {
     /*
    * NOTE: "bytes" does _not_ include strings or other later malloc'd things.
    */
-    switch (mode) {
-        case DB_BOOT_TRG:
-            break;
-        case DB_BOOT_WLD:
-            size[0] = sizeof(struct Room) * rec_count;
-            basic_mud_log("   %d rooms, %d bytes.", rec_count, size[0]);
-            break;
-        case DB_BOOT_MOB:
-            size[0] = sizeof(struct index_data) * rec_count;
-            size[1] = sizeof(struct Character) * rec_count;
-            basic_mud_log("   %d mobs, %d bytes in index, %d bytes in prototypes.", rec_count, size[0], size[1]);
-            break;
-        case DB_BOOT_OBJ:
-            size[0] = sizeof(struct index_data) * rec_count;
-            size[1] = sizeof(struct Object) * rec_count;
-            basic_mud_log("   %d objs, %d bytes in index, %d bytes in prototypes.", rec_count, size[0], size[1]);
-            break;
-        case DB_BOOT_ZON:
-            size[0] = sizeof(struct Zone) * rec_count;
-            basic_mud_log("   %d zones, %d bytes.", rec_count, size[0]);
-            break;
-        case DB_BOOT_HLP:
-            CREATE(help_table, struct help_index_element, rec_count);
-            size[0] = sizeof(struct help_index_element) * rec_count;
-            basic_mud_log("   %d entries, %d bytes.", rec_count, size[0]);
-            break;
-    }
 
     rewind(db_index);
     fscanf(db_index, "%s\n", buf1);
@@ -3458,35 +3442,35 @@ static void link_zones() {
         auto newid = getNextID(lastZoneID, zone_table);
         // I normally don't use the [] operator but in this case, I -want- it to get-or-create...
         auto &z = zone_table[newid];
-        z.number = newid;
-        z.name = zt.name;
+        z->number = newid;
+        z->name = zt.name;
         for(auto cvn : zt.children) {
             if(auto zf = zone_table.find(cvn); zf != zone_table.end()) {
-                zf->second.parent = newid;
-                z.children.insert(cvn);
+                zf->second->parent = newid;
+                z->children.insert(cvn);
             } else {
                 basic_mud_log("Warning: zone %d listed as child of %s but does not exist.", cvn, zt.name.c_str());
             }
         }
         if(auto oloc = Location(zt.orbit)) {
-            z.launchDestination = oloc.getLocID();
+            z->launchDestination = oloc.getLocID();
             if(auto r = dynamic_cast<Room*>(oloc.getLoc())) {
                 auto oldz = r->getZone();
                 oldz->rooms.remove(r->shared_from_this());
-                r->zone.reset(&z);
-                z.rooms.add(r->shared_from_this());
+                r->zone.reset(z.get());
+                z->rooms.add(r->shared_from_this());
             } else {
                 basic_mud_log("Warning: Orbit location %s for zone %s is not a room.", zt.orbit.c_str(), zt.name.c_str());
             }
         }
         for(const auto &zf : zt.flagsToAdd) {
-            z.zone_flags.set(zf);
+            z->zone_flags.set(zf);
         }
         for(const auto &[k, v] : zt.landSpots) {
-            z.landingSpots[k] = std::format("R:{}", v);
+            z->landingSpots[k] = std::format("R:{}", v);
         }
         for(const auto& [k, v] : zt.dockSpots) {
-            z.dockingSpots[k] = std::format("R:{}", v);
+            z->dockingSpots[k] = std::format("R:{}", v);
         }
     }
 }
@@ -3694,8 +3678,8 @@ static void migrate_space() {
     a->strings["name"] = "Space";
     // Assign zone.
     auto &z = zone_table.at(232);
-    a->zone.reset(&z);
-    z.environment[ENV_GRAVITY] = 0.0;
+    a->zone.reset(z.get());
+    z->environment[ENV_GRAVITY] = 0.0;
 
     auto dim = BoxDim::fromCenter({}, 200, 200);
     auto s = std::make_unique<Shape>();
@@ -3793,12 +3777,12 @@ static void migrate_space() {
     auto replaceScriptLine = [&](trig_vnum vn, std::vector<std::pair<int, std::string>> patches) {
         if(auto found = trig_index.find(vn); found != trig_index.end()) {
             for(auto& [line, newText] : patches) {
-                if(line < 0 || line >= found->second.lines.size()) {
+                if(line < 0 || line >= found->second->lines.size()) {
                     basic_mud_log("Warning: Attempted to replace line %d in trigger %d but it does not exist.", line, vn);
                     continue;
                 }
                 // Replace the line with the new text.
-                found->second.lines[line] = {ScriptLineType::COMMAND, newText};
+                found->second->lines[line] = {ScriptLineType::COMMAND, newText};
             }
         }
     };
@@ -4012,9 +3996,6 @@ void boot_db_world_legacy() {
     basic_mud_log("Loading objs and generating index.");
     index_boot(DB_BOOT_OBJ);
 
-    basic_mud_log("Loading disabled commands list...");
-    load_disabled();
-
     basic_mud_log("Loading shops.");
     index_boot(DB_BOOT_SHP);
 
@@ -4029,7 +4010,6 @@ static void index_boot_help();
 static void assemblyBootAssemblies();
 
 static void boot_db_legacy() {
-    boot_db_time();
     boot_db_textfiles();
     boot_db_spellfeats();
     boot_db_world_legacy();
@@ -4041,7 +4021,6 @@ static void boot_db_legacy() {
     assemblyBootAssemblies();
     boot_db_sort();
     boot_db_boards();
-    boot_db_banned();
     boot_db_spacemap();
     topLoad();
 }
@@ -4077,31 +4056,32 @@ void migrate_accounts() {
         auto id = getNextID(lastAccountID, accounts);
 
         // Now let's get a new account_data...
-        auto &a = accounts[id];
+        auto a = std::make_shared<Account>();
+        accounts[id] = a;
 
         // Moving forward, we assume that every account file is using the above structure and is valid.
         // Don't second-guess it, just process.
 
         // Line 1: Name (string)
-        std::getline(file, a.name);
+        std::getline(file, a->name);
 
         // Line 2: Email Address (string)
-        std::getline(file, a.email);
+        std::getline(file, a->email);
 
         // Line 3: password (clear text, will hash...)
         std::string pass;
         std::getline(file, pass);
-        a.password = pass;
+        a->password = pass;
         
         // Line 4: slots (int)
         std::string slots;
         std::getline(file, slots);
-        a.slots = std::stoi(slots);
+        a->slots = std::stoi(slots);
 
         // Line 5: current RPP (int)
         std::string rpp;
         std::getline(file, rpp);
-        a.rpp = std::stoi(rpp);
+        a->rpp = std::stoi(rpp);
 
         // Now for the Character lines, they either contain a name, or they contain "Empty".
         // "Empty" is not a character. It's a placeholder for an empty slot.
@@ -4119,7 +4099,7 @@ void migrate_accounts() {
         // Line 11: adminLevel (int)
         std::string adminLevel;
         std::getline(file, adminLevel);
-        a.admin_level = std::stoi(adminLevel);
+        a->admin_level = std::stoi(adminLevel);
 
         // Line 12: customFile present (bool)
         std::string customFile;
@@ -4135,7 +4115,7 @@ void migrate_accounts() {
             std::string line;
             std::getline(customFile, line); // skip the first line
             while(std::getline(customFile, line)) {
-                a.customs.emplace_back(line);
+                a->customs.emplace_back(line);
             }
             customFile.close();
         }
@@ -4145,7 +4125,7 @@ void migrate_accounts() {
         std::getline(file, rppBank);
         auto bank = std::stoi(rppBank);
         file.close();
-        a.id = id;
+        a->id = id;
     }
 }
 
@@ -4167,15 +4147,16 @@ void migrate_characters() {
         ch->isPC = true;
         convert_character(ch);
         auto id = getNextID(lastCharacterID, Character::registry);
-        auto &p = players[id];
-        p.id = id;
+        auto p = std::make_shared<PlayerData>();
+        players[id] = p;
+        p->id = id;
         ch->id = id;
-        p.character = ch;
-        p.name = ch->getName();
+        p->character = ch;
+        p->name = ch->getName();
         auto &a = accounts[accID];
-        p.account = &a;
-        a.admin_level = std::max(a.admin_level, GET_ADMLEVEL(ch));
-        a.characters.emplace_back(ch->id);
+        p->account = a.get();
+        a->admin_level = std::max(a->admin_level, GET_ADMLEVEL(ch));
+        a->characters.emplace_back(ch->id);
         auto lroom = ch->getBaseStat<room_vnum>("load_room");
         ch->setBaseStat<room_vnum>("was_in_room", lroom);
         Character::registry.emplace(id, sh);
@@ -4207,7 +4188,7 @@ void migrate_characters() {
         while(std::getline(file, line)) {
             try {
                 auto vnum = std::stoi(line);
-                if(mob_proto.contains(vnum)) pa.sense_memory.insert(vnum);
+                if(mob_proto.contains(vnum)) pa->sense_memory.insert(vnum);
             } catch(...) {
                 basic_mud_log("Error parsing %s for sense migration.", line.c_str());
             }
@@ -4249,7 +4230,7 @@ void migrate_characters() {
             if(name == "Gibbles") continue;
             auto pc = findPlayer(name);
             if(!pc) continue;
-            pa.dub_names[pc->id] = dub;
+            pa->dub_names[pc->id] = dub;
         }
     }
 
@@ -4325,7 +4306,7 @@ void migrate_characters() {
         // replacement string length  (size_t), replacement string, alias type (a bool)
 
         while(std::getline(file, line)) {
-            auto &a = pa->second.aliases.emplace_back();
+            auto &a = pa->second->aliases.emplace_back();
             std::getline(file, a.name);
             std::getline(file, line);
             std::getline(file, a.replacement);
@@ -4692,14 +4673,6 @@ static void migrate_obj_data(T* o) {
 
 }
 
-static int hsort(const void *a, const void *b) {
-    const struct help_index_element *a1, *b1;
-
-    a1 = (const struct help_index_element *) a;
-    b1 = (const struct help_index_element *) b;
-
-    return (strcasecmp(a1->keywords, b1->keywords));
-}
 
 static void index_boot_help() {
     const char *index_filename, *prefix = nullptr;    /* nullptr or egcs 1.1 complains */
@@ -4755,8 +4728,6 @@ static void index_boot_help() {
    */
     switch (mode) {
         case DB_BOOT_HLP:
-            CREATE(help_table, struct help_index_element, rec_count);
-            size[0] = sizeof(struct help_index_element) * rec_count;
             basic_mud_log("   %d entries, %d bytes.", rec_count, size[0]);
             break;
     }
@@ -4779,12 +4750,6 @@ static void index_boot_help() {
         fscanf(db_index, "%s\n", buf1);
     }
     fclose(db_index);
-
-    /* Sort the help index. */
-    if (mode == DB_BOOT_HLP) {
-        qsort(help_table, top_of_helpt, sizeof(struct help_index_element), hsort);
-        top_of_helpt--;
-    }
 }
 
 static void assemblyBootAssemblies() {
@@ -4853,7 +4818,7 @@ void migrate_data() {
 
     for(auto &[vn, o] : obj_proto) {
 
-        migrate_obj_data(&o);
+        migrate_obj_data(o.get());
 
     }
 

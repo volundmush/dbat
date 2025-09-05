@@ -1,5 +1,7 @@
 #include "dbat/Structure.h"
 
+std::unordered_map<int64_t, std::shared_ptr<Structure>> structures;
+
 std::string Structure::getLocID() const {
     return fmt::format("{}:{}", "S", id);
 }

@@ -7,10 +7,10 @@
  *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
  *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
  ************************************************************************ */
-#include "dbat/Character.h"
+#include "dbat/CharacterUtils.h"
 #include "dbat/Zone.h"
 #include "dbat/CharacterPrototype.h"
-#include "dbat/Object.h"
+#include "dbat/ObjectUtils.h"
 #include "dbat/Destination.h"
 #include "dbat/mobact.h"
 #include "dbat/utils.h"
@@ -28,6 +28,10 @@
 #include "dbat/spec_procs.h"
 #include "dbat/class.h"
 #include "dbat/filter.h"
+#include "dbat/Random.h"
+#include "dbat/utils.h"
+
+#include "dbat/const/Environment.h"
 
 #define MOB_AGGR_TO_ALIGN (MOB_AGGR_EVIL | MOB_AGGR_NEUTRAL | MOB_AGGR_GOOD)
 
@@ -72,11 +76,11 @@ void mobile_activity(uint64_t heartPulse, double deltaTime)
 
     for (auto &[zvn, z] : zone_table)
     {
-        if (z.playersInZone.empty())
+        if (z->playersInZone.empty())
             continue;
 
         // copy the set.
-        auto npclist = z.npcsInZone.snapshot_weak();
+        auto npclist = z->npcsInZone.snapshot_weak();
 
         for (auto ch : filter_raw(npclist))
         {
@@ -87,23 +91,11 @@ void mobile_activity(uint64_t heartPulse, double deltaTime)
             auto start = std::chrono::high_resolution_clock::now();
 
             /* Examine call for special procedure */
-            if (MOB_FLAGGED(ch, MOB_SPEC) && !no_specials)
+            if (auto func = GET_MOB_SPEC(ch); func && !no_specials)
             {
-                auto &func = mob_index.at(GET_MOB_RNUM(ch)).func;
-                if (func == nullptr)
-                {
-                    basic_mud_log("SYSERR: %s (#%d): Attempting to call non-existing mob function.",
-                                  GET_NAME(ch), GET_MOB_VNUM(ch));
-                    ch->mob_flags.set(MOB_SPEC, false);
-                    auto &mp = mob_proto.at(ch->getVnum());
-                    mp.mob_flags.set(MOB_SPEC, false);
-                }
-                else
-                {
-                    char actbuf[MAX_INPUT_LENGTH] = "";
+                char actbuf[MAX_INPUT_LENGTH] = "";
                     if (func(ch, ch, 0, actbuf))
                         continue; /* go to next char */
-                }
             }
             auto end = std::chrono::high_resolution_clock::now();
 

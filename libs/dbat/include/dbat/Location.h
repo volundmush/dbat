@@ -64,7 +64,7 @@ struct Location {
     std::optional<Destination> getExit(Direction dir) const;
     std::map<Direction, Destination> getExits() const;
 
-    const std::vector<ExtraDescription>& getExtraDescription() const; // Returns the extra description data.
+    ExtraDescriptionViews getExtraDescription() const; // Returns the extra description data.
 
     double getEnvironment(int type) const;
     double setEnvironment(int type, double value);
@@ -173,3 +173,5 @@ namespace std {
         std::size_t operator()(const Location& loc) const noexcept;
     };
 }
+
+extern Location find_target_location(Character *ch, char *rawroomstr);
