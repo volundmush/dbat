@@ -326,7 +326,7 @@ namespace game {
     void init_zones() {
         for (auto &[vn, z] : zone_table) {
             basic_mud_log("Resetting #%d: %s.", vn, z->name.c_str());
-            z.reset();
+            z->reset();
         }
     }
 }

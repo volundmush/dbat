@@ -184,7 +184,7 @@ void processCommand(Character *ch, int cmd, CommandData cd)
     char blah[MAX_INPUT_LENGTH];
     int skip_ld = 0;
 
-    std::string line_str = cd.getOriginal();
+    std::string line_str = std::string(cd.argument);
     auto line = (char*)line_str.c_str();
 
     auto cm = complete_cmd_info[cmd];
