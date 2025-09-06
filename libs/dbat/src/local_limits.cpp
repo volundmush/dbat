@@ -16,9 +16,9 @@
 #include "dbat/send.h"
 #include "dbat/spells.h"
 #include "dbat/comm.h"
-#include "dbat/dg_comm.h"
+//#include "dbat/dg_comm.h"
 #include "dbat/act.other.h"
-#include "dbat/act.item.h"
+//#include "dbat/act.item.h"
 #include "dbat/vehicles.h"
 #include "dbat/act.movement.h"
 #include "dbat/constants.h"
@@ -32,7 +32,7 @@
 
 #include "dbat/commands.h"
 
-#include "dbat/const/Skill.h"
+//#include "dbat/const/Skill.h"
 #include "dbat/const/Condition.h"
 #include "dbat/const/Environment.h"
 #include "dbat/const/CombatPreference.h"

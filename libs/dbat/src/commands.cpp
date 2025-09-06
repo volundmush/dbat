@@ -1,7 +1,7 @@
 #include "dbat/Character.h"
 #include "dbat/commands.h"
-#include "dbat/act.movement.h"
-#include "dbat/act.informative.h"
+//#include "dbat/act.movement.h"
+//#include "dbat/act.informative.h"
 #include "dbat/planet.h"
 
 #include "dbat/const/AdminLevel.h"

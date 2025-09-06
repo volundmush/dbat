@@ -21,8 +21,8 @@
 #include "dbat/utils.h"
 #include "dbat/db.h"
 #include "dbat/handler.h"
-#include "dbat/dg_event.h"
-#include "dbat/comm.h"
+//#include "dbat/dg_event.h"
+//#include "dbat/comm.h"
 #include "dbat/constants.h"
 
 extern bitvector_t asciiflag_conv(char *flag);

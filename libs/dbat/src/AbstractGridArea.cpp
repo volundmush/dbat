@@ -1,4 +1,3 @@
-#include "dbat/constants.h"
 #include "dbat/AbstractGridArea.h"
 #include "dbat/Destination.h"
 #include "dbat/Character.h"
@@ -241,12 +240,6 @@ FlagHandler<RoomFlag>& AbstractGridArea::getRoomFlags(const Coordinates& coor)
 {
     auto &t = ensure_tile(tileOverrides, coor);
     return t.roomFlags;
-}
-
-FlagHandler<WhereFlag>& AbstractGridArea::getWhereFlags(const Coordinates& coor)
-{
-    auto &t = ensure_tile(tileOverrides, coor);
-    return t.whereFlags;
 }
 
 SectorType AbstractGridArea::getSectorType(const Coordinates &coor) const

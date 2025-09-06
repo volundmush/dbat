@@ -5,10 +5,10 @@
 
 #include "dbat/utils.h"
 #include "dbat/interpreter.h"
-#include "dbat/spells.h"
-#include "dbat/comm.h"
+//#include "dbat/spells.h"
+//#include "dbat/comm.h"
 #include "dbat/class.h"
-#include "dbat/fight.h"
+//#include "dbat/fight.h"
 #include "dbat/weather.h"
 
 #include "dbat/const/AdminLevel.h"

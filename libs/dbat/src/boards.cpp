@@ -49,7 +49,7 @@ it.
 #include "dbat/CharacterUtils.h"
 #include "dbat/ObjectUtils.h"
 #include "dbat/ObjectPrototype.h"
-#include "dbat/RoomUtils.h"
+//#include "dbat/RoomUtils.h"
 #include "dbat/Destination.h"
 #include "dbat/Descriptor.h"
 
@@ -57,11 +57,11 @@ it.
 #include "dbat/send.h"
 #include "dbat/comm.h"
 #include "dbat/db.h"
-#include "dbat/boards.h"
+//#include "dbat/boards.h"
 #include "dbat/interpreter.h"
 #include "dbat/handler.h"
 #include "dbat/improved-edit.h"
-#include "dbat/dg_comm.h"
+//#include "dbat/dg_comm.h"
 #include "dbat/config.h"
 #include "dbat/utils.h"
 

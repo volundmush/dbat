@@ -4,15 +4,15 @@
 #include "dbat/Descriptor.h"
 #include "dbat/CharacterUtils.h"
 #include "dbat/utils.h"
-#include "dbat/db.h"
+//#include "dbat/db.h"
 #include "dbat/handler.h"
 #include "dbat/Shop.h"
 #include "dbat/constants.h"
-#include "dbat/planet.h"
-#include "dbat/constants.h"
+//#include "dbat/planet.h"
+//#include "dbat/constants.h"
 #include "dbat/filter.h"
 #include "dbat/dg_scripts.h"
-#include "dbat/send.h"
+//#include "dbat/send.h"
 #include "dbat/act.wizard.h"
 #include "dbat/Random.h"
 #include "dbat/const/Environment.h"
@@ -385,11 +385,6 @@ void Room::deleteExit(const Coordinates &coor, Direction dir)
 void Room::replaceExit(const Coordinates &coor, const Destination &dest)
 {
     replaceExit(dest);
-}
-
-FlagHandler<WhereFlag>& Room::getWhereFlags(const Coordinates &coor)
-{
-    return where_flags;
 }
 
 FlagHandler<RoomFlag>& Room::getRoomFlags(const Coordinates &coor)

@@ -8,10 +8,10 @@
 #include "dbat/Character.h"
 #include "dbat/Descriptor.h"
 #include "dbat/feats.h"
-#include "dbat/send.h"
-#include "dbat/comm.h"
+//#include "dbat/send.h"
+//#include "dbat/comm.h"
 #include "dbat/handler.h"
-#include "dbat/constants.h"
+//#include "dbat/constants.h"
 #include "dbat/interpreter.h"
 
 /* Local Functions */

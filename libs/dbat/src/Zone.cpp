@@ -194,11 +194,21 @@ Zone* HasZone::getZone() const {
     return zone.get();
 }
 
-bool Zone::getZoneFlag(ZoneFlag zf, bool checkAncestors) const {
+bool Zone::getFlag(ZoneFlag zf, bool checkAncestors) const {
     if (zone_flags.get(zf)) return true;
     if (checkAncestors) {
         if (auto p = getParent()) {
-            return p->getZoneFlag(zf, true);
+            return p->getFlag(zf, true);
+        }
+    }
+    return false;
+}
+
+bool Zone::getFlag(WhereFlag wf, bool checkAncestors) const {
+    if (where_flags.get(wf)) return true;
+    if (checkAncestors) {
+        if (auto p = getParent()) {
+            return p->getFlag(wf, true);
         }
     }
     return false;

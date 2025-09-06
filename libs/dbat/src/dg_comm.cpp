@@ -18,7 +18,7 @@
 #include "dbat/Zone.h"
 #include "dbat/dg_comm.h"
 #include "dbat/act.informative.h"
-#include "dbat/send.h"
+//#include "dbat/send.h"
 #include "dbat/races.h"
 #include "dbat/comm.h"
 #include "dbat/dg_scripts.h"

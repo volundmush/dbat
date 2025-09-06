@@ -80,11 +80,6 @@ struct AbstractLocation {
     bool toggleRoomFlag(const Coordinates& coor, int flag);
     bool getRoomFlag(const Coordinates& coor, int flag);
 
-    virtual FlagHandler<WhereFlag>& getWhereFlags(const Coordinates& coor) = 0;
-    virtual void setWhereFlag(const Coordinates& coor, WhereFlag flag, bool value = true);
-    virtual bool toggleWhereFlag(const Coordinates& coor, WhereFlag flag);
-    virtual bool getWhereFlag(const Coordinates& coor, WhereFlag flag);
-
     virtual SectorType getSectorType(const Coordinates& coor) const = 0;
 
     virtual std::optional<std::string> getTileDisplayOverride(const Coordinates& coor) const;

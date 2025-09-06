@@ -14,7 +14,7 @@
 #include "dbat/interpreter.h"
 #include "dbat/handler.h"
 #include "dbat/db.h"
-#include "dbat/comm.h"
+//#include "dbat/comm.h"
 #include "dbat/spells.h"
 #include "dbat/mail.h"
 #include "dbat/boards.h"

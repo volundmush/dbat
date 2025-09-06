@@ -1,9 +1,9 @@
 #include "dbat/Character.h"
 #include "dbat/Room.h"
 #include "dbat/planet.h"
-#include "dbat/db.h"
+//#include "dbat/db.h"
 #include "dbat/comm.h"
-#include "dbat/send.h"
+//#include "dbat/send.h"
 
 
 void displayLandSpots(Character *ch, std::string_view planet_name, const std::map<std::string, Location>& locations) {

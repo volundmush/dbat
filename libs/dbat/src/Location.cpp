@@ -10,7 +10,7 @@
 #include "dbat/filter.h"
 #include "dbat/utils.h"
 #include "dbat/constants.h"
-#include "dbat/fight.h"
+//#include "dbat/fight.h"
 #include "dbat/planet.h"
 #include "dbat/interpreter.h"
 #include "dbat/act.informative.h"
@@ -339,28 +339,12 @@ bool Location::getRoomFlag(RoomFlag flag) const
     return false;
 }
 
-void Location::setWhereFlag(WhereFlag flag, bool value)
-{
-    if (auto a = getLoc())
-    {
-        a->setWhereFlag(position, flag, value);
-    }
-}
-
-bool Location::toggleWhereFlag(WhereFlag flag)
-{
-    if (auto a = getLoc())
-    {
-        return a->toggleWhereFlag(position, flag);
-    }
-    return false;
-}
 
 bool Location::getWhereFlag(WhereFlag flag) const
 {
-    if (auto a = getLoc())
+    if (auto z = getZone())
     {
-        return a->getWhereFlag(position, flag);
+        return z->getFlag(flag);
     }
     return false;
 }
@@ -663,16 +647,6 @@ FlagHandler<RoomFlag>& Location::getRoomFlags()
         return a->getRoomFlags(position);
     }
     static FlagHandler<RoomFlag> standby;
-    return standby;
-}
-
-FlagHandler<WhereFlag>& Location::getWhereFlags()
-{
-    if (auto a = getLoc())
-    {
-        return a->getWhereFlags(position);
-    }
-    static FlagHandler<WhereFlag> standby;
     return standby;
 }
 

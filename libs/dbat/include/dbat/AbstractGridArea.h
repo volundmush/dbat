@@ -177,7 +177,6 @@ struct AbstractGridArea : public HasMudStrings, public AbstractLocation, public 
     std::optional<Destination> getDirection(const Coordinates& coor, Direction dir) override;
     std::map<Direction, Destination> getDirections(const Coordinates& coor) override;
     FlagHandler<RoomFlag>& getRoomFlags(const Coordinates& coor) override;
-    FlagHandler<WhereFlag>& getWhereFlags(const Coordinates& coor) override;
     SectorType getSectorType(const Coordinates& coor) const override;
     std::optional<std::string> getTileDisplayOverride(const Coordinates& coor) const override;
     void broadcastAt(const Coordinates& coor, const std::string& message) override;

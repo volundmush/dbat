@@ -22,7 +22,7 @@
 #include "dbat/constants.h"
 #include "dbat/dg_scripts.h"
 #include "dbat/feats.h"
-#include "dbat/mobact.h"
+//#include "dbat/mobact.h"
 #include "dbat/fight.h"
 #include "dbat/filter.h"
 #include "dbat/Random.h"

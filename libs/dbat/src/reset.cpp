@@ -12,7 +12,7 @@
 #include "dbat/RoomUtils.h"
 #include "dbat/utils.h"
 #include "dbat/db.h"
-#include "dbat/handler.h"
+//#include "dbat/handler.h"
 #include "dbat/reset.h"
 #include "dbat/spec_procs.h"
 

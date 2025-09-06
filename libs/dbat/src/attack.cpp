@@ -1,7 +1,7 @@
 #include "dbat/CharacterUtils.h"
 #include "dbat/ObjectUtils.h"
 #include "dbat/RoomUtils.h"
-#include "dbat/Destination.h"
+//#include "dbat/Destination.h"
 #include "dbat/Descriptor.h"
 #include "dbat/attack.h"
 #include "dbat/act.movement.h"

@@ -77,11 +77,8 @@ struct Location {
     bool toggleRoomFlag(RoomFlag flag);
     bool getRoomFlag(int flag) const;
     bool getRoomFlag(RoomFlag flag) const;
-    void setWhereFlag(WhereFlag flag, bool value = true);
-    bool toggleWhereFlag(WhereFlag flag);
     bool getWhereFlag(WhereFlag flag) const;
     FlagHandler<RoomFlag>& getRoomFlags();
-    FlagHandler<WhereFlag>& getWhereFlags();
 
     std::string getUID(bool active = false) const;
 

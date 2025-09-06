@@ -15,7 +15,7 @@
 #include "dbat/Descriptor.h"
 #include "dbat/act.social.h"
 #include "dbat/comm.h"
-#include "dbat/send.h"
+//#include "dbat/send.h"
 #include "dbat/commands.h"
 #include "dbat/interpreter.h"
 #include "dbat/handler.h"
@@ -24,7 +24,7 @@
 #include "dbat/Social.h"
 #include "dbat/Random.h"
 #include "dbat/const/AdminLevel.h"
-#include "dbat/const/Filename.h"
+//#include "dbat/const/Filename.h"
 
 
 /* local functions */

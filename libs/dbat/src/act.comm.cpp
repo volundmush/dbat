@@ -30,12 +30,10 @@
 #include "dbat/dg_scripts.h"
 
 #include "dbat/const/Max.h"
-#include "dbat/const/Skill.h"
 #include "dbat/const/AdminLevel.h"
 #include "dbat/const/Pulse.h"
 #include "dbat/const/ChatHistory.h"
 #include "dbat/const/WearSlot.h"
-#include "dbat/const/Pulse.h"
 
 /* local functions */
 static void perform_tell(Character *ch, Character *vict, char *arg);

@@ -126,7 +126,6 @@ struct Room : public AbstractLocation, public HasProtoScript, public HasVnum, pu
     std::map<Direction, Destination> getDirections(const Coordinates& coor) override;
 
     FlagHandler<RoomFlag>& getRoomFlags(const Coordinates& coor) override;
-    FlagHandler<WhereFlag>& getWhereFlags(const Coordinates& coor) override;
 
     SectorType getSectorType(const Coordinates& coor) const override;
     void broadcastAt(const Coordinates& coor, const std::string& message) override;

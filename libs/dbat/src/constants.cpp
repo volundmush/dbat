@@ -9,7 +9,7 @@
 ************************************************************************ */
 
 #include "dbat/constants.h"
-#include "dbat/races.h"
+//#include "dbat/races.h"
 #include "dbat/const/Direction.h"
 
 const char *circlemud_version = "CircleMUD, version 3.1";

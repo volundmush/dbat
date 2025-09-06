@@ -14,7 +14,7 @@
 #include "dbat/Descriptor.h"
 #include "dbat/Zone.h"
 #include "dbat/Destination.h"
-#include "dbat/screen.h"
+//#include "dbat/screen.h"
 #include "dbat/dg_scripts.h"
 #include "dbat/send.h"
 #include "dbat/comm.h"

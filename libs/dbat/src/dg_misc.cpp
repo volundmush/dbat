@@ -17,7 +17,7 @@
 #include "dbat/comm.h"
 #include "dbat/interpreter.h"
 #include "dbat/handler.h"
-#include "dbat/dg_event.h"
+//#include "dbat/dg_event.h"
 #include "dbat/db.h"
 #include "dbat/spells.h"
 #include "dbat/constants.h"

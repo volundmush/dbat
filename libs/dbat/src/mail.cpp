@@ -17,7 +17,7 @@ Written by Jeremy Elson (jelson@circlemud.org)
 #include "dbat/ObjectUtils.h"
 #include "dbat/Descriptor.h"
 #include "dbat/mail.h"
-#include "dbat/send.h"
+//#include "dbat/send.h"
 #include "dbat/comm.h"
 #include "dbat/db.h"
 #include "dbat/interpreter.h"

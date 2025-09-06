@@ -11,7 +11,7 @@
 #include "dbat/Account.h"
 #include "dbat/players.h"
 #include "dbat/utils.h"
-#include "dbat/db.h"
+//#include "dbat/db.h"
 #include "dbat/handler.h"
 #include "dbat/dg_scripts.h"
 #include "dbat/class.h"

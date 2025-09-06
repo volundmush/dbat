@@ -1,5 +1,5 @@
 #include "dbat/affect.h"
-#include "dbat/constants.h"
+//#include "dbat/constants.h"
 #include "dbat/spells.h"
 
 #include "dbat/const/Position.h"

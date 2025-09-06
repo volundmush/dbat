@@ -166,21 +166,6 @@ bool AbstractLocation::getRoomFlag(const Coordinates &coor, RoomFlag flag)
     return getRoomFlags(coor).get(flag);
 }
 
-void AbstractLocation::setWhereFlag(const Coordinates &coor, WhereFlag flag, bool value)
-{
-    getWhereFlags(coor).set(flag, value);
-}
-
-bool AbstractLocation::toggleWhereFlag(const Coordinates &coor, WhereFlag flag)
-{
-    return getWhereFlags(coor).toggle(flag);
-}
-
-bool AbstractLocation::getWhereFlag(const Coordinates &coor, WhereFlag flag)
-{
-    return getWhereFlags(coor).get(flag);
-}
-
 std::optional<std::string> AbstractLocation::getTileDisplayOverride(const Coordinates &coor) const
 {
     return std::nullopt;
