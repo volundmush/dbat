@@ -163,7 +163,7 @@ extern int GET_SPEEDI(Character *ch);
 #define GET_MOLT_LEVEL(ch) ch->getBaseStat<int>("molt_level")
 #define GET_SDCOOLDOWN(ch) ch->getBaseStat<int>("selfdestruct_cooldown")
 #define GET_INGESTLEARNED(ch) ch->getBaseStat<int>("ingest_learned")
-#define GET_POS(ch)        ch->getBaseStat<int>("position")
+#define GET_POS(ch)        ch->position
 #define GET_IDNUM(ch)        ch->id
 #define IS_CARRYING_W(ch)    ch->getBaseStat("weight_carried")
 #define IS_CARRYING_N(ch)    ch->getInventory().size()
@@ -232,8 +232,6 @@ inline SpecialFunc GET_MOB_SPEC(Character *ch) {
 #define GET_MOB_RNUM(mob)    mob->getVnum()
 #define GET_MOB_VNUM(mob)    mob->getVnum()
 
-
-#define GET_DEFAULT_POS(ch)    ch->mob_specials.default_pos
 #define MEMORY(ch)        ch->mob_specials.memory
 
 #define CAN_CARRY_W(ch) (ch->getEffectiveStat<int>("carry_capacity"))

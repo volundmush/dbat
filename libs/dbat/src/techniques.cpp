@@ -177,7 +177,8 @@ void tech_handle_crashdown(Character *ch, Character *vict)
         act("@w$N@w is knocked out of the air!@n", true, ch, nullptr, vict, TO_NOTVICT);
         vict->affect_flags.set(AFF_FLYING, false);
         vict->setBaseStat<int>("altitude", 0);
-        vict->setBaseStat("combo", POS_SITTING);
+        vict->position = POS_SITTING;
+        vict->setBaseStat("combo", 0);
     }
     else
     {

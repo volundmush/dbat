@@ -1139,8 +1139,6 @@ static int parse_simple_mob(FILE *mob_f, struct CharacterPrototype *ch, mob_vnum
     ch->setBaseStat("ki", t[4]);
     ch->setBaseStat("stamina", t[5]);
 
-    ch->mob_specials.damnodice = t[6];
-    ch->mob_specials.damsizedice = t[7];
     ch->setBaseStat("damage_mod", t[8]);
 
     if (!get_line(mob_f, line)) {
@@ -1180,7 +1178,6 @@ static int parse_simple_mob(FILE *mob_f, struct CharacterPrototype *ch, mob_vnum
         return 0;
     }
 
-    GET_DEFAULT_POS(ch) = t[1];
     ch->sex = static_cast<Sex>(t[2]);
 
     //set_height_and_weight_by_race(ch);
@@ -1223,11 +1220,6 @@ static void interpret_espec(const char *keyword, const char *value, struct Chara
   */
     if (value)
         num_arg = atoi(value);
-
-    CASE("BareHandAttack") {
-        RANGE(0, 99);
-        ch->mob_specials.attack_type = num_arg;
-    }
 
     CASE("Size") {
         RANGE(SIZE_UNDEFINED, NUM_SIZES - 1);
@@ -2521,7 +2513,6 @@ static int load_char(const char *name, struct Character *ch) {
 
         ch->setBaseStat("bless_level", PFDEF_HEIGHT);
         ch->setBaseStat("life_percent", PFDEF_WEIGHT);
-        ch->setBaseStat<int>("position", POS_STANDING);
 
         ch->setBaseStat<int>("olc_zone", PFDEF_OLC);
 

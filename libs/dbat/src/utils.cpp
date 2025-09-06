@@ -1975,10 +1975,10 @@ bool spar_friendly(Character *ch, Character *npc)
     }
 
     auto shared = ch->shared_from_this();
-    auto find = std::find_if(npc->mob_specials.memory.begin(), npc->mob_specials.memory.end(), [shared](const auto &mem)
+    auto find = std::find_if(npc->agg_memory.begin(), npc->agg_memory.end(), [shared](const auto &mem)
                              { return mem.lock() == shared; });
 
-    if (find != npc->mob_specials.memory.end())
+    if (find != npc->agg_memory.end())
         return false;
 
     for (auto f : {MOB_AGGRESSIVE, MOB_DUMMY})

@@ -8,7 +8,7 @@
 #include <magic_enum/magic_enum.hpp>
 #include <magic_enum/magic_enum_utility.hpp>
 
-extern std::unordered_map<int, std::vector<character_affect_type>> pos_affects;
+extern std::unordered_map<Position, std::vector<character_affect_type>> pos_affects;
 
 std::string affect_t::locName()
 {
@@ -219,7 +219,7 @@ bool affect_t::isPercent()
     }
 }
 
-std::unordered_map<int, std::vector<character_affect_type>> pos_affects = {
+std::unordered_map<Position, std::vector<character_affect_type>> pos_affects = {
     {POS_DEAD, {}},
     {POS_MORTALLYW, {}},
     {POS_INCAP, {{APPLY_CVIT_REGEN_MULT, -0.25, ~0}}},

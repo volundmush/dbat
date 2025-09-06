@@ -536,7 +536,7 @@ void mag_affects(int level, Character *ch, Character *victim,
         {
             victim->sendText("You feel very sleepy...  Zzzz......\r\n");
             act("$n goes to sleep.", true, victim, nullptr, nullptr, TO_ROOM);
-            victim->setBaseStat("combo", POS_SLEEPING);
+            victim->position = POS_SLEEPING;
         }
         break;
 
@@ -553,7 +553,7 @@ void mag_affects(int level, Character *ch, Character *victim,
         {
             victim->sendText("You feel very sleepy...  Zzzz......\r\n");
             act("$n goes to sleep.", true, victim, nullptr, nullptr, TO_ROOM);
-            victim->setBaseStat("combo", POS_SLEEPING);
+            victim->position = POS_SLEEPING;
         }
         break;
 

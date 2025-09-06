@@ -440,11 +440,6 @@ static void init_char_stats_misc()
             .addTag("misc");
     }
 
-    charStats.addStat("position")
-        .setInitFunc(8.0)
-        .setMinBaseValue(0.0)
-        .setMaxBaseValue(8.0);
-
     charStats.addStat("kaioken")
         .setInitFunc(0.0)
         .setMinBaseValue(0.0)

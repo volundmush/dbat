@@ -436,7 +436,7 @@ void mobile_activity(uint64_t heartPulse, double deltaTime)
 
             start = std::chrono::high_resolution_clock::now();
             /* Mob Memory */
-            if (IS_HUMANOID(ch) && !(ch->mob_specials.memory.empty()) && !MOB_FLAGGED(ch, MOB_DUMMY) && !IS_AFFECTED(ch, AFF_PARALYZE))
+            if (IS_HUMANOID(ch) && !(ch->agg_memory.empty()) && !MOB_FLAGGED(ch, MOB_DUMMY) && !IS_AFFECTED(ch, AFF_PARALYZE))
             {
                 auto people = ch->location.getPeople();
                 for (auto vict : filter_raw(people))
@@ -448,7 +448,7 @@ void mobile_activity(uint64_t heartPulse, double deltaTime)
                     if (GET_HIT(ch) <= GET_MAX_HIT(ch) / 100)
                         continue;
 
-                    for (auto ref : filter_raw(ch->mob_specials.memory))
+                    for (auto ref : filter_raw(ch->agg_memory))
                     {
                         if (ref != vict)
                             continue;

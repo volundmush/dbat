@@ -1502,7 +1502,7 @@ namespace atk
             else if ((GET_POS(victim) == POS_STANDING || GET_POS(victim) == POS_FIGHTING) &&
                      !AFF_FLAGGED(victim, AFF_KNOCKED))
             {
-                victim->setBaseStat<int>("position", POS_SITTING);
+                victim->position = POS_SITTING;
             }
             victim->location.modDamage(5);
             break;

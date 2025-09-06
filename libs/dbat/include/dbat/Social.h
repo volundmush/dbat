@@ -1,5 +1,5 @@
 #pragma once
-
+#include "const/Position.h"
 
 /* used in the socials */
 struct social_messg {
@@ -8,8 +8,8 @@ struct social_messg {
     char *sort_as;              /* holds a copy of a similar command or
                                * abbreviation to sort by for the parser */
     int hide;                   /* ? */
-    int min_victim_position;    /* Position of victim */
-    int min_char_position;      /* Position of char */
+    Position min_victim_position;    /* Position of victim */
+    Position min_char_position;      /* Position of char */
     int min_level_char;          /* Minimum level of socialing char */
 
     /* No argument was supplied */

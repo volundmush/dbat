@@ -23,6 +23,7 @@
 #include "const/AffectFlag.h"
 #include "const/Mutation.h"
 #include "const/Size.h"
+#include "const/Position.h"
 #include "Flags.h"
 
 struct CharacterPrototype;
@@ -50,16 +51,6 @@ struct alias_data {
     std::string name;
     std::string replacement;
     int type{};
-};
-
-/* Specials used by NPCs, not PCs */
-struct mob_special_data {
-    std::list<std::weak_ptr<Character>> memory{};        /* List of attackers to remember	       */
-    int attack_type{};        /* The Attack Type Bitvector for NPC's     */
-    int default_pos{POS_STANDING};        /* Default position for NPC                */
-    int damnodice{};          /* The number of damage dice's	       */
-    int damsizedice{};        /* The size of the damage dice's           */
-    bool newitem{};             /* Check if mob has new inv item       */
 };
 
 /* Queued spell entry */
@@ -177,8 +168,8 @@ struct CharacterBase : public HasVnum, public HasMudStrings, public HasExtraDesc
     std::optional<SubRace> subrace{};
     Sensei sensei{Sensei::commoner};
     Sex sex{Sex::male};
-    struct mob_special_data mob_specials{};
     Size size{Size::medium};
+    Position position{Position::Standing};
     FlagHandler<CharacterFlag> character_flags{};
     FlagHandler<MobFlag> mob_flags{};
     FlagHandler<Race> bio_genomes{};

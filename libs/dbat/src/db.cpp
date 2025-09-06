@@ -923,7 +923,6 @@ Character *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
     mob->time.created = mob->time.logon = time(nullptr); /* why not */
     mob->time.played = 0.0;
     mob->time.logon = time(nullptr);
-    mob->setBaseStat("position", mob->mob_specials.default_pos);
     for(const auto& i : {0, 1, 2, 3}) mob->limb_condition[i] = 100;
 
     assign_triggers(mob, MOB_TRIGGER);
@@ -1140,8 +1139,7 @@ void reset_char(Character *ch) {
     ch->followers.clear();
     ch->master = nullptr;
     FIGHTING(ch) = nullptr;
-    ch->setBaseStat("position", POS_STANDING);
-    ch->mob_specials.default_pos = POS_STANDING;
+    ch->position = Position::Standing;
     ch->time.logon = time(nullptr);
 
 }

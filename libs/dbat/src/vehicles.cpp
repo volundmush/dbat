@@ -404,7 +404,7 @@ static void handle_pilot_ready(Character *ch)
 
     ch->player_flags.set(PLR_PILOTING, true);
     act("@w$n sits down and begins piloting the ship.", true, ch, nullptr, nullptr, TO_ROOM);
-    ch->setBaseStat<int>("position", POS_SITTING);
+    ch->position = POS_SITTING;
     ch->sendText("@wYou take a seat in the pilot's chair.\r\n");
 }
 
@@ -414,7 +414,7 @@ static void handle_pilot_unready(Character *ch)
     {
         act("@w$n stands up and stops piloting the ship.", true, ch, nullptr, nullptr, TO_ROOM);
         ch->sendText("@wYou stand up from the pilot's seat.\r\n");
-        ch->setBaseStat<int>("position", POS_STANDING);
+        ch->position = POS_STANDING;
         ch->player_flags.set(PLR_PILOTING, false);
     }
     else

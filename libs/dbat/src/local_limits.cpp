@@ -187,7 +187,7 @@ static void update_flags(Character *ch)
         {
             ch->sendText("You FINALLY wake up.\r\n");
             act("$n wakes up.", true, ch, nullptr, nullptr, TO_ROOM);
-            ch->setBaseStat<int>("position", POS_SITTING);
+            ch->position = POS_SITTING;
         }
     }
 

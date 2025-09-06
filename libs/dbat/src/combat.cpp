@@ -897,7 +897,7 @@ void handle_knockdown(Character *ch)
     {
         act("@mYou are knocked off your feet!@n", true, ch, nullptr, nullptr, TO_CHAR);
         act("@W$n@m is knocked off $s feet!@n", true, ch, nullptr, nullptr, TO_ROOM);
-        ch->setBaseStat<int>("position", POS_SITTING);
+        ch->position = POS_SITTING;
     }
 }
 
@@ -5737,7 +5737,7 @@ void hurt(int limb, int chance, Character *ch, Character *vict, Object *obj, int
 
         if (IS_HUMANOID(vict) && !IS_NPC(ch) && IS_NPC(vict) && (!ch->isSparring() || !vict->isSparring()))
         {
-            vict->mob_specials.memory.push_back(ch->shared_from_this());
+            vict->agg_memory.push_back(ch->shared_from_this());
         }
         if (IS_NPC(vict) && GET_HIT(vict) > ((vict->getEffectiveStat<int64_t>("health"))) / 4)
         {
@@ -5756,7 +5756,7 @@ void hurt(int limb, int chance, Character *ch, Character *vict, Object *obj, int
             if (IS_NPC(vict) && Random::get<int>(1, 20) >= 12)
             {
                 act("@W$n@W stands up.@n", false, vict, nullptr, nullptr, TO_ROOM);
-                vict->setBaseStat<int>("position", POS_STANDING);
+                vict->position = POS_STANDING;
             }
         }
         if (IS_NPC(vict))
@@ -5876,7 +5876,7 @@ void hurt(int limb, int chance, Character *ch, Character *vict, Object *obj, int
                 {
                     stop_fighting(ch);
                 }
-                vict->setBaseStat<int>("position", POS_SLEEPING);
+                vict->position = POS_SLEEPING;
                 if (!IS_NPC(ch))
                 {
                     vict->affect_flags.set(AFF_KNOCKED, true);
@@ -5920,7 +5920,7 @@ void hurt(int limb, int chance, Character *ch, Character *vict, Object *obj, int
             {
                 stop_fighting(ch);
             }
-            vict->setBaseStat<int>("position", POS_SLEEPING);
+            vict->position = POS_SLEEPING;
             if (!IS_NPC(ch))
             {
                 vict->affect_flags.set(AFF_KNOCKED, true);
@@ -5979,7 +5979,7 @@ void hurt(int limb, int chance, Character *ch, Character *vict, Object *obj, int
                 {
                     stop_fighting(ch);
                 }
-                vict->setBaseStat<int>("position", POS_SITTING);
+                vict->position = POS_SITTING;
                 vict->leaveLocation();
                 vict->moveToLocation(sensei::getStartRoom(vict->sensei));
             }

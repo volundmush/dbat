@@ -9,7 +9,7 @@
 struct command_info *complete_cmd_info;
 
 const struct command_info cmd_info[] = {
-    {"RESERVED", "", 0, nullptr, 0, ADMLVL_NONE, 0, 0}, /* this must be first -- for specprocs */
+    {"RESERVED", "", POS_DEAD, nullptr, 0, ADMLVL_NONE, 0, 0}, /* this must be first -- for specprocs */
 
     /* directions must come before other commands but after RESERVED */
     {"north", "n", POS_RESTING, do_move, 0, ADMLVL_NONE, SCMD_NORTH, 1},
@@ -552,7 +552,7 @@ const struct command_info cmd_info[] = {
     {".location", ".lo", POS_DEAD, do_mush_location, -1, ADMLVL_BUILDER, 0, 0},
     {".choices", ".ch", POS_DEAD, do_mush_choices, -1, ADMLVL_BUILDER, 0, 0},
     {".reset", ".res", POS_DEAD, do_mush_reset, -1, ADMLVL_BUILDER, 0, 0},
-    {"\n", "zzzzzzz", 0, nullptr, 0, ADMLVL_NONE, 0, 0}}; /* this must be last */
+    {"\n", "zzzzzzz", POS_DEAD, nullptr, 0, ADMLVL_NONE, 0, 0}}; /* this must be last */
 
 int matchCommand(Character *ch, std::string_view cmd)
 {

@@ -204,7 +204,6 @@ void from_json(const json& j, FlagHandler<Enum>& m)
     }
 }
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(mob_special_data, attack_type, default_pos, damnodice, damsizedice)
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(time_data, birth, created, maxage, logon, played, seconds_aged)
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(time_info_data, remainder, seconds, minutes, hours, day, month, year)
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(weather_data, pressure, change, sky, sunlight)
@@ -1589,7 +1588,6 @@ void to_json(json &j, const CharacterBase &c) {
     j["race"] = c.race;
     if(c.subrace) j["subrace"] = c.subrace;
     j["sex"] = c.sex;
-    j["mob_specials"] = c.mob_specials;
     j["size"] = c.size;
     if(c.character_flags) j["character_flags"] = c.character_flags;
     if(c.mob_flags) j["mob_flags"] = c.mob_flags;
@@ -1606,7 +1604,6 @@ void from_json(const json &j, CharacterBase &c) {
     if (j.contains("race")) c.race = j["race"];
     if (j.contains("subrace")) c.subrace = j["subrace"];
     if (j.contains("sex")) c.sex = j["sex"];
-    if (j.contains("mob_specials")) j.at("mob_specials").get_to(c.mob_specials);
     if (j.contains("size")) c.size = j["size"];
     if (j.contains("character_flags")) j.at("character_flags").get_to(c.character_flags);
     if (j.contains("mob_flags")) j.at("mob_flags").get_to(c.mob_flags);

@@ -2612,7 +2612,7 @@ void list_one_char(Character *i, Character *ch)
         ch->send_to("@D[@G%d@D]@w %s", GET_MOB_VNUM(i), sString.c_str());
     }
 
-    if (IS_NPC(i) && i->getRoomDescription() && GET_POS(i) == GET_DEFAULT_POS(i) && !FIGHTING(i))
+    if (IS_NPC(i) && i->getRoomDescription() && !FIGHTING(i))
     {
         ch->send_to("%s", i->getRoomDescription());
 

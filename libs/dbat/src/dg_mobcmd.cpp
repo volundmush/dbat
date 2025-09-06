@@ -1176,7 +1176,6 @@ ACMD(do_mtransform)
     ch->room_description = m->room_description;
     
     ch->appearances = m->appearances;
-    ch->mob_specials = m->mob_specials;
     ch->stats = m->stats;
     ch->mob_flags = m->mob_flags;
     ch->bodyparts = m->bodyparts;

@@ -62,6 +62,9 @@ struct Character : public CharacterBase, public HasID, public HasLocation, publi
 
     std::string title;
 
+    // only used by NPCs.
+    std::list<std::weak_ptr<Character>> agg_memory{};
+
     const char* getDgName() const override;
     std::vector<trig_vnum> getProtoScript() const override;
     void activate();

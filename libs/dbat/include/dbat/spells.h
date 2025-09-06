@@ -10,6 +10,7 @@
 #pragma once
 #include <cstdint>
 #include "const/Max.h"
+#include "const/Position.h"
 
 struct Character;
 struct Object;
@@ -413,7 +414,7 @@ constexpr int SKLEARN_CLASS = 2; /* Class skill for this class */
 constexpr int SKLEARN_BOOL = 3; /* Skill is known or not */
 
 struct spell_info_type {
-    int8_t min_position;    /* Position for caster	 */
+    Position min_position{POS_DEAD};    /* Position for caster	 */
     int mana_min;        /* Min amount of mana used by a spell (highest lev) */
     int mana_max;    /* Max amount of mana used by a spell (lowest lev) */
     int mana_change;     /* Change in mana used by spell from lev to lev */

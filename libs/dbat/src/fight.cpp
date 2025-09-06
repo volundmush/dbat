@@ -1133,7 +1133,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime)
 
         if (GET_POS(ch) == POS_FIGHTING)
         {
-            ch->setBaseStat<int>("position", POS_STANDING);
+            ch->position = POS_STANDING;
         }
         if (PLR_FLAGGED(ch, PLR_SPIRAL))
         {
@@ -1220,7 +1220,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime)
                 act("@C$n@W chokes YOU@W, and you pass out!@n", true, ch, nullptr, GRAPPLING(ch), TO_VICT);
                 act("@C$n@W chokes @c$N@W, and $E passes out!@n", true, ch, nullptr, GRAPPLING(ch), TO_NOTVICT);
                 ch->affect_flags.set(AFF_KNOCKED, true);
-                GRAPPLING(ch)->setBaseStat<int>("position", POS_SLEEPING);
+                GRAPPLING(ch)->position = POS_SLEEPING;
                 GRAPPLING(ch)->setBaseStat<int>("grapple_type", -1);
                 GRAPPLED(GRAPPLING(ch)) = nullptr;
                 GRAPPLING(ch) = nullptr;
@@ -1286,7 +1286,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime)
             if (IS_NPC(ch) && Random::get<int>(1, 20) >= 12)
             {
                 act("@W$n@W stands up.@n", false, ch, nullptr, nullptr, TO_ROOM);
-                ch->setBaseStat<int>("position", POS_STANDING);
+                ch->position = POS_STANDING;
             }
         }
 
@@ -1681,15 +1681,15 @@ void update_pos(Character *victim)
     else if (GET_POS(victim) == POS_SITTING && FIGHTING(victim))
         return;
     else if (GET_HIT(victim) > 0)
-        victim->setBaseStat<int>("position", POS_STANDING);
+        victim->position = POS_STANDING;
     else if (GET_HIT(victim) <= -11)
-        victim->setBaseStat<int>("position", POS_DEAD);
+        victim->position = POS_DEAD;
     else if (GET_HIT(victim) <= -6)
-        victim->setBaseStat<int>("position", POS_MORTALLYW);
+        victim->position = POS_MORTALLYW;
     else if (GET_HIT(victim) <= -3)
-        victim->setBaseStat<int>("position", POS_INCAP);
+        victim->position = POS_INCAP;
     else
-        victim->setBaseStat<int>("position", POS_STUNNED);
+        victim->position = POS_STUNNED;
 }
 
 static void check_killer(Character *ch, Character *vict)
@@ -1716,11 +1716,11 @@ void set_fighting(Character *ch, Character *vict)
 
     if (GET_POS(ch) == POS_SITTING)
     {
-        ch->setBaseStat<int>("position", POS_SITTING);
+        ch->position = POS_SITTING;
     }
     else if (GET_POS(ch) == POS_SLEEPING)
     {
-        ch->setBaseStat<int>("position", POS_SLEEPING);
+        ch->position = POS_SLEEPING;
     }
 
     for (auto c : {ch, vict})
@@ -2232,7 +2232,7 @@ void raw_kill(Character *ch, Character *killer)
 
     /* To make ordinary commands work in scripts.  welcor*/
     if (GET_POS(ch) != POS_SITTING && GET_POS(ch) != POS_SLEEPING && GET_POS(ch) != POS_RESTING)
-        ch->setBaseStat<int>("position", POS_STANDING);
+        ch->position = POS_STANDING;
 
     if (killer && !IS_NPC(killer))
     {
@@ -2563,7 +2563,7 @@ void die(Character *ch, Character *killer)
             {
                 stop_fighting(ch);
             }
-            ch->setBaseStat<int>("position", POS_SITTING);
+            ch->position = POS_SITTING;
             ch->teleport_to(sensei::getStartRoom(ch->sensei));
             return;
         }

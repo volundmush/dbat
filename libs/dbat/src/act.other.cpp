@@ -2533,7 +2533,7 @@ ACMD(do_future)
     }
 
     assign_affect(vict, AFF_FUTURE, 0, -1, 0, 0, 2, 0, 0, 5);
-    vict->setBaseStat("combo", POS_SLEEPING);
+    vict->position = POS_SLEEPING;
 }
 
 ACMD(do_drag)
@@ -7220,7 +7220,7 @@ ACMD(do_focus)
                     true, ch, nullptr, vict, TO_VICT);
                 act("$n focuses ki while moving $s hands in a lulling pattern, putting $N to sleep!", true, ch, nullptr,
                     vict, TO_NOTVICT);
-                vict->setBaseStat("combo", POS_SLEEPING);
+                vict->position = POS_SLEEPING;
                 vict->affect_flags.set(AFF_FLYING, false);
                 vict->setBaseStat<int>("altitude", 0);
                 return;
@@ -11082,7 +11082,7 @@ ACMD(do_steal)
                 else
                 { /* Failure! */
                     reveal_hiding(ch, 0);
-                    vict->setBaseStat("combo", POS_SITTING);
+                    vict->position = POS_SITTING;
                     act("@rYou are caught trying to steal $p@r from @R$N@r!@n", true, ch, obj, vict, TO_CHAR);
                     act("@rYou feel your body being shifted while you sleep and wake up to find @R$n@r trying to steal $p@r from you!@n",
                         true, ch, obj, vict, TO_VICT);
@@ -11091,7 +11091,7 @@ ACMD(do_steal)
                     WAIT_STATE(ch, PULSE_3SEC);
                     if (IS_NPC(vict))
                     {
-                        vict->setBaseStat("combo", POS_STANDING);
+                        vict->position = POS_STANDING;
                         set_fighting(vict, ch);
                     }
                     improve_skill(ch, SKILL_SLEIGHT_OF_HAND, 2);
@@ -11166,7 +11166,7 @@ ACMD(do_steal)
                     WAIT_STATE(ch, PULSE_3SEC);
                     if (IS_NPC(vict))
                     {
-                        vict->setBaseStat("combo", POS_STANDING);
+                        vict->position = POS_STANDING;
                         set_fighting(vict, ch);
                     }
                     improve_skill(ch, SKILL_SLEIGHT_OF_HAND, 2);

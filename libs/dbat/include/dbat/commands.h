@@ -1,6 +1,8 @@
 #pragma once
 #include "Command.h"
 
+#include "const/Position.h"
+
 struct Object;
 struct Character;
 
@@ -252,7 +254,7 @@ struct command_info
 {
     const char *command;
     const char *sort_as;
-    int8_t minimum_position;
+    Position minimum_position;
     CommandFunc command_pointer;
     int16_t minimum_level;
     int16_t minimum_admlevel;

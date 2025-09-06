@@ -443,7 +443,7 @@ void set_skill_type(int snum, int sktype)
 }
 
 /* Assign the spells on boot up */
-void spello(int spl, const char *name, int max_mana, int min_mana, int mana_change, int minpos, int targets, int violent,
+void spello(int spl, const char *name, int max_mana, int min_mana, int mana_change, Position minpos, int targets, int violent,
             int routines, int save_flags, int comp_flags, const char *wearoff, int cmspell_level, int school, int domain)
 {
     int i;
@@ -473,7 +473,7 @@ void spello(int spl, const char *name, int max_mana, int min_mana, int mana_chan
     spell_info[spl].domain = domain;
 }
 
-void arto(int spl, const char *name, int max_ki, int min_ki, int ki_change, int minpos, int targets, int violent,
+void arto(int spl, const char *name, int max_ki, int min_ki, int ki_change, Position minpos, int targets, int violent,
           int routines, int save_flags, int comp_flags, const char *wearoff)
 {
     spello(spl, name, 0, 0, 0, minpos, targets, violent, routines, save_flags, comp_flags, wearoff, 0, 0, 0);
@@ -494,29 +494,29 @@ void unused_spell(int spl)
     }
     for (i = 0; i < NUM_RACES; i++)
         spell_info[spl].race_can_learn[i] = SKLEARN_CROSSCLASS;
-    spell_info[spl].mana_max = 0;
-    spell_info[spl].mana_min = 0;
-    spell_info[spl].mana_change = 0;
-    spell_info[spl].ki_max = 0;
-    spell_info[spl].ki_min = 0;
-    spell_info[spl].ki_change = 0;
-    spell_info[spl].min_position = 0;
-    spell_info[spl].targets = 0;
-    spell_info[spl].violent = 0;
-    spell_info[spl].routines = 0;
-    spell_info[spl].name = unused_spellname;
-    spell_info[spl].skilltype = SKTYPE_NONE;
-    spell_info[spl].flags = 0;
-    spell_info[spl].save_flags = 0;
-    spell_info[spl].comp_flags = 0;
-    spell_info[spl].spell_level = 0;
-    spell_info[spl].school = 0;
-    spell_info[spl].domain = 0;
+       spell_info[spl].mana_max = 0;
+       spell_info[spl].mana_min = 0;
+       spell_info[spl].mana_change = 0;
+       spell_info[spl].ki_max = 0;
+       spell_info[spl].ki_min = 0;
+       spell_info[spl].ki_change = 0;
+       spell_info[spl].min_position = POS_DEAD;
+       spell_info[spl].targets = 0;
+       spell_info[spl].violent = 0;
+       spell_info[spl].routines = 0;
+       spell_info[spl].name = unused_spellname;
+       spell_info[spl].skilltype = SKTYPE_NONE;
+       spell_info[spl].flags = 0;
+       spell_info[spl].save_flags = 0;
+       spell_info[spl].comp_flags = 0;
+       spell_info[spl].spell_level = 0;
+       spell_info[spl].school = 0;
+       spell_info[spl].domain = 0;
 }
 
 void skillo(int skill, const char *name, int flags)
 {
-    spello(skill, name, 0, 0, 0, 0, 0, 0, 0, 0, 0, nullptr, 0, 0, 0);
+    spello(skill, name, 0, 0, 0, POS_DEAD, 0, 0, 0, 0, 0, nullptr, 0, 0, 0);
     spell_info[skill].skilltype = SKTYPE_SKILL;
     spell_info[skill].flags = flags;
 }

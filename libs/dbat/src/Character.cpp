@@ -669,7 +669,7 @@ void Character::setStatusKnockedOut()
     affect_flags.set(AFF_KNOCKED, true);
     affect_flags.set(AFF_FLYING, false);
     setBaseStat("altitude", 0);
-    this->setBaseStat<int>("position", POS_SLEEPING);
+    this->position = POS_SLEEPING;
 }
 
 void Character::cureStatusKnockedOut(bool announce)
@@ -695,7 +695,7 @@ void Character::cureStatusKnockedOut(bool announce)
         }
 
         affect_flags.set(AFF_KNOCKED, false);
-        this->setBaseStat<int>("position", POS_SITTING);
+        this->position = POS_SITTING;
     }
 }
 
@@ -1084,7 +1084,7 @@ double Character::getAffectModifier(uint64_t location, uint64_t specific)
     total += trans::getModifier(this, location, specific);
 
     // Position modifier.
-    if (auto find = pos_affects.find(getBaseStat<int>("position")); find != pos_affects.end())
+    if (auto find = pos_affects.find(position); find != pos_affects.end())
     {
         for (auto &eff : find->second)
         {

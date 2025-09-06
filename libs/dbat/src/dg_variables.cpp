@@ -952,7 +952,7 @@ void find_replacement(HasDgScripts *go, HasDgScripts *sc, DgScript *trig, UnitTy
                 {
                     if (subfield && *subfield)
                     {
-                        for (i = POS_SLEEPING; i <= POS_STANDING; i++)
+                        for (i = static_cast<int>(POS_SLEEPING); i <= static_cast<int>(POS_STANDING); i++)
                         {
                             /* allows : Sleeping, Resting, Sitting, Fighting, Standing */
                             if (!strncasecmp(subfield, position_types[i], strlen(subfield)))
@@ -962,7 +962,7 @@ void find_replacement(HasDgScripts *go, HasDgScripts *sc, DgScript *trig, UnitTy
                             }
                         }
                     }
-                    snprintf(str, slen, "%s", position_types[GET_POS(c)]);
+                    snprintf(str, slen, "%s", position_types[static_cast<int>(GET_POS(c))]);
                 }
                 else if (boost::iequals(field, "prac"))
                 {

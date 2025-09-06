@@ -103,7 +103,7 @@ void command_interpreter(Character *ch, char *argument)
     case POS_INCAP:
     case POS_MORTALLYW:
     case POS_STUNNED:
-        ch->setBaseStat<int>("position", POS_SITTING);
+        ch->position = POS_SITTING;
         break;
     }
 

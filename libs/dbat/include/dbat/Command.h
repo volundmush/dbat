@@ -14,7 +14,7 @@ class CommandData {
     
     std::string getOriginal() const { return _original; }
     std::string_view cmd;
-    std::string_view switch_type;
+    std::vector<std::string_view> switches;
     std::string_view switch_mod;
     std::string_view argument;
     std::vector<std::string_view> arguments;

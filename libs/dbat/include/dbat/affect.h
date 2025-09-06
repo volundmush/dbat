@@ -6,6 +6,7 @@
 #include <unordered_map>
 
 #include "Typedefs.h"
+#include "const/Position.h"
 
 struct Character;
 
@@ -82,4 +83,4 @@ struct affected_type : affect_t {
     struct affected_type *next{};
 };
 
-extern std::unordered_map<int, std::vector<character_affect_type>> pos_affects;
+extern std::unordered_map<Position, std::vector<character_affect_type>> pos_affects;

@@ -2,7 +2,7 @@
 #include <boost/algorithm/string.hpp>
 #include "dbat/Command.h"
 
-static std::regex cmd_regex(R"(^([A-Za-z0-9-.]+)(?:\/([A-Za-z0-9-.]+)(?:\:([A-Za-z0-9-.]+))?)?(?:\s+(.*)?)?)", std::regex::icase);
+static std::regex cmd_regex(R"(^([A-Za-z0-9-.]+)(?:\/(([A-Za-z0-9-.]+)(?:\/([A-Za-z0-9-.]+)){0,}))?(?:\:([A-Za-z0-9-.]+))?(?:\s+(.*)?)?)", std::regex::icase);
 
 CommandData::CommandData(std::string_view txt_in) : _original(txt_in) {
     // Take ownership of a copy of the input, then we'll make everything else
@@ -14,9 +14,10 @@ CommandData::CommandData(std::string_view txt_in) : _original(txt_in) {
             return cm[i].matched ? std::string_view(cm[i].first, cm[i].length()) : std::string_view{};
         };
         cmd         = to_sv(m, 1);
-        switch_type = to_sv(m, 2);
-        switch_mod  = to_sv(m, 3);
-        argument    = to_sv(m, 4);
+        std::string_view switch_part = to_sv(m, 2);
+        boost::split(switches, switch_part, boost::is_any_of("/"), boost::token_compress_on);
+        switch_mod  = to_sv(m, 5);
+        argument    = to_sv(m, 6);
         argument = boost::trim_copy(argument);
         boost::split(arguments, argument, boost::is_space(), boost::token_compress_on);
         equals_present = boost::icontains(argument, "=");

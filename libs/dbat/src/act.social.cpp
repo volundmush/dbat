@@ -257,8 +257,8 @@ void boot_social_messages()
             soc_mess_list[curr_soc].command = strdup(next_soc + 1);
             soc_mess_list[curr_soc].sort_as = strdup(sorted);
             soc_mess_list[curr_soc].hide = hide;
-            soc_mess_list[curr_soc].min_char_position = min_char_pos;
-            soc_mess_list[curr_soc].min_victim_position = min_pos;
+            soc_mess_list[curr_soc].min_char_position = static_cast<Position>(min_char_pos);
+            soc_mess_list[curr_soc].min_victim_position = static_cast<Position>(min_pos);
             soc_mess_list[curr_soc].min_level_char = min_lvl;
         }
         else
@@ -273,7 +273,7 @@ void boot_social_messages()
             soc_mess_list[curr_soc].sort_as = strdup(next_soc);
             soc_mess_list[curr_soc].hide = hide;
             soc_mess_list[curr_soc].min_char_position = POS_RESTING;
-            soc_mess_list[curr_soc].min_victim_position = min_pos;
+            soc_mess_list[curr_soc].min_victim_position = static_cast<Position>(min_pos);
             soc_mess_list[curr_soc].min_level_char = 0;
         }
 
@@ -375,7 +375,7 @@ void create_command_list()
 
     complete_cmd_info[k].command = "\n";
     complete_cmd_info[k].sort_as = "zzzzzzz";
-    complete_cmd_info[k].minimum_position = 0;
+    complete_cmd_info[k].minimum_position = POS_DEAD;
     complete_cmd_info[k].command_pointer = nullptr;
     complete_cmd_info[k].minimum_level = 0;
     complete_cmd_info[k].minimum_admlevel = 0;
