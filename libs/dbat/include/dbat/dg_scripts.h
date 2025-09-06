@@ -325,7 +325,7 @@ extern void process_eval(HasDgScripts *go, HasDgScripts *sc, DgScript *trig,
 std::shared_ptr<DgScript> read_trigger(int nr);
 
 extern void dg_read_trigger(FILE *fp, struct HasDgScripts *proto, UnitType type);
-extern void dg_read_trigger(FILE *fp, struct ThingPrototype *proto, UnitType type);
+extern void dg_read_trigger(FILE *fp, struct HasProtoScript *proto, UnitType type);
 
 extern void dg_obj_trigger(char *line, ObjectPrototype *obj);
 

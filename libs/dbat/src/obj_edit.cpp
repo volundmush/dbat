@@ -235,15 +235,15 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg)
 
                 *buf = '\0';
                 sprintf(buf, "%s", d->obj_name);
-                obj->strings["name"] = buf;
+                obj->name = buf;
 
                 *buf2 = '\0';
                 sprintf(buf2, "%s", d->obj_short);
-                obj->strings["short_description"] = buf2;
+                obj->short_description = buf2;
 
                 *buf3 = '\0';
                 sprintf(buf3, "%s", d->obj_long);
-                obj->strings["room_description"] = buf3;
+                obj->room_description = buf3;
 
                 d->obj_editflag = EDIT_NONE;
                 d->obj_editval = EDIT_NONE;
@@ -556,13 +556,13 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg)
                     }
                     *buf = '\0';
                     sprintf(buf, "%s", d->obj_name);
-                    obj->strings["name"] = buf;
+                    obj->name = buf;
                     *buf2 = '\0';
                     sprintf(buf2, "%s", d->obj_short);
-                    obj->strings["short_description"] = buf2;
+                    obj->short_description = buf2;
                     *buf3 = '\0';
                     sprintf(buf3, "%s", d->obj_long);
-                    obj->strings["room_description"] = buf3;
+                    obj->room_description = buf3;
                 }
                 else
                 {
@@ -570,13 +570,13 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg)
                     d->character->addToInventory(obj);
                     *buf = '\0';
                     sprintf(buf, "%s", d->obj_name);
-                    obj->strings["name"] = strdup(buf);
+                    obj->name = strdup(buf);
                     *buf2 = '\0';
                     sprintf(buf2, "%s", d->obj_short);
-                    obj->strings["short_description"] = buf2;
+                    obj->short_description = buf2;
                     *buf3 = '\0';
                     sprintf(buf3, "%s", d->obj_long);
-                    obj->strings["room_description"] = buf3;
+                    obj->room_description = buf3;
                     switch (d->obj_weapon)
                     {
                     case 1:

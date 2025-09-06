@@ -7,6 +7,10 @@
 #include <unordered_map>
 #include <functional>
 
+#include "HasMudStrings.h"
+#include "HasExtraDescriptions.h"
+#include "HasMisc.h"
+
 #include "const/Appearance.h"
 #include "const/Position.h"
 
@@ -16,6 +20,7 @@
 #include "const/CharacterFlag.h"
 #include "const/MobFlag.h"
 #include "const/AdminFlag.h"
+#include "const/AffectFlag.h"
 #include "const/Mutation.h"
 #include "const/Size.h"
 #include "Flags.h"
@@ -167,7 +172,7 @@ extern bool PLR_FLAGGED(Character *ch, int flag);
 extern bool PRF_FLAGGED(Character *ch, int flag);
 extern bool ADM_FLAGGED(Character *ch, int flag);
 
-struct CharacterBase {
+struct CharacterBase : public HasVnum, public HasMudStrings, public HasExtraDescriptions, public HasStats {
     Race race{Race::human};
     std::optional<SubRace> subrace{};
     Sensei sensei{Sensei::commoner};
@@ -178,4 +183,5 @@ struct CharacterBase {
     FlagHandler<MobFlag> mob_flags{};
     FlagHandler<Race> bio_genomes{};
     FlagHandler<Mutation> mutations{};
+    FlagHandler<AffectFlag> affect_flags{};
 };

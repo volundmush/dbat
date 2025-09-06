@@ -29,7 +29,7 @@ std::vector<std::weak_ptr<DgScript>> HasDgScripts::getScripts()
     return out;
 }
 
-std::string HasDgScripts::scriptString() const
+std::string HasDgScripts::getDgScriptString() const
 {
     std::vector<std::string> vnums;
     for (auto p : getProtoScript())

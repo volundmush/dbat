@@ -5,15 +5,19 @@
 #include "HasZone.h"
 #include "HasMudStrings.h"
 #include "StatHandler.h"
+#include "HasMisc.h"
 
 struct Room;
 
 extern StatHandler<Room> roomStats;
 
-struct Room : public AbstractLocation, public HasZone, public HasDgScripts, public HasMudStrings, public HasExtraDescriptions, public HasSubscriptions, public HasResetCommands, std::enable_shared_from_this<Room> {
+struct Room : public AbstractLocation, public HasProtoScript, public HasVnum, public HasZone, public HasDgScripts, public HasMudStrings, public HasExtraDescriptions, public HasSubscriptions, public HasResetCommands, std::enable_shared_from_this<Room> {
     static std::unordered_map<int, std::shared_ptr<Room>> registry;
     
     Room();
+    
+    vnum getDgVnum() const override;
+    UnitType getDgUnitType() const override;
 
     vnum getLocVnum() const override;
     std::string getLocID() const override;
@@ -30,7 +34,6 @@ struct Room : public AbstractLocation, public HasZone, public HasDgScripts, publ
     SpecialFunc func{};
 
     const char* getDgName() const override;
-    std::vector<trig_vnum> proto_script; /* list of default triggers  */
     std::vector<trig_vnum> getProtoScript() const override;
 
     int damage{};                     /* How damaged the room is            */

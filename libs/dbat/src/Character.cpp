@@ -1766,30 +1766,7 @@ void Character::mergeClones() {
 
 Character &Character::operator=(CharacterPrototype &other)
 {
-    // basic proto data fields
-    vn = other.vn;
-    if (other.name)
-        strings["name"] = other.name;
-    if (other.room_description)
-        strings["room_description"] = other.room_description;
-    if (other.look_description)
-        strings["look_description"] = other.look_description;
-    if (other.short_description)
-        strings["short_description"] = other.short_description;
-    affect_flags = other.affect_flags;
-    stats = other.stats;
-
-    // item proto data fields
-    race = other.race;
-    subrace = other.subrace;
-    sensei = other.sensei;
-    sex = other.sex;
-    mob_specials = other.mob_specials;
-    character_flags = other.character_flags;
-    mob_flags = other.mob_flags;
-    bio_genomes = other.bio_genomes;
-    mutations = other.mutations;
-    size = other.size;
+    CharacterBase::operator=(static_cast<const CharacterBase&>(other));
 
     return *this;
 }
@@ -1960,4 +1937,12 @@ std::string_view Character::otherSensePower(Character *other) {
     } else {
         return "@Croughly equal@Y with you";
     }
+}
+
+vnum Character::getDgVnum() const {
+    return getVnum();
+}
+
+UnitType Character::getDgUnitType() const {
+    return UnitType::character;
 }

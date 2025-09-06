@@ -1170,7 +1170,11 @@ ACMD(do_mtransform)
 
     /* Thanks to Russell Ryan for this fix. RRfon we need to copy the
     the strings so we don't end up free'ing the prototypes later */
-    ch->strings = m->strings;
+    ch->name = m->name;
+    ch->short_description = m->short_description;
+    ch->look_description = m->look_description;
+    ch->room_description = m->room_description;
+    
     ch->appearances = m->appearances;
     ch->mob_specials = m->mob_specials;
     ch->stats = m->stats;

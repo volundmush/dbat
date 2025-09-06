@@ -931,7 +931,7 @@ ACMD(do_nickname)
             {
                 char nick[MAX_INPUT_LENGTH];
                 sprintf(nick, "%s", CAP(arg2));
-                ship2->strings["look_description"] = nick;
+                ship2->look_description = nick;
                 auto objs = objectSubscriptions.all(fmt::format("vnum_{}", GET_OBJ_VNUM(ship2) + 1000));
                 for (auto k : filter_raw(objs))
                 {
@@ -960,8 +960,8 @@ ACMD(do_nickname)
     }
 
     ch->send_to("@wYou nickname %s@w as '@C%s@w'.@n\r\n", sdesc, arg2);
-    obj->strings["short_description"] = fmt::format("{} @wnicknamed @D(@C{}@D)@n", sdesc, CAP(arg2));
-    obj->strings["name"] = fmt::format("{} {}", obj->getName(), arg2);
+    obj->short_description = fmt::format("{} @wnicknamed @D(@C{}@D)@n", sdesc, CAP(arg2));
+    obj->name = fmt::format("{} {}", obj->getName(), arg2);
 }
 
 /* local globals */
@@ -1673,7 +1673,7 @@ void show_obj_to_char(Object *obj, Character *ch, int mode)
                 {
                     ch->send_to("@D[@G%d@D]@w ", GET_OBJ_VNUM(obj));
                     if (!obj->getProtoScript().empty())
-                        ch->send_to("%s ", obj->scriptString().c_str());
+                        ch->send_to("%s ", obj->getDgScriptString().c_str());
                 }
                 else
                 {
@@ -1681,7 +1681,7 @@ void show_obj_to_char(Object *obj, Character *ch, int mode)
                     {
                         ch->send_to("@D[@G%d@D]@w ", GET_OBJ_VNUM(obj));
                         if (!obj->getProtoScript().empty())
-                            ch->send_to("%s ", obj->scriptString().c_str());
+                            ch->send_to("%s ", obj->getDgScriptString().c_str());
                     }
                 }
             }
@@ -1745,7 +1745,7 @@ void show_obj_to_char(Object *obj, Character *ch, int mode)
         {
             ch->send_to("[%d] ", GET_OBJ_VNUM(obj));
             if (!obj->getProtoScript().empty())
-                ch->send_to("%s ", obj->scriptString().c_str());
+                ch->send_to("%s ", obj->getDgScriptString().c_str());
         }
 
         if (PRF_FLAGGED(ch, PRF_IHEALTH))
@@ -2608,7 +2608,7 @@ void list_one_char(Character *i, Character *ch)
 
     if (!IS_NPC(ch) && PRF_FLAGGED(ch, PRF_ROOMFLAGS) && IS_NPC(i))
     {
-        auto sString = !i->getProtoScript().empty() ? fmt::format("{} ", i->scriptString()) : "";
+        auto sString = !i->getProtoScript().empty() ? fmt::format("{} ", i->getDgScriptString()) : "";
         ch->send_to("@D[@G%d@D]@w %s", GET_MOB_VNUM(i), sString.c_str());
     }
 
@@ -4348,7 +4348,7 @@ ACMD(do_score)
     if (view == full || view == personal)
     {
         ch->sendText("  @cO@D-----------------------------[  @cPersonal  @D]-----------------------------@cO@n\n");
-        ch->send_to("  @D|  @CName@D: @W%15s@D,   @CTitle@D: @W%-38s@D|@n\n", GET_NAME(ch), GET_TITLE(ch));
+        ch->send_to("  @D|  @CName@D: @W%15s@D,   @CTitle@D: @W%-38s@D|@n\n", GET_NAME(ch), ch->title);
         if (IS_ANDROID(ch))
         {
             char model[100], version[100];
@@ -5549,7 +5549,7 @@ ACMD(do_who)
     if (ch->canSee(tch) && IS_PLAYING(d))
         {
             if (*name_search && !boost::iequals(GET_NAME(tch), name_search) &&
-                !strstr(GET_TITLE(tch), name_search))
+                !boost::icontains(tch->title, name_search))
                 continue;
             if (!ch->canSee(tch) || GET_LEVEL(tch) < low || GET_LEVEL(tch) > high)
                 continue;
@@ -5598,7 +5598,7 @@ ACMD(do_who)
             if (!IS_PLAYING(d))
                 continue;
             if (*name_search && !boost::iequals(GET_NAME(tch), name_search) &&
-                !strstr(GET_TITLE(tch), name_search))
+                !boost::icontains(tch->title, name_search))
                 continue;
             if (!ch->canSee(tch) || GET_LEVEL(tch) < low || GET_LEVEL(tch) > high)
                 continue;
@@ -6004,7 +6004,7 @@ static void print_object_location(int num, Object *obj, Character *ch,
         ch->send_to("%33s", " - ");
 
     if (!obj->getProtoScript().empty())
-        ch->send_to("%s", obj->scriptString().c_str());
+        ch->send_to("%s", obj->getDgScriptString().c_str());
 
     if (auto r = obj->getRoom())
     {
@@ -6070,7 +6070,7 @@ static void perform_immort_where(Character *ch, char *arg)
                 ch->sendFmt("M{}. {} - [{}] {}", ++num, GET_NAME(i), i->location, i->location.getName());
                 if (IS_NPC(i) && !i->scripts.empty())
                 {
-                    auto t = i->scriptString();
+                    auto t = i->getDgScriptString();
                     ch->send_to("%s ", t.c_str());
                 }
                 ch->sendText("\r\n");
@@ -7166,7 +7166,7 @@ ACMD(do_desc)
     {
         d->send_to("Current description:\r\n%s\r\n", ch->getLookDescription());
         d->sendText("Enter the new text you'd like others to see when they look at you.\r\n");
-        string_write(d, &ch->strings["look_description"], EXDSCR_LENGTH, 0, ch->strings["look_description"]);
+        string_write(d, &ch->look_description, EXDSCR_LENGTH, 0, ch->look_description);
         STATE(d) = CON_EXDESC;
     }
     else

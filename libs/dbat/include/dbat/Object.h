@@ -24,12 +24,14 @@ extern StatHandler<Object> itemStats;
 extern SubscriptionManager<Object> objectSubscriptions;
 
 
-struct Object : public ObjectBase, public HasID, public HasLocation, public HasInventory, public HasExtraDescriptions, public HasDgScripts, public HasMudStrings, public HasAffectFlags, public HasSubscriptions, public HasStats, public HasPicky, public std::enable_shared_from_this<Object> {
+struct Object : public ObjectBase, public HasID, public HasLocation, public HasInventory, public HasDgScripts, public HasSubscriptions, public std::enable_shared_from_this<Object> {
     static std::unordered_map<int64_t, std::shared_ptr<Object>> registry;
     Object();
     ~Object();
     Object& operator=(const ObjectPrototype& proto);
     
+    vnum getDgVnum() const override;
+    UnitType getDgUnitType() const override;
     const char* getDgName() const override;
     std::vector<trig_vnum> getProtoScript() const override;
     

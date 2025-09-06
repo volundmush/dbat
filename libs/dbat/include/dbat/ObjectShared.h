@@ -3,12 +3,18 @@
 #include <string>
 #include <array>
 
+#include "HasMudStrings.h"
+#include "HasExtraDescriptions.h"
+#include "HasPicky.h"
+#include "HasMisc.h"
+
 #include "const/Max.h"
 #include "const/WearFlag.h"
 #include "const/ItemValues.h"
 #include "const/ItemFlag.h"
 #include "const/ItemType.h"
 #include "const/Size.h"
+#include "const/AffectFlag.h"
 
 #include "Flags.h"
 #include "affect.h"
@@ -38,11 +44,12 @@ extern bool OBJAFF_FLAGGED(Object *obj, int flag);
 
 extern bool OBJ_FLAGGED(Object *obj, int flag);
 
-struct ObjectBase {
+struct ObjectBase : public HasVnum, public HasMudStrings, public HasExtraDescriptions, public HasStats, public HasPicky {
     ItemType type_flag{ItemType::unknown};      /* Type of item                        */
     std::array<affected_type, MAX_OBJ_AFFECT> affected;  /* affects */
     FlagHandler<WearFlag> wear_flags{}; /* Where you can wear it     */
     FlagHandler<ItemFlag> item_flags{}; /* If it hums, glows, etc.  */
+    FlagHandler<AffectFlag> affect_flags{};
     Size size{Size::medium};           /* Size class of object                */
    
 };

@@ -4,7 +4,7 @@
 #include "Typedefs.h"
 #include "Command.h"
 #include "ObjectShared.h"
-#include "ThingPrototype.h"
+#include "HasMisc.h"
 #include "HasPicky.h"
 #include "affect.h"
 
@@ -14,9 +14,13 @@ struct ObjectPrototype;
 
 extern StatHandler<ObjectPrototype> itemProtoStats;
 
-struct ObjectPrototype : public ObjectBase, public ThingPrototype, public picky_data {
+struct ObjectPrototype : public ObjectBase, public HasProtoScript {
+
     ObjectPrototype() = default;
     ObjectPrototype(const Object& other);
+
+    
+    std::vector<trig_vnum> proto_script; /* list of default triggers  */
     
     ObjectPrototype& operator=(const ObjectPrototype& other);
 
@@ -39,7 +43,7 @@ struct ObjectPrototype : public ObjectBase, public ThingPrototype, public picky_
 };
 
 inline std::string format_as(const ObjectPrototype& z) {
-    return fmt::format("ObjectPrototype {} '{}'", z.vn, z.short_description ? z.short_description : "<unnamed>");
+    return fmt::format("ObjectPrototype {} '{}'", z.vn, z.short_description);
 }
 
 extern std::map<obj_vnum, std::shared_ptr<ObjectPrototype>> obj_proto;

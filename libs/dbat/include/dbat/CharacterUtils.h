@@ -36,7 +36,7 @@ inline bool IS_MOB(const Character* ch) {
 
 #define GET_PC_NAME(ch)    ch->getName()
 #define GET_NAME(ch)    (IS_NPC(ch) ? (ch)->getShortDescription() : GET_PC_NAME(ch))
-#define GET_TITLE(ch)   ch->getString("title").empty() ? "[Unset Title]" : (char*)((ch)->getString("title").data())
+#define GET_TITLE(ch)   ch->title
 #define GET_PHASE(ch)   ch->getBaseStat<int>("starphase")
 #define GET_MIMIC(ch)   (ch->mimic ? ch->mimic->getID()+1 : 0)
 #define GET_VOICE(ch)   ch->voice

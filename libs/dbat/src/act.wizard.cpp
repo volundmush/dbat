@@ -1749,7 +1749,7 @@ static void do_stat_character(Character *ch, Character *k)
     }
     else
 
-        ch->sendFmt("Title: {}\r\n", k->getString("title"));
+        ch->sendFmt("Title: {}\r\n", k->title);
 
     ch->send_to("L-Des: %s@n", k->getRoomDescription() ? k->getRoomDescription() : "<None>\r\n");
     snprintf(buf, sizeof(buf), "%s", sensei::getName(k->sensei).c_str());
@@ -4201,7 +4201,7 @@ static int perform_set(Character *ch, Character *vict, int mode,
         break;
     case 2:
         set_title(vict, val_arg);
-        ch->send_to("%s's title is now: %s\r\n", GET_NAME(vict), GET_TITLE(vict));
+        ch->send_to("%s's title is now: %s\r\n", GET_NAME(vict), vict->title);
         break;
     case 3:
         vict->pref_flags.toggle(PRF_SUMMONABLE);

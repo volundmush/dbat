@@ -397,13 +397,21 @@ FlagHandler<RoomFlag>& Room::getRoomFlags(const Coordinates &coor)
     return room_flags;
 }
 
+vnum Room::getDgVnum() const {
+    return getVnum();
+}
+
+UnitType Room::getDgUnitType() const {
+    return UnitType::room;
+}
+
 bool Room::buildwalk(const Coordinates& coor, Character* ch, Direction dir) {
     // by the time we reach this function, all permission checks have already been carried out.
 
     auto r = std::make_shared<Room>();
     r->vn = getNextID(lastRoomID, Room::registry);
-    r->strings["name"] = "New BuildWalk Room";
-    r->strings["look_description"] = fmt::format("This unfinished room was created by {}.\r\n", ch->getName());
+    r->name = "New BuildWalk Room";
+    r->look_description = fmt::format("This unfinished room was created by {}.\r\n", ch->getName());
     r->zone = zone;
 
     Room::registry[r->vn] = r;

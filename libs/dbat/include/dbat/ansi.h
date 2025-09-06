@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 
-extern int count_color_chars(const char *string);
+extern int count_color_chars(std::string_view string);
 
 std::string processColors(const std::string &txt, int parse, char **choices);
 size_t countColors(const std::string &txt);

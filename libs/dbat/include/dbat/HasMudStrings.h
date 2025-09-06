@@ -6,10 +6,13 @@
 struct HasMudStrings {
     // make it virtual.
     virtual ~HasMudStrings() = default;
+    std::string name;
     const char* getName() const;
+    std::string room_description;
     const char* getRoomDescription() const;
+    std::string look_description;
     const char* getLookDescription() const;
+    std::string short_description;
     const char* getShortDescription() const;
-    std::string_view getString(const std::string &key) const; // Returns a string from the strings map.
     std::unordered_map<std::string, std::string> strings;
 };

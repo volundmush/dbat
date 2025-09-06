@@ -4,7 +4,8 @@
 
 #include "Typedefs.h"
 #include "Command.h"
-#include "ThingPrototype.h"
+#include "HasMisc.h"
+
 #include "CharacterShared.h"
 #include "StatHandler.h"
 
@@ -12,8 +13,7 @@ struct CharacterPrototype;
 
 extern StatHandler<CharacterPrototype> npcProtoStats;
 
-struct CharacterPrototype : public CharacterBase, public ThingPrototype {
-
+struct CharacterPrototype : public CharacterBase, public HasProtoScript {
 
     template<typename R = double>
     R getBaseStat(const std::string& stat) {

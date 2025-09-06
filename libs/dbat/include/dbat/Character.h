@@ -46,7 +46,7 @@ namespace atk {
     struct Attack;
 }
 
-struct Character : public CharacterBase, public HasID, public HasLocation, public HasEquipment, public HasInventory, public HasMudStrings, public HasDgScripts, public HasAffectFlags, public HasSubscriptions, public HasStats, std::enable_shared_from_this<Character> {
+struct Character : public CharacterBase, public HasID, public HasLocation, public HasEquipment, public HasInventory, public HasDgScripts, public HasSubscriptions, std::enable_shared_from_this<Character> {
     static std::unordered_map<int64_t, std::shared_ptr<Character>> registry;
 
     Character();
@@ -55,7 +55,12 @@ struct Character : public CharacterBase, public HasID, public HasLocation, publi
 
     Character& operator=(CharacterPrototype& proto);
 
+    vnum getDgVnum() const override;
+    UnitType getDgUnitType() const override;
+
     bool isPC{false};
+
+    std::string title;
 
     const char* getDgName() const override;
     std::vector<trig_vnum> getProtoScript() const override;

@@ -66,7 +66,7 @@ void dg_read_trigger(FILE *fp, HasDgScripts *proto, UnitType type) {
             case OBJ_TRIGGER:
                 mudlog(BRF, ADMLVL_BUILDER, true,
                        "SYSERR: dg_read_trigger: Trigger vnum #%d asked for but non-existant! (object: %s - %d)",
-                       vnum, static_cast<Object*>(proto)->getName(), proto->getVnum());
+                       vnum, static_cast<Object*>(proto)->getName(), static_cast<Object*>(proto)->getVnum());
                 break;
             case MOB_TRIGGER:
                 mudlog(BRF, ADMLVL_BUILDER, true,
@@ -88,31 +88,31 @@ void dg_read_trigger(FILE *fp, HasDgScripts *proto, UnitType type) {
 
     switch(type) {
         case OBJ_TRIGGER:
-            if(!obj_proto.contains(proto->getVnum())) {
+            if(!obj_proto.contains(proto->getDgVnum())) {
                 mudlog(BRF, ADMLVL_BUILDER, true,
                        "SYSERR: dg_read_trigger: Trigger vnum #%d asked for but non-existant! (object: %s - %d)",
-                       vnum, static_cast<Object*>(proto)->getName(), proto->getVnum());
+                       vnum, static_cast<Object*>(proto)->getName(), proto->getDgVnum());
                 return;
             }
-            obj_proto.at(proto->getVnum())->proto_script.push_back(rnum);
+            obj_proto.at(proto->getDgVnum())->proto_script.push_back(rnum);
             break;
         case MOB_TRIGGER:
-            if(!mob_proto.contains(proto->getVnum())) {
+            if(!mob_proto.contains(proto->getDgVnum())) {
                 mudlog(BRF, ADMLVL_BUILDER, true,
                        "SYSERR: dg_read_trigger: Trigger vnum #%d asked for but non-existant! (mob: %s - %d)",
                        vnum, GET_NAME(static_cast<Character *>(proto)), GET_MOB_VNUM(static_cast<Character *>(proto)));
                 return;
             }
-            mob_proto.at(proto->getVnum())->proto_script.push_back(rnum);
+            mob_proto.at(proto->getDgVnum())->proto_script.push_back(rnum);
             break;
         case WLD_TRIGGER:
-            if(!Room::registry.contains(proto->getVnum())) {
+            if(!Room::registry.contains(proto->getDgVnum())) {
                 mudlog(BRF, ADMLVL_BUILDER, true,
                        "SYSERR: dg_read_trigger: Trigger vnum #%d asked for but non-existant! (room:%d)",
                        vnum, GET_ROOM_VNUM(static_cast<Room *>(proto)->getVnum()));
                 return;
             }
-            Room::registry.at(proto->getVnum())->proto_script.push_back(rnum);
+            Room::registry.at(proto->getDgVnum())->proto_script.push_back(rnum);
             break;
         default:
             mudlog(BRF, ADMLVL_BUILDER, true,
@@ -121,7 +121,7 @@ void dg_read_trigger(FILE *fp, HasDgScripts *proto, UnitType type) {
     }
 }
 
-void dg_read_trigger(FILE *fp, struct ThingPrototype *proto, UnitType type) {
+void dg_read_trigger(FILE *fp, struct HasProtoScript *proto, UnitType type) {
     char line[READ_SIZE];
     char junk[8];
     int vnum, rnum, count;

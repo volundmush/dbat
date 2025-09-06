@@ -981,56 +981,15 @@ void dump_globaldata(const std::filesystem::path &loc)
     dump_to_file(loc, "globaldata.json", j);
 }
 
-
-void to_json(json &j, const ThingPrototype &u)
-{
-    j["vn"] = u.vn;
-    if (u.name && strlen(u.name))
-        j["name"] = u.name;
-    if (u.room_description && strlen(u.room_description))
-        j["room_description"] = u.room_description;
-    if (u.look_description && strlen(u.look_description))
-        j["look_description"] = u.look_description;
-    if (u.short_description && strlen(u.short_description))
-        j["short_description"] = u.short_description;
-    if(!u.extra_descriptions.empty()) j["extra_descriptions"] = u.extra_descriptions;
-    if (!u.proto_script.empty())
-        j["proto_script"] = u.proto_script;
-    if (!u.stats.empty())
-        j["stats"] = u.stats;
-    if (u.affect_flags)
-        j["affect_flags"] = u.affect_flags;
+void to_json(json &j, const HasProtoScript &s) {
+    if(!s.proto_script.empty()) {
+        j["proto_script"] = s.proto_script;
+    }
 }
 
-void from_json(const json &j, ThingPrototype &u)
-{
-    u.vn = j["vn"].get<int>();
-    if (j.contains("name"))
-        u.name = strdup(j["name"].get<std::string>().c_str());
-    if (j.contains("room_description"))
-        u.room_description = strdup(j["room_description"].get<std::string>().c_str());
-    if (j.contains("look_description"))
-        u.look_description = strdup(j["look_description"].get<std::string>().c_str());
-    if (j.contains("short_description"))
-        u.short_description = strdup(j["short_description"].get<std::string>().c_str());
-
-    if (j.contains("extra_descriptions"))
-        j["extra_descriptions"].get_to(u.extra_descriptions);
-
-    if (j.contains("proto_script"))
-    {
-        for (auto p : j["proto_script"])
-        {
-            u.proto_script.emplace_back(p.get<trig_vnum>());
-        }
-    }
-
-    if (j.contains("stats"))
-        u.stats = j["stats"];
-
-    if (j.contains("affect_flags"))
-    {
-        u.affect_flags = j["affect_flags"].get<FlagHandler<AffectFlag>>();
+void from_json(const json &j, HasProtoScript &s) {
+    if(j.contains("proto_script")) {
+        j.at("proto_script").get_to(s.proto_script);
     }
 }
 
@@ -1312,23 +1271,48 @@ static void dump_structures(const std::filesystem::path &loc)
 
 // Object serialize/deserialize...
 
-void to_json(json &j, const ObjectPrototype &o)
-{
-    to_json(j, static_cast<const ThingPrototype &>(o));
+void to_json(json &j, const ObjectBase &o) {
+    to_json(j, static_cast<const HasVnum &>(o));
+    to_json(j, static_cast<const HasMudStrings &>(o));
+    to_json(j, static_cast<const HasExtraDescriptions &>(o));
+    to_json(j, static_cast<const HasStats &>(o));
     to_json(j, static_cast<const picky_data &>(o));
-
     j["type_flag"] = o.type_flag;
     if (o.wear_flags)
         j["wear_flags"] = o.wear_flags;
     if (o.item_flags)
         j["item_flags"] = o.item_flags;
+    j["size"] = o.size;
+    if(o.affect_flags) j["affect_flags"] = o.affect_flags;
+    j["affected"] = o.affected;
+}
 
-    for (auto &i : o.affected)
-    {
-        if (i.location == APPLY_NONE)
-            continue;
-        j["affected"].push_back(i);
+void from_json(const json& j, ObjectBase &o) {
+    from_json(j, static_cast<HasVnum &>(o));
+    from_json(j, static_cast<HasMudStrings &>(o));
+    from_json(j, static_cast<HasExtraDescriptions &>(o));
+    from_json(j, static_cast<HasStats &>(o));
+    from_json(j, static_cast<picky_data &>(o));
+
+    if (j.contains("type_flag")) o.type_flag = j["type_flag"];
+    if (j.contains("wear_flags")) j.at("wear_flags").get_to(o.wear_flags);
+    if (j.contains("item_flags")) j.at("item_flags").get_to(o.item_flags);
+    if (j.contains("size")) j.at("size").get_to(o.size);
+    if (j.contains("affect_flags")) j.at("affect_flags").get_to(o.affect_flags);
+
+    if (j.contains("affected")) {
+        int counter = 0;
+        for (auto &i : j["affected"]) {
+            i.get_to(o.affected[counter]);
+            counter++;
+        }
     }
+}
+
+void to_json(json &j, const ObjectPrototype &o)
+{
+    to_json(j, static_cast<const ObjectBase &>(o));
+    to_json(j, static_cast<const HasProtoScript &>(o));
 };
 
 void to_json(json &j, const Object &o)
@@ -1339,7 +1323,6 @@ void to_json(json &j, const Object &o)
     to_json(j, static_cast<const HasMudStrings &>(o));
     to_json(j, static_cast<const HasExtraDescriptions &>(o));
     to_json(j, static_cast<const HasStats &>(o));
-    to_json(j, static_cast<const HasAffectFlags &>(o));
 
     if (o.running_scripts)
         j["running_scripts"] = o.running_scripts.value();
@@ -1360,25 +1343,9 @@ void to_json(json &j, const Object &o)
 
 void from_json(const json &j, ObjectPrototype &o)
 {
-    from_json(j, static_cast<picky_data &>(o));
-    from_json(j, static_cast<ThingPrototype &>(o));
+    from_json(j, static_cast<ObjectBase &>(o));
+    from_json(j, static_cast<HasProtoScript &>(o));
 
-    if (j.contains("type_flag"))
-        o.type_flag = j["type_flag"];
-    if (j.contains("wear_flags"))
-        o.wear_flags = j["wear_flags"].get<FlagHandler<WearFlag>>();
-    if (j.contains("item_flags"))
-        o.item_flags = j["item_flags"].get<FlagHandler<ItemFlag>>();
-
-    if (j.contains("affected"))
-    {
-        int counter = 0;
-        for (auto &i : j["affected"])
-        {
-            i.get_to(o.affected[counter]);
-            counter++;
-        }
-    }
     auto otype = static_cast<int>(o.type_flag);
     if ((otype == ITEM_PORTAL ||
          otype == ITEM_HATCH) &&
@@ -1407,37 +1374,14 @@ void from_json(const json &j, ObjectPrototype &o)
 
 void from_json(const json &j, Object &o)
 {
-    from_json(j, static_cast<picky_data &>(o));
+    from_json(j, static_cast<ObjectBase &>(o));
     from_json(j, static_cast<HasID &>(o));
     from_json(j, static_cast<HasDgScripts &>(o));
-    from_json(j, static_cast<HasMudStrings &>(o));
-    from_json(j, static_cast<HasExtraDescriptions &>(o));
-    from_json(j, static_cast<HasStats &>(o));
-    from_json(j, static_cast<HasAffectFlags &>(o));
 
     if (j.contains("running_scripts"))
     {
         o.running_scripts.emplace();
         j["running_scripts"].get_to(o.running_scripts.value());
-    }
-
-    if (j.contains("type_flag"))
-        o.type_flag = j["type_flag"];
-
-    if (j.contains("wear_flags"))
-        o.wear_flags = j["wear_flags"].get<FlagHandler<WearFlag>>();
-
-    if (j.contains("item_flags"))
-        o.item_flags = j["item_flags"].get<FlagHandler<ItemFlag>>();
-
-    if (j.contains("affected"))
-    {
-        int counter = 0;
-        for (auto &i : j["affected"])
-        {
-            i.get_to(o.affected[counter]);
-            counter++;
-        }
     }
 }
 
@@ -1637,20 +1581,44 @@ void from_json(const json &j, affected_type &a)
         a.bitvector = j["bitvector"];
 }
 
+void to_json(json &j, const CharacterBase &c) {
+    to_json(j, static_cast<const HasVnum&>(c));
+    to_json(j, static_cast<const HasMudStrings&>(c));
+    to_json(j, static_cast<const HasExtraDescriptions&>(c));
+    to_json(j, static_cast<const HasStats&>(c));
+    j["race"] = c.race;
+    if(c.subrace) j["subrace"] = c.subrace;
+    j["sex"] = c.sex;
+    j["mob_specials"] = c.mob_specials;
+    j["size"] = c.size;
+    if(c.character_flags) j["character_flags"] = c.character_flags;
+    if(c.mob_flags) j["mob_flags"] = c.mob_flags;
+    if(c.affect_flags) j["affect_flags"] = c.affect_flags;
+    if(c.bio_genomes) j["bio_genomes"] = c.bio_genomes;
+    if(c.mutations) j["mutations"] = c.mutations;
+}
+
+void from_json(const json &j, CharacterBase &c) {
+    from_json(j, static_cast<HasVnum&>(c));
+    from_json(j, static_cast<HasMudStrings&>(c));
+    from_json(j, static_cast<HasExtraDescriptions&>(c));
+    from_json(j, static_cast<HasStats&>(c));
+    if (j.contains("race")) c.race = j["race"];
+    if (j.contains("subrace")) c.subrace = j["subrace"];
+    if (j.contains("sex")) c.sex = j["sex"];
+    if (j.contains("mob_specials")) j.at("mob_specials").get_to(c.mob_specials);
+    if (j.contains("size")) c.size = j["size"];
+    if (j.contains("character_flags")) j.at("character_flags").get_to(c.character_flags);
+    if (j.contains("mob_flags")) j.at("mob_flags").get_to(c.mob_flags);
+    if (j.contains("affect_flags")) j.at("affect_flags").get_to(c.affect_flags);
+    if (j.contains("bio_genomes")) j.at("bio_genomes").get_to(c.bio_genomes);
+    if (j.contains("mutations")) j.at("mutations").get_to(c.mutations);
+}
+
 void to_json(json &j, const CharacterPrototype &c)
 {
-    to_json(j, static_cast<const ThingPrototype &>(c));
-    j["sex"] = c.sex;
-    if (c.character_flags)
-        j["character_flags"] = c.character_flags;
-    if (c.mob_flags)
-        j["mob_flags"] = c.mob_flags;
-    j["race"] = c.race;
-    j["sensei"] = c.sensei;
-    json ms;
-    to_json(ms, c.mob_specials);
-    if (!ms.empty())
-        j["mob_specials"] = ms;
+    to_json(j, static_cast<const CharacterBase &>(c));
+    to_json(j, static_cast<const HasProtoScript&>(c));
 }
 
 void to_json(json& j, const HasZone& p) {
@@ -1664,14 +1632,12 @@ void from_json(const json& j, HasZone& p) {
 
 void to_json(json& j, const HasDgScripts& p) {
     to_json(j, static_cast<const HasVariables&>(p));
-    to_json(j, static_cast<const HasVnum&>(p));
     j["type"] = p.type;
     if(p.running_scripts) j["running_scripts"] = *p.running_scripts;
 }
 
 void from_json(const json& j, HasDgScripts& p) {
     from_json(j, static_cast<HasVariables&>(p));
-    from_json(j, static_cast<HasVnum&>(p));
     if (j.contains("type"))
         p.type = j["type"];
     if (j.contains("running_scripts"))
@@ -1774,22 +1740,8 @@ void from_json(const json& j, Structure& p) {
 
 void from_json(const json &j, CharacterPrototype &c)
 {
-    from_json(j, static_cast<ThingPrototype &>(c));
-    if (j.contains("sex"))
-        c.sex = j["sex"];
-    if (j.contains("character_flags"))
-        c.character_flags = j["character_flags"];
-    if (j.contains("mob_flags"))
-        c.mob_flags = j["mob_flags"];
-    if (j.contains("race"))
-        c.race = j["race"];
-    if (j.contains("sensei"))
-        c.sensei = j["sensei"];
-    if (j.contains("mob_specials"))
-        from_json(j["mob_specials"], c.mob_specials);
-
-    if (j.contains("proto_script"))
-        c.proto_script = j["proto_script"].get<std::vector<trig_vnum>>();
+    from_json(j, static_cast<CharacterBase &>(c));
+    from_json(j, static_cast<HasProtoScript&>(c));
 
     if (c.race != Race::human)
         c.affect_flags.set(AFF_INFRAVISION, true);
@@ -1799,26 +1751,21 @@ void from_json(const json &j, CharacterPrototype &c)
 
 void to_json(json &j, const Character &c)
 {
+    to_json(j, static_cast<const CharacterBase &>(c));
     to_json(j, static_cast<const HasID &>(c));
     to_json(j, static_cast<const HasDgScripts &>(c));
-    to_json(j, static_cast<const HasMudStrings &>(c));
-    // to_json(j, static_cast<const HasExtraDescriptions&>(c));
-    to_json(j, static_cast<const HasStats &>(c));
-    to_json(j, static_cast<const HasAffectFlags &>(c));
 
     if(c.isPC) j["isPC"] = c.isPC;
 
     if (c.running_scripts)
         j["running_scripts"] = c.running_scripts.value();
 
-    j["sex"] = c.sex;
     if (!c.appearances.empty())
         j["appearances"] = c.appearances;
 
     if (c.character_flags)
         j["character_flags"] = c.character_flags;
-    if (c.mob_flags)
-        j["mob_flags"] = c.mob_flags;
+
     if (c.player_flags)
         j["player_flags"] = c.player_flags;
 
@@ -1830,9 +1777,6 @@ void to_json(json &j, const Character &c)
         {
             j["bodyparts"].push_back(i);
         }
-
-    j["race"] = c.race;
-    j["sensei"] = c.sensei;
 
     if (c.admin_flags)
         j["admin_flags"] = c.admin_flags;
@@ -1889,11 +1833,6 @@ void to_json(json &j, const Character &c)
             j["lboard"].push_back(std::make_pair(i, c.lboard[i]));
     }
 
-    if (c.mutations)
-        j["mutations"] = c.mutations;
-    if (c.bio_genomes)
-        j["bio_genomes"] = c.bio_genomes;
-
     if (c.mimic)
         j["mimic"] = c.mimic.value();
     j["form"] = c.form;
@@ -1920,12 +1859,9 @@ void to_json(json &j, const Character &c)
 
 void from_json(const json &j, Character &c)
 {
+    from_json(j, static_cast<CharacterBase &>(c));
     from_json(j, static_cast<HasID &>(c));
     from_json(j, static_cast<HasDgScripts &>(c));
-    from_json(j, static_cast<HasMudStrings &>(c));
-    // from_json(j, static_cast<HasExtraDescriptions&>(c));
-    from_json(j, static_cast<HasStats &>(c));
-    from_json(j, static_cast<HasAffectFlags &>(c));
 
     if(j.contains("isPC")) {
         c.isPC = j["isPC"];
@@ -1937,24 +1873,9 @@ void from_json(const json &j, Character &c)
         j["running_scripts"].get_to(c.running_scripts.value());
     }
 
-    if (j.contains("sex"))
-        c.sex = j["sex"];
     if (j.contains("appearances"))
         c.appearances = j["appearances"];
 
-    if (j.contains("race"))
-        c.race = j["race"];
-
-    if (j.contains("sensei"))
-        c.sensei = j["sensei"];
-
-    if (j.contains("mob_specials"))
-        j["mob_specials"].get_to(c.mob_specials);
-
-    if (j.contains("character_flags"))
-        c.character_flags = j["character_flags"].get<FlagHandler<CharacterFlag>>();
-    if (j.contains("mob_flags"))
-        c.mob_flags = j["mob_flags"].get<FlagHandler<MobFlag>>();
     if (j.contains("player_flags"))
         c.player_flags = j["player_flags"].get<FlagHandler<PlayerFlag>>();
 
@@ -2033,11 +1954,6 @@ void from_json(const json &j, Character &c)
             c.gravAcclim[i[0].get<int>()] = i[1];
         }
     }
-
-    if (j.contains("bio_genomes"))
-        c.bio_genomes = j["bio_genomes"];
-    if (j.contains("mutations"))
-        c.mutations = j["mutations"];
 
     if (j.contains("mimic"))
         c.mimic = j["mimic"].get<Race>();
@@ -2399,7 +2315,7 @@ PlayerData *create_player_character(int account_id, const json &j)
     p->account = acc.get();
     p->character = ch.get();
     p->name = j.at("name").get<std::string>();
-    ch->strings["name"] = p->name;
+    ch->name = p->name;
     ch->isPC = true;
 
     acc->characters.push_back(ch->id);

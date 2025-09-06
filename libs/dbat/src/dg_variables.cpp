@@ -1282,7 +1282,7 @@ void find_replacement(HasDgScripts *go, HasDgScripts *sc, DgScript *trig, UnitTy
                     {
                         char blah[500];
                         sprintf(blah, "%s %s", o->getName(), subfield);
-                        o->strings["name"] = blah;
+                        o->name = blah;
                     }
                 }
                 else if (boost::iequals(field, "next_in_list"))
@@ -1327,7 +1327,7 @@ void find_replacement(HasDgScripts *go, HasDgScripts *sc, DgScript *trig, UnitTy
                     {
                         char blah[500];
                         sprintf(blah, "%s @wnicknamed @D(@C%s@D)@n", o->getShortDescription(), subfield);
-                        o->strings["short_description"] = blah;
+                        o->short_description = blah;
                     }
                 }
                 else if (boost::iequals(field, "setaffects"))

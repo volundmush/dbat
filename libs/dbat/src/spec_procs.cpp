@@ -518,12 +518,12 @@ SPECIAL(pet_shops)
         {
             snprintf(buf, sizeof(buf), "%s %s", pet->getName(), pet_name);
             /* free(pet->name); don't free the prototype! */
-            pet->strings["name"] = buf;
+            pet->name = buf;
 
             snprintf(buf, sizeof(buf), "%sA small sign on a chain around the neck says 'My name is %s'\r\n",
                      pet->getLookDescription(), pet_name);
             /* free(pet->description); don't free the prototype! */
-            pet->strings["look_description"] = buf;
+            pet->look_description = buf;
         }
         pet->moveToLocation(ch);
         add_follower(pet, ch);

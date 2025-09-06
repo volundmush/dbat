@@ -27,3 +27,8 @@ struct HasStats {
 struct HasID {
     int64_t id{NOTHING}; /* the unique ID of this entity */
 };
+
+struct HasProtoScript {
+    std::vector<trig_vnum> proto_script; /* list of default triggers  */
+    std::string scriptString() const;
+};

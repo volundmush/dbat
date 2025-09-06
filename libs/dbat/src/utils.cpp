@@ -3263,16 +3263,11 @@ int levenshtein_distance(std::string_view s1, std::string_view s2) {
     return at(s1_len, s2_len);
 }
 
-int count_color_chars(const char *string)
+int count_color_chars(std::string_view string)
 {
-    int i, len;
     int num = 0;
 
-    if (!string || !*string)
-        return 0;
-
-    len = strlen(string);
-    for (i = 0; i < len; i++)
+    for (size_t i = 0; i < string.size(); i++)
     {
         while (string[i] == '@')
         {

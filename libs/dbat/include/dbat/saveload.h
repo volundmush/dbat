@@ -7,7 +7,6 @@
 #include "dbat/Guild.h"
 #include "dbat/json.h"
 #include "dbat/TimeInfo.h"
-#include "dbat/ThingPrototype.h"
 #include "dbat/Help.h"
 
 extern PlayerData* create_player_character(int account_id, const json &j);
@@ -66,9 +65,6 @@ void from_json(const json& j, Room& r);
 
 void to_json(json& j, const Object& o);
 void from_json(const json& j, Object& o);
-
-void to_json(json& j, const ThingPrototype& o);
-void from_json(const json& j, ThingPrototype& o);
 
 void to_json(json& j, const ObjectPrototype& o);
 void from_json(const json& j, ObjectPrototype& o);

@@ -321,26 +321,15 @@ void Object::commit_iedit(const ObjectPrototype &other)
 
 Object &Object::operator=(const ObjectPrototype &other)
 {
-    // basic proto data fields
-    vn = other.vn;
-    if (other.name)
-        strings["name"] = other.name;
-    if (other.room_description)
-        strings["room_description"] = other.room_description;
-    if (other.look_description)
-        strings["look_description"] = other.look_description;
-    if (other.short_description)
-        strings["short_description"] = other.short_description;
-    affect_flags = other.affect_flags;
-    stats = other.stats;
-    extra_descriptions = other.extra_descriptions;
-
-    // item proto data fields
-    type_flag = other.type_flag;
-    affected = other.affected;
-    wear_flags = other.wear_flags;
-    item_flags = other.item_flags;
-    size = other.size;
+    ObjectBase::operator=(static_cast<const ObjectBase&>(other));
 
     return *this;
+}
+
+vnum Object::getDgVnum() const {
+    return getVnum();
+}
+
+UnitType Object::getDgUnitType() const {
+    return UnitType::object;
 }

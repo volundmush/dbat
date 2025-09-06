@@ -3,12 +3,14 @@
 #include "HasVariables.h"
 #include "HasMisc.h"
 
-struct HasDgScripts : public HasVariables, public HasVnum {
+struct HasDgScripts : public HasVariables {
 
     virtual const char* getDgName() const = 0;
 
     UnitType type{UnitType::unknown};
 
+    virtual UnitType getDgUnitType() const = 0;
+    virtual vnum getDgVnum() const = 0;
     virtual bool isActive() const = 0;
 
     long trigger_types{};   /* bitvector of trigger types */
@@ -20,7 +22,7 @@ struct HasDgScripts : public HasVariables, public HasVnum {
     std::vector<trig_vnum> getScriptOrder(); /* this will return running_scripts if said, or the results of getProtoScripts() */
     std::vector<std::weak_ptr<DgScript>> getScripts();
     virtual std::vector<trig_vnum> getProtoScript() const = 0;
-    std::string scriptString() const;
+    std::string getDgScriptString() const;
 
     // generates the persistent UID which will identify this object when it's saved
     // to a variable and which hopefully survives a reboot.

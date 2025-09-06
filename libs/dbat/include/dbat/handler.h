@@ -54,7 +54,7 @@ extern bool isname(std::string_view needle, std::span<std::string_view> haystack
 
 extern bool isname(std::string_view needle, std::string_view haystack);
 
-extern int is_name(const char *str, const char *namelist);
+extern int is_name(std::string_view str, std::string_view namelist);
 
 extern char *fname(const char *namelist);
 

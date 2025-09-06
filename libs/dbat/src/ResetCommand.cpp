@@ -17,7 +17,7 @@
 
 #include "dbat/const/WearSlot.h"
 
-static const char *getObjShort(obj_vnum target)
+static std::string_view getObjShort(obj_vnum target)
 {
     if (auto found = obj_proto.find(target); found != obj_proto.end())
     {
@@ -26,7 +26,7 @@ static const char *getObjShort(obj_vnum target)
     return "???";
 }
 
-static const char *getMobShort(mob_vnum target)
+static std::string_view getMobShort(mob_vnum target)
 {
     if (auto found = mob_proto.find(target); found != mob_proto.end())
     {
@@ -35,11 +35,11 @@ static const char *getMobShort(mob_vnum target)
     return "???";
 }
 
-static const char *getTrigName(trig_vnum target)
+static std::string_view getTrigName(trig_vnum target)
 {
     if (auto found = trig_index.find(target); found != trig_index.end())
     {
-        return found->second->name.c_str();
+        return found->second->name;
     }
     return "???";
 }

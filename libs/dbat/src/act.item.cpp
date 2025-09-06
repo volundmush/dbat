@@ -3428,7 +3428,7 @@ void name_from_drinkcon(Object *obj)
         }
     }
 
-    obj->strings["name"] = oss.str();
+    obj->name = oss.str();
 }
 
 void name_to_drinkcon(Object *obj, int type)
@@ -3441,7 +3441,7 @@ void name_to_drinkcon(Object *obj, int type)
     CREATE(new_name, char, strlen(obj->getName()) + strlen(drinknames[type]) + 2);
     sprintf(new_name, "%s %s", obj->getName(), drinknames[type]); /* sprintf: OK */
 
-    obj->strings["name"] = new_name;
+    obj->name = new_name;
     free(new_name);
 }
 

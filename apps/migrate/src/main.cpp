@@ -1088,7 +1088,7 @@ static void parse_room(FILE *fl, room_vnum virtual_nr) {
                 letter = fread_letter(fl);
                 ungetc(letter, fl);
                 while (letter == 'T') {
-                    dg_read_trigger(fl, get_room(virtual_nr), WLD_TRIGGER);
+                    dg_read_trigger(fl, (HasProtoScript*)get_room(virtual_nr), WLD_TRIGGER);
                     letter = fread_letter(fl);
                     ungetc(letter, fl);
                 }
@@ -1434,7 +1434,8 @@ static int parse_mobile_from_file(FILE *mob_f, struct CharacterPrototype *ch, vn
 
     /***** String data *****/
     ch->name = fread_string(mob_f, buf2);
-    tmpptr = ch->short_description = fread_string(mob_f, buf2);
+    ch->short_description = fread_string(mob_f, buf2);
+    tmpptr = (char*)ch->short_description.c_str();
     if (tmpptr && *tmpptr)
         if (!strcasecmp(fname(tmpptr), "a") || !strcasecmp(fname(tmpptr), "an") ||
             !strcasecmp(fname(tmpptr), "the"))
@@ -1699,20 +1700,21 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
     sprintf(buf2, "object #%d", nr);    /* sprintf: OK (for 'buf2 >= 19') */
 
     /* *** string data *** */
-    if ((o->name = fread_string(obj_f, buf2)) == nullptr) {
-        basic_mud_log("SYSERR: Null obj name or format error at or near %s", buf2);
-        exit(1);
-    }
-    tmpptr = o->short_description = fread_string(obj_f, buf2);
+    tmpptr = fread_string(obj_f, buf2);
+    o->name = std::string(tmpptr);
+    tmpptr = fread_string(obj_f, buf2);
     if (tmpptr && *tmpptr)
         if (!strcasecmp(fname(tmpptr), "a") || !strcasecmp(fname(tmpptr), "an") ||
             !strcasecmp(fname(tmpptr), "the"))
             *tmpptr = tolower(*tmpptr);
+    o->short_description = std::string(tmpptr);
 
-    tmpptr = o->room_description = fread_string(obj_f, buf2);
+    tmpptr = fread_string(obj_f, buf2);
     if (tmpptr && *tmpptr)
         CAP(tmpptr);
-    o->look_description = fread_string(obj_f, buf2);
+    o->room_description = std::string(tmpptr);
+    tmpptr = fread_string(obj_f, buf2);
+    o->look_description = std::string(tmpptr);
 
     /* *** numeric data *** */
     if (!get_line(obj_f, line)) {

@@ -104,38 +104,33 @@ char *fname(const char *namelist)
 
 /* Stock isname().  Leave this here even if you put in a newer  *
  * isname().  Used for OasisOLC.                                */
-int is_name(const char *str, const char *namelist)
-{
-    const char *curname, *curstr;
+int is_name(std::string_view str, std::string_view namelist) {
+    if (str.empty() || namelist.empty()) return 0;
 
-    if (!*str || !*namelist || !str || !namelist)
-        return (0);
+    auto it  = namelist.begin();
+    auto end = namelist.end();
 
-    curname = namelist;
-    for (;;)
-    {
-        for (curstr = str;; curstr++, curname++)
-        {
-            if (!*curstr && !isalpha(*curname))
-                return (1);
+    // helpers as inline lambdas (note the unsigned char cast to avoid UB with std::isalpha)
+    auto is_alpha    = [](char c){ return std::isalpha(static_cast<unsigned char>(c)) != 0; };
+    auto is_not_alpha= [&](char c){ return !is_alpha(c); };
 
-            if (!*curname)
-                return (0);
+    while (true) {
+        it = std::find_if(it, end, is_alpha);              // start of next alpha token
+        if (it == end) break;
+        auto jt = std::find_if(it, end, is_not_alpha);     // end of token
 
-            if (!*curstr || *curname == ' ')
-                break;
+        std::string_view token{ &*it, static_cast<size_t>(jt - it) };
 
-            if (tolower(*curstr) != tolower(*curname))
-                break;
+        // (the all_of is technically redundant given how we found the token,
+        //  but included per your preference)
+        if (!token.empty()
+            && std::all_of(token.begin(), token.end(), is_alpha)
+            && boost::iequals(token, str)) {
+            return 1;
         }
-
-        /* skip to next name */
-        for (; isalpha(*curname); curname++)
-            ;
-        if (!*curname)
-            return (0);
-        curname++; /* first char of new name */
+        it = jt; // continue scanning
     }
+    return 0;
 }
 
 /* allow abbreviations */
@@ -1271,18 +1266,18 @@ Object *create_money(int amount)
     auto &ex = obj->extra_descriptions.emplace_back();
     ex.first = "zenni money";
 
-    obj->strings["name"] = "zenni money";
+    obj->name = "zenni money";
     if (amount == 1)
     {
-        obj->strings["short_description"] = "a single zenni";
-        obj->strings["room_description"] = "One miserable zenni is lying here";
+        obj->short_description = "a single zenni";
+        obj->room_description = "One miserable zenni is lying here";
         ex.second = "It's just one miserable little zenni.";
     }
     else
     {
-        obj->strings["short_description"] = money_desc(amount);
+        obj->short_description = money_desc(amount);
         snprintf(buf, sizeof(buf), "%s is lying here", money_desc(amount));
-        obj->strings["room_description"] = CAP(buf);
+        obj->room_description = CAP(buf);
 
         if (amount < 10)
             snprintf(buf, sizeof(buf), "There is %d zenni.", amount);
