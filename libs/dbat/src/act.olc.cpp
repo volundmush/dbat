@@ -1754,5 +1754,63 @@ Result<std::string> handlePickyOps(HasPicky* hp, HasPickyOps op, std::string_vie
             return handleFlagOps<Race>(hp->only_race, arg, "Only Races");
         case HasPickyOps::NotRace:
             return handleFlagOps<Race>(hp->not_race, arg, "Not Races");
+        default:
+            return err("Invalid operation.");
     }
+    return err("Invalid operation.");
+}
+
+enum class ObjectBaseOps {
+    ItemType,
+    Affected,
+    WearFlags,
+    ItemFlags,
+    AffectFlags,
+    Size
+};
+
+using ObjectBaseOpChoice = std::variant<HasMudStringsOp, HasExtraDescOps, HasPickyOps, ObjectBaseOps>;
+
+Result<ObjectBaseOpChoice> parseObjectBaseOp(std::string_view op) {
+    auto mudStrOp = chooseEnum<HasMudStringsOp>(op, "MudStrings Operation");
+    if(mudStrOp) return mudStrOp.value();
+    auto exDescOp = chooseEnum<HasExtraDescOps>(op, "ExtraDesc Operation");
+    if(exDescOp) return exDescOp.value();
+    auto pickyOp = chooseEnum<HasPickyOps>(op, "Picky Operation");
+    if(pickyOp) return pickyOp.value();
+    auto objBaseOp = chooseEnum<ObjectBaseOps>(op, "ObjectBase Operation");
+    if(objBaseOp) return objBaseOp.value();
+    return err("Invalid operation.");
+}
+
+Result<std::string> handleObjectBaseOps(ObjectBase* ob, ObjectBaseOpChoice op, CommandData& cdata) {
+    if(std::holds_alternative<HasMudStringsOp>(op)) {
+        auto msOp = std::get<HasMudStringsOp>(op);
+        return handleMudStrings(ob, msOp, std::string(cdata.rsargs));
+    } else if(std::holds_alternative<HasExtraDescOps>(op)) {
+        auto edOp = std::get<HasExtraDescOps>(op);
+        return handleExtraDescs(ob, edOp, cdata.rsargs);
+    } else if(std::holds_alternative<HasPickyOps>(op)) {
+        auto pOp = std::get<HasPickyOps>(op);
+        return handlePickyOps(ob, pOp, cdata.rsargs);
+    } else if(std::holds_alternative<ObjectBaseOps>(op)) {
+        auto obOp = std::get<ObjectBaseOps>(op);
+        switch(obOp) {
+            case ObjectBaseOps::ItemType:
+                return handleSetEnum<ItemType>(ob->type_flag, cdata.rsargs, "Item Type");
+            case ObjectBaseOps::Affected: {
+                //return handleFlagOps<AffectLocation>(ob->affected, cdata.rsargs, "Affected");
+                return err("Not implemented yet.");
+            }
+            case ObjectBaseOps::WearFlags:
+                return handleFlagOps<WearFlag>(ob->wear_flags, cdata.rsargs, "Wear Flags");
+            case ObjectBaseOps::ItemFlags:
+                return handleFlagOps<ItemFlag>(ob->item_flags, cdata.rsargs, "Item Flags");
+            case ObjectBaseOps::AffectFlags:
+                return handleFlagOps<AffectFlag>(ob->affect_flags, cdata.rsargs, "Affect Flags");
+            case ObjectBaseOps::Size:
+                return handleSetEnum<Size>(ob->size, cdata.rsargs, "Size");
+        }
+    }
+    return err("Invalid operation.");
 }

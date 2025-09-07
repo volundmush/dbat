@@ -1037,8 +1037,8 @@ static void parse_room(FILE *fl, room_vnum virtual_nr) {
 
     r->zone.reset(z.get());
     r->vn = virtual_nr;
-    r->strings["name"] = fread_string(fl, buf2);
-    r->strings["look_description"] = fread_string(fl, buf2);
+    r->name = fread_string(fl, buf2);
+    r->look_description = fread_string(fl, buf2);
 
     if (!get_line(fl, line)) {
         basic_mud_log("SYSERR: Expecting roomflags/sector type of room #%d but file ended!",
@@ -1693,20 +1693,20 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
 
     /* *** string data *** */
     tmpptr = fread_string(obj_f, buf2);
-    o->name = std::string(tmpptr);
+    if(tmpptr) o->name = std::string(tmpptr);
     tmpptr = fread_string(obj_f, buf2);
     if (tmpptr && *tmpptr)
         if (!strcasecmp(fname(tmpptr), "a") || !strcasecmp(fname(tmpptr), "an") ||
             !strcasecmp(fname(tmpptr), "the"))
             *tmpptr = tolower(*tmpptr);
-    o->short_description = std::string(tmpptr);
+    if(tmpptr) o->short_description = std::string(tmpptr);
 
     tmpptr = fread_string(obj_f, buf2);
     if (tmpptr && *tmpptr)
         CAP(tmpptr);
-    o->room_description = std::string(tmpptr);
+    if(tmpptr) o->room_description = std::string(tmpptr);
     tmpptr = fread_string(obj_f, buf2);
-    o->look_description = std::string(tmpptr);
+    if(tmpptr) o->look_description = std::string(tmpptr);
 
     /* *** numeric data *** */
     if (!get_line(obj_f, line)) {
@@ -2582,7 +2582,7 @@ static int load_char(const char *name, struct Character *ch) {
                 case 'D':
                     if (!strcmp(tag, "Deat")) ch->setBaseStat("death_time", atoi(line));
                     else if (!strcmp(tag, "Deac")) ch->setBaseStat("death_count", atoi(line));
-                    else if (!strcmp(tag, "Desc")) ch->strings["look_description"] = fread_string(fl, buf2);
+                    else if (!strcmp(tag, "Desc")) ch->look_description = fread_string(fl, buf2);
                     else if (!strcmp(tag, "Dex ")) ch->setBaseStat("agility", atoi(line));
                     else if (!strcmp(tag, "Drnk")) GET_COND(ch, DRUNK) = atoi(line);
                     else if (!strcmp(tag, "Damg")) ch->setBaseStat("damage_mod", atoi(line));
@@ -2666,7 +2666,7 @@ static int load_char(const char *name, struct Character *ch) {
                     break;
 
                 case 'N':
-                    if (!strcmp(tag, "Name")) ch->strings["name"] = strdup(line);
+                    if (!strcmp(tag, "Name")) ch->name = line;
                     break;
 
                 case 'O':
@@ -2682,7 +2682,7 @@ static int load_char(const char *name, struct Character *ch) {
                     else if (!strcmp(tag, "PfOt")) POOFOUT(ch) = strdup(line);
 #endif
                     else if (!strcmp(tag, "Pole")) ch->setBaseStat("pole_bonus", atoi(line));
-                    else if (!strcmp(tag, "Posi")) ch->setBaseStat<int>("position", atoi(line));
+                    else if (!strcmp(tag, "Posi")) ch->position = static_cast<Position>(atoi(line));
                     else if (!strcmp(tag, "Pref")) {
                         sscanf(line, "%s %s %s %s", f1, f2, f3, f4);
                         flags[0] = asciiflag_conv(f1);
@@ -2864,9 +2864,9 @@ static void handle_ships(Object *object, Room *room) {
                                         ld);
                             }
                             snprintf(nick3, sizeof(nick3), "%s is resting here@w", nick2);
-                            vehicle->strings["name"] = nick;
-                            vehicle->strings["short_description"] = nick2;
-                            vehicle->strings["room_description"] = nick3;
+                            vehicle->name = nick;
+                            vehicle->short_description = nick2;
+                            vehicle->room_description = nick3;
                         }
                     }
                 }
@@ -2958,31 +2958,31 @@ int House_load(room_vnum rvnum) {
             if (!strcmp("XAP", line)) {  /* then this is a Xap Obj, requires
                                        special care */
                 if ((txt = fread_string(fl, buf2))) {
-                    temp->strings["name"] = txt;
+                    temp->name = txt;
                     free(txt);
                 } else {
-                    temp->strings["name"] = "undefined";
+                    temp->name = "undefined";
                 }
 
                 if ((txt = fread_string(fl, buf2))) {
-                    temp->strings["short_description"] = txt;
+                    temp->short_description = txt;
                     free(txt);
                 } else {
-                    temp->strings["short_description"] = "undefined";
+                    temp->short_description = "undefined";
                 }
 
                 if ((txt = fread_string(fl, buf2))) {
-                    temp->strings["room_description"] = txt;
+                    temp->room_description = txt;
                     free(txt);
                 } else {
-                    temp->strings["room_description"] = "undefined";
+                    temp->room_description = "undefined";
                 }
 
                 if ((txt = fread_string(fl, buf2))) {
-                    temp->strings["look_description"] = txt;
+                    temp->look_description = txt;
                     free(txt);
                 } else {
-                    temp->strings["look_description"] = "undefined";
+                    temp->look_description = "undefined";
                 }
 
                 if (!get_line(fl, line) ||
@@ -3656,7 +3656,7 @@ static void migrate_space() {
     auto a = std::make_shared<Area>();
     a->vn = 1;
     areas[a->vn] = a;
-    a->strings["name"] = "Space";
+    a->name = "Space";
     // Assign zone.
     auto &z = zone_table.at(232);
     a->zone.reset(z.get());
@@ -3715,13 +3715,13 @@ static void migrate_space() {
                 t.resetCommands = r->resetCommands;
             }
 
-            if(!boost::iequals(r->strings["name"], "@WDepths of Space@n")) {
+            if(!boost::iequals(r->name, "@WDepths of Space@n")) {
                 auto &t = a->tileOverrides[find->second];
-                t.strings["name"] = r->strings["name"];
+                t.name = r->name;
             }
-            if(!boost::iequals(r->strings["look_description"], sdesc)) {
+            if(!boost::iequals(r->look_description, sdesc)) {
                 auto &t = a->tileOverrides[find->second];
-                t.strings["look_description"] = r->strings["look_description"];
+                t.look_description = r->look_description;
             }
 
             for(const auto& [wf, over] : extraTiles) {
@@ -3935,10 +3935,7 @@ static void migrate_space() {
     replaceScriptLine(3941, eaglePatches);
 
     auto p = findPlayer("Wayland");
-    Location loc;
-    loc.al = a;
-    // set to Earth...
-    loc.position = spaceCoordinates.at(40979);
+    Location loc(a, spaceCoordinates.at(40979));
     p->moveToLocation(loc);
 
 
@@ -4422,6 +4419,35 @@ static void migrate_char_data(T* c) {
 
     // convert affectedv
 }
+
+void combine_and_trim(ObjectBase* o) {
+    auto& aff = o->affected;
+    if (aff.empty()) return;
+
+    // Iterate from tail to head (i = size-1 ... 1)
+    for (std::size_t i = aff.size(); i-- > 0; ) {
+        if (aff[i].location == 0) continue; // skip empty slots
+
+        for (std::size_t j = 0; j < i; ++j) {
+            if (aff[j].location == aff[i].location &&
+                aff[j].modifier == aff[i].modifier &&
+                aff[j].isBitwise()) {
+                // Combine the specifics with bitwise OR into the earlier slot
+                aff[j].specific |= aff[i].specific;
+
+                // Clear the tail-wards element (same effect as your original)
+                aff[i].location = 0;
+                aff[i].modifier = 0.0;
+                aff[i].specific = 0;
+                break;
+            }
+        }
+    }
+
+    std::erase_if(aff, [](const affected_type& a) { return a.location == 0; });
+    o->affected.shrink_to_fit();
+}
+
 template<typename T>
 static void migrate_obj_data(T* o) {
     // Convert obj_affects
@@ -4430,45 +4456,7 @@ static void migrate_obj_data(T* o) {
         migrate_aff(&aff);
     }
 
-    // Iterate from tail to head to combine matching affects
-    for (int i = MAX_OBJ_AFFECT - 1; i > 0; --i) {
-        if (o->affected[i].location == 0) continue; // Skip empty slots
-
-        for (int j = 0; j < i; ++j) {
-            if (o->affected[j].location == o->affected[i].location &&
-                o->affected[j].modifier == o->affected[i].modifier &&
-                o->affected[j].isBitwise()) {
-                // Combine the specifics with bitwise OR
-                o->affected[j].specific |= o->affected[i].specific;
-
-                // Clear the tail-wards element
-                o->affected[i].location = 0;
-                o->affected[i].modifier = 0.0;
-                o->affected[i].specific = 0;
-                break;
-            }
-        }
-    }
-
-    // Now compact the array, moving everything towards index 0
-    int empty_index = -1;
-    for (int i = 0; i < MAX_OBJ_AFFECT; ++i) {
-        if (o->affected[i].location == 0 && empty_index == -1) {
-            // Mark the first empty slot found
-            empty_index = i;
-        } else if (o->affected[i].location != 0 && empty_index != -1) {
-            // Move the non-empty slot to the first empty slot found
-            o->affected[empty_index] = o->affected[i];
-            // Clear the current slot
-            o->affected[i].location = 0;
-            o->affected[i].modifier = 0.0;
-            o->affected[i].specific = 0;
-            // Update empty_index to the next empty slot
-            ++empty_index;
-        }
-    }
-
-    // extra_flags data.
+    combine_and_trim(o);
 
     // First let's cconvert all relevant flags to new data structures.
     for(auto i = 0; i < 96; i++) {

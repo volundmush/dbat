@@ -36,6 +36,13 @@ Location::Location(Room *room) : Location()
     }
 }
 
+Location::Location(const std::shared_ptr<AbstractLocation>& al, const Coordinates& pos)
+{
+    this->al = al;
+    position = pos;
+    locationID = getLocID();
+}
+
 Location::Location(const std::shared_ptr<Room>& room)
 {
     al = room;

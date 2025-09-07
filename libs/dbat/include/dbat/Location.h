@@ -30,6 +30,7 @@ struct Location {
     Location(room_vnum rv);
     Location(Room* room);
     Location(Character* ch);
+    Location(const std::shared_ptr<AbstractLocation>& al, const Coordinates& pos = {});
     Location(const std::shared_ptr<Room>& room);
     Location(const std::string& txt);
 

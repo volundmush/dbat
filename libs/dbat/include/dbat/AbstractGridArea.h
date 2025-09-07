@@ -7,7 +7,8 @@
 
 struct TileOverride : public HasResetCommands {
     explicit operator bool() const;
-    std::unordered_map<std::string, std::string> strings;
+    std::string name;
+    std::string look_description;
     std::optional<SectorType> sectorType;
     FlagHandler<RoomFlag> roomFlags;
     FlagHandler<WhereFlag> whereFlags;

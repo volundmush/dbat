@@ -426,7 +426,8 @@ bool Room::buildwalk(const Coordinates& coor, Character* ch, Direction dir) {
 }
 
 void Room::setString(const Coordinates& coor, const std::string& name, const std::string& value) {
-    strings[name] = value;
+    if (name == "name") this->name = value;
+    else if (name == "look_description") this->look_description = value;
 }
 
 void Room::setResetCommands(const Coordinates& coor, const std::vector<ResetCommand>& cmds) {

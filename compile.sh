@@ -26,6 +26,8 @@ esac
 BDIR="build"
 cmake -S . -B "$BDIR" -G Ninja -DCMAKE_BUILD_TYPE=${MODE} -DDBAT_BUILD_PYTHON=ON
 
+rm -rf $BDIR/libs/ext
+
 # Build just the Python module by default for speed; pass "all" to build everything.
 TARGET="${2:-dbat_ext}"
 if [[ "${1,,}" == "release" || "${1,,}" == "reldeb" || "${1,,}" == "debug" ]]; then

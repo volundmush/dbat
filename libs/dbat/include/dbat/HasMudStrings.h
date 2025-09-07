@@ -14,5 +14,4 @@ struct HasMudStrings {
     const char* getLookDescription() const;
     std::string short_description;
     const char* getShortDescription() const;
-    std::unordered_map<std::string, std::string> strings;
 };

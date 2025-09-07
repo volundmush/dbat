@@ -32,9 +32,6 @@ cdef extern from "dbat/saveload.h":
     void to_json(json& j, const db.help_index_element& h)
     void from_json(const json& j, db.help_index_element& m)
 
-    void to_json(json& j, const db.ThingPrototype& h)
-    void from_json(const json& j, db.ThingPrototype& m)
-
     void to_json(json& j, const db.ObjectPrototype& h)
     void from_json(const json& j, db.ObjectPrototype& m)
 

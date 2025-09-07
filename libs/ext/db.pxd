@@ -77,18 +77,15 @@ cdef extern from "dbat/Account.h":
     Account* findAccount(const string& name)
     Account* createAccount(const string& name, const string& password)
 
-cdef extern from "dbat/ThingPrototype.h":
-    cdef cppclass ThingPrototype:
-        pass
 
 cdef extern from "dbat/CharacterPrototype.h":
-    cdef cppclass CharacterPrototype(ThingPrototype):
+    cdef cppclass CharacterPrototype:
         pass
 
     map[int, shared_ptr[CharacterPrototype]] mob_proto
 
 cdef extern from "dbat/ObjectPrototype.h":
-    cdef cppclass ObjectPrototype(ThingPrototype):
+    cdef cppclass ObjectPrototype:
         pass
 
     map[int, shared_ptr[ObjectPrototype]] obj_proto
@@ -217,4 +214,4 @@ cdef extern from "dbat/API.h":
     vector[string] getBioGenomeNames()
     vector[string] getMutationNames()
     vector[string] getSexNames()
-    vector[string] getSubRaceNames()
+    vector[string] getAndroidModelNames()

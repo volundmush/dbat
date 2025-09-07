@@ -473,8 +473,8 @@ def get_names(category: str) -> list[str]:
         names = db.getCharacterFlagNames()
     elif category == "zone_flags":
         names = db.getZoneFlagNames()
-    elif category == "subraces":
-        names = db.getSubRaceNames()
+    elif category == "android_models":
+        names = db.getAndroidModelNames()
     elif category == "sexes":
         names = db.getSexNames()
     elif category == "mutations":

@@ -213,7 +213,7 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(HasAffectFlags, affect_flags)
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(HasStats, stats)
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(HasID, id)
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(HasExtraDescriptions, extra_descriptions)
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(HasMudStrings, strings)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(HasMudStrings, name, look_description, short_description, room_description)
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(HasVnum, vn)
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(HasVariables, variables)
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(Location, locationID, position)
@@ -1041,6 +1041,7 @@ void from_json(const json &j, Destination &e)
 void to_json(json &j, const Room &r)
 {
     // we need to call the to_json for unit_data...
+    to_json(j, static_cast<const HasVnum &>(r));
     to_json(j, static_cast<const HasDgScripts &>(r));
     to_json(j, static_cast<const HasMudStrings &>(r));
     to_json(j, static_cast<const HasExtraDescriptions &>(r));
@@ -1064,6 +1065,7 @@ void to_json(json &j, const Room &r)
 void from_json(const json &j, Room &r)
 {
     // call the from_json of unit_data...
+    from_json(j, static_cast<HasVnum &>(r));
     from_json(j, static_cast<HasDgScripts &>(r));
     from_json(j, static_cast<HasMudStrings &>(r));
     from_json(j, static_cast<HasExtraDescriptions &>(r));
@@ -1289,13 +1291,7 @@ void from_json(const json& j, ObjectBase &o) {
     if (j.contains("size")) j.at("size").get_to(o.size);
     if (j.contains("affect_flags")) j.at("affect_flags").get_to(o.affect_flags);
 
-    if (j.contains("affected")) {
-        int counter = 0;
-        for (auto &i : j["affected"]) {
-            i.get_to(o.affected[counter]);
-            counter++;
-        }
-    }
+    if (j.contains("affected")) j.at("affected").get_to(o.affected);
 }
 
 void to_json(json &j, const ObjectPrototype &o)
@@ -1633,7 +1629,8 @@ void from_json(const json& j, HasDgScripts& p) {
 
 void to_json(json& j, const TileOverride& p) {
     to_json(j, static_cast<const HasResetCommands&>(p));
-    j["strings"] = p.strings;
+    if(!p.name.empty()) j["name"] = p.name;
+    if(!p.look_description.empty()) j["look_description"] = p.look_description;
     j["roomFlags"] = p.roomFlags;
     j["whereFlags"] = p.whereFlags;
     j["damage"] = p.damage;
@@ -1645,19 +1642,14 @@ void to_json(json& j, const TileOverride& p) {
 
 void from_json(const json& j, TileOverride& p) {
     from_json(j, static_cast<HasResetCommands&>(p));
-    if (j.contains("strings"))
-        p.strings = j["strings"].get<std::unordered_map<std::string, std::string>>();
-    if (j.contains("roomFlags"))
-        p.roomFlags = j["roomFlags"].get<FlagHandler<RoomFlag>>();
-    if (j.contains("whereFlags"))
-        p.whereFlags = j["whereFlags"].get<FlagHandler<WhereFlag>>();
-    if (j.contains("damage"))
-        p.damage = j["damage"].get<int>();
-    if (j.contains("groundEffect"))
-        p.groundEffect = j["groundEffect"].get<int>();
-    if (j.contains("exits"))
-        p.exits = j["exits"].get<std::map<Direction, Destination>>();
-    if(j.contains("tileDisplay")) p.tileDisplay = j["tileDisplay"].get<std::string>();
+    if(j.contains("name")) j.at("name").get_to(p.name);
+    if(j.contains("look_description")) j.at("look_description").get_to(p.look_description);
+    if (j.contains("roomFlags")) j.at("roomFlags").get_to(p.roomFlags);
+    if (j.contains("whereFlags")) j.at("whereFlags").get_to(p.whereFlags);
+    if (j.contains("damage")) j.at("damage").get_to(p.damage);
+    if (j.contains("groundEffect")) j.at("groundEffect").get_to(p.groundEffect);
+    if (j.contains("exits")) j.at("exits").get_to(p.exits);
+    if(j.contains("tileDisplay")) j.at("tileDisplay").get_to(p.tileDisplay);
 }
 
 

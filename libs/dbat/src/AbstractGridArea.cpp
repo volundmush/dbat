@@ -7,7 +7,7 @@ std::unordered_map<int64_t, std::shared_ptr<GridTemplate>> gridTemplates;
 TileOverride::operator bool() const
 {
     // A TileOverride is considered "valid" if it has at least one of the following:
-    return sectorType.has_value() || !strings.empty() || roomFlags.count() || whereFlags.count() || !exits.empty() || damage != 0 || groundEffect != 0 || !exits.empty();
+    return sectorType.has_value() || !name.empty() || !look_description.empty() || roomFlags.count() || whereFlags.count() || !exits.empty() || damage != 0 || groundEffect != 0 || !exits.empty();
 }
 
 // Helper to fetch or create a TileOverride entry.
@@ -86,7 +86,6 @@ void AbstractGridArea::rebuildShapeIndex() {
 }
 
 AbstractGridArea& AbstractGridArea::operator=(const GridTemplate& other) {
-    strings = other.strings;
     shapes.clear();
     for(const auto& [name, shapeBase] : other.shapes) {
         shapes[name] = std::make_unique<Shape>(shapeBase);
@@ -206,10 +205,7 @@ const char *AbstractGridArea::getName(const Coordinates &coor) const
 {
     if (auto t = find_tile(tileOverrides, coor))
     {
-        if (auto it = t->strings.find("name"); it != t->strings.end())
-        {
-            return it->second.c_str();
-        }
+        if (!t->name.empty()) return t->name.c_str();
     }
 
     if(auto shp = topShapeAt(coor)) {
@@ -224,10 +220,7 @@ const char *AbstractGridArea::getLookDescription(const Coordinates &coor) const
 {
     if (auto t = find_tile(tileOverrides, coor))
     {
-        if (auto it = t->strings.find("look_description"); it != t->strings.end())
-        {
-            return it->second.c_str();
-        }
+        if(!t->look_description.empty()) return t->look_description.c_str();
     }
     if(auto shp = topShapeAt(coor)) {
         if(!shp->description.empty()) return shp->description.c_str();
@@ -358,7 +351,8 @@ bool AbstractGridArea::buildwalk(const Coordinates& coor, Character* ch, Directi
 
 void AbstractGridArea::setString(const Coordinates& coor, const std::string& name, const std::string& value) {
     auto &t = ensure_tile(tileOverrides, coor);
-    t.strings[name] = value;
+    if (name == "name") t.name = value;
+    else if (name == "look_description") t.look_description = value;
 }
 
 void AbstractGridArea::setResetCommands(const Coordinates& coor, const std::vector<ResetCommand>& cmds) {
