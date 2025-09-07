@@ -8,8 +8,12 @@
 #include "dbat/Parse.h"
 #include "dbat/ID.h"
 #include "dbat/interpreter.h"
+#include "dbat/Enum.h"
+#include "dbat/Flags.h"
 
 #include "dbat/const/WearSlot.h"
+
+
 
 ACMD(do_mush_foreach) {
     if (cdata.lsargs.empty() || cdata.rsargs.empty()) {
@@ -65,7 +69,7 @@ static const std::unordered_map<std::string, ZoneOp> kOps{
     {"land", ZoneOp::Land},
 };
 
-static const std::string mushZoneHelp = R"(
+constexpr std::string_view mushZoneHelp = R"(
 MUSH-style Zone Editor Commands:
 Alias: .z
 
@@ -235,15 +239,13 @@ ACMD(do_mush_zone)
             ch->sendText(res.error());
             return;
         }
-        auto z = res.value();
-        if (cdata.rsargs.empty())
+        auto fres = handleFlagOps<ZoneFlag>(res.value()->zone_flags, cdata.rsargs, "Zone Flags");
+        if (!fres)
         {
-            ch->sendFmt("Current flags: {}\r\n", z->zone_flags.getFlagNames());
+            ch->sendText(fres.error());
             return;
         }
-        auto results = z->zone_flags.applyChanges(std::string(cdata.rsargs));
-        ch->sendText(results.printResults());
-        return;
+        ch->sendFmt("For {}: {}", *res.value(), fres.value());
     }
     case ZoneOp::List:
         list_zones(ch);
@@ -495,7 +497,7 @@ ACMD(do_mush_zone)
     }
 }
 
-static const std::string mushExitsHelp = R"(
+constexpr std::string_view mushExitsHelp = R"(
 MUSH-style Exits Editor
 =============================================================================
 The following exit directions are available:
@@ -694,6 +696,7 @@ ACMD(do_mush_exit)
         }
         ex->key = numRes.value();
         ch->sendFmt("{} Key set to: {}\r\n", *ex, *found->second);
+        ch->location.replaceExit(*ex);
         return;
     }
     case ExitOp::Flags:
@@ -712,14 +715,14 @@ ACMD(do_mush_exit)
             ch->sendFmt("There is no {} exit.\r\n", dir);
             return;
         }
-
-        if (cdata.rsargs.empty())
+        auto res = handleFlagOps<ExitFlag>(ex->exit_flags, cdata.rsargs, "Exit Flags");
+        if (!res)
         {
-            ch->sendFmt("Current flags: {}\r\n", ex->exit_flags.getFlagNames());
+            ch->sendText(res.error());
             return;
         }
-        auto results = ex->exit_flags.applyChanges(std::string(cdata.rsargs));
-        ch->sendText(results.printResults());
+        ch->sendText(res.value());
+        ch->location.replaceExit(*ex);
         return;
     }
     case ExitOp::DCLock:
@@ -747,6 +750,7 @@ ACMD(do_mush_exit)
         }
         ex->dclock = resNum.value();
         ch->sendFmt("{} DC Lock set to: {}\r\n", *ex, ex->dclock);
+        ch->location.replaceExit(*ex);
         return;
     }
     case ExitOp::DCHide:
@@ -774,6 +778,7 @@ ACMD(do_mush_exit)
         }
         ex->dchide = resNum.value();
         ch->sendFmt("{} DC Hide set to: {}\r\n", *ex, ex->dchide);
+        ch->location.replaceExit(*ex);
         return;
     }
     }
@@ -897,7 +902,7 @@ ACMD(do_mush_choices)
     }
 }
 
-static const std::string mushLocationHelp = R"(
+constexpr std::string_view mushLocationHelp = R"(
 MUSH-style Location Editor
 =============================================================================
 Alias: .lo
@@ -1041,24 +1046,19 @@ ACMD(do_mush_location)
             }
             auto loc = locRes.value();
             auto &cf = loc.getRoomFlags();
-            if (cdata.rsargs.empty()) {
-                ch->sendFmt("Current flags: {}\r\n", cf.getFlagNames());
+            auto res = handleFlagOps<RoomFlag>(cf, cdata.rsargs, "Room Flags");
+            if (!res) {
+                ch->sendText(res.error());
                 return;
             }
-            if (boost::iequals(cdata.rsargs, "NONE")) {
-                cf.clear();
-                ch->sendFmt("{} Flags cleared.\r\n", loc);
-                return;
-            }
-            auto results = cf.applyChanges(std::string(cdata.rsargs));
-            ch->sendText(results.printResults());
+            ch->sendFmt("For {}: {}\r\n", loc, res.value());
             return;
         }
     }
 }
 
 
-static const std::string mushResetHelp = R"(
+constexpr std::string_view mushResetHelp = R"(
 MUSH-style Zone Reset Editor
 =============================================================================
 Alias: .res
@@ -1448,16 +1448,311 @@ enum class CharacterBaseOps {
     AffectFlags
 };
 
-using CharacterBaseOpChoice = std::variant<HasMudStringsOp, HasExtraDescOps, HasProtoScriptOps, CharacterBaseOps>;
+using CharacterBaseOpChoice = std::variant<HasMudStringsOp, HasExtraDescOps, CharacterBaseOps>;
 
 Result<CharacterBaseOpChoice> parseCharacterBaseOp(std::string_view op) {
     auto mudStrOp = chooseEnum<HasMudStringsOp>(op, "MudStrings Operation");
     if(mudStrOp) return mudStrOp.value();
     auto exDescOp = chooseEnum<HasExtraDescOps>(op, "ExtraDesc Operation");
     if(exDescOp) return exDescOp.value();
-    auto protoScriptOp = chooseEnum<HasProtoScriptOps>(op, "ProtoScript Operation");
-    if(protoScriptOp) return protoScriptOp.value();
     auto charBaseOp = chooseEnum<CharacterBaseOps>(op, "CharacterBase Operation");
     if(charBaseOp) return charBaseOp.value();
     return err("Invalid operation.");
+}
+
+Result<std::string> handleCharacterBaseOps(CharacterBase* cb, CharacterBaseOpChoice op, CommandData& cdata) {
+    if(std::holds_alternative<HasMudStringsOp>(op)) {
+        auto msOp = std::get<HasMudStringsOp>(op);
+        return handleMudStrings(cb, msOp, std::string(cdata.rsargs));
+    } else if(std::holds_alternative<HasExtraDescOps>(op)) {
+        auto edOp = std::get<HasExtraDescOps>(op);
+        return handleExtraDescs(cb, edOp, cdata.rsargs);
+    } else if(std::holds_alternative<CharacterBaseOps>(op)) {
+        auto cbOp = std::get<CharacterBaseOps>(op);
+        switch(cbOp) {
+            case CharacterBaseOps::Race: {
+                return handleSetEnum<Race>(cb->race, cdata.rsargs, "Race");
+            }
+            case CharacterBaseOps::Model: {
+                // only Androids use model...
+                if(cb->race != Race::android) {
+                    return err("Only Androids have a Model.");
+                }
+                AndroidModel model;
+                auto res = handleSetEnum<AndroidModel>(model, cdata.rsargs, "Model");
+                if(res) {
+                    cb->model = model;
+                }
+                return res;
+            }
+            case CharacterBaseOps::Sensei:
+                return handleSetEnum<Sensei>(cb->sensei, cdata.rsargs, "Sensei");
+            case CharacterBaseOps::Sex:
+                return handleSetEnum<Sex>(cb->sex, cdata.rsargs, "Sex");
+            case CharacterBaseOps::Size:
+                return handleSetEnum<Size>(cb->size, cdata.rsargs, "Size");
+            case CharacterBaseOps::CharacterFlags:
+                return handleFlagOps<CharacterFlag>(cb->character_flags, cdata.rsargs, "Character Flags");
+            case CharacterBaseOps::MobFlags:
+                return handleFlagOps<MobFlag>(cb->mob_flags, cdata.rsargs, "Mob Flags");
+            case CharacterBaseOps::BioGenomes:
+                return handleFlagOps<Race>(cb->bio_genomes, cdata.rsargs, "BioGenomes");
+            case CharacterBaseOps::Mutations:
+                return handleFlagOps<Mutation>(cb->mutations, cdata.rsargs, "Mutations");
+            case CharacterBaseOps::AffectFlags:
+                return handleFlagOps<AffectFlag>(cb->affect_flags, cdata.rsargs, "Affect Flags");
+        }
+    }
+    return err("Invalid operation.");
+}
+
+constexpr std::string_view mushProtoHelp = R"(
+MUSH-style Mobile (mob) Prototype Editor
+=============================================================================
+Alias: .mp
+
+This command manages the mobile prototypes in the game.
+Remember that the /switches can partial match.
+
+.mproto <vnum>
+    Display information about the given Mob Prototype.
+
+.mproto/create <vnum>
+    Create a new Mob Prototype with the given Vnum.
+
+.mproto/delete <vnum>=YES
+    Delete the given Mob Prototype. You must type YES to confirm.
+
+.mproto/list <startVnum>=<endVnum>
+    List all Mob Prototypes in the given range.
+
+.mproto/stat <vnum>/[<stat>[=<value>]]
+    Set a stat on the given Mob Prototype. Omit the value to see options.
+    Examples:
+    .mproto/stat 50 to view all stats that mob proto 50 can have. 
+    .mproto/stat 50/strength to view info about strength,
+    .mproto/stat 50/strength=10 to set strength to 10.
+
+.mproto/name <vnum>=<name>
+    Set the Name for a Mob Prototype. This is really the keywords used for
+    searching.
+
+.mproto/shortdesc <vnum>=<short description>
+    Set the Short Description for a Mob Prototype. This is what people see when
+    the mobile is used in action descriptions.
+
+.mproto/lookdesc <vnum>=<look description>
+    Set the Look Description for a Mob Prototype. This is what people see when
+    they look at the mobile.
+
+.mproto/roomdesc <vnum>=<room description>
+    Set the Room Description for a Mob Prototype. This is what people see when
+    the mobile is listed amongst others in a location.
+
+.mproto/listextradesc <vnum>
+    List all Extra Descriptions for the given Mob Prototype.
+
+.mproto/addextradesc <vnum>=<keyword>|<description>
+    Add an Extra Description to the given Mob Prototype. Separate keywords and
+    description with a | (pipe). The | character may not appear in either field.
+
+.mproto/removeextradesc <vnum>=<index>
+    Remove the Extra Description at the given index from the Mob Prototype.
+
+.mproto/clearextradesc <vnum>
+    Remove all Extra Descriptions from the Mob Prototype.
+
+.mproto/listscripts <vnum>
+    List all DgScripts assigned to the given Mob Prototype.
+
+.mproto/addscript <vnum>=<scriptVnum>|<index>
+    Add a DgScript to the given Mob Prototype. Separate vnum and index with
+    a | (pipe). use index -1 to append to the end, otherwise it will insert at
+    given index and 'push down' anything after it. The order does matter as the
+    scripts are processed in that order.
+
+.mproto/removescript <vnum>=<index>
+    Remove the DgScript at the given index from the Mob Prototype.
+
+.mproto/clearscripts <vnum>
+    Remove all DgScripts from the Mob Prototype.
+
+.mproto/race <vnum>=<race>
+    Set the Race for the given Mob Prototype.
+
+.mproto/model <vnum>=<model>
+    Set the Model for the given Mob Prototype. Only Androids have a model.
+
+.mproto/sensei <vnum>=<sensei>
+    Set the Sensei for the given Mob Prototype.
+
+.mproto/sex <vnum>=<sex>
+    Set the sex for the given Mob Prototype.
+
+.mproto/size <vnum>=<size>
+    Set the size for the given Mob Prototype.
+
+.mproto/characterflags <vnum>=<flags>
+    Set the Character Flags for the given Mob Prototype.
+    Use + or - to add or remove flags. Example: +FLAG1 -FLAG2
+    See .choices/CharacterFlags
+
+.mproto/mobflags <vnum>=<flags>
+    Set the Mob Flags for the given Mob Prototype.
+    See .choices/MobFlags
+
+.mproto/affectflags <vnum>=<flags>
+    Set the Affect Flags for the given Mob Prototype.
+    See .choices/AffectFlags
+
+.mproto/biogenomes <vnum>=<flags>
+    Set the BioGenomes for the given Mob Prototype.
+    See .choices/Race
+    Note: Meant for Bio-Androids, but will work on any mob.
+
+.mproto/mutations <vnum>=<flags>
+    Set the Mutations for the given Mob Prototype.
+    See .choices/Mutations
+    Note: Meant for Mutants, but will work on any mob.
+
+)";
+
+enum class MobProtoOps {
+    ExamineProto,
+    CreateProto,
+    ListProto,
+    DeleteProto,
+    StatProto,
+    Help
+};
+
+Result<CharacterPrototype*> getMobProto(std::string_view arg) {
+    auto numRes = parseNumber<mob_vnum>(arg, "Mob Vnum");
+    if(!numRes) {
+        return err(numRes.error());
+    }
+    auto mv = numRes.value();
+    auto found = mob_proto.find(mv);
+    if(found == mob_proto.end()) {
+        return err("Mob Proto not found.");
+    }
+    return found->second.get();
+}
+
+void handleMobProtoOps(Character *ch, MobProtoOps op, CommandData& cdata) {
+    switch(op) {
+        case MobProtoOps::ExamineProto: {
+            return;
+        }
+        case MobProtoOps::ListProto: {
+            ch->sendText("Not implemented yet.\r\n");
+            return;
+        }
+        case MobProtoOps::CreateProto: {
+            auto numRes = parseNumber<mob_vnum>(cdata.lsargs, "Mob Vnum");
+            if(!numRes) {
+                ch->sendText(numRes.error());
+                return;
+            }
+            auto mv = numRes.value();
+            if(mob_proto.contains(mv)) {
+                ch->sendFmt("Mob Proto {} already exists.\r\n", mv);
+                return;
+            }
+            auto newMob = std::make_shared<CharacterPrototype>();
+            newMob->vn = mv;
+            newMob->name = "unnamed mobile";
+            newMob->short_description = "an unnamed mobile";
+            newMob->look_description = "You see nothing special.\r\n";
+            newMob->room_description = "An unnamed mobile is here. Someone nag a builder.\r\n";
+            mob_proto.emplace(mv, newMob);
+            ch->sendFmt("Created new Mob Proto: {}\r\n", *newMob);
+            return;
+        }
+        case MobProtoOps::DeleteProto: {
+            ch->sendText("Not implemented yet.\r\n");
+            return;
+        }
+        case MobProtoOps::StatProto: {
+            ch->sendText("Not implemented yet.\r\n");
+            return;
+        }
+        case MobProtoOps::Help: {
+            ch->sendText(mushProtoHelp);
+            return;
+        }
+    }
+}
+
+
+
+ACMD(do_mush_mproto) {
+    std::string_view op = cdata.switches.empty() ? "" : cdata.switches[0];
+
+    auto oper = chooseEnum<MobProtoOps>(op, "MobProto Operation");
+    if(oper) {
+        handleMobProtoOps(ch, oper.value(), cdata);
+        return;
+    }
+
+    // Or are we adding a Script Prototype Vnum to it...?
+    auto protoSc = chooseEnum<HasProtoScriptOps>(op, "ProtoScript Operation");
+    if(protoSc) {
+        auto mobRes = getMobProto(cdata.lsargs);
+        if(!mobRes) {
+            ch->sendText(mobRes.error());
+            return;
+        }
+        auto res = handleProtoScripts(mobRes.value(), protoSc.value(), cdata.rsargs);
+        if(!res) {
+            ch->sendText(res.error());
+            return;
+        }
+        ch->sendFmt("{} Modified: {}\r\n", *mobRes.value(), res.value());
+        return;
+    }
+
+    auto charBaseOpRes = parseCharacterBaseOp(op);
+    if(charBaseOpRes) {
+        auto mobRes = getMobProto(cdata.lsargs);
+        if(!mobRes) {
+            ch->sendText(mobRes.error());
+            return;
+        }
+        auto res = handleCharacterBaseOps(mobRes.value(), charBaseOpRes.value(), cdata);
+        if(!res) {
+            ch->sendText(res.error());
+        } else {
+            ch->sendFmt("{} Modified: {}\r\n", *mobRes.value(), res.value());
+        }
+        return;
+    }
+    ch->sendText("Invalid Operation. See .mproto/help\r\n");
+
+}
+
+enum class HasPickyOps {
+    OnlyAlign,
+    NotAlign,
+    OnlySensei,
+    NotSensei,
+    OnlyRace,
+    NotRace
+};
+
+Result<std::string> handlePickyOps(HasPicky* hp, HasPickyOps op, std::string_view arg) {
+    switch(op) {
+        case HasPickyOps::OnlyAlign:
+            return handleFlagOps<MoralAlign>(hp->only_alignment, arg, "Only Alignments");
+        case HasPickyOps::NotAlign:
+            return handleFlagOps<MoralAlign>(hp->not_alignment, arg, "Not Alignments");
+        case HasPickyOps::OnlySensei:
+            return handleFlagOps<Sensei>(hp->only_sensei, arg, "Only Sensei");
+        case HasPickyOps::NotSensei:
+            return handleFlagOps<Sensei>(hp->not_sensei, arg, "Not Sensei");
+        case HasPickyOps::OnlyRace:
+            return handleFlagOps<Race>(hp->only_race, arg, "Only Races");
+        case HasPickyOps::NotRace:
+            return handleFlagOps<Race>(hp->not_race, arg, "Not Races");
+    }
 }

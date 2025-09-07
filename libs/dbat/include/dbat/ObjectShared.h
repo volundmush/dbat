@@ -46,7 +46,7 @@ extern bool OBJ_FLAGGED(Object *obj, int flag);
 
 struct ObjectBase : public HasVnum, public HasMudStrings, public HasExtraDescriptions, public HasStats, public HasPicky {
     ItemType type_flag{ItemType::unknown};      /* Type of item                        */
-    std::array<affected_type, MAX_OBJ_AFFECT> affected;  /* affects */
+    std::vector<affected_type> affected;  /* affects */
     FlagHandler<WearFlag> wear_flags{}; /* Where you can wear it     */
     FlagHandler<ItemFlag> item_flags{}; /* If it hums, glows, etc.  */
     FlagHandler<AffectFlag> affect_flags{};

@@ -41,10 +41,7 @@ std::vector<std::string> getWhereFlagNames();
 std::vector<std::string> getSexNames();
 std::vector<std::string> getMutationNames();
 std::vector<std::string> getBioGenomeNames();
-std::vector<std::string> getSubRaceNames();
-
-
-
+std::vector<std::string> getAndroidModelNames();
 
 extern std::vector<CharacterPrototype *> collectNPCProtos(int start_vnum, int end_vnum);
 extern std::vector<ObjectPrototype *> collectItemProtos(int start_vnum, int end_vnum);

@@ -5667,7 +5667,7 @@ void hurt(int limb, int chance, Character *ch, Character *vict, Object *obj, int
         if (!IS_NPC(vict) && GET_SKILL(vict, SKILL_ARMOR))
         {
             int nanite = GET_SKILL(vict, SKILL_ARMOR), perc = Random::get<int>(1, 220);
-            if (vict->subrace == SubRace::android_model_sense)
+            if (vict->model == AndroidModel::Sense)
             {
                 perc = Random::get<int>(1, 176);
             }

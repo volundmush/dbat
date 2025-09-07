@@ -362,7 +362,7 @@ void do_start(Character *ch)
         punch = Random::get<int>(10, 16);
         SET_SKILL(ch, SKILL_REGENERATE, punch);
     }
-    if (IS_ANDROID(ch) && ch->subrace == SubRace::android_model_absorb)
+    if (IS_ANDROID(ch) && ch->model == AndroidModel::Absorb)
     {
         punch = Random::get<int>(25, 35);
         SET_SKILL(ch, SKILL_ABSORB, punch);
@@ -452,7 +452,7 @@ void do_start(Character *ch)
     advance_level(ch);
     /*mudlog(BRF, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), TRUE, "%s advanced to level %d", GET_NAME(ch), GET_LEVEL(ch));*/
 
-    if (IS_ANDROID(ch) && ch->subrace == SubRace::android_model_sense)
+    if (IS_ANDROID(ch) && ch->model == AndroidModel::Sense)
     {
         SET_SKILL(ch, SKILL_SENSE, 100);
         for (const auto &s : {"health", "ki", "stamina"})
@@ -1146,10 +1146,10 @@ int invalid_class(Character *ch, Object *obj)
     if (GET_ADMLEVEL(ch) >= ADMLVL_IMMORT)
         return false;
 
-    if (!obj->only_sensei.empty() && !obj->only_sensei.contains(ch->sensei))
+    if (obj->only_sensei.count() && !obj->only_sensei.get(ch->sensei))
         return true;
 
-    if (obj->not_sensei.contains(ch->sensei))
+    if (obj->not_sensei.get(ch->sensei))
         return true;
 
     return false;

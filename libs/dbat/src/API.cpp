@@ -161,8 +161,8 @@ std::vector<std::string> getMutationNames() {
         return getEnumNameList<Mutation>();
 }
 
-std::vector<std::string> getSubRaceNames() {
-        return getEnumNameList<SubRace>();
+std::vector<std::string> getAndroidModelNames() {
+        return getEnumNameList<AndroidModel>();
 }
 
 std::vector<std::string> getBioGenomeNames() {

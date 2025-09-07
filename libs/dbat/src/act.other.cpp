@@ -4811,7 +4811,7 @@ ACMD(do_recharge)
         return;
     }
 
-    if (ch->subrace != SubRace::android_model_repair)
+    if (ch->model != AndroidModel::Repair)
     {
         ch->sendText("You are not a repair model android.\r\n");
         return;
@@ -4870,7 +4870,7 @@ ACMD(do_srepair)
         return;
     }
 
-    if (!IS_NPC(ch) && ch->subrace != SubRace::android_model_repair)
+    if (!IS_NPC(ch) && ch->model != AndroidModel::Repair)
     {
         ch->sendText("You are not a repair model android.\r\n");
         return;
@@ -4959,7 +4959,7 @@ ACMD(do_upgrade)
 
     if (!*arg)
     {
-        if (ch->subrace != SubRace::android_model_absorb)
+        if (ch->model != AndroidModel::Absorb)
         {
             ch->sendText("@c--------@D[@rUpgrade Menu@D]@c--------\r\n"
                          "@cUpgrade @RPowerlevel@D: @Y75 @WPoints\r\n"
@@ -5067,7 +5067,7 @@ ACMD(do_upgrade)
         }
     }
 
-    if (ch->subrace == SubRace::android_model_absorb)
+    if (ch->model == AndroidModel::Absorb)
     {
         ch->sendText("You are an absorb model and can only upgrade with augmentation kits.\r\n");
         return;
@@ -5551,7 +5551,7 @@ ACMD(do_absorb)
     {
         if (!IS_NPC(ch))
         {
-            if (ch->subrace != SubRace::android_model_absorb)
+            if (ch->model != AndroidModel::Absorb)
             {
                 ch->sendText("You are not an absorbtion model.\r\n");
                 return;
@@ -8605,7 +8605,7 @@ ACMD(do_instant)
     {
         return;
     }
-    else if (!GET_SKILL(ch, SKILL_SENSE) && ch->subrace != SubRace::android_model_sense)
+    else if (!GET_SKILL(ch, SKILL_SENSE) && ch->model != AndroidModel::Sense)
     {
         ch->sendText("You can't sense them to go to there!\r\n");
         return;

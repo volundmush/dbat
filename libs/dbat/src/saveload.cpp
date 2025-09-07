@@ -671,30 +671,20 @@ static void dump_dgscripts(const std::filesystem::path &loc)
 // org_data...
 void to_json(json &j, const picky_data &p)
 {
-    if (!p.not_alignment.empty())
-        j["not_alignment"] = p.not_alignment;
-    if (!p.not_race.empty())
-        j["not_race"] = p.not_race;
-    if (!p.only_race.empty())
-        j["only_race"] = p.only_race;
-    if (!p.not_sensei.empty())
-        j["not_sensei"] = p.not_sensei;
-    if (!p.only_sensei.empty())
-        j["only_sensei"] = p.only_sensei;
+    if (p.not_alignment) j["not_alignment"] = p.not_alignment;
+    if (p.not_race) j["not_race"] = p.not_race;
+    if (p.only_race) j["only_race"] = p.only_race;
+    if (p.not_sensei) j["not_sensei"] = p.not_sensei;
+    if (p.only_sensei) j["only_sensei"] = p.only_sensei;
 }
 
 void from_json(const json &j, picky_data &p)
 {
-    if (j.contains("not_alignment"))
-        p.not_alignment = j["not_alignment"].get<std::unordered_set<MoralAlign>>();
-    if (j.contains("not_race"))
-        p.not_race = j["not_race"].get<std::unordered_set<Race>>();
-    if (j.contains("only_race"))
-        p.only_race = j["only_race"].get<std::unordered_set<Race>>();
-    if (j.contains("not_sensei"))
-        p.not_sensei = j["not_sensei"].get<std::unordered_set<Sensei>>();
-    if (j.contains("only_sensei"))
-        p.only_sensei = j["only_sensei"].get<std::unordered_set<Sensei>>();
+    if (j.contains("not_alignment")) j.at("not_alignment").get_to(p.not_alignment);
+    if (j.contains("not_race")) j.at("not_race").get_to(p.not_race);
+    if (j.contains("only_race")) j.at("only_race").get_to(p.only_race);
+    if (j.contains("not_sensei")) j.at("not_sensei").get_to(p.not_sensei);
+    if (j.contains("only_sensei")) j.at("only_sensei").get_to(p.only_sensei);
 }
 
 void to_json(json &j, const org_data &o)
@@ -1586,7 +1576,7 @@ void to_json(json &j, const CharacterBase &c) {
     to_json(j, static_cast<const HasExtraDescriptions&>(c));
     to_json(j, static_cast<const HasStats&>(c));
     j["race"] = c.race;
-    if(c.subrace) j["subrace"] = c.subrace;
+    if(c.model) j["model"] = c.model;
     j["sex"] = c.sex;
     j["size"] = c.size;
     if(c.character_flags) j["character_flags"] = c.character_flags;
@@ -1602,7 +1592,7 @@ void from_json(const json &j, CharacterBase &c) {
     from_json(j, static_cast<HasExtraDescriptions&>(c));
     from_json(j, static_cast<HasStats&>(c));
     if (j.contains("race")) c.race = j["race"];
-    if (j.contains("subrace")) c.subrace = j["subrace"];
+    if (j.contains("model")) c.model = j["model"];
     if (j.contains("sex")) c.sex = j["sex"];
     if (j.contains("size")) c.size = j["size"];
     if (j.contains("character_flags")) j.at("character_flags").get_to(c.character_flags);

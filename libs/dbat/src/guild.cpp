@@ -541,9 +541,9 @@ int is_guild_ok_char(Character *keeper, Character *ch, int guild_nr)
 
     auto &g = guild_index.at(guild_nr);
 
-    if ((IS_GOOD(ch) && g->not_alignment.contains(MoralAlign::good)) ||
-        (IS_EVIL(ch) && g->not_alignment.contains(MoralAlign::evil)) ||
-        (IS_NEUTRAL(ch) && g->not_alignment.contains(MoralAlign::neutral)))
+    if ((IS_GOOD(ch) && g->not_alignment.get(MoralAlign::good)) ||
+        (IS_EVIL(ch) && g->not_alignment.get(MoralAlign::evil)) ||
+        (IS_NEUTRAL(ch) && g->not_alignment.get(MoralAlign::neutral)))
     {
         snprintf(buf, sizeof(buf), "%s %s",
                  GET_NAME(ch), MSG_TRAINER_DISLIKE_ALIGN);
@@ -554,7 +554,7 @@ int is_guild_ok_char(Character *keeper, Character *ch, int guild_nr)
     if (IS_NPC(ch))
         return (false);
 
-    if (g->not_sensei.contains(ch->sensei))
+    if (g->not_sensei.get(ch->sensei))
     {
         snprintf(buf, sizeof(buf), "%s %s",
                  GET_NAME(ch), MSG_TRAINER_DISLIKE_CLASS);
@@ -562,17 +562,14 @@ int is_guild_ok_char(Character *keeper, Character *ch, int guild_nr)
         return (false);
     }
 
-    for (auto &cl : g->only_sensei)
+    if (!g->only_sensei.count() && !g->only_sensei.get(ch->sensei))
     {
-        if (cl != ch->sensei)
-        {
-            snprintf(buf, sizeof(buf), "%s %s", GET_NAME(ch), MSG_TRAINER_DISLIKE_CLASS);
-            do_tell(keeper, buf, cmd_tell, 0);
-            return (false);
-        }
+        snprintf(buf, sizeof(buf), "%s %s", GET_NAME(ch), MSG_TRAINER_DISLIKE_CLASS);
+        do_tell(keeper, buf, cmd_tell, 0);
+        return (false);
     }
 
-    if (g->not_race.contains(ch->race))
+    if (g->not_race.get(ch->race))
     {
         snprintf(buf, sizeof(buf), "%s %s",
                  GET_NAME(ch), MSG_TRAINER_DISLIKE_RACE);
@@ -580,14 +577,11 @@ int is_guild_ok_char(Character *keeper, Character *ch, int guild_nr)
         return (false);
     }
 
-    for (auto &r : g->only_race)
+    if (!g->only_race.count() && !g->only_race.get(ch->race))
     {
-        if (r != ch->race)
-        {
-            snprintf(buf, sizeof(buf), "%s %s", GET_NAME(ch), MSG_TRAINER_DISLIKE_RACE);
-            do_tell(keeper, buf, cmd_tell, 0);
-            return (false);
-        }
+        snprintf(buf, sizeof(buf), "%s %s", GET_NAME(ch), MSG_TRAINER_DISLIKE_RACE);
+        do_tell(keeper, buf, cmd_tell, 0);
+        return (false);
     }
 
     return (true);

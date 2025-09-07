@@ -235,3 +235,14 @@ public:
         return results;
     }
 };
+
+template<typename EnumType>
+requires std::is_enum_v<EnumType>
+Result<std::string> handleFlagOps(FlagHandler<EnumType>& flags, std::string_view arg, std::string_view fieldName) {
+    if (arg.empty())
+    {
+        return fmt::format("Current {}: {}\r\n", fieldName, flags.getFlagNames());
+    }
+    auto results = flags.applyChanges(std::string(arg));
+    return fmt::format("{} changes:\r\n{}", fieldName, results.printResults());
+}

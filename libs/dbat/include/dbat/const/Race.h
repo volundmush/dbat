@@ -29,11 +29,11 @@ enum class Race : std::uint8_t
     mechanical = 23,
 };
 
-enum class SubRace : std::uint8_t
+enum class AndroidModel : std::uint8_t
 {
-    android_model_absorb = 0,
-    android_model_repair = 1,
-    android_model_sense = 2
+    Absorb = 0,
+    Repair = 1,
+    Sense = 2
 };
 
 /* Races */

@@ -857,7 +857,7 @@ void androidAbsorbSystem(uint64_t heartPulse, double deltaTime)
                         ch->send_to("@gYou gain +@G%d@g permanent powerlevel!@n\r\n", gain);
                         if (group_bonus(ch, 2) == 7)
                         {
-                            if (leader->subrace == SubRace::android_model_sense)
+                            if (leader->model == AndroidModel::Sense)
                             {
                                 int gbonus = gain * 0.15;
                                 gain += gbonus;
@@ -893,7 +893,7 @@ void androidAbsorbSystem(uint64_t heartPulse, double deltaTime)
                         ch->send_to("@gYou gain +@G%d@g permanent stamina!@n\r\n", gain);
                         if (group_bonus(ch, 2) == 7)
                         {
-                            if (leader->subrace == SubRace::android_model_sense)
+                            if (leader->model == AndroidModel::Sense)
                             {
                                 int gbonus = gain * 0.15;
                                 gain += gbonus;
@@ -929,7 +929,7 @@ void androidAbsorbSystem(uint64_t heartPulse, double deltaTime)
                         ch->send_to("@gYou gain +@G%d@g permanent ki!@n\r\n", gain);
                         if (ch->master && group_bonus(ch, 2) == 7)
                         {
-                            if (leader->subrace == SubRace::android_model_sense)
+                            if (leader->model == AndroidModel::Sense)
                             {
                                 int gbonus = gain * 0.15;
                                 gain += gbonus;

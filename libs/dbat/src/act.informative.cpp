@@ -4353,15 +4353,15 @@ ACMD(do_score)
         {
             char model[100], version[100];
             int absorb = 0;
-            if (ch->subrace == SubRace::android_model_absorb)
+            if (ch->model == AndroidModel::Absorb)
             {
                 sprintf(model, "@CAbsorption");
             }
-            else if (ch->subrace == SubRace::android_model_repair)
+            else if (ch->model == AndroidModel::Repair)
             {
                 sprintf(model, "@GSelf Repairing");
             }
-            else if (ch->subrace == SubRace::android_model_sense)
+            else if (ch->model == AndroidModel::Sense)
             {
                 sprintf(model, "@RSensor Equiped");
             }
@@ -4767,7 +4767,7 @@ ACMD(do_status)
 
         if (GET_LEVEL(ch) < 100)
         {
-            if ((IS_ANDROID(ch) && ch->subrace == SubRace::android_model_absorb) || (!IS_ANDROID(ch) && !IS_BIO(ch) && !IS_MAJIN(ch)))
+            if ((IS_ANDROID(ch) && ch->model == AndroidModel::Absorb) || (!IS_ANDROID(ch) && !IS_BIO(ch) && !IS_MAJIN(ch)))
             {
                 ch->send_to("         @R%s@n to SC a stat this level.\r\n", add_commas(ch->calc_soft_cap()).c_str());
             }

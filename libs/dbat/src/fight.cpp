@@ -393,12 +393,12 @@ static void mob_attack(Character *ch, char *buf)
         }
         else if (special < 100)
         { /* Normal physical attack */
-            if (IS_ANDROID(ch) && ch->subrace == SubRace::android_model_repair && GET_HIT(ch) <= (ch->getEffectiveStat<int64_t>("health")) * 0.5 &&
+            if (IS_ANDROID(ch) && ch->model == AndroidModel::Repair && GET_HIT(ch) <= (ch->getEffectiveStat<int64_t>("health")) * 0.5 &&
                 Random::get<int>(1, 20) >= 16)
             {
                 do_srepair(ch, nullptr, 0, 0);
             }
-            else if (IS_ANDROID(ch) && ch->subrace == SubRace::android_model_absorb && Random::get<int>(1, 20) >= 19)
+            else if (IS_ANDROID(ch) && ch->model == AndroidModel::Absorb && Random::get<int>(1, 20) >= 19)
             {
                 do_absorb(ch, buf2, 0, 0);
             }
@@ -2276,12 +2276,12 @@ void raw_kill(Character *ch, Character *killer)
                 }
             }
         }
-        if (IS_ANDROID(killer) && !IS_NPC(killer) && !(killer->subrace == SubRace::android_model_absorb))
+        if (IS_ANDROID(killer) && !IS_NPC(killer) && !(killer->model == AndroidModel::Absorb))
         {
             int up = 0;
             auto klevel = GET_LEVEL(killer);
             auto chlevel = GET_LEVEL(ch);
-            if (killer->subrace == SubRace::android_model_repair)
+            if (killer->model == AndroidModel::Repair)
             {
 
                 if (klevel > chlevel + 15)
@@ -2514,7 +2514,7 @@ void raw_kill(Character *ch, Character *killer)
 
         if (!IS_NPC(ch))
         {
-            if (IS_ANDROID(ch) && ch->subrace != SubRace::android_model_absorb && android_lose && GET_UP(ch) > 5)
+            if (IS_ANDROID(ch) && ch->model != AndroidModel::Absorb && android_lose && GET_UP(ch) > 5)
             {
                 int loss = GET_UP(ch) / 5;
                 ch->modBaseStat<int>("upgrade_points", -loss);
@@ -2776,18 +2776,18 @@ static void perform_group_gain(Character *ch, int base, Character *victim)
     {
         if (IS_ANDROID(ch))
         {
-            if (leader->subrace == SubRace::android_model_absorb)
+            if (leader->model == AndroidModel::Absorb)
             {
                 ch->modCurVitalDam(CharVital::ki, -.02);
                 ch->modCurVitalDam(CharVital::stamina, -.02);
                 ch->send_to("You receive a bonus from your group's leader! @D[@G2%s PL/ST/Ki Recovered!@D]@n\r\n", "%");
             }
-            else if (leader->subrace == SubRace::android_model_repair)
+            else if (leader->model == AndroidModel::Repair)
             {
                 ch->modCurVitalDam(CharVital::health, -.02);
                 ch->send_to("You receive a bonus from your group's leader! @D[@G5%s PL Repaired@D]@n\r\n", "%");
             }
-            else if (leader->subrace == SubRace::android_model_sense && !(ch->subrace == SubRace::android_model_absorb))
+            else if (leader->model == AndroidModel::Sense && !(ch->model == AndroidModel::Absorb))
             {
                 ch->modBaseStat<int>("upgrade_points", 5);
                 ch->sendText("You receive a bonus from your group's leader! @D[@G+5 @mUpgrade Points@D]@n\r\n");

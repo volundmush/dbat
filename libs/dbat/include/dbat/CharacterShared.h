@@ -165,7 +165,7 @@ extern bool ADM_FLAGGED(Character *ch, int flag);
 
 struct CharacterBase : public HasVnum, public HasMudStrings, public HasExtraDescriptions, public HasStats {
     Race race{Race::human};
-    std::optional<SubRace> subrace{};
+    std::optional<AndroidModel> model{};
     Sensei sensei{Sensei::commoner};
     Sex sex{Sex::male};
     Size size{Size::medium};

@@ -231,7 +231,7 @@ static int is_ok_char(Character *keeper, Character *ch, vnum shop_nr)
     auto &sh = shop_index.at(shop_nr);
 
     auto align = GET_ALIGNMENT(ch);
-    if (align == 0 && sh->not_alignment.contains(MoralAlign::neutral) || align > 0 && sh->not_alignment.contains(MoralAlign::good) || align < 0 && sh->not_alignment.contains(MoralAlign::evil))
+    if (align == 0 && sh->not_alignment.get(MoralAlign::neutral) || align > 0 && sh->not_alignment.get(MoralAlign::good) || align < 0 && sh->not_alignment.get(MoralAlign::evil))
     {
         auto message = fmt::format("{} {}", GET_NAME(ch), MSG_NO_SELL_ALIGN);
         do_tell(keeper, (char*)message.c_str(), cmd_tell, 0);
@@ -241,34 +241,28 @@ static int is_ok_char(Character *keeper, Character *ch, vnum shop_nr)
     if (IS_NPC(ch))
         return (true);
 
-    if (sh->not_sensei.contains(ch->sensei))
+    if (sh->not_sensei.get(ch->sensei))
     {
         auto message = fmt::format("{} {}", GET_NAME(ch), MSG_NO_SELL_CLASS);
         do_tell(keeper, (char*)message.c_str(), cmd_tell, 0);
         return (false);
     }
 
-    for (auto &cl : sh->only_sensei)
+    if (sh->only_sensei.count() && !sh->only_sensei.get(ch->sensei))
     {
-        if (cl != ch->sensei)
-        {
-            auto message = fmt::format("{} {}", GET_NAME(ch), MSG_NO_SELL_CLASS);
-            do_tell(keeper, (char*)message.c_str(), cmd_tell, 0);
-            return (false);
-        }
+        auto message = fmt::format("{} {}", GET_NAME(ch), MSG_NO_SELL_CLASS);
+        do_tell(keeper, (char*)message.c_str(), cmd_tell, 0);
+        return (false);
     }
 
-    for (auto &race : sh->only_race)
+    if (sh->only_race.count() && !sh->only_race.get(ch->race))
     {
-        if (race != ch->race)
-        {
-            auto message = fmt::format("{} {}", GET_NAME(ch), MSG_NO_SELL_RACE);
-            do_tell(keeper, (char*)message.c_str(), cmd_tell, 0);
-            return (false);
-        }
+        auto message = fmt::format("{} {}", GET_NAME(ch), MSG_NO_SELL_RACE);
+        do_tell(keeper, (char*)message.c_str(), cmd_tell, 0);
+        return (false);
     }
 
-    if (sh->not_race.contains(ch->race))
+    if (sh->not_race.get(ch->race))
     {
         auto message = fmt::format("{} {}", GET_NAME(ch), MSG_NO_SELL_RACE);
         do_tell(keeper, (char*)message.c_str(), cmd_tell, 0);
@@ -1476,63 +1470,33 @@ std::string org_data::customerString()
 {
     std::vector<std::string> sections;
 
-    if (!not_alignment.empty())
+    if (not_alignment.count())
     {
-        std::vector<std::string> aligns;
-        for (auto align : not_alignment)
-        {
-            auto name = magic_enum::enum_name(align);
-            aligns.emplace_back(name);
-        }
-        std::string section = "no: " + boost::join(aligns, ", ");
+        std::string section = "no: " + not_alignment.getFlagNames();
         sections.emplace_back(section);
     }
 
-    if (!not_race.empty())
+    if (not_race.count())
     {
-        std::vector<std::string> races;
-        for (auto &race : not_race)
-        {
-            auto name = magic_enum::enum_name(race);
-            races.emplace_back(name);
-        }
-        std::string section = "no: " + boost::join(races, ", ");
+        std::string section = "no: " + not_race.getFlagNames();
         sections.emplace_back(section);
     }
 
-    if (!not_sensei.empty())
+    if (not_sensei.count())
     {
-        std::vector<std::string> classes;
-        for (auto &cls : not_sensei)
-        {
-            auto name = magic_enum::enum_name(cls);
-            classes.emplace_back(name);
-        }
-        std::string section = "no: " + boost::join(classes, ", ");
+        std::string section = "no: " + not_sensei.getFlagNames();
         sections.emplace_back(section);
     }
 
-    if (!only_race.empty())
+    if (only_race.count())
     {
-        std::vector<std::string> races;
-        for (auto &race : only_race)
-        {
-            auto name = magic_enum::enum_name(race);
-            races.emplace_back(name);
-        }
-        std::string section = "only: " + boost::join(races, ", ");
+        std::string section = "only: " + only_race.getFlagNames();
         sections.emplace_back(section);
     }
 
-    if (!only_sensei.empty())
+    if (only_sensei.count())
     {
-        std::vector<std::string> classes;
-        for (auto &cls : only_sensei)
-        {
-            auto name = magic_enum::enum_name(cls);
-            classes.emplace_back(name);
-        }
-        std::string section = "only: " + boost::join(classes, ", ");
+        std::string section = "only: " + only_sensei.getFlagNames();
         sections.emplace_back(section);
     }
 

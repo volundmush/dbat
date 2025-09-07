@@ -150,10 +150,10 @@ int invalid_race(Character *ch, Object *obj)
     if (GET_ADMLEVEL(ch) >= ADMLVL_IMMORT)
         return false;
 
-    if (!obj->only_race.empty() && !obj->only_race.contains(ch->race))
+    if (obj->only_race.count() && !obj->only_race.get(ch->race))
         return true;
 
-    if (obj->not_race.contains(ch->race))
+    if (obj->not_race.get(ch->race))
         return true;
 
     return false;
@@ -482,7 +482,7 @@ namespace race
                          }},
         {Race::android, {
                             {APPLY_CVIT_REGEN_MULT, 0.0, ~0, [](auto ch)
-                             { return ch->subrace == SubRace::android_model_absorb ? -0.66 : 0.0; }},
+                             { return ch->model == AndroidModel::Absorb ? -0.66 : 0.0; }},
                         }},
         {Race::saiyan, {
                            {APPLY_CSTAT_GAIN_MULT, 0.3, static_cast<int>(CharStat::experience)},

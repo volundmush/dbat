@@ -212,10 +212,10 @@ static void convert_character(CharacterPrototype *c) {
     c->character_flags.set(CharacterFlag::tail, race::hasTail(c->race));
 
     if(c->mob_flags.get(31)) {
-        c->subrace = SubRace::android_model_absorb;
+        c->model = AndroidModel::Absorb;
     }
     if(c->mob_flags.get(32)) {
-        c->subrace = SubRace::android_model_repair;
+        c->model = AndroidModel::Repair;
     }
 }
 
@@ -224,10 +224,10 @@ static void convert_character(Character *c) {
         c->character_flags.set(CharacterFlag::tail, race::hasTail(c->race));
 
         if(c->mob_flags.get(31)) {
-            c->subrace = SubRace::android_model_absorb;
+            c->model = AndroidModel::Absorb;
         }
         if(c->mob_flags.get(32)) {
-            c->subrace = SubRace::android_model_repair;
+            c->model = AndroidModel::Repair;
         }
         
     } else {
@@ -238,13 +238,13 @@ static void convert_character(Character *c) {
         c->character_flags.set(CharacterFlag::cyber_left_leg, c->player_flags.get(49));
 
         if(c->player_flags.get(41)) {
-            c->subrace = SubRace::android_model_absorb;
+            c->model = AndroidModel::Absorb;
         }
         if(c->player_flags.get(42)) {
-            c->subrace = SubRace::android_model_repair;
+            c->model = AndroidModel::Repair;
         }
         if(c->player_flags.get(43)) {
-            c->subrace = SubRace::android_model_sense;
+            c->model = AndroidModel::Sense;
         }
     }
 }
@@ -420,136 +420,136 @@ static void handle_org_who(org_data &g, bitvector_t with_who[]) {
         if(IS_SET_AR(with_who, i)) {
             switch(i) {
                 case TRADE_NOGOOD:
-                    g.not_alignment.insert(MoralAlign::good);
+                    g.not_alignment.set(MoralAlign::good);
                     break;
                 case TRADE_NOEVIL:
-                    g.not_alignment.insert(MoralAlign::evil);
+                    g.not_alignment.set(MoralAlign::evil);
                     break;
                 case TRADE_NONEUTRAL:
-                    g.not_alignment.insert(MoralAlign::neutral);
+                    g.not_alignment.set(MoralAlign::neutral);
                     break;
                 case TRADE_NOWIZARD:
-                    g.not_sensei.insert(Sensei::roshi);
+                    g.not_sensei.set(Sensei::roshi);
                     break;
                 case TRADE_ONLYWIZARD:
-                    g.only_sensei.insert(Sensei::roshi);
+                    g.only_sensei.set(Sensei::roshi);
                     break;
                 case TRADE_NOCLERIC:
-                    g.not_sensei.insert(Sensei::piccolo);
+                    g.not_sensei.set(Sensei::piccolo);
                     break;
                 case TRADE_ONLYCLERIC:
-                    g.only_sensei.insert(Sensei::piccolo);
+                    g.only_sensei.set(Sensei::piccolo);
                     break;
                 case TRADE_NOROGUE:
-                    g.not_sensei.insert(Sensei::crane);
+                    g.not_sensei.set(Sensei::crane);
                     break;
                 case TRADE_ONLYROGUE:
-                    g.only_sensei.insert(Sensei::crane);
+                    g.only_sensei.set(Sensei::crane);
                     break;
                 case TRADE_NOFIGHTER:
-                    g.not_sensei.insert(Sensei::nail);
+                    g.not_sensei.set(Sensei::nail);
                     break;
                 case TRADE_ONLYFIGHTER:
-                    g.only_sensei.insert(Sensei::nail);
+                    g.only_sensei.set(Sensei::nail);
                     break;
                 case TRADE_NOHUMAN:
-                    g.not_race.insert(Race::human);
+                    g.not_race.set(Race::human);
                     break;
                 case TRADE_NOICER:
-                    g.not_race.insert(Race::icer);
+                    g.not_race.set(Race::icer);
                     break;
                 case TRADE_NOSAIYAN:
-                    g.not_race.insert(Race::saiyan);
+                    g.not_race.set(Race::saiyan);
                     break;
                 case TRADE_NOKONATSU:
-                    g.not_race.insert(Race::konatsu);
+                    g.not_race.set(Race::konatsu);
                     break;
                 case TRADE_NONAMEK:
-                    g.not_race.insert(Race::namekian);
+                    g.not_race.set(Race::namekian);
                     break;
                 case TRADE_NOMUTANT:
-                    g.not_race.insert(Race::mutant);
+                    g.not_race.set(Race::mutant);
                     break;
                 case TRADE_NOKANASSAN:
-                    g.not_race.insert(Race::kanassan);
+                    g.not_race.set(Race::kanassan);
                     break;
                 case TRADE_NOBIO:
-                    g.not_race.insert(Race::bio_android);
+                    g.not_race.set(Race::bio_android);
                     break;
                 case TRADE_NOANDROID:
-                    g.not_race.insert(Race::android);
+                    g.not_race.set(Race::android);
                     break;
                 case TRADE_NODEMON:
-                    g.not_race.insert(Race::demon);
+                    g.not_race.set(Race::demon);
                     break;
                 case TRADE_NOMAJIN:
-                    g.not_race.insert(Race::majin);
+                    g.not_race.set(Race::majin);
                     break;
                 case TRADE_NOKAI:
-                    g.not_race.insert(Race::kai);
+                    g.not_race.set(Race::kai);
                     break;
                 case TRADE_NOTRUFFLE:
-                    g.not_race.insert(Race::tuffle);
+                    g.not_race.set(Race::tuffle);
                     break;
                 case TRADE_NOMONK:
-                    g.not_sensei.insert(Sensei::bardock);
+                    g.not_sensei.set(Sensei::bardock);
                     break;
                 case TRADE_ONLYMONK:
-                    g.only_sensei.insert(Sensei::bardock);
+                    g.only_sensei.set(Sensei::bardock);
                     break;
                 case TRADE_NOPALADIN:
-                    g.not_sensei.insert(Sensei::ginyu);
+                    g.not_sensei.set(Sensei::ginyu);
                     break;
                 case TRADE_ONLYPALADIN:
-                    g.only_sensei.insert(Sensei::ginyu);
+                    g.only_sensei.set(Sensei::ginyu);
                     break;
                 case TRADE_NOSORCERER:
-                    g.not_sensei.insert(Sensei::frieza);
+                    g.not_sensei.set(Sensei::frieza);
                     break;
                 case TRADE_ONLYSORCERER:
-                    g.only_sensei.insert(Sensei::frieza);
+                    g.only_sensei.set(Sensei::frieza);
                     break;
                 case TRADE_NODRUID:
-                    g.not_sensei.insert(Sensei::tapion);
+                    g.not_sensei.set(Sensei::tapion);
                     break;
                 case TRADE_ONLYDRUID:
-                    g.only_sensei.insert(Sensei::tapion);
+                    g.only_sensei.set(Sensei::tapion);
                     break;
                 case TRADE_NOBARD:
-                    g.not_sensei.insert(Sensei::sixteen);
+                    g.not_sensei.set(Sensei::sixteen);
                     break;
                 case TRADE_ONLYBARD:
-                    g.only_sensei.insert(Sensei::sixteen);
+                    g.only_sensei.set(Sensei::sixteen);
                     break;
                 case TRADE_NORANGER:
-                    g.not_sensei.insert(Sensei::dabura);
+                    g.not_sensei.set(Sensei::dabura);
                     break;
                 case TRADE_ONLYRANGER:
-                    g.only_sensei.insert(Sensei::dabura);
+                    g.only_sensei.set(Sensei::dabura);
                     break;
                 case TRADE_NOBARBARIAN:
-                    g.not_sensei.insert(Sensei::kibito);
+                    g.not_sensei.set(Sensei::kibito);
                     break;
                 case TRADE_ONLYBARBARIAN:
-                    g.only_sensei.insert(Sensei::kibito);
+                    g.only_sensei.set(Sensei::kibito);
                     break;
                 case TRADE_ONLYARCANE_ARCHER:
-                    g.only_sensei.insert(Sensei::jinto);
+                    g.only_sensei.set(Sensei::jinto);
                     break;
                 case TRADE_NOARCANE_ARCHER:
-                    g.not_sensei.insert(Sensei::jinto);
+                    g.not_sensei.set(Sensei::jinto);
                     break;
                 case TRADE_ONLYARCANE_TRICKSTER:
-                    g.only_sensei.insert(Sensei::tsuna);
+                    g.only_sensei.set(Sensei::tsuna);
                     break;
                 case TRADE_NOARCANE_TRICKSTER:
-                    g.not_sensei.insert(Sensei::tsuna);
+                    g.not_sensei.set(Sensei::tsuna);
                     break;
                 case TRADE_ONLYARCHMAGE:
-                    g.only_sensei.insert(Sensei::kurzak);
+                    g.only_sensei.set(Sensei::kurzak);
                     break;
                 case TRADE_NOARCHMAGE:
-                    g.not_sensei.insert(Sensei::kurzak);
+                    g.not_sensei.set(Sensei::kurzak);
                     break;
                 
             }
@@ -1810,14 +1810,6 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
         o->setBaseStat("timer", -1);
     }
 
-    /* *** extra descriptions and affect fields *** */
-
-    for (j = 0; j < MAX_OBJ_AFFECT; j++) {
-        auto &aj = o->affected[j];
-        aj.location = APPLY_NONE;
-        aj.modifier = 0;
-        aj.specific = 0;
-    }
 
     strcat(buf2, ", after numeric constants\n"    /* strcat: OK (for 'buf2 >= 87') */
                  "...expecting 'E', 'A', '$', or next object number");
@@ -1835,11 +1827,7 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
                 exd.second = fread_string(obj_f, buf2);
             }
                 break;
-            case 'A':
-                if (j >= MAX_OBJ_AFFECT) {
-                    basic_mud_log("SYSERR: Too many A fields (%d max), %s", MAX_OBJ_AFFECT, buf2);
-                    exit(1);
-                }
+            case 'A': {
                 if (!get_line(obj_f, line)) {
                     basic_mud_log("SYSERR: Format error in 'A' field, %s\n"
                         "...expecting 2 numeric constants but file ended!", buf2);
@@ -1855,10 +1843,11 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
                         exit(1);
                     }
                 }
-
-                o->affected[j].location = t[0];
-                o->affected[j].modifier = t[1];
-                o->affected[j].specific = t[2];
+                auto &af = o->affected.emplace_back();
+                af.location = t[0];
+                af.modifier = t[1];
+                af.specific = t[2];
+            }
                 j++;
                 break;
             case 'S':  /* Spells for Spellbooks*/
@@ -4491,88 +4480,88 @@ static void migrate_obj_data(T* o) {
         // Convert it.
         switch(i) {
             case 9: // ITEM_ANTI_GOOD
-                o->not_alignment.insert(MoralAlign::good);
+                o->not_alignment.set(MoralAlign::good);
                 break;
             case 10: // ITEM_ANTI_EVIL
-                o->not_alignment.insert(MoralAlign::evil);
+                o->not_alignment.set(MoralAlign::evil);
                 break;
             case 11: // ITEM_ANTI_NEUTRAL
-                o->not_alignment.insert(MoralAlign::neutral);
+                o->not_alignment.set(MoralAlign::neutral);
                 break;
             case 12: // ITEM_ANTI_ROSHI
-                o->not_sensei.insert(Sensei::roshi);
+                o->not_sensei.set(Sensei::roshi);
                 break;
             case 13:
-                o->not_sensei.insert(Sensei::piccolo);
+                o->not_sensei.set(Sensei::piccolo);
                 break;
             case 14:
-                o->not_sensei.insert(Sensei::crane);
+                o->not_sensei.set(Sensei::crane);
                 break;
             case 15:
-                o->not_sensei.insert(Sensei::nail);
+                o->not_sensei.set(Sensei::nail);
                 break;
             case 17:
-                o->not_sensei.insert(Sensei::tapion);
+                o->not_sensei.set(Sensei::tapion);
                 break;
             case 19:
-                o->not_sensei.insert(Sensei::sixteen);
+                o->not_sensei.set(Sensei::sixteen);
                 break;
             case 20:
-                o->not_sensei.insert(Sensei::dabura);
+                o->not_sensei.set(Sensei::dabura);
                 break;
             case 21:
-                o->not_sensei.insert(Sensei::ginyu);
+                o->not_sensei.set(Sensei::ginyu);
                 break;
             case 22: // ITEM_ANTI_HUMAN
-                o->not_race.insert(Race::human);
+                o->not_race.set(Race::human);
                 break;
             case 23: // ITEM_ANTI_ICER
-                o->not_race.insert(Race::icer);
+                o->not_race.set(Race::icer);
                 break;
             case 24: // ITEM_ANTI_SAIYAN
-                o->not_race.insert(Race::saiyan);
+                o->not_race.set(Race::saiyan);
                 break;
             case 25: // ITEM_ANTI_KONATSU
-                o->not_race.insert(Race::konatsu);
+                o->not_race.set(Race::konatsu);
                 break;
             case 29:
-                o->not_sensei.insert(Sensei::bardock);
+                o->not_sensei.set(Sensei::bardock);
                 break;
             case 30:
-                o->not_sensei.insert(Sensei::kibito);
+                o->not_sensei.set(Sensei::kibito);
                 break;
             case 31:
-                o->not_sensei.insert(Sensei::frieza);
+                o->not_sensei.set(Sensei::frieza);
                 break;
             case 41: // ITEM_ONLY_HUMAN
-                o->only_race.insert(Race::human);
+                o->only_race.set(Race::human);
                 break;
             case 42: // ITEM_ONLY_ICER
-                o->only_race.insert(Race::icer);
+                o->only_race.set(Race::icer);
                 break;
             case 43: // ITEM_ONLY_SAIYAN
-                o->only_race.insert(Race::saiyan);
+                o->only_race.set(Race::saiyan);
                 break;
             case 44: // ITEM_ONLY_KONATSU
-                o->only_race.insert(Race::konatsu);
+                o->only_race.set(Race::konatsu);
                 break;
             case 45:
-                o->only_sensei.insert(Sensei::bardock);
+                o->only_sensei.set(Sensei::bardock);
                 break;
             case 46:
-                o->only_sensei.insert(Sensei::kibito);
+                o->only_sensei.set(Sensei::kibito);
                 break;
             case 47:
-                o->only_sensei.insert(Sensei::frieza);
+                o->only_sensei.set(Sensei::frieza);
                 break;
             case 50:
-                o->not_sensei.insert(Sensei::kurzak);
+                o->not_sensei.set(Sensei::kurzak);
                 break;
             case 51:
-                o->only_sensei.insert(Sensei::kurzak);
+                o->only_sensei.set(Sensei::kurzak);
                 break;
             case 75:
-                o->only_sensei.insert(Sensei::jinto);
+                o->only_sensei.set(Sensei::jinto);
                 break;
             case 33:
             case 34:

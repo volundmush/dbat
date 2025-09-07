@@ -33,6 +33,10 @@ struct CharacterPrototype : public CharacterBase, public HasProtoScript {
     SpecialFunc func{nullptr};
 };
 
+inline std::string format_as(const CharacterPrototype& mob) {
+    return fmt::format("MobProto {} '{}'", mob.vn, mob.getName());
+}
+
 extern std::map<mob_vnum, std::shared_ptr<CharacterPrototype>> mob_proto;
 
 extern int vnum_mobile(char *searchname, Character *ch);

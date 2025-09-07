@@ -56,3 +56,17 @@ Result<T> chooseEnum(std::string_view arg, std::string_view context, const std::
     }
     return res.value()->second;
 }
+
+template<typename EnumType>
+requires std::is_enum_v<EnumType>
+Result<std::string> handleSetEnum(EnumType& field, std::string_view arg, std::string_view fieldName, const std::function<bool(EnumType)>& filter = {}) {
+    if(arg.empty()) {
+        return err(fmt::format("You must provide a value for {}.", fieldName));
+    }
+    auto res = chooseEnum<EnumType>(arg, std::string(fieldName), filter);
+    if(!res) {
+        return err(res.error());
+    }
+    field = res.value();
+    return fmt::format("Set {} to {}.", fieldName, magic_enum::enum_name(field));
+}
