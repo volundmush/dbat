@@ -377,6 +377,15 @@ struct Character : public CharacterBase, public HasID, public HasLocation, publi
 
 };
 
+inline std::string format_as_diagnostic(const Character& ch) {
+    std::vector<std::string> parts;
+    parts.emplace_back(format_as(static_cast<const HasID&>(ch)));
+    parts.emplace_back(format_as(static_cast<const CharacterBase&>(ch)));
+    parts.emplace_back(format_as(static_cast<const HasLocation&>(ch)));
+    parts.emplace_back(format_as(static_cast<const HasDgScripts&>(ch)));
+    parts.emplace_back(format_as(static_cast<const HasSubscriptions&>(ch)));
+    return fmt::format("({}) Character:\r\n{}", ch.isPC ? "PC" : "NPC", fmt::join(parts, "\r\n"));
+}
 
 extern SubscriptionManager<Character> characterSubscriptions;
 

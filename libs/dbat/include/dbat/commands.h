@@ -948,6 +948,9 @@ extern DECCMD(do_mush_choices);
 extern DECCMD(do_mush_room);
 extern DECCMD(do_mush_area);
 extern DECCMD(do_mush_structure);
+extern DECCMD(do_mush_oproto);
+extern DECCMD(do_mush_mproto);
+extern DECCMD(do_mush_foreach);
 
 extern DECCMD(do_say);
 

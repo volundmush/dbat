@@ -40,3 +40,13 @@ struct HasLocation {
 
     //virtual std::string renderInLocationFor(Character* viewer);
 };
+
+inline std::string format_as(const HasLocation& unit) {
+    std::vector<std::string> locs;
+    for(const auto& [name, loc] : unit.registeredLocations) {
+        locs.push_back(fmt::format("{}: {} ({})", name, loc.getLocID(), loc.getName()));
+    }
+    if(locs.empty()) locs.push_back("<none>");
+
+    return fmt::format("Location: {} ({})\r\nSaved Location: {}", unit.location.getLocID(), unit.location.getName(), fmt::join(locs, ", "));
+}

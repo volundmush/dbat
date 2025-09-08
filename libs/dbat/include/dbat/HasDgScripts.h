@@ -19,8 +19,8 @@ struct HasDgScripts : public HasVariables {
 
     void activateScripts();
     void deactivateScripts();
-    std::vector<trig_vnum> getScriptOrder(); /* this will return running_scripts if said, or the results of getProtoScripts() */
-    std::vector<std::weak_ptr<DgScript>> getScripts();
+    std::vector<trig_vnum> getScriptOrder() const; /* this will return running_scripts if said, or the results of getProtoScripts() */
+    std::vector<std::weak_ptr<DgScript>> getScripts() const;
     virtual std::vector<trig_vnum> getProtoScript() const = 0;
     std::string getDgScriptString() const;
 
@@ -31,3 +31,14 @@ struct HasDgScripts : public HasVariables {
     virtual std::optional<std::string> dgCallMember(const std::string& member, const std::string& arg);
 
 };
+
+inline std::string format_as(const HasDgScripts& unit) {
+    std::vector<std::string> scripts;
+    for(const auto& scw : unit.getScripts()) {
+        if(auto sc = scw.lock()) {
+            scripts.push_back(format_as_diagnostic(*sc));
+        }
+    }
+    scripts.emplace_back(format_as(static_cast<const HasVariables&>(unit)));
+    return fmt::format("DgScripts: {}", fmt::join(scripts, ", "));
+}

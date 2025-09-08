@@ -687,7 +687,7 @@ static void display_room_flags(Location& loc, Character *ch, const std::vector<Z
 
     double grav = loc.getEnvironment(ENV_GRAVITY);
     auto g = fmt::format("{}", grav);
-    snprintf(buf3, sizeof(buf3), "@D[ @G%s@D] @wSector: @D[ @G%s @D] @LocationID: @D[@G%s@D]@n Gravity: @D[@G%sx@D]@n", buf, buf2, loc.getLocID().c_str(), g.c_str());
+    snprintf(buf3, sizeof(buf3), "@D[ @G%s@D] @wSector: @D[ @G%s @D] LocationID: @D[@G%s@D]@n Gravity: @D[@G%sx@D]@n", buf, buf2, loc.getLocID().c_str(), g.c_str());
     ch->send_to("@wFlags: %-70s@w\r\n", buf3);
 
     if (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_NODEC))

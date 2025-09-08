@@ -19,9 +19,6 @@ struct ObjectPrototype : public ObjectBase, public HasProtoScript {
     ObjectPrototype() = default;
     ObjectPrototype(const Object& other);
 
-    
-    std::vector<trig_vnum> proto_script; /* list of default triggers  */
-    
     ObjectPrototype& operator=(const ObjectPrototype& other);
 
     template<typename R = double>
@@ -44,6 +41,15 @@ struct ObjectPrototype : public ObjectBase, public HasProtoScript {
 
 inline std::string format_as(const ObjectPrototype& z) {
     return fmt::format("ObjectPrototype {} '{}'", z.vn, z.short_description);
+}
+
+inline std::string format_as_diagnostic(const ObjectPrototype& item) {
+    std::vector<std::string> parts;
+    parts.emplace_back(format_as(static_cast<const ObjectBase&>(item)));
+    parts.emplace_back(format_as(static_cast<const HasProtoScript&>(item)));
+    if(item.func) parts.emplace_back("Has SpecialFunc");
+
+    return fmt::format("Object Prototype:\r\n{}", fmt::join(parts, "\r\n"));
 }
 
 extern std::map<obj_vnum, std::shared_ptr<ObjectPrototype>> obj_proto;

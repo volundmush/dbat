@@ -58,4 +58,8 @@ struct HasResetCommands {
     std::string printResetCommands() const;
 };
 
+inline std::string format_as(const HasResetCommands& hrc) {
+    return hrc.printResetCommands();
+}
+
 extern Result<ResetCommand> parseResetCommand(std::vector<std::string> seq);

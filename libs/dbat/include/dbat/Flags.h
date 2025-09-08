@@ -180,7 +180,7 @@ public:
         names.reserve(bits.count());
         for (auto f : getAll())
         {
-            names.push_back(fmt::format("{}", f));
+            names.push_back(fmt::format("{}", magic_enum::enum_name(f)));
         }
         return names;
     }
@@ -235,6 +235,22 @@ public:
         return results;
     }
 };
+
+template <typename FlagEnum>
+    requires std::is_enum_v<FlagEnum>
+inline std::string format_as(const FlagHandler<FlagEnum>& flags) {
+    // e.g. "AffectFlag" (optionally strip namespaces)
+    constexpr std::string_view type_name = []{
+        std::string_view tn = magic_enum::enum_type_name<FlagEnum>();
+        if (auto pos = tn.rfind("::"); pos != std::string_view::npos) tn.remove_prefix(pos + 2);
+        return tn;
+    }();
+
+    if (flags.count() == 0)
+        return fmt::format("{}s: <none>", type_name);
+
+    return fmt::format("{}s: [{}]", type_name, fmt::join(flags.getAllFlags(), ", "));
+}
 
 template<typename EnumType>
 requires std::is_enum_v<EnumType>

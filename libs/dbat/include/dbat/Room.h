@@ -155,4 +155,22 @@ inline std::string format_as(const Room& r) {
     return fmt::format("Room {} '{}'", r.getVnum(), r.getName());
 }
 
+inline std::string format_as_diagnostic(const Room& room) {
+    std::vector<std::string> parts;
+    parts.emplace_back(format_as(static_cast<const HasVnum&>(room)));
+    parts.emplace_back(format_as(static_cast<const HasZone&>(room)));
+    parts.emplace_back(format_as(static_cast<const HasMudStrings&>(room)));
+    parts.emplace_back(format_as(static_cast<const HasExtraDescriptions&>(room)));
+    parts.emplace_back(fmt::format("SectorType: {}", magic_enum::enum_name(room.sector_type)));
+    parts.emplace_back(fmt::format("RoomFlags: {}", room.room_flags));
+    parts.emplace_back(format_as(static_cast<const HasSubscriptions&>(room)));
+    parts.emplace_back(format_as(static_cast<const HasProtoScript&>(room)));
+    parts.emplace_back(format_as(static_cast<const HasDgScripts&>(room)));
+    parts.emplace_back(format_as(static_cast<const HasResetCommands&>(room)));
+    
+    if(room.func) parts.emplace_back("Has SpecialFunc");
+
+    return fmt::format("Room:\r\n{}", fmt::join(parts, "\r\n"));
+}
+
 extern SubscriptionManager<Room> roomSubscriptions;

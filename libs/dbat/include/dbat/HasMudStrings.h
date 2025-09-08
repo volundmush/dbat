@@ -3,6 +3,8 @@
 #include <string_view>
 #include <unordered_map>
 
+#include <fmt/format.h>
+
 struct HasMudStrings {
     // make it virtual.
     virtual ~HasMudStrings() = default;
@@ -15,3 +17,11 @@ struct HasMudStrings {
     std::string short_description;
     const char* getShortDescription() const;
 };
+
+inline std::string format_as(const HasMudStrings& unit) {
+    return fmt::format("name: {}\r\nshort_description: {}\r\nlook_description: {}\r\nroom_description: {}",
+                       unit.getName(),
+                       unit.getShortDescription(),
+                       unit.getLookDescription(),
+                       unit.getRoomDescription());
+}

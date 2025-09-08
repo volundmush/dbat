@@ -1,7 +1,7 @@
 #include "dbat/HasDgScripts.h"
 
 
-std::vector<trig_vnum> HasDgScripts::getScriptOrder()
+std::vector<trig_vnum> HasDgScripts::getScriptOrder() const
 {
     if (running_scripts.has_value())
     {
@@ -10,7 +10,7 @@ std::vector<trig_vnum> HasDgScripts::getScriptOrder()
     return getProtoScript();
 }
 
-std::vector<std::weak_ptr<DgScript>> HasDgScripts::getScripts()
+std::vector<std::weak_ptr<DgScript>> HasDgScripts::getScripts() const
 {
     std::vector<std::weak_ptr<DgScript>> out;
     auto proto = getScriptOrder();

@@ -2,6 +2,10 @@
 #include <string>
 #include <unordered_map>
 #include <optional>
+#include <vector>
+
+#include <fmt/format.h>
+#include <fmt/ranges.h>
 
 struct HasVariables {
     std::unordered_map<std::string, std::string> variables; // Subscriptions to services.
@@ -19,3 +23,12 @@ struct HasVariables {
 
     bool eraseVariable(std::string_view key);
 };
+
+inline std::string format_as(const HasVariables& unit) {
+    if(unit.variables.empty()) return "script variables: <none>";
+    std::vector<std::string> vars;
+    for(const auto& [key, val] : unit.variables) {
+        vars.push_back(fmt::format("{}: {}", key, val));
+    }
+    return fmt::format("script variables: [{}]", fmt::join(vars, ", "));
+}

@@ -552,7 +552,12 @@ const struct command_info cmd_info[] = {
     {".location", ".lo", POS_DEAD, do_mush_location, -1, ADMLVL_BUILDER, 0, 0},
     {".choices", ".ch", POS_DEAD, do_mush_choices, -1, ADMLVL_BUILDER, 0, 0},
     {".reset", ".res", POS_DEAD, do_mush_reset, -1, ADMLVL_BUILDER, 0, 0},
-    {"\n", "zzzzzzz", POS_DEAD, nullptr, 0, ADMLVL_NONE, 0, 0}}; /* this must be last */
+    {".oproto", ".op", POS_DEAD, do_mush_oproto, -1, ADMLVL_BUILDER, 0, 0},
+    {".mproto", ".mp", POS_DEAD, do_mush_mproto, -1, ADMLVL_BUILDER, 0, 0},
+    {".foreach", ".for", POS_DEAD, do_mush_foreach, -1, ADMLVL_BUILDER, 0, 0},
+    {"\n", "zzzzzzz", POS_DEAD, nullptr, 0, ADMLVL_NONE, 0, 0} /* this must be last */
+
+};
 
 int matchCommand(Character *ch, std::string_view cmd)
 {

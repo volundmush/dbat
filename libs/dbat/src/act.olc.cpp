@@ -126,6 +126,38 @@ properly detected by the commands.
 
 )";
 
+Result<ObjectPrototype*> getObjProto(obj_vnum vnum) {
+    auto found = obj_proto.find(vnum);
+    if(found == obj_proto.end()) {
+        return err("Obj Proto not found.");
+    }
+    return found->second.get();
+}
+
+Result<ObjectPrototype*> getObjProto(std::string_view arg) {
+    auto numRes = parseNumber<obj_vnum>(arg, "Obj Vnum");
+    if(!numRes) {
+        return err(numRes.error());
+    }
+    return getObjProto(numRes.value());
+}
+
+Result<CharacterPrototype*> getMobProto(mob_vnum vnum) {
+    auto found = mob_proto.find(vnum);
+    if(found == mob_proto.end()) {
+        return err("Mob Proto not found.");
+    }
+    return found->second.get();
+}
+
+Result<CharacterPrototype*> getMobProto(std::string_view arg) {
+    auto numRes = parseNumber<mob_vnum>(arg, "Mob Vnum");
+    if(!numRes) {
+        return err(numRes.error());
+    }
+    return getMobProto(numRes.value());
+}
+
 ACMD(do_mush_zone)
 {
 
@@ -1626,18 +1658,7 @@ enum class MobProtoOps {
     Help
 };
 
-Result<CharacterPrototype*> getMobProto(std::string_view arg) {
-    auto numRes = parseNumber<mob_vnum>(arg, "Mob Vnum");
-    if(!numRes) {
-        return err(numRes.error());
-    }
-    auto mv = numRes.value();
-    auto found = mob_proto.find(mv);
-    if(found == mob_proto.end()) {
-        return err("Mob Proto not found.");
-    }
-    return found->second.get();
-}
+
 
 void handleMobProtoOps(Character *ch, MobProtoOps op, CommandData& cdata) {
     switch(op) {
@@ -1813,4 +1834,202 @@ Result<std::string> handleObjectBaseOps(ObjectBase* ob, ObjectBaseOpChoice op, C
         }
     }
     return err("Invalid operation.");
+}
+
+constexpr std::string_view mushOProtoHelp = R"(
+MUSH-style Object (obj) Prototype Editor
+=============================================================================
+Alias: .op
+
+This command manages the mobile prototypes in the game.
+Remember that the /switches can partial match.
+
+.oproto <vnum>
+    Display information about the given Prototype.
+
+.oproto/create <vnum>
+    Create a new Prototype with the given Vnum.
+
+.oproto/delete <vnum>=YES
+    Delete the given Prototype. You must type YES to confirm.
+
+.oproto/list <startVnum>=<endVnum>
+    List all Prototypes in the given range.
+
+.oproto/stat <vnum>/[<stat>[=<value>]]
+    Set a stat on the given Prototype. Omit the value to see options.
+    Examples:
+    .oproto/stat 50 to view all stats that proto 50 can have. 
+    .oproto/stat 50/strength to view info about strength,
+    .oproto/stat 50/strength=10 to set strength to 10.
+
+.oproto/name <vnum>=<name>
+    Set the Name for a Prototype. This is really the keywords used for
+    searching.
+
+.oproto/shortdesc <vnum>=<short description>
+    Set the Short Description for a Prototype. This is what people see when
+    the mobile is used in action descriptions.
+
+.oproto/lookdesc <vnum>=<look description>
+    Set the Look Description for a Prototype. This is what people see when
+    they look at the mobile.
+
+.oproto/roomdesc <vnum>=<room description>
+    Set the Room Description for a Prototype. This is what people see when
+    the mobile is listed amongst others in a location.
+
+.oproto/listextradesc <vnum>
+    List all Extra Descriptions for the given Prototype.
+
+.oproto/addextradesc <vnum>=<keyword>|<description>
+    Add an Extra Description to the given Prototype. Separate keywords and
+    description with a | (pipe). The | character may not appear in either field.
+
+.oproto/removeextradesc <vnum>=<index>
+    Remove the Extra Description at the given index from the Prototype.
+
+.oproto/clearextradesc <vnum>
+    Remove all Extra Descriptions from the Prototype.
+
+.oproto/listscripts <vnum>
+    List all DgScripts assigned to the given Prototype.
+
+.oproto/addscript <vnum>=<scriptVnum>|<index>
+    Add a DgScript to the given Prototype. Separate vnum and index with
+    a | (pipe). use index -1 to append to the end, otherwise it will insert at
+    given index and 'push down' anything after it. The order does matter as the
+    scripts are processed in that order.
+
+.oproto/removescript <vnum>=<index>
+    Remove the DgScript at the given index from the Prototype.
+
+.oproto/clearscripts <vnum>
+    Remove all DgScripts from the Prototype.
+
+.oproto/itemtype <vnum>=<itemtype>
+    Set the Item Type for the given Prototype.
+
+.oproto/size <vnum>=<size>
+    Set the size for the given Prototype.
+
+.oproto/itemflags <vnum>=<flags>
+    Set the Item Flags for the given Prototype.
+    Use + or - to add or remove flags. Example: +FLAG1 -FLAG2
+    See .choices/ItemFlags
+
+.oproto/wearflags <vnum>=<flags>
+    Set the Wear Flags for the given Prototype.
+    Remember: WearFlag::take is needed for an item to be picked up.
+    See .choices/WearFlags
+
+.oproto/affectflags <vnum>=<flags>
+    Set the Affect Flags for the given Prototype.
+    See .choices/AffectFlags
+
+.oproto/addaffected <vnum>=<location>,<specific>,<modifier>
+    Add an Affect to the given Prototype. Location, Specific, and Modifier
+    are all numbers. Must study the Apply code to know what to put here, sorry.
+
+.oproto/removeaffected <vnum>=<index>
+    Remove the Affect at the given index from the Prototype.
+
+)";
+
+enum class ObjProtoOps {
+    ExamineProto,
+    CreateProto,
+    ListProto,
+    DeleteProto,
+    StatProto,
+    Help
+};
+
+void handleObjProtoOps(Character *ch, ObjProtoOps op, CommandData& cdata) {
+    switch(op) {
+        case ObjProtoOps::ExamineProto: {
+            return;
+        }
+        case ObjProtoOps::ListProto: {
+            ch->sendText("Not implemented yet.\r\n");
+            return;
+        }
+        case ObjProtoOps::CreateProto: {
+            auto numRes = parseNumber<obj_vnum>(cdata.lsargs, "Object Vnum");
+            if(!numRes) {
+                ch->sendText(numRes.error());
+                return;
+            }
+            auto ov = numRes.value();
+            if(obj_proto.contains(ov)) {
+                ch->sendFmt("Object Proto {} already exists.\r\n", ov);
+                return;
+            }
+            auto newObj = std::make_shared<ObjectPrototype>();
+            newObj->vn = ov;
+            newObj->name = "unnamed object";
+            newObj->short_description = "an unnamed object";
+            newObj->look_description = "You see nothing special.\r\n";
+            obj_proto.emplace(ov, newObj);
+            ch->sendFmt("Created new Object Proto: {}\r\n", *newObj);
+            return;
+        }
+        case ObjProtoOps::DeleteProto: {
+            ch->sendText("Not implemented yet.\r\n");
+            return;
+        }
+        case ObjProtoOps::StatProto: {
+            ch->sendText("Not implemented yet.\r\n");
+            return;
+        }
+        case ObjProtoOps::Help: {
+            ch->sendText(mushOProtoHelp);
+            return;
+        }
+    }
+}
+
+ACMD(do_mush_oproto) {
+    std::string_view op = cdata.switches.empty() ? "" : cdata.switches[0];
+
+    auto oper = chooseEnum<ObjProtoOps>(op, "ObjProto Operation");
+    if(oper) {
+        handleObjProtoOps(ch, oper.value(), cdata);
+        return;
+    }
+
+    // Or are we adding a Script Prototype Vnum to it...?
+    auto protoSc = chooseEnum<HasProtoScriptOps>(op, "ProtoScript Operation");
+    if(protoSc) {
+        auto objRes = getObjProto(cdata.lsargs);
+        if(!objRes) {
+            ch->sendText(objRes.error());
+            return;
+        }
+        auto res = handleProtoScripts(objRes.value(), protoSc.value(), cdata.rsargs);
+        if(!res) {
+            ch->sendText(res.error());
+            return;
+        }
+        ch->sendFmt("{} Modified: {}\r\n", *objRes.value(), res.value());
+        return;
+    }
+
+    auto objBaseOpRes = parseObjectBaseOp(op);
+    if(objBaseOpRes) {
+        auto objRes = getObjProto(cdata.lsargs);
+        if(!objRes) {
+            ch->sendText(objRes.error());
+            return;
+        }
+        auto res = handleObjectBaseOps(objRes.value(), objBaseOpRes.value(), cdata);
+        if(!res) {
+            ch->sendText(res.error());
+        } else {
+            ch->sendFmt("{} Modified: {}\r\n", *objRes.value(), res.value());
+        }
+        return;
+    }
+    ch->sendText("Invalid Operation. See .oproto/help\r\n");
+
 }

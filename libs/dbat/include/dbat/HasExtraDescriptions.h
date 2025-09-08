@@ -4,6 +4,8 @@
 #include <optional>
 #include <span>
 
+#include <fmt/format.h>
+
 using ExtraDescription = std::pair<std::string, std::string>;
 using ExtraDescriptions = std::vector<ExtraDescription>;
 
@@ -15,5 +17,15 @@ struct HasExtraDescriptions {
     ExtraDescriptionViews getExtraDescription() const; // Returns the extra description data.
     ExtraDescriptions extra_descriptions; // Extra descriptions for this unit.
 };
+
+inline std::string format_as(const HasExtraDescriptions& hed) {
+    std::string result = "Extra Descriptions:\r\n";
+    int line = 0;
+    for(auto &ed : hed.extra_descriptions) {
+        result += fmt::format("   {}: [{}] {}\r\n", line++, ed.first, ed.second);
+    }
+    return result;
+}
+
 std::optional<ExtraDescriptionView> find_exdesc(std::string_view word, std::span<ExtraDescriptionView> hed);
 std::optional<ExtraDescriptionView> find_exdesc(std::string_view word, HasExtraDescriptions* hed);
