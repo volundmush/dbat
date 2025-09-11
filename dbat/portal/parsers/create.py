@@ -119,21 +119,21 @@ class CreateParser(BaseParser):
                 self.data.sex = Sex.neutral
                 await self.send_line("Sex set to neutral as Namekians do not have a defined sex.")
 
-    async def handle_subrace(self, args: str):
-        if not (available := self.available_subraces()):
-            await self.send_line("This race does not have subraces.")
+    async def handle_model(self, args: str):
+        if not (available := self.available_models()):
+            await self.send_line("This race does not have Android Models.")
             return
         if not args:
-            await self.send_line("You must supply a subrace for your character.")
+            await self.send_line("You must supply a Android Model for your character.")
             return
         if not (choice := partial_match(args, available, key=lambda t: t.name)):
-            await self.send_line("Invalid subrace choice. cghelp subrace for available options.")
+            await self.send_line("Invalid Android Model choice. cghelp model for available options.")
             return
-        if choice == self.data.subrace:
-            await self.send_line(f"Character subrace is already set to {choice.name.capitalize()}.")
+        if choice == self.data.android_model:
+            await self.send_line(f"Character Android Model is already set to {choice.name.capitalize()}.")
             return
-        self.data.subrace = choice
-        await self.send_line(f"Character subrace set to: {choice.name.capitalize()}.")
+        self.data.android_model = choice
+        await self.send_line(f"Character Android Model set to: {choice.name.capitalize()}.")
 
     async def handle_sex(self, args: str):
         if not (available := self.data.available_sexes()):
@@ -270,7 +270,7 @@ class CreateParser(BaseParser):
         lsargs = match_dict.get("lsargs", "")
         rsargs = match_dict.get("rsargs", "")
 
-        if not (cmd := partial_match(raw_cmd, ["cghelp", "help", "choices", "name", "race", "subrace", "sex", "sensei", "mutation", "genome", "keep", "align", "finish", "cancel", "look"])):
+        if not (cmd := partial_match(raw_cmd, ["cghelp", "help", "choices", "name", "race", "model", "sex", "sensei", "mutation", "genome", "keep", "align", "finish", "cancel", "look"])):
             await self.send_line("Invalid command. Type 'cghelp' for help.")
             return
 
@@ -283,8 +283,8 @@ class CreateParser(BaseParser):
                 await self.handle_name(args)
             case "race":
                 await self.handle_race(args)
-            case "subrace":
-                await self.handle_subrace(args)
+            case "model":
+                await self.handle_model(args)
             case "sex":
                 await self.handle_sex(args)
             case "sensei":
@@ -311,8 +311,8 @@ class CreateParser(BaseParser):
     async def display_choices(self):
         choices_table = self.make_table("Category", "Choices", title="Choices for Character Creation")
         choices_table.add_row("Race", ", ".join([e.name.capitalize() for e in self.data.available_races()]))
-        if (subraces := self.data.available_subraces()):
-            choices_table.add_row("SubRace", ", ".join([e.name.capitalize() for e in subraces]))
+        if (models := self.data.available_models()):
+            choices_table.add_row("Android Model", ", ".join([e.name.capitalize() for e in models]))
         if (sexes := self.data.available_sexes()):
             choices_table.add_row("Sex", ", ".join([e.name.capitalize() for e in sexes]))
         choices_table.add_row("Sensei", ", ".join([e.name.capitalize() for e in self.data.available_senseis()]))
@@ -326,7 +326,7 @@ class CreateParser(BaseParser):
         data_table.add_row("Sensei", self.data.sensei.name.capitalize() if self.data.sensei else "<unset>")
         match self.data.race:
             case Race.android:
-                data_table.add_row("SubRace", self.data.subrace.name.capitalize() if self.data.subrace else "<unset>")
+                data_table.add_row("Android Model", self.data.android_model.name.capitalize() if self.data.android_model else "<unset>")
             case Race.mutant:
                 data_table.add_row("Mutations", ", ".join([m.name.capitalize() for m in self.data.mutations]) or "<none>")
             case Race.bio_android:

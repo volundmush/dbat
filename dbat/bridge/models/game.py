@@ -299,7 +299,7 @@ class CharData(ThingData):
     title: str = ""
     race: names.Race = names.Race.spirit
     sensei: names.Sensei = names.Sensei.commoner
-    subrace: names.SubRace | None = None
+    model: names.AndroidModel | None = None
     appearances: typing.Dict[names.Appearance, int] = Field(default_factory=dict)
     stats: typing.Dict[str, float] = Field(default_factory=dict)
     character_flags: typing.Set[names.CharacterFlag] = Field(default_factory=set)
@@ -319,8 +319,8 @@ class CharData(ThingData):
     def serialize_sensei(self, value):
         return value.name
 
-    @field_serializer("subrace")
-    def serialize_subrace(self, value):
+    @field_serializer("model")
+    def serialize_model(self, value):
         return value.name if value else None
     
     @field_serializer("appearances")
@@ -393,9 +393,9 @@ class ChargenData(BaseModel):
     def available_races(self) -> list[names.Race]:
         return [race for race in names.Race if race.name not in ("spirit", "animal", "saiba", "serpent", "ogre", "yardratian", "dragon", "mechanical")]
 
-    def available_subraces(self) -> list[names.SubRace]:
+    def available_models(self) -> list[names.AndroidModel]:
         if self.race == names.Race.android:
-            return [s for s in names.SubRace]
+            return [s for s in names.AndroidModel]
         return list()
 
     def available_senseis(self) -> list[names.Sensei]:
