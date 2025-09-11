@@ -760,8 +760,7 @@ void from_json(const json &j, Shop &s)
         s.profit_buy = j["profit_buy"];
     if (j.contains("profit_sell"))
         s.profit_sell = j["profit_sell"];
-    if (j.contains("type"))
-        s.type = j["type"];
+    if (j.contains("type")) j.at("type").get_to(s.type);
     if (j.contains("no_such_item1"))
         j.at("no_such_item1").get_to(s.no_such_item1);
     if (j.contains("no_such_item2"))

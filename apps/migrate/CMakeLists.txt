@@ -13,6 +13,7 @@ target_link_libraries(dbat_migrate
     Boost::iostreams
     ZLIB::ZLIB
     Threads::Threads
+    bsd
     ${MATH_LIB}
 )
 

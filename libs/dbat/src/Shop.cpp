@@ -452,7 +452,7 @@ static int trade_with(Object *item, vnum shop_nr)
     auto &shop = shop_index.at(shop_nr);
 
     for (const auto &product : shop->type)
-        if (product.type == GET_OBJ_TYPE(item))
+        if (product.type == static_cast<int>(GET_OBJ_TYPE(item)))
         {
             if (GET_OBJ_VAL(item, VAL_WAND_CHARGES) == 0 &&
                 (GET_OBJ_TYPE(item) == ITEM_WAND ||

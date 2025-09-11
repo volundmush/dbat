@@ -6,6 +6,7 @@
 #include <fstream>
 #include <thread>
 #include <cstdlib>
+#include <bsd/string.h>
 
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/regex.hpp>
@@ -676,7 +677,7 @@ static void boot_the_shops(FILE *shop_f, char *filename, int rec_count) {
                 read_line(shop_f, "%d", &shop_temp);
                 if(shop_temp == -1) break;
                 auto &t = sh->type.emplace_back();
-                t.type = static_cast<ItemType>(shop_temp);
+                t.type = shop_temp;
             }
 
             sh->no_such_item1 = read_shop_message(0, SHOP_NUM(top_shop), shop_f, buf2);

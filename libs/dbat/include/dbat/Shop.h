@@ -11,7 +11,7 @@
 struct Object;
 
 struct shop_buy_data {
-    ItemType type{ItemType::unknown};
+    int type{-1};
     std::string keywords{};
 };
 
