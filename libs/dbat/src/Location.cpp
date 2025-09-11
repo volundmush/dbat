@@ -881,7 +881,7 @@ static void display_room_damage_description(Location& loc, Character *ch)
     auto sect = static_cast<int>(loc.getSectorType());
     auto sunk = loc.getEnvironment(ENV_WATER) >= 100.0;
 
-    if ((!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_BRIEF)) || loc.getRoomFlag(ROOM_DEATH))
+    if ((!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_BRIEF)))
     {
         if (dmg <= 99 || (dmg == 100 && (sect == SECT_WATER_SWIM || sunk || sect == SECT_FLYING || sect == SECT_SHOP || sect == SECT_IMPORTANT)))
         {

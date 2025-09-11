@@ -195,7 +195,6 @@ Object *get_object_in_equip(Character *ch, std::string_view name)
     }
     else
     {
-        snprintf(tmpname, sizeof(tmpname), "%s", name);
         if (!(number = get_number(&tmp)))
             return nullptr;
 

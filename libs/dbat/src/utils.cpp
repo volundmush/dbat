@@ -7,6 +7,7 @@
  *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
  *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
  ************************************************************************ */
+#include <bsd/string.h>
 #include <cstdarg>
 #include <fstream>
 #include <string_view>
@@ -3356,14 +3357,14 @@ bool OBJAFF_FLAGGED(Object *obj, AffectFlag flag)
     return obj->affect_flags.get(flag);
 }
 
-bool ROOM_FLAGGED(Room *loc, int flag)
+bool ROOM_FLAGGED(Room *loc, RoomFlag flag)
 {
     if (!loc)
         return false;
     return loc->room_flags.get(flag);
 }
 
-bool ROOM_FLAGGED(room_vnum loc, int flag)
+bool ROOM_FLAGGED(room_vnum loc, RoomFlag flag)
 {
     return ROOM_FLAGGED(get_room(loc), flag);
 }
@@ -3393,7 +3394,7 @@ bool PRF_FLAGGED(Character *ch, int flag)
     return ch->pref_flags.get(flag);
 }
 
-bool PLR_FLAGGED(Character *ch, int flag)
+bool PLR_FLAGGED(Character *ch, PlayerFlag flag)
 {
     return ch->player_flags.get(flag);
 }

@@ -40,6 +40,7 @@
 #include "dbat/const/Condition.h"
 #include "dbat/const/Skill.h"
 #include "dbat/const/Direction.h"
+#include "dbat/const/PlayerFlag.h"
 
 #include <algorithm>
 #include <magic_enum/magic_enum.hpp>
@@ -801,7 +802,7 @@ static const std::map<std::string, int> _save_names = {
     {"saving_reflex", SAVING_REFLEX},
     {"saving_will", SAVING_WILL}};
 
-static const std::map<std::string, int> _pflags = {
+static const std::map<std::string, PlayerFlag> _pflags = {
     {"is_killer", PLR_KILLER},
     {"is_thief", PLR_THIEF}};
 

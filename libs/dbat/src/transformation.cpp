@@ -1765,7 +1765,8 @@ namespace trans
             drain = found->second;
         }
 
-        if (form == Form::super_saiyan_1 && PLR_FLAGGED(ch, PLR_FPSSJ))
+        // TODO: fix this. FPSSJ check.
+        if (form == Form::super_saiyan_1 && false)
             drain *= 0.5;
 
         if (ch->location.getWhereFlag(WhereFlag::afterlife_hell) || ch->location.getWhereFlag(WhereFlag::afterlife))

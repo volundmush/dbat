@@ -24,6 +24,7 @@
 #include "const/Mutation.h"
 #include "const/Size.h"
 #include "const/Position.h"
+#include "const/PlayerFlag.h"
 #include "Flags.h"
 
 struct CharacterPrototype;
@@ -159,7 +160,7 @@ extern bool AFF_FLAGGED(Character *ch, AffectFlag flag);
 extern bool AFF_FLAGGED(Character *ch, int flag);
 extern bool AFF_FLAGGED(CharacterPrototype *ch, int flag);
 
-extern bool PLR_FLAGGED(Character *ch, int flag);
+extern bool PLR_FLAGGED(Character *ch, PlayerFlag flag);
 extern bool PRF_FLAGGED(Character *ch, int flag);
 extern bool ADM_FLAGGED(Character *ch, AdminFlag flag);
 

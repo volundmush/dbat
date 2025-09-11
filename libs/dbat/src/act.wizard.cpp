@@ -8,6 +8,7 @@
  *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
  ************************************************************************ */
 #include <sys/param.h>
+#include <bsd/string.h>
 #include "dbat/Log.h"
 #include "dbat/CharacterUtils.h"
 #include "dbat/ObjectUtils.h"
@@ -3445,7 +3446,7 @@ ACMD(do_wiznet)
     {
         if (IS_PLAYING(d) && (GET_ADMLEVEL(d->character) >= level) &&
             (!PRF_FLAGGED(d->character, PRF_NOWIZ)) &&
-            (!PLR_FLAGGED(d->character, PLR_WRITING | PLR_MAILING)) && (d != ch->desc || !(PRF_FLAGGED(d->character, PRF_NOREPEAT))))
+            (!PLR_FLAGGED(d->character, PLR_MAILING) && !PLR_FLAGGED(d->character, PLR_WRITING)) && (d != ch->desc || !(PRF_FLAGGED(d->character, PRF_NOREPEAT))))
         {
             if (d->character->canSee(ch))
             {
@@ -5193,13 +5194,6 @@ ACMD(do_zcheck)
                                     dirs[j], e.getVnum());
             } /* for (k.. */
         } /* cycle directions */
-
-        if (ROOM_FLAGGED(i, ROOM_ATRIUM | ROOM_HOUSE | ROOM_OLC))
-            len += snprintf(buf + len, sizeof(buf) - len,
-                            "- Has illegal affection bits set (%s %s %s)\r\n",
-                            ROOM_FLAGGED(i, ROOM_ATRIUM) ? "ATRIUM" : "",
-                            ROOM_FLAGGED(i, ROOM_HOUSE) ? "HOUSE" : "",
-                            ROOM_FLAGGED(i, ROOM_OLC) ? "OLC" : "");
 
         if ((MIN_ROOM_DESC_LENGTH) && strlen(r->getLookDescription()) < MIN_ROOM_DESC_LENGTH && (found = 1))
             len += snprintf(buf + len, sizeof(buf) - len,

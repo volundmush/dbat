@@ -214,13 +214,14 @@ static void update_flags(Character *ch)
         ch->affect_flags.set(AFF_ENSNARED, false);
     }
 
-    if ((IS_SAIYAN(ch) || IS_HALFBREED(ch)) && (ch->form == Form::super_saiyan_1) && !PLR_FLAGGED(ch, PLR_FPSSJ))
+    // Todo: fix the FPSSJ thing.
+    if ((IS_SAIYAN(ch) || IS_HALFBREED(ch)) && (ch->form == Form::super_saiyan_1) && false)
     {
         ch->modBaseStat<int>("absorbs", 1);
         if (GET_ABSORBS(ch) >= 300)
         {
             ch->sendText("You have mastered the base Super Saiyan transformation and achieved Full Power Super Saiyan! Super Saiyan First can now be maintained effortlessly.\r\n");
-            ch->player_flags.set(PLR_FPSSJ, true);
+            //ch->player_flags.set(PLR_FPSSJ, true);
             ch->setBaseStat<int>("absorbs", 0);
         }
     }

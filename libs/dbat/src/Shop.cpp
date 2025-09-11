@@ -11,6 +11,7 @@
 /***
  * The entire shop rewrite for Circle 3.0 was done by Jeff Fink.  Thanks Jeff!
  ***/
+#include <bsd/string.h>
 #include "dbat/Shop.h"
 #include "dbat/CharacterUtils.h"
 #include "dbat/ObjectUtils.h"

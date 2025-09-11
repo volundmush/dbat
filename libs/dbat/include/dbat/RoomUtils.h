@@ -3,8 +3,8 @@
 
 extern bool WHERE_FLAGGED(room_vnum loc, WhereFlag flag);
 extern bool WHERE_FLAGGED(Room *loc, WhereFlag flag);
-extern bool ROOM_FLAGGED(room_vnum loc, int flag);
-extern bool ROOM_FLAGGED(Room *loc, int flag);
+extern bool ROOM_FLAGGED(room_vnum loc, RoomFlag flag);
+extern bool ROOM_FLAGGED(Room *loc, RoomFlag flag);
 
 #define SECT(room)    (VALID_ROOM_RNUM(room) ? get_room(room)->sector_type : SECT_INSIDE)
 #define ROOM_DAMAGE(room)   get_room(room)->getDamage()

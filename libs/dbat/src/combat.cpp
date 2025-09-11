@@ -4344,7 +4344,7 @@ int64_t damtype(Character *ch, int type, int skill, double percent)
         if (Random::get<int>(1, 10) >= 7)
         {
             ch->sendText("You feel less angry.\r\n");
-            ch->affect_flags.set(PLR_FURY, false);
+            ch->player_flags.set(PLR_FURY, false);
         }
     }
     else if (PLR_FLAGGED(ch, PLR_FURY))
@@ -4353,7 +4353,7 @@ int64_t damtype(Character *ch, int type, int skill, double percent)
         act("Your rage magnifies your attack power!", true, ch, nullptr, nullptr, TO_CHAR);
         act("Swirling energy flows around $n as $e releases $s rage in the attack!", true, ch, nullptr, nullptr,
             TO_ROOM);
-        ch->affect_flags.set(PLR_FURY, false);
+        ch->player_flags.set(PLR_FURY, false);
     }
     /* End of Fury Mode for halfbreeds */
 
