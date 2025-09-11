@@ -350,7 +350,7 @@ void mag_objectmagic(Character *ch, Object *obj,
         break;
     default:
         basic_mud_log("SYSERR: Unknown object_type %d in mag_objectmagic.",
-                      GET_OBJ_TYPE(obj));
+                      magic_enum::enum_name(GET_OBJ_TYPE(obj)));
         break;
     }
 }

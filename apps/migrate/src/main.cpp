@@ -676,7 +676,7 @@ static void boot_the_shops(FILE *shop_f, char *filename, int rec_count) {
                 read_line(shop_f, "%d", &shop_temp);
                 if(shop_temp == -1) break;
                 auto &t = sh->type.emplace_back();
-                t.type = shop_temp;
+                t.type = static_cast<ItemType>(shop_temp);
             }
 
             sh->no_such_item1 = read_shop_message(0, SHOP_NUM(top_shop), shop_f, buf2);
@@ -1536,7 +1536,7 @@ static void obj_values(T* obj, int64_t old_value[]) {
     if(old_value[5]) obj->setBaseStat(VAL_ALL_MAXHEALTH, old_value[5]);
     if(old_value[7]) obj->setBaseStat(VAL_ALL_MATERIAL, old_value[7]);
 
-    switch(static_cast<int>(obj->type_flag)) {
+    switch(obj->type_flag) {
         case ITEM_LIGHT:
             if(old_value[0]) obj->setBaseStat(VAL_LIGHT_TIME, old_value[0]);
             if(old_value[2]) obj->setBaseStat(VAL_LIGHT_HOURS, old_value[2]);

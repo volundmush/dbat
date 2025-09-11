@@ -43,7 +43,7 @@ int64_t MOD_OBJ_VAL(T* obj, const std::string& val, int mod) {
 extern bool OBJAFF_FLAGGED(Object *obj, AffectFlag flag);
 #define OBJVAL_FLAGGED(obj, flag) (IS_SET(GET_OBJ_VAL(obj, VAL_CONTAINER_FLAGS), flag))
 
-extern bool OBJ_FLAGGED(Object *obj, int flag);
+extern bool OBJ_FLAGGED(Object *obj, ItemFlag flag);
 
 struct ObjectBase : public HasVnum, public HasMudStrings, public HasExtraDescriptions, public HasStats, public HasPicky {
     ItemType type_flag{ItemType::unknown};      /* Type of item                        */

@@ -7,7 +7,7 @@ void auto_equip(Character *ch, Object *obj, int location);
 
 #define GET_OBJ_LEVEL(obj)      obj->getBaseStat<int>("level")
 #define GET_OBJ_PERM(obj)       obj->affect_flags
-#define GET_OBJ_TYPE(obj)    static_cast<int>(obj->type_flag)
+#define GET_OBJ_TYPE(obj)    obj->type_flag
 #define GET_OBJ_COST(obj)    obj->getBaseStat<int>("cost")
 #define GET_OBJ_RENT(obj)    obj->getBaseStat<int>("cost_per_day")
 #define GET_OBJ_EXTRA(obj)    obj->item_flags

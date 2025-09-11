@@ -402,7 +402,7 @@ static int evaluate_expression(Object *obj, char *expr)
                 for (eindex = 0; *extra_bits[eindex] != '\n'; eindex++)
                     if (boost::iequals(name, extra_bits[eindex]))
                     {
-                        push(&vals, OBJ_FLAGGED(obj, eindex));
+                        push(&vals, OBJ_FLAGGED(obj, static_cast<ItemFlag>(eindex)));
                         break;
                     }
                 if (*extra_bits[eindex] == '\n')
@@ -1674,7 +1674,7 @@ static void list_detailed_shop(Character *ch, vnum shop_nr)
         }
 
         linelen = snprintf(buf1, sizeof(buf1), "%s (#%d) [%s]",
-                           item_types[t.type],
+                           item_types[static_cast<int>(t.type)],
                            t.type,
                            !t.keywords.empty() ? t.keywords.c_str() : "all");
 

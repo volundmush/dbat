@@ -1152,7 +1152,7 @@ void mag_alter_objs(int level, Character *ch, Object *obj,
         }
         break;
     case SPELL_INVISIBLE:
-        if (!OBJ_FLAGGED(obj, ITEM_NOINVIS | ITEM_INVISIBLE))
+        if (!(OBJ_FLAGGED(obj, ITEM_INVISIBLE) || OBJ_FLAGGED(obj, ITEM_NOINVIS)))
         {
             obj->item_flags.set(ITEM_INVISIBLE, true);
             to_char = "$p vanishes.";

@@ -1330,9 +1330,8 @@ void from_json(const json &j, ObjectPrototype &o)
     from_json(j, static_cast<ObjectBase &>(o));
     from_json(j, static_cast<HasProtoScript &>(o));
 
-    auto otype = static_cast<int>(o.type_flag);
-    if ((otype == ITEM_PORTAL ||
-         otype == ITEM_HATCH) &&
+    auto otype = o.type_flag;
+    if ((otype == ITEM_PORTAL || otype == ITEM_HATCH) &&
         (!o.getBaseStat<int>(VAL_DOOR_DCLOCK) ||
          !o.getBaseStat<int>(VAL_DOOR_DCHIDE)))
     {

@@ -3346,7 +3346,7 @@ void SET_SKILL_PERF(Character *ch, uint16_t skill, int16_t val)
     s.perfs = val;
 }
 
-bool OBJ_FLAGGED(Object *obj, int flag)
+bool OBJ_FLAGGED(Object *obj, ItemFlag flag)
 {
     return obj->item_flags.get(flag);
 }

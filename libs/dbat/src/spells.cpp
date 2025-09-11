@@ -286,8 +286,7 @@ ASPELL(spell_identify)
         char bitbuf[MAX_STRING_LENGTH];
         char buf2[MAX_STRING_LENGTH];
 
-        sprinttype(GET_OBJ_TYPE(obj), item_types, bitbuf, sizeof(bitbuf));
-        ch->send_to("You feel informed:\r\nObject '%s', Item type: %s\r\n", obj->getShortDescription(), bitbuf);
+        ch->send_to("You feel informed:\r\nObject '%s', Item type: %s\r\n", obj->getShortDescription(), magic_enum::enum_name(GET_OBJ_TYPE(obj)));
 
         if (obj->affect_flags)
         {
