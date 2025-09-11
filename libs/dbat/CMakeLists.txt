@@ -40,6 +40,7 @@ target_link_libraries(dbat
     ZLIB::ZLIB
     Boost::regex
     Threads::Threads
+    bsd
     ${MATH_LIB}
   PRIVATE
     Boost::iostreams
