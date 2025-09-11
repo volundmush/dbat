@@ -3689,7 +3689,7 @@ ACMD(do_drink)
         af.duration = amount * 3;
         af.modifier = 0;
         af.location = APPLY_NONE;
-        af.bitvector = AFF_POISON;
+        af.aff_flags.set(AFF_POISON);
         affect_join(ch, &af, false, false, false, false);
     }
     /* empty the container, and no longer poison.
@@ -3890,7 +3890,7 @@ ACMD(do_eat)
         af.duration = amount * 2;
         af.modifier = 0;
         af.location = APPLY_NONE;
-        af.bitvector = AFF_POISON;
+        af.aff_flags.set(AFF_POISON);
         affect_join(ch, &af, false, false, false, false);
     }
 

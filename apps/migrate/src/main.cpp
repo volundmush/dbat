@@ -2360,7 +2360,7 @@ static void load_affects(FILE *fl, struct Character *ch, int violence) {
             af.duration = num2;
             af.modifier = num3;
             af.location = num4;
-            af.bitvector = num5;
+            af.aff_flags.set(static_cast<AffectFlag>(num5));
             af.specific = num6;
             if (violence)
                 affectv_to_char(ch, &af);

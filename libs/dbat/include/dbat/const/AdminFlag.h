@@ -28,22 +28,22 @@ enum class AdminFlag : uint8_t
 /*
  * ADM flags - define admin privs for chars
  */
-constexpr int ADM_TELLALL = 0;       /* Can use 'tell all' to broadcast GOD */
-constexpr int ADM_SEEINV = 1;        /* Sees other chars inventory IMM */
-constexpr int ADM_SEESECRET = 2;     /* Sees secret doors IMM */
-constexpr int ADM_KNOWWEATHER = 3;   /* Knows details of weather GOD */
-constexpr int ADM_FULLWHERE = 4;     /* Full output of 'where' command IMM */
-constexpr int ADM_MONEY = 5;         /* Char has a bottomless wallet GOD */
-constexpr int ADM_EATANYTHING = 6;   /* Char can eat anything GOD */
-constexpr int ADM_NOPOISON = 7;      /* Char can't be poisoned IMM */
-constexpr int ADM_WALKANYWHERE = 8;  /* Char has unrestricted walking IMM */
-constexpr int ADM_NOKEYS = 9;        /* Char needs no keys for locks GOD */
-constexpr int ADM_INSTANTKILL = 10;  /* "kill" command is instant IMPL */
-constexpr int ADM_NOSTEAL = 11;      /* Char cannot be stolen from IMM */
-constexpr int ADM_TRANSALL = 12;     /* Can use 'trans all' GRGOD */
-constexpr int ADM_SWITCHMORTAL = 13; /* Can 'switch' to a mortal PC body IMPL */
-constexpr int ADM_FORCEMASS = 14;    /* Can force rooms or all GRGOD */
-constexpr int ADM_ALLHOUSES = 15;    /* Can enter any house GRGOD */
-constexpr int ADM_NODAMAGE = 16;     /* Cannot be damaged IMM */
-constexpr int ADM_ALLSHOPS = 17;     /* Can use all shops GOD */
-constexpr int ADM_CEDIT = 18;        /* Can use cedit IMPL */
+constexpr AdminFlag ADM_TELLALL = AdminFlag::tell_all;       /* Can use 'tell all' to broadcast GOD */
+constexpr AdminFlag ADM_SEEINV = AdminFlag::see_invisible;        /* Sees other chars inventory IMM */
+constexpr AdminFlag ADM_SEESECRET = AdminFlag::see_secret;     /* Sees secret doors IMM */
+constexpr AdminFlag ADM_KNOWWEATHER = AdminFlag::know_weather;   /* Knows details of weather GOD */
+constexpr AdminFlag ADM_FULLWHERE = AdminFlag::full_where;     /* Full output of 'where' command IMM */
+constexpr AdminFlag ADM_MONEY = AdminFlag::money;         /* Char has a bottomless wallet GOD */
+constexpr AdminFlag ADM_EATANYTHING = AdminFlag::eat_anything;   /* Char can eat anything GOD */
+constexpr AdminFlag ADM_NOPOISON = AdminFlag::no_poison;      /* Char can't be poisoned IMM */
+constexpr AdminFlag ADM_WALKANYWHERE = AdminFlag::walk_anywhere;  /* Char has unrestricted walking IMM */
+constexpr AdminFlag ADM_NOKEYS = AdminFlag::no_keys;        /* Char needs no keys for locks GOD */
+constexpr AdminFlag ADM_INSTANTKILL = AdminFlag::instant_kill;  /* "kill" command is instant IMPL */
+constexpr AdminFlag ADM_NOSTEAL = AdminFlag::no_steal;      /* Char cannot be stolen from IMM */
+constexpr AdminFlag ADM_TRANSALL = AdminFlag::trans_all;     /* Can use 'trans all' GRGOD */
+constexpr AdminFlag ADM_SWITCHMORTAL = AdminFlag::switch_mortal; /* Can 'switch' to a mortal PC body IMPL */
+constexpr AdminFlag ADM_FORCEMASS = AdminFlag::force_mass;    /* Can force rooms or all GRGOD */
+constexpr AdminFlag ADM_ALLHOUSES = AdminFlag::all_houses;    /* Can enter any house GRGOD */
+constexpr AdminFlag ADM_NODAMAGE = AdminFlag::no_damage;     /* Cannot be damaged IMM */
+constexpr AdminFlag ADM_ALLSHOPS = AdminFlag::all_shops;     /* Can use all shops GOD */
+constexpr AdminFlag ADM_CEDIT = AdminFlag::cedit;        /* Can use cedit IMPL */

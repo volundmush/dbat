@@ -415,9 +415,9 @@ const char *report_party_health(Character *ch);
 
 extern int know_skill(Character *ch, int skill);
 
-extern void null_affect(Character *ch, int aff_flag);
+extern void null_affect(Character *ch, AffectFlag aff_flag);
 
-extern void assign_affect(Character *ch, int aff_flag, int skill, int dur, int str, int con, int intel, int agl, int wis,
+extern void assign_affect(Character *ch, AffectFlag aff_flag, int skill, int dur, int str, int con, int intel, int agl, int wis,
               int spd);
 
 extern int sec_roll_check(Character *ch);

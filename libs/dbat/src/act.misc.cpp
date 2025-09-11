@@ -3651,7 +3651,7 @@ ACMD(do_kanso)
             af.duration = Random::get<int>(1, 3);
             af.modifier = 0;
             af.location = APPLY_NONE;
-            af.bitvector = AFF_PARA;
+            af.aff_flags.set(AFF_PARA);
             affect_join(vict, &af, false, false, false, false);
         }
     }
@@ -3921,7 +3921,7 @@ ACMD(do_hayasa)
         af.duration = duration;
         af.modifier = 0;
         af.location = APPLY_NONE;
-        af.bitvector = AFF_HAYASA;
+        af.aff_flags.set(AFF_HAYASA);
         affect_join(ch, &af, false, false, false, false);
         ch->setBaseStat<int>("speedboost", GET_SPEEDCALC(ch) * 0.5);
         reveal_hiding(ch, 0);

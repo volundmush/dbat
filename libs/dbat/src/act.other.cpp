@@ -3848,7 +3848,7 @@ ACMD(do_spit)
         af.duration = Random::get<int>(1, 2);
         af.modifier = 0;
         af.location = APPLY_NONE;
-        af.bitvector = AFF_PARALYZE;
+        af.aff_flags.set(AFF_PARALYZE);
         affect_join(vict, &af, false, false, false, false);
 
         ch->modCurVital(CharVital::ki, -cost);
@@ -12800,7 +12800,7 @@ ACMD(do_resurrect)
     {
         next_af = af->next;
         if (af->location == APPLY_NONE && af->type == -1 &&
-            (af->bitvector == AFF_SPIRIT || af->bitvector == AFF_ETHEREAL))
+            (af->aff_flags.get(AFF_SPIRIT) || af->aff_flags.get(AFF_ETHEREAL)))
             affect_remove(ch, af);
     }
 

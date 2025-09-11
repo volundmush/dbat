@@ -1550,8 +1550,8 @@ void to_json(json &j, const affected_type &a)
         j["type"] = a.type;
     if (a.duration)
         j["duration"] = a.duration;
-    if (a.bitvector)
-        j["bitvector"] = a.bitvector;
+    if (a.aff_flags)
+        j["aff_flags"] = a.aff_flags;
 }
 
 void from_json(const json &j, affected_type &a)
@@ -1561,8 +1561,7 @@ void from_json(const json &j, affected_type &a)
         a.type = j["type"];
     if (j.contains("duration"))
         a.duration = j["duration"];
-    if (j.contains("bitvector"))
-        a.bitvector = j["bitvector"];
+    if (j.contains("aff_flags")) j.at("aff_flags").get_to(a.aff_flags);
 }
 
 void to_json(json &j, const CharacterBase &c) {

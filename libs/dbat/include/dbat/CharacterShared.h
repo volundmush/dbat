@@ -161,7 +161,7 @@ extern bool AFF_FLAGGED(CharacterPrototype *ch, int flag);
 
 extern bool PLR_FLAGGED(Character *ch, int flag);
 extern bool PRF_FLAGGED(Character *ch, int flag);
-extern bool ADM_FLAGGED(Character *ch, int flag);
+extern bool ADM_FLAGGED(Character *ch, AdminFlag flag);
 
 struct CharacterBase : public HasVnum, public HasMudStrings, public HasExtraDescriptions, public HasStats {
     Race race{Race::human};

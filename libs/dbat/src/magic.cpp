@@ -343,7 +343,7 @@ void mag_affects(int level, Character *ch, Character *victim,
     for (i = 0; i < MAX_SPELL_AFFECTS; i++)
     {
         af[i].type = spellnum;
-        af[i].bitvector = 0;
+        af[i].aff_flags.clear();
         af[i].modifier = 0;
         af[i].location = APPLY_NONE;
     }
@@ -399,13 +399,13 @@ void mag_affects(int level, Character *ch, Character *victim,
         af[0].specific = static_cast<int>(ComStat::accuracy);
         af[0].modifier = -4;
         af[0].duration = 2;
-        af[0].bitvector = AFF_BLIND;
+        af[0].aff_flags.set(AFF_BLIND);
 
         af[1].location = APPLY_COMBAT_BASE;
         af[1].specific = static_cast<int>(ComStat::armor);
         af[1].modifier = -4;
         af[1].duration = 2;
-        af[1].bitvector = AFF_BLIND;
+        af[1].aff_flags.set(AFF_BLIND);
 
         to_room = "$n seems to be blinded!";
         to_vict = "You have been blinded!";
@@ -416,7 +416,7 @@ void mag_affects(int level, Character *ch, Character *victim,
         af[0].specific = static_cast<int>(ComStat::accuracy);
         af[0].duration = 1 + (level / 2);
         af[0].modifier = -1;
-        af[0].bitvector = AFF_CURSE;
+        af[0].aff_flags.set(AFF_CURSE);
 
         accum_duration = true;
         accum_affect = true;
@@ -429,13 +429,13 @@ void mag_affects(int level, Character *ch, Character *victim,
         af[0].specific = static_cast<int>(CharAttribute::strength);
         af[0].duration = -1;
         af[0].modifier = -6;
-        af[0].bitvector = AFF_CURSE;
+        af[0].aff_flags.set(AFF_CURSE);
 
         af[1].location = APPLY_COMBAT_MULT;
         af[1].specific = static_cast<int>(ComStat::accuracy);
         af[1].duration = -1;
         af[1].modifier = -4;
-        af[1].bitvector = AFF_CURSE;
+        af[1].aff_flags.set(AFF_CURSE);
 
         accum_duration = false;
         accum_affect = false;
@@ -445,21 +445,21 @@ void mag_affects(int level, Character *ch, Character *victim,
 
     case SPELL_DETECT_ALIGN:
         af[0].duration = 12 + level;
-        af[0].bitvector = AFF_DETECT_ALIGN;
+        af[0].aff_flags.set(AFF_DETECT_ALIGN);
         accum_duration = true;
         to_vict = "Your eyes tingle.";
         break;
 
     case SPELL_SEE_INVIS:
         af[0].duration = 12 + level;
-        af[0].bitvector = AFF_DETECT_INVIS;
+        af[0].aff_flags.set(AFF_DETECT_INVIS);
         accum_duration = true;
         to_vict = "Your eyes tingle.";
         break;
 
     case SPELL_DETECT_MAGIC:
         af[0].duration = 12 + level;
-        af[0].bitvector = AFF_DETECT_MAGIC;
+        af[0].aff_flags.set(AFF_DETECT_MAGIC);
         accum_duration = true;
         to_vict = "Your eyes tingle.";
         break;
@@ -476,7 +476,7 @@ void mag_affects(int level, Character *ch, Character *victim,
 
     case SPELL_DARKVISION:
         af[0].duration = 12 + level;
-        af[0].bitvector = AFF_INFRAVISION;
+        af[0].aff_flags.set(AFF_INFRAVISION);
         accum_duration = true;
         to_vict = "Your eyes glow red.";
         to_room = "$n's eyes glow red.";
@@ -490,7 +490,7 @@ void mag_affects(int level, Character *ch, Character *victim,
         af[0].modifier = 4;
         af[0].location = APPLY_COMBAT_BASE;
         af[0].specific = static_cast<int>(ComStat::armor);
-        af[0].bitvector = AFF_INVISIBLE;
+        af[0].aff_flags.set(AFF_INVISIBLE);
         accum_duration = true;
         to_vict = "You vanish.";
         to_room = "$n slowly fades out of existence.";
@@ -502,21 +502,21 @@ void mag_affects(int level, Character *ch, Character *victim,
         af[0].specific = static_cast<int>(CharAttribute::strength);
         af[0].duration = level;
         af[0].modifier = -2;
-        af[0].bitvector = AFF_POISON;
+        af[0].aff_flags.set(AFF_POISON);
         to_vict = "You feel very sick.";
         to_room = "$n gets violently ill!";
         break;
 
     case SPELL_PROT_FROM_EVIL:
         af[0].duration = 24;
-        af[0].bitvector = AFF_PROTECT_GOOD;
+        af[0].aff_flags.set(AFF_PROTECT_GOOD);
         accum_duration = true;
         to_vict = "You feel invulnerable!";
         break;
 
     case SPELL_SANCTUARY:
         af[0].duration = 4;
-        af[0].bitvector = AFF_SANCTUARY;
+        af[0].aff_flags.set(AFF_SANCTUARY);
 
         accum_duration = true;
         to_vict = "A white aura momentarily surrounds you.";
@@ -530,7 +530,7 @@ void mag_affects(int level, Character *ch, Character *victim,
             return;
 
         af[0].duration = 4 + (level / 4);
-        af[0].bitvector = AFF_SLEEP;
+        af[0].aff_flags.set(AFF_SLEEP);
 
         if (GET_POS(victim) > POS_SLEEPING)
         {
@@ -547,7 +547,7 @@ void mag_affects(int level, Character *ch, Character *victim,
             return;
 
         af[0].duration = 4 + (level / 4);
-        af[0].bitvector = AFF_SLEEP;
+        af[0].aff_flags.set(AFF_SLEEP);
 
         if (GET_POS(victim) > POS_SLEEPING)
         {
@@ -570,13 +570,13 @@ void mag_affects(int level, Character *ch, Character *victim,
     case SPELL_SENSE_LIFE:
         to_vict = "Your feel your awareness improve.";
         af[0].duration = level;
-        af[0].bitvector = AFF_SENSE_LIFE;
+        af[0].aff_flags.set(AFF_SENSE_LIFE);
         accum_duration = true;
         break;
 
     case SPELL_WATERWALK:
         af[0].duration = 24;
-        af[0].bitvector = AFF_WATERWALK;
+        af[0].aff_flags.set(AFF_WATERWALK);
         accum_duration = true;
         to_vict = "You feel webbing between your toes.";
         break;
@@ -588,18 +588,6 @@ void mag_affects(int level, Character *ch, Character *victim,
         break;
     }
 
-    /*
-     * If this is a mob that has this affect set in its mob file, do not
-     * perform the affect.  This prevents people from un-sancting mobs
-     * by sancting them and waiting for it to fade, for example.
-     */
-    if (IS_NPC(victim) && !affected_by_spell(victim, spellnum))
-        for (i = 0; i < MAX_SPELL_AFFECTS; i++)
-            if (AFF_FLAGGED(victim, af[i].bitvector))
-            {
-                ch->send_to("%s", CONFIG_NOEFFECT);
-                return;
-            }
 
     /*
      * If the victim is already affected by this spell, and the spell does
@@ -612,7 +600,7 @@ void mag_affects(int level, Character *ch, Character *victim,
     }
 
     for (i = 0; i < MAX_SPELL_AFFECTS; i++)
-        if (af[i].bitvector || (af[i].location != APPLY_NONE))
+        if (af[i].aff_flags || (af[i].location != APPLY_NONE))
             affect_join(victim, af + i, accum_duration, false, accum_affect, false);
 
     if (to_vict)
@@ -1276,7 +1264,7 @@ void affect_update_violence(uint64_t heartPulse, double deltaTime)
                         (af->next->duration > 0))
                         if (spell_info[af->type].wear_off_msg)
                             i->send_to("%s\r\n", spell_info[af->type].wear_off_msg);
-                if (af->bitvector == AFF_SUMMONED)
+                if (af->aff_flags.get(AFF_SUMMONED))
                 {
                     stop_follower(i);
                     if (!DEAD(i))
@@ -1308,7 +1296,7 @@ void mag_affectsv(int level, Character *ch, Character *victim,
     for (i = 0; i < MAX_SPELL_AFFECTS; i++)
     {
         af[i].type = spellnum;
-        af[i].bitvector = 0;
+        af[i].aff_flags.clear();
         af[i].modifier = 0;
         af[i].location = APPLY_NONE;
     }
@@ -1326,21 +1314,21 @@ void mag_affectsv(int level, Character *ch, Character *victim,
     {
     case SPELL_PARALYZE:
         af[0].duration = level / 2;
-        af[0].bitvector = AFF_PARALYZE;
+        af[0].aff_flags.set(AFF_PARALYZE);
         accum_duration = false;
         to_vict = "You feel your limbs freeze!";
         to_room = "$n suddenly freezes in place!";
         break;
     case ART_STUNNING_FIST:
         af[0].duration = 1;
-        af[0].bitvector = AFF_STUNNED;
+        af[0].aff_flags.set(AFF_STUNNED);
         accum_duration = false;
         to_vict = "You are in a stunned daze!";
         to_room = "$n is stunned.";
         break;
     case ART_EMPTY_BODY:
         af[0].duration = GET_KI(ch) / 10;
-        af[0].bitvector = AFF_ETHEREAL;
+        af[0].aff_flags.set(AFF_ETHEREAL);
         accum_duration = false;
         to_vict = "You switch to the ethereal plane.";
         to_room = "$n disappears.";
@@ -1352,7 +1340,7 @@ void mag_affectsv(int level, Character *ch, Character *victim,
             return;
         }
         af[0].duration = std::max(6, 20 - level);
-        af[0].bitvector = AFF_CDEATH;
+        af[0].aff_flags.set(AFF_CDEATH);
         accum_duration = false;
         to_vict = "You feel death closing in.";
         break;
@@ -1379,7 +1367,7 @@ void mag_affectsv(int level, Character *ch, Character *victim,
     case SPELL_SUMMON_MONSTER_VIII:
     case SPELL_SUMMON_MONSTER_IX:
         af[0].duration = level;
-        af[0].bitvector = AFF_SUMMONED;
+        af[0].aff_flags.set(AFF_SUMMONED);
         accum_duration = false;
         to_vict = "You are summoned to assist $N!";
         to_room = "$n appears, ready for action.";
@@ -1395,7 +1383,7 @@ void mag_affectsv(int level, Character *ch, Character *victim,
         af[0].specific = static_cast<int>(ComStat::accuracy);
         af[0].modifier = -1;
         af[0].duration = 2;
-        af[0].bitvector = AFF_BLIND;
+        af[0].aff_flags.set(AFF_BLIND);
 
         to_room = "$n seems to be dazzled!";
         to_vict = "You have been dazzled!";
@@ -1403,24 +1391,12 @@ void mag_affectsv(int level, Character *ch, Character *victim,
 
     case SPELL_FIRE_SHIELD:
         af[0].duration = level * 5;
-        af[0].bitvector = AFF_FIRE_SHIELD;
+        af[0].aff_flags.set(AFF_FIRE_SHIELD);
         to_room = "$n is engulfed in a firey shield!";
         to_vict = "You are engulfed in a firey shield!";
         break;
     }
 
-    /*
-     * If this is a mob that has this affect set in its mob file, do not
-     * perform the affect.  This prevents people from un-sancting mobs
-     * by sancting them and waiting for it to fade, for example.
-     */
-    if (IS_NPC(victim) && !affected_by_spell(victim, spellnum))
-        for (i = 0; i < MAX_SPELL_AFFECTS; i++)
-            if (AFF_FLAGGED(victim, af[i].bitvector))
-            {
-                ch->send_to("%s", CONFIG_NOEFFECT);
-                return;
-            }
     /*
      * If the victim is already affected by this spell, and the spell does
      * not have an accumulative effect, then fail the spell.
@@ -1432,7 +1408,7 @@ void mag_affectsv(int level, Character *ch, Character *victim,
     }
 
     for (i = 0; i < MAX_SPELL_AFFECTS; i++)
-        if (af[i].bitvector || (af[i].location != APPLY_NONE))
+        if (af[i].aff_flags || (af[i].location != APPLY_NONE))
             affectv_join(victim, af + i, accum_duration, false, accum_affect, false);
 
     if (to_vict)

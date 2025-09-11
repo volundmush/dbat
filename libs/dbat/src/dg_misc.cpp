@@ -236,10 +236,10 @@ void do_dg_affect(DgScript *trig, char *cmd) {
 
     if (type == APPLY_TYPE) {
         af.location = i;
-        af.bitvector = 0;
+        af.aff_flags.clear();
     } else {
         af.location = 0;
-        af.bitvector = i;
+        af.aff_flags.set(i);
     }
 
     affect_to_char(ch, &af);

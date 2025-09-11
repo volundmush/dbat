@@ -182,69 +182,6 @@ bool isname(std::string_view needle, std::string_view haystack) {
 }
 
 
-void aff_apply_modify(Character *ch, int loc, int mod, int spec, char *msg)
-{
-}
-
-void affect_modify(Character *ch, int loc, int mod, int spec, long bitv, bool add)
-{
-    if (add)
-    {
-        if (bitv != AFF_INFRAVISION || !IS_ANDROID(ch))
-        {
-            ch->affect_flags.set(bitv, true);
-        }
-    }
-    else
-    {
-        if (bitv != AFF_INFRAVISION || !IS_ANDROID(ch))
-        {
-            ch->affect_flags.set(bitv, false);
-            mod = -mod;
-        }
-    }
-
-    aff_apply_modify(ch, loc, mod, spec, "affect_modify");
-}
-
-void affect_modify_ar(Character *ch, int loc, int mod, int spec, const std::bitset<NUM_AFF_FLAGS> &bitv, bool add)
-{
-    int i, j;
-
-    if (add)
-        for (i = 0; i < bitv.size(); i++)
-            if (bitv.test(i))
-                ch->affect_flags.set(i, true);
-            else
-            {
-                for (i = 0; i < bitv.size(); i++)
-                    if (bitv.test(i))
-                        ch->affect_flags.set(i, false);
-                mod = -mod;
-            }
-
-    aff_apply_modify(ch, loc, mod, spec, "affect_modify_ar");
-}
-
-void affect_modify_ar(Character *ch, int loc, int mod, int spec, const std::unordered_set<AffectFlag> &bitv, bool add)
-{
-    int i, j;
-
-    if (add)
-        for (i = 0; i < bitv.size(); i++)
-            if (bitv.contains(static_cast<AffectFlag>(i)))
-                ch->affect_flags.set(i, true);
-            else
-            {
-                for (i = 0; i < bitv.size(); i++)
-                    if (bitv.contains(static_cast<AffectFlag>(i)))
-                        ch->affect_flags.set(i, false);
-                mod = -mod;
-            }
-
-    aff_apply_modify(ch, loc, mod, spec, "affect_modify_ar");
-}
-
 
 /* Insert an affect_type in a Character structure
    Automatically sets apropriate bits and apply's */
@@ -260,7 +197,6 @@ void affect_to_char(Character *ch, struct affected_type *af)
     affected_alloc->next = ch->affected;
     ch->affected = affected_alloc;
 
-    affect_modify(ch, af->location, af->modifier, af->specific, af->bitvector, true);
 }
 
 /*
@@ -278,7 +214,6 @@ void affect_remove(Character *ch, struct affected_type *af)
         return;
     }
 
-    affect_modify(ch, af->location, af->modifier, af->specific, af->bitvector, false);
     REMOVE_FROM_LIST(af, ch->affected, next, cmtemp);
     delete af;
     if (!ch->affected)
@@ -1412,7 +1347,6 @@ void affectv_to_char(Character *ch, struct affected_type *af)
     affected_alloc->next = ch->affectedv;
     ch->affectedv = affected_alloc;
 
-    affect_modify(ch, af->location, af->modifier, af->specific, af->bitvector, true);
 }
 
 void affectv_remove(Character *ch, struct affected_type *af)
@@ -1425,7 +1359,7 @@ void affectv_remove(Character *ch, struct affected_type *af)
         return;
     }
 
-    affect_modify(ch, af->location, af->modifier, af->specific, af->bitvector, false);
+
     REMOVE_FROM_LIST(af, ch->affectedv, next, cmtemp);
     free(af);
     if (!ch->affectedv)

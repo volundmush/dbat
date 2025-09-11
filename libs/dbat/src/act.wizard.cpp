@@ -1883,13 +1883,12 @@ static void do_stat_character(Character *ch, Character *k)
             if (aff->modifier)
                 ch->send_to("%+d to %s", aff->modifier, apply_types[(int)aff->location]);
 
-            if (aff->bitvector)
+            if (aff->aff_flags)
             {
                 if (aff->modifier)
                     ch->sendText(", ");
 
-                strcpy(buf, affected_bits[aff->bitvector]);
-                ch->send_to("sets %s", buf);
+                ch->sendFmt("sets {}", aff->aff_flags.getFlagNames());
             }
             ch->sendText("\r\n");
         }
@@ -1905,13 +1904,12 @@ static void do_stat_character(Character *ch, Character *k)
             if (aff->modifier)
                 ch->send_to("%+d to %s", aff->modifier, apply_types[(int)aff->location]);
 
-            if (aff->bitvector)
+            if (aff->aff_flags)
             {
                 if (aff->modifier)
                     ch->sendText(", ");
 
-                strcpy(buf, affected_bits[aff->bitvector]);
-                ch->send_to("sets %s", buf);
+                ch->sendFmt("sets {}", aff->aff_flags.getFlagNames());
             }
             ch->sendText("\r\n");
         }
@@ -3987,13 +3985,13 @@ ACMD(do_show)
                     j += snprintf(strp + j, k - j, "%+.2f to %s", aff->modifier,
                                   apply_types[(int)aff->location]);
 
-                if (aff->bitvector)
+                if (aff->aff_flags)
                 {
                     if (aff->modifier)
                         j += snprintf(strp + j, k - j, ", ");
 
-                    strcpy(field, affected_bits[aff->bitvector]);
-                    j += snprintf(strp + j, k - j, "sets %s", field);
+                    auto fnames = aff->aff_flags.getFlagNames();
+                    j += snprintf(strp + j, k - j, "sets %s", fnames.c_str());
                 }
                 j += snprintf(strp + j, k - j, "\r\n");
             }
@@ -5083,7 +5081,7 @@ ACMD(do_zcheck)
                 ac = GET_OBJ_VAL(obj, VAL_ARMOR_APPLYAC);
                 for (j = 0; j < TOTAL_WEAR_CHECKS; j++)
                 {
-                    if (CAN_WEAR(obj, zarmor[j].bitvector) && (ac > zarmor[j].ac_allowed) && (found = 1))
+                    if (CAN_WEAR(obj, zarmor[j].aff_flags) && (ac > zarmor[j].ac_allowed) && (found = 1))
                         len += snprintf(buf + len, sizeof(buf) - len,
                                         "- Has AC %d (%s limit is %d)\r\n",
                                         ac, zarmor[j].message, zarmor[j].ac_allowed);

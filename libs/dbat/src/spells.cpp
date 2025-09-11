@@ -267,7 +267,7 @@ ASPELL(spell_charm)
             af.duration /= GET_INT(victim);
         af.modifier = 0;
         af.location = 0;
-        af.bitvector = AFF_CHARM;
+        af.aff_flags.set(AFF_CHARM);
         affect_to_char(victim, &af);
 
         act("Isn't $n just such a nice fellow?", false, ch, nullptr, victim, TO_VICT);

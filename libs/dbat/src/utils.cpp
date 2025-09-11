@@ -632,14 +632,14 @@ int roll_aff_duration(int num, int add)
     return (outcome);
 }
 
-void null_affect(Character *ch, int aff_flag)
+void null_affect(Character *ch, AffectFlag aff_flag)
 {
     struct affected_type *af, *next_af;
 
     for (af = ch->affected; af; af = next_af)
     {
         next_af = af->next;
-        if (af->location == APPLY_NONE && af->bitvector == aff_flag)
+        if (af->location == APPLY_NONE && af->aff_flags.get(aff_flag))
             affect_remove(ch, af);
     }
 
@@ -654,7 +654,7 @@ void null_affect(Character *ch, int aff_flag)
     }
 }
 
-void assign_affect(Character *ch, int aff_flag, int skill, int dur, int str, int con, int intel, int agl, int wis,
+void assign_affect(Character *ch, AffectFlag aff_flag, int skill, int dur, int str, int con, int intel, int agl, int wis,
                    int spd)
 {
     struct affected_type af[6];
@@ -669,7 +669,7 @@ void assign_affect(Character *ch, int aff_flag, int skill, int dur, int str, int
         af[num].duration = dur;
         af[num].modifier = 0;
         af[num].location = APPLY_NONE;
-        af[num].bitvector = aff_flag;
+        af[num].aff_flags.set(aff_flag);
         affect_join(ch, &af[num], false, false, false, false);
         num += 1;
     }
@@ -682,7 +682,7 @@ void assign_affect(Character *ch, int aff_flag, int skill, int dur, int str, int
         af[num].modifier = str;
         af[num].location = APPLY_CATTR_BASE;
         af[num].specific = static_cast<int>(CharAttribute::strength);
-        af[num].bitvector = aff_flag;
+        af[num].aff_flags.set(aff_flag);
         affect_join(ch, &af[num], false, false, false, false);
         num += 1;
     }
@@ -693,7 +693,7 @@ void assign_affect(Character *ch, int aff_flag, int skill, int dur, int str, int
         af[num].modifier = con;
         af[num].location = APPLY_CATTR_BASE;
         af[num].specific = static_cast<int>(CharAttribute::constitution);
-        af[num].bitvector = aff_flag;
+        af[num].aff_flags.set(aff_flag);
         affect_join(ch, &af[num], false, false, false, false);
         num += 1;
     }
@@ -704,7 +704,7 @@ void assign_affect(Character *ch, int aff_flag, int skill, int dur, int str, int
         af[num].modifier = intel;
         af[num].location = APPLY_CATTR_BASE;
         af[num].specific = static_cast<int>(CharAttribute::intelligence);
-        af[num].bitvector = aff_flag;
+        af[num].aff_flags.set(aff_flag);
         affect_join(ch, &af[num], false, false, false, false);
         num += 1;
     }
@@ -715,7 +715,7 @@ void assign_affect(Character *ch, int aff_flag, int skill, int dur, int str, int
         af[num].modifier = agl;
         af[num].location = APPLY_CATTR_BASE;
         af[num].specific = static_cast<int>(CharAttribute::agility);
-        af[num].bitvector = aff_flag;
+        af[num].aff_flags.set(aff_flag);
         affect_join(ch, &af[num], false, false, false, false);
         num += 1;
     }
@@ -726,7 +726,7 @@ void assign_affect(Character *ch, int aff_flag, int skill, int dur, int str, int
         af[num].modifier = spd;
         af[num].location = APPLY_CATTR_BASE;
         af[num].specific = static_cast<int>(CharAttribute::speed);
-        af[num].bitvector = aff_flag;
+        af[num].aff_flags.set(aff_flag);
         affect_join(ch, &af[num], false, false, false, false);
         num += 1;
     }
@@ -737,7 +737,7 @@ void assign_affect(Character *ch, int aff_flag, int skill, int dur, int str, int
         af[num].modifier = wis;
         af[num].location = APPLY_CATTR_BASE;
         af[num].specific = static_cast<int>(CharAttribute::wisdom);
-        af[num].bitvector = aff_flag;
+        af[num].aff_flags.set(aff_flag);
         affect_join(ch, &af[num], false, false, false, false);
         num += 1;
     }
@@ -3150,33 +3150,29 @@ size_t countColors(const std::string &txt)
     return txt.size() - stripped.size();
 }
 
-int default_admin_flags_mortal[] =
-    {-1};
+std::vector<AdminFlag> default_admin_flags_mortal = {};
 
-int default_admin_flags_immortal[] =
-    {ADM_SEEINV, ADM_SEESECRET, ADM_FULLWHERE, ADM_NOPOISON, ADM_WALKANYWHERE,
-     ADM_NODAMAGE, ADM_NOSTEAL, -1};
+std::vector<AdminFlag> default_admin_flags_immortal =
+    {AdminFlag::see_invisible, AdminFlag::see_secret, AdminFlag::full_where, AdminFlag::no_poison, AdminFlag::walk_anywhere,
+     AdminFlag::no_damage, AdminFlag::no_steal};
 
-int default_admin_flags_builder[] =
-    {-1};
+std::vector<AdminFlag> default_admin_flags_builder = {};
 
-int default_admin_flags_god[] =
-    {ADM_ALLSHOPS, ADM_TELLALL, ADM_KNOWWEATHER, ADM_MONEY, ADM_EATANYTHING,
-     ADM_NOKEYS, -1};
+std::vector<AdminFlag> default_admin_flags_god =
+    {AdminFlag::all_shops, AdminFlag::tell_all, AdminFlag::know_weather, AdminFlag::money, AdminFlag::eat_anything,
+     AdminFlag::no_keys};
+std::vector<AdminFlag> default_admin_flags_grgod =
+    {AdminFlag::trans_all, AdminFlag::force_mass, AdminFlag::all_houses};
+std::vector<AdminFlag> default_admin_flags_impl =
+    {AdminFlag::switch_mortal, AdminFlag::instant_kill, AdminFlag::cedit};
 
-int default_admin_flags_grgod[] =
-    {ADM_TRANSALL, ADM_FORCEMASS, ADM_ALLHOUSES, -1};
-
-int default_admin_flags_impl[] =
-    {ADM_SWITCHMORTAL, ADM_INSTANTKILL, ADM_CEDIT, -1};
-
-int *default_admin_flags[ADMLVL_IMPL + 1] = {
-    default_admin_flags_mortal,
-    default_admin_flags_immortal,
-    default_admin_flags_builder,
-    default_admin_flags_god,
-    default_admin_flags_grgod,
-    default_admin_flags_impl};
+std::vector<AdminFlag>* default_admin_flags[ADMLVL_IMPL + 1] = {
+    &default_admin_flags_mortal,
+    &default_admin_flags_immortal,
+    &default_admin_flags_builder,
+    &default_admin_flags_god,
+    &default_admin_flags_grgod,
+    &default_admin_flags_impl};
 
 void admin_set(Character *ch, int value)
 {
@@ -3195,8 +3191,8 @@ void admin_set(Character *ch, int value)
         while (GET_ADMLEVEL(ch) < value)
         {
             ch->modBaseStat<int>("admin_level", 1);
-            for (i = 0; default_admin_flags[GET_ADMLEVEL(ch)][i] != -1; i++)
-                ch->admin_flags.set(default_admin_flags[GET_ADMLEVEL(ch)][i], true);
+            for (auto f : *default_admin_flags[GET_ADMLEVEL(ch)])
+                ch->admin_flags.set(f, true);
         }
 
         if (orig < ADMLVL_IMMORT && value >= ADMLVL_IMMORT)
@@ -3219,8 +3215,8 @@ void admin_set(Character *ch, int value)
                admin_level_names[value]);
         while (GET_ADMLEVEL(ch) > value)
         {
-            for (i = 0; default_admin_flags[GET_ADMLEVEL(ch)][i] != -1; i++)
-                ch->admin_flags.set(default_admin_flags[GET_ADMLEVEL(ch)][i], false);
+            for (auto f : *default_admin_flags[GET_ADMLEVEL(ch)])
+                ch->admin_flags.set(f, false);
             ch->modBaseStat<int>("admin_level", -1);
         }
 
@@ -3355,34 +3351,9 @@ bool OBJ_FLAGGED(Object *obj, int flag)
     return obj->item_flags.get(flag);
 }
 
-bool OBJAFF_FLAGGED(Object *obj, int flag)
+bool OBJAFF_FLAGGED(Object *obj, AffectFlag flag)
 {
     return obj->affect_flags.get(flag);
-}
-
-bool ROOM_FLAGGED(room_vnum loc, int flag)
-{
-    if (auto room = get_room(loc); room)
-    {
-        return room->room_flags.get(static_cast<RoomFlag>(flag));
-    }
-    return false;
-}
-
-bool WHERE_FLAGGED(room_vnum loc, WhereFlag flag)
-{
-    if (auto room = get_room(loc); room)
-    {
-        return room->where_flags.get(static_cast<WhereFlag>(flag));
-    }
-    return false;
-}
-
-bool WHERE_FLAGGED(Room *loc, WhereFlag flag)
-{
-    if (!loc)
-        return false;
-    return loc->where_flags.get(flag);
 }
 
 bool ROOM_FLAGGED(Room *loc, int flag)
@@ -3392,7 +3363,27 @@ bool ROOM_FLAGGED(Room *loc, int flag)
     return loc->room_flags.get(flag);
 }
 
-bool ADM_FLAGGED(Character *ch, int flag)
+bool ROOM_FLAGGED(room_vnum loc, int flag)
+{
+    return ROOM_FLAGGED(get_room(loc), flag);
+}
+
+bool WHERE_FLAGGED(Room *loc, WhereFlag flag)
+{
+    if (!loc)
+        return false;
+    Location l(loc);
+    return l.getWhereFlag(flag);
+}
+
+bool WHERE_FLAGGED(room_vnum loc, WhereFlag flag)
+{
+    return WHERE_FLAGGED(get_room(loc), flag);
+}
+
+
+
+bool ADM_FLAGGED(Character *ch, AdminFlag flag)
 {
     return ch->admin_flags.get(flag);
 }

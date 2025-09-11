@@ -7,6 +7,8 @@
 
 #include "Typedefs.h"
 #include "const/Position.h"
+#include "const/AffectFlag.h"
+#include "Flags.h"
 
 struct Character;
 
@@ -79,7 +81,7 @@ struct affected_type : affect_t {
     using affect_t::affect_t;
     int16_t type{};          /* The type of spell that caused this      */
     int16_t duration{};      /* For how long its effects will last      */
-    bitvector_t bitvector{}; /* Tells which bits to set (AFF_XXX) */
+    FlagHandler<AffectFlag> aff_flags{}; /* Tells which bits to set (AFF_XXX) */
     struct affected_type *next{};
 };
 

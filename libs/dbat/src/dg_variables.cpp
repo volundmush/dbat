@@ -805,7 +805,7 @@ static const std::map<std::string, int> _pflags = {
     {"is_killer", PLR_KILLER},
     {"is_thief", PLR_THIEF}};
 
-static const std::map<std::string, int> _aflags = {
+static const std::map<std::string, AffectFlag> _aflags = {
     {"dead", AFF_SPIRIT},
     {"flying", AFF_FLYING}};
 

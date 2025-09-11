@@ -40,7 +40,7 @@ int64_t MOD_OBJ_VAL(T* obj, const std::string& val, int mod) {
     return obj->modBaseStat(val, mod);
 }
 
-extern bool OBJAFF_FLAGGED(Object *obj, int flag);
+extern bool OBJAFF_FLAGGED(Object *obj, AffectFlag flag);
 #define OBJVAL_FLAGGED(obj, flag) (IS_SET(GET_OBJ_VAL(obj, VAL_CONTAINER_FLAGS), flag))
 
 extern bool OBJ_FLAGGED(Object *obj, int flag);
