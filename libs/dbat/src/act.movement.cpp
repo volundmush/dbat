@@ -432,6 +432,7 @@ int do_simple_move(Character *ch, int dir, int need_specials_check)
     char buf3[MAX_STRING_LENGTH];
     int need_movement;
     Room *rm;
+    auto cdir = static_cast<Direction>(dir);
 
     /*
      * Check for special routines (North is 1 in command list, but 0 here) Note
@@ -738,9 +739,9 @@ int do_simple_move(Character *ch, int dir, int need_specials_check)
     }
 
     snprintf(buf2, sizeof(buf2), "%s%s",
-             ((dir == UP) || (dir == DOWN) ? "" : "the "),
-             (dir == UP ? "below" : (dir == DOWN) ? "above"
-                                                  : dirs[rev_dir[dir]]));
+             ((cdir == UP) || (cdir == DOWN) ? "" : "the "),
+             (cdir == UP ? "below" : (cdir == DOWN) ? "above"
+                                                  : dirs[static_cast<int>(rev_dir.at(cdir))]));
     act("$n arrives from $T.", true, ch, nullptr, buf2, TO_ROOM | TO_SNEAKRESIST);
 
     if (FIGHTING(ch))
@@ -1476,6 +1477,7 @@ static void do_doorcmd(Character *ch, Object *obj, int door, int scmd)
 
     std::optional<Destination> ex;
     std::optional<Destination> back;
+    auto cdoor = static_cast<Direction>(door);
 
     if ((obj) && GET_OBJ_TYPE(obj) == ITEM_HATCH)
     {
@@ -1567,7 +1569,7 @@ static void do_doorcmd(Character *ch, Object *obj, int door, int scmd)
         OPEN_DOOR(IN_ROOM(ch), obj, door);
         if (back)
         {
-            OPEN_DOOR(other_room, obj, rev_dir[door]);
+            OPEN_DOOR(other_room, obj, static_cast<int>(rev_dir.at(cdoor)));
         }
         if (!obj)
         {
@@ -1630,7 +1632,7 @@ static void do_doorcmd(Character *ch, Object *obj, int door, int scmd)
         CLOSE_DOOR(IN_ROOM(ch), obj, door);
         if (back)
         {
-            CLOSE_DOOR(other_room, obj, rev_dir[door]);
+            CLOSE_DOOR(other_room, obj, static_cast<int>(rev_dir.at(cdoor)));
         }
         if (!obj)
         {
@@ -1662,7 +1664,7 @@ static void do_doorcmd(Character *ch, Object *obj, int door, int scmd)
         LOCK_DOOR(IN_ROOM(ch), obj, door);
         if (back)
         {
-            LOCK_DOOR(other_room, obj, rev_dir[door]);
+            LOCK_DOOR(other_room, obj, static_cast<int>(rev_dir.at(cdoor)));
         }
         if (!obj)
         {
@@ -1694,7 +1696,7 @@ static void do_doorcmd(Character *ch, Object *obj, int door, int scmd)
         UNLOCK_DOOR(IN_ROOM(ch), obj, door);
         if (back)
         {
-            UNLOCK_DOOR(other_room, obj, rev_dir[door]);
+            UNLOCK_DOOR(other_room, obj, static_cast<int>(rev_dir.at(cdoor)));
         }
         if (!obj)
         {
@@ -1710,7 +1712,7 @@ static void do_doorcmd(Character *ch, Object *obj, int door, int scmd)
     case SCMD_PICK:
         TOGGLE_LOCK(IN_ROOM(ch), obj, door);
         if (back)
-            TOGGLE_LOCK(other_room, obj, rev_dir[door]);
+            TOGGLE_LOCK(other_room, obj, static_cast<int>(rev_dir.at(cdoor)));
         ch->sendText("The lock quickly yields to your skills.\r\n");
         len = strlcpy(buf, "$n skillfully picks the lock on ", sizeof(buf));
         break;

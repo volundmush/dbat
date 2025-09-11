@@ -360,7 +360,7 @@ bool Room::buildwalk(const Coordinates& coor, Character* ch, Direction dir) {
     dest.dir = dir;
     ch->location.replaceExit(dest);
 
-    rdest.dir = static_cast<Direction>(rev_dir[static_cast<int>(dir)]);
+    rdest.dir = rev_dir.at(dir);
 
     dest.replaceExit(rdest);
 

@@ -7,10 +7,11 @@
  *  tbaMUD is based on CircleMUD and DikuMUD, Copyright (C) 1990, 1991.    *
  ************************************************************************ */
 #pragma once
-
+#include <map>
 #include "const/Max.h"
 #include "const/AdminLevel.h"
 #include "const/Wield.h"
+#include "const/Direction.h"
 
 extern const char *circlemud_version;
 extern const char *oasisolc_version;
@@ -52,7 +53,7 @@ extern const char *size_names[NUM_SIZES + 1];
 extern const char *domains[NUM_DOMAINS + 1];
 extern const char *schools[NUM_SCHOOLS + 1];
 extern const char *limb_names[4];
-extern int rev_dir[NUM_OF_DIRS];
+extern const std::map<Direction, Direction> rev_dir;
 extern int movement_loss[NUM_ROOM_SECTORS];
 extern const char *admin_flag_names[];
 extern int drink_aff[NUM_LIQ_TYPES][NUM_CONDITIONS];

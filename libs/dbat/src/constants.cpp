@@ -1308,21 +1308,20 @@ const char *size_names[NUM_SIZES + 1] = {
         "\n"
 };
 
-
-int rev_dir[NUM_OF_DIRS] =
+const std::map<Direction, Direction> rev_dir =
         {
-                /* North */ SOUTH,
-                /* East  */ WEST,
-                /* South */ NORTH,
-                /* West  */ EAST,
-                /* Up    */ DOWN,
-                /* Down  */ UP,
-                /* NW    */ SOUTHEAST,
-                /* NE    */ SOUTHWEST,
-                /* SE    */ NORTHWEST,
-                /* SW    */ NORTHEAST,
-                /* In    */ OUTDIR,
-                /* Out   */ INDIR
+                {NORTH, SOUTH},
+                {EAST, WEST},
+                {SOUTH, NORTH},
+                {WEST, EAST},
+                /* Up    */ {UP, DOWN},
+                /* Down  */ {DOWN, UP},
+                /* NW    */ {NORTHWEST, SOUTHEAST},
+                /* NE    */ {NORTHEAST, SOUTHWEST},
+                /* SE    */ {SOUTHEAST, NORTHWEST},
+                /* SW    */ {SOUTHWEST, NORTHEAST},
+                /* In    */ {INDIR, OUTDIR},
+                /* Out   */ {OUTDIR, INDIR}
         };
 
 int movement_loss[NUM_ROOM_SECTORS] =

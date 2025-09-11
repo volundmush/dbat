@@ -6354,7 +6354,7 @@ ACMD(do_obstruct)
         ch->sendText("That is not an acceptable direction.\n[ N | E | S | W | NE | NW | SE | SW | U | D | I | O ]\r\n");
         return;
     }
-    int dir2 = rev_dir[dir];
+    int dir2 = static_cast<int>(rev_dir.at(static_cast<Direction>(dir)));
 
     auto ex = ch->location.getExit(static_cast<Direction>(dir));
     if (!ex)

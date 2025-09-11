@@ -260,7 +260,7 @@ int greet_mtrigger(Character *actor, int dir)
                 t->isReady() && (Random::get<int>(1, 100) <= GET_TRIG_NARG(t)))
             {
                 if (dir >= 0 && dir < NUM_OF_DIRS)
-                    t->setVariable("direction", (const char *)dirs[rev_dir[dir]]);
+                    t->setVariable("direction", (const char *)dirs[static_cast<int>(rev_dir.at(static_cast<Direction>(dir)))]);
                 else
                     t->setVariable("direction", "none");
                 t->setUID("actor", actor);
@@ -1205,7 +1205,7 @@ int enter_wtrigger(Room *room, Character *actor, int dir)
             (Random::get<int>(1, 100) <= GET_TRIG_NARG(t)))
         {
             if (dir >= 0 && dir < NUM_OF_DIRS)
-                t->setVariable("direction", (const char *)dirs[rev_dir[dir]]);
+                t->setVariable("direction", (const char *)dirs[static_cast<int>(rev_dir.at(static_cast<Direction>(dir)))]);
             else
                 t->setVariable("direction", "none");
             t->setUID("actor", actor);

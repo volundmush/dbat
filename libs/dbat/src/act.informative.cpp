@@ -1121,7 +1121,7 @@ static void send_attribute_desc(Character *ch, const char *label, const char *va
 
 static void draw_closed_exit(char map[9][10], int x, int y, int door)
 {
-    switch (door)
+    switch (static_cast<Direction>(door))
     {
     case NORTH:
         map[y - 1][x] = '8';
@@ -1210,7 +1210,7 @@ static char get_sector_char(int sect, double geffect, double waterEnv)
 static void draw_open_exit(char map[9][10], int x, int y, int door, int sect, double geffect, double waterEnv)
 {
     char sectorChar = get_sector_char(sect, geffect, waterEnv);
-    switch (door)
+    switch (static_cast<Direction>(door))
     {
     case NORTH:
         map[y - 1][x] = sectorChar;
@@ -4177,16 +4177,18 @@ ACMD(do_look)
 
     if (is_abbrev(arg, "inside") && (dir = ch->location.getExit(Direction::inside)) && !*arg2)
     {
+        auto ind = static_cast<int>(Direction::inside);
         if (subcmd == SCMD_SEARCH)
-            search_in_direction(ch, INDIR);
+            search_in_direction(ch, ind);
         else
-            look_in_direction(ch, INDIR);
+            look_in_direction(ch, ind);
         return;
     }
 
     if (is_abbrev(arg, "inside") && (subcmd == SCMD_SEARCH) && !*arg2)
     {
-        search_in_direction(ch, INDIR);
+        auto ind = static_cast<int>(Direction::inside);
+        search_in_direction(ch, ind);
         return;
     }
 

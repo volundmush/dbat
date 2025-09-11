@@ -255,7 +255,7 @@ void drive_in_direction(Character *ch, Object *vehicle, int dir)
     }
 
     vehicle->location.send_to("%s @wflies in from the %s.\r\n",
-                              vehicle->getShortDescription(), dirs[rev_dir[dir]]);
+                              vehicle->getShortDescription(), dirs[static_cast<int>(rev_dir.at(static_cast<Direction>(dir)))]);
 }
 
 static void warp_ship_to_location(Character *ch, Object *vehicle, int room_vnum)

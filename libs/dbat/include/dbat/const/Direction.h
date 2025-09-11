@@ -18,15 +18,15 @@ enum class Direction : uint8_t
     outside = 11
 };
 
-constexpr int NORTH = 0;
-constexpr int EAST = 1;
-constexpr int SOUTH = 2;
-constexpr int WEST = 3;
-constexpr int UP = 4;
-constexpr int DOWN = 5;
-constexpr int NORTHWEST = 6;
-constexpr int NORTHEAST = 7;
-constexpr int SOUTHEAST = 8;
-constexpr int SOUTHWEST = 9;
-constexpr int INDIR = 10;
-constexpr int OUTDIR = 11;
+constexpr Direction NORTH = Direction::north;
+constexpr Direction EAST = Direction::east;
+constexpr Direction SOUTH = Direction::south;
+constexpr Direction WEST = Direction::west;
+constexpr Direction UP = Direction::up;
+constexpr Direction DOWN = Direction::down;
+constexpr Direction NORTHWEST = Direction::northwest;
+constexpr Direction NORTHEAST = Direction::northeast;
+constexpr Direction SOUTHEAST = Direction::southeast;
+constexpr Direction SOUTHWEST = Direction::southwest;
+constexpr Direction INDIR = Direction::inside;
+constexpr Direction OUTDIR = Direction::outside;

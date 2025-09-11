@@ -1,6 +1,7 @@
 #pragma once
 
 #include "const/Max.h"
+#include "const/Direction.h"
 struct Character;
 
 // global variables

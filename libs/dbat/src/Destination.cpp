@@ -3,7 +3,7 @@
 
 std::optional<Destination> Destination::getReverse() const
 {
-    return getExit(static_cast<Direction>(rev_dir[static_cast<int>(dir)]));
+    return getExit(rev_dir.at(dir));
 }
 
 constexpr int EXIT_ISDOOR = (1 << 0);    /* Exit is a door		*/
