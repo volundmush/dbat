@@ -36,8 +36,7 @@
 /* LIMITATION: a target MUST exist for the spell unless the spell is   */
 /* set to TAR_IGNORE. Also, group spells are not permitted             */
 /* code borrowed from do_cast() */
-void do_dg_cast(void *go, HasDgScripts *sc, DgScript *trig,
-                UnitType type, char *cmd) {
+void do_dg_cast(DgScript *trig, char *cmd) {
     Character *caster = nullptr;
     Character *tch = nullptr;
     Object *tobj = nullptr;
@@ -47,6 +46,8 @@ void do_dg_cast(void *go, HasDgScripts *sc, DgScript *trig,
     char buf2[MAX_STRING_LENGTH], orig_cmd[MAX_INPUT_LENGTH];
 
     /* need to get the caster or the room of the temporary caster */
+    auto type = trig->getAttachType();
+    auto go = trig->owner.get();
     switch (type) {
         case MOB_TRIGGER:
             caster = (Character *) go;
@@ -154,7 +155,7 @@ void do_dg_cast(void *go, HasDgScripts *sc, DgScript *trig,
 constexpr int APPLY_TYPE = 1;
 constexpr int AFFECT_TYPE = 2;
 
-void do_dg_affect(void *go, HasDgScripts *sc, DgScript *trig, UnitType script_type, char *cmd) {
+void do_dg_affect(DgScript *trig, char *cmd) {
     Character *ch = nullptr;
     int value = 0, duration = 0;
     char junk[MAX_INPUT_LENGTH]; /* will be set to "dg_affect" */

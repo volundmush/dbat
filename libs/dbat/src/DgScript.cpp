@@ -47,42 +47,37 @@ int remove_trigger(HasDgScripts *sc, char *name);
 
 bool is_num(const std::string &arg);
 
-void eval_op(char *op, char *lhs, char *rhs, char *result, HasDgScripts *go,
-             HasDgScripts *sc, DgScript *trig);
+void eval_op(char *op, char *lhs, char *rhs, char *result, DgScript *trig);
 
 char *matching_paren(char *p);
 
-void eval_expr(char *line, char *result, HasDgScripts *go, HasDgScripts *sc,
-               DgScript *trig, UnitType type);
+void eval_expr(char *line, char *result, DgScript *trig);
 
-int eval_lhs_op_rhs(char *expr, char *result, HasDgScripts *go, HasDgScripts *sc,
-                    DgScript *trig, UnitType type);
+int eval_lhs_op_rhs(char *expr, char *result, DgScript *trig);
 
-void process_wait(HasDgScripts *go, DgScript *trig, UnitType type, char *cmd);
+void process_wait(DgScript *trig, char *cmd);
 
-void process_set(HasDgScripts *sc, DgScript *trig, char *cmd);
+void process_set(DgScript *trig, char *cmd);
 
-void process_attach(HasDgScripts *go, HasDgScripts *sc, DgScript *trig,
-                    UnitType type, char *cmd);
+void process_attach(DgScript *trig, char *cmd);
 
-void process_detach(HasDgScripts *go, HasDgScripts *sc, DgScript *trig,
-                    UnitType type, char *cmd);
+void process_detach(DgScript *trig, char *cmd);
 
 int process_return(DgScript *trig, char *cmd);
 
-void process_unset(HasDgScripts *sc, DgScript *trig, char *cmd);
+void process_unset(DgScript *trig, char *cmd);
 
-void process_remote(HasDgScripts *sc, DgScript *trig, char *cmd);
+void process_remote(DgScript *trig, char *cmd);
 
-void process_rdelete(HasDgScripts *sc, DgScript *trig, char *cmd);
+void process_rdelete(DgScript *trig, char *cmd);
 
-void process_global(HasDgScripts *sc, DgScript *trig, char *cmd, long id);
+void process_global(DgScript *trig, char *cmd, long id);
 
-void process_context(HasDgScripts *sc, DgScript *trig, char *cmd);
+void process_context(DgScript *trig, char *cmd);
 
-void extract_value(HasDgScripts *sc, DgScript *trig, char *cmd);
+void extract_value(DgScript *trig, char *cmd);
 
-void dg_letter_value(HasDgScripts *sc, DgScript *trig, char *cmd);
+void dg_letter_value(DgScript *trig, char *cmd);
 
 int fgetline(FILE *file, char *p);
 
@@ -1539,8 +1534,7 @@ static bool check_truthy(const char *txt)
 }
 
 /* evaluates 'lhs op rhs', and copies to result */
-void eval_op(char *op, char *lhs, char *rhs, char *result, HasDgScripts *go,
-             HasDgScripts *sc, DgScript *trig)
+void eval_op(char *op, char *lhs, char *rhs, char *result, DgScript *trig)
 {
     unsigned char *p;
     int n;
@@ -1657,8 +1651,7 @@ char *matching_paren(char *p)
 }
 
 /* evaluates line, and returns answer in result */
-void eval_expr(char *line, char *result, HasDgScripts *go, HasDgScripts *sc,
-               DgScript *trig, UnitType type)
+void eval_expr(char *line, char *result, DgScript *trig)
 {
     char expr[MAX_INPUT_LENGTH], *p;
 
@@ -1670,21 +1663,20 @@ void eval_expr(char *line, char *result, HasDgScripts *go, HasDgScripts *sc,
         p = strcpy(expr, line);
         p = matching_paren(expr);
         *p = '\0';
-        eval_expr(expr + 1, result, go, sc, trig, type);
+        eval_expr(expr + 1, result, trig);
     }
-    else if (eval_lhs_op_rhs(line, result, go, sc, trig, type))
+    else if (eval_lhs_op_rhs(line, result, trig))
     {
     }
     else
-        var_subst(go, sc, trig, type, line, result);
+        var_subst(trig, line, result);
 }
 
 /*
  * evaluates expr if it is in the form lhs op rhs, and copies
  * answer in result.  returns 1 if expr is evaluated, else 0
  */
-int eval_lhs_op_rhs(char *expr, char *result, HasDgScripts *go, HasDgScripts *sc,
-                    DgScript *trig, UnitType type)
+int eval_lhs_op_rhs(char *expr, char *result, DgScript *trig)
 {
     char *p, *tokens[MAX_INPUT_LENGTH];
     char line[MAX_INPUT_LENGTH], lhr[MAX_INPUT_LENGTH], rhr[MAX_INPUT_LENGTH];
@@ -1743,9 +1735,9 @@ int eval_lhs_op_rhs(char *expr, char *result, HasDgScripts *go, HasDgScripts *sc
                 *tokens[j] = '\0';
                 p = tokens[j] + strlen(ops[i]);
 
-                eval_expr(line, lhr, go, sc, trig, type);
-                eval_expr(p, rhr, go, sc, trig, type);
-                eval_op(ops[i], lhr, rhr, result, go, sc, trig);
+                eval_expr(line, lhr, trig);
+                eval_expr(p, rhr, trig);
+                eval_op(ops[i], lhr, rhr, result, trig);
 
                 return 1;
             }
@@ -1765,7 +1757,7 @@ int eval_lhs_op_rhs(char *expr, char *result, HasDgScripts *go, HasDgScripts *sc
  */
 
 /* processes any 'wait' commands in a trigger */
-void process_wait(HasDgScripts *go, DgScript *trig, UnitType type, char *cmd)
+void process_wait(DgScript *trig, char *cmd)
 {
     char buf[MAX_INPUT_LENGTH], *arg;
     struct wait_event_data *wait_event_obj;
@@ -1842,7 +1834,7 @@ void process_wait(HasDgScripts *go, DgScript *trig, UnitType type, char *cmd)
 }
 
 /* processes a script set command */
-void process_set(HasDgScripts *sc, DgScript *trig, char *cmd)
+void process_set(DgScript *trig, char *cmd)
 {
     char arg[MAX_INPUT_LENGTH], name[MAX_INPUT_LENGTH], *value;
 
@@ -1861,8 +1853,7 @@ void process_set(HasDgScripts *sc, DgScript *trig, char *cmd)
 }
 
 /* processes a script eval command */
-void process_eval(HasDgScripts *go, HasDgScripts *sc, DgScript *trig,
-                  UnitType type, char *cmd)
+void process_eval(DgScript *trig, char *cmd)
 {
     char arg[MAX_INPUT_LENGTH], name[MAX_INPUT_LENGTH];
     char result[MAX_INPUT_LENGTH], *expr;
@@ -1885,14 +1876,13 @@ void process_eval(HasDgScripts *go, HasDgScripts *sc, DgScript *trig,
     }
     else
     {
-        eval_expr(expr, result, go, sc, trig, type);
+        eval_expr(expr, result, trig);
         trig->setVariable(name, result);
     }
 }
 
 /* script attaching a trigger to something */
-void process_attach(HasDgScripts *go, HasDgScripts *sc, DgScript *trig,
-                    UnitType type, char *cmd)
+void process_attach(DgScript *trig, char *cmd)
 {
     char arg[MAX_INPUT_LENGTH], trignum_s[MAX_INPUT_LENGTH];
     char result[MAX_INPUT_LENGTH], *id_p;
@@ -1919,7 +1909,7 @@ void process_attach(HasDgScripts *go, HasDgScripts *sc, DgScript *trig,
     else
     {
         /* parse and locate the id specified */
-        eval_expr(id_p, result, go, sc, trig, type);
+        eval_expr(id_p, result, trig);
     }
 
     /* parse and locate the id specified */
@@ -1979,8 +1969,7 @@ void process_attach(HasDgScripts *go, HasDgScripts *sc, DgScript *trig,
 }
 
 /* script detaching a trigger from something */
-void process_detach(HasDgScripts *go, HasDgScripts *sc, DgScript *trig,
-                    UnitType type, char *cmd)
+void process_detach(DgScript *trig, char *cmd)
 {
     char arg[MAX_INPUT_LENGTH], trignum_s[MAX_INPUT_LENGTH];
     char result[MAX_INPUT_LENGTH], *id_p;
@@ -2006,7 +1995,7 @@ void process_detach(HasDgScripts *go, HasDgScripts *sc, DgScript *trig,
     else
     {
         /* parse and locate the id specified */
-        eval_expr(id_p, result, go, sc, trig, type);
+        eval_expr(id_p, result, trig);
     }
 
     /* parse and locate the id specified */
@@ -2113,7 +2102,7 @@ int process_return(DgScript *trig, char *cmd)
  * removes a variable from the global vars of sc,
  * or the local vars of trig if not found in global list.
  */
-void process_unset(HasDgScripts *sc, DgScript *trig, char *cmd)
+void process_unset(DgScript *trig, char *cmd)
 {
     char arg[MAX_INPUT_LENGTH], *var;
 
@@ -2128,6 +2117,8 @@ void process_unset(HasDgScripts *sc, DgScript *trig, char *cmd)
         return;
     }
 
+    auto sc = trig->owner.get();
+
     if (auto find = sc->variables.find(var); find != sc->variables.end())
     {
         sc->variables.erase(find);
@@ -2140,7 +2131,7 @@ void process_unset(HasDgScripts *sc, DgScript *trig, char *cmd)
  * copy a locally owned variable to the globals of another script
  *     'remote <variable_name> <uid>'
  */
-void process_remote(HasDgScripts *sc, DgScript *trig, char *cmd)
+void process_remote(DgScript *trig, char *cmd)
 {
     struct trig_var_data *vd;
     HasDgScripts *sc_remote = nullptr;
@@ -2279,7 +2270,7 @@ int perform_set_dg_var(Character *ch, Character *vict, char *val_arg)
  * delete a variable from the globals of another script
  *     'rdelete <variable_name> <uid>'
  */
-void process_rdelete(HasDgScripts *sc, DgScript *trig, char *cmd)
+void process_rdelete(DgScript *trig, char *cmd)
 {
     struct trig_var_data *vd, *vd_prev = nullptr;
     HasDgScripts *sc_remote = nullptr;
@@ -2328,7 +2319,7 @@ void process_rdelete(HasDgScripts *sc, DgScript *trig, char *cmd)
 /*
  * makes a local variable into a global variable
  */
-void process_global(HasDgScripts *sc, DgScript *trig, char *cmd, long id)
+void process_global(DgScript *trig, char *cmd, long id)
 {
     struct trig_var_data *vd;
     char arg[MAX_INPUT_LENGTH], *var;
@@ -2352,11 +2343,13 @@ void process_global(HasDgScripts *sc, DgScript *trig, char *cmd, long id)
         return;
     }
 
+    auto sc = trig->owner.get();
+
     sc->setVariable(varIt->first, varIt->second); /* copy the variable to the script's variables */
 }
 
 /* set the current context for a script */
-void process_context(HasDgScripts *sc, DgScript *trig, char *cmd)
+void process_context(DgScript *trig, char *cmd)
 {
     char arg[MAX_INPUT_LENGTH], *var;
 
@@ -2372,7 +2365,7 @@ void process_context(HasDgScripts *sc, DgScript *trig, char *cmd)
     }
 }
 
-void extract_value(HasDgScripts *sc, DgScript *trig, char *cmd)
+void extract_value(DgScript *trig, char *cmd)
 {
     char buf[MAX_INPUT_LENGTH], buf2[MAX_INPUT_LENGTH];
     char *buf3;
@@ -2418,7 +2411,7 @@ void extract_value(HasDgScripts *sc, DgScript *trig, char *cmd)
 
 */
 
-void dg_letter_value(HasDgScripts *sc, DgScript *trig, char *cmd)
+void dg_letter_value(DgScript *trig, char *cmd)
 {
     // set the letter/number at position 'num' as the variable.
     char junk[MAX_INPUT_LENGTH];
@@ -3138,7 +3131,7 @@ std::string DgScript::evaluateExpression(const std::string &expr)
 {
     char buf[MAX_STRING_LENGTH];
 
-    eval_expr((char *)expr.c_str(), buf, owner.get(), owner.get(), this, proto->attach_type);
+    eval_expr((char *)expr.c_str(), buf, this);
     return std::string(buf);
 }
 
@@ -3146,7 +3139,7 @@ bool DgScript::evaluateComparison(const std::string &left, const std::string &ri
 {
     char buf[MAX_STRING_LENGTH];
 
-    eval_op((char *)op.c_str(), (char *)left.c_str(), (char *)right.c_str(), buf, owner.get(), owner.get(), this);
+    eval_op((char *)op.c_str(), (char *)left.c_str(), (char *)right.c_str(), buf, this);
     return truthy(std::string(buf));
 }
 
@@ -3203,7 +3196,7 @@ void DgScript::processCommand(const std::string &raw_text)
     if (boost::iequals(cmd, "eval"))
     {
         // Handle eval command
-        process_eval(owner.get(), owner.get(), this, proto->attach_type, (char *)full_command.c_str());
+        process_eval(this, (char *)full_command.c_str());
     }
     else if (boost::iequals(cmd, "nop"))
     {
@@ -3212,12 +3205,12 @@ void DgScript::processCommand(const std::string &raw_text)
     else if (boost::iequals(cmd, "extract"))
     {
         // Handle extract command
-        extract_value(owner.get(), this, (char *)full_command.c_str());
+        extract_value(this, (char *)full_command.c_str());
     }
     else if (boost::iequals(cmd, "dg_letter"))
     {
         // Handle dg_letter command
-        dg_letter_value(owner.get(), this, (char *)full_command.c_str());
+        dg_letter_value(this, (char *)full_command.c_str());
     }
     else if (boost::iequals(cmd, "halt"))
     {
@@ -3226,27 +3219,27 @@ void DgScript::processCommand(const std::string &raw_text)
     }
     else if (boost::iequals(cmd, "dg_cast"))
     {
-        do_dg_cast(owner.get(), owner.get(), this, proto->attach_type, (char *)full_command.c_str());
+        do_dg_cast(this, (char *)full_command.c_str());
     }
     else if (boost::iequals(cmd, "dg_affect"))
     {
-        do_dg_affect(owner.get(), owner.get(), this, proto->attach_type, (char *)full_command.c_str());
+        do_dg_affect(this, (char *)full_command.c_str());
     }
     else if (boost::iequals(cmd, "global"))
     {
-        process_global(owner.get(), this, (char *)full_command.c_str(), 0);
+        process_global(this, (char *)full_command.c_str(), 0);
     }
     else if (boost::iequals(cmd, "context"))
     {
-        process_context(owner.get(), this, (char *)full_command.c_str());
+        process_context(this, (char *)full_command.c_str());
     }
     else if (boost::iequals(cmd, "remote"))
     {
-        process_remote(owner.get(), this, (char *)full_command.c_str());
+        process_remote(this, (char *)full_command.c_str());
     }
     else if (boost::iequals(cmd, "rdelete"))
     {
-        process_rdelete(owner.get(), this, (char *)full_command.c_str());
+        process_rdelete(this, (char *)full_command.c_str());
     }
     else if (boost::iequals(cmd, "return"))
     {
@@ -3254,24 +3247,23 @@ void DgScript::processCommand(const std::string &raw_text)
     }
     else if (boost::iequals(cmd, "set"))
     {
-        process_set(owner.get(), this, (char *)full_command.c_str());
+        process_set(this, (char *)full_command.c_str());
     }
     else if (boost::iequals(cmd, "unset"))
     {
-        process_unset(owner.get(), this, (char *)full_command.c_str());
+        process_unset(this, (char *)full_command.c_str());
     }
     else if (boost::iequals(cmd, "wait"))
     {
-        process_wait(owner.get(), this, proto->attach_type,
-                     (char *)full_command.c_str());
+        process_wait(this, (char *)full_command.c_str());
     }
     else if (boost::iequals(cmd, "attach"))
     {
-        process_attach(owner.get(), owner.get(), this, proto->attach_type, (char *)full_command.c_str());
+        process_attach(this, (char *)full_command.c_str());
     }
     else if (boost::iequals(cmd, "detach"))
     {
-        process_detach(owner.get(), owner.get(), this, proto->attach_type, (char *)full_command.c_str());
+        process_detach(this, (char *)full_command.c_str());
     }
     else if (boost::iequals(cmd, "version"))
     {

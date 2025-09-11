@@ -318,8 +318,7 @@ Room *dg_room_of_obj(Object *obj);
 /* Thanks to Chris Gilbert for reminding me that there are other options. */
 extern trig_rnum real_trigger(trig_vnum vnum);
 
-extern void process_eval(HasDgScripts *go, HasDgScripts *sc, DgScript *trig,
-                         UnitType type, char *cmd);
+extern void process_eval(DgScript *trig, char *cmd);
 
 /* from dg_db_scripts.c */
 std::shared_ptr<DgScript> read_trigger(int nr);
@@ -339,11 +338,7 @@ extern char *skill_percent(Character *ch, char *skill);
 extern int char_has_item(std::string_view item, Character *ch);
 
 extern std::string dg_substitutions(DgScript* trig, std::string_view input);
-extern void var_subst(HasDgScripts *go, HasDgScripts *sc, DgScript *trig,
-                      UnitType type, char *line, char *buf);
-
-extern void find_replacement(HasDgScripts *go, HasDgScripts *sc, DgScript *trig,
-                             UnitType type, char *var, char *field, char *subfield, char *str, size_t slen);
+extern void var_subst(DgScript *trig, char *line, char *buf);
 
 /* From dg_handler.c */
 extern void extract_script(HasDgScripts *thing, UnitType type);
@@ -354,11 +349,9 @@ extern char *any_one_name(char *argument, char *first_arg);
 extern void sub_write(char *arg, Character *ch, int8_t find_invis, int targets);
 
 /* from dg_misc.c */
-extern void do_dg_cast(void *go, HasDgScripts *sc, DgScript *trig,
-                       UnitType type, char *cmd);
+extern void do_dg_cast(DgScript *trig, char *cmd);
 
-extern void do_dg_affect(void *go, HasDgScripts *sc, DgScript *trig,
-                         UnitType type, char *cmd);
+extern void do_dg_affect(DgScript *trig, char *cmd);
 
 extern void send_char_pos(Character *ch, int dam);
 
