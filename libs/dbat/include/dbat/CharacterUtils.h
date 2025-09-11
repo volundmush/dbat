@@ -31,11 +31,10 @@ inline bool IS_MOB(const Character* ch) {
 
 #define IN_ROOM(ch)    ch->location.getVnum()
 #define IN_ZONE(ch)   ch->getRoom()->zone
-#define GET_WAS_IN(ch)    ch->getBaseStat<room_vnum>("was_in_room")
 #define GET_AGE(ch)     ch->time.currentAge()
 
 #define GET_PC_NAME(ch)    ch->getName()
-#define GET_NAME(ch)    (IS_NPC(ch) ? (ch)->getShortDescription() : GET_PC_NAME(ch))
+#define GET_NAME(ch)    (IS_NPC(ch) ? ch->getShortDescription() : GET_PC_NAME(ch))
 #define GET_TITLE(ch)   ch->title
 #define GET_PHASE(ch)   ch->getBaseStat<int>("starphase")
 #define GET_MIMIC(ch)   (ch->mimic ? ch->mimic->getID()+1 : 0)
@@ -101,7 +100,7 @@ extern int GET_SPEEDI(Character *ch);
 #define GET_MAX_MOVE(ch)  ch->getEffectiveStat<int64_t>("stamina")
 #define GET_MAX_MANA(ch)  ch->getEffectiveStat<int64_t>("ki")
 #define GET_KI(ch)      ch->getCurVital(CharVital::ki)
-#define GET_DROOM(ch)     ch->getBaseStat<room_vnum>("death_room")
+#define GET_DROOM(ch)     (ch->registeredLocations.contains("death_room") ? ch->registeredLocations.at("death_room").getVnum() : Location())
 #define GET_SPAM(ch)      ch->getBaseStat<int>("spam")
 #define GET_SHIPROOM(ch)  ch->getBaseStat<room_vnum>("ship_room")
 #define GET_LPLAY(ch)     ch->getBaseStat<time_t>("last_played")
@@ -195,7 +194,7 @@ extern int GET_SPEEDI(Character *ch);
 #define GET_LINTEREST(ch)       ch->getBaseStat<time_t>("last_interest")
 
 #define GET_COND(ch, i)        ch->conditions[i]
-#define GET_LOADROOM(ch)    ch->getBaseStat<room_vnum>("load_room")
+#define GET_LOADROOM(ch)    (ch->registeredLocations.contains("load_room") ? ch->registeredLocations.at("load_room") : Location())
 #define GET_PRACTICES(ch)    ch->getPractices()
 #define GET_TRAINSTR(ch)        ch->getBaseStat<int>("train_strength")
 #define GET_TRAININT(ch)        ch->getBaseStat<int>("train_intelligence")
@@ -398,7 +397,7 @@ inline bool DIRT_ROOM(Character *ch) {
 #define GET_BAB(ch)        GET_POLE_BONUS(ch)
 #define GET_GAUNTLET(ch)    ch->getBaseStat<int>("gauntlet")
 
-#define MOB_LOADROOM(ch)      ch->getBaseStat<room_vnum>("hometown")  /*hometown not used for mobs*/
+#define MOB_LOADROOM(ch) (ch->registeredLocations.contains("spawn") ? ch->registeredLocations.at("spawn") : Location())
 
 extern void update_pos(Character *victim);
 

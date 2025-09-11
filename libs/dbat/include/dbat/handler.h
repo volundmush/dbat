@@ -12,12 +12,16 @@
 #include <vector>
 #include <memory>
 #include <span>
+#include <functional>
 
 struct Character;
 struct Object;
 struct affected_type;
+struct HasInteractive;
 
 #include "Typedefs.h"
+
+std::pair<int, std::string_view> splitSearchNumber(std::string_view txt);
 
 /* handling the affected-structures */
 extern void update_char_objects(Character *ch); /* handler.c */
@@ -123,3 +127,4 @@ constexpr bitvector_t FIND_OBJ_INV = (1 << 2);
 constexpr bitvector_t FIND_OBJ_ROOM = (1 << 3);
 constexpr bitvector_t FIND_OBJ_WORLD = (1 << 4);
 constexpr bitvector_t FIND_OBJ_EQUIP = (1 << 5);
+

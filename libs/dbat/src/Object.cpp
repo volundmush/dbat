@@ -11,12 +11,17 @@
 #include "dbat/act.informative.h"
 #include "dbat/const/Environment.h"
 
+int64_t Object::lastID{0};
 std::unordered_map<int64_t, std::shared_ptr<Object>> Object::registry;
 SubscriptionManager<Object> objectSubscriptions;
 
 Object::Object()
 {
     type = UnitType::object;
+}
+
+void Object::setID(int64_t newID) {
+    id = newID;
 }
 
 

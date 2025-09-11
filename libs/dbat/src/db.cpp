@@ -47,6 +47,8 @@
 #include "dbat/filter.h"
 #include "dbat/utils.h"
 
+#include "dbat/Create.h"
+
 #include "dbat/Random.h"
 #include "dbat/ID.h"
 //#include "dbat/Help.h"
@@ -400,12 +402,10 @@ Character *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
         basic_mud_log("WARNING: Mobile vnum %d does not exist in database.", nr);
         return (nullptr);
     }
-    auto sh = std::make_shared<Character>();
+    auto sh = createEntity<Character>();
     auto mob = sh.get();
 
     *mob = *(proto->second);
-    mob->id = getNextID(lastCharacterID, Character::registry);
-    Character::registry.emplace(mob->id, sh);
 
     mob->activate();
 
@@ -939,9 +939,7 @@ Character *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
 
 /* create an object, and add it to the object list */
 Object *create_obj() {
-    auto sh = std::make_shared<Object>();
-    sh->id = getNextID(lastObjectID, Object::registry);
-    Object::registry.emplace(sh->id, sh);
+    auto sh = createEntity<Object>();;
     sh->activate();
     assign_triggers(sh.get(), OBJ_TRIGGER);
     return sh.get();
@@ -960,14 +958,10 @@ Object *read_object(obj_vnum nr, int type) /* and obj_rnum */
         basic_mud_log("Object (%c) %d does not exist in database.", type == VIRTUAL ? 'V' : 'R', nr);
         return (nullptr);
     }
-    auto sh = std::make_shared<Object>();
+    auto sh = createEntity<Object>();
     auto obj = sh.get();
     // the operator= will copy the prototype data into the new object.
     *obj = *(proto->second);
-
-    obj->id = getNextID(lastObjectID, Object::registry);
-    Object::registry.emplace(obj->id, sh);
-
     
     if (nr == 65) {
         SET_OBJ_VAL(obj, VAL_BED_HTANK_CHARGE, 20);
@@ -1165,8 +1159,6 @@ void init_char(Character *ch) {
     ch->time.logon = ch->time.created = time(nullptr);
     ch->time.played = 0.0;
 
-    ch->setBaseStat("hometown", 1);
-
     set_height_and_weight_by_race(ch);
 
     for (i = 1; i < SKILL_TABLE_SIZE; i++) {
@@ -1180,7 +1172,7 @@ void init_char(Character *ch) {
     for (i = 0; i < 3; i++)
         GET_COND(ch, i) = (GET_ADMLEVEL(ch) == ADMLVL_IMPL ? -1 : 24);
 
-    ch->setBaseStat("load_room", NOWHERE);
+    ch->registeredLocations.erase("load_room");
 
     do_start(ch);
 }

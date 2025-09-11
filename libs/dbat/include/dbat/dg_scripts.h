@@ -292,7 +292,7 @@ extern int trgvar_in_room(room_vnum vnum);
 
 extern Object *get_obj_in_list(char *name, const std::vector<std::weak_ptr<Object>> &list);
 
-extern Object *get_object_in_equip(Character *ch, char *name);
+extern Object *get_object_in_equip(Character *ch, std::string_view name);
 
 extern void script_trigger_check(uint64_t heartPulse, double deltaTime);
 
@@ -332,12 +332,13 @@ extern void dg_obj_trigger(char *line, ObjectPrototype *obj);
 extern void assign_triggers(struct HasDgScripts *i, UnitType type);
 
 /* From dg_variables.c */
-extern int item_in_list(char *item, const std::vector<std::weak_ptr<Object>> &list);
+extern int item_in_list(std::string_view item, const std::vector<std::weak_ptr<Object>> &list);
 
 extern char *skill_percent(Character *ch, char *skill);
 
-extern int char_has_item(char *item, Character *ch);
+extern int char_has_item(std::string_view item, Character *ch);
 
+extern std::string dg_substitutions(DgScript* trig, std::string_view input);
 extern void var_subst(HasDgScripts *go, HasDgScripts *sc, DgScript *trig,
                       UnitType type, char *line, char *buf);
 

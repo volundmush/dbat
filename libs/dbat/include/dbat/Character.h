@@ -10,6 +10,7 @@
 #include "HasLocation.h"
 #include "HasMudStrings.h"
 #include "HasDgScripts.h"
+#include "HasInteractive.h"
 
 #include "WeakBag.h"
 #include "Handle.h"
@@ -46,14 +47,23 @@ namespace atk {
     struct Attack;
 }
 
-struct Character : public CharacterBase, public HasID, public HasLocation, public HasEquipment, public HasInventory, public HasDgScripts, public HasSubscriptions, std::enable_shared_from_this<Character> {
+struct Character : public CharacterBase, public HasID, public HasLocation, public HasInteractive, public HasEquipment, public HasInventory, public HasDgScripts, public HasSubscriptions, std::enable_shared_from_this<Character> {
+    static int64_t lastID;
     static std::unordered_map<int64_t, std::shared_ptr<Character>> registry;
 
     Character();
     ~Character();
+    void setID(int64_t newID);
     // this constructor below is to be used only for the mob_proto map.
 
     Character& operator=(CharacterPrototype& proto);
+
+    std::vector<std::string> getInteractivityKeywords(struct Character* viewer) override;
+    std::string getDisplayName(struct Character* viewer, bool capitalizeArticle = false) override;
+    bool isVisibleTo(Character* viewer) override;
+
+    Sex getApparentSex(Character* viewer);
+    Race getApparentRace(Character* viewer);
 
     vnum getDgVnum() const override;
     UnitType getDgUnitType() const override;
@@ -69,7 +79,7 @@ struct Character : public CharacterBase, public HasID, public HasLocation, publi
     std::vector<trig_vnum> getProtoScript() const override;
     void activate();
     void deactivate();
-    std::optional<std::string> dgCallMember(const std::string& member, const std::string& arg) override;
+    DgReturn dgCallMember(DgScript* trig, std::string_view field, std::string_view subfield) override;
 
     std::string getUID(bool active) const override;
 
@@ -367,8 +377,7 @@ struct Character : public CharacterBase, public HasID, public HasLocation, publi
     bool isSparring() const;
 
     bool canSeeInDark() const;
-    bool canSee(Character *target, bool skipLightCheck = false);
-    bool canSee(Object *target, bool skipLightCheck = false);
+    bool canSee(HasInteractive *target, bool skipLightCheck = false);
     
     std::string displayNameFor(Character* viewer);
 

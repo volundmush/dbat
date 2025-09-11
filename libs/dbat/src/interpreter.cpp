@@ -549,13 +549,9 @@ int search_block(char *arg, const char **list, int exact)
     return (-1);
 }
 
-int is_number(const char *str)
+int is_number(std::string_view str)
 {
-    while (*str)
-        if (!isdigit(*(str++)))
-            return (0);
-
-    return (1);
+    return std::all_of(str.begin(), str.end(), ::isdigit);
 }
 
 /*

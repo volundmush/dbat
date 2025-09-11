@@ -28,7 +28,7 @@ struct HasDgScripts : public HasVariables {
     // to a variable and which hopefully survives a reboot.
     virtual std::string getUID(bool active = false) const = 0;
 
-    virtual std::optional<std::string> dgCallMember(const std::string& member, const std::string& arg);
+    virtual DgReturn dgCallMember(DgScript* sc, std::string_view field, std::string_view subfield) = 0;
 
 };
 

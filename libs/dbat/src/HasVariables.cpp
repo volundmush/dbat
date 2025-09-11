@@ -18,3 +18,5 @@ bool HasVariables::hasVariable(std::string_view key) const {
 bool HasVariables::eraseVariable(std::string_view key) {
     return variables.erase(std::string(key)) > 0;
 }
+
+HasVariables dgGlobalVariables;

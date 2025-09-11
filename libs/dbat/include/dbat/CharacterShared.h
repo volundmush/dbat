@@ -155,7 +155,7 @@ template<typename T>
 bool MOB_FLAGGED(T* ch, int flag) {
     return ch->mob_flags.get(flag);
 };
-
+extern bool AFF_FLAGGED(Character *ch, AffectFlag flag);
 extern bool AFF_FLAGGED(Character *ch, int flag);
 extern bool AFF_FLAGGED(CharacterPrototype *ch, int flag);
 

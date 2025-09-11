@@ -35,12 +35,17 @@
 #include "dbat/const/Environment.h"
 #include "dbat/const/AdminLevel.h"
 
+int64_t Character::lastID{0};
 std::unordered_map<int64_t, std::shared_ptr<Character>> Character::registry;
 SubscriptionManager<Character> characterSubscriptions;
 
 Character::Character()
 {
     type = UnitType::character;
+}
+
+void Character::setID(int64_t newID) {
+    id = newID;
 }
 
 
@@ -221,6 +226,14 @@ std::vector<trig_vnum> Character::getProtoScript() const
         return mob_proto.at(v)->proto_script;
     }
     return {};
+}
+
+Sex Character::getApparentSex(Character *viewer) {
+    return sex;
+}
+
+Race Character::getApparentRace(Character *viewer) {
+    return mimic.value_or(race);
 }
 
 std::string Character::juggleRaceName(bool capitalized)
@@ -1217,17 +1230,8 @@ bool Character::canCarryWeight(Character *obj)
 room_vnum Character::normalizeLoadRoom(room_vnum in)
 {
     // If they were in the void, then we need to use their last good room.
-    room_vnum room = NOWHERE;
+    room_vnum room = in;
     room_vnum lroom = NOWHERE;
-    // Handle the void issue...
-    if (in == 0 || in == 1)
-    {
-        room = GET_WAS_IN(this);
-    }
-    else
-    {
-        room = in;
-    }
 
     // Personal Pocket Dimensions
     // if (room >= 19800 && room <= 19899) {
@@ -1470,106 +1474,7 @@ void Character::gazeAtMoon()
     trans::handleEchoTransform(this, form);
 }
 
-static const std::map<std::string, std::string> _attr_names = {
-    {"str", "strength"},
-    {"wis", "wisdom"},
-    {"con", "constitution"},
-    {"cha", "speed"},
-    {"spd", "speed"},
-    {"dex", "agility"},
-    {"agi", "agility"},
-    {"int", "intelligence"},
 
-    {"strength", "strength"},
-    {"wisdom", "wisdom"},
-    {"constitution", "constitution"},
-    {"speed", "speed"},
-    {"agility", "agility"},
-    {"intelligence", "intelligence"}};
-
-static const std::map<std::string, std::string> _money_names = {
-    {"bank", "money_bank"},
-    {"gold", "money_carried"},
-    {"zenni", "money_carried"}};
-
-static const std::map<std::string, int> _cond_names = {
-    {"hunger", HUNGER},
-    {"thirst", THIRST},
-    {"drunk", DRUNK}};
-
-static const std::map<std::string, int> _save_names = {
-    {"saving_fortitude", SAVING_FORTITUDE},
-    {"saving_reflex", SAVING_REFLEX},
-    {"saving_will", SAVING_WILL}};
-
-static const std::map<std::string, int> _pflags = {
-    {"is_killer", PLR_KILLER},
-    {"is_thief", PLR_THIEF}};
-
-static const std::map<std::string, int> _aflags = {
-    {"dead", AFF_SPIRIT},
-    {"flying", AFF_FLYING}};
-
-std::optional<std::string> Character::dgCallMember(const std::string &member, const std::string &arg)
-{
-    std::string lmember = member;
-    boost::to_lower(lmember);
-    boost::trim(lmember);
-
-    if (auto attr = _attr_names.find(lmember); attr != _attr_names.end())
-    {
-        if (!arg.empty())
-        {
-            attribute_t addition = atof(arg.c_str());
-            modBaseStat(attr->second, addition);
-        }
-        return fmt::format("{}", getBaseStat(attr->second));
-    }
-
-    if (auto mon = _money_names.find(lmember); mon != _money_names.end())
-    {
-        if (!arg.empty())
-        {
-            money_t addition = atoll(arg.c_str());
-            modBaseStat(mon->second, addition);
-        }
-        return fmt::format("{}", (money_t)getBaseStat(mon->second));
-    }
-
-    if (auto con = _cond_names.find(lmember); con != _cond_names.end())
-    {
-        if (!arg.empty())
-        {
-            int addition = atof(arg.c_str());
-            GET_COND(this, con->second) = std::clamp<int>(addition, -1, 24);
-        }
-        return fmt::format("{}", GET_COND(this, con->second));
-    }
-
-    if (auto save = _save_names.find(lmember); save != _save_names.end())
-    {
-        return fmt::format("{}", 0);
-    }
-
-    if (auto pf = _pflags.find(lmember); pf != _pflags.end())
-    {
-        if (!arg.empty())
-        {
-            if (boost::iequals("on", arg.c_str()))
-                player_flags.set(pf->second, true);
-            else if (boost::iequals("off", arg.c_str()))
-                player_flags.set(pf->second, false);
-        }
-        return player_flags.get(pf->second) ? "1" : "0";
-    }
-
-    if (auto af = _aflags.find(lmember); af != _aflags.end())
-    {
-        return AFF_FLAGGED(this, af->second) ? "1" : "0";
-    }
-
-    return {};
-}
 
 void Character::setTask(Task t)
 {
@@ -1778,118 +1683,22 @@ bool Character::canSeeInDark() const {
     return false;
 }
 
-bool Character::canSee(Character *other, bool skipLightCheck)
+bool Character::canSee(HasInteractive *other, bool skipLightCheck)
 {
-    // can always see yourself.
-    if (this == other)
-        return true;
-
-    auto myAdminLevel = getBaseStat<int>("admin_level");
-    auto otherInvisLevel = other->getBaseStat<int>("invis_level");
-
-    // if the other has imm invisibility at a higher level,
-    // no chance of seeing them even with holylight.
-    if(myAdminLevel < otherInvisLevel)
-        return false;
-
-    // anyone with holylight (ADMIN VISION) set can always see anything.
-    if(player_flags.get(PRF_HOLYLIGHT)) 
-        return true;
-
-    // respect hidden without holylight on...
-    if(other->affect_flags.get(AFF_HIDE) && myAdminLevel <= 0)
-        return false;
-
-    // Can only detect the invisible if we have detect invisible.
-    if(other->affect_flags.get(AFF_INVISIBLE) && !affect_flags.get(AFF_DETECT_INVIS))
-        return false;
-
-    // cannot see them if the area is dark...
-    if(!skipLightCheck) {
-        if(!canSeeInDark() && other->location.getIsDark())
-            return false;
-    }
-
-    // huh. I guess we can see them. cool.
-    return true;
-}
-
-bool Character::canSee(Object *obj, bool skipLightCheck)
-{
-
-    // Admin vision can always see anything.
-    if(player_flags.get(PRF_HOLYLIGHT))
-        return true;
-
-    // can only ever see invisible items if you have detect_invis
-    if(obj->item_flags.get(ITEM_INVISIBLE) && !affect_flags.get(AFF_DETECT_INVIS))
-        return false;
-
+    auto res = other->isVisibleTo(this);
     
-    if(auto wornby = obj->getWornBy()) {
-        // You can always see your own equipment.
-        if(wornby == this) return true;
-        // but if someone else is wearing it then you also need to be able to see them!
-        else return canSee(wornby, skipLightCheck);
-    }
-    
-    if(auto carriedby = obj->getCarriedBy()) {
-        if(carriedby == this) return true;
-        else return canSee(carriedby, skipLightCheck);
-    }
-
-    // If the object is in a container you have to be able to see the container.
-    // There shouldn't be any reason you wouldn't be able to if you got this far,
-    // but let's just be triple-sure and see what happens.
-    if(auto containedby = obj->getContainer()) {
-        return canSee(containedby, skipLightCheck);
-    }
-
-    // The object must be in an AbstractLocation, so the only check left is darkness.
-
     // cannot see them if the area is dark...
-    if(!skipLightCheck) {
-        if(!canSeeInDark() && obj->location.getIsDark())
-            return false;
+    if(!player_flags.get(PRF_HOLYLIGHT) && !skipLightCheck) {
+        if(!canSeeInDark() && location.getIsDark())
+            res = false;
     }
 
-    return true;
+    return res;
 }
 
 std::string Character::displayNameFor(Character* viewer)
 {
-    // 1) Disguise gate: if I'm disguised and the viewer is a normal PC, show only race.
-    const bool iAmDisguised = this->player_flags.get(PLR_DISGUISED);
-    const bool viewerIsAdmin = viewer && viewer->getBaseStat<int>("admin_level") > 0;
-    const bool viewerIsNpc   = viewer && IS_NPC(viewer);
-
-    if (iAmDisguised && !(viewerIsAdmin || viewerIsNpc)) {
-        return race::getName(this->race); // e.g., "Saiyan", etc.
-    }
-
-    // 2) Visibility gate
-    if (viewer && !viewer->canSee(const_cast<Character*>(this))) {
-        return "Someone";
-    }
-
-    // 3) Introduction gate (does viewer know me?)
-    const bool samePerson = (viewer == this);
-    const bool eitherAdmin = viewerIsAdmin || (this->getBaseStat<int>("admin_level") > 0);
-    const bool eitherNpc   = viewerIsNpc   || IS_NPC(this);
-    const bool viewerKnowsMe = samePerson || readIntro(this, viewer) == 1 || eitherAdmin || eitherNpc;
-
-    if (viewerKnowsMe) {
-        // 4) Name selection: real name for wiz/NPC/self; otherwise the viewer-specific dub.
-        const bool wizView = samePerson || eitherAdmin || eitherNpc;
-        if (wizView) {
-            return GET_NAME(this);      // canonical name
-        } else {
-            return get_i_name(viewer, this); // viewer’s dubbed name for me
-        }
-    }
-
-    // 5) Fallback: generic description
-    return introd_calc(this);
+    return getDisplayName(viewer, false);
 }
 
 std::string_view Character::otherSenseAlign(Character *other) {
@@ -1946,3 +1755,4 @@ vnum Character::getDgVnum() const {
 UnitType Character::getDgUnitType() const {
     return UnitType::character;
 }
+

@@ -72,7 +72,6 @@ extern void string_add(struct descriptor_data *d, char *str);
 extern void std_string_add(struct descriptor_data *d, char *str);
 
 extern void string_write(struct descriptor_data *d, std::string *txt, size_t len, long mailto, std::string backup);
-extern void string_write(struct descriptor_data *d, char **txt, size_t len, long mailto, void *data);
 
 constexpr int PAGE_LENGTH = 22;
 constexpr int PAGE_WIDTH = 79;

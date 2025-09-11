@@ -57,7 +57,7 @@ extern void half_chop(char *string, char *arg1, char *arg2);
 
 extern int is_abbrev(const char *arg1, const char *arg2);
 
-extern int is_number(const char *str);
+extern int is_number(std::string_view str);
 
 extern int find_command(const char *command);
 

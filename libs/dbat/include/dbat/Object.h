@@ -11,6 +11,7 @@
 #include "HasMudStrings.h"
 #include "HasPicky.h"
 #include "affect.h"
+#include "HasInteractive.h"
 
 #include "const/ItemFlag.h"
 
@@ -24,16 +25,24 @@ extern StatHandler<Object> itemStats;
 extern SubscriptionManager<Object> objectSubscriptions;
 
 
-struct Object : public ObjectBase, public HasID, public HasLocation, public HasInventory, public HasDgScripts, public HasSubscriptions, public std::enable_shared_from_this<Object> {
+struct Object : public ObjectBase, public HasID, public HasInteractive, public HasLocation, public HasInventory, public HasDgScripts, public HasSubscriptions, public std::enable_shared_from_this<Object> {
+    static int64_t lastID;
     static std::unordered_map<int64_t, std::shared_ptr<Object>> registry;
     Object();
     ~Object();
     Object& operator=(const ObjectPrototype& proto);
+
+    std::vector<std::string> getInteractivityKeywords(struct Character* viewer) override;
+    std::string getDisplayName(struct Character* viewer, bool capitalizeArticle = false) override;
+    bool isVisibleTo(Character* viewer) override;
+
+    void setID(int64_t newID);
     
     vnum getDgVnum() const override;
     UnitType getDgUnitType() const override;
     const char* getDgName() const override;
     std::vector<trig_vnum> getProtoScript() const override;
+    DgReturn dgCallMember(DgScript* trig, std::string_view field, std::string_view subfield) override;
     
     double getAffectModifier(uint64_t location, uint64_t specific);
 

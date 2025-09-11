@@ -4124,7 +4124,7 @@ void migrate_characters() {
         auto ch = sh.get();
         ch->isPC = true;
         convert_character(ch);
-        auto id = getNextID(lastCharacterID, Character::registry);
+        auto id = getNextID(Character::lastID, Character::registry);
         auto p = std::make_shared<PlayerData>();
         players[id] = p;
         p->id = id;

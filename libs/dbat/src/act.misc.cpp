@@ -6542,7 +6542,7 @@ ACMD(do_beacon)
     else
     {
         ch->sendText("You stake out the room you are in and will return to it if you die and are revived.\r\n");
-        ch->setBaseStat("death_room", ch->location.getVnum());
+        ch->registeredLocations["death_room"] = ch->location;
         return;
     }
 }

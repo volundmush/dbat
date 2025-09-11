@@ -1,6 +1,8 @@
 #pragma once
 #include <memory>
 #include <experimental/memory>
+#include <functional>
+#include <variant>
 #include <magic_enum/magic_enum_format.hpp>
 #include "DgScriptPrototype.h"
 #include "HasVariables.h"
@@ -83,3 +85,15 @@ inline std::string format_as_diagnostic(const DgScript& z) {
 }
 
 extern SubscriptionManager<DgScript> triggerSubscriptions;
+
+// the kinds of return values we can have from variable substitutions.
+// this is usually a string but might be a reference to a Room, Character, or Object (HasDgScripts)
+// a deliberate null value is represented by an empty string.
+using DgReturn = std::variant<std::string, HasDgScripts*>;
+
+// used for things like "time" and "random" and "find" for DgScript subsitutions...
+// So for instance, %time.hour% or %find.character(John)%
+// the string views might be empty if not used.
+using DgFunc = std::function<DgReturn(DgScript*, std::string_view field, std::string_view subfield)>;
+
+#define DGFUNC(fname) DgReturn fname(DgScript* trig, std::string_view field, std::string_view subfield)

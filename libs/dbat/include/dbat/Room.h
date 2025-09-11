@@ -12,7 +12,10 @@ struct Room;
 extern StatHandler<Room> roomStats;
 
 struct Room : public AbstractLocation, public HasProtoScript, public HasVnum, public HasZone, public HasDgScripts, public HasMudStrings, public HasExtraDescriptions, public HasSubscriptions, public HasResetCommands, std::enable_shared_from_this<Room> {
+    static int lastID;
     static std::unordered_map<int, std::shared_ptr<Room>> registry;
+
+    void setID(int newID);
     
     Room();
     
@@ -82,7 +85,7 @@ struct Room : public AbstractLocation, public HasProtoScript, public HasVnum, pu
     void deleteExit(Direction dir);
     void replaceExit(const Destination& dest);
 
-    std::optional<std::string> dgCallMember(const std::string& member, const std::string& arg) override;
+    DgReturn dgCallMember(DgScript* trig, std::string_view field, std::string_view subfield) override;
 
     template<typename R = double>
     R getBaseStat(const std::string& stat) {

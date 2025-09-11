@@ -33,6 +33,7 @@
 #include "dbat/filter.h"
 #include "dbat/utils.h"
 #include "dbat/Random.h"
+#include "dbat/Parse.h"
 
 #include "dbat/const/WearSlot.h"
 #include "dbat/const/MaterialType.h"
@@ -1536,4 +1537,28 @@ void item_check(Object *object, Character *ch)
             break;
         }
     }
+}
+
+std::pair<int, std::string_view> splitSearchNumber(std::string_view txt)
+{
+    auto s = boost::trim_copy(txt);
+
+    const auto dot = s.find('.');
+    if (dot == std::string_view::npos) {
+        // No ordinal prefix: default to 1st match
+        return {1, s};
+    }
+
+    auto num_sv  = boost::trim_copy(s.substr(0, dot));
+
+    auto after   = boost::trim_copy(s.substr(dot + 1));
+
+    if (num_sv.empty())
+        return {0, after};
+
+    auto numres = parseNumber<int>(num_sv, "search number", 1);
+    if(!numres) {
+        return {0, after};
+    }
+    return {numres.value(), after};
 }

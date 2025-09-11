@@ -3,7 +3,7 @@
 
 #include <fmt/format.h>
 
-struct Zone;
+#include "Zone.h"
 
 struct HasZone {
     Zone* getZone() const;
@@ -11,8 +11,8 @@ struct HasZone {
 };
 
 inline std::string format_as(const HasZone& hz) {
-    if(hz.zone) {
-        return fmt::format("Zone: {}", *hz.zone);
+    if(auto z = hz.getZone()) {
+        return fmt::format("Zone: {}", *z);
     } else {
         return "Zone: <none>";
     }

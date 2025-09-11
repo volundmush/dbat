@@ -38,11 +38,6 @@ std::string HasDgScripts::getDgScriptString() const
     return fmt::format("@D[@wT{}@D]@n", fmt::join(vnums, ","));
 }
 
-std::optional<std::string> HasDgScripts::dgCallMember(const std::string &member, const std::string &arg)
-{
-    return std::nullopt;
-}
-
 void HasDgScripts::activateScripts()
 {
     for (auto &[vn, t] : scripts)

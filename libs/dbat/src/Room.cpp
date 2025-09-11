@@ -16,14 +16,19 @@
 #include "dbat/act.wizard.h"
 #include "dbat/Random.h"
 #include "dbat/const/Environment.h"
-#include "dbat/ID.h"
+#include "dbat/Create.h"
 
+int Room::lastID{0};
 std::unordered_map<int, std::shared_ptr<Room>> Room::registry;
 SubscriptionManager<Room> roomSubscriptions;
 
 Room::Room() : AbstractLocation()
 {
     type = UnitType::room;
+}
+
+void Room::setID(int newID) {
+    vn = newID;
 }
 
 /*
@@ -87,63 +92,6 @@ int Room::modDamage(int amount)
     return setDamage(damage + amount);
 }
 
-static const std::unordered_set<int> inside_sectors = {SECT_INSIDE, SECT_UNDERWATER, SECT_IMPORTANT, SECT_SHOP, SECT_SPACE};
-
-static const std::map<std::string, int> _dirNames = {
-    {"north", NORTH},
-    {"east", EAST},
-    {"south", SOUTH},
-    {"west", WEST},
-    {"up", UP},
-    {"down", DOWN},
-    {"northwest", NORTHWEST},
-    {"northeast", NORTHEAST},
-    {"southwest", SOUTHWEST},
-    {"southeast", SOUTHEAST},
-    {"inside", INDIR},
-    {"outside", OUTDIR}
-
-};
-
-std::optional<std::string> Room::dgCallMember(const std::string &member, const std::string &arg)
-{
-    std::string lmember = member;
-    boost::to_lower(lmember);
-    boost::trim(lmember);
-    char bitholder[MAX_STRING_LENGTH];
-
-    if (auto d = _dirNames.find(lmember); d != _dirNames.end())
-    {
-        auto ex = getDirection(static_cast<Direction>(d->second));
-        if (!ex)
-        {
-            return "";
-        }
-        if (!arg.empty())
-        {
-            if (boost::iequals(arg.c_str(), "vnum"))
-            {
-                return fmt::format("{}", ex->getVnum());
-            }
-            else if (boost::iequals(arg.c_str(), "key"))
-                return fmt::format("{}", ex->key);
-            else if (boost::iequals(arg.c_str(), "bits"))
-            {
-                return ex->exit_flags.getFlagNames();
-            }
-            else if (boost::iequals(arg.c_str(), "room"))
-            {
-                return fmt::format("{}", ex->getUID(true));
-            }
-        }
-        else /* no subfield - default to bits */
-        {
-            return ex->exit_flags.getFlagNames();
-        }
-    }
-
-    return {};
-}
 
 
 
@@ -403,13 +351,10 @@ UnitType Room::getDgUnitType() const {
 bool Room::buildwalk(const Coordinates& coor, Character* ch, Direction dir) {
     // by the time we reach this function, all permission checks have already been carried out.
 
-    auto r = std::make_shared<Room>();
-    r->vn = getNextID(lastRoomID, Room::registry);
+    auto r = createEntity<Room>();
     r->name = "New BuildWalk Room";
     r->look_description = fmt::format("This unfinished room was created by {}.\r\n", ch->getName());
     r->zone = zone;
-
-    Room::registry[r->vn] = r;
 
     Destination dest(r), rdest(ch->location);
     dest.dir = dir;

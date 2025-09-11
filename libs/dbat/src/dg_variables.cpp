@@ -34,8 +34,15 @@
 #include "dbat/Random.h"
 #include "dbat/utils.h"
 #include "dbat/weather.h"
+#include "dbat/Parse.h"
 
 #include "dbat/const/Environment.h"
+#include "dbat/const/Condition.h"
+#include "dbat/const/Skill.h"
+#include "dbat/const/Direction.h"
+
+#include <algorithm>
+#include <magic_enum/magic_enum.hpp>
 
 /* Utility functions */
 
@@ -68,14 +75,14 @@ char *skill_percent(Character *ch, char *skill)
    Now returns the number of matching objects -- Welcor 02/04
 */
 
-int item_in_list(char *item, const std::vector<std::weak_ptr<Object>> &list)
+int item_in_list(std::string_view item, const std::vector<std::weak_ptr<Object>> &list)
 {
     int count = 0;
 
     if (list.empty())
         return 0;
 
-    if (*item == UID_CHAR)
+    if (item.starts_with(UID_CHAR))
     {
         auto uidResult = resolveUID(item);
         if (!uidResult)
@@ -94,7 +101,7 @@ int item_in_list(char *item, const std::vector<std::weak_ptr<Object>> &list)
     }
     else if (is_number(item) > -1)
     { /* check for vnum */
-        obj_vnum ovnum = atof(item);
+        auto ovnum = parseNumber<obj_vnum>(item, "item id").value_or(NOTHING);
 
         for (auto i : filter_raw(list))
         {
@@ -127,7 +134,7 @@ int item_in_list(char *item, const std::vector<std::weak_ptr<Object>> &list)
    MUD -- 4dimensions.org:6000
 */
 
-int char_has_item(char *item, Character *ch)
+int char_has_item(std::string_view item, Character *ch)
 {
 
     /* If this works, no more searching needed */
@@ -388,146 +395,8 @@ void find_replacement(HasDgScripts *go, HasDgScripts *sc, DgScript *trig, UnitTy
         }
         else
         {
-            if (boost::iequals(var, "self"))
-            {
-                c = nullptr;
-                r = nullptr;
-                o = nullptr;
-                switch (type)
-                {
-                case MOB_TRIGGER:
-                    c = (Character *)go;
-                    break; /* the room.  - Welcor        */
-                case OBJ_TRIGGER:
-                    o = (Object *)go;
-                    break;
-                case WLD_TRIGGER:
-                    r = (Room *)go;
-                    break;
-                }
-            }
-            else if (boost::iequals(var, "global"))
-            {
-                HasDgScripts *thescript = SCRIPT(get_room(0));
-                *str = '\0';
-                if (!thescript)
-                {
-                    script_log("Attempt to find global var. Apparently the void has no script.");
-                    return;
-                }
-                for (const auto &[key, val] : thescript->variables)
-                    if (boost::iequals(key.c_str(), field))
-                    {
-                        found = val;
-                        break;
-                    }
-
-                if (found)
-                    snprintf(str, slen, "%s", found->c_str());
-
-                return;
-            }
-            else if (boost::iequals(var, "people"))
-            {
-                snprintf(str, slen, "%d", ((num = atoi(field)) > 0) ? trgvar_in_room(num) : 0);
-                return;
-            }
-            else if (boost::iequals(var, "time"))
-            {
-                if (boost::iequals(field, "hour"))
-                    snprintf(str, slen, "%d", time_info.hours);
-                else if (boost::iequals(field, "minute"))
-                    snprintf(str, slen, "%d", time_info.minutes);
-                else if (boost::iequals(field, "second"))
-                    snprintf(str, slen, "%d", time_info.seconds);
-                else if (boost::iequals(field, "day"))
-                    snprintf(str, slen, "%d", time_info.day + 1);
-                else if (boost::iequals(field, "month"))
-                    snprintf(str, slen, "%d", time_info.month + 1);
-                else if (boost::iequals(field, "year"))
-                    snprintf(str, slen, "%ld", time_info.year);
-                else
-                    *str = '\0';
-                return;
-            }
-            /*
-
-                  %findobj.<room vnum X>(<object vnum/id/name>)%
-                    - count number of objects in room X with this name/id/vnum
-                  %findmob.<room vnum X>(<mob vnum Y>)%
-                    - count number of mobs in room X with vnum Y
-
-            for example you want to check how many PC's are in room with vnum 1204.
-            as PC's have the vnum -1...
-            you would type:
-            in any script:
-            %echo% players in room 1204: %findmob.1204(-1)%
-
-            Or say you had a bank, and you want a script to check the number of
-            bags
-            of gold (vnum: 1234)
-            in the vault (vnum: 453) now and then. you can just use
-            %findobj.453(1234)% and it will return the number of bags of gold.
-
-            **/
-
             /* addition inspired by Jamie Nelson - mordecai@xtra.co.nz */
-            else if (boost::iequals(var, "findmob"))
-            {
-                if (!field || !*field || !subfield || !*subfield)
-                {
-                    script_log("findmob.vnum(mvnum) - illegal syntax");
-                    strcpy(str, "0");
-                }
-                else
-                {
-                    auto fi = atoi(field);
-                    room_rnum rrnum = real_room(fi);
-                    mob_vnum mvnum = atoi(subfield);
-
-                    if (rrnum == NOWHERE)
-                    {
-                        script_log("findmob.vnum(ovnum): No room with vnum %d", fi);
-                        strcpy(str, "0");
-                    }
-                    else
-                    {
-                        i = 0;
-                        auto people = get_room(rrnum)->getPeople().snapshot_weak();
-                        for (auto ch : filter_raw(people))
-                            if (GET_MOB_VNUM(ch) == mvnum)
-                                i++;
-
-                        snprintf(str, slen, "%d", i);
-                    }
-                }
-            }
-            /* addition inspired by Jamie Nelson - mordecai@xtra.co.nz */
-            else if (boost::iequals(var, "findobj"))
-            {
-                if (!field || !*field || !subfield || !*subfield)
-                {
-                    script_log("findobj.vnum(ovnum) - illegal syntax");
-                    strcpy(str, "0");
-                }
-                else
-                {
-                    auto fi = atoi(field);
-                    room_rnum rrnum = real_room(fi);
-
-                    if (rrnum == NOWHERE)
-                    {
-                        script_log("findobj.vnum(ovnum): No room with vnum %d", fi);
-                        strcpy(str, "0");
-                    }
-                    else
-                    {
-                        /* item_in_list looks within containers as well. */
-                        snprintf(str, slen, "%d", item_in_list(subfield, Location(rrnum).getObjects()));
-                    }
-                }
-            }
-            else if (boost::iequals(var, "random"))
+            if (boost::iequals(var, "random"))
             {
                 if (boost::iequals(field, "char"))
                 {
@@ -627,955 +496,10 @@ void find_replacement(HasDgScripts *go, HasDgScripts *sc, DgScript *trig, UnitTy
         if (text_processed(field, subfield, value, str, slen))
             return;
 
-        if (c)
-        {
-
-            if (boost::iequals(field, "global"))
-            { /* get global of something else */
-                if (IS_NPC(c))
-                {
-                    find_replacement(go, c, nullptr, MOB_TRIGGER,
-                                     subfield, nullptr, nullptr, str, slen);
-                }
-            }
-            /* set str to some 'non-text' first */
-            *str = '\x1';
-
-            if (auto result = c->dgCallMember(field, subfield ? subfield : ""); result)
-            {
-                snprintf(str, slen, "%s", result.value().c_str());
-                return;
-            }
-
-            switch (tolower(*field))
-            {
-            case 'a':
-                if (boost::iequals(field, "aaaaa"))
-                {
-                    strcpy(str, "0");
-                }
-                else if (boost::iequals(field, "affect"))
-                {
-                    if (subfield && *subfield)
-                    {
-                        int affect = get_flag_by_name(affected_bits, subfield);
-                        if (affect != NOFLAG && AFF_FLAGGED(c, affect))
-                            strcpy(str, "1");
-                        else
-                            strcpy(str, "0");
-                    }
-                    else
-                        strcpy(str, "0");
-                }
-                else if (boost::iequals(field, "alias"))
-                    snprintf(str, slen, "%s", GET_PC_NAME(c));
-
-                else if (boost::iequals(field, "align"))
-                {
-                    if (subfield && *subfield)
-                    {
-                        int addition = atof(subfield);
-                        c->setBaseStat("good_evil", std::clamp<int>(addition, -1000, 1000));
-                    }
-                    snprintf(str, slen, "%d", GET_ALIGNMENT(c));
-                }
-                break;
-            case 'c':
-                if (boost::iequals(field, "canbeseen"))
-                {
-                    if ((type == MOB_TRIGGER) && !((Character *)go)->canSee(c))
-                        strcpy(str, "0");
-                    else
-                        strcpy(str, "1");
-                }
-                else if (boost::iequals(field, "carry"))
-                {
-                    if (!IS_NPC(c) && CARRYING(c))
-                        strcpy(str, "1");
-                    else
-                        strcpy(str, "0");
-                }
-                else if (boost::iequals(field, "clan"))
-                {
-                    strcpy(str, "0");
-                }
-                else if (boost::iequals(field, "class"))
-                {
-                    if (!IS_NPC(c))
-                        snprintf(str, slen, "%s", sensei::getName(c->sensei).c_str());
-                    else
-                        snprintf(str, slen, "blank");
-                }
-                break;
-            case 'd':
-                if (boost::iequals(field, "death"))
-                {
-                    snprintf(str, slen, "%ld", GET_DTIME(c));
-                }
-                else if (boost::iequals(field, "drag"))
-                {
-                    if (!IS_NPC(c) && DRAGGING(c))
-                        strcpy(str, "1");
-                    else
-                        strcpy(str, "0");
-                }
-                break;
-            case 'e':
-                if (boost::iequals(field, "eq"))
-                {
-                    int pos;
-                    if (!subfield || !*subfield)
-                        *str = '\0';
-                    else if (*subfield == '*')
-                    {
-                        for (i = 0, j = 0; i < NUM_WEARS; i++)
-                            if (GET_EQ(c, i))
-                            {
-                                j++;
-                                break;
-                            }
-                        if (j > 0)
-                            strcpy(str, "1");
-                        else
-                            *str = '\0';
-                    }
-                    else if ((pos = find_eq_pos_script(subfield)) < 0 || !GET_EQ(c, pos))
-                        *str = '\0';
-                    else
-                        snprintf(str, slen, "%s", ((((c)->getEquipSlot(pos)))->getUID(true).c_str()));
-                }
-                if (boost::iequals(field, "exp"))
-                {
-                    if (subfield && *subfield)
-                    {
-                        int64_t addition = std::max<int64_t>(0, atof(subfield));
-
-                        c->modExperience(addition);
-                    }
-                    snprintf(str, slen, "%" I64T "", GET_EXP(c));
-                }
-                break;
-            case 'f':
-                if (boost::iequals(field, "fighting"))
-                {
-                    if (FIGHTING(c))
-                        snprintf(str, slen, "%s", ((((c)->fighting))->getUID(true).c_str()));
-                    else
-                        *str = '\0';
-                }
-                else if (boost::iequals(field, "follower"))
-                {
-                    if (!c->followers)
-                        *str = '\0';
-                    else
-                        snprintf(str, slen, "%s", ((c->followers.head())->getUID(true).c_str()));
-                }
-                break;
-            case 'h':
-                if (boost::iequals(field, "has_item"))
-                {
-                    if (!(subfield && *subfield))
-                        *str = '\0';
-                    else
-                        snprintf(str, slen, "%d", char_has_item(subfield, c));
-                }
-                else if (boost::iequals(field, "hisher"))
-                    snprintf(str, slen, "%s", HSHR(c));
-
-                else if (boost::iequals(field, "heshe"))
-                    snprintf(str, slen, "%s", HSSH(c));
-
-                else if (boost::iequals(field, "himher"))
-                    snprintf(str, slen, "%s", HMHR(c));
-
-                else if (boost::iequals(field, "hitp"))
-                {
-                    if (subfield && *subfield)
-                    {
-                        int64_t addition = atof(subfield);
-                        if (addition > 0)
-                        {
-                            c->modCurVital(CharVital::health, addition);
-                        }
-                        else
-                        {
-                            c->modCurVital(CharVital::health, -addition);
-                        }
-
-                        update_pos(c);
-                    }
-                    snprintf(str, slen, "%" I64T "", GET_HIT(c));
-                }
-                break;
-            case 'i':
-                if (boost::iequals(field, "id"))
-                    snprintf(str, slen, "%s", c->getUID(true).c_str());
-
-                /* new check for pc/npc status */
-                else if (boost::iequals(field, "is_pc"))
-                {
-                    strcpy(str, !IS_NPC(c) ? "1" : "0");
-                }
-                else if (boost::iequals(field, "inventory"))
-                {
-                    if (subfield && *subfield)
-                    {
-                        auto con = c->getInventory();
-                        auto oid = atof(subfield);
-                        for (auto obj : filter_raw(con))
-                        {
-                            if (GET_OBJ_VNUM(obj) == oid)
-                            {
-                                snprintf(str, slen, "%s", ((obj)->getUID(true).c_str())); /* arg given, found */
-                                return;
-                            }
-                        }
-                    }
-                    else
-                    { /* no arg given */
-                        if (auto con = c->getInventory(); !con.empty())
-                        {
-                            for (auto o : filter_raw(con))
-                            {
-                                snprintf(str, slen, "%s", o->getUID(true).c_str());
-                                return;
-                            }
-                        }
-                    }
-                    *str = '\0'; /* arg given, not found */
-                    return;
-                }
-                break;
-            case 'l':
-                if (boost::iequals(field, "level"))
-                    snprintf(str, slen, "%d", GET_LEVEL(c));
-                break;
-            case 'm':
-                if (boost::iequals(field, "maxhitp"))
-                {
-                    if (subfield && *subfield)
-                    {
-                        int64_t addition = atof(subfield);
-                        // GET_MAX_HIT(c) = MAX(GET_MAX_HIT(c) + addition, 1);
-                    }
-                    snprintf(str, slen, "%" I64T "", GET_MAX_HIT(c));
-                }
-                else if (boost::iequals(field, "mana"))
-                {
-                    if (subfield && *subfield)
-                    {
-                        int64_t addition = atof(subfield);
-                        if (addition > 0)
-                        {
-                            c->modCurVital(CharVital::ki, addition);
-                        }
-                        else
-                        {
-                            c->modCurVital(CharVital::ki, -addition);
-                        }
-                    }
-                    snprintf(str, slen, "%" I64T "", (c->getCurVital(CharVital::ki)));
-                }
-                else if (boost::iequals(field, "maxmana"))
-                {
-                    if (subfield && *subfield)
-                    {
-                        int64_t addition = atof(subfield);
-                        // GET_MAX_MANA(c) = MAX(GET_MAX_MANA(c) + addition, 1);
-                    }
-                    snprintf(str, slen, "%" I64T "", GET_MAX_MANA(c));
-                }
-                else if (boost::iequals(field, "move"))
-                {
-                    if (subfield && *subfield)
-                    {
-                        int64_t addition = atof(subfield);
-                        if (addition > 0)
-                        {
-                            c->modCurVital(CharVital::stamina, addition);
-                        }
-                        else
-                        {
-                            c->modCurVital(CharVital::stamina, -addition);
-                        }
-                    }
-                    snprintf(str, slen, "%" I64T "", (c->getCurVital(CharVital::stamina)));
-                }
-                else if (boost::iequals(field, "maxmove"))
-                {
-                    if (subfield && *subfield)
-                    {
-                        int64_t addition = atof(subfield);
-                        // GET_MAX_MOVE(c) = MAX(GET_MAX_MOVE(c) + addition, 1);
-                    }
-                    snprintf(str, slen, "%" I64T "", GET_MAX_MOVE(c));
-                }
-                else if (boost::iequals(field, "master"))
-                {
-                    if (!c->master)
-                        *str = '\0';
-                    else
-                        snprintf(str, slen, "%s", (c->master->getUID(true).c_str()));
-                }
-                break;
-            case 'n':
-                if (boost::iequals(field, "name"))
-                {
-                    snprintf(str, slen, "%s", GET_NAME(c));
-                }
-                else if (boost::iequals(field, "next_in_room"))
-                {
-                    if (auto people = c->location.getPeople(); !people.empty())
-                    {
-                        auto found = false;
-                        for (auto p : filter_raw(people))
-                        {
-                            if (found)
-                            {
-                                snprintf(str, slen, "%s", p->getUID(true).c_str());
-                                return;
-                            }
-                            if (p == c)
-                            {
-                                found = true;
-                            }
-                        }
-                    }
-                    *str = '\0';
-                    return;
-                }
-                break;
-            case 'p':
-                /* Thanks to Christian Ejlertsen for this idea
-                   And to Ken Ray for speeding the implementation up :)*/
-                if (boost::iequals(field, "pos"))
-                {
-                    if (subfield && *subfield)
-                    {
-                        for (i = static_cast<int>(POS_SLEEPING); i <= static_cast<int>(POS_STANDING); i++)
-                        {
-                            /* allows : Sleeping, Resting, Sitting, Fighting, Standing */
-                            if (!strncasecmp(subfield, position_types[i], strlen(subfield)))
-                            {
-                                c->setBaseStat("combo", i);
-                                break;
-                            }
-                        }
-                    }
-                    snprintf(str, slen, "%s", position_types[static_cast<int>(GET_POS(c))]);
-                }
-                else if (boost::iequals(field, "prac"))
-                {
-                    if (IS_NPC(c))
-                    {
-                        if (IN_ROOM(c) != NOWHERE)
-                        {
-                            c->location.sendText("Error!: Report this trigger error to the coding authorities!\r\n");
-                        }
-                    }
-                    if (subfield && *subfield)
-                    {
-                        int addition = atof(subfield);
-                        c->modPractices(addition);
-                    }
-                    snprintf(str, slen, "%d", GET_PRACTICES(c));
-                }
-                else if (boost::iequals(field, "plr"))
-                {
-                    if (subfield && *subfield)
-                    {
-                        int plr = get_flag_by_name(player_bits, subfield);
-                        if (plr != NOFLAG && PLR_FLAGGED(c, plr))
-                            strcpy(str, "1");
-                        else
-                            strcpy(str, "0");
-                    }
-                    else
-                        strcpy(str, "0");
-                }
-                else if (boost::iequals(field, "pref"))
-                {
-                    if (subfield && *subfield)
-                    {
-                        int pref = get_flag_by_name(preference_bits, subfield);
-                        if (pref != NOFLAG && PRF_FLAGGED(c, pref))
-                            strcpy(str, "1");
-                        else
-                            strcpy(str, "0");
-                    }
-                    else
-                        strcpy(str, "0");
-                }
-                break;
-            case 'r':
-                if (boost::iequals(field, "room"))
-                { /* in NOWHERE, return the void */
-/* see note in dg_scripts.h */
-#ifdef ACTOR_ROOM_IS_UID
-                    if (auto roomFound = c->getRoom(); roomFound)
-                    {
-                        snprintf(str, slen, "%s", roomFound->getUID(true).c_str());
-                    }
-#else
-                    snprintf(str, slen, "%d", (IN_ROOM(c) != NOWHERE) ? c->getRoom()->number : 0);
-#endif
-                }
-#ifdef GET_RACE
-                else if (boost::iequals(field, "race"))
-                {
-                    snprintf(str, slen, "%s", race::getName(c->race).c_str());
-                }
-#endif
-                else if (boost::iequals(field, "rpp"))
-                {
-                    if (subfield && *subfield)
-                    {
-                        int addition = atof(subfield);
-                        c->modRPP(addition);
-                    }
-
-                    snprintf(str, slen, "%d", c->getRPP());
-                }
-
-                break;
-            case 's':
-                if (boost::iequals(field, "sex"))
-                    snprintf(str, slen, "%s", genders[(int)GET_SEX(c)]);
-
-                else if (boost::iequals(field, "size"))
-                {
-                    if (subfield && *subfield)
-                    {
-                        int ns;
-                        if ((ns = search_block(subfield, size_names, false)) > -1)
-                        {
-                            (c)->setSize(ns);
-                        }
-                    }
-                    sprinttype(get_size(c), size_names, str, slen);
-                }
-                else if (boost::iequals(field, "skill"))
-                    snprintf(str, slen, "%s", skill_percent(c, subfield));
-
-                else if (boost::iequals(field, "skillset"))
-                {
-                    if (!IS_NPC(c) && subfield && *subfield)
-                    {
-                        char skillname[MAX_INPUT_LENGTH], *amount;
-                        amount = one_word(subfield, skillname);
-                        skip_spaces(&amount);
-                        if (amount && *amount && is_number(amount))
-                        {
-                            int skillnum = find_skill_num(skillname, SKTYPE_SKILL);
-                            if (skillnum > 0)
-                            {
-                                int new_value = std::clamp<double>(atof(amount), 0, 100);
-                                SET_SKILL(c, skillnum, new_value);
-                            }
-                        }
-                    }
-                    *str = '\0'; /* so the parser know we recognize 'skillset' as a field */
-                }
-                break;
-            case 't':
-                if (boost::iequals(field, "tnl"))
-                {
-                    snprintf(str, slen, "%ld", level_exp(c, GET_LEVEL(c) + 1));
-                }
-                break;
-            case 'v':
-                if (boost::iequals(field, "vnum"))
-                {
-                    if (subfield && *subfield)
-                    {
-                        snprintf(str, slen, "%d", IS_NPC(c) ? (int)(GET_MOB_VNUM(c) == atof(subfield)) : -1);
-                    }
-                    else
-                    {
-                        if (IS_NPC(c))
-                            snprintf(str, slen, "%d", GET_MOB_VNUM(c));
-                        else
-                            /*
-                             * for compatibility with unsigned indexes
-                             * - this is deprecated - use %actor.is_pc% to check
-                             * instead of %actor.vnum% == -1  --Welcor 09/03
-                             */
-                            strcpy(str, "-1");
-                    }
-                }
-                else if (boost::iequals(field, "varexists"))
-                {
-                    snprintf(str, slen, "%d", c->variables.contains(subfield));
-                }
-
-                break;
-            case 'w':
-                if (boost::iequals(field, "weight"))
-                    snprintf(str, slen, "%s", fmt::format("{}", c->getEffectiveStat("weight")).c_str());
-
-                break;
-            } /* switch *field */
-
-            if (*str == '\x1')
-            { /* no match found in switch */
-                if (auto found = c->getVariable(field); found)
-                {
-                    snprintf(str, slen, "%s", found->c_str());
-                }
-                else
-                {
-                    *str = '\0';
-                    script_log("Trigger: %s, VNum %d. unknown char field: '%s'",
-                               GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), field);
-                }
-            }
-
-        } /* if (c) ...*/
-
-        else if (o)
-        {
-
-            *str = '\x1';
-            switch (tolower(*field))
-            {
-            case 'a':
-                if (boost::iequals(field, "affects"))
-                {
-                    if (subfield && *subfield)
-                    {
-                        if (check_flags_by_name_ar(GET_OBJ_PERM(o).getAllAsSet(), NUM_AFF_FLAGS, subfield, affected_bits) > 0)
-                            snprintf(str, slen, "1");
-                        else
-                            snprintf(str, slen, "0");
-                    }
-                    else
-                        snprintf(str, slen, "0");
-                }
-                break;
-            case 'c':
-                if (boost::iequals(field, "cost"))
-                {
-                    if (subfield && *subfield)
-                    {
-                        int addition = atof(subfield);
-                        o->setBaseStat<int>("cost", std::max<int>(0, addition + GET_OBJ_COST(o)));
-                    }
-                    snprintf(str, slen, "%d", GET_OBJ_COST(o));
-                }
-                else if (boost::iequals(field, "cost_per_day"))
-                {
-                    if (subfield && *subfield)
-                    {
-                        int addition = atof(subfield);
-                        o->setBaseStat<int>("cost_per_day", std::max<int>(0, addition + GET_OBJ_RENT(o)));
-                    }
-                    snprintf(str, slen, "%d", GET_OBJ_RENT(o));
-                }
-                else if (boost::iequals(field, "carried_by"))
-                {
-                    if (auto carriedby = o->getCarriedBy(); carriedby)
-                        snprintf(str, slen, "%s", carriedby->getUID(true).c_str());
-                    else
-                        *str = '\0';
-                }
-                else if (boost::iequals(field, "contents"))
-                {
-                    if (auto con = o->getInventory(); !con.empty())
-                    {
-                        for (auto obj : filter_raw(con))
-                        {
-                            snprintf(str, slen, "%s", obj->getUID(true).c_str());
-                            return;
-                        }
-                    }
-                    else
-                        *str = '\0';
-                }
-                /* thanks to Jamie Nelson (Mordecai of 4 Dimensions MUD) */
-                else if (boost::iequals(field, "count"))
-                {
-                    if (GET_OBJ_TYPE(o) == ITEM_CONTAINER)
-                        snprintf(str, slen, "%d", item_in_list(subfield, o->getInventory()));
-                    else
-                        strcpy(str, "0");
-                }
-                break;
-            case 'e':
-                if (boost::iequals(field, "extra"))
-                {
-                    if (subfield && *subfield)
-                    {
-                        if (check_flags_by_name_ar(GET_OBJ_EXTRA(o).getAllAsSet(), NUM_ITEM_FLAGS, subfield, extra_bits) > 0)
-                            snprintf(str, slen, "1");
-                        else
-                            snprintf(str, slen, "0");
-                    }
-                    else
-                        snprintf(str, slen, "0");
-                }
-                else
-                {
-                    snprintf(str, slen, "%s", GET_OBJ_EXTRA(o).getFlagNames().c_str());
-                }
-                break;
-            case 'h':
-                /* thanks to Jamie Nelson (Mordecai of 4 Dimensions MUD) */
-                if (boost::iequals(field, "has_in"))
-                {
-                    if (GET_OBJ_TYPE(o) == ITEM_CONTAINER)
-                        snprintf(str, slen, "%s", (item_in_list(subfield, o->getInventory()) ? "1" : "0"));
-                    else
-                        strcpy(str, "0");
-                }
-                if (boost::iequals(field, "health"))
-                {
-                    if (subfield && *subfield)
-                    {
-                        int addition = atoi(subfield);
-                        SET_OBJ_VAL(o, VAL_ALL_HEALTH, std::max<int>(1, addition + GET_OBJ_VAL(o, VAL_ALL_HEALTH)));
-                        if (OBJ_FLAGGED(o, ITEM_BROKEN) && GET_OBJ_VAL(o, VAL_ALL_HEALTH) >= 100)
-                            o->item_flags.set(ITEM_BROKEN, false);
-                    }
-                    snprintf(str, slen, "%ld", GET_OBJ_VAL(o, VAL_ALL_HEALTH));
-                }
-                break;
-            case 'i':
-                if (boost::iequals(field, "id"))
-                    snprintf(str, slen, "%s", o->getUID(true).c_str());
-
-                else if (boost::iequals(field, "is_inroom"))
-                {
-                    if (auto roomFound = o->getRoom(); roomFound)
-                        snprintf(str, slen, "%s", roomFound->getUID(true).c_str());
-                    else
-                        *str = '\0';
-                }
-                else if (boost::iequals(field, "is_pc"))
-                {
-                    strcpy(str, "-1");
-                }
-                else if (boost::iequals(field, "itemflag"))
-                {
-                    if (subfield && *subfield)
-                    {
-                        int item = get_flag_by_name(extra_bits, subfield);
-                        if (item != NOFLAG && OBJ_FLAGGED(o, item))
-                            strcpy(str, "1");
-                        else
-                            strcpy(str, "0");
-                    }
-                    else
-                        strcpy(str, "0");
-                }
-                break;
-            case 'l':
-                if (boost::iequals(field, "level"))
-                    snprintf(str, slen, "%d", GET_OBJ_LEVEL(o));
-                break;
-
-            case 'n':
-                if (boost::iequals(field, "name"))
-                {
-                    if (!subfield || !*subfield)
-                        snprintf(str, slen, "%s", o->getName());
-                    else
-                    {
-                        char blah[500];
-                        sprintf(blah, "%s %s", o->getName(), subfield);
-                        o->name = blah;
-                    }
-                }
-                else if (boost::iequals(field, "next_in_list"))
-                {
-                    if (auto con = o->location.getObjects(); !con.empty())
-                    {
-                        auto found = false;
-                        for (auto ob : filter_raw(con))
-                        {
-                            if (ob == o)
-                            {
-                                found = true;
-                                continue;
-                            }
-                            if (found)
-                            {
-                                snprintf(str, slen, "%s", ob->getUID(true).c_str());
-                                return;
-                            }
-                        }
-                    }
-
-                    *str = '\0';
-                    return;
-                }
-                break;
-            case 'r':
-                if (boost::iequals(field, "room"))
-                {
-                    if (auto roomFound = get_room(obj_room(o)); roomFound)
-                        snprintf(str, slen, "%s", roomFound->getUID(true).c_str());
-                    else
-                        *str = '\0';
-                }
-                break;
-            case 's':
-                if (boost::iequals(field, "shortdesc"))
-                {
-                    if (!subfield || !*subfield)
-                        snprintf(str, slen, "%s", o->getShortDescription());
-                    else
-                    {
-                        char blah[500];
-                        sprintf(blah, "%s @wnicknamed @D(@C%s@D)@n", o->getShortDescription(), subfield);
-                        o->short_description = blah;
-                    }
-                }
-                else if (boost::iequals(field, "setaffects"))
-                {
-                    if (subfield && *subfield)
-                    {
-                        int ns;
-                        if ((ns = check_flags_by_name_ar(GET_OBJ_PERM(o).getAllAsSet(), NUM_AFF_FLAGS, subfield, affected_bits)) >
-                            0)
-                        {
-                            o->affect_flags.toggle(ns);
-                            snprintf(str, slen, "1");
-                        }
-                    }
-                }
-                else if (boost::iequals(field, "setextra"))
-                {
-                    if (subfield && *subfield)
-                    {
-                        int ns;
-                        if ((ns = check_flags_by_name_ar(GET_OBJ_EXTRA(o).getAllAsSet(), NUM_ITEM_FLAGS, subfield, extra_bits)) >
-                            0)
-                        {
-                            o->item_flags.toggle(ns);
-                            snprintf(str, slen, "1");
-                        }
-                    }
-                }
-                else if (boost::iequals(field, "size"))
-                {
-                    if (subfield && *subfield)
-                    {
-                        int ns;
-                        if ((ns = search_block(subfield, size_names, false)) > -1)
-                        {
-                            (o)->size = static_cast<Size>(ns);
-                        }
-                    }
-                    sprinttype(static_cast<int>(GET_OBJ_SIZE(o)), size_names, str, slen);
-                }
-                break;
-            case 't':
-                if (boost::iequals(field, "type"))
-                    sprinttype(GET_OBJ_TYPE(o), item_types, str, slen);
-
-                else if (boost::iequals(field, "timer"))
-                    snprintf(str, slen, "%d", GET_OBJ_TIMER(o));
-                break;
-            case 'v':
-                if (boost::iequals(field, "vnum"))
-                    if (subfield && *subfield)
-                    {
-                        snprintf(str, slen, "%d", (int)(GET_OBJ_VNUM(o) == atof(subfield)));
-                    }
-                    else
-                    {
-                        snprintf(str, slen, "%d", GET_OBJ_VNUM(o));
-                    }
-                else if (boost::iequals(field, "value") && subfield && *subfield)
-                    snprintf(str, slen, "%ld", GET_OBJ_VAL(o, subfield));
-                break;
-            case 'w':
-                if (boost::iequals(field, "weight"))
-                {
-                    if (subfield && *subfield)
-                    {
-                        auto addition = atof(subfield);
-                        if (addition < 0 || addition > 0)
-                        {
-                            o->setBaseStat<weight_t>("weight", std::max<double>(0, addition + GET_OBJ_WEIGHT(o)));
-                        }
-                        else
-                        {
-                            o->setBaseStat<weight_t>("weight", 0);
-                        }
-                    }
-                    snprintf(str, slen, "%s", fmt::format("{}", GET_OBJ_WEIGHT(o)).c_str());
-                }
-                else if (boost::iequals(field, "worn_by"))
-                {
-                    if (auto worn = o->getWornBy())
-                        snprintf(str, slen, "%s", worn->getUID(true).c_str());
-                    else
-                        *str = '\0';
-                }
-                break;
-            } /* switch *field */
-
-            if (*str == '\x1')
-            { /* no match in switch */
-                if (auto found = o->getVariable(field); found)
-                {
-                    snprintf(str, slen, "%s", found->c_str());
-                }
-                else
-                {
-                    *str = '\0';
-                    if (!boost::iequals(GET_TRIG_NAME(trig), "Rename Object"))
-                    {
-                        script_log("Trigger: %s, VNum %d, type: %d. unknown object field: '%s'",
-                                   GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), static_cast<int>(type), field);
-                    }
-                }
-            }
-        } /* if (o) ... */
-
-        else if (r)
-        {
-
-            if (auto result = r->dgCallMember(field, subfield ? subfield : ""); result)
-            {
-                snprintf(str, slen, "%s", result->c_str());
-                return;
-            }
-
-            /* special handling of the void, as it stores all 'full global' variables */
-            if (r->getVnum() == 0)
-            {
-                if (auto found = r->getVariable(field); found)
-                    snprintf(str, slen, "%s", found->c_str());
-                else
-                    *str = '\0';
-            }
-            else if (boost::iequals(field, "name"))
-                snprintf(str, slen, "%s", r->getName());
-
-            else if (boost::iequals(field, "sector"))
-                sprinttype(static_cast<int>(r->sector_type), sector_types, str, slen);
-
-            else if (boost::iequals(field, "gravity")) {
-                Location loc(r);
-                snprintf(str, slen, "%d", (int)loc.getEnvironment(ENV_GRAVITY));
-            }
-
-            else if (boost::iequals(field, "vnum"))
-            {
-                if (subfield && *subfield)
-                {
-                    snprintf(str, slen, "%d", (int)(r->getVnum() == atof(subfield)));
-                }
-                else
-                {
-                    snprintf(str, slen, "%d", r->getVnum());
-                }
-            }
-            else if (boost::iequals(field, "contents"))
-            {
-                if (subfield && *subfield)
-                {
-                    auto con = r->getObjects().snapshot_weak();
-                    for (auto obj : filter_raw(con))
-                    {
-                        if (GET_OBJ_VNUM(obj) == atof(subfield))
-                        {
-                            /* arg given, found */
-                            snprintf(str, slen, "%s", ((obj)->getUID(true).c_str()));
-                            return;
-                        }
-                    }
-                    if (!obj)
-                        *str = '\0'; /* arg given, not found */
-                }
-                else
-                { /* no arg given */
-                    if (auto con = r->getObjects().snapshot_weak(); !con.empty())
-                    {
-                        for (auto obj : filter_raw(con))
-                        {
-                            snprintf(str, slen, "%s", obj->getUID(true).c_str());
-                            return;
-                        }
-                    }
-                    else
-                    {
-                        *str = '\0';
-                    }
-                }
-            }
-            else if (boost::iequals(field, "people"))
-            {
-                if (auto people = r->getPeople().snapshot_weak(); !people.empty())
-                {
-                    for (auto p : filter_raw(people))
-                    {
-                        snprintf(str, slen, "%s", p->getUID(true).c_str());
-                        return;
-                    }
-                }
-                *str = '\0';
-                return;
-            }
-            else if (boost::iequals(field, "id"))
-            {
-                if (r->getVnum() != NOWHERE)
-                    snprintf(str, slen, "%s", r->getUID(true).c_str());
-                else
-                    *str = '\0';
-            }
-            else if (boost::iequals(field, "weather"))
-            {
-                const char *sky_look[] = {
-                    "sunny",
-                    "cloudy",
-                    "rainy",
-                    "lightning"};
-
-                if (!r->room_flags.get(ROOM_INDOORS))
-                    snprintf(str, slen, "%s", sky_look[weather_info.sky]);
-                else
-                    *str = '\0';
-            }
-            else if (boost::iequals(field, "fishing"))
-            {
-                if (ROOM_FLAGGED(r, ROOM_FISHING))
-                    snprintf(str, slen, "1");
-                else
-                    snprintf(str, slen, "0");
-            }
-            else if (boost::iequals(field, "zonenumber"))
-                snprintf(str, slen, "%d", r->zone->number);
-            else if (boost::iequals(field, "zonename"))
-                snprintf(str, slen, "%s", r->zone->name.c_str());
-            else if (boost::iequals(field, "roomflag"))
-            {
-                if (subfield && *subfield)
-                {
-                    if (check_flags_by_name_ar(r->room_flags.getAllAsSet(), NUM_ROOM_FLAGS, subfield, room_bits) > 0)
-                        snprintf(str, slen, "1");
-                    else
-                        snprintf(str, slen, "0");
-                }
-                else
-                    snprintf(str, slen, "0");
-            }
-            else
-            {
-                if (auto found = r->getVariable(field); found)
-                    snprintf(str, slen, "%s", found->c_str());
-                else
-                {
-                    *str = '\0';
-                    script_log("Trigger: %s, VNum %d, type: %d. unknown room field: '%s'",
-                               GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), static_cast<int>(type), field);
-                }
-            }
-        } /* if (r).. */
     }
 }
+
+
 
 /*
  * Now automatically checks if the variable has more then one field
@@ -1596,116 +520,1124 @@ void find_replacement(HasDgScripts *go, HasDgScripts *sc, DgScript *trig, UnitTy
 void var_subst(HasDgScripts *go, HasDgScripts *sc, DgScript *trig,
                UnitType type, char *line, char *buf)
 {
-    char tmp[MAX_INPUT_LENGTH], repl_str[MAX_INPUT_LENGTH];
-    char *var = nullptr, *field = nullptr, *p = nullptr;
-    char tmp2[MAX_INPUT_LENGTH];
-    char *subfield_p, subfield[MAX_INPUT_LENGTH];
-    int left, len;
-    int paren_count = 0;
-    int dots = 0;
-
-    /* skip out if no %'s */
-    if (!strchr(line, '%'))
-    {
-        strcpy(buf, line);
-        return;
-    }
-    /*lets just empty these to start with*/
-    *repl_str = *tmp = *tmp2 = '\0';
-
-    p = strcpy(tmp, line);
-    subfield_p = subfield;
-
-    left = MAX_INPUT_LENGTH - 1;
-
-    while (*p && (left > 0))
-    {
-
-        /* copy until we find the first % */
-        while (*p && (*p != '%') && (left > 0))
-        {
-            *(buf++) = *(p++);
-            left--;
-        }
-
-        *buf = '\0';
-
-        /* double % */
-        if (*p && (*(++p) == '%') && (left > 0))
-        {
-            *(buf++) = *(p++);
-            *buf = '\0';
-            left--;
-            continue;
-        }
-
-        /* so it wasn't double %'s */
-        else if (*p && (left > 0))
-        {
-
-            /* search until end of var or beginning of field */
-            for (var = p; *p && (*p != '%') && (*p != '.'); p++)
-                ;
-
-            field = p;
-            if (*p == '.')
-            {
-                *(p++) = '\0';
-                dots = 0;
-                for (field = p; *p && ((*p != '%') || (paren_count > 0) || (dots)); p++)
-                {
-                    if (dots > 0)
-                    {
-                        *subfield_p = '\0';
-                        find_replacement(go, sc, trig, type, var, field, subfield, repl_str, sizeof(repl_str));
-                        if (*repl_str)
-                        {
-                            snprintf(tmp2, sizeof(tmp2), "eval tmpvr %s", repl_str); // temp var
-                            process_eval(go, sc, trig, type, tmp2);
-                            strcpy(var, "tmpvr");
-                            field = p;
-                            dots = 0;
-                            continue;
-                        }
-                        dots = 0;
-                    }
-                    else if (*p == '(')
-                    {
-                        *p = '\0';
-                        paren_count++;
-                    }
-                    else if (*p == ')')
-                    {
-                        *p = '\0';
-                        paren_count--;
-                    }
-                    else if (paren_count > 0)
-                    {
-                        *subfield_p++ = *p;
-                    }
-                    else if (*p == '.')
-                    {
-                        *p = '\0';
-                        dots++;
-                    }
-                } /* for (field.. */
-            } /* if *p == '.' */
-
-            *(p++) = '\0';
-            *subfield_p = '\0';
-
-            if (*subfield)
-            {
-                var_subst(go, sc, trig, type, subfield, tmp2);
-                strcpy(subfield, tmp2);
-            }
-
-            find_replacement(go, sc, trig, type, var, field, subfield, repl_str, sizeof(repl_str) - 1);
-
-            strncat(buf, repl_str, left);
-            len = strlen(repl_str);
-            buf += len;
-            left -= len;
-        } /* else if *p .. */
-    } /* while *p .. */
+    auto res = dg_substitutions(trig, line);
+    snprintf(buf, MAX_STRING_LENGTH, "%s", res.c_str());
 }
+
+// this function needs to split a string like "actor.name.first" into {"actor", "name", "first"}
+// However, caveat, if we're fed actor.name(%actor.target%).first we need to return
+// {"actor", "name(%actor.target%)", "first"}. In other words, we ignore dots inside parens.
+// Also, if we have unbalanced parens, we just return the whole string as one field, since it's probably
+// an error anyway.
+std::vector<std::string_view> dg_split_fields(std::string_view input) {
+    std::vector<std::string_view> out;
+    
+    size_t start = 0;
+    size_t paren_count = 0;
+    for (size_t i = 0; i < input.size(); ++i) {
+        if (input[i] == '(') {
+            paren_count++;
+        } else if (input[i] == ')') {
+            if (paren_count > 0) paren_count--;
+        } else if (input[i] == '.' && paren_count == 0) {
+            // found a dot at top level
+            out.push_back(input.substr(start, i - start));
+            start = i + 1;
+        }
+    }
+    // add the last field
+    if (start < input.size()) {
+        out.push_back(input.substr(start));
+    }
+    // if paren_count != 0, we had unbalanced parens, return the whole string as one field
+    if (paren_count != 0) {
+        out.clear();
+        out.push_back(input);
+    }
+
+    return out;
+}
+
+// if input is a DgUID then we resolveUID it. else we return a std::string of it.
+DgReturn resolveVar(std::string_view input) {
+    auto res = resolveUID(input);
+    if(res) return res.get();
+    return std::string(input);
+}
+
+DGFUNC(dg_func_time) {
+    if (boost::iequals(field, "hour")) {
+        return fmt::format("{}", time_info.hours);
+    } else if (boost::iequals(field, "minute")) {
+        return fmt::format("{}", time_info.minutes);
+    } else if(boost::iequals(field, "second")) {
+        return fmt::format("{}", time_info.seconds);
+    } else if(boost::iequals(field, "day")) {
+        return fmt::format("{}", time_info.day + 1);
+    } else if(boost::iequals(field, "month")) {
+        return fmt::format("{}", time_info.month + 1); // months are 0-11
+    } else if(boost::iequals(field, "year")) {
+        return fmt::format("{}", time_info.year);
+    }
+    return "";
+}
+
+DGFUNC(dg_func_global) {
+    if(!subfield.empty()) {
+        dgGlobalVariables.setVariable(field, subfield);
+    }
+    return resolveVar(dgGlobalVariables.getVariable(field).value_or(""));
+}
+
+DGFUNC(dg_func_people) {
+    auto numRes = parseNumber<int>(field, "func people");
+    if(!numRes) return "0";
+    return fmt::format("{}", trgvar_in_room(*numRes));
+
+}
+
+DGFUNC(dg_func_random) {
+    if(boost::iequals(field, "char")) {
+        std::vector<std::weak_ptr<Character>> chars;
+        switch(trig->getAttachType()) {
+            case UnitType::character: {
+                auto c = (Character*)trig->owner.get();
+                if(!c) return "";
+                auto candidates = c->location.getPeople();
+                for(auto ch : filter_raw(candidates)) {
+                    if(ch != c && c->canSee(ch)) {
+                        chars.push_back(ch->shared_from_this());
+                    }
+                }
+            }
+            break;
+            case UnitType::object: {
+                auto o = (Object*)trig->owner.get();
+                if(!o) return "";
+                auto candidates = get_room(obj_room(o))->getPeople().snapshot_weak();
+                for(auto ch : filter_raw(candidates)) {
+                    if(valid_dg_target(ch, DG_ALLOW_GODS)) {
+                        chars.push_back(ch->shared_from_this());
+                    }
+                }
+            }
+            break;
+            case UnitType::room: {
+                auto r = (Room*)trig->owner.get();
+                if(!r) return "";
+                auto candidates = r->getPeople().snapshot_weak();
+                for(auto ch : filter_raw(candidates)) {
+                    if(valid_dg_target(ch, DG_ALLOW_GODS)) {
+                        chars.push_back(ch->shared_from_this());
+                    }
+                }
+            }
+            break;
+        }
+        auto res = Random::get(chars);
+        if(res != chars.end(); auto c = res->lock()) {
+            return c.get();
+        } else {
+            return "";
+        }
+    }
+    if(boost::iequals(field, "dir")) {
+        Location loc{};
+        switch(trig->getAttachType()) {
+            case UnitType::character: {
+                auto c = (Character*)trig->owner.get();
+                if(!c) return "";
+                loc = c->location;
+            }
+            break;
+            case UnitType::object: {
+                auto o = (Object*)trig->owner.get();
+                if(!o) return "";
+                loc = o->getAbsoluteLocation();
+            }
+            break;
+            case UnitType::room: {
+                auto r = (Room*)trig->owner.get();
+                if(!r) return "";
+                loc = Location(r);
+            }
+            break;
+        }
+
+        std::vector<int> available;
+        for (auto &[d, e] : loc.getExits())
+            available.push_back(static_cast<int>(d));
+        if(available.empty()) return "";
+        auto dir = Random::get(available);
+        return dirs[*dir];
+    }
+
+    if(auto numRes = parseNumber<int>(field, "func random")) {
+        auto num = *numRes;
+        if(num <= 0) return "0";
+        return fmt::format("{}", Random::get<int>(1, num));
+    }
+    return "0";
+}
+
+/*
+
+%findobj.<room vnum X>(<object vnum/id/name>)%
+- count number of objects in room X with this name/id/vnum
+%findmob.<room vnum X>(<mob vnum Y>)%
+- count number of mobs in room X with vnum Y
+
+for example you want to check how many PC's are in room with vnum 1204.
+as PC's have the vnum -1...
+you would type:
+in any script:
+%echo% players in room 1204: %findmob.1204(-1)%
+
+Or say you had a bank, and you want a script to check the number of
+bags
+of gold (vnum: 1234)
+in the vault (vnum: 453) now and then. you can just use
+%findobj.453(1234)% and it will return the number of bags of gold.
+
+*/
+
+DGFUNC(dg_func_findmob) {
+    auto numRes = parseNumber<int>(field, "func findmob");
+    if(!numRes) return "0";
+    auto mvnumRes = parseNumber<mob_vnum>(subfield, "func findmob");
+
+    auto r = get_room(*numRes);
+    if(!r) return "0";
+    auto people = r->getPeople().snapshot_weak();
+    int count = 0;
+    if(mvnumRes) {
+        auto mv = *mvnumRes;
+        for(auto ch : filter_raw(people)) {
+            if(ch->vn == mv) {
+                count++;
+            }
+        }
+    } else {
+        // not a number, so search by name/id
+        for(auto ch : filter_raw(people)) {
+            if(isname(subfield, ch->getName())) {
+                count++;
+            }
+        }
+    }
+    return fmt::format("{}", count);
+}
+
+DGFUNC(dg_func_findobj) {
+    auto numRes = parseNumber<int>(field, "func findobj");
+    if(!numRes) return "0";
+    auto r = get_room(*numRes);
+    if(!r) return "0";
+
+    int count = 0;
+    auto objs = r->getObjects().snapshot_weak();
+    if(auto ovnumRes = parseNumber<obj_vnum>(subfield, "func findobj")) {
+        auto ov = *ovnumRes;
+        for(auto obj : filter_raw(objs)) {
+            if(obj->vn == ov) {
+                count++;
+            }
+        }
+    } else {
+        // not a number, so search by name/id
+        for(auto obj : filter_raw(objs)) {
+            if(isname(subfield, obj->getName())) {
+                count++;
+            }
+        }
+    }
+    return fmt::format("{}", count);
+
+}
+
+using DgVar = std::variant<DgFunc, DgReturn>;
+
+// input can look like "name" or "name(%actor.target%), or even name(%find.character(John)%)"
+// in the case of the first, we return {"name", ""}
+// for the second, we return {"name", "%actor.target%"}
+// in the last, we return {"name", "%find.character(John%)"}
+std::pair<std::string_view, std::string_view> dg_parse_field(DgScript* trig, std::string_view input) {
+    auto paren_start = input.find('(');
+    if(paren_start == std::string_view::npos) {
+        return {input, ""};
+    }
+    // found a paren, so we need to find the matching closing paren.
+    size_t paren_count = 1;
+    size_t i = paren_start + 1;
+    for(; i < input.size(); ++i) {
+        if(input[i] == '(') {
+            paren_count++;
+        } else if(input[i] == ')') {
+            paren_count--;
+            if(paren_count == 0) break;
+        }
+    }
+    if(paren_count != 0) {
+        // unbalanced parens, return whole string as field
+        return {input, ""};
+    }
+    // now i is at the closing paren
+    auto field = input.substr(0, paren_start);
+    auto subfield = input.substr(paren_start + 1, i - paren_start - 1);
+    // if subfield contains %, we need to process it for substitutions.
+    return {field, subfield};
+}
+
+
+std::string dg_text_func(DgScript* trig, std::string_view input, std::string_view field, std::string_view subfield) {
+    if(boost::iequals(field, "strlen")) {
+        return fmt::format("{}", input.size());
+    }
+
+    if(boost::iequals(field, "trim")) {
+        auto start = std::string(input);
+        boost::trim(start);
+        return start;
+    }
+
+    if(boost::iequals(field, "contains")) {
+        return boost::icontains(input, subfield) ? "1" : "0";
+    }
+
+    if(boost::iequals(field, "car")) {
+        auto start = std::string(input);
+        auto first_space = start.find(' ');
+        if(first_space == std::string::npos) {
+            return start;
+        } else {
+            return start.substr(0, first_space);
+        }
+    }
+
+    if(boost::iequals(field, "cdr")) {
+        auto start = std::string(input);
+        auto first_space = start.find(' ');
+        if(first_space == std::string::npos) {
+            return "";
+        } else {
+            auto next_non_space = start.find_first_not_of(' ', first_space);
+            if(next_non_space == std::string::npos) {
+                return "";
+            } else {
+                return start.substr(next_non_space);
+            }
+        }
+    }
+
+    if(boost::iequals(field, "charat")) {
+        auto indexRes = parseNumber<size_t>(subfield, "text func charat");
+        if(!indexRes) return "";
+        size_t index = *indexRes;
+        if(index < 1 || index > input.size()) return "";
+        return std::string(1, input[index - 1]);
+    }
+
+    if(boost::iequals(field, "mudcommand")) {
+        int length, cmd;
+        for (length = input.size(), cmd = 0;
+             *cmd_info[cmd].command != '\n'; cmd++)
+            if (!strncmp(cmd_info[cmd].command, input.data(), length))
+                break;
+
+        if (*cmd_info[cmd].command == '\n')
+            return "";
+        else
+            return std::string(cmd_info[cmd].command);
+    }
+
+
+    return "";
+}
+
+
+// This is the top-level replace operation for handling %blah% substitutions.
+// The reason we need a top-level is that while many scripts just do %actor.name% or %here.name%
+// there exist special functions like %time.hour% and %find.character(John)% which need to be
+// handled specially. So this will look for those special cases.
+std::string dg_replace_fields(DgScript* trig, std::string_view input) {
+    auto col = static_cast<int>(trig->getAttachType());
+    std::unordered_map<std::string_view, DgVar> specialFuncs = {
+        // first the functions...
+        {"time", dg_func_time},
+        {"global", dg_func_global},
+        {"people", dg_func_people},
+        {"findmob", dg_func_findmob},
+        {"findobj", dg_func_findobj},
+
+        // the special "self" reference...
+        {"self", trig->owner.get()},
+
+        // and explicit string subsitutions used for commands.
+        {"ctime", fmt::format("{}", time(nullptr))},
+        {"door", door[col]},
+        {"force", force[col]},
+        {"load", load[col]},
+        {"purge", purge[col]},
+        {"teleport", teleport[col]},
+        {"damage", xdamage[col]},
+        {"send", send_cmd[col]},
+        {"echo", echo_cmd[col]},
+        {"echoaround", echoaround_cmd[col]},
+        {"zoneecho", zoneecho[col]},
+        {"asound", asound[col]},
+        {"at", at[col]},
+        {"transform", transform[col]},
+        {"recho", recho[col]}
+    };
+
+
+    // next we need to copy in all the variables from trig that don't conflict with the above.
+    // this will enable use of things like "actor" and "room" and etc set by most triggers.
+    for (const auto& [key, val] : trig->variables) {
+        if(specialFuncs.contains(key)) continue;
+        specialFuncs[key] = resolveVar(val);
+    }
+    // now we split the input into fields
+    auto fields = dg_split_fields(input);
+    if(fields.empty()) return ""; // should not happen..
+
+    // now for the tricky part. we need to process the fields one by one while keeping track of the
+    // entity being referenced in a chain.
+
+    DgVar current = "";
+    auto iter = fields.begin();
+    std::string_view first = *iter;
+
+    for(auto& [k, v] : specialFuncs) {
+        if(boost::iequals(k, first)) {
+            first = k;
+            break;
+        }
+    }
+
+    while(iter != fields.end()) {
+        iter++;
+        std::string_view field, subfield, usefield;
+        if(iter != fields.end()) {
+            std::tie(field, subfield) = dg_parse_field(trig, *iter);
+        }
+
+        // owner for a possible recursive substitution.
+        std::string subbed;
+        // if subfield contains a % we need to process it for substitutions.
+        if(!subfield.empty() && subfield.find('%') != std::string_view::npos) {
+            subbed = dg_substitutions(trig, subfield);
+            usefield = subbed;
+        } else {
+            usefield = subfield;
+        }
+        
+        if(std::holds_alternative<DgFunc>(current)) {
+            // we have a function, so we need to call it with the next field.
+            auto func = std::get<DgFunc>(current);
+            current = func(trig, field, usefield);
+        } else if(std::holds_alternative<DgReturn>(current)) {
+            auto ret = std::get<DgReturn>(current);
+            if(std::holds_alternative<std::string>(ret)) {
+            // strings have a special function to handle them.
+            auto input = std::get<std::string>(ret);
+            if(!field.empty()) {
+                current = dg_text_func(trig, input, field, usefield);
+            } else {
+                return input;
+            }
+        } else if(std::holds_alternative<HasDgScripts*>(ret)) {
+                // we have an entity. it must be HasDgScripts*
+                auto entity = std::get<HasDgScripts*>(ret);
+                current = entity->dgCallMember(trig, field, usefield);
+            }
+        }
+    }
+
+    // at this point, current should be a string. But it's hard to say. we need to convert it if not.
+    if(std::holds_alternative<DgFunc>(current)) {
+        // we have a function, but no field to call it with. just return empty string
+        return "";
+    } else if(std::holds_alternative<DgReturn>(current)) {
+        auto ret = std::get<DgReturn>(current);
+        if(std::holds_alternative<std::string>(ret)) {
+            return std::get<std::string>(ret);
+        } else if(std::holds_alternative<HasDgScripts*>(ret)) {
+            auto entity = std::get<HasDgScripts*>(ret);
+            return entity->getUID(true);
+        }
+    }
+    return "";
+}
+
+
+// Scan and replace all outermost %...% sections. By outermost, we mean that if we encounter
+// opening parens, we stop searching for % until we find the matching closing paren.
+// This allows for things like %find.character(John.%Doe%)% to work properly.
+std::string dg_substitutions(DgScript* trig, std::string_view input) {
+    std::string out;
+    
+    size_t start = 0;
+    size_t i = 0;
+    size_t paren_count = 0;
+    while(i < input.size()) {
+        if(input[i] == '(') {
+            paren_count++;
+            i++;
+        } else if(input[i] == ')') {
+            if(paren_count > 0) paren_count--;
+            i++;
+        } else if(input[i] == '%' && paren_count == 0) {
+            // found a top-level %
+            // copy everything up to here
+            out.append(input.substr(start, i - start));
+            size_t end = input.find('%', i + 1);
+            if(end == std::string_view::npos) {
+                // no matching %, just copy the rest and break
+                out.append(input.substr(i));
+                break;
+            }
+            // found a matching %
+            auto field = input.substr(i + 1, end - i - 1);
+            out.append(dg_replace_fields(trig, field));
+            i = end + 1;
+            start = i;
+        } else {
+            i++;
+        }
+    }
+    // copy any remaining text
+    if(start < input.size()) {
+        out.append(input.substr(start));
+    }
+
+    return out;
+}
+
+static const std::map<std::string, std::string> _attr_names = {
+    {"str", "strength"},
+    {"wis", "wisdom"},
+    {"con", "constitution"},
+    {"cha", "speed"},
+    {"spd", "speed"},
+    {"dex", "agility"},
+    {"agi", "agility"},
+    {"int", "intelligence"},
+
+    {"strength", "strength"},
+    {"wisdom", "wisdom"},
+    {"constitution", "constitution"},
+    {"speed", "speed"},
+    {"agility", "agility"},
+    {"intelligence", "intelligence"}};
+
+static const std::map<std::string, std::string> _money_names = {
+    {"bank", "money_bank"},
+    {"gold", "money_carried"},
+    {"zenni", "money_carried"}};
+
+static const std::map<std::string, std::string> _cond_names = {
+    {"hunger", "hunger"},
+    {"thirst", "thirst"},
+    {"drunk", "drunk"}};
+
+static const std::map<std::string, int> _save_names = {
+    {"saving_fortitude", SAVING_FORTITUDE},
+    {"saving_reflex", SAVING_REFLEX},
+    {"saving_will", SAVING_WILL}};
+
+static const std::map<std::string, int> _pflags = {
+    {"is_killer", PLR_KILLER},
+    {"is_thief", PLR_THIEF}};
+
+static const std::map<std::string, int> _aflags = {
+    {"dead", AFF_SPIRIT},
+    {"flying", AFF_FLYING}};
+
+
+static const std::map<std::string, std::string> _misc_char_stats = {
+    {"align", "good_evil"},
+    {"death", "death_time"},
+    {"level", "level"}
+};
+
+static const std::map<std::string, CharVital> _char_vitals = {
+    {"hitp", CharVital::health},
+    {"mana", CharVital::ki},
+    {"move", CharVital::stamina}
+};
+
+static const std::map<std::string, std::string> _char_max_vital = {
+    {"maxhitp", "health"},
+    {"maxmana", "ki"},
+    {"maxmove", "stamina"}
+};
+
+
+template<typename StatType>
+std::string dgCharacterHandleStat(Character* go, const std::string& stat, const std::string& arg) {
+    if (!arg.empty())
+    {
+        auto addRes = parseNumber<StatType>(arg, "dgHandleStat").value_or(0);
+        go->modBaseStat(stat, addRes);
+    }
+    return fmt::format("{}", go->getBaseStat<StatType>(stat));
+}
+
+template<typename EnumType>
+requires std::is_enum_v<EnumType>
+std::string dgHandleFlags(FlagHandler<EnumType>& flags, const std::string& arg, std::optional<bool> value = std::nullopt) {
+    if(!arg.empty()) {
+        auto res = chooseEnum<EnumType>(arg, "dgHandleFlag");
+        if(res) {
+            if(value.has_value()) {
+                flags.set(*res, value.value());
+            }
+            return flags.get(*res) ? "1" : "0";
+        }
+    }
+    return "0";
+}
+
+template<typename EnumType>
+requires std::is_enum_v<EnumType>
+std::string dgHandleEnum(EnumType& val, const std::string& arg) {
+    if(!arg.empty()) {
+        auto res = chooseEnum<EnumType>(arg, "dgHandleEnum");
+        if(res) {
+            val = *res;
+        }
+    }
+    return std::string(magic_enum::enum_name(val));
+}
+
+DgReturn Character::dgCallMember(DgScript* trig, std::string_view field, std::string_view subfield) {
+    std::string member(field);
+    boost::trim(member);
+    auto lmember = boost::to_lower_copy(member);
+
+    std::string arg(subfield);
+    boost::trim(arg);
+
+    if(boost::iequals(lmember, "alias")) return getName();
+
+    if (auto attr = _attr_names.find(lmember); attr != _attr_names.end())
+    {
+        return dgCharacterHandleStat<attribute_t>(this, attr->second, arg);
+    }
+
+    if (auto mon = _money_names.find(lmember); mon != _money_names.end())
+    {
+        return dgCharacterHandleStat<money_t>(this, mon->second, arg);
+    }
+
+    if (auto con = _cond_names.find(lmember); con != _cond_names.end())
+    {
+        return dgCharacterHandleStat<int>(this, con->second, arg);
+    }
+
+    if(auto misc = _misc_char_stats.find(lmember); misc != _misc_char_stats.end()) {
+        return dgCharacterHandleStat<int>(this, misc->second, arg);
+    }
+
+    if (auto save = _save_names.find(lmember); save != _save_names.end())
+    {
+        return fmt::format("{}", 0);
+    }
+
+    if (auto pf = _pflags.find(lmember); pf != _pflags.end())
+    {
+        if (!arg.empty())
+        {
+            if (boost::iequals("on", arg.c_str()))
+                player_flags.set(pf->second, true);
+            else if (boost::iequals("off", arg.c_str()))
+                player_flags.set(pf->second, false);
+        }
+        return player_flags.get(pf->second) ? "1" : "0";
+    }
+
+    if (auto af = _aflags.find(lmember); af != _aflags.end())
+    {
+        return AFF_FLAGGED(this, af->second) ? "1" : "0";
+    }
+
+    if(auto cv = _char_vitals.find(lmember); cv != _char_vitals.end()) {
+        if(!arg.empty()) {
+            auto addRes = parseNumber<int64_t>(arg, "dgCallMember char vital").value_or(0);
+            modCurVital(cv->second, addRes);
+        }
+        return fmt::format("{}", getCurVital(cv->second));
+    }
+
+    if(auto cmv = _char_max_vital.find(lmember); cmv != _char_max_vital.end()) {
+        if(!arg.empty()) {
+            auto addRes = parseNumber<int64_t>(arg, "dgCallMember char max vital").value_or(0);
+            modBaseStat(cmv->second, addRes);
+        }
+        return fmt::format("{}", getEffectiveStat<int64_t>(cmv->second));
+    }
+
+    if(boost::iequals(lmember, "affect")) {
+        if(!arg.empty()) {
+            auto res = chooseEnum<AffectFlag>(arg, "affect flags");
+            if(res) {
+                return AFF_FLAGGED(this, *res) ? "1" : "0";
+            }
+        }
+        return "0";
+    }
+
+    if(boost::iequals(lmember, "canbeseen")) {
+        if(trig->getAttachType() == UnitType::character) {
+            auto actor = (Character*)trig->owner.get();
+            return actor->canSee(this) ? "1" : "0";
+        }
+        return "0";
+    }
+
+    if(boost::iequals(lmember, "carry")) {
+        return CARRYING(this) ? "1" : "0";
+    }
+
+    if(boost::iequals(lmember, "clan")) return "";
+
+    if(boost::iequals(lmember, "class") || boost::iequals(lmember, "sensei"))
+        return std::string(magic_enum::enum_name(sensei));
+
+    
+    if(boost::iequals(lmember, "drag"))
+        return DRAGGING(this) ? "1" : "0";
+    
+    if(boost::iequals(lmember, "eq")) {
+        auto eq = getEquipment();
+        if(boost::iequals(arg, "*")) return !eq.empty() ? "1" : "0";
+        if(auto numRes = parseNumber<int>(arg, "dgCallMember eq"); numRes) {
+            int pos = *numRes;
+            if(auto find = eq.find(pos); find != eq.end()) {
+                return find->second;
+            }
+        }
+        return "";
+    }
+
+    if(boost::iequals(lmember, "exp")) {
+        if(!arg.empty()) {
+            auto addRes = parseNumber<int64_t>(arg, "dgCallMember exp");
+            if(addRes) {
+                modExperience(*addRes);
+            }
+        }
+        return fmt::format("{}", GET_EXP(this));
+    }
+
+    if(boost::iequals(lmember, "fighting"))
+        if(auto f = FIGHTING(this))
+            return f;
+        else
+            return "";
+    
+    if(boost::iequals(lmember, "follower")) {
+        if(!followers) return "";
+        auto h = followers.head();
+        return h;
+    }
+
+    if(boost::iequals(lmember, "has_item")) {
+        if(arg.empty()) return "";
+        return fmt::format("{}", char_has_item(arg, this));
+    }
+
+    if(boost::iequals(lmember, "hisher"))
+        return HSHR(this);
+    
+    
+    if(boost::iequals(lmember, "heshe"))
+        return HSSH(this);
+
+    if(boost::iequals(lmember, "himher"))
+        return HMHR(this);
+
+    if(boost::iequals(lmember, "id"))
+        return getUID(true);
+    
+    if(boost::iequals(lmember, "is_pc"))
+        return IS_NPC(this) ? "0" : "1";
+    
+    if(boost::iequals(lmember, "inventory")) {
+        auto inv = getInventory();
+        // if arg is empty, return first item...
+        if(arg.empty()) {
+            for(auto item : filter_raw(inv)) {
+                return item;
+            }
+            return "";
+        }
+        auto numRes = parseNumber<obj_vnum>(arg, "dgCallMember inventory");
+        if(numRes) {
+            obj_vnum vnum = *numRes;
+            for(auto item : filter_raw(inv)) {
+                if(GET_OBJ_VNUM(item) == vnum) {
+                    return item;
+                }
+            }
+        }
+    }
+
+    if(boost::iequals(lmember, "master"))
+        if(master) return master;
+        else return "";
+
+    if(boost::iequals(lmember, "name"))
+        return IS_NPC(this) ? getShortDescription() : getName();
+    
+    if(boost::iequals(lmember, "next_in_room")) {
+        if (auto people = location.getPeople(); !people.empty())
+        {
+            auto found = false;
+            for (auto p : filter_raw(people))
+            {
+                if (found)
+                {
+                    return p;
+                }
+                if (p == this)
+                {
+                    found = true;
+                }
+            }
+        }
+        return "";
+    }
+
+    if(boost::iequals(lmember, "pos"))
+        return dgHandleEnum(position, arg);
+
+    if(boost::iequals(lmember, "prac")) {
+        if(!arg.empty()) {
+            auto addRes = parseNumber<int>(arg, "dgCallMember prac");
+            if(addRes) {
+                modPractices(*addRes);
+            }
+        }
+        return fmt::format("{}", GET_PRACTICES(this));
+    }
+
+    if(boost::iequals(lmember, "plr"))
+        return dgHandleFlags(player_flags, arg);
+    if(boost::iequals(lmember, "pref"))
+        return dgHandleFlags(pref_flags, arg);
+    
+    if(boost::iequals(lmember, "room"))
+        if(auto r = getRoom())
+            return r;
+        return "";
+    
+    if(boost::iequals(lmember, "race"))
+        return std::string(magic_enum::enum_name(race));
+
+    if(boost::iequals(lmember, "rpp")) {
+        if(!arg.empty()) {
+            auto addRes = parseNumber<int>(arg, "dgCallMember rpp");
+            if(addRes) {
+                modRPP(*addRes);
+            }
+        }
+        return fmt::format("{}", getRPP());
+    }
+
+    if(boost::iequals(lmember, "sex"))
+        return std::string(magic_enum::enum_name(sex));
+    
+    if(boost::iequals(lmember, "skillset")) {
+        if(!arg.empty()) {
+            std::vector<std::string_view> parts;
+            boost::split(parts, arg, boost::is_space(), boost::token_compress_on);
+            if(parts.size() != 2) return "";
+            auto skRes = chooseEnum<Skill>(parts[0], "dgCallMember skillset");
+            if(!skRes) {
+                return "";
+            }
+            auto numRes = parseNumber<int>(parts[1], "dgCallMember skillset");
+            if(!numRes) {
+                return "";
+            }
+            SET_SKILL(this, static_cast<int>(*skRes), *numRes);
+        }
+    }
+
+    if(boost::iequals(lmember, "size"))
+        return dgHandleEnum(size, arg);
+    
+    if(boost::iequals(lmember, "tnl"))
+        return fmt::format("{}", level_exp(this, GET_LEVEL(this) +1));
+
+    if(boost::iequals(lmember, "vnum"))
+        return fmt::format("{}", IS_NPC(this) ? vn : NOTHING);
+
+    if(boost::iequals(lmember, "varexists"))
+        return variables.contains(arg) ? "1" : "0";
+    
+    if(boost::iequals(lmember, "weight"))
+        return fmt::format("{}", getEffectiveStat("weight"));
+
+    if(auto found = getVariable(member); found)
+        return resolveVar(*found);
+    
+    script_log("Trigger: %s, VNum %d. unknown char field: '%s'",
+                               GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), field);
+
+    return "";
+}
+
+static const std::map<std::string, std::string> _obj_misc_stats = {
+    {"cost", "cost"},
+    {"cost_per_day", "cost_per_day"},
+    {"level", "level"},
+    {"health", "health"},
+    {"timer", "timer"}
+};
+
+DgReturn Object::dgCallMember(DgScript* trig, std::string_view field, std::string_view subfield) {
+    std::string member(field);
+    boost::trim(member);
+    auto lmember = boost::to_lower_copy(member);
+
+    std::string arg(subfield);
+    boost::trim(arg);
+
+    if(boost::iequals(lmember, "affects"))
+        return dgHandleFlags(affect_flags, arg);
+    
+    if(boost::iequals(lmember, "carried_by"))
+        if(auto c = getCarriedBy()) return c;
+        else return "";
+    
+    if(boost::iequals(lmember, "contents")) {
+        if (auto con = getInventory(); !con.empty())
+        {
+            for (auto obj : filter_raw(con))
+            {
+                return obj;
+            }
+        }
+        return "";
+    }
+
+    if(boost::iequals(lmember, "count")) {
+        if(type_flag == ItemType::container) {
+            return fmt::format("{}", getInventory().size());
+        }
+        return "0";
+    }
+
+    if(boost::iequals(lmember, "extra"))
+        return dgHandleFlags(item_flags, arg);
+    
+    if(boost::iequals(lmember, "has_in")) {
+        if(type_flag == ItemType::container) {
+            return item_in_list((char*)arg.c_str(), getInventory()) ? "1" : "0";
+        }
+        return "0";
+    }
+
+    if(boost::iequals(lmember, "id"))
+        return getUID(true);
+
+    if(boost::iequals(lmember, "is_inroom") || boost::iequals(lmember, "room") || boost::iequals(lmember, "in_room"))
+        if(auto r = getRoom()) return r;
+        else return "";
+
+    if(boost::iequals(lmember, "is_pc")) return "-1";
+
+    if(boost::iequals(lmember, "itemflag")) 
+        return dgHandleFlags(item_flags, arg);
+    
+    if(boost::iequals(lmember, "name")) {
+        if(!arg.empty()) {
+            name = fmt::format("{} {}", name, arg);
+        }
+        return getName();
+    }
+
+    if(boost::iequals(lmember, "next_in_list")) {
+        if (auto con = location.getObjects(); !con.empty())
+        {
+            auto found = false;
+            for (auto ob : filter_raw(con))
+            {
+                if (ob == this)
+                {
+                    found = true;
+                    continue;
+                }
+                if (found)
+                {
+                    return ob;
+                }
+            }
+        }
+        return "";
+    }
+
+    if(boost::iequals(lmember, "shortdesc")) {
+        if(!arg.empty()) {
+            short_description = fmt::format("{} @wnicknamed @D(@C{}@D)@n", short_description, arg);
+        }
+        return getShortDescription();
+    }
+
+    if(boost::iequals(lmember, "setaffects")) return dgHandleFlags(affect_flags, arg, true);
+    if(boost::iequals(lmember, "setextra")) return dgHandleFlags(item_flags, arg, true);
+    if(boost::iequals(lmember, "size")) return std::string(magic_enum::enum_name(size));
+    if(boost::iequals(lmember, "type")) return std::string(magic_enum::enum_name(type_flag));
+
+    if(boost::iequals(lmember, "value"))
+        if(!arg.empty()) return fmt::format("{}", GET_OBJ_VAL(this, arg));
+        else return "";
+
+    if(boost::iequals(lmember, "vnum")) return fmt::format("{}", getVnum());
+    if(boost::iequals(lmember, "weight")) {
+        if(!arg.empty()) {
+            auto addRes = parseNumber<int>(arg, "dgCallMember weight");
+            if(addRes) {
+                setBaseStat("weight", *addRes);
+            }
+        }
+        return fmt::format("{}", getEffectiveStat<weight_t>("weight"));
+    }
+
+    if(boost::iequals(lmember, "worn_by")) {
+        auto w = getWornBy();
+        if(w) return w;
+        return "";
+    }
+
+    if(auto found = getVariable(member); found)
+        return resolveVar(*found);
+
+    script_log("Trigger: %s, VNum %d, type: %d. unknown object field: '%s'",
+        GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), static_cast<int>(type), field);
+
+    return "";
+}
+
+static const std::unordered_set<int> inside_sectors = {SECT_INSIDE, SECT_UNDERWATER, SECT_IMPORTANT, SECT_SHOP, SECT_SPACE};
+
+static const std::map<std::string, Direction> _dirNames = {
+    {"north", Direction::north},
+    {"east", Direction::east},
+    {"south", Direction::south},
+    {"west", Direction::west},
+    {"up", Direction::up},
+    {"down", Direction::down},
+    {"northwest", Direction::northwest},
+    {"northeast", Direction::northeast},
+    {"southwest", Direction::southwest},
+    {"southeast", Direction::southeast},
+    {"inside", Direction::inside},
+    {"outside", Direction::outside}
+
+};
+
+DgReturn Room::dgCallMember(DgScript* trig, std::string_view field, std::string_view subfield) {
+    std::string member(field);
+    boost::trim(member);
+    auto lmember = boost::to_lower_copy(member);
+
+    std::string arg(subfield);
+    boost::trim(arg);
+
+    if (auto d = _dirNames.find(lmember); d != _dirNames.end())
+    {
+        auto ex = getDirection(d->second);
+        if (!ex)
+        {
+            return "";
+        }
+        if (!arg.empty())
+        {
+            if (boost::iequals(arg.c_str(), "vnum"))
+            {
+                return fmt::format("{}", ex->getVnum());
+            }
+            else if (boost::iequals(arg.c_str(), "key"))
+                return fmt::format("{}", ex->key);
+            else if (boost::iequals(arg.c_str(), "bits"))
+            {
+                return ex->exit_flags.getFlagNames();
+            }
+            else if (boost::iequals(arg.c_str(), "room"))
+            {
+                return fmt::format("{}", ex->getUID(true));
+            }
+        }
+        else /* no subfield - default to bits */
+        {
+            return ex->exit_flags.getFlagNames();
+        }
+    }
+
+    if(boost::iequals(lmember, "vnum")) return fmt::format("{}", getVnum());
+    if(boost::iequals(lmember, "id")) return getUID(true);
+
+    if(boost::iequals(lmember, "name")) return getName();
+    if(boost::iequals(lmember, "sector")) return std::string(magic_enum::enum_name(sector_type));
+
+    if(boost::iequals(lmember, "gravity")) {
+        Location loc(this);
+        return fmt::format("{}", (int)loc.getEnvironment(ENV_GRAVITY));
+    }
+
+    if(boost::iequals(lmember, "contents")) {
+        auto con = getObjects().snapshot_weak();
+        if(!arg.empty()) {
+            // search for vnum...
+            for(auto obj : filter_raw(con)) {
+                if(GET_OBJ_VNUM(obj) == atoi(arg.c_str())) {
+                    return obj;
+                }
+            }
+        } else {
+            for(auto obj : filter_raw(con)) {
+                return obj;
+            }
+        }
+        return "";
+    }
+
+    if(boost::iequals(lmember, "people")) {
+        auto ppl = getPeople().snapshot_weak();
+        for(auto ch : filter_raw(ppl)) {
+            return ch;
+        }
+        return "";
+    }
+
+    if(boost::iequals(lmember, "weather")) {
+        if(room_flags.get(ROOM_INDOORS)) return "";
+        const char *sky_look[] = {
+                    "sunny",
+                    "cloudy",
+                    "rainy",
+                    "lightning"};
+        return sky_look[weather_info.sky];
+    }
+
+    if(boost::iequals(lmember, "fishing"))
+        return room_flags.get(ROOM_FISHING) ? "1" : "0";
+
+    if(boost::iequals(lmember, "zonenumber")) return fmt::format("{}", zone->number);
+    if(boost::iequals(lmember, "zonename")) return fmt::format("{}", zone->name);
+
+    if(boost::iequals(lmember, "roomflag")) return dgHandleFlags(room_flags, arg);
+
+    if(auto found = getVariable(member); found)
+        return resolveVar(*found);
+    
+    script_log("Trigger: %s, VNum %d, type: %d. unknown room field: '%s'",
+            GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), static_cast<int>(type), field);
+
+    return "";
+}
+

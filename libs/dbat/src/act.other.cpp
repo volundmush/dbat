@@ -10790,7 +10790,7 @@ ACMD(do_quit)
             if (rvn != NOWHERE && rvn != 0 &&
                 rvn != 1)
             {
-                ch->setBaseStat("load_room", rvn);
+                ch->registeredLocations["load_room"] = rvn;
             }
         }
         if (ch->location.getWhereFlag(WhereFlag::pendulum_past))
@@ -10798,7 +10798,7 @@ ACMD(do_quit)
             if (rvn != NOWHERE && rvn != 0 &&
                 rvn != 1)
             {
-                ch->setBaseStat("load_room", GET_ROOM_VNUM(real_room(1561)));
+                ch->registeredLocations["load_room"] = 1561;
             }
         }
         extract_char(ch); /* Char is saved before extracting. */

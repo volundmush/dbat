@@ -3412,15 +3412,19 @@ bool AFF_FLAGGED(CharacterPrototype *ch, int flag)
     return ch->affect_flags.get(flag);
 }
 
-bool AFF_FLAGGED(Character *ch, int flag)
-{
-    if (ch->affect_flags.get(flag))
+bool AFF_FLAGGED(Character *ch, AffectFlag flag) {
+if (ch->affect_flags.get(flag))
         return true;
     for (auto i = 0; i < NUM_WEARS; i++)
         if (auto eq = GET_EQ(ch, i); eq)
             if (eq->affect_flags.get(flag))
                 return true;
     return false;
+}
+
+bool AFF_FLAGGED(Character *ch, int flag)
+{
+    return ch->affect_flags.get(static_cast<AffectFlag>(flag));
 }
 
 bool ETHER_STREAM(Character *ch)

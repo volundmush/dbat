@@ -561,10 +561,11 @@ ACMD(do_say)
                         {
                             auto revive = [&](Character *c)
                             {
-                                auto droom = real_room(GET_DROOM(c));
-                                if (droom == NOWHERE)
+                                auto droom = GET_DROOM(c);
+                                if (!droom)
                                 {
-                                    droom = c->setBaseStat("death_room", 300);
+                                    droom = Location(300);
+                                    c->registeredLocations["death_room"] = droom;
                                 }
                                 c->leaveLocation();
                                 ch->moveToLocation(droom);

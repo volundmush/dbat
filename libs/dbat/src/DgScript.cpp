@@ -27,6 +27,7 @@
 #include "dbat/utils.h"
 #include "dbat/TimeInfo.h"
 #include "dbat/weather.h"
+#include "dbat/Parse.h"
 
 #include "dbat/UID.h"
 #include "dbat/const/WearSlot.h"
@@ -166,7 +167,7 @@ Object *get_obj_in_list(char *name, const std::vector<std::weak_ptr<Object>> &li
     return nullptr;
 }
 
-Object *get_object_in_equip(Character *ch, char *name)
+Object *get_object_in_equip(Character *ch, std::string_view name)
 {
     int j, n = 0, number;
     Object *obj;
@@ -174,7 +175,7 @@ Object *get_object_in_equip(Character *ch, char *name)
     char *tmp = tmpname;
     int32_t id;
 
-    if (*name == UID_CHAR)
+    if (name.starts_with(UID_CHAR))
     {
         auto uidResult = resolveUID(name);
         if (!uidResult)
@@ -191,7 +192,7 @@ Object *get_object_in_equip(Character *ch, char *name)
     }
     else if (is_number(name))
     {
-        obj_vnum ovnum = atoi(name);
+        auto ovnum = parseNumber<obj_vnum>(name, "equip id").value_or(NOTHING);
         for (j = 0; j < NUM_WEARS; j++)
             if ((obj = GET_EQ(ch, j)))
                 if (GET_OBJ_VNUM(obj) == ovnum)
@@ -3155,12 +3156,9 @@ bool DgScript::truthy(const std::string &value) const
 }
 
 std::string DgScript::substituteVariables(const std::string &raw_text)
-{
-    char buf[MAX_STRING_LENGTH];
-
-    var_subst(owner.get(), owner.get(), this, proto->attach_type, (char *)raw_text.c_str(), buf);
-
-    return std::string(buf);
+{   
+    auto result = dg_substitutions(this, raw_text);
+    return result;
 }
 
 void DgScript::processCommand(const std::string &raw_text)

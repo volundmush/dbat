@@ -868,7 +868,7 @@ ACMD(do_recall)
             ch->leaveLocation();
             ch->moveToLocation(2);
             ch->lookAtLocation();
-            ch->setBaseStat("load_room", ch->location.getVnum());
+            ch->registeredLocations["load_room"] = ch->location;
         }
     }
 }
@@ -1736,9 +1736,9 @@ static void do_stat_character(Character *ch, Character *k)
     auto sex = fmt::format("{}", magic_enum::enum_name(k->sex));
 
     snprintf(buf, sizeof(buf), "%s", sex.c_str());
-    ch->send_to("%s %s '%s'  IDNum: [%5d], In room [%5d], Loadroom : [%5d]\r\n", buf, (!IS_NPC(k) ? "PC" : (!IS_MOB(k) ? "NPC" : "MOB")), GET_NAME(k), IS_NPC(k) ? ((k)->id) : GET_IDNUM(k), k->location.getVnum(), IS_NPC(k) ? MOB_LOADROOM(k) : GET_LOADROOM(k));
+    ch->sendFmt("{} {} '{}'  IDNum: [{}], In room [{}], Loadroom : [{}]\r\n", buf, (!IS_NPC(k) ? "PC" : (!IS_MOB(k) ? "NPC" : "MOB")), GET_NAME(k), IS_NPC(k) ? ((k)->id) : GET_IDNUM(k), k->location, IS_NPC(k) ? MOB_LOADROOM(k) : GET_LOADROOM(k));
 
-    ch->send_to("DROOM: [%5d]\r\n", GET_DROOM(k));
+    ch->sendFmt("DROOM: [{}]\r\n", GET_DROOM(k));
     if (IS_MOB(k))
     {
         if (auto mas = k->getBaseStat<int>("master_id"); mas != NOTHING)
@@ -4419,7 +4419,7 @@ static int perform_set(Character *ch, Character *vict, int mode,
         if (boost::iequals(val_arg, "off"))
         {
             vict->player_flags.set(PLR_LOADROOM, false);
-            vict->setBaseStat("load_room", NOWHERE);
+            vict->registeredLocations.erase("load_room");
         }
         else if (is_number(val_arg))
         {
@@ -4427,9 +4427,9 @@ static int perform_set(Character *ch, Character *vict, int mode,
             if (real_room(rvnum) != NOWHERE)
             {
                 vict->player_flags.set(PLR_LOADROOM, true);
-                vict->setBaseStat("load_room", rvnum);
+                vict->registeredLocations["load_room"] = rvnum;
 
-                ch->send_to("%s will enter at room #%d.\r\n", GET_NAME(vict), GET_LOADROOM(vict));
+                ch->sendFmt("{} will enter at room {}.\r\n", GET_NAME(vict), GET_LOADROOM(vict));
             }
             else
             {
@@ -4586,7 +4586,7 @@ static int perform_set(Character *ch, Character *vict, int mode,
             ch->sendText("There is no such room.\r\n");
             return (0);
         }
-        vict->setBaseStat("death_room", value);
+        vict->registeredLocations["death_room"] = value;
         break;
 
     case 68:

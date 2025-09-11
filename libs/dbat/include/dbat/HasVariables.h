@@ -32,3 +32,5 @@ inline std::string format_as(const HasVariables& unit) {
     }
     return fmt::format("script variables: [{}]", fmt::join(vars, ", "));
 }
+
+extern HasVariables dgGlobalVariables;

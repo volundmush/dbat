@@ -2,14 +2,12 @@
 #include <cstdint>
 #include <type_traits>
 
-extern int64_t lastCharacterID;
-extern int64_t lastObjectID;
+
 extern int64_t lastAccountID;
 extern int64_t lastStructureID;
 extern int64_t lastAreaID;
 extern int64_t lastGridTemplateID;
 
-extern int lastRoomID;
 extern int lastZoneID;
 extern int lastShopID;
 extern int lastGuildID;

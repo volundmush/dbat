@@ -38,10 +38,10 @@ struct AbstractLocation {
     WeakBag<T> getContents(const Coordinates& coor) {
         WeakBag<T> result;
         contents.for_each_shared([&](const auto& ptr) {
+            if(!ptr->isActiveInLocation()) return;
+            if(ptr->location.position != coor) return;
             if(auto item = std::dynamic_pointer_cast<T>(ptr)) {
-                if (item->isActiveInLocation() && item->location.position == coor) {
-                    result.add(item);
-                }
+                result.add(item);
             }
         });
         return result;

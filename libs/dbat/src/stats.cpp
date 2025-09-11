@@ -475,7 +475,7 @@ static void init_char_stats_misc()
     charStats.addStat("skill_slots")
         .setInitFunc(30.0);
 
-    for (const auto &s : {"was_in_room", "master_id", "hometown", "load_room", "death_room", "listen_direction"})
+    for (const auto &s : {"was_in_room", "master_id", "listen_direction"})
     {
         charStats.addStat(s)
             //.setInitFunc(NOWHERE)
@@ -586,3 +586,4 @@ void init_stat_handlers()
     init_item_stats();
     init_room_stats();
 }
+

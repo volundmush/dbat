@@ -905,7 +905,7 @@ void load_globaldata(const std::filesystem::path &loc)
     }
     if (j.contains("lastCharacterID"))
     {
-        j["lastCharacterID"].get_to(lastCharacterID);
+        j["lastCharacterID"].get_to(Character::lastID);
     }
     if (j.contains("lastAccountID"))
     {
@@ -913,7 +913,7 @@ void load_globaldata(const std::filesystem::path &loc)
     }
     if (j.contains("lastObjectID"))
     {
-        j["lastObjectID"].get_to(lastObjectID);
+        j["lastObjectID"].get_to(Object::lastID);
     }
     if (j.contains("lastStructureID"))
     {
@@ -929,7 +929,7 @@ void load_globaldata(const std::filesystem::path &loc)
     }
     if (j.contains("lastRoomID"))
     {
-        j["lastRoomID"].get_to(lastRoomID);
+        j["lastRoomID"].get_to(Room::lastID);
     }
     if (j.contains("lastShopID"))
     {
@@ -954,13 +954,13 @@ void dump_globaldata(const std::filesystem::path &loc)
     j["time"] = time_info;
     j["era_uptime"] = era_uptime;
     j["weather"] = weather_info;
-    j["lastCharacterID"] = lastCharacterID;
+    j["lastCharacterID"] = Character::lastID;
     j["lastAccountID"] = lastAccountID;
-    j["lastObjectID"] = lastObjectID;
+    j["lastObjectID"] = Object::lastID;
     j["lastStructureID"] = lastStructureID;
     j["lastAreaID"] = lastAreaID;
     j["lastGridTemplateID"] = lastGridTemplateID;
-    j["lastRoomID"] = lastRoomID;
+    j["lastRoomID"] = Room::lastID;
     j["lastZoneID"] = lastZoneID;
     j["lastShopID"] = lastShopID;
     j["lastGuildID"] = lastGuildID;
@@ -2286,7 +2286,7 @@ PlayerData *create_player_character(int account_id, const json &j)
 {
     auto &acc = accounts.at(account_id);
     auto ch = std::make_shared<Character>();
-    ch->id = getNextID(lastCharacterID, Character::registry);
+    ch->id = getNextID(Character::lastID, Character::registry);
     auto p = std::make_shared<PlayerData>();
     players.emplace(ch->id, p);
     p->id = ch->id;

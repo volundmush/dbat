@@ -1149,7 +1149,7 @@ ACMD(do_move)
         if (auto rvn = ch->location.getVnum(); rvn != NOWHERE && rvn != 0 &&
                                                rvn != 1)
         {
-            ch->setBaseStat("load_room", rvn);
+            ch->registeredLocations["load_room"] = rvn;
         }
 
         auto ratio = ch->getBaseStat("burden_ratio");
