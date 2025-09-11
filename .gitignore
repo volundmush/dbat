@@ -80,3 +80,4 @@ dbat_ext/*.cpp
 localhost-key.pem
 localhost.pem
 dependencies/
+config.user.toml

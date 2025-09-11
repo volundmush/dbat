@@ -2307,6 +2307,8 @@ PlayerData *create_player_character(int account_id, const json &j)
         ch->bio_genomes = j["bio_genomes"];
     if (j.contains("mutations"))
         ch->mutations = j["mutations"];
+    if(j.contains("android_model"))
+        ch->model = j["android_model"].get<AndroidModel>();
     if (j.contains("align"))
         ch->setBaseStat("good_evil", j["align"].get<int>());
 

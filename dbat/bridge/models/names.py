@@ -4,7 +4,7 @@ from dbat_ext import get_names
 # Map the Python enum name to the corresponding category string that your C++ get_names() expects.
 __categories = {
     "Race": "races",
-    "SubRace": "subraces",
+    "AndroidModel": "android_models",
     "Sex": "sexes",
     "Sensei": "senseis",
     "Form": "forms",

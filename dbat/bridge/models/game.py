@@ -358,7 +358,7 @@ class CharData(ThingData):
 class ChargenData(BaseModel):
     name: str | None = None
     race: names.Race | None = None
-    subrace: names.SubRace | None = None
+    android_model: names.AndroidModel | None = None
     sex: names.Sex | None = None
     sensei: names.Sensei | None = None
     mutations: typing.Set[names.Mutation] = Field(default_factory=set)
@@ -370,8 +370,8 @@ class ChargenData(BaseModel):
     def serialize_race(self, value):
         return value.name if value else None
 
-    @field_serializer("subrace")
-    def serialize_subrace(self, value):
+    @field_serializer("android_model")
+    def serialize_android_model(self, value):
         return value.name if value else None
     
     @field_serializer("sex")
@@ -433,16 +433,16 @@ class ChargenData(BaseModel):
             raise ValueError("Name cannot contain spaces.")
         if self.race is None:
             raise ValueError("Race is required.")
-        if self.race == "android" and self.subrace is None:
-            raise ValueError("SubRace is required.")
+        if self.race == "android" and self.android_model is None:
+            raise ValueError("Android Model is required.")
         if self.sex is None:
             raise ValueError("Sex is required.")
         if self.sensei is None:
             raise ValueError("Sensei is required.")
         match self.race:
             case names.Race.android:
-                if self.subrace is None:
-                    raise ValueError("SubRace is required for androids.")
+                if self.android_model is None:
+                    raise ValueError("Android Model is required for androids.")
             case names.Race.mutant:
                 if len(self.mutations) != 2:
                     raise ValueError("2 Mutations are required for mutants.")

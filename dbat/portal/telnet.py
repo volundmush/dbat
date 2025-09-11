@@ -163,8 +163,11 @@ class TelnetService(Service):
         protocol.host_address = address
         protocol.host_port = port
         if dbat.APP.resolver:
-            reverse = await dbat.APP.resolver.gethostbyaddr(address)
-            protocol.host_names = reverse.aliases
+            try:
+                reverse = await dbat.APP.resolver.gethostbyaddr(address)
+                protocol.host_names = reverse.aliases
+            except Exception:
+                pass
         self.sessions.add(protocol)
         await dbat.APP.handle_new_protocol(protocol)
         self.sessions.remove(protocol)
