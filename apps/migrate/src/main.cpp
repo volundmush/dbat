@@ -1178,6 +1178,7 @@ static int parse_simple_mob(FILE *mob_f, struct CharacterPrototype *ch, mob_vnum
         return 0;
     }
 
+    ch->position = static_cast<Position>(t[1]);
     ch->sex = static_cast<Sex>(t[2]);
 
     //set_height_and_weight_by_race(ch);
@@ -2586,7 +2587,7 @@ static int load_char(const char *name, struct Character *ch) {
                     else if (!strcmp(tag, "Dex ")) ch->setBaseStat("agility", atoi(line));
                     else if (!strcmp(tag, "Drnk")) GET_COND(ch, DRUNK) = atoi(line);
                     else if (!strcmp(tag, "Damg")) ch->setBaseStat("damage_mod", atoi(line));
-                    else if (!strcmp(tag, "Droo")) ch->setBaseStat("death_room", atoi(line));
+                    else if (!strcmp(tag, "Droo")) ;
                     break;
 
                 case 'E':
@@ -2615,7 +2616,7 @@ static int load_char(const char *name, struct Character *ch) {
                 case 'H':
                     if (!strcmp(tag, "Hit ")) load_HMVS(ch, line, LOAD_HIT);
                     else if (!strcmp(tag, "Hite")) ch->setBaseStat("height", atoi(line));
-                    else if (!strcmp(tag, "Home")) ch->setBaseStat("hometown", atoi(line));
+                    else if (!strcmp(tag, "Home")) ;
                     else if (!strcmp(tag, "Host")) {
                     }
                     //else if (!strcmp(tag, "Hrc ")) ch->set(CharAppearance::hair_color, atoi(line));
@@ -2711,7 +2712,7 @@ static int load_char(const char *name, struct Character *ch) {
                     else if (!strcmp(tag, "Rad1")) ch->setBaseStat("radar1", atoi(line));
                     else if (!strcmp(tag, "Rad2")) ch->setBaseStat("radar2", atoi(line));
                     else if (!strcmp(tag, "Rad3")) ch->setBaseStat("radar3", atoi(line));
-                    else if (!strcmp(tag, "Room")) ch->setBaseStat("load_room", atoi(line));
+                    else if (!strcmp(tag, "Room")) ;
                     else if (!strcmp(tag, "RPfe")) GET_FEATURE(ch) = strdup(line);
                     break;
 
@@ -4135,8 +4136,8 @@ void migrate_characters() {
         p->account = a.get();
         a->admin_level = std::max(a->admin_level, GET_ADMLEVEL(ch));
         a->characters.emplace_back(ch->id);
-        auto lroom = ch->getBaseStat<room_vnum>("load_room");
-        ch->setBaseStat<room_vnum>("was_in_room", lroom);
+        //auto lroom = ch->getBaseStat<room_vnum>("load_room");
+        //ch->setBaseStat<room_vnum>("was_in_room", lroom);
         Character::registry.emplace(id, sh);
     }
 

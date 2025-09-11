@@ -868,6 +868,7 @@ std::string dg_replace_fields(DgScript* trig, std::string_view input) {
         {"people", dg_func_people},
         {"findmob", dg_func_findmob},
         {"findobj", dg_func_findobj},
+        {"random", dg_func_random},
 
         // the special "self" reference...
         {"self", trig->owner.get()},
@@ -910,13 +911,13 @@ std::string dg_replace_fields(DgScript* trig, std::string_view input) {
 
     for(auto& [k, v] : specialFuncs) {
         if(boost::iequals(k, first)) {
-            first = k;
+            current = v;
             break;
         }
     }
 
+    iter++;
     while(iter != fields.end()) {
-        iter++;
         std::string_view field, subfield, usefield;
         if(iter != fields.end()) {
             std::tie(field, subfield) = dg_parse_field(trig, *iter);
@@ -952,6 +953,7 @@ std::string dg_replace_fields(DgScript* trig, std::string_view input) {
                 current = entity->dgCallMember(trig, field, usefield);
             }
         }
+        iter++;
     }
 
     // at this point, current should be a string. But it's hard to say. we need to convert it if not.
@@ -1385,7 +1387,7 @@ DgReturn Character::dgCallMember(DgScript* trig, std::string_view field, std::st
         return resolveVar(*found);
     
     script_log("Trigger: %s, VNum %d. unknown char field: '%s'",
-                               GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), field);
+        GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), member.c_str());
 
     return "";
 }
@@ -1405,6 +1407,16 @@ DgReturn Object::dgCallMember(DgScript* trig, std::string_view field, std::strin
 
     std::string arg(subfield);
     boost::trim(arg);
+
+    if(auto find = _obj_misc_stats.find(lmember); find != _obj_misc_stats.end()) {
+        if(!arg.empty()) {
+            auto addRes = parseNumber<int>(arg, "dgCallMember obj misc stat");
+            if(addRes) {
+                setBaseStat(find->second, *addRes);
+            }
+        }
+        return fmt::format("{}", getEffectiveStat<int>(find->second));
+    }
 
     if(boost::iequals(lmember, "affects"))
         return dgHandleFlags(affect_flags, arg);
@@ -1517,7 +1529,7 @@ DgReturn Object::dgCallMember(DgScript* trig, std::string_view field, std::strin
         return resolveVar(*found);
 
     script_log("Trigger: %s, VNum %d, type: %d. unknown object field: '%s'",
-        GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), static_cast<int>(type), field);
+        GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), static_cast<int>(type), member.c_str());
 
     return "";
 }
@@ -1593,8 +1605,9 @@ DgReturn Room::dgCallMember(DgScript* trig, std::string_view field, std::string_
         auto con = getObjects().snapshot_weak();
         if(!arg.empty()) {
             // search for vnum...
+            auto v = parseNumber<obj_vnum>(arg, "dgCallMember room contents").value_or(-2);
             for(auto obj : filter_raw(con)) {
-                if(GET_OBJ_VNUM(obj) == atoi(arg.c_str())) {
+                if(GET_OBJ_VNUM(obj) == v) {
                     return obj;
                 }
             }
@@ -1636,7 +1649,7 @@ DgReturn Room::dgCallMember(DgScript* trig, std::string_view field, std::string_
         return resolveVar(*found);
     
     script_log("Trigger: %s, VNum %d, type: %d. unknown room field: '%s'",
-            GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), static_cast<int>(type), field);
+            GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), static_cast<int>(type), member.c_str());
 
     return "";
 }

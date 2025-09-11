@@ -2580,6 +2580,7 @@ std::vector<ScriptLine> parse_script(const std::vector<std::string> &orig)
         // Check the first token
         size_t pos = trimmedLine.find_first_of(" (");
         std::string firstToken = (pos == std::string::npos) ? trimmedLine : trimmedLine.substr(0, pos);
+        boost::to_lower(firstToken);
 
         if (firstToken == "if")
         {
@@ -3156,7 +3157,10 @@ bool DgScript::truthy(const std::string &value) const
 }
 
 std::string DgScript::substituteVariables(const std::string &raw_text)
-{   
+{
+    if(boost::icontains(raw_text, "self.room.contents")) {
+        basic_mud_log("lets test this!");
+    }
     auto result = dg_substitutions(this, raw_text);
     return result;
 }
