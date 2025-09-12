@@ -49,7 +49,7 @@ static void dump_to_file(const std::filesystem::path &loc, const std::string &na
     out.push(boost::iostreams::gzip_compressor());
     out.push(file);
     std::ostream outStream(&out);
-    outStream << jdumps(data);
+    outStream << jdumps_pretty(data);
 
     // auto endTime = std::chrono::high_resolution_clock::now();
     // auto duration = std::chrono::duration<double>(endTime - startTime).count();

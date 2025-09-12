@@ -147,6 +147,10 @@ void Character::deactivate()
     characterSubscriptions.unsubscribeFromAll(sh);
     deactivateInventory();
     deactivateEquipment();
+
+    if(isPC && location) {
+        registeredLocations["load_room"] = location;
+    }
 }
 
 bool Character::isActive() const
@@ -1232,6 +1236,10 @@ room_vnum Character::normalizeLoadRoom(room_vnum in)
     // If they were in the void, then we need to use their last good room.
     room_vnum room = in;
     room_vnum lroom = NOWHERE;
+
+    if(room < 2) {
+        room = 100;
+    }
 
     // Personal Pocket Dimensions
     // if (room >= 19800 && room <= 19899) {

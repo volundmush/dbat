@@ -2766,10 +2766,6 @@ int DgScript::execute()
         {
             throw DgScriptError("Exceeded maximum script depth.");
         }
-        if (state == DgScriptState::ERROR || state == DgScriptState::DONE)
-        {
-            reset();
-        }
         int executionCount = 0;
         state = DgScriptState::RUNNING;
         int processed_line = 0;
@@ -2789,15 +2785,17 @@ int DgScript::execute()
 
         if (state == DgScriptState::RUNNING && (processed_line == (proto->lines.size() - 1)))
         {
-            // If we reached the end of the script, we set it to DONE.
-            // This is important to ensure that the script is marked as finished.
-            setState(DgScriptState::DONE);
+            auto retValue = toReturn;
+            reset();
+            return retValue;
         }
     }
     catch (const DgScriptError &e)
     {
-        state = DgScriptState::ERROR;
         error(e.what());
+        auto retValue = toReturn;
+        reset();
+        return retValue;
     }
 
     return toReturn;

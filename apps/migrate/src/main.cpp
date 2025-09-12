@@ -1729,7 +1729,9 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
         wearFlags[1] = asciiflag_conv(f6);
         wearFlags[2] = asciiflag_conv(f7);
         wearFlags[3] = asciiflag_conv(f8);
-        for(auto i = 0; i < NUM_ITEM_WEARS; i++) if(IS_SET_AR(wearFlags, i)) o->wear_flags.set(i);
+        for(auto i = 0; i < NUM_ITEM_WEARS; i++) 
+            if(IS_SET_AR(wearFlags, i)) 
+                o->wear_flags.set(i);
 
         permFlags[0] = asciiflag_conv(f9);
         permFlags[1] = asciiflag_conv(f10);
@@ -3016,18 +3018,16 @@ int House_load(room_vnum rvnum) {
                             fread_string(fl, buf2);
                             get_line(fl, line);
                             break;
-                        case 'A':
-                            if (j >= MAX_OBJ_AFFECT) {
-                                basic_mud_log("SYSERR: Too many object affectations in loading house file");
-                                danger = 1;
-                            }
+                        case 'A': {
                             get_line(fl, line);
                             sscanf(line, "%ld %ld %ld", t, t + 1, t + 2);
-                            temp->affected[j].location = t[0];
-                            temp->affected[j].modifier = t[1];
-                            temp->affected[j].specific = t[2];
+                            auto &ja = temp->affected.emplace_back();
+                            ja.location = t[0];
+                            ja.modifier = t[1];
+                            ja.specific = t[2];
                             j++;
                             get_line(fl, line);
+                        }
                             break;
 
                         case 'G':

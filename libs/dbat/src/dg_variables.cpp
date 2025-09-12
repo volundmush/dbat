@@ -730,9 +730,10 @@ std::string dg_replace_fields(DgScript* trig, std::string_view input) {
 // Scan and replace all outermost %...% sections. By outermost, we mean that if we encounter
 // opening parens, we stop searching for % until we find the matching closing paren.
 // This allows for things like %find.character(John.%Doe%)% to work properly.
-std::string dg_substitutions(DgScript* trig, std::string_view input) {
-    std::string out;
+std::vector<std::pair<bool, std::string_view>> dg_find_sections(std::string_view input) {
+    std::vector<std::pair<bool, std::string_view>> out;
     
+    bool in_section = false;
     size_t start = 0;
     size_t i = 0;
     size_t paren_count = 0;
@@ -745,18 +746,19 @@ std::string dg_substitutions(DgScript* trig, std::string_view input) {
             i++;
         } else if(input[i] == '%' && paren_count == 0) {
             // found a top-level %
-            // copy everything up to here
-            out.append(input.substr(start, i - start));
-            size_t end = input.find('%', i + 1);
-            if(end == std::string_view::npos) {
-                // no matching %, just copy the rest and break
-                out.append(input.substr(i));
-                break;
+            if(in_section) {
+                in_section = false;
+                size_t end = i;
+                auto field = input.substr(start, end - start);
+                out.emplace_back(true, field);
+            } else {
+                // copy everything up to here
+                if(start < i) {
+                    out.emplace_back(false, input.substr(start, i - start));
+                }
+                in_section = true;
             }
-            // found a matching %
-            auto field = input.substr(i + 1, end - i - 1);
-            out.append(dg_replace_fields(trig, field));
-            i = end + 1;
+            i++;
             start = i;
         } else {
             i++;
@@ -764,7 +766,22 @@ std::string dg_substitutions(DgScript* trig, std::string_view input) {
     }
     // copy any remaining text
     if(start < input.size()) {
-        out.append(input.substr(start));
+        out.emplace_back(false, input.substr(start));
+    }
+
+    return out;
+}
+
+std::string dg_substitutions(DgScript* trig, std::string_view input) {
+    std::string out;
+
+    auto res = dg_find_sections(input);
+    for(auto& [is_field, text] : res) {
+        if(is_field) {
+            out.append(dg_replace_fields(trig, text));
+        } else {
+            out.append(text);
+        }
     }
 
     return out;
@@ -1087,7 +1104,8 @@ DgReturn Character::dgCallMember(DgScript* trig, std::string_view field, std::st
     if(boost::iequals(lmember, "room"))
         if(auto r = getRoom())
             return r;
-        return "";
+        else
+            return "";
     
     if(boost::iequals(lmember, "race"))
         return std::string(magic_enum::enum_name(race));

@@ -12,9 +12,9 @@
             "justMyCode": false, // step into libs/Cython if needed
             "subProcess": true, // follow forks/spawns
             "env": {
-    "LD_LIBRARY_PATH": "/opt/gcc-15/lib64:${env:LD_LIBRARY_PATH}"
-  },
-      // Interpreter: uses the one you selected in VS Code (point it to .venv)
+                "LD_LIBRARY_PATH": "/opt/gcc-15/lib64:${env:LD_LIBRARY_PATH}"
+            },
+            // Interpreter: uses the one you selected in VS Code (point it to .venv)
         },
         // --- Python mode: portal ---
         {
@@ -27,8 +27,8 @@
             "justMyCode": false,
             "subProcess": true,
             "env": {
-    "LD_LIBRARY_PATH": "/opt/gcc-15/lib64:${env:LD_LIBRARY_PATH}"
-  },
+                "LD_LIBRARY_PATH": "/opt/gcc-15/lib64:${env:LD_LIBRARY_PATH}"
+            },
         },
         {
             "name": "DBAT: (GDB) server",
@@ -41,7 +41,12 @@
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
-            "environment": [{ "name": "LD_LIBRARY_PATH", "value": "/opt/gcc-15/lib64:${env:LD_LIBRARY_PATH}" }],
+            "environment": [
+                {
+                    "name": "LD_LIBRARY_PATH",
+                    "value": "/opt/gcc-15/lib64:${env:LD_LIBRARY_PATH}"
+                }
+            ],
             "externalConsole": false,
             "MIMode": "gdb",
             "miDebuggerPath": "/usr/bin/gdb",
@@ -50,7 +55,9 @@
                     "description": "Enable pretty printing",
                     "text": "-enable-pretty-printing",
                     "ignoreFailures": true
-                }
+                },
+                { "text": "python import sys; sys.path.insert(0, '/opt/gcc-15/share/gcc-15.1.0/python')" }, 
+                { "text": "python from libstdcxx.v6.printers import register_libstdcxx_printers; register_libstdcxx_printers(None)" }
             ]
         },
         {
@@ -64,7 +71,12 @@
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
-            "environment": [{ "name": "LD_LIBRARY_PATH", "value": "/opt/gcc-15/lib64:${env:LD_LIBRARY_PATH}" }],
+            "environment": [
+                {
+                    "name": "LD_LIBRARY_PATH",
+                    "value": "/opt/gcc-15/lib64:${env:LD_LIBRARY_PATH}"
+                }
+            ],
             "externalConsole": false,
             "MIMode": "gdb",
             "miDebuggerPath": "/usr/bin/gdb",
@@ -73,7 +85,9 @@
                     "description": "Enable pretty printing",
                     "text": "-enable-pretty-printing",
                     "ignoreFailures": true
-                }
+                },
+                { "text": "python import sys; sys.path.insert(0, '/opt/gcc-15/share/gcc-15.1.0/python')" }, 
+                { "text": "python from libstdcxx.v6.printers import register_libstdcxx_printers; register_libstdcxx_printers(None)" }
             ]
         },
         {
@@ -87,6 +101,10 @@
                 {
                     "name": "LSAN_OPTIONS",
                     "value": "verbosity=1:log_threads=1"
+                },
+                {
+                    "name": "LD_LIBRARY_PATH",
+                    "value": "/opt/gcc-15/lib64:${env:LD_LIBRARY_PATH}"
                 }
             ],
             // You can also set ASAN_OPTIONS here if needed],
@@ -97,7 +115,9 @@
                     "description": "Enable pretty-printing for gdb",
                     "text": "-enable-pretty-printing",
                     "ignoreFailures": true
-                }
+                },
+                { "text": "python import sys; sys.path.insert(0, '/opt/gcc-15/share/gcc-15.1.0/python')" }, 
+                { "text": "python from libstdcxx.v6.printers import register_libstdcxx_printers; register_libstdcxx_printers(None)" }
             ],
             "miDebuggerPath": "/usr/bin/gdb",
         },

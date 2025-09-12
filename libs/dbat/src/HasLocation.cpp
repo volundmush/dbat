@@ -40,14 +40,12 @@ void HasLocation::leaveLocation()
 {   
     Location loc = location;
     if (auto a = loc.getLoc()) {
-        location.al.reset();
-        location.position = {};
         a->removeFromContents(getSharedHasLocation());
         onLeaveLocation(loc);
-    } else {
-        location.al.reset();
-        location.position = {};
     }
+    location.al.reset();
+    location.position = {};
+    location.locationID = "";
 }
 
 bool HasLocation::getLocationVisibleTo(Character* viewer) {

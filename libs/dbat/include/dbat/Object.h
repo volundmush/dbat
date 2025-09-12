@@ -71,16 +71,6 @@ struct Object : public ObjectBase, public HasID, public HasInteractive, public H
     void onAddToInventory(const std::shared_ptr<Object>& obj) override;
     void onRemoveFromInventory(const std::shared_ptr<Object>& obj) override;
 
-    /* arbitrary named doubles */
-    ItemType type_flag{ItemType::unknown};      /* Type of item                        */
-    
-    FlagHandler<WearFlag> wear_flags{}; /* Where you can wear it     */
-    FlagHandler<ItemFlag> item_flags{}; /* If it hums, glows, etc.  */
-    
-    Size size{Size::medium};           /* Size class of object                */
-
-    std::array<affected_type, MAX_OBJ_AFFECT> affected;  /* affects */
-
     // when equipped or held by a character, they'll be set to this.
     std::weak_ptr<Character> carrier{};
     int16_t worn_on{-1};        /* If the object is worn, where */

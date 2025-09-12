@@ -184,14 +184,15 @@ AbstractLocation* Location::getLoc() const {
         return a.get();
     }
 
-    if(auto res = Location(locationID)) {
-        al = res.al;
-        position = res.position;
-        locationID = res.locationID;
-        if(auto a = al.lock()) {
-            return a.get();
+    if(!locationID.empty())
+        if(auto res = Location(locationID)) {
+            al = res.al;
+            position = res.position;
+            locationID = res.locationID;
+            if(auto a = al.lock()) {
+                return a.get();
+            }
         }
-    }
 
     return nullptr;
 }

@@ -464,6 +464,7 @@ void do_start(Character *ch)
     ch->restoreVitals();
 
     ch->setBaseStat<int>("olc_zone", NOWHERE);
+    ch->registeredLocations["load_room"] = 100;
 }
 
 static const int free_start_feats_wizard[] = {
