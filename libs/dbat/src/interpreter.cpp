@@ -145,7 +145,7 @@ void command_interpreter(Character *ch, char *argument)
         }
         else
         {
-            ch->wait_input_queue.emplace_back(cmd, cdata);
+            ch->wait_input_queue.emplace_back(std::make_pair(cmd, cdata));
             characterSubscriptions.subscribe("commandWaitQueue", ch);
         }
         return;
@@ -167,9 +167,9 @@ void commandWaitQueue(uint64_t heartPulse, double deltaTime)
                 doContinuedTask(ch);
             else if (!ch->wait_input_queue.empty())
             {
-                auto [cmd, cdata] = ch->wait_input_queue.front();
+                auto res = *ch->wait_input_queue.begin();
                 ch->wait_input_queue.pop_front();
-                processCommand(ch, cmd, cdata);
+                processCommand(ch, res.first, res.second);
             }
             if (ch->getBaseStat("waitTime") <= 0.0 && ch->task == Task::nothing && ch->wait_input_queue.empty())
             {

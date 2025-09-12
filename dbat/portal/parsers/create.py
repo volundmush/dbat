@@ -10,7 +10,7 @@ from httpx import HTTPStatusError
 from dbat.utils import partial_match
 
 from dbat.bridge.models.game import AccountData, PlayerData, ChargenData, HelpData
-from dbat.bridge.models.names import Race, SubRace, Sensei, Mutation, BioGenome, Sex
+from dbat.bridge.models.names import Race, AndroidModel, Sensei, Mutation, BioGenome, Sex
 
 class CreateParser(BaseParser):
     """

@@ -3,16 +3,17 @@
 #include <string_view>
 #include <vector>
 #include <unordered_map>
+#include <memory>
 #include <stdexcept>
 
 class CommandData {
-    const std::string _original;
+    std::shared_ptr<const std::string> _original;
 
     public:
     CommandData() = default;
     CommandData(std::string_view command_line);
-    
-    std::string getOriginal() const { return _original; }
+
+    std::string_view original;
     std::string_view cmd;
     std::vector<std::string_view> switches;
     std::string_view switch_mod;

@@ -809,27 +809,34 @@ ACMD(do_heeldrop)
 
 ACMD(do_attack)
 {
-    if (GET_OBJ_VAL(GET_EQ(ch, WEAR_WIELD2), VAL_WEAPON_DAMTYPE) == TYPE_PIERCE - TYPE_HIT)
+    auto weapon = GET_EQ(ch, WEAR_WIELD2);
+    if(!weapon) {
+        ch->sendText("You need to wield a weapon to use this command.\r\n");
+        return;
+    }
+    auto val = GET_OBJ_VAL(weapon, VAL_WEAPON_DAMTYPE);
+
+    if (val == TYPE_PIERCE - TYPE_HIT)
     {
         atk::Stab a(ch, argument);
         a.execute();
     }
-    else if (GET_OBJ_VAL(GET_EQ(ch, WEAR_WIELD2), VAL_WEAPON_DAMTYPE) == TYPE_SLASH - TYPE_HIT)
+    else if (val == TYPE_SLASH - TYPE_HIT)
     {
         atk::Slash a(ch, argument);
         a.execute();
     }
-    else if (GET_OBJ_VAL(GET_EQ(ch, WEAR_WIELD2), VAL_WEAPON_DAMTYPE) == TYPE_CRUSH - TYPE_HIT)
+    else if (val == TYPE_CRUSH - TYPE_HIT)
     {
         atk::Crush a(ch, argument);
         a.execute();
     }
-    else if (GET_OBJ_VAL(GET_EQ(ch, WEAR_WIELD2), VAL_WEAPON_DAMTYPE) == TYPE_STAB - TYPE_HIT)
+    else if (val == TYPE_STAB - TYPE_HIT)
     {
         atk::Impale a(ch, argument);
         a.execute();
     }
-    else if (GET_OBJ_VAL(GET_EQ(ch, WEAR_WIELD2), VAL_WEAPON_DAMTYPE) == TYPE_BLAST - TYPE_HIT)
+    else if (val == TYPE_BLAST - TYPE_HIT)
     {
         atk::Shoot a(ch, argument);
         a.execute();
