@@ -14,18 +14,9 @@ async def register_user(
     if not len(account_db):
         adminLevel = 10
 
-    user = AccountData(
-        name=username,
-        password=hashed_password,
-        admin_level=adminLevel
-    )
-    
-    # this will have handled validation so now we just need to do something about the SecretStr
-    data = user.model_dump(exclude_unset=True)
-    # deal with the secretstr.
-    data["password"] = hashed_password
-    
-    new_user = account_db.create(data)
+    user = {"name": username, "password": hashed_password, "admin_level": adminLevel}
+
+    new_user = account_db.create(user)
     
     return AccountData(**new_user)
 

@@ -1,12 +1,40 @@
 {
     "version": "0.2.0",
     "configurations": [
+        // --- Python mode: server ---
+        {
+            "name": "DBAT: Server (Python)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "dbat.game", // python -m dbat.game
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "justMyCode": false, // step into libs/Cython if needed
+            "subProcess": true, // follow forks/spawns
+            "env": {} // add env here if needed
+      // Interpreter: uses the one you selected in VS Code (point it to .venv)
+        },
+        // --- Python mode: portal ---
+        {
+            "name": "DBAT: Portal (Python)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "dbat.portal",
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "subProcess": true,
+            "env": {}
+        },
         {
             "name": "DBAT: (GDB) server",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/.venv/bin/python",
-            "args": ["-m", "dbat.game"],
+            "args": [
+                "-m",
+                "dbat.game"
+            ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
@@ -26,7 +54,10 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/.venv/bin/python",
-            "args": ["-m", "dbat.portal"],
+            "args": [
+                "-m",
+                "dbat.portal"
+            ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
@@ -48,10 +79,12 @@
             "program": "${workspaceFolder}/compiled/dbat_migrate",
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
-            "environment": [{
-                "name": "LSAN_OPTIONS",
-                "value": "verbosity=1:log_threads=1"
-            }],
+            "environment": [
+                {
+                    "name": "LSAN_OPTIONS",
+                    "value": "verbosity=1:log_threads=1"
+                }
+            ],
             // You can also set ASAN_OPTIONS here if needed],
             "externalConsole": false,
             "MIMode": "gdb",

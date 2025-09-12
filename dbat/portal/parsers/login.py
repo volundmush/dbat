@@ -83,8 +83,11 @@ class LoginParser(BaseParser):
             await self.send_line(f"Invalid registration credentials: {e}")
             return
 
+        data = {
+            "username": u.username,
+            "password": u.password.get_secret_value(),
+        }
         try:
-            data = u.model_dump()
             json_data = await self.api_call("POST", "/auth/register", json=data)
         except HTTPStatusError as e:
             await self.send_line(f"Registration failed: {e}")

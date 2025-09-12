@@ -252,6 +252,7 @@ cdef class AccountDB:
         # we'll add the ID here.
         id = db.getNextAccountID()
         data["vn"] = id
+        data["id"] = id
         serialized = orjson.dumps(data)
         # now we'll turn it into a nlohmann::json...
         j = jloads(serialized)
