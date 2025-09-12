@@ -11,7 +11,9 @@
             "console": "integratedTerminal",
             "justMyCode": false, // step into libs/Cython if needed
             "subProcess": true, // follow forks/spawns
-            "env": {} // add env here if needed
+            "env": {
+    "LD_LIBRARY_PATH": "/opt/gcc-15/lib64:${env:LD_LIBRARY_PATH}"
+  },
       // Interpreter: uses the one you selected in VS Code (point it to .venv)
         },
         // --- Python mode: portal ---
@@ -24,7 +26,9 @@
             "console": "integratedTerminal",
             "justMyCode": false,
             "subProcess": true,
-            "env": {}
+            "env": {
+    "LD_LIBRARY_PATH": "/opt/gcc-15/lib64:${env:LD_LIBRARY_PATH}"
+  },
         },
         {
             "name": "DBAT: (GDB) server",
@@ -37,7 +41,7 @@
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
-            "environment": [],
+            "environment": [{ "name": "LD_LIBRARY_PATH", "value": "/opt/gcc-15/lib64:${env:LD_LIBRARY_PATH}" }],
             "externalConsole": false,
             "MIMode": "gdb",
             "miDebuggerPath": "/usr/bin/gdb",
@@ -60,7 +64,7 @@
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
-            "environment": [],
+            "environment": [{ "name": "LD_LIBRARY_PATH", "value": "/opt/gcc-15/lib64:${env:LD_LIBRARY_PATH}" }],
             "externalConsole": false,
             "MIMode": "gdb",
             "miDebuggerPath": "/usr/bin/gdb",

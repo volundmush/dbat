@@ -3934,10 +3934,8 @@ ACMD(do_show)
             low = -1;
             high = 9999999;
         }
-        strp = "Disabled";
         if (ch->desc)
-            ch->desc->send_to("%s", strp);
-        free(strp);
+            ch->desc->sendText("Disabled");
         break;
 
     case 15:
