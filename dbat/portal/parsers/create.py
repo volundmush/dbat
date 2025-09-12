@@ -345,7 +345,8 @@ class CreateParser(BaseParser):
     
     async def handle_finish(self):
         try:
-            result = await self.api_call("POST", f"/characters/", json=self.data.model_dump(exclude_unset=True, exclude_none=True))
+            data = self.data.model_dump(exclude_unset=True, exclude_none=True)
+            result = await self.api_call("POST", f"/characters/", json=data)
         except HTTPStatusError as e:
             await self.send_line(f"Error creating character: {e.response.text}")
             return

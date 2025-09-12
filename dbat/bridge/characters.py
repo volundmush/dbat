@@ -42,7 +42,8 @@ async def create_character(user: AccountData, char_data: ChargenData) -> PlayerD
         char_data.check()
         if (found := find_character(char_data.name, should_raise=False)) is not None:
             raise ValueError(f"Character with name {char_data.name} already exists.")
-        return player_db.create_character(user, char_data)
+        data = char_data.model_dump(exclude_unset=True, exclude_none=True)
+        return player_db.create_character(user, data)
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)

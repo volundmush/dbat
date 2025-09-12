@@ -304,8 +304,10 @@ cdef class PlayerDB:
         for vn in db.players:
             yield vn.first
     
-    def create_character(self, user, data):
-        new_player = create_player_character(user.id, jloads(data.model_dump_json().encode("utf-8")))
+    def create_character(self, user, data: dict):
+        serialized = orjson.dumps(data)
+        j = jloads(serialized)
+        new_player = create_player_character(user.id, j)
         return orjson.loads(self._dump(new_player))
 
 player_db = PlayerDB()
