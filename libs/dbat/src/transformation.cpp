@@ -581,19 +581,19 @@ namespace trans
         // Saiyan
         {Form::super_saiyan_1, [](Character *ch)
          {
-             return ((ch->race == Race::saiyan || ch->race == Race::halfbreed));
+             return ((ch->race == Race::saiyan || ch->race == Race::half_saiyan));
          }},
         {Form::super_saiyan_2, [](Character *ch)
          {
-             return ((ch->race == Race::saiyan || ch->race == Race::halfbreed) && !ch->transforms.contains(Form::ikari) && !ch->transforms.contains(Form::legendary_saiyan) && getMasteryTier(ch, Form::super_saiyan_1) >= 2);
+             return ((ch->race == Race::saiyan || ch->race == Race::half_saiyan) && !ch->transforms.contains(Form::ikari) && !ch->transforms.contains(Form::legendary_saiyan) && getMasteryTier(ch, Form::super_saiyan_1) >= 2);
          }},
         {Form::super_saiyan_3, [](Character *ch)
          {
-             return ((ch->race == Race::saiyan || ch->race == Race::halfbreed) && getMasteryTier(ch, Form::super_saiyan_2) >= 2);
+             return ((ch->race == Race::saiyan || ch->race == Race::half_saiyan) && getMasteryTier(ch, Form::super_saiyan_2) >= 2);
          }},
         {Form::super_saiyan_4, [](Character *ch)
          {
-             return ((ch->race == Race::saiyan || ch->race == Race::halfbreed) && ch->hasTail() && getMasteryTier(ch, Form::golden_oozaru) >= 3 && getMasteryTier(ch, Form::super_saiyan_3) >= 3);
+             return ((ch->race == Race::saiyan || ch->race == Race::half_saiyan) && ch->hasTail() && getMasteryTier(ch, Form::golden_oozaru) >= 3 && getMasteryTier(ch, Form::super_saiyan_3) >= 3);
          }},
 
         // Legendary Saiyan

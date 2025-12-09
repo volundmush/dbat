@@ -86,23 +86,22 @@ static bool resetSpawnMob(Location &loc, SpawnRegistry &reg, mob_vnum target, in
         int count_spawn = 0;
         int count_loc = 0;
         // Retrieve set of NPCs that use this vnum...
+
         auto npcs = characterSubscriptions.all(index);
+        if(npcs.size() >= max_spawn) {
+            return false;
+        }
+
         for (auto ch : filter_raw(npcs))
         {
-
             if (auto spawnedat = ch->registeredLocations.find("spawn"); spawnedat != ch->registeredLocations.end())
             {
                 if (spawnedat->second == loc)
-                    if (++count_spawn >= max_spawn)
+                    if (++count_loc >= max_loc)
                     {
                         return false;
                     }
             }
-            if (ch->location == loc)
-                if (++count_loc >= max_loc)
-                {
-                    return false;
-                }
         }
     }
 

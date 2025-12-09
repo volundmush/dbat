@@ -120,7 +120,7 @@ class CreateParser(BaseParser):
                 await self.send_line("Sex set to neutral as Namekians do not have a defined sex.")
 
     async def handle_model(self, args: str):
-        if not (available := self.available_models()):
+        if not (available := self.data.available_models()):
             await self.send_line("This race does not have Android Models.")
             return
         if not args:
@@ -300,7 +300,7 @@ class CreateParser(BaseParser):
             case "finish":
                 await self.handle_finish()
             case "cancel":
-                await self.handle_cancel(args)
+                await self.handle_cancel()
             case "look":
                 await self.handle_look()
             case "choices":

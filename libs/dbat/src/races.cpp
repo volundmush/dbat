@@ -291,7 +291,7 @@ namespace race
     }
 
     static std::unordered_set<Race> playable = {Race::human, Race::saiyan, Race::icer, Race::konatsu, Race::namekian,
-                                                Race::mutant, Race::kanassan, Race::halfbreed, Race::bio_android, Race::android, Race::demon, Race::majin,
+                                                Race::mutant, Race::kanassan, Race::half_saiyan, Race::bio_android, Race::android, Race::demon, Race::majin,
                                                 Race::kai, Race::tuffle};
 
     bool isPlayable(Race id)
@@ -336,7 +336,7 @@ namespace race
         {Race::namekian, "Namekian"},
         {Race::mutant, "Mutant"},
         {Race::kanassan, "Kanassan"},
-        {Race::halfbreed, "Halfbreed"},
+        {Race::half_saiyan, "Half-Saiyan"},
         {Race::bio_android, "BioAndroid"},
         {Race::android, "Android"},
         {Race::demon, "Demon"},
@@ -369,7 +369,7 @@ namespace race
         {Race::namekian, "Nam"},
         {Race::mutant, "Mut"},
         {Race::kanassan, "Kan"},
-        {Race::halfbreed, "H-B"},
+        {Race::half_saiyan, "H-S"},
         {Race::bio_android, "Bio"},
         {Race::android, "And"},
         {Race::demon, "Dem"},
@@ -415,7 +415,7 @@ namespace race
         case Race::icer:
         case Race::bio_android:
         case Race::saiyan:
-        case Race::halfbreed:
+        case Race::half_saiyan:
             return true;
         default:
             return false;
@@ -492,7 +492,7 @@ namespace race
                            //{APPLY_TRANS_ST_UPKEEP, 0.0, 0, [](Character *ch) {return ch->getCurLFPercent() > 0.7 ? -0.25 : 0.0}}
                        }},
 
-        {Race::halfbreed, {
+        {Race::half_saiyan, {
                               {APPLY_CSTAT_GAIN_MULT, 0.2, static_cast<int>(CharStat::experience)},
                               //{APPLY_SKILL_SLOTS, 1},
                               //{APPLY_ATTR_TRAIN_COST, -0.25, (int)CharTrain::Intelligence},

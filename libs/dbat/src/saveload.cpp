@@ -1568,6 +1568,7 @@ void to_json(json &j, const CharacterBase &c) {
     to_json(j, static_cast<const HasExtraDescriptions&>(c));
     to_json(j, static_cast<const HasStats&>(c));
     j["race"] = c.race;
+    j["sensei"] = c.sensei;
     if(c.model) j["model"] = c.model;
     j["sex"] = c.sex;
     j["size"] = c.size;
@@ -1585,6 +1586,7 @@ void from_json(const json &j, CharacterBase &c) {
     from_json(j, static_cast<HasExtraDescriptions&>(c));
     from_json(j, static_cast<HasStats&>(c));
     if (j.contains("race")) c.race = j["race"];
+    if(j.contains("sensei")) c.sensei = j["sensei"];
     if (j.contains("model")) c.model = j["model"];
     if(j.contains("position")) j.at("position").get_to(c.position);
     if (j.contains("sex")) c.sex = j["sex"];

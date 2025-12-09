@@ -333,7 +333,7 @@ extern void WAIT_STATE(Character *ch, double timeToWait);
 #define IS_NAMEK(ch)            (GET_RACE(ch) == Race::namekian)
 #define IS_MUTANT(ch)           (GET_RACE(ch) == Race::mutant)
 #define IS_KANASSAN(ch)         (GET_RACE(ch) == Race::kanassan)
-#define IS_HALFBREED(ch)        (GET_RACE(ch) == Race::halfbreed)
+#define IS_HALFBREED(ch)        (GET_RACE(ch) == Race::half_saiyan)
 #define IS_BIO(ch)              (GET_RACE(ch) == Race::bio_android)
 #define IS_ANDROID(ch)          (GET_RACE(ch) == Race::android)
 #define IS_DEMON(ch)            (GET_RACE(ch) == Race::demon)

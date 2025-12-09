@@ -29,12 +29,12 @@ struct Guild : public org_data
     std::unordered_set<uint8_t> feats; /* array to keep track of which feats things we'll train */
 };
 
-constexpr std::string_view MSG_TRAINER_NOT_OPEN = "I'm busy! Come back later!";
-constexpr std::string_view MSG_TRAINER_NO_SEE_CH = "I don't train someone I can't see!";
-constexpr std::string_view MSG_TRAINER_DISLIKE_ALIGN = "Get out of here before I get angry, you are not aligned with me!";
-constexpr std::string_view MSG_TRAINER_DISLIKE_CLASS = "I won't train those of your discipline!";
-constexpr std::string_view MSG_TRAINER_DISLIKE_RACE = "Get out of here, I don't help your kind!";
-constexpr std::string_view MSG_TRAINER_MINLVL = "You are not of a skilled enough level to recieve my training.";
+constexpr const char* MSG_TRAINER_NOT_OPEN = "I'm busy! Come back later!";
+constexpr const char* MSG_TRAINER_NO_SEE_CH = "I don't train someone I can't see!";
+constexpr const char* MSG_TRAINER_DISLIKE_ALIGN = "Get out of here before I get angry, you are not aligned with me!";
+constexpr const char* MSG_TRAINER_DISLIKE_CLASS = "I won't train those of your discipline!";
+constexpr const char* MSG_TRAINER_DISLIKE_RACE = "Get out of here, I don't help your kind!";
+constexpr const char* MSG_TRAINER_MINLVL = "You are not of a skilled enough level to recieve my training.";
 
 #define GM_NUM(i) guild_index.at(i)->vnum
 #define GM_TRAINER(i) guild_index.at(i)->keeper

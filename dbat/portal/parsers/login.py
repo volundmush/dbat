@@ -74,7 +74,7 @@ class LoginParser(BaseParser):
         await self.connection.handle_login(token)
 
     async def handle_register(self, lsargs: str, rsargs: str):
-        if not lsargs and rsargs:
+        if not (lsargs and rsargs):
             await self.send_line("Usage: register <username>=<password>")
             return
         try:

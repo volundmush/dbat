@@ -14,9 +14,10 @@ CommandData::CommandData(std::string_view txt_in) : _original(std::make_shared<s
         auto to_sv = [](const std::cmatch& cm, size_t i) -> std::string_view {
             return cm[i].matched ? std::string_view(cm[i].first, cm[i].length()) : std::string_view{};
         };
-        cmd         = to_sv(m, 1);
+        cmd = to_sv(m, 1);
         std::string_view switch_part = to_sv(m, 2);
-        boost::split(switches, switch_part, boost::is_any_of("/"), boost::token_compress_on);
+        if(!switch_part.empty())
+            boost::split(switches, switch_part, boost::is_any_of("/"), boost::token_compress_on);
         switch_mod  = to_sv(m, 5);
         argument    = to_sv(m, 6);
         argument = boost::trim_copy(argument);
