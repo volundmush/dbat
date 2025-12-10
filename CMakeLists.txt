@@ -67,10 +67,10 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 endif()
 
 CPMAddPackage(NAME fmt                   GITHUB_REPOSITORY fmtlib/fmt            GIT_TAG 11.2.0)
-CPMAddPackage(NAME spdlog                GITHUB_REPOSITORY gabime/spdlog         VERSION 1.15.3)
+#CPMAddPackage(NAME spdlog                GITHUB_REPOSITORY gabime/spdlog         VERSION 1.15.3)
 CPMAddPackage(NAME nlohmann_json         GITHUB_REPOSITORY nlohmann/json         VERSION 3.12.0)
 CPMAddPackage(NAME magic_enum            GITHUB_REPOSITORY Neargye/magic_enum    VERSION 0.9.7)
-CPMAddPackage(NAME EnTT                  GITHUB_REPOSITORY skypjack/entt         VERSION 3.15.0)
+#CPMAddPackage(NAME EnTT                  GITHUB_REPOSITORY skypjack/entt         VERSION 3.15.0)
 CPMAddPackage(NAME effolkronium_random   GITHUB_REPOSITORY volundmush/random     GIT_TAG master
                OPTIONS "Random_BuildTests OFF")
 

@@ -1,3 +1,4 @@
+#include <iomanip>
 #include "dbat/CharacterUtils.h"
 #include "dbat/ObjectUtils.h"
 #include "dbat/Zone.h"

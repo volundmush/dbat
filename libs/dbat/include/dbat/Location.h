@@ -3,6 +3,9 @@
 #include <optional>
 #include <map>
 
+#include <fmt/format.h>
+#include <fmt/printf.h>
+
 #include "const/RoomFlag.h"
 #include "const/WhereFlag.h"
 #include "const/SectorType.h"

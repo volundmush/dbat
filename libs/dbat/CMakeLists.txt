@@ -33,7 +33,6 @@ target_sources(dbat
 target_link_libraries(dbat
   PUBLIC
     fmt::fmt
-    spdlog::spdlog
     magic_enum::magic_enum
     effolkronium_random
     nlohmann_json
@@ -45,5 +44,3 @@ target_link_libraries(dbat
   PRIVATE
     Boost::iostreams
 )
-
-target_compile_definitions(dbat PRIVATE SPDLOG_FMT_EXTERNAL=1)

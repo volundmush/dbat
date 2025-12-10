@@ -5,6 +5,9 @@
 #include <string>
 #include <list>
 
+#include <fmt/format.h>
+#include <fmt/printf.h>
+
 #include "Log.h"
 #include "Typedefs.h"
 
