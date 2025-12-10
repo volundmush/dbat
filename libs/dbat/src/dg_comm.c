@@ -67,7 +67,7 @@ void sub_write_to_char(struct char_data *ch, char *tokens[],
 	    else if ((struct char_data *)otokens[i] == ch)
 		strcat(sb,"you");
 	    else
-		strcat(sb,PERS((struct char_data *)otokens[i], ch));
+		strcat(sb,PERS(((struct char_data *)otokens[i]), ch));
 	    break;
 
 	case '|':
@@ -77,36 +77,36 @@ void sub_write_to_char(struct char_data *ch, char *tokens[],
 		strcat(sb,"your");
 	    else
 	    {
-		strcat(sb,PERS((struct char_data *) otokens[i], ch));
+		strcat(sb,PERS(((struct char_data *) otokens[i]), ch));
 		strcat(sb,"'s");
 	    }
 	    break;
 
 	case '^':
-	    if (!otokens[i] || !CAN_SEE(ch, (struct char_data *) otokens[i]))
+	    if (!otokens[i] || !CAN_SEE(ch, ((struct char_data *) otokens[i])))
 		strcat(sb,"its");
 	    else if (otokens[i] == ch)
 		strcat(sb,"your");
 	    else
-		strcat(sb,HSHR((struct char_data *) otokens[i]));
+		strcat(sb,HSHR(((struct char_data *) otokens[i])));
 	    break;
 
 	case '&':
-	    if (!otokens[i] || !CAN_SEE(ch, (struct char_data *) otokens[i]))
+	    if (!otokens[i] || !CAN_SEE(ch, ((struct char_data *) otokens[i])))
 		strcat(sb,"it");
 	    else if (otokens[i] == ch)
 		strcat(sb,"you");
 	    else
-		strcat(sb,HSSH((struct char_data *) otokens[i]));
+		strcat(sb,HSSH(((struct char_data *) otokens[i])));
 	    break;
 
 	case '*':
-	    if (!otokens[i] || !CAN_SEE(ch, (struct char_data *) otokens[i]))
+	    if (!otokens[i] || !CAN_SEE(ch, ((struct char_data *) otokens[i])))
 		strcat(sb,"it");
 	    else if (otokens[i] == ch)
 		strcat(sb,"you");
 	    else
-		strcat(sb,HMHR((struct char_data *) otokens[i]));
+		strcat(sb,HMHR(((struct char_data *) otokens[i])));
 	    break;
 
 	case '¨':

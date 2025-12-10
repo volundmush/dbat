@@ -23,6 +23,7 @@
 #include "oasis.h"
 #include "constants.h"
 #include "spell_parser.h"
+#include "spells.h"
 #include "act.movement.h"
 
 /*

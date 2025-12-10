@@ -5951,7 +5951,7 @@ void nanny(struct descriptor_data *d, char *arg)
       case 'H':
       case 'h':
          if (IS_KAI(d->character) || IS_DEMON(d->character) || IS_MAJIN(d->character)) {
-          d->character->time.birth = time(0) - (500 * SECS_PER_MUD_YEAR);
+          d->character->time.birth = time(0) - (500 * (time_t)SECS_PER_MUD_YEAR);
          } else if (IS_NAMEK(d->character)) {
           d->character->time.birth = time(0) - (250 * SECS_PER_MUD_YEAR);
          } else {
@@ -5961,9 +5961,9 @@ void nanny(struct descriptor_data *d, char *arg)
       case 'I':
       case 'i':
          if (IS_KAI(d->character) || IS_DEMON(d->character) || IS_MAJIN(d->character)) {
-          d->character->time.birth = time(0) - (800 * SECS_PER_MUD_YEAR);
+          d->character->time.birth = time(0) - (800 * (time_t)SECS_PER_MUD_YEAR);
          } else if (IS_NAMEK(d->character)) {
-          d->character->time.birth = time(0) - (400 * SECS_PER_MUD_YEAR);
+          d->character->time.birth = time(0) - (400 * (time_t)SECS_PER_MUD_YEAR);
          } else {
           d->character->time.birth = time(0) - (75 * SECS_PER_MUD_YEAR);
          }

@@ -2583,7 +2583,7 @@ struct descriptor_data {
    struct descriptor_data *snoop_by; /* And who is snooping this char	*/
    struct descriptor_data *next; /* link to next descriptor		*/
    struct oasis_olc_data *olc;   /* OLC info                            */
-   struct compr *comp;                /* compression info */
+   struct compr *comp;           /* compression info */
    char *user;                   /* What user am I?                     */
    char *email;                  /* User Account Email.                 */
    char *pass;                   /* User Account Password.              */

@@ -17,6 +17,7 @@
 #include "db.h"
 #include "screen.h"
 #include "spells.h"
+#include "fight.h"
 #include "constants.h"
 
 /* copied from spell_parser.c: */

@@ -47,6 +47,7 @@
 #include "constants.h"
 #include "act.wizard.h"
 #include "act.offensive.h"
+#include "fight.h"
 
 /*
  * Local functions.
@@ -1042,12 +1043,12 @@ ACMD(do_mtransform)
     tmpmob.followers = ch->followers;
     tmpmob.master = ch->master;
 
-    GET_WAS_IN(&tmpmob) = GET_WAS_IN(ch);
-    GET_GOLD(&tmpmob) = GET_GOLD(ch);
-    GET_POS(&tmpmob) = GET_POS(ch);
-    IS_CARRYING_W(&tmpmob) = IS_CARRYING_W(ch);
-    IS_CARRYING_N(&tmpmob) = IS_CARRYING_N(ch);
-    FIGHTING(&tmpmob) = FIGHTING(ch);
+    tmpmob.was_in_room = ch->was_in_room;
+    tmpmob.gold = ch->gold;
+    tmpmob.position = ch->position;
+    tmpmob.carry_weight = ch->carry_weight;
+    tmpmob.carry_items = ch->carry_items;
+    tmpmob.fighting = ch->fighting;
     memcpy(ch, &tmpmob, sizeof(*ch));
 
     for (pos = 0; pos < NUM_WEARS; pos++) {

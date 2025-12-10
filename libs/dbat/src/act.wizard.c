@@ -2523,7 +2523,7 @@ static void execute_copyover(void)
     d_next = d->next; /* We delete from the list , so need to save this */
     if (!d->character || d->connected > CON_PLAYING) {
       write_to_descriptor (d->descriptor, "\n\rSorry, we are rebooting. Come back in a few seconds.\n\r", d->comp);
-      close (d); /* throw'em out */
+      close_socket(d); /* throw'em out */
     } else {
       if (GET_ROOM_VNUM(IN_ROOM(och)) > 1) {
        fprintf (fp, "%d %s %s %d %s\n", d->descriptor, GET_NAME(och), d->host, GET_ROOM_VNUM(IN_ROOM(och)), d->user);

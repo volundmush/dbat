@@ -2344,6 +2344,7 @@ static char *parse_object(FILE *obj_f, int nr)
   char f5[READ_SIZE], f6[READ_SIZE], f7[READ_SIZE], f8[READ_SIZE];
   char f9[READ_SIZE], f10[READ_SIZE], f11[READ_SIZE], f12[READ_SIZE];
   struct extra_descr_data *new_descr;
+  struct obj_data *obj = NULL;
 
   obj_index[i].vnum = nr;
   obj_index[i].number = 0;
@@ -2353,26 +2354,28 @@ static char *parse_object(FILE *obj_f, int nr)
     obj_htree = htree_init();
   htree_add(obj_htree, nr, i);
 
-  clear_object(obj_proto + i);
-  obj_proto[i].item_number = i;
+  obj = obj_proto + i;
+
+  clear_object(obj);
+  obj->item_number = i;
 
   sprintf(buf2, "object #%d", nr);	/* sprintf: OK (for 'buf2 >= 19') */
 
   /* *** string data *** */
-  if ((obj_proto[i].name = fread_string(obj_f, buf2)) == NULL) {
+  if ((obj->name = fread_string(obj_f, buf2)) == NULL) {
     log("SYSERR: Null obj name or format error at or near %s", buf2);
     exit(1);
   }
-  tmpptr = obj_proto[i].short_description = fread_string(obj_f, buf2);
+  tmpptr = obj->short_description = fread_string(obj_f, buf2);
   if (tmpptr && *tmpptr)
     if (!strcasecmp(fname(tmpptr), "a") || !strcasecmp(fname(tmpptr), "an") ||
 	!strcasecmp(fname(tmpptr), "the"))
       *tmpptr = LOWER(*tmpptr);
 
-  tmpptr = obj_proto[i].description = fread_string(obj_f, buf2);
+  tmpptr = obj->description = fread_string(obj_f, buf2);
   if (tmpptr && *tmpptr)
     CAP(tmpptr);
-  obj_proto[i].action_description = fread_string(obj_f, buf2);
+  obj->action_description = fread_string(obj_f, buf2);
 
   /* *** numeric data *** */
   if (!get_line(obj_f, line)) {
@@ -2392,18 +2395,18 @@ static char *parse_object(FILE *obj_f, int nr)
           t[3] = asciiflag_conv_aff(f3);
 	    
 	log("Converting object #%d to 128bits..", nr);
-    GET_OBJ_EXTRA(obj_proto + i)[0] = asciiflag_conv(f1);
-    GET_OBJ_EXTRA(obj_proto + i)[1] = 0;
-    GET_OBJ_EXTRA(obj_proto + i)[2] = 0;
-    GET_OBJ_EXTRA(obj_proto + i)[3] = 0;
-    GET_OBJ_WEAR(obj_proto + i)[0] = asciiflag_conv(f2);
-    GET_OBJ_WEAR(obj_proto + i)[1] = 0;
-    GET_OBJ_WEAR(obj_proto + i)[2] = 0;
-    GET_OBJ_WEAR(obj_proto + i)[3] = 0;
-    GET_OBJ_PERM(obj_proto + i)[0] = asciiflag_conv_aff(f3);
-    GET_OBJ_PERM(obj_proto + i)[1] = 0;
-    GET_OBJ_PERM(obj_proto + i)[2] = 0;
-    GET_OBJ_PERM(obj_proto + i)[3] = 0;
+    GET_OBJ_EXTRA(obj)[0] = asciiflag_conv(f1);
+    GET_OBJ_EXTRA(obj)[1] = 0;
+    GET_OBJ_EXTRA(obj)[2] = 0;
+    GET_OBJ_EXTRA(obj)[3] = 0;
+    GET_OBJ_WEAR(obj)[0] = asciiflag_conv(f2);
+    GET_OBJ_WEAR(obj)[1] = 0;
+    GET_OBJ_WEAR(obj)[2] = 0;
+    GET_OBJ_WEAR(obj)[3] = 0;
+    GET_OBJ_PERM(obj)[0] = asciiflag_conv_aff(f3);
+    GET_OBJ_PERM(obj)[1] = 0;
+    GET_OBJ_PERM(obj)[2] = 0;
+    GET_OBJ_PERM(obj)[3] = 0;
     
     if(bitsavetodisk) { 
       add_to_save_list(zone_table[real_zone_by_thing(nr)].number, 1);
@@ -2413,18 +2416,18 @@ static char *parse_object(FILE *obj_f, int nr)
 	log("   done.");
   } else if (retval == 13) {
  
-    GET_OBJ_EXTRA(obj_proto + i)[0] = asciiflag_conv(f1);
-    GET_OBJ_EXTRA(obj_proto + i)[1] = asciiflag_conv(f2);
-    GET_OBJ_EXTRA(obj_proto + i)[2] = asciiflag_conv(f3);
-    GET_OBJ_EXTRA(obj_proto + i)[3] = asciiflag_conv(f4);
-    GET_OBJ_WEAR(obj_proto + i)[0] = asciiflag_conv(f5);
-    GET_OBJ_WEAR(obj_proto + i)[1] = asciiflag_conv(f6);
-    GET_OBJ_WEAR(obj_proto + i)[2] = asciiflag_conv(f7);
-    GET_OBJ_WEAR(obj_proto + i)[3] = asciiflag_conv(f8);
-    GET_OBJ_PERM(obj_proto + i)[0] = asciiflag_conv(f9);
-    GET_OBJ_PERM(obj_proto + i)[1] = asciiflag_conv(f10);
-    GET_OBJ_PERM(obj_proto + i)[2] = asciiflag_conv(f11);
-    GET_OBJ_PERM(obj_proto + i)[3] = asciiflag_conv(f12);
+    GET_OBJ_EXTRA(obj)[0] = asciiflag_conv(f1);
+    GET_OBJ_EXTRA(obj)[1] = asciiflag_conv(f2);
+    GET_OBJ_EXTRA(obj)[2] = asciiflag_conv(f3);
+    GET_OBJ_EXTRA(obj)[3] = asciiflag_conv(f4);
+    GET_OBJ_WEAR(obj)[0] = asciiflag_conv(f5);
+    GET_OBJ_WEAR(obj)[1] = asciiflag_conv(f6);
+    GET_OBJ_WEAR(obj)[2] = asciiflag_conv(f7);
+    GET_OBJ_WEAR(obj)[3] = asciiflag_conv(f8);
+    GET_OBJ_PERM(obj)[0] = asciiflag_conv(f9);
+    GET_OBJ_PERM(obj)[1] = asciiflag_conv(f10);
+    GET_OBJ_PERM(obj)[2] = asciiflag_conv(f11);
+    GET_OBJ_PERM(obj)[3] = asciiflag_conv(f12);
 
   } else {
     log("SYSERR: Format error in first numeric line (expecting 13 args, got %d), %s", retval, buf2);
@@ -2432,7 +2435,7 @@ static char *parse_object(FILE *obj_f, int nr)
   }
   
   /* Object flags checked in check_object(). */
-  GET_OBJ_TYPE(obj_proto + i) = t[0];
+  GET_OBJ_TYPE(obj) = t[0];
   
   if (!get_line(obj_f, line)) {
     log("SYSERR: Expecting second numeric line of %s, but file ended!", buf2);
@@ -2448,22 +2451,22 @@ static char *parse_object(FILE *obj_f, int nr)
   }
 
   for (j = 0; j < NUM_OBJ_VAL_POSITIONS; j++)
-    GET_OBJ_VAL(obj_proto + i, j) = t[j];
+    GET_OBJ_VAL(obj, j) = t[j];
 
-  if ((GET_OBJ_TYPE(obj_proto + i) == ITEM_PORTAL || \
-       GET_OBJ_TYPE(obj_proto + i) == ITEM_HATCH) && \
-       (!GET_OBJ_VAL(obj_proto + i, VAL_DOOR_DCLOCK) || \
-        !GET_OBJ_VAL(obj_proto + i, VAL_DOOR_DCHIDE))) {
-    GET_OBJ_VAL(obj_proto + i, VAL_DOOR_DCLOCK) = 20;
-    GET_OBJ_VAL(obj_proto + i, VAL_DOOR_DCHIDE) = 20;
+  if ((GET_OBJ_TYPE(obj) == ITEM_PORTAL || \
+       GET_OBJ_TYPE(obj) == ITEM_HATCH) && \
+       (!GET_OBJ_VAL(obj, VAL_DOOR_DCLOCK) || \
+        !GET_OBJ_VAL(obj, VAL_DOOR_DCHIDE))) {
+    GET_OBJ_VAL(obj, VAL_DOOR_DCLOCK) = 20;
+    GET_OBJ_VAL(obj, VAL_DOOR_DCHIDE) = 20;
     if(bitsavetodisk) {
       add_to_save_list(zone_table[real_zone_by_thing(nr)].number, 1);
       converting = TRUE;
     }
   }
 
-  if (GET_OBJ_TYPE(obj_proto + i) == ITEM_WEAPON && GET_OBJ_VAL(obj_proto + i, 0) > 169) {
-    GET_OBJ_VAL(obj_proto + i, 0) = suntzu_weapon_convert(t[0]);
+  if (GET_OBJ_TYPE(obj) == ITEM_WEAPON && GET_OBJ_VAL(obj, 0) > 169) {
+    GET_OBJ_VAL(obj, 0) = suntzu_weapon_convert(t[0]);
 
     if(bitsavetodisk) {
       add_to_save_list(zone_table[real_zone_by_thing(nr)].number, 1);
@@ -2493,29 +2496,28 @@ static char *parse_object(FILE *obj_f, int nr)
     exit(1);
   }
   }
-  GET_OBJ_WEIGHT(obj_proto + i) = t[0];
-  GET_OBJ_COST(obj_proto + i) = t[1];
-  GET_OBJ_RENT(obj_proto + i) = t[2];
-  GET_OBJ_LEVEL(obj_proto + i) = t[3];
-  GET_OBJ_SIZE(obj_proto + i) = SIZE_MEDIUM;
-
+  GET_OBJ_WEIGHT(obj) = t[0];
+  GET_OBJ_COST(obj) = t[1];
+  GET_OBJ_RENT(obj) = t[2];
+  GET_OBJ_LEVEL(obj) = t[3];
+  GET_OBJ_SIZE(obj) = SIZE_MEDIUM;
   /* check to make sure that weight of containers exceeds curr. quantity */
-  if (GET_OBJ_TYPE(obj_proto + i) == ITEM_DRINKCON ||
-      GET_OBJ_TYPE(obj_proto + i) == ITEM_FOUNTAIN) {
-    if (GET_OBJ_WEIGHT(obj_proto + i) < GET_OBJ_VAL(obj_proto + i, 1))
-      GET_OBJ_WEIGHT(obj_proto + i) = GET_OBJ_VAL(obj_proto + i, 1) + 5;
+  if (GET_OBJ_TYPE(obj) == ITEM_DRINKCON ||
+      GET_OBJ_TYPE(obj) == ITEM_FOUNTAIN) {
+    if (GET_OBJ_WEIGHT(obj) < GET_OBJ_VAL(obj, 1))
+      GET_OBJ_WEIGHT(obj) = GET_OBJ_VAL(obj, 1) + 5;
   }
   /* *** make sure portal objects have their timer set correctly *** */
-  if (GET_OBJ_TYPE(obj_proto + i) == ITEM_PORTAL) {
-    GET_OBJ_TIMER(obj_proto + i) =  -1;
+  if (GET_OBJ_TYPE(obj) == ITEM_PORTAL) {
+    GET_OBJ_TIMER(obj) =  -1;
   }
 
   /* *** extra descriptions and affect fields *** */
 
   for (j = 0; j < MAX_OBJ_AFFECT; j++) {
-    obj_proto[i].affected[j].location = APPLY_NONE;
-    obj_proto[i].affected[j].modifier = 0;
-    obj_proto[i].affected[j].specific = 0;
+    obj->affected[j].location = APPLY_NONE;
+    obj->affected[j].modifier = 0;
+    obj->affected[j].specific = 0;
   }
 
   strcat(buf2, ", after numeric constants\n"	/* strcat: OK (for 'buf2 >= 87') */
@@ -2532,8 +2534,8 @@ static char *parse_object(FILE *obj_f, int nr)
       CREATE(new_descr, struct extra_descr_data, 1);
       new_descr->keyword = fread_string(obj_f, buf2);
       new_descr->description = fread_string(obj_f, buf2);
-      new_descr->next = obj_proto[i].ex_description;
-      obj_proto[i].ex_description = new_descr;
+      new_descr->next = obj->ex_description;
+      obj->ex_description = new_descr;
       break;
     case 'A':
       if (j >= MAX_OBJ_AFFECT) {
@@ -2558,11 +2560,11 @@ static char *parse_object(FILE *obj_f, int nr)
 
       if (t[0] >= APPLY_UNUSED3 && t[0] <= APPLY_UNUSED4) {
         log("Warning: object #%d (%s) uses deprecated saving throw applies",
-            nr, GET_OBJ_SHORT(obj_proto + i));
+            nr, GET_OBJ_SHORT(obj));
       }
-      obj_proto[i].affected[j].location = t[0];
-      obj_proto[i].affected[j].modifier = t[1];
-      obj_proto[i].affected[j].specific = t[2];
+      obj->affected[j].location = t[0];
+      obj->affected[j].modifier = t[1];
+      obj->affected[j].specific = t[2];
       j++;
       break;
     case 'S':  /* Spells for Spellbooks*/
@@ -2582,12 +2584,12 @@ static char *parse_object(FILE *obj_f, int nr)
 	    "...offending line: '%s'", buf2, retval, line);
 	exit(1);
       }
-      if (!obj_proto[i].sbinfo) {
-        CREATE(obj_proto[i].sbinfo, struct obj_spellbook_spell, SPELLBOOK_SIZE);
-        memset((char *) obj_proto[i].sbinfo, 0, SPELLBOOK_SIZE * sizeof(struct obj_spellbook_spell));
+      if (!obj->sbinfo) {
+        CREATE(obj->sbinfo, struct obj_spellbook_spell, SPELLBOOK_SIZE);
+        memset((char *) obj->sbinfo, 0, SPELLBOOK_SIZE * sizeof(struct obj_spellbook_spell));
       }
-      obj_proto[i].sbinfo[j].spellname = t[0];
-      obj_proto[i].sbinfo[j].pages = t[1];
+      obj->sbinfo[j].spellname = t[0];
+      obj->sbinfo[j].pages = t[1];
       j++;
       break;
     case 'T':  /* DG triggers */
@@ -2605,17 +2607,17 @@ static char *parse_object(FILE *obj_f, int nr)
 	    "...offending line: '%s'", buf2, line);
 	exit(1);
       }
-      GET_OBJ_SIZE(obj_proto + i) = t[0];
+      GET_OBJ_SIZE(obj) = t[0];
       break;
     case '$':
     case '#':
       /* Objects that set CHARM on players are bad. */
-      if (OBJAFF_FLAGGED(obj_proto + i, AFF_CHARM)) {
+      if (OBJAFF_FLAGGED(obj, AFF_CHARM)) {
         log("SYSERR: Object #%d has reserved bit AFF_CHARM set.", nr);
-        REMOVE_BIT_AR(GET_OBJ_PERM(obj_proto + i), AFF_CHARM);
+        REMOVE_BIT_AR(GET_OBJ_PERM(obj), AFF_CHARM);
       }
       top_of_objt = i;
-      check_object(obj_proto + i);
+      check_object(obj);
       i++;
       return (line);
     default:

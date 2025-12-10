@@ -17,12 +17,14 @@
 #include "fight.h"
 #include "act.attack.h"
 #include "dg_comm.h"
+#include "dg_scripts.h"
 #include "utils.h"
 #include "comm.h"
 #include "act.item.h"
 #include "handler.h"
 #include "constants.h"
 #include "genzon.h"
+#include "class.h"
 
 /* local functions */
 void damage_weapon(struct char_data *ch, struct obj_data *obj, struct char_data *vict)

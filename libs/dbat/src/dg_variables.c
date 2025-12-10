@@ -270,10 +270,10 @@ void find_replacement(void *go, struct script_data *sc, trig_data *trig, int typ
       if (!strcasecmp(var, "self")) {
         switch (type) {
         case MOB_TRIGGER:
-          snprintf(str, slen, "%c%d", UID_CHAR, GET_ID((char_data *) go));
+          snprintf(str, slen, "%c%d", UID_CHAR, GET_ID(((char_data *) go)));
           break;
         case OBJ_TRIGGER:
-          snprintf(str, slen, "%c%d", UID_CHAR, GET_ID((obj_data *) go));
+          snprintf(str, slen, "%c%d", UID_CHAR, GET_ID(((obj_data *) go)));
           break;
         case WLD_TRIGGER:
           snprintf(str, slen, "%c%d", UID_CHAR, ((room_data *)go)->number + ROOM_ID_BASE);
@@ -521,10 +521,10 @@ in the vault (vnum: 453) now and then. you can just use
               in_room = real_room(((struct room_data *) go)->number);
               break;
             case OBJ_TRIGGER:
-              in_room = obj_room((struct obj_data *) go);
+              in_room = obj_room(((struct obj_data *) go));
               break;
             case MOB_TRIGGER:
-              in_room = IN_ROOM((struct char_data *)go);
+              in_room = IN_ROOM(((struct char_data *)go));
               break;
           }
           if (in_room == NOWHERE) {

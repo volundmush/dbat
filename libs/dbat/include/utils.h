@@ -310,71 +310,68 @@ int wield_type(int chsize, const struct obj_data *weap);
 #define CHECK_PLAYER_SPECIAL(ch, var)	(var)
 #endif
 
-#define MOB_FLAGS(ch)	((ch)->act)
-#define PLR_FLAGS(ch)	((ch)->act)
-#define PRF_FLAGS(ch) CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->pref))
-#define AFF_FLAGS(ch)	((ch)->affected_by)
-#define ADM_FLAGS(ch)	((ch)->admflags)
-#define ROOM_FLAGS(loc)	(world[(loc)].room_flags)
-#define SPELL_ROUTINES(spl)	(spell_info[spl].routines)
-#define ZONE_FLAGS(rnum)       (zone_table[(rnum)].zone_flags)
-#define ZONE_MINLVL(rnum)      (zone_table[(rnum)].min_level)
-#define ZONE_MAXLVL(rnum)      (zone_table[(rnum)].max_level)
+#define MOB_FLAGS(ch)	ch->act
+#define PLR_FLAGS(ch)	ch->act
+#define PRF_FLAGS(ch) CHECK_PLAYER_SPECIAL(ch, ch->player_specials->pref)
+#define AFF_FLAGS(ch)	ch->affected_by
+#define ADM_FLAGS(ch)	ch->admflags
+#define ROOM_FLAGS(loc)	world[loc].room_flags
+#define SPELL_ROUTINES(spl)	spell_info[spl].routines
+#define ZONE_FLAGS(rnum)       zone_table[rnum].zone_flags
+#define ZONE_MINLVL(rnum)      zone_table[rnum].min_level
+#define ZONE_MAXLVL(rnum)      zone_table[rnum].max_level
 /* Return the gauntlet highest room for ch */ 
-#define GET_GAUNTLET(ch)    CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->gauntlet))
+#define GET_GAUNTLET(ch)    CHECK_PLAYER_SPECIAL(ch, ch->player_specials->gauntlet)
 
 /*
  * See http://www.circlemud.org/~greerga/todo/todo.009 to eliminate MOB_ISNPC.
  * IS_MOB() acts as a VALID_MOB_RNUM()-like function.
  */
-#define IS_NPC(ch)	(IS_SET_AR(MOB_FLAGS(ch), MOB_ISNPC))
+#define IS_NPC(ch)	IS_SET_AR(MOB_FLAGS(ch), MOB_ISNPC)
 #define IS_MOB(ch)	(IS_NPC(ch) && GET_MOB_RNUM(ch) <= top_of_mobt && \
 				GET_MOB_RNUM(ch) != NOBODY)
 
-#define MOB_FLAGGED(ch, flag) (IS_NPC(ch) && IS_SET_AR(MOB_FLAGS(ch), (flag)))
-#define PLR_FLAGGED(ch, flag) (!IS_NPC(ch) && IS_SET_AR(PLR_FLAGS(ch), (flag)))
-#define AFF_FLAGGED(ch, flag) (IS_SET_AR(AFF_FLAGS(ch), (flag)))
-#define PRF_FLAGGED(ch, flag) (IS_SET_AR(PRF_FLAGS(ch), (flag)))
-#define ADM_FLAGGED(ch, flag) (IS_SET_AR(ADM_FLAGS(ch), (flag)))
-#define ROOM_FLAGGED(loc, flag) (IS_SET_AR(ROOM_FLAGS(loc), (flag)))
-#define EXIT_FLAGGED(exit, flag) (IS_SET((exit)->exit_info, (flag)))
-#define OBJAFF_FLAGGED(obj, flag) (IS_SET_AR(GET_OBJ_PERM(obj), (flag)))
-#define OBJVAL_FLAGGED(obj, flag) (IS_SET(GET_OBJ_VAL((obj), VAL_CONTAINER_FLAGS), (flag)))
-#define OBJWEAR_FLAGGED(obj, flag) (IS_SET_AR(GET_OBJ_WEAR(obj), (flag)))
-#define OBJ_FLAGGED(obj, flag) (IS_SET_AR(GET_OBJ_EXTRA(obj), (flag)))
-#define BODY_FLAGGED(ch, flag) (IS_SET_AR(BODY_PARTS(ch), (flag)))
-#define ZONE_FLAGGED(rnum, flag)   (IS_SET_AR(zone_table[(rnum)].zone_flags, flag))
-#define HAS_SPELL_ROUTINE(spl, flag) (IS_SET(SPELL_ROUTINES(spl), (flag)))
+#define MOB_FLAGGED(ch, flag) (IS_NPC(ch) && IS_SET_AR(MOB_FLAGS(ch), flag))
+#define PLR_FLAGGED(ch, flag) (!IS_NPC(ch) && IS_SET_AR(PLR_FLAGS(ch), flag))
+#define AFF_FLAGGED(ch, flag) IS_SET_AR(AFF_FLAGS(ch), flag)
+#define PRF_FLAGGED(ch, flag) IS_SET_AR(PRF_FLAGS(ch), flag)
+#define ADM_FLAGGED(ch, flag) IS_SET_AR(ADM_FLAGS(ch), flag)
+#define ROOM_FLAGGED(loc, flag) IS_SET_AR(ROOM_FLAGS(loc), flag)
+#define EXIT_FLAGGED(exit, flag) IS_SET(exit->exit_info, flag)
+#define OBJAFF_FLAGGED(obj, flag) IS_SET_AR(GET_OBJ_PERM(obj), flag)
+#define OBJVAL_FLAGGED(obj, flag) IS_SET(GET_OBJ_VAL(obj, VAL_CONTAINER_FLAGS), flag)
+#define OBJWEAR_FLAGGED(obj, flag) IS_SET_AR(GET_OBJ_WEAR(obj), flag)
+#define OBJ_FLAGGED(obj, flag) IS_SET_AR(GET_OBJ_EXTRA(obj), flag)
+#define BODY_FLAGGED(ch, flag) IS_SET_AR(BODY_PARTS(ch), flag)
+#define ZONE_FLAGGED(rnum, flag)   IS_SET_AR(zone_table[rnum].zone_flags, flag)
+#define HAS_SPELL_ROUTINE(spl, flag) IS_SET(SPELL_ROUTINES(spl), flag)
 
 /* IS_AFFECTED for backwards compatibility */
-#define IS_AFFECTED(ch, skill) (AFF_FLAGGED((ch), (skill)))
+#define IS_AFFECTED(ch, skill) AFF_FLAGGED(ch, (skill))
 
-#define PLR_TOG_CHK(ch,flag) ((TOGGLE_BIT_AR(PLR_FLAGS(ch), (flag))) & Q_BIT(flag))
-#define PRF_TOG_CHK(ch,flag) ((TOGGLE_BIT_AR(PRF_FLAGS(ch), (flag))) & Q_BIT(flag))
-#define ADM_TOG_CHK(ch,flag) ((TOGGLE_BIT_AR(ADM_FLAGS(ch), (flag))) & Q_BIT(flag))
-#define AFF_TOG_CHK(ch,flag) ((TOGGLE_BIT_AR(AFF_FLAGS(ch), (flag))) & Q_BIT(flag))
+#define PLR_TOG_CHK(ch,flag) ((TOGGLE_BIT_AR(PLR_FLAGS(ch), flag)) & Q_BIT(flag))
+#define PRF_TOG_CHK(ch,flag) ((TOGGLE_BIT_AR(PRF_FLAGS(ch), flag)) & Q_BIT(flag))
+#define ADM_TOG_CHK(ch,flag) ((TOGGLE_BIT_AR(ADM_FLAGS(ch), flag)) & Q_BIT(flag))
+#define AFF_TOG_CHK(ch,flag) ((TOGGLE_BIT_AR(AFF_FLAGS(ch), flag)) & Q_BIT(flag))
 
 /* new define for quick check */
-#define DEAD(ch) (PLR_FLAGGED((ch), PLR_NOTDEADYET) || MOB_FLAGGED((ch), MOB_NOTDEADYET))
+#define DEAD(ch) (PLR_FLAGGED(ch, PLR_NOTDEADYET) || MOB_FLAGGED(ch, MOB_NOTDEADYET))
 
 /* room utils ************************************************************/
 
 
-#define SECT(room)	(VALID_ROOM_RNUM(room) ? \
-				world[(room)].sector_type : SECT_INSIDE)
-#define ROOM_DAMAGE(room)   (world[(room)].dmg)
-#define ROOM_EFFECT(room)   (world[(room)].geffect)
-#define ROOM_GRAVITY(room)  (world[(room)].gravity)
+#define SECT(room)	(VALID_ROOM_RNUM(room) ? world[room].sector_type : SECT_INSIDE)
+#define ROOM_DAMAGE(room)   world[room].dmg
+#define ROOM_EFFECT(room)   world[room].geffect
+#define ROOM_GRAVITY(room)  world[room].gravity
 #define SUNKEN(room)    (ROOM_EFFECT(room) < 0 || SECT(room) == SECT_UNDERWATER)
 
-#define IS_DARK(room)	room_is_dark((room))
+#define IS_DARK(room)	room_is_dark(room)
 #define IS_LIGHT(room)  (!IS_DARK(room))
 
 #define VALID_ROOM_RNUM(rnum)	((rnum) != NOWHERE && (rnum) <= top_of_world)
-#define GET_ROOM_VNUM(rnum) \
-	((room_vnum)(VALID_ROOM_RNUM(rnum) ? world[(rnum)].number : NOWHERE))
-#define GET_ROOM_SPEC(room) \
-	(VALID_ROOM_RNUM(room) ? world[(room)].func : NULL)
+#define GET_ROOM_VNUM(rnum) ((room_vnum)(VALID_ROOM_RNUM(rnum) ? world[rnum].number : NOWHERE))
+#define GET_ROOM_SPEC(room) (VALID_ROOM_RNUM(room) ? world[room].func : NULL)
 
 /* Minor Planet Defines */
 #define PLANET_ZENITH(room) ((GET_ROOM_VNUM(room) >= 3400 && GET_ROOM_VNUM(room) <= 3599) || (GET_ROOM_VNUM(room) >= 62900 && GET_ROOM_VNUM(room) <= 62999) || \
@@ -383,62 +380,61 @@ int wield_type(int chsize, const struct obj_data *weap);
 /* char utils ************************************************************/
 
 
-#define IN_ROOM(ch)	((ch)->in_room)
-#define IN_ZONE(ch)   (zone_table[(world[(IN_ROOM(ch))].zone)].number)
-#define GET_WAS_IN(ch)	((ch)->was_in_room)
-#define GET_AGE(ch)     (age(ch)->year)
+#define IN_ROOM(ch)	ch->in_room
+#define IN_ZONE(ch)   zone_table[world[IN_ROOM(ch)].zone].number
+#define GET_WAS_IN(ch)	ch->was_in_room
+#define GET_AGE(ch)     age(ch)->year
 
-#define GET_PC_NAME(ch)	((ch)->name)
-#define GET_NAME(ch)    (IS_NPC(ch) ? \
-			 (ch)->short_descr : GET_PC_NAME(ch))
-#define GET_TITLE(ch)   ((ch)->desc ? ((ch)->desc->title ? (ch)->desc->title : "[Unset Title]") : "@D[@GNew User@D]")
-#define GET_USER_TITLE(d) ((d)->title)
-#define GET_PHASE(ch)   ((ch)->starphase)
-#define GET_MIMIC(ch)   ((ch)->mimic)
-#define GET_VOICE(ch)   ((ch)->voice)
-#define GET_CLAN(ch)    ((ch)->clan)
-#define GET_TRANSCLASS(ch) ((ch)->transclass)
-#define GET_FEATURE(ch) ((ch)->feature)
-#define GET_USER(ch)    ((ch)->desc ? ((ch)->desc->user ? (ch)->desc->user : "NOUSER") : "NOUSER")
-#define GET_LOG_USER(ch) ((ch)->loguser)
-#define GET_CRANK(ch)   ((ch)->crank)
-#define GET_ADMLEVEL(ch)	((ch)->admlevel)
-#define GET_CLASS_LEVEL(ch)	((ch)->level)
-#define GET_LEVEL_ADJ(ch)	((ch)->level_adj)
-#define GET_HITDICE(ch)		((ch)->race_level)
+#define GET_PC_NAME(ch)	ch->name
+#define GET_NAME(ch)    (IS_NPC(ch) ? ch->short_descr : GET_PC_NAME(ch))
+#define GET_TITLE(ch)   (ch->desc ? (ch->desc->title ? ch->desc->title : "[Unset Title]") : "@D[@GNew User@D]")
+#define GET_USER_TITLE(d) d->title
+#define GET_PHASE(ch)   ch->starphase
+#define GET_MIMIC(ch)   ch->mimic
+#define GET_VOICE(ch)   ch->voice
+#define GET_CLAN(ch)    ch->clan
+#define GET_TRANSCLASS(ch) ch->transclass
+#define GET_FEATURE(ch) ch->feature
+#define GET_USER(ch)    (ch->desc ? (ch->desc->user ? ch->desc->user : "NOUSER") : "NOUSER")
+#define GET_LOG_USER(ch) ch->loguser
+#define GET_CRANK(ch)   ch->crank
+#define GET_ADMLEVEL(ch)	ch->admlevel
+#define GET_CLASS_LEVEL(ch)	ch->level
+#define GET_LEVEL_ADJ(ch)	ch->level_adj
+#define GET_HITDICE(ch)		ch->race_level
 #define GET_LEVEL(ch)	(GET_CLASS_LEVEL(ch) + GET_LEVEL_ADJ(ch) + GET_HITDICE(ch))
-#define GET_PFILEPOS(ch)((ch)->pfilepos)
+#define GET_PFILEPOS(ch)	ch->pfilepos
 
-#define GET_CLASS(ch)   ((ch)->chclass)
-#define GET_CLASS_NONEPIC(ch, whichclass) ((ch)->chclasses[whichclass])
-#define GET_CLASS_EPIC(ch, whichclass) ((ch)->epicclasses[whichclass])
+#define GET_CLASS(ch)   ch->chclass
+#define GET_CLASS_NONEPIC(ch, whichclass) ch->chclasses[whichclass]
+#define GET_CLASS_EPIC(ch, whichclass) ch->epicclasses[whichclass]
 #define GET_CLASS_RANKS(ch, whichclass) (GET_CLASS_NONEPIC(ch, whichclass) + \
                                          GET_CLASS_EPIC(ch, whichclass))
-#define GET_RACE(ch)    ((ch)->race)
-#define GET_HAIRL(ch)   ((ch)->hairl)
-#define GET_HAIRC(ch)   ((ch)->hairc)
-#define GET_HAIRS(ch)   ((ch)->hairs)
-#define GET_SKIN(ch)    ((ch)->skin)
-#define GET_EYE(ch)     ((ch)->eye)
-#define GET_DISTFEA(ch) ((ch)->distfea)
-#define GET_HOME(ch)	((ch)->hometown)
-#define GET_WEIGHT(ch)  ((ch)->weight)
-#define GET_HEIGHT(ch)  ((ch)->height)
-#define GET_PC_HEIGHT(ch)	(!IS_NPC(ch) ? age(ch)->year <= 10 ? (int)((ch)->height * 0.68) : age(ch)->year <= 12 ? (int)((ch)->height * 0.72) : age(ch)->year <= 14 ? (int)((ch)->height * 0.85) : age(ch)->year <= 16 ? (int)((ch)->height * 0.92) : (ch)->height : (ch)->height)
-#define GET_PC_WEIGHT(ch)	(!IS_NPC(ch) ? age(ch)->year <= 10 ? (int)((ch)->weight * 0.48) : age(ch)->year <= 12 ? (int)((ch)->weight * 0.55) : age(ch)->year <= 14 ? (int)((ch)->weight * 0.7) : age(ch)->year <= 16 ? (int)((ch)->weight * 0.85) : (ch)->weight : (ch)->weight)
-#define GET_SEX(ch)	((ch)->sex)
-#define GET_TLEVEL(ch)	((ch)->player_specials->tlevel)
-#define CARRYING(ch)    ((ch)->player_specials->carrying)
-#define CARRIED_BY(ch)  ((ch)->player_specials->carried_by)
-#define RACIAL_PREF(ch) ((ch)->player_specials->racial_pref)
-#define GET_RP(ch)      ((ch)->rp)
-#define GET_RBANK(ch)   ((ch)->rbank)
-#define GET_TRP(ch)     ((ch)->trp)
-#define GET_SUPPRESS(ch) ((ch)->suppression)
-#define GET_SUPP(ch)    ((ch)->suppressed)
-#define GET_RDISPLAY(ch) ((ch)->rdisplay)
+#define GET_RACE(ch)    ch->race
+#define GET_HAIRL(ch)   ch->hairl
+#define GET_HAIRC(ch)   ch->hairc
+#define GET_HAIRS(ch)   ch->hairs
+#define GET_SKIN(ch)    ch->skin
+#define GET_EYE(ch)     ch->eye
+#define GET_DISTFEA(ch) ch->distfea
+#define GET_HOME(ch)	ch->hometown
+#define GET_WEIGHT(ch)  ch->weight
+#define GET_HEIGHT(ch)  ch->height
+#define GET_PC_HEIGHT(ch)	(!IS_NPC(ch) ? age(ch)->year <= 10 ? (int)(ch->height * 0.68) : age(ch)->year <= 12 ? (int)(ch->height * 0.72) : age(ch)->year <= 14 ? (int)(ch->height * 0.85) : age(ch)->year <= 16 ? (int)(ch->height * 0.92) : ch->height : ch->height)
+#define GET_PC_WEIGHT(ch)	(!IS_NPC(ch) ? age(ch)->year <= 10 ? (int)(ch->weight * 0.48) : age(ch)->year <= 12 ? (int)(ch->weight * 0.55) : age(ch)->year <= 14 ? (int)(ch->weight * 0.7) : age(ch)->year <= 16 ? (int)(ch->weight * 0.85) : ch->weight : ch->weight)
+#define GET_SEX(ch)	(ch->sex)
+#define GET_TLEVEL(ch)	ch->player_specials->tlevel
+#define CARRYING(ch)    ch->player_specials->carrying
+#define CARRIED_BY(ch)  ch->player_specials->carried_by
+#define RACIAL_PREF(ch) ch->player_specials->racial_pref
+#define GET_RP(ch)      ch->rp
+#define GET_RBANK(ch)   ch->rbank
+#define GET_TRP(ch)     ch->trp
+#define GET_SUPPRESS(ch) ch->suppression
+#define GET_SUPP(ch)    ch->suppressed
+#define GET_RDISPLAY(ch) ch->rdisplay
 
-#define GET_STR(ch)     ((ch)->aff_abils.str)
+#define GET_STR(ch)     ch->aff_abils.str
 /*
  * We could define GET_ADD to be ((GET_STR(ch) > 18) ?
  *                                ((GET_STR(ch) - 18) * 10) : 0)
@@ -448,11 +444,11 @@ int wield_type(int chsize, const struct obj_data *weap);
  */
 /* The old define: */
 /* #define GET_ADD(ch)     ((ch)->aff_abils.str_add) */
-#define GET_DEX(ch)     ((ch)->aff_abils.dex)
-#define GET_INT(ch)     ((ch)->aff_abils.intel)
-#define GET_WIS(ch)     ((ch)->aff_abils.wis)
-#define GET_CON(ch)     ((ch)->aff_abils.con)
-#define GET_CHA(ch)     ((ch)->aff_abils.cha)
+#define GET_DEX(ch)     ch->aff_abils.dex
+#define GET_INT(ch)     ch->aff_abils.intel
+#define GET_WIS(ch)     ch->aff_abils.wis
+#define GET_CON(ch)     ch->aff_abils.con
+#define GET_CHA(ch)     ch->aff_abils.cha
 #define GET_MUTBOOST(ch) (IS_MUTANT(ch) ? ((GET_GENOME(ch, 0) == 1 || GET_GENOME(ch, 1) == 1) ? (GET_SPEEDCALC(ch) + GET_SPEEDBONUS(ch) + GET_SPEEDBOOST(ch)) * 0.3 : 0) : 0)
 #define GET_SPEEDI(ch)  (GET_SPEEDCALC(ch) + GET_SPEEDBONUS(ch) + GET_SPEEDBOOST(ch) + GET_MUTBOOST(ch))
 #define GET_SPEEDCALC(ch) (IS_GRAP(ch) ? GET_CHA(ch) : (IS_INFERIOR(ch) ? (AFF_FLAGGED(ch, AFF_FLYING) ? (GET_SPEEDVAR(ch) * 1.25) : GET_SPEEDVAR(ch)) : GET_SPEEDVAR(ch)))
@@ -471,177 +467,176 @@ int wield_type(int chsize, const struct obj_data *weap);
  * looked at to see if it needs to change before being converted to use
  * GET_ARMOR
  */
-#define SPOILED(ch)       ((ch)->time.played > 86400)
-#define GET_DEATH_TYPE(ch) ((ch)->death_type)
-#define GET_SLEEPT(ch)    ((ch)->sleeptime)
-#define GET_FOODR(ch)     ((ch)->foodr)
-#define GET_ALT(ch)       ((ch)->altitude)
-#define GET_CHARGE(ch)    ((ch)->charge)
-#define GET_CHARGETO(ch)  ((ch)->chargeto)
-#define GET_ARMOR(ch)     ((ch)->armor)
-#define GET_ARMOR_LAST(ch) ((ch)->armor_last)
-#define GET_HIT(ch)	  ((ch)->hit)
-#define GET_MAX_HIT(ch)	  ((ch)->max_hit)
-#define GET_MOVE(ch)	  ((ch)->move)
-#define GET_MAX_MOVE(ch)  ((ch)->max_move)
-#define GET_MANA(ch)	  ((ch)->mana)
-#define GET_MAX_MANA(ch)  ((ch)->max_mana)
-#define GET_KI(ch)	  ((ch)->ki)
-#define GET_MAX_KI(ch)    ((ch)->max_ki)
-#define GET_DROOM(ch)     ((ch)->droom)
-#define GET_OVERFLOW(ch)  ((ch)->overf)
-#define GET_SPAM(ch)      ((ch)->spam)
-#define GET_SHIP(ch)      ((ch)->ship)
-#define GET_SHIPROOM(ch)  ((ch)->shipr)
-#define GET_LPLAY(ch)     ((ch)->lastpl)
-#define GET_DTIME(ch)     ((ch)->deathtime)
-#define GET_RTIME(ch)     ((ch)->rewtime)
-#define GET_DCOUNT(ch)    ((ch)->dcount)
-#define GET_BOARD(ch, i)  ((ch)->lboard[i])
-#define GET_LIMBS(ch, i)  ((ch)->limbs[i])
-#define GET_LIMBCOND(ch, i) ((ch)->limb_condition[i])
-#define GET_SONG(ch)      ((ch)->powerattack)
-#define GET_BONUS(ch, i)  ((ch)->bonuses[i])
-#define GET_TRANSCOST(ch, i) ((ch)->transcost[i])
-#define GET_CCPOINTS(ch)  ((ch)->ccpoints)
-#define GET_NEGCOUNT(ch)  ((ch)->negcount)
-#define GET_GENOME(ch, i)    ((ch)->genome[i])
-#define COMBO(ch)         ((ch)->combo)
-#define LASTATK(ch)       ((ch)->lastattack)
-#define COMBHITS(ch)      ((ch)->combhits)
-#define GET_AURA(ch)      ((ch)->aura)
-#define GET_RADAR1(ch)    ((ch)->radar1)
-#define GET_RADAR2(ch)    ((ch)->radar2)
-#define GET_RADAR3(ch)    ((ch)->radar3)
-#define GET_PING(ch)      ((ch)->ping)
-#define GET_SLOTS(ch)     ((ch)->skill_slots)
-#define GET_TGROWTH(ch)   ((ch)->tail_growth)
-#define GET_RMETER(ch)    ((ch)->rage_meter)
-#define GET_PERSONALITY(ch) ((ch)->personality)
-#define GET_COMBINE(ch)   ((ch)->combine)
-#define GET_PREFERENCE(ch) ((ch)->preference)
-#define GET_BASE_PL(ch)   ((ch)->basepl)
-#define GET_RELAXCOUNT(ch) ((ch)->relax_count)
-#define GET_BLESSLVL(ch)  ((ch)->blesslvl)
-#define GET_ASB(ch)       ((ch)->asb)
-#define GET_REGEN(ch)     ((ch)->regen)
+#define SPOILED(ch)       (ch->time.played > 86400)
+#define GET_DEATH_TYPE(ch) ch->death_type
+#define GET_SLEEPT(ch)    ch->sleeptime
+#define GET_FOODR(ch)     ch->foodr
+#define GET_ALT(ch)       ch->altitude
+#define GET_CHARGE(ch)    ch->charge
+#define GET_CHARGETO(ch)  ch->chargeto
+#define GET_ARMOR(ch)     ch->armor
+#define GET_ARMOR_LAST(ch) ch->armor_last
+#define GET_HIT(ch)	  ch->hit
+#define GET_MAX_HIT(ch)	  ch->max_hit
+#define GET_MOVE(ch)	  ch->move
+#define GET_MAX_MOVE(ch)  ch->max_move
+#define GET_MANA(ch)	  ch->mana
+#define GET_MAX_MANA(ch)  ch->max_mana
+#define GET_KI(ch)	  ch->ki
+#define GET_MAX_KI(ch)    ch->max_ki
+#define GET_DROOM(ch)     ch->droom
+#define GET_OVERFLOW(ch)  ch->overf
+#define GET_SPAM(ch)      ch->spam
+#define GET_SHIP(ch)      ch->ship
+#define GET_SHIPROOM(ch)  ch->shipr
+#define GET_LPLAY(ch)     ch->lastpl
+#define GET_DTIME(ch)     ch->deathtime
+#define GET_RTIME(ch)     ch->rewtime
+#define GET_DCOUNT(ch)    ch->dcount
+#define GET_BOARD(ch, i)  ch->lboard[i]
+#define GET_LIMBS(ch, i)  ch->limbs[i]
+#define GET_LIMBCOND(ch, i) ch->limb_condition[i]
+#define GET_SONG(ch)      ch->powerattack
+#define GET_BONUS(ch, i)  ch->bonuses[i]
+#define GET_TRANSCOST(ch, i) ch->transcost[i]
+#define GET_CCPOINTS(ch)  ch->ccpoints
+#define GET_NEGCOUNT(ch)  ch->negcount
+#define GET_GENOME(ch, i)    ch->genome[i]
+#define COMBO(ch)         ch->combo
+#define LASTATK(ch)       ch->lastattack
+#define COMBHITS(ch)      ch->combhits
+#define GET_AURA(ch)      ch->aura
+#define GET_RADAR1(ch)    ch->radar1
+#define GET_RADAR2(ch)    ch->radar2
+#define GET_RADAR3(ch)    ch->radar3
+#define GET_PING(ch)      ch->ping
+#define GET_SLOTS(ch)     ch->skill_slots
+#define GET_TGROWTH(ch)   ch->tail_growth
+#define GET_RMETER(ch)    ch->rage_meter
+#define GET_PERSONALITY(ch) ch->personality
+#define GET_COMBINE(ch)   ch->combine
+#define GET_PREFERENCE(ch) ch->preference
+#define GET_BASE_PL(ch)   ch->basepl
+#define GET_RELAXCOUNT(ch) ch->relax_count
+#define GET_BLESSLVL(ch)  ch->blesslvl
+#define GET_ASB(ch)       ch->asb
+#define GET_REGEN(ch)     ch->regen
 #define GET_BLESSBONUS(ch) (AFF_FLAGGED(ch, AFF_BLESS) ? (GET_BLESSLVL(ch) >= 100 ? ((GET_MAX_MANA(ch) * 0.5) + (GET_MAX_MOVE(ch) * 0.5)) * 0.1 : GET_BLESSLVL(ch) >= 60 ? ((GET_MAX_MANA(ch) * 0.5) + (GET_MAX_MOVE(ch) * 0.5)) * 0.05 : GET_BLESSLVL(ch) >= 40 ? ((GET_MAX_MANA(ch) * 0.5) + (GET_MAX_MOVE(ch) * 0.5)) * 0.02 : 0) : 0) 
 #define GET_POSELF(ch)    (!IS_NPC(ch) ? PLR_FLAGGED(ch, PLR_POSE) ? GET_SKILL(ch, SKILL_POSE) >= 100 ? 0.15 : GET_SKILL(ch, SKILL_POSE) >= 60 ? 0.1 : GET_SKILL(ch, SKILL_POSE) >= 40 ? 0.05 : 0 : 0 : 0)
 #define GET_POSEBONUS(ch) (((GET_MAX_MANA(ch) * 0.5) + (GET_MAX_MOVE(ch) * 0.5)) * GET_POSELF(ch))
 #define GET_LIFEBONUS(ch) (IS_ARLIAN(ch) ? ((GET_MAX_MANA(ch) * 0.01) * (GET_MOLT_LEVEL(ch) / 100)) + ((GET_MAX_MOVE(ch) * 0.01) * (GET_MOLT_LEVEL(ch) / 100)) : 0)
-#define GET_LIFEBONUSES(ch) ((ch)->lifebonus > 0 ? (GET_LIFEBONUS(ch) + GET_BLESSBONUS(ch) + GET_POSEBONUS(ch)) * (((ch)->lifebonus + 100) * 0.01) : (GET_LIFEBONUS(ch) + GET_BLESSBONUS(ch) + GET_POSEBONUS(ch)))
+#define GET_LIFEBONUSES(ch) (ch->lifebonus > 0 ? (GET_LIFEBONUS(ch) + GET_BLESSBONUS(ch) + GET_POSEBONUS(ch)) * ((ch->lifebonus + 100) * 0.01) : (GET_LIFEBONUS(ch) + GET_BLESSBONUS(ch) + GET_POSEBONUS(ch)))
 #define GET_LIFEMAX(ch)   (IS_DEMON(ch) ? (((GET_MAX_MANA(ch) * 0.5) + (GET_MAX_MOVE(ch) * 0.5)) * 0.75) + GET_LIFEBONUSES(ch) : (IS_KONATSU(ch) ? (((GET_MAX_MANA(ch) * 0.5) + (GET_MAX_MOVE(ch) * 0.5)) * 0.85) + GET_LIFEBONUSES(ch) : (GET_MAX_MANA(ch) * 0.5) + (GET_MAX_MOVE(ch) * 0.5) + GET_LIFEBONUSES(ch)))
-#define GET_LIFEFORCE(ch) ((ch)->lifeforce)
-#define GET_LIFEPERC(ch)  ((ch)->lifeperc)
-#define GET_STUPIDKISS(ch) ((ch)->stupidkiss)
-#define GET_SPEEDBOOST(ch) ((ch)->speedboost)
-#define GET_BACKSTAB_COOL(ch) ((ch)->backstabcool)
-#define GET_COOLDOWN(ch)  ((ch)->con_cooldown)
-#define GET_BASE_KI(ch)   ((ch)->baseki)
-#define GET_BASE_ST(ch)   ((ch)->basest)
-#define GET_BARRIER(ch)   ((ch)->barrier)
-#define GET_GOLD(ch)	  ((ch)->gold)
-#define GET_KAIOKEN(ch)   ((ch)->kaioken)
-#define GET_BOOSTS(ch)    ((ch)->boosts)
-#define MAJINIZED(ch)     ((ch)->majinize)
-#define GET_MAJINIZED(ch) ((ch)->majinizer)
-#define GET_FURY(ch)      ((ch)->fury)
-#define GET_BTIME(ch)     ((ch)->btime)
-#define GET_UP(ch)        ((ch)->upgrade)
-#define GET_FORGETING(ch) ((ch)->forgeting)
-#define GET_FORGET_COUNT(ch) ((ch)->forgetcount)
-#define GET_BANK_GOLD(ch) ((ch)->bank_gold)
-#define GET_POLE_BONUS(ch) ((ch)->accuracy)
-#define GET_FISHSTATE(ch)  ((ch)->fishstate)
-#define GET_FISHD(ch)     ((ch)->accuracy_mod)
-#define GET_DAMAGE_MOD(ch) ((ch)->damage_mod)
-#define GET_SPELLFAIL(ch) ((ch)->spellfail)
-#define GET_ARMORCHECK(ch) ((ch)->armorcheck)
-#define GET_ARMORCHECKALL(ch) ((ch)->armorcheckall)
-#define GET_MOLT_EXP(ch)  ((ch)->moltexp)
-#define GET_MOLT_LEVEL(ch) ((ch)->moltlevel)
-#define GET_SDCOOLDOWN(ch) ((ch)->con_sdcooldown)
-#define GET_INGESTLEARNED(ch) ((ch)->ingestLearned)
-#define GET_POS(ch)		((ch)->position)
-#define GET_IDNUM(ch)		((ch)->idnum)
-#define GET_ID(x)		((x)->id)
-#define IS_CARRYING_W(ch)	((ch)->carry_weight)
-#define IS_CARRYING_N(ch)	((ch)->carry_items)
-#define FIGHTING(ch)		((ch)->fighting)
-#define GET_POWERATTACK(ch)	((ch)->powerattack)
-#define GET_GROUPKILLS(ch)	((ch)->combatexpertise)
-#define GET_SAVE_BASE(ch, i)	((ch)->saving_throw[i])
-#define GET_SAVE_MOD(ch, i)	((ch)->apply_saving_throw[i])
+#define GET_LIFEFORCE(ch) ch->lifeforce
+#define GET_LIFEPERC(ch)  ch->lifeperc
+#define GET_STUPIDKISS(ch) ch->stupidkiss
+#define GET_SPEEDBOOST(ch) ch->speedboost
+#define GET_BACKSTAB_COOL(ch) ch->backstabcool
+#define GET_COOLDOWN(ch)  ch->con_cooldown
+#define GET_BASE_KI(ch)   ch->baseki
+#define GET_BASE_ST(ch)   ch->basest
+#define GET_BARRIER(ch)   ch->barrier
+#define GET_GOLD(ch)	  ch->gold
+#define GET_KAIOKEN(ch)   ch->kaioken
+#define GET_BOOSTS(ch)    ch->boosts
+#define MAJINIZED(ch)     ch->majinize
+#define GET_MAJINIZED(ch) ch->majinizer
+#define GET_FURY(ch)      ch->fury
+#define GET_BTIME(ch)     ch->btime
+#define GET_UP(ch)        ch->upgrade
+#define GET_FORGETING(ch) ch->forgeting
+#define GET_FORGET_COUNT(ch) ch->forgetcount
+#define GET_BANK_GOLD(ch) ch->bank_gold
+#define GET_POLE_BONUS(ch) ch->accuracy
+#define GET_FISHSTATE(ch)  ch->fishstate
+#define GET_FISHD(ch)     ch->accuracy_mod
+#define GET_DAMAGE_MOD(ch) ch->damage_mod
+#define GET_SPELLFAIL(ch) ch->spellfail
+#define GET_ARMORCHECK(ch) ch->armorcheck
+#define GET_ARMORCHECKALL(ch) ch->armorcheckall
+#define GET_MOLT_EXP(ch)  ch->moltexp
+#define GET_MOLT_LEVEL(ch) ch->moltlevel
+#define GET_SDCOOLDOWN(ch) ch->con_sdcooldown
+#define GET_INGESTLEARNED(ch) ch->ingestLearned
+#define GET_POS(ch)		ch->position
+#define GET_IDNUM(ch)		ch->idnum
+#define GET_ID(x)		x->id
+#define IS_CARRYING_W(ch)	ch->carry_weight
+#define IS_CARRYING_N(ch)	ch->carry_items
+#define FIGHTING(ch)		ch->fighting
+#define GET_POWERATTACK(ch)	ch->powerattack
+#define GET_GROUPKILLS(ch)	ch->combatexpertise
+#define GET_SAVE_BASE(ch, i)	ch->saving_throw[i]
+#define GET_SAVE_MOD(ch, i)	ch->apply_saving_throw[i]
 #define GET_SAVE(ch, i)		(GET_SAVE_BASE(ch, i) + GET_SAVE_MOD(ch, i))
-#define GET_ALIGNMENT(ch)	((ch)->alignment)
-#define GET_ETHIC_ALIGNMENT(ch)	((ch)->alignment_ethic)
-#define SITS(ch)                ((ch)->sits)
-#define MINDLINK(ch)            ((ch)->mindlink)
-#define LINKER(ch)              ((ch)->linker)
-#define LASTHIT(ch)             ((ch)->lasthit)
-#define DRAGGING(ch)            ((ch)->drag)
-#define DRAGGED(ch)             ((ch)->dragged)
-#define GRAPPLING(ch)           ((ch)->grappling)
-#define GRAPPLED(ch)            ((ch)->grappled)
-#define GRAPTYPE(ch)            ((ch)->grap)
-#define GET_ORIGINAL(ch)        ((ch)->original)
-#define GET_CLONES(ch)          ((ch)->clones)
-#define GET_DEFENDER(ch)        ((ch)->defender)
-#define GET_DEFENDING(ch)       ((ch)->defending)
-#define BLOCKS(ch)              ((ch)->blocks)
-#define BLOCKED(ch)             ((ch)->blocked)
-#define ABSORBING(ch)           ((ch)->absorbing)
-#define ABSORBBY(ch)            ((ch)->absorbby)
-#define GET_EAVESDROP(ch)       ((ch)->listenroom)
-#define GET_EAVESDIR(ch)        ((ch)->eavesdir)
-#define GET_ABSORBS(ch)         ((ch)->absorbs)
-#define GET_LINTEREST(ch)       ((ch)->lastint)
+#define GET_ALIGNMENT(ch)	ch->alignment
+#define GET_ETHIC_ALIGNMENT(ch)	ch->alignment_ethic
+#define SITS(ch)                ch->sits
+#define MINDLINK(ch)            ch->mindlink
+#define LINKER(ch)              ch->linker
+#define LASTHIT(ch)             ch->lasthit
+#define DRAGGING(ch)            ch->drag
+#define DRAGGED(ch)             ch->dragged
+#define GRAPPLING(ch)           ch->grappling
+#define GRAPPLED(ch)            ch->grappled
+#define GRAPTYPE(ch)            ch->grap
+#define GET_ORIGINAL(ch)        ch->original
+#define GET_CLONES(ch)          ch->clones
+#define GET_DEFENDER(ch)        ch->defender
+#define GET_DEFENDING(ch)       ch->defending
+#define BLOCKS(ch)              ch->blocks
+#define BLOCKED(ch)             ch->blocked
+#define ABSORBING(ch)           ch->absorbing
+#define ABSORBBY(ch)            ch->absorbby
+#define GET_EAVESDROP(ch)       ch->listenroom
+#define GET_EAVESDIR(ch)        ch->eavesdir
+#define GET_ABSORBS(ch)         ch->absorbs
+#define GET_LINTEREST(ch)       ch->lastint
 
-#define GET_COND(ch, i)		CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->conditions[(i)]))
-#define GET_LOADROOM(ch)	CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->load_room))
-#define GET_PRACTICES(ch,cl)	CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->class_skill_points[cl]))
-#define GET_RACE_PRACTICES(ch)	CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->skill_points))
-#define GET_TRAINS(ch)		CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->ability_trains))
-#define GET_TRAINSTR(ch)        CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->trainstr))
-#define GET_TRAININT(ch)        CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->trainint))
-#define GET_TRAINCON(ch)        CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->traincon))
-#define GET_TRAINWIS(ch)        CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->trainwis))
-#define GET_TRAINAGL(ch)        CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->trainagl))
-#define GET_TRAINSPD(ch)        CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->trainspd))
-#define GET_INVIS_LEV(ch)	CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->invis_level))
-#define GET_WIMP_LEV(ch)	CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->wimp_level))
-#define GET_FREEZE_LEV(ch)	CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->freeze_level))
-#define GET_BAD_PWS(ch)		CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->bad_pws))
-#define GET_TALK(ch, i)		CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->talks[i]))
-#define POOFIN(ch)		CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->poofin))
-#define POOFOUT(ch)		CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->poofout))
-#define GET_OLC_ZONE(ch)	CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->olc_zone))
-#define GET_LAST_OLC_TARG(ch)	CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->last_olc_targ))
-#define GET_LAST_OLC_MODE(ch)	CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->last_olc_mode))
-#define GET_ALIASES(ch)		CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->aliases))
-#define GET_LAST_TELL(ch)	CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->last_tell))
-#define GET_HOST(ch)		CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->host))
-#define GET_HISTORY(ch, i)      CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->comm_hist[i]))
+#define GET_COND(ch, i)		CHECK_PLAYER_SPECIAL(ch, (ch->player_specials->conditions[i]))
+#define GET_LOADROOM(ch)	CHECK_PLAYER_SPECIAL(ch, (ch->player_specials->load_room))
+#define GET_PRACTICES(ch,cl)	CHECK_PLAYER_SPECIAL(ch, (ch->player_specials->class_skill_points[cl]))
+#define GET_RACE_PRACTICES(ch)	CHECK_PLAYER_SPECIAL(ch, (ch->player_specials->skill_points))
+#define GET_TRAINS(ch)		CHECK_PLAYER_SPECIAL(ch, (ch->player_specials->ability_trains))
+#define GET_TRAINSTR(ch)        CHECK_PLAYER_SPECIAL(ch, (ch->player_specials->trainstr))
+#define GET_TRAININT(ch)        CHECK_PLAYER_SPECIAL(ch, (ch->player_specials->trainint))
+#define GET_TRAINCON(ch)        CHECK_PLAYER_SPECIAL(ch, (ch->player_specials->traincon))
+#define GET_TRAINWIS(ch)        CHECK_PLAYER_SPECIAL(ch, (ch->player_specials->trainwis))
+#define GET_TRAINAGL(ch)        CHECK_PLAYER_SPECIAL(ch, (ch->player_specials->trainagl))
+#define GET_TRAINSPD(ch)        CHECK_PLAYER_SPECIAL(ch, (ch->player_specials->trainspd))
+#define GET_INVIS_LEV(ch)	CHECK_PLAYER_SPECIAL(ch, (ch->player_specials->invis_level))
+#define GET_WIMP_LEV(ch)	CHECK_PLAYER_SPECIAL(ch, (ch->player_specials->wimp_level))
+#define GET_FREEZE_LEV(ch)	CHECK_PLAYER_SPECIAL(ch, (ch->player_specials->freeze_level))
+#define GET_BAD_PWS(ch)		CHECK_PLAYER_SPECIAL(ch, (ch->player_specials->bad_pws))
+#define GET_TALK(ch, i)		CHECK_PLAYER_SPECIAL(ch, (ch->player_specials->talks[i]))
+#define POOFIN(ch)		CHECK_PLAYER_SPECIAL(ch, (ch->player_specials->poofin))
+#define POOFOUT(ch)		CHECK_PLAYER_SPECIAL(ch, (ch->player_specials->poofout))
+#define GET_OLC_ZONE(ch)	CHECK_PLAYER_SPECIAL(ch, (ch->player_specials->olc_zone))
+#define GET_LAST_OLC_TARG(ch)	CHECK_PLAYER_SPECIAL(ch, (ch->player_specials->last_olc_targ))
+#define GET_LAST_OLC_MODE(ch)	CHECK_PLAYER_SPECIAL(ch, (ch->player_specials->last_olc_mode))
+#define GET_ALIASES(ch)		CHECK_PLAYER_SPECIAL(ch, (ch->player_specials->aliases))
+#define GET_LAST_TELL(ch)	CHECK_PLAYER_SPECIAL(ch, (ch->player_specials->last_tell))
+#define GET_HOST(ch)		CHECK_PLAYER_SPECIAL(ch, (ch->player_specials->host))
+#define GET_HISTORY(ch, i)      CHECK_PLAYER_SPECIAL(ch, (ch->player_specials->comm_hist[i]))
+#define GET_SKILL_BONUS(ch, i)		ch->skillmods[i]
+#define GET_SKILL_PERF(ch, i)           ch->skillperfs[i]
+#define SET_SKILL_BONUS(ch, i, value)	do { ch->skillmods[i] = value; } while (0)
+#define SET_SKILL_PERF(ch, i, value)    do { ch->skillperfs[i] = value; } while (0)
+#define GET_SKILL_BASE(ch, i)		ch->skills[i]
+#define GET_SKILL(ch, i)		(ch->skills[i] + GET_SKILL_BONUS(ch, i))
+#define SET_SKILL(ch, i, val)		do { ch->skills[i] = val; } while(0)
+#define BODY_PARTS(ch)  ch->bodyparts
 
-#define GET_SKILL_BONUS(ch, i)		(ch->skillmods[i])
-#define GET_SKILL_PERF(ch, i)           (ch->skillperfs[i])
-#define SET_SKILL_BONUS(ch, i, value)	do { (ch)->skillmods[i] = value; } while (0)
-#define SET_SKILL_PERF(ch, i, value)    do { (ch)->skillperfs[i] = value; } while (0)
-#define GET_SKILL_BASE(ch, i)		(ch->skills[i])
-#define GET_SKILL(ch, i)		((ch)->skills[i] + GET_SKILL_BONUS(ch, i))
-#define SET_SKILL(ch, i, val)		do { (ch)->skills[i] = val; } while(0)
-#define BODY_PARTS(ch)  ((ch)->bodyparts)
-
-#define GET_EQ(ch, i)		((ch)->equipment[i])
+#define GET_EQ(ch, i)		ch->equipment[i]
 
 #define GET_MOB_SPEC(ch)	(IS_MOB(ch) ? mob_index[(ch)->nr].func : NULL)
-#define GET_MOB_RNUM(mob)	((mob)->nr)
+#define GET_MOB_RNUM(mob)	mob->nr
 #define GET_MOB_VNUM(mob)	(IS_MOB(mob) ? \
 				 mob_index[GET_MOB_RNUM(mob)].vnum : NOBODY)
 
-#define GET_DEFAULT_POS(ch)	((ch)->mob_specials.default_pos)
-#define MEMORY(ch)		((ch)->mob_specials.memory)
-#define MOB_COOLDOWN(ch)        ((ch)->cooldown)
+#define GET_DEFAULT_POS(ch)	ch->mob_specials.default_pos
+#define MEMORY(ch)		ch->mob_specials.memory
+#define MOB_COOLDOWN(ch)        ch->cooldown
 
 /* STRENGTH_APPLY_INDEX is no longer needed with the death of GET_ADD */
 /* #define STRENGTH_APPLY_INDEX(ch) \
@@ -652,8 +647,8 @@ int wield_type(int chsize, const struct obj_data *weap);
           (GET_ADD(ch) <= 99) ? 29 :  30 ) ) )                   \
         ) */
 
-#define CAN_CARRY_W(ch) (max_carry_weight(ch))
-#define CAN_CARRY_N(ch) (50)
+#define CAN_CARRY_W(ch) max_carry_weight(ch)
+#define CAN_CARRY_N(ch) 50
 #define AWAKE(ch) (GET_POS(ch) > POS_SLEEPING)
 #define CAN_SEE_IN_DARK(ch) \
    (AFF_FLAGGED(ch, AFF_INFRAVISION) || (!IS_NPC(ch) && PRF_FLAGGED(ch, PRF_HOLYLIGHT)) || (IS_MUTANT(ch) && (GET_GENOME(ch, 0) == 4 || GET_GENOME(ch, 1) == 4)) || PLR_FLAGGED(ch, PLR_AURALIGHT))
@@ -668,14 +663,14 @@ int wield_type(int chsize, const struct obj_data *weap);
                          (IS_LAWFUL(ch) ? 0 : (IS_CHAOTIC(ch) ? 2 : 1)))
 
 #define IN_ARENA(ch)   (GET_ROOM_VNUM(IN_ROOM(ch)) >= 17800 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 17874)
-#define ARENA_IDNUM(ch) ((ch)->arenawatch)
+#define ARENA_IDNUM(ch) ch->arenawatch
 
 /* These three deprecated. */
 #define WAIT_STATE(ch, cycle) do { GET_WAIT_STATE(ch) = (cycle); } while(0)
-#define CHECK_WAIT(ch)                ((ch)->wait > 0)
+#define CHECK_WAIT(ch)                (ch->wait > 0)
 #define GET_MOB_WAIT(ch)      GET_WAIT_STATE(ch)
 /* New, preferred macro. */
-#define GET_WAIT_STATE(ch)    ((ch)->wait)
+#define GET_WAIT_STATE(ch)    ch->wait
 
 #define IS_PLAYING(d)   (STATE(d) == CON_TEDIT || STATE(d) == CON_REDIT ||      \
                         STATE(d) == CON_MEDIT || STATE(d) == CON_OEDIT ||       \
@@ -687,13 +682,13 @@ int wield_type(int chsize, const struct obj_data *weap);
                         STATE(d) == CON_POBJ)
 #define IS_INMENU(d)    (STATE(d) == CON_MENU || STATE(d) == CON_EXDESC || STATE(d) == CON_UMENU || STATE(d) == CON_GET_USER || STATE(d) == CON_GET_EMAIL || STATE(d) == CON_CHPWD_GETOLD || STATE(d) == CON_CHPWD_GETNEW || STATE(d) == CON_CHPWD_VRFY || STATE(d) == CON_DELCNF1 || STATE(d) == CON_DELCNF2 || STATE(d) == CON_QRACE || STATE(d) == CON_QCLASS || STATE(d) == CON_CLASS_HELP || STATE(d) == CON_RACE_HELP || STATE(d) == CON_BONUS || STATE(d) == CON_NEGATIVE || STATE(d) == CON_DISTFEA || STATE(d) == CON_HW || STATE(d) == CON_AURA)
 
-#define SENDOK(ch)    (((ch)->desc || SCRIPT_CHECK((ch), MTRIG_ACT)) && \
+#define SENDOK(ch)    ((ch->desc || SCRIPT_CHECK(ch, MTRIG_ACT)) && \
                       (to_sleeping || AWAKE(ch)) && \
-                      !PLR_FLAGGED((ch), PLR_WRITING))
+                      !PLR_FLAGGED(ch, PLR_WRITING))
 /* descriptor-based utils ************************************************/
 
 /* Hrm, not many.  We should make more. -gg 3/4/99 */
-#define STATE(d)	((d)->connected)
+#define STATE(d)	d->connected
 
 /* object utils **********************************************************/
 
@@ -705,54 +700,53 @@ int wield_type(int chsize, const struct obj_data *weap);
 #define VALID_OBJ_RNUM(obj)	(GET_OBJ_RNUM(obj) <= top_of_objt && \
 				 GET_OBJ_RNUM(obj) != NOTHING)
 
-#define GET_OBJ_LEVEL(obj)      ((obj)->level)
-#define GET_OBJ_PERM(obj)       ((obj)->bitvector)
-#define GET_OBJ_TYPE(obj)	((obj)->type_flag)
-#define GET_OBJ_COST(obj)	((obj)->cost)
-#define GET_OBJ_RENT(obj)	((obj)->cost_per_day)
-#define GET_OBJ_EXTRA(obj)	((obj)->extra_flags)
-#define GET_OBJ_EXTRA_AR(obj, i)   ((obj)->extra_flags[(i)])
-#define GET_OBJ_WEAR(obj)	((obj)->wear_flags)
-#define GET_OBJ_VAL(obj, val)	((obj)->value[(val)])
-#define GET_OBJ_WEIGHT(obj)	((obj)->weight)
-#define GET_OBJ_TIMER(obj)	((obj)->timer)
-#define SITTING(obj)            ((obj)->sitting)
-#define GET_OBJ_POSTTYPE(obj)   ((obj)->posttype)
-#define GET_OBJ_POSTED(obj)     ((obj)->posted_to)
-#define GET_FELLOW_WALL(obj)    ((obj)->fellow_wall)
-#define GET_AUCTER(obj)         ((obj)->aucter)
-#define GET_CURBID(obj)         ((obj)->curBidder)
-#define GET_AUCTERN(obj)        ((obj)->auctname)
-#define GET_AUCTIME(obj)        ((obj)->aucTime)
-#define GET_BID(obj)            ((obj)->bid)
-#define GET_STARTBID(obj)       ((obj)->startbid)
-#define FOOB(obj)               ((obj)->foob)
+#define GET_OBJ_LEVEL(obj)      obj->level
+#define GET_OBJ_PERM(obj)       obj->bitvector
+#define GET_OBJ_TYPE(obj)	obj->type_flag
+#define GET_OBJ_COST(obj)	obj->cost
+#define GET_OBJ_RENT(obj)	obj->cost_per_day
+#define GET_OBJ_EXTRA(obj)	obj->extra_flags
+#define GET_OBJ_EXTRA_AR(obj, i)   obj->extra_flags[i]
+#define GET_OBJ_WEAR(obj)	obj->wear_flags
+#define GET_OBJ_VAL(obj, val)	obj->value[val]
+#define GET_OBJ_WEIGHT(obj)	obj->weight
+#define GET_OBJ_TIMER(obj)	obj->timer
+#define SITTING(obj)            obj->sitting
+#define GET_OBJ_POSTTYPE(obj)   obj->posttype
+#define GET_OBJ_POSTED(obj)     obj->posted_to
+#define GET_FELLOW_WALL(obj)    obj->fellow_wall
+#define GET_AUCTER(obj)         obj->aucter
+#define GET_CURBID(obj)         obj->curBidder
+#define GET_AUCTERN(obj)        obj->auctname
+#define GET_AUCTIME(obj)        obj->aucTime
+#define GET_BID(obj)            obj->bid
+#define GET_STARTBID(obj)       obj->startbid
+#define FOOB(obj)               obj->foob
 /* Below is used for "homing" ki attacks */
-#define TARGET(obj)             ((obj)->target)
-#define KICHARGE(obj)           ((obj)->kicharge)
-#define KITYPE(obj)             ((obj)->kitype)
-#define USER(obj)               ((obj)->user)
-#define KIDIST(obj)             ((obj)->distance)
+#define TARGET(obj)             obj->target
+#define KICHARGE(obj)           obj->kicharge
+#define KITYPE(obj)             obj->kitype
+#define USER(obj)               obj->user
+#define KIDIST(obj)             obj->distance
 /* Above is used for "homing ki attacks */
-#define SFREQ(obj)              ((obj)->scoutfreq)
-#define HCHARGE(obj)            ((obj)->healcharge)
-#define GET_LAST_LOAD(obj)      ((obj)->lload)
-#define GET_OBJ_SIZE(obj)	((obj)->size)
-#define GET_OBJ_RNUM(obj)	((obj)->item_number)
+#define SFREQ(obj)              obj->scoutfreq
+#define HCHARGE(obj)            obj->healcharge
+#define GET_LAST_LOAD(obj)      obj->lload
+#define GET_OBJ_SIZE(obj)	obj->size
+#define GET_OBJ_RNUM(obj)	obj->item_number
 #define GET_OBJ_VNUM(obj)	(VALID_OBJ_RNUM(obj) ? \
 				obj_index[GET_OBJ_RNUM(obj)].vnum : NOTHING)
 #define GET_OBJ_SPEC(obj)	(VALID_OBJ_RNUM(obj) ? \
 				obj_index[GET_OBJ_RNUM(obj)].func : NULL)
-#define GET_FUEL(obj)           (GET_OBJ_VAL((obj), 2))
-#define GET_FUELCOUNT(obj)      (GET_OBJ_VAL((obj), 3))
+#define GET_FUEL(obj)           GET_OBJ_VAL(obj, 2)
+#define GET_FUELCOUNT(obj)      GET_OBJ_VAL(obj, 3)
 
 #define IS_CORPSE(obj)		(GET_OBJ_TYPE(obj) == ITEM_CONTAINER && \
-					GET_OBJ_VAL((obj), VAL_CONTAINER_CORPSE) == 1)
+					GET_OBJ_VAL(obj, VAL_CONTAINER_CORPSE) == 1)
 
-#define CAN_WEAR(obj, part)	OBJWEAR_FLAGGED((obj), (part))
-#define GET_OBJ_MATERIAL(obj)   ((obj)->value[7])
-#define GET_OBJ_SHORT(obj)	((obj)->short_description)
-
+#define CAN_WEAR(obj, part)	OBJWEAR_FLAGGED(obj, part)
+#define GET_OBJ_MATERIAL(obj)   obj->value[7]
+#define GET_OBJ_SHORT(obj)	obj->short_description
 /* compound utilities and other macros **********************************/
 
 /*
@@ -774,17 +768,17 @@ int wield_type(int chsize, const struct obj_data *weap);
 /* Various macros building up to CAN_SEE */
 
 #define LIGHT_OK(sub)	(!AFF_FLAGGED(sub, AFF_BLIND) && !PLR_FLAGGED(sub, PLR_EYEC) && \
-   (IS_LIGHT(IN_ROOM(sub)) || AFF_FLAGGED((sub), AFF_INFRAVISION) || (IS_MUTANT(sub) && (GET_GENOME(sub, 0) == 4 || GET_GENOME(sub, 1) == 4)) || PLR_FLAGGED(sub, PLR_AURALIGHT)) )
+   (IS_LIGHT(IN_ROOM(sub)) || AFF_FLAGGED(sub, AFF_INFRAVISION) || (IS_MUTANT(sub) && (GET_GENOME(sub, 0) == 4 || GET_GENOME(sub, 1) == 4)) || PLR_FLAGGED(sub, PLR_AURALIGHT)) )
 
 #define INVIS_OK(sub, obj) \
- (!AFF_FLAGGED((obj),AFF_INVISIBLE) || AFF_FLAGGED(sub,AFF_DETECT_INVIS))
+ (!AFF_FLAGGED(obj,AFF_INVISIBLE) || AFF_FLAGGED(sub, AFF_DETECT_INVIS))
 
 #define MORT_CAN_SEE(sub, obj) (LIGHT_OK(sub) && INVIS_OK(sub, obj))
 
 #define IMM_CAN_SEE(sub, obj) \
    (MORT_CAN_SEE(sub, obj) || (!IS_NPC(sub) && PRF_FLAGGED(sub, PRF_HOLYLIGHT)))
 
-#define SELF(sub, obj)  ((sub) == (obj))
+#define SELF(sub, obj)  (sub == obj)
 
 /* Can subject see character "obj"? */
 #define CAN_SEE(sub, obj) (SELF(sub, obj) || \
@@ -796,7 +790,7 @@ int wield_type(int chsize, const struct obj_data *weap);
 
 
 #define INVIS_OK_OBJ(sub, obj) \
-  (!OBJ_FLAGGED((obj), ITEM_INVISIBLE) || AFF_FLAGGED((sub), AFF_DETECT_INVIS))
+  (!OBJ_FLAGGED(obj, ITEM_INVISIBLE) || AFF_FLAGGED(sub, AFF_DETECT_INVIS))
 
 /* Is anyone carrying this object and if so, are they visible? */
 #define CAN_SEE_OBJ_CARRIER(sub, obj) \
@@ -814,8 +808,8 @@ int wield_type(int chsize, const struct obj_data *weap);
     ((IS_CARRYING_N(ch) + 1) <= CAN_CARRY_N(ch)))
 
 #define CAN_GET_OBJ(ch, obj)   \
-   (CAN_WEAR((obj), ITEM_WEAR_TAKE) && !SITTING(obj) && CAN_CARRY_OBJ((ch),(obj)) && \
-    CAN_SEE_OBJ((ch),(obj)))
+   (CAN_WEAR(obj, ITEM_WEAR_TAKE) && !SITTING(obj) && CAN_CARRY_OBJ(ch,obj) && \
+    CAN_SEE_OBJ(ch,obj))
 
 #define DISG(ch, vict) ((!PLR_FLAGGED(ch, PLR_DISGUISED)) || \
    (PLR_FLAGGED(ch, PLR_DISGUISED) && (GET_ADMLEVEL(vict) > 0 || IS_NPC(vict))))

@@ -7,6 +7,8 @@
 #include "act.informative.h"
 #include "oasis.h"
 #include "utils.h"
+#include "interpreter.h"
+#include "comm.h"
 #include "dg_olc.h"
 
 /* local global */

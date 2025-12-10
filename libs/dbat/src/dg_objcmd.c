@@ -330,7 +330,7 @@ OCMD(do_otransform)
 
     /* move new obj info over to old object and delete new obj */
     memcpy(&tmpobj, o, sizeof(*o));
-    IN_ROOM(&tmpobj) = IN_ROOM(obj);
+    tmpobj.in_room = obj->in_room;
     tmpobj.carried_by = obj->carried_by;
     tmpobj.worn_by = obj->worn_by;
     tmpobj.worn_on = obj->worn_on;

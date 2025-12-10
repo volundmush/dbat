@@ -3180,28 +3180,28 @@ void perform_act(const char *orig, struct char_data *ch, struct obj_data *obj, c
 	i = PERS(ch, to);
 	break;
       case 'N':
-	CHECK_NULL(vict_obj, PERS((struct char_data *) vict_obj, to));
+	CHECK_NULL(vict_obj, PERS(((struct char_data *) vict_obj), to));
 	dg_victim = (const struct char_data *) vict_obj;
 	break;
       case 'm':
 	i = HMHR(ch);
 	break;
       case 'M':
-	CHECK_NULL(vict_obj, HMHR((const struct char_data *) vict_obj));
+	CHECK_NULL(vict_obj, HMHR(((const struct char_data *) vict_obj)));
 	dg_victim = (const struct char_data *) vict_obj;
 	break;
       case 's':
 	i = HSHR(ch);
 	break;
       case 'S':
-	CHECK_NULL(vict_obj, HSHR((const struct char_data *) vict_obj));
+	CHECK_NULL(vict_obj, HSHR(((const struct char_data *) vict_obj)));
 	dg_victim = (const struct char_data *) vict_obj;
 	break;
       case 'e':
 	i = HSSH(ch);
 	break;
       case 'E':
-	CHECK_NULL(vict_obj, HSSH((const struct char_data *) vict_obj));
+	CHECK_NULL(vict_obj, HSSH(((const struct char_data *) vict_obj)));
 	dg_victim = (const struct char_data *) vict_obj;
 	break;
       case 'o':

@@ -1993,7 +1993,7 @@ void makeuid_var(void *go, struct script_data *sc, trig_data *trig,
           if ((o = get_obj_in_list_vis((struct char_data *)go, name, NULL,
                     ((struct char_data *)go)->carrying)) == NULL)
             o = get_obj_in_list_vis((struct char_data *)go, name, NULL,
-                    world[IN_ROOM((struct char_data *)go)].contents);
+                    world[IN_ROOM(((struct char_data *)go))].contents);
           break;
       }
       if (o)
@@ -2008,7 +2008,7 @@ void makeuid_var(void *go, struct script_data *sc, trig_data *trig,
           r = obj_room((struct obj_data *)go);
           break;
         case MOB_TRIGGER:
-          r = IN_ROOM((struct char_data *)go);
+          r = IN_ROOM(((struct char_data *)go));
           break;
       }
       if (r != NOWHERE)
@@ -2512,11 +2512,11 @@ int script_driver(void *go_adress, trig_data *trig, int type, int mode)
     switch (type) {
       case MOB_TRIGGER:
         script_log("It was attached to %s [%d]",
-           GET_NAME((char_data *) go), GET_MOB_VNUM((char_data *) go));
+           GET_NAME(((char_data *) go)), GET_MOB_VNUM(((char_data *) go)));
         break;
       case OBJ_TRIGGER:
         script_log("It was attached to %s [%d]",
-           ((obj_data *) go)->short_description, GET_OBJ_VNUM((obj_data *) go));
+           ((obj_data *) go)->short_description, GET_OBJ_VNUM(((obj_data *) go)));
         break;
       case WLD_TRIGGER:
         script_log("It was attached to %s [%d]",

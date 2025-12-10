@@ -10,6 +10,7 @@
 
 #include "fight.h"
 #include "dg_comm.h"
+#include "dg_scripts.h"
 #include "act.attack.h"
 #include "act.other.h"
 #include "act.misc.h"
@@ -21,7 +22,9 @@
 #include "config.h"
 #include "races.h"
 #include "handler.h"
+#include "class.h"
 #include "combat.h"
+#include "objsave.h"
 
 /* Structures */
 struct char_data *combat_list = NULL;	/* head of l-list of fighting chars */

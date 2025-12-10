@@ -18,6 +18,7 @@
 #include "db.h"
 #include "genolc.h"
 #include "interpreter.h"
+#include "modify.h"
 #include "oasis.h"
 #include "dg_event.h"
 #include "constants.h"
