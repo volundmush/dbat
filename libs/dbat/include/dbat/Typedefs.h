@@ -7,6 +7,7 @@
 #define NOTHING NOWHERE
 #define NOBODY NOWHERE
 #define NOFLAG NOWHERE
+#define NOBZOB NOWHERE
 
 #define I64T "ld"
 #define SZT "ld"

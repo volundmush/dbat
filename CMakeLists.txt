@@ -35,6 +35,16 @@ set(CMAKE_C_COMPILER_LAUNCHER   ccache)
 
 set(BUILD_TESTING OFF)
 
+option(DBAT_BUILD_PROFILE "Emit compiler timing/profiling information" OFF)
+if(DBAT_BUILD_PROFILE)
+  message(STATUS "DBAT_BUILD_PROFILE=ON (compiler timing enabled)")
+  if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    add_compile_options(-ftime-report)
+  elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    add_compile_options(-ftime-trace)
+  endif()
+endif()
+
 # ---------------- deps (yours) ----------------
 find_package(Boost CONFIG REQUIRED COMPONENTS regex iostreams)
 find_package(ZLIB REQUIRED)

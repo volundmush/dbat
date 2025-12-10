@@ -24,7 +24,16 @@ esac
 # Default behavior: use the same CMake build dir as VS Code (./build),
 # enable the Python extension target, and build incrementally.
 BDIR="build"
-cmake -S . -B "$BDIR" -G Ninja -DCMAKE_BUILD_TYPE=${MODE} -DDBAT_BUILD_PYTHON=ON
+
+PROFILE_MODE=${DBAT_PROFILE:-1}
+cmake_args=(-S . -B "$BDIR" -G Ninja -DCMAKE_BUILD_TYPE=${MODE} -DDBAT_BUILD_PYTHON=ON)
+if [[ "$PROFILE_MODE" == "1" ]]; then
+	cmake_args+=(-DDBAT_BUILD_PROFILE=ON)
+else
+	cmake_args+=(-DDBAT_BUILD_PROFILE=OFF)
+fi
+
+cmake "${cmake_args[@]}"
 
 rm -rf $BDIR/libs/ext
 
@@ -38,11 +47,12 @@ JOBS="${2:-$DEFAULT_JOBS}"
 
 # Build just the Python module by default for speed; pass "all" (third argument) to build everything.
 TARGET="${3:-dbat_ext}"
-if [[ "${1,,}" == "release" || "${1,,}" == "reldeb" || "${1,,}" == "debug" ]]; then
-	cmake --build "$BDIR" --target "$TARGET" --parallel "$JOBS" || exit $?
-else
-	cmake --build "$BDIR" --target "$TARGET" --parallel "$JOBS" || exit $?
+build_cmd=(cmake --build "$BDIR" --target "$TARGET" --parallel "$JOBS")
+if [[ "$PROFILE_MODE" == "1" ]]; then
+	build_cmd+=(-- -d stats)
 fi
+
+"${build_cmd[@]}" || exit $?
 
 # Seamless import: symlink the built extension into the active venv's site-packages
 SO_SRC=$(ls -t compiled/dbat_ext*.so 2>/dev/null | head -n 1)
@@ -55,6 +65,16 @@ if [[ -n "$SO_SRC" ]]; then
 	echo "Linked $SO_DEST -> $SO_SRC"
 	# Optional convenience alias without tag for import tools that search by simple name
 	ln -sf "$SO_BASENAME" "$SITEPKG/dbat_ext.so" 2>/dev/null || true
+fi
+
+if [[ "$PROFILE_MODE" == "1" ]]; then
+	if command -v ninja >/dev/null 2>&1; then
+		PROFILE_LOG="$BDIR/ninja-profile.log"
+		ninja -C "$BDIR" -t profile | tee "$PROFILE_LOG"
+		echo "Ninja profile written to $PROFILE_LOG"
+	else
+		echo "Warning: Ninja not found; skipping -t profile output" >&2
+	fi
 fi
 
 exit 0
