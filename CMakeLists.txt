@@ -1,71 +1,61 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 4.1.1)
+project(circle LANGUAGES C CXX)
 
-project(circle)
+# ---------------- basics (yours) ----------------
+set(CPM_DOWNLOAD_VERSION 0.42.0)
+set(CPM_DOWNLOAD_LOCATION "${CMAKE_BINARY_DIR}/cmake/CPM_${CPM_DOWNLOAD_VERSION}.cmake")
 
-file(GLOB CIRCLE_INCLUDE src/*.h)
-#file(GLOB CIRCLE_SRC src/*.cpp)
-file(GLOB CIRCLE_SRC src/*.c)
+if(NOT (EXISTS ${CPM_DOWNLOAD_LOCATION}))
+  message(STATUS "Downloading CPM.cmake")
+  file(DOWNLOAD
+       https://github.com/TheLartians/CPM.cmake/releases/download/v${CPM_DOWNLOAD_VERSION}/CPM.cmake
+       ${CPM_DOWNLOAD_LOCATION})
+endif()
+include(${CPM_DOWNLOAD_LOCATION})
 
-set_property(GLOBAL PROPERTY C_STANDARD 11)
-#set_property(GLOBAL PROPERTY CXX_STANDARD 17)
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
-set(CMAKE_CXX_FLAGS "-fpermissive")
+# Pick a single C++ standard and use it everywhere
+set(CMAKE_C_STANDARD 23)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-find_library(LIBBSD NAMES bsd libbsd)
-include_directories(include)
-if(${LIBBSD})
-    link_libraries(${LIBBSD})
-    add_compile_definitions(HAVE_LIBBSD)
+set(CPM_SOURCE_CACHE ${PROJECT_SOURCE_DIR}/dependencies)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/compiled)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/compiled)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/compiled)
+
+# (Consider guarding these by platform if you plan to make wheels later)
+#set(CMAKE_CXX_FLAGS "-Wno-write-strings -Wno-format-truncation -Wno-multichar -Wno-unused-result -Wno-deprecated-declarations -fpermissive -march=native")
+set(CMAKE_EXE_LINKER_FLAGS     "${CMAKE_EXE_LINKER_FLAGS}     -fuse-ld=mold")
+set(CMAKE_MODULE_LINKER_FLAGS  "${CMAKE_MODULE_LINKER_FLAGS}  -fuse-ld=mold")
+set(CMAKE_SHARED_LINKER_FLAGS  "${CMAKE_SHARED_LINKER_FLAGS}  -fuse-ld=mold")
+
+#set(CMAKE_CXX_COMPILER_LAUNCHER ccache)
+set(CMAKE_C_COMPILER_LAUNCHER   ccache)
+
+set(BUILD_TESTING OFF)
+
+# ---------------- deps (yours) ----------------
+#find_package(Boost CONFIG REQUIRED COMPONENTS regex iostreams)
+find_package(ZLIB REQUIRED)
+#find_package(Threads REQUIRED)
+
+if(UNIX AND NOT APPLE)
+  set(MATH_LIB m)
+endif()
+
+# Fallback: if the detected GNU C++ toolchain doesn't list libstdc++ among
+# its implicit link libraries (common with partial/manual installs), add it
+# to the standard C++ link line so executables link cleanly without per-target
+# workarounds. This has no effect on toolchains that already inject it.
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  list(FIND CMAKE_CXX_IMPLICIT_LINK_LIBRARIES "stdc++" _has_stdcxx)
+  if(_has_stdcxx EQUAL -1)
+    message(STATUS "GNU toolchain missing implicit libstdc++; adding -lstdc++ to CMAKE_CXX_STANDARD_LIBRARIES")
+    set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_CXX_STANDARD_LIBRARIES} -lstdc++")
+  endif()
 endif()
 
 
-#find_package(ZLIB REQUIRED)
-#link_libraries(ZLIB::ZLIB)
-find_library(ZLIB NAMES z libz REQUIRED)
-link_libraries(${ZLIB})
-
-# this is the core library we're making.
-add_library(circlemud ${CIRCLE_INCLUDE} ${CIRCLE_SRC})
-# everything we make will link to it.
-link_libraries(circlemud)
-
-# the various binaries
-add_executable(circle apps/circle.c)
-add_executable(asciipasswd apps/circle.c)
-add_executable(autowiz apps/autowiz.c)
-add_executable(delobjs apps/delobjs.c)
-add_executable(play2to3 apps/play2to3.c)
-add_executable(shopconv apps/shopconv.c)
-add_executable(showplay apps/showplay.c)
-add_executable(sign apps/sign.c)
-add_executable(split apps/split.c)
-add_executable(wld2html apps/wld2html.c)
-
-target_compile_definitions(circlemud PUBLIC USING_CMAKE=1 CIRCLE_UNIX=1 POSIX=1)
-
-
-#find_package(SQLite3 REQUIRED)
-#if(SQLite3_FOUND)
-#    message("Found SQLite3.")
-#    target_link_libraries(circlemud SQLite::SQLite3)
-#endif()
-
-#find_package(OpenSSL REQUIRED)
-#if(OpenSSL_FOUND)
-#    message("Found OpenSSL.")
-#    target_link_libraries(circlemud OpenSSL::Crypto)
-#endif()
-
-# Support for FMT
-#target_include_directories(circlemud PUBLIC libs/fmt/include)
-#target_compile_definitions(circlemud PUBLIC FMT_HEADER_ONLY=1)
-
-# Support for SQLITEPP
-#target_include_directories(circlemud PUBLIC libs/sqlitepp/include)
-
-# Support for ASIO
-#target_include_directories(circlemud PUBLIC libs/asio/asio/include)
-
-SET(circle_link ${CMAKE_INSTALL_PREFIX}/bin/)
+# ---------------- your native targets ----------------
+add_subdirectory(libs/dbat)
+add_subdirectory(apps/circle)

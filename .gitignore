@@ -51,24 +51,33 @@ Module.symvers
 Mkfile.old
 dkms.conf
 
+# VS Code
+.venv
+.venv/
+__pycache__
+dependency_links.txt
+not-zip-safe
+PKG-INFO
+requires.txt
+SOURCES.txt
+top_level.txt
+dist/
+*.pid
+
 # CLion
 .idea/
-cmake-build-*
+cmake-*
 
 # DBAT
-lib
+data/
+logs/
 src/Makefile
-config.log
-config.status
-utils/Makefile
-bin/asciipasswd
-bin/autowiz
-bin/circle
-bin/delobjs
-bin/play2to3
-bin/purgeplay
-bin/shopconv
-bin/showplay
-bin/sign
-bin/split
-bin/wld2html
+compiled/
+build/
+game/secret_settings.py
+dbat_ext/*.cpp
+
+localhost-key.pem
+localhost.pem
+dependencies/
+config.user.toml
