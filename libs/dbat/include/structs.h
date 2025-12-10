@@ -2538,16 +2538,6 @@ struct txt_q {
 
 struct compr {
     int state; /* 0 - off. 1 - waiting for response. 2 - compress2 on */
-
-    Bytef *buff_out;
-    int total_out; /* size of input buffer */
-    int size_out; /* size of data in output buffer */
-
-    Bytef *buff_in;
-    int total_in; /* size of input buffer */
-    int size_in; /* size of data in input buffer */
-
-    z_streamp stream;
 };
 
 struct descriptor_data {

@@ -21,7 +21,6 @@
 #include <sys/time.h>
 #include <time.h>
 #include <assert.h>
-#include <zlib.h>
 #include <sys/select.h>
 #include <fcntl.h>
 #include <sys/fcntl.h>
@@ -39,12 +38,7 @@
 #include <arpa/telnet.h>
 #include <dirent.h>
 #include <linux/limits.h>
-
-#ifdef HAVE_LIBBSD
-#include <bsd/string.h>
-#else
 #include "stringutils.h"
-#endif
 
 /* Basic system dependencies *******************************************/
 #if CIRCLE_GNU_LIBC_MEMORY_TRACK && !defined(HAVE_MCHECK_H)

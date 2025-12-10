@@ -2536,17 +2536,7 @@ static void execute_copyover(void)
       /* save och */
       Crash_rentsave(och, 0);
       save_char(och);
-        if (d->comp->state == 2) {
-            d->comp->state = 3; /* Code to use Z_FINISH for deflate */
-        }
       write_to_descriptor (d->descriptor, buf, d->comp);
-      d->comp->state = 0;
-        if (d->comp->stream) {
-            deflateEnd(d->comp->stream);
-            free(d->comp->stream);
-            free(d->comp->buff_out);
-            free(d->comp->buff_in);
-        }
     }
   }
 
