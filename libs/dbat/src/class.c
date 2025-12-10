@@ -2410,7 +2410,7 @@ time_t max_age(struct char_data *ch)
   if (ch->time.maxage)
     return ch->time.maxage - ch->time.birth;
 
-  aging = racial_aging_data + GET_RACE(ch);
+  //aging = racial_aging_data + GET_RACE(ch);
 
   tmp = 120;
 

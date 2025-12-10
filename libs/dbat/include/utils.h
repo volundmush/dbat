@@ -971,7 +971,7 @@ int wield_type(int chsize, const struct obj_data *weap);
 #define DIRT_ROOM(ch) (OUTSIDE_SECTTYPE(ch) && ((SECT(IN_ROOM(ch)) != SECT_WATER_NOSWIM) && \
                        (SECT(IN_ROOM(ch)) != SECT_WATER_SWIM)))
 
-#define SPEAKING(ch)     ((ch)->player_specials->speaking)
+#define SPEAKING(ch)     ch->player_specials->speaking
 
 /* OS compatibility ******************************************************/
 
@@ -1010,7 +1010,7 @@ int wield_type(int chsize, const struct obj_data *weap);
  * automatically sets when it determines whether or not the system is
  * capable of encrypting.
  */
-#define CRYPT(a,b) ((char *) crypt((a),(b)))
+#define CRYPT(a,b) ((char *) crypt(a,b))
 
 /*******************  Config macros *********************/
 
@@ -1104,19 +1104,19 @@ int wield_type(int chsize, const struct obj_data *weap);
   /** Character Creation Method **/
 #define CONFIG_CREATION_METHOD	config_info.creation.method
 
-#define GET_SPELLMEM(ch, i)	((ch->player_specials->spellmem[i]))
-#define GET_MEMCURSOR(ch)	((ch->player_specials->memcursor))
+#define GET_SPELLMEM(ch, i)	(ch->player_specials->spellmem[i])
+#define GET_MEMCURSOR(ch)	(ch->player_specials->memcursor)
 /* returns the number of spells per slot */
-#define GET_SPELL_LEVEL(ch, i)	((ch)->player_specials->spell_level[i])
-#define IS_ARCANE(ch)		(IS_WIZARD(ch))
-#define IS_DIVINE(ch)		(IS_CLERIC(ch))
-#define HAS_FEAT(ch, i)		((ch)->feats[i])
-#define HAS_COMBAT_FEAT(ch,i,j)	IS_SET_AR((ch)->combat_feats[(i)], (j))
-#define SET_COMBAT_FEAT(ch,i,j)	SET_BIT_AR((ch)->combat_feats[(i)], (j))
-#define HAS_SCHOOL_FEAT(ch,i,j)	IS_SET((ch)->school_feats[(i)], (j))
-#define SET_SCHOOL_FEAT(ch,i,j)	SET_BIT((ch)->school_feats[(i)], (j))
+#define GET_SPELL_LEVEL(ch, i)	ch->player_specials->spell_level[i]
+#define IS_ARCANE(ch)		IS_WIZARD(ch)
+#define IS_DIVINE(ch)		IS_CLERIC(ch)
+#define HAS_FEAT(ch, i)		ch->feats[i]
+#define HAS_COMBAT_FEAT(ch,i,j)	IS_SET_AR(ch->combat_feats[i], j)
+#define SET_COMBAT_FEAT(ch,i,j)	SET_BIT_AR(ch->combat_feats[i], j)
+#define HAS_SCHOOL_FEAT(ch,i,j)	IS_SET(ch->school_feats[i], j)
+#define SET_SCHOOL_FEAT(ch,i,j)	SET_BIT(ch->school_feats[i], j)
 #define GET_BAB(ch)		GET_POLE_BONUS(ch)
-#define SET_FEAT(ch, i, value)	do { CHECK_PLAYER_SPECIAL((ch), (ch)->feats[i]) = value; } while(0)
+#define SET_FEAT(ch, i, value)	do { CHECK_PLAYER_SPECIAL(ch, ch->feats[i]) = value; } while(0)
 #define GET_SPELL_MASTERY_POINTS(ch) \
 				(ch->player_specials->spell_mastery_points)
 #define GET_FEAT_POINTS(ch)	(ch->player_specials->feat_points)
@@ -1126,12 +1126,12 @@ int wield_type(int chsize, const struct obj_data *weap);
 #define GET_EPIC_CLASS_FEATS(ch,cl) \
 				(ch->player_specials->epic_class_feat_points[cl])
 #define IS_EPIC_LEVEL(ch)	(GET_CLASS_LEVEL(ch) >= 20)
-#define HAS_CRAFT_SKILL(ch,i,j)	IS_SET_AR((ch)->craft_skill[(i)], (j))
-#define SET_CRAFT_SKILL(ch,i,j)	SET_BIT_AR((ch)->craft_skill[(i)], (j))
-#define HAS_KNOWLEDGE_SKILL(ch,i,j)	IS_SET_AR((ch)->knowledge_skill[(i)], (j))
-#define SET_KNOWLEDGE_SKILL(ch,i,j)	SET_BIT_AR((ch)->knowledge_skill[(i)], (j))
-#define HAS_PROFESSION_SKILL(ch,i,j)	IS_SET_AR((ch)->profession_skill[(i)], (j))
-#define SET_PROFESSION_SKILL(ch,i,j)	SET_BIT_AR((ch)->profession_skill[(i)], (j))
+#define HAS_CRAFT_SKILL(ch,i,j)	IS_SET_AR(ch->craft_skill[i], j)
+#define SET_CRAFT_SKILL(ch,i,j)	SET_BIT_AR(ch->craft_skill[i], j)
+#define HAS_KNOWLEDGE_SKILL(ch,i,j)	IS_SET_AR(ch->knowledge_skill[i], j)
+#define SET_KNOWLEDGE_SKILL(ch,i,j)	SET_BIT_AR(ch->knowledge_skill[i], j)
+#define HAS_PROFESSION_SKILL(ch,i,j)	IS_SET_AR(ch->profession_skill[i], j)
+#define SET_PROFESSION_SKILL(ch,i,j)	SET_BIT_AR(ch->profession_skill[i], j)
 
 /* General use directory functions & structures. Required due to */
 /* various differences between directory handling code on        */
@@ -1150,16 +1150,16 @@ char *xdir_next(struct xap_dir *xd);
 void xdir_close(struct xap_dir *xd);
 int insure_directory(char *path, int isfile);
 void admin_set(struct char_data *ch, int value);
-#define GET_PAGE_LENGTH(ch)         CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->page_length))
+#define GET_PAGE_LENGTH(ch)         CHECK_PLAYER_SPECIAL(ch, ch->player_specials->page_length)
 #define IS_COLOR_CHAR(c)  (c == 'n' || c == 'b' || c == 'B' || c == 'c' || \
    c == 'C' || c == 'g' || c == 'G' || c == 'm' || c == 'M' || c == 'r' || \
    c == 'R' || c == 'y' || c == 'Y' || c == 'w' || c == 'W' || c == 'k' || \
    c == 'K' || c == '0' || c == '2' || c == '3' || c == '4' || c == '5' || \
    c == '6' || c == '7' || c == 'o' || c == 'e' || c == 'u' || c == 'l') 
-#define MOB_LOADROOM(ch)      ((ch)->hometown)  /*hometown not used for mobs*/
-#define OBJ_LOADROOM(obj)     ((obj)->room_loaded)
+#define MOB_LOADROOM(ch)      ch->hometown  /*hometown not used for mobs*/
+#define OBJ_LOADROOM(obj)     obj->room_loaded
 
 int     levenshtein_distance(char *s1, char *s2);
-#define GET_MURDER(ch)          CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->murder))
+#define GET_MURDER(ch)          CHECK_PLAYER_SPECIAL(ch, ch->player_specials->murder)
 
 #endif
