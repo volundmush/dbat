@@ -215,11 +215,11 @@ int wield_type(int chsize, const struct obj_data *weap);
 /* string utils **********************************************************/
 
 
-#define YESNO(a) ((a) ? "YES" : "NO")
-#define ONOFF(a) ((a) ? "ON" : "OFF")
+#define YESNO(a) (a ? "YES" : "NO")
+#define ONOFF(a) (a ? "ON" : "OFF")
 
-#define LOWER(c)   (((c)>='A'  && (c) <= 'Z') ? ((c)+('a'-'A')) : (c))
-#define UPPER(c)   (((c)>='a'  && (c) <= 'z') ? ((c)+('A'-'a')) : (c) )
+#define LOWER(c)   ((c>='A'  && c <= 'Z') ? c+('a'-'A') : c)
+#define UPPER(c)   ((c>='a'  && c <= 'z') ? c+('A'-'a') : c)
 
 #define ISNEWL(ch) ((ch) == '\n' || (ch) == '\r') 
 
