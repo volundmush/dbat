@@ -5,8 +5,9 @@
 #include <string>
 #include <map>
 #include <memory>
-#include <magic_enum/magic_enum_format.hpp>
 #include <fmt/format.h>
+#include <enchantum/fmt_format.hpp>
+
 
 #include "const/UnitType.h"
 
@@ -45,7 +46,7 @@ struct DgScriptPrototype {
 };
 
 inline std::string format_as(const DgScriptPrototype& dg) {
-    return fmt::format("({}) DgScriptPrototype {} '{}'", magic_enum::enum_name(dg.attach_type), dg.vn, dg.name);
+    return fmt::format("({}) DgScriptPrototype {} '{}'", enchantum::to_string(dg.attach_type), dg.vn, dg.name);
 }
 
 extern std::map<trig_vnum, std::shared_ptr<DgScriptPrototype>> trig_index;

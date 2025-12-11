@@ -10,7 +10,7 @@ namespace skill
             return "throw";
         if (skill == Skill::kamehameha)
             return "KameHameHa";
-        auto ename = magic_enum::enum_name(skill);
+        auto ename = enchantum::to_string(skill);
         std::string name(ename);
         // replace underscores with spaces
         std::replace(name.begin(), name.end(), '_', ' ');

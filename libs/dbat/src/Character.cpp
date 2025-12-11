@@ -243,13 +243,13 @@ Race Character::getApparentRace(Character *viewer) {
 std::string Character::juggleRaceName(bool capitalized)
 {
 
-    std::string apparent = fmt::format("{}", magic_enum::enum_name(race));
+    std::string apparent = fmt::format("{}", enchantum::to_string(race));
 
     switch (race)
     {
     case Race::hoshijin:
         if (mimic)
-            apparent = fmt::format("{}", magic_enum::enum_name(*mimic));
+            apparent = fmt::format("{}", enchantum::to_string(*mimic));
         break;
     case Race::half_saiyan:
     case Race::android:
@@ -580,22 +580,22 @@ int64_t Character::calcGravCost(int64_t num)
 
 bool Character::isFullVital(CharVital type)
 {
-    return getBaseStat(fmt::format("{}_damage", magic_enum::enum_name(type))) <= 0.0;
+    return getBaseStat(fmt::format("{}_damage", enchantum::to_string(type))) <= 0.0;
 }
 
 double Character::modCurVitalDam(CharVital type, double dam)
 {
-    return modBaseStat(fmt::format("{}_damage", magic_enum::enum_name(type)), dam);
+    return modBaseStat(fmt::format("{}_damage", enchantum::to_string(type)), dam);
 }
 
 double Character::setCurVitalDam(CharVital type, double dam)
 {
-    return setBaseStat(fmt::format("{}_damage", magic_enum::enum_name(type)), dam);
+    return setBaseStat(fmt::format("{}_damage", enchantum::to_string(type)), dam);
 }
 
 double Character::getCurVitalDam(CharVital type)
 {
-    return getBaseStat(fmt::format("{}_damage", magic_enum::enum_name(type)));
+    return getBaseStat(fmt::format("{}_damage", enchantum::to_string(type)));
 }
 
 double Character::getCurVitalMeterPercent(CharVital type)
@@ -613,7 +613,7 @@ int64_t Character::getCurVital(CharVital type)
 
 int64_t Character::getMaxVital(CharVital type)
 {
-    auto effective_stat = getEffectiveStat(std::string(magic_enum::enum_name(type)));
+    auto effective_stat = getEffectiveStat(std::string(enchantum::to_string(type)));
     return effective_stat;
 }
 
@@ -621,7 +621,7 @@ int64_t Character::setCurVital(CharVital type, int64_t amt)
 {
     auto m = getMaxVital(type);
     auto ratio = static_cast<double>(amt) / static_cast<double>(m);
-    setBaseStat(fmt::format("{}_damage", magic_enum::enum_name(type)), -ratio);
+    setBaseStat(fmt::format("{}_damage", enchantum::to_string(type)), -ratio);
     return getCurVital(type);
 }
 
@@ -629,7 +629,7 @@ int64_t Character::modCurVital(CharVital type, int64_t amt)
 {
     auto m = getMaxVital(type);
     auto ratio = static_cast<double>(amt) / static_cast<double>(m);
-    modBaseStat(fmt::format("{}_damage", magic_enum::enum_name(type)), -ratio);
+    modBaseStat(fmt::format("{}_damage", enchantum::to_string(type)), -ratio);
     return getCurVital(type);
 }
 
@@ -640,14 +640,14 @@ void Character::restoreHealth(bool announce)
 
 int64_t Character::getCurVitalPercent(CharVital type, double amt)
 {
-    auto cur_vital = getEffectiveStat(std::string(magic_enum::enum_name(type)));
+    auto cur_vital = getEffectiveStat(std::string(enchantum::to_string(type)));
     auto dmg = getCurVitalMeterPercent(type);
     return (cur_vital * dmg) * amt;
 }
 
 int64_t Character::getMaxVitalPercent(CharVital type, double amt)
 {
-    auto max_vital = getEffectiveStat(std::string(magic_enum::enum_name(type)));
+    auto max_vital = getEffectiveStat(std::string(enchantum::to_string(type)));
     return static_cast<int64_t>(max_vital * amt);
 }
 

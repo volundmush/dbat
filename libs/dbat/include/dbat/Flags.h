@@ -8,6 +8,8 @@
 #include <fmt/ranges.h>
 
 #include "Enum.h"
+#include <enchantum/type_name.hpp>
+#include <enchantum/fmt_format.hpp>
 
 template <typename FlagEnum>
     requires std::is_enum_v<FlagEnum>
@@ -22,11 +24,11 @@ struct FlagChangeResults
         std::string result;
         for (const auto &flag : added)
         {
-            result += fmt::format("  + {}\r\n", magic_enum::enum_name(flag));
+            result += fmt::format("  + {}\r\n", flag);
         }
         for (const auto &flag : removed)
         {
-            result += fmt::format("  - {}\r\n", magic_enum::enum_name(flag));
+            result += fmt::format("  - {}\r\n", flag);
         }
         for (const auto &error : errors)
         {
@@ -180,7 +182,7 @@ public:
         names.reserve(bits.count());
         for (auto f : getAll())
         {
-            names.push_back(fmt::format("{}", magic_enum::enum_name(f)));
+            names.push_back(std::string(enchantum::to_string(f)));
         }
         return names;
     }
@@ -241,7 +243,7 @@ template <typename FlagEnum>
 inline std::string format_as(const FlagHandler<FlagEnum>& flags) {
     // e.g. "AffectFlag" (optionally strip namespaces)
     constexpr std::string_view type_name = []{
-        std::string_view tn = magic_enum::enum_type_name<FlagEnum>();
+        std::string_view tn = enchantum::type_name<FlagEnum>;
         if (auto pos = tn.rfind("::"); pos != std::string_view::npos) tn.remove_prefix(pos + 2);
         return tn;
     }();

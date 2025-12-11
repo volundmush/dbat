@@ -164,7 +164,7 @@ inline std::string format_as_diagnostic(const Room& room) {
     parts.emplace_back(format_as(static_cast<const HasZone&>(room)));
     parts.emplace_back(format_as(static_cast<const HasMudStrings&>(room)));
     parts.emplace_back(format_as(static_cast<const HasExtraDescriptions&>(room)));
-    parts.emplace_back(fmt::format("SectorType: {}", magic_enum::enum_name(room.sector_type)));
+    parts.emplace_back(fmt::format("SectorType: {}", enchantum::to_string(room.sector_type)));
     parts.emplace_back(fmt::format("RoomFlags: {}", room.room_flags));
     parts.emplace_back(format_as(static_cast<const HasSubscriptions&>(room)));
     parts.emplace_back(format_as(static_cast<const HasProtoScript&>(room)));

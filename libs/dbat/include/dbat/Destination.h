@@ -1,7 +1,7 @@
 #pragma once
 #include <unordered_map>
 #include <functional>
-#include <magic_enum/magic_enum_format.hpp>
+#include <enchantum/fmt_format.hpp>
 
 #include "Location.h"
 #include "const/ExitFlag.h"
@@ -33,7 +33,7 @@ struct Destination : public Location {
 };
 
 inline std::string format_as(const Destination& d) {
-    return fmt::format("{} Exit {} to {}", d.generated ? "Generated" : "Direct", magic_enum::enum_name(d.dir), d.getLocID());
+    return fmt::format("{} Exit {} to {}", d.generated ? "Generated" : "Direct", enchantum::to_string(d.dir), d.getLocID());
 }
 
 #define EXIT(ch, door)  ch->location.getExit(static_cast<Direction>(door))

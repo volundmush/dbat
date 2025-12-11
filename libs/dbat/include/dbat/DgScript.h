@@ -3,7 +3,7 @@
 #include <experimental/memory>
 #include <functional>
 #include <variant>
-#include <magic_enum/magic_enum_format.hpp>
+#include <enchantum/fmt_format.hpp>
 #include "DgScriptPrototype.h"
 #include "HasVariables.h"
 #include "HasMisc.h"
@@ -74,13 +74,13 @@ private:
 };
 
 inline std::string format_as(const DgScript& z) {
-    return fmt::format("({}) DgScript {} '{}'", magic_enum::enum_name(z.getAttachType()), z.getVnum(), z.proto->name);
+    return fmt::format("({}) DgScript {} '{}'", enchantum::to_string(z.getAttachType()), z.getVnum(), z.proto->name);
 }
 
 inline std::string format_as_diagnostic(const DgScript& z) {
     return fmt::format("{}, state: {}, current_line: {}, waiting: {}, depth_stack size: {}\r\n    variables: [{}]",
                        format_as(z),
-                       magic_enum::enum_name(z.state), z.current_line, z.waiting,
+                       enchantum::to_string(z.state), z.current_line, z.waiting,
                        z.depth_stack.size(), fmt::join(z.variables, ", "));
 }
 

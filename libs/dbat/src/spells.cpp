@@ -287,7 +287,7 @@ ASPELL(spell_identify)
         char bitbuf[MAX_STRING_LENGTH];
         char buf2[MAX_STRING_LENGTH];
 
-        ch->send_to("You feel informed:\r\nObject '%s', Item type: %s\r\n", obj->getShortDescription(), magic_enum::enum_name(GET_OBJ_TYPE(obj)));
+        ch->send_to("You feel informed:\r\nObject '%s', Item type: %s\r\n", obj->getShortDescription(), enchantum::to_string(GET_OBJ_TYPE(obj)));
 
         if (obj->affect_flags)
         {

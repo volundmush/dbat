@@ -5,18 +5,17 @@
 
 #include "PartialMatch.h"
 
-#include <magic_enum/magic_enum.hpp>
+#include <enchantum/enchantum.hpp>
 
 
 template<typename FlagEnum, typename MapType = std::unordered_map<std::string, FlagEnum>>
 requires std::is_enum_v<FlagEnum>
 auto getEnumMap(const std::function<bool(FlagEnum v)>& filter = {}) {
     MapType flag_map;
-    for (auto val : magic_enum::enum_values<FlagEnum>())
+    for (const auto &[val, name] : enchantum::entries<FlagEnum>)
     {
         if(filter && !filter(val)) continue;
-        auto vname = std::string(magic_enum::enum_name(val));
-        flag_map[vname] = val;
+        flag_map[std::string(name)] = val;
     }
     return flag_map;
 }
@@ -25,7 +24,7 @@ template<typename FlagEnum, typename ListType = std::vector<FlagEnum>>
 requires std::is_enum_v<FlagEnum>
 auto getEnumList(const std::function<bool(FlagEnum v)>& filter = {}) {
     ListType flag_list;
-    for (auto val : magic_enum::enum_values<FlagEnum>())
+    for (const auto &[val, name] : enchantum::entries<FlagEnum>)
     {
         if(filter && !filter(val)) continue;
         flag_list.emplace_back(val);
@@ -37,10 +36,10 @@ template<typename FlagEnum, typename ListType = std::vector<std::string>>
 requires std::is_enum_v<FlagEnum>
 auto getEnumNameList(const std::function<bool(FlagEnum v)>& filter = {}) {
     ListType flag_list;
-    for (auto val : magic_enum::enum_values<FlagEnum>())
+    for (const auto &[val, name] : enchantum::entries<FlagEnum>)
     {
         if(filter && !filter(val)) continue;
-        flag_list.emplace_back(magic_enum::enum_name(val));
+        flag_list.emplace_back(name);
     }
     return flag_list;
 }
@@ -68,5 +67,5 @@ Result<std::string> handleSetEnum(EnumType& field, std::string_view arg, std::st
         return err(res.error());
     }
     field = res.value();
-    return fmt::format("Set {} to {}.", fieldName, magic_enum::enum_name(field));
+    return fmt::format("Set {} to {}.", fieldName, enchantum::to_string(field));
 }

@@ -5,8 +5,7 @@
 #include "dbat/const/Position.h"
 #include "dbat/const/CharacterProperties.h"
 
-#include <magic_enum/magic_enum.hpp>
-#include <magic_enum/magic_enum_utility.hpp>
+#include "dbat/Enum.h"
 
 extern std::unordered_map<Position, std::vector<character_affect_type>> pos_affects;
 
@@ -84,12 +83,9 @@ std::vector<std::string> affect_t::specificNames()
     case APPLY_CATTR_POST:
     case APPLY_CATTR_GAIN_MULT:
     {
-        magic_enum::enum_for_each<CharAttribute>([&](auto val)
-                                                 {
-                constexpr CharAttribute v = val;
-                if(specific & static_cast<int>(v)) {
-                    out.emplace_back(magic_enum::enum_name(v));
-                    } });
+        auto res = getEnumNameList<CharAttribute>([&](CharAttribute v)
+                                                 { return specific & static_cast<int>(v); });
+        out.insert(out.end(), res.begin(),  res.end());
     }
     break;
     case APPLY_CVIT_BASE:
@@ -100,12 +96,9 @@ std::vector<std::string> affect_t::specificNames()
     case APPLY_CVIT_REGEN_MULT:
     case APPLY_TRANS_UPKEEP_CVIT:
     {
-        magic_enum::enum_for_each<CharVital>([&](auto val)
-                                             {
-                constexpr CharVital v = val;
-                if(specific & static_cast<int>(v)) {
-                    out.emplace_back(magic_enum::enum_name(v));
-                } });
+        auto res = getEnumNameList<CharVital>([&](CharVital v)
+                                             { return specific & static_cast<int>(v); });
+        out.insert(out.end(), res.begin(),  res.end());
     }
     break;
     case APPLY_CSTAT_BASE:
@@ -113,57 +106,42 @@ std::vector<std::string> affect_t::specificNames()
     case APPLY_CSTAT_POST:
     case APPLY_CSTAT_GAIN_MULT:
     {
-        magic_enum::enum_for_each<CharStat>([&](auto val)
-                                            {
-                constexpr CharStat v = val;
-                if(specific & static_cast<int>(v)) {
-                    out.emplace_back(magic_enum::enum_name(v));
-                } });
+        auto res = getEnumNameList<CharStat>([&](CharStat v)
+                                             { return specific & static_cast<int>(v); });
+        out.insert(out.end(), res.begin(),  res.end());
     }
     break;
     case APPLY_CDIM_BASE:
     case APPLY_CDIM_MULT:
     case APPLY_CDIM_POST:
     {
-        magic_enum::enum_for_each<CharDim>([&](auto val)
-                                           {
-                constexpr CharDim v = val;
-                if(specific & static_cast<int>(v)) {
-                    out.emplace_back(magic_enum::enum_name(v));
-                } });
+        auto res = getEnumNameList<CharDim>([&](CharDim v)
+                                             { return specific & static_cast<int>(v); });
+        out.insert(out.end(), res.begin(),  res.end());
     }
     break;
     case APPLY_COMBAT_BASE:
     case APPLY_COMBAT_MULT:
     {
-        magic_enum::enum_for_each<ComStat>([&](auto val)
-                                           {
-                constexpr ComStat v = val;
-                if(specific & static_cast<int>(v)) {
-                    out.emplace_back(magic_enum::enum_name(v));
-                } });
+        auto res = getEnumNameList<ComStat>([&](ComStat v)
+                                             { return specific & static_cast<int>(v); });
+        out.insert(out.end(), res.begin(),  res.end());
     }
     break;
     case APPLY_DTYPE_RES:
     case APPLY_DTYPE_BON:
     {
-        magic_enum::enum_for_each<DamType>([&](auto val)
-                                           {
-                constexpr DamType v = val;
-                if(specific & static_cast<int>(v)) {
-                    out.emplace_back(magic_enum::enum_name(v));
-                } });
+        auto res = getEnumNameList<DamType>([&](DamType v)
+                                             { return specific & static_cast<int>(v); });
+        out.insert(out.end(), res.begin(),  res.end());
     }
     break;
     case APPLY_ATKTIER_BON:
     case APPLY_ATKTIER_RES:
     {
-        magic_enum::enum_for_each<AtkTier>([&](auto val)
-                                           {
-                constexpr AtkTier v = val;
-                if(specific & static_cast<int>(v)) {
-                    out.emplace_back(magic_enum::enum_name(v));
-                } });
+        auto res = getEnumNameList<AtkTier>([&](AtkTier v)
+                                             { return specific & static_cast<int>(v); });
+        out.insert(out.end(), res.begin(),  res.end());
     }
     break;
     case APPLY_SKILL:

@@ -248,7 +248,7 @@ int check_flags_by_name_ar(const Container& container, int numflags, char *searc
     static_assert(std::is_enum<typename Container::value_type>::value, 
         "Container must contain enum values");
     
-    auto casted = magic_enum::enum_cast<typename Container::value_type>(search);
+    auto casted = enchantum::cast<typename Container::value_type>(search);
     if (!casted.has_value()) {
         return false;
     }

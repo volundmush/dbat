@@ -1,6 +1,6 @@
 #pragma once
 #include <cstdint>
-#include <magic_enum/magic_enum.hpp>
+#include <enchantum/common.hpp>
 
 enum class Skill : uint16_t
 {
@@ -168,10 +168,18 @@ enum class Skill : uint16_t
 
 };
 
+/*
 template <>
 struct magic_enum::customize::enum_range<Skill>
 {
     static constexpr int min = 400;
     static constexpr int max = 562;
-    // (max - min) must be less than UINT16_MAX.
+};
+*/
+
+template<>
+struct enchantum::enum_traits<Skill> {
+  //constexpr static auto prefix_length = sizeof("BigEnumOutsideOfDefault_")-1; // sizeof includes null terminator!
+  constexpr static auto min = 400;    // inclusive
+  constexpr static auto max = 562; // inclusive
 };

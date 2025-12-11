@@ -33,7 +33,7 @@ target_sources(dbat
 target_link_libraries(dbat
   PUBLIC
     fmt::fmt
-    magic_enum::magic_enum
+    enchantum::enchantum
     effolkronium_random
     nlohmann_json
     ZLIB::ZLIB

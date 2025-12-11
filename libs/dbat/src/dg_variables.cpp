@@ -43,7 +43,6 @@
 #include "dbat/const/PlayerFlag.h"
 
 #include <algorithm>
-#include <magic_enum/magic_enum.hpp>
 
 /* Utility functions */
 
@@ -881,7 +880,7 @@ std::string dgHandleEnum(EnumType& val, const std::string& arg) {
             val = *res;
         }
     }
-    return std::string(magic_enum::enum_name(val));
+    return std::string(enchantum::to_string(val));
 }
 
 DgReturn Character::dgCallMember(DgScript* trig, std::string_view field, std::string_view subfield) {
@@ -976,7 +975,7 @@ DgReturn Character::dgCallMember(DgScript* trig, std::string_view field, std::st
     if(boost::iequals(lmember, "clan")) return "";
 
     if(boost::iequals(lmember, "class") || boost::iequals(lmember, "sensei"))
-        return std::string(magic_enum::enum_name(sensei));
+        return std::string(enchantum::to_string(sensei));
 
     
     if(boost::iequals(lmember, "drag"))
@@ -1108,7 +1107,7 @@ DgReturn Character::dgCallMember(DgScript* trig, std::string_view field, std::st
             return "";
     
     if(boost::iequals(lmember, "race"))
-        return std::string(magic_enum::enum_name(race));
+        return std::string(enchantum::to_string(race));
 
     if(boost::iequals(lmember, "rpp")) {
         if(!arg.empty()) {
@@ -1121,7 +1120,7 @@ DgReturn Character::dgCallMember(DgScript* trig, std::string_view field, std::st
     }
 
     if(boost::iequals(lmember, "sex"))
-        return std::string(magic_enum::enum_name(sex));
+        return std::string(enchantum::to_string(sex));
     
     if(boost::iequals(lmember, "skillset")) {
         if(!arg.empty()) {
@@ -1273,8 +1272,8 @@ DgReturn Object::dgCallMember(DgScript* trig, std::string_view field, std::strin
 
     if(boost::iequals(lmember, "setaffects")) return dgHandleFlags(affect_flags, arg, true);
     if(boost::iequals(lmember, "setextra")) return dgHandleFlags(item_flags, arg, true);
-    if(boost::iequals(lmember, "size")) return std::string(magic_enum::enum_name(size));
-    if(boost::iequals(lmember, "type")) return std::string(magic_enum::enum_name(type_flag));
+    if(boost::iequals(lmember, "size")) return std::string(enchantum::to_string(size));
+    if(boost::iequals(lmember, "type")) return std::string(enchantum::to_string(type_flag));
 
     if(boost::iequals(lmember, "value"))
         if(!arg.empty()) return fmt::format("{}", GET_OBJ_VAL(this, arg));
@@ -1366,7 +1365,7 @@ DgReturn Room::dgCallMember(DgScript* trig, std::string_view field, std::string_
     if(boost::iequals(lmember, "id")) return getUID(true);
 
     if(boost::iequals(lmember, "name")) return getName();
-    if(boost::iequals(lmember, "sector")) return std::string(magic_enum::enum_name(sector_type));
+    if(boost::iequals(lmember, "sector")) return std::string(enchantum::to_string(sector_type));
 
     if(boost::iequals(lmember, "gravity")) {
         Location loc(this);

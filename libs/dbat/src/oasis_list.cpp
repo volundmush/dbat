@@ -245,7 +245,7 @@ void list_objects(Character *ch, room_vnum vmin, room_vnum vmax)
         auto sString = !o->proto_script.empty() ? fmt::format(" {}", o->scriptString()) : "";
         ch->send_to("@g%4d@n);[@g%-5d@n] @[2]%-*s @y[%s]@n%s\r\n",
                     vn, objectSubscriptions.count(fmt::format("vnum_{}", vn)), count_color_chars(o->short_description) + 44,
-                    o->short_description, magic_enum::enum_name(o->type_flag).data(),
+                    o->short_description, enchantum::to_string(o->type_flag).data(),
                     sString.c_str());
     }
 

@@ -167,9 +167,9 @@ std::vector<std::string> getAndroidModelNames() {
 
 std::vector<std::string> getBioGenomeNames() {
         std::vector<std::string> out;
-        for (auto val : magic_enum::enum_values<Race>()) {
+        for (const auto &[val, name] : enchantum::entries<Race>) {
                 if(race::isValidGenome(val)) {
-                        out.emplace_back(magic_enum::enum_name(val));
+                        out.emplace_back(enchantum::to_string(val));
                 }
         }
         

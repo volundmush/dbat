@@ -1,7 +1,7 @@
 #pragma once
 #include <cstdint>
 
-#include <magic_enum/magic_enum.hpp>
+#include <enchantum/enchantum.hpp>
 
 
 using attribute_t = std::uint8_t;
@@ -13,12 +13,6 @@ enum class CharAttribute : std::uint8_t
     wisdom = 1 << 3,       // 8
     constitution = 1 << 4, // 16
     speed = 1 << 5         // 32
-};
-
-template <>
-struct magic_enum::customize::enum_range<CharAttribute>
-{
-    static constexpr bool is_flags = true;
 };
 
 using attribute_train_t = std::uint32_t;

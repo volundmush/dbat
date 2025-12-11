@@ -60,8 +60,8 @@ inline std::string format_as(const ObjectBase& ob) {
     parts.emplace_back(format_as(static_cast<const HasVnum&>(ob)));
     parts.emplace_back(format_as(static_cast<const HasMudStrings&>(ob)));
     parts.emplace_back(format_as(static_cast<const HasExtraDescriptions&>(ob)));
-    parts.emplace_back(fmt::format("Type: {}", magic_enum::enum_name(ob.type_flag)));
-    parts.emplace_back(fmt::format("Size: {}", magic_enum::enum_name(ob.size)));
+    parts.emplace_back(fmt::format("Type: {}", enchantum::to_string(ob.type_flag)));
+    parts.emplace_back(fmt::format("Size: {}", enchantum::to_string(ob.size)));
     if(ob.wear_flags) parts.emplace_back(fmt::format("Wear Flags: {}", format_as(ob.wear_flags)));
     if(ob.item_flags) parts.emplace_back(fmt::format("Item Flags: {}", format_as(ob.item_flags)));
     if(ob.affect_flags) parts.emplace_back(fmt::format("Affect Flags: {}", format_as(ob.affect_flags)));

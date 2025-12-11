@@ -1544,7 +1544,7 @@ static void do_stat_object(Character *ch, Object *j)
     }
     ch->send_to("Name: '%s', Keywords: %s, Size: %s\r\n", j->getShortDescription() ? j->getShortDescription() : "<None>", j->getName(), size_names[static_cast<int>(GET_OBJ_SIZE(j))]);
 
-    ch->send_to("VNum: [@g%5d@n], RNum: [%5d], Idnum: [%5d], Type: %s, SpecProc: %s\r\n", vnum, GET_OBJ_RNUM(j), j->id, magic_enum::enum_name(j->type_flag), GET_OBJ_SPEC(j) ? "Exists" : "None");
+    ch->send_to("VNum: [@g%5d@n], RNum: [%5d], Idnum: [%5d], Type: %s, SpecProc: %s\r\n", vnum, GET_OBJ_RNUM(j), j->id, enchantum::to_string(j->type_flag), GET_OBJ_SPEC(j) ? "Exists" : "None");
 
     ch->send_to("Unique ID: @g%" I64T "@n\r\n", j->id);
 
@@ -1733,7 +1733,7 @@ static void do_stat_character(Character *ch, Character *k)
         *(tmstr + strlen(tmstr) - 1) = '\0';
         ch->send_to("LOADED AT: [%s]\r\n", tmstr);
     }
-    auto sex = fmt::format("{}", magic_enum::enum_name(k->sex));
+    auto sex = fmt::format("{}", enchantum::to_string(k->sex));
 
     snprintf(buf, sizeof(buf), "%s", sex.c_str());
     ch->sendFmt("{} {} '{}'  IDNum: [{}], In room [{}], Loadroom : [{}]\r\n", buf, (!IS_NPC(k) ? "PC" : (!IS_MOB(k) ? "NPC" : "MOB")), GET_NAME(k), IS_NPC(k) ? ((k)->id) : GET_IDNUM(k), k->location, IS_NPC(k) ? MOB_LOADROOM(k) : GET_LOADROOM(k));
@@ -1795,7 +1795,7 @@ static void do_stat_character(Character *ch, Character *k)
 
     ch->send_to("Armor: [%d ], Damage: [%2d]\r\n", GET_ARMOR(k), GET_DAMAGE_MOD(k));
 
-    ch->send_to("Pos: %s, Fighting: %s", magic_enum::enum_name(k->position), FIGHTING(k) ? GET_NAME(FIGHTING(k)) : "Nobody");
+    ch->send_to("Pos: %s, Fighting: %s", enchantum::to_string(k->position), FIGHTING(k) ? GET_NAME(FIGHTING(k)) : "Nobody");
 
     if (k->desc)
     {

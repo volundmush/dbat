@@ -185,7 +185,7 @@ std::optional<Destination> AbstractGridArea::getDirection(const Coordinates &coo
 std::map<Direction, Destination> AbstractGridArea::getDirections(const Coordinates &coor)
 {
     std::map<Direction, Destination> out;
-    for (auto dir : magic_enum::enum_values<Direction>())
+    for (const auto &[dir, name] : enchantum::entries<Direction>)
     {
         if (auto dest = getDirection(coor, dir))
         {

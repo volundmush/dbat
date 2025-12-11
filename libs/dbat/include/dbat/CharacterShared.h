@@ -183,12 +183,12 @@ inline std::string format_as(const CharacterBase& cb) {
     parts.emplace_back(format_as(static_cast<const HasVnum&>(cb)));
     parts.emplace_back(format_as(static_cast<const HasMudStrings&>(cb)));
     parts.emplace_back(format_as(static_cast<const HasExtraDescriptions&>(cb)));
-    parts.emplace_back(fmt::format("Race: {}", magic_enum::enum_name(cb.race)));
-    if(cb.model) parts.emplace_back(fmt::format("Model: {}", magic_enum::enum_name(cb.model.value())));
-    parts.emplace_back(fmt::format("Sensei: {}", magic_enum::enum_name(cb.sensei)));
-    parts.emplace_back(fmt::format("Sex: {}", magic_enum::enum_name(cb.sex)));
-    parts.emplace_back(fmt::format("Size: {}", magic_enum::enum_name(cb.size)));
-    parts.emplace_back(fmt::format("Position: {}", magic_enum::enum_name(cb.position)));
+    parts.emplace_back(fmt::format("Race: {}", enchantum::to_string(cb.race)));
+    if(cb.model) parts.emplace_back(fmt::format("Model: {}", enchantum::to_string(cb.model.value())));
+    parts.emplace_back(fmt::format("Sensei: {}", enchantum::to_string(cb.sensei)));
+    parts.emplace_back(fmt::format("Sex: {}", enchantum::to_string(cb.sex)));
+    parts.emplace_back(fmt::format("Size: {}", enchantum::to_string(cb.size)));
+    parts.emplace_back(fmt::format("Position: {}", enchantum::to_string(cb.position)));
     if(cb.character_flags) parts.emplace_back(fmt::format("Character Flags: {}", format_as(cb.character_flags)));
     if(cb.mob_flags) parts.emplace_back(fmt::format("Mob Flags: {}", format_as(cb.mob_flags)));
     if(cb.bio_genomes) parts.emplace_back(fmt::format("BioGenomes: {}", format_as(cb.bio_genomes)));
