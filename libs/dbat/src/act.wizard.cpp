@@ -85,6 +85,7 @@
 #include "dbat/const/Filename.h"
 #include "dbat/const/ChatHistory.h"
 
+#include <enchantum/fmt_format.hpp>
 
 /* local variables */
 static int copyover_timer = 0; /* for timed copyovers */
@@ -1733,10 +1734,8 @@ static void do_stat_character(Character *ch, Character *k)
         *(tmstr + strlen(tmstr) - 1) = '\0';
         ch->send_to("LOADED AT: [%s]\r\n", tmstr);
     }
-    auto sex = fmt::format("{}", k->sex);
 
-    snprintf(buf, sizeof(buf), "%s", sex.c_str());
-    ch->sendFmt("{} {} '{}'  IDNum: [{}], In room [{}], Loadroom : [{}]\r\n", buf, (!IS_NPC(k) ? "PC" : (!IS_MOB(k) ? "NPC" : "MOB")), GET_NAME(k), IS_NPC(k) ? ((k)->id) : GET_IDNUM(k), k->location, IS_NPC(k) ? MOB_LOADROOM(k) : GET_LOADROOM(k));
+    ch->sendFmt("{} {} '{}'  IDNum: [{}], In room [{}], Loadroom : [{}]\r\n", k->sex, (!IS_NPC(k) ? "PC" : (!IS_MOB(k) ? "NPC" : "MOB")), GET_NAME(k), IS_NPC(k) ? ((k)->id) : GET_IDNUM(k), k->location, IS_NPC(k) ? MOB_LOADROOM(k) : GET_LOADROOM(k));
 
     ch->sendFmt("DROOM: [{}]\r\n", GET_DROOM(k));
     if (IS_MOB(k))
@@ -1752,9 +1751,7 @@ static void do_stat_character(Character *ch, Character *k)
         ch->sendFmt("Title: {}\r\n", k->title);
 
     ch->send_to("L-Des: %s@n", k->getRoomDescription() ? k->getRoomDescription() : "<None>\r\n");
-    snprintf(buf, sizeof(buf), "%s", sensei::getName(k->sensei).c_str());
-    snprintf(buf2, sizeof(buf2), "%s", race::getName(k->race).c_str());
-    ch->send_to("Class: %s, Race: %s, Lev: [@y%2d@n], XP: [@y%" I64T "@n]\r\n", buf, buf2, GET_LEVEL(k), GET_EXP(k));
+    ch->send_to("Class: %s, Race: %s, Lev: [@y%2d@n], XP: [@y%" I64T "@n]\r\n", sensei::getName(k->sensei), race::getName(k->race), GET_LEVEL(k), GET_EXP(k));
 
     if (!IS_NPC(k))
     {
@@ -1782,10 +1779,10 @@ static void do_stat_character(Character *ch, Character *k)
     ch->send_to("Str: [@c%d@n]  Int: [@c%d@n]  Wis: [@c%d@n]  "
                 "Dex: [@c%d@n]  Con: [@c%d@n]  Cha: [@c%d@n]\r\n",
                 GET_STR(k), GET_INT(k), GET_WIS(k), GET_DEX(k), GET_CON(k), GET_CHA(k));
-
-    ch->send_to("PL :[@g%12s@n]  KI :[@g%12s@n]  ST :[@g%12s@n]\r\n", add_commas(GET_HIT(k)).c_str(), add_commas((k->getCurVital(CharVital::ki))).c_str(), add_commas((k->getCurVital(CharVital::stamina))).c_str());
-    ch->send_to("MPL:[@g%12s@n]  MKI:[@g%12s@n]  MST:[@g%12s@n]\r\n", add_commas(GET_MAX_HIT(k)).c_str(), add_commas(GET_MAX_MANA(k)).c_str(), add_commas(GET_MAX_MOVE(k)).c_str());
-    ch->send_to("BPL:[@g%12s@n]  BKI:[@g%12s@n]  BST:[@g%12s@n]\r\n", add_commas((k->getBaseStat<int64_t>("health"))).c_str(), add_commas((k->getBaseStat<int64_t>("ki"))).c_str(), add_commas((k->getBaseStat<int64_t>("stamina"))).c_str());
+    ch->send_to("PL :[@g%12s@n] SUP :[@g%12s@n]\r\n", add_commas(k->getPL(false)).c_str(), add_commas(k->getBaseStat<int>("suppression")).c_str());
+    ch->send_to("HP :[@g%12s@n]  KI :[@g%12s@n]  ST :[@g%12s@n]\r\n", add_commas(GET_HIT(k)).c_str(), add_commas((k->getCurVital(CharVital::ki))).c_str(), add_commas((k->getCurVital(CharVital::stamina))).c_str());
+    ch->send_to("MHP:[@g%12s@n]  MKI:[@g%12s@n]  MST:[@g%12s@n]\r\n", add_commas(GET_MAX_HIT(k)).c_str(), add_commas(GET_MAX_MANA(k)).c_str(), add_commas(GET_MAX_MOVE(k)).c_str());
+    ch->send_to("BHP:[@g%12s@n]  BKI:[@g%12s@n]  BST:[@g%12s@n]\r\n", add_commas((k->getBaseStat<int64_t>("health"))).c_str(), add_commas((k->getBaseStat<int64_t>("ki"))).c_str(), add_commas((k->getBaseStat<int64_t>("stamina"))).c_str());
     ch->send_to("LF :[@g%12s@n]  MLF:[@g%12s@n]  LFP:[@g%3d@n]\r\n", add_commas((k->getCurVital(CharVital::lifeforce))).c_str(), add_commas((k->getEffectiveStat("lifeforce"))).c_str(), GET_LIFEPERC(k));
 
     if (GET_ADMLEVEL(k))
@@ -1795,7 +1792,7 @@ static void do_stat_character(Character *ch, Character *k)
 
     ch->send_to("Armor: [%d ], Damage: [%2d]\r\n", GET_ARMOR(k), GET_DAMAGE_MOD(k));
 
-    ch->send_to("Pos: %s, Fighting: %s", k->position, FIGHTING(k) ? GET_NAME(FIGHTING(k)) : "Nobody");
+    ch->send_to("Pos: %s, Fighting: %s", enchantum::to_string(k->position), FIGHTING(k) ? GET_NAME(FIGHTING(k)) : "Nobody");
 
     if (k->desc)
     {
@@ -1870,8 +1867,7 @@ static void do_stat_character(Character *ch, Character *k)
     }
 
     /* Showing the bitvector */
-    sprintf(buf, "%s", AFF_FLAGS(k).getFlagNames().c_str());
-    ch->send_to("AFF: @y%s@n\r\n", buf);
+    ch->send_to("AFF: @y%s@n\r\n", AFF_FLAGS(k).getFlagNames());
 
     /* Routine to show what spells a char is affected by */
     if (k->affected)

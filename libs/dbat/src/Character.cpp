@@ -844,23 +844,28 @@ int64_t Character::getPL(bool suppressed)
     int64_t vitalCalc = (getEffectiveStat<int64_t>("health") + getEffectiveStat<int64_t>("ki")) / 4;
     int attrCalc = (getEffectiveStat("agility") + getEffectiveStat("constitution") + getEffectiveStat("intelligence") + getEffectiveStat("speed") + getEffectiveStat("strength") + getEffectiveStat("wisdom")) / 50;
 
-    auto sup = suppressed ? getBaseStat<int>("suppression") : 100.0;
-
     double speed = getEffectiveStat("speednar");
 
-    double pl = (vitalCalc * attrCalc * speed) * (sup / 100.0);
+    double pl = (vitalCalc * attrCalc * speed);
+    if(suppressed) {
+        auto sup = getBaseStat<double>("suppression");
+        if(sup > 0.0) {
+            pl *= (sup / 100.0);
+        }
+    }
 
     if (IS_NPC(this))
     {
-        if (GET_LEVEL(this) < 10)
+        auto lv = GET_LEVEL(this);
+        if (lv < 10)
             pl *= 2;
-        else if (GET_LEVEL(this) < 30)
+        else if (lv < 30)
             pl /= 1;
-        else if (GET_LEVEL(this) < 50)
+        else if (lv < 50)
             pl /= 4;
-        else if (GET_LEVEL(this) < 70)
+        else if (lv < 70)
             pl /= 6;
-        else if (GET_LEVEL(this) < 90)
+        else if (lv < 90)
             pl /= 8;
         else
             pl /= 10;
