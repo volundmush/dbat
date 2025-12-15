@@ -251,7 +251,7 @@ std::string Character::juggleRaceName(bool capitalized)
         if (mimic)
             apparent = fmt::format("{}", enchantum::to_string(*mimic));
         break;
-    case Race::half_saiyan:
+    case Race::halfbreed:
     case Race::android:
     case Race::saiyan:
         apparent = getAppearance(Appearance::seeming);

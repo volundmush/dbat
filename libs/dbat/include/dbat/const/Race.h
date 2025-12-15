@@ -11,7 +11,7 @@ enum class Race : std::uint8_t
     namekian = 5,
     mutant = 6,
     kanassan = 7,
-    half_saiyan = 8,
+    halfbreed = 8,
     bio_android = 9,
     android = 10,
     demon = 11,
@@ -44,7 +44,7 @@ constexpr Race RACE_KONATSU = Race::konatsu;
 constexpr Race RACE_NAMEK = Race::namekian;
 constexpr Race RACE_MUTANT = Race::mutant;
 constexpr Race RACE_KANASSAN = Race::kanassan;
-constexpr Race RACE_HALFBREED = Race::half_saiyan;
+constexpr Race RACE_HALFBREED = Race::halfbreed;
 constexpr Race RACE_BIO = Race::bio_android;
 constexpr Race RACE_ANDROID = Race::android;
 constexpr Race RACE_DEMON = Race::demon;
