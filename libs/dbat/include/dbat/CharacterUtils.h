@@ -55,7 +55,6 @@ inline bool IS_MOB(const Character* ch) {
 #define GET_HAIRS(ch)   ch->getAppearanceStr(Appearance::hair_style)
 #define GET_SKIN(ch)    ch->getAppearanceStr(Appearance::skin_color)
 #define GET_EYE(ch)     ch->getAppearanceStr(Appearance::eye_color)
-#define GET_HOME(ch)    ch->getBaseStat<room_vnum>("hometown")
 #define GET_WEIGHT(ch)  ch->getEffectiveStat("weight")
 #define GET_HEIGHT(ch)  ch->getEffectiveStat("height")
 #define GET_PC_HEIGHT(ch)    GET_HEIGHT(ch)

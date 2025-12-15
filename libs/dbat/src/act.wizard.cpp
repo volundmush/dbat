@@ -1733,7 +1733,7 @@ static void do_stat_character(Character *ch, Character *k)
         *(tmstr + strlen(tmstr) - 1) = '\0';
         ch->send_to("LOADED AT: [%s]\r\n", tmstr);
     }
-    auto sex = fmt::format("{}", enchantum::to_string(k->sex));
+    auto sex = fmt::format("{}", k->sex);
 
     snprintf(buf, sizeof(buf), "%s", sex.c_str());
     ch->sendFmt("{} {} '{}'  IDNum: [{}], In room [{}], Loadroom : [{}]\r\n", buf, (!IS_NPC(k) ? "PC" : (!IS_MOB(k) ? "NPC" : "MOB")), GET_NAME(k), IS_NPC(k) ? ((k)->id) : GET_IDNUM(k), k->location, IS_NPC(k) ? MOB_LOADROOM(k) : GET_LOADROOM(k));
@@ -1775,7 +1775,7 @@ static void do_stat_character(Character *ch, Character *k)
             ch->send_to("@RCharacter Deaths@D: @r%d@n\r\n", GET_DCOUNT(k));
         }
 
-        ch->send_to("Hometown: [%d], Align: [%4d], Ethic: [%4d]", GET_HOME(k), GET_ALIGNMENT(k), GET_ETHIC_ALIGNMENT(k));
+        ch->send_to("Align: [%4d], Ethic: [%4d]", GET_ALIGNMENT(k), GET_ETHIC_ALIGNMENT(k));
 
         ch->sendText("\r\n");
     }
@@ -1795,7 +1795,7 @@ static void do_stat_character(Character *ch, Character *k)
 
     ch->send_to("Armor: [%d ], Damage: [%2d]\r\n", GET_ARMOR(k), GET_DAMAGE_MOD(k));
 
-    ch->send_to("Pos: %s, Fighting: %s", enchantum::to_string(k->position), FIGHTING(k) ? GET_NAME(FIGHTING(k)) : "Nobody");
+    ch->send_to("Pos: %s, Fighting: %s", k->position, FIGHTING(k) ? GET_NAME(FIGHTING(k)) : "Nobody");
 
     if (k->desc)
     {
