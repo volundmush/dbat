@@ -1534,6 +1534,28 @@ void Character::sendText(std::string_view txt)
     desc->sendText(txt);
 }
 
+size_t Character::send_to(const char *fmt, ...) {
+    if (!desc)
+        return 0;
+    
+    std::string output;
+
+    // calculate size
+    va_list args;
+    va_start(args, fmt);
+    size_t size = vsnprintf(nullptr, 0, fmt, args);
+    va_end(args);
+
+    output.resize(size + 1);
+    va_start(args, fmt);
+    vsnprintf(output.data(), size + 1, fmt, args);
+    va_end(args);
+
+    sendText(output);
+
+    return output.size();
+}
+
 bool Character::isSparring() const
 {
 

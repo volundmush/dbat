@@ -3,6 +3,7 @@ import orjson
 import asyncio
 import time
 import typing
+from loguru import logger
 from pathlib import Path
 from fastapi import HTTPException, status
 import dbat
@@ -19,10 +20,32 @@ cimport db
 from db cimport Room, Character, Object, Account, help_index_element, ObjectPrototype, CharacterPrototype
 from saveload cimport jdumps, jloads, jobject, to_json, from_json, runSave, create_player_character
 
+cdef void _cy_log_outputter(const string& file_name, const string& function_name, int line, int col, int lvl, const string& message) noexcept nogil:
+    with gil:
+        py_file_name = file_name.decode("utf-8", errors='ignore')
+        py_function_name = function_name.decode("utf-8", errors='ignore')
+        py_message = message.decode("utf-8", errors='ignore')
+
+        level = logger.info
+        if lvl == 0:
+            level = logger.trace
+        elif lvl == 1:
+            level = logger.debug
+        elif lvl == 3:
+            level = logger.warning
+        elif lvl == 4:
+            level = logger.error
+        elif lvl == 5:
+            level = logger.critical
+
+        level(f"{os.path.basename(py_file_name)}:{line} in {py_function_name} - {py_message}")
+
+
 def load_db():
     """
     Wraps the C++ boot_db_new() function.
     """
+    db.custom_log_outputter = _cy_log_outputter
     db.load_config()
     cur_path = Path().absolute()
     db.init()

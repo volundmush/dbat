@@ -28,6 +28,8 @@ COMMANDS_PRIORITY: dict[int, list["Command"]] = defaultdict(list)
 
 APP = None
 
+LOGGER = None
+
 
 class Service:
     load_priority: int = 0

@@ -29,7 +29,6 @@ crypt_context = CryptContext(schemes=["argon2"])
 def setup_logging(name: str):
 
     logformat = {
-        "format": "{time} - {level} - {message}",
         "backtrace": True,
         "diagnose": True,
     }

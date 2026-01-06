@@ -13,6 +13,10 @@ namespace mud::log
     // ---- Primary API (fmt-style, compile-time checked) ----
     void log(std::source_location loc, int lvl, const char* fmtstr, ...);
 
+    // function pointer for a custom log outputter.
+    using LogOutputter = void(*)(const std::string& file_name, const std::string& function_name, int line, int col, int lvl, const std::string& message);
+    extern LogOutputter custom_log_outputter;
+
 }
 
 #define LTRACE(messg, ...) ::mud::log::log(std::source_location::current(), 0, messg __VA_OPT__(,) __VA_ARGS__)

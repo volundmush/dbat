@@ -312,6 +312,26 @@ void Room::sendText(const std::string &txt)
     }
 }
 
+size_t Room::send_to(const char *fmt, ...) {
+    
+    std::string output;
+
+    // calculate size
+    va_list args;
+    va_start(args, fmt);
+    size_t size = vsnprintf(nullptr, 0, fmt, args);
+    va_end(args);
+
+    output.resize(size + 1);
+    va_start(args, fmt);
+    vsnprintf(output.data(), size + 1, fmt, args);
+    va_end(args);
+
+    sendText(output);
+
+    return output.size();
+}
+
 void Room::deleteExit(Direction dir)
 {
     if (auto find = exits.find(dir); find != exits.end())

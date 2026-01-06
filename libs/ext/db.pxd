@@ -170,6 +170,10 @@ cdef extern from "dbat/comm.h" namespace "game":
     void init_zones()
     void init_copyover()
 
+cdef extern from "dbat/Log.h" namespace "mud::log":
+    ctypedef void (*LogOutputter)(const string& file_name, const string& function_name, int line, int col, int lvl, const string& message)
+    extern LogOutputter custom_log_outputter
+
 cdef extern from "dbat/comm.h":
     void runOneLoop(double deltaTime)
 
