@@ -30,6 +30,11 @@ target_sources(dbat
         ${INCLUDE}
 )
 
+target_precompile_headers(dbat
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/private/pch.hpp
+)
+
 target_link_libraries(dbat
   PUBLIC
     fmt::fmt
