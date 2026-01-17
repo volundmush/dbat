@@ -59,7 +59,7 @@ void assemblyListToChar(Character *pCharacter, int type)
             {
                 sprinttype(g_pAssemblyTable[i].uchAssemblyType, AssemblyTypes, szAssmType, sizeof(szAssmType));
                 sprintf(szBuffer, "[%5ld] %s (%s)\r\n", g_pAssemblyTable[i].lVnum,
-                        obj_proto.at(lRnum)->short_description, szAssmType);
+                        obj_proto.at(lRnum)->short_description.c_str(), szAssmType);
                 pCharacter->sendText(szBuffer);
 
                 if (GET_ADMLEVEL(pCharacter) > 0)
@@ -76,7 +76,7 @@ void assemblyListToChar(Character *pCharacter, int type)
                         {
                             sprintf(szBuffer, " %5ld: %-20.20s Extract=%-3.3s InRoom=%-3.3s\r\n",
                                     +g_pAssemblyTable[i].pComponents[j].lVnum,
-                                    obj_proto.at(lRnum)->short_description,
+                                    obj_proto.at(lRnum)->short_description.c_str(),
                                     (g_pAssemblyTable[i].pComponents[j].bExtract ? "Yes" : "No"),
                                     (g_pAssemblyTable[i].pComponents[j].bInRoom ? "Yes" : "No"));
                             pCharacter->sendText(szBuffer);

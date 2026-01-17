@@ -2083,7 +2083,7 @@ ACMD(do_extract)
             }
             Object *bottle = nullptr, *next_obj, *obj2;
             int found = false;
-            if (bottle = ch->searchInventory(3423))
+            if ((bottle = ch->searchInventory(3423)))
             {
                 found = true;
             }
@@ -2186,7 +2186,7 @@ ACMD(do_runic)
 
     Object *obj, *next_obj, *bottle = nullptr;
     int found = false, amount = 0, brush = false;
-    if (bottle = ch->searchInventory(3424))
+    if ((bottle = ch->searchInventory(3424)))
     {
         found = true;
         amount = GET_OBJ_VAL(bottle, VAL_OTHER_SERAF);
@@ -3287,7 +3287,7 @@ ACMD(do_channel)
     int found = false;
     auto coldruby = [](const auto &o)
     { return GET_OBJ_VNUM(o) == 6600 && !OBJ_FLAGGED(o, ITEM_HOT); };
-    if (ruby = ch->searchInventory(coldruby))
+    if ((ruby = ch->searchInventory(coldruby)))
     {
         found = true;
     }
@@ -4182,7 +4182,7 @@ ACMD(do_ensnare)
     int found = false;
     auto valid_weave = [](const auto &o)
     { return valid_silk(o) && !OBJ_FLAGGED(o, ITEM_FORGED); };
-    if (obj = ch->searchInventory(valid_weave))
+    if ((obj = ch->searchInventory(valid_weave)))
     {
         found = true;
     }
@@ -4373,7 +4373,7 @@ ACMD(do_silk)
         double price = 1;
         auto valid_weave = [](const auto &o)
         { return valid_silk(o) && !OBJ_FLAGGED(o, ITEM_FORGED); };
-        if (obj = ch->searchInventory(valid_weave))
+        if ((obj = ch->searchInventory(valid_weave)))
         {
             found = true;
         }

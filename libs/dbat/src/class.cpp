@@ -670,6 +670,8 @@ void advance_level(Character *ch)
         case RACE_TRUFFLE:
             prac_reward += prac_reward * 0.5;
             break;
+        default:
+            break;
         }
 
         if (!IS_HUMAN(ch))

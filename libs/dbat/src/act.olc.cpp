@@ -1,4 +1,5 @@
 #include <variant>
+#include <ranges>
 
 #include "dbat/CharacterUtils.h"
 #include "dbat/RoomUtils.h"
@@ -1280,6 +1281,7 @@ ACMD(do_mush_reset) {
                 ch->sendText("Invalid index.\r\n");
                 return;
             }
+            cmdArgs.erase(cmdArgs.begin());
             auto cmdRes = parseResetCommand(cmdArgs);
             if(!cmdRes) {
                 ch->sendText(cmdRes.error());
@@ -1304,6 +1306,34 @@ ACMD(do_mush_reset) {
             }
             loc.executeResetCommands(rcm);
             ch->sendFmt("Executing Reset Commands for {}\r\n", loc);
+            return;
+        }
+        case ResOp::Replace: {
+            if(split.size() < 1) {
+                ch->sendText("Replace in where?");
+                return;
+            }
+            auto locRes = getLocation(split[0], ch);
+            if (!locRes) {
+                ch->sendText(locRes.error());
+                return;
+            }
+            auto loc = locRes.value();
+            auto rcm = loc.getResetCommands();
+            int index = parseNumber<int>(cmdArgs[0], "Reset Command Index").value_or(-1);
+            if (index < 0 || index >= static_cast<int>(rcm.size())) {
+                ch->sendText("Invalid index.\r\n");
+                return;
+            }
+            cmdArgs.erase(cmdArgs.begin());
+            auto cmdRes = parseResetCommand(cmdArgs);
+            if(!cmdRes) {
+                ch->sendText(cmdRes.error());
+                return;
+            }
+            rcm[index] = cmdRes.value();
+            loc.setResetCommands(rcm);
+            ch->sendFmt("Replaced Reset Command at {}: {}\r\n", index, cmdRes.value());
             return;
         }
     }

@@ -5705,6 +5705,8 @@ void hurt(int limb, int chance, Character *ch, Character *vict, Object *obj, int
                     mult = 50;
                     amount = "MOST";
                     break;
+                default:
+                    break;
                 }
 
                 auto victMsg = fmt::format("@WYour @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block {} of the damage!@n", amount);
@@ -6181,7 +6183,7 @@ void hurt(int limb, int chance, Character *ch, Character *vict, Object *obj, int
                     }
                     else
                     {
-                        ch->send_to(" @D<@YProcessing@D: @c%s - @r%s%%@D>@n\r\n", add_commas(vict->getPL()).c_str(), std::to_string((int)((1.0 - vict->getCurVitalDam(CharVital::health)) * 100)));
+                        ch->send_to(" @D<@YProcessing@D: @c%s - @r%s%%@D>@n\r\n", add_commas(vict->getPL()).c_str(), std::to_string((int)((1.0 - vict->getCurVitalDam(CharVital::health)) * 100)).c_str());
                     }
                 }
                 else
@@ -6204,7 +6206,7 @@ void hurt(int limb, int chance, Character *ch, Character *vict, Object *obj, int
                         }
                         else
                         {
-                            ch->send_to(" @D<@YProcessing@D: @c%s - @r%s%%@D>@n\r\n", add_commas(vpl).c_str(), std::to_string((int)((1.0 - vict->getCurVitalDam(CharVital::health)) * 100)));
+                            ch->send_to(" @D<@YProcessing@D: @c%s - @r%s%%@D>@n\r\n", add_commas(vpl).c_str(), std::to_string((int)((1.0 - vict->getCurVitalDam(CharVital::health)) * 100)).c_str());
                         }
                     }
                     else
@@ -6233,7 +6235,7 @@ void hurt(int limb, int chance, Character *ch, Character *vict, Object *obj, int
                         }
                         else
                         {
-                            ch->send_to(" @D<@YProcessing@D: @c%s - @r%s%%@D>@n\r\n", add_commas(vpl).c_str(), std::to_string((int)((1.0 - vict->getCurVitalDam(CharVital::health)) * 100)));
+                            ch->send_to(" @D<@YProcessing@D: @c%s - @r%s%%@D>@n\r\n", add_commas(vpl).c_str(), std::to_string((int)((1.0 - vict->getCurVitalDam(CharVital::health)) * 100)).c_str());
                         }
                     }
                     else
@@ -6253,7 +6255,7 @@ void hurt(int limb, int chance, Character *ch, Character *vict, Object *obj, int
                         }
                         else
                         {
-                            ch->send_to(" @D<@YProcessing@D: @c%s - @r%s%%@D>@n\r\n", add_commas(vpl).c_str(), std::to_string((int)((1.0 - vict->getCurVitalDam(CharVital::health)) * 100)));
+                            ch->send_to(" @D<@YProcessing@D: @c%s - @r%s%%@D>@n\r\n", add_commas(vpl).c_str(), std::to_string((int)((1.0 - vict->getCurVitalDam(CharVital::health)) * 100)).c_str());
                         }
                     }
                     else

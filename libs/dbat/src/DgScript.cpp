@@ -587,7 +587,7 @@ Object *get_obj_by_obj(Object *obj, char *name)
     if (boost::iequals(name, "self") || boost::iequals(name, "me"))
         return obj;
 
-    if (i = get_obj_in_list(name, obj->getInventory()))
+    if ((i = get_obj_in_list(name, obj->getInventory())))
         return i;
 
     if (auto o = obj->getContainer())
@@ -1312,7 +1312,7 @@ ACMD(do_detach)
                 }
             }
 
-            if (arg3 == nullptr || !*arg3)
+            if (arg3[0] == '\0')
                 ch->sendText("You must specify a trigger to remove.\r\n");
             else
                 trigger = arg3;
@@ -1330,7 +1330,7 @@ ACMD(do_detach)
                 return;
             }
 
-            if (arg3 == nullptr || !*arg3)
+            if (arg3[0] == '\0')
                 ch->sendText("You must specify a trigger to remove.\r\n");
             else
                 trigger = arg3;
@@ -1584,19 +1584,19 @@ void eval_op(char *op, char *lhs, char *rhs, char *result, DgScript *trig)
     }
     else if (!strcmp("<=", op))
     {
-        sprintf(result, "%d", !boost::iequals(lhs, rhs) <= 0);
+        sprintf(result, "%d", strcasecmp(lhs, rhs) <= 0);
     }
     else if (!strcmp(">=", op))
     {
-        sprintf(result, "%d", !boost::iequals(lhs, rhs) <= 0);
+        sprintf(result, "%d", strcasecmp(lhs, rhs) >= 0);
     }
     else if (!strcmp("<", op))
     {
-        sprintf(result, "%d", !boost::iequals(lhs, rhs) < 0);
+        sprintf(result, "%d", strcasecmp(lhs, rhs) < 0);
     }
     else if (!strcmp(">", op))
     {
-        sprintf(result, "%d", !boost::iequals(lhs, rhs) > 0);
+        sprintf(result, "%d", strcasecmp(lhs, rhs) > 0);
     }
     else if (!strcmp("/=", op))
         sprintf(result, "%c", str_str(lhs, rhs) ? '1' : '0');
@@ -2255,7 +2255,7 @@ int perform_set_dg_var(Character *ch, Character *vict, char *val_arg)
 
     var_value = any_one_arg(val_arg, var_name);
 
-    if (var_name == nullptr || !*var_name || var_value == nullptr || !*var_value)
+    if (var_name[0] == '\0' || !var_value || !*var_value)
     {
         ch->sendText("Usage: set <char> <varname> <value>\r\n");
         return 0;
@@ -2709,6 +2709,8 @@ void DgScript::setState(DgScriptState newState)
     case DgScriptState::WAITING:
         triggerSubscriptions.subscribe("waiting", shared_from_this());
         break;
+    default:
+        break;
     }
 }
 
@@ -2996,6 +2998,8 @@ void DgScript::processLine(const ScriptLine &line)
         case ScriptLineType::SWITCH:
             current_line++;
             break;
+        default:
+            break;
         }
         depth_stack.pop_back();
     }
@@ -3008,7 +3012,11 @@ void DgScript::processLine(const ScriptLine &line)
         }
         current_line = locateDone(ScriptLineType::SWITCH, current_line + 1);
         break;
+    
+    default:
+        throw DgScriptError("Unknown script line type.");
     }
+    
 }
 
 int DgScript::locateElseIfElseEnd(int startLine) const
@@ -3280,6 +3288,8 @@ void DgScript::processCommand(const std::string &raw_text)
         case WLD_TRIGGER:
             wld_command_interpreter((Room *)owner.get(), (char *)full_command.c_str());
             break;
+        default:
+            throw DgScriptError("Unknown attach type.");
         }
     }
 }

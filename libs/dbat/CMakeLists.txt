@@ -39,6 +39,7 @@ target_link_libraries(dbat
     ZLIB::ZLIB
     Boost::regex
     Threads::Threads
+    spdlog::spdlog
     bsd
     ${MATH_LIB}
   PRIVATE

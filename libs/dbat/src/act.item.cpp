@@ -1026,7 +1026,7 @@ ACMD(do_deploy)
     {
         auto iscapsule = [](const auto &o)
         { return o->getVnum() == 4 || o->getVnum() == 5 || o->getVnum() == 6; };
-        if (obj = ch->searchInventory(iscapsule))
+        if ((obj = ch->searchInventory(iscapsule)))
         {
             capsule = true;
         }
@@ -1141,7 +1141,7 @@ ACMD(do_deploy)
 
     while (giveup == false && cont == false)
     {
-        if (obj3 = Location(get_room(rnum)).searchObjects(18801))
+        if ((obj3 = Location(get_room(rnum)).searchObjects(18801)))
         {
             found = true;
         }
@@ -2058,7 +2058,7 @@ ACMD(do_assemble)
 
     Object *tool = nullptr, *next_obj;
 
-    if (tool = ch->searchInventory(386))
+    if ((tool = ch->searchInventory(386)))
     {
         act("@WYou open up your toolkit and take out the necessary tools.@n", true, ch, nullptr, nullptr, TO_CHAR);
         act("@C$n@W opens up $s toolkit and takes out the necessary tools.@n", true, ch, nullptr, nullptr, TO_ROOM);
@@ -3718,7 +3718,7 @@ ACMD(do_eat)
     if (IS_NPC(ch)) /* Cannot use GET_COND() on mobs. */
         return;
 
-    if ((IS_ANDROID(ch) || GET_COND(ch, HUNGER)) < 0 && GET_ADMLEVEL(ch) < 1)
+    if ((IS_ANDROID(ch) || GET_COND(ch, HUNGER) < 0) && GET_ADMLEVEL(ch) < 1)
     {
         ch->sendText("You need not eat!\r\n");
         return;

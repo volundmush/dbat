@@ -9044,7 +9044,7 @@ ACMD(do_transform)
     int formtype = trans::getFormType(ch, trans);
     int grade = 1;
 
-    if (arg2)
+    if (arg2[0] != '\0')
         grade = atoi(arg2);
 
     if ((cur_form == trans || (formtype == 2 && cur_tech == trans)) && grade == ch->transforms[trans].grade)

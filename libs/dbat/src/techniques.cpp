@@ -60,6 +60,8 @@ void tech_handle_posmodifier(Character *vict, int &pry, int &blk, int &dge, int 
         blk /= 2;
         dge /= 2;
         prob += 10;
+    default:
+        break;
     }
 }
 

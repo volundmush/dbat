@@ -52,14 +52,14 @@ ACMD(do_oasis_list)
 
     if (subcmd == SCMD_OASIS_ZLIST)
     { /* special case */
-        if (smin && *smin && is_number(smin))
+        if (!boost::iequals(smin, "") && is_number(smin))
             print_zone(ch, atoi(smin));
         else
             list_zones(ch);
         return;
     }
 
-    if (!*smin || *smin == '.')
+    if (boost::iequals(smin, "") || boost::iequals(smin, "."))
     {
         rzone = ch->location.getZone()->number;
     }
@@ -129,7 +129,7 @@ ACMD(do_oasis_links)
     skip_spaces(&argument);
     one_argument(argument, arg);
 
-    if ((!arg || !*arg) || !strcmp(arg, "."))
+    if (boost::iequals(arg, "") || boost::iequals(arg, "."))
     {
         zvnum = ch->location.getZone()->number;
     }

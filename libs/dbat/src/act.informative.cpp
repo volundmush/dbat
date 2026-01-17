@@ -916,7 +916,7 @@ ACMD(do_nickname)
         int found = false;
         auto is_ship = [](const auto &o)
         { return GET_OBJ_VNUM(o) >= 45000 && GET_OBJ_VNUM(o) <= 45999; };
-        if (ship2 = ch->location.searchObjects(is_ship))
+        if ((ship2 = ch->location.searchObjects(is_ship)))
         {
             found = true;
         }
@@ -1147,6 +1147,8 @@ static void draw_closed_exit(char map[9][10], int x, int y, int door)
     case SOUTHWEST:
         map[y + 1][x - 1] = '8';
         break;
+    default:
+        break;
     }
 }
 
@@ -1235,6 +1237,8 @@ static void draw_open_exit(char map[9][10], int x, int y, int door, int sect, do
         break;
     case SOUTHWEST:
         map[y + 1][x - 1] = sectorChar;
+        break;
+    default:
         break;
     }
 }
@@ -3292,7 +3296,7 @@ ACMD(do_autoexit)
         ch->send_to("Your current autoexit level is %s.\r\n", exitlevels[EXIT_LEV(ch)]);
         return;
     }
-    if (((tp = search_block(arg, exitlevels, false)) == -1))
+    if ((tp = search_block(arg, exitlevels, false)) == -1)
     {
         ch->sendText("Usage: Autoexit { Off | Normal | Complete }\r\n");
         return;
@@ -5849,7 +5853,7 @@ ACMD(do_users)
                 d->account ? d->account->name.c_str() : "UNKNOWN", state, idletime, timeptr,
                 "N");
 
-        if (d->host && *d->host)
+        if (d->host[0] != 0)
             sprintf(line + strlen(line), "\n%3d [%s Site: %s]\r\n", -1, d->account ? d->account->name.c_str() : "UNKNOWN",
                     d->host);
         else
@@ -6494,7 +6498,7 @@ ACMD(do_color)
         ch->sendText("Usage: color [ off | on ]\r\n");
         return;
     }
-    if (((tp = search_block(arg, ctypes, false)) == -1))
+    if ((tp = search_block(arg, ctypes, false)) == -1)
     {
         ch->sendText("Usage: color [ off | on ]\r\n");
         return;

@@ -68,7 +68,21 @@ struct Room : public AbstractLocation, public HasProtoScript, public HasVnum, pu
     }
     */
 
-    size_t send_to(const char *fmt, ...) __attribute__((format(printf, 2, 3)));
+    template<typename... Args>
+    size_t send_to(fmt::string_view format, Args&&... args) {
+        try {
+            // Use fmt::sprintf directly (printf-style).
+            std::string formatted_string = fmt::sprintf(format, std::forward<Args>(args)...);
+            if(formatted_string.empty()) return 0;
+            sendText(formatted_string);
+            return formatted_string.size();
+        }
+        catch(const fmt::format_error& e) {
+            LERROR("SYSERR: Format error in Room::send_to: %s", e.what());
+            LERROR("Template was: %s", format.data());
+            return 0;
+        }
+    }
     
     void deleteExit(Direction dir);
     void replaceExit(const Destination& dest);

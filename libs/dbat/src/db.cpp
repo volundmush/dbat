@@ -1125,8 +1125,7 @@ char *fread_string(FILE *fl, const char *error) {
  * replace, give everybody using it a different copy so
  * as to avoid special cases.
 
-
-/* clear some of the the working variables of a char */
+ clear some of the the working variables of a char */
 void reset_char(Character *ch) {
     int i;
 

@@ -512,7 +512,7 @@ OCMD(do_dgoload)
 
     target = two_arguments(argument, arg1, arg2);
 
-    if (!*arg1 || !*arg2 || !is_number(arg2) || ((number = atoi(arg2)) < 0))
+    if (arg1[0] == '\0' || arg2[0] == '\0' || !is_number(arg2) || ((number = atoi(arg2)) < 0))
     {
         obj_log(obj, "oload: bad syntax");
         return;
@@ -580,7 +580,7 @@ OCMD(do_dgoload)
         tch = get_char_near_obj(obj, arg1);
         if (tch)
         {
-            if (arg2 && *arg2 &&
+            if (arg2[0] != '\0' &&
                 (pos = find_eq_pos_script(arg2)) >= 0 &&
                 !GET_EQ(tch, pos) &&
                 can_wear_on_pos(object, pos))
@@ -618,7 +618,7 @@ OCMD(do_odamage)
     two_arguments(argument, name, amount);
 
     /* who cares if it's a number ? if not it'll just be 0 */
-    if (!*name || !*amount)
+    if (name[0] == '\0' || amount[0] == '\0')
     {
         obj_log(obj, "odamage: bad syntax");
         return;

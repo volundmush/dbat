@@ -781,6 +781,8 @@ static void mob_attack(Character *ch, char *buf)
                         else
                             do_zanzoken(ch, "40", 0, 0);
                         break;
+                    default:
+                        break;
                     }
                 }
                 break;

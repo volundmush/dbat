@@ -48,6 +48,18 @@ std::map<shop_vnum, std::shared_ptr<Shop>> shop_index;
 shop_vnum top_shop = NOTHING;
 int cmd_say, cmd_tell, cmd_emote, cmd_slap, cmd_puke;
 
+constexpr const char* MSG_NOT_OPEN_YET = "Come back later!";
+constexpr const char* MSG_NOT_REOPEN_YET = "Sorry, we have closed, but come back later.";
+constexpr const char* MSG_CLOSED_FOR_DAY = "Sorry, come back tomorrow.";
+constexpr const char* MSG_NO_STEAL_HERE = "$n is a bloody thief!";
+constexpr const char* MSG_NO_SEE_CHAR = "I don't trade with someone I can't see!";
+constexpr const char* MSG_NO_SELL_ALIGN = "Get out of here before I call the guards!";
+constexpr const char* MSG_NO_SELL_CLASS = "We don't serve your kind here!";
+constexpr const char* MSG_NO_SELL_RACE = "Get lost! We don't serve you kind here!";
+constexpr const char* MSG_NO_USED_WANDSTAFF = "I don't buy used up wands or staves!";
+constexpr const char* MSG_CANT_KILL_KEEPER = "Get out of here before I call the guards!";
+constexpr const char* MSG_NO_BUY_BROKEN = "Sorry, but I don't deal in broken items.";
+
 /* local functions */
 static char *read_shop_message(int mnum, room_vnum shr, FILE *shop_f, const char *why);
 
@@ -1642,7 +1654,7 @@ static void list_detailed_shop(Character *ch, vnum shop_nr)
             column += 2;
         }
         linelen = snprintf(buf1, sizeof(buf1), "%s (#%d)",
-                           obj_proto.at(p)->short_description,
+                           obj_proto.at(p)->short_description.c_str(),
                            p);
 
         /* Implementing word-wrapping: assumes screen-size == 80 */

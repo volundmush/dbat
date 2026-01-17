@@ -109,17 +109,6 @@ constexpr int MAX_OPER = 4;
 constexpr int MIN_OUTSIDE_BANK = 5000;
 constexpr int MAX_OUTSIDE_BANK = 15000;
 
-constexpr std::string_view MSG_NOT_OPEN_YET = "Come back later!";
-constexpr std::string_view MSG_NOT_REOPEN_YET = "Sorry, we have closed, but come back later.";
-constexpr std::string_view MSG_CLOSED_FOR_DAY = "Sorry, come back tomorrow.";
-constexpr std::string_view MSG_NO_STEAL_HERE = "$n is a bloody thief!";
-constexpr std::string_view MSG_NO_SEE_CHAR = "I don't trade with someone I can't see!";
-constexpr std::string_view MSG_NO_SELL_ALIGN = "Get out of here before I call the guards!";
-constexpr std::string_view MSG_NO_SELL_CLASS = "We don't serve your kind here!";
-constexpr std::string_view MSG_NO_SELL_RACE = "Get lost! We don't serve you kind here!";
-constexpr std::string_view MSG_NO_USED_WANDSTAFF = "I don't buy used up wands or staves!";
-constexpr std::string_view MSG_CANT_KILL_KEEPER = "Get out of here before I call the guards!";
-constexpr std::string_view MSG_NO_BUY_BROKEN = "Sorry, but I don't deal in broken items.";
 
 // global variables
 extern const char *trade_letters[NUM_TRADERS + 1];

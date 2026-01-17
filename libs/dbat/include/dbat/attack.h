@@ -183,9 +183,9 @@ namespace atk
         bool isPhysical() override { return false; };
         bool checkOtherConditions() override;
         double calculateKiCost() override;
-        double getKiEfficiency();
-        int getTier() { return 1; };
-        int getHoming() { return 0; };
+        double getKiEfficiency() override;
+        int getTier() override { return 1; };
+        int getHoming() override { return 0; };
         Result handleParry() override;
         Result handleDodge() override;
         Result handlePerfectDodge() override;
@@ -841,7 +841,7 @@ namespace atk
         int getSkill() override { return SKILL_KNEE; }
         int getAtkID() override { return 8; };
         std::string getName() override { return "fire breath"; }
-        std::optional<int> hasCooldown() { return 10; };
+        std::optional<int> hasCooldown() override { return 10; };
         void attackPostprocess() override;
 
         void announceHitspot() override;
@@ -854,7 +854,7 @@ namespace atk
         int getSkill() override { return SKILL_KNEE; }
         int getAtkID() override { return 8; };
         std::string getName() override { return "ram"; }
-        std::optional<int> hasCooldown() { return 4; };
+        std::optional<int> hasCooldown() override { return 4; };
 
         void announceHitspot() override;
     };
@@ -866,7 +866,7 @@ namespace atk
         int getSkill() override { return SKILL_KNEE; }
         int getAtkID() override { return 8; };
         std::string getName() override { return "fang strike"; }
-        std::optional<int> hasCooldown() { return 4; };
+        std::optional<int> hasCooldown() override { return 4; };
         void attackPreprocess() override;
 
         void announceHitspot() override;
@@ -880,7 +880,7 @@ namespace atk
         int getAtkID() override { return 55; };
         std::string getName() override { return "sundering force"; }
         int getTier() override { return 3; };
-        std::optional<int> hasCooldown() { return 6; };
+        std::optional<int> hasCooldown() override { return 6; };
         bool canParry() override { return false; };
         bool canBlock() override { return false; };
         int limbhurtChance() override;
@@ -927,7 +927,7 @@ namespace atk
         int getSkill() override { return SKILL_BASH; }
         int getAtkID() override { return 51; };
         std::string getName() override { return "bash"; }
-        std::optional<int> hasCooldown() { return 6; };
+        std::optional<int> hasCooldown() override { return 6; };
         void attackPostprocess() override;
 
         void announceHitspot() override;
@@ -1047,7 +1047,7 @@ namespace atk
         int getSkill() override { return SKILL_PUNCH; }
         int getAtkID() override { return 8; };
         std::string getName() override { return "bite"; }
-        std::optional<int> hasCooldown() { return 4; };
+        std::optional<int> hasCooldown() override { return 4; };
         void attackPostprocess() override;
         void attackPreprocess() override;
 
@@ -1205,7 +1205,7 @@ namespace atk
         int wtype = 1;
         int getSkill() override { return SKILL_DAGGER; }
 
-        int getWeaponType() { return (TYPE_PIERCE - TYPE_HIT); };
+        int getWeaponType() override { return (TYPE_PIERCE - TYPE_HIT); };
         std::string getName() override { return "dagger"; }
         void attackPreprocess() override;
 
@@ -1221,7 +1221,7 @@ namespace atk
         int64_t beforepl = 0;
         int getSkill() override { return SKILL_SWORD; }
 
-        int getWeaponType() { return (TYPE_SLASH - TYPE_HIT); };
+        int getWeaponType() override { return (TYPE_SLASH - TYPE_HIT); };
         std::string getName() override { return "sword"; }
         void attackPreprocess() override;
         void attackPostprocess() override;
@@ -1239,7 +1239,7 @@ namespace atk
 
         int getSkill() override { return SKILL_CLUB; }
 
-        int getWeaponType() { return (TYPE_CRUSH - TYPE_HIT); };
+        int getWeaponType() override { return (TYPE_CRUSH - TYPE_HIT); };
         std::string getName() override { return "club"; }
         void attackPreprocess() override;
         void attackPostprocess() override;
@@ -1255,7 +1255,7 @@ namespace atk
         int wtype = 3;
         int getSkill() override { return SKILL_SPEAR; }
 
-        int getWeaponType() { return (TYPE_STAB - TYPE_HIT); };
+        int getWeaponType() override { return (TYPE_STAB - TYPE_HIT); };
         std::string getName() override { return "spear"; }
 
         void announceHitspot() override;
@@ -1269,7 +1269,7 @@ namespace atk
         int wtype = 4;
         int getSkill() override { return SKILL_GUN; }
 
-        int getWeaponType() { return (TYPE_BLAST - TYPE_HIT); };
+        int getWeaponType() override { return (TYPE_BLAST - TYPE_HIT); };
         std::string getName() override { return "gun"; }
         void handleHitspot() override;
         bool checkOtherConditions() override;
@@ -1289,7 +1289,7 @@ namespace atk
         int wtype = 5;
         int getSkill() override { return SKILL_BRAWL; }
 
-        int getWeaponType() { return (TYPE_PUNCH - TYPE_HIT); };
+        int getWeaponType() override { return (TYPE_PUNCH - TYPE_HIT); };
         std::string getName() override { return "weapon"; }
         void attackPreprocess() override;
         void handleHitspot() override;

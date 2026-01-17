@@ -567,7 +567,7 @@ WCMD(do_wload)
         tch = get_char_in_room(room, arg1);
         if (tch)
         {
-            if (arg2 && *arg2 &&
+            if (arg2[0] != '\0' &&
                 (pos = find_eq_pos_script(arg2)) >= 0 &&
                 !GET_EQ(tch, pos) &&
                 can_wear_on_pos(object, pos))

@@ -10,9 +10,9 @@ struct HasLocation {
     struct Room* getRoom();
     room_vnum getRoomVnum();
 
-    virtual bool isActiveInLocation() const = 0;
+    virtual bool isActiveInLocation() const;
 
-    virtual std::shared_ptr<HasLocation> getSharedHasLocation() = 0;
+    virtual std::shared_ptr<HasLocation> getSharedHasLocation();
 
     void moveToLocation(const Location& loc);
     void leaveLocation();
@@ -30,11 +30,11 @@ struct HasLocation {
 
     // When categorizing this thing in a Look display, what should it show under?
     // Should be plural. Example: Creatures, Items, Vehicles, Furniture, etc.
-    virtual std::string getLocationDisplayCategory(Character* viewer) const = 0;
+    virtual std::string getLocationDisplayCategory(Character* viewer) const;
 
     // Display information about the thing in its current information. used for 'room displays.'
     // Currently doesn't return anything because lots of old code directly calls viewer->sendText()...
-    virtual void displayLocationInfo(Character* viewer) = 0;
+    virtual void displayLocationInfo(Character* viewer);
 
     virtual bool getLocationVisibleTo(Character* viewer);
 

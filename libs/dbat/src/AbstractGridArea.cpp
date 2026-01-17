@@ -166,6 +166,8 @@ std::optional<Destination> AbstractGridArea::getDirection(const Coordinates &coo
         case Direction::outside:
             // These directions are not valid for grid areas.
             return std::nullopt;
+        default:
+            break;
     }
 
     // Apply our direction

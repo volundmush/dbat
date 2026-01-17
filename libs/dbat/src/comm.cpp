@@ -283,7 +283,7 @@ void runOneLoop(double deltaTime) {
     }
 
     // send output to the Python side...
-    g_distribute_output();
+    if(g_distribute_output) g_distribute_output();
 
     /* Kick out folks in the CON_CLOSE or CON_DISCONNECT state */
     {
@@ -1382,7 +1382,7 @@ void close_socket(struct descriptor_data *d) {
         // Notify the server that this socket will be closed.
         // This will send a None event to all attached streams
         // and close them gracefully.
-        g_send_close(c->id);
+        if(g_send_close) g_send_close(c->id);
     }
 
     sessions.erase(d->id);

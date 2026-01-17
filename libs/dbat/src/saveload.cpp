@@ -794,7 +794,7 @@ void from_json(const json &j, Shop &s)
     if (j.contains("open2"))
         s.open2 = j["open2"];
     if (j.contains("close2"))
-        s.close2;
+        s.close2 = j["close2"];
     if (j.contains("bankAccount"))
         s.bankAccount = j["bankAccount"];
     if (j.contains("lastsort"))

@@ -34,19 +34,10 @@ set(CMAKE_CXX_COMPILER_LAUNCHER ccache)
 set(CMAKE_C_COMPILER_LAUNCHER   ccache)
 
 set(BUILD_TESTING OFF)
-
-option(DBAT_BUILD_PROFILE "Emit compiler timing/profiling information" OFF)
-if(DBAT_BUILD_PROFILE)
-  message(STATUS "DBAT_BUILD_PROFILE=ON (compiler timing enabled)")
-  if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    add_compile_options(-ftime-report)
-  elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    add_compile_options(-ftime-trace)
-  endif()
-endif()
-
+# ---------------- 
 # ---------------- deps (yours) ----------------
-find_package(Boost CONFIG REQUIRED COMPONENTS regex iostreams)
+find_package(OpenSSL REQUIRED)
+find_package(Boost CONFIG REQUIRED COMPONENTS regex iostreams url)
 find_package(ZLIB REQUIRED)
 find_package(Threads REQUIRED)
 
@@ -54,20 +45,8 @@ if(UNIX AND NOT APPLE)
   set(MATH_LIB m)
 endif()
 
-# Fallback: if the detected GNU C++ toolchain doesn't list libstdc++ among
-# its implicit link libraries (common with partial/manual installs), add it
-# to the standard C++ link line so executables link cleanly without per-target
-# workarounds. This has no effect on toolchains that already inject it.
-if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-  list(FIND CMAKE_CXX_IMPLICIT_LINK_LIBRARIES "stdc++" _has_stdcxx)
-  if(_has_stdcxx EQUAL -1)
-    message(STATUS "GNU toolchain missing implicit libstdc++; adding -lstdc++ to CMAKE_CXX_STANDARD_LIBRARIES")
-    set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_CXX_STANDARD_LIBRARIES} -lstdc++")
-  endif()
-endif()
-
 CPMAddPackage(NAME fmt                   GITHUB_REPOSITORY fmtlib/fmt            GIT_TAG 11.2.0)
-#CPMAddPackage(NAME spdlog                GITHUB_REPOSITORY gabime/spdlog         VERSION 1.15.3)
+CPMAddPackage(NAME spdlog                GITHUB_REPOSITORY gabime/spdlog         VERSION 1.15.3)
 CPMAddPackage(NAME nlohmann_json         GITHUB_REPOSITORY nlohmann/json         VERSION 3.12.0)
 CPMAddPackage(NAME enchantum            GITHUB_REPOSITORY ZXShady/enchantum    GIT_TAG 0.3.0)
 #CPMAddPackage(NAME EnTT                  GITHUB_REPOSITORY skypjack/entt         VERSION 3.15.0)
@@ -75,27 +54,9 @@ CPMAddPackage(NAME effolkronium_random   GITHUB_REPOSITORY volundmush/random    
                OPTIONS "Random_BuildTests OFF")
 
 
-
 # ---------------- your native targets ----------------
+add_subdirectory(libs/jwt)
 add_subdirectory(libs/dbat)
-add_subdirectory(apps/migrate)
-
-# =====================================================================
-# Python/Cython extension (built when scikit-build-core drives the build,
-# or if you pass -DDBAT_BUILD_PYTHON=ON manually)
-# =====================================================================
-# Prefer enabling by default when building under scikit-build-core. Some
-# frontends set SKBUILD as an environment variable; consult both env and var.
-set(_dbat_build_python_default OFF)
-if(DEFINED SKBUILD AND SKBUILD)
-  set(_dbat_build_python_default ON)
-elseif(DEFINED ENV{SKBUILD} AND NOT "$ENV{SKBUILD}" STREQUAL "")
-  set(_dbat_build_python_default ON)
-endif()
-option(DBAT_BUILD_PYTHON "Build the Python extension" ${_dbat_build_python_default})
-message(STATUS "DBAT_BUILD_PYTHON=${DBAT_BUILD_PYTHON}")
-
-if(DBAT_BUILD_PYTHON)
-  message(STATUS "Adding subdirectory libs/ext for Python/Cython extension")
-  add_subdirectory(libs/ext)
-endif()
+add_subdirectory(libs/netbind)
+#add_subdirectory(apps/migrate)
+#add_subdirectory(apps/server)

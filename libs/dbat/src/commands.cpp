@@ -565,7 +565,7 @@ int matchCommand(Character *ch, std::string_view cmd)
         {
                 auto &c = complete_cmd_info[i];
                 // we reached the end and didn't get a match...
-                if (c.command == "\n")
+                if (boost::iequals(c.command, "\n"))
                         return -1;
                 if (c.minimum_level > ch->getBaseStat<int>("level"))
                         continue;

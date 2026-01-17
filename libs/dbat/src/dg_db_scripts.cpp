@@ -166,7 +166,7 @@ void dg_obj_trigger(char *line, ObjectPrototype *obj) {
     if (rnum == NOTHING) {
         mudlog(BRF, ADMLVL_BUILDER, true,
                "SYSERR: Trigger vnum #%d asked for but non-existant! (Object: %s - %d)",
-               vnum, obj->short_description, obj->vn);
+               vnum, obj->short_description.c_str(), obj->vn);
         return;
     }
 

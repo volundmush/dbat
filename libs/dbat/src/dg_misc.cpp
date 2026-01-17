@@ -171,8 +171,8 @@ void do_dg_affect(DgScript *trig, char *cmd) {
     half_chop(cmd, value_p, duration_p);
 
     /* make sure all parameters are present */
-    if (charname == nullptr || !*charname || property == nullptr || !*property ||
-        value_p == nullptr || !*value_p || duration_p == nullptr || !*duration_p) {
+    if (charname[0] == '\0' || property[0] == '\0' ||
+        value_p[0] == '\0' || duration_p[0] == '\0') {
         script_log("Trigger: %s, VNum %d. dg_affect usage: <target> <property> <value> <duration>",
                    GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig));
         return;

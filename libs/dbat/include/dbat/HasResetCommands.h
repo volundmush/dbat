@@ -15,12 +15,11 @@ enum class ResetCommandType : uint8_t {
     OBJ = 1,
     GIVE = 2,
     PUT = 3,
-    GET = 4,
-    EQUIP = 5,
-    DOOR = 6,
-    REMOVE = 7,
-    TRIGGER = 8,
-    VARIABLE = 9
+    EQUIP = 4,
+    DOOR = 5,
+    REMOVE = 6,
+    TRIGGER = 7,
+    VARIABLE = 8
 };
 
 struct SpawnRegistry {

@@ -581,10 +581,10 @@ ACMD(do_mload)
             return;
         }
         two_arguments(target, arg1, arg2); /* recycling ... */
-        tch = (arg1 && *arg1 == UID_CHAR) ? get_char(arg1) : get_char_room_vis(ch, arg1, nullptr);
+        tch = (arg1[0] == UID_CHAR) ? get_char(arg1) : get_char_room_vis(ch, arg1, nullptr);
         if (tch)
         {
-            if (arg2 && *arg2 &&
+            if (arg2[0] &&
                 (pos = find_eq_pos_script(arg2)) >= 0 &&
                 !GET_EQ(tch, pos) &&
                 can_wear_on_pos(object, pos))
@@ -597,7 +597,7 @@ ACMD(do_mload)
             load_otrigger(object);
             return;
         }
-        cnt = (arg1 && *arg1 == UID_CHAR) ? get_obj(arg1) : get_obj_vis(ch, arg1, nullptr);
+        cnt = (arg1[0] == UID_CHAR) ? get_obj(arg1) : get_obj_vis(ch, arg1, nullptr);
         if (cnt && GET_OBJ_TYPE(cnt) == ITEM_CONTAINER)
         {
             cnt->addToInventory(object);
@@ -1221,11 +1221,11 @@ ACMD(do_maddtransform)
     }
 
     bool add = true;
-    if (operation == "add")
+    if (boost::iequals(operation, "add"))
     {
         add = true;
     }
-    else if (operation == "remove")
+    else if (boost::iequals(operation, "remove"))
     {
         add = false;
     }
@@ -1238,11 +1238,10 @@ ACMD(do_maddtransform)
 
     auto foundForm = trans::findForm(ch, strForm);
 
-    if (foundForm.has_value())
-        if (add)
-            ch->addTransform(*foundForm);
-        else
-            ch->removeTransform(*foundForm);
+    if (foundForm.has_value()) {
+        if (add) {ch->addTransform(*foundForm);}
+        else {ch->removeTransform(*foundForm);}
+    }
 }
 
 ACMD(do_mdoor)

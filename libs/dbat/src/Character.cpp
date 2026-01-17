@@ -256,6 +256,8 @@ std::string Character::juggleRaceName(bool capitalized)
     case Race::saiyan:
         apparent = getAppearance(Appearance::seeming);
         break;
+    default:
+        break;
     }
 
     if (capitalized)
@@ -1534,6 +1536,7 @@ void Character::sendText(std::string_view txt)
     desc->sendText(txt);
 }
 
+/*
 size_t Character::send_to(const char *fmt, ...) {
     if (!desc)
         return 0;
@@ -1555,7 +1558,7 @@ size_t Character::send_to(const char *fmt, ...) {
 
     return output.size();
 }
-
+*/
 bool Character::isSparring() const
 {
 

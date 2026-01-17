@@ -1443,8 +1443,8 @@ static void do_stat_room(Character *ch, Room *rm)
     {
         ch->sendText("Extra descs:");
         for (const auto &ex : exd)
-        {
-            ch->send_to(" [@c%s@n]", ex.first);
+        {   
+            ch->send_to(" [@c%s@n]", std::string(ex.first).c_str());
         }
         ch->sendText("\r\n");
     }
@@ -2507,7 +2507,7 @@ ACMD(do_pgrant)
     {
         vict->addTransform(*foundForm);
         ch->send_to("Form %s added!\r\n", strForm);
-        log_imm_action("Form Added: %s added %s to %s!", ch, strForm, vict);
+        log_imm_action("Form Added: %s added %s to %s!", ch, strForm.c_str(), vict);
     }
     else
     {
@@ -2515,13 +2515,13 @@ ACMD(do_pgrant)
         {
             vict->hideTransform(*foundForm, true);
             ch->send_to("Form %s hidden!\r\n", strForm);
-            log_imm_action("Form Hidden: %s hidden %s from %s!", ch, strForm, vict);
+            log_imm_action("Form Hidden: %s hidden %s from %s!", ch, strForm.c_str(), GET_NAME(vict));
         }
         else
         {
             vict->hideTransform(*foundForm, false);
             ch->send_to("Form %s unhidden!\r\n", strForm);
-            log_imm_action("Form Unhidden: %s unhidden %s from %s!", ch, strForm, vict);
+            log_imm_action("Form Unhidden: %s unhidden %s from %s!", ch, strForm.c_str(), GET_NAME(vict));
         }
     }
 }
@@ -2550,15 +2550,15 @@ ACMD(do_rpreward)
 
     if (is_abbrev(arg2, "medium"))
     {
-        int rppGain = 5;
-        int vitalsGain = 0.6;
-        int growthGain = 3;
+        rppGain = 5;
+        vitalsGain = 0.6;
+        growthGain = 3;
     }
     else if (is_abbrev(arg2, "high"))
     {
-        int rppGain = 7;
-        int vitalsGain = 0.9;
-        int growthGain = 4;
+        rppGain = 7;
+        vitalsGain = 0.9;
+        growthGain = 4;
     }
 
     double boundPL = log(ch->getBaseStat<int64_t>("health"));
@@ -2773,7 +2773,7 @@ ACMD(do_syslog)
         ch->send_to("Your syslog is currently %s.\r\n", logtypes[(PRF_FLAGGED(ch, PRF_LOG1) ? 1 : 0) + (PRF_FLAGGED(ch, PRF_LOG2) ? 2 : 0)]);
         return;
     }
-    if (((tp = search_block(arg, logtypes, false)) == -1))
+    if ((tp = search_block(arg, logtypes, false)) == -1)
     {
         ch->sendText("Usage: syslog { Off | Brief | Normal | Complete }\r\n");
         return;
@@ -3910,7 +3910,7 @@ ACMD(do_show)
         break;
 
     case 14:
-        if (value && *value)
+        if (value[0] != '\0')
         {
             if (sscanf(value, "%d-%d", &low, &high) != 2)
             {
@@ -4947,7 +4947,7 @@ ACMD(do_zcheck)
     struct extra_descr_data *ext, *ext2;
     one_argument(argument, buf);
 
-    if (buf == nullptr || !*buf || !strcmp(buf, "."))
+    if (buf[0] == '\0' || !strcmp(buf, "."))
         zrnum = ch->location.getZone()->number;
     else
         zrnum = real_zone(atoi(buf));
@@ -5358,6 +5358,8 @@ static void obj_checkload(Character *ch, obj_vnum ovnum)
                     count += 1;
                 }
                 break;
+            default:
+                break;
             } /* switch */
         } /*for cmd_no......*/
     } /*for zone...*/
@@ -5404,9 +5406,6 @@ static void trg_checkload(Character *ch, trig_vnum tvnum)
             case ResetCommandType::PUT: /* object to object */
                 lastobj_v = c.target;
                 break;
-            case ResetCommandType::GET: /* obj_to_char */
-                lastobj_v = c.target;
-                break;
             case ResetCommandType::EQUIP: /* object to equipment list */
                 lastobj_v = c.target;
                 break;
@@ -5450,6 +5449,8 @@ static void trg_checkload(Character *ch, trig_vnum tvnum)
                     found = 1;
                 }
                 break;
+                default:
+                    break;
             } /* switch */
         } /*for cmd_no......*/
     } /*for zone...*/

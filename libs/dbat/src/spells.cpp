@@ -342,6 +342,8 @@ ASPELL(spell_identify)
         case ITEM_ARMOR:
             ch->send_to("AC-apply is %.1f\r\n", ((float)GET_OBJ_VAL(obj, VAL_ARMOR_APPLYAC)) / 10);
             break;
+        default:
+                break;
         }
         found = false;
         for (i = 0; i < MAX_OBJ_AFFECT; i++)

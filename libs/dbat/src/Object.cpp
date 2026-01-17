@@ -55,7 +55,7 @@ void Object::activate()
     services.insert("active");
     if (IS_CORPSE(this))
         services.insert("corpseRotService");
-    if (SCRIPT_TYPES(this) && OTRIG_RANDOM)
+    if (SCRIPT_TYPES(this) & OTRIG_RANDOM)
         services.insert("randomTriggers");
     if (vn == 65)
         services.insert("healTankService");

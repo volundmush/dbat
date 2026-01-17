@@ -149,6 +149,8 @@ std::unordered_map<Coordinates, Destination> gatherSurroundings(const Location& 
                 case Direction::up:
                 case Direction::down:
                     continue;
+                default:
+                    break;
             }
 
             // stay in bounds...

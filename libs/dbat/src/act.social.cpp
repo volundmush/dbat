@@ -333,7 +333,7 @@ void create_command_list()
     {
         k = j;
         for (i = j + 1; i <= top_of_socialt; i++)
-            if (!boost::iequals(soc_mess_list[i].sort_as, soc_mess_list[k].sort_as) < 0)
+            if (strcasecmp(soc_mess_list[i].sort_as, soc_mess_list[k].sort_as) < 0)
                 k = i;
         if (j != k)
         {

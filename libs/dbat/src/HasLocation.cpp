@@ -63,3 +63,19 @@ void HasLocation::onLeaveLocation(const Location& loc) {
 void HasLocation::onLocationChanged(const Location& oldloc, const Location& newloc) {
     // this isn't used yet.
 }
+
+std::shared_ptr<HasLocation> HasLocation::getSharedHasLocation() {
+    return {};
+}
+
+std::string HasLocation::getLocationDisplayCategory(Character* viewer) const {
+    return "unknown";
+}
+
+bool HasLocation::isActiveInLocation() const {
+    return true;
+}
+
+void HasLocation::displayLocationInfo(Character* viewer) {
+    // default implementation does nothing.
+}

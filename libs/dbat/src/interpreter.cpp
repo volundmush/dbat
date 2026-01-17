@@ -105,6 +105,8 @@ void command_interpreter(Character *ch, char *argument)
     case POS_STUNNED:
         ch->position = POS_SITTING;
         break;
+    default:
+        break;
     }
 
     /* just drop to next line for hitting CR */
@@ -279,6 +281,8 @@ void processCommand(Character *ch, int cmd, CommandData cd)
         case POS_FIGHTING:
             ch->sendText("No way!  You're fighting for your life!\r\n");
             return;
+        default:
+            break;
         }
     }
     if (no_specials || !special(ch, cmd, line))

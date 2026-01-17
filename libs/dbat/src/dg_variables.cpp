@@ -386,9 +386,12 @@ DGFUNC(dg_func_random) {
                 }
             }
             break;
+            default:
+                break;
         }
         auto res = Random::get(chars);
-        if(res != chars.end(); auto c = res->lock()) {
+        if(res != chars.end()) {
+            auto c = res->lock();
             return c.get();
         } else {
             return "";
@@ -415,6 +418,8 @@ DGFUNC(dg_func_random) {
                 loc = Location(r);
             }
             break;
+            default:
+                break;
         }
 
         std::vector<int> available;
@@ -1003,11 +1008,12 @@ DgReturn Character::dgCallMember(DgScript* trig, std::string_view field, std::st
         return fmt::format("{}", GET_EXP(this));
     }
 
-    if(boost::iequals(lmember, "fighting"))
-        if(auto f = FIGHTING(this))
+    if(boost::iequals(lmember, "fighting")) {
+        if(auto f = FIGHTING(this)) {
             return f;
-        else
-            return "";
+        }
+        else {return "";}
+    }
     
     if(boost::iequals(lmember, "follower")) {
         if(!followers) return "";
@@ -1056,12 +1062,14 @@ DgReturn Character::dgCallMember(DgScript* trig, std::string_view field, std::st
         }
     }
 
-    if(boost::iequals(lmember, "master"))
-        if(master) return master;
-        else return "";
+    if(boost::iequals(lmember, "master")) {
+        if(master) {return master;}
+        else {return "";}   
+    }
 
-    if(boost::iequals(lmember, "name"))
+    if(boost::iequals(lmember, "name")) {
         return IS_NPC(this) ? getShortDescription() : getName();
+    }
     
     if(boost::iequals(lmember, "next_in_room")) {
         if (auto people = location.getPeople(); !people.empty())
@@ -1082,8 +1090,9 @@ DgReturn Character::dgCallMember(DgScript* trig, std::string_view field, std::st
         return "";
     }
 
-    if(boost::iequals(lmember, "pos"))
+    if(boost::iequals(lmember, "pos")) {
         return dgHandleEnum(position, arg);
+    }
 
     if(boost::iequals(lmember, "prac")) {
         if(!arg.empty()) {
@@ -1096,18 +1105,20 @@ DgReturn Character::dgCallMember(DgScript* trig, std::string_view field, std::st
     }
 
     if(boost::iequals(lmember, "plr"))
-        return dgHandleFlags(player_flags, arg);
+        {return dgHandleFlags(player_flags, arg);}
     if(boost::iequals(lmember, "pref"))
-        return dgHandleFlags(pref_flags, arg);
+        {return dgHandleFlags(pref_flags, arg);}
     
-    if(boost::iequals(lmember, "room"))
+    if(boost::iequals(lmember, "room")) {
         if(auto r = getRoom())
-            return r;
+            {return r;}
         else
-            return "";
+            {return "";}
+    }
     
-    if(boost::iequals(lmember, "race"))
+    if(boost::iequals(lmember, "race")) {
         return std::string(enchantum::to_string(race));
+    }
 
     if(boost::iequals(lmember, "rpp")) {
         if(!arg.empty()) {
@@ -1119,8 +1130,9 @@ DgReturn Character::dgCallMember(DgScript* trig, std::string_view field, std::st
         return fmt::format("{}", getRPP());
     }
 
-    if(boost::iequals(lmember, "sex"))
+    if(boost::iequals(lmember, "sex")) {
         return std::string(enchantum::to_string(sex));
+    }
     
     if(boost::iequals(lmember, "skillset")) {
         if(!arg.empty()) {
@@ -1139,8 +1151,9 @@ DgReturn Character::dgCallMember(DgScript* trig, std::string_view field, std::st
         }
     }
 
-    if(boost::iequals(lmember, "size"))
+    if(boost::iequals(lmember, "size")) {
         return dgHandleEnum(size, arg);
+    }
     
     if(boost::iequals(lmember, "tnl"))
         return fmt::format("{}", level_exp(this, GET_LEVEL(this) +1));
@@ -1189,12 +1202,14 @@ DgReturn Object::dgCallMember(DgScript* trig, std::string_view field, std::strin
         return fmt::format("{}", getEffectiveStat<int>(find->second));
     }
 
-    if(boost::iequals(lmember, "affects"))
+    if(boost::iequals(lmember, "affects")) {
         return dgHandleFlags(affect_flags, arg);
+    }
     
-    if(boost::iequals(lmember, "carried_by"))
-        if(auto c = getCarriedBy()) return c;
-        else return "";
+    if(boost::iequals(lmember, "carried_by")) {
+        if(auto c = getCarriedBy()) {return c;}
+        else {return "";}
+    }
     
     if(boost::iequals(lmember, "contents")) {
         if (auto con = getInventory(); !con.empty())
@@ -1227,9 +1242,10 @@ DgReturn Object::dgCallMember(DgScript* trig, std::string_view field, std::strin
     if(boost::iequals(lmember, "id"))
         return getUID(true);
 
-    if(boost::iequals(lmember, "is_inroom") || boost::iequals(lmember, "room") || boost::iequals(lmember, "in_room"))
-        if(auto r = getRoom()) return r;
-        else return "";
+    if(boost::iequals(lmember, "is_inroom") || boost::iequals(lmember, "room") || boost::iequals(lmember, "in_room")) {
+        if(auto r = getRoom()) {return r;}
+        else {return "";}
+    }
 
     if(boost::iequals(lmember, "is_pc")) return "-1";
 
@@ -1275,9 +1291,10 @@ DgReturn Object::dgCallMember(DgScript* trig, std::string_view field, std::strin
     if(boost::iequals(lmember, "size")) return std::string(enchantum::to_string(size));
     if(boost::iequals(lmember, "type")) return std::string(enchantum::to_string(type_flag));
 
-    if(boost::iequals(lmember, "value"))
-        if(!arg.empty()) return fmt::format("{}", GET_OBJ_VAL(this, arg));
-        else return "";
+    if(boost::iequals(lmember, "value")) {
+        if(!arg.empty()) {return fmt::format("{}", GET_OBJ_VAL(this, arg));}
+        else {return "";}
+    }
 
     if(boost::iequals(lmember, "vnum")) return fmt::format("{}", getVnum());
     if(boost::iequals(lmember, "weight")) {

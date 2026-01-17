@@ -934,7 +934,7 @@ ACMD(do_selfd)
     }
 
     /*Andros Start*/
-    if (!GET_SDCOOLDOWN(ch) <= 0)
+    if (GET_SDCOOLDOWN(ch) > 0)
     {
         ch->sendText("Your body is still recovering from the last self destruct!\r\n");
         return;

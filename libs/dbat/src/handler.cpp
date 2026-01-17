@@ -77,14 +77,18 @@ const char *get_i_name(Character *ch, Character *vict)
 
     if (IS_NPC(ch) || IS_NPC(vict))
     {
-        return (RACE(vict));
+        sprintf(name, "%s", RACE(vict));
+        return name;
     }
 
     auto &p = players.at(ch->id);
 
     auto found = p->dub_names.find(vict->id);
-    if (found == p->dub_names.end())
-        return RACE(vict);
+    if (found == p->dub_names.end()) {
+        sprintf(name, "%s", RACE(vict));
+        return name;
+    }
+        
 
     // print *found to name and return buf pointer.
     sprintf(name, "%s", found->second.c_str());

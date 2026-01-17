@@ -42,10 +42,8 @@
   )
 
   # Make sure we compile with the same standard/features as the rest
-  target_compile_features(dbat_ext PRIVATE cxx_std_23)
+  #target_compile_features(dbat_ext PRIVATE cxx_std_23)
 
   # Install the Python extension into the top-level of the wheel so
   # `import dbat_ext` finds it directly. Cover both Unix (.so) and Windows (.pyd).
-  install(TARGETS dbat_ext
-          LIBRARY DESTINATION .
-          RUNTIME DESTINATION .)
+  #install(TARGETS dbat_ext LIBRARY DESTINATION . RUNTIME DESTINATION .)

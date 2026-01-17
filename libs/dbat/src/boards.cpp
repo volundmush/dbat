@@ -305,7 +305,7 @@ struct board_info *load_board(obj_vnum board_vnum) {
                    deletions, message deletions, etc.  'Failures' will not be logged */
                 if ((get_name_by_id(poster) == nullptr) && (BOARD_VERSION(temp_board) != CURRENT_BOARD_VER)) {
                     free(memboard);
-                } else if ((poster_name == nullptr) && (BOARD_VERSION(temp_board) == CURRENT_BOARD_VER)) {
+                } else if ((poster_name[0] == '\0') && (BOARD_VERSION(temp_board) == CURRENT_BOARD_VER)) {
                     free(memboard);
                 } else {
                     /* locate specific message this pertains to - therefore, messages MUST be loaded first! */

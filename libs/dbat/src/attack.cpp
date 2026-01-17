@@ -472,6 +472,8 @@ namespace atk
             case DefenseResult::Blocked:
                 calcDamage /= 4;
                 break;
+            default:
+                break;
             }
             if (calcDamage < 1)
                 calcDamage = 1;
@@ -723,7 +725,7 @@ namespace atk
         {
             if (currentDodgeCheck > axion_dice(10))
                 incomingDamage /= 10;
-            if (incomingDamage > victim->getEffectiveStat<int64_t>("ki") / 5 && !incomingDamage > victim->getEffectiveStat<int64_t>("ki") * 5)
+            if (incomingDamage > victim->getEffectiveStat<int64_t>("ki") / 5 && !(incomingDamage > victim->getEffectiveStat<int64_t>("ki") * 5))
                 incomingDamage = victim->getEffectiveStat<int64_t>("ki") / 5;
 
             victim->modCurVital(CharVital::ki, -incomingDamage);
@@ -1784,7 +1786,7 @@ namespace atk
         {
             if (currentDodgeCheck > axion_dice(10))
                 incomingDamage /= 10;
-            if (incomingDamage > victim->getEffectiveStat<int64_t>("ki") / 5 && !incomingDamage > victim->getEffectiveStat<int64_t>("ki") * 5)
+            if (incomingDamage > victim->getEffectiveStat<int64_t>("ki") / 5 && !(incomingDamage > victim->getEffectiveStat<int64_t>("ki") * 5))
                 incomingDamage = victim->getEffectiveStat<int64_t>("ki") / 5;
 
             victim->modCurVital(CharVital::ki, -incomingDamage);
@@ -2613,11 +2615,11 @@ namespace atk
         }
         else if (initSkill >= 60 && GET_HIT(victim) >= 2)
         {
-            victim->modCurVital(CharVital::lifeforce, -(calcDamage * .2, -1));
+            victim->modCurVital(CharVital::lifeforce, -(calcDamage * .2));
         }
         else if (initSkill >= 40 && GET_HIT(victim) >= 2)
         {
-            victim->modCurVital(CharVital::lifeforce, -(calcDamage * .05, -1));
+            victim->modCurVital(CharVital::lifeforce, -(calcDamage * .05));
         }
     }
 

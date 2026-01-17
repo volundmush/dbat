@@ -66,6 +66,8 @@ std::string ResetCommand::print() const
         return fmt::sprintf("%sAttach trigger @c%s@y [@c%d@y] to %s", if_flag ? " then " : "", getTrigName(target), target, ((ex == static_cast<int>(MOB_TRIGGER)) ? "mobile" : ((ex == static_cast<int>(OBJ_TRIGGER)) ? "object" : ((ex == static_cast<int>(WLD_TRIGGER)) ? "room" : "????"))));
     case ResetCommandType::VARIABLE:
         return fmt::sprintf("%sAssign global %s:%d to %s = %s", if_flag ? " then " : "", key.c_str(), ex, ((ex == static_cast<int>(MOB_TRIGGER)) ? "mobile" : ((ex == static_cast<int>(OBJ_TRIGGER)) ? "object" : ((ex == static_cast<int>(WLD_TRIGGER)) ? "room" : "????"))), value.c_str());
+    default:
+        return "Unknown Reset Command";
     }
     return "";
 }
@@ -345,6 +347,8 @@ static bool resetTrigger(Location &loc, SpawnRegistry &reg, trig_vnum target, in
         }
         break;
     }
+    default:
+    break;
     }
     return false;
 }
@@ -383,6 +387,8 @@ static bool resetVariable(Location &loc, SpawnRegistry &reg, int extype, const s
         }
         break;
     }
+    default:
+        break;
     }
     return false;
 }

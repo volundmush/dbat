@@ -311,7 +311,7 @@ void Room::sendText(const std::string &txt)
         }
     }
 }
-
+/*
 size_t Room::send_to(const char *fmt, ...) {
     
     std::string output;
@@ -331,7 +331,7 @@ size_t Room::send_to(const char *fmt, ...) {
 
     return output.size();
 }
-
+*/
 void Room::deleteExit(Direction dir)
 {
     if (auto find = exits.find(dir); find != exits.end())

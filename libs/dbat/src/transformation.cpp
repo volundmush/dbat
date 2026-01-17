@@ -2721,6 +2721,8 @@ namespace trans
                 return "blue";
             case Form::legendary_saiyan:
                 return "greenish-golden";
+            default:
+                return {};
             }
         case Appearance::aura_color:
             switch (form)
@@ -2739,6 +2741,8 @@ namespace trans
                 return "greenish-golden";
             case Form::ultra_instinct:
                 return "silver";
+            default:
+                return {};
             }
         case Appearance::eye_color:
             switch (form)
@@ -2751,7 +2755,11 @@ namespace trans
                 return "red";
             case Form::super_saiyan_blue:
                 return "blue";
+            default:
+                return {};
             }
+            default:
+                return {};
         }
 
         return {};
