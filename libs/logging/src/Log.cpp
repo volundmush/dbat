@@ -1,9 +1,8 @@
-#include "dbat/Log.h"
+#include "logging/Log.hpp"
 #include <vector>
 #include <filesystem>
 
-namespace mud::log {
-
+namespace dbat::log {
 static std::shared_ptr<spdlog::logger> make_logger(const Options& o) {
     std::vector<spdlog::sink_ptr> sinks;
 
@@ -47,9 +46,10 @@ void init(const Options& opts) {
     if (opts.enable_backtrace) {
         logger->enable_backtrace(opts.backtrace_lines);
     }
-
-    spdlog::set_default_logger(logger);
+    
     spdlog::register_logger(logger);
+    spdlog::set_default_logger(logger);
+    
 }
 
 void set_level(int lvl) {

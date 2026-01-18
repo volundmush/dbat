@@ -19,7 +19,7 @@
 
 #include "HasResetCommands.h"
 
-#include "Log.h"
+#include "logging/Log.hpp"
 
 struct Room;
 struct Character;

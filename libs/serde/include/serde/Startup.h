@@ -13,9 +13,15 @@ extern void boot_db_specials();
 extern void boot_db_sort();
 extern void boot_db_boards();
 extern void boot_db_shadow();
+
 extern void boot_db_spacemap();
 extern void boot_db_sort();
 
 extern void boot_db_new();
 
-extern time_t boot_time;
+namespace dbat::init {
+    void init();
+    void init_locale();
+    void init_database();
+    void init_zones();
+}

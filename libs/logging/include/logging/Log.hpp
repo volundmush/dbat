@@ -16,7 +16,7 @@
 #include <spdlog/async.h>
 #include <spdlog/async_logger.h>
 
-namespace mud::log
+namespace dbat::log
 {
     struct Options
     {
@@ -32,7 +32,7 @@ namespace mud::log
         bool async = true;
         int level = SPDLOG_LEVEL_INFO;
         int flush_on = SPDLOG_LEVEL_WARN;
-        std::string pattern = "[%Y-%m-%d %H:%M:%S.%e] [%t] [%^%l%$] %v";
+        std::string pattern = "[%Y-%m-%d %H:%M:%S.%e] [%t] [%^%l%$] [%s:%#]%v";
         bool enable_backtrace = true;
         int backtrace_lines = 64;
     };
@@ -88,12 +88,12 @@ namespace mud::log
 
 // ---- Handy macros (capture source location automatically) ----
 // These mirror spdlog's active-level gating if you set SPDLOG_ACTIVE_LEVEL.
-#define LTRACE(...) ::mud::log::log(std::source_location::current(), SPDLOG_LEVEL_TRACE, __VA_ARGS__)
-#define LDEBUG(...) ::mud::log::log(std::source_location::current(), SPDLOG_LEVEL_DEBUG, __VA_ARGS__)
-#define LINFO(...) ::mud::log::log(std::source_location::current(), SPDLOG_LEVEL_INFO, __VA_ARGS__)
-#define LWARN(...) ::mud::log::log(std::source_location::current(), SPDLOG_LEVEL_WARN, __VA_ARGS__)
-#define LERROR(...) ::mud::log::log(std::source_location::current(), SPDLOG_LEVEL_ERROR, __VA_ARGS__)
-#define LCRIT(...) ::mud::log::log(std::source_location::current(), SPDLOG_LEVEL_CRITICAL, __VA_ARGS__)
+#define LTRACE(...) ::dbat::log::log(std::source_location::current(), SPDLOG_LEVEL_TRACE, __VA_ARGS__)
+#define LDEBUG(...) ::dbat::log::log(std::source_location::current(), SPDLOG_LEVEL_DEBUG, __VA_ARGS__)
+#define LINFO(...) ::dbat::log::log(std::source_location::current(), SPDLOG_LEVEL_INFO, __VA_ARGS__)
+#define LWARN(...) ::dbat::log::log(std::source_location::current(), SPDLOG_LEVEL_WARN, __VA_ARGS__)
+#define LERROR(...) ::dbat::log::log(std::source_location::current(), SPDLOG_LEVEL_ERROR, __VA_ARGS__)
+#define LCRIT(...) ::dbat::log::log(std::source_location::current(), SPDLOG_LEVEL_CRITICAL, __VA_ARGS__)
 
 // Legacy printf-style logger kept intact (formats with fmt::sprintf)
 template <typename... Args>
@@ -104,18 +104,12 @@ inline void basic_mud_log_helper(std::source_location loc, fmt::string_view prin
         std::string line = fmt::sprintf(printf_style_fmt, std::forward<Args>(args)...);
         if (!line.empty())
             // Use compile-time-checked formatting to write the final string
-            mud::log::log(loc, SPDLOG_LEVEL_INFO, "{}", line);
+            dbat::log::log(loc, SPDLOG_LEVEL_INFO, "{}", line);
     }
     catch (const std::exception &e)
     {
-        mud::log::log(loc, SPDLOG_LEVEL_ERROR, "SYSERR: Format error in basic_mud_log: {} (template: {})", e.what(), printf_style_fmt);
+        dbat::log::log(loc, SPDLOG_LEVEL_ERROR, "SYSERR: Format error in basic_mud_log: {} (template: {})", e.what(), printf_style_fmt);
     }
 }
 
 #define basic_mud_log(...) ::basic_mud_log_helper(std::source_location::current(), __VA_ARGS__)
-
-
-// Log once or every N helper macros (simple, thread-safe enough for logs)
-#define LOG_WARN_ONCE(msg, ...) do { static std::atomic<bool> _done{false}; if (!_done.exchange(true)) LOG_WARN(msg, ##__VA_ARGS__);} while (0)
-
-#define LOG_INFO_EVERY_N(n, msg, ...) do {static std::atomic<unsigned> _cnt{0}; auto _v = _cnt.fetch_add(1) + 1; if ((_v % (n)) == 0) LOG_INFO(msg, ##__VA_ARGS__);} while (0)

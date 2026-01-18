@@ -39,8 +39,7 @@
 #include "dbat/screen.h"
 #include "dbat/utils.h"
 #include "dbat/filter.h"
-
-#include "dbat/Startup.h"
+#include "dbat/TimeInfo.h"
 #include "dbat/Random.h"
 
 #include "dbat/players.h"
@@ -48,10 +47,7 @@
 #include "dbat/transformation.h"
 #include "dbat/db.h"
 
-//#include "dbat/transformation.h"
 #include "dbat/Shop.h"
-
-#include "dbat/saveload.h"
 
 #include "dbat/const/Condition.h"
 #include "dbat/const/ColorCustom.h"
@@ -306,30 +302,7 @@ void runOneLoop(double deltaTime) {
     tics_passed++;
 }
 
-namespace game {
 
-    void init() {
-        game::init_locale();
-        game::init_database();
-        game::init_zones();
-    }
-
-
-    void init_locale() {
-        std::locale::global(std::locale("en_US.UTF-8"));
-    }
-
-    void init_database() {
-        boot_db_new();
-    }
-
-    void init_zones() {
-        for (auto &[vn, z] : zone_table) {
-            basic_mud_log("Resetting #%d: %s.", vn, z->name.c_str());
-            z->reset();
-        }
-    }
-}
 
 void record_usage(uint64_t heartPulse, double deltaTime) {
 

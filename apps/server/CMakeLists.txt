@@ -8,12 +8,7 @@ target_sources(dbat_server
 target_link_libraries(dbat_server
     PUBLIC
     dbat::netbind
-    fmt::fmt
-    Boost::regex
-    Boost::iostreams
-    ZLIB::ZLIB
-    Threads::Threads
-    ${MATH_LIB}
+    dbat::serde
 )
 
 # Ensure we link using the C++ linker driver (for libstdc++ and friends)

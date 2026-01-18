@@ -100,6 +100,8 @@ extern bool isMigrating;
 extern bool gameIsLoading;
 extern bool saveAll;
 
+extern time_t boot_time;
+
 extern int circle_restrict;
 
 extern char *help, *ihelp, *credits, *news, *info, *wizlist, *immlist, *background;
@@ -114,8 +116,6 @@ extern time_t old_beginning_of_time;
 
 /* public procedures in db.c */
 extern char *fread_string(FILE *fl, const char *error);
-
-
 
 extern void free_text_files();
 

@@ -1,23 +1,23 @@
 #pragma once
+#include "serde/json.h"
+
 #include "dbat/Character.h"
 #include "dbat/Object.h"
 #include "dbat/Zone.h"
 #include "dbat/AbstractGridArea.h"
 #include "dbat/Shop.h"
 #include "dbat/Guild.h"
-#include "dbat/json.h"
 #include "dbat/TimeInfo.h"
 #include "dbat/Help.h"
 
 extern PlayerData* create_player_character(int account_id, const json &j);
 
 void runSave();
+
 void load_zones(const std::filesystem::path& loc);
 void load_accounts(const std::filesystem::path& loc);
 void load_dgscript_prototypes(const std::filesystem::path& loc);
-
 void load_dgscripts(const std::filesystem::path& loc);
-
 void load_globaldata(const std::filesystem::path& loc);
 
 void load_shops(const std::filesystem::path& loc);
@@ -93,3 +93,20 @@ void from_json(const json& j, Area& p);
 void to_json(json& j, const Structure& p);
 void from_json(const json& j, Structure& p);
 
+std::vector<std::filesystem::path> getDumpFiles(const std::filesystem::path &dir, std::string_view pattern);
+
+namespace dbat::save {
+
+    struct SaveTask {
+        std::string filename;
+        std::function<json()> task;
+    };
+
+    std::string generateSaveLocation();
+
+    const std::vector<SaveTask>& getSaveAssetTasks();
+    const std::vector<SaveTask>& getSaveUserTasks();
+
+    void runSaveSyncHelper(const std::vector<SaveTask>& tasks, std::string_view folder, std::string_view prefix);
+    void runSaveSync();
+}

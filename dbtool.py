@@ -103,12 +103,33 @@ def tool_exit_skills(dump_dir: Path, args):
             total += 1
             print(f"Room: {ex.get("room")} Direction {ex.get('direction', 'Unknown')} - value: {val}")
 
+def tool_memory_load(dump_dir: Path, args):
+    input("Press Enter to continue...")
+    files = ["accounts", "areas", "assemblies", "characters", "dgScriptPrototypes", "dgscripts_characters", "dgscripts_objects", "dgscripts_rooms", 
+             "exits", "globaldata", "guilds", "help", "itemPrototypes", "items", "npcPrototypes", "players", "rooms", "shops", "zones"]
+    
+    exists = [f for f in files if (dump_dir / f"{f}.json.gz").exists()]
+
+    loaded = {f: readJsonFile(dump_dir, f) for f in exists}
+
+    # now we need to report how much memory that loaded is using.
+    total_size = 0
+    print("Memory Usage Report:")
+    for name, data in loaded.items():
+        size = sys.getsizeof(data)
+        total_size += size
+        print(f"  {name:<20}: {size:>10} bytes")
+    print(f"Total Memory Used: {total_size} bytes")
+    input("Press Enter to continue...")
+
+
 tools = {
     # Provided an affect (and, optionally, a specific), lists everything with matching obj_affected_type
     "SearchObjApply": tool_index_obj_apply,
     "SearchObjFlag": tool_index_obj_flag,
     "RoomScripts": tool_index_room_scripts,
-    "ExitSkills": tool_exit_skills
+    "ExitSkills": tool_exit_skills,
+    "MemoryLoad": tool_memory_load
 }
 
 def main():

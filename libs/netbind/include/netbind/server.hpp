@@ -1,9 +1,10 @@
-#include "netbind/net.hpp"
-#include "dbat/Log.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/beast.hpp>
 #include <boost/url.hpp>
 #include <expected>
+
+#include "netbind/net.hpp"
+#include "logging/Log.hpp"
 
 namespace dbat::net {
 

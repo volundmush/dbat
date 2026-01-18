@@ -35,7 +35,7 @@
 #include "dbat/spell_parser.h"
 #include "dbat/Shop.h"
 #include "dbat/Guild.h"
-#include "dbat/saveload.h"
+#include "serde/saveload.h"
 #include "dbat/assemblies.h"
 #include "dbat/vehicles.h"
 #include "dbat/ansi.h"
@@ -44,7 +44,8 @@
 #include "dbat/interpreter.h"
 #include "dbat/Random.h"
 #include "dbat/ID.h"
-#include "dbat/Startup.h"
+#include "serde/Startup.h"
+#include "serde/saveload.h"
 
 #include "dbat/const/Max.h"
 #include "dbat/const/Filename.h"
@@ -1670,6 +1671,8 @@ static void obj_values(T* obj, int64_t old_value[]) {
             break;
         case ITEM_FISHPOLE:
             if(old_value[0]) obj->setBaseStat(VAL_FISHPOLE_BAIT, old_value[0]);
+            break;
+        default:
             break;
     }
 
@@ -4019,7 +4022,7 @@ void migrate_accounts() {
 
     auto path = std::filesystem::current_path() / "data" / "user";
     if(!std::filesystem::exists(path)) {
-        basic_mud_log("No user directory found, skipping account migration.");
+        LINFO("No user directory found, skipping account migration.");
         return;
     }
 
@@ -4827,12 +4830,12 @@ void migrate_db() {
 void run_migration() {
     isMigrating = true;
     load_config();
-    game::init_locale();
+    dbat::init::init_locale();
     migrate_db();
     // let's experiment here...
     migrate_space();
     printSpace();
-    runSave();
+    dbat::save::runSaveSync();
     destroy_db();
 }
 

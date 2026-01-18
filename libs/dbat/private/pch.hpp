@@ -51,5 +51,4 @@
 #include <boost/iostreams/filtering_streambuf.hpp>
 #include <fmt/format.h>
 #include <fmt/args.h>
-#include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>

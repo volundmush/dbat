@@ -7,12 +7,7 @@ target_sources(dbat_migrate
 
 target_link_libraries(dbat_migrate
     PUBLIC
-    dbat::dbat
-    fmt::fmt
-    Boost::regex
-    Boost::iostreams
-    ZLIB::ZLIB
-    Threads::Threads
+    dbat::serde
     ${MATH_LIB}
 )
 

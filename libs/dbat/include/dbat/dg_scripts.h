@@ -11,7 +11,7 @@
 #pragma once
 #include <cstdarg>
 #include <variant>
-#include "Log.h"
+#include "logging/Log.hpp"
 #include "Command.h"
 #include "DgScriptPrototype.h"
 #include "db.h"
@@ -391,7 +391,3 @@ extern room_rnum obj_room(Object *obj);
 
 #define SCRIPT_CHECK(go, type) ((go) && IS_SET(SCRIPT_TYPES((go)), type))
 #define TRIGGER_CHECK(t, type) (IS_SET(GET_TRIG_TYPE(t), (type)) && (t)->isReady())
-
-// extern nlohmann::json serializeVars(struct trig_var_data *vd);
-
-// extern void deserializeVars(struct trig_var_data **vd, const nlohmann::json& j);

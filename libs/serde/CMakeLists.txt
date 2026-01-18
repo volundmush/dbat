@@ -1,7 +1,7 @@
-add_library(dbat_jwt STATIC)
-add_library(dbat::jwt ALIAS dbat_jwt)
+add_library(dbat_serde STATIC)
+add_library(dbat::serde ALIAS dbat_serde)
 
-target_include_directories(dbat_jwt
+target_include_directories(dbat_serde
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
@@ -17,10 +17,10 @@ file(GLOB_RECURSE SRC
 # Also glob up include/*.hpp
 
 file(GLOB_RECURSE INCLUDE
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/jwt/*.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/serde/*.hpp
 )
 
-target_sources(dbat_jwt
+target_sources(dbat_serde
     PRIVATE
         ${SRC}
     PUBLIC
@@ -30,9 +30,11 @@ target_sources(dbat_jwt
         ${INCLUDE}
 )
 
-target_link_libraries(dbat_jwt
+target_link_libraries(dbat_serde
   PUBLIC
+    dbat::dbat
     nlohmann_json
   PRIVATE
-    OpenSSL::Crypto
+    ZLIB::ZLIB
+    Threads::Threads
 )

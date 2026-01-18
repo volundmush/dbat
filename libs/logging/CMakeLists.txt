@@ -1,7 +1,7 @@
-add_library(dbat_jwt STATIC)
-add_library(dbat::jwt ALIAS dbat_jwt)
+add_library(dbat_logging STATIC)
+add_library(dbat::logging ALIAS dbat_logging)
 
-target_include_directories(dbat_jwt
+target_include_directories(dbat_logging
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
@@ -17,10 +17,10 @@ file(GLOB_RECURSE SRC
 # Also glob up include/*.hpp
 
 file(GLOB_RECURSE INCLUDE
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/jwt/*.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/logging/*.hpp
 )
 
-target_sources(dbat_jwt
+target_sources(dbat_logging
     PRIVATE
         ${SRC}
     PUBLIC
@@ -30,9 +30,8 @@ target_sources(dbat_jwt
         ${INCLUDE}
 )
 
-target_link_libraries(dbat_jwt
+target_link_libraries(dbat_logging
   PUBLIC
-    nlohmann_json
-  PRIVATE
-    OpenSSL::Crypto
+    fmt::fmt
+    spdlog::spdlog
 )

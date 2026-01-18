@@ -1,8 +1,9 @@
 #include "netbind/net.hpp"
 #include "dbat/db.h"
-#include "dbat/Log.h"
+#include "logging/Log.hpp"
 #include "dbat/comm.h"
-#include "dbat/saveload.h"
+#include "serde/Startup.h"
+#include "serde/saveload.h"
 
 
 static bool running{false};
@@ -36,7 +37,7 @@ boost::asio::awaitable<void> run_game(double heartbeat_interval, double save_int
             save_timer -= heartbeat_interval;
             if(save_timer <= 0.0) {
                 save_timer = save_interval;
-                runSave();
+                dbat::save::runSaveSync();
             }
 
             auto elapsed = end - start;
@@ -51,7 +52,7 @@ boost::asio::awaitable<void> run_game(double heartbeat_interval, double save_int
             }
         }
     } catch(const std::exception &e) {
-        LERROR("Exception in run_game: %s", e.what());
+        LERROR("Exception in run_game: {}", e.what());
     }
 
     LINFO("Game loop has exited.");
@@ -59,6 +60,8 @@ boost::asio::awaitable<void> run_game(double heartbeat_interval, double save_int
 }
 
 int main(int argc, char** argv) {
+
+    dbat::log::init();
 
     auto& ioc = dbat::net::context();
 
@@ -72,7 +75,7 @@ int main(int argc, char** argv) {
     dbat::net::bind_server(address, port, tls_context);
 
     load_config();
-    game::init();
+    dbat::init::init();
 
     auto strand = boost::asio::make_strand(ioc);
     boost::asio::co_spawn(strand, run_game(0.05, 300.0), boost::asio::detached);

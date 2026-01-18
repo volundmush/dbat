@@ -1,7 +1,7 @@
 #pragma once
 #include <map>
 
-#include "Log.h"
+#include "logging/Log.hpp"
 #include "const/ZoneFlag.h"
 #include "const/WhereFlag.h"
 #include "Flags.h"

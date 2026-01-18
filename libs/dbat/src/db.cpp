@@ -9,7 +9,7 @@
 ************************************************************************ */
 #include <fstream>
 
-#include "dbat/Log.h"
+#include "logging/Log.hpp"
 #include "dbat/CharacterUtils.h"
 #include "dbat/ObjectUtils.h"
 #include "dbat/RoomUtils.h"
@@ -43,7 +43,6 @@
 #include "dbat/races.h"
 #include "dbat/Account.h"
 //#include "dbat/maputils.h"
-#include "dbat/saveload.h"
 #include "dbat/filter.h"
 #include "dbat/utils.h"
 

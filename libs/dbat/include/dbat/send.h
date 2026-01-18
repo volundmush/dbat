@@ -1,7 +1,7 @@
 #pragma once
 #include <fmt/format.h>
 #include <fmt/printf.h>
-#include "Log.h"
+#include "logging/Log.hpp"
 #include "Typedefs.h"
 #include "dbat/const/WhereFlag.h"
 

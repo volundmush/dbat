@@ -40,11 +40,10 @@ target_link_libraries(dbat
     fmt::fmt
     enchantum::enchantum
     effolkronium_random
-    nlohmann_json
-    ZLIB::ZLIB
+    
     Boost::regex
     Threads::Threads
-    spdlog::spdlog
+    dbat::logging
     bsd
     ${MATH_LIB}
   PRIVATE

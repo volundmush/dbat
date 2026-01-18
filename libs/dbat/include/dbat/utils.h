@@ -8,7 +8,7 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
-#include "Log.h"
+#include "logging/Log.hpp"
 #include "db.h"
 #include "config.h"
 #include "races.h"

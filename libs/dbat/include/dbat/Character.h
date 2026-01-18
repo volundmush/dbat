@@ -1,7 +1,7 @@
 #pragma once
 #include <bitset>
 
-#include "Log.h"
+#include "logging/Log.hpp"
 #include "CharacterShared.h"
 #include "Account.h"
 #include "HasMisc.h"

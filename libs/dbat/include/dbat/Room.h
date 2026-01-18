@@ -1,5 +1,5 @@
 #pragma once
-#include "Log.h"
+#include "logging/Log.hpp"
 #include "AbstractLocation.h"
 #include "HasDgScripts.h"
 #include "HasZone.h"

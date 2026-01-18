@@ -9,7 +9,7 @@
  ************************************************************************ */
 #include <sys/param.h>
 #include <bsd/string.h>
-#include "dbat/Log.h"
+#include "logging/Log.hpp"
 #include "dbat/CharacterUtils.h"
 #include "dbat/ObjectUtils.h"
 #include "dbat/RoomUtils.h"
@@ -56,7 +56,6 @@
 #include "dbat/Parse.h"
 #include "dbat/TimeInfo.h"
 #include "dbat/DragonBall.h"
-#include "dbat/Startup.h"
 
 #include "dbat/const/Pulse.h"
 #include "dbat/const/Condition.h"

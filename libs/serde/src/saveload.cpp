@@ -4,7 +4,10 @@
 #include <boost/iostreams/filtering_streambuf.hpp>
 #include <boost/iostreams/filter/gzip.hpp>
 
-#include "dbat/saveload.h"
+#include "serde/json.h"
+#include "serde/saveload.h"
+
+#include "dbat/filter.h"
 #include "dbat/ObjectPrototype.h"
 #include "dbat/CharacterPrototype.h"
 #include "dbat/CharacterUtils.h"
@@ -24,7 +27,7 @@
 #include "dbat/constants.h"
 #include "dbat/races.h"
 #include "dbat/class.h"
-#include "dbat/json.h"
+
 #include "dbat/assemblies.h"
 #include "dbat/ID.h"
 #include "dbat/TimeInfo.h"
@@ -342,7 +345,7 @@ void load_zones(const std::filesystem::path &loc)
     }
 }
 
-static void dump_zones(const std::filesystem::path &loc)
+static json dump_zones()
 {
     json j;
 
@@ -350,7 +353,7 @@ static void dump_zones(const std::filesystem::path &loc)
     {
         j.push_back(*z);
     }
-    dump_to_file(loc, "zones.json", j);
+    return j;
 }
 
 
@@ -448,7 +451,7 @@ void from_json(const json &j, help_index_element &a)
     if (j.contains("min_level")) j.at("min_level").get_to(a.min_level);
 }
 
-static void dump_accounts(const std::filesystem::path &loc)
+static json dump_accounts()
 {
     json j;
 
@@ -457,7 +460,7 @@ static void dump_accounts(const std::filesystem::path &loc)
         j.push_back(*r);
     }
 
-    dump_to_file(loc, "accounts.json", j);
+    return j;
 }
 
 void load_accounts(const std::filesystem::path &loc)
@@ -536,7 +539,7 @@ void from_json(const json &j, DgScript &t)
 
 void load_dgscript_prototypes(const std::filesystem::path &loc)
 {
-    for (auto j : load_from_file(loc, "dgScriptPrototypes.json"))
+    for (auto j : load_from_file(loc, "dgscript_prototypes.json"))
     {
         auto id = j["vn"].get<int64_t>();
         auto t = std::make_shared<DgScriptPrototype>();
@@ -545,14 +548,14 @@ void load_dgscript_prototypes(const std::filesystem::path &loc)
     }
 }
 
-static void dump_dgscript_prototypes(const std::filesystem::path &loc)
+static json dump_dgscript_prototypes()
 {
     json j;
     for (auto &[v, t] : trig_index)
     {
         j.push_back(*t);
     }
-    dump_to_file(loc, "dgScriptPrototypes.json", j);
+    return j;
 }
 
 void load_dgscripts(const std::filesystem::path &loc)
@@ -609,41 +612,9 @@ void load_dgscripts(const std::filesystem::path &loc)
     }
 }
 
-static void dump_dgscripts(const std::filesystem::path &loc)
+static json dump_dgscripts_characters()
 {
-    json jr, jo, jc;
-
-    for (auto &[id, u] : Room::registry)
-    {
-        if (u->scripts.empty())
-            continue; // Skip units without scripts
-        json j2;
-        j2["vn"] = id;
-        for (auto &[vn, r] : u->scripts)
-        {
-            json j3;
-            j3["vn"] = vn;
-            j3["data"] = *r;
-            j2["scripts"].push_back(j3);
-        }
-        jr.push_back(j2);
-    }
-
-    for (auto &[id, u] : Object::registry)
-    {
-        if (u->scripts.empty())
-            continue; // Skip units without scripts
-        json j2;
-        j2["id"] = id;
-        for (auto &[vn, r] : u->scripts)
-        {
-            json j3;
-            j3["vn"] = vn;
-            j3["data"] = *r;
-            j2["scripts"].push_back(j3);
-        }
-        jo.push_back(j2);
-    }
+    json j;
 
     for (auto &[id, u] : Character::registry)
     {
@@ -658,12 +629,53 @@ static void dump_dgscripts(const std::filesystem::path &loc)
             j3["data"] = *r;
             j2["scripts"].push_back(j3);
         }
-        jc.push_back(j2);
+        j.push_back(j2);
     }
+    return j;
+}
 
-    dump_to_file(loc, "dgscripts_rooms.json", jr);
-    dump_to_file(loc, "dgscripts_objects.json", jo);
-    dump_to_file(loc, "dgscripts_characters.json", jc);
+static json dump_dgscripts_rooms()
+{
+    json j;
+
+    for (auto &[id, u] : Room::registry)
+    {
+        if (u->scripts.empty())
+            continue; // Skip units without scripts
+        json j2;
+        j2["vn"] = id;
+        for (auto &[vn, r] : u->scripts)
+        {
+            json j3;
+            j3["vn"] = vn;
+            j3["data"] = *r;
+            j2["scripts"].push_back(j3);
+        }
+        j.push_back(j2);
+    }
+    return j;
+}
+
+static json dump_dgscripts_objects()
+{
+    json j;
+
+    for (auto &[id, u] : Object::registry)
+    {
+        if (u->scripts.empty())
+            continue; // Skip units without scripts
+        json j2;
+        j2["id"] = id;
+        for (auto &[vn, r] : u->scripts)
+        {
+            json j3;
+            j3["vn"] = vn;
+            j3["data"] = *r;
+            j2["scripts"].push_back(j3);
+        }
+        j.push_back(j2);
+    }
+    return j;
 }
 
 // org_data...
@@ -812,14 +824,14 @@ void load_shops(const std::filesystem::path &loc)
     }
 }
 
-static void dump_shops(const std::filesystem::path &loc)
+static json dump_shops()
 {
     json j;
     for (auto &[v, s] : shop_index)
     {
         j.push_back(*s);
     }
-    dump_to_file(loc, "shops.json", j);
+    return j;
 }
 
 // guilds serialize/deserialize...
@@ -865,14 +877,14 @@ void from_json(const json &j, Guild &g)
         g.close = j["close"];
 }
 
-static void dump_guilds(const std::filesystem::path &loc)
+static json dump_guilds()
 {
     json j;
     for (auto &[v, g] : guild_index)
     {
         j.push_back(*g);
     }
-    dump_to_file(loc, "guilds.json", j);
+    return j;
 }
 
 void load_guilds(const std::filesystem::path &loc)
@@ -945,7 +957,7 @@ void load_globaldata(const std::filesystem::path &loc)
     
 }
 
-void dump_globaldata(const std::filesystem::path &loc)
+json dump_globaldata()
 {
     json j;
 
@@ -964,7 +976,7 @@ void dump_globaldata(const std::filesystem::path &loc)
     j["lastGuildID"] = lastGuildID;
     j["lastScriptID"] = lastScriptID;
 
-    dump_to_file(loc, "globaldata.json", j);
+    return j;
 }
 
 void to_json(json &j, const HasProtoScript &s) {
@@ -1130,7 +1142,7 @@ void load_areas_finish(const std::filesystem::path &loc)
 
 void load_grid_templates(const std::filesystem::path &loc)
 {
-    for (auto j : load_from_file(loc, "gridTemplates.json"))
+    for (auto j : load_from_file(loc, "grid_templates.json"))
     {
         auto vn = j["vn"].get<int>();
         auto t = std::make_shared<GridTemplate>();
@@ -1188,7 +1200,7 @@ void load_exits(const std::filesystem::path &loc)
     }
 }
 
-static void dump_exits(const std::filesystem::path &loc)
+static json dump_exits()
 {
     json exits;
 
@@ -1204,10 +1216,10 @@ static void dump_exits(const std::filesystem::path &loc)
             exits.push_back(j2);
         }
     }
-    dump_to_file(loc, "exits.json", exits);
+    return exits;
 }
 
-static void dump_rooms(const std::filesystem::path &loc)
+static json dump_rooms()
 {
     json rooms;
 
@@ -1215,10 +1227,10 @@ static void dump_rooms(const std::filesystem::path &loc)
     {
         rooms.push_back(*r);
     }
-    dump_to_file(loc, "rooms.json", rooms);
+    return rooms;
 }
 
-static void dump_grid_templates(const std::filesystem::path &loc)
+static json dump_grid_templates()
 {
     json jdata;
 
@@ -1226,10 +1238,10 @@ static void dump_grid_templates(const std::filesystem::path &loc)
     {
         jdata.push_back(*r);
     }
-    dump_to_file(loc, "gridTemplates.json", jdata);
+    return jdata;
 }
 
-static void dump_areas(const std::filesystem::path &loc)
+static json dump_areas()
 {
     json jdata;
 
@@ -1237,10 +1249,10 @@ static void dump_areas(const std::filesystem::path &loc)
     {
         jdata.push_back(*r);
     }
-    dump_to_file(loc, "areas.json", jdata);
+    return jdata;
 }
 
-static void dump_structures(const std::filesystem::path &loc)
+static json dump_structures()
 {
     json jdata;
 
@@ -1254,7 +1266,7 @@ static void dump_structures(const std::filesystem::path &loc)
         j["HasLocation"] = j3;
         jdata.push_back(j);
     }
-    dump_to_file(loc, "structures.json", jdata);
+    return jdata;
 }
 
 // Object serialize/deserialize...
@@ -1306,8 +1318,7 @@ void to_json(json &j, const Object &o)
     to_json(j, static_cast<const HasExtraDescriptions &>(o));
     to_json(j, static_cast<const HasStats &>(o));
 
-    if (o.running_scripts)
-        j["running_scripts"] = o.running_scripts.value();
+    //if (o.running_scripts) j["running_scripts"] = o.running_scripts.value();
 
     j["type_flag"] = o.type_flag;
     if (o.wear_flags)
@@ -1359,11 +1370,13 @@ void from_json(const json &j, Object &o)
     from_json(j, static_cast<HasID &>(o));
     from_json(j, static_cast<HasDgScripts &>(o));
 
+    /*
     if (j.contains("running_scripts"))
     {
         o.running_scripts.emplace();
         j["running_scripts"].get_to(o.running_scripts.value());
     }
+    */
 }
 
 void load_item_prototypes(const std::filesystem::path &loc)
@@ -1388,6 +1401,87 @@ void load_items_initial(const std::filesystem::path &loc)
         Object::registry.emplace(id, sh);
     }
     basic_mud_log("Loaded %d items", Object::registry.size());
+}
+
+static void save_inventory(HasInventory &hi, json &j) {
+    json inv = json::array();
+    auto contents = hi.getInventory();
+    for (const auto &item : filter_raw(contents)) {
+        json ji;
+        to_json(ji, *item);
+        save_inventory(*item, ji);
+        inv.push_back(ji);
+    }
+    if (!inv.empty()) {
+        j["inventory"] = inv;
+    }
+}
+
+static void load_inventory(HasInventory &hi, const json &j) {
+    if (j.contains("inventory")) {
+        for (const auto &ji : j["inventory"]) {
+            auto item = std::make_shared<Object>();
+            ji.get_to(*item);
+            Object::registry.emplace(item->id, item);
+            hi.addToInventory(item);
+            load_inventory(*item, ji);
+        }
+    }
+}
+
+static void save_equipment(HasEquipment &he, json &j) {
+    json inv = json::array();
+    auto eq = he.getEquipment();
+    for (const auto &[slot, item] : eq) {
+        json ji, jio;
+        ji["slot"] = slot;
+        to_json(jio, *item);
+        save_inventory(*item, jio);
+        ji["item"] = jio;
+        inv.push_back(ji);
+    }
+    if (!inv.empty()) {
+        j["equipment"] = inv;
+    }
+}
+
+static void load_equipment(HasEquipment &he, const json &j) {
+    if (j.contains("equipment")) {
+        for (const auto &ji : j["equipment"]) {
+            auto slot = ji["slot"].get<int>();
+            auto item = std::make_shared<Object>();
+            ji["item"].get_to(*item);
+            Object::registry.emplace(item->id, item);
+            he.addToEquip(item, slot);
+            load_inventory(*item, ji["item"]);
+        }
+    }
+}
+
+static void save_contents(Location& al, json &j) {
+    json inv = json::array();
+    auto contents = al.getObjects();
+    for (const auto &item : filter_raw(contents)) {
+        json ji;
+        to_json(ji, *item);
+        save_inventory(*item, ji);
+        inv.push_back(ji);
+    }
+    if (!inv.empty()) {
+        j["contents"] = inv;
+    }
+}
+
+static void load_contents(Location& al, const json &j) {
+    if (j.contains("contents")) {
+        for (const auto &ji : j["contents"]) {
+            auto item = std::make_shared<Object>();
+            ji.get_to(*item);
+            Object::registry.emplace(item->id, item);
+            item->moveToLocation(al);
+            load_inventory(*item, ji);
+        }
+    }
 }
 
 static json serialize_obj_relations(const Object *o)
@@ -1475,7 +1569,7 @@ void load_items_finish(const std::filesystem::path &loc)
     }
 }
 
-static void dump_items(const std::filesystem::path &loc)
+static json dump_items()
 {
     json j;
 
@@ -1490,17 +1584,17 @@ static void dump_items(const std::filesystem::path &loc)
         j2["HasLocation"] = j3;
         j.push_back(j2);
     }
-    dump_to_file(loc, "items.json", j);
+    return j;
 }
 
-static void dump_item_prototypes(const std::filesystem::path &loc)
+static json dump_item_prototypes()
 {
     json j;
     for (auto &[v, o] : obj_proto)
     {
         j.push_back(*o);
     }
-    dump_to_file(loc, "itemPrototypes.json", j);
+    return j;
 }
 
 // Character serialize/deserialize...
@@ -1735,8 +1829,7 @@ void to_json(json &j, const Character &c)
 
     if(c.isPC) j["isPC"] = c.isPC;
 
-    if (c.running_scripts)
-        j["running_scripts"] = c.running_scripts.value();
+    //if (c.running_scripts) j["running_scripts"] = c.running_scripts.value();
 
     if (!c.appearances.empty())
         j["appearances"] = c.appearances;
@@ -1845,11 +1938,13 @@ void from_json(const json &j, Character &c)
         c.isPC = j["isPC"];
     }
 
+    /*
     if (j.contains("running_scripts"))
     {
         c.running_scripts.emplace();
         j["running_scripts"].get_to(c.running_scripts.value());
     }
+    */
 
     if (j.contains("appearances"))
         c.appearances = j["appearances"];
@@ -1951,7 +2046,7 @@ void from_json(const json &j, Character &c)
         c.permForms = j["permForms"].get<std::unordered_set<Form>>();
 }
 
-static void dump_characters(const std::filesystem::path &loc)
+static json dump_characters()
 {
     json j = json::array();
 
@@ -1966,10 +2061,10 @@ static void dump_characters(const std::filesystem::path &loc)
         j2["HasLocation"] = j3;
         j.push_back(j2);
     }
-    dump_to_file(loc, "characters.json", j);
+    return j;
 }
 
-static void dump_npc_prototypes(const std::filesystem::path &loc)
+static json dump_npc_prototypes()
 {
     json j;
 
@@ -1977,7 +2072,7 @@ static void dump_npc_prototypes(const std::filesystem::path &loc)
     {
         j.push_back(*n);
     }
-    dump_to_file(loc, "npcPrototypes.json", j);
+    return j;
 }
 
 void load_characters_initial(const std::filesystem::path &loc)
@@ -2116,15 +2211,25 @@ void from_json(const json &j, PlayerData &p)
     }
 }
 
-static void dump_players(const std::filesystem::path &loc)
+static json dump_players()
 {
-    json j;
+    json j = json::array();
 
     for (auto &[v, r] : players)
     {
-        j.push_back(*r);
+        auto j2 = json::object();
+        to_json(j2, *r);
+
+        auto j3 = json::object();
+        to_json(j3, *r->character);
+        save_inventory(*r->character, j3);
+        save_equipment(*r->character, j3);
+
+        j2["character"] = j3;
+
+        j.push_back(j2);
     }
-    dump_to_file(loc, "players.json", j);
+    return j;
 }
 
 void load_players(const std::filesystem::path &loc)
@@ -2135,15 +2240,20 @@ void load_players(const std::filesystem::path &loc)
         auto p = std::make_shared<PlayerData>();
         j.get_to(*p);
         players.emplace(id, p);
+
+        auto ch = std::make_shared<Character>();
+        j["character"].get_to(*ch);
+        Character::registry.emplace(ch->id, ch);
+        p->character = ch.get();
+        load_inventory(*ch, j["character"]);
+        load_equipment(*ch, j["character"]);
     }
 }
 
-static std::vector<std::filesystem::path> getDumpFiles()
+std::vector<std::filesystem::path> getDumpFiles(const std::filesystem::path &dir, std::string_view pattern)
 {
-    std::filesystem::path dir = "data/dumps"; // Change to your directory
     std::vector<std::filesystem::path> directories;
 
-    auto pattern = "dump-";
     for (const auto &entry : std::filesystem::directory_iterator(dir))
     {
         if (entry.is_directory() && entry.path().filename().string().starts_with(pattern))
@@ -2156,9 +2266,9 @@ static std::vector<std::filesystem::path> getDumpFiles()
     return directories;
 }
 
-static void cleanup_state()
+static void cleanup_state(const std::filesystem::path &dir, std::string_view pattern)
 {
-    auto vecFiles = getDumpFiles();
+    auto vecFiles = getDumpFiles(dir, pattern);
     std::list<std::filesystem::path> files(vecFiles.begin(), vecFiles.end());
 
     // If we have more than x state files, we want to purge the oldest one(s) until we have just x.
@@ -2217,11 +2327,11 @@ void from_json(const json &j, Shape &r) {
     from_json(j, static_cast<ShapeBase&>(r));
 }
 
-static void dump_help(const std::filesystem::path &loc)
+static json dump_help()
 {
     auto j = json::array();
     to_json(j, help_table);
-    dump_to_file(loc, "help.json", j);
+    return j;
 }
 
 void load_help(const std::filesystem::path &loc)
@@ -2230,7 +2340,7 @@ void load_help(const std::filesystem::path &loc)
     data.get_to(help_table);
 }
 
-static void dump_assemblies(const std::filesystem::path &loc)
+static json dump_assemblies()
 {
     auto j = json::array();
 
@@ -2254,7 +2364,7 @@ static void dump_assemblies(const std::filesystem::path &loc)
         }
     }
 
-    dump_to_file(loc, "assemblies.json", j);
+    return j;
 }
 
 void load_assemblies(const std::filesystem::path &loc)
@@ -2328,74 +2438,123 @@ PlayerData *create_player_character(int account_id, const json &j)
     return p.get();
 }
 
-void runSave()
-{
-    basic_mud_log("Beginning dump of state to disk.");
-    // Open up a new database file as <cwd>/state/<timestamp>.sqlite3 and dump the state into it.
-    auto path = std::filesystem::current_path() / "data" / "dumps";
-    std::filesystem::create_directories(path);
-    auto now = std::chrono::system_clock::now();
-    auto time_t_now = std::chrono::system_clock::to_time_t(now);
-    std::tm tm_now = *std::localtime(&time_t_now);
+static json dump_save_rooms() {
+    json j = json::array();
 
-    auto tempPath = path / "temp";
-    std::filesystem::remove_all(tempPath);
-    std::filesystem::create_directories(tempPath);
-
-    auto newPath = path / fmt::format("dump-{:04}{:02}{:02}{:02}{:02}{:02}",
-                                      tm_now.tm_year + 1900,
-                                      tm_now.tm_mon + 1,
-                                      tm_now.tm_mday,
-                                      tm_now.tm_hour,
-                                      tm_now.tm_min,
-                                      tm_now.tm_sec);
-
-    double duration{};
-    bool failed = false;
-    try
-    {
-        auto startTime = std::chrono::high_resolution_clock::now();
-        std::vector<std::thread> threads;
-        for (const auto func : {dump_accounts, dump_characters,
-                                dump_players, dump_dgscripts, dump_help, dump_assemblies,
-                                dump_items, dump_globaldata, dump_grid_templates,
-                                dump_rooms, dump_exits, dump_item_prototypes,
-                                dump_npc_prototypes, dump_shops, dump_areas,
-                                dump_guilds, dump_zones, dump_structures,
-                                dump_dgscript_prototypes})
-        {
-            threads.emplace_back([func, &tempPath]()
-                                 {
-                try {
-                    func(tempPath);
-                } catch (const std::exception& e) {
-                    basic_mud_log("Error during dump: %s", e.what());
-                    throw;
-                } });
-        }
-
-        for (auto &thread : threads)
-        {
-            thread.join();
-        }
-        threads.clear();
-
-        auto endTime = std::chrono::high_resolution_clock::now();
-        duration = std::chrono::duration<double>(endTime - startTime).count();
+    for (auto &[v, r] : Room::registry) {
+        //j.push_back(*r);
     }
-    catch (std::exception &e)
-    {
-        basic_mud_log("(GAME HAS NOT BEEN SAVED!) Exception in dump_state(): %s", e.what());
-        send_to_all("Warning, a critical error occurred during save! Please alert staff!\r\n");
-        failed = true;
-    }
-    if (failed)
-        return;
-
-    std::filesystem::rename(tempPath, newPath);
-    basic_mud_log("Finished dumping state to %s in %f seconds.", newPath.string(), duration);
-    cleanup_state();
+    return j;
 }
+
+namespace dbat::save {
+    const std::vector<SaveTask>& getSaveUserTasks() {
+        static const std::vector<SaveTask> tasks = {
+            {"accounts", dump_accounts},
+            {"players", dump_players},
+            {"areas", dump_areas},
+            {"saverooms", dump_save_rooms}
+        };
+        return tasks;
+    }
+
+    const std::vector<SaveTask>& getSaveAssetTasks() {
+        static const std::vector<SaveTask> tasks = {
+            {"help", dump_help},
+            {"assemblies", dump_assemblies},
+            {"globaldata", dump_globaldata},
+            {"grid_templates", dump_grid_templates},
+            {"rooms", dump_rooms},
+            {"exits", dump_exits},
+            {"item_prototypes", dump_item_prototypes},
+            {"npc_prototypes", dump_npc_prototypes},
+            {"shops", dump_shops},
+            {"guilds", dump_guilds},
+            {"zones", dump_zones},
+            {"structures", dump_structures},
+            {"dgscript_prototypes", dump_dgscript_prototypes}
+        };
+        return tasks;
+    }
+
+    std::string generateSaveLocation(const std::chrono::_V2::system_clock::time_point now, std::string_view prefix) {
+        
+        auto time_t_now = std::chrono::system_clock::to_time_t(now);
+        std::tm tm_now = *std::localtime(&time_t_now);
+        return fmt::format("{}{:04}{:02}{:02}{:02}{:02}{:02}",
+                           prefix,
+                           tm_now.tm_year + 1900,
+                           tm_now.tm_mon + 1,
+                           tm_now.tm_mday,
+                           tm_now.tm_hour,
+                           tm_now.tm_min,
+                           tm_now.tm_sec);
+    }
+
+    void runSaveSyncHelper(const std::chrono::_V2::system_clock::time_point now, const std::vector<SaveTask>& tasks, std::string_view folder, std::string_view prefix)
+    {
+        LINFO("Beginning dump of {} to disk.", folder);
+        // Open up a new database file as <cwd>/state/<timestamp>.sqlite3 and dump the state into it.
+        auto path = std::filesystem::current_path() / "data" / "dumps" / folder;
+        auto newPath = path / dbat::save::generateSaveLocation(now, prefix);
+        std::filesystem::create_directories(path);
+        
+        auto tempPath = path / "temp";
+        std::filesystem::remove_all(tempPath);
+        std::filesystem::create_directories(tempPath);
+
+        double duration{};
+        bool failed = false;
+        try
+        {
+            auto startTime = std::chrono::high_resolution_clock::now();
+            std::vector<std::thread> threads;
+            for (const auto &[name, task] : tasks)
+            {
+                threads.emplace_back([task, name, &tempPath]()
+                                    {
+                    try {
+                        auto data = task();
+                        dump_to_file(tempPath, name + ".json", data);
+                    } catch (const std::exception& e) {
+                        LERROR("Error during dump: %s", e.what());
+                        throw;
+                    } });
+            }
+
+            for (auto &thread : threads)
+            {
+                thread.join();
+            }
+            threads.clear();
+
+            auto endTime = std::chrono::high_resolution_clock::now();
+            duration = std::chrono::duration<double>(endTime - startTime).count();
+        }
+        catch (std::exception &e)
+        {
+            LERROR("(GAME HAS NOT BEEN SAVED!) Exception in dump_state(): %s", e.what());
+            send_to_all("Warning, a critical error occurred during save! Please alert staff!\r\n");
+            failed = true;
+        }
+        if (failed) {
+            std::filesystem::remove_all(tempPath);
+            return;
+        }
+
+        std::filesystem::rename(tempPath, newPath);
+        LINFO("Finished dumping state to {} in {} seconds.", newPath.string(), duration);
+        cleanup_state(path, prefix);
+    }
+
+    void runSaveSync() {
+        auto now = std::chrono::system_clock::now();
+        runSaveSyncHelper(now, getSaveUserTasks(), "user", "user-");
+        runSaveSyncHelper(now, getSaveAssetTasks(), "assets", "assets-");
+    }
+
+}
+
 
 void rest_post_script(int accountID, int scriptID, const std::string &data)
 {
@@ -2425,3 +2584,4 @@ void rest_post_script(int accountID, int scriptID, const std::string &data)
         basic_mud_log("%s created DgScript %d: '%s'", acc->name.c_str(), scriptID, t->name);
     }
 }
+

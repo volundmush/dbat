@@ -55,8 +55,10 @@ CPMAddPackage(NAME effolkronium_random   GITHUB_REPOSITORY volundmush/random    
 
 
 # ---------------- your native targets ----------------
+add_subdirectory(libs/logging)
 add_subdirectory(libs/jwt)
-add_subdirectory(libs/dbat)
 add_subdirectory(libs/netbind)
-#add_subdirectory(apps/migrate)
+add_subdirectory(libs/dbat)
+add_subdirectory(libs/serde)
+add_subdirectory(apps/migrate)
 add_subdirectory(apps/server)
