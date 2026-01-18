@@ -1,4 +1,5 @@
 #include "jwt/jwt.hpp"
+#include <nlohmann/json.hpp>
 #include <openssl/crypto.h>
 #include <openssl/evp.h>
 #include <openssl/hmac.h>

@@ -273,7 +273,7 @@ namespace dbat::init {
 
     void init_zones() {
         for (auto &[vn, z] : zone_table) {
-            LINFO("Resetting #%d: %s.", vn, z->name.c_str());
+            LINFO("Resetting #{}: {}.", vn, z->name.c_str());
             z->reset();
         }
     }

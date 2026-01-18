@@ -4,3 +4,4 @@
 #include <chrono>
 #include <boost/iostreams/filtering_streambuf.hpp>
 #include <boost/iostreams/filter/gzip.hpp>
+#include <nlohmann/json.hpp>

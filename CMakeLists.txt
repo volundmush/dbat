@@ -19,6 +19,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 #set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
+option(DBAT_TIME_TRACE "Enable clang -ftime-trace output" ON)
+
 set(CPM_SOURCE_CACHE ${PROJECT_SOURCE_DIR}/dependencies)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/compiled)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/compiled)
@@ -26,6 +28,9 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/compiled)
 
 # (Consider guarding these by platform if you plan to make wheels later)
 set(CMAKE_CXX_FLAGS "-Wno-write-strings -Wno-format-truncation -Wno-multichar -Wno-unused-result -Wno-deprecated-declarations -fpermissive -march=native")
+if(DBAT_TIME_TRACE)
+  add_compile_options(-ftime-trace)
+endif()
 set(CMAKE_EXE_LINKER_FLAGS     "${CMAKE_EXE_LINKER_FLAGS}     -fuse-ld=mold")
 set(CMAKE_MODULE_LINKER_FLAGS  "${CMAKE_MODULE_LINKER_FLAGS}  -fuse-ld=mold")
 set(CMAKE_SHARED_LINKER_FLAGS  "${CMAKE_SHARED_LINKER_FLAGS}  -fuse-ld=mold")
@@ -54,7 +59,7 @@ CPMAddPackage(NAME effolkronium_random   GITHUB_REPOSITORY volundmush/random    
                OPTIONS "Random_BuildTests OFF")
 
 
-# ---------------- your native targets ----------------
+# ---------------- targets ----------------
 add_subdirectory(libs/logging)
 add_subdirectory(libs/jwt)
 add_subdirectory(libs/netbind)

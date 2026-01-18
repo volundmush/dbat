@@ -20,6 +20,11 @@ file(GLOB_RECURSE INCLUDE
     ${CMAKE_CURRENT_SOURCE_DIR}/include/jwt/*.hpp
 )
 
+target_precompile_headers(dbat_jwt
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/private/pch.hpp
+)
+
 target_sources(dbat_jwt
     PRIVATE
         ${SRC}

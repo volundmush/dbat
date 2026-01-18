@@ -1,4 +1,5 @@
 #include "serde/json.h"
+#include <nlohmann/json.hpp>
 
 std::string jdumps(const json &j)
 {

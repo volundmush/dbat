@@ -30,6 +30,11 @@ target_sources(dbat_netbind
         ${INCLUDE}
 )
 
+target_precompile_headers(dbat_netbind
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/private/pch.hpp
+)
+
 target_link_libraries(dbat_netbind
   PUBLIC
     dbat::dbat

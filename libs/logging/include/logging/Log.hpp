@@ -32,7 +32,7 @@ namespace dbat::log
         bool async = true;
         int level = SPDLOG_LEVEL_INFO;
         int flush_on = SPDLOG_LEVEL_WARN;
-        std::string pattern = "[%Y-%m-%d %H:%M:%S.%e] [%t] [%^%l%$] [%s:%#]%v";
+        std::string pattern = "[%Y-%m-%d %H:%M:%S.%e] [%t] [%^%l%$] [%s:%#] %v";
         bool enable_backtrace = true;
         int backtrace_lines = 64;
     };

@@ -6,6 +6,7 @@
 
 #include "serde/json.h"
 #include "serde/saveload.h"
+#include <nlohmann/json.hpp>
 
 #include "dbat/filter.h"
 #include "dbat/ObjectPrototype.h"
@@ -1381,7 +1382,7 @@ void from_json(const json &j, Object &o)
 
 void load_item_prototypes(const std::filesystem::path &loc)
 {
-    for (auto j : load_from_file(loc, "itemPrototypes.json"))
+    for (auto j : load_from_file(loc, "item_prototypes.json"))
     {
         auto id = j["vn"].get<int64_t>();
         auto i = std::make_shared<ObjectPrototype>();
@@ -2110,7 +2111,7 @@ void load_characters_finish(const std::filesystem::path &loc)
 
 void load_npc_prototypes(const std::filesystem::path &loc)
 {
-    for (auto j : load_from_file(loc, "npcPrototypes.json"))
+    for (auto j : load_from_file(loc, "npc_prototypes.json"))
     {
         auto id = j["vn"].get<int64_t>();
         if (id <= 0)
@@ -2448,7 +2449,13 @@ static json dump_save_rooms() {
 }
 
 namespace dbat::save {
-    const std::vector<SaveTask>& getSaveUserTasks() {
+
+    struct SaveTask {
+        std::string filename;
+        std::function<json()> task;
+    };
+
+    static const std::vector<SaveTask>& getSaveUserTasks() {
         static const std::vector<SaveTask> tasks = {
             {"accounts", dump_accounts},
             {"players", dump_players},
@@ -2458,7 +2465,7 @@ namespace dbat::save {
         return tasks;
     }
 
-    const std::vector<SaveTask>& getSaveAssetTasks() {
+    static const std::vector<SaveTask>& getSaveAssetTasks() {
         static const std::vector<SaveTask> tasks = {
             {"help", dump_help},
             {"assemblies", dump_assemblies},
@@ -2477,7 +2484,7 @@ namespace dbat::save {
         return tasks;
     }
 
-    std::string generateSaveLocation(const std::chrono::_V2::system_clock::time_point now, std::string_view prefix) {
+    static std::string generateSaveLocation(const std::chrono::_V2::system_clock::time_point now, std::string_view prefix) {
         
         auto time_t_now = std::chrono::system_clock::to_time_t(now);
         std::tm tm_now = *std::localtime(&time_t_now);
@@ -2491,7 +2498,7 @@ namespace dbat::save {
                            tm_now.tm_sec);
     }
 
-    void runSaveSyncHelper(const std::chrono::_V2::system_clock::time_point now, const std::vector<SaveTask>& tasks, std::string_view folder, std::string_view prefix)
+    static void runSaveSyncHelper(const std::chrono::_V2::system_clock::time_point now, const std::vector<SaveTask>& tasks, std::string_view folder, std::string_view prefix)
     {
         LINFO("Beginning dump of {} to disk.", folder);
         // Open up a new database file as <cwd>/state/<timestamp>.sqlite3 and dump the state into it.

@@ -3,7 +3,7 @@
 #include <string>
 #include <chrono>
 #include <expected>
-#include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 
 namespace dbat::jwt {
      std::string create(const nlohmann::json& payload, const std::string& secret, std::chrono::seconds expiration = std::chrono::seconds(3600));

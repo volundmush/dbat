@@ -30,6 +30,11 @@ target_sources(dbat_serde
         ${INCLUDE}
 )
 
+target_precompile_headers(dbat_serde
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/private/pch.hpp
+)
+
 target_link_libraries(dbat_serde
   PUBLIC
     dbat::dbat
