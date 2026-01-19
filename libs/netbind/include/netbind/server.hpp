@@ -8,11 +8,15 @@
 #include <functional>
 #include <memory>
 #include <variant>
+#include <charconv>
+#include <algorithm>
 #include <nlohmann/json.hpp>
 
 #include "netbind/net.hpp"
 #include "logging/Log.hpp"
 #include "web/web.hpp"
+#include "dbat/Account.h"
+#include "dbat/Parse.h"
 
 namespace dbat::net {
 
@@ -54,9 +58,16 @@ struct CharacterCreateReq {
     nlohmann::json character_data;
 };
 
+struct PlayReq {
+    int64_t account_id;
+    int64_t character_id;
+};
+
 using NetRequest = std::variant<UserRegisterReq, UserLoginReq, UserRefreshReq,
-                                CharacterListReq, CharacterDeleteReq, CharacterCreateReq>;
+                                CharacterListReq, CharacterDeleteReq, CharacterCreateReq, PlayReq>;
 using NetResponse = std::variant<HttpAnswer, HttpError>;
+
+using JsonChannel = boost::asio::experimental::concurrent_channel<void(boost::system::error_code, nlohmann::json)>;
 
 using ResponseChannel = boost::asio::experimental::concurrent_channel<void(boost::system::error_code, NetResponse)>;
 using ResponseChannelPtr = std::shared_ptr<ResponseChannel>;
@@ -85,17 +96,82 @@ RequestChannel& request_channel();
 
 boost::asio::awaitable<std::size_t> drain_request_channel(std::chrono::steady_clock::duration budget);
 
+std::expected<int64_t, HttpError> require_access_subject(dbat::web::RouteContext& data);
+boost::asio::awaitable<dbat::web::Result> send_request_and_reply(dbat::web::RouteContext& data, NetRequest&& request);
 
-template<typename T>
-struct HttpData {
-    Connection<T>& conn;
-    HttpRequest&   req;
-    HttpResponse&  res;
-    Url            url; // by value
+template <typename T>
+struct WebSocketConnection {
+    boost::beast::websocket::stream<T>& ws;
+    bool isSecure{false};
+    std::string hostname, address;
+    dbat::web::RouteContext& data;
+    int64_t account_id;
+    int64_t character_id;
+    std::shared_ptr<JsonChannel> send_channel, receive_channel;
+
+    boost::asio::awaitable<void> run() {
+        co_return;
+    }
 };
 
-inline std::expected<nlohmann::json, HttpError> parse_json_body(HttpRequest const& req) {
-    return web::parse_json_body(req);
+template <typename T>
+boost::asio::awaitable<dbat::web::Result> handle_play(Connection<T>& conn, dbat::web::RouteContext& data) {
+    auto sub = require_access_subject(data);
+    if (!sub) {
+        co_return HttpError{http::status::unauthorized, "Unauthorized\n"};
+    }
+
+    std::optional<int64_t> character_id;
+    for (auto const& param : data.url.params()) {
+        if (param.key == "character_id") {
+            auto result = parseNumber<int64_t>(param.value, "character_id", 0);
+            if (!result) {
+                co_return HttpError{http::status::bad_request, result.error()};
+            }
+            character_id = result.value();
+            break;
+        }
+    }
+
+    if (!character_id.has_value()) {
+        co_return HttpError{http::status::bad_request, "Missing character_id\n"};
+    }
+
+    dbat::net::PlayReq play_req;
+    play_req.account_id = sub.value();
+    play_req.character_id = character_id.value();
+
+    // We have to avoid directly touching the database, so we'll use a NetRequest to validate whether this is allowed.
+    auto response = co_await send_request_and_reply(data, NetRequest{std::move(play_req)});
+    if (!response) {
+        co_return response;
+    }
+    // We got an OK response, so we can proceed with the WebSocket upgrade.
+
+    boost::beast::websocket::stream<T> ws(std::move(conn.connection));
+    ws.set_option(boost::beast::websocket::stream_base::timeout::suggested(boost::beast::role_type::server));
+    ws.set_option(boost::beast::websocket::stream_base::decorator(
+        [](boost::beast::websocket::response_type& res) {
+            res.set(http::field::server, "dbat");
+        }
+    ));
+
+    try {
+        co_await ws.async_accept(data.req, boost::asio::use_awaitable);
+    } catch (const std::exception& e) {
+        co_return HttpError{http::status::bad_request, std::string("WebSocket upgrade failed: ") + e.what() + "\n"};
+    }
+
+    auto exec = co_await boost::asio::this_coro::executor;
+
+    WebSocketConnection<T> ws_conn{ws, conn.isSecure, conn.hostname, conn.address, data, sub.value(), 
+        character_id.value(), std::make_shared<JsonChannel>(exec, 32), std::make_shared<JsonChannel>(exec, 32)};
+
+    co_await ws_conn.run();
+
+
+    // This is included to satisfy the return type; the handler will ignore it.
+    co_return HttpAnswer{http::status::switching_protocols, ""};
 }
 
 template <typename T>
@@ -126,23 +202,44 @@ boost::asio::awaitable<void> handle_http(Connection<T>& conn) {
             dbat::web::RouteContext web_data{req, res, *parsed, {}};
 
             try {
-                auto result = co_await global_router.dispatch(web_data);
 
-                if (!result) {
-                    res.result(http::status::not_found);
-                    res.set(http::field::content_type, "text/plain");
-                    res.body() = "Not Found\n";
-                } else if (result->has_value()) {
-                    auto& answer = result->value();
-                    res.result(answer.status);
-                    res.set(answer.content_type_field, answer.content_type);
-                    res.body() = answer.body;
+                if(web_data.url.path() == "/play") {
+                    if(!boost::beast::websocket::is_upgrade(req)) {
+                        res.result(http::status::bad_request);
+                        res.set(http::field::content_type, "text/plain");
+                        res.body() = "Expected WebSocket upgrade request\n";
+                    } else {
+                        auto ws_result = co_await handle_play(conn, web_data);
+                        if (!ws_result) {
+                            auto& error = ws_result.error();
+                            res.result(error.status);
+                            res.set(error.content_type_field, error.content_type);
+                            res.body() = error.body;
+                        } else {
+                            co_return;
+                        }
+                    }
                 } else {
-                    auto& error = result->error();
-                    res.result(error.status);
-                    res.set(error.content_type_field, error.content_type);
-                    res.body() = error.body;
+                    auto result = co_await global_router.dispatch(web_data);
+
+                    if (!result) {
+                        res.result(http::status::not_found);
+                        res.set(http::field::content_type, "text/plain");
+                        res.body() = "Not Found\n";
+                    } else if (result->has_value()) {
+                        auto& answer = result->value();
+                        res.result(answer.status);
+                        res.set(answer.content_type_field, answer.content_type);
+                        res.body() = answer.body;
+                    } else {
+                        auto& error = result->error();
+                        res.result(error.status);
+                        res.set(error.content_type_field, error.content_type);
+                        res.body() = error.body;
+                    }
                 }
+
+                
             } catch (const std::exception& e) {
                 LINFO("Unhandled exception in handler: {}", e.what());
                 res.result(http::status::internal_server_error);

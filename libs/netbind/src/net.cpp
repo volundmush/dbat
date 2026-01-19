@@ -60,30 +60,27 @@ namespace dbat::net {
             response_json["user_id"] = account.id;
             return response_json;
         }
+    }
 
-        std::expected<int64_t, HttpError> require_access_subject(dbat::web::RouteContext& data) {
-            if (jwt_config.secret.empty()) {
-                return std::unexpected(HttpError{http::status::internal_server_error, "JWT secret not configured\n"});
-            }
+    std::expected<int64_t, HttpError> require_access_subject(dbat::web::RouteContext& data) {
 
-            auto payload_res = web::valid_jwt(data.req, jwt_config.secret);
-            if (!payload_res) {
-                return std::unexpected(payload_res.error());
-            }
-
-            const auto& payload = payload_res.value();
-            if (payload.contains("token_use") && payload["token_use"].is_string()) {
-                if (payload["token_use"] != "access") {
-                    return std::unexpected(HttpError{http::status::unauthorized, "Invalid access token\n"});
-                }
-            }
-
-            if (!payload.contains("sub") || !payload["sub"].is_number_integer()) {
-                return std::unexpected(HttpError{http::status::unauthorized, "Invalid token subject\n"});
-            }
-
-            return payload["sub"].get<int64_t>();
+        auto payload_res = web::valid_jwt(data.req, jwt_config.secret);
+        if (!payload_res) {
+            return std::unexpected(payload_res.error());
         }
+
+        const auto& payload = payload_res.value();
+        if (payload.contains("token_use") && payload["token_use"].is_string()) {
+            if (payload["token_use"] != "access") {
+                return std::unexpected(HttpError{http::status::unauthorized, "Invalid access token\n"});
+            }
+        }
+
+        if (!payload.contains("sub") || !payload["sub"].is_number_integer()) {
+            return std::unexpected(HttpError{http::status::unauthorized, "Invalid token subject\n"});
+        }
+
+        return payload["sub"].get<int64_t>();
     }
 
     RequestChannel& request_channel() {
@@ -466,7 +463,7 @@ namespace dbat::net {
     boost::asio::awaitable<dbat::web::Result> handle_auth_register_post(dbat::web::RouteContext& data) {
         // Handle registration
         // first we'll retrieve and parse the JSON body
-        auto json_res = parse_json_body(data.req);
+        auto json_res = web::parse_json_body(data.req);
         if (!json_res) {
             co_return std::unexpected(json_res.error());
         }
@@ -489,7 +486,7 @@ namespace dbat::net {
     }
 
     boost::asio::awaitable<dbat::web::Result> handle_auth_login_post(dbat::web::RouteContext& data) {
-        auto json_res = parse_json_body(data.req);
+        auto json_res = web::parse_json_body(data.req);
         if (!json_res) {
             co_return std::unexpected(json_res.error());
         }
@@ -511,7 +508,7 @@ namespace dbat::net {
     }
 
     boost::asio::awaitable<dbat::web::Result> handle_auth_refresh_post(dbat::web::RouteContext& data) {
-        auto json_res = parse_json_body(data.req);
+        auto json_res = web::parse_json_body(data.req);
         if (!json_res) {
             co_return std::unexpected(json_res.error());
         }
@@ -543,7 +540,7 @@ namespace dbat::net {
             co_return std::unexpected(sub_res.error());
         }
 
-        auto json_res = parse_json_body(data.req);
+        auto json_res = web::parse_json_body(data.req);
         if (!json_res) {
             co_return std::unexpected(json_res.error());
         }
@@ -558,7 +555,7 @@ namespace dbat::net {
             co_return std::unexpected(sub_res.error());
         }
 
-        auto json_res = parse_json_body(data.req);
+        auto json_res = web::parse_json_body(data.req);
         if (!json_res) {
             co_return std::unexpected(json_res.error());
         }
