@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 4.1.1)
-project(circle LANGUAGES C CXX)
+project(dbat LANGUAGES C CXX)
 
 # ---------------- basics (yours) ----------------
 set(CPM_DOWNLOAD_VERSION 0.42.0)
@@ -62,8 +62,12 @@ CPMAddPackage(NAME effolkronium_random   GITHUB_REPOSITORY volundmush/random    
 # ---------------- targets ----------------
 add_subdirectory(libs/logging)
 add_subdirectory(libs/jwt)
+add_subdirectory(libs/valid)
+add_subdirectory(libs/dotenv)
+add_subdirectory(libs/web)
 add_subdirectory(libs/netbind)
 add_subdirectory(libs/dbat)
 add_subdirectory(libs/serde)
+
 add_subdirectory(apps/migrate)
 add_subdirectory(apps/server)

@@ -81,3 +81,6 @@ localhost-key.pem
 localhost.pem
 dependencies/
 config.user.toml
+
+
+.env.local

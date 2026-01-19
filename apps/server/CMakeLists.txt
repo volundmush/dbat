@@ -9,6 +9,7 @@ target_link_libraries(dbat_server
     PUBLIC
     dbat::netbind
     dbat::serde
+    dbat::dotenv
 )
 
 # Ensure we link using the C++ linker driver (for libstdc++ and friends)

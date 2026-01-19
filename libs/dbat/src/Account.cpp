@@ -25,16 +25,16 @@ int Account::getNextID()
     return ::getNextID(lastAccountID, accounts);
 }
 
-Account *createAccount(const std::string &name, const std::string &password)
+std::expected<struct Account*, std::string> createAccount(const std::string &name, const std::string &password)
 {
     if (name.empty())
-        throw std::invalid_argument("Username cannot be blank.");
+        return std::unexpected("Username cannot be blank.");
     if (password.empty())
-        throw std::invalid_argument("Password cannot be blank.");
+        return std::unexpected("Password cannot be blank.");
 
     if (auto found = findAccount(name); found)
     {
-        throw std::invalid_argument("Username already exists.");
+        return std::unexpected("Username already exists.");
     }
 
     auto nextId = Account::getNextID();
@@ -56,4 +56,9 @@ void Account::modRPP(int amt)
     {
         rpp = 0;
     }
+}
+
+bool Account::check_password(std::string_view pwd) const
+{
+    return password == pwd;
 }

@@ -2,6 +2,8 @@
 // Created by basti on 10/24/2021.
 //
 
+#include "valid/valid.hpp"
+
 #include "dbat/CharacterUtils.h"
 #include "dbat/CharacterPrototype.h"
 #include "dbat/ObjectUtils.h"
@@ -25,6 +27,8 @@
 #include "dbat/weather.h"
 #include "dbat/handler.h"
 #include "dbat/utils.h"
+#include "dbat/send.h"
+#include "dbat/ID.h"
 
 #include "dbat/Random.h"
 #include "dbat/TimeInfo.h"
@@ -1794,3 +1798,152 @@ UnitType Character::getDgUnitType() const {
     return UnitType::character;
 }
 
+std::expected<void, std::string> ChargenData::validate() {
+    if(!name.has_value()) {
+        return std::unexpected("Character name cannot be empty.");
+    }
+    auto &res_name = name.value();
+    auto validated_name = dbat::valid::character_name(res_name);
+    if(!validated_name) {
+        return std::unexpected(validated_name.error());
+    }
+    auto final_name = validated_name.value();
+    name = final_name;
+
+    if(!race.has_value()) {
+        return std::unexpected("Character race must be selected.");
+    }
+    auto &final_race = race.value();
+    if(!race::isPlayable(final_race)) {
+        return std::unexpected("Race is invalid for character creation.");
+    }
+
+    if(!sex.has_value()) {
+        return std::unexpected("Character sex must be selected.");
+    }
+    
+    auto &final_sex = sex.value();
+    if(!race::getValidSexes(final_race).contains(final_sex)) {
+        return std::unexpected("Selected sex is invalid for the chosen race.");
+    }
+
+    if(!sensei.has_value()) {
+        return std::unexpected("Character sensei must be selected.");
+    }
+    auto &final_sensei = sensei.value();
+    if(!sensei::isPlayable(final_sensei)) {
+        return std::unexpected("Sensei is invalid for character creation.");
+    }
+
+    if(!sensei::isValidSenseiForRace(final_sensei, final_race)) {
+        return std::unexpected("Selected sensei is invalid for the chosen race.");
+    }
+
+    switch(final_race) {
+        case Race::android: {
+            if(!model.has_value()) {
+                return std::unexpected("Character android model must be selected.");
+            }
+        }
+        break;
+
+        case Race::bio_android: {
+            if(bio_genomes.count() != 2) {
+                return std::unexpected("BioAndroid characters must select two genomes.");
+            }
+
+            for(const auto& genome : bio_genomes.getAll()) {
+                if(!race::isValidGenome(genome)) {
+                    return std::unexpected("One or more selected bio-genomes are invalid.");
+                }
+            }
+
+        }
+        break;
+
+        case Race::mutant: {
+            if(mutations.count() != 2) {
+                return std::unexpected("Mutant characters must select two mutations.");
+            }
+        }
+        break;
+
+        default:
+            if(model.has_value()) {
+                return std::unexpected("Only android characters can select an android model.");
+            }
+            if(mutations.count()) {
+                return std::unexpected("Only mutants can select mutations.");
+            }
+            if(bio_genomes.count()) {
+                return std::unexpected("Only BioAndroid characters can select bio-genomes.");
+            }
+            break;
+    }
+
+    if(!model.has_value() && final_race == Race::android) {
+        return std::unexpected("Character android model must be selected.");
+    }
+
+    if(model.has_value() && final_race != Race::android) {
+        return std::unexpected("Only android characters can select an android model.");
+    }
+
+    if(alignment < -1000 || alignment > 1000) {
+        return std::unexpected("Character alignment must be between -1000 and 1000.");
+    }
+    return {};
+}
+
+std::expected<std::shared_ptr<Character>, std::string> createPlayerCharacter(struct Account* account, ChargenData& data) {
+    auto validated = data.validate();
+    if(!validated) {
+        return std::unexpected(validated.error());
+    }
+    auto current_characters = account->characters.size();
+    if(current_characters >= account->slots) {
+        return std::unexpected("You have reached the maximum number of characters for your account.");
+    }
+
+    auto exists = findPlayer(data.name.value());
+    if(exists) {
+        return std::unexpected("A character with that name already exists.");
+    }
+
+    auto ch = std::make_shared<Character>();
+    ch->id = getNextID(Character::lastID, Character::registry);
+    auto p = std::make_shared<PlayerData>();
+    players.emplace(ch->id, p);
+    p->id = ch->id;
+    p->account = account;
+    p->character = ch.get();
+    p->name = data.name.value();
+    ch->name = p->name;
+    ch->isPC = true;
+
+    account->characters.push_back(ch->id);
+
+    ch->sex = data.sex.value();
+    ch->race = data.race.value();
+    ch->sensei = data.sensei.value();
+    ch->model = data.model;
+    ch->mutations = data.mutations;
+    ch->bio_genomes = data.bio_genomes;
+
+    if(!data.keep_skills) {
+        ch->modBaseStat("practices", 200);
+        ch->player_flags.set(PlayerFlag::forgetting_skill);
+    }
+    
+    ch->setBaseStat("good_evil", data.alignment);
+
+    players.emplace(ch->id, p);
+    Character::registry.emplace(ch->id, ch);
+
+    init_char(ch.get());
+
+    send_to_imm("New character created, %s, by user, %s.", GET_NAME(ch.get()), account->name.c_str());
+
+    return ch;
+    
+}

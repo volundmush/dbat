@@ -1,9 +1,12 @@
-#include "netbind/net.hpp"
+#include <thread>
+#include "netbind/server.hpp"
 #include "dbat/db.h"
 #include "logging/Log.hpp"
 #include "dbat/comm.h"
 #include "serde/Startup.h"
 #include "serde/saveload.h"
+#include "dotenv/dotenv.hpp"
+
 
 
 static bool running{false};
@@ -15,6 +18,7 @@ boost::asio::awaitable<void> async_distribute_output() {
 
 boost::asio::awaitable<void> run_game(double heartbeat_interval, double save_interval) {
     using namespace std::chrono;
+    using clock = steady_clock;
 
     running = true;
 
@@ -29,10 +33,10 @@ boost::asio::awaitable<void> run_game(double heartbeat_interval, double save_int
     try {
         while(running) {
             // get current timestamp...
-            auto start = high_resolution_clock::now();
+            auto start = clock::now();
             runOneLoop(heartbeat_interval);
             co_await async_distribute_output();
-            auto end =  high_resolution_clock::now();
+            auto end =  clock::now();
 
             save_timer -= heartbeat_interval;
             if(save_timer <= 0.0) {
@@ -43,7 +47,16 @@ boost::asio::awaitable<void> run_game(double heartbeat_interval, double save_int
             auto elapsed = end - start;
             auto remaining = interval - elapsed;
 
-            if(remaining > steady_clock::duration::zero()) {
+            // This section processes network requests within the remaining time budget.
+            // It will process at least one if there is one to do, though.
+            start = clock::now();
+            auto processed = co_await dbat::net::drain_request_channel(remaining);
+            //LDEBUG("Processed {} requests in this tick.", processed);
+            end = clock::now();
+            elapsed = end - start;
+            remaining = remaining - elapsed;
+
+            if(remaining > clock::duration::zero()) {
                 timer.expires_after(remaining);
                 co_await timer.async_wait(boost::asio::use_awaitable);
             } else {
@@ -61,21 +74,18 @@ boost::asio::awaitable<void> run_game(double heartbeat_interval, double save_int
 
 int main(int argc, char** argv) {
 
+    dbat::dotenv::load_env_file(".env", false);
+    dbat::dotenv::load_env_file(".env.local", true);
+
     dbat::log::init();
 
-    auto& ioc = dbat::net::context();
-
-    auto address = boost::asio::ip::address_v6::any();
-
-    uint16_t port = 8080;
-
-    std::shared_ptr<boost::asio::ssl::context> tls_context = nullptr;
-    tls_context.reset();
-
-    dbat::net::bind_server(address, port, tls_context);
+    dbat::net::init();
+    dbat::net::start_servers();
 
     load_config();
     dbat::init::init();
+
+    auto& ioc = dbat::net::context();
 
     auto strand = boost::asio::make_strand(ioc);
     boost::asio::co_spawn(strand, run_game(0.05, 300.0), boost::asio::detached);

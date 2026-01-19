@@ -93,6 +93,9 @@ void from_json(const json& j, Area& p);
 void to_json(json& j, const Structure& p);
 void from_json(const json& j, Structure& p);
 
+void to_json(json& j, const ChargenData& p);
+void from_json(const json& j, ChargenData& p);
+
 std::vector<std::filesystem::path> getDumpFiles(const std::filesystem::path &dir, std::string_view pattern);
 
 namespace dbat::save {

@@ -5,6 +5,7 @@
 #include <map>
 #include <unordered_map>
 #include <unordered_set>
+#include <expected>
 
 #include "Typedefs.h"
 
@@ -38,10 +39,12 @@ struct Account {
 
     static int getNextID();
 
+    bool check_password(std::string_view pwd) const;
+
 };
 
 extern std::map<vnum, std::shared_ptr<Account>> accounts;
 
 struct Account *findAccount(const std::string &name);
 
-struct Account *createAccount(const std::string &name, const std::string &password);
+std::expected<struct Account*, std::string> createAccount(const std::string &name, const std::string &password);

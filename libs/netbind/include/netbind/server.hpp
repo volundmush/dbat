@@ -1,27 +1,90 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/beast.hpp>
 #include <boost/url.hpp>
+#include <boost/asio/experimental/awaitable_operators.hpp>
+#include <boost/asio/experimental/concurrent_channel.hpp>
 #include <expected>
+#include <chrono>
+#include <functional>
+#include <memory>
+#include <variant>
+#include <nlohmann/json.hpp>
 
 #include "netbind/net.hpp"
 #include "logging/Log.hpp"
+#include "web/web.hpp"
 
 namespace dbat::net {
 
 namespace http = boost::beast::http;
 
-using HttpRequest  = http::request<http::string_body>;
-using HttpResponse = http::response<http::string_body>;
-using Url          = boost::urls::url_view;
-
-struct HttpError {
-    http::status status;
-    std::string body;
-    http::field content_type_field = http::field::content_type;
-    std::string content_type = "text/plain";
-};
+using HttpRequest  = web::HttpRequest;
+using HttpResponse = web::HttpResponse;
+using Url          = web::Url;
+using HttpAnswer   = web::HttpAnswer;
+using HttpError    = web::HttpError;
 
 using HttpResult = std::expected<void, HttpError>;
+
+struct UserRegisterReq {
+    std::string username;
+    std::string password;
+};
+
+struct UserLoginReq {
+    std::string username;
+    std::string password;
+};
+
+struct UserRefreshReq {
+    std::string refresh_token;
+};
+
+struct CharacterListReq {
+    int64_t account_id;
+};
+
+struct CharacterDeleteReq {
+    int64_t account_id;
+    int64_t character_id;
+};
+
+struct CharacterCreateReq {
+    int64_t account_id;
+    nlohmann::json character_data;
+};
+
+using NetRequest = std::variant<UserRegisterReq, UserLoginReq, UserRefreshReq,
+                                CharacterListReq, CharacterDeleteReq, CharacterCreateReq>;
+using NetResponse = std::variant<HttpAnswer, HttpError>;
+
+using ResponseChannel = boost::asio::experimental::concurrent_channel<void(boost::system::error_code, NetResponse)>;
+using ResponseChannelPtr = std::shared_ptr<ResponseChannel>;
+
+
+struct RequestMessage {
+    NetRequest            request;
+    ResponseChannelPtr    response_channel;
+
+    RequestMessage()
+        : response_channel(std::make_shared<ResponseChannel>(context().get_executor(), 1)) {}
+
+    RequestMessage(NetRequest req)
+        : request(std::move(req)), response_channel(std::make_shared<ResponseChannel>(context().get_executor(), 1)) {}
+
+    RequestMessage(NetRequest req, ResponseChannel response)
+        : request(std::move(req)), response_channel(std::make_shared<ResponseChannel>(std::move(response))) {}
+
+    RequestMessage(NetRequest req, ResponseChannelPtr response)
+        : request(std::move(req)), response_channel(std::move(response)) {}
+};
+
+using RequestChannel = boost::asio::experimental::concurrent_channel<void(boost::system::error_code, RequestMessage)>;
+
+RequestChannel& request_channel();
+
+boost::asio::awaitable<std::size_t> drain_request_channel(std::chrono::steady_clock::duration budget);
+
 
 template<typename T>
 struct HttpData {
@@ -31,50 +94,8 @@ struct HttpData {
     Url            url; // by value
 };
 
-std::optional<std::string_view> bearer_token(HttpRequest const& req) {
-    auto h = req[http::field::authorization];
-    std::string_view s(h.data(), h.size());
-    constexpr std::string_view p = "Bearer ";
-    if (s.size() <= p.size()) return std::nullopt;
-    if (s.substr(0, p.size()) != p) return std::nullopt;
-    return s.substr(p.size());
-}
-
-template <typename T>
-boost::asio::awaitable<HttpResult> handle_auth_register(HttpData<T>& data) {
-    // Handle registration
-    co_return std::unexpected(HttpError{http::status::not_implemented, "Registration not implemented\n"});
-}
-
-template <typename T>
-boost::asio::awaitable<HttpResult> handle_auth_login(HttpData<T>& data) {
-    // Handle login
-    co_return std::unexpected(HttpError{http::status::not_implemented, "Login not implemented\n"});
-}
-
-template <typename T>
-boost::asio::awaitable<HttpResult> handle_auth(HttpData<T>& data) {
-    if(data.url.path() == "/auth/register") {
-        if(data.req.method() != http::verb::post) {
-            co_return std::unexpected(HttpError{http::status::method_not_allowed, "Method Not Allowed\n"});
-        }
-        co_return co_await handle_auth_register(data);
-    } else if(data.url.path() == "/auth/login") {
-        if(data.req.method() != http::verb::post) {
-            co_return std::unexpected(HttpError{http::status::method_not_allowed, "Method Not Allowed\n"});
-        }
-        co_return co_await handle_auth_login(data);
-    }
-    co_return std::unexpected(HttpError{http::status::not_found, "Not Found\n"});
-}
-
-template <typename T>
-boost::asio::awaitable<HttpResult> handle_root(HttpData<T>& data) {
-    if(boost::algorithm::starts_with(data.url.path(), "/auth/")) {
-        co_return co_await handle_auth(data);
-    }
-
-    co_return std::unexpected(HttpError{http::status::not_found, "Not Found\n"});
+inline std::expected<nlohmann::json, HttpError> parse_json_body(HttpRequest const& req) {
+    return web::parse_json_body(req);
 }
 
 template <typename T>
@@ -102,16 +123,25 @@ boost::asio::awaitable<void> handle_http(Connection<T>& conn) {
             res.set(http::field::content_type, "text/plain");
             res.body() = "Invalid URL\n";
         } else {
-            HttpData<T> data{conn, req, res, *parsed};
+            dbat::web::RouteContext web_data{req, res, *parsed, {}};
 
             try {
-                auto result = co_await handle_root(data);
+                auto result = co_await global_router.dispatch(web_data);
 
                 if (!result) {
-                    auto& r = result.error();
-                    res.result(r.status);
-                    res.set(r.content_type_field, r.content_type);
-                    res.body() = r.body;
+                    res.result(http::status::not_found);
+                    res.set(http::field::content_type, "text/plain");
+                    res.body() = "Not Found\n";
+                } else if (result->has_value()) {
+                    auto& answer = result->value();
+                    res.result(answer.status);
+                    res.set(answer.content_type_field, answer.content_type);
+                    res.body() = answer.body;
+                } else {
+                    auto& error = result->error();
+                    res.result(error.status);
+                    res.set(error.content_type_field, error.content_type);
+                    res.body() = error.body;
                 }
             } catch (const std::exception& e) {
                 LINFO("Unhandled exception in handler: {}", e.what());

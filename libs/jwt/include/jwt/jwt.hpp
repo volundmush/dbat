@@ -6,11 +6,10 @@
 #include <nlohmann/json_fwd.hpp>
 
 namespace dbat::jwt {
-     std::string create(const nlohmann::json& payload, const std::string& secret, std::chrono::seconds expiration = std::chrono::seconds(3600));
+     std::string create(const nlohmann::json& payload, std::string_view secret, std::chrono::seconds expiration = std::chrono::seconds(3600));
 
-
-     std::expected<nlohmann::json, std::string> verify(const std::string& token, const std::string& secret);
-
-     std::string base64UrlEncode(const std::string& input);
-     std::string base64UrlDecode(const std::string& input);
+     std::expected<nlohmann::json, std::string> verify(std::string_view token, std::string_view secret);
+     
+     std::string base64UrlEncode(std::string_view input);
+     std::string base64UrlDecode(std::string_view input);
 } // namespace dbat::jwt

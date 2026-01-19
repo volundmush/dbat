@@ -40,7 +40,7 @@ target_link_libraries(dbat
     fmt::fmt
     enchantum::enchantum
     effolkronium_random
-    
+    dbat::valid
     Boost::regex
     Threads::Threads
     dbat::logging

@@ -7,7 +7,7 @@
 #include <string_view>
 
 namespace {
-    std::string hmacSha256(const std::string& data, const std::string& secret) {
+    std::string hmacSha256(std::string_view data, std::string_view secret) {
         unsigned int length = 0;
         unsigned char digest[EVP_MAX_MD_SIZE];
         HMAC(EVP_sha256(),
@@ -25,7 +25,7 @@ namespace dbat::jwt {
 
     constexpr std::string_view jwt_header = R"({"alg":"HS256","typ":"JWT"})";
 
-    std::string create(const nlohmann::json& payload, const std::string& secret, std::chrono::seconds expiration) {
+    std::string create(const nlohmann::json& payload, std::string_view secret, std::chrono::seconds expiration) {
         nlohmann::json payload_with_exp = payload;
         const auto now = std::chrono::system_clock::now();
         const auto exp_time = now + expiration;
@@ -41,29 +41,29 @@ namespace dbat::jwt {
         return signing_input + "." + signature_part;
     }
 
-    std::expected<nlohmann::json, std::string> verify(const std::string& token, const std::string& secret) {
+    std::expected<nlohmann::json, std::string> verify(std::string_view token, std::string_view secret) {
         const auto first_dot = token.find('.');
-        if (first_dot == std::string::npos) {
+        if (first_dot == std::string_view::npos) {
             return std::unexpected("invalid token format");
         }
         const auto second_dot = token.find('.', first_dot + 1);
-        if (second_dot == std::string::npos || token.find('.', second_dot + 1) != std::string::npos) {
+        if (second_dot == std::string_view::npos || token.find('.', second_dot + 1) != std::string_view::npos) {
             return std::unexpected("invalid token format");
         }
 
-        const std::string header_part = token.substr(0, first_dot);
-        const std::string payload_part = token.substr(first_dot + 1, second_dot - first_dot - 1);
-        const std::string signature_part = token.substr(second_dot + 1);
+        auto header_part = token.substr(0, first_dot);
+        auto payload_part = token.substr(first_dot + 1, second_dot - first_dot - 1);
+        auto signature_part = token.substr(second_dot + 1);
 
-        const std::string signing_input = header_part + "." + payload_part;
-        const std::string expected_signature = base64UrlEncode(hmacSha256(signing_input, secret));
+        const std::string signing_input = std::string(header_part) + "." + std::string(payload_part);
+        auto expected_signature = base64UrlEncode(hmacSha256(signing_input, secret));
 
         if (expected_signature.size() != signature_part.size() ||
             CRYPTO_memcmp(expected_signature.data(), signature_part.data(), expected_signature.size()) != 0) {
             return std::unexpected("invalid token signature");
         }
 
-        const std::string decoded_header = base64UrlDecode(header_part);
+        auto decoded_header = base64UrlDecode(header_part);
         if (decoded_header.empty() && !header_part.empty()) {
             return std::unexpected("invalid token header");
         }
@@ -103,7 +103,7 @@ namespace dbat::jwt {
         return payload_json;
     }
 
-    std::string base64UrlEncode(const std::string& input) {
+    std::string base64UrlEncode(std::string_view input) {
         if (input.empty()) {
             return {};
         }
@@ -137,12 +137,12 @@ namespace dbat::jwt {
         return encoded;
     }
 
-    std::string base64UrlDecode(const std::string& input) {
+    std::string base64UrlDecode(std::string_view input) {
         if (input.empty()) {
             return {};
         }
 
-        std::string padded = input;
+        std::string padded = std::string(input);
         for (char& ch : padded) {
             if (ch == '-') {
                 ch = '+';

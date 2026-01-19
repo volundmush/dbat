@@ -5,8 +5,8 @@
 #include <boost/iostreams/filter/gzip.hpp>
 
 #include "serde/json.h"
+#include "serde/templates.h"
 #include "serde/saveload.h"
-#include <nlohmann/json.hpp>
 
 #include "dbat/filter.h"
 #include "dbat/ObjectPrototype.h"
@@ -35,14 +35,6 @@
 #include "dbat/weather.h"
 #include "dbat/Help.h"
 #include "dbat/utils.h"
-
-inline std::string demangle(const char* mangled_name) {
-    int status = -1;
-    char* demangled = abi::__cxa_demangle(mangled_name, nullptr, nullptr, &status);
-    std::string result = (status == 0 && demangled != nullptr) ? demangled : mangled_name;
-    std::free(demangled);
-    return result;
-}
 
 // dump and load routines...
 static void dump_to_file(const std::filesystem::path &loc, const std::string &name, const json &data)
@@ -99,112 +91,6 @@ static json load_from_file(const std::filesystem::path &loc, const std::string &
         return {};
     }
     return j;
-}
-
-template<typename T>
-requires std::is_enum_v<T>
-void to_json(json& j, const T& a) {
-    j = enchantum::to_string(a);
-}
-
-template<typename T>
-requires std::is_enum_v<T>
-void from_json(const json& j, T& a) {
-    auto name = j.get<std::string>();
-    auto op = enchantum::cast<T>(name);
-    if(op.has_value())
-        a = op.value();
-    else
-        throw std::invalid_argument("Invalid enum value: " + name +
-            " for enum type: " + demangle(typeid(T).name()));
-}
-
-template <typename Enum, typename Value>
-requires std::is_enum_v<Enum>
-void to_json(json& j, const std::map<Enum, Value>& m)
-{
-    j = json::object();
-    for (auto const& [key, val] : m) {
-        std::string key_str = std::string(enchantum::to_string(key));
-        if(key_str.empty()) continue;
-        j[key_str] = val; // This calls to_json on 'val' if it’s a type with a known converter
-    }
-}
-
-template <typename Enum, typename Value>
-requires std::is_enum_v<Enum>
-void from_json(const json& j, std::map<Enum, Value>& m)
-{
-    m.clear();
-    for (auto const& [key_str, value_json] : j.items()) {
-        // Convert string -> Enum
-        auto maybe = enchantum::cast<Enum>(key_str);
-        if (!maybe.has_value()) {
-            if(typeid(Enum) == typeid(Skill)) continue;
-            throw std::invalid_argument("Invalid enum key: " + key_str
-            + " for enum type: " + demangle(typeid(Enum).name()));
-        }
-        m[maybe.value()] = value_json.get<Value>();
-    }
-}
-
-template <typename Enum, typename Value>
-requires std::is_enum_v<Enum>
-void to_json(json& j, const std::unordered_map<Enum, Value>& m)
-{
-    j = json::object();
-    for (auto const& [key, val] : m) {
-        std::string key_str = std::string(enchantum::to_string(key));
-        if(key_str.empty()) continue;
-        j[key_str] = val; // This calls to_json on 'val' if it’s a type with a known converter
-    }
-}
-
-template <typename Enum, typename Value>
-requires std::is_enum_v<Enum>
-void from_json(const json& j, std::unordered_map<Enum, Value>& m)
-{
-    m.clear();
-    for (auto const& [key_str, value_json] : j.items()) {
-        // Convert string -> Enum
-        auto maybe = enchantum::cast<Enum>(key_str);
-        if (!maybe.has_value()) {
-            if(typeid(Enum) == typeid(Skill)) continue;
-            throw std::invalid_argument("Invalid enum key: " + key_str
-                + " for enum type: " + demangle(typeid(Enum).name()));
-        }
-        m[maybe.value()] = value_json.get<Value>();
-    }
-}
-
-template <typename Enum>
-requires std::is_enum_v<Enum>
-void to_json(json& j, const FlagHandler<Enum>& m)
-{
-    j = json::array();
-    for (auto const& key : m.getAll()) {
-        std::string key_str = std::string(enchantum::to_string(key));
-        if(key_str.empty()) continue;
-        j.push_back(key_str); // This calls to_json on 'val' if it’s a type with a known converter
-    }
-}
-
-template <typename Enum>
-requires std::is_enum_v<Enum>
-void from_json(const json& j, FlagHandler<Enum>& m)
-{
-    m.clear();
-    for (auto const& key_str : j) {
-        // Convert string -> Enum
-        auto key = key_str.get<std::string>();
-        auto maybe = enchantum::cast<Enum>(key);
-        if (!maybe.has_value()) {
-            if(typeid(Enum) == typeid(Skill)) continue;
-            throw std::invalid_argument("Invalid enum key: " + key
-                + " for enum type: " + demangle(typeid(Enum).name()));
-        }
-        m.set(maybe.value());
-    }
 }
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(time_data, birth, created, maxage, logon, played, seconds_aged)
@@ -2047,6 +1933,32 @@ void from_json(const json &j, Character &c)
         c.permForms = j["permForms"].get<std::unordered_set<Form>>();
 }
 
+void to_json(json &j, const ChargenData &c)
+{
+    if(c.name) j["name"] = *c.name;
+    if(c.race) j["race"] = *c.race;
+    if(c.model) j["model"] = *c.model;
+    if(c.sex) j["sex"] = *c.sex;
+    if(c.sensei) j["sensei"] = *c.sensei;
+    if(c.bio_genomes) j["bio_genomes"] = c.bio_genomes;
+    if(c.mutations) j["mutations"] = c.mutations;
+    j["keep_skills"] = c.keep_skills;
+    j["alignment"] = c.alignment;
+}
+
+void from_json(const json &j, ChargenData &c)
+{
+    if (j.contains("name")) c.name = j["name"].get<std::string>();
+    if (j.contains("race")) c.race = j["race"].get<Race>();
+    if (j.contains("model")) c.model = j["model"].get<AndroidModel>();
+    if (j.contains("sex")) c.sex = j["sex"].get<Sex>();
+    if (j.contains("sensei")) c.sensei = j["sensei"].get<Sensei>();
+    if (j.contains("bio_genomes")) j.at("bio_genomes").get_to(c.bio_genomes);
+    if (j.contains("mutations")) j.at("mutations").get_to(c.mutations);
+    if (j.contains("keep_skills")) c.keep_skills = j["keep_skills"];
+    if (j.contains("alignment")) c.alignment = j["alignment"];
+}
+
 static json dump_characters()
 {
     json j = json::array();
@@ -2389,54 +2301,6 @@ void load_assemblies(const std::filesystem::path &loc)
             }
         }
     }
-}
-
-// This is called by the Cython code to create a new player character.
-// Everything should be already validated several times over.
-PlayerData *create_player_character(int account_id, const json &j)
-{
-    auto &acc = accounts.at(account_id);
-    auto ch = std::make_shared<Character>();
-    ch->id = getNextID(Character::lastID, Character::registry);
-    auto p = std::make_shared<PlayerData>();
-    players.emplace(ch->id, p);
-    p->id = ch->id;
-    p->account = acc.get();
-    p->character = ch.get();
-    p->name = j.at("name").get<std::string>();
-    ch->name = p->name;
-    ch->isPC = true;
-
-    acc->characters.push_back(ch->id);
-
-    if (j.contains("sex"))
-        ch->sex = j["sex"];
-    if (j.contains("race"))
-        ch->race = j["race"];
-    if (j.contains("sensei"))
-        ch->sensei = j["sensei"];
-    if (j.contains("bio_genomes"))
-        ch->bio_genomes = j["bio_genomes"];
-    if (j.contains("mutations"))
-        ch->mutations = j["mutations"];
-    if(j.contains("android_model"))
-        ch->model = j["android_model"].get<AndroidModel>();
-    if (j.contains("align"))
-        ch->setBaseStat("good_evil", j["align"].get<int>());
-
-    if (j.contains("keep_skills") && !j.at("keep_skills").get<bool>())
-    {
-        ch->modBaseStat("practices", 200);
-        ch->player_flags.set(PlayerFlag::forgetting_skill);
-    }
-
-    Character::registry.emplace(ch->id, ch);
-
-    init_char(ch.get());
-
-    send_to_imm("New character created, %s, by user, %s.", GET_NAME(ch.get()), acc->name.c_str());
-
-    return p.get();
 }
 
 static json dump_save_rooms() {

@@ -26,7 +26,7 @@
 #include "StatHandler.h"
 
 struct PlayerData {
-    int id{NOTHING};
+    int64_t id{NOTHING};
     std::string name;
     struct Account *account{};
     struct Character *character{};
@@ -404,3 +404,18 @@ extern std::vector<std::weak_ptr<Character>> getAllCharacters();
 extern Character *affect_list;
 extern Character *affectv_list;
 
+struct ChargenData {
+    std::optional<std::string> name;
+    std::optional<Race> race;
+    std::optional<AndroidModel> model;
+    std::optional<Sex> sex;
+    std::optional<Sensei> sensei;
+    FlagHandler<Race> bio_genomes{};
+    FlagHandler<Mutation> mutations{};
+    bool keep_skills{true};
+    int alignment{0};
+
+    std::expected<void, std::string> validate();
+};
+
+extern std::expected<std::shared_ptr<Character>, std::string> createPlayerCharacter(struct Account* account, ChargenData& data);
