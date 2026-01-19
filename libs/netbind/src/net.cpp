@@ -12,7 +12,9 @@
 
 #include "valid/valid.hpp"
 #include "dbat/Account.h"
+#include "dbat/Descriptor.h"
 #include "dbat/players.h"
+#include "dbat/db.h"
 #include "dbat/Character.h"
 
 #include "serde/saveload.h"
@@ -88,7 +90,112 @@ namespace dbat::net {
         return channel;
     }
 
-    
+    Channel<std::shared_ptr<GameConnectionInfo>>& game_connection_channel() {
+        static Channel<std::shared_ptr<GameConnectionInfo>> channel(context().get_executor(), 1024);
+        return channel;
+    }
+
+    Channel<std::pair<int64_t, std::string>>& game_disconnection_channel() {
+        static Channel<std::pair<int64_t, std::string>> channel(context().get_executor(), 1024);
+        return channel;
+    }
+
+    std::unordered_map<int64_t, std::shared_ptr<GameConnectionInfo>> active_game_connections;
+
+    boost::asio::awaitable<void> acceptNewConnections() {
+        // let's accept all new connections. we'll grab as many as we can from game_connection_channel()
+        static int64_t next_connection_id = 1;
+
+        auto &chan = game_connection_channel();
+        while(chan.ready()) {
+            auto game_info = co_await chan.async_receive(boost::asio::use_awaitable);
+            game_info->connection_id = next_connection_id++;
+            active_game_connections.emplace(game_info->connection_id, game_info);
+            create_join_session(game_info->account_id, game_info->character_id, game_info->connection_id, game_info->address);
+        }
+    }
+
+    boost::asio::awaitable<void> handleNewOutput() {
+        for(auto& [conn_id, desc] : sessions) {
+            if(!desc) continue;
+            if(desc->processed_output.empty()) continue;
+
+            GameMessageText gmsg{desc->processed_output};
+            boost::system::error_code ec;
+            auto it = active_game_connections.find(conn_id);
+            if(it != active_game_connections.end()) {
+                auto& game_info = it->second;
+                co_await game_info->to_websocket.async_send(ec, gmsg, boost::asio::use_awaitable);
+                if(ec) {
+                    LINFO("Error sending processed output to connection {}: {}", conn_id, ec.message());
+                }
+            }
+
+            desc->processed_output.clear();
+        }
+    }
+
+    boost::asio::awaitable<void> handleNewInput() {
+        for(auto& [id, ginfo] : active_game_connections) {
+            auto it = sessions.find(id);
+            if(it == sessions.end()) continue;
+            auto& desc = it->second;
+            if(!desc) continue;
+
+            boost::system::error_code ec;
+            // retrieve a message from to_game if there is one.
+            while(ginfo->to_game.ready()) {
+                auto gmsg = co_await ginfo->to_game.async_receive(boost::asio::redirect_error(boost::asio::use_awaitable, ec));
+                if(ec) {
+                    LINFO("Error receiving message from connection {}: {}", id, ec.message());
+                    break;
+                }
+                if(std::holds_alternative<GameMessageText>(gmsg)) {
+                    auto& msg = std::get<GameMessageText>(gmsg);
+                    desc->raw_input_queue.push_back(msg.text);
+                } else if(std::holds_alternative<GameMessageDisconnect>(gmsg)) {
+                    auto& msg = std::get<GameMessageDisconnect>(gmsg);
+                    desc->onConnectionLost(id);
+                    LINFO("Connection {} disconnected by game server: {}", id, msg.reason);
+                } else {
+                    LERROR("Unknown message type received from WebSocket for connection {}.", id);
+                }
+            }
+        }
+    }
+
+    boost::asio::awaitable<void> handleDisconnections() {
+        // handles disconnections reported from the websocket connections.
+        auto &chan = game_disconnection_channel();
+        while(chan.ready()) {
+            auto [conn_id, reason] = co_await chan.async_receive(boost::asio::use_awaitable);
+            auto it = active_game_connections.find(conn_id);
+            if(it != active_game_connections.end()) {
+                auto& game_info = it->second;
+                if(auto desc_it = sessions.find(conn_id); desc_it != sessions.end()) {
+                    auto& desc = desc_it->second;
+                    if(desc) {
+                        desc->onConnectionLost(game_info->connection_id);
+                    }
+                }
+                active_game_connections.erase(it);
+            }
+        }
+
+        // if any ids are not in sessions, we can also clean them up.
+        GameMessageDisconnect quit_msg{"quit"};
+        ToGameMessage quit_game_msg{quit_msg};
+        boost::system::error_code ec;
+        for(auto &[id, ginfo] : active_game_connections) {
+            if(sessions.find(id) == sessions.end()) {
+                active_game_connections.erase(id);
+                co_await ginfo->to_websocket.async_send(ec, quit_game_msg, boost::asio::use_awaitable);
+                if(ec) {
+                    LINFO("Error sending quit message to connection {}: {}", id, ec.message());
+                }
+            }
+        }
+    }
 
     boost::asio::awaitable<NetResponse> handle_request(RequestMessage& msg) {
 
@@ -374,12 +481,12 @@ namespace dbat::net {
         try {
             auto client_address = socket.remote_endpoint().address().to_string();
             auto client_hostname = client_address;
-            LINFO("Incoming connection from %s", client_address.c_str());
+            LINFO("Incoming connection from {}", client_address);
             if(auto rev_res = co_await reverse_lookup(socket); rev_res) {
                 client_hostname = rev_res.value();
-                LINFO("Resolved hostname %s for %s", client_hostname.c_str(), client_address.c_str());
+                LINFO("Resolved hostname {} for {}", client_hostname, client_address);
             } else {
-                LINFO("Could not resolve hostname for %s: %s", client_address.c_str(), rev_res.error().message().c_str());
+                LINFO("Could not resolve hostname for {}: {}", client_address, rev_res.error().message());
             }
             
             if(tls_context) {
@@ -387,10 +494,10 @@ namespace dbat::net {
                 boost::system::error_code ec;
                 co_await ssl_socket.async_handshake(boost::asio::ssl::stream_base::server, boost::asio::redirect_error(boost::asio::use_awaitable, ec));
                 if(ec) {
-                    LERROR("TLS handshake failed with %s: %s", client_hostname.c_str(), ec.message().c_str());
+                    LERROR("TLS handshake failed with {}: {}", client_hostname, ec.message());
                     co_return;
                 }
-                LINFO("Completed TLS handshake with %s", client_hostname.c_str());
+                LINFO("Completed TLS handshake with {}", client_hostname);
                 auto con = Connection{std::move(ssl_socket), true, client_hostname, client_address};
                 co_await handle_http(con);
             } else {
@@ -399,7 +506,7 @@ namespace dbat::net {
             }
         }
         catch(const std::exception& e) {
-            LERROR("Error handling client: %s", e.what());
+            LERROR("Error handling client: {}", e.what());
         }
     }
 
@@ -408,7 +515,7 @@ namespace dbat::net {
             boost::system::error_code ec;
             auto socket = co_await acceptor.async_accept(boost::asio::redirect_error(boost::asio::use_awaitable, ec));
             if(ec) {
-                LERROR("Accept error: %s", ec.message().c_str());
+                LERROR("Accept error: {}", ec.message());
                 continue;
             }
             auto strand = boost::asio::make_strand(context());
@@ -646,17 +753,17 @@ namespace dbat::net {
                     );
                     tls_config.ssl_context->use_certificate_chain_file(tls_config.cert_path.string());
                     tls_config.ssl_context->use_private_key_file(tls_config.key_path.string(), boost::asio::ssl::context::pem);
-                    LINFO("TLS enabled using cert %s", tls_config.cert_path.string().c_str());
+                    LINFO("TLS enabled using cert {}", tls_config.cert_path.string());
                 } catch (const std::exception& e) {
-                    LERROR("Failed to initialize TLS context: %s", e.what());
+                    LERROR("Failed to initialize TLS context: {}", e.what());
                     tls_config.ssl_context.reset();
                 }
             } else {
                 if (!cert_exists) {
-                    LERROR("TLS certificate not found: %s", tls_config.cert_path.string().c_str());
+                    LERROR("TLS certificate not found: {}", tls_config.cert_path.string());
                 }
                 if (!key_exists) {
-                    LERROR("TLS key not found: %s", tls_config.key_path.string().c_str());
+                    LERROR("TLS key not found: {}", tls_config.key_path.string());
                 }
                 tls_config.ssl_context.reset();
             }
@@ -700,8 +807,15 @@ namespace dbat::net {
     }
 
     void start_servers() {
-        bind_server(tls_config.address, tls_config.port, tls_config.ssl_context);
-        bind_server(config.tcp_address, config.tcp_port, nullptr);
+        if (tls_config.ssl_context) {
+            bind_server(tls_config.address, tls_config.port, tls_config.ssl_context);
+            LINFO("HTTPS server listening on {}:{}", tls_config.address.to_string(), tls_config.port);
+        } else {
+            bind_server(config.tcp_address, config.tcp_port, nullptr);
+            LINFO("HTTP server listening on {}:{}", config.tcp_address.to_string(), config.tcp_port);
+        }
+        
+        
     }
 
 }

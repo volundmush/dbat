@@ -1325,7 +1325,7 @@ void load_config() {
     load_default_config();
 }
 
-int create_join_session(int account_id, int character_id, int64_t connection_id, const std::string& ip) {
+int create_join_session(int64_t account_id, int64_t character_id, int64_t connection_id, const std::string& ip) {
     auto acc_found = accounts.find(account_id);
     if(acc_found == accounts.end()) return -1;
     auto &acc = acc_found->second;
@@ -1340,9 +1340,9 @@ int create_join_session(int account_id, int character_id, int64_t connection_id,
         if(sess->conns.empty()) {
             // the character is currently active, but link dead.
             sess->timeoutCounter = 0.0;
-                        ch.get()->send_to("You have reconnected to %s from %s.\r\n", ch->getName(), ip);
+                ch->send_to("You have reconnected to %s from %s.\r\n", ch->getName(), ip);
         } else {
-                        ch.get()->send_to("Another connection is now linked to %s, from %s.\r\n", ch->getName(), ip);
+                ch->send_to("Another connection is now linked to %s, from %s.\r\n", ch->getName(), ip);
         }
         sess->conns.emplace(connection_id, ip);
         acc->descriptors.insert(sess);
@@ -1371,7 +1371,7 @@ int create_join_session(int account_id, int character_id, int64_t connection_id,
         sessions.emplace(character_id, desc);
         desc->next = descriptor_list;
         descriptor_list = desc;
-                ch.get()->send_to("You have connected to %s from %s.\r\n", ch->getName(), ip);
+        ch->send_to("You have connected to %s from %s.\r\n", ch->getName(), ip);
         return 1;
     }
 }

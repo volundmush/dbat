@@ -11,11 +11,6 @@
 
 static bool running{false};
 
-boost::asio::awaitable<void> async_distribute_output() {
-
-    co_return;
-}
-
 boost::asio::awaitable<void> run_game(double heartbeat_interval, double save_interval) {
     using namespace std::chrono;
     using clock = steady_clock;
@@ -32,10 +27,14 @@ boost::asio::awaitable<void> run_game(double heartbeat_interval, double save_int
 
     try {
         while(running) {
+            
             // get current timestamp...
             auto start = clock::now();
+            co_await dbat::net::acceptNewConnections();
+            co_await dbat::net::handleNewInput();
             runOneLoop(heartbeat_interval);
-            co_await async_distribute_output();
+            co_await dbat::net::handleNewOutput();
+            co_await dbat::net::handleDisconnections();
             auto end =  clock::now();
 
             save_timer -= heartbeat_interval;
