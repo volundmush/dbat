@@ -125,7 +125,7 @@ namespace dbat::telnet
         }
     }
 
-    std::expected<std::pair<TelnetMessage, size_t>, std::string> parseTelnetMessage(std::string_view data, TelnetMode mode)
+    std::expected<std::pair<TelnetMessage, size_t>, std::string> parseTelnetMessage(std::string_view data)
     {
         if (data.empty())
         {

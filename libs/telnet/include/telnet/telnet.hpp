@@ -6,12 +6,20 @@
 #include <vector>
 #include <cstdint>
 #include <functional>
+#include <chrono>
 
 #include <nlohmann/json.hpp>
 #include <boost/asio/experimental/awaitable_operators.hpp>
 #include <boost/asio/experimental/concurrent_channel.hpp>
 
+#include "net/net.hpp"
+
+#include "dbat/Descriptor.h"
+
 namespace dbat::telnet {
+
+    template<typename T>
+    using Channel = boost::asio::experimental::concurrent_channel<void(boost::system::error_code, T)>;
 
     namespace codes {
         constexpr char NUL = static_cast<char>(0);
@@ -111,25 +119,10 @@ namespace dbat::telnet {
         TelnetMessageNAWS, TelnetMessageCompress, TelnetMessageGMCP, 
         TelnetMessageMTTS, TelnetMessageCharset, TelnetError>;
 
-    enum class TelnetMode {
-        client,
-        server
-    };
-
-    struct TelnetSend {
-        TelnetMessage message;
-    };
-
-    struct TelnetReceive {
-        TelnetMessage message;
-    };
-
-    using TelnetEvent = std::variant<TelnetSend, TelnetReceive, TelnetError, TelnetMessageCompress, TelnetChangeCapabilities>;
-
     // attempts to parse a telnet message from the given data buffer.
     // On success, returns the parsed TelnetMessage and the number of bytes consumed.
     // On failure, returns an error string.
-    std::expected<std::pair<TelnetMessage, size_t>, std::string> parseTelnetMessage(std::string_view data, TelnetMode mode);
+    std::expected<std::pair<TelnetMessage, size_t>, std::string> parseTelnetMessage(std::string_view data);
 
     struct TelnetConnection;
 
@@ -143,23 +136,25 @@ namespace dbat::telnet {
         TelnetOptionState remote;  // their side
     };
 
-    struct TelnetConnection {
-        TelnetConnection(TelnetMode mode)
-            : mode_(mode) {}
+    class TelnetConnection {
+        public:
+        TelnetConnection(dbat::net::AnyConnection connection);
         
+        boost::asio::awaitable<void> run(boost::asio::steady_timer::duration negotiation_timeout);
+
+        private:
+        dbat::net::AnyConnection conn_;
+        ClientData client_data_;
+        nlohmann::json changed_capabilities_;
+        
+        boost::asio::awaitable<void> runReader();
+        boost::asio::awaitable<void> runWriter();
+        boost::asio::awaitable<void> runMain(boost::asio::steady_timer::duration negotiation_timeout);
         boost::asio::awaitable<void> processData(std::string_view data);
         boost::asio::awaitable<void> sendAppData(std::string_view app_data);
         boost::asio::awaitable<void> sendSubNegotiation(char option, std::string_view sub_data);
-        void setEventHandler(std::function<boost::asio::awaitable<void>(const TelnetEvent&)> handler);
-
-        TelnetMode mode_;
 
         std::unordered_map<char, TelnetOptionPerspective> option_states_;
-
-        std::function<boost::asio::awaitable<void>(const TelnetSend&)> send_handler_;
-        std::function<boost::asio::awaitable<void>(const TelnetReceive&)> receive_handler_;
-        std::function<boost::asio::awaitable<void>(const TelnetError&)> error_handler_;
-        std::function<boost::asio::awaitable<void>(const TelnetChangeCapabilities&)> capabilities_handler_;
     };
 
 }

@@ -29,11 +29,14 @@ struct txt_q {
     struct txt_block *tail;
 };
 
-struct ClientCapabilities {
+struct ClientData {
+    std::string client_address = "UNKNOWN";
+    std::string client_hostname = "UNKNOWN";
     std::string client_protocol = "UNKNOWN";
     std::string client_name = "UNKNOWN";
     std::string client_version = "UNKNOWN";
     std::string encoding = "ascii";
+    bool tls = false;
     uint8_t color = 0;
     uint16_t width = 78;
     uint16_t height = 24;
