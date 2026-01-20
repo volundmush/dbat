@@ -23,6 +23,8 @@ namespace {
 
 namespace dbat::jwt {
 
+    JwtConfig jwt_config;
+
     constexpr std::string_view jwt_header = R"({"alg":"HS256","typ":"JWT"})";
 
     std::string create(const nlohmann::json& payload, std::string_view secret, std::chrono::seconds expiration) {
@@ -188,4 +190,36 @@ namespace dbat::jwt {
         decoded.resize(static_cast<size_t>(adjusted_length));
         return decoded;
     }
+
+        std::int64_t now_seconds() {
+            return static_cast<std::int64_t>(std::chrono::system_clock::to_time_t(std::chrono::system_clock::now()));
+        }
+
+        nlohmann::json base_claims(nlohmann::json& claims) {
+            claims["iat"] = now_seconds();
+            claims["iss"] = jwt_config.issuer;
+            claims["aud"] = jwt_config.audience;
+            return claims;
+        }
+
+        std::string create_access_token(nlohmann::json&& claims) {
+            base_claims(claims);
+            claims["token_use"] = "access";
+            return dbat::jwt::create(claims, jwt_config.secret, jwt_config.token_expiry);
+        }
+
+        std::string create_refresh_token(nlohmann::json&& claims) {
+            base_claims(claims);
+            claims["token_use"] = "refresh";
+            return dbat::jwt::create(claims, jwt_config.secret, jwt_config.refresh_token_expiry);
+        }
+
+        nlohmann::json build_token_response(std::string_view access_token, std::string_view refresh_token) {
+            nlohmann::json response_json;
+            response_json["token_type"] = "Bearer";
+            response_json["access_token"] = access_token;
+            response_json["refresh_token"] = refresh_token;
+            response_json["expires_in"] = static_cast<int>(jwt_config.token_expiry.count());
+            return response_json;
+        }
 }

@@ -5,8 +5,11 @@
 #include <expected>
 #include <vector>
 #include <cstdint>
+#include <functional>
 
 #include <nlohmann/json.hpp>
+#include <boost/asio/experimental/awaitable_operators.hpp>
+#include <boost/asio/experimental/concurrent_channel.hpp>
 
 namespace dbat::telnet {
 
@@ -95,6 +98,10 @@ namespace dbat::telnet {
         std::unordered_map<std::string, std::string> entries;
     };
 
+    struct TelnetChangeCapabilities {
+        nlohmann::json capabilities;
+    };
+
     struct TelnetError {
         std::string message;
     };
@@ -109,8 +116,50 @@ namespace dbat::telnet {
         server
     };
 
+    struct TelnetSend {
+        TelnetMessage message;
+    };
+
+    struct TelnetReceive {
+        TelnetMessage message;
+    };
+
+    using TelnetEvent = std::variant<TelnetSend, TelnetReceive, TelnetError, TelnetMessageCompress, TelnetChangeCapabilities>;
+
     // attempts to parse a telnet message from the given data buffer.
     // On success, returns the parsed TelnetMessage and the number of bytes consumed.
     // On failure, returns an error string.
     std::expected<std::pair<TelnetMessage, size_t>, std::string> parseTelnetMessage(std::string_view data, TelnetMode mode);
+
+    struct TelnetConnection;
+
+    struct TelnetOptionState {
+        bool enabled{false};
+        bool negotiating{false};
+    };
+
+    struct TelnetOptionPerspective {
+        TelnetOptionState local;   // our side
+        TelnetOptionState remote;  // their side
+    };
+
+    struct TelnetConnection {
+        TelnetConnection(TelnetMode mode)
+            : mode_(mode) {}
+        
+        boost::asio::awaitable<void> processData(std::string_view data);
+        boost::asio::awaitable<void> sendAppData(std::string_view app_data);
+        boost::asio::awaitable<void> sendSubNegotiation(char option, std::string_view sub_data);
+        void setEventHandler(std::function<boost::asio::awaitable<void>(const TelnetEvent&)> handler);
+
+        TelnetMode mode_;
+
+        std::unordered_map<char, TelnetOptionPerspective> option_states_;
+
+        std::function<boost::asio::awaitable<void>(const TelnetSend&)> send_handler_;
+        std::function<boost::asio::awaitable<void>(const TelnetReceive&)> receive_handler_;
+        std::function<boost::asio::awaitable<void>(const TelnetError&)> error_handler_;
+        std::function<boost::asio::awaitable<void>(const TelnetChangeCapabilities&)> capabilities_handler_;
+    };
+
 }

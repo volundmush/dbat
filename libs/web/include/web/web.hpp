@@ -1,20 +1,17 @@
 #pragma once
 
-#include <expected>
+#include "jwt/jwt.hpp"
+#include "net/net.hpp"
+
 #include <functional>
 #include <memory>
 #include <optional>
-#include <string>
-#include <string_view>
 #include <unordered_map>
 #include <vector>
 
-#include <boost/asio.hpp>
 #include <boost/beast/http.hpp>
 #include <boost/url.hpp>
 #include <nlohmann/json.hpp>
-
-#include "jwt/jwt.hpp"
 
 namespace dbat::web {
     namespace http = boost::beast::http;
@@ -85,6 +82,27 @@ namespace dbat::web {
       }
 
       return payload;
+    }
+
+    inline std::expected<int64_t, HttpError> require_access_subject(dbat::web::RouteContext& data) {
+
+        auto payload_res = web::valid_jwt(data.req, dbat::jwt::jwt_config.secret);
+        if (!payload_res) {
+            return std::unexpected(payload_res.error());
+        }
+
+        const auto& payload = payload_res.value();
+        if (payload.contains("token_use") && payload["token_use"].is_string()) {
+            if (payload["token_use"] != "access") {
+                return std::unexpected(HttpError{http::status::unauthorized, "Invalid access token\n"});
+            }
+        }
+
+        if (!payload.contains("sub") || !payload["sub"].is_number_integer()) {
+            return std::unexpected(HttpError{http::status::unauthorized, "Invalid token subject\n"});
+        }
+
+        return payload["sub"].get<int64_t>();
     }
 
     inline std::expected<nlohmann::json, HttpError> parse_json_body(HttpRequest const& req) {

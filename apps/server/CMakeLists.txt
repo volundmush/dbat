@@ -7,9 +7,9 @@ target_sources(dbat_server
 
 target_link_libraries(dbat_server
     PUBLIC
-    dbat::netbind
+    dbat::api
     dbat::serde
-    dbat::dotenv
+    dbat::config
 )
 
 # Ensure we link using the C++ linker driver (for libstdc++ and friends)

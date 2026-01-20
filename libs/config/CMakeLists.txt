@@ -1,7 +1,7 @@
-add_library(dbat_telnet STATIC)
-add_library(dbat::telnet ALIAS dbat_telnet)
+add_library(dbat_config STATIC)
+add_library(dbat::config ALIAS dbat_config)
 
-target_include_directories(dbat_telnet
+target_include_directories(dbat_config
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
@@ -16,15 +16,15 @@ file(GLOB_RECURSE SRC
 
 # Also glob up include/*.hpp
 file(GLOB_RECURSE INCLUDE
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/telnet/*.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/config/*.hpp
 )
 
-target_precompile_headers(dbat_telnet
+target_precompile_headers(dbat_config
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/private/pch.hpp
 )
 
-target_sources(dbat_telnet
+target_sources(dbat_config
     PRIVATE
         ${SRC}
     PUBLIC
@@ -35,11 +35,10 @@ target_sources(dbat_telnet
 )
 
 # Add deps as needed
-
-target_link_libraries(dbat_telnet
+target_link_libraries(dbat_config
   PUBLIC
-    dbat::serde
     dbat::net
-  PRIVATE
-    ZLIB::ZLIB
+    dbat::logging
+    dbat::jwt
+    dbat::dotenv
 )

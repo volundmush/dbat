@@ -1,7 +1,7 @@
-add_library(dbat_netbind STATIC)
-add_library(dbat::netbind ALIAS dbat_netbind)
+add_library(dbat_net STATIC)
+add_library(dbat::net ALIAS dbat_net)
 
-target_include_directories(dbat_netbind
+target_include_directories(dbat_net
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
@@ -15,12 +15,16 @@ file(GLOB_RECURSE SRC
 )
 
 # Also glob up include/*.hpp
-
 file(GLOB_RECURSE INCLUDE
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/netbind/*.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/net/*.hpp
 )
 
-target_sources(dbat_netbind
+target_precompile_headers(dbat_net
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/private/pch.hpp
+)
+
+target_sources(dbat_net
     PRIVATE
         ${SRC}
     PUBLIC
@@ -30,20 +34,12 @@ target_sources(dbat_netbind
         ${INCLUDE}
 )
 
-target_precompile_headers(dbat_netbind
-    PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/private/pch.hpp
-)
-
-target_link_libraries(dbat_netbind
+# Add deps as needed
+target_link_libraries(dbat_net
   PUBLIC
-        dbat::serde
-        dbat::jwt
-        dbat::web
+    dbat::logging
   PRIVATE
-    Boost::url
     Boost::iostreams
     OpenSSL::SSL
     OpenSSL::Crypto
-
 )

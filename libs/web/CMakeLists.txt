@@ -35,11 +35,8 @@ target_sources(dbat_web
 )
 
 target_link_libraries(dbat_web
-    PUBLIC
-        dbat::jwt
-)
-target_link_libraries(dbat_web
   PUBLIC
     dbat::jwt
+    dbat::net
     Boost::url
 )
