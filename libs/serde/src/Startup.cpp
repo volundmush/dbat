@@ -31,11 +31,11 @@ static void db_load_activate_entities() {
         assign_triggers(r.get(), WLD_TRIGGER);
         r->activateScripts();
         auto con = r->getObjects().snapshot_weak();
-        for(auto o : filter_raw(con)) {
+        for(auto o : volcano::util::filter_raw(con)) {
             o->activate();
         }
         auto people = r->getPeople().snapshot_weak();
-        for(auto c : filter_raw(people)) {
+        for(auto c : volcano::util::filter_raw(people)) {
             if(IS_NPC(c)) {
                 c->activate();
             }

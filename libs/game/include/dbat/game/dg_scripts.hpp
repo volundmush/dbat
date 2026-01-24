@@ -1,0 +1,393 @@
+/**************************************************************************
+ *  File: dg_scripts.h                                                     *
+ *  Usage: header file for script structures and constants, and            *
+ *         function prototypes for dg_scripts.c                            *
+ *                                                                         *
+ *                                                                         *
+ *  $Author: Mark A. Heilpern/egreen/Welcor $                              *
+ *  $Date: 2004/10/11 12:07:00$                                            *
+ *  $Revision: 1.0.14 $                                                    *
+ **************************************************************************/
+#pragma once
+#include <cstdarg>
+#include <variant>
+#include "Log.hpp"
+#include "Command.hpp"
+#include "DgScriptPrototype.hpp"
+#include "db.hpp"
+
+struct Object;
+struct Character;
+struct Room;
+struct DgScript;
+struct ObjectPrototype;
+
+#ifdef _MSC_VER
+#define __attribute__(a)
+#endif
+
+#define DG_SCRIPT_VERSION "DG Scripts 1.0.14"
+
+/* unless you change this, Puff casts all your dg spells */
+constexpr int DG_CASTER_PROXY = 1;
+/* spells cast by objects and rooms use this level */
+constexpr int DG_SPELL_LEVEL = 25;
+
+/*
+ * define this if you don't want wear/remove triggers to fire when
+ * a player is saved.
+ */
+#define NO_EXTRANEOUS_TRIGGERS
+/*
+ * %actor.room% behaviour :
+ * Until pl 7 %actor.room% returned a room vnum.
+ * Working with this number in scripts was unnecessarily hard,
+ * especially in those situations one needed the id of the room,
+ * the items in it, etc. As a result of this, the output
+ * has been changed (as of pl 8) to a room variable.
+ * This means old scripts will need a minor adjustment;
+ *
+ * Before:
+ * if %actor.room%==3001
+ *   %echo% You are at the main temple.
+ *
+ * After:
+ * eval room %actor.room%
+ * if %room.vnum%==3001
+ *   %echo% You are at the main temple.
+ *
+ * If you wish to continue using the old style, comment out the line below.
+ *
+ * Welcor
+ */
+#define ACTOR_ROOM_IS_UID 1
+
+/* mob trigger types */
+#define MTRIG_GLOBAL (1 << 0)    /* check even if zone empty   */
+#define MTRIG_RANDOM (1 << 1)    /* checked randomly           */
+#define MTRIG_COMMAND (1 << 2)   /* character types a command  */
+#define MTRIG_SPEECH (1 << 3)    /* a char says a word/phrase  */
+#define MTRIG_ACT (1 << 4)       /* word or phrase sent to act */
+#define MTRIG_DEATH (1 << 5)     /* character dies             */
+#define MTRIG_GREET (1 << 6)     /* something enters room seen */
+#define MTRIG_GREET_ALL (1 << 7) /* anything enters room       */
+#define MTRIG_ENTRY (1 << 8)     /* the mob enters a room      */
+#define MTRIG_RECEIVE (1 << 9)   /* character is given obj     */
+#define MTRIG_FIGHT (1 << 10)    /* each pulse while fighting  */
+#define MTRIG_HITPRCNT (1 << 11) /* fighting and below some hp */
+#define MTRIG_BRIBE (1 << 12)    /* coins are given to mob     */
+#define MTRIG_LOAD (1 << 13)     /* the mob is loaded          */
+#define MTRIG_MEMORY (1 << 14)   /* mob see's someone remembered */
+#define MTRIG_CAST (1 << 15)     /* mob targetted by spell     */
+#define MTRIG_LEAVE (1 << 16)    /* someone leaves room seen   */
+#define MTRIG_DOOR (1 << 17)     /* door manipulated in room   */
+
+#define MTRIG_TIME (1 << 19)    /* trigger based on specific game hour */
+#define MTRIG_HOURLY (1 << 20)  /* triggered every game hour */
+#define MTRIG_QUARTER (1 << 21) /* triggered every 15 game minutes */
+
+/* obj trigger types */
+#define OTRIG_GLOBAL (1 << 0)  /* unused                     */
+#define OTRIG_RANDOM (1 << 1)  /* checked randomly           */
+#define OTRIG_COMMAND (1 << 2) /* character types a command  */
+
+#define OTRIG_TIMER (1 << 5)   /* item's timer expires       */
+#define OTRIG_GET (1 << 6)     /* item is picked up          */
+#define OTRIG_DROP (1 << 7)    /* character trys to drop obj */
+#define OTRIG_GIVE (1 << 8)    /* character trys to give obj */
+#define OTRIG_WEAR (1 << 9)    /* character trys to wear obj */
+#define OTRIG_REMOVE (1 << 11) /* character trys to remove obj */
+
+#define OTRIG_LOAD (1 << 13) /* the object is loaded        */
+
+#define OTRIG_CAST (1 << 15)  /* object targetted by spell   */
+#define OTRIG_LEAVE (1 << 16) /* someone leaves room seen    */
+
+#define OTRIG_CONSUME (1 << 18) /* char tries to eat/drink obj */
+#define OTRIG_TIME (1 << 19)    /* trigger based on specific game hour */
+#define OTRIG_HOURLY (1 << 20)  /* triggered every game hour */
+#define OTRIG_QUARTER (1 << 21) /* triggered every 15 game minutes */
+
+/* wld trigger types */
+#define WTRIG_GLOBAL (1 << 0)  /* check even if zone empty   */
+#define WTRIG_RANDOM (1 << 1)  /* checked randomly           */
+#define WTRIG_COMMAND (1 << 2) /* character types a command  */
+#define WTRIG_SPEECH (1 << 3)  /* a char says word/phrase    */
+
+#define WTRIG_RESET (1 << 5) /* zone has been reset        */
+#define WTRIG_ENTER (1 << 6) /* character enters room      */
+#define WTRIG_DROP (1 << 7)  /* something dropped in room  */
+
+#define WTRIG_CAST (1 << 15)  /* spell cast in room */
+#define WTRIG_LEAVE (1 << 16) /* character leaves the room */
+#define WTRIG_DOOR (1 << 17)  /* door manipulated in room  */
+
+#define WTRIG_TIME (1 << 19)    /* trigger based on specific game hour */
+#define WTRIG_HOURLY (1 << 20)  /* triggered every game hour */
+#define WTRIG_QUARTER (1 << 21) /* triggered every 15 game minutes */
+
+/* obj command trigger types */
+#define OCMD_EQUIP (1 << 0) /* obj must be in char's equip */
+#define OCMD_INVEN (1 << 1) /* obj must be in char's inven */
+#define OCMD_ROOM (1 << 2)  /* obj must be in char's room  */
+
+/* obj consume trigger commands */
+constexpr int OCMD_EAT = 1;
+constexpr int OCMD_DRINK = 2;
+constexpr int OCMD_QUAFF = 3;
+
+constexpr int TRIG_NEW = 0;     /* trigger starts from top  */
+constexpr int TRIG_RESTART = 1; /* trigger restarting       */
+
+/*
+ * These are slightly off of PULSE_MOBILE so
+ * everything isnt happening at the same time
+ */
+#define PULSE_DG_SCRIPT (13 RL_SEC)
+
+constexpr int MAX_SCRIPT_DEPTH = 10; /* maximum depth triggers can
+                recurse into each other */
+
+constexpr int SCRIPT_ERROR_CODE = -9999999; /* this shouldn't happen too often */
+
+/* one line of the trigger */
+
+/* used for actor memory triggers */
+struct script_memory
+{
+    int64_t id{}; /* id of who to remember */
+    char *cmd{};  /* command, or nullptr for generic */
+    struct script_memory *next{};
+};
+
+/* function prototypes from dg_triggers.c */
+extern char *one_phrase(char *arg, char *first_arg);
+
+extern int is_substring(char *sub, char *string);
+
+extern int word_check(char *str, char *wordlist);
+
+extern void act_mtrigger(Character *ch, char *str, Character *actor, Character *victim, Object *object,
+                         Object *target, char *arg);
+
+extern void speech_mtrigger(Character *actor, char *str);
+
+extern void speech_wtrigger(Character *actor, char *str);
+
+extern void greet_memory_mtrigger(Character *ch);
+
+extern int greet_mtrigger(Character *actor, int dir);
+
+extern int entry_mtrigger(Character *ch);
+
+extern void entry_memory_mtrigger(Character *ch);
+
+extern int enter_wtrigger(Room *room, Character *actor, int dir);
+
+extern int drop_otrigger(Object *obj, Character *actor);
+
+extern void timer_otrigger(Object *obj);
+
+extern int get_otrigger(Object *obj, Character *actor);
+
+extern int drop_wtrigger(Object *obj, Character *actor);
+
+extern int give_otrigger(Object *obj, Character *actor,
+                         Character *victim);
+
+extern int receive_mtrigger(Character *ch, Character *actor,
+                            Object *obj);
+
+extern void bribe_mtrigger(Character *ch, Character *actor,
+                           int amount);
+
+extern int wear_otrigger(Object *obj, Character *actor, int where);
+
+extern int remove_otrigger(Object *obj, Character *actor);
+
+extern int cmd_otrig(Object *obj, Character *actor, char *cmd,
+                     char *argument, int type);
+
+extern int command_mtrigger(Character *actor, std::string_view cmd, std::string_view argument);
+
+extern int command_otrigger(Character *actor, std::string_view cmd, std::string_view argument);
+
+extern int command_wtrigger(Character *actor, std::string_view cmd, std::string_view argument);
+
+extern int death_mtrigger(Character *ch, Character *actor);
+
+extern void fight_mtrigger(Character *ch);
+
+extern void hitprcnt_mtrigger(Character *ch);
+
+extern void random_mtrigger(Character *ch);
+
+extern void random_otrigger(Object *obj);
+
+extern void random_wtrigger(Room *ch);
+
+extern void reset_wtrigger(Room *ch);
+
+extern void load_mtrigger(Character *ch);
+
+extern void load_otrigger(Object *obj);
+
+extern int cast_mtrigger(Character *actor, Character *ch, int spellnum);
+
+extern int cast_otrigger(Character *actor, Object *obj, int spellnum);
+
+extern int cast_wtrigger(Character *actor, Character *vict, Object *obj, int spellnum);
+
+extern int leave_mtrigger(Character *actor, int dir);
+
+extern int leave_wtrigger(Room *room, Character *actor, int dir);
+
+extern int leave_otrigger(Room *room, Character *actor, int dir);
+
+extern int door_mtrigger(Character *actor, int subcmd, int dir);
+
+extern int door_wtrigger(Character *actor, int subcmd, int dir);
+
+extern int consume_otrigger(Object *obj, Character *actor, int cmd);
+
+extern void time_mtrigger(Character *ch);
+extern void interval_mtrigger(Character *ch, int trigFlag);
+
+extern void time_otrigger(Object *obj);
+extern void interval_otrigger(Object *obj, int trigFlag);
+
+extern void time_wtrigger(Room *room);
+extern void interval_wtrigger(Room *room, int trigFlag);
+
+/* function prototypes from dg_scripts.c */
+extern char *str_str(char *cs, char *ct);
+
+extern int find_eq_pos_script(char *arg);
+
+extern int can_wear_on_pos(Object *obj, int pos);
+
+extern Character *get_char(char *name);
+
+extern Character *get_char_near_obj(Object *obj, char *name);
+
+extern Character *get_char_in_room(Room *room, char *name);
+
+extern Object *get_obj_near_obj(Object *obj, char *name);
+
+extern Object *get_obj(char *name);
+
+extern Room *get_room(char *name);
+
+extern Character *get_char_by_obj(Object *obj, char *name);
+
+extern Character *get_char_by_room(Room *room, char *name);
+
+extern Object *get_obj_by_obj(Object *obj, char *name);
+
+extern Object *get_obj_in_room(Room *room, char *name);
+
+extern Object *get_obj_by_room(Room *room, char *name);
+
+extern int trgvar_in_room(room_vnum vnum);
+
+extern Object *get_obj_in_list(char *name, const std::vector<std::weak_ptr<Object>> &list);
+
+extern Object *get_object_in_equip(Character *ch, std::string_view name);
+
+extern void script_trigger_check(uint64_t heartPulse, double deltaTime);
+
+extern void check_time_triggers();
+
+extern void check_interval_triggers(int trigFlag);
+
+extern void find_uid_name(char *uid, char *name, size_t nlen);
+
+extern void do_sstat(Character *ch, struct HasDgScripts *ud);
+
+extern void add_trigger(HasDgScripts *sc, const std::shared_ptr<DgScript> t, int loc);
+
+extern void script_vlog(const char *format, va_list args);
+
+extern void script_log(const char *format, ...) __attribute__((format(printf, 1, 2)));
+
+extern char *matching_quote(char *p);
+
+Room *dg_room_of_obj(Object *obj);
+
+/* To maintain strict-aliasing we'll have to do this trick with a union */
+/* Thanks to Chris Gilbert for reminding me that there are other options. */
+extern trig_rnum real_trigger(trig_vnum vnum);
+
+extern void process_eval(DgScript *trig, char *cmd);
+
+/* from dg_db_scripts.c */
+std::shared_ptr<DgScript> read_trigger(int nr);
+
+extern void dg_read_trigger(FILE *fp, struct HasDgScripts *proto, UnitType type);
+extern void dg_read_trigger(FILE *fp, struct HasProtoScript *proto, UnitType type);
+
+extern void dg_obj_trigger(char *line, ObjectPrototype *obj);
+
+extern void assign_triggers(struct HasDgScripts *i, UnitType type);
+
+/* From dg_variables.c */
+extern int item_in_list(std::string_view item, const std::vector<std::weak_ptr<Object>> &list);
+
+extern char *skill_percent(Character *ch, char *skill);
+
+extern int char_has_item(std::string_view item, Character *ch);
+
+extern std::string dg_substitutions(DgScript* trig, std::string_view input);
+extern void var_subst(DgScript *trig, char *line, char *buf);
+
+/* From dg_handler.c */
+extern void extract_script(HasDgScripts *thing, UnitType type);
+
+/* from dg_comm.c */
+extern char *any_one_name(char *argument, char *first_arg);
+
+extern void sub_write(char *arg, Character *ch, int8_t find_invis, int targets);
+
+/* from dg_misc.c */
+extern void do_dg_cast(DgScript *trig, char *cmd);
+
+extern void do_dg_affect(DgScript *trig, char *cmd);
+
+extern void send_char_pos(Character *ch, int dam);
+
+extern int valid_dg_target(Character *ch, int bitvector);
+
+extern void script_damage(Character *vict, int dam);
+
+extern std::vector<ScriptLine> parse_script(const std::vector<std::string> &orig);
+
+/* from dg_objcmd.c */
+extern room_rnum obj_room(Object *obj);
+
+/* defines for valid_dg_target */
+#define DG_ALLOW_GODS (1 << 0)
+
+/* Macros for scripts */
+
+#define UID_CHAR '#'
+#define GET_TRIG_NAME(t) ((char *)(t)->proto->name.c_str())
+#define GET_TRIG_RNUM(t) ((t)->getVnum())
+#define GET_TRIG_VNUM(t) ((t)->getVnum())
+#define GET_TRIG_TYPE(t) ((t)->getTriggerType())
+#define GET_TRIG_NARG(t) ((t)->proto->narg)
+#define GET_TRIG_ARG(t) ((char *)(t)->proto->arglist.c_str())
+#define GET_TRIG_VARS(t) ((t)->variables)
+
+#define GET_TRIG_DEPTH(t) ((t)->depth)
+#define GET_TRIG_LOOPS(t) ((t)->loops)
+
+#define SCRIPT(o) ((o))
+#define SCRIPT_MEM(c) ((c)->memory)
+
+#define SCRIPT_TYPES(s) ((s)->trigger_types)
+#define TRIGGERS(s) ((s)->trig_list)
+
+#define GET_SHORT(ch) ((ch)->getShortDescription())
+
+#define SCRIPT_CHECK(go, type) ((go) && IS_SET(SCRIPT_TYPES((go)), type))
+#define TRIGGER_CHECK(t, type) (IS_SET(GET_TRIG_TYPE(t), (type)) && (t)->isReady())

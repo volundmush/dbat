@@ -50,9 +50,7 @@ if(UNIX AND NOT APPLE)
   set(MATH_LIB m)
 endif()
 
-CPMAddPackage(NAME fmt                   GITHUB_REPOSITORY fmtlib/fmt            GIT_TAG 12.1.0)
-CPMAddPackage(NAME spdlog                GITHUB_REPOSITORY gabime/spdlog         VERSION 1.17.0)
-CPMAddPackage(NAME nlohmann_json         GITHUB_REPOSITORY nlohmann/json         VERSION 3.12.0)
+CPMAddPackage(NAME volcano          GITHUB_REPOSITORY volundmush/volcano            GIT_TAG main)
 CPMAddPackage(NAME enchantum            GITHUB_REPOSITORY ZXShady/enchantum    GIT_TAG 0.3.0)
 #CPMAddPackage(NAME EnTT                  GITHUB_REPOSITORY skypjack/entt         VERSION 3.15.0)
 CPMAddPackage(NAME effolkronium_random   GITHUB_REPOSITORY volundmush/random     GIT_TAG master
@@ -60,18 +58,11 @@ CPMAddPackage(NAME effolkronium_random   GITHUB_REPOSITORY volundmush/random    
 
 
 # ---------------- targets ----------------
-add_subdirectory(libs/logging)
-add_subdirectory(libs/jwt)
 add_subdirectory(libs/valid)
-add_subdirectory(libs/dotenv)
-add_subdirectory(libs/web)
-add_subdirectory(libs/telnet)
-add_subdirectory(libs/net)
-add_subdirectory(libs/config)
-add_subdirectory(libs/api)
-add_subdirectory(libs/dbat)
-add_subdirectory(libs/serde)
+#add_subdirectory(libs/api)
+add_subdirectory(libs/game)
+#add_subdirectory(libs/serde)
 
-add_subdirectory(apps/migrate)
-add_subdirectory(apps/server)
-add_subdirectory(apps/portal)
+#add_subdirectory(apps/migrate)
+#add_subdirectory(apps/server)
+#add_subdirectory(apps/portal)

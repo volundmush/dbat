@@ -1293,7 +1293,7 @@ void load_items_initial(const std::filesystem::path &loc)
 static void save_inventory(HasInventory &hi, json &j) {
     json inv = json::array();
     auto contents = hi.getInventory();
-    for (const auto &item : filter_raw(contents)) {
+    for (const auto &item : volcano::util::filter_raw(contents)) {
         json ji;
         to_json(ji, *item);
         save_inventory(*item, ji);
@@ -1348,7 +1348,7 @@ static void load_equipment(HasEquipment &he, const json &j) {
 static void save_contents(Location& al, json &j) {
     json inv = json::array();
     auto contents = al.getObjects();
-    for (const auto &item : filter_raw(contents)) {
+    for (const auto &item : volcano::util::filter_raw(contents)) {
         json ji;
         to_json(ji, *item);
         save_inventory(*item, ji);
