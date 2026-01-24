@@ -17,7 +17,7 @@ file(GLOB_RECURSE SRC
 # Also glob up include/*.hpp
 
 file(GLOB_RECURSE INCLUDE
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/serde/*.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/dbat/serde/*.hpp
 )
 
 target_sources(dbat_serde
@@ -37,7 +37,7 @@ target_precompile_headers(dbat_serde
 
 target_link_libraries(dbat_serde
   PUBLIC
-    dbat::dbat
+    dbat::game
     nlohmann_json
   PRIVATE
     ZLIB::ZLIB

@@ -1,11 +1,11 @@
 #pragma once
 #include <cxxabi.h>
-#include "serde/json.h"
+#include "json.hpp"
 #include <nlohmann/json.hpp>
 
-#include "dbat/Enum.h"
-#include "dbat/Flags.h"
-#include "dbat/const/Skill.h"
+#include "volcano/util/Enum.hpp"
+#include "dbat/game/Flags.hpp"
+#include "dbat/game/const/Skill.hpp"
 
 inline std::string demangle(const char* mangled_name) {
     int status = -1;

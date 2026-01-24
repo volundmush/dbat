@@ -1,16 +1,16 @@
 #pragma once
 #include <filesystem>
-#include "serde/json.h"
+#include "json.hpp"
 
 
-#include "dbat/Character.h"
-#include "dbat/Object.h"
-#include "dbat/Zone.h"
-#include "dbat/AbstractGridArea.h"
-#include "dbat/Shop.h"
-#include "dbat/Guild.h"
-#include "dbat/TimeInfo.h"
-#include "dbat/Help.h"
+#include "dbat/game/Character.hpp"
+#include "dbat/game/Object.hpp"
+#include "dbat/game/Zone.hpp"
+#include "dbat/game/AbstractGridArea.hpp"
+#include "dbat/game/Shop.hpp"
+#include "dbat/game/Guild.hpp"
+#include "dbat/game/TimeInfo.hpp"
+#include "dbat/game/Help.hpp"
 
 extern PlayerData* create_player_character(int account_id, const json &j);
 

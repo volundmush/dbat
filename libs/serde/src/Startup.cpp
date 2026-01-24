@@ -1,29 +1,28 @@
-#include "serde/Startup.h"
-#include "serde/saveload.h"
+#include "dbat/serde/Startup.hpp"
+#include "dbat/serde/saveload.hpp"
 #include <vector>
 #include <filesystem>
 
-#include "dbat/RoomUtils.h"
-#include "dbat/ObjectUtils.h"
-#include "dbat/CharacterUtils.h"
+#include "dbat/game/RoomUtils.hpp"
+#include "dbat/game/ObjectUtils.hpp"
+#include "dbat/game/CharacterUtils.hpp"
 
-#include "dbat/db.h"
-#include "dbat/dg_scripts.h"
-#include "dbat/filter.h"
-#include "dbat/utils.h"
-#include "dbat/magic.h"
-#include "dbat/feats.h"
-#include "dbat/maputils.h"
-#include "dbat/boards.h"
-#include "dbat/mail.h"
-#include "dbat/act.social.h"
-#include "dbat/act.informative.h"
-#include "dbat/spec_assign.h"
-#include "dbat/interpreter.h"
+#include "dbat/game/db.hpp"
+#include "dbat/game/dg_scripts.hpp"
+#include "volcano/util/FilterWeak.hpp"
+#include "dbat/game/utils.hpp"
+#include "dbat/game/magic.hpp"
+#include "dbat/game/feats.hpp"
+#include "dbat/game/maputils.hpp"
+#include "dbat/game/boards.hpp"
+#include "dbat/game/mail.hpp"
+#include "dbat/game/act.social.hpp"
+#include "dbat/game/act.informative.hpp"
+#include "dbat/game/spec_assign.hpp"
+#include "dbat/game/interpreter.hpp"
+#include "dbat/game/DragonBall.hpp"
 
-#include "dbat/DragonBall.h"
-
-#include "dbat/act.other.h"
+#include "dbat/game/act.other.hpp"
 
 static void db_load_activate_entities() {
     // activate all items which ended up "in the world".
