@@ -1,9 +1,9 @@
-#include "api/channel.hpp"
+#include "dbat/api/channel.hpp"
 
-#include "dbat/Descriptor.h"
-#include "dbat/db.h"
-#include "serde/saveload.h"
-#include "dbat/comm.h"
+#include "dbat/game/Descriptor.hpp"
+#include "dbat/game/db.hpp"
+#include "dbat/serde/saveload.hpp"
+#include "dbat/game/comm.hpp"
 
 namespace dbat::api {
 
@@ -105,7 +105,7 @@ namespace dbat::api {
         }
     }
 
-    boost::asio::awaitable<NetResponse> handle_request(RequestMessage& msg);
+    boost::asio::awaitable<volcano::web::HttpAnswer> handle_request(RequestMessage& msg);
 
     boost::asio::awaitable<std::size_t> drain_request_channel(std::chrono::steady_clock::duration budget) {
         using clock = std::chrono::steady_clock;

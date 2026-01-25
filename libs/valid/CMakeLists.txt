@@ -16,7 +16,7 @@ file(GLOB_RECURSE SRC
 
 # Also glob up include/*.hpp
 file(GLOB_RECURSE INCLUDE
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/valid/*.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/dbat/valid/*.hpp
 )
 
 target_precompile_headers(dbat_valid

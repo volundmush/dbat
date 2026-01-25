@@ -1,5 +1,5 @@
 #pragma once
-#include "api/base.hpp"
+#include "base.hpp"
 
 #include <boost/asio/experimental/concurrent_channel.hpp>
 #include <nlohmann/json.hpp>
@@ -51,10 +51,9 @@ namespace dbat::api
 
     using NetRequest = std::variant<UserRegisterReq, UserLoginReq, UserRefreshReq,
                                     CharacterListReq, CharacterDeleteReq, CharacterCreateReq, PlayReq>;
-    using NetResponse = std::variant<web::HttpAnswer, web::HttpError>;
 
     using JsonChannel = Channel<nlohmann::json>;
-    using ResponseChannel = Channel<NetResponse>;
+    using ResponseChannel = Channel<volcano::web::HttpAnswer>;
 
     using ResponseChannelPtr = std::shared_ptr<ResponseChannel>;
 
@@ -64,7 +63,7 @@ namespace dbat::api
 
     Channel<std::string> &broadcast_channel();
 
-    boost::asio::awaitable<dbat::web::Result> send_request_and_reply(dbat::web::RouteContext &data, NetRequest &&request);
+    boost::asio::awaitable<volcano::web::HttpAnswer> send_request_and_reply(volcano::web::RequestContext &ctx, NetRequest &&request);
 
     struct GameMessageText
     {
@@ -100,10 +99,10 @@ namespace dbat::api
     ResponseChannelPtr    response_channel;
 
     RequestMessage()
-        : response_channel(std::make_shared<ResponseChannel>(dbat::net::context().get_executor(), 1)) {}
+        : response_channel(std::make_shared<ResponseChannel>(volcano::net::context().get_executor(), 1)) {}
 
     RequestMessage(NetRequest req)
-        : request(std::move(req)), response_channel(std::make_shared<ResponseChannel>(dbat::net::context().get_executor(), 1)) {}
+        : request(std::move(req)), response_channel(std::make_shared<ResponseChannel>(volcano::net::context().get_executor(), 1)) {}
 
     RequestMessage(NetRequest req, ResponseChannel response)
         : request(std::move(req)), response_channel(std::make_shared<ResponseChannel>(std::move(response))) {}

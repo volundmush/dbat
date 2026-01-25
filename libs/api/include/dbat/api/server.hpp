@@ -1,5 +1,5 @@
 #pragma once
-#include "api/channel.hpp"
+#include "channel.hpp"
 #include <boost/algorithm/string.hpp>
 
 
@@ -14,10 +14,10 @@
 #include <algorithm>
 #include <nlohmann/json.hpp>
 
-#include "logging/Log.hpp"
-#include "web/web.hpp"
-#include "dbat/Account.h"
-#include "dbat/Parse.h"
+#include "volcano/log/Log.hpp"
+#include "volcano/web/web.hpp"
+#include "dbat/game/Account.hpp"
+#include "dbat/game/Parse.hpp"
 
 namespace dbat::api {
 

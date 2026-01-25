@@ -17,7 +17,7 @@ file(GLOB_RECURSE SRC
 # Also glob up include/*.hpp
 
 file(GLOB_RECURSE INCLUDE
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/api/*.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/dbat/api/*.hpp
 )
 
 target_sources(dbat_api
@@ -38,12 +38,6 @@ target_precompile_headers(dbat_api
 target_link_libraries(dbat_api
   PUBLIC
         dbat::serde
-        dbat::jwt
-        dbat::web
-  PRIVATE
-    Boost::url
-    Boost::iostreams
-    OpenSSL::SSL
-    OpenSSL::Crypto
-
+        volcano::jwt
+        volcano::web
 )

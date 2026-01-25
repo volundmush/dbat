@@ -2,7 +2,7 @@
 // Created by basti on 10/24/2021.
 //
 
-#include "valid/valid.hpp"
+#include "dbat/valid/valid.hpp"
 
 #include "dbat/game/CharacterUtils.hpp"
 #include "dbat/game/CharacterPrototype.hpp"
