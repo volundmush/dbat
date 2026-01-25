@@ -1,6 +1,8 @@
 add_library(dbat_game STATIC)
 add_library(dbat::game ALIAS dbat_game)
 
+target_compile_features(dbat_game PUBLIC cxx_std_23)
+
 target_include_directories(dbat_game
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

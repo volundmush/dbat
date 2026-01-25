@@ -1,6 +1,7 @@
 #pragma once
 #include "volcano/log/Log.hpp"
 #include <fmt/format.h>
+#include <fmt/printf.h>
 
 inline void basic_mud_log(std::string_view message)
 {
@@ -9,11 +10,11 @@ inline void basic_mud_log(std::string_view message)
 }
 
 template <typename... Args>
-inline void basic_mud_log(fmt::format_string<Args...> fmtstr, Args&&... args)
+inline void basic_mud_log(std::string_view fmtstr, Args&&... args)
 {
     try
     {
-        std::string line = fmt::format(fmtstr, std::forward<Args>(args)...);
+        std::string line = fmt::sprintf(fmtstr, std::forward<Args>(args)...);
         if (!line.empty())
             // Use compile-time-checked formatting to write the final string
             volcano::log::log(std::source_location::current(), SPDLOG_LEVEL_INFO, "{}", line);

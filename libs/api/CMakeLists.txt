@@ -1,6 +1,8 @@
 add_library(dbat_api STATIC)
 add_library(dbat::api ALIAS dbat_api)
 
+target_compile_features(dbat_api PUBLIC cxx_std_23)
+
 target_include_directories(dbat_api
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

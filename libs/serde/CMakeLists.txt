@@ -1,6 +1,8 @@
 add_library(dbat_serde STATIC)
 add_library(dbat::serde ALIAS dbat_serde)
 
+target_compile_features(dbat_serde PUBLIC cxx_std_23)
+
 target_include_directories(dbat_serde
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

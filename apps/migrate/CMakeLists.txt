@@ -1,5 +1,7 @@
 add_executable(dbat_migrate)
 
+target_compile_features(dbat_migrate PUBLIC cxx_std_23)
+
 target_sources(dbat_migrate
     PRIVATE
         src/main.cpp

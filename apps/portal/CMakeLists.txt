@@ -1,5 +1,7 @@
 add_executable(dbat_portal)
 
+target_compile_features(dbat_portal PUBLIC cxx_std_23)
+
 target_sources(dbat_portal
     PRIVATE
         src/main.cpp

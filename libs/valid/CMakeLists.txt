@@ -1,6 +1,8 @@
 add_library(dbat_valid STATIC)
 add_library(dbat::valid ALIAS dbat_valid)
 
+target_compile_features(dbat_valid PUBLIC cxx_std_23)
+
 target_include_directories(dbat_valid
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

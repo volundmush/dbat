@@ -12,46 +12,46 @@
 #include <boost/algorithm/string/regex.hpp>
 #include <regex>
 
-#include "dbat/Zone.h"
-#include "dbat/CharacterUtils.h"
-#include "dbat/CharacterPrototype.h"
-#include "dbat/ObjectUtils.h"
-#include "dbat/ObjectPrototype.h"
-#include "dbat/DgScriptPrototype.h"
-#include "dbat/RoomUtils.h"
-#include "dbat/Destination.h"
-#include "dbat/Area.h"
-#include "dbat/comm.h"
-#include "dbat/utils.h"
-#include "dbat/dg_scripts.h"
-#include "dbat/constants.h"
-#include "dbat/maputils.h"
-#include "dbat/config.h"
-#include "dbat/class.h"
-#include "dbat/players.h"
-#include "dbat/Account.h"
-#include "dbat/act.item.h"
-#include "dbat/pfdefaults.h"
-#include "dbat/spell_parser.h"
-#include "dbat/Shop.h"
-#include "dbat/Guild.h"
-#include "serde/saveload.h"
-#include "dbat/assemblies.h"
-#include "dbat/vehicles.h"
-#include "dbat/ansi.h"
-#include "dbat/Help.h"
-#include "dbat/utils.h"
-#include "dbat/interpreter.h"
-#include "dbat/Random.h"
-#include "dbat/ID.h"
-#include "serde/Startup.h"
-#include "serde/saveload.h"
+#include "dbat/game/Zone.hpp"
+#include "dbat/game/CharacterUtils.hpp"
+#include "dbat/game/CharacterPrototype.hpp"
+#include "dbat/game/ObjectUtils.hpp"
+#include "dbat/game/ObjectPrototype.hpp"
+#include "dbat/game/DgScriptPrototype.hpp"
+#include "dbat/game/RoomUtils.hpp"
+#include "dbat/game/Destination.hpp"
+#include "dbat/game/Area.hpp"
+#include "dbat/game/comm.hpp"
+#include "dbat/game/utils.hpp"
+#include "dbat/game/dg_scripts.hpp"
+#include "dbat/game/constants.hpp"
+#include "dbat/game/maputils.hpp"
+#include "dbat/game/config.hpp"
+#include "dbat/game/class.hpp"
+#include "dbat/game/players.hpp"
+#include "dbat/game/Account.hpp"
+#include "dbat/game/act.item.hpp"
+#include "dbat/game/pfdefaults.hpp"
+#include "dbat/game/spell_parser.hpp"
+#include "dbat/game/Shop.hpp"
+#include "dbat/game/Guild.hpp"
+#include "dbat/serde/saveload.hpp"
+#include "dbat/game/assemblies.hpp"
+#include "dbat/game/vehicles.hpp"
+#include "volcano/circle/CircleAnsi.hpp"
+#include "dbat/game/Help.hpp"
+#include "dbat/game/utils.hpp"
+#include "dbat/game/interpreter.hpp"
+#include "dbat/game/Random.hpp"
+#include "dbat/game/ID.hpp"
+#include "dbat/serde/Startup.hpp"
+#include "dbat/serde/saveload.hpp"
 
-#include "dbat/const/Max.h"
-#include "dbat/const/Filename.h"
-#include "dbat/const/Condition.h"
-#include "dbat/const/ContainerFlag.h"
-#include "dbat/const/Environment.h"
+#include "dbat/game/const/Max.hpp"
+#include "dbat/game/const/Filename.hpp"
+#include "dbat/game/const/Condition.hpp"
+#include "dbat/game/const/ContainerFlag.hpp"
+#include "dbat/game/const/Environment.hpp"
 
 #define Q_FIELD(x)  ((int) (x) / 32)
 #define Q_BIT(x)    (1 << ((x) % 32))
@@ -1440,8 +1440,7 @@ static int parse_mobile_from_file(FILE *mob_f, struct CharacterPrototype *ch, vn
 
     /* *** Numeric data *** */
     if (!get_line(mob_f, line)) {
-        basic_mud_log("SYSERR: Format error after string section of mob #%d\n"
-            "...expecting line of form '# # # {S | E}', but file ended!", nr);
+        basic_mud_log("SYSERR: Format error after string section of mob #%d\n...expecting line of form '# # # {S | E}', but file ended!", nr);
         return 0;
     }
 
@@ -1465,8 +1464,7 @@ static int parse_mobile_from_file(FILE *mob_f, struct CharacterPrototype *ch, vn
         ch->setBaseStat("good_evil", t[2]);
 
     } else {
-        basic_mud_log("SYSERR: Format error after string section of mob #%d\n"
-            "...expecting line of form '# # # {S | E}'", nr);
+        basic_mud_log("SYSERR: Format error after string section of mob #%d\n...expecting line of form '# # # {S | E}'", nr);
         exit(1);
     }
 
@@ -3602,7 +3600,7 @@ static void printSpace() {
     std::filesystem::path spaceFile = "space.txt";
     std::ofstream ofs(spaceFile);
     if (ofs) {
-        ofs << processColors(space, true, nullptr);
+        ofs << volcano::circle::processColors(space, true, nullptr);
     }
     ofs.close();
 }
@@ -4011,7 +4009,7 @@ static void boot_db_legacy() {
 // ACTUAL MIGRATION STUFF BELOW...
 
 static std::string stripAnsi(const std::string& str) {
-    return processColors(str, false, nullptr);
+    return volcano::circle::processColors(str, false, nullptr);
 }
 
 static std::vector<std::pair<std::string, vnum>> characterToAccount;
