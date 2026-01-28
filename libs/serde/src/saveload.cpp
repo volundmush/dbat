@@ -209,7 +209,7 @@ void load_zones(const std::filesystem::path &loc)
 {
     for (auto j : load_from_file(loc, "zones.json"))
     {
-        auto id = j.at("number").get<int64_t>();
+        auto id = j.at("+number").get<int64_t>();
         auto z = std::make_shared<Zone>();
         j.get_to(*z);
         zone_table.emplace(id, z);
@@ -331,11 +331,11 @@ void to_json(json &j, const help_index_element &a)
 
 void from_json(const json &j, help_index_element &a)
 {
-    if (j.contains(+"index")) j.at("index").get_to(a.index);
-    if (j.contains(+"keywords")) j.at("keywords").get_to(a.keywords);
-    if (j.contains(+"entry")) j.at("entry").get_to(a.entry);
-    if (j.contains(+"duplicate")) j.at("duplicate").get_to(a.duplicate);
-    if (j.contains(+"min_level")) j.at("min_level").get_to(a.min_level);
+    if (j.contains(+"index")) j.at("+index").get_to(a.index);
+    if (j.contains(+"keywords")) j.at("+keywords").get_to(a.keywords);
+    if (j.contains(+"entry")) j.at("+entry").get_to(a.entry);
+    if (j.contains(+"duplicate")) j.at("+duplicate").get_to(a.duplicate);
+    if (j.contains(+"min_level")) j.at("+min_level").get_to(a.min_level);
 }
 
 static json dump_accounts()
@@ -577,11 +577,11 @@ void to_json(json &j, const picky_data &p)
 
 void from_json(const json &j, picky_data &p)
 {
-    if (j.contains(+"not_alignment")) j.at("not_alignment").get_to(p.not_alignment);
-    if (j.contains(+"not_race")) j.at("not_race").get_to(p.not_race);
-    if (j.contains(+"only_race")) j.at("only_race").get_to(p.only_race);
-    if (j.contains(+"not_sensei")) j.at("not_sensei").get_to(p.not_sensei);
-    if (j.contains(+"only_sensei")) j.at("only_sensei").get_to(p.only_sensei);
+    if (j.contains(+"not_alignment")) j.at("+not_alignment").get_to(p.not_alignment);
+    if (j.contains(+"not_race")) j.at("+not_race").get_to(p.not_race);
+    if (j.contains(+"only_race")) j.at("+only_race").get_to(p.only_race);
+    if (j.contains(+"not_sensei")) j.at("+not_sensei").get_to(p.not_sensei);
+    if (j.contains(+"only_sensei")) j.at("+only_sensei").get_to(p.only_sensei);
 }
 
 void to_json(json &j, const org_data &o)
@@ -658,21 +658,21 @@ void from_json(const json &j, Shop &s)
         s.profit_buy = j["profit_buy"];
     if (j.contains(+"profit_sell"))
         s.profit_sell = j["profit_sell"];
-    if (j.contains(+"type")) j.at("type").get_to(s.type);
+    if (j.contains(+"type")) j.at("+type").get_to(s.type);
     if (j.contains(+"no_such_item1"))
-        j.at("no_such_item1").get_to(s.no_such_item1);
+        j.at("+no_such_item1").get_to(s.no_such_item1);
     if (j.contains(+"no_such_item2"))
-        j.at("no_such_item2").get_to(s.no_such_item2);
+        j.at("+no_such_item2").get_to(s.no_such_item2);
     if (j.contains(+"missing_cash1"))
-        j.at("missing_cash1").get_to(s.missing_cash1);
+        j.at("+missing_cash1").get_to(s.missing_cash1);
     if (j.contains(+"missing_cash2"))
-        j.at("missing_cash2").get_to(s.missing_cash2);
+        j.at("+missing_cash2").get_to(s.missing_cash2);
     if (j.contains(+"do_not_buy"))
-        j.at("do_not_buy").get_to(s.do_not_buy);
+        j.at("+do_not_buy").get_to(s.do_not_buy);
     if (j.contains(+"message_buy"))
-        j.at("message_buy").get_to(s.message_buy);
+        j.at("+message_buy").get_to(s.message_buy);
     if (j.contains(+"message_sell"))
-        j.at("message_sell").get_to(s.message_sell);
+        j.at("+message_sell").get_to(s.message_sell);
     if (j.contains(+"temper1"))
         s.temper1 = j["temper1"];
 
@@ -874,7 +874,7 @@ void to_json(json &j, const HasProtoScript &s) {
 
 void from_json(const json &j, HasProtoScript &s) {
     if(j.contains(+"proto_script")) {
-        j.at("proto_script").get_to(s.proto_script);
+        j.at("+proto_script").get_to(s.proto_script);
     }
 }
 
@@ -893,7 +893,7 @@ void from_json(const json &j, HasLocation &hl) {
         hl.location = j["location"].get<Location>();
     }
     if(j.contains(+"registeredLocations")) {
-        j.at("registeredLocations").get_to(hl.registeredLocations);
+        j.at("+registeredLocations").get_to(hl.registeredLocations);
     }
 }
 
@@ -1021,7 +1021,7 @@ void load_areas_finish(const std::filesystem::path &loc)
         if(auto cf = areas.find(vn); cf != areas.end())
         {
             auto &to = cf->second->tileOverrides;
-            j.at("tileOverrides").get_to(to);
+            j.at("+tileOverrides").get_to(to);
         }
 
     }
@@ -1061,7 +1061,7 @@ void load_structures_finish(const std::filesystem::path &loc)
 
         if(j.contains(+"tileOverrides")) {
             auto &to = cf->second->tileOverrides;
-            j.at("tileOverrides").get_to(to);
+            j.at("+tileOverrides").get_to(to);
         }
 
         if (j.contains(+"HasLocation"))
@@ -1182,12 +1182,12 @@ void from_json(const json& j, ObjectBase &o) {
     from_json(j, static_cast<picky_data &>(o));
 
     if (j.contains(+"type_flag")) o.type_flag = j["type_flag"];
-    if (j.contains(+"wear_flags")) j.at("wear_flags").get_to(o.wear_flags);
-    if (j.contains(+"item_flags")) j.at("item_flags").get_to(o.item_flags);
-    if (j.contains(+"size")) j.at("size").get_to(o.size);
-    if (j.contains(+"affect_flags")) j.at("affect_flags").get_to(o.affect_flags);
+    if (j.contains(+"wear_flags")) j.at("+wear_flags").get_to(o.wear_flags);
+    if (j.contains(+"item_flags")) j.at("+item_flags").get_to(o.item_flags);
+    if (j.contains(+"size")) j.at("+size").get_to(o.size);
+    if (j.contains(+"affect_flags")) j.at("+affect_flags").get_to(o.affect_flags);
 
-    if (j.contains(+"affected")) j.at("affected").get_to(o.affected);
+    if (j.contains(+"affected")) j.at("+affected").get_to(o.affected);
 }
 
 void to_json(json &j, const ObjectPrototype &o)
@@ -1539,7 +1539,7 @@ void from_json(const json &j, affected_type &a)
         a.type = j["type"];
     if (j.contains(+"duration"))
         a.duration = j["duration"];
-    if (j.contains(+"aff_flags")) j.at("aff_flags").get_to(a.aff_flags);
+    if (j.contains(+"aff_flags")) j.at("+aff_flags").get_to(a.aff_flags);
 }
 
 void to_json(json &j, const CharacterBase &c) {
@@ -1568,14 +1568,14 @@ void from_json(const json &j, CharacterBase &c) {
     if (j.contains(+"race")) c.race = j["race"];
     if(j.contains(+"sensei")) c.sensei = j["sensei"];
     if (j.contains(+"model")) c.model = j["model"];
-    if(j.contains(+"position")) j.at("position").get_to(c.position);
+    if(j.contains(+"position")) j.at("+position").get_to(c.position);
     if (j.contains(+"sex")) c.sex = j["sex"];
     if (j.contains(+"size")) c.size = j["size"];
-    if (j.contains(+"character_flags")) j.at("character_flags").get_to(c.character_flags);
-    if (j.contains(+"mob_flags")) j.at("mob_flags").get_to(c.mob_flags);
-    if (j.contains(+"affect_flags")) j.at("affect_flags").get_to(c.affect_flags);
-    if (j.contains(+"bio_genomes")) j.at("bio_genomes").get_to(c.bio_genomes);
-    if (j.contains(+"mutations")) j.at("mutations").get_to(c.mutations);
+    if (j.contains(+"character_flags")) j.at("+character_flags").get_to(c.character_flags);
+    if (j.contains(+"mob_flags")) j.at("+mob_flags").get_to(c.mob_flags);
+    if (j.contains(+"affect_flags")) j.at("+affect_flags").get_to(c.affect_flags);
+    if (j.contains(+"bio_genomes")) j.at("+bio_genomes").get_to(c.bio_genomes);
+    if (j.contains(+"mutations")) j.at("+mutations").get_to(c.mutations);
 }
 
 void to_json(json &j, const CharacterPrototype &c)
@@ -1622,14 +1622,14 @@ void to_json(json& j, const TileOverride& p) {
 
 void from_json(const json& j, TileOverride& p) {
     from_json(j, static_cast<HasResetCommands&>(p));
-    if(j.contains(+"name")) j.at("name").get_to(p.name);
-    if(j.contains(+"look_description")) j.at("look_description").get_to(p.look_description);
-    if (j.contains(+"roomFlags")) j.at("roomFlags").get_to(p.roomFlags);
-    if (j.contains(+"whereFlags")) j.at("whereFlags").get_to(p.whereFlags);
-    if (j.contains(+"damage")) j.at("damage").get_to(p.damage);
-    if (j.contains(+"groundEffect")) j.at("groundEffect").get_to(p.groundEffect);
-    if (j.contains(+"exits")) j.at("exits").get_to(p.exits);
-    if(j.contains(+"tileDisplay")) j.at("tileDisplay").get_to(p.tileDisplay);
+    if(j.contains(+"name")) j.at("+name").get_to(p.name);
+    if(j.contains(+"look_description")) j.at("+look_description").get_to(p.look_description);
+    if (j.contains(+"roomFlags")) j.at("+roomFlags").get_to(p.roomFlags);
+    if (j.contains(+"whereFlags")) j.at("+whereFlags").get_to(p.whereFlags);
+    if (j.contains(+"damage")) j.at("+damage").get_to(p.damage);
+    if (j.contains(+"groundEffect")) j.at("+groundEffect").get_to(p.groundEffect);
+    if (j.contains(+"exits")) j.at("+exits").get_to(p.exits);
+    if(j.contains(+"tileDisplay")) j.at("+tileDisplay").get_to(p.tileDisplay);
 }
 
 
@@ -1644,8 +1644,8 @@ void to_json(json& j, const GridTemplate& p) {
 void from_json(const json& j, GridTemplate& p) {
     from_json(j, static_cast<HasMudStrings&>(p));
     from_json(j, static_cast<HasVnum&>(p));
-    if(j.contains(+"shapes")) j.at("shapes").get_to(p.shapes);
-    if(j.contains(+"tileOverrides")) j.at("tileOverrides").get_to(p.tileOverrides);
+    if(j.contains(+"shapes")) j.at("+shapes").get_to(p.shapes);
+    if(j.contains(+"tileOverrides")) j.at("+tileOverrides").get_to(p.tileOverrides);
 }
 
 void to_json(json& j, const AbstractGridArea& p) {
@@ -1664,13 +1664,13 @@ void from_json(const json& j, AbstractGridArea& p) {
     from_json(j, static_cast<HasMudStrings&>(p));
     if(j.contains(+"shapes")) {
         // we have an object of key->data and need to use make_unique on data...
-        for (auto& [key, value] : j.at("shapes").get<json::object_t>()) {
+        for (auto& [key, value] : j.at("+shapes").get<json::object_t>()) {
             Shape s{};
             value.get_to(s);
             p.shapes[key] = std::make_unique<Shape>(std::move(s));
         }
     }
-    if(j.contains(+"tileOverrides")) j.at("tileOverrides").get_to(p.tileOverrides);
+    if(j.contains(+"tileOverrides")) j.at("+tileOverrides").get_to(p.tileOverrides);
 }
 
 void to_json(json& j, const Area& p) {
@@ -1953,8 +1953,8 @@ void from_json(const json &j, ChargenData &c)
     if (j.contains(+"model")) c.model = j["model"].get<AndroidModel>();
     if (j.contains(+"sex")) c.sex = j["sex"].get<Sex>();
     if (j.contains(+"sensei")) c.sensei = j["sensei"].get<Sensei>();
-    if (j.contains(+"bio_genomes")) j.at("bio_genomes").get_to(c.bio_genomes);
-    if (j.contains(+"mutations")) j.at("mutations").get_to(c.mutations);
+    if (j.contains(+"bio_genomes")) j.at("+bio_genomes").get_to(c.bio_genomes);
+    if (j.contains(+"mutations")) j.at("+mutations").get_to(c.mutations);
     if (j.contains(+"keep_skills")) c.keep_skills = j["keep_skills"];
     if (j.contains(+"alignment")) c.alignment = j["alignment"];
 }
@@ -2213,7 +2213,7 @@ void from_json(const json &j, ShapeBase &r) {
     if(j.contains(+"name")) r.name = j["name"].get<std::string>();
     if(j.contains(+"description")) r.description = j["description"].get<std::string>();
     if (j.contains(+"geom")) {
-        const auto& g = j.at("geom");
+        const auto& g = j.at("+geom");
         switch (r.type) { // <- r.type (not p.type)
             case ShapeType::Box:
                 r.geom = g.get<BoxDim>();
@@ -2286,13 +2286,13 @@ void load_assemblies(const std::filesystem::path &loc)
 
     for (auto j : data)
     {
-        auto vn = j.at("vnum").get<vnum>();
-        auto atype = j.at("assembly_type").get<int>();
+        auto vn = j.at("+vnum").get<vnum>();
+        auto atype = j.at("+assembly_type").get<int>();
         assemblyCreate(vn, atype);
         if (j.contains(+"components"))
         {
             // components are an array containing bExtract, bInRoom, and vnum lVnum...
-            for (auto comp : j.at("components"))
+            for (auto comp : j.at("+components"))
             {
                 auto bExtract = comp.at("bExtract").get<bool>();
                 auto bInRoom = comp.at("bInRoom").get<bool>();

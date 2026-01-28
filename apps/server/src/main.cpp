@@ -6,6 +6,31 @@
 #include "dbat/serde/Startup.hpp"
 #include "dbat/serde/saveload.hpp"
 
+boost::asio::awaitable<void> run_portal(volcano::net::Server server, std::string_view target_str) {
+
+    auto& ioc = volcano::net::context();
+
+    auto target_res = volcano::web::parse_http_target(target_str);
+    if(!target_res) {
+        LERROR("", target_res.error());
+        // stop the ioc then return!
+        co_return;
+    }
+
+    boost::asio::co_spawn(
+        volcano::net::context(),
+        server.run(),
+        boost::asio::detached
+    );
+
+    
+
+    auto strand = boost::asio::make_strand(ioc);
+    boost::asio::co_spawn(strand, dbat::api::run_game(0.05, 300.0), boost::asio::detached);
+
+    co_return;
+}
+
 int main(int argc, char** argv) {
 
     // Pre setup
@@ -55,20 +80,17 @@ int main(int argc, char** argv) {
         handler
     );
     LINFO("Starting {} server on {}:{}", ssl_ctx ? "HTTPS" : "HTTP", endpoint.address().to_string(), endpoint.port());
-    boost::asio::co_spawn(
-        volcano::net::context(),
-        server.run(),
-        boost::asio::detached
-    );
+    
 
     // game setup
     load_config();
     dbat::init::init();
 
-    auto& ioc = volcano::net::context();
-
-    auto strand = boost::asio::make_strand(ioc);
-    boost::asio::co_spawn(strand, dbat::api::run_game(0.05, 300.0), boost::asio::detached);
+    boost::asio::co_spawn(
+        volcano::net::context(),
+        run_portal(std::move(server)),
+        boost::asio::detached
+    );
 
     volcano::net::run();
 

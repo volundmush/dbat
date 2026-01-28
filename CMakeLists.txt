@@ -65,4 +65,4 @@ add_subdirectory(libs/serde)
 
 add_subdirectory(apps/migrate)
 add_subdirectory(apps/server)
-#add_subdirectory(apps/portal)
+add_subdirectory(apps/portal)
