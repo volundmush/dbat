@@ -172,7 +172,7 @@ void write_to_file(void *buf, int size, long filepos)
 {
     FILE *mail_file;
 
-    if (filepos % BLOCK_SIZE)
+    if (filepos % MAIL_BLOCK_SIZE)
     {
         basic_mud_log("SYSERR: Mail system -- fatal error #2!!! (invalid file position %ld)", filepos);
         no_mail = true;
@@ -206,7 +206,7 @@ void read_from_file(void *buf, int size, long filepos)
 {
     FILE *mail_file;
 
-    if (filepos % BLOCK_SIZE)
+    if (filepos % MAIL_BLOCK_SIZE)
     {
         basic_mud_log("SYSERR: Mail system -- fatal error #3!!! (invalid filepos read %ld)", filepos);
         no_mail = true;
@@ -276,16 +276,16 @@ int scan_file()
     {
         if (next_block.block_type == HEADER_BLOCK)
         {
-            index_mail(next_block.header_data.to, block_num * BLOCK_SIZE);
+            index_mail(next_block.header_data.to, block_num * MAIL_BLOCK_SIZE);
             total_messages++;
         }
         else if (next_block.block_type == DELETED_BLOCK)
         {
-            push_free_list(block_num * BLOCK_SIZE);
+            push_free_list(block_num * MAIL_BLOCK_SIZE);
         }
         else
         {
-            push_free_list(block_num * BLOCK_SIZE);
+            push_free_list(block_num * MAIL_BLOCK_SIZE);
         }
         block_num++;
     }
@@ -293,7 +293,7 @@ int scan_file()
     file_end_pos = ftell(mail_file);
     fclose(mail_file);
     basic_mud_log("   %ld bytes read.", file_end_pos);
-    if (file_end_pos % BLOCK_SIZE)
+    if (file_end_pos % MAIL_BLOCK_SIZE)
     {
         basic_mud_log("SYSERR: Error booting mail system -- Mail file corrupt!");
         basic_mud_log("SYSERR: Mail disabled!");
@@ -334,7 +334,7 @@ void store_mail(long to, long from, char *message_pointer)
     int bytes_written, total_length = strlen(message_pointer);
 
     if ((sizeof(header_block_type) != sizeof(data_block_type)) ||
-        (sizeof(header_block_type) != BLOCK_SIZE))
+        (sizeof(header_block_type) != MAIL_BLOCK_SIZE))
     {
         core_dump();
         return;
@@ -356,7 +356,7 @@ void store_mail(long to, long from, char *message_pointer)
 
     target_address = pop_free_list(); /* find next free block */
     index_mail(to, target_address);   /* add it to mail index in memory */
-    write_to_file(&header, BLOCK_SIZE, target_address);
+    write_to_file(&header, MAIL_BLOCK_SIZE, target_address);
 
     if (strlen(msg_txt) <= HEADER_BLOCK_DATASIZE)
         return; /* that was the whole message */
@@ -371,14 +371,14 @@ void store_mail(long to, long from, char *message_pointer)
     last_address = target_address;
     target_address = pop_free_list();
     header.header_data.next_block = target_address;
-    write_to_file(&header, BLOCK_SIZE, last_address);
+    write_to_file(&header, MAIL_BLOCK_SIZE, last_address);
 
     /* now write the current data block */
     memset((char *)&data, 0, sizeof(data)); /* clear the record */
     data.block_type = LAST_BLOCK;
     strncpy(data.txt, msg_txt, DATA_BLOCK_DATASIZE); /* strncpy: OK (d.txt:DATA_BLOCK_DATASIZE+1) */
     data.txt[DATA_BLOCK_DATASIZE] = '\0';
-    write_to_file(&data, BLOCK_SIZE, target_address);
+    write_to_file(&data, MAIL_BLOCK_SIZE, target_address);
     bytes_written += strlen(data.txt);
     msg_txt += strlen(data.txt);
 
@@ -401,13 +401,13 @@ void store_mail(long to, long from, char *message_pointer)
 
         /* rewrite the previous block to link it to the next */
         data.block_type = target_address;
-        write_to_file(&data, BLOCK_SIZE, last_address);
+        write_to_file(&data, MAIL_BLOCK_SIZE, last_address);
 
         /* now write the next block, assuming it's the last.  */
         data.block_type = LAST_BLOCK;
         strncpy(data.txt, msg_txt, DATA_BLOCK_DATASIZE); /* strncpy: OK (d.txt:DATA_BLOCK_DATASIZE+1) */
         data.txt[DATA_BLOCK_DATASIZE] = '\0';
-        write_to_file(&data, BLOCK_SIZE, target_address);
+        write_to_file(&data, MAIL_BLOCK_SIZE, target_address);
 
         bytes_written += strlen(data.txt);
         msg_txt += strlen(data.txt);
@@ -480,7 +480,7 @@ char *read_delete(long recipient, char **from)
     }
 
     /* ok, now lets do some readin'! */
-    read_from_file(&header, BLOCK_SIZE, mail_address);
+    read_from_file(&header, MAIL_BLOCK_SIZE, mail_address);
 
     if (header.block_type != HEADER_BLOCK)
     {
@@ -523,18 +523,18 @@ char *read_delete(long recipient, char **from)
 
     /* mark the block as deleted */
     header.block_type = DELETED_BLOCK;
-    write_to_file(&header, BLOCK_SIZE, mail_address);
+    write_to_file(&header, MAIL_BLOCK_SIZE, mail_address);
     push_free_list(mail_address);
 
     while (following_block != LAST_BLOCK)
     {
-        read_from_file(&data, BLOCK_SIZE, following_block);
+        read_from_file(&data, MAIL_BLOCK_SIZE, following_block);
 
         strcat(buf, data.txt); /* strcat: OK (data.txt:DATA_BLOCK_DATASIZE < buf:MAX_MAIL_SIZE) */
         mail_address = following_block;
         following_block = data.block_type;
         data.block_type = DELETED_BLOCK;
-        write_to_file(&data, BLOCK_SIZE, mail_address);
+        write_to_file(&data, MAIL_BLOCK_SIZE, mail_address);
         push_free_list(mail_address);
     }
 

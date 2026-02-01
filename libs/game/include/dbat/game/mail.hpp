@@ -29,7 +29,7 @@ constexpr int STAMP_PRICE = 10;
 constexpr int MAX_MAIL_SIZE = 4096;
 
 /* size of mail file allocation blocks		*/
-constexpr int BLOCK_SIZE = 256;
+constexpr int MAIL_BLOCK_SIZE = 256;
 
 /*
  * NOTE:  Make sure that your block size is big enough -- if not,
@@ -79,10 +79,10 @@ struct header_data_type
 
 /* size of the data part of a header block */
 #define HEADER_BLOCK_DATASIZE \
-    (BLOCK_SIZE - sizeof(long) - sizeof(struct header_data_type) - sizeof(char))
+    (MAIL_BLOCK_SIZE - sizeof(long) - sizeof(struct header_data_type) - sizeof(char))
 
 /* size of the data part of a data block */
-#define DATA_BLOCK_DATASIZE (BLOCK_SIZE - sizeof(long) - sizeof(char))
+#define DATA_BLOCK_DATASIZE (MAIL_BLOCK_SIZE - sizeof(long) - sizeof(char))
 
 /* note that an extra space is allowed in all string fields for the
    terminating null character.  */

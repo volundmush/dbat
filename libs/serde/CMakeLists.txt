@@ -40,6 +40,7 @@ target_precompile_headers(dbat_serde
 target_link_libraries(dbat_serde
   PUBLIC
     dbat::game
+    volcano::net
     nlohmann_json
   PRIVATE
     ZLIB::ZLIB

@@ -1465,9 +1465,11 @@ static const std::unordered_map<SectorType, std::string> tileStrings = {
 
 static void ensureColumns(std::vector<std::string>& lines, int length, int lineCount) {
     for(auto& l : lines) {
-        auto len = volcano::circle::processColors(l, false, nullptr).size();
-        if(len < length) {
-            l += std::string(length - len, ' ');
+        auto len = l.size();
+        auto num_colors = volcano::circle::countColors(l);
+        // append up to num_colors in spaces to account for color codes but don't exceed length
+        if(len + num_colors < length) {
+            l += std::string(length - (len + num_colors), ' ');
         }
     }
     while(lines.size() < lineCount) {

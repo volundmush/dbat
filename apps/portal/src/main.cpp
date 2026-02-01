@@ -102,7 +102,7 @@ int main(int argc, char** argv) {
         return std::make_shared<dbat::portal::AccountMode>(client);
     };
 
-    volcano::net::run();
+    volcano::net::run(1);
 
     return 0;
 }

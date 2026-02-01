@@ -12,6 +12,9 @@
 
 #include <nlohmann/json.hpp>
 
+#include "dbat/game/Room.hpp"
+#include "dbat/game/ObjectPrototype.hpp"
+#include "dbat/game/CharacterPrototype.hpp"
 #include "dbat/valid/valid.hpp"
 #include "dbat/game/Account.hpp"
 #include "dbat/game/Descriptor.hpp"
@@ -243,6 +246,50 @@ namespace dbat::api {
 
             co_return HttpAnswer{http::status::ok, "Joining Play."};
 
+        } else if(std::holds_alternative<MsspReq>(msg.request)) {
+            // Handle MSSP request
+            std::vector<std::pair<std::string, std::string>> mssp;
+
+            mssp.emplace_back(std::make_pair("NAME", "Dragon Ball: Advent Truth"));
+            mssp.emplace_back(std::make_pair("PLAYERS", std::to_string(sessions.size())));
+            //mssp.emplace_back(std::make_pair("UPTIME", std::to_string(get_uptime_seconds())));
+
+            mssp.emplace_back(std::make_pair("CHARSET", "ASCII"));
+            mssp.emplace_back(std::make_pair("CODEBASE", "CircleMUD 3.5 With Goodies Rasputin (highly modified)"));
+            mssp.emplace_back(std::make_pair("DISCORD", "https://discord.gg/f6HYy3CRud"));
+            mssp.emplace_back(std::make_pair("CRAWL DELAY", "-1"));
+            mssp.emplace_back(std::make_pair("HOSTNAME", "dbat.mushhaven.com"));
+            mssp.emplace_back(std::make_pair("PORT", "1280"));
+            mssp.emplace_back(std::make_pair("SSL", "1281"));
+
+            mssp.emplace_back(std::make_pair("FAMILY", "CircleMUD"));
+            mssp.emplace_back(std::make_pair("GENRE", "FANTASY"));
+            mssp.emplace_back(std::make_pair("SUBGENRE", "ANIME"));
+            mssp.emplace_back(std::make_pair("GAMEPLAY", "RPI"));
+            mssp.emplace_back(std::make_pair("STATUS", "LIVE"));
+
+            mssp.emplace_back(std::make_pair("AREAS", std::to_string(zone_table.size())));
+            mssp.emplace_back(std::make_pair("HELPFILES", std::to_string(help_table.size())));
+            mssp.emplace_back(std::make_pair("MOBILES", std::to_string(mob_proto.size())));
+            mssp.emplace_back(std::make_pair("OBJECTS", std::to_string(obj_proto.size())));
+            mssp.emplace_back(std::make_pair("ROOMS", std::to_string(Room::registry.size())));
+
+            mssp.emplace_back(std::make_pair("ANSI", "1"));
+            mssp.emplace_back(std::make_pair("XTERM 256 COLORS", "1"));
+            mssp.emplace_back(std::make_pair("XTERM TRUE COLORS", "1"));
+            mssp.emplace_back(std::make_pair("UTF-8", "0"));
+
+            mssp.emplace_back(std::make_pair("PAY TO PLAY", "0"));
+            mssp.emplace_back(std::make_pair("PAY FOR PERKS", "0"));
+
+            nlohmann::json mssp_json = nlohmann::json::array();
+            mssp_json = mssp;
+
+            HttpAnswer answer;
+            answer.status = http::status::ok;
+            answer.content_type = "application/json";
+            answer.body = mssp_json.dump();
+            co_return answer;
         }
 
         co_return HttpAnswer{http::status::not_implemented, "Request handling not implemented\n"};

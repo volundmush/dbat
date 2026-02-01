@@ -68,10 +68,16 @@ namespace dbat::api {
         co_return co_await send_request_and_reply(data, NetRequest{std::move(req)});
     }
 
+    boost::asio::awaitable<volcano::web::HttpAnswer> handle_mssp(volcano::net::AnyStream &conn, volcano::web::RequestContext& data) {
+        MsspReq req;
+        co_return co_await send_request_and_reply(data, NetRequest{std::move(req)});
+    }
+
     std::shared_ptr<volcano::web::Router> init_router() {
 
         auto router = std::make_shared<volcano::web::Router>();
         auto &v1 = router->add_router("v1");
+        v1.add_request_handler("mssp", http::verb::get, handle_mssp);
         auto &v1auth = v1.add_router("auth");
         v1auth.add_request_handler("register", http::verb::post, require_username_password, handle_auth_register_post);
         v1auth.add_request_handler("login", http::verb::post, require_username_password, handle_auth_login_post);

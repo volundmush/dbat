@@ -49,8 +49,10 @@ namespace dbat::api
         int64_t character_id;
     };
 
+    struct MsspReq {};
+
     using NetRequest = std::variant<UserRegisterReq, UserLoginReq, UserRefreshReq,
-                                    CharacterListReq, CharacterDeleteReq, CharacterCreateReq, PlayReq>;
+                                    CharacterListReq, CharacterDeleteReq, CharacterCreateReq, PlayReq, MsspReq>;
 
     using JsonChannel = Channel<nlohmann::json>;
     using ResponseChannel = Channel<volcano::web::HttpAnswer>;

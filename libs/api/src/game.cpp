@@ -180,7 +180,7 @@ namespace dbat::api {
                 save_timer -= heartbeat_interval;
                 if(save_timer <= 0.0) {
                     save_timer = save_interval;
-                    dbat::save::runSaveSync();
+                    co_await dbat::save::runSaveAsync();
                 }
 
                 auto elapsed = end - start;

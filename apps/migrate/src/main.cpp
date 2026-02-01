@@ -12,6 +12,8 @@
 #include <boost/algorithm/string/regex.hpp>
 #include <regex>
 
+#include "volcano/net/net.hpp"
+
 #include "dbat/game/Zone.hpp"
 #include "dbat/game/CharacterUtils.hpp"
 #include "dbat/game/CharacterPrototype.hpp"
@@ -3600,7 +3602,7 @@ static void printSpace() {
     std::filesystem::path spaceFile = "space.txt";
     std::ofstream ofs(spaceFile);
     if (ofs) {
-        ofs << volcano::circle::processColors(space, true, nullptr);
+        ofs << volcano::circle::processColors(space, volcano::ansi::ColorMode::TrueColor);
     }
     ofs.close();
 }
@@ -4009,7 +4011,7 @@ static void boot_db_legacy() {
 // ACTUAL MIGRATION STUFF BELOW...
 
 static std::string stripAnsi(const std::string& str) {
-    return volcano::circle::processColors(str, false, nullptr);
+    return volcano::circle::processColors(str, volcano::ansi::ColorMode::None);
 }
 
 static std::vector<std::pair<std::string, vnum>> characterToAccount;
@@ -4825,7 +4827,7 @@ void migrate_db() {
     }
 }
 
-void run_migration() {
+boost::asio::awaitable<void> run_migration() {
     isMigrating = true;
     load_config();
     dbat::init::init_locale();
@@ -4833,11 +4835,16 @@ void run_migration() {
     // let's experiment here...
     migrate_space();
     printSpace();
-    dbat::save::runSaveSync();
+    co_await dbat::save::runSaveAsync();
     destroy_db();
+    co_return;
 }
 
 int main(int argc, char **argv) {
-    run_migration();
+
+    auto &ioc = volcano::net::context();
+
+    boost::asio::co_spawn(ioc, run_migration(), boost::asio::detached);
+    volcano::net::run();
     return 0;
 }

@@ -1,4 +1,5 @@
 #pragma once
+#include "volcano/net/Base.hpp"
 #include <filesystem>
 #include "json.hpp"
 
@@ -11,6 +12,8 @@
 #include "dbat/game/Guild.hpp"
 #include "dbat/game/TimeInfo.hpp"
 #include "dbat/game/Help.hpp"
+
+#include <boost/asio/awaitable.hpp>
 
 extern PlayerData* create_player_character(int account_id, const json &j);
 
@@ -101,4 +104,5 @@ std::vector<std::filesystem::path> getDumpFiles(const std::filesystem::path &dir
 namespace dbat::save {
 
     void runSaveSync();
+    boost::asio::awaitable<void> runSaveAsync();
 }
