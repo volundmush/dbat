@@ -42,4 +42,5 @@ target_link_libraries(dbat_api
         dbat::serde
         volcano::jwt
         volcano::web
+        volcano::mud
 )

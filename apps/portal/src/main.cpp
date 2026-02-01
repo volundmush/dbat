@@ -99,7 +99,7 @@ int main(int argc, char** argv) {
     );
 
     volcano::portal::create_initial_mode_handler = [](volcano::portal::Client& client) {
-        return std::make_shared<dbat::portal::AccountMode>(client);
+        return std::make_shared<dbat::portal::LoginMode>(client);
     };
 
     volcano::net::run(1);

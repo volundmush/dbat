@@ -159,9 +159,7 @@ namespace dbat::api {
             HttpAnswer answer;
             answer.status = http::status::ok;
             answer.content_type = "application/json";
-            nlohmann::json response_json;
-            response_json["characters"] = std::move(list);
-            answer.body = response_json.dump();
+            answer.body = list.dump();
             co_return answer;
         } else if (std::holds_alternative<CharacterDeleteReq>(msg.request)) {
             auto& req = std::get<CharacterDeleteReq>(msg.request);

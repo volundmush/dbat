@@ -3,6 +3,7 @@
 
 #include <boost/asio/experimental/concurrent_channel.hpp>
 #include <nlohmann/json.hpp>
+#include "volcano/mud/ClientData.hpp"
 
 namespace dbat::api
 {
@@ -72,9 +73,14 @@ namespace dbat::api
         std::string text;
     };
 
-    struct GameMessageJson
+    struct GameMessageGMCP
     {
+        std::string package;
         nlohmann::json data;
+    };
+
+    struct GameMessageChangeCapabilities {
+        nlohmann::json capabilities;
     };
 
     struct GameMessageDisconnect
@@ -82,7 +88,7 @@ namespace dbat::api
         std::string reason;
     };
 
-    using ToGameMessage = std::variant<GameMessageText, GameMessageJson, GameMessageDisconnect>;
+    using ToGameMessage = std::variant<GameMessageText, GameMessageGMCP, GameMessageChangeCapabilities, GameMessageDisconnect>;
 
     struct GameConnectionInfo
     {
@@ -92,6 +98,7 @@ namespace dbat::api
         int64_t character_id;
         Channel<ToGameMessage> to_game, to_websocket;
         int64_t connection_id;
+        volcano::mud::ClientData client_data;
     };
 
     extern std::unordered_map<int64_t, std::shared_ptr<GameConnectionInfo>> active_game_connections;

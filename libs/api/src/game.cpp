@@ -8,6 +8,7 @@
 namespace dbat::api {
 
     std::unordered_map<int64_t, std::shared_ptr<GameConnectionInfo>> active_game_connections;
+    static std::unordered_set<int64_t> pending_game_connections;
 
     boost::asio::awaitable<void> acceptNewConnections() {
         // let's accept all new connections. we'll grab as many as we can from game_connection_channel()
@@ -19,6 +20,7 @@ namespace dbat::api {
             auto game_info = co_await chan.async_receive(boost::asio::use_awaitable);
             game_info->connection_id = next_connection_id++;
             active_game_connections.emplace(game_info->connection_id, game_info);
+            pending_game_connections.insert(game_info->connection_id);
             create_join_session(game_info->account_id, game_info->character_id, game_info->connection_id, game_info->address);
         }
     }
@@ -30,12 +32,18 @@ namespace dbat::api {
 
             GameMessageText gmsg{desc->processed_output};
             boost::system::error_code ec;
-            auto it = active_game_connections.find(conn_id);
-            if(it != active_game_connections.end()) {
-                auto& game_info = it->second;
-                co_await game_info->to_websocket.async_send(ec, gmsg, boost::asio::use_awaitable);
-                if(ec) {
-                    LINFO("Error sending processed output to connection {}: {}", conn_id, ec.message());
+
+            for(const auto& [id, addr] : desc->conns) {
+                if(id == conn_id) {
+                    continue;
+                }
+                auto it = active_game_connections.find(id);
+                if(it != active_game_connections.end()) {
+                    auto& game_info = it->second;
+                    co_await game_info->to_websocket.async_send(ec, gmsg, boost::asio::use_awaitable);
+                    if(ec) {
+                        LINFO("Error sending processed output to connection {}: {}", id, ec.message());
+                    }
                 }
             }
 
@@ -45,7 +53,7 @@ namespace dbat::api {
 
     boost::asio::awaitable<void> handleNewInput() {
         for(auto& [id, ginfo] : active_game_connections) {
-            auto it = sessions.find(id);
+            auto it = sessions.find(ginfo->character_id);
             if(it == sessions.end()) continue;
             auto& desc = it->second;
             if(!desc) continue;
@@ -65,8 +73,8 @@ namespace dbat::api {
                     auto& msg = std::get<GameMessageDisconnect>(gmsg);
                     desc->onConnectionLost(id);
                     LINFO("Connection {} disconnected by game server: {}", id, msg.reason);
-                } else {
-                    LERROR("Unknown message type received from WebSocket for connection {}.", id);
+                } else if(std::holds_alternative<GameMessageGMCP>(gmsg)) {
+                    // don't do anything with GMCP just yet...
                 }
             }
         }
@@ -90,18 +98,33 @@ namespace dbat::api {
             }
         }
 
+        for (auto it = pending_game_connections.begin(); it != pending_game_connections.end(); ) {
+            if (sessions.find(*it) != sessions.end()) {
+                it = pending_game_connections.erase(it);
+            } else {
+                ++it;
+            }
+        }
+
         // if any ids are not in sessions, we can also clean them up.
         GameMessageDisconnect quit_msg{"quit"};
         ToGameMessage quit_game_msg{quit_msg};
         boost::system::error_code ec;
+        std::unordered_set<int64_t> to_erase;
         for(auto &[id, ginfo] : active_game_connections) {
+            if (pending_game_connections.contains(id)) {
+                continue;
+            }
             if(sessions.find(id) == sessions.end()) {
-                active_game_connections.erase(id);
+                to_erase.insert(id);
                 co_await ginfo->to_websocket.async_send(ec, quit_game_msg, boost::asio::use_awaitable);
                 if(ec) {
                     LINFO("Error sending quit message to connection {}: {}", id, ec.message());
                 }
             }
+        }
+        for(auto id : to_erase) {
+            active_game_connections.erase(id);
         }
     }
 

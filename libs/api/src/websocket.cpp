@@ -2,7 +2,8 @@
 #include "dbat/api/channel.hpp"
 #include "dbat/game/Parse.hpp"
 #include "volcano/log/Log.hpp"
-
+#include "volcano/mud/ClientDataSave.hpp"
+#include "dbat/api/guards.hpp"
 
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/asio/experimental/awaitable_operators.hpp>
@@ -43,19 +44,21 @@ namespace dbat::api
                         LERROR("Failed to send text message to game server from connection {}: {}", game_info->connection_id, ec.message().c_str());
                     }
                 }
-                else if (boost::iequals(type, "json"))
+                else if (boost::iequals(type, "gmcp"))
                 {
-                    if (!msg.contains("data") || !msg["data"].is_object())
+                    if(!msg.contains("package") || !msg["package"].is_string() ||
+                       !msg.contains("data") || !msg["data"].is_object())
                     {
-                        LINFO("Received 'json' message without valid 'data' field from connection {}.", game_info->connection_id);
+                        LINFO("Received 'gmcp' message without valid 'package' or 'data' field from connection {}.", game_info->connection_id);
                         co_return;
                     }
+                    std::string package = msg["package"].get<std::string>();
                     nlohmann::json data = msg["data"];
-                    GameMessageJson gmsg{data};
+                    GameMessageGMCP gmsg{package, data};
                     co_await game_info->to_game.async_send(ec, gmsg, boost::asio::use_awaitable);
                     if (ec)
                     {
-                        LERROR("Failed to send json message to game server from connection {}: {}", game_info->connection_id, ec.message().c_str());
+                        LERROR("Failed to send gmcp message to game server from connection {}: {}", game_info->connection_id, ec.message().c_str());
                     }
                 }
                 else if (boost::iequals(type, "disconnect"))
@@ -70,6 +73,21 @@ namespace dbat::api
                     if (ec)
                     {
                         LERROR("Failed to send disconnect message to game server from connection {}: {}", game_info->connection_id, ec.message().c_str());
+                    }
+                }
+                else if (boost::iequals(type, "change_capabilities"))
+                {
+                    if(!msg.contains("capabilities") || !msg["capabilities"].is_object())
+                    {
+                        LINFO("Received 'change_capabilities' message without valid 'capabilities' field from connection {}.", game_info->connection_id);
+                        co_return;
+                    }
+                    nlohmann::json capabilities = msg["capabilities"];
+                    GameMessageChangeCapabilities gmsg{capabilities};
+                    co_await game_info->to_game.async_send(ec, gmsg, boost::asio::use_awaitable);
+                    if (ec)
+                    {
+                        LERROR("Failed to send change_capabilities message to game server from connection {}: {}", game_info->connection_id, ec.message().c_str());
                     }
                 }
                 else
@@ -92,7 +110,7 @@ namespace dbat::api
                     {
                         // read a message
                         std::size_t n = co_await ws.async_read(buffer, boost::asio::use_awaitable);
-                        if (ws.text())
+                        if (ws.got_text())
                         {
                             auto data_ptr = buffer.data().data();
                             auto data_str = std::string_view(static_cast<const char *>(data_ptr), n);
@@ -158,10 +176,11 @@ namespace dbat::api
                             jmsg["type"] = "text";
                             jmsg["text"] = msg.text;
                         }
-                        else if (std::holds_alternative<GameMessageJson>(gmsg))
+                        else if (std::holds_alternative<GameMessageGMCP>(gmsg))
                         {
-                            auto &msg = std::get<GameMessageJson>(gmsg);
-                            jmsg["type"] = "json";
+                            auto &msg = std::get<GameMessageGMCP>(gmsg);
+                            jmsg["type"] = "gmcp";
+                            jmsg["package"] = msg.package;
                             jmsg["data"] = msg.data;
                         }
                         else if (std::holds_alternative<GameMessageDisconnect>(gmsg))
@@ -220,23 +239,7 @@ namespace dbat::api
         auto account_id = data.user_data["account_id"].get<int64_t>();
         auto character_id = data.user_data["character_id"].get<int64_t>();
 
-        ws.set_option(boost::beast::websocket::stream_base::timeout::suggested(boost::beast::role_type::server));
-        ws.set_option(boost::beast::websocket::stream_base::decorator(
-            [](boost::beast::websocket::response_type &res)
-            {
-                res.set(http::field::server, "dbat");
-            }));
-
-        try
-        {
-            co_await ws.async_accept(data.request, boost::asio::use_awaitable);
-        }
-        catch (const std::exception &e)
-        {
-            LERROR("WebSocket upgrade failed: {}", e.what());
-            co_return;
-        }
-
+        // retrieve X-Client-Info header
         auto exec = co_await boost::asio::this_coro::executor;
         auto &net_stream = ws.next_layer();
 
@@ -248,7 +251,9 @@ namespace dbat::api
             character_id,
             Channel<ToGameMessage>(exec, 32),
             Channel<ToGameMessage>(exec, 32),
-            -1);
+            -1
+        );
+        from_json(data.user_data["client_info"], gameinfo->client_data);
 
         WebSocketConnection ws_conn{ws, data, gameinfo};
         co_await ws_conn.run();

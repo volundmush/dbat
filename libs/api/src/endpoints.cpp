@@ -87,7 +87,7 @@ namespace dbat::api {
         v1character.add_request_handler("", http::verb::post, require_access_subject, handle_character_post);
         v1character.add_request_handler("", http::verb::delete_, require_access_subject, handle_character_delete);
 
-        v1.add_websocket_handler("play", require_access_subject, handle_play);
+        v1.add_websocket_handler("play", require_client_info, handle_play);
     
         return router;
     }

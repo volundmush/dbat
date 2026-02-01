@@ -78,4 +78,31 @@ namespace dbat::api {
 
         co_return std::optional<HttpAnswer>();
     }
+
+    boost::asio::awaitable<std::optional<HttpAnswer>> require_client_info(volcano::net::AnyStream &conn, volcano::web::RequestContext& ctx) {
+        if(auto res = co_await require_character_id(conn, ctx); !res) {
+            co_return res;
+        }
+
+        nlohmann::json client_data_json;
+        bool json_error = false;
+        if (ctx.request.find("X-Client-Info") != ctx.request.end())
+        {
+            auto client_info_b64 = ctx.request["X-Client-Info"];
+            try
+            {
+                auto client_info_str = volcano::jwt::base64UrlDecode(client_info_b64);
+                client_data_json = nlohmann::json::parse(client_info_str, nullptr, false);
+            }
+            catch (const std::exception &e)
+            {
+                json_error = true;
+            }
+        }
+        if(json_error) {
+            co_return HttpAnswer{http::status::bad_request, "Invalid X-Client-Info header\n"};
+        }
+        ctx.user_data["client_info"] = client_data_json;
+        co_return std::optional<HttpAnswer>();
+    }
 }
