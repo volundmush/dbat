@@ -64,6 +64,11 @@ namespace dbat::portal {
 
     boost::asio::awaitable<void> AccountMode::handleCommand(const std::string& data) {
         auto cmd = volcano::mud::CommandData(data);
+
+        if(boost::equals(cmd.cmd, "IDLE")) {
+            co_return;
+        }
+
         if(boost::iequals(cmd.cmd, "chargen")) {
             co_await cmdChargen(cmd);
         } else if(boost::iequals(cmd.cmd, "delete")) {

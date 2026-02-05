@@ -33,8 +33,6 @@ cmake_args=(-S . -B "$BDIR" -G Ninja -DCMAKE_BUILD_TYPE=${MODE})
 
 cmake "${cmake_args[@]}"
 
-rm -rf $BDIR/libs/ext
-
 # Allow overriding the parallelism via the second argument; default to half the cores.
 NPROC=$(nproc)
 DEFAULT_JOBS=$(( NPROC / 2 ))

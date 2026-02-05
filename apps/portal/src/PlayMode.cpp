@@ -25,6 +25,10 @@ namespace dbat::portal {
 
     boost::asio::awaitable<void> PlayMode::handleCommand(const std::string& data) {
 
+        if(boost::equals(data, "IDLE")) {
+            co_return;
+        }
+
         nlohmann::json msg;
         msg["type"] = "text";
         msg["text"] = data;

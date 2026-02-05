@@ -13,6 +13,25 @@ namespace dbat::portal {
         co_return std::optional<volcano::portal::JwtTokens>();
     }
 
+    boost::asio::awaitable<void> CircleModeHandler::handleServerDisconnect() {
+        // this is called by commands such as quit, or when the server disconnects us.
+        // any messages to the user should be sent before this is called.
+        co_await client_.sendDisconnect();
+        std::shared_ptr<volcano::portal::ModeHandler> empty;
+        co_await requestMode(empty);
+        co_return;
+    }
+
+    boost::asio::awaitable<void> CircleModeHandler::handleDisconnect() {
+        // this is called by the telnet link when the connection is lost.
+        // by default all it can do is kill the mode handler and Client.
+        // However, derived classes may override this to provide
+        // custom behavior.
+        std::shared_ptr<volcano::portal::ModeHandler> empty;
+        co_await requestMode(empty);
+        co_return;
+    }
+
     // CircleModeHandler implementation would go here
     boost::asio::awaitable<void> CircleModeHandler::sendCircleLine(std::string_view line) {
         auto color = static_cast<volcano::ansi::ColorMode>(client_.clientData().color);
@@ -34,7 +53,7 @@ namespace dbat::portal {
 
     boost::asio::awaitable<void> CircleModeHandler::cmdQuit(volcano::mud::CommandData& cmd) {
         co_await sendCircleLine("Goodbye!");
-        requestCancel();
+        co_await handleServerDisconnect();
         co_return;
     }
 

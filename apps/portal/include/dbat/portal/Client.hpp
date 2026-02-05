@@ -17,6 +17,8 @@ namespace dbat::portal {
         public:
         using ModeHandler::ModeHandler;
         protected:
+        virtual boost::asio::awaitable<void> handleServerDisconnect();
+        boost::asio::awaitable<void> handleDisconnect() override;
         boost::asio::awaitable<void> sendCircleLine(std::string_view line);
         boost::asio::awaitable<void> sendCircleText(std::string_view text);
         boost::asio::awaitable<void> cmdQuit(volcano::mud::CommandData& cmd);

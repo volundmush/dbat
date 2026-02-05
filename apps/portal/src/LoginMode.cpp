@@ -49,6 +49,10 @@ namespace dbat::portal {
 
     boost::asio::awaitable<void> LoginMode::handleCommand(const std::string& data) {
         auto cmd = volcano::mud::CommandData(data);
+        if(boost::equals(cmd.cmd, "IDLE")) {
+            co_return;
+        }
+        
         if(boost::iequals(cmd.cmd, "quit")) {
             co_await cmdQuit(cmd);
         } else if(boost::iequals(cmd.cmd, "mssp")) {
