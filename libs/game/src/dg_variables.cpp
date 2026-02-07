@@ -1060,6 +1060,7 @@ DgReturn Character::dgCallMember(DgScript* trig, std::string_view field, std::st
                 }
             }
         }
+        return "";
     }
 
     if(boost::iequals(lmember, "master")) {
@@ -1149,6 +1150,13 @@ DgReturn Character::dgCallMember(DgScript* trig, std::string_view field, std::st
             }
             SET_SKILL(this, static_cast<int>(*skRes), *numRes);
         }
+    }
+
+    if(boost::iequals(lmember, "skill")) {
+        if(arg.empty()) return "";
+        auto skill_num = find_skill_num((char*)arg.c_str(), SKTYPE_SKILL);
+        if(skill_num < 0) return "";
+        return fmt::format("{}", GET_SKILL(this, skill_num));
     }
 
     if(boost::iequals(lmember, "size")) {

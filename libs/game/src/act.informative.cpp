@@ -1467,9 +1467,10 @@ static void ensureColumns(std::vector<std::string>& lines, int length, int lineC
     for(auto& l : lines) {
         auto len = l.size();
         auto num_colors = volcano::circle::countColors(l);
+        auto spaces_needed = std::max<int>(0, length - (len - num_colors));
         // append up to num_colors in spaces to account for color codes but don't exceed length
-        if(len + num_colors < length) {
-            l += std::string(length - (len + num_colors), ' ');
+        if(spaces_needed > 0) {
+            l += std::string(spaces_needed, ' ');
         }
     }
     while(lines.size() < lineCount) {

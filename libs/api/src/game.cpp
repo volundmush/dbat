@@ -203,7 +203,12 @@ namespace dbat::api {
                 save_timer -= heartbeat_interval;
                 if(save_timer <= 0.0) {
                     save_timer = save_interval;
+                    saveAll = true;
+                }
+
+                if(saveAll) {
                     co_await dbat::save::runSaveAsync();
+                    saveAll = false;
                 }
 
                 auto elapsed = end - start;

@@ -4711,6 +4711,7 @@ ACMD(do_set)
 
 ACMD(do_saveall)
 {
+    saveAll = true;
     ch->sendText("World and house files saved.\r\n");
 }
 

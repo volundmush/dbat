@@ -96,7 +96,7 @@ void boot_db_world() {
     load_grid_templates(assetLatest);
 
     LINFO("Loading areas initial...");
-    load_areas_initial(userLatest);
+    load_areas_initial(assetLatest);
 
     LINFO("Loading shops.");
     load_shops(assetLatest);

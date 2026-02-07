@@ -244,6 +244,20 @@ double Zone::getEnvironment(int type, bool checkAncestors) const {
     return 0.0;
 }
 
+void Zone::sortRooms() {
+    // This function sorts the rooms in this zone by their vnum, and also updates the linked list of rooms in each room to match the new order.
+    auto sortedRooms = rooms.snapshot_shared();
+    std::sort(sortedRooms.begin(), sortedRooms.end(), [](const std::shared_ptr<Room>& a, const std::shared_ptr<Room>& b) {
+        return a->getVnum() < b->getVnum();
+    });
+
+    // Clear the current rooms and re-add them in sorted order
+    rooms.clear();
+    for (auto& room : sortedRooms) {
+        rooms.add(room);
+    }
+}
+
 /* execute the reset command table of a given zone */
 void Zone::reset()
 {

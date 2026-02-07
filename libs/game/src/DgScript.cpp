@@ -3156,9 +3156,6 @@ bool DgScript::truthy(const std::string &value) const
 
 std::string DgScript::substituteVariables(const std::string &raw_text)
 {
-    if(boost::icontains(raw_text, "self.room.contents")) {
-        basic_mud_log("lets test this!");
-    }
     auto result = dg_substitutions(this, raw_text);
     return result;
 }

@@ -3,21 +3,17 @@
 #include <fmt/format.h>
 #include <fmt/printf.h>
 
-inline void basic_mud_log(std::string_view message)
-{
-    if (!message.empty())
-        volcano::log::log(std::source_location::current(), SPDLOG_LEVEL_INFO, "{}", message);
-}
+
 
 template <typename... Args>
-inline void basic_mud_log(std::string_view fmtstr, Args&&... args)
+inline void basic_mud_log_helper_args(std::source_location location, std::string_view fmtstr, Args&&... args)
 {
     try
     {
         std::string line = fmt::sprintf(fmtstr, std::forward<Args>(args)...);
         if (!line.empty())
             // Use compile-time-checked formatting to write the final string
-            volcano::log::log(std::source_location::current(), SPDLOG_LEVEL_INFO, "{}", line);
+            volcano::log::log(location, SPDLOG_LEVEL_INFO, "{}", line);
     }
     catch (const std::exception &e)
     {
@@ -25,3 +21,5 @@ inline void basic_mud_log(std::string_view fmtstr, Args&&... args)
         volcano::log::log(std::source_location::current(), SPDLOG_LEVEL_ERROR, "SYSERR: Format error in basic_mud_log: {} (template: {})", e.what(), fmt_view);
     }
 }
+
+#define basic_mud_log(...) basic_mud_log_helper_args(std::source_location::current(), __VA_ARGS__)

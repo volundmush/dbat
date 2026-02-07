@@ -15,20 +15,19 @@
 #include "dbat/game/const/WearSlot.hpp"
 
 
-
 ACMD(do_mush_foreach) {
-    if (cdata.lsargs.empty() || cdata.rsargs.empty()) {
+    if (cdata.lstrim.empty() || cdata.rstrim.empty()) {
         ch->sendText("Usage: .foreach <list>=<command with {} placeholder>\r\n");
         return;
     }
     std::vector<std::string_view> items;
-    boost::split(items, cdata.lsargs, boost::is_space(), boost::token_compress_on);
+    boost::split(items, cdata.lstrim, boost::is_space(), boost::token_compress_on);
 
     for(auto item : items) {
         if(item.empty()) continue;
         std::string cmdline;
         try {
-            cmdline = fmt::format(fmt::runtime(cdata.rsargs), item);
+            cmdline = fmt::format(fmt::runtime(cdata.rstrim), item);
         } catch (const std::exception& e) {
             ch->sendText(fmt::format("Error processing item '{}': {}\r\n", item, e.what()));
         }
@@ -162,7 +161,7 @@ Result<CharacterPrototype*> getMobProto(std::string_view arg) {
 ACMD(do_mush_zone)
 {
 
-    std::string_view op = cdata.switches.empty() ? "examine": cdata.switches[0];
+    std::string_view op = cdata.switches.empty() ? "examine" : cdata.switches[0];
 
     auto oper = volcano::util::partialMatch(op, kOps);
 
@@ -177,16 +176,16 @@ ACMD(do_mush_zone)
     {
     case ZoneOp::Create:
     {
-        auto res = validateZoneName(cdata.lsargs);
+        auto res = validateZoneName(cdata.lstrim);
         if (!res)
         {
             ch->sendText(res.error());
             return;
         }
         Zone *parent = nullptr;
-        if (!cdata.rsargs.empty())
+        if (!cdata.rstrim.empty())
         {
-            auto parentRes = getZone(cdata.rsargs, ch);
+            auto parentRes = getZone(cdata.rstrim, ch);
             if (!parentRes)
             {
                 ch->sendText(parentRes.error());
@@ -213,7 +212,7 @@ ACMD(do_mush_zone)
     }
     case ZoneOp::Delete:
     {
-        auto zRes = getZone(cdata.lsargs, ch);
+        auto zRes = getZone(cdata.lstrim, ch);
         if (!zRes)
         {
             ch->sendText(zRes.error());
@@ -233,7 +232,7 @@ ACMD(do_mush_zone)
     }
     case ZoneOp::Rename:
     {
-        auto res = getZone(cdata.lsargs, ch);
+        auto res = getZone(cdata.lstrim, ch);
         if (!res)
         {
             ch->sendText(res.error());
@@ -241,7 +240,7 @@ ACMD(do_mush_zone)
         }
         auto z = res.value();
         auto oldname = z->name;
-        auto nameRes = validateZoneName(cdata.rsargs);
+        auto nameRes = validateZoneName(cdata.rstrim);
         if (!nameRes)
         {
             ch->sendText(nameRes.error());
@@ -253,7 +252,7 @@ ACMD(do_mush_zone)
     }
     case ZoneOp::Reset:
     {
-        auto res = getZone(cdata.lsargs, ch);
+        auto res = getZone(cdata.lstrim, ch);
         if (!res)
         {
             ch->sendText(res.error());
@@ -266,13 +265,13 @@ ACMD(do_mush_zone)
     }
     case ZoneOp::Flags:
     {
-        auto res = getZone(cdata.lsargs, ch);
+        auto res = getZone(cdata.lstrim, ch);
         if (!res)
         {
             ch->sendText(res.error());
             return;
         }
-        auto fres = handleFlagOps<ZoneFlag>(res.value()->zone_flags, cdata.rsargs, "Zone Flags");
+        auto fres = handleFlagOps<ZoneFlag>(res.value()->zone_flags, cdata.rstrim, "Zone Flags");
         if (!fres)
         {
             ch->sendText(fres.error());
@@ -285,7 +284,7 @@ ACMD(do_mush_zone)
         return;
     case ZoneOp::Examine:
     {
-        auto res = getZone(cdata.lsargs, ch);
+        auto res = getZone(cdata.lstrim, ch);
         if (!res)
         {
             ch->sendText(res.error());
@@ -297,19 +296,19 @@ ACMD(do_mush_zone)
     }
     case ZoneOp::Parent:
     {
-        auto res = getZone(cdata.lsargs, ch);
+        auto res = getZone(cdata.lstrim, ch);
         if (!res)
         {
             ch->sendText(res.error());
             return;
         }
         auto z = res.value();
-        if (cdata.rsargs.empty())
+        if (cdata.rstrim.empty())
         {
             ch->sendText("Set parent to what? Use NONE to clear.");
             return;
         }
-        if (boost::iequals(cdata.rsargs, "NONE"))
+        if (boost::iequals(cdata.rstrim, "NONE"))
         {
             auto par = z->getParent();
             if (!par)
@@ -322,7 +321,7 @@ ACMD(do_mush_zone)
             ch->sendFmt("{} parent cleared.", *z);
             return;
         }
-        auto parentRes = getZone(cdata.rsargs, ch);
+        auto parentRes = getZone(cdata.rstrim, ch);
         if (!parentRes)
         {
             ch->sendText(parentRes.error());
@@ -341,7 +340,7 @@ ACMD(do_mush_zone)
     }
     case ZoneOp::AddRooms:
     {
-        auto res = getZone(cdata.rsargs, ch);
+        auto res = getZone(cdata.rstrim, ch);
         if (!res)
         {
             ch->sendText(res.error());
@@ -349,12 +348,13 @@ ACMD(do_mush_zone)
         }
         auto z = res.value();
         // the lsargs should be a space-delimited sequence of numbers >0...
-        auto ranges = parseRanges<room_vnum>(cdata.lsargs);
+        auto ranges = parseRanges<room_vnum>(cdata.lstrim);
         if (!ranges)
         {
             ch->sendText(ranges.error());
             return;
         }
+        bool addedAny = false;
         for (auto i : ranges.value())
         {
             auto r = get_room(i);
@@ -369,9 +369,14 @@ ACMD(do_mush_zone)
                 already_zone->rooms.remove(sh);
             }
             z->rooms.add(sh);
+            addedAny = true;
             sh->zone.reset(z);
             ch->sendFmt("Added {} to {}\r\n", *r, *z);
         }
+        if(addedAny) {
+            z->sortRooms();
+        }
+        return;
     }
     case ZoneOp::Help:
     {
@@ -380,14 +385,14 @@ ACMD(do_mush_zone)
     }
     case ZoneOp::Launch:
     {
-        auto res = getZone(cdata.lsargs, ch);
+        auto res = getZone(cdata.lstrim, ch);
         if (!res)
         {
             ch->sendText(res.error());
             return;
         }
         auto z = res.value();
-        if (cdata.rsargs.empty())
+        if (cdata.rstrim.empty())
         {
             if (!z->launchDestination.empty())
             {
@@ -399,13 +404,13 @@ ACMD(do_mush_zone)
             }
             return;
         }
-        if(boost::iequals(cdata.rsargs, "NONE"))
+        if(boost::iequals(cdata.rstrim, "NONE"))
         {
             z->launchDestination.clear();
             ch->sendFmt("{} Launch location cleared.\r\n", *z);
             return;
         }
-        auto locRes = getLocation(cdata.rsargs, ch);
+        auto locRes = getLocation(cdata.rstrim, ch);
         if (!locRes)
         {
             ch->sendText(locRes.error());
@@ -419,14 +424,14 @@ ACMD(do_mush_zone)
     case ZoneOp::Land: {
         // this and Dock work very similarly to Launch, except they're targeting a
         // std::unordered_map<std::string, std::string> landingSpots, dockingSpots
-        auto res = getZone(cdata.lsargs, ch);
+        auto res = getZone(cdata.lstrim, ch);
         if (!res)
         {
             ch->sendText(res.error());
             return;
         }
         auto z = res.value();
-        if (cdata.rsargs.empty())
+        if (cdata.rstrim.empty())
         {
             if (!z->landingSpots.empty())
             {
@@ -445,7 +450,7 @@ ACMD(do_mush_zone)
         }
         // The rsargs should be a <target>,<LocationID> | NONE
         std::vector<std::string> split;
-        boost::split(split, cdata.rsargs, boost::is_any_of(","));
+        boost::split(split, cdata.rstrim, boost::is_any_of(","));
         for(auto &s : split)
         {
             boost::trim(s);
@@ -472,14 +477,14 @@ ACMD(do_mush_zone)
         return;
     }
     case ZoneOp::Dock: {
-        auto res = getZone(cdata.lsargs, ch);
+        auto res = getZone(cdata.lstrim, ch);
         if (!res)
         {
             ch->sendText(res.error());
             return;
         }
         auto z = res.value();
-        if (cdata.rsargs.empty())
+        if (cdata.rstrim.empty())
         {
             if (!z->dockingSpots.empty())
             {
@@ -498,7 +503,7 @@ ACMD(do_mush_zone)
         }
         // The rsargs should be a <target>,<LocationID> | NONE
         std::vector<std::string> split;
-        boost::split(split, cdata.rsargs, boost::is_any_of(","));
+        boost::split(split, cdata.rstrim, boost::is_any_of(","));
         for(auto &s : split)
         {
             boost::trim(s);
@@ -637,7 +642,7 @@ ACMD(do_mush_exit)
     }
     case ExitOp::Clear:
     {
-        auto dirRes = volcano::util::chooseEnum<Direction>(cdata.lsargs, "Direction");
+        auto dirRes = volcano::util::chooseEnum<Direction>(cdata.lstrim, "Direction");
         if (!dirRes)
         {
             ch->sendText(dirRes.error());
@@ -662,7 +667,7 @@ ACMD(do_mush_exit)
     }
     case ExitOp::Destination:
     {
-        auto dirRes = volcano::util::chooseEnum<Direction>(cdata.lsargs, "Direction");
+        auto dirRes = volcano::util::chooseEnum<Direction>(cdata.lstrim, "Direction");
         if (!dirRes)
         {
             ch->sendText(dirRes.error());
@@ -672,7 +677,7 @@ ACMD(do_mush_exit)
 
         auto ex = ch->location.getExit(dir);
 
-        auto locRes = getLocation(cdata.rsargs, ch);
+        auto locRes = getLocation(cdata.rstrim, ch);
         if (!locRes)
         {
             ch->sendText(locRes.error());
@@ -694,7 +699,7 @@ ACMD(do_mush_exit)
     }
     case ExitOp::Key:
     {
-        auto dirRes = volcano::util::chooseEnum<Direction>(cdata.lsargs, "Direction");
+        auto dirRes = volcano::util::chooseEnum<Direction>(cdata.lstrim, "Direction");
         if (!dirRes)
         {
             ch->sendText(dirRes.error());
@@ -708,13 +713,13 @@ ACMD(do_mush_exit)
             ch->sendFmt("There is no {} exit.\r\n", dir);
             return;
         }
-        if (boost::iequals(cdata.rsargs, "NONE") || cdata.rsargs == "-1")
+        if (boost::iequals(cdata.rstrim, "NONE") || cdata.rstrim == "-1")
         {
             ex->key = NOTHING;
             ch->sendFmt("{} Key set to: NOTHING.\r\n", *ex);
             return;
         }
-        auto numRes = parseNumber<obj_vnum>(cdata.rsargs, "Object ID");
+        auto numRes = parseNumber<obj_vnum>(cdata.rstrim, "Object ID");
         if (!numRes)
         {
             ch->sendText(numRes.error());
@@ -734,7 +739,7 @@ ACMD(do_mush_exit)
     }
     case ExitOp::Flags:
     {
-        auto dirRes = volcano::util::chooseEnum<Direction>(cdata.lsargs, "Direction");
+        auto dirRes = volcano::util::chooseEnum<Direction>(cdata.lstrim, "Direction");
         if (!dirRes)
         {
             ch->sendText(dirRes.error());
@@ -748,7 +753,7 @@ ACMD(do_mush_exit)
             ch->sendFmt("There is no {} exit.\r\n", dir);
             return;
         }
-        auto res = handleFlagOps<ExitFlag>(ex->exit_flags, cdata.rsargs, "Exit Flags");
+        auto res = handleFlagOps<ExitFlag>(ex->exit_flags, cdata.rstrim, "Exit Flags");
         if (!res)
         {
             ch->sendText(res.error());
@@ -760,7 +765,7 @@ ACMD(do_mush_exit)
     }
     case ExitOp::DCLock:
     {
-        auto dirRes = volcano::util::chooseEnum<Direction>(cdata.lsargs, "Direction");
+        auto dirRes = volcano::util::chooseEnum<Direction>(cdata.lstrim, "Direction");
         if (!dirRes)
         {
             ch->sendText(dirRes.error());
@@ -775,7 +780,7 @@ ACMD(do_mush_exit)
             return;
         }
 
-        auto resNum = parseNumber(cdata.rsargs, "DC Lock");
+        auto resNum = parseNumber(cdata.rstrim, "DC Lock");
         if (!resNum)
         {
             ch->sendText(resNum.error());
@@ -788,7 +793,7 @@ ACMD(do_mush_exit)
     }
     case ExitOp::DCHide:
     {
-        auto dirRes = volcano::util::chooseEnum<Direction>(cdata.lsargs, "Direction");
+        auto dirRes = volcano::util::chooseEnum<Direction>(cdata.lstrim, "Direction");
         if (!dirRes)
         {
             ch->sendText(dirRes.error());
@@ -803,7 +808,7 @@ ACMD(do_mush_exit)
             return;
         }
 
-        auto resNum = parseNumber(cdata.rsargs, "DC Hide");
+        auto resNum = parseNumber(cdata.rstrim, "DC Hide");
         if (!resNum)
         {
             ch->sendText(resNum.error());
@@ -1001,7 +1006,7 @@ ACMD(do_mush_location)
             return;
         }
         case LocationOp::Examine: {
-            auto locRes = getLocation(cdata.lsargs.empty() ? "here" : cdata.lsargs, ch);
+            auto locRes = getLocation(cdata.lstrim.empty() ? "here" : cdata.lstrim, ch);
             if (!locRes) {
                 ch->sendText(locRes.error());
                 return;
@@ -1011,57 +1016,57 @@ ACMD(do_mush_location)
             return;
         }
         case LocationOp::Name: {
-            auto locRes = getLocation(cdata.lsargs, ch);
+            auto locRes = getLocation(cdata.lstrim, ch);
             if (!locRes) {
                 ch->sendText(locRes.error());
                 return;
             }
             auto loc = locRes.value();
-            if (cdata.rsargs.empty()) {
+            if (cdata.rstrim.empty()) {
                 ch->sendFmt("Current name: {}\r\n", loc.getName());
                 return;
             }
-            if (boost::iequals(cdata.rsargs, "NONE")) {
+            if (boost::iequals(cdata.rstrim, "NONE")) {
                 loc.setString("name", "");
                 ch->sendFmt("{} Name cleared.\r\n", loc);
                 return;
             }
-            loc.setString("name", std::string(cdata.rsargs));
+            loc.setString("name", std::string(cdata.rstrim));
             ch->sendFmt("{} Name set to: {}\r\n", loc, loc.getName());
             return;
         }
         case LocationOp::Description: {
-            auto locRes = getLocation(cdata.lsargs, ch);
+            auto locRes = getLocation(cdata.lstrim, ch);
             if (!locRes) {
                 ch->sendText(locRes.error());
                 return;
             }
             auto loc = locRes.value();
-            if (cdata.rsargs.empty()) {
+            if (cdata.rstrim.empty()) {
                 ch->sendFmt("Current description: {}\r\n", loc.getLookDescription());
                 return;
             }
-            if (boost::iequals(cdata.rsargs, "NONE")) {
+            if (boost::iequals(cdata.rstrim, "NONE")) {
                 loc.setString("look_description", "");
                 ch->sendFmt("{} Look description cleared.\r\n", loc);
                 return;
             }
-            loc.setString("look_description", std::string(cdata.rsargs));
+            loc.setString("look_description", std::string(cdata.rstrim));
             ch->sendFmt("{} Look description set to: {}\r\n", loc, loc.getLookDescription());
             return;
         }
         case LocationOp::Sector: {
-            auto locRes = getLocation(cdata.lsargs, ch);
+            auto locRes = getLocation(cdata.lstrim, ch);
             if (!locRes) {
                 ch->sendText(locRes.error());
                 return;
             }
             auto loc = locRes.value();
-            if (cdata.rsargs.empty()) {
+            if (cdata.rstrim.empty()) {
                 ch->sendFmt("Current sector: {}\r\n", loc.getSectorType());
                 return;
             }
-            auto sectorRes = volcano::util::chooseEnum<SectorType>(cdata.rsargs, "Sector Type");
+            auto sectorRes = volcano::util::chooseEnum<SectorType>(cdata.rstrim, "Sector Type");
             if (!sectorRes) {
                 ch->sendText(sectorRes.error());
                 return;
@@ -1072,14 +1077,14 @@ ACMD(do_mush_location)
             return;
         }
         case LocationOp::Flags: {
-            auto locRes = getLocation(cdata.lsargs, ch);
+            auto locRes = getLocation(cdata.lstrim, ch);
             if (!locRes) {
                 ch->sendText(locRes.error());
                 return;
             }
             auto loc = locRes.value();
             auto &cf = loc.getRoomFlags();
-            auto res = handleFlagOps<RoomFlag>(cf, cdata.rsargs, "Room Flags");
+            auto res = handleFlagOps<RoomFlag>(cf, cdata.rstrim, "Room Flags");
             if (!res) {
                 ch->sendText(res.error());
                 return;
@@ -1192,7 +1197,7 @@ ACMD(do_mush_reset) {
     }
 
     std::vector<std::string> split;
-    boost::split(split, cdata.rsargs, boost::is_space(), boost::token_compress_on);
+    boost::split(split, cdata.rstrim, boost::is_space(), boost::token_compress_on);
     for(auto &s : split) boost::trim(s);
     auto slice = split | std::views::drop(1);
     std::vector<std::string> cmdArgs{slice.begin(), slice.end()};
@@ -1204,7 +1209,7 @@ ACMD(do_mush_reset) {
             return;
         }
         case ResOp::Examine: {
-            auto locRes = getLocation(cdata.lsargs.empty() ? "here" : cdata.lsargs, ch);
+            auto locRes = getLocation(cdata.lstrim.empty() ? "here" : cdata.lstrim, ch);
             if (!locRes) {
                 ch->sendText(locRes.error());
                 return;
@@ -1223,7 +1228,7 @@ ACMD(do_mush_reset) {
             return;
         }
         case ResOp::Add: {
-            auto locRes = getLocation(cdata.lsargs.empty() ? "here" : cdata.lsargs, ch);
+            auto locRes = getLocation(cdata.lstrim.empty() ? "here" : cdata.lstrim, ch);
             if (!locRes) {
                 ch->sendText(locRes.error());
                 return;
@@ -1253,7 +1258,7 @@ ACMD(do_mush_reset) {
             }
             auto loc = locRes.value();
             auto rcm = loc.getResetCommands();
-            int index = parseNumber<int>(cdata.rsargs, "Reset Command Index").value_or(-1);
+            int index = parseNumber<int>(cdata.rstrim, "Reset Command Index").value_or(-1);
             if (index < 0 || index >= static_cast<int>(rcm.size())) {
                 ch->sendText("Invalid index.\r\n");
                 return;
@@ -1293,7 +1298,7 @@ ACMD(do_mush_reset) {
             return;
         }
         case ResOp::Execute: {
-            auto locRes = getLocation(cdata.lsargs.empty() ? "here" : cdata.lsargs, ch);
+            auto locRes = getLocation(cdata.lstrim.empty() ? "here" : cdata.lstrim, ch);
             if (!locRes) {
                 ch->sendText(locRes.error());
                 return;
@@ -1525,15 +1530,15 @@ Result<CharacterBaseOpChoice> parseCharacterBaseOp(std::string_view op) {
 Result<std::string> handleCharacterBaseOps(CharacterBase* cb, CharacterBaseOpChoice op, CommandData& cdata) {
     if(std::holds_alternative<HasMudStringsOp>(op)) {
         auto msOp = std::get<HasMudStringsOp>(op);
-        return handleMudStrings(cb, msOp, std::string(cdata.rsargs));
+        return handleMudStrings(cb, msOp, std::string(cdata.rstrim));
     } else if(std::holds_alternative<HasExtraDescOps>(op)) {
         auto edOp = std::get<HasExtraDescOps>(op);
-        return handleExtraDescs(cb, edOp, cdata.rsargs);
+        return handleExtraDescs(cb, edOp, cdata.rstrim);
     } else if(std::holds_alternative<CharacterBaseOps>(op)) {
         auto cbOp = std::get<CharacterBaseOps>(op);
         switch(cbOp) {
             case CharacterBaseOps::Race: {
-                return volcano::util::handleSetEnum<Race>(cb->race, cdata.rsargs, "Race");
+                return volcano::util::handleSetEnum<Race>(cb->race, cdata.rstrim, "Race");
             }
             case CharacterBaseOps::Model: {
                 // only Androids use model...
@@ -1541,28 +1546,28 @@ Result<std::string> handleCharacterBaseOps(CharacterBase* cb, CharacterBaseOpCho
                     return err("Only Androids have a Model.");
                 }
                 AndroidModel model;
-                auto res = volcano::util::handleSetEnum<AndroidModel>(model, cdata.rsargs, "Model");
+                auto res = volcano::util::handleSetEnum<AndroidModel>(model, cdata.rstrim, "Model");
                 if(res) {
                     cb->model = model;
                 }
                 return res;
             }
             case CharacterBaseOps::Sensei:
-                return volcano::util::handleSetEnum<Sensei>(cb->sensei, cdata.rsargs, "Sensei");
+                return volcano::util::handleSetEnum<Sensei>(cb->sensei, cdata.rstrim, "Sensei");
             case CharacterBaseOps::Sex:
-                return volcano::util::handleSetEnum<Sex>(cb->sex, cdata.rsargs, "Sex");
+                return volcano::util::handleSetEnum<Sex>(cb->sex, cdata.rstrim, "Sex");
             case CharacterBaseOps::Size:
-                return volcano::util::handleSetEnum<Size>(cb->size, cdata.rsargs, "Size");
+                return volcano::util::handleSetEnum<Size>(cb->size, cdata.rstrim, "Size");
             case CharacterBaseOps::CharacterFlags:
-                return handleFlagOps<CharacterFlag>(cb->character_flags, cdata.rsargs, "Character Flags");
+                return handleFlagOps<CharacterFlag>(cb->character_flags, cdata.rstrim, "Character Flags");
             case CharacterBaseOps::MobFlags:
-                return handleFlagOps<MobFlag>(cb->mob_flags, cdata.rsargs, "Mob Flags");
+                return handleFlagOps<MobFlag>(cb->mob_flags, cdata.rstrim, "Mob Flags");
             case CharacterBaseOps::BioGenomes:
-                return handleFlagOps<Race>(cb->bio_genomes, cdata.rsargs, "BioGenomes");
+                return handleFlagOps<Race>(cb->bio_genomes, cdata.rstrim, "BioGenomes");
             case CharacterBaseOps::Mutations:
-                return handleFlagOps<Mutation>(cb->mutations, cdata.rsargs, "Mutations");
+                return handleFlagOps<Mutation>(cb->mutations, cdata.rstrim, "Mutations");
             case CharacterBaseOps::AffectFlags:
-                return handleFlagOps<AffectFlag>(cb->affect_flags, cdata.rsargs, "Affect Flags");
+                return handleFlagOps<AffectFlag>(cb->affect_flags, cdata.rstrim, "Affect Flags");
         }
     }
     return err("Invalid operation.");
@@ -1700,7 +1705,7 @@ void handleMobProtoOps(Character *ch, MobProtoOps op, CommandData& cdata) {
             return;
         }
         case MobProtoOps::CreateProto: {
-            auto numRes = parseNumber<mob_vnum>(cdata.lsargs, "Mob Vnum");
+            auto numRes = parseNumber<mob_vnum>(cdata.lstrim, "Mob Vnum");
             if(!numRes) {
                 ch->sendText(numRes.error());
                 return;
@@ -1749,12 +1754,12 @@ ACMD(do_mush_mproto) {
     // Or are we adding a Script Prototype Vnum to it...?
     auto protoSc = volcano::util::chooseEnum<HasProtoScriptOps>(op, "ProtoScript Operation");
     if(protoSc) {
-        auto mobRes = getMobProto(cdata.lsargs);
+        auto mobRes = getMobProto(cdata.lstrim);
         if(!mobRes) {
             ch->sendText(mobRes.error());
             return;
         }
-        auto res = handleProtoScripts(mobRes.value(), protoSc.value(), cdata.rsargs);
+        auto res = handleProtoScripts(mobRes.value(), protoSc.value(), cdata.rstrim);
         if(!res) {
             ch->sendText(res.error());
             return;
@@ -1765,7 +1770,7 @@ ACMD(do_mush_mproto) {
 
     auto charBaseOpRes = parseCharacterBaseOp(op);
     if(charBaseOpRes) {
-        auto mobRes = getMobProto(cdata.lsargs);
+        auto mobRes = getMobProto(cdata.lstrim);
         if(!mobRes) {
             ch->sendText(mobRes.error());
             return;
@@ -1837,30 +1842,30 @@ Result<ObjectBaseOpChoice> parseObjectBaseOp(std::string_view op) {
 Result<std::string> handleObjectBaseOps(ObjectBase* ob, ObjectBaseOpChoice op, CommandData& cdata) {
     if(std::holds_alternative<HasMudStringsOp>(op)) {
         auto msOp = std::get<HasMudStringsOp>(op);
-        return handleMudStrings(ob, msOp, std::string(cdata.rsargs));
+        return handleMudStrings(ob, msOp, std::string(cdata.rstrim));
     } else if(std::holds_alternative<HasExtraDescOps>(op)) {
         auto edOp = std::get<HasExtraDescOps>(op);
-        return handleExtraDescs(ob, edOp, cdata.rsargs);
+        return handleExtraDescs(ob, edOp, cdata.rstrim);
     } else if(std::holds_alternative<HasPickyOps>(op)) {
         auto pOp = std::get<HasPickyOps>(op);
-        return handlePickyOps(ob, pOp, cdata.rsargs);
+        return handlePickyOps(ob, pOp, cdata.rstrim);
     } else if(std::holds_alternative<ObjectBaseOps>(op)) {
         auto obOp = std::get<ObjectBaseOps>(op);
         switch(obOp) {
             case ObjectBaseOps::ItemType:
-                return volcano::util::handleSetEnum<ItemType>(ob->type_flag, cdata.rsargs, "Item Type");
+                return volcano::util::handleSetEnum<ItemType>(ob->type_flag, cdata.rstrim, "Item Type");
             case ObjectBaseOps::Affected: {
-                //return handleFlagOps<AffectLocation>(ob->affected, cdata.rsargs, "Affected");
+                //return handleFlagOps<AffectLocation>(ob->affected, cdata.rstrim, "Affected");
                 return err("Not implemented yet.");
             }
             case ObjectBaseOps::WearFlags:
-                return handleFlagOps<WearFlag>(ob->wear_flags, cdata.rsargs, "Wear Flags");
+                return handleFlagOps<WearFlag>(ob->wear_flags, cdata.rstrim, "Wear Flags");
             case ObjectBaseOps::ItemFlags:
-                return handleFlagOps<ItemFlag>(ob->item_flags, cdata.rsargs, "Item Flags");
+                return handleFlagOps<ItemFlag>(ob->item_flags, cdata.rstrim, "Item Flags");
             case ObjectBaseOps::AffectFlags:
-                return handleFlagOps<AffectFlag>(ob->affect_flags, cdata.rsargs, "Affect Flags");
+                return handleFlagOps<AffectFlag>(ob->affect_flags, cdata.rstrim, "Affect Flags");
             case ObjectBaseOps::Size:
-                return volcano::util::handleSetEnum<Size>(ob->size, cdata.rsargs, "Size");
+                return volcano::util::handleSetEnum<Size>(ob->size, cdata.rstrim, "Size");
         }
     }
     return err("Invalid operation.");
@@ -1985,7 +1990,7 @@ void handleObjProtoOps(Character *ch, ObjProtoOps op, CommandData& cdata) {
             return;
         }
         case ObjProtoOps::CreateProto: {
-            auto numRes = parseNumber<obj_vnum>(cdata.lsargs, "Object Vnum");
+            auto numRes = parseNumber<obj_vnum>(cdata.lstrim, "Object Vnum");
             if(!numRes) {
                 ch->sendText(numRes.error());
                 return;
@@ -2031,12 +2036,12 @@ ACMD(do_mush_oproto) {
     // Or are we adding a Script Prototype Vnum to it...?
     auto protoSc = volcano::util::chooseEnum<HasProtoScriptOps>(op, "ProtoScript Operation");
     if(protoSc) {
-        auto objRes = getObjProto(cdata.lsargs);
+        auto objRes = getObjProto(cdata.lstrim);
         if(!objRes) {
             ch->sendText(objRes.error());
             return;
         }
-        auto res = handleProtoScripts(objRes.value(), protoSc.value(), cdata.rsargs);
+        auto res = handleProtoScripts(objRes.value(), protoSc.value(), cdata.rstrim);
         if(!res) {
             ch->sendText(res.error());
             return;
@@ -2047,7 +2052,7 @@ ACMD(do_mush_oproto) {
 
     auto objBaseOpRes = parseObjectBaseOp(op);
     if(objBaseOpRes) {
-        auto objRes = getObjProto(cdata.lsargs);
+        auto objRes = getObjProto(cdata.lstrim);
         if(!objRes) {
             ch->sendText(objRes.error());
             return;

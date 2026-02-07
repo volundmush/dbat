@@ -59,6 +59,9 @@ struct Zone {
      *   2: Just reset.
      */
     WeakBag<Room> rooms;
+
+    void sortRooms();
+
     WeakBag<Area> areas;
     WeakBag<Character> npcsInZone;
     WeakBag<Character> playersInZone;

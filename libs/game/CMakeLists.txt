@@ -48,6 +48,7 @@ target_link_libraries(dbat_game
     volcano::util
     volcano::circle
     volcano::log
+    volcano::mud
     bsd
     ${MATH_LIB}
   PRIVATE

@@ -1045,6 +1045,9 @@ void load_rooms(const std::filesystem::path &loc)
         r->zone->rooms.add(r);
         r->activate();
     }
+    for(auto &[id, z] : zone_table) {
+        z->sortRooms();
+    }
 }
 
 void load_areas_initial(const std::filesystem::path &loc)
@@ -2374,7 +2377,6 @@ namespace dbat::save {
         static const std::vector<SaveTask> tasks = {
             {"accounts", dump_accounts},
             {"players", dump_players},
-            {"areas", dump_areas},
             {"saverooms", dump_save_rooms}
         };
         return tasks;
@@ -2388,6 +2390,7 @@ namespace dbat::save {
             {"grid_templates", dump_grid_templates},
             {"rooms", dump_rooms},
             {"exits", dump_exits},
+            {"areas", dump_areas},
             {"item_prototypes", dump_item_prototypes},
             {"npc_prototypes", dump_npc_prototypes},
             {"shops", dump_shops},
