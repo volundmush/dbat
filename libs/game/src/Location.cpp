@@ -104,7 +104,7 @@ Location::Location(const std::string& lid)
         }
     } else if(letter == "S") {
         // Structure
-        if(auto find = structures.find(id); find != structures.end()) {
+        if(auto find = Structure::registry.find(id); find != Structure::registry.end()) {
             al = find->second;
             locationID = getLocID();
             return;

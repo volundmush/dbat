@@ -95,6 +95,7 @@ struct Character : public CharacterBase, public HasID, public HasLocation, publi
     void onLocationChanged(const Location& oldloc, const Location& newloc) override;
 
     void sendText(std::string_view txt);
+    void sendAround(std::string_view txt);
 
     template<typename... Args>
     void sendFmt(fmt::string_view format, Args&&... args) {
@@ -120,6 +121,22 @@ struct Character : public CharacterBase, public HasID, public HasLocation, publi
         }
         catch(const fmt::format_error& e) {
             LERROR("SYSERR: Format error in Character::send_to: %s", e.what());
+            LERROR("Template was: %s", format.data());
+            return 0;
+        }
+    }
+
+    template<typename... Args>
+    size_t send_around(fmt::string_view format, Args&&... args) {
+        try {
+            // Use fmt::sprintf directly (printf-style).
+            std::string formatted_string = fmt::sprintf(format, std::forward<Args>(args)...);
+            if(formatted_string.empty()) return 0;
+            sendAround(formatted_string);
+            return formatted_string.size();
+        }
+        catch(const fmt::format_error& e) {
+            LERROR("SYSERR: Format error in Character::send_around: %s", e.what());
             LERROR("Template was: %s", format.data());
             return 0;
         }

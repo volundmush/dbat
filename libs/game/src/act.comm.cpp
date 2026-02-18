@@ -22,6 +22,7 @@
 #include "dbat/game/Descriptor.hpp"
 
 #include "volcano/util/FilterWeak.hpp"
+#include "volcano/util/Parse.hpp"
 #include "dbat/game/interpreter.hpp"
 #include "dbat/game/config.hpp"
 #include "dbat/game/utils.hpp"
@@ -74,10 +75,10 @@ static void list_languages(Character *ch)
 
 ACMD(do_voice)
 {
-    skip_spaces(&argument);
-
     if (IS_NPC(ch))
         return;
+
+    auto &arg = cdata.argument;
 
     if (GET_BONUS(ch, BONUS_MUTE) > 0)
     {
@@ -85,48 +86,42 @@ ACMD(do_voice)
         return;
     }
 
-    if (!*argument)
+    if (arg.empty())
     {
         ch->sendText("What are you changing your voice description to?\r\n");
         return;
     }
-    else if (strlen(argument) > 75)
+    
+    if (arg.size() > 75)
     {
         ch->sendText("Your voice description can not be longer than 75 characters.\r\n");
         return;
     }
-    else if (strstr(argument, "@"))
+    
+    if (arg.contains('@'))
     {
         ch->sendText("You can not use colorcode in voice descriptions.\r\n");
         return;
     }
-    else if (GET_VOICE(ch) && GET_RP(ch) < 1)
+    
+    if (GET_VOICE(ch) && GET_RP(ch) < 1)
     {
         ch->sendText("Your voice has already been set. You will need at least 1 RPP to be able to change it.\r\n");
         return;
     }
-    else if (GET_VOICE(ch))
+    
+    if (GET_VOICE(ch))
     {
-        ch->send_to("Your voice has now been set to: %s\r\n", argument);
-        if (GET_VOICE(ch))
-        {
-            free(GET_VOICE(ch));
-        }
-        GET_VOICE(ch) = strdup(argument);
         ch->modRPP(-1);
         ch->sendText("@D(@cRPP@W: @w-1@D)@n\n\n");
-        return;
+        free(GET_VOICE(ch));
     }
-    else
-    {
-        ch->send_to("Your voice has now been set to: %s\r\n", argument);
-        if (GET_VOICE(ch))
-        {
-            free(GET_VOICE(ch));
-        }
-        GET_VOICE(ch) = strdup(argument);
-        return;
-    }
+
+    auto new_voice = std::string(arg);
+
+    GET_VOICE(ch) = strdup(new_voice.c_str());
+
+    ch->send_to("Your voice has now been set to: %s\r\n", new_voice);
 }
 
 ACMD(do_languages)
@@ -194,35 +189,25 @@ static void garble_text(char *string, int known, int lang)
 
 ACMD(do_osay)
 {
-
-    skip_spaces(&argument);
-
     if (IS_NPC(ch))
         return;
 
-    if (!*argument)
+    auto &arg = cdata.argument;
+
+    if (arg.empty())
     {
         ch->sendText("Yes, but WHAT do you want to osay?\r\n");
         return;
     }
-    else
-    {
-        char buf[MAX_INPUT_LENGTH];
-        char buf2[MAX_INPUT_LENGTH];
 
-        sprintf(buf, "@WYou @D[@mOSAY@D] @W'@w%s@W'@n", argument);
-        if (!PRF_FLAGGED(ch, PRF_HIDE))
-        {
-            sprintf(buf2, "@W%s @D[@mOSAY@D] @W'@w%s@W'@n", GET_ADMLEVEL(ch) > 0 ? GET_NAME(ch) : GET_USER(ch),
-                    argument);
-        }
-        if (PRF_FLAGGED(ch, PRF_HIDE))
-        {
-            sprintf(buf2, "@WAnonymous @D[@mOSAY@D] @W'@w%s@W'@n", argument);
-        }
-        act(buf, false, ch, nullptr, nullptr, TO_CHAR);
-        act(buf2, false, ch, nullptr, nullptr, TO_ROOM);
-    }
+    ch->send_to("You @W[@mOSAY@W] '@w%s@W'@n\r\n", arg);
+
+    auto buf2 = PRF_FLAGGED(ch, PRF_HIDE) 
+    ? fmt::sprintf("@WAnonymous @D[@mOSAY@D] @W'@w%s@W'@n", arg)
+    : fmt::sprintf("@W%s @D[@mOSAY@D] @W'@w%s@W'@n", GET_ADMLEVEL(ch) > 0 ? GET_NAME(ch) : GET_USER(ch),
+            arg);
+
+    ch->sendAround(buf2);
 }
 
 ACMD(do_say)

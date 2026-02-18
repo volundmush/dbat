@@ -13,9 +13,11 @@
 #include <memory>
 #include <span>
 #include <functional>
+#include <string_view>
 
 struct Character;
 struct Object;
+struct Structure;
 struct affected_type;
 struct HasInteractive;
 
@@ -99,7 +101,7 @@ Character *get_char_world_vis(Character *ch, char *name, int *number);
 Object *get_obj_num(obj_rnum nr);
 
 Object *get_obj_in_list_vis(Character *ch, const char *name, int *number, const std::vector<std::weak_ptr<Object>> &list);
-
+Structure *get_structure_in_list_vis(Character *ch, std::string_view name, int *number, const std::vector<std::weak_ptr<Structure>> &list);
 Object *get_obj_vis(Character *ch, char *name, int *num);
 
 Object *get_obj_in_equip_vis(Character *ch, char *arg, int *number, const std::map<int, Object *> &equipment);

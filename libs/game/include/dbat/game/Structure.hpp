@@ -1,12 +1,16 @@
 #pragma once
 #include <unordered_map>
+#include <unordered_set>
 #include <memory>
 
+#include "const/StructureFlag.hpp"
+#include "Flags.hpp"
 #include "AbstractGridArea.hpp"
 #include "HasLocation.hpp"
 #include "HasInteractive.hpp"
 
-struct Structure : public AbstractGridArea, public HasID, public HasInteractive, public HasLocation, std::enable_shared_from_this<Structure> {
+struct Structure : public AbstractGridArea, public HasID, public HasInteractive, public HasLocation, public std::enable_shared_from_this<Structure> {
+    static std::unordered_map<int64_t, std::shared_ptr<Structure>> registry;
     std::string getLocID() const override;
     vnum getLocVnum() const override;
     Zone* getLocZone() const override;
@@ -21,6 +25,12 @@ struct Structure : public AbstractGridArea, public HasID, public HasInteractive,
     void displayLocationInfo(Character* viewer) override;
     std::shared_ptr<HasLocation> getSharedHasLocation() override;
 
-};
+    std::expected<Location, std::string> getDockingPortLocation(Structure *vehicle, Character *pilot);
 
-extern std::unordered_map<int64_t, std::shared_ptr<Structure>> structures;
+    FlagHandler<StructureFlag> structure_flags;
+
+    std::unordered_set<int64_t> owners, users, banned;
+
+    bool isAuthorized(Character *ch, bool ownerOnly = false) const;
+
+};

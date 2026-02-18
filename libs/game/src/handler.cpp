@@ -15,6 +15,7 @@
 #include "dbat/game/Descriptor.hpp"
 #include "dbat/game/Destination.hpp"
 #include "dbat/game/handler.hpp"
+#include "dbat/game/Structure.hpp"
 //#include "dbat/game/send.hpp"
 #include "dbat/game/comm.hpp"
 #include "dbat/game/db.hpp"
@@ -1070,6 +1071,30 @@ Object *get_obj_in_list_vis(Character *ch, const char *name, int *number, const 
     {
         if (isname(name, i->getName()))
             if (ch->canSee(i) || (GET_OBJ_TYPE(i) == ITEM_LIGHT))
+                if (--(*number) == 0)
+                    return i;
+    }
+
+    return nullptr;
+}
+
+Structure *get_structure_in_list_vis(Character *ch, std::string_view name, int *number, const std::vector<std::weak_ptr<Structure>> &list)
+{
+    int num;
+
+    if (!number)
+    {
+        number = &num;
+        num = get_number((char**)&name);
+    }
+
+    if (*number == 0)
+        return nullptr;
+
+    for (auto i : volcano::util::filter_raw(list))
+    {
+        if (isname(name, i->getName()))
+            if (ch->canSee(i))
                 if (--(*number) == 0)
                     return i;
     }

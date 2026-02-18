@@ -3,7 +3,7 @@
 //
 
 #include "dbat/valid/valid.hpp"
-
+#include "volcano/util/FilterWeak.hpp"
 #include "dbat/game/CharacterUtils.hpp"
 #include "dbat/game/CharacterPrototype.hpp"
 #include "dbat/game/ObjectUtils.hpp"
@@ -1538,6 +1538,16 @@ void Character::sendText(std::string_view txt)
     if (!desc)
         return;
     desc->sendText(txt);
+}
+
+void Character::sendAround(std::string_view txt)
+{
+    auto people = location.getPeople();
+    for (auto p : volcano::util::filter_raw(people))
+    {
+        if(p == this) continue;
+        p->sendText(txt);
+    }
 }
 
 /*

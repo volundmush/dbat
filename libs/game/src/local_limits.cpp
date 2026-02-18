@@ -1666,14 +1666,6 @@ void point_update(uint64_t heartPulse, double deltaTime)
                     continue;
                 processed.insert(j->id);
 
-                if (GET_OBJ_TYPE(j) == ITEM_HATCH)
-                {
-                    if ((vehicle = find_vehicle_by_vnum(GET_OBJ_VAL(j, VAL_HATCH_DEST))))
-                    {
-                        SET_OBJ_VAL(j, VAL_HATCH_EXTROOM, vehicle->location.getVnum());
-                    }
-                }
-
                 if (GET_OBJ_TYPE(j) == ITEM_PORTAL)
                 {
                     if (GET_OBJ_TIMER(j) > 0)

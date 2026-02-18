@@ -1099,7 +1099,7 @@ void load_structures_initial(const std::filesystem::path &loc)
         auto id = j["id"].get<int64_t>();
         auto r = std::make_shared<Structure>();
         j.get_to(*r);
-        structures.emplace(id, r);
+        Structure::registry.emplace(id, r);
         r->rebuildShapeIndex();
     }
 }
@@ -1110,8 +1110,8 @@ void load_structures_finish(const std::filesystem::path &loc)
     {
         auto id = j["id"].get<int>();
 
-        auto cf = structures.find(id);
-        if(cf == structures.end()) continue;
+        auto cf = Structure::registry.find(id);
+        if(cf == Structure::registry.end()) continue;
 
         if(j.contains(+"tileOverrides")) {
             auto &to = cf->second->tileOverrides;
@@ -1197,7 +1197,7 @@ static json dump_structures()
 {
     json jdata;
 
-    for (auto &[v, r] : structures)
+    for (auto &[v, r] : Structure::registry)
     {   
         auto j = json::object();
         auto j3 = json::object();

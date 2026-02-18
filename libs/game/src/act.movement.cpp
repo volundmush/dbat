@@ -13,6 +13,7 @@
 #include "dbat/game/RoomUtils.hpp"
 #include "dbat/game/Destination.hpp"
 #include "dbat/game/Descriptor.hpp"
+#include "dbat/game/Structure.hpp"
 #include "dbat/game/Zone.hpp"
 #include "dbat/game/act.movement.hpp"
 #include "dbat/game/dg_comm.hpp"
@@ -1038,43 +1039,18 @@ ACMD(do_move)
      */
     if (PLR_FLAGGED(ch, PLR_PILOTING))
     {
-        Object *vehicle = nullptr, *controls = nullptr;
-        int noship = false;
-        if (!(controls = find_control(ch)) && GET_ADMLEVEL(ch) < 1)
+        auto vehicle = std::dynamic_pointer_cast<Structure>(ch->location.al.lock()).get();
+        if(!vehicle)
         {
-            noship = true;
-        }
-        else if (!(vehicle = find_vehicle_by_vnum(GET_OBJ_VAL(controls, VAL_CONTROL_VEHICLE_VNUM))))
-        {
-            noship = true;
-        }
-        if (noship == true)
-        {
-            ch->sendText("Your ship controls are not here or your ship was not found, report to Iovan!\r\n");
+            ch->sendText("You are not in a vehicle!\r\n");
             return;
         }
-        else if (controls && vehicle)
-        {
-            if (GET_FUEL(controls) <= 0)
-            {
-                ch->sendText("The ship is out of fuel!\r\n");
-                return;
-            }
-            drive_in_direction(ch, vehicle, subcmd - 1);
-            if (GET_OBJ_VAL(controls, VAL_CONTROL_SPEED) == 1)
-            {
-                WAIT_STATE(ch, PULSE_2SEC);
-            }
-            else if (GET_OBJ_VAL(controls, VAL_CONTROL_SPEED) == 2)
-            {
-                WAIT_STATE(ch, PULSE_1SEC);
-            }
-            controls = nullptr;
-            vehicle = nullptr;
-            return;
-        }
+        
+        handle_drive_direction(ch, vehicle, subcmd - 1, 0);
+
         return;
     }
+
     if (PLR_FLAGGED(ch, PLR_HEALT))
     {
         ch->sendText("You are inside a healing tank!\r\n");
@@ -1474,17 +1450,13 @@ static void do_doorcmd(Character *ch, Object *obj, int door, int scmd)
     size_t len;
     int num = 0;
     room_rnum other_room = NOWHERE;
-    Object *hatch = nullptr, *obj2 = nullptr, *next_obj, *vehicle = nullptr;
+    Object *hatch = nullptr, *obj2 = nullptr, *next_obj;
 
     std::optional<Destination> ex;
     std::optional<Destination> back;
     auto cdoor = static_cast<Direction>(door);
 
-    if ((obj) && GET_OBJ_TYPE(obj) == ITEM_HATCH)
-    {
-        vehicle = find_vehicle_by_vnum(GET_OBJ_VAL(obj, VAL_HATCH_DEST));
-    }
-    else if ((obj) && GET_OBJ_TYPE(obj) == ITEM_VEHICLE)
+    if ((obj) && GET_OBJ_TYPE(obj) == ITEM_VEHICLE)
     {
         if (auto pdest = real_room(GET_OBJ_VAL(obj, VAL_PORTAL_DEST)) != NOWHERE)
         {
