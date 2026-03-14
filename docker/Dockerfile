@@ -17,14 +17,17 @@ RUN apt-get update \
         build-essential \
         libbsd-dev \
         liburing-dev \
-        zlib1g-dev \
+        libpq-dev \
+    zlib1g-dev \
         ninja-build \
         cmake \
         mold \
         ccache \
         libboost-all-dev \
-        python3.15 \
-        python3.15-venv \
+        python3.14 \
+        python3.14-venv \
+        libffi-dev \
+        python3.14-dev \
         gcc-15 \
         g++-15 \
     && update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-15 150 \

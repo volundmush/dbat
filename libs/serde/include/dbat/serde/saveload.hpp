@@ -1,5 +1,4 @@
 #pragma once
-#include "dbat/net/Base.hpp"
 #include <filesystem>
 #include "json.hpp"
 

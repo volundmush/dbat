@@ -309,10 +309,10 @@ static void handle_pilot_unready(Character *ch);
 static std::expected<VehicleInUse, std::string> validate_drive_conditions(Character *ch);
 static void handle_drive_command(Character *ch, Structure *vehicle, Object *controls, const std::string &arg, const std::string &arg2);
 
-static void handle_drive_land(Character *ch, Structure *vehicle, const std::string &pad);
+static void handle_drive_land(Character *ch, Structure *vehicle, std::string_view pad);
 static void handle_drive_launch(Character *ch, Structure *vehicle, Object *controls);
-static void handle_buoy_launch(Character *ch, Structure *vehicle, const std::string &marker);
-static void handle_buoy_deactivate(Character *ch, const std::string &marker);
+static void handle_buoy_launch(Character *ch, Structure *vehicle, std::string_view marker);
+static void handle_buoy_deactivate(Character *ch, std::string_view marker);
 
 static void handle_pilot_ready(Character *ch)
 {

@@ -3852,9 +3852,10 @@ static void look_out_window(Character *ch, const char *arg)
     }
     else
     {
-        /* We are looking out of a vehicle */
+        /* We are looking out of a vehicle
         if ((vehicle = find_vehicle_by_vnum(GET_OBJ_VAL(viewport, VAL_WINDOW_VIEWPORT))))
-            target = vehicle->location;
+            target = vehicle->location;*/
+        // TODO: that.
     }
     if (!target)
     {

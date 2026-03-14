@@ -58,51 +58,6 @@ static void dump_to_file(const std::filesystem::path &loc, const std::string &na
     // basic_mud_log("Dumping %s to disk took %f seconds.", name, duration);
 }
 
-// dump and load routines...
-static boost::asio::awaitable<void> dump_to_file_async(const std::filesystem::path &loc, const std::string &name, const json &data)
-{
-    if (data.empty())
-        co_return;
-
-    // now gzip dump into another std::string
-    std::string compressed;
-    {
-        boost::iostreams::filtering_streambuf<boost::iostreams::output> outbuf;
-        outbuf.push(boost::iostreams::gzip_compressor());
-        outbuf.push(boost::iostreams::back_inserter(compressed));
-        std::ostream outstream(&outbuf);
-        outstream << jdumps_pretty(data);
-    }
-
-    auto exec = co_await boost::asio::this_coro::executor;
-    boost::asio::stream_file file(exec);
-    boost::system::error_code open_ec;
-    file.open(
-        loc / (name + ".gz"),
-        boost::asio::file_base::create | boost::asio::file_base::write_only | boost::asio::file_base::truncate,
-        open_ec);
-    if (open_ec)
-    {
-        basic_mud_log("Error opening file %s for async dump: %s", (loc / (name + ".gz")).c_str(), open_ec.message().c_str());
-        co_return;
-    }
-
-    boost::system::error_code write_ec;
-    co_await boost::asio::async_write(
-        file,
-        boost::asio::buffer(compressed),
-        boost::asio::redirect_error(boost::asio::use_awaitable, write_ec));
-    if (write_ec)
-    {
-        basic_mud_log("Error writing file %s for async dump: %s", (loc / (name + ".gz")).c_str(), write_ec.message().c_str());
-    }
-    co_return;
-
-    // auto endTime = std::chrono::high_resolution_clock::now();
-    // auto duration = std::chrono::duration<double>(endTime - startTime).count();
-    // basic_mud_log("Dumping %s to disk took %f seconds.", name, duration);
-}
-
 static json load_from_file(const std::filesystem::path &loc, const std::string &name)
 {
     // We'll automatically append ".gz"

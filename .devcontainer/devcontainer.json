@@ -1,17 +1,19 @@
 {
-    "name": "dbat-dev",
-    "dockerComposeFile": ["../docker-compose.yml", "docker-compose.yml"],
-    "service": "dev",
-    "workspaceFolder": "/workspaces/dbat",
-    "shutdownAction": "stopCompose",
-    "remoteUser": "vscode",
-    "customizations": {
-        "vscode": {
-            "extensions": [
-                "ms-vscode.cmake-tools",
-                "ms-vscode.cpptools",
-                "ms-vscode.cpptools-extension-pack"
-            ]
-        }
-    }
+  "name": "dbat-dev",
+  "dockerComposeFile": ["../docker-compose.yml", "docker-compose.yml"],
+  "service": "dev",
+  "workspaceFolder": "/workspaces/dbat",
+  "shutdownAction": "stopCompose",
+  "remoteUser": "root",
+  "updateRemoteUserUID": false,
+  "runArgs": ["--userns=keep-id", "--security-opt=label=disable"],
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-vscode.cmake-tools",
+        "ms-vscode.cpptools",
+        "ms-vscode.cpptools-extension-pack",
+      ],
+    },
+  },
 }

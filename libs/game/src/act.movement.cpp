@@ -1495,6 +1495,7 @@ static void do_doorcmd(Character *ch, Object *obj, int door, int scmd)
     case SCMD_OPEN:
         if (obj)
         {
+            /*
             if ((obj) && GET_OBJ_TYPE(obj) == ITEM_HATCH && (vehicle))
             {
                 OPEN_DOOR(IN_ROOM(ch), vehicle, door);
@@ -1516,6 +1517,8 @@ static void do_doorcmd(Character *ch, Object *obj, int door, int scmd)
                 }
                 vehicle = nullptr;
             }
+             */
+            // TODO: that
             if ((obj) && GET_OBJ_TYPE(obj) == ITEM_VEHICLE && (hatch))
             {
                 OPEN_DOOR(IN_ROOM(ch), hatch, door);
@@ -1557,6 +1560,7 @@ static void do_doorcmd(Character *ch, Object *obj, int door, int scmd)
     case SCMD_CLOSE:
         if (obj)
         {
+            /*
             if ((obj) && GET_OBJ_TYPE(obj) == ITEM_HATCH && (vehicle))
             {
                 CLOSE_DOOR(IN_ROOM(ch), vehicle, door);
@@ -1578,6 +1582,8 @@ static void do_doorcmd(Character *ch, Object *obj, int door, int scmd)
                 }
                 vehicle = NULL;
             }
+             */
+            // TODO: that
             if ((obj) && GET_OBJ_TYPE(obj) == ITEM_VEHICLE && (hatch))
             {
                 CLOSE_DOOR(IN_ROOM(ch), hatch, door);
@@ -1621,11 +1627,14 @@ static void do_doorcmd(Character *ch, Object *obj, int door, int scmd)
     case SCMD_LOCK:
         if (obj)
         {
+            /*
             if ((obj) && GET_OBJ_TYPE(obj) == ITEM_HATCH && (vehicle))
             {
                 LOCK_DOOR(IN_ROOM(ch), vehicle, door);
                 vehicle = NULL;
             }
+             */
+            // TODO: that
             if ((obj) && GET_OBJ_TYPE(obj) == ITEM_VEHICLE && (hatch))
             {
                 LOCK_DOOR(IN_ROOM(ch), hatch, door);
@@ -1653,11 +1662,14 @@ static void do_doorcmd(Character *ch, Object *obj, int door, int scmd)
     case SCMD_UNLOCK:
         if (obj)
         {
+            /*
             if ((obj) && GET_OBJ_TYPE(obj) == ITEM_HATCH && (vehicle))
             {
                 UNLOCK_DOOR(IN_ROOM(ch), vehicle, door);
                 vehicle = NULL;
             }
+             */
+            // TODO: that
             if ((obj) && GET_OBJ_TYPE(obj) == ITEM_VEHICLE && (hatch))
             {
                 UNLOCK_DOOR(IN_ROOM(ch), hatch, door);
@@ -2132,7 +2144,8 @@ static int do_simple_leave(Character *ch, Object *obj, int need_specials_check)
 
     if (GET_OBJ_TYPE(obj) != ITEM_PORTAL)
     {
-        vehicle = find_vehicle_by_vnum(GET_OBJ_VAL(obj, VAL_HATCH_DEST));
+        //vehicle = find_vehicle_by_vnum(GET_OBJ_VAL(obj, VAL_HATCH_DEST));
+        // TODO: that.
     }
 
     if (vehicle == nullptr && GET_OBJ_TYPE(obj) != ITEM_PORTAL)

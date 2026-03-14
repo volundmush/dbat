@@ -63,7 +63,7 @@ SOURCES.txt
 top_level.txt
 dist/
 *.pid
-
+.cache/
 # CLion
 .idea/
 cmake-*

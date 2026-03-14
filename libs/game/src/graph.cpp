@@ -121,7 +121,7 @@ std::optional<std::vector<PathNode>> find_bfs_path(Location &src, Location &targ
     return std::nullopt;
 }
 
-/* 
+/*
 This also does a Breadth-First traversal but the goal isn't to find a destination, but to gather our surroundings
 based on coordinates. The first time we visit a given coordinate it 'wins', we will not be overwriting it in the
 output.
@@ -249,11 +249,14 @@ ACMD(do_sradar)
     {
         noship = true;
     }
+    /*
     else if (!(vehicle = find_vehicle_by_vnum(GET_OBJ_VAL(controls, VAL_CONTROL_VEHICLE_VNUM))))
     {
         ch->sendText("@wYou can't find anything to pilot.\r\n");
         return;
     }
+     */
+    // TODO: that
 
     if (noship == false && vehicle->location.getTileType() != SECT_SPACE)
     {
