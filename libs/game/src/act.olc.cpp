@@ -9,7 +9,7 @@
 #include "dbat/game/Parse.hpp"
 #include "dbat/game/ID.hpp"
 #include "dbat/game/interpreter.hpp"
-#include "volcano/util/Enum.hpp"
+#include "dbat/util/Enum.hpp"
 #include "dbat/game/Flags.hpp"
 
 #include "dbat/game/const/WearSlot.hpp"
@@ -76,7 +76,7 @@ Alias: .z
 .zone <id>
     Examine a zone.
 
-.zone/create <name>[=<parent ID>] 
+.zone/create <name>[=<parent ID>]
     Create a new zone with optional parent.
 
 .zone/delete <id>=YES
@@ -163,7 +163,7 @@ ACMD(do_mush_zone)
 
     std::string_view op = cdata.switches.empty() ? "examine" : cdata.switches[0];
 
-    auto oper = volcano::util::partialMatch(op, kOps);
+    auto oper = dbat::util::partialMatch(op, kOps);
 
     if (!oper)
     {
@@ -539,7 +539,7 @@ constexpr std::string_view mushExitsHelp = R"(
 MUSH-style Exits Editor
 =============================================================================
 The following exit directions are available:
-- north, east, south, west, up, down, northeast, southeast, southwest, 
+- north, east, south, west, up, down, northeast, southeast, southwest,
 - northwest, inside, outside
 
 This command always targets the exits in your current location.
@@ -560,12 +560,12 @@ Alias: .ex
 
 .exit/destination <direction>=<LocationID>
     Create/open or re-link an exit.
-    In a grid area this will create an exit override that can lead anywhere, 
+    In a grid area this will create an exit override that can lead anywhere,
     but this is best used only on edges. The automapper will become very
     confused otherwise if default bounds are in play.
 
 .exit/key <direction>=<key vnum>
-   The object vnum that'll be used as a key. 
+   The object vnum that'll be used as a key.
    Set to NONE or -1 to clear.
 
 .exit/dclock <direction>=<difficulty>
@@ -580,7 +580,7 @@ Alias: .ex
 
 .exit/clear <direction>
     Delete/close/wipe an exit.
-    This won't do anything in a grid area where you're in default 
+    This won't do anything in a grid area where you're in default
     bounds without overrides.
 
 .exit/help
@@ -616,7 +616,7 @@ ACMD(do_mush_exit)
 {
     std::string_view op = cdata.switches.empty() ? "list" : cdata.switches[0];
 
-    auto oper = volcano::util::partialMatch(op, kExitOps);
+    auto oper = dbat::util::partialMatch(op, kExitOps);
 
     if (!oper)
     {
@@ -642,7 +642,7 @@ ACMD(do_mush_exit)
     }
     case ExitOp::Clear:
     {
-        auto dirRes = volcano::util::chooseEnum<Direction>(cdata.lstrim, "Direction");
+        auto dirRes = dbat::util::chooseEnum<Direction>(cdata.lstrim, "Direction");
         if (!dirRes)
         {
             ch->sendText(dirRes.error());
@@ -667,7 +667,7 @@ ACMD(do_mush_exit)
     }
     case ExitOp::Destination:
     {
-        auto dirRes = volcano::util::chooseEnum<Direction>(cdata.lstrim, "Direction");
+        auto dirRes = dbat::util::chooseEnum<Direction>(cdata.lstrim, "Direction");
         if (!dirRes)
         {
             ch->sendText(dirRes.error());
@@ -699,7 +699,7 @@ ACMD(do_mush_exit)
     }
     case ExitOp::Key:
     {
-        auto dirRes = volcano::util::chooseEnum<Direction>(cdata.lstrim, "Direction");
+        auto dirRes = dbat::util::chooseEnum<Direction>(cdata.lstrim, "Direction");
         if (!dirRes)
         {
             ch->sendText(dirRes.error());
@@ -739,7 +739,7 @@ ACMD(do_mush_exit)
     }
     case ExitOp::Flags:
     {
-        auto dirRes = volcano::util::chooseEnum<Direction>(cdata.lstrim, "Direction");
+        auto dirRes = dbat::util::chooseEnum<Direction>(cdata.lstrim, "Direction");
         if (!dirRes)
         {
             ch->sendText(dirRes.error());
@@ -765,7 +765,7 @@ ACMD(do_mush_exit)
     }
     case ExitOp::DCLock:
     {
-        auto dirRes = volcano::util::chooseEnum<Direction>(cdata.lstrim, "Direction");
+        auto dirRes = dbat::util::chooseEnum<Direction>(cdata.lstrim, "Direction");
         if (!dirRes)
         {
             ch->sendText(dirRes.error());
@@ -793,7 +793,7 @@ ACMD(do_mush_exit)
     }
     case ExitOp::DCHide:
     {
-        auto dirRes = volcano::util::chooseEnum<Direction>(cdata.lstrim, "Direction");
+        auto dirRes = dbat::util::chooseEnum<Direction>(cdata.lstrim, "Direction");
         if (!dirRes)
         {
             ch->sendText(dirRes.error());
@@ -854,12 +854,12 @@ ACMD(do_mush_choices)
     if (op.empty())
     {
         ch->sendText("Usage: .choices/<type>\r\n");
-        auto choices = volcano::util::getEnumNameList<ChoiceOp>();
+        auto choices = dbat::util::getEnumNameList<ChoiceOp>();
         ch->sendFmt("Available Types: {}\r\n", fmt::join(choices, ", "));
         return;
     }
 
-    auto oper = volcano::util::chooseEnum<ChoiceOp>(op, "Choice");
+    auto oper = dbat::util::chooseEnum<ChoiceOp>(op, "Choice");
 
     if (!oper)
     {
@@ -872,70 +872,70 @@ ACMD(do_mush_choices)
     switch (choice)
     {
     case ChoiceOp::Sensei:
-        ch->sendFmt("Sensei Choices: {}", fmt::join(volcano::util::getEnumNameList<Sensei>(), ", "));
+        ch->sendFmt("Sensei Choices: {}", fmt::join(dbat::util::getEnumNameList<Sensei>(), ", "));
         return;
     case ChoiceOp::Race:
-        ch->sendFmt("Race Choices: {}", fmt::join(volcano::util::getEnumNameList<Race>(), ", "));
+        ch->sendFmt("Race Choices: {}", fmt::join(dbat::util::getEnumNameList<Race>(), ", "));
         return;
     case ChoiceOp::Form:
-        ch->sendFmt("Form Choices: {}", fmt::join(volcano::util::getEnumNameList<Form>(), ", "));
+        ch->sendFmt("Form Choices: {}", fmt::join(dbat::util::getEnumNameList<Form>(), ", "));
         return;
     case ChoiceOp::WhereFlag:
-        ch->sendFmt("Where Flag Choices: {}", fmt::join(volcano::util::getEnumNameList<WhereFlag>(), ", "));
+        ch->sendFmt("Where Flag Choices: {}", fmt::join(dbat::util::getEnumNameList<WhereFlag>(), ", "));
         return;
     case ChoiceOp::RoomFlag:
-        ch->sendFmt("Room Flag Choices: {}", fmt::join(volcano::util::getEnumNameList<RoomFlag>(), ", "));
+        ch->sendFmt("Room Flag Choices: {}", fmt::join(dbat::util::getEnumNameList<RoomFlag>(), ", "));
         return;
     case ChoiceOp::ZoneFlag:
-        ch->sendFmt("Zone Flag Choices: {}", fmt::join(volcano::util::getEnumNameList<ZoneFlag>(), ", "));
+        ch->sendFmt("Zone Flag Choices: {}", fmt::join(dbat::util::getEnumNameList<ZoneFlag>(), ", "));
         return;
     case ChoiceOp::ExitFlag:
-        ch->sendFmt("Exit Flag Choices: {}", fmt::join(volcano::util::getEnumNameList<ExitFlag>(), ", "));
+        ch->sendFmt("Exit Flag Choices: {}", fmt::join(dbat::util::getEnumNameList<ExitFlag>(), ", "));
         return;
     case ChoiceOp::SectorType:
-        ch->sendFmt("Sector Type Choices: {}", fmt::join(volcano::util::getEnumNameList<SectorType>(), ", "));
+        ch->sendFmt("Sector Type Choices: {}", fmt::join(dbat::util::getEnumNameList<SectorType>(), ", "));
         return;
     case ChoiceOp::Size:
-        ch->sendFmt("Size Choices: {}", fmt::join(volcano::util::getEnumNameList<Size>(), ", "));
+        ch->sendFmt("Size Choices: {}", fmt::join(dbat::util::getEnumNameList<Size>(), ", "));
         return;
     case ChoiceOp::Sex:
-        ch->sendFmt("Sex Choices: {}", fmt::join(volcano::util::getEnumNameList<Sex>(), ", "));
+        ch->sendFmt("Sex Choices: {}", fmt::join(dbat::util::getEnumNameList<Sex>(), ", "));
         return;
     case ChoiceOp::Appearance:
-        ch->sendFmt("Appearance Choices: {}", fmt::join(volcano::util::getEnumNameList<Appearance>(), ", "));
+        ch->sendFmt("Appearance Choices: {}", fmt::join(dbat::util::getEnumNameList<Appearance>(), ", "));
         return;
     case ChoiceOp::CharacterFlag:
-        ch->sendFmt("Character Flag Choices: {}", fmt::join(volcano::util::getEnumNameList<CharacterFlag>(), ", "));
+        ch->sendFmt("Character Flag Choices: {}", fmt::join(dbat::util::getEnumNameList<CharacterFlag>(), ", "));
         return;
     case ChoiceOp::PlayerFlag:
-        ch->sendFmt("Player Flag Choices: {}", fmt::join(volcano::util::getEnumNameList<PlayerFlag>(), ", "));
+        ch->sendFmt("Player Flag Choices: {}", fmt::join(dbat::util::getEnumNameList<PlayerFlag>(), ", "));
         return;
     case ChoiceOp::MobFlag:
-        ch->sendFmt("Mob Flag Choices: {}", fmt::join(volcano::util::getEnumNameList<MobFlag>(), ", "));
+        ch->sendFmt("Mob Flag Choices: {}", fmt::join(dbat::util::getEnumNameList<MobFlag>(), ", "));
         return;
     case ChoiceOp::PrefFlag:
-        ch->sendFmt("Pref Flag Choices: {}", fmt::join(volcano::util::getEnumNameList<PrefFlag>(), ", "));
+        ch->sendFmt("Pref Flag Choices: {}", fmt::join(dbat::util::getEnumNameList<PrefFlag>(), ", "));
         return;
     case ChoiceOp::AffectFlag:
-        ch->sendFmt("Affect Flag Choices: {}", fmt::join(volcano::util::getEnumNameList<AffectFlag>(), ", "));
+        ch->sendFmt("Affect Flag Choices: {}", fmt::join(dbat::util::getEnumNameList<AffectFlag>(), ", "));
         return;
     case ChoiceOp::ItemType:
-        ch->sendFmt("Item Type Choices: {}", fmt::join(volcano::util::getEnumNameList<ItemType>(), ", "));
+        ch->sendFmt("Item Type Choices: {}", fmt::join(dbat::util::getEnumNameList<ItemType>(), ", "));
         return;
     case ChoiceOp::WearFlag:
-        ch->sendFmt("Wear Flag Choices: {}", fmt::join(volcano::util::getEnumNameList<WearFlag>(), ", "));
+        ch->sendFmt("Wear Flag Choices: {}", fmt::join(dbat::util::getEnumNameList<WearFlag>(), ", "));
         return;
     case ChoiceOp::WearSlot:
-        ch->sendFmt("Wear Slot Choices: {}", fmt::join(volcano::util::getEnumNameList<WearSlot>(), ", "));
+        ch->sendFmt("Wear Slot Choices: {}", fmt::join(dbat::util::getEnumNameList<WearSlot>(), ", "));
         return;
     case ChoiceOp::ItemFlag:
-        ch->sendFmt("Item Flag Choices: {}", fmt::join(volcano::util::getEnumNameList<ItemFlag>(), ", "));
+        ch->sendFmt("Item Flag Choices: {}", fmt::join(dbat::util::getEnumNameList<ItemFlag>(), ", "));
         return;
     case ChoiceOp::AdminFlag:
-        ch->sendFmt("Admin Flag Choices: {}", fmt::join(volcano::util::getEnumNameList<AdminFlag>(), ", "));
+        ch->sendFmt("Admin Flag Choices: {}", fmt::join(dbat::util::getEnumNameList<AdminFlag>(), ", "));
         return;
     case ChoiceOp::Direction:
-        ch->sendFmt("Direction Choices: {}", fmt::join(volcano::util::getEnumNameList<Direction>(), ", "));
+        ch->sendFmt("Direction Choices: {}", fmt::join(dbat::util::getEnumNameList<Direction>(), ", "));
         return;
     }
 }
@@ -991,7 +991,7 @@ ACMD(do_mush_location)
 {
     std::string_view op = cdata.switches.empty() ? "examine" : cdata.switches[0];
 
-    auto oper = volcano::util::chooseEnum<LocationOp>(op, "Location Operation");
+    auto oper = dbat::util::chooseEnum<LocationOp>(op, "Location Operation");
 
     if (!oper)
     {
@@ -1066,7 +1066,7 @@ ACMD(do_mush_location)
                 ch->sendFmt("Current sector: {}\r\n", loc.getSectorType());
                 return;
             }
-            auto sectorRes = volcano::util::chooseEnum<SectorType>(cdata.rstrim, "Sector Type");
+            auto sectorRes = dbat::util::chooseEnum<SectorType>(cdata.rstrim, "Sector Type");
             if (!sectorRes) {
                 ch->sendText(sectorRes.error());
                 return;
@@ -1188,7 +1188,7 @@ enum class ResOp : uint8_t {
 ACMD(do_mush_reset) {
     std::string_view op = cdata.switches.empty() ? "examine" : cdata.switches[0];
 
-    auto oper = volcano::util::chooseEnum<ResOp>(op, "Reset Operation");
+    auto oper = dbat::util::chooseEnum<ResOp>(op, "Reset Operation");
 
     if (!oper)
     {
@@ -1518,11 +1518,11 @@ enum class CharacterBaseOps {
 using CharacterBaseOpChoice = std::variant<HasMudStringsOp, HasExtraDescOps, CharacterBaseOps>;
 
 Result<CharacterBaseOpChoice> parseCharacterBaseOp(std::string_view op) {
-    auto mudStrOp = volcano::util::chooseEnum<HasMudStringsOp>(op, "MudStrings Operation");
+    auto mudStrOp = dbat::util::chooseEnum<HasMudStringsOp>(op, "MudStrings Operation");
     if(mudStrOp) return mudStrOp.value();
-    auto exDescOp = volcano::util::chooseEnum<HasExtraDescOps>(op, "ExtraDesc Operation");
+    auto exDescOp = dbat::util::chooseEnum<HasExtraDescOps>(op, "ExtraDesc Operation");
     if(exDescOp) return exDescOp.value();
-    auto charBaseOp = volcano::util::chooseEnum<CharacterBaseOps>(op, "CharacterBase Operation");
+    auto charBaseOp = dbat::util::chooseEnum<CharacterBaseOps>(op, "CharacterBase Operation");
     if(charBaseOp) return charBaseOp.value();
     return err("Invalid operation.");
 }
@@ -1538,7 +1538,7 @@ Result<std::string> handleCharacterBaseOps(CharacterBase* cb, CharacterBaseOpCho
         auto cbOp = std::get<CharacterBaseOps>(op);
         switch(cbOp) {
             case CharacterBaseOps::Race: {
-                return volcano::util::handleSetEnum<Race>(cb->race, cdata.rstrim, "Race");
+                return dbat::util::handleSetEnum<Race>(cb->race, cdata.rstrim, "Race");
             }
             case CharacterBaseOps::Model: {
                 // only Androids use model...
@@ -1546,18 +1546,18 @@ Result<std::string> handleCharacterBaseOps(CharacterBase* cb, CharacterBaseOpCho
                     return err("Only Androids have a Model.");
                 }
                 AndroidModel model;
-                auto res = volcano::util::handleSetEnum<AndroidModel>(model, cdata.rstrim, "Model");
+                auto res = dbat::util::handleSetEnum<AndroidModel>(model, cdata.rstrim, "Model");
                 if(res) {
                     cb->model = model;
                 }
                 return res;
             }
             case CharacterBaseOps::Sensei:
-                return volcano::util::handleSetEnum<Sensei>(cb->sensei, cdata.rstrim, "Sensei");
+                return dbat::util::handleSetEnum<Sensei>(cb->sensei, cdata.rstrim, "Sensei");
             case CharacterBaseOps::Sex:
-                return volcano::util::handleSetEnum<Sex>(cb->sex, cdata.rstrim, "Sex");
+                return dbat::util::handleSetEnum<Sex>(cb->sex, cdata.rstrim, "Sex");
             case CharacterBaseOps::Size:
-                return volcano::util::handleSetEnum<Size>(cb->size, cdata.rstrim, "Size");
+                return dbat::util::handleSetEnum<Size>(cb->size, cdata.rstrim, "Size");
             case CharacterBaseOps::CharacterFlags:
                 return handleFlagOps<CharacterFlag>(cb->character_flags, cdata.rstrim, "Character Flags");
             case CharacterBaseOps::MobFlags:
@@ -1596,7 +1596,7 @@ Remember that the /switches can partial match.
 .mproto/stat <vnum>/[<stat>[=<value>]]
     Set a stat on the given Mob Prototype. Omit the value to see options.
     Examples:
-    .mproto/stat 50 to view all stats that mob proto 50 can have. 
+    .mproto/stat 50 to view all stats that mob proto 50 can have.
     .mproto/stat 50/strength to view info about strength,
     .mproto/stat 50/strength=10 to set strength to 10.
 
@@ -1745,14 +1745,14 @@ void handleMobProtoOps(Character *ch, MobProtoOps op, CommandData& cdata) {
 ACMD(do_mush_mproto) {
     std::string_view op = cdata.switches.empty() ? "" : cdata.switches[0];
 
-    auto oper = volcano::util::chooseEnum<MobProtoOps>(op, "MobProto Operation");
+    auto oper = dbat::util::chooseEnum<MobProtoOps>(op, "MobProto Operation");
     if(oper) {
         handleMobProtoOps(ch, oper.value(), cdata);
         return;
     }
 
     // Or are we adding a Script Prototype Vnum to it...?
-    auto protoSc = volcano::util::chooseEnum<HasProtoScriptOps>(op, "ProtoScript Operation");
+    auto protoSc = dbat::util::chooseEnum<HasProtoScriptOps>(op, "ProtoScript Operation");
     if(protoSc) {
         auto mobRes = getMobProto(cdata.lstrim);
         if(!mobRes) {
@@ -1828,13 +1828,13 @@ enum class ObjectBaseOps {
 using ObjectBaseOpChoice = std::variant<HasMudStringsOp, HasExtraDescOps, HasPickyOps, ObjectBaseOps>;
 
 Result<ObjectBaseOpChoice> parseObjectBaseOp(std::string_view op) {
-    auto mudStrOp = volcano::util::chooseEnum<HasMudStringsOp>(op, "MudStrings Operation");
+    auto mudStrOp = dbat::util::chooseEnum<HasMudStringsOp>(op, "MudStrings Operation");
     if(mudStrOp) return mudStrOp.value();
-    auto exDescOp = volcano::util::chooseEnum<HasExtraDescOps>(op, "ExtraDesc Operation");
+    auto exDescOp = dbat::util::chooseEnum<HasExtraDescOps>(op, "ExtraDesc Operation");
     if(exDescOp) return exDescOp.value();
-    auto pickyOp = volcano::util::chooseEnum<HasPickyOps>(op, "Picky Operation");
+    auto pickyOp = dbat::util::chooseEnum<HasPickyOps>(op, "Picky Operation");
     if(pickyOp) return pickyOp.value();
-    auto objBaseOp = volcano::util::chooseEnum<ObjectBaseOps>(op, "ObjectBase Operation");
+    auto objBaseOp = dbat::util::chooseEnum<ObjectBaseOps>(op, "ObjectBase Operation");
     if(objBaseOp) return objBaseOp.value();
     return err("Invalid operation.");
 }
@@ -1853,7 +1853,7 @@ Result<std::string> handleObjectBaseOps(ObjectBase* ob, ObjectBaseOpChoice op, C
         auto obOp = std::get<ObjectBaseOps>(op);
         switch(obOp) {
             case ObjectBaseOps::ItemType:
-                return volcano::util::handleSetEnum<ItemType>(ob->type_flag, cdata.rstrim, "Item Type");
+                return dbat::util::handleSetEnum<ItemType>(ob->type_flag, cdata.rstrim, "Item Type");
             case ObjectBaseOps::Affected: {
                 //return handleFlagOps<AffectLocation>(ob->affected, cdata.rstrim, "Affected");
                 return err("Not implemented yet.");
@@ -1865,7 +1865,7 @@ Result<std::string> handleObjectBaseOps(ObjectBase* ob, ObjectBaseOpChoice op, C
             case ObjectBaseOps::AffectFlags:
                 return handleFlagOps<AffectFlag>(ob->affect_flags, cdata.rstrim, "Affect Flags");
             case ObjectBaseOps::Size:
-                return volcano::util::handleSetEnum<Size>(ob->size, cdata.rstrim, "Size");
+                return dbat::util::handleSetEnum<Size>(ob->size, cdata.rstrim, "Size");
         }
     }
     return err("Invalid operation.");
@@ -1894,7 +1894,7 @@ Remember that the /switches can partial match.
 .oproto/stat <vnum>/[<stat>[=<value>]]
     Set a stat on the given Prototype. Omit the value to see options.
     Examples:
-    .oproto/stat 50 to view all stats that proto 50 can have. 
+    .oproto/stat 50 to view all stats that proto 50 can have.
     .oproto/stat 50/strength to view info about strength,
     .oproto/stat 50/strength=10 to set strength to 10.
 
@@ -2027,14 +2027,14 @@ void handleObjProtoOps(Character *ch, ObjProtoOps op, CommandData& cdata) {
 ACMD(do_mush_oproto) {
     std::string_view op = cdata.switches.empty() ? "" : cdata.switches[0];
 
-    auto oper = volcano::util::chooseEnum<ObjProtoOps>(op, "ObjProto Operation");
+    auto oper = dbat::util::chooseEnum<ObjProtoOps>(op, "ObjProto Operation");
     if(oper) {
         handleObjProtoOps(ch, oper.value(), cdata);
         return;
     }
 
     // Or are we adding a Script Prototype Vnum to it...?
-    auto protoSc = volcano::util::chooseEnum<HasProtoScriptOps>(op, "ProtoScript Operation");
+    auto protoSc = dbat::util::chooseEnum<HasProtoScriptOps>(op, "ProtoScript Operation");
     if(protoSc) {
         auto objRes = getObjProto(cdata.lstrim);
         if(!objRes) {

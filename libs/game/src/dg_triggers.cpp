@@ -29,7 +29,7 @@
 //#include "dbat/game/spell_parser.hpp"
 #include "dbat/game/act.movement.hpp"
 #include "dbat/game/spells.hpp"
-#include "volcano/util/FilterWeak.hpp"
+#include "dbat/util/FilterWeak.hpp"
 #include "dbat/game/utils.hpp"
 #include "dbat/game/TimeInfo.hpp"
 
@@ -136,7 +136,7 @@ void random_mtrigger(Character *ch)
         return;
 
     std::vector<std::weak_ptr<DgScript>> scripts = ch->getScripts();
-    for (const auto &t : volcano::util::filter_shared(scripts))
+    for (const auto &t : dbat::util::filter_shared(scripts))
     {
         if (TRIGGER_CHECK(t, MTRIG_RANDOM) &&
             (Random::get<int>(1, 100) <= GET_TRIG_NARG(t)))
@@ -155,7 +155,7 @@ void bribe_mtrigger(Character *ch, Character *actor, int amount)
         return;
 
     auto scripts = ch->getScripts();
-    for (const auto &t : volcano::util::filter_shared(scripts))
+    for (const auto &t : dbat::util::filter_shared(scripts))
     {
         if (TRIGGER_CHECK(t, MTRIG_BRIBE) && (amount >= GET_TRIG_NARG(t)))
         {
@@ -178,7 +178,7 @@ void greet_memory_mtrigger(Character *actor)
         return;
 
     auto people = actor->location.getPeople();
-    for (auto ch : volcano::util::filter_raw(people))
+    for (auto ch : dbat::util::filter_raw(people))
     {
         if (!SCRIPT_MEM(ch) || !AWAKE(ch) || FIGHTING(ch) || (ch == actor) ||
             AFF_FLAGGED(ch, AFF_CHARM))
@@ -198,7 +198,7 @@ void greet_memory_mtrigger(Character *actor)
             if (mem && !command_performed)
             {
                 auto scripts = ch->getScripts();
-                for (const auto &t : volcano::util::filter_shared(scripts))
+                for (const auto &t : dbat::util::filter_shared(scripts))
                 {
                     if (IS_SET(GET_TRIG_TYPE(t), MTRIG_MEMORY) &&
                         ch->canSee(actor) &&
@@ -243,7 +243,7 @@ int greet_mtrigger(Character *actor, int dir)
         return true;
 
     auto people = actor->location.getPeople();
-    for (auto ch : volcano::util::filter_raw(people))
+    for (auto ch : dbat::util::filter_raw(people))
     {
         if (!SCRIPT_CHECK(ch, MTRIG_GREET | MTRIG_GREET_ALL) ||
             !AWAKE(ch) || FIGHTING(ch) || (ch == actor) ||
@@ -253,7 +253,7 @@ int greet_mtrigger(Character *actor, int dir)
             continue;
 
         auto scripts = ch->getScripts();
-        for (const auto &t : volcano::util::filter_shared(scripts))
+        for (const auto &t : dbat::util::filter_shared(scripts))
         {
             if (((IS_SET(GET_TRIG_TYPE(t), MTRIG_GREET) && ch->canSee(actor)) ||
                  IS_SET(GET_TRIG_TYPE(t), MTRIG_GREET_ALL)) &&
@@ -283,7 +283,7 @@ void entry_memory_mtrigger(Character *ch)
         return;
 
     auto people = ch->location.getPeople();
-    for (auto actor : volcano::util::filter_raw(people))
+    for (auto actor : dbat::util::filter_raw(people))
     {
         if (actor != ch && SCRIPT_MEM(ch))
         {
@@ -297,7 +297,7 @@ void entry_memory_mtrigger(Character *ch)
                     else
                     {
                         auto scripts = ch->getScripts();
-                        for (const auto &t : volcano::util::filter_shared(scripts))
+                        for (const auto &t : dbat::util::filter_shared(scripts))
                         {
                             if (TRIGGER_CHECK(t, MTRIG_MEMORY) && (Random::get<int>(1, 100) <=
                                                                    GET_TRIG_NARG(t)))
@@ -336,7 +336,7 @@ int entry_mtrigger(Character *ch)
         return 1;
 
     auto scripts = ch->getScripts();
-    for (const auto &t : volcano::util::filter_shared(scripts))
+    for (const auto &t : dbat::util::filter_shared(scripts))
     {
         if (TRIGGER_CHECK(t, MTRIG_ENTRY) && (Random::get<int>(1, 100) <= GET_TRIG_NARG(t)))
         {
@@ -356,14 +356,14 @@ int command_mtrigger(Character *actor, std::string_view cmd, std::string_view ar
         return 0;
 
     auto people = actor->location.getPeople();
-    for (auto ch : volcano::util::filter_raw(people))
+    for (auto ch : dbat::util::filter_raw(people))
     {
 
         if (SCRIPT_CHECK(ch, MTRIG_COMMAND) && !AFF_FLAGGED(ch, AFF_CHARM) &&
             (actor != ch))
         {
             auto scripts = ch->getScripts();
-            for (const auto &t : volcano::util::filter_shared(scripts))
+            for (const auto &t : dbat::util::filter_shared(scripts))
             {
                 if (!TRIGGER_CHECK(t, MTRIG_COMMAND))
                     continue;
@@ -396,14 +396,14 @@ void speech_mtrigger(Character *actor, char *str)
     char buf[MAX_INPUT_LENGTH];
 
     auto people = actor->location.getPeople();
-    for (auto ch : volcano::util::filter_raw(people))
+    for (auto ch : dbat::util::filter_raw(people))
     {
 
         if (SCRIPT_CHECK(ch, MTRIG_SPEECH) && AWAKE(ch) &&
             !AFF_FLAGGED(ch, AFF_CHARM) && (actor != ch))
         {
             auto scripts = ch->getScripts();
-            for (const auto &t : volcano::util::filter_shared(scripts))
+            for (const auto &t : dbat::util::filter_shared(scripts))
             {
                 if (!TRIGGER_CHECK(t, MTRIG_SPEECH))
                     continue;
@@ -437,7 +437,7 @@ void act_mtrigger(Character *ch, char *str, Character *actor, Character *victim,
         (actor != ch))
     {
         auto scripts = ch->getScripts();
-        for (const auto &t : volcano::util::filter_shared(scripts))
+        for (const auto &t : dbat::util::filter_shared(scripts))
         {
             if (!TRIGGER_CHECK(t, MTRIG_ACT))
                 continue;
@@ -486,7 +486,7 @@ void fight_mtrigger(Character *ch)
         return;
 
     auto scripts = ch->getScripts();
-    for (const auto &t : volcano::util::filter_shared(scripts))
+    for (const auto &t : dbat::util::filter_shared(scripts))
     {
         if (TRIGGER_CHECK(t, MTRIG_FIGHT) &&
             (Random::get<int>(1, 100) <= GET_TRIG_NARG(t)))
@@ -513,7 +513,7 @@ void hitprcnt_mtrigger(Character *ch)
         return;
 
     auto scripts = ch->getScripts();
-    for (const auto &t : volcano::util::filter_shared(scripts))
+    for (const auto &t : dbat::util::filter_shared(scripts))
     {
         if (TRIGGER_CHECK(t, MTRIG_HITPRCNT) && GET_MAX_HIT(ch) &&
             (GET_HIT(ch) <= (GET_MAX_HIT(ch) / 100) * GET_TRIG_NARG(t)))
@@ -536,7 +536,7 @@ int receive_mtrigger(Character *ch, Character *actor, Object *obj)
         return 1;
 
     auto scripts = ch->getScripts();
-    for (const auto &t : volcano::util::filter_shared(scripts))
+    for (const auto &t : dbat::util::filter_shared(scripts))
     {
         if (TRIGGER_CHECK(t, MTRIG_RECEIVE) &&
             (Random::get<int>(1, 100) <= GET_TRIG_NARG(t)))
@@ -563,7 +563,7 @@ int death_mtrigger(Character *ch, Character *actor)
         return 1;
 
     auto scripts = ch->getScripts();
-    for (const auto &t : volcano::util::filter_shared(scripts))
+    for (const auto &t : dbat::util::filter_shared(scripts))
     {
         if (TRIGGER_CHECK(t, MTRIG_DEATH) &&
             (Random::get<int>(1, 100) <= GET_TRIG_NARG(t)))
@@ -585,7 +585,7 @@ void load_mtrigger(Character *ch)
         return;
 
     auto scripts = ch->getScripts();
-    for (const auto &t : volcano::util::filter_shared(scripts))
+    for (const auto &t : dbat::util::filter_shared(scripts))
     {
         if (TRIGGER_CHECK(t, MTRIG_LOAD) &&
             (Random::get<int>(1, 100) <= GET_TRIG_NARG(t)))
@@ -616,7 +616,7 @@ int cast_mtrigger(Character *actor, Character *ch, int spellnum)
         return 1;
 
     auto scripts = ch->getScripts();
-    for (const auto &t : volcano::util::filter_shared(scripts))
+    for (const auto &t : dbat::util::filter_shared(scripts))
     {
         if (TRIGGER_CHECK(t, MTRIG_CAST) &&
             (Random::get<int>(1, 100) <= GET_TRIG_NARG(t)))
@@ -639,7 +639,7 @@ int leave_mtrigger(Character *actor, int dir)
     if (!valid_dg_target(actor, DG_ALLOW_GODS))
         return 1;
     auto people = actor->location.getPeople();
-    for (auto ch : volcano::util::filter_raw(people))
+    for (auto ch : dbat::util::filter_raw(people))
     {
         if (!SCRIPT_CHECK(ch, MTRIG_LEAVE) ||
             !AWAKE(ch) || FIGHTING(ch) || (ch == actor) ||
@@ -647,7 +647,7 @@ int leave_mtrigger(Character *actor, int dir)
             continue;
 
         auto scripts = ch->getScripts();
-        for (const auto &t : volcano::util::filter_shared(scripts))
+        for (const auto &t : dbat::util::filter_shared(scripts))
         {
             if ((IS_SET(GET_TRIG_TYPE(t), MTRIG_LEAVE)) &&
                 t->isReady() && (Random::get<int>(1, 100) <= GET_TRIG_NARG(t)))
@@ -668,7 +668,7 @@ int door_mtrigger(Character *actor, int subcmd, int dir)
 {
     char buf[MAX_INPUT_LENGTH];
     auto people = actor->location.getPeople();
-    for (auto ch : volcano::util::filter_raw(people))
+    for (auto ch : dbat::util::filter_raw(people))
     {
         if (!SCRIPT_CHECK(ch, MTRIG_DOOR) ||
             !AWAKE(ch) || FIGHTING(ch) || (ch == actor) ||
@@ -676,7 +676,7 @@ int door_mtrigger(Character *actor, int subcmd, int dir)
             continue;
 
         auto scripts = ch->getScripts();
-        for (const auto &t : volcano::util::filter_shared(scripts))
+        for (const auto &t : dbat::util::filter_shared(scripts))
         {
             if (IS_SET(GET_TRIG_TYPE(t), MTRIG_DOOR) && ch->canSee(actor) &&
                 t->isReady() && (Random::get<int>(1, 100) <= GET_TRIG_NARG(t)))
@@ -704,7 +704,7 @@ void time_mtrigger(Character *ch)
         return;
 
     auto scripts = ch->getScripts();
-    for (const auto &t : volcano::util::filter_shared(scripts))
+    for (const auto &t : dbat::util::filter_shared(scripts))
     {
         if (TRIGGER_CHECK(t, MTRIG_TIME) &&
             (time_info.hours == GET_TRIG_NARG(t)))
@@ -725,7 +725,7 @@ void interval_mtrigger(Character *ch, int trigFlag)
         return;
 
     auto scripts = ch->getScripts();
-    for (const auto &t : volcano::util::filter_shared(scripts))
+    for (const auto &t : dbat::util::filter_shared(scripts))
     {
         if (TRIGGER_CHECK(t, trigFlag))
         {
@@ -746,7 +746,7 @@ void random_otrigger(Object *obj)
         return;
 
     auto scripts = obj->getScripts();
-    for (const auto &t : volcano::util::filter_shared(scripts))
+    for (const auto &t : dbat::util::filter_shared(scripts))
     {
         if (TRIGGER_CHECK(t, OTRIG_RANDOM) &&
             (Random::get<int>(1, 100) <= GET_TRIG_NARG(t)))
@@ -764,7 +764,7 @@ void timer_otrigger(Object *obj)
         return;
 
     auto scripts = obj->getScripts();
-    for (const auto &t : volcano::util::filter_shared(scripts))
+    for (const auto &t : dbat::util::filter_shared(scripts))
     {
         if (TRIGGER_CHECK(t, OTRIG_TIMER))
         {
@@ -783,7 +783,7 @@ int get_otrigger(Object *obj, Character *actor)
         return 1;
 
     auto scripts = obj->getScripts();
-    for (const auto &t : volcano::util::filter_shared(scripts))
+    for (const auto &t : dbat::util::filter_shared(scripts))
     {
         if (TRIGGER_CHECK(t, OTRIG_GET) && (Random::get<int>(1, 100) <= GET_TRIG_NARG(t)))
         {
@@ -811,7 +811,7 @@ int cmd_otrig(Object *obj, Character *actor, std::string_view cmd, std::string_v
     if (obj && SCRIPT_CHECK(obj, OTRIG_COMMAND))
     {
         auto scripts = obj->getScripts();
-        for (const auto &t : volcano::util::filter_shared(scripts))
+        for (const auto &t : dbat::util::filter_shared(scripts))
         {
             if (!TRIGGER_CHECK(t, OTRIG_COMMAND))
                 continue;
@@ -853,11 +853,11 @@ int command_otrigger(Character *actor, std::string_view cmd, std::string_view ar
                 !OBJ_FLAGGED(GET_EQ(actor, i), ITEM_FORGED))
                 return 1;
     auto con = actor->getInventory();
-    for (auto obj : volcano::util::filter_raw(con))
+    for (auto obj : dbat::util::filter_raw(con))
         if (cmd_otrig(obj, actor, cmd, argument, OCMD_INVEN) && !OBJ_FLAGGED(obj, ITEM_FORGED))
             return 1;
     auto loco = actor->location.getObjects();
-    for (auto obj : volcano::util::filter_raw(loco))
+    for (auto obj : dbat::util::filter_raw(loco))
         if (cmd_otrig(obj, actor, cmd, argument, OCMD_ROOM) && !OBJ_FLAGGED(obj, ITEM_FORGED))
             return 1;
 
@@ -873,7 +873,7 @@ int wear_otrigger(Object *obj, Character *actor, int where)
         return 1;
 
     auto scripts = obj->getScripts();
-    for (const auto &t : volcano::util::filter_shared(scripts))
+    for (const auto &t : dbat::util::filter_shared(scripts))
     {
         if (TRIGGER_CHECK(t, OTRIG_WEAR))
         {
@@ -904,7 +904,7 @@ int remove_otrigger(Object *obj, Character *actor)
         return 1;
 
     auto scripts = obj->getScripts();
-    for (const auto &t : volcano::util::filter_shared(scripts))
+    for (const auto &t : dbat::util::filter_shared(scripts))
     {
         if (TRIGGER_CHECK(t, OTRIG_REMOVE))
         {
@@ -932,7 +932,7 @@ int drop_otrigger(Object *obj, Character *actor)
         return 1;
 
     auto scripts = obj->getScripts();
-    for (const auto &t : volcano::util::filter_shared(scripts))
+    for (const auto &t : dbat::util::filter_shared(scripts))
     {
         if (TRIGGER_CHECK(t, OTRIG_DROP) && (Random::get<int>(1, 100) <= GET_TRIG_NARG(t)))
         {
@@ -960,7 +960,7 @@ int give_otrigger(Object *obj, Character *actor, Character *victim)
         return 1;
 
     auto scripts = obj->getScripts();
-    for (const auto &t : volcano::util::filter_shared(scripts))
+    for (const auto &t : dbat::util::filter_shared(scripts))
     {
         if (TRIGGER_CHECK(t, OTRIG_GIVE) && (Random::get<int>(1, 100) <= GET_TRIG_NARG(t)))
         {
@@ -989,7 +989,7 @@ void load_otrigger(Object *obj)
         return;
 
     auto scripts = obj->getScripts();
-    for (const auto &t : volcano::util::filter_shared(scripts))
+    for (const auto &t : dbat::util::filter_shared(scripts))
     {
         if (TRIGGER_CHECK(t, OTRIG_LOAD) &&
             (Random::get<int>(1, 100) <= GET_TRIG_NARG(t)))
@@ -1021,7 +1021,7 @@ int cast_otrigger(Character *actor, Object *obj, int spellnum)
         return 1;
 
     auto scripts = obj->getScripts();
-    for (const auto &t : volcano::util::filter_shared(scripts))
+    for (const auto &t : dbat::util::filter_shared(scripts))
     {
         if (TRIGGER_CHECK(t, OTRIG_CAST) &&
             (Random::get<int>(1, 100) <= GET_TRIG_NARG(t)))
@@ -1046,13 +1046,13 @@ int leave_otrigger(Room *room, Character *actor, int dir)
     if (!valid_dg_target(actor, DG_ALLOW_GODS))
         return 1;
     auto con = room->getObjects().snapshot_weak();
-    for (auto obj : volcano::util::filter_raw(con))
+    for (auto obj : dbat::util::filter_raw(con))
     {
         if (!SCRIPT_CHECK(obj, OTRIG_LEAVE))
             continue;
 
         auto scripts = obj->getScripts();
-        for (const auto &t : volcano::util::filter_shared(scripts))
+        for (const auto &t : dbat::util::filter_shared(scripts))
         {
             if (TRIGGER_CHECK(t, OTRIG_LEAVE) && (Random::get<int>(1, 100) <= GET_TRIG_NARG(t)))
             {
@@ -1080,7 +1080,7 @@ int consume_otrigger(Object *obj, Character *actor, int cmd)
         return 1;
 
     auto scripts = obj->getScripts();
-    for (const auto &t : volcano::util::filter_shared(scripts))
+    for (const auto &t : dbat::util::filter_shared(scripts))
     {
         if (TRIGGER_CHECK(t, OTRIG_CONSUME))
         {
@@ -1119,7 +1119,7 @@ void time_otrigger(Object *obj)
         return;
 
     auto scripts = obj->getScripts();
-    for (const auto &t : volcano::util::filter_shared(scripts))
+    for (const auto &t : dbat::util::filter_shared(scripts))
     {
         if (TRIGGER_CHECK(t, OTRIG_TIME) &&
             (time_info.hours == GET_TRIG_NARG(t)))
@@ -1138,7 +1138,7 @@ void interval_otrigger(Object *obj, int trigFlag)
         return;
 
     auto scripts = obj->getScripts();
-    for (const auto &t : volcano::util::filter_shared(scripts))
+    for (const auto &t : dbat::util::filter_shared(scripts))
     {
         if (TRIGGER_CHECK(t, trigFlag))
         {
@@ -1160,7 +1160,7 @@ void reset_wtrigger(Room *room)
         return;
 
     auto scripts = room->getScripts();
-    for (const auto &t : volcano::util::filter_shared(scripts))
+    for (const auto &t : dbat::util::filter_shared(scripts))
     {
         if (TRIGGER_CHECK(t, WTRIG_RESET) &&
             (Random::get<int>(1, 100) <= GET_TRIG_NARG(t)))
@@ -1179,7 +1179,7 @@ void random_wtrigger(Room *room)
         return;
 
     auto scripts = room->getScripts();
-    for (const auto &t : volcano::util::filter_shared(scripts))
+    for (const auto &t : dbat::util::filter_shared(scripts))
     {
         if (TRIGGER_CHECK(t, WTRIG_RANDOM) &&
             (Random::get<int>(1, 100) <= GET_TRIG_NARG(t)))
@@ -1199,7 +1199,7 @@ int enter_wtrigger(Room *room, Character *actor, int dir)
         return 1;
 
     auto scripts = room->getScripts();
-    for (const auto &t : volcano::util::filter_shared(scripts))
+    for (const auto &t : dbat::util::filter_shared(scripts))
     {
         if (TRIGGER_CHECK(t, WTRIG_ENTER) &&
             (Random::get<int>(1, 100) <= GET_TRIG_NARG(t)))
@@ -1231,7 +1231,7 @@ int command_wtrigger(Character *actor, std::string_view cmd, std::string_view ar
     if (!room)
         return 0;
     auto scripts = room->getScripts();
-    for (const auto &t : volcano::util::filter_shared(scripts))
+    for (const auto &t : dbat::util::filter_shared(scripts))
     {
         if (!TRIGGER_CHECK(t, WTRIG_COMMAND))
             continue;
@@ -1265,7 +1265,7 @@ void speech_wtrigger(Character *actor, char *str)
 
     auto room = actor->getRoom();
     auto scripts = room->getScripts();
-    for (const auto &t : volcano::util::filter_shared(scripts))
+    for (const auto &t : dbat::util::filter_shared(scripts))
     {
         if (!TRIGGER_CHECK(t, WTRIG_SPEECH))
             continue;
@@ -1299,7 +1299,7 @@ int drop_wtrigger(Object *obj, Character *actor)
 
     auto room = actor->getRoom();
     auto scripts = room->getScripts();
-    for (const auto &t : volcano::util::filter_shared(scripts))
+    for (const auto &t : dbat::util::filter_shared(scripts))
         if (TRIGGER_CHECK(t, WTRIG_DROP) &&
             (Random::get<int>(1, 100) <= GET_TRIG_NARG(t)))
         {
@@ -1325,7 +1325,7 @@ int cast_wtrigger(Character *actor, Character *vict, Object *obj, int spellnum)
 
     auto room = actor->getRoom();
     auto scripts = room->getScripts();
-    for (const auto &t : volcano::util::filter_shared(scripts))
+    for (const auto &t : dbat::util::filter_shared(scripts))
     {
         if (TRIGGER_CHECK(t, WTRIG_CAST) &&
             (Random::get<int>(1, 100) <= GET_TRIG_NARG(t)))
@@ -1358,7 +1358,7 @@ int leave_wtrigger(Room *room, Character *actor, int dir)
         return 1;
 
     auto scripts = room->getScripts();
-    for (const auto &t : volcano::util::filter_shared(scripts))
+    for (const auto &t : dbat::util::filter_shared(scripts))
     {
         if (TRIGGER_CHECK(t, WTRIG_LEAVE) &&
             (Random::get<int>(1, 100) <= GET_TRIG_NARG(t)))
@@ -1384,7 +1384,7 @@ int door_wtrigger(Character *actor, int subcmd, int dir)
 
     auto room = actor->getRoom();
     auto scripts = room->getScripts();
-    for (const auto &t : volcano::util::filter_shared(scripts))
+    for (const auto &t : dbat::util::filter_shared(scripts))
     {
         if (TRIGGER_CHECK(t, WTRIG_DOOR) &&
             (Random::get<int>(1, 100) <= GET_TRIG_NARG(t)))
@@ -1411,7 +1411,7 @@ void time_wtrigger(Room *room)
         return;
 
     auto scripts = room->getScripts();
-    for (const auto &t : volcano::util::filter_shared(scripts))
+    for (const auto &t : dbat::util::filter_shared(scripts))
     {
         if (TRIGGER_CHECK(t, WTRIG_TIME) &&
             (time_info.hours == GET_TRIG_NARG(t)))
@@ -1431,7 +1431,7 @@ void interval_wtrigger(Room *room, int trigFlag)
         return;
 
     auto scripts = room->getScripts();
-    for (const auto &t : volcano::util::filter_shared(scripts))
+    for (const auto &t : dbat::util::filter_shared(scripts))
     {
         if (TRIGGER_CHECK(t, WTRIG_TIME))
         {

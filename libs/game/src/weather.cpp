@@ -21,7 +21,7 @@
 #include "dbat/game/races.hpp"
 #include "dbat/game/dg_scripts.hpp"
 #include "dbat/game/transformation.hpp"
-#include "volcano/util/FilterWeak.hpp"
+#include "dbat/util/FilterWeak.hpp"
 #include "dbat/game/TimeInfo.hpp"
 #include "dbat/game/utils.hpp"
 
@@ -34,7 +34,7 @@ static void grow_plants()
 
     auto sub = objectSubscriptions.all("growingPlants");
 
-    for (auto k : volcano::util::filter_raw(sub))
+    for (auto k : dbat::util::filter_raw(sub))
     {
 
         if (k->location.getRoomFlag(ROOM_GARDEN1) || k->location.getRoomFlag(ROOM_GARDEN2))

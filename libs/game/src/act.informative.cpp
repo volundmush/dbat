@@ -26,7 +26,7 @@
 #include "dbat/game/Random.hpp"
 #include "dbat/game/weather.hpp"
 #include "dbat/game/utils.hpp"
-#include "volcano/util/FilterWeak.hpp"
+#include "dbat/util/FilterWeak.hpp"
 
 #include "dbat/game/interpreter.hpp"
 
@@ -51,7 +51,7 @@
 #include "dbat/game/improved-edit.hpp"
 #include "dbat/game/transformation.hpp"
 // #include "dbat/game/planet.hpp"
-#include "volcano/circle/CircleAnsi.hpp"
+#include "dbat/circle/CircleAnsi.hpp"
 
 #include "dbat/game/Help.hpp"
 
@@ -322,7 +322,7 @@ static void search_room(Character *ch)
     act("@y$n@Y begins searching the room carefully.@n", true, ch, nullptr, nullptr, TO_ROOM);
     WAIT_STATE(ch, PULSE_1SEC);
     auto people = ch->location.getPeople();
-    for (auto t : volcano::util::filter_raw(people))
+    for (auto t : dbat::util::filter_raw(people))
     {
         vict = t;
         if (AFF_FLAGGED(vict, AFF_HIDE) && vict != ch)
@@ -358,7 +358,7 @@ static void search_room(Character *ch)
         }
     }
     auto loco = ch->location.getObjects();
-    for (auto obj : volcano::util::filter_raw(loco))
+    for (auto obj : dbat::util::filter_raw(loco))
     {
         if (OBJ_FLAGGED(obj, ITEM_BURIED) && perc * bonus > Random::get<int>(50, 200))
         {
@@ -446,8 +446,8 @@ ACMD(do_mimic)
         ch->mimic.reset();
     }
 
-    auto choices = volcano::util::getEnumMap<Race>(check);
-    auto chosen_race = volcano::util::partialMatch(arg, choices, false);
+    auto choices = dbat::util::getEnumMap<Race>(check);
+    auto chosen_race = dbat::util::partialMatch(arg, choices, false);
     if (!chosen_race)
     {
         ch->sendText(chosen_race.error());
@@ -572,7 +572,7 @@ ACMD(do_draw)
         return;
     }
     auto con = obj->getInventory();
-    for (auto obj2 : volcano::util::filter_raw(con))
+    for (auto obj2 : dbat::util::filter_raw(con))
     {
         obj2->clearLocation();
         ch->addToInventory(obj2);
@@ -618,7 +618,7 @@ ACMD(do_shuffle)
     }
 
     auto con = obj->getInventory();
-    for (auto obj2 : volcano::util::filter_raw(con))
+    for (auto obj2 : dbat::util::filter_raw(con))
     {
         if (!OBJ_FLAGGED(obj2, ITEM_CARD))
         {
@@ -633,7 +633,7 @@ ACMD(do_shuffle)
     }
     int total = count;
     auto con2 = obj->getInventory();
-    for (auto obj2 : volcano::util::filter_raw(con2))
+    for (auto obj2 : dbat::util::filter_raw(con2))
     {
         obj2->clearLocation();
         obj2->moveToLocation(48);
@@ -641,7 +641,7 @@ ACMD(do_shuffle)
     while (count > 0)
     {
         auto con = get_room(48)->getObjects().snapshot_weak();
-        for (auto obj2 : volcano::util::filter_raw(con))
+        for (auto obj2 : dbat::util::filter_raw(con))
         {
             if (!OBJ_FLAGGED(obj2, ITEM_CARD))
             {
@@ -685,7 +685,7 @@ ACMD(do_hand)
     {
         ch->sendText("@CYour hand contains:\r\n@D---------------------------@n\r\n");
         auto con = ch->getInventory();
-        for (auto obj : volcano::util::filter_raw(con))
+        for (auto obj : dbat::util::filter_raw(con))
         {
             if (obj && !OBJ_FLAGGED(obj, ITEM_CARD))
             {
@@ -720,7 +720,7 @@ ACMD(do_hand)
         ch->sendText("You show off your hand to the room.\r\n");
         act("@C$n's hand contains:\r\n@D---------------------------@n", true, ch, nullptr, nullptr, TO_ROOM);
         auto con = ch->getInventory();
-        for (auto obj : volcano::util::filter_raw(con))
+        for (auto obj : dbat::util::filter_raw(con))
         {
             if (obj && !OBJ_FLAGGED(obj, ITEM_CARD))
             {
@@ -933,7 +933,7 @@ ACMD(do_nickname)
                 sprintf(nick, "%s", CAP(arg2));
                 ship2->look_description = nick;
                 auto objs = objectSubscriptions.all(fmt::format("vnum_{}", GET_OBJ_VNUM(ship2) + 1000));
-                for (auto k : volcano::util::filter_raw(objs))
+                for (auto k : dbat::util::filter_raw(objs))
                 {
                     extract_obj(k);
                     auto was_in = ship2->location;
@@ -1466,7 +1466,7 @@ static const std::unordered_map<SectorType, std::string> tileStrings = {
 static void ensureColumns(std::vector<std::string>& lines, int length, int lineCount) {
     for(auto& l : lines) {
         auto len = l.size();
-        auto num_colors = volcano::circle::countColors(l);
+        auto num_colors = dbat::circle::countColors(l);
         auto spaces_needed = std::max<int>(0, length - (len - num_colors));
         // append up to num_colors in spaces to account for color codes but don't exceed length
         if(spaces_needed > 0) {
@@ -2205,7 +2205,7 @@ static void list_obj_to_char(const std::vector<std::weak_ptr<Object>> &list, Cha
     bool found = false;
     int num;
 
-    for (auto i : volcano::util::filter_raw(list))
+    for (auto i : dbat::util::filter_raw(list))
     {
         if (i->getRoomDescription() == nullptr || !boost::iequals(i->getRoomDescription(), "undefined") == 0)
             continue;
@@ -2531,7 +2531,7 @@ static void look_at_char(Character *i, Character *ch)
                 {
                     auto sheath = GET_EQ(i, j);
                     auto con = sheath->getInventory();
-                    for (auto obj2 : volcano::util::filter_raw(con))
+                    for (auto obj2 : dbat::util::filter_raw(con))
                     {
                         ch->sendText("@D  ---- @YSheathed@D ----@c> @n");
                         show_obj_to_char(obj2, ch, SHOW_OBJ_SHORT);
@@ -2546,7 +2546,7 @@ static void look_at_char(Character *i, Character *ch)
                 {
                     auto sheath = GET_EQ(i, j);
                     auto con = sheath->getInventory();
-                    for (auto obj2 : volcano::util::filter_raw(con))
+                    for (auto obj2 : dbat::util::filter_raw(con))
                     {
                         ch->sendText("@D  ---- @YSheathed@D ----@c> @n");
                         show_obj_to_char(obj2, ch, SHOW_OBJ_SHORT);
@@ -2568,7 +2568,7 @@ static void look_at_char(Character *i, Character *ch)
         if (GET_SKILL(ch, SKILL_KEEN) > axion_dice(0) && (!IS_NPC(i) || GET_ADMLEVEL(ch) > 1))
         {
             auto con = i->getInventory();
-            for (auto tmp_obj : volcano::util::filter_raw(con))
+            for (auto tmp_obj : dbat::util::filter_raw(con))
             {
                 if (ch->canSee(tmp_obj) && (ADM_FLAGGED(ch, ADM_SEEINV) || (Random::get<int>(0, 20) < GET_WIS(ch))))
                 {
@@ -3037,7 +3037,7 @@ static void list_char_to_char(const std::vector<std::weak_ptr<Character>> &list,
 {
     struct hide_node *hideinfo = nullptr;
 
-    for (auto i : volcano::util::filter_raw(list))
+    for (auto i : dbat::util::filter_raw(list))
     {
         if (AFF_FLAGGED(i, AFF_HIDE) && roll_resisted(i, SKILL_HIDE, ch, SKILL_SPOT))
         {
@@ -3050,7 +3050,7 @@ static void list_char_to_char(const std::vector<std::weak_ptr<Character>> &list,
         }
     }
 
-    for (auto i : volcano::util::filter_raw(list))
+    for (auto i : dbat::util::filter_raw(list))
     {
         if (ch == i || (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_HOLYLIGHT) && IS_NPC(i) &&
                         i->getRoomDescription() && *i->getRoomDescription() == '.'))
@@ -3703,7 +3703,7 @@ static void handle_look_in_inventory(Character *ch, char *arg)
         }
     }
     auto con = ch->getInventory();
-    for (auto obj : volcano::util::filter_raw(con))
+    for (auto obj : dbat::util::filter_raw(con))
     {
     if (ch->canSee(obj) && handle_exdesc_look(ch, arg, obj->getExtraDescription(), obj))
         {
@@ -3712,7 +3712,7 @@ static void handle_look_in_inventory(Character *ch, char *arg)
         }
     }
     auto loco = ch->location.getObjects();
-    for (auto obj : volcano::util::filter_raw(loco))
+    for (auto obj : dbat::util::filter_raw(loco))
     {
     if (ch->canSee(obj) && handle_exdesc_look(ch, arg, obj->getExtraDescription(), obj))
         {
@@ -5311,7 +5311,7 @@ static void show_equipment(Character *ch, Object *equipment, const char *wear_lo
     if (OBJ_FLAGGED(equipment, ITEM_SHEATH))
     {
         auto con = equipment->getInventory();
-        for (auto obj2 : volcano::util::filter_raw(con))
+        for (auto obj2 : dbat::util::filter_raw(con))
         {
             ch->sendText("@D  ---- @YSheathed@D ----@c> @n");
             show_obj_to_char(obj2, ch, SHOW_OBJ_SHORT);
@@ -5988,7 +5988,7 @@ static void perform_mortal_where(Character *ch, char *arg)
     else
     { /* print only FIRST char, not all. */
         auto ac = characterSubscriptions.all("active");
-        for (auto i : volcano::util::filter_raw(ac))
+        for (auto i : dbat::util::filter_raw(ac))
         {
             auto room = i->getRoom();
             if (!room || i == ch)
@@ -6071,7 +6071,7 @@ static void perform_immort_where(Character *ch, char *arg)
         mudlog(NRM, std::max(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), true, "GODCMD: %s has checked where for the location of %s",
                GET_NAME(ch), arg);
         auto ac = characterSubscriptions.all("active");
-        for (auto i : volcano::util::filter_raw(ac))
+        for (auto i : dbat::util::filter_raw(ac))
         {
             if (ch->canSee(i) && i->location && isname(arg, i->getName()))
             {
@@ -6086,7 +6086,7 @@ static void perform_immort_where(Character *ch, char *arg)
             }
         }
         auto ao = objectSubscriptions.all("active");
-        for (auto k : volcano::util::filter_raw(ao))
+        for (auto k : dbat::util::filter_raw(ao))
         {
             if (ch->canSee(k) && isname(arg, k->getName()))
             {

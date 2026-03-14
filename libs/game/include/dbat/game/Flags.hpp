@@ -7,7 +7,7 @@
 #include <fmt/format.h>
 #include <fmt/ranges.h>
 
-#include "volcano/util/Enum.hpp"
+#include "dbat/util/Enum.hpp"
 #include "Result.hpp"
 #include <enchantum/type_name.hpp>
 #include <enchantum/fmt_format.hpp>
@@ -174,7 +174,7 @@ public:
     // Mapping / pretty helpers (assumes you have a formatter for enums)
     std::unordered_map<std::string, FlagEnum> getFlagMap() const
     {
-        return volcano::util::getEnumMap<FlagEnum>();
+        return dbat::util::getEnumMap<FlagEnum>();
     }
 
     std::vector<std::string> getAllFlags() const
@@ -201,7 +201,7 @@ public:
 
         auto findFlag = [&](const std::string &name)
         {
-            return volcano::util::partialMatch(name, fmap, false, [](const auto &pair)
+            return dbat::util::partialMatch(name, fmap, false, [](const auto &pair)
                                 { return pair.first; });
         };
 

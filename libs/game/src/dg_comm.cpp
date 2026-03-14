@@ -27,7 +27,7 @@
 #include "dbat/game/planet.hpp"
 
 #include "dbat/game/utils.hpp"
-#include "volcano/util/FilterWeak.hpp"
+#include "dbat/util/FilterWeak.hpp"
 
 #include "dbat/game/const/Max.hpp"
 #include "dbat/game/const/WearSlot.hpp"
@@ -203,7 +203,7 @@ void sub_write(char *arg, Character *ch, int8_t find_invis, int targets) {
 
     if (IS_SET(targets, TO_ROOM)) {
         auto people = ch->location.getPeople();
-        for (auto to : volcano::util::filter_raw(people))
+        for (auto to : dbat::util::filter_raw(people))
             if (to != ch && SENDOK(to))
                 sub_write_to_char(to, tokens, otokens, type);
     }
@@ -251,7 +251,7 @@ void Zone::sendToSense(Character *source, const char* messg, bool childrenOnly) 
         } else {
             name = source->getShortDescription();
         }
-        
+
 
         if(boost::icontains(messg, "landing")) {
             auto dest = renderZoneChain(zchain, ch);
@@ -272,7 +272,7 @@ void Zone::sendToSense(Character *source, const char* messg, bool childrenOnly) 
 void send_to_scouter(const char *messg, Character *ch, int num, int type) {
     if (!messg || !*messg)
         return;
-    
+
     if (IS_ANDROID(ch)) return;
 
     auto planet = ch->location.getZone()->getRoot();
@@ -293,7 +293,7 @@ void send_to_scouter(const char *messg, Character *ch, int num, int type) {
         if (GET_INVIS_LEV(ch) > GET_ADMLEVEL(tch)) {
             return;
         }
-        
+
         auto obj = GET_EQ(tch, WEAR_EYE);
         if (!obj) return;
 

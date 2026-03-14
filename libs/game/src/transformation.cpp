@@ -12,7 +12,7 @@
 #include "dbat/game/attack.hpp"
 #include "dbat/game/handler.hpp"
 #include "dbat/game/utils.hpp"
-#include "volcano/util/FilterWeak.hpp"
+#include "dbat/util/FilterWeak.hpp"
 
 #include "dbat/game/const/Environment.hpp"
 
@@ -1796,7 +1796,7 @@ namespace trans
     {
         // TODO: replace this with a subscription for anyone who's not in base form.
         auto subs = characterSubscriptions.all("transforms");
-        for (auto ch : volcano::util::filter_raw(subs))
+        for (auto ch : dbat::util::filter_raw(subs))
         {
 
             // check transform logic...

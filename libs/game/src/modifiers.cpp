@@ -5,7 +5,7 @@
 #include "dbat/game/const/Position.hpp"
 #include "dbat/game/const/CharacterProperties.hpp"
 
-#include "volcano/util/Enum.hpp"
+#include "dbat/util/Enum.hpp"
 
 extern std::unordered_map<Position, std::vector<character_affect_type>> pos_affects;
 
@@ -83,7 +83,7 @@ std::vector<std::string> affect_t::specificNames()
     case APPLY_CATTR_POST:
     case APPLY_CATTR_GAIN_MULT:
     {
-        auto res = volcano::util::getEnumNameList<CharAttribute>([&](CharAttribute v)
+        auto res = dbat::util::getEnumNameList<CharAttribute>([&](CharAttribute v)
                                                  { return specific & static_cast<int>(v); });
         out.insert(out.end(), res.begin(),  res.end());
     }
@@ -96,7 +96,7 @@ std::vector<std::string> affect_t::specificNames()
     case APPLY_CVIT_REGEN_MULT:
     case APPLY_TRANS_UPKEEP_CVIT:
     {
-        auto res = volcano::util::getEnumNameList<CharVital>([&](CharVital v)
+        auto res = dbat::util::getEnumNameList<CharVital>([&](CharVital v)
                                              { return specific & static_cast<int>(v); });
         out.insert(out.end(), res.begin(),  res.end());
     }
@@ -106,7 +106,7 @@ std::vector<std::string> affect_t::specificNames()
     case APPLY_CSTAT_POST:
     case APPLY_CSTAT_GAIN_MULT:
     {
-        auto res = volcano::util::getEnumNameList<CharStat>([&](CharStat v)
+        auto res = dbat::util::getEnumNameList<CharStat>([&](CharStat v)
                                              { return specific & static_cast<int>(v); });
         out.insert(out.end(), res.begin(),  res.end());
     }
@@ -115,7 +115,7 @@ std::vector<std::string> affect_t::specificNames()
     case APPLY_CDIM_MULT:
     case APPLY_CDIM_POST:
     {
-        auto res = volcano::util::getEnumNameList<CharDim>([&](CharDim v)
+        auto res = dbat::util::getEnumNameList<CharDim>([&](CharDim v)
                                              { return specific & static_cast<int>(v); });
         out.insert(out.end(), res.begin(),  res.end());
     }
@@ -123,7 +123,7 @@ std::vector<std::string> affect_t::specificNames()
     case APPLY_COMBAT_BASE:
     case APPLY_COMBAT_MULT:
     {
-        auto res = volcano::util::getEnumNameList<ComStat>([&](ComStat v)
+        auto res = dbat::util::getEnumNameList<ComStat>([&](ComStat v)
                                              { return specific & static_cast<int>(v); });
         out.insert(out.end(), res.begin(),  res.end());
     }
@@ -131,7 +131,7 @@ std::vector<std::string> affect_t::specificNames()
     case APPLY_DTYPE_RES:
     case APPLY_DTYPE_BON:
     {
-        auto res = volcano::util::getEnumNameList<DamType>([&](DamType v)
+        auto res = dbat::util::getEnumNameList<DamType>([&](DamType v)
                                              { return specific & static_cast<int>(v); });
         out.insert(out.end(), res.begin(),  res.end());
     }
@@ -139,7 +139,7 @@ std::vector<std::string> affect_t::specificNames()
     case APPLY_ATKTIER_BON:
     case APPLY_ATKTIER_RES:
     {
-        auto res = volcano::util::getEnumNameList<AtkTier>([&](AtkTier v)
+        auto res = dbat::util::getEnumNameList<AtkTier>([&](AtkTier v)
                                              { return specific & static_cast<int>(v); });
         out.insert(out.end(), res.begin(),  res.end());
     }

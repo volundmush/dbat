@@ -32,7 +32,7 @@
 #include "dbat/game/planet.hpp"
 #include "dbat/game/config.hpp"
 #include "dbat/game/utils.hpp"
-#include "volcano/util/FilterWeak.hpp"
+#include "dbat/util/FilterWeak.hpp"
 
 #include "dbat/game/const/Pulse.hpp"
 #include "dbat/game/const/Environment.hpp"
@@ -317,7 +317,7 @@ ACMD(do_land)
     Location landing;
     std::string landName = "UNKNOWN";
 
-    if (auto matched = volcano::util::partialMatch(argument, landLocations, false))
+    if (auto matched = dbat::util::partialMatch(argument, landLocations, false))
     {
         landing = matched.value()->second;
         landName = matched.value()->first;
@@ -348,7 +348,7 @@ ACMD(do_land)
     send_to_scouter("A powerlevel signal has been detected landing on the planet", ch, 0, 1);
     act("$n comes down from high above in the sky and quickly lands on the ground.", true, ch, nullptr, nullptr,
         TO_ROOM);
-    
+
     ch->lookAtLocation();
 }
 
@@ -1045,7 +1045,7 @@ ACMD(do_move)
             ch->sendText("You are not in a vehicle!\r\n");
             return;
         }
-        
+
         handle_drive_direction(ch, vehicle, subcmd - 1, 0);
 
         return;
@@ -2029,7 +2029,7 @@ static int perform_enter_obj(Character *ch, Object *obj, int need_specials_check
                 int filled = false;
                 auto dest = get_room(GET_OBJ_VAL(obj, VAL_PORTAL_DEST));
                 auto people = dest->getPeople().snapshot_weak();
-                for (auto tch : volcano::util::filter_raw(people))
+                for (auto tch : dbat::util::filter_raw(people))
                 {
                     filled = true;
                     break;
@@ -2047,7 +2047,7 @@ static int perform_enter_obj(Character *ch, Object *obj, int need_specials_check
                         act("You follow $N.\r\n", false, k, nullptr, ch, TO_CHAR);
                         perform_enter_obj(k, obj, 1);
                     }
-                });        
+                });
         }
         else
         {
@@ -2315,7 +2315,7 @@ static int perform_leave_obj(Character *ch, Object *obj, int need_specials_check
                         perform_leave_obj(k, obj, 1);
                     }
                 });
-                    
+
     }
     return could_move;
 }
@@ -2483,7 +2483,7 @@ static void handle_fly_space(Character *ch)
             TO_ROOM);
 
     auto landing = z->getLandingSpots();
-    if(!landing.empty()) 
+    if(!landing.empty())
         ch->sendText("@mOOC: Use the command 'land' to see where you can land from here.@n\r\n");
 
     if (!IS_ANDROID(ch))

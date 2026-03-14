@@ -23,7 +23,7 @@
 #include "dbat/game/constants.hpp"
 //#include "dbat/game/comm.hpp"
 //#include "dbat/game/players.hpp"
-#include "volcano/util/FilterWeak.hpp"
+#include "dbat/util/FilterWeak.hpp"
 #include "dbat/game/utils.hpp"
 #include "dbat/game/TimeInfo.hpp"
 #include "dbat/game/weather.hpp"
@@ -148,13 +148,13 @@ Object *get_obj_in_list(char *name, const std::vector<std::weak_ptr<Object>> &li
             return nullptr;
         auto obj = obj2.get();
 
-        for (auto i : volcano::util::filter_raw(list))
+        for (auto i : dbat::util::filter_raw(list))
             if (i == obj)
                 return obj;
     }
     else
     {
-        for (auto i : volcano::util::filter_raw(list))
+        for (auto i : dbat::util::filter_raw(list))
             if (isname(name, i->getName()))
                 return i;
     }
@@ -361,7 +361,7 @@ Character *get_char_near_obj(Object *obj, char *name)
         if ((num = obj_room(obj)) != NOWHERE)
         {
             auto people = get_room(num)->getPeople().snapshot_weak();
-            for (auto ch : volcano::util::filter_raw(people))
+            for (auto ch : dbat::util::filter_raw(people))
                 if (isname(name, ch->getName()) &&
                     valid_dg_target(ch, DG_ALLOW_GODS))
                     return ch;
@@ -392,7 +392,7 @@ Character *get_char_in_room(Room *room, char *name)
     else
     {
         auto people = room->getPeople().snapshot_weak();
-        for (auto ch : volcano::util::filter_raw(people))
+        for (auto ch : dbat::util::filter_raw(people))
             if (isname(name, ch->getName()) &&
                 valid_dg_target(ch, DG_ALLOW_GODS))
                 return ch;
@@ -452,7 +452,7 @@ Object *get_obj_near_obj(Object *obj, char *name)
 
         /* check peoples' inventory */
         auto people = get_room(rm)->getPeople().snapshot_weak();
-        for (auto ch : volcano::util::filter_raw(people))
+        for (auto ch : dbat::util::filter_raw(people))
             if ((i = get_object_in_equip(ch, name)))
                 return i;
     }
@@ -472,7 +472,7 @@ Object *get_obj(char *name)
     else
     {
         auto ao = objectSubscriptions.all("active");
-        for (auto obj : volcano::util::filter_raw(ao))
+        for (auto obj : dbat::util::filter_raw(ao))
         {
             if (isname(name, obj->getName()))
                 return obj;
@@ -522,7 +522,7 @@ Character *get_char_by_obj(Object *obj, char *name)
             return wearer;
 
         auto ac = characterSubscriptions.all("active");
-        for (auto ch : volcano::util::filter_raw(ac))
+        for (auto ch : dbat::util::filter_raw(ac))
         {
             if (isname(name, ch->getName()) &&
                 valid_dg_target(ch, DG_ALLOW_GODS))
@@ -552,13 +552,13 @@ Character *get_char_by_room(Room *room, char *name)
     else
     {
         auto people = room->getPeople().snapshot_weak();
-        for (auto ch : volcano::util::filter_raw(people))
+        for (auto ch : dbat::util::filter_raw(people))
             if (isname(name, ch->getName()) &&
                 valid_dg_target(ch, DG_ALLOW_GODS))
                 return ch;
 
         auto ac = characterSubscriptions.all("active");
-        for (auto ch : volcano::util::filter_raw(ac))
+        for (auto ch : dbat::util::filter_raw(ac))
         {
             if (isname(name, ch->getName()) &&
                 valid_dg_target(ch, DG_ALLOW_GODS))
@@ -624,14 +624,14 @@ Object *get_obj_in_room(Room *room, char *name)
         if (!o)
             return nullptr;
         auto con = room->getObjects().snapshot_weak();
-        for (auto obj : volcano::util::filter_raw(con))
+        for (auto obj : dbat::util::filter_raw(con))
             if (o == obj)
                 return obj;
     }
     else
     {
         auto con = room->getObjects().snapshot_weak();
-        for (auto obj : volcano::util::filter_raw(con))
+        for (auto obj : dbat::util::filter_raw(con))
             if (isname(name, obj->getName()))
                 return obj;
     }
@@ -650,12 +650,12 @@ Object *get_obj_by_room(Room *room, char *name)
     }
 
     auto con = room->getObjects().snapshot_weak();
-    for (auto obj : volcano::util::filter_raw(con))
+    for (auto obj : dbat::util::filter_raw(con))
         if (isname(name, obj->getName()))
             return obj;
 
     auto ao = objectSubscriptions.all("active");
-    for (auto obj : volcano::util::filter_raw(ao))
+    for (auto obj : dbat::util::filter_raw(ao))
     {
         if (isname(name, obj->getName()))
             return obj;
@@ -671,7 +671,7 @@ void script_trigger_check(uint64_t heartPulse, double deltaTime)
     HasDgScripts *sc;
 
     auto crandsubs = characterSubscriptions.all("randomTriggers");
-    for (auto ch : volcano::util::filter_raw(crandsubs))
+    for (auto ch : dbat::util::filter_raw(crandsubs))
     {
         sc = SCRIPT(ch);
 
@@ -682,7 +682,7 @@ void script_trigger_check(uint64_t heartPulse, double deltaTime)
     }
 
     auto orandsubs = objectSubscriptions.all("randomTriggers");
-    for (auto obj : volcano::util::filter_raw(orandsubs))
+    for (auto obj : dbat::util::filter_raw(orandsubs))
     {
         sc = SCRIPT(obj);
 
@@ -691,7 +691,7 @@ void script_trigger_check(uint64_t heartPulse, double deltaTime)
     }
 
     auto rrandsubs = roomSubscriptions.all("randomTriggers");
-    for (auto room : volcano::util::filter_raw(rrandsubs))
+    for (auto room : dbat::util::filter_raw(rrandsubs))
     {
         sc = SCRIPT(room);
 
@@ -708,7 +708,7 @@ void check_time_triggers()
     HasDgScripts *sc;
 
     auto ctimesubs = characterSubscriptions.all("timeTriggers");
-    for (auto ch : volcano::util::filter_raw(ctimesubs))
+    for (auto ch : dbat::util::filter_raw(ctimesubs))
     {
         sc = SCRIPT(ch);
 
@@ -719,7 +719,7 @@ void check_time_triggers()
     }
 
     auto otimesubs = objectSubscriptions.all("timeTriggers");
-    for (auto obj : volcano::util::filter_raw(otimesubs))
+    for (auto obj : dbat::util::filter_raw(otimesubs))
     {
         sc = SCRIPT(obj);
 
@@ -728,7 +728,7 @@ void check_time_triggers()
     }
 
     auto rtimesubs = roomSubscriptions.all("timeTriggers");
-    for (auto room : volcano::util::filter_raw(rtimesubs))
+    for (auto room : dbat::util::filter_raw(rtimesubs))
     {
         sc = SCRIPT(room);
 
@@ -742,7 +742,7 @@ void check_time_triggers()
 void check_interval_triggers(int trigFlag)
 {
     auto ac = characterSubscriptions.all("active");
-    for (auto ch : volcano::util::filter_raw(ac))
+    for (auto ch : dbat::util::filter_raw(ac))
     {
         auto sc = SCRIPT(ch);
 
@@ -753,7 +753,7 @@ void check_interval_triggers(int trigFlag)
     }
 
     auto ao = objectSubscriptions.all("active");
-    for (auto obj : volcano::util::filter_raw(ao))
+    for (auto obj : dbat::util::filter_raw(ao))
     {
         auto sc = SCRIPT(obj);
 
@@ -939,7 +939,7 @@ void script_stat(Character *ch, HasDgScripts *sc)
     }
 
     auto scripts = sc->getScripts();
-    for (const auto &t : volcano::util::filter_shared(scripts))
+    for (const auto &t : dbat::util::filter_shared(scripts))
     {
         ch->send_to("\r\n  Trigger: @y%s@n, VNum: [@y%5d@n], RNum: [%5d]\r\n", GET_TRIG_NAME(t), GET_TRIG_VNUM(t), GET_TRIG_RNUM(t));
 
@@ -1077,7 +1077,7 @@ ACMD(do_attach)
         if (!victim)
         { /* search room for one with this vnum */
             auto people = ch->location.getPeople();
-            for (auto t : volcano::util::filter_raw(people))
+            for (auto t : dbat::util::filter_raw(people))
             {
                 if (GET_MOB_VNUM(t) == num_arg)
                 {
@@ -1198,7 +1198,7 @@ int remove_trigger(HasDgScripts *sc, char *name)
     n = 0;
     j = nullptr;
     auto scripts = sc->getScripts();
-    for (auto i : volcano::util::filter_shared(scripts))
+    for (auto i : dbat::util::filter_shared(scripts))
     {
         if (string)
         {
@@ -1239,7 +1239,7 @@ int remove_trigger(HasDgScripts *sc, char *name)
         /* update the script type bitvector */
         SCRIPT_TYPES(sc) = 0;
         auto update_scripts = sc->getScripts();
-        for (auto i : volcano::util::filter_shared(update_scripts))
+        for (auto i : dbat::util::filter_shared(update_scripts))
             SCRIPT_TYPES(sc) |= GET_TRIG_TYPE(i);
 
         return 1;
@@ -1298,7 +1298,7 @@ ACMD(do_detach)
             if (!victim)
             { /* search room for one with this vnum */
                 auto people = ch->location.getPeople();
-                for (auto v : volcano::util::filter_raw(people))
+                for (auto v : dbat::util::filter_raw(people))
                 {
                     victim = v;
                     if (GET_MOB_VNUM(victim) == num_arg)
@@ -3012,11 +3012,11 @@ void DgScript::processLine(const ScriptLine &line)
         }
         current_line = locateDone(ScriptLineType::SWITCH, current_line + 1);
         break;
-    
+
     default:
         throw DgScriptError("Unknown script line type.");
     }
-    
+
 }
 
 int DgScript::locateElseIfElseEnd(int startLine) const

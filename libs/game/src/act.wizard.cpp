@@ -46,10 +46,10 @@
 #include "dbat/game/Guild.hpp"
 #include "dbat/game/spell_parser.hpp"
 #include "dbat/game/transformation.hpp"
-#include "volcano/circle/CircleAnsi.hpp"
+#include "dbat/circle/CircleAnsi.hpp"
 //#include "dbat/game/config.hpp"
 #include "dbat/game/utils.hpp"
-#include "volcano/util/FilterWeak.hpp"
+#include "dbat/util/FilterWeak.hpp"
 
 #include "dbat/game/ID.hpp"
 #include "dbat/game/UID.hpp"
@@ -947,7 +947,7 @@ ACMD(do_echo)
             sprintf(argument, "%s\n@D(@gMessage truncated to %d characters@D)@n\n", argument, truncAt);
         }
         auto people = ch->location.getPeople();
-        for (auto vict : volcano::util::filter_raw(people))
+        for (auto vict : dbat::util::filter_raw(people))
         {
             if (vict == ch)
                 continue;
@@ -1442,7 +1442,7 @@ static void do_stat_room(Character *ch, Room *rm)
     {
         ch->sendText("Extra descs:");
         for (const auto &ex : exd)
-        {   
+        {
             ch->send_to(" [@c%s@n]", std::string(ex.first).c_str());
         }
         ch->sendText("\r\n");
@@ -1455,7 +1455,7 @@ static void do_stat_room(Character *ch, Room *rm)
     auto sz = people.size();
     int i2 = 0;
     found = false;
-    for (auto k : volcano::util::filter_raw(people))
+    for (auto k : dbat::util::filter_raw(people))
     {
         i2++;
     if (!ch->canSee(k))
@@ -1479,7 +1479,7 @@ static void do_stat_room(Character *ch, Room *rm)
         column = 9; /* ^^^ strlen ^^^ */
         i2 = 0;
         found = false;
-        for (auto j : volcano::util::filter_raw(con))
+        for (auto j : dbat::util::filter_raw(con))
         {
             i2++;
             if (!ch->canSee(j))
@@ -1576,7 +1576,7 @@ static void do_stat_object(Character *ch, Object *j)
 
     ch->send_to("Extra flags   : %s\r\n", GET_OBJ_EXTRA(j).getFlagNames());
 
-    ch->send_to("Weight: %f, Value: %d, Cost/day: %d, Timer: %d, Min Level: %d\r\n", 
+    ch->send_to("Weight: %f, Value: %d, Cost/day: %d, Timer: %d, Min Level: %d\r\n",
         GET_OBJ_WEIGHT(j), GET_OBJ_COST(j), GET_OBJ_RENT(j), GET_OBJ_TIMER(j), GET_OBJ_LEVEL(j));
 
     /*
@@ -1679,7 +1679,7 @@ static void do_stat_object(Character *ch, Object *j)
         found = false;
         auto sz = con.size();
         auto count = 0;
-        for (auto j2 : volcano::util::filter_raw(con))
+        for (auto j2 : dbat::util::filter_raw(con))
         {
             column += ch->send_to("%s %s", found++ ? "," : "", j2->getShortDescription());
             count++;
@@ -1819,7 +1819,7 @@ static void do_stat_character(Character *ch, Character *k)
     int counts = 0, total = 0;
     i = 0;
     auto con = k->getInventory();
-    for (auto j : volcano::util::filter_raw(con))
+    for (auto j : dbat::util::filter_raw(con))
     {
         counts += check_insidebag(j, 0.5);
         counts++;
@@ -2279,7 +2279,7 @@ ACMD(do_return)
     auto desc = ch->desc;
     if (!desc)
         return;
-    
+
     auto victim = desc->original;
     if (victim)
     {
@@ -2731,7 +2731,7 @@ ACMD(do_purge)
         ch->location.sendText("The world seems a little cleaner.\r\n");
 
         auto people = ch->location.getPeople();
-        for (auto it : volcano::util::filter_raw(people))
+        for (auto it : dbat::util::filter_raw(people))
         {
             vict = it;
             if (!IS_NPC(vict))
@@ -2739,7 +2739,7 @@ ACMD(do_purge)
 
             /* Dump inventory. */
             auto con = vict->getInventory();
-            for (auto o : volcano::util::filter_raw(con))
+            for (auto o : dbat::util::filter_raw(con))
                 extract_obj(o);
 
             /* Dump equipment. */
@@ -2753,7 +2753,7 @@ ACMD(do_purge)
 
         /* Clear the ground. */
         auto con = ch->location.getObjects();
-        for (auto o : volcano::util::filter_raw(con))
+        for (auto o : dbat::util::filter_raw(con))
             extract_obj(o);
     }
 }
@@ -3052,7 +3052,7 @@ void perform_immort_vis(Character *ch)
 static void perform_immort_invis(Character *ch, int level)
 {
     auto people = ch->location.getPeople();
-    for (auto tch : volcano::util::filter_raw(people))
+    for (auto tch : dbat::util::filter_raw(people))
     {
         if (tch == ch)
             continue;
@@ -3330,7 +3330,7 @@ ACMD(do_force)
         mudlog(NRM, std::max(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "(GC) %s forced room %d to %s",
                GET_NAME(ch), ch->location.getVnum(), to_force);
         auto people = ch->location.getPeople();
-        for (auto target : volcano::util::filter_raw(people))
+        for (auto target : dbat::util::filter_raw(people))
         {
             vict = target;
             if (!IS_NPC(vict) && GET_ADMLEVEL(vict) >= GET_ADMLEVEL(ch))
@@ -3652,7 +3652,7 @@ static size_t print_zone_to_buf(char *bufptr, size_t left, zone_rnum zone, int l
 
     return snprintf(bufptr, left,
                     "%3d %-*s By: %-10.10s\r\n", z->number,
-                    static_cast<int>(volcano::circle::countColors(z->name.c_str()) + 30), z->name.c_str(),
+                    static_cast<int>(dbat::circle::countColors(z->name.c_str()) + 30), z->name.c_str(),
                     z->builders.c_str());
 }
 
@@ -3828,7 +3828,7 @@ ACMD(do_show)
                 if (e == 0)
                 {
                     nlen = snprintf(buf + len, sizeof(buf) - len, "%2d: (void   ) [%5d] %-*s%s (%s)\r\n", ++k,
-                                    vn, static_cast<int>(volcano::circle::countColors(r->getName())) + 40, r->getName(), QNRM,
+                                    vn, static_cast<int>(dbat::circle::countColors(r->getName())) + 40, r->getName(), QNRM,
                                     dirs[j]);
                     if (len + nlen >= sizeof(buf) || nlen < 0)
                         break;
@@ -3837,7 +3837,7 @@ ACMD(do_show)
                 if (e == NOWHERE && !e.general_description.empty())
                 {
                     nlen = snprintf(buf + len, sizeof(buf) - len, "%2d: (Nowhere) [%5d] %-*s%s (%s)\r\n", ++k,
-                                    vn, static_cast<int>(volcano::circle::countColors(r->getName())) + 40, r->getName(), QNRM,
+                                    vn, static_cast<int>(dbat::circle::countColors(r->getName())) + 40, r->getName(), QNRM,
                                     dirs[j]);
                     if (len + nlen >= sizeof(buf) || nlen < 0)
                         break;
@@ -4513,7 +4513,7 @@ static int perform_set(Character *ch, Character *vict, int mode,
             check = [ch](Race id)
             { return race::getValidSexes(id).contains(GET_SEX(ch)) && race::isPlayable(id); };
         }
-        auto res = volcano::util::chooseEnum<Race>(std::string(val_arg), "Race", check);
+        auto res = dbat::util::chooseEnum<Race>(std::string(val_arg), "Race", check);
         if (!res)
         {
             ch->sendText(res.error());
@@ -4726,7 +4726,7 @@ ACMD(do_peace)
 {
     ch->location.sendText("Everything is quite peaceful now.\r\n");
     auto people = ch->location.getPeople();
-    for (auto vict : volcano::util::filter_raw(people))
+    for (auto vict : dbat::util::filter_raw(people))
     {
         if (GET_ADMLEVEL(vict) > GET_ADMLEVEL(ch))
             continue;
@@ -4856,14 +4856,14 @@ ACMD(do_zpurge)
     auto &z = zone_table.at(zone);
     z->rooms.for_each([](Room* r) {
         auto people = r->getPeople().snapshot_weak();
-        for (auto mob : volcano::util::filter_raw(people))
+        for (auto mob : dbat::util::filter_raw(people))
         {
             if (!IS_NPC(mob))
                 continue;
             extract_char(mob);
         }
         auto con = r->getObjects().snapshot_weak();
-        for (auto obj : volcano::util::filter_raw(con))
+        for (auto obj : dbat::util::filter_raw(con))
         {
             extract_obj(obj);
         }
@@ -5596,5 +5596,5 @@ ACMD(do_dig)
 
 ACMD(do_rcopy)
 {
-    
+
 }

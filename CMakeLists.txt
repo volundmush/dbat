@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 4.1.1)
+cmake_minimum_required(VERSION 3.28)
 project(dbat LANGUAGES C CXX)
 
 # ---------------- basics (yours) ----------------
@@ -19,8 +19,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 #set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-option(DBAT_TIME_TRACE "Enable clang -ftime-trace output" ON)
-
 set(CPM_SOURCE_CACHE ${PROJECT_SOURCE_DIR}/dependencies)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/compiled)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/compiled)
@@ -28,9 +26,6 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/compiled)
 
 # (Consider guarding these by platform if you plan to make wheels later)
 set(CMAKE_CXX_FLAGS "-Wno-write-strings -Wno-format-truncation -Wno-multichar -Wno-unused-result -Wno-deprecated-declarations -fpermissive -march=native")
-if(DBAT_TIME_TRACE)
-  add_compile_options(-ftime-trace)
-endif()
 set(CMAKE_EXE_LINKER_FLAGS     "${CMAKE_EXE_LINKER_FLAGS}     -fuse-ld=mold")
 set(CMAKE_MODULE_LINKER_FLAGS  "${CMAKE_MODULE_LINKER_FLAGS}  -fuse-ld=mold")
 set(CMAKE_SHARED_LINKER_FLAGS  "${CMAKE_SHARED_LINKER_FLAGS}  -fuse-ld=mold")
@@ -39,19 +34,20 @@ set(CMAKE_CXX_COMPILER_LAUNCHER ccache)
 set(CMAKE_C_COMPILER_LAUNCHER   ccache)
 
 set(BUILD_TESTING OFF)
-# ---------------- 
+# ----------------
 # ---------------- deps (yours) ----------------
-find_package(OpenSSL REQUIRED)
 find_package(Boost CONFIG REQUIRED COMPONENTS regex iostreams url)
-find_package(ZLIB REQUIRED)
 find_package(Threads REQUIRED)
+find_package(ZLIB REQUIRED)
 
 
 if(UNIX AND NOT APPLE)
   set(MATH_LIB m)
 endif()
 
-CPMAddPackage(NAME volcano          GITHUB_REPOSITORY volundmush/volcano            GIT_TAG main)
+CPMAddPackage(NAME fmt                   GITHUB_REPOSITORY fmtlib/fmt            GIT_TAG 12.1.0)
+CPMAddPackage(NAME spdlog                GITHUB_REPOSITORY gabime/spdlog         VERSION 1.17.0)
+CPMAddPackage(NAME nlohmann_json         GITHUB_REPOSITORY nlohmann/json         VERSION 3.12.0)
 CPMAddPackage(NAME enchantum            GITHUB_REPOSITORY ZXShady/enchantum    GIT_TAG 0.3.0)
 #CPMAddPackage(NAME EnTT                  GITHUB_REPOSITORY skypjack/entt         VERSION 3.15.0)
 CPMAddPackage(NAME effolkronium_random   GITHUB_REPOSITORY volundmush/random     GIT_TAG master
@@ -59,11 +55,15 @@ CPMAddPackage(NAME effolkronium_random   GITHUB_REPOSITORY volundmush/random    
 
 
 # ---------------- targets ----------------
-add_subdirectory(libs/valid)
-add_subdirectory(libs/api)
+#add_subdirectory(libs/link)
+add_subdirectory(libs/mud)
 add_subdirectory(libs/game)
-add_subdirectory(libs/serde)
+#add_subdirectory(libs/serde)
+add_subdirectory(libs/log)
+add_subdirectory(libs/util)
+add_subdirectory(libs/ansi)
+add_subdirectory(libs/circle)
 
-add_subdirectory(apps/migrate)
-add_subdirectory(apps/server)
-add_subdirectory(apps/portal)
+
+#add_subdirectory(apps/migrate)
+#add_subdirectory(apps/server)

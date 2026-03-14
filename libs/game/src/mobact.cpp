@@ -27,7 +27,7 @@
 #include "dbat/game/act.social.hpp"
 //#include "dbat/game/spec_procs.hpp"
 #include "dbat/game/class.hpp"
-#include "volcano/util/FilterWeak.hpp"
+#include "dbat/util/FilterWeak.hpp"
 #include "dbat/game/Random.hpp"
 //#include "dbat/game/utils.hpp"
 
@@ -41,7 +41,7 @@ static int player_present(Character *ch)
     if (IN_ROOM(ch) == NOWHERE)
         return 0;
     auto people = ch->location.getPeople();
-    for (auto vict : volcano::util::filter_raw(people))
+    for (auto vict : dbat::util::filter_raw(people))
     {
         if (!IS_NPC(vict))
         {
@@ -82,7 +82,7 @@ void mobile_activity(uint64_t heartPulse, double deltaTime)
         // copy the set.
         auto npclist = z->npcsInZone.snapshot_weak();
 
-        for (auto ch : volcano::util::filter_raw(npclist))
+        for (auto ch : dbat::util::filter_raw(npclist))
         {
             if (processed.contains(ch->id))
                 continue;
@@ -114,7 +114,7 @@ void mobile_activity(uint64_t heartPulse, double deltaTime)
                 {
                     max = 1;
                     best_obj = nullptr;
-                    for (auto obj : volcano::util::filter_raw(con))
+                    for (auto obj : dbat::util::filter_raw(con))
                         if (CAN_GET_OBJ(ch, obj) && GET_OBJ_COST(obj) > max)
                         {
                             best_obj = obj;
@@ -172,7 +172,7 @@ void mobile_activity(uint64_t heartPulse, double deltaTime)
             /* RESPOND TO A HUGE ATTACK */
             start = std::chrono::high_resolution_clock::now();
             auto con = ch->location.getObjects();
-            for (auto hugeatk : volcano::util::filter_raw(con))
+            for (auto hugeatk : dbat::util::filter_raw(con))
             {
                 if (FIGHTING(ch))
                 {
@@ -213,7 +213,7 @@ void mobile_activity(uint64_t heartPulse, double deltaTime)
                 int spot_roll = Random::get<int>(1, GET_LEVEL(ch) + 10);
                 found = false;
                 auto people = ch->location.getPeople();
-                for (auto v : volcano::util::filter_raw(people))
+                for (auto v : dbat::util::filter_raw(people))
                 {
                     vict = v;
                     if (vict == ch)
@@ -343,7 +343,7 @@ void mobile_activity(uint64_t heartPulse, double deltaTime)
                 Character *vict, *next_v;
                 int done = false;
                 auto locp = ch->location.getPeople();
-                for (auto v : volcano::util::filter_raw(locp))
+                for (auto v : dbat::util::filter_raw(locp))
                 {
                     v = vict;
                     if (vict == ch)
@@ -394,7 +394,7 @@ void mobile_activity(uint64_t heartPulse, double deltaTime)
                 Character *vict, *next_v;
                 int done = false;
                 auto locp = ch->location.getPeople();
-                for (auto v : volcano::util::filter_raw(locp))
+                for (auto v : dbat::util::filter_raw(locp))
                 {
                     vict = v;
                     if (vict == ch)
@@ -439,7 +439,7 @@ void mobile_activity(uint64_t heartPulse, double deltaTime)
             if (IS_HUMANOID(ch) && !(ch->agg_memory.empty()) && !MOB_FLAGGED(ch, MOB_DUMMY) && !IS_AFFECTED(ch, AFF_PARALYZE))
             {
                 auto people = ch->location.getPeople();
-                for (auto vict : volcano::util::filter_raw(people))
+                for (auto vict : dbat::util::filter_raw(people))
                 {
                     if (IS_NPC(vict) || !ch->canSee(vict) || PRF_FLAGGED(vict, PRF_NOHASSLE))
                         continue;
@@ -448,7 +448,7 @@ void mobile_activity(uint64_t heartPulse, double deltaTime)
                     if (GET_HIT(ch) <= GET_MAX_HIT(ch) / 100)
                         continue;
 
-                    for (auto ref : volcano::util::filter_raw(ch->agg_memory))
+                    for (auto ref : dbat::util::filter_raw(ch->agg_memory))
                     {
                         if (ref != vict)
                             continue;
@@ -480,7 +480,7 @@ void mobile_activity(uint64_t heartPulse, double deltaTime)
             {
                 found = false;
                 auto locp = ch->location.getPeople();
-                for (auto v : volcano::util::filter_raw(locp))
+                for (auto v : dbat::util::filter_raw(locp))
                 {
                     vict = v;
                     if (ch == vict || !IS_NPC(vict) || !FIGHTING(vict))

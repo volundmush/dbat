@@ -24,7 +24,7 @@
 #include "dbat/game/feats.hpp"
 //#include "dbat/game/mobact.hpp"
 #include "dbat/game/fight.hpp"
-#include "volcano/util/FilterWeak.hpp"
+#include "dbat/util/FilterWeak.hpp"
 #include "dbat/game/Random.hpp"
 #include "dbat/game/utils.hpp"
 #include "dbat/game/const/Condition.hpp"
@@ -40,7 +40,7 @@ void affect_update(uint64_t heartPulse, double deltaTime)
 {
     struct affected_type *af, *next;
     auto subs = characterSubscriptions.all("affected");
-    for (auto i : volcano::util::filter_raw(subs))
+    for (auto i : dbat::util::filter_raw(subs))
     {
         for (af = i->affected; af; af = next)
         {
@@ -77,7 +77,7 @@ int mag_materials(Character *ch, int item0, int item1, int item2, int extract, i
 {
     Object *obj0 = nullptr, *obj1 = nullptr, *obj2 = nullptr;
     auto con = ch->getInventory();
-    for (auto tobj : volcano::util::filter_raw(con))
+    for (auto tobj : dbat::util::filter_raw(con))
     {
         if ((item0 > 0) && (GET_OBJ_VNUM(tobj) == item0))
         {
@@ -655,7 +655,7 @@ void mag_groups(int level, Character *ch, int spellnum)
         k = ch->master;
     else
         k = ch;
-    
+
     k->followers.for_each([&](auto f) {
         if (f->location != ch->location)
             return;
@@ -679,7 +679,7 @@ void mag_groups(int level, Character *ch, int spellnum)
 void mag_masses(int level, Character *ch, int spellnum)
 {
     auto people = ch->location.getPeople();
-    for (auto tch : volcano::util::filter_raw(people))
+    for (auto tch : dbat::util::filter_raw(people))
     {
         if (tch == ch)
             continue;
@@ -723,7 +723,7 @@ void mag_areas(int level, Character *ch, int spellnum)
         act(to_room, false, ch, nullptr, nullptr, TO_ROOM);
 
     auto people = ch->location.getPeople();
-    for (auto tch : volcano::util::filter_raw(people))
+    for (auto tch : dbat::util::filter_raw(people))
     {
 
         /*
@@ -1023,7 +1023,7 @@ void mag_summons(int level, Character *ch, Object *obj, int spellnum, char *arg)
     if (handle_corpse)
     {
         auto con = obj->getInventory();
-        for (auto tobj : volcano::util::filter_raw(con))
+        for (auto tobj : dbat::util::filter_raw(con))
         {
             tobj->clearLocation();
             mob->addToInventory(tobj);

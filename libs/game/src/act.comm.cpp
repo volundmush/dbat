@@ -21,8 +21,8 @@
 #include "dbat/game/DragonBall.hpp"
 #include "dbat/game/Descriptor.hpp"
 
-#include "volcano/util/FilterWeak.hpp"
-#include "volcano/util/Parse.hpp"
+#include "dbat/util/FilterWeak.hpp"
+#include "dbat/util/Parse.hpp"
 #include "dbat/game/interpreter.hpp"
 #include "dbat/game/config.hpp"
 #include "dbat/game/utils.hpp"
@@ -91,25 +91,25 @@ ACMD(do_voice)
         ch->sendText("What are you changing your voice description to?\r\n");
         return;
     }
-    
+
     if (arg.size() > 75)
     {
         ch->sendText("Your voice description can not be longer than 75 characters.\r\n");
         return;
     }
-    
+
     if (arg.contains('@'))
     {
         ch->sendText("You can not use colorcode in voice descriptions.\r\n");
         return;
     }
-    
+
     if (GET_VOICE(ch) && GET_RP(ch) < 1)
     {
         ch->sendText("Your voice has already been set. You will need at least 1 RPP to be able to change it.\r\n");
         return;
     }
-    
+
     if (GET_VOICE(ch))
     {
         ch->modRPP(-1);
@@ -202,7 +202,7 @@ ACMD(do_osay)
 
     ch->send_to("You @W[@mOSAY@W] '@w%s@W'@n\r\n", arg);
 
-    auto buf2 = PRF_FLAGGED(ch, PRF_HIDE) 
+    auto buf2 = PRF_FLAGGED(ch, PRF_HIDE)
     ? fmt::sprintf("@WAnonymous @D[@mOSAY@D] @W'@w%s@W'@n", arg)
     : fmt::sprintf("@W%s @D[@mOSAY@D] @W'@w%s@W'@n", GET_ADMLEVEL(ch) > 0 ? GET_NAME(ch) : GET_USER(ch),
             arg);
@@ -254,7 +254,7 @@ ACMD(do_say)
             strcpy(verb, "say");
         }
         auto people = ch->location.getPeople();
-        for (auto tch : volcano::util::filter_raw(people))
+        for (auto tch : dbat::util::filter_raw(people))
         {
             if (tch != ch && tch->desc)
             {
@@ -1106,7 +1106,7 @@ ACMD(do_spec_comm)
 static void handle_whisper(char *buf, Character *ch, Character *vict)
 {
     auto people = ch->location.getPeople();
-    for (auto tch : volcano::util::filter_raw(people))
+    for (auto tch : dbat::util::filter_raw(people))
     {
         if (IS_NPC(tch))
         {

@@ -3,7 +3,7 @@
 #include "json.hpp"
 #include <nlohmann/json.hpp>
 
-#include "volcano/util/Enum.hpp"
+#include "dbat/util/Enum.hpp"
 #include "dbat/game/Flags.hpp"
 #include "dbat/game/const/Skill.hpp"
 

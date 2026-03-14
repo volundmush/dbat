@@ -30,7 +30,7 @@
 #include "dbat/game/races.hpp"
 #include "dbat/game/TimeInfo.hpp"
 #include "dbat/game/UID.hpp"
-#include "volcano/util/FilterWeak.hpp"
+#include "dbat/util/FilterWeak.hpp"
 #include "dbat/game/Random.hpp"
 #include "dbat/game/utils.hpp"
 #include "dbat/game/weather.hpp"
@@ -91,7 +91,7 @@ int item_in_list(std::string_view item, const std::vector<std::weak_ptr<Object>>
         if (!obj)
             return 0;
 
-        for (auto i : volcano::util::filter_raw(list))
+        for (auto i : dbat::util::filter_raw(list))
         {
             if (i == obj)
                 count++;
@@ -103,7 +103,7 @@ int item_in_list(std::string_view item, const std::vector<std::weak_ptr<Object>>
     { /* check for vnum */
         auto ovnum = parseNumber<obj_vnum>(item, "item id").value_or(NOTHING);
 
-        for (auto i : volcano::util::filter_raw(list))
+        for (auto i : dbat::util::filter_raw(list))
         {
             if (GET_OBJ_VNUM(i) == ovnum)
                 count++;
@@ -113,7 +113,7 @@ int item_in_list(std::string_view item, const std::vector<std::weak_ptr<Object>>
     }
     else
     {
-        for (auto i : volcano::util::filter_raw(list))
+        for (auto i : dbat::util::filter_raw(list))
         {
             if (isname(item, i->getName()))
                 count++;
@@ -284,7 +284,7 @@ void var_subst(DgScript *trig, char *line, char *buf)
 // an error anyway.
 std::vector<std::string_view> dg_split_fields(std::string_view input) {
     std::vector<std::string_view> out;
-    
+
     size_t start = 0;
     size_t paren_count = 0;
     for (size_t i = 0; i < input.size(); ++i) {
@@ -357,7 +357,7 @@ DGFUNC(dg_func_random) {
                 auto c = (Character*)trig->owner.get();
                 if(!c) return "";
                 auto candidates = c->location.getPeople();
-                for(auto ch : volcano::util::filter_raw(candidates)) {
+                for(auto ch : dbat::util::filter_raw(candidates)) {
                     if(ch != c && c->canSee(ch)) {
                         chars.push_back(ch->shared_from_this());
                     }
@@ -368,7 +368,7 @@ DGFUNC(dg_func_random) {
                 auto o = (Object*)trig->owner.get();
                 if(!o) return "";
                 auto candidates = get_room(obj_room(o))->getPeople().snapshot_weak();
-                for(auto ch : volcano::util::filter_raw(candidates)) {
+                for(auto ch : dbat::util::filter_raw(candidates)) {
                     if(valid_dg_target(ch, DG_ALLOW_GODS)) {
                         chars.push_back(ch->shared_from_this());
                     }
@@ -379,7 +379,7 @@ DGFUNC(dg_func_random) {
                 auto r = (Room*)trig->owner.get();
                 if(!r) return "";
                 auto candidates = r->getPeople().snapshot_weak();
-                for(auto ch : volcano::util::filter_raw(candidates)) {
+                for(auto ch : dbat::util::filter_raw(candidates)) {
                     if(valid_dg_target(ch, DG_ALLOW_GODS)) {
                         chars.push_back(ch->shared_from_this());
                     }
@@ -470,14 +470,14 @@ DGFUNC(dg_func_findmob) {
     int count = 0;
     if(mvnumRes) {
         auto mv = *mvnumRes;
-        for(auto ch : volcano::util::filter_raw(people)) {
+        for(auto ch : dbat::util::filter_raw(people)) {
             if(ch->vn == mv) {
                 count++;
             }
         }
     } else {
         // not a number, so search by name/id
-        for(auto ch : volcano::util::filter_raw(people)) {
+        for(auto ch : dbat::util::filter_raw(people)) {
             if(isname(subfield, ch->getName())) {
                 count++;
             }
@@ -496,14 +496,14 @@ DGFUNC(dg_func_findobj) {
     auto objs = r->getObjects().snapshot_weak();
     if(auto ovnumRes = parseNumber<obj_vnum>(subfield, "func findobj")) {
         auto ov = *ovnumRes;
-        for(auto obj : volcano::util::filter_raw(objs)) {
+        for(auto obj : dbat::util::filter_raw(objs)) {
             if(obj->vn == ov) {
                 count++;
             }
         }
     } else {
         // not a number, so search by name/id
-        for(auto obj : volcano::util::filter_raw(objs)) {
+        for(auto obj : dbat::util::filter_raw(objs)) {
             if(isname(subfield, obj->getName())) {
                 count++;
             }
@@ -690,7 +690,7 @@ std::string dg_replace_fields(DgScript* trig, std::string_view input) {
         } else {
             usefield = subfield;
         }
-        
+
         if(std::holds_alternative<DgFunc>(current)) {
             // we have a function, so we need to call it with the next field.
             auto func = std::get<DgFunc>(current);
@@ -736,7 +736,7 @@ std::string dg_replace_fields(DgScript* trig, std::string_view input) {
 // This allows for things like %find.character(John.%Doe%)% to work properly.
 std::vector<std::pair<bool, std::string_view>> dg_find_sections(std::string_view input) {
     std::vector<std::pair<bool, std::string_view>> out;
-    
+
     bool in_section = false;
     size_t start = 0;
     size_t i = 0;
@@ -865,7 +865,7 @@ template<typename EnumType>
 requires std::is_enum_v<EnumType>
 std::string dgHandleFlags(FlagHandler<EnumType>& flags, const std::string& arg, std::optional<bool> value = std::nullopt) {
     if(!arg.empty()) {
-        auto res = volcano::util::chooseEnum<EnumType>(arg, "dgHandleFlag");
+        auto res = dbat::util::chooseEnum<EnumType>(arg, "dgHandleFlag");
         if(res) {
             if(value.has_value()) {
                 flags.set(*res, value.value());
@@ -880,7 +880,7 @@ template<typename EnumType>
 requires std::is_enum_v<EnumType>
 std::string dgHandleEnum(EnumType& val, const std::string& arg) {
     if(!arg.empty()) {
-        auto res = volcano::util::chooseEnum<EnumType>(arg, "dgHandleEnum");
+        auto res = dbat::util::chooseEnum<EnumType>(arg, "dgHandleEnum");
         if(res) {
             val = *res;
         }
@@ -957,7 +957,7 @@ DgReturn Character::dgCallMember(DgScript* trig, std::string_view field, std::st
 
     if(boost::iequals(lmember, "affect")) {
         if(!arg.empty()) {
-            auto res = volcano::util::chooseEnum<AffectFlag>(arg, "affect flags");
+            auto res = dbat::util::chooseEnum<AffectFlag>(arg, "affect flags");
             if(res) {
                 return AFF_FLAGGED(this, *res) ? "1" : "0";
             }
@@ -982,10 +982,10 @@ DgReturn Character::dgCallMember(DgScript* trig, std::string_view field, std::st
     if(boost::iequals(lmember, "class") || boost::iequals(lmember, "sensei"))
         return std::string(enchantum::to_string(sensei));
 
-    
+
     if(boost::iequals(lmember, "drag"))
         return DRAGGING(this) ? "1" : "0";
-    
+
     if(boost::iequals(lmember, "eq")) {
         auto eq = getEquipment();
         if(boost::iequals(arg, "*")) return !eq.empty() ? "1" : "0";
@@ -1014,7 +1014,7 @@ DgReturn Character::dgCallMember(DgScript* trig, std::string_view field, std::st
         }
         else {return "";}
     }
-    
+
     if(boost::iequals(lmember, "follower")) {
         if(!followers) return "";
         auto h = followers.head();
@@ -1028,8 +1028,8 @@ DgReturn Character::dgCallMember(DgScript* trig, std::string_view field, std::st
 
     if(boost::iequals(lmember, "hisher"))
         return HSHR(this);
-    
-    
+
+
     if(boost::iequals(lmember, "heshe"))
         return HSSH(this);
 
@@ -1038,15 +1038,15 @@ DgReturn Character::dgCallMember(DgScript* trig, std::string_view field, std::st
 
     if(boost::iequals(lmember, "id"))
         return getUID(true);
-    
+
     if(boost::iequals(lmember, "is_pc"))
         return IS_NPC(this) ? "0" : "1";
-    
+
     if(boost::iequals(lmember, "inventory")) {
         auto inv = getInventory();
         // if arg is empty, return first item...
         if(arg.empty()) {
-            for(auto item : volcano::util::filter_raw(inv)) {
+            for(auto item : dbat::util::filter_raw(inv)) {
                 return item;
             }
             return "";
@@ -1054,7 +1054,7 @@ DgReturn Character::dgCallMember(DgScript* trig, std::string_view field, std::st
         auto numRes = parseNumber<obj_vnum>(arg, "dgCallMember inventory");
         if(numRes) {
             obj_vnum vnum = *numRes;
-            for(auto item : volcano::util::filter_raw(inv)) {
+            for(auto item : dbat::util::filter_raw(inv)) {
                 if(GET_OBJ_VNUM(item) == vnum) {
                     return item;
                 }
@@ -1065,18 +1065,18 @@ DgReturn Character::dgCallMember(DgScript* trig, std::string_view field, std::st
 
     if(boost::iequals(lmember, "master")) {
         if(master) {return master;}
-        else {return "";}   
+        else {return "";}
     }
 
     if(boost::iequals(lmember, "name")) {
         return IS_NPC(this) ? getShortDescription() : getName();
     }
-    
+
     if(boost::iequals(lmember, "next_in_room")) {
         if (auto people = location.getPeople(); !people.empty())
         {
             auto found = false;
-            for (auto p : volcano::util::filter_raw(people))
+            for (auto p : dbat::util::filter_raw(people))
             {
                 if (found)
                 {
@@ -1109,14 +1109,14 @@ DgReturn Character::dgCallMember(DgScript* trig, std::string_view field, std::st
         {return dgHandleFlags(player_flags, arg);}
     if(boost::iequals(lmember, "pref"))
         {return dgHandleFlags(pref_flags, arg);}
-    
+
     if(boost::iequals(lmember, "room")) {
         if(auto r = getRoom())
             {return r;}
         else
             {return "";}
     }
-    
+
     if(boost::iequals(lmember, "race")) {
         return std::string(enchantum::to_string(race));
     }
@@ -1134,13 +1134,13 @@ DgReturn Character::dgCallMember(DgScript* trig, std::string_view field, std::st
     if(boost::iequals(lmember, "sex")) {
         return std::string(enchantum::to_string(sex));
     }
-    
+
     if(boost::iequals(lmember, "skillset")) {
         if(!arg.empty()) {
             std::vector<std::string_view> parts;
             boost::split(parts, arg, boost::is_space(), boost::token_compress_on);
             if(parts.size() != 2) return "";
-            auto skRes = volcano::util::chooseEnum<Skill>(parts[0], "dgCallMember skillset");
+            auto skRes = dbat::util::chooseEnum<Skill>(parts[0], "dgCallMember skillset");
             if(!skRes) {
                 return "";
             }
@@ -1162,7 +1162,7 @@ DgReturn Character::dgCallMember(DgScript* trig, std::string_view field, std::st
     if(boost::iequals(lmember, "size")) {
         return dgHandleEnum(size, arg);
     }
-    
+
     if(boost::iequals(lmember, "tnl"))
         return fmt::format("{}", level_exp(this, GET_LEVEL(this) +1));
 
@@ -1171,13 +1171,13 @@ DgReturn Character::dgCallMember(DgScript* trig, std::string_view field, std::st
 
     if(boost::iequals(lmember, "varexists"))
         return variables.contains(arg) ? "1" : "0";
-    
+
     if(boost::iequals(lmember, "weight"))
         return fmt::format("{}", getEffectiveStat("weight"));
 
     if(auto found = getVariable(member); found)
         return resolveVar(*found);
-    
+
     script_log("Trigger: %s, VNum %d. unknown char field: '%s'",
         GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), member.c_str());
 
@@ -1213,16 +1213,16 @@ DgReturn Object::dgCallMember(DgScript* trig, std::string_view field, std::strin
     if(boost::iequals(lmember, "affects")) {
         return dgHandleFlags(affect_flags, arg);
     }
-    
+
     if(boost::iequals(lmember, "carried_by")) {
         if(auto c = getCarriedBy()) {return c;}
         else {return "";}
     }
-    
+
     if(boost::iequals(lmember, "contents")) {
         if (auto con = getInventory(); !con.empty())
         {
-            for (auto obj : volcano::util::filter_raw(con))
+            for (auto obj : dbat::util::filter_raw(con))
             {
                 return obj;
             }
@@ -1239,7 +1239,7 @@ DgReturn Object::dgCallMember(DgScript* trig, std::string_view field, std::strin
 
     if(boost::iequals(lmember, "extra"))
         return dgHandleFlags(item_flags, arg);
-    
+
     if(boost::iequals(lmember, "has_in")) {
         if(type_flag == ItemType::container) {
             return item_in_list((char*)arg.c_str(), getInventory()) ? "1" : "0";
@@ -1257,9 +1257,9 @@ DgReturn Object::dgCallMember(DgScript* trig, std::string_view field, std::strin
 
     if(boost::iequals(lmember, "is_pc")) return "-1";
 
-    if(boost::iequals(lmember, "itemflag")) 
+    if(boost::iequals(lmember, "itemflag"))
         return dgHandleFlags(item_flags, arg);
-    
+
     if(boost::iequals(lmember, "name")) {
         if(!arg.empty()) {
             name = fmt::format("{} {}", name, arg);
@@ -1271,7 +1271,7 @@ DgReturn Object::dgCallMember(DgScript* trig, std::string_view field, std::strin
         if (auto con = location.getObjects(); !con.empty())
         {
             auto found = false;
-            for (auto ob : volcano::util::filter_raw(con))
+            for (auto ob : dbat::util::filter_raw(con))
             {
                 if (ob == this)
                 {
@@ -1402,13 +1402,13 @@ DgReturn Room::dgCallMember(DgScript* trig, std::string_view field, std::string_
         if(!arg.empty()) {
             // search for vnum...
             auto v = parseNumber<obj_vnum>(arg, "dgCallMember room contents").value_or(-2);
-            for(auto obj : volcano::util::filter_raw(con)) {
+            for(auto obj : dbat::util::filter_raw(con)) {
                 if(GET_OBJ_VNUM(obj) == v) {
                     return obj;
                 }
             }
         } else {
-            for(auto obj : volcano::util::filter_raw(con)) {
+            for(auto obj : dbat::util::filter_raw(con)) {
                 return obj;
             }
         }
@@ -1417,7 +1417,7 @@ DgReturn Room::dgCallMember(DgScript* trig, std::string_view field, std::string_
 
     if(boost::iequals(lmember, "people")) {
         auto ppl = getPeople().snapshot_weak();
-        for(auto ch : volcano::util::filter_raw(ppl)) {
+        for(auto ch : dbat::util::filter_raw(ppl)) {
             return ch;
         }
         return "";
@@ -1443,10 +1443,9 @@ DgReturn Room::dgCallMember(DgScript* trig, std::string_view field, std::string_
 
     if(auto found = getVariable(member); found)
         return resolveVar(*found);
-    
+
     script_log("Trigger: %s, VNum %d, type: %d. unknown room field: '%s'",
             GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), static_cast<int>(type), member.c_str());
 
     return "";
 }
-

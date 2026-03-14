@@ -17,7 +17,7 @@
 //#include "dbat/game/interpreter.hpp"
 #include "dbat/game/db.hpp"
 #include "dbat/game/vehicles.hpp"
-#include "volcano/util/FilterWeak.hpp"
+#include "dbat/util/FilterWeak.hpp"
 #include "dbat/game/Random.hpp"
 
 int mapnums[MAP_ROWS + 1][MAP_COLS + 1];
@@ -35,7 +35,7 @@ void ping_ship(int vnum, int vnum2)
     }
 
     auto ac = characterSubscriptions.all("active");
-    for (auto tch : volcano::util::filter_raw(ac))
+    for (auto tch : dbat::util::filter_raw(ac))
     {
         if (!(obj = find_control(tch)))
         {

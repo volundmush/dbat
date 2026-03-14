@@ -29,7 +29,7 @@
 #include "dbat/game/class.hpp"
 #include "dbat/game/utils.hpp"
 #include "dbat/game/Random.hpp"
-#include "volcano/util/FilterWeak.hpp"
+#include "dbat/util/FilterWeak.hpp"
 
 #include "dbat/game/const/LiquidType.hpp"
 
@@ -189,7 +189,7 @@ ASPELL(spell_locate_object)
     j = level / 2;
 
     auto ao = objectSubscriptions.all("active");
-    for (auto i : volcano::util::filter_raw(ao))
+    for (auto i : dbat::util::filter_raw(ao))
     {
         if (!isname(name, i->getName()))
             continue;

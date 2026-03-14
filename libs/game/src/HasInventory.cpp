@@ -1,6 +1,6 @@
 #include "dbat/game/HasInventory.hpp"
 #include "dbat/game/Object.hpp"
-#include "volcano/util/FilterWeak.hpp"
+#include "dbat/util/FilterWeak.hpp"
 
 void HasInventory::addToInventory(Object *obj)
 {
@@ -41,7 +41,7 @@ std::vector<std::weak_ptr<Object>> HasInventory::getInventory() const
 
 void HasInventory::traverseInventory(const std::function<void(Object *)> &func, bool recurse)
 {
-    for (const auto &obj : volcano::util::filter_raw(inventory))
+    for (const auto &obj : dbat::util::filter_raw(inventory))
     {
         func(obj);
         if (recurse)
@@ -54,7 +54,7 @@ void HasInventory::traverseInventory(const std::function<void(Object *)> &func, 
 std::unordered_set<Object *> HasInventory::gatherFromInventory(const std::function<bool(Object *)> &func, bool recurse)
 {
     std::unordered_set<Object *> out;
-    for (const auto &obj : volcano::util::filter_raw(inventory))
+    for (const auto &obj : dbat::util::filter_raw(inventory))
     {
         if (func(obj))
         {
@@ -71,7 +71,7 @@ std::unordered_set<Object *> HasInventory::gatherFromInventory(const std::functi
 
 Object *HasInventory::searchInventory(const std::function<bool(Object *)> &func, bool recurse)
 {
-    for (const auto &obj : volcano::util::filter_raw(inventory))
+    for (const auto &obj : dbat::util::filter_raw(inventory))
     {
         if (func(obj))
         {
@@ -96,7 +96,7 @@ Object *HasInventory::searchInventory(obj_vnum vnum, bool working, bool recurse)
 
 void HasInventory::activateInventory()
 {
-    for (const auto &obj : volcano::util::filter_raw(inventory))
+    for (const auto &obj : dbat::util::filter_raw(inventory))
     {
         obj->activate();
     }
@@ -104,7 +104,7 @@ void HasInventory::activateInventory()
 
 void HasInventory::deactivateInventory()
 {
-    for (const auto &obj : volcano::util::filter_raw(inventory))
+    for (const auto &obj : dbat::util::filter_raw(inventory))
     {
         obj->deactivate();
     }

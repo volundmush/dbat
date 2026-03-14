@@ -2,8 +2,7 @@
 // Created by basti on 10/24/2021.
 //
 
-#include "dbat/valid/valid.hpp"
-#include "volcano/util/FilterWeak.hpp"
+#include "dbat/util/FilterWeak.hpp"
 #include "dbat/game/CharacterUtils.hpp"
 #include "dbat/game/CharacterPrototype.hpp"
 #include "dbat/game/ObjectUtils.hpp"
@@ -1543,7 +1542,7 @@ void Character::sendText(std::string_view txt)
 void Character::sendAround(std::string_view txt)
 {
     auto people = location.getPeople();
-    for (auto p : volcano::util::filter_raw(people))
+    for (auto p : dbat::util::filter_raw(people))
     {
         if(p == this) continue;
         p->sendText(txt);
@@ -1554,7 +1553,7 @@ void Character::sendAround(std::string_view txt)
 size_t Character::send_to(const char *fmt, ...) {
     if (!desc)
         return 0;
-    
+
     std::string output;
 
     // calculate size
@@ -1738,7 +1737,7 @@ bool Character::canSeeInDark() const {
 bool Character::canSee(HasInteractive *other, bool skipLightCheck)
 {
     auto res = other->isVisibleTo(this);
-    
+
     // cannot see them if the area is dark...
     if(!player_flags.get(PRF_HOLYLIGHT) && !skipLightCheck) {
         if(!canSeeInDark() && location.getIsDark())
@@ -1813,11 +1812,8 @@ std::expected<void, std::string> ChargenData::validate() {
         return std::unexpected("Character name cannot be empty.");
     }
     auto &res_name = name.value();
-    auto validated_name = dbat::valid::character_name(res_name);
-    if(!validated_name) {
-        return std::unexpected(validated_name.error());
-    }
-    auto final_name = validated_name.value();
+    auto validated_name = res_name;
+    auto final_name = validated_name;
     name = final_name;
 
     if(!race.has_value()) {
@@ -1831,7 +1827,7 @@ std::expected<void, std::string> ChargenData::validate() {
     if(!sex.has_value()) {
         return std::unexpected("Character sex must be selected.");
     }
-    
+
     auto &final_sex = sex.value();
     if(!race::getValidSexes(final_race).contains(final_sex)) {
         return std::unexpected("Selected sex is invalid for the chosen race.");
@@ -1944,7 +1940,7 @@ std::expected<std::shared_ptr<Character>, std::string> createPlayerCharacter(str
         ch->modBaseStat("practices", 200);
         ch->player_flags.set(PlayerFlag::forgetting_skill);
     }
-    
+
     ch->setBaseStat("good_evil", data.alignment);
 
     players.emplace(ch->id, p);
@@ -1955,5 +1951,5 @@ std::expected<std::shared_ptr<Character>, std::string> createPlayerCharacter(str
     send_to_imm("New character created, %s, by user, %s.", GET_NAME(ch.get()), account->name.c_str());
 
     return ch;
-    
+
 }

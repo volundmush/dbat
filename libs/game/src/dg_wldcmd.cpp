@@ -19,7 +19,7 @@
 #include "dbat/game/interpreter.hpp"
 #include "dbat/game/handler.hpp"
 #include "dbat/game/db.hpp"
-#include "volcano/util/FilterWeak.hpp"
+#include "dbat/util/FilterWeak.hpp"
 
 /*
  * Local functions
@@ -374,7 +374,7 @@ WCMD(do_wteleport)
             return;
         }
         auto people = room->getPeople().snapshot_weak();
-        for (auto ch : volcano::util::filter_raw(people))
+        for (auto ch : dbat::util::filter_raw(people))
         {
             if (!valid_dg_target(ch, DG_ALLOW_GODS))
                 continue;
@@ -414,7 +414,7 @@ WCMD(do_wforce)
     if (boost::iequals(arg1, "all"))
     {
         auto people = room->getPeople().snapshot_weak();
-        for (auto ch : volcano::util::filter_raw(people))
+        for (auto ch : dbat::util::filter_raw(people))
         {
 
             if (valid_dg_target(ch, 0))
@@ -450,14 +450,14 @@ WCMD(do_wpurge)
     {
         /* purge all */
         auto people = room->getPeople().snapshot_weak();
-        for (auto ch : volcano::util::filter_raw(people))
+        for (auto ch : dbat::util::filter_raw(people))
         {
             if (IS_NPC(ch))
                 extract_char(ch);
         }
 
         auto con = room->getObjects().snapshot_weak();
-        for (auto obj : volcano::util::filter_raw(con))
+        for (auto obj : dbat::util::filter_raw(con))
         {
             extract_obj(obj);
         }

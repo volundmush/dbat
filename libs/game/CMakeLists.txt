@@ -42,13 +42,12 @@ target_link_libraries(dbat_game
     fmt::fmt
     enchantum::enchantum
     effolkronium_random
-    dbat::valid
     Boost::regex
     Threads::Threads
-    volcano::util
-    volcano::circle
-    volcano::log
-    volcano::mud
+    dbat::util
+    dbat::circle
+    dbat::log
+    dbat::mud
     bsd
     ${MATH_LIB}
   PRIVATE

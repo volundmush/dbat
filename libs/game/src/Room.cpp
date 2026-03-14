@@ -10,7 +10,7 @@
 #include "dbat/game/constants.hpp"
 //#include "dbat/game/planet.hpp"
 //#include "dbat/game/constants.hpp"
-#include "volcano/util/FilterWeak.hpp"
+#include "dbat/util/FilterWeak.hpp"
 #include "dbat/game/dg_scripts.hpp"
 //#include "dbat/game/send.hpp"
 #include "dbat/game/act.wizard.hpp"
@@ -248,7 +248,7 @@ std::optional<double> Room::getEnvironment(const Coordinates &coor, int type) co
         // check for a gravity generator...
         // bypass const deliberately here...
         auto con = ((Room*)this)->getObjects().snapshot_weak();
-        for (auto c : volcano::util::filter_raw(con))
+        for (auto c : dbat::util::filter_raw(con))
         {
             if (auto g = c->getBaseStat("gravity"); g > 0.0)
                 return g;
@@ -284,7 +284,7 @@ std::optional<double> Room::getEnvironment(const Coordinates &coor, int type) co
 void Room::sendText(const std::string &txt)
 {
     auto people = getPeople().snapshot_weak();
-    for (auto i : volcano::util::filter_raw(people))
+    for (auto i : dbat::util::filter_raw(people))
     {
         i->sendText(txt);
     }
@@ -313,7 +313,7 @@ void Room::sendText(const std::string &txt)
 }
 /*
 size_t Room::send_to(const char *fmt, ...) {
-    
+
     std::string output;
 
     // calculate size

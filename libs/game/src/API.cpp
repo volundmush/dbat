@@ -1,6 +1,6 @@
 #include <map>
 #include "dbat/game/API.hpp"
-#include "volcano/util/Enum.hpp"
+#include "dbat/util/Enum.hpp"
 
 #include "dbat/game/const/Race.hpp"
 #include "dbat/game/const/Sensei.hpp"
@@ -38,131 +38,131 @@
 
 
 std::vector<std::string> getRaceNames() {
-        return volcano::util::getEnumNameList<Race>();
+        return dbat::util::getEnumNameList<Race>();
 }
 
 std::vector<std::string> getSenseiNames() {
-        return volcano::util::getEnumNameList<Sensei>();
+        return dbat::util::getEnumNameList<Sensei>();
 }
 
 std::vector<std::string> getFormNames() {
-        return volcano::util::getEnumNameList<Form>();
+        return dbat::util::getEnumNameList<Form>();
 }
 
 std::vector<std::string> getSkillNames() {
-        return volcano::util::getEnumNameList<Skill>();
+        return dbat::util::getEnumNameList<Skill>();
 }
 
 std::vector<std::string> getRoomFlagNames() {
-        return volcano::util::getEnumNameList<RoomFlag>();
+        return dbat::util::getEnumNameList<RoomFlag>();
 }
 
 std::vector<std::string> getSectorTypeNames() {
-        return volcano::util::getEnumNameList<SectorType>();
+        return dbat::util::getEnumNameList<SectorType>();
 }
 
 std::vector<std::string> getSizeNames() {
-        return volcano::util::getEnumNameList<Size>();
+        return dbat::util::getEnumNameList<Size>();
 }
 
 std::vector<std::string> getPlayerFlagNames() {
-        return volcano::util::getEnumNameList<PlayerFlag>();
+        return dbat::util::getEnumNameList<PlayerFlag>();
 }
 
 std::vector<std::string> getMobFlagNames() {
-        return volcano::util::getEnumNameList<MobFlag>();
+        return dbat::util::getEnumNameList<MobFlag>();
 }
 
 std::vector<std::string> getPrefFlagNames() {
-        return volcano::util::getEnumNameList<PrefFlag>();
+        return dbat::util::getEnumNameList<PrefFlag>();
 }
 
 std::vector<std::string> getAffectFlagNames() {
-        return volcano::util::getEnumNameList<AffectFlag>();
+        return dbat::util::getEnumNameList<AffectFlag>();
 }
 
 std::vector<std::string> getItemTypeNames() {
-        return volcano::util::getEnumNameList<ItemType>();
+        return dbat::util::getEnumNameList<ItemType>();
 }
 
 std::vector<std::string> getWearFlagNames() {
-        return volcano::util::getEnumNameList<WearFlag>();
+        return dbat::util::getEnumNameList<WearFlag>();
 }
 
 std::vector<std::string> getItemFlagNames() {
-        return volcano::util::getEnumNameList<ItemFlag>();
+        return dbat::util::getEnumNameList<ItemFlag>();
 }
 
 std::vector<std::string> getAdminFlagNames() {
-        return volcano::util::getEnumNameList<AdminFlag>();
+        return dbat::util::getEnumNameList<AdminFlag>();
 }
 
 std::vector<std::string> getDirectionNames() {
-        return volcano::util::getEnumNameList<Direction>();
+        return dbat::util::getEnumNameList<Direction>();
 }
 
 std::vector<std::string> getAttributeNames() {
-        return volcano::util::getEnumNameList<CharAttribute>();
+        return dbat::util::getEnumNameList<CharAttribute>();
 }
 
 std::vector<std::string> getAttributeTrainNames() {
-        return volcano::util::getEnumNameList<CharTrain>();
+        return dbat::util::getEnumNameList<CharTrain>();
 }
 
 std::vector<std::string> getAppearanceNames() {
-        return volcano::util::getEnumNameList<Appearance>();
+        return dbat::util::getEnumNameList<Appearance>();
 }
 
 std::vector<std::string> getAlignNames() {
-        return volcano::util::getEnumNameList<CharAlign>();
+        return dbat::util::getEnumNameList<CharAlign>();
 }
 
 std::vector<std::string> getMoneyNames() {
-        return volcano::util::getEnumNameList<CharMoney>();
+        return dbat::util::getEnumNameList<CharMoney>();
 }
 
 std::vector<std::string> getVitalNames() {
-        return volcano::util::getEnumNameList<CharVital>();
+        return dbat::util::getEnumNameList<CharVital>();
 }
 
 std::vector<std::string> getStatNames() {
-        return volcano::util::getEnumNameList<CharStat>();
+        return dbat::util::getEnumNameList<CharStat>();
 }
 
 std::vector<std::string> getDimNames() {
-        return volcano::util::getEnumNameList<CharDim>();
+        return dbat::util::getEnumNameList<CharDim>();
 }
 
 std::vector<std::string> getComStatNames() {
-        return volcano::util::getEnumNameList<ComStat>();
+        return dbat::util::getEnumNameList<ComStat>();
 }
 
 std::vector<std::string> getShopFlagNames() {
-        return volcano::util::getEnumNameList<ShopFlag>();
+        return dbat::util::getEnumNameList<ShopFlag>();
 }
 
 std::vector<std::string> getCharacterFlagNames() {
-        return volcano::util::getEnumNameList<CharacterFlag>();
+        return dbat::util::getEnumNameList<CharacterFlag>();
 }
 
 std::vector<std::string> getZoneFlagNames() {
-        return volcano::util::getEnumNameList<ZoneFlag>();
+        return dbat::util::getEnumNameList<ZoneFlag>();
 }
 
 std::vector<std::string> getWhereFlagNames() {
-        return volcano::util::getEnumNameList<WhereFlag>();
+        return dbat::util::getEnumNameList<WhereFlag>();
 }
 
 std::vector<std::string> getSexNames() {
-        return volcano::util::getEnumNameList<Sex>();
+        return dbat::util::getEnumNameList<Sex>();
 }
 
 std::vector<std::string> getMutationNames() {
-        return volcano::util::getEnumNameList<Mutation>();
+        return dbat::util::getEnumNameList<Mutation>();
 }
 
 std::vector<std::string> getAndroidModelNames() {
-        return volcano::util::getEnumNameList<AndroidModel>();
+        return dbat::util::getEnumNameList<AndroidModel>();
 }
 
 std::vector<std::string> getBioGenomeNames() {
@@ -172,21 +172,21 @@ std::vector<std::string> getBioGenomeNames() {
                         out.emplace_back(enchantum::to_string(val));
                 }
         }
-        
+
         return out;
 }
 
 template<typename T>
 std::vector<T*> collectObjectsInRange(int start_vnum, int end_vnum, const std::map<int, std::shared_ptr<T>>& object_map) {
     std::vector<T*> result;
-    
+
     for (int vnum = start_vnum; vnum <= end_vnum; ++vnum) {
         auto it = object_map.find(vnum);
         if (it != object_map.end()) {
             result.push_back(const_cast<T*>(it->second.get()));
         }
     }
-    
+
     return result;
 }
 

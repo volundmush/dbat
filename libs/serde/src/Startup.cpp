@@ -9,7 +9,7 @@
 
 #include "dbat/game/db.hpp"
 #include "dbat/game/dg_scripts.hpp"
-#include "volcano/util/FilterWeak.hpp"
+#include "dbat/util/FilterWeak.hpp"
 #include "dbat/game/utils.hpp"
 #include "dbat/game/magic.hpp"
 #include "dbat/game/feats.hpp"
@@ -30,11 +30,11 @@ static void db_load_activate_entities() {
         assign_triggers(r.get(), WLD_TRIGGER);
         r->activateScripts();
         auto con = r->getObjects().snapshot_weak();
-        for(auto o : volcano::util::filter_raw(con)) {
+        for(auto o : dbat::util::filter_raw(con)) {
             o->activate();
         }
         auto people = r->getPeople().snapshot_weak();
-        for(auto c : volcano::util::filter_raw(people)) {
+        for(auto c : dbat::util::filter_raw(people)) {
             if(IS_NPC(c)) {
                 c->activate();
             }
@@ -109,7 +109,7 @@ void boot_db_world() {
 
     LINFO("Loading help entries.");
     load_help(assetLatest);
-    
+
     LINFO("Loading assemblies.");
     load_assemblies(assetLatest);
 

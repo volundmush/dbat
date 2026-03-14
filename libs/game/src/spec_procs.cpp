@@ -31,7 +31,7 @@
 #include "dbat/game/class.hpp"
 #include "dbat/game/players.hpp"
 //#include "dbat/game/act.informative.hpp"
-#include "volcano/util/FilterWeak.hpp"
+#include "dbat/util/FilterWeak.hpp"
 #include "dbat/game/Random.hpp"
 #include "dbat/game/utils.hpp"
 
@@ -49,7 +49,7 @@ SPECIAL(dump)
     int value = 0;
 
     auto con = ch->location.getObjects();
-    for (auto k : volcano::util::filter_raw(con))
+    for (auto k : dbat::util::filter_raw(con))
     {
         act("$p vanishes in a puff of smoke!", false, nullptr, k, nullptr, TO_ROOM);
         extract_obj(k);
@@ -61,7 +61,7 @@ SPECIAL(dump)
     do_drop(ch, argument, cmd, SCMD_DROP);
 
     con = ch->location.getObjects();
-    for (auto k : volcano::util::filter_raw(con))
+    for (auto k : dbat::util::filter_raw(con))
     {
         act("$p vanishes in a puff of smoke!", false, nullptr, k, nullptr, TO_ROOM);
         value += std::clamp<int>(GET_OBJ_COST(k) / 10, 1, 50);
@@ -95,7 +95,7 @@ int num_players_in_room(room_vnum room)
 
     int num_players = 0;
     auto p = r->getPeople().snapshot_weak();
-    for (auto ch : volcano::util::filter_raw(p))
+    for (auto ch : dbat::util::filter_raw(p))
     {
         if (IS_NPC(ch))
             continue;
@@ -111,7 +111,7 @@ bool check_mob_in_room(mob_vnum mob, room_vnum room)
     if (auto r = get_room(room); r)
     {
         auto p = r->getPeople().snapshot_weak();
-        for (auto ch : volcano::util::filter_raw(p))
+        for (auto ch : dbat::util::filter_raw(p))
             if (ch->getVnum() == mob)
                 return true;
     }
@@ -248,7 +248,7 @@ SPECIAL(gauntlet_room) /* Jamdog - 13th Feb 2006 */
             {
                 // don't let him proceed if mob is still alive
                 auto loco = ch->location.getPeople();
-                for (auto tch : volcano::util::filter_raw(loco))
+                for (auto tch : dbat::util::filter_raw(loco))
                 {
                     if (IS_NPC(tch) && i > 0) /* Ignore mobs in the waiting room */
                     {
@@ -264,7 +264,7 @@ SPECIAL(gauntlet_room) /* Jamdog - 13th Feb 2006 */
 
                     /* Check the next room for players and ensure mob is waiting */
                     auto pg = get_room(real_room(gauntlet_info[i + 1][1]))->getPeople().snapshot_weak();
-                    for (auto tch : volcano::util::filter_raw(pg))
+                    for (auto tch : dbat::util::filter_raw(pg))
                     {
                         if (!IS_NPC(tch))
                         {
@@ -406,7 +406,7 @@ SPECIAL(gauntlet_rest) /* Jamdog - 20th Feb 2007 */
 
                 /* Check the next room for players and ensure mob is waiting */
                 auto pg = get_room(real_room(gauntlet_info[i][1]))->getPeople().snapshot_weak();
-                for (auto tch : volcano::util::filter_raw(pg))
+                for (auto tch : dbat::util::filter_raw(pg))
                 {
                     if (!IS_NPC(tch))
                     {
@@ -485,7 +485,7 @@ SPECIAL(pet_shops)
     {
         ch->sendText("Available pets are:\r\n");
         auto pcon = get_room(pet_room)->getPeople().snapshot_weak();
-        for (auto pet : volcano::util::filter_raw(pcon))
+        for (auto pet : dbat::util::filter_raw(pcon))
         {
             /* No, you can't have the Implementor as a pet if he's in there. */
             if (!IS_NPC(pet))
@@ -553,7 +553,7 @@ SPECIAL(auction)
         auto aroom = get_room(auct_room);
         Destination des(aroom);
         auto con = des.getObjects();
-        for (auto obj : volcano::util::filter_raw(con))
+        for (auto obj : dbat::util::filter_raw(con))
         {
             if (GET_AUCTER(obj) == ((ch)->id))
             {
@@ -606,7 +606,7 @@ SPECIAL(auction)
         auto aroom = get_room(auct_room);
         Destination des(aroom);
         auto con = des.getObjects();
-        for (auto obj : volcano::util::filter_raw(con))
+        for (auto obj : dbat::util::filter_raw(con))
         {
             if (GET_CURBID(obj) == ((ch)->id))
             {

@@ -4,7 +4,7 @@
 #include "dbat/game/CharacterUtils.hpp"
 #include "dbat/game/RoomUtils.hpp"
 #include "dbat/game/utils.hpp"
-#include "volcano/util/FilterWeak.hpp"
+#include "dbat/util/FilterWeak.hpp"
 
 #include "dbat/game/const/ConnectionState.hpp"
 #include "dbat/game/const/Environment.hpp"

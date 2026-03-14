@@ -43,7 +43,7 @@
 #include "dbat/game/races.hpp"
 #include "dbat/game/Account.hpp"
 //#include "dbat/game/maputils.hpp"
-#include "volcano/util/FilterWeak.hpp"
+#include "dbat/util/FilterWeak.hpp"
 #include "dbat/game/utils.hpp"
 
 #include "dbat/game/Create.hpp"
@@ -112,7 +112,7 @@ void destroy_db() {
         if(ent) ent->deactivate();
     }
     Room::registry.clear();
-    
+
 }
 
 int no_mail = 0;        /* mail disabled?		 */
@@ -249,7 +249,7 @@ void auc_save() {
         basic_mud_log("SYSERR: Can't write to '%s' auction file.", AUCTION_FILE);
     else {
         auto con = get_room(80)->getObjects().snapshot_weak();
-        for (auto obj : volcano::util::filter_raw(con)) {
+        for (auto obj : dbat::util::filter_raw(con)) {
             fprintf(fl, "%ld %s %ld %ld %d %d %ld\n", obj->id, GET_AUCTERN(obj), GET_AUCTER(obj),
                         GET_CURBID(obj), GET_STARTBID(obj), GET_BID(obj), GET_AUCTIME(obj));
         }
@@ -873,7 +873,7 @@ Character *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
         mob->setBaseStat("money_carried", money);
     }
 
-    
+
     if (GET_EXP(mob) <= 0 && !MOB_FLAGGED(mob, MOB_DUMMY)) {
         int64_t mexp = GET_LEVEL(mob) * base;
         mexp = mexp * .9;
@@ -961,7 +961,7 @@ Object *read_object(obj_vnum nr, int type) /* and obj_rnum */
     auto obj = sh.get();
     // the operator= will copy the prototype data into the new object.
     *obj = *(proto->second);
-    
+
     if (nr == 65) {
         SET_OBJ_VAL(obj, VAL_BED_HTANK_CHARGE, 20);
     }
@@ -969,7 +969,7 @@ Object *read_object(obj_vnum nr, int type) /* and obj_rnum */
         if (GET_OBJ_VAL(obj, VAL_FOOD_MAXFOODVAL) == 0) {
             SET_OBJ_VAL(obj, VAL_FOOD_MAXFOODVAL, GET_OBJ_VAL(obj, VAL_FOOD_FOODVAL));
         }
-        obj->setBaseStat("foob", GET_OBJ_VAL(obj, VAL_FOOD_FOODVAL));     
+        obj->setBaseStat("foob", GET_OBJ_VAL(obj, VAL_FOOD_FOODVAL));
     }
 
     obj->activate();
@@ -1037,7 +1037,7 @@ void reset_zone(zone_vnum vn) {
 
 void repairRoomDamage(uint64_t heartPulse, double deltaTime) {
     auto subs = roomSubscriptions.all("repairRoomDamage");
-    for(auto room : volcano::util::filter_raw(subs)) {
+    for(auto room : dbat::util::filter_raw(subs)) {
 
         if(auto dmg = room->getDamage(); dmg > 0) {
             int toRepair = 0;

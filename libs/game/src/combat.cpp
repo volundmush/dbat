@@ -32,7 +32,7 @@
 #include "dbat/game/techniques.hpp"
 //#include "dbat/game/act.informative.hpp"
 #include "dbat/game/utils.hpp"
-#include "volcano/util/FilterWeak.hpp"
+#include "dbat/util/FilterWeak.hpp"
 
 #include "dbat/game/Random.hpp"
 
@@ -2027,7 +2027,7 @@ void huge_update(uint64_t heartPulse, double deltaTime)
 
     /* Checking the object list for any huge ki attacks */
     auto subs = objectSubscriptions.all("hugeKiAttacks");
-    for (auto k : volcano::util::filter_raw(subs))
+    for (auto k : dbat::util::filter_raw(subs))
     {
 
         if (GET_AUCTER(k) > 0 && GET_AUCTIME(k) + 604800 <= time(nullptr))
@@ -2079,7 +2079,7 @@ void huge_update(uint64_t heartPulse, double deltaTime)
 
                         /* Hit those in the current room. */
                         auto people = k->location.getPeople();
-                        for (auto it : volcano::util::filter_raw(people))
+                        for (auto it : dbat::util::filter_raw(people))
                         {
                             vict = it;
 
@@ -2209,7 +2209,7 @@ void huge_update(uint64_t heartPulse, double deltaTime)
 
                     /* Hit those in the current room. */
                     auto people = k->location.getPeople();
-                    for (auto it : volcano::util::filter_raw(people))
+                    for (auto it : dbat::util::filter_raw(people))
                     {
                         vict = it;
 
@@ -2304,7 +2304,7 @@ void huge_update(uint64_t heartPulse, double deltaTime)
 
                         /* Hit those in the current room. */
                         auto people = k->location.getPeople();
-                        for (auto it : volcano::util::filter_raw(people))
+                        for (auto it : dbat::util::filter_raw(people))
                         {
                             vict = it;
 
@@ -2432,7 +2432,7 @@ void huge_update(uint64_t heartPulse, double deltaTime)
 
                     /* Hit those in the current room. */
                     auto people = k->location.getPeople();
-                    for (auto it : volcano::util::filter_raw(people))
+                    for (auto it : dbat::util::filter_raw(people))
                     {
                         vict = it;
 
@@ -2512,7 +2512,7 @@ void huge_update(uint64_t heartPulse, double deltaTime)
 void homing_update(uint64_t heartPulse, double deltaTime)
 {
     auto subs = objectSubscriptions.all("homingKiAttacks");
-    for (auto k : volcano::util::filter_raw(subs))
+    for (auto k : dbat::util::filter_raw(subs))
     {
 
         if (KICHARGE(k) <= 0)
@@ -3186,7 +3186,7 @@ void parry_ki(double attperc, Character *ch, Character *vict, char sname[1000], 
     Object *tob, *next_obj;
     Character *tch, *next_v;
     auto people = ch->location.getPeople();
-    for (auto target : volcano::util::filter_raw(people))
+    for (auto target : dbat::util::filter_raw(people))
     {
         tch = target;
 
@@ -3231,7 +3231,7 @@ void parry_ki(double attperc, Character *ch, Character *vict, char sname[1000], 
         }
     }
     auto loco = ch->location.getObjects();
-    for (auto tob : volcano::util::filter_raw(loco))
+    for (auto tob : dbat::util::filter_raw(loco))
     {
         if (OBJ_FLAGGED(tob, ITEM_UNBREAKABLE))
             continue;
@@ -5893,7 +5893,7 @@ void hurt(int limb, int chance, Character *ch, Character *vict, Object *obj, int
                 solo_gain(ch, vict);
                 int founded = 0;
                 auto con = vict->getInventory();
-                for (auto rew : volcano::util::filter_raw(con))
+                for (auto rew : dbat::util::filter_raw(con))
                 {
                     rew->clearLocation();
                     rew->moveToLocation(vict);

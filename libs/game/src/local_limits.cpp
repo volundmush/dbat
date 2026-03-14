@@ -27,7 +27,7 @@
 #include "dbat/game/handler.hpp"
 #include "dbat/game/dg_scripts.hpp"
 #include "dbat/game/utils.hpp"
-#include "volcano/util/FilterWeak.hpp"
+#include "dbat/util/FilterWeak.hpp"
 #include "dbat/game/Random.hpp"
 
 #include "dbat/game/commands.hpp"
@@ -735,7 +735,7 @@ static void heal_limb(Character *ch)
 void androidAbsorbSystem(uint64_t heartPulse, double deltaTime)
 {
     auto sub = characterSubscriptions.all("androidAbsorbSystem");
-    for (auto ch : volcano::util::filter_raw(sub))
+    for (auto ch : dbat::util::filter_raw(sub))
     {
 
         bool unsubscribe = false;
@@ -980,7 +980,7 @@ void androidAbsorbSystem(uint64_t heartPulse, double deltaTime)
 void goopTimeService(uint64_t heartPulse, double deltaTime)
 {
     auto sub = characterSubscriptions.all("goopTimeService");
-    for (auto ch : volcano::util::filter_raw(sub))
+    for (auto ch : dbat::util::filter_raw(sub))
     {
 
         if (!PLR_FLAGGED(ch, PLR_GOOP))
@@ -1100,7 +1100,7 @@ void corpseRotService(uint64_t heartPulse, double deltaTime)
 {
     Object *jj, *next_thing2;
     auto subs = objectSubscriptions.all("corpseRotService");
-    for (auto j : volcano::util::filter_raw(subs))
+    for (auto j : dbat::util::filter_raw(subs))
     {
 
         // how the fuck did this happen? TODO add a warning.
@@ -1151,7 +1151,7 @@ void corpseRotService(uint64_t heartPulse, double deltaTime)
             {
                 if (j->location)
                 {
-                    for (auto jj : volcano::util::filter_raw(con))
+                    for (auto jj : dbat::util::filter_raw(con))
                     {
                         jj->clearLocation();
                         jj->moveToLocation(j->location);
@@ -1159,7 +1159,7 @@ void corpseRotService(uint64_t heartPulse, double deltaTime)
                 }
                 else if (auto c = j->getCarriedBy())
                 {
-                    for (auto jj : volcano::util::filter_raw(con))
+                    for (auto jj : dbat::util::filter_raw(con))
                     {
                         jj->clearLocation();
                         c->addToInventory(jj);
@@ -1167,7 +1167,7 @@ void corpseRotService(uint64_t heartPulse, double deltaTime)
                 }
                 else if (auto c = j->getWornBy())
                 {
-                    for (auto jj : volcano::util::filter_raw(con))
+                    for (auto jj : dbat::util::filter_raw(con))
                     {
                         jj->clearLocation();
                         c->addToInventory(jj);
@@ -1175,7 +1175,7 @@ void corpseRotService(uint64_t heartPulse, double deltaTime)
                 }
                 else if (auto o = j->getContainer())
                 {
-                    for (auto jj : volcano::util::filter_raw(con))
+                    for (auto jj : dbat::util::filter_raw(con))
                     {
                         jj->clearLocation();
                         o->addToInventory(jj);
@@ -1237,7 +1237,7 @@ void characterVitalsRecovery(uint64_t heartPulse, double deltaTime)
     auto runRecover = [&](const std::string &service, CharVital v)
     {
         auto subs = characterSubscriptions.all(service);
-        for (auto ch : volcano::util::filter_raw(subs))
+        for (auto ch : dbat::util::filter_raw(subs))
         {
             if (!shouldRecover(ch))
                 continue;
@@ -1268,7 +1268,7 @@ void characterVitalsRecovery(uint64_t heartPulse, double deltaTime)
 void healTankService(uint64_t heartPulse, double deltaTime)
 {
     auto subs = objectSubscriptions.all("healTankService");
-    for (auto o : volcano::util::filter_raw(subs))
+    for (auto o : dbat::util::filter_raw(subs))
     {
 
         auto en = o->getBaseStat("energy");
@@ -1326,7 +1326,7 @@ void healTankService(uint64_t heartPulse, double deltaTime)
 void hunger_update(uint64_t heartPulse, double deltaTime)
 {
     auto ac = characterSubscriptions.all("players");
-    for (auto i : volcano::util::filter_raw(ac))
+    for (auto i : dbat::util::filter_raw(ac))
     {
         // making it so that you don't get hungry/thirsty if you're just leisurely idling, rping, etc.
         if (!i->isFullVital(CharVital::health))
@@ -1350,7 +1350,7 @@ void hunger_update(uint64_t heartPulse, double deltaTime)
 void relax_update(uint64_t heartPulse, double deltaTime)
 {
     auto ac = characterSubscriptions.all("players");
-    for (auto i : volcano::util::filter_raw(ac))
+    for (auto i : dbat::util::filter_raw(ac))
     {
         if (i->location.getRoomFlag(ROOM_HOUSE))
         {
@@ -1383,7 +1383,7 @@ void relax_update(uint64_t heartPulse, double deltaTime)
 void auralight_update(uint64_t heartPulse, double deltaTime)
 {
     auto ac = characterSubscriptions.all("auralight");
-    for (auto i : volcano::util::filter_raw(ac))
+    for (auto i : dbat::util::filter_raw(ac))
     {
         if (PLR_FLAGGED(i, PLR_AURALIGHT))
         {
@@ -1408,7 +1408,7 @@ void auralight_update(uint64_t heartPulse, double deltaTime)
 void player_misc_update(uint64_t heartPulse, double deltaTime)
 {
     auto ac = characterSubscriptions.all("players");
-    for (auto i : volcano::util::filter_raw(ac))
+    for (auto i : dbat::util::filter_raw(ac))
     {
         i->raiseGravAcclim();
         update_char_objects(i);
@@ -1438,7 +1438,7 @@ void player_misc_update(uint64_t heartPulse, double deltaTime)
 void kaioken_update(uint64_t heartPulse, double deltaTime)
 {
     auto ac = characterSubscriptions.all("players");
-    for (auto i : volcano::util::filter_raw(ac))
+    for (auto i : dbat::util::filter_raw(ac))
     {
         auto kaioken = GET_KAIOKEN(i);
         int x = (kaioken * 5) + 5;
@@ -1454,7 +1454,7 @@ void kaioken_update(uint64_t heartPulse, double deltaTime)
 void poison_update(uint64_t heartPulse, double deltaTime)
 {
     auto ac = characterSubscriptions.all("poisoned");
-    for (auto i : volcano::util::filter_raw(ac))
+    for (auto i : dbat::util::filter_raw(ac))
     {
         if (!AFF_FLAGGED(i, AFF_POISON))
         {
@@ -1517,7 +1517,7 @@ void point_update(uint64_t heartPulse, double deltaTime)
         for (auto &l : {&z->playersInZone, &z->npcsInZone})
         {
             auto copy = l->snapshot_weak();
-            for (auto i : volcano::util::filter_raw(copy))
+            for (auto i : dbat::util::filter_raw(copy))
             {
                 if (processed.contains(i->id))
                     continue;
@@ -1660,7 +1660,7 @@ void point_update(uint64_t heartPulse, double deltaTime)
             }
 
             auto items = z->objectsInZone.snapshot_weak();
-            for (auto j : volcano::util::filter_raw(items))
+            for (auto j : dbat::util::filter_raw(items))
             {
                 if (processed.contains(j->id))
                     continue;

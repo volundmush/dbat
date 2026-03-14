@@ -6,7 +6,7 @@
 #include "dbat/game/utils.hpp"
 #include "dbat/game/handler.hpp"
 #include "dbat/game/Shop.hpp"
-#include "volcano/util/FilterWeak.hpp"
+#include "dbat/util/FilterWeak.hpp"
 #include "dbat/game/dg_scripts.hpp"
 #include "dbat/game/act.informative.hpp"
 #include "dbat/game/const/Environment.hpp"

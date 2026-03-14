@@ -32,7 +32,7 @@
 #include "dbat/game/act.movement.hpp"
 #include "dbat/game/players.hpp"
 //#include "dbat/game/mobact.hpp"
-#include "volcano/util/FilterWeak.hpp"
+#include "dbat/util/FilterWeak.hpp"
 #include "dbat/game/utils.hpp"
 #include "dbat/game/Random.hpp"
 #include "dbat/game/Parse.hpp"
@@ -89,7 +89,7 @@ const char *get_i_name(Character *ch, Character *vict)
         sprintf(name, "%s", RACE(vict));
         return name;
     }
-        
+
 
     // print *found to name and return buf pointer.
     sprintf(name, "%s", found->second.c_str());
@@ -463,7 +463,7 @@ Character *get_char_room(char *name, int *number, room_rnum room)
         return nullptr;
 
     auto people = get_room(room)->getPeople().snapshot_weak();
-    for (auto i : volcano::util::filter_raw(people))
+    for (auto i : dbat::util::filter_raw(people))
     {
         if (isname(name, i->getName()))
             if (--(*number) == 0)
@@ -511,7 +511,7 @@ void extract_obj(Object *obj)
     }
 
     auto con = obj->getInventory();
-    for (auto o : volcano::util::filter_raw(con))
+    for (auto o : dbat::util::filter_raw(con))
         extract_obj(o);
 
     obj->deactivate();
@@ -529,7 +529,7 @@ static void update_object(Object *obj, int use)
     if (!SCRIPT_CHECK(obj, OTRIG_TIMER) && (GET_OBJ_TIMER(obj) > 0))
         obj->modBaseStat("timer", -use);
     auto con = obj->getInventory();
-    for (auto o : volcano::util::filter_raw(con))
+    for (auto o : dbat::util::filter_raw(con))
     {
         update_object(o, use);
     }
@@ -565,7 +565,7 @@ void update_char_objects(Character *ch)
             update_object(GET_EQ(ch, i), 2);
         }
     auto con = ch->getInventory();
-    for (auto o : volcano::util::filter_raw(con))
+    for (auto o : dbat::util::filter_raw(con))
         update_object(o, 1);
 }
 
@@ -719,7 +719,7 @@ void extract_char_final(Character *ch)
     if (IS_NPC(ch))
     {
         auto con = ch->getInventory();
-        for (auto obj : volcano::util::filter_shared(con))
+        for (auto obj : dbat::util::filter_shared(con))
         {
             obj->clearLocation();
             obj->moveToLocation(ch);
@@ -736,13 +736,13 @@ void extract_char_final(Character *ch)
     if (FIGHTING(ch))
         stop_fighting(ch);
     auto subs = characterSubscriptions.all("combatSystem");
-    for (auto k : volcano::util::filter_raw(subs))
+    for (auto k : dbat::util::filter_raw(subs))
     {
         if (FIGHTING(k) == ch)
             stop_fighting(k);
     }
 
-    
+
 
     /* If there's a descriptor, they're in the menu now. */
     if (ch->desc)
@@ -781,14 +781,14 @@ void extract_char(Character *ch)
     }
 
     extractions_pending.insert(ch);
-    
+
     if(auto foll = ch->followers)
         foll.for_each([&](auto f) {
             if (IS_NPC(f) && AFF_FLAGGED(f, AFF_CHARM) && (f->location == ch->location || IN_ROOM(ch) == 1))
                 {
                     /* transfer objects to char, if any */
                     auto con = f->getInventory();
-                    for (auto obj : volcano::util::filter_shared(con))
+                    for (auto obj : dbat::util::filter_shared(con))
                     {
                         obj->clearLocation();
                         ch->addToInventory(obj);
@@ -844,7 +844,7 @@ Character *get_player_vis(Character *ch, char *name, int *number, int inroom)
     }
 
     auto ac = characterSubscriptions.all("active");
-    for (auto i : volcano::util::filter_raw(ac))
+    for (auto i : dbat::util::filter_raw(ac))
     {
         if (IS_NPC(i))
             continue;
@@ -916,7 +916,7 @@ Character *get_char_room_vis(Character *ch, char *name, int *number)
     if (*number == 0)
         return (get_player_vis(ch, name, nullptr, FIND_CHAR_ROOM));
     auto people = ch->location.getPeople();
-    for (auto i : volcano::util::filter_raw(people))
+    for (auto i : dbat::util::filter_raw(people))
     {
         if (boost::iequals(name, "last") && LASTHIT(i) != 0 && LASTHIT(i) == GET_IDNUM(ch))
         {
@@ -995,7 +995,7 @@ Character *get_char_world_vis(Character *ch, char *name, int *number)
         return get_player_vis(ch, name, nullptr, 0);
 
     auto ac = characterSubscriptions.all("active");
-    for (auto i : volcano::util::filter_raw(ac))
+    for (auto i : dbat::util::filter_raw(ac))
     {
         if (ch->location == i->location)
             continue;
@@ -1067,7 +1067,7 @@ Object *get_obj_in_list_vis(Character *ch, const char *name, int *number, const 
     if (*number == 0)
         return nullptr;
 
-    for (auto i : volcano::util::filter_raw(list))
+    for (auto i : dbat::util::filter_raw(list))
     {
         if (isname(name, i->getName()))
             if (ch->canSee(i) || (GET_OBJ_TYPE(i) == ITEM_LIGHT))
@@ -1091,7 +1091,7 @@ Structure *get_structure_in_list_vis(Character *ch, std::string_view name, int *
     if (*number == 0)
         return nullptr;
 
-    for (auto i : volcano::util::filter_raw(list))
+    for (auto i : dbat::util::filter_raw(list))
     {
         if (isname(name, i->getName()))
             if (ch->canSee(i))
@@ -1127,7 +1127,7 @@ Object *get_obj_vis(Character *ch, char *name, int *number)
 
     /* ok.. no luck yet. scan the entire obj list   */
     auto ao = objectSubscriptions.all("active");
-    for (auto i : volcano::util::filter_raw(ao))
+    for (auto i : dbat::util::filter_raw(ao))
     {
         if (isname(name, i->getName()))
             if (ch->canSee(i))

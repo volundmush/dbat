@@ -32,9 +32,9 @@
 #include "dbat/game/constants.hpp"
 #include "dbat/game/dg_scripts.hpp"
 #include "dbat/game/boards.hpp"
-#include "volcano/circle/CircleAnsi.hpp"
+#include "dbat/circle/CircleAnsi.hpp"
 #include "dbat/game/utils.hpp"
-#include "volcano/util/FilterWeak.hpp"
+#include "dbat/util/FilterWeak.hpp"
 
 #include "dbat/game/players.hpp"
 
@@ -921,7 +921,7 @@ ACMD(do_pack)
                     {
                         auto r = get_room(rnum);
                         auto con = r->getObjects().snapshot_weak();
-                        for (auto o : volcano::util::filter_raw(con))
+                        for (auto o : dbat::util::filter_raw(con))
                             extract_obj(o);
                         count++;
                         rnum++;
@@ -935,7 +935,7 @@ ACMD(do_pack)
                     {
                         auto r = get_room(rnum);
                         auto con = r->getObjects().snapshot_weak();
-                        for (auto o : volcano::util::filter_raw(con))
+                        for (auto o : dbat::util::filter_raw(con))
                             extract_obj(o);
                         count++;
                         rnum++;
@@ -949,14 +949,14 @@ ACMD(do_pack)
                     {
                         auto r = get_room(rnum);
                         auto con = r->getObjects().snapshot_weak();
-                        for (auto o : volcano::util::filter_raw(con))
+                        for (auto o : dbat::util::filter_raw(con))
                             extract_obj(o);
                         count++;
                         rnum++;
                     }
                 }
                 auto con = ch->getInventory();
-                for (auto obj2 : volcano::util::filter_raw(con))
+                for (auto obj2 : dbat::util::filter_raw(con))
                 {
                     if (GET_OBJ_VNUM(obj) == 18802)
                     {
@@ -992,7 +992,7 @@ int check_insidebag(Object *cont, double mult)
     int count = 0, containers = 0;
 
     auto con = cont->getInventory();
-    for (auto inside : volcano::util::filter_raw(con))
+    for (auto inside : dbat::util::filter_raw(con))
     {
         if (GET_OBJ_TYPE(inside) == ITEM_CONTAINER)
         {
@@ -1477,7 +1477,7 @@ void dball_load(uint64_t heartPulse, double deltaTime)
 
         WISHTIME = 0;
         auto ao = objectSubscriptions.all("active");
-        for (auto k : volcano::util::filter_raw(ao))
+        for (auto k : dbat::util::filter_raw(ao))
         {
             if (OBJ_FLAGGED(k, ITEM_FORGED))
                 continue;
@@ -1653,7 +1653,7 @@ ACMD(do_bid)
         return;
     }
     auto con = get_room(auct_room)->getObjects().snapshot_weak();
-    for (auto obj : volcano::util::filter_raw(con))
+    for (auto obj : dbat::util::filter_raw(con))
     {
         list++;
     }
@@ -1665,7 +1665,7 @@ ACMD(do_bid)
         ch->sendText("@Y                                   Auction@n\r\n");
         ch->sendText("@c------------------------------------------------------------------------------@n\r\n");
         auto con = get_room(auct_room)->getObjects().snapshot_weak();
-        for (auto obj : volcano::util::filter_raw(con))
+        for (auto obj : dbat::util::filter_raw(con))
         {
             if (GET_AUCTER(obj) <= 0)
             {
@@ -1674,19 +1674,19 @@ ACMD(do_bid)
             list++;
             if (GET_AUCTIME(obj) + 86400 > time(nullptr) && GET_CURBID(obj) <= -1)
             {
-                ch->send_to("@D[@R#@W%3d@D][@mOwner@W: @w%10s@D][@GItem Name@W: @w%-*s@D][@GCost@W: @Y%s@D]@n\r\n", list, get_name_by_id(GET_AUCTER(obj)) ? CAP(get_name_by_id(GET_AUCTER(obj))) : "Nobody", volcano::circle::countColors(obj->getShortDescription()) + 30, obj->getShortDescription(), add_commas(GET_BID(obj)).c_str());
+                ch->send_to("@D[@R#@W%3d@D][@mOwner@W: @w%10s@D][@GItem Name@W: @w%-*s@D][@GCost@W: @Y%s@D]@n\r\n", list, get_name_by_id(GET_AUCTER(obj)) ? CAP(get_name_by_id(GET_AUCTER(obj))) : "Nobody", dbat::circle::countColors(obj->getShortDescription()) + 30, obj->getShortDescription(), add_commas(GET_BID(obj)).c_str());
             }
             else if (GET_AUCTIME(obj) + 86400 > time(nullptr) && GET_CURBID(obj) > -1)
             {
-                ch->send_to("@D[@R#@W%3d@D][@mOwner@W: @w%10s@D][@GItem Name@W: @w%-*s@D][@RTop Bid@W: %s @Y%s@D]@n\r\n", list, get_name_by_id(GET_AUCTER(obj)) ? CAP(get_name_by_id(GET_AUCTER(obj))) : "Nobody", volcano::circle::countColors(obj->getShortDescription()) + 30, obj->getShortDescription(), get_name_by_id(GET_CURBID(obj)) ? CAP(get_name_by_id(GET_CURBID(obj))) : "Nobody", add_commas(GET_BID(obj)).c_str());
+                ch->send_to("@D[@R#@W%3d@D][@mOwner@W: @w%10s@D][@GItem Name@W: @w%-*s@D][@RTop Bid@W: %s @Y%s@D]@n\r\n", list, get_name_by_id(GET_AUCTER(obj)) ? CAP(get_name_by_id(GET_AUCTER(obj))) : "Nobody", dbat::circle::countColors(obj->getShortDescription()) + 30, obj->getShortDescription(), get_name_by_id(GET_CURBID(obj)) ? CAP(get_name_by_id(GET_CURBID(obj))) : "Nobody", add_commas(GET_BID(obj)).c_str());
             }
             else if (GET_AUCTIME(obj) + 86400 < time(nullptr) && GET_CURBID(obj) > -1)
             {
-                ch->send_to("@D[@R#@W%3d@D][@mOwner@W: @w%10s@D][@GItem Name@W: @w%-*s@D][@RBid Winner@W: %s @Y%s@D]@n\r\n", list, get_name_by_id(GET_AUCTER(obj)) ? CAP(get_name_by_id(GET_AUCTER(obj))) : "Nobody", volcano::circle::countColors(obj->getShortDescription()) + 30, obj->getShortDescription(), get_name_by_id(GET_CURBID(obj)) ? CAP(get_name_by_id(GET_CURBID(obj))) : "Nobody", add_commas(GET_BID(obj)).c_str());
+                ch->send_to("@D[@R#@W%3d@D][@mOwner@W: @w%10s@D][@GItem Name@W: @w%-*s@D][@RBid Winner@W: %s @Y%s@D]@n\r\n", list, get_name_by_id(GET_AUCTER(obj)) ? CAP(get_name_by_id(GET_AUCTER(obj))) : "Nobody", dbat::circle::countColors(obj->getShortDescription()) + 30, obj->getShortDescription(), get_name_by_id(GET_CURBID(obj)) ? CAP(get_name_by_id(GET_CURBID(obj))) : "Nobody", add_commas(GET_BID(obj)).c_str());
             }
             else
             {
-                ch->send_to("@D[@R#@W%3d@D][@mOwner@W: @w%10s@D][@GItem Name@W: @w%-*s@D][@RClosed@D]@n\r\n", list, get_name_by_id(GET_AUCTER(obj)) ? CAP(get_name_by_id(GET_AUCTER(obj))) : "Nobody", volcano::circle::countColors(obj->getShortDescription()) + 30, obj->getShortDescription());
+                ch->send_to("@D[@R#@W%3d@D][@mOwner@W: @w%10s@D][@GItem Name@W: @w%-*s@D][@RClosed@D]@n\r\n", list, get_name_by_id(GET_AUCTER(obj)) ? CAP(get_name_by_id(GET_AUCTER(obj))) : "Nobody", dbat::circle::countColors(obj->getShortDescription()) + 30, obj->getShortDescription());
             }
             found = true;
         }
@@ -1712,7 +1712,7 @@ ACMD(do_bid)
         }
 
         auto con = get_room(auct_room)->getObjects().snapshot_weak();
-        for (auto obj : volcano::util::filter_raw(con))
+        for (auto obj : dbat::util::filter_raw(con))
         {
             if (GET_AUCTER(obj) <= 0)
             {
@@ -1845,7 +1845,7 @@ ACMD(do_bid)
             return;
         }
         auto con = Location(auct_room).getObjects();
-        for (auto obj : volcano::util::filter_raw(con))
+        for (auto obj : dbat::util::filter_raw(con))
         {
             if (GET_AUCTER(obj) <= 0)
             {
@@ -2195,7 +2195,7 @@ static void perform_put(Character *ch, Object *obj,
         Object *obj2 = nullptr, *next_obj = nullptr;
         int count = 0, minus = 0;
         auto con = cont->getInventory();
-        for (auto obj2 : volcano::util::filter_raw(con))
+        for (auto obj2 : dbat::util::filter_raw(con))
         {
             minus += GET_OBJ_WEIGHT(obj2);
             count++;
@@ -2335,7 +2335,7 @@ ACMD(do_put)
             { /* put <obj> <container> */
                 auto con = ch->getInventory();
                 int transferred = 0;
-                for (auto obj : volcano::util::filter_raw(con))
+                for (auto obj : dbat::util::filter_raw(con))
                 {
                     if ((ch->canSee(obj) || GET_OBJ_TYPE(obj) == ITEM_LIGHT) && isname(theobj, obj->getName()))
                     {
@@ -2358,7 +2358,7 @@ ACMD(do_put)
             else
             {
                 auto con = ch->getInventory();
-                for (auto obj : volcano::util::filter_raw(con))
+                for (auto obj : dbat::util::filter_raw(con))
                 {
                     if (obj != cont && ch->canSee(obj) && (obj_dotmode == FIND_ALL || isname(theobj, obj->getName())))
                     {
@@ -2503,7 +2503,7 @@ static void get_from_container(Character *ch, Object *cont,
     {
         auto con = cont->getInventory();
         int transferred = 0;
-        for (auto obj : volcano::util::filter_raw(con))
+        for (auto obj : dbat::util::filter_raw(con))
         {
             if (ch->canSee(obj) && isname(arg, obj->getName()))
             {
@@ -2528,7 +2528,7 @@ static void get_from_container(Character *ch, Object *cont,
             return;
         }
         auto con = cont->getInventory();
-        for (auto obj : volcano::util::filter_raw(con))
+        for (auto obj : dbat::util::filter_raw(con))
         {
             if (ch->canSee(obj) && (obj_dotmode == FIND_ALL || isname(arg, obj->getName())))
             {
@@ -2625,7 +2625,7 @@ static void get_from_room(Character *ch, char *arg, int howmany)
         }
         auto con = ch->location.getObjects();
         int transferred = 0;
-        for (auto obj : volcano::util::filter_raw(con))
+        for (auto obj : dbat::util::filter_raw(con))
         {
             if (ch->canSee(obj) && isname(arg, obj->getName()))
             {
@@ -2648,7 +2648,7 @@ static void get_from_room(Character *ch, char *arg, int howmany)
             return;
         }
         auto loco = ch->location.getObjects();
-        for (auto obj : volcano::util::filter_raw(loco))
+        for (auto obj : dbat::util::filter_raw(loco))
         {
             if (ch->canSee(obj) && (dotmode == FIND_ALL || isname(arg, obj->getName())))
             {
@@ -2721,7 +2721,7 @@ ACMD(do_get)
                 return;
             }
             auto con = ch->getInventory();
-            for (auto cont : volcano::util::filter_raw(con))
+            for (auto cont : dbat::util::filter_raw(con))
                 if (ch->canSee(cont) &&
                     (cont_dotmode == FIND_ALL || isname(arg2, cont->getName())))
                 {
@@ -2737,7 +2737,7 @@ ACMD(do_get)
                     }
                 }
             auto loco = ch->location.getObjects();
-            for (auto cont : volcano::util::filter_raw(loco))
+            for (auto cont : dbat::util::filter_raw(loco))
                 if (ch->canSee(cont) &&
                     (cont_dotmode == FIND_ALL || isname(arg2, cont->getName())))
                 {
@@ -3052,7 +3052,7 @@ ACMD(do_drop)
         else
         {
             auto con = ch->getInventory();
-            for (auto obj : volcano::util::filter_raw(con))
+            for (auto obj : dbat::util::filter_raw(con))
             {
                 if (ch->canSee(obj) && isname(arg, obj->getName()))
                 {
@@ -3088,7 +3088,7 @@ ACMD(do_drop)
                 ch->sendText("You don't seem to be carrying anything.\r\n");
             else
             {
-                for (auto obj : volcano::util::filter_raw(con))
+                for (auto obj : dbat::util::filter_raw(con))
                 {
                     amount += perform_drop(ch, obj, mode, sname, RDR);
                 }
@@ -3102,7 +3102,7 @@ ACMD(do_drop)
                 return;
             }
             auto con = ch->getInventory();
-            for (auto obj : volcano::util::filter_raw(con))
+            for (auto obj : dbat::util::filter_raw(con))
             {
                 if (isname(arg, obj->getName()))
                     if (ch->canSee(obj) || (GET_OBJ_TYPE(obj) == ITEM_LIGHT))
@@ -3318,7 +3318,7 @@ ACMD(do_give)
 
         auto con = ch->getInventory();
         int given = 0;
-        for (auto obj : volcano::util::filter_raw(con))
+        for (auto obj : dbat::util::filter_raw(con))
         {
             if (ch->canSee(obj) || GET_OBJ_TYPE(obj) == ITEM_LIGHT && isname(arg, obj->getName()))
             {
@@ -3376,7 +3376,7 @@ ACMD(do_give)
                 ch->sendText("You don't seem to be holding anything.\r\n");
             else
             {
-                for (auto obj : volcano::util::filter_raw(con))
+                for (auto obj : dbat::util::filter_raw(con))
                 {
                     if (ch->canSee(obj) &&
                         ((dotmode == FIND_ALL || isname(arg, obj->getName()))))
@@ -4499,7 +4499,7 @@ ACMD(do_wear)
     if (dotmode == FIND_ALL)
     {
         auto con = ch->getInventory();
-        for (auto obj : volcano::util::filter_raw(con))
+        for (auto obj : dbat::util::filter_raw(con))
         {
             if (ch->canSee(obj) && (where = find_eq_pos(ch, obj, nullptr)) >= 0)
             {
@@ -4538,7 +4538,7 @@ ACMD(do_wear)
         }
         auto con = ch->getInventory();
         int found = 0;
-        for (auto obj : volcano::util::filter_raw(con))
+        for (auto obj : dbat::util::filter_raw(con))
         {
             if (!(ch->canSee(obj) && isname(arg1, obj->getName())))
                 continue;

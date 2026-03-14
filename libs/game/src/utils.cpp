@@ -36,8 +36,8 @@
 #include "dbat/game/act.other.hpp"
 //#include "dbat/game/planet.hpp"
 //#include "dbat/game/send.hpp"
-#include "volcano/circle/CircleAnsi.hpp"
-#include "volcano/util/FilterWeak.hpp"
+#include "dbat/circle/CircleAnsi.hpp"
+#include "dbat/util/FilterWeak.hpp"
 #include "dbat/game/Random.hpp"
 #include "dbat/game/weather.hpp"
 #include "dbat/game/TimeInfo.hpp"
@@ -142,10 +142,10 @@ const char *report_party_health(Character *ch)
                             "@G", /* 6/7 */
                             "@g", /* 7/7 */
                             "@w"};
-    
+
     if (auto foll = ch->followers.snapshot_weak(); !foll.empty())
     {
-        for (auto k : volcano::util::filter_raw(foll))
+        for (auto k : dbat::util::filter_raw(foll))
         {
             if (!AFF_FLAGGED(k, AFF_GROUP))
                 continue;
@@ -416,7 +416,7 @@ const char *report_party_health(Character *ch)
         count = 1;
 
         if(auto pfoll = party1->followers.snapshot_weak(); !pfoll.empty())
-        for (auto k : volcano::util::filter_raw(pfoll))
+        for (auto k : dbat::util::filter_raw(pfoll))
         {
             if (!AFF_FLAGGED(k, AFF_GROUP))
                 continue;
@@ -959,7 +959,7 @@ int roll_pursue(Character *ch, Character *vict)
         act("@C$n@R pursues after the fleeing @c$N@R!@n", true, ch, nullptr, vict, TO_NOTVICT);
 
         struct follow_type *k, *next;
-        
+
         ch->followers.for_each([&](Character* k) {
             if ((k->location == ch->location) && (GET_POS(k) >= POS_STANDING) &&
                     (!AFF_FLAGGED(ch, AFF_ZANZOKEN) ||
@@ -999,7 +999,7 @@ void broken_update(uint64_t heartPulse, double deltaTime)
 
     // Gravity generators
     auto gens = objectSubscriptions.all("vnum_11");
-    for (auto k : volcano::util::filter_raw(gens))
+    for (auto k : dbat::util::filter_raw(gens))
     {
         if (k->getCarriedBy())
         {
@@ -1041,7 +1041,7 @@ void broken_update(uint64_t heartPulse, double deltaTime)
 
     // ATMS
     auto atms = objectSubscriptions.all("vnum_3034");
-    for (auto k : volcano::util::filter_raw(atms))
+    for (auto k : dbat::util::filter_raw(atms))
     {
         if (k->getCarriedBy())
         {
@@ -1299,7 +1299,7 @@ const char *sense_location_name(room_vnum roomnum)
         break;
     case 44:
     case 45:
-        return "Glug's Volcano";
+        return "Glug's dbat";
         break;
     case 46:
     case 47:
@@ -1534,7 +1534,7 @@ const char *sense_location_name(room_vnum roomnum)
         return "Dark of Arlia";
         break;
     case 174:
-        return "Fistarl Volcano";
+        return "Fistarl dbat";
         break;
     case 175:
     case 176:
@@ -1920,7 +1920,7 @@ void handle_evolution(Character *ch, int64_t dmg)
 void demon_refill_lf(Character *ch, int64_t num)
 {
     auto pe = ch->location.getPeople();
-    for (auto tch : volcano::util::filter_raw(pe))
+    for (auto tch : dbat::util::filter_raw(pe))
     {
         if (!IS_DEMON(tch))
             continue;
@@ -1942,7 +1942,7 @@ void mob_talk(Character *ch, const char *speech)
         return;
     }
     auto pe = ch->location.getPeople();
-    for (auto tch : volcano::util::filter_raw(pe))
+    for (auto tch : dbat::util::filter_raw(pe))
     {
         if (!IS_NPC(tch))
             continue;
@@ -2622,7 +2622,7 @@ int dice(int num, int size)
 char *CAP(char *txt)
 {
     int i;
-    for (i = 0; txt[i] != '\0' && (txt[i] == '@' && volcano::circle::isColorChar(txt[i + 1])); i += 2)
+    for (i = 0; txt[i] != '\0' && (txt[i] == '@' && dbat::circle::isColorChar(txt[i + 1])); i += 2)
         ;
 
     txt[i] = toupper(txt[i]);
@@ -2812,7 +2812,7 @@ void stop_follower(Character *ch)
 
     if (has_group(ch))
         ch->setBaseStat<int>("group_kills", 0);
-    
+
     ch->master->followers.remove(ch->shared_from_this());
     ch->master = nullptr;
 }

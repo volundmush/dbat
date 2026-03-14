@@ -27,7 +27,7 @@
 //#include "dbat/game/act.informative.hpp"
 #include "dbat/game/planet.hpp"
 #include "dbat/game/utils.hpp"
-#include "volcano/util/FilterWeak.hpp"
+#include "dbat/util/FilterWeak.hpp"
 
 #include "dbat/game/const/Pulse.hpp"
 
@@ -442,14 +442,14 @@ static void handle_drive_command(Character *ch, Structure *vehicle, Object *cont
         drive_outof_vehicle(ch, vehicle);
         return;
     }
-    
+
     if (auto it = directions.find(arg); it != directions.end())
     {
         int dir = it->second;
         handle_drive_direction(ch, vehicle, dir, GET_OBJ_VAL(controls, VAL_CONTROL_SPEED));
         return;
     }
-    
+
     if (boost::iequals(arg, "land"))
     {
         handle_drive_land(ch, vehicle, arg2);
@@ -460,19 +460,19 @@ static void handle_drive_command(Character *ch, Structure *vehicle, Object *cont
         handle_drive_launch(ch, vehicle, controls);
         return;
     }
-    
+
     if (boost::iequals(arg, "mark"))
     {
         handle_buoy_launch(ch, vehicle, arg2);
         return;
     }
-    
+
     if (boost::iequals(arg, "deactivate"))
     {
         handle_buoy_deactivate(ch, arg2);
         return;
     }
-    
+
     ch->sendText("@wThats not a valid direction.\r\n");
     ch->sendText("Try one of these.\r\n");
     ch->sendText("[ north/n  | south/s  | east/e  |  west/w  ]\r\n");
@@ -535,7 +535,7 @@ static void handle_drive_land(Character *ch, Structure *vehicle, std::string_vie
     Location landing;
     std::string landName = "UNKNOWN";
 
-    if (auto matched = volcano::util::partialMatch(pad, pads, false))
+    if (auto matched = dbat::util::partialMatch(pad, pads, false))
     {
         landing = matched.value()->second;
         landName = matched.value()->first;

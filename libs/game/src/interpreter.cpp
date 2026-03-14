@@ -33,7 +33,7 @@
 //#include "dbat/game/act.wizard.hpp"
 #include "dbat/game/Command.hpp"
 #include "dbat/game/utils.hpp"
-#include "volcano/util/FilterWeak.hpp"
+#include "dbat/util/FilterWeak.hpp"
 #include "dbat/game/Random.hpp"
 #include "dbat/game/TimeInfo.hpp"
 
@@ -113,7 +113,7 @@ void command_interpreter(Character *ch, char *argument)
     skip_spaces(&argument);
     if (!*argument)
         return;
-    
+
     auto cdata = CommandData(argument);
 
     /* Since all command triggers check for valid_dg_target before acting, the levelcheck
@@ -161,7 +161,7 @@ void commandWaitQueue(uint64_t heartPulse, double deltaTime)
 
     auto sub = characterSubscriptions.all("commandWaitQueue");
 
-    for (auto ch : volcano::util::filter_raw(sub))
+    for (auto ch : dbat::util::filter_raw(sub))
     {
         if (auto res = ch->modBaseStat("waitTime", -deltaTime); res <= 0.0)
         {
@@ -1183,7 +1183,7 @@ int special(Character *ch, int cmd, char *arg)
 
     /* special in inventory? */
     auto con = ch->getInventory();
-    for (auto obj : volcano::util::filter_raw(con))
+    for (auto obj : dbat::util::filter_raw(con))
     {
         if (auto func = GET_OBJ_SPEC(obj))
             if (func(ch, obj, cmd, arg))
@@ -1194,14 +1194,14 @@ int special(Character *ch, int cmd, char *arg)
     if (ch->location)
     {
         auto people = ch->location.getPeople();
-        for (auto mob : volcano::util::filter_raw(people))
+        for (auto mob : dbat::util::filter_raw(people))
             if (IS_NPC(mob) && !MOB_FLAGGED(mob, MOB_NOTDEADYET))
                 if (auto func = GET_MOB_SPEC(mob); func)
                     if (func(ch, mob, cmd, arg))
                         return 1;
 
         auto con = ch->location.getObjects();
-        for (auto obj : volcano::util::filter_raw(con))
+        for (auto obj : dbat::util::filter_raw(con))
         {
             if (auto func = GET_OBJ_SPEC(obj); func)
                 if (func(ch, obj, cmd, arg))
@@ -1269,7 +1269,7 @@ void enter_player_game(struct descriptor_data *d)
 
     /*load_char_pets(ch);*/
     auto ac = characterSubscriptions.all("active");
-    for (auto check : volcano::util::filter_raw(ac))
+    for (auto check : dbat::util::filter_raw(ac))
     {
         if (!check->master && IS_NPC(check) && check->getBaseStat<int>("master_id") == GET_IDNUM(ch) &&
             AFF_FLAGGED(check, AFF_CHARM) && !circle_follow(check, ch))

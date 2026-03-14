@@ -1,0 +1,22 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:latest
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: muforge
+      POSTGRES_PASSWORD: muforge
+      POSTGRES_DB: muforge
+    ports:
+      - "5432:5432"
+    volumes:
+      - mucrucible-postgres-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U muforge -d muforge"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  mucrucible-postgres-data:

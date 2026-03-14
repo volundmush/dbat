@@ -534,7 +534,7 @@ namespace race
 
     std::vector<Race> filterRaces(std::function<bool(Race)> func)
     {
-        return volcano::util::getEnumList<Race>(func);
+        return dbat::util::getEnumList<Race>(func);
     };
 
     std::string defaultAppearance(Character *ch, Appearance type)

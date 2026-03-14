@@ -9,9 +9,8 @@ target_sources(dbat_server
 
 target_link_libraries(dbat_server
     PUBLIC
-    dbat::api
+    dbat::link
     dbat::serde
-    volcano::config
 )
 
 # Ensure we link using the C++ linker driver (for libstdc++ and friends)

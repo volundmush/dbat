@@ -1,6 +1,6 @@
 #include "volcano/config/config.hpp"
-#include "dbat/api/endpoints.hpp"
-#include "dbat/api/game.hpp"
+#include "dbat/link/endpoints.hpp"
+#include "dbat/link/game.hpp"
 #include "dbat/game/db.hpp"
 #include "dbat/game/comm.hpp"
 #include "dbat/serde/Startup.hpp"
@@ -10,14 +10,14 @@ int main(int argc, char** argv) {
 
     // Pre setup
     auto conf = volcano::config::init("server");
-    dbat::api::jwt.secret = conf.jwt.secret;
-    dbat::api::jwt.token_expiry = std::chrono::seconds(conf.jwt.expiry_minutes * 60);
-    dbat::api::jwt.refresh_token_expiry = std::chrono::seconds(conf.jwt.refresh_expiry_minutes * 60);
-    dbat::api::jwt.issuer = conf.jwt.issuer;
-    dbat::api::jwt.audience = conf.jwt.audience;
+    dbat::link::jwt.secret = conf.jwt.secret;
+    dbat::link::jwt.token_expiry = std::chrono::seconds(conf.jwt.expiry_minutes * 60);
+    dbat::link::jwt.refresh_token_expiry = std::chrono::seconds(conf.jwt.refresh_expiry_minutes * 60);
+    dbat::link::jwt.issuer = conf.jwt.issuer;
+    dbat::link::jwt.audience = conf.jwt.audience;
     LINFO("JWT configured: issuer='{}', audience='{}', expiry={} minutes, refresh expiry={} minutes",
-        dbat::api::jwt.issuer,
-        dbat::api::jwt.audience,
+        dbat::link::jwt.issuer,
+        dbat::link::jwt.audience,
         conf.jwt.expiry_minutes,
         conf.jwt.refresh_expiry_minutes
     );
@@ -36,11 +36,11 @@ int main(int argc, char** argv) {
         LINFO("TLS not enabled on server.");
     }
 
-    auto router = dbat::api::init_router();
+    auto router = dbat::link::init_router();
     auto handler = volcano::web::make_router_handler(router);
 
     auto &endpoint_config = ssl_ctx ? conf.https : conf.http;
-    
+
     auto endpoint = boost::asio::ip::tcp::endpoint(endpoint_config.address, endpoint_config.port);
 
     auto &ioc = volcano::net::context();
@@ -57,7 +57,7 @@ int main(int argc, char** argv) {
         handler
     );
     LINFO("Starting {} server on {}:{}", ssl_ctx ? "HTTPS" : "HTTP", endpoint.address().to_string(), endpoint.port());
-    
+
 
     // game setup
     load_config();
@@ -70,7 +70,7 @@ int main(int argc, char** argv) {
     );
 
     auto strand = boost::asio::make_strand(ioc);
-    boost::asio::co_spawn(strand, dbat::api::run_game(0.05, 300.0), boost::asio::detached);
+    boost::asio::co_spawn(strand, dbat::link::run_game(0.05, 300.0), boost::asio::detached);
 
     volcano::net::run();
 

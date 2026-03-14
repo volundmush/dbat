@@ -33,8 +33,8 @@
 //#include "dbat/game/dg_comm.hpp"
 #include "dbat/game/act.other.hpp"
 #include "dbat/game/class.hpp"
-#include "volcano/util/FilterWeak.hpp"
-#include "volcano/circle/CircleAnsi.hpp"
+#include "dbat/util/FilterWeak.hpp"
+#include "dbat/circle/CircleAnsi.hpp"
 #include "dbat/game/utils.hpp"
 #include "dbat/game/TimeInfo.hpp"
 #include "dbat/game/Random.hpp"
@@ -571,7 +571,7 @@ static Object *get_slide_obj_vis(Character *ch, char *name,
     if (!(number = get_number(&tmp)))
         return (nullptr);
 
-    for (auto i : volcano::util::filter_raw(list))
+    for (auto i : dbat::util::filter_raw(list))
         if (isname(tmp, i->getName()))
             if (ch->canSee(i) && !same_obj(last_match, i))
             {
@@ -598,7 +598,7 @@ static Object *get_hash_obj_vis(Character *ch, char *name,
         return (nullptr);
 
     Object *last_obj = nullptr;
-    for (auto loop : volcano::util::filter_raw(list))
+    for (auto loop : dbat::util::filter_raw(list))
     if (ch->canSee(loop) && GET_OBJ_COST(loop) > 0)
             if (!same_obj(last_obj, loop))
             {
@@ -931,7 +931,7 @@ static void shopping_buy(char *arg, Character *ch, Character *keeper, vnum shop_
         char actbuf[MAX_INPUT_LENGTH];
 
         auto &sh = shop_index.at(shop_nr);
-        
+
         std::string message = !sh->missing_cash2.empty() ? sh->missing_cash2 : "You can't afford that!";
 
         do_tell(keeper, (char*)message.c_str(), cmd_tell, 0);
@@ -1018,7 +1018,7 @@ static void shopping_buy(char *arg, Character *ch, Character *keeper, vnum shop_
 
     {
         auto contents = ch->getInventory();
-        for (auto i : volcano::util::filter_raw(contents))
+        for (auto i : dbat::util::filter_raw(contents))
         {
             strlcpy(tempstr, times_message(i, nullptr, bought), sizeof(tempstr));
             break;
@@ -1263,7 +1263,7 @@ list_object(Object *obj, int cnt, int aindex, vnum shop_nr, Character *keeper, C
         displevel = 20;
 
     snprintf(result, sizeof(result), " %2d)  %9s %-*s %3d %13s\r\n", aindex, quantity,
-             static_cast<int>(volcano::circle::countColors(itemname)) + 36, itemname, displevel, add_commas(buy_price(obj, shop_nr, keeper, ch)).c_str());
+             static_cast<int>(dbat::circle::countColors(itemname)) + 36, itemname, displevel, add_commas(buy_price(obj, shop_nr, keeper, ch)).c_str());
     return (result);
 }
 
@@ -1287,7 +1287,7 @@ static void shopping_list(char *arg, Character *ch, Character *keeper, vnum shop
                        "----------------------------------------------------------------------\r\n",
                   sizeof(buf));
     if (auto con = keeper->getInventory(); !con.empty())
-        for (auto obj : volcano::util::filter_raw(con))
+        for (auto obj : dbat::util::filter_raw(con))
             if (ch->canSee(obj) && GET_OBJ_COST(obj) > 0)
             {
                 if (!last_obj)
@@ -1783,10 +1783,10 @@ bool Shop::isProducing(obj_vnum vn)
 void Shop::runPurge()
 {
     auto keepers = getKeepers();
-    for (auto keeper : volcano::util::filter_raw(keepers))
+    for (auto keeper : dbat::util::filter_raw(keepers))
     {
         auto con = keeper->getInventory();
-        for (auto sobj : volcano::util::filter_raw(con))
+        for (auto sobj : dbat::util::filter_raw(con))
         {
             if (isProducing(sobj->getVnum()))
             {

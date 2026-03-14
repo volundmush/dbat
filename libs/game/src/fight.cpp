@@ -34,7 +34,7 @@
 //#include "dbat/game/act.informative.hpp"
 #include "dbat/game/transformation.hpp"
 #include "dbat/game/Random.hpp"
-#include "volcano/util/FilterWeak.hpp"
+#include "dbat/util/FilterWeak.hpp"
 #include "dbat/game/utils.hpp"
 #include "dbat/game/DragonBall.hpp"
 #include "dbat/game/const/WearSlot.hpp"
@@ -77,7 +77,7 @@ int group_bonus(Character *ch, int type)
 
     if (auto foll = ch->followers.snapshot_weak(); !foll.empty())
     {
-        for (auto k : volcano::util::filter_raw(foll))
+        for (auto k : dbat::util::filter_raw(foll))
         {
             if (!AFF_FLAGGED(k, AFF_GROUP))
             {
@@ -981,7 +981,7 @@ void powerupService(uint64_t heartPulse, double deltaTime)
 {
     char buf3[MAX_STRING_LENGTH];
     auto subs = characterSubscriptions.all("powerupService");
-    for (auto ch : volcano::util::filter_raw(subs))
+    for (auto ch : dbat::util::filter_raw(subs))
     {
 
         if (!ch->character_flags.get(CharacterFlag::powering_up))
@@ -1073,7 +1073,7 @@ void powerupService(uint64_t heartPulse, double deltaTime)
 void lifeforceSystem(uint64_t heartPulse, double deltaTime)
 {
     auto subs = characterSubscriptions.all("lifeforceSystem");
-    for (auto ch : volcano::util::filter_raw(subs))
+    for (auto ch : dbat::util::filter_raw(subs))
     {
 
         if (Random::get<int>(1, 15) < 14)
@@ -1130,7 +1130,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime)
 {
     int perc = 0;
     auto subs = characterSubscriptions.all("fight_stack");
-    for (auto ch : volcano::util::filter_raw(subs))
+    for (auto ch : dbat::util::filter_raw(subs))
     {
 
         if (GET_POS(ch) == POS_FIGHTING)
@@ -1331,7 +1331,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime)
                 {
                     act("$n@G flees in terror and you lose sight of $m!", true, ch, nullptr, nullptr, TO_ROOM);
                     auto con = ch->getInventory();
-                    for (auto o : volcano::util::filter_raw(con))
+                    for (auto o : dbat::util::filter_raw(con))
                         extract_obj(o);
 
                     extract_char(ch);
@@ -1344,7 +1344,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime)
                 {
                     act("$n@G turns and runs away. You lose sight of $m!", true, ch, nullptr, nullptr, TO_ROOM);
                     auto con = ch->getInventory();
-                    for (auto o : volcano::util::filter_raw(con))
+                    for (auto o : dbat::util::filter_raw(con))
                         extract_obj(o);
                     extract_char(ch);
                     continue;
@@ -1407,7 +1407,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime)
 void kiChargeSystem(uint64_t heartPulse, double deltaTime)
 {
     auto subs = characterSubscriptions.all("kiChargeSystem");
-    for (auto ch : volcano::util::filter_raw(subs))
+    for (auto ch : dbat::util::filter_raw(subs))
     {
 
         if (!PLR_FLAGGED(ch, PLR_CHARGE))
@@ -1559,7 +1559,7 @@ void kiChargeSystem(uint64_t heartPulse, double deltaTime)
     }
 
     auto subs2 = characterSubscriptions.all("kiLeakingSystem");
-    for (auto ch : volcano::util::filter_raw(subs2))
+    for (auto ch : dbat::util::filter_raw(subs2))
     {
 
         if (GET_CHARGE(ch) <= 0)
@@ -1790,7 +1790,7 @@ static void make_pcorpse(Character *ch)
     corpse->setBaseStat<int>("timer", CONFIG_MAX_PC_CORPSE_TIME);
 
     auto inv = ch->getInventory();
-    for (auto obj : volcano::util::filter_shared(inv))
+    for (auto obj : dbat::util::filter_shared(inv))
     {
         if (GET_OBJ_VNUM(obj) < 19900 && GET_OBJ_VNUM(obj) != 17998)
         {
@@ -2067,7 +2067,7 @@ static void make_corpse(Character *ch, Character *tch)
     if (MOB_FLAGGED(ch, MOB_HUSK))
     {
         auto con = ch->getInventory();
-        for (auto obj : volcano::util::filter_raw(con))
+        for (auto obj : dbat::util::filter_raw(con))
         {
             obj->clearLocation();
             extract_obj(obj);
@@ -2077,7 +2077,7 @@ static void make_corpse(Character *ch, Character *tch)
     {
         /* transfer character's inventory to the corpse */
         auto con = ch->getInventory();
-        for (auto o : volcano::util::filter_shared(con))
+        for (auto o : dbat::util::filter_shared(con))
         {
             o->clearLocation();
             corpse->addToInventory(o);
@@ -2458,7 +2458,7 @@ void raw_kill(Character *ch, Character *killer)
         if (FIGHTING(ch))
             stop_fighting(ch);
         auto subs = characterSubscriptions.all("combatSystem");
-        for (auto c : volcano::util::filter_raw(subs))
+        for (auto c : dbat::util::filter_raw(subs))
         {
             if (FIGHTING(c) == ch)
                 stop_fighting(c);
@@ -2866,7 +2866,7 @@ void group_gain(Character *ch, Character *victim)
             }
         }
     });
-        
+
 
     if (tot_members == 1 || IN_ARENA(ch))
     {

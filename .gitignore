@@ -70,17 +70,14 @@ cmake-*
 
 # DBAT
 data/
-logs/
+*.log
+*.log.*
 src/Makefile
 compiled/
 build/
-game/secret_settings.py
-dbat_ext/*.cpp
+*.pem
 
-localhost-key.pem
-localhost.pem
 dependencies/
-config.user.toml
 
-
-.env.local
+config/local.toml
+config/secrets.toml

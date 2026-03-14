@@ -35,7 +35,7 @@
 #include "dbat/game/class.hpp"
 //#include "dbat/game/act.informative.hpp"
 #include "dbat/game/utils.hpp"
-#include "volcano/util/FilterWeak.hpp"
+#include "dbat/util/FilterWeak.hpp"
 
 #include "dbat/game/Random.hpp"
 
@@ -187,7 +187,7 @@ ACMD(do_multiform)
     Character *tch = nullptr, *next_v = nullptr;
 
     auto people = ch->location.getPeople();
-    for (auto tch : volcano::util::filter_raw(people))
+    for (auto tch : dbat::util::filter_raw(people))
     {
         if (tch == ch || !IS_NPC(tch))
         {
@@ -288,7 +288,7 @@ static void generate_multiform(Character *ch, int count)
         clone->short_description = clone_sdesc;
         clone->look_description = clone_ldesc;
         clone->room_description = clone_ldesc;
-        
+
         clone->race = ch->race;
         clone->sensei = ch->sensei;
 
@@ -356,7 +356,7 @@ static void resolve_song(Character *ch)
     }
 
     auto con = ch->getInventory();
-    for (auto obj2 : volcano::util::filter_raw(con))
+    for (auto obj2 : dbat::util::filter_raw(con))
     {
         if (GET_OBJ_VNUM(obj2) == 8802 || GET_OBJ_VNUM(obj2) == 8807)
         {
@@ -385,7 +385,7 @@ static void resolve_song(Character *ch)
     act("@CYou continue playing your song.@n", true, ch, nullptr, nullptr, TO_CHAR);
     act(buf, true, ch, nullptr, nullptr, TO_ROOM);
     auto people = ch->location.getPeople();
-    for (auto t : volcano::util::filter_raw(people))
+    for (auto t : dbat::util::filter_raw(people))
     {
         vict = t;
         switch ((int)GET_SONG(ch))
@@ -821,7 +821,7 @@ ACMD(do_song)
     int instrument = 0;
 
     auto con = ch->getInventory();
-    for (auto obj2 : volcano::util::filter_raw(con))
+    for (auto obj2 : dbat::util::filter_raw(con))
     {
         if (GET_OBJ_VNUM(obj2) == 8802 || GET_OBJ_VNUM(obj2) == 8807)
         {
@@ -1122,7 +1122,7 @@ ACMD(do_moondust)
 
     Character *vict = nullptr, *next_v = nullptr;
     auto people = ch->location.getPeople();
-    for (auto t : volcano::util::filter_raw(people))
+    for (auto t : dbat::util::filter_raw(people))
     {
         vict = t;
         if (vict == ch)
@@ -1693,7 +1693,7 @@ void fish_update(uint64_t heartPulse, double deltaTime)
     Character *i, *next_char, *ch = nullptr;
     int quality = 0;
     auto subs = characterSubscriptions.all("goneFishing");
-    for (auto i2 : volcano::util::filter_raw(subs))
+    for (auto i2 : dbat::util::filter_raw(subs))
     {
         i = i2;
 
@@ -3491,7 +3491,7 @@ ACMD(do_hydromancy)
             act(bun, true, ch, nullptr, nullptr, TO_CHAR);
             act(bunn, true, ch, nullptr, nullptr, TO_ROOM);
             auto people = ch->location.getPeople();
-            for (auto t : volcano::util::filter_raw(people))
+            for (auto t : dbat::util::filter_raw(people))
             {
                 vict = t;
                 if (vict == ch)
@@ -5192,7 +5192,7 @@ static int valid_recipe(Character *ch, int recipe, int type)
     {
         /* Check for ingredients in inventory */
         auto con = ch->getInventory();
-        for (auto obj2 : volcano::util::filter_raw(con))
+        for (auto obj2 : dbat::util::filter_raw(con))
         {
             switch (GET_OBJ_VNUM(obj2))
             {
@@ -5334,7 +5334,7 @@ static int valid_recipe(Character *ch, int recipe, int type)
     else
     { /* We know the ingredients are there, remove and exit. */
         auto con = ch->getInventory();
-        for (auto obj2 : volcano::util::filter_raw(con))
+        for (auto obj2 : dbat::util::filter_raw(con))
         {
             switch (GET_OBJ_VNUM(obj2))
             {
@@ -6382,7 +6382,7 @@ ACMD(do_obstruct)
         return;
     }
     auto con = dest.getObjects();
-    for (auto o : volcano::util::filter_raw(con))
+    for (auto o : dbat::util::filter_raw(con))
     {
         obj = o;
         if (GET_OBJ_VNUM(obj) == 79)

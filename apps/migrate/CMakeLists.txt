@@ -10,7 +10,6 @@ target_sources(dbat_migrate
 target_link_libraries(dbat_migrate
     PUBLIC
     dbat::serde
-    volcano::net
     ${MATH_LIB}
 )
 

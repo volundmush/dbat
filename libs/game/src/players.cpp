@@ -15,7 +15,7 @@
 #include "dbat/game/handler.hpp"
 #include "dbat/game/dg_scripts.hpp"
 #include "dbat/game/class.hpp"
-#include "volcano/util/FilterWeak.hpp"
+#include "dbat/util/FilterWeak.hpp"
 
 std::map<int64_t, std::shared_ptr<PlayerData>> players;
 
@@ -113,7 +113,7 @@ void deletePlayerCharacter(std::weak_ptr<Character> ref)
 
     // erase their inventory.
     auto con = ch->getInventory();
-    for (auto o : volcano::util::filter_raw(con))
+    for (auto o : dbat::util::filter_raw(con))
         extract_obj(o);
 
     // delete their gear.

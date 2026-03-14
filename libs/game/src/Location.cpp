@@ -7,7 +7,7 @@
 #include "dbat/game/Destination.hpp"
 #include "dbat/game/Zone.hpp"
 #include "dbat/game/ObjectUtils.hpp"
-#include "volcano/util/FilterWeak.hpp"
+#include "dbat/util/FilterWeak.hpp"
 #include "dbat/game/utils.hpp"
 #include "dbat/game/constants.hpp"
 //#include "dbat/game/fight.hpp"
@@ -499,7 +499,7 @@ int Location::countPlayers()
 {
     int total = 0;
     auto people = getPeople();
-    for (const auto &ch : volcano::util::filter_raw(people))
+    for (const auto &ch : dbat::util::filter_raw(people))
     {
         if (!IS_NPC(ch))
             total++;
@@ -554,7 +554,7 @@ namespace std
 void Location::traverseObjects(const std::function<void(Object *)> &func, bool recurse)
 {
     auto objs = getObjects();
-    for (const auto &obj : volcano::util::filter_raw(objs))
+    for (const auto &obj : dbat::util::filter_raw(objs))
     {
         func(obj);
         if (recurse)
@@ -568,7 +568,7 @@ std::unordered_set<Object *> Location::gatherFromObjects(const std::function<boo
 {
     std::unordered_set<Object *> found;
     auto objs = getObjects();
-    for (const auto &obj : volcano::util::filter_raw(objs))
+    for (const auto &obj : dbat::util::filter_raw(objs))
     {
         if (func(obj))
         {
@@ -586,7 +586,7 @@ std::unordered_set<Object *> Location::gatherFromObjects(const std::function<boo
 Object *Location::searchObjects(const std::function<bool(Object *)> &func, bool recurse)
 {
     auto objs = getObjects();
-    for (const auto &obj : volcano::util::filter_raw(objs))
+    for (const auto &obj : dbat::util::filter_raw(objs))
     {
         if (func(obj))
         {
@@ -605,7 +605,7 @@ Object *Location::searchObjects(const std::function<bool(Object *)> &func, bool 
 Object *Location::searchObjects(obj_vnum vnum, bool working, bool recurse)
 {
     auto objs = getObjects();
-    for (const auto &obj : volcano::util::filter_raw(objs))
+    for (const auto &obj : dbat::util::filter_raw(objs))
     {
         if (obj->getVnum() == vnum && (!working || obj->isWorking()))
         {
@@ -680,7 +680,7 @@ static void display_room_flags(Location& loc, Character *ch, const std::vector<Z
         if (auto sc = r->getScripts(); !sc.empty())
         {
             ch->sendText("@D[@GTriggers");
-            for (auto t : volcano::util::filter_shared(sc))
+            for (auto t : dbat::util::filter_shared(sc))
                 ch->send_to(" %d", t->getVnum());
             ch->sendText("@D] ");
         }
@@ -955,7 +955,7 @@ static void display_garden_info(Location& loc, Character *ch)
 void Location::displayLookFor(Character* ch) {
     if (!ch->desc)
         return;
-    
+
     auto a = getLoc();
     if(!a) {
         ch->sendText("You can't see anything here.");
@@ -1015,7 +1015,7 @@ void Location::displayLookFor(Character* ch) {
     auto con = a->getContents<HasLocation>(position).snapshot_weak();
     auto sh = ch->shared_from_this();
     std::map<std::string, std::vector<std::weak_ptr<HasLocation>>> categorized_contents;
-    for (const auto& hl : volcano::util::filter_shared(con)) {
+    for (const auto& hl : dbat::util::filter_shared(con)) {
         // Filter by visibility...
         if((hl != sh) && hl->getLocationVisibleTo(ch))
             categorized_contents[hl->getLocationDisplayCategory(ch)].emplace_back(hl);
@@ -1024,7 +1024,7 @@ void Location::displayLookFor(Character* ch) {
     for(auto& [cat, entities] : categorized_contents) {
         // it's impossible for entities to be empty here...
         ch->sendFmt("    {}:\r\n", cat);
-        for(auto ent : volcano::util::filter_raw(entities)) {
+        for(auto ent : dbat::util::filter_raw(entities)) {
             ent->displayLocationInfo(ch);
             ch->sendText("@n");
         }

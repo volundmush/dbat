@@ -1,12 +1,10 @@
 #include "dbat/serde/saveload.hpp"
 
-#include <boost/asio/experimental/channel.hpp>
-#include <boost/asio/stream_file.hpp>
-#include <boost/iostreams/device/back_inserter.hpp>
-
 #include <fstream>
-#include <thread>
 #include <chrono>
+#include <execution>
+#include <mutex>
+#include <atomic>
 #include <boost/iostreams/filtering_streambuf.hpp>
 #include <boost/iostreams/filter/gzip.hpp>
 
@@ -14,7 +12,7 @@
 #include "dbat/serde/templates.hpp"
 
 
-#include "volcano/util/FilterWeak.hpp"
+#include "dbat/util/FilterWeak.hpp"
 #include "dbat/game/ObjectPrototype.hpp"
 #include "dbat/game/CharacterPrototype.hpp"
 #include "dbat/game/CharacterUtils.hpp"
@@ -887,12 +885,12 @@ void load_globaldata(const std::filesystem::path &loc)
     {
         j["lastGuildID"].get_to(lastGuildID);
     }
-    
+
     if (j.contains(+"lastScriptID"))
     {
         j["lastScriptID"].get_to(lastScriptID);
     }
-    
+
 }
 
 json dump_globaldata()
@@ -1067,7 +1065,7 @@ void load_areas_initial(const std::filesystem::path &loc)
 void load_areas_finish(const std::filesystem::path &loc)
 {
     for (auto j : load_from_file(loc, "areas.json"))
-    {   
+    {
         if(!j.contains(+"tileOverrides"))
             continue;
 
@@ -1198,7 +1196,7 @@ static json dump_structures()
     json jdata;
 
     for (auto &[v, r] : Structure::registry)
-    {   
+    {
         auto j = json::object();
         auto j3 = json::object();
         j["id"] = r->id;
@@ -1347,7 +1345,7 @@ void load_items_initial(const std::filesystem::path &loc)
 static void save_inventory(HasInventory &hi, json &j) {
     json inv = json::array();
     auto contents = hi.getInventory();
-    for (const auto &item : volcano::util::filter_raw(contents)) {
+    for (const auto &item : dbat::util::filter_raw(contents)) {
         json ji;
         to_json(ji, *item);
         save_inventory(*item, ji);
@@ -1402,7 +1400,7 @@ static void load_equipment(HasEquipment &he, const json &j) {
 static void save_contents(Location& al, json &j) {
     json inv = json::array();
     auto contents = al.getObjects();
-    for (const auto &item : volcano::util::filter_raw(contents)) {
+    for (const auto &item : dbat::util::filter_raw(contents)) {
         json ji;
         to_json(ji, *item);
         save_inventory(*item, ji);
@@ -2403,7 +2401,7 @@ namespace dbat::save {
     }
 
     static std::string generateSaveLocation(const std::chrono::_V2::system_clock::time_point now, std::string_view prefix) {
-        
+
         auto time_t_now = std::chrono::system_clock::to_time_t(now);
         std::tm tm_now = *std::localtime(&time_t_now);
         return fmt::format("{}{:04}{:02}{:02}{:02}{:02}{:02}",
@@ -2423,7 +2421,7 @@ namespace dbat::save {
         auto path = std::filesystem::current_path() / "data" / "dumps" / folder;
         auto newPath = path / dbat::save::generateSaveLocation(now, prefix);
         std::filesystem::create_directories(path);
-        
+
         auto tempPath = path / "temp";
         std::filesystem::remove_all(tempPath);
         std::filesystem::create_directories(tempPath);
@@ -2433,25 +2431,39 @@ namespace dbat::save {
         try
         {
             auto startTime = std::chrono::high_resolution_clock::now();
-            std::vector<std::thread> threads;
-            for (const auto &[name, task] : tasks)
-            {
-                threads.emplace_back([task, name, &tempPath]()
-                                    {
-                    try {
-                        auto data = task();
-                        dump_to_file(tempPath, name + ".json", data);
-                    } catch (const std::exception& e) {
-                        LERROR("Error during dump: %s", e.what());
-                        throw;
-                    } });
-            }
 
-            for (auto &thread : threads)
+            std::exception_ptr firstException;
+            std::mutex exceptionMutex;
+            std::atomic<bool> failedTask{false};
+
+            std::for_each(std::execution::par, tasks.begin(), tasks.end(), [&](const SaveTask &entry)
             {
-                thread.join();
+                if (failedTask.load(std::memory_order_relaxed))
+                {
+                    return;
+                }
+
+                try
+                {
+                    auto data = entry.task();
+                    dump_to_file(tempPath, entry.filename + ".json", data);
+                }
+                catch (const std::exception &e)
+                {
+                    LERROR("Error during dump: %s", e.what());
+                    failedTask.store(true, std::memory_order_relaxed);
+                    std::lock_guard<std::mutex> lock(exceptionMutex);
+                    if (!firstException)
+                    {
+                        firstException = std::current_exception();
+                    }
+                }
+            });
+
+            if (firstException)
+            {
+                std::rethrow_exception(firstException);
             }
-            threads.clear();
 
             auto endTime = std::chrono::high_resolution_clock::now();
             duration = std::chrono::duration<double>(endTime - startTime).count();
@@ -2476,105 +2488,6 @@ namespace dbat::save {
         auto now = std::chrono::system_clock::now();
         runSaveSyncHelper(now, getSaveUserTasks(), "user", "user-");
         runSaveSyncHelper(now, getSaveAssetTasks(), "assets", "assets-");
-    }
-
-    static boost::asio::awaitable<void> runSaveAsyncHelper(const std::chrono::_V2::system_clock::time_point now, const std::vector<SaveTask>& tasks, std::string_view folder, std::string_view prefix)
-    {
-        LINFO("Beginning dump of {} to disk.", folder);
-        // Open up a new database file as <cwd>/state/<timestamp>.sqlite3 and dump the state into it.
-        auto path = std::filesystem::current_path() / "data" / "dumps" / folder;
-        auto newPath = path / dbat::save::generateSaveLocation(now, prefix);
-        std::filesystem::create_directories(path);
-        
-        auto tempPath = path / "temp";
-        std::filesystem::remove_all(tempPath);
-        std::filesystem::create_directories(tempPath);
-
-        double duration{};
-        std::atomic_bool failed{false};
-        try
-        {
-            auto startTime = std::chrono::high_resolution_clock::now();
-            auto exec = co_await boost::asio::this_coro::executor;
-            boost::asio::experimental::channel<void(boost::system::error_code)> done(exec, tasks.size());
-
-            for (const auto &[name, task] : tasks)
-            {
-                boost::asio::co_spawn(
-                    exec,
-                    [&tempPath, name, task, &failed, &done]() -> boost::asio::awaitable<void> {
-                        try {
-                            auto data = task();
-                            co_await dump_to_file_async(tempPath, name + ".json", data);
-                        } catch (const std::exception& e) {
-                            LERROR("Error during dump: %s", e.what());
-                            failed.store(true, std::memory_order_relaxed);
-                        }
-
-                        boost::system::error_code ec;
-                        co_await done.async_send(ec, boost::asio::use_awaitable);
-                        co_return;
-                    },
-                    boost::asio::detached);
-            }
-
-            for (std::size_t i = 0; i < tasks.size(); ++i)
-            {
-                boost::system::error_code recv_ec;
-                co_await done.async_receive(boost::asio::redirect_error(boost::asio::use_awaitable, recv_ec));
-            }
-
-            auto endTime = std::chrono::high_resolution_clock::now();
-            duration = std::chrono::duration<double>(endTime - startTime).count();
-        }
-        catch (std::exception &e)
-        {
-            LERROR("(GAME HAS NOT BEEN SAVED!) Exception in dump_state(): %s", e.what());
-            send_to_all("Warning, a critical error occurred during save! Please alert staff!\r\n");
-            failed.store(true, std::memory_order_relaxed);
-        }
-        if (failed.load(std::memory_order_relaxed)) {
-            std::filesystem::remove_all(tempPath);
-            co_return;
-        }
-
-        std::filesystem::rename(tempPath, newPath);
-        LINFO("Finished dumping state to {} in {} seconds.", newPath.string(), duration);
-        cleanup_state(path, prefix);
-        co_return;
-    }
-
-    boost::asio::awaitable<void> runSaveAsync() {
-        auto now = std::chrono::system_clock::now();
-        auto exec = co_await boost::asio::this_coro::executor;
-        boost::asio::experimental::channel<void(boost::system::error_code)> done(exec, 2);
-
-        boost::asio::co_spawn(
-            exec,
-            [now, &done]() -> boost::asio::awaitable<void> {
-                co_await runSaveAsyncHelper(now, getSaveUserTasks(), "user", "user-");
-                boost::system::error_code ec;
-                co_await done.async_send(ec, boost::asio::use_awaitable);
-                co_return;
-            },
-            boost::asio::detached);
-
-        boost::asio::co_spawn(
-            exec,
-            [now, &done]() -> boost::asio::awaitable<void> {
-                co_await runSaveAsyncHelper(now, getSaveAssetTasks(), "assets", "assets-");
-                boost::system::error_code ec;
-                co_await done.async_send(ec, boost::asio::use_awaitable);
-                co_return;
-            },
-            boost::asio::detached);
-
-        for (int i = 0; i < 2; ++i)
-        {
-            boost::system::error_code recv_ec;
-            co_await done.async_receive(boost::asio::redirect_error(boost::asio::use_awaitable, recv_ec));
-        }
-        co_return;
     }
 
 }
@@ -2608,4 +2521,3 @@ void rest_post_script(int accountID, int scriptID, const std::string &data)
         basic_mud_log("%s created DgScript %d: '%s'", acc->name.c_str(), scriptID, t->name);
     }
 }
-

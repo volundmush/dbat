@@ -5,9 +5,9 @@
 #include <unordered_map>
 #include <memory>
 #include <stdexcept>
-#include "volcano/mud/Command.hpp"
+#include "dbat/mud/Command.hpp"
 
-using CommandData = volcano::mud::CommandData;
+using CommandData = dbat::mud::CommandData;
 
 class CommandError : public std::runtime_error {
 public:

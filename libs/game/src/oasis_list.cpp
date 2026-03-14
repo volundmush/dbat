@@ -24,7 +24,7 @@
 //#include "dbat/game/Guild.hpp"
 #include "dbat/game/races.hpp"
 #include "dbat/game/class.hpp"
-#include "volcano/circle/CircleAnsi.hpp"
+#include "dbat/circle/CircleAnsi.hpp"
 #include "dbat/game/utils.hpp"
 
 #include "dbat/game/const/AdminLevel.hpp"
@@ -181,7 +181,7 @@ void list_rooms(Character *ch, zone_vnum vmin, zone_vnum vmax)
 
         auto sString = !r->proto_script.empty() ? fmt::format(" {}", r->scriptString()) : "";
 
-        ch->send_to("[@g%-5d@n] @[1]%-*s@n %s", vn, volcano::circle::countColors(r->getName()) + 44, r->getName(), sString.c_str());
+        ch->send_to("[@g%-5d@n] @[1]%-*s@n %s", vn, dbat::circle::countColors(r->getName()) + 44, r->getName(), sString.c_str());
         for (auto &[d, e] : r->getDirections())
         {
             if (e.getZone() != r->getZone())
@@ -214,7 +214,7 @@ void list_mobiles(Character *ch, zone_vnum vmin, zone_vnum vmax)
         counter++;
         auto sString = !m->proto_script.empty() ? fmt::format(" {}", m->scriptString()) : "";
         ch->send_to("@g%4d@n);[@g%-5d@n] @[3]%-*s @C%-9s @c%-9s @y[%4d]@n %s\r\n",
-                    vn, characterSubscriptions.count(fmt::format("vnum_{}", vn)), volcano::circle::countColors(m->short_description) + 30,
+                    vn, characterSubscriptions.count(fmt::format("vnum_{}", vn)), dbat::circle::countColors(m->short_description) + 30,
                     m->short_description, TRUE_RACE(m), sensei::getName(m->sensei).c_str(),
                     m->getBaseStat<int>("level"),
                     sString.c_str());
@@ -244,7 +244,7 @@ void list_objects(Character *ch, room_vnum vmin, room_vnum vmax)
         counter++;
         auto sString = !o->proto_script.empty() ? fmt::format(" {}", o->scriptString()) : "";
         ch->send_to("@g%4d@n);[@g%-5d@n] @[2]%-*s @y[%s]@n%s\r\n",
-                    vn, objectSubscriptions.count(fmt::format("vnum_{}", vn)), volcano::circle::countColors(o->short_description) + 44,
+                    vn, objectSubscriptions.count(fmt::format("vnum_{}", vn)), dbat::circle::countColors(o->short_description) + 44,
                     o->short_description, enchantum::to_string(o->type_flag).data(),
                     sString.c_str());
     }

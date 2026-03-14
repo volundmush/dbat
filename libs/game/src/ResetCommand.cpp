@@ -5,7 +5,7 @@
 #include "dbat/game/CharacterPrototype.hpp"
 #include "dbat/game/Destination.hpp"
 #include "dbat/game/RoomUtils.hpp"
-#include "volcano/util/FilterWeak.hpp"
+#include "dbat/util/FilterWeak.hpp"
 #include "dbat/game/db.hpp"
 #include "dbat/game/constants.hpp"
 #include "dbat/game/utils.hpp"
@@ -13,7 +13,7 @@
 #include "dbat/game/Shop.hpp"
 #include "dbat/game/Random.hpp"
 #include "dbat/game/Parse.hpp"
-#include "volcano/util/Enum.hpp"
+#include "dbat/util/Enum.hpp"
 
 #include "dbat/game/const/WearSlot.hpp"
 
@@ -94,7 +94,7 @@ static bool resetSpawnMob(Location &loc, SpawnRegistry &reg, mob_vnum target, in
             return false;
         }
 
-        for (auto ch : volcano::util::filter_raw(npcs))
+        for (auto ch : dbat::util::filter_raw(npcs))
         {
             if (auto spawnedat = ch->registeredLocations.find("spawn"); spawnedat != ch->registeredLocations.end())
             {
@@ -137,7 +137,7 @@ static bool resetSpawnObj(Location &loc, SpawnRegistry &reg, obj_vnum target, in
         int count_loc = 0;
         // Retrieve set of objects that use this vnum...
         auto objs = objectSubscriptions.all(index);
-        for (auto obj : volcano::util::filter_raw(objs))
+        for (auto obj : dbat::util::filter_raw(objs))
         {
 
             if (auto spawnedat = obj->registeredLocations.find("spawn"); spawnedat != obj->registeredLocations.end())
@@ -336,7 +336,7 @@ static bool resetTrigger(Location &loc, SpawnRegistry &reg, trig_vnum target, in
         break;
     }
     case UnitType::room:
-    {   
+    {
         if(auto a = loc.getLoc())
         {
             if (auto r = dynamic_cast<Room*>(a))
@@ -466,7 +466,7 @@ Result<ResetCommand> parseResetCommand(std::vector<std::string> sequence) {
         return err("Not enough arguments for reset command.\r\n");
     }
 
-    auto resType = volcano::util::chooseEnum<ResetCommandType>(sequence[0], "reset command type");
+    auto resType = dbat::util::chooseEnum<ResetCommandType>(sequence[0], "reset command type");
     if(!resType) {
         return err(resType.error());
     }
@@ -517,7 +517,7 @@ Result<ResetCommand> parseResetCommand(std::vector<std::string> sequence) {
             return cmd;
         }
         case ResetCommandType::DOOR: {
-            auto dirRes = volcano::util::chooseEnum<Direction>(sequence[1], "direction");
+            auto dirRes = dbat::util::chooseEnum<Direction>(sequence[1], "direction");
             if(!dirRes) {
                 return err(dirRes.error());
             }
@@ -723,7 +723,7 @@ Result<ResetCommand> parseResetCommand(std::vector<std::string> sequence) {
             }
             cmd.target = ovn;
 
-            auto slotRes = volcano::util::chooseEnum<WearSlot>(sequence[2], "wear location");
+            auto slotRes = dbat::util::chooseEnum<WearSlot>(sequence[2], "wear location");
             if(!slotRes) {
                 return err(slotRes.error());
             }

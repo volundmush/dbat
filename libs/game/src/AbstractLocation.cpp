@@ -1,5 +1,5 @@
 #include "dbat/game/AbstractLocation.hpp"
-#include "volcano/util/FilterWeak.hpp"
+#include "dbat/util/FilterWeak.hpp"
 #include "dbat/game/ObjectUtils.hpp"
 #include "dbat/game/Character.hpp"
 #include "dbat/game/Structure.hpp"
@@ -49,7 +49,7 @@ int AbstractLocation::getCookElement(const Coordinates &coor)
 {
     int found = 0;
     auto con = getObjects(coor).snapshot_weak();
-    for (auto obj : volcano::util::filter_raw(con))
+    for (auto obj : dbat::util::filter_raw(con))
     {
         if (GET_OBJ_TYPE(obj) == ITEM_CAMPFIRE)
         {
@@ -78,7 +78,7 @@ bool AbstractLocation::getIsDark(const Coordinates &coor)
     return false; // temporarily disabled.
 
     auto pe = getPeople(coor).snapshot_weak();
-    for (auto c : volcano::util::filter_raw(pe))
+    for (auto c : dbat::util::filter_raw(pe))
     {
         if (c->isProvidingLight())
             return false;
@@ -148,7 +148,7 @@ void AbstractLocation::removeFromContents(const std::shared_ptr<HasLocation> &hl
 }
 
 void AbstractLocation::onRemoveFromContents(const std::shared_ptr<HasLocation>& hl) {
-    
+
 }
 
 void AbstractLocation::setRoomFlag(const Coordinates &coor, RoomFlag flag, bool value)

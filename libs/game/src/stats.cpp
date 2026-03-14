@@ -4,7 +4,7 @@
 #include "dbat/game/ObjectPrototype.hpp"
 #include "dbat/game/CharacterPrototype.hpp"
 #include "dbat/game/utils.hpp"
-#include "volcano/util/FilterWeak.hpp"
+#include "dbat/util/FilterWeak.hpp"
 #include "dbat/game/StatHandler.hpp"
 
 #include "dbat/game/Random.hpp"
@@ -252,7 +252,7 @@ static void init_char_stats_derived()
             // Example derived stat calculation
             double weight = 0;
             auto objects = target->getInventory();
-            for(auto obj : volcano::util::filter_raw(objects)) {
+            for(auto obj : dbat::util::filter_raw(objects)) {
                 weight += obj->getEffectiveStat("weight_total");
             }
             return weight; })
@@ -265,7 +265,7 @@ static void init_char_stats_derived()
             // Example derived stat calculation
             double weight = 0;
             auto objects = target->getInventory();
-            for(auto obj : volcano::util::filter_raw(objects)) {
+            for(auto obj : dbat::util::filter_raw(objects)) {
                 weight += obj->getEffectiveStat("weight_total");
             }
             return weight; })
@@ -586,4 +586,3 @@ void init_stat_handlers()
     init_item_stats();
     init_room_stats();
 }
-

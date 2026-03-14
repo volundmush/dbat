@@ -50,7 +50,7 @@
 #include "dbat/game/act.wizard.hpp"
 #include "dbat/game/fight.hpp"
 #include "dbat/game/transformation.hpp"
-#include "volcano/util/FilterWeak.hpp"
+#include "dbat/util/FilterWeak.hpp"
 #include "dbat/game/utils.hpp"
 #include "dbat/game/Random.hpp"
 
@@ -337,7 +337,7 @@ ACMD(do_mjunk)
     else
     {
         auto con = ch->getInventory();
-        for (auto obj : volcano::util::filter_raw(con))
+        for (auto obj : dbat::util::filter_raw(con))
         {
             if (arg[3] == '\0' || isname(arg + 4, obj->getName()))
             {
@@ -645,14 +645,14 @@ ACMD(do_mpurge)
         Object *obj_next;
 
         auto people = ch->location.getPeople();
-        for (auto victim : volcano::util::filter_raw(people))
+        for (auto victim : dbat::util::filter_raw(people))
         {
             if (IS_NPC(victim) && victim != ch)
                 extract_char(victim);
         }
 
         auto locobjs = ch->location.getObjects();
-        for (auto obj : volcano::util::filter_raw(locobjs))
+        for (auto obj : dbat::util::filter_raw(locobjs))
         {
             extract_obj(obj);
         }
@@ -830,7 +830,7 @@ ACMD(do_mteleport)
         }
 
         auto people = ch->location.getPeople();
-        for (auto vict : volcano::util::filter_raw(people))
+        for (auto vict : dbat::util::filter_raw(people))
         {
 
             if (valid_dg_target(vict, DG_ALLOW_GODS))
@@ -1174,7 +1174,7 @@ ACMD(do_mtransform)
     ch->short_description = m->short_description;
     ch->look_description = m->look_description;
     ch->room_description = m->room_description;
-    
+
     ch->appearances = m->appearances;
     ch->stats = m->stats;
     ch->mob_flags = m->mob_flags;

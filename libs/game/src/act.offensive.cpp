@@ -27,7 +27,7 @@
 #include "dbat/game/techniques.hpp"
 #include "dbat/game/attack.hpp"
 #include "dbat/game/utils.hpp"
-#include "volcano/util/FilterWeak.hpp"
+#include "dbat/util/FilterWeak.hpp"
 
 #include "dbat/game/Random.hpp"
 
@@ -324,7 +324,7 @@ ACMD(do_genki)
         return;
     }
     auto people = ch->location.getPeople();
-    for (auto f : volcano::util::filter_raw(people))
+    for (auto f : dbat::util::filter_raw(people))
     {
         friend_char = f;
         if (friend_char == ch)
@@ -1263,7 +1263,7 @@ ACMD(do_assist)
         else
         {
             auto people = ch->location.getPeople();
-            for (auto opp : volcano::util::filter_raw(people))
+            for (auto opp : dbat::util::filter_raw(people))
             {
                 if (FIGHTING(opp) == helpee)
                 {

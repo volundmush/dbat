@@ -24,9 +24,9 @@ esac
 # Default behavior: use the same CMake build dir as VS Code (./build),
 # enable the Python extension target, and buirmld incrementally.
 BDIR="build"
-CC="clang"
-CXX="clang++"
-export CC CXX
+#CC="gcc"
+#CXX="g++"
+#export CC CXX
 
 PROFILE_MODE=${DBAT_PROFILE:-1}
 cmake_args=(-S . -B "$BDIR" -G Ninja -DCMAKE_BUILD_TYPE=${MODE})

@@ -8,7 +8,7 @@ improved-edit.c		Routines specific to the improved editor.
 #include "dbat/game/send.hpp"
 #include "dbat/game/comm.hpp"
 #include "dbat/game/interpreter.hpp"
-#include "volcano/circle/CircleAnsi.hpp"
+#include "dbat/circle/CircleAnsi.hpp"
 #include "dbat/game/utils.hpp"
 
 #include "dbat/game/const/AdminLevel.hpp"
@@ -724,7 +724,7 @@ int format_text(char **ptr_string, int mode, struct descriptor_data *d, unsigned
             {
                 strcat(formatted, "\r\n");
                 line_chars = 0;
-                color_chars = volcano::circle::countColors(start);
+                color_chars = dbat::circle::countColors(start);
             }
 
             if (!cap_next)
@@ -753,7 +753,7 @@ int format_text(char **ptr_string, int mode, struct descriptor_data *d, unsigned
             {
                 strcat(formatted, "\r\n");
                 line_chars = 0;
-                color_chars = volcano::circle::countColors(start);
+                color_chars = dbat::circle::countColors(start);
             }
             else if (*flow == '\"' || *flow == '\'')
             {

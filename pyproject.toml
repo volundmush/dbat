@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dbat"
+version = "0.1.0"
+requires-python = ">=3.14"
+dependencies = [
+    "muforge @ git+https://github.com/mufoundry/muforge@main",
+    "muplugins @ git+https://github.com/mufoundry/muplugins@main"
+]
+# This creates the `muforge` command on install
+#scripts = { muforge = "muforge" }
+
+[tool.setuptools]
+packages = ["dbat"]

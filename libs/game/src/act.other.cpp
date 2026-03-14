@@ -44,7 +44,7 @@
 #include "dbat/game/utils.hpp"
 #include "dbat/game/DragonBall.hpp"
 #include "dbat/game/Random.hpp"
-#include "volcano/util/FilterWeak.hpp"
+#include "dbat/util/FilterWeak.hpp"
 
 #include "dbat/game/const/Pulse.hpp"
 #include "dbat/game/const/LegacyBonus.hpp"
@@ -581,7 +581,7 @@ ACMD(do_rpp)
             {
                 int found = false;
                 auto ao = objectSubscriptions.all("active");
-                for (auto k : volcano::util::filter_raw(ao))
+                for (auto k : dbat::util::filter_raw(ao))
                 {
                     if (OBJ_FLAGGED(k, ITEM_FORGED))
                     {
@@ -8195,7 +8195,7 @@ ACMD(do_solar)
         true, ch, nullptr, nullptr, TO_ROOM);
 
     auto people = ch->location.getPeople();
-    for (auto vict : volcano::util::filter_raw(people))
+    for (auto vict : dbat::util::filter_raw(people))
     {
         if (vict == ch)
             continue;

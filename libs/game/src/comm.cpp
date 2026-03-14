@@ -38,7 +38,7 @@
 #include "dbat/game/constants.hpp"
 #include "dbat/game/screen.hpp"
 #include "dbat/game/utils.hpp"
-#include "volcano/util/FilterWeak.hpp"
+#include "dbat/util/FilterWeak.hpp"
 #include "dbat/game/TimeInfo.hpp"
 #include "dbat/game/Random.hpp"
 
@@ -461,7 +461,7 @@ char *make_prompt(struct descriptor_data *d) {
             }
             if (PRF_FLAGGED(d->character, PRF_FORM) && len < sizeof(prompt)) {
                 auto form = d->character->form;
-                
+
                 if(d->character->transforms[form].grade > 1)
                     count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@mForm@y: @W%s - %s@D]@n",
                         trans::getAbbr(d->character, form).c_str(), std::to_string(d->character->transforms[form].grade).c_str());
@@ -501,7 +501,7 @@ char *make_prompt(struct descriptor_data *d) {
                     case 51:
                         promptCombo = "Combo (Bash) - ";
                         break;
-                    case 52:    
+                    case 52:
                         promptCombo = "Combo (Headbutt) - ";
                         break;
                     case 56:
@@ -1702,7 +1702,7 @@ char *act(const char *str, int hide_invisible, Character *ch,
             }
         }
     }
-    for (auto target : volcano::util::filter_raw(to)) {
+    for (auto target : dbat::util::filter_raw(to)) {
         if (!SENDOK(target) || (target == ch))
             continue;
     if (hide_invisible && ch && !target->canSee(ch))

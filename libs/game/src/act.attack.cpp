@@ -17,7 +17,7 @@
 #include "dbat/game/CharacterUtils.hpp"
 #include "dbat/game/ObjectUtils.hpp"
 #include "dbat/game/RoomUtils.hpp"
-#include "volcano/util/FilterWeak.hpp"
+#include "dbat/util/FilterWeak.hpp"
 #include "dbat/game/send.hpp"
 #include "dbat/game/attack.hpp"
 #include "dbat/game/constants.hpp"
@@ -1031,7 +1031,7 @@ ACMD(do_selfd)
         act("@R$n EXPLODES! The explosion expands outward burning up all surroundings for a large distance. The explosion takes on the shape of a large energy dome with $n at its center!@n",
             true, ch, nullptr, nullptr, TO_ROOM);
         auto people = ch->location.getPeople();
-        for (auto tch : volcano::util::filter_raw(people))
+        for (auto tch : dbat::util::filter_raw(people))
         {
             if (tch == ch)
             {

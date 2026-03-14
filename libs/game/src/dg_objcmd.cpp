@@ -23,7 +23,7 @@
 #include "dbat/game/db.hpp"
 #include "dbat/game/constants.hpp"
 #include "dbat/game/act.wizard.hpp"
-#include "volcano/util/FilterWeak.hpp"
+#include "dbat/util/FilterWeak.hpp"
 
 /*
  * Local functions
@@ -186,7 +186,7 @@ OCMD(do_oforce)
         else
         {
             auto people = get_room(room)->getPeople().snapshot_weak();
-            for (auto ch : volcano::util::filter_raw(people))
+            for (auto ch : dbat::util::filter_raw(people))
             {
                 if (valid_dg_target(ch, 0))
                 {
@@ -371,13 +371,13 @@ OCMD(do_opurge)
         {
             auto room = get_room(rm);
             auto people = room->getPeople().snapshot_weak();
-            for (auto ch : volcano::util::filter_raw(people))
+            for (auto ch : dbat::util::filter_raw(people))
             {
                 if (IS_NPC(ch))
                     extract_char(ch);
             }
             auto con = room->getObjects().snapshot_weak();
-            for (auto o : volcano::util::filter_raw(con))
+            for (auto o : dbat::util::filter_raw(con))
             {
                 if (o != obj)
                     extract_obj(o);
@@ -474,7 +474,7 @@ OCMD(do_oteleport)
     {
         auto rm = obj->getAbsoluteLocation();
         auto people = rm.getPeople();
-        for (auto ch : volcano::util::filter_raw(people))
+        for (auto ch : dbat::util::filter_raw(people))
         {
             if (!valid_dg_target(ch, DG_ALLOW_GODS))
                 continue;
