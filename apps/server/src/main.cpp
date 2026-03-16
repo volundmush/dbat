@@ -1,78 +1,32 @@
-#include "volcano/config/config.hpp"
-#include "dbat/link/endpoints.hpp"
-#include "dbat/link/game.hpp"
+#include "dbat/log/Log.hpp"
 #include "dbat/game/db.hpp"
 #include "dbat/game/comm.hpp"
 #include "dbat/serde/Startup.hpp"
 #include "dbat/serde/saveload.hpp"
+#include "dbat/link/game.hpp"
 
 int main(int argc, char** argv) {
 
     // Pre setup
-    auto conf = volcano::config::init("server");
-    dbat::link::jwt.secret = conf.jwt.secret;
-    dbat::link::jwt.token_expiry = std::chrono::seconds(conf.jwt.expiry_minutes * 60);
-    dbat::link::jwt.refresh_token_expiry = std::chrono::seconds(conf.jwt.refresh_expiry_minutes * 60);
-    dbat::link::jwt.issuer = conf.jwt.issuer;
-    dbat::link::jwt.audience = conf.jwt.audience;
-    LINFO("JWT configured: issuer='{}', audience='{}', expiry={} minutes, refresh expiry={} minutes",
-        dbat::link::jwt.issuer,
-        dbat::link::jwt.audience,
-        conf.jwt.expiry_minutes,
-        conf.jwt.refresh_expiry_minutes
-    );
+    auto log_options = dbat::log::Options();
+    log_options.file_path = "logs/" + "dbat" + ".log";
+    dbat::log::init(log_options);
 
-    std::shared_ptr<boost::asio::ssl::context> ssl_ctx;
+    // db setup
+    dbat::link::db_conn = std::make_unique<pqxx::connection>("host=127.0.0.1 port=5432 dbname=muforge user=muforge password=muforge");
 
-    if(!conf.tls.cert_path.empty() && !conf.tls.key_path.empty()) {
-        auto tls = volcano::net::create_ssl_context(conf.tls.cert_path, conf.tls.key_path);
-        if(!tls) {
-            LERROR("Failed to create TLS context: {}", tls.error());
-            return 1;
-        }
-        ssl_ctx = *tls;
-        LINFO("TLS enabled on server.");
-    } else {
-        LINFO("TLS not enabled on server.");
+    if(!dbat::link::db_conn) {
+        dbat::log::error("Failed to connect to database");
+        return 1;
     }
-
-    auto router = dbat::link::init_router();
-    auto handler = volcano::web::make_router_handler(router);
-
-    auto &endpoint_config = ssl_ctx ? conf.https : conf.http;
-
-    auto endpoint = boost::asio::ip::tcp::endpoint(endpoint_config.address, endpoint_config.port);
-
-    auto &ioc = volcano::net::context();
-
-    boost::asio::ip::tcp::acceptor acc(
-        ioc,
-        endpoint,
-        true
-    );
-
-    volcano::net::Server server(
-        std::move(acc),
-        ssl_ctx,
-        handler
-    );
-    LINFO("Starting {} server on {}:{}", ssl_ctx ? "HTTPS" : "HTTP", endpoint.address().to_string(), endpoint.port());
-
 
     // game setup
     load_config();
     dbat::init::init();
 
-    boost::asio::co_spawn(
-        ioc,
-        server.run(),
-        boost::asio::detached
-    );
 
-    auto strand = boost::asio::make_strand(ioc);
-    boost::asio::co_spawn(strand, dbat::link::run_game(0.05, 300.0), boost::asio::detached);
+    auto answer = dbat::link::run_game(0.05, 300.0);
 
-    volcano::net::run();
 
     return 0;
 }

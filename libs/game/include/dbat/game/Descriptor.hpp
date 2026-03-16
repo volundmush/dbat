@@ -13,6 +13,7 @@
 
 #include "const/ConnectionState.hpp"
 #include "const/Max.hpp"
+#include <nlohmann/json.hpp>
 
 struct Object;
 struct Character;
@@ -29,42 +30,28 @@ struct txt_q {
     struct txt_block *tail;
 };
 
-struct ClientData {
-    std::string client_address = "UNKNOWN";
-    std::string client_hostname = "UNKNOWN";
-    std::string client_protocol = "UNKNOWN";
-    std::string client_name = "UNKNOWN";
-    std::string client_version = "UNKNOWN";
-    std::string encoding = "ascii";
-    bool tls = false;
-    uint8_t color = 0;
-    uint16_t width = 78;
-    uint16_t height = 24;
-    bool mccp2 = false;
-    bool mccp2_enabled = false;
-    bool mccp3 = false;
-    bool mccp3_enabled = false;
-    bool gmcp = false;
-    bool mtts = false;
-    bool naws = false;
-    bool charset = false;
-    bool mnes = false;
-    bool linemode = false;
-    bool sga = false;
-    bool force_endline = false;
-    bool screen_reader = false;
-    bool mouse_tracking = false;
-    bool vt100 = false;
-    bool osc_color_palette = false;
-    bool proxy = false;
-    bool tls_support = false;
+struct GameConnectionInfo {
+    std::string id;
+    std::string pc_id;
+    std::string user_id;
+    int account_id;
+    int64_t character_id;
+    time_t created_at;
+    std::string ip_address;
+    std::string user_agent;
+};
+
+struct Event {
+    std::string type;
+    nlohmann::json data;
 };
 
 struct descriptor_data {
     int64_t id{NOTHING};
-    std::unordered_map<int64_t, std::string> conns;
-    void onConnectionLost(int64_t connId);
-    void onConnectionClosed(int64_t connId);
+    std::string pc_id;
+    std::unordered_map<std::string, std::shared_ptr<GameConnectionInfo>> conns;
+    void onConnectionLost(std::string connId);
+    void onConnectionClosed(std::string connId);
 
     char host[HOST_LENGTH + 1];    /* hostname				*/
     int connected{CON_PLAYING};        /* mode of 'connectedness'		*/
@@ -77,6 +64,7 @@ struct descriptor_data {
     size_t max_str{};            /* maximum size of string in modify-str	*/
     int32_t mail_to{};        /* name for mail system			*/
     bool has_prompt{true};        /* is the user at a prompt?             */
+    std::list<Event> incoming_events;
     std::string last_input;        /* the last input			*/
     std::list<std::string> raw_input_queue, input_queue;
     std::string output;        /* ptr to the current output buffer	*/
@@ -149,3 +137,5 @@ struct descriptor_data {
 
 extern struct descriptor_data *descriptor_list;
 extern std::map<int64_t, struct descriptor_data *> sessions;
+
+extern int create_join_session(std::shared_ptr<GameConnectionInfo> info);

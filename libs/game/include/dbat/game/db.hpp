@@ -138,7 +138,7 @@ int64_t getNextAccountID();
 
 
 
-extern int create_join_session(int64_t account_id, int64_t character_id, int64_t connection_id, const std::string &ip);
+
 
 
 

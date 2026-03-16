@@ -40,4 +40,5 @@ target_precompile_headers(dbat_link
 target_link_libraries(dbat_link
   PUBLIC
         dbat::serde
+        pqxx
 )

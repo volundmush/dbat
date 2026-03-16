@@ -56,7 +56,7 @@ CPMAddPackage(NAME effolkronium_random   GITHUB_REPOSITORY volundmush/random    
 
 
 # ---------------- targets ----------------
-#add_subdirectory(libs/link)
+add_subdirectory(libs/link)
 add_subdirectory(libs/mud)
 add_subdirectory(libs/game)
 add_subdirectory(libs/serde)

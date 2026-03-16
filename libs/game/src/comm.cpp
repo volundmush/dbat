@@ -1778,14 +1778,14 @@ void shutdown_game(int exitCode) {
     std::exit(exitCode);
 }
 
-void descriptor_data::onConnectionClosed(int64_t connId) {
+void descriptor_data::onConnectionClosed(std::string connId) {
     conns.erase(connId);
     if(conns.empty()) {
         handleLostLastConnection(true);
     }
 }
 
-void descriptor_data::onConnectionLost(int64_t connId) {
+void descriptor_data::onConnectionLost(std::string connId) {
     conns.erase(connId);
     if(conns.empty()) {
         handleLostLastConnection(false);
