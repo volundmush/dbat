@@ -18,4 +18,4 @@ deprecated = ["sha512_crypt", "plaintext"]
 # The information that'll be fed straight into
 # asyncpg's connection function via **kwargs.
 # The dsn format is: postgresql://<user>:<password>@<host>:<port>/<database>
-dsn = "postgres://muforge:muforge@localhost:5432/muforge"
+dsn = "postgres://muforge:muforge@postgres:5432/muforge"

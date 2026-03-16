@@ -103,5 +103,4 @@ std::vector<std::filesystem::path> getDumpFiles(const std::filesystem::path &dir
 namespace dbat::save {
 
     void runSaveSync();
-    boost::asio::awaitable<void> runSaveAsync();
 }

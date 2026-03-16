@@ -1,6 +1,6 @@
-#include <pqxx/pqxx>
-#include <memory>
 
+#include <memory>
+#include "dbat/link/game.hpp"
 #include "dbat/game/Descriptor.hpp"
 #include "dbat/game/db.hpp"
 #include "dbat/serde/saveload.hpp"

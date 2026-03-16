@@ -9,7 +9,7 @@ target_sources(dbat_migrate
 
 target_link_libraries(dbat_migrate
     PUBLIC
-    dbat::serde
+    dbat::game
     ${MATH_LIB}
 )
 

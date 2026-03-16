@@ -14,6 +14,7 @@ struct descriptor_data;
 struct Account {
     Account() = default;
     int id{NOTHING};
+    std::string user_id;
     std::string name;
     std::string password;
     std::string email;

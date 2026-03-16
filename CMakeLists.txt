@@ -56,15 +56,13 @@ CPMAddPackage(NAME effolkronium_random   GITHUB_REPOSITORY volundmush/random    
 
 
 # ---------------- targets ----------------
-add_subdirectory(libs/link)
 add_subdirectory(libs/mud)
 add_subdirectory(libs/game)
-add_subdirectory(libs/serde)
 add_subdirectory(libs/log)
 add_subdirectory(libs/util)
 add_subdirectory(libs/ansi)
 add_subdirectory(libs/circle)
 
 
-#add_subdirectory(apps/migrate)
-#add_subdirectory(apps/server)
+add_subdirectory(apps/migrate)
+add_subdirectory(apps/server)

@@ -65,3 +65,7 @@ bool Structure::isAuthorized(Character *ch, bool ownerOnly) const {
     }
     return (owners.contains(ch->id)) || (users.contains(ch->id));
 }
+
+std::expected<Location, std::string> Structure::getDockingPortLocation(Structure *vehicle, Character *pilot) {
+    return std::unexpected("not yet implemented");
+}

@@ -26,7 +26,8 @@
 #include "StatHandler.hpp"
 
 struct PlayerData {
-    int64_t id{NOTHING};
+    int64_t id{NOTHING}; // the local ID.
+    std::string character_id; // used by the authentication system.
     std::string name;
     struct Account *account{};
     struct Character *character{};
@@ -238,17 +239,17 @@ struct Character : public CharacterBase, public HasID, public HasLocation, publi
 
     struct Character *master{};    /* Who is char following? */
     WeakBag<Character> followers{}; /* List of chars followers. master is the reverse */
-    
+
     ObjectHandle sits{};      /* What am I sitting on? */
     struct Character *fighting{};    /* Opponent				*/
-    
+
     struct Character *blocks{};    /* Who am I blocking?    */
     struct Character *blocked{};   /* Who is blocking me?    */
     struct Character *absorbing{}; /* Who am I absorbing */
     struct Character *absorbby{};  /* Who is absorbing me */
     struct Character *carrying{};
     struct Character *carried_by{};
-    
+
     struct Character *drag{};
     struct Character *dragged{};
     struct Character *mindlink{};
@@ -368,7 +369,7 @@ struct Character : public CharacterBase, public HasID, public HasLocation, publi
     void restoreHealth(bool announce = true);
 
     int64_t getPL(bool suppressed = true);
-    
+
     void restoreVitals(bool announce = true);
     void restoreStatus(bool announce = true);
     void restoreLimbs(bool announce = true);
@@ -395,7 +396,7 @@ struct Character : public CharacterBase, public HasID, public HasLocation, publi
 
     bool canSeeInDark() const;
     bool canSee(HasInteractive *target, bool skipLightCheck = false);
-    
+
     std::string displayNameFor(Character* viewer);
 
     std::string_view otherSensePower(Character* other);

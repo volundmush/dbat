@@ -2330,6 +2330,7 @@ namespace dbat::save {
         static const std::vector<SaveTask> tasks = {
             {"accounts", dump_accounts},
             {"players", dump_players},
+            // TODO: Add structures to replace saverooms.
             {"saverooms", dump_save_rooms}
         };
         return tasks;

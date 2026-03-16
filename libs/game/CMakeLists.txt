@@ -49,7 +49,9 @@ target_link_libraries(dbat_game
     dbat::log
     dbat::mud
     bsd
+    pqxx
     ${MATH_LIB}
+    nlohmann_json
   PRIVATE
     Boost::iostreams
 )

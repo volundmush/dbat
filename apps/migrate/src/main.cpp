@@ -12,7 +12,7 @@
 #include <boost/algorithm/string/regex.hpp>
 #include <regex>
 
-#include "volcano/net/net.hpp"
+#include "dbat/link/game.hpp"
 
 #include "dbat/game/Zone.hpp"
 #include "dbat/game/CharacterUtils.hpp"
@@ -40,7 +40,7 @@
 #include "dbat/serde/saveload.hpp"
 #include "dbat/game/assemblies.hpp"
 #include "dbat/game/vehicles.hpp"
-#include "volcano/circle/CircleAnsi.hpp"
+#include "dbat/circle/CircleAnsi.hpp"
 #include "dbat/game/Help.hpp"
 #include "dbat/game/utils.hpp"
 #include "dbat/game/interpreter.hpp"
@@ -233,7 +233,7 @@ static void convert_character(Character *c) {
         if(c->mob_flags.get(32)) {
             c->model = AndroidModel::Repair;
         }
-        
+
     } else {
         c->character_flags.set(CharacterFlag::tail, c->player_flags.get(30));
         c->character_flags.set(CharacterFlag::cyber_right_arm, c->player_flags.get(46));
@@ -555,7 +555,7 @@ static void handle_org_who(org_data &g, bitvector_t with_who[]) {
                 case TRADE_NOARCHMAGE:
                     g.not_sensei.set(Sensei::kurzak);
                     break;
-                
+
             }
         }
     }
@@ -691,7 +691,7 @@ static void boot_the_shops(FILE *shop_f, char *filename, int rec_count) {
             sh->message_buy = read_shop_message(5, SHOP_NUM(top_shop), shop_f, buf2);
             sh->message_sell = read_shop_message(6, SHOP_NUM(top_shop), shop_f, buf2);
             read_line(shop_f, "%d", &SHOP_BROKE_TEMPER(top_shop));
-            
+
             bitvector_t bitvector;
             read_line(shop_f, "%d", &bitvector);
             for(auto i = 0; i < 2; i++) {
@@ -979,7 +979,7 @@ static void setup_dir(FILE *fl, Room *r, int dir) {
         }
 
         d->key = real_object(t[1]);
-        
+
         // since the rooms don't exist yet, we can't set d->unit...
         room_directions.emplace_back(r, cdir, t[2]);
         //d->unit = get_room(t[2]);
@@ -1732,8 +1732,8 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
         wearFlags[1] = asciiflag_conv(f6);
         wearFlags[2] = asciiflag_conv(f7);
         wearFlags[3] = asciiflag_conv(f8);
-        for(auto i = 0; i < NUM_ITEM_WEARS; i++) 
-            if(IS_SET_AR(wearFlags, i)) 
+        for(auto i = 0; i < NUM_ITEM_WEARS; i++)
+            if(IS_SET_AR(wearFlags, i))
                 o->wear_flags.set(i);
 
         permFlags[0] = asciiflag_conv(f9);
@@ -2847,43 +2847,6 @@ static void handle_ships(Object *object, Room *room) {
             SET_OBJ_VAL(object, VAL_CONTAINER_FLAGS, newval);
         }
     }
-
-    if (GET_OBJ_TYPE(object) == ITEM_HATCH && GET_OBJ_VAL(object, VAL_HATCH_DEST) > 1 && GET_OBJ_VNUM(object) > 19199) {
-        Object *vehicle = nullptr;
-        if (!(vehicle = find_vehicle_by_vnum(GET_OBJ_VAL(object, VAL_HATCH_DEST)))) {
-            if (real_room(GET_OBJ_VAL(object, VAL_HATCH_EXTROOM)) != NOWHERE) {
-                vehicle = read_object(GET_OBJ_VAL(object, VAL_HATCH_DEST), VIRTUAL);
-                if(!vehicle) {
-                    basic_mud_log("SYSERR: Vehicle %d not found for hatch %d", GET_OBJ_VAL(object, VAL_HATCH_DEST), GET_OBJ_VNUM(object));
-                } else {
-                    vehicle->moveToLocation(GET_OBJ_VAL(object, VAL_HATCH_EXTROOM));
-                    if (auto ld = object->getLookDescription(); ld) {
-                        if (strlen(ld)) {
-                            char nick[MAX_INPUT_LENGTH], nick2[MAX_INPUT_LENGTH], nick3[MAX_INPUT_LENGTH];
-                            if (GET_OBJ_VNUM(vehicle) <= 46099 && GET_OBJ_VNUM(vehicle) >= 46000) {
-                                snprintf(nick, sizeof(nick), "Saiyan Pod %s", ld);
-                                snprintf(nick2, sizeof(nick2), "@wA @Ys@ya@Yi@yy@Ya@yn @Dp@Wo@Dd@w named @D(@C%s@D)@w",
-                                        ld);
-                            } else if (GET_OBJ_VNUM(vehicle) >= 46100 && GET_OBJ_VNUM(vehicle) <= 46199) {
-                                snprintf(nick, sizeof(nick), "EDI Xenofighter MK. II %s", ld);
-                                snprintf(nick2, sizeof(nick2), 
-                                        "@wAn @YE@yD@YI @CX@ce@Wn@Do@Cf@ci@Wg@Dh@Wt@ce@Cr @RMK. II @wnamed @D(@C%s@D)@w",
-                                        ld);
-                            }
-                            snprintf(nick3, sizeof(nick3), "%s is resting here@w", nick2);
-                            vehicle->name = nick;
-                            vehicle->short_description = nick2;
-                            vehicle->room_description = nick3;
-                        }
-                    }
-                }
-                int newval = GET_OBJ_VAL(object, VAL_CONTAINER_FLAGS) | CONT_CLOSED | CONT_LOCKED;
-                SET_OBJ_VAL(object, VAL_CONTAINER_FLAGS, newval);
-            } else {
-                basic_mud_log("Hatch load: Hatch with no vehicle load room: #%d!", GET_OBJ_VNUM(object));
-            }
-        }
-    }
 }
 
 int House_load(room_vnum rvnum) {
@@ -3602,7 +3565,7 @@ static void printSpace() {
     std::filesystem::path spaceFile = "space.txt";
     std::ofstream ofs(spaceFile);
     if (ofs) {
-        ofs << volcano::circle::processColors(space, volcano::ansi::ColorMode::TrueColor);
+        ofs << dbat::circle::processColors(space, dbat::ansi::ColorMode::TrueColor);
     }
     ofs.close();
 }
@@ -3738,7 +3701,7 @@ static void migrate_space() {
             }
 
             // Still need to deal with the darned stars properly. A direct tile copy works fine for now.
-            
+
         } else {
             // We're working on a room that doesn't exist in the old space map.
             // Our goals: scan for exits that lead to space and re-link them
@@ -4011,12 +3974,12 @@ static void boot_db_legacy() {
 // ACTUAL MIGRATION STUFF BELOW...
 
 static std::string stripAnsi(const std::string& str) {
-    return volcano::circle::processColors(str, volcano::ansi::ColorMode::None);
+    return dbat::circle::processColors(str, dbat::ansi::ColorMode::None);
 }
 
 static std::vector<std::pair<std::string, vnum>> characterToAccount;
 
-void migrate_accounts() {
+void migrate_accounts(pqxx::work &txn) {
 	// user files are stored in <cwd>/user/<folder>/<file>.usr so we'll need to do recursive iteration using
     // C++ std::filesystem...
 
@@ -4025,8 +3988,6 @@ void migrate_accounts() {
         LINFO("No user directory found, skipping account migration.");
         return;
     }
-
-    std::unordered_map<Account*, std::string> pendingPasswords;
 
     for(auto &p : std::filesystem::recursive_directory_iterator(path)) {
         if(p.path().extension() != ".usr") continue;
@@ -4054,8 +4015,7 @@ void migrate_accounts() {
         // Line 3: password (clear text, will hash...)
         std::string pass;
         std::getline(file, pass);
-        a->password = pass;
-        
+
         // Line 4: slots (int)
         std::string slots;
         std::getline(file, slots);
@@ -4109,10 +4069,27 @@ void migrate_accounts() {
         auto bank = std::stoi(rppBank);
         file.close();
         a->id = id;
+
+        auto row = txn.exec(
+            "INSERT INTO users (username, admin_level) VALUES ($1, $2) RETURNING id",
+            {a->name, a->admin_level}
+        );
+        auto user_id = row.empty() ? std::string{} : row[0][0].as<std::string>();
+        a->user_id = user_id;
+
+        row = txn.exec(
+            "INSERT INTO passwords (user_id, password_hash) VALUES ($1, $2) RETURNING id",
+            {a->user_id, pass}
+        );
+        auto pass_id = row.empty() ? std::string{} : row[0][0].as<std::string>();
+        txn.exec("UPDATE users SET current_password_id = $1 WHERE id = $2", {pass_id, a->user_id});
+
+        txn.exec("INSERT INTO dbat.users (id, dbat_id) VALUES ($1, $2)", {a->user_id, a->id});
     }
+    txn.commit();
 }
 
-void migrate_characters() {
+void migrate_characters(pqxx::work &txn) {
     // Unlike accounts, player files are indexed. However, unless their name showed up in an account,
     // there's no point migrating them.
 
@@ -4138,11 +4115,20 @@ void migrate_characters() {
         p->name = ch->getName();
         auto &a = accounts[accID];
         p->account = a.get();
+        auto old_level = a->admin_level;
         a->admin_level = std::max(a->admin_level, GET_ADMLEVEL(ch));
+        if(old_level != a->admin_level) {
+            txn.exec("UPDATE users SET admin_level = $1 WHERE id = $2", {a->admin_level, a->user_id});
+        }
         a->characters.emplace_back(ch->id);
         //auto lroom = ch->getBaseStat<room_vnum>("load_room");
         //ch->setBaseStat<room_vnum>("was_in_room", lroom);
         Character::registry.emplace(id, sh);
+
+        auto row = txn.exec("INSERT INTO pcs (user_id, name, admin_mantle) VALUES ($1, $2, $3) RETURNING id", {a->user_id, p->name, GET_ADMLEVEL(ch)});
+        auto pc_id = row[0][0].as<std::string>();
+        p->character_id = pc_id;
+        txn.exec("INSERT INTO dbat.pcs (id, dbat_id) VALUES ($1, $2)", {pc_id, id});
     }
 
     // migrate sense files...
@@ -4312,6 +4298,7 @@ void migrate_characters() {
         }
 
     }
+
 }
 
 static void migrate_aff(affect_t *aff) {
@@ -4812,39 +4799,49 @@ void migrate_data() {
 
 }
 
-void migrate_db() {
+void migrate_db(pqxx::work &txn) {
     boot_db_legacy();
     House_boot();
-
-    migrate_accounts();
-
+    migrate_accounts(txn);
     migrate_data();
-
-    try {
-        migrate_characters();
-    } catch(std::exception &e) {
-        basic_mud_log("Error migrating characters: %s", e.what());
-    }
+    migrate_characters(txn);
 }
 
-boost::asio::awaitable<void> run_migration() {
+void run_migration() {
     isMigrating = true;
     load_config();
     dbat::init::init_locale();
-    migrate_db();
+
+    pqxx::work txn(*dbat::link::db_conn);
+
+    migrate_db(txn);
+
     // let's experiment here...
     migrate_space();
     printSpace();
-    co_await dbat::save::runSaveAsync();
+    dbat::save::runSaveSync();
+    txn.commit();
     destroy_db();
-    co_return;
 }
 
 int main(int argc, char **argv) {
 
-    auto &ioc = volcano::net::context();
+    auto log_options = dbat::log::Options();
+    log_options.file_path = "logs/migrate.log";
+    dbat::log::init(log_options);
 
-    boost::asio::co_spawn(ioc, run_migration(), boost::asio::detached);
-    volcano::net::run();
+    LINFO("Starting database migration...");
+
+    dbat::link::db_conn = std::make_unique<pqxx::connection>("host=postgres port=5432 dbname=muforge user=muforge password=muforge");
+
+    if(!dbat::link::db_conn) {
+        LERROR("Failed to connect to database");
+        return 1;
+    }
+
+    LINFO("Connected to database");
+
+    run_migration();
+
     return 0;
 }

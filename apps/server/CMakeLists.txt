@@ -9,8 +9,7 @@ target_sources(dbat_server
 
 target_link_libraries(dbat_server
     PUBLIC
-    dbat::link
-    dbat::serde
+    dbat::game
 )
 
 # Ensure we link using the C++ linker driver (for libstdc++ and friends)

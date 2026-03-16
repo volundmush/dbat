@@ -1,4 +1,4 @@
-#include "dbat/log/Log.hpp"
+#include "dbat/game/Log.hpp"
 #include "dbat/game/db.hpp"
 #include "dbat/game/comm.hpp"
 #include "dbat/serde/Startup.hpp"
@@ -9,14 +9,14 @@ int main(int argc, char** argv) {
 
     // Pre setup
     auto log_options = dbat::log::Options();
-    log_options.file_path = "logs/" + "dbat" + ".log";
+    log_options.file_path = "logs/dbat.log";
     dbat::log::init(log_options);
 
     // db setup
-    dbat::link::db_conn = std::make_unique<pqxx::connection>("host=127.0.0.1 port=5432 dbname=muforge user=muforge password=muforge");
+    dbat::link::db_conn = std::make_unique<pqxx::connection>("host=postgres port=5432 dbname=muforge user=muforge password=muforge");
 
     if(!dbat::link::db_conn) {
-        dbat::log::error("Failed to connect to database");
+        LERROR("Failed to connect to database");
         return 1;
     }
 
