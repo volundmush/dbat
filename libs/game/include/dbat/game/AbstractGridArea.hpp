@@ -1,5 +1,6 @@
 #pragma once
 #include <variant>
+#include <nlohmann/json_fwd.hpp>
 
 #include "AbstractLocation.hpp"
 #include "HasMisc.hpp"
@@ -34,6 +35,9 @@ struct AABB {
     }
 };
 
+void to_json(nlohmann::json& j, const AABB& unit);
+void from_json(const nlohmann::json& j, AABB& unit);
+
 // ---------- Box geometry ----------
 struct BoxDim {
     AABB box;
@@ -57,6 +61,9 @@ struct BoxDim {
         return box.contains(c);
     }
 };
+
+void to_json(nlohmann::json& j, const BoxDim& unit);
+void from_json(const nlohmann::json& j, BoxDim& unit);
 
 // ---------- Round geometry (disk/cylinder in Z) ----------
 struct RoundDim {
@@ -86,6 +93,9 @@ struct RoundDim {
     }
 };
 
+void to_json(nlohmann::json& j, const RoundDim& unit);
+void from_json(const nlohmann::json& j, RoundDim& unit);
+
 struct Shape;
 
 // the serializable data for shapes.
@@ -100,6 +110,9 @@ struct ShapeBase {
     // an override to display tiles differently.
     std::string tileDisplay{};
 };
+
+void to_json(nlohmann::json& j, const ShapeBase& p);
+void from_json(const nlohmann::json& j, ShapeBase& p);
 
 struct AbstractGridArea;
 
@@ -128,6 +141,9 @@ struct Shape : public ShapeBase {
     void reComputeAABB();
     AABB cachedAabb;      // filled on add/update
 };
+
+void to_json(nlohmann::json& j, const Shape& p);
+void from_json(const nlohmann::json& j, Shape& p);
 
 struct BucketKey {
     int bx, by, bz;

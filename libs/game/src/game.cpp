@@ -1,14 +1,11 @@
-
-#include <memory>
 #include "dbat/link/game.hpp"
+#include "dbat/game/Database.hpp"
 #include "dbat/game/Descriptor.hpp"
 #include "dbat/game/db.hpp"
 #include "dbat/serde/saveload.hpp"
 #include "dbat/game/comm.hpp"
 
 namespace dbat::link {
-
-    std::unique_ptr<pqxx::connection> db_conn;
 
     std::unordered_map<std::string, std::shared_ptr<GameConnectionInfo>> active_game_connections;
     static std::unordered_set<std::string> pending_game_connections;
@@ -18,8 +15,6 @@ namespace dbat::link {
         for(auto& [id, info] : active_game_connections) {
             existing_connections.insert(id);
         }
-
-        pqxx::work txn(*db_conn);
 
         auto rows = txn.exec(
             "SELECT s.*,u.dbat_id AS account_id,c.dbat_id AS character_id"
@@ -42,14 +37,11 @@ namespace dbat::link {
             create_join_session(conn);
         }
 
-        txn.commit();
     }
 
     void handleNewOutput() {
-        pqxx::work txn(*db_conn);
-
         auto stream = pqxx::stream_to::table(
-            txn,
+            *dbat::db::txn,
             {"public", "pc_events"},
             {"pc_id", "event_type", "data"}
         );
@@ -66,10 +58,7 @@ namespace dbat::link {
     }
 
     void handleNewInput() {
-
-        pqxx::work txn(*db_conn);
-
-        auto rows = txn.exec(
+        auto rows = dbat::db::txn->exec(
             "SELECT e.*,p.dbat_id AS character_id"
             "FROM dbat.incoming_events AS e LEFT JOIN dbat.pcs AS p ON e.pc_id = p.id");
 
@@ -85,20 +74,17 @@ namespace dbat::link {
             desc->incoming_events.push_back({event_type, data});
         }
 
-        txn.exec("DELETE FROM dbat.incoming_events");
-        txn.commit();
+        dbat::db::txn->exec("DELETE FROM dbat.incoming_events");
     }
 
     void handleDisconnections() {
-        pqxx::work txn(*db_conn);
-
         // we need to detect which of our active_game_connections are no longer in pc_subscriptions.
         std::unordered_set<std::string> existing_connections;
         for(auto& [id, info] : active_game_connections) {
             existing_connections.insert(id);
         }
 
-        auto rows = txn.exec(
+        auto rows = dbat::db::txn->exec(
             "WITH input_ids AS (SELECT unnest($1::uuid[]) AS id)"
             "SELECT i.id FROM input_ids AS i LEFT JOIN pc_subscriptions AS s ON i.id = s.pc_id WHERE s.pc_id IS NULL",
             existing_connections);
@@ -129,7 +115,7 @@ namespace dbat::link {
 
         if(!to_erase.empty()) {
             auto stream = pqxx::stream_to::table(
-                txn,
+                *dbat::db::txn,
                 {"public", "pc_events"},
                 {"pc_id", "event_type", "data"}
             );
@@ -139,7 +125,6 @@ namespace dbat::link {
             }
             stream.complete();
         }
-        txn.commit();
     }
 
     std::size_t process_requests(std::chrono::steady_clock::duration budget) {
@@ -147,10 +132,8 @@ namespace dbat::link {
         const auto start = clock::now();
         std::size_t processed = 0;
 
-        pqxx::work txn(*db_conn);
-
         // Get all pending requests.
-        auto rows = txn.exec(
+        auto rows = dbat::db::txn->exec(
             "SELECT r.*,u.username,u.admin_level"
             "FROM dbat.api_requests AS r LEFT JOIN users AS u ON r.user_id = u.id"
             "WHERE r.response_status = -1"
@@ -161,7 +144,7 @@ namespace dbat::link {
             // TODO: deserialize request data, feed into handler that returns a response...
             auto response = true;
 
-            txn.exec(
+            dbat::db::txn->exec(
                 "UPDATE dbat.api_requests"
                 "SET response_status = $1, response_data = $2"
                 "WHERE id = $3",
@@ -194,6 +177,8 @@ namespace dbat::link {
         try {
             while(running) {
 
+                dbat::db::txn = std::make_unique<pqxx::work>(*dbat::db::conn);
+
                 // get current timestamp...
                 auto start = clock::now();
                 dbat::link::acceptNewConnections();
@@ -201,18 +186,7 @@ namespace dbat::link {
                 runOneLoop(heartbeat_interval);
                 dbat::link::handleNewOutput();
                 dbat::link::handleDisconnections();
-                auto end =  clock::now();
-
-                save_timer -= heartbeat_interval;
-                if(save_timer <= 0.0) {
-                    save_timer = save_interval;
-                    saveAll = true;
-                }
-
-                if(saveAll) {
-                    dbat::save::runSaveSync();
-                    saveAll = false;
-                }
+                auto end = clock::now();
 
                 auto elapsed = end - start;
                 auto remaining = interval - elapsed;
@@ -225,6 +199,9 @@ namespace dbat::link {
                 end = clock::now();
                 elapsed = end - start;
                 remaining = remaining - elapsed;
+
+                dbat::db::txn->commit();
+                dbat::db::txn.reset();
 
                 if (remaining > clock::duration::zero()) {
                     std::this_thread::sleep_for(remaining);

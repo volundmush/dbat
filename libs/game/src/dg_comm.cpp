@@ -239,7 +239,7 @@ void Zone::sendToSense(Character *source, const char* messg, bool childrenOnly) 
         auto power = source->otherSensePower(ch);
 
         std::string name = "someone";
-        if(source->isPC) {
+        if(source->player) {
             auto recognize = read_sense_memory(source, ch);
             if(recognize) {
                 if(readIntro(ch, source) == 1) {

@@ -4,6 +4,7 @@
 #include <vector>
 #include <functional>
 #include <unordered_map>
+#include <nlohmann/json_fwd.hpp>
 
 #include "Typedefs.hpp"
 #include "const/Position.hpp"
@@ -68,6 +69,9 @@ struct affect_t {
     bool match(int loc, int spec);
     bool isPercent();
 };
+
+void to_json(nlohmann::json& j, const affect_t& unit);
+void from_json(const nlohmann::json& j, affect_t& unit);
 
 struct character_affect_type : affect_t {
     std::function<double(struct Character *ch)> func{};

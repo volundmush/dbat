@@ -14,12 +14,87 @@
 #include "dbat/game/const/Environment.hpp"
 
 #include "dbat/game/players.hpp"
+#include <nlohmann/json.hpp>
 
 std::map<zone_vnum, std::shared_ptr<Zone>> zone_table;    /* zone table			 */
 std::unordered_set<zone_vnum> zone_reset_queue;
 
+void to_json(nlohmann::json& j, const Zone& unit)
+{
+    if(unit.number != NOTHING) {
+        j[+"number"] = unit.number;
+    }
+    if(unit.parent != NOTHING) {
+        j[+"parent"] = unit.parent;
+    }
+    if(!unit.name.empty()) {
+        j[+"name"] = unit.name;
+    }
+    if(!unit.builders.empty()) {
+        j[+"builders"] = unit.builders;
+    }
+    if(unit.lifespan != 5) {
+        j[+"lifespan"] = unit.lifespan;
+    }
+    if(unit.age != 0.0) {
+        j[+"age"] = unit.age;
+    }
+    if(unit.reset_mode != 2) {
+        j[+"reset_mode"] = unit.reset_mode;
+    }
+    if(unit.zone_flags) {
+        j[+"zone_flags"] = unit.zone_flags;
+    }
+    if(!unit.launchDestination.empty()) {
+        j[+"launchDestination"] = unit.launchDestination;
+    }
+    if(!unit.landingSpots.empty()) {
+        j[+"landingSpots"] = unit.landingSpots;
+    }
+    if(!unit.dockingSpots.empty()) {
+        j[+"dockingSpots"] = unit.dockingSpots;
+    }
+}
+
+void from_json(const nlohmann::json& j, Zone& unit)
+{
+    if(j.contains(+"number")) {
+        j.at(+"number").get_to(unit.number);
+    }
+    if(j.contains(+"parent")) {
+        j.at(+"parent").get_to(unit.parent);
+    }
+    if(j.contains(+"name")) {
+        j.at(+"name").get_to(unit.name);
+    }
+    if(j.contains(+"builders")) {
+        j.at(+"builders").get_to(unit.builders);
+    }
+    if(j.contains(+"lifespan")) {
+        j.at(+"lifespan").get_to(unit.lifespan);
+    }
+    if(j.contains(+"age")) {
+        j.at(+"age").get_to(unit.age);
+    }
+    if(j.contains(+"reset_mode")) {
+        j.at(+"reset_mode").get_to(unit.reset_mode);
+    }
+    if(j.contains(+"zone_flags")) {
+        j.at(+"zone_flags").get_to(unit.zone_flags);
+    }
+    if(j.contains(+"launchDestination")) {
+        j.at(+"launchDestination").get_to(unit.launchDestination);
+    }
+    if(j.contains(+"landingSpots")) {
+        j.at(+"landingSpots").get_to(unit.landingSpots);
+    }
+    if(j.contains(+"dockingSpots")) {
+        j.at(+"dockingSpots").get_to(unit.dockingSpots);
+    }
+}
+
 std::string Zone::displayNameFor(Character *ch) {
-    
+
     std::string out;
     auto alevel = GET_ADMLEVEL(ch);
     auto isbuilder = alevel >= ADMLVL_BUILDER;
@@ -32,7 +107,7 @@ std::string Zone::displayNameFor(Character *ch) {
     } else {
         disp = colorName;
     }
-    if(ch->isPC && !isbuilder) {
+    if(ch->player && !isbuilder) {
         auto p = players.at(ch->id);
         if(p->known_zones.contains(number)) {
             out += disp;
@@ -224,7 +299,7 @@ double Zone::getEnvironment(int type, bool checkAncestors) const {
             return p->getEnvironment(type, true);
         }
     }
-    
+
     switch(type) {
         case ENV_GRAVITY:
             // gravity defaults to 1.0 unless manually overriden by Zone rules.
@@ -287,7 +362,7 @@ void Zone::reset()
                 }
             }
         });
-        
+
     }
 
     // TODO: Split this off into a function or something based off Location...
@@ -327,4 +402,3 @@ void Zone::reset()
         }
     });
 }
-

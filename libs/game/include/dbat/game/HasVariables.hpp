@@ -3,6 +3,7 @@
 #include <unordered_map>
 #include <optional>
 #include <vector>
+#include <nlohmann/json_fwd.hpp>
 
 #include <fmt/format.h>
 #include <fmt/ranges.h>
@@ -23,6 +24,9 @@ struct HasVariables {
 
     bool eraseVariable(std::string_view key);
 };
+
+void to_json(nlohmann::json& j, const HasVariables& unit);
+void from_json(const nlohmann::json& j, HasVariables& unit);
 
 inline std::string format_as(const HasVariables& unit) {
     if(unit.variables.empty()) return "script variables: <none>";

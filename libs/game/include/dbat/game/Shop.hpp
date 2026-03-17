@@ -1,5 +1,6 @@
 #pragma once
 #include <map>
+#include <nlohmann/json_fwd.hpp>
 
 #include "HasOrganizationInfo.hpp"
 
@@ -14,6 +15,9 @@ struct shop_buy_data {
     int type{-1};
     std::string keywords{};
 };
+
+void to_json(nlohmann::json& j, const shop_buy_data& unit);
+void from_json(const nlohmann::json& j, shop_buy_data& unit);
 
 struct Shop : public org_data {
     void add_product(obj_vnum v);
@@ -41,6 +45,9 @@ struct Shop : public org_data {
     bool isProducing(obj_vnum vn);
     void runPurge();
 };
+
+void to_json(nlohmann::json& j, const Shop& s);
+void from_json(const nlohmann::json& j, Shop& s);
 
 
 extern void shop_purge(uint64_t heartPulse, double deltaTime);

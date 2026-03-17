@@ -2,6 +2,7 @@
 #include <memory>
 #include <optional>
 #include <map>
+#include <nlohmann/json_fwd.hpp>
 
 #include <fmt/format.h>
 #include <fmt/printf.h>
@@ -162,6 +163,9 @@ struct Location {
     Location getLaunchDestination();
     Zone* getLandZone();
 };
+
+void to_json(nlohmann::json& j, const Location& unit);
+void from_json(const nlohmann::json& j, Location& unit);
 
 inline std::string format_as(const Location& loc) {
     return fmt::format("{}", loc.getLocID());

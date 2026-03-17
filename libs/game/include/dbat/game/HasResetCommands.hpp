@@ -2,6 +2,7 @@
 #include <vector>
 #include <unordered_map>
 #include <memory>
+#include <nlohmann/json_fwd.hpp>
 
 #include "Typedefs.hpp"
 #include "Result.hpp"
@@ -47,6 +48,9 @@ struct ResetCommand {
     std::string print() const;
 };
 
+void to_json(nlohmann::json& j, const ResetCommand& unit);
+void from_json(const nlohmann::json& j, ResetCommand& unit);
+
 inline std::string format_as(const ResetCommand& cmd) {
     return cmd.print();
 }
@@ -56,6 +60,9 @@ struct HasResetCommands {
     std::vector<ResetCommand> resetCommands;
     std::string printResetCommands() const;
 };
+
+void to_json(nlohmann::json& j, const HasResetCommands& unit);
+void from_json(const nlohmann::json& j, HasResetCommands& unit);
 
 inline std::string format_as(const HasResetCommands& hrc) {
     return hrc.printResetCommands();

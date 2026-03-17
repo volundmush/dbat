@@ -28,6 +28,7 @@
 #include "dbat/game/utils.hpp"
 #include "dbat/game/send.hpp"
 #include "dbat/game/ID.hpp"
+#include "dbat/game/Database.hpp"
 
 #include "dbat/game/Random.hpp"
 #include "dbat/game/TimeInfo.hpp"
@@ -151,7 +152,7 @@ void Character::deactivate()
     deactivateInventory();
     deactivateEquipment();
 
-    if(isPC && location) {
+    if(player && location) {
         registeredLocations["load_room"] = location;
     }
 }
@@ -1910,7 +1911,10 @@ std::expected<std::shared_ptr<Character>, std::string> createPlayerCharacter(str
     if(current_characters >= account->slots) {
         return std::unexpected("You have reached the maximum number of characters for your account.");
     }
-
+    namespace dbat::db {
+        extern std::unique_ptr<pqxx::connection> conn;
+        extern std::unique_ptr<pqxx::work> txn;
+    }
     auto exists = findPlayer(data.name.value());
     if(exists) {
         return std::unexpected("A character with that name already exists.");
@@ -1925,7 +1929,7 @@ std::expected<std::shared_ptr<Character>, std::string> createPlayerCharacter(str
     p->character = ch.get();
     p->name = data.name.value();
     ch->name = p->name;
-    ch->isPC = true;
+    ch->player = p.get();
 
     account->characters.push_back(ch->id);
 
@@ -1952,4 +1956,8 @@ std::expected<std::shared_ptr<Character>, std::string> createPlayerCharacter(str
 
     return ch;
 
+}
+
+void Character::save() {
+    if(!player) return;
 }

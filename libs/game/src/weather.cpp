@@ -24,8 +24,41 @@
 #include "dbat/util/FilterWeak.hpp"
 #include "dbat/game/TimeInfo.hpp"
 #include "dbat/game/utils.hpp"
+#include <nlohmann/json.hpp>
 
 struct weather_data weather_info;    /* the infomation about the weather */
+
+void to_json(nlohmann::json& j, const weather_data& unit)
+{
+    if(unit.pressure != 0) {
+        j[+"pressure"] = unit.pressure;
+    }
+    if(unit.change != 0) {
+        j[+"change"] = unit.change;
+    }
+    if(unit.sky != 0) {
+        j[+"sky"] = unit.sky;
+    }
+    if(unit.sunlight != 0) {
+        j[+"sunlight"] = unit.sunlight;
+    }
+}
+
+void from_json(const nlohmann::json& j, weather_data& unit)
+{
+    if(j.contains(+"pressure")) {
+        j.at(+"pressure").get_to(unit.pressure);
+    }
+    if(j.contains(+"change")) {
+        j.at(+"change").get_to(unit.change);
+    }
+    if(j.contains(+"sky")) {
+        j.at(+"sky").get_to(unit.sky);
+    }
+    if(j.contains(+"sunlight")) {
+        j.at(+"sunlight").get_to(unit.sunlight);
+    }
+}
 
 static void phase_powerup(Character *ch, int type, int phase);
 

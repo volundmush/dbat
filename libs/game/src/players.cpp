@@ -17,25 +17,7 @@
 #include "dbat/game/class.hpp"
 #include "dbat/util/FilterWeak.hpp"
 
-std::map<int64_t, std::shared_ptr<PlayerData>> players;
-
-long get_id_by_name(const char *name)
-{
-    auto find = findPlayer(name);
-    if (!find)
-        return -1;
-    return find->id;
-}
-
-char *get_name_by_id(long id)
-{
-    static char buf[128];
-    auto find = players.find(id);
-    if (find == players.end())
-        return nullptr;
-    sprintf(buf, "%s", find->second->name.c_str());
-    return buf;
-}
+std::unordered_map<std::string, std::shared_ptr<PlayerData>> players;
 
 /*************************************************************************
  *  stuff related to the save/load player system				 *
@@ -49,11 +31,11 @@ constexpr int NUM_OF_SAVE_THROWS = 3;
 
 Character *findPlayer(const std::string &name)
 {
-    for (auto &player : players)
+    for (auto &[id, player] : players)
     {
-        if (boost::iequals(player.second->name, name))
+        if (boost::iequals(player->name, name))
         {
-            return player.second->character;
+            return player->character;
         }
     }
     return nullptr;

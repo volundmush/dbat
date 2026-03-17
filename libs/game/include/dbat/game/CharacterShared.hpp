@@ -6,6 +6,7 @@
 #include <vector>
 #include <unordered_map>
 #include <functional>
+#include <nlohmann/json_fwd.hpp>
 
 #include "HasMudStrings.hpp"
 #include "HasExtraDescriptions.hpp"
@@ -72,6 +73,13 @@ struct skill_data {
     int16_t perfs{0};
 };
 
+void to_json(nlohmann::json& j, const time_data& unit);
+void from_json(const nlohmann::json& j, time_data& unit);
+void to_json(nlohmann::json& j, const alias_data& unit);
+void from_json(const nlohmann::json& j, alias_data& unit);
+void to_json(nlohmann::json& j, const skill_data& unit);
+void from_json(const nlohmann::json& j, skill_data& unit);
+
 struct trans_data {
 
     std::string description{};
@@ -87,7 +95,7 @@ struct trans_data {
     double blutz{0.0}; // The number of seconds you can spend in Oozaru.
 };
 
-enum Task 
+enum Task
 {
     nothing = 0,
     meditate = 1,

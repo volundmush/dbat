@@ -5,6 +5,8 @@
 #include <span>
 
 #include <fmt/format.h>
+#include <nlohmann/json_fwd.hpp>
+
 
 using ExtraDescription = std::pair<std::string, std::string>;
 using ExtraDescriptions = std::vector<ExtraDescription>;
@@ -29,3 +31,6 @@ inline std::string format_as(const HasExtraDescriptions& hed) {
 
 std::optional<ExtraDescriptionView> find_exdesc(std::string_view word, std::span<ExtraDescriptionView> hed);
 std::optional<ExtraDescriptionView> find_exdesc(std::string_view word, HasExtraDescriptions* hed);
+
+void to_json(nlohmann::json& j, const HasExtraDescriptions& hed);
+void from_json(const nlohmann::json& j, HasExtraDescriptions& hed);

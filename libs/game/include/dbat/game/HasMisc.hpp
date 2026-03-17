@@ -7,6 +7,8 @@
 #include "const/AffectFlag.hpp"
 #include "Flags.hpp"
 
+#include <nlohmann/json_fwd.hpp>
+
 struct HasSubscriptions {
     std::unordered_set<std::string> subscriptions{}; // Subscriptions to services.
 };
@@ -24,6 +26,9 @@ inline std::string format_as(const HasVnum& unit) {
     return fmt::format("vnum: {}", unit.getVnum());
 }
 
+void to_json(nlohmann::json& j, const HasSubscriptions& hs);
+void from_json(const nlohmann::json& j, HasSubscriptions& hs);
+
 struct HasStats {
     std::unordered_map<std::string, double> stats{};
 };
@@ -37,9 +42,15 @@ inline std::string format_as(const HasStats& unit) {
     return fmt::format("stats: [{}]", fmt::join(stats, ", "));
 }
 
+void to_json(nlohmann::json& j, const HasStats& hs);
+void from_json(const nlohmann::json& j, HasStats& hs);
+
 struct HasID {
     int64_t id{NOTHING}; /* the unique ID of this entity */
 };
+
+void to_json(nlohmann::json& j, const HasID& hs);
+void from_json(const nlohmann::json& j, HasID& hs);
 
 inline std::string format_as(const HasID& unit) {
     return fmt::format("id: {}", unit.id);

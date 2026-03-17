@@ -39,6 +39,7 @@
 #include "dbat/game/TimeInfo.hpp"
 #include "dbat/game/Random.hpp"
 #include "dbat/game/const/Pulse.hpp"
+#include <nlohmann/json.hpp>
 
 /* Forward/External function declarations */
 static void sort_keeper_objs(Character *keeper, vnum shop_nr);
@@ -47,6 +48,26 @@ static void sort_keeper_objs(Character *keeper, vnum shop_nr);
 std::map<shop_vnum, std::shared_ptr<Shop>> shop_index;
 shop_vnum top_shop = NOTHING;
 int cmd_say, cmd_tell, cmd_emote, cmd_slap, cmd_puke;
+
+void to_json(nlohmann::json& j, const shop_buy_data& unit)
+{
+    if(unit.type != -1) {
+        j[+"type"] = unit.type;
+    }
+    if(!unit.keywords.empty()) {
+        j[+"keywords"] = unit.keywords;
+    }
+}
+
+void from_json(const nlohmann::json& j, shop_buy_data& unit)
+{
+    if(j.contains(+"type")) {
+        j.at(+"type").get_to(unit.type);
+    }
+    if(j.contains(+"keywords")) {
+        j.at(+"keywords").get_to(unit.keywords);
+    }
+}
 
 constexpr const char* MSG_NOT_OPEN_YET = "Come back later!";
 constexpr const char* MSG_NOT_REOPEN_YET = "Sorry, we have closed, but come back later.";
@@ -1803,4 +1824,100 @@ void shop_purge(uint64_t heartPulse, double deltaTime)
     {
         shop->runPurge();
     }
+}
+
+void to_json(json &j, const Shop &s)
+{
+    to_json(j, static_cast<org_data>(s));
+
+    if (!s.producing.empty())
+        j["producing"] = s.producing;
+    if (s.profit_buy)
+        j["profit_buy"] = s.profit_buy;
+    if (s.profit_sell)
+        j["profit_sell"] = s.profit_sell;
+    if (!s.type.empty())
+        j["type"] = s.type;
+    if (!s.no_such_item1.empty())
+        j["no_such_item1"] = s.no_such_item1;
+    if (!s.no_such_item2.empty())
+        j["no_such_item2"] = s.no_such_item2;
+    if (!s.missing_cash1.empty())
+        j["missing_cash1"] = s.missing_cash1;
+    if (!s.missing_cash2.empty())
+        j["missing_cash2"] = s.missing_cash2;
+    if (!s.do_not_buy.empty())
+        j["do_not_buy"] = s.do_not_buy;
+    if (!s.message_buy.empty())
+        j["message_buy"] = s.message_buy;
+    if (!s.message_sell.empty())
+        j["message_sell"] = s.message_sell;
+    if (s.temper1)
+        j["temper1"] = s.temper1;
+    j["shop_flags"] = s.shop_flags;
+    for (auto r : s.in_room)
+        j["in_room"].push_back(r);
+    if (s.open1)
+        j["open1"] = s.open1;
+    if (s.close1)
+        j["close1"] = s.close1;
+    if (s.open2)
+        j["open2"] = s.open2;
+    if (s.close2)
+        j["close2"] = s.close2;
+    if (s.bankAccount)
+        j["bankAccount"] = s.bankAccount;
+    if (s.lastsort)
+        j["lastsort"] = s.lastsort;
+}
+
+void from_json(const json &j, Shop &s)
+{
+    from_json(j, static_cast<org_data &>(s));
+    if (j.contains(+"producing"))
+        s.producing = j["producing"].get<std::vector<int>>();
+    if (j.contains(+"profit_buy"))
+        s.profit_buy = j["profit_buy"];
+    if (j.contains(+"profit_sell"))
+        s.profit_sell = j["profit_sell"];
+    if (j.contains(+"type")) j.at(+"type").get_to(s.type);
+    if (j.contains(+"no_such_item1"))
+        j.at(+"no_such_item1").get_to(s.no_such_item1);
+    if (j.contains(+"no_such_item2"))
+        j.at(+"no_such_item2").get_to(s.no_such_item2);
+    if (j.contains(+"missing_cash1"))
+        j.at(+"missing_cash1").get_to(s.missing_cash1);
+    if (j.contains(+"missing_cash2"))
+        j.at(+"missing_cash2").get_to(s.missing_cash2);
+    if (j.contains(+"do_not_buy"))
+        j.at(+"do_not_buy").get_to(s.do_not_buy);
+    if (j.contains(+"message_buy"))
+        j.at(+"message_buy").get_to(s.message_buy);
+    if (j.contains(+"message_sell"))
+        j.at(+"message_sell").get_to(s.message_sell);
+    if (j.contains(+"temper1"))
+        s.temper1 = j["temper1"];
+
+    if (j.contains(+"shop_flags"))
+        s.shop_flags = j["shop_flags"].get<FlagHandler<ShopFlag>>();
+
+    if (j.contains(+"in_room"))
+    {
+        for (auto &r : j["in_room"])
+        {
+            s.in_room.insert(r.get<int>());
+        }
+    }
+    if (j.contains(+"open1"))
+        s.open1 = j["open1"];
+    if (j.contains(+"close1"))
+        s.close1 = j["close1"];
+    if (j.contains(+"open2"))
+        s.open2 = j["open2"];
+    if (j.contains(+"close2"))
+        s.close2 = j["close2"];
+    if (j.contains(+"bankAccount"))
+        s.bankAccount = j["bankAccount"];
+    if (j.contains(+"lastsort"))
+        s.lastsort = j["lastsort"];
 }

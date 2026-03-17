@@ -6,8 +6,35 @@
 #include "dbat/game/const/CharacterProperties.hpp"
 
 #include "dbat/util/Enum.hpp"
+#include <nlohmann/json.hpp>
 
 extern std::unordered_map<Position, std::vector<character_affect_type>> pos_affects;
+
+void to_json(nlohmann::json& j, const affect_t& unit)
+{
+    if(unit.location != 0) {
+        j[+"location"] = unit.location;
+    }
+    if(unit.modifier != 0.0) {
+        j[+"modifier"] = unit.modifier;
+    }
+    if(unit.specific != 0) {
+        j[+"specific"] = unit.specific;
+    }
+}
+
+void from_json(const nlohmann::json& j, affect_t& unit)
+{
+    if(j.contains(+"location")) {
+        j.at(+"location").get_to(unit.location);
+    }
+    if(j.contains(+"modifier")) {
+        j.at(+"modifier").get_to(unit.modifier);
+    }
+    if(j.contains(+"specific")) {
+        j.at(+"specific").get_to(unit.specific);
+    }
+}
 
 std::string affect_t::locName()
 {

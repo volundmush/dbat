@@ -1,7 +1,6 @@
 #pragma once
 #include <string>
-#include <string_view>
-#include <unordered_map>
+#include <nlohmann/json_fwd.hpp>
 
 #include <fmt/format.h>
 
@@ -25,3 +24,6 @@ inline std::string format_as(const HasMudStrings& unit) {
                        unit.getLookDescription(),
                        unit.getRoomDescription());
 }
+
+void to_json(nlohmann::json& j, const HasMudStrings& unit);
+void from_json(const nlohmann::json& j, HasMudStrings& unit);

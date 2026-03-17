@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <nlohmann/json_fwd.hpp>
 
 /* Sun state for weather_data */
 constexpr int SUN_DARK = 0;
@@ -39,6 +40,9 @@ struct weather_data {
     int sky{};    /* How is the sky. */
     int sunlight{};    /* And how much sun. */
 };
+
+void to_json(nlohmann::json& j, const weather_data& unit);
+void from_json(const nlohmann::json& j, weather_data& unit);
 
 struct Character;
 

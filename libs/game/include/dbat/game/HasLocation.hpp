@@ -1,5 +1,6 @@
 #pragma once
 #include "Location.hpp"
+#include <nlohmann/json_fwd.hpp>
 
 // Character, Object, and perhaps later some new vehicles use HasLocation.
 struct HasLocation {
@@ -40,6 +41,9 @@ struct HasLocation {
 
     //virtual std::string renderInLocationFor(Character* viewer);
 };
+
+void to_json(nlohmann::json& j, const HasLocation& unit);
+void from_json(const nlohmann::json& j, HasLocation& unit);
 
 inline std::string format_as(const HasLocation& unit) {
     std::vector<std::string> locs;

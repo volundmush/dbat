@@ -26,15 +26,14 @@
 #include "StatHandler.hpp"
 
 struct PlayerData {
-    int64_t id{NOTHING}; // the local ID.
-    std::string character_id; // used by the authentication system.
+    std::string id; // A UUID.
     std::string name;
     struct Account *account{};
     struct Character *character{};
     std::vector<struct alias_data> aliases;    /* Character's aliases                  */
-    std::unordered_set<int64_t> sense_player;
+    std::unordered_set<std::string> sense_player;
     std::unordered_set<mob_vnum> sense_memory;
-    std::map<int64_t, std::string> dub_names;
+    std::map<std::string, std::string> dub_names; // maps UUID to name
     std::unordered_set<zone_vnum> known_zones;
     char *color_choices[NUM_COLOR]{}; /* Choices for custom colors		*/
     struct txt_block *comm_hist[NUM_HIST]{}; /* Player's communications history     */
@@ -69,7 +68,10 @@ struct Character : public CharacterBase, public HasID, public HasLocation, publi
     vnum getDgVnum() const override;
     UnitType getDgUnitType() const override;
 
-    bool isPC{false};
+    // this will be set if the character is a player-controlled character.
+    struct PlayerData *player{nullptr};
+    // saves player character to the database. use when anything changes.
+    void save();
 
     std::string title;
 
@@ -411,7 +413,7 @@ inline std::string format_as_diagnostic(const Character& ch) {
     parts.emplace_back(format_as(static_cast<const HasLocation&>(ch)));
     parts.emplace_back(format_as(static_cast<const HasDgScripts&>(ch)));
     parts.emplace_back(format_as(static_cast<const HasSubscriptions&>(ch)));
-    return fmt::format("({}) Character:\r\n{}", ch.isPC ? "PC" : "NPC", fmt::join(parts, "\r\n"));
+    return fmt::format("({}) Character:\r\n{}", ch.player ? "PC" : "NPC", fmt::join(parts, "\r\n"));
 }
 
 extern SubscriptionManager<Character> characterSubscriptions;

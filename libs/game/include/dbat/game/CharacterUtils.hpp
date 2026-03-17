@@ -2,11 +2,11 @@
 #include "CharacterPrototype.hpp"
 
 inline bool IS_NPC(const Character* ch) {
-    return !ch->isPC;
+    return ch->player == nullptr;
 }
 
 inline bool IS_PC(const Character* ch) {
-    return ch->isPC;
+    return ch->player != nullptr;
 }
 
 inline bool IS_MOB(const Character* ch) {
@@ -260,7 +260,7 @@ extern void WAIT_STATE(Character *ch, double timeToWait);
                       (to_sleeping || AWAKE(ch)) && \
                       !PLR_FLAGGED(ch, PLR_WRITING))
 
-                      
+
 #define HSHR(ch) (GET_SEX(ch) != Sex::neutral ? (GET_SEX(ch)==SEX_MALE ? "his": (GET_SEX(ch)==SEX_FEMALE ? "her" : "their")) :"its")
 #define HSSH(ch) (GET_SEX(ch) != Sex::neutral ? (GET_SEX(ch)==SEX_MALE ? "he" : (GET_SEX(ch)==SEX_FEMALE ? "she" : "they")) : "it")
 #define HMHR(ch) (GET_SEX(ch) != Sex::neutral ? (GET_SEX(ch)==SEX_MALE ? "him": (GET_SEX(ch)==SEX_FEMALE ? "her" : "their")) : "it")

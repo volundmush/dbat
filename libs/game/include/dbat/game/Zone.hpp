@@ -1,5 +1,6 @@
 #pragma once
 #include <map>
+#include <nlohmann/json_fwd.hpp>
 
 #include "Log.hpp"
 #include "const/ZoneFlag.hpp"
@@ -188,6 +189,9 @@ struct Zone {
     void sendToSense(Character *source, const char* messg, bool childrenOnly = false);
     void actToOutside(Character *source, const char* messg, bool childrenOnly = false);
 };
+
+void to_json(nlohmann::json& j, const Zone& unit);
+void from_json(const nlohmann::json& j, Zone& unit);
 
 inline std::string format_as(const Zone& z) {
     return fmt::format("Zone {} '{}'", z.number, z.name);

@@ -1,4 +1,6 @@
 #pragma once
+#include <nlohmann/json_fwd.hpp>
+
 #include "DgScript.hpp"
 #include "HasVariables.hpp"
 #include "HasMisc.hpp"
@@ -31,6 +33,9 @@ struct HasDgScripts : public HasVariables {
     virtual DgReturn dgCallMember(DgScript* sc, std::string_view field, std::string_view subfield) = 0;
 
 };
+
+void to_json(nlohmann::json& j, const HasDgScripts& p);
+void from_json(const nlohmann::json& j, HasDgScripts& p);
 
 inline std::string format_as(const HasDgScripts& unit) {
     std::vector<std::string> scripts;

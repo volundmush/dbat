@@ -97,33 +97,6 @@ static json load_from_file(const std::filesystem::path &loc, const std::string &
     return j;
 }
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(time_data, birth, created, maxage, logon, played, seconds_aged)
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(time_info_data, remainder, seconds, minutes, hours, day, month, year)
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(weather_data, pressure, change, sky, sunlight)
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(shop_buy_data, type, keywords)
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(Coordinates, x, y, z)
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(HasStats, stats)
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(HasID, id)
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(HasExtraDescriptions, extra_descriptions)
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(HasMudStrings, name, look_description, short_description, room_description)
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(HasVnum, vn)
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(HasVariables, variables)
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(Location, locationID, position)
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(HasLocation, location, registeredLocations)
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ResetCommand, type, if_flag, target, max, max_location, ex, chance, key, value)
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(HasResetCommands, resetCommands)
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(Zone, number, parent, name, builders, lifespan, age, reset_mode, zone_flags, launchDestination, landingSpots, dockingSpots)
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(affect_t, location, modifier, specific)
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(RoundDim, center, radius, zMin, zMax, r2)
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(AABB, min, max)
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(BoxDim, box)
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(skill_data, level, perfs)
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(alias_data, name, replacement, type)
-
-
-void to_json(json& j, const HasDgScripts& p);
-void from_json(const json& j, HasDgScripts& p);
-
 void to_json(json& j, const HasZone& p);
 void from_json(const json& j, HasZone& p);
 
@@ -132,12 +105,6 @@ void from_json(const json& j, trans_data& t);
 
 void to_json(json& j, const affected_type& a);
 void from_json(const json& j, affected_type& a);
-
-void to_json(json& j, const ShapeBase& p);
-void from_json(const json& j, ShapeBase& p);
-
-void to_json(json& j, const Shape& p);
-void from_json(const json& j, Shape& p);
 
 // helper type save/load...
 template <std::size_t N>
@@ -608,102 +575,6 @@ void from_json(const json &j, org_data &o)
 }
 
 // shops serialize/deserialize...
-void to_json(json &j, const Shop &s)
-{
-    to_json(j, static_cast<org_data>(s));
-
-    if (!s.producing.empty())
-        j["producing"] = s.producing;
-    if (s.profit_buy)
-        j["profit_buy"] = s.profit_buy;
-    if (s.profit_sell)
-        j["profit_sell"] = s.profit_sell;
-    if (!s.type.empty())
-        j["type"] = s.type;
-    if (!s.no_such_item1.empty())
-        j["no_such_item1"] = s.no_such_item1;
-    if (!s.no_such_item2.empty())
-        j["no_such_item2"] = s.no_such_item2;
-    if (!s.missing_cash1.empty())
-        j["missing_cash1"] = s.missing_cash1;
-    if (!s.missing_cash2.empty())
-        j["missing_cash2"] = s.missing_cash2;
-    if (!s.do_not_buy.empty())
-        j["do_not_buy"] = s.do_not_buy;
-    if (!s.message_buy.empty())
-        j["message_buy"] = s.message_buy;
-    if (!s.message_sell.empty())
-        j["message_sell"] = s.message_sell;
-    if (s.temper1)
-        j["temper1"] = s.temper1;
-    j["shop_flags"] = s.shop_flags;
-    for (auto r : s.in_room)
-        j["in_room"].push_back(r);
-    if (s.open1)
-        j["open1"] = s.open1;
-    if (s.close1)
-        j["close1"] = s.close1;
-    if (s.open2)
-        j["open2"] = s.open2;
-    if (s.close2)
-        j["close2"] = s.close2;
-    if (s.bankAccount)
-        j["bankAccount"] = s.bankAccount;
-    if (s.lastsort)
-        j["lastsort"] = s.lastsort;
-}
-
-void from_json(const json &j, Shop &s)
-{
-    from_json(j, static_cast<org_data &>(s));
-    if (j.contains(+"producing"))
-        s.producing = j["producing"].get<std::vector<int>>();
-    if (j.contains(+"profit_buy"))
-        s.profit_buy = j["profit_buy"];
-    if (j.contains(+"profit_sell"))
-        s.profit_sell = j["profit_sell"];
-    if (j.contains(+"type")) j.at(+"type").get_to(s.type);
-    if (j.contains(+"no_such_item1"))
-        j.at(+"no_such_item1").get_to(s.no_such_item1);
-    if (j.contains(+"no_such_item2"))
-        j.at(+"no_such_item2").get_to(s.no_such_item2);
-    if (j.contains(+"missing_cash1"))
-        j.at(+"missing_cash1").get_to(s.missing_cash1);
-    if (j.contains(+"missing_cash2"))
-        j.at(+"missing_cash2").get_to(s.missing_cash2);
-    if (j.contains(+"do_not_buy"))
-        j.at(+"do_not_buy").get_to(s.do_not_buy);
-    if (j.contains(+"message_buy"))
-        j.at(+"message_buy").get_to(s.message_buy);
-    if (j.contains(+"message_sell"))
-        j.at(+"message_sell").get_to(s.message_sell);
-    if (j.contains(+"temper1"))
-        s.temper1 = j["temper1"];
-
-    if (j.contains(+"shop_flags"))
-        s.shop_flags = j["shop_flags"].get<FlagHandler<ShopFlag>>();
-
-    if (j.contains(+"in_room"))
-    {
-        for (auto &r : j["in_room"])
-        {
-            s.in_room.insert(r.get<int>());
-        }
-    }
-    if (j.contains(+"open1"))
-        s.open1 = j["open1"];
-    if (j.contains(+"close1"))
-        s.close1 = j["close1"];
-    if (j.contains(+"open2"))
-        s.open2 = j["open2"];
-    if (j.contains(+"close2"))
-        s.close2 = j["close2"];
-    if (j.contains(+"bankAccount"))
-        s.bankAccount = j["bankAccount"];
-    if (j.contains(+"lastsort"))
-        s.lastsort = j["lastsort"];
-}
-
 void load_shops(const std::filesystem::path &loc)
 {
     for (auto j : load_from_file(loc, "shops.json"))
@@ -1600,20 +1471,6 @@ void from_json(const json& j, HasZone& p) {
         p.zone.reset(zone_table.at(j["zone"].get<zone_vnum>()).get());
 }
 
-void to_json(json& j, const HasDgScripts& p) {
-    to_json(j, static_cast<const HasVariables&>(p));
-    j["type"] = p.type;
-    if(p.running_scripts) j["running_scripts"] = *p.running_scripts;
-}
-
-void from_json(const json& j, HasDgScripts& p) {
-    from_json(j, static_cast<HasVariables&>(p));
-    if (j.contains(+"type"))
-        p.type = j["type"];
-    if (j.contains(+"running_scripts"))
-        p.running_scripts = j["running_scripts"].get<std::vector<vnum>>();
-}
-
 void to_json(json& j, const TileOverride& p) {
     to_json(j, static_cast<const HasResetCommands&>(p));
     if(!p.name.empty()) j["name"] = p.name;
@@ -1721,7 +1578,6 @@ void to_json(json &j, const Character &c)
     to_json(j, static_cast<const HasID &>(c));
     to_json(j, static_cast<const HasDgScripts &>(c));
 
-    if(c.isPC) j["isPC"] = c.isPC;
 
     //if (c.running_scripts) j["running_scripts"] = c.running_scripts.value();
 
@@ -1828,9 +1684,6 @@ void from_json(const json &j, Character &c)
     from_json(j, static_cast<HasID &>(c));
     from_json(j, static_cast<HasDgScripts &>(c));
 
-    if(j.contains(+"isPC")) {
-        c.isPC = j["isPC"];
-    }
 
     /*
     if (j.contains(+"running_scripts"))
@@ -2199,53 +2052,6 @@ static void cleanup_state(const std::filesystem::path &dir, std::string_view pat
     }
 }
 
-
-void to_json(json &j, const ShapeBase &p)
-{
-    j["type"] = p.type;
-    j["priority"] = p.priority;
-    j["sectorType"] = p.sectorType;
-    if(!p.name.empty()) j["name"] = p.name;
-    if(!p.description.empty()) j["description"] = p.description;
-    j["geom"] = std::visit([](auto const& g) {
-        return json(g); // relies on to_json for BoxDim / RoundDim
-    }, p.geom);
-    if(!p.tileDisplay.empty()) j["tileDisplay"] = p.tileDisplay;
-}
-
-void from_json(const json &j, ShapeBase &r) {
-    if(j.contains(+"type")) r.type = j["type"].get<ShapeType>();
-    if(j.contains(+"priority")) r.priority = j["priority"].get<int>();
-    if(j.contains(+"sectorType")) r.sectorType = j["sectorType"].get<SectorType>();
-    if(j.contains(+"name")) r.name = j["name"].get<std::string>();
-    if(j.contains(+"description")) r.description = j["description"].get<std::string>();
-    if (j.contains(+"geom")) {
-        const auto& g = j.at(+"geom");
-        switch (r.type) { // <- r.type (not p.type)
-            case ShapeType::Box:
-                r.geom = g.get<BoxDim>();
-                break;
-            case ShapeType::Round:
-                r.geom = g.get<RoundDim>();
-                break;
-        }
-    } else {
-        // optional: default the variant based on type
-        switch (r.type) {
-            case ShapeType::Box:   r.geom = BoxDim{};   break;
-            case ShapeType::Round: r.geom = RoundDim{}; break;
-        }
-    }
-    if(j.contains(+"tileDisplay")) r.tileDisplay = j["tileDisplay"];
-}
-
-void to_json(json &j, const Shape &p) {
-    to_json(j, static_cast<const ShapeBase&>(p));
-}
-
-void from_json(const json &j, Shape &r) {
-    from_json(j, static_cast<ShapeBase&>(r));
-}
 
 static json dump_help()
 {

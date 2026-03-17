@@ -24,7 +24,7 @@ bool Character::isVisibleTo(Character* viewer) {
 bool Object::isVisibleTo(Character *viewer) {
     if(item_flags.get(ITEM_INVISIBLE) && !viewer->affect_flags.get(AFF_DETECT_INVIS))
         return false;
-    
+
     if(auto wornby = getWornBy()) {
         // You can always see your own equipment.
         if(wornby == viewer) return true;
@@ -52,8 +52,8 @@ std::string Character::getDisplayName(struct Character* viewer, bool capitalizeA
     if(!viewer->canSee(this)) {
         return "Someone";
     }
-    
-    if(isPC) {
+
+    if(player) {
         if(IS_NPC(viewer) || getBaseStat<int>("admin_level") > 0) {
             // NPCs just don't use the dub system at all, and admin characters
             // reveal their names to everyone who can see them.
@@ -127,7 +127,7 @@ std::vector<std::string> Character::getInteractivityKeywords(struct Character* v
             break;
     }
 
-    if(isPC) {
+    if(player) {
         if(IS_NPC(viewer) || getBaseStat<int>("admin_level") > 0) {
             // NPCs just don't use the dub system at all, and admin characters
             // reveal their names to everyone who can see them.

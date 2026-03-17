@@ -1,6 +1,27 @@
 #include "dbat/game/HasLocation.hpp"
 #include "dbat/game/Room.hpp"
 #include "dbat/game/Location.hpp"
+#include <nlohmann/json.hpp>
+
+void to_json(nlohmann::json& j, const HasLocation& unit)
+{
+    if(unit.location) {
+        j[+"location"] = unit.location;
+    }
+    if(!unit.registeredLocations.empty()) {
+        j[+"registeredLocations"] = unit.registeredLocations;
+    }
+}
+
+void from_json(const nlohmann::json& j, HasLocation& unit)
+{
+    if(j.contains(+"location")) {
+        j.at(+"location").get_to(unit.location);
+    }
+    if(j.contains(+"registeredLocations")) {
+        j.at(+"registeredLocations").get_to(unit.registeredLocations);
+    }
+}
 
 
 Room *HasLocation::getRoom()

@@ -16,6 +16,27 @@
 #include "dbat/game/act.informative.hpp"
 #include "dbat/game/const/AutoExit.hpp"
 #include "dbat/game/const/Environment.hpp"
+#include <nlohmann/json.hpp>
+
+void to_json(nlohmann::json& j, const Location& unit)
+{
+    if(!unit.locationID.empty()) {
+        j[+"locationID"] = unit.locationID;
+    }
+    if(unit.position) {
+        j[+"position"] = unit.position;
+    }
+}
+
+void from_json(const nlohmann::json& j, Location& unit)
+{
+    if(j.contains(+"locationID")) {
+        j.at(+"locationID").get_to(unit.locationID);
+    }
+    if(j.contains(+"position")) {
+        j.at(+"position").get_to(unit.position);
+    }
+}
 
 Location::Location(room_vnum rv)
 {

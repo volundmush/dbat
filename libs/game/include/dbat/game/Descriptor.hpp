@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include <string>
 #include <list>
+#include <memory>
 
 #include <fmt/format.h>
 #include <fmt/printf.h>
@@ -32,10 +33,8 @@ struct txt_q {
 
 struct GameConnectionInfo {
     std::string id;
-    std::string pc_id;
     std::string user_id;
-    int account_id;
-    int64_t character_id;
+    std::string pc_id;
     time_t created_at;
     std::string ip_address;
     std::string user_agent;
@@ -47,8 +46,7 @@ struct Event {
 };
 
 struct descriptor_data {
-    int64_t id{NOTHING};
-    std::string pc_id;
+    std::string id; // matches the character id.
     std::unordered_map<std::string, std::shared_ptr<GameConnectionInfo>> conns;
     void onConnectionLost(std::string connId);
     void onConnectionClosed(std::string connId);

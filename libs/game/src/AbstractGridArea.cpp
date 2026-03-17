@@ -1,8 +1,81 @@
 #include "dbat/game/AbstractGridArea.hpp"
 #include "dbat/game/Destination.hpp"
 #include "dbat/game/Character.hpp"
+#include <nlohmann/json.hpp>
 
 std::unordered_map<int64_t, std::shared_ptr<GridTemplate>> gridTemplates;
+
+void to_json(nlohmann::json& j, const RoundDim& unit)
+{
+    if(unit.center) {
+        j[+"center"] = unit.center;
+    }
+    if(unit.radius != 0) {
+        j[+"radius"] = unit.radius;
+    }
+    if(unit.zMin != 0) {
+        j[+"zMin"] = unit.zMin;
+    }
+    if(unit.zMax != 0) {
+        j[+"zMax"] = unit.zMax;
+    }
+    if(unit.r2 != 0) {
+        j[+"r2"] = unit.r2;
+    }
+}
+
+void from_json(const nlohmann::json& j, RoundDim& unit)
+{
+    if(j.contains(+"center")) {
+        j.at(+"center").get_to(unit.center);
+    }
+    if(j.contains(+"radius")) {
+        j.at(+"radius").get_to(unit.radius);
+    }
+    if(j.contains(+"zMin")) {
+        j.at(+"zMin").get_to(unit.zMin);
+    }
+    if(j.contains(+"zMax")) {
+        j.at(+"zMax").get_to(unit.zMax);
+    }
+    if(j.contains(+"r2")) {
+        j.at(+"r2").get_to(unit.r2);
+    }
+}
+
+void to_json(nlohmann::json& j, const AABB& unit)
+{
+    if(unit.min) {
+        j[+"min"] = unit.min;
+    }
+    if(unit.max) {
+        j[+"max"] = unit.max;
+    }
+}
+
+void from_json(const nlohmann::json& j, AABB& unit)
+{
+    if(j.contains(+"min")) {
+        j.at(+"min").get_to(unit.min);
+    }
+    if(j.contains(+"max")) {
+        j.at(+"max").get_to(unit.max);
+    }
+}
+
+void to_json(nlohmann::json& j, const BoxDim& unit)
+{
+    if(unit.box.min || unit.box.max) {
+        j[+"box"] = unit.box;
+    }
+}
+
+void from_json(const nlohmann::json& j, BoxDim& unit)
+{
+    if(j.contains(+"box")) {
+        j.at(+"box").get_to(unit.box);
+    }
+}
 
 TileOverride::operator bool() const
 {
@@ -126,7 +199,7 @@ AbstractGridArea& AbstractGridArea::operator=(const GridTemplate& other) {
 }
 
 bool AbstractGridArea::validCoordinates(const Coordinates& coor) const {
-    
+
     if (auto it = tileOverrides.find(coor); it != tileOverrides.end() && it->second.sectorType)
     {
         // If the tile we're on has a sector type override.
@@ -370,4 +443,51 @@ void AbstractGridArea::setSectorType(const Coordinates& coor, SectorType type) {
 std::vector<ResetCommand> AbstractGridArea::getResetCommands(const Coordinates& coor) {
     auto &t = ensure_tile(tileOverrides, coor);
     return t.resetCommands;
+}
+
+void to_json(json &j, const ShapeBase &p)
+{
+    j["type"] = p.type;
+    j["priority"] = p.priority;
+    j["sectorType"] = p.sectorType;
+    if(!p.name.empty()) j["name"] = p.name;
+    if(!p.description.empty()) j["description"] = p.description;
+    j["geom"] = std::visit([](auto const& g) {
+        return json(g); // relies on to_json for BoxDim / RoundDim
+    }, p.geom);
+    if(!p.tileDisplay.empty()) j["tileDisplay"] = p.tileDisplay;
+}
+
+void from_json(const json &j, ShapeBase &r) {
+    if(j.contains(+"type")) r.type = j["type"].get<ShapeType>();
+    if(j.contains(+"priority")) r.priority = j["priority"].get<int>();
+    if(j.contains(+"sectorType")) r.sectorType = j["sectorType"].get<SectorType>();
+    if(j.contains(+"name")) r.name = j["name"].get<std::string>();
+    if(j.contains(+"description")) r.description = j["description"].get<std::string>();
+    if (j.contains(+"geom")) {
+        const auto& g = j.at(+"geom");
+        switch (r.type) { // <- r.type (not p.type)
+            case ShapeType::Box:
+                r.geom = g.get<BoxDim>();
+                break;
+            case ShapeType::Round:
+                r.geom = g.get<RoundDim>();
+                break;
+        }
+    } else {
+        // optional: default the variant based on type
+        switch (r.type) {
+            case ShapeType::Box:   r.geom = BoxDim{};   break;
+            case ShapeType::Round: r.geom = RoundDim{}; break;
+        }
+    }
+    if(j.contains(+"tileDisplay")) r.tileDisplay = j["tileDisplay"];
+}
+
+void to_json(json &j, const Shape &p) {
+    to_json(j, static_cast<const ShapeBase&>(p));
+}
+
+void from_json(const json &j, Shape &r) {
+    from_json(j, static_cast<ShapeBase&>(r));
 }
