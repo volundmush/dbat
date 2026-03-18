@@ -95,6 +95,9 @@ struct trans_data {
     double blutz{0.0}; // The number of seconds you can spend in Oozaru.
 };
 
+void to_json(nlohmann::json& j, const trans_data& t);
+void from_json(const nlohmann::json& j, trans_data& t);
+
 enum Task
 {
     nothing = 0,
@@ -185,6 +188,9 @@ struct CharacterBase : public HasVnum, public HasMudStrings, public HasExtraDesc
     FlagHandler<Mutation> mutations{};
     FlagHandler<AffectFlag> affect_flags{};
 };
+
+void to_json(nlohmann::json& j, const CharacterBase& c);
+void from_json(const nlohmann::json& j, CharacterBase& c);
 
 inline std::string format_as(const CharacterBase& cb) {
     std::vector<std::string> parts;

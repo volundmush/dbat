@@ -33,8 +33,35 @@
 #include "dbat/game/const/WearSlot.hpp"
 
 #include <boost/algorithm/string/regex.hpp>
+#include <nlohmann/json.hpp>
 
 SubscriptionManager<DgScript> triggerSubscriptions;
+
+void to_json(nlohmann::json &j, const DgScript &t)
+{
+    j["vn"] = t.getVnum();
+    j["current_line"] = t.current_line;
+    j["state"] = t.state;
+    j["depth_stack"] = t.depth_stack;
+    if (t.waiting != 0.0)
+        j["waiting"] = t.waiting;
+    if (!t.variables.empty())
+        j["variables"] = t.variables;
+}
+
+void from_json(const nlohmann::json &j, DgScript &t)
+{
+    auto vn = j["vn"].get<int>();
+    t.proto = trig_index.at(vn).get();
+    if (j.contains(+"state"))
+        t.state = j["state"].get<DgScriptState>();
+    if (j.contains(+"waiting"))
+        t.waiting = j["waiting"].get<double>();
+    if (j.contains(+"depth_stack"))
+        t.depth_stack = j["depth_stack"].get<std::vector<DepthType>>();
+    if (j.contains(+"variables"))
+        t.variables = j["variables"].get<std::unordered_map<std::string, std::string>>();
+}
 
 #define PULSES_PER_MUD_HOUR (SECS_PER_MUD_HOUR * PASSES_PER_SEC)
 

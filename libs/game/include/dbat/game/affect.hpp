@@ -89,4 +89,7 @@ struct affected_type : affect_t {
     struct affected_type *next{};
 };
 
+void to_json(nlohmann::json& j, const affected_type& a);
+void from_json(const nlohmann::json& j, affected_type& a);
+
 extern std::unordered_map<Position, std::vector<character_affect_type>> pos_affects;

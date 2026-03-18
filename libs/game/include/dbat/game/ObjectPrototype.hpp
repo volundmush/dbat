@@ -1,6 +1,7 @@
 #pragma once
 #include <map>
 #include <memory>
+#include <nlohmann/json_fwd.hpp>
 #include "Typedefs.hpp"
 #include "Command.hpp"
 #include "ObjectShared.hpp"
@@ -60,3 +61,6 @@ extern int vnum_weapontype(char *searchname, Character *ch);
 extern int vnum_armortype(char *searchname, Character *ch);
 
 extern obj_rnum real_object(obj_vnum vnum);
+
+void to_json(nlohmann::json& j, const ObjectPrototype& o);
+void from_json(const nlohmann::json& j, ObjectPrototype& o);

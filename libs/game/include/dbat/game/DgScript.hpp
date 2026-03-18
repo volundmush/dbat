@@ -3,6 +3,7 @@
 #include <experimental/memory>
 #include <functional>
 #include <variant>
+#include <nlohmann/json_fwd.hpp>
 #include <enchantum/fmt_format.hpp>
 #include "DgScriptPrototype.hpp"
 #include "HasVariables.hpp"
@@ -97,3 +98,6 @@ using DgReturn = std::variant<std::string, HasDgScripts*>;
 using DgFunc = std::function<DgReturn(DgScript*, std::string_view field, std::string_view subfield)>;
 
 #define DGFUNC(fname) DgReturn fname(DgScript* trig, std::string_view field, std::string_view subfield)
+
+void to_json(nlohmann::json& j, const DgScript& t);
+void from_json(const nlohmann::json& j, DgScript& t);

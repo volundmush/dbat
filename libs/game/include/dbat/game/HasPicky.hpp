@@ -4,6 +4,7 @@
 #include "const/Sensei.hpp"
 #include "const/CharacterProperties.hpp"
 #include "Flags.hpp"
+#include <nlohmann/json_fwd.hpp>
 
 struct HasPicky {
     FlagHandler<MoralAlign> only_alignment, not_alignment;    /* Neutral, lawful, etc.		*/
@@ -26,3 +27,6 @@ inline std::string format_as(const HasPicky& hp) {
 }
 
 using picky_data = HasPicky;
+
+void to_json(nlohmann::json& j, const picky_data& p);
+void from_json(const nlohmann::json& j, picky_data& p);

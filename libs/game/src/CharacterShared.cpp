@@ -90,3 +90,75 @@ void from_json(const nlohmann::json& j, skill_data& unit)
         j.at(+"perfs").get_to(unit.perfs);
     }
 }
+
+void to_json(nlohmann::json &j, const trans_data &t)
+{
+    if (t.time_spent_in_form != 0.0)
+        j["time_spent_in_form"] = t.time_spent_in_form;
+    j["visible"] = t.visible;
+    j["limit_broken"] = t.limit_broken;
+    j["unlocked"] = t.unlocked;
+    j["grade"] = t.grade;
+    if (!t.vars.empty())
+        j["vars"] = t.vars;
+    if (!t.description.empty())
+        j["description"] = t.description;
+    if (!t.appearances.empty())
+        j["appearances"] = t.appearances;
+}
+
+void from_json(const nlohmann::json &j, trans_data &t)
+{
+    if (j.contains(+"time_spent_in_form"))
+        t.time_spent_in_form = j["time_spent_in_form"];
+    if (j.contains(+"visible"))
+        t.visible = j["visible"];
+    if (j.contains(+"limit_broken"))
+        t.limit_broken = j["limit_broken"];
+    if (j.contains(+"unlocked"))
+        t.unlocked = j["unlocked"];
+    if (j.contains(+"grade"))
+        t.grade = j["grade"];
+    if (j.contains(+"vars"))
+        t.vars = j["vars"];
+    if (j.contains(+"description"))
+        t.description = j["description"].get<std::string>();
+    if (j.contains(+"appearances"))
+        t.appearances = j["appearances"];
+}
+
+void to_json(nlohmann::json &j, const CharacterBase &c) {
+    to_json(j, static_cast<const HasVnum&>(c));
+    to_json(j, static_cast<const HasMudStrings&>(c));
+    to_json(j, static_cast<const HasExtraDescriptions&>(c));
+    to_json(j, static_cast<const HasStats&>(c));
+    j["race"] = c.race;
+    j["sensei"] = c.sensei;
+    if(c.model) j["model"] = c.model;
+    j["sex"] = c.sex;
+    j["size"] = c.size;
+    j["position"] = c.position;
+    if(c.character_flags) j["character_flags"] = c.character_flags;
+    if(c.mob_flags) j["mob_flags"] = c.mob_flags;
+    if(c.affect_flags) j["affect_flags"] = c.affect_flags;
+    if(c.bio_genomes) j["bio_genomes"] = c.bio_genomes;
+    if(c.mutations) j["mutations"] = c.mutations;
+}
+
+void from_json(const nlohmann::json &j, CharacterBase &c) {
+    from_json(j, static_cast<HasVnum&>(c));
+    from_json(j, static_cast<HasMudStrings&>(c));
+    from_json(j, static_cast<HasExtraDescriptions&>(c));
+    from_json(j, static_cast<HasStats&>(c));
+    if (j.contains(+"race")) c.race = j["race"];
+    if(j.contains(+"sensei")) c.sensei = j["sensei"];
+    if (j.contains(+"model")) c.model = j["model"];
+    if(j.contains(+"position")) j.at(+"position").get_to(c.position);
+    if (j.contains(+"sex")) c.sex = j["sex"];
+    if (j.contains(+"size")) c.size = j["size"];
+    if (j.contains(+"character_flags")) j.at(+"character_flags").get_to(c.character_flags);
+    if (j.contains(+"mob_flags")) j.at(+"mob_flags").get_to(c.mob_flags);
+    if (j.contains(+"affect_flags")) j.at(+"affect_flags").get_to(c.affect_flags);
+    if (j.contains(+"bio_genomes")) j.at(+"bio_genomes").get_to(c.bio_genomes);
+    if (j.contains(+"mutations")) j.at(+"mutations").get_to(c.mutations);
+}

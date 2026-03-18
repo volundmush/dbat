@@ -1,6 +1,7 @@
 #pragma once
 #include <map>
 #include <memory>
+#include <nlohmann/json_fwd.hpp>
 
 #include "Typedefs.hpp"
 #include "Command.hpp"
@@ -51,3 +52,6 @@ extern std::map<mob_vnum, std::shared_ptr<CharacterPrototype>> mob_proto;
 extern int vnum_mobile(char *searchname, Character *ch);
 
 extern mob_rnum real_mobile(mob_vnum vnum);
+
+void to_json(nlohmann::json& j, const CharacterPrototype& c);
+void from_json(const nlohmann::json& j, CharacterPrototype& c);

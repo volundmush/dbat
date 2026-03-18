@@ -1,4 +1,5 @@
 #pragma once
+#include <nlohmann/json_fwd.hpp>
 #include "AbstractGridArea.hpp"
 #include "HasZone.hpp"
 
@@ -11,3 +12,6 @@ struct Area : public AbstractGridArea, public HasVnum, public HasZone, std::enab
 };
 
 extern std::unordered_map<int64_t, std::shared_ptr<Area>> areas;
+
+void to_json(nlohmann::json& j, const Area& p);
+void from_json(const nlohmann::json& j, Area& p);

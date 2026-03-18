@@ -4,6 +4,7 @@
 #include <memory>
 #include <map>
 #include <unordered_set>
+#include <nlohmann/json_fwd.hpp>
 
 #include "Typedefs.hpp"
 
@@ -30,3 +31,6 @@ struct Account {
 extern std::map<std::string, std::shared_ptr<Account>> accounts;
 
 struct Account *findAccount(const std::string &name);
+
+void to_json(nlohmann::json& j, const Account& a);
+void from_json(const nlohmann::json& j, Account& a);

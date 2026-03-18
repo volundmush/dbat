@@ -20,3 +20,15 @@ void to_json(nlohmann::json& j, const HasID& hs) {
 void from_json(const nlohmann::json& j, HasID& hs) {
     j.at("id").get_to(hs.id);
 }
+
+void to_json(nlohmann::json &j, const HasProtoScript &s) {
+    if(!s.proto_script.empty()) {
+        j["proto_script"] = s.proto_script;
+    }
+}
+
+void from_json(const nlohmann::json &j, HasProtoScript &s) {
+    if(j.contains(+"proto_script")) {
+        j.at(+"proto_script").get_to(s.proto_script);
+    }
+}

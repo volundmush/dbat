@@ -1,5 +1,6 @@
 #include "dbat/game/Structure.hpp"
 #include "dbat/game/Character.hpp"
+#include <nlohmann/json.hpp>
 
 std::unordered_map<int64_t, std::shared_ptr<Structure>> Structure::registry;
 
@@ -68,4 +69,14 @@ bool Structure::isAuthorized(Character *ch, bool ownerOnly) const {
 
 std::expected<Location, std::string> Structure::getDockingPortLocation(Structure *vehicle, Character *pilot) {
     return std::unexpected("not yet implemented");
+}
+
+void to_json(nlohmann::json& j, const Structure& p) {
+    to_json(j, static_cast<const AbstractGridArea&>(p));
+    to_json(j, static_cast<const HasID&>(p));
+}
+
+void from_json(const nlohmann::json& j, Structure& p) {
+    from_json(j, static_cast<AbstractGridArea&>(p));
+    from_json(j, static_cast<HasID&>(p));
 }

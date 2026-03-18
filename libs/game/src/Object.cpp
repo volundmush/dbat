@@ -10,6 +10,7 @@
 #include "dbat/game/dg_scripts.hpp"
 #include "dbat/game/act.informative.hpp"
 #include "dbat/game/const/Environment.hpp"
+#include <nlohmann/json.hpp>
 
 int64_t Object::lastID{0};
 std::unordered_map<int64_t, std::shared_ptr<Object>> Object::registry;
@@ -337,4 +338,32 @@ vnum Object::getDgVnum() const {
 
 UnitType Object::getDgUnitType() const {
     return UnitType::object;
+}
+
+void to_json(nlohmann::json &j, const Object &o)
+{
+    to_json(j, static_cast<const HasID &>(o));
+    to_json(j, static_cast<const HasDgScripts &>(o));
+    to_json(j, static_cast<const picky_data &>(o));
+    to_json(j, static_cast<const HasMudStrings &>(o));
+    to_json(j, static_cast<const HasExtraDescriptions &>(o));
+    to_json(j, static_cast<const HasStats &>(o));
+    j["type_flag"] = o.type_flag;
+    if (o.wear_flags)
+        j["wear_flags"] = o.wear_flags;
+    if (o.item_flags)
+        j["item_flags"] = o.item_flags;
+    for (auto &i : o.affected)
+    {
+        if (i.location == APPLY_NONE)
+            continue;
+        j["affected"].push_back(i);
+    }
+}
+
+void from_json(const nlohmann::json &j, Object &o)
+{
+    from_json(j, static_cast<ObjectBase &>(o));
+    from_json(j, static_cast<HasID &>(o));
+    from_json(j, static_cast<HasDgScripts &>(o));
 }

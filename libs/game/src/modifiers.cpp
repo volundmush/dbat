@@ -36,6 +36,27 @@ void from_json(const nlohmann::json& j, affect_t& unit)
     }
 }
 
+void to_json(nlohmann::json &j, const affected_type &a)
+{
+    to_json(j, static_cast<const affect_t &>(a));
+    if (a.type)
+        j["type"] = a.type;
+    if (a.duration)
+        j["duration"] = a.duration;
+    if (a.aff_flags)
+        j["aff_flags"] = a.aff_flags;
+}
+
+void from_json(const nlohmann::json &j, affected_type &a)
+{
+    from_json(j, static_cast<affect_t &>(a));
+    if (j.contains(+"type"))
+        a.type = j["type"];
+    if (j.contains(+"duration"))
+        a.duration = j["duration"];
+    if (j.contains(+"aff_flags")) j.at(+"aff_flags").get_to(a.aff_flags);
+}
+
 std::string affect_t::locName()
 {
     switch (location)

@@ -20,6 +20,9 @@ struct TileOverride : public HasResetCommands {
     std::string tileDisplay{};
 };
 
+void to_json(nlohmann::json& j, const TileOverride& p);
+void from_json(const nlohmann::json& j, TileOverride& p);
+
 enum class ShapeType : uint8_t {
     Box = 0,
     Round = 1
@@ -128,6 +131,9 @@ struct GridTemplate : public HasMudStrings, public HasVnum {
     std::unordered_map<Coordinates, TileOverride> tileOverrides;
 };
 
+void to_json(nlohmann::json& j, const GridTemplate& p);
+void from_json(const nlohmann::json& j, GridTemplate& p);
+
 // The shape that's used for instances.
 struct Shape : public ShapeBase {
     using ShapeBase::operator=;
@@ -216,5 +222,8 @@ struct AbstractGridArea : public HasMudStrings, public AbstractLocation, public 
     void setSectorType(const Coordinates& coor, SectorType type) override;
 
 };
+
+void to_json(nlohmann::json& j, const AbstractGridArea& p);
+void from_json(const nlohmann::json& j, AbstractGridArea& p);
 
 extern std::unordered_map<int64_t, std::shared_ptr<GridTemplate>> gridTemplates;

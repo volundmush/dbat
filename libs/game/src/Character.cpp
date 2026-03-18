@@ -38,6 +38,7 @@
 #include "dbat/game/const/WearSlot.hpp"
 #include "dbat/game/const/Environment.hpp"
 #include "dbat/game/const/AdminLevel.hpp"
+#include <nlohmann/json.hpp>
 
 int64_t Character::lastID{0};
 std::unordered_map<int64_t, std::shared_ptr<Character>> Character::registry;
@@ -1960,4 +1961,240 @@ std::expected<std::shared_ptr<Character>, std::string> createPlayerCharacter(str
 
 void Character::save() {
     if(!player) return;
+}
+
+void to_json(nlohmann::json &j, const Character &c)
+{
+    to_json(j, static_cast<const CharacterBase &>(c));
+    to_json(j, static_cast<const HasID &>(c));
+    to_json(j, static_cast<const HasDgScripts &>(c));
+    if (!c.appearances.empty())
+        j["appearances"] = c.appearances;
+    if (c.character_flags)
+        j["character_flags"] = c.character_flags;
+    if (c.player_flags)
+        j["player_flags"] = c.player_flags;
+    if (c.pref_flags)
+        j["pref_flags"] = c.pref_flags;
+    for (auto i = 0; i < c.bodyparts.size(); i++)
+        if (c.bodyparts.test(i))
+            j["bodyparts"].push_back(i);
+    if (c.admin_flags)
+        j["admin_flags"] = c.admin_flags;
+    nlohmann::json td;
+    to_json(td, c.time);
+    if (!td.empty())
+        j["time"] = td;
+    for (auto i = 0; i < 4; i++)
+    {
+        if (c.limb_condition[i])
+            j["limb_condition"].push_back(std::make_pair(i, c.limb_condition[i]));
+    }
+    for (auto i = 0; i < NUM_CONDITIONS; i++)
+    {
+        if (c.conditions[i])
+            j["conditions"].push_back(std::make_pair(i, c.conditions[i]));
+    }
+    for (auto i = 0; i < c.gravAcclim.size(); i++)
+    {
+        if (c.gravAcclim[i])
+            j["gravAcclim"].push_back(std::make_pair(i, c.gravAcclim[i]));
+    }
+    auto ch = (Character *)&c;
+    std::erase_if(ch->skill, [](const auto &s){ return s.second.level == 0 && s.second.perfs == 0; });
+    if (!c.skill.empty())
+        j["skill"] = c.skill;
+    for (auto a = c.affected; a; a = a->next)
+    {
+        if (a->type)
+            j["affected"].push_back(*a);
+    }
+    for (auto a = c.affectedv; a; a = a->next)
+    {
+        if (a->type)
+            j["affectedv"].push_back(*a);
+    }
+    for (auto i = 0; i < 5; i++)
+    {
+        if (c.lboard[i])
+            j["lboard"].push_back(std::make_pair(i, c.lboard[i]));
+    }
+    if (c.mimic)
+        j["mimic"] = c.mimic.value();
+    j["form"] = c.form;
+    if (c.rdisplay)
+        j["rdisplay"] = c.rdisplay;
+    if (c.feature)
+        j["feature"] = c.feature;
+    if (c.voice && strlen(c.voice))
+        j["voice"] = c.voice;
+    if (c.poofin && strlen(c.poofin))
+        j["poofin"] = c.poofin;
+    if (c.poofout && strlen(c.poofout))
+        j["poofout"] = c.poofout;
+    if (!c.transforms.empty())
+        j["transforms"] = c.transforms;
+    if (!c.permForms.empty())
+        j["permForms"] = c.permForms;
+}
+
+void from_json(const nlohmann::json &j, Character &c)
+{
+    from_json(j, static_cast<CharacterBase &>(c));
+    from_json(j, static_cast<HasID &>(c));
+    from_json(j, static_cast<HasDgScripts &>(c));
+    if (j.contains(+"appearances"))
+        c.appearances = j["appearances"];
+    if (j.contains(+"player_flags"))
+        c.player_flags = j["player_flags"].get<FlagHandler<PlayerFlag>>();
+    if (j.contains(+"pref_flags"))
+        c.pref_flags = j["pref_flags"].get<FlagHandler<PrefFlag>>();
+    if (j.contains(+"bodyparts"))
+        for (auto &i : j["bodyparts"])
+            c.bodyparts.set(i.get<int>());
+    if (j.contains(+"admin_flags"))
+        c.admin_flags = j["admin_flags"].get<FlagHandler<AdminFlag>>();
+    if (j.contains(+"time"))
+        j["time"].get_to(c.time);
+    if (j.contains(+"limb_condition"))
+    {
+        for (auto &i : j["limb_condition"])
+            c.limb_condition[i[0].get<int>()] = i[1];
+    }
+    if (j.contains(+"skill"))
+        c.skill = j["skill"].get<std::map<Skill, skill_data>>();
+    if (j.contains(+"affected"))
+    {
+        auto ja = j["affected"];
+        for (auto it = ja.rbegin(); it != ja.rend(); ++it)
+        {
+            auto a = new affected_type(*it);
+            a->next = c.affected;
+            c.affected = a;
+        }
+    }
+    if (j.contains(+"affectedv"))
+    {
+        auto ja = j["affectedv"];
+        for (auto it = ja.rbegin(); it != ja.rend(); ++it)
+        {
+            auto a = new affected_type(*it);
+            a->next = c.affectedv;
+            c.affectedv = a;
+        }
+    }
+    if (j.contains(+"lboard"))
+    {
+        for (auto &i : j["lboard"])
+            c.lboard[i[0].get<int>()] = i[1];
+    }
+    if (j.contains(+"conditions"))
+    {
+        for (auto &i : j["conditions"])
+            c.conditions[i[0].get<int>()] = i[1];
+    }
+    if (j.contains(+"gravAcclim"))
+    {
+        for (auto &i : j["gravAcclim"])
+            c.gravAcclim[i[0].get<int>()] = i[1];
+    }
+    if (j.contains(+"mimic"))
+        c.mimic = j["mimic"].get<Race>();
+    if (j.contains(+"rdisplay"))
+        c.rdisplay = strdup(j["rdisplay"].get<std::string>().c_str());
+    if (j.contains(+"feature"))
+        c.feature = strdup(j["feature"].get<std::string>().c_str());
+    if (j.contains(+"voice"))
+        c.voice = strdup(j["voice"].get<std::string>().c_str());
+    if (j.contains(+"form"))
+        c.form = j["form"];
+    if (j.contains(+"transforms"))
+        c.transforms = j["transforms"];
+    if (j.contains(+"permForms"))
+        c.permForms = j["permForms"].get<std::unordered_set<Form>>();
+}
+
+void to_json(nlohmann::json &j, const ChargenData &c)
+{
+    if(c.name) j["name"] = *c.name;
+    if(c.race) j["race"] = *c.race;
+    if(c.model) j["model"] = *c.model;
+    if(c.sex) j["sex"] = *c.sex;
+    if(c.sensei) j["sensei"] = *c.sensei;
+    if(c.bio_genomes) j["bio_genomes"] = c.bio_genomes;
+    if(c.mutations) j["mutations"] = c.mutations;
+    j["keep_skills"] = c.keep_skills;
+    j["alignment"] = c.alignment;
+}
+
+void from_json(const nlohmann::json &j, ChargenData &c)
+{
+    if (j.contains(+"name")) c.name = j["name"].get<std::string>();
+    if (j.contains(+"race")) c.race = j["race"].get<Race>();
+    if (j.contains(+"model")) c.model = j["model"].get<AndroidModel>();
+    if (j.contains(+"sex")) c.sex = j["sex"].get<Sex>();
+    if (j.contains(+"sensei")) c.sensei = j["sensei"].get<Sensei>();
+    if (j.contains(+"bio_genomes")) j.at(+"bio_genomes").get_to(c.bio_genomes);
+    if (j.contains(+"mutations")) j.at(+"mutations").get_to(c.mutations);
+    if (j.contains(+"keep_skills")) c.keep_skills = j["keep_skills"];
+    if (j.contains(+"alignment")) c.alignment = j["alignment"];
+}
+
+void to_json(nlohmann::json &j, const PlayerData &p)
+{
+    j["id"] = p.id;
+    j["name"] = p.name;
+    if (p.account)
+        j["account"] = p.account->id;
+    for (auto &a : p.aliases)
+        j["aliases"].push_back(a);
+    for (auto &i : p.sense_player)
+        j["sensePlayer"].push_back(i);
+    for (auto &i : p.sense_memory)
+        j["senseMemory"].push_back(i);
+    for (auto &i : p.dub_names)
+        j["dubNames"].push_back(i);
+    for (auto i = 0; i < NUM_COLOR; i++)
+    {
+        if (p.color_choices[i] && strlen(p.color_choices[i]))
+            j["color_choices"].push_back(std::make_pair(i, p.color_choices[i]));
+    }
+}
+
+void from_json(const nlohmann::json &j, PlayerData &p)
+{
+    p.id = j["id"];
+    p.name = j["name"].get<std::string>();
+    if (j.contains(+"account"))
+    {
+        auto accID = j["account"].get<vnum>();
+        auto accFind = accounts.find(accID);
+        if (accFind != accounts.end())
+            p.account = accFind->second.get();
+    }
+    if (j.contains(+"aliases"))
+    {
+        for (auto ja : j["aliases"])
+            p.aliases.emplace_back(ja);
+    }
+    if (j.contains(+"sensePlayer"))
+    {
+        for (auto &i : j["sensePlayer"])
+            p.sense_player.insert(i.get<int64_t>());
+    }
+    if (j.contains(+"senseMemory"))
+    {
+        for (auto &i : j["senseMemory"])
+            p.sense_memory.insert(i.get<vnum>());
+    }
+    if (j.contains(+"dubNames"))
+    {
+        for (auto &i : j["dubNames"])
+            p.dub_names.emplace(i[0].get<int64_t>(), i[1].get<std::string>());
+    }
+    if (j.contains(+"color_choices"))
+    {
+        for (auto &i : j["color_choices"])
+            p.color_choices[i[0].get<int>()] = strdup(i[1].get<std::string>().c_str());
+    }
 }

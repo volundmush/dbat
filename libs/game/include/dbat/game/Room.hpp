@@ -6,6 +6,7 @@
 #include "HasMudStrings.hpp"
 #include "StatHandler.hpp"
 #include "HasMisc.hpp"
+#include <nlohmann/json_fwd.hpp>
 
 struct Room;
 
@@ -179,3 +180,6 @@ inline std::string format_as_diagnostic(const Room& room) {
 }
 
 extern SubscriptionManager<Room> roomSubscriptions;
+
+void to_json(nlohmann::json& j, const Room& r);
+void from_json(const nlohmann::json& j, Room& r);

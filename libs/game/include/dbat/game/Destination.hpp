@@ -2,6 +2,7 @@
 #include <unordered_map>
 #include <functional>
 #include <enchantum/fmt_format.hpp>
+#include <nlohmann/json_fwd.hpp>
 
 #include "Location.hpp"
 #include "const/ExitFlag.hpp"
@@ -48,3 +49,6 @@ constexpr int BFS_TOO_FAR = -4;
 extern int find_first_step(Location &src, Location &target);
 
 std::unordered_map<Coordinates, Destination> gatherSurroundings(const Location& loc, Character *ch, int minX = -4, int maxX = 4, int minY = -4, int maxY = 4, const std::function<bool(const Destination&, Character*)> is_valid = {});
+
+void to_json(nlohmann::json& j, const Destination& e);
+void from_json(const nlohmann::json& j, Destination& e);

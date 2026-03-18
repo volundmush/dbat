@@ -44,60 +44,6 @@ void load_help(const std::filesystem::path& loc);
 
 void load_assemblies(const std::filesystem::path& loc);
 
-void to_json(json& j, const help_index_element& a);
-void from_json(const json& j, help_index_element& a);
-
-void to_json(json& j, const Account& a);
-void from_json(const json& j, Account& a);
-
-void to_json(json& j, const DgScript& t);
-void from_json(const json& j, DgScript& t);
-
-void to_json(json&j, const Shop& s);
-void from_json(const json& j, Shop& s);
-
-void to_json(json& j, const Guild& g);
-void from_json(const json& j, Guild& g);
-
-void to_json(json& j, const Destination &e);
-void from_json(const json& j, Destination &e);
-
-void to_json(json& j, const Room& r);
-void from_json(const json& j, Room& r);
-
-void to_json(json& j, const Object& o);
-void from_json(const json& j, Object& o);
-
-void to_json(json& j, const ObjectPrototype& o);
-void from_json(const json& j, ObjectPrototype& o);
-
-void to_json(json& j, const CharacterPrototype& o);
-void from_json(const json& j, CharacterPrototype& o);
-
-void to_json(json& j, const Character& c);
-void from_json(const json& j, Character& c);
-
-void from_json(const json& j, Character& c);
-void to_json(json& j, const Character& c);
-
-void to_json(json& j, const PlayerData& p);
-void from_json(const json& j, PlayerData& p);
-
-void to_json(json& j, const TileOverride& p);
-void from_json(const json& j, TileOverride& p);
-
-void to_json(json& j, const GridTemplate& p);
-void from_json(const json& j, GridTemplate& p);
-
-void to_json(json& j, const Area& p);
-void from_json(const json& j, Area& p);
-
-void to_json(json& j, const Structure& p);
-void from_json(const json& j, Structure& p);
-
-void to_json(json& j, const ChargenData& p);
-void from_json(const json& j, ChargenData& p);
-
 std::vector<std::filesystem::path> getDumpFiles(const std::filesystem::path &dir, std::string_view pattern);
 
 namespace dbat::save {

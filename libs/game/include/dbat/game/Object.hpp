@@ -1,6 +1,7 @@
 #pragma once
 #include <memory>
 #include <unordered_map>
+#include <nlohmann/json_fwd.hpp>
 
 #include "ObjectShared.hpp"
 #include "HasLocation.hpp"
@@ -152,3 +153,5 @@ struct fmt::formatter<Object> {
     }
 };
 
+void to_json(nlohmann::json& j, const Object& o);
+void from_json(const nlohmann::json& j, Object& o);

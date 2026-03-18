@@ -17,6 +17,7 @@
 #include "dbat/game/Random.hpp"
 #include "dbat/game/const/Environment.hpp"
 #include "dbat/game/Create.hpp"
+#include <nlohmann/json.hpp>
 
 int Room::lastID{0};
 std::unordered_map<int, std::shared_ptr<Room>> Room::registry;
@@ -405,4 +406,41 @@ void Room::setSectorType(const Coordinates& coor, SectorType type) {
 
 std::vector<ResetCommand> Room::getResetCommands(const Coordinates& coor) {
     return resetCommands;
+}
+
+void to_json(nlohmann::json &j, const Room &r)
+{
+    to_json(j, static_cast<const HasVnum &>(r));
+    to_json(j, static_cast<const HasDgScripts &>(r));
+    to_json(j, static_cast<const HasMudStrings &>(r));
+    to_json(j, static_cast<const HasExtraDescriptions &>(r));
+    to_json(j, static_cast<const HasResetCommands &>(r));
+    to_json(j, static_cast<const HasZone &>(r));
+    j["sector_type"] = r.sector_type;
+    if (r.room_flags)
+        j["room_flags"] = r.room_flags;
+    for (auto p : r.proto_script)
+    {
+        if (trig_index.contains(p))
+            j["proto_script"].push_back(p);
+    }
+}
+
+void from_json(const nlohmann::json &j, Room &r)
+{
+    from_json(j, static_cast<HasVnum &>(r));
+    from_json(j, static_cast<HasDgScripts &>(r));
+    from_json(j, static_cast<HasMudStrings &>(r));
+    from_json(j, static_cast<HasExtraDescriptions &>(r));
+    from_json(j, static_cast<HasResetCommands &>(r));
+    from_json(j, static_cast<HasZone &>(r));
+    if (j.contains(+"sector_type"))
+        r.sector_type = j["sector_type"];
+    if (j.contains(+"room_flags"))
+        r.room_flags = j["room_flags"].get<FlagHandler<RoomFlag>>();
+    if (j.contains(+"proto_script"))
+    {
+        for (auto p : j["proto_script"])
+            r.proto_script.emplace_back(p.get<trig_vnum>());
+    }
 }

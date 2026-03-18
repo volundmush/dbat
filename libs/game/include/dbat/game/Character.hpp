@@ -1,5 +1,6 @@
 #pragma once
 #include <bitset>
+#include <nlohmann/json_fwd.hpp>
 
 #include "Log.hpp"
 #include "CharacterShared.hpp"
@@ -439,3 +440,10 @@ struct ChargenData {
 };
 
 extern std::expected<std::shared_ptr<Character>, std::string> createPlayerCharacter(struct Account* account, ChargenData& data);
+
+void to_json(nlohmann::json& j, const Character& c);
+void from_json(const nlohmann::json& j, Character& c);
+void to_json(nlohmann::json& j, const ChargenData& c);
+void from_json(const nlohmann::json& j, ChargenData& c);
+void to_json(nlohmann::json& j, const PlayerData& p);
+void from_json(const nlohmann::json& j, PlayerData& p);

@@ -1,5 +1,6 @@
 #pragma once
 #include <experimental/memory>
+#include <nlohmann/json_fwd.hpp>
 
 #include <fmt/format.h>
 
@@ -17,3 +18,6 @@ inline std::string format_as(const HasZone& hz) {
         return "Zone: <none>";
     }
 }
+
+void to_json(nlohmann::json& j, const HasZone& p);
+void from_json(const nlohmann::json& j, HasZone& p);

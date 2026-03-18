@@ -5,6 +5,7 @@
 #include <string>
 #include <map>
 #include <memory>
+#include <nlohmann/json_fwd.hpp>
 #include <fmt/format.h>
 #include <enchantum/fmt_format.hpp>
 
@@ -50,3 +51,6 @@ inline std::string format_as(const DgScriptPrototype& dg) {
 }
 
 extern std::map<trig_vnum, std::shared_ptr<DgScriptPrototype>> trig_index;
+
+void to_json(nlohmann::json& j, const DgScriptPrototype& t);
+void from_json(const nlohmann::json& j, DgScriptPrototype& t);

@@ -2,6 +2,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <memory>
+#include <nlohmann/json_fwd.hpp>
 
 #include "const/StructureFlag.hpp"
 #include "Flags.hpp"
@@ -34,3 +35,6 @@ struct Structure : public AbstractGridArea, public HasID, public HasInteractive,
     bool isAuthorized(Character *ch, bool ownerOnly = false) const;
 
 };
+
+void to_json(nlohmann::json& j, const Structure& p);
+void from_json(const nlohmann::json& j, Structure& p);

@@ -77,6 +77,68 @@ void from_json(const nlohmann::json& j, BoxDim& unit)
     }
 }
 
+void to_json(nlohmann::json& j, const TileOverride& p) {
+    to_json(j, static_cast<const HasResetCommands&>(p));
+    if(!p.name.empty()) j["name"] = p.name;
+    if(!p.look_description.empty()) j["look_description"] = p.look_description;
+    j["roomFlags"] = p.roomFlags;
+    j["whereFlags"] = p.whereFlags;
+    j["damage"] = p.damage;
+    j["groundEffect"] = p.groundEffect;
+    j["exits"] = p.exits;
+    if(!p.tileDisplay.empty()) j["tileDisplay"] = p.tileDisplay;
+}
+
+void from_json(const nlohmann::json& j, TileOverride& p) {
+    from_json(j, static_cast<HasResetCommands&>(p));
+    if(j.contains(+"name")) j.at(+"name").get_to(p.name);
+    if(j.contains(+"look_description")) j.at(+"look_description").get_to(p.look_description);
+    if (j.contains(+"roomFlags")) j.at(+"roomFlags").get_to(p.roomFlags);
+    if (j.contains(+"whereFlags")) j.at(+"whereFlags").get_to(p.whereFlags);
+    if (j.contains(+"damage")) j.at(+"damage").get_to(p.damage);
+    if (j.contains(+"groundEffect")) j.at(+"groundEffect").get_to(p.groundEffect);
+    if (j.contains(+"exits")) j.at(+"exits").get_to(p.exits);
+    if(j.contains(+"tileDisplay")) j.at(+"tileDisplay").get_to(p.tileDisplay);
+}
+
+void to_json(nlohmann::json& j, const GridTemplate& p) {
+    to_json(j, static_cast<const HasMudStrings&>(p));
+    to_json(j, static_cast<const HasVnum&>(p));
+    if(!p.shapes.empty()) j["shapes"] = p.shapes;
+    if(!p.tileOverrides.empty()) j["tileOverrides"] = p.tileOverrides;
+}
+
+void from_json(const nlohmann::json& j, GridTemplate& p) {
+    from_json(j, static_cast<HasMudStrings&>(p));
+    from_json(j, static_cast<HasVnum&>(p));
+    if(j.contains(+"shapes")) j.at(+"shapes").get_to(p.shapes);
+    if(j.contains(+"tileOverrides")) j.at(+"tileOverrides").get_to(p.tileOverrides);
+}
+
+void to_json(nlohmann::json& j, const AbstractGridArea& p) {
+    to_json(j, static_cast<const HasMudStrings&>(p));
+    if(!p.shapes.empty()) {
+        auto j2 = nlohmann::json::object();
+        for(auto& [name, ptr] : p.shapes) {
+            j2[name] = *ptr;
+        }
+        j["shapes"] = j2;
+    }
+    if(!p.tileOverrides.empty()) j["tileOverrides"] = p.tileOverrides;
+}
+
+void from_json(const nlohmann::json& j, AbstractGridArea& p) {
+    from_json(j, static_cast<HasMudStrings&>(p));
+    if(j.contains(+"shapes")) {
+        for (auto& [key, value] : j.at(+"shapes").get<nlohmann::json::object_t>()) {
+            Shape s{};
+            value.get_to(s);
+            p.shapes[key] = std::make_unique<Shape>(std::move(s));
+        }
+    }
+    if(j.contains(+"tileOverrides")) j.at(+"tileOverrides").get_to(p.tileOverrides);
+}
+
 TileOverride::operator bool() const
 {
     // A TileOverride is considered "valid" if it has at least one of the following:

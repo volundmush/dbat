@@ -61,6 +61,9 @@ struct HasProtoScript {
     std::string scriptString() const;
 };
 
+void to_json(nlohmann::json& j, const HasProtoScript& s);
+void from_json(const nlohmann::json& j, HasProtoScript& s);
+
 inline std::string format_as(const HasProtoScript& unit) {
     if(unit.proto_script.empty()) return "proto_script: <none>";
     return fmt::format("proto_script: [{}]", fmt::join(unit.proto_script, ", "));

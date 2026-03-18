@@ -26,6 +26,7 @@
 #include "dbat/game/utils.hpp"
 #include "dbat/game/Random.hpp"
 #include "dbat/game/TimeInfo.hpp"
+#include <nlohmann/json.hpp>
 
 /* Local variables */
 int spell_sort_info[SKILL_TABLE_SIZE + 1];
@@ -122,6 +123,77 @@ int calculate_skill_cost(Character *ch, int skill)
     }
 
     return (cost);
+}
+
+void to_json(nlohmann::json &j, const picky_data &p)
+{
+    if (p.not_alignment) j["not_alignment"] = p.not_alignment;
+    if (p.not_race) j["not_race"] = p.not_race;
+    if (p.only_race) j["only_race"] = p.only_race;
+    if (p.not_sensei) j["not_sensei"] = p.not_sensei;
+    if (p.only_sensei) j["only_sensei"] = p.only_sensei;
+}
+
+void from_json(const nlohmann::json &j, picky_data &p)
+{
+    if (j.contains(+"not_alignment")) j.at(+"not_alignment").get_to(p.not_alignment);
+    if (j.contains(+"not_race")) j.at(+"not_race").get_to(p.not_race);
+    if (j.contains(+"only_race")) j.at(+"only_race").get_to(p.only_race);
+    if (j.contains(+"not_sensei")) j.at(+"not_sensei").get_to(p.not_sensei);
+    if (j.contains(+"only_sensei")) j.at(+"only_sensei").get_to(p.only_sensei);
+}
+
+void to_json(nlohmann::json &j, const org_data &o)
+{
+    to_json(j, static_cast<picky_data>(o));
+    j["vnum"] = o.vnum;
+    if (o.keeper != NOTHING)
+        j["keeper"] = o.keeper;
+}
+
+void from_json(const nlohmann::json &j, org_data &o)
+{
+    from_json(j, static_cast<picky_data &>(o));
+    if (j.contains(+"vnum"))
+        o.vnum = j["vnum"];
+    if (j.contains(+"keeper"))
+        o.keeper = j["keeper"];
+}
+
+void to_json(nlohmann::json &j, const Guild &g)
+{
+    to_json(j, static_cast<org_data>(g));
+    if (g.skills)
+        j["skills"] = g.skills;
+    if (!g.feats.empty())
+        j["feats"] = g.feats;
+    if (g.charge != 1.0)
+        j["charge"] = g.charge;
+    if (!g.no_such_skill.empty())
+        j["no_such_skill"] = g.no_such_skill;
+    if (!g.not_enough_gold.empty())
+        j["not_enough_gold"] = g.not_enough_gold;
+    if (g.minlvl)
+        j["minlvl"] = g.minlvl;
+    if (g.open)
+        j["open"] = g.open;
+    if (g.close)
+        j["close"] = g.close;
+}
+
+void from_json(const nlohmann::json &j, Guild &g)
+{
+    from_json(j, static_cast<org_data &>(g));
+    if (j.contains(+"skills")) j.at(+"skills").get_to(g.skills);
+    if (j.contains(+"feats")) j.at(+"feats").get_to(g.feats);
+    if (j.contains(+"charge")) g.charge = j["charge"];
+    if (j.contains(+"no_such_skill"))
+        g.no_such_skill = j["no_such_skill"];
+    if (j.contains(+"not_enough_gold"))
+        g.not_enough_gold = j["not_enough_gold"];
+    if (j.contains(+"minlvl")) g.minlvl = j["minlvl"];
+    if (j.contains(+"open")) g.open = j["open"];
+    if (j.contains(+"close")) g.close = j["close"];
 }
 
 void handle_ingest_learn(Character *ch, Character *vict)

@@ -17,6 +17,7 @@
 
 #include "Flags.hpp"
 #include "affect.hpp"
+#include <nlohmann/json_fwd.hpp>
 
 struct Object;
 
@@ -70,3 +71,6 @@ inline std::string format_as(const ObjectBase& ob) {
 
     return fmt::format("Base Object Data:\r\n{}", fmt::join(parts, "\r\n"));
 }
+
+void to_json(nlohmann::json& j, const ObjectBase& o);
+void from_json(const nlohmann::json& j, ObjectBase& o);

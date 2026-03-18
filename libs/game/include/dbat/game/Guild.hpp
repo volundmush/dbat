@@ -1,6 +1,7 @@
 #pragma once
 #include <map>
 #include <memory>
+#include <nlohmann/json_fwd.hpp>
 
 #include "HasOrganizationInfo.hpp"
 
@@ -72,3 +73,6 @@ extern void assign_the_guilds();
 extern SPECIAL(guild);
 
 extern std::map<guild_vnum, std::shared_ptr<Guild>> guild_index;
+
+void to_json(nlohmann::json& j, const Guild& g);
+void from_json(const nlohmann::json& j, Guild& g);
