@@ -3963,13 +3963,11 @@ static void boot_db_legacy() {
     boot_db_spellfeats();
     boot_db_world_legacy();
     index_boot_help();
-    boot_db_mail();
     boot_db_socials();
     boot_db_commands();
     boot_db_specials();
     assemblyBootAssemblies();
     boot_db_sort();
-    boot_db_boards();
     boot_db_spacemap();
     topLoad();
 }

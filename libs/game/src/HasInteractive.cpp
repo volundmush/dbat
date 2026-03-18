@@ -65,8 +65,8 @@ std::string Character::getDisplayName(struct Character* viewer, bool capitalizeA
             } else {
                 if(!player_flags.get(PLR_DISGUISED)) {
                     // players see dub names if they have them.
-                    auto &p = players.at(viewer->id);
-                    if(auto find = p->dub_names.find(id); find != p->dub_names.end()) {
+                    auto p = viewer->player;
+                    if(auto find = p->dub_names.find(player->id); find != p->dub_names.end()) {
                         return find->second;
                     }
                 }
@@ -139,8 +139,8 @@ std::vector<std::string> Character::getInteractivityKeywords(struct Character* v
             } else {
                 // players MIGHT have a dub name...
                 // But if not, they will have to settle for the race added earlier.
-                auto &p = players.at(viewer->id);
-                if(auto find = p->dub_names.find(id); find != p->dub_names.end()) {
+                auto p = viewer->player;
+                if(auto find = p->dub_names.find(player->id); find != p->dub_names.end()) {
                     keywords.push_back(find->second);
                 }
             }

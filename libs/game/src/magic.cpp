@@ -1018,7 +1018,7 @@ void mag_summons(int level, Character *ch, Object *obj, int spellnum, char *arg)
         {
             set_fighting(mob, FIGHTING(ch));
         }
-        mob->setBaseStat("master_id", GET_IDNUM(ch));
+        mob->master_id = ch->player->id;
     }
     if (handle_corpse)
     {

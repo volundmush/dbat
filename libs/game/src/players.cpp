@@ -149,7 +149,7 @@ bool Account::canBeDeleted()
     return true;
 }
 
-bool deleteUserAccount(vnum id)
+bool deleteUserAccount(std::string id)
 {
     if (!accounts.contains(id))
         return false;

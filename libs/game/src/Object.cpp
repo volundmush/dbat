@@ -143,8 +143,6 @@ bool Object::isWorking()
 Object::~Object()
 {
     extract_script(this, type);
-    if (auctname)
-        free(auctname);
 }
 
 const char *Object::getDgName() const

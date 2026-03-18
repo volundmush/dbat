@@ -17,7 +17,7 @@
 extern PlayerData* create_player_character(int account_id, const json &j);
 
 void load_zones(const std::filesystem::path& loc);
-void load_accounts(const std::filesystem::path& loc);
+//void load_accounts(const std::filesystem::path& loc);
 void load_dgscript_prototypes(const std::filesystem::path& loc);
 void load_dgscripts(const std::filesystem::path& loc);
 void load_globaldata(const std::filesystem::path& loc);

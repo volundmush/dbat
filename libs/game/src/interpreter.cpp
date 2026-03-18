@@ -308,7 +308,7 @@ ACMD(do_alias)
     if (IS_NPC(ch))
         return;
 
-    auto &p = players.at(ch->id);
+    auto p = ch->player;
 
     repl = any_one_arg(argument, arg);
 
@@ -467,7 +467,7 @@ void perform_alias(struct descriptor_data *d, char *orig)
         d->input_queue.emplace_back(orig);
         return;
     }
-    auto &p = players.at(d->character->id);
+    auto p = d->character->player;
     auto &aliases = p->aliases;
 
     /* bail out immediately if the guy doesn't have any aliases */
@@ -1271,7 +1271,7 @@ void enter_player_game(struct descriptor_data *d)
     auto ac = characterSubscriptions.all("active");
     for (auto check : dbat::util::filter_raw(ac))
     {
-        if (!check->master && IS_NPC(check) && check->getBaseStat<int>("master_id") == GET_IDNUM(ch) &&
+        if (IS_NPC(check) && check->master_id == ch->player->id &&
             AFF_FLAGGED(check, AFF_CHARM) && !circle_follow(check, ch))
             add_follower(check, ch);
     }
@@ -1550,7 +1550,7 @@ char *rIntro(Character *ch, char *arg)
 void fingerUser(Character *ch, struct Account *account)
 {
     ch->send_to("@D[@gUsername   @D: @w%-30s@D]@n\r\n", account->name.c_str());
-    ch->send_to("@D[@gEmail      @D: @w%-30s@D]@n\r\n", account->email.c_str());
+    //ch->send_to("@D[@gEmail      @D: @w%-30s@D]@n\r\n", account->email.c_str());
     ch->send_to("@D[@gTotal Slots@D: @w%-30d@D]@n\r\n", account->slots);
     ch->send_to("@D[@gRP Points  @D: @w%-30d@D]@n\r\n", account->rpp);
 

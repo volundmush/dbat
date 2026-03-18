@@ -1,3 +1,5 @@
+#include <unordered_map>
+#include <memory>
 #include "dbat/game/Descriptor.hpp"
 #include "dbat/game/Account.hpp"
 #include "dbat/game/Character.hpp"

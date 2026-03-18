@@ -883,7 +883,7 @@ int read_sense_memory(Character *ch, Character *vict)
     if (IS_NPC(ch))
         return 0;
 
-    auto &p = players.at(ch->id);
+    auto p = ch->player;
 
     if (IS_NPC(vict))
     {
@@ -891,7 +891,7 @@ int read_sense_memory(Character *ch, Character *vict)
     }
     else
     {
-        return p->sense_player.contains(vict->id);
+        return p->sense_player.contains(vict->player->id);
     }
 }
 
@@ -905,7 +905,7 @@ void sense_memory_write(Character *ch, Character *vict)
 
     if (IS_NPC(ch))
         return;
-    auto &p = players.at(ch->id);
+    auto p = ch->player;
 
     if (IS_NPC(vict))
     {
@@ -913,7 +913,7 @@ void sense_memory_write(Character *ch, Character *vict)
     }
     else
     {
-        p->sense_player.insert(vict->id);
+        p->sense_player.insert(vict->player->id);
     }
 }
 

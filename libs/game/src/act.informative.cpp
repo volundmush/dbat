@@ -1874,10 +1874,6 @@ void show_obj_to_char(Object *obj, Character *ch, int mode)
                 ch->sendText("There appears to be nothing written on it.\r\n");
             return;
 
-        case ITEM_BOARD:
-            show_board(GET_OBJ_VNUM(obj), ch);
-            break;
-
         case ITEM_CONTROL:
             ch->send_to("@RFUEL@D: %s%s@n\r\n", GET_FUEL(obj) >= 200 ? "@G" : GET_FUEL(obj) >= 100 ? "@Y"
                                                                                                    : "@r",
@@ -3632,44 +3628,6 @@ static void examine_item(Character *ch, Object *obj, const char *arg)
     }
 }
 
-static void handle_board_read(Character *ch, char *arg)
-{
-    Object *obj = ch->searchInventory([](const auto &o)
-                                      { return GET_OBJ_TYPE(o) == ITEM_BOARD; });
-    if (!obj)
-        obj = ch->location.searchObjects([](const auto &o)
-                                         { return GET_OBJ_TYPE(o) == ITEM_BOARD; });
-
-    if (!obj)
-    {
-        ch->sendText("Read what?\r\n");
-        return;
-    }
-
-    char number[MAX_STRING_LENGTH];
-    arg = one_argument(arg, number);
-
-    if (!*number)
-    {
-        ch->sendText("Read what?\r\n");
-    }
-    else if (isname(number, obj->getName()))
-    {
-        show_board(GET_OBJ_VNUM(obj), ch);
-    }
-    else if (!isdigit(*number) || strchr(number, '.'))
-    {
-        char new_arg[MAX_STRING_LENGTH];
-        snprintf(new_arg, sizeof(new_arg), "%s %s", number, arg);
-        look_at_target(ch, new_arg, 0);
-    }
-    else
-    {
-        int msg = atoi(number);
-        board_display_msg(GET_OBJ_VNUM(obj), ch, msg);
-    }
-}
-
 static bool handle_exdesc_look(Character *ch, char *arg, const std::vector<ExtraDescriptionView> &ex_desc_list, Object *obj)
 {
     char *desc;
@@ -3768,14 +3726,7 @@ static void look_at_target(Character *ch, char *arg, int cmread)
         return;
     }
 
-    if (cmread)
-    {
-        handle_board_read(ch, arg);
-    }
-    else
-    {
-        handle_look(ch, arg);
-    }
+    handle_look(ch, arg);
 }
 
 static void look_out_window(Character *ch, const char *arg)

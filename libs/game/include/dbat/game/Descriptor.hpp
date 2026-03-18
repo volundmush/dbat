@@ -33,6 +33,7 @@ struct txt_q {
 
 struct GameConnectionInfo {
     std::string id;
+    // user_id and pc_id are both UUIDs represented as strings.
     std::string user_id;
     std::string pc_id;
     time_t created_at;
@@ -134,6 +135,6 @@ struct descriptor_data {
 #define STATE(d)    ((d)->connected)
 
 extern struct descriptor_data *descriptor_list;
-extern std::map<int64_t, struct descriptor_data *> sessions;
+extern std::unordered_map<std::string, struct descriptor_data *> sessions;
 
 extern int create_join_session(std::shared_ptr<GameConnectionInfo> info);

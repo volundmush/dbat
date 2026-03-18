@@ -240,51 +240,6 @@ ACMD(do_reboot) {
 constexpr int NUM_OBJ_UNIQUE_POOLS = 5000;
 
 
-
-/* save the auction file */
-void auc_save() {
-    FILE *fl;
-
-    if ((fl = fopen(AUCTION_FILE, "w")) == nullptr)
-        basic_mud_log("SYSERR: Can't write to '%s' auction file.", AUCTION_FILE);
-    else {
-        auto con = get_room(80)->getObjects().snapshot_weak();
-        for (auto obj : dbat::util::filter_raw(con)) {
-            fprintf(fl, "%ld %s %ld %ld %d %d %ld\n", obj->id, GET_AUCTERN(obj), GET_AUCTER(obj),
-                        GET_CURBID(obj), GET_STARTBID(obj), GET_BID(obj), GET_AUCTIME(obj));
-        }
-        fprintf(fl, "~END~\n");
-        fclose(fl);
-    }
-}
-
-/* load from auction file */
-void auc_load(Object *obj) {
-    char line[500], filler[50];
-    int64_t oID;
-    time_t timer;
-    int aID, bID, cost, startc;
-    FILE *fl;
-
-    if ((fl = fopen(AUCTION_FILE, "r")) == nullptr)
-        basic_mud_log("SYSERR: Can't read from '%s' auction file.", AUCTION_FILE);
-    else {
-        while (!feof(fl)) {
-            get_line(fl, line);
-            sscanf(line, "%" I64T " %s %d %d %d %d %ld\n", &oID, filler, &aID, &bID, &startc, &cost, &timer);
-            if (obj->id == oID) {
-                GET_AUCTERN(obj) = strdup(filler);
-                GET_AUCTER(obj) = aID;
-                GET_CURBID(obj) = bID;
-                GET_STARTBID(obj) = startc;
-                GET_BID(obj) = cost;
-                GET_AUCTIME(obj) = timer;
-            }
-        }
-        fclose(fl);
-    }
-}
-
 time_t old_beginning_of_time;
 
 bitvector_t asciiflag_conv(char *flag) {

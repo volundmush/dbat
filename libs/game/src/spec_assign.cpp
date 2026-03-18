@@ -84,11 +84,5 @@ void assign_rooms()
     ASSIGNROOM(5, dump);
     ASSIGNROOM(3, pet_shops);
     ASSIGNROOM(4, pet_shops);
-    ASSIGNROOM(81, auction);
-    ASSIGNROOM(82, auction);
-    ASSIGNROOM(83, auction);
-    ASSIGNROOM(84, auction);
-    ASSIGNROOM(85, auction);
-    ASSIGNROOM(86, auction);
     /* Gauntlet rooms track how far a player progressed into zone  Jamdog - 13th Feb 2006 */
 }

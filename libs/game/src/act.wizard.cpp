@@ -1739,8 +1739,11 @@ static void do_stat_character(Character *ch, Character *k)
     ch->sendFmt("DROOM: [{}]\r\n", GET_DROOM(k));
     if (IS_MOB(k))
     {
-        if (auto mas = k->getBaseStat<int>("master_id"); mas != NOTHING)
-            sprintf(buf, ", Master: %s", get_name_by_id(mas));
+        if (auto mas = k->master_id; !mas.empty()) {
+            if(auto p = players.find(mas); p != players.end())
+                mas = p->second->name;
+            sprintf(buf, ", Master: %s", mas.c_str());
+        }
         else
             buf[0] = 0;
         ch->send_to("Keyword: %s, VNum: [%5d], RNum: [%5d]%s\r\n", k->getName(), GET_MOB_VNUM(k), GET_MOB_RNUM(k), buf);
@@ -1762,14 +1765,8 @@ static void do_stat_character(Character *ch, Character *k)
 
         ch->send_to("Created: [%s], Last Logon: [%s], Played [%dh %dm], Age [%d]\r\n", buf1, cmbuf2, (int)k->time.played / 3600, (int)(((int64_t)k->time.played % 3600) / 60), 0);
 
-        if (auto find = players.find(k->id); find != players.end())
-        {
-            ch->send_to("@YOwned by User@D: [@C%s@D]@n\r\n", find->second->account->name.c_str());
-        }
-        if (!IS_NPC(k))
-        {
-            ch->send_to("@RCharacter Deaths@D: @r%d@n\r\n", GET_DCOUNT(k));
-        }
+        ch->send_to("@YOwned by User@D: [@C%s@D]@n\r\n", k->player->account->name.c_str());
+        ch->send_to("@RCharacter Deaths@D: @r%d@n\r\n", GET_DCOUNT(k));
 
         ch->send_to("Align: [%4d], Ethic: [%4d]", GET_ALIGNMENT(k), GET_ETHIC_ALIGNMENT(k));
 

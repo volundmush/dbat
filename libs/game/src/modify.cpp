@@ -914,79 +914,7 @@ void string_add(struct descriptor_data *d, char *str)
 
 static void playing_string_cleanup(struct descriptor_data *d, int action)
 {
-    struct board_info *board;
-    struct board_msg *fore, *cur, *aft;
 
-    if (PLR_FLAGGED(d->character, PLR_MAILING))
-    {
-        if (action == STRINGADD_SAVE && *d->str)
-        {
-            store_mail(d->mail_to, GET_IDNUM(d->character), *d->str);
-            d->sendText("Message sent!\r\n");
-            notify_if_playing(d->character, d->mail_to);
-        }
-        else
-        {
-            d->sendText("Mail aborted.\r\n");
-            free(*d->str);
-            free(d->str);
-        }
-    }
-
-    if (PLR_FLAGGED(d->character, PLR_WRITING))
-    {
-        if (d->mail_to >= BOARD_MAGIC)
-        {
-            if (action == STRINGADD_ABORT)
-            {
-                /* find the message */
-                board = locate_board(d->mail_to - BOARD_MAGIC);
-                fore = cur = aft = nullptr;
-                for (cur = BOARD_MESSAGES(board); cur; cur = aft)
-                {
-                    aft = MESG_NEXT(cur);
-                    if (cur->data == *d->str)
-                    {
-                        if (BOARD_MESSAGES(board) == cur)
-                        {
-                            if (MESG_NEXT(cur))
-                            {
-                                BOARD_MESSAGES(board) = MESG_NEXT(cur);
-                            }
-                            else
-                            {
-                                BOARD_MESSAGES(board) = nullptr;
-                            }
-                        }
-                        if (fore)
-                        {
-                            MESG_NEXT(fore) = aft;
-                        }
-                        if (aft)
-                        {
-                            MESG_PREV(aft) = fore;
-                        }
-                        free(cur->subject);
-                        free(cur->data);
-                        free(cur);
-                        BOARD_MNUM(board)
-                        --;
-                        d->sendText("Post aborted.\r\n");
-                        return;
-                    }
-                    fore = cur;
-                }
-                d->sendText("Unable to find your message to delete it!\r\n");
-            }
-            else
-            {
-                d->sendText("\r\nPost saved.\r\n");
-                save_board(locate_board(d->mail_to - BOARD_MAGIC));
-            }
-        }
-
-        /* hm... I wonder what happens when you can't finish writing a note */
-    }
 }
 
 static void exdesc_string_cleanup(struct descriptor_data *d, int action)

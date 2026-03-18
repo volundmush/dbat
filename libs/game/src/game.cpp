@@ -60,11 +60,11 @@ namespace dbat::link {
             "FROM dbat.incoming_events AS e LEFT JOIN dbat.pcs AS p ON e.pc_id = p.id");
 
         for(const auto& row : rows) {
-            auto character_id = row["character_id"].as<int64_t>();
+            auto pc_id = row["character_id"].as<std::string>();
             auto event_type = row["event_type"].as<std::string>();
             auto data = row["data"].as<std::string>();
 
-            auto it = sessions.find(character_id);
+            auto it = sessions.find(pc_id);
             if(it == sessions.end()) continue;
             auto& desc = it->second;
             if(!desc) continue;

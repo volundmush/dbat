@@ -30,8 +30,4 @@ extern void perform_remove(Character *ch, int pos);
 
 extern int64_t max_carry_weight(Character *ch);
 
-extern void stop_auction(int type, Character *ch);
-
-extern void check_auction(uint64_t heartPulse, double deltaTime);
-
 // commands

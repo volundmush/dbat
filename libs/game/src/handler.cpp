@@ -82,9 +82,9 @@ const char *get_i_name(Character *ch, Character *vict)
         return name;
     }
 
-    auto &p = players.at(ch->id);
+    auto p = ch->player;
 
-    auto found = p->dub_names.find(vict->id);
+    auto found = p->dub_names.find(vict->player->id);
     if (found == p->dub_names.end()) {
         sprintf(name, "%s", RACE(vict));
         return name;

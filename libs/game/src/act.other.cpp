@@ -10772,8 +10772,6 @@ ACMD(do_quit)
         ch->sendText("Goodbye, friend.. Come back soon!\r\n");
         if (ch->followers || ch->master)
             die_follower(ch);
-        if (ch == ch_selling)
-            stop_auction(AUC_QUIT_CANCEL, nullptr);
 
         /*  We used to check here for duping attempts, but we may as well
          *  do it right in extract_char(), since there is no check if a

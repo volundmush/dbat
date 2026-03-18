@@ -135,30 +135,6 @@ static json dump_zones()
 }
 
 
-// account_data serialize/deserialize...
-static json dump_accounts()
-{
-    json j;
-
-    for (auto &[v, r] : accounts)
-    {
-        j.push_back(*r);
-    }
-
-    return j;
-}
-
-void load_accounts(const std::filesystem::path &loc)
-{
-    for (auto acc : load_from_file(loc, "accounts.json"))
-    {
-        auto vn = acc.at("id").get<int64_t>();
-        auto a = std::make_shared<Account>();
-        acc.get_to(*a);
-        accounts.emplace(vn, a);
-    }
-}
-
 void load_dgscript_prototypes(const std::filesystem::path &loc)
 {
     for (auto j : load_from_file(loc, "dgscript_prototypes.json"))
@@ -855,6 +831,7 @@ static json dump_npc_prototypes()
 
 void load_characters_initial(const std::filesystem::path &loc)
 {
+    /*
     for (auto j : load_from_file(loc, "characters.json"))
     {
         auto id = j["id"].get<int64_t>();
@@ -867,10 +844,12 @@ void load_characters_initial(const std::filesystem::path &loc)
         }
         Character::registry.emplace(id, c);
     }
+        */
 }
 
 void load_characters_finish(const std::filesystem::path &loc)
 {
+    /*
     for (auto j : load_from_file(loc, "characters.json"))
     {
         auto id = j["id"].get<int64_t>();
@@ -884,6 +863,7 @@ void load_characters_finish(const std::filesystem::path &loc)
             hl.get_to(static_cast<HasLocation&>(*ch));
         }
     }
+        */
 }
 
 void load_npc_prototypes(const std::filesystem::path &loc)
@@ -925,6 +905,7 @@ static json dump_players()
 
 void load_players(const std::filesystem::path &loc)
 {
+    /*
     for (auto j : load_from_file(loc, "players.json"))
     {
         auto id = j["id"].get<int64_t>();
@@ -939,6 +920,7 @@ void load_players(const std::filesystem::path &loc)
         load_inventory(*ch, j["character"]);
         load_equipment(*ch, j["character"]);
     }
+        */
 }
 
 std::vector<std::filesystem::path> getDumpFiles(const std::filesystem::path &dir, std::string_view pattern)
@@ -1052,7 +1034,6 @@ namespace dbat::save {
 
     static const std::vector<SaveTask>& getSaveUserTasks() {
         static const std::vector<SaveTask> tasks = {
-            {"accounts", dump_accounts},
             {"players", dump_players},
             // TODO: Add structures to replace saverooms.
             {"saverooms", dump_save_rooms}
@@ -1170,34 +1151,4 @@ namespace dbat::save {
         runSaveSyncHelper(now, getSaveAssetTasks(), "assets", "assets-");
     }
 
-}
-
-
-void rest_post_script(int accountID, int scriptID, const std::string &data)
-{
-    auto &acc = accounts.at(accountID);
-    json j;
-    try
-    {
-        j = json::parse(data);
-    }
-    catch (const json::parse_error &e)
-    {
-        basic_mud_log("Error parsing JSON data for script %d: %s", scriptID, e.what());
-        return;
-    }
-    if (trig_index.contains(scriptID))
-    {
-        auto &trig = trig_index.at(scriptID);
-        // TODO: Post the data to the trigger
-
-        basic_mud_log("%s updated DgScript %d: '%s'", acc->name.c_str(), scriptID, trig->name);
-    }
-    else
-    {
-        auto t = std::make_shared<DgScriptPrototype>();
-        j.get_to(*t);
-        trig_index.emplace(scriptID, t);
-        basic_mud_log("%s created DgScript %d: '%s'", acc->name.c_str(), scriptID, t->name);
-    }
 }

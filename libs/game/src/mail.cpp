@@ -1,8 +1,12 @@
 #include "dbat/game/mail.hpp"
 #include "dbat/game/Database.hpp"
 #include "dbat/game/Character.hpp"
+#include "dbat/game/CharacterUtils.hpp"
 #include "dbat/game/TimeInfo.hpp"
 #include "dbat/game/comm.hpp"
+#include "dbat/game/interpreter.hpp"
+
+#include "dbat/game/const/AdminLevel.hpp"
 
 int count_unreceived_mail(const std::string& playerId)
 {
@@ -12,7 +16,7 @@ int count_unreceived_mail(const std::string& playerId)
 
     auto result = txn->exec(
         "SELECT COUNT(*) FROM dbat.mail WHERE recipient_id = $1 AND received_at IS NULL",
-        {playerId}
+        pqxx::params{playerId}
     );
 
     if (result.empty())
@@ -29,7 +33,7 @@ int count_unread_mail(const std::string& playerId)
 
     auto result = txn->exec(
         "SELECT COUNT(*) FROM dbat.mail WHERE recipient_id = $1 AND received_at IS NOT NULL AND is_read = false",
-        {playerId}
+        pqxx::params{playerId}
     );
 
     if (result.empty())
@@ -38,41 +42,10 @@ int count_unread_mail(const std::string& playerId)
     return result[0][0].as<int>();
 }
 
-SPECIAL(postmaster)
-{
-    if (!ch->desc || IS_NPC(ch))
-        return false;
-
-    if (!(CMD_IS("mail") || CMD_IS("check") || CMD_IS("receive")))
-        return false;
-
-    if (CMD_IS("mail"))
-    {
-        postmaster_send_mail(ch, (Character *)me, cmd, argument);
-        return true;
-    }
-    else if (CMD_IS("check"))
-    {
-        postmaster_check_mail(ch, (Character *)me, cmd, argument);
-        return true;
-    }
-    else if (CMD_IS("receive"))
-    {
-        postmaster_receive_mail(ch, (Character *)me, cmd, argument);
-        return true;
-    }
-    return false;
-}
 
 void postmaster_send_mail(Character *ch, Character *mailman,
                          int cmd, char *arg)
 {
-    if (GET_LEVEL(ch) < MIN_MAIL_LEVEL && GET_ADMLEVEL(ch) < ADMLVL_IMMORT)
-    {
-        act("$n tells you, 'Sorry, you have to be level $d to send mail!'", false, mailman, nullptr, ch, TO_VICT, MIN_MAIL_LEVEL);
-        return;
-    }
-
     ch->send_to("@YThe mail system is currently disabled for composition.@n\r\n"
                 "@YPlease try again in a future update.@n\r\n");
 }
@@ -95,7 +68,7 @@ void postmaster_check_mail(Character *ch, Character *mailman,
 
     auto unreadResult = txn->exec(
         "SELECT COUNT(*) FROM dbat.mail WHERE recipient_id = $1 AND received_at IS NULL",
-        {ch->player->id}
+        pqxx::params{ch->player->id}
     );
 
     int unreadCount = 0;
@@ -106,7 +79,7 @@ void postmaster_check_mail(Character *ch, Character *mailman,
 
     txn->exec(
         "UPDATE dbat.mail SET received_at = NOW() WHERE recipient_id = $1 AND received_at IS NULL",
-        {ch->player->id}
+        pqxx::params{ch->player->id}
     );
 
     if (unreadCount > 0)
@@ -140,7 +113,7 @@ void postmaster_receive_mail(Character *ch, Character *mailman,
         "FROM dbat.mail "
         "WHERE recipient_id = $1 AND received_at IS NOT NULL "
         "ORDER BY created_at ASC",
-        {ch->player->id}
+        pqxx::params{ch->player->id}
     );
 
     if (mailResult.empty())
@@ -163,7 +136,7 @@ void postmaster_receive_mail(Character *ch, Character *mailman,
 
         auto senderResult = txn->exec(
             "SELECT name FROM public.pcs WHERE id = $1",
-            {senderId}
+            pqxx::params{senderId}
         );
 
         std::string senderName = "Unknown";
@@ -207,7 +180,7 @@ void read_mail_message(Character *ch, Character *mailman, int messageNum)
         "WHERE recipient_id = $1 AND received_at IS NOT NULL "
         "ORDER BY created_at ASC "
         "LIMIT 1 OFFSET $2",
-        {ch->player->id, messageNum - 1}
+        pqxx::params{ch->player->id, messageNum - 1}
     );
 
     if (mailResult.empty())
@@ -223,11 +196,11 @@ void read_mail_message(Character *ch, Character *mailman, int messageNum)
     int64_t icTimestamp = row["ic_timestamp"].as<int64_t>();
     int64_t mailId = row["id"].as<int64_t>();
 
-    txn->exec("UPDATE dbat.mail SET is_read = true WHERE id = $1", {mailId});
+    txn->exec("UPDATE dbat.mail SET is_read = true WHERE id = $1", pqxx::params{mailId});
 
     auto senderResult = txn->exec(
         "SELECT name FROM public.pcs WHERE id = $1",
-        {senderId}
+        pqxx::params{senderId}
     );
 
     std::string senderName = "Unknown";
@@ -245,4 +218,31 @@ void read_mail_message(Character *ch, Character *mailman, int messageNum)
     ch->send_to("@c-------------------------------------------------------@n\r\n");
     ch->send_to("@w{}\r\n", body);
     ch->send_to("@c-------------------------------------------------------@n\r\n");
+}
+
+
+SPECIAL(postmaster)
+{
+    if (!ch->desc || IS_NPC(ch))
+        return false;
+
+    if (!(CMD_IS("mail") || CMD_IS("check") || CMD_IS("receive")))
+        return false;
+
+    if (CMD_IS("mail"))
+    {
+        postmaster_send_mail(ch, (Character *)me, cmd, argument);
+        return true;
+    }
+    else if (CMD_IS("check"))
+    {
+        postmaster_check_mail(ch, (Character *)me, cmd, argument);
+        return true;
+    }
+    else if (CMD_IS("receive"))
+    {
+        postmaster_receive_mail(ch, (Character *)me, cmd, argument);
+        return true;
+    }
+    return false;
 }

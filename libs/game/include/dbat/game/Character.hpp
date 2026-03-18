@@ -224,6 +224,9 @@ struct Character : public CharacterBase, public HasID, public HasLocation, publi
     void gainGrowth(double);
 
     // Instance-relevant fields below...
+
+    std::string master_id; // used by NPCs
+
     struct time_data time{};    /* PC's AGE in days			*/
     struct affected_type *affected{};
     /* affected by what spells		*/

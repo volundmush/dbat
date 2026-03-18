@@ -2,6 +2,8 @@
 #include <string>
 #include "Command.hpp"
 
+SPECIAL(postmaster);
+
 constexpr int MIN_MAIL_LEVEL = 3;
 
 int count_unreceived_mail(const std::string& playerId);

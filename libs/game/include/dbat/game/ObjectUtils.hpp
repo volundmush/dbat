@@ -19,12 +19,6 @@ void auto_equip(Character *ch, Object *obj, int location);
 #define GET_OBJ_POSTTYPE(obj)   obj->posttype
 #define GET_OBJ_POSTED(obj)     obj->posted_to
 #define GET_FELLOW_WALL(obj)    obj->fellow_wall
-#define GET_AUCTER(obj)         obj->aucter
-#define GET_CURBID(obj)         obj->curBidder
-#define GET_AUCTERN(obj)        obj->auctname
-#define GET_AUCTIME(obj)        obj->aucTime
-#define GET_BID(obj)            obj->bid
-#define GET_STARTBID(obj)       obj->startbid
 #define FOOB(obj)               obj->getBaseStat<int>("foob")
 /* Below is used for "homing" ki attacks */
 #define TARGET(obj)             obj->target

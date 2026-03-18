@@ -51,7 +51,7 @@ void Account::modRPP(int amt)
 
 void to_json(nlohmann::json &j, const Account &a)
 {
-    if (a.id != NOTHING)
+    if (!a.id.empty())
         j["id"] = a.id;
     if (!a.name.empty())
         j["name"] = a.name;

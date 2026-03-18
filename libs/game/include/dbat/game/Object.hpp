@@ -95,14 +95,6 @@ struct Object : public ObjectBase, public HasID, public HasInteractive, public H
     int posttype{};
     // for icewalls
     struct Object *fellow_wall{};
-
-    // auction data...
-    char *auctname{};
-    int64_t aucter{};
-    int64_t curBidder{};
-    time_t aucTime{};
-    int bid{};
-    int startbid{};
     
 
     bool isProvidingLight();

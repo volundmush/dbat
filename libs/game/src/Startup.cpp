@@ -117,7 +117,7 @@ void boot_db_world() {
 
     // Now loading user data...
     LINFO("Loading accounts.");
-    load_accounts(userLatest);
+    //load_accounts(userLatest);
 
     LINFO("Loading players.");
     load_players(userLatest);
@@ -176,13 +176,6 @@ void boot_db_help() {
 
 }
 
-void boot_db_mail() {
-    LINFO("Booting mail system.");
-    if (!scan_file()) {
-        LINFO("    Mail boot failed -- Mail system disabled");
-    }
-}
-
 void boot_db_socials() {
     LINFO("Loading social messages.");
     boot_social_messages();
@@ -215,11 +208,6 @@ void boot_db_sort() {
     sort_feats();
 }
 
-void boot_db_boards() {
-    LINFO("Booting boards system.");
-    init_boards();
-}
-
 
 void boot_db_spacemap() {
     FILE *mapfile = fopen(MAP_FILE, "r");
@@ -242,13 +230,11 @@ void boot_db_new() {
     boot_db_textfiles();
     boot_db_spellfeats();
     boot_db_world();
-    boot_db_mail();
     boot_db_socials();
     boot_db_commands();
     boot_db_help();
     boot_db_specials();
     boot_db_sort();
-    boot_db_boards();
     boot_db_spacemap();
     topLoad();
 }

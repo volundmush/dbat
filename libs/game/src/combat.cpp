@@ -2030,15 +2030,6 @@ void huge_update(uint64_t heartPulse, double deltaTime)
     for (auto k : dbat::util::filter_raw(subs))
     {
 
-        if (GET_AUCTER(k) > 0 && GET_AUCTIME(k) + 604800 <= time(nullptr))
-        {
-            if (IN_ROOM(k) && k->location.getVnum() == 80)
-            {
-                room_vnum inroom = IN_ROOM(k);
-                extract_obj(k);
-                continue;
-            }
-        }
         if (KICHARGE(k) <= 0)
         {
             continue;

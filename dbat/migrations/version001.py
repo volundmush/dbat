@@ -51,6 +51,25 @@ CREATE TABLE dbat.mail (
     is_read BOOLEAN NOT NULL DEFAULT FALSE
 );
 
+CREATE TABLE dbat.market (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    seller_id UUID REFERENCES public.pcs(id) ON DELETE RESTRICT,
+    auction BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    expires_at TIMESTAMPTZ NOT NULL,
+    name TEXT NOT NULL,
+    data JSONB NOT NULL DEFAULT '{}'::jsonb,
+    price BIGINT NOT NULL
+);
+
+CREATE TABLE dbat.market_bidding (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    market_id UUID REFERENCES dbat.market(id) ON DELETE CASCADE,
+    bidder_id UUID REFERENCES public.pcs(id) ON DELETE RESTRICT,
+    amount BIGINT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
 CREATE TABLE dbat.help (
     id SERIAL PRIMARY KEY,
     keywords TEXT NOT NULL,
