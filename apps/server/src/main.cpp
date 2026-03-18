@@ -3,7 +3,7 @@
 #include "dbat/game/Database.hpp"
 #include "dbat/game/comm.hpp"
 #include "dbat/game/Startup.hpp"
-#include "dbat/game/saveload.hpp"
+#include "dbat/game/load.hpp"
 #include "dbat/game/game.hpp"
 
 int main(int argc, char** argv) {

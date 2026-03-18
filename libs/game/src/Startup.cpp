@@ -1,5 +1,5 @@
 #include "dbat/game/Startup.hpp"
-#include "dbat/game/saveload.hpp"
+#include "dbat/game/load.hpp"
 #include <vector>
 #include <filesystem>
 
@@ -50,86 +50,63 @@ void boot_db_shadow() {
 
 void boot_db_world() {
 
-    auto assetDumps = getDumpFiles("data/dumps/assets", "assets-");
-    if (!assetDumps.empty()) {
-        LINFO("Newest assets dump: {}", assetDumps.front().string());
-    } else {
-        LINFO("No matching assets dumps found.");
-        return;
-    }
-
-    auto assetLatest = assetDumps.front();
-
-    auto userDumps = getDumpFiles("data/dumps/user", "user-");
-    if (!userDumps.empty()) {
-        LINFO("Newest users dump: {}", userDumps.front().string());
-    } else {
-        LINFO("No matching user dumps found.");
-        return;
-    }
-
-    auto userLatest = userDumps.front();
-
     LINFO("Loading stat handlers...");
     init_stat_handlers();
 
     LINFO("Loading global data...");
-    load_globaldata(assetLatest);
+    load_globaldata();
 
     LINFO("Loading Zones...");
-    load_zones(assetLatest);
+    load_zones();
 
     LINFO("Loading DgScripts and generating index.");
-    load_dgscript_prototypes(assetLatest);
+    load_dgscript_prototypes();
 
     LINFO("Loading mobs and generating index.");
-    load_npc_prototypes(assetLatest);
+    load_npc_prototypes();
 
     LINFO("Loading objs and generating index.");
-    load_item_prototypes(assetLatest);
+    load_item_prototypes();
 
     LINFO("Loading rooms.");
-    load_rooms(assetLatest);
+    load_rooms();
 
     LINFO("Loading Grid Templates...");
-    load_grid_templates(assetLatest);
+    load_grid_templates();
 
     LINFO("Loading areas initial...");
-    load_areas_initial(assetLatest);
+    load_areas_initial();
 
     LINFO("Loading shops.");
-    load_shops(assetLatest);
+    load_shops();
 
     LINFO("Loading guild masters.");
-    load_guilds(assetLatest);
+    load_guilds();
 
     LINFO("Loading exits.");
-    load_exits(assetLatest);
-
-    LINFO("Loading help entries.");
-    load_help(assetLatest);
+    load_exits();
 
     LINFO("Loading assemblies.");
-    load_assemblies(assetLatest);
+    load_assemblies();
 
     LINFO("Loading areas finish...");
-    load_areas_finish(assetLatest);
+    load_areas_finish();
 
     // Now loading user data...
     LINFO("Loading accounts.");
     //load_accounts(userLatest);
 
     LINFO("Loading players.");
-    load_players(userLatest);
+    load_players();
 
     LINFO("Loading characters initial...");
-    load_characters_initial(userLatest);
+    load_characters_initial();
 
     LINFO("Loading structures initial...");
-    load_structures_initial(userLatest);
+    load_structures_initial();
 
     LINFO("Loading structures finish...");
-    load_structures_finish(userLatest);
+    load_structures_finish();
 
     // Now that all of the game entities have been spawned, we can finish loading
     // relations between them.

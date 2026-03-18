@@ -1412,11 +1412,14 @@ ACMD(do_assemble)
         return;
     }
 
-    if ((lVnum = assemblyFindAssembly(arg2)) < 0 && (lVnum = assemblyGetAssemblyIndex(atoi(arg2))) < 0)
+    vnum directVnum = atoi(arg2);
+    if ((lVnum = assemblyFindAssembly(arg2)) < 0 && !assemblyGetAssemblyPtr(directVnum))
     {
         ch->send_to("You can't %s %s %s.\r\n", CMD_NAME, AN(arg2), arg2);
         return;
     }
+    if (lVnum < 0)
+        lVnum = directVnum;
     else if (!assemblyCheckComponents(lVnum, ch, false))
     {
         ch->sendText("You haven't got all the things you need.\r\n");

@@ -7,11 +7,18 @@
 #include "dbat/game/Area.hpp"
 #include "dbat/game/Structure.hpp"
 #include "dbat/game/Character.hpp"
+#include "dbat/game/players.hpp"
 #include "dbat/game/CharacterPrototype.hpp"
 #include "dbat/game/Object.hpp"
 #include "dbat/game/ObjectPrototype.hpp"
 #include "dbat/game/assemblies.hpp"
+#include "dbat/game/weather.hpp"
+#include "dbat/game/TimeInfo.hpp"
+#include "dbat/game/ID.hpp"
 #include <nlohmann/json.hpp>
+
+using ::to_json;
+using ::from_json;
 
 namespace dbat::dirty {
 
@@ -24,7 +31,32 @@ namespace dbat::dirty {
         if(!players.empty()) {
             for(const auto& id : players) {
                 if(auto find = ::players.find(id); find != ::players.end()) {
-                    // TODO: handle.
+                    auto &p = *find->second;
+                    nlohmann::json j;
+                    to_json(j, p);
+
+                    txn->exec(
+                        "INSERT INTO dbat.pc_components (pc_id, component_name, data, created_at, updated_at) "
+                        "VALUES ($1, 'dbat_player', $2::jsonb, NOW(), NOW()) "
+                        "ON CONFLICT (pc_id, component_name) DO UPDATE SET "
+                        "data = EXCLUDED.data, "
+                        "updated_at = NOW()",
+                        {id, j.dump()}
+                    );
+
+                    if(p.character) {
+                        nlohmann::json jc;
+                        to_json(jc, *p.character);
+
+                        txn->exec(
+                            "INSERT INTO dbat.pc_components (pc_id, component_name, data, created_at, updated_at) "
+                            "VALUES ($1, 'dbat_character', $2::jsonb, NOW(), NOW()) "
+                            "ON CONFLICT (pc_id, component_name) DO UPDATE SET "
+                            "data = EXCLUDED.data, "
+                            "updated_at = NOW()",
+                            {id, jc.dump()}
+                        );
+                    }
                 } else {
                     // was deleted!
                 }
@@ -56,8 +88,7 @@ namespace dbat::dirty {
         if(!dgproto.empty()) {
             for(const auto& id : dgproto) {
                 if(auto find = trig_index.find(id); find != trig_index.end()) {
-                    nlohmann::json j;
-                    to_json(j, *find->second);
+                    auto &dg = *find->second;
                     txn->exec(
                         "INSERT INTO dbat.dgproto (id, name, attach_type, trigger_type, narg, arglist, body, created_at, updated_at) "
                         "VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW()) "
@@ -69,7 +100,7 @@ namespace dbat::dirty {
                         "arglist = EXCLUDED.arglist, "
                         "body = EXCLUDED.body, "
                         "updated_at = NOW()",
-                        {id, j.value("name", ""), j.value("attach_type", ""), j.value("trigger_type", 0), j.value("narg", 0), j.value("arglist", ""), j.value("body", "")}
+                        {dg.vn, dg.name, dg.attach_type, dg.trigger_type, dg.narg, dg.arglist, dg.scriptString()}
                     );
                 } else {
                     txn->exec("DELETE FROM dbat.dgproto WHERE id=$1", {id});
@@ -121,15 +152,17 @@ namespace dbat::dirty {
         if(!rooms.empty()) {
             for(const auto& id : rooms) {
                 if(auto find = Room::registry.find(id); find != Room::registry.end()) {
-                    nlohmann::json j;
+                    nlohmann::json j, je;
                     to_json(j, *find->second);
+                    to_json(je, find->second->getDirections());
                     txn->exec(
-                        "INSERT INTO dbat.rooms_blob (id, data, created_at, updated_at) "
-                        "VALUES ($1, $2::jsonb, NOW(), NOW()) "
+                        "INSERT INTO dbat.rooms_blob (id, data, exits, created_at, updated_at) "
+                        "VALUES ($1, $2::jsonb, $3::jsonb, NOW(), NOW()) "
                         "ON CONFLICT (id) DO UPDATE SET "
                         "data = EXCLUDED.data, "
+                        "exits = EXCLUDED.exits, "
                         "updated_at = NOW()",
-                        {id, j.dump()}
+                        {id, j.dump(), je.dump()}
                     );
                 } else {
                     txn->exec("DELETE FROM dbat.rooms_blob WHERE id=$1", {id});
@@ -140,7 +173,7 @@ namespace dbat::dirty {
 
         if(!areas.empty()) {
             for(const auto& id : areas) {
-                if(auto find = Area::registry.find(id); find != Area::registry.end()) {
+                if(auto find = ::areas.find(id); find != ::areas.end()) {
                     nlohmann::json j;
                     to_json(j, *find->second);
                     txn->exec(
@@ -220,9 +253,9 @@ namespace dbat::dirty {
 
         if(!assemblies.empty()) {
             for(const auto& id : assemblies) {
-                if(auto find = assemblies.find(id); find != assemblies.end()) {
+                if(auto find = g_mAssemblyTable.find(id); find != g_mAssemblyTable.end()) {
                     nlohmann::json j;
-                    to_json(j, *find);
+                    to_json(j, find->second);
                     txn->exec(
                         "INSERT INTO dbat.assemblies_blob (id, data, created_at, updated_at) "
                         "VALUES ($1, $2::jsonb, NOW(), NOW()) "
@@ -236,6 +269,66 @@ namespace dbat::dirty {
                 }
             }
             assemblies.clear();
+        }
+
+        {
+            nlohmann::json j;
+            j["time"] = time_info;
+            j["era_uptime"] = era_uptime;
+            j["weather"] = weather_info;
+            j["lastCharacterID"] = Character::lastID;
+            j["lastObjectID"] = Object::lastID;
+            j["lastStructureID"] = lastStructureID;
+            j["lastGridTemplateID"] = lastGridTemplateID;
+            j["lastAreaID"] = lastAreaID;
+            j["lastRoomID"] = Room::lastID;
+            j["lastShopID"] = lastShopID;
+            j["lastGuildID"] = lastGuildID;
+            j["lastScriptID"] = lastScriptID;
+
+            for(const auto& [key, value] : j.items()) {
+                txn->exec(
+                    "INSERT INTO dbat.globals (key, data) VALUES ($1, $2::jsonb) "
+                    "ON CONFLICT (key) DO UPDATE SET data = EXCLUDED.data",
+                    {key, value.dump()}
+                );
+            }
+        }
+    }
+
+    void dirtyAll() {
+        for(const auto& [id, p] : ::players) {
+            players.insert(id);
+        }
+        for(const auto& [id, z] : zone_table) {
+            zones.insert(id);
+        }
+        for(const auto& [id, dg] : trig_index) {
+            dgproto.insert(id);
+        }
+        for(const auto& [id, s] : shop_index) {
+            shops.insert(id);
+        }
+        for(const auto& [id, g] : guild_index) {
+            guilds.insert(id);
+        }
+        for(const auto& [id, r] : Room::registry) {
+            rooms.insert(id);
+        }
+        for(const auto& [id, a] : ::areas) {
+            areas.insert(id);
+        }
+        for(const auto& [id, s] : Structure::registry) {
+            structures.insert(id);
+        }
+        for(const auto& [id, o] : obj_proto) {
+            oproto.insert(id);
+        }
+        for(const auto& [id, n] : mob_proto) {
+            nproto.insert(id);
+        }
+        for(const auto& [vn, a] : g_mAssemblyTable) {
+            assemblies.insert(vn);
         }
     }
 };

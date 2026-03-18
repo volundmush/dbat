@@ -6620,97 +6620,12 @@ ACMD(do_commands)
 
 ACMD(do_history)
 {
-    char arg[MAX_INPUT_LENGTH];
-    int type;
-
-    one_argument(argument, arg);
-    if (IS_NPC(ch))
-        return;
-
-    auto p = ch->player;
-
-    type = search_block(arg, history_types, false);
-    if (!*arg || type < 0)
-    {
-        int i;
-
-        ch->sendText("Usage: history <");
-        for (i = 0; *history_types[i] != '\n'; i++)
-        {
-            if ((i != 3 && GET_ADMLEVEL(ch) <= 0) || GET_ADMLEVEL(ch) >= 1)
-            {
-                ch->send_to(" %s ", history_types[i]);
-            }
-            if (*history_types[i + 1] == '\n')
-            {
-                ch->sendText(">\r\n");
-            }
-            else
-            {
-                if ((i != 3 && GET_ADMLEVEL(ch) <= 0) || GET_ADMLEVEL(ch) >= 1)
-                {
-                    ch->sendText("|");
-                }
-            }
-        }
-        return;
-    }
-
-    if (p->comm_hist[type] && p->comm_hist[type]->text && *p->comm_hist[type]->text)
-    {
-        struct txt_block *tmp;
-        for (tmp = p->comm_hist[type]; tmp; tmp = tmp->next)
-            ch->send_to("%s", tmp->text);
-    }
-    else
-        ch->sendText("You have no history in that channel.\r\n");
+    ch->sendText("You can't see any history.\r\n");
 }
 
 void add_history(Character *ch, char *str, int type)
 {
-    int i = 0;
-    char time_str[MAX_STRING_LENGTH], buf[MAX_STRING_LENGTH];
-    struct txt_block *tmp;
-    time_t ct;
 
-    if (IS_NPC(ch))
-        return;
-
-    auto p = ch->player;
-
-    tmp = p->comm_hist[type];
-    ct = time(nullptr);
-    strftime(time_str, sizeof(time_str), "%H:%M ", localtime(&ct));
-
-    sprintf(buf, "%s%s", time_str, str);
-
-    if (!tmp)
-    {
-        CREATE(p->comm_hist[type], struct txt_block, 1);
-        p->comm_hist[type]->text = strdup(buf);
-    }
-    else
-    {
-        while (tmp->next)
-            tmp = tmp->next;
-        CREATE(tmp->next, struct txt_block, 1);
-        tmp->next->text = strdup(buf);
-
-        for (tmp = p->comm_hist[type]; tmp; tmp = tmp->next, i++)
-            ;
-
-        for (; i > HIST_LENGTH && p->comm_hist[type]; i--)
-        {
-            tmp = p->comm_hist[type];
-            p->comm_hist[type] = tmp->next;
-            if (tmp->text)
-                free(tmp->text);
-            free(tmp);
-        }
-    }
-    /* add this history message to ALL */
-    if (type != HIST_ALL)
-        add_history(ch, str, HIST_ALL);
 }
 
 ACMD(do_scan)

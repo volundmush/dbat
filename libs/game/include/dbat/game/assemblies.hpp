@@ -1,78 +1,67 @@
 #pragma once
 
+#include <vector>
+#include <unordered_map>
+#include "dbat/game/Typedefs.hpp"
+#include <nlohmann/json_fwd.hpp>
+
 struct Character;
 
-typedef struct assembly_data ASSEMBLY;
 typedef struct component_data COMPONENT;
 
-
+struct component_data {
+    bool bExtract;               
+    bool bInRoom;                
+    vnum lVnum;                  
+};
 
 struct assembly_data {
-    long lVnum;                  /* Vnum of the object assembled. */
-    long lNumComponents;         /* Number of components. */
-    unsigned char uchAssemblyType;        /* Type of assembly (ASSM_xxx).
-*/
-    struct component_data *pComponents;          /* Array of component info. */
+    vnum lVnum;                  
+    unsigned char uchAssemblyType;
+    std::vector<component_data> pComponents;
 };
 
-/* Assembly component structure definition. */
-struct component_data {
-    bool bExtract;               /* Extract the object after use. */
-    bool bInRoom;                /* Component in room, not inven. */
-    long lVnum;                  /* Vnum of the component object. */
-};
+extern std::unordered_map<vnum, assembly_data> g_mAssemblyTable;
 
-extern long g_lNumAssemblies;
-extern ASSEMBLY *g_pAssemblyTable;
-
-/* ******************************************************************** *
- * Preprocessor constants.                                             *
- * ******************************************************************** */
-
-/* Assembly type: Used in ASSEMBLY.iAssemblyType */
-constexpr int ASSM_MAKE = 0;     // Assembly must be made.
-constexpr int ASSM_BAKE = 1;     // Assembly must be baked.
-constexpr int ASSM_BREW = 2;     // Assembly must be brewed.
-constexpr int ASSM_ASSEMBLE = 3; // Assembly must be assembled.
-constexpr int ASSM_CRAFT = 4;    // Assembly must be crafted.
-constexpr int ASSM_FLETCH = 5;   // Assembly must be fletched.
-constexpr int ASSM_KNIT = 6;     // Assembly must be knitted.
-constexpr int ASSM_MIX = 7;      // Assembly must be mixed.
-constexpr int ASSM_THATCH = 8;   // Assembly must be thatched.
-constexpr int ASSM_WEAVE = 9;    // Assembly must be woven.
-constexpr int ASSM_FORGE = 10;   // Assembly must be forged.
-
-/* ******************************************************************** *
- * Prototypes for assemblies.c.
- *
- * ******************************************************************** */
+constexpr int ASSM_MAKE = 0;
+constexpr int ASSM_BAKE = 1;
+constexpr int ASSM_BREW = 2;
+constexpr int ASSM_ASSEMBLE = 3;
+constexpr int ASSM_CRAFT = 4;
+constexpr int ASSM_FLETCH = 5;
+constexpr int ASSM_KNIT = 6;
+constexpr int ASSM_MIX = 7;
+constexpr int ASSM_THATCH = 8;
+constexpr int ASSM_WEAVE = 9;
+constexpr int ASSM_FORGE = 10;
 
 extern void assemblyListToChar(Character *pCharacter, int type = 0);
 
-extern bool assemblyAddComponent(long lVnum, long lComponentVnum,
+extern bool assemblyAddComponent(vnum lVnum, vnum lComponentVnum,
                                  bool bExtract, bool bInRoom);
 
-extern bool assemblyCheckComponents(long lVnum, Character *pCharacter, int extract_yes);
+extern bool assemblyCheckComponents(vnum lVnum, Character *pCharacter, int extract_yes);
 
-extern bool assemblyCreate(long lVnum, int iAssembledType);
+extern bool assemblyCreate(vnum lVnum, int iAssembledType);
 
-extern bool assemblyDestroy(long lVnum);
+extern bool assemblyDestroy(vnum lVnum);
 
-extern bool assemblyHasComponent(long lVnum, long lComponentVnum);
+extern bool assemblyHasComponent(vnum lVnum, vnum lComponentVnum);
 
-extern bool assemblyRemoveComponent(long lVnum, long lComponentVnum);
+extern bool assemblyRemoveComponent(vnum lVnum, vnum lComponentVnum);
 
-extern int assemblyGetType(long lVnum);
+extern int assemblyGetType(vnum lVnum);
 
-extern long assemblyCountComponents(long lVnum);
+extern size_t assemblyCountComponents(vnum lVnum);
 
-extern long assemblyFindAssembly(const char *pszAssemblyName);
+extern vnum assemblyFindAssembly(const char *pszAssemblyName);
 
-extern long assemblyGetAssemblyIndex(long lVnum);
+extern vnum assemblyGetComponentVnum(assembly_data *pAssembly, size_t index);
 
-extern long assemblyGetComponentIndex(ASSEMBLY *pAssembly,
-                                      long lComponentVnum);
+extern assembly_data *assemblyGetAssemblyPtr(vnum lVnum);
 
-ASSEMBLY *assemblyGetAssemblyPtr(long lVnum);
+void to_json(nlohmann::json& j, const component_data& c);
+void from_json(const nlohmann::json& j, component_data& c);
 
-/* ******************************************************************** */
+void to_json(nlohmann::json& j, const assembly_data& a);
+void from_json(const nlohmann::json& j, assembly_data& a);

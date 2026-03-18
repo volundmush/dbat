@@ -2126,10 +2126,6 @@ void from_json(const nlohmann::json &j, ChargenData &c)
 
 void to_json(nlohmann::json &j, const PlayerData &p)
 {
-    j["id"] = p.id;
-    j["name"] = p.name;
-    if (!p.user_id.empty())
-        j["user_id"] = p.user_id;
     for (auto &a : p.aliases)
         j["aliases"].push_back(a);
     if (!p.sense_player.empty())
@@ -2147,12 +2143,6 @@ void to_json(nlohmann::json &j, const PlayerData &p)
 
 void from_json(const nlohmann::json &j, PlayerData &p)
 {
-    p.id = j["id"];
-    p.name = j["name"].get<std::string>();
-    if (j.contains(+"user_id"))
-    {
-        j.at(+"user_id").get_to(p.user_id);
-    }
     if (j.contains(+"aliases"))
     {
         for (auto ja : j["aliases"])

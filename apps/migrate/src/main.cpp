@@ -39,7 +39,7 @@
 #include "dbat/game/spell_parser.hpp"
 #include "dbat/game/Shop.hpp"
 #include "dbat/game/Guild.hpp"
-#include "dbat/game/saveload.hpp"
+#include "dbat/game/load.hpp"
 #include "dbat/game/assemblies.hpp"
 #include "dbat/game/vehicles.hpp"
 #include "dbat/circle/CircleAnsi.hpp"
@@ -49,8 +49,8 @@
 #include "dbat/game/Random.hpp"
 #include "dbat/game/ID.hpp"
 #include "dbat/game/Startup.hpp"
-#include "dbat/game/saveload.hpp"
-
+#include "dbat/game/load.hpp"
+#include "dbat/game/Dirty.hpp"
 #include "dbat/game/const/Max.hpp"
 #include "dbat/game/const/Filename.hpp"
 #include "dbat/game/const/Condition.hpp"
@@ -4821,7 +4821,8 @@ void run_migration() {
     // let's experiment here...
     migrate_space();
     printSpace();
-    dbat::save::runSaveSync();
+    dbat::dirty::dirtyAll();
+    dbat::dirty::saveDirty();
     dbat::db::txn->commit();
     destroy_db();
 }

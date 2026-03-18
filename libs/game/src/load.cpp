@@ -1,12 +1,7 @@
-#include "dbat/game/saveload.hpp"
+#include "dbat/game/load.hpp"
 
-#include <fstream>
 #include <chrono>
 #include <execution>
-#include <mutex>
-#include <atomic>
-#include <boost/iostreams/filtering_streambuf.hpp>
-#include <boost/iostreams/filter/gzip.hpp>
 
 #include "dbat/game/json.hpp"
 
@@ -43,9 +38,10 @@ void load_zones()
     auto zrows = dbat::db::txn->exec("SELECT id, data FROM dbat.zones_blob");
     for (const auto& row : zrows)
     {
-        auto id = row.get<int64_t>(0);
+        auto id = row["id"].as<int64_t>();
         auto z = std::make_shared<Zone>();
-        json::from_json(row.get<std::string>(1), *z);
+        auto j = nlohmann::json::parse(row["data"].as<std::string>());
+        from_json(j, *z);
         zone_table.emplace(id, z);
     }
 
@@ -71,90 +67,45 @@ void load_dgscript_prototypes()
 {
     for (const auto& row : dbat::db::txn->exec("SELECT * from dbat.dgproto"))
     {
-        auto id = j["vn"].get<int64_t>();
+
+        auto id = row["id"].as<int64_t>();
         auto t = std::make_shared<DgScriptPrototype>();
-        j.get_to(*t);
+        t->vn = id;
+        t->name = row["name"].as<std::string>();
+        t->attach_type = static_cast<UnitType>(row["attach_type"].as<int>());
+        t->trigger_type = row["trigger_type"].as<int>();
+        t->narg = row["narg"].as<int>();
+        t->arglist = row["arglist"].as<std::string>();
+
+        auto body = row["body"].as<std::string>();
+        t->setBody(body);
+
         trig_index.emplace(id, t);
     }
 }
-
-void load_dgscripts()
-{
-    for (auto j : load_from_file(loc, "dgscripts_characters.json"))
-    {
-        auto id = j["id"].get<int64_t>();
-
-        auto u = Character::registry.at(id);
-
-        for (auto d : j["scripts"])
-        {
-            auto vn = d["vn"].get<int>();
-            auto r = std::make_shared<DgScript>();
-            d["data"].get_to(*r);
-            u->scripts.emplace(vn, r);
-            r->owner.reset(u.get());
-            u->trigger_types |= GET_TRIG_TYPE(r);
-        }
-    }
-
-    for (auto j : load_from_file(loc, "dgscripts_objects.json"))
-    {
-        auto id = j["id"].get<int64_t>();
-
-        auto u = Object::registry.at(id);
-
-        for (auto d : j["scripts"])
-        {
-            auto vn = d["vn"].get<int>();
-            auto r = std::make_shared<DgScript>();
-            d["data"].get_to(*r);
-            u->scripts.emplace(vn, r);
-            r->owner.reset(u.get());
-            u->trigger_types |= GET_TRIG_TYPE(r);
-        }
-    }
-
-    for (auto j : load_from_file(loc, "dgscripts_rooms.json"))
-    {
-        auto id = j["vn"].get<int64_t>();
-
-        auto u = Room::registry.at(id).get();
-
-        for (auto d : j["scripts"])
-        {
-            auto vn = d["vn"].get<int>();
-            auto r = std::make_shared<DgScript>();
-            d["data"].get_to(*r);
-            u->scripts.emplace(vn, r);
-            r->owner.reset(u);
-            u->trigger_types |= GET_TRIG_TYPE(r);
-        }
-    }
-}
-
-
-
 
 // org_data...
 // shops serialize/deserialize...
 void load_shops()
 {
-    for (const auto& row : dbat::db::txn->exec("SELECT * FROM dbat.shops_blob"))
+    for (const auto& row : dbat::db::txn->exec("SELECT id,data FROM dbat.shops_blob"))
     {
-        auto id = j["vnum"].get<int64_t>();
+        auto id = row["id"].as<int64_t>();
         auto s = std::make_shared<Shop>();
-        j.get_to(*s);
+        auto j = nlohmann::json::parse(row["data"].as<std::string>());
+        from_json(j, *s);
         shop_index.emplace(id, s);
     }
 }
 
 void load_guilds()
 {
-    for (const auto& row : dbat::db::txn->exec("SELECT * FROM dbat.guilds_blob"))
+    for (const auto& row : dbat::db::txn->exec("SELECT id,data FROM dbat.guilds_blob"))
     {
-        auto id = j["vnum"].get<int64_t>();
+        auto id = row["id"].as<int64_t>();
         auto g = std::make_shared<Guild>();
-        j.get_to(*g);
+        auto j = nlohmann::json::parse(row["data"].as<std::string>());
+        from_json(j, *g);
         guild_index.emplace(id, g);
     }
 }
@@ -162,38 +113,46 @@ void load_guilds()
 // globaldata serialize/deserialize...
 void load_globaldata()
 {
-    auto j = load_from_file(loc, "globaldata.json");
+    for (const auto& row : dbat::db::txn->exec("SELECT key, data FROM dbat.globals")) {
+        auto key = row["key"].as<std::string>();
+        auto data = nlohmann::json::parse(row["data"].as<std::string>());
 
-    if (j.contains(+"time"))
-    {
-        j["time"].get_to(time_info);
+        if (key == "time") {
+            data.get_to(time_info);
+        } else if (key == "era_uptime") {
+            data.get_to(era_uptime);
+        } else if (key == "weather") {
+            data.get_to(weather_info);
+        } else if (key == "lastCharacterID") {
+            data.get_to(Character::lastID);
+        } else if (key == "lastObjectID") {
+            data.get_to(Object::lastID);
+        } else if (key == "lastStructureID") {
+            data.get_to(lastStructureID);
+        } else if (key == "lastGridTemplateID") {
+            data.get_to(lastGridTemplateID);
+        } else if (key == "lastAreaID") {
+            data.get_to(lastAreaID);
+        } else if (key == "lastRoomID") {
+            data.get_to(Room::lastID);
+        } else if (key == "lastShopID") {
+            data.get_to(lastShopID);
+        } else if (key == "lastGuildID") {
+            data.get_to(lastGuildID);
+        } else if (key == "lastScriptID") {
+            data.get_to(lastScriptID);
+        }
     }
-    if (j.contains(+"era_uptime"))
-        j["era_uptime"].get_to(era_uptime);
-    if (j.contains(+"weather"))
-    {
-        j["weather"].get_to(weather_info);
-    }
-
-}
-
-json dump_globaldata()
-{
-    json j;
-
-    j["time"] = time_info;
-    j["era_uptime"] = era_uptime;
-    j["weather"] = weather_info;
-
-    return j;
 }
 
 void load_rooms()
 {
     for (const auto& row : dbat::db::txn->exec("SELECT * FROM dbat.rooms_blob"))
     {
-        auto vn = j["vn"].get<int64_t>();
+        auto vn = row["id"].as<int64_t>();
         auto r = std::make_shared<Room>();
+        // Assuming the JSON data is in the second column (index 1)
+        nlohmann::json j = nlohmann::json::parse(row["data"].as<std::string>());
         j.get_to(*r);
         Room::registry.emplace(vn, r);
         r->zone->rooms.add(r);
@@ -206,11 +165,13 @@ void load_rooms()
 
 void load_areas_initial()
 {
-    for (const auto& row : dbat::db::txn->exec("SELECT * FROM dbat.areas_blob"))
-        auto vn = j["vn"].get<int>();
+    for (const auto& row : dbat::db::txn->exec("SELECT * FROM dbat.areas_blob")) {
+        auto id = row["id"].as<int64_t>();
         auto r = std::make_shared<Area>();
+        // Assuming the JSON data is in the second column (index 1)
+        nlohmann::json j = nlohmann::json::parse(row["data"].as<std::string>());
         j.get_to(*r);
-        areas.emplace(vn, r);
+        areas.emplace(id, r);
         r->rebuildShapeIndex();
         auto z = r->getZone();
         z->areas.add(r);
@@ -219,13 +180,14 @@ void load_areas_initial()
 
 void load_areas_finish()
 {
-    for (auto j : load_from_file(loc, "areas.json"))
-    {
-        if(!j.contains(+"tileOverrides"))
-            continue;
+    for (const auto& row : dbat::db::txn->exec("SELECT * FROM dbat.areas_blob")) {
+        auto id = row["id"].as<int64_t>();
+        // Assuming the JSON data is in the second column (index 1)
+        nlohmann::json j = nlohmann::json::parse(row["data"].as<std::string>());
 
-        auto vn = j["vn"].get<int>();
-        if(auto cf = areas.find(vn); cf != areas.end())
+        if(!j.contains(+"tileOverrides")) continue;
+
+        if(auto cf = areas.find(id); cf != areas.end())
         {
             auto &to = cf->second->tileOverrides;
             j.at(+"tileOverrides").get_to(to);
@@ -236,21 +198,17 @@ void load_areas_finish()
 
 void load_grid_templates()
 {
-    for (auto j : load_from_file(loc, "grid_templates.json"))
-    {
-        auto vn = j["vn"].get<int>();
-        auto t = std::make_shared<GridTemplate>();
-        j.get_to(*t);
-        auto p = gridTemplates.emplace(vn, t);
-    }
+
 }
 
 void load_structures_initial()
 {
     for (const auto& row : dbat::db::txn->exec("SELECT * FROM dbat.structures_blob"))
     {
-        auto id = j["id"].get<int64_t>();
+        auto id = row["id"].as<int64_t>();
         auto r = std::make_shared<Structure>();
+        // Assuming the JSON data is in the second column (index 1)
+        nlohmann::json j = nlohmann::json::parse(row["data"].as<std::string>());
         j.get_to(*r);
         Structure::registry.emplace(id, r);
         r->rebuildShapeIndex();
@@ -261,7 +219,8 @@ void load_structures_finish()
 {
     for (const auto& row : dbat::db::txn->exec("SELECT * FROM dbat.structures_blob"))
     {
-        auto id = j["id"].get<int>();
+        auto id = row["id"].as<int64_t>();
+        nlohmann::json j = nlohmann::json::parse(row["data"].as<std::string>());
 
         auto cf = Structure::registry.find(id);
         if(cf == Structure::registry.end()) continue;
@@ -284,13 +243,12 @@ void load_structures_finish()
 
 void load_exits()
 {
-    for (const auto& row : dbat::db::txn->exec("SELECT * FROM dbat.rooms_blob"))
+    for (const auto& row : dbat::db::txn->exec("SELECT id,exits FROM dbat.rooms_blob"))
     {
-        auto id = j["room"].get<int64_t>();
-        auto dir = j["direction"].get<Direction>();
+        auto id = row["id"].as<room_vnum>();
+        auto exits = nlohmann::json::parse(row["exits"].as<std::string>());
         auto r = get_room(id);
-        auto &ex = r->exits[dir];
-        j["data"].get_to(ex);
+        exits.get_to(r->exits);
     }
 }
 
@@ -409,70 +367,34 @@ void load_npc_prototypes()
 
 void load_players()
 {
-
     for(const auto& row : dbat::db::txn->exec("SELECT p.*,u.username,pd.data AS player_data FROM pcs AS p LEFT JOIN users AS u ON p.user_id=u.id LEFT JOIN pc_components AS pd ON pd.pc_id=p.id AND pd.component_type='dbat_player'")) {
         auto id = row["id"].as<std::string>();
 
         auto p = std::make_shared<PlayerData>();
+
+        if(auto pdata = row["player_data"].get<std::string>(); pdata) {
+            nlohmann::json j = nlohmann::json::parse(*pdata);
+            from_json(j, *p);
+        }
+
         p->id = id;
         p->name = row["name"].as<std::string>();
         p->user_id = row["user_id"].as<std::string>();
         p->username = row["username"].as<std::string>();
-
-        if(row["player_data"]) {
-            nlohmann::json j = nlohmann::json::parse(row["player_data"].as<std::string>());
-            j.get_to(*p);
-        }
     }
 }
 
-static json dump_assemblies()
-{
-    auto j = json::array();
-
-    if (g_pAssemblyTable)
-    {
-        for (auto i = 0; i < g_lNumAssemblies; i++)
-        {
-            auto a = json::object();
-            a["vnum"] = g_pAssemblyTable[i].lVnum;
-            a["assembly_type"] = g_pAssemblyTable[i].uchAssemblyType;
-
-            for (auto k = 0; k < g_pAssemblyTable[i].lNumComponents; k++)
-            {
-                auto comp = json::object();
-                comp["bExtract"] = g_pAssemblyTable[i].pComponents[k].bExtract;
-                comp["bInRoom"] = g_pAssemblyTable[i].pComponents[k].bInRoom;
-                comp["lVnum"] = g_pAssemblyTable[i].pComponents[k].lVnum;
-                a["components"].push_back(comp);
-            }
-            j.push_back(a);
-        }
-    }
-
-    return j;
-}
 
 void load_assemblies()
 {
-    auto data = load_from_file(loc, "assemblies.json");
-
-    for (auto j : data)
+    for (const auto& row : dbat::db::txn->exec("SELECT * FROM dbat.assemblies_blob"))
     {
-        auto vn = j.at(+"vnum").get<vnum>();
-        auto atype = j.at(+"assembly_type").get<int>();
-        assemblyCreate(vn, atype);
-        if (j.contains(+"components"))
-        {
-            // components are an array containing bExtract, bInRoom, and vnum lVnum...
-            for (auto comp : j.at(+"components"))
-            {
-                auto bExtract = comp.at("bExtract").get<bool>();
-                auto bInRoom = comp.at("bInRoom").get<bool>();
-                auto lVnum = comp.at("lVnum").get<vnum>();
-                assemblyAddComponent(vn, lVnum, bExtract, bInRoom);
-            }
-        }
+        auto vn = row["id"].as<int64_t>();
+        nlohmann::json j = nlohmann::json::parse(row["data"].as<std::string>());
+        
+        assembly_data a;
+        from_json(j, a);
+        g_mAssemblyTable[vn] = std::move(a);
     }
 }
 

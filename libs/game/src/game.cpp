@@ -2,8 +2,9 @@
 #include "dbat/game/Database.hpp"
 #include "dbat/game/Descriptor.hpp"
 #include "dbat/game/db.hpp"
-#include "dbat/game/saveload.hpp"
+#include "dbat/game/load.hpp"
 #include "dbat/game/comm.hpp"
+#include "dbat/game/Dirty.hpp"
 
 namespace dbat::link {
 
@@ -196,6 +197,8 @@ namespace dbat::link {
                 end = clock::now();
                 elapsed = end - start;
                 remaining = remaining - elapsed;
+
+                dbat::dirty::saveDirty();
 
                 dbat::db::txn->commit();
                 dbat::db::txn.reset();

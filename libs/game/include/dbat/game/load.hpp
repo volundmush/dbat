@@ -10,30 +10,29 @@
 #include "dbat/game/TimeInfo.hpp"
 #include "dbat/game/Help.hpp"
 
-void load_zones(const std::filesystem::path& loc);
-//void load_accounts(const std::filesystem::path& loc);
-void load_dgscript_prototypes(const std::filesystem::path& loc);
-void load_dgscripts(const std::filesystem::path& loc);
-void load_globaldata(const std::filesystem::path& loc);
+void load_zones();
+//void load_accounts();
+void load_dgscript_prototypes();
+void load_dgscripts();
+void load_globaldata();
 
-void load_shops(const std::filesystem::path& loc);
-void load_guilds(const std::filesystem::path& loc);
-void load_rooms(const std::filesystem::path& loc);
-void load_exits(const std::filesystem::path& loc);
-void load_areas_initial(const std::filesystem::path& loc);
-void load_areas_finish(const std::filesystem::path& loc);
-void load_grid_templates(const std::filesystem::path& loc);
-void load_structures_initial(const std::filesystem::path& loc);
-void load_structures_finish(const std::filesystem::path& loc);
+void load_shops();
+void load_guilds();
+void load_rooms();
+void load_exits();
+void load_areas_initial();
+void load_areas_finish();
+void load_grid_templates();
+void load_structures_initial();
+void load_structures_finish();
 
-void load_item_prototypes(const std::filesystem::path& loc);
-void load_items_initial(const std::filesystem::path& loc);
-void load_items_finish(const std::filesystem::path& loc);
-void load_npc_prototypes(const std::filesystem::path& loc);
-void load_characters_finish(const std::filesystem::path& loc);
-void load_characters_initial(const std::filesystem::path& loc);
+void load_item_prototypes();
+void load_items_initial();
+void load_items_finish();
+void load_npc_prototypes();
+void load_characters_finish();
+void load_characters_initial();
 
-void load_players(const std::filesystem::path& loc);
-void load_help(const std::filesystem::path& loc);
+void load_players();
 
-void load_assemblies(const std::filesystem::path& loc);
+void load_assemblies();
