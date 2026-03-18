@@ -4,6 +4,7 @@
 
 #include "const/RoomFlag.hpp"
 #include "const/WhereFlag.hpp"
+#include "const/SectorType.hpp"
 
 #include "Flags.hpp"
 #include "Command.hpp"

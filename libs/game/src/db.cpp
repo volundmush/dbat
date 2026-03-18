@@ -1324,9 +1324,3 @@ void load_default_config() {
 void load_config() {
     load_default_config();
 }
-
-
-
-int64_t getNextAccountID() {
-    return getNextID(lastAccountID, accounts);
-}

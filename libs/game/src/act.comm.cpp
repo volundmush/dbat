@@ -27,7 +27,6 @@
 #include "dbat/game/config.hpp"
 #include "dbat/game/utils.hpp"
 #include "dbat/game/send.hpp"
-#include "dbat/game/boards.hpp"
 #include "dbat/game/improved-edit.hpp"
 #include "dbat/game/dg_scripts.hpp"
 
@@ -1329,22 +1328,6 @@ ACMD(do_write)
     char *papername, *penname;
     char buf1[MAX_STRING_LENGTH], buf2[MAX_STRING_LENGTH];
 
-    auto isBoard = [](const auto &o)
-    {
-        return GET_OBJ_TYPE(o) == ITEM_BOARD;
-    };
-
-    auto obj = ch->searchInventory(isBoard);
-    if (!obj)
-        ch->location.searchObjects(isBoard);
-
-    if (obj)
-    { /* then there IS a board! */
-        write_board_message(GET_OBJ_VNUM(obj), ch, argument);
-        act("$n begins to write a note on $p.", true, ch, obj, nullptr, TO_ROOM);
-        return;
-    }
-
     papername = buf1;
     penname = buf2;
 
@@ -1730,39 +1713,6 @@ ACMD(do_qcomm)
 
 ACMD(do_respond)
 {
-    int mnum = 0;
-    char number[MAX_STRING_LENGTH];
-
-    if (IS_NPC(ch))
-    {
-        ch->sendText("As a mob, you never bothered to learn to read or write.\r\n");
-        return;
-    }
-
-    auto isBoard = [](const auto &o)
-    { return GET_OBJ_TYPE(o) == ITEM_BOARD; };
-
-    auto obj = ch->searchInventory(isBoard);
-    if (!obj)
-        obj = ch->location.searchObjects(isBoard);
-
-    /* No board in the room? Send generic message -spl */
-    if (!obj)
-    {
-        ch->sendText("Sorry, you may only reply to messages posted on a board.\r\n");
-        return;
-    }
-
-    argument = one_argument(argument, number);
-    if (!*number)
-    {
-        ch->sendText("Respond to what?\r\n");
-        return;
-    }
-    if (!isdigit(*number) || (!(mnum = atoi(number))))
-    {
-        ch->sendText("You must type the number of the message you wish to reply to.\r\n");
-        return;
-    }
-    board_respond(GET_OBJ_VNUM(obj), ch, mnum);
+    ch->sendText("This is disabled. Use the new board system!\r\n");
+    return;
 }

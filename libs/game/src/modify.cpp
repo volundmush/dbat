@@ -17,7 +17,6 @@
 //#include "dbat/game/comm.hpp"
 #include "dbat/game/spells.hpp"
 #include "dbat/game/mail.hpp"
-#include "dbat/game/boards.hpp"
 #include "dbat/game/improved-edit.hpp"
 #include "dbat/game/Shop.hpp"
 #include "dbat/game/Guild.hpp"

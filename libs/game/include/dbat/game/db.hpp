@@ -134,13 +134,6 @@ constexpr int BAN_ALL = 3;
 
 /* global buffering system */
 
-int64_t getNextAccountID();
-
-
-
-
-
-
 
 extern int dg_owner_purged;
 

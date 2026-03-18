@@ -8,11 +8,14 @@
 #include <cstdlib>
 #include <bsd/string.h>
 
+#include <nlohmann/json.hpp>
+
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/regex.hpp>
 #include <regex>
 
-#include "dbat/link/game.hpp"
+#include "dbat/game/game.hpp"
+#include "dbat/game/Database.hpp"
 
 #include "dbat/game/Zone.hpp"
 #include "dbat/game/CharacterUtils.hpp"
@@ -37,7 +40,7 @@
 #include "dbat/game/spell_parser.hpp"
 #include "dbat/game/Shop.hpp"
 #include "dbat/game/Guild.hpp"
-#include "dbat/serde/saveload.hpp"
+#include "dbat/game/saveload.hpp"
 #include "dbat/game/assemblies.hpp"
 #include "dbat/game/vehicles.hpp"
 #include "dbat/circle/CircleAnsi.hpp"
@@ -46,8 +49,8 @@
 #include "dbat/game/interpreter.hpp"
 #include "dbat/game/Random.hpp"
 #include "dbat/game/ID.hpp"
-#include "dbat/serde/Startup.hpp"
-#include "dbat/serde/saveload.hpp"
+#include "dbat/game/Startup.hpp"
+#include "dbat/game/saveload.hpp"
 
 #include "dbat/game/const/Max.hpp"
 #include "dbat/game/const/Filename.hpp"
@@ -224,7 +227,7 @@ static void convert_character(CharacterPrototype *c) {
 }
 
 static void convert_character(Character *c) {
-    if(!c->isPC) {
+    if(!c->player) {
         c->character_flags.set(CharacterFlag::tail, race::hasTail(c->race));
 
         if(c->mob_flags.get(31)) {
@@ -3977,9 +3980,9 @@ static std::string stripAnsi(const std::string& str) {
     return dbat::circle::processColors(str, dbat::ansi::ColorMode::None);
 }
 
-static std::vector<std::pair<std::string, vnum>> characterToAccount;
+static std::vector<std::pair<std::string, std::string>> characterToAccount;
 
-void migrate_accounts(pqxx::work &txn) {
+void migrate_accounts() {
 	// user files are stored in <cwd>/user/<folder>/<file>.usr so we'll need to do recursive iteration using
     // C++ std::filesystem...
 
@@ -3996,21 +3999,19 @@ void migrate_accounts(pqxx::work &txn) {
         // Open file for reading...
         std::ifstream file(p.path());
 
-        // Step 1: create an ID for this account...
-        auto id = getNextID(lastAccountID, accounts);
-
-        // Now let's get a new account_data...
-        auto a = std::make_shared<Account>();
-        accounts[id] = a;
+        // Line 1: Name (string)
+        std::string name;
+        std::getline(file, name);
 
         // Moving forward, we assume that every account file is using the above structure and is valid.
         // Don't second-guess it, just process.
 
-        // Line 1: Name (string)
-        std::getline(file, a->name);
-
         // Line 2: Email Address (string)
-        std::getline(file, a->email);
+        std::string email;
+        std::getline(file, email);
+        if(auto find = email.find("<AT>"); find != std::string::npos) {
+            email.replace(find, 4, "@");
+        }
 
         // Line 3: password (clear text, will hash...)
         std::string pass;
@@ -4019,30 +4020,32 @@ void migrate_accounts(pqxx::work &txn) {
         // Line 4: slots (int)
         std::string slots;
         std::getline(file, slots);
-        a->slots = std::stoi(slots);
+        auto slots_count = std::stoi(slots);
 
         // Line 5: current RPP (int)
         std::string rpp;
         std::getline(file, rpp);
-        a->rpp = std::stoi(rpp);
+        auto rp_points = std::stoi(rpp);
 
         // Now for the Character lines, they either contain a name, or they contain "Empty".
         // "Empty" is not a character. It's a placeholder for an empty slot.
         // For now, we will move through all five lines, and for any that do not contain "Empty",
         // we insert the character name into the characterToAccount map.
 
+        std::vector<std::string> characterNames;
+
         for(int i = 0;i < 5; i++) {
             std::string charName;
             std::getline(file, charName);
             if(charName != "Empty") {
-                characterToAccount.emplace_back(charName, id);
+                characterNames.emplace_back(charName);
             }
         }
 
         // Line 11: adminLevel (int)
         std::string adminLevel;
         std::getline(file, adminLevel);
-        a->admin_level = std::stoi(adminLevel);
+        auto admin_level = std::stoi(adminLevel);
 
         // Line 12: customFile present (bool)
         std::string customFile;
@@ -4051,6 +4054,7 @@ void migrate_accounts(pqxx::work &txn) {
 
         // if custom, then we want to open a sister file that ends in .cus in the same directory and read every line
         // beyond the first into a.customs.
+        std::vector<std::string> customs;
         if(custom) {
             auto customPath = p.path();
             customPath.replace_extension(".cus");
@@ -4058,7 +4062,7 @@ void migrate_accounts(pqxx::work &txn) {
             std::string line;
             std::getline(customFile, line); // skip the first line
             while(std::getline(customFile, line)) {
-                a->customs.emplace_back(line);
+                customs.emplace_back(line);
             }
             customFile.close();
         }
@@ -4068,28 +4072,54 @@ void migrate_accounts(pqxx::work &txn) {
         std::getline(file, rppBank);
         auto bank = std::stoi(rppBank);
         file.close();
-        a->id = id;
 
-        auto row = txn.exec(
+        // Now let's get a new account_data...
+        auto a = std::make_shared<Account>();
+
+
+        auto row = dbat::db::txn->exec(
             "INSERT INTO users (username, admin_level) VALUES ($1, $2) RETURNING id",
-            {a->name, a->admin_level}
+            {name, admin_level}
         );
         auto user_id = row.empty() ? std::string{} : row[0][0].as<std::string>();
-        a->user_id = user_id;
+        a->id = user_id;
+        a->name = name;
+        a->rpp = rp_points;
 
-        row = txn.exec(
+        accounts[user_id] = a;
+
+        auto comp = nlohmann::json::object();
+        if(rp_points) comp["rpp"] = rp_points;
+        if(slots_count) comp["slots"] = slots_count;
+        if(bank) comp["bank"] = bank;
+        if(custom) comp["customs"] = customs;
+        if(!comp.empty()) {
+            dbat::db::txn->exec(
+                "INSERT INTO user_components (user_id, component_name, data) VALUES ($1, $2, $3::jsonb)",
+                {a->id, "dbat", comp.dump()}
+            );
+        }
+
+        a->id = user_id;
+
+        for(auto charName : characterNames) {
+            characterToAccount.emplace_back(charName, user_id);
+        }
+        
+        if(!email.empty()) {
+            dbat::db::txn->exec("INSERT INTO emails (user_id, email) VALUES ($1, $2)", {a->id, email});
+        }
+
+        row = dbat::db::txn->exec(
             "INSERT INTO passwords (user_id, password_hash) VALUES ($1, $2) RETURNING id",
-            {a->user_id, pass}
+            {a->id, pass}
         );
         auto pass_id = row.empty() ? std::string{} : row[0][0].as<std::string>();
-        txn.exec("UPDATE users SET current_password_id = $1 WHERE id = $2", {pass_id, a->user_id});
-
-        txn.exec("INSERT INTO dbat.users (id, dbat_id) VALUES ($1, $2)", {a->user_id, a->id});
+        dbat::db::txn->exec("UPDATE users SET current_password_id = $1 WHERE id = $2", {pass_id, a->id});
     }
-    txn.commit();
 }
 
-void migrate_characters(pqxx::work &txn) {
+void migrate_characters() {
     // Unlike accounts, player files are indexed. However, unless their name showed up in an account,
     // there's no point migrating them.
 
@@ -4104,31 +4134,30 @@ void migrate_characters(pqxx::work &txn) {
             continue;
         }
         auto ch = sh.get();
-        ch->isPC = true;
+
+        auto &a = accounts[accID];
+
+        auto row = dbat::db::txn->exec("INSERT INTO pcs (user_id, name, admin_mantle) VALUES ($1, $2, $3) RETURNING id", {a->id, ch->getName(), GET_ADMLEVEL(ch)});
+        auto id = row[0][0].as<std::string>();
+
         convert_character(ch);
-        auto id = getNextID(Character::lastID, Character::registry);
+        ch->id = getNextID(Character::lastID, Character::registry);
         auto p = std::make_shared<PlayerData>();
         players[id] = p;
         p->id = id;
-        ch->id = id;
         p->character = ch;
+        ch->player = p.get();
         p->name = ch->getName();
-        auto &a = accounts[accID];
         p->account = a.get();
         auto old_level = a->admin_level;
         a->admin_level = std::max(a->admin_level, GET_ADMLEVEL(ch));
         if(old_level != a->admin_level) {
-            txn.exec("UPDATE users SET admin_level = $1 WHERE id = $2", {a->admin_level, a->user_id});
+            dbat::db::txn->exec("UPDATE users SET admin_level = $1 WHERE id = $2", {a->admin_level, a->id});
         }
-        a->characters.emplace_back(ch->id);
+        a->characters.emplace_back(id);
         //auto lroom = ch->getBaseStat<room_vnum>("load_room");
         //ch->setBaseStat<room_vnum>("was_in_room", lroom);
-        Character::registry.emplace(id, sh);
-
-        auto row = txn.exec("INSERT INTO pcs (user_id, name, admin_mantle) VALUES ($1, $2, $3) RETURNING id", {a->user_id, p->name, GET_ADMLEVEL(ch)});
-        auto pc_id = row[0][0].as<std::string>();
-        p->character_id = pc_id;
-        txn.exec("INSERT INTO dbat.pcs (id, dbat_id) VALUES ($1, $2)", {pc_id, id});
+        Character::registry.emplace(ch->id, sh);
     }
 
     // migrate sense files...
@@ -4148,7 +4177,7 @@ void migrate_characters(pqxx::work &txn) {
             basic_mud_log("Error loading %s for sense migration.", name.c_str());
             continue;
         }
-        auto pa = players.at(ch->id);
+        auto pa = ch->player;
         // The file contains a sequence of lines, with each line containing a number.
 		// The number is the vnum of a mobile the player's sensed.
         // We will read each line and insert the vnum into the player's sensed list.
@@ -4182,7 +4211,7 @@ void migrate_characters(pqxx::work &txn) {
             continue;
         }
 
-        auto pa = players.at(ch->id);
+        auto pa = ch->player;
 
 		// The file contains a series of lines.
         // Each line looks like: <name> <dub>
@@ -4199,7 +4228,7 @@ void migrate_characters(pqxx::work &txn) {
             if(name == "Gibbles") continue;
             auto pc = findPlayer(name);
             if(!pc) continue;
-            pa->dub_names[pc->id] = dub;
+            pa->dub_names[pc->player->id] = dub;
         }
     }
 
@@ -4260,12 +4289,6 @@ void migrate_characters(pqxx::work &txn) {
             basic_mud_log("Error loading %s for alias migration.", name.c_str());
             continue;
         }
-        auto pa = players.find(ch->id);
-        if(pa == players.end()) {
-            basic_mud_log("Error loading %s for alias migration.", name.c_str());
-            continue;
-        }
-
 
         std::ifstream file(p.path());
         std::string line;
@@ -4275,7 +4298,7 @@ void migrate_characters(pqxx::work &txn) {
         // replacement string length  (size_t), replacement string, alias type (a bool)
 
         while(std::getline(file, line)) {
-            auto &a = pa->second->aliases.emplace_back();
+            auto &a = ch->player->aliases.emplace_back();
             std::getline(file, a.name);
             std::getline(file, line);
             std::getline(file, a.replacement);
@@ -4799,12 +4822,12 @@ void migrate_data() {
 
 }
 
-void migrate_db(pqxx::work &txn) {
+void migrate_db() {
     boot_db_legacy();
     House_boot();
-    migrate_accounts(txn);
+    migrate_accounts();
     migrate_data();
-    migrate_characters(txn);
+    migrate_characters();
 }
 
 void run_migration() {
@@ -4812,15 +4835,13 @@ void run_migration() {
     load_config();
     dbat::init::init_locale();
 
-    pqxx::work txn(*dbat::link::db_conn);
-
-    migrate_db(txn);
+    migrate_db();
 
     // let's experiment here...
     migrate_space();
     printSpace();
     dbat::save::runSaveSync();
-    txn.commit();
+    dbat::db::txn->commit();
     destroy_db();
 }
 
@@ -4832,12 +4853,14 @@ int main(int argc, char **argv) {
 
     LINFO("Starting database migration...");
 
-    dbat::link::db_conn = std::make_unique<pqxx::connection>("host=postgres port=5432 dbname=muforge user=muforge password=muforge");
+    dbat::db::conn = std::make_unique<pqxx::connection>("host=postgres port=5432 dbname=muforge user=muforge password=muforge");
 
-    if(!dbat::link::db_conn) {
+    if(!dbat::db::conn) {
         LERROR("Failed to connect to database");
         return 1;
     }
+
+    dbat::db::txn = std::make_unique<pqxx::work>(*dbat::db::conn);
 
     LINFO("Connected to database");
 

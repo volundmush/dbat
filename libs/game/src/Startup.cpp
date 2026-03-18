@@ -1,5 +1,5 @@
-#include "dbat/serde/Startup.hpp"
-#include "dbat/serde/saveload.hpp"
+#include "dbat/game/Startup.hpp"
+#include "dbat/game/saveload.hpp"
 #include <vector>
 #include <filesystem>
 
@@ -14,7 +14,6 @@
 #include "dbat/game/magic.hpp"
 #include "dbat/game/feats.hpp"
 #include "dbat/game/maputils.hpp"
-#include "dbat/game/boards.hpp"
 #include "dbat/game/mail.hpp"
 #include "dbat/game/act.social.hpp"
 #include "dbat/game/act.informative.hpp"

@@ -1,4 +1,4 @@
-#include "dbat/serde/json.hpp"
+#include "dbat/game/json.hpp"
 #include <nlohmann/json.hpp>
 
 std::string jdumps(const json &j)

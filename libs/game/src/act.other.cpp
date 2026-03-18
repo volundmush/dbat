@@ -712,13 +712,11 @@ ACMD(do_rpp)
         {
             fprintf(fl, "@D[@cName@W: @C%-20s @cRequest@W: @Y%-20s@D]\n", GET_NAME(ch), "House");
             send_to_imm("RPP Request: %s paid for house", GET_NAME(ch));
-            BOARDNEWCOD = time(nullptr);
         }
         else if (selection == 2)
         {
             fprintf(fl, "@D[@cName@W: @C%-20s @cRequest@W: @Y%-20s@D]\n", GET_NAME(ch), "Custom Skill");
             send_to_imm("RPP Request: %s paid for Custom Skill, uhoh spaggettios", GET_NAME(ch));
-            BOARDNEWCOD = time(nullptr);
         }
         ch->modRPP(-pay);
         ch->send_to("@R%d@W RPP paid for your selection. An immortal will address the request soon enough. Be patient.@n\r\n", pay);
@@ -12212,8 +12210,13 @@ ACMD(do_gen_tog)
         else
         {
             act("$n has come back from AFK.", true, ch, nullptr, nullptr, TO_ROOM);
-            if (has_mail(GET_IDNUM(ch)))
-                ch->sendText("You have mail waiting.\r\n");
+            if (ch->player && !ch->player->id.empty())
+            {
+                int unreceived = count_unreceived_mail(ch->player->id);
+                int unread = count_unread_mail(ch->player->id);
+                if (unreceived > 0 || unread > 0)
+                    ch->send_to("You have @Y{}@n unreceived and @Y{}@n unread mail.\r\n", unreceived, unread);
+            }
         }
         break;
     case SCMD_AUTOLOOT:
@@ -12429,11 +12432,6 @@ ACMD(do_file)
     {
         ch->sendText("You are not godly enough to view that file!\r\n");
         return;
-    }
-
-    if (boost::iequals(field, "request"))
-    {
-        GET_BOARD(ch, 2) = time(nullptr);
     }
 
     if (!*value)

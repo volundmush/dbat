@@ -1826,7 +1826,7 @@ void shop_purge(uint64_t heartPulse, double deltaTime)
     }
 }
 
-void to_json(json &j, const Shop &s)
+void to_json(nlohmann::json &j, const Shop &s)
 {
     to_json(j, static_cast<org_data>(s));
 
@@ -1871,7 +1871,7 @@ void to_json(json &j, const Shop &s)
         j["lastsort"] = s.lastsort;
 }
 
-void from_json(const json &j, Shop &s)
+void from_json(const nlohmann::json &j, Shop &s)
 {
     from_json(j, static_cast<org_data &>(s));
     if (j.contains(+"producing"))

@@ -108,8 +108,7 @@ std::string Zone::displayNameFor(Character *ch) {
         disp = colorName;
     }
     if(ch->player && !isbuilder) {
-        auto p = players.at(ch->id);
-        if(p->known_zones.contains(number)) {
+        if(ch->player->known_zones.contains(number)) {
             out += disp;
         } else {
             out += "???";

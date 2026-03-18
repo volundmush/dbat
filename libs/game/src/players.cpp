@@ -106,16 +106,16 @@ void deletePlayerCharacter(std::weak_ptr<Character> ref)
     characterSubscriptions.unsubscribeFromAll(ch);
 
     // Get a copy of player_data
-    auto pdata = players.at(ch->id);
+    auto pdata = players.at(ch->player->id);
 
     // Erase the character from the players map.
-    players.erase(ch->id);
+    players.erase(pdata->id);
 
     for (auto &[id, pd] : players)
     {
         // cleanups....
-        pd->sense_player.erase(ch->id);
-        pd->dub_names.erase(ch->id);
+        pd->sense_player.erase(ch->player->id);
+        pd->dub_names.erase(ch->player->id);
     }
 
     // Now we'll deal with the account.
@@ -123,7 +123,7 @@ void deletePlayerCharacter(std::weak_ptr<Character> ref)
 
     // Remove the character from the account's list. That means we'll need to remove the matching ch->id from the vector.
     acc->characters.erase(std::remove_if(acc->characters.begin(), acc->characters.end(), [ch](const auto &c)
-                                         { return c == ch->id; }),
+                                         { return c == ch->player->id; }),
                           acc->characters.end());
 
     // Let the destructor take it from here, and pray.

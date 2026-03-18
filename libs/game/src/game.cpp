@@ -1,8 +1,8 @@
-#include "dbat/link/game.hpp"
+#include "dbat/game/game.hpp"
 #include "dbat/game/Database.hpp"
 #include "dbat/game/Descriptor.hpp"
 #include "dbat/game/db.hpp"
-#include "dbat/serde/saveload.hpp"
+#include "dbat/game/saveload.hpp"
 #include "dbat/game/comm.hpp"
 
 namespace dbat::link {
@@ -16,7 +16,7 @@ namespace dbat::link {
             existing_connections.insert(id);
         }
 
-        auto rows = txn.exec(
+        auto rows = dbat::db::txn->exec(
             "SELECT s.*,u.dbat_id AS account_id,c.dbat_id AS character_id"
             "FROM pc_subscriptions AS s LEFT JOIN dbat.users AS u ON s.user_id = u.id"
             "LEFT JOIN dbat.pcs AS c ON s.pc_id = c.id"
@@ -28,8 +28,6 @@ namespace dbat::link {
             conn->id = row["id"].as<std::string>();
             conn->pc_id = row["pc_id"].as<std::string>();
             conn->user_id = row["user_id"].as<std::string>();
-            conn->account_id = row["account_id"].as<int>();
-            conn->character_id = row["character_id"].as<int64_t>();
             conn->created_at = row["created_at"].as<time_t>();
             conn->ip_address = row["ip_address"].as<std::string>();
             active_game_connections.emplace(conn->id, conn);
@@ -50,11 +48,10 @@ namespace dbat::link {
             if(!desc) continue;
             if(desc->processed_output.empty()) continue;
 
-            stream.write_values(desc->pc_id, "text.circle", desc->processed_output);
+            stream.write_values(desc->id, "text.circle", desc->processed_output);
             desc->processed_output.clear();
         }
         stream.complete();
-        txn.commit();
     }
 
     void handleNewInput() {
@@ -93,7 +90,7 @@ namespace dbat::link {
             auto conn_id = row["id"].as<std::string>();
             if(auto it = active_game_connections.find(conn_id); it != active_game_connections.end()) {
                 auto& game_info = it->second;
-                if(auto desc_it = sessions.find(game_info->character_id); desc_it != sessions.end()) {
+                if(auto desc_it = sessions.find(game_info->pc_id); desc_it != sessions.end()) {
                     auto& desc = desc_it->second;
                     if(desc) {
                         desc->onConnectionLost(game_info->id);

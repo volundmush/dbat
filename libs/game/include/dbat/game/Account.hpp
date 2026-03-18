@@ -4,6 +4,7 @@
 #include <memory>
 #include <map>
 #include <unordered_set>
+#include <expected>
 #include <nlohmann/json_fwd.hpp>
 
 #include "Typedefs.hpp"
@@ -28,7 +29,9 @@ struct Account {
 
 };
 
-extern std::map<std::string, std::shared_ptr<Account>> accounts;
+std::expected<struct Account*, std::string> createAccount(const std::string &id, const std::string &name);
+
+extern std::unordered_map<std::string, std::shared_ptr<Account>> accounts;
 
 struct Account *findAccount(const std::string &name);
 

@@ -507,7 +507,7 @@ std::vector<ResetCommand> AbstractGridArea::getResetCommands(const Coordinates& 
     return t.resetCommands;
 }
 
-void to_json(json &j, const ShapeBase &p)
+void to_json(nlohmann::json &j, const ShapeBase &p)
 {
     j["type"] = p.type;
     j["priority"] = p.priority;
@@ -515,12 +515,12 @@ void to_json(json &j, const ShapeBase &p)
     if(!p.name.empty()) j["name"] = p.name;
     if(!p.description.empty()) j["description"] = p.description;
     j["geom"] = std::visit([](auto const& g) {
-        return json(g); // relies on to_json for BoxDim / RoundDim
+        return nlohmann::json(g); // relies on to_json for BoxDim / RoundDim
     }, p.geom);
     if(!p.tileDisplay.empty()) j["tileDisplay"] = p.tileDisplay;
 }
 
-void from_json(const json &j, ShapeBase &r) {
+void from_json(const nlohmann::json &j, ShapeBase &r) {
     if(j.contains(+"type")) r.type = j["type"].get<ShapeType>();
     if(j.contains(+"priority")) r.priority = j["priority"].get<int>();
     if(j.contains(+"sectorType")) r.sectorType = j["sectorType"].get<SectorType>();
@@ -546,10 +546,10 @@ void from_json(const json &j, ShapeBase &r) {
     if(j.contains(+"tileDisplay")) r.tileDisplay = j["tileDisplay"];
 }
 
-void to_json(json &j, const Shape &p) {
+void to_json(nlohmann::json &j, const Shape &p) {
     to_json(j, static_cast<const ShapeBase&>(p));
 }
 
-void from_json(const json &j, Shape &r) {
+void from_json(const nlohmann::json &j, Shape &r) {
     from_json(j, static_cast<ShapeBase&>(r));
 }

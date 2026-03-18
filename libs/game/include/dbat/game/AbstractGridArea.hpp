@@ -1,5 +1,7 @@
 #pragma once
 #include <variant>
+#include <map>
+#include <cstdint>
 #include <nlohmann/json_fwd.hpp>
 
 #include "AbstractLocation.hpp"

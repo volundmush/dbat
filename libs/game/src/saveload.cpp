@@ -1,4 +1,4 @@
-#include "dbat/serde/saveload.hpp"
+#include "dbat/game/saveload.hpp"
 
 #include <fstream>
 #include <chrono>
@@ -8,9 +8,7 @@
 #include <boost/iostreams/filtering_streambuf.hpp>
 #include <boost/iostreams/filter/gzip.hpp>
 
-#include "dbat/serde/json.hpp"
-#include "dbat/serde/templates.hpp"
-
+#include "dbat/game/json.hpp"
 
 #include "dbat/util/FilterWeak.hpp"
 #include "dbat/game/ObjectPrototype.hpp"
@@ -97,75 +95,7 @@ static json load_from_file(const std::filesystem::path &loc, const std::string &
     return j;
 }
 
-template <std::size_t N>
-void to_json(json &j, const std::bitset<N> &bs)
-{
-    std::vector<std::size_t> set_indexes;
-    for (std::size_t i = 0; i < N; ++i)
-    {
-        if (bs.test(i))
-        {
-            set_indexes.push_back(i);
-        }
-    }
-    j = set_indexes;
-}
 
-template <std::size_t N>
-void from_json(const json &j, std::bitset<N> &bs)
-{
-    bs.reset();
-    // Extract the vector of indexes from JSON
-    auto indexes = j.get<std::vector<std::size_t>>();
-    for (auto idx : indexes)
-    {
-        if (idx < N)
-        { // ensure the index is within range
-            bs.set(idx, true);
-        }
-    }
-}
-
-/*
-void to_json(json &j, const Zone &z)
-{
-    j["number"] = z.number;
-    if (z.parent)
-        j["parent"] = z.parent.value();
-    if (!z.name.empty())
-        j["name"] = z.name;
-    if (!z.builders.empty())
-        j["builders"] = z.builders;
-    if (z.lifespan)
-        j["lifespan"] = z.lifespan;
-
-    if (z.reset_mode)
-        j["reset_mode"] = z.reset_mode;
-
-    // Serialize zone flags
-    if (z.zone_flags)
-        j["zone_flags"] = z.zone_flags;
-}
-
-void from_json(const json &j, Zone &z)
-{
-    if (j.contains(+"number"))
-        z.number = j["number"];
-    if (j.contains(+"parent"))
-        z.parent = j["parent"].get<zone_vnum>();
-    if (j.contains(+"name"))
-        z.name = j["name"].get<std::string>();
-    if (j.contains(+"builders"))
-        z.builders = j["builders"].get<std::string>();
-    if (j.contains(+"lifespan"))
-        z.lifespan = j["lifespan"];
-    if (j.contains(+"reset_mode"))
-        z.reset_mode = j["reset_mode"];
-
-    if (j.contains(+"zone_flags"))
-        z.zone_flags = j["zone_flags"].get<FlagHandler<ZoneFlag>>();
-}
-*/
 void load_zones(const std::filesystem::path &loc)
 {
     for (auto j : load_from_file(loc, "zones.json"))

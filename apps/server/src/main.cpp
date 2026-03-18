@@ -1,9 +1,10 @@
 #include "dbat/game/Log.hpp"
 #include "dbat/game/db.hpp"
+#include "dbat/game/Database.hpp"
 #include "dbat/game/comm.hpp"
-#include "dbat/serde/Startup.hpp"
-#include "dbat/serde/saveload.hpp"
-#include "dbat/link/game.hpp"
+#include "dbat/game/Startup.hpp"
+#include "dbat/game/saveload.hpp"
+#include "dbat/game/game.hpp"
 
 int main(int argc, char** argv) {
 
@@ -13,9 +14,9 @@ int main(int argc, char** argv) {
     dbat::log::init(log_options);
 
     // db setup
-    dbat::link::db_conn = std::make_unique<pqxx::connection>("host=postgres port=5432 dbname=muforge user=muforge password=muforge");
+    dbat::db::conn = std::make_unique<pqxx::connection>("host=postgres port=5432 dbname=muforge user=muforge password=muforge");
 
-    if(!dbat::link::db_conn) {
+    if(!dbat::db::conn) {
         LERROR("Failed to connect to database");
         return 1;
     }
@@ -28,5 +29,5 @@ int main(int argc, char** argv) {
     auto answer = dbat::link::run_game(0.05, 300.0);
 
 
-    return 0;
+    return answer;
 }

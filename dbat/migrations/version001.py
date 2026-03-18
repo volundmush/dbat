@@ -39,6 +39,18 @@ CREATE TABLE dbat.zones (
     data JSONB NOT NULL DEFAULT '{}'::jsonb
 );
 
+CREATE TABLE dbat.mail (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    sender_id UUID REFERENCES public.pcs(id) ON DELETE RESTRICT,
+    recipient_id UUID REFERENCES public.pcs(id) ON DELETE RESTRICT,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
+    ic_timestamp BIGINT NOT NULL DEFAULT 0,
+    received_at TIMESTAMPTZ NULL DEFAULT NULL,
+    subject TEXT NOT NULL,
+    body TEXT NOT NULL,
+    is_read BOOLEAN NOT NULL DEFAULT FALSE
+);
+
 CREATE TABLE dbat.help (
     id SERIAL PRIMARY KEY,
     keywords TEXT NOT NULL,

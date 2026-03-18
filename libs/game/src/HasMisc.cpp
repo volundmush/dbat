@@ -32,3 +32,15 @@ void from_json(const nlohmann::json &j, HasProtoScript &s) {
         j.at(+"proto_script").get_to(s.proto_script);
     }
 }
+
+void to_json(nlohmann::json& j, const HasVnum& unit) {
+    if(unit.vn != NOTHING) {
+        j[+"vn"] = unit.vn;
+    }
+}
+
+void from_json(const nlohmann::json& j, HasVnum& unit) {
+    if(j.contains(+"vn")) {
+        j.at(+"vn").get_to(unit.vn);
+    }
+}

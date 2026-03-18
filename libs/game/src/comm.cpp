@@ -387,7 +387,9 @@ char *make_prompt(struct descriptor_data *d) {
                 if (count >= 0)
                     len += count;
             }
-            if (has_mail(GET_IDNUM(d->character)) && !PRF_FLAGGED(d->character, PRF_NMWARN) &&
+            if (d->character->player && !d->character->player->id.empty() &&
+                (count_unreceived_mail(d->character->player->id) > 0 || count_unread_mail(d->character->player->id) > 0) &&
+                !PRF_FLAGGED(d->character, PRF_NMWARN) &&
                 (GET_ADMLEVEL(d->character) > 0) && len < sizeof(prompt)) {
                 count = snprintf(prompt + len, sizeof(prompt) - len, "CHECK MAIL - ");
                 flagged = true;
@@ -413,7 +415,9 @@ char *make_prompt(struct descriptor_data *d) {
                 if (count >= 0)
                     len += count;
             }
-            if (has_mail(GET_IDNUM(d->character)) && (GET_ADMLEVEL(d->character) <= 0) &&
+            if (d->character->player && !d->character->player->id.empty() &&
+                (count_unreceived_mail(d->character->player->id) > 0 || count_unread_mail(d->character->player->id) > 0) &&
+                (GET_ADMLEVEL(d->character) <= 0) &&
                 !PRF_FLAGGED(d->character, PRF_NMWARN) && len < sizeof(prompt)) {
                 count = snprintf(prompt + len, sizeof(prompt) - len, "CHECK MAIL - ");
                 flagged = true;

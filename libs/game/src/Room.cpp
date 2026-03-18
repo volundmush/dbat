@@ -428,12 +428,12 @@ void to_json(nlohmann::json &j, const Room &r)
 
 void from_json(const nlohmann::json &j, Room &r)
 {
-    from_json(j, static_cast<HasVnum &>(r));
-    from_json(j, static_cast<HasDgScripts &>(r));
-    from_json(j, static_cast<HasMudStrings &>(r));
-    from_json(j, static_cast<HasExtraDescriptions &>(r));
-    from_json(j, static_cast<HasResetCommands &>(r));
-    from_json(j, static_cast<HasZone &>(r));
+    from_json(j, static_cast<HasVnum&>(r));
+    from_json(j, static_cast<HasDgScripts&>(r));
+    from_json(j, static_cast<HasMudStrings&>(r));
+    from_json(j, static_cast<HasExtraDescriptions&>(r));
+    from_json(j, static_cast<HasResetCommands&>(r));
+    from_json(j, static_cast<HasZone&>(r));
     if (j.contains(+"sector_type"))
         r.sector_type = j["sector_type"];
     if (j.contains(+"room_flags"))

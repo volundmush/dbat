@@ -17,6 +17,9 @@ inline std::string format_as(const HasSubscriptions& unit) {
     return fmt::format("service subscriptions: [{}]", fmt::join(unit.subscriptions, ", "));
 }
 
+void to_json(nlohmann::json& j, const HasSubscriptions& hs);
+void from_json(const nlohmann::json& j, HasSubscriptions& hs);
+
 struct HasVnum {
     vnum vn{NOTHING};
     vnum getVnum() const;
@@ -26,8 +29,8 @@ inline std::string format_as(const HasVnum& unit) {
     return fmt::format("vnum: {}", unit.getVnum());
 }
 
-void to_json(nlohmann::json& j, const HasSubscriptions& hs);
-void from_json(const nlohmann::json& j, HasSubscriptions& hs);
+void to_json(nlohmann::json& j, const HasVnum& hs);
+void from_json(const nlohmann::json& j, HasVnum& hs);
 
 struct HasStats {
     std::unordered_map<std::string, double> stats{};

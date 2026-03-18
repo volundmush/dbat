@@ -29,7 +29,6 @@
 #include "dbat/game/send.hpp"
 #include "dbat/game/ID.hpp"
 #include "dbat/game/Database.hpp"
-
 #include "dbat/game/Random.hpp"
 #include "dbat/game/TimeInfo.hpp"
 #include "dbat/game/players.hpp"
@@ -922,9 +921,7 @@ int Character::getRPP()
         return 0;
     }
 
-    auto &p = players.at(id);
-
-    return p->account->rpp;
+    return player->account->rpp;
 }
 
 
@@ -935,9 +932,7 @@ void Character::modRPP(int amt)
         return;
     }
 
-    auto &p = players.at(id);
-
-    p->account->modRPP(amt);
+    player->account->modRPP(amt);
 }
 
 int Character::getPractices()
@@ -1017,18 +1012,15 @@ void Character::login()
 
     this->lookAtLocation();
 
-    if (has_mail(GET_IDNUM(this)))
-        this->sendText("\r\nYou have mail waiting.\r\n");
-    if (GET_ADMLEVEL(this) >= 1 && BOARDNEWIMM > GET_BOARD(this, 1))
-        this->sendText("\r\n@GMake sure to check the immortal board, there is a new post there.@n\r\n");
-    if (GET_ADMLEVEL(this) >= 1 && BOARDNEWCOD > GET_BOARD(this, 2))
-        this->sendText("\r\n@GMake sure to check the request file, it has been updated.@n\r\n");
-    if (GET_ADMLEVEL(this) >= 1 && BOARDNEWBUI > GET_BOARD(this, 4))
-        this->sendText("\r\n@GMake sure to check the builder board, there is a new post there.@n\r\n");
-    if (GET_ADMLEVEL(this) >= 1 && BOARDNEWDUO > GET_BOARD(this, 3))
-        this->sendText("\r\n@GMake sure to check punishment board, there is a new post there.@n\r\n");
-    if (BOARDNEWMORT > GET_BOARD(this, 0))
-        this->sendText("\r\n@GThere is a new bulletin board post.@n\r\n");
+    if (this->player && !this->player->id.empty())
+    {
+        int unreceived = count_unreceived_mail(this->player->id);
+        int unread = count_unread_mail(this->player->id);
+        if (unreceived > 0 || unread > 0)
+        {
+            this->send_to("\r\nYou have @Y{}@n unreceived and @Y{}@n unread mail.\r\n", unreceived, unread);
+        }
+    }
     if (NEWSUPDATE > GET_LPLAY(this))
         this->send_to("\r\n@GThe NEWS file has been updated, type 'news %d' to see the latest entry or 'news list' to see available entries.@n\r\n", LASTNEWS);
 
@@ -1639,9 +1631,8 @@ void Character::onMoveToLocation(const Location &loc)
             pref_flags.set(PRF_ARENAWATCH, false);
             setBaseStat<room_vnum>("arena_watch", -1);
         }
-        auto &p = players.at(id);
         for(auto zc : z->getChain()) {
-            p->known_zones.insert(zc->number);
+            sh->player->known_zones.insert(zc->number);
         }
     }
 }
@@ -1912,27 +1903,27 @@ std::expected<std::shared_ptr<Character>, std::string> createPlayerCharacter(str
     if(current_characters >= account->slots) {
         return std::unexpected("You have reached the maximum number of characters for your account.");
     }
-    namespace dbat::db {
-        extern std::unique_ptr<pqxx::connection> conn;
-        extern std::unique_ptr<pqxx::work> txn;
-    }
+
     auto exists = findPlayer(data.name.value());
     if(exists) {
         return std::unexpected("A character with that name already exists.");
     }
 
+    auto row = dbat::db::txn->exec("INSERT INTO pcs (user_id, name) VALUES ($1, $2) RETURNING id", {account->id, data.name.value()});
+    auto id = row[0][0].as<std::string>();
+
     auto ch = std::make_shared<Character>();
     ch->id = getNextID(Character::lastID, Character::registry);
     auto p = std::make_shared<PlayerData>();
-    players.emplace(ch->id, p);
-    p->id = ch->id;
+    players.emplace(id, p);
+    p->id = id;
     p->account = account;
     p->character = ch.get();
     p->name = data.name.value();
     ch->name = p->name;
     ch->player = p.get();
 
-    account->characters.push_back(ch->id);
+    account->characters.push_back(id);
 
     ch->sex = data.sex.value();
     ch->race = data.race.value();
@@ -1948,7 +1939,6 @@ std::expected<std::shared_ptr<Character>, std::string> createPlayerCharacter(str
 
     ch->setBaseStat("good_evil", data.alignment);
 
-    players.emplace(ch->id, p);
     Character::registry.emplace(ch->id, ch);
 
     init_char(ch.get());
@@ -2148,12 +2138,12 @@ void to_json(nlohmann::json &j, const PlayerData &p)
         j["account"] = p.account->id;
     for (auto &a : p.aliases)
         j["aliases"].push_back(a);
-    for (auto &i : p.sense_player)
-        j["sensePlayer"].push_back(i);
+    if (!p.sense_player.empty())
+        j["sensePlayer"] = p.sense_player;
     for (auto &i : p.sense_memory)
         j["senseMemory"].push_back(i);
-    for (auto &i : p.dub_names)
-        j["dubNames"].push_back(i);
+    if (!p.dub_names.empty())
+        j["dubNames"] = p.dub_names;
     for (auto i = 0; i < NUM_COLOR; i++)
     {
         if (p.color_choices[i] && strlen(p.color_choices[i]))
@@ -2167,7 +2157,7 @@ void from_json(const nlohmann::json &j, PlayerData &p)
     p.name = j["name"].get<std::string>();
     if (j.contains(+"account"))
     {
-        auto accID = j["account"].get<vnum>();
+        auto accID = j["account"].get<std::string>();
         auto accFind = accounts.find(accID);
         if (accFind != accounts.end())
             p.account = accFind->second.get();
@@ -2179,8 +2169,7 @@ void from_json(const nlohmann::json &j, PlayerData &p)
     }
     if (j.contains(+"sensePlayer"))
     {
-        for (auto &i : j["sensePlayer"])
-            p.sense_player.insert(i.get<int64_t>());
+        j.at(+"sensePlayer").get_to(p.sense_player);
     }
     if (j.contains(+"senseMemory"))
     {
@@ -2189,8 +2178,7 @@ void from_json(const nlohmann::json &j, PlayerData &p)
     }
     if (j.contains(+"dubNames"))
     {
-        for (auto &i : j["dubNames"])
-            p.dub_names.emplace(i[0].get<int64_t>(), i[1].get<std::string>());
+        j.at(+"dubNames").get_to(p.dub_names);
     }
     if (j.contains(+"color_choices"))
     {

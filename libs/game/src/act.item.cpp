@@ -31,7 +31,6 @@
 #include "dbat/game/Guild.hpp"
 #include "dbat/game/constants.hpp"
 #include "dbat/game/dg_scripts.hpp"
-#include "dbat/game/boards.hpp"
 #include "dbat/circle/CircleAnsi.hpp"
 #include "dbat/game/utils.hpp"
 #include "dbat/util/FilterWeak.hpp"

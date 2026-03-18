@@ -42,7 +42,6 @@
 #include "dbat/game/constants.hpp"
 #include "dbat/game/dg_scripts.hpp"
 #include "dbat/game/class.hpp"
-#include "dbat/game/boards.hpp"
 #include "dbat/game/screen.hpp"
 #include "dbat/game/mail.hpp"
 #include "dbat/game/Guild.hpp"
@@ -1025,16 +1024,14 @@ int readIntro(Character *ch, Character *vict)
         return 1;
     }
 
-    auto &p = players.at(ch->id);
-
-    return p->dub_names.contains(vict->id);
+    return ch->player->dub_names.contains(vict->player->id);
 }
 
 void introWrite(Character *ch, Character *vict, char *name)
 {
     std::string n(name);
-    auto &p = players.at(ch->id);
-    p->dub_names[vict->id] = n;
+
+    ch->player->dub_names[vict->player->id] = n;
 }
 
 ACMD(do_intro)
@@ -4701,9 +4698,14 @@ ACMD(do_status)
         {
             ch->sendText("         Check the 'news', it has been updated recently.\r\n");
         }
-        if (has_mail(GET_IDNUM(ch)))
+        if (ch->player && !ch->player->id.empty())
         {
-            ch->sendText("         Check your mail at the nearest postmaster.\r\n");
+            int unreceived = count_unreceived_mail(ch->player->id);
+            int unread = count_unread_mail(ch->player->id);
+            if (unreceived > 0 || unread > 0)
+            {
+                ch->send_to("         You have @Y{}@n unreceived and @Y{}@n unread mail. Check the nearest postmaster.\r\n", unreceived, unread);
+            }
         }
         if (PRF_FLAGGED(ch, PRF_HIDE))
         {
@@ -6670,7 +6672,7 @@ ACMD(do_history)
     if (IS_NPC(ch))
         return;
 
-    auto &p = players.at(ch->id);
+    auto p = ch->player;
 
     type = search_block(arg, history_types, false);
     if (!*arg || type < 0)
@@ -6719,7 +6721,7 @@ void add_history(Character *ch, char *str, int type)
     if (IS_NPC(ch))
         return;
 
-    auto &p = players.at(ch->id);
+    auto p = ch->player;
 
     tmp = p->comm_hist[type];
     ct = time(nullptr);

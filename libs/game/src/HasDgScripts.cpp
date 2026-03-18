@@ -53,13 +53,13 @@ void HasDgScripts::deactivateScripts()
         t->deactivate();
     }
 }
-void to_json(json& j, const HasDgScripts& p) {
+void to_json(nlohmann::json& j, const HasDgScripts& p) {
     to_json(j, static_cast<const HasVariables&>(p));
     j["type"] = p.type;
     if(p.running_scripts) j["running_scripts"] = *p.running_scripts;
 }
 
-void from_json(const json& j, HasDgScripts& p) {
+void from_json(const nlohmann::json& j, HasDgScripts& p) {
     from_json(j, static_cast<HasVariables&>(p));
     if (j.contains(+"type"))
         p.type = j["type"];
