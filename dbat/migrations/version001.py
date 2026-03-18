@@ -33,10 +33,12 @@ FOR EACH ROW
 WHEN (NEW.response_status <> -1)
 EXECUTE FUNCTION dbat.notify_api_request_responded_trigger();
 
-CREATE TABLE dbat.zones (
+CREATE TABLE dbat.zones_blob (
     id SERIAL PRIMARY KEY,
     name TEXT NOT NULL,
-    data JSONB NOT NULL DEFAULT '{}'::jsonb
+    data JSONB NOT NULL DEFAULT '{}'::jsonb,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE dbat.mail (
@@ -84,17 +86,23 @@ CREATE TABLE dbat.dgproto (
     trigger_type INT NOT NULL DEFAULT 0,
     narg INT NOT NULL DEFAULT 0,
     arglist TEXT NOT NULL DEFAULT '',
-    body TEXT NOT NULL DEFAULT ''
+    body TEXT NOT NULL DEFAULT '',
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE dbat.shops (
+CREATE TABLE dbat.shops_blob (
     id SERIAL PRIMARY KEY,
-    data JSONB NOT NULL DEFAULT '{}'::jsonb
+    data JSONB NOT NULL DEFAULT '{}'::jsonb,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE dbat.guilds (
+CREATE TABLE dbat.guilds_blob (
     id SERIAL PRIMARY KEY,
-    data JSONB NOT NULL DEFAULT '{}'::jsonb
+    data JSONB NOT NULL DEFAULT '{}'::jsonb,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE dbat.globals (
@@ -102,35 +110,47 @@ CREATE TABLE dbat.globals (
     data JSONB NOT NULL DEFAULT '{}'::jsonb
 );
 
-CREATE TABLE dbat.rooms (
+CREATE TABLE dbat.rooms_blob (
     id SERIAL PRIMARY KEY,
     data JSONB NOT NULL DEFAULT '{}'::jsonb,
-    exits JSONB NOT NULL DEFAULT '{}'::jsonb
+    exits JSONB NOT NULL DEFAULT '{}'::jsonb,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE dbat.areas (
+CREATE TABLE dbat.areas_blob (
     id SERIAL PRIMARY KEY,
-    data JSONB NOT NULL DEFAULT '{}'::jsonb
+    data JSONB NOT NULL DEFAULT '{}'::jsonb,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE dbat.structures (
+CREATE TABLE dbat.structures_blob (
     id SERIAL PRIMARY KEY,
-    data JSONB NOT NULL DEFAULT '{}'::jsonb
+    data JSONB NOT NULL DEFAULT '{}'::jsonb,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE dbat.oproto (
+CREATE TABLE dbat.oproto_blob (
     id SERIAL PRIMARY KEY,
-    data JSONB NOT NULL DEFAULT '{}'::jsonb
+    data JSONB NOT NULL DEFAULT '{}'::jsonb,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE dbat.nproto (
+CREATE TABLE dbat.nproto_blob (
     id SERIAL PRIMARY KEY,
-    data JSONB NOT NULL DEFAULT '{}'::jsonb
+    data JSONB NOT NULL DEFAULT '{}'::jsonb,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE dbat.assemblies (
+CREATE TABLE dbat.assemblies_blob (
     id SERIAL PRIMARY KEY,
-    data JSONB NOT NULL DEFAULT '{}'::jsonb
+    data JSONB NOT NULL DEFAULT '{}'::jsonb,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 """

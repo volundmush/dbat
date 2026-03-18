@@ -1020,7 +1020,7 @@ ACMD(do_echo)
         {
             char blom[MAX_INPUT_LENGTH];
             sprintf(blom, "@D(@GOOC@W: @gSmote by user %s@D)@n",
-                    IS_NPC(ch) ? GET_NAME(ch) : (ch->desc->account == nullptr ? "ERROR REPORT" : ch->desc->account->name.c_str()));
+                    IS_NPC(ch) ? GET_NAME(ch) : ch->desc->character->player->username.c_str());
             act(blom, false, ch, nullptr, nullptr, TO_ROOM);
         }
         act("\n\n", false, ch, nullptr, nullptr, TO_CHAR);
@@ -1765,7 +1765,7 @@ static void do_stat_character(Character *ch, Character *k)
 
         ch->send_to("Created: [%s], Last Logon: [%s], Played [%dh %dm], Age [%d]\r\n", buf1, cmbuf2, (int)k->time.played / 3600, (int)(((int64_t)k->time.played % 3600) / 60), 0);
 
-        ch->send_to("@YOwned by User@D: [@C%s@D]@n\r\n", k->player->account->name.c_str());
+        ch->send_to("@YOwned by User@D: [@C%s@D]@n\r\n", k->player->username.c_str());
         ch->send_to("@RCharacter Deaths@D: @r%d@n\r\n", GET_DCOUNT(k));
 
         ch->send_to("Align: [%4d], Ethic: [%4d]", GET_ALIGNMENT(k), GET_ETHIC_ALIGNMENT(k));

@@ -4,7 +4,6 @@
 
 #include "Log.hpp"
 #include "CharacterShared.hpp"
-#include "Account.hpp"
 #include "HasMisc.hpp"
 #include "HasEquipment.hpp"
 #include "HasInventory.hpp"
@@ -29,7 +28,8 @@
 struct PlayerData {
     std::string id; // A UUID.
     std::string name;
-    struct Account *account{};
+    std::string user_id; // A UUID
+    std::string username;
     struct Character *character{};
     std::vector<struct alias_data> aliases;    /* Character's aliases                  */
     std::unordered_set<std::string> sense_player;
@@ -37,7 +37,9 @@ struct PlayerData {
     std::map<std::string, std::string> dub_names; // maps UUID to name
     std::unordered_set<zone_vnum> known_zones;
     char *color_choices[NUM_COLOR]{}; /* Choices for custom colors		*/
-    struct txt_block *comm_hist[NUM_HIST]{}; /* Player's communications history     */
+    void save();
+    int getRPP();
+    void modRPP(int amount);
 };
 
 struct Character;
@@ -442,7 +444,7 @@ struct ChargenData {
     std::expected<void, std::string> validate();
 };
 
-extern std::expected<std::shared_ptr<Character>, std::string> createPlayerCharacter(struct Account* account, ChargenData& data);
+extern std::expected<std::shared_ptr<Character>, std::string> createPlayerCharacter(std::string_view user_id, ChargenData& data);
 
 void to_json(nlohmann::json& j, const Character& c);
 void from_json(const nlohmann::json& j, Character& c);

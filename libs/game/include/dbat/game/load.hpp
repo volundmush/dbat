@@ -1,7 +1,5 @@
 #pragma once
 #include <filesystem>
-#include "json.hpp"
-
 
 #include "dbat/game/Character.hpp"
 #include "dbat/game/Object.hpp"
@@ -11,10 +9,6 @@
 #include "dbat/game/Guild.hpp"
 #include "dbat/game/TimeInfo.hpp"
 #include "dbat/game/Help.hpp"
-
-#include <boost/asio/awaitable.hpp>
-
-extern PlayerData* create_player_character(int account_id, const json &j);
 
 void load_zones(const std::filesystem::path& loc);
 //void load_accounts(const std::filesystem::path& loc);
@@ -43,10 +37,3 @@ void load_players(const std::filesystem::path& loc);
 void load_help(const std::filesystem::path& loc);
 
 void load_assemblies(const std::filesystem::path& loc);
-
-std::vector<std::filesystem::path> getDumpFiles(const std::filesystem::path &dir, std::string_view pattern);
-
-namespace dbat::save {
-
-    void runSaveSync();
-}

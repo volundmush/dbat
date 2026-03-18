@@ -12,7 +12,6 @@
 #include "dbat/game/RoomUtils.hpp"
 #include "dbat/game/Destination.hpp"
 #include "dbat/game/Descriptor.hpp"
-#include "dbat/game/Account.hpp"
 #include "dbat/game/spec_procs.hpp"
 //#include "dbat/game/send.hpp"
 #include "dbat/game/comm.hpp"
@@ -983,19 +982,9 @@ SPECIAL(bank)
                 return (true);
             }
 
-            if (ch->desc->account == nullptr)
+            if (vict->player->user_id == ch->player->user_id)
             {
-                ch->sendText("There is an error. Report to staff.");
-                return (true);
-            }
-            auto id = vict->player->id;
-            auto &p = players.at(id);
-            auto &c = p->account->characters;
-            auto found = std::find_if(c.begin(), c.end(), [&](auto i)
-                                      { return i == id; });
-            if (found != c.end())
-            {
-                ch->sendText("You can not transfer money to your own offline characters...");
+                ch->sendText("You can not transfer money to your own characters...");
                 return (true);
             }
             vict->modBaseStat("money_bank", amount);

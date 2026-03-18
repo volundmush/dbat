@@ -18,7 +18,7 @@
 
 struct Object;
 struct Character;
-struct Account;
+struct PlayerData;
 
 struct txt_block {
     char *text;
@@ -74,7 +74,6 @@ struct descriptor_data {
     struct descriptor_data *snooping{}; /* Who is this char snooping	*/
     struct descriptor_data *snoop_by{}; /* And who is snooping this char	*/
     struct descriptor_data *next{}; /* link to next descriptor		*/
-    struct Account *account{}; /* Account info                        */
     int level{};
     char *newsbuf{};
     /*---------------Player Level Object Editing Variables-------------------*/

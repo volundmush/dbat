@@ -11,7 +11,6 @@
 #include "dbat/game/ObjectUtils.hpp"
 #include "dbat/game/Descriptor.hpp"
 #include "dbat/game/RoomUtils.hpp"
-#include "dbat/game/Account.hpp"
 #include "dbat/game/Location.hpp"
 #include "dbat/game/interpreter.hpp"
 #include "dbat/game/comm.hpp"
@@ -40,6 +39,9 @@
 #include "dbat/game/const/AdminLevel.hpp"
 #include "dbat/game/const/Position.hpp"
 #include "dbat/game/const/Filename.hpp"
+
+#include "dbat/game/Database.hpp"
+#include <nlohmann/json.hpp>
 
 /* local functions */
 void perform_complex_alias(struct txt_q *input_q, char *orig, struct alias_data *a);
@@ -1409,17 +1411,17 @@ void payout(int num)
         {
             if (num == 0)
             {
-                k->account->modRPP(1);
+                k->character->modRPP(1);
                 k->character->sendText("@D[@G+ 1 RPP@D] @cA total logon count within 4 of the highest has been achieved.@n\r\n");
             }
             else if (num == 1)
             {
-                k->account->modRPP(2);
+                k->character->modRPP(2);
                 k->character->sendText("@D[@G+ 2 RPP@D] @cThe total logon count has tied with the highest ever.@n\r\n");
             }
             else
             {
-                k->account->modRPP(3);
+                k->character->modRPP(3);
                 k->character->sendText("@D[@G+ 3 RPP@D] @cA new logon count record has been achieved!@n\r\n");
             }
             k->character->setBaseStat("rewtime", LASTPAYOUT);
@@ -1547,22 +1549,30 @@ char *rIntro(Character *ch, char *arg)
         return "NOTHING";
 }
 
-void fingerUser(Character *ch, struct Account *account)
+void fingerUser(Character *ch, std::string_view id)
 {
-    ch->send_to("@D[@gUsername   @D: @w%-30s@D]@n\r\n", account->name.c_str());
-    //ch->send_to("@D[@gEmail      @D: @w%-30s@D]@n\r\n", account->email.c_str());
-    ch->send_to("@D[@gTotal Slots@D: @w%-30d@D]@n\r\n", account->slots);
-    ch->send_to("@D[@gRP Points  @D: @w%-30d@D]@n\r\n", account->rpp);
+
+    auto rows = dbat::db::txn->exec("SELECT * from users WHERE id = $1", pqxx::params{id});
+
+    if(rows.empty()) {
+        ch->sendText("No such user.\r\n");
+        return;
+    }
+
+    const auto& account = rows[0];
+
+    ch->send_to("@D[@gUsername   @D: @w%-30s@D]@n\r\n", account["username"].as<std::string>().c_str());
+    //ch->send_to("@D[@gEmail      @D: @w%-30s@D]@n\r\n", account["email"].get<std::string>().c_str());
+    //ch->send_to("@D[@gTotal Slots@D: @w%-30d@D]@n\r\n", account["slots"].get<int>());
+    //ch->send_to("@D[@gRP Points  @D: @w%-30d@D]@n\r\n", account["rpp"].get<int>());
 
     if (GET_ADMLEVEL(ch) > 0)
     {
         int counter = 0;
-        for (auto ref : account->characters)
+        auto crows = dbat::db::txn->exec("SELECT * from pcs WHERE user_id = $1", pqxx::params{account["id"].get<int>()});
+        for (auto row : crows)
         {
-            auto p = players.find(ref);
-            if (p == players.end())
-                continue;
-            ch->send_to("@D[@gCh. Slot %d @D: @w%-30s@D]@n\r\n", ++counter, p->second->character->getName());
+            ch->send_to("@D[@gCh. Slot %d @D: @w%-30s@D]@n\r\n", ++counter, row["name"].as<std::string>().c_str());
         }
         ch->sendText("\n");
     }

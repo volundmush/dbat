@@ -33,7 +33,7 @@ extern int special(Character *ch, int cmd, char *arg);
 
 void payout(int num);
 int lockRead(char *name);
-extern void fingerUser(Character *ch, struct Account *acc);
+extern void fingerUser(Character *ch, std::string_view id);
 
 extern int readUserIndex(char *name);
 

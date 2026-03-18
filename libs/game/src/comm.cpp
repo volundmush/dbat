@@ -43,7 +43,6 @@
 #include "dbat/game/Random.hpp"
 
 #include "dbat/game/players.hpp"
-#include "dbat/game/Account.hpp"
 #include "dbat/game/transformation.hpp"
 #include "dbat/game/db.hpp"
 
@@ -1348,11 +1347,6 @@ void close_socket(struct descriptor_data *d) {
         free(d->obj_short);
     if (d->obj_long)
         free(d->obj_long);
-
-    if(d->account) {
-        d->account->descriptors.erase(d);
-        d->account = nullptr;
-    }
 
     if(c) {
         c->desc = nullptr;

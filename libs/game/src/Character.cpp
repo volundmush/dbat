@@ -8,7 +8,6 @@
 #include "dbat/game/ObjectUtils.hpp"
 #include "dbat/game/Descriptor.hpp"
 #include "dbat/game/Zone.hpp"
-#include "dbat/game/Account.hpp"
 #include "dbat/game/RoomUtils.hpp"
 #include "dbat/game/races.hpp"
 #include "dbat/game/spells.hpp"
@@ -916,23 +915,18 @@ void Character::remove_kaioken(int8_t announce)
 
 int Character::getRPP()
 {
-    if (IS_NPC(this))
-    {
-        return 0;
-    }
-
-    return player->account->rpp;
+    return player ? player->getRPP() : 0;
 }
 
 
 void Character::modRPP(int amt)
 {
-    if (IS_NPC(this))
+    if (!player)
     {
         return;
     }
 
-    player->account->modRPP(amt);
+    player->modRPP(amt);
 }
 
 int Character::getPractices()
@@ -1894,22 +1888,24 @@ std::expected<void, std::string> ChargenData::validate() {
     return {};
 }
 
-std::expected<std::shared_ptr<Character>, std::string> createPlayerCharacter(struct Account* account, ChargenData& data) {
+std::expected<std::shared_ptr<Character>, std::string> createPlayerCharacter(std::string_view user_id, ChargenData& data) {
     auto validated = data.validate();
     if(!validated) {
         return std::unexpected(validated.error());
     }
-    auto current_characters = account->characters.size();
-    if(current_characters >= account->slots) {
-        return std::unexpected("You have reached the maximum number of characters for your account.");
+
+    auto arows = dbat::db::txn->exec("SELECT * FROM users WHERE id = $1", {user_id});
+    if(arows.empty()) {
+        return std::unexpected("user not found");
     }
+    auto account = arows[0];
 
     auto exists = findPlayer(data.name.value());
     if(exists) {
         return std::unexpected("A character with that name already exists.");
     }
 
-    auto row = dbat::db::txn->exec("INSERT INTO pcs (user_id, name) VALUES ($1, $2) RETURNING id", {account->id, data.name.value()});
+    auto row = dbat::db::txn->exec("INSERT INTO pcs (user_id, name) VALUES ($1, $2) RETURNING id", {user_id, data.name.value()});
     auto id = row[0][0].as<std::string>();
 
     auto ch = std::make_shared<Character>();
@@ -1917,13 +1913,11 @@ std::expected<std::shared_ptr<Character>, std::string> createPlayerCharacter(str
     auto p = std::make_shared<PlayerData>();
     players.emplace(id, p);
     p->id = id;
-    p->account = account;
+    p->user_id = user_id;
     p->character = ch.get();
     p->name = data.name.value();
     ch->name = p->name;
     ch->player = p.get();
-
-    account->characters.push_back(id);
 
     ch->sex = data.sex.value();
     ch->race = data.race.value();
@@ -1943,7 +1937,7 @@ std::expected<std::shared_ptr<Character>, std::string> createPlayerCharacter(str
 
     init_char(ch.get());
 
-    send_to_imm("New character created, %s, by user, %s.", GET_NAME(ch.get()), account->name.c_str());
+    send_to_imm("New character created, %s, by user, %s.", GET_NAME(ch.get()), account["username"].as<std::string>());
 
     return ch;
 
@@ -2134,8 +2128,8 @@ void to_json(nlohmann::json &j, const PlayerData &p)
 {
     j["id"] = p.id;
     j["name"] = p.name;
-    if (p.account)
-        j["account"] = p.account->id;
+    if (!p.user_id.empty())
+        j["user_id"] = p.user_id;
     for (auto &a : p.aliases)
         j["aliases"].push_back(a);
     if (!p.sense_player.empty())
@@ -2155,12 +2149,9 @@ void from_json(const nlohmann::json &j, PlayerData &p)
 {
     p.id = j["id"];
     p.name = j["name"].get<std::string>();
-    if (j.contains(+"account"))
+    if (j.contains(+"user_id"))
     {
-        auto accID = j["account"].get<std::string>();
-        auto accFind = accounts.find(accID);
-        if (accFind != accounts.end())
-            p.account = accFind->second.get();
+        j.at(+"user_id").get_to(p.user_id);
     }
     if (j.contains(+"aliases"))
     {
@@ -2185,4 +2176,16 @@ void from_json(const nlohmann::json &j, PlayerData &p)
         for (auto &i : j["color_choices"])
             p.color_choices[i[0].get<int>()] = strdup(i[1].get<std::string>().c_str());
     }
+}
+
+void PlayerData::save() {
+
+}
+
+void PlayerData::modRPP(int amount) {
+
+}
+
+int PlayerData::getRPP() {
+    return 0;
 }

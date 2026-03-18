@@ -42,7 +42,7 @@ inline bool IS_MOB(const Character* ch) {
 #define GET_CLAN(ch)    ch->clan
 #define GET_TRANSCLASS(ch) ch->transclass
 #define GET_FEATURE(ch) ch->feature
-#define GET_USER(ch)    (ch->desc ? (ch->desc->account ? (char*)(ch->desc->account->name.c_str()) : "NOUSER") : "NOUSER")
+#define GET_USER(ch)    (ch->player ? ch->player->username.c_str() : "NOUSER")
 #define GET_CRANK(ch)   ch->crank
 #define GET_ADMLEVEL(ch)    ch->getBaseStat<int>("admin_level")
 #define GET_LEVEL(ch)    ch->getBaseStat<int>("level")

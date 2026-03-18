@@ -861,7 +861,7 @@ static void perform_tell(Character *ch, Character *vict, char *arg)
         if (!IS_NPC(ch))
         {
             snprintf(buf2, sizeof(buf2), "@YYou tell %s, '%s'@n\r\n",
-                     GET_ADMLEVEL(vict) > 0 ? GET_NAME(vict) : (vict->desc->account ? GET_USER(vict) : "ERROR"), arg);
+                     GET_ADMLEVEL(vict) > 0 ? GET_NAME(vict) : GET_USER(vict), arg);
             if (GET_ADMLEVEL(ch) < 5 && GET_ADMLEVEL(vict) < 5 && !IS_NPC(ch) && !IS_NPC(vict))
             {
                 send_to_imm("@GTELL: @C%s@G tells @c%s, @W'@w%s@W'@n",
@@ -948,9 +948,7 @@ ACMD(do_tell)
                 continue;
             if (STATE(k) != CON_PLAYING)
                 continue;
-            if (!k->account)
-                continue;
-            if (found == false && !IS_NPC(ch) && (boost::iequals(k->account->name.c_str(), buf) || strstr(k->account->name.c_str(), buf)))
+            if (found == false && !IS_NPC(ch) && (boost::iequals(k->character->player->username.c_str(), buf) || strstr(k->character->player->username.c_str(), buf)))
             {
                 vict = k->character;
                 found = true;

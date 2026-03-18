@@ -8,7 +8,6 @@
 #include "dbat/game/Descriptor.hpp"
 #include "dbat/game/ObjectUtils.hpp"
 #include "dbat/game/CharacterUtils.hpp"
-#include "dbat/game/Account.hpp"
 #include "dbat/game/obj_edit.hpp"
 #include "dbat/game/send.hpp"
 #include "dbat/game/comm.hpp"
@@ -607,7 +606,6 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg)
                 d->character->modRPP(-20);
                 obj->size = static_cast<Size>(get_size(d->character));
                 send_to_imm("Custom Eq: %s has bought: %s.", GET_NAME(d->character), obj->getShortDescription());
-                d->account->customs.emplace_back(obj->getShortDescription());
                 log_custom(d, obj);
             }
             else if (boost::iequals(arg, "n") || boost::iequals(arg, "N"))

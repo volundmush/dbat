@@ -22,6 +22,7 @@
 #include "dbat/game/Descriptor.hpp"
 #include "dbat/game/ObjectPrototype.hpp"
 #include "dbat/game/TimeInfo.hpp"
+#include "dbat/game/Database.hpp"
 
 #include "dbat/game/Random.hpp"
 #include "dbat/game/weather.hpp"
@@ -46,7 +47,6 @@
 #include "dbat/game/mail.hpp"
 #include "dbat/game/Guild.hpp"
 #include "dbat/game/players.hpp"
-#include "dbat/game/Account.hpp"
 #include "dbat/game/improved-edit.hpp"
 #include "dbat/game/transformation.hpp"
 // #include "dbat/game/planet.hpp"
@@ -3831,13 +3831,15 @@ ACMD(do_finger)
         return;
     }
 
-    auto account = findAccount(arg);
-    if (!account)
-    {
+    auto arows = dbat::db::txn->exec("SELECT * FROM users WHERE username LIKE $1 LIMIT 1", pqxx::params{arg});
+
+    if(arows.empty()) {
         ch->sendText("That user does not exist\r\n");
         return;
     }
-    fingerUser(ch, account);
+    auto account = arows[0];
+
+    fingerUser(ch, account["id"].as<std::string>());
 }
 
 ACMD(do_rptrans)
@@ -3883,17 +3885,19 @@ ACMD(do_rptrans)
             continue;
         if (STATE(k) != CON_PLAYING)
             continue;
-        if (boost::iequals(k->account->name.c_str(), arg))
+        if (boost::iequals(k->character->player->username, arg)) {
             vict = k->character;
+            break;
+        }
     }
-    if (vict == nullptr)
+    if (!vict)
     {
+        ch->sendText("That user is not currently playing.\r\n");
+        return;
     }
-    else
-    {
-        vict->modRPP(amt);
-        vict->send_to("@W%s gives @C%d@W of their RPP to you. How nice!\r\n", GET_NAME(ch), amt);
-    }
+
+    vict->modRPP(amt);
+    vict->send_to("@W%s gives @C%d@W of their RPP to you. How nice!\r\n", GET_NAME(ch), amt);
     ch->modRPP(-amt);
     ch->send_to("@WYou exchange @C%d@W RPP to user @c%s@W for a warm fuzzy feeling.\r\n", amt, CAP(arg));
     mudlog(NRM, std::max(ADMLVL_IMPL, GET_INVIS_LEV(ch)), true, "EXCHANGE: %s gave %d RPP to user %s", GET_NAME(ch), amt,
@@ -5589,7 +5593,7 @@ ACMD(do_who)
                 num_can_see++;
 
                 char usr[100];
-                sprintf(usr, "@W(@R%s@W)%s", tch->desc->account->name.c_str(),
+                sprintf(usr, "@W(@R%s@W)%s", tch->desc->character->player->username.c_str(),
                         PLR_FLAGGED(tch, PLR_BIOGR) ? "" : (SPOILED(tch) ? " @R*@n" : ""));
                 ch->send_to("%s               @D<@C%-12s@D> %s@w%s", line_color, GET_ADMLEVEL(ch) > 0 ? GET_NAME(tch) : (GET_ADMLEVEL(tch) > 0 ? GET_NAME(tch) : (GET_USER(tch) ? GET_USER(tch) : "nullptr")), GET_ADMLEVEL(ch) > 0 ? usr : "", line_color);
 
@@ -5807,15 +5811,15 @@ ACMD(do_users)
         sprintf(line, "%3d %-20s %-20s %-14s %-3s %-8s %1s ", -1,
                 d->original && d->original->getName() ? d->original->getName() : d->character && d->character->getName() ? d->character->getName()
                                                                                                                          : "UNDEFINED",
-                d->account ? d->account->name.c_str() : "UNKNOWN", state, idletime, timeptr,
+                d->character->player->username.c_str(), state, idletime, timeptr,
                 "N");
 
         if (d->host[0] != 0)
-            sprintf(line + strlen(line), "\n%3d [%s Site: %s]\r\n", -1, d->account ? d->account->name.c_str() : "UNKNOWN",
+            sprintf(line + strlen(line), "\n%3d [%s Site: %s]\r\n", -1, d->character->player->username.c_str(),
                     d->host);
         else
             sprintf(line + strlen(line), "\n%3d [%s Site: Hostname unknown]\r\n", -1,
-                    d->account ? d->account->name.c_str() : "UNKNOWN");
+                    d->character->player->username.c_str());
 
         if (STATE(d) != CON_PLAYING)
         {

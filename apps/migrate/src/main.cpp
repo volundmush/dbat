@@ -34,7 +34,6 @@
 #include "dbat/game/config.hpp"
 #include "dbat/game/class.hpp"
 #include "dbat/game/players.hpp"
-#include "dbat/game/Account.hpp"
 #include "dbat/game/act.item.hpp"
 #include "dbat/game/pfdefaults.hpp"
 #include "dbat/game/spell_parser.hpp"
@@ -4071,20 +4070,12 @@ void migrate_accounts() {
         auto bank = std::stoi(rppBank);
         file.close();
 
-        // Now let's get a new account_data...
-        auto a = std::make_shared<Account>();
-
 
         auto row = dbat::db::txn->exec(
             "INSERT INTO users (username, admin_level) VALUES ($1, $2) RETURNING id",
             {name, admin_level}
         );
         auto user_id = row.empty() ? std::string{} : row[0][0].as<std::string>();
-        a->id = user_id;
-        a->name = name;
-        a->rpp = rp_points;
-
-        accounts[user_id] = a;
 
         auto comp = nlohmann::json::object();
         if(rp_points) comp["rpp"] = rp_points;
@@ -4094,26 +4085,24 @@ void migrate_accounts() {
         if(!comp.empty()) {
             dbat::db::txn->exec(
                 "INSERT INTO user_components (user_id, component_name, data) VALUES ($1, $2, $3::jsonb)",
-                {a->id, "dbat", comp.dump()}
+                {user_id, "dbat", comp.dump()}
             );
         }
-
-        a->id = user_id;
 
         for(auto charName : characterNames) {
             characterToAccount.emplace_back(charName, user_id);
         }
         
         if(!email.empty()) {
-            dbat::db::txn->exec("INSERT INTO emails (user_id, email) VALUES ($1, $2)", {a->id, email});
+            dbat::db::txn->exec("INSERT INTO emails (user_id, email) VALUES ($1, $2)", {user_id, email});
         }
 
         row = dbat::db::txn->exec(
             "INSERT INTO passwords (user_id, password_hash) VALUES ($1, $2) RETURNING id",
-            {a->id, pass}
+            {user_id, pass}
         );
         auto pass_id = row.empty() ? std::string{} : row[0][0].as<std::string>();
-        dbat::db::txn->exec("UPDATE users SET current_password_id = $1 WHERE id = $2", {pass_id, a->id});
+        dbat::db::txn->exec("UPDATE users SET current_password_id = $1 WHERE id = $2", {pass_id, user_id});
     }
 }
 
@@ -4133,9 +4122,7 @@ void migrate_characters() {
         }
         auto ch = sh.get();
 
-        auto &a = accounts[accID];
-
-        auto row = dbat::db::txn->exec("INSERT INTO pcs (user_id, name, admin_mantle) VALUES ($1, $2, $3) RETURNING id", {a->id, ch->getName(), GET_ADMLEVEL(ch)});
+        auto row = dbat::db::txn->exec("INSERT INTO pcs (user_id, name, admin_mantle) VALUES ($1, $2, $3) RETURNING id", {accID, ch->getName(), GET_ADMLEVEL(ch)});
         auto id = row[0][0].as<std::string>();
 
         convert_character(ch);
@@ -4146,19 +4133,15 @@ void migrate_characters() {
         p->character = ch;
         ch->player = p.get();
         p->name = ch->getName();
-        p->account = a.get();
-        auto old_level = a->admin_level;
-        a->admin_level = std::max(a->admin_level, GET_ADMLEVEL(ch));
-        if(old_level != a->admin_level) {
-            dbat::db::txn->exec("UPDATE users SET admin_level = $1 WHERE id = $2", {a->admin_level, a->id});
-        }
-        a->characters.emplace_back(id);
+
+        auto admin_level = GET_ADMLEVEL(ch);
+        dbat::db::txn->exec("UPDATE users SET admin_level = LEAST(admin_level,$1) WHERE id = $2", pqxx::params{admin_level, accID});
         //auto lroom = ch->getBaseStat<room_vnum>("load_room");
         //ch->setBaseStat<room_vnum>("was_in_room", lroom);
         Character::registry.emplace(ch->id, sh);
     }
 
-    // migrate sense files...
+    // migrate sense files...s
     auto path = std::filesystem::current_path() / "data" / "sense";
     if(!std::filesystem::exists(path)) {
         basic_mud_log("No sense directory found, skipping account migration.");
