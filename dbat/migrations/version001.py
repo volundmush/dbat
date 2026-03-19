@@ -154,3 +154,5 @@ CREATE TABLE dbat.assemblies_blob (
 );
 
 """
+
+depends = [("core", "version001")]

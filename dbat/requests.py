@@ -1,15 +1,16 @@
 import asyncio
 import uuid
+from muforge.application import Service
 
 
-class RequestHandler:
-    def __init__(self, plugin):
-        self.plugin = plugin
+class RequestHandler(Service):
+    def __init__(self, app, plugin):
+        super().__init__(app, plugin)
         self.outstanding_requests: dict[uuid.UUID, asyncio.Future] = {}
 
     @property
     def core(self):
-        return self.plugin.app.plugins["core"]
+        return self.app.plugins["core"]
 
     async def handle_response(self, conn, pid, channel, payload):
         try:
@@ -40,7 +41,7 @@ class RequestHandler:
         if future is not None and not future.done():
             future.set_result((row["response_status"], row["response_data"]))
 
-    async def listen_events(self):
+    async def run(self):
         async with self.core.db.connection() as conn:
             await conn.add_listener("dbat_api_request_responded", self.handle_response)
             # Do nothing in order to keep the listener running.

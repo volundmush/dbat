@@ -2,12 +2,29 @@ from muforge.plugin import BasePlugin
 
 
 class DBAT(BasePlugin):
-    async def setup_final(self):
+
+    def name(self):
+        return "Dragon Ball: Advent Truth"
+
+    def slug(self):
+        return "dbat"
+
+    def version(self):
+        return "0.0.1"
+    
+    def game_services(self):
         from .requests import RequestHandler
 
-        self.request_handler = RequestHandler(self)
-        self.app.fastapi_instance.state.dbat_requests = self.request_handler
-        self.app.task_group.create_task(self.request_handler.listen_events())
+        return {"request_handler": RequestHandler}
+
+    async def setup_final(self):
+        request_handler = self.app.services["request_handler"]
+        self.app.fastapi_instance.state.dbat_requests = request_handler
 
     def depends(self):
         return [("core", ">=0.0.1")]
+
+    def game_migrations(self):
+        from .migrations import version001
+
+        return [("version001", version001)]
