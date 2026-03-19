@@ -20,7 +20,7 @@
 #include "dbat/game/spec_assign.hpp"
 #include "dbat/game/interpreter.hpp"
 #include "dbat/game/DragonBall.hpp"
-
+#include "dbat/game/Database.hpp"
 #include "dbat/game/act.other.hpp"
 
 static void db_load_activate_entities() {
@@ -216,9 +216,11 @@ void boot_db_new() {
 namespace dbat::init {
 
     void init() {
+        dbat::db::txn = std::make_unique<pqxx::work>(*dbat::db::conn);
         init_locale();
         init_database();
         init_zones();
+        dbat::db::txn->commit();
     }
 
     void init_locale() {

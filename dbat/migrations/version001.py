@@ -74,10 +74,18 @@ CREATE TABLE dbat.market_bidding (
 
 CREATE TABLE dbat.help (
     id SERIAL PRIMARY KEY,
-    keywords TEXT NOT NULL,
     entry TEXT NOT NULL,
     min_level INT NOT NULL DEFAULT 0
 );
+
+CREATE TABLE dbat.help_keywords (
+    id SERIAL PRIMARY KEY,
+    help_id INT REFERENCES dbat.help(id) ON DELETE CASCADE,
+    keyword TEXT NOT NULL
+);
+
+-- Index for fast lookup
+CREATE INDEX idx_help_keywords_keyword ON dbat.help_keywords(keyword);
 
 CREATE TABLE dbat.dgproto (
     id SERIAL PRIMARY KEY,

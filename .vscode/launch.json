@@ -13,10 +13,6 @@
                     "name": "LSAN_OPTIONS",
                     "value": "verbosity=1:log_threads=1"
                 },
-                {
-                    "name": "LD_LIBRARY_PATH",
-                    "value": "/opt/gcc-15/lib64:${env:LD_LIBRARY_PATH}"
-                }
             ],
             // You can also set ASAN_OPTIONS here if needed],
             "externalConsole": false,
@@ -27,8 +23,6 @@
                     "text": "-enable-pretty-printing",
                     "ignoreFailures": true
                 },
-                { "text": "python import sys; sys.path.insert(0, '/opt/gcc-15/share/gcc-15.1.0/python')" }, 
-                { "text": "python from libstdcxx.v6.printers import register_libstdcxx_printers; register_libstdcxx_printers(None)" }
             ],
             "miDebuggerPath": "/usr/bin/gdb",
         },
@@ -44,10 +38,6 @@
                     "name": "LSAN_OPTIONS",
                     "value": "verbosity=1:log_threads=1"
                 },
-                {
-                    "name": "LD_LIBRARY_PATH",
-                    "value": "/opt/gcc-15/lib64:${env:LD_LIBRARY_PATH}"
-                }
             ],
             // You can also set ASAN_OPTIONS here if needed],
             "externalConsole": false,
@@ -58,41 +48,8 @@
                     "text": "-enable-pretty-printing",
                     "ignoreFailures": true
                 },
-                { "text": "python import sys; sys.path.insert(0, '/opt/gcc-15/share/gcc-15.1.0/python')" }, 
-                { "text": "python from libstdcxx.v6.printers import register_libstdcxx_printers; register_libstdcxx_printers(None)" }
             ],
             "miDebuggerPath": "/usr/bin/gdb",
         },
-        {
-            "name": "DBAT: (GDB) New Portal",
-            "type": "cppdbg",
-            "request": "launch",
-            "program": "${workspaceFolder}/compiled/dbat_portal",
-            "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
-            "environment": [
-                {
-                    "name": "LSAN_OPTIONS",
-                    "value": "verbosity=1:log_threads=1"
-                },
-                {
-                    "name": "LD_LIBRARY_PATH",
-                    "value": "/opt/gcc-15/lib64:${env:LD_LIBRARY_PATH}"
-                }
-            ],
-            // You can also set ASAN_OPTIONS here if needed],
-            "externalConsole": false,
-            "MIMode": "gdb",
-            "setupCommands": [
-                {
-                    "description": "Enable pretty-printing for gdb",
-                    "text": "-enable-pretty-printing",
-                    "ignoreFailures": true
-                },
-                { "text": "python import sys; sys.path.insert(0, '/opt/gcc-15/share/gcc-15.1.0/python')" }, 
-                { "text": "python from libstdcxx.v6.printers import register_libstdcxx_printers; register_libstdcxx_printers(None)" }
-            ],
-            "miDebuggerPath": "/usr/bin/gdb",
-        }
     ]
 }

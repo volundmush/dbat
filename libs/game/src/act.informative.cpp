@@ -5388,18 +5388,11 @@ static void space_to_minus(char *str)
 ACMD(do_help)
 {
     char buf[MAX_STRING_LENGTH * 4];
-    int mid = 0;
 
     if (!ch->desc)
         return;
 
     skip_spaces(&argument);
-
-    if (help_table.empty())
-    {
-        ch->sendText("No help available.\r\n");
-        return;
-    }
 
     if (!*argument)
     {
@@ -5416,48 +5409,49 @@ ACMD(do_help)
 
     space_to_minus(argument);
 
-    if ((mid = search_help(argument, GET_ADMLEVEL(ch))) == NOWHERE)
+    auto result = search_help(argument, GET_ADMLEVEL(ch));
+
+    if (!result)
     {
-        int i, found = 0;
-        ch->sendText("There is no help on that word.\r\n");
+        ch->sendText(result.error());
+        ch->sendText("\r\n");
         if (GET_ADMLEVEL(ch) < 3)
         {
             mudlog(NRM, std::max(ADMLVL_IMPL, GET_INVIS_LEV(ch)), true, "%s tried to get help on %s", GET_NAME(ch),
                    argument);
         }
-        for (auto &h : help_table)
-        {
-            if (h.min_level > GET_ADMLEVEL(ch)) continue;
-            /* To help narrow down results, if they don't start with the same letters, move on */
-            if (!boost::istarts_with(h.keywords, argument)) continue;
-            if (levenshtein_distance(argument, h.keywords) <= 2)
-            {
-                if (!found)
-                {
-                    ch->sendText("\r\nDid you mean:\r\n");
-                    found = 1;
-                }
-                ch->send_to("  %s\r\n", h.keywords);
-            }
-        }
         return;
     }
 
-    auto &hm = help_table[mid];
+    auto help_id = result.value();
+    auto rows = dbat::db::txn->exec(
+        "SELECT entry, min_level FROM dbat.help WHERE id = $1",
+        pqxx::params{help_id}
+    );
 
-    if (hm.min_level > GET_ADMLEVEL(ch))
+    if (rows.empty())
+    {
+        ch->sendText("Help entry not found.\r\n");
+        return;
+    }
+
+    auto entry = rows[0]["entry"].as<std::string>();
+    auto min_level = rows[0]["min_level"].as<int>();
+
+    if (min_level > GET_ADMLEVEL(ch))
     {
         ch->sendText("There is no help on that word.\r\n");
         return;
     }
+
     ch->sendText("@b~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~@n\r\n");
-    ch->sendText(hm.entry);
+    ch->sendText(entry);
     ch->sendText("@b~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~@n\r\n");
     if (GET_ADMLEVEL(ch) > 0)
     {
-        sprintf(buf + strlen(buf), "@WHelp File Level@w: @D(@R%d@D)@n\r\n", hm.min_level);
+        sprintf(buf, "@WHelp File Level@w: @D(@R%d@D)@n\r\n", min_level);
+        ch->desc->send_to("%s", buf);
     }
-    ch->desc->send_to("%s", buf);
 }
 
 #define WHO_FORMAT \

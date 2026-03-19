@@ -259,22 +259,20 @@ static void load_help(FILE *fl, char *name) {
     char key[READ_SIZE + 1], next_key[READ_SIZE + 1], entry[32384];
     size_t entrylen;
     char line[READ_SIZE + 1], hname[READ_SIZE + 1], *scan;
-    struct help_index_element el{};
 
     strlcpy(hname, name, sizeof(hname));
 
     get_one_line(fl, key);
     while (*key != '$') {
-        strcat(key, "\r\n"); /* strcat: OK (READ_SIZE - "\n"  "\r\n" == READ_SIZE  1) */
+        strcat(key, "\r\n");
         entrylen = strlcpy(entry, key, sizeof(entry));
 
-        /* Read in the corresponding help entry. */
         get_one_line(fl, line);
         while (*line != '#' && entrylen < sizeof(entry) - 1) {
             entrylen += strlcpy(entry + entrylen, line, sizeof(entry) - entrylen);
 
             if (entrylen + 2 < sizeof(entry) - 1) {
-                strcpy(entry + entrylen, "\r\n"); /* strcpy: OK (size checked above) */
+                strcpy(entry + entrylen, "\r\n");
                 entrylen += 2;
             }
             get_one_line(fl, line);
@@ -285,31 +283,35 @@ static void load_help(FILE *fl, char *name) {
             const char *truncmsg = "\r\n*TRUNCATED*\r\n";
 
             strcpy(entry + sizeof(entry) - strlen(truncmsg) - 1,
-                   truncmsg); /* strcpy: OK (assuming sane 'entry' size) */
+                   truncmsg);
 
             keysize = strlen(key) - 2;
             basic_mud_log("SYSERR: Help entry exceeded buffer space: %.*s", keysize, key);
 
-            /* If we ran out of buffer space, eat the rest of the entry. */
             while (*line != '#')
                 get_one_line(fl, line);
         }
 
+        int min_level = 0;
         if (*line == '#') {
-            if (sscanf(line, "#%d", &el.min_level) != 1) {
+            if (sscanf(line, "#%d", &min_level) != 1) {
                 basic_mud_log("SYSERR: Help entry does not have a min level. %s", key);
-                el.min_level = 0;
+                min_level = 0;
             }
         }
 
-        el.duplicate = 0;
-        el.entry = entry;
-        scan = one_word(key, next_key);
+        auto row = dbat::db::txn->exec(
+            "INSERT INTO dbat.help (entry, min_level) VALUES ($1, $2) RETURNING id",
+            pqxx::params{entry, min_level}
+        );
+        auto help_id = row[0][0].as<int>();
 
+        scan = one_word(key, next_key);
         while (*next_key) {
-            el.keywords = next_key;
-            help_table.emplace_back(el);
-            el.duplicate++;
+            dbat::db::txn->exec(
+                "INSERT INTO dbat.help_keywords (help_id, keyword) VALUES ($1, $2)",
+                pqxx::params{help_id, next_key}
+            );
             scan = one_word(scan, next_key);
         }
         get_one_line(fl, key);
@@ -4094,7 +4096,14 @@ void migrate_accounts() {
         }
         
         if(!email.empty()) {
-            dbat::db::txn->exec("INSERT INTO emails (user_id, email) VALUES ($1, $2)", {user_id, email});
+            LINFO("Migrating email for user {}: {}", name.c_str(), email.c_str());
+            try {
+                pqxx::subtransaction stxn{*dbat::db::txn};
+                stxn.exec("INSERT INTO emails (user_id, email) VALUES ($1, $2)", {user_id, email});
+                stxn.commit();
+            } catch(const pqxx::check_violation &e) {
+                LINFO("Skipping invalid email '{}' for user {}", email.c_str(), name.c_str());
+            }
         }
 
         row = dbat::db::txn->exec(
@@ -4120,6 +4129,13 @@ void migrate_characters() {
             sh.reset();
             continue;
         }
+        
+        if(auto exists = dbat::db::txn->exec("SELECT id FROM pcs WHERE name = $1 LIMIT 1", pqxx::params{sh->getName()}); !exists.empty()) {
+            basic_mud_log("Character %s already exists in database, skipping migration for this character.", sh->getName());
+            sh.reset();
+            continue;
+        }
+
         auto ch = sh.get();
 
         auto row = dbat::db::txn->exec("INSERT INTO pcs (user_id, name, admin_mantle) VALUES ($1, $2, $3) RETURNING id", {accID, ch->getName(), GET_ADMLEVEL(ch)});

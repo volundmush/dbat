@@ -367,7 +367,7 @@ void load_npc_prototypes()
 
 void load_players()
 {
-    for(const auto& row : dbat::db::txn->exec("SELECT p.*,u.username,pd.data AS player_data FROM pcs AS p LEFT JOIN users AS u ON p.user_id=u.id LEFT JOIN pc_components AS pd ON pd.pc_id=p.id AND pd.component_type='dbat_player'")) {
+    for(const auto& row : dbat::db::txn->exec("SELECT p.*,u.username,pd.data AS player_data FROM pcs AS p LEFT JOIN users AS u ON p.user_id=u.id LEFT JOIN pc_components AS pd ON pd.pc_id=p.id AND pd.component_name='dbat_player'")) {
         auto id = row["id"].as<std::string>();
 
         auto p = std::make_shared<PlayerData>();

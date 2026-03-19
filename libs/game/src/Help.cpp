@@ -1,52 +1,46 @@
 #include "dbat/game/Typedefs.hpp"
 #include "dbat/game/Help.hpp"
-#include <nlohmann/json.hpp>
+#include "dbat/game/Database.hpp"
 
 #include <boost/algorithm/string.hpp>
 
-std::vector<help_index_element> help_table;
-
-int search_help(std::string_view argument, int level)
+std::expected<int, std::string> search_help(std::string_view argument, int level)
 {
-    if (help_table.empty() || argument.empty())
-        return NOTHING;
-
-    for(auto i = 0; i < help_table.size(); ++i) {
-        if(boost::iequals(help_table[i].keywords, argument)) {
-            if(level >= help_table[i].min_level) {
-                return i;
-            }
-        }
+    if (argument.empty()) {
+        return std::unexpected("No search term provided");
     }
-    return NOTHING;
-}
 
-struct help_index_element *get_help(std::string_view name, int level) {
-    auto results = search_help(name, level);
-    if (results != NOTHING)
-        return &help_table[results];
-    
-    return nullptr;
-}
+    auto arg_lower = boost::algorithm::to_lower_copy(std::string{argument});
 
-void to_json(nlohmann::json &j, const help_index_element &a)
-{
-    j["index"] = a.index;
-    if (!a.keywords.empty())
-        j["keywords"] = a.keywords;
-    if (!a.entry.empty())
-        j["entry"] = a.entry;
-    if (a.duplicate != NOTHING)
-        j["duplicate"] = a.duplicate;
-    if (a.min_level != 0)
-        j["min_level"] = a.min_level;
-}
+    auto exact_rows = dbat::db::txn->exec(
+        "SELECT h.id FROM dbat.help h "
+        "JOIN dbat.help_keywords k ON h.id = k.help_id "
+        "WHERE LOWER(k.keyword) = LOWER($1) AND h.min_level <= $2 "
+        "LIMIT 1",
+        pqxx::params{std::string{argument}, level}
+    );
 
-void from_json(const nlohmann::json &j, help_index_element &a)
-{
-    if (j.contains(+"index")) j.at(+"index").get_to(a.index);
-    if (j.contains(+"keywords")) j.at(+"keywords").get_to(a.keywords);
-    if (j.contains(+"entry")) j.at(+"entry").get_to(a.entry);
-    if (j.contains(+"duplicate")) j.at(+"duplicate").get_to(a.duplicate);
-    if (j.contains(+"min_level")) j.at(+"min_level").get_to(a.min_level);
+    if (!exact_rows.empty()) {
+        return exact_rows[0][0].as<int>();
+    }
+
+    auto partial_rows = dbat::db::txn->exec(
+        "SELECT DISTINCT k.keyword FROM dbat.help h "
+        "JOIN dbat.help_keywords k ON h.id = k.help_id "
+        "WHERE k.keyword ILIKE ($1 || '%') AND h.min_level <= $2 "
+        "ORDER BY k.keyword "
+        "LIMIT 10",
+        pqxx::params{arg_lower, level}
+    );
+
+    if (!partial_rows.empty()) {
+        std::string matches = "No exact match. Perhaps you meant: ";
+        for (size_t i = 0; i < partial_rows.size(); ++i) {
+            if (i > 0) matches += ", ";
+            matches += partial_rows[i][0].as<std::string>();
+        }
+        return std::unexpected(matches);
+    }
+
+    return std::unexpected("No help found for '" + std::string{argument} + "'");
 }

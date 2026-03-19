@@ -35,13 +35,14 @@ std::optional<ExtraDescriptionView> find_exdesc(std::string_view word, HasExtraD
 
 
 void to_json(nlohmann::json& j, const HasExtraDescriptions& hed) {
-    j = nlohmann::json::array();
     for (const auto& ed : hed.extra_descriptions) {
-        j.push_back({ed.first, ed.second});
+        j["+extra_descriptions"].push_back({ed.first, ed.second});
     }
 }
 
 void from_json(const nlohmann::json& j, HasExtraDescriptions& hed) {
     hed.extra_descriptions.clear();
-    j.get_to(hed.extra_descriptions);
+    if(j.contains(+"extra_descriptions")) {
+        j.at(+"extra_descriptions").get_to(hed.extra_descriptions);
+    }
 }

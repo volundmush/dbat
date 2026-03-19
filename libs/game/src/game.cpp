@@ -18,9 +18,9 @@ namespace dbat::link {
         }
 
         auto rows = dbat::db::txn->exec(
-            "SELECT s.*,u.dbat_id AS account_id,c.dbat_id AS character_id"
-            "FROM pc_subscriptions AS s LEFT JOIN dbat.users AS u ON s.user_id = u.id"
-            "LEFT JOIN dbat.pcs AS c ON s.pc_id = c.id"
+            "SELECT s.*,c.user_id"
+            " FROM pc_sessions AS s"
+            " LEFT JOIN pcs AS c ON s.pc_id = c.id"
             " WHERE id <> ALL($1::uuid[])"
             , existing_connections);
 
@@ -84,7 +84,7 @@ namespace dbat::link {
 
         auto rows = dbat::db::txn->exec(
             "WITH input_ids AS (SELECT unnest($1::uuid[]) AS id)"
-            "SELECT i.id FROM input_ids AS i LEFT JOIN pc_subscriptions AS s ON i.id = s.pc_id WHERE s.pc_id IS NULL",
+            "SELECT i.id FROM input_ids AS i LEFT JOIN pc_sessions AS s ON i.id = s.pc_id WHERE s.pc_id IS NULL",
             existing_connections);
 
         for(const auto& row : rows) {
