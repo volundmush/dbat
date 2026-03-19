@@ -99,9 +99,6 @@ void boot_db_world() {
     LINFO("Loading players.");
     load_players();
 
-    LINFO("Loading characters initial...");
-    load_characters_initial();
-
     LINFO("Loading structures initial...");
     load_structures_initial();
 

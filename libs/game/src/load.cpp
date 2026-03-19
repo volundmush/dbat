@@ -72,7 +72,10 @@ void load_dgscript_prototypes()
         auto t = std::make_shared<DgScriptPrototype>();
         t->vn = id;
         t->name = row["name"].as<std::string>();
-        t->attach_type = static_cast<UnitType>(row["attach_type"].as<int>());
+        auto attachResult = enchantum::cast<UnitType>(row["attach_type"].as<std::string>());
+        if (attachResult) {
+            t->attach_type = *attachResult;
+        }
         t->trigger_type = row["trigger_type"].as<int>();
         t->narg = row["narg"].as<int>();
         t->arglist = row["arglist"].as<std::string>();

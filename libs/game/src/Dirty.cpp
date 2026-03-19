@@ -15,6 +15,7 @@
 #include "dbat/game/weather.hpp"
 #include "dbat/game/TimeInfo.hpp"
 #include "dbat/game/ID.hpp"
+#include "dbat/game/DgScriptPrototype.hpp"
 #include <nlohmann/json.hpp>
 
 using ::to_json;
@@ -100,7 +101,7 @@ namespace dbat::dirty {
                         "arglist = EXCLUDED.arglist, "
                         "body = EXCLUDED.body, "
                         "updated_at = NOW()",
-                        {dg.vn, dg.name, dg.attach_type, dg.trigger_type, dg.narg, dg.arglist, dg.scriptString()}
+                        {dg.vn, dg.name, enchantum::to_string(dg.attach_type), dg.trigger_type, dg.narg, dg.arglist, dg.scriptString()}
                     );
                 } else {
                     txn->exec("DELETE FROM dbat.dgproto WHERE id=$1", {id});
