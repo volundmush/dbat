@@ -1,12 +1,13 @@
+#include "dbat/migrate/assemblies.hpp"
+
 #include "dbat/game/CharacterUtils.hpp"
 #include "dbat/game/ObjectUtils.hpp"
 #include "dbat/game/RoomUtils.hpp"
 #include "dbat/game/Descriptor.hpp"
-#include "dbat/game/assemblies.hpp"
+
 #include "dbat/game/handler.hpp"
 #include "dbat/game/constants.hpp"
 #include "dbat/game/utils.hpp"
-#include <nlohmann/json.hpp>
 
 std::unordered_map<vnum, assembly_data> g_mAssemblyTable;
 
@@ -292,39 +293,4 @@ assembly_data *assemblyGetAssemblyPtr(vnum lVnum)
 void free_assemblies()
 {
     g_mAssemblyTable.clear();
-}
-
-void to_json(nlohmann::json& j, const component_data& c)
-{
-    j = nlohmann::json{
-        {"bExtract", c.bExtract},
-        {"bInRoom", c.bInRoom},
-        {"lVnum", c.lVnum}
-    };
-}
-
-void from_json(const nlohmann::json& j, component_data& c)
-{
-    c.bExtract = j.at("bExtract").get<bool>();
-    c.bInRoom = j.at("bInRoom").get<bool>();
-    c.lVnum = j.at("lVnum").get<vnum>();
-}
-
-void to_json(nlohmann::json& j, const assembly_data& a)
-{
-    j = nlohmann::json{
-        {"lVnum", a.lVnum},
-        {"uchAssemblyType", a.uchAssemblyType},
-        {"pComponents", a.pComponents}
-    };
-}
-
-void from_json(const nlohmann::json& j, assembly_data& a)
-{
-    a.lVnum = j.at("lVnum").get<vnum>();
-    a.uchAssemblyType = j.at("uchAssemblyType").get<unsigned char>();
-    if (j.contains("pComponents"))
-    {
-        j.at("pComponents").get_to(a.pComponents);
-    }
 }

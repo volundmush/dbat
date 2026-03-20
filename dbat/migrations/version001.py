@@ -154,6 +154,24 @@ CREATE TABLE dbat.nproto_blob (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+CREATE TABLE dbat.assembly_recipes (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name TEXT NOT NULL,
+    assembly_type TEXT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    oproto_id INT NOT NULL REFERENCES dbat.oproto_blob(id) ON DELETE RESTRICT
+);
+
+CREATE TABLE dbat.assembly_ingredients (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    recipe_id UUID REFERENCES dbat.assembly_recipes(id) ON DELETE CASCADE,
+    oproto_id INT NOT NULL REFERENCES dbat.oproto_blob(id) ON DELETE RESTRICT,
+    quantity INT NOT NULL DEFAULT 1,
+    consumed BOOLEAN NOT NULL DEFAULT TRUE,
+    in_room BOOLEAN NOT NULL DEFAULT FALSE
+);
+
 CREATE TABLE dbat.assemblies_blob (
     id SERIAL PRIMARY KEY,
     data JSONB NOT NULL DEFAULT '{}'::jsonb,

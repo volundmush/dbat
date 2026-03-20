@@ -35,4 +35,3 @@ void load_characters_initial();
 
 void load_players();
 
-void load_assemblies();

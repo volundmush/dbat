@@ -59,9 +59,3 @@ extern vnum assemblyFindAssembly(const char *pszAssemblyName);
 extern vnum assemblyGetComponentVnum(assembly_data *pAssembly, size_t index);
 
 extern assembly_data *assemblyGetAssemblyPtr(vnum lVnum);
-
-void to_json(nlohmann::json& j, const component_data& c);
-void from_json(const nlohmann::json& j, component_data& c);
-
-void to_json(nlohmann::json& j, const assembly_data& a);
-void from_json(const nlohmann::json& j, assembly_data& a);

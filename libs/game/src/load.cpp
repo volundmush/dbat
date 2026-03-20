@@ -384,17 +384,3 @@ void load_players()
     }
 }
 
-
-void load_assemblies()
-{
-    for (const auto& row : dbat::db::txn->exec("SELECT * FROM dbat.assemblies_blob"))
-    {
-        auto vn = row["id"].as<int64_t>();
-        nlohmann::json j = nlohmann::json::parse(row["data"].as<std::string>());
-        
-        assembly_data a;
-        from_json(j, a);
-        g_mAssemblyTable[vn] = std::move(a);
-    }
-}
-

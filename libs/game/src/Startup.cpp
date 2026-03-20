@@ -86,9 +86,6 @@ void boot_db_world() {
     LINFO("Loading exits.");
     load_exits();
 
-    LINFO("Loading assemblies.");
-    load_assemblies();
-
     LINFO("Loading areas finish...");
     load_areas_finish();
 

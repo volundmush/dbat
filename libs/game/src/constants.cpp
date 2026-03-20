@@ -1109,22 +1109,6 @@ const char *history_types[NUM_HIST + 1] = {
 };
 
 
-/* Constants for Assemblies    *****************************************/
-const char *AssemblyTypes[MAX_ASSM + 1] = {
-        "Don't Use",
-        "Don't Use",
-        "build",
-        "Don't Use",
-        "Don't Use",
-        "Don't Use",
-        "Don't Use",
-        "Don't Use",
-        "Don't Use",
-        "Don't Use",
-        "Don't Use",
-        "\n"
-};
-
 /* other constants for liquids ******************************************/
 
 

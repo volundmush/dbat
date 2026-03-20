@@ -57,7 +57,7 @@ extern const std::map<Direction, Direction> rev_dir;
 extern int movement_loss[NUM_ROOM_SECTORS];
 extern const char *admin_flag_names[];
 extern int drink_aff[NUM_LIQ_TYPES][NUM_CONDITIONS];
-extern const char *AssemblyTypes[MAX_ASSM + 1];
+
 extern const char *alignments[NUM_ALIGNS + 1];
 extern const char *admin_level_names[ADMLVL_IMPL + 2];
 extern const char *spell_schools[NUM_SCHOOLS + 1];

@@ -256,26 +256,6 @@ namespace dbat::dirty {
             nproto.clear();
         }
 
-        if(!assemblies.empty()) {
-            for(const auto& id : assemblies) {
-                if(auto find = g_mAssemblyTable.find(id); find != g_mAssemblyTable.end()) {
-                    auto j = nlohmann::json::object();
-                    to_json(j, find->second);
-                    txn->exec(
-                        "INSERT INTO dbat.assemblies_blob (id, data, created_at, updated_at) "
-                        "VALUES ($1, $2::jsonb, NOW(), NOW()) "
-                        "ON CONFLICT (id) DO UPDATE SET "
-                        "data = EXCLUDED.data, "
-                        "updated_at = NOW()",
-                        {id, j.dump()}
-                    );
-                } else {
-                    txn->exec("DELETE FROM dbat.assemblies_blob WHERE id=$1", {id});
-                }
-            }
-            assemblies.clear();
-        }
-
         {
             auto j = nlohmann::json::object();
             j["time"] = time_info;
@@ -331,9 +311,6 @@ namespace dbat::dirty {
         }
         for(const auto& [id, n] : mob_proto) {
             nproto.insert(id);
-        }
-        for(const auto& [vn, a] : g_mAssemblyTable) {
-            assemblies.insert(vn);
         }
     }
 };

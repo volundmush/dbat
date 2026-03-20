@@ -31,7 +31,7 @@ bool DescriptionEditor::isValid() {
 }
 
 
-TransformationDescriptionEditor::TransformationDescriptionEditor(descriptor_data& desc, size_t maxLength, std::shared_ptr<HasMudStrings> target, Form form)
+TransformationDescriptionEditor::TransformationDescriptionEditor(descriptor_data& desc, size_t maxLength, std::shared_ptr<Character> target, Form form)
     : DescriptionEditor(desc, maxLength, target), form_(form) {
 }
 
