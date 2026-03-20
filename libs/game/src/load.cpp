@@ -24,7 +24,6 @@
 #include "dbat/game/constants.hpp"
 #include "dbat/game/races.hpp"
 #include "dbat/game/class.hpp"
-#include "dbat/game/assemblies.hpp"
 #include "dbat/game/ID.hpp"
 #include "dbat/game/TimeInfo.hpp"
 #include "dbat/game/weather.hpp"

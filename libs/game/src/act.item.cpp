@@ -20,7 +20,6 @@
 #include "dbat/game/act.comm.hpp"
 #include "dbat/game/act.informative.hpp"
 #include "dbat/game/config.hpp"
-#include "dbat/game/assemblies.hpp"
 #include "dbat/game/send.hpp"
 #include "dbat/game/comm.hpp"
 #include "dbat/game/interpreter.hpp"
@@ -52,7 +51,9 @@
 #include "dbat/game/const/ContainerFlag.hpp"
 #include "dbat/game/const/Condition.hpp"
 #include "dbat/game/const/Recipe.hpp"
-#include "dbat/game/const/Environment.hpp"
+#include "dbat/game/const/Environment.hpp" 
+#include "dbat/game/Database.hpp"
+#include "dbat/game/Assembly.hpp"
 
 
 /* global variables */
@@ -1362,6 +1363,9 @@ ACMD(do_bid)
     ch->sendText("This command is currently disabled.\r\n");
 }
 
+
+
+
 ACMD(do_assemble)
 {
     long lVnum = NOTHING;
@@ -1371,7 +1375,6 @@ ACMD(do_assemble)
 
     int roll = 0;
 
-    // skip_spaces(&argument);
     two_arguments(argument, arg, arg2);
 
     Object *tool = nullptr, *next_obj;
@@ -1393,7 +1396,7 @@ ACMD(do_assemble)
     if (*argument == '\0' || menu > 0)
     {
         ch->send_to("What would you like to %s?\r\n", CMD_NAME);
-        assemblyListToChar(ch, menu);
+        sqlListAssemblies(ch, menu);
         return;
     }
 
@@ -1413,14 +1416,21 @@ ACMD(do_assemble)
     }
 
     vnum directVnum = atoi(arg2);
-    if ((lVnum = assemblyFindAssembly(arg2)) < 0 && !assemblyGetAssemblyPtr(directVnum))
+    auto recipe = sqlFindRecipeByName(arg2);
+    
+    if (!recipe) {
+        recipe = sqlFindRecipeByVnum(directVnum);
+    }
+    
+    if (!recipe)
     {
         ch->send_to("You can't %s %s %s.\r\n", CMD_NAME, AN(arg2), arg2);
         return;
     }
-    if (lVnum < 0)
-        lVnum = directVnum;
-    else if (!assemblyCheckComponents(lVnum, ch, false))
+    
+    lVnum = recipe->oproto_id;
+    
+    if (auto check = sqlCheckComponents(*recipe, ch, false); !check)
     {
         ch->sendText("You haven't got all the things you need.\r\n");
         return;
@@ -1459,19 +1469,16 @@ ACMD(do_assemble)
     }
     improve_skill(ch, SKILL_BUILD, 1);
 
-    /* Create the assembled object. */
     if ((pObject = read_object(lVnum, VIRTUAL)) == nullptr)
     {
         ch->send_to("You can't %s %s %s.\r\n", CMD_NAME, AN(arg2), arg2);
         return;
     }
 
-    assemblyCheckComponents(lVnum, ch, true);
+    sqlCheckComponents(*recipe, ch, true);
 
-    /* Now give the object to the character. */
     if (GET_OBJ_VNUM(pObject) != 1611)
     {
-        // ch->addToInventory(pObject);
         ch->craftingTask.improvementRounds = 0;
         ch->craftingTask.pObject = pObject;
 

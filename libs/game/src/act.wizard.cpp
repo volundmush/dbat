@@ -30,7 +30,6 @@
 #include "dbat/game/act.informative.hpp"
 #include "dbat/game/players.hpp"
 #include "dbat/game/weather.hpp"
-#include "dbat/game/assemblies.hpp"
 #include "dbat/game/comm.hpp"
 #include "dbat/game/constants.hpp"
 #include "dbat/game/dg_scripts.hpp"
@@ -55,6 +54,7 @@
 #include "dbat/game/Parse.hpp"
 #include "dbat/game/TimeInfo.hpp"
 #include "dbat/game/DragonBall.hpp"
+#include "dbat/game/Assembly.hpp"
 
 #include "dbat/game/const/Pulse.hpp"
 #include "dbat/game/const/Condition.hpp"
@@ -3784,7 +3784,7 @@ ACMD(do_show)
         break;
         /* show assembly */
     case 11:
-        assemblyListToChar(ch);
+        sqlListAssemblies(ch, 0);
         break;
         /* show guilds */
     case 12:

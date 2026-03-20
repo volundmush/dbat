@@ -4,6 +4,8 @@
 #include "dbat/game/HasMudStrings.hpp"
 #include "dbat/game/const/Form.hpp"
 
+struct Character;
+
 class DescriptionEditor : public EditorMode {
 public:
     DescriptionEditor(

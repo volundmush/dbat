@@ -179,6 +179,29 @@ CREATE TABLE dbat.assemblies_blob (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+CREATE TABLE dbat.parties (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name TEXT NOT NULL,
+    leader_id UUID REFERENCES public.pcs(id) ON DELETE RESTRICT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE dbat.party_members (
+    party_id UUID REFERENCES dbat.parties(id) ON DELETE CASCADE,
+    pc_id UUID REFERENCES public.pcs(id) ON DELETE CASCADE,
+    joined_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (party_id, pc_id)
+);
+
+CREATE TABLE dbat.party_invites (
+    party_id UUID REFERENCES dbat.parties(id) ON DELETE CASCADE,
+    pc_id UUID REFERENCES public.pcs(id) ON DELETE CASCADE,
+    invited_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    expires_at TIMESTAMPTZ NOT NULL DEFAULT (now() + INTERVAL '10 minute'),
+    PRIMARY KEY (party_id, pc_id)
+);
+
 """
 
 depends = [("core", "version001")]

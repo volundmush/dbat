@@ -11,7 +11,6 @@
 #include "dbat/game/CharacterPrototype.hpp"
 #include "dbat/game/Object.hpp"
 #include "dbat/game/ObjectPrototype.hpp"
-#include "dbat/game/assemblies.hpp"
 #include "dbat/game/weather.hpp"
 #include "dbat/game/TimeInfo.hpp"
 #include "dbat/game/ID.hpp"

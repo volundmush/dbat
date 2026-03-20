@@ -40,7 +40,7 @@
 #include "dbat/game/Shop.hpp"
 #include "dbat/game/Guild.hpp"
 #include "dbat/game/load.hpp"
-#include "dbat/game/assemblies.hpp"
+#include "dbat/migrate/assemblies.hpp"
 #include "dbat/game/vehicles.hpp"
 #include "dbat/circle/CircleAnsi.hpp"
 #include "dbat/game/Help.hpp"
@@ -4767,12 +4767,27 @@ static void assemblyBootAssemblies() {
                 basic_mud_log("SYSERR: bootAssemblies(): Could not add component #%ld to "
                     "assembly #%ld.", lPartVnum, lVnum);
             }
+
+            if (lVnum != NOTHING && lPartVnum != NOTHING) {
+                auto recipeRes = dbat::db::txn->exec(
+                    "SELECT id FROM dbat.assembly_recipes WHERE oproto_id = $1",
+                    {static_cast<int>(lVnum)}
+                );
+                if (!recipeRes.empty()) {
+                    auto recipeId = recipeRes[0][0].as<std::string>();
+                    dbat::db::txn->exec(
+                        "INSERT INTO dbat.assembly_ingredients (recipe_id, oproto_id, quantity, consumed, in_room) "
+                        "VALUES ($1, $2, 1, $3, $4)",
+                        {recipeId, static_cast<int>(lPartVnum), iExtract != 0, iInRoom != 0}
+                    );
+                }
+            }
         } else if (strcasecmp(szTag, "Vnum") == 0) {
             if (sscanf(szLine, "#%ld %s", &lVnum, szType) != 2) {
                 basic_mud_log("SYSERR: bootAssemblies(): Invalid format in file %s, "
                     "line %ld.", ASSEMBLIES_FILE, lLineCount);
                 lVnum = NOTHING;
-            } else if ((iType = search_block(szType, AssemblyTypes, true)) < 0) {
+            } else if ((iType = 3) < 0) {
                 basic_mud_log("SYSERR: bootAssemblies(): Invalid type '%s' for assembly "
                     "vnum #%ld at line %ld.", szType, lVnum, lLineCount);
                 lVnum = NOTHING;
@@ -4780,6 +4795,22 @@ static void assemblyBootAssemblies() {
                 basic_mud_log("SYSERR: bootAssemblies(): Could not create assembly for vnum "
                     "#%ld, type %s.", lVnum, szType);
                 lVnum = NOTHING;
+            }
+
+            if (lVnum != NOTHING) {
+                auto objIt = obj_proto.find(static_cast<obj_vnum>(lVnum));
+                std::string name;
+                if (objIt != obj_proto.end()) {
+                    name = objIt->second->short_description;
+                } else {
+                    name = "Unknown Assembly " + std::to_string(lVnum);
+                }
+
+                dbat::db::txn->exec(
+                    "INSERT INTO dbat.assembly_recipes (name, assembly_type, oproto_id) "
+                    "VALUES ($1, $2, $3)",
+                    {name, "build", static_cast<int>(lVnum)}
+                );
             }
         } else {
             basic_mud_log("SYSERR: Invalid tag '%s' in file %s, line #%ld.", szTag,
