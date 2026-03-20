@@ -37,7 +37,6 @@
 #include "dbat/game/races.hpp"
 #include "dbat/game/class.hpp"
 #include "dbat/game/spells.hpp"
-#include "dbat/game/improved-edit.hpp"
 //#include "dbat/game/feats.hpp"
 #include "dbat/game/fight.hpp"
 #include "dbat/game/screen.hpp"
@@ -362,114 +361,6 @@ ACMD(do_news)
 
 /* Write the news entry */
 
-ACMD(do_newsedit)
-{
-
-    if (GET_ADMLEVEL(ch) < 1 || IS_NPC(ch))
-    {
-        return;
-    }
-
-    FILE *fl;
-    const char *filename;
-    char line[256];
-    int entries = 0, lookup = 0, lastentry = 0, nr;
-
-    filename = NEWS_FILE;
-
-    if (!*argument)
-    {
-        ch->sendText("Syntax: newsedit (title)\r\n");
-        return;
-    }
-    else if (strlen(argument) > 50)
-    {
-        ch->sendText("Limit of 50 characters for title.\r\n");
-        return;
-    }
-    else if (strstr(argument, "#"))
-    {
-        ch->sendText("# is a forbidden character for news entries as it is used by the file system.\r\n");
-        return;
-    }
-
-    /* Check the file for the entry so we may edit it if need be*/
-
-    if (!(fl = fopen(filename, "r")))
-    {
-        basic_mud_log("SYSERR: Couldn't open news file for reading");
-        return;
-    }
-
-    while (!feof(fl))
-    {
-        get_line(fl, line);
-        if (*line == '#')
-        { /* Count the entries */
-            entries++;
-            if (sscanf(line, "#%d", &nr) != 1)
-            {
-                continue;
-            }
-            else
-            {
-                lastentry = nr;
-            }
-        }
-    } /* End of main read while */
-    fclose(fl);
-
-    /* Time to write the entry */
-    struct
-    {
-        const char *cmd;
-        char level;
-        char **buffer;
-        int size;
-        char *filename;
-    } fields[] = {
-        /* edit the lvls to your own needs */
-        {"news", ADMLVL_IMMORT, &immlist, 2000, IMMLIST_FILE},
-        {"\n", 0, nullptr, 0, nullptr}};
-
-    char *tmstr;
-    time_t mytime = time(nullptr);
-    tmstr = (char *)asctime(localtime(&mytime));
-    *(tmstr + strlen(tmstr) - 1) = '\0';
-
-    if (lastentry == 0)
-    {
-        if (entries == 0)
-        {
-            lookup = 1;
-        }
-        else
-        { /* Uh oh */
-            send_to_imm("ERROR: News file entries are disorganized. Report to Iovan for analysis.\r\n");
-            return;
-        }
-    }
-    else
-    {
-        lookup = lastentry + 1;
-    }
-    char *backstr = nullptr;
-    act("$n begins to edit the news.", true, ch, nullptr, nullptr, TO_ROOM);
-    ch->sendText("@D----------------------=[@GNews Edit@D]=----------------------@n\n");
-    ch->sendText(" @RRemember that using # in newsedit is not possible. That\n");
-    ch->sendText("character will be eaten because it is required for the news\n");
-    ch->sendText("file as a delimiter. Also if you want to create an empty line\n");
-    ch->sendText("between paragraphs you will need to enter a single space and\n");
-    ch->sendText("not just push enter. Happy editing!@n\n");
-    ch->sendText("@D---------------------------------------------------------@n\n");
-    send_editor_help(ch->desc);
-    skip_spaces(&argument);
-    ch->desc->newsbuf = strdup(argument);
-    TOP_OF_NEWS = lookup;
-    LASTNEWS = lookup;
-    //string_write(ch->desc, fields[0].buffer, 2000, 0, backstr);
-    STATE(ch->desc) = CON_NEWSEDIT;
-}
 
 static void print_lockout(Character *ch)
 {
@@ -5594,4 +5485,102 @@ ACMD(do_dig)
 ACMD(do_rcopy)
 {
 
+}
+
+ACMD(do_skillset)
+{
+    Character *vict;
+    char name[MAX_INPUT_LENGTH];
+    char buf[MAX_INPUT_LENGTH], help[MAX_STRING_LENGTH];
+    int skill, value, i = 0, qend;
+
+    argument = one_argument(argument, name);
+
+    if (!*name)
+    { /* no arguments. print an informative text */
+        ch->sendText("Syntax: skillset <name> '<skill>' <value>\r\n"
+                     "Skill being one of the following:\r\n");
+        for (qend = 0, i = 0; i < SKILL_TABLE_SIZE; i++)
+        {
+            if (spell_info[i].name == unused_spellname) /* This is valid. */
+                continue;
+            ch->send_to("%18s", spell_info[i].name);
+            if (qend++ % 4 == 3)
+                ch->sendText("\r\n");
+        }
+        if (qend % 4 != 0)
+            ch->sendText("\r\n");
+        return;
+    }
+
+    if (!(vict = get_char_vis(ch, name, nullptr, FIND_CHAR_WORLD)))
+    {
+        ch->send_to("%s", CONFIG_NOPERSON);
+        return;
+    }
+    skip_spaces(&argument);
+
+    /* If there is no chars in argument */
+    if (!*argument)
+    {
+        i = snprintf(help, sizeof(help) - i, "\r\nSkills:\r\n");
+        i += print_skills_by_type(vict, help + i, sizeof(help) - i, SKTYPE_SKILL, nullptr);
+        i += snprintf(help + i, sizeof(help) - i, "\r\nSpells:\r\n");
+        i += print_skills_by_type(vict, help + i, sizeof(help) - i, SKTYPE_SPELL, nullptr);
+        if (CONFIG_ENABLE_LANGUAGES)
+        {
+            i += snprintf(help + i, sizeof(help) - i, "\r\nLanguages:\r\n");
+            i += print_skills_by_type(vict, help + i, sizeof(help) - i, SKTYPE_SKILL | SKTYPE_LANG, nullptr);
+        }
+        if (i >= sizeof(help))
+            strcpy(help + sizeof(help) - strlen("** OVERFLOW **") - 1, "** OVERFLOW **"); /* strcpy: OK */
+        ch->desc->send_to("%s", help);
+        return;
+    }
+
+    if (*argument != '\'')
+    {
+        ch->sendText("Skill must be enclosed in: ''\r\n");
+        return;
+    }
+    /* Locate the last quote and lowercase the magic words (if any) */
+
+    for (qend = 1; argument[qend] && argument[qend] != '\''; qend++)
+        argument[qend] = tolower(argument[qend]);
+
+    if (argument[qend] != '\'')
+    {
+        ch->sendText("Skill must be enclosed in: ''\r\n");
+        return;
+    }
+    strcpy(help, (argument + 1)); /* strcpy: OK (MAX_INPUT_LENGTH <= MAX_STRING_LENGTH) */
+    help[qend - 1] = '\0';
+    if ((skill = find_skill_num(help, SKTYPE_SKILL)) <= 0)
+    {
+        ch->sendText("Unrecognized skill.\r\n");
+        return;
+    }
+    argument += qend + 1; /* skip to next parameter */
+    argument = one_argument(argument, buf);
+
+    if (!*buf)
+    {
+        ch->sendText("Learned value expected.\r\n");
+        return;
+    }
+    value = atoi(buf);
+    if (value < 0)
+    {
+        ch->sendText("Minimum value for learned is 0.\r\n");
+        return;
+    }
+
+    /*
+     * find_skill_num() guarantees a valid spell_info[] index, or -1, and we
+     * checked for the -1 above so we are safe here.
+     */
+    SET_SKILL(vict, skill, value);
+    mudlog(BRF, ADMLVL_IMMORT, true, "skillset: %s changed %s's '%s' to %d.", GET_NAME(ch), GET_NAME(vict),
+           spell_info[skill].name, value);
+    ch->send_to("You change %s's %s to %d.\r\n", GET_NAME(vict), spell_info[skill].name, value);
 }

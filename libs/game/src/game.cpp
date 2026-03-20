@@ -57,11 +57,10 @@ namespace dbat::link {
 
     void handleNewInput() {
         auto rows = dbat::db::txn->exec(
-            "SELECT e.*,p.dbat_id AS character_id"
-            "FROM dbat.incoming_events AS e LEFT JOIN dbat.pcs AS p ON e.pc_id = p.id");
+            "SELECT e.* FROM dbat.incoming_events AS e LEFT JOIN dbat.pcs AS p ON e.pc_id = p.id");
 
         for(const auto& row : rows) {
-            auto pc_id = row["character_id"].as<std::string>();
+            auto pc_id = row["pc_id"].as<std::string>();
             auto event_type = row["event_type"].as<std::string>();
             auto data = row["data"].as<std::string>();
 

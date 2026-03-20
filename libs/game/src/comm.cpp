@@ -12,6 +12,7 @@
 #include "dbat/game/RoomUtils.hpp"
 #include "dbat/game/Destination.hpp"
 #include "dbat/game/Descriptor.hpp"
+#include "dbat/game/DescriptorMode.hpp"
 #include "dbat/game/Zone.hpp"
 #include "dbat/game/comm.hpp"
 //#include "dbat/game/send.hpp"
@@ -1748,26 +1749,12 @@ void descriptor_data::handle_input() {
 
     auto comm = (char*)command.c_str();
 
-    if (str)        /* Writing boards, mail, etc. */
-        string_add(this, comm);
-    else if(std_str) {
-        std_string_add(this, comm);
+    if (mode) {
+        mode->handleInput(command);
+        return;
     }
-    else {            /* else: we're playing normally. */
-        try {
-            command_interpreter(character, comm); /* Send it to interpreter */
-        }
-        catch(const std::exception & err) {
-            basic_mud_log("Exception when running Command Interpreter for %s: %s", GET_NAME(character), err.what());
-            basic_mud_log("Command was: %s", comm);
-            shutdown_game(EXIT_FAILURE);
-        }
-        catch(...) {
-            basic_mud_log("Unknown exception when running Command Interpreter for %s", GET_NAME(character));
-            basic_mud_log("Command was: %s", comm);
-            shutdown_game(EXIT_FAILURE);
-        }
-    }
+    
+    command_interpreter(character, comm);
 
 }
 

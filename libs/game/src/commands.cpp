@@ -273,12 +273,9 @@ const struct command_info cmd_info[] = {
     {"multiform", "multifor", POS_STANDING, do_multiform, 0, ADMLVL_NONE, 0, 1},
     {"mute", "mute", POS_DEAD, do_wizutil, 0, ADMLVL_IMMORT, SCMD_SQUELCH, 0},
     {"music", "musi", POS_RESTING, do_gen_comm, 1, ADMLVL_NONE, SCMD_HOLLER, 0},
-
     {"newbie", "newbie", POS_SLEEPING, do_gen_comm, 0, ADMLVL_NONE, SCMD_AUCTION, 0},
     {"news", "news", POS_SLEEPING, do_news, 0, ADMLVL_NONE, 0, 0},
-    {"newsedit", "newsedi", POS_SLEEPING, do_newsedit, 0, ADMLVL_IMMORT, 0, 0},
     {"nickname", "nicknam", POS_RESTING, do_nickname, 0, ADMLVL_NONE, 0, 0},
-    {"nocompress", "nocompress", POS_DEAD, do_gen_tog, 0, ADMLVL_NONE, SCMD_NOCOMPRESS, 0},
     {"noeq", "noeq", POS_DEAD, do_gen_tog, 0, ADMLVL_NONE, SCMD_NOEQSEE, 0},
     {"nolin", "nolin", POS_DEAD, do_gen_tog, 0, ADMLVL_NONE, SCMD_NODEC, 0},
     {"nomusic", "nomusi", POS_DEAD, do_gen_tog, 0, ADMLVL_NONE, SCMD_NOMUSIC, 0},

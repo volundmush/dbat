@@ -44,7 +44,7 @@ void assemblyListToChar(Character *pCharacter, int type)
             if (type == 0 || type == static_cast<int>(obj_proto.at(lRnum)->type_flag))
             {
                 sprinttype(assembly.uchAssemblyType, AssemblyTypes, szAssmType, sizeof(szAssmType));
-                sprintf(szBuffer, "[%5ld] %s (%s)\r\n", assembly.lVnum,
+                sprintf(szBuffer, "[%5d] %s (%s)\r\n", assembly.lVnum,
                         obj_proto.at(lRnum)->short_description.c_str(), szAssmType);
                 pCharacter->sendText(szBuffer);
 
@@ -60,7 +60,7 @@ void assemblyListToChar(Character *pCharacter, int type)
                         }
                         else
                         {
-                            sprintf(szBuffer, " %5ld: %-20.20s Extract=%-3.3s InRoom=%-3.3s\r\n",
+                            sprintf(szBuffer, " %5d: %-20.20s Extract=%-3.3s InRoom=%-3.3s\r\n",
                                     +comp.lVnum,
                                     obj_proto.at(lRnum)->short_description.c_str(),
                                     (comp.bExtract ? "Yes" : "No"),

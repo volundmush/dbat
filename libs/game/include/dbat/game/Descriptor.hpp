@@ -46,6 +46,8 @@ struct Event {
     nlohmann::json data;
 };
 
+class DescriptorMode;
+
 struct descriptor_data {
     std::string id; // matches the character id.
     std::unordered_map<std::string, std::shared_ptr<GameConnectionInfo>> conns;
@@ -54,6 +56,9 @@ struct descriptor_data {
 
     char host[HOST_LENGTH + 1];    /* hostname				*/
     int connected{CON_PLAYING};        /* mode of 'connectedness'		*/
+
+    std::unique_ptr<DescriptorMode> mode;
+    void switchMode(std::unique_ptr<DescriptorMode>&& new_mode);
 
     time_t login_time{time(nullptr)};        /* when the person connected		*/
     std::string* std_str{nullptr}; // for the alternate modify-str system...

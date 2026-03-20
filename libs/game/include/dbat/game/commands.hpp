@@ -913,8 +913,6 @@ extern DECCMD(do_reward);
 
 extern DECCMD(do_approve);
 
-extern DECCMD(do_newsedit);
-
 extern DECCMD(do_news);
 
 extern DECCMD(do_lag);

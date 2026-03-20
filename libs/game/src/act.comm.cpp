@@ -27,7 +27,7 @@
 #include "dbat/game/config.hpp"
 #include "dbat/game/utils.hpp"
 #include "dbat/game/send.hpp"
-#include "dbat/game/improved-edit.hpp"
+#include "dbat/game/DescriptionEditor.hpp"
 #include "dbat/game/dg_scripts.hpp"
 
 #include "dbat/game/const/Max.hpp"
@@ -1405,9 +1405,8 @@ ACMD(do_write)
 
         /* we can write - hooray! */
         act("$n begins to jot down a note.", true, ch, nullptr, nullptr, TO_ROOM);
-        paper->item_flags.set(ITEM_UNIQUE_SAVE, true);
-        send_editor_help(ch->desc);
-        string_write(ch->desc, &paper->look_description, MAX_NOTE_LENGTH, 0, paper->look_description);
+        auto editor = std::make_unique<DescriptionEditor>(*ch->desc, MAX_NOTE_LENGTH, paper->shared_from_this());
+        ch->desc->switchMode(std::move(editor));
     }
 }
 

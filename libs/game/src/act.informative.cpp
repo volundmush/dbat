@@ -47,7 +47,7 @@
 #include "dbat/game/mail.hpp"
 #include "dbat/game/Guild.hpp"
 #include "dbat/game/players.hpp"
-#include "dbat/game/improved-edit.hpp"
+#include "dbat/game/DescriptionEditor.hpp"
 #include "dbat/game/transformation.hpp"
 // #include "dbat/game/planet.hpp"
 #include "dbat/circle/CircleAnsi.hpp"
@@ -7038,21 +7038,21 @@ ACMD(do_desc)
     {
         return;
     }
-    if (ch->form == Form::base)
+    auto form = ch->form;
+    if (form == Form::base)
     {
         d->send_to("Current description:\r\n%s\r\n", ch->getLookDescription());
         d->sendText("Enter the new text you'd like others to see when they look at you.\r\n");
-        string_write(d, &ch->look_description, EXDSCR_LENGTH, 0, ch->look_description);
-        STATE(d) = CON_EXDESC;
+
+        auto editor = std::make_unique<DescriptionEditor>(*d, EXDSCR_LENGTH, ch->shared_from_this());
+        d->switchMode(std::move(editor));
     }
     else
     {
-        auto form = ch->form;
-
         d->send_to("Current description for %s:\r\n%s\r\n", trans::getName(ch, form), ch->transforms[form].description);
         d->sendText("Enter the new text you'd like others to see when they look at you in this form.\r\n");
 
-        string_write(d, &ch->transforms[form].description, EXDSCR_LENGTH, 0, ch->transforms[form].description);
-        STATE(d) = CON_EXDESC;
+        auto editor = std::make_unique<TransformationDescriptionEditor>(*d, EXDSCR_LENGTH, ch->shared_from_this(), form);
+        d->switchMode(std::move(editor));
     }
 }

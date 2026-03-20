@@ -4,6 +4,7 @@
 #include "dbat/game/Descriptor.hpp"
 #include "dbat/game/Character.hpp"
 #include "dbat/game/players.hpp"
+#include "dbat/game/DescriptorMode.hpp"
 
 
 std::unordered_map<std::string, struct descriptor_data*> sessions;
@@ -59,5 +60,15 @@ int create_join_session(std::shared_ptr<GameConnectionInfo> info) {
         descriptor_list = desc;
         ch->send_to("You have connected to %s from %s.\r\n", ch->getName(), info->ip_address);
         return 1;
+    }
+}
+
+void descriptor_data::switchMode(std::unique_ptr<DescriptorMode>&& new_mode) {
+    if(mode) {
+        mode->onClose();
+    }
+    mode = std::move(new_mode);
+    if(mode) {
+        mode->onLaunch();
     }
 }
