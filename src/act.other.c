@@ -7904,7 +7904,7 @@ ACMD(do_eavesdrop) {
   if (EXIT(ch, dir)) {
     if (IS_SET(EXIT(ch, dir)->exit_info, EX_CLOSED) && EXIT(ch, dir)->keyword) {
       sprintf(buf, "The %s is closed.\r\n", fname(EXIT(ch, dir)->keyword));
-      send_to_char(ch, buf);
+      send_to_char(ch, "%s", buf);
     } else {
       GET_EAVESDROP(ch) = GET_ROOM_VNUM(EXIT(ch, dir)->to_room);
       GET_EAVESDIR(ch) = dir;
@@ -15868,7 +15868,7 @@ ACMD(do_file)
      for (j = 0, i = 1; fields[i].level; i++)
        if (fields[i].level <= GET_LEVEL(ch))
          sprintf(buf+strlen(buf), "%-15s%s\r\n", fields[i].cmd, fields[i].file);
-     send_to_char(ch, buf);
+     send_to_char(ch, "%s", buf);
      return;
    }
 

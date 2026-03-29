@@ -2211,7 +2211,7 @@ static void gen_map(struct char_data *ch, int num)
      key += 1;
     }
     else {
-      send_to_char(ch, buf2);
+      send_to_char(ch, "%s", buf2);
     }
   }
   if (num == 1) {
@@ -7079,7 +7079,7 @@ ACMD(do_who)
     if (short_list)
       send_to_char(ch, "Players\r\n-------\r\n");
     else
-      send_to_char(ch, rank[i].disp);
+      send_to_char(ch, "%s", rank[i].disp);
 
     for (d = descriptor_list; d; d = d->next) {
       if (!IS_PLAYING(d))
@@ -8565,7 +8565,7 @@ static void search_in_direction(struct char_data * ch, int dir)
   if (EXIT(ch, dir)) {
     if (EXIT(ch, dir)->general_description &&
         !EXIT_FLAGGED(EXIT(ch, dir), EX_SECRET))
-      send_to_char(ch, EXIT(ch, dir)->general_description);
+      send_to_char(ch, "%s", EXIT(ch, dir)->general_description);
     else if (!EXIT_FLAGGED(EXIT(ch, dir), EX_SECRET))
       send_to_char(ch, "There is a normal exit there.\r\n");
     else if (EXIT_FLAGGED(EXIT(ch, dir), EX_ISDOOR) &&

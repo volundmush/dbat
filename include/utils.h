@@ -14,6 +14,7 @@
 #include "structs.h"
 #include "db.h"
 #include "races.h"
+#include "handler.h"
 
 #define log			basic_mud_log
 

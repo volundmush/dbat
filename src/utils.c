@@ -1219,7 +1219,7 @@ void customWrite(struct char_data *ch, struct obj_data *obj)
   if (strcasecmp(prev, line))
    sprintf(buf+strlen(buf), "%s\n", line);
   *prev = '\0';
-  sprintf(prev, line);
+  sprintf(prev, "%s", line);
  }
 
  fclose(file);
@@ -1268,10 +1268,10 @@ void customRead(struct descriptor_data *d, int type, char *name)
     sprintf(buf+strlen(buf), "%s\n", line);
    *filler = '\0';
    *line = '\0';
-   sprintf(filler, line);
+   sprintf(filler, "%s", line);
   }
 
-  send_to_char(d->character, buf);
+  send_to_char(d->character, "%s", buf);
 
   fclose(fl);    
   return;
@@ -1292,10 +1292,10 @@ void customRead(struct descriptor_data *d, int type, char *name)
    if (strcasecmp(filler, line))
     sprintf(buf+strlen(buf), "%s\n", line);
    *filler = '\0';
-   sprintf(filler, line);
+   sprintf(filler, "%s", line);
   }
 
-  write_to_output(d, buf);
+  write_to_output(d, "%s", buf);
 
   fclose(fl);
  }
@@ -3148,7 +3148,7 @@ void game_info(const char *format, ...)
     if (!(i->character)) 
       continue; 
 
-    write_to_output(i, messg); 
+    write_to_output(i, "%s", messg); 
     va_start(args, format); 
     vwrite_to_output(i, format, args); 
     va_end(args); 
@@ -3947,7 +3947,7 @@ void improve_skill(struct char_data *ch, int skill, int num)
   SET_SKILL(ch, skill, percent);
   if (newpercent >= 1) {
      sprintf(skillbuf, "@WYou feel you have learned something new about @G%s@W.@n\r\n", spell_info[skill].name);
-     send_to_char(ch, skillbuf);
+     send_to_char(ch, "%s", skillbuf);
      if (GET_SKILL_BASE(ch, skill) >= 100) {
       send_to_char(ch, "You learned a lot by mastering that skill.\r\n");
       if (perf_skill(skill)) {

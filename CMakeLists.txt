@@ -1,71 +1,68 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.22)
+
+set(CPM_DOWNLOAD_VERSION 0.35.5)
+set(CPM_DOWNLOAD_LOCATION "${CMAKE_BINARY_DIR}/cmake/CPM_${CPM_DOWNLOAD_VERSION}.cmake")
+
+if(NOT (EXISTS ${CPM_DOWNLOAD_LOCATION}))
+    message(STATUS "Downloading CPM.cmake")
+    file(DOWNLOAD https://github.com/TheLartians/CPM.cmake/releases/download/v${CPM_DOWNLOAD_VERSION}/CPM.cmake ${CPM_DOWNLOAD_LOCATION})
+endif()
+
+include(${CPM_DOWNLOAD_LOCATION})
 
 project(circle)
 
-file(GLOB CIRCLE_INCLUDE src/*.h)
-#file(GLOB CIRCLE_SRC src/*.cpp)
-file(GLOB CIRCLE_SRC src/*.c)
+find_package(ZLIB REQUIRED)
 
-set_property(GLOBAL PROPERTY C_STANDARD 11)
-#set_property(GLOBAL PROPERTY CXX_STANDARD 17)
+
+set(CMAKE_C_STANDARD 23)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
-set(CMAKE_CXX_FLAGS "-fpermissive")
+
+add_compile_options(-Wno-format-overflow)
+add_compile_options(-Wno-format-truncation)
+add_compile_options(-Wno-multichar)
 
 find_library(LIBBSD NAMES bsd libbsd)
-include_directories(include)
-if(${LIBBSD})
-    link_libraries(${LIBBSD})
-    add_compile_definitions(HAVE_LIBBSD)
-endif()
+add_compile_definitions(HAVE_LIBBSD)
 
 
-#find_package(ZLIB REQUIRED)
-#link_libraries(ZLIB::ZLIB)
-find_library(ZLIB NAMES z libz REQUIRED)
-link_libraries(${ZLIB})
+set(BUILD_TESTING OFF)
 
-# this is the core library we're making.
-add_library(circlemud ${CIRCLE_INCLUDE} ${CIRCLE_SRC})
-# everything we make will link to it.
-link_libraries(circlemud)
+add_library(circlemud STATIC)
+target_include_directories(circlemud
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>
+)
 
-# the various binaries
-add_executable(circle apps/circle.c)
-add_executable(asciipasswd apps/circle.c)
-add_executable(autowiz apps/autowiz.c)
-add_executable(delobjs apps/delobjs.c)
-add_executable(play2to3 apps/play2to3.c)
-add_executable(shopconv apps/shopconv.c)
-add_executable(showplay apps/showplay.c)
-add_executable(sign apps/sign.c)
-add_executable(split apps/split.c)
-add_executable(wld2html apps/wld2html.c)
+file(GLOB_RECURSE CIRCLE_INCLUDE include/*.h)
+file(GLOB_RECURSE CIRCLE_SRC src/*.c)
+
+target_sources(circlemud
+    PRIVATE
+        ${CIRCLE_SRC}
+    PUBLIC
+        FILE_SET HEADERS
+      BASE_DIRS include
+      FILES
+        ${CIRCLE_INCLUDE}
+)
+
+target_link_libraries(circlemud
+    PUBLIC
+    bsd
+    ZLIB::ZLIB
+)
 
 target_compile_definitions(circlemud PUBLIC USING_CMAKE=1 CIRCLE_UNIX=1 POSIX=1)
 
+# the various binaries
+#add_executable(circle)
+#target_sources(circle PRIVATE apps/circle.cpp)
+#target_link_libraries(circle PRIVATE circlemud)
 
-#find_package(SQLite3 REQUIRED)
-#if(SQLite3_FOUND)
-#    message("Found SQLite3.")
-#    target_link_libraries(circlemud SQLite::SQLite3)
-#endif()
 
-#find_package(OpenSSL REQUIRED)
-#if(OpenSSL_FOUND)
-#    message("Found OpenSSL.")
-#    target_link_libraries(circlemud OpenSSL::Crypto)
-#endif()
-
-# Support for FMT
-#target_include_directories(circlemud PUBLIC libs/fmt/include)
-#target_compile_definitions(circlemud PUBLIC FMT_HEADER_ONLY=1)
-
-# Support for SQLITEPP
-#target_include_directories(circlemud PUBLIC libs/sqlitepp/include)
-
-# Support for ASIO
-#target_include_directories(circlemud PUBLIC libs/asio/asio/include)
 
 SET(circle_link ${CMAKE_INSTALL_PREFIX}/bin/)

@@ -123,7 +123,7 @@ void writeClanMasterlist() {
 
 
   sprintf(buf, "%d\n", num_clans);
-  fprintf(fl, buf);
+  fprintf(fl, "%s", buf);
   for(i = 0; i < num_clans; i++) {
     fprintf(fl, "%s%d.cla\n", LIB_CLAN, i);
   }
@@ -907,10 +907,10 @@ void handle_clan_member_list(struct char_data *ch)
  if(S == NULL)
   return;
 
- send_to_char(ch, S->modlist);
- send_to_char(ch, S->memlist);
- send_to_char(ch, S->applist);
- send_to_char(ch, "@n");
+ send_to_char(ch, "%s", S->modlist);
+ send_to_char(ch, "%s", S->memlist);
+ send_to_char(ch, "%s", S->applist);
+ send_to_char(ch, "%s", "@n");
 }
 
 bool clanIsMember(const char *name, const struct char_data *ch) {

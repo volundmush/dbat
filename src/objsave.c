@@ -48,7 +48,7 @@ void delete_inv_backup(struct char_data *ch)
     FILE *source;
     char source_file[20480];
     char alpha[MAX_INPUT_LENGTH], name[MAX_INPUT_LENGTH];
-    sprintf(name, GET_NAME(ch));
+    sprintf(name, "%s", GET_NAME(ch));
 
     if (name[0] == 'a' || name[0] == 'A' || name[0] == 'b' || name[0] == 'B' || name[0] == 'c' || name[0] == 'C' || name[0] == 'd' || name[0] == 'D' || name[0] == 'e' || name[0] == 'E') {
      sprintf(alpha, "A-E");
@@ -87,7 +87,7 @@ int load_inv_backup(struct char_data *ch)
     FILE *source, *target;
     char source_file[20480], target_file[20480], buf2[20480];
     char alpha[MAX_INPUT_LENGTH], name[MAX_INPUT_LENGTH];
-    sprintf(name, GET_NAME(ch));
+    sprintf(name, "%s", GET_NAME(ch));
 
     if (name[0] == 'a' || name[0] == 'A' || name[0] == 'b' || name[0] == 'B' || name[0] == 'c' || name[0] == 'C' || name[0] == 'd' || name[0] == 'D' || name[0] == 'e' || name[0] == 'E') {
      sprintf(alpha, "A-E");
@@ -108,13 +108,13 @@ int load_inv_backup(struct char_data *ch)
 
     if (!(source = fopen(source_file, "r"))) {
       log("Source in load_inv_backup failed to load.");
-      log(source_file);
+      log("%s", source_file);
       return -1;
     }
 
     if (!(target = fopen(target_file, "w"))) {
       log("Target in load_inv_backup failed to load.");
-      log(target_file);
+      log("%s", target_file);
       return -1;
     }
 
@@ -135,7 +135,7 @@ static int inv_backup(struct char_data *ch)
  char buf[20480];
 
     char alpha[MAX_INPUT_LENGTH], name[MAX_INPUT_LENGTH];
-    sprintf(name, GET_NAME(ch));
+    sprintf(name, "%s", GET_NAME(ch));
 
     if (name[0] == 'a' || name[0] == 'A' || name[0] == 'b' || name[0] == 'B' || name[0] == 'c' || name[0] == 'C' || name[0] == 'd' || name[0] == 'D' || name[0] == 'e' || name[0] == 'E') {
      sprintf(alpha, "A-E");
@@ -165,7 +165,7 @@ int cp(struct char_data *ch)
     FILE *source, *target;
     char source_file[20480], target_file[20480], buf2[20480];
     char alpha[MAX_INPUT_LENGTH], name[MAX_INPUT_LENGTH];
-    sprintf(name, GET_NAME(ch));
+    sprintf(name, "%s", GET_NAME(ch));
 
     if (name[0] == 'a' || name[0] == 'A' || name[0] == 'b' || name[0] == 'B' || name[0] == 'c' || name[0] == 'C' || name[0] == 'd' || name[0] == 'D' || name[0] == 'e' || name[0] == 'E') {
      sprintf(alpha, "A-E");
@@ -186,13 +186,13 @@ int cp(struct char_data *ch)
 
     if (!(source = fopen(source_file, "r"))) {
       log("Source failed to load.");
-      log(source_file);
+      log("%s", source_file);
       return -1;
     }
 
     if (!(target = fopen(target_file, "w"))) {
       log("Target failed to load.");
-      log(target_file);
+      log("%s", target_file);
       return -1;
     }
  
