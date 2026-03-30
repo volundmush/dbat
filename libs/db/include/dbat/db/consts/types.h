@@ -1,5 +1,6 @@
 #pragma once
 #include <stdint.h>
+#include <stdbool.h>
 #include <time.h>
 
 #define CIRCLE_UNSIGNED_INDEX 0	/* 0 = signed, 1 = unsigned */

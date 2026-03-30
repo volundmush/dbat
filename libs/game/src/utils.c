@@ -4184,77 +4184,7 @@ void mudlog(int type, int level, int file, const char *str, ...)
 
 
 
-/* If you don't have a 'const' array, just cast it as such.  It's safer
- * to cast a non-const array as const than to cast a const one as non-const.
- * Doesn't really matter since this function doesn't change the array though.  */
-size_t sprintbit(bitvector_t bitvector, const char *names[], char *result, size_t reslen)
-{
-  size_t len = 0;
-  int nlen;
-  long nr;
 
-  *result = '\0';
-
-  for (nr = 0; bitvector && len < reslen; bitvector >>= 1) {
-    if (IS_SET(bitvector, 1)) {
-      nlen = snprintf(result + len, reslen - len, "%s ", *names[nr] != '\n' ? names[nr] : "UNDEFINED");
-      if (len + nlen >= reslen || nlen < 0)
-        break;
-      len += nlen;
-    }
-
-    if (*names[nr] != '\n')
-      nr++;
-  }
-
-  if (!*result)
-    len = strlcpy(result, "None ", reslen);
-
-  return (len);
-}
-
-
-size_t sprinttype(int type, const char *names[], char *result, size_t reslen)
-{
-  int nr = 0;
-
-  while (type && *names[nr] != '\n') {
-    type--;
-    nr++;
-  }
-
-  return strlcpy(result, *names[nr] != '\n' ? names[nr] : "UNDEFINED", reslen);
-}
-
-
-void sprintbitarray(int bitvector[], const char *names[], int maxar, char *result)
-{
-  int nr, teller, found = FALSE;
-
-  *result = '\0';
-
-  for(teller = 0; teller < maxar && !found; teller++)
-    for (nr = 0; nr < 32 && !found; nr++) {
-	  if (IS_SET_AR(bitvector, (teller*32)+nr)) {
-        if (*names[(teller*32)+nr] != '\n') {
-          if (*names[(teller*32)+nr] != '\0') {
-
-    strcat(result, names[(teller*32)+nr]);
-
-    strcat(result, " ");
-          }
-		} else {
-
-  strcat(result, "UNDEFINED ");
-        }
-	  }
-      if (*names[(teller*32)+nr] == '\n')
-        found = TRUE;
-    }
-
-  if (!*result)
-    strcpy(result, "None ");
-}
 
 
 /* Calculate the REAL time passed over the last t2-t1 centuries (secs) */
