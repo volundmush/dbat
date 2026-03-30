@@ -205,27 +205,11 @@ extern struct config_data config_info;
 
 
 
-extern struct zone_data *zone_table;
-extern zone_rnum top_of_zone_table;
 
-extern struct descriptor_data *descriptor_list;
-extern struct char_data *character_list;
-extern struct char_data *affect_list;
-extern struct char_data *affectv_list;
-extern struct player_special_data dummy_mob;
-
-extern struct index_data *mob_index;
-extern struct char_data *mob_proto;
-extern mob_rnum top_of_mobt;
-
-extern struct index_data *obj_index;
-extern struct obj_data *object_list;
-extern struct obj_data *obj_proto;
-extern obj_rnum top_of_objt;
 
 extern struct htree_node *room_htree;
-extern struct htree_node *mob_htree;
-extern struct htree_node *obj_htree;
+
+
 
 extern struct social_messg *soc_mess_list;
 extern int top_of_socialt;
@@ -234,8 +218,8 @@ extern struct index_data **trig_index;
 extern struct index_data **trig_index;
 extern struct trig_data *trigger_list;
 extern int top_of_trigt;
-extern long max_mob_id;
-extern long max_obj_id;
+
+
 extern int dg_owner_purged;
 extern int xap_objs;
 

@@ -12,6 +12,8 @@
 #include "consts/feats.h"
 #include "consts/affflags.h"
 #include "consts/adminflags.h"
+#include "index.h"
+#include "htree.h"
 
 #define PM_ARRAY_MAX    4
 
@@ -456,3 +458,15 @@ struct char_data {
   int relax_count;
  	int ingestLearned;
 };
+
+
+extern struct char_data *character_list;
+extern struct char_data *affect_list;
+extern struct char_data *affectv_list;
+extern struct player_special_data dummy_mob;
+
+extern struct index_data *mob_index;
+extern struct char_data *mob_proto;
+extern mob_rnum top_of_mobt;
+extern struct htree_node *mob_htree;
+extern long max_mob_id;

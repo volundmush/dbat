@@ -1,18 +1,5 @@
-/***************************************************************************
- *   File: htree.h                                                         *
- *  Usage: Generalized hash tree code for fast lookups                     *
- *                                                                         *
- * This code is released under the CircleMud License                       *
- * Written by Elie Rosenblum <fnord@cosanostra.net>                        *
- * Copyright (c) 7-Oct-2004                                                *
- ***************************************************************************/
-
-#ifndef __HTREE_H__
-#define __HTREE_H__
-
-#include "structs.h"
-
-
+#pragma once 
+#include "consts/types.h"
 
 /* Magic constants: */
 /* Don't change these unless you know what you're doing, the constants must
@@ -42,6 +29,3 @@ void htree_add(struct htree_node *root, IDXTYPE index, IDXTYPE content);
 void htree_del(struct htree_node *root, IDXTYPE index);
 IDXTYPE htree_find(struct htree_node *root, IDXTYPE index);
 void htree_test();
-
-
-#endif

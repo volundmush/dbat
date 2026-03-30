@@ -4,6 +4,8 @@
 #include "consts/maximums.h"
 #include "consts/affflags.h"
 #include "affected.h"
+#include "index.h"
+#include "htree.h"
 
 struct obj_spellbook_spell {
    int spellname;	/* Which spell is written */
@@ -73,3 +75,10 @@ struct obj_data {
    struct obj_data *posted_to;
    struct obj_data *fellow_wall;
 };
+
+extern struct index_data *obj_index;
+extern struct obj_data *object_list;
+extern struct obj_data *obj_proto;
+extern obj_rnum top_of_objt;
+extern struct htree_node *obj_htree;
+extern long max_obj_id;

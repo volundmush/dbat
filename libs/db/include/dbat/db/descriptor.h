@@ -103,3 +103,6 @@ struct descriptor_data {
    char *title;
    int rbank;
 };
+
+
+extern struct descriptor_data *descriptor_list;

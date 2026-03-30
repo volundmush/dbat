@@ -1,6 +1,6 @@
 #pragma once
 #include "consts/types.h"
-#include "consts/bits.h"
+#include "consts/zoneflags.h"
 
 /* structure for the reset commands */
 struct reset_com {
@@ -76,3 +76,6 @@ struct reset_q_type {
    struct reset_q_element *head;
    struct reset_q_element *tail;
 };
+
+extern struct zone_data *zone_table;
+extern zone_rnum top_of_zone_table;
