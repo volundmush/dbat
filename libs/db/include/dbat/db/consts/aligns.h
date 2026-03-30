@@ -10,3 +10,5 @@
 #define ALIGN_HORRIBLE           8
 
 #define NUM_ALIGNS               9
+
+extern const char *alignments[NUM_ALIGNS+1];

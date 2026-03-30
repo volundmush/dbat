@@ -76,3 +76,5 @@
 #define CON_GENOME       72
 
 #define NUM_CON_TYPES 73
+
+extern const char *connected_types[NUM_CON_TYPES+1];

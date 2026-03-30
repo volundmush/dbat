@@ -10,4 +10,6 @@
 #define POS_FIGHTING   7	/* fighting		*/
 #define POS_STANDING   8	/* standing		*/
 
-#define NUM_POSITIONS  9 
+#define NUM_POSITIONS  9
+
+extern const char *position_types[NUM_POSITIONS+1];

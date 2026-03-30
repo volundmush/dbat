@@ -10,3 +10,5 @@
 #define ADMLVL_VICE             4
 #define ADMLVL_GRGOD		5
 #define ADMLVL_IMPL		6
+
+extern const char *admin_level_names[ADMLVL_IMPL+2];

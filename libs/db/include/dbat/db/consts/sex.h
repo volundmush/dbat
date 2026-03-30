@@ -5,3 +5,5 @@
 #define SEX_FEMALE    2
 
 #define NUM_SEX       3
+
+extern const char *genders[NUM_SEX+1];

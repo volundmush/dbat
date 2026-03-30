@@ -18,3 +18,7 @@
 #define SECT_LAVA            14            /* This room always has lava */
 
 #define NUM_ROOM_SECTORS     15
+
+extern const char *sector_types[NUM_ROOM_SECTORS+1];
+
+extern int movement_loss[NUM_ROOM_SECTORS];

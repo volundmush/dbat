@@ -1,4 +1,6 @@
 #pragma once
+#include "materials.h"
+#include "conditions.h"
 
 /* Character equipment positions: used as index for char_data.equipment[] */
 /* NOTE: Don't confuse these constants with the ITEM_ bitvectors
@@ -465,3 +467,21 @@
 #define VAL_MAXMATURE                 3
 #define VAL_WATERLEVEL                6
 #define VAL_SOILQ                     8
+
+#define NUM_FULLNESS		5
+
+
+extern const char *equipment_types[NUM_WEARS+1];
+extern const char *wear_where[NUM_WEARS+1];
+extern const char *item_types[NUM_ITEM_TYPES+1];
+extern const char *wear_bits[NUM_ITEM_WEARS+1];
+extern const char *extra_bits[NUM_ITEM_FLAGS+1];
+extern const char *container_bits[NUM_CONT_FLAGS+1];
+
+
+extern const char *drinks[NUM_LIQ_TYPES+1];
+extern const char *drinknames[NUM_LIQ_TYPES+1];
+extern const char *color_liquid[NUM_LIQ_TYPES+1];
+extern int drink_aff[NUM_LIQ_TYPES][NUM_CONDITIONS];
+extern const char *fullness[NUM_FULLNESS+1];
+extern const char *material_names[NUM_MATERIALS+1];

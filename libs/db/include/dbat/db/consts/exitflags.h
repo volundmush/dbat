@@ -9,3 +9,4 @@
 
 #define NUM_EXIT_FLAGS 5
 
+extern const char *exit_bits[NUM_EXIT_FLAGS+1];

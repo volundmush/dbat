@@ -1,6 +1,11 @@
 add_library(dbat_db STATIC)
 add_library(dbat::db ALIAS dbat_db)
 
+# target is C23
+target_compile_features(dbat_db PUBLIC c_std_23)
+set_target_properties(dbat_db PROPERTIES LINKER_LANGUAGE C)
+target_compile_options(dbat_db PUBLIC -std=gnu23)
+
 target_include_directories(dbat_db
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

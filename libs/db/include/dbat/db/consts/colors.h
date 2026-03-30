@@ -18,3 +18,5 @@
 #define COLOR_ROOMSAY			15
 
 #define NUM_COLOR			16
+
+extern const char *cchoice_names[NUM_COLOR+1];

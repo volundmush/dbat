@@ -37,3 +37,7 @@
 #define ZONE_SPARE31		33
 #define ZONE_SPARE32		34
 #define ZONE_SPARE33		35
+
+#define NUM_ZONE_FLAGS          36
+
+extern const char *zone_bits[NUM_ZONE_FLAGS+1];

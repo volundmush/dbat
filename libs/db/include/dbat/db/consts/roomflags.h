@@ -71,3 +71,5 @@
 #define ROOM_CANREMODEL         65
 
 #define NUM_ROOM_FLAGS          66
+
+extern const char *room_bits[NUM_ROOM_FLAGS+1];

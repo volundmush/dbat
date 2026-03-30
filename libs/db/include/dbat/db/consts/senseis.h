@@ -74,3 +74,5 @@
 #define SENSEI_NPC_COMMONER	28
 #define SENSEI_NPC_ARISTOCRAT	29
 #define SENSEI_NPC_WARRIOR	30
+
+extern const char *sensei_style[MAX_SENSEI];

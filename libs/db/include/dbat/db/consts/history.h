@@ -11,3 +11,5 @@
 #define HIST_SNET      9
 
 #define NUM_HIST      10
+
+extern const char *history_types[NUM_HIST+1];

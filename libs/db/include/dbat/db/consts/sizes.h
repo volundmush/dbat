@@ -12,3 +12,5 @@
 #define SIZE_COLOSSAL	8
 
 #define NUM_SIZES         9
+
+extern const char *size_names[NUM_SIZES+1];

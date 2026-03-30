@@ -64,3 +64,5 @@
 #define PRF_ENERGIZE    59
 
 #define NUM_PRF_FLAGS   60
+
+extern const char *preference_bits[NUM_PRF_FLAGS+1];

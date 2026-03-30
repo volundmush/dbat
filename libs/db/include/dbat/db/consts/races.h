@@ -31,3 +31,14 @@
 #define RACE_FAERIE		23
 
 #define NUM_RACES		24
+
+struct aging_data {
+  int adult;		/* Adulthood */
+  int classdice[3][2];	/* Dice info for starting age based on class age type */
+  int middle;		/* Middle age */
+  int old;		/* Old age */
+  int venerable;	/* Venerable age */
+  int maxdice[2];	/* For roll to determine natural death beyond venerable */
+};
+
+extern const struct aging_data racial_aging_data[NUM_RACES];

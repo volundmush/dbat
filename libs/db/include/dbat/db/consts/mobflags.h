@@ -1,7 +1,6 @@
 #pragma once
 
-/* Mob Personalty */
-#define MAX_PERSONALITIES 5
+
 
 /* Mobile flags: used by char_data.act */
 #define MOB_SPEC		0  /* Mob has a callable spec-proc   	*/
@@ -41,3 +40,5 @@
 #define MOB_POWERUP             34 /* Is powering up                    */
 
 #define NUM_MOB_FLAGS 35
+
+extern const char *action_bits[NUM_MOB_FLAGS+1];

@@ -77,3 +77,5 @@
 #define CFEAT_GREATER_SPELL_FOCUS		1
 
 #define SFEAT_MAX				1
+
+extern const char *spell_schools[NUM_SCHOOLS+1];

@@ -98,3 +98,13 @@
 #define PHASE_GUARDIAN          4
 #define PHASE_LOVE              5
 #define PHASE_STRENGTH          6
+
+
+
+extern const char *hairl_types[];
+extern const char *eye_types[];
+extern const char *FHA_types[];
+extern const char *hairc_types[];
+extern const char *hairs_types[];
+extern const char *skin_types[];
+extern const char *aura_types[];

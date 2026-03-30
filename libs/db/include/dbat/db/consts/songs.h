@@ -12,3 +12,5 @@
 #define SONG_TELEPORT_FRIGID    9
 #define SONG_TELEPORT_AETHER   10
 #define SONG_TELEPORT_KANASSA  11
+
+extern const char *song_types[];

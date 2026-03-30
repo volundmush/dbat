@@ -48,3 +48,5 @@
 #define APPLY_ALL_STATS        45       /* Apply to all attributes	*/
 
 #define NUM_APPLIES 46
+
+extern const char *apply_types[NUM_APPLIES+1];

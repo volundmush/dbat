@@ -62,141 +62,11 @@
 * Structures                                                          *
 **********************************************************************/
 
-/* Extra description: used in objects, mobiles, and rooms */
-struct extra_descr_data {
-   char	*keyword;                 /* Keyword in look/examine          */
-   char	*description;             /* What to see                      */
-   struct extra_descr_data *next; /* Next in list                     */
-};
-
-
-
-struct obj_affected_type {
-   int location;       /* Which ability to change (APPLY_XXX) */
-   int specific;       /* Some locations have parameters      */
-   int modifier;       /* How much it changes by              */
-};
-
-struct obj_spellbook_spell {
-   int spellname;	/* Which spell is written */
-   int pages;		/* How many pages does it take up */
-};
-
-/* ================== Memory Structure for Objects ================== */
-struct obj_data {
-   obj_vnum item_number;	/* Where in data-base			*/
-   room_rnum in_room;		/* In what room -1 when conta/carr	*/
-   room_vnum room_loaded;	/* Room loaded in, for room_max checks	*/
-
-   int  value[NUM_OBJ_VAL_POSITIONS];   /* Values of the item (see list)    */
-   int8_t type_flag;      /* Type of item                        */
-   int  level;           /* Minimum level of object.            */
-   int  wear_flags[TW_ARRAY_MAX]; /* Where you can wear it     */
-   int  extra_flags[EF_ARRAY_MAX]; /* If it hums, glows, etc.  */
-   int64_t  weight;         /* Weigt what else                     */
-   int  cost;           /* Value when sold (gp.)               */
-   int  cost_per_day;   /* Cost to keep pr. real day           */
-   int  timer;          /* Timer for object                    */
-   int  bitvector[AF_ARRAY_MAX]; /* To set chars bits          */
-   int  size;           /* Size class of object                */
-
-   struct obj_affected_type affected[MAX_OBJ_AFFECT];  /* affects */
-
-   char	*name;                    /* Title of object :get etc.        */
-   char	*description;		  /* When in room                     */
-   char	*short_description;       /* when worn/carry/in cont.         */
-   char	*action_description;      /* What to write when used          */
-   struct extra_descr_data *ex_description; /* extra descriptions     */
-   struct char_data *carried_by;  /* Carried by :NULL in room/conta   */
-   struct char_data *worn_by;	  /* Worn by?			      */
-   int16_t worn_on;		  /* Worn where?		      */
-
-   struct obj_data *in_obj;       /* In what object NULL when none    */
-   struct obj_data *contains;     /* Contains objects                 */
-
-   int32_t id;                       /* used by DG triggers              */
-   time_t generation;             /* creation time for dupe check     */
-   int64_t unique_id;  /* random bits for dupe check       */
-
-   struct trig_proto_list *proto_script; /* list of default triggers  */
-   struct script_data *script;    /* script info for the object       */
-
-   struct obj_data *next_content; /* For 'contains' lists             */
-   struct obj_data *next;         /* For the object list              */
-
-   struct obj_spellbook_spell *sbinfo;  /* For spellbook info */
-   struct char_data *sitting;       /* Who is sitting on me? */
-   int scoutfreq;
-   time_t lload;
-   int healcharge;
-   int64_t kicharge;
-   int kitype;
-   struct char_data *user;
-   struct char_data *target;
-   int distance;
-   int foob;
-   int32_t aucter;
-   int32_t curBidder;
-   time_t aucTime;
-   int bid;
-   int startbid;
-   char *auctname;
-   int posttype;
-   struct obj_data *posted_to;
-   struct obj_data *fellow_wall;
-};
 /* ======================================================================= */
 
 
 /* room-related structures ************************************************/
 
-
-struct room_direction_data {
-   char	*general_description;       /* When look DIR.			*/
-
-   char	*keyword;		/* for open/close			*/
-
-   int16_t exit_info;		/* Exit info			*/
-   obj_vnum key;		/* Key's number (-1 for no key)		*/
-   room_rnum to_room;		/* Where direction leads (NOWHERE)	*/
-   int dclock;			/* DC to pick the lock			*/
-   int dchide;			/* DC to find hidden			*/
-   int dcskill;			/* Skill req. to move through exit	*/
-   int dcmove;			/* DC for skill to move through exit	*/
-   int failsavetype;		/* Saving Throw type on skill fail	*/
-   int dcfailsave;		/* DC to save against on fail		*/
-   int failroom;		/* Room # to put char in when fail > 5  */
-   int totalfailroom;		/* Room # if char fails save < 5	*/
-};
-
-
-/* ================== Memory Structure for room ======================= */
-struct room_data {
-   room_vnum number;		/* Rooms number	(vnum)		      */
-   zone_rnum zone;              /* Room zone (for resetting)          */
-   int	sector_type;            /* sector type (move/hide)            */
-   char	*name;                  /* Rooms name 'You are ...'           */
-   char	*description;           /* Shown when entered                 */
-   struct extra_descr_data *ex_description; /* for examine/look       */
-   struct room_direction_data *dir_option[NUM_OF_DIRS]; /* Directions */
-   int room_flags[RF_ARRAY_MAX];   /* DEATH,DARK ... etc */
-
-   struct trig_proto_list *proto_script; /* list of default triggers  */
-   struct script_data *script;  /* script info for the object         */
-
-   int8_t light;                  /* Number of lightsources in room     */
-   SPECIAL(*func);
-
-   struct obj_data *contents;   /* List of items in room              */
-   struct char_data *people;    /* List of NPC / PC in room           */
-
-   int timed;                   /* For timed Dt's                     */
-   int dmg;                     /* How damaged the room is            */
-   int gravity;                 /* What is the level of gravity?      */
-   int geffect;			/* Effect of ground destruction       */
-
-};
-/* ====================================================================== */
 
 
 /* char-related structures ************************************************/
@@ -332,19 +202,6 @@ struct mob_special_data {
    int8_t damnodice;          /* The number of damage dice's	       */
    int8_t damsizedice;        /* The size of the damage dice's           */
    int newitem;             /* Check if mob has new inv item       */
-};
-
-
-/* An affect structure. */
-struct affected_type {
-   int16_t type;          /* The type of spell that caused this      */
-   int16_t duration;      /* For how long its effects will last      */
-   int modifier;         /* This is added to apropriate ability     */
-   int location;         /* Tells which ability to change(APPLY_XXX)*/
-   int specific;         /* Some locations have parameters          */
-   bitvector_t bitvector; /* Tells which bits to set (AFF_XXX) */
-
-   struct affected_type *next;
 };
 
 /* Queued spell entry */
@@ -671,107 +528,6 @@ struct char_data {
 /* descriptor-related structures ******************************************/
 
 
-struct txt_block {
-   char	*text;
-   int aliased;
-   struct txt_block *next;
-};
-
-
-struct txt_q {
-   struct txt_block *head;
-   struct txt_block *tail;
-};
-
-struct compr {
-    int state; /* 0 - off. 1 - waiting for response. 2 - compress2 on */
-
-    Bytef *buff_out;
-    int total_out; /* size of input buffer */
-    int size_out; /* size of data in output buffer */
-
-    Bytef *buff_in;
-    int total_in; /* size of input buffer */
-    int size_in; /* size of data in input buffer */
-
-    z_streamp stream;
-};
-
-struct descriptor_data {
-   socklen_t	descriptor;	/* file descriptor for socket		*/
-   char	host[HOST_LENGTH+1];	/* hostname				*/
-   int8_t	bad_pws;	/* number of bad pw attemps this login	*/
-   int8_t idle_tics;		/* tics idle at password prompt		*/
-   int	connected;		/* mode of 'connectedness'		*/
-   int	desc_num;		/* unique num assigned to desc		*/
-   time_t login_time;		/* when the person connected		*/
-   char *showstr_head;		/* for keeping track of an internal str	*/
-   char **showstr_vector;	/* for paging through texts		*/
-   int  showstr_count;		/* number of pages to page through	*/
-   int  showstr_page;		/* which page are we currently showing?	*/
-   char	**str;			/* for the modify-str system		*/
-   char *backstr;		/* backup string for modify-str system	*/
-   size_t max_str;	        /* maximum size of string in modify-str	*/
-   int32_t mail_to;		/* name for mail system			*/
-   int	has_prompt;		/* is the user at a prompt?             */
-   char	inbuf[MAX_RAW_INPUT_LENGTH];  /* buffer for raw input		*/
-   char	last_input[MAX_INPUT_LENGTH]; /* the last input			*/
-   char small_outbuf[SMALL_BUFSIZE];  /* standard output buffer		*/
-   char *output;		/* ptr to the current output buffer	*/
-   char **history;		/* History of commands, for ! mostly.	*/
-   int	history_pos;		/* Circular array position.		*/
-   int  bufptr;			/* ptr to end of current output		*/
-   int	bufspace;		/* space left in the output buffer	*/
-   struct txt_block *large_outbuf; /* ptr to large buffer, if we need it */
-   struct txt_q input;		/* q of unprocessed input		*/
-   struct char_data *character;	/* linked to char			*/
-   struct char_data *original;	/* original char if switched		*/
-   struct descriptor_data *snooping; /* Who is this char snooping	*/
-   struct descriptor_data *snoop_by; /* And who is snooping this char	*/
-   struct descriptor_data *next; /* link to next descriptor		*/
-   struct oasis_olc_data *olc;   /* OLC info                            */
-   struct compr *comp;                /* compression info */
-   char *user;                   /* What user am I?                     */
-   char *email;                  /* User Account Email.                 */
-   char *pass;                   /* User Account Password.              */
-   char *loadplay;               /* What character am I loading?        */
-   int writenew;                 /* What slot am I writing to?          */
-   int total;                    /* What Is My Total Character Limit?   */
-   int rpp;                      /* What is my total RPP?               */
-   char *tmp1;
-   char *tmp2;
-   char *tmp3;
-   char *tmp4;
-   char *tmp5;
-   int level;
-   char *newsbuf;
-   /*---------------Player Level Object Editing Variables-------------------*/
-   int obj_editval;
-   int obj_editflag;
-   char *obj_was;
-   char *obj_name;
-   char *obj_short;
-   char *obj_long;
-   int obj_type;
-   int obj_weapon;
-   struct obj_data *obj_point;
-   /*---------------Ship Construction Editing Variables---------------------*/
-   int shipmenu;
-   int shipsize;
-   char *ship_name;
-   int shipextra[4];
-   int shields;
-   int armor;
-   int drive;
-   int shipweap;
-   /*-----------------------------------------------------------------------*/
-   int user_freed;
-   int customfile;
-   char *title;
-   int rbank;
-};
-
-
 /* other miscellaneous structures ***************************************/
 
 
@@ -835,33 +591,14 @@ struct social_messg {
 };
 
 
-struct weather_data {
-   int	pressure;	/* How is the pressure ( Mb ) */
-   int	change;	/* How fast and what way does it change. */
-   int	sky;	/* How is the sky. */
-   int	sunlight;	/* And how much sun. */
-};
-
-
 /*
  * Element in monster and object index-tables.
  *
  * NOTE: Assumes sizeof(mob_vnum) >= sizeof(obj_vnum)
  */
-struct index_data {
-   mob_vnum	vnum;	/* virtual number of this mob/obj		*/
-   int		number;	/* number of existing units of this mob/obj	*/
-   SPECIAL(*func);
 
-   char *farg;         /* string argument for special function     */
-   struct trig_data *proto;     /* for triggers... the trigger     */
-};
 
-/* linked list for mob/object prototype trigger lists */
-struct trig_proto_list {
-  int vnum;                             /* vnum of the trigger   */
-  struct trig_proto_list *next;         /* next trigger          */
-};
+
 
 struct guild_info_type {
   int pc_class;
@@ -1017,14 +754,7 @@ struct config_data {
 /*
  * Data about character aging
  */
-struct aging_data {
-  int adult;		/* Adulthood */
-  int classdice[3][2];	/* Dice info for starting age based on class age type */
-  int middle;		/* Middle age */
-  int old;		/* Old age */
-  int venerable;	/* Venerable age */
-  int maxdice[2];	/* For roll to determine natural death beyond venerable */
-};
+
 
 #ifdef MEMORY_DEBUG
 #include "zmalloc.h"

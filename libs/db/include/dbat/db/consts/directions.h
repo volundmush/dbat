@@ -15,3 +15,7 @@
 #define OUTDIR        11
 
 #define NUM_OF_DIRS	12	/* number of directions in a room (nsewud) */
+
+extern const char *dirs[NUM_OF_DIRS+1];
+extern const char *abbr_dirs[NUM_OF_DIRS+1];
+extern int rev_dir[NUM_OF_DIRS];

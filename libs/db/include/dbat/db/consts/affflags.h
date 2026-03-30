@@ -79,3 +79,5 @@
 #define AFF_SPIRITCONTROL     74
 
 #define NUM_AFF_FLAGS 75
+
+extern const char *affected_bits[NUM_AFF_FLAGS+1];
