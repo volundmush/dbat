@@ -13,7 +13,8 @@ include(${CPM_DOWNLOAD_LOCATION})
 project(circle)
 
 find_package(ZLIB REQUIRED)
-
+find_library(LIBBSD NAMES bsd libbsd)
+add_compile_definitions(HAVE_LIBBSD)
 
 set(CMAKE_C_STANDARD 23)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
@@ -24,45 +25,6 @@ add_compile_options(-Wno-format-overflow)
 add_compile_options(-Wno-format-truncation)
 add_compile_options(-Wno-multichar)
 
-find_library(LIBBSD NAMES bsd libbsd)
-add_compile_definitions(HAVE_LIBBSD)
-
-
 set(BUILD_TESTING OFF)
 
-add_library(circlemud STATIC)
-target_include_directories(circlemud
-    PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-        $<INSTALL_INTERFACE:include>
-)
-
-file(GLOB_RECURSE CIRCLE_INCLUDE include/*.h)
-file(GLOB_RECURSE CIRCLE_SRC src/*.c)
-
-target_sources(circlemud
-    PRIVATE
-        ${CIRCLE_SRC}
-    PUBLIC
-        FILE_SET HEADERS
-      BASE_DIRS include
-      FILES
-        ${CIRCLE_INCLUDE}
-)
-
-target_link_libraries(circlemud
-    PUBLIC
-    bsd
-    ZLIB::ZLIB
-)
-
-target_compile_definitions(circlemud PUBLIC USING_CMAKE=1 CIRCLE_UNIX=1 POSIX=1)
-
-# the various binaries
-#add_executable(circle)
-#target_sources(circle PRIVATE apps/circle.cpp)
-#target_link_libraries(circle PRIVATE circlemud)
-
-
-
-SET(circle_link ${CMAKE_INSTALL_PREFIX}/bin/)
+add_subdirectory(libs/dbat)
