@@ -3,11 +3,11 @@
  * Copyright 1996 by Harvey Gilpin					*
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
-#include "dbat/gengld.h"
-#include "dbat/shop.h"
-#include "dbat/genolc.h"
-#include "dbat/genzon.h"
-#include "dbat/utils.h"
+#include "dbat/game/gengld.h"
+#include "dbat/game/shop.h"
+#include "dbat/game/genolc.h"
+#include "dbat/game/genzon.h"
+#include "dbat/game/utils.h"
 
 /*
  * NOTE (gg): Didn't modify sedit much. Don't consider it as 'recent'

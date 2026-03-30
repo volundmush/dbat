@@ -4,16 +4,16 @@
  * A graphical in-game game configuration utility for OasisOLC.         *
  ************************************************************************/
 
-#include "dbat/cedit.h"
-#include "dbat/utils.h"
-#include "dbat/comm.h"
-#include "dbat/oasis.h"
-#include "dbat/db.h"
-#include "dbat/interpreter.h"
-#include "dbat/genolc.h"
-#include "dbat/imc.h"
-#include "dbat/improved-edit.h"
-#include "dbat/constants.h"
+#include "dbat/game/cedit.h"
+#include "dbat/game/utils.h"
+#include "dbat/game/comm.h"
+#include "dbat/game/oasis.h"
+#include "dbat/game/db.h"
+#include "dbat/game/interpreter.h"
+#include "dbat/game/genolc.h"
+#include "dbat/game/imc.h"
+#include "dbat/game/improved-edit.h"
+#include "dbat/game/constants.h"
 
 /******************************************************************************/
 /** External Functions                                                       **/

@@ -24,16 +24,16 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
-#include "dbat/sha256.h"
-#include "dbat/structs.h"
-#include "dbat/utils.h"
-#include "dbat/comm.h"
-#include "dbat/db.h"
-#include "dbat/handler.h"
-#include "dbat/interpreter.h"
-#include "dbat/imc.h"
-#include "dbat/imccfg.h"
-#include "dbat/sha256.h"
+#include "dbat/game/sha256.h"
+#include "dbat/game/structs.h"
+#include "dbat/game/utils.h"
+#include "dbat/game/comm.h"
+#include "dbat/game/db.h"
+#include "dbat/game/handler.h"
+#include "dbat/game/interpreter.h"
+#include "dbat/game/imc.h"
+#include "dbat/game/imccfg.h"
+#include "dbat/game/sha256.h"
 
 #define IMCKEY( literal, field, value ) \
 if( !strcasecmp( (word), (literal) ) )  \

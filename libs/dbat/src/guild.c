@@ -7,20 +7,20 @@
  * Written by Jason Goodwin.   jgoodwin@expert.cc.purdue.edu               *
  ************************************************************************ */
 
-#include "dbat/guild.h"
-#include "dbat/utils.h"
-#include "dbat/spells.h"
-#include "dbat/comm.h"
-#include "dbat/db.h"
-#include "dbat/interpreter.h"
-#include "dbat/gengld.h"
-#include "dbat/local_limits.h"
-#include "dbat/feats.h"
-#include "dbat/act.comm.h"
-#include "dbat/handler.h"
-#include "dbat/shop.h"
-#include "dbat/class.h"
-#include "dbat/constants.h"
+#include "dbat/game/guild.h"
+#include "dbat/game/utils.h"
+#include "dbat/game/spells.h"
+#include "dbat/game/comm.h"
+#include "dbat/game/db.h"
+#include "dbat/game/interpreter.h"
+#include "dbat/game/gengld.h"
+#include "dbat/game/local_limits.h"
+#include "dbat/game/feats.h"
+#include "dbat/game/act.comm.h"
+#include "dbat/game/handler.h"
+#include "dbat/game/shop.h"
+#include "dbat/game/class.h"
+#include "dbat/game/constants.h"
 
 /* Local variables */
 int spell_sort_info[SKILL_TABLE_SIZE + 1];

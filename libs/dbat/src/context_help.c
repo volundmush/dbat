@@ -3,13 +3,13 @@
  * If you add more olc options, be sure to add a case for it here. - Welcor
  */
 
-#include "dbat/context_help.h"
-#include "dbat/act.informative.h"
-#include "dbat/oasis.h"
-#include "dbat/utils.h"
-#include "dbat/dg_olc.h"
-#include "dbat/interpreter.h"
-#include "dbat/comm.h"
+#include "dbat/game/context_help.h"
+#include "dbat/game/act.informative.h"
+#include "dbat/game/oasis.h"
+#include "dbat/game/utils.h"
+#include "dbat/game/dg_olc.h"
+#include "dbat/game/interpreter.h"
+#include "dbat/game/comm.h"
 
 /* local global */
 char *context_help_list[NUM_CONTEXTS];

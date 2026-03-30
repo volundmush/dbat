@@ -6,11 +6,11 @@
 *				     		     * 
 * Paolo Libardi - pinkpallin@libero.it		     * 
 *****************************************************/
-#include "dbat/maputils.h"
-#include "dbat/utils.h"
-#include "dbat/comm.h"
-#include "dbat/interpreter.h"
-#include "dbat/db.h"
+#include "dbat/game/maputils.h"
+#include "dbat/game/utils.h"
+#include "dbat/game/comm.h"
+#include "dbat/game/interpreter.h"
+#include "dbat/game/db.h"
 
 
 extern struct room_data *world;  

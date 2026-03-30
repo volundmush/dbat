@@ -8,19 +8,19 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 
-#include "dbat/players.h"
-#include "dbat/utils.h"
-#include "dbat/db.h"
-#include "dbat/handler.h"
-#include "dbat/pfdefaults.h"
-#include "dbat/feats.h"
-#include "dbat/dg_scripts.h"
-#include "dbat/comm.h"
-#include "dbat/genmob.h"
-#include "dbat/constants.h"
-#include "dbat/imc.h"
-#include "dbat/class.h"
-#include "dbat/config.h"
+#include "dbat/game/players.h"
+#include "dbat/game/utils.h"
+#include "dbat/game/db.h"
+#include "dbat/game/handler.h"
+#include "dbat/game/pfdefaults.h"
+#include "dbat/game/feats.h"
+#include "dbat/game/dg_scripts.h"
+#include "dbat/game/comm.h"
+#include "dbat/game/genmob.h"
+#include "dbat/game/constants.h"
+#include "dbat/game/imc.h"
+#include "dbat/game/class.h"
+#include "dbat/game/config.h"
 
 #define LOAD_HIT	0
 #define LOAD_MANA	1

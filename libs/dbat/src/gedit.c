@@ -6,20 +6,20 @@
  *  Made for Oasis OLC                                                   *
  *  Copyright 1996 Harvey Gilpin.                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-#include "dbat/gedit.h"
-#include "dbat/genzon.h"
-#include "dbat/act.informative.h"
-#include "dbat/oasis.h"
-#include "dbat/gengld.h"
-#include "dbat/utils.h"
-#include "dbat/comm.h"
-#include "dbat/handler.h"
-#include "dbat/races.h"
-#include "dbat/interpreter.h"
-#include "dbat/spells.h"
-#include "dbat/feats.h"
-#include "dbat/genolc.h"
-#include "dbat/shop.h"
+#include "dbat/game/gedit.h"
+#include "dbat/game/genzon.h"
+#include "dbat/game/act.informative.h"
+#include "dbat/game/oasis.h"
+#include "dbat/game/gengld.h"
+#include "dbat/game/utils.h"
+#include "dbat/game/comm.h"
+#include "dbat/game/handler.h"
+#include "dbat/game/races.h"
+#include "dbat/game/interpreter.h"
+#include "dbat/game/spells.h"
+#include "dbat/game/feats.h"
+#include "dbat/game/genolc.h"
+#include "dbat/game/shop.h"
 
 /*
  * Should check more things.

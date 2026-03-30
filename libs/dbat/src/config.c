@@ -14,8 +14,8 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 
-#include "dbat/config.h"
-#include "dbat/interpreter.h"	/* alias_data definition for structs.h */
+#include "dbat/game/config.h"
+#include "dbat/game/interpreter.h"	/* alias_data definition for structs.h */
 
 /*
  * Update:  The following constants and variables are now the default values

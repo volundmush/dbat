@@ -8,13 +8,13 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 
-#include "dbat/spec_assign.h"
-#include "dbat/db.h"
-#include "dbat/interpreter.h"
-#include "dbat/utils.h"
-#include "dbat/spec_procs.h"
-#include "dbat/objsave.h"
-#include "dbat/mail.h"
+#include "dbat/game/spec_assign.h"
+#include "dbat/game/db.h"
+#include "dbat/game/interpreter.h"
+#include "dbat/game/utils.h"
+#include "dbat/game/spec_procs.h"
+#include "dbat/game/objsave.h"
+#include "dbat/game/mail.h"
 
 /* local functions */
 void ASSIGNROOM(room_vnum room, SPECIAL(fname));

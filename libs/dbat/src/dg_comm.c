@@ -12,15 +12,15 @@
 *  $Date: 2004/10/11 12:07:00$                                            *
 *  $Revision: 1.0.14 $                                                    *
 ************************************************************************ */
-#include "dbat/dg_comm.h"
-#include "dbat/act.informative.h"
-#include "dbat/utils.h"
-#include "dbat/races.h"
-#include "dbat/comm.h"
-#include "dbat/dg_scripts.h"
-#include "dbat/graph.h"
-#include "dbat/spells.h"
-#include "dbat/handler.h"
+#include "dbat/game/dg_comm.h"
+#include "dbat/game/act.informative.h"
+#include "dbat/game/utils.h"
+#include "dbat/game/races.h"
+#include "dbat/game/comm.h"
+#include "dbat/game/dg_scripts.h"
+#include "dbat/game/graph.h"
+#include "dbat/game/spells.h"
+#include "dbat/game/handler.h"
 
 /* local functions */
 void sub_write_to_char(struct char_data *ch, char *tokens[], void *otokens[], char type[]);

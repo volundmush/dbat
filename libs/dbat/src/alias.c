@@ -9,10 +9,10 @@
 * CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.		 *
 *********************************************************************** */
 
-#include "dbat/alias.h"
-#include "dbat/utils.h"
-#include "dbat/interpreter.h"
-#include "dbat/db.h"
+#include "dbat/game/alias.h"
+#include "dbat/game/utils.h"
+#include "dbat/game/interpreter.h"
+#include "dbat/game/db.h"
 
 
 void write_aliases(struct char_data *ch)

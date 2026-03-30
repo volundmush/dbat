@@ -12,17 +12,17 @@
 *  $Revision: 1.0.14 $                                                    *
 **************************************************************************/
 
-#include "dbat/dg_olc.h"
-#include "dbat/utils.h"
-#include "dbat/comm.h"
-#include "dbat/db.h"
-#include "dbat/genolc.h"
-#include "dbat/interpreter.h"
-#include "dbat/oasis.h"
-#include "dbat/dg_event.h"
-#include "dbat/constants.h"
-#include "dbat/act.wizard.h"
-#include "dbat/modify.h"
+#include "dbat/game/dg_olc.h"
+#include "dbat/game/utils.h"
+#include "dbat/game/comm.h"
+#include "dbat/game/db.h"
+#include "dbat/game/genolc.h"
+#include "dbat/game/interpreter.h"
+#include "dbat/game/oasis.h"
+#include "dbat/game/dg_event.h"
+#include "dbat/game/constants.h"
+#include "dbat/game/act.wizard.h"
+#include "dbat/game/modify.h"
 
 /* local functions */
 static void trigedit_disp_menu(struct descriptor_data *d);

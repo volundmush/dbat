@@ -8,22 +8,22 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 
-#include "dbat/local_limits.h"
-#include "dbat/utils.h"
-#include "dbat/spells.h"
-#include "dbat/comm.h"
-#include "dbat/dg_comm.h"
-#include "dbat/act.other.h"
-#include "dbat/alias.h"
-#include "dbat/act.item.h"
-#include "dbat/vehicles.h"
-#include "dbat/act.movement.h"
-#include "dbat/constants.h"
-#include "dbat/class.h"
-#include "dbat/fight.h"
-#include "dbat/objsave.h"
-#include "dbat/handler.h"
-#include "dbat/dg_scripts.h"
+#include "dbat/game/local_limits.h"
+#include "dbat/game/utils.h"
+#include "dbat/game/spells.h"
+#include "dbat/game/comm.h"
+#include "dbat/game/dg_comm.h"
+#include "dbat/game/act.other.h"
+#include "dbat/game/alias.h"
+#include "dbat/game/act.item.h"
+#include "dbat/game/vehicles.h"
+#include "dbat/game/act.movement.h"
+#include "dbat/game/constants.h"
+#include "dbat/game/class.h"
+#include "dbat/game/fight.h"
+#include "dbat/game/objsave.h"
+#include "dbat/game/handler.h"
+#include "dbat/game/dg_scripts.h"
 
 /* local defines */
 #define sick_fail       2

@@ -9,12 +9,12 @@
 *  To see this in action, check out AderonMUD                            * 
 ************************************************************************ */ 
 
-#include "dbat/structs.h" 
-#include "dbat/utils.h" 
-#include "dbat/db.h"
-#include "dbat/handler.h"
-#include "dbat/reset.h" 
-#include "dbat/spec_procs.h"
+#include "dbat/game/structs.h" 
+#include "dbat/game/utils.h" 
+#include "dbat/game/db.h"
+#include "dbat/game/handler.h"
+#include "dbat/game/reset.h" 
+#include "dbat/game/spec_procs.h"
 
 
 /* pre_reset is called before a zone is reset - returns TRUE to prevent a normal reset of the zone */ 

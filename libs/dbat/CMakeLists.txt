@@ -1,8 +1,7 @@
-add_library(dbat STATIC)
+add_library(dbat_game STATIC)
+add_library(dbat::game ALIAS dbat_game)
 
-target_compile_features(dbat PUBLIC cxx_std_23)
-
-target_include_directories(dbat
+target_include_directories(dbat_game
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
@@ -18,10 +17,10 @@ file(GLOB_RECURSE SRC
 # Also glob up include/*.hpp
 
 file(GLOB_RECURSE INCLUDE
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/dbat/*.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/dbat/game/*.h
 )
 
-target_sources(dbat
+target_sources(dbat_game
     PRIVATE
         ${SRC}
     PUBLIC
@@ -31,7 +30,7 @@ target_sources(dbat
         ${INCLUDE}
 )
 
-target_link_libraries(dbat
+target_link_libraries(dbat_game
   PUBLIC
     bsd
     ZLIB::ZLIB

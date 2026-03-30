@@ -33,7 +33,7 @@
 #else
 #include <endian.h>
 #endif
-#include "dbat/sha256.h"
+#include "dbat/game/sha256.h"
 
 #if __FreeBSD_version < 500111
 

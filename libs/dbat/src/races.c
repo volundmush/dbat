@@ -1,6 +1,6 @@
-#include "dbat/races.h"
-#include "dbat/utils.h"
-#include "dbat/interpreter.h"
+#include "dbat/game/races.h"
+#include "dbat/game/utils.h"
+#include "dbat/game/interpreter.h"
 
 const char *race_names[NUM_RACES+1] = {
   "human",

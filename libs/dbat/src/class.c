@@ -15,20 +15,20 @@
  * the appropriate new special cases for your new class.
  */
 
-#include "dbat/class.h"
-#include "dbat/db.h"
-#include "dbat/utils.h"
-#include "dbat/comm.h"
-#include "dbat/spells.h"
-#include "dbat/interpreter.h"
-#include "dbat/constants.h"
-#include "dbat/handler.h"
-#include "dbat/feats.h"
-#include "dbat/oasis.h"
-#include "dbat/act.wizard.h"
-#include "dbat/dg_comm.h"
-#include "dbat/config.h"
-#include "dbat/act.other.h"
+#include "dbat/game/class.h"
+#include "dbat/game/db.h"
+#include "dbat/game/utils.h"
+#include "dbat/game/comm.h"
+#include "dbat/game/spells.h"
+#include "dbat/game/interpreter.h"
+#include "dbat/game/constants.h"
+#include "dbat/game/handler.h"
+#include "dbat/game/feats.h"
+#include "dbat/game/oasis.h"
+#include "dbat/game/act.wizard.h"
+#include "dbat/game/dg_comm.h"
+#include "dbat/game/config.h"
+#include "dbat/game/act.other.h"
 
 /* Names first */
 

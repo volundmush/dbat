@@ -7,11 +7,11 @@
  * ******************************************************************** */
 #define __ASSEMBLIES_C__
 
-#include "dbat/assemblies.h"
-#include "dbat/utils.h"
-#include "dbat/comm.h"
-#include "dbat/handler.h"
-#include "dbat/constants.h"
+#include "dbat/game/assemblies.h"
+#include "dbat/game/utils.h"
+#include "dbat/game/comm.h"
+#include "dbat/game/handler.h"
+#include "dbat/game/constants.h"
 
 /* Local global variables. */
 static long           g_lNumAssemblies = 0;

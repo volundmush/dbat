@@ -8,21 +8,21 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 
-#include "dbat/mobact.h"
-#include "dbat/utils.h"
-#include "dbat/db.h"
-#include "dbat/comm.h"
-#include "dbat/interpreter.h"
-#include "dbat/handler.h"
-#include "dbat/spells.h"
-#include "dbat/shop.h"
-#include "dbat/combat.h"
-#include "dbat/act.offensive.h"
-#include "dbat/act.movement.h"
-#include "dbat/act.other.h"
-#include "dbat/act.item.h"
-#include "dbat/act.social.h"
-#include "dbat/spec_procs.h"
+#include "dbat/game/mobact.h"
+#include "dbat/game/utils.h"
+#include "dbat/game/db.h"
+#include "dbat/game/comm.h"
+#include "dbat/game/interpreter.h"
+#include "dbat/game/handler.h"
+#include "dbat/game/spells.h"
+#include "dbat/game/shop.h"
+#include "dbat/game/combat.h"
+#include "dbat/game/act.offensive.h"
+#include "dbat/game/act.movement.h"
+#include "dbat/game/act.other.h"
+#include "dbat/game/act.item.h"
+#include "dbat/game/act.social.h"
+#include "dbat/game/spec_procs.h"
 
 /* local functions */
 int player_present(struct char_data *ch);

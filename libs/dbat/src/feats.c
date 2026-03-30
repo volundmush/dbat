@@ -7,12 +7,12 @@
 *****************************************************************************/
 
 
-#include "dbat/feats.h"
-#include "dbat/utils.h"
-#include "dbat/comm.h"
-#include "dbat/handler.h"
-#include "dbat/constants.h"
-#include "dbat/interpreter.h"
+#include "dbat/game/feats.h"
+#include "dbat/game/utils.h"
+#include "dbat/game/comm.h"
+#include "dbat/game/handler.h"
+#include "dbat/game/constants.h"
+#include "dbat/game/interpreter.h"
 
 /* Local Functions */
 

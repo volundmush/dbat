@@ -7,14 +7,14 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
-#include "dbat/house.h"
-#include "dbat/comm.h"
-#include "dbat/handler.h"
-#include "dbat/db.h"
-#include "dbat/interpreter.h"
-#include "dbat/utils.h"
-#include "dbat/constants.h"
-#include "dbat/objsave.h"
+#include "dbat/game/house.h"
+#include "dbat/game/comm.h"
+#include "dbat/game/handler.h"
+#include "dbat/game/db.h"
+#include "dbat/game/interpreter.h"
+#include "dbat/game/utils.h"
+#include "dbat/game/constants.h"
+#include "dbat/game/objsave.h"
 
 /* local globals */
 struct house_control_rec house_control[MAX_HOUSES];

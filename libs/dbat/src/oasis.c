@@ -5,20 +5,20 @@
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
 
-#include "dbat/structs.h"
-#include "dbat/utils.h"
-#include "dbat/interpreter.h"
-#include "dbat/comm.h"
-#include "dbat/db.h"
-#include "dbat/shop.h"
-#include "dbat/genmob.h"
-#include "dbat/genshp.h"
-#include "dbat/genzon.h"
-#include "dbat/genobj.h"
-#include "dbat/oasis.h"
-#include "dbat/dg_olc.h"
-#include "dbat/handler.h"
-#include "dbat/guild.h"
+#include "dbat/game/structs.h"
+#include "dbat/game/utils.h"
+#include "dbat/game/interpreter.h"
+#include "dbat/game/comm.h"
+#include "dbat/game/db.h"
+#include "dbat/game/shop.h"
+#include "dbat/game/genmob.h"
+#include "dbat/game/genshp.h"
+#include "dbat/game/genzon.h"
+#include "dbat/game/genobj.h"
+#include "dbat/game/oasis.h"
+#include "dbat/game/dg_olc.h"
+#include "dbat/game/handler.h"
+#include "dbat/game/guild.h"
 
 
 /******************************************************************************/

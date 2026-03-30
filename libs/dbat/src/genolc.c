@@ -5,18 +5,18 @@
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
 #define __GENOLC_C__
-#include "dbat/genolc.h"
-#include "dbat/gengld.h"
-#include "dbat/cedit.h"
-#include "dbat/genmob.h"
-#include "dbat/genobj.h"
-#include "dbat/genshp.h"
-#include "dbat/genwld.h"
-#include "dbat/modify.h"
-#include "dbat/genzon.h"
-#include "dbat/oasis.h"
-#include "dbat/utils.h"
-#include "dbat/comm.h"
+#include "dbat/game/genolc.h"
+#include "dbat/game/gengld.h"
+#include "dbat/game/cedit.h"
+#include "dbat/game/genmob.h"
+#include "dbat/game/genobj.h"
+#include "dbat/game/genshp.h"
+#include "dbat/game/genwld.h"
+#include "dbat/game/modify.h"
+#include "dbat/game/genzon.h"
+#include "dbat/game/oasis.h"
+#include "dbat/game/utils.h"
+#include "dbat/game/comm.h"
 
 /* List of zones to be saved.  */
 struct save_list_data *save_list;

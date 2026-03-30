@@ -7,20 +7,20 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
-#include "dbat/act.comm.h"
-#include "dbat/dg_comm.h"
-#include "dbat/utils.h"
-#include "dbat/comm.h"
-#include "dbat/spells.h"
-#include "dbat/interpreter.h"
-#include "dbat/db.h"
-#include "dbat/config.h"
-#include "dbat/act.wizard.h"
-#include "dbat/act.informative.h"
-#include "dbat/handler.h"
-#include "dbat/dg_scripts.h"
-#include "dbat/boards.h"
-#include "dbat/improved-edit.h"
+#include "dbat/game/act.comm.h"
+#include "dbat/game/dg_comm.h"
+#include "dbat/game/utils.h"
+#include "dbat/game/comm.h"
+#include "dbat/game/spells.h"
+#include "dbat/game/interpreter.h"
+#include "dbat/game/db.h"
+#include "dbat/game/config.h"
+#include "dbat/game/act.wizard.h"
+#include "dbat/game/act.informative.h"
+#include "dbat/game/handler.h"
+#include "dbat/game/dg_scripts.h"
+#include "dbat/game/boards.h"
+#include "dbat/game/improved-edit.h"
 
 /* local functions */
 static void perform_tell(struct char_data *ch, struct char_data *vict, char *arg);

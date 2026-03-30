@@ -6,15 +6,15 @@
  * 1999 July 25 caminturn@earthlink.net                                *
  * ******************************************************************** */
 
-#include "dbat/assedit.h"
-#include "dbat/utils.h"
-#include "dbat/db.h"
-#include "dbat/comm.h"
-#include "dbat/handler.h"
-#include "dbat/interpreter.h"
-#include "dbat/oasis.h"
-#include "dbat/assemblies.h"
-#include "dbat/constants.h"
+#include "dbat/game/assedit.h"
+#include "dbat/game/utils.h"
+#include "dbat/game/db.h"
+#include "dbat/game/comm.h"
+#include "dbat/game/handler.h"
+#include "dbat/game/interpreter.h"
+#include "dbat/game/oasis.h"
+#include "dbat/game/assemblies.h"
+#include "dbat/game/constants.h"
 
 
 /*-------------------------------------------------------------------*

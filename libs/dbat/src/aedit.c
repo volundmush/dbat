@@ -6,15 +6,15 @@
  * ftpable from ftp.circlemud.org:/pub/CircleMUD/contrib/code
  */
 
-#include "dbat/aedit.h"
-#include "dbat/act.informative.h"
-#include "dbat/act.social.h"
-#include "dbat/interpreter.h"
-#include "dbat/comm.h"
-#include "dbat/utils.h"
-#include "dbat/oasis.h"
-#include "dbat/genolc.h"
-#include "dbat/constants.h"
+#include "dbat/game/aedit.h"
+#include "dbat/game/act.informative.h"
+#include "dbat/game/act.social.h"
+#include "dbat/game/interpreter.h"
+#include "dbat/game/comm.h"
+#include "dbat/game/utils.h"
+#include "dbat/game/oasis.h"
+#include "dbat/game/genolc.h"
+#include "dbat/game/constants.h"
 
 /*------------------------------------------------------------------------*\
   Utils and exported functions.

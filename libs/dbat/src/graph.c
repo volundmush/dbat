@@ -8,17 +8,17 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 
-#include "dbat/graph.h"
-#include "dbat/utils.h"
-#include "dbat/comm.h"
-#include "dbat/interpreter.h"
-#include "dbat/handler.h"
-#include "dbat/db.h"
-#include "dbat/spells.h"
-#include "dbat/constants.h"
-#include "dbat/maputils.h"
-#include "dbat/vehicles.h"
-#include "dbat/act.informative.h"
+#include "dbat/game/graph.h"
+#include "dbat/game/utils.h"
+#include "dbat/game/comm.h"
+#include "dbat/game/interpreter.h"
+#include "dbat/game/handler.h"
+#include "dbat/game/db.h"
+#include "dbat/game/spells.h"
+#include "dbat/game/constants.h"
+#include "dbat/game/maputils.h"
+#include "dbat/game/vehicles.h"
+#include "dbat/game/act.informative.h"
 
 /* local functions */
 int VALID_EDGE(room_rnum x, int y);

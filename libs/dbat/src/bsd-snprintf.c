@@ -88,14 +88,14 @@
  **************************************************************/
 
 #if 0
-#include "dbat/includes.h"
+#include "dbat/game/includes.h"
 
 CVSHEADER("$CVSHeader: cwg/rasputin/src/bsd-snprintf.c,v 1.2 2004/12/21 02:39:33 fnord Exp $");
 
 RCSID("$Id: bsd-snprintf.c,v 1.2 2004/12/21 02:39:33 fnord Exp $");
 #else
-#include "dbat/conf.h"
-#include "dbat/sysdep.h"
+#include "dbat/game/conf.h"
+#include "dbat/game/sysdep.h"
 # define MAX(a, b)	((a) < (b) ? (b) : (a))
 #endif
 

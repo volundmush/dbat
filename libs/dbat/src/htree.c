@@ -7,9 +7,9 @@
  * Copyright (c) 7-Oct-2004                                                *
  ***************************************************************************/
 
-#include "dbat/htree.h"
-#include "dbat/utils.h"
-#include "dbat/db.h"
+#include "dbat/game/htree.h"
+#include "dbat/game/utils.h"
+#include "dbat/game/db.h"
 
 #undef HTREE_TEST_CYCLES
 

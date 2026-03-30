@@ -7,21 +7,21 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
-#include "dbat/spec_procs.h"
-#include "dbat/utils.h"
-#include "dbat/comm.h"
-#include "dbat/interpreter.h"
-#include "dbat/handler.h"
-#include "dbat/db.h"
-#include "dbat/spells.h"
-#include "dbat/constants.h"
-#include "dbat/mail.h"
-#include "dbat/act.movement.h"
-#include "dbat/act.item.h"
-#include "dbat/act.social.h"
-#include "dbat/guild.h"
-#include "dbat/races.h"
-#include "dbat/act.comm.h"
+#include "dbat/game/spec_procs.h"
+#include "dbat/game/utils.h"
+#include "dbat/game/comm.h"
+#include "dbat/game/interpreter.h"
+#include "dbat/game/handler.h"
+#include "dbat/game/db.h"
+#include "dbat/game/spells.h"
+#include "dbat/game/constants.h"
+#include "dbat/game/mail.h"
+#include "dbat/game/act.movement.h"
+#include "dbat/game/act.item.h"
+#include "dbat/game/act.social.h"
+#include "dbat/game/guild.h"
+#include "dbat/game/races.h"
+#include "dbat/game/act.comm.h"
 
 /* local functions */
 

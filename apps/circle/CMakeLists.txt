@@ -1,7 +1,5 @@
 add_executable(circle)
 
-target_compile_features(circle PUBLIC cxx_std_23)
-
 target_include_directories(circle
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -23,5 +21,5 @@ target_sources(circle
 
 target_link_libraries(circle
   PUBLIC
-    dbat
+    dbat::game
 )

@@ -9,12 +9,12 @@
 
 /* --relistan 2/22/99 - 2/24/99 */
 
-#include "dbat/statedit.h"
-#include "dbat/interpreter.h"
-#include "dbat/comm.h"
-#include "dbat/utils.h"
-#include "dbat/db.h"
-#include "dbat/oasis.h"
+#include "dbat/game/statedit.h"
+#include "dbat/game/interpreter.h"
+#include "dbat/game/comm.h"
+#include "dbat/game/utils.h"
+#include "dbat/game/db.h"
+#include "dbat/game/oasis.h"
 
 int parse_stat_menu(struct descriptor_data *d, char *arg);
 int stats_assign_stat(int abil, char *arg, struct descriptor_data *d);

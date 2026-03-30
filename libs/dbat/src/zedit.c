@@ -4,20 +4,20 @@
  * Copyright 1997-2001 George Greer (greerga@circlemud.org)		*
  ************************************************************************/
 
-#include "dbat/structs.h"
-#include "dbat/comm.h"
-#include "dbat/interpreter.h"
-#include "dbat/utils.h"
-#include "dbat/db.h"
-#include "dbat/constants.h"
-#include "dbat/genolc.h"
-#include "dbat/genzon.h"
-#include "dbat/oasis.h"
-#include "dbat/dg_scripts.h"
-#include "dbat/act.informative.h"
-#include "dbat/races.h"
-#include "dbat/act.wizard.h"
-#include "dbat/handler.h"
+#include "dbat/game/structs.h"
+#include "dbat/game/comm.h"
+#include "dbat/game/interpreter.h"
+#include "dbat/game/utils.h"
+#include "dbat/game/db.h"
+#include "dbat/game/constants.h"
+#include "dbat/game/genolc.h"
+#include "dbat/game/genzon.h"
+#include "dbat/game/oasis.h"
+#include "dbat/game/dg_scripts.h"
+#include "dbat/game/act.informative.h"
+#include "dbat/game/races.h"
+#include "dbat/game/act.wizard.h"
+#include "dbat/game/handler.h"
 
 /*
  * Nasty internal macros to clean up the code.

@@ -8,20 +8,20 @@
 *  $Revision: 1.0.14 $                                                    *
 **************************************************************************/
 
-#include "dbat/structs.h"
-#include "dbat/dg_scripts.h"
-#include "dbat/utils.h"
-#include "dbat/comm.h"
-#include "dbat/interpreter.h"
-#include "dbat/handler.h"
-#include "dbat/dg_event.h"
-#include "dbat/db.h"
-#include "dbat/screen.h"
-#include "dbat/constants.h"
-#include "dbat/spells.h"
-#include "dbat/oasis.h"
-#include "dbat/class.h"
-#include "dbat/races.h"
+#include "dbat/game/structs.h"
+#include "dbat/game/dg_scripts.h"
+#include "dbat/game/utils.h"
+#include "dbat/game/comm.h"
+#include "dbat/game/interpreter.h"
+#include "dbat/game/handler.h"
+#include "dbat/game/dg_event.h"
+#include "dbat/game/db.h"
+#include "dbat/game/screen.h"
+#include "dbat/game/constants.h"
+#include "dbat/game/spells.h"
+#include "dbat/game/oasis.h"
+#include "dbat/game/class.h"
+#include "dbat/game/races.h"
 
 /* Utility functions */
 

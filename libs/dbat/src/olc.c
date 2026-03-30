@@ -14,13 +14,13 @@
  *  NOT DONE!!
  */
 
-#include "dbat/olc.h"
-#include "dbat/utils.h"
-#include "dbat/comm.h"
-#include "dbat/interpreter.h"
-#include "dbat/handler.h"
-#include "dbat/db.h"
-#include "dbat/olc.h"
+#include "dbat/game/olc.h"
+#include "dbat/game/utils.h"
+#include "dbat/game/comm.h"
+#include "dbat/game/interpreter.h"
+#include "dbat/game/handler.h"
+#include "dbat/game/db.h"
+#include "dbat/game/olc.h"
 
 /* OLC command format:
  *

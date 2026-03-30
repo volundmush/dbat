@@ -8,22 +8,22 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 
-#include "dbat/modify.h"
-#include "dbat/utils.h"
-#include "dbat/interpreter.h"
-#include "dbat/handler.h"
-#include "dbat/db.h"
-#include "dbat/comm.h"
-#include "dbat/spells.h"
-#include "dbat/mail.h"
-#include "dbat/boards.h"
-#include "dbat/improved-edit.h"
-#include "dbat/oasis.h"
-#include "dbat/tedit.h"
-#include "dbat/shop.h"
-#include "dbat/guild.h"
-#include "dbat/spell_parser.h"
-#include "dbat/dg_olc.h"
+#include "dbat/game/modify.h"
+#include "dbat/game/utils.h"
+#include "dbat/game/interpreter.h"
+#include "dbat/game/handler.h"
+#include "dbat/game/db.h"
+#include "dbat/game/comm.h"
+#include "dbat/game/spells.h"
+#include "dbat/game/mail.h"
+#include "dbat/game/boards.h"
+#include "dbat/game/improved-edit.h"
+#include "dbat/game/oasis.h"
+#include "dbat/game/tedit.h"
+#include "dbat/game/shop.h"
+#include "dbat/game/guild.h"
+#include "dbat/game/spell_parser.h"
+#include "dbat/game/dg_olc.h"
 
 /* local functions */
 

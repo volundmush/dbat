@@ -13,17 +13,17 @@
 *   credits found in act.offensive.c except for the commands added in-    *
 *                                                   ~~Iovan               *
 ************************************************************************ */
-#include "dbat/act.attack.h"
-#include "dbat/fight.h"
-#include "dbat/dg_comm.h"
-#include "dbat/act.item.h"
-#include "dbat/interpreter.h"
-#include "dbat/utils.h"
-#include "dbat/handler.h"
-#include "dbat/comm.h"
-#include "dbat/constants.h"
-#include "dbat/combat.h"
-#include "dbat/class.h"
+#include "dbat/game/act.attack.h"
+#include "dbat/game/fight.h"
+#include "dbat/game/dg_comm.h"
+#include "dbat/game/act.item.h"
+#include "dbat/game/interpreter.h"
+#include "dbat/game/utils.h"
+#include "dbat/game/handler.h"
+#include "dbat/game/comm.h"
+#include "dbat/game/constants.h"
+#include "dbat/game/combat.h"
+#include "dbat/game/class.h"
 
 ACMD(do_lightgrenade)
 {

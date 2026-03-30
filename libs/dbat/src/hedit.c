@@ -10,20 +10,20 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 **************************************************************************/
 
-#include "dbat/hedit.h"
-#include "dbat/comm.h"
-#include "dbat/interpreter.h"
-#include "dbat/utils.h"
-#include "dbat/db.h"
-#include "dbat/boards.h"
-#include "dbat/oasis.h"
-#include "dbat/genolc.h"
-#include "dbat/genzon.h"
-#include "dbat/handler.h"
-#include "dbat/improved-edit.h"
-#include "dbat/config.h"
-#include "dbat/dg_comm.h"
-#include "dbat/act.informative.h"
+#include "dbat/game/hedit.h"
+#include "dbat/game/comm.h"
+#include "dbat/game/interpreter.h"
+#include "dbat/game/utils.h"
+#include "dbat/game/db.h"
+#include "dbat/game/boards.h"
+#include "dbat/game/oasis.h"
+#include "dbat/game/genolc.h"
+#include "dbat/game/genzon.h"
+#include "dbat/game/handler.h"
+#include "dbat/game/improved-edit.h"
+#include "dbat/game/config.h"
+#include "dbat/game/dg_comm.h"
+#include "dbat/game/act.informative.h"
 
 /* external functions */
 

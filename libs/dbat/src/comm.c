@@ -7,39 +7,39 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
-#include "dbat/comm.h"
-#include "dbat/utils.h"
-#include "dbat/config.h"
-#include "dbat/maputils.h"
-#include "dbat/ban.h"
-#include "dbat/weather.h"
-#include "dbat/act.wizard.h"
-#include "dbat/act.misc.h"
-#include "dbat/house.h"
-#include "dbat/act.other.h"
-#include "dbat/dg_comm.h"
-#include "dbat/handler.h"
-#include "dbat/dg_scripts.h"
-#include "dbat/act.item.h"
-#include "dbat/interpreter.h"
-#include "dbat/random.h"
-#include "dbat/act.informative.h"
-#include "dbat/dg_event.h"
-#include "dbat/mobact.h"
-#include "dbat/magic.h"
-#include "dbat/imc.h"
-#include "dbat/objsave.h"
-#include "dbat/genolc.h"
-#include "dbat/class.h"
-#include "dbat/combat.h"
-#include "dbat/modify.h"
-#include "dbat/fight.h"
-#include "dbat/local_limits.h"
-#include "dbat/clan.h"
-#include "dbat/mail.h"
-#include "dbat/races.h"
-#include "dbat/constants.h"
-#include "dbat/screen.h"
+#include "dbat/game/comm.h"
+#include "dbat/game/utils.h"
+#include "dbat/game/config.h"
+#include "dbat/game/maputils.h"
+#include "dbat/game/ban.h"
+#include "dbat/game/weather.h"
+#include "dbat/game/act.wizard.h"
+#include "dbat/game/act.misc.h"
+#include "dbat/game/house.h"
+#include "dbat/game/act.other.h"
+#include "dbat/game/dg_comm.h"
+#include "dbat/game/handler.h"
+#include "dbat/game/dg_scripts.h"
+#include "dbat/game/act.item.h"
+#include "dbat/game/interpreter.h"
+#include "dbat/game/random.h"
+#include "dbat/game/act.informative.h"
+#include "dbat/game/dg_event.h"
+#include "dbat/game/mobact.h"
+#include "dbat/game/magic.h"
+#include "dbat/game/imc.h"
+#include "dbat/game/objsave.h"
+#include "dbat/game/genolc.h"
+#include "dbat/game/class.h"
+#include "dbat/game/combat.h"
+#include "dbat/game/modify.h"
+#include "dbat/game/fight.h"
+#include "dbat/game/local_limits.h"
+#include "dbat/game/clan.h"
+#include "dbat/game/mail.h"
+#include "dbat/game/races.h"
+#include "dbat/game/constants.h"
+#include "dbat/game/screen.h"
 
 /* externs */
 
@@ -3009,7 +3009,7 @@ void send_to_eaves(const char *messg, struct char_data *tch, ...)
       *buf = '\0';
       sprintf(buf2, "@W%s %s\r\n", PERS(d->character, tch), messg);
       sprintf(buf, "-----Eavesdrop-----\r\n%s-----Eavesdrop-----\r\n", buf2);
-      send_to_char(d->character, buf);
+      send_to_char(d->character, "%s", buf);
      }
   }
 }

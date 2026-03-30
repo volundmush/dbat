@@ -13,14 +13,14 @@
 Written by Jeremy Elson (jelson@circlemud.org)
 
 *************************************************************************/
-#include "dbat/mail.h"
-#include "dbat/utils.h"
-#include "dbat/comm.h"
-#include "dbat/db.h"
-#include "dbat/interpreter.h"
-#include "dbat/handler.h"
-#include "dbat/improved-edit.h"
-#include "dbat/players.h"
+#include "dbat/game/mail.h"
+#include "dbat/game/utils.h"
+#include "dbat/game/comm.h"
+#include "dbat/game/db.h"
+#include "dbat/game/interpreter.h"
+#include "dbat/game/handler.h"
+#include "dbat/game/improved-edit.h"
+#include "dbat/game/players.h"
 
 /* local globals */
 static mail_index_type *mail_index = NULL;	/* list of recs in the mail file  */

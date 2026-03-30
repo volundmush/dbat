@@ -6,18 +6,18 @@
 *  Copyright 2007 Stefan Cole (aka Jamdog)                               * 
 *  Used at AderonMUD (aderonmud.genesismuds.com 3200)                    * 
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */ 
-#include "dbat/hsedit.h"
-#include "dbat/comm.h"
-#include "dbat/utils.h"
-#include "dbat/handler.h"
-#include "dbat/interpreter.h"
-#include "dbat/db.h"
-#include "dbat/oasis.h"
-#include "dbat/genolc.h"
-#include "dbat/genzon.h"
-#include "dbat/house.h"
-#include "dbat/act.informative.h"
-#include "dbat/constants.h"
+#include "dbat/game/hsedit.h"
+#include "dbat/game/comm.h"
+#include "dbat/game/utils.h"
+#include "dbat/game/handler.h"
+#include "dbat/game/interpreter.h"
+#include "dbat/game/db.h"
+#include "dbat/game/oasis.h"
+#include "dbat/game/genolc.h"
+#include "dbat/game/genzon.h"
+#include "dbat/game/house.h"
+#include "dbat/game/act.informative.h"
+#include "dbat/game/constants.h"
 
 /*------------------------------------------------------------------------*/ 
 /* internal globals */ 

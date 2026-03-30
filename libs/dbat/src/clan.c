@@ -29,11 +29,11 @@
 //********************************************************************************
 
 
-#include "dbat/clan.h"        // the interface we need to impleme
-#include "dbat/db.h"             // for LIB_ETC
-#include "dbat/comm.h"           // for send_to_char
-#include "dbat/interpreter.h"    // for ACMD()
-#include "dbat/utils.h"          // for CREATE() and IDNUM()
+#include "dbat/game/clan.h"        // the interface we need to impleme
+#include "dbat/game/db.h"             // for LIB_ETC
+#include "dbat/game/comm.h"           // for send_to_char
+#include "dbat/game/interpreter.h"    // for ACMD()
+#include "dbat/game/utils.h"          // for CREATE() and IDNUM()
 
 extern char *strlwr(char *s);
 extern void send_editor_help(struct descriptor_data *d);

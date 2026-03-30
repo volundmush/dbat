@@ -9,18 +9,18 @@
 ************************************************************************ */
 
 
-#include "dbat/magic.h"
-#include "dbat/utils.h"
-#include "dbat/comm.h"
-#include "dbat/spells.h"
-#include "dbat/handler.h"
-#include "dbat/db.h"
-#include "dbat/interpreter.h"
-#include "dbat/constants.h"
-#include "dbat/dg_scripts.h"
-#include "dbat/feats.h"
-#include "dbat/mobact.h"
-#include "dbat/fight.h"
+#include "dbat/game/magic.h"
+#include "dbat/game/utils.h"
+#include "dbat/game/comm.h"
+#include "dbat/game/spells.h"
+#include "dbat/game/handler.h"
+#include "dbat/game/db.h"
+#include "dbat/game/interpreter.h"
+#include "dbat/game/constants.h"
+#include "dbat/game/dg_scripts.h"
+#include "dbat/game/feats.h"
+#include "dbat/game/mobact.h"
+#include "dbat/game/fight.h"
 
 /* local functions */
 int mag_materials(struct char_data *ch, int item0, int item1, int item2, int extract, int verbose);

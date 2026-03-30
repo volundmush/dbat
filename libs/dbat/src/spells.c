@@ -8,22 +8,22 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 
-#include "dbat/structs.h"
-#include "dbat/utils.h"
-#include "dbat/comm.h"
-#include "dbat/spells.h"
-#include "dbat/handler.h"
-#include "dbat/db.h"
-#include "dbat/constants.h"
-#include "dbat/interpreter.h"
-#include "dbat/dg_scripts.h"
-#include "dbat/feats.h"
-#include "dbat/oasis.h"
-#include "dbat/config.h"
-#include "dbat/act.item.h"
-#include "dbat/act.movement.h"
-#include "dbat/races.h"
-#include "dbat/act.informative.h"
+#include "dbat/game/structs.h"
+#include "dbat/game/utils.h"
+#include "dbat/game/comm.h"
+#include "dbat/game/spells.h"
+#include "dbat/game/handler.h"
+#include "dbat/game/db.h"
+#include "dbat/game/constants.h"
+#include "dbat/game/interpreter.h"
+#include "dbat/game/dg_scripts.h"
+#include "dbat/game/feats.h"
+#include "dbat/game/oasis.h"
+#include "dbat/game/config.h"
+#include "dbat/game/act.item.h"
+#include "dbat/game/act.movement.h"
+#include "dbat/game/races.h"
+#include "dbat/game/act.informative.h"
 
 /* external variables */
 

@@ -3,7 +3,7 @@
 //
 
 #ifndef HAVE_LIBBSD
-#include "dbat/stringutils.h"
+#include "dbat/game/stringutils.h"
 #include <string.h>
 
 size_t strlcpy(char *dest, const char *source, size_t totalsize)

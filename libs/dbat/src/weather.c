@@ -8,14 +8,14 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 
-#include "dbat/weather.h"
-#include "dbat/utils.h"
-#include "dbat/comm.h"
-#include "dbat/interpreter.h"
-#include "dbat/db.h"
-#include "dbat/dg_comm.h"
-#include "dbat/act.other.h"
-#include "dbat/config.h"
+#include "dbat/game/weather.h"
+#include "dbat/game/utils.h"
+#include "dbat/game/comm.h"
+#include "dbat/game/interpreter.h"
+#include "dbat/game/db.h"
+#include "dbat/game/dg_comm.h"
+#include "dbat/game/act.other.h"
+#include "dbat/game/config.h"
 
 static void another_hour(int mode);
 static void weather_change(void);

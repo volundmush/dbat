@@ -7,21 +7,21 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
-#include "dbat/handler.h"
-#include "dbat/utils.h"
-#include "dbat/comm.h"
-#include "dbat/db.h"
-#include "dbat/handler.h"
-#include "dbat/interpreter.h"
-#include "dbat/spells.h"
-#include "dbat/dg_scripts.h"
-#include "dbat/feats.h"
-#include "dbat/races.h"
-#include "dbat/class.h"
-#include "dbat/objsave.h"
-#include "dbat/fight.h"
-#include "dbat/races.h"
-#include "dbat/act.informative.h"
+#include "dbat/game/handler.h"
+#include "dbat/game/utils.h"
+#include "dbat/game/comm.h"
+#include "dbat/game/db.h"
+#include "dbat/game/handler.h"
+#include "dbat/game/interpreter.h"
+#include "dbat/game/spells.h"
+#include "dbat/game/dg_scripts.h"
+#include "dbat/game/feats.h"
+#include "dbat/game/races.h"
+#include "dbat/game/class.h"
+#include "dbat/game/objsave.h"
+#include "dbat/game/fight.h"
+#include "dbat/game/races.h"
+#include "dbat/game/act.informative.h"
 
 /* local vars */
 static int extractions_pending = 0;

@@ -8,20 +8,20 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 
-#include "dbat/utils.h"
-#include "dbat/comm.h"
-#include "dbat/handler.h"
-#include "dbat/random.h"
-#include "dbat/spells.h"
-#include "dbat/db.h"
-#include "dbat/config.h"
-#include "dbat/fight.h"
-#include "dbat/races.h"
-#include "dbat/class.h"
-#include "dbat/feats.h"
-#include "dbat/genzon.h"
-#include "dbat/constants.h"
-#include "dbat/act.informative.h"
+#include "dbat/game/utils.h"
+#include "dbat/game/comm.h"
+#include "dbat/game/handler.h"
+#include "dbat/game/random.h"
+#include "dbat/game/spells.h"
+#include "dbat/game/db.h"
+#include "dbat/game/config.h"
+#include "dbat/game/fight.h"
+#include "dbat/game/races.h"
+#include "dbat/game/class.h"
+#include "dbat/game/feats.h"
+#include "dbat/game/genzon.h"
+#include "dbat/game/constants.h"
+#include "dbat/game/act.informative.h"
 
 /* local functions */
 char commastring[MAX_STRING_LENGTH];

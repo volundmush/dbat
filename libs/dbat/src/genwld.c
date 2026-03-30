@@ -5,17 +5,17 @@
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
 
-#include "dbat/genwld.h"
-#include "dbat/utils.h"
-#include "dbat/db.h"
-#include "dbat/handler.h"
-#include "dbat/comm.h"
-#include "dbat/genolc.h"
-#include "dbat/genwld.h"
-#include "dbat/genzon.h"
-#include "dbat/shop.h"
-#include "dbat/dg_olc.h"
-#include "dbat/htree.h"
+#include "dbat/game/genwld.h"
+#include "dbat/game/utils.h"
+#include "dbat/game/db.h"
+#include "dbat/game/handler.h"
+#include "dbat/game/comm.h"
+#include "dbat/game/genolc.h"
+#include "dbat/game/genwld.h"
+#include "dbat/game/genzon.h"
+#include "dbat/game/shop.h"
+#include "dbat/game/dg_olc.h"
+#include "dbat/game/htree.h"
 
 
 /*

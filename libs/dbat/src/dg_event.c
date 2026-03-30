@@ -28,10 +28,10 @@
  *
  */
 #include <limits.h>
-#include "dbat/dg_event.h"
-#include "dbat/utils.h"
+#include "dbat/game/dg_event.h"
+#include "dbat/game/utils.h"
 
-#include "dbat/comm.h"
+#include "dbat/game/comm.h"
 
 static struct queue *event_q;          /* the event queue */
 

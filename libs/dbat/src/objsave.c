@@ -8,20 +8,20 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 
-#include "dbat/objsave.h"
+#include "dbat/game/objsave.h"
 #include <unistd.h>
 #include <errno.h>
-#include "dbat/structs.h"
-#include "dbat/comm.h"
-#include "dbat/handler.h"
-#include "dbat/db.h"
-#include "dbat/interpreter.h"
-#include "dbat/utils.h"
-#include "dbat/spells.h"
-#include "dbat/players.h"
-#include "dbat/class.h"
-#include "dbat/act.social.h"
-#include "dbat/act.item.h"
+#include "dbat/game/structs.h"
+#include "dbat/game/comm.h"
+#include "dbat/game/handler.h"
+#include "dbat/game/db.h"
+#include "dbat/game/interpreter.h"
+#include "dbat/game/utils.h"
+#include "dbat/game/spells.h"
+#include "dbat/game/players.h"
+#include "dbat/game/class.h"
+#include "dbat/game/act.social.h"
+#include "dbat/game/act.item.h"
 
 /* local functions */
 

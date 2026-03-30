@@ -11,20 +11,20 @@
 *  original credits maintained where relevant for act.other.c as this is  *
 *  practically an act.other.c part two - Iovan 3/20/2011                  *
 ************************************************************************ */
-#include "dbat/act.misc.h"
-#include "dbat/dg_comm.h"
-#include "dbat/act.item.h"
-#include "dbat/act.wizard.h"
-#include "dbat/act.movement.h"
-#include "dbat/utils.h"
-#include "dbat/spells.h"
-#include "dbat/comm.h"
-#include "dbat/handler.h"
-#include "dbat/combat.h"
-#include "dbat/constants.h"
-#include "dbat/obj_edit.h"
-#include "dbat/fight.h"
-#include "dbat/class.h"
+#include "dbat/game/act.misc.h"
+#include "dbat/game/dg_comm.h"
+#include "dbat/game/act.item.h"
+#include "dbat/game/act.wizard.h"
+#include "dbat/game/act.movement.h"
+#include "dbat/game/utils.h"
+#include "dbat/game/spells.h"
+#include "dbat/game/comm.h"
+#include "dbat/game/handler.h"
+#include "dbat/game/combat.h"
+#include "dbat/game/constants.h"
+#include "dbat/game/obj_edit.h"
+#include "dbat/game/fight.h"
+#include "dbat/game/class.h"
 
 /* local functions  */
 static void generate_multiform(struct char_data *ch, struct char_data *multi1, struct char_data *multi2, struct char_data *multi3);

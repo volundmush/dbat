@@ -4,11 +4,11 @@
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
 
-#include "dbat/genzon.h"
-#include "dbat/utils.h"
+#include "dbat/game/genzon.h"
+#include "dbat/game/utils.h"
 
-#include "dbat/genolc.h"
-#include "dbat/dg_scripts.h"
+#include "dbat/game/genolc.h"
+#include "dbat/game/dg_scripts.h"
 
 /* real zone of room/mobile/object/shop given */
 zone_rnum real_zone_by_thing(room_vnum vznum)

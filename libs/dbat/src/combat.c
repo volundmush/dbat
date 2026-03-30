@@ -10,21 +10,21 @@
 *  System (RDBS) of the MUD Dragonball Advent Truth.                      *
 ************************************************************************ */
 
-#include "dbat/combat.h"
-#include "dbat/act.movement.h"
-#include "dbat/act.item.h"
-#include "dbat/mobact.h"
-#include "dbat/fight.h"
-#include "dbat/act.attack.h"
-#include "dbat/dg_comm.h"
-#include "dbat/utils.h"
-#include "dbat/comm.h"
-#include "dbat/act.item.h"
-#include "dbat/handler.h"
-#include "dbat/constants.h"
-#include "dbat/genzon.h"
-#include "dbat/class.h"
-#include "dbat/dg_scripts.h"
+#include "dbat/game/combat.h"
+#include "dbat/game/act.movement.h"
+#include "dbat/game/act.item.h"
+#include "dbat/game/mobact.h"
+#include "dbat/game/fight.h"
+#include "dbat/game/act.attack.h"
+#include "dbat/game/dg_comm.h"
+#include "dbat/game/utils.h"
+#include "dbat/game/comm.h"
+#include "dbat/game/act.item.h"
+#include "dbat/game/handler.h"
+#include "dbat/game/constants.h"
+#include "dbat/game/genzon.h"
+#include "dbat/game/class.h"
+#include "dbat/game/dg_scripts.h"
 
 /* local functions */
 void damage_weapon(struct char_data *ch, struct obj_data *obj, struct char_data *vict)

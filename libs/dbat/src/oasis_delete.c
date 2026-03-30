@@ -17,9 +17,9 @@
    +-----------------------------------------------------------------------+
 */                                                                       
 
-#include "dbat/structs.h"
-#include "dbat/utils.h"
-#include "dbat/oasis.h"
+#include "dbat/game/structs.h"
+#include "dbat/game/utils.h"
+#include "dbat/game/oasis.h"
 
 /* Internal Functions */
 int free_strings(void *data, int type);

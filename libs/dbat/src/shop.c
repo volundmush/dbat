@@ -11,20 +11,20 @@
 /***
  * The entire shop rewrite for Circle 3.0 was done by Jeff Fink.  Thanks Jeff!
  ***/
-#include "dbat/shop.h"
-#include "dbat/comm.h"
-#include "dbat/handler.h"
-#include "dbat/db.h"
-#include "dbat/interpreter.h"
-#include "dbat/utils.h"
-#include "dbat/constants.h"
-#include "dbat/spells.h"
-#include "dbat/feats.h"
-#include "dbat/act.comm.h"
-#include "dbat/act.wizard.h"
-#include "dbat/act.social.h"
-#include "dbat/dg_comm.h"
-#include "dbat/act.other.h"
+#include "dbat/game/shop.h"
+#include "dbat/game/comm.h"
+#include "dbat/game/handler.h"
+#include "dbat/game/db.h"
+#include "dbat/game/interpreter.h"
+#include "dbat/game/utils.h"
+#include "dbat/game/constants.h"
+#include "dbat/game/spells.h"
+#include "dbat/game/feats.h"
+#include "dbat/game/act.comm.h"
+#include "dbat/game/act.wizard.h"
+#include "dbat/game/act.social.h"
+#include "dbat/game/dg_comm.h"
+#include "dbat/game/act.other.h"
 
 /* Forward/External function declarations */
 static void sort_keeper_objs(struct char_data *keeper, int shop_nr);

@@ -3,11 +3,11 @@
 improved-edit.c		Routines specific to the improved editor.
 
 */
-#include "dbat/improved-edit.h"
-#include "dbat/utils.h"
-#include "dbat/db.h"
-#include "dbat/comm.h"
-#include "dbat/interpreter.h"
+#include "dbat/game/improved-edit.h"
+#include "dbat/game/utils.h"
+#include "dbat/game/db.h"
+#include "dbat/game/comm.h"
+#include "dbat/game/interpreter.h"
 
 int format_script(struct descriptor_data *d);
 

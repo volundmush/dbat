@@ -354,7 +354,7 @@ void pad_check(meminfo *m)
 #ifdef ZTEST
 #undef ZMALLOC_H
 
-#include "dbat/zmalloc.h"
+#include "dbat/game/zmalloc.h"
 
 int main()
 {

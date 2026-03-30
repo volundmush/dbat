@@ -5,14 +5,14 @@
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
 
-#include "dbat/genobj.h"
-#include "dbat/genolc.h"
-#include "dbat/genzon.h"
-#include "dbat/utils.h"
-#include "dbat/handler.h"
-#include "dbat/htree.h"
-#include "dbat/dg_olc.h"
-#include "dbat/shop.h"
+#include "dbat/game/genobj.h"
+#include "dbat/game/genolc.h"
+#include "dbat/game/genzon.h"
+#include "dbat/game/utils.h"
+#include "dbat/game/handler.h"
+#include "dbat/game/htree.h"
+#include "dbat/game/dg_olc.h"
+#include "dbat/game/shop.h"
 
 static int copy_object_main(struct obj_data *to, struct obj_data *from, int free_object);
 
