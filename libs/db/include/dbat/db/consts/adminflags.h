@@ -23,5 +23,5 @@
 #define ADM_CEDIT		18	/* Can use cedit IMPL */
 
 #define NUM_ADMFLAGS            19
-
+#define AD_ARRAY_MAX	4
 extern const char *admin_flags[NUM_ADMFLAGS+1];

@@ -80,4 +80,6 @@
 
 #define NUM_AFF_FLAGS 75
 
+#define AF_ARRAY_MAX    4
+
 extern const char *affected_bits[NUM_AFF_FLAGS+1];

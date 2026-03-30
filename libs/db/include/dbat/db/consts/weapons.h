@@ -16,15 +16,7 @@
 #define MAX_CRIT_TYPE	CRIT_X4
 #define NUM_CRIT_TYPES 3
 
-/* Combat feats that apply to a specific weapon type */
-#define CFEAT_IMPROVED_CRITICAL			0
-#define CFEAT_WEAPON_FINESSE			1
-#define CFEAT_WEAPON_FOCUS			2
-#define CFEAT_WEAPON_SPECIALIZATION		3
-#define CFEAT_GREATER_WEAPON_FOCUS		4
-#define CFEAT_GREATER_WEAPON_SPECIALIZATION	5
 
-#define CFEAT_MAX				5
 
 #define MAX_ARMOR_TYPES         5
 #define NUM_WIELD_NAMES		4

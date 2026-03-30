@@ -72,4 +72,6 @@
 
 #define NUM_ROOM_FLAGS          66
 
+#define RF_ARRAY_MAX    4
+
 extern const char *room_bits[NUM_ROOM_FLAGS+1];

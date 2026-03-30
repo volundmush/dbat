@@ -1,93 +1,19 @@
-/* ************************************************************************
-*   File: structs.h                                     Part of CircleMUD *
-*  Usage: header file for central structures and constants                *
-*                                                                         *
-*  All rights reserved.  See license.doc for complete information.        *
-*                                                                         *
-*  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
-*  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
-************************************************************************ */
+#pragma once
+#include "consts/types.h"
+#include "consts/prefflags.h"
+#include "consts/magic.h"
+#include "consts/colors.h"
+#include "consts/conditions.h"
+#include "consts/history.h"
+#include "consts/senseis.h"
+#include "consts/itemdata.h"
+#include "consts/skills.h"
+#include "consts/bonus.h"
+#include "consts/feats.h"
+#include "consts/affflags.h"
+#include "consts/adminflags.h"
 
-#ifndef CIRCLE_STRUCTS_H
-#define CIRCLE_STRUCTS_H
-
-#include "sysdep.h"
-
-/*
- * Intended use of this macro is to allow external packages to work with
- * a variety of CircleMUD versions without modifications.  For instance,
- * an IS_CORPSE() macro was introduced in pl13.  Any future code add-ons
- * could take into account the CircleMUD version and supply their own
- * definition for the macro if used on an older version of CircleMUD.
- * You are supposed to compare this with the macro CIRCLEMUD_VERSION()
- * in utils.h.  See there for usage.
- */
-
-
-/*
- * If you want equipment to be automatically equipped to the same place
- * it was when players rented, set the define below to 1.  Please note
- * that this will require erasing or converting all of your rent files.
- * And of course, you have to recompile everything.  We need this feature
- * for CircleMUD to be complete but we refuse to break binary file
- * compatibility.
- */
-#define USE_AUTOEQ	1	/* TRUE/FALSE aren't defined yet. */
-
-
-/* preamble *************************************************************/
-
-/*
- * As of bpl20, it should be safe to use unsigned data types for the
- * various virtual and real number data types.  There really isn't a
- * reason to use signed anymore so use the unsigned types and get
- * 65,535 objects instead of 32,768.
- *
- * NOTE: This will likely be unconditionally unsigned later.
- */
-
-
-
-/*
- * A MAX_PWD_LENGTH of 10 will cause BSD-derived systems with MD5 passwords
- * and GNU libc 2 passwords to be truncated.  On BSD this will enable anyone
- * with a name longer than 5 character to log in with any password.  If you
- * have such a system, it is suggested you change the limit to 20.
- *
- * Please note that this will erase your player files.  If you are not
- * prepared to do so, simply erase these lines but heed the above warning.
- */
-
-/**********************************************************************
-* Structures                                                          *
-**********************************************************************/
-
-/* ======================================================================= */
-
-
-/* room-related structures ************************************************/
-
-
-
-/* char-related structures ************************************************/
-
-
-/* memory structure for characters */
-struct memory_rec_struct {
-   int32_t id;
-   struct memory_rec_struct *next;
-};
-
-typedef struct memory_rec_struct memory_rec;
-
-
-/* This structure is purely intended to be an easy way to transfer */
-/* and return information about time (real or mudwise).            */
-struct time_info_data {
-   int hours, day, month;
-   int16_t year;
-};
-
+#define PM_ARRAY_MAX    4
 
 /* These data contain information about a players time data */
 struct time_data {
@@ -193,6 +119,15 @@ struct innate_node {
    int spellnum;
    struct innate_node *next;
 };
+
+/* memory structure for characters */
+struct memory_rec_struct {
+   int32_t id;
+   struct memory_rec_struct *next;
+};
+
+typedef struct memory_rec_struct memory_rec;
+
 
 /* Specials used by NPCs, not PCs */
 struct mob_special_data {
@@ -521,243 +456,3 @@ struct char_data {
   int relax_count;
  	int ingestLearned;
 };
-
-/* ====================================================================== */
-
-
-/* descriptor-related structures ******************************************/
-
-
-/* other miscellaneous structures ***************************************/
-
-
-struct msg_type {
-   char	*attacker_msg;  /* message to attacker */
-   char	*victim_msg;    /* message to victim   */
-   char	*room_msg;      /* message to room     */
-};
-
-
-struct message_type {
-   struct msg_type die_msg;	/* messages when death			*/
-   struct msg_type miss_msg;	/* messages when miss			*/
-   struct msg_type hit_msg;	/* messages when hit			*/
-   struct msg_type god_msg;	/* messages when hit on god		*/
-   struct message_type *next;	/* to next messages of this kind.	*/
-};
-
-
-struct message_list {
-   int	a_type;			/* Attack type				*/
-   int	number_of_attacks;	/* How many attack messages to chose from. */
-   struct message_type *msg;	/* List of messages.			*/
-};
-
-/* used in the socials */
-struct social_messg {
-  int act_nr;
-  char *command;               /* holds copy of activating command */
-  char *sort_as;              /* holds a copy of a similar command or
-                               * abbreviation to sort by for the parser */
-  int hide;                   /* ? */
-  int min_victim_position;    /* Position of victim */
-  int min_char_position;      /* Position of char */
-  int min_level_char;          /* Minimum level of socialing char */
-
-  /* No argument was supplied */
-  char *char_no_arg;
-  char *others_no_arg;
-
-  /* An argument was there, and a victim was found */
-  char *char_found;
-  char *others_found;
-  char *vict_found;
-
-  /* An argument was there, as well as a body part, and a victim was found */
-  char *char_body_found;
-  char *others_body_found;
-  char *vict_body_found;
-
-  /* An argument was there, but no victim was found */
-  char *not_found;
-
-  /* The victim turned out to be the character */
-  char *char_auto;
-  char *others_auto;
-
-  /* If the char cant be found search the char's inven and do these: */
-  char *char_obj_found;
-  char *others_obj_found;
-};
-
-
-/*
- * Element in monster and object index-tables.
- *
- * NOTE: Assumes sizeof(mob_vnum) >= sizeof(obj_vnum)
- */
-
-
-
-
-struct guild_info_type {
-  int pc_class;
-  room_vnum guild_room;
-  int direction;
-};
-
-/*
- * Config structs
- * 
- */
- 
- /*
- * The game configuration structure used for configurating the game play 
- * variables.
- */
-struct game_data {
-  int pk_allowed;         /* Is player killing allowed? 	  */
-  int pt_allowed;         /* Is player thieving allowed?	  */
-  int level_can_shout;	  /* Level player must be to shout.	  */
-  int holler_move_cost;	  /* Cost to holler in move points.	  */
-  int tunnel_size;        /* Number of people allowed in a tunnel.*/
-  int max_exp_gain;       /* Maximum experience gainable per kill.*/
-  int max_exp_loss;       /* Maximum experience losable per death.*/
-  int max_npc_corpse_time;/* Num tics before NPC corpses decompose*/
-  int max_pc_corpse_time; /* Num tics before PC corpse decomposes.*/
-  int idle_void;          /* Num tics before PC sent to void(idle)*/
-  int idle_rent_time;     /* Num tics before PC is autorented.	  */
-  int idle_max_level;     /* Level of players immune to idle.     */
-  int dts_are_dumps;      /* Should items in dt's be junked?	  */
-  int load_into_inventory;/* Objects load in immortals inventory. */
-  int track_through_doors;/* Track through doors while closed?    */
-  int level_cap;          /* You cannot level to this level       */
-  int stack_mobs;	  /* Turn mob stacking on                 */
-  int stack_objs;	  /* Turn obj stacking on                 */
-  int mob_fighting;       /* Allow mobs to attack other mobs.     */	 
-  char *OK;               /* When player receives 'Okay.' text.	  */
-  char *NOPERSON;         /* 'No-one by that name here.'	  */
-  char *NOEFFECT;         /* 'Nothing seems to happen.'	          */
-  int disp_closed_doors;  /* Display closed doors in autoexit?	  */
-  int reroll_player;      /* Players can reroll stats on creation */
-  int initial_points;	  /* Initial points pool size		  */
-  int enable_compression; /* Enable MCCP2 stream compression      */
-  int enable_languages;   /* Enable spoken languages              */
-  int all_items_unique;   /* Treat all items as unique 		  */
-  float exp_multiplier;     /* Experience gain  multiplier	  */
-};
-
-
-
-/*
- * The rent and crashsave options.
- */
-struct crash_save_data {
-  int free_rent;          /* Should the MUD allow rent for free?  */
-  int max_obj_save;       /* Max items players can rent.          */
-  int min_rent_cost;      /* surcharge on top of item costs.	  */
-  int auto_save;          /* Does the game automatically save ppl?*/
-  int autosave_time;      /* if auto_save=TRUE, how often?        */
-  int crash_file_timeout; /* Life of crashfiles and idlesaves.    */
-  int rent_file_timeout;  /* Lifetime of normal rent files in days*/
-};
-
-
-/*
- * The room numbers. 
- */
-struct room_numbers {
-  room_vnum mortal_start_room;	/* vnum of room that mortals enter at.  */
-  room_vnum immort_start_room;  /* vnum of room that immorts enter at.  */
-  room_vnum frozen_start_room;  /* vnum of room that frozen ppl enter.  */
-  room_vnum donation_room_1;    /* vnum of donation room #1.            */
-  room_vnum donation_room_2;    /* vnum of donation room #2.            */
-  room_vnum donation_room_3;    /* vnum of donation room #3.	        */
-};
-
-
-/*
- * The game operational constants.
- */
-struct game_operation {
-  uint16_t DFLT_PORT;      /* The default port to run the game.  */
-  char *DFLT_IP;            /* Bind to all interfaces.		  */
-  char *DFLT_DIR;           /* The default directory (lib).	  */
-  char *LOGNAME;            /* The file to log messages to.	  */
-  int max_playing;          /* Maximum number of players allowed. */
-  int max_filesize;         /* Maximum size of misc files.	  */
-  int max_bad_pws;          /* Maximum number of pword attempts.  */
-  int siteok_everyone;	    /* Everyone from all sites are SITEOK.*/
-  int nameserver_is_slow;   /* Is the nameserver slow or fast?	  */
-  int use_new_socials;      /* Use new or old socials file ?      */
-  int auto_save_olc;        /* Does OLC save to disk right away ? */
-  char *MENU;               /* The MAIN MENU.			  */
-  char *WELC_MESSG;	    /* The welcome message.		  */
-  char *START_MESSG;        /* The start msg for new characters.  */
-  int imc_enabled; /**< Is connection to IMC allowed ? */
-};
-
-/*
- * The Autowizard options.
- */
-struct autowiz_data {
-  int use_autowiz;        /* Use the autowiz feature?		*/
-  int min_wizlist_lev;    /* Minimun level to show on wizlist.	*/
-};
-
-/* This is for the tick system.
- *
- */
- 
-struct tick_data {
-  int pulse_violence;
-  int pulse_mobile;
-  int pulse_zone;
-  int pulse_autosave;
-  int pulse_idlepwd;
-  int pulse_sanity;
-  int pulse_usage;
-  int pulse_timesave;
-  int pulse_current;
-};
-
-/*
- * The character advancement (leveling) options.
- */
-struct advance_data {
-  int allow_multiclass; /* Allow advancement in multiple classes     */
-  int allow_prestige;   /* Allow advancement in prestige classes     */
-};
-
-/*
- * The new character creation method options.
- */
-struct creation_data {
-  int method; /* What method to use for new character creation */
-};
-
-/*
- * The main configuration structure;
- */
-struct config_data {
-  char                   *CONFFILE;	/* config file path	 */
-  struct game_data       play;		/* play related config   */
-  struct crash_save_data csd;		/* rent and save related */
-  struct room_numbers    room_nums;	/* room numbers          */
-  struct game_operation  operation;	/* basic operation       */
-  struct autowiz_data    autowiz;	/* autowiz related stuff */
-  struct advance_data    advance;   /* char advancement stuff */
-  struct tick_data       ticks;		/* game tick stuff 	 */
-  struct creation_data	 creation;	/* char creation method	 */
-};
-
-/*
- * Data about character aging
- */
-
-
-#ifdef MEMORY_DEBUG
-#include "zmalloc.h"
-#endif
-
-#endif

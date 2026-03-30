@@ -109,8 +109,7 @@
 #define NOTRAIN_LIZARDFOLK(i)	(IS_SET_AR((GM_WITH_WHO(i)), TRADE_NOLIZARDFOLK))
 
 
-extern struct guild_data *guild_index;
-extern int top_guild;
+
 extern int spell_sort_info[SKILL_TABLE_SIZE + 1];
 
 /* Functions defined in guild.c */

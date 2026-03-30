@@ -1,6 +1,7 @@
 #pragma once
 #include "consts/types.h"
-#include "consts/maximums.h"
+#include "consts/skills.h"
+#include "consts/feats.h"
 
 #define GW_ARRAY_MAX    4
  
@@ -17,3 +18,6 @@ struct guild_data {
   SPECIAL(*func);                /* secondary spec_proc for the GM */
   int feats[NUM_FEATS_DEFINED];  /* array to keep track of which feats things we'll train */
 };
+
+extern struct guild_data *guild_index;
+extern int top_guild;

@@ -1,6 +1,6 @@
 #pragma once
 #include "consts/types.h"
-#include "consts/bits.h"
+#include "consts/roomflags.h"
 #include "consts/directions.h"
 
 struct room_direction_data {
@@ -49,3 +49,6 @@ struct room_data {
 
 };
 /* ====================================================================== */
+
+extern struct room_data *world;
+extern room_rnum top_of_world;

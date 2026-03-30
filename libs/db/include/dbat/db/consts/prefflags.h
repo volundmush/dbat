@@ -64,5 +64,6 @@
 #define PRF_ENERGIZE    59
 
 #define NUM_PRF_FLAGS   60
+#define PR_ARRAY_MAX    4
 
 extern const char *preference_bits[NUM_PRF_FLAGS+1];

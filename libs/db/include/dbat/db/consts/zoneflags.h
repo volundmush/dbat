@@ -39,5 +39,6 @@
 #define ZONE_SPARE33		35
 
 #define NUM_ZONE_FLAGS          36
+#define ZF_ARRAY_MAX	4
 
 extern const char *zone_bits[NUM_ZONE_FLAGS+1];

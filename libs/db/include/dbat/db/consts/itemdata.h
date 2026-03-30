@@ -470,6 +470,8 @@
 
 #define NUM_FULLNESS		5
 
+#define EF_ARRAY_MAX    4
+#define TW_ARRAY_MAX    4
 
 extern const char *equipment_types[NUM_WEARS+1];
 extern const char *wear_where[NUM_WEARS+1];

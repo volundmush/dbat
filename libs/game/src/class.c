@@ -368,20 +368,7 @@ int parse_class(struct char_data *ch, int arg)
  * "recycle" the existing mobs that are used in other guilds for your new
  * guild, then you don't have to change that file, only here.
  */
-const struct guild_info_type guild_info[6] = {
 
-/* Kortaal */
-  { CLASS_ROSHI,	3017,	SCMD_EAST	},
-  { CLASS_PICCOLO,	3004,	SCMD_NORTH	},
-  { CLASS_KRANE, 	3027,	SCMD_EAST	},
-  { CLASS_NAIL, 	3021,	SCMD_EAST	},
-
-/* Brass Dragon */
-  { -999 /* all */ ,	5065,	SCMD_WEST	},
-
-/* this must go last -- add new guards above! */
-  { -1, NOWHERE, -1}
-};
 /* 
  * These tables hold the various level configuration setting;
  * experience points, base hit values, character saving throws.

@@ -36,12 +36,12 @@ input */
 #define MAX_AFFECT		32
 #define MAX_OBJ_AFFECT		6
 #define MAX_NOTE_LENGTH		6000	/* arbitrary */
-#define SKILL_TABLE_SIZE	1000
+
 #define SPELLBOOK_SIZE		50
-#define MAX_FEATS	        750
+
 #define MAX_HELP_KEYWORDS       256
 #define MAX_HELP_ENTRY          MAX_STRING_LENGTH
-#define NUM_FEATS_DEFINED       252
+
 
 #define NUM_CONFIG_SECTIONS     7
 

@@ -32,3 +32,6 @@ struct shop_data {
    int	 lastsort;		/* How many items are sorted in inven?	*/
    SPECIAL (*func);		/* Secondary spec_proc for shopkeeper	*/
 };
+
+extern struct shop_data *shop_index;
+extern int top_shop;

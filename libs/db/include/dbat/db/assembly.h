@@ -23,3 +23,5 @@ struct component_data {
   long         lVnum;                  /* Vnum of the component object. */
 };
 
+void free_assembly(struct assembly_data *assembly);
+struct assembly_data alloc_assembly();

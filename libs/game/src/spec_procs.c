@@ -672,35 +672,6 @@ SPECIAL(magic_user_orig)
 *  Special procedures for mobiles                                      *
 ******************************************************************** */
 
-SPECIAL(guild_guard)
-{
-  int i;
-  struct char_data *guard = (struct char_data *)me;
-  const char *buf = "The guard humiliates you, and blocks your way.\r\n";
-  const char *buf2 = "The guard humiliates $n, and blocks $s way.";
-
-  if (!IS_MOVE(cmd) || AFF_FLAGGED(guard, AFF_BLIND))
-    return (FALSE);
-
-  if (ADM_FLAGGED(ch, ADM_WALKANYWHERE))
-    return (FALSE);
-
-  for (i = 0; guild_info[i].guild_room != NOWHERE; i++) {
-    /* Wrong guild or not trying to enter. */
-    if (GET_ROOM_VNUM(IN_ROOM(ch)) != guild_info[i].guild_room || cmd != guild_info[i].direction)
-      continue;
-
-    /* Allow the people of the guild through. */
-    if (!IS_NPC(ch) && GET_CLASS_RANKS(ch, guild_info[i].pc_class) > 0 )
-      continue;
-
-    send_to_char(ch, "%s", buf);
-    act(buf2, FALSE, ch, 0, 0, TO_ROOM);
-    return (TRUE);
-  }
-
-  return (FALSE);
-}
 
 
 SPECIAL(puff)

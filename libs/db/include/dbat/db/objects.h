@@ -1,8 +1,8 @@
 #pragma once
 #include "consts/types.h"
 #include "consts/itemdata.h"
-#include "consts/bits.h"
 #include "consts/maximums.h"
+#include "consts/affflags.h"
 #include "affected.h"
 
 struct obj_spellbook_spell {
