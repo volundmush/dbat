@@ -27,4 +27,5 @@ add_compile_options(-Wno-multichar)
 
 set(BUILD_TESTING OFF)
 
-add_subdirectory(libs/dbat)
+add_subdirectory(libs/db)
+add_subdirectory(libs/game)

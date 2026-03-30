@@ -59,20 +59,19 @@
 
 #define HAS_RLIMIT
 
-#define CIRCLE_UNSIGNED_INDEX 1	/* 0 = signed, 1 = unsigned */
+#define CIRCLE_UNSIGNED_INDEX 0	/* 0 = signed, 1 = unsigned */
 
 #if CIRCLE_UNSIGNED_INDEX
 #define IDXTYPE	uint16_t
-#define NOWHERE	((IDXTYPE)~0)
 #define NOTHING	((IDXTYPE)~0)
-#define NOBODY	((IDXTYPE)~0)
-#define NOFLAG  ((IDXTYPE)~0)
 #else
-#define IDXTYPE	int16_t
-#define NOWHERE	(-1)	/* nil reference for rooms	*/
-#define NOTHING	(-1)	/* nil reference for objects	*/
-#define NOBODY		(-1)	/* nil reference for mobiles	*/
+#define IDXTYPE	int
+#define NOTHING	-1	/* nil reference for objects	*/
 #endif
+
+#define NOWHERE NOTHING
+#define NOBODY NOTHING
+#define NOFLAG NOTHING
 
 #define I64T "ld"
 #define SZT "ld"
@@ -101,8 +100,8 @@ typedef IDXTYPE guild_rnum;
  */
 typedef uint32_t bitvector_t;
 
-#define FALSE 0
-#define TRUE 1
+#define FALSE false
+#define TRUE true
 
 
 #define ACMD(name) void (name)(struct char_data *ch, char *argument, int cmd, int subcmd)
