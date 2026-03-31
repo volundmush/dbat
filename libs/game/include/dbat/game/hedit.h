@@ -1,6 +1,5 @@
 #pragma once
 #include "dbat/db/consts/types.h"
-struct descriptor_data;
 
 void hedit_parse(struct descriptor_data *, char *);
 static void hedit_setup_new(struct descriptor_data *);

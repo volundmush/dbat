@@ -24,6 +24,10 @@
 #include "dbat/game/act.social.h"
 #include "dbat/game/spec_procs.h"
 
+#include "dbat/db/characters.h"
+#include "dbat/db/objects.h"
+#include "dbat/db/rooms.h"
+
 /* local functions */
 int player_present(struct char_data *ch);
 void clearMemory(struct char_data *ch);

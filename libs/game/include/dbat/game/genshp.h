@@ -1,9 +1,6 @@
 #pragma once
 #include "dbat/db/consts/types.h"
 
-struct shop_data;
-struct shop_buy_data;
-
 void copy_shop(struct shop_data *tshop, struct shop_data *fshop, int free_old_strings);
 void copy_list(IDXTYPE **tlist, IDXTYPE *flist);
 void copy_type_list(struct shop_buy_data **tlist, struct shop_buy_data *flist);

@@ -95,7 +95,9 @@ CVSHEADER("$CVSHeader: cwg/rasputin/src/bsd-snprintf.c,v 1.2 2004/12/21 02:39:33
 RCSID("$Id: bsd-snprintf.c,v 1.2 2004/12/21 02:39:33 fnord Exp $");
 #else
 #include "dbat/game/conf.h"
-#include "dbat/game/sysdep.h"
+#include "dbat/db/characters.h"
+#include "dbat/db/objects.h"
+#include "dbat/db/rooms.h"
 # define MAX(a, b)	((a) < (b) ? (b) : (a))
 #endif
 

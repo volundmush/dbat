@@ -1,5 +1,5 @@
 #pragma once
-
+#include "dbat/db/consts/types.h"
 /* ****** MUD MAIL SYSTEM HEADER FILE **********************
  ***     written by Jeremy Elson (jelson@circlemud.org) ***
  ********************************************************* */

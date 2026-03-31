@@ -22,6 +22,10 @@ Written by Jeremy Elson (jelson@circlemud.org)
 #include "dbat/game/improved-edit.h"
 #include "dbat/game/players.h"
 
+#include "dbat/db/characters.h"
+#include "dbat/db/objects.h"
+#include "dbat/db/rooms.h"
+
 /* local globals */
 static mail_index_type *mail_index = NULL;	/* list of recs in the mail file  */
 static position_list_type *free_list = NULL;	/* list of free positions in file */

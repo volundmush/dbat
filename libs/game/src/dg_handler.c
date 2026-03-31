@@ -13,12 +13,18 @@
 *  $Revision: 1.0.14 $                                                    *
 ***************************************************************************/
 
-#include "dbat/game/structs.h"
 #include "dbat/game/dg_scripts.h"
 #include "dbat/game/utils.h"
 #include "dbat/game/db.h"
 #include "dbat/game/handler.h"
 #include "dbat/game/dg_event.h"
+
+#include "dbat/db/characters.h"
+#include "dbat/db/objects.h"
+#include "dbat/db/rooms.h"
+#include "dbat/db/consts/triggers.h"
+
+#include <assert.h>
 
 
 /* frees memory associated with var */

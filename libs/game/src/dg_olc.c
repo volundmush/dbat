@@ -20,9 +20,11 @@
 #include "dbat/game/interpreter.h"
 #include "dbat/game/oasis.h"
 #include "dbat/game/dg_event.h"
-#include "dbat/game/constants.h"
 #include "dbat/game/act.wizard.h"
 #include "dbat/game/modify.h"
+#include "dbat/db/characters.h"
+#include "dbat/db/objects.h"
+#include "dbat/db/rooms.h"
 
 /* local functions */
 static void trigedit_disp_menu(struct descriptor_data *d);

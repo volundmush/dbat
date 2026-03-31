@@ -1,5 +1,5 @@
 #pragma once
-
+#include "dbat/db/consts/assemblytypes.h"
 typedef struct assembly_data   ASSEMBLY;
 typedef struct component_data  COMPONENT;
 

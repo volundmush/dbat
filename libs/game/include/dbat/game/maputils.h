@@ -1,5 +1,5 @@
 #pragma once
-
+#include "dbat/db/consts/types.h"
 #define MAP_ROWS	199
 #define MAP_COLS	199
 

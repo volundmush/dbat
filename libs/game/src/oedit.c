@@ -5,7 +5,6 @@
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
 
-#include "dbat/game/structs.h"
 #include "dbat/game/comm.h"
 #include "dbat/game/interpreter.h"
 #include "dbat/game/spells.h"
@@ -13,7 +12,6 @@
 #include "dbat/game/db.h"
 #include "dbat/game/handler.h"
 #include "dbat/game/boards.h"
-#include "dbat/game/constants.h"
 #include "dbat/game/shop.h"
 #include "dbat/game/genolc.h"
 #include "dbat/game/genobj.h"
@@ -26,6 +24,11 @@
 #include "dbat/game/act.wizard.h"
 #include "dbat/game/races.h"
 #include "dbat/game/fight.h"
+
+#include "dbat/db/characters.h"
+#include "dbat/db/objects.h"
+#include "dbat/db/rooms.h"
+#include "dbat/db/descriptor.h"
 
 /*------------------------------------------------------------------------*/
 

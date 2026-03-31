@@ -1,7 +1,5 @@
 #pragma once
 #include "dbat/db/consts/types.h"
-struct reset_com;
-struct zone_data;
 
 zone_rnum create_new_zone(zone_vnum vzone_num, room_vnum bottom, room_vnum top, const char **error);
 void remove_room_zone_commands(zone_rnum zone, room_rnum room_num);

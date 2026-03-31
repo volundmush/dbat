@@ -5,7 +5,6 @@
  * XXX: This needs Oasis-ifying.
  */
 
-#include "dbat/game/structs.h"
 #include "dbat/game/utils.h"
 #include "dbat/game/interpreter.h"
 #include "dbat/game/comm.h"
@@ -15,6 +14,9 @@
 #include "dbat/game/improved-edit.h"
 #include "dbat/game/tedit.h"
 #include "dbat/game/config.h"
+#include "dbat/db/characters.h"
+#include "dbat/db/objects.h"
+#include "dbat/db/rooms.h"
 
 void news_string_cleanup(struct descriptor_data *d, int terminator)
 {

@@ -4,6 +4,9 @@
 ************************************************************************ */
 
 #include "dbat/game/random.h"
+#include "dbat/db/characters.h"
+#include "dbat/db/objects.h"
+#include "dbat/db/rooms.h"
 
 /*
  * I am bothered by the non-portablility of 'rand' and 'random' -- rand

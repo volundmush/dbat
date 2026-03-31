@@ -19,6 +19,10 @@
 #include "dbat/game/fight.h"
 #include "dbat/game/act.other.h"
 
+#include "dbat/db/characters.h"
+#include "dbat/db/objects.h"
+#include "dbat/db/rooms.h"
+
 /* extern globals */
 
 /* local globals */

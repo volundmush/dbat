@@ -1,5 +1,5 @@
 #pragma once
-struct descriptor_data;
+#include "dbat/db/consts/types.h"
 
 
 #define CONFIG_IMPROVED_EDITOR	1

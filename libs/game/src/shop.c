@@ -17,7 +17,6 @@
 #include "dbat/game/db.h"
 #include "dbat/game/interpreter.h"
 #include "dbat/game/utils.h"
-#include "dbat/game/constants.h"
 #include "dbat/game/spells.h"
 #include "dbat/game/feats.h"
 #include "dbat/game/act.comm.h"
@@ -25,6 +24,11 @@
 #include "dbat/game/act.social.h"
 #include "dbat/game/dg_comm.h"
 #include "dbat/game/act.other.h"
+
+#include "dbat/db/characters.h"
+#include "dbat/db/objects.h"
+#include "dbat/db/rooms.h"
+#include "dbat/db/shops.h"
 
 /* Forward/External function declarations */
 static void sort_keeper_objs(struct char_data *keeper, int shop_nr);

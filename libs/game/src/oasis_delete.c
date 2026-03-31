@@ -17,9 +17,11 @@
    +-----------------------------------------------------------------------+
 */                                                                       
 
-#include "dbat/game/structs.h"
 #include "dbat/game/utils.h"
 #include "dbat/game/oasis.h"
+#include "dbat/db/characters.h"
+#include "dbat/db/objects.h"
+#include "dbat/db/rooms.h"
 
 /* Internal Functions */
 int free_strings(void *data, int type);

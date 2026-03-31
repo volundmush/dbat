@@ -17,6 +17,9 @@
 #include "dbat/game/oasis.h"
 #include "dbat/game/utils.h"
 #include "dbat/game/comm.h"
+#include "dbat/db/characters.h"
+#include "dbat/db/objects.h"
+#include "dbat/db/rooms.h"
 
 /* List of zones to be saved.  */
 struct save_list_data *save_list;

@@ -15,10 +15,13 @@
 #include "dbat/game/handler.h"
 #include "dbat/game/db.h"
 #include "dbat/game/spells.h"
-#include "dbat/game/constants.h"
 #include "dbat/game/maputils.h"
 #include "dbat/game/vehicles.h"
 #include "dbat/game/act.informative.h"
+
+#include "dbat/db/characters.h"
+#include "dbat/db/objects.h"
+#include "dbat/db/rooms.h"
 
 /* local functions */
 int VALID_EDGE(room_rnum x, int y);

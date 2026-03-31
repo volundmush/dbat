@@ -1,6 +1,5 @@
 #pragma once
 #include "dbat/db/consts/types.h"
-struct guild_data;
 
 void copy_guild(struct guild_data *tguild, struct guild_data *fguild);
 void copy_list(IDXTYPE **tlist, IDXTYPE *flist);

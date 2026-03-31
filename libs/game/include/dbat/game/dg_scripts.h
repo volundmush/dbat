@@ -1,5 +1,11 @@
 #pragma once
 #include "dbat/db/dgscripts.h"
+#include "dbat/db/characters.h"
+#include "dbat/db/objects.h"
+#include "dbat/db/rooms.h"
+
+#include <stdarg.h>
+#include <stdio.h>
 
 #include "genzon.h"
 #include "oasis.h"

@@ -26,6 +26,7 @@
 //
 //********************************************************************************
 #pragma once
+#include "dbat/db/consts/types.h"
 
 #define LVL_CLAN_MOD            32
 #define DEFAULT_OPEN_JOIN          FALSE

@@ -1,5 +1,5 @@
 #pragma once
-
+#include "dbat/db/consts/types.h"
 #define OLC_SET		0
 #define OLC_SHOW	1
 #define OLC_REPEAT	2

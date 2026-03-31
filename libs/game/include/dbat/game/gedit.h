@@ -1,6 +1,5 @@
 #pragma once
-struct descriptor_data;
-struct guild_data;
+#include "dbat/db/consts/types.h"
 
 void gedit_setup_new(struct descriptor_data *d);
 void gedit_setup_existing(struct descriptor_data *d, int rgm_num);

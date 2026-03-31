@@ -18,6 +18,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include "dbat/db/characters.h"
+#include "dbat/db/objects.h"
+#include "dbat/db/rooms.h"
 
 #define NUM_ZBUCKETS 256
 #define GET_ZBUCKET(addr) (((size_t)(addr) >> 3) & 0xFF)

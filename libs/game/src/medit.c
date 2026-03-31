@@ -17,7 +17,6 @@
 #include "dbat/game/genshp.h"
 #include "dbat/game/oasis.h"
 #include "dbat/game/handler.h"
-#include "dbat/game/constants.h"
 #include "dbat/game/improved-edit.h"
 #include "dbat/game/dg_olc.h"
 #include "dbat/game/screen.h"
@@ -25,6 +24,12 @@
 #include "dbat/game/class.h"
 #include "dbat/game/act.wizard.h"
 #include "dbat/game/modify.h"
+
+#include "dbat/db/characters.h"
+#include "dbat/db/objects.h"
+#include "dbat/db/rooms.h"
+#include "dbat/db/descriptor.h"
+
 /*-------------------------------------------------------------------*/
 
 /*

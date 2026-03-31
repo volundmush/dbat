@@ -1,4 +1,5 @@
 #pragma once
+#include "dbat/db/consts/types.h"
 
 // functions
 void remember(struct char_data *ch, struct char_data *victim);

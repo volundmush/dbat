@@ -20,7 +20,9 @@
 #include "dbat/game/handler.h"
 #include "dbat/game/shop.h"
 #include "dbat/game/class.h"
-#include "dbat/game/constants.h"
+#include "dbat/db/characters.h"
+#include "dbat/db/objects.h"
+#include "dbat/db/rooms.h"
 
 /* Local variables */
 int spell_sort_info[SKILL_TABLE_SIZE + 1];

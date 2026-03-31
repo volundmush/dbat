@@ -15,6 +15,11 @@
 #include "dbat/game/handler.h"
 #include "dbat/game/db.h"
 
+#include "dbat/db/characters.h"
+#include "dbat/db/objects.h"
+#include "dbat/db/rooms.h"
+#include "dbat/db/bans.h"
+
 /* local globals */
 struct ban_list_element *ban_list = NULL;
 

@@ -22,6 +22,10 @@
 #include "dbat/game/db.h"
 #include "dbat/game/olc.h"
 
+#include "dbat/db/characters.h"
+#include "dbat/db/objects.h"
+#include "dbat/db/rooms.h"
+
 /* OLC command format:
  *
  * olc {"." | {<"room"|"mobile"|"object"> <number>}} <arguments>

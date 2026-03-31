@@ -18,12 +18,14 @@
 #include "dbat/game/act.item.h"
 #include "dbat/game/vehicles.h"
 #include "dbat/game/act.movement.h"
-#include "dbat/game/constants.h"
 #include "dbat/game/class.h"
 #include "dbat/game/fight.h"
 #include "dbat/game/objsave.h"
 #include "dbat/game/handler.h"
 #include "dbat/game/dg_scripts.h"
+#include "dbat/db/characters.h"
+#include "dbat/db/objects.h"
+#include "dbat/db/rooms.h"
 
 /* local defines */
 #define sick_fail       2

@@ -17,10 +17,11 @@
 #include "dbat/game/dg_scripts.h"
 #include "dbat/game/comm.h"
 #include "dbat/game/genmob.h"
-#include "dbat/game/constants.h"
-#include "dbat/game/imc.h"
 #include "dbat/game/class.h"
 #include "dbat/game/config.h"
+#include "dbat/db/characters.h"
+#include "dbat/db/objects.h"
+#include "dbat/db/rooms.h"
 
 #define LOAD_HIT	0
 #define LOAD_MANA	1

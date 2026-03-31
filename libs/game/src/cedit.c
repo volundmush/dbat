@@ -11,9 +11,13 @@
 #include "dbat/game/db.h"
 #include "dbat/game/interpreter.h"
 #include "dbat/game/genolc.h"
-#include "dbat/game/imc.h"
 #include "dbat/game/improved-edit.h"
-#include "dbat/game/constants.h"
+#include "dbat/db/characters.h"
+#include "dbat/db/objects.h"
+#include "dbat/db/rooms.h"
+#include "dbat/db/consts/create.h"
+
+#include <ctype.h>
 
 /******************************************************************************/
 /** External Functions                                                       **/
@@ -155,7 +159,7 @@ void cedit_setup(struct descriptor_data *d)
   OLC_CONFIG(d)->operation.siteok_everyone    = CONFIG_SITEOK_ALL;
   OLC_CONFIG(d)->operation.use_new_socials    = CONFIG_NEW_SOCIALS;
   OLC_CONFIG(d)->operation.auto_save_olc      = CONFIG_OLC_SAVE;
-  OLC_CONFIG(d)->operation.imc_enabled        = CONFIG_IMC_ENABLED;
+  OLC_CONFIG(d)->operation.imc_enabled        = 0; // CONFIG_IMC_ENABLED;
   OLC_CONFIG(d)->operation.nameserver_is_slow = CONFIG_NS_IS_SLOW;
   
   /****************************************************************************/
@@ -302,15 +306,16 @@ void cedit_save_internally(struct descriptor_data *d)
   /****************************************************************************/
   /** Autowiz                                                                **/
   /****************************************************************************/
-  /* IMC - if turning on or off, deal with IMC, and recommend a copyover */
+  /* IMC - stubbed out since IMC is being removed
   if (CONFIG_IMC_ENABLED != OLC_CONFIG(d)->operation.imc_enabled) {
     copyover_needed = TRUE;
-    if (OLC_CONFIG(d)->operation.imc_enabled)  /* If turning on  */
-      imc_startup(FALSE, -1, FALSE);           /* FALSE arg, so the autoconnect setting can govern it. */
-    else                                       /* If turning off */
+    if (OLC_CONFIG(d)->operation.imc_enabled)  // If turning on  
+      imc_startup(FALSE, -1, FALSE);           // FALSE arg, so the autoconnect setting can govern it.
+    else                                       // If turning off 
       imc_shutdown(FALSE);
   }
   CONFIG_IMC_ENABLED        = OLC_CONFIG(d)->operation.imc_enabled;
+  */
   CONFIG_USE_AUTOWIZ          = OLC_CONFIG(d)->autowiz.use_autowiz;
   CONFIG_MIN_WIZLIST_LEV      = OLC_CONFIG(d)->autowiz.min_wizlist_lev;
   
@@ -655,9 +660,8 @@ int save_config( IDXTYPE nowhere )
                 "START_MESSG = \n%s~\n\n", buf);
   }
   
-  fprintf(fl, "* Is the IMC global channel enabled (1) or not (0).\n"
-              "imc_enabled = %d\n\n",
-              CONFIG_IMC_ENABLED);
+  fprintf(fl, "* IMC global channel is now removed.\n"
+              "imc_enabled = 0\n\n");
 
   fprintf(fl, "\n\n\n* [ Autowiz Options ]\n");
   

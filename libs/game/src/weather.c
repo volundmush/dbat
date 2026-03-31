@@ -17,6 +17,10 @@
 #include "dbat/game/act.other.h"
 #include "dbat/game/config.h"
 
+#include "dbat/db/characters.h"
+#include "dbat/db/objects.h"
+#include "dbat/db/rooms.h"
+
 static void another_hour(int mode);
 static void weather_change(void);
 static void phase_powerup(struct char_data *ch, int type, int phase);

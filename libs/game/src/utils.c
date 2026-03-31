@@ -20,8 +20,11 @@
 #include "dbat/game/class.h"
 #include "dbat/game/feats.h"
 #include "dbat/game/genzon.h"
-#include "dbat/game/constants.h"
 #include "dbat/game/act.informative.h"
+
+#include "dbat/db/characters.h"
+#include "dbat/db/objects.h"
+#include "dbat/db/rooms.h"
 
 /* local functions */
 char commastring[MAX_STRING_LENGTH];

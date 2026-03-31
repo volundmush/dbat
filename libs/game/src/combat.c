@@ -21,10 +21,16 @@
 #include "dbat/game/comm.h"
 #include "dbat/game/act.item.h"
 #include "dbat/game/handler.h"
-#include "dbat/game/constants.h"
 #include "dbat/game/genzon.h"
 #include "dbat/game/class.h"
 #include "dbat/game/dg_scripts.h"
+
+#include "dbat/db/characters.h"
+#include "dbat/db/objects.h"
+#include "dbat/db/rooms.h"
+#include "dbat/db/consts/attacks.h"
+#include "dbat/db/consts/pulse.h"
+#include "dbat/db/consts/deathtype.h"
 
 /* local functions */
 void damage_weapon(struct char_data *ch, struct obj_data *obj, struct char_data *vict)

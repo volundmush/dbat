@@ -7,7 +7,6 @@
 *  $Revision: 1.0.14 $                                                    *
 **************************************************************************/
 
-#include "dbat/game/structs.h"
 #include "dbat/game/dg_scripts.h"
 #include "dbat/game/utils.h"
 #include "dbat/game/comm.h"
@@ -17,8 +16,11 @@
 #include "dbat/game/db.h"
 #include "dbat/game/screen.h"
 #include "dbat/game/spells.h"
-#include "dbat/game/constants.h"
 #include "dbat/game/fight.h"
+#include "dbat/db/characters.h"
+#include "dbat/db/objects.h"
+#include "dbat/db/rooms.h"
+#include "dbat/db/consts/triggers.h"
 
 /* copied from spell_parser.c: */
 #define SINFO spell_info[spellnum]

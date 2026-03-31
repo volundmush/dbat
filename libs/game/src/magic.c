@@ -16,11 +16,14 @@
 #include "dbat/game/handler.h"
 #include "dbat/game/db.h"
 #include "dbat/game/interpreter.h"
-#include "dbat/game/constants.h"
 #include "dbat/game/dg_scripts.h"
 #include "dbat/game/feats.h"
 #include "dbat/game/mobact.h"
 #include "dbat/game/fight.h"
+
+#include "dbat/db/characters.h"
+#include "dbat/db/objects.h"
+#include "dbat/db/rooms.h"
 
 /* local functions */
 int mag_materials(struct char_data *ch, int item0, int item1, int item2, int extract, int verbose);

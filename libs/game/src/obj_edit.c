@@ -14,10 +14,14 @@
 #include "dbat/game/db.h"
 #include "dbat/game/spells.h"
 #include "dbat/game/screen.h"
-#include "dbat/game/constants.h"
 #include "dbat/game/obj_edit.h"
 #include "dbat/game/dg_comm.h"
 #include "dbat/game/act.other.h"
+
+#include "dbat/db/characters.h"
+#include "dbat/db/objects.h"
+#include "dbat/db/rooms.h"
+#include "dbat/db/descriptor.h"
 
 /* local functions  */
 void disp_custom_menu(struct descriptor_data *d);

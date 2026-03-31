@@ -6,12 +6,22 @@
 *                                                                         *
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
-************************************************************************ */
+ ************************************************************************ */
 
+#include "dbat/game/boards.h"
+#include "dbat/game/db.h"
+#include "dbat/game/comm.h"
+#include "dbat/game/handler.h"
+#include "dbat/game/utils.h"
+#include "dbat/game/interpreter.h"
+#include "dbat/game/statedit.h"
+#include "dbat/db/characters.h"
+#include "dbat/db/objects.h"
+#include "dbat/db/rooms.h"
+#include "dbat/db/boards.h"
+#include <sys/stat.h>
 
-/* FEATURES & INSTALLATION INSTRUCTIONS ***********************************
-
-This board code has many improvements over the infamously buggy standard
+/* This board code has many improvements over the infamously buggy standard
 Diku board code.  Features include:
 
 - Arbitrary number of boards handled by one set of generalized routines.

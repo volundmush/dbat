@@ -8,6 +8,9 @@ improved-edit.c		Routines specific to the improved editor.
 #include "dbat/game/db.h"
 #include "dbat/game/comm.h"
 #include "dbat/game/interpreter.h"
+#include "dbat/db/characters.h"
+#include "dbat/db/objects.h"
+#include "dbat/db/rooms.h"
 
 int format_script(struct descriptor_data *d);
 

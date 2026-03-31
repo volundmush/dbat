@@ -24,6 +24,9 @@
 #include "dbat/game/config.h"
 #include "dbat/game/dg_comm.h"
 #include "dbat/game/act.informative.h"
+#include "dbat/db/characters.h"
+#include "dbat/db/objects.h"
+#include "dbat/db/rooms.h"
 
 /* external functions */
 

@@ -33,6 +33,8 @@
 #include "dbat/db/consts/constates.h"
 #include "dbat/db/weather.h"
 
+#include <ctype.h>
+
 
 /* local functions */
 static void perform_tell(struct char_data *ch, struct char_data *vict, char *arg);

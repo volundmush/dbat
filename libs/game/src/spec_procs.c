@@ -14,7 +14,6 @@
 #include "dbat/game/handler.h"
 #include "dbat/game/db.h"
 #include "dbat/game/spells.h"
-#include "dbat/game/constants.h"
 #include "dbat/game/mail.h"
 #include "dbat/game/act.movement.h"
 #include "dbat/game/act.item.h"
@@ -22,6 +21,10 @@
 #include "dbat/game/guild.h"
 #include "dbat/game/races.h"
 #include "dbat/game/act.comm.h"
+
+#include "dbat/db/characters.h"
+#include "dbat/db/objects.h"
+#include "dbat/db/rooms.h"
 
 /* local functions */
 

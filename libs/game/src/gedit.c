@@ -20,6 +20,9 @@
 #include "dbat/game/feats.h"
 #include "dbat/game/genolc.h"
 #include "dbat/game/shop.h"
+#include "dbat/db/characters.h"
+#include "dbat/db/objects.h"
+#include "dbat/db/rooms.h"
 
 /*
  * Should check more things.

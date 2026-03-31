@@ -9,6 +9,10 @@
 #include "dbat/game/genzon.h"
 #include "dbat/game/utils.h"
 
+#include "dbat/db/characters.h"
+#include "dbat/db/objects.h"
+#include "dbat/db/rooms.h"
+
 /*
  * NOTE (gg): Didn't modify sedit much. Don't consider it as 'recent'
  * 	as the other editors with regard to updates or style.

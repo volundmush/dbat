@@ -1,7 +1,6 @@
 #pragma once
 #include "dbat/db/consts/types.h"
 
-
 // functions
 void npc_steal(struct char_data *ch, struct char_data *victim);
 int num_players_in_room(room_vnum room);

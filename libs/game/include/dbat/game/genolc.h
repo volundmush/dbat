@@ -1,8 +1,5 @@
 #pragma once
 #include "dbat/db/consts/types.h"
-struct descriptor_data;
-struct extra_descr_data;
-struct zone_data;
 
 #define STRING_TERMINATOR       '~'
 

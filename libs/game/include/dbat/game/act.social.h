@@ -1,6 +1,5 @@
 #pragma once
 #include "dbat/db/consts/types.h"
-#include "dbat/db/social.h"
 #include <stdio.h>
 
 // functions

@@ -49,6 +49,9 @@
 #include "dbat/db/consts/weapons.h"
 #include "dbat/db/weather.h"
 #include "dbat/db/players.h"
+#include "dbat/db/dgscripts.h"
+#include "dbat/db/consts/maximums.h"
+#include "dbat/db/shops.h"
 
 /* local variables */
 static int copyover_timer = 0; /* for timed copyovers */

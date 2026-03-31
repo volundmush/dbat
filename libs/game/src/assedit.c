@@ -14,7 +14,11 @@
 #include "dbat/game/interpreter.h"
 #include "dbat/game/oasis.h"
 #include "dbat/game/assemblies.h"
-#include "dbat/game/constants.h"
+#include "dbat/db/characters.h"
+#include "dbat/db/objects.h"
+#include "dbat/db/rooms.h"
+
+#include <ctype.h>
 
 
 /*-------------------------------------------------------------------*

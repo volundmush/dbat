@@ -34,6 +34,9 @@
 #include <endian.h>
 #endif
 #include "dbat/game/sha256.h"
+#include "dbat/db/characters.h"
+#include "dbat/db/objects.h"
+#include "dbat/db/rooms.h"
 
 #if __FreeBSD_version < 500111
 

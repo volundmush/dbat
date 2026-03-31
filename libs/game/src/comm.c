@@ -27,7 +27,6 @@
 #include "dbat/game/dg_event.h"
 #include "dbat/game/mobact.h"
 #include "dbat/game/magic.h"
-#include "dbat/game/imc.h"
 #include "dbat/game/objsave.h"
 #include "dbat/game/genolc.h"
 #include "dbat/game/class.h"
@@ -38,8 +37,17 @@
 #include "dbat/game/clan.h"
 #include "dbat/game/mail.h"
 #include "dbat/game/races.h"
-#include "dbat/game/constants.h"
 #include "dbat/game/screen.h"
+
+#include "dbat/db/characters.h"
+#include "dbat/db/objects.h"
+#include "dbat/db/rooms.h"
+#include "dbat/db/descriptor.h"
+#include "dbat/db/bans.h"
+#include "dbat/game/telnet.h"
+#include "dbat/db/consts/pulse.h"
+#include "dbat/db/dgscripts.h"
+#include "dbat/db/help.h"
 
 /* externs */
 

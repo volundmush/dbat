@@ -15,6 +15,9 @@
 #include "dbat/game/utils.h"
 #include "dbat/game/db.h"
 #include "dbat/game/oasis.h"
+#include "dbat/db/characters.h"
+#include "dbat/db/objects.h"
+#include "dbat/db/rooms.h"
 
 int parse_stat_menu(struct descriptor_data *d, char *arg);
 int stats_assign_stat(int abil, char *arg, struct descriptor_data *d);

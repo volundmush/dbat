@@ -10,6 +10,9 @@
 #include "dbat/game/dg_olc.h"
 #include "dbat/game/interpreter.h"
 #include "dbat/game/comm.h"
+#include "dbat/db/characters.h"
+#include "dbat/db/objects.h"
+#include "dbat/db/rooms.h"
 
 /* local global */
 char *context_help_list[NUM_CONTEXTS];

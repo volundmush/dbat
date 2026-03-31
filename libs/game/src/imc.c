@@ -25,13 +25,14 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include "dbat/game/sha256.h"
-#include "dbat/game/structs.h"
 #include "dbat/game/utils.h"
 #include "dbat/game/comm.h"
 #include "dbat/game/db.h"
+#include "dbat/db/characters.h"
+#include "dbat/db/objects.h"
+#include "dbat/db/rooms.h"
 #include "dbat/game/handler.h"
 #include "dbat/game/interpreter.h"
-#include "dbat/game/imc.h"
 #include "dbat/game/imccfg.h"
 #include "dbat/game/sha256.h"
 

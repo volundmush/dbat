@@ -1,6 +1,5 @@
 #pragma once
 #include "dbat/db/consts/types.h"
-struct descriptor_data;
 
 // functions
 void paginate_string(char *str, struct descriptor_data *d);

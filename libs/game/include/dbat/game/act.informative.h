@@ -1,6 +1,5 @@
 #pragma once
 #include "dbat/db/consts/types.h"
-#include "dbat/db/command.h"
 
 // defines
 #define MAX_PORTAL_TYPES        6

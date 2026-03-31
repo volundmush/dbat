@@ -1,5 +1,4 @@
 #pragma once
-struct descriptor_data;
 #include "house.h"
 
 void hsedit_setup_new(struct descriptor_data *d);

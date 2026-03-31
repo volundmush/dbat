@@ -20,8 +20,11 @@
 #include "dbat/db/characters.h"
 #include "dbat/db/command.h"
 #include "dbat/db/descriptor.h"
+#include "dbat/db/consts/triggers.h"
 
 #include <errno.h>
+#include <assert.h>
+#include <ctype.h>
 
 /* local functions */
 char *fread_action(FILE *fl, int nr);

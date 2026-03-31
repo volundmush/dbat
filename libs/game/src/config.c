@@ -15,7 +15,10 @@
 ************************************************************************ */
 
 #include "dbat/game/config.h"
-#include "dbat/game/interpreter.h"	/* alias_data definition for structs.h */
+#include "dbat/game/interpreter.h"
+#include "dbat/db/characters.h"
+#include "dbat/db/objects.h"
+#include "dbat/db/rooms.h"	/* alias_data definition for structs.h */
 
 /*
  * Update:  The following constants and variables are now the default values

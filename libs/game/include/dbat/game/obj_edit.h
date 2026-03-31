@@ -1,5 +1,5 @@
 #pragma once
-struct descriptor_data;
+#include "dbat/db/consts/types.h"
 
 
 /* obj_edit.c functions */

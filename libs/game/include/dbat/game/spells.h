@@ -1,4 +1,5 @@
 #pragma once
+#include "dbat/db/consts/types.h"
 
 
 #define DEFAULT_STAFF_LVL	12

@@ -1,5 +1,5 @@
 #pragma once
-
+#include "dbat/db/consts/types.h"
 // functions
 void timed_dt(struct char_data *ch);
 void run_autowiz(void);

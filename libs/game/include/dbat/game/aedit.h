@@ -1,5 +1,5 @@
 #pragma once
-#include "dbat/db/descriptor.h"
+#include "dbat/db/consts/types.h"
 
 void aedit_disp_menu(struct descriptor_data * d);
 void aedit_parse(struct descriptor_data * d, char *arg);

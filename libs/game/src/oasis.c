@@ -5,7 +5,6 @@
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
 
-#include "dbat/game/structs.h"
 #include "dbat/game/utils.h"
 #include "dbat/game/interpreter.h"
 #include "dbat/game/comm.h"
@@ -19,6 +18,9 @@
 #include "dbat/game/dg_olc.h"
 #include "dbat/game/handler.h"
 #include "dbat/game/guild.h"
+#include "dbat/db/characters.h"
+#include "dbat/db/objects.h"
+#include "dbat/db/rooms.h"
 
 
 /******************************************************************************/

@@ -18,6 +18,8 @@
 
 #include "dbat/db/zones.h"
 #include "dbat/db/characters.h"
+#include "dbat/db/social.h"
+#include "dbat/db/command.h"
 
 /*------------------------------------------------------------------------*\
   Utils and exported functions.

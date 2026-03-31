@@ -14,6 +14,10 @@
 #include "dbat/game/interpreter.h"
 #include "dbat/game/db.h"
 
+#include "dbat/db/characters.h"
+#include "dbat/db/objects.h"
+#include "dbat/db/rooms.h"
+
 
 void write_aliases(struct char_data *ch)
 {

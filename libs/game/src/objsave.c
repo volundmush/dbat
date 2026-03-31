@@ -11,7 +11,6 @@
 #include "dbat/game/objsave.h"
 #include <unistd.h>
 #include <errno.h>
-#include "dbat/game/structs.h"
 #include "dbat/game/comm.h"
 #include "dbat/game/handler.h"
 #include "dbat/game/db.h"
@@ -22,6 +21,10 @@
 #include "dbat/game/class.h"
 #include "dbat/game/act.social.h"
 #include "dbat/game/act.item.h"
+
+#include "dbat/db/characters.h"
+#include "dbat/db/objects.h"
+#include "dbat/db/rooms.h"
 
 /* local functions */
 

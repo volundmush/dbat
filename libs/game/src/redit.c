@@ -5,7 +5,6 @@
  *  Copyright 1997-2001 George Greer (greerga@circlemud.org)		*
  ************************************************************************/
 
-#include "dbat/game/structs.h"
 #include "dbat/game/utils.h"
 #include "dbat/game/comm.h"
 #include "dbat/game/interpreter.h"
@@ -17,12 +16,16 @@
 #include "dbat/game/oasis.h"
 #include "dbat/game/improved-edit.h"
 #include "dbat/game/dg_olc.h"
-#include "dbat/game/constants.h"
 #include "dbat/game/spells.h"
 #include "dbat/game/handler.h"
 #include "dbat/game/races.h"
 #include "dbat/game/act.wizard.h"
 #include "dbat/game/act.informative.h"
+
+#include "dbat/db/characters.h"
+#include "dbat/db/objects.h"
+#include "dbat/db/rooms.h"
+#include "dbat/db/descriptor.h"
 
 /*------------------------------------------------------------------------*/
 

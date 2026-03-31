@@ -9,6 +9,9 @@
 
 #include "dbat/game/genolc.h"
 #include "dbat/game/dg_scripts.h"
+#include "dbat/db/characters.h"
+#include "dbat/db/objects.h"
+#include "dbat/db/rooms.h"
 
 /* real zone of room/mobile/object/shop given */
 zone_rnum real_zone_by_thing(room_vnum vznum)

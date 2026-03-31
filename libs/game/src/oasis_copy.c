@@ -18,7 +18,9 @@
 #include "dbat/game/genolc.h"
 #include "dbat/game/genwld.h"
 #include "dbat/game/genshp.h"
-#include "dbat/game/constants.h"
+#include "dbat/db/characters.h"
+#include "dbat/db/objects.h"
+#include "dbat/db/rooms.h"
 
 /******************************************************************************/
 /** Internal Functions                                                       **/

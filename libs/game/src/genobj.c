@@ -10,9 +10,16 @@
 #include "dbat/game/genzon.h"
 #include "dbat/game/utils.h"
 #include "dbat/game/handler.h"
-#include "dbat/game/htree.h"
 #include "dbat/game/dg_olc.h"
 #include "dbat/game/shop.h"
+
+#include "dbat/db/characters.h"
+#include "dbat/db/objects.h"
+#include "dbat/db/rooms.h"
+#include "dbat/db/consts/triggers.h"
+#include "dbat/db/shops.h"
+
+#include <assert.h>
 
 static int copy_object_main(struct obj_data *to, struct obj_data *from, int free_object);
 

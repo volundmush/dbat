@@ -1,5 +1,6 @@
 #pragma once
 #include "consts/types.h"
+#include "consts/triggers.h"
 #include "index.h"
 
 /* linked list for mob/object prototype trigger lists */

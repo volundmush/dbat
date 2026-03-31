@@ -21,7 +21,6 @@
 #include "dbat/game/comm.h"
 #include "dbat/game/spells.h"
 #include "dbat/game/interpreter.h"
-#include "dbat/game/constants.h"
 #include "dbat/game/handler.h"
 #include "dbat/game/feats.h"
 #include "dbat/game/oasis.h"
@@ -29,8 +28,16 @@
 #include "dbat/game/dg_comm.h"
 #include "dbat/game/config.h"
 #include "dbat/game/act.other.h"
+#include "dbat/db/characters.h"
+#include "dbat/db/objects.h"
+#include "dbat/db/rooms.h"
+
+#include <ctype.h>
 
 /* Names first */
+
+#define Y 1
+#define N 0
 
 /* Some races copied from the SRD under OGL, see ../doc/srd.txt for information */
 const int class_ok_race[NUM_RACES][NUM_CLASSES] = {
@@ -75,6 +82,8 @@ int class_ok_align[NUM_ALIGNS][NUM_CLASSES] = {
 /* CE */ { Y, Y, Y, Y, N, N, Y, N, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, N, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y }
 };
 
+#undef Y
+#undef N
 
 
 /* Adapted from the SRD under OGL, see ../doc/srd.txt for information */

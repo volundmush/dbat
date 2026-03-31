@@ -15,6 +15,9 @@
 #include "dbat/game/spec_procs.h"
 #include "dbat/game/objsave.h"
 #include "dbat/game/mail.h"
+#include "dbat/db/characters.h"
+#include "dbat/db/objects.h"
+#include "dbat/db/rooms.h"
 
 /* local functions */
 void ASSIGNROOM(room_vnum room, SPECIAL(fname));

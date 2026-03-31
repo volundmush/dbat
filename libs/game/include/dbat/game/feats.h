@@ -1,4 +1,5 @@
 #pragma once
+#include "dbat/db/consts/types.h"
 #include "dbat/db/consts/feats.h"
 
 /* Functions defined in feats.c */

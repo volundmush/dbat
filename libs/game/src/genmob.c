@@ -10,11 +10,14 @@
 #include "dbat/game/genolc.h"
 #include "dbat/game/shop.h"
 #include "dbat/game/genzon.h"
-#include "dbat/game/htree.h"
 #include "dbat/game/guild.h"
 #include "dbat/game/dg_scripts.h"
 #include "dbat/game/handler.h"
 #include "dbat/game/dg_olc.h"
+
+#include "dbat/db/characters.h"
+#include "dbat/db/objects.h"
+#include "dbat/db/rooms.h"
 
 /* From db.c */
 void init_mobile_skills(void);

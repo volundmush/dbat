@@ -1,9 +1,6 @@
 #pragma once
 #include "dbat/db/consts/types.h"
 
-struct descriptor_data;
-
-
 #define GM_NUM(i)  (guild_index[i].vnum)
 #define GM_TRAINER(i) (guild_index[i].gm)
 #define GM_OPEN(i) (guild_index[i].open)

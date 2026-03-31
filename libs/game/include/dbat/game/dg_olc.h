@@ -1,7 +1,6 @@
 #pragma once
 #include "dbat/db/consts/types.h"
 #include <stdio.h>
-struct descriptor_data;
 
 
 #define NUM_TRIG_TYPE_FLAGS		20

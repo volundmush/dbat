@@ -40,6 +40,7 @@
 #include "dbat/db/consts/weapons.h"
 #include "dbat/db/zones.h"
 #include "dbat/db/consts/triggers.h"
+#include "dbat/db/command.h"
 
 /* global variables */
 struct obj_data *obj_selling = NULL;	/* current object for sale */

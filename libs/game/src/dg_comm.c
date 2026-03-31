@@ -22,6 +22,12 @@
 #include "dbat/game/spells.h"
 #include "dbat/game/handler.h"
 
+#include "dbat/db/characters.h"
+#include "dbat/db/objects.h"
+#include "dbat/db/rooms.h"
+
+#include <ctype.h>
+
 /* local functions */
 void sub_write_to_char(struct char_data *ch, char *tokens[], void *otokens[], char type[]);
 

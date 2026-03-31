@@ -1,8 +1,23 @@
 #pragma once
 
+#include <stdlib.h>
+#include <string.h>
+#include <errno.h>
+#include "dbat/db/consts/types.h"
+#include "dbat/db/flags.h"
+
 #include "db.h"
 #include "races.h"
 #include "handler.h"
+
+#include "dbat/db/characters.h"
+#include "dbat/db/descriptor.h"
+#include "dbat/db/rooms.h"
+#include "dbat/db/objects.h"
+#include "dbat/db/zones.h"
+#include "dbat/db/players.h"
+#include "dbat/db/config.h"
+#include "dbat/db/weather.h"
 
 #define log			basic_mud_log
 

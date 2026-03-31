@@ -1,6 +1,9 @@
 #include "dbat/game/races.h"
 #include "dbat/game/utils.h"
 #include "dbat/game/interpreter.h"
+#include "dbat/db/characters.h"
+#include "dbat/db/objects.h"
+#include "dbat/db/rooms.h"
 
 
 #define Y   TRUE

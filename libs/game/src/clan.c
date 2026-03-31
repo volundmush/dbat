@@ -35,6 +35,11 @@
 #include "dbat/game/interpreter.h"    // for ACMD()
 #include "dbat/game/utils.h"          // for CREATE() and IDNUM()
 
+#include "dbat/db/characters.h"
+#include "dbat/db/objects.h"
+#include "dbat/db/rooms.h"
+#include "dbat/db/descriptor.h"
+
 extern char *strlwr(char *s);
 extern void send_editor_help(struct descriptor_data *d);
 

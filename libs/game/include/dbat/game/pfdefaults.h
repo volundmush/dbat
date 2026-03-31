@@ -1,5 +1,5 @@
 #pragma once
-
+#include "dbat/db/consts/types.h"
 /*
   ascii pfile variable defaults
 

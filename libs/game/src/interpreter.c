@@ -21,10 +21,8 @@
 #include "dbat/game/tedit.h"
 #include "dbat/game/improved-edit.h"
 #include "dbat/game/dg_scripts.h"
-#include "dbat/game/constants.h"
 #include "dbat/game/shop.h"
 #include "dbat/game/guild.h"
-#include "dbat/game/imc.h"
 #include "dbat/game/clan.h"
 #include "dbat/game/class.h"
 #include "dbat/game/races.h"
@@ -41,6 +39,12 @@
 #include "dbat/game/ban.h"
 #include "dbat/game/assedit.h"
 #include "dbat/game/obj_edit.h"
+
+#include "dbat/db/characters.h"
+#include "dbat/db/objects.h"
+#include "dbat/db/rooms.h"
+#include "dbat/db/descriptor.h"
+#include "dbat/db/command.h"
 
 /* local global variables */
 DISABLED_DATA *disabled_first = NULL;

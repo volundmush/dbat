@@ -17,7 +17,9 @@
 #include "dbat/game/genzon.h"
 #include "dbat/game/house.h"
 #include "dbat/game/act.informative.h"
-#include "dbat/game/constants.h"
+#include "dbat/db/characters.h"
+#include "dbat/db/objects.h"
+#include "dbat/db/rooms.h"
 
 /*------------------------------------------------------------------------*/ 
 /* internal globals */ 

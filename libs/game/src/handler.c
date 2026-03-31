@@ -23,6 +23,10 @@
 #include "dbat/game/races.h"
 #include "dbat/game/act.informative.h"
 
+#include "dbat/db/characters.h"
+#include "dbat/db/objects.h"
+#include "dbat/db/rooms.h"
+
 /* local vars */
 static int extractions_pending = 0;
 

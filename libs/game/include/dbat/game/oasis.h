@@ -1,9 +1,5 @@
 #pragma once
 #include "dbat/db/consts/types.h"
-struct descriptor_data;
-struct social_messg;
-struct help_index_element;
-struct house_control_rec;
 
 #define _OASISOLC	0x206   /* 2.0.6 */
 /*
@@ -855,5 +851,3 @@ void free_context_help(void);
 #define STAT_GET_CHA  5
 #define STAT_QUIT     6
 #define STAT_PARSE_MENU 7
-
-#endif
