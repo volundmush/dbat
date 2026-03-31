@@ -1421,7 +1421,7 @@ static void do_stat_room(struct char_data *ch)
 	  zone_table[rm->zone].number, rm->number, IN_ROOM(ch),
           (long) rm->number + ROOM_ID_BASE, buf2);
 
-  sprintbitarray(rm->room_flags, room_bits, RF_ARRAY_MAX, buf2);
+  sprintbitarray(rm->room_flags, room_bits, RF_ARRAY_MAX, buf2, sizeof(buf2));
   send_to_char(ch, "Room Damage: %d, Room Effect: %d\r\n", rm->dmg, rm->geffect);
   send_to_char(ch, "SpecProc: %s, Flags: %s\r\n", rm->func == NULL ? "None" : "Exists", buf2);
 
@@ -1546,13 +1546,13 @@ static void do_stat_object(struct char_data *ch, struct obj_data *j)
     send_to_char(ch, "\r\n");
   }
 
-  sprintbitarray(GET_OBJ_WEAR(j), wear_bits, TW_ARRAY_MAX, buf);
+  sprintbitarray(GET_OBJ_WEAR(j), wear_bits, TW_ARRAY_MAX, buf, sizeof(buf));
   send_to_char(ch, "Can be worn on: %s\r\n", buf);
 
-  sprintbitarray(GET_OBJ_PERM(j), affected_bits, AF_ARRAY_MAX, buf);
+  sprintbitarray(GET_OBJ_PERM(j), affected_bits, AF_ARRAY_MAX, buf, sizeof(buf));
   send_to_char(ch, "Set char bits : %s\r\n", buf);
 
-  sprintbitarray(GET_OBJ_EXTRA(j), extra_bits, EF_ARRAY_MAX, buf);
+  sprintbitarray(GET_OBJ_EXTRA(j), extra_bits, EF_ARRAY_MAX, buf, sizeof(buf));
   send_to_char(ch, "Extra flags   : %s\r\n", buf);
 
   send_to_char(ch, "Weight: %"I64T", Value: %d, Cost/day: %d, Timer: %d, Min Level: %d\r\n",
@@ -1806,15 +1806,15 @@ static void do_stat_character(struct char_data *ch, struct char_data *k)
   if (IS_NPC(k)) {
     sprinttype(k->mob_specials.default_pos, position_types, buf, sizeof(buf));
     send_to_char(ch, ", Default position: %s\r\n", buf);
-    sprintbitarray(MOB_FLAGS(k), action_bits, PM_ARRAY_MAX, buf);
+    sprintbitarray(MOB_FLAGS(k), action_bits, PM_ARRAY_MAX, buf, sizeof(buf));
     send_to_char(ch, "NPC flags: @c%s@n\r\n", buf);
   } else {
     send_to_char(ch, ", Idle Timer (in tics) [%d]\r\n", k->timer);
 
-    sprintbitarray(PLR_FLAGS(k), player_bits, PM_ARRAY_MAX, buf);
+    sprintbitarray(PLR_FLAGS(k), player_bits, PM_ARRAY_MAX, buf, sizeof(buf));
     send_to_char(ch, "PLR: @c%s@n\r\n", buf);
 
-    sprintbitarray(PRF_FLAGS(k), preference_bits, PR_ARRAY_MAX, buf);
+    sprintbitarray(PRF_FLAGS(k), preference_bits, PR_ARRAY_MAX, buf, sizeof(buf));
     send_to_char(ch, "PRF: @g%s@n\r\n", buf);
   }
 
@@ -1866,7 +1866,7 @@ static void do_stat_character(struct char_data *ch, struct char_data *k)
   }
 
   /* Showing the bitvector */
-  sprintbitarray(AFF_FLAGS(k), affected_bits, AF_ARRAY_MAX, buf);
+  sprintbitarray(AFF_FLAGS(k), affected_bits, AF_ARRAY_MAX, buf, sizeof(buf));
   send_to_char(ch, "AFF: @y%s@n\r\n", buf);
 
   /* Routine to show what spells a char is affected by */

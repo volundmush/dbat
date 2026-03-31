@@ -1,5 +1,6 @@
 #pragma once
 #include "dbat/db/consts/types.h"
+#include "dbat/db/consts/maximums.h"
 #include "spells.h"
 
 // global variables

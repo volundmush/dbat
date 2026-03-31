@@ -3,6 +3,7 @@
  * Copyright 1996 Harvey Gilpin						*
  * Copyright 1997-2001 George Greer (greerga@circlemud.org)		*
  ************************************************************************/
+#include <ctype.h>
 #include "dbat/game/sedit.h"
 #include "dbat/game/utils.h"
 #include "dbat/game/comm.h"

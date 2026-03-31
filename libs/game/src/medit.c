@@ -3,7 +3,7 @@
  * Copyright 1996 Harvey Gilpin						*
  * Copyright 1997-2001 George Greer (greerga@circlemud.org)		*
  ************************************************************************/
-
+#include <ctype.h>
 #include "dbat/game/medit.h"
 #include "dbat/game/interpreter.h"
 #include "dbat/game/comm.h"
@@ -24,6 +24,7 @@
 #include "dbat/game/class.h"
 #include "dbat/game/act.wizard.h"
 #include "dbat/game/modify.h"
+#include "dbat/game/dg_scripts.h"
 
 #include "dbat/db/characters.h"
 #include "dbat/db/objects.h"
@@ -388,7 +389,7 @@ void medit_disp_mob_flags(struct descriptor_data *d)
     write_to_output(d, "@g%2d@n) %-20.20s  %s", i + 1, action_bits[i],
 		!(++columns % 2) ? "\r\n" : "");
   }
-  sprintbitarray(MOB_FLAGS(OLC_MOB(d)), action_bits, AF_ARRAY_MAX, flags);
+  sprintbitarray(MOB_FLAGS(OLC_MOB(d)), action_bits, AF_ARRAY_MAX, flags, sizeof(flags));
   write_to_output(d, "\r\nCurrent flags : @c%s@n\r\nEnter mob flags (0 to quit) : ",
 		  flags);
 }
@@ -421,7 +422,7 @@ void medit_disp_aff_flags(struct descriptor_data *d)
     write_to_output(d, "@g%2d@n) %-20.20s  %s", i + 1, affected_bits[i+1],
                     !(++columns % 2) ? "\r\n" : "");
   }
-  sprintbitarray(AFF_FLAGS(OLC_MOB(d)), affected_bits, AF_ARRAY_MAX, flags);
+  sprintbitarray(AFF_FLAGS(OLC_MOB(d)), affected_bits, AF_ARRAY_MAX, flags, sizeof(flags));
   write_to_output(d, "\r\nCurrent flags   : @c%s@n\r\nEnter aff flags (0 to quit) : ",
                   flags);
 }

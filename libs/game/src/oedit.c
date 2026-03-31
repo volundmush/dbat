@@ -4,7 +4,7 @@
  * Copyright 1996 by Harvey Gilpin					*
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
-
+#include <ctype.h>
 #include "dbat/game/comm.h"
 #include "dbat/game/interpreter.h"
 #include "dbat/game/spells.h"
@@ -29,7 +29,7 @@
 #include "dbat/db/objects.h"
 #include "dbat/db/rooms.h"
 #include "dbat/db/descriptor.h"
-#include "dbat/db/dgscripts.h"
+#include "dbat/game/dg_scripts.h"
 #include "dbat/db/shops.h"
 #include "dbat/db/boards.h"
 

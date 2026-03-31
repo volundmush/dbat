@@ -1,6 +1,8 @@
 #pragma once
 #include "dbat/db/consts/types.h"
-
+#include "dbat/db/consts/senseis.h"
+#include "dbat/db/consts/races.h"
+#include "dbat/db/consts/skills.h"
 
 #define DEFAULT_STAFF_LVL	12
 #define DEFAULT_WAND_LVL	12

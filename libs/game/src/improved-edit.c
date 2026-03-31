@@ -3,6 +3,7 @@
 improved-edit.c		Routines specific to the improved editor.
 
 */
+#include <ctype.h>
 #include "dbat/game/improved-edit.h"
 #include "dbat/game/utils.h"
 #include "dbat/game/db.h"

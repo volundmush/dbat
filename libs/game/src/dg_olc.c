@@ -11,7 +11,7 @@
 *  $Date: 2004/10/11 12:07:00$                                            *
 *  $Revision: 1.0.14 $                                                    *
 **************************************************************************/
-
+#include <ctype.h>
 #include "dbat/game/dg_olc.h"
 #include "dbat/game/utils.h"
 #include "dbat/game/comm.h"
@@ -25,8 +25,9 @@
 #include "dbat/db/characters.h"
 #include "dbat/db/objects.h"
 #include "dbat/db/rooms.h"
+#include "dbat/game/genzon.h"
 
-#include "dbat/db/dgscripts.h"
+#include "dbat/game/dg_scripts.h"
 
 /* local functions */
 static void trigedit_disp_menu(struct descriptor_data *d);

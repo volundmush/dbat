@@ -232,10 +232,6 @@ void init_game(uint16_t cmport)
 
   boot_db();
 
-  if (CONFIG_IMC_ENABLED) {
-    imc_startup(FALSE, -1, FALSE); // FALSE arg, so the autoconnect setting can govern it.
-  }
-
        FILE *mapfile;
        int rowcounter, colcounter;
        int vnum_read;
@@ -278,9 +274,6 @@ void init_game(uint16_t cmport)
 
   close(mother_desc);
 
-  if (CONFIG_IMC_ENABLED) {
-    imc_shutdown(FALSE);
-  }
 
   if (circle_reboot != 2)
     save_all();
@@ -617,10 +610,6 @@ void game_loop(socklen_t cmmother_desc)
     if (missed_pulses > 30 RL_SEC) {
       log("SYSERR: Missed %d seconds worth of pulses.", missed_pulses / PASSES_PER_SEC);
       missed_pulses = 30 RL_SEC;
-    }
-
-    if (CONFIG_IMC_ENABLED) {
-      imc_loop();
     }
 
     /* Now execute the heartbeat functions */

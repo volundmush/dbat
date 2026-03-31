@@ -24,6 +24,7 @@
 #include "dbat/game/obj_edit.h"
 #include "dbat/game/fight.h"
 #include "dbat/game/class.h"
+#include "dbat/game/interpreter.h"
 
 #include "dbat/db/characters.h"
 #include "dbat/db/objects.h"

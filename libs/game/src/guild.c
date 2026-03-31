@@ -6,7 +6,7 @@
  * Based on shop.c.  As such, the CircleMud License applies                *
  * Written by Jason Goodwin.   jgoodwin@expert.cc.purdue.edu               *
  ************************************************************************ */
-
+#include <ctype.h>
 #include "dbat/game/guild.h"
 #include "dbat/game/utils.h"
 #include "dbat/game/spells.h"

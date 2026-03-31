@@ -8,6 +8,7 @@
 *  $Revision: 1.0.14 $                                                    *
 **************************************************************************/
 #include <stdio.h>
+#include <ctype.h>
 #include "dbat/game/dg_scripts.h"
 #include "dbat/game/utils.h"
 #include "dbat/game/comm.h"

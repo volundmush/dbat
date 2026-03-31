@@ -7,6 +7,7 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 **************************************************************************/
+#include <ctype.h>
 #include "dbat/game/act.other.h"
 #include "dbat/game/utils.h"
 #include "dbat/game/comm.h"
@@ -48,6 +49,7 @@
 #include "dbat/db/consts/shadowdragons.h"
 #include "dbat/db/zones.h"
 #include "dbat/db/consts/auction.h"
+#include "dbat/db/command.h"
 
 /* local functions */
 static int has_scanner(struct char_data *ch);
@@ -7833,7 +7835,7 @@ ACMD(do_appraise) {
  if (!found)
     send_to_char(ch, " None");
  char buf2[MAX_STRING_LENGTH];
- sprintbitarray(GET_OBJ_PERM(obj), affected_bits, AF_ARRAY_MAX, buf2);
+ sprintbitarray(GET_OBJ_PERM(obj), affected_bits, AF_ARRAY_MAX, buf2, sizeof(buf2));
  send_to_char(ch, "\nSpecial: %s\r\n", buf2); 
 
  WAIT_STATE(ch, PULSE_2SEC);

@@ -70,7 +70,6 @@ struct player_special_data {
   void *last_olc_targ;		/* olc control                          */
   int last_olc_mode;		/* olc control                          */
   char *host;			/* host of last logon                   */
-  struct imcchar_data *imcchardata;  /**< IMC2 Data */
   int spell_level[MAX_SPELL_LEVEL];
 				/* bonus to number of spells memorized */
   int memcursor;		/* points to the next free slot in spellmem */

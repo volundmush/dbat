@@ -7,6 +7,7 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
+#include <ctype.h>
 #include "dbat/game/act.item.h"
 #include "dbat/game/vehicles.h"
 #include "dbat/game/dg_comm.h"
@@ -1811,7 +1812,7 @@ ACMD(do_bid)
     }
     send_to_char(ch, "@GItem Weight @W: @w%s@n\n", add_commas(GET_OBJ_WEIGHT(obj2)));
     char bits[MAX_STRING_LENGTH];
-    sprintbitarray(GET_OBJ_WEAR(obj2), wear_bits, TW_ARRAY_MAX, bits);
+    sprintbitarray(GET_OBJ_WEAR(obj2), wear_bits, TW_ARRAY_MAX, bits, sizeof(bits));
     search_replace(bits, "TAKE", "");
     send_to_char(ch, "@GWear Loc.   @W:@w%s\n", bits);
     if (GET_OBJ_TYPE(obj2) == ITEM_WEAPON) {
@@ -1853,7 +1854,7 @@ ACMD(do_bid)
      else
       send_to_char(ch, "@n");
      char buf2[MAX_STRING_LENGTH];
-     sprintbitarray(GET_OBJ_PERM(obj2), affected_bits, AF_ARRAY_MAX, buf2);
+     sprintbitarray(GET_OBJ_PERM(obj2), affected_bits, AF_ARRAY_MAX, buf2, sizeof(buf2));
      send_to_char(ch, "\n@GSpecial     @W:@w %s\n", buf2);
      send_to_char(ch, "@c------------------------------------------------------------------------\n");
      return;

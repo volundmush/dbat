@@ -21,6 +21,7 @@
 #include "dbat/game/feats.h"
 #include "dbat/game/genolc.h"
 #include "dbat/game/shop.h"
+#include "dbat/game/guild.h"
 
 #include "dbat/db/characters.h"
 #include "dbat/db/objects.h"

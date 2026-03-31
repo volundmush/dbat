@@ -7,6 +7,7 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
+#include <ctype.h>
 #include "dbat/game/act.informative.h"
 #include "dbat/game/act.wizard.h"
 #include "dbat/game/vehicles.h"
@@ -39,6 +40,7 @@
 #include "dbat/game/interpreter.h"
 #include "dbat/db/consts/time.h"
 #include "dbat/db/consts/pulse.h"
+#include "dbat/db/command.h"
 
 /* local functions */
 static void gen_map(struct char_data *ch, int num);
@@ -4463,7 +4465,7 @@ void look_at_room(room_rnum target_room, struct char_data *ch, int ignore_brief)
     char buf2[MAX_STRING_LENGTH];
     char buf3[MAX_STRING_LENGTH];
 
-    sprintbitarray(ROOM_FLAGS(target_room), room_bits, RF_ARRAY_MAX, buf);
+    sprintbitarray(ROOM_FLAGS(target_room), room_bits, RF_ARRAY_MAX, buf, sizeof(buf));
     sprinttype(rm->sector_type, sector_types, buf2, sizeof(buf2));
     if (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_NODEC)) {
       send_to_char(ch, "\r\n@wO----------------------------------------------------------------------O@n\r\n");

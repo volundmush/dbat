@@ -22,6 +22,7 @@
 #include "dbat/db/characters.h"
 #include "dbat/db/objects.h"
 #include "dbat/db/rooms.h"
+#include "dbat/game/interpreter.h"
 
 #define LOAD_HIT	0
 #define LOAD_MANA	1
@@ -64,59 +65,6 @@ extern const char *class_names[];
 /*************************************************************************
 *  stuff related to the player index					 *
 *************************************************************************/
-
-void load_imc_pfile( struct char_data *ch );
-/*char *imc_fread_word( char *buf, size_t len, FILE *fp );*/
-void save_imc_pfile(struct char_data *ch);
-
-void save_imc_pfile(struct char_data *ch)
-{
-  FILE *fl;
-  char filename[PATH_MAX];
-
-  if (!CH_IMCDATA(ch))
-    return;
-
-  if (!get_filename(filename, sizeof(filename), IMC_FILE, GET_PC_NAME(ch)))
-    return;
-
-  if (!(fl = fopen(filename, "w")))
-  {
-    if (errno != ENOENT)
-      log("SYSERR: opening IMC2 file '%s' for writing: %s", filename, strerror(errno));
-    return;
-  }
-
-  imc_savechar(ch, fl);
-  fclose(fl);
-}
-
-void load_imc_pfile(struct char_data *ch)
-{
-  FILE *fl;
-  char filename[PATH_MAX];
-  char *word;
-
-  if (!get_filename(filename, sizeof(filename), IMC_FILE, GET_PC_NAME(ch)))
-    return;
-
-  if (!(fl = fopen(filename, "r")))
-  {
-    if (errno != ENOENT)
-      log("SYSERR: opening IMC2 file '%s' for reading: %s", filename, strerror(errno));
-    return;
-  }
-
-  for (;;)
-  {
-    word = imcfread_word(fl);
-    /*imc_fread_word(word, sizeof(word), fl);*/
-    if (*word != 'I')
-      break;
-    imc_loadchar(ch, fl, word);
-  }
-  fclose(fl);
-}
 
 /* new version to build player index for ASCII Player Files */
 /* generate index table for the player file */
@@ -788,11 +736,6 @@ int load_char(const char *name, struct char_data *ch)
     GET_COND(ch, DRUNK) = -1;
   }
 
-  if (CONFIG_IMC_ENABLED) {
-    imc_initchar(ch);
-    load_imc_pfile(ch);
-  }
-
   if (IS_ANDROID(ch)) {
     GET_COND(ch, HUNGER) = -1;
     GET_COND(ch, THIRST) = -1;
@@ -1275,9 +1218,6 @@ void save_char(struct char_data * ch)
   for (i = 0; i < MAX_AFFECT; i++) {
     if (tmp_aff[i].type)
       affect_to_char(ch, &tmp_aff[i]);
-  }
-  if (CONFIG_IMC_ENABLED) {
-    save_imc_pfile(ch);
   }
 
   for (i = 0; i < MAX_AFFECT; i++) {

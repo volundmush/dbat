@@ -23,6 +23,8 @@
 #include "dbat/db/rooms.h"
 #include "dbat/db/dgscripts.h"
 
+#include "dbat/game/dg_scripts.h"
+
 
 /******************************************************************************/
 /** Internal Data Structures                                                 **/

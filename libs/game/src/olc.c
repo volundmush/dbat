@@ -13,7 +13,7 @@
  *  *** DO *** NOT *** SEND ME MAIL ASKING WHY IT DOESN'T WORK -- IT'S
  *  NOT DONE!!
  */
-
+#include <ctype.h>
 #include "dbat/game/olc.h"
 #include "dbat/game/utils.h"
 #include "dbat/game/comm.h"

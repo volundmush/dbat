@@ -4,7 +4,7 @@
  *  Copyright 1996 Harvey Gilpin					*
  *  Copyright 1997-2001 George Greer (greerga@circlemud.org)		*
  ************************************************************************/
-
+#include <ctype.h>
 #include "dbat/game/utils.h"
 #include "dbat/game/comm.h"
 #include "dbat/game/interpreter.h"
@@ -21,12 +21,12 @@
 #include "dbat/game/races.h"
 #include "dbat/game/act.wizard.h"
 #include "dbat/game/act.informative.h"
+#include "dbat/game/dg_scripts.h"
 
 #include "dbat/db/characters.h"
 #include "dbat/db/objects.h"
 #include "dbat/db/rooms.h"
 #include "dbat/db/descriptor.h"
-#include "dbat/db/dgscripts.h"
 /*------------------------------------------------------------------------*/
 
 /*
