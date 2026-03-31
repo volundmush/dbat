@@ -23,7 +23,6 @@
 #include "dbat/game/assemblies.h"
 #include "dbat/game/house.h"
 #include "dbat/game/comm.h"
-#include "dbat/game/constants.h"
 #include "dbat/game/dg_scripts.h"
 #include "dbat/game/races.h"
 #include "dbat/game/class.h"
@@ -38,6 +37,18 @@
 #include "dbat/game/shop.h"
 #include "dbat/game/guild.h"
 #include "dbat/game/spell_parser.h"
+
+#include "dbat/game/config.h"
+#include "dbat/db/characters.h"
+#include "dbat/db/descriptor.h"
+#include "dbat/db/consts/pulse.h"
+#include "dbat/db/rooms.h"
+#include "dbat/db/objects.h"
+#include "dbat/db/zones.h"
+#include "dbat/db/consts/triggers.h"
+#include "dbat/db/consts/weapons.h"
+#include "dbat/db/weather.h"
+#include "dbat/db/players.h"
 
 /* local variables */
 static int copyover_timer = 0; /* for timed copyovers */

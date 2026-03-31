@@ -22,7 +22,16 @@
 #include "dbat/game/dg_scripts.h"
 #include "dbat/game/local_limits.h"
 #include "dbat/game/house.h"
-#include "dbat/game/constants.h"
+#include "dbat/game/config.h"
+
+#include "dbat/db/characters.h"
+#include "dbat/db/objects.h"
+#include "dbat/db/rooms.h"
+#include "dbat/db/zones.h"
+#include "dbat/db/descriptor.h"
+#include "dbat/db/consts/pulse.h"
+#include "dbat/db/consts/time.h"
+#include "dbat/db/weather.h"
 
 /* local functions */
 static void handle_fall(struct char_data *ch);

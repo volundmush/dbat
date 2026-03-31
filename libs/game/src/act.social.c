@@ -14,6 +14,15 @@
 #include "dbat/game/interpreter.h"
 #include "dbat/game/handler.h"
 
+#include "dbat/game/config.h"
+#include "dbat/db/social.h"
+#include "dbat/db/rooms.h"
+#include "dbat/db/characters.h"
+#include "dbat/db/command.h"
+#include "dbat/db/descriptor.h"
+
+#include <errno.h>
+
 /* local functions */
 char *fread_action(FILE *fl, int nr);
 static int find_action(int cmd);

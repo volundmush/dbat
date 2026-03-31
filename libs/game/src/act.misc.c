@@ -25,6 +25,16 @@
 #include "dbat/game/fight.h"
 #include "dbat/game/class.h"
 
+#include "dbat/db/characters.h"
+#include "dbat/db/objects.h"
+#include "dbat/db/rooms.h"
+#include "dbat/db/descriptor.h"
+#include "dbat/db/consts/songs.h"
+#include "dbat/db/consts/time.h"
+#include "dbat/db/consts/pulse.h"
+#include "dbat/db/consts/fish.h"
+#include "dbat/db/consts/recipes.h"
+
 /* local functions  */
 static void generate_multiform(struct char_data *ch, struct char_data *multi1, struct char_data *multi2, struct char_data *multi3);
 static void resolve_song(struct char_data *ch);

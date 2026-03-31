@@ -28,7 +28,6 @@
 #include "dbat/game/fight.h"
 #include "dbat/game/races.h"
 #include "dbat/game/class.h"
-#include "dbat/game/constants.h"
 #include "dbat/game/shop.h"
 #include "dbat/game/feats.h"
 #include "dbat/game/guild.h"
@@ -36,6 +35,19 @@
 #include "dbat/game/objsave.h"
 #include "dbat/game/mail.h"
 #include "dbat/game/clan.h"
+
+#include <sys/stat.h>
+
+#include "dbat/db/characters.h"
+#include "dbat/db/descriptor.h"
+#include "dbat/db/weather.h"
+#include "dbat/db/objects.h"
+#include "dbat/db/consts/pulse.h"
+#include "dbat/db/rooms.h"
+#include "dbat/game/dragonball.h"
+#include "dbat/db/consts/shadowdragons.h"
+#include "dbat/db/zones.h"
+#include "dbat/db/consts/auction.h"
 
 /* local functions */
 static int has_scanner(struct char_data *ch);

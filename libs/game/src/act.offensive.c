@@ -15,9 +15,16 @@
 #include "dbat/game/spells.h"
 #include "dbat/game/utils.h"
 #include "dbat/game/handler.h"
-#include "dbat/game/constants.h"
 #include "dbat/game/fight.h"
 #include "dbat/game/guild.h"
+
+#include "dbat/game/config.h"
+#include "dbat/db/characters.h"
+#include "dbat/db/objects.h"
+#include "dbat/db/rooms.h"
+#include "dbat/db/descriptor.h"
+#include "dbat/db/consts/pulse.h"
+#include "dbat/db/consts/deathtype.h"
 
 /* Combat commands below this line */
 
