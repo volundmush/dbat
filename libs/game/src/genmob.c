@@ -18,6 +18,8 @@
 #include "dbat/db/characters.h"
 #include "dbat/db/objects.h"
 #include "dbat/db/rooms.h"
+#include "dbat/db/shops.h"
+#include "dbat/db/guilds.h"
 
 /* From db.c */
 void init_mobile_skills(void);

@@ -32,6 +32,7 @@
 #include "dbat/game/config.h"
 #include "dbat/db/consts/constates.h"
 #include "dbat/db/weather.h"
+#include "dbat/db/command.h"
 
 #include <ctype.h>
 

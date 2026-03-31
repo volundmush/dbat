@@ -15,10 +15,13 @@
 #include "dbat/game/genzon.h"
 #include "dbat/game/shop.h"
 #include "dbat/game/dg_olc.h"
+#include "dbat/game/dg_scripts.h"
 
 #include "dbat/db/characters.h"
 #include "dbat/db/objects.h"
 #include "dbat/db/rooms.h"
+#include "dbat/db/dgscripts.h"
+#include "dbat/db/shops.h"
 
 
 /*

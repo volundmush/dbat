@@ -7,7 +7,7 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
-#define __INTERPRETER_C__
+
 #include "dbat/game/interpreter.h"
 #include "dbat/game/comm.h"
 #include "dbat/game/db.h"
@@ -45,6 +45,8 @@
 #include "dbat/db/rooms.h"
 #include "dbat/db/descriptor.h"
 #include "dbat/db/command.h"
+#include "dbat/db/disabled.h"
+#include "dbat/db/bans.h"
 
 /* local global variables */
 DISABLED_DATA *disabled_first = NULL;
@@ -491,7 +493,7 @@ struct command_info *complete_cmd_info;
  * priority.
  */
 
-cpp_extern const struct command_info cmd_info[] = {
+const struct command_info cmd_info[] = {
   { "RESERVED", "", 0, 0, 0, ADMLVL_NONE	, 0 },     /* this must be first -- for specprocs */
 
   /* directions must come before other commands but after RESERVED */

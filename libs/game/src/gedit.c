@@ -6,6 +6,7 @@
  *  Made for Oasis OLC                                                   *
  *  Copyright 1996 Harvey Gilpin.                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+#include <ctype.h>
 #include "dbat/game/gedit.h"
 #include "dbat/game/genzon.h"
 #include "dbat/game/act.informative.h"
@@ -20,9 +21,11 @@
 #include "dbat/game/feats.h"
 #include "dbat/game/genolc.h"
 #include "dbat/game/shop.h"
+
 #include "dbat/db/characters.h"
 #include "dbat/db/objects.h"
 #include "dbat/db/rooms.h"
+#include "dbat/db/guilds.h"
 
 /*
  * Should check more things.
@@ -401,7 +404,7 @@ void gedit_no_train_menu(struct descriptor_data *d)
                     !(++count % 2) ? "\r\n" : "");
   }
 
-  sprintbitarray(G_WITH_WHO(guilddata), trade_letters, sizeof(bits), bits);
+  sprintbitarray(G_WITH_WHO(guilddata), trade_letters, 4, bits, sizeof(bits));
   write_to_output(d, "\r\nCurrent train flags: @c%s@n\r\n"
                   "Enter choice, 0 to quit : ", bits);
   OLC_MODE(d) = GEDIT_NO_TRAIN;
@@ -419,7 +422,7 @@ void gedit_disp_menu(struct descriptor_data *d)
 
 	clear_screen(d);
 
-	sprintbitarray(G_WITH_WHO(guilddata), trade_letters, sizeof(buf1), buf1);
+	sprintbitarray(G_WITH_WHO(guilddata), trade_letters, sizeof(buf1), buf1, sizeof(buf1));
 
 	write_to_output(d, 
 			  "-- Guild Number: [@c%d@n]\r\n"

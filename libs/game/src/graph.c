@@ -22,6 +22,7 @@
 #include "dbat/db/characters.h"
 #include "dbat/db/objects.h"
 #include "dbat/db/rooms.h"
+#include "dbat/db/consts/pulse.h"
 
 /* local functions */
 int VALID_EDGE(room_rnum x, int y);

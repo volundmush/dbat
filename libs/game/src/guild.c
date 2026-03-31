@@ -23,6 +23,8 @@
 #include "dbat/db/characters.h"
 #include "dbat/db/objects.h"
 #include "dbat/db/rooms.h"
+#include "dbat/db/guilds.h"
+#include "dbat/db/command.h"
 
 /* Local variables */
 int spell_sort_info[SKILL_TABLE_SIZE + 1];

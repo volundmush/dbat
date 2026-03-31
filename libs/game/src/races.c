@@ -18,6 +18,9 @@ const int race_ok_gender[NUM_SEX][NUM_RACES] = {
 
 };
 
+#undef Y
+#undef N
+
 const char *race_display[NUM_RACES] = {
   "@B1@W) @cHuman\r\n",
   "@B2@W) @cSaiyan\r\n",

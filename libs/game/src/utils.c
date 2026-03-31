@@ -25,6 +25,10 @@
 #include "dbat/db/characters.h"
 #include "dbat/db/objects.h"
 #include "dbat/db/rooms.h"
+#include "dbat/db/consts/aligns.h"
+
+#include <sys/stat.h>
+#include <dirent.h>
 
 /* local functions */
 char commastring[MAX_STRING_LENGTH];

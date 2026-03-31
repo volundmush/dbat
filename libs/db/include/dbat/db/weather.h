@@ -1,5 +1,6 @@
 #pragma once
 #include <stdint.h>
+#include "consts/weather.h"
 
 struct weather_data {
    int	pressure;	/* How is the pressure ( Mb ) */

@@ -12,6 +12,7 @@
 #include "dbat/db/characters.h"
 #include "dbat/db/objects.h"
 #include "dbat/db/rooms.h"
+#include "dbat/db/zones.h"
 
 /* real zone of room/mobile/object/shop given */
 zone_rnum real_zone_by_thing(room_vnum vznum)
@@ -79,7 +80,7 @@ zone_rnum create_new_zone(zone_vnum vzone_num, room_vnum bottom, room_vnum top, 
   /*
    * Make sure the zone does not exist.
    */
-  room = vzone_num * 100; /* Old CircleMUD 100-zones. */
+  room_vnum room = vzone_num * 100; /* Old CircleMUD 100-zones. */
   for (i = 0; i <= top_of_zone_table; i++)
     if (genolc_zone_bottom(i) <= room && zone_table[i].top >= room) {
       *error = "A zone already covers that area.\r\n";

@@ -17,6 +17,7 @@
 #include "dbat/db/characters.h"
 #include "dbat/db/objects.h"
 #include "dbat/db/rooms.h"
+#include "dbat/db/command.h"
 
 
 void write_aliases(struct char_data *ch)

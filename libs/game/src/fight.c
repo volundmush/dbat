@@ -30,6 +30,9 @@
 #include "dbat/db/objects.h"
 #include "dbat/db/rooms.h"
 #include "dbat/db/descriptor.h"
+#include "dbat/db/consts/deathtype.h"
+#include "dbat/db/consts/shadowdragons.h"
+#include "dbat/db/consts/pulse.h"
 
 /* Structures */
 struct char_data *combat_list = NULL;	/* head of l-list of fighting chars */

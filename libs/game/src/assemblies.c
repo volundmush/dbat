@@ -10,6 +10,7 @@
 #include "dbat/game/utils.h"
 #include "dbat/game/comm.h"
 #include "dbat/game/handler.h"
+#include "dbat/game/interpreter.h"
 
 #include "dbat/db/characters.h"
 #include "dbat/db/objects.h"

@@ -11,10 +11,12 @@
 #include "dbat/game/genolc.h"
 #include "dbat/game/genshp.h"
 #include "dbat/game/genzon.h"
+#include "dbat/game/shop.h"
 
 #include "dbat/db/characters.h"
 #include "dbat/db/objects.h"
 #include "dbat/db/rooms.h"
+#include "dbat/db/shops.h"
 
 /*
  * NOTE (gg): Didn't modify sedit much. Don't consider it as 'recent'

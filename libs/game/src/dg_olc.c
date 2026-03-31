@@ -26,6 +26,8 @@
 #include "dbat/db/objects.h"
 #include "dbat/db/rooms.h"
 
+#include "dbat/db/dgscripts.h"
+
 /* local functions */
 static void trigedit_disp_menu(struct descriptor_data *d);
 static void trigedit_disp_types(struct descriptor_data *d);

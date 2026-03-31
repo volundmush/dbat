@@ -1,5 +1,6 @@
 #pragma once
 #include "dbat/db/consts/types.h"
+#include "dbat/db/consts/skills.h"
 
 #define GM_NUM(i)  (guild_index[i].vnum)
 #define GM_TRAINER(i) (guild_index[i].gm)

@@ -4,6 +4,7 @@
 #include "consts/maximums.h"
 #include "consts/affflags.h"
 #include "consts/sizes.h"
+#include "consts/weapons.h"
 #include "consts/applies.h"
 #include "affected.h"
 #include "index.h"

@@ -29,6 +29,7 @@
 #include "dbat/db/objects.h"
 #include "dbat/db/rooms.h"
 #include "dbat/db/shops.h"
+#include "dbat/db/consts/pulse.h"
 
 /* Forward/External function declarations */
 static void sort_keeper_objs(struct char_data *keeper, int shop_nr);

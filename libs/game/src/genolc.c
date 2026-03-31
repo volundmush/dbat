@@ -4,7 +4,6 @@
  * Copyright 1996 by Harvey Gilpin					*
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
-#define __GENOLC_C__
 #include "dbat/game/genolc.h"
 #include "dbat/game/gengld.h"
 #include "dbat/game/cedit.h"

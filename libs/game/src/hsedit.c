@@ -6,6 +6,7 @@
 *  Copyright 2007 Stefan Cole (aka Jamdog)                               * 
 *  Used at AderonMUD (aderonmud.genesismuds.com 3200)                    * 
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */ 
+#include <ctype.h>
 #include "dbat/game/hsedit.h"
 #include "dbat/game/comm.h"
 #include "dbat/game/utils.h"

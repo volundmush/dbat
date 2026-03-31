@@ -26,6 +26,7 @@
 #include "dbat/db/characters.h"
 #include "dbat/db/objects.h"
 #include "dbat/db/rooms.h"
+#include "dbat/db/command.h"
 
 /* external variables */
 
@@ -270,11 +271,11 @@ ASPELL(spell_identify)
     send_to_char(ch, "You feel informed:\r\nObject '%s', Item type: %s\r\n", obj->short_description, bitbuf);
 
     if (GET_OBJ_PERM(obj)) {
-      sprintbitarray(GET_OBJ_PERM(obj), affected_bits, AF_ARRAY_MAX, bitbuf);
+      sprintbitarray(GET_OBJ_PERM(obj), affected_bits, AF_ARRAY_MAX, bitbuf, sizeof(bitbuf));
       send_to_char(ch, "Item will give you following abilities:  %s\r\n", bitbuf);
     }
 
-    sprintbitarray(GET_OBJ_EXTRA(obj), extra_bits, EF_ARRAY_MAX, bitbuf);
+    sprintbitarray(GET_OBJ_EXTRA(obj), extra_bits, EF_ARRAY_MAX, bitbuf, sizeof(bitbuf));
     send_to_char(ch, "Item is: %s\r\n", bitbuf);
 
     send_to_char(ch, "Weight: %"I64T", Value: %d, Rent: %d, Min Level: %d\r\n", GET_OBJ_WEIGHT(obj), GET_OBJ_COST(obj), GET_OBJ_RENT(obj), GET_OBJ_LEVEL(obj));

@@ -21,6 +21,9 @@
 #include "dbat/db/characters.h"
 #include "dbat/db/objects.h"
 #include "dbat/db/rooms.h"
+#include "dbat/db/descriptor.h"
+#include "dbat/db/zones.h"
+#include "dbat/game/dg_scripts.h"
 
 /******************************************************************************/
 /** Internal Functions                                                       **/

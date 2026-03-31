@@ -1,6 +1,7 @@
 #pragma once
+#include <stdio.h>
 #include "dbat/db/consts/types.h"
-
+#include "dbat/db/consts/maximums.h"
 
 
 #define BUY_TYPE(i)		((i).type)

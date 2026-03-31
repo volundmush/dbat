@@ -72,6 +72,7 @@ struct player_index_element;
 struct social_messg;
 struct weather_data;
 struct time_info_data;
+struct reset_com;
 
 typedef struct char_data char_data;
 typedef struct obj_data obj_data;
@@ -98,6 +99,7 @@ typedef struct player_index_element player_index_element;
 typedef struct social_messg social_messg;
 typedef struct weather_data weather_data;
 typedef struct time_info_data time_info_data;
+typedef struct reset_com reset_com;
 
 
 #define ACMD(name) void (name)(struct char_data *ch, char *argument, int cmd, int subcmd)

@@ -25,6 +25,8 @@
 #include "dbat/db/characters.h"
 #include "dbat/db/objects.h"
 #include "dbat/db/rooms.h"
+#include "dbat/db/command.h"
+#include "dbat/db/consts/gauntlet.h"
 
 /* local functions */
 

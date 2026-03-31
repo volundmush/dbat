@@ -9,6 +9,18 @@
 ************************************************************************ */
 #include "dbat/game/comm.h"
 #include "dbat/game/utils.h"
+
+#include <signal.h>
+#include <sys/resource.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <ctype.h>
+#include <sys/time.h>
+#include <netdb.h>
+#include <fcntl.h>
+#include <sys/wait.h>
 #include "dbat/game/config.h"
 #include "dbat/game/maputils.h"
 #include "dbat/game/ban.h"
@@ -46,17 +58,16 @@
 #include "dbat/db/bans.h"
 #include "dbat/game/telnet.h"
 #include "dbat/db/consts/pulse.h"
+#include "dbat/db/consts/songs.h"
 #include "dbat/db/dgscripts.h"
 #include "dbat/db/help.h"
 
 /* externs */
 
-
 int passcomm(struct char_data *ch, char *comm);
 
 
 /* local globals */
-struct descriptor_data *descriptor_list = NULL;		/* master desc list */
 struct txt_block *bufpool = 0;	/* pool of large output buffers */
 int buf_largecount = 0;		/* # of large buffers which exist */
 int buf_overflows = 0;		/* # of overflows of output */
@@ -413,21 +424,11 @@ void game_loop(socklen_t cmmother_desc)
 
     /* Sleep if we don't have any connections */
     if (descriptor_list == NULL) {
-       if (CONFIG_IMC_ENABLED) {
-         top_desc = this_imcmud != NULL ? MAX( cmmother_desc, this_imcmud->desc ) : cmmother_desc;
-       } else {
-         top_desc = cmmother_desc;
-       }
-      if (!CONFIG_IMC_ENABLED) {
-       log("No connections.  Going to sleep.");
-      }
+       top_desc = cmmother_desc;
+      log("No connections.  Going to sleep.");
       FD_ZERO(&input_set);
       FD_SET(cmmother_desc, &input_set);
 
-       if (CONFIG_IMC_ENABLED) {
-         if ( this_imcmud != NULL && this_imcmud->desc != -1 )
-            FD_SET(this_imcmud->desc, &input_set);
-       }
       if (select(top_desc + 1, &input_set, (fd_set *) 0, (fd_set *) 0, NULL) < 0) {
 	if (errno == EINTR)
 	  log("Waking up to process signal.");

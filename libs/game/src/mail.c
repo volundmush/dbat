@@ -25,6 +25,7 @@ Written by Jeremy Elson (jelson@circlemud.org)
 #include "dbat/db/characters.h"
 #include "dbat/db/objects.h"
 #include "dbat/db/rooms.h"
+#include "dbat/db/command.h"
 
 /* local globals */
 static mail_index_type *mail_index = NULL;	/* list of recs in the mail file  */

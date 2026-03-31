@@ -19,6 +19,7 @@
 #include "dbat/db/characters.h"
 #include "dbat/db/objects.h"
 #include "dbat/db/rooms.h"
+#include "dbat/db/shops.h"
 
 
 /******************************************************************************/
@@ -359,7 +360,7 @@ void print_zone(struct char_data *ch, zone_vnum vnum)
     return;
   }
 
-  sprintbitarray(zone_table[rnum].zone_flags, zone_bits, ZF_ARRAY_MAX, bits);  
+  sprintbitarray(zone_table[rnum].zone_flags, zone_bits, ZF_ARRAY_MAX, bits, sizeof(bits));  
   /****************************************************************************/
   /** Locate the largest of the three, top_of_world, top_of_mobt, or         **/
   /** top_of_objt.                                                           **/

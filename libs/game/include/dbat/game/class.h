@@ -6,7 +6,7 @@
 
 extern const int class_ok_race[NUM_RACES][NUM_CLASSES];
 extern const char *config_sect[NUM_CONFIG_SECTIONS+1];
-
+extern const int class_hit_die_size[NUM_CLASSES];
 
 
 // functions

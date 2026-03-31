@@ -7,7 +7,7 @@
 *  $Date: 2004/10/11 12:07:00$                                            *
 *  $Revision: 1.0.14 $                                                    *
 **************************************************************************/
-
+#include <ctype.h>
 #include "dbat/game/dg_scripts.h"
 #include "dbat/game/act.wizard.h"
 #include "dbat/game/dg_event.h"
@@ -19,6 +19,7 @@
 #include "dbat/db/characters.h"
 #include "dbat/db/objects.h"
 #include "dbat/db/rooms.h"
+#include "dbat/db/consts/pulse.h"
 
 #define PULSES_PER_MUD_HOUR     (SECS_PER_MUD_HOUR*PASSES_PER_SEC)
 

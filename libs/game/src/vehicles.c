@@ -19,6 +19,7 @@
 #include "dbat/db/characters.h"
 #include "dbat/db/objects.h"
 #include "dbat/db/rooms.h"
+#include "dbat/db/consts/pulse.h"
 
 #ifndef EXITN
 #  define EXITN(room, door)		(world[room].dir_option[door])

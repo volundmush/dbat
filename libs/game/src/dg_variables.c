@@ -7,7 +7,7 @@
 *  $Date: 2004/10/11 12:07:00 $                                           *
 *  $Revision: 1.0.14 $                                                    *
 **************************************************************************/
-
+#include <stdio.h>
 #include "dbat/game/dg_scripts.h"
 #include "dbat/game/utils.h"
 #include "dbat/game/comm.h"
@@ -24,6 +24,7 @@
 #include "dbat/db/characters.h"
 #include "dbat/db/objects.h"
 #include "dbat/db/rooms.h"
+#include "dbat/db/command.h"
 
 /* Utility functions */
 
@@ -1199,7 +1200,7 @@ in the vault (vnum: 453) now and then. you can just use
             } else 
               snprintf(str, slen, "0");
           } else {
-            sprintbitarray(GET_OBJ_EXTRA(o), extra_bits, EF_ARRAY_MAX, str);
+            sprintbitarray(GET_OBJ_EXTRA(o), extra_bits, EF_ARRAY_MAX, str, slen);
           }
           break;
         case 'h':

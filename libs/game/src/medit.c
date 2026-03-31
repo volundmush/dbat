@@ -29,6 +29,9 @@
 #include "dbat/db/objects.h"
 #include "dbat/db/rooms.h"
 #include "dbat/db/descriptor.h"
+#include "dbat/db/dgscripts.h"
+#include "dbat/db/shops.h"
+#include "dbat/db/consts/npc.h"
 
 /*-------------------------------------------------------------------*/
 
@@ -508,8 +511,8 @@ void medit_disp_menu(struct descriptor_data *d)
 	  GET_NDD(mob), GET_SDD(mob), GET_HIT(mob), GET_MANA(mob),
 	  GET_MOVE(mob), GET_ARMOR(mob), GET_EXP(mob), GET_GOLD(mob)
 	  );
-  sprintbitarray(MOB_FLAGS(mob), action_bits, AF_ARRAY_MAX, flags);
-  sprintbitarray(AFF_FLAGS(mob), affected_bits, AF_ARRAY_MAX, flag2);
+  sprintbitarray(MOB_FLAGS(mob), action_bits, AF_ARRAY_MAX, flags, sizeof(flags));
+  sprintbitarray(AFF_FLAGS(mob), affected_bits, AF_ARRAY_MAX, flag2, sizeof(flag2));
   write_to_output(d,
 	  "@gI@n) Position   : @y%-10s@n,	 @gJ@n) Default   : @y%-10s\r\n"
 	  "@gK@n) Personality: @Y%s@n\r\n"

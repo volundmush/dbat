@@ -3,6 +3,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <sys/socket.h>
+#include "dbat/db/descriptor.h"
 #include <zlib.h>
 
 struct descriptor_data;
