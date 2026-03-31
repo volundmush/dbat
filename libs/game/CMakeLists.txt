@@ -34,4 +34,5 @@ target_link_libraries(dbat_game
   PUBLIC
     bsd
     ZLIB::ZLIB
+    dbat::db
 )

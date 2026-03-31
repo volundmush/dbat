@@ -3,9 +3,12 @@
 #include "consts/itemdata.h"
 #include "consts/maximums.h"
 #include "consts/affflags.h"
+#include "consts/sizes.h"
+#include "consts/applies.h"
 #include "affected.h"
 #include "index.h"
 #include "htree.h"
+#include "extradesc.h"
 
 struct obj_spellbook_spell {
    int spellname;	/* Which spell is written */

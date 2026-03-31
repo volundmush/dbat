@@ -1,14 +1,6 @@
-/************************************************************************
- * Generic OLC Library - Guild / gengld.h			v1.0	*
- * Copyright 1996 by Harvey Gilpin					*
- * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
- ************************************************************************/
-
-#ifndef __GENGLD_H__
-#define __GENGLD_H__
-
-#include "structs.h"
-#include "guild.h"
+#pragma once
+#include "dbat/db/consts/types.h"
+struct guild_data;
 
 void copy_guild(struct guild_data *tguild, struct guild_data *fguild);
 void copy_list(IDXTYPE **tlist, IDXTYPE *flist);
@@ -51,5 +43,3 @@ guild_rnum real_guild(guild_vnum vnum);
 #define MAX_PER_PRAC    1	/* max percent gain in skill per practice */
 #define MIN_PER_PRAC    2	/* min percent gain in skill per practice */
 #define PRAC_TYPE       3	/* should it say 'spell' or 'skill'?	 */
-
-#endif

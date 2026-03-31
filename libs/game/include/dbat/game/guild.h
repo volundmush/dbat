@@ -1,15 +1,7 @@
-/* ************************************************************************
-*   File: guild.h                                                         *
-*  Usage: GuildMaster definition for everything needed by guild.c         *
-*                                                                         *
-* Written by Jason Goodwin.   jgoodwin@expert.cc.purdue.edu               *
-************************************************************************ */
+#pragma once
+#include "dbat/db/consts/types.h"
 
-#ifndef __GUILD_H__
-#define __GUILD_H__
-
-
-#include "structs.h"
+struct descriptor_data;
 
 
 #define GM_NUM(i)  (guild_index[i].vnum)
@@ -124,5 +116,3 @@ int count_guilds(guild_vnum low, guild_vnum high);
 
 /*. External . */
 SPECIAL(guild);
-
-#endif

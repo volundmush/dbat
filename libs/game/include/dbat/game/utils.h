@@ -1,17 +1,5 @@
-/* ************************************************************************
-*   File: utils.h                                       Part of CircleMUD *
-*  Usage: header file: utility macros and prototypes of utility funcs     *
-*                                                                         *
-*  All rights reserved.  See license.doc for complete information.        *
-*                                                                         *
-*  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
-*  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
-************************************************************************ */
+#pragma once
 
-#ifndef __UTILS_H__
-#define __UTILS_H__
-
-#include "structs.h"
 #include "db.h"
 #include "races.h"
 #include "handler.h"
@@ -1165,5 +1153,3 @@ void admin_set(struct char_data *ch, int value);
 
 int     levenshtein_distance(char *s1, char *s2);
 #define GET_MURDER(ch)          CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->murder))
-
-#endif

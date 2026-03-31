@@ -1,29 +1,5 @@
-/* ******************************************************************** *
- * FILE        : assemblies.h                  Copyright (C) 1999 Geoff Davis
-*
- * USAGE: Definitions, constants and prototypes for assembly engine.   *
- * -------------------------------------------------------------------- *
- * 1999 MAY 07 gdavis/azrael@laker.net Initial implementation.         *
- * ******************************************************************** */
-
-#ifndef __ASSEMBLIES_H__
-#define __ASSEMBLIES_H__
-
-#include "structs.h"
-
-/* ******************************************************************** *
- * Preprocessor constants.                                             *
- * ******************************************************************** */
-
-
-/* ******************************************************************** *
- * Type aliases.                                                       *
- * ******************************************************************** */
-
-/* ******************************************************************** *
- * Prototypes for assemblies.c.
-*
- * ******************************************************************** */
+#pragma once
+#include "dbat/db/assembly.h"
 
 void           assemblyBootAssemblies( void );
 void           assemblySaveAssemblies( void );
@@ -49,6 +25,3 @@ long           assemblyGetComponentIndex( ASSEMBLY *pAssembly,
 ASSEMBLY*      assemblyGetAssemblyPtr( long lVnum );
 
 /* ******************************************************************** */
-
-#endif
-

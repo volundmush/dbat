@@ -141,3 +141,5 @@ struct config_data {
   struct tick_data       ticks;		/* game tick stuff 	 */
   struct creation_data	 creation;	/* char creation method	 */
 };
+
+extern struct config_data config_info;

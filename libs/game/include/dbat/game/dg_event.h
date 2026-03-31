@@ -1,22 +1,4 @@
-/* ************************************************************************
-*  File: dg_event.h                                                       *
-*                                                                         *
-*  Usage: structures and prototypes for events                            *
-*                                                                         *
-*  Written by Eric Green (ejg3@cornell.edu)                               *
-*                                                                         *
-*  Changes:                                                               *
-*      3/6/98 ejg:  Changed return type of EVENTFUNC from void to long.   *
-*                   Moved struct event definition to events.c.            *
-*  $Author: Mark A. Heilpern/egreen/Welcor $                              *
-*  $Date: 2004/10/11 12:07:00$                                            *
-*  $Revision: 1.0.14 $                                                    *
-************************************************************************ */
-#ifndef __DG_EVENT_H__
-#define __DG_EVENT_H__
-
-#include "structs.h"
-
+#pragma once
 
 /*
 ** how often will heartbeat() call the 'wait' event function?
@@ -73,5 +55,3 @@ long queue_key(struct queue *q);
 long queue_elmt_key(struct q_element *qe);
 void queue_free(struct queue *q);
 int  event_is_queued(struct event *event);
-
-#endif

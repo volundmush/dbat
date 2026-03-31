@@ -2,6 +2,7 @@
 #include <zlib.h>
 #include "consts/types.h"
 #include "consts/maximums.h"
+#include "consts/constates.h"
 
 
 struct txt_block {

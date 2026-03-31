@@ -79,3 +79,5 @@ struct reset_q_type {
 
 extern struct zone_data *zone_table;
 extern zone_rnum top_of_zone_table;
+
+extern struct reset_q_type reset_q;	/* queue of zones to be reset	 */

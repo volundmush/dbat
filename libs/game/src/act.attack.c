@@ -13,6 +13,7 @@
 *   credits found in act.offensive.c except for the commands added in-    *
 *                                                   ~~Iovan               *
 ************************************************************************ */
+#include "dbat/db/consts/types.h"
 #include "dbat/game/act.attack.h"
 #include "dbat/game/fight.h"
 #include "dbat/game/dg_comm.h"
@@ -21,9 +22,18 @@
 #include "dbat/game/utils.h"
 #include "dbat/game/handler.h"
 #include "dbat/game/comm.h"
-#include "dbat/game/constants.h"
 #include "dbat/game/combat.h"
 #include "dbat/game/class.h"
+
+#include "dbat/db/consts/skills.h"
+#include "dbat/db/characters.h"
+#include "dbat/db/objects.h"
+#include "dbat/db/rooms.h"
+#include "dbat/db/consts/attacks.h"
+#include "dbat/db/consts/deathtype.h"
+#include "dbat/db/consts/pulse.h"
+#include "dbat/db/weather.h"
+
 
 ACMD(do_lightgrenade)
 {

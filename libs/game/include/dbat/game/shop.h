@@ -1,17 +1,5 @@
-/* ************************************************************************
-*   File: shop.h                                        Part of CircleMUD *
-*  Usage: shop file definitions, structures, constants                    *
-*                                                                         *
-*  All rights reserved.  See license.doc for complete information.        *
-*                                                                         *
-*  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
-*  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
-************************************************************************ */
-
-#ifndef __SHOP_H__
-#define __SHOP_H__
-
-#include "structs.h"
+#pragma once
+#include "dbat/db/consts/types.h"
 
 
 
@@ -228,8 +216,7 @@ struct stack_data {
 // global variables
 extern const char *trade_letters[NUM_TRADERS+1];
 extern const char *shop_bits[];
-extern struct shop_data *shop_index;
-extern int top_shop, cmd_say, cmd_tell, cmd_emote, cmd_slap, cmd_puke;
+extern int cmd_say, cmd_tell, cmd_emote, cmd_slap, cmd_puke;
 
 // functions
 int shop_producing(struct obj_data *item, int shop_nr);
@@ -245,6 +232,3 @@ int count_shops(shop_vnum low, shop_vnum high);
 SPECIAL(shop_keeper);
 
 // commands
-
-
-#endif

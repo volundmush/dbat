@@ -1,11 +1,5 @@
-//
-// Created by volund on 10/20/21.
-//
-
-#ifndef CIRCLE_HSEDIT_H
-#define CIRCLE_HSEDIT_H
-
-#include "structs.h"
+#pragma once
+struct descriptor_data;
 #include "house.h"
 
 void hsedit_setup_new(struct descriptor_data *d);
@@ -21,5 +15,3 @@ void hsedit_disp_val1_menu(struct descriptor_data *d);
 void hsedit_disp_val2_menu(struct descriptor_data *d);
 void hsedit_disp_val3_menu(struct descriptor_data *d);
 void free_house(struct house_control_rec *house);
-
-#endif //CIRCLE_HSEDIT_H

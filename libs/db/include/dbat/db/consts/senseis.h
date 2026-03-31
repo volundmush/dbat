@@ -76,3 +76,7 @@
 #define SENSEI_NPC_WARRIOR	30
 
 extern const char *sensei_style[MAX_SENSEI];
+
+extern const char *pc_class_types[NUM_CLASSES+1];
+extern const char *class_names[NUM_CLASSES+1];
+extern const char *class_abbrevs[NUM_CLASSES+1];

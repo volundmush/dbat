@@ -19,7 +19,6 @@
 #include "dbat/game/spells.h"
 #include "dbat/game/races.h"
 #include "dbat/game/handler.h"
-#include "dbat/game/constants.h"
 #include "dbat/game/dg_scripts.h"
 #include "dbat/game/class.h"
 #include "dbat/game/boards.h"
@@ -27,6 +26,19 @@
 #include "dbat/game/mail.h"
 #include "dbat/game/guild.h"
 #include "dbat/game/clan.h"
+
+#include "dbat/db/characters.h"
+#include "dbat/db/objects.h"
+#include "dbat/db/rooms.h"
+#include "dbat/db/descriptor.h"
+#include "dbat/db/weather.h"
+#include "dbat/db/consts/weapons.h"
+#include "dbat/db/help.h"
+#include "dbat/db/consts/autoexit.h"
+#include "dbat/db/consts/songs.h"
+#include "dbat/game/interpreter.h"
+#include "dbat/db/consts/time.h"
+#include "dbat/db/consts/pulse.h"
 
 /* local functions */
 static void gen_map(struct char_data *ch, int num);
@@ -7398,11 +7410,7 @@ ACMD(do_gen_ps)
     send_to_char(ch, "\033[H\033[J");
     break;
   case SCMD_VERSION:
-    send_to_char(ch, "%s\r\n", circlemud_version);
-    send_to_char(ch, "%s\r\n", oasisolc_version);
-    send_to_char(ch, "%s\r\n", DG_SCRIPT_VERSION);
-    send_to_char(ch, "%s\r\n", CWG_VERSION);
-    send_to_char(ch, "%s\r\n", DBAT_VERSION);
+    send_to_char(ch, "%s\r\n", "Ongoing");
     break;
   case SCMD_WHOAMI:
     send_to_char(ch, "%s\r\n", GET_NAME(ch));

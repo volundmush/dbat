@@ -1,5 +1,6 @@
 #pragma once
 #include "consts/types.h"
+#include "index.h"
 
 /* linked list for mob/object prototype trigger lists */
 struct trig_proto_list {
@@ -77,10 +78,10 @@ struct trig_var_data {
 /* structure for triggers */
 struct trig_data {
     IDXTYPE nr; 	                /* trigger's rnum                  */
-    int8_t attach_type;			/* mob/obj/wld intentions          */
-    int8_t data_type;		        /* type of game_data for trig      */
+    uint8_t attach_type;			/* mob/obj/wld intentions          */
+    uint8_t data_type;		        /* type of game_data for trig      */
     char *name;			        /* name of trigger                 */
-    long trigger_type;			/* type of trigger (for bitvector) */
+    bitvector_t trigger_type;			/* type of trigger (for bitvector) */
     struct cmdlist_element *cmdlist;	/* top of command list             */
     struct cmdlist_element *curr_state;	/* ptr to current line of trigger  */
     int narg;				/* numerical argument              */
@@ -98,7 +99,7 @@ struct trig_data {
 
 /* a complete script (composed of several triggers) */
 struct script_data {
-  long types;				/* bitvector of trigger types */
+  bitvector_t types;			/* bitvector of trigger types */
   struct trig_data *trig_list;	        /* list of triggers           */
   struct trig_var_data *global_vars;	/* list of global variables   */
   bool purged;				/* script is set to be purged */
@@ -127,3 +128,10 @@ struct script_memory {
   char *cmd;				/* command, or NULL for generic */
   struct script_memory *next;
 };
+
+
+extern struct index_data **trig_index;
+
+extern struct index_data **trig_index;
+extern struct trig_data *trigger_list;
+extern int top_of_trigt;

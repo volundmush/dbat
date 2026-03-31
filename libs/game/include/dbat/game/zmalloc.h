@@ -1,12 +1,4 @@
-/**************************************************************************
-*  File: zmalloc.h                                         Part of tbaMUD *
-*  Usage: A simple memory allocation monitor, header.                     *
-*                                                                         *
-*  Version 1.1 Copyright 1996, 1998, 1999, 2000 Eric Murray ericm@lne.com *
-**************************************************************************/
-
-#ifndef ZMALLOC_H
-#define ZMALLOC_H
+#pragma once
 
 unsigned char *zmalloc(int, char *, int);
 unsigned char *zrealloc(unsigned char *, int, char *, int);
@@ -19,5 +11,3 @@ char *zstrdup(const char *, char *, int);
 #define calloc(n,x)	zmalloc((n*x),__FILE__,__LINE__)
 #define realloc(r,x)	zrealloc((unsigned char *)(r),(x),__FILE__,__LINE__)
 #define free(x)		zfree2((unsigned char *)(x),__FILE__,__LINE__)
-
-#endif /* ZMALLOC_H */

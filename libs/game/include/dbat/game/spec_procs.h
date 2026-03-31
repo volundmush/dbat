@@ -1,11 +1,5 @@
-//
-// Created by basti on 10/22/2021.
-//
-
-#ifndef CIRCLE_SPEC_PROCS_H
-#define CIRCLE_SPEC_PROCS_H
-
-#include "structs.h"
+#pragma once
+#include "dbat/db/consts/types.h"
 
 
 // functions
@@ -45,5 +39,3 @@ SPECIAL(cleric_ao);
 SPECIAL(dziak);
 SPECIAL(azimer);
 SPECIAL(lyrzaxyn);
-
-#endif //CIRCLE_SPEC_PROCS_H

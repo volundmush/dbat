@@ -1,16 +1,5 @@
-/* ************************************************************************
-*  File: obj_edit.h                  Part of Dragonball Advent Truth      *
-*  Usage: Player level object editing utilities and common functions for  *
-*  obj_edit.c                                                             *
-*                                                                         *
-*  This is an original file created by me for Dragonball Advent Truth     *
-*  to house all player level object editing defines/declarations          *
-*                                                            Iovan 1/6/13 *
-************************************************************************ */
-
-#ifndef __OBJ_EDIT_H__
-#define __OBJ_EDIT_H__
-#include "structs.h"
+#pragma once
+struct descriptor_data;
 
 
 /* obj_edit.c functions */
@@ -42,5 +31,3 @@ void disp_restring_menu(struct descriptor_data *d);
 #define EDIT_RESTRING_LDESC 4
 #define EDIT_RESTRING_QUIT  5
 #define EDIT_RESTRING_CONF  6
-
-#endif

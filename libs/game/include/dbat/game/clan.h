@@ -25,11 +25,7 @@
 //    telnet://dreams.game-host.org:4000
 //
 //********************************************************************************
-
-#ifndef __CLAN_H__
-#define __CLAN_H__
-
-#include "structs.h"        // for char_data
+#pragma once
 
 #define LVL_CLAN_MOD            32
 #define DEFAULT_OPEN_JOIN          FALSE
@@ -218,5 +214,3 @@ extern int num_clans;
 // List all of the clans vict belongs to, to char
 //
 void listClansOfVictToChar(const struct char_data *vict, struct char_data *ch);
-
-#endif

@@ -1,17 +1,4 @@
-/* ************************************************************************
-*   File: mail.h                                        Part of CircleMUD *
-*  Usage: header file for mail system                                     *
-*                                                                         *
-*  All rights reserved.  See license.doc for complete information.        *
-*                                                                         *
-*  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
-*  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
-************************************************************************ */
-
-#ifndef __MAIL_H__
-#define __MAIL_H__
-
-#include "structs.h"
+#pragma once
 
 /* ****** MUD MAIL SYSTEM HEADER FILE **********************
  ***     written by Jeremy Elson (jelson@circlemud.org) ***
@@ -115,5 +102,3 @@ typedef struct mail_index_type_d mail_index_type;
 void notify_if_playing(struct char_data *from, int recipient_id);
 
 SPECIAL(postmaster);
-
-#endif

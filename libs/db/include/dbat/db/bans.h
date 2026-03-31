@@ -16,3 +16,6 @@ struct ban_list_element {
    char	name[MAX_NAME_LENGTH+1];
    struct ban_list_element *next;
 };
+
+extern struct ban_list_element *ban_list;
+extern int num_invalid;

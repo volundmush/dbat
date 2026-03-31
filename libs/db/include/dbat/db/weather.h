@@ -14,3 +14,6 @@ struct time_info_data {
    int hours, day, month;
    int16_t year;
 };
+
+extern struct time_info_data time_info;/* the infomation about the time    */
+extern struct weather_data weather_info;	/* the infomation about the weather */

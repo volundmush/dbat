@@ -1,8 +1,5 @@
-#ifndef __HOUSE_H__
-#define __HOUSE_H__
-
-#include "structs.h"
-
+#pragma once
+#include "dbat/db/consts/types.h"
 
 #define MAX_HOUSES	1000
 #define MAX_GUESTS	10
@@ -68,4 +65,3 @@ void House_delete_file(room_vnum vnum);                        /* house.c */
 
 ACMD(do_hcontrol);
 ACMD(do_house);
-#endif

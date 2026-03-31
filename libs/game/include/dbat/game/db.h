@@ -1,19 +1,6 @@
-/* ************************************************************************
-*   File: db.h                                          Part of CircleMUD *
-*  Usage: header file for database handling                               *
-*                                                                         *
-*  All rights reserved.  See license.doc for complete information.        *
-*                                                                         *
-*  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
-*  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
-************************************************************************ */
-
-#ifndef __DB_H__
-#define __DB_H__
-
-#include "structs.h"
-
-
+#pragma once
+#include "dbat/db/consts/types.h"
+#include <stdio.h>
 /* arbitrary constants used by index_boot() (must be unique) */
 #define DB_BOOT_WLD	0
 #define DB_BOOT_MOB	1
@@ -114,22 +101,20 @@
 
 
 // global variables
-extern struct time_info_data time_info;/* the infomation about the time    */
-extern struct weather_data weather_info;	/* the infomation about the weather */
-extern struct player_special_data dummy_mob;	/* dummy spec area for mobs	*/
-extern struct reset_q_type reset_q;	/* queue of zones to be reset	 */
-extern struct char_data *EDRAGON;
-extern int WISH[2];
-extern int DRAGONR, DRAGONZ, DRAGONC, SHENRON;
+
 extern int circle_restrict;
-extern struct help_index_element *help_table;
+
 extern char *help, *ihelp, *credits, *news, *info, *wizlist, *immlist, *background;
 extern char *policies, *handbook, *motd, *imotd, *GREETINGS, *GREETANSI;
-extern int top_of_helpt, dballtime;
+
 extern int mini_mud, no_rent_check, no_mail;
 extern room_rnum r_mortal_start_room;	/* rnum of mortal start room	 */
 extern room_rnum r_immort_start_room;	/* rnum of immort start room	 */
 extern room_rnum r_frozen_start_room;	/* rnum of frozen start room	 */
+
+
+struct time_info_data;
+struct extra_descr_data;
 
 /* public procedures in db.c */
 void boot_world(void);
@@ -201,25 +186,6 @@ int	vnum_armortype(char *searchname, struct char_data *ch);
 /* global buffering system */
 extern time_t boot_time;
 
-extern struct config_data config_info;
-
-
-
-
-
-extern struct htree_node *room_htree;
-
-
-
-extern struct social_messg *soc_mess_list;
-extern int top_of_socialt;
-extern struct index_data **trig_index;
-
-extern struct index_data **trig_index;
-extern struct trig_data *trigger_list;
-extern int top_of_trigt;
-
-
 extern int dg_owner_purged;
 extern int xap_objs;
 
@@ -234,20 +200,5 @@ void reset_zone(zone_rnum zone);
 #define DISABLED_FILE    "disabled.cmds"  /* disabled commands */
 #define END_MARKER    "END" /* for load_disabled() and save_disabled() */
 
-typedef struct disabled_data DISABLED_DATA;
-
-extern DISABLED_DATA *disabled_first; /* interpreter.c */
-
-/* one disabled command */
-struct disabled_data {
-       DISABLED_DATA *next;                /* pointer to next node          */
-       struct command_info const *command; /* pointer to the command struct */
-       char *disabled_by;                  /* name of disabler              */
-       int16_t level;                       /* level of disabler             */
-       int subcmd;                         /* the subcmd, if any            */
-};
-
 // commands
 ACMD(do_reboot);
-
-#endif

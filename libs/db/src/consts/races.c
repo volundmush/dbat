@@ -1,4 +1,5 @@
 #include "dbat/db/consts/races.h"
+#include "dbat/db/consts/sizes.h"
 
 /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
 const struct aging_data racial_aging_data[NUM_RACES] = {
@@ -27,4 +28,145 @@ const struct aging_data racial_aging_data[NUM_RACES] = {
 /* LIZARDFOLK   */ { 110,	{{4,6}, {6,6}, {10,6}},	175,	263,	350,	{4,100}	},
 /* WARHOST      */ { 110,	{{4,6}, {6,6}, {10,6}},	175,	263,	350,	{4,100}	},
 /* FAERIE       */ { 110,	{{4,6}, {6,6}, {10,6}},	175,	263,	350,	{4,100}	},
+};
+
+
+const char *race_names[NUM_RACES+1] = {
+  "human",
+  "saiyan",
+  "icer",
+  "konatsu",
+  "namekian",
+  "mutant",
+  "kanassan",
+  "halfbreed",
+  "bioandroid",
+  "android",
+  "demon",
+  "majin",
+  "kai",
+  "truffle",
+  "hoshijin",
+  "animal",
+  "saiba",
+  "serpent",
+  "ogre",
+  "yardratian",
+  "arlian",
+  "dragon",
+  "mechanical",
+  "spirit",
+  "\n"
+};
+
+const char *race_abbrevs[NUM_RACES+1] = {
+  "Hum",
+  "Sai",
+  "Ice",
+  "Kon",
+  "Nam",
+  "Mut",
+  "Kan",
+  "H-B",
+  "Bio",
+  "And",
+  "Dem",
+  "Maj",
+  "Kai",
+  "Tru",
+  "Hos",
+  "Ict",
+  "Sab",
+  "Ser",
+  "Trl",
+  "Dra",
+  "Arl",
+  "Mnd",
+  "Mec",
+  "Spi",
+  "\n"
+};
+
+const char *pc_race_types[NUM_RACES+1] = {
+  "Human",
+  "Saiyan",
+  "Icer",
+  "Konatsu",
+  "Namekian",
+  "Mutant",
+  "Kanassan",
+  "Halfbreed",
+  "Bioandroid",
+  "Android",
+  "Demon",
+  "Majin",
+  "Kai",
+  "Truffle",
+  "Hoshijin",
+  "animal",
+  "Saiba",
+  "Serpent",
+  "Ogre",
+  "Yardratian",
+  "Arlian",
+  "Dragon",
+  "mechanical",
+  "Spirit",
+  "\n"
+};
+
+const char *d_race_types[NUM_RACES+1] = {
+  "A Disguised Human",
+  "A Disguised Saiyan",
+  "A Disguised Icer",
+  "A Disguised Konatsu",
+  "A Disguised Namekian",
+  "A Disguised Mutant",
+  "A Disguised Kanassan",
+  "A Disguised Halfbreed",
+  "A Disguised Bioandroid",
+  "A Disguised Android",
+  "A Disguised Demon",
+  "A Disguised Majin",
+  "A Disguised Kai",
+  "A Disguised Truffle",
+  "A Disguised Hoshijin",
+  "A Disguised Animal",
+  "Saiba",
+  "Serpent",
+  "Ogre",
+  "Yardratian",
+  "A Disguised Arlian",
+  "Dragon",
+  "mechanical",
+  "Spirit",
+  "\n"
+};
+
+const int race_def_sizetable[NUM_RACES + 1] =
+{
+/* HUMAN */	SIZE_MEDIUM,
+/* SAIYAN */	SIZE_MEDIUM,
+/* ICER */	SIZE_MEDIUM,
+/* KONATSU */	SIZE_MEDIUM,
+/* NAMEK */	SIZE_MEDIUM,
+/* MUTANT */	SIZE_MEDIUM,
+/* KANASSAN */	SIZE_MEDIUM,
+/* HALFBREED */	SIZE_MEDIUM,
+/* BIO */	SIZE_MEDIUM,
+/* ANDROID */	SIZE_MEDIUM,
+/* DEMON */	SIZE_MEDIUM,
+/* MAJIN */	SIZE_MEDIUM,
+/* KAI */	SIZE_MEDIUM,
+/* TRUFFLE */	SIZE_SMALL,
+/* GOBLIN */	SIZE_MEDIUM,
+/* ANIMAL */	SIZE_FINE,
+/* ORC */	SIZE_LARGE,
+/* SNAKE */	SIZE_MEDIUM,
+/* TROLL */	SIZE_LARGE,
+/* MINOTAUR */	SIZE_MEDIUM,
+/* Arlian */	SIZE_MEDIUM,
+/* LIZARDFOLK */SIZE_MEDIUM,
+/* WARHOST */	SIZE_MEDIUM,
+/* FAERIE */	SIZE_TINY
 };

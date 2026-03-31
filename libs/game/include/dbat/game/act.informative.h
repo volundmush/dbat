@@ -1,11 +1,6 @@
-//
-// Created by basti on 10/22/2021.
-//
-
-#ifndef CIRCLE_ACT_INFORMATIVE_H
-#define CIRCLE_ACT_INFORMATIVE_H
-
-#include "structs.h"
+#pragma once
+#include "dbat/db/consts/types.h"
+#include "dbat/db/command.h"
 
 // defines
 #define MAX_PORTAL_TYPES        6
@@ -18,6 +13,7 @@
 
 // global variables
 extern int *cmd_sort_info;
+struct extra_descr_data;
 
 // functions
 int readIntro(struct char_data *ch, struct char_data *vict);
@@ -78,5 +74,3 @@ ACMD(do_intro);
 ACMD(do_scan);
 ACMD(do_toplist);
 ACMD(do_whois);
-
-#endif //CIRCLE_ACT_INFORMATIVE_H

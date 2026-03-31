@@ -2,6 +2,10 @@
 #include "consts/types.h"
 #include "consts/roomflags.h"
 #include "consts/directions.h"
+#include "consts/sectortypes.h"
+#include "consts/exitflags.h"
+#include "htree.h"
+#include "extradesc.h"
 
 struct room_direction_data {
    char	*general_description;       /* When look DIR.			*/
@@ -52,3 +56,4 @@ struct room_data {
 
 extern struct room_data *world;
 extern room_rnum top_of_world;
+extern struct htree_node *room_htree;

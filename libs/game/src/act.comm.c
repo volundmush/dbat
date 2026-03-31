@@ -22,6 +22,18 @@
 #include "dbat/game/boards.h"
 #include "dbat/game/improved-edit.h"
 
+#include "dbat/db/characters.h"
+#include "dbat/db/objects.h"
+#include "dbat/db/rooms.h"
+#include "dbat/db/descriptor.h"
+#include "dbat/game/dragonball.h"
+#include "dbat/db/consts/pulse.h"
+#include "dbat/db/consts/admlevel.h"
+#include "dbat/game/config.h"
+#include "dbat/db/consts/constates.h"
+#include "dbat/db/weather.h"
+
+
 /* local functions */
 static void perform_tell(struct char_data *ch, struct char_data *vict, char *arg);
 static int is_tell_ok(struct char_data *ch, struct char_data *vict);

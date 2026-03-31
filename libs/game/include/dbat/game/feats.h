@@ -1,15 +1,5 @@
-/***********************************************************************
-** FEATS.H                                                            **
-** Header file for the Gates of Krynn Feat System.                    **
-** Initial code by Paladine (Stephen Squires)                         **
-** Created Thursday, September 5, 2002                                **
-**                                                                    **
-***********************************************************************/
-
-#ifndef __FEATS_H__
-#define __FEATS_H__
-
-#include "structs.h"
+#pragma once
+#include "dbat/db/consts/feats.h"
 
 /* Functions defined in feats.c */
 int is_proficient_with_armor(const struct char_data *ch, int armor_type);
@@ -225,5 +215,3 @@ extern struct feat_info feat_list[NUM_FEATS_DEFINED+1];
 #define HRANK_CASTER    3
 
 #define BASE_DC 10
-
-#endif

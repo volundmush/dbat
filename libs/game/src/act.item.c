@@ -24,10 +24,22 @@
 #include "dbat/game/class.h"
 #include "dbat/game/feats.h"
 #include "dbat/game/guild.h"
-#include "dbat/game/constants.h"
 #include "dbat/game/genzon.h"
 #include "dbat/game/dg_scripts.h"
 #include "dbat/game/boards.h"
+
+#include "dbat/db/characters.h"
+#include "dbat/db/objects.h"
+#include "dbat/db/rooms.h"
+#include "dbat/db/descriptor.h"
+#include "dbat/db/consts/pulse.h"
+#include "dbat/db/consts/auction.h"
+#include "dbat/game/dragonball.h"
+#include "dbat/game/interpreter.h"
+#include "dbat/db/consts/recipes.h"
+#include "dbat/db/consts/weapons.h"
+#include "dbat/db/zones.h"
+#include "dbat/db/consts/triggers.h"
 
 /* global variables */
 struct obj_data *obj_selling = NULL;	/* current object for sale */

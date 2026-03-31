@@ -21,7 +21,6 @@
 #include "dbat/game/comm.h"
 #include "dbat/game/handler.h"
 #include "dbat/game/combat.h"
-#include "dbat/game/constants.h"
 #include "dbat/game/obj_edit.h"
 #include "dbat/game/fight.h"
 #include "dbat/game/class.h"

@@ -1,14 +1,8 @@
-/************************************************************************
- * Generic OLC Library - Shops / genshp.h			v1.0	*
- * Copyright 1996 by Harvey Gilpin					*
- * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
- ************************************************************************/
+#pragma once
+#include "dbat/db/consts/types.h"
 
-#ifndef __GENSHP_H__
-#define __GENSHP_H__
-
-#include "structs.h"
-#include "shop.h"
+struct shop_data;
+struct shop_buy_data;
 
 void copy_shop(struct shop_data *tshop, struct shop_data *fshop, int free_old_strings);
 void copy_list(IDXTYPE **tlist, IDXTYPE *flist);
@@ -59,5 +53,3 @@ shop_rnum real_shop(shop_vnum vnum);
 #define S_NOBUY(i)		((i)->do_not_buy)
 #define S_BUY(i)		((i)->message_buy)
 #define S_SELL(i)		((i)->message_sell)
-
-#endif

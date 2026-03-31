@@ -1,12 +1,6 @@
-//
-// Created by basti on 10/21/2021.
-//
-
-#ifndef CIRCLE_OBJSAVE_H
-#define CIRCLE_OBJSAVE_H
-
-#include "structs.h"
-
+#pragma once
+#include "dbat/db/consts/types.h"
+#include <stdio.h>
 
 /* these factors should be unique integers */
 #define RENT_FACTOR 	1
@@ -33,5 +27,3 @@ void	Crash_save_all(void);
 int     Crash_load_xapobjs(struct char_data *ch);
 
 SPECIAL(receptionist);
-
-#endif //CIRCLE_OBJSAVE_H

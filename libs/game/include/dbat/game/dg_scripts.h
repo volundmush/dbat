@@ -1,19 +1,6 @@
-/**************************************************************************
-*  File: dg_scripts.h                                                     *
-*  Usage: header file for script structures and constants, and            *
-*         function prototypes for dg_scripts.c                            *
-*                                                                         *
-*                                                                         *
-*  $Author: Mark A. Heilpern/egreen/Welcor $                              *
-*  $Date: 2004/10/11 12:07:00$                                            *
-*  $Revision: 1.0.14 $                                                    *
-**************************************************************************/
+#pragma once
+#include "dbat/db/dgscripts.h"
 
-#ifndef __DG_SCRIPTS_H__
-#define __DG_SCRIPTS_H__
-
-#include "structs.h"
-#include "db.h"
 #include "genzon.h"
 #include "oasis.h"
 
@@ -95,9 +82,9 @@ char_data *get_char_by_room(room_data *room, char *name);
 obj_data *get_obj_by_obj(obj_data *obj, char *name);
 obj_data *get_obj_in_room(room_data *room, char *name);
 obj_data *get_obj_by_room(room_data *room, char *name);
-int trgvar_in_room(room_vnum vnum);
 obj_data *get_obj_in_list(char *name, obj_data *list);
 obj_data *get_object_in_equip(char_data * ch, char *name);
+int trgvar_in_room(room_vnum vnum);
 void script_trigger_check(void);
 void check_time_triggers(void);
 void find_uid_name(char *uid, char *name, size_t nlen);
@@ -220,5 +207,3 @@ room_rnum obj_room(obj_data *obj);
 		         sprintf(buf, "%c%d", UID_CHAR, GET_ID(go)); \
                          add_var(&GET_TRIG_VARS(trig), name, buf, context); } while (0)
 
-
-#endif

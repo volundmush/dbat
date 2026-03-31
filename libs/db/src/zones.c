@@ -2,3 +2,4 @@
 
 struct zone_data *zone_table;
 zone_rnum top_of_zone_table;
+struct reset_q_type reset_q;	/* queue of zones to be reset	 */

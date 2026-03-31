@@ -1,11 +1,5 @@
-//
-// Created by basti on 10/22/2021.
-//
-
-#ifndef CIRCLE_AEDIT_H
-#define CIRCLE_AEDIT_H
-
-#include "structs.h"
+#pragma once
+#include "dbat/db/descriptor.h"
 
 void aedit_disp_menu(struct descriptor_data * d);
 void aedit_parse(struct descriptor_data * d, char *arg);
@@ -17,5 +11,3 @@ int aedit_find_command(const char *txt);
 
 // commands
 ACMD(do_oasis_aedit);
-
-#endif //CIRCLE_AEDIT_H

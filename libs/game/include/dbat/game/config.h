@@ -1,11 +1,7 @@
-//
-// Created by volund on 10/20/21.
-//
-
-#ifndef CIRCLE_CONFIG_H
-#define CIRCLE_CONFIG_H
-
-#include "structs.h"
+#pragma once
+#include "dbat/db/consts/types.h"
+#include "dbat/db/consts/maximums.h"
+#include "dbat/db/config.h"
 
 /* GAME PLAY OPTIONS */
 #if !defined(NO)
@@ -87,5 +83,3 @@ extern int disp_closed_doors, reroll_status, allow_multiclass, allow_prestige, a
 extern int enable_compression, enable_languages, all_items_unique, method;
 
 extern float exp_multiplier;
-
-#endif //CIRCLE_CONFIG_H

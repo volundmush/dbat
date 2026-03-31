@@ -1,8 +1,5 @@
 #pragma once
 
-
-
-
 /* Races */
 #define RACE_UNDEFINED		-1
 #define RACE_HUMAN		0
@@ -42,3 +39,9 @@ struct aging_data {
 };
 
 extern const struct aging_data racial_aging_data[NUM_RACES];
+
+extern const char *d_race_types[NUM_RACES+1];
+extern const char *race_names[NUM_RACES+1];
+extern const char *pc_race_types[NUM_RACES+1];
+extern const int race_def_sizetable[NUM_RACES + 1];
+extern const char *race_abbrevs[NUM_RACES+1];

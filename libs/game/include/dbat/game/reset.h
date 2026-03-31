@@ -1,17 +1,5 @@
-/************************************************************************* 
-*  File: reset.h                             Designed for CircleMUD 3.5  * 
-*  Usage: implementation of pre-zone resets and post-zone resets         * 
-*         functions called before and after a normal zone reset          * 
-*                                                                        * 
-*  All rights reserved.                                                  * 
-*                                                                        * 
-*  Copyright (C) 2007 Stefan Cole (a.k.a. Jamdog)                        * 
-*  To see this in action, check out AderonMUD                            * 
-************************************************************************ */ 
-
-#ifndef __RESET_H__
-#define __RESET_H__
-#include "structs.h"
+#pragma once
+#include "dbat/db/consts/types.h"
 
 /* returned by pre-reset function */ 
 #define PERFORM_NORMAL_RESET 0 
@@ -39,5 +27,3 @@ bool prereset_gauntlet_zone(void);
 /* Zone post-reset functions */ 
 
 /* Other local functions */
-
-#endif

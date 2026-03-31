@@ -1,17 +1,7 @@
-/* ************************************************************************
-*   File: handler.h                                     Part of CircleMUD *
-*  Usage: header file: prototypes of handling and utility functions       *
-*                                                                         *
-*  All rights reserved.  See license.doc for complete information.        *
-*                                                                         *
-*  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
-*  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
-************************************************************************ */
+#pragma once
+#include "dbat/db/consts/types.h"
 
-#ifndef __HANDLER_H__
-#define __HANDLER_H__
-
-#include "structs.h"
+struct affected_type;
 
 /* handling the affected-structures */
 void update_char_objects(struct char_data *ch);	/* handler.c */
@@ -104,6 +94,3 @@ int	generic_find(char *arg, bitvector_t bitvector, struct char_data *ch,
 #define FIND_OBJ_ROOM      (1 << 3)
 #define FIND_OBJ_WORLD     (1 << 4)
 #define FIND_OBJ_EQUIP     (1 << 5)
-
-
-#endif
