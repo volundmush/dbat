@@ -1,9 +1,9 @@
 import uuid
 import typing
-from .location import HasLocation, IsLocation
+from .location import HasLocation
 from .equipment import HasEquipment
 from .inventory import HasInventory
-from .dgscripts import HasDgScripts
+from .dgscripts import HasDgScripts, DgReference
 from .misc import HasInteractive, HasFlags, HasColorName, HasColorDescription
 import dbat
 from loguru import logger
@@ -39,7 +39,7 @@ class MobilePrototype(HasColorName, HasColorDescription, HasFlags, HasInteractiv
         }
 
 
-class Character(HasColorName, HasColorDescription, HasLocation, IsLocation, HasEquipment, HasInventory, HasDgScripts, HasInteractive, HasFlags):
+class Character(HasColorName, HasColorDescription, HasLocation, HasEquipment, HasInventory, HasDgScripts, HasInteractive, HasFlags):
     """
     Base class for characters. Shoul not be used directly.
     """
@@ -50,13 +50,12 @@ class Character(HasColorName, HasColorDescription, HasLocation, IsLocation, HasE
         HasColorName.__init__(self)
         HasColorDescription.__init__(self)
         HasLocation.__init__(self)
-        IsLocation.__init__(self)
         HasEquipment.__init__(self)
         HasInventory.__init__(self)
         HasDgScripts.__init__(self)
         HasInteractive.__init__(self)
         HasFlags.__init__(self)
-        self.id: str = ""
+        self.id: uuid = uuid.NIL
         self.deleted = False
         # The session of an attached user, if any.
         self.session: Session | None = None
@@ -110,6 +109,9 @@ class Character(HasColorName, HasColorDescription, HasLocation, IsLocation, HasE
     def clear_command_queue(self):
         self.command_queue.clear()
         dbat.SUBSCRIPTIONS["pending_command"].discard(self)
+    
+    def as_dg_ref(self) -> DgReference:
+        return DgReference("object", self.id)
 
 class Mobile(Character):
     """
@@ -126,9 +128,8 @@ class PlayerCharacter(Character):
     Class for Player Characters.
     """
 
-    def __init__(self, pc_id: uuid.UUID):
+    def __init__(self):
         Character.__init__(self)
-        self.pc_id = str(pc_id)
     
     def is_npc(self) -> bool:
         return False
@@ -138,4 +139,4 @@ class PlayerCharacter(Character):
         This will save the player character to the database.
         Or rather, it will enqueue them to be saved after this tick.
         """
-        dbat.DIRTY_PLAYERS.add(self.pc_id)
+        dbat.DIRTY_PLAYERS.add(self.id)

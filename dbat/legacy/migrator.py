@@ -81,37 +81,41 @@ class Migrator:
     
     def __init__(self, legacy_db: LegacyDatabase):
         self.db = legacy_db
+        self.zone_map: dict[int, Zone] = dict()
+        self.area_map: dict[int, Zone] = dict()
+        self.room_map: dict[int, Tile] = dict()
     
     def migrate_zones(self):
         for k, v in self.db.zones.items():
             z = Zone()
-            z.id = str(k)
+            z.id = uuid.uuid4()
             z.set_color_name(convert_color_string(v.color_name))
             z.flags.update([str(x) for x in v.zone_flags])
             dbat.ZONES[z.id] = z
+            self.zone_map[k] = z
         
         # Now that all are created, setup parent-child relationships.
         for k, v in self.db.zones.items():
-            z = dbat.ZONES[str(k)]
+            z = self.zone_map[k]
             if v.parent != -1:
-                p = dbat.ZONES[str(v.parent)]
+                p = self.zone_map[v.parent]
                 z.parent = p
                 p.children.add(z)
         
         # We'll turn all of the Areas into Zones.
         for k, v in self.db.areas.items():
-            area_id = f"area_{k}"
             z = Zone()
-            z.id = area_id
+            z.id = uuid.uuid4()
             z.set_color_name(convert_color_string(v.name))
             z.set_color_description(convert_color_string(v.look_description))
 
-            p = dbat.ZONES.get(str(v.zone), None)
+            p = self.zone_map.get(v.zone, None)
             if p:
                 z.parent = p
                 p.children.add(z)
 
             dbat.ZONES[z.id] = z
+            self.area_map[k] = z
 
             for shape_name, shape in v.shapes.items():
                 s = Shape(z, (shape.coordinates.x, shape.coordinates.y, shape.coordinates.z))
@@ -134,10 +138,12 @@ class Migrator:
             # Tiles come after we import rooms.
 
         for k, v in self.db.rooms.items():
-            z = dbat.ZONES.get(f"{v.zone}")
+            z = self.zone_map.get(v.zone)
             p = (k, 0, 0)
             t = Tile(z, p)
             t.slug = f"{k}"
+            self.room_map[k] = t
+            
             t.set_color_name(convert_color_string(v.name))
             t.set_color_description(convert_color_string(v.look_description))
             t.sector_type = v.sector_type
@@ -171,7 +177,7 @@ class Migrator:
 
         # now that we've got all of the rooms imported and accessible by the slug index, we can handle exits.
         for k, v in self.db.areas.items():
-            z = dbat.ZONES.get(f"area_{k}")
+            z = self.area_map.get(k)
 
             for coor, t in v.tiles.items():
                 tile = Tile(z, (coor.x, coor.y, coor.z))
@@ -194,8 +200,8 @@ class Migrator:
 
         # now we'll handle exits for legacy rooms.
         for k, v in self.db.rooms.items():
-            z = dbat.ZONES.get(f"{v.zone}")
-            tile = dbat.SLUGS["tile"].get(f"{k}")
+            z = self.zone_map.get(v.zone)
+            tile = self.tile_map.get(k, None)
             if not tile:
                 print(f"Invalid tile slug {k} for zone {z.id}")
                 continue

@@ -1,3 +1,4 @@
+import uuid
 from dataclasses import dataclass, field, asdict
 
 from .location import POINT, IsLocation, Location
@@ -212,7 +213,8 @@ class Grid(IsLocation, HasFlags, HasColorName, HasColorDescription):
         IsLocation.__init__(self)
         HasFlags.__init__(self)
         HasColorName.__init__(self)
-        HasColorDescription.__init__(self)  
+        HasColorDescription.__init__(self)
+        self.id: uuid.UUID = uuid.UUID(int=0)
         self.shapes: dict[POINT, Shape] = dict()
         self.tiles: dict[POINT, Tile] = dict()
         self.landing_spots: dict[str, Location] = dict()

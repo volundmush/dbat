@@ -1,4 +1,5 @@
 import dbat
+import uuid
 POINT = tuple[int, int, int]
 
 class IsLocation:
@@ -62,12 +63,12 @@ class Location:
     information about the object it targets.
     """
 
-    def __init__(self, entity_type: str, entity_id: str, point: POINT = None):
+    def __init__(self, location_type: str, location_id: uuid.UUID, point: POINT = None):
         if not point:
             point = (0,0,0)
         
-        self.entity_type = entity_type
-        self.entity_id = entity_id
+        self.location_type = location_type
+        self.location_id = location_id
         self.point: POINT = point
     
     def dump(self) -> dict:
@@ -75,8 +76,8 @@ class Location:
             return {}
         
         return {
-            "entity_type": self.entity_type,
-            "entity_id": self.entity_id,
+            "location_type": self.location_type,
+            "location_id": self.location_id,
             "point": list(self.point)
         }
     
@@ -102,15 +103,11 @@ class Location:
         return f"<Location: {self.entity} at {self.point}>"
 
     def get_target(self):
-        match self.entity_type:
+        match self.location_type:
             case "zone":
-                return dbat.ZONES.get(self.entity_id)
+                return dbat.ZONES.get(self.location_id)
             case "structure":
-                return dbat.STRUCTURES.get(self.entity_id)
-            case "character":
-                return dbat.CHARACTERS.get(self.entity_id)
-            case "object":
-                return dbat.OBJECTS.get(self.entity_id)
+                return dbat.STRUCTURES.get(self.location_id)
             case _:
                 return None
 

@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
 from .inventory import HasInventory
-from .location import IsLocation, HasLocation
-from .dgscripts import HasDgScripts
+from .location import HasLocation
+from .dgscripts import HasDgScripts, DgReference
 from .misc import HasFlags, HasInteractive, HasColorName, HasColorDescription
 import dbat
 
@@ -102,12 +102,11 @@ class ObjectPrototype(HasColorName, HasColorDescription, HasInteractive, HasFlag
 
 
 
-class Object(HasColorName, HasColorDescription, IsLocation, HasLocation, HasInventory, HasDgScripts, HasInteractive, HasFlags):
+class Object(HasColorName, HasColorDescription, HasLocation, HasInventory, HasDgScripts, HasInteractive, HasFlags):
 
     def __init__(self):
         HasColorName.__init__(self)
         HasColorDescription.__init__(self)
-        IsLocation.__init__(self)
         HasLocation.__init__(self)
         HasInventory.__init__(self)
         HasDgScripts.__init__(self)
@@ -117,6 +116,7 @@ class Object(HasColorName, HasColorDescription, IsLocation, HasLocation, HasInve
         self.deleted = False
 
         self.equipped_by: HasEquipment | None = None
+        self.equipped_at: str = ""
         self.stored_by: HasInventory | None = None
 
         # components
@@ -144,3 +144,6 @@ class Object(HasColorName, HasColorDescription, IsLocation, HasLocation, HasInve
 
     def valid_location_coordinates(self, point):
         return True
+    
+    def as_dg_ref(self) -> DgReference:
+        return DgReference("object", self.id)

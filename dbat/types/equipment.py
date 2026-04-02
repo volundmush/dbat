@@ -27,6 +27,7 @@ class HasEquipment:
             raise ValueError(f"Slot {slot} is already occupied")
         self.__equipment[slot] = obj
         obj.equipped_by = self
+        obj.equipped_at = slot
         self.on_add_equipment(slot, obj)
         obj.on_equipped(self, slot)
     
@@ -36,6 +37,7 @@ class HasEquipment:
     def remove_equipment(self, slot: str) -> Object | None:
         if (obj := self.__equipment.pop(slot, None)) is not None:
             obj.equipped_by = None
+            obj.equipped_at = ""
             self.on_remove_equipment(slot, obj)
             obj.on_unequipped(self, slot)
             return obj

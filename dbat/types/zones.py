@@ -9,7 +9,6 @@ class Zone(Grid, IsLocation):
     def __init__(self):
         Grid.__init__(self)
         IsLocation.__init__(self)
-        self.id: str = ""
         self.deleted = False
         self.parent: "Zone | None" = None
         self.children: set["Zone"] = set()

@@ -20,7 +20,6 @@ class Structure(Grid, HasLocation, IsLocation, HasInteractive, HasFlags, HasInve
         HasInteractive.__init__(self)
         HasFlags.__init__(self)
         HasInventory.__init__(self)
-        self.id: str = ""
         self.deleted = False
     
     def __bool__(self):
