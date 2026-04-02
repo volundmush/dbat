@@ -1,16 +1,11 @@
 #!/usr/bin/env python3
 from dataclasses import dataclass, field
-import asyncio
-import asyncpg
-import io
-import orjson
-import uuid
+
 import random
-import pathlib
 from collections import defaultdict, deque
 import re
 from pathlib import Path
-from enum import Enum, IntEnum, IntFlag
+from enum import IntEnum
 
 class ZoneFlag(IntEnum):
     closed = 0
@@ -700,7 +695,7 @@ class ItemType(IntEnum):
     yum = 33             # This was good food
     plant = 34           # This will grow!
     fishing_pole = 35    # FOR FISHING
-    fishing_bait = 36     # DITTO
+    fishing_bait = 36    # DITTO
 
 class ItemFlag(IntEnum):
     glow = 0           # Item is glowing
@@ -1163,6 +1158,7 @@ class Tile:
 class Area(Entity):
     vnum: int = -1
     name: str = ""
+    zone: int = -1
     look_description: str = ""
     shapes: dict[str, Shape] = field(default_factory=dict)
     tiles: dict[Coordinates, Tile] = field(default_factory=dict)
@@ -2960,6 +2956,7 @@ class LegacyDatabase:
                     continue
 
                 res = ResetCommand()
+                res.depends_last = reset.if_flag
                 match reset.command:
                     case "M":
                         res.command = "MOB"
@@ -3910,7 +3907,7 @@ class LegacyDatabase:
 
         s = Shape()
         s.name = "@WDepths of Space@n"
-        s.description = " @DThis dark void has very little light.  The light it does have comes from\ndistant astral bodies such as stars or planets.  Occasional clouds of gas,\nasteroids, or comets can be seen.  Other than that it is empty blackness for\nthousands upon thousands of miles in every direction.  @n\n"
+        s.look_description = " @DThis dark void has very little light.  The light it does have comes from\ndistant astral bodies such as stars or planets.  Occasional clouds of gas,\nasteroids, or comets can be seen.  Other than that it is empty blackness for\nthousands upon thousands of miles in every direction.  @n\n"
         s.coordinates = Coordinates(x=0, y=0, z=0)
         s.dimensions = Dimensions(north=100, south=100, east=100, west=100)
         s.priority = 0
@@ -3939,7 +3936,7 @@ class LegacyDatabase:
             shape = Shape()
             shape.type = "round"
             shape.coordinates = coor
-            shape.dimensions = {"north": radius, "south": radius, "east": radius, "west": radius}
+            shape.dimensions = Dimensions(north=radius, south=radius, east=radius, west=radius)
             shape.priority = 1
             shape.tile_display = symbol
             shape.sector_type = SectorType.space
@@ -3967,7 +3964,7 @@ class LegacyDatabase:
                     tile.name = v.name
                     over = True
                 
-                if v.look_description != s.description:
+                if v.look_description != s.look_description:
                     tile.look_description = v.look_description
                     over = True
                 
@@ -4103,262 +4100,3 @@ def prepare_migration(path: Path) -> LegacyDatabase:
 def test() -> LegacyDatabase:
     path = Path("data")
     return prepare_migration(path)
-
-class Migrator:
-    def __init__(self, legacy_db: LegacyDatabase, conn: asyncpg.Connection):
-        self.db = legacy_db
-        self.conn = conn
-    
-        self.account_map: dict[str, uuid.UUID] = dict()
-        self.character_map: dict[str, uuid.UUID] = dict()
-        self.oproto_map: dict[int, uuid.UUID] = dict()
-        self.nproto_map: dict[int, uuid.UUID] = dict()
-        self.zone_map: dict[int, uuid.UUID] = dict()
-        self.room_map: dict[int, uuid.UUID] = dict()
-        self.area_map: dict[int, uuid.UUID] = dict()
-        self.dgproto_map: dict[int, uuid.UUID] = dict()
-
-    async def migrate_accounts(self, tx: asyncpg.Connection):
-        for k, v in self.db.accounts.items():
-            results = await tx.fetchrow("INSERT INTO users (username, admin_level) VALUES ($1, $2) RETURNING id", v.name, v.admin_level)
-            id = results["id"]
-            self.account_map[k] = id
-
-            presults = await tx.fetchrow("INSERT INTO passwords (user_id, password_hash) VALUES ($1, $2) RETURNING id", id, v.password)
-            pid = presults["id"]
-
-            await tx.execute("UPDATE users SET current_password_id = $1 WHERE id = $2", pid, id)
-
-            if v.email:
-                await tx.execute("INSERT INTO emails (user_id, email) VALUES ($1, $2)", id, v.email)
-
-            await tx.execute("INSERT INTO dbat.entities (id, entity_type, name) VALUES ($1, 'user', $2)", id, v.name)
-            
-            # and now we want to insert v.rpp and v.rpp_bank into dbat.entity_stats...
-            await tx.execute("INSERT INTO dbat.entity_stats (entity_id, stat_type, stat, value) VALUES ($1, 'rpp', 'current', $2)", id, v.rpp)
-            await tx.execute("INSERT INTO dbat.entity_stats (entity_id, stat_type, stat, value) VALUES ($1, 'rpp', 'bank', $2)", id, v.rpp_bank)
-
-
-    async def migrate_player_characters(self, tx: asyncpg.Connection):
-        for k, v in self.characters.items():
-            pass
-    
-    async def migrate_zones(self, tx: asyncpg.Connection):
-        for z in self.db.iter_zones():
-            row = await tx.fetchrow("INSERT INTO dbat.entities (entity_type, name, slug) VALUES ($1, $2, $3) RETURNING id", "zone", z.name, str(z.vnum))
-            id = row["id"]
-            self.zone_map[z.vnum] = id
-
-            if z.parent != -1:
-                parent_id = self.zone_map.get(z.parent, None)
-                if parent_id is not None:
-                    await tx.execute("INSERT INTO dbat.entity_relations (id, target_id, relation_type) VALUES ($1, $2, $3)", id, parent_id, "parent")
-
-            await tx.execute("INSERT INTO dbat.entity_strings (entity_id, string_type, key, value) VALUES ($1, $2, $3, $3)", id, "zone", "builders", z.builders)
-
-            for flag in z.zone_flags:
-                await tx.execute("INSERT INTO dbat.entity_flags (entity_id, flag_type, flag) VALUES ($1, $2, $3)", id, "zone", flag)
-
-            await tx.execute("INSERT INTO dbat.reset_timers (id, reset_mode, reset_lifespan) VALUES ($1, $2, $3)", id, z.reset_mode, z.lifespan * 60.0)
-
-    async def migrate_areas(self, tx: asyncpg.Connection):
-        for k, a in self.db.areas.items():
-            row = await tx.fetchrow("INSERT INTO dbat.entities (entity_type, name, slug) VALUES ($1, $2, $3) RETURNING id", "zone", a.name, str(a.vnum))
-            id = row["id"]
-            self.area_map[k] = id
-
-            zone_id = self.zone_map.get(a.zone, None)
-            if zone_id is not None:
-                await tx.execute("INSERT INTO dbat.entity_relations (id, target_id, relation_type) VALUES ($1, $2, $3)", id, zone_id, "parent")
-
-            for n, s in a.shapes.items():
-                srow = await tx.fetchrow("INSERT INTO dbat.entities (entity_type, name, color_name, description) VALUES ($1, $2, $3, $4) RETURNING id", "shape", strip_color(s.name), s.name, s.look_description)
-                s_id = srow["id"]
-                await tx.execute("INSERT INTO dbat.entity_shapes (id, grid_id, priority, shape_type, x, y, z, north, east, south, west, up, down, sector_type, tile_display) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)", s_id, id, s.priority, s.type, s.coordinates.x, s.coordinates.y, s.coordinates.z, s.dimensions.north, s.dimensions.east, s.dimensions.south, s.dimensions.west, s.dimensions.up, s.dimensions.down, s.sector_type, s.tile_display)
-
-            for coor, tile in a.tiles.items():
-                trow = await tx.fetchrow("INSERT INTO dbat.entities (entity_type, name, color_name, description) VALUES ($1, $2, $3, $4) RETURNING id", "tile", strip_color(tile.name), tile.name, tile.look_description)
-                t_id = trow["id"]
-                await tx.execute("INSERT INTO dbat.entity_tiles (id, grid_id, x, y, z, sector_type, tile_display) VALUES ($1, $2, $3, $4, $5, $6, $7)", t_id, id, coor.x, coor.y, coor.z, tile.sector_type, tile.tile_display)
-
-                for flag in tile.room_flags:
-                    await tx.execute("INSERT INTO dbat.entity_flags (entity_id, flag_type, flag) VALUES ($1, $2, $3)", t_id, "room", flag)
-
-                for i, p in enumerate(tile.proto_script):
-                    await tx.execute("INSERT INTO dbat.entity_dgscript (entity_id, dgproto_id, script_order) VALUES ($1, $2, $3)", t_id, p, i * 10)
-
-                for ex in tile.extra_descriptions:
-                    await tx.execute("INSERT INTO dbat.extra_descriptions (entity_id, keywords, description) VALUES ($1, $2, $3)", t_id, ex.keyword, ex.description)
-                
-                for i, r in enumerate(tile.reset_commands):
-                    await tx.execute("INSERT INTO dbat.tile_resets (id, reset_order, command, depends_last, target, max_quantity, max_location, chance, ex, key, value) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)", t_id, i * 10, r.command, r.depends_last, r.target, r.max, r.max_location, r.chance, r.ex, r.key, r.value)
-
-    async def migrate_rooms(self, tx: asyncpg.Connection):
-        for k, r in self.db.rooms.items():
-            row = await tx.fetchrow("INSERT INTO dbat.entities (entity_type, name, color_name, description, slug) VALUES ($1, $2, $3, $4, $5) RETURNING id", "tile", strip_color(r.name), r.name, r.look_description, str(r.vnum))
-            id = row["id"]
-            self.room_map[k] = id
-
-            zone_id = self.zone_map.get(r.zone, None)
-            # Since the legacy rooms aren't geometrically consistent, we can't rely on coordinates.
-            # Hence, we'll simply set their x values to the old vnums and rely on exits to keep the old layouts.
-            trow = await tx.fetchrow("INSERT INTO dbat.entity_tiles (id, grid_id, x, sector_type, tile_display) VALUES ($1, $2, $3, $4, $5)", id, zone_id, r.vnum, r.sector_type, r.tile_display)
-
-            for flag in r.room_flags:
-                await tx.execute("INSERT INTO dbat.entity_flags (entity_id, flag_type, flag) VALUES ($1, $2, $3)", id, "room", flag)
-
-            for flag in r.where_flags:
-                await tx.execute("INSERT INTO dbat.entity_flags (entity_id, flag_type, flag) VALUES ($1, $2, $3)", id, "where", flag)
-
-            for i, p in enumerate(r.proto_script):
-                await tx.execute("INSERT INTO dbat.entity_dgscript (entity_id, dgproto_id, script_order) VALUES ($1, $2, $3)", id, p, i * 10)
-
-            for ex in r.extra_descriptions:
-                await tx.execute("INSERT INTO dbat.extra_descriptions (entity_id, keywords, description) VALUES ($1, $2, $3, $4)", id, ex.keyword, ex.description)
-
-            for i, res in enumerate(r.reset_commands):
-                await tx.execute("INSERT INTO dbat.tile_resets (id, reset_order, command, depends_last, target, max_quantity, max_location, chance, ex, key, value) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)", id, i * 10, res.command, res.depends_last, res.target, res.max, res.max_location, res.chance, res.ex, res.key, res.value)
-
-    async def _migrate_exit_helper(self, tx: asyncpg.Connection, location: uuid.UUID, direction: Direction, ex: Exit):
-        exrow = await tx.fetchrow("INSERT INTO dbat.entities (entity_type) VALUES ($1) RETURNING id", "exit")
-        ex_id = exrow["id"]
-        target = ex.destination
-        target_vnum = target.target
-
-        match target.type:
-            case "room":
-                target_id = self.room_map.get(target_vnum, None)
-                coor = Coordinates(x=target.target)
-            case "area":
-                target_id = self.area_map.get(target_vnum, None)
-                coor = target.coordinates                
-
-        await tx.execute("INSERT INTO dbat.entity_exits (id, place_id, exit_type, exit_key, destination_id, x, y, z) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)", 
-                         ex_id, location, "exit", direction.name, target_id, coor.x, coor.y, coor.z)
-
-        for flag in ex.exit_flags:
-            await tx.execute("INSERT INTO dbat.entity_flags (entity_id, flag_type, flag) VALUES ($1, $2, $3)", ex_id, "exit", flag)
-
-        for x in ("dclock", "dchide", "key"):
-            if getattr(ex, x) > 0:
-                await tx.execute("INSERT INTO dbat.entity_stats (entity_id, stat_type, stat, value) VALUES ($1, $2, $3, $4)", ex_id, "exit", x, getattr(ex, x))
-            
-        for x in ("keywords", "description"):
-            if getattr(ex, x):
-                await tx.execute("INSERT INTO dbat.entity_strings (entity_id, string_type, key, value) VALUES ($1, $2, $3, $4)", ex_id, "exit", x, getattr(ex, x))
-
-    async def migrate_exits(self, tx: asyncpg.Connection):
-        # we previously couldn't migrate exits, because not every zone/room existed yet. Now they do.
-        for k, r in self.db.rooms.items():
-            id = self.room_map.get(k, None)
-            for direction, ex in r.exits.items():
-                await self._migrate_exit_helper(tx, id, direction, ex)
-            
-    async def migrate_area_exits(self, tx: asyncpg.Connection):
-        for k, a in self.db.areas.items():
-            area_id = self.area_map.get(k, None)
-            for coor, tile in a.tiles.items():
-                trow = await tx.fetchrow("INSERT INTO dbat.entities (entity_type, name, color_name, description) VALUES ($1, $2, $3, $4) RETURNING id", "tile", strip_color(tile.name), tile.name, tile.look_description)
-                t_id = trow["id"]
-                await tx.execute("INSERT INTO dbat.entity_tiles (id, grid_id, x, y, z, sector_type, tile_display) VALUES ($1, $2, $3, $4, $5, $6, $7)", t_id, area_id, coor.x, coor.y, coor.z, tile.sector_type, tile.tile_display)
-
-                for flag in tile.room_flags:
-                    await tx.execute("INSERT INTO dbat.entity_flags (entity_id, flag_type, flag) VALUES ($1, $2, $3)", t_id, "room", flag)
-
-                for i, p in enumerate(tile.proto_script):
-                    await tx.execute("INSERT INTO dbat.entity_dgscript (entity_id, dgproto_id, script_order) VALUES ($1, $2, $3)", t_id, p, i * 10)
-                
-                for ex in tile.extra_descriptions:
-                    await tx.execute("INSERT INTO dbat.extra_descriptions (entity_id, keywords, description) VALUES ($1, $2, $3)", t_id, ex.keyword, ex.description)
-
-                for i, r in enumerate(tile.reset_commands):
-                    await tx.execute("INSERT INTO dbat.tile_resets (id, reset_order, command, depends_last, target, max_quantity, max_location, chance, ex, key, value) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)", t_id, i * 10, r.command, r.depends_last, r.target, r.max, r.max_location, r.chance, r.ex, r.key, r.value)
-
-                for direction, ex in tile.exits.items():
-                    await self._migrate_exit_helper(tx, t_id, direction, ex)
-
-    async def migrate_object_prototypes(self, tx: asyncpg.Connection):
-        pass
-
-    async def migrate_npc_prototypes(self, tx: asyncpg.Connection):
-        pass
-
-    async def migrate_help(self, tx: asyncpg.Connection):
-        for hfile in self.db.help:
-            await tx.execute(
-                """
-                INSERT INTO dbat.help (name, entry, min_level)
-                VALUES ($1, $2, $3)
-                """,
-                hfile.name,
-                hfile.entry,
-                hfile.min_level
-            )
-
-    async def migrate_assemblies(self, tx: asyncpg.Connection):
-        pass
-
-    async def migrate_shops(self, tx: asyncpg.Connection):
-        for k, v in self.db.shops.items():
-            row = await tx.fetchrow("INSERT INTO dbat.entities (entity_type, slug) VALUES ($1, $2) RETURNING id", "shop", str(k))
-            id = row["id"]
-        
-            for msg in ("no_such_item1", "no_such_item2", "do_not_buy", "missing_cash1", "missing_cash2", "message_buy", "message_sell"):
-                await tx.execute("INSERT INTO dbat.entity_strings (entity_id, string_type, key, value) VALUES ($1, $2, $3, $4)", id, "message", msg, getattr(k, msg))
-
-            for stat in ("profit_buy", "profit_sell", "open1", "close1", "open2", "close2", "temper"):
-                await tx.execute("INSERT INTO dbat.entity_stats (entity_id, stat_type, stat, value) VALUES ($1, $2, $3, $4)", id, "shop", stat, getattr(v, stat))
-
-            for flag in v.shop_flags:
-                await tx.execute("INSERT INTO dbat.entity_flags (entity_id, flag_type, flag) VALUES ($1, $2, $3)", id, "shop", flag)
-
-            for item in v.products:
-                item_id = self.db.oproto.get(item, None)
-                await tx.execute("INSERT INTO dbat.shop_producing (shop_id, item_id) VALUES ($1, $2)", id, item_id)
-
-            for buy_type in v.types_bought:
-                await tx.execute("INSERT INTO dbat.shop_buying (shop_id, item_type, keywords) VALUES ($1, $2, $3)", id, buy_type.item_type, buy_type.keywords)
-
-    async def migrate_guilds(self, tx: asyncpg.Connection):
-        for k, v in self.db.guilds.items():
-            row = await tx.fetchrow("INSERT INTO dbat.entities (entity_type, slug) VALUES ($1, $2) RETURNING id", "guild", str(k))
-            id = row["id"]
-            for sk in v.skills:
-                await tx.execute("INSERT INTO dbat.entity_flags (entity_id, flag_type, flag) VALUES ($1, $2, $3)", id, "skill", sk)
-
-            for msg in ("no_such_skill", "not_enough_gold"):
-                await tx.execute("INSERT INTO dbat.entity_strings (entity_id, string_type, key, value) VALUES ($1, $2, $3, $4)", id, "message", msg, getattr(k, msg))
-
-            for stat in ("charge", "open", "close"):
-                await tx.execute("INSERT INTO dbat.entity_stats (entity_id, stat_type, stat, value) VALUES ($1, $2, $3, $4)", id, "guild", stat, getattr(v, stat))
-
-    async def migrate_dgscripts(self, tx: asyncpg.Connection):
-        for k, v in self.db.dgproto.items():
-            await tx.execute("INSERT INTO dbat.dgproto (id, name, attach_type, trigger_type, narg, arglist, body) VALUES ($1, $2, $3, $4, $5, $6, $7)", k, v.name, v.attach_type, v.trigger_type, v.narg, v.command, v.body)
-
-    async def migrate(self):
-        async with self.conn.transaction() as tx:
-            await self.migrate_help(tx)
-            await self.migrate_accounts(tx)
-            await self.migrate_dgscripts(tx)
-            await self.migrate_zones(tx)
-            await self.migrate_areas(tx)
-            await self.migrate_rooms(tx)
-            await self.migrate_exits(tx)
-            await self.migrate_area_exits(tx)
-            await self.migrate_player_characters(tx)
-            await self.migrate_object_prototypes(tx)
-            await self.migrate_npc_prototypes(tx)
-            await self.migrate_assemblies(tx)
-            await self.migrate_shops(tx)
-            await self.migrate_guilds(tx)
-
-
-async def migrate(db: LegacyDatabase):
-    conn = await asyncpg.connect(user="postgres", password="password", database="legacy_migration", host="localhost")
-    migrator = Migrator(db, conn)
-    await migrator.migrate()
-
-if __name__ == "__main__":
-    db = test()
-    asyncio.run(migrate(db))

@@ -4,6 +4,7 @@ from .location import HasLocation, IsLocation
 from .equipment import HasEquipment
 from .inventory import HasInventory
 from .dgscripts import HasDgScripts
+from .misc import HasInteractive, HasFlags
 import dbat
 
 if typing.TYPE_CHECKING:
@@ -14,17 +15,21 @@ class MobilePrototype:
     pass
 
 
-class Character(HasLocation, IsLocation, HasEquipment, HasInventory, HasDgScripts):
+class Character(HasLocation, IsLocation, HasEquipment, HasInventory, HasDgScripts, HasInteractive, HasFlags):
     """
     Base class for characters. Shoul not be used directly.
     """
     location_type: str = "character"
     slug_type: str = "character"
 
-    __slots__ = ("id", "deleted")
-
     def __init__(self):
-        super().__init__()
+        HasLocation.__init__(self)
+        IsLocation.__init__(self)
+        HasEquipment.__init__(self)
+        HasInventory.__init__(self)
+        HasDgScripts.__init__(self)
+        HasInteractive.__init__(self)
+        HasFlags.__init__(self)
         self.id: str = ""
         self.deleted = False
         # The session of an attached user, if any.
@@ -64,7 +69,7 @@ class Mobile(Character):
     """
 
     def __init__(self, proto: MobilePrototype):
-        super().__init__()
+        Character.__init__(self)
         self.proto = proto
 
 
@@ -74,8 +79,8 @@ class PlayerCharacter(Character):
     """
 
     def __init__(self, pc_id: uuid.UUID):
-        super().__init__()
-        self.id = str(pc_id)
+        Character.__init__(self)
+        self.pc_id = str(pc_id)
     
     def is_npc(self) -> bool:
         return False

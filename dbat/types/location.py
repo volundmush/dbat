@@ -73,6 +73,9 @@ class Location:
             return False
         return self.entity.valid_location_coordinates(self.point)
 
+    def __repr__(self):
+        return f"<Location {self.entity} at {self.point}>"
+
     def get_target(self):
         pass
 
