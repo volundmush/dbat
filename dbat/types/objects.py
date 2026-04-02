@@ -2,7 +2,8 @@ from typing import TYPE_CHECKING
 from .inventory import HasInventory
 from .location import IsLocation, HasLocation
 from .dgscripts import HasDgScripts
-from .misc import HasFlags, HasInteractive
+from .misc import HasFlags, HasInteractive, HasColorName, HasColorDescription
+import dbat
 
 if TYPE_CHECKING:
     from .equipment import HasEquipment
@@ -63,14 +64,49 @@ class ValueComponent:
     def __init__(self):
         self.value = 0
 
-class ObjectPrototype:
-    pass
-
-
-
-class Object(IsLocation, HasLocation, HasInventory, HasDgScripts, HasInteractive, HasFlags):
+class ObjectPrototype(HasColorName, HasColorDescription, HasInteractive, HasFlags):
 
     def __init__(self):
+        HasColorName.__init__(self)
+        HasColorDescription.__init__(self)
+        HasInteractive.__init__(self)
+        HasFlags.__init__(self)
+        self.id: str = ""
+        self.wearable: WearableComponent | None = None
+        self.weapon: WeaponComponent | None = None
+        self.consumable: ConsumableComponent | None = None
+        self.tool: ToolComponent | None = None
+        self.breakable: BreakableComponent | None = None
+        self.container: ContainerComponent | None = None
+        self.fuel_consumer: FuelConsumerComponent | None = None
+        self.fuel_provider: FuelProviderComponent | None = None
+        self.value: ValueComponent | None = None
+
+        self.proto_script: list[str] = list()
+
+    def spawn(self) -> Object:
+        pass
+
+    def dump(self) -> dict:
+        return {
+            "id": self.id,
+            "color_name": self.color_name.markup,
+            "color_description": self.color_description.markup,
+            "flags": list(self.flags),
+            "keywords": self.keywords,
+            "proto_script": self.proto_script,
+        }
+    
+    def save(self):
+        dbat.DIRTY_OBJECT_PROTOTYPES.add(self.id)
+
+
+
+class Object(HasColorName, HasColorDescription, IsLocation, HasLocation, HasInventory, HasDgScripts, HasInteractive, HasFlags):
+
+    def __init__(self):
+        HasColorName.__init__(self)
+        HasColorDescription.__init__(self)
         IsLocation.__init__(self)
         HasLocation.__init__(self)
         HasInventory.__init__(self)
@@ -82,6 +118,8 @@ class Object(IsLocation, HasLocation, HasInventory, HasDgScripts, HasInteractive
 
         self.equipped_by: HasEquipment | None = None
         self.stored_by: HasInventory | None = None
+
+        # components
         self.wearable: WearableComponent | None = None
         self.weapon: WeaponComponent | None = None
         self.consumable: ConsumableComponent | None = None
@@ -98,8 +136,11 @@ class Object(IsLocation, HasLocation, HasInventory, HasDgScripts, HasInteractive
     def __bool__(self):
         return not self.deleted
     
-    async def on_equipped(self, equipper: HasEquipment, slot: int):
+    def on_equipped(self, equipper: HasEquipment, slot: int):
         pass
 
-    async def on_unequipped(self, equipper: HasEquipment, slot: int):
+    def on_unequipped(self, equipper: HasEquipment, slot: int):
         pass
+
+    def valid_location_coordinates(self, point):
+        return True

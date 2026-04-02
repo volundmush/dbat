@@ -1,3 +1,4 @@
+import dbat
 from .grids import Grid
 from .location import IsLocation, Location
 
@@ -16,3 +17,6 @@ class Zone(Grid, IsLocation):
     
     def __bool__(self):
         return not self.deleted
+    
+    def save(self):
+        dbat.DIRTY_ZONES.add(self.id)

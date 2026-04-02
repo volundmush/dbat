@@ -2,6 +2,8 @@ from muforge.plugin import BasePlugin
 from collections import defaultdict
 import uuid
 import typing
+import orjson
+from pathlib import Path
 
 if typing.TYPE_CHECKING:
     from .types.objects import Object, ObjectPrototype
@@ -11,6 +13,8 @@ if typing.TYPE_CHECKING:
 
 # Slugs are used for legacy indexing and special tags. for instance: room:5
 SLUGS: dict[str, dict[str, typing.Any]] = defaultdict(dict)
+
+SUBSCRIPTIONS: dict[str, set[typing.Any]] = defaultdict(set)
 
 ZONES: dict[str, Zone] = dict()
 STRUCTURES: dict[str, typing.Any] = dict()
@@ -28,6 +32,7 @@ SHOPS: dict[str, typing.Any] = dict()
 GUILDS: dict[str, typing.Any] = dict()
 
 DIRTY_PLAYERS: set[PlayerCharacter] = set()
+
 DIRTY_OBJECT_PROTOTYPES: set[str] = set()
 DIRTY_MOBILE_PROTOTYPES: set[str] = set()
 DIRTY_DGSCRIPT_PROTOTYPES: set[str] = set()
@@ -35,6 +40,61 @@ DIRTY_SHOPS: set[str] = set()
 DIRTY_GUILDS: set[str] = set()
 DIRTY_ZONES: set[str] = set()
 DIRTY_STRUCTURES: set[str] = set()
+
+def dump_assets():
+    """
+    Dump all assets to disk.
+    """
+    
+    # starting from current working directory...
+    p = Path()
+
+    assets = p / "assets"
+
+    global DIRTY_ZONES, DIRTY_OBJECT_PROTOTYPES, DIRTY_MOBILE_PROTOTYPES, DIRTY_DGSCRIPT_PROTOTYPES, DIRTY_SHOPS, DIRTY_GUILDS
+
+    if DIRTY_ZONES:
+        zones = assets / "zones"
+        zones.mkdir(exist_ok=True, parents=True)
+
+        for k in DIRTY_ZONES:
+            file = zones / f"{k}.json"
+            if z := ZONES.get(k):
+                with open(file, "wb") as f:
+                    f.write(orjson.dumps(z.dump()))
+            else:
+                if file.exists():
+                    file.unlink()
+        DIRTY_ZONES.clear()
+
+    if DIRTY_OBJECT_PROTOTYPES:
+        oprotos = assets / "objects"
+        oprotos.mkdir(exist_ok=True, parents=True)
+
+        for k in DIRTY_OBJECT_PROTOTYPES:
+            file = oprotos / f"{k}.json"
+            if o := OBJECT_PROTOTYPES.get(k):
+                with open(file, "wb") as f:
+                    f.write(orjson.dumps(o.dump()))
+            else:
+                if file.exists():
+                    file.unlink()
+        DIRTY_OBJECT_PROTOTYPES.clear()
+    
+    if DIRTY_MOBILE_PROTOTYPES:
+        mprotos = assets / "mobiles"
+        mprotos.mkdir(exist_ok=True, parents=True)
+
+        for k in DIRTY_MOBILE_PROTOTYPES:
+            file = mprotos / f"{k}.json"
+            if m := MOBILE_PROTOTYPES.get(k):
+                with open(file, "wb") as f:
+                    f.write(orjson.dumps(m.dump()))
+            else:
+                if file.exists():
+                    file.unlink()
+        DIRTY_MOBILE_PROTOTYPES.clear()
+
 
 class DBAT(BasePlugin):
 

@@ -1,3 +1,4 @@
+import dbat
 POINT = tuple[int, int, int]
 
 class IsLocation:
@@ -61,12 +62,27 @@ class Location:
     information about the object it targets.
     """
 
-    def __init__(self, entity: IsLocation, point: POINT = None):
+    def __init__(self, entity_type: str, entity_id: str, point: POINT = None):
         if not point:
             point = (0,0,0)
         
-        self.entity = entity
+        self.entity_type = entity_type
+        self.entity_id = entity_id
         self.point: POINT = point
+    
+    def dump(self) -> dict:
+        if not self:
+            return {}
+        
+        return {
+            "entity_type": self.entity_type,
+            "entity_id": self.entity_id,
+            "point": list(self.point)
+        }
+    
+    @classmethod
+    def load(cls, data: dict) -> Location:
+        return Location(**data)
     
     def __bool__(self):
         if not self.entity:
@@ -76,15 +92,34 @@ class Location:
     def __repr__(self):
         return f"<Location {self.entity} at {self.point}>"
 
+    @property
+    def entity(self):
+        return self.get_target()
+
+    def __repr__(self):
+        if not self:
+            return "<Location: Nowhere>"
+        return f"<Location: {self.entity} at {self.point}>"
+
     def get_target(self):
-        pass
+        match self.entity_type:
+            case "zone":
+                return dbat.ZONES.get(self.entity_id)
+            case "structure":
+                return dbat.STRUCTURES.get(self.entity_id)
+            case "character":
+                return dbat.CHARACTERS.get(self.entity_id)
+            case "object":
+                return dbat.OBJECTS.get(self.entity_id)
+            case _:
+                return None
 
     def on_map(self) -> bool:
         """
         Returns whether this location is on the map.
         This would be false if it's inside something's inventory, equipped, etc.
         """
-        return self.target_type in ("room", "area", "structure", "zone")
+        return self.target_type in ("zone", "zone")
 
 
 class HasLocation:

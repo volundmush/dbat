@@ -3,6 +3,7 @@ import asyncpg
 import uuid
 from pathlib import Path
 from .loader import LegacyDatabase, ResetCommand as LegacyReset
+from rich.text import Text
 
 import dbat
 from dbat.types.grids import Grid, Tile, Shape, Exit, POINT, Direction, ResetCommand
@@ -14,6 +15,8 @@ from dbat.types.location import Location
 from dbat.types.shops import Shop
 from dbat.types.guilds import Guild
 from dbat.types.zones import Zone
+
+from dbat.legacy.ansi import convert_color_string
 
 def convert_reset_commands(legacy: list[LegacyReset]) -> list[ResetCommand]:
     """
@@ -79,11 +82,11 @@ class Migrator:
     def __init__(self, legacy_db: LegacyDatabase):
         self.db = legacy_db
     
-    async def migrate_zones(self):
+    def migrate_zones(self):
         for k, v in self.db.zones.items():
             z = Zone()
             z.id = str(k)
-            z.name = v.color_name
+            z.set_color_name(convert_color_string(v.color_name))
             z.flags.update([str(x) for x in v.zone_flags])
             dbat.ZONES[z.id] = z
         
@@ -100,8 +103,8 @@ class Migrator:
             area_id = f"area_{k}"
             z = Zone()
             z.id = area_id
-            z.name = v.name
-            z.description = v.look_description
+            z.set_color_name(convert_color_string(v.name))
+            z.set_color_description(convert_color_string(v.look_description))
 
             p = dbat.ZONES.get(str(v.zone), None)
             if p:
@@ -113,10 +116,10 @@ class Migrator:
             for shape_name, shape in v.shapes.items():
                 s = Shape(z, (shape.coordinates.x, shape.coordinates.y, shape.coordinates.z))
                 s.type = shape.type
-                s.name = shape.name
+                s.set_color_name(convert_color_string(shape.name))
                 s.sector_type = shape.sector_type
                 s.tile_display = shape.tile_display
-                s.description = shape.look_description
+                s.set_color_description(convert_color_string(shape.look_description))
                 s.north = shape.dimensions.north
                 s.south = shape.dimensions.south
                 s.east = shape.dimensions.east
@@ -135,8 +138,8 @@ class Migrator:
             p = (k, 0, 0)
             t = Tile(z, p)
             t.slug = f"{k}"
-            t.name = v.name
-            t.description = v.look_description
+            t.set_color_name(convert_color_string(v.name))
+            t.set_color_description(convert_color_string(v.look_description))
             t.sector_type = v.sector_type
             t.extra_descriptions = [ExtraDescription(ed.keywords, ed.description) for ed in v.extra_descriptions]
             t.proto_script = v.proto_script.copy()
@@ -172,8 +175,8 @@ class Migrator:
 
             for coor, t in v.tiles.items():
                 tile = Tile(z, (coor.x, coor.y, coor.z))
-                tile.name = t.name
-                tile.description = t.look_description
+                tile.set_color_name(convert_color_string(t.name))
+                tile.set_color_description(convert_color_string(t.look_description))
                 tile.sector_type = t.sector_type
                 tile.extra_descriptions = [ExtraDescription(ed.keywords, ed.description) for ed in t.extra_descriptions]
                 tile.proto_script = t.proto_script.copy()
@@ -201,8 +204,47 @@ class Migrator:
 
         # TODO: LAST: handle docking/landing/launch points.
 
+        for k, v in dbat.ZONES.items():
+            dbat.DIRTY_ZONES.add(k)
+
+    def migrate_objects(self):
+        for k, v in self.db.oproto.items():
+            o = ObjectPrototype()
+            o.id = str(k)
+            o.keywords = [x.lower() for x in v.name.split()]
+            o.set_color_name(convert_color_string(v.short_description))
+            o.set_color_description(convert_color_string(v.look_description))
+            o.proto_script = [str(x) for x in v.proto_script]
+            
+            # TODO: proper object conversion.
+            
+            dbat.OBJECT_PROTOTYPES[o.id] = o
+            dbat.DIRTY_OBJECT_PROTOTYPES.add(o.id)
+    
+    def migrate_mobiles(self):
+        for k, v in self.db.nproto.items():
+            m = MobilePrototype()
+            m.id = str(k)
+            m.keywords = [x.lower() for x in v.name.split()]
+            m.set_color_name(convert_color_string(v.short_description))
+            m.set_color_description(convert_color_string(v.look_description))
+            m.proto_script = [str(x) for x in v.proto_script]
+
+            # TODO: proper mobile conversion.
+
+            dbat.MOBILE_PROTOTYPES[m.id] = m
+            dbat.DIRTY_MOBILE_PROTOTYPES.add(m.id)
+
+    def migrate_assets(self):
+        self.migrate_zones()
+        self.migrate_objects()
+        self.migrate_mobiles()
+
+        dbat.dump_assets()
+
     async def migrate(self, conn: asyncpg.Connection):
-        await self.migrate_zones()
+        pass
+        
 
 def get_db():
     db = LegacyDatabase()

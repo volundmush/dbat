@@ -1,7 +1,7 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, asdict
 
 from .location import POINT, IsLocation, Location
-from .misc import HasFlags, HasExtraDescriptions
+from .misc import HasFlags, HasExtraDescriptions, HasColorName, HasColorDescription
 from enum import Enum
 
 from .dgscripts import HasDgScripts
@@ -119,17 +119,28 @@ class Exit:
 
     def __repr__(self):
         return f"<Exit to {self.location}>"
+    
+    def dump(self) -> dict:
+        return {
+            "location": self.location.dump(),
+            "flags": list(self.flags),
+            "keywords": self.keywords,
+            "description": self.description,
+            "dchide": self.dchide,
+            "dclock": self.dclock,
+            "keys": list(self.keys),
+        }
 
-class Shape:
+class Shape(HasColorName, HasColorDescription):
 
     def __init__(self, grid: "Grid", point: POINT):
-        self.name: str = ""
+        HasColorName.__init__(self)
+        HasColorDescription.__init__(self)
         self.grid: "Grid" = grid
         self.point: POINT = point
         self.type: str = "box"
         self.sector_type: int = 0
         self.tile_display: str = ""
-        self.description: str = ""
         self.north: int = 0
         self.south: int = 0
         self.east: int = 0
@@ -138,28 +149,58 @@ class Shape:
         self.down: int = 0
         self.priority: int = 0
 
+    def dump(self) -> dict:
+        return {
+            "type": self.type,
+            "sector_type": self.sector_type,
+            "tile_display": self.tile_display,
+            "north": self.north,
+            "south": self.south,
+            "east": self.east,
+            "west": self.west,
+            "up": self.up,
+            "down": self.down,
+            "priority": self.priority,
+        }
 
-class Tile(HasDgScripts, HasFlags, HasExtraDescriptions):
+
+class Tile(HasColorName, HasColorDescription, HasDgScripts, HasFlags, HasExtraDescriptions):
     slug_type: str = "tile"
 
     def __init__(self, grid: "Grid", point: POINT):
+        HasColorName.__init__(self)
+        HasColorDescription.__init__(self)
         HasDgScripts.__init__(self)
         HasFlags.__init__(self)
         HasExtraDescriptions.__init__(self)
         self.grid: "Grid" = grid
         self.point: POINT = point
         self.slug: str = ""
-        self.name: str = ""
-        self.description: str = ""
-        self.sector_type: int | None = None
-        self.proto_script: list[int] = list()
+        self.sector_type: str = ""
+        self.proto_script: list[str] = list()
         self.ground_effect: int = 0
         self.damage: int = 0
-        self.reset_commands: list[dict] = list()
+        self.reset_commands: list[ResetCommand] = list()
         self.exits: dict[Direction, Exit] = dict()
         self.tile_display: str = ""
+    
+    def dump(self) -> dict:
+        return {
+            "slug": self.slug,
+            "color_name": self.color_name.markup,
+            "color_description": self.color_description.markup,
+            "sector_type": self.sector_type,
+            "proto_script": self.proto_script,
+            "ground_effect": self.ground_effect,
+            "damage": self.damage,
+            "reset_commands": [asdict(cmd) for cmd in self.reset_commands],
+            "exits": {direction.value: exit.dump() for direction, exit in self.exits.items()},
+            "tile_display": self.tile_display,
+            "extra_descriptions": [{"keywords": ed.keywords, "description": ed.description} for ed in self.extra_descriptions],
+            "flags": list(self.flags),
+        }
 
-class Grid(IsLocation, HasFlags):
+class Grid(IsLocation, HasFlags, HasColorName, HasColorDescription):
     """
     This is an Abstract class representing a 3D tilegrid.
     Two implementations: Zones, and Structures.
@@ -170,14 +211,25 @@ class Grid(IsLocation, HasFlags):
     def __init__(self):
         IsLocation.__init__(self)
         HasFlags.__init__(self)
-        self.name: str = ""
-        self.description: str = ""
+        HasColorName.__init__(self)
+        HasColorDescription.__init__(self)  
         self.shapes: dict[POINT, Shape] = dict()
         self.tiles: dict[POINT, Tile] = dict()
         self.landing_spots: dict[str, Location] = dict()
         self.docking_spots: dict[str, Location] = dict()
         self._shape_index: dict[POINT, list[tuple[Shape, int]]] = {}  # point -> [(shape, priority), ...]
         self._shape_index_dirty: bool = True
+    
+    def dump(self) -> dict:
+        return {
+            "color_name": self.color_name.markup,
+            "color_description": self.color_description.markup,
+            "flags": list(self.flags),
+            "shapes": [[list(point), shape.dump()] for point, shape in self.shapes.items()],
+            "tiles": [[list(point), tile.dump()] for point, tile in self.tiles.items()],
+            "landing_spots": {name: loc.dump() for name, loc in self.landing_spots.items()},
+            "docking_spots": {name: loc.dump() for name, loc in self.docking_spots.items()},
+        }
 
     def valid_location_coordinates(self, point: POINT) -> bool:
         # A location is valid if it has a tile or shape at that point.

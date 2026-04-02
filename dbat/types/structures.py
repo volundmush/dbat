@@ -1,3 +1,4 @@
+import dbat
 from .grids import Grid
 from .location import HasLocation, IsLocation
 from .misc import HasFlags, HasInteractive
@@ -24,3 +25,6 @@ class Structure(Grid, HasLocation, IsLocation, HasInteractive, HasFlags, HasInve
     
     def __bool__(self):
         return not self.deleted
+    
+    def save(self):
+        dbat.DIRTY_STRUCTURES.add(self.id)
