@@ -2,8 +2,9 @@ import uuid
 from dataclasses import dataclass, field, asdict
 
 from .location import POINT, IsLocation, Location
-from .misc import HasFlags, HasExtraDescriptions, HasColorName, HasColorDescription
+from .misc import HasFlags, HasExtraDescriptions, ExtraDescription, HasColorName, HasColorDescription
 from enum import Enum
+from rich.text import Text
 
 from .dgscripts import HasDgScripts
 
@@ -131,6 +132,17 @@ class Exit:
             "dclock": self.dclock,
             "keys": list(self.keys),
         }
+    
+    @classmethod
+    def load(cls, data: dict) -> "Exit":
+        exit = cls(Location.load(data["location"]))
+        exit.flags = set(data.get("flags", list()))
+        exit.keywords = data.get("keywords", "")
+        exit.description = data.get("description", "")
+        exit.dchide = data.get("dchide", 0)
+        exit.dclock = data.get("dclock", 0)
+        exit.keys = set(data.get("keys", list()))
+        return exit
 
 class Shape(HasColorName, HasColorDescription):
 
@@ -163,6 +175,21 @@ class Shape(HasColorName, HasColorDescription):
             "down": self.down,
             "priority": self.priority,
         }
+    
+    @classmethod
+    def load(cls, grid: "Grid", point: POINT, data: dict) -> "Shape":
+        shape = cls(grid, point)
+        shape.type = data["type"]
+        shape.sector_type = data["sector_type"]
+        shape.tile_display = data.get("tile_display", "")
+        shape.north = data.get("north", 0)
+        shape.south = data.get("south", 0)
+        shape.east = data.get("east", 0)
+        shape.west = data.get("west", 0)
+        shape.up = data.get("up", 0)
+        shape.down = data.get("down", 0)
+        shape.priority = data.get("priority", 0)
+        return shape
 
 
 class Tile(HasColorName, HasColorDescription, HasDgScripts, HasFlags, HasExtraDescriptions):
@@ -200,6 +227,23 @@ class Tile(HasColorName, HasColorDescription, HasDgScripts, HasFlags, HasExtraDe
             "extra_descriptions": [{"keywords": ed.keywords, "description": ed.description} for ed in self.extra_descriptions],
             "flags": list(self.flags),
         }
+    
+    @classmethod
+    def load(cls, grid: "Grid", point: POINT, data: dict) -> "Tile":
+        tile = cls(grid, point)
+        tile.slug = data["slug"]
+        tile.color_name = Text.from_markup(data["color_name"])
+        tile.color_description = Text.from_markup(data["color_description"])
+        tile.sector_type = data["sector_type"]
+        tile.proto_script = data.get("proto_script", list())
+        tile.ground_effect = data.get("ground_effect", 0)
+        tile.damage = data.get("damage", 0)
+        tile.reset_commands = [ResetCommand(**cmd) for cmd in data.get("reset_commands", list())]
+        tile.exits = {Direction(direction): Exit.load(exit_data) for direction, exit_data in data.get("exits", dict()).items()}
+        tile.tile_display = data.get("tile_display", "")
+        tile.extra_descriptions = [ExtraDescription(ed["keywords"], ed["description"]) for ed in data.get("extra_descriptions", list())]
+        tile.flags = set(data.get("flags", list()))
+        return tile
 
 class Grid(IsLocation, HasFlags, HasColorName, HasColorDescription):
     """
@@ -232,6 +276,19 @@ class Grid(IsLocation, HasFlags, HasColorName, HasColorDescription):
             "landing_spots": {name: loc.dump() for name, loc in self.landing_spots.items()},
             "docking_spots": {name: loc.dump() for name, loc in self.docking_spots.items()},
         }
+    
+    @classmethod
+    def load_grid(cls, grid, data: dict) -> "Grid":
+        grid.color_name = Text.from_markup(data["color_name"])
+        grid.color_description = Text.from_markup(data["color_description"])
+        grid.flags = set(data["flags"])
+        # Load shapes and tiles...
+        grid.shapes = {tuple(shape_data[0]): Shape.load(grid, tuple(shape_data[0]), shape_data[1]) for shape_data in data.get("shapes", list())}
+        grid.tiles = {tuple(tile_data[0]): Tile.load(grid, tuple(tile_data[0]), tile_data[1]) for tile_data in data.get("tiles", list())}
+        grid.landing_spots = {name: Location.load(loc_data) for name, loc_data in data.get("landing_spots", dict()).items()}
+        grid.docking_spots = {name: Location.load(loc_data) for name, loc_data in data.get("docking_spots", dict()).items()}
+        return grid
+
 
     def valid_location_coordinates(self, point: POINT) -> bool:
         # A location is valid if it has a tile or shape at that point.

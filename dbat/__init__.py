@@ -46,11 +46,11 @@ def dump_assets():
     """
     
     # starting from current working directory...
-    p = Path()
+    p = Path() / "data"
 
     assets = p / "assets"
 
-    global DIRTY_ZONES, DIRTY_OBJECT_PROTOTYPES, DIRTY_MOBILE_PROTOTYPES, DIRTY_DGSCRIPT_PROTOTYPES, DIRTY_SHOPS, DIRTY_GUILDS
+    global DIRTY_ZONES, DIRTY_OBJECT_PROTOTYPES, DIRTY_MOBILE_PROTOTYPES, DIRTY_DGSCRIPT_PROTOTYPES, DIRTY_SHOPS, DIRTY_GUILDS, DIRTY_STRUCTURES
 
     if DIRTY_ZONES:
         zones = assets / "zones"
@@ -60,7 +60,7 @@ def dump_assets():
             file = zones / f"{k}.json"
             if z := ZONES.get(k):
                 with open(file, "wb") as f:
-                    f.write(orjson.dumps(z.dump()))
+                    f.write(orjson.dumps(z.dump(), option=orjson.OPT_INDENT_2))
             else:
                 if file.exists():
                     file.unlink()
@@ -74,7 +74,7 @@ def dump_assets():
             file = oprotos / f"{k}.json"
             if o := OBJECT_PROTOTYPES.get(k):
                 with open(file, "wb") as f:
-                    f.write(orjson.dumps(o.dump()))
+                    f.write(orjson.dumps(o.dump(), option=orjson.OPT_INDENT_2))
             else:
                 if file.exists():
                     file.unlink()
@@ -88,11 +88,67 @@ def dump_assets():
             file = mprotos / f"{k}.json"
             if m := MOBILE_PROTOTYPES.get(k):
                 with open(file, "wb") as f:
-                    f.write(orjson.dumps(m.dump()))
+                    f.write(orjson.dumps(m.dump(), option=orjson.OPT_INDENT_2))
             else:
                 if file.exists():
                     file.unlink()
         DIRTY_MOBILE_PROTOTYPES.clear()
+    
+    if DIRTY_DGSCRIPT_PROTOTYPES:
+        dgprotos = assets / "dgscripts"
+        dgprotos.mkdir(exist_ok=True, parents=True)
+
+        for k in DIRTY_DGSCRIPT_PROTOTYPES:
+            file = dgprotos / f"{k}.json"
+            if m := DGSCRIPT_PROTOTYPES.get(k):
+                with open(file, "wb") as f:
+                    f.write(orjson.dumps(m.dump(), option=orjson.OPT_INDENT_2))
+            else:
+                if file.exists():
+                    file.unlink()
+        DIRTY_DGSCRIPT_PROTOTYPES.clear()
+    
+    if DIRTY_SHOPS:
+        shops = assets / "shops"
+        shops.mkdir(exist_ok=True, parents=True)
+
+        for k in DIRTY_SHOPS:
+            file = shops / f"{k}.json"
+            if s := SHOPS.get(k):
+                with open(file, "wb") as f:
+                    f.write(orjson.dumps(s.dump(), option=orjson.OPT_INDENT_2))
+            else:
+                if file.exists():
+                    file.unlink()
+        DIRTY_SHOPS.clear()
+    
+    if DIRTY_GUILDS:
+        guilds = assets / "guilds"
+        guilds.mkdir(exist_ok=True, parents=True)
+
+        for k in DIRTY_GUILDS:
+            file = guilds / f"{k}.json"
+            if g := GUILDS.get(k):
+                with open(file, "wb") as f:
+                    f.write(orjson.dumps(g.dump(), option=orjson.OPT_INDENT_2))
+            else:
+                if file.exists():
+                    file.unlink()
+        DIRTY_GUILDS.clear()
+
+    if DIRTY_STRUCTURES:
+        structures = assets / "structures"
+        structures.mkdir(exist_ok=True, parents=True)
+
+        for k in DIRTY_STRUCTURES:
+            file = structures / f"{k}.json"
+            if s := STRUCTURES.get(k):
+                with open(file, "wb") as f:
+                    f.write(orjson.dumps(s.dump(), option=orjson.OPT_INDENT_2))
+            else:
+                if file.exists():
+                    file.unlink()
+        DIRTY_STRUCTURES.clear()
 
 
 class DBAT(BasePlugin):
@@ -119,6 +175,4 @@ class DBAT(BasePlugin):
         return [("core", ">=0.0.1")]
 
     def game_migrations(self):
-        from .migrations import version001
-
-        return [("version001", version001)]
+        return dict()

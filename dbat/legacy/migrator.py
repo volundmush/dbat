@@ -1,6 +1,7 @@
 import asyncio
 import asyncpg
 import uuid
+import shutil
 from pathlib import Path
 from .loader import LegacyDatabase, ResetCommand as LegacyReset
 from rich.text import Text
@@ -15,6 +16,7 @@ from dbat.types.location import Location
 from dbat.types.shops import Shop
 from dbat.types.guilds import Guild
 from dbat.types.zones import Zone
+from dbat.types.dgscripts import DgScript, TriggerType, parse_script, compile_dgscript, render_code
 
 from dbat.legacy.ansi import convert_color_string
 
@@ -60,22 +62,7 @@ def convert_reset_commands(legacy: list[LegacyReset]) -> list[ResetCommand]:
             out.append(current)
     return out
 
-def convert_location(legacy_location) -> Location:
-    entity = None
-    x = 0
-    y = 0
-    z = 0
-    match legacy_location.type:
-        case "room":
-            entity = dbat.SLUGS["tile"][f"{legacy_location.target}"].grid
-            x = legacy_location.target
-        case "area":
-            entity = dbat.ZONES[f"area_{legacy_location.target}"]
-            x = legacy_location.coordinates.x
-            y = legacy_location.coordinates.y
-            z = legacy_location.coordinates.z
-    l = Location(entity, point=(x, y, z))
-    return l
+
 
 class Migrator:
     
@@ -153,6 +140,34 @@ class Migrator:
             t.flags.update([str(x.name) for x in v.room_flags])
             z.tiles[p] = t
             dbat.SLUGS[t.slug_type][t.slug] = t
+        
+        def convert_location(legacy_location) -> Location:
+            entity_type = None
+            entity_id = None
+            x = 0
+            y = 0
+            z = 0
+            match legacy_location.type:
+                case "room":
+                    tile = self.room_map.get(legacy_location.target, None)
+                    if not tile:
+                        print(f"Invalid location target {legacy_location.target} for type room")
+                        return None
+                    entity_type = "zone"
+                    entity_id = tile.grid.id
+                    x = legacy_location.target
+                case "area":
+                    area = self.area_map.get(legacy_location.target, None)
+                    if not area:
+                        print(f"Invalid location target {legacy_location.target} for type area")
+                        return None
+                    entity_type = "zone"
+                    entity_id = area.id
+                    x = legacy_location.coordinates.x
+                    y = legacy_location.coordinates.y
+                    z = legacy_location.coordinates.z
+            l = Location(entity_type, entity_id, point=(x, y, z))
+            return l
 
         def convert_exit(to_tile: Tile, legacy_exits: dict):
             for od, oe in legacy_exits.items():
@@ -201,7 +216,7 @@ class Migrator:
         # now we'll handle exits for legacy rooms.
         for k, v in self.db.rooms.items():
             z = self.zone_map.get(v.zone)
-            tile = self.tile_map.get(k, None)
+            tile = self.room_map.get(k, None)
             if not tile:
                 print(f"Invalid tile slug {k} for zone {z.id}")
                 continue
@@ -217,7 +232,9 @@ class Migrator:
         for k, v in self.db.oproto.items():
             o = ObjectPrototype()
             o.id = str(k)
-            o.keywords = [x.lower() for x in v.name.split()]
+            o.keywords = {x.lower() for x in v.name.split()}
+            for x in ("a", "the", "an"):
+                o.keywords.discard(x)
             o.set_color_name(convert_color_string(v.short_description))
             o.set_color_description(convert_color_string(v.look_description))
             o.proto_script = [str(x) for x in v.proto_script]
@@ -231,7 +248,9 @@ class Migrator:
         for k, v in self.db.nproto.items():
             m = MobilePrototype()
             m.id = str(k)
-            m.keywords = [x.lower() for x in v.name.split()]
+            m.keywords = {x.lower() for x in v.name.split()}
+            for x in ("a", "the", "an"):
+                m.keywords.discard(x)
             m.set_color_name(convert_color_string(v.short_description))
             m.set_color_description(convert_color_string(v.look_description))
             m.proto_script = [str(x) for x in v.proto_script]
@@ -240,27 +259,160 @@ class Migrator:
 
             dbat.MOBILE_PROTOTYPES[m.id] = m
             dbat.DIRTY_MOBILE_PROTOTYPES.add(m.id)
+    
+    def migrate_dgscripts(self):
+        dgpatches_dir = Path() / "dgpatches"
+        dgpatches: dict[int, str] = dict()
+        if dgpatches_dir.exists():
+            for f in dgpatches_dir.glob("*.txt"):
+                dgpatches[int(f.stem)] = f.read_text()
+
+        mobtrig_map = {
+            0: TriggerType.GLOBAL,
+            1: TriggerType.RANDOM,
+            2: TriggerType.COMMAND,
+            3: TriggerType.SPEECH,
+            4: TriggerType.ACT,
+            5: TriggerType.DEATH,
+            6: TriggerType.GREET,
+            7: TriggerType.GREET_ALL,
+            8: TriggerType.ENTRY,
+            9: TriggerType.RECEIVE,
+            10: TriggerType.FIGHT,
+            11: TriggerType.HEALTH_PERCENT,
+            12: TriggerType.BRIBE,
+            13: TriggerType.LOAD,
+            14: TriggerType.MEMORY,
+            16: TriggerType.LEAVE,
+            17: TriggerType.DOOR,
+
+            19: TriggerType.TIME,
+            20: TriggerType.HOURLY,
+            21: TriggerType.QUARTERLY
+        }
+
+        objtrig_map = {
+            0: TriggerType.GLOBAL,
+            1: TriggerType.RANDOM,
+            2: TriggerType.COMMAND,
+
+            5: TriggerType.TIMER,
+            6: TriggerType.GET,
+            7: TriggerType.DROP,
+            8: TriggerType.GIVE,
+            9: TriggerType.WEAR,
+            11: TriggerType.REMOVE,
+            13: TriggerType.LOAD,
+            15: TriggerType.CAST,
+            16: TriggerType.LEAVE,
+            18: TriggerType.CONSUME,
+            19: TriggerType.TIME,
+            20: TriggerType.HOURLY,
+            21: TriggerType.QUARTERLY
+        }
+
+        wldtrig_map = {
+            0: TriggerType.GLOBAL,
+            1: TriggerType.RANDOM,
+            2: TriggerType.COMMAND,
+            3: TriggerType.SPEECH,
+            5: TriggerType.RESET,
+            6: TriggerType.ENTRY,
+            7: TriggerType.DROP,
+            15: TriggerType.CAST,
+            16: TriggerType.LEAVE,
+            17: TriggerType.DOOR,
+            19: TriggerType.TIME,
+            20: TriggerType.HOURLY,
+            21: TriggerType.QUARTERLY
+        }
+
+
+        for k, v in self.db.dgproto.items():
+            s = DgScript()
+            s.id = str(k)
+            s.name = v.name
+            s.narg = v.narg
+            s.command = v.command
+            trigmap = None
+            match v.attach_type:
+                case 0:
+                    s.attach_type = "mobile"
+                    trigmap = mobtrig_map
+                case 1:
+                    s.attach_type = "object"
+                    trigmap = objtrig_map
+                case 2:
+                    s.attach_type = "tile"
+                    trigmap = wldtrig_map
+            s.triggers = {flag for bit, flag in trigmap.items() if v.trigger_type & (1 << bit)}
+            if not s.triggers:
+                print(f"WARNING: DG script {s.id} has no trigger type flags set. Original is: {v.trigger_type}")
+
+
+            # dgpatches allow us to override the script body with a fixed version.
+            code_body = dgpatches.get(k, v.body)
+            
+            s.code = parse_script(code_body)
+            try:
+                tree, root = compile_dgscript(s.code)
+            except Exception as e:
+                print(f"Error compiling DG script {s.id}: {e}")
+                dgpatches_dir.mkdir(exist_ok=True)
+                patch_file = dgpatches_dir / f"{k}.txt"
+                with patch_file.open("w") as f:
+                    f.write(code_body)
+                print(f"Wrote out patch file to {patch_file} for manual fixing.")
+                continue
+            s.root_node = root
+            self.node_map = tree
+
+            dbat.DGSCRIPT_PROTOTYPES[s.id] = s
+            dbat.DIRTY_DGSCRIPT_PROTOTYPES.add(s.id)
+
+    def migrate_shops(self):
+        pass
+
+    def migrate_guilds(self):
+        pass
 
     def migrate_assets(self):
         self.migrate_zones()
         self.migrate_objects()
         self.migrate_mobiles()
-
+        self.migrate_dgscripts()
+        self.migrate_shops()
+        self.migrate_guilds()
+        p = Path() / "data"
+        
+        for x in ("assets", "userdata"):
+            f = p / x
+            if f.exists():
+                shutil.rmtree(f)
+        
         dbat.dump_assets()
 
-    async def migrate(self, conn: asyncpg.Connection):
+    async def migrate_users(self, conn: asyncpg.Connection):
         pass
-        
+
+    async def migrate_players(self, conn: asyncpg.Connection):
+        pass
+
+    async def migrate(self, conn: asyncpg.Connection):
+        self.migrate_assets()
+        await self.migrate_users(conn)
+        await self.migrate_players(conn)
 
 def get_db():
     db = LegacyDatabase()
     db.load_from_files(Path("data"))
     return db
 
-async def test():
+def test():
     db = get_db()
     migrator = Migrator(db)
-    await migrator.migrate(None)
+    migrator.migrate_assets()
+    return migrator
 
 async def migrate(db: LegacyDatabase):
     migrator = Migrator(db)

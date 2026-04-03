@@ -27,3 +27,15 @@ class Structure(Grid, HasLocation, IsLocation, HasInteractive, HasFlags, HasInve
     
     def save(self):
         dbat.DIRTY_STRUCTURES.add(self.id)
+    
+    def dump(self) -> dict:
+        out = super().dump()
+
+        return out
+
+    @classmethod
+    def load(cls, data: dict) -> "Structure":
+        structure = cls()
+        Grid.load_grid(structure, data)
+        # Load shapes and tiles...
+        return structure

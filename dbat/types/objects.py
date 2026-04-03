@@ -4,6 +4,7 @@ from .location import HasLocation
 from .dgscripts import HasDgScripts, DgReference
 from .misc import HasFlags, HasInteractive, HasColorName, HasColorDescription
 import dbat
+from rich.text import Text
 
 if TYPE_CHECKING:
     from .equipment import HasEquipment
@@ -93,12 +94,23 @@ class ObjectPrototype(HasColorName, HasColorDescription, HasInteractive, HasFlag
             "color_name": self.color_name.markup,
             "color_description": self.color_description.markup,
             "flags": list(self.flags),
-            "keywords": self.keywords,
+            "keywords": list(self.keywords),
             "proto_script": self.proto_script,
         }
     
     def save(self):
         dbat.DIRTY_OBJECT_PROTOTYPES.add(self.id)
+    
+    @classmethod
+    def load(cls, data: dict) -> ObjectPrototype:
+        obj = cls()
+        obj.id = data["id"]
+        obj.color_name = Text.from_markup(data["color_name"])
+        obj.color_description = Text.from_markup(data["color_description"])
+        obj.flags = set(data["flags"])
+        obj.keywords = set(data["keywords"])
+        obj.proto_script = data.get("proto_script", list())
+        return obj
 
 
 

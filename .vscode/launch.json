@@ -1,55 +1,21 @@
 {
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "name": "DBAT: (GDB) Migrate",
-            "type": "cppdbg",
-            "request": "launch",
-            "program": "${workspaceFolder}/compiled/dbat_migrate",
-            "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
-            "environment": [
-                {
-                    "name": "LSAN_OPTIONS",
-                    "value": "verbosity=1:log_threads=1"
-                },
-            ],
-            // You can also set ASAN_OPTIONS here if needed],
-            "externalConsole": false,
-            "MIMode": "gdb",
-            "setupCommands": [
-                {
-                    "description": "Enable pretty-printing for gdb",
-                    "text": "-enable-pretty-printing",
-                    "ignoreFailures": true
-                },
-            ],
-            "miDebuggerPath": "/usr/bin/gdb",
-        },
-        {
-            "name": "DBAT: (GDB) New Server",
-            "type": "cppdbg",
-            "request": "launch",
-            "program": "${workspaceFolder}/compiled/dbat_server",
-            "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
-            "environment": [
-                {
-                    "name": "LSAN_OPTIONS",
-                    "value": "verbosity=1:log_threads=1"
-                },
-            ],
-            // You can also set ASAN_OPTIONS here if needed],
-            "externalConsole": false,
-            "MIMode": "gdb",
-            "setupCommands": [
-                {
-                    "description": "Enable pretty-printing for gdb",
-                    "text": "-enable-pretty-printing",
-                    "ignoreFailures": true
-                },
-            ],
-            "miDebuggerPath": "/usr/bin/gdb",
-        },
-    ]
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Python: muforge.game",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "muforge.game",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Python: muforge.portal",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "muforge.portal",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal"
+    }
+  ]
 }

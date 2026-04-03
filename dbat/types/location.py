@@ -25,14 +25,14 @@ class IsLocation:
         """
         return False
 
-    def add_content(self, con: "HasLocation", loc: POINT):
+    def add_content(self, con: "HasLocation", loc: POINT, loading: bool = False):
         """
         Adds an entity to this location. This should only be called by the HasLocation.add_to_location method.
         """
         self.__contents.append(con)
-        self.on_contents_add(con, loc)
+        self.on_contents_add(con, loc, loading)
 
-    def on_contents_add(self, con: "HasLocation", new_loc: POINT):
+    def on_contents_add(self, con: "HasLocation", new_loc: POINT, loading: bool = False):
         """
         This is called when an entity is added to this location. It can be used to trigger events, etc.
         """
@@ -149,3 +149,10 @@ class HasLocation:
         loc = self.location
         self.location = None
         loc.entity.remove_content(self, loc.point)
+    
+    def register_location(self):
+        """
+        This should be called after loading an object from disk, to register its location with the location's contents.
+        """
+        if self.location:
+            self.location.entity.add_content(self, self.location.point, loading=True)

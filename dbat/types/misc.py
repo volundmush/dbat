@@ -55,9 +55,9 @@ class HasInteractive:
 
     def __init__(self):
         # Keywords are used for searching/targeting. They are simple string tokens like plant, saiyan, bear, etc.
-        self.keywords = list()
+        self.keywords = set()
     
-    def get_keywords(self, viewer: Character) -> list[str]:
+    def get_keywords(self, viewer: Character) -> set[str]:
         """
         Get the keywords for this entity. This is used for searching/targeting.
         Viewer is the character trying to interact with the entity.
@@ -118,6 +118,13 @@ class HasInteractive:
         The current see gmhide grade is used for seeing through admin hide.
         """
         return 0.0
+    
+    def get_display_name(self, viewer: Character, capitalize: bool = False) -> Text:
+        """
+        Get the display name for this entity. This is used for displaying the entity to the viewer.
+        It may be different from the name for other viewers if the entity is hidden or invisible.
+        """
+        return self.name
 
 
 class HasFlags:
