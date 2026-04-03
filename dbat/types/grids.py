@@ -1,14 +1,22 @@
+import typing
 import uuid
 from dataclasses import dataclass, field, asdict
 
+from loguru import logger
+
+from dbat.types.characters import Mobile, MobilePrototype
+from dbat.types.objects import Object, ObjectPrototype
+from .dgscripts import TriggerType, HasDgScripts
 from .location import POINT, IsLocation, Location
 from .misc import HasFlags, HasExtraDescriptions, ExtraDescription, HasColorName, HasColorDescription
 from enum import Enum
 from rich.text import Text
+import random
+import dbat
 
 from .dgscripts import HasDgScripts
 
-POINT = tuple[int, int, int]  # (x, y, z) coordinates in a grid
+POINT = typing.Tuple[int, int, int]  # (x, y, z) coordinates in a grid
 
 class Direction(Enum):
     north = "north"
@@ -86,7 +94,140 @@ class ResetCommand:
     ex: int = 0
     key: str = ""
     value: str = ""
-    subcommands: list["ResetCommand"] = field(default_factory=list)
+    subcommands: list[ResetCommand] = field(default_factory=list)
+
+    @classmethod
+    def load(cls, data: dict) -> ResetCommand:
+        subs = data.pop("subcommands", list())
+        cmd = cls(**data)
+        if subs:
+            cmd.subcommands = [ResetCommand.load(sub) for sub in subs]
+        return cmd
+
+
+    def execute(self, tile: "Tile", last_spawned=None):
+        successful = False
+        spawned: Object | Mobile = None
+
+        if self.chance < 100:
+            roll = random.randint(1, 100)
+            if roll > self.chance:
+                return  # Command fails due to chance
+        
+        loc = tile.as_location()
+
+        def perform_counts(proto):
+            if self.max_world > 0 and len(proto.instances) >= self.max_world:
+                return False  # Max world limit reached, fail silently
+            if self.max_location > 0:
+                # Count how many instances of this proto are in the current location
+                count = sum(1 for instance in proto.instances if instance.spawn_location == loc)
+                if count >= self.max_location:
+                    return False  # Max location limit reached, fail silently
+            return True
+
+        match self.command:
+            case "MOB":
+                if not (proto := dbat.MOBILE_PROTOTYPES.get(self.target, None)):
+                    logger.warning(f"ResetCommand for {tile}: MOB target {self.target} does not exist.")
+                    return  # Invalid prototype, fail silently
+                if not perform_counts(proto):
+                    return  # Count limits reached, fail silently
+                spawned = proto.spawn()
+                spawned.add_to_location(loc)
+                spawned.trigger_dgscripts(TriggerType.LOAD)
+                successful = True
+            case "GIVE":
+                if not last_spawned:
+                    logger.warning(f"ResetCommand for {tile}: GIVE command has no last_spawned entity to give to.")
+                    return  # No entity to give to, fail silently
+                if not isinstance(last_spawned, Mobile):
+                    logger.warning(f"ResetCommand for {tile}: GIVE command's last_spawned entity is not a Mobile.")
+                    return  # Last spawned entity is not a mobile, fail silently
+                if not (proto := dbat.OBJECT_PROTOTYPES.get(self.target, None)):
+                    logger.warning(f"ResetCommand for {tile}: GIVE target {self.target} does not exist.")
+                    return  # Invalid prototype, fail silently
+                spawned = proto.spawn()
+                spawned.add_to_location(loc)
+                spawned.trigger_dgscripts(TriggerType.LOAD)
+                if last_spawned.can_store(spawned):
+                    spawned.remove_from_location()
+                    last_spawned.add_to_inventory(spawned)
+                successful = True
+                logger.info(f"ResetCommand for {tile}: GIVE spawned {spawned} and gave to {last_spawned} if possible, otherwise left in location.")
+            case "OBJ":
+                if not (proto := dbat.OBJECT_PROTOTYPES.get(self.target, None)):
+                    logger.warning(f"ResetCommand for {tile}: OBJ target {self.target} does not exist.")
+                    return  # Invalid prototype, fail silently
+                if not perform_counts(proto):
+                    return  # Count limits reached, fail silently
+                spawned = proto.spawn()
+                spawned.add_to_location(loc)
+                spawned.trigger_dgscripts(TriggerType.LOAD)
+                successful = True
+            case "EQUIP":
+                if not last_spawned:
+                    logger.warning(f"ResetCommand for {tile}: EQUIP command has no last_spawned entity to equip.")
+                    return  # No entity to equip, fail silently
+                if not isinstance(last_spawned, Mobile):
+                    logger.warning(f"ResetCommand for {tile}: EQUIP command's last_spawned entity is not a Mobile.")
+                    return  # Last spawned entity is not a mobile, fail silently
+                if not (proto := dbat.OBJECT_PROTOTYPES.get(self.target, None)):
+                    logger.warning(f"ResetCommand for {tile}: EQUIP target {self.target} does not exist.")
+                    return  # Invalid prototype, fail silently
+                if not perform_counts(proto):
+                    return  # Count limits reached, fail silently
+                if last_spawned.get_equipment(self.key):
+                    logger.warning(f"ResetCommand for {tile}: EQUIP target {self.target} slot {self.key} is already equipped.")
+                    return  # Slot already equipped, fail silently
+                spawned = proto.spawn()
+                spawned.add_to_location(loc)
+                spawned.trigger_dgscripts(TriggerType.LOAD)
+                spawned.remove_from_location()
+                last_spawned.add_equipment(self.key, spawned)
+                successful = True
+            case "PUT":
+                # put object inside last_spawned (container) if possible, otherwise put in location
+                if not last_spawned:
+                    logger.warning(f"ResetCommand for {tile}: PUT command has no last_spawned entity to put into.")
+                    return  # No entity to put into, fail silently
+                if not isinstance(last_spawned, Object):
+                    logger.warning(f"ResetCommand for {tile}: PUT command's last_spawned entity is not an Object.")
+                    return  # Last spawned entity is not an object, fail silently
+                if not (proto := dbat.OBJECT_PROTOTYPES.get(self.target, None)):
+                    logger.warning(f"ResetCommand for {tile}: PUT target {self.target} does not exist.")
+                    return  # Invalid prototype, fail silently
+                if not perform_counts(proto):
+                    return  # Count limits reached, fail silently
+                spawned = proto.spawn()
+                spawned.add_to_location(loc)
+                spawned.trigger_dgscripts(TriggerType.LOAD)
+                if last_spawned.can_store(spawned):
+                    spawned.remove_from_location()
+                    last_spawned.add_to_inventory(spawned)
+                successful = True
+            case "REMOVE":
+                pass
+            case "DOOR":
+                pass
+            case "TRIGGER":
+                # add a DgScript to the last_spawned entity regardless of what it is.
+                if not last_spawned:
+                    logger.warning(f"ResetCommand for {tile}: TRIGGER command has no last_spawned entity to add trigger to.")
+                    return  # No entity to add trigger to, fail silently
+                if not (dgscript := dbat.DGSCRIPT_PROTOTYPES.get(self.target, None)):
+                    logger.warning(f"ResetCommand for {tile}: TRIGGER target {self.target} does not exist.")
+                    return  # Invalid prototype, fail silently
+                last_spawned.add_dgscript(dgscript)
+                pass
+            case "VARIABLE":
+                pass
+            case _:
+                pass
+
+        if successful:
+            for subcmd in self.subcommands:
+                subcmd.execute(tile, last_spawned=spawned)
 
 class SectorType(Enum):
     inside = "inside"       # Indoors
@@ -105,11 +246,11 @@ class SectorType(Enum):
     space = "space"       # This is a space room
     lava = "lava"         # This room always has lava
 
-class Exit:
+class Exit(HasFlags):
 
     def __init__(self, location: Location):
+        HasFlags.__init__(self)
         self.location: Location  = location
-        self.flags: set[str] = set()
         self.keywords: str = ""
         self.description: str = ""
         self.dchide: int = 0
@@ -152,7 +293,7 @@ class Shape(HasColorName, HasColorDescription):
         self.grid: "Grid" = grid
         self.point: POINT = point
         self.type: str = "box"
-        self.sector_type: int = 0
+        self.sector_type: str = ""
         self.tile_display: str = ""
         self.north: int = 0
         self.south: int = 0
@@ -190,6 +331,9 @@ class Shape(HasColorName, HasColorDescription):
         shape.down = data.get("down", 0)
         shape.priority = data.get("priority", 0)
         return shape
+    
+    def save(self):
+        self.grid.save()
 
 
 class Tile(HasColorName, HasColorDescription, HasDgScripts, HasFlags, HasExtraDescriptions):
@@ -212,6 +356,12 @@ class Tile(HasColorName, HasColorDescription, HasDgScripts, HasFlags, HasExtraDe
         self.exits: dict[Direction, Exit] = dict()
         self.tile_display: str = ""
     
+    def __repr__(self):
+        return f"<Tile:{self.point} in {self.grid}>"
+
+    def as_location(self) -> Location:
+        return Location(self.grid.location_type, self.grid.id, self.point)
+
     def dump(self) -> dict:
         return {
             "slug": self.slug,
@@ -238,12 +388,19 @@ class Tile(HasColorName, HasColorDescription, HasDgScripts, HasFlags, HasExtraDe
         tile.proto_script = data.get("proto_script", list())
         tile.ground_effect = data.get("ground_effect", 0)
         tile.damage = data.get("damage", 0)
-        tile.reset_commands = [ResetCommand(**cmd) for cmd in data.get("reset_commands", list())]
+        tile.reset_commands = [ResetCommand.load(cmd) for cmd in data.get("reset_commands", list())]
         tile.exits = {Direction(direction): Exit.load(exit_data) for direction, exit_data in data.get("exits", dict()).items()}
         tile.tile_display = data.get("tile_display", "")
         tile.extra_descriptions = [ExtraDescription(ed["keywords"], ed["description"]) for ed in data.get("extra_descriptions", list())]
         tile.flags = set(data.get("flags", list()))
         return tile
+
+    def execute_reset_commands(self):
+        for cmd in self.reset_commands:
+            cmd.execute(self)
+    
+    def save(self):
+        self.grid.save()
 
 class Grid(IsLocation, HasFlags, HasColorName, HasColorDescription):
     """
@@ -259,15 +416,18 @@ class Grid(IsLocation, HasFlags, HasColorName, HasColorDescription):
         HasColorName.__init__(self)
         HasColorDescription.__init__(self)
         self.id: uuid.UUID = uuid.UUID(int=0)
+        self.slug: str = ""
         self.shapes: dict[POINT, Shape] = dict()
         self.tiles: dict[POINT, Tile] = dict()
         self.landing_spots: dict[str, Location] = dict()
         self.docking_spots: dict[str, Location] = dict()
+        self.default_point: POINT = (0, 0, 0)
         self._shape_index: dict[POINT, list[tuple[Shape, int]]] = {}  # point -> [(shape, priority), ...]
         self._shape_index_dirty: bool = True
-    
+
     def dump(self) -> dict:
         return {
+            "id": str(self.id),
             "color_name": self.color_name.markup,
             "color_description": self.color_description.markup,
             "flags": list(self.flags),
@@ -275,20 +435,28 @@ class Grid(IsLocation, HasFlags, HasColorName, HasColorDescription):
             "tiles": [[list(point), tile.dump()] for point, tile in self.tiles.items()],
             "landing_spots": {name: loc.dump() for name, loc in self.landing_spots.items()},
             "docking_spots": {name: loc.dump() for name, loc in self.docking_spots.items()},
+            "default_point": list(self.default_point),
+            "slug": self.slug,
         }
     
     @classmethod
     def load_grid(cls, grid, data: dict) -> "Grid":
+        grid.id = uuid.UUID(data["id"])
         grid.color_name = Text.from_markup(data["color_name"])
         grid.color_description = Text.from_markup(data["color_description"])
         grid.flags = set(data["flags"])
+        grid.slug = data.get("slug", "")
         # Load shapes and tiles...
         grid.shapes = {tuple(shape_data[0]): Shape.load(grid, tuple(shape_data[0]), shape_data[1]) for shape_data in data.get("shapes", list())}
         grid.tiles = {tuple(tile_data[0]): Tile.load(grid, tuple(tile_data[0]), tile_data[1]) for tile_data in data.get("tiles", list())}
         grid.landing_spots = {name: Location.load(loc_data) for name, loc_data in data.get("landing_spots", dict()).items()}
         grid.docking_spots = {name: Location.load(loc_data) for name, loc_data in data.get("docking_spots", dict()).items()}
+        grid.default_point = tuple(data.get("default_point", (0, 0, 0)))
         return grid
 
+    def reset_grid(self):
+        for tile in self.tiles.values():
+            tile.execute_reset_commands()
 
     def valid_location_coordinates(self, point: POINT) -> bool:
         # A location is valid if it has a tile or shape at that point.

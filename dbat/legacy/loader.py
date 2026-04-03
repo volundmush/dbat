@@ -1733,8 +1733,6 @@ def parse_objects(f: Scanner):
         out.cost = cost
         out.cost_per_day = cost_per_day
         out.level = level
-
-        pos = f.tell()
         
         def handle_z():
             data = f.readline()
@@ -1769,10 +1767,12 @@ def parse_objects(f: Scanner):
             out.affected.append(Affected(*map(int, f.readline().split())))
 
         while True:
+            pos = f.tell()
             line = f.readline()
             if not line:
                 break
             if line.startswith("#"):
+                yield out
                 f.seek(pos)
                 break
             if line.startswith("$~"):
@@ -2971,17 +2971,17 @@ class LegacyDatabase:
 
     def process_reset_commands(self):
         for zone in self.zones.values():
+            r = None
             for reset in zone.resets:
-                r = None
-
+                
                 match reset.command:
                     case "M" | "O" | "T" | "V":
-                        r = self.rooms.get(reset.arg3)
+                        if not (r := self.rooms.get(reset.arg3)):
+                            continue
                     case "D" | "R":
-                        r = self.rooms.get(reset.arg1)
-                
-                if r is None:
-                    continue
+                        if not (r := self.rooms.get(reset.arg1)):
+                            continue
+
 
                 res = ResetCommand()
                 res.depends_last = reset.if_flag

@@ -30,3 +30,6 @@ class HasInventory:
     
     def on_remove_From_inventory(self, obj: Object):
         pass
+
+    def can_store(self, obj: Object) -> bool:
+        return True

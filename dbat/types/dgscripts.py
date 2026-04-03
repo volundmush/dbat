@@ -1,4 +1,5 @@
 import uuid
+from venv import logger
 import dbat
 import typing
 from enum import Enum
@@ -436,6 +437,68 @@ class HasDgScripts:
     def as_dg_ref(self) -> DgReference:
         raise NotImplementedError("Every HasDgScripts needs to implement as_dg_ref()!")
 
+    def get_dgscript_order(self) -> list[str]:
+        """
+        Most entities use the proto_script as their script order,
+        but a few change their script order around during runtime,
+        so we have script_order as an override.
+        """
+        if self.script_order is not None:
+            return self.script_order.copy()
+        return self.proto_script.copy()
+    
+    def iter_dgscripts(self):
+        for script_id in self.get_dgscript_order():
+            if script_id in self.dgscripts:
+                yield self.dgscripts[script_id]
+
+    def trigger_dgscripts(self, trigger: TriggerType, **kwargs):
+        """
+        Trigger all DgScripts matching the given trigger type, in order.
+        """
+        # we need to santy check the variables passed in, as they'll be given to the DgScripts.
+        # Valid variables: strings, DgReferences or anything that can become one
+        vars = dict()
+        for k, v in kwargs.items():
+            if isinstance(v, (str, DgReference)):
+                vars[k] = v
+            elif isinstance(v, HasDgScripts):
+                vars[k] = v.as_dg_ref()
+            else:
+                logger.warning(f"trigger_dgscripts: Invalid variable type for {k}: {type(v)}. Skipping this variable.")
+
+        for script in self.iter_dgscripts():
+            # We will fire off the first script that can accept the trigger.
+            if trigger not in script.script.triggers:
+                continue
+            if not script.ready():
+                # The script isn't in a ready state. It is either running or waiting.
+                continue
+            script.variables.update(vars)
+            res = script.execute(trigger)
+
+            return res
+
+    def add_dgscript(self, script: DgScript):
+        """
+        Adds a DgScript to this entity, but doesn't add it to the prototype.
+        """
+        if script.id in self.dgscripts:
+            raise ValueError(f"Script {script.id} is already attached to this entity.")
+        instance = DgScriptInstance(script, self)
+        self.dgscripts[script.id] = instance
+        if not self.script_order:
+            self.script_order = self.proto_script.copy()
+        self.script_order.append(script.id)
+    
+    def remove_dgscript(self, script_id: str):
+        """
+        Removes a DgScript from this entity, but doesn't remove it from the prototype.
+        """
+        if script_id in self.dgscripts:
+            del self.dgscripts[script_id]
+            if self.script_order and script_id in self.script_order:
+                self.script_order.remove(script_id)
 
 class DgScriptInstance:
     

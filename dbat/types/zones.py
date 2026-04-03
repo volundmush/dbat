@@ -5,6 +5,7 @@ from .location import IsLocation, Location
 
 class Zone(Grid, IsLocation):
     slug_type: str = "zone"
+    location_type: str = "zone"
 
     def __init__(self):
         Grid.__init__(self)
@@ -16,6 +17,9 @@ class Zone(Grid, IsLocation):
     
     def __bool__(self):
         return not self.deleted
+
+    def __repr__(self):
+        return f"<Zone: {self.color_name.plain} ({self.id}){f" {self.slug}" if self.slug else ""}>"
     
     def save(self):
         dbat.DIRTY_ZONES.add(self.id)

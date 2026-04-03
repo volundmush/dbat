@@ -6,6 +6,7 @@ from .inventory import HasInventory
 from .dgscripts import HasDgScripts, DgReference
 from .misc import HasInteractive, HasFlags, HasColorName, HasColorDescription
 import dbat
+import copy
 from loguru import logger
 from rich.text import Text
 from rich.errors import MarkupError
@@ -13,6 +14,8 @@ from rich.errors import MarkupError
 if typing.TYPE_CHECKING:
     from dbat.sessions import Session
     from .objects import Object
+    from .location import Location
+
 
 class MobilePrototype(HasColorName, HasColorDescription, HasFlags, HasInteractive):
     
@@ -24,6 +27,7 @@ class MobilePrototype(HasColorName, HasColorDescription, HasFlags, HasInteractiv
         self.id = ""
 
         self.proto_script: list[str] = list()
+        self.instances: set[Mobile] = set()
     
     def save(self):
         dbat.DIRTY_MOBILE_PROTOTYPES.add(self.id)
@@ -47,6 +51,16 @@ class MobilePrototype(HasColorName, HasColorDescription, HasFlags, HasInteractiv
         mob.flags = set(data["flags"])
         mob.keywords = set(data["keywords"])
         mob.proto_script = data.get("proto_script", list())
+        return mob
+    
+    def spawn(self) -> Mobile:
+        mob = Mobile(self)
+        mob.id = uuid.uuid4()
+        mob.color_name = self.color_name.copy()
+        mob.color_description = self.color_description.copy()
+        mob.flags = self.flags.copy()
+        mob.proto = self
+        mob.game_activate()
         return mob
 
 
@@ -154,7 +168,24 @@ class Mobile(Character):
     def __init__(self, proto: MobilePrototype):
         Character.__init__(self)
         self.proto = proto
+        # Set by reset commands, should be cleared if it is ever picked up or relocated.
+        self.spawn_location: Location | None = None
     
+    def __repr__(self):
+        return f"<Mobile: {self.color_name.plain} ({self.id})>"
+    
+    def game_activate(self):
+        dbat.MOBILES[self.id] = self
+        dbat.CHARACTERS[self.id] = self
+        if self.proto:
+            self.proto.instances.add(self)
+    
+    def game_deactivate(self):
+        dbat.MOBILES.pop(self.id, None)
+        dbat.CHARACTERS.pop(self.id, None)
+        if self.proto:
+            self.proto.instances.discard(self)
+
     def get_display_name(self, viewer: Character, capitalize: bool = False) -> Text:
         out = self.color_name.copy()
         if capitalize:
@@ -175,7 +206,17 @@ class PlayerCharacter(Character):
         Character.__init__(self)
         self.dub_names: dict[uuid.UUID, str] = dict()
 
+    def __repr__(self):
+        return f"<PlayerCharacter: {self.color_name.plain} ({self.id})>"
     
+    def game_activate(self):
+        dbat.PLAYERS[self.id] = self
+        dbat.CHARACTERS[self.id] = self
+    
+    def game_deactivate(self):
+        dbat.PLAYERS.pop(self.id, None)
+        dbat.CHARACTERS.pop(self.id, None)
+
     def is_npc(self) -> bool:
         return False
     

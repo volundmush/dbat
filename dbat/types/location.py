@@ -83,6 +83,8 @@ class Location:
     
     @classmethod
     def load(cls, data: dict) -> Location:
+        if not data:
+            return None
         return Location(**data)
     
     def __bool__(self):

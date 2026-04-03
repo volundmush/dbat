@@ -163,13 +163,13 @@ class DBAT(BasePlugin):
         return "0.0.1"
     
     def game_services(self):
-        from .requests import RequestHandler
+        from .game import GameService
 
-        return {"request_handler": RequestHandler}
+        return {"game": GameService}
 
     async def setup_final(self):
-        request_handler = self.app.services["request_handler"]
-        self.app.fastapi_instance.state.dbat_requests = request_handler
+        dbat = self.app.services["game"]
+        self.app.fastapi_instance.state.dbat_game = dbat
 
     def depends(self):
         return [("core", ">=0.0.1")]

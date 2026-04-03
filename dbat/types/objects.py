@@ -2,12 +2,15 @@ from typing import TYPE_CHECKING
 from .inventory import HasInventory
 from .location import HasLocation
 from .dgscripts import HasDgScripts, DgReference
-from .misc import HasFlags, HasInteractive, HasColorName, HasColorDescription
+from .misc import HasExtraDescriptions, HasFlags, HasInteractive, HasColorName, HasColorDescription
 import dbat
+import uuid
+import copy
 from rich.text import Text
 
 if TYPE_CHECKING:
     from .equipment import HasEquipment
+    from .location import Location
 
 
 class WearableComponent:
@@ -65,13 +68,14 @@ class ValueComponent:
     def __init__(self):
         self.value = 0
 
-class ObjectPrototype(HasColorName, HasColorDescription, HasInteractive, HasFlags):
+class ObjectPrototype(HasColorName, HasColorDescription, HasInteractive, HasFlags, HasExtraDescriptions):
 
     def __init__(self):
         HasColorName.__init__(self)
         HasColorDescription.__init__(self)
         HasInteractive.__init__(self)
         HasFlags.__init__(self)
+        HasExtraDescriptions.__init__(self)
         self.id: str = ""
         self.wearable: WearableComponent | None = None
         self.weapon: WeaponComponent | None = None
@@ -84,9 +88,34 @@ class ObjectPrototype(HasColorName, HasColorDescription, HasInteractive, HasFlag
         self.value: ValueComponent | None = None
 
         self.proto_script: list[str] = list()
+        self.instances: set[Object] = set()
 
     def spawn(self) -> Object:
-        pass
+        obj = Object()
+        obj.id = uuid.uuid4()
+        obj.proto = self
+        obj.color_name = self.color_name.copy()
+        obj.color_description = self.color_description.copy()
+        if self.extra_descriptions:
+            obj.extra_descriptions = copy.deepcopy(self.extra_descriptions)
+        obj.flags = set(self.flags)
+        obj.keywords = set(self.keywords)
+        obj.proto_script = list(self.proto_script)
+
+        # Components are deepcopied to ensure that each spawned object has its own instance of the component, allowing for individual state management.
+        # Since deepcopy on none returns none, we don't gotta care about the details here.
+
+        obj.wearable = copy.deepcopy(self.wearable)
+        obj.weapon = copy.deepcopy(self.weapon)
+        obj.consumable = copy.deepcopy(self.consumable)
+        obj.tool = copy.deepcopy(self.tool)
+        obj.breakable = copy.deepcopy(self.breakable)
+        obj.container = copy.deepcopy(self.container)
+        obj.fuel_consumer = copy.deepcopy(self.fuel_consumer)
+        obj.fuel_provider = copy.deepcopy(self.fuel_provider)
+        obj.value = copy.deepcopy(self.value)
+        obj.game_activate()
+        return obj
 
     def dump(self) -> dict:
         return {
@@ -114,7 +143,7 @@ class ObjectPrototype(HasColorName, HasColorDescription, HasInteractive, HasFlag
 
 
 
-class Object(HasColorName, HasColorDescription, HasLocation, HasInventory, HasDgScripts, HasInteractive, HasFlags):
+class Object(HasColorName, HasColorDescription, HasLocation, HasInventory, HasDgScripts, HasInteractive, HasFlags, HasExtraDescriptions):
 
     def __init__(self):
         HasColorName.__init__(self)
@@ -124,8 +153,11 @@ class Object(HasColorName, HasColorDescription, HasLocation, HasInventory, HasDg
         HasDgScripts.__init__(self)
         HasInteractive.__init__(self)
         HasFlags.__init__(self)
+        HasExtraDescriptions.__init__(self)
+        self.id: uuid.UUID = uuid.NIL
         # if deleted, this will be cleaned up after the current tick.
         self.deleted = False
+        self.proto: ObjectPrototype | None = None
 
         self.equipped_by: HasEquipment | None = None
         self.equipped_at: str = ""
@@ -141,12 +173,27 @@ class Object(HasColorName, HasColorDescription, HasLocation, HasInventory, HasDg
         self.fuel_consumer: FuelConsumerComponent | None = None
         self.fuel_provider: FuelProviderComponent | None = None
         self.value: ValueComponent | None = None
+        # Set by reset commands, should be cleared if it is ever picked up or relocated.
+        self.spawn_location: Location | None = None
 
         # Stores arbitrary data for use by components.
         self.data: dict = dict()
     
+    def __repr__(self):
+        return f"<Object: {self.color_name.plain} ({self.id})>"
+    
     def __bool__(self):
         return not self.deleted
+    
+    def game_activate(self):
+        dbat.OBJECTS[self.id] = self
+        if self.proto:
+            self.proto.instances.add(self)
+    
+    def game_deactivate(self):
+        dbat.OBJECTS.pop(self.id, None)
+        if self.proto:
+            self.proto.instances.discard(self)
     
     def on_equipped(self, equipper: HasEquipment, slot: int):
         pass

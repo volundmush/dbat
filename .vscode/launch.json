@@ -16,6 +16,14 @@
       "module": "muforge.portal",
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal"
+    },
+    {
+      "name": "Python: dbat.legacy.migrator",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "dbat.legacy.migrator",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal"
     }
   ]
 }

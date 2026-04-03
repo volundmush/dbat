@@ -82,6 +82,7 @@ class Migrator:
         for k, v in self.db.zones.items():
             z = Zone()
             z.id = uuid.uuid4()
+            z.slug = str(k)
             z.set_color_name(convert_color_string(v.color_name))
             z.flags.update([str(x) for x in v.zone_flags])
             dbat.ZONES[z.id] = z
@@ -99,6 +100,7 @@ class Migrator:
         for k, v in self.db.areas.items():
             z = Zone()
             z.id = uuid.uuid4()
+            z.slug = str(f"area_{k}")
             z.set_color_name(convert_color_string(v.name))
             z.set_color_description(convert_color_string(v.look_description))
 
@@ -409,7 +411,8 @@ def test():
     migrator.migrate_assets()
     return migrator
 
-async def migrate(db: LegacyDatabase):
+async def migrate():
+    db = get_db()
     migrator = Migrator(db)
     
     from muforge.utils.boot import get_environment
@@ -417,9 +420,9 @@ async def migrate(db: LegacyDatabase):
 
     core = app.plugins["core"]
 
-    async with core.db.transaction() as tx:
-        await migrator.migrate(tx)
+    migrator.migrate_assets()
+    
+    return migrator
 
 if __name__ == "__main__":
-    db = get_db()
-    asyncio.run(migrate(db))
+    asyncio.run(migrate())
