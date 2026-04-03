@@ -1,10 +1,13 @@
 import asyncio
 import asyncpg
 import uuid
+import re
 import shutil
 from pathlib import Path
 from .loader import LegacyDatabase, ResetCommand as LegacyReset
 from rich.text import Text
+
+from pydantic import EmailStr
 
 import dbat
 from dbat.types.grids import Grid, Tile, Shape, Exit, POINT, Direction, ResetCommand
@@ -71,6 +74,9 @@ class Migrator:
         self.zone_map: dict[int, Zone] = dict()
         self.area_map: dict[int, Zone] = dict()
         self.room_map: dict[int, Tile] = dict()
+        self.account_map: dict[str, uuid.UUID] = dict()
+        self.account_email_map: dict[str, uuid.UUID] = dict()
+        self.account_merge_map: dict[str, str] = dict()
     
     def migrate_zones(self):
         for k, v in self.db.zones.items():
@@ -392,17 +398,6 @@ class Migrator:
         
         dbat.dump_assets()
 
-    async def migrate_users(self, conn: asyncpg.Connection):
-        pass
-
-    async def migrate_players(self, conn: asyncpg.Connection):
-        pass
-
-    async def migrate(self, conn: asyncpg.Connection):
-        self.migrate_assets()
-        await self.migrate_users(conn)
-        await self.migrate_players(conn)
-
 def get_db():
     db = LegacyDatabase()
     db.load_from_files(Path("data"))
@@ -416,12 +411,14 @@ def test():
 
 async def migrate(db: LegacyDatabase):
     migrator = Migrator(db)
+    
+    from muforge.utils.boot import get_environment
+    app = await get_environment("game")
 
-    conn = await asyncpg.connect("postgresql://localhost/dbat")
+    core = app.plugins["core"]
 
-    async with asyncpg.connect("postgresql://localhost/dbat") as conn:
-        async with conn.transaction() as tx:
-            await migrator.migrate(tx)
+    async with core.db.transaction() as tx:
+        await migrator.migrate(tx)
 
 if __name__ == "__main__":
     db = get_db()

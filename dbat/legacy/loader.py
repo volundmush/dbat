@@ -1257,6 +1257,34 @@ class Scanner:
     def seek(self, pos: int):
         self.pos = pos
 
+def parse_account(f: Scanner) -> Account:
+    acc = {
+        "name": f.readline(),
+        "email": f.readline().replace("<AT>", "@"),
+        "password": f.readline(),
+        "slots": int(f.readline()),
+        "rpp": int(f.readline())
+    }
+
+    characters = list()
+    while True:
+        pos = f.tell()
+        line = f.readline()
+        if line.isdigit():
+            f.seek(pos)
+            break
+        if line == "Empty":
+            continue
+        characters.append(line)
+
+    if characters:
+        acc["characters"] = characters
+    acc["admin_level"] = int(f.readline())
+    acc["custom_file"] = int(f.readline())
+    acc["rpp_bank"] = int(f.readline())
+    return Account(**acc)
+
+
 def parse_character(f: Scanner) -> Character:
     out = Character()
 
