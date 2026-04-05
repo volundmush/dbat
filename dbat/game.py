@@ -136,3 +136,37 @@ class GameService(Service):
     async def setup(self):
         await self.load_assets()
         await self.reset_world()
+    
+    async def process_pending_commands(self, delta_time: float):
+        pending = dbat.SUBSCRIPTIONS.get("pending_commands", set()).copy()
+        for character in pending:
+            character.process_command_queue(delta_time)
+
+
+    async def update(self, delta_time: float):
+        """
+        Run an instance of the main loop and advance game state by delta_time.
+        """
+
+        # We will want to have a more elaborate game services loop in the future but for now let's just process pending commands.
+        await self.process_pending_commands(delta_time)
+
+    async def run(self):
+        """
+        The game simulation runs at a tick speed of 0.1 seconds.
+        Every 0.1 seconds we call the update loops and pass in delta time.
+        We sleep for the remainder of the tick if the update loops finish early.
+        """
+        tick_speed = 0.1
+        last_time = asyncio.get_event_loop().time()
+        while True:
+            now = asyncio.get_event_loop().time()
+            delta_time = now - last_time
+            await self.update(delta_time)
+            elapsed = asyncio.get_event_loop().time() - now
+            if elapsed < tick_speed:
+                await asyncio.sleep(tick_speed - elapsed)
+            else:
+                # even if we're running behind, we still want to yield control to the event loop so we don't block other tasks.
+                await asyncio.sleep(0)
+            last_time = now

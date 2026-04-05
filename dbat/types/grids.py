@@ -154,7 +154,6 @@ class ResetCommand:
                     spawned.remove_from_location()
                     last_spawned.add_to_inventory(spawned)
                 successful = True
-                logger.info(f"ResetCommand for {tile}: GIVE spawned {spawned} and gave to {last_spawned} if possible, otherwise left in location.")
             case "OBJ":
                 if not (proto := dbat.OBJECT_PROTOTYPES.get(self.target, None)):
                     logger.warning(f"ResetCommand for {tile}: OBJ target {self.target} does not exist.")
@@ -562,15 +561,32 @@ class Grid(IsLocation, HasFlags, HasColorName, HasColorDescription):
                 continue  # inside/outside exits are special and not generated here
             adjacent_point = direction.update_coordinates(point)
             if self.valid_location_coordinates(adjacent_point):
-                exits[direction] = Exit(Location(self, adjacent_point))
+                exits[direction] = Exit(Location(self.location_type, self.id, adjacent_point))
         if point in self.tiles:
             exits.update(self.tiles[point].exits)
         return exits
     
     def get_exit_for_direction(self, point: POINT, direction: Direction) -> Exit | None:
+        if point in self.tiles and direction in self.tiles[point].exits:
+            return self.tiles[point].exits[direction]
+        
         adjacent_point = direction.update_coordinates(point)
         if not self.valid_location_coordinates(adjacent_point):
             return None
-        if point in self.tiles and direction in self.tiles[point].exits:
-            return self.tiles[point].exits[direction]
-        return Exit(Location(self, adjacent_point))
+        return Exit(Location(self.location_type, self.id, adjacent_point))
+    
+    def get_display_name(self, point: POINT, viewer: "Character") -> str:
+        if point in self.tiles and self.tiles[point].color_name:
+            return self.tiles[point].color_name
+        shape = self.query_shape(point)
+        if shape and shape.color_name:
+            return shape.color_name
+        return "Unremarkable Ground"
+    
+    def get_display_description(self, point: POINT, viewer: "Character") -> str:
+        if point in self.tiles and self.tiles[point].color_description:
+            return self.tiles[point].color_description
+        shape = self.query_shape(point)
+        if shape and shape.color_description:
+            return shape.color_description
+        return ""

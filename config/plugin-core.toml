@@ -4,7 +4,7 @@ dynaconf_merge = true
 # These are the defaults for the JWT tokens.
 # PLEASE CHANGE THE SECRET!
 algorithm = "HS256"
-secret = "CHANGE_ME_DAMMIT"
+secret = "CHANGE_ME_DAMMIT4bdc4d7e659f381c74129c17fae30b8d"
 token_expire_minutes = 30
 # 7 days in minutes.
 refresh_expire_minutes = 10080

@@ -10,6 +10,7 @@ if typing.TYPE_CHECKING:
     from .types.zones import Zone
     from .types.characters import PlayerCharacter, Character, Mobile
     from .types.dgscripts import DgScript
+    from .types.accounts import Account
 
 # Slugs are used for legacy indexing and special tags. for instance: room:5
 SLUGS: dict[str, dict[str, typing.Any]] = defaultdict(dict)
@@ -22,7 +23,9 @@ CHARACTERS: dict[uuid.UUID, Character] = dict()
 MOBILES: dict[uuid.UUID, Mobile] = dict()
 OBJECTS: dict[uuid.UUID, Object] = dict()
 
+
 PLAYERS: dict[uuid.UUID, PlayerCharacter] = dict()
+ACCOUNTS: dict[uuid.UUID, Account] = dict()
 
 OBJECT_PROTOTYPES: dict[str, ObjectPrototype] = dict()
 MOBILE_PROTOTYPES: dict[str, ObjectPrototype] = dict()
@@ -39,6 +42,10 @@ DIRTY_SHOPS: set[str] = set()
 DIRTY_GUILDS: set[str] = set()
 DIRTY_ZONES: set[uuid.UUID] = set()
 DIRTY_STRUCTURES: set[uuid.UUID] = set()
+DIRTY_ACCOUNTS: set[uuid.UUID] = set()
+
+CHARACTER_COMMANDS: dict[str, type["CharacterCommand"]] = dict()
+CHARACTER_COMMANDS_PRIORITY: dict[int, list[type["CharacterCommand"]]] = defaultdict(list)
 
 def dump_assets():
     """
@@ -153,6 +160,11 @@ def dump_assets():
 
 class DBAT(BasePlugin):
 
+    def __init__(self, app):
+        super().__init__(app)
+        self.registered_character_commands = dict()
+        self.character_commands_priority = defaultdict(list)
+
     def name(self):
         return "Dragon Ball: Advent Truth"
 
@@ -167,12 +179,56 @@ class DBAT(BasePlugin):
 
         return {"game": GameService}
 
-    async def setup_final(self):
-        dbat = self.app.services["game"]
-        self.app.fastapi_instance.state.dbat_game = dbat
+    def core_events(self):
+        from .events.informative import LookLocation
+
+        all_events = [LookLocation]
+
+        return {ev.event_type(): ev for ev in all_events}
+    
+    def character_commands(self) -> list[type["CharacterCommand"]]:
+        out = list()
+        from .character_commands.informative import Look
+
+        out.append(Look)
+
+        from .character_commands.movement import Move
+        out.append(Move)
+
+        return out
+
+    async def setup_character_commands(self):
+        for p in self.app.plugin_load_order:
+            if not hasattr(p, "character_commands"):
+                continue
+            for command in p.character_commands():
+                self.registered_character_commands[command.key] = command
+        
+        # sort by priority
+        for command in self.registered_character_commands.values():
+            self.character_commands_priority[command.priority].append(command)
+        for v in self.character_commands_priority.values():
+            v.sort(key=lambda c: c.key)
+        
+        global CHARACTER_COMMANDS, CHARACTER_COMMANDS_PRIORITY
+        CHARACTER_COMMANDS = self.registered_character_commands
+        CHARACTER_COMMANDS_PRIORITY = self.character_commands_priority
+
+    async def setup_final(self, app_name: str):
+        match app_name:
+            case "game":
+                dbat = self.app.services["game"]
+                self.app.fastapi_instance.state.dbat_game = dbat
+                await self.setup_character_commands()
 
     def depends(self):
         return [("core", ">=0.0.1")]
 
     def game_migrations(self):
         return dict()
+    
+    def game_classes(self):
+        # Replaces the Core session.
+        from .sessions import Session
+
+        return {"session": Session}

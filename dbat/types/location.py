@@ -1,6 +1,9 @@
 import dbat
 import uuid
 POINT = tuple[int, int, int]
+from rich.text import Text
+
+from ..events.informative import LookLocation
 
 class IsLocation:
     location_type: str = "abstract"
@@ -118,8 +121,39 @@ class Location:
         Returns whether this location is on the map.
         This would be false if it's inside something's inventory, equipped, etc.
         """
-        return self.target_type in ("zone", "zone")
+        return self.target_type in ("zone", "structure")
 
+    def render_look(self, viewer: "Character"):
+        target = self.get_target()
+        name = target.get_display_name(self.point, viewer)
+        description = target.get_display_description(self.point, viewer)
+        objects = list()
+        characters = list()
+        from .characters import Character
+        from .objects import Object
+        
+        for content in target.iter_contents_at(self.point):
+            if not viewer.can_see(content):
+                continue
+            if content is viewer:
+                continue
+            match content:
+                case Character():
+                    characters.append(content)
+                case Object():
+                    objects.append(content)
+        
+        exits = list(target.generate_exits_at(self.point).keys())
+
+        event = LookLocation(
+            location=(self.location_type, self.location_id, self.point),
+            name=name.markup if isinstance(name, Text) else name,
+            description=description.markup if isinstance(description, Text) else description,
+            objects=[(obj.id, obj.get_display_name(viewer)) for obj in objects],
+            characters=[(char.id, char.get_display_name(viewer)) for char in characters],
+            exits=exits
+        )
+        viewer.send_event(event)
 
 class HasLocation:
 

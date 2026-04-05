@@ -10,11 +10,14 @@ import copy
 from loguru import logger
 from rich.text import Text
 from rich.errors import MarkupError
+from .location import Location
 
 if typing.TYPE_CHECKING:
     from dbat.sessions import Session
     from .objects import Object
-    from .location import Location
+    from .accounts import Account
+    from .structures import Structure
+    from .grids import Direction
 
 
 class MobilePrototype(HasColorName, HasColorDescription, HasFlags, HasInteractive):
@@ -93,6 +96,12 @@ class Character(HasColorName, HasColorDescription, HasLocation, HasEquipment, Ha
     def save(self):
         pass
 
+    @property
+    def admin_level(self) -> int:
+        if self.session:
+            return self.session.user.admin_level
+        return 0
+
     def send_rich(self, text: str | Text):
         if not self.session:
             return
@@ -130,12 +139,37 @@ class Character(HasColorName, HasColorDescription, HasLocation, HasEquipment, Ha
 
     def enqueue_command(self, command: str):
         self.command_queue.append(command)
-        dbat.SUBSCRIPTIONS["pending_command"].add(self)
+        dbat.SUBSCRIPTIONS["pending_commands"].add(self)
 
     def clear_command_queue(self):
         self.command_queue.clear()
-        dbat.SUBSCRIPTIONS["pending_command"].discard(self)
+        dbat.SUBSCRIPTIONS["pending_commands"].discard(self)
     
+    def available_commands(self):
+        priorities = sorted(list(dbat.CHARACTER_COMMANDS_PRIORITY.keys()), reverse=True)
+        for priority in priorities:
+            for command_cls in dbat.CHARACTER_COMMANDS_PRIORITY[priority]:
+                if command_cls.check_access(self):
+                    yield command_cls
+    
+    def execute_command(self, command_str: str):
+        for command_cls in self.available_commands():
+            match = command_cls.check_match(self, command_str)
+            if match is not None:
+                command = command_cls(self, command_str, match)
+                return command.execute()
+        return {"ok": False, "error": "No matching command found."}
+
+    def process_command_queue(self, delta_time: float):
+        if not self.command_queue:
+            dbat.SUBSCRIPTIONS["pending_command"].discard(self)
+            return
+        
+        command_str = self.command_queue.pop(0)
+        if not self.command_queue:
+            dbat.SUBSCRIPTIONS["pending_command"].discard(self)
+        self.execute_command(command_str)
+
     def as_dg_ref(self) -> DgReference:
         return DgReference("object", self.id)
     
@@ -159,6 +193,12 @@ class Character(HasColorName, HasColorDescription, HasLocation, HasEquipment, Ha
             out.add(app_sex)
 
         return out
+    
+    def look_at(self, target: Character | Direction | Location | Object | Structure):
+        if hasattr(target, "render_look") and callable(target.render_look):
+            target.render_look(self)
+        else:
+            self.send_text("You see nothing special.")
 
 class Mobile(Character):
     """
@@ -205,6 +245,7 @@ class PlayerCharacter(Character):
     def __init__(self):
         Character.__init__(self)
         self.dub_names: dict[uuid.UUID, str] = dict()
+        self.account: Account | None = None
 
     def __repr__(self):
         return f"<PlayerCharacter: {self.color_name.plain} ({self.id})>"
@@ -212,6 +253,12 @@ class PlayerCharacter(Character):
     def game_activate(self):
         dbat.PLAYERS[self.id] = self
         dbat.CHARACTERS[self.id] = self
+
+        # Adding in a location hack for dev time now.
+        if not self.location:
+            z = dbat.SLUGS["zone"]["3"]
+            l = Location("zone", z.id, (300,0,0))
+            self.add_to_location(l)
     
     def game_deactivate(self):
         dbat.PLAYERS.pop(self.id, None)
