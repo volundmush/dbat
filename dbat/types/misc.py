@@ -1,18 +1,18 @@
 import typing
-from dataclasses import dataclass
+from pydantic import BaseModel, Field, ConfigDict
+from muplugins.core.db.fields import RichText
 from rich.text import Text
 from rich.errors import MarkupError
 
 if typing.TYPE_CHECKING:
     from .characters import Character
 
-class HasColorName:
+class HasColorName(BaseModel):
     """
     This is for entities that have a color name.
     """
-
-    def __init__(self):
-        self.color_name: Text = Text()
+    model_config = ConfigDict(validate_assignment=True)
+    color_name: RichText = Field(default_factory=RichText, description="The color name of this entity")
     
     @property
     def name(self) -> str:
@@ -27,13 +27,12 @@ class HasColorName:
         except MarkupError:
             self.color_name = Text(color_name)
 
-class HasColorDescription:
+class HasColorDescription(BaseModel):
     """
     This is for entities that have a color description.
     """
-
-    def __init__(self):
-        self.color_description: Text = Text()
+    model_config = ConfigDict(validate_assignment=True)
+    color_description: RichText = Field(default_factory=RichText, description="The color description of this entity")
     
     @property
     def description(self) -> str:
@@ -48,14 +47,11 @@ class HasColorDescription:
         except MarkupError:
             self.color_description = Text(color_description)
 
-class HasInteractive:
+class HasInteractive(BaseModel):
     """
     This is for entities that can be interacted with.
     """
-
-    def __init__(self):
-        # Keywords are used for searching/targeting. They are simple string tokens like plant, saiyan, bear, etc.
-        self.keywords = set()
+    keywords: set[str] = Field(default_factory=set, description="A set of keywords for this entity, used for searching/targeting")
     
     def get_keywords(self, viewer: Character) -> set[str]:
         """
@@ -127,27 +123,24 @@ class HasInteractive:
         return self.name
 
 
-class HasFlags:
+class HasFlags(BaseModel):
     """
     This is for entities that have flags.
     """
-
-    def __init__(self):
-        self.flags: set[str] = set()
+    model_config = ConfigDict(validate_assignment=True)
+    flags: set[str] = Field(default_factory=set, description="A set of flags for this entity")
     
     def has_flag(self, flag: str) -> bool:
         return flag in self.flags
 
 
-@dataclass(slots=True)
-class ExtraDescription:
-    keywords: str = ""
-    description: str = ""
+class ExtraDescription(BaseModel):
+    keywords: str = Field("", description="The keywords for this extra description, used for searching/targeting")
+    description: RichText = Field(default_factory=RichText, description="The extra description text")
 
 class HasExtraDescriptions:
     """
     This is for entities that have extra descriptions.
     """
-
-    def __init__(self):
-        self.extra_descriptions: list[ExtraDescription] = list()
+    model_config = ConfigDict(validate_assignment=True)
+    extra_descriptions: list[ExtraDescription] = Field(default_factory=list, description="A list of extra descriptions for this entity")

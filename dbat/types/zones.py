@@ -1,40 +1,36 @@
+import uuid
+
 import dbat
 from .grids import Grid
-from .location import IsLocation, Location
-
+from .location import IsLocation, Location, PrivateAttr
+from pydantic import Field, ConfigDict
 
 class Zone(Grid, IsLocation):
-    slug_type: str = "zone"
-    location_type: str = "zone"
+    parent_id: uuid.UUID | None = Field(default=None, description="The ID of the parent zone, if any.")
+    launch_destination: Location | None = Field(default=None, description="The location to launch into when entering this zone.")
 
-    def __init__(self):
-        Grid.__init__(self)
-        IsLocation.__init__(self)
-        self.deleted = False
-        self.parent: "Zone | None" = None
-        self.children: set["Zone"] = set()
-        self.launch_destination: Location | None = None
+    __children: set[uuid.UUID] = PrivateAttr(default_factory=set)
+    __deleted: bool = PrivateAttr(default=False)
+
+    def add_child(self, child: "Zone"):
+        self.__children.add(child.id)
+        child.parent_id = self.id
+
+    def remove_child(self, child: "Zone"):
+        self.__children.remove(child.id)
+        child.parent_id = None
+
+    def report_slug_type(self):
+        return "zone"
+    
+    def report_location_type(self):
+        return "zone"
     
     def __bool__(self):
-        return not self.deleted
+        return not self.__deleted
 
     def __repr__(self):
         return f"<Zone: {self.color_name.plain} ({self.id}){f" {self.slug}" if self.slug else ""}>"
     
     def save(self):
-        dbat.DIRTY_ZONES.add(self.id)
-    
-    def dump(self) -> dict:
-        out = super().dump()
-        if self.launch_destination:
-            out["launch_destination"] = self.launch_destination.dump()
-        if self.parent:
-            out["parent"] = self.parent.id
-        return out
-
-    @classmethod
-    def load(cls, data: dict) -> "Zone":
-        zone = cls()
-        Grid.load_grid(zone, data)
-        #zone.launch_destination = Location.load(data["launch_destination"]) if data.get("launch_destination")
-        return zone
+        dbat.INDEX.dirty_zones.add(self.id)

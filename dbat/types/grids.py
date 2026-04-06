@@ -1,13 +1,13 @@
 import typing
 import uuid
-from dataclasses import dataclass, field, asdict
+from pydantic import BaseModel, Field, ConfigDict, PrivateAttr
 
 from loguru import logger
 
 from dbat.types.characters import Mobile, MobilePrototype
 from dbat.types.objects import Object, ObjectPrototype
 from .dgscripts import TriggerType, HasDgScripts
-from .location import POINT, IsLocation, Location
+from .location import Point, IsLocation, Location
 from .misc import HasFlags, HasExtraDescriptions, ExtraDescription, HasColorName, HasColorDescription
 from enum import Enum
 from rich.text import Text
@@ -16,7 +16,6 @@ import dbat
 
 from .dgscripts import HasDgScripts
 
-POINT = typing.Tuple[int, int, int]  # (x, y, z) coordinates in a grid
 
 class Direction(Enum):
     north = "north"
@@ -59,33 +58,33 @@ class Direction(Enum):
             case Direction.outside:
                 return Direction.inside
 
-    def update_coordinates(self, coor: POINT) -> POINT:
+    def update_coordinates(self, coor: Point) -> Point:
         match self:
             case Direction.north:
-                return (coor[0], coor[1] + 1, coor[2])
+                return Point(coor.x, coor.y + 1, coor.z)
             case Direction.east:
-                return (coor[0] + 1, coor[1], coor[2])
+                return Point(coor.x + 1, coor.y, coor.z)
             case Direction.south:
-                return (coor[0], coor[1] - 1, coor[2])
+                return Point(coor.x, coor.y - 1, coor.z)
             case Direction.west:
-                return (coor[0] - 1, coor[1], coor[2])
+                return Point(coor.x - 1, coor.y, coor.z)
             case Direction.up:
-                return (coor[0], coor[1], coor[2] + 1)
+                return Point(coor.x, coor.y, coor.z + 1)
             case Direction.down:
-                return (coor[0], coor[1], coor[2] - 1)
+                return Point(coor.x, coor.y, coor.z - 1)
             case Direction.northeast:
-                return (coor[0] + 1, coor[1] + 1, coor[2])
+                return Point(coor.x + 1, coor.y + 1, coor.z)
             case Direction.southeast:
-                return (coor[0] + 1, coor[1] - 1, coor[2])
+                return Point(coor.x + 1, coor.y - 1, coor.z)
             case Direction.southwest:
-                return (coor[0] - 1, coor[1] - 1, coor[2])
+                return Point(coor.x - 1, coor.y - 1, coor.z)
             case Direction.northwest:
-                return (coor[0] - 1, coor[1] + 1, coor[2])
+                return Point(coor.x - 1, coor.y + 1, coor.z)
             case _:
-                return coor
+                return coor.model_copy()
 
-@dataclass(slots=True)
-class ResetCommand:
+
+class ResetCommand(BaseModel):
     command: str = ""
     target: str = ""
     max_world: int = 0
@@ -94,16 +93,7 @@ class ResetCommand:
     ex: int = 0
     key: str = ""
     value: str = ""
-    subcommands: list[ResetCommand] = field(default_factory=list)
-
-    @classmethod
-    def load(cls, data: dict) -> ResetCommand:
-        subs = data.pop("subcommands", list())
-        cmd = cls(**data)
-        if subs:
-            cmd.subcommands = [ResetCommand.load(sub) for sub in subs]
-        return cmd
-
+    subcommands: list[ResetCommand] = Field(default_factory=list)
 
     def execute(self, tile: "Tile", last_spawned=None):
         successful = False
@@ -245,161 +235,80 @@ class SectorType(Enum):
     space = "space"       # This is a space room
     lava = "lava"         # This room always has lava
 
-class Exit(HasFlags):
+class ExitBase(HasFlags):
+    keywords: str = ""
+    description: str = ""
+    dchide: int = 0
+    dclock: int = 0
+    keys: set[str] = Field(default_factory=set, description="A set of key object prototypes that can unlock this exit")
 
-    def __init__(self, location: Location):
-        HasFlags.__init__(self)
-        self.location: Location  = location
-        self.keywords: str = ""
-        self.description: str = ""
-        self.dchide: int = 0
-        self.dclock: int = 0
-        self.keys: set[str] = set()  # keywords for keys that can unlock this exit
+
+class Exit(ExitBase):
+    location: Location = Field(default_factory=Location, description="The location this exit leads to")
 
     def __bool__(self):
         return bool(self.location)
 
     def __repr__(self):
         return f"<Exit to {self.location}>"
+
+class ShapeBase(HasColorName, HasColorDescription):
+    point: Point = Field(default_factory=Point, description="The coordinates of this shape within the grid")
+    type: str = Field(default="box", description="The type of shape, such as 'box' or 'round'")
+    sector_type: str = Field(default="", description="The sector type of this shape, such as 'inside', 'city', 'field', etc.")
+    tile_display: str = Field(default="", description="The tile display string for this shape, used for map rendering")
+    north: int = Field(default=0, description="How far this shape extends to the north.")
+    south: int = Field(default=0, description="How far this shape extends to the south.")
+    east: int = Field(default=0, description="How far this shape extends to the east.")
+    west: int = Field(default=0, description="How far this shape extends to the west.")
+    up: int = Field(default=0, description="How far this shape extends upwards.")
+    down: int = Field(default=0, description="How far this shape extends downwards.")
+    priority: int = Field(default=0, description="The priority of this shape when determining which shape covers a point. Higher priority shapes will take precedence over lower priority shapes.")
+
+
+class HasGrid(BaseModel):
+    grid_type: str = Field(..., description="The type of grid this entity is located in, such as 'zone' or 'structure'", exclude=True)
+    grid_id: uuid.UUID = Field(..., description="The ID of the grid this entity is located in", exclude=True)
+
+    def grid(self):
+        match self.grid_type:
+            case "zone":
+                return dbat.INDEX.get_zone(self.grid_id)
+            case "structure":
+                return dbat.INDEX.get_structure(self.grid_id)
+            case _:
+                return None
+
+
+class Shape(ShapeBase, HasGrid):
+    pass
+
+class TileBase(HasColorName, HasColorDescription, HasDgScripts, HasFlags, HasExtraDescriptions):
+    point: Point = Field(default_factory=Point, description="The coordinates of this tile within the grid")
+    sector_type: str = Field(default="", description="The sector type of this tile, such as 'inside', 'city', 'field', etc.")
+    reset_commands: list[ResetCommand] = Field(default_factory=list, description="A list of reset commands to execute when this tile resets.")
+    tile_display: str = Field(default="", description="The tile display string for this tile, used for map rendering")
+
+class Tile(TileBase, HasGrid):
+    slug: str = Field(default="", description="The slug for this tile, used for referencing it in reset commands and such.")
+    ground_effect: int = Field(default=0, description="The ground effect for this tile, such as damage or healing.")
+    damage: int = Field(default=0, description="The damage this tile does to characters that end their turn on it.")
+    exits: dict[Direction, Exit] = Field(default_factory=dict, description="A dictionary mapping directions to exits from this tile.")
     
-    def dump(self) -> dict:
-        return {
-            "location": self.location.dump(),
-            "flags": list(self.flags),
-            "keywords": self.keywords,
-            "description": self.description,
-            "dchide": self.dchide,
-            "dclock": self.dclock,
-            "keys": list(self.keys),
-        }
-    
-    @classmethod
-    def load(cls, data: dict) -> "Exit":
-        exit = cls(Location.load(data["location"]))
-        exit.flags = set(data.get("flags", list()))
-        exit.keywords = data.get("keywords", "")
-        exit.description = data.get("description", "")
-        exit.dchide = data.get("dchide", 0)
-        exit.dclock = data.get("dclock", 0)
-        exit.keys = set(data.get("keys", list()))
-        return exit
+    def report_slug_type(self):
+        return "tile"
 
-class Shape(HasColorName, HasColorDescription):
-
-    def __init__(self, grid: "Grid", point: POINT):
-        HasColorName.__init__(self)
-        HasColorDescription.__init__(self)
-        self.grid: "Grid" = grid
-        self.point: POINT = point
-        self.type: str = "box"
-        self.sector_type: str = ""
-        self.tile_display: str = ""
-        self.north: int = 0
-        self.south: int = 0
-        self.east: int = 0
-        self.west: int = 0
-        self.up: int = 0
-        self.down: int = 0
-        self.priority: int = 0
-
-    def dump(self) -> dict:
-        return {
-            "type": self.type,
-            "sector_type": self.sector_type,
-            "tile_display": self.tile_display,
-            "north": self.north,
-            "south": self.south,
-            "east": self.east,
-            "west": self.west,
-            "up": self.up,
-            "down": self.down,
-            "priority": self.priority,
-        }
-    
-    @classmethod
-    def load(cls, grid: "Grid", point: POINT, data: dict) -> "Shape":
-        shape = cls(grid, point)
-        shape.type = data["type"]
-        shape.sector_type = data["sector_type"]
-        shape.tile_display = data.get("tile_display", "")
-        shape.north = data.get("north", 0)
-        shape.south = data.get("south", 0)
-        shape.east = data.get("east", 0)
-        shape.west = data.get("west", 0)
-        shape.up = data.get("up", 0)
-        shape.down = data.get("down", 0)
-        shape.priority = data.get("priority", 0)
-        return shape
-    
-    def save(self):
-        self.grid.save()
-
-
-class Tile(HasColorName, HasColorDescription, HasDgScripts, HasFlags, HasExtraDescriptions):
-    slug_type: str = "tile"
-
-    def __init__(self, grid: "Grid", point: POINT):
-        HasColorName.__init__(self)
-        HasColorDescription.__init__(self)
-        HasDgScripts.__init__(self)
-        HasFlags.__init__(self)
-        HasExtraDescriptions.__init__(self)
-        self.grid: "Grid" = grid
-        self.point: POINT = point
-        self.slug: str = ""
-        self.sector_type: str = ""
-        self.proto_script: list[str] = list()
-        self.ground_effect: int = 0
-        self.damage: int = 0
-        self.reset_commands: list[ResetCommand] = list()
-        self.exits: dict[Direction, Exit] = dict()
-        self.tile_display: str = ""
-    
     def __repr__(self):
         return f"<Tile:{self.point} in {self.grid}>"
 
-    def as_location(self) -> Location:
-        return Location(self.grid.location_type, self.grid.id, self.point)
-
-    def dump(self) -> dict:
-        return {
-            "slug": self.slug,
-            "color_name": self.color_name.markup,
-            "color_description": self.color_description.markup,
-            "sector_type": self.sector_type,
-            "proto_script": self.proto_script,
-            "ground_effect": self.ground_effect,
-            "damage": self.damage,
-            "reset_commands": [asdict(cmd) for cmd in self.reset_commands],
-            "exits": {direction.value: exit.dump() for direction, exit in self.exits.items()},
-            "tile_display": self.tile_display,
-            "extra_descriptions": [{"keywords": ed.keywords, "description": ed.description} for ed in self.extra_descriptions],
-            "flags": list(self.flags),
-        }
-    
-    @classmethod
-    def load(cls, grid: "Grid", point: POINT, data: dict) -> "Tile":
-        tile = cls(grid, point)
-        tile.slug = data["slug"]
-        tile.color_name = Text.from_markup(data["color_name"])
-        tile.color_description = Text.from_markup(data["color_description"])
-        tile.sector_type = data["sector_type"]
-        tile.proto_script = data.get("proto_script", list())
-        tile.ground_effect = data.get("ground_effect", 0)
-        tile.damage = data.get("damage", 0)
-        tile.reset_commands = [ResetCommand.load(cmd) for cmd in data.get("reset_commands", list())]
-        tile.exits = {Direction(direction): Exit.load(exit_data) for direction, exit_data in data.get("exits", dict()).items()}
-        tile.tile_display = data.get("tile_display", "")
-        tile.extra_descriptions = [ExtraDescription(ed["keywords"], ed["description"]) for ed in data.get("extra_descriptions", list())]
-        tile.flags = set(data.get("flags", list()))
-        return tile
+    def as_location(self) -> Location | None:
+        if not (g := self.grid()):
+            return None
+        return Location(g.report_location_type(), g.id, self.point)
 
     def execute_reset_commands(self):
         for cmd in self.reset_commands:
             cmd.execute(self)
-    
-    def save(self):
-        self.grid.save()
 
 class Grid(IsLocation, HasFlags, HasColorName, HasColorDescription):
     """
@@ -408,68 +317,34 @@ class Grid(IsLocation, HasFlags, HasColorName, HasColorDescription):
     Zones are used for the main world map.
     Structures are instances for vehicles, dungeons, etc.
     """
-
-    def __init__(self):
-        IsLocation.__init__(self)
-        HasFlags.__init__(self)
-        HasColorName.__init__(self)
-        HasColorDescription.__init__(self)
-        self.id: uuid.UUID = uuid.UUID(int=0)
-        self.slug: str = ""
-        self.shapes: dict[POINT, Shape] = dict()
-        self.tiles: dict[POINT, Tile] = dict()
-        self.landing_spots: dict[str, Location] = dict()
-        self.docking_spots: dict[str, Location] = dict()
-        self.default_point: POINT = (0, 0, 0)
-        self._shape_index: dict[POINT, list[tuple[Shape, int]]] = {}  # point -> [(shape, priority), ...]
-        self._shape_index_dirty: bool = True
-
-    def dump(self) -> dict:
-        return {
-            "id": str(self.id),
-            "color_name": self.color_name.markup,
-            "color_description": self.color_description.markup,
-            "flags": list(self.flags),
-            "shapes": [[list(point), shape.dump()] for point, shape in self.shapes.items()],
-            "tiles": [[list(point), tile.dump()] for point, tile in self.tiles.items()],
-            "landing_spots": {name: loc.dump() for name, loc in self.landing_spots.items()},
-            "docking_spots": {name: loc.dump() for name, loc in self.docking_spots.items()},
-            "default_point": list(self.default_point),
-            "slug": self.slug,
-        }
+    id: uuid.UUID = Field(..., description="The unique identifier for this grid")
+    slug: str = Field("", description="The slug for this grid, used for referencing it in reset commands and such.")
+    shapes: dict[Point, Shape] = Field(default_factory=dict, description="A dictionary mapping coordinates to shapes in this grid")
+    tiles: dict[Point, Tile] = Field(default_factory=dict, description="A dictionary mapping coordinates to tiles in this grid")
+    landing_spots: dict[str, Location] = Field(default_factory=dict, description="A dictionary mapping landing spot names to locations in this grid. Used for vehicles and such.")
+    docking_spots: dict[str, Location] = Field(default_factory=dict, description="A dictionary mapping docking spot names to locations in this grid. Used for vehicles and such.")
+    default_point: Point = Field(default_factory=Point, description="The default coordinates for this grid, used for placing entities that don't have a specific location within the grid.")
     
-    @classmethod
-    def load_grid(cls, grid, data: dict) -> "Grid":
-        grid.id = uuid.UUID(data["id"])
-        grid.color_name = Text.from_markup(data["color_name"])
-        grid.color_description = Text.from_markup(data["color_description"])
-        grid.flags = set(data["flags"])
-        grid.slug = data.get("slug", "")
-        # Load shapes and tiles...
-        grid.shapes = {tuple(shape_data[0]): Shape.load(grid, tuple(shape_data[0]), shape_data[1]) for shape_data in data.get("shapes", list())}
-        grid.tiles = {tuple(tile_data[0]): Tile.load(grid, tuple(tile_data[0]), tile_data[1]) for tile_data in data.get("tiles", list())}
-        grid.landing_spots = {name: Location.load(loc_data) for name, loc_data in data.get("landing_spots", dict()).items()}
-        grid.docking_spots = {name: Location.load(loc_data) for name, loc_data in data.get("docking_spots", dict()).items()}
-        grid.default_point = tuple(data.get("default_point", (0, 0, 0)))
-        return grid
+    __shape_index: dict[Point, list[tuple[Shape, int]]] = PrivateAttr(default_factory=dict) 
+    __shape_index_dirty: bool = PrivateAttr(default=True)
 
     def reset_grid(self):
         for tile in self.tiles.values():
             tile.execute_reset_commands()
 
-    def valid_location_coordinates(self, point: POINT) -> bool:
+    def valid_location_coordinates(self, point: Point) -> bool:
         # A location is valid if it has a tile or shape at that point.
         return point in self.tiles or self.query_shape(point) is not None
 
     def _invalidate_shape_index(self):
-        self._shape_index_dirty = True
+        self.__shape_index_dirty = True
 
     def add_shape(self, shape: Shape):
         """Add a shape to the grid and invalidate the spatial index."""
         self.shapes[shape.point] = shape
         self._invalidate_shape_index()
 
-    def remove_shape(self, point: POINT) -> Shape | None:
+    def remove_shape(self, point: Point) -> Shape | None:
         """Remove a shape from the grid and invalidate the spatial index."""
         shape = self.shapes.pop(point, None)
         if shape:
@@ -478,24 +353,24 @@ class Grid(IsLocation, HasFlags, HasColorName, HasColorDescription):
 
     def _build_shape_index(self):
         """Build spatial index mapping each point to shapes that cover it, sorted by priority (highest first)."""
-        self._shape_index.clear()
+        self.__shape_index.clear()
         
         for shape_point, shape in self.shapes.items():
             # Generate all points covered by this shape based on its type
             covered_points = self._get_shape_points(shape_point, shape)
             
             for point in covered_points:
-                if point not in self._shape_index:
-                    self._shape_index[point] = []
-                self._shape_index[point].append((shape, shape.priority))
+                if point not in self.__shape_index:
+                    self.__shape_index[point] = []
+                self.__shape_index[point].append((shape, shape.priority))
         
         # Sort each point's list by priority (highest first)
-        for point in self._shape_index:
-            self._shape_index[point].sort(key=lambda x: x[1], reverse=True)
+        for point in self.__shape_index:
+            self.__shape_index[point].sort(key=lambda x: x[1], reverse=True)
         
-        self._shape_index_dirty = False
+        self.__shape_index_dirty = False
 
-    def _get_shape_points(self, shape_point: POINT, shape: Shape) -> set[POINT]:
+    def _get_shape_points(self, shape_point: Point, shape: Shape) -> set[Point]:
         """Generate all points covered by a shape based on its type."""
         points = set()
         
@@ -506,22 +381,22 @@ class Grid(IsLocation, HasFlags, HasColorName, HasColorDescription):
             radius_y = shape.north + shape.south
             radius_z = shape.up + shape.down
             
-            for x in range(shape_point[0] - radius_x, shape_point[0] + radius_x + 1):
-                for y in range(shape_point[1] - radius_y, shape_point[1] + radius_y + 1):
-                    for z in range(shape_point[2] - radius_z, shape_point[2] + radius_z + 1):
+            for x in range(shape_point.x - radius_x, shape_point.x + radius_x + 1):
+                for y in range(shape_point.y - radius_y, shape_point.y + radius_y + 1):
+                    for z in range(shape_point.z - radius_z, shape_point.z + radius_z + 1):
                         # Manhattan distance from center
-                        dist = abs(x - shape_point[0]) + abs(y - shape_point[1]) + abs(z - shape_point[2])
+                        dist = abs(x - shape_point.x) + abs(y - shape_point.y) + abs(z - shape_point.z)
                         max_dist = radius_x + radius_y + radius_z
                         if dist <= max_dist:
                             points.add((x, y, z))
         else:
             # Default to box (rectangular prism)
-            min_x = shape_point[0] - shape.west
-            max_x = shape_point[0] + shape.east
-            min_y = shape_point[1] - shape.south
-            max_y = shape_point[1] + shape.north
-            min_z = shape_point[2] - shape.down
-            max_z = shape_point[2] + shape.up
+            min_x = shape_point.x - shape.west
+            max_x = shape_point.x + shape.east
+            min_y = shape_point.y - shape.south
+            max_y = shape_point.y + shape.north
+            min_z = shape_point.z - shape.down
+            max_z = shape_point.z + shape.up
             
             for x in range(min_x, max_x + 1):
                 for y in range(min_y, max_y + 1):
@@ -530,31 +405,31 @@ class Grid(IsLocation, HasFlags, HasColorName, HasColorDescription):
         
         return points
 
-    def query_shape(self, point: POINT) -> Shape | None:
+    def query_shape(self, point: Point) -> Shape | None:
         """Query the highest-priority shape covering the given point. Returns None if no shape covers it."""
-        if self._shape_index_dirty:
+        if self.__shape_index_dirty:
             self._build_shape_index()
         
-        if point not in self._shape_index:
+        if point not in self.__shape_index:
             return None
         
         # Return the first (highest priority) shape
-        shapes_at_point = self._shape_index[point]
+        shapes_at_point = self.__shape_index[point]
         if shapes_at_point:
             return shapes_at_point[0][0]
         return None
 
-    def query_shape_all(self, point: POINT) -> list[Shape]:
+    def query_shape_all(self, point: Point) -> list[Shape]:
         """Query all shapes covering the given point, sorted by priority (highest first)."""
-        if self._shape_index_dirty:
+        if self.__shape_index_dirty:
             self._build_shape_index()
         
-        if point not in self._shape_index:
+        if point not in self.__shape_index:
             return []
         
-        return [s for s, _ in self._shape_index[point]]
+        return [s for s, _ in self.__shape_index[point]]
 
-    def generate_exits_at(self, point: POINT) -> dict[Direction, Exit]:
+    def generate_exits_at(self, point: Point) -> dict[Direction, Exit]:
         exits = dict()
         for direction in Direction:
             if direction in [Direction.inside, Direction.outside]:
@@ -566,7 +441,7 @@ class Grid(IsLocation, HasFlags, HasColorName, HasColorDescription):
             exits.update(self.tiles[point].exits)
         return exits
     
-    def get_exit_for_direction(self, point: POINT, direction: Direction) -> Exit | None:
+    def get_exit_for_direction(self, point: Point, direction: Direction) -> Exit | None:
         if point in self.tiles and direction in self.tiles[point].exits:
             return self.tiles[point].exits[direction]
         
@@ -575,7 +450,7 @@ class Grid(IsLocation, HasFlags, HasColorName, HasColorDescription):
             return None
         return Exit(Location(self.location_type, self.id, adjacent_point))
     
-    def get_display_name(self, point: POINT, viewer: "Character") -> str:
+    def get_display_name(self, point: Point, viewer: "Character") -> str:
         if point in self.tiles and self.tiles[point].color_name:
             return self.tiles[point].color_name
         shape = self.query_shape(point)
@@ -583,7 +458,7 @@ class Grid(IsLocation, HasFlags, HasColorName, HasColorDescription):
             return shape.color_name
         return "Unremarkable Ground"
     
-    def get_display_description(self, point: POINT, viewer: "Character") -> str:
+    def get_display_description(self, point: Point, viewer: "Character") -> str:
         if point in self.tiles and self.tiles[point].color_description:
             return self.tiles[point].color_description
         shape = self.query_shape(point)

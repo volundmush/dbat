@@ -1,8 +1,10 @@
 import uuid
+from pydantic import BaseModel, Field, ConfigDict, model_validator, PrivateAttr
 from venv import logger
 import dbat
 import typing
 from enum import Enum
+from .location import Point
 
 if typing.TYPE_CHECKING:
     from .grids import POINT
@@ -342,58 +344,39 @@ def compile_dgscript(code: list[tuple[ScriptLineType, str]]) -> tuple[dict[int, 
     return node_map, root
 
 
-class DgScript:
-    
-    def __init__(self):
-        self.id: str = ""
-        self.name: str = ""
-        # attach_type has no real meaning in code, it's just a label.
-        self.attach_type: str = ""
-        self.narg: int = 0
-        self.triggers: set[TriggerType] = set()
-        self.command: str = ""
-        self.code: list[tuple[ScriptLineType, str | None]] = []
-        self.root_node: DgTreeNode | None = None
-        self.node_map: dict[int, DgTreeNode] = dict()
+class DgScript(BaseModel):
+    id: str = Field(default=..., description="Unique identifier for this script.")
+    name: str = Field(default="", description="A human-readable name for this script.")
+    attach_type: str = Field(default="", description="The type of entity this script can be attached to. This is just a label and has no real meaning in code.")
+    narg: int = Field(default=0, description="The narg field from the original DgScript. This is just a label and has no real meaning in code.")
+    triggers: set[TriggerType] = Field(default_factory=set, description="The set of triggers that activate this script.")
+    command: str = Field(default="", description="The command field from the original DgScript. This is just a label and has no real meaning in code.")
+    body: str = Field(default="", description="The original code body of this script. This is just a label and has no real meaning in code, as the actual code that is executed is stored in __lines after parsing.")
+    __lines: list[tuple[ScriptLineType, str]] = PrivateAttr(default_factory=list)
+    __root_node: DgTreeNode | None = PrivateAttr(default=None)
+    __node_map: dict[int, DgTreeNode] = PrivateAttr(default_factory=dict)
     
     def script(self):
-        return render_code(self.code)
-    
-    def dump(self) -> dict:
-        return {"id": self.id,
-                "name": self.name,
-                "attach_type": self.attach_type,
-                "narg": self.narg,
-                "triggers": [t.value for t in self.triggers],
-                "command": self.command,
-                "code": self.script()
-                }
+        return render_code(self.__lines)
 
-    @classmethod
-    def load(cls, data: dict) -> "DgScript":
-        s = cls()
-        s.id = data["id"]
-        s.name = data["name"]
-        s.attach_type = data["attach_type"]
-        s.narg = data["narg"]
-        s.triggers = set(TriggerType(t) for t in data["triggers"])
-        s.command = data["command"]
-        s.code = parse_script(data["code"])
-        dg_tree, root = compile_dgscript(s.code)
-        s.root_node = root
-        s.node_map = dg_tree
-        return s
+    @model_validator(mode="after")
+    def _compile_from_body(self):
+        if self.body and not self.__lines:
+            self.__lines = parse_script(self.body)
+            dg_tree, root = compile_dgscript(self.__lines)
+            self.__root_node = root
+            self.__node_map = dg_tree
+        return self
 
-class DgReference:
+
+class DgReference(BaseModel):
     """
     Variables in DgScripts can be either a string or a reference to another game object.
     This handles the latter case.
     """
-
-    def __init__(self, entity_type: str, entity_id: uuid.UUID, point: POINT = (0,0,0)):
-        self.entity_type = entity_type
-        self.entity_id = entity_id
-        self.point = point
+    entity_type: str = Field(..., description="The type of entity this reference points to. Can be 'character', 'object', 'zone', or 'structure'.")
+    entity_id: uuid.UUID = Field(..., description="The unique ID of the entity this reference points to.")
+    point: Point = Field(default_factory=Point, description="For tile reference. For characters/objects, this is unused.")    
     
     def __bool__(self):
         return bool(self.get_target())
@@ -401,35 +384,23 @@ class DgReference:
     def get_target(self) -> HasDgScripts | None:
         match self.entity_type:
             case "zone":
-                if z := dbat.ZONES.get(self.entity_id, None):
+                if z := dbat.index.get_zone(self.entity_id):
                     return z.tiles.get(self.point, None)
             case "structure":
-                if s := dbat.STRUCTURES.get(self.entity_id, None):
+                if s := dbat.index.get_structure(self.entity_id):
                     return s.tiles.get(self.point, None)
             case "character":
-                return dbat.CHARACTERS.get(self.entity_id, None)
+                return dbat.index.get_character(self.entity_id)
             case "object":
-                return dbat.OBJECTS.get(self.entity_id, None)
+                return dbat.index.get_object(self.entity_id)
             case _:
                 return None
-    
-    def dump(self) -> dict:
-        return {"entity_type": self.entity_type,
-                "entity_id": self.entity_id,
-                "point": list(self.point)
-                }
-    
-    @classmethod
-    def load(cls, data: dict) -> DgReference:
-        return DgReference(**data)
 
-class HasDgScripts:
-
-    def __init__(self):
-        self.proto_script: list[str] = list()
-        self.dgscripts: dict[str, "DgScriptInstance"] = dict()
-        self.script_order: list[str] | None = None
-        self.dg_variables: dict[str, str | DgReference] = dict()
+class HasDgScripts(BaseModel):
+    proto_script: list[str] = Field(default_factory=list, description="The list of script IDs that are attached to this entity by its prototype. This is used to determine the order of script execution, and should not be modified directly.")
+    __dgscripts: dict[str, DgScriptInstance] = PrivateAttr(default_factory=dict)
+    __script_order: list[str] | None = PrivateAttr(default=None)
+    dg_variables: dict[str, str | DgReference] = Field(default_factory=dict, description="The variables that are currently set for this entity's DgScripts.")
     
     def evaluate_dgscript_member(self, script: "DgScriptInstance", field: str, arg: str) -> None | str:
         return None
@@ -443,14 +414,14 @@ class HasDgScripts:
         but a few change their script order around during runtime,
         so we have script_order as an override.
         """
-        if self.script_order is not None:
-            return self.script_order.copy()
+        if self.__script_order is not None:
+            return self.__script_order.copy()
         return self.proto_script.copy()
     
     def iter_dgscripts(self):
         for script_id in self.get_dgscript_order():
-            if script_id in self.dgscripts:
-                yield self.dgscripts[script_id]
+            if script_id in self.__dgscripts:
+                yield self.__dgscripts[script_id]
 
     def trigger_dgscripts(self, trigger: TriggerType, **kwargs):
         """
@@ -483,29 +454,27 @@ class HasDgScripts:
         """
         Adds a DgScript to this entity, but doesn't add it to the prototype.
         """
-        if script.id in self.dgscripts:
+        if script.id in self.__dgscripts:
             raise ValueError(f"Script {script.id} is already attached to this entity.")
         instance = DgScriptInstance(script, self)
-        self.dgscripts[script.id] = instance
-        if not self.script_order:
-            self.script_order = self.proto_script.copy()
-        self.script_order.append(script.id)
+        self.__dgscripts[script.id] = instance
+        if not self.__script_order:
+            self.__script_order = self.proto_script.copy()
+        self.__script_order.append(script.id)
     
     def remove_dgscript(self, script_id: str):
         """
         Removes a DgScript from this entity, but doesn't remove it from the prototype.
         """
-        if script_id in self.dgscripts:
-            del self.dgscripts[script_id]
-            if self.script_order and script_id in self.script_order:
-                self.script_order.remove(script_id)
+        if script_id in self.__dgscripts:
+            del self.__dgscripts[script_id]
+            if self.__script_order and script_id in self.__script_order:
+                self.__script_order.remove(script_id)
 
-class DgScriptInstance:
-    
-    def __init__(self, script: DgScript, owner: HasDgScripts):
-        self.script = script
-        self.owner = owner
-        self.variables: dict[str, str | DgReference] = dict()
+class DgScriptInstance(BaseModel):
+    script: DgScript = Field(..., description="The DgScript this instance is based on.", exclude=True)
+    owner: HasDgScripts = Field(..., description="The entity this script is attached to.", exclude=True)
+    variables: dict[str, str | DgReference] = Field(default_factory=dict, description="The variables currently set for this script instance. These are used when executing the script.", exclude=True)
     
     def __bool__(self):
         return bool(self.owner)

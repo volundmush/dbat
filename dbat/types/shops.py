@@ -1,8 +1,6 @@
-class Shop:
-    
-    def dump(self) -> dict:
-        return dict()
+import typing
+import uuid
+from pydantic import BaseModel, Field, ConfigDict
 
-    @classmethod
-    def load(cls, data: dict) -> "Shop":
-        return cls()
+class Shop(BaseModel):
+    model_config = ConfigDict(validate_assignment=True)

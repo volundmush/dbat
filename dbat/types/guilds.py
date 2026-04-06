@@ -1,9 +1,6 @@
+import typing
+import uuid
+from pydantic import BaseModel, Field, ConfigDict
 
-class Guild:
-    
-    def dump(self) -> dict:
-        return dict()
-
-    @classmethod
-    def load(cls, data: dict) -> "Guild":
-        return cls()
+class Guild(BaseModel):
+    model_config = ConfigDict(validate_assignment=True)

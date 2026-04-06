@@ -1,133 +1,71 @@
 import uuid
-
+from pydantic import Field, ConfigDict, PrivateAttr
 import dbat
-from .grids import Grid, POINT, Tile, Shape, Exit, Direction, ResetCommand
+from .grids import Grid, Point, Tile, Shape, Exit, Direction, ResetCommand, TileBase, ShapeBase, ExitBase
 from .location import HasLocation, IsLocation, Location
 from .misc import HasColorName, HasColorDescription, HasInteractive, HasFlags
 from .inventory import HasInventory
 import copy
 
-class ExitPrototype(HasFlags):
+class ExitPrototype(ExitBase):
     """
     ExitPrototypes are templates for spawning Exits.
     This is useful for things like player-owned structures, dungeon instances, etc.
+    # Unlike real exits, prototypes only have coordinates.
     """
+    location: Point = Field(default_factory=Point, description="The coordinates within the tile that this exit leads to.")
 
-    def __init__(self):
-        # Unlike real exits, prototypes only have coordinates.
-        # This is because they can only point at a location within
-        # the grid they're defined in.
-        HasFlags.__init__(self)
-        self.location: POINT = (0,0,0)
-        self.keywords: str = ""
-        self.description: str = ""
-        self.dchide: int = 0
-        self.dclock: int = 0
-        self.keys: set[str] = set()
-    
-    def spawn(self, tile: Tile) -> Exit:
-        exit = Exit(Location(tile.grid.entity_type, tile.grid.id, self.location))
-        exit.flags = self.flags.copy()
-        exit.keywords = self.keywords
-        exit.description = self.description
-        exit.dchide = self.dchide
-        exit.dclock = self.dclock
-        exit.keys = self.keys.copy()
-        return exit
+    def spawn(self, loc_type: str, grid_id: uuid.UUID) -> Exit:
+        data = self.model_dump()
+        data["location"] = Location(loc_type, grid_id, self.location)
+        return Exit(**data)
 
-class TilePrototype(HasColorName, HasColorDescription, HasFlags):
+class TilePrototype(TileBase):
     """
     TilePrototypes are templates for spawning Tiles.
     This is useful for things like player-owned structures, dungeon instances, etc.
     """
+    exits: dict[Direction, ExitPrototype] = Field(default_factory=dict, description="The exits from this tile. The keys are the directions of the exits.")
 
-    def __init__(self):
-        HasColorName.__init__(self)
-        HasColorDescription.__init__(self)
-        HasFlags.__init__(self)
-        self.exits: dict[Direction, ExitPrototype] = dict()
-        self.sector_type: str = ""
-        self.reset_commands: list[ResetCommand] = list()
-        self.tile_display: str = ""
-
-    def spawn(self, grid: Grid, point: POINT) -> Tile:
-        tile = Tile(grid, point)
-        tile.color_name = self.color_name.copy()
-        tile.color_description = self.color_description.copy()
-        tile.flags = self.flags.copy()
-        for direction, exit_proto in self.exits.items():
-            tile.exits[direction] = exit_proto.spawn(tile)
-        tile.reset_commands = copy.deepcopy(self.reset_commands)
-        return tile
+    def spawn(self, loc_type: str, grid_id: uuid.UUID) -> Tile:
+        data = self.model_dump(exclude={"exits"})
+        data["grid"] = grid_id
+        data["exits"] = {k: v.spawn(loc_type, grid_id) for k, v in self.exits.items()}
+        return Tile(**data)
 
 
-class ShapePrototype(HasColorName, HasColorDescription):
+class ShapePrototype(ShapeBase):
     """
     ShapePrototypes are templates for spawning Shapes.
     This is useful for things like player-owned structures, dungeon instances, etc.
     """
 
-    def __init__(self):
-        HasColorName.__init__(self)
-        HasColorDescription.__init__(self)
-        self.type: str = "box"
-        self.sector_type: str = ""
-        self.tile_display: str = ""
-        self.north: int = 0
-        self.south: int = 0
-        self.east: int = 0
-        self.west: int = 0
-        self.up: int = 0
-        self.down: int = 0
-        self.priority: int = 0
-
-    def spawn(self, grid: Grid, point: POINT) -> Shape:
-        shape = Shape(grid, point)
-        shape.id = uuid.uuid4()
-        shape.color_name = self.color_name.copy()
-        shape.color_description = self.color_description.copy()
-        shape.type = self.type
-        shape.sector_type = self.sector_type
-        shape.tile_display = self.tile_display
-        shape.north = self.north
-        shape.south = self.south
-        shape.east = self.east
-        shape.west = self.west
-        shape.up = self.up
-        shape.down = self.down
-        shape.priority = self.priority
-        return shape
+    def spawn(self, grid_id: uuid.UUID) -> Shape:
+        data = self.model_dump()
+        data["grid"] = grid_id
+        return Shape(**data)
 
 class StructurePrototype(HasColorName, HasColorDescription, HasFlags):
     """
     StructurePrototypes are templates for spawning Structures.
     This is useful for things like player-owned structures, dungeon instances, etc.
     """
+    shapes: dict[Point, ShapePrototype] = Field(default_factory=dict, description="The shapes that make up this structure. The keys are the coordinates of the shapes within the structure.")
+    tiles: dict[Point, TilePrototype] = Field(default_factory=dict, description="The tiles that make up this structure. The keys are the coordinates of the tiles within the structure.")
+    landing_spots: dict[str, Point] = Field(default_factory=dict, description="Named coordinates within the structure that can be used as landing spots for things like exits, entrances, etc.")     
+    docking_spots: dict[str, Point] = Field(default_factory=dict, description="Named coordinates within the structure that can be used as docking spots for things like exits, entrances, etc.")
+    default_point: Point = Field(default_factory=Point, description="The default point to place things within the structure, such as when spawning characters, objects, etc. It should be a valid point within the structure.")
 
-    def __init__(self):
-        HasColorName.__init__(self)
-        HasColorDescription.__init__(self)
-        HasFlags.__init__(self)
-        self.shapes: dict[POINT, ShapePrototype] = dict()
-        self.tiles: dict[POINT, TilePrototype] = dict()
-        self.landing_spots: dict[str, POINT] = dict() # name to coordinates mapping for landing spots. These are used for things like exits, entrances, etc.
-        self.docking_spots: dict[str, POINT] = dict() # name to coordinates mapping for docking spots. These are used for things like exits, entrances, etc.
-        self.default_point: POINT = (0, 0, 0) # The default point is used for things like spawning characters, objects, etc. It should be a valid point within the structure.
-        self.instances: set[Structure] = set()
+    __instances: set[uuid.UUID] = PrivateAttr(default_factory=set)
 
     def spawn(self) -> Structure:
-        structure = Structure()
-        structure.proto = self
-        structure.color_name = self.color_name.copy()
-        structure.color_description = self.color_description.copy()
-        structure.flags = self.flags.copy()
-        structure.proto = self
-        structure.default_point = self.default_point
-        for point, shape_proto in self.shapes.items():
-            structure.shapes[point] = shape_proto.spawn(structure, point)
-        for point, tile_proto in self.tiles.items():
-            structure.tiles[point] = tile_proto.spawn(structure, point)
-        
+        data = self.model_dump(exclude={"shapes", "tiles", "landing_spots", "docking_spots"})
+        id = uuid.uuid4()
+        data["id"] = id
+        data["shapes"] = {k: v.spawn("structure", id) for k, v in self.shapes.items()}
+        data["tiles"] = {k: v.spawn("structure", id) for k, v in self.tiles.items()}
+        structure = Structure(**data)
+        structure.proto = self.id
         structure.game_activate()
         return structure
 
@@ -137,46 +75,34 @@ class Structure(Grid, HasLocation, IsLocation, HasInteractive, HasInventory):
     after Zones. Unlike Zones, they have a Location.
 
     """
-    slug_type: str = "structure"
-    location_type: str = "structure"
+    __deleted: bool = PrivateAttr(default=False)
+    proto: str = Field(default="", description="The prototype this structure was spawned from, if any.")
 
-    def __init__(self):
-        Grid.__init__(self)
-        HasLocation.__init__(self)
-        IsLocation.__init__(self)
-        HasInteractive.__init__(self)
-        HasFlags.__init__(self)
-        HasInventory.__init__(self)
-        self.deleted = False
-        self.proto: StructurePrototype | None = None
+    def report_location_type(self):
+        return "structure"
+
+    def report_slug_type(self):
+        return "structure"
     
     def __bool__(self):
-        return not self.deleted
+        return not self.__deleted
     
     def __repr__(self):
         return f"<Structure: {self.color_name.plain} ({self.id}){f" {self.slug}" if self.slug else ""}>"
     
     def game_activate(self):
-        dbat.STRUCTURES[self.id] = self
+        dbat.INDEX.structures[self.id] = self
         if self.proto:
-            self.proto.instances.add(self)
+            proto = dbat.INDEX.structure_prototypes.get(self.proto)
+            if proto:
+                proto.instances.add(self)
 
     def game_deactivate(self):
         if self.proto:
-            self.proto.instances.discard(self)
-        dbat.STRUCTURES.pop(self.id, None)
+            proto = dbat.INDEX.structure_prototypes.get(self.proto)
+            if proto:
+                proto.instances.discard(self)
+        dbat.INDEX.structures.pop(self.id, None)
 
     def save(self):
-        dbat.DIRTY_STRUCTURES.add(self.id)
-    
-    def dump(self) -> dict:
-        out = super().dump()
-
-        return out
-
-    @classmethod
-    def load(cls, data: dict) -> "Structure":
-        structure = cls()
-        Grid.load_grid(structure, data)
-        # Load shapes and tiles...
-        return structure
+        dbat.INDEX.dirty_structures.add(self.id)

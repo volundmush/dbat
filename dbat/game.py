@@ -25,8 +25,11 @@ class GameService(Service):
         from .types.grids import Tile, Shape
         from .types.zones import Zone
         from .types.structures import Structure
+        from .types.dgscripts import DgScript
 
         p = Path() / "data"/ "assets"
+        
+        idx = dbat.INDEX
 
         # Loading the game maps - Zones, and Structures
         # load zones
@@ -37,24 +40,23 @@ class GameService(Service):
             for file in zones.glob("*.json"):
                 with file.open("r") as f:
                     data = orjson.loads(f.read())
-                    zone = Zone.load(data)
-                    dbat.ZONES[zone.id] = zone
+                    zone = Zone(**data)
+                    idx.zones[zone.id] = zone
                     if zone.slug:
-                        dbat.SLUGS["zone"][zone.slug] = zone
+                        idx.slugs["zone"][zone.slug] = zone
                     if par := data.get("parent", None):
                         zone_parents[zone.id] = uuid.UUID(par)
-            logger.info(f"Loaded {len(dbat.ZONES)} zones.")
+            logger.info(f"Loaded {len(idx.zones)} zones.")
 
         # assign parents and children
         for zone_id, parent_id in zone_parents.items():
-            if not (parent := dbat.ZONES.get(parent_id, None)):
+            if not (parent := idx.zones.get(parent_id, None)):
                 logger.warning(f"Zone {zone_id} has parent {parent_id} which does not exist.")
                 continue
-            if not (child := dbat.ZONES.get(zone_id, None)):
+            if not (child := idx.zones.get(zone_id, None)):
                 logger.warning(f"Zone {parent.id}: {parent.name} has child {zone_id} but the child does not exist.")
                 continue
-            child.parent = parent
-            parent.children.add(child)
+            parent.add_child(child)
         
 
         # load structures
@@ -64,14 +66,14 @@ class GameService(Service):
             for file in structures.glob("*.json"):
                 with file.open("r") as f:
                     data = orjson.loads(f.read())
-                    structure = Structure.load(data)
+                    structure = Structure(**data)
                     if structure.slug:
-                        dbat.SLUGS["structure"][structure.slug] = structure
-                    dbat.STRUCTURES[structure.id] = structure
+                        idx.slugs["structure"][structure.slug] = structure
+                    idx.structures[structure.id] = structure
         
-            for k, v in dbat.STRUCTURES.items():
+            for k, v in idx.structures.items():
                 v.register_location()
-            logger.info(f"Loaded {len(dbat.STRUCTURES)} structures.")
+            logger.info(f"Loaded {len(idx.structures)} structures.")
 
         objects = p / "objects"
         if objects.exists():
@@ -79,9 +81,9 @@ class GameService(Service):
             for file in objects.glob("*.json"):
                 with file.open("r") as f:
                     data = orjson.loads(f.read())
-                    obj = ObjectPrototype.load(data)
-                    dbat.OBJECT_PROTOTYPES[obj.id] = obj
-            logger.info(f"Loaded {len(dbat.OBJECT_PROTOTYPES)} object prototypes.")
+                    obj = ObjectPrototype(**data)
+                    idx.object_prototypes[obj.id] = obj
+            logger.info(f"Loaded {len(idx.object_prototypes)} object prototypes.")
 
         mobiles = p / "mobiles"
         if mobiles.exists():
@@ -89,9 +91,9 @@ class GameService(Service):
             for file in mobiles.glob("*.json"):
                 with file.open("r") as f:
                     data = orjson.loads(f.read())
-                    mob = MobilePrototype.load(data)
-                    dbat.MOBILE_PROTOTYPES[mob.id] = mob
-            logger.info(f"Loaded {len(dbat.MOBILE_PROTOTYPES)} mobile prototypes.")
+                    mob = MobilePrototype(**data)
+                    idx.mobile_prototypes[mob.id] = mob
+            logger.info(f"Loaded {len(idx.mobile_prototypes)} mobile prototypes.")
 
         shops = p / "shops"
         if shops.exists():
@@ -99,9 +101,9 @@ class GameService(Service):
             for file in shops.glob("*.json"):
                 with file.open("r") as f:
                     data = orjson.loads(f.read())
-                    shop = Shop.load(data)
-                    dbat.SHOPS[shop.id] = shop
-            logger.info(f"Loaded {len(dbat.SHOPS)} shops.")
+                    shop = Shop(**data)
+                    idx.shops[shop.id] = shop
+            logger.info(f"Loaded {len(idx.shops)} shops.")
 
         guilds = p / "guilds"
         if guilds.exists():
@@ -110,9 +112,9 @@ class GameService(Service):
             for file in guilds.glob("*.json"):
                 with file.open("r") as f:
                     data = orjson.loads(f.read())
-                    guild = Guild.load(data)
-                    dbat.GUILDS[guild.id] = guild
-            logger.info(f"Loaded {len(dbat.GUILDS)} guilds.")
+                    guild = Guild(**data)
+                    idx.guilds[guild.id] = guild
+            logger.info(f"Loaded {len(idx.guilds)} guilds.")
 
         dgscripts = p / "dgscripts"
         if dgscripts.exists():
@@ -120,17 +122,17 @@ class GameService(Service):
             for file in dgscripts.glob("*.json"):
                 with file.open("r") as f:
                     data = orjson.loads(f.read())
-                    dgscript = dbat.types.dgscripts.DgScript.load(data)
-                    dbat.DGSCRIPT_PROTOTYPES[dgscript.id] = dgscript
-            logger.info(f"Loaded {len(dbat.DGSCRIPT_PROTOTYPES)} dg scripts.")
+                    dgscript = DgScript(**data)
+                    idx.dgscript_prototypes[dgscript.id] = dgscript
+            logger.info(f"Loaded {len(idx.dgscript_prototypes)} dg scripts.")
         
     async def reset_world(self):
         logger.info("Running initial reset on zones...")
-        for k, v in dbat.ZONES.items():
+        for k, v in dbat.INDEX.zones.items():
             v.reset_grid()
 
         logger.info("Running initial reset on structures...")
-        for k, v in dbat.STRUCTURES.items():
+        for k, v in dbat.INDEX.structures.items():
             v.reset_grid()
 
     async def setup(self):

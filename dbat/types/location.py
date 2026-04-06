@@ -1,118 +1,109 @@
 import dbat
 import uuid
-POINT = tuple[int, int, int]
+from pydantic import BaseModel, ConfigDict, Field, PrivateAttr
 from rich.text import Text
 
 from ..events.informative import LookLocation
 
-class IsLocation:
-    location_type: str = "abstract"
+class Point(BaseModel):
+    model_config = ConfigDict(frozen=True)
+    x: int = Field(0, description="The X coordinate")
+    y: int = Field(0, description="The Y coordinate")
+    z: int = Field(0, description="The Z coordinate")
 
-    def __init__(self):
-        self.__contents: list["HasLocation"] = list()
+class IsLocation(BaseModel):
+    """
+    A base class for objects that "are map locations" where characters and objects can be.
+    Currently this is just Grids (Zones and Structures).
+    """
+    __contents: list[uuid.UUID] = PrivateAttr(default_factory=list)
+
+    def report_location_type(self) -> str:
+        """
+        The string type of this location.
+        """
+        raise NotImplementedError("report_location_type must be implemented by subclasses of IsLocation")
 
     def iter_contents(self):
-        for c in self.__contents.copy():
-            if c:
-                yield c
+        for ent_id in self.__contents.copy():
+            if (e := dbat.INDEX.entities.get(ent_id, None)) is not None:
+                yield e
     
-    def iter_contents_at(self, point: POINT):
-        for c in self.__contents.copy():
-            if c and c.location and c.location.point == point:
-                yield c
+    def iter_contents_at(self, point: Point):
+        for ent_id in self.__contents.copy():
+            if (e := dbat.INDEX.entities.get(ent_id, None)) is not None and e.location and e.location.point == point:
+                yield e
 
-    def valid_location_coordinates(self, point: POINT) -> bool:
+    def valid_location_coordinates(self, point: Point) -> bool:
         """
         Returns whether the given coordinates are valid for this object.
         For example, a room might only have one valid coordinate (0,0,0), while a zone might have many.
         """
         return False
 
-    def add_content(self, con: "HasLocation", loc: POINT, loading: bool = False):
+    def add_content(self, con: "HasLocation", loc: Point, loading: bool = False):
         """
         Adds an entity to this location. This should only be called by the HasLocation.add_to_location method.
         """
-        self.__contents.append(con)
+        self.__contents.append(con.id)
         self.on_contents_add(con, loc, loading)
 
-    def on_contents_add(self, con: "HasLocation", new_loc: POINT, loading: bool = False):
+    def on_contents_add(self, con: "HasLocation", new_loc: Point, loading: bool = False):
         """
         This is called when an entity is added to this location. It can be used to trigger events, etc.
         """
 
-    def relocate_content(self, con: "HasLocation", old_loc: POINT, new_loc: POINT):
+    def relocate_content(self, con: "HasLocation", old_loc: Point, new_loc: Point):
         self.on_contents_relocate(con, old_loc, new_loc)
 
-    def on_contents_relocate(self, con: "HasLocation", old_loc: POINT, new_loc: POINT):
+    def on_contents_relocate(self, con: "HasLocation", old_loc: Point, new_loc: Point):
         """
         This is called when an entity was already IN this location, but is changing coordinates.
         """
 
-    def remove_content(self, con: "HasLocation", old_loc: POINT):
-        self.__contents.remove(con)
+    def remove_content(self, con: "HasLocation", old_loc: Point):
+        self.__contents.remove(con.id)
         self.on_contents_remove(con, old_loc)
 
-    def on_contents_remove(self, con: "HasLocation", old_loc: POINT):
+    def on_contents_remove(self, con: "HasLocation", old_loc: Point):
         """
         This is called when an entity was in this location, and is now removed from it.
         """
     
-    def make_location(self, point: POINT) -> Location:
-        return Location(self, point)
+    def make_location(self, point: Point) -> Location:
+        return Location(self.report_location_type(), self.id, point)
 
-class Location:
+class Location(BaseModel):
     """
     This represents an ADDRESS to a location. It can be serialized. It can also be used to access
     information about the object it targets.
     """
-
-    def __init__(self, location_type: str, location_id: uuid.UUID, point: POINT = None):
-        if not point:
-            point = (0,0,0)
-        
-        self.location_type = location_type
-        self.location_id = location_id
-        self.point: POINT = point
-    
-    def dump(self) -> dict:
-        if not self:
-            return {}
-        
-        return {
-            "location_type": self.location_type,
-            "location_id": self.location_id,
-            "point": list(self.point)
-        }
-    
-    @classmethod
-    def load(cls, data: dict) -> Location:
-        if not data:
-            return None
-        return Location(**data)
+    location_type: str = Field(..., description="The type of location, such as 'zone' or 'structure'")
+    location_id: uuid.UUID = Field(..., description="The ID of the location object")
+    point: Point = Field(default_factory=Point, description="The coordinates within the location")
     
     def __bool__(self):
-        if not self.entity:
+        if not (e := self.entity):
             return False
-        return self.entity.valid_location_coordinates(self.point)
-
-    def __repr__(self):
-        return f"<Location {self.entity} at {self.point}>"
+        return e.valid_location_coordinates(self.point)
 
     @property
     def entity(self):
         return self.get_target()
 
     def __repr__(self):
-        if not self:
+        if not (e := self.entity):
             return "<Location: Nowhere>"
-        return f"<Location: {self.entity} at {self.point}>"
+        if not e.valid_location_coordinates(self.point):
+            return f"<Location: Invalid location on {e}>"
+        return f"<Location: {e} at {self.point}>"
 
     def get_target(self):
         match self.location_type:
             case "zone":
-                return dbat.ZONES.get(self.location_id)
+                return dbat.INDEX.get_zone(self.location_id)
             case "structure":
-                return dbat.STRUCTURES.get(self.location_id)
+                return dbat.INDEX.get_structure(self.location_id)
             case _:
                 return None
 
@@ -121,7 +112,7 @@ class Location:
         Returns whether this location is on the map.
         This would be false if it's inside something's inventory, equipped, etc.
         """
-        return self.target_type in ("zone", "structure")
+        return self.location_type in ("zone", "structure")
 
     def render_look(self, viewer: "Character"):
         target = self.get_target()
@@ -155,23 +146,10 @@ class Location:
         )
         viewer.send_event(event)
 
-class HasLocation:
-
-    def __init__(self, location: Location = None):
-        self.__location: Location | None = location
-
-    @property
-    def location(self) -> Location | None:
-        if self.__location is not None and not self.__location:
-            self.__location = None
-            return None
-        return self.__location
-    
-    @location.setter
-    def location(self, value: Location | None):
-        if value is not None and not isinstance(value, Location):
-            raise ValueError("Location must be a Location object or None")
-        self.__location = value
+class HasLocation(BaseModel):
+    model_config = ConfigDict(validate_assignment=True)
+    location: Location | None = Field(default=None, description="The current location of this entity")
+    saved_locations: dict[str, Location] = Field(default_factory=dict, description="A dict of saved locations by name")
     
     def add_to_location(self, location: Location):
         if self.location:

@@ -1,5 +1,6 @@
 import uuid
 import typing
+from pydantic import BaseModel, Field, ConfigDict, PrivateAttr
 from .location import HasLocation
 from .equipment import HasEquipment
 from .inventory import HasInventory
@@ -20,78 +21,38 @@ if typing.TYPE_CHECKING:
     from .grids import Direction
 
 
-class MobilePrototype(HasColorName, HasColorDescription, HasFlags, HasInteractive):
-    
-    def __init__(self):
-        HasColorName.__init__(self)
-        HasColorDescription.__init__(self)
-        HasFlags.__init__(self)
-        HasInteractive.__init__(self)
-        self.id = ""
+class CharacterBase(HasColorName, HasColorDescription, HasFlags, HasDgScripts, HasInteractive):
+    pass
 
-        self.proto_script: list[str] = list()
-        self.instances: set[Mobile] = set()
+
+class MobilePrototype(CharacterBase):
+    __instances: set[uuid.UUID] = PrivateAttr(default_factory=set)
+    id: str = Field(..., description="The unique ID of this mobile prototype.")
     
     def save(self):
-        dbat.DIRTY_MOBILE_PROTOTYPES.add(self.id)
-    
-    def dump(self) -> dict:
-        return {
-            "id": self.id,
-            "color_name": self.color_name.markup,
-            "color_description": self.color_description.markup,
-            "flags": list(self.flags),
-            "keywords": list(self.keywords),
-            "proto_script": self.proto_script,
-        }
-    
-    @classmethod
-    def load(cls, data: dict) -> MobilePrototype:
-        mob = cls()
-        mob.id = data["id"]
-        mob.color_name = Text.from_markup(data["color_name"])
-        mob.color_description = Text.from_markup(data["color_description"])
-        mob.flags = set(data["flags"])
-        mob.keywords = set(data["keywords"])
-        mob.proto_script = data.get("proto_script", list())
-        return mob
+        dbat.INDEX.dirty_mobile_prototypes.add(self.id)
     
     def spawn(self) -> Mobile:
-        mob = Mobile(self)
-        mob.id = uuid.uuid4()
-        mob.color_name = self.color_name.copy()
-        mob.color_description = self.color_description.copy()
-        mob.flags = self.flags.copy()
-        mob.proto = self
+        data = self.model_dump()
+        id = uuid.uuid4()
+        data["id"] = id
+        mob = Mobile(**data)
+        mob.__proto = self
         mob.game_activate()
         return mob
 
 
-class Character(HasColorName, HasColorDescription, HasLocation, HasEquipment, HasInventory, HasDgScripts, HasInteractive, HasFlags):
+class Character(CharacterBase, HasLocation, HasEquipment, HasInventory):
     """
-    Base class for characters. Shoul not be used directly.
+    Base class for characters. Should not be used directly.
     """
-    location_type: str = "character"
-    slug_type: str = "character"
-
-    def __init__(self):
-        HasColorName.__init__(self)
-        HasColorDescription.__init__(self)
-        HasLocation.__init__(self)
-        HasEquipment.__init__(self)
-        HasInventory.__init__(self)
-        HasDgScripts.__init__(self)
-        HasInteractive.__init__(self)
-        HasFlags.__init__(self)
-        
-        self.id: uuid = uuid.NIL
-        self.deleted = False
-        # The session of an attached user, if any.
-        self.session: Session | None = None
-        self.command_queue: list[str] = list()
+    id: uuid.UUID = Field(..., description="The unique ID of this character.")
+    session: Session | None = Field(default=None, description="The session of an attached user, if any.", exclude=True)
+    command_queue: list[str] = Field(default_factory=list, description="The queue of commands to be processed for this character.", exclude=True)
+    __deleted: bool = PrivateAttr(default=False)
 
     def __bool__(self):
-        return not self.deleted
+        return not self.__deleted
     
     def save(self):
         pass
@@ -166,12 +127,10 @@ class Character(HasColorName, HasColorDescription, HasLocation, HasEquipment, Ha
             return
         
         command_str = self.command_queue.pop(0)
-        if not self.command_queue:
-            dbat.SUBSCRIPTIONS["pending_command"].discard(self)
         self.execute_command(command_str)
 
     def as_dg_ref(self) -> DgReference:
-        return DgReference("object", self.id)
+        return DgReference("character", self.id)
     
     def get_apparent_race(self, viewer: Character) -> str:
         return "unknown"
@@ -204,27 +163,25 @@ class Mobile(Character):
     """
     Class for Mobiles/NPCs.
     """
-
-    def __init__(self, proto: MobilePrototype):
-        Character.__init__(self)
-        self.proto = proto
-        # Set by reset commands, should be cleared if it is ever picked up or relocated.
-        self.spawn_location: Location | None = None
+    __proto: str = PrivateAttr(default="")
+    spawn_location: Location | None = Field(default=None, description="The location this mobile was spawned at. This is set by reset commands, and should be cleared if it is ever picked up or relocated.", exclude=True)
     
     def __repr__(self):
         return f"<Mobile: {self.color_name.plain} ({self.id})>"
     
     def game_activate(self):
-        dbat.MOBILES[self.id] = self
-        dbat.CHARACTERS[self.id] = self
-        if self.proto:
-            self.proto.instances.add(self)
+        dbat.INDEX.mobiles[self.id] = self
+        dbat.INDEX.characters[self.id] = self
+        dbat.INDEX.entities[self.id] = self
+        if self.__proto:
+            self.__proto.instances.add(self)
     
     def game_deactivate(self):
-        dbat.MOBILES.pop(self.id, None)
-        dbat.CHARACTERS.pop(self.id, None)
-        if self.proto:
-            self.proto.instances.discard(self)
+        dbat.INDEX.mobiles.pop(self.id, None)
+        dbat.INDEX.characters.pop(self.id, None)
+        dbat.INDEX.entities.pop(self.id, None)
+        if self.__proto:
+            self.__proto.instances.discard(self)
 
     def get_display_name(self, viewer: Character, capitalize: bool = False) -> Text:
         out = self.color_name.copy()
@@ -241,28 +198,27 @@ class PlayerCharacter(Character):
     """
     Class for Player Characters.
     """
-
-    def __init__(self):
-        Character.__init__(self)
-        self.dub_names: dict[uuid.UUID, str] = dict()
-        self.account: Account | None = None
+    dub_names: dict[uuid.UUID, str] = Field(default_factory=dict, description="A mapping of character IDs to the dub name for that character. This is used for displaying other characters with a different name than their actual name, such as for NPCs or for players who have chosen to dub another player with a different name.")
+    account: uuid.UUID | None = Field(default=None, description="The account this player character belongs to.")
 
     def __repr__(self):
         return f"<PlayerCharacter: {self.color_name.plain} ({self.id})>"
     
     def game_activate(self):
-        dbat.PLAYERS[self.id] = self
-        dbat.CHARACTERS[self.id] = self
+        dbat.INDEX.players[self.id] = self
+        dbat.INDEX.characters[self.id] = self
+        dbat.INDEX.entities[self.id] = self
 
         # Adding in a location hack for dev time now.
         if not self.location:
-            z = dbat.SLUGS["zone"]["3"]
+            z = dbat.INDEX.slugs["zone"]["3"]
             l = Location("zone", z.id, (300,0,0))
             self.add_to_location(l)
     
     def game_deactivate(self):
-        dbat.PLAYERS.pop(self.id, None)
-        dbat.CHARACTERS.pop(self.id, None)
+        dbat.INDEX.players.pop(self.id, None)
+        dbat.INDEX.characters.pop(self.id, None)
+        dbat.INDEX.entities.pop(self.id, None)
 
     def is_npc(self) -> bool:
         return False
@@ -275,7 +231,7 @@ class PlayerCharacter(Character):
         This will save the player character to the database.
         Or rather, it will enqueue them to be saved after this tick.
         """
-        dbat.DIRTY_PLAYERS.add(self.id)
+        dbat.INDEX.dirty_players.add(self.id)
     
     def get_keywords(self, viewer: Character) -> set[str]:
         out = super().get_keywords(viewer)
