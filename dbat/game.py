@@ -141,8 +141,9 @@ class GameService(Service):
     
     async def process_pending_commands(self, delta_time: float):
         pending = dbat.SUBSCRIPTIONS.get("pending_commands", set()).copy()
-        for character in pending:
-            character.process_command_queue(delta_time)
+        for id in pending:
+            if character := dbat.INDEX.get_character(id):
+                character.process_command_queue(delta_time)
 
 
     async def update(self, delta_time: float):

@@ -5,6 +5,8 @@ from .utils.indexer import Indexer
 
 INDEX = Indexer()
 
+SUBSCRIPTIONS = defaultdict(set)
+
 CHARACTER_COMMANDS: dict[str, type["CharacterCommand"]] = dict()
 CHARACTER_COMMANDS_PRIORITY: dict[int, list[type["CharacterCommand"]]] = defaultdict(list)
 

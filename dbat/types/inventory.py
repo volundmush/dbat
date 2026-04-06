@@ -13,14 +13,12 @@ class HasInventory(BaseModel):
 
     def iter_inventory(self):
         for i in self.__inventory.copy():
-            if (e := dbat.INDEX.get_object(i, None)) is not None:
+            if (e := dbat.INDEX.get_object(i)):
                 yield e
     
     def add_to_inventory(self, obj: Object):
-        if obj.location:
-            raise ValueError("Object is already in a location")
-        if obj.equipped_by:
-            raise ValueError("Object is equipped!")
+        obj.can_relocate()
+        obj.spawn_location = None
         self.__inventory.append(obj.id)
         self.on_add_to_inventory(obj)
     

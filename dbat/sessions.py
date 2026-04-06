@@ -60,15 +60,12 @@ class Session(_BaseSession):
             target.enqueue_command(command)
     
     async def on_start(self):
-        if not (acc := dbat.ACCOUNTS.get(self.user.id, None)):
+        if not (acc := dbat.INDEX.get_account(self.user.id)):
             # we have to load the account into the system from postgres.
             from .types.accounts import Account
-            acc = Account()
-            acc.id = self.user.id
-            acc.email = self.user.email
-            acc.username = self.user.username
-            acc.admin_level = self.user.admin_level
-            
+            data = {"id": self.user.id, "email": self.user.email, "username": self.user.email, "admin_level": self.user.admin_level}
+            acc = Account(**data)
+
             # now we retrieve the 'dbat' component from user_components...
             async with self.core.db.connection() as conn:
                 row = await conn.fetchrow(
@@ -79,23 +76,26 @@ class Session(_BaseSession):
                     acc.rpp = data.get("rpp", 0)
                     acc.rpp_bank = data.get("rpp_bank", 0)
 
-            dbat.ACCOUNTS[acc.id] = acc
+            dbat.INDEX.accounts[acc.id] = acc
         
         self.account = acc
 
-        if not (char := dbat.PLAYERS.get(self.pc.id, None)):
+        if not (char := dbat.INDEX.get_player(self.pc.id)):
             # we have to load the character into the system from postgres.
             from .types.characters import PlayerCharacter
-            char = PlayerCharacter()
-            char.id = self.pc.id
-            char.set_color_name(self.pc.name)
-            char.account = acc
+            data = {
+                "id": self.pc.id,
+                "color_name": self.pc.name,
+                "account_id": acc.id,
+            }
+
+            char = PlayerCharacter(**data)
             self.original = char
-            char.session = self
+            char._session = self
             char.game_activate()
         else:
-            char.session = self
-        
+            char._session = self
+
         
         
         

@@ -1,11 +1,10 @@
 import uuid
-from pydantic import Field, ConfigDict, PrivateAttr
+from pydantic import Field, ConfigDict, PrivateAttr, model_validator
 import dbat
 from .grids import Grid, Point, Tile, Shape, Exit, Direction, ResetCommand, TileBase, ShapeBase, ExitBase
-from .location import HasLocation, IsLocation, Location
+from .location import HasLocation, IsLocation, Location, Point
 from .misc import HasColorName, HasColorDescription, HasInteractive, HasFlags
 from .inventory import HasInventory
-import copy
 
 class ExitPrototype(ExitBase):
     """
@@ -56,7 +55,14 @@ class StructurePrototype(HasColorName, HasColorDescription, HasFlags):
     docking_spots: dict[str, Point] = Field(default_factory=dict, description="Named coordinates within the structure that can be used as docking spots for things like exits, entrances, etc.")
     default_point: Point = Field(default_factory=Point, description="The default point to place things within the structure, such as when spawning characters, objects, etc. It should be a valid point within the structure.")
 
-    __instances: set[uuid.UUID] = PrivateAttr(default_factory=set)
+    _instances: set[uuid.UUID] = PrivateAttr(default_factory=set)
+
+    @model_validator(mode="before")
+    @classmethod
+    def convert_dicts(cls, data: dict) -> dict:
+        for field in ("shapes", "tiles"):
+            data[field] = Point.deserialize_dict(data.get(field, dict()))
+        return data
 
     def spawn(self) -> Structure:
         data = self.model_dump(exclude={"shapes", "tiles", "landing_spots", "docking_spots"})
@@ -76,7 +82,17 @@ class Structure(Grid, HasLocation, IsLocation, HasInteractive, HasInventory):
 
     """
     __deleted: bool = PrivateAttr(default=False)
-    proto: str = Field(default="", description="The prototype this structure was spawned from, if any.")
+    proto_id: str = Field(default="", description="The prototype this structure was spawned from, if any.")
+
+    @model_validator(mode="before")
+    @classmethod
+    def convert_dicts(cls, data: dict) -> dict:
+        for field in ("shapes", "tiles"):
+            data[field] = Point.deserialize_dict(data.get(field, dict()))
+        return data
+
+    def proto(self) -> StructurePrototype | None:
+        return dbat.INDEX.structure_prototypes.get(self.proto_id, None)
 
     def report_location_type(self):
         return "structure"
@@ -92,17 +108,13 @@ class Structure(Grid, HasLocation, IsLocation, HasInteractive, HasInventory):
     
     def game_activate(self):
         dbat.INDEX.structures[self.id] = self
-        if self.proto:
-            proto = dbat.INDEX.structure_prototypes.get(self.proto)
-            if proto:
-                proto.instances.add(self)
+        if p := self.proto():
+            p._instances.add(self)
 
     def game_deactivate(self):
-        if self.proto:
-            proto = dbat.INDEX.structure_prototypes.get(self.proto)
-            if proto:
-                proto.instances.discard(self)
         dbat.INDEX.structures.pop(self.id, None)
+        if p := self.proto():
+            p._instances.discard(self)
 
     def save(self):
         dbat.INDEX.dirty_structures.add(self.id)

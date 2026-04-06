@@ -1,12 +1,12 @@
 import typing
 import uuid
-from pydantic import BaseModel, Field, ConfigDict, PrivateAttr
+from pydantic import BaseModel, Field, ConfigDict, PrivateAttr, model_validator
 
 from loguru import logger
 
 from dbat.types.characters import Mobile, MobilePrototype
 from dbat.types.objects import Object, ObjectPrototype
-from .dgscripts import TriggerType, HasDgScripts
+from .dgscripts import DgReference, TriggerType, HasDgScripts
 from .location import Point, IsLocation, Location
 from .misc import HasFlags, HasExtraDescriptions, ExtraDescription, HasColorName, HasColorDescription
 from enum import Enum
@@ -61,25 +61,25 @@ class Direction(Enum):
     def update_coordinates(self, coor: Point) -> Point:
         match self:
             case Direction.north:
-                return Point(coor.x, coor.y + 1, coor.z)
+                return Point(x=coor.x, y=coor.y + 1, z=coor.z)
             case Direction.east:
-                return Point(coor.x + 1, coor.y, coor.z)
+                return Point(x=coor.x + 1, y=coor.y, z=coor.z)
             case Direction.south:
-                return Point(coor.x, coor.y - 1, coor.z)
+                return Point(x=coor.x, y=coor.y - 1, z=coor.z)
             case Direction.west:
-                return Point(coor.x - 1, coor.y, coor.z)
+                return Point(x=coor.x - 1, y=coor.y, z=coor.z)
             case Direction.up:
-                return Point(coor.x, coor.y, coor.z + 1)
+                return Point(x=coor.x, y=coor.y, z=coor.z + 1)
             case Direction.down:
-                return Point(coor.x, coor.y, coor.z - 1)
+                return Point(x=coor.x, y=coor.y, z=coor.z - 1)
             case Direction.northeast:
-                return Point(coor.x + 1, coor.y + 1, coor.z)
+                return Point(x=coor.x + 1, y=coor.y + 1, z=coor.z)
             case Direction.southeast:
-                return Point(coor.x + 1, coor.y - 1, coor.z)
+                return Point(x=coor.x + 1, y=coor.y - 1, z=coor.z)
             case Direction.southwest:
-                return Point(coor.x - 1, coor.y - 1, coor.z)
+                return Point(x=coor.x - 1, y=coor.y - 1, z=coor.z)
             case Direction.northwest:
-                return Point(coor.x - 1, coor.y + 1, coor.z)
+                return Point(x=coor.x - 1, y=coor.y + 1, z=coor.z)
             case _:
                 return coor.model_copy()
 
@@ -107,18 +107,23 @@ class ResetCommand(BaseModel):
         loc = tile.as_location()
 
         def perform_counts(proto):
-            if self.max_world > 0 and len(proto.instances) >= self.max_world:
+            if self.max_world > 0 and len(proto._instances) >= self.max_world:
                 return False  # Max world limit reached, fail silently
             if self.max_location > 0:
+                instances = list()
+                for instance_id in proto._instances:
+                    instance = dbat.INDEX.entities.get(instance_id, None)
+                    if instance and instance.spawn_location and instance.spawn_location == loc:
+                        instances.append(instance)
                 # Count how many instances of this proto are in the current location
-                count = sum(1 for instance in proto.instances if instance.spawn_location == loc)
+                count = sum(1 for instance in instances)
                 if count >= self.max_location:
                     return False  # Max location limit reached, fail silently
             return True
 
         match self.command:
             case "MOB":
-                if not (proto := dbat.MOBILE_PROTOTYPES.get(self.target, None)):
+                if not (proto := dbat.INDEX.mobile_prototypes.get(self.target, None)):
                     logger.warning(f"ResetCommand for {tile}: MOB target {self.target} does not exist.")
                     return  # Invalid prototype, fail silently
                 if not perform_counts(proto):
@@ -134,7 +139,7 @@ class ResetCommand(BaseModel):
                 if not isinstance(last_spawned, Mobile):
                     logger.warning(f"ResetCommand for {tile}: GIVE command's last_spawned entity is not a Mobile.")
                     return  # Last spawned entity is not a mobile, fail silently
-                if not (proto := dbat.OBJECT_PROTOTYPES.get(self.target, None)):
+                if not (proto := dbat.INDEX.object_prototypes.get(self.target, None)):
                     logger.warning(f"ResetCommand for {tile}: GIVE target {self.target} does not exist.")
                     return  # Invalid prototype, fail silently
                 spawned = proto.spawn()
@@ -145,7 +150,7 @@ class ResetCommand(BaseModel):
                     last_spawned.add_to_inventory(spawned)
                 successful = True
             case "OBJ":
-                if not (proto := dbat.OBJECT_PROTOTYPES.get(self.target, None)):
+                if not (proto := dbat.INDEX.object_prototypes.get(self.target, None)):
                     logger.warning(f"ResetCommand for {tile}: OBJ target {self.target} does not exist.")
                     return  # Invalid prototype, fail silently
                 if not perform_counts(proto):
@@ -161,7 +166,7 @@ class ResetCommand(BaseModel):
                 if not isinstance(last_spawned, Mobile):
                     logger.warning(f"ResetCommand for {tile}: EQUIP command's last_spawned entity is not a Mobile.")
                     return  # Last spawned entity is not a mobile, fail silently
-                if not (proto := dbat.OBJECT_PROTOTYPES.get(self.target, None)):
+                if not (proto := dbat.INDEX.object_prototypes.get(self.target, None)):
                     logger.warning(f"ResetCommand for {tile}: EQUIP target {self.target} does not exist.")
                     return  # Invalid prototype, fail silently
                 if not perform_counts(proto):
@@ -183,7 +188,7 @@ class ResetCommand(BaseModel):
                 if not isinstance(last_spawned, Object):
                     logger.warning(f"ResetCommand for {tile}: PUT command's last_spawned entity is not an Object.")
                     return  # Last spawned entity is not an object, fail silently
-                if not (proto := dbat.OBJECT_PROTOTYPES.get(self.target, None)):
+                if not (proto := dbat.INDEX.object_prototypes.get(self.target, None)):
                     logger.warning(f"ResetCommand for {tile}: PUT target {self.target} does not exist.")
                     return  # Invalid prototype, fail silently
                 if not perform_counts(proto):
@@ -204,7 +209,7 @@ class ResetCommand(BaseModel):
                 if not last_spawned:
                     logger.warning(f"ResetCommand for {tile}: TRIGGER command has no last_spawned entity to add trigger to.")
                     return  # No entity to add trigger to, fail silently
-                if not (dgscript := dbat.DGSCRIPT_PROTOTYPES.get(self.target, None)):
+                if not (dgscript := dbat.INDEX.dgscripts.get(self.target, None)):
                     logger.warning(f"ResetCommand for {tile}: TRIGGER target {self.target} does not exist.")
                     return  # Invalid prototype, fail silently
                 last_spawned.add_dgscript(dgscript)
@@ -267,8 +272,8 @@ class ShapeBase(HasColorName, HasColorDescription):
 
 
 class HasGrid(BaseModel):
-    grid_type: str = Field(..., description="The type of grid this entity is located in, such as 'zone' or 'structure'", exclude=True)
-    grid_id: uuid.UUID = Field(..., description="The ID of the grid this entity is located in", exclude=True)
+    grid_type: str = Field(..., description="The type of grid this entity is located in, such as 'zone' or 'structure'")
+    grid_id: uuid.UUID = Field(..., description="The ID of the grid this entity is located in")
 
     def grid(self):
         match self.grid_type:
@@ -298,17 +303,23 @@ class Tile(TileBase, HasGrid):
     def report_slug_type(self):
         return "tile"
 
+    def __str__(self):
+        return repr(self)
+
     def __repr__(self):
-        return f"<Tile:{self.point} in {self.grid}>"
+        return f"<Tile:{self.point} in {self.grid()}>"
 
     def as_location(self) -> Location | None:
         if not (g := self.grid()):
             return None
-        return Location(g.report_location_type(), g.id, self.point)
+        return Location(location_type=g.report_location_type(), location_id=g.id, point=self.point)
 
     def execute_reset_commands(self):
         for cmd in self.reset_commands:
             cmd.execute(self)
+    
+    def as_dg_ref(self):
+        return DgReference(entity_type=self.grid_type, entity_id=self.grid_id, point=self.point)
 
 class Grid(IsLocation, HasFlags, HasColorName, HasColorDescription):
     """
@@ -327,6 +338,19 @@ class Grid(IsLocation, HasFlags, HasColorName, HasColorDescription):
     
     __shape_index: dict[Point, list[tuple[Shape, int]]] = PrivateAttr(default_factory=dict) 
     __shape_index_dirty: bool = PrivateAttr(default=True)
+
+    def __repr__(self):
+        return f"<{self.__class__.__name__}: {self.color_name.plain} ({self.id}){f' {self.slug}' if self.slug else ''}>"
+
+    def __str__(self):
+        return repr(self)
+
+    @model_validator(mode="before")
+    @classmethod
+    def convert_dicts(cls, data: dict) -> dict:
+        for field in ("shapes", "tiles"):
+            data[field] = Point.deserialize_dict(data.get(field, dict()))
+        return data
 
     def reset_grid(self):
         for tile in self.tiles.values():
@@ -436,7 +460,7 @@ class Grid(IsLocation, HasFlags, HasColorName, HasColorDescription):
                 continue  # inside/outside exits are special and not generated here
             adjacent_point = direction.update_coordinates(point)
             if self.valid_location_coordinates(adjacent_point):
-                exits[direction] = Exit(Location(self.location_type, self.id, adjacent_point))
+                exits[direction] = Exit(location=Location(location_type=self.report_location_type(), location_id=self.id, point=adjacent_point))
         if point in self.tiles:
             exits.update(self.tiles[point].exits)
         return exits
@@ -448,7 +472,7 @@ class Grid(IsLocation, HasFlags, HasColorName, HasColorDescription):
         adjacent_point = direction.update_coordinates(point)
         if not self.valid_location_coordinates(adjacent_point):
             return None
-        return Exit(Location(self.location_type, self.id, adjacent_point))
+        return Exit(location=Location(location_type=self.report_location_type(), location_id=self.id, point=adjacent_point))
     
     def get_display_name(self, point: Point, viewer: "Character") -> str:
         if point in self.tiles and self.tiles[point].color_name:

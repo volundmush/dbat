@@ -80,11 +80,13 @@ class Migrator:
     
     def migrate_zones(self):
         for k, v in self.db.zones.items():
+            data = dict()
             id = uuid.uuid4()
-            z = Zone(id=id)
-            z.slug = str(k)
-            z.color_name = convert_color_string(v.color_name)
-            z.flags.update([str(x) for x in v.zone_flags])
+            data["id"] = id
+            data["slug"] = str(k)
+            data["color_name"] = convert_color_string(v.name)
+            data["flags"] = [str(x) for x in v.zone_flags]
+            z = Zone(**data)
             dbat.INDEX.zones[z.id] = z
             self.zone_map[k] = z
         
@@ -97,17 +99,19 @@ class Migrator:
         
         # We'll turn all of the Areas into Zones.
         for k, v in self.db.areas.items():
+            data = dict()
             id = uuid.uuid4()
-            z = Zone(id=id)
-            z.slug = str(f"area_{k}")
-            z.color_name = convert_color_string(v.name)
-            z.color_description = convert_color_string(v.look_description)
-
+            data["id"] = id
+            data["slug"] = str(f"area_{k}")
+            data["color_name"] = convert_color_string(v.name)
+            #data["flags"] = [str(x) for x in v.zone_flags]
+            data["color_description"] = convert_color_string(v.look_description)
+            z = Zone(**data)
+            
             p = self.zone_map.get(v.zone, None)
             if p:
-                z.parent = p
-                p.children.add(z)
-
+                p.add_child(z)
+            
             dbat.INDEX.zones[z.id] = z
             self.area_map[k] = z
 

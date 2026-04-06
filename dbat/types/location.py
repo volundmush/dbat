@@ -1,5 +1,6 @@
 import dbat
 import uuid
+import typing
 from pydantic import BaseModel, ConfigDict, Field, PrivateAttr
 from rich.text import Text
 
@@ -10,6 +11,19 @@ class Point(BaseModel):
     x: int = Field(0, description="The X coordinate")
     y: int = Field(0, description="The Y coordinate")
     z: int = Field(0, description="The Z coordinate")
+
+    @classmethod
+    def from_str(cls, s: str) -> "Point":
+        parts = s.split(" ")
+        if len(parts) != 3:
+            raise ValueError(f"Invalid point string: {s}")
+        # we should now have a sequence of ["x=0", "y=0", "z=0"]
+        x, y, z = (int(part.split("=")[1]) for part in parts)
+        return cls(x=x, y=y, z=z)
+
+    @classmethod
+    def deserialize_dict(cls, d: dict[str, typing.Any]) -> dict[Point, typing.Any]:
+        return {Point.from_str(k): v for k, v in d.items()}
 
 class IsLocation(BaseModel):
     """
@@ -156,6 +170,10 @@ class HasLocation(BaseModel):
             raise ValueError(f"{self} is already in a location")
         self.location = location
         location.entity.add_content(self, location.point)
+        self.on_add_to_location(location)
+    
+    def on_add_to_location(self, location: Location):
+        pass
     
     def remove_from_location(self):
         if not self.location:
@@ -163,6 +181,9 @@ class HasLocation(BaseModel):
         loc = self.location
         self.location = None
         loc.entity.remove_content(self, loc.point)
+    
+    def on_remove_from_location(self, location: Location):
+        pass
     
     def register_location(self):
         """

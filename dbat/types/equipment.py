@@ -16,29 +16,30 @@ class HasEquipment(BaseModel):
     def get_equipment(self, slot: str) -> Object | None:
         if not (obj_id := self.__equipment.get(slot, None)):
             return None
-        return dbat.INDEX.get_object(obj_id, None)
+        return dbat.INDEX.get_object(obj_id)
     
     def get_all_equipment(self) -> dict[str, Object]:
         out = dict()
         for k, v in self.__equipment.copy().items():
             if not v:
                 continue
-            if (obj := dbat.INDEX.get_object(v, None)) is not None:
+            if (obj := dbat.INDEX.get_object(v)) is not None:
                 out[k] = obj
         return out
 
     def iter_equipment(self):
         for slot, obj in self.__equipment.copy().items():
-            if not (e := dbat.INDEX.get_object(obj, None)):
+            if not (e := dbat.INDEX.get_object(obj)):
                 continue
             yield slot, e
     
     def add_equipment(self, slot: str, obj: Object):
         if slot in self.__equipment:
             raise ValueError(f"Slot {slot} is already occupied")
+        obj.can_relocate()
         self.__equipment[slot] = obj.id
-        obj.equipped_by = self
-        obj.equipped_at = slot
+        obj._equipped_by = self.id
+        obj._equipped_at = slot
         self.on_add_equipment(slot, obj)
         obj.on_equipped(self, slot)
     
@@ -48,8 +49,8 @@ class HasEquipment(BaseModel):
     def remove_equipment(self, slot: str) -> Object | None:
         if (obj_id := self.__equipment.pop(slot, None)) is not None:
             if (obj := dbat.INDEX.get_object(obj_id, None)) is not None:
-                obj.equipped_by = None
-                obj.equipped_at = ""
+                obj._equipped_by = None
+                obj._equipped_at = ""
                 self.on_remove_equipment(slot, obj)
                 obj.on_unequipped(self, slot)
                 return obj

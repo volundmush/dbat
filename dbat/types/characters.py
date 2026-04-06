@@ -1,7 +1,7 @@
 import uuid
 import typing
 from pydantic import BaseModel, Field, ConfigDict, PrivateAttr
-from .location import HasLocation
+from .location import HasLocation, Point
 from .equipment import HasEquipment
 from .inventory import HasInventory
 from .dgscripts import HasDgScripts, DgReference
@@ -26,7 +26,7 @@ class CharacterBase(HasColorName, HasColorDescription, HasFlags, HasDgScripts, H
 
 
 class MobilePrototype(CharacterBase):
-    __instances: set[uuid.UUID] = PrivateAttr(default_factory=set)
+    _instances: set[uuid.UUID] = PrivateAttr(default_factory=set)
     id: str = Field(..., description="The unique ID of this mobile prototype.")
     
     def save(self):
@@ -37,7 +37,7 @@ class MobilePrototype(CharacterBase):
         id = uuid.uuid4()
         data["id"] = id
         mob = Mobile(**data)
-        mob.__proto = self
+        mob.proto_id = self.id
         mob.game_activate()
         return mob
 
@@ -47,8 +47,8 @@ class Character(CharacterBase, HasLocation, HasEquipment, HasInventory):
     Base class for characters. Should not be used directly.
     """
     id: uuid.UUID = Field(..., description="The unique ID of this character.")
-    session: Session | None = Field(default=None, description="The session of an attached user, if any.", exclude=True)
-    command_queue: list[str] = Field(default_factory=list, description="The queue of commands to be processed for this character.", exclude=True)
+    _session: Session | None = PrivateAttr(default=None)
+    _command_queue: list[str] = PrivateAttr(default_factory=list)
     __deleted: bool = PrivateAttr(default=False)
 
     def __bool__(self):
@@ -59,35 +59,35 @@ class Character(CharacterBase, HasLocation, HasEquipment, HasInventory):
 
     @property
     def admin_level(self) -> int:
-        if self.session:
-            return self.session.user.admin_level
+        if self._session:
+            return self._session.user.admin_level
         return 0
 
     def send_rich(self, text: str | Text):
-        if not self.session:
+        if not self._session:
             return
         try:
             rich_text = Text.from_markup(text) if isinstance(text, str) else text
         except MarkupError:
             logger.warning(f"Failed to parse rich text: {text}")
             rich_text = Text(str(text))
-        self.session.append_rich(rich_text)
+        self._session.append_rich(rich_text)
 
     def send_text(self, text: str):
-        if self.session:
-            self.session.append_text(text)
+        if self._session:
+            self._session.append_text(text)
     
     def send_line(self, text: str):
-        if self.session:
-            self.session.append_line(text)
+        if self._session:
+            self._session.append_line(text)
     
     def send_gmcp(self, package: str, data: dict):
-        if self.session:
-            self.session.append_gmcp(package, data)
+        if self._session:
+            self._session.append_gmcp(package, data)
     
     def send_event(self, event):
-        if self.session:
-            self.session.append_event(event)
+        if self._session:
+            self._session.append_event(event)
 
     def is_npc(self) -> bool:
         return True
@@ -99,12 +99,12 @@ class Character(CharacterBase, HasLocation, HasEquipment, HasInventory):
         return True
 
     def enqueue_command(self, command: str):
-        self.command_queue.append(command)
-        dbat.SUBSCRIPTIONS["pending_commands"].add(self)
+        self._command_queue.append(command)
+        dbat.SUBSCRIPTIONS["pending_commands"].add(self.id)
 
     def clear_command_queue(self):
-        self.command_queue.clear()
-        dbat.SUBSCRIPTIONS["pending_commands"].discard(self)
+        self._command_queue.clear()
+        dbat.SUBSCRIPTIONS["pending_commands"].discard(self.id)
     
     def available_commands(self):
         priorities = sorted(list(dbat.CHARACTER_COMMANDS_PRIORITY.keys()), reverse=True)
@@ -122,15 +122,15 @@ class Character(CharacterBase, HasLocation, HasEquipment, HasInventory):
         return {"ok": False, "error": "No matching command found."}
 
     def process_command_queue(self, delta_time: float):
-        if not self.command_queue:
-            dbat.SUBSCRIPTIONS["pending_command"].discard(self)
+        if not self._command_queue:
+            dbat.SUBSCRIPTIONS["pending_commands"].discard(self.id)
             return
         
-        command_str = self.command_queue.pop(0)
+        command_str = self._command_queue.pop(0)
         self.execute_command(command_str)
 
     def as_dg_ref(self) -> DgReference:
-        return DgReference("character", self.id)
+        return DgReference(entity_type="character", entity_id=self.id)
     
     def get_apparent_race(self, viewer: Character) -> str:
         return "unknown"
@@ -163,26 +163,29 @@ class Mobile(Character):
     """
     Class for Mobiles/NPCs.
     """
-    __proto: str = PrivateAttr(default="")
+    proto_id: str = Field(default="", description="The prototype this mobile was spawned from, if any.")
     spawn_location: Location | None = Field(default=None, description="The location this mobile was spawned at. This is set by reset commands, and should be cleared if it is ever picked up or relocated.", exclude=True)
     
     def __repr__(self):
         return f"<Mobile: {self.color_name.plain} ({self.id})>"
     
+    def proto(self) -> MobilePrototype | None:
+        return dbat.INDEX.mobile_prototypes.get(self.proto_id, None)
+
     def game_activate(self):
         dbat.INDEX.mobiles[self.id] = self
         dbat.INDEX.characters[self.id] = self
         dbat.INDEX.entities[self.id] = self
-        if self.__proto:
-            self.__proto.instances.add(self)
+        if p := self.proto():
+            p._instances.add(self.id)
     
     def game_deactivate(self):
         dbat.INDEX.mobiles.pop(self.id, None)
         dbat.INDEX.characters.pop(self.id, None)
         dbat.INDEX.entities.pop(self.id, None)
-        if self.__proto:
-            self.__proto.instances.discard(self)
-
+        if p := self.proto():
+            p._instances.discard(self.id)
+    
     def get_display_name(self, viewer: Character, capitalize: bool = False) -> Text:
         out = self.color_name.copy()
         if capitalize:
@@ -199,7 +202,7 @@ class PlayerCharacter(Character):
     Class for Player Characters.
     """
     dub_names: dict[uuid.UUID, str] = Field(default_factory=dict, description="A mapping of character IDs to the dub name for that character. This is used for displaying other characters with a different name than their actual name, such as for NPCs or for players who have chosen to dub another player with a different name.")
-    account: uuid.UUID | None = Field(default=None, description="The account this player character belongs to.")
+    account_id: uuid.UUID | None = Field(default=None, description="The account this player character belongs to.")
 
     def __repr__(self):
         return f"<PlayerCharacter: {self.color_name.plain} ({self.id})>"
@@ -212,7 +215,7 @@ class PlayerCharacter(Character):
         # Adding in a location hack for dev time now.
         if not self.location:
             z = dbat.INDEX.slugs["zone"]["3"]
-            l = Location("zone", z.id, (300,0,0))
+            l = Location(location_type="zone", location_id=z.id, point=Point(x=300,y=0,z=0))
             self.add_to_location(l)
     
     def game_deactivate(self):

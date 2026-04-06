@@ -2,8 +2,8 @@ import uuid
 
 import dbat
 from .grids import Grid
-from .location import IsLocation, Location, PrivateAttr
-from pydantic import Field, ConfigDict
+from .location import IsLocation, Location, Point
+from pydantic import Field, ConfigDict, model_validator, PrivateAttr
 
 class Zone(Grid, IsLocation):
     parent_id: uuid.UUID | None = Field(default=None, description="The ID of the parent zone, if any.")
@@ -11,6 +11,13 @@ class Zone(Grid, IsLocation):
 
     __children: set[uuid.UUID] = PrivateAttr(default_factory=set)
     __deleted: bool = PrivateAttr(default=False)
+
+    @model_validator(mode="before")
+    @classmethod
+    def convert_dicts(cls, data: dict) -> dict:
+        for field in ("shapes", "tiles"):
+            data[field] = Point.deserialize_dict(data.get(field, dict()))
+        return data
 
     def add_child(self, child: "Zone"):
         self.__children.add(child.id)
