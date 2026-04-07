@@ -25,9 +25,6 @@ class Move(CharacterCommand):
                   }
     
     def func(self):
-        if not self.character.location:
-            self.send_line("You are in an unknown location and cannot move.")
-            return {"ok": False, "error": "No location"}
 
         full_command = self.parsed.get("full_command", "")
         if full_command in ("go", "move"):
@@ -51,16 +48,11 @@ class Move(CharacterCommand):
             self.send_line(f"Invalid direction: {direction_str}")
             return {"ok": False, "error": f"Invalid direction: {direction_str}"}
 
-        loc = self.character.location
-        if not (ex := loc.get_target().get_exit_for_direction(loc.point, direction)):
-            self.send_line(f"You can't go {direction_str} from here.")
-            return {"ok": False, "error": f"No exit in direction: {direction_str}"}
+        result = self.character.move_direction(direction)
+        if not result:
+            err = result.unwrap_err()
+            self.send_line(f"You can't go {direction_str} from here: {err}")
+            return {"ok": False, "error": f"Cannot move {direction_str}: {err}"}
 
-        if not ex.location:
-            self.send_line(f"The exit to the {direction_str} is blocked.")
-            return {"ok": False, "error": f"Exit in direction {direction_str} is blocked."}
-
-        self.character.remove_from_location()
-        self.character.add_to_location(ex.location)
-        self.character.look_at(ex.location)
+        self.character.look_at(self.character.location)
         return {"ok": True}

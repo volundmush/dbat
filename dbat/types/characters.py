@@ -1,17 +1,20 @@
 import uuid
 import typing
+from datetime import datetime
+from muforge.utils.result import Result
 from pydantic import BaseModel, Field, ConfigDict, PrivateAttr
 from .location import HasLocation, Point
 from .equipment import HasEquipment
 from .inventory import HasInventory
-from .dgscripts import HasDgScripts, DgReference
+from .dgscripts import HasDgScripts, DgReference, TriggerType
 from .misc import HasInteractive, HasFlags, HasColorName, HasColorDescription
 import dbat
-import copy
 from loguru import logger
+from muplugins.core.db.fields import RichText
 from rich.text import Text
 from rich.errors import MarkupError
 from .location import Location
+from .hediffs import HeDiff
 
 if typing.TYPE_CHECKING:
     from dbat.sessions import Session
@@ -50,11 +53,13 @@ class SenseiComponent(BaseModel):
     data: dict[str, dict] = Field(default_factory=dict, description="A mapping of sensei names to sensei data. This is used for storing the data for each sensei, such as stat changes or special abilities.")
 
 
+
+
 class CharacterBase(HasColorName, HasColorDescription, HasFlags, HasDgScripts, HasInteractive):
     physiology: PhysiologyComponent = Field(default_factory=PhysiologyComponent, description="The physiology of this character. This is used for things like determining what they can see, what they look like to others, etc.")
     form: FormComponent = Field(default_factory=FormComponent, description="The form of this character. This is used for things like determining what they can do, what they look like to others, etc.")
     sensei: SenseiComponent = Field(default_factory=SenseiComponent, description="The sensei of this character. This is used for things like determining what they can do, what they look like to others, etc.")
-
+    hediffs: dict[uuid.UUID, HeDiff] = Field(default_factory=dict, description="The hediffs that affect this character. This is used for things like determining what they can see, what they look like to others, etc.")
 
 class MobilePrototype(CharacterBase):
     _instances: set[uuid.UUID] = PrivateAttr(default_factory=set)
@@ -146,19 +151,25 @@ class Character(CharacterBase, HasLocation, HasEquipment, HasInventory):
     
     def execute_command(self, command_str: str):
         for command_cls in self.available_commands():
-            match = command_cls.check_match(self, command_str)
-            if match is not None:
+            if match := command_cls.check_match(self, command_str):
                 command = command_cls(self, command_str, match)
                 return command.execute()
+
+        # no command was found in the system... but we might have
+        # custom commands via dgscripts. worry about that later.
+
         return {"ok": False, "error": "No matching command found."}
 
     def process_command_queue(self, delta_time: float):
-        if not self._command_queue:
+        try:
+            command = self._command_queue.pop(0)
+        except IndexError:
             dbat.SUBSCRIPTIONS["pending_commands"].discard(self.id)
             return
         
-        command_str = self._command_queue.pop(0)
-        self.execute_command(command_str)
+        self.execute_command(command)        
+        if not self._command_queue:
+            dbat.SUBSCRIPTIONS["pending_commands"].discard(self.id)
 
     def as_dg_ref(self) -> DgReference:
         return DgReference(entity_type="character", entity_id=self.id)
@@ -184,12 +195,161 @@ class Character(CharacterBase, HasLocation, HasEquipment, HasInventory):
 
         return out
     
+    def can_carry(self, item: Object) -> Result:
+        # Placeholder: Check for weight and volume limits, etc.
+        return Result.Ok()
+
+    def perform_get(self, item: Object) -> Result:
+        """
+        The item to be 'gotten' should be in the same location as the character, in a container 
+        in the character's inventory or equipment, or in a container in the current location.
+        We will assume this is true.
+        """
+        if not (res := self.can_carry(item)):
+            return res
+        
+        if not (res := item.trigger_dgscripts(TriggerType.GET, actor=self.as_dg_ref())):
+            return res
+        
+        return Result.Ok()
+    
+    def perform_put(self, item: Object, target: Object | Structure) -> Result:
+        """
+        The item to be 'put' should be in the character's inventory, and the target should be in the same location as the character.
+        We will assume this is true.
+        """
+        if not (res := item.trigger_dgscripts(TriggerType.PUT, actor=self.as_dg_ref(), target=target.as_dg_ref())):
+            return res
+        
+        return Result.Ok()
+
+    def perform_give(self, item: Object, target: Character) -> Result:
+        """
+        The item to be 'given' should be in the character's inventory, and the target should be in the same location as the character.
+        We will assume this is true.
+        """
+        if not (res := item.trigger_dgscripts(TriggerType.GIVE, actor=self.as_dg_ref(), target=target.as_dg_ref())):
+            return res
+        
+        if not (res := target.can_carry(item)):
+            return res
+
+        if not (res := target.trigger_dgscripts(TriggerType.RECEIVE, actor=self.as_dg_ref(), item=item.as_dg_ref())):
+            return res
+        
+        return Result.Ok()
+
+    def perform_drop(self, item: Object, location: Location) -> Result:
+        """
+        The item to be 'dropped' should be in the character's inventory.
+        We will assume this is true.
+        """
+        if not (res := item.trigger_dgscripts(TriggerType.DROP, actor=self.as_dg_ref(), location=location.as_dg_ref())):
+            return res
+
+        return Result.Ok()
+
+    def perform_wear(self, item: Object, slot: str) -> Result:
+        pass
+
+
+    def perform_remove(self, item: Object, slot: str) -> Result:
+        pass
+
+
+    def perform_consume(self, item: Object) -> Result:
+        pass
+
+
+    def perform_pay(self, target: Character, amount: int) -> Result:
+        pass
+
+
+    def on_hear_speech(self, speaker: Character, message: str):
+        pass
+
+
+    def perform_speech(self, message: str) -> Result:
+        pass
+
+
+    def on_witness_action(self, actor: Character, action: str):
+        pass
+
+
+    def perform_emote(self, message: str) -> Result:
+        pass
+
     def look_at(self, target: Character | Direction | Location | Object | Structure):
         if hasattr(target, "render_look") and callable(target.render_look):
             target.render_look(self)
         else:
             self.send_text("You see nothing special.")
+    
+    def do_relocate(self, new_location: Location, via: Direction | str, forced=False, look_after=True) -> Result:
+        old_location = self.location
 
+        trigger_info = {
+            "actor": self.as_dg_ref()
+        }
+        if isinstance(via, Direction):
+            trigger_info["direction"] = via.name
+        else:
+            trigger_info["direction"] = via
+
+        if old_location:
+            if not (res := old_location.trigger(TriggerType.LEAVE, **trigger_info)):
+                return res
+
+            self.remove_from_location()
+        
+        
+        self.add_to_location(new_location)
+        if not (res := new_location.trigger(TriggerType.ENTRY, **trigger_info)):
+            # we need to move them back to the old location if the entry trigger fails,
+            #  unless this is a forced move.
+            if old_location and not forced:
+                self.remove_from_location()
+                self.add_to_location(old_location)
+            return res
+
+        if look_after:
+            self.look_at(self.location)
+
+        if not (self.get_gmhide_grade() or self.get_hide_grade() or self.get_invis_grade()):
+            new_location.trigger(TriggerType.GREET, **trigger_info)
+        new_location.trigger(TriggerType.GREET_ALL,**trigger_info)
+
+        return Result.Ok()
+
+    def move_enter(self, target: Object | Structure, forced=False, look_after=True) -> Result:
+        """
+        This will handle entering an object (portal) or structure (building/vehicle).
+        """
+
+    def move_leave(self, target: Object | Structure, forced=False) -> Result:
+        """
+        This will handle leaving an object (portal) or structure (building/vehicle).
+        """
+
+    def move_direction(self, direction: Direction, forced=False, look_after=True) -> Result:
+        """
+        Classic MUD movement through exits in a direction.
+        """
+        if not self.location:
+            return Result.Err("There is nowhere to go.")
+        
+        if not (exit := self.location.get_exit(direction, self)):
+            return Result.Err(f"Nothing seems to be to the {direction.name}.")
+        
+        # This will be false with a reason if the exit's a closed door/locked/etc.
+        if not (trav := exit.can_traverse(self)):
+            return trav
+
+        destination = exit.location
+
+        return self.do_relocate(destination, via=direction, forced=forced, look_after=look_after)
+    
 class Mobile(Character):
     """
     Class for Mobiles/NPCs.

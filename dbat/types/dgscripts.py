@@ -29,7 +29,7 @@ class TriggerType(Enum):
     GREET = "greet"  # when a player enters the location this entity is in, and they're visible. Tiles always see everything.
     GREET_ALL = "greet_all"  # when a player enters the location this entity is in, regardless of visibility.
     ENTRY = "entry"  # when this entity enters a new location
-    LEAVE = "leave"  # when someone leaves the location this entity is in, and they're visible.
+    LEAVE = "leave"  # when someone leaves the location this entity is in, and they're visible. It can prevent leaving.
     RECEIVE = "receive"  # when this entity is given an object.
     LOAD = "load"  # when the entity spawns into the world via Map Resets.
     DOOR = "door"  # when someone manipulates a door in the current location
