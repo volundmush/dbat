@@ -21,8 +21,39 @@ if typing.TYPE_CHECKING:
     from .grids import Direction
 
 
+class PhysiologyComponent(BaseModel):
+    race: str = Field(default="human", description="The race of this character.")
+    sex: str = Field(default="male", description="The sex of this character.")
+
+    def get_traits(self, character: Character) -> set[str]:
+        pass
+
+
+class FormData(HasColorDescription, HasColorName, HasFlags):
+    duration_in_form: float = Field(default=0.0, description="The duration that the character has been in this form. This is used for things like determining when to end temporary forms, etc.")
+    grade: int = Field(default=0, description="The grade of this form. This is used for things like determining if a character can see another character in this form, etc.")
+    visible: bool = Field(default=True, description="Whether this form is visible to the user.")
+    limit_broken: bool = Field(default=False, description="Whether this form is limit broken.")
+    unlocked: bool = Field(default=False, description="Whether this form is unlocked.")
+    stats: dict[str, float] = Field(default_factory=dict, description="A dictionary for storing any additional data for this form.")
+
+
+class FormComponent(BaseModel):
+    current: str = Field(default="base", description="The current form of this character.")
+    technique: str = Field(default="base", description="The current technique of this character.")
+    permanents: set[str] = Field(default_factory=set, description="A set of permanent forms that this character has.")
+    data: dict[str, FormData] = Field(default_factory=dict, description="A mapping of form names to form data. This is used for storing the data for each form, such as stat changes or special abilities.")
+
+
+class SenseiComponent(BaseModel):
+    current: str = Field(default="nobody", description="The current sensei of this character.")
+    data: dict[str, dict] = Field(default_factory=dict, description="A mapping of sensei names to sensei data. This is used for storing the data for each sensei, such as stat changes or special abilities.")
+
+
 class CharacterBase(HasColorName, HasColorDescription, HasFlags, HasDgScripts, HasInteractive):
-    pass
+    physiology: PhysiologyComponent = Field(default_factory=PhysiologyComponent, description="The physiology of this character. This is used for things like determining what they can see, what they look like to others, etc.")
+    form: FormComponent = Field(default_factory=FormComponent, description="The form of this character. This is used for things like determining what they can do, what they look like to others, etc.")
+    sensei: SenseiComponent = Field(default_factory=SenseiComponent, description="The sensei of this character. This is used for things like determining what they can do, what they look like to others, etc.")
 
 
 class MobilePrototype(CharacterBase):
@@ -133,10 +164,10 @@ class Character(CharacterBase, HasLocation, HasEquipment, HasInventory):
         return DgReference(entity_type="character", entity_id=self.id)
     
     def get_apparent_race(self, viewer: Character) -> str:
-        return "unknown"
+        return self.physiology.race
     
     def get_apparent_sex(self, viewer: Character) -> str:
-        return "unknown"
+        return self.physiology.sex
     
     def get_keywords(self, viewer: Character) -> set[str]:
         out = super().get_keywords(viewer)

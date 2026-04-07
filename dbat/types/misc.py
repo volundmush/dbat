@@ -17,15 +17,7 @@ class HasColorName(BaseModel):
     @property
     def name(self) -> str:
         return self.color_name.plain
-    
-    def set_color_name(self, color_name: str | Text):
-        if isinstance(color_name, Text):
-            self.color_name = color_name
-            return
-        try:
-            self.color_name = Text.from_markup(color_name)
-        except MarkupError:
-            self.color_name = Text(color_name)
+
 
 class HasColorDescription(BaseModel):
     """
@@ -37,15 +29,6 @@ class HasColorDescription(BaseModel):
     @property
     def description(self) -> str:
         return self.color_description.plain
-    
-    def set_color_description(self, color_description: str | Text):
-        if isinstance(color_description, Text):
-            self.color_description = color_description
-            return
-        try:
-            self.color_description = Text.from_markup(color_description)
-        except MarkupError:
-            self.color_description = Text(color_description)
 
 class HasInteractive(BaseModel):
     """

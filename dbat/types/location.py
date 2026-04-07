@@ -1,10 +1,12 @@
 import dbat
 import uuid
 import typing
+import math
 from pydantic import BaseModel, ConfigDict, Field, PrivateAttr
 from rich.text import Text
+from muplugins.core.db.fields import RichText
 
-from ..events.informative import LookLocation
+
 
 class Point(BaseModel):
     model_config = ConfigDict(frozen=True)
@@ -87,11 +89,108 @@ class IsLocation(BaseModel):
     def make_location(self, point: Point) -> Location:
         return Location(self.report_location_type(), self.id, point)
 
+
+class TileDisplay(BaseModel):
+    sector_type: str = Field(default="", description="The type of sector this tile is. This determines the base color and description of the tile.")
+    tile_override: RichText | None = Field(default=None, description="If set, this tile will display as this instead of its normal appearance.")
+
+    @classmethod
+    def create_from_location(cls, location: Location, viewer: "Character") -> TileDisplay:
+        target = location.get_target()
+        point = location.point
+
+        sector_type = ""
+        tile_override = None
+
+        if shape := target.query_shape(point):
+            if shape.sector_type:
+                sector_type = shape.sector_type
+            if shape.tile_display:
+                tile_override = shape.tile_display
+        if point in target.tiles:
+            tile = target.tiles[point]
+            if tile.sector_type:
+                sector_type = tile.sector_type
+            if tile.tile_display:
+                tile_override = tile.tile_display
+        
+        return cls(sector_type=sector_type, tile_override=tile_override)
+
+    def display(self) -> Text:
+        return Text("?")
+
+class RenderedMap(BaseModel):
+    """
+    A section of map rendered for 2D view. It's tiles in rows and columns.
+    """
+    height: int = Field(..., description="The height of the rendered map, in tiles.")
+    width: int = Field(..., description="The width of the rendered map, in tiles.")
+    tiles: list[list[TileDisplay | None]] = Field(..., description="The tiles of the rendered map.")
+
+    @classmethod
+    def create_from_location(cls, location: Location, viewer: "Character", height: int = 7, width: int = 7) -> RenderedMap:
+        # We can assume that height and width will always be odd and at least 3.
+        # the given Location is our center point.
+
+        # For this, we will be ignoring exits leading up, down, inward, or outward.
+        # We also don't use the actual coordinates of Locations, but instead generate a relative coordinate
+        # system based on directional traversals, where our center point is (0,0).
+
+        # loc_map stores the places we've been by relative coordinates.
+        # in the case of inconsistent geometry, it's first come first registered.
+        loc_map: dict[Point, Location] = dict()
+
+        # we will use breadth-first traversal to generate the map, starting from the center point.
+        visited: set[Location] = set()
+
+        queue: list[tuple[Location, Point]] = [(location, Point(x=0, y=0, z=0))]
+
+        from ..types.grids import Direction
+
+        while queue:
+            loc, point = queue.pop(0)
+            x, y, z = point.x, point.y, point.z
+            if loc in visited:
+                continue
+            visited.add(loc)
+
+            # boundary check
+            if abs(x) > (width-1) / 2 or abs(y) > (height-1) / 2:
+                continue
+
+            loc_map[point] = loc
+
+            if not (target := loc.get_target()):
+                continue
+            
+            exits = target.generate_exits_at(loc.point)
+            for direction, exit in exits.items():
+                if direction in (Direction.up, Direction.down, Direction.inside, Direction.outside):
+                    continue
+                if exit.location not in visited:
+                    queue.append((exit.location, direction.update_coordinates(point)))
+
+        tiles = list()
+
+        for y in range(-(height-1)//2, (height-1)//2 + 1):
+            row = list()
+            for x in range(-(width-1)//2, (width-1)//2 + 1):
+                point = Point(x=x, y=y, z=0)
+                if point in loc_map:
+                    loc = loc_map[point]
+                    row.append(TileDisplay.create_from_location(loc, viewer))
+                else:
+                    row.append(None)
+            tiles.append(row)
+
+        return cls(height=height, width=width, tiles=tiles)
+
 class Location(BaseModel):
     """
     This represents an ADDRESS to a location. It can be serialized. It can also be used to access
     information about the object it targets.
     """
+    model_config = ConfigDict(validate_assignment=True, frozen=True)
     location_type: str = Field(..., description="The type of location, such as 'zone' or 'structure'")
     location_id: uuid.UUID = Field(..., description="The ID of the location object")
     point: Point = Field(default_factory=Point, description="The coordinates within the location")
@@ -134,8 +233,10 @@ class Location(BaseModel):
         description = target.get_display_description(self.point, viewer)
         objects = list()
         characters = list()
+        structures = list()
         from .characters import Character
         from .objects import Object
+        from .structures import Structure
         
         for content in target.iter_contents_at(self.point):
             if not viewer.can_see(content):
@@ -147,16 +248,25 @@ class Location(BaseModel):
                     characters.append(content)
                 case Object():
                     objects.append(content)
+                case Structure():
+                    structures.append(content)
         
-        exits = list(target.generate_exits_at(self.point).keys())
+        exits = target.generate_exits_at(self.point)
 
-        event = LookLocation(
-            location=(self.location_type, self.location_id, self.point),
-            name=name.markup if isinstance(name, Text) else name,
-            description=description.markup if isinstance(description, Text) else description,
-            objects=[(obj.id, obj.get_display_name(viewer)) for obj in objects],
-            characters=[(char.id, char.get_display_name(viewer)) for char in characters],
-            exits=exits
+        from ..events.views import LocationCharacterLine, LocationObjectLine, LocationStructureLine
+        from ..events.informative import LocationDisplay
+
+        rendered_map = RenderedMap.create_from_location(self, viewer)
+
+        event = LocationDisplay(
+            location=self,
+            color_name=name,
+            color_description=description,
+            objects=[LocationObjectLine.from_object(obj, viewer) for obj in objects],
+            characters=[LocationCharacterLine.from_character(char, viewer) for char in characters],
+            structures=[LocationStructureLine.from_structure(struct, viewer) for struct in structures],
+            exits=exits,
+            rendered_map=rendered_map
         )
         viewer.send_event(event)
 

@@ -33,9 +33,9 @@ class DBAT(BasePlugin):
         return {"game": GameService}
 
     def core_events(self):
-        from .events.informative import LookLocation
+        from .events.informative import LocationDisplay
 
-        all_events = [LookLocation]
+        all_events = [LocationDisplay]
 
         return {ev.event_type(): ev for ev in all_events}
     

@@ -474,18 +474,18 @@ class Grid(IsLocation, HasFlags, HasColorName, HasColorDescription):
             return None
         return Exit(location=Location(location_type=self.report_location_type(), location_id=self.id, point=adjacent_point))
     
-    def get_display_name(self, point: Point, viewer: "Character") -> str:
+    def get_display_name(self, point: Point, viewer: "Character") -> Text:
         if point in self.tiles and self.tiles[point].color_name:
             return self.tiles[point].color_name
         shape = self.query_shape(point)
         if shape and shape.color_name:
             return shape.color_name
-        return "Unremarkable Ground"
+        return Text("Unremarkable Ground")
     
-    def get_display_description(self, point: Point, viewer: "Character") -> str:
+    def get_display_description(self, point: Point, viewer: "Character") -> Text:
         if point in self.tiles and self.tiles[point].color_description:
             return self.tiles[point].color_description
         shape = self.query_shape(point)
         if shape and shape.color_description:
             return shape.color_description
-        return ""
+        return Text("")
