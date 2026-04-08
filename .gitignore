@@ -70,3 +70,5 @@ config.log
 config.status
 utils/Makefile
 .cache
+.zig-cache/
+*.pem
