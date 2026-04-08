@@ -501,17 +501,22 @@ _ALL_WEIGHT = [InventoryWeight, EquippedWeight, CarriedWeight, Weight, TotalWeig
 
 class SkillDef(StatDef):
     tags: set[str] = {"skill"}
+    min_base: float = 0.0
+    max_base: float = 100.0
     min_value: float = 0.0
+    max_value: float = 105.0
     default_value: float = 0.0
     category = "skills"
+    skill_flags: set[str] = set()
 
 
 class Flex(SkillDef):
     key = "flex"
+    skill_flags = {"need_train"}
 
 
 class Genius(SkillDef):
     key = "genius"
-
+    skill_flags = {"need_train"}
 
 ALL_STATS = _ALL_ATTRIBUTES + _ALL_VITALS + _ALL_RESOURCES + _ALL_OTHER + _ALL_ADVANCEMENT + _ALL_COMBAT + _ALL_WEIGHT
