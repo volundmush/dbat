@@ -512,11 +512,792 @@ class SkillDef(StatDef):
 
 class Flex(SkillDef):
     key = "flex"
-    skill_flags = {"need_train"}
+    skill_flags = {"cha_mod", "need_train"}
 
 
 class Genius(SkillDef):
     key = "genius"
-    skill_flags = {"need_train"}
+    skill_flags = {"int_mod", "need_train"}
 
-ALL_STATS = _ALL_ATTRIBUTES + _ALL_VITALS + _ALL_RESOURCES + _ALL_OTHER + _ALL_ADVANCEMENT + _ALL_COMBAT + _ALL_WEIGHT
+
+class Enlighten(SkillDef):
+    key = "enlighten"
+    skill_flags = {"int_mod", "need_train"}
+
+
+class ToughSkin(SkillDef):
+    key = "tough_skin"
+    skill_flags = {"str_mod", "armor_all"}
+
+
+class Kaioken(SkillDef):
+    key = "kaioken"
+    skill_flags = {"int_mod", "need_train"}
+
+
+class Bless(SkillDef):
+    key = "bless"
+    skill_flags = {"wis_mod", "need_train"}
+
+
+class Curse(SkillDef):
+    key = "curse"
+    skill_flags = {"wis_mod", "need_train"}
+
+
+class Poison(SkillDef):
+    key = "poison"
+    skill_flags = {"wis_mod", "need_train"}
+
+
+class Vigor(SkillDef):
+    key = "vigor"
+    skill_flags = {"wis_mod", "need_train"}
+
+
+class Pose(SkillDef):
+    key = "special_pose"
+    skill_flags = {"int_mod", "need_train"}
+
+
+class Hasshuken(SkillDef):
+    key = "hasshuken"
+    skill_flags = {"int_mod", "need_train"}
+
+
+class Gardening(SkillDef):
+    key = "gardening"
+    skill_flags = {"int_mod", "need_train"}
+
+
+class Extract(SkillDef):
+    key = "extract"
+    skill_flags = {"int_mod", "need_train"}
+
+
+class Runic(SkillDef):
+    key = "runic"
+    skill_flags = {"int_mod", "need_train"}
+
+
+class Commune(SkillDef):
+    key = "commune"
+    skill_flags = {"int_mod", "need_train"}
+
+
+class SolarFlare(SkillDef):
+    key = "solar_flare"
+    skill_flags = {"int_mod", "need_train"}
+
+
+class Might(SkillDef):
+    key = "might"
+    skill_flags = {"str_mod", "need_train"}
+
+
+class Balance(SkillDef):
+    key = "balance"
+    skill_flags = {"dex_mod", "armor_all"}
+
+
+class Build(SkillDef):
+    key = "build"
+    skill_flags = {"int_mod", "need_train"}
+
+
+class Concentration(SkillDef):
+    key = "concentration"
+    skill_flags = {"con_mod"}
+
+
+class Spot(SkillDef):
+    key = "spot"
+    skill_flags = {"wis_mod"}
+
+
+class FirstAid(SkillDef):
+    key = "first_aid"
+    skill_flags = {"wis_mod", "need_train"}
+
+
+class Disguise(SkillDef):
+    key = "disguise"
+    skill_flags = {"cha_mod"}
+
+
+class EscapeArtist(SkillDef):
+    key = "escape"
+    skill_flags = {"dex_mod", "armor_all"}
+
+
+class Appraise(SkillDef):
+    key = "appraise"
+    skill_flags = {"int_mod"}
+
+
+class Heal(SkillDef):
+    key = "heal"
+    skill_flags = {"wis_mod", "armor_bad"}
+
+
+class Forgery(SkillDef):
+    key = "forgery"
+    skill_flags = {"int_mod"}
+
+
+class Hide(SkillDef):
+    key = "hide"
+    skill_flags = {"dex_mod", "armor_all"}
+
+
+class Listen(SkillDef):
+    key = "listen"
+    skill_flags = {"wis_mod"}
+
+
+class Eavesdrop(SkillDef):
+    key = "eavesdrop"
+    skill_flags = {"int_mod"}
+
+
+class Cure(SkillDef):
+    key = "cure_poison"
+    skill_flags = {"wis_mod", "need_train"}
+
+
+class OpenLock(SkillDef):
+    key = "open_lock"
+    skill_flags = {"dex_mod", "need_train", "armor_bad"}
+
+
+class Regenerate(SkillDef):
+    key = "regenerate"
+    skill_flags = {"con_mod", "need_train"}
+
+
+class KeenSight(SkillDef):
+    key = "keen_sight"
+    skill_flags = {"int_mod", "need_train"}
+
+
+class Search(SkillDef):
+    key = "search"
+    skill_flags = {"int_mod"}
+
+
+class MoveSilently(SkillDef):
+    key = "move_silently"
+    skill_flags = {"dex_mod", "armor_all"}
+
+
+class Absorb(SkillDef):
+    key = "absorb"
+    skill_flags = {"int_mod", "need_train"}
+
+
+class SleightOfHand(SkillDef):
+    key = "sleight_of_hand"
+    skill_flags = {"dex_mod", "armor_all"}
+
+
+class Ingest(SkillDef):
+    key = "ingest"
+    skill_flags = {"str_mod", "need_train"}
+
+
+class Repair(SkillDef):
+    key = "fix"
+    skill_flags = {"int_mod", "need_train"}
+
+
+class Sense(SkillDef):
+    key = "sense"
+    skill_flags = {"int_mod", "need_train"}
+
+
+class Survival(SkillDef):
+    key = "survival"
+    skill_flags = {"wis_mod", "need_train"}
+
+
+class Yoik(SkillDef):
+    key = "yoikominminken"
+    skill_flags = {"int_mod", "need_train"}
+
+
+class Create(SkillDef):
+    key = "create"
+    skill_flags = {"int_mod", "need_train"}
+
+
+class Spit(SkillDef):
+    key = "stone_spit"
+    skill_flags = {"int_mod", "need_train"}
+
+
+class Potential(SkillDef):
+    key = "potential_release"
+    skill_flags = {"int_mod", "need_train"}
+
+
+class Telepathy(SkillDef):
+    key = "telepathy"
+    skill_flags = {"int_mod", "need_train"}
+
+
+class Focus(SkillDef):
+    key = "focus"
+    skill_flags = {"int_mod", "need_train"}
+
+
+class InstantTransmission(SkillDef):
+    key = "instant_transmission"
+    skill_flags = {"int_mod", "need_train", "tier_4"}
+
+
+class Sword(SkillDef):
+    key = "sword"
+    skill_flags = {"int_mod", "need_train"}
+
+
+class Dagger(SkillDef):
+    key = "dagger"
+    skill_flags = {"int_mod", "need_train"}
+
+
+class Club(SkillDef):
+    key = "club"
+    skill_flags = {"int_mod", "need_train"}
+
+
+class Spear(SkillDef):
+    key = "spear"
+    skill_flags = {"int_mod", "need_train"}
+
+
+class Gun(SkillDef):
+    key = "gun"
+    skill_flags = {"int_mod", "need_train"}
+
+
+class Brawl(SkillDef):
+    key = "brawl"
+    skill_flags = {"int_mod", "need_train"}
+
+
+class Dodge(SkillDef):
+    key = "dodge"
+    skill_flags = {"cha_mod", "need_train"}
+
+
+class Parry(SkillDef):
+    key = "parry"
+    skill_flags = {"dex_mod", "need_train"}
+
+
+class Block(SkillDef):
+    key = "block"
+    skill_flags = {"dex_mod", "need_train"}
+
+
+class Zanzoken(SkillDef):
+    key = "zanzoken"
+    skill_flags = {"int_mod", "need_train"}
+
+
+class Barrier(SkillDef):
+    key = "barrier"
+    skill_flags = {"int_mod", "need_train"}
+
+
+class Throw(SkillDef):
+    key = "throw"
+    skill_flags = {"dex_mod", "need_train"}
+
+
+class Punch(SkillDef):
+    key = "punch"
+    skill_flags = {"str_mod", "need_train"}
+
+
+class Kick(SkillDef):
+    key = "kick"
+    skill_flags = {"str_mod", "need_train"}
+
+
+class Elbow(SkillDef):
+    key = "elbow"
+    skill_flags = {"str_mod", "need_train"}
+
+
+class Knee(SkillDef):
+    key = "knee"
+    skill_flags = {"str_mod", "need_train"}
+
+
+class Roundhouse(SkillDef):
+    key = "roundhouse"
+    skill_flags = {"str_mod", "need_train"}
+
+
+class Uppercut(SkillDef):
+    key = "uppercut"
+    skill_flags = {"str_mod", "need_train"}
+
+
+class Slam(SkillDef):
+    key = "slam"
+    skill_flags = {"str_mod", "need_train", "tier_2"}
+
+
+class Heeldrop(SkillDef):
+    key = "heeldrop"
+    skill_flags = {"str_mod", "need_train", "tier_2"}
+
+
+class KiBall(SkillDef):
+    key = "kiball"
+    skill_flags = {"int_mod", "need_train"}
+
+
+class KiBlast(SkillDef):
+    key = "kiblast"
+    skill_flags = {"int_mod", "need_train"}
+
+
+class Beam(SkillDef):
+    key = "beam"
+    skill_flags = {"int_mod", "need_train"}
+
+
+class Tsuihidan(SkillDef):
+    key = "tsuihidan"
+    skill_flags = {"int_mod", "need_train"}
+
+
+class Shogekiha(SkillDef):
+    key = "shogekiha"
+    skill_flags = {"int_mod", "need_train"}
+
+
+class Renzo(SkillDef):
+    key = "renzokou_energy_dan"
+    skill_flags = {"int_mod", "need_train"}
+
+
+class Masenko(SkillDef):
+    key = "masenko"
+    skill_flags = {"int_mod", "need_train", "tier_2"}
+
+
+class Dodonpa(SkillDef):
+    key = "dodonpa"
+    skill_flags = {"int_mod", "need_train", "tier_2"}
+
+
+class GalikGun(SkillDef):
+    key = "galik_gun"
+    skill_flags = {"int_mod", "need_train", "tier_2"}
+
+
+class Kamehameha(SkillDef):
+    key = "kamehameha"
+    skill_flags = {"int_mod", "need_train", "tier_2"}
+
+
+class DeathBeam(SkillDef):
+    key = "deathbeam"
+    skill_flags = {"int_mod", "need_train", "tier_2"}
+
+
+class Eraser(SkillDef):
+    key = "eraser_cannon"
+    skill_flags = {"int_mod", "need_train", "tier_2"}
+
+
+class TSlash(SkillDef):
+    key = "twin_slash"
+    skill_flags = {"int_mod", "need_train", "tier_2"}
+
+
+class PsyBlast(SkillDef):
+    key = "psychic_blast"
+    skill_flags = {"int_mod", "need_train", "tier_2"}
+
+
+class Honoo(SkillDef):
+    key = "honoo"
+    skill_flags = {"int_mod", "need_train", "tier_2"}
+
+
+class DualBeam(SkillDef):
+    key = "dual_beam"
+    skill_flags = {"int_mod", "need_train", "tier_2"}
+
+
+class Rogafufuken(SkillDef):
+    key = "rogafufuken"
+    skill_flags = {"int_mod", "need_train", "tier_2"}
+
+
+class Bakuhatsuha(SkillDef):
+    key = "bakuhatsuha"
+    skill_flags = {"int_mod", "need_train", "tier_2"}
+
+
+class Kienzan(SkillDef):
+    key = "kienzan"
+    skill_flags = {"int_mod", "need_train", "tier_3"}
+
+
+class TriBeam(SkillDef):
+    key = "tribeam"
+    skill_flags = {"int_mod", "need_train", "tier_3"}
+
+
+class SBC(SkillDef):
+    key = "special_beam_cannon"
+    skill_flags = {"int_mod", "need_train", "tier_3"}
+
+
+class FinalFlash(SkillDef):
+    key = "final_flash"
+    skill_flags = {"int_mod", "need_train", "tier_3"}
+
+
+class Crusher(SkillDef):
+    key = "crusher_ball"
+    skill_flags = {"int_mod", "need_train", "tier_3"}
+
+
+class DdSlash(SkillDef):
+    key = "darkness_dragon_slash"
+    skill_flags = {"int_mod", "need_train", "tier_3"}
+
+
+class PBarrage(SkillDef):
+    key = "psychic_barrage"
+    skill_flags = {"int_mod", "need_train", "tier_3"}
+
+
+class HellFlash(SkillDef):
+    key = "hell_flash"
+    skill_flags = {"int_mod", "need_train", "tier_3"}
+
+
+class HellSpear(SkillDef):
+    key = "hell_spear_blast"
+    skill_flags = {"int_mod", "need_train", "tier_3"}
+
+
+class Kakusanha(SkillDef):
+    key = "kakusanha"
+    skill_flags = {"int_mod", "need_train", "tier_4"}
+
+
+class Scatter(SkillDef):
+    key = "scatter_shot"
+    skill_flags = {"int_mod", "need_train", "tier_4"}
+
+
+class BigBang(SkillDef):
+    key = "big_bang"
+    skill_flags = {"int_mod", "need_train", "tier_4"}
+
+
+class PSlash(SkillDef):
+    key = "phoenix_slash"
+    skill_flags = {"int_mod", "need_train", "tier_4"}
+
+
+class DeathBall(SkillDef):
+    key = "deathball"
+    skill_flags = {"int_mod", "need_train", "tier_4"}
+
+
+class SpiritBall(SkillDef):
+    key = "spirit_ball"
+    skill_flags = {"int_mod", "need_train", "tier_4"}
+
+
+class GenkiDama(SkillDef):
+    key = "genki_dama"
+    skill_flags = {"int_mod", "need_train", "tier_5"}
+
+
+class Genocide(SkillDef):
+    key = "genocide"
+    skill_flags = {"int_mod", "need_train", "tier_5"}
+
+
+class DualWield(SkillDef):
+    key = "dual_wield"
+    skill_flags = {"int_mod", "need_train"}
+
+
+class TwoHand(SkillDef):
+    key = "twohand"
+    skill_flags = {"int_mod", "need_train"}
+
+
+class Style(SkillDef):
+    key = "fighting_arts"
+    skill_flags = {"int_mod"}
+
+
+class Kura(SkillDef):
+    key = "kuraiiro_seiki"
+    skill_flags = {"int_mod", "need_train"}
+
+
+class TailWhip(SkillDef):
+    key = "tailwhip"
+    skill_flags = {"int_mod", "need_train", "tier_1"}
+
+
+class Kousengan(SkillDef):
+    key = "kousengan"
+    skill_flags = {"int_mod", "need_train", "tier_1"}
+
+
+class Taisha(SkillDef):
+    key = "taisha_reiki"
+    skill_flags = {"int_mod", "need_train"}
+
+
+class Paralyze(SkillDef):
+    key = "paralyze"
+    skill_flags = {"int_mod", "need_train"}
+
+
+class Infuse(SkillDef):
+    key = "infuse"
+    skill_flags = {"int_mod", "need_train"}
+
+
+class Roll(SkillDef):
+    key = "roll"
+    skill_flags = {"int_mod", "need_train"}
+
+
+class Trip(SkillDef):
+    key = "trip"
+    skill_flags = {"int_mod", "need_train"}
+
+
+class Grapple(SkillDef):
+    key = "grapple"
+    skill_flags = {"int_mod", "need_train"}
+
+
+class WSpike(SkillDef):
+    key = "water_spikes"
+    skill_flags = {"int_mod", "need_train", "tier_2"}
+
+
+class SelfD(SkillDef):
+    key = "self_destruct"
+    skill_flags = {"int_mod", "need_train", "tier_2"}
+
+
+class Spiral(SkillDef):
+    key = "spiral_comet"
+    skill_flags = {"int_mod", "need_train", "tier_4"}
+
+
+class Breaker(SkillDef):
+    key = "star_breaker"
+    skill_flags = {"int_mod", "need_train", "tier_3"}
+
+
+class Mimic(SkillDef):
+    key = "mimic"
+    skill_flags = {"int_mod", "need_train"}
+
+
+class WRazor(SkillDef):
+    key = "water_razor"
+    skill_flags = {"int_mod", "need_train", "tier_3"}
+
+
+class Koteiru(SkillDef):
+    key = "koteiru_bakuha"
+    skill_flags = {"int_mod", "need_train", "tier_4"}
+
+
+class Dimizu(SkillDef):
+    key = "dimizu_toride"
+    skill_flags = {"int_mod", "need_train"}
+
+
+class HyogaKabe(SkillDef):
+    key = "hyoga_kabe"
+    skill_flags = {"int_mod", "need_train"}
+
+
+class Wellspring(SkillDef):
+    key = "wellspring"
+    skill_flags = {"int_mod", "need_train"}
+
+
+class AquaBarrier(SkillDef):
+    key = "aqua_barrier"
+    skill_flags = {"int_mod", "need_train"}
+
+
+class Warp(SkillDef):
+    key = "warp_pool"
+    skill_flags = {"int_mod", "need_train"}
+
+
+class HSpiral(SkillDef):
+    key = "hell_spiral"
+    skill_flags = {"int_mod", "need_train", "tier_4"}
+
+
+class Armor(SkillDef):
+    key = "nanite_armor"
+    skill_flags = {"int_mod", "need_train"}
+
+
+class FireShield(SkillDef):
+    key = "fireshield"
+    skill_flags = {"int_mod", "need_train"}
+
+
+class Cooking(SkillDef):
+    key = "cooking"
+    skill_flags = {"int_mod", "need_train"}
+
+
+class Seishou(SkillDef):
+    key = "seishou_enko"
+    skill_flags = {"int_mod", "need_train", "tier_2"}
+
+
+class Silk(SkillDef):
+    key = "silk"
+    skill_flags = {"int_mod", "need_train"}
+
+
+class Bash(SkillDef):
+    key = "bash"
+    skill_flags = {"int_mod", "need_train", "tier_3"}
+
+
+class Headbutt(SkillDef):
+    key = "headbutt"
+    skill_flags = {"int_mod", "need_train", "tier_3"}
+
+
+class Ensnare(SkillDef):
+    key = "ensnare"
+    skill_flags = {"int_mod", "need_train"}
+
+
+class StarNova(SkillDef):
+    key = "starnova"
+    skill_flags = {"int_mod", "need_train", "tier_4"}
+
+
+class Malice(SkillDef):
+    key = "malice_breaker"
+    skill_flags = {"int_mod", "need_train", "tier_4"}
+
+
+class Zen(SkillDef):
+    key = "zen_blade_strike"
+    skill_flags = {"int_mod", "need_train", "tier_3"}
+
+
+class Sunder(SkillDef):
+    key = "sundering_force"
+    skill_flags = {"int_mod", "need_train", "tier_4"}
+
+
+class Wither(SkillDef):
+    key = "wither"
+    skill_flags = {"int_mod", "need_train"}
+
+
+class Metamorph(SkillDef):
+    key = "dark_metamorphosis"
+    skill_flags = {"int_mod", "need_train"}
+
+
+class Hayasa(SkillDef):
+    key = "hayasa"
+    skill_flags = {"int_mod", "need_train"}
+
+
+class Energize(SkillDef):
+    key = "energize_throwing"
+    skill_flags = {"int_mod", "need_train"}
+
+
+class Pursuit(SkillDef):
+    key = "pursuit"
+    skill_flags = {"int_mod", "need_train"}
+
+
+class HealGlow(SkillDef):
+    key = "healing_glow"
+    skill_flags = {"int_mod", "need_train"}
+
+
+class Handling(SkillDef):
+    key = "handling"
+    skill_flags = {"int_mod", "need_train"}
+
+
+class MysticMusic(SkillDef):
+    key = "mystic_music"
+    skill_flags = {"int_mod", "need_train"}
+
+
+class LightGrenade(SkillDef):
+    key = "light_grenade"
+    skill_flags = {"int_mod", "need_train", "tier_4"}
+
+
+class Multiform(SkillDef):
+    key = "multiform"
+    skill_flags = {"int_mod", "need_train", "tier_1"}
+
+
+class SpiritControl(SkillDef):
+    key = "spirit_control"
+    skill_flags = {"int_mod", "need_train", "tier_1"}
+
+
+class Balefire(SkillDef):
+    key = "balefire"
+    skill_flags = {"int_mod", "need_train", "tier_4"}
+
+
+class BlessedHammer(SkillDef):
+    key = "blessed_hammer"
+    skill_flags = {"int_mod", "need_train", "tier_1"}
+
+
+_ALL_SKILLS = [
+    Flex, Genius, Enlighten, ToughSkin, Kaioken, Bless, Curse, Poison, Vigor, Pose, Hasshuken,
+    Gardening, Extract, Runic, Commune, SolarFlare, Might, Balance, Build, Concentration, Spot,
+    FirstAid, Disguise, EscapeArtist, Appraise, Heal, Forgery, Hide, Listen, Eavesdrop, Cure,
+    OpenLock, Regenerate, KeenSight, Search, MoveSilently, Absorb, SleightOfHand, Ingest, Repair,
+    Sense, Survival, Yoik, Create, Spit, Potential, Telepathy, Focus, InstantTransmission,
+    Sword, Dagger, Club, Spear, Gun, Brawl,
+    Dodge, Parry, Block, Zanzoken, Barrier,
+    Throw, Punch, Kick, Elbow, Knee, Roundhouse, Uppercut, Slam, Heeldrop, KiBall, KiBlast, Beam,
+    Tsuihidan, Shogekiha, Renzo, Masenko, Dodonpa, GalikGun, Kamehameha, DeathBeam, Eraser,
+    TSlash, PsyBlast, Honoo, DualBeam, Rogafufuken, Bakuhatsuha, Kienzan, TriBeam, SBC,
+    FinalFlash, Crusher, DdSlash, PBarrage, HellFlash, HellSpear, Kakusanha, Scatter, BigBang,
+    PSlash, DeathBall, SpiritBall, GenkiDama, Genocide, DualWield, TwoHand, Style, Kura,
+    TailWhip, Kousengan, Taisha, Paralyze, Infuse, Roll, Trip, Grapple, WSpike, SelfD, Spiral,
+    Breaker, Mimic, WRazor, Koteiru, Dimizu, HyogaKabe, Wellspring, AquaBarrier, Warp, HSpiral,
+    Armor, FireShield, Cooking, Seishou, Silk, Bash, Headbutt, Ensnare, StarNova, Malice, Zen,
+    Sunder, Wither, Metamorph, Hayasa, Energize, Pursuit, HealGlow, Handling, MysticMusic,
+    LightGrenade, Multiform, SpiritControl, Balefire, BlessedHammer,
+]
+
+ALL_STATS = _ALL_ATTRIBUTES + _ALL_VITALS + _ALL_RESOURCES + _ALL_OTHER + _ALL_ADVANCEMENT + _ALL_COMBAT + _ALL_WEIGHT + _ALL_SKILLS
