@@ -1503,6 +1503,8 @@ ACMD(do_train)
     }
      */
 
+    plus *= 2;
+
     if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 19800 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 19899) {
         plus *= 4;
     }

@@ -40,11 +40,7 @@
 #include <dirent.h>
 #include <linux/limits.h>
 
-#ifdef HAVE_LIBBSD
 #include <bsd/string.h>
-#else
-#include "stringutils.h"
-#endif
 
 // C++ STD libraries
 #include <string>

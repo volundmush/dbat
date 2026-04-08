@@ -1,6 +1,6 @@
-cmake_minimum_required(VERSION 3.22)
+cmake_minimum_required(VERSION 4.1)
 
-set(CPM_DOWNLOAD_VERSION 0.35.5)
+set(CPM_DOWNLOAD_VERSION 0.42.1)
 set(CPM_DOWNLOAD_LOCATION "${CMAKE_BINARY_DIR}/cmake/CPM_${CPM_DOWNLOAD_VERSION}.cmake")
 
 if(NOT (EXISTS ${CPM_DOWNLOAD_LOCATION}))
@@ -15,20 +15,20 @@ project(circle)
 CPMAddPackage(
         NAME json
         GITHUB_REPOSITORY nlohmann/json
-        VERSION 3.11.2
+        VERSION 3.12.0
 )
 
 CPMAddPackage(
         NAME eff_random
-        GITHUB_REPOSITORY effolkronium/random
-        VERSION 1.4.1
+        GITHUB_REPOSITORY volundmush/random
+        GIT_TAG master
         OPTIONS "Random_BuildTests OFF"
 )
 
 CPMAddPackage(
         NAME cppcodec
-        GITHUB_REPOSITORY tplgy/cppcodec
-        VERSION 0.2
+        GITHUB_REPOSITORY volundmush/cppcodec
+        GIT_TAG master
         OPTIONS "BUILD_TESTING OFF"
 )
 
@@ -52,8 +52,8 @@ CPMAddPackage(
 
 CPMAddPackage(
         name argh
-        GITHUB_REPOSITORY adishavit/argh
-        VERSION 1.3.2
+        GITHUB_REPOSITORY volundmush/argh
+        GIT_TAG master
         OPTIONS "BUILD_EXAMPLES OFF" "BUILD_TESTS OFF"
 )
 

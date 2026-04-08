@@ -917,7 +917,7 @@ void gain_exp(struct char_data *ch, int64_t gain)
      struct obj_data *obj = GET_EQ(ch, WEAR_SH);
      if (GET_OBJ_VNUM(obj) == 1127) {
       int64_t spar = gain;
-      gain += gain * 0.25;
+      gain += gain * 2.5;
       spar = gain - spar;
       send_to_char(ch, "@D[@BBooster EXP@W: @G+%s@D]\r\n", add_commas(spar));
      }
