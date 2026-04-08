@@ -67,12 +67,134 @@ class DBAT(BasePlugin):
         CHARACTER_COMMANDS = self.registered_character_commands
         CHARACTER_COMMANDS_PRIORITY = self.character_commands_priority
 
+    def character_races(self) -> list:
+        out = list()
+
+        from .types.races import ALL_RACES
+
+        out.extend(ALL_RACES)
+        return out
+    
+    async def setup_character_races(self):
+        for p in self.app.plugin_load_order:
+            if not hasattr(p, "character_races"):
+                continue
+            for race in p.character_races():
+                race_handler = race()
+                INDEX.character_races[race_handler.key()] = race_handler
+
+    def character_senseis(self) -> list:
+        out = list()
+
+        from .types.senseis import ALL_SENSEIS
+
+        out.extend(ALL_SENSEIS)
+        return out
+    
+    async def setup_character_senseis(self):
+        for p in self.app.plugin_load_order:
+            if not hasattr(p, "character_senseis"):
+                continue
+            for sensei in p.character_senseis():
+                sensei_handler = sensei()
+                INDEX.character_senseis[sensei_handler.key()] = sensei_handler
+
+    def character_sexes(self) -> list:
+        out = list()
+
+        from .types.sexes import ALL_SEXES
+        out.extend(ALL_SEXES)
+        return out
+    
+    async def setup_character_sexes(self):
+        for p in self.app.plugin_load_order:
+            if not hasattr(p, "character_sexes"):
+                continue
+            for sex in p.character_sexes():
+                sex_handler = sex()
+                INDEX.character_sexes[sex_handler.key()] = sex_handler
+
+    def character_bodyparts(self) -> list[type["BodyPartHandler"]]:
+        out = list()
+
+        from .types.bodyplans import ALL_BODY_PARTS
+        
+        out.extend(ALL_BODY_PARTS)
+
+        return out
+
+    async def setup_character_bodyparts(self):
+        for p in self.app.plugin_load_order:
+            if not hasattr(p, "character_bodyparts"):
+                continue
+            for part in p.character_bodyparts():
+                handler = part()
+                INDEX.body_parts[handler.key()] = handler
+
+    def character_bodyplans(self) -> list[type["BodyPlanHandler"]]:
+        out = list()
+
+        from .types.bodyplans import ALL_BODY_PLANS
+        
+        out.extend(ALL_BODY_PLANS)
+
+        return out
+
+    async def setup_character_bodyplans(self):
+        for p in self.app.plugin_load_order:
+            if not hasattr(p, "character_bodyplans"):
+                continue
+            for plan in p.character_bodyplans():
+                handler = plan()
+                INDEX.body_plans[handler.key()] = handler
+
+    def character_stats(self) -> list[type["StatDef"]]:
+        out = list()
+
+        from .types.stats import ALL_STATS
+        
+        out.extend(ALL_STATS)
+
+        return out
+
+    async def setup_character_stats(self):
+        for p in self.app.plugin_load_order:
+            if not hasattr(p, "character_stats"):
+                continue
+            for stat in p.character_stats():
+                handler = stat()
+                INDEX.character_stats[handler.key] = handler
+
+    def character_hediffs(self) -> list[type["HeDiffHandler"]]:
+        out = list()
+
+        from .types.hediffs import ALL_HEDIFFS
+        
+        out.extend(ALL_HEDIFFS)
+
+        return out
+
+    async def setup_character_hediffs(self):
+        for p in self.app.plugin_load_order:
+            if not hasattr(p, "character_hediffs"):
+                continue
+            for hediff in p.character_hediffs():
+                handler = hediff()
+                INDEX.hediffs[handler.key()] = handler
+
     async def setup_final(self, app_name: str):
         match app_name:
             case "game":
                 dbat = self.app.services["game"]
                 self.app.fastapi_instance.state.dbat_game = dbat
+                await self.setup_character_races()
+                await self.setup_character_sexes()
+                await self.setup_character_senseis()
                 await self.setup_character_commands()
+                await self.setup_character_bodyparts()
+                await self.setup_character_bodyplans()
+                await self.setup_character_stats()
+                await self.setup_character_hediffs()
 
     def depends(self):
         return [("core", ">=0.0.1")]

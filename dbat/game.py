@@ -137,7 +137,6 @@ class GameService(Service):
 
     async def setup(self):
         await self.load_assets()
-        await self.reset_world()
     
     async def process_pending_commands(self, delta_time: float):
         pending = dbat.SUBSCRIPTIONS.get("pending_commands", set()).copy()
@@ -160,6 +159,8 @@ class GameService(Service):
         Every 0.1 seconds we call the update loops and pass in delta time.
         We sleep for the remainder of the tick if the update loops finish early.
         """
+        await self.reset_world()
+        
         tick_speed = 0.1
         last_time = asyncio.get_event_loop().time()
         while True:

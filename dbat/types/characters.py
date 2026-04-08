@@ -53,13 +53,55 @@ class SenseiComponent(BaseModel):
     data: dict[str, dict] = Field(default_factory=dict, description="A mapping of sensei names to sensei data. This is used for storing the data for each sensei, such as stat changes or special abilities.")
 
 
+class StatsComponent(BaseModel):
+    stats: dict[str, float] = Field(default_factory=dict, description="A mapping of stat names to stat values. This stores 'base' stats.")
+    # Stores the calculated values of stats after applying all modifies.
+    _cache: dict[str, float] = PrivateAttr(default_factory=dict)
 
+    def iter_stats(self):
+        for stat in dbat.INDEX.character_stats.copy().values():
+            yield stat
+
+    def base(self, stat_name: str, character: Character) -> float:
+        if not (stat := dbat.INDEX.get_character_stat(stat_name)):
+            raise ValueError(f"Stat {stat_name} does not exist.")
+        return stat.get_base(character)
+
+    def effective(self, stat_name: str, character: Character) -> float:
+        if not (stat := dbat.INDEX.get_character_stat(stat_name)):
+            raise ValueError(f"Stat {stat_name} does not exist.")
+        return stat.calculate_current(character)
+
+    def set(self, stat_name: str, character: "Character", value: float):
+        if not (stat := dbat.INDEX.get_character_stat(stat_name)):
+            raise ValueError(f"Stat {stat_name} does not exist.")
+        stat.set(character, value)
+
+    def mod(self, stat_name: str, character: "Character", delta: float):
+        """
+        This is a direct mod; it generally shouldn't be used, in favor of gain
+        """
+        if not (stat := dbat.INDEX.get_character_stat(stat_name)):
+            raise ValueError(f"Stat {stat_name} does not exist.")
+        stat.mod(character, delta)
+    
+    def gain(self, stat_name: str, character: "Character", delta: float):
+        """
+        This is the preferred method for stat growth, as it will handle things bonuses etc.
+        """
+        if not (stat := dbat.INDEX.get_character_stat(stat_name)):
+            raise ValueError(f"Stat {stat_name} does not exist.")
+        return stat.gain(character, delta)
+
+    def invalidate_cache(self):
+        self._cache.clear()
 
 class CharacterBase(HasColorName, HasColorDescription, HasFlags, HasDgScripts, HasInteractive):
     physiology: PhysiologyComponent = Field(default_factory=PhysiologyComponent, description="The physiology of this character. This is used for things like determining what they can see, what they look like to others, etc.")
     form: FormComponent = Field(default_factory=FormComponent, description="The form of this character. This is used for things like determining what they can do, what they look like to others, etc.")
     sensei: SenseiComponent = Field(default_factory=SenseiComponent, description="The sensei of this character. This is used for things like determining what they can do, what they look like to others, etc.")
     hediffs: dict[uuid.UUID, HeDiff] = Field(default_factory=dict, description="The hediffs that affect this character. This is used for things like determining what they can see, what they look like to others, etc.")
+    stats: StatsComponent = Field(default_factory=StatsComponent, description="The stats of this character. This is used for things like determining what they can do, what they look like to others, etc.")
 
 class MobilePrototype(CharacterBase):
     _instances: set[uuid.UUID] = PrivateAttr(default_factory=set)
@@ -86,6 +128,7 @@ class Character(CharacterBase, HasLocation, HasEquipment, HasInventory):
     _session: Session | None = PrivateAttr(default=None)
     _command_queue: list[str] = PrivateAttr(default_factory=list)
     __deleted: bool = PrivateAttr(default=False)
+    _stats: StatsComponent = PrivateAttr(default_factory=StatsComponent)
 
     def __bool__(self):
         return not self.__deleted
@@ -133,6 +176,21 @@ class Character(CharacterBase, HasLocation, HasEquipment, HasInventory):
     
     def valid_location_coordinates(self, point):
         return True
+    
+    def get_stat(self, stat_name: str) -> float:
+        return self.stats.effective(stat_name, self)
+    
+    def get_base_stat(self, stat_name: str) -> float:
+        return self.stats.base(stat_name, self)
+    
+    def set_stat(self, stat_name: str, value: float):
+        self.stats.set(stat_name, self, value)
+    
+    def mod_stat(self, stat_name: str, delta: float):
+        self.stats.mod(stat_name, self, delta)
+
+    def gain_stat(self, stat_name: str, delta: float):
+        return self.stats.gain(stat_name, self, delta)
 
     def enqueue_command(self, command: str):
         self._command_queue.append(command)

@@ -18,6 +18,13 @@ class Race:
     
     def is_playable(self) -> bool:
         return True
+    
+    def apply_stat_modifier(self, character: "Character", stat_mod: "StatModifier"):
+        """
+        Apply a stat modifier to this character. This is used for things like racial stat bonuses.
+        By default, this does nothing, but subclasses can override this to provide more nuanced behavior.
+        """
+        pass
 
 
 class Human(Race):
@@ -67,7 +74,11 @@ class Android(Race):
 
 
 class Demon(Race):
-    pass
+    
+    def apply_stat_modifier(self, character: "Character", stat_mod: "StatModifier"):
+        match stat_mod.key:
+            case "lifeforce_max":
+                stat_mod.additive_multipliers.append(0.75)
 
 
 class Majin(Race):
@@ -87,7 +98,14 @@ class Hoshijin(Race):
 
 
 class Arlian(Race):
-    pass
+    
+    def apply_stat_modifier(self, character: "Character", stat_mod: "StatModifier"):
+        match stat_mod.key:
+            case "lifeforce_max":
+                ki_max = character.get_stat("ki_max")
+                stamina_max = character.get_stat("stamina_max")
+                molt_level = character.get_stat("molt_level")
+                stat_mod.pre_modifiers.append((ki_max * 0.01) * (molt_level / 100) + (stamina_max * 0.01) * (molt_level / 100))
 
 
 class _Unplayable(Race):

@@ -218,6 +218,8 @@ class BioAndroidTail(Tail):
         return "bioandroid_tail"
 
 
+ALL_BODY_PARTS = [HumanoidHead, HumanoidTorso, HumanoidLeftArm, HumanoidRightArm, HumanoidLeftLeg, HumanoidRightLeg, Tail, IcerTail, SaiyanTail, BioAndroidTail]
+
 
 class BodyPlanHandler:
     """
@@ -297,6 +299,9 @@ class BioAndroidBody(HumanoidBody):
             raise ValueError("Body part handler not found for bioandroid tail")
 
         return out
+
+
+ALL_BODY_PLANS = [HumanoidBody, SaiyanBody, IcerBody, BioAndroidBody]
 
 
 class BodyPart(BaseModel):

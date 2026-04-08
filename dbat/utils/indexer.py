@@ -13,6 +13,9 @@ if typing.TYPE_CHECKING:
     from ..types.guilds import Guild
     from ..types.structures import Structure, StructurePrototype
     from ..types.accounts import Account
+    from ..types.bodyplans import BodyPartHandler, BodyPlanHandler
+    from ..types.stats import StatDef
+    from ..types.hediffs import HeDiffHandler
 
 class Indexer:
     """
@@ -50,6 +53,23 @@ class Indexer:
         self.dirty_structures: set[uuid.UUID] = set()
         self.dirty_accounts: set[uuid.UUID] = set()
         self.dirty_players: set[uuid.UUID] = set()
+
+        self.body_plans: dict[str, BodyPlanHandler] = {}
+        self.body_parts: dict[str, BodyPartHandler] = {}
+        self.character_stats: dict[str, StatDef] = {}
+        self.hediffs: dict[str, HeDiffHandler] = {}
+    
+    def get_hediff(self, hediff_id: str) -> HeDiffHandler | None:
+        return self.hediffs.get(hediff_id, None)
+
+    def get_body_plan(self, plan_id: str) -> BodyPlanHandler | None:
+        return self.body_plans.get(plan_id, None)
+    
+    def get_body_part(self, part_id: str) -> BodyPartHandler | None:
+        return self.body_parts.get(part_id, None)
+    
+    def get_character_stat(self, stat_key: str) -> StatDef | None:
+        return self.character_stats.get(stat_key, None)
     
     def get_slug(self, category: str, slug: str) -> typing.Any | None:
         return self.slugs.get(category, dict()).get(slug, None)

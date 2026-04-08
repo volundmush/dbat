@@ -5,6 +5,28 @@ from pydantic import BaseModel, Field, ConfigDict, PrivateAttr
 from .misc import HasColorName, HasColorDescription, HasFlags
 from rich.text import Text
 
+from enum import IntEnum
+
+class HeDiffStage(IntEnum):
+    minor = 1
+    moderate = 2
+    major = 3
+    severe = 4
+    extreme = 5
+
+    @classmethod
+    def from_severity(cls, severity: float) -> "HeDiffStage":
+        if severity < 20.0:
+            return cls.minor
+        elif severity < 40.0:
+            return cls.moderate
+        elif severity < 60.0:
+            return cls.major
+        elif severity < 80.0:
+            return cls.severe
+        else:
+            return cls.extreme
+
 
 class HeDiffHandler:
     """
@@ -25,12 +47,37 @@ class HeDiffHandler:
     # will instead add to the existing severity. This is used for things like Bloodloss.
     stacks = False
 
+    # Whether reaching 100% severity will cause death.
+    lethal_max = False
+
+    # Whether this should be counted against the character's overall health.
+    is_injury = False
+
+    # If false, this hediff must be explicitly made visible to be seen by the player.
+    always_visible = True
+
+    # A custom severity means it's retrieved from some external source and cannot be set manually.
+    custom_severity = False
+
     def key(self) -> str:
         """
         Return the key that identifies this hediff handler. This is used for looking up the handler for a given hediff.
         """
         raise NotImplementedError("HeDiffHandler subclasses must implement the key() method to return their unique key.")
     
+    def get_severity(self, hediff: "HeDiff", character: "Character") -> float:
+        """
+        Return the current severity of this hediff. By default, this returns the severity stored on the HeDiff instance, but subclasses can override this to provide more nuanced behavior.
+        """
+        return hediff.severity
+
+    def current_stage(self, hediff: "HeDiff", character: "Character") -> HeDiffStage:
+        """
+        Return the current stage of this hediff, based on its severity. This is used for things like determining the name and description of the hediff to display.
+        By default, this uses the HeDiffStage.from_severity method to determine the stage based on the severity. Subclasses can override this to provide more nuanced behavior.
+        """
+        return HeDiffStage.from_severity(self.get_severity(hediff, character))
+
     def on_apply(self, hediff: "HeDiff", character: "Character"):
         """
         Apply the behavior of the given hediff to the given character. This is called automatically by the game engine, and should not be called manually.
@@ -71,7 +118,71 @@ class HeDiffHandler:
         Return the description of this hediff to be shown in the character's displays.
         """
         return Text(hediff.key)
+    
+    def on_stage_change(self, hediff: "HeDiff", character: "Character", old_stage: HeDiffStage, new_stage: HeDiffStage):
+        """
+        Handle a change in stage of this hediff. This is called automatically by the game engine when the stage of a hediff changes, and should not be called manually.
+        """
+        pass
 
+    def mod_severity(self, hediff: "HeDiff", character: "Character", delta: float):
+        """
+        Modify the severity of this hediff by the given amount. This is called automatically by the game engine when the severity of a hediff is modified, and should not be called manually.
+        """
+        if self.custom_severity:
+            return
+        new_value = hediff.severity + delta
+        self.set_severity(hediff, character, new_value)
+    
+    def on_max_severity(self, hediff: "HeDiff", character: "Character"):
+        """
+        Handle this hediff reaching maximum severity. This is called automatically by the game engine when the severity of a hediff reaches 100.0, and should not be called manually.
+        """
+        pass
+
+    def on_zero_severity(self, hediff: "HeDiff", character: "Character"):
+        """
+        Handle this hediff reaching zero severity. This is called automatically by the game engine when the severity of a hediff reaches 0.0, and should not be called manually.
+        """
+        pass
+
+    def set_severity(self, hediff: "HeDiff", character: "Character", new_severity: float):
+        """
+        Set the severity of this hediff to the given amount. This is called automatically by the game engine when the severity of a hediff is modified, and should not be called manually.
+        """
+        if self.custom_severity:
+            return
+        current_stage = self.current_stage(hediff, character)
+        hediff.severity = max(0.0, min(100.0, new_severity))
+        new_stage = self.current_stage(hediff, character)
+        # if the new stage is higher or lower, we need to progressively call on_stage_change
+        if int(new_stage) > int(current_stage):
+            for stage in HeDiffStage:
+                if int(stage) > int(current_stage) and int(stage) <= int(new_stage):
+                    self.on_stage_change(hediff, character, current_stage, stage)
+                    current_stage = stage
+        elif int(new_stage) < int(current_stage):
+            for stage in HeDiffStage:
+                if int(stage) < int(current_stage) and int(stage) >= int(new_stage):
+                    self.on_stage_change(hediff, character, current_stage, stage)
+                    current_stage = stage
+        if hediff.severity >= 100.0:
+            self.on_max_severity(hediff, character)
+        elif hediff.severity <= 0.0:
+            self.on_zero_severity(hediff, character)
+
+    def apply_stat_modifier(self, hediff: "HeDiff", character: "Character", stat_mod: "StatModifier"):
+        """
+        Apply the stat modifiers of this hediff to the given StatModifier object. This is called automatically by the game engine when calculating the current value of a stat for a character, and should not be called manually.
+        By default, this does nothing. Subclasses can override this to provide more nuanced behavior.
+        """
+        pass
+
+    def is_visible(self, hediff: "HeDiff", character: "Character") -> bool:
+        """
+        Return whether this hediff should be visible in the character's displays. By default, this returns the value of self.always_visible, but subclasses can override this to provide more nuanced behavior.
+        """
+        return self.always_visible or hediff.data.get("is_visible", False)
 
 class EquippedItem(HeDiffHandler):
     """
@@ -84,10 +195,32 @@ class EquippedItem(HeDiffHandler):
     This is mainly used for stat bonuses.
     """
     health_related = False
+    always_visible = False
 
     def key(self) -> str:
         return "equipped_item"
 
+class Race(HeDiffHandler):
+    """
+    A hediff which acts as a wrapper for the effects of a character's race.
+    """
+    always_visible = False
+    stacks = True
+
+    def apply_stat_modifier(self, hediff: "HeDiff", character: "Character", stat_mod: "StatModifier"):
+        if race := dbat.INDEX.get_race(character.physiology.race):
+            race.apply_stat_modifier(character, stat_mod)
+
+class Sensei(HeDiffHandler):
+    """
+    A hediff which acts as a wrapper for the effects of a character's sensei.
+    """
+    always_visible = False
+    stacks = True
+
+    def apply_stat_modifier(self, hediff: "HeDiff", character: "Character", stat_mod: "StatModifier"):
+        if sensei := dbat.INDEX.get_sensei(character.sensei.current):
+            sensei.apply_stat_modifier(character, stat_mod)
 
 class TreatableBase(HeDiffHandler):
     """
@@ -121,6 +254,7 @@ class Bloodloss(TreatableBase):
     and blood transfusions.
     """
     stacks = True
+    lethal_max = True
 
     def key(self) -> str:
         return "blood_loss"
@@ -132,6 +266,7 @@ class InjuryBase(TreatableBase):
     Injuries heal over time, usually, and can be treated. They usually bleed.
     Their display names vary with severity.
     """
+    is_injury = True
 
     def update_bloodloss(self, hediff: "HeDiff", character: "Character", delta_time: float):
         """
@@ -163,7 +298,20 @@ class Impact(InjuryBase):
     """
     def key(self) -> str:
         return "impact"
-
+    
+    def report_name(self, hediff: "HeDiff", character: "Character") -> Text:
+        stage = self.current_stage(hediff)
+        match stage:
+            case HeDiffStage.minor:
+                return Text("Bruise")
+            case HeDiffStage.moderate:
+                return Text("Contusion")
+            case HeDiffStage.major:
+                return Text("Crack")
+            case HeDiffStage.severe:
+                return Text("Fracture")
+            case HeDiffStage.extreme:
+                return Text("Shatter")
 
 class Laceration(InjuryBase):
     """
@@ -175,6 +323,20 @@ class Laceration(InjuryBase):
     """
     def key(self) -> str:
         return "laceration"
+    
+    def report_name(self, hediff: "HeDiff", character: "Character") -> Text:
+        stage = self.current_stage(hediff)
+        match stage:
+            case HeDiffStage.minor:
+                return Text("Scratch")
+            case HeDiffStage.moderate:
+                return Text("Cut")
+            case HeDiffStage.major:
+                return Text("Slash")
+            case HeDiffStage.severe:
+                return Text.from_markup("[bold red]Gash[/]")
+            case HeDiffStage.extreme:
+                return Text.from_markup("[bold red]Cleave[/]")
 
 
 class Puncture(InjuryBase):
@@ -184,6 +346,20 @@ class Puncture(InjuryBase):
     """
     def key(self) -> str:
         return "puncture"
+    
+    def report_name(self, hediff: "HeDiff", character: "Character") -> Text:
+        stage = self.current_stage(hediff)
+        match stage:
+            case HeDiffStage.minor:
+                return Text("Puncture")
+            case HeDiffStage.moderate:
+                return Text("Stab")
+            case HeDiffStage.major:
+                return Text("Piercing")
+            case HeDiffStage.severe:
+                return Text.from_markup("[bold red]Gouge[/]")
+            case HeDiffStage.extreme:
+                return Text.from_markup("[bold red]Impale[/]")
 
 
 class Burn(InjuryBase):
@@ -193,6 +369,20 @@ class Burn(InjuryBase):
 
     def key(self) -> str:
         return "burn"
+    
+    def report_name(self, hediff: "HeDiff", character: "Character") -> Text:
+        stage = self.current_stage(hediff)
+        match stage:
+            case HeDiffStage.minor:
+                return Text("Singed")
+            case HeDiffStage.moderate:
+                return Text("Scorched")
+            case HeDiffStage.major:
+                return Text("Burned")
+            case HeDiffStage.severe:
+                return Text.from_markup("[bold red]Charred[/]")
+            case HeDiffStage.extreme:
+                return Text.from_markup("[bold red]Incinerated[/]")
 
 
 class Frostbite(InjuryBase):
@@ -201,6 +391,20 @@ class Frostbite(InjuryBase):
     """
     def key(self) -> str:
         return "frostbite"
+    
+    def report_name(self, hediff: "HeDiff", character: "Character") -> Text:
+        stage = self.current_stage(hediff)
+        match stage:
+            case HeDiffStage.minor:
+                return Text("Chilled")
+            case HeDiffStage.moderate:
+                return Text("Frostnip")
+            case HeDiffStage.major:
+                return Text("Frostbite")
+            case HeDiffStage.severe:
+                return Text.from_markup("[bold blue]Frozen[/]")
+            case HeDiffStage.extreme:
+                return Text.from_markup("[bold blue]Encased in Ice[/]")
 
 
 class Shock(InjuryBase):
@@ -209,6 +413,20 @@ class Shock(InjuryBase):
     """
     def key(self) -> str:
         return "shock"
+    
+    def report_name(self, hediff: "HeDiff", character: "Character") -> Text:
+        stage = self.current_stage(hediff)
+        match stage:
+            case HeDiffStage.minor:
+                return Text("Tingling")
+            case HeDiffStage.moderate:
+                return Text("Shocked")
+            case HeDiffStage.major:
+                return Text("Electrified")
+            case HeDiffStage.severe:
+                return Text.from_markup("[bold yellow]Electrocuted[/]")
+            case HeDiffStage.extreme:
+                return Text.from_markup("[bold yellow]Charred[/]")
 
 
 class Abrasion(InjuryBase):
@@ -221,9 +439,64 @@ class Abrasion(InjuryBase):
         return "abrasion"
 
 
+    def report_name(self, hediff: "HeDiff", character: "Character") -> Text:
+        stage = self.current_stage(hediff)
+        match stage:
+            case HeDiffStage.minor:
+                return Text("Scraped")
+            case HeDiffStage.moderate:
+                return Text("Grazed")
+            case HeDiffStage.major:
+                return Text("Abraded")
+            case HeDiffStage.severe:
+                return Text.from_markup("[bold red]Lacerated[/]")
+            case HeDiffStage.extreme:
+                return Text.from_markup("[bold red]Devastated[/]")
 
 
+_ALL_INJURIES = [Impact, Laceration, Puncture, Burn, Frostbite, Shock, Abrasion]
 
+
+class Bless(HeDiffHandler):
+    """
+    A beneficial hediff that boosts lifeforce_max.
+    """
+    health_related = False
+    stacks = True
+
+    def key(self) -> str:
+        return "bless"
+    
+    def apply_stat_modifier(self, hediff: "HeDiff", character: "Character", stat_mod: "StatModifier"):
+        match stat_mod.key:
+            case "lifeforce_max":
+                ki_max = character.get_stat("ki_max")
+                stamina_max = character.get_stat("stamina_max")
+                return ((ki_max + stamina_max) * 0.5) * (hediff.severity / 100)
+
+
+class FightingPose(HeDiffHandler):
+    """
+    The Ginyu Fighting Pose. How does it do what it does? Who knows.
+    """
+    stacks = True
+    custom_severity = True
+
+    def get_severity(self, hediff: "HeDiff", character: "Character") -> float:
+        return character.get_stat("skill_fighting_pose")
+
+    def key(self) -> str:
+        return "fighting_pose"
+    
+    def apply_stat_modifier(self, hediff: "HeDiff", character: "Character", stat_mod: "StatModifier"):
+        match stat_mod.key:
+            case "lifeforce_max":
+                ki_max = character.get_stat("ki_max")
+                stamina_max = character.get_stat("stamina_max")
+                return ((ki_max + stamina_max) * 0.5) * (self.get_severity(hediff, character) / 100) * 0.15
+
+
+ALL_HEDIFFS = _ALL_INJURIES + [Bloodloss, EquippedItem, Race, Sensei, Bless]
 
 ## Below is what goes on Characters.
 
@@ -249,7 +522,7 @@ class HeDiffSource(BaseModel):
     """
     type: str = Field(..., description="The type of the source. This is used for things like determining where a disease came from, or who caused a wound.")
     entity_type: str | None = Field(default=None, description="The entity type of the source. This is used for things like determining where a disease came from, or who caused a wound.")
-    id: uuid.UUID | None = Field(default=None, description="The ID of the source. This is used for things like determining where a disease came from, or who caused a wound.")
+    id: uuid.UUID | str | None = Field(default=None, description="The ID of the source. This is used for things like determining where a disease came from, or who caused a wound.")
     name: str | None = Field(default=None, description="The name of the source. This is used for things like determining where a disease came from, or who caused a wound.")
 
     def get(self):
@@ -316,3 +589,9 @@ class HeDiff(HeDiffBase):
         Update the behavior of this hediff on the given character. This is called automatically by the game engine every tick, and should not be called manually.
         """
         self.handler.on_update(self, character, delta_time)
+    
+    def apply_stat_modifier(self, character: "Character", stat_mod: "StatModifier"):
+        """
+        Apply the stat modifiers of this hediff to the given StatModifier object. This is called automatically by the game engine when calculating the current value of a stat for a character, and should not be called manually.
+        """
+        self.handler.apply_stat_modifier(self, character, stat_mod)
