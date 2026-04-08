@@ -184,44 +184,6 @@ class HeDiffHandler:
         """
         return self.always_visible or hediff.data.get("is_visible", False)
 
-class EquippedItem(HeDiffHandler):
-    """
-    A hediff representing an item that a character has equipped. 
-    This is used for things like armor, weapons, accessories, etc. 
-    It can be used to apply the effects of the item to the character, 
-    and to display the item in the character's displays.
-    The source of this hediff should be the item that is equipped.
-
-    This is mainly used for stat bonuses.
-    """
-    health_related = False
-    always_visible = False
-
-    def key(self) -> str:
-        return "equipped_item"
-
-class Race(HeDiffHandler):
-    """
-    A hediff which acts as a wrapper for the effects of a character's race.
-    """
-    always_visible = False
-    stacks = True
-
-    def apply_stat_modifier(self, hediff: "HeDiff", character: "Character", stat_mod: "StatModifier"):
-        if race := dbat.INDEX.get_race(character.physiology.race):
-            race.apply_stat_modifier(character, stat_mod)
-
-class Sensei(HeDiffHandler):
-    """
-    A hediff which acts as a wrapper for the effects of a character's sensei.
-    """
-    always_visible = False
-    stacks = True
-
-    def apply_stat_modifier(self, hediff: "HeDiff", character: "Character", stat_mod: "StatModifier"):
-        if sensei := dbat.INDEX.get_sensei(character.sensei.current):
-            sensei.apply_stat_modifier(character, stat_mod)
-
 class TreatableBase(HeDiffHandler):
     """
     If something can be medically treated, it inherits from this.
@@ -468,11 +430,12 @@ class Bless(HeDiffHandler):
         return "bless"
     
     def apply_stat_modifier(self, hediff: "HeDiff", character: "Character", stat_mod: "StatModifier"):
-        match stat_mod.key:
-            case "lifeforce_max":
+        match stat_mod.storage_key:
+            case "vitals:lifeforce_max":
                 ki_max = character.get_stat("ki_max")
                 stamina_max = character.get_stat("stamina_max")
-                return ((ki_max + stamina_max) * 0.5) * (hediff.severity / 100)
+                total = ((ki_max + stamina_max) * 0.5) * (hediff.severity / 100)
+                stat_mod.additive_multipliers.append((self.report_name(hediff, character), total))
 
 
 class FightingPose(HeDiffHandler):
@@ -489,14 +452,15 @@ class FightingPose(HeDiffHandler):
         return "fighting_pose"
     
     def apply_stat_modifier(self, hediff: "HeDiff", character: "Character", stat_mod: "StatModifier"):
-        match stat_mod.key:
-            case "lifeforce_max":
+        match stat_mod.storage_key:
+            case "vitals:lifeforce_max":
                 ki_max = character.get_stat("ki_max")
                 stamina_max = character.get_stat("stamina_max")
-                return ((ki_max + stamina_max) * 0.5) * (self.get_severity(hediff, character) / 100) * 0.15
+                total = ((ki_max + stamina_max) * 0.5) * (self.get_severity(hediff, character) / 100) * 0.15
+                stat_mod.additive_multipliers.append((self.report_name(hediff, character), total))
+                
 
-
-ALL_HEDIFFS = _ALL_INJURIES + [Bloodloss, EquippedItem, Race, Sensei, Bless]
+ALL_HEDIFFS = _ALL_INJURIES + [Bloodloss, FightingPose,Bless]
 
 ## Below is what goes on Characters.
 

@@ -16,6 +16,9 @@ class Race:
     def __str__(self):
         return self.name
     
+    def modifier_name(self) -> str:
+        return f"Race: {self.name}"
+    
     def is_playable(self) -> bool:
         return True
     
@@ -57,6 +60,12 @@ class Namekian(Race):
 class Mutant(Race):
     pass
 
+class Konatsu(Race):
+    
+    def apply_stat_modifier(self, character: "Character", stat_mod: "StatModifier"):
+        match stat_mod.storage_key:
+            case "vitals:lifeforce_max":
+                stat_mod.additive_multipliers.append((self.modifier_name(), -0.15))
 
 class Kanassan(Race):
     pass
@@ -76,9 +85,9 @@ class Android(Race):
 class Demon(Race):
     
     def apply_stat_modifier(self, character: "Character", stat_mod: "StatModifier"):
-        match stat_mod.key:
-            case "lifeforce_max":
-                stat_mod.additive_multipliers.append(0.75)
+        match stat_mod.storage_key:
+            case "vitals:lifeforce_max":
+                stat_mod.additive_multipliers.append((self.modifier_name(), -0.25))
 
 
 class Majin(Race):
@@ -100,13 +109,14 @@ class Hoshijin(Race):
 class Arlian(Race):
     
     def apply_stat_modifier(self, character: "Character", stat_mod: "StatModifier"):
-        match stat_mod.key:
-            case "lifeforce_max":
+        match stat_mod.storage_key:
+            case "vitals:lifeforce_max":
                 ki_max = character.get_stat("ki_max")
                 stamina_max = character.get_stat("stamina_max")
                 molt_level = character.get_stat("molt_level")
-                stat_mod.pre_modifiers.append((ki_max * 0.01) * (molt_level / 100) + (stamina_max * 0.01) * (molt_level / 100))
-
+                total = (ki_max * 0.01) * (molt_level / 100) + (stamina_max * 0.01) * (molt_level / 100)
+                stat_mod.additive_multipliers.append((self.modifier_name(), total))
+                
 
 class _Unplayable(Race):
     

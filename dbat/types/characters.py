@@ -22,6 +22,7 @@ if typing.TYPE_CHECKING:
     from .accounts import Account
     from .structures import Structure
     from .grids import Direction
+    from .stats import StatModifier, StatDef
 
 
 class PhysiologyComponent(BaseModel):
@@ -57,44 +58,51 @@ class StatsComponent(BaseModel):
     stats: dict[str, float] = Field(default_factory=dict, description="A mapping of stat names to stat values. This stores 'base' stats.")
     # Stores the calculated values of stats after applying all modifies.
     _cache: dict[str, float] = PrivateAttr(default_factory=dict)
+    _modifiers: dict[str, StatModifier] = PrivateAttr(default_factory=dict)
 
     def iter_stats(self):
         for stat in dbat.INDEX.character_stats.copy().values():
             yield stat
 
-    def base(self, stat_name: str, character: Character) -> float:
-        if not (stat := dbat.INDEX.get_character_stat(stat_name)):
+    def base(self, stat_category: str, stat_name: str, character: Character) -> float:
+        if not (stat := dbat.INDEX.get_character_stat(stat_category, stat_name)):
             raise ValueError(f"Stat {stat_name} does not exist.")
         return stat.get_base(character)
 
-    def effective(self, stat_name: str, character: Character) -> float:
-        if not (stat := dbat.INDEX.get_character_stat(stat_name)):
+    def effective(self, stat_category: str, stat_name: str, character: Character) -> float:
+        if not (stat := dbat.INDEX.get_character_stat(stat_category, stat_name)):
             raise ValueError(f"Stat {stat_name} does not exist.")
-        return stat.calculate_current(character)
+        return stat.current(character)
 
-    def set(self, stat_name: str, character: "Character", value: float):
-        if not (stat := dbat.INDEX.get_character_stat(stat_name)):
+    def set(self, stat_category: str, stat_name: str, character: "Character", value: float):
+        if not (stat := dbat.INDEX.get_character_stat(stat_category, stat_name)):
             raise ValueError(f"Stat {stat_name} does not exist.")
         stat.set(character, value)
 
-    def mod(self, stat_name: str, character: "Character", delta: float):
+    def mod(self, stat_category: str, stat_name: str, character: "Character", delta: float):
         """
         This is a direct mod; it generally shouldn't be used, in favor of gain
         """
-        if not (stat := dbat.INDEX.get_character_stat(stat_name)):
+        if not (stat := dbat.INDEX.get_character_stat(stat_category, stat_name)):
             raise ValueError(f"Stat {stat_name} does not exist.")
         stat.mod(character, delta)
     
-    def gain(self, stat_name: str, character: "Character", delta: float):
+    def gain(self, stat_category: str, stat_name: str, character: "Character", delta: float):
         """
         This is the preferred method for stat growth, as it will handle things bonuses etc.
         """
-        if not (stat := dbat.INDEX.get_character_stat(stat_name)):
+        if not (stat := dbat.INDEX.get_character_stat(stat_category, stat_name)):
             raise ValueError(f"Stat {stat_name} does not exist.")
         return stat.gain(character, delta)
 
+    def get_stat_modifier(self, stat_category: str, stat_name: str, character: "Character") -> StatModifier:
+        if not (stat := dbat.INDEX.get_character_stat(stat_category, stat_name)):
+            raise ValueError(f"Stat {stat_name} does not exist.")
+        return stat.get_stat_modifiers(character)
+
     def invalidate_cache(self):
         self._cache.clear()
+        self._modifiers.clear()
 
 class CharacterBase(HasColorName, HasColorDescription, HasFlags, HasDgScripts, HasInteractive):
     physiology: PhysiologyComponent = Field(default_factory=PhysiologyComponent, description="The physiology of this character. This is used for things like determining what they can see, what they look like to others, etc.")
@@ -177,20 +185,40 @@ class Character(CharacterBase, HasLocation, HasEquipment, HasInventory):
     def valid_location_coordinates(self, point):
         return True
     
-    def get_stat(self, stat_name: str) -> float:
-        return self.stats.effective(stat_name, self)
+    def get_stat(self, stat_category: str, stat_name: str) -> float:
+        return self.stats.effective(stat_category, stat_name, self)
     
-    def get_base_stat(self, stat_name: str) -> float:
-        return self.stats.base(stat_name, self)
+    def get_base_stat(self, stat_category: str, stat_name: str) -> float:
+        return self.stats.base(stat_category, stat_name, self)
     
-    def set_stat(self, stat_name: str, value: float):
-        self.stats.set(stat_name, self, value)
+    def set_stat(self, stat_category: str, stat_name: str, value: float):
+        self.stats.set(stat_category, stat_name, self, value)
     
-    def mod_stat(self, stat_name: str, delta: float):
-        self.stats.mod(stat_name, self, delta)
+    def mod_stat(self, stat_category: str, stat_name: str, delta: float):
+        self.stats.mod(stat_category, stat_name, self, delta)
 
-    def gain_stat(self, stat_name: str, delta: float):
-        return self.stats.gain(stat_name, self, delta)
+    def gain_stat(self, stat_category: str, stat_name: str, delta: float):
+        return self.stats.gain(stat_category, stat_name, self, delta)
+    
+    def get_stat_modifier(self, stat_category: str, stat_name: str) -> StatModifier:
+        pass
+
+    def gather_stat_modifiers(self, stat_mod: StatModifier):
+        """
+        This will iterate through things like race, sensei, transformations,
+        equipment, and hediffs.
+        """
+        if (race := dbat.INDEX.get_character_race(self.physiology.race)):
+            race.apply_stat_modifier(self, stat_mod)
+        
+        if (sensei := dbat.INDEX.get_character_sensei(self.sensei.current)):
+            sensei.apply_stat_modifier(self, stat_mod)
+        
+        for slot, item in self.iter_equipment():
+            item.apply_stat_modifier(self, stat_mod)
+
+        for hediff in self.hediffs.values():
+            hediff.apply_stat_modifier(self, stat_mod)
 
     def enqueue_command(self, command: str):
         self._command_queue.append(command)
