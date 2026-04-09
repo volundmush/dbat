@@ -2524,7 +2524,7 @@ struct char_data {
     int ingestLearned;
 
     // C++ reworking
-    const std::string &juggleRaceName(bool capitalized) const;
+    const std::string &juggleRaceName(bool capitalized);
 
     void restore(bool announce);
 
@@ -2536,36 +2536,36 @@ struct char_data {
 
     void teleport_to(IDXTYPE rnum);
 
-    bool in_room_range(IDXTYPE low_rnum, IDXTYPE high_rnum) const;
+    bool in_room_range(IDXTYPE low_rnum, IDXTYPE high_rnum);
 
-    bool in_past() const;
+    bool in_past();
 
-    bool is_newbie() const;
+    bool is_newbie();
 
-    bool in_northran() const;
+    bool in_northran();
 
-    bool can_tolerate_gravity(int grav) const;
+    bool can_tolerate_gravity(int grav);
 
-    int calcTier() const;
+    int calcTier();
 
-    int64_t calc_soft_cap() const;
+    int64_t calc_soft_cap();
 
-    bool is_soft_cap(int64_t type, long double mult) const;
+    bool is_soft_cap(int64_t type, long double mult);
 
-    bool is_soft_cap(int64_t type) const;
+    bool is_soft_cap(int64_t type);
 
-    int wearing_android_canister() const;
+    int wearing_android_canister();
 
     int calcGravCost(int64_t num);
 
     // Stats stuff
 
-    int64_t getCurHealth() const;
-    int64_t getMaxHealth() const;
-    double getCurHealthPercent() const;
-    int64_t getPercentOfCurHealth(double amt) const;
-    int64_t getPercentOfMaxHealth(double amt) const;
-    bool isFullHealth() const;
+    int64_t getCurHealth();
+    int64_t getMaxHealth();
+    double getCurHealthPercent();
+    int64_t getPercentOfCurHealth(double amt);
+    int64_t getPercentOfMaxHealth(double amt);
+    bool isFullHealth();
 
     int64_t setCurHealth(int64_t amt);
     int64_t setCurHealthPercent(double amt);
@@ -2578,24 +2578,24 @@ struct char_data {
     int64_t healCurHealth(int64_t amt);
     int64_t harmCurHealth(int64_t amt);
 
-    int64_t getMaxPL() const;
-    int64_t getMaxPLTrans() const;
-    int64_t getCurPL() const;
-    int64_t getBasePL() const;
-    int64_t getEffBasePL() const;
-    double getCurPLPercent() const;
-    int64_t getPercentOfCurPL(double amt) const;
-    int64_t getPercentOfMaxPL(double amt) const;
-    bool isFullPL() const;
+    int64_t getMaxPL();
+    int64_t getMaxPLTrans();
+    int64_t getCurPL();
+    int64_t getBasePL();
+    int64_t getEffBasePL();
+    double getCurPLPercent();
+    int64_t getPercentOfCurPL(double amt);
+    int64_t getPercentOfMaxPL(double amt);
+    bool isFullPL();
 
-    int64_t getCurKI() const;
-    int64_t getMaxKI() const;
-    int64_t getBaseKI() const;
-    int64_t getEffBaseKI() const;
-    double getCurKIPercent() const;
-    int64_t getPercentOfCurKI(double amt) const;
-    int64_t getPercentOfMaxKI(double amt) const;
-    bool isFullKI() const;
+    int64_t getCurKI();
+    int64_t getMaxKI();
+    int64_t getBaseKI();
+    int64_t getEffBaseKI();
+    double getCurKIPercent();
+    int64_t getPercentOfCurKI(double amt);
+    int64_t getPercentOfMaxKI(double amt);
+    bool isFullKI();
 
     int64_t setCurKI(int64_t amt);
     int64_t setCurKIPercent(double amt);
@@ -2605,14 +2605,14 @@ struct char_data {
     int64_t decCurKIPercent(double amt, int64_t floor = 0);
     void restoreKI(bool announce = true);
 
-    int64_t getCurST() const;
-    int64_t getMaxST() const;
-    int64_t getBaseST() const;
-    int64_t getEffBaseST() const;
-    double getCurSTPercent() const;
-    int64_t getPercentOfCurST(double amt) const;
-    int64_t getPercentOfMaxST(double amt) const;
-    bool isFullST() const;
+    int64_t getCurST();
+    int64_t getMaxST();
+    int64_t getBaseST();
+    int64_t getEffBaseST();
+    double getCurSTPercent();
+    int64_t getPercentOfCurST(double amt);
+    int64_t getPercentOfMaxST(double amt);
+    bool isFullST();
 
     int64_t setCurST(int64_t amt);
     int64_t setCurSTPercent(double amt);
@@ -2622,12 +2622,12 @@ struct char_data {
     int64_t decCurSTPercent(double amt, int64_t floor = 0);
     void restoreST(bool announce = true);
 
-    int64_t getCurLF() const;
-    int64_t getMaxLF() const;
-    double getCurLFPercent() const;
-    int64_t getPercentOfCurLF(double amt) const;
-    int64_t getPercentOfMaxLF(double amt) const;
-    bool isFullLF() const;
+    int64_t getCurLF();
+    int64_t getMaxLF();
+    double getCurLFPercent();
+    int64_t getPercentOfCurLF(double amt);
+    int64_t getPercentOfMaxLF(double amt);
+    bool isFullLF();
 
     int64_t setCurLF(int64_t amt);
     int64_t setCurLFPercent(double amt);
@@ -2638,7 +2638,7 @@ struct char_data {
     void restoreLF(bool announce = true);
 
 
-    bool isFullVitals() const;
+    bool isFullVitals();
     void restoreVitals(bool announce = true);
     void restoreStatus(bool announce = true);
     void restoreLimbs(bool announce = true);
@@ -2670,14 +2670,14 @@ struct char_data {
     void setStatusKnockedOut();
 
     // stats refactor stuff
-    int64_t getMaxCarryWeight() const;
-    int64_t getCurGearWeight() const;
-    int64_t getCurCarriedWeight() const;
-    int64_t getAvailableCarryWeight() const;
+    int64_t getMaxCarryWeight();
+    int64_t getCurGearWeight();
+    int64_t getCurCarriedWeight();
+    int64_t getAvailableCarryWeight();
 
-    double speednar() const;
-    int64_t getEffMaxPL() const;
-    bool isWeightedPL() const;
+    double speednar();
+    int64_t getEffMaxPL();
+    bool isWeightedPL();
 
     void apply_kaioken(int times, bool announce);
     void remove_kaioken(int8_t announce);

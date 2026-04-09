@@ -14,7 +14,7 @@ target_include_directories(dbat_game
 
 # Global up src/*.cpp
 file(GLOB_RECURSE SRC
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/*.c*
 )
 
 # Also glob up include/*.h*

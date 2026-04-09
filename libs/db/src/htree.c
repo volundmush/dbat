@@ -7,9 +7,9 @@
  * Copyright (c) 7-Oct-2004                                                *
  ***************************************************************************/
 
-#include "dbat/game/htree.h"
-#include "dbat/game/utils.h"
-#include "dbat/game/db.h"
+#include "dbat/db/htree.h"
+#include <stdlib.h>
+#include <string.h>
 
 #undef HTREE_TEST_CYCLES
 
@@ -30,7 +30,7 @@ struct htree_node *htree_init()
 
   if (! HTREE_NULL) {
     htree_total_nodes++;
-    CREATE(HTREE_NULL, struct htree_node, 1);
+    HTREE_NULL = calloc(1, sizeof(struct htree_node));
     for (i = 0; i < HTREE_NODE_SUBS; i++) {
       HTREE_NULL->subs[i] = HTREE_NULL;
     }
@@ -42,7 +42,7 @@ struct htree_node *htree_init()
     htree_depth_used = 1;
 
   htree_total_nodes++;
-  CREATE(newnode, struct htree_node, 1);
+  newnode = calloc(1, sizeof(struct htree_node));
   memcpy(newnode->subs, HTREE_NULL->subs, HTREE_NODE_SUBS * sizeof(struct htree_node *));
   newnode->content = NOWHERE;
   newnode->parent = HTREE_NULL;
@@ -79,7 +79,7 @@ void htree_add(struct htree_node *root, IDXTYPE htindex, IDXTYPE content)
     htindex >>= HTREE_NODE_BITS;
     if (tmp->subs[i] == HTREE_NULL) {
       htree_total_nodes++;
-      CREATE(tmp->subs[i], struct htree_node, 1);
+      tmp->subs[i] = calloc(1, sizeof(struct htree_node));
       memcpy(tmp->subs[i]->subs, HTREE_NULL->subs, HTREE_NODE_SUBS * sizeof(struct htree_node *));
       tmp->subs[i]->content = NOWHERE;
       tmp->subs[i]->parent = HTREE_NULL;
@@ -125,66 +125,4 @@ IDXTYPE htree_find(struct htree_node *root, IDXTYPE htindex)
 
   tmp = htree_find_node(root, htindex);
   return tmp->content;
-}
-
-room_rnum real_room_old(room_vnum vnum)
-{
-  room_rnum bot, top, mid;
-  bot = 0;
-  top = top_of_world;
-
-  /* perform binary search on world-table */
-  for (;;) {
-    mid = (bot + top) / 2;
-
-    if ((world + mid)->number == vnum)
-      return (mid);
-
-    if (bot >= top)
-      return (NOWHERE);
-    if ((world + mid)->number > vnum)
-      top = mid - 1;
-    else
-      bot = mid + 1;
-  }
-}
-
-void htree_test()
-{
-#ifdef HTREE_TEST_CYCLES
-  int i, n, l;
-  struct timeval start, finish;
-  float t1, t2;
-
-  if (gettimeofday(&start, NULL)) {
-    log("error getting time: gettimeofday(): %s", strerror(errno));
-  }
-  for (i = 0; i < HTREE_TEST_CYCLES; i++) {
-    n = rand_number(1, top_of_world);
-    l = real_room_old(world[n].number);
-  }
-  if (gettimeofday(&finish, NULL)) {
-    log("error getting time: gettimeofday(): %s", strerror(errno));
-  }
-  log("old start: %2d.%06d", start.tv_sec, start.tv_usec);
-  log("old   end: %2d.%06d", finish.tv_sec, finish.tv_usec);
-  t1 = ((float)finish.tv_sec + ((float)finish.tv_usec) / 1000000) -
-       ((float)start.tv_sec + ((float)start.tv_usec) / 1000000);
-  if (gettimeofday(&start, NULL)) {
-    log("error getting time: gettimeofday(): %s", strerror(errno));
-  }
-  for (i = 0; i < HTREE_TEST_CYCLES; i++) {
-    n = rand_number(1, top_of_world);
-    l = real_room(world[n].number);
-  }
-  if (gettimeofday(&finish, NULL)) {
-    log("error getting time: gettimeofday(): %s", strerror(errno));
-  }
-  log("new start: %2d.%06d", start.tv_sec, start.tv_usec);
-  log("new   end: %2d.%06d", finish.tv_sec, finish.tv_usec);
-  t2 = ((float)finish.tv_sec + ((float)finish.tv_usec) / 1000000) -
-       ((float)start.tv_sec + ((float)start.tv_usec) / 1000000);
-  log("htree_test: htree speedup factor: %.0f%% (%.2f/%.2f)", t1 * 100 / t2, t1, t2);
-#endif /* HTREE_TEST_CYCLES */
-  log("htree stats (global): %d nodes, %"SZT" bytes (depth %d/%"SZT" used/possible)", htree_total_nodes, htree_total_nodes * sizeof(struct htree_node), htree_depth_used, HTREE_MAX_DEPTH);
 }
