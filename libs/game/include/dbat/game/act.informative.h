@@ -1,11 +1,5 @@
-//
-// Created by basti on 10/22/2021.
-//
-
-#ifndef CIRCLE_ACT_INFORMATIVE_H
-#define CIRCLE_ACT_INFORMATIVE_H
-
-#include "structs.h"
+#pragma once
+#include "dbat/db/consts/types.h"
 
 // defines
 #define MAX_PORTAL_TYPES        6
@@ -78,5 +72,3 @@ ACMD(do_intro);
 ACMD(do_scan);
 ACMD(do_toplist);
 ACMD(do_whois);
-
-#endif //CIRCLE_ACT_INFORMATIVE_H

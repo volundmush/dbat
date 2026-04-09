@@ -35,14 +35,12 @@
 *  $Revision: 1.0.14 $                                                    *
 **************************************************************************/
 
-#include "dbat/game/structs.h"
 #include "dbat/game/dg_scripts.h"
 #include "dbat/game/db.h"
 #include "dbat/game/utils.h"
 #include "dbat/game/handler.h"
 #include "dbat/game/interpreter.h"
 #include "dbat/game/comm.h"
-#include "dbat/game/constants.h"
 #include "dbat/game/act.wizard.h"
 #include "dbat/game/fight.h"
 
@@ -158,11 +156,11 @@ ACMD(do_mheal)
     amount = GET_MAX_HIT(ch) * perc;
 
     if (!strcasecmp(arg, "pl")) {
-        ch->incCurHealthPercent(num);
+        incCurHealthPercent(ch, num);
     } else if (!strcasecmp(arg, "ki")) {
-        ch->incCurKIPercent(num);
+        incCurKIPercent(ch, num);
     } else if (!strcasecmp(arg, "st")) {
-        ch->incCurSTPercent(num);
+        incCurSTPercent(ch, num);
     } else {
         mob_log(ch, "mheal called with wrong argument [pl | ki | st]");
         return;

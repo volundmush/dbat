@@ -17,7 +17,6 @@
 #include "dbat/game/db.h"
 #include "dbat/game/interpreter.h"
 #include "dbat/game/utils.h"
-#include "dbat/game/constants.h"
 #include "dbat/game/spells.h"
 #include "dbat/game/feats.h"
 #include "dbat/game/act.comm.h"

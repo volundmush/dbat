@@ -14,8 +14,8 @@
 #include "dbat/game/comm.h"
 #include "dbat/game/spells.h"
 #include "dbat/game/utils.h"
+#include "dbat/game/character_utils.h"
 #include "dbat/game/handler.h"
-#include "dbat/game/constants.h"
 #include "dbat/game/fight.h"
 #include "dbat/game/guild.h"
 #include "dbat/game/class.h"
@@ -117,7 +117,7 @@ ACMD(do_galikgun)
   }
 
   if (prob < perc - 20) {
-   if ((vict->getCurST()) > 0) {
+   if ((getCurST(vict)) > 0) {
     if (tech_handle_android_absorb(ch, vict)) {
         pcost(ch, 1, 0);
      return;
@@ -369,7 +369,7 @@ ACMD(do_honoo)
   }
 
   if (prob < perc - 20) {
-   if ((vict->getCurST()) > 0) {
+   if ((getCurST(vict)) > 0) {
     if (tech_handle_android_absorb(ch, vict)) {
         pcost(ch, 1, 0);
      return;
@@ -681,7 +681,7 @@ ACMD(do_psyblast)
   }
 
   if (prob < perc - 20) {
-   if ((vict->getCurST()) > 0) {
+   if ((getCurST(vict)) > 0) {
     if (tech_handle_android_absorb(ch, vict)) {
         pcost(ch, 1, 0);
      return;
@@ -987,7 +987,7 @@ ACMD(do_tslash)
   }
 
   if (prob < perc - 20) {
-   if ((vict->getCurST()) > 0) {
+   if ((getCurST(vict)) > 0) {
     if (blk > axion_dice(10)) {
      act("@C$N@W moves quickly and blocks your twin slash!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou move quickly and block @C$n's@W twin slash!@n", FALSE, ch, 0, vict, TO_VICT);
@@ -1112,11 +1112,11 @@ ACMD(do_tslash)
        }
       }
       else if (dmg > GET_MAX_HIT(vict) / 5 && (IS_MAJIN(vict) || IS_BIO(vict))) {
-       if (GET_SKILL(vict, SKILL_REGENERATE) > rand_number(1, 101) && (vict->getCurKI()) >= GET_MAX_MANA(vict) / 40) {
+       if (GET_SKILL(vict, SKILL_REGENERATE) > rand_number(1, 101) && (getCurKI(vict)) >= GET_MAX_MANA(vict) / 40) {
         act("@R$N@r has $S head cut off by the attack but regenerates a moment later!@n", TRUE, ch, 0, vict, TO_CHAR);
         act("@rYou have your head cut off by the attack but regenerate a moment later!@n", TRUE, ch, 0, vict, TO_VICT);
         act("@R$N@r has $S head cut off by the attack but regenerates a moment later!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-        vict->decCurKI(vict->getMaxKI() / 40);
+        decCurKI(vict, getMaxKI(vict) / 40);
         hurt(0, 0, ch, vict, NULL, dmg, 1);
        }
        else {
@@ -1312,18 +1312,18 @@ ACMD(do_eraser)
       pcost(vict, 0, GET_MAX_HIT(vict) / 200);
 
       if (GET_SKILL(ch, SKILL_ERASER) >= 100) {
-          ch->decCurKI((GET_MAX_MANA(ch) * attperc) * 0.15);
+          decCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.15);
       } else if (GET_SKILL(ch, SKILL_ERASER) >= 60) {
-          ch->decCurKI((GET_MAX_MANA(ch) * attperc) * 0.1);
+          decCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.1);
       } else if (GET_SKILL(ch, SKILL_ERASER) >= 40) {
-          ch->decCurKI((GET_MAX_MANA(ch) * attperc) * 0.05);
+          decCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.05);
       }
 
       return;
   }
 
   if (prob < perc - 20) {
-   if ((vict->getCurST()) > 0) {
+   if ((getCurST(vict)) > 0) {
     if (tech_handle_android_absorb(ch, vict)) {
         pcost(ch, 1, 0);
      return;
@@ -1335,11 +1335,11 @@ ACMD(do_eraser)
      pcost(ch, attperc, 0);
      pcost(vict, 0, GET_MAX_HIT(vict) / 500);
         if (GET_SKILL(ch, SKILL_ERASER) >= 100) {
-            ch->decCurKI((GET_MAX_MANA(ch) * attperc) * 0.15);
+            decCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.15);
         } else if (GET_SKILL(ch, SKILL_ERASER) >= 60) {
-            ch->decCurKI((GET_MAX_MANA(ch) * attperc) * 0.1);
+            decCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.1);
         } else if (GET_SKILL(ch, SKILL_ERASER) >= 40) {
-            ch->decCurKI((GET_MAX_MANA(ch) * attperc) * 0.05);
+            decCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.05);
         }
      dmg = damtype(ch, 18, skill, attperc);
      dmg /= 4;
@@ -1364,11 +1364,11 @@ ACMD(do_eraser)
 
      pcost(ch, attperc, 0);
         if (GET_SKILL(ch, SKILL_ERASER) >= 100) {
-            ch->decCurKI((GET_MAX_MANA(ch) * attperc) * 0.15);
+            decCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.15);
         } else if (GET_SKILL(ch, SKILL_ERASER) >= 60) {
-            ch->decCurKI((GET_MAX_MANA(ch) * attperc) * 0.1);
+            decCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.1);
         } else if (GET_SKILL(ch, SKILL_ERASER) >= 40) {
-            ch->decCurKI((GET_MAX_MANA(ch) * attperc) * 0.05);
+            decCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.05);
         }
      hurt(0, 0, ch, vict, NULL, 0, 1);
      
@@ -1381,11 +1381,11 @@ ACMD(do_eraser)
 
      pcost(ch, attperc, 0);
         if (GET_SKILL(ch, SKILL_ERASER) >= 100) {
-            ch->decCurKI((GET_MAX_MANA(ch) * attperc) * 0.15);
+            decCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.15);
         } else if (GET_SKILL(ch, SKILL_ERASER) >= 60) {
-            ch->decCurKI((GET_MAX_MANA(ch) * attperc) * 0.1);
+            decCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.1);
         } else if (GET_SKILL(ch, SKILL_ERASER) >= 40) {
-            ch->decCurKI((GET_MAX_MANA(ch) * attperc) * 0.05);
+            decCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.05);
         }
      hurt(0, 0, ch, vict, NULL, 0, 1);
      
@@ -1398,11 +1398,11 @@ ACMD(do_eraser)
      act("@c$n@W fires a eraser cannon at @C$N@W, but somehow misses!@n", FALSE, ch, 0, vict, TO_NOTVICT);
      pcost(ch, attperc, 0);
        if (GET_SKILL(ch, SKILL_ERASER) >= 100) {
-           ch->decCurKI((GET_MAX_MANA(ch) * attperc) * 0.15);
+           decCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.15);
        } else if (GET_SKILL(ch, SKILL_ERASER) >= 60) {
-           ch->decCurKI((GET_MAX_MANA(ch) * attperc) * 0.1);
+           decCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.1);
        } else if (GET_SKILL(ch, SKILL_ERASER) >= 40) {
-           ch->decCurKI((GET_MAX_MANA(ch) * attperc) * 0.05);
+           decCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.05);
        }
      
    }
@@ -1456,11 +1456,11 @@ ACMD(do_eraser)
    }
      pcost(ch, attperc, 0);
       if (GET_SKILL(ch, SKILL_ERASER) >= 100) {
-          ch->decCurKI((GET_MAX_MANA(ch) * attperc) * 0.15);
+          decCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.15);
       } else if (GET_SKILL(ch, SKILL_ERASER) >= 60) {
-          ch->decCurKI((GET_MAX_MANA(ch) * attperc) * 0.1);
+          decCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.1);
       } else if (GET_SKILL(ch, SKILL_ERASER) >= 40) {
-          ch->decCurKI((GET_MAX_MANA(ch) * attperc) * 0.05);
+          decCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.05);
       }
      
     return;
@@ -1481,11 +1481,11 @@ ACMD(do_eraser)
    hurt(0, 0, ch, NULL, obj, dmg, 0);
      pcost(ch, attperc, 0);
      if (GET_SKILL(ch, SKILL_ERASER) >= 100) {
-         ch->decCurKI((GET_MAX_MANA(ch) * attperc) * 0.15);
+         decCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.15);
      } else if (GET_SKILL(ch, SKILL_ERASER) >= 60) {
-         ch->decCurKI((GET_MAX_MANA(ch) * attperc) * 0.1);
+         decCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.1);
      } else if (GET_SKILL(ch, SKILL_ERASER) >= 40) {
-         ch->decCurKI((GET_MAX_MANA(ch) * attperc) * 0.05);
+         decCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.05);
      }
    
  }
@@ -1575,7 +1575,7 @@ ACMD(do_pbarrage)
   }
 
   if (prob < perc - 20) {
-   if ((vict->getCurST()) > 0) {
+   if ((getCurST(vict)) > 0) {
     if (blk > axion_dice(10)) {
      act("@C$N@W moves quickly and blocks your psychic barrage!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou move quickly and block @C$n's@W psychic barrage!@n", FALSE, ch, 0, vict, TO_VICT);
@@ -1894,8 +1894,8 @@ ACMD(do_genki)
     continue;
    }
    if (AFF_FLAGGED(friend_char, AFF_GROUP) && (friend_char->master == ch || ch->master == friend_char || friend_char->master == ch->master)) {
-    GET_CHARGE(ch) += (ch->getCurKI()) / 10;
-    ch->decCurKI(ch->getCurKI() / 20);
+    GET_CHARGE(ch) += (getCurKI(ch)) / 10;
+    decCurKI(ch, getCurKI(ch) / 20);
    }
   }
 
@@ -2011,7 +2011,7 @@ ACMD(do_spiritball)
   }
 
   if (prob < perc - 20) {
-   if ((vict->getCurST()) > 0) {
+   if ((getCurST(vict)) > 0) {
     if (pry > rand_number(1, 140) && (!IS_NPC(vict) || !MOB_FLAGGED(vict, MOB_DUMMY))) {
      act("@C$N@W deflects your Spirit Ball, sending it flying away!@n", TRUE, ch, 0, vict, TO_CHAR);
      act("@WYou deflect @C$n's@W Spirit Ball sending it flying away!@n", TRUE, ch, 0, vict, TO_VICT);
@@ -2239,7 +2239,7 @@ ACMD(do_deathball)
   }
 
   if (prob < perc - 20) {
-   if ((vict->getCurST()) > 0) {
+   if ((getCurST(vict)) > 0) {
     if (dge > axion_dice(10)) {
      act("@C$N@W manages to dodge your deathball, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou dodge @C$n's@W deathball, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_VICT);
@@ -2465,7 +2465,7 @@ ACMD(do_pslash)
   }
 
   if (prob < perc - 20) {
-   if ((vict->getCurST()) > 0) {
+   if ((getCurST(vict)) > 0) {
     if (blk > axion_dice(10)) {
      act("@C$N@W moves quickly and blocks your Phoenix Slash!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou move quickly and block @C$n's@W Phoenix Slash!@n", FALSE, ch, 0, vict, TO_VICT);
@@ -2693,7 +2693,7 @@ ACMD(do_bigbang)
   }
 
   if (prob < perc - 20) {
-   if ((vict->getCurST()) > 0) {
+   if ((getCurST(vict)) > 0) {
     if (blk > axion_dice(10)) {
      act("@C$N@W moves quickly and blocks your Big Bang!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou move quickly and block @C$n's@W Big Bang!@n", FALSE, ch, 0, vict, TO_VICT);
@@ -2923,7 +2923,7 @@ ACMD(do_scatter)
   }
 
   if (prob < perc - 20) {
-   if ((vict->getCurST()) > 0) {
+   if ((getCurST(vict)) > 0) {
     if (blk > axion_dice(10)) {
      act("@C$N@W moves quickly and blocks every kiball of your scatter shot!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou move quickly and block every kiball of @C$n's@W scatter shot!@n", FALSE, ch, 0, vict, TO_VICT);
@@ -3155,7 +3155,7 @@ ACMD(do_balefire)
   }
 
   if (prob < perc - 20) {
-   if ((vict->getCurST()) > 0) {
+   if ((getCurST(vict)) > 0) {
     if (blk > axion_dice(10)) {
      act("@C$N@W moves quickly and blocks every kiball of your scatter shot!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou move quickly and block every kiball of @C$n's@W scatter shot!@n", FALSE, ch, 0, vict, TO_VICT);
@@ -3414,7 +3414,7 @@ ACMD(do_kakusanha)
       }
       dge = handle_dodge(vict);
       if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) &&
-              (vict->getCurST()) >= 1 && GET_POS(vict) != POS_SLEEPING) {
+              (getCurST(vict)) >= 1 && GET_POS(vict) != POS_SLEEPING) {
        hits++;
        act("@C$N@c disappears, avoiding the beam chasing $M!@n", FALSE, ch, 0, vict, TO_CHAR);
        act("@cYou disappear, avoiding the beam chasing you!@n", FALSE, ch, 0, vict, TO_VICT);
@@ -3660,7 +3660,7 @@ ACMD(do_hellspear)
       dge = handle_dodge(vict);
 
       if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) &&
-              (vict->getCurST()) >= 1 && GET_POS(vict) != POS_SLEEPING) {
+              (getCurST(vict)) >= 1 && GET_POS(vict) != POS_SLEEPING) {
        act("@C$N@c disappears, avoiding the explosion before reappearing elsewhere!@n", FALSE, ch, 0, vict, TO_CHAR);
        act("@cYou disappear, avoiding the explosion before reappearing elsewhere!@n", FALSE, ch, 0, vict, TO_VICT);
        act("@C$N@c disappears, avoiding the explosion before reappearing elsewhere!@n", FALSE, ch, 0, vict, TO_NOTVICT);
@@ -3793,7 +3793,7 @@ ACMD(do_hellflash)
   }
 
   if (prob < perc - 20) {
-   if ((vict->getCurST()) > 0) {
+   if ((getCurST(vict)) > 0) {
     if (blk > axion_dice(10)) {
      act("@C$N@W moves quickly and blocks your Hell Flash!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou move quickly and block @C$n's@W Hell Flash!@n", FALSE, ch, 0, vict, TO_VICT);
@@ -4058,7 +4058,7 @@ ACMD(do_ddslash)
   }
 
   if (prob < perc - 20) {
-   if ((vict->getCurST()) > 0) {
+   if ((getCurST(vict)) > 0) {
     if (blk > axion_dice(10)) {
      act("@C$N@W moves quickly and blocks your Darkness Dragon Slash!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou move quickly and block @C$n's@W Darkness Dragon Slash!@n", FALSE, ch, 0, vict, TO_VICT);
@@ -4293,7 +4293,7 @@ ACMD(do_crusher)
   }
 
   if (prob < perc - 20) {
-   if ((vict->getCurST()) > 0) {
+   if ((getCurST(vict)) > 0) {
     if (blk > axion_dice(10)) {
      act("@C$N@W moves quickly and blocks your crusher ball!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou move quickly and block @C$n's@W crusher ball!@n", FALSE, ch, 0, vict, TO_VICT);
@@ -4530,7 +4530,7 @@ ACMD(do_final)
   }
 
   if (prob < perc - 20) {
-   if ((vict->getCurST()) > 0) {
+   if ((getCurST(vict)) > 0) {
     if (blk > axion_dice(10)) {
      act("@C$N@W moves quickly and blocks your final flash!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou move quickly and block @C$n's@W final flash!@n", FALSE, ch, 0, vict, TO_VICT);
@@ -4749,7 +4749,7 @@ ACMD(do_sbc)
   }
 
   if (prob < perc - 20) {
-   if ((vict->getCurST()) > 0) {
+   if ((getCurST(vict)) > 0) {
     if (dge > axion_dice(10)) {
      act("@C$N@W manages to dodge your special beam cannon, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou dodge @C$n's@W special beam cannon, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_VICT);
@@ -4952,7 +4952,7 @@ ACMD(do_tribeam)
   }
 
   if (prob < perc - 20) {
-   if ((vict->getCurST()) > 0) {
+   if ((getCurST(vict)) > 0) {
     if (blk > axion_dice(10)) {
      act("@C$N@W moves quickly and blocks your tribeam!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou move quickly and block @C$n's@W tribeam!@n", FALSE, ch, 0, vict, TO_VICT);
@@ -5009,11 +5009,11 @@ ACMD(do_tribeam)
   else {
    dmg = damtype(ch, 26, skill, attperc);
    if (GET_SKILL(ch, SKILL_TRIBEAM) >= 100) {
-    dmg += (ch->getMaxLF()) * 0.20;
+    dmg += (getMaxLF(ch)) * 0.20;
    } else if (GET_SKILL(ch, SKILL_TRIBEAM) >= 60) {
-    dmg += (ch->getMaxLF()) * 0.10;
+    dmg += (getMaxLF(ch)) * 0.10;
    } else if (GET_SKILL(ch, SKILL_TRIBEAM) >= 40) {
-    dmg += (ch->getMaxLF()) * 0.05;
+    dmg += (getMaxLF(ch)) * 0.05;
    }
 
    int hitspot = 1;
@@ -5178,7 +5178,7 @@ ACMD(do_kienzan)
   }
 
   if (prob < perc - 20) {
-   if ((vict->getCurST()) > 0) {
+   if ((getCurST(vict)) > 0) {
     if (dge > axion_dice(10)) {
      act("@C$N@W manages to dodge your kienzan, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou dodge @C$n's@W kienzan, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_VICT);
@@ -5264,11 +5264,11 @@ ACMD(do_kienzan)
        }
       }
       else if (dmg > GET_MAX_HIT(vict) / 5 && (IS_MAJIN(vict) || IS_BIO(vict))) {
-       if (GET_SKILL(vict, SKILL_REGENERATE) > rand_number(1, 101) && (vict->getCurKI()) >= GET_MAX_MANA(vict) / 40) {
+       if (GET_SKILL(vict, SKILL_REGENERATE) > rand_number(1, 101) && (getCurKI(vict)) >= GET_MAX_MANA(vict) / 40) {
         act("@R$N@r is cut in half by the attack but regenerates a moment later!@n", TRUE, ch, 0, vict, TO_CHAR);
         act("@rYou are cut in half by the attack but regenerate a moment later!@n", TRUE, ch, 0, vict, TO_VICT);
         act("@R$N@r is cut in half by the attack but regenerates a moment later!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-        vict->decCurKI(vict->getMaxKI() / 40);
+        decCurKI(vict, getMaxKI(vict) / 40);
         hurt(0, 0, ch, vict, NULL, dmg, 1);
        }
        else {
@@ -5328,11 +5328,11 @@ ACMD(do_kienzan)
        }
       }
       else if (dmg > GET_MAX_HIT(vict) / 5 && (IS_MAJIN(vict) || IS_BIO(vict))) {
-       if (GET_SKILL(vict, SKILL_REGENERATE) > rand_number(1, 101) && (vict->getCurKI()) >= GET_MAX_MANA(vict) / 40) {
+       if (GET_SKILL(vict, SKILL_REGENERATE) > rand_number(1, 101) && (getCurKI(vict)) >= GET_MAX_MANA(vict) / 40) {
         act("@R$N@r has $S head cut off by the attack but regenerates a moment later!@n", TRUE, ch, 0, vict, TO_CHAR);
         act("@rYou have your head cut off by the attack but regenerate a moment later!@n", TRUE, ch, 0, vict, TO_VICT);
         act("@R$N@r has $S head cut off by the attack but regenerates a moment later!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-           vict->decCurKI(vict->getMaxKI() / 40);
+           decCurKI(vict, getMaxKI(vict) / 40);
         hurt(0, 0, ch, vict, NULL, dmg, 1);
        }
        else {
@@ -5576,7 +5576,7 @@ ACMD(do_baku)
       }
       dge = handle_dodge(vict);
       if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) &&
-              (vict->getCurST()) >= 1 && GET_POS(vict) != POS_SLEEPING) {
+              (getCurST(vict)) >= 1 && GET_POS(vict) != POS_SLEEPING) {
        act("@C$N@c disappears, avoiding the explosion before reappearing elsewhere!@n", FALSE, ch, 0, vict, TO_CHAR);
        act("@cYou disappear, avoiding the explosion before reappearing elsewhere!@n", FALSE, ch, 0, vict, TO_VICT);
        act("@C$N@c disappears, avoiding the explosion before reappearing elsewhere!@n", FALSE, ch, 0, vict, TO_NOTVICT);
@@ -5692,7 +5692,7 @@ ACMD(do_rogafufuken)
   }
 
   if (prob < perc - 20) {
-   if ((vict->getCurST()) > 0) {
+   if ((getCurST(vict)) > 0) {
     if (pry > rand_number(1, 140) && (!IS_NPC(vict) || !MOB_FLAGGED(vict, MOB_DUMMY))) {
      act("@C$N@W parries your rogafufuken with a punch of $s own!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou parry @C$n's@W rogafufuken with a punch of your own!@n", FALSE, ch, 0, vict, TO_VICT);
@@ -5924,7 +5924,7 @@ ACMD(do_dualbeam)
     return;
    }
   if (prob < perc - 20) {
-   if ((vict->getCurST()) > 0) {
+   if ((getCurST(vict)) > 0) {
     if (blk > axion_dice(10)) {
      act("@C$N@W moves quickly and blocks your dualbeam!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou move quickly and block @C$n's@W dualbeam!@n", FALSE, ch, 0, vict, TO_VICT);
@@ -6167,7 +6167,7 @@ ACMD(do_blessedhammer)
   }
 
   if (prob < perc - 20) {
-   if ((vict->getCurST()) > 0) {
+   if ((getCurST(vict)) > 0) {
     if (blk > axion_dice(10)) {
      act("@C$N@W moves quickly and blocks your @WB@Dl@We@Ds@Ws@De@Wd @DH@Wa@Dm@Wm@De@Wr@n!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou move quickly and block @C$n's@W @WB@Dl@We@Ds@Ws@De@Wd @DH@Wa@Dm@Wm@De@Wr@n!@n", FALSE, ch, 0, vict, TO_VICT);
@@ -6394,7 +6394,7 @@ ACMD(do_kousengan)
   }
 
   if (prob < perc - 20) {
-   if ((vict->getCurST()) > 0) {
+   if ((getCurST(vict)) > 0) {
     if (blk > axion_dice(10)) {
      act("@C$N@W moves quickly and blocks your kousengan!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou move quickly and block @C$n's@W kousengan!@n", FALSE, ch, 0, vict, TO_VICT);
@@ -6643,7 +6643,7 @@ ACMD(do_deathbeam)
   }
 
   if (prob < perc - 20) {
-   if ((vict->getCurST()) > 0) {
+   if ((getCurST(vict)) > 0) {
     if (blk > axion_dice(10)) {
      act("@C$N@W moves quickly and blocks your deathbeam!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou move quickly and block @C$n's@W deathbeam!@n", FALSE, ch, 0, vict, TO_VICT);
@@ -6793,11 +6793,11 @@ ACMD(do_deathbeam)
      break;
    }
      if (GET_SKILL(ch, SKILL_DEATHBEAM) >= 100 && GET_HIT(vict) >= 2) {
-         ch->decCurLF(dmg * .4, -1);
+         decCurLF(ch, dmg * .4, -1);
      } else if (GET_SKILL(ch, SKILL_DEATHBEAM) >= 60 && GET_HIT(vict) >= 2) {
-         ch->decCurLF(dmg * .2, -1);
+         decCurLF(ch, dmg * .2, -1);
      } else if (GET_SKILL(ch, SKILL_DEATHBEAM) >= 40 && GET_HIT(vict) >= 2) {
-         ch->decCurLF(dmg * .05, -1);
+         decCurLF(ch, dmg * .05, -1);
      }
      if (GET_SKILL_PERF(ch, SKILL_DEATHBEAM) == 3 && attperc > minimum) {
       pcost(ch, attperc - 0.05, 0);
@@ -6930,7 +6930,7 @@ ACMD(do_dodonpa)
      }
 
   if (prob < perc - 20) {
-   if ((vict->getCurST()) > 0) {
+   if ((getCurST(vict)) > 0) {
     if (blk > axion_dice(10)) {
      act("@C$N@W moves quickly and blocks your dodonpa!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou move quickly and block @C$n's@W dodonpa!@n", FALSE, ch, 0, vict, TO_VICT);
@@ -7053,7 +7053,7 @@ ACMD(do_dodonpa)
      break;
    }
      if (rand_number(1, 3) == 2) {
-         vict->decCurKI(dmg / 4);
+         decCurKI(vict, dmg / 4);
       send_to_char(vict, "@RYou feel some of your ki drained away by the attack!@n\r\n");
      }
      if (GET_SKILL_PERF(ch, SKILL_DODONPA) == 3 && attperc > minimum) {
@@ -7182,7 +7182,7 @@ ACMD(do_masenko)
   }
 
   if (prob < perc - 20) {
-   if ((vict->getCurST()) > 0) {
+   if ((getCurST(vict)) > 0) {
     if (tech_handle_android_absorb(ch, vict)) {
      if (GET_SKILL_PERF(ch, SKILL_MASENKO) == 3 && attperc > minimum) {
       pcost(ch, attperc - 0.05, 0);
@@ -7330,7 +7330,7 @@ ACMD(do_masenko)
    }
      if (rand_number(1, 2) == 2 && !AFF_FLAGGED(vict, AFF_SANCTUARY)) {
       send_to_char(vict, "@RThe attack seems to have taken a toll on your stamina!@n\r\n");
-      vict->decCurST(dmg / 4);
+      decCurST(vict, dmg / 4);
      }
      if (GET_SKILL_PERF(ch, SKILL_MASENKO) == 3 && attperc > minimum) {
       pcost(ch, attperc - 0.05, 0);
@@ -7455,11 +7455,11 @@ ACMD(do_kamehameha)
       pcost(vict, 0, GET_MAX_HIT(vict) / 200);
 
       if (GET_SKILL(ch, SKILL_KAMEHAMEHA) >= 100) {
-          ch->incCurKI((GET_MAX_MANA(ch) * attperc) * 0.25);
+          incCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.25);
       } else if (GET_SKILL(ch, SKILL_KAMEHAMEHA) >= 60) {
-          ch->incCurKI((GET_MAX_MANA(ch) * attperc) * 0.1);
+          incCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.1);
       } else if (GET_SKILL(ch, SKILL_KAMEHAMEHA) >= 40) {
-          ch->incCurKI((GET_MAX_MANA(ch) * attperc) * 0.05);
+          incCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.05);
       }
       if (GET_SKILL_PERF(ch, SKILL_KAMEHAMEHA) == 3) {
           WAIT_STATE(ch, PULSE_3SEC);
@@ -7468,7 +7468,7 @@ ACMD(do_kamehameha)
   }
 
   if (prob < perc - 20) {
-   if ((vict->getCurST()) > 0) {
+   if ((getCurST(vict)) > 0) {
     if (tech_handle_android_absorb(ch, vict)) {
      if (GET_SKILL_PERF(ch, SKILL_KAMEHAMEHA) == 3 && attperc > minimum) {
       pcost(ch, attperc - 0.05, 0);
@@ -7492,11 +7492,11 @@ ACMD(do_kamehameha)
 	  }
      pcost(vict, 0, GET_MAX_HIT(vict) / 500);
         if (GET_SKILL(ch, SKILL_KAMEHAMEHA) >= 100) {
-            ch->incCurKI((GET_MAX_MANA(ch) * attperc) * 0.25);
+            incCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.25);
         } else if (GET_SKILL(ch, SKILL_KAMEHAMEHA) >= 60) {
-            ch->incCurKI((GET_MAX_MANA(ch) * attperc) * 0.1);
+            incCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.1);
         } else if (GET_SKILL(ch, SKILL_KAMEHAMEHA) >= 40) {
-            ch->incCurKI((GET_MAX_MANA(ch) * attperc) * 0.05);
+            incCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.05);
         }
      dmg = damtype(ch, 13, skill, attperc);
      dmg /= 4;
@@ -7523,11 +7523,11 @@ ACMD(do_kamehameha)
       pcost(ch, attperc, 0);
      }
         if (GET_SKILL(ch, SKILL_KAMEHAMEHA) >= 100) {
-            ch->incCurKI((GET_MAX_MANA(ch) * attperc) * 0.25);
+            incCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.25);
         } else if (GET_SKILL(ch, SKILL_KAMEHAMEHA) >= 60) {
-            ch->incCurKI((GET_MAX_MANA(ch) * attperc) * 0.1);
+            incCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.1);
         } else if (GET_SKILL(ch, SKILL_KAMEHAMEHA) >= 40) {
-            ch->incCurKI((GET_MAX_MANA(ch) * attperc) * 0.05);
+            incCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.05);
         }
      improve_skill(vict, SKILL_DODGE, 0);
 	 if (GET_SKILL_PERF(ch, SKILL_KAMEHAMEHA) == 3) {
@@ -7547,11 +7547,11 @@ ACMD(do_kamehameha)
       pcost(ch, attperc, 0);
      }
         if (GET_SKILL(ch, SKILL_KAMEHAMEHA) >= 100) {
-            ch->incCurKI((GET_MAX_MANA(ch) * attperc) * 0.25);
+            incCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.25);
         } else if (GET_SKILL(ch, SKILL_KAMEHAMEHA) >= 60) {
-            ch->incCurKI((GET_MAX_MANA(ch) * attperc) * 0.1);
+            incCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.1);
         } else if (GET_SKILL(ch, SKILL_KAMEHAMEHA) >= 40) {
-            ch->incCurKI((GET_MAX_MANA(ch) * attperc) * 0.05);
+            incCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.05);
         }
 	 if (GET_SKILL_PERF(ch, SKILL_KAMEHAMEHA) == 3) {
 		WAIT_STATE(ch, PULSE_3SEC);
@@ -7571,11 +7571,11 @@ ACMD(do_kamehameha)
       pcost(ch, attperc, 0);
      }
        if (GET_SKILL(ch, SKILL_KAMEHAMEHA) >= 100) {
-           ch->incCurKI((GET_MAX_MANA(ch) * attperc) * 0.25);
+           incCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.25);
        } else if (GET_SKILL(ch, SKILL_KAMEHAMEHA) >= 60) {
-           ch->incCurKI((GET_MAX_MANA(ch) * attperc) * 0.1);
+           incCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.1);
        } else if (GET_SKILL(ch, SKILL_KAMEHAMEHA) >= 40) {
-           ch->incCurKI((GET_MAX_MANA(ch) * attperc) * 0.05);
+           incCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.05);
        }
    }
    if (GET_SKILL_PERF(ch, SKILL_KAMEHAMEHA) == 3) {
@@ -7660,11 +7660,11 @@ ACMD(do_kamehameha)
       pcost(ch, attperc, 0);
      }
       if (GET_SKILL(ch, SKILL_KAMEHAMEHA) >= 100) {
-          ch->incCurKI((GET_MAX_MANA(ch) * attperc) * 0.25);
+          incCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.25);
       } else if (GET_SKILL(ch, SKILL_KAMEHAMEHA) >= 60) {
-          ch->incCurKI((GET_MAX_MANA(ch) * attperc) * 0.1);
+          incCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.1);
       } else if (GET_SKILL(ch, SKILL_KAMEHAMEHA) >= 40) {
-          ch->incCurKI((GET_MAX_MANA(ch) * attperc) * 0.05);
+          incCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.05);
       }
      
     return;
@@ -7688,11 +7688,11 @@ ACMD(do_kamehameha)
    hurt(0, 0, ch, NULL, obj, dmg, 0);
    pcost(ch, attperc, 0);
      if (GET_SKILL(ch, SKILL_KAMEHAMEHA) >= 100) {
-         ch->incCurKI((GET_MAX_MANA(ch) * attperc) * 0.25);
+         incCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.25);
      } else if (GET_SKILL(ch, SKILL_KAMEHAMEHA) >= 60) {
-         ch->incCurKI((GET_MAX_MANA(ch) * attperc) * 0.1);
+         incCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.1);
      } else if (GET_SKILL(ch, SKILL_KAMEHAMEHA) >= 40) {
-         ch->incCurKI((GET_MAX_MANA(ch) * attperc) * 0.05);
+         incCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.05);
      }
  }
  else {
@@ -7847,7 +7847,7 @@ ACMD(do_renzo)
    }
   }
   if (count == 0) {
-   if ((vict->getCurST()) > 0) {
+   if ((getCurST(vict)) > 0) {
     if (tech_handle_android_absorb(ch, vict)) {
      pcost(ch, 1, 0);
      return;
@@ -8150,7 +8150,7 @@ ACMD(do_heeldrop)
   }
 
   if (prob < perc - 20) {
-   if ((vict->getCurST()) > 0) {
+   if ((getCurST(vict)) > 0) {
     if (pry > rand_number(1, 140) && (!IS_NPC(vict) || !MOB_FLAGGED(vict, MOB_DUMMY))) {
      act("@C$N@W parries your heeldrop with a punch of $S own!@n", TRUE, ch, 0, vict, TO_CHAR);
      act("@WYou parry @C$n's@W heeldrop with a punch of your own!@n", TRUE, ch, 0, vict, TO_VICT);
@@ -8529,7 +8529,7 @@ ACMD(do_attack)
   }
 
   if (prob < perc - 20) {
-   if ((vict->getCurST()) > 0) {
+   if ((getCurST(vict)) > 0) {
     if (pry > rand_number(1, 140) && (!IS_NPC(vict) || !MOB_FLAGGED(vict, MOB_DUMMY))) {
      act("@C$N@W intercepts and parries your attack with $S own!@n", TRUE, ch, 0, vict, TO_CHAR);
      act("@WYou intercept and parry @C$n's@W attack with one of your own!@n", TRUE, ch, 0, vict, TO_VICT);
@@ -8751,7 +8751,7 @@ ACMD(do_attack)
          /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
          break;
        }/* end slash switch*/
-       if (beforepl - GET_HIT(vict) >= (vict->getEffMaxPL()) * 0.025) {
+        if (beforepl - GET_HIT(vict) >= (getEffMaxPL(vict)) * 0.025) {
         cut_limb(ch, vict, wlvl, hitspot);
        }
       break;
@@ -9182,7 +9182,7 @@ ACMD(do_shogekiha)
   }
 
   if (prob < perc - 20) {
-   if ((vict->getCurST()) > 0) {
+   if ((getCurST(vict)) > 0) {
     if (blk > axion_dice(10)) {
      act("@C$N@W moves quickly and blocks shogekiha!@n", TRUE, ch, 0, vict, TO_CHAR);
      act("@WYou move quickly and block @C$n's@W shogekiha!@n", TRUE, ch, 0, vict, TO_VICT);
@@ -9230,11 +9230,11 @@ ACMD(do_shogekiha)
    dmg = damtype(ch, 10, skill, attperc);
     if (IS_KABITO(ch)) {
      if (GET_SKILL(ch, SKILL_SHOGEKIHA) >= 100) {
-         ch->incCurKI((ch->getMaxKI() * attperc) * .15);
+         incCurKI(ch, (getMaxKI(ch) * attperc) * .15);
      } else if (GET_SKILL(ch, SKILL_SHOGEKIHA) >= 60) {
-         ch->incCurKI((ch->getMaxKI() * attperc) * .1);
+         incCurKI(ch, (getMaxKI(ch) * attperc) * .1);
      } else if (GET_SKILL(ch, SKILL_SHOGEKIHA) >= 40) {
-         ch->incCurKI((ch->getMaxKI() * attperc) * .05);
+         incCurKI(ch, (getMaxKI(ch) * attperc) * .05);
      }
    }
    int hitspot = 1;
@@ -9433,7 +9433,7 @@ ACMD(do_tsuihidan)
   }
 
   if (prob < perc - 20) {
-   if ((vict->getCurST()) > 0) {
+   if ((getCurST(vict)) > 0) {
     if (tech_handle_android_absorb(ch, vict)) {
      pcost(ch, 1, 0);
      return;
@@ -9552,7 +9552,7 @@ ACMD(do_tsuihidan)
      break;
    }
      if (master_pass == TRUE) {
-         vict->decCurST(dmg);
+         decCurST(vict, dmg);
       act("@CYour tsuihidan hits a vital spot and seems to sap some of @c$N's@C stamina!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n's@C tsuihidan hits a vital spot and saps some of your stamina!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@C$n's@C tsuihidan hits a vital spot and saps some of @c$N's@C stamina!", TRUE, ch, 0, vict, TO_NOTVICT);
@@ -9784,7 +9784,7 @@ ACMD(do_attack2)
   }
 
   if (prob < perc - 20) {
-   if ((vict->getCurST()) > 0) {
+   if ((getCurST(vict)) > 0) {
     if (pry > rand_number(1, 140) && (!IS_NPC(vict) || !MOB_FLAGGED(vict, MOB_DUMMY))) {
      act("@C$N@W intercepts and parries your attack with $S own!@n", TRUE, ch, 0, vict, TO_CHAR);
      act("@WYou intercept and parry @C$n's@W attack with one of your own!@n", TRUE, ch, 0, vict, TO_VICT);
@@ -9967,7 +9967,7 @@ ACMD(do_attack2)
          /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
          break;
        }/* end slash switch*/
-      if (beforepl - GET_HIT(vict) >= (vict->getEffMaxPL()) * 0.025) {
+       if (beforepl - GET_HIT(vict) >= (getEffMaxPL(vict)) * 0.025) {
        cut_limb(ch, vict, wlvl, hitspot);
       }
       break;
@@ -10323,7 +10323,7 @@ ACMD(do_bite)
         }
 
 		if (prob < perc - 20) {
-			if ((vict->getCurST()) > 0) {
+			if ((getCurST(vict)) > 0) {
 				if (pry > rand_number(1, 140) && (!IS_NPC(vict) || !MOB_FLAGGED(vict, MOB_DUMMY))) {
 					act("@C$N@W parries your bite with a punch of their own!@n", TRUE, ch, 0, vict, TO_CHAR);
 					act("@WYou parry @C$n's@W bite with a punch of your own!@n", TRUE, ch, 0, vict, TO_VICT);
@@ -10575,7 +10575,7 @@ ACMD(do_kiball)
 
   if(!tech_handle_zanzoken(ch, vict, "kiball")) {
       if (frompool == TRUE) {
-          ch->decCurKI(ch->getMaxKI() * attperc);
+          decCurKI(ch, getMaxKI(ch) * attperc);
       } else {
           pcost(ch, attperc, 0);
       }
@@ -10585,7 +10585,7 @@ ACMD(do_kiball)
 
 
   if (prob < perc - 20) {
-   if ((vict->getCurST()) > 0) {
+   if ((getCurST(vict)) > 0) {
     if (tech_handle_android_absorb(ch, vict)) {
      pcost(ch, 1, 0);
      return;
@@ -10826,7 +10826,7 @@ ACMD(do_beam)
   }
 
   if (prob < perc - 20) {
-   if ((vict->getCurST()) > 0) {
+   if ((getCurST(vict)) > 0) {
     if (tech_handle_android_absorb(ch, vict)) {
      pcost(ch, 1, 0);
      return;
@@ -11113,7 +11113,7 @@ ACMD(do_kiblast)
 
 
   if (prob < perc - 20) {
-   if ((vict->getCurST()) > 0) {
+   if ((getCurST(vict)) > 0) {
     if (tech_handle_android_absorb(ch, vict)) {
      pcost(ch, 1, 0);
      return;
@@ -11250,12 +11250,12 @@ ACMD(do_kiblast)
       /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
      break;
    }
-     if (master_pass == TRUE && record > GET_HIT(vict) && (record - GET_HIT(vict) > (vict->getEffMaxPL()) * 0.025)) {
+      if (master_pass == TRUE && record > GET_HIT(vict) && (record - GET_HIT(vict) > (getEffMaxPL(vict)) * 0.025)) {
        if (!AFF_FLAGGED(vict, AFF_KNOCKED) && !AFF_FLAGGED(vict, AFF_SANCTUARY)) {
         act("@C$N@W is knocked out!@n", TRUE, ch, 0, vict, TO_CHAR);
         act("@WYou are knocked out!@n", TRUE, ch, 0, vict, TO_VICT);
         act("@C$N@W is knocked out!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-        vict->setStatusKnockedOut();
+        setStatusKnockedOut(vict);
        }
      }
      pcost(ch, attperc, 0);
@@ -11369,7 +11369,7 @@ ACMD(do_slam)
   }
 
   if (prob < perc - 20) {
-   if ((vict->getCurST()) > 0) {
+   if ((getCurST(vict)) > 0) {
     if (pry > rand_number(1, 140) && (!IS_NPC(vict) || !MOB_FLAGGED(vict, MOB_DUMMY))) {
      act("@C$N@W parries your slam with a punch of $S own!@n", TRUE, ch, 0, vict, TO_CHAR);
      act("@WYou parry @C$n's@W slam with a punch of your own!@n", TRUE, ch, 0, vict, TO_VICT);
@@ -11451,7 +11451,7 @@ ACMD(do_slam)
         act("@C$N@W is knocked out!@n", TRUE, ch, 0, vict, TO_CHAR);
         act("@WYou are knocked out!@n", TRUE, ch, 0, vict, TO_VICT);
         act("@C$N@W is knocked out!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-        vict->setStatusKnockedOut();
+        setStatusKnockedOut(vict);
        }
        else if ((GET_POS(vict) == POS_STANDING || GET_POS(vict) == POS_FIGHTING) && !AFF_FLAGGED(vict, AFF_KNOCKED)) {
         GET_POS(vict) = POS_SITTING;
@@ -11707,7 +11707,7 @@ ACMD(do_uppercut)
   }
 
   if (prob < perc - 20) {
-   if ((vict->getCurST()) > 0) {
+   if ((getCurST(vict)) > 0) {
     if (pry > rand_number(1, 140) && (!IS_NPC(vict) || !MOB_FLAGGED(vict, MOB_DUMMY))) {
      act("@C$N@W parries your uppercut with a punch of $S own!@n", TRUE, ch, 0, vict, TO_CHAR);
      act("@WYou parry @C$n's@W uppercut with a punch of your own!@n", TRUE, ch, 0, vict, TO_VICT);
@@ -11788,7 +11788,7 @@ ACMD(do_uppercut)
         act("@C$N@W is knocked out!@n", TRUE, ch, 0, vict, TO_CHAR);
         act("@WYou are knocked out!@n", TRUE, ch, 0, vict, TO_VICT);
         act("@C$N@W is knocked out!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-        vict->setStatusKnockedOut();
+        setStatusKnockedOut(vict);
        }
       dmg *= calc_critical(ch, 0);
       hurt(0, 0, ch, vict, NULL, dmg, 0);
@@ -11924,7 +11924,7 @@ ACMD(do_tailwhip)
   }
 
   if (prob < perc - 20) {
-   if ((vict->getCurST()) > 0) {
+   if ((getCurST(vict)) > 0) {
     if (pry > rand_number(1, 140) && (!IS_NPC(vict) || !MOB_FLAGGED(vict, MOB_DUMMY))) {
      act("@C$N@W parries your tailwhip with a punch of $S own!@n", TRUE, ch, 0, vict, TO_CHAR);
      act("@WYou parry @C$n's@W tailwhip with a punch of your own!@n", TRUE, ch, 0, vict, TO_VICT);
@@ -12167,7 +12167,7 @@ ACMD(do_roundhouse)
   }
 
   if (prob < perc - 20) {
-   if ((vict->getCurST()) > 0) {
+   if ((getCurST(vict)) > 0) {
     if (pry > rand_number(1, 140) && (!IS_NPC(vict) || !MOB_FLAGGED(vict, MOB_DUMMY))) {
      act("@C$N@W parries your roundhouse with a punch of $S own!@n", TRUE, ch, 0, vict, TO_CHAR);
      act("@WYou parry @C$n's@W roundhouse with a punch of your own!@n", TRUE, ch, 0, vict, TO_VICT);
@@ -12389,7 +12389,7 @@ ACMD(do_elbow)
   }
 
   if (prob < perc - 20) {
-   if ((vict->getCurST()) > 0) {
+   if ((getCurST(vict)) > 0) {
     if (pry > rand_number(1, 140) && (!IS_NPC(vict) || !MOB_FLAGGED(vict, MOB_DUMMY))) {
      act("@C$N@W parries your elbow with an elbow of $S own!@n", TRUE, ch, 0, vict, TO_CHAR);
      act("@WYou parry @C$n's@W elbow with one of your own!@n", TRUE, ch, 0, vict, TO_VICT); 
@@ -12614,7 +12614,7 @@ ACMD(do_kick)
   }
 
   if (prob < perc - 20) {
-   if ((vict->getCurST()) > 0) {
+   if ((getCurST(vict)) > 0) {
     if (pry > rand_number(1, 140) && (!IS_NPC(vict) || !MOB_FLAGGED(vict, MOB_DUMMY))) {
      act("@C$N@W parries your kick with a kick of $S own!@n", TRUE, ch, 0, vict, TO_CHAR);
      act("@WYou parry @C$n's@W kick with one of your own!@n", TRUE, ch, 0, vict, TO_VICT); 
@@ -12839,7 +12839,7 @@ ACMD(do_knee)
   }
 
   if (prob < perc - 20) {
-   if ((vict->getCurST()) > 0) {
+   if ((getCurST(vict)) > 0) {
     if (pry > rand_number(1, 140) && (!IS_NPC(vict) || !MOB_FLAGGED(vict, MOB_DUMMY))) {
      act("@C$N@W parries your knee with a knee of $S own!@n", TRUE, ch, 0, vict, TO_CHAR);
      act("@WYou parry @C$n's@W knee with one of your own!@n", TRUE, ch, 0, vict, TO_VICT); 
@@ -13054,7 +13054,7 @@ ACMD(do_punch)
   }
 
   if (prob < perc - 20) {
-   if ((vict->getCurST()) > 0) {
+   if ((getCurST(vict)) > 0) {
     if (pry > rand_number(1, 140) && (!IS_NPC(vict) || !MOB_FLAGGED(vict, MOB_DUMMY))) {
      act("@C$N@W parries your punch with a punch of $S own!@n", TRUE, ch, 0, vict, TO_CHAR);
      act("@WYou parry @C$n's@W punch with a punch of your own!@n", TRUE, ch, 0, vict, TO_VICT);
@@ -13239,7 +13239,7 @@ ACMD(do_charge)
      act("$n@w's aura disappears.@n", TRUE, ch, 0, 0, TO_ROOM);
      break;
    }
-   ch->incCurKI(GET_CHARGE(ch));
+   incCurKI(ch, GET_CHARGE(ch));
    GET_CHARGE(ch) = 0;
    GET_CHARGETO(ch) = 0;
    REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_CHARGE);
@@ -13261,7 +13261,7 @@ ACMD(do_charge)
      act("$n@w's aura disappears.@n", TRUE, ch, 0, 0, TO_ROOM);
      break;
    }
-   ch->incCurKI(GET_CHARGE(ch));
+   incCurKI(ch, GET_CHARGE(ch));
    GET_CHARGE(ch) = 0;
    GET_CHARGETO(ch) = 0;
    return;
@@ -13290,7 +13290,7 @@ ACMD(do_charge)
    send_to_char(ch, "You are not even charging!\r\n");
    return;
   }
-  else if ((ch->getCurKI()) < GET_MAX_MANA(ch) / 100) {
+  else if ((getCurKI(ch)) < GET_MAX_MANA(ch) / 100) {
    send_to_char(ch, "You don't even have enough ki!\r\n");
    return;
   }
@@ -13300,8 +13300,8 @@ ACMD(do_charge)
      return;
     } else if (AFF_FLAGGED(ch, AFF_SPIRITCONTROL)) {
      int64_t diff = 0;
-     if ((ch->getCurKI()) < ((GET_MAX_MANA(ch) * 0.01) * amt) + 1) {
-      diff = (((GET_MAX_MANA(ch) * 0.01) * amt) + 1) - (ch->getCurKI());
+     if ((getCurKI(ch)) < ((GET_MAX_MANA(ch) * 0.01) * amt) + 1) {
+      diff = (((GET_MAX_MANA(ch) * 0.01) * amt) + 1) - (getCurKI(ch));
      }
      int chance = 15;
      chance -= GET_SKILL(ch, SKILL_SPIRITCONTROL) / 10;
@@ -13326,7 +13326,7 @@ ACMD(do_charge)
       sprintf(bloom, "@wA %s aura flashes up brightly around $n@w!@n", aura_types[GET_AURA(ch)]);
       act(bloom, TRUE, ch, 0, 0, TO_ROOM);
       GET_CHARGE(ch) = (((GET_MAX_MANA(ch) * 0.01) * amt) + 1) - diff;
-      ch->decCurKI((((GET_MAX_MANA(ch) * 0.01) * amt) + 1) - diff + spiritcost);
+      decCurKI(ch, (((GET_MAX_MANA(ch) * 0.01) * amt) + 1) - diff + spiritcost);
      }     
     } else {
      reveal_hiding(ch, 0);
@@ -13403,7 +13403,7 @@ ACMD(do_powerup)
    send_to_char(ch, "@WYou are already at max!@n");
    return;
    }
-  if ((ch->getCurKI()) < GET_MAX_MANA(ch) / 20) {
+  if ((getCurKI(ch)) < GET_MAX_MANA(ch) / 20) {
    send_to_char(ch, "@WYou do not have enough ki to powerup!@n");
    return;
    }

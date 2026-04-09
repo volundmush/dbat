@@ -14,7 +14,6 @@
 #include "dbat/game/utils.h"
 #include "dbat/game/oasis.h"
 #include "dbat/game/genolc.h"
-#include "dbat/game/constants.h"
 
 /*------------------------------------------------------------------------*\
   Utils and exported functions.

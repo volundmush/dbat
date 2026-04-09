@@ -1,11 +1,6 @@
-//
-// Created by basti on 10/22/2021.
-//
+#pragma once
+#include "dbat/db/consts/types.h"
 
-#ifndef CIRCLE_ACT_MOVEMENT_H
-#define CIRCLE_ACT_MOVEMENT_H
-
-#include "structs.h"
 
 // global variables
 extern const char *cmd_door[NUM_DOOR_CMD];
@@ -35,5 +30,3 @@ ACMD(do_flee);
 ACMD(do_carry);
 ACMD(do_land);
 ACMD(do_move);
-
-#endif //CIRCLE_ACT_MOVEMENT_H

@@ -9,6 +9,7 @@
 **************************************************************************/
 #include "dbat/game/act.other.h"
 #include "dbat/game/utils.h"
+#include "dbat/game/character_utils.h"
 #include "dbat/game/comm.h"
 #include "dbat/game/handler.h"
 #include "dbat/game/dg_comm.h"
@@ -28,7 +29,6 @@
 #include "dbat/game/fight.h"
 #include "dbat/game/races.h"
 #include "dbat/game/class.h"
-#include "dbat/game/constants.h"
 #include "dbat/game/shop.h"
 #include "dbat/game/feats.h"
 #include "dbat/game/guild.h"
@@ -137,16 +137,16 @@ void bring_to_cap(struct char_data *ch)
 {
 
  auto p_trans = (ch->race->raceCanTransform() && !ch->race->raceCanRevert());
- auto cap = ch->calc_soft_cap();
+  auto cap = calc_soft_cap(ch);
 
  switch(ch->race->getSoftType(ch)) {
      case dbat::race::Fixed:
-         if(ch->getBasePL() < cap)
-             ch->gainBasePL(cap - ch->getBasePL()-1, p_trans);
-         if(ch->getBaseKI() < cap)
-             ch->gainBaseKI(cap - ch->getBaseKI()-1, p_trans);
-         if(ch->getBaseST() < cap)
-             ch->gainBaseST(cap - ch->getBaseST()-1, p_trans);
+         if(getBasePL(ch) < cap)
+             gainBasePL(ch, cap - getBasePL(ch)-1, p_trans);
+         if(getBaseKI(ch) < cap)
+             gainBaseKI(ch, cap - getBaseKI(ch)-1, p_trans);
+         if(getBaseST(ch) < cap)
+             gainBaseST(ch, cap - getBaseST(ch)-1, p_trans);
  }
 }
 
@@ -367,7 +367,7 @@ ACMD(do_rpp)
      send_to_char(ch, "You aren't even dead!");
      return;
 	} else {
-        ch->resurrect(RPP);
+        resurrect(ch, RPP);
      send_to_char(ch, "You have been revived.\r\n");
     } /* Can pay for it */
    } /* End Simple Revival Reward */
@@ -446,7 +446,7 @@ ACMD(do_rpp)
          send_to_char(ch, "This is not available to bugs.\r\n");
          return;
     } else {
-     if (ch->is_soft_cap(0) && ch->is_soft_cap(1) && ch->is_soft_cap(2)) {
+     if (is_soft_cap(ch, 0) && is_soft_cap(ch, 1) && is_soft_cap(ch, 2)) {
        send_to_char(ch, "You are already above your softcap for this level.\r\n");
        return;
      }
@@ -684,7 +684,7 @@ ACMD(do_commune)
   return;
  }
   
- if ((ch->getCurST()) >= GET_MAX_MOVE(ch)) {
+ if ((getCurST(ch)) >= GET_MAX_MOVE(ch)) {
   send_to_char(ch, "Your stamina is already at full.\r\n");
   return;
  }
@@ -692,12 +692,12 @@ ACMD(do_commune)
  int prob = GET_SKILL(ch, SKILL_COMMUNE), perc = axion_dice(0);
  int64_t cost = GET_MAX_MOVE(ch) * .05;
  
- if ((ch->getCurKI()) < cost) {
+ if ((getCurKI(ch)) < cost) {
   send_to_char(ch, "You do not have enough ki to commune with the Eldritch Star.\r\n");
   return;
  }
  if (prob < perc) {
-     ch->decCurKI(cost);
+     decCurKI(ch, cost);
         reveal_hiding(ch, 0);
   act("@cYou close your eyes and try to commune with the Eldritch Star. You are unable to concentrate though.@n", TRUE, ch, 0, 0, TO_CHAR);
   act("@W$n closes $s eyes for a moment. Then $e reopens them and frowns.@n", TRUE, ch, 0, 0, TO_ROOM);
@@ -705,8 +705,8 @@ ACMD(do_commune)
   return;
  }
  else {
-     ch->decCurKI(cost);
-     ch->decCurST(cost);
+     decCurKI(ch, cost);
+     decCurST(ch, cost);
         reveal_hiding(ch, 0);
   act("@cYou close your eyes and commune with the Eldritch Star spiritually. You feel your stamina replenish some.@n", TRUE, ch, 0, 0, TO_CHAR);
   act("@W$n closes $s eyes for a moment. Then $e reopens them and smiles.@n", TRUE, ch, 0, 0, TO_ROOM);
@@ -866,13 +866,13 @@ ACMD(do_grapple)
   pass = TRUE;
   int perc = GET_SKILL(ch, SKILL_GRAPPLE), prob = axion_dice(0), cost = GET_MAX_MOVE(ch) / 100;
 
-  if ((ch->getCurST()) < cost) {
+  if ((getCurST(ch)) < cost) {
    send_to_char(ch, "You do not have enough stamina to grapple!\r\n");
    return;
   }
 
   if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) &&
-          (vict->getCurST()) >= 1 && GET_POS(vict) != POS_SLEEPING) {
+          (getCurST(vict)) >= 1 && GET_POS(vict) != POS_SLEEPING) {
    if (!AFF_FLAGGED(ch, AFF_ZANZOKEN) || (AFF_FLAGGED(ch, AFF_ZANZOKEN) && GET_SPEEDI(ch) + rand_number(1, 5) < GET_SPEEDI(vict) + rand_number(1, 5))) {
            reveal_hiding(ch, 0);
      act("@C$N@c disappears, avoiding your grapple attempt before reappearing!@n", FALSE, ch, 0, vict, TO_CHAR);
@@ -882,7 +882,7 @@ ACMD(do_grapple)
       REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
      }
      REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     ch->decCurST(cost);
+     decCurST(ch, cost);
      WAIT_STATE(ch, PULSE_4SEC);
      return;
    }
@@ -911,7 +911,7 @@ ACMD(do_grapple)
    act("@RYou try to grapple with @r$N@R, but $E manages to overpower you!@n", TRUE, ch, 0, vict, TO_CHAR);
    act("@r$n@R tries to grapple with YOU, but you manage to overpower $m!@n", TRUE, ch, 0, vict, TO_VICT);
    act("@r$n@R tries to grapple with @r$N@R, but $E manages to overpower @r$n@R!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      ch->decCurST(cost);
+      decCurST(ch, cost);
    improve_skill(ch, SKILL_GRAPPLE, 1);
    WAIT_STATE(ch, PULSE_4SEC);
    return;
@@ -920,7 +920,7 @@ ACMD(do_grapple)
    act("@RYou try to grapple with @r$N@R, but $E manages to overpower you!@n", TRUE, ch, 0, vict, TO_CHAR);
    act("@r$n@R tries to grapple with YOU, but you manage to overpower $m!@n", TRUE, ch, 0, vict, TO_VICT);
    act("@r$n@R tries to grapple with @r$N@R, but $E manages to overpower @r$n@R!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      ch->decCurST(cost);
+      decCurST(ch, cost);
    improve_skill(ch, SKILL_GRAPPLE, 1);
    WAIT_STATE(ch, PULSE_4SEC);
    return;
@@ -929,7 +929,7 @@ ACMD(do_grapple)
    act("@RYou try to grapple with @r$N@R, but $E manages to avoid it!@n", TRUE, ch, 0, vict, TO_CHAR);
    act("@r$n@R tries to grapple with YOU, but you manage to avoid it!@n", TRUE, ch, 0, vict, TO_VICT);
    act("@r$n@R tries to grapple with @r$N@R, but $E manages to avoid it!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      ch->decCurST(cost);
+      decCurST(ch, cost);
    improve_skill(ch, SKILL_GRAPPLE, 1);
    WAIT_STATE(ch, PULSE_4SEC);
    return;
@@ -949,7 +949,7 @@ ACMD(do_grapple)
    GRAPTYPE(vict) = 1;
    /* Let's grapple! */
 
-      ch->decCurST(cost);
+      decCurST(ch, cost);
    improve_skill(ch, SKILL_GRAPPLE, 1);
    WAIT_STATE(ch, PULSE_4SEC);
    return;
@@ -966,7 +966,7 @@ ACMD(do_grapple)
    GRAPTYPE(vict) = 2;
    /* Let's grapple! */
 
-      ch->decCurST(cost);
+      decCurST(ch, cost);
    improve_skill(ch, SKILL_GRAPPLE, 1);
    WAIT_STATE(ch, PULSE_4SEC);
    return;
@@ -987,7 +987,7 @@ ACMD(do_grapple)
    GRAPTYPE(vict) = 4;
    /* Let's grapple! */
 
-      ch->decCurST(cost);
+      decCurST(ch, cost);
    improve_skill(ch, SKILL_GRAPPLE, 1);
    WAIT_STATE(ch, PULSE_4SEC);
    return;
@@ -1008,7 +1008,7 @@ ACMD(do_grapple)
     REMOVE_BIT_AR(PLR_FLAGS(vict), PLR_THANDW);
    }
 
-      ch->decCurST(cost);
+      decCurST(ch, cost);
    improve_skill(ch, SKILL_GRAPPLE, 1);
    WAIT_STATE(ch, PULSE_4SEC);
    return;
@@ -1034,7 +1034,7 @@ ACMD(do_trip)
 
  int cost = GET_MAX_HIT(ch) / 200;
 
- if (cost > (ch->getCurST())) {
+ if (cost > (getCurST(ch))) {
   send_to_char(ch, "You don't have enough stamina.\r\n");
   return;
  }
@@ -1084,7 +1084,7 @@ ACMD(do_trip)
   }
 
   if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) &&
-          (vict->getCurST()) >= 1 && GET_POS(vict) != POS_SLEEPING) {
+          (getCurST(vict)) >= 1 && GET_POS(vict) != POS_SLEEPING) {
    if (!AFF_FLAGGED(ch, AFF_ZANZOKEN) || (AFF_FLAGGED(ch, AFF_ZANZOKEN) && GET_SPEEDI(ch) + rand_number(1, 5) < GET_SPEEDI(vict) + rand_number(1, 5))) {
           reveal_hiding(ch, 0);
      act("@C$N@c disappears, avoiding your trip before reappearing!@n", FALSE, ch, 0, vict, TO_CHAR);
@@ -1094,7 +1094,7 @@ ACMD(do_trip)
       REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
      }
      REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-       ch->decCurST(cost);
+       decCurST(ch, cost);
      WAIT_STATE(ch, PULSE_4SEC);
      return;
    }
@@ -1114,7 +1114,7 @@ ACMD(do_trip)
    act("@m$n@m moves to trip YOU, but $e screws up and you manage to keep your footing!@n", TRUE, ch, 0, vict, TO_VICT);
    act("@m$n@m moves to trip $N@m, but $e screws up and $N@m manages to keep $S footing!@n", TRUE, ch, 0, vict, TO_NOTVICT);
    improve_skill(ch, SKILL_TRIP, 0);
-      ch->decCurST(cost);
+      decCurST(ch, cost);
    WAIT_STATE(ch, PULSE_4SEC);
    if (FIGHTING(ch) == NULL) {
     set_fighting(ch, vict);
@@ -1133,7 +1133,7 @@ ACMD(do_trip)
    act("@m$n@m moves to trip YOU, and manages to knock you off your feet!@n", TRUE, ch, 0, vict, TO_VICT);
    act("@m$n@m moves to trip $N@m, and manages to knock $N@m off $S feet!@n", TRUE, ch, 0, vict, TO_NOTVICT);
    improve_skill(ch, SKILL_TRIP, 0);
-      ch->decCurST(cost);
+      decCurST(ch, cost);
    GET_POS(vict) = POS_SITTING;
    WAIT_STATE(ch, PULSE_4SEC);
    if (FIGHTING(ch) == NULL) {
@@ -1169,7 +1169,7 @@ ACMD(do_train)
 
  one_argument(argument, arg);
 
- weight = ch->getCurCarriedWeight();
+ weight = getCurCarriedWeight(ch);
 
  int strcap = 5000, spdcap = 5000, intcap = 5000, wiscap = 5000, concap = 5000, aglcap = 5000;
 
@@ -1371,21 +1371,21 @@ ACMD(do_train)
         case 2:
         case 3:
         case 4:
-            if ((ch->getCurST()) < cost) {
+            if ((getCurST(ch)) < cost) {
                 send_to_char(ch, "You do not have enough stamina with the current weight worn and gravity!\r\n");
                 return;
             }
             plus = (((total / 20) + (GET_MAX_MOVE(ch) / 50)) * 100) / GET_MAX_MOVE(ch);
-            ch->decCurST(cost);
+            decCurST(ch, cost);
             break;
         case 5:
         case 6:
-            if ((ch->getCurKI()) < cost) {
+            if ((getCurKI(ch)) < cost) {
                 send_to_char(ch, "You do not have enough ki with the current weight worn and gravity!\r\n");
                 return;
             }
             plus = (((total / 20) + (GET_MAX_MANA(ch) / 50)) * 100) / GET_MAX_MANA(ch);
-            ch->decCurKI(cost);
+            decCurKI(ch, cost);
             break;
     }
 
@@ -1600,11 +1600,11 @@ ACMD(do_rip)
  }
 
  if (ch != vict && GET_POS(ch) > POS_SLEEPING) {
-  if ((ch->getCurST()) < GET_MAX_MOVE(ch) / 20) {
+  if ((getCurST(ch)) < GET_MAX_MOVE(ch) / 20) {
    send_to_char(ch, "You are too tired to manage to grab their tail!\r\n");
    return;
   } else if (GET_SPEEDI(ch) > GET_SPEEDI(vict)) {
-      ch->decCurST(ch->getMaxST() / 20);
+      decCurST(ch, getMaxST(ch) / 20);
    if (GET_HIT(ch) > GET_HIT(vict) * 2) {
           reveal_hiding(ch, 0);
     act("@rYou rush at @R$N@r and grab $S tail! With a powerful tug you pull it off!@n", TRUE, ch, 0, vict, TO_CHAR);
@@ -1620,7 +1620,7 @@ ACMD(do_rip)
     return;
    }
   } else {
-      ch->decCurST(ch->getMaxST() / 20);
+      decCurST(ch, getMaxST(ch) / 20);
          reveal_hiding(ch, 0);
    act("@rYou rush at @R$N@r and try to grab $S tail, but fail!@n", TRUE, ch, 0, vict, TO_CHAR);
    act("@R$n@r rushes at YOU and tries to grab your tail, but fails!@n", TRUE, ch, 0, vict, TO_VICT);
@@ -1633,11 +1633,11 @@ ACMD(do_rip)
    act("@R$n@r grabs $s own tail and yanks it off!@n", TRUE, ch, 0, 0, TO_ROOM);
    vict->race->loseTail(vict);
  } else {
-  if ((ch->getCurST()) < GET_MAX_MOVE(ch) / 20) {
+  if ((getCurST(ch)) < GET_MAX_MOVE(ch) / 20) {
    send_to_char(ch, "You are too tired to manage to grab their tail!\r\n");
    return;
   }
-     ch->decCurST(ch->getMaxKI() / 20);
+     decCurST(ch, getMaxKI(ch) / 20);
           reveal_hiding(ch, 0);
     act("@rYou reach and grab @R$N's@r tail! With a powerful tug you pull it off!@n", TRUE, ch, 0, vict, TO_CHAR);
     act("@RYou feel your tail pulled off!@n", TRUE, ch, 0, vict, TO_VICT);
@@ -1661,7 +1661,7 @@ ACMD(do_infuse)
   return;
  }
 
- if ((ch->getCurKI()) < GET_MAX_MANA(ch) / 100) {
+ if ((getCurKI(ch)) < GET_MAX_MANA(ch) / 100) {
   send_to_char(ch, "You don't have enough ki to infuse into your attacks!\r\n");
   return;
  }
@@ -1669,7 +1669,7 @@ ACMD(do_infuse)
  act("You start infusing ki into your attacks.", TRUE, ch, 0, 0, TO_CHAR);
  act("$n starts infusing ki into $s attacks.", TRUE, ch, 0, 0, TO_ROOM);
  SET_BIT_AR(AFF_FLAGS(ch), AFF_INFUSE);
- ch->decCurKI(ch->getMaxKI() / 100);
+ decCurKI(ch, getMaxKI(ch) / 100);
 }
 
 ACMD(do_paralyze)
@@ -1704,7 +1704,7 @@ ACMD(do_paralyze)
   return;
  }
 
- if ((ch->getCurKI()) < GET_HIT(vict) / 10 + (GET_MAX_MANA(ch) / 20)) {
+ if ((getCurKI(ch)) < GET_HIT(vict) / 10 + (GET_MAX_MANA(ch) / 20)) {
   send_to_char(ch, "You realize you can't paralyze them. You don't have enough ki to restrain them!\r\n");
   return;
  }
@@ -1719,7 +1719,7 @@ ACMD(do_paralyze)
  }
 
  if (GET_BONUS(vict, BONUS_INSOMNIAC)) {
-     ch->decCurKI(GET_HIT(vict) / 6 + (GET_MAX_MANA(ch) / 20));
+     decCurKI(ch, GET_HIT(vict) / 6 + (GET_MAX_MANA(ch) / 20));
   act("@RYou focus ki and point both your arms at @r$N@R. However $N seems to shake off your paralysis attack!@n", TRUE, ch, 0, vict, TO_CHAR);
   act("@r$n @Rfocuses ki and points both $s arms at YOU! Your insomnia makes you immune to $s feeble paralysis attempt.@n", TRUE, ch, 0, vict, TO_VICT);
   act("@r$n @Rfocuses ki and points both $s arms at @r$N@R. However $N seems to shake off $s paralysis attack!@n", TRUE, ch, 0, vict, TO_NOTVICT);
@@ -1729,7 +1729,7 @@ ACMD(do_paralyze)
   act("@RYou focus ki and point both your arms at @r$N@R. However $E manages to avoid your attempt to paralyze $M!@n", TRUE, ch, 0, vict, TO_CHAR);
   act("@r$n @Rfocuses ki and points both $s arms at YOU! You manage to avoid $s technique though...@n", TRUE, ch, 0, vict, TO_VICT);
   act("@r$n @Rfocuses ki and points both $s arms at @r$N@R. However $E manages to avoid @r$n's@R attempted technique...@n", TRUE, ch, 0, vict, TO_NOTVICT);
-     ch->decCurKI(GET_HIT(vict) / 6 + (GET_MAX_MANA(ch) / 20));
+     decCurKI(ch, GET_HIT(vict) / 6 + (GET_MAX_MANA(ch) / 20));
   improve_skill(ch, SKILL_PARALYZE, 0);
  } else {
         reveal_hiding(ch, 0);
@@ -1738,7 +1738,7 @@ ACMD(do_paralyze)
   act("@r$n @Rfocuses ki and points both $s arms at @r$N@R. @r$n's@R ki flows into @r$N@R body and partially paralyzes $M!@n", TRUE, ch, 0, vict, TO_NOTVICT);
      int duration = GET_INT(ch) / 15;
      assign_affect(vict, AFF_PARA, SKILL_PARALYZE, duration, 0, 0, 0, 0, 0, 0);
-     ch->decCurKI(GET_HIT(vict) / 6 + (GET_MAX_MANA(ch) / 20));
+     decCurKI(ch, GET_HIT(vict) / 6 + (GET_MAX_MANA(ch) / 20));
   improve_skill(ch, SKILL_PARALYZE, 0);
  }
 }
@@ -1763,14 +1763,14 @@ ACMD(do_taisha)
   return;
  }
 
- if ((ch->getCurKI()) < GET_MAX_MANA(ch) / 3) {
+ if ((getCurKI(ch)) < GET_MAX_MANA(ch) / 3) {
   send_to_char(ch, "You don't have enough ki.\r\n");
   return;
  }
 
  int prob = GET_SKILL(ch, SKILL_TAISHA), perc = axion_dice(0);
 
- ch->decCurKI(ch->getMaxKI() / 3);
+ decCurKI(ch, getMaxKI(ch) / 3);
  if (prob < perc) {
         reveal_hiding(ch, 0);
   act("@WYou hold up your hands while channeling ki. Your technique fails to produce an aura though....@n", TRUE, ch, 0, 0, TO_CHAR);
@@ -1794,7 +1794,7 @@ ACMD(do_kura)
   return;
  }
 
- if ((ch->getCurKI()) >= GET_MAX_MANA(ch)) {
+ if ((getCurKI(ch)) >= GET_MAX_MANA(ch)) {
   send_to_char(ch, "Your ki is already maxed out!\r\n");
   return;
  }
@@ -1823,13 +1823,13 @@ ACMD(do_kura)
  cost = (GET_MAX_MANA(ch) / 100) * num;
  bonus = cost;
 
- if ((ch->getCurST()) < cost) {
+ if ((getCurST(ch)) < cost) {
   send_to_char(ch, "You do not have enough stamina for that high a number.\r\n");
   return;
  }
 
  if (skill <= axion_dice(0)) {
-     ch->decCurST(cost);
+     decCurST(ch, cost);
         reveal_hiding(ch, 0);
   act("You crouch down and scream as your eyes turn red. You attempt to tap into your dark energies but you fail!", TRUE, ch, 0, 0, TO_CHAR);
   act("@c$n@w crouches down and screams as $s eyes turn red and $e attempts to tap into dark energies but fails!", TRUE, ch, 0, 0, TO_ROOM);
@@ -1838,8 +1838,8 @@ ACMD(do_kura)
   return;
  }
  else {
-     ch->decCurST(cost);
-     ch->incCurKI(bonus);
+     decCurST(ch, cost);
+     incCurKI(ch, bonus);
         reveal_hiding(ch, 0);
   act("You crouch down and scream as your eyes turn red. You attempt to tap into your dark energies and succeed as a rush of energy explodes around you!", TRUE, ch, 0, 0, TO_CHAR);
   act("@c$n@w crouches down and screams as $s eyes turn red. Suddenly $e manages to tap into dark energies and a rush of energy explodes around $m!", TRUE, ch, 0, 0, TO_ROOM);
@@ -1876,8 +1876,8 @@ ACMD(do_candy)
         return;
     }
 
-    auto ch_max = ch->getMaxPLTrans();
-    auto vict_max = vict->getMaxPLTrans();
+    auto ch_max = getMaxPLTrans(ch);
+    auto vict_max = getMaxPLTrans(vict);
 
     if (!IS_NPC(vict)) {
         send_to_char(ch, "You can't turn them into candy.\r\n");
@@ -1895,12 +1895,12 @@ ACMD(do_candy)
         send_to_char(ch, "They are too weak.\r\n");
         return;
     }
-    if ((ch->getCurKI()) < ch_max / 15) {
+    if ((getCurKI(ch)) < ch_max / 15) {
         send_to_char(ch, "You do not have enough ki.\r\n");
         return;
     }
     if (rand_number(1, 6) == 6) {
-        ch->decCurKI(ch->getMaxKI() / 15);
+        decCurKI(ch, getMaxKI(ch) / 15);
         reveal_hiding(ch, 0);
         act("@cYou aim your forelock at @R$N@c and fire a beam of energy but it is dodged!@n", TRUE, ch, 0, vict, TO_CHAR);
         act("@C$n@c aims $s forelock at @R$N@c and fires a beam of energy but the beam is dodged!@n", TRUE, ch, 0, vict, TO_NOTVICT);
@@ -1914,7 +1914,7 @@ ACMD(do_candy)
         return;
     }
     else {
-        ch->decCurKI(ch->getMaxKI() / 15);
+        decCurKI(ch, getMaxKI(ch) / 15);
         reveal_hiding(ch, 0);
         act("@cYou aim your forelock at @R$N@c and fire a beam of energy that envelopes $S entire body and changes $M into candy!@n", TRUE, ch, 0, vict, TO_CHAR);
         act("@C$n@c aims $s forelock at @R$N@c and fires a beam of energy that envelopes $S entire body and changes $M into candy!@n ", TRUE, ch, 0, vict, TO_NOTVICT);
@@ -1975,7 +1975,7 @@ ACMD(do_future)
   return;
  }
 
- if ((ch->getCurKI()) < GET_MAX_MANA(ch) / 40) {
+ if ((getCurKI(ch)) < GET_MAX_MANA(ch) / 40) {
   send_to_char(ch, "You do not have enough ki.\r\n");
   return;
  }
@@ -1994,7 +1994,7 @@ ACMD(do_future)
    send_to_char(ch, "They can't handle having their intelligence increased beyond 25.\r\n");
    return;
   }
-     ch->decCurKI(ch->getMaxKI() / 40);
+     decCurKI(ch, getMaxKI(ch) / 40);
   GET_PRACTICES(ch, GET_CLASS(ch)) -= 100;
         reveal_hiding(ch, 0);
   act("@CYou focus your energy into your fingers before stabbing your claws into $N and bestowing the power of Future Sight upon $M. Shortly after $E passes out.@n", TRUE, ch, 0, vict, TO_CHAR);
@@ -2015,7 +2015,7 @@ ACMD(do_future)
    send_to_char(ch, "You can't handle having your intelligence increased beyond 25.\r\n");
    return;
   }
-     ch->decCurKI(ch->getMaxKI() / 40);
+     decCurKI(ch, getMaxKI(ch) / 40);
   GET_PRACTICES(ch, GET_CLASS(ch)) -= 100;
         reveal_hiding(ch, 0);
   act("@CYou focus your energy into your mind and awaken your latent Future Sight powers!@n", TRUE, ch, 0, vict, TO_CHAR);
@@ -2196,7 +2196,7 @@ ACMD(do_suppress)
   return;
  }
 
- int64_t max = (ch->getEffMaxPL());
+  int64_t max = getEffMaxPL(ch);
  int64_t amt = ((max * 0.01) * num);
 
     reveal_hiding(ch, 0);
@@ -2221,7 +2221,7 @@ ACMD(do_hass)
  if (!check_skill(ch, SKILL_HASSHUKEN)) {
    return;
  }
- if ((ch->getCurST()) < GET_MAX_MOVE(ch) / 30) {
+ if ((getCurST(ch)) < GET_MAX_MOVE(ch) / 30) {
    send_to_char(ch, "You do not have enough stamina.\r\n");
    return;
  }
@@ -2233,7 +2233,7 @@ ACMD(do_hass)
          reveal_hiding(ch, 0);
   act("@WYou try to move your arms at incredible speeds but screw up and waste some of your stamina.@n", TRUE, ch, 0, 0, TO_CHAR);
   act("@C$n@W tries to move $s arms at incredible speeds but screws up and wastes some of $s stamina.@n", TRUE, ch, 0, 0, TO_ROOM);
-  ch->decCurST(ch->getMaxST() / 30);
+  decCurST(ch, getMaxST(ch) / 30);
   improve_skill(ch, SKILL_HASSHUKEN, 0);
   return;
  }
@@ -2243,7 +2243,7 @@ ACMD(do_hass)
   act("@C$n@W concentrates and starts to move $s arms at incredible speeds.@n", TRUE, ch, 0, 0, TO_ROOM);
   int duration = perc / 15;
   assign_affect(ch, AFF_HASS, SKILL_HASSHUKEN, duration, 0, 0, 0, 0, 0, 0);
-  ch->decCurST(ch->getMaxST() / 30);
+  decCurST(ch, getMaxST(ch) / 30);
   improve_skill(ch, SKILL_HASSHUKEN, 0);
   return;
  }
@@ -2414,7 +2414,7 @@ ACMD(do_pose)
   return;
  }
 
- if ((ch->getCurST()) < GET_MAX_MOVE(ch) / 40) {
+ if ((getCurST(ch)) < GET_MAX_MOVE(ch) / 40) {
   send_to_char(ch, "You do not have enough stamina to pull off such an exciting pose!\r\n");
   return;
  }
@@ -2445,7 +2445,7 @@ ACMD(do_pose)
         reveal_hiding(ch, 0);
   act("@WYou attempt to strike an awe inspiring pose, but end up falling on your face!@n", TRUE, ch, 0, 0, TO_CHAR);
   act("@C$n@W attempts to strike an awe inspiring pose, but ends up falling on $s face!@n", TRUE, ch, 0, 0, TO_ROOM);
-     ch->decCurST(ch->getMaxST() / 40);
+     decCurST(ch, getMaxST(ch) / 40);
   improve_skill(ch, SKILL_POSE, 0);
   return;
  }
@@ -2473,10 +2473,10 @@ ACMD(do_pose)
   ch->real_abils.str += 8;
   ch->real_abils.dex += 8;
   save_char(ch);
-  int64_t before = (ch->getMaxLF());
+  int64_t before = (getMaxLF(ch));
   SET_BIT_AR(PLR_FLAGS(ch), PLR_POSE);
-  ch->incCurLF((ch->getMaxLF()) - before);
-     ch->decCurST(ch->getMaxST() / 40);
+  incCurLF(ch, (getMaxLF(ch)) - before);
+     decCurST(ch, getMaxST(ch) / 40);
   improve_skill(ch, SKILL_POSE, 0);
   return;
  }
@@ -2507,13 +2507,13 @@ ACMD(do_fury) {
   }
 
   if (!*arg) {
-   if (GET_HIT(ch) < (ch->getEffMaxPL())) {
-    if ((ch->getCurLF()) >= (ch->getMaxLF()) * 0.2) {
-     ch->restoreHealth(false);
-     ch->decCurLFPercent(.2);
+   if (GET_HIT(ch) < getEffMaxPL(ch)) {
+    if ((getCurLF(ch)) >= (getMaxLF(ch)) * 0.2) {
+     restoreHealth(ch, false);
+     decCurLFPercent(ch, .2);
     } else {
-        ch->incCurHealth((ch->getCurLF()));
-        ch->decCurLFPercent(2,-1);
+        incCurHealth(ch, (getCurLF(ch)));
+        decCurLFPercent(ch, 2, -1);
     }
    }
    GET_FURY(ch) = 0;
@@ -2631,7 +2631,7 @@ ACMD(do_telepathy)
   return;
  }
 
- else if ((ch->getCurKI()) < GET_MAX_MANA(ch) / 40) {
+ else if ((getCurKI(ch)) < GET_MAX_MANA(ch) / 40) {
   send_to_char(ch, "You do not have enough ki to focus your mental abilities.\r\n");
   return;
  }
@@ -2674,7 +2674,7 @@ ACMD(do_telepathy)
    if (GET_INT(vict) > GET_INT(ch)) {
     send_to_char(ch, "You feel like someone was using your mind for something...\r\n");
    }
-      ch->decCurKI(ch->getMaxKI() / 40);
+      decCurKI(ch, getMaxKI(ch) / 40);
    return;  
   }
  }
@@ -2736,7 +2736,7 @@ ACMD(do_telepathy)
   }
   else {
    if (axion_dice(0) > GET_SKILL(ch, SKILL_TELEPATHY)) {
-       ch->decCurKI(ch->getMaxKI() / 40);
+       decCurKI(ch, getMaxKI(ch) / 40);
     act("@wYou attempt to read $N's@w mind, but fail to see it clearly.@n", TRUE, ch, 0, vict, TO_CHAR);
     if (rand_number(1, 15) >= 14 && !AFF_FLAGGED(ch, AFF_SHOCKED)) {
      act("@MYour mind has been shocked!@n", TRUE, ch, 0, 0, TO_CHAR);
@@ -2747,7 +2747,7 @@ ACMD(do_telepathy)
     return;
    }
    else if (GET_SKILL(vict, SKILL_TELEPATHY) >= GET_SKILL(ch, SKILL_TELEPATHY) && rand_number(1, 2) == 2) {
-       ch->decCurKI(ch->getMaxKI() / 40);
+       decCurKI(ch, getMaxKI(ch) / 40);
     act("@wYou fail to read @c$N's@w mind and they seemed to have noticed the attempt!@n", TRUE, ch, 0, vict, TO_CHAR);
     act("@C$n@w attempts to read your mind, but you resist and force $m out!@n", TRUE, ch, 0, vict, TO_VICT);
     improve_skill(ch, SKILL_TELEPATHY, 0);
@@ -2755,7 +2755,7 @@ ACMD(do_telepathy)
    }
    else {
     send_to_char(ch, "@wYou peer into their mind:\r\n");
-       ch->decCurKI(ch->getMaxKI() / 40);
+       decCurKI(ch, getMaxKI(ch) / 40);
     send_to_char(ch, "@GName      @D: @W%s@n\r\n", GET_NAME(vict));
     send_to_char(ch, "@GRace      @D: @W%s@n\r\n", TRUE_RACE(vict));
     send_to_char(ch, "@GSensei    @D: @W%s@n\r\n", vict->chclass->getName().c_str());
@@ -2839,7 +2839,7 @@ ACMD(do_telepathy)
     send_to_char(vict, "@c%s@W talks to you telepathically, @w'@C%s@w'@n\r\n", GET_NAME(ch), argument);
     send_to_imm("@GTELEPATHY: @C%s@G telepaths @c%s, @W'@w%s@W'@n", GET_ADMLEVEL(ch) > 0 ? GET_NAME(ch) : GET_USER(ch),  GET_ADMLEVEL(vict) > 0 ? GET_NAME(vict) : GET_USER(vict), argument);
    }
-      ch->decCurKI(ch->getMaxKI() / 40);
+      decCurKI(ch, getMaxKI(ch) / 40);
   } // End of vict is here
   return;
  } // End of send argument
@@ -2903,10 +2903,10 @@ ACMD(do_potential)
 
   SET_BIT_AR(PLR_FLAGS(vict), PLR_PR);
 
-  vict->gainBasePL((vict->getBasePL() / 100) * boost);
+  gainBasePL(vict, (getBasePL(vict) / 100) * boost);
   if (IS_HALFBREED(vict)) {
-      vict->gainBaseKI((vict->getBaseKI() / 100) * boost);
-      vict->gainBaseST((vict->getBaseST() / 100) * boost);
+      gainBaseKI(vict, (getBaseKI(vict) / 100) * boost);
+      gainBaseST(vict, (getBaseST(vict) / 100) * boost);
   }
         reveal_hiding(ch, 0);
   act("You place your hand on top of $N's head. After a moment of concentrating you release their hidden potential.", TRUE, ch, 0, vict, TO_CHAR);
@@ -2996,9 +2996,9 @@ ACMD(do_majinize)
 
 		if (GET_MAJINIZED(vict) == 0)
 		{
-			GET_MAJINIZED(vict) = ((vict->getBasePL()) * .4);
+			GET_MAJINIZED(vict) = ((getBasePL(vict)) * .4);
 		}
-        vict->loseBasePL(GET_MAJINIZED(vict));
+        loseBasePL(vict, GET_MAJINIZED(vict));
 		return;
 	}
 	else if (GET_BOOSTS(ch) == 0)
@@ -3031,8 +3031,8 @@ ACMD(do_majinize)
 		MAJINIZED(vict) = GET_ID(ch);
 		GET_BOOSTS(ch) -= 1;
 
-		GET_MAJINIZED(vict) = (vict->getBasePL()) * .4;
-        vict->gainBasePLPercent(.4, true);
+		GET_MAJINIZED(vict) = (getBasePL(vict)) * .4;
+        gainBasePLPercent(vict, .4, true);
 		return;
 	}
 
@@ -3078,13 +3078,13 @@ ACMD(do_spit)
 
  cost = ((GET_MAX_MANA(ch) / (GET_SKILL(ch, SKILL_SPIT) / 4)) + GET_MAX_MANA(ch) / 100);
 
- if ((ch->getCurKI()) < cost) {
+ if ((getCurKI(ch)) < cost) {
   send_to_char(ch, "You do not have enough ki to petrifiy with your spit!\r\n");
   return;
  }
 
  if (GET_SKILL(ch, SKILL_SPIT) < axion_dice(0)) {
-  ch->decCurKI(cost);
+  decCurKI(ch, cost);
         reveal_hiding(ch, 0);
   act("@WGathering spit you concentrate ki into a wicked loogie and let it loose, but it falls short of hitting @c$N@W!@n", TRUE, ch, 0, vict, TO_CHAR);
   act("@C$n@W seems to focus ki before hawking a loogie at you! Fortunatly the loogie falls short.@n", TRUE, ch, 0, vict, TO_VICT);
@@ -3093,8 +3093,8 @@ ACMD(do_spit)
   WAIT_STATE(ch, PULSE_2SEC);
   return;
  }
- else if (AFF_FLAGGED(vict, AFF_ZANZOKEN) && (vict->getCurST()) >= 1 && GET_POS(vict) != POS_SLEEPING) {
-     ch->decCurKI(cost);
+ else if (AFF_FLAGGED(vict, AFF_ZANZOKEN) && (getCurST(vict)) >= 1 && GET_POS(vict) != POS_SLEEPING) {
+     decCurKI(ch, cost);
            reveal_hiding(ch, 0);
      act("@C$N@c disappears, avoiding your spit before reappearing!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@cYou disappear, avoiding @C$n's@c @rstone spit@c before reappearing!@n", FALSE, ch, 0, vict, TO_VICT);
@@ -3112,7 +3112,7 @@ ACMD(do_spit)
   af.bitvector = AFF_PARALYZE;
   affect_join(vict, &af, FALSE, FALSE, FALSE, FALSE);
 
-     ch->decCurKI(cost);
+     decCurKI(ch, cost);
         reveal_hiding(ch, 0);
   act("@WGathering spit you concentrate ki into a wicked loogie and let it loose, and it smacks into @c$N@W turning $M into stone!@n", TRUE, ch, 0, vict, TO_CHAR);
   act("@C$n@W seems to focus ki before hawking a loogie at you! It manages to hit and you instantly turn to stone!@n", TRUE, ch, 0, vict, TO_VICT);
@@ -3297,7 +3297,7 @@ kachin ? "create kachin\r\n" : "",  boost ? "create elixir\r\n" : "");
   cost = GET_MAX_MANA(ch) / (skill / 2);
   cost *= discount;
    
-  if ((ch->getCurKI()) < cost) {
+  if ((getCurKI(ch)) < cost) {
    send_to_char(ch, "You do not have enough ki to create %s\r\n", arg);
    return;
   } else {
@@ -3332,7 +3332,7 @@ kachin ? "create kachin\r\n" : "",  boost ? "create elixir\r\n" : "");
    reveal_hiding(ch, 0);  GET_COOLDOWN(ch) = 10;
    act("You hold out your hand and create $p out of your ki!", TRUE, ch, obj, 0, TO_CHAR);
    act("$n holds out $s hand and creates $p out of thin air!", TRUE, ch, obj, 0, TO_ROOM);
-      ch->decCurKI(cost);
+      decCurKI(ch, cost);
    return;
   }
  }
@@ -3340,7 +3340,7 @@ kachin ? "create kachin\r\n" : "",  boost ? "create elixir\r\n" : "");
   cost = GET_MAX_MANA(ch) / (skill * 2);
   cost *= discount;
    
-  if ((ch->getCurKI()) < cost) {
+  if ((getCurKI(ch)) < cost) {
    send_to_char(ch, "You do not have enough ki to create %s\r\n", arg);
    return;
   }
@@ -3376,7 +3376,7 @@ kachin ? "create kachin\r\n" : "",  boost ? "create elixir\r\n" : "");
    reveal_hiding(ch, 0);  GET_COOLDOWN(ch) = 10;
    act("You hold out your hand and create $p out of your ki!", TRUE, ch, obj, 0, TO_CHAR);
    act("$n holds out $s hand and creates $p out of thin air!", TRUE, ch, obj, 0, TO_ROOM);
-      ch->decCurKI(cost);
+      decCurKI(ch, cost);
    return;
   }
  }
@@ -3388,7 +3388,7 @@ kachin ? "create kachin\r\n" : "",  boost ? "create elixir\r\n" : "");
    send_to_char(ch, "What do you want to create?\r\n");
    return;
   }
-  if ((ch->getCurKI()) < cost) {
+  if ((getCurKI(ch)) < cost) {
    send_to_char(ch, "You do not have enough ki to create %s\r\n", arg);
    return;
   }
@@ -3399,7 +3399,7 @@ kachin ? "create kachin\r\n" : "",  boost ? "create elixir\r\n" : "");
    reveal_hiding(ch, 0);  GET_COOLDOWN(ch) = 10;
    act("You hold out your hand and create $p out of your ki!", TRUE, ch, obj, 0, TO_CHAR);
    act("$n holds out $s hand and creates $p out of thin air!", TRUE, ch, obj, 0, TO_ROOM);
-      ch->decCurKI(cost);
+      decCurKI(ch, cost);
    return;
   }
  }
@@ -3411,7 +3411,7 @@ kachin ? "create kachin\r\n" : "",  boost ? "create elixir\r\n" : "");
    send_to_char(ch, "What do you want to create?\r\n");
    return;
   }
-  if ((ch->getCurKI()) < cost) {
+  if ((getCurKI(ch)) < cost) {
    send_to_char(ch, "You do not have enough ki to create %s\r\n", arg);
    return;
   }
@@ -3422,7 +3422,7 @@ kachin ? "create kachin\r\n" : "",  boost ? "create elixir\r\n" : "");
    reveal_hiding(ch, 0);  //GET_COOLDOWN(ch) = 10;
    act("You hold out your hand and create $p out of your ki!", TRUE, ch, obj, 0, TO_CHAR);
    act("$n holds out $s hand and creates $p out of thin air!", TRUE, ch, obj, 0, TO_ROOM);
-      ch->decCurKI(cost);
+      decCurKI(ch, cost);
    return;
   }
  }
@@ -3434,7 +3434,7 @@ kachin ? "create kachin\r\n" : "",  boost ? "create elixir\r\n" : "");
    send_to_char(ch, "What do you want to create?\r\n");
    return;
   }
-  if ((ch->getCurKI()) < cost) {
+  if ((getCurKI(ch)) < cost) {
    send_to_char(ch, "You do not have enough ki to create %s\r\n", arg);
    return;
   }
@@ -3553,7 +3553,7 @@ kachin ? "create kachin\r\n" : "",  boost ? "create elixir\r\n" : "");
    reveal_hiding(ch, 0);  GET_COOLDOWN(ch) = 10;
    act("You hold out your hand and create $p out of your ki!", TRUE, ch, obj, 0, TO_CHAR);
    act("$n holds out $s hand and creates $p out of thin air!", TRUE, ch, obj, 0, TO_ROOM);
-      ch->decCurKI(cost);
+      decCurKI(ch, cost);
    return;
   }
  }
@@ -3565,7 +3565,7 @@ kachin ? "create kachin\r\n" : "",  boost ? "create elixir\r\n" : "");
    send_to_char(ch, "What do you want to create?\r\n");
    return;
   }
-  if ((ch->getCurKI()) < cost) {
+  if ((getCurKI(ch)) < cost) {
    send_to_char(ch, "You do not have enough ki to create %s\r\n", arg);
    return;
   }
@@ -3614,7 +3614,7 @@ kachin ? "create kachin\r\n" : "",  boost ? "create elixir\r\n" : "");
    reveal_hiding(ch, 0);  GET_COOLDOWN(ch) = 10;
    act("You hold out your hand and create $p out of your ki!", TRUE, ch, obj, 0, TO_CHAR);
    act("$n holds out $s hand and creates $p out of thin air!", TRUE, ch, obj, 0, TO_ROOM);
-      ch->decCurKI(cost);
+      decCurKI(ch, cost);
    return;
   }
  }
@@ -3625,7 +3625,7 @@ kachin ? "create kachin\r\n" : "",  boost ? "create elixir\r\n" : "");
    send_to_char(ch, "What do you want to create?\r\n");
    return;
   }
-  if ((ch->getCurKI()) < cost) {
+  if ((getCurKI(ch)) < cost) {
    send_to_char(ch, "You do not have enough ki to create %s\r\n", arg);
    return;
   }
@@ -3638,7 +3638,7 @@ kachin ? "create kachin\r\n" : "",  boost ? "create elixir\r\n" : "");
    reveal_hiding(ch, 0);  GET_COOLDOWN(ch) = 10;
    act("You hold out your hand and create $p out of your ki!", TRUE, ch, obj, 0, TO_CHAR);
    act("$n holds out $s hand and creates $p out of thin air!", TRUE, ch, obj, 0, TO_ROOM);
-      ch->decCurKI(cost);
+      decCurKI(ch, cost);
    return;
   }
  } else if (!(strcmp(arg, "shuriken"))) {
@@ -3649,7 +3649,7 @@ kachin ? "create kachin\r\n" : "",  boost ? "create elixir\r\n" : "");
    send_to_char(ch, "What do you want to create?\r\n");
    return;
   }
-  if ((ch->getCurKI()) < cost) {
+  if ((getCurKI(ch)) < cost) {
    send_to_char(ch, "You do not have enough ki to create %s\r\n", arg);
    return;
   }
@@ -3663,7 +3663,7 @@ kachin ? "create kachin\r\n" : "",  boost ? "create elixir\r\n" : "");
    reveal_hiding(ch, 0);  GET_COOLDOWN(ch) = 10;
    act("You hold out your hand and create $p out of your ki!", TRUE, ch, obj, 0, TO_CHAR);
    act("$n holds out $s hand and creates $p out of thin air!", TRUE, ch, obj, 0, TO_ROOM);
-      ch->decCurKI(cost);
+      decCurKI(ch, cost);
    return;
   }
  }
@@ -3675,7 +3675,7 @@ kachin ? "create kachin\r\n" : "",  boost ? "create elixir\r\n" : "");
    send_to_char(ch, "What do you want to create?\r\n");
    return;
   }
-  if ((ch->getCurKI()) < cost) {
+  if ((getCurKI(ch)) < cost) {
    send_to_char(ch, "You do not have enough ki to create %s\r\n", arg);
    return;
   }
@@ -3688,7 +3688,7 @@ kachin ? "create kachin\r\n" : "",  boost ? "create elixir\r\n" : "");
    reveal_hiding(ch, 0);  GET_COOLDOWN(ch) = 10;
    act("You hold out your hand and create $p out of your ki!", TRUE, ch, obj, 0, TO_CHAR);
    act("$n holds out $s hand and creates $p out of thin air!", TRUE, ch, obj, 0, TO_ROOM);
-      ch->decCurKI(cost);
+      decCurKI(ch, cost);
    return;
   }
  }
@@ -3700,7 +3700,7 @@ kachin ? "create kachin\r\n" : "",  boost ? "create elixir\r\n" : "");
    send_to_char(ch, "What do you want to create?\r\n");
    return;
   }
-  if ((ch->getCurKI()) < cost) {
+  if ((getCurKI(ch)) < cost) {
    send_to_char(ch, "You do not have enough ki to create %s\r\n", arg);
    return;
   }
@@ -3713,7 +3713,7 @@ kachin ? "create kachin\r\n" : "",  boost ? "create elixir\r\n" : "");
    reveal_hiding(ch, 0);  GET_COOLDOWN(ch) = 10;
    act("You hold out your hand and create $p out of your ki!", TRUE, ch, obj, 0, TO_CHAR);
    act("$n holds out $s hand and creates $p out of thin air!", TRUE, ch, obj, 0, TO_ROOM);
-      ch->decCurKI(cost);
+      decCurKI(ch, cost);
    return;
   }
  }
@@ -3725,7 +3725,7 @@ kachin ? "create kachin\r\n" : "",  boost ? "create elixir\r\n" : "");
    send_to_char(ch, "What do you want to create?\r\n");
    return;
   }
-  if ((ch->getCurKI()) < cost) {
+  if ((getCurKI(ch)) < cost) {
    send_to_char(ch, "You do not have enough ki to create %s\r\n", arg);
    return;
   }
@@ -3738,7 +3738,7 @@ kachin ? "create kachin\r\n" : "",  boost ? "create elixir\r\n" : "");
    reveal_hiding(ch, 0);  GET_COOLDOWN(ch) = 10;
    act("You hold out your hand and create $p out of your ki!", TRUE, ch, obj, 0, TO_CHAR);
    act("$n holds out $s hand and creates $p out of thin air!", TRUE, ch, obj, 0, TO_ROOM);
-      ch->decCurKI(cost);
+      decCurKI(ch, cost);
    return;
   }
  }
@@ -3750,7 +3750,7 @@ kachin ? "create kachin\r\n" : "",  boost ? "create elixir\r\n" : "");
    send_to_char(ch, "What do you want to create?\r\n");
    return;
   }
-  if ((ch->getCurKI()) < cost) {
+  if ((getCurKI(ch)) < cost) {
    send_to_char(ch, "You do not have enough ki to create %s\r\n", arg);
    return;
   }
@@ -3762,7 +3762,7 @@ kachin ? "create kachin\r\n" : "",  boost ? "create elixir\r\n" : "");
    reveal_hiding(ch, 0);  GET_COOLDOWN(ch) = 10;
    act("You hold out your hand and create $p out of your ki!", TRUE, ch, obj, 0, TO_CHAR);
    act("$n holds out $s hand and creates $p out of thin air!", TRUE, ch, obj, 0, TO_ROOM);
-      ch->decCurKI(cost);
+      decCurKI(ch, cost);
    return;
   }
  }
@@ -3774,7 +3774,7 @@ kachin ? "create kachin\r\n" : "",  boost ? "create elixir\r\n" : "");
    send_to_char(ch, "What do you want to create?\r\n");
    return;
   }
-  if ((ch->getCurKI()) < cost) {
+  if ((getCurKI(ch)) < cost) {
    send_to_char(ch, "You do not have enough ki to create %s\r\n", arg);
    return;
   }
@@ -3786,7 +3786,7 @@ kachin ? "create kachin\r\n" : "",  boost ? "create elixir\r\n" : "");
    reveal_hiding(ch, 0);  GET_COOLDOWN(ch) = 10;
    act("You hold out your hand and create $p out of your ki!", TRUE, ch, obj, 0, TO_CHAR);
    act("$n holds out $s hand and creates $p out of thin air!", TRUE, ch, obj, 0, TO_ROOM);
-      ch->decCurKI(cost);
+      decCurKI(ch, cost);
    return;
   }
  }
@@ -3798,7 +3798,7 @@ kachin ? "create kachin\r\n" : "",  boost ? "create elixir\r\n" : "");
    send_to_char(ch, "What do you want to create?\r\n");
    return;
   }
-  if ((ch->getCurKI()) < cost) {
+  if ((getCurKI(ch)) < cost) {
    send_to_char(ch, "You do not have enough ki to create %s\r\n", arg);
    return;
   }
@@ -3818,21 +3818,21 @@ kachin ? "create kachin\r\n" : "",  boost ? "create elixir\r\n" : "");
    reveal_hiding(ch, 0);  GET_COOLDOWN(ch) = 10;
    act("You hold out your hand and create $p out of your ki!", TRUE, ch, obj, 0, TO_CHAR);
    act("$n holds out $s hand and creates $p out of thin air!", TRUE, ch, obj, 0, TO_ROOM);
-      ch->decCurKI(cost);
-   ch->decCurHealthPercent(1, 1);
+      decCurKI(ch, cost);
+   decCurHealthPercent(ch, 1, 1);
    GET_PRACTICES(ch, GET_CLASS(ch)) -= 10;   
    return;
   }
  }
  else if (!(strcmp(arg, "senzu"))) {
   cost = GET_MAX_MANA(ch);
-  int64_t cost2 = (ch->getEffMaxPL()) - 1;
+   int64_t cost2 = getEffMaxPL(ch) - 1;
    
   if (senzu == FALSE) {
    send_to_char(ch, "What do you want to create?\r\n");
    return;
   }
-  if ((ch->getCurKI()) < cost) {
+  if ((getCurKI(ch)) < cost) {
    send_to_char(ch, "You do not have enough ki to create %s, you need full ki.\r\n", arg);
    return;
   }
@@ -3840,7 +3840,7 @@ kachin ? "create kachin\r\n" : "",  boost ? "create elixir\r\n" : "");
    send_to_char(ch, "You do not have enough powerlevel to create %s, you need to be at full.\r\n", arg);
    return;
   }
-  else if ((ch->getCurST()) < GET_MAX_MOVE(ch)) {
+  else if ((getCurST(ch)) < GET_MAX_MOVE(ch)) {
    send_to_char(ch, "You do not have enough stamina to create %s, you need to be at full.\r\n", arg);
    return;
   }
@@ -3855,9 +3855,9 @@ kachin ? "create kachin\r\n" : "",  boost ? "create elixir\r\n" : "");
    reveal_hiding(ch, 0);  GET_COOLDOWN(ch) = 10;
    act("You hold out your hand and create $p out of your ki!", TRUE, ch, obj, 0, TO_CHAR);
    act("$n holds out $s hand and creates $p out of thin air!", TRUE, ch, obj, 0, TO_ROOM);
-      ch->decCurKI(cost);
-      ch->decCurHealth(cost2);
-      ch->decCurSTPercent(1, 1);
+      decCurKI(ch, cost);
+      decCurHealth(ch, cost2);
+      decCurSTPercent(ch, 1, 1);
    GET_PRACTICES(ch, GET_CLASS(ch)) -= 50;
    return;
   }
@@ -3891,11 +3891,11 @@ ACMD(do_recharge)
 
   cost = GET_MAX_MOVE(ch) / 20;
 
-  if ((ch->getCurKI()) < cost) {
+  if ((getCurKI(ch)) < cost) {
    send_to_char(ch, "You do not have enough ki to recharge your stamina.\r\n");
    return;
   }
-  else if ((ch->getCurST()) >= GET_MAX_MOVE(ch)) {
+  else if ((getCurST(ch)) >= GET_MAX_MOVE(ch)) {
    send_to_char(ch, "Your energy reserves are already full.\r\n");
    return;
   }
@@ -3903,12 +3903,12 @@ ACMD(do_recharge)
    reveal_hiding(ch, 0);  GET_COOLDOWN(ch) = 10;
    act("You focus your ki into your energy reserves, recharging them some.", TRUE, ch, 0, 0, TO_CHAR);
    act("$n stops and glows green briefly.", TRUE, ch, 0, 0, TO_ROOM);
-      ch->decCurKI(cost);
-   if ((ch->getCurST()) + (cost * 2) < GET_MAX_MOVE(ch)) {
-    ch->incCurST(cost * 2);
+      decCurKI(ch, cost);
+   if ((getCurST(ch)) + (cost * 2) < GET_MAX_MOVE(ch)) {
+    incCurST(ch, cost * 2);
    }
    else {
-    ch->restoreST(false);
+    restoreST(ch, false);
     send_to_char(ch, "You are fully recharged now.\r\n");
    }
    WAIT_STATE(ch, PULSE_2SEC);
@@ -3939,11 +3939,11 @@ ACMD(do_srepair)
   
   cost = GET_MAX_HIT(ch) / 40;
 
-  if ((ch->getCurST()) < cost) {
+  if ((getCurST(ch)) < cost) {
    send_to_char(ch, "You do not have enough stamina to repair yourself.\r\n");
    return;
   }
-  else if (GET_HIT(ch) >= (ch->getEffMaxPL())) {
+  else if (GET_HIT(ch) >= getEffMaxPL(ch)) {
    send_to_char(ch, "You are already at full functionality and do not require repairs.\r\n");
    return;
   }
@@ -3973,19 +3973,19 @@ ACMD(do_srepair)
    if (repaired == TRUE) {
     send_to_char(ch, "@GYour nano-robots also repair all of your equipment a little bit.@n\r\n");
    }
-    ch->decCurST(cost);
+    decCurST(ch, cost);
     heal = cost * 2;
    if (GET_BONUS(ch, BONUS_HEALER) > 0) {
     heal += heal * .25;
    }
 
-   if(ch->incCurHealth(heal) == ch->getEffMaxPL()) {
+    if(incCurHealth(ch, heal) == getEffMaxPL(ch)) {
        send_to_char(ch, "You are fully repaired now.\r\n");
    }
 
-   if (!IS_NPC(ch) && rand_number(1, 3) == 2 && (ch->getCurKI()) < GET_MAX_MANA(ch)) {
+   if (!IS_NPC(ch) && rand_number(1, 3) == 2 && (getCurKI(ch)) < GET_MAX_MANA(ch)) {
     send_to_char(ch, "@GThe repairs have managed to relink power reserves and boost your current energy level.@n\r\n");
-    ch->incCurKI(cost);
+    incCurKI(ch, cost);
    }
    WAIT_STATE(ch, PULSE_2SEC);
   }
@@ -4070,7 +4070,7 @@ ACMD(do_upgrade)
     extract_obj(obj);
     act("@WYou install the circuits and upgrade your maximum powerlevel.@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@C$n@W installs some circuits and upgrades $s systems.@n", TRUE, ch, 0, 0, TO_ROOM);
-    ch->gainBasePL(gain, true);
+    gainBasePL(ch, gain, true);
     send_to_char(ch, "@gGain @D[@G+%s@D]\r\n", add_commas(gain));
     return;
    } else if (!strcasecmp("ki", arg2)) {
@@ -4078,7 +4078,7 @@ ACMD(do_upgrade)
     extract_obj(obj);
     act("@WYou install the circuits and upgrade your maximum ki.@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@C$n@W installs some circuits and upgrades $s systems.@n", TRUE, ch, 0, 0, TO_ROOM);
-    ch->gainBaseKI(gain, true);
+    gainBaseKI(ch, gain, true);
     send_to_char(ch, "@gGain @D[@G+%s@D]\r\n", add_commas(gain));
     return;
    } else if (!strcasecmp("stamina", arg2)) {
@@ -4086,7 +4086,7 @@ ACMD(do_upgrade)
     extract_obj(obj);
     act("@WYou install the circuits and upgrade your maximum stamina.@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@C$n@W installs some circuits and upgrades $s systems.@n", TRUE, ch, 0, 0, TO_ROOM);
-    ch->gainBaseST(gain, true);
+    gainBaseST(ch, gain, true);
     send_to_char(ch, "@gGain @D[@G+%s@D]\r\n", add_commas(gain));
     return;
    } else {
@@ -4101,7 +4101,7 @@ ACMD(do_upgrade)
   return;
  }
 
- if (ch->is_soft_cap(0)) {
+ if (is_soft_cap(ch, 0)) {
   send_to_char(ch, "@mYou are unable to spend anymore UGP right now (Softcap)@n\r\n");
   return;
  }
@@ -4155,14 +4155,14 @@ ACMD(do_upgrade)
    send_to_char(ch, "You need %s upgrade points, and only have %s.\r\n", add_commas(cost), add_commas(GET_UP(ch)));
    return;
   }
-  else if (ch->is_soft_cap(bonus)) {
+  else if (is_soft_cap(ch, bonus)) {
    send_to_char(ch, "@mYou can't spend that much UGP on it as it will go over your softcap.@n\r\n");
    return;
   }
   else {
    GET_UP(ch) -= cost;
    send_to_char(ch, "You upgrade your system and gain %s %s!", add_commas(bonus), arg);
-   ch->gainBasePL(bonus, true);
+   gainBasePL(ch, bonus, true);
   }
  }
  else if (!strcasecmp("ki", arg)) {
@@ -4199,14 +4199,14 @@ ACMD(do_upgrade)
    send_to_char(ch, "You need %s upgrade points, and only have %s.\r\n", add_commas(cost), add_commas(GET_UP(ch)));
    return;
   }
-  else if (ch->is_soft_cap(bonus)) {
+  else if (is_soft_cap(ch, bonus)) {
    send_to_char(ch, "@mYou can't spend that much UGP on it as it will go over your softcap.@n\r\n");
    return;
   }
   else {
    GET_UP(ch) -= cost;
    send_to_char(ch, "You upgrade your system and gain %s %s!", add_commas(bonus), arg);
-   ch->gainBaseKI(bonus, true);
+   gainBaseKI(ch, bonus, true);
   }
  }
  else if (!strcasecmp("stamina", arg)) {
@@ -4243,14 +4243,14 @@ ACMD(do_upgrade)
    send_to_char(ch, "You need %s upgrade points, and only have %s.\r\n", add_commas(cost), add_commas(GET_UP(ch)));
    return;
   }
-  else if (ch->is_soft_cap(bonus)) {
+  else if (is_soft_cap(ch, bonus)) {
    send_to_char(ch, "@mYou can't spend that much UGP on it as it will go over your softcap.@n\r\n");
    return;
   }
   else {
    GET_UP(ch) -= cost;
    send_to_char(ch, "You upgrade your system and gain %s %s!", add_commas(bonus), arg);
-   ch->gainBaseST(bonus, true);
+   gainBaseST(ch, bonus, true);
   }
  }
  else {
@@ -4306,7 +4306,7 @@ ACMD(do_ingest)
    return;
   }
   
-  if (GET_MAX_HIT(vict) >= (ch->getBasePL()) * 3) {
+  if (GET_MAX_HIT(vict) >= (getBasePL(ch)) * 3) {
    send_to_char(ch, "You are too weak to ingest them into your body!\r\n");
    return;
   }
@@ -4315,7 +4315,7 @@ ACMD(do_ingest)
    return;
   }
    reveal_hiding(ch, 0);
-  if (AFF_FLAGGED(vict, AFF_ZANZOKEN) && (vict->getCurST()) >= 1 && GET_POS(vict) != POS_SLEEPING) {
+  if (AFF_FLAGGED(vict, AFF_ZANZOKEN) && (getCurST(vict)) >= 1 && GET_POS(vict) != POS_SLEEPING) {
      act("@C$N@c disappears, avoiding your attempted ingestion!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@cYou disappear, avoiding @C$n's@c attempted @ringestion@c before reappearing!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@c disappears, avoiding @C$n's@c attempted @ringestion@c before reappearing!@n", FALSE, ch, 0, vict, TO_NOTVICT);
@@ -4335,12 +4335,12 @@ ACMD(do_ingest)
     act("@C$n@W flings a piece of goo at you! The goo engulfs your body and then returns to @C$n@W!@n", TRUE, ch, 0, vict, TO_VICT);
     act("@C$n@w flings a piece of goo at @c$N@W! The goo engulfs $M and then return to @C$n@W!@n", TRUE, ch, 0, vict, TO_NOTVICT);
     GET_ABSORBS(ch) += 1;
-    int64_t pl = (vict->getBasePL()) / 6;
-    int64_t stam = (vict->getBaseST()) / 6;
-    int64_t ki = (vict->getBaseKI()) / 6;
-    ch->gainBasePL(pl, true);
-    ch->gainBaseST(stam, true);
-    ch->gainBaseKI(ki, true);
+    int64_t pl = (getBasePL(vict)) / 6;
+    int64_t stam = (getBaseST(vict)) / 6;
+    int64_t ki = (getBaseKI(vict)) / 6;
+    gainBasePL(ch, pl, true);
+    gainBaseST(ch, stam, true);
+    gainBaseKI(ch, ki, true);
     if (!IS_NPC(vict) && !IS_NPC(ch)) {
      send_to_imm("[PK] %s killed %s at room [%d]\r\n", GET_NAME(ch), GET_NAME(vict), GET_ROOM_VNUM(IN_ROOM(vict)));
      SET_BIT_AR(PLR_FLAGS(vict), PLR_ABSORBED);
@@ -4493,7 +4493,7 @@ ACMD(do_absorb)
     send_to_char(ch, "They are too weak for you to bother absorbing from.\r\n");
     return;
    }
-   if ((vict->getCurST()) < (GET_MAX_MOVE(vict) / 20) && (vict->getCurKI()) < (GET_MAX_MANA(vict) / 20)) {
+   if ((getCurST(vict)) < (GET_MAX_MOVE(vict) / 20) && (getCurKI(vict)) < (GET_MAX_MANA(vict) / 20)) {
     send_to_char(ch, "They have nothing to absorb right now, they are drained...\r\n");
     return;
    }
@@ -4538,7 +4538,7 @@ ACMD(do_absorb)
     send_to_char(ch, "You already have already absorbed 3 people.\r\n");
     return;
   }
-  if (GET_MAX_HIT(vict) >= (ch->getBasePL()) * 3) {
+  if (GET_MAX_HIT(vict) >= (getBasePL(ch)) * 3) {
    send_to_char(ch, "You are too weak to absorb them into your cellular structure!\r\n");
    return;
   }
@@ -4562,13 +4562,13 @@ ACMD(do_absorb)
     act("@C$n@w rushes at @c$N@W and $s tail engulfs $M! You quickly suck $S squirming body into your tail, absorbing @c$N@W!@n", TRUE, ch, 0, vict, TO_NOTVICT);
     GET_ABSORBS(ch) -= 1;
 
-      int64_t stam = (vict->getBaseST()) / 5;
-      int64_t ki = (vict->getBaseKI()) / 5;
-      int64_t pl = (vict->getBasePL()) / 5;
+      int64_t stam = (getBaseST(vict)) / 5;
+      int64_t ki = (getBaseKI(vict)) / 5;
+      int64_t pl = (getBasePL(vict)) / 5;
 
-    ch->gainBasePL(pl, true);
-      ch->gainBaseST(stam, true);
-      ch->gainBaseKI(ki, true);
+    gainBasePL(ch, pl, true);
+      gainBaseST(ch, stam, true);
+      gainBaseKI(ch, ki, true);
 
     if (!IS_NPC(vict) && !IS_NPC(ch)) {
      send_to_imm("[PK] %s killed %s at room [%d]\r\n", GET_NAME(ch), GET_NAME(vict), GET_ROOM_VNUM(IN_ROOM(vict)));
@@ -4604,7 +4604,7 @@ ACMD(do_absorb)
    send_to_char(ch, "You can't absorb their bio extract, you need to swallow them with your tail!\r\n");
    return;
   }
-  if (ch->is_soft_cap(0)) {
+  if (is_soft_cap(ch, 0)) {
     send_to_char(ch, "You can not handle any more bio extract at your current level.\r\n");
     return;
   }
@@ -4625,9 +4625,9 @@ ACMD(do_absorb)
   else {
    act("@WYou rush at @c$N@W and stab them with your tail! You quickly suck out all the bio extract you need and leave the empty husk behind!", TRUE, ch, 0, vict, TO_CHAR);
    act("@C$n@w rushes at @c$N@W and stabs $M with $s tail! $e quickly sucks out all the bio extract and leaves the empty husk of @c$N@W behind!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-   int64_t stam = (vict->getBaseST()) / 2000;
-   int64_t ki = (vict->getBaseKI()) / 2000;
-   int64_t pl = (vict->getBasePL()) / 2000;
+   int64_t stam = (getBaseST(vict)) / 2000;
+   int64_t ki = (getBaseKI(vict)) / 2000;
+   int64_t pl = (getBasePL(vict)) / 2000;
    stam += rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2);
    pl += rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2);
    ki += rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2);
@@ -4635,10 +4635,10 @@ ACMD(do_absorb)
    ki = std::min(ki, 1500000L);
    pl = std::min(pl, 1500000L);
 
-   ch->gainBasePL(pl, true);
-   ch->gainBaseST(stam, true);
-   ch->gainBaseKI(ki, true);
-   ch->incCurLFPercent(.05);
+   gainBasePL(ch, pl, true);
+   gainBaseST(ch, stam, true);
+   gainBaseKI(ch, ki, true);
+   incCurLFPercent(ch, .05);
    send_to_char(ch, "@D[@gABSORB@D] @rPL@W: @D(@y%s@D) @cKi@W: @D(@y%s@D) @gSt@W: @D(@y%s@D)@n\r\n", add_commas(pl), add_commas(ki), add_commas(stam));
    improve_skill(ch, SKILL_ABSORB, 0);
    WAIT_STATE(ch, PULSE_4SEC);
@@ -4806,12 +4806,12 @@ ACMD(do_regenerate) {
   return;
  }
 
- if (GET_HIT(ch) >= (ch->getEffMaxPL())) {
+ if (GET_HIT(ch) >= getEffMaxPL(ch)) {
   send_to_char(ch, "You do not need to regenerate, you are at full health.\r\n");
   return;
  }
 
- if (GET_SUPPRESS(ch) > 0 && GET_HIT(ch) >= (((ch->getEffMaxPL()) / 100) * GET_SUPPRESS(ch))) {
+  if (GET_SUPPRESS(ch) > 0 && GET_HIT(ch) >= ((getEffMaxPL(ch) / 100) * GET_SUPPRESS(ch))) {
   send_to_char(ch, "You do not need to regenerate, you are at full health.\r\n");
   return;
  }
@@ -4838,7 +4838,7 @@ ACMD(do_regenerate) {
   return;
  }
 
- amt = ((ch->getEffMaxPL()) * 0.01) * num;
+  amt = (getEffMaxPL(ch) * 0.01) * num;
  if (amt > 1)
   amt /= 2;
 
@@ -4846,7 +4846,7 @@ ACMD(do_regenerate) {
   amt = amt * 0.9;
  }
 
- int64_t life = ((ch->getCurLF()) - amt * 0.8), energy = ((ch->getCurKI()) - amt * 0.2);
+ int64_t life = ((getCurLF(ch)) - amt * 0.8), energy = ((getCurKI(ch)) - amt * 0.2);
 
  if ((life <= 0 || energy <= 0) && !IS_NPC(ch)) {
   send_to_char(ch, "Your life force or ki are too low to regenerate that much.\r\n");
@@ -4856,16 +4856,16 @@ ACMD(do_regenerate) {
   return;
  }
 
- ch->incCurHealth(amt * 2);
+ incCurHealth(ch, amt * 2);
 
  if (!IS_NPC(ch))
-     ch->decCurLF(amt * .8);
+     decCurLF(ch, amt * .8);
 
- ch->decCurKI(amt * .2);
+ decCurKI(ch, amt * .2);
 
    reveal_hiding(ch, 0);
 
- if (GET_HIT(ch) >= (ch->getEffMaxPL())) {
+ if (GET_HIT(ch) >= getEffMaxPL(ch)) {
   act("You concentrate your ki and regenerate your body completely.", TRUE, ch, 0, 0, TO_CHAR);
   act("$n concentrates and regenerates $s body completely.", TRUE, ch, 0, 0, TO_ROOM);
  }
@@ -4970,12 +4970,12 @@ ACMD(do_focus)
     send_to_char(ch, "You already have tough skin!\r\n");
     return;
    }
-   else if ((ch->getCurKI()) < GET_MAX_MANA(ch) / 20) {
+   else if ((getCurKI(ch)) < GET_MAX_MANA(ch) / 20) {
     send_to_char(ch, "You do not have enough ki to infuse into your skin.\r\n");
     return;
    }
    else if (GET_SKILL(ch, SKILL_TSKIN) < axion_dice(0)) {
-    ch->decCurKI(ch->getMaxKI() / 20);
+    decCurKI(ch, getMaxKI(ch) / 20);
     reveal_hiding(ch, 0);
     act("You focus ki into your skin, but fail in making it tough!", TRUE, ch, 0, 0, TO_CHAR);
     act("$n focuses ki into $s skin, but fails in making it tough!", TRUE, ch, 0, 0, TO_ROOM);
@@ -4984,7 +4984,7 @@ ACMD(do_focus)
    else {
     int duration = GET_INT(ch) / 20;
     assign_affect(ch, AFF_STONESKIN, SKILL_TSKIN, duration, 0, 0, 0, 0, 0, 0);
-       ch->decCurKI(ch->getMaxKI() / 20);
+       decCurKI(ch, getMaxKI(ch) / 20);
     reveal_hiding(ch, 0);
     act("You focus ki into your skin, making it tough!", TRUE, ch, 0, 0, TO_CHAR);
     act("$n focuses ki into $s skin, making it tough!", TRUE, ch, 0, 0, TO_ROOM);
@@ -5013,12 +5013,12 @@ ACMD(do_focus)
      send_to_char(ch, "Whatever would you waste your ki on them for?\r\n");
      return;
     }
-    else if ((ch->getCurKI()) < GET_MAX_MANA(ch) / 20) {
+    else if ((getCurKI(ch)) < GET_MAX_MANA(ch) / 20) {
      send_to_char(ch, "You do not have enough ki to infuse into their skin.\r\n");
      return;
     }
     else if (GET_SKILL(ch, SKILL_TSKIN) < axion_dice(0)) {
-        ch->decCurKI(ch->getMaxKI() / 20);
+        decCurKI(ch, getMaxKI(ch) / 20);
      reveal_hiding(ch, 0);
      act("You focus ki into $N's skin, but fail in making it tough!", TRUE, ch, 0, vict, TO_CHAR);
      act("$n focuses ki into your skin, but fails in making it tough!", TRUE, ch, 0, vict, TO_VICT);
@@ -5028,7 +5028,7 @@ ACMD(do_focus)
     else {
      int duration = roll_aff_duration(GET_INT(ch), 2);
      assign_affect(vict, AFF_STONESKIN, SKILL_TSKIN, duration, 0, 0, 0, 0, 0, 0);
-        ch->decCurKI(ch->getMaxKI() / 20);
+        decCurKI(ch, getMaxKI(ch) / 20);
      reveal_hiding(ch, 0);
      act("You focus ki into $N's skin, making it tough!", TRUE, ch, 0, vict, TO_CHAR);
      act("$n focuses ki into your skin, making it tough!", TRUE, ch, 0, vict, TO_VICT);
@@ -5054,18 +5054,18 @@ ACMD(do_focus)
    } else if (GET_BONUS(ch, BONUS_FRAIL) > 0 && GET_STR(ch) + 2 > 25) {
     send_to_char(ch, "Your body is not able to withstand increasing its strength beyond 25.\r\n");
     return;
-   } else if ((ch->getCurKI()) < GET_MAX_MANA(ch) / 20) {
+   } else if ((getCurKI(ch)) < GET_MAX_MANA(ch) / 20) {
     send_to_char(ch, "You do not have enough ki to infuse into your muscles.\r\n");
     return;
    } else if (GET_SKILL(ch, SKILL_MIGHT) < axion_dice(0)) {
-       ch->decCurKI(ch->getMaxKI() / 20);
+       decCurKI(ch, getMaxKI(ch) / 20);
     reveal_hiding(ch, 0);
     act("You focus ki into your muscles, but fail in making them mighty!", TRUE, ch, 0, 0, TO_CHAR);
     act("$n focuses ki into $s muscles, but fails in making them mighty!", TRUE, ch, 0, 0, TO_ROOM);
     return;
    } else {
     SET_BIT_AR(AFF_FLAGS(ch), AFF_MIGHT);
-       ch->decCurKI(ch->getMaxKI() / 20);
+       decCurKI(ch, getMaxKI(ch) / 20);
     int duration = roll_aff_duration(GET_INT(ch), 2);
                                         /* Str , Con, Int, Agl, Wis, Spd */
     assign_affect(ch, AFF_MIGHT, SKILL_MIGHT, duration, 10, 2, 0, 0, 0, 0);
@@ -5101,18 +5101,18 @@ ACMD(do_focus)
     } else if (IS_NPC(vict)) {
      send_to_char(ch, "Whatever would you waste your ki on them for?\r\n");
      return;
-    } else if ((ch->getCurKI()) < GET_MAX_MANA(ch) / 20) {
+    } else if ((getCurKI(ch)) < GET_MAX_MANA(ch) / 20) {
      send_to_char(ch, "You do not have enough ki to infuse into their muscles.\r\n");
      return;
     } else if (GET_SKILL(ch, SKILL_MIGHT) < axion_dice(0)) {
-        ch->decCurKI(ch->getMaxKI() / 20);
+        decCurKI(ch, getMaxKI(ch) / 20);
      reveal_hiding(ch, 0);
      act("You focus ki into $N's muscles, but fail in making them mighty!", TRUE, ch, 0, vict, TO_CHAR);
      act("$n focuses ki into your muscles, but fails in making them mighty!", TRUE, ch, 0, vict, TO_VICT);
      act("$n focuses ki into $N's muscles, but fails in making them mighty!", TRUE, ch, 0, vict, TO_NOTVICT);
      return;
     } else {
-        ch->decCurKI(ch->getMaxKI() / 20);
+        decCurKI(ch, getMaxKI(ch) / 20);
      int duration = roll_aff_duration(GET_INT(ch), 2);
                                         /* Str , Con, Int, Agl, Wis, Spd */
      assign_affect(vict, AFF_MIGHT, SKILL_MIGHT, duration, 10, 2, 0, 0, 0, 0);
@@ -5145,11 +5145,11 @@ ACMD(do_focus)
     if (AFF_FLAGGED(vict, AFF_WITHER)) {
      send_to_char(ch, "They already have been withered!\r\n");
      return;
-    } else if ((ch->getCurKI()) < GET_MAX_MANA(ch) / 20) {
+    } else if ((getCurKI(ch)) < GET_MAX_MANA(ch) / 20) {
      send_to_char(ch, "You do not have enough ki to wither them.\r\n");
      return;
     } else if (GET_SKILL(ch, SKILL_WITHER) < axion_dice(0)) {
-        ch->decCurKI(ch->getMaxKI() / 20);
+        decCurKI(ch, getMaxKI(ch) / 20);
      reveal_hiding(ch, 0);
      act("You focus ki into $N's body, but fail in withering it!", TRUE, ch, 0, vict, TO_CHAR);
      act("$n focuses ki into your body, but fails in withering it!", TRUE, ch, 0, vict, TO_VICT);
@@ -5157,7 +5157,7 @@ ACMD(do_focus)
      return;
     } else {
      SET_BIT_AR(AFF_FLAGS(vict), AFF_WITHER);
-        ch->decCurKI(ch->getMaxKI() / 20);
+        decCurKI(ch, getMaxKI(ch) / 20);
      vict->real_abils.str -= 3;
      vict->real_abils.cha -= 3;
      save_char(vict);
@@ -5182,12 +5182,12 @@ ACMD(do_focus)
     send_to_char(ch, "You're not able to withstand increasing your wisdom beyond 25.\r\n");
     return;
    }
-   else if ((ch->getCurKI()) < GET_MAX_MANA(ch) / 20) {
+   else if ((getCurKI(ch)) < GET_MAX_MANA(ch) / 20) {
     send_to_char(ch, "You do not have enough ki to use this skill.\r\n");
     return;
    }
    else if (GET_SKILL(ch, SKILL_ENLIGHTEN) < axion_dice(0)) {
-       ch->decCurKI(ch->getMaxKI() / 20);
+       decCurKI(ch, getMaxKI(ch) / 20);
     reveal_hiding(ch, 0);
     act("You focus ki into your mind, but fail in awakening it to cosmic wisdom!", TRUE, ch, 0, 0, TO_CHAR);
     act("$n focuses ki into $s mind, but fails in awakening it to cosmic wisdom!", TRUE, ch, 0, 0, TO_ROOM);
@@ -5197,7 +5197,7 @@ ACMD(do_focus)
     int duration = roll_aff_duration(GET_INT(ch), 2);
                                         /* Str , Con, Int, Agl, Wis, Spd */
     assign_affect(ch, AFF_ENLIGHTEN, SKILL_ENLIGHTEN, duration, 0, 0, 0, 0, 10, 0);
-       ch->decCurKI(ch->getMaxKI() / 20);
+       decCurKI(ch, getMaxKI(ch) / 20);
     reveal_hiding(ch, 0);
     act("You focus ki into your mind, awakening it to cosmic wisdom!", TRUE, ch, 0, 0, TO_CHAR);
     act("$n focuses ki into $s mind, awakening it to cosmic wisdom!", TRUE, ch, 0, 0, TO_ROOM);
@@ -5247,12 +5247,12 @@ ACMD(do_focus)
      send_to_char(ch, "Whatever would you waste your ki on them for?\r\n");
      return;
     }
-    else if ((ch->getCurKI()) < GET_MAX_MANA(ch) / 20) {
+    else if ((getCurKI(ch)) < GET_MAX_MANA(ch) / 20) {
      send_to_char(ch, "You do not have enough ki to use this skill.\r\n");
      return;
     }
     else if (GET_SKILL(ch, SKILL_ENLIGHTEN) < axion_dice(0)) {
-        ch->decCurKI(ch->getMaxKI() / 20);
+        decCurKI(ch, getMaxKI(ch) / 20);
      reveal_hiding(ch, 0);
      act("You focus ki into $N's mind, but fail in awakening it to cosmic wisdom!", TRUE, ch, 0, vict, TO_CHAR);
      act("$n focuses ki into your mind, but fails in awakening it to cosmic wisdom!", TRUE, ch, 0, vict, TO_VICT);
@@ -5263,7 +5263,7 @@ ACMD(do_focus)
      int duration = roll_aff_duration(GET_INT(ch), 2);
                                         /* Str , Con, Int, Agl, Wis, Spd */
      assign_affect(vict, AFF_ENLIGHTEN, SKILL_ENLIGHTEN, duration, 0, 0, 0, 0, 10, 0);
-        ch->decCurKI(ch->getMaxKI() / 20);
+        decCurKI(ch, getMaxKI(ch) / 20);
      reveal_hiding(ch, 0);
      act("You focus ki into $N's mind, awakening it to cosmic wisdom!", TRUE, ch, 0, vict, TO_CHAR);
      act("$n focuses ki into your mind, awakening it to cosmic wisdom!", TRUE, ch, 0, vict, TO_VICT);
@@ -5305,12 +5305,12 @@ ACMD(do_focus)
     send_to_char(ch, "You're not able to withstand increasing your intelligence beyond 25.\r\n");
     return;
    }
-   else if ((ch->getCurKI()) < GET_MAX_MANA(ch) / 20) {
+   else if ((getCurKI(ch)) < GET_MAX_MANA(ch) / 20) {
     send_to_char(ch, "You do not have enough ki to infuse into your mind.\r\n");
     return;
    }
    else if (GET_SKILL(ch, SKILL_GENIUS) < axion_dice(0)) {
-       ch->decCurKI(ch->getMaxKI() / 20);
+       decCurKI(ch, getMaxKI(ch) / 20);
     reveal_hiding(ch, 0);
     act("You focus ki into your mind, but fail in making it work faster!", TRUE, ch, 0, 0, TO_CHAR);
     act("$n focuses ki into $s muscles, but fails in making it work faster!", TRUE, ch, 0, 0, TO_ROOM);
@@ -5320,7 +5320,7 @@ ACMD(do_focus)
     int duration = roll_aff_duration(GET_INT(ch), 2);
                                         /* Str , Con, Int, Agl, Wis, Spd */
     assign_affect(ch, AFF_GENIUS, SKILL_GENIUS, duration, 0, 0, 10, 0, 0, 0);
-       ch->decCurKI(ch->getMaxKI() / 20);
+       decCurKI(ch, getMaxKI(ch) / 20);
     reveal_hiding(ch, 0);
     act("You focus ki into your mind, making it work faster!", TRUE, ch, 0, 0, TO_CHAR);
     act("$n focuses ki into $s mind, making it work faster!", TRUE, ch, 0, 0, TO_ROOM);
@@ -5353,12 +5353,12 @@ ACMD(do_focus)
      send_to_char(ch, "Whatever would you waste your ki on them for?\r\n");
      return;
     }
-    else if ((ch->getCurKI()) < GET_MAX_MANA(ch) / 20) {
+    else if ((getCurKI(ch)) < GET_MAX_MANA(ch) / 20) {
      send_to_char(ch, "You do not have enough ki to infuse into their mind.\r\n");
      return;
     }
     else if (GET_SKILL(ch, SKILL_GENIUS) < axion_dice(0)) {
-        ch->decCurKI(ch->getMaxKI() / 20);
+        decCurKI(ch, getMaxKI(ch) / 20);
      reveal_hiding(ch, 0);
      act("You focus ki into $N's mind, but fail in making it work faster!", TRUE, ch, 0, vict, TO_CHAR);
      act("$n focuses ki into your mind, but fails in making it work faster!", TRUE, ch, 0, vict, TO_VICT);
@@ -5369,7 +5369,7 @@ ACMD(do_focus)
      int duration = roll_aff_duration(GET_INT(ch), 2);;
                                         /* Str , Con, Int, Agl, Wis, Spd */
      assign_affect(vict, AFF_GENIUS, SKILL_GENIUS, duration, 0, 0, 10, 0, 0, 0);
-        ch->decCurKI(ch->getMaxKI() / 20);
+        decCurKI(ch, getMaxKI(ch) / 20);
      reveal_hiding(ch, 0);
      act("You focus ki into $N's mind, making it work faster!", TRUE, ch, 0, vict, TO_CHAR);
      act("$n focuses ki into your mind, making it work faster!", TRUE, ch, 0, vict, TO_VICT);
@@ -5399,19 +5399,19 @@ ACMD(do_focus)
     send_to_char(ch, "You're not able to withstand increasing your agility beyond 25.\r\n");
     return;
    }
-   else if ((ch->getCurKI()) < GET_MAX_MANA(ch) / 20) {
+   else if ((getCurKI(ch)) < GET_MAX_MANA(ch) / 20) {
     send_to_char(ch, "You do not have enough ki to infuse into your limbs.\r\n");
     return;
    }
    else if (GET_SKILL(ch, SKILL_FLEX) < axion_dice(0)) {
-       ch->decCurKI(ch->getMaxKI() / 20);
+       decCurKI(ch, getMaxKI(ch) / 20);
     reveal_hiding(ch, 0);
     act("You focus ki into your limbs, but fail in making them more flexible!", TRUE, ch, 0, 0, TO_CHAR);
     act("$n focuses ki into $s muscles, but fails in making them more flexible!", TRUE, ch, 0, 0, TO_ROOM);
     return;
    }
    else {
-       ch->decCurKI(ch->getMaxKI() / 20);
+       decCurKI(ch, getMaxKI(ch) / 20);
     int duration = roll_aff_duration(GET_INT(ch), 2);;
                                         /* Str , Con, Int, Agl, Wis, Spd */
     assign_affect(ch, AFF_FLEX, SKILL_FLEX, duration, 0, 0, 0, 10, 0, 0);
@@ -5447,12 +5447,12 @@ ACMD(do_focus)
      send_to_char(ch, "Whatever would you waste your ki on them for?\r\n");
      return;
     }
-    else if ((ch->getCurKI()) < GET_MAX_MANA(ch) / 20) {
+    else if ((getCurKI(ch)) < GET_MAX_MANA(ch) / 20) {
      send_to_char(ch, "You do not have enough ki to infuse into their limbs.\r\n");
      return;
     }
     else if (GET_SKILL(ch, SKILL_FLEX) < axion_dice(0)) {
-        ch->decCurKI(ch->getMaxKI() / 20);
+        decCurKI(ch, getMaxKI(ch) / 20);
      reveal_hiding(ch, 0);
      act("You focus ki into $N's limbs, but fail in making them more flexible!", TRUE, ch, 0, vict, TO_CHAR);
      act("$n focuses ki into your limbs, but fails in making them more flexible!", TRUE, ch, 0, vict, TO_VICT);
@@ -5460,7 +5460,7 @@ ACMD(do_focus)
      return;
     }
     else {
-        ch->decCurKI(ch->getMaxKI() / 20);
+        decCurKI(ch, getMaxKI(ch) / 20);
      int duration = roll_aff_duration(GET_INT(ch), 2);;
                                         /* Str , Con, Int, Agl, Wis, Spd */
      assign_affect(vict, AFF_FLEX, SKILL_FLEX, duration, 0, 0, 0, 10, 0, 0);
@@ -5489,12 +5489,12 @@ ACMD(do_focus)
     send_to_char(ch, "You already are blessed!\r\n");
     return;
    }
-   else if ((ch->getCurKI()) < GET_MAX_MANA(ch) / 20) {
+   else if ((getCurKI(ch)) < GET_MAX_MANA(ch) / 20) {
     send_to_char(ch, "You do not have enough ki to bless.\r\n");
     return;
    }
    else if (GET_SKILL(ch, SKILL_BLESS) < axion_dice(0)) {
-       ch->decCurKI(ch->getMaxKI() / 20);
+       decCurKI(ch, getMaxKI(ch) / 20);
     reveal_hiding(ch, 0);
     act("You focus ki while chanting spiritual words. Your blessing does nothing though, you must have messed up!", TRUE, ch, 0, 0, TO_CHAR);
     act("$n focuses ki while chanting spiritual words. $n seems disappointed.", TRUE, ch, 0, 0, TO_ROOM);
@@ -5504,7 +5504,7 @@ ACMD(do_focus)
     int duration = roll_aff_duration(GET_INT(ch), 3);;
                                         /* Str , Con, Int, Agl, Wis, Spd */
     assign_affect(ch, AFF_BLESS, SKILL_BLESS, duration, 0, 0, 0, 0, 0, 0);
-       ch->decCurKI(ch->getMaxKI() / 20);
+       decCurKI(ch, getMaxKI(ch) / 20);
     reveal_hiding(ch, 0);
     if (IS_KABITO(ch)) {
      GET_BLESSLVL(ch) = GET_SKILL(ch, SKILL_BLESS);
@@ -5542,12 +5542,12 @@ ACMD(do_focus)
      send_to_char(ch, "Whatever would you waste your ki on them for?\r\n");
      return;
     }
-    else if ((ch->getCurKI()) < GET_MAX_MANA(ch) / 20) {
+    else if ((getCurKI(ch)) < GET_MAX_MANA(ch) / 20) {
      send_to_char(ch, "You do not have enough ki to bless.\r\n");
      return;
     }
     else if (GET_SKILL(ch, SKILL_BLESS) < axion_dice(0)) {
-        ch->decCurKI(ch->getMaxKI() / 20);
+        decCurKI(ch, getMaxKI(ch) / 20);
      reveal_hiding(ch, 0);
      act("You focus ki while chanting spiritual words. Your blessing fails!", TRUE, ch, 0, 0, TO_CHAR);
      act("$n focuses ki while chanting spiritual words. $n places a hand on your head, but nothing happens!", TRUE, ch, 0, vict, TO_VICT);
@@ -5558,7 +5558,7 @@ ACMD(do_focus)
      int duration = roll_aff_duration(GET_INT(ch), 3);;
                                         /* Str , Con, Int, Agl, Wis, Spd */
      assign_affect(vict, AFF_BLESS, SKILL_BLESS, duration, 0, 0, 0, 0, 0, 0);
-        ch->decCurKI(ch->getMaxKI() / 20);
+        decCurKI(ch, getMaxKI(ch) / 20);
      reveal_hiding(ch, 0);
      if (IS_KAI(ch)) {
       GET_BLESSLVL(vict) = GET_SKILL(ch, SKILL_BLESS);
@@ -5597,12 +5597,12 @@ ACMD(do_focus)
     send_to_char(ch, "You are immune to curses!\r\n");
     return;
    }
-   else if ((ch->getCurKI()) < GET_MAX_MANA(ch) / 20) {
+   else if ((getCurKI(ch)) < GET_MAX_MANA(ch) / 20) {
     send_to_char(ch, "You do not have enough ki to CURSE.\r\n");
     return;
    }
    else if (GET_SKILL(ch, SKILL_CURSE) < axion_dice(0)) {
-       ch->decCurKI(ch->getMaxKI() / 20);
+       decCurKI(ch, getMaxKI(ch) / 20);
     reveal_hiding(ch, 0);
     act("You focus ki while chanting demonic words. Your cursing does nothing though, you must have messed up!", TRUE, ch, 0, 0, TO_CHAR);
     act("$n focuses ki while chanting demonic words. $n seems disappointed.", TRUE, ch, 0, 0, TO_ROOM);
@@ -5612,7 +5612,7 @@ ACMD(do_focus)
     int duration = roll_aff_duration(GET_INT(ch), 3);;
                                         /* Str , Con, Int, Agl, Wis, Spd */
     assign_affect(vict, AFF_CURSE, SKILL_CURSE, duration, 0, 0, 0, 0, 0, 0);
-       ch->decCurKI(ch->getMaxKI() / 20);
+       decCurKI(ch, getMaxKI(ch) / 20);
     reveal_hiding(ch, 0);
     act("You focus ki while chanting demonic words. You feel your body recovering at below normal speed!", TRUE, ch, 0, 0, TO_CHAR);
     act("$n focuses ki while chanting demonic words. $n grins after finishing $s chant.", TRUE, ch, 0, 0, TO_ROOM);
@@ -5649,12 +5649,12 @@ ACMD(do_focus)
      send_to_char(ch, "They are immune to curses!\r\n");
      return;
     }
-    else if ((ch->getCurKI()) < GET_MAX_MANA(ch) / 20) {
+    else if ((getCurKI(ch)) < GET_MAX_MANA(ch) / 20) {
      send_to_char(ch, "You do not have enough ki to CURSE.\r\n");
      return;
     }
     else if (GET_SKILL(ch, SKILL_CURSE) < axion_dice(0)) {
-        ch->decCurKI(ch->getMaxKI() / 20);
+        decCurKI(ch, getMaxKI(ch) / 20);
      reveal_hiding(ch, 0);
      act("You focus ki while chanting demonic words. Your cursing fails!", TRUE, ch, 0, 0, TO_CHAR);
      act("$n focuses ki while chanting demonic words. $n places a hand on your head, but nothing happens!", TRUE, ch, 0, vict, TO_VICT);
@@ -5665,7 +5665,7 @@ ACMD(do_focus)
      int duration = roll_aff_duration(GET_INT(ch), 3);;
                                         /* Str , Con, Int, Agl, Wis, Spd */
      assign_affect(vict, AFF_CURSE, SKILL_CURSE, duration, 0, 0, 0, 0, 0, 0);
-        ch->decCurKI(ch->getMaxKI() / 20);
+        decCurKI(ch, getMaxKI(ch) / 20);
      reveal_hiding(ch, 0);
      act("You focus ki while chanting demonic words. cursing $N with slower regeneration!", TRUE, ch, 0, vict, TO_CHAR);
      act("$n focuses ki while chanting demonic words. $n then places a hand on your head, cursing you!", TRUE, ch, 0, vict, TO_VICT);
@@ -5702,18 +5702,18 @@ ACMD(do_focus)
     } else if (AFF_FLAGGED(vict, AFF_BLIND)) {
      send_to_char(ch, "They appear to be blind!\r\n");
      return;
-    } else if ((ch->getCurKI()) < GET_MAX_MANA(ch) / 20) {
+    } else if ((getCurKI(ch)) < GET_MAX_MANA(ch) / 20) {
      send_to_char(ch, "You do not have enough ki to use Yoikominminken.\r\n");
      return;
     } else if (GET_BONUS(vict, BONUS_INSOMNIAC)) {
-        ch->decCurKI(ch->getMaxKI() / 20);
+        decCurKI(ch, getMaxKI(ch) / 20);
      reveal_hiding(ch, 0);
      act("You focus ki while moving your hands in lulling patterns, but $N doesn't look the least bit sleepy!", TRUE, ch, 0, vict, TO_CHAR);
      act("$n focuses ki while moving $s hands in a lulling pattern, but you just don't feel tired.", TRUE, ch, 0, vict, TO_VICT);
      act("$n focuses ki while moving $s hands in a lulling pattern, but $N doesn't look the least bit sleepy!", TRUE, ch, 0, vict, TO_NOTVICT);
      return;
     } else if (GET_SKILL(ch, SKILL_YOIK) < axion_dice(0) || (GET_INT(ch) + rand_number(1, 3) < GET_INT(vict) + rand_number(1, 5))) {
-        ch->decCurKI(ch->getMaxKI() / 20);
+        decCurKI(ch, getMaxKI(ch) / 20);
      reveal_hiding(ch, 0);
      act("You focus ki while moving your hands in lulling patterns, but fail to put $N to sleep!", TRUE, ch, 0, vict, TO_CHAR);
      act("$n focuses ki while moving $s hands in a lulling pattern, but you resist the technique!", TRUE, ch, 0, vict, TO_VICT);
@@ -5723,7 +5723,7 @@ ACMD(do_focus)
      int duration = rand_number(1, 2);
                                         /* Str , Con, Int, Agl, Wis, Spd */
      assign_affect(vict, AFF_SLEEP, SKILL_YOIK, duration, 0, 0, 0, 0, 0, 0);
-        ch->decCurKI(ch->getMaxKI() / 20);
+        decCurKI(ch, getMaxKI(ch) / 20);
      reveal_hiding(ch, 0);
      act("You focus ki while moving your hands in lulling patterns, putting $N to sleep!", TRUE, ch, 0, vict, TO_CHAR);
      act("$n focuses ki while moving $s hands in a lulling pattern, before you realise it you are asleep!", TRUE, ch, 0, vict, TO_VICT);
@@ -5743,29 +5743,29 @@ ACMD(do_focus)
    return;
   }
   if (!*name) {
-   if ((ch->getCurKI()) < GET_MAX_MANA(ch) / 10) {
+   if ((getCurKI(ch)) < GET_MAX_MANA(ch) / 10) {
     send_to_char(ch, "You do not have enough ki to use vigor.\r\n");
     return;
    }
    else if (GET_SKILL(ch, SKILL_VIGOR) < axion_dice(0)) {
-       ch->decCurKI(ch->getMaxKI() / 10);
+       decCurKI(ch, getMaxKI(ch) / 10);
     reveal_hiding(ch, 0);
     act("You focus ki into your very cells, but fail at re-engerizing them!", TRUE, ch, 0, 0, TO_CHAR);
     act("$n focuses ki and glows green for a moment, $e then frowns.", TRUE, ch, 0, 0, TO_ROOM);
     WAIT_STATE(ch, PULSE_2SEC);
     return;
    }
-   else if ((ch->getCurST()) >= GET_MAX_MOVE(ch)) {
+   else if ((getCurST(ch)) >= GET_MAX_MOVE(ch)) {
     send_to_char(ch, "You already have full stamina.\r\n");
     return;
    }
    else {
     if (GET_BONUS(ch, BONUS_HEALER) > 0) {
-        ch->incCurST(ch->getMaxKI() / 8);
-        ch->decCurKI(ch->getMaxKI() / 8);
+        incCurST(ch, getMaxKI(ch) / 8);
+        decCurKI(ch, getMaxKI(ch) / 8);
     } else {
-        ch->incCurST(ch->getMaxKI() / 10);
-        ch->decCurKI(ch->getMaxKI() / 10);
+        incCurST(ch, getMaxKI(ch) / 10);
+        decCurKI(ch, getMaxKI(ch) / 10);
     }
 
     reveal_hiding(ch, 0);
@@ -5789,16 +5789,16 @@ ACMD(do_focus)
      send_to_char(ch, "Whatever would you waste your ki on them for?\r\n");
      return;
     }
-    else if ((ch->getCurKI()) < GET_MAX_MANA(ch) / 10) {
+    else if ((getCurKI(ch)) < GET_MAX_MANA(ch) / 10) {
      send_to_char(ch, "You do not have enough ki to use vigor.\r\n");
      return;
     }
-   else if ((vict->getCurST()) >= GET_MAX_MOVE(vict)) {
+   else if ((getCurST(vict)) >= GET_MAX_MOVE(vict)) {
     send_to_char(ch, "They already have full stamina.\r\n");
     return;
    }
     else if (GET_SKILL(ch, SKILL_VIGOR) < axion_dice(0)) {
-        ch->decCurKI(ch->getMaxKI() / 10);
+        decCurKI(ch, getMaxKI(ch) / 10);
      reveal_hiding(ch, 0);
      act("You focus ki into $N's very cells, and fail at re-energizing them!", TRUE, ch, 0, vict, TO_CHAR);
      act("$n focuses ki into your very cells, but nothing happens!", TRUE, ch, 0, vict, TO_VICT);
@@ -5808,11 +5808,11 @@ ACMD(do_focus)
     }
     else {
      if (GET_BONUS(ch, BONUS_HEALER) > 0) {
-         vict->incCurST(vict->getMaxKI() / 8);
-         ch->decCurKI(ch->getMaxKI() / 8);
-     } else {
-         vict->incCurST(vict->getMaxKI() / 10);
-         ch->decCurKI(ch->getMaxKI() / 10);
+          incCurST(vict, getMaxKI(vict) / 8);
+          decCurKI(ch, getMaxKI(ch) / 8);
+      } else {
+          incCurST(vict, getMaxKI(vict) / 10);
+         decCurKI(ch, getMaxKI(ch) / 10);
      }
      reveal_hiding(ch, 0);
      act("You focus ki into $N's very cells, and manage to re-energize them!", TRUE, ch, 0, vict, TO_CHAR);
@@ -5835,12 +5835,12 @@ ACMD(do_focus)
     send_to_char(ch, "You are not poisoned!\r\n");
     return;
    }
-   else if ((ch->getCurKI()) < GET_MAX_MANA(ch) / 20) {
+   else if ((getCurKI(ch)) < GET_MAX_MANA(ch) / 20) {
     send_to_char(ch, "You do not have enough ki to cure.\r\n");
     return;
    }
    else if (GET_SKILL(ch, SKILL_CURE) < axion_dice(0)) {
-       ch->decCurKI(ch->getMaxKI() / 20);
+       decCurKI(ch, getMaxKI(ch) / 20);
     reveal_hiding(ch, 0);
     act("You focus ki and aim a pulsing light at your body. Nothing happens!", TRUE, ch, 0, 0, TO_CHAR);
     act("$n focuses ki and aims a pulsing light at $s body. Nothing seems to happen.", TRUE, ch, 0, 0, TO_ROOM);
@@ -5848,7 +5848,7 @@ ACMD(do_focus)
    }
    else {
     affect_from_char(ch, SPELL_POISON);
-       ch->decCurKI(ch->getMaxKI() / 20);
+       decCurKI(ch, getMaxKI(ch) / 20);
     reveal_hiding(ch, 0);
     act("You focus ki and aim a pulsing light at your body. You feel the poison in your blood disappear!", TRUE, ch, 0, 0, TO_CHAR);
     act("$n focuses ki and aims a pulsing light at $s body. $n smiles.", TRUE, ch, 0, 0, TO_ROOM);
@@ -5874,12 +5874,12 @@ ACMD(do_focus)
      send_to_char(ch, "They are not poisoned!\r\n");
      return;
     }
-    else if ((ch->getCurKI()) < GET_MAX_MANA(ch) / 20) {
+    else if ((getCurKI(ch)) < GET_MAX_MANA(ch) / 20) {
      send_to_char(ch, "You do not have enough ki to cure.\r\n");
      return;
     }
     else if (GET_SKILL(ch, SKILL_CURE) < axion_dice(0)) {
-        ch->decCurKI(ch->getMaxKI() / 20);
+        decCurKI(ch, getMaxKI(ch) / 20);
      reveal_hiding(ch, 0);
      act("You focus ki and aim a pulsing light at $N's body. Nothing happens.", TRUE, ch, 0, vict, TO_CHAR);
      act("$n focuses ki and aims a pulsing light at your body. You are STILL poisoned!", TRUE, ch, 0, vict, TO_VICT);
@@ -5888,7 +5888,7 @@ ACMD(do_focus)
     }
     else {
      affect_from_char(vict, SPELL_POISON);
-        ch->decCurKI(ch->getMaxKI() / 20);
+        decCurKI(ch, getMaxKI(ch) / 20);
      reveal_hiding(ch, 0);
      act("You focus ki and aim a pulsing light at $N's body. $e is cured.", TRUE, ch, 0, vict, TO_CHAR);
      act("$n focuses ki and aims a pulsing light at your body. You have been cured of your poison!", TRUE, ch, 0, vict, TO_VICT);
@@ -5928,12 +5928,12 @@ ACMD(do_focus)
      send_to_char(ch, "They already have been poisoned!\r\n");
      return;
     }
-    else if ((ch->getCurKI()) < GET_MAX_MANA(ch) / 20) {
+    else if ((getCurKI(ch)) < GET_MAX_MANA(ch) / 20) {
      send_to_char(ch, "You do not have enough ki to poison.\r\n");
      return;
     }
     else if (GET_SKILL(ch, SKILL_POISON) < axion_dice(0)) {
-        ch->decCurKI(ch->getMaxKI() / 20);
+        decCurKI(ch, getMaxKI(ch) / 20);
      reveal_hiding(ch, 0);
      act("You focus ki and fling poison at $N. You missed!", TRUE, ch, 0, vict, TO_CHAR);
      act("$n focuses ki and flings poison at you, but misses!", TRUE, ch, 0, vict, TO_VICT);
@@ -5941,7 +5941,7 @@ ACMD(do_focus)
      return;
     }
     else {
-        ch->decCurKI(ch->getMaxKI() / 20);
+        decCurKI(ch, getMaxKI(ch) / 20);
      reveal_hiding(ch, 0);
      act("You focus ki and fling poison at $N! The poison burns into $s skin!", TRUE, ch, 0, vict, TO_CHAR);
      act("$n focuses ki and flings poison at you! The poison burns into your skin!", TRUE, ch, 0, vict, TO_VICT);
@@ -6033,7 +6033,7 @@ ACMD(do_kaioken)
 
     if(x == 0) {
         if (GET_KAIOKEN(ch) > 0) {
-            ch->remove_kaioken(1);
+            remove_kaioken(ch, 1);
             return;
         } else {
             send_to_char(ch, "You are not in kaioken!\r\n");
@@ -6053,7 +6053,7 @@ ACMD(do_kaioken)
         }
     }
 
-    auto cost_unit = ch->getMaxKI() / 50;
+    auto cost_unit = getMaxKI(ch) / 50;
     auto cost_diff = cost_unit * GET_KAIOKEN(ch);
     auto cost = (cost_unit * x) - cost_diff;
 
@@ -6062,7 +6062,7 @@ ACMD(do_kaioken)
         cost = 0;
     }
 
-    if ((ch->getCurKI()) < cost) {
+    if ((getCurKI(ch)) < cost) {
         send_to_char(ch, "You do not have enough ki to focus into your body for that level.\r\n");
         return;
     }
@@ -6071,7 +6071,7 @@ ACMD(do_kaioken)
     roll = rand_number(1, xnum);
     reveal_hiding(ch, 0);
 
-    ch->decCurKI(cost);
+    decCurKI(ch, cost);
     improve_skill(ch, SKILL_KAIOKEN, 1);
 
     if (init_skill(ch, SKILL_KAIOKEN) < roll) {
@@ -6081,13 +6081,13 @@ ACMD(do_kaioken)
         return;
     }
 
-    if(ch->getMaxHealth() < kaioken_levels[x]) {
+    if(getMaxHealth(ch) < kaioken_levels[x]) {
         act("@rA blazing red aura bursts up around your body, flashing intensely before your body gives out and you release the kaioken because of the pressure!@n", TRUE, ch, 0, 0, TO_CHAR);
         act("@rA blazing red aura bursts up around @R$n's @rbody, flashing intensely before $s body gives out and $e releases the kaioken because of the pressure!@n", TRUE, ch, 0, 0, TO_ROOM);
         return;
     }
 
-    ch->apply_kaioken(x, true);
+    apply_kaioken(ch, x, true);
 
     WAIT_STATE(ch, PULSE_1SEC);
 }
@@ -6149,7 +6149,7 @@ ACMD(do_plant)
    act("@wYou try and fail to plant $p@w on @c$N@w! However no one seemed to notice.@n", TRUE, ch, obj, vict, TO_CHAR);
    WAIT_STATE(ch, PULSE_2SEC);
    return;
-  } else if (GET_OBJ_WEIGHT(obj) + (vict->getCurCarriedWeight()) > CAN_CARRY_W(vict)) {
+  } else if (GET_OBJ_WEIGHT(obj) + (getCurCarriedWeight(vict)) > CAN_CARRY_W(vict)) {
    reveal_hiding(ch, 0);
    act("@C$n@w tries to plant $p@w on you!@n", TRUE, ch, obj, vict, TO_VICT);
    act("@C$n@w tries to plant $p@w on @c$N@w!@n", TRUE, ch, obj, vict, TO_NOTVICT);
@@ -6425,7 +6425,7 @@ ACMD(do_disguise) {
   return;
  }
 
- if ((ch->getCurST()) < (ch->getCurST()) / 50) {
+ if ((getCurST(ch)) < (getCurST(ch)) / 50) {
   send_to_char(ch, "You are too tired to try that right now.\r\n");
   return;
  }
@@ -6442,7 +6442,7 @@ ACMD(do_disguise) {
  else {
   send_to_char(ch, "You finish attempting to disguise yourself, but realize you failed and need to try again.\r\n");
   act("@C$n @wattempts and fails to disguise $mself properly and must try again.", TRUE, ch, 0, 0, TO_ROOM);
-  ch->decCurST(ch->getMaxST() / 50);
+  decCurST(ch, getMaxST(ch) / 50);
   return;
  }
 }
@@ -6523,7 +6523,7 @@ ACMD(do_zanzoken)
   cost *= 10;
  }
 
- if ((ch->getCurKI()) < cost) {
+ if ((getCurKI(ch)) < cost) {
   send_to_char(ch, "You do not have enough ki.\r\n");
   return;
  }
@@ -6531,13 +6531,13 @@ ACMD(do_zanzoken)
  if (prob < perc) {
   send_to_char(ch, "You focus your ki in preparation of a zanzoken but mess up and waste your ki!\r\n");
   improve_skill(ch, SKILL_ZANZOKEN, 2);
-  ch->decCurKI(cost);
+  decCurKI(ch, cost);
   WAIT_STATE(ch, PULSE_2SEC);
   return;
  }
  
  act("@wYou focus your ki, preparing to move at super speeds if necessary.@n", TRUE, ch, 0, 0, TO_CHAR);
-    ch->decCurKI(cost);
+    decCurKI(ch, cost);
  SET_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
  improve_skill(ch, SKILL_ZANZOKEN, 2);
  WAIT_STATE(ch, PULSE_2SEC);
@@ -6666,7 +6666,7 @@ ACMD(do_solar)
   cost = GET_MAX_MANA(ch) / 15;
  }
 
- if ((ch->getCurKI()) < cost) {
+ if ((getCurKI(ch)) < cost) {
   send_to_char(ch, "You do not have enough ki.\r\n");
   return;
  }
@@ -6677,7 +6677,7 @@ ACMD(do_solar)
  if (prob < perc) {
   act("@WYou raise both your hands to either side of your face, while closing your eyes, and shout '@YSolar Flare@W' but nothing happens!@n", TRUE, ch, 0, 0, TO_CHAR);
   act("@C$n@W raises both $s hands to either side of $s face, while closing $s eyes, and shouts '@YSolar Flare@W' but nothing happens!@n", TRUE, ch, 0, 0, TO_ROOM);
-     ch->decCurKI(cost);
+     decCurKI(ch, cost);
   WAIT_STATE(ch, PULSE_3SEC);
   improve_skill(ch, SKILL_SOLARF, 0);
   return;
@@ -6706,7 +6706,7 @@ ACMD(do_solar)
    }
   }
   improve_skill(ch, SKILL_SOLARF, 0);
-    ch->decCurKI(cost);
+    decCurKI(ch, cost);
   WAIT_STATE(ch, PULSE_3SEC);
 }
 
@@ -6768,16 +6768,16 @@ ACMD(do_heal)
    heal += heal * .1;
   }
 
-  if (heal < (vict->getEffMaxPL())) {
+  if (heal < getEffMaxPL(vict)) {
    heal += (heal / 100) * (GET_WIS(ch) / 4);
   }
 
-  if ((ch->getCurKI()) < cost) {
+  if ((getCurKI(ch)) < cost) {
    send_to_char(ch, "You do not have enough ki.\r\n");
    return;
   }
 
-  if (GET_HIT(vict) >= (vict->getEffMaxPL())) {
+  if (GET_HIT(vict) >= getEffMaxPL(vict)) {
    if (vict != ch) {
     send_to_char(ch, "They are already at full health.\r\n");
    } else {
@@ -6786,7 +6786,7 @@ ACMD(do_heal)
    return;   
   }
 
-  if (GET_SUPPRESS(vict) > 0 && GET_HIT(vict) >= (((vict->getEffMaxPL()) / 100) * GET_SUPPRESS(vict))) {
+   if (GET_SUPPRESS(vict) > 0 && GET_HIT(vict) >= ((getEffMaxPL(vict) / 100) * GET_SUPPRESS(vict))) {
    send_to_char(ch, "They are already at full health.\r\n");
    return;
   }
@@ -6799,7 +6799,7 @@ ACMD(do_heal)
     act("@WYou place your hands near @c$N@W, but fail to concentrate enough to heal them!@n", TRUE, ch, 0, vict, TO_CHAR);
     act("@C$n@W places $s hands near you, but nothing happens!@n", TRUE, ch, 0, vict, TO_VICT);
     act("@C$n@W places $s hands near @c$N@W, but nothing happens.", TRUE, ch, 0, vict, TO_NOTVICT);
-       ch->decCurKI(cost);
+       decCurKI(ch, cost);
     improve_skill(ch, SKILL_HEAL, 0);
     WAIT_STATE(ch, PULSE_2SEC);
     return;
@@ -6807,7 +6807,7 @@ ACMD(do_heal)
    if (vict == ch) {
     act("@WYou place your hands on your body, but fail to concentrate to heal yourself!@n", TRUE, ch, 0, vict, TO_CHAR);
     act("@C$n@W places $s hands on $s body, but nothing happens.", TRUE, ch, 0, vict, TO_NOTVICT);
-       ch->decCurKI(cost);
+       decCurKI(ch, cost);
     improve_skill(ch, SKILL_HEAL, 0);
     WAIT_STATE(ch, PULSE_2SEC);
     return;
@@ -6821,18 +6821,18 @@ ACMD(do_heal)
    act("@WYou place your hands near @c$N@W and an orange glow surrounds $M!@n", TRUE, ch, 0, vict, TO_CHAR);
    act("@C$n@W places $s hands near you and an orange glow surrounds you!@n", TRUE, ch, 0, vict, TO_VICT);
    act("@C$n@W places $s hands near @c$N@W and an orange glow surrounds $M.", TRUE, ch, 0, vict, TO_NOTVICT);
-      ch->decCurKI(cost);
-      vict->incCurHealth(heal);
+      decCurKI(ch, cost);
+      incCurHealth(vict, heal);
 
    if (IS_NAIL(ch)) {
     if (GET_SKILL(ch, SKILL_HEAL) >= 100) {
-     ch->incCurST(heal * .4);
+     incCurST(ch, heal * .4);
      send_to_char(vict, "@GYou feel some of your stamina return as well!@n\r\n");
     } else if (GET_SKILL(ch, SKILL_HEAL) >= 60) {
-        ch->incCurST(heal * .2);
+        incCurST(ch, heal * .2);
      send_to_char(vict, "@GYou feel some of your stamina return as well!@n\r\n");
     } else if (GET_SKILL(ch, SKILL_HEAL) >= 40) {
-        ch->incCurST(heal * .1);
+        incCurST(ch, heal * .1);
      send_to_char(vict, "@GYou feel some of your stamina return as well!@n\r\n");
     }
    }
@@ -6853,14 +6853,14 @@ ACMD(do_heal)
    GET_LIMBCOND(vict, 2) = 100;
    GET_LIMBCOND(vict, 3) = 100;
    GET_LIMBCOND(vict, 4) = 100;
-   if ((vict->getCurLF()) <= (vict->getMaxLF()) * 0.5 && !IS_ANDROID(vict)) {
-       vict->incCurLF((ch->getMaxLF()) * .35);
+   if(getCurLF(vict) <= getMaxLF(vict) * 0.5 && !IS_ANDROID(vict)) {
+       incCurLF(vict, (getMaxLF(ch)) * .35);
     send_to_char(vict, "You feel that your lifeforce has recovered some!\r\n");
    }
    improve_skill(ch, SKILL_HEAL, 0);
    if (vict->master == ch || ch->master == vict || ch->master == vict->master) {
     if (IS_NAIL(ch) && IS_NAMEK(ch) && level_exp(ch, GET_LEVEL(ch) + 1) - GET_EXP(ch) > 0 && GET_HIT(vict) <=
-                                                                                                     (vict->getEffMaxPL()) * 0.85 && rand_number(1, 3) == 3) {
+                                                                                                     getEffMaxPL(vict) * 0.85 && rand_number(1, 3) == 3) {
      GET_EXP(ch) += level_exp(ch, GET_LEVEL(ch) + 1) * 0.005;
     }
    }
@@ -6874,18 +6874,18 @@ ACMD(do_heal)
    }
    act("@WYou place your hands on your body and an orange glow surrounds you!@n", TRUE, ch, 0, vict, TO_CHAR);
    act("@C$n@W places $s hands on $s body and an orange glow surrounds $m.", TRUE, ch, 0, vict, TO_NOTVICT);
-      ch->decCurKI(cost);
-      vict->incCurHealth(heal);
+      decCurKI(ch, cost);
+      incCurHealth(vict, heal);
 
    if (IS_NAIL(ch)) {
     if (GET_SKILL(ch, SKILL_HEAL) >= 100) {
-        ch->incCurST(heal * .4);
+        incCurST(ch, heal * .4);
      send_to_char(vict, "@GYou feel some of your stamina return as well!@n\r\n");
     } else if (GET_SKILL(ch, SKILL_HEAL) >= 60) {
-        ch->incCurST(heal * .2);
+        incCurST(ch, heal * .2);
      send_to_char(vict, "@GYou feel some of your stamina return as well!@n\r\n");
     } else if (GET_SKILL(ch, SKILL_HEAL) >= 40) {
-        ch->incCurST(heal * .1);
+        incCurST(ch, heal * .1);
      send_to_char(vict, "@GYou feel some of your stamina return as well!@n\r\n");
     }
    }
@@ -7057,7 +7057,7 @@ ACMD(do_instant)
    cost = GET_MAX_MANA(ch) / 10;
   }
 
-  if ((ch->getCurKI()) - cost < 0) {
+  if ((getCurKI(ch)) - cost < 0) {
    send_to_char(ch, "You do not have enough ki to instantaneously move.\r\n");
    return;
   }
@@ -7089,7 +7089,7 @@ ACMD(do_instant)
    if (tar != NULL) {
     if (tar != ch) {
      send_to_char(ch, "You prepare to move instantly but mess up the process and waste some of your ki!\r\n");
-        ch->decCurKI(cost);
+        decCurKI(ch, cost);
      improve_skill(ch, skill_num, 2);
      WAIT_STATE(ch, PULSE_2SEC);
      return;
@@ -7099,7 +7099,7 @@ ACMD(do_instant)
     }
    } else {
     send_to_char(ch, "You prepare to move instantly but mess up the process and waste some of your ki!\r\n");
-       ch->decCurKI(cost);
+       decCurKI(ch, cost);
     improve_skill(ch, skill_num, 2);
     WAIT_STATE(ch, PULSE_2SEC);
     return;
@@ -7135,7 +7135,7 @@ ACMD(do_instant)
    return;
   }
 
-     ch->decCurKI(cost);
+     decCurKI(ch, cost);
   act("@wPlacing two fingers on your forehead you close your eyes and concentrate. Accelerating to such a speed that you move through the molecules of the universe faster than the speed of light. You stop as you arrive at $N@w!@n", TRUE, ch, 0, tar, TO_CHAR);
   act("@w$n@w appears in an instant out of nowhere right next to you!@n", TRUE, ch, 0, tar, TO_VICT);
   act("@w$n@w places two fingers on $s forehead and disappears in an instant!@n", TRUE, ch, 0, tar, TO_NOTVICT);
@@ -7143,7 +7143,7 @@ ACMD(do_instant)
   handle_teleport(ch, tar, 0);
   improve_skill(ch, skill_num, 2);
  } else {
-     ch->decCurKI(cost);
+     decCurKI(ch, cost);
   act("@wPlacing two fingers on your forehead you close your eyes and concentrate. Accelerating to such a speed that you move faster than light and arrive almost instantly at your destination. Having located the planet by its collective population's ki.@n", TRUE, ch, 0, 0, TO_CHAR);
   act("@w$n@w places two fingers on $s forehead and disappears in an instant!@n", TRUE, ch, 0, 0, TO_NOTVICT);
   handle_teleport(ch, NULL, location);
@@ -7586,7 +7586,7 @@ ACMD(do_transform)
     auto npc = IS_NPC(ch);
 
 	/*R: Hidden transformation stuff following this*/
-	if (!npc && (ch->getBasePL()) < 50000) {
+	if (!npc && (getBasePL(ch)) < 50000) {
 		send_to_char(ch, "@RYou are too weak to comprehend transforming!@n\r\n");
 		return;
 	}
@@ -7649,12 +7649,12 @@ ACMD(do_transform)
         return;
     }
 
-    if (!npc && (ch->getBasePL()) < trans_req(ch, to_tier)) {
+    if (!npc && (getBasePL(ch)) < trans_req(ch, to_tier)) {
         send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
         return;
     }
 
-    if (!npc && (ch->getCurST()) <= GET_MAX_MOVE(ch) * trans.drain) {
+    if (!npc && (getCurST(ch)) <= GET_MAX_MOVE(ch) * trans.drain) {
         send_to_char(ch, "You do not have enough stamina!");
         return;
     }
@@ -7772,7 +7772,7 @@ ACMD(do_situp)
    return;
   }
 
- if ((ch->getCurST()) < cost) {
+ if ((getCurST(ch)) < cost) {
    send_to_char(ch, "You are too tired!\r\n");
    return;
   }
@@ -7895,7 +7895,7 @@ ACMD(do_situp)
     send_to_char(ch, "This gravity is just perfect for you...\r\n");
     bonus *= 4;
    }
-   if (ch->is_soft_cap(2)) {
+   if (is_soft_cap(ch, 2)) {
     bonus = 0;
    }
    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HBTC)) {
@@ -7936,7 +7936,7 @@ ACMD(do_situp)
       bonus += bonus * 0.1;
     }
     send_to_char(ch, "You feel slightly more vigorous @D[@G+%s@D]@n.\r\n", add_commas(bonus));
-     ch->gainBaseST(bonus, true);
+     gainBaseST(ch, bonus, true);
    if (ROOM_GRAVITY(IN_ROOM(ch)) <= 50) {
    WAIT_STATE(ch, PULSE_2SEC);  
    }
@@ -7955,7 +7955,7 @@ ACMD(do_situp)
    else if (ROOM_GRAVITY(IN_ROOM(ch)) <= 10000) {
    WAIT_STATE(ch, PULSE_7SEC);
    }
-   ch->decCurST(cost);
+   decCurST(ch, cost);
  }
 }
 
@@ -8044,7 +8044,7 @@ ACMD(do_meditate)
   } else if (LINKER(ch) == 1) {
    send_to_char(ch, "This is not how you break YOUR mind link.\r\n");
    return;
-  } else if ((ch->getCurKI()) < GET_MAX_MANA(MINDLINK(ch)) * 0.05) {
+  } else if ((getCurKI(ch)) < GET_MAX_MANA(MINDLINK(ch)) * 0.05) {
    send_to_char(ch, "You do not have enough ki to manage a break.\r\n");
    return;
   } else if (GET_INT(ch) + rand_number(-5, 10) >= GET_INT(MINDLINK(ch)) + (GET_SKILL(MINDLINK(ch), SKILL_TELEPATHY) * 0.1)) {
@@ -8065,7 +8065,7 @@ ACMD(do_meditate)
    act("$n closes their eyes for a few seconds, and appears to struggle quite a bit.", FALSE, ch, 0, MINDLINK(ch), TO_ROOM);
    send_to_char(MINDLINK(ch), "@rYour mind linked target struggles to free their mind, but fails!@n\r\n");
 
-   ch->decCurKI(GET_MAX_MANA(MINDLINK(ch)) * .05);
+   decCurKI(ch, GET_MAX_MANA(MINDLINK(ch)) * .05);
    return;
   }
  } else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(ch)].contents))) {
@@ -8131,7 +8131,7 @@ ACMD(do_meditate)
    cost *= 4;
   }
 
- if ((ch->getCurKI()) < cost) {
+ if ((getCurKI(ch)) < cost) {
    send_to_char(ch, "You don't have enough ki!\r\n");
    return;
   }
@@ -8222,7 +8222,7 @@ ACMD(do_meditate)
     send_to_char(ch, "This gravity is just perfect for you....\r\n");
     bonus *= 4;
    }
-    if (ch->is_soft_cap(1)) {
+    if (is_soft_cap(ch, 1)) {
      bonus = 0;
     }
    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HBTC)) {
@@ -8253,7 +8253,7 @@ ACMD(do_meditate)
    }
    if (bonus != 1 && IS_DEMON(ch) && rand_number(1, 100) >= 80) {
     send_to_char(ch, "Your spirit magnifies the strength of your body! @D[@G+%s@D]@n\r\n", add_commas(bonus / 2));
-    ch->gainBasePL(bonus / 2);
+    gainBasePL(ch, bonus / 2);
     }
 
     bonus += GET_LEVEL(ch) / 20;
@@ -8265,7 +8265,7 @@ ACMD(do_meditate)
     }
     /* Rillao: transloc, add new transes here */
     send_to_char(ch, "You feel your spirit grow stronger @D[@G+%s@D]@n.\r\n", add_commas(bonus));
-    ch->gainBaseKI(bonus, true);
+    gainBaseKI(ch, bonus, true);
    if (ROOM_GRAVITY(IN_ROOM(ch)) <= 50) {
    WAIT_STATE(ch, PULSE_2SEC);
    }
@@ -8285,7 +8285,7 @@ ACMD(do_meditate)
    WAIT_STATE(ch, PULSE_7SEC);
    }
 
-     ch->decCurKI(cost);
+     decCurKI(ch, cost);
   }
 }
 
@@ -8364,7 +8364,7 @@ ACMD(do_pushup)
    return;
   }
 
- if ((ch->getCurST()) < cost) {
+ if ((getCurST(ch)) < cost) {
    send_to_char(ch, "You are too tired!\r\n");
    return;
   }
@@ -8452,35 +8452,35 @@ ACMD(do_pushup)
     act("@gYou do a pushup, and it was a really hard one to finish.@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@g$n does a pushup, while sweating profusely.@n", TRUE, ch, 0, 0, TO_ROOM);
    }
-   if (cost >= ch->getMaxPLTrans() / 2) {
+   if (cost >= getMaxPLTrans(ch) / 2) {
     send_to_char(ch, "This gravity is a great challenge for you!\r\n");
     bonus *= 10;
    }
-   else if (cost >= ch->getMaxPLTrans() / 4) {
+   else if (cost >= getMaxPLTrans(ch) / 4) {
     send_to_char(ch, "This gravity is an awesome challenge for you!\r\n");
     bonus *= 8;
    }
-   else if (cost >= ch->getMaxPLTrans() / 10) {
+   else if (cost >= getMaxPLTrans(ch) / 10) {
     send_to_char(ch, "This gravity is a good challenge for you!\r\n");
     bonus *= 6;
    }
-   else if (cost < ch->getMaxPLTrans() / 1000) {
+   else if (cost < getMaxPLTrans(ch) / 1000) {
     send_to_char(ch, "This gravity is so easy to you, you could do it in your sleep....\r\n");
     bonus /= 8;
    }
-   else if (cost < ch->getMaxPLTrans() / 100) {
+   else if (cost < getMaxPLTrans(ch) / 100) {
     send_to_char(ch, "This gravity is the opposite of a challenge for you....\r\n");
     bonus /= 5;
    }
-   else if (cost < ch->getMaxPLTrans() / 50) {
+   else if (cost < getMaxPLTrans(ch) / 50) {
     send_to_char(ch, "This gravity is definitely not a challenge for you....\r\n");
     bonus /= 4;
    }
-   else if (cost < ch->getMaxPLTrans() / 30) {
+   else if (cost < getMaxPLTrans(ch) / 30) {
     send_to_char(ch, "This gravity is barely a challenge for you....\r\n");
     bonus /= 3;
    }
-   else if (cost < ch->getMaxPLTrans() / 20) {
+   else if (cost < getMaxPLTrans(ch) / 20) {
     send_to_char(ch, "This gravity is hardly a challenge for you....\r\n");
     bonus /= 2;
    }
@@ -8488,7 +8488,7 @@ ACMD(do_pushup)
     send_to_char(ch, "This gravity is just perfect for you....\r\n");
     bonus *= 4;
    }
-   if (ch->is_soft_cap(0)) {
+   if (is_soft_cap(ch, 0)) {
     bonus = 0;
    }
    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HBTC)) {
@@ -8533,7 +8533,7 @@ ACMD(do_pushup)
      if (IS_HUMAN(ch)) {
          bonus = bonus * 0.8;
      }
-     ch->gainBasePL(bonus, true);
+     gainBasePL(ch, bonus, true);
    if (ROOM_GRAVITY(IN_ROOM(ch)) <= 50) {
    WAIT_STATE(ch, PULSE_2SEC);  
    }
@@ -8552,7 +8552,7 @@ ACMD(do_pushup)
    else if (ROOM_GRAVITY(IN_ROOM(ch)) <= 10000) {
    WAIT_STATE(ch, PULSE_7SEC);
    }
-     ch->decCurST(cost);
+     decCurST(ch, cost);
  }
 }
 
@@ -8634,17 +8634,17 @@ void base_update(void)
 			if (IS_ANDROID(d->character) && ABSORBING(d->character) && rand_number(1, 10) >= 7) {
 				int64_t drain1 = GET_MAX_MANA(d->character) * 0.01, drain2 = GET_MAX_MOVE(d->character) * 0.01;
 				struct char_data *drained = ABSORBING(d->character);
-				if ((drained->getCurST()) - drain2 < 0) {
-					drain2 = (drained->getCurST());
+				if ((getCurST(drained)) - drain2 < 0) {
+					drain2 = (getCurST(drained));
 				}
-				if ((drained->getCurKI()) - drain1 < 0) {
-					drain1 = (drained->getCurKI());
+				if ((getCurKI(drained)) - drain1 < 0) {
+					drain1 = (getCurKI(drained));
 				}
-                d->character->incCurST(drain2);
-                d->character->incCurKI(drain1);
-                d->character->incCurHealth(drain1 * .5);
+                incCurST(d->character, drain2);
+                incCurKI(d->character, drain1);
+                incCurHealth(d->character, drain1 * .5);
 
-				if (d->character->isFullKI() && d->character->isFullST()) {
+				if (isFullKI(d->character) && isFullST(d->character)) {
 					do_absorb(d->character, NULL, 0, 0);
 				}
 			}
@@ -8656,13 +8656,13 @@ void base_update(void)
 		if (!IS_NPC(d->character) && rand_number(1, 15) >= 14) {
 			ash_burn(d->character);
 		}
-        auto forty_lf = (d->character->getMaxLF()) * 0.4;
-		if (AFF_FLAGGED(d->character, AFF_CURSE) && (d->character->getCurLF()) > forty_lf) {
-			d->character->decCurLFPercent(.01);
-			demon_refill_lf(d->character, (d->character->getMaxLF()) * 0.01);
+        auto forty_lf = getMaxLF(d->character) * 0.4;
+		if (AFF_FLAGGED(d->character, AFF_CURSE) && getCurLF(d->character) > forty_lf) {
+			decCurLFPercent(d->character, .01);
+			demon_refill_lf(d->character, getMaxLF(d->character) * 0.01);
 
-			if ((d->character->getCurLF()) < forty_lf) {
-                d->character->incCurLF(forty_lf - d->character->getCurLF());
+			if (getCurLF(d->character) < forty_lf) {
+                incCurLF(d->character, forty_lf - getCurLF(d->character));
 			}
 		}
 		if (GET_BACKSTAB_COOL(d->character) > 0) {
@@ -8704,7 +8704,7 @@ void base_update(void)
 		{
 			if (IS_BIO(d->character))
 			{
-                d->character->restoreHealth();
+                restoreHealth(d->character);
 				act("@GYour body has fully regenerated! You flex your arms and legs outward with a rush of renewed strength!@n", TRUE, d->character, 0, 0, TO_CHAR);
 				act("@g$n@G's body has fully regenerated! Suddenly $e flexes $s arms and legs and a rush of power erupts from off of $s body!@n", TRUE, d->character, 0, 0, TO_ROOM);
 			}
@@ -8713,9 +8713,9 @@ void base_update(void)
 			{
 
 				int zenkaiPL, zenkaiKi, zenkaiSt;
-				zenkaiPL = (d->character->getBasePL()) * 1.03;
-				zenkaiKi = (d->character->getBaseKI()) * 1.015;
-				zenkaiSt = (d->character->getBaseST()) * 1.015;
+				zenkaiPL = getBasePL(d->character) * 1.03;
+				zenkaiKi = getBaseKI(d->character) * 1.015;
+				zenkaiSt = getBaseST(d->character) * 1.015;
 
 				//GET_HIT(d->character) = gear_pl(d->character) * .5;
 				//GET_MANA(d->character) = GET_MAX_MANA(d->character) *.2;
@@ -8724,9 +8724,9 @@ void base_update(void)
 
 				if (!IN_ARENA(d->character))
 				{
-                    d->character->gainBasePL(zenkaiPL);
-                    d->character->gainBaseKI(zenkaiKi);
-                    d->character->gainBaseST(zenkaiSt);
+                    gainBasePL(d->character, zenkaiPL);
+                    gainBaseKI(d->character, zenkaiKi);
+                    gainBaseST(d->character, zenkaiSt);
 
 					send_to_char(d->character, "@D[@YZ@ye@wn@Wk@Ya@yi @YB@yo@wo@Ws@Yt@D] @WYou feel much stronger!\r\n");
 					send_to_char(d->character, "@D[@RPL@Y:@n+%s@D] @D[@CKI@Y:@n+%s@D] @D[@GSTA@Y:@n+%s@D]@n\r\n", add_commas(zenkaiPL), add_commas(zenkaiKi), add_commas(zenkaiSt));
@@ -8735,7 +8735,7 @@ void base_update(void)
 				act("@r$n@R collapses to the ground, seemingly dead. After a brief moment, their eyes flash open with a determined look on their face!", TRUE, d->character, 0, 0, TO_ROOM);
 			}
 			else {
-                d->character->restoreHealth();
+                restoreHealth(d->character);
 				act("@MYour body has fully regenerated! You scream out in triumph and a short gust of steam erupts from your pores!@n", TRUE, d->character, 0, 0, TO_CHAR);
 				act("@m$n@M's body has fully regenerated! Suddenly $e screams out in gleeful triumph and short gust of steam erupts from $s skin pores!", TRUE, d->character, 0, 0, TO_ROOM);
 			}
@@ -8857,8 +8857,8 @@ void base_update(void)
 			ABSORBING(d->character) = NULL;
 		}
 		if (IS_ANDROID(d->character) && ABSORBING(d->character)) {
-			if ((((d->character)->absorbing)->getCurST()) < (GET_MAX_MOVE(d->character) / 15) &&
-                    (((d->character)->absorbing)->getCurKI()) < (GET_MAX_MANA(d->character) / 15)) {
+			if (getCurST(ABSORBING(d->character)) < (GET_MAX_MOVE(d->character) / 15) &&
+                    getCurKI(ABSORBING(d->character)) < (GET_MAX_MANA(d->character) / 15)) {
 				act("@WYou stop absorbing stamina and ki from @c$N as they don't have enough for you to take@W!@n", TRUE, d->character, 0, ABSORBING(d->character), TO_CHAR);
 				act("@C$n@W stops absorbing stamina and ki from you!@n", TRUE, d->character, 0, ABSORBING(d->character), TO_VICT);
 				act("@C$n@W stops absorbing stamina and ki from @c$N@w!@n", TRUE, d->character, 0, ABSORBING(d->character), TO_NOTVICT);
@@ -8873,25 +8873,25 @@ void base_update(void)
 			}
 		}
 		if (IS_ANDROID(d->character) && ABSORBING(d->character) && rand_number(1, 9) >= 6) {
-			if ((((d->character)->absorbing)->getCurST()) > (GET_MAX_MOVE(d->character) / 15) ||
-                    (((d->character)->absorbing)->getCurKI()) > (GET_MAX_MANA(d->character) / 15)) {
+			if (getCurST(ABSORBING(d->character)) > (GET_MAX_MOVE(d->character) / 15) ||
+                    getCurKI(ABSORBING(d->character)) > (GET_MAX_MANA(d->character) / 15)) {
 
-                d->character->incCurKI(d->character->getMaxKI() * .08);
-                d->character->incCurST(d->character->getMaxST() * .08);
+                incCurKI(d->character, getMaxKI(d->character) * .08);
+                incCurST(d->character, getMaxST(d->character) * .08);
 
-                ABSORBING(d->character)->decCurKI(d->character->getMaxKI() / 20, 1);
-                ABSORBING(d->character)->decCurST(d->character->getMaxST() / 20, 1);
+                decCurKI(ABSORBING(d->character), getMaxKI(d->character) / 20, 1);
+                decCurST(ABSORBING(d->character), getMaxST(d->character) / 20, 1);
 
 				act("@WYou absorb stamina and ki from @c$N@W!@n", TRUE, d->character, 0, ABSORBING(d->character), TO_CHAR);
 				act("@C$n@W absorbs stamina and ki from you!@n", TRUE, d->character, 0, ABSORBING(d->character), TO_VICT);
 				send_to_char(ABSORBING(d->character), "@wTry 'escape'!@n\r\n");
 				act("@C$n@W absorbs stamina and ki from @c$N@w!@n", TRUE, d->character, 0, ABSORBING(d->character), TO_NOTVICT);
-				if (GET_HIT(d->character) < (d->character->getEffMaxPL())) {
-                    d->character->incCurHealth(d->character->getMaxKI() * .04);
+				if (GET_HIT(d->character) < getEffMaxPL(d->character)) {
+                    incCurHealth(d->character, getMaxKI(d->character) * .04);
 					send_to_char(d->character, "@CYou convert a portion of the absorbed energy into refilling your powerlevel.@n\r\n");
 				}
 
-				if (d->character->isFullST() && d->character->isFullKI()) {
+				if (isFullST(d->character) && isFullKI(d->character)) {
 
 					act("@WYou stop absorbing stamina and ki from @c$N as you are full@W!@n", TRUE, d->character, 0, ABSORBING(d->character), TO_CHAR);
 					act("@C$n@W stops absorbing stamina and ki from you!@n", TRUE, d->character, 0, ABSORBING(d->character), TO_VICT);
@@ -8905,9 +8905,9 @@ void base_update(void)
 					ABSORBBY(ABSORBING(d->character)) = NULL;
 					ABSORBING(d->character) = NULL;
 				}
-				bool sum = !d->character->is_soft_cap(0);
-                bool mum = !d->character->is_soft_cap(2);
-                bool ium = !d->character->is_soft_cap(1);
+				bool sum = !is_soft_cap(d->character, 0);
+                bool mum = !is_soft_cap(d->character, 2);
+                bool ium = !is_soft_cap(d->character, 1);
                 auto leader = d->character->master ? d->character->master : d->character;
 				if (sum) {
 					if (rand_number(1, 8) >= 6) {
@@ -8931,7 +8931,7 @@ void base_update(void)
 								send_to_char(d->character, "The leader of your group conveys an extra bonus! @D[@G+%s@D]@n \r\n", add_commas(gbonus));
 							}
 						}
-                        d->character->gainBasePL(gain);
+                        gainBasePL(d->character, gain);
 					}
 				}
 				if (mum) {
@@ -8957,7 +8957,7 @@ void base_update(void)
 								send_to_char(d->character, "The leader of your group conveys an extra bonus! @D[@G+%s@D]@n \r\n", add_commas(gbonus));
 							}
 						}
-                        d->character->gainBaseST(gain);
+                        gainBaseST(d->character, gain);
 					}
 				}
 				if (ium) {
@@ -8983,28 +8983,28 @@ void base_update(void)
 								send_to_char(d->character, "The leader of your group conveys an extra bonus! @D[@G+%s@D]@n \r\n", add_commas(gbonus));
 							}
 						}
-                        d->character->gainBaseKI(gain);
+                        gainBaseKI(d->character, gain);
 					}
 				}
 				if (!sum) {
 					if (rand_number(1, 8) >= 6) {
 						int gain = 1;
 						send_to_char(d->character, "@gYou gain +@G%d@g permanent powerlevel. You may need to level.@n\r\n", gain);
-						d->character->gainBasePL(gain);
+						gainBasePL(d->character, gain);
 					}
 				}
 				if (!mum) {
 					if (rand_number(1, 8) >= 6) {
 						int gain = 1;
 						send_to_char(d->character, "@gYou gain +@G%d@g permanent stamina. You may need to level.@n\r\n", gain);
-						d->character->gainBaseST(gain);
+						gainBaseST(d->character, gain);
 					}
 				}
 				if (!ium) {
 					if (rand_number(1, 8) >= 6) {
 						int gain = 1;
 						send_to_char(d->character, "@gYou gain +@G%d@g permanent ki. You may need to level.@n\r\n", gain);
-						d->character->gainBaseKI(gain);
+						gainBaseKI(d->character, gain);
 					}
 				}
 			}
@@ -9405,7 +9405,7 @@ ACMD(do_scouter)
       }
       else {
        long double percent = 0.0, cur = 0.0, max = 0.0;
-       int64_t stam = (vict->getCurST()), mstam = GET_MAX_MOVE(vict);
+       int64_t stam = (getCurST(vict)), mstam = GET_MAX_MOVE(vict);
        if (stam <= 0)
         stam = 1;
        if (mstam <= 0)
@@ -9704,7 +9704,7 @@ ACMD(do_steal)
   return;
  }
 
- if ((ch->getCurST()) < (GET_MAX_MOVE(ch) / 40) + IS_CARRYING_W(ch)) {
+ if ((getCurST(ch)) < (GET_MAX_MOVE(ch) / 40) + IS_CARRYING_W(ch)) {
   send_to_char(ch, "You do not have enough stamina.\r\n");
   return;
  }
@@ -9831,7 +9831,7 @@ ACMD(do_steal)
 	  } else if (OBJ_FLAGGED(obj, ITEM_NOSTEAL)) {
 	   send_to_char(ch, "You can't steal that!\r\n");
 	   return;
-     } else if (GET_OBJ_WEIGHT(obj) + (ch->getCurCarriedWeight()) > CAN_CARRY_W(ch)) {
+     } else if (GET_OBJ_WEIGHT(obj) + (getCurCarriedWeight(ch)) > CAN_CARRY_W(ch)) {
       send_to_char(ch, "You can't carry that much weight.\r\n");
       return;
      } else if (IS_CARRYING_N(ch) + 1 > CAN_CARRY_N(ch)) {
@@ -9877,7 +9877,7 @@ ACMD(do_steal)
 	  } else if (GET_OBJ_TYPE(obj) == ITEM_KEY) {
       send_to_char(ch, "No stealing keys!\r\n");
       return;
-     } else if (GET_OBJ_WEIGHT(obj) + (ch->getCurCarriedWeight()) > CAN_CARRY_W(ch)) {
+     } else if (GET_OBJ_WEIGHT(obj) + (getCurCarriedWeight(ch)) > CAN_CARRY_W(ch)) {
       send_to_char(ch, "You can't carry that much weight.\r\n");
       return;
      } else if (IS_CARRYING_N(ch) + 1 > CAN_CARRY_N(ch)) {
@@ -10019,12 +10019,12 @@ static int perform_group(struct char_data *ch, struct char_data *vict, int highl
   }
 
   if (highlvl >= 100) {
-   if ((vict->getEffMaxPL()) > highpl * 1.5) {
+   if ((getEffMaxPL(vict))) > highpl * 1.5) {
     act("$n is too powerful right now to be in a level 100 group with you.", TRUE, vict, 0, ch, TO_VICT);
     return (0);
    }
 
-   if ((vict->getEffMaxPL()) < lowpl * 0.5) {
+   if ((getEffMaxPL(vict))) < lowpl * 0.5) {
     act("$n is too weak right now to be in a level 100 group with you.", TRUE, vict, 0, ch, TO_VICT);
     return (0);
    }
@@ -10057,12 +10057,12 @@ static void print_group(struct char_data *ch)
       send_to_char(ch, "@D----------------@n\r\n");
       if (GET_HIT(k) > GET_MAX_HIT(k) / 10) {
       snprintf(buf, sizeof(buf), "@gL@D: @w$N @W- @D[@RPL@Y: @c%s @CKi@Y: @c%s @GST@Y: @c%s@D] [@w%2d %s %s@D]@n",
-	      add_commas(GET_HIT(k)), add_commas((k->getCurKI())), add_commas((k->getCurST())), GET_LEVEL(k),
+	      add_commas(GET_HIT(k)), add_commas((getCurKI(k))), add_commas((getCurST(k))), GET_LEVEL(k),
               CLASS_ABBR(k), RACE_ABBR(k));
       }
-      if (GET_HIT(k) <= (GET_MAX_HIT(k) - (k->getCurCarriedWeight())) / 10) {
+      if (GET_HIT(k) <= (GET_MAX_HIT(k) - (getCurCarriedWeight(k))) / 10) {
       snprintf(buf, sizeof(buf), "@gL@D: @w$N @W- @D[@RPL@Y: @r%s @CKi@Y: @c%s @GST@Y: @c%s@D] [@w%2d %s %s@D]@n",
-              add_commas(GET_HIT(k)), add_commas((k->getCurKI())), add_commas((k->getCurST())), GET_LEVEL(k),
+              add_commas(GET_HIT(k)), add_commas((getCurKI(k))), add_commas((getCurST(k))), GET_LEVEL(k),
               CLASS_ABBR(k), RACE_ABBR(k));
       }
       act(buf, FALSE, ch, 0, k, TO_CHAR);
@@ -10072,16 +10072,16 @@ static void print_group(struct char_data *ch)
       if (!AFF_FLAGGED(f->follower, AFF_GROUP))
 	continue;
       send_to_char(ch, "@D----------------@n\r\n");
-      if (GET_HIT(f->follower) > (GET_MAX_HIT(f->follower) - (f->follower->getCurCarriedWeight())) / 10) {
+      if (GET_HIT(f->follower) > (GET_MAX_HIT(f->follower) - (getCurCarriedWeight(f->follower))) / 10) {
       snprintf(buf, sizeof(buf), "@gF@D: @w$N @W- @D[@RPL@Y: @c%s @CKi@Y: @c%s @GST@Y: @c%s@D] [@w%2d %s %s@D]",
-              add_commas(GET_HIT(f->follower)), add_commas((f->follower->getCurKI())), add_commas(
-                      (f->follower->getCurST())),
+              add_commas(GET_HIT(f->follower)), add_commas((getCurKI(f->follower))), add_commas(
+                      (getCurST(f->follower))),
 	      GET_LEVEL(f->follower), CLASS_ABBR(f->follower), RACE_ABBR(f->follower));
       }
-      if (GET_HIT(f->follower) <= (GET_MAX_HIT(f->follower) - (f->follower->getCurCarriedWeight())) / 10) {
+      if (GET_HIT(f->follower) <= (GET_MAX_HIT(f->follower) - (getCurCarriedWeight(f->follower))) / 10) {
       snprintf(buf, sizeof(buf), "@gF@D: @w$N @W- @D[@RPL@Y: @r%s @CKi@Y: @c%s @GST@Y: @c%s@D] [@w%2d %s %s@D]",
-              add_commas(GET_HIT(f->follower)), add_commas((f->follower->getCurKI())), add_commas(
-                      (f->follower->getCurST())),
+              add_commas(GET_HIT(f->follower)), add_commas((getCurKI(f->follower))), add_commas(
+                      (getCurST(f->follower))),
               GET_LEVEL(f->follower), CLASS_ABBR(f->follower), RACE_ABBR(f->follower));
       }
       act(buf, FALSE, ch, 0, f->follower, TO_CHAR);
@@ -10119,8 +10119,8 @@ ACMD(do_group)
 
   highlvl = GET_LEVEL(ch);
   lowlvl = GET_LEVEL(ch);
-  highpl = (ch->getEffMaxPL());
-  lowpl = (ch->getEffMaxPL());
+  highpl = getEffMaxPL(ch);
+  lowpl = getEffMaxPL(ch);
 
   for (found = 0, f = ch->followers; f; f = f->next) {
    if (AFF_FLAGGED(f->follower, AFF_GROUP)) {
@@ -10242,8 +10242,8 @@ ACMD(do_report)
 
   snprintf(buf, sizeof(buf), "$n reports: %" I64T "/%" I64T "H, %" I64T "/%" I64T "M, %" I64T "/%" I64T "V\r\n",
 	  GET_HIT(ch), GET_MAX_HIT(ch),
-           (ch->getCurKI()), GET_MAX_MANA(ch),
-           (ch->getCurST()), GET_MAX_MOVE(ch));
+           (getCurKI(ch)), GET_MAX_MANA(ch),
+           (getCurST(ch)), GET_MAX_MOVE(ch));
 
   k = (ch->master ? ch->master : ch);
 
@@ -10410,7 +10410,7 @@ ACMD(do_use)
      switch (GET_OBJ_VNUM(mag_item))
      {
       case 381:
-       if ((ch->getCurST()) >= GET_MAX_MOVE(ch)) {
+       if ((getCurST(ch)) >= GET_MAX_MOVE(ch)) {
         send_to_char(ch, "Your stamina is full.\r\n");
         return;
        }
@@ -10418,9 +10418,9 @@ ACMD(do_use)
        act("@C$n@W places an $p@W against $s chest and a loud click is heard.@n", TRUE, ch, mag_item, 0, TO_ROOM);
        if (GET_SKILL(ch, SKILL_FIRST_AID) > 0) {
         send_to_char(ch, "@CYour skill in First Aid has helped increase the use of the injector. You gain more stamina as a result.@n\r\n");
-        ch->incCurST(ch->getMaxST() * .25);
+        incCurST(ch, getMaxST(ch) * .25);
        } else {
-           ch->incCurST(ch->getMaxST() * .1);
+           incCurST(ch, getMaxST(ch) * .1);
        }
        extract_obj(mag_item);
        return;
@@ -10454,14 +10454,14 @@ ACMD(do_use)
        }
         refreshed = FALSE;
 
-        if (GET_HIT(ch) <= (ch->getEffMaxPL()) * 0.99) {
-            ch->incCurHealth(large_rand((ch->getEffMaxPL()) * 0.08, (ch->getEffMaxPL()) * 0.16));
+        if (GET_HIT(ch) <= getEffMaxPL(ch)  * 0.99) {
+            incCurHealth(ch, large_rand(getEffMaxPL(ch) * 0.08, getEffMaxPL(ch) * 0.16));
          refreshed = TRUE;
-        } else if ((ch->getCurKI()) <= (ch->getEffMaxPL()) * 0.99) {
-            ch->incCurKI(large_rand(GET_MAX_MANA(ch) * 0.08, GET_MAX_MANA(ch) * 0.16));
+        } else if ((getCurKI(ch)) <= getEffMaxPL(ch)  * 0.99) {
+            incCurKI(ch, large_rand(GET_MAX_MANA(ch) * 0.08, GET_MAX_MANA(ch) * 0.16));
          refreshed = TRUE;
-        } else if ((ch->getCurST()) <= GET_MAX_MOVE(ch) * 0.99) {
-            ch->incCurST(large_rand(GET_MAX_MOVE(ch) * 0.08, GET_MAX_MOVE(ch) * 0.16));
+        } else if ((getCurST(ch)) <= GET_MAX_MOVE(ch)  * 0.99) {
+            incCurST(ch, large_rand(GET_MAX_MOVE(ch) * 0.08, GET_MAX_MOVE(ch) * 0.16));
          refreshed = TRUE;
         }
         if (refreshed == TRUE) {
@@ -11300,7 +11300,7 @@ ACMD(do_fix)
    return;
  } else { /* For androids repairing themselves */
 
-   if (GET_HIT(ch) >= (ch->getEffMaxPL())) {
+   if (GET_HIT(ch) >= getEffMaxPL(ch)) {
     send_to_char(ch, "Your body is already in peak condition.\r\n");
     return; 
    } else if (GET_SKILL(ch, SKILL_REPAIR) < axion_dice(0)) {
@@ -11314,10 +11314,10 @@ ACMD(do_fix)
     act("You use the repair kit to fix part of your body...", TRUE, ch, 0, 0, TO_CHAR);
     act("$n works on their body with a repair kit.", TRUE, ch, 0, 0, TO_ROOM);
     int64_t mult = GET_SKILL(ch, SKILL_REPAIR);
-    int64_t add = (((ch->getEffMaxPL()) * 0.005) + 10) * mult;
+    int64_t add = (getEffMaxPL(ch) * 0.005 + 10) * mult;
 
     extract_obj(obj4);
-    if (ch->incCurHealth(add) == ch->getEffMaxPL()) {
+    if (incCurHealth(ch, add) == getEffMaxPL(ch)) {
      send_to_char(ch, "Your body has been totally repaired.\r\n");
      WAIT_STATE(ch, PULSE_5SEC);
     } else {
@@ -12264,11 +12264,11 @@ ACMD(do_aid)
     dc = axion_dice(0);
     if ((GET_SKILL(ch, SKILL_FIRST_AID) + 1) > dc) {
       send_to_char(ch, "You bandage %s's wounds.\r\n", GET_NAME(vict));
-      int64_t roll = (((vict->getEffMaxPL()) / 100) * (GET_WIS(ch) / 4)) + (vict->getEffMaxPL()) * 0.25;
+      int64_t roll = (getEffMaxPL(vict) / 100) * (GET_WIS(ch) / 4) + getEffMaxPL(vict) * 0.25;
       if (GET_BONUS(ch, BONUS_HEALER) > 0) {
        roll += roll * .1;
       }
-      vict->incCurHealth(roll);
+      incCurHealth(vict, roll);
 
       send_to_char(vict, "Your wounds are bandaged by %s!\r\n", GET_NAME(ch));
       act("$n's wounds are stablized by $N!", TRUE, vict, 0, ch, TO_NOTVICT);
@@ -12406,12 +12406,12 @@ ACMD(do_aura) {
 	   REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_AURALIGHT);
 	   world[IN_ROOM(ch)].light--;
         
-     } else if ((ch->getCurKI()) > GET_MAX_MANA(ch) * 0.12) {
+     } else if ((getCurKI(ch)) > GET_MAX_MANA(ch) * 0.12) {
 	 if (IN_ROOM(ch) != NOWHERE) {
 	  world[IN_ROOM(ch)].light++;
          }
           reveal_hiding(ch, 0);
-     ch->decCurKIPercent(.12);
+     decCurKIPercent(ch, .12);
           send_to_char(ch, "A bright %s aura begins to burn around you as you provide light to the surrounding area!\r\n", aura_types[GET_AURA(ch)]);	
 	  char bloom[MAX_INPUT_LENGTH];
           sprintf(bloom, "@wA %s aura flashes up brightly around $n@w as they provide light to the area.@n", aura_types[GET_AURA(ch)]);

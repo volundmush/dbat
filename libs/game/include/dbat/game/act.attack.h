@@ -1,11 +1,5 @@
-//
-// Created by basti on 10/22/2021.
-//
-
-#ifndef CIRCLE_ACT_ATTACK_H
-#define CIRCLE_ACT_ATTACK_H
-
-#include "structs.h"
+#pragma once
+#include "dbat/db/consts/types.h"
 
 // Commands
 ACMD(do_spike);
@@ -29,5 +23,3 @@ ACMD(do_lightgrenade);
 ACMD(do_strike);
 ACMD(do_ram);
 ACMD(do_breath);
-
-#endif //CIRCLE_ACT_ATTACK_H

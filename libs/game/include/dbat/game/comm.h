@@ -1,18 +1,5 @@
-/* ************************************************************************
-*   File: comm.h                                        Part of CircleMUD *
-*  Usage: header file: prototypes of public communication functions       *
-*                                                                         *
-*  All rights reserved.  See license.doc for complete information.        *
-*                                                                         *
-*  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
-*  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
-************************************************************************ */
-
-#ifndef __COMM_H__
-#define __COMM_H__
-
-#include "structs.h"
-
+#pragma once
+#include "dbat/db/consts/types.h"
 
 #if CIRCLE_GNU_LIBC_MEMORY_TRACK
 # include <mcheck.h>
@@ -125,5 +112,3 @@ void free_bufpool(void);
 void setup_log(const char *filename, int fd);
 int open_logfile(const char *filename, FILE *stderr_fp);
 void init_descriptor (struct descriptor_data *newd, int desc);
-
-#endif

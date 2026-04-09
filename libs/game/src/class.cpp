@@ -23,11 +23,11 @@
 #include "dbat/game/comm.h"
 #include "dbat/game/spells.h"
 #include "dbat/game/interpreter.h"
-#include "dbat/game/constants.h"
 #include "dbat/game/handler.h"
 #include "dbat/game/feats.h"
 #include "dbat/game/oasis.h"
 #include "dbat/game/act.wizard.h"
+#include "dbat/game/character_utils.h"
 #include "dbat/game/dg_comm.h"
 #include "dbat/game/config.h"
 #include "dbat/game/act.other.h"
@@ -614,9 +614,9 @@ void do_start(struct char_data *ch)
 
   if (IS_ANDROID(ch) && PLR_FLAGGED(ch, PLR_SENSEM)) {
    SET_SKILL(ch, SKILL_SENSE, 100);
-   ch->gainBasePL(rand_number(400, 500));
-   ch->gainBaseST(rand_number(400, 500));
-   ch->gainBaseKI(rand_number(400, 500));
+   gainBasePL(ch, rand_number(400, 500));
+   gainBaseST(ch, rand_number(400, 500));
+   gainBaseKI(ch, rand_number(400, 500));
   }
 
      if (ch->real_abils.str > 20) {
@@ -665,7 +665,7 @@ void do_start(struct char_data *ch)
      SET_BIT_AR(PLR_FLAGS(ch), PLR_LSSJ);
      write_to_output(ch->desc, "@GYou were one of the few born a Legendary Super Saiyan!@n\r\n");
   }
-  ch->restoreVitals();
+  restoreVitals(ch);
 
   ch->player_specials->olc_zone = NOWHERE;
   save_char(ch);
@@ -995,12 +995,12 @@ void advance_level(struct char_data *ch, int whichclass)
    }
 
    if (!IS_HUMAN(ch)) {
-    add_hp = ((ch->getBasePL()) * 0.01) * pl_percent;
+    add_hp = ((getBasePL(ch)) * 0.01) * pl_percent;
    } else if (IS_HUMAN(ch)) {
-    add_hp = (((ch->getBasePL()) * 0.01) * pl_percent) * 0.8;
+    add_hp = (((getBasePL(ch)) * 0.01) * pl_percent) * 0.8;
    }
-   add_mana = ((ch->getBaseKI()) * 0.01) * ki_percent;
-   add_move = ((ch->getBaseST()) * 0.01) * st_percent;
+   add_mana = ((getBaseKI(ch)) * 0.01) * ki_percent;
+   add_move = ((getBaseST(ch)) * 0.01) * st_percent;
    add_prac = prac_reward + GET_INT(ch);
   }
   if (add_hp >= 300000 && add_hp < 600000) {
@@ -1160,7 +1160,7 @@ void advance_level(struct char_data *ch, int whichclass)
   if (GET_LEVEL(ch) > 1) {
     /* blah */
   } else {
-      ch->gainBasePL(rand_number(1, 20));
+      gainBasePL(ch, rand_number(1, 20));
       ch->basepl = std::max(ch->basepl, 250L);
       ch->baseki = std::max(ch->baseki, 250L);
       ch->basest = std::max(ch->basest, 250L);
@@ -1214,9 +1214,9 @@ void advance_level(struct char_data *ch, int whichclass)
   llog->ki_roll = add_ki;
   llog->add_skill = add_prac;
   GET_PRACTICES(ch, whichclass) += add_prac;
-  ch->gainBasePL(add_hp, true);
-  ch->gainBaseKI(add_mana, true);
-  ch->gainBaseST(add_move, true);
+  gainBasePL(ch, add_hp, true);
+  gainBaseKI(ch, add_mana, true);
+  gainBaseST(ch, add_move, true);
   int nhp = add_hp;
   int nma = add_mana;
   int nmo = add_move;

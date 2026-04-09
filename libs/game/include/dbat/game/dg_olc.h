@@ -9,10 +9,9 @@
 *  $Date: 2004/10/11 12:07:00$                                            *
 *  $Revision: 1.0.14 $                                                    *
 **************************************************************************/
-#ifndef __DG_OLC_H__
-#define __DG_OLC_H__
-
-#include "dg_scripts.h"
+#pragma once
+#include "dbat/db/consts/types.h"
+#include <stdio.h>
 
 
 #define NUM_TRIG_TYPE_FLAGS		20
@@ -50,5 +49,3 @@ void trigedit_save(struct descriptor_data *d);
 int format_script(struct descriptor_data *d);
 
 ACMD(do_oasis_trigedit);
-
-#endif

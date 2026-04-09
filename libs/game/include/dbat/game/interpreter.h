@@ -1,17 +1,5 @@
-/* ************************************************************************
-*   File: interpreter.h                                 Part of CircleMUD *
-*  Usage: header file: public procs, macro defs, subcommand defines       *
-*                                                                         *
-*  All rights reserved.  See license.doc for complete information.        *
-*                                                                         *
-*  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
-*  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
-************************************************************************ */
-
-#ifndef __INTERPRETER_H__
-#define __INTERPRETER_H__
-
-#include "structs.h"
+#pragma once
+#include "dbat/db/consts/types.h"
 
 #define CMD_NAME (complete_cmd_info[cmd].command)
 #define CMD_IS(cmd_name) (!strcmp(cmd_name, complete_cmd_info[cmd].command))
@@ -55,18 +43,6 @@ char	*delete_doubledollar(char *string);
 /* for compatibility with 2.20: */
 #define argument_interpreter(a, b, c) two_arguments(a, b, c)
 
-
-struct command_info {
-   const char *command;
-   const char *sort_as;
-   int8_t minimum_position;
-   void	(*command_pointer)
-	   (struct char_data *ch, char *argument, int cmd, int subcmd);
-   int16_t minimum_level;
-   int16_t minimum_admlevel;
-   int	subcmd;
-};
-
 /*
  * Necessary for CMD_IS macro.  Borland needs the structure defined first
  * so it has been moved down here.
@@ -78,12 +54,6 @@ extern struct command_info *complete_cmd_info;
  * because a Windows 95 compiler gives a warning about it having similiar
  * named member.
  */
-struct alias_data {
-  char *alias;
-  char *replacement;
-  int type;
-  struct alias_data *next;
-};
 
 #define ALIAS_SIMPLE	0
 #define ALIAS_COMPLEX	1
@@ -329,5 +299,3 @@ struct alias_data {
 #define SCMD_REDIT      1
 #define SCMD_OEDIT      2
 #define SCMD_MEDIT      3
-
-#endif

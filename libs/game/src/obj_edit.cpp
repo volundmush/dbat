@@ -5,7 +5,7 @@
 *  This is an original file created by me for Dragonball Advent Truth     *
 *  to house all player level object editing functions -- Iovan 1/6/13     *
 ************************************************************************ */
-#define __OBJ_EDIT_C__
+
 #include "dbat/game/obj_edit.h"
 #include "dbat/game/utils.h"
 #include "dbat/game/comm.h"
@@ -14,7 +14,7 @@
 #include "dbat/game/db.h"
 #include "dbat/game/spells.h"
 #include "dbat/game/screen.h"
-#include "dbat/game/constants.h"
+
 #include "dbat/game/obj_edit.h"
 #include "dbat/game/dg_comm.h"
 #include "dbat/game/act.other.h"

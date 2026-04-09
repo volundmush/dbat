@@ -8,10 +8,11 @@
 #include "dbat/game/combat.h"
 #include "dbat/game/comm.h"
 #include "dbat/game/spells.h"
+#include "dbat/game/character_utils.h"
 
 bool tech_handle_zanzoken(char_data *ch, char_data *vict, const std::string& name) {
     if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) &&
-            (vict->getCurST()) >= 1 && GET_POS(vict) != POS_SLEEPING) {
+            (getCurST(vict)) >= 1 && GET_POS(vict) != POS_SLEEPING) {
         if (!AFF_FLAGGED(ch, AFF_ZANZOKEN) || (AFF_FLAGGED(ch, AFF_ZANZOKEN) && GET_SPEEDI(ch) + rand_number(1, 5) < GET_SPEEDI(vict) + rand_number(1, 5))) {
             char msg[MAX_INPUT_LENGTH];
             snprintf(msg, sizeof(msg), "@C$N@c disappears, avoiding your %s before reappearing!@n", name.c_str());
@@ -124,7 +125,7 @@ bool tech_handle_android_absorb(char_data *ch, char_data *vict) {
             amot = GET_MAX_MANA(ch) / 20;
         }
         if (GET_CHARGE(vict) + amot > GET_MAX_MANA(vict)) {
-            vict->incCurKI(vict->getMaxKI() - GET_CHARGE(vict));
+            incCurKI(vict, getMaxKI(vict) - GET_CHARGE(vict));
             GET_CHARGE(vict) = GET_MAX_MANA(vict);
         }
         else {

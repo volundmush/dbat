@@ -1,5 +1,5 @@
-#ifndef __CONF_H__
-#define __CONF_H__
+#pragma once
+#include "dbat/db/consts/types.h"
 
 
 /* src/conf.h.  Generated from conf.h.in by configure.  */
@@ -347,6 +347,3 @@
 #define SIZEOF_SIZE_T 8
 #define SIZEOF_TIME_T 8
 #define SIZEOF_CHAR_P 8
-
-
-#endif

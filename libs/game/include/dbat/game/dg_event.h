@@ -12,10 +12,8 @@
 *  $Date: 2004/10/11 12:07:00$                                            *
 *  $Revision: 1.0.14 $                                                    *
 ************************************************************************ */
-#ifndef __DG_EVENT_H__
-#define __DG_EVENT_H__
-
-#include "structs.h"
+#pragma once
+#include "dbat/db/consts/types.h"
 
 
 /*
@@ -73,5 +71,3 @@ long queue_key(struct queue *q);
 long queue_elmt_key(struct q_element *qe);
 void queue_free(struct queue *q);
 int  event_is_queued(struct event *event);
-
-#endif

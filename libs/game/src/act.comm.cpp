@@ -13,6 +13,7 @@
 #include "dbat/game/comm.h"
 #include "dbat/game/spells.h"
 #include "dbat/game/interpreter.h"
+#include "dbat/game/character_utils.h"
 #include "dbat/game/db.h"
 #include "dbat/game/config.h"
 #include "dbat/game/act.wizard.h"

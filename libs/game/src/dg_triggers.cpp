@@ -13,7 +13,6 @@
 *  $Revision: 1.0.14 $                                                    *
 **************************************************************************/
 
-#include "dbat/game/structs.h"
 #include "dbat/game/dg_scripts.h"
 #include "dbat/game/utils.h"
 #include "dbat/game/comm.h"
@@ -21,7 +20,6 @@
 #include "dbat/game/handler.h"
 #include "dbat/game/db.h"
 #include "dbat/game/oasis.h"
-#include "dbat/game/constants.h"
 #include "dbat/game/spell_parser.h"
 #include "dbat/game/act.movement.h"
 #include "dbat/game/spells.h"

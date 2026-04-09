@@ -1,14 +1,5 @@
-/************************************************************************
- * OasisOLC - General / oasis.h					v2.0	*
- * Original author: Levork						*
- * Copyright 1996 by Harvey Gilpin					*
- * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
- ************************************************************************/
-
-#ifndef __OASIS_H__
-#define __OASIS_H__
-
-#include "structs.h"
+#pragma once
+#include "dbat/db/consts/types.h"
 
 
 #define _OASISOLC	0x206   /* 2.0.6 */
@@ -861,5 +852,3 @@ void free_context_help(void);
 #define STAT_GET_CHA  5
 #define STAT_QUIT     6
 #define STAT_PARSE_MENU 7
-
-#endif

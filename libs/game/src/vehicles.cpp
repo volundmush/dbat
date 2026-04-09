@@ -14,7 +14,6 @@
 #include "dbat/game/interpreter.h"
 #include "dbat/game/handler.h"
 #include "dbat/game/db.h"
-#include "dbat/game/constants.h"
 #include "dbat/game/class.h"
 #include "dbat/game/races.h"
 

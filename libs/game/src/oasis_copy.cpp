@@ -18,7 +18,6 @@
 #include "dbat/game/genolc.h"
 #include "dbat/game/genwld.h"
 #include "dbat/game/genshp.h"
-#include "dbat/game/constants.h"
 
 /******************************************************************************/
 /** Internal Functions                                                       **/

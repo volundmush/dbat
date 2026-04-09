@@ -1,11 +1,6 @@
-//
-// Created by basti on 10/22/2021.
-//
+#pragma once
+#include "dbat/db/consts/types.h"
 
-#ifndef CIRCLE_ACT_SOCIAL_H
-#define CIRCLE_ACT_SOCIAL_H
-
-#include "structs.h"
 
 // functions
 void boot_social_messages(void);
@@ -19,5 +14,3 @@ void create_command_list(void);
 ACMD(do_action);
 ACMD(do_insult);
 ACMD(do_gmote);
-
-#endif //CIRCLE_ACT_SOCIAL_H

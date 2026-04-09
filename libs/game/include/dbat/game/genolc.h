@@ -1,14 +1,5 @@
-/************************************************************************
- * Generic OLC Library - General / genolc.h			v1.0	*
- * Original author: Levork						*
- * Copyright 1996 by Harvey Gilpin					*
- * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
- ************************************************************************/
-
-#ifndef __GENOLC_H__
-#define __GENOLC_H__
-
-#include "structs.h"
+#pragma once
+#include "dbat/db/consts/types.h"
 #include "db.h"
 
 #define STRING_TERMINATOR       '~'
@@ -56,4 +47,3 @@ room_vnum genolc_zone_bottom(zone_rnum rznum);
 room_vnum genolc_zonep_bottom(struct zone_data *zone);
 void create_world_index(int znum, const char *type);
 void free_save_list(void);
-#endif

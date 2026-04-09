@@ -14,7 +14,6 @@
 #include "dbat/game/utils.h"
 #include "dbat/game/interpreter.h"
 #include "dbat/game/handler.h"
-#include "dbat/game/constants.h"
 #include "dbat/game/comm.h"
 
 #define PULSES_PER_MUD_HOUR     (SECS_PER_MUD_HOUR*PASSES_PER_SEC)

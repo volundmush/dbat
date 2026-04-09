@@ -7,7 +7,6 @@
 *  $Revision: 1.0.14 $                                                    *
 **************************************************************************/
 
-#include "dbat/game/structs.h"
 #include "dbat/game/dg_scripts.h"
 #include "dbat/game/utils.h"
 #include "dbat/game/comm.h"
@@ -16,8 +15,8 @@
 #include "dbat/game/dg_event.h"
 #include "dbat/game/db.h"
 #include "dbat/game/spells.h"
-#include "dbat/game/constants.h"
 #include "dbat/game/fight.h"
+#include "dbat/game/character_utils.h"
 
 /* copied from spell_parser.c: */
 #define SINFO spell_info[spellnum]
@@ -300,7 +299,7 @@ void script_damage(struct char_data *vict, int dam)
     return;
   }
 
-  vict->decCurHealth(dam);
+  decCurHealth(vict, dam);
 
   update_pos(vict);
   send_char_pos(vict, dam);

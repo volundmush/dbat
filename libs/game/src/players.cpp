@@ -17,10 +17,9 @@
 #include "dbat/game/dg_scripts.h"
 #include "dbat/game/comm.h"
 #include "dbat/game/genmob.h"
-#include "dbat/game/constants.h"
-#include "dbat/game/imc.h"
 #include "dbat/game/class.h"
 #include "dbat/game/config.h"
+#include "dbat/game/character_utils.h"
 
 #define LOAD_HIT	0
 #define LOAD_MANA	1
@@ -57,63 +56,6 @@ long top_idnum = 0;		/* highest idnum in use		 */
  */
 #define ASCII_SAVE_POOFS  FALSE
 
-
-/*************************************************************************
-*  stuff related to the player index					 *
-*************************************************************************/
-
-void load_imc_pfile( struct char_data *ch );
-/*char *imc_fread_word( char *buf, size_t len, FILE *fp );*/
-void save_imc_pfile(struct char_data *ch);
-
-void save_imc_pfile(struct char_data *ch)
-{
-  FILE *fl;
-  char filename[PATH_MAX];
-
-  if (!CH_IMCDATA(ch))
-    return;
-
-  if (!get_filename(filename, sizeof(filename), IMC_FILE, GET_PC_NAME(ch)))
-    return;
-
-  if (!(fl = fopen(filename, "w")))
-  {
-    if (errno != ENOENT)
-      log("SYSERR: opening IMC2 file '%s' for writing: %s", filename, strerror(errno));
-    return;
-  }
-
-  imc_savechar(ch, fl);
-  fclose(fl);
-}
-
-void load_imc_pfile(struct char_data *ch)
-{
-  FILE *fl;
-  char filename[PATH_MAX];
-  char *word;
-
-  if (!get_filename(filename, sizeof(filename), IMC_FILE, GET_PC_NAME(ch)))
-    return;
-
-  if (!(fl = fopen(filename, "r")))
-  {
-    if (errno != ENOENT)
-      log("SYSERR: opening IMC2 file '%s' for reading: %s", filename, strerror(errno));
-    return;
-  }
-
-  for (;;)
-  {
-    word = imcfread_word(fl);
-    /*imc_fread_word(word, sizeof(word), fl);*/
-    if (*word != 'I')
-      break;
-    imc_loadchar(ch, fl, word);
-  }
-  fclose(fl);
-}
 
 /* new version to build player index for ASCII Player Files */
 /* generate index table for the player file */
@@ -789,11 +731,6 @@ int load_char(const char *name, struct char_data *ch)
     GET_COND(ch, DRUNK) = -1;
   }
 
-  if (CONFIG_IMC_ENABLED) {
-    imc_initchar(ch);
-    load_imc_pfile(ch);
-  }
-
   if (IS_ANDROID(ch)) {
     GET_COND(ch, HUNGER) = -1;
     GET_COND(ch, THIRST) = -1;
@@ -1103,10 +1040,10 @@ void save_char(struct char_data * ch)
   /*
   if (GET_HIT(ch)	   != PFDEF_HIT  || GET_MAX_HIT(ch)  != PFDEF_MAXHIT)
     fprintf(fl, "Hit : %" I64T "/%" I64T "\n", GET_HIT(ch),  GET_MAX_HIT(ch));
-  if ((ch->getCurKI())	   != PFDEF_MANA || GET_MAX_MANA(ch) != PFDEF_MAXMANA)
-    fprintf(fl, "Mana: %" I64T "/%" I64T "\n", (ch->getCurKI()), GET_MAX_MANA(ch));
-  if ((ch->getCurST())	   != PFDEF_MOVE || GET_MAX_MOVE(ch) != PFDEF_MAXMOVE)
-    fprintf(fl, "Move: %" I64T "/%" I64T "\n", (ch->getCurST()), GET_MAX_MOVE(ch));
+  if ((getCurKI(ch))	   != PFDEF_MANA || GET_MAX_MANA(ch) != PFDEF_MAXMANA)
+    fprintf(fl, "Mana: %" I64T "/%" I64T "\n", (getCurKI(ch)), GET_MAX_MANA(ch));
+  if ((getCurST(ch))	   != PFDEF_MOVE || GET_MAX_MOVE(ch) != PFDEF_MAXMOVE)
+    fprintf(fl, "Move: %" I64T "/%" I64T "\n", (getCurST(ch)), GET_MAX_MOVE(ch));
   if (GET_KI(ch)	   != PFDEF_KI || GET_MAX_KI(ch) != PFDEF_MAXKI)
     fprintf(fl, "Ki  : %" I64T "/%" I64T "\n", GET_KI(ch), GET_MAX_KI(ch));
   */
@@ -1144,11 +1081,11 @@ void save_char(struct char_data * ch)
   if (GET_GENOME(ch, 0)    != PFDEF_EYE)        fprintf(fl, "Geno: %d\n", GET_GENOME(ch, 0));
   if (GET_GENOME(ch, 1)    != PFDEF_EYE)        fprintf(fl, "Gen1: %d\n", GET_GENOME(ch, 1));
   if (GET_POS(ch)          != POS_STANDING)     fprintf(fl, "Posi: %d\n", GET_POS(ch));
-  //if ((ch->getCurLF())    != PFDEF_BASEPL)     fprintf(fl, "LF  : %" I64T "\n", (ch->getCurLF()));
+  //if ((getCurLF(ch))    != PFDEF_BASEPL)     fprintf(fl, "LF  : %" I64T "\n", (getCurLF(ch)));
   if (GET_LIFEPERC(ch)     != PFDEF_WEIGHT)     fprintf(fl, "LFPC: %d\n", GET_LIFEPERC(ch));
-  if ((ch->getBasePL())      != PFDEF_BASEPL)     fprintf(fl, "Bpl : %" I64T "\n", (ch->getBasePL()));
-  if ((ch->getBaseKI())      != PFDEF_BASEKI)     fprintf(fl, "Bki : %" I64T "\n", (ch->getBaseKI()));
-  if ((ch->getBaseST())      != PFDEF_BASEST)     fprintf(fl, "Bst : %" I64T "\n", (ch->getBaseST()));
+  if (getBasePL(ch)      != PFDEF_BASEPL)     fprintf(fl, "Bpl : %" I64T "\n", getBasePL(ch));
+  if (getBaseKI(ch)      != PFDEF_BASEKI)     fprintf(fl, "Bki : %" I64T "\n", getBaseKI(ch));
+  if (getBaseST(ch)      != PFDEF_BASEST)     fprintf(fl, "Bst : %" I64T "\n", getBaseST(ch));
   if (GET_DROOM(ch)        != PFDEF_DROOM)      fprintf(fl, "Droo: %d\n", GET_DROOM(ch)); 
   if (GET_HAIRL(ch)        != PFDEF_HAIRL)      fprintf(fl, "Hrl : %d\n", GET_HAIRL(ch));
   if (GET_HAIRS(ch)        != PFDEF_HAIRS)      fprintf(fl, "Hrs : %d\n", GET_HAIRS(ch));
@@ -1277,9 +1214,6 @@ void save_char(struct char_data * ch)
   for (i = 0; i < MAX_AFFECT; i++) {
     if (tmp_aff[i].type)
       affect_to_char(ch, &tmp_aff[i]);
-  }
-  if (CONFIG_IMC_ENABLED) {
-    save_imc_pfile(ch);
   }
 
   for (i = 0; i < MAX_AFFECT; i++) {

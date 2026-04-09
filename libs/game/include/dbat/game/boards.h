@@ -1,17 +1,5 @@
-/* ************************************************************************
-*   File: boards.h                                      Part of CircleMUD *
-*  Usage: header file for bulletin boards                                 *
-*                                                                         *
-*  All rights reserved.  See license.doc for complete information.        *
-*                                                                         *
-*  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
-*  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
-************************************************************************ */
-
-#ifndef __BOARDS_H__
-#define __BOARDS_H__
-
-#include "structs.h"
+#pragma once
+#include "dbat/db/consts/types.h"
 
 /* New Dynamic boards v2.4 -PjD (dughi@imaxx.net) */
 #define BOARD_DIRECTORY                "etc/boards" SLASH
@@ -22,42 +10,6 @@
 /* Provides individual message structure */
 /* doubly linked so forward or back is relatively simple */
 
-struct board_msg {
-  long poster;
-  time_t timestamp;
-  char *subject;
-  char *data;
-  struct board_msg *next;
-  struct board_msg *prev;
-  char *name;
-};
-
-/* Defines what we require to generate a hash for lookup
-   of a message given a reader */
-
-struct board_memory {
-  int timestamp;
-  int reader;
-  struct board_memory *next;
-  char *name;
-};
-
-struct board_info {
-   int	read_lvl;	/* min level to read messages on this board */
-   int	write_lvl;	/* min level to write messages on this board */
-   int	remove_lvl;	/* min level to remove messages from this board */
-  int  num_messages;           /* num messages of this board */
-  int  vnum;
-  struct board_info *next;
-  struct board_msg *messages;
-  int  version;
-  
-  /* why 301? why not?  It might not be the greatest, but if you really
-     know what a hash is, you'll realize that in this case, I didn't even
-     work on the algorithm, so it shouldn't make a bit of difference */
-  
-  struct board_memory *memory[301];
-};
 
 #define READ_LVL(i) (i->read_lvl)
 #define WRITE_LVL(i) (i->write_lvl)
@@ -104,5 +56,3 @@ struct board_info *locate_board(obj_vnum board_vnum);
 void remove_board_msg(obj_vnum board_vnum, struct char_data * ch, int arg);
 
 extern struct board_info *bboards;
-
-#endif

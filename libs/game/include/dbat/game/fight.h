@@ -1,11 +1,5 @@
-//
-// Created by volund on 10/20/21.
-//
-
-#ifndef CIRCLE_FIGHT_H
-#define CIRCLE_FIGHT_H
-
-#include "structs.h"
+#pragma once
+#include "dbat/db/consts/types.h"
 #include "spells.h"
 
 // global variables
@@ -103,5 +97,3 @@ ACMD(do_kaioken);
 ACMD(do_escape);
 ACMD(do_balefire);
 ACMD(do_blessedhammer);
-
-#endif //CIRCLE_FIGHT_H

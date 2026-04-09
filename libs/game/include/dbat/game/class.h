@@ -1,12 +1,5 @@
-//
-// Created by volund on 10/20/21.
-//
-
-#ifndef CIRCLE_CLASS_H
-#define CIRCLE_CLASS_H
-
-#include "structs.h"
-#include "races.h"
+#pragma once
+#include "dbat/db/consts/types.h"
 
 // global variables
 
@@ -82,5 +75,3 @@ namespace dbat::sensei {
     Sensei* find_sensei_map_id(const int id, const SenseiMap& s_map);
     SenseiMap valid_for_race_pc(char_data *ch);
 }
-
-#endif //CIRCLE_CLASS_H

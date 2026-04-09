@@ -1,11 +1,6 @@
-//
-// Created by basti on 10/22/2021.
-//
+#pragma once
+#include "dbat/db/consts/types.h"
 
-#ifndef CIRCLE_ACT_COMM_H
-#define CIRCLE_ACT_COMM_H
-
-#include "structs.h"
 
 // commands
 ACMD(do_say);
@@ -21,5 +16,3 @@ ACMD(do_qcomm);
 ACMD(do_voice);
 ACMD(do_languages);
 ACMD(do_osay);
-
-#endif //CIRCLE_ACT_COMM_H

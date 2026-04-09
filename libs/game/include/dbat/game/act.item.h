@@ -1,11 +1,6 @@
-//
-// Created by basti on 10/22/2021.
-//
+#pragma once
+#include "dbat/db/consts/types.h"
 
-#ifndef CIRCLE_ACT_ITEM_H
-#define CIRCLE_ACT_ITEM_H
-
-#include "structs.h"
 
 /* act.item.c */
 // global variables
@@ -49,5 +44,3 @@ ACMD(do_pack);
 ACMD(do_garden);
 ACMD(do_refuel);
 ACMD(do_sac);
-
-#endif //CIRCLE_ACT_ITEM_H

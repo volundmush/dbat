@@ -1,15 +1,5 @@
-/* ************************************************************************
-*  File: obj_edit.h                  Part of Dragonball Advent Truth      *
-*  Usage: Player level ship editing utilities and common functions for    *
-*  ship.c                                                                 *
-*                                                                         *
-*  This is an original file created by me for Dragonball Advent Truth     *
-*  to house all player level ship   editing defines/declarations          *
-*                                                            Iovan 1/6/13 *
-************************************************************************ */
-
-#ifndef __SHIP_H__
-#define __SHIP_H__
+#pragma once
+#include "dbat/db/consts/types.h"
 
 /* external functions   */
 
@@ -35,5 +25,3 @@
 #define SHIP_EXTRAS   7
 #define SHIP_ARMORS   5
 #define SHIP_EQUIP    5
-
-#endif

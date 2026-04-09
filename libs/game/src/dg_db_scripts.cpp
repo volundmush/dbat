@@ -13,14 +13,12 @@
 *  $Revision: 1.0.14 $                                                    *
 ************************************************************************ */
 
-#include "dbat/game/structs.h"
 #include "dbat/game/dg_scripts.h"
 #include "dbat/game/utils.h"
 #include "dbat/game/db.h"
 #include "dbat/game/handler.h"
 #include "dbat/game/dg_event.h"
 #include "dbat/game/comm.h"
-#include "dbat/game/constants.h"
 
 extern void half_chop(char *string, char *arg1, char *arg2);
 extern bitvector_t asciiflag_conv(char *flag);

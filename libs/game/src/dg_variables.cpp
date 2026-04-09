@@ -8,7 +8,6 @@
 *  $Revision: 1.0.14 $                                                    *
 **************************************************************************/
 
-#include "dbat/game/structs.h"
 #include "dbat/game/dg_scripts.h"
 #include "dbat/game/utils.h"
 #include "dbat/game/comm.h"
@@ -17,11 +16,11 @@
 #include "dbat/game/dg_event.h"
 #include "dbat/game/db.h"
 #include "dbat/game/screen.h"
-#include "dbat/game/constants.h"
 #include "dbat/game/spells.h"
 #include "dbat/game/oasis.h"
 #include "dbat/game/class.h"
 #include "dbat/game/races.h"
+#include "dbat/game/character_utils.h"
 
 /* Utility functions */
 
@@ -761,9 +760,9 @@ in the vault (vnum: 453) now and then. you can just use
             if (subfield && *subfield) {
               int64_t addition = atoll(subfield);
               if(addition > 0 ) {
-                  c->incCurHealth(addition);
+                  incCurHealth(c, addition);
               } else {
-                  c->decCurHealth(addition);
+                  decCurHealth(c, addition);
               }
 
               update_pos(c);
@@ -863,12 +862,12 @@ in the vault (vnum: 453) now and then. you can just use
             if (subfield && *subfield) {
               int64_t addition = atoll(subfield);
               if(addition > 0) {
-                  c->incCurKI(addition);
+                  incCurKI(c, addition);
               } else {
-                  c->decCurKI(addition);
+                  decCurKI(c, addition);
               }
             }
-            snprintf(str, slen, "%" I64T "", (c->getCurKI()));
+            snprintf(str, slen, "%" I64T "", (getCurKI(c)));
           }
           else if (!strcasecmp(field, "maxmana")) {
             if (subfield && *subfield) {
@@ -882,13 +881,13 @@ in the vault (vnum: 453) now and then. you can just use
             if (subfield && *subfield) {
               int64_t addition = atoll(subfield);
               if(addition > 0) {
-                  c->incCurST(addition);
+                  incCurST(c, addition);
               } else {
-                  c->decCurST(addition);
+                  decCurST(c, addition);
               }
 
             }
-            snprintf(str, slen, "%" I64T "", (c->getCurST()));
+            snprintf(str, slen, "%" I64T "", (getCurST(c)));
           }
 
           else if (!strcasecmp(field, "maxmove")) {

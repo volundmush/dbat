@@ -13,7 +13,6 @@
 #include "dbat/game/genshp.h"
 #include "dbat/game/genzon.h"
 #include "dbat/game/oasis.h"
-#include "dbat/game/constants.h"
 #include "dbat/game/races.h"
 #include "dbat/game/act.informative.h"
 

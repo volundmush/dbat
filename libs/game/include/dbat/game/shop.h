@@ -1,52 +1,9 @@
-/* ************************************************************************
-*   File: shop.h                                        Part of CircleMUD *
-*  Usage: shop file definitions, structures, constants                    *
-*                                                                         *
-*  All rights reserved.  See license.doc for complete information.        *
-*                                                                         *
-*  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
-*  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
-************************************************************************ */
-
-#ifndef __SHOP_H__
-#define __SHOP_H__
-
-#include "structs.h"
-
-struct shop_buy_data {
-   int type;
-   char *keywords;
-};
+#pragma once
+#include "dbat/db/consts/types.h"
+#include <stdio.h>
 
 #define BUY_TYPE(i)		((i).type)
 #define BUY_WORD(i)		((i).keywords)
-
-#define SW_ARRAY_MAX	4
-
-struct shop_data {
-   room_vnum vnum;		/* Virtual number of this shop		*/
-   obj_vnum *producing;		/* Which item to produce (virtual)	*/
-   float profit_buy;		/* Factor to multiply cost with		*/
-   float profit_sell;		/* Factor to multiply cost with		*/
-   struct shop_buy_data *type;	/* Which items to trade			*/
-   char	*no_such_item1;		/* Message if keeper hasn't got an item	*/
-   char	*no_such_item2;		/* Message if player hasn't got an item	*/
-   char	*missing_cash1;		/* Message if keeper hasn't got cash	*/
-   char	*missing_cash2;		/* Message if player hasn't got cash	*/
-   char	*do_not_buy;		/* If keeper dosn't buy such things	*/
-   char	*message_buy;		/* Message when player buys item	*/
-   char	*message_sell;		/* Message when player sells item	*/
-   int	 temper1;		/* How does keeper react if no money	*/
-   bitvector_t	 bitvector;	/* Can attack? Use bank? Cast here?	*/
-   mob_rnum	 keeper;	/* The mobile who owns the shop (rnum)	*/
-   int	 with_who[SW_ARRAY_MAX];/* Who does the shop trade with?	*/
-   room_vnum *in_room;		/* Where is the shop?			*/
-   int	 open1, open2;		/* When does the shop open?		*/
-   int	 close1, close2;	/* When does the shop close?		*/
-   int	 bankAccount;		/* Store all gold over 15000 (disabled)	*/
-   int	 lastsort;		/* How many items are sorted in inven?	*/
-   SPECIAL (*func);		/* Secondary spec_proc for shopkeeper	*/
-};
 
 
 #define MAX_TRADE	5	/* List maximums for compatibility	*/
@@ -256,8 +213,7 @@ struct stack_data {
 // global variables
 extern const char *trade_letters[NUM_TRADERS+1];
 extern const char *shop_bits[];
-extern struct shop_data *shop_index;
-extern int top_shop, cmd_say, cmd_tell, cmd_emote, cmd_slap, cmd_puke;
+extern int cmd_say, cmd_tell, cmd_emote, cmd_slap, cmd_puke;
 
 // functions
 int shop_producing(struct obj_data *item, int shop_nr);

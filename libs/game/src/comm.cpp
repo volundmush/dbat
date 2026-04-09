@@ -27,7 +27,7 @@
 #include "dbat/game/dg_event.h"
 #include "dbat/game/mobact.h"
 #include "dbat/game/magic.h"
-#include "dbat/game/imc.h"
+
 #include "dbat/game/objsave.h"
 #include "dbat/game/genolc.h"
 #include "dbat/game/class.h"
@@ -38,7 +38,7 @@
 #include "dbat/game/clan.h"
 #include "dbat/game/mail.h"
 #include "dbat/game/races.h"
-#include "dbat/game/constants.h"
+#include "dbat/game/character_utils.h"
 #include "dbat/game/screen.h"
 
 /* externs */
@@ -212,10 +212,6 @@ void init_game(uint16_t cmport)
 
   boot_db();
 
-  if (CONFIG_IMC_ENABLED) {
-    imc_startup(FALSE, -1, FALSE); // FALSE arg, so the autoconnect setting can govern it.
-  }
-
        FILE *mapfile;
        int rowcounter, colcounter;
        int vnum_read;
@@ -257,10 +253,6 @@ void init_game(uint16_t cmport)
     close_socket(descriptor_list);
 
   close(mother_desc);
-
-  if (CONFIG_IMC_ENABLED) {
-    imc_shutdown(FALSE);
-  }
 
   if (circle_reboot != 2)
     save_all();
@@ -404,30 +396,18 @@ void game_loop(socklen_t cmmother_desc)
 
     /* Sleep if we don't have any connections */
     if (descriptor_list == NULL) {
-       if (CONFIG_IMC_ENABLED) {
-         top_desc = this_imcmud != NULL ? MAX( cmmother_desc, this_imcmud->desc ) : cmmother_desc;
-       } else {
-         top_desc = cmmother_desc;
-       }
-      if (!CONFIG_IMC_ENABLED) {
-       log("No connections.  Going to sleep.");
-      }
+       top_desc = cmmother_desc;
+      log("No connections.  Going to sleep.");
       FD_ZERO(&input_set);
       FD_SET(cmmother_desc, &input_set);
 
-       if (CONFIG_IMC_ENABLED) {
-         if ( this_imcmud != NULL && this_imcmud->desc != -1 )
-            FD_SET(this_imcmud->desc, &input_set);
-       }
       if (select(top_desc + 1, &input_set, (fd_set *) 0, (fd_set *) 0, NULL) < 0) {
 	if (errno == EINTR)
 	  log("Waking up to process signal.");
 	else
 	  perror("SYSERR: Select coma");
       } else
-         if (!CONFIG_IMC_ENABLED) {
-          log("New connection.  Waking up.");
-         }
+         log("New connection.  Waking up.");
       gettimeofday(&last_time, (struct timezone *) 0);
     }
     /* Set up the input, output, and exception sets for select(). */
@@ -607,10 +587,6 @@ void game_loop(socklen_t cmmother_desc)
     if (missed_pulses > 30 RL_SEC) {
       log("SYSERR: Missed %d seconds worth of pulses.", missed_pulses / PASSES_PER_SEC);
       missed_pulses = 30 RL_SEC;
-    }
-
-    if (CONFIG_IMC_ENABLED) {
-      imc_loop();
     }
 
     /* Now execute the heartbeat functions */
@@ -877,8 +853,8 @@ char *make_prompt(struct descriptor_data *d)
         if (count >= 0)
           len += count;
       }
-      if ((ch->getCurST()) << 2 < GET_MAX_MOVE(ch) && len < sizeof(prompt)) {
-        count = snprintf(prompt + len, sizeof(prompt) - len, "STA: %" I64T " ", (ch->getCurST()));
+      if ((getCurST(ch)) << 2 < GET_MAX_MOVE(ch) && len < sizeof(prompt)) {
+        count = snprintf(prompt + len, sizeof(prompt) - len, "STA: %" I64T " ", (getCurST(ch)));
         if (count >= 0)
           len += count;
       }
@@ -1345,24 +1321,24 @@ char *make_prompt(struct descriptor_data *d)
           if(PRF_FLAGGED(d->character, PRF_DISPHP) && len < sizeof(prompt)) {
               auto col = "n";
               auto ch = d->character;
-              if(ch->getMaxPL() > ch->getMaxPLTrans())
+              if(getMaxPL(ch) > getMaxPLTrans(ch))
                   col = "g";
-              else if(ch->isWeightedPL())
+              else if(isWeightedPL(ch))
                   col = "m";
-              else if(ch->getCurHealthPercent() > .5)
+              else if(getCurHealthPercent(ch) > .5)
                   col = "c";
-              else if(ch->getCurHealthPercent() > .1)
+              else if(getCurHealthPercent(ch) > .1)
                   col = "y";
-              else if(ch->getCurHealthPercent() <= .1)
+              else if(getCurHealthPercent(ch) <= .1)
                   col = "r";
 
-              if((count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@RPL@n@Y: @%s%s@D]@n", col, add_commas(ch->getCurPL()))) > 0)
+              if((count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@RPL@n@Y: @%s%s@D]@n", col, add_commas(getCurPL(ch)))) > 0)
                   len += count;
           }
       } else if (PRF_FLAGGED(d->character, PRF_DISPHP)) {
 
           auto ch = d->character;
-          auto perc = ((double)ch->getCurHealth() / (double)ch->getMaxPLTrans()) * 100;
+          auto perc = ((double)getCurHealth(ch) / (double)getMaxPLTrans(ch)) * 100;
           auto col = "n";
           if(perc > 100)
               col = "g";
@@ -1380,28 +1356,28 @@ char *make_prompt(struct descriptor_data *d)
       }
       if (!PRF_FLAGGED(d->character, PRF_DISPERC)) {
        if (PRF_FLAGGED(d->character, PRF_DISPKI) && len < sizeof(prompt) &&
-               (d->character->getCurKI()) > GET_MAX_MANA(d->character) / 2) {
+               (getCurKI(d->character)) > GET_MAX_MANA(d->character) / 2) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@CKI@Y: @c%s@D]@n", add_commas(
-                (d->character->getCurKI())));
+                (getCurKI(d->character))));
         if (count >= 0)
           len += count;
        }
        else if (PRF_FLAGGED(d->character, PRF_DISPKI) && len < sizeof(prompt) &&
-               (d->character->getCurKI()) > GET_MAX_MANA(d->character) / 10) {
+               (getCurKI(d->character)) > GET_MAX_MANA(d->character) / 10) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@CKI@Y: @y%s@D]@n", add_commas(
-                (d->character->getCurKI())));
+                (getCurKI(d->character))));
         if (count >= 0)
           len += count;
        }
        else if (PRF_FLAGGED(d->character, PRF_DISPKI) && len < sizeof(prompt) &&
-               (d->character->getCurKI()) <= GET_MAX_MANA(d->character) / 10) {
+               (getCurKI(d->character)) <= GET_MAX_MANA(d->character) / 10) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@CKI@Y: @r%s@D]@n", add_commas(
-                (d->character->getCurKI())));
+                (getCurKI(d->character))));
         if (count >= 0)
           len += count;
        }
       } else if (PRF_FLAGGED(d->character, PRF_DISPKI)) {
-       int64_t power = (d->character->getCurKI()), maxpower = GET_MAX_MANA(d->character);
+       int64_t power = (getCurKI(d->character)), maxpower = GET_MAX_MANA(d->character);
        int perc = 0;
        if (power <= 0) {
         power = 1;
@@ -1433,28 +1409,28 @@ char *make_prompt(struct descriptor_data *d)
       }
       if (!PRF_FLAGGED(d->character, PRF_DISPERC)) {
        if (PRF_FLAGGED(d->character, PRF_DISPMOVE) && len < sizeof(prompt) &&
-               (d->character->getCurST()) > GET_MAX_MOVE(d->character) / 2) {
+               (getCurST(d->character)) > GET_MAX_MOVE(d->character) / 2) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@GSTA@Y: @c%s@D]@n", add_commas(
-                (d->character->getCurST())));
+                (getCurST(d->character))));
         if (count >= 0)
           len += count;
        }
        else if (PRF_FLAGGED(d->character, PRF_DISPMOVE) && len < sizeof(prompt) &&
-               (d->character->getCurST()) > GET_MAX_MOVE(d->character) / 10) {
+               (getCurST(d->character)) > GET_MAX_MOVE(d->character) / 10) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@GSTA@Y: @y%s@D]@n", add_commas(
-                (d->character->getCurST())));
+                (getCurST(d->character))));
         if (count >= 0)
           len += count;
        }
        else if (PRF_FLAGGED(d->character, PRF_DISPMOVE) && len < sizeof(prompt) &&
-               (d->character->getCurST()) <= GET_MAX_MOVE(d->character) / 10) {
+               (getCurST(d->character)) <= GET_MAX_MOVE(d->character) / 10) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@GSTA@Y: @r%s@D]@n", add_commas(
-                (d->character->getCurST())));
+                (getCurST(d->character))));
         if (count >= 0)
           len += count;
        }
       } else if (PRF_FLAGGED(d->character, PRF_DISPMOVE)) {
-       int64_t power = (d->character->getCurST()), maxpower = GET_MAX_MOVE(d->character);
+       int64_t power = (getCurST(d->character)), maxpower = GET_MAX_MOVE(d->character);
        int perc = 0;
        if (power <= 0) {
         power = 1;

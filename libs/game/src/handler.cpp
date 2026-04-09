@@ -22,6 +22,7 @@
 #include "dbat/game/fight.h"
 #include "dbat/game/races.h"
 #include "dbat/game/act.informative.h"
+#include "dbat/game/character_utils.h"
 
 /* local vars */
 static int extractions_pending = 0;
@@ -721,7 +722,7 @@ void obj_to_char(struct obj_data *object, struct char_data *ch)
     IS_CARRYING_N(ch)++;
     if ((GET_KAIOKEN(ch) <= 0 && !AFF_FLAGGED(ch, AFF_METAMORPH)) && !OBJ_FLAGGED(object, ITEM_THROW)) {
 
-    } else if (GET_HIT(ch) > (ch->getEffMaxPL())) {
+    } else if (GET_HIT(ch) > (getEffMaxPL(ch)))) {
        if (GET_KAIOKEN(ch) > 0) {
         send_to_char(ch, "@RThe strain of the weight has reduced your kaioken somewhat!@n\n");
        } else if (AFF_FLAGGED(ch, AFF_METAMORPH)) {
@@ -757,7 +758,7 @@ void obj_from_char(struct obj_data *object)
   if (!IS_NPC(object->carried_by))
     SET_BIT_AR(PLR_FLAGS(object->carried_by), PLR_CRASH);
  
-  int64_t previous = (object->carried_by->getEffMaxPL());
+  int64_t previous = (getEffMaxPL(object->carried_by)());
 
   IS_CARRYING_W(object->carried_by) -= GET_OBJ_WEIGHT(object);
   IS_CARRYING_N(object->carried_by)--;

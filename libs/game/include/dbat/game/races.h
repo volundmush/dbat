@@ -1,11 +1,5 @@
-//
-// Created by volund on 10/20/21.
-//
-
-#ifndef CIRCLE_RACES_H
-#define CIRCLE_RACES_H
-
-#include "structs.h"
+#pragma once
+#include "dbat/db/consts/types.h"
 
 
 // global variables
@@ -171,6 +165,3 @@ namespace dbat::race {
     Race *find_race_map_id(const int id, const RaceMap &r_map);
 
 }
-
-
-#endif //CIRCLE_RACES_H

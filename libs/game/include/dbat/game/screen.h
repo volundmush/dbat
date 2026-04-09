@@ -1,15 +1,5 @@
-/* ************************************************************************
-*   File: screen.h                                      Part of CircleMUD *
-*  Usage: header file with ANSI color codes for online color              *
-*                                                                         *
-*  All rights reserved.  See license.doc for complete information.        *
-*                                                                         *
-*  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
-*  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
-************************************************************************ */
-
-#ifndef __SCREEN_H__
-#define __SCREEN_H__
+#pragma once
+#include "dbat/db/consts/types.h"
 
 #define KNRM  "\x1B[0m"
 #define KRED  "\x1B[31m"
@@ -82,5 +72,3 @@
 #define AB_MAGENTA      "45"
 #define AB_CYAN         "46"
 #define AB_WHITE        "47"
-
-#endif

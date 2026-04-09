@@ -198,3 +198,288 @@ struct levelup_data {
   struct level_learn_entry *skills;	/* Head of linked list		*/
   struct level_learn_entry *feats;	/* Head of linked list		*/
 };
+
+
+struct char_data {
+    int pfilepos;            /* playerfile pos			*/
+    mob_rnum nr;            /* Mob's rnum				*/
+    room_rnum in_room;        /* Location (real room number)		*/
+    room_rnum was_in_room;    /* location for linkdead people		*/
+    int wait;            /* wait for how many loops		*/
+
+    char *name;            /* PC / NPC s name (kill ...  )		*/
+    char *short_descr;        /* for NPC 'actions'			*/
+    char *long_descr;        /* for 'look'				*/
+    char *description;        /* Extra descriptions                   */
+    char *title;            /* PC / NPC's title                     */
+    int size;            /* Size class of char                   */
+    int8_t sex;            /* PC / NPC's sex                       */
+    int race;
+    //int8_t race;		/* PC / NPC's race                      */
+    int8_t hairl;               /* PC hair length                       */
+    int8_t hairs;               /* PC hair style                        */
+    int8_t hairc;               /* PC hair color                        */
+    int8_t skin;                /* PC skin color                        */
+    int8_t eye;                 /* PC eye color                         */
+    int8_t distfea;             /* PC's Distinguishing Feature          */
+    int race_level;        /* PC / NPC's racial level / hit dice   */
+    int level_adj;        /* PC level adjustment                  */
+    int chclass;        /* Last class taken                     */
+    int chclasses[NUM_CLASSES];    /* Ranks in all classes        */
+    int epicclasses[NUM_CLASSES];    /* Ranks in all epic classes */
+    struct levelup_data *level_info;
+    /* Info on gained levels */
+    int level;            /* PC / NPC's level                     */
+    int admlevel;            /* PC / NPC's admin level               */
+    bitvector_t admflags[AD_ARRAY_MAX];    /* Bitvector for admin privs		*/
+    room_vnum hometown;        /* PC Hometown / NPC spawn room         */
+    struct time_data time;    /* PC's AGE in days			*/
+    uint8_t weight;        /* PC / NPC's weight                    */
+    uint8_t height;        /* PC / NPC's height                    */
+
+    struct abil_data real_abils;    /* Abilities without modifiers   */
+    struct abil_data aff_abils;    /* Abils with spells/stones/etc  */
+    struct player_special_data *player_specials;
+    /* PC specials				*/
+    struct mob_special_data mob_specials;
+    /* NPC specials				*/
+
+    struct affected_type *affected;
+    /* affected by what spells		*/
+    struct affected_type *affectedv;
+    /* affected by what combat spells	*/
+    struct queued_act *actq;    /* queued spells / other actions	*/
+
+    struct obj_data *equipment[NUM_WEARS];
+    /* Equipment array			*/
+    struct obj_data *carrying;    /* Head of list				*/
+
+    struct descriptor_data *desc;    /* NULL for mobiles			*/
+    int32_t id;            /* used by DG triggers			*/
+
+    struct trig_proto_list *proto_script;
+    /* list of default triggers		*/
+    struct script_data *script;    /* script info for the object		*/
+    struct script_memory *memory;    /* for mob memory triggers		*/
+
+    struct char_data *next_in_room;
+    /* For room->people - list		*/
+    struct char_data *next;    /* For either monster or ppl-list	*/
+    struct char_data *next_fighting;
+    /* For fighting list			*/
+    struct char_data *next_affect;/* For affect wearoff			*/
+    struct char_data *next_affectv;
+    /* For round based affect wearoff	*/
+
+    struct follow_type *followers;/* List of chars followers		*/
+    struct char_data *master;    /* Who is char following?		*/
+    int32_t master_id;
+
+    struct memorize_node *memorized;
+    struct innate_node *innate;
+
+    struct char_data *fighting;    /* Opponent				*/
+
+    int8_t position;        /* Standing, fighting, sleeping, etc.	*/
+
+    int carry_weight;        /* Carried weight			*/
+    int8_t carry_items;        /* Number of items carried		*/
+    int timer;            /* Timer for update			*/
+
+    struct obj_data *sits;      /* What am I sitting on? */
+    struct char_data *blocks;    /* Who am I blocking?    */
+    struct char_data *blocked;   /* Who is blocking me?    */
+    struct char_data *absorbing; /* Who am I absorbing */
+    struct char_data *absorbby;  /* Who is absorbing me */
+
+    int8_t feats[MAX_FEATS + 1];    /* Feats (booleans and counters)	*/
+    int combat_feats[CFEAT_MAX + 1][FT_ARRAY_MAX];
+    /* One bitvector array per CFEAT_ type	*/
+    bitvector_t school_feats[SFEAT_MAX + 1];/* One bitvector array per CFEAT_ type	*/
+
+    int8_t skills[SKILL_TABLE_SIZE + 1];
+    /* array of skills/spells/arts/etc	*/
+    int8_t skillmods[SKILL_TABLE_SIZE + 1];
+    /* array of skill mods			*/
+    int8_t skillperfs[SKILL_TABLE_SIZE + 1];
+    /* array of skill mods                  */
+
+    int alignment;        /* +-1000 for alignment good vs. evil	*/
+    int alignment_ethic;        /* +-1000 for alignment law vs. chaos	*/
+    int32_t idnum;            /* player's idnum; -1 for mobiles	*/
+    bitvector_t act[PM_ARRAY_MAX];    /* act flag for NPC's; player flag for PC's */
+
+    bitvector_t affected_by[AF_ARRAY_MAX];/* Bitvector for current affects	*/
+    bitvector_t bodyparts[AF_ARRAY_MAX];  /* Bitvector for current bodyparts      */
+    int16_t saving_throw[3];    /* Saving throw				*/
+    int16_t apply_saving_throw[3];    /* Saving throw bonuses			*/
+
+    int powerattack;        /* Setting for power attack level	*/
+    int combatexpertise;        /* Setting for Combat expertise level   */
+
+    int64_t mana;
+    int64_t max_mana;    /* Max mana for PC/NPC			*/
+    int64_t hit;
+    int64_t max_hit;    /* Max hit for PC/NPC			*/
+    int64_t move;
+    int64_t max_move;    /* Max move for PC/NPC			*/
+    int64_t ki;
+    int64_t max_ki;/* Max ki for PC/NPC			*/
+
+    int armor;        /* Internally stored *10		*/
+    int16_t shield_bonus;       /* Shield bonus for AC			*/
+    int gold;            /* Money carried			*/
+    int bank_gold;        /* Gold the char has in a bank account	*/
+    int64_t exp;            /* The experience of the player		*/
+
+    int accuracy;            /* Base hit accuracy			*/
+    int accuracy_mod;        /* Any bonus or penalty to the accuracy	*/
+    int damage_mod;        /* Any bonus or penalty to the damage	*/
+
+    int16_t spellfail;        /* Total spell failure %                 */
+    int16_t armorcheck;        /* Total armorcheck penalty with proficiency forgiveness */
+    int16_t armorcheckall;    /* Total armorcheck penalty regardless of proficiency */
+
+    /* All below added by Iovan for sure o.o */
+
+    int64_t basepl;
+    int64_t baseki;
+    int64_t basest;
+    int64_t charge;
+    int64_t chargeto;
+    int64_t barrier;
+
+    char *clan;
+
+    room_vnum droom;
+    int choice;
+    int sleeptime;
+    int foodr;
+    int altitude;
+    int overf;
+    int spam;
+
+    room_vnum radar1;
+    room_vnum radar2;
+    room_vnum radar3;
+    int ship;
+    room_vnum shipr;
+    time_t lastpl;
+    time_t lboard[5];
+
+    room_vnum listenroom;
+    int crank;
+    int kaioken;
+    int absorbs;
+    int boosts;
+    int upgrade;
+    time_t lastint;
+    int majinize;
+    short fury;
+    short btime;
+    int eavesdir;
+    time_t deathtime;
+    int rp;
+    int64_t suppression;
+    int64_t suppressed;
+    struct char_data *drag;
+    struct char_data *dragged;
+    int trp;
+    struct char_data *mindlink;
+    int lasthit;
+    int dcount;
+    char *voice;                  /* PC's snet voice */
+    int limbs[4];                 /* 0 Right Arm, 1 Left Arm, 2 Right Leg, 3 Left Leg */
+    int aura;
+    time_t rewtime;
+    struct char_data *grappling;
+    struct char_data *grappled;
+    int grap;
+    int genome[2];                /* Bio racial bonus, Genome */
+    int combo;
+    int lastattack;
+    int combhits;
+    int ping;
+    int starphase;
+    int mimic;
+    int bonuses[MAX_BONUSES];
+    int ccpoints;
+    int negcount;
+    int cooldown;
+    int death_type;
+
+    int64_t moltexp;
+    int moltlevel;
+
+    char *loguser;                /* What user was I last saved as?      */
+    int arenawatch;
+    int64_t majinizer;
+    int speedboost;
+    int skill_slots;
+    int tail_growth;
+    int rage_meter;
+    char *feature;
+    int transclass;
+    int transcost[6];
+    int armor_last;
+    int forgeting;
+    int forgetcount;
+    int backstabcool;
+    int con_cooldown;
+    short stupidkiss;
+    char *temp_prompt;
+
+    int personality;
+    int combine;
+    int linker;
+    int fishstate;
+    int throws;
+
+    struct char_data *defender;
+    struct char_data *defending;
+
+    int64_t lifeforce;
+    int lifeperc;
+    int gooptime;
+    int blesslvl;
+    struct char_data *poisonby;
+
+    int mobcharge;
+    int preference;
+    int aggtimer;
+
+    int lifebonus;
+    int asb;
+    int regen;
+    int rbank;
+    int con_sdcooldown;
+
+    int limb_condition[4];
+
+    char placeholder[2];
+
+    char *rdisplay;
+
+    short song;
+    struct char_data *original;
+    short clones;
+    int relax_count;
+    int ingestLearned;
+
+    // Stats stuff
+    double health;
+    double energy;
+    double stamina;
+    double life;
+};
+
+extern struct char_data *character_list;
+extern struct char_data *affect_list;
+extern struct char_data *affectv_list;
+extern struct player_special_data dummy_mob;
+
+extern struct index_data *mob_index;
+extern struct char_data *mob_proto;
+extern mob_rnum top_of_mobt;
+extern struct htree_node *mob_htree;
+extern long max_mob_id;

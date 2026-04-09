@@ -16,11 +16,11 @@
 #include "dbat/game/handler.h"
 #include "dbat/game/db.h"
 #include "dbat/game/interpreter.h"
-#include "dbat/game/constants.h"
 #include "dbat/game/dg_scripts.h"
 #include "dbat/game/feats.h"
 #include "dbat/game/mobact.h"
 #include "dbat/game/fight.h"
+#include "dbat/game/character_utils.h"
 
 /* local functions */
 int mag_materials(struct char_data *ch, int item0, int item1, int item2, int extract, int verbose);
@@ -1024,7 +1024,7 @@ void mag_points(int level, struct char_data *ch, struct char_data *victim,
     if (GET_COND(victim, HUNGER) > -1) {
      GET_COND(victim, HUNGER) = 48;
     }
-    victim->restore(true);
+    restore(victim, true);
     break;
 
   case ART_WHOLENESS_OF_BODY:

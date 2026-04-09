@@ -1,17 +1,5 @@
-/* ************************************************************************
-*   File: utils.h                                       Part of CircleMUD *
-*  Usage: header file: utility macros and prototypes of utility funcs     *
-*                                                                         *
-*  All rights reserved.  See license.doc for complete information.        *
-*                                                                         *
-*  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
-*  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
-************************************************************************ */
-
-#ifndef __UTILS_H__
-#define __UTILS_H__
-
-#include "structs.h"
+#pragma once
+#include "dbat/db/consts/types.h"
 #include "db.h"
 #include "races.h"
 #include "handler.h"
@@ -179,7 +167,6 @@ int wield_type(int chsize, const struct obj_data *weap);
 #define NEW_OBJ_FILES   4
 #define PLR_FILE        5
 #define PET_FILE        6
-#define IMC_FILE        7 /**< The IMC2 Data for players */
 #define USER_FILE       8 /* User Account System */
 #define INTRO_FILE      9
 #define SENSE_FILE      10
@@ -477,10 +464,10 @@ int wield_type(int chsize, const struct obj_data *weap);
 #define GET_CHARGETO(ch)  ((ch)->chargeto)
 #define GET_ARMOR(ch)     ((ch)->armor)
 #define GET_ARMOR_LAST(ch) ((ch)->armor_last)
-#define GET_HIT(ch)	  ((ch)->getCurPL())
-#define GET_MAX_HIT(ch)	  ((ch)->getEffMaxPL())
-#define GET_MAX_MOVE(ch)  ((ch)->getMaxST())
-#define GET_MAX_MANA(ch)  (ch->getMaxKI())
+#define GET_HIT(ch)	  (getCurPL(ch))
+#define GET_MAX_HIT(ch)	  (getEffMaxPL(ch))
+#define GET_MAX_MOVE(ch)  (getMaxST(ch))
+#define GET_MAX_MANA(ch)  (getMaxKI(ch))
 #define GET_KI(ch)	  ((ch)->ki)
 #define GET_MAX_KI(ch)    ((ch)->max_ki)
 #define GET_DROOM(ch)     ((ch)->droom)
@@ -642,7 +629,7 @@ int wield_type(int chsize, const struct obj_data *weap);
           (GET_ADD(ch) <= 99) ? 29 :  30 ) ) )                   \
         ) */
 
-#define CAN_CARRY_W(ch) ((ch)->getMaxCarryWeight())
+#define CAN_CARRY_W(ch) (getMaxCarryWeight(ch))
 #define CAN_CARRY_N(ch) (50)
 #define AWAKE(ch) (GET_POS(ch) > POS_SLEEPING)
 #define CAN_SEE_IN_DARK(ch) \
@@ -835,8 +822,8 @@ int wield_type(int chsize, const struct obj_data *weap);
 			 (EXIT(ch,door)->to_room != NOWHERE) && \
 			 !IS_SET(EXIT(ch, door)->exit_info, EX_CLOSED))
 
-#define RACE(ch)      ((ch)->juggleRaceName(true).c_str())
-#define LRACE(ch)     ((ch)->juggleRaceName(false).c_str())
+#define RACE(ch)      (juggleRaceName(ch, true).c_str())
+#define LRACE(ch)     (juggleRaceName(ch, false).c_str())
 #define TRUE_RACE(ch) ((ch)->race->getName().c_str())
 
 #define CLASS_ABBR(ch) ((ch)->chclass->getAbbr().c_str())
@@ -1077,8 +1064,7 @@ int wield_type(int chsize, const struct obj_data *weap);
 #define CONFIG_MENU             config_info.operation.MENU
 #define CONFIG_WELC_MESSG       config_info.operation.WELC_MESSG
 #define CONFIG_START_MESSG      config_info.operation.START_MESSG
-/** Can players communicate on the IMC channel ? */
-#define CONFIG_IMC_ENABLED      config_info.operation.imc_enabled
+
 
   /** Autowiz **/
 #define CONFIG_USE_AUTOWIZ      config_info.autowiz.use_autowiz
@@ -1159,5 +1145,3 @@ void admin_set(struct char_data *ch, int value);
 
 int     levenshtein_distance(char *s1, char *s2);
 #define GET_MURDER(ch)          CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->murder))
-
-#endif

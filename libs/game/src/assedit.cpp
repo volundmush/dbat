@@ -14,7 +14,6 @@
 #include "dbat/game/interpreter.h"
 #include "dbat/game/oasis.h"
 #include "dbat/game/assemblies.h"
-#include "dbat/game/constants.h"
 
 
 /*-------------------------------------------------------------------*

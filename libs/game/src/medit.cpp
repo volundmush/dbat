@@ -17,7 +17,6 @@
 #include "dbat/game/genshp.h"
 #include "dbat/game/oasis.h"
 #include "dbat/game/handler.h"
-#include "dbat/game/constants.h"
 #include "dbat/game/improved-edit.h"
 #include "dbat/game/dg_olc.h"
 #include "dbat/game/screen.h"
@@ -25,6 +24,7 @@
 #include "dbat/game/class.h"
 #include "dbat/game/act.wizard.h"
 #include "dbat/game/modify.h"
+#include "dbat/game/character_utils.h"
 /*-------------------------------------------------------------------*/
 
 /*
@@ -502,8 +502,8 @@ void medit_disp_menu(struct descriptor_data *d)
 	  OLC_NUM(d), genders[(int)GET_SEX(mob)], GET_ALIAS(mob),
 	  GET_SDESC(mob), GET_LDESC(mob), GET_DDESC(mob), GET_HITDICE(mob),
 	  GET_ALIGNMENT(mob), GET_FISHD(mob), GET_DAMAGE_MOD(mob),
-	  GET_NDD(mob), GET_SDD(mob), GET_HIT(mob), (mob->getCurKI()),
-                  (mob->getCurST()), GET_ARMOR(mob), GET_EXP(mob), GET_GOLD(mob)
+	  GET_NDD(mob), GET_SDD(mob), GET_HIT(mob), (getCurKI(mob)),
+                  (getCurST(mob)), GET_ARMOR(mob), GET_EXP(mob), GET_GOLD(mob)
 	  );
   sprintbitarray(MOB_FLAGS(mob), action_bits, AF_ARRAY_MAX, flags);
   sprintbitarray(AFF_FLAGS(mob), affected_bits, AF_ARRAY_MAX, flag2);

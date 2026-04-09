@@ -1,11 +1,6 @@
-//
-// Created by basti on 10/22/2021.
-//
+#pragma once
+#include "dbat/db/consts/types.h"
 
-#ifndef CIRCLE_ACT_OTHER_H
-#define CIRCLE_ACT_OTHER_H
-
-#include "structs.h"
 
 // variables
 extern const room_vnum freeres[NUM_ALIGNS];
@@ -114,5 +109,3 @@ ACMD(do_fix);
 ACMD(do_resurrect);
 ACMD(do_clan);
 ACMD(do_aid);
-
-#endif //CIRCLE_ACT_OTHER_H

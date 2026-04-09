@@ -11,9 +11,7 @@
 #include "dbat/game/db.h"
 #include "dbat/game/interpreter.h"
 #include "dbat/game/genolc.h"
-#include "dbat/game/imc.h"
 #include "dbat/game/improved-edit.h"
-#include "dbat/game/constants.h"
 
 /******************************************************************************/
 /** External Functions                                                       **/
@@ -155,7 +153,6 @@ void cedit_setup(struct descriptor_data *d)
   OLC_CONFIG(d)->operation.siteok_everyone    = CONFIG_SITEOK_ALL;
   OLC_CONFIG(d)->operation.use_new_socials    = CONFIG_NEW_SOCIALS;
   OLC_CONFIG(d)->operation.auto_save_olc      = CONFIG_OLC_SAVE;
-  OLC_CONFIG(d)->operation.imc_enabled        = CONFIG_IMC_ENABLED;
   OLC_CONFIG(d)->operation.nameserver_is_slow = CONFIG_NS_IS_SLOW;
   
   /****************************************************************************/
@@ -302,15 +299,6 @@ void cedit_save_internally(struct descriptor_data *d)
   /****************************************************************************/
   /** Autowiz                                                                **/
   /****************************************************************************/
-  /* IMC - if turning on or off, deal with IMC, and recommend a copyover */
-  if (CONFIG_IMC_ENABLED != OLC_CONFIG(d)->operation.imc_enabled) {
-    copyover_needed = TRUE;
-    if (OLC_CONFIG(d)->operation.imc_enabled)  /* If turning on  */
-      imc_startup(FALSE, -1, FALSE);           /* FALSE arg, so the autoconnect setting can govern it. */
-    else                                       /* If turning off */
-      imc_shutdown(FALSE);
-  }
-  CONFIG_IMC_ENABLED        = OLC_CONFIG(d)->operation.imc_enabled;
   CONFIG_USE_AUTOWIZ          = OLC_CONFIG(d)->autowiz.use_autowiz;
   CONFIG_MIN_WIZLIST_LEV      = OLC_CONFIG(d)->autowiz.min_wizlist_lev;
   
@@ -654,10 +642,6 @@ int save_config( IDXTYPE nowhere )
     fprintf(fl, "* NEWBIE start message.\n"
                 "START_MESSG = \n%s~\n\n", buf);
   }
-  
-  fprintf(fl, "* Is the IMC global channel enabled (1) or not (0).\n"
-              "imc_enabled = %d\n\n",
-              CONFIG_IMC_ENABLED);
 
   fprintf(fl, "\n\n\n* [ Autowiz Options ]\n");
   
@@ -905,7 +889,6 @@ void cedit_disp_operation_options(struct descriptor_data *d)
         "@WL@B) @CMain Menu           : \r\n@n%s@n\r\n"
         "@WM@B) @CWelcome Message     : \r\n@n%s@n\r\n"
         "@WN@B) @CStart Message       : \r\n@n%s@n\r\n"
-        "@WO@B) @CIMC Enabled         : @c%s@n\r\n"
     	"@WQ@B) @CExit To The Main Menu\r\n"
     	"@WEnter your choice : @n",
     OLC_CONFIG(d)->operation.DFLT_PORT,
@@ -921,8 +904,7 @@ void cedit_disp_operation_options(struct descriptor_data *d)
     YESNO(OLC_CONFIG(d)->operation.auto_save_olc),
     OLC_CONFIG(d)->operation.MENU ? OLC_CONFIG(d)->operation.MENU : "<None>",
     OLC_CONFIG(d)->operation.WELC_MESSG ? OLC_CONFIG(d)->operation.WELC_MESSG : "<None>",
-    OLC_CONFIG(d)->operation.START_MESSG ? OLC_CONFIG(d)->operation.START_MESSG : "<None>",
-    YESNO(OLC_CONFIG(d)->operation.imc_enabled)
+    OLC_CONFIG(d)->operation.START_MESSG ? OLC_CONFIG(d)->operation.START_MESSG : "<None>"
     );
   
   OLC_MODE(d) = CEDIT_OPERATION_OPTIONS_MENU;
@@ -1519,7 +1501,6 @@ void cedit_parse(struct descriptor_data *d, char *arg)
            return;
          case 'o':
          case 'O':
-           TOGGLE_VAR(OLC_CONFIG(d)->operation.imc_enabled);
            break;
 
          case 'q':

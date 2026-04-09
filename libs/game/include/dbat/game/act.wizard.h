@@ -1,11 +1,6 @@
-//
-// Created by basti on 10/22/2021.
-//
+#pragma once
+#include "dbat/db/consts/types.h"
 
-#ifndef CIRCLE_ACT_WIZARD_H
-#define CIRCLE_ACT_WIZARD_H
-
-#include "structs.h"
 
 /* global variables */
 
@@ -76,5 +71,3 @@ ACMD(do_plist);
 ACMD(do_peace);
 ACMD(do_raise);
 ACMD(do_boom);
-
-#endif //CIRCLE_ACT_WIZARD_H

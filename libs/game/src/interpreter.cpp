@@ -21,7 +21,6 @@
 #include "dbat/game/dg_scripts.h"
 #include "dbat/game/shop.h"
 #include "dbat/game/guild.h"
-#include "dbat/game/imc.h"
 #include "dbat/game/clan.h"
 #include "dbat/game/class.h"
 #include "dbat/game/races.h"
@@ -1176,16 +1175,8 @@ void command_interpreter(struct char_data *ch, char *argument)
 
 
   if (*complete_cmd_info[cmd].command == '\n') {
-     if (CONFIG_IMC_ENABLED && !IS_NPC(ch)) {
-       if(!IS_NPC(ch) && !imc_command_hook(ch, arg, line)) {
-         send_to_char(ch, "Huh!?!\r\n");
-       } else {
-         skip_ld = 1;
-       }
-     } else {
       send_to_char(ch, "Huh!?!\r\n");
       return;
-     }
   }
 
   else if (!command_pass(blah, ch) && GET_ADMLEVEL(ch) < 1)
@@ -2471,9 +2462,7 @@ int enter_player_game (struct descriptor_data *d)
     if (PLR_FLAGGED(d->character, PLR_HEALT)) {
      REMOVE_BIT_AR(PLR_FLAGS(d->character), PLR_HEALT);
     }
-    if (CONFIG_IMC_ENABLED) {
-     load_imc_pfile(d->character);
-    }
+
     if (readIntro(d->character, d->character) == 2) {
      introCreate(d->character);
     }
@@ -5999,7 +5988,7 @@ void nanny(struct descriptor_data *d, char *arg)
        write_to_output(d, "keep or forget: \r\n");
        STATE(d) = CON_SKILLS;
      } else if (penalty == TRUE) {
-         d->character->loseBasePLPercent(.2);
+         loseBasePLPercent(d->character, .2);
 
         switch (roll) {
          case 1:
@@ -6574,10 +6563,7 @@ void nanny(struct descriptor_data *d, char *arg)
       GET_PFILEPOS(d->character) = create_entry(GET_PC_NAME(d->character));
     /* Now GET_NAME() will work properly. */
     init_char(d->character);
-    if (CONFIG_IMC_ENABLED) {
-      imc_initchar(d->character);
-      load_imc_pfile(d->character);
-    }
+
     save_char(d->character);
     save_player_index();
     write_to_output(d, "%s\r\n*** PRESS RETURN: ", motd);

@@ -1,6 +1,5 @@
 #pragma once
-
-#include "dbat/game/structs.h"
+#include "dbat/db/consts/types.h"
 
 const std::string &juggleRaceName(char_data *ch, bool capitalized);
 void restore_by(char_data *ch, char_data *healer);

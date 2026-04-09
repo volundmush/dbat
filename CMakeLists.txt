@@ -32,5 +32,6 @@ find_package(ZLIB REQUIRED)
 
 set(BUILD_TESTING OFF)
 
+add_subdirectory(libs/db)
 add_subdirectory(libs/game)
-add_subdirectory(apps/server)
+#add_subdirectory(apps/server)

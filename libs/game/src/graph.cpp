@@ -15,7 +15,6 @@
 #include "dbat/game/handler.h"
 #include "dbat/game/db.h"
 #include "dbat/game/spells.h"
-#include "dbat/game/constants.h"
 #include "dbat/game/maputils.h"
 #include "dbat/game/vehicles.h"
 #include "dbat/game/act.informative.h"

@@ -1,17 +1,5 @@
-/* ************************************************************************
-*   File: db.h                                          Part of CircleMUD *
-*  Usage: header file for database handling                               *
-*                                                                         *
-*  All rights reserved.  See license.doc for complete information.        *
-*                                                                         *
-*  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
-*  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
-************************************************************************ */
-
-#ifndef __DB_H__
-#define __DB_H__
-
-#include "structs.h"
+#pragma once
+#include "dbat/db/consts/types.h"
 
 
 /* arbitrary constants used by index_boot() (must be unique) */
@@ -38,7 +26,6 @@
 #define LIB_PLRALIAS	"plralias/"
 #define LIB_PLRFILES	"plrfiles/"
 #define LIB_HOUSE	"house/"
-#define LIB_PLRIMC      "plrimc/"
 #define SLASH		"/"
 
 #define SUF_OBJS	"new"
@@ -47,7 +34,6 @@
 #define SUF_MEM	        "mem"
 #define SUF_PLR	        "plr"
 #define SUF_PET		"pet"
-#define SUF_IMC         "imc"
 #define SUF_USER        "usr"
 #define SUF_INTRO       "itr"
 #define SUF_SENSE       "sen"
@@ -114,18 +100,15 @@
 
 
 // global variables
-extern struct time_info_data time_info;/* the infomation about the time    */
-extern struct weather_data weather_info;	/* the infomation about the weather */
-extern struct player_special_data dummy_mob;	/* dummy spec area for mobs	*/
-extern struct reset_q_type reset_q;	/* queue of zones to be reset	 */
+
 extern struct char_data *EDRAGON;
 extern int WISH[2];
 extern int DRAGONR, DRAGONZ, DRAGONC, SHENRON;
 extern int circle_restrict;
-extern struct help_index_element *help_table;
+
 extern char *help, *ihelp, *credits, *news, *info, *wizlist, *immlist, *background;
 extern char *policies, *handbook, *motd, *imotd, *GREETINGS, *GREETANSI;
-extern int top_of_helpt, dballtime;
+extern int dballtime;
 extern int mini_mud, no_rent_check, no_mail;
 extern room_rnum r_mortal_start_room;	/* rnum of mortal start room	 */
 extern room_rnum r_immort_start_room;	/* rnum of immort start room	 */
@@ -193,165 +176,10 @@ int	vnum_armortype(char *searchname, struct char_data *ch);
 #define REAL 0
 #define VIRTUAL 1
 
-/* structure for the reset commands */
-struct reset_com {
-   char	command;   /* current command                      */
-
-   bool if_flag;	/* if TRUE: exe only if preceding exe'd */
-   int	arg1;		/*                                      */
-   int	arg2;		/* Arguments to the command             */
-   int	arg3;		/*                                      */
-   int  arg4;		/* room_max  default 0			*/
-   int  arg5;           /* percentages variable                 */
-   int line;		/* line number this command appears on  */
-   char *sarg1;		/* string argument                      */
-   char *sarg2;		/* string argument                      */
-
-   /* 
-	*  Commands:              *
-	*  'M': Read a mobile     *
-	*  'O': Read an object    *
-	*  'G': Give obj to mob   *
-	*  'P': Put obj in obj    *
-	*  'G': Obj to char       *
-	*  'E': Obj to char equip *
-	*  'D': Set state of door *
-	*  'T': Trigger command   *
-        *  'V': Assign a variable *
-   */
-};
-
-
-
-/* zone definition structure. for the 'zone-table'   */
-#define CUR_WORLD_VERSION 1
-#define CUR_ZONE_VERSION  2
-
-struct zone_data {
-   char	*name;		    /* name of this zone                  */
-   char *builders;          /* namelist of builders allowed to    */
-                            /* modify this zone.		  */
-   int	lifespan;           /* how long between resets (minutes)  */
-   int	age;                /* current age of this zone (minutes) */
-   room_vnum bot;           /* starting room number for this zone */
-   room_vnum top;           /* upper limit for rooms in this zone */
-
-   int	reset_mode;         /* conditions for reset (see below)   */
-   zone_vnum number;	    /* virtual number of this zone	  */
-   struct reset_com *cmd;   /* command table for reset	          */
-   int min_level;           /* Minimum level to enter zone        */
-   int max_level;           /* Max Mortal level to enter zone     */
-   int zone_flags[ZF_ARRAY_MAX];          /* Flags for the zone.                */
-
-
-   /*
-    * Reset mode:
-    *   0: Don't reset, and don't update age.
-    *   1: Reset if no PC's are located in zone.
-    *   2: Just reset.
-    */
-};
-
-
-
-/* for queueing zones for update   */
-struct reset_q_element {
-   zone_rnum zone_to_reset;            /* ref to zone_data */
-   struct reset_q_element *next;
-};
-
-
-
-/* structure for the update queue     */
-struct reset_q_type {
-   struct reset_q_element *head;
-   struct reset_q_element *tail;
-};
-
-
-/* Added level, flags, and last, primarily for pfile autocleaning.  You
-   can also use them to keep online statistics, and can add race, class,
-   etc if you like.
-*/
-struct player_index_element {
-   char	*name;
-   long id;
-   int level;
-   int admlevel;
-   int flags;
-   time_t last;
-   int ship;
-   int shiproom;
-   time_t played;
-   char *clan;
-};
-
-
-struct help_index_element {
-   char *index;      /*Future Use */
-   char *keywords;   /*Keyword Place holder and sorter */
-   char *entry;      /*Entries for help files with Keywords at very top*/
-   int duplicate;    /*Duplicate entries for multple keywords*/
-   int min_level;    /*Min Level to read help entry*/
-};
-
-
-/* don't change these */
-#define BAN_NOT 	0
-#define BAN_NEW 	1
-#define BAN_SELECT	2
-#define BAN_ALL		3
-
-#define BANNED_SITE_LENGTH    50
-struct ban_list_element {
-   char	site[BANNED_SITE_LENGTH+1];
-   int	type;
-   time_t date;
-   char	name[MAX_NAME_LENGTH+1];
-   struct ban_list_element *next;
-};
-
 
 /* global buffering system */
 extern time_t boot_time;
 
-extern struct config_data config_info;
-
-extern struct room_data *world;
-extern room_rnum top_of_world;
-
-
-extern struct zone_data *zone_table;
-extern zone_rnum top_of_zone_table;
-
-extern struct descriptor_data *descriptor_list;
-extern struct char_data *character_list;
-extern struct char_data *affect_list;
-extern struct char_data *affectv_list;
-extern struct player_special_data dummy_mob;
-
-extern struct index_data *mob_index;
-extern struct char_data *mob_proto;
-extern mob_rnum top_of_mobt;
-
-extern struct index_data *obj_index;
-extern struct obj_data *object_list;
-extern struct obj_data *obj_proto;
-extern obj_rnum top_of_objt;
-
-extern struct htree_node *room_htree;
-extern struct htree_node *mob_htree;
-extern struct htree_node *obj_htree;
-
-extern struct social_messg *soc_mess_list;
-extern int top_of_socialt;
-extern struct index_data **trig_index;
-
-extern struct index_data **trig_index;
-extern struct trig_data *trigger_list;
-extern int top_of_trigt;
-extern long max_mob_id;
-extern long max_obj_id;
 extern int dg_owner_purged;
 extern int xap_objs;
 
@@ -366,20 +194,6 @@ void reset_zone(zone_rnum zone);
 #define DISABLED_FILE    "disabled.cmds"  /* disabled commands */
 #define END_MARKER    "END" /* for load_disabled() and save_disabled() */
 
-typedef struct disabled_data DISABLED_DATA;
-
-extern DISABLED_DATA *disabled_first; /* interpreter.c */
-
-/* one disabled command */
-struct disabled_data {
-       DISABLED_DATA *next;                /* pointer to next node          */
-       struct command_info const *command; /* pointer to the command struct */
-       char *disabled_by;                  /* name of disabler              */
-       int16_t level;                       /* level of disabler             */
-       int subcmd;                         /* the subcmd, if any            */
-};
 
 // commands
 ACMD(do_reboot);
-
-#endif

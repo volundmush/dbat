@@ -26,7 +26,7 @@
 #include "dbat/game/comm.h"
 #include "dbat/game/dg_scripts.h"
 #include "dbat/game/interpreter.h"
-#include "dbat/game/htree.h"
+#include "dbat/db/htree.h"
 #include "dbat/game/genolc.h"
 #include "dbat/game/shop.h"
 #include "dbat/game/handler.h"
@@ -34,11 +34,9 @@
 #include "dbat/game/clan.h"
 #include "dbat/game/boards.h"
 #include "dbat/game/objsave.h"
-#include "dbat/game/constants.h"
 #include "dbat/game/genmob.h"
 #include "dbat/game/spells.h"
 #include "dbat/game/races.h"
-#include "dbat/game/imc.h"
 #include "dbat/game/spell_parser.h"
 #include "dbat/game/genobj.h"
 
@@ -123,7 +121,6 @@ struct player_special_data dummy_mob;	/* dummy spec area for mobs	*/
 struct reset_q_type reset_q;	/* queue of zones to be reset	 */
 
 extern struct board_info *boards; /* our boards */
-extern int imc_is_enabled;
 
 /* local functions */
 static void mob_stats(struct char_data *mob);
@@ -1526,9 +1523,6 @@ static void parse_room(FILE *fl, int virtual_nr)
 
     sprintf(flags, "room #%d", virtual_nr);	/* sprintf: OK (until 399-bit integers) */
     
-    /* No need to scan the other three sections; they're 0 anyway */
-    check_bitvector_names(world[room_nr].room_flags[0], room_bits_count, flags, "room"); 
-	
     if(bitsavetodisk) { /* Maybe the implementor just wants to look at the 128bit files */
       add_to_save_list(zone_table[real_zone_by_thing(virtual_nr)].number, 3);
       converting = TRUE;
@@ -1544,8 +1538,7 @@ static void parse_room(FILE *fl, int virtual_nr)
 
   world[room_nr].sector_type = t[2];
   sprintf(flags, "object #%d", virtual_nr);	/* sprintf: OK (until 399-bit integers) */
-  for(taeller=0; taeller < AF_ARRAY_MAX; taeller++) 
-    check_bitvector_names(world[room_nr].room_flags[taeller], room_bits_count, flags, "room");
+
   } else {
   log("SYSERR: Format error in roomflags/sector type of room #%d", virtual_nr);
   exit(1);
@@ -2202,7 +2195,6 @@ int parse_mobile_from_file(FILE *mob_f, struct char_data *ch)
     MOB_FLAGS(ch)[1] = 0;
     MOB_FLAGS(ch)[2] = 0;
     MOB_FLAGS(ch)[3] = 0;
-    check_bitvector_names(MOB_FLAGS(ch)[0], action_bits_count, buf2, "mobile");
 
     AFF_FLAGS(ch)[0] = asciiflag_conv_aff(f2);
     AFF_FLAGS(ch)[1] = 0;
@@ -2222,8 +2214,6 @@ int parse_mobile_from_file(FILE *mob_f, struct char_data *ch)
       REMOVE_BIT_AR(MOB_FLAGS(ch), MOB_AGGR_NEUTRAL);
     if (MOB_FLAGGED(ch, MOB_AGGRESSIVE) && MOB_FLAGGED(ch, MOB_AGGR_EVIL))
       REMOVE_BIT_AR(MOB_FLAGS(ch), MOB_AGGR_EVIL);
-
-    check_bitvector_names(AFF_FLAGS(ch)[0], affected_bits_count, buf2, "mobile affect");
 
     /* 
      * This is necessary, since if we have conventional worldfiles, &letter
@@ -2246,8 +2236,6 @@ int parse_mobile_from_file(FILE *mob_f, struct char_data *ch)
     MOB_FLAGS(ch)[1] = asciiflag_conv(f2);
     MOB_FLAGS(ch)[2] = asciiflag_conv(f3);
     MOB_FLAGS(ch)[3] = asciiflag_conv(f4);
-    for(taeller=0; taeller < AF_ARRAY_MAX; taeller++) 
-      check_bitvector_names(MOB_FLAGS(ch)[taeller], action_bits_count, buf2, "mobile");
   
     AFF_FLAGS(ch)[0] = asciiflag_conv(f5);
     AFF_FLAGS(ch)[1] = asciiflag_conv(f6);
@@ -2256,8 +2244,6 @@ int parse_mobile_from_file(FILE *mob_f, struct char_data *ch)
 
     GET_ALIGNMENT(ch) = t[2];
 
-    for(taeller=0; taeller < AF_ARRAY_MAX; taeller++) 
-      check_bitvector_names(AFF_FLAGS(ch)[taeller], affected_bits_count, buf2, "mobile affect");
   } else {
     log("SYSERR: Format error after string section of mob #%d\n"
 	"...expecting line of form '# # # {S | E}'", nr);
@@ -4409,10 +4395,6 @@ void free_char(struct char_data *ch)
 
   if (ch->player_specials != NULL && ch->player_specials != &dummy_mob) {
 
-    if (CONFIG_IMC_ENABLED) {
-      imc_freechardata(ch);
-    }
-
     while ((a = GET_ALIASES(ch)) != NULL) {
       GET_ALIASES(ch) = (GET_ALIASES(ch))->next;
       free_alias(a);
@@ -4931,11 +4913,6 @@ static int check_object(struct obj_data *obj)
 	GET_OBJ_VNUM(obj), obj->short_description, GET_OBJ_RENT(obj));
 
   snprintf(objname, sizeof(objname), "Object #%d (%s)", GET_OBJ_VNUM(obj), obj->short_description);
-  for(y = 0; y < TW_ARRAY_MAX; y++) {
-    error |= check_bitvector_names(GET_OBJ_WEAR(obj)[y], wear_bits_count, objname, "object wear");
-    error |= check_bitvector_names(GET_OBJ_EXTRA(obj)[y], extra_bits_count, objname, "object extra");
-    error |= check_bitvector_names(GET_OBJ_PERM(obj)[y], affected_bits_count, objname, "object affect");
-  }
 
   switch (GET_OBJ_TYPE(obj)) {
   case ITEM_DRINKCON:
@@ -5256,7 +5233,6 @@ void load_default_config( void )
   CONFIG_MENU                   = strdup(MENU);
   CONFIG_WELC_MESSG             = strdup(WELC_MESSG);
   CONFIG_START_MESSG            = strdup(START_MESSG);
-  CONFIG_IMC_ENABLED            = imc_is_enabled;
   CONFIG_EXP_MULTIPLIER		= 1.0;
   
   /****************************************************************************/
@@ -5412,8 +5388,6 @@ void load_config( void )
           log("Ignoring immort_level_ok obsolete config");
         else if (!strcasecmp(tag, "immort_start_room"))
           CONFIG_IMMORTAL_START = num;
-        else if (!strcasecmp(tag, "imc_enabled"))
-          CONFIG_IMC_ENABLED = num;
         else if (!strcasecmp(tag, "initial_points"))
           CONFIG_INITIAL_POINTS_POOL = num;
         break;

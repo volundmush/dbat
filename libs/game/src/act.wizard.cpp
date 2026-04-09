@@ -11,6 +11,7 @@
 #include "dbat/game/act.wizard.h"
 #include "dbat/game/interpreter.h"
 #include "dbat/game/utils.h"
+#include "dbat/game/character_utils.h"
 #include "dbat/game/config.h"
 #include "dbat/game/act.other.h"
 #include "dbat/game/maputils.h"
@@ -23,7 +24,6 @@
 #include "dbat/game/assemblies.h"
 #include "dbat/game/house.h"
 #include "dbat/game/comm.h"
-#include "dbat/game/constants.h"
 #include "dbat/game/dg_scripts.h"
 #include "dbat/game/races.h"
 #include "dbat/game/class.h"
@@ -1763,13 +1763,13 @@ static void do_stat_character(struct char_data *ch, struct char_data *k)
 	  GET_STR(k), GET_INT(k), GET_WIS(k), GET_DEX(k), GET_CON(k), GET_CHA(k));
 
   send_to_char(ch, "PL :[@g%12s@n]  KI :[@g%12s@n]  ST :[@g%12s@n]\r\n",
-	  add_commas(GET_HIT(k)), add_commas((k->getCurKI())), add_commas((k->getCurST())));
+	  add_commas(GET_HIT(k)), add_commas((getCurKI(k))), add_commas((getCurST(k))));
   send_to_char(ch, "MPL:[@g%12s@n]  MKI:[@g%12s@n]  MST:[@g%12s@n]\r\n",
           add_commas(GET_MAX_HIT(k)), add_commas(GET_MAX_MANA(k)), add_commas(GET_MAX_MOVE(k)));
   send_to_char(ch, "BPL:[@g%12s@n]  BKI:[@g%12s@n]  BST:[@g%12s@n]\r\n",
-          add_commas((k->getBasePL())), add_commas((k->getBaseKI())), add_commas((k->getBaseST())));
+          add_commas((getBasePL(k))), add_commas((getBaseKI(k))), add_commas((getBaseST(k))));
   send_to_char(ch, "LF :[@g%12s@n]  MLF:[@g%12s@n]  LFP:[@g%3d@n]\r\n",
-          add_commas((k->getCurLF())), add_commas((k->getMaxLF())), GET_LIFEPERC(k));
+          add_commas((getCurLF(k))), add_commas((getMaxLF(k))), GET_LIFEPERC(k));
 
   if (GET_ADMLEVEL(k))
     send_to_char(ch, "Admin Level: [@y%d - %s@n]\r\n", GET_ADMLEVEL(k), admin_level_names[GET_ADMLEVEL(k)]);
@@ -2714,7 +2714,7 @@ ACMD(do_restore)
     { 
       if (!IS_PLAYING(j) || !(vict = j->character)) 
        continue;
-      vict->restore_by(ch);
+      restore_by(vict, ch);
     }
     send_to_char(ch, "Okay.\r\n");
   }
@@ -2723,7 +2723,7 @@ ACMD(do_restore)
   else if (!IS_NPC(vict) && ch != vict && GET_ADMLEVEL(vict) >= GET_ADMLEVEL(ch))
     send_to_char(ch, "They don't need your help.\r\n");
   else {
-      vict->restore_by(ch);
+      restore_by(vict, ch);
     send_to_char(ch, "%s", CONFIG_OK);
     send_to_imm("[Log: %s restored %s.]", GET_NAME(ch), GET_NAME(vict));
     log_imm_action("RESTORE: %s has restored %s.", GET_NAME(ch), GET_NAME(vict));
@@ -4641,9 +4641,9 @@ ACMD(do_raise)
   }
 
     if (GET_ADMLEVEL(ch) <= 0) {
-        vict->resurrect(Basic);
+        resurrect(vict, Basic);
     } else {
-        vict->resurrect(Costless);
+        resurrect(vict, Costless);
     }
 
   send_to_char(ch, "@wYou return %s from the @Bspirit@w world, to the world of the living!@n\r\n", GET_NAME(vict));

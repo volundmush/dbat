@@ -11,7 +11,6 @@
 #include "dbat/game/utils.h"
 #include "dbat/game/comm.h"
 #include "dbat/game/handler.h"
-#include "dbat/game/constants.h"
 
 /* Local global variables. */
 static long           g_lNumAssemblies = 0;
