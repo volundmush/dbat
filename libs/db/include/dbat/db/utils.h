@@ -15,6 +15,9 @@
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
 
+#define YESNO(a) ((a) ? "YES" : "NO")
+#define ONOFF(a) ((a) ? "ON" : "OFF")
+
 
 /* memory utils **********************************************************/
 

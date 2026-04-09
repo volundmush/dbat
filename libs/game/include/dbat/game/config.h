@@ -1,5 +1,6 @@
 #pragma once
 #include "dbat/db/consts/types.h"
+#include "dbat/db/config.h"
 
 /* GAME PLAY OPTIONS */
 #if !defined(NO)

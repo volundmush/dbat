@@ -25,13 +25,13 @@ struct obj_data {
    int  value[NUM_OBJ_VAL_POSITIONS];   /* Values of the item (see list)    */
    int8_t type_flag;      /* Type of item                        */
    int  level;           /* Minimum level of object.            */
-   int  wear_flags[TW_ARRAY_MAX]; /* Where you can wear it     */
-   int  extra_flags[EF_ARRAY_MAX]; /* If it hums, glows, etc.  */
+   bitvector_t  wear_flags[TW_ARRAY_MAX]; /* Where you can wear it     */
+   bitvector_t  extra_flags[EF_ARRAY_MAX]; /* If it hums, glows, etc.  */
    int64_t  weight;         /* Weigt what else                     */
    int  cost;           /* Value when sold (gp.)               */
    int  cost_per_day;   /* Cost to keep pr. real day           */
    int  timer;          /* Timer for object                    */
-   int  bitvector[AF_ARRAY_MAX]; /* To set chars bits          */
+   bitvector_t  bitvector[AF_ARRAY_MAX]; /* To set chars bits          */
    int  size;           /* Size class of object                */
 
    struct obj_affected_type affected[MAX_OBJ_AFFECT];  /* affects */

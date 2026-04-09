@@ -35,7 +35,7 @@ struct room_data {
    char	*description;           /* Shown when entered                 */
    struct extra_descr_data *ex_description; /* for examine/look       */
    struct room_direction_data *dir_option[NUM_OF_DIRS]; /* Directions */
-   int room_flags[RF_ARRAY_MAX];   /* DEATH,DARK ... etc */
+   bitvector_t room_flags[RF_ARRAY_MAX];   /* DEATH,DARK ... etc */
 
    struct trig_proto_list *proto_script; /* list of default triggers  */
    struct script_data *script;  /* script info for the object         */

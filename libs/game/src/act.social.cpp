@@ -9,11 +9,20 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 #include "dbat/game/act.social.h"
+#include "dbat/db/consts/maximums.h"
+#include <errno.h>
+#include "dbat/db/social.h"
+#include "dbat/game/config.h"
+#include "dbat/game/db.h"
 #include "dbat/game/comm.h"
-#include "dbat/game/utils.h"
 #include "dbat/game/character_utils.h"
+#include "dbat/game/descriptor_utils.h"
+#include "dbat/game/stringutils.h"
+#include "dbat/game/room_utils.h"
+#include "dbat/game/search.h"
 #include "dbat/game/interpreter.h"
 #include "dbat/game/handler.h"
+#include "dbat/game/random.h"
 
 /* local functions */
 char *fread_action(FILE *fl, int nr);
@@ -264,7 +273,6 @@ void boot_social_messages(void)
 
   /* close file & set top */
   fclose(fl);
-  assert(curr_soc <= top_of_socialt);
   top_of_socialt = curr_soc;
 }
 

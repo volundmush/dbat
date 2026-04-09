@@ -8,17 +8,32 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 #include "dbat/game/act.movement.h"
+#include "dbat/db/consts/maximums.h"
+#include "dbat/db/utils.h"
+
+#include "dbat/game/character_utils.h"
+#include "dbat/game/room_utils.h"
+#include "dbat/game/object_utils.h"
+#include "dbat/game/descriptor_utils.h"
+#include "dbat/game/zone_utils.h"
+#include "dbat/game/stringutils.h"
+#include "dbat/game/search.h"
+#include "dbat/game/config.h"
+#include "dbat/game/random.h"
+#include "dbat/game/extract.h"
+
+#include "dbat/game/act.informative.h"
+
 #include "dbat/game/dg_comm.h"
 #include "dbat/game/vehicles.h"
 #include "dbat/game/oasis_copy.h"
-#include "dbat/game/handler.h"
-#include "dbat/game/utils.h"
+#include "dbat/game/relocate.h"
 #include "dbat/game/comm.h"
 #include "dbat/game/interpreter.h"
 #include "dbat/game/fight.h"
 #include "dbat/game/spells.h"
 #include "dbat/game/oasis.h"
-#include "dbat/game/character_utils.h"
+
 #include "dbat/game/guild.h"
 #include "dbat/game/dg_scripts.h"
 #include "dbat/game/local_limits.h"

@@ -1,5 +1,6 @@
 #pragma once
 #include "dbat/db/consts/types.h"
+#include "dbat/db/command.h"
 
 #define CMD_NAME (complete_cmd_info[cmd].command)
 #define CMD_IS(cmd_name) (!strcmp(cmd_name, complete_cmd_info[cmd].command))

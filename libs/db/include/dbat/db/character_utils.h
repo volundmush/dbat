@@ -921,7 +921,7 @@ bool char_is_spoiled(const struct char_data *ch);
 #define GET_TITLE(ch)   ((ch)->desc ? ((ch)->desc->title ? (ch)->desc->title : "[Unset Title]") : "@D[@GNew User@D]")
 #define GET_USER_TITLE(d) ((d)->title)
 #define GET_PHASE(ch)   ((ch)->starphase)
-#define GET_MIMIC(ch)   ((ch)->mimic ? (ch)->mimic->getID()+1 : 0)
+#define GET_MIMIC(ch)   ((ch)->mimic)
 #define GET_VOICE(ch)   ((ch)->voice)
 #define GET_CLAN(ch)    ((ch)->clan)
 #define GET_TRANSCLASS(ch) ((ch)->transclass)
@@ -1256,7 +1256,7 @@ bool char_is_spoiled(const struct char_data *ch);
 
 #define PERS(ch, vict) ((DISG(ch, vict) ? (CAN_SEE(vict, ch) ? (INTROD(vict, ch) ? (ISWIZ(ch, vict) ? GET_NAME(ch) :\
                         get_i_name(vict, ch)) : introd_calc(ch)) : "Someone") :\
-                        get_race(ch)->getName().c_str()))
+                        get_race(ch->race)->getName().c_str()))
 
 #define OBJS(obj, vict) (CAN_SEE_OBJ((vict), (obj)) ? \
 	(obj)->short_description  : "something")
@@ -1275,10 +1275,10 @@ bool char_is_spoiled(const struct char_data *ch);
 
 #define RACE(ch)      (juggleRaceName(ch, true).c_str())
 #define LRACE(ch)     (juggleRaceName(ch, false).c_str())
-#define TRUE_RACE(ch) (get_race(ch)->getName().c_str())
+#define TRUE_RACE(ch) (get_race(ch->race)->getName().c_str())
 
-#define CLASS_ABBR(ch) ((ch)->chclass->getAbbr().c_str())
-#define RACE_ABBR(ch) (get_race(ch)->getAbbr().c_str())
+#define CLASS_ABBR(ch) (get_sensei(ch->chclass)->getAbbr().c_str())
+#define RACE_ABBR(ch) (get_race(ch->race)->getAbbr().c_str())
 
 #define IS_ROSHI(ch)            (GET_CLASS(ch) == CLASS_ROSHI)
 #define IS_PICCOLO(ch)          (GET_CLASS(ch) == CLASS_PICCOLO)

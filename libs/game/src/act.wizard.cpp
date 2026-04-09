@@ -7,11 +7,28 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
-
 #include "dbat/game/act.wizard.h"
+#include "dbat/db/consts/maximums.h"
+#include "dbat/db/players.h"
+#include "dbat/db/utils.h"
+
+#include <unistd.h>
+
 #include "dbat/game/interpreter.h"
-#include "dbat/game/utils.h"
+#include "dbat/game/time.h"
+
 #include "dbat/game/character_utils.h"
+#include "dbat/game/descriptor_utils.h"
+#include "dbat/game/object_utils.h"
+#include "dbat/game/zone_utils.h"
+#include "dbat/game/room_utils.h"
+#include "dbat/game/stringutils.h"
+#include "dbat/game/search.h"
+#include "dbat/game/relocate.h"
+#include "dbat/game/fileop.h"
+#include "dbat/game/extract.h"
+#include "dbat/game/affect.h"
+
 #include "dbat/game/config.h"
 #include "dbat/game/act.other.h"
 #include "dbat/game/maputils.h"
@@ -1407,7 +1424,7 @@ static void do_stat_room(struct char_data *ch)
 	  zone_table[rm->zone].number, rm->number, IN_ROOM(ch),
           (long) rm->number + ROOM_ID_BASE, buf2);
 
-  sprintbitarray(rm->room_flags, room_bits, RF_ARRAY_MAX, buf2);
+  sprintbitarray(rm->room_flags, room_bits, RF_ARRAY_MAX, buf2, sizeof(buf2));
   send_to_char(ch, "Room Damage: %d, Room Effect: %d\r\n", rm->dmg, rm->geffect);
   send_to_char(ch, "SpecProc: %s, Flags: %s\r\n", rm->func == NULL ? "None" : "Exists", buf2);
 
@@ -1532,13 +1549,13 @@ static void do_stat_object(struct char_data *ch, struct obj_data *j)
     send_to_char(ch, "\r\n");
   }
 
-  sprintbitarray(GET_OBJ_WEAR(j), wear_bits, TW_ARRAY_MAX, buf);
+  sprintbitarray(GET_OBJ_WEAR(j), wear_bits, TW_ARRAY_MAX, buf, sizeof(buf));
   send_to_char(ch, "Can be worn on: %s\r\n", buf);
 
-  sprintbitarray(GET_OBJ_PERM(j), affected_bits, AF_ARRAY_MAX, buf);
+  sprintbitarray(GET_OBJ_PERM(j), affected_bits, AF_ARRAY_MAX, buf, sizeof(buf));
   send_to_char(ch, "Set char bits : %s\r\n", buf);
 
-  sprintbitarray(GET_OBJ_EXTRA(j), extra_bits, EF_ARRAY_MAX, buf);
+  sprintbitarray(GET_OBJ_EXTRA(j), extra_bits, EF_ARRAY_MAX, buf, sizeof(buf));
   send_to_char(ch, "Extra flags   : %s\r\n", buf);
 
   send_to_char(ch, "Weight: %" I64T ", Value: %d, Cost/day: %d, Timer: %d, Min Level: %d\r\n",
@@ -1715,7 +1732,7 @@ static void do_stat_character(struct char_data *ch, struct char_data *k)
   if (CONFIG_ALLOW_MULTICLASS) {
     strncpy(buf, class_desc_str(k, 1, 0), sizeof(buf));
   } else {
-    snprintf(buf, sizeof(buf), "%s", k->chclass->getName().c_str());
+    snprintf(buf, sizeof(buf), "%s", get_sensei(k->chclass)->getName().c_str());
   }
     snprintf(buf2, sizeof(buf2), "%s", get_race(k->race)->getName().c_str());
   send_to_char(ch, "Class: %s, Race: %s, Lev: [@y%2d(%dHD+%dcl+%d)@n], XP: [@y%" I64T "@n]\r\n",
@@ -1792,15 +1809,15 @@ static void do_stat_character(struct char_data *ch, struct char_data *k)
   if (IS_NPC(k)) {
     sprinttype(k->mob_specials.default_pos, position_types, buf, sizeof(buf));
     send_to_char(ch, ", Default position: %s\r\n", buf);
-    sprintbitarray(MOB_FLAGS(k), action_bits, PM_ARRAY_MAX, buf);
+    sprintbitarray(MOB_FLAGS(k), action_bits, PM_ARRAY_MAX, buf, sizeof(buf));
     send_to_char(ch, "NPC flags: @c%s@n\r\n", buf);
   } else {
     send_to_char(ch, ", Idle Timer (in tics) [%d]\r\n", k->timer);
 
-    sprintbitarray(PLR_FLAGS(k), player_bits, PM_ARRAY_MAX, buf);
+    sprintbitarray(PLR_FLAGS(k), player_bits, PM_ARRAY_MAX, buf, sizeof(buf));
     send_to_char(ch, "PLR: @c%s@n\r\n", buf);
 
-    sprintbitarray(PRF_FLAGS(k), preference_bits, PR_ARRAY_MAX, buf);
+    sprintbitarray(PRF_FLAGS(k), preference_bits, PR_ARRAY_MAX, buf, sizeof(buf));
     send_to_char(ch, "PRF: @g%s@n\r\n", buf);
   }
 
@@ -1852,7 +1869,7 @@ static void do_stat_character(struct char_data *ch, struct char_data *k)
   }
 
   /* Showing the bitvector */
-  sprintbitarray(AFF_FLAGS(k), affected_bits, AF_ARRAY_MAX, buf);
+  sprintbitarray(AFF_FLAGS(k), affected_bits, AF_ARRAY_MAX, buf, sizeof(buf));
   send_to_char(ch, "AFF: @y%s@n\r\n", buf);
 
   /* Routine to show what spells a char is affected by */
@@ -2453,6 +2470,31 @@ ACMD(do_syslog)
 
 #define EXE_FILE "bin/circle" /* maybe use argv[0] but it's not reliable */
 
+void game_info(const char *format, ...)
+{ 
+  struct descriptor_data *i; 
+  va_list args; 
+  char messg[MAX_STRING_LENGTH]; 
+
+  if (format == NULL) 
+    return; 
+
+  sprintf(messg, "@r-@R=@D<@GCOPYOVER@D>@R=@r- @W"); 
+
+  for (i = descriptor_list; i; i = i->next) { 
+    if (STATE(i) != CON_PLAYING && (STATE(i) != CON_REDIT && STATE(i) != CON_OEDIT && STATE(i) != CON_MEDIT)) 
+      continue; 
+    if (!(i->character)) 
+      continue; 
+
+    write_to_output(i, messg); 
+    va_start(args, format); 
+    vwrite_to_output(i, format, args); 
+    va_end(args); 
+    write_to_output(i, "@n\r\n@R>>>@GMake sure to pick up your bed items and save.@n\r\n"); 
+  } 
+}
+
 /* (c) 1996-97 Erwin S. Andreasen <erwin@pip.dknet.dk> */
 ACMD(do_copyover) 
 { 
@@ -2522,7 +2564,7 @@ static void execute_copyover(void)
     struct char_data * och = d->character;
     d_next = d->next; /* We delete from the list , so need to save this */
     if (!d->character || d->connected > CON_PLAYING) {
-      write_to_descriptor (d->descriptor, "\n\rSorry, we are rebooting. Come back in a few seconds.\n\r", d->comp);
+      write_to_descriptor (d->descriptor, "\n\rSorry, we are rebooting. Come back in a few seconds.\n\r");
       close_socket(d); /* throw'em out */
     } else {
       if (GET_ROOM_VNUM(IN_ROOM(och)) > 1) {
@@ -2536,17 +2578,7 @@ static void execute_copyover(void)
       /* save och */
       Crash_rentsave(och, 0);
       save_char(och);
-        if (d->comp->state == 2) {
-            d->comp->state = 3; /* Code to use Z_FINISH for deflate */
-        }
-      write_to_descriptor (d->descriptor, buf, d->comp);
-      d->comp->state = 0;
-        if (d->comp->stream) {
-            deflateEnd(d->comp->stream);
-            free(d->comp->stream);
-            free(d->comp->buff_out);
-            free(d->comp->buff_in);
-        }
+      write_to_descriptor (d->descriptor, buf);
     }
   }
 
@@ -4108,7 +4140,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
       return (0);
     }
     value = GET_CLASS_RANKS(vict, GET_CLASS(vict));
-    vict->chclass = chosen_sensei;
+    vict->chclass = chosen_sensei->getID();
     break;
   case 40:
     SET_OR_REMOVE(PLR_FLAGS(vict), PLR_NOWIZLIST);
@@ -4210,7 +4242,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
           send_to_char(ch, "That is not a valid race for them.\r\n");
           return (0);
       }
-      vict->race = chosen_race;
+      vict->race = chosen_race->getID();
     racial_body_parts(vict);
     break;
 
@@ -4641,9 +4673,9 @@ ACMD(do_raise)
   }
 
     if (GET_ADMLEVEL(ch) <= 0) {
-        resurrect(vict, Basic);
+        resurrect(vict, 0);
     } else {
-        resurrect(vict, Costless);
+        resurrect(vict, 1);
     }
 
   send_to_char(ch, "@wYou return %s from the @Bspirit@w world, to the world of the living!@n\r\n", GET_NAME(vict));

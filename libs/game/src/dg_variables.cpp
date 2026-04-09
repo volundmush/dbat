@@ -622,7 +622,7 @@ in the vault (vnum: 453) now and then. you can just use
           }
           else if (!strcasecmp(field, "class")) {
            if (!IS_NPC(c))
-            snprintf(str, slen, "%s", c->chclass->getName().c_str());
+            snprintf(str, slen, "%s", get_sensei(c->chclass)->getName().c_str());
            else
             snprintf(str, slen, "blank");
           }
@@ -1205,7 +1205,7 @@ in the vault (vnum: 453) now and then. you can just use
             } else 
               snprintf(str, slen, "0");
           } else {
-            sprintbitarray(GET_OBJ_EXTRA(o), extra_bits, EF_ARRAY_MAX, str);
+            sprintbitarray(GET_OBJ_EXTRA(o), extra_bits, EF_ARRAY_MAX, str, slen);
           }
           break;
         case 'h':

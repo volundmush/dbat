@@ -8,8 +8,29 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 **************************************************************************/
 #include "dbat/game/act.other.h"
-#include "dbat/game/utils.h"
+#include "dbat/db/consts/maximums.h"
+#include "dbat/db/consts/shadowdragons.h"
+#include "dbat/db/consts/auction.h"
+#include "dbat/db/consts/aligns.h"
+#include "dbat/db/utils.h"
+
+#include <sys/stat.h>
+
+#include "dbat/game/config.h"
 #include "dbat/game/character_utils.h"
+#include "dbat/game/descriptor_utils.h"
+#include "dbat/game/object_utils.h"
+#include "dbat/game/zone_utils.h"
+#include "dbat/game/room_utils.h"
+#include "dbat/game/stringutils.h"
+#include "dbat/game/search.h"
+#include "dbat/game/random.h"
+#include "dbat/game/affect.h"
+#include "dbat/game/relocate.h"
+#include "dbat/game/extract.h"
+#include "dbat/game/races.h"
+#include "dbat/game/fileop.h"
+
 #include "dbat/game/comm.h"
 #include "dbat/game/handler.h"
 #include "dbat/game/dg_comm.h"
@@ -36,6 +57,8 @@
 #include "dbat/game/objsave.h"
 #include "dbat/game/mail.h"
 #include "dbat/game/clan.h"
+
+#include <map>
 
 /* local functions */
 static int has_scanner(struct char_data *ch);
@@ -1232,7 +1255,7 @@ ACMD(do_train)
 
  int sensei = -1;
 
-   if(GET_ROOM_VNUM(IN_ROOM(ch)) == ch->chclass->senseiLocationID()) {
+   if(GET_ROOM_VNUM(IN_ROOM(ch)) == get_sensei(ch->chclass)->senseiLocationID()) {
        if(!(GET_GOLD(ch) >= 8 && GET_PRACTICES(ch, GET_CLASS(ch)) >= 1)) {
            send_to_char(ch, "It costs 8 Zenni and 1 PS to train with your sensei.\r\n");
            return;
@@ -1248,8 +1271,8 @@ ACMD(do_train)
            total *= 300;
        else if (GET_LEVEL(ch) >= 10)
            total *= 150;
-       sensei = ch->chclass->getID();
-       send_to_char(ch, "@G%s begins to instruct you in training technique.@n\r\n", ch->chclass->getName().c_str());
+       sensei = get_sensei(ch->chclass)->getID();
+       send_to_char(ch, "@G%s begins to instruct you in training technique.@n\r\n", get_sensei(ch->chclass)->getName().c_str());
    }
 
  if (total > GET_MAX_HIT(ch) * 2) {
@@ -2758,7 +2781,7 @@ ACMD(do_telepathy)
        decCurKI(ch, getMaxKI(ch) / 40);
     send_to_char(ch, "@GName      @D: @W%s@n\r\n", GET_NAME(vict));
     send_to_char(ch, "@GRace      @D: @W%s@n\r\n", TRUE_RACE(vict));
-    send_to_char(ch, "@GSensei    @D: @W%s@n\r\n", vict->chclass->getName().c_str());
+    send_to_char(ch, "@GSensei    @D: @W%s@n\r\n", get_sensei(vict->chclass)->getName().c_str());
     send_to_char(ch, "@GStr       @D: @W%d@n\r\n", GET_STR(vict));
     send_to_char(ch, "@GCon       @D: @W%d@n\r\n", GET_CON(vict));
     send_to_char(ch, "@GInt       @D: @W%d@n\r\n", GET_INT(vict));
@@ -6395,7 +6418,7 @@ ACMD(do_appraise) {
  if (!found)
     send_to_char(ch, " None");
  char buf2[MAX_STRING_LENGTH];
- sprintbitarray(GET_OBJ_PERM(obj), affected_bits, AF_ARRAY_MAX, buf2);
+ sprintbitarray(GET_OBJ_PERM(obj), affected_bits, AF_ARRAY_MAX, buf2, sizeof(buf2));
  send_to_char(ch, "\nSpecial: %s\r\n", buf2); 
 
  WAIT_STATE(ch, PULSE_2SEC);

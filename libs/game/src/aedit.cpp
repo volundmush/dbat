@@ -5,13 +5,13 @@
  * for use with OasisOLC
  * ftpable from ftp.circlemud.org:/pub/CircleMUD/contrib/code
  */
-
 #include "dbat/game/aedit.h"
+#include "dbat/db/consts/maximums.h"
+
 #include "dbat/game/act.informative.h"
 #include "dbat/game/act.social.h"
 #include "dbat/game/interpreter.h"
 #include "dbat/game/comm.h"
-#include "dbat/game/utils.h"
 #include "dbat/game/oasis.h"
 #include "dbat/game/genolc.h"
 

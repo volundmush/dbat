@@ -365,7 +365,7 @@ void sedit_no_trade_menu(struct descriptor_data *d)
     write_to_output(d, "@g%2d@n) %-20.20s   %s", i + 1, trade_letters[i],
 		!(++count % 2) ? "\r\n" : "");
   }
-  sprintbitarray(S_NOTRADE(OLC_SHOP(d)), trade_letters, sizeof(bits), bits);
+  sprintbitarray(S_NOTRADE(OLC_SHOP(d)), trade_letters, bits, sizeof(bits));
   write_to_output(d, "\r\nCurrently won't trade with: @c%s@n\r\n"
 	  "Enter choice : ", bits);
   OLC_MODE(d) = SEDIT_NOTRADE;
@@ -403,7 +403,7 @@ void sedit_disp_menu(struct descriptor_data *d)
   shop = OLC_SHOP(d);
 
   clear_screen(d);
-  sprintbitarray(S_NOTRADE(shop), trade_letters, sizeof(buf1), buf1);
+  sprintbitarray(S_NOTRADE(shop), trade_letters, buf1, sizeof(buf1));
   sprintbit(S_BITVECTOR(shop), shop_bits, buf2, sizeof(buf2));
   write_to_output(d,
 	  "-- Shop Number : [@c%d@n]\r\n"

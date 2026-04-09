@@ -84,7 +84,7 @@ void resurrect(char_data *ch, ResurrectionMode mode) {
         char_to_room(ch, real_room(GET_DROOM(ch)));
     }
     else {
-        char_to_room(ch, real_room(ch->chclass->senseiStartRoom()));
+        char_to_room(ch, real_room(get_sensei(ch->chclass)->senseiStartRoom()));
     }
     look_at_room(IN_ROOM(ch), ch, 0);
 
@@ -208,7 +208,7 @@ static std::map<int, uint16_t> grav_threshold = {
 bool can_tolerate_gravity(char_data *ch, int grav) {
     if(IS_NPC(ch)) return true;
     int tolerance = 0;
-    tolerance = MAX(tolerance, ch->chclass->getGravTolerance());
+    tolerance = MAX(tolerance, get_sensei(ch->chclass)->getGravTolerance());
     if(tolerance >= grav)
         return true;
     return getMaxPL(ch) >= grav_threshold[grav];

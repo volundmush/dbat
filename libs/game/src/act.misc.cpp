@@ -12,18 +12,43 @@
 *  practically an act.other.c part two - Iovan 3/20/2011                  *
 ************************************************************************ */
 #include "dbat/game/act.misc.h"
+#include "dbat/db/consts/maximums.h"
+#include "dbat/db/consts/songs.h"
+#include "dbat/db/consts/fish.h"
+#include "dbat/db/consts/recipes.h"
+#include "dbat/db/consts/attacks.h"
+#include "dbat/db/utils.h"
+
+#include "dbat/game/character_utils.h"
+#include "dbat/game/room_utils.h"
+#include "dbat/game/object_utils.h"
+#include "dbat/game/descriptor_utils.h"
+
+#include "dbat/game/random.h"
+#include "dbat/game/affect.h"
+#include "dbat/game/search.h"
+#include "dbat/game/stringutils.h"
+#include "dbat/game/extract.h"
+#include "dbat/game/relocate.h"
+#include "dbat/game/interpreter.h"
+
+#include "dbat/game/db.h"
+
 #include "dbat/game/dg_comm.h"
 #include "dbat/game/act.wizard.h"
 #include "dbat/game/act.movement.h"
-#include "dbat/game/utils.h"
+#include "dbat/game/act.informative.h"
+
 #include "dbat/game/spells.h"
 #include "dbat/game/comm.h"
-#include "dbat/game/character_utils.h"
+
 #include "dbat/game/handler.h"
 #include "dbat/game/combat.h"
 #include "dbat/game/obj_edit.h"
 #include "dbat/game/fight.h"
 #include "dbat/game/class.h"
+
+#include <vector>
 
 /* local functions  */
 static void generate_multiform(struct char_data *ch, int count);

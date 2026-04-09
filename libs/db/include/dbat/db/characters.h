@@ -77,7 +77,7 @@ struct player_special_data {
   int8_t freeze_level;		/* Level of god who froze char, if any	*/
   int16_t invis_level;		/* level of invisibility		*/
   room_vnum load_room;		/* Which room to place char in		*/
-  int pref[PR_ARRAY_MAX];	/* preference flags for PC's.		*/
+  bitvector_t pref[PR_ARRAY_MAX];	/* preference flags for PC's.		*/
   uint8_t bad_pws;		/* number of bad password attemps	*/
   int8_t conditions[NUM_CONDITIONS];		/* Drunk, full, thirsty			*/
   int skill_points;		/* Skill points earned from race HD	*/

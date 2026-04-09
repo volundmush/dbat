@@ -11,6 +11,7 @@
 
 #pragma once
 #include "dbat/db/consts/types.h"
+#include "dbat/db/dgscripts.h"
 
 #include "db.h"
 #include "genzon.h"

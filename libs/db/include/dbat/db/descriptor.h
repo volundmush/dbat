@@ -2,7 +2,7 @@
 #include "consts/types.h"
 #include "consts/maximums.h"
 #include "consts/constates.h"
-
+#include <sys/socket.h>
 
 struct txt_block {
    char	*text;

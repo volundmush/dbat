@@ -5,6 +5,7 @@
 #include "dbat/game/log.h"
 #include "dbat/game/races.h"
 #include "dbat/game/class.h"
+#include "dbat/db/weather.h"
 
 const std::string &juggleRaceName(char_data *ch, bool capitalized);
 void restore_by(char_data *ch, char_data *healer);
@@ -197,4 +198,19 @@ int handle_speed(struct char_data *ch, struct char_data *vict);
 struct time_info_data *age(struct char_data *ch);
 const char *get_i_name(struct char_data *ch, struct char_data *vict);
 
+void assign_affect(struct char_data *ch, int aff_flag, int skill, int dur, int str, int con, int intel, int agl, int wis, int spd);
+int know_skill(struct char_data *ch, int skill);
+
 size_t send_to_char(struct char_data *ch, const char *messg, ...) __attribute__((format(printf, 2, 3)));
+void admin_set(struct char_data *ch, int value);
+char *sense_location(struct char_data *ch);
+void null_affect(struct char_data *ch, int aff_flag);
+int planet_check(struct char_data *ch, struct char_data *vict);
+/* Player autoexit levels: used as an index to exitlevels           */
+#define EXIT_OFF        0       /* Autoexit off                     */
+#define EXIT_NORMAL     1       /* Brief display (stock behaviour)  */
+#define EXIT_NA         2       /* Not implemented - do not use     */
+#define EXIT_COMPLETE   3       /* Full display                     */
+
+#define _exitlevel(ch) (!IS_NPC(ch) ? (PRF_FLAGGED((ch),PRF_AUTOEXIT) ? 1 : 0 ) + (PRF_FLAGGED((ch),PRF_FULL_EXIT) ? 2 : 0 ) : 0 )
+#define EXIT_LEV(ch) (_exitlevel(ch))

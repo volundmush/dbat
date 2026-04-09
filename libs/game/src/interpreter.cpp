@@ -4633,7 +4633,7 @@ void nanny(struct descriptor_data *d, char *arg)
     total -= 30;
     mudlog(CMP, ADMLVL_GOD, TRUE, "New player: %s [%s %s]", 
            GET_NAME(d->character), TRUE_RACE(d->character),
-           d->character->chclass->getName().c_str());
+           d->get_sensei(character->chclass)->getName().c_str());
     break;
 
   case CON_QSTATS:
@@ -4659,7 +4659,7 @@ void nanny(struct descriptor_data *d, char *arg)
     total -= 30;
     mudlog(CMP, ADMLVL_GOD, TRUE, "New player: %s [%s %s]", 
            GET_NAME(d->character), TRUE_RACE(d->character),
-           d->character->chclass->getName().c_str());
+           d->get_sensei(character->chclass)->getName().c_str());
     mudlog(CMP, ADMLVL_GOD, TRUE, "Str: %2d Dex: %2d Con: %2d Int: %2d "
            "Wis:  %2d Cha: %2d mod total: %2d", GET_STR(d->character), 
            GET_DEX(d->character), GET_CON(d->character), GET_INT(d->character),

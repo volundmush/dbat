@@ -233,7 +233,7 @@ static void mob_attack(struct char_data *ch, char *buf)
  }
 
  if (axion_dice(-10) > 90 && getCurHealthPercent(ch) <= .5 && !MOB_FLAGGED(ch, MOB_POWERUP) && GET_MOB_VNUM(ch) != 25 &&
- !(IS_ANDROID(ch) || IS_ANIMAL(ch) || ch->chclass->getID() == dbat::sensei::commoner))  {
+ !(IS_ANDROID(ch) || IS_ANIMAL(ch) || get_sensei(ch->chclass)->getID() == dbat::sensei::commoner))  {
   do_powerup(ch, nullptr, 0, 0);
   return;
  }
@@ -2146,7 +2146,7 @@ void raw_kill(struct char_data * ch, struct char_data * killer)
             break;
         case Newbie:
             restore(ch, false);
-            teleport_to(ch, ch->chclass->senseiStartRoom());
+            teleport_to(ch, get_sensei(ch->chclass)->senseiStartRoom());
             send_to_char(ch, "\r\n@RYou should beware, when you reach level 9, you will actually die. So you\r\n"
                              "should learn to be more careful. Since when you die past that point and\r\n"
                              "actually reach the afterlife you need to realise that being revived will\r\n"
@@ -2199,7 +2199,7 @@ void die(struct char_data *ch, struct char_data *killer)
     stop_fighting(ch);
    }
    GET_POS(ch) = POS_SITTING;
-   teleport_to(ch, ch->chclass->senseiStartRoom());
+   teleport_to(ch, get_sensei(ch->chclass)->senseiStartRoom());
    return;
   }
     REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_KILLER);

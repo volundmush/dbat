@@ -382,7 +382,7 @@ void medit_disp_mob_flags(struct descriptor_data *d)
     write_to_output(d, "@g%2d@n) %-20.20s  %s", i + 1, action_bits[i],
 		!(++columns % 2) ? "\r\n" : "");
   }
-  sprintbitarray(MOB_FLAGS(OLC_MOB(d)), action_bits, AF_ARRAY_MAX, flags);
+  sprintbitarray(MOB_FLAGS(OLC_MOB(d)), action_bits, AF_ARRAY_MAX, flags, sizeof(flags));
   write_to_output(d, "\r\nCurrent flags : @c%s@n\r\nEnter mob flags (0 to quit) : ",
 		  flags);
 }
@@ -415,7 +415,7 @@ void medit_disp_aff_flags(struct descriptor_data *d)
     write_to_output(d, "@g%2d@n) %-20.20s  %s", i + 1, affected_bits[i+1],
                     !(++columns % 2) ? "\r\n" : "");
   }
-  sprintbitarray(AFF_FLAGS(OLC_MOB(d)), affected_bits, AF_ARRAY_MAX, flags);
+  sprintbitarray(AFF_FLAGS(OLC_MOB(d)), affected_bits, AF_ARRAY_MAX, flags, sizeof(flags));
   write_to_output(d, "\r\nCurrent flags   : @c%s@n\r\nEnter aff flags (0 to quit) : ",
                   flags);
 }
@@ -505,8 +505,8 @@ void medit_disp_menu(struct descriptor_data *d)
 	  GET_NDD(mob), GET_SDD(mob), GET_HIT(mob), (getCurKI(mob)),
                   (getCurST(mob)), GET_ARMOR(mob), GET_EXP(mob), GET_GOLD(mob)
 	  );
-  sprintbitarray(MOB_FLAGS(mob), action_bits, AF_ARRAY_MAX, flags);
-  sprintbitarray(AFF_FLAGS(mob), affected_bits, AF_ARRAY_MAX, flag2);
+  sprintbitarray(MOB_FLAGS(mob), action_bits, AF_ARRAY_MAX, flags, sizeof(flags));
+  sprintbitarray(AFF_FLAGS(mob), affected_bits, AF_ARRAY_MAX, flag2, sizeof(flag2));
   write_to_output(d,
 	  "@gI@n) Position   : @y%-10s@n,	 @gJ@n) Default   : @y%-10s\r\n"
 	  "@gK@n) Personality: @Y%s@n\r\n"
@@ -523,7 +523,7 @@ void medit_disp_menu(struct descriptor_data *d)
 	  position_types[(int)GET_POS(mob)],
 	  position_types[(int)GET_DEFAULT_POS(mob)],
           npc_personality[GET_PERSONALITY(mob)],
-	  flags, flag2, mob->chclass->getName().c_str(),
+	  flags, flag2, get_sensei(mob->chclass)->getName().c_str(),
           TRUE_RACE(mob),
           OLC_SCRIPT(d) ?"Set.":"Not Set.", size_names[get_size(mob)]
 	  );

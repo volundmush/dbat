@@ -8,6 +8,25 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 #include "dbat/game/act.item.h"
+
+#include "dbat/db/consts/auction.h"
+#include "dbat/db/consts/maximums.h"
+#include "dbat/db/consts/recipes.h"
+#include "dbat/db/utils.h"
+
+#include "dbat/game/character_utils.h"
+#include "dbat/game/object_utils.h"
+#include "dbat/game/room_utils.h"
+#include "dbat/game/zone_utils.h"
+#include "dbat/game/stringutils.h"
+#include "dbat/game/descriptor_utils.h"
+#include "dbat/game/search.h"
+#include "dbat/game/random.h"
+#include "dbat/game/extract.h"
+#include "dbat/game/relocate.h"
+#include "dbat/game/interpreter.h"
+#include "dbat/game/affect.h"
+
 #include "dbat/game/vehicles.h"
 #include "dbat/game/dg_comm.h"
 #include "dbat/game/act.wizard.h"
@@ -16,18 +35,15 @@
 #include "dbat/game/act.informative.h"
 #include "dbat/game/config.h"
 #include "dbat/game/assemblies.h"
-#include "dbat/game/utils.h"
 #include "dbat/game/comm.h"
-#include "dbat/game/interpreter.h"
 #include "dbat/game/spells.h"
 #include "dbat/game/handler.h"
-#include "dbat/game/class.h"
 #include "dbat/game/feats.h"
 #include "dbat/game/guild.h"
 #include "dbat/game/genzon.h"
 #include "dbat/game/dg_scripts.h"
 #include "dbat/game/boards.h"
-#include "dbat/game/character_utils.h"
+
 
 /* global variables */
 struct obj_data *obj_selling = NULL;	/* current object for sale */
@@ -1799,7 +1815,7 @@ ACMD(do_bid)
     }
     send_to_char(ch, "@GItem Weight @W: @w%s@n\n", add_commas(GET_OBJ_WEIGHT(obj2)));
     char bits[MAX_STRING_LENGTH];
-    sprintbitarray(GET_OBJ_WEAR(obj2), wear_bits, TW_ARRAY_MAX, bits);
+    sprintbitarray(GET_OBJ_WEAR(obj2), wear_bits, TW_ARRAY_MAX, bits, sizeof(bits));
     search_replace(bits, "TAKE", "");
     send_to_char(ch, "@GWear Loc.   @W:@w%s\n", bits);
     if (GET_OBJ_TYPE(obj2) == ITEM_WEAPON) {
@@ -1841,7 +1857,7 @@ ACMD(do_bid)
      else
       send_to_char(ch, "@n");
      char buf2[MAX_STRING_LENGTH];
-     sprintbitarray(GET_OBJ_PERM(obj2), affected_bits, AF_ARRAY_MAX, buf2);
+     sprintbitarray(GET_OBJ_PERM(obj2), affected_bits, AF_ARRAY_MAX, buf2, sizeof(buf2));
      send_to_char(ch, "\n@GSpecial     @W:@w %s\n", buf2);
      send_to_char(ch, "@c------------------------------------------------------------------------\n");
      return;

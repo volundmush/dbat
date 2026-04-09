@@ -1939,7 +1939,7 @@ char *class_desc_str(struct char_data *ch, int howlong, int wantthe)
         rank = GET_CLASS_RANKS(ch, j);
       }
     rank = GET_CLASS_RANKS(ch, GET_CLASS(ch));
-    snprintf(ptr, sizeof(str) - (ptr - str), "%s%d%s", ch->chclass->getNameLower().c_str(),
+    snprintf(ptr, sizeof(str) - (ptr - str), "%s%d%s", get_sensei(ch->chclass)->getNameLower().c_str(),
              rank, GET_LEVEL(ch) == rank ? "" : "+");
     return str;
   }
@@ -2352,5 +2352,13 @@ namespace dbat::sensei {
             }
         }
         return out;
+    }
+}
+
+dbat::sensei::Sensei* get_sensei(int id) {
+    if(auto sensei = dbat::sensei::sensei_map.find(id); sensei != dbat::sensei::sensei_map.end()) {
+        return sensei->second;
+    } else {
+        return nullptr;
     }
 }

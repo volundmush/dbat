@@ -868,7 +868,7 @@ void oedit_disp_extra_menu(struct descriptor_data *d)
     write_to_output(d, "@g%2d@n) %-20.20s %s", counter + 1,
 		extra_bits[counter], !(++columns % 3) ? "\r\n" : "");
   }
-  sprintbitarray(GET_OBJ_EXTRA(OLC_OBJ(d)), extra_bits, EF_ARRAY_MAX, bits);
+  sprintbitarray(GET_OBJ_EXTRA(OLC_OBJ(d)), extra_bits, EF_ARRAY_MAX, bits, sizeof(bits));
   write_to_output(d, "\r\nObject flags: @c%s@n\r\n"
 	  "Enter object extra flag (0 to quit) : ",
 	  bits);
@@ -891,7 +891,7 @@ void oedit_disp_perm_menu(struct descriptor_data *d)
     write_to_output(d, "@g%2d@n) %-20.20s%s", counter, 
 		affected_bits[counter], !(++columns % 3) ? "\r\n" : "");
   }
-  sprintbitarray(GET_OBJ_PERM(OLC_OBJ(d)), affected_bits, EF_ARRAY_MAX, bitbuf);
+  sprintbitarray(GET_OBJ_PERM(OLC_OBJ(d)), affected_bits, EF_ARRAY_MAX, bitbuf, sizeof(bitbuf));
   write_to_output(d, "\r\nObject permanent flags: @c%s@n\r\n"
           "Enter object perm flag (0 to quit) : ", bitbuf);
 }
@@ -926,7 +926,7 @@ void oedit_disp_wear_menu(struct descriptor_data *d)
     write_to_output(d, "@g%2d@n) %-20.20s %s", counter + 1,
 		wear_bits[counter], !(++columns % 3) ? "\r\n" : "");
   }
-  sprintbitarray(GET_OBJ_WEAR(OLC_OBJ(d)), wear_bits, TW_ARRAY_MAX, bits);
+  sprintbitarray(GET_OBJ_WEAR(OLC_OBJ(d)), wear_bits, TW_ARRAY_MAX, bits, sizeof(bits));
   write_to_output(d, "\r\nWear flags: @c%s@n\r\n"
 	  "Enter wear flag, 0 to quit : ", bits);
 }
@@ -946,7 +946,7 @@ void oedit_disp_menu(struct descriptor_data *d)
    * Build buffers for first part of menu.
    */
   sprinttype(GET_OBJ_TYPE(obj), item_types, tbitbuf, sizeof(tbitbuf));
-  sprintbitarray(GET_OBJ_EXTRA(obj), extra_bits, EF_ARRAY_MAX, ebitbuf);
+  sprintbitarray(GET_OBJ_EXTRA(obj), extra_bits, EF_ARRAY_MAX, ebitbuf, sizeof(ebitbuf));
 
   /*
    * Build first half of menu.
@@ -975,8 +975,8 @@ void oedit_disp_menu(struct descriptor_data *d)
   /*
    * Build second half of menu.
    */
-  sprintbitarray(GET_OBJ_WEAR(OLC_OBJ(d)), wear_bits, EF_ARRAY_MAX, tbitbuf);
-  sprintbitarray(GET_OBJ_PERM(OLC_OBJ(d)), affected_bits, EF_ARRAY_MAX, ebitbuf);
+  sprintbitarray(GET_OBJ_WEAR(OLC_OBJ(d)), wear_bits, EF_ARRAY_MAX, tbitbuf, sizeof(tbitbuf));
+  sprintbitarray(GET_OBJ_PERM(OLC_OBJ(d)), affected_bits, EF_ARRAY_MAX, ebitbuf, sizeof(ebitbuf));
 
   write_to_output(d,
 	  "@g7@n) Wear flags  : @c%s@n\r\n"

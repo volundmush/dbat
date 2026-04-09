@@ -2,6 +2,10 @@
 #include "dbat/db/consts/types.h"
 #include "dbat/db/consts/races.h"
 
+#include <unordered_map>
+#include <map>
+#include <optional>
+
 
 // global variables
 extern const struct guild_info_type guild_info[6];
@@ -168,3 +172,5 @@ namespace dbat::race {
 }
 
 dbat::race::Race* get_race(int id);
+int get_size(struct char_data *ch);
+int wield_type(int chsize, const struct obj_data *weap);
