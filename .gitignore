@@ -72,3 +72,4 @@ logs/
 *.pid
 dependencies/
 *.pem
+syslog*

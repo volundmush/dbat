@@ -44,9 +44,9 @@ while ( : ) do
 
   DATE=`date`
   echo "autorun starting game $DATE" >> syslog
-  echo "running bin/circle $FLAGS $PORT" >> syslog
+  echo "running bin/dbat_server $FLAGS $PORT" >> syslog
 
-  bin/circle $FLAGS $PORT >> syslog 2>&1
+  bin/dbat_server $FLAGS $PORT >> syslog 2>&1
 
   tail -30 syslog > syslog.CRASH
 
