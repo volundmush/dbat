@@ -124,3 +124,24 @@ size_t sprintbitarray(bitvector_t bitvector[], const char *names[], int maxar, c
 
   return len;
 }
+
+int get_flag_by_name(const char *flag_list[], char *flag_name) 
+{ 
+   int i=0; 
+   for (;flag_list[i] && *flag_list[i] && strcmp(flag_list[i], "\n") != 0; i++) 
+     if (!strcmp(flag_list[i], flag_name)) 
+       return (i); 
+   return (NOFLAG); 
+}
+
+size_t sprinttype(int type, const char *names[], char *result, size_t reslen)
+{
+  int nr = 0;
+
+  while (type && *names[nr] != '\n') {
+    type--;
+    nr++;
+  }
+
+  return strlcpy(result, *names[nr] != '\n' ? names[nr] : "UNDEFINED", reslen);
+}

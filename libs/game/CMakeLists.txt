@@ -2,6 +2,7 @@ add_library(dbat_game STATIC)
 add_library(dbat::game ALIAS dbat_game)
 
 target_compile_features(dbat_game PUBLIC cxx_std_23)
+target_compile_options(dbat_game PUBLIC -std=gnu++23)
 target_compile_definitions(dbat_game PUBLIC USING_CMAKE=1 CIRCLE_UNIX=1 POSIX=1)
 
 target_include_directories(dbat_game

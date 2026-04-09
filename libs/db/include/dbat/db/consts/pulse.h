@@ -44,3 +44,15 @@
 #define PULSE_CD11      (11 CD_TICK)
 #define PULSE_CD12      (12 CD_TICK)
 /* End CD Ticks    */
+
+/* mud-life time */
+#define SECS_PER_MUD_HOUR	300
+#define SECS_PER_MUD_DAY	(24*SECS_PER_MUD_HOUR)
+#define SECS_PER_MUD_MONTH	(30*SECS_PER_MUD_DAY)
+#define SECS_PER_MUD_YEAR	(12*SECS_PER_MUD_MONTH)
+
+/* real-life time (remember Real Life?) */
+#define SECS_PER_REAL_MIN	60
+#define SECS_PER_REAL_HOUR	(60*SECS_PER_REAL_MIN)
+#define SECS_PER_REAL_DAY	(24*SECS_PER_REAL_HOUR)
+#define SECS_PER_REAL_YEAR	(365*SECS_PER_REAL_DAY)

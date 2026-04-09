@@ -132,3 +132,43 @@ bool isWeightedPL(char_data *ch);
 
 void apply_kaioken(char_data *ch, int times, bool announce);
 void remove_kaioken(char_data *ch, int8_t announce);
+
+void dispel_ash(struct char_data *ch);
+int has_group(struct char_data *ch);
+const char *report_party_health(struct char_data *ch);
+int sec_roll_check(struct char_data *ch);
+int get_measure(struct char_data *ch, int height, int weight);
+int trans_cost(struct char_data *ch, int trans);
+int trans_req(struct char_data *ch, int trans);
+const char *disp_align(struct char_data *ch);
+void senseCreate(struct char_data *ch);
+int read_sense_memory(struct char_data *ch, struct char_data *vict);
+void sense_memory_write(struct char_data *ch, struct char_data *vict);
+int roll_pursue(struct char_data *ch, struct char_data *vict);
+void reveal_hiding(struct char_data *ch, int type);
+int block_calc(struct char_data *ch);
+int64_t molt_threshold(struct char_data *ch);
+int armor_evolve(struct char_data *ch);
+void handle_evolution(struct char_data *ch, int64_t dmg);
+void demon_refill_lf(struct char_data *ch, int64_t num);
+void mob_talk(struct char_data *ch, const char *speech);
+int mob_respond(struct char_data *ch, struct char_data *vict, const char *speech);
+bool is_sparring(struct char_data *ch);
+char *introd_calc(struct char_data *ch);
+int64_t gear_exp(struct char_data *ch, int64_t exp);
+void purge_homing(struct char_data *ch);
+void improve_skill(struct char_data *ch, int skill, int num);
+void stop_follower(struct char_data *ch);
+int num_followers_charmed(struct char_data *ch);
+void switch_leader(struct char_data *old, struct char_data *new_leader);
+void die_follower(struct char_data *ch);
+void add_follower(struct char_data *ch, struct char_data *leader);
+bool circle_follow(struct char_data *ch, struct char_data *victim);
+
+
+void	advance_level(struct char_data *ch, int whichclass);
+void	set_title(struct char_data *ch, char *title);
+void	gain_exp(struct char_data *ch, int64_t gain);
+void	gain_exp_regardless(struct char_data *ch, int gain);
+void	gain_condition(struct char_data *ch, int condition, int value);
+void	update_pos(struct char_data *victim);

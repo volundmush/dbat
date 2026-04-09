@@ -427,6 +427,10 @@ struct spell_info_type {
 
 extern struct spell_info_type spell_info[SKILL_TABLE_SIZE];
 
+#define SPELL_ROUTINES(spl)	(spell_info[spl].routines)
+#define HAS_SPELL_ROUTINE(spl, flag) (IS_SET(SPELL_ROUTINES(spl), (flag)))
+
+
 /* Possible Targets:
 
    bit 0 : IGNORE TARGET
