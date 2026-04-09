@@ -56,18 +56,19 @@ dkms.conf
 cmake-build-*
 
 # DBAT
-libs
-lib
-libs
+lib/
+data/
 src/Makefile
 config.log
 config.status
 utils/Makefile
 bin/
-build
+build/
 log/
 logs/
 *.log
 *.tar.gz
 *.tgz
 *.pid
+dependencies/
+*.pem
