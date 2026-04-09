@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 4.1)
+cmake_minimum_required(VERSION 3.31)
 project(dbat LANGUAGES C CXX)
 
 set(CPM_DOWNLOAD_VERSION 0.42.1)
@@ -28,15 +28,15 @@ CPMAddPackage(
 
 CPMAddPackage(
         NAME eff_random
-        GITHUB_REPOSITORY volundmush/random
-        GIT_TAG master
+        GITHUB_REPOSITORY ilqvya/random
+        VERSION 1.5.0
         OPTIONS "Random_BuildTests OFF"
 )
 
 CPMAddPackage(
         NAME cppcodec
-        GITHUB_REPOSITORY volundmush/cppcodec
-        GIT_TAG master
+        GITHUB_REPOSITORY tplgy/cppcodec
+        VERSION 0.2
         OPTIONS "BUILD_TESTING OFF"
 )
 
@@ -60,8 +60,8 @@ CPMAddPackage(
 
 CPMAddPackage(
         name argh
-        GITHUB_REPOSITORY volundmush/argh
-        GIT_TAG master
+        GITHUB_REPOSITORY adishavit/argh
+        VERSION 1.3.2
         OPTIONS "BUILD_EXAMPLES OFF" "BUILD_TESTS OFF"
 )
 
