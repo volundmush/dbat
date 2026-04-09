@@ -13,7 +13,9 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
-
+#include "dbat/db/consts/maximums.h"
+#include "dbat/db/consts/admlevel.h"
+#include "dbat/db/characters.h"
 #include "dbat/game/config.h"
 #include "dbat/game/interpreter.h"	/* alias_data definition for structs.h */
 

@@ -12,16 +12,22 @@
 *  $Date: 2004/10/11 12:07:00$                                            *
 *  $Revision: 1.0.14 $                                                    *
 ************************************************************************ */
+#include "dbat/db/consts/maximums.h"
+#include "dbat/db/utils.h"
+#include "dbat/game/log.h"
 
 #include "dbat/game/dg_scripts.h"
-#include "dbat/game/utils.h"
 #include "dbat/game/db.h"
 #include "dbat/game/handler.h"
 #include "dbat/game/dg_event.h"
 #include "dbat/game/comm.h"
+#include "dbat/game/fileop.h"
+#include "dbat/game/stringutils.h"
+#include "dbat/game/character_utils.h"
+#include "dbat/game/room_utils.h"
+#include "dbat/game/object_utils.h"
 
-extern void half_chop(char *string, char *arg1, char *arg2);
-extern bitvector_t asciiflag_conv(char *flag);
+#include <stdlib.h>
 
 /* local functions */
 void trig_data_init(trig_data *this_data);
@@ -34,8 +40,8 @@ void parse_trigger(FILE *trig_f, int nr)
     struct index_data *t_index;
     struct trig_data *trig;
 
-    CREATE(trig, trig_data, 1);
-    CREATE(t_index, index_data, 1);
+    CREATE(trig, struct trig_data, 1);
+    CREATE(t_index, struct index_data, 1);
 
     t_index->vnum = nr;
     t_index->number = 0;

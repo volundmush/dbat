@@ -7,9 +7,27 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
-
 #include "dbat/game/db.h"
-#include "dbat/game/utils.h"
+#include "dbat/db/consts/maximums.h"
+#include "dbat/db/utils.h"
+#include "dbat/db/help.h"
+#include "dbat/game/stringutils.h"
+
+#include "dbat/game/character_utils.h"
+#include "dbat/game/descriptor_utils.h"
+#include "dbat/game/object_utils.h"
+#include "dbat/game/room_utils.h"
+#include "dbat/game/zone_utils.h"
+#include "dbat/game/fileop.h"
+#include "dbat/game/affect.h"
+#include "dbat/game/weather.h"
+#include "dbat/game/time.h"
+#include "dbat/game/xdir.h"
+#include "dbat/game/search.h"
+#include "dbat/game/extract.h"
+#include "dbat/game/relocate.h"
+#include "dbat/db/players.h"
+
 #include "dbat/game/feats.h"
 #include "dbat/game/config.h"
 #include "dbat/game/players.h"
@@ -39,6 +57,10 @@
 #include "dbat/game/races.h"
 #include "dbat/game/spell_parser.h"
 #include "dbat/game/genobj.h"
+
+#include <errno.h>
+#include <stdlib.h>
+#include <linux/limits.h>
 
 /**************************************************************************
 *  declarations of most of the 'global' variables                         *
@@ -1893,15 +1915,9 @@ static int parse_simple_mob(FILE *mob_f, struct char_data *ch, int nr)
  
   GET_GOLD(ch) = t[0];
   GET_EXP(ch) = 0;
-  ch->race = dbat::race::find_race_map_id(t[2], dbat::race::race_map);
-  if(!ch->race) {
-      ch->race = dbat::race::race_map[dbat::race::human];
-  }
+  ch->race = t[2];
 
-  ch->chclass = dbat::sensei::find_sensei_map_id(t[3], dbat::sensei::sensei_map);
-  if(!ch->chclass) {
-      ch->chclass = dbat::sensei::sensei_map[dbat::sensei::commoner];
-  }
+  ch->chclass = t[3];
   GET_SAVE_BASE(ch, SAVING_FORTITUDE) = 0;
   GET_SAVE_BASE(ch, SAVING_REFLEX) = 0;
   GET_SAVE_BASE(ch, SAVING_WILL) = 0;

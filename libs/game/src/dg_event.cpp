@@ -28,9 +28,9 @@
  *
  */
 #include "dbat/game/dg_event.h"
-#include "dbat/game/utils.h"
 #include <limits.h>
 #include "dbat/game/comm.h"
+#include "dbat/game/log.h"
 
 static struct queue *event_q;          /* the event queue */
 
@@ -201,8 +201,6 @@ struct q_element *queue_enq(struct queue *q, void *data, long key)
 void queue_deq(struct queue *q, struct q_element *qe)
 {
   int i;
-
-  assert(qe);
 
   i = qe->key % NUM_EVENT_QUEUES;
 

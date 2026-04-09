@@ -13,13 +13,13 @@
 *  $Revision: 1.0.14 $                                                    *
 ***************************************************************************/
 
-#include "dbat/game/structs.h"
 #include "dbat/game/dg_scripts.h"
-#include "dbat/game/utils.h"
 #include "dbat/game/db.h"
 #include "dbat/game/handler.h"
 #include "dbat/game/dg_event.h"
+#include "dbat/game/stringutils.h"
 
+#include <stdlib.h>
 
 /* frees memory associated with var */
 void free_var_el(struct trig_var_data *var)
