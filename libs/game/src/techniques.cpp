@@ -13,12 +13,13 @@ bool tech_handle_zanzoken(char_data *ch, char_data *vict, const std::string& nam
     if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) &&
             (vict->getCurST()) >= 1 && GET_POS(vict) != POS_SLEEPING) {
         if (!AFF_FLAGGED(ch, AFF_ZANZOKEN) || (AFF_FLAGGED(ch, AFF_ZANZOKEN) && GET_SPEEDI(ch) + rand_number(1, 5) < GET_SPEEDI(vict) + rand_number(1, 5))) {
-            auto msg = fmt::format("@C$N@c disappears, avoiding your {} before reappearing!@n", name);
-            act(msg.c_str(), TRUE, ch, nullptr, vict, TO_CHAR);
-            msg = fmt::format("@cYou disappear, avoiding @C$n's@c {} before reappearing!@n", name);
-            act(msg.c_str(), TRUE, ch, nullptr, vict, TO_VICT);
-            msg = fmt::format("@C$N@c disappears, avoiding @C$n's@c {} before reappearing!@n", name);
-            act(msg.c_str(), TRUE, ch, nullptr, vict, TO_NOTVICT);
+            char msg[MAX_INPUT_LENGTH];
+            snprintf(msg, sizeof(msg), "@C$N@c disappears, avoiding your %s before reappearing!@n", name.c_str());
+            act(msg, TRUE, ch, nullptr, vict, TO_CHAR);
+            snprintf(msg, sizeof(msg), "@cYou disappear, avoiding @C$n's@c %s before reappearing!@n", name.c_str());
+            act(msg, TRUE, ch, nullptr, vict, TO_VICT);
+            snprintf(msg, sizeof(msg), "@C$N@c disappears, avoiding @C$n's@c %s before reappearing!@n", name.c_str());
+            act(msg, TRUE, ch, nullptr, vict, TO_NOTVICT);
             if (AFF_FLAGGED(ch, AFF_ZANZOKEN)) {
                 REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
             }
@@ -89,12 +90,13 @@ bool tech_handle_targeting(char_data *ch, char *arg, char_data **vict, obj_data 
 
 void tech_handle_fireshield(char_data *ch, char_data *vict, const std::string& part) {
     if (GET_HIT(vict) > 0 && !AFF_FLAGGED(vict, AFF_SPIRIT) && AFF_FLAGGED(vict, AFF_FIRESHIELD) && !GET_BONUS(ch, BONUS_FIREPROOF) && !IS_DEMON(ch)) {
-        auto msg = fmt::format("@c$N's@W fireshield burns your {}!@n", part);
-        act(msg.c_str(), TRUE, ch, nullptr, vict, TO_CHAR);
-        msg = fmt::format("@C$n's@W {} is burned by your fireshield!@n", part);
-        act(msg.c_str(), TRUE, ch, nullptr, vict, TO_VICT);
-        msg = fmt::format("@c$n's@W {} is burned by @C$N's@W fireshield!@n", part);
-        act(msg.c_str(), TRUE, ch, nullptr, vict, TO_NOTVICT);
+        char msg[MAX_INPUT_LENGTH];
+        snprintf(msg, sizeof(msg), "@c$N's@W fireshield burns your %s!@n", part.c_str());
+        act(msg, TRUE, ch, nullptr, vict, TO_CHAR);
+        snprintf(msg, sizeof(msg), "@C$n's@W %s is burned by your fireshield!@n", part.c_str());
+        act(msg, TRUE, ch, nullptr, vict, TO_VICT);
+        snprintf(msg, sizeof(msg), "@c$n's@W %s is burned by @C$N's@W fireshield!@n", part.c_str());
+        act(msg, TRUE, ch, nullptr, vict, TO_NOTVICT);
         int64_t dmg = GET_MAX_MANA(vict) * 0.02;
         LASTATK(vict) += 1000;
         hurt(0, 0, vict, ch, nullptr, dmg, 0);

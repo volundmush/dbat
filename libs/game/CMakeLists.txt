@@ -40,10 +40,6 @@ target_precompile_headers(dbat_game
 
 target_link_libraries(dbat_game
   PUBLIC
-    fmt::fmt
     ZLIB::ZLIB
     effolkronium_random
-    argh
-    cppcodec
-    nlohmann_json
 )

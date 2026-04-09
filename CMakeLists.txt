@@ -21,52 +21,14 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 set(CMAKE_CXX_FLAGS "-fpermissive -w")
 
 CPMAddPackage(
-        NAME json
-        GITHUB_REPOSITORY nlohmann/json
-        VERSION 3.12.0
-)
-
-CPMAddPackage(
         NAME eff_random
         GITHUB_REPOSITORY ilqvya/random
         VERSION 1.5.0
         OPTIONS "Random_BuildTests OFF"
 )
 
-CPMAddPackage(
-        NAME cppcodec
-        GITHUB_REPOSITORY tplgy/cppcodec
-        VERSION 0.2
-        OPTIONS "BUILD_TESTING OFF"
-)
-
-CPMAddPackage(
-        NAME fmt
-        GITHUB_REPOSITORY fmtlib/fmt
-        GIT_TAG 9.1.0
-)
-
-CPMAddPackage(
-        name sqlitepp
-        GITHUB_REPOSITORY mpaland/sqlitepp
-        GIT_TAG 1.6.0
-)
-
-CPMAddPackage(
-        NAME spdlog
-        GITHUB_REPOSITORY gabime/spdlog
-        VERSION 1.10.0
-)
-
-CPMAddPackage(
-        name argh
-        GITHUB_REPOSITORY adishavit/argh
-        VERSION 1.3.2
-        OPTIONS "BUILD_EXAMPLES OFF" "BUILD_TESTS OFF"
-)
 
 find_package(ZLIB REQUIRED)
-find_package(Boost REQUIRED)
 
 set(BUILD_TESTING OFF)
 

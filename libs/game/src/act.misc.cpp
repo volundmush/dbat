@@ -244,17 +244,21 @@ static void generate_multiform(struct char_data *ch, int count)
         return;
     }
 
-    auto clone_name = fmt::format("{}'s Clone", ch->name);
-    auto clone_sdesc = fmt::format("{}'s @CClone@n", ch->name);
-    auto clone_ldesc = fmt::format("{}'s @CClone@w is standing here.@n\n", ch->name);
+    char clone_name[MAX_INPUT_LENGTH];
+    snprintf(clone_name, sizeof(clone_name), "%s's Clone", ch->name);
+
+    char clone_sdesc[MAX_INPUT_LENGTH];
+    snprintf(clone_sdesc, sizeof(clone_sdesc), "%s's @CClone@n", ch->name);
+    char clone_ldesc[MAX_INPUT_LENGTH];
+    snprintf(clone_ldesc, sizeof(clone_ldesc), "%s's @CClone@w is standing here.@n\n", ch->name);
 
     for(int i = 0; i < count; i++) {
         char_data *clone = nullptr;
         clone = read_mobile(r_num, REAL);
 
-        clone->name = strdup(clone_name.c_str());
-        clone->short_descr = strdup(clone_sdesc.c_str());
-        clone->long_descr = strdup(clone_ldesc.c_str());
+        clone->name = strdup(clone_name);
+        clone->short_descr = strdup(clone_sdesc);
+        clone->long_descr = strdup(clone_ldesc);
         if(ch->description)
             clone->description = strdup(ch->description);
         clone->race = ch->race;
