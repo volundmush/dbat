@@ -637,34 +637,7 @@ void payout(int num)
  }
 }
 
-int command_pass(char *cmd, struct char_data *ch)
-{
 
- if (AFF_FLAGGED(ch, AFF_LIQUEFIED)) {
-  if (strcasecmp(cmd, "liquefy") && strcasecmp(cmd, "ingest") && strcasecmp(cmd, "look") && strcasecmp(cmd, "score") && strcasecmp(cmd, "ooc") && strcasecmp(cmd, "osay") && strcasecmp(cmd, "emote") && strcasecmp(cmd, "smote") && strcasecmp(cmd, "status")) {
-   send_to_char(ch, "You are not capable of performing that action while liquefied!\r\n");
-   return (FALSE);
-  }
- } else if (IS_AFFECTED(ch, AFF_PARALYZE)) {
-  if (strcasecmp(cmd, "look") && strcasecmp(cmd, "score") && strcasecmp(cmd, "ooc") && strcasecmp(cmd, "osay") && strcasecmp(cmd, "emote") && strcasecmp(cmd, "smote") && strcasecmp(cmd, "status")) {
-   send_to_char(ch, "You are not capable of performing that action while petrified!\r\n");
-   return (FALSE);
-  }
- } else if (IS_AFFECTED(ch, AFF_FROZEN)) {
-  if (strcasecmp(cmd, "look") && strcasecmp(cmd, "score") && strcasecmp(cmd, "ooc") && strcasecmp(cmd, "osay") && strcasecmp(cmd, "emote") && strcasecmp(cmd, "smote") && strcasecmp(cmd, "status")) {
-   send_to_char(ch, "You are not capable of performing that action while a frozen block of ice!\r\n");
-   return (FALSE);
-  }
- } else if (IS_AFFECTED(ch, AFF_PARA) && GET_INT(ch) < rand_number(1, 60)) {
-  if (strcasecmp(cmd, "look") && strcasecmp(cmd, "score") && strcasecmp(cmd, "ooc") && strcasecmp(cmd, "osay") && strcasecmp(cmd, "emote") && strcasecmp(cmd, "smote") && strcasecmp(cmd, "status")) {
-   act("@yYou fail to overcome your paralysis!@n", TRUE, ch, 0, 0, TO_CHAR);
-   act("@Y$n @ystruggles with $s paralysis!@n", TRUE, ch, 0, 0, TO_ROOM);
-   return (FALSE);
-  }
- }
-
- return (TRUE);
-}
 
 int lockRead(char *name) {
   char fname[40], filler[50], line[256];

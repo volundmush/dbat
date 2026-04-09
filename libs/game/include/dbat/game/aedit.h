@@ -12,3 +12,5 @@ int aedit_find_command(const char *txt);
 
 // commands
 ACMD(do_oasis_aedit);
+
+ACMD(do_astat);

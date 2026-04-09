@@ -14,6 +14,8 @@ void snoop_check(struct char_data *ch);
 void copyover_check(void);
 
 // commands
+ACMD(do_copyover);
+ACMD(do_findkey);
 ACMD(do_echo);
 ACMD(do_send);
 ACMD(do_at);

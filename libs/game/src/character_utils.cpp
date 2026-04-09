@@ -1,4 +1,6 @@
 #include "dbat/db/characters.h"
+#include "dbat/db/utils.h"
+#include "dbat/db/consts/aligns.h"
 #include "dbat/game/character_utils.h"
 #include "dbat/game/races.h"
 #include "dbat/game/spells.h"
@@ -6,6 +8,21 @@
 #include "dbat/game/class.h"
 #include "dbat/game/fight.h"
 #include "dbat/game/act.movement.h"
+#include "dbat/game/relocate.h"
+#include "dbat/game/room_utils.h"
+#include "dbat/game/object_utils.h"
+#include "dbat/game/descriptor_utils.h"
+#include "dbat/game/zone_utils.h"
+#include "dbat/game/db.h"
+#include "dbat/game/random.h"
+#include "dbat/game/act.informative.h"
+#include "dbat/game/stringutils.h"
+#include "dbat/game/extract.h"
+#include "dbat/game/affect.h"
+#include "dbat/game/fileop.h"
+#include "dbat/game/genzon.h"
+#include "dbat/game/feats.h"
+#include "dbat/game/time.h"
 
 #include <string>
 
@@ -13,32 +30,32 @@ static const std::string robot = "Robotic-Humanoid";
 static const std::string robot_lower = "robotic-humanoid";
 static const std::string unknown = "UNKNOWN";
 
-const std::string &juggleRaceName(char_data *ch, bool capitalized) {
+std::string juggleRaceName(char_data *ch, bool capitalized) {
     if(!ch->race) return unknown;
 
-    dbat::race::Race *apparent = dbat::race::race_map.at(ch->race);
+    dbat::race::Race *apparent = get_race(ch->race);
 
     switch(apparent->getID()) {
         case dbat::race::hoshijin:
-            if(ch->mimic > -1) apparent = dbat::race::race_map.at(ch->mimic);
+            if(ch->mimic > -1) apparent = get_race(ch->mimic);
             break;
         case dbat::race::halfbreed:
             switch(RACIAL_PREF(ch)) {
                 case 1:
-                    apparent = dbat::race::race_map.at(dbat::race::human);
+                    apparent = get_race(dbat::race::human);
                     break;
                 case 2:
-                    apparent = dbat::race::race_map.at(dbat::race::saiyan);
+                    apparent = get_race(dbat::race::saiyan);
                     break;
             }
             break;
         case dbat::race::android:
             switch(RACIAL_PREF(ch)) {
                 case 1:
-                    apparent = dbat::race::race_map.at(dbat::race::android);
+                    apparent = get_race(dbat::race::android);
                     break;
                 case 2:
-                    apparent = dbat::race::race_map.at(dbat::race::human);
+                    apparent = get_race(dbat::race::human);
                     break;
                 case 3:
                     if(capitalized) {
@@ -50,7 +67,7 @@ const std::string &juggleRaceName(char_data *ch, bool capitalized) {
             break;
         case dbat::race::saiyan:
             if(PLR_FLAGGED(ch, PLR_TAILHIDE)) {
-                apparent = dbat::race::race_map.at(dbat::race::human);
+                apparent = get_race(dbat::race::human);
             }
             break;
     }
@@ -74,7 +91,7 @@ void restore(char_data *ch, bool announce) {
     restoreLF(ch, announce);
 }
 
-void resurrect(char_data *ch, ResurrectionMode mode) {
+void resurrect(char_data *ch, int mode) {
     restore(ch, true);
     REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ETHEREAL);
     REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_SPIRIT);
@@ -90,9 +107,9 @@ void resurrect(char_data *ch, ResurrectionMode mode) {
 
     int dur = 100;
     switch(mode) {
-        case Costless:
+        case 1:
             return;
-        case Basic:
+        case 0:
             if (ch->dcount >= 8 && ch->dcount < 10) {
                 dur = 90;
             } else if (ch->dcount >= 5 && ch->dcount < 8) {
@@ -103,7 +120,7 @@ void resurrect(char_data *ch, ResurrectionMode mode) {
                 dur = 40;
             }
             break;
-        case RPP:
+        case 2:
             dur = 100;
             break;
     }
@@ -2937,7 +2954,7 @@ void demon_refill_lf(struct char_data *ch, int64_t num)
    if ((getCurLF(tch)) >= (getMaxLF(tch)))
     continue;
    else {
-       tincCurLF(ch, num);
+       incCurLF(ch, num);
     act("@CYou feel the life energy from @c$N@C's cursed body flow out and you draw it into yourself!@n", TRUE, tch, 0, ch, TO_CHAR);
    }
   }

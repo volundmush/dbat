@@ -7,8 +7,12 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
+#include "dbat/db/consts/maximums.h"
+#include "dbat/db/consts/songs.h"
+#include "dbat/db/utils.h"
+#include "dbat/db/bans.h"
+#include "dbat/game/stringutils.h"
 #include "dbat/game/comm.h"
-#include "dbat/game/utils.h"
 #include "dbat/game/config.h"
 #include "dbat/game/maputils.h"
 #include "dbat/game/ban.h"
@@ -28,6 +32,15 @@
 #include "dbat/game/mobact.h"
 #include "dbat/game/magic.h"
 
+#include "dbat/game/character_utils.h"
+#include "dbat/game/descriptor_utils.h"
+#include "dbat/game/object_utils.h"
+#include "dbat/game/object_systems.h"
+#include "dbat/game/extract.h"
+#include "dbat/game/fileop.h"
+#include "dbat/game/relocate.h"
+#include "dbat/game/stringutils.h"
+
 #include "dbat/game/objsave.h"
 #include "dbat/game/genolc.h"
 #include "dbat/game/class.h"
@@ -39,7 +52,23 @@
 #include "dbat/game/mail.h"
 #include "dbat/game/races.h"
 #include "dbat/game/character_utils.h"
+#include "dbat/game/room_utils.h"
 #include "dbat/game/screen.h"
+
+#include <errno.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <linux/limits.h>
+#include <sys/resource.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netdb.h>
+#include <arpa/inet.h>
+#include <sys/time.h>
+#include <sys/signal.h>
+#include <sys/fcntl.h>
 
 /* externs */
 
@@ -71,30 +100,10 @@ uint16_t port;
 socklen_t mother_desc;
 char *last_act_message = NULL;
 
-
-void *z_alloc(void *opaque, uInt items, uInt size)
-{
-    return calloc(items, size);
-}
-
-void z_free(void *opaque, void *address)
-{
-    return free(address);
-}
-
 /***********************************************************************
 *  main game loop and related stuff                                    *
 ***********************************************************************/
 int enter_player_game(struct descriptor_data *d);
-
-/* first compression neg. string */
-const char compress_offer[4] =
-{
-  (char) IAC,
-  (char) WILL,
-  (char) COMPRESS2,
-  (char) 0,
-};
 
 
 /* Reload players after a copyover */
@@ -768,40 +777,6 @@ void record_usage(void)
 	  sockets_connected, sockets_playing);
 }
 
-
-
-/*
- * Turn off echoing (specific to telnet client)
- */
-void echo_off(struct descriptor_data *d)
-{
-  char off_string[] =
-  {
-    (char) IAC,
-    (char) WILL,
-    (char) TELOPT_ECHO,
-    (char) 0,
-  };
-
-  write_to_output(d, "%s", off_string);
-}
-
-
-/*
- * Turn on echoing (specific to telnet client)
- */
-void echo_on(struct descriptor_data *d)
-{
-  char on_string[] =
-  {
-    (char) IAC,
-    (char) WONT,
-    (char) TELOPT_ECHO,
-    (char) 0
-  };
-
-  write_to_output(d, "%s", on_string);
-}
 
 
 char *make_prompt(struct descriptor_data *d)
@@ -1940,10 +1915,6 @@ void init_descriptor (struct descriptor_data *newd, int desc)
   if (++last_desc == 1000)
     last_desc = 1;
   newd->desc_num = last_desc;
-
-  CREATE(newd->comp, struct compr, 1);
-  newd->comp->state = 0; /* we start in normal mode */
-    newd->comp->stream = NULL;
 }
 
 void set_color(struct descriptor_data *d)
@@ -2410,9 +2381,6 @@ int process_input(struct descriptor_data *t)
 	t->history_pos = 0;
     }
    /* the '--' command flushes the queue - Jamdog - 9th May 2007 */ 
-   if (masadv(tmp, t->character)) {
-     /* Unfinished color cycling code, do not touch. */
-   }
    if ( (*tmp == '-') && (*(tmp+1) == '-') && !(*(tmp+2)) ) 
    { 
      write_to_output(t, "All queued commands cancelled.\r\n"); 
@@ -2625,17 +2593,6 @@ void close_socket(struct descriptor_data *d)
     default:
       break;
   }
-
-  /* free compression structures */
-    if (d->comp->stream) {
-        deflateEnd(d->comp->stream);
-        free(d->comp->stream);
-        free(d->comp->buff_out);
-        free(d->comp->buff_in);
-    }
-  /* d->comp was still created even if there is no zlib, for comp->state) */
-  if (d->comp)
-    free(d->comp);  
       
   free(d);
 }

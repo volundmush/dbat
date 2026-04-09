@@ -14,12 +14,15 @@
  * you should go through this entire file from beginning to end and add
  * the appropriate new special cases for your new class.
  */
-
+#include "dbat/db/consts/maximums.h"
+#include "dbat/db/utils.h"
 #include "dbat/game/class.h"
 
 #include <utility>
+#include <string>
+#include <algorithm>
+
 #include "dbat/game/db.h"
-#include "dbat/game/utils.h"
 #include "dbat/game/comm.h"
 #include "dbat/game/spells.h"
 #include "dbat/game/interpreter.h"
@@ -28,118 +31,16 @@
 #include "dbat/game/oasis.h"
 #include "dbat/game/act.wizard.h"
 #include "dbat/game/character_utils.h"
+#include "dbat/game/descriptor_utils.h"
+#include "dbat/game/object_utils.h"
 #include "dbat/game/dg_comm.h"
 #include "dbat/game/config.h"
 #include "dbat/game/act.other.h"
+#include "dbat/game/random.h"
+#include "dbat/game/relocate.h"
+#include "dbat/game/stringutils.h"
 
 /* Names first */
-
-const char *class_abbrevs[NUM_CLASSES+1] = {
-  "Ro",
-  "Pi",
-  "Kr",
-  "Na",
-  "Ba",
-  "Gi",
-  "Fr",
-  "Ta",
-  "An",
-  "Da",
-  "Ki",
-  "Ji",
-  "Ts",
-  "Ku",
-  "As",
-  "Bl",
-  "Dd",
-  "Du",
-  "Dw",
-  "Ek",
-  "Ht",
-  "Hw",
-  "Lo",
-  "Mt",
-  "Sh",
-  "Th",
-  "Ex",
-  "Ad",
-  "Co",
-  "Ar",
-  "Wa",
-  "\n"
-};
-
-/* Copied from the SRD under OGL, see ../doc/srd.txt for information */
-const char *class_names[NUM_CLASSES+1] = {
-  "roshi",
-  "piccolo",
-  "krane",
-  "nail",
-  "bardock",
-  "ginyu",
-  "frieza",
-  "tapion",
-  "android 16",
-  "dabura",
-  "kibito",
-  "jinto",
-  "tsuna",
-  "kurzak",
-  "assassin",
-  "blackguard",
-  "dragon disciple",
-  "duelist",
-  "dwarven defender",
-  "eldritch knight",
-  "hierophant",
-  "horizon walker",
-  "loremaster",
-  "mystic theurge",
-  "shadowdancer",
-  "thaumaturgist",
-  "artisan",
-  "magi",
-  "normal",
-  "noble",
-  "soldier",
-  "\n"
-};
-
-
-/* The menu for choosing a class in interpreter.c: */
-const char *class_display[NUM_CLASSES] = {
-  "@B1@W) @MRoshi\r\n",
-  "@B2@W) @WPiccolo\r\n",
-  "@B3@W) @YKrane\r\n",
-  "@B4@W) @BNail\r\n",
-  "@B5@W) @BBardock\r\n",
-  "@B6@W) @BGinyu\r\n",
-  "@B7@W) @WFrieza\r\n",
-  "@B8@W) @YTapion\r\n",
-  "@B9@W) @BAndroid 16\r\n",
-  "@B10@W) @BDabura\r\n",
-  "@B11@W) @BKibito\r\n",
-  "@B12@W) @BJinto\r\n",
-  "@B13@W) @BTsuna\r\n",
-  "@B14@W) @BKurzak\r\n",
-  "assassin (P)\r\n",
-  "blackguard (P)\r\n",
-  "dragon disciple (P)\r\n",
-  "duelist (P)\r\n",
-  "dwarven defender (P)\r\n",
-  "eldritch knight (P)\r\n",
-  "hierophant (P)\r\n",
-  "horizon walker (P)\r\n",
-  "loremaster (P)\r\n",
-  "mystic theurge (P)\r\n",
-  "shadowdancer (P)\r\n",
-  "thaumaturgist (P)\r\n",
-  "Artisan NPC\r\n",
-  "Magi NPC\r\n",
-  "Normal NPC\r\n",
-  "Noble NPC\r\n",
-  "Soldier NPC\r\n",
-};
 
 /*
  * The code to interpret a class letter -- used in interpreter.c when a
@@ -157,20 +58,7 @@ const char *class_display[NUM_CLASSES] = {
  * "recycle" the existing mobs that are used in other guilds for your new
  * guild, then you don't have to change that file, only here.
  */
-const struct guild_info_type guild_info[6] = {
 
-/* Kortaal */
-  { CLASS_ROSHI,	3017,	SCMD_EAST	},
-  { CLASS_PICCOLO,	3004,	SCMD_NORTH	},
-  { CLASS_KRANE, 	3027,	SCMD_EAST	},
-  { CLASS_NAIL, 	3021,	SCMD_EAST	},
-
-/* Brass Dragon */
-  { -999 /* all */ ,	5065,	SCMD_WEST	},
-
-/* this must go last -- add new guards above! */
-  { -1, NOWHERE, -1}
-};
 /* 
  * These tables hold the various level configuration setting;
  * experience points, base hit values, character saving throws.
@@ -2356,7 +2244,7 @@ namespace dbat::sensei {
 }
 
 dbat::sensei::Sensei* get_sensei(int id) {
-    if(auto sensei = dbat::sensei::sensei_map.find(id); sensei != dbat::sensei::sensei_map.end()) {
+    if(auto sensei = dbat::sensei::sensei_map.find(static_cast<dbat::sensei::sensei_id>(id)); sensei != dbat::sensei::sensei_map.end()) {
         return sensei->second;
     } else {
         return nullptr;

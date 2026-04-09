@@ -1,6 +1,7 @@
 #pragma once
 #include "dbat/db/consts/types.h"
 
+ACMD(do_teach);
 
 #define GM_NUM(i)  (guild_index[i].vnum)
 #define GM_TRAINER(i) (guild_index[i].gm)

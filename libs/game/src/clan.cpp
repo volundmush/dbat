@@ -27,13 +27,17 @@
 //    telnet://dreams.game-host.org:4000
 //
 //********************************************************************************
-
-
+#include "dbat/db/utils.h"          // for CREATE() and IDNUM()
+#include "dbat/db/consts/maximums.h"
+#include "dbat/game/fileop.h"
 #include "dbat/game/clan.h"        // the interface we need to impleme
 #include "dbat/game/db.h"             // for LIB_ETC
 #include "dbat/game/comm.h"           // for send_to_char
 #include "dbat/game/interpreter.h"    // for ACMD()
-#include "dbat/game/utils.h"          // for CREATE() and IDNUM()
+#include "dbat/game/log.h"
+#include "dbat/game/stringutils.h"
+#include "dbat/game/character_utils.h"
+
 
 extern char *strlwr(char *s);
 extern void send_editor_help(struct descriptor_data *d);
@@ -439,7 +443,7 @@ void clanAdd(struct clan_data *S)
   struct clan_data **oldList = clan;
 
   /*clan = malloc( sizeof(struct clan_data *) * (num_clans) );*/
-  clan = malloc( sizeof(struct clan_data *) * (num_clans + 1) );
+  clan = (clan_data**)malloc( sizeof(struct clan_data *) * (num_clans + 1) );
 
   for(i = 0; i < num_clans; i++)
     clan[i] = oldList[i];
@@ -520,7 +524,7 @@ void clanBoot() {
     return;
   }
 
-  clan = malloc( sizeof(struct clan_data *) * num_clans );
+  clan = (clan_data**)malloc( sizeof(struct clan_data *) * num_clans );
 
   for(i = 0; i < num_clans; i++) {
     if( (len = fgetlinetomax(fl, line, MAX_STRING_LENGTH)) > 0) {

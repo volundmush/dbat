@@ -5,12 +5,22 @@
  * -------------------------------------------------------------------- *
  * 1999 MAY 07 gdavis/azrael@laker.net Initial implementation.         *
  * ******************************************************************** */
-#define __ASSEMBLIES_C__
-
+#include "dbat/db/assembly.h"
+#include "dbat/db/consts/maximums.h"
+#include "dbat/db/consts/assemblytypes.h"
 #include "dbat/game/assemblies.h"
-#include "dbat/game/utils.h"
 #include "dbat/game/comm.h"
 #include "dbat/game/handler.h"
+#include "dbat/game/fileop.h"
+#include "dbat/game/db.h"
+#include "dbat/game/stringutils.h"
+#include "dbat/game/log.h"
+#include "dbat/game/object_utils.h"
+#include "dbat/game/room_utils.h"
+#include "dbat/game/character_utils.h"
+#include "dbat/game/extract.h"
+#include "dbat/game/relocate.h"
+#include "dbat/game/search.h"
 
 /* Local global variables. */
 static long           g_lNumAssemblies = 0;

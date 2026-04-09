@@ -1,4 +1,11 @@
+#include "dbat/game/affect.h"
+#include "dbat/db/consts/applies.h"
+#include "dbat/db/utils.h"
 
+#include "dbat/game/character_utils.h"
+#include "dbat/game/object_utils.h"
+#include "dbat/game/spells.h"
+#include "dbat/game/feats.h"
 
 void aff_apply_modify(struct char_data *ch, int loc, int mod, int spec, char *msg)
 {
@@ -224,7 +231,7 @@ void affect_modify(struct char_data * ch, int loc, int mod, int spec, long bitv,
 }
 
 
-void affect_modify_ar(struct char_data * ch, int loc, int mod, int spec, int bitv[], bool add)
+void affect_modify_ar(struct char_data * ch, int loc, int mod, int spec, bitvector_t bitv[], bool add)
 {
   int i , j;
 

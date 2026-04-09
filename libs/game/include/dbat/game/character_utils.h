@@ -7,7 +7,7 @@
 #include "dbat/game/class.h"
 #include "dbat/db/weather.h"
 
-const std::string &juggleRaceName(char_data *ch, bool capitalized);
+std::string juggleRaceName(char_data *ch, bool capitalized);
 void restore_by(char_data *ch, char_data *healer);
 void restore(char_data *ch, bool announce);
 void resurrect(char_data *ch, ResurrectionMode mode);

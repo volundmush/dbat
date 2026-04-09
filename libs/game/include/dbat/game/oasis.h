@@ -502,6 +502,10 @@ ACMD(do_oasis);
 ACMD(do_oasis_list);
 ACMD(do_oasis_links);
 
+ACMD(do_iedit);
+ACMD(do_show_save_list);
+ACMD(do_rcopy);
+
 void medit_free_mobile(struct char_data *mob);
 void medit_setup_new(struct descriptor_data *d);
 void medit_setup_existing(struct descriptor_data *d, int rmob_num);

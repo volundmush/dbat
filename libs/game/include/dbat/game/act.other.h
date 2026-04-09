@@ -1,6 +1,6 @@
 #pragma once
 #include "dbat/db/consts/types.h"
-
+#include "dbat/db/consts/aligns.h"
 
 // variables
 extern const room_vnum freeres[NUM_ALIGNS];
@@ -23,6 +23,7 @@ void add_innate_affects(struct char_data *ch);
 void update_innate(struct char_data *ch);
 
 // commands
+ACMD(do_skills);
 ACMD(do_gen_comm);
 ACMD(do_charge);
 ACMD(do_wear);

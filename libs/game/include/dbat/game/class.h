@@ -1,6 +1,6 @@
 #pragma once
 #include "dbat/db/consts/types.h"
-
+#include <map>
 // global variables
 
 extern const char *config_sect[NUM_CONFIG_SECTIONS+1];

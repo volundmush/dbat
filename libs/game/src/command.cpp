@@ -1,6 +1,39 @@
 #include "dbat/game/command.h"
+#include "dbat/game/character_utils.h"
+#include "dbat/game/room_utils.h"
+#include "dbat/game/object_utils.h"
+#include "dbat/game/interpreter.h"
+#include "dbat/game/random.h"
+#include "dbat/game/stringutils.h"
+#include "dbat/game/comm.h"
 
+#include "dbat/game/act.attack.h"
+#include "dbat/game/act.comm.h"
+#include "dbat/game/act.informative.h"
+#include "dbat/game/act.item.h"
+#include "dbat/game/act.misc.h"
+#include "dbat/game/act.movement.h"
+#include "dbat/game/act.offensive.h"
+#include "dbat/game/act.other.h"
+#include "dbat/game/act.social.h"
+#include "dbat/game/act.wizard.h"
+#include "dbat/game/alias.h"
+#include "dbat/game/aedit.h"
+#include "dbat/game/assedit.h"
+#include "dbat/game/ban.h"
+#include "dbat/game/db.h"
+#include "dbat/game/dg_scripts.h"
+#include "dbat/game/disabled.h"
+#include "dbat/game/guild.h"
+#include "dbat/game/graph.h"
+#include "dbat/game/hedit.h"
+#include "dbat/game/house.h"
+#include "dbat/game/modify.h"
+#include "dbat/game/oasis.h"
+#include "dbat/game/oasis_copy.h"
 
+#include "dbat/game/tedit.h"
+#include "dbat/game/vehicles.h"
 
 const struct command_info cmd_info[] = {
   { "RESERVED", "", 0, 0, 0, ADMLVL_NONE	, 0 },     /* this must be first -- for specprocs */
@@ -578,7 +611,34 @@ const struct command_info cmd_info[] = {
   { "\n", "zzzzzzz", 0, 0, 0, ADMLVL_NONE	, 0 } };	/* this must be last */
 
 
+int command_pass(char *cmd, struct char_data *ch)
+{
 
+ if (AFF_FLAGGED(ch, AFF_LIQUEFIED)) {
+  if (strcasecmp(cmd, "liquefy") && strcasecmp(cmd, "ingest") && strcasecmp(cmd, "look") && strcasecmp(cmd, "score") && strcasecmp(cmd, "ooc") && strcasecmp(cmd, "osay") && strcasecmp(cmd, "emote") && strcasecmp(cmd, "smote") && strcasecmp(cmd, "status")) {
+   send_to_char(ch, "You are not capable of performing that action while liquefied!\r\n");
+   return (FALSE);
+  }
+ } else if (IS_AFFECTED(ch, AFF_PARALYZE)) {
+  if (strcasecmp(cmd, "look") && strcasecmp(cmd, "score") && strcasecmp(cmd, "ooc") && strcasecmp(cmd, "osay") && strcasecmp(cmd, "emote") && strcasecmp(cmd, "smote") && strcasecmp(cmd, "status")) {
+   send_to_char(ch, "You are not capable of performing that action while petrified!\r\n");
+   return (FALSE);
+  }
+ } else if (IS_AFFECTED(ch, AFF_FROZEN)) {
+  if (strcasecmp(cmd, "look") && strcasecmp(cmd, "score") && strcasecmp(cmd, "ooc") && strcasecmp(cmd, "osay") && strcasecmp(cmd, "emote") && strcasecmp(cmd, "smote") && strcasecmp(cmd, "status")) {
+   send_to_char(ch, "You are not capable of performing that action while a frozen block of ice!\r\n");
+   return (FALSE);
+  }
+ } else if (IS_AFFECTED(ch, AFF_PARA) && GET_INT(ch) < rand_number(1, 60)) {
+  if (strcasecmp(cmd, "look") && strcasecmp(cmd, "score") && strcasecmp(cmd, "ooc") && strcasecmp(cmd, "osay") && strcasecmp(cmd, "emote") && strcasecmp(cmd, "smote") && strcasecmp(cmd, "status")) {
+   act("@yYou fail to overcome your paralysis!@n", TRUE, ch, 0, 0, TO_CHAR);
+   act("@Y$n @ystruggles with $s paralysis!@n", TRUE, ch, 0, 0, TO_ROOM);
+   return (FALSE);
+  }
+ }
+
+ return (TRUE);
+}
 
 int special(struct char_data *ch, int cmd, char *arg)
 {

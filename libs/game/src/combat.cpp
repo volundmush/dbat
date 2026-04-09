@@ -9,15 +9,16 @@
 *  contains code written by Iovan for use with the Real Dragonball Battle *
 *  System (RDBS) of the MUD Dragonball Advent Truth.                      *
 ************************************************************************ */
-
+#include "dbat/db/consts/deathtype.h"
+#include "dbat/db/consts/attacks.h"
 #include "dbat/game/combat.h"
 #include "dbat/game/act.movement.h"
+#include "dbat/game/act.informative.h"
 #include "dbat/game/act.item.h"
 #include "dbat/game/mobact.h"
 #include "dbat/game/fight.h"
 #include "dbat/game/act.attack.h"
 #include "dbat/game/dg_comm.h"
-#include "dbat/game/utils.h"
 #include "dbat/game/comm.h"
 #include "dbat/game/act.item.h"
 #include "dbat/game/handler.h"
@@ -27,6 +28,13 @@
 #include <effolkronium/random.hpp>
 #include "dbat/game/techniques.h"
 #include "dbat/game/character_utils.h"
+#include "dbat/game/object_utils.h"
+#include "dbat/game/room_utils.h"
+#include "dbat/game/extract.h"
+#include "dbat/game/random.h"
+#include "dbat/game/relocate.h"
+#include "dbat/game/stringutils.h"
+#include "dbat/game/affect.h"
 
 /* local functions */
 void damage_weapon(struct char_data *ch, struct obj_data *obj, struct char_data *vict)

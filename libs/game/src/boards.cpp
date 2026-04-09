@@ -44,9 +44,9 @@ it.
     similar fashion.
 
 */
-
+#include "dbat/db/boards.h"
+#include "dbat/db/utils.h"
 #include "dbat/game/boards.h"
-#include "dbat/game/utils.h"
 #include "dbat/game/comm.h"
 #include "dbat/game/db.h"
 #include "dbat/game/boards.h"
@@ -56,6 +56,19 @@ it.
 #include "dbat/game/clan.h"
 #include "dbat/game/dg_comm.h"
 #include "dbat/game/config.h"
+#include "dbat/game/xdir.h"
+#include "dbat/game/fileop.h"
+#include "dbat/game/stringutils.h"
+#include "dbat/game/log.h"
+#include "dbat/game/character_utils.h"
+#include "dbat/game/descriptor_utils.h"
+#include "dbat/game/object_utils.h"
+#include "dbat/game/room_utils.h"
+#include "dbat/game/extract.h"
+
+#include <sys/stat.h>
+#include <errno.h>
+#include <unistd.h>
 
 struct board_info *bboards = NULL;  /* our global board structure */
 

@@ -8,7 +8,6 @@
 
 
 // global variables
-extern const struct guild_info_type guild_info[6];
 
 // functions
 void racial_body_parts(struct char_data *ch);

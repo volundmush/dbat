@@ -3,15 +3,20 @@
  * Copyright 2002-2003 Kip Potter   (kip_potter@hotmail.com)            *
  * A graphical in-game game configuration utility for OasisOLC.         *
  ************************************************************************/
-
+#include "dbat/db/utils.h"
+#include "dbat/db/consts/create.h"
+#include "dbat/game/config.h"
 #include "dbat/game/cedit.h"
-#include "dbat/game/utils.h"
 #include "dbat/game/comm.h"
 #include "dbat/game/oasis.h"
 #include "dbat/game/db.h"
 #include "dbat/game/interpreter.h"
 #include "dbat/game/genolc.h"
 #include "dbat/game/improved-edit.h"
+#include "dbat/game/character_utils.h"
+#include "dbat/game/descriptor_utils.h"
+#include "dbat/game/room_utils.h"
+#include "dbat/game/stringutils.h"
 
 /******************************************************************************/
 /** External Functions                                                       **/

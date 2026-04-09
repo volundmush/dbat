@@ -10,9 +10,18 @@
 *********************************************************************** */
 
 #include "dbat/game/alias.h"
-#include "dbat/game/utils.h"
+#include "dbat/db/consts/maximums.h"
+#include "dbat/db/utils.h"
+
+#include <linux/limits.h>
+#include <errno.h>
+#include "dbat/game/fileop.h"
 #include "dbat/game/interpreter.h"
+#include "dbat/game/character_utils.h"
+#include "dbat/game/descriptor_utils.h"
+#include "dbat/game/stringutils.h"
 #include "dbat/game/db.h"
+#include "dbat/game/comm.h"
 
 
 void write_aliases(struct char_data *ch)
