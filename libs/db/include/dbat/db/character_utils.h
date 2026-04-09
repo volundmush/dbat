@@ -4,6 +4,13 @@
 #include <time.h>
 #include "characters.h"
 #include "flags.h"
+#include "consts/pulse.h"
+#include "consts/races.h"
+#include "consts/sex.h"
+#include "consts/prefflags.h"
+#include "consts/playerflags.h"
+#include "consts/adminflags.h"
+#include "consts/mobflags.h"
 
 extern struct player_special_data dummy_mob;
 
@@ -124,7 +131,7 @@ int char_get_admlevel(const struct char_data *ch);
 int char_get_pfilepos(const struct char_data *ch);
 int32_t char_get_idnum(const struct char_data *ch);
 
-void char_set_class(struct char_data *ch, int class);
+void char_set_class(struct char_data *ch, int chclass);
 void char_set_admlevel(struct char_data *ch, int level);
 void char_set_level(struct char_data *ch, int level);
 
@@ -929,12 +936,12 @@ bool char_is_spoiled(const struct char_data *ch);
 #define GET_LEVEL(ch)	(GET_CLASS_LEVEL(ch) + GET_LEVEL_ADJ(ch) + GET_HITDICE(ch))
 #define GET_PFILEPOS(ch)((ch)->pfilepos)
 
-#define GET_CLASS(ch)   ((ch)->chclass ? (ch)->chclass->getID() : 0)
+#define GET_CLASS(ch)   ((ch)->chclass ? (ch)->chclass : 0)
 #define GET_CLASS_NONEPIC(ch, whichclass) ((ch)->chclasses[whichclass])
 #define GET_CLASS_EPIC(ch, whichclass) ((ch)->epicclasses[whichclass])
 #define GET_CLASS_RANKS(ch, whichclass) (GET_CLASS_NONEPIC(ch, whichclass) + \
                                          GET_CLASS_EPIC(ch, whichclass))
-#define GET_RACE(ch)    ((ch)->race->getID())
+#define GET_RACE(ch)    ((ch)->race)
 #define GET_HAIRL(ch)   ((ch)->hairl)
 #define GET_HAIRC(ch)   ((ch)->hairc)
 #define GET_HAIRS(ch)   ((ch)->hairs)
@@ -973,6 +980,7 @@ bool char_is_spoiled(const struct char_data *ch);
 #define GET_WIS(ch)     ((ch)->aff_abils.wis)
 #define GET_CON(ch)     ((ch)->aff_abils.con)
 #define GET_CHA(ch)     ((ch)->aff_abils.cha)
+
 #define GET_MUTBOOST(ch) (IS_MUTANT(ch) ? ((GET_GENOME(ch, 0) == 1 || GET_GENOME(ch, 1) == 1) ? (GET_SPEEDCALC(ch) + GET_SPEEDBONUS(ch) + GET_SPEEDBOOST(ch)) * 0.3 : 0) : 0)
 #define GET_SPEEDI(ch)  (GET_SPEEDCALC(ch) + GET_SPEEDBONUS(ch) + GET_SPEEDBOOST(ch) + GET_MUTBOOST(ch))
 #define GET_SPEEDCALC(ch) (IS_GRAP(ch) ? GET_CHA(ch) : (IS_INFERIOR(ch) ? (AFF_FLAGGED(ch, AFF_FLYING) ? (GET_SPEEDVAR(ch) * 1.25) : GET_SPEEDVAR(ch)) : GET_SPEEDVAR(ch)))
@@ -1248,7 +1256,7 @@ bool char_is_spoiled(const struct char_data *ch);
 
 #define PERS(ch, vict) ((DISG(ch, vict) ? (CAN_SEE(vict, ch) ? (INTROD(vict, ch) ? (ISWIZ(ch, vict) ? GET_NAME(ch) :\
                         get_i_name(vict, ch)) : introd_calc(ch)) : "Someone") :\
-                        (ch)->race->getName().c_str()))
+                        get_race(ch)->getName().c_str()))
 
 #define OBJS(obj, vict) (CAN_SEE_OBJ((vict), (obj)) ? \
 	(obj)->short_description  : "something")
@@ -1267,10 +1275,10 @@ bool char_is_spoiled(const struct char_data *ch);
 
 #define RACE(ch)      (juggleRaceName(ch, true).c_str())
 #define LRACE(ch)     (juggleRaceName(ch, false).c_str())
-#define TRUE_RACE(ch) ((ch)->race->getName().c_str())
+#define TRUE_RACE(ch) (get_race(ch)->getName().c_str())
 
 #define CLASS_ABBR(ch) ((ch)->chclass->getAbbr().c_str())
-#define RACE_ABBR(ch) ((ch)->race->getAbbr().c_str())
+#define RACE_ABBR(ch) (get_race(ch)->getAbbr().c_str())
 
 #define IS_ROSHI(ch)            (GET_CLASS(ch) == CLASS_ROSHI)
 #define IS_PICCOLO(ch)          (GET_CLASS(ch) == CLASS_PICCOLO)
@@ -1438,3 +1446,5 @@ bool char_is_spoiled(const struct char_data *ch);
 
 #define MOB_LOADROOM(ch)      ((ch)->hometown)  /*hometown not used for mobs*/
 #define GET_MURDER(ch)          CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->murder))
+
+#define GET_PAGE_LENGTH(ch)         CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->page_length))

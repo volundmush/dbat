@@ -1,11 +1,9 @@
 #pragma once
+#include "consts/types.h"
 #include <stdbool.h>
 #include <stdint.h>
 #include <time.h>
-#include "objects.h"
 #include "flags.h"
-
-struct char_data;
 
 // =============================================================================
 // Object Classification

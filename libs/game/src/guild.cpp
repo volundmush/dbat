@@ -1122,7 +1122,7 @@ int rpp_to_level(struct char_data *ch) {
     switch (GET_LEVEL(ch)) {
         case 2:
             // charge the RPP races to level for the first time.
-            return ch->race->getRPPCost();
+            return get_race(ch->race)->getRPPCost();
         case 91:
         case 92:
         case 93:

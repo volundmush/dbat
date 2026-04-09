@@ -1,8 +1,6 @@
 #include "dbat/db/characters.h"
-#include "dbat/db/character_utils.h"
 #include "dbat/game/character_utils.h"
 #include "dbat/game/races.h"
-#include "dbat/game/utils.h"
 #include "dbat/game/spells.h"
 #include "dbat/game/comm.h"
 #include "dbat/game/class.h"
@@ -18,29 +16,29 @@ static const std::string unknown = "UNKNOWN";
 const std::string &juggleRaceName(char_data *ch, bool capitalized) {
     if(!ch->race) return unknown;
 
-    dbat::race::Race *apparent = ch->race;
+    dbat::race::Race *apparent = dbat::race::race_map.at(ch->race);
 
     switch(apparent->getID()) {
         case dbat::race::hoshijin:
-            if(ch->mimic) apparent = ch->mimic;
+            if(ch->mimic > -1) apparent = dbat::race::race_map.at(ch->mimic);
             break;
         case dbat::race::halfbreed:
             switch(RACIAL_PREF(ch)) {
                 case 1:
-                    apparent = dbat::race::race_map[dbat::race::human];
+                    apparent = dbat::race::race_map.at(dbat::race::human);
                     break;
                 case 2:
-                    apparent = dbat::race::race_map[dbat::race::saiyan];
+                    apparent = dbat::race::race_map.at(dbat::race::saiyan);
                     break;
             }
             break;
         case dbat::race::android:
             switch(RACIAL_PREF(ch)) {
                 case 1:
-                    apparent = dbat::race::race_map[dbat::race::android];
+                    apparent = dbat::race::race_map.at(dbat::race::android);
                     break;
                 case 2:
-                    apparent = dbat::race::race_map[dbat::race::human];
+                    apparent = dbat::race::race_map.at(dbat::race::human);
                     break;
                 case 3:
                     if(capitalized) {
@@ -52,7 +50,7 @@ const std::string &juggleRaceName(char_data *ch, bool capitalized) {
             break;
         case dbat::race::saiyan:
             if(PLR_FLAGGED(ch, PLR_TAILHIDE)) {
-                apparent = dbat::race::race_map[dbat::race::human];
+                apparent = dbat::race::race_map.at(dbat::race::human);
             }
             break;
     }
@@ -210,7 +208,7 @@ static std::map<int, uint16_t> grav_threshold = {
 bool can_tolerate_gravity(char_data *ch, int grav) {
     if(IS_NPC(ch)) return true;
     int tolerance = 0;
-    tolerance = std::max(tolerance, ch->chclass->getGravTolerance());
+    tolerance = MAX(tolerance, ch->chclass->getGravTolerance());
     if(tolerance >= grav)
         return true;
     return getMaxPL(ch) >= grav_threshold[grav];
@@ -220,14 +218,14 @@ int calcTier(char_data *ch) {
     int tier = ch->level / 10;
     if((ch->level % 10) == 0)
         tier--;
-    tier = std::max(tier, 0);
-    tier = std::min(tier, 9);
+    tier = MAX(tier, 0);
+    tier = MIN(tier, 9);
     return tier;
 }
 
 int64_t calc_soft_cap(char_data *ch) {
     auto tier = calcTier(ch);
-    auto softmap = ch->race->getSoftMap(ch);
+    auto softmap = get_race(ch->race)->getSoftMap(ch);
     return ch->level * softmap[tier];
 }
 
@@ -246,7 +244,7 @@ bool is_soft_cap(char_data *ch, int64_t type, long double mult) {
 
     int64_t against = 0;
 
-    switch(ch->race->getSoftType(ch)) {
+    switch(get_race(ch->race)->getSoftType(ch)) {
         case dbat::race::Fixed:
             switch(type) {
                 case 0:
@@ -334,18 +332,18 @@ bool isFullHealth(char_data *ch) {
 }
 
 int64_t setCurHealth(char_data *ch, int64_t amt) {
-    ch->hit = std::max(0L, std::abs(amt));
+    ch->hit = MAX(0L, std::abs(amt));
     return ch->hit;
 }
 
 int64_t setCurHealthPercent(char_data *ch, double amt) {
-    ch->hit = std::max(0L, (int64_t)(getMaxHealth(ch) * std::abs(amt)));
+    ch->hit = MAX(0L, (int64_t)(getMaxHealth(ch) * std::abs(amt)));
     return ch->hit;
 }
 
 int64_t incCurHealth(char_data *ch, int64_t amt, bool limit_max) {
     if(limit_max)
-        ch->health = std::min(1.0, ch->health+(double)std::abs(amt) / (double)getEffMaxPL(ch));
+        ch->health = MIN(1.0, ch->health+(double)std::abs(amt) / (double)getEffMaxPL(ch));
     else
         ch->health += (double)std::abs(amt) / (double)getEffMaxPL(ch);
     return getCurHealth(ch);
@@ -355,13 +353,13 @@ int64_t decCurHealth(char_data *ch, int64_t amt, int64_t floor) {
     auto fl = 0.0;
     if(floor > 0)
         fl = (double)floor / (double)getEffMaxPL(ch);
-    ch->health = std::max(fl, ch->health-(double)std::abs(amt) / (double)getEffMaxPL(ch));
+    ch->health = MAX(fl, ch->health-(double)std::abs(amt) / (double)getEffMaxPL(ch));
     return getCurHealth(ch);
 }
 
 int64_t incCurHealthPercent(char_data *ch, double amt, bool limit_max) {
     if(limit_max)
-        ch->health = std::min(1.0, ch->health+std::abs(amt));
+        ch->health = MIN(1.0, ch->health+std::abs(amt));
     else
         ch->health += std::abs(amt);
     return getCurHealth(ch);
@@ -371,7 +369,7 @@ int64_t decCurHealthPercent(char_data *ch, double amt, int64_t floor) {
     auto fl = 0.0;
     if(floor > 0)
         fl = (double)floor / (double)getEffMaxPL(ch);
-    ch->health = std::max(fl, ch->health-std::abs(amt));
+    ch->health = MAX(fl, ch->health-std::abs(amt));
     return getCurHealth(ch);
 }
 
@@ -388,7 +386,7 @@ int64_t harmCurHealth(char_data *ch, int64_t amt) {
 }
 
 int64_t getMaxPLTrans(char_data *ch) {
-    auto form = ch->race->getCurForm(ch);
+    auto form = get_race(ch->race)->getCurForm(ch);
     int64_t total = 0;
     if(form.flag) {
         total = (form.bonus + getEffBasePL(ch)) * form.mult;
@@ -411,7 +409,7 @@ int64_t getMaxPL(char_data *ch) {
 
 int64_t getCurPL(char_data *ch) {
     if(ch->suppression > 0){
-        return getEffMaxPL(ch) * std::min(ch->health, (double)ch->suppression/100);
+        return getEffMaxPL(ch) * MIN(ch->health, (double)ch->suppression/100);
     } else {
         return getEffMaxPL(ch) * ch->health;
     }
@@ -451,7 +449,7 @@ int64_t getCurKI(char_data *ch) {
 }
 
 int64_t getMaxKI(char_data *ch) {
-    auto form = ch->race->getCurForm(ch);
+    auto form = get_race(ch->race)->getCurForm(ch);
     if(form.flag) {
         return (form.bonus + getEffBaseKI(ch)) * form.mult;
     } else {
@@ -489,18 +487,18 @@ bool isFullKI(char_data *ch) {
 }
 
 int64_t setCurKI(char_data *ch, int64_t amt) {
-    ch->mana = std::max(0L, std::abs(amt));
+    ch->mana = MAX(0L, std::abs(amt));
     return ch->mana;
 }
 
 int64_t setCurKIPercent(char_data *ch, double amt) {
-    ch->mana = std::max(0L, (int64_t)(getMaxKI(ch) * std::abs(amt)));
+    ch->mana = MAX(0L, (int64_t)(getMaxKI(ch) * std::abs(amt)));
     return ch->mana;
 }
 
 int64_t incCurKI(char_data *ch, int64_t amt, bool limit_max) {
     if(limit_max)
-        ch->energy = std::min(1.0, ch->energy+(double)std::abs(amt) / (double)getMaxKI(ch));
+        ch->energy = MIN(1.0, ch->energy+(double)std::abs(amt) / (double)getMaxKI(ch));
     else
         ch->energy += (double)std::abs(amt) / (double)getMaxKI(ch);
     return getCurKI(ch);
@@ -510,13 +508,13 @@ int64_t decCurKI(char_data *ch, int64_t amt, int64_t floor) {
     auto fl = 0.0;
     if(floor > 0)
         fl = (double)floor / (double)getMaxKI(ch);
-    ch->energy = std::max(fl, ch->energy-(double)std::abs(amt) / (double)getMaxKI(ch));
+    ch->energy = MAX(fl, ch->energy-(double)std::abs(amt) / (double)getMaxKI(ch));
     return getCurKI(ch);
 }
 
 int64_t incCurKIPercent(char_data *ch, double amt, bool limit_max) {
     if(limit_max)
-        ch->energy = std::min(1.0, ch->energy+std::abs(amt));
+        ch->energy = MIN(1.0, ch->energy+std::abs(amt));
     else
         ch->energy += std::abs(amt);
     return getCurKI(ch);
@@ -529,7 +527,7 @@ int64_t decCurKIPercent(char_data *ch, double amt, int64_t floor) {
     auto fl = 0.0;
     if(floor > 0)
         fl = (double)floor / (double)getMaxKI(ch);
-    ch->energy = std::max(fl, ch->energy-std::abs(amt));
+    ch->energy = MAX(fl, ch->energy-std::abs(amt));
     return getCurKI(ch);
 }
 
@@ -542,7 +540,7 @@ int64_t getCurST(char_data *ch) {
 }
 
 int64_t getMaxST(char_data *ch) {
-    auto form = ch->race->getCurForm(ch);
+    auto form = get_race(ch->race)->getCurForm(ch);
     if(form.flag) {
         return (form.bonus + getEffBaseST(ch)) * form.mult;
     } else {
@@ -580,18 +578,18 @@ bool isFullST(char_data *ch) {
 }
 
 int64_t setCurST(char_data *ch, int64_t amt) {
-    ch->move = std::max(0L, std::abs(amt));
+    ch->move = MAX(0L, std::abs(amt));
     return ch->move;
 }
 
 int64_t setCurSTPercent(char_data *ch, double amt) {
-    ch->move = std::max(0L, (int64_t)(getMaxST(ch) * std::abs(amt)));
+    ch->move = MAX(0L, (int64_t)(getMaxST(ch) * std::abs(amt)));
     return ch->move;
 }
 
 int64_t incCurST(char_data *ch, int64_t amt, bool limit_max) {
     if(limit_max)
-        ch->stamina = std::min(1.0, ch->stamina+(double)std::abs(amt) / (double)getMaxST(ch));
+        ch->stamina = MIN(1.0, ch->stamina+(double)std::abs(amt) / (double)getMaxST(ch));
     else
         ch->stamina += (double)std::abs(amt) / (double)getMaxST(ch);
     return getCurST(ch);
@@ -601,13 +599,13 @@ int64_t decCurST(char_data *ch, int64_t amt, int64_t floor) {
     auto fl = 0.0;
     if(floor > 0)
         fl = (double)floor / (double)getMaxST(ch);
-    ch->stamina = std::max(fl, ch->stamina-(double)std::abs(amt) / (double)getMaxST(ch));
+    ch->stamina = MAX(fl, ch->stamina-(double)std::abs(amt) / (double)getMaxST(ch));
     return getCurST(ch);
 }
 
 int64_t incCurSTPercent(char_data *ch, double amt, bool limit_max) {
     if(limit_max)
-        ch->stamina = std::min(1.0, ch->stamina+std::abs(amt));
+        ch->stamina = MIN(1.0, ch->stamina+std::abs(amt));
     else
         ch->stamina += std::abs(amt);
     return getMaxST(ch);
@@ -617,7 +615,7 @@ int64_t decCurSTPercent(char_data *ch, double amt, int64_t floor) {
     auto fl = 0.0;
     if(floor > 0)
         fl = (double)floor / (double)getMaxST(ch);
-    ch->stamina = std::max(fl, ch->stamina-std::abs(amt));
+    ch->stamina = MAX(fl, ch->stamina-std::abs(amt));
     return getCurST(ch);
 }
 
@@ -650,18 +648,18 @@ bool isFullLF(char_data *ch) {
 }
 
 int64_t setCurLF(char_data *ch, int64_t amt) {
-    ch->life = std::max(0L, std::abs(amt));
+    ch->life = MAX(0L, std::abs(amt));
     return getCurLF(ch);
 }
 
 int64_t setCurLFPercent(char_data *ch, double amt) {
-    ch->life = std::max(0L, (int64_t)(getMaxLF(ch) * std::abs(amt)));
+    ch->life = MAX(0L, (int64_t)(getMaxLF(ch) * std::abs(amt)));
     return getCurLF(ch);
 }
 
 int64_t incCurLF(char_data *ch, int64_t amt, bool limit_max) {
     if(limit_max)
-        ch->life = std::min(1.0, ch->stamina+(double)std::abs(amt) / (double)getMaxLF(ch));
+        ch->life = MIN(1.0, ch->stamina+(double)std::abs(amt) / (double)getMaxLF(ch));
     else
         ch->life += (double)std::abs(amt) / (double)getMaxLF(ch);
     return getCurLF(ch);
@@ -671,13 +669,13 @@ int64_t decCurLF(char_data *ch, int64_t amt, int64_t floor) {
     auto fl = 0.0;
     if(floor > 0)
         fl = (double)floor / (double)getMaxLF(ch);
-    ch->life = std::max(fl, ch->life-(double)std::abs(amt) / (double)getMaxLF(ch));
+    ch->life = MAX(fl, ch->life-(double)std::abs(amt) / (double)getMaxLF(ch));
     return getCurLF(ch);
 }
 
 int64_t incCurLFPercent(char_data *ch, double amt, bool limit_max) {
     if(limit_max)
-        ch->life = std::min(1.0, ch->life+std::abs(amt));
+        ch->life = MIN(1.0, ch->life+std::abs(amt));
     else
         ch->life += std::abs(amt);
     return getCurLF(ch);
@@ -687,7 +685,7 @@ int64_t decCurLFPercent(char_data *ch, double amt, int64_t floor) {
     auto fl = 0.0;
     if(floor > 0)
         fl = (double)floor / (double)getMaxLF(ch);
-    ch->life = std::max(fl, ch->life-std::abs(amt));
+    ch->life = MAX(fl, ch->life-std::abs(amt));
     return getCurLF(ch);
 }
 
@@ -775,7 +773,7 @@ void restoreLimbs(char_data *ch, bool announce) {
         GET_LIMBCOND(ch, l.first) = 100;
     }
 
-    ch->race->gainTail(ch, announce);
+    get_race(ch->race)->gainTail(ch, announce);
 }
 
 int64_t gainBasePL(char_data *ch, int64_t amt, bool trans_mult) {
@@ -800,17 +798,17 @@ void gainBaseAll(char_data *ch, int64_t amt, bool trans_mult) {
 }
 
 int64_t loseBasePL(char_data *ch, int64_t amt, bool trans_mult) {
-    ch->basepl = std::max(1L, ch->basepl-amt);
+    ch->basepl = MAX(1L, ch->basepl-amt);
     return ch->basepl;
 }
 
 int64_t loseBaseST(char_data *ch, int64_t amt, bool trans_mult) {
-    ch->basest = std::max(1L, ch->basest-amt);
+    ch->basest = MAX(1L, ch->basest-amt);
     return ch->basest;
 }
 
 int64_t loseBaseKI(char_data *ch, int64_t amt, bool trans_mult) {
-    ch->baseki = std::max(1L, ch->baseki-amt);
+    ch->baseki = MAX(1L, ch->baseki-amt);
     return ch->baseki;
 }
 
@@ -857,7 +855,7 @@ void loseBaseAllPercent(char_data *ch, double amt, bool trans_mult) {
 }
 
 int64_t getMaxCarryWeight(char_data *ch) {
-    return std::max(1L, (getMaxPL(ch) / 200) + (GET_STR(ch) * 50));
+    return MAX(1L, (getMaxPL(ch) / 200) + (GET_STR(ch) * 50));
 }
 
 int64_t getCurGearWeight(char_data *ch) {
@@ -2835,7 +2833,7 @@ int64_t molt_threshold(struct char_data *ch)
   threshold = threshold * 0.12;
  }
 
- return std::min(threshold, max);
+ return MIN(threshold, max);
 }
 
 int armor_evolve(struct char_data *ch)
@@ -3531,7 +3529,7 @@ void improve_skill(struct char_data *ch, int skill, int num)
   roll -= (roll * 0.01) * GET_ASB(ch);
  }
 
- roll = std::max(roll, 300);
+ roll = MAX(roll, 300);
 
   if (rand_number(1, roll) > ((GET_INT(ch) * 2) + GET_WIS(ch))) {
      return;
@@ -3849,4 +3847,575 @@ struct time_info_data *age(struct char_data *ch)
   player_age = *mud_time_passed(time(0), ch->time.birth);
 
   return (&player_age);
+}
+
+/* Used to roll starting PL/KI/ST in character creation */
+int roll_stats(struct char_data *ch, int type, int bonus)
+{
+
+  int pool = 0, base_num = bonus, max_num = bonus;
+  int powerlevel = 0, ki = 1, stamina = 2;
+
+  if (type == powerlevel) {
+   base_num = ch->real_abils.str * 3;
+   max_num = ch->real_abils.str * 5;
+  } else if (type == ki) {
+   base_num = ch->real_abils.intel * 3;
+   max_num = ch->real_abils.intel * 5;
+  } else if (type == stamina) {
+   base_num = ch->real_abils.con * 3;
+   max_num = ch->real_abils.con * 5;
+  }
+
+ pool = rand_number(base_num, max_num) + bonus;
+ 
+ return (pool);
+}
+
+
+
+
+/* For Getting An Intro Name */
+const char *get_i_name(struct char_data *ch, struct char_data *vict) {
+  char fname[40], filler[50], scrap[100], line[256];
+  static char name[50];
+  int known = FALSE;
+  FILE *fl;
+
+  /* Read Introduction File */
+  if (vict == NULL) {
+    return ("");
+  }
+
+  if (IS_NPC(ch) || IS_NPC(vict)) {
+   return (RACE(vict));
+  }
+
+  if (vict == ch) {
+    return ("");
+  }
+
+  if (!get_filename(fname, sizeof(fname), INTRO_FILE, GET_NAME(ch))) {
+    return (RACE(vict));
+  }
+  else if (!(fl = fopen(fname, "r"))) {
+    return (RACE(vict));
+  }
+
+  while (!feof(fl)) {
+    get_line(fl, line);
+    sscanf(line, "%s %s\n", filler, scrap);
+    if (!strcasecmp(GET_NAME(vict), filler)) {
+     sprintf(name, "%s", scrap);
+     known = TRUE;
+    }
+  }
+  fclose(fl);
+
+   if (known == TRUE)
+    return (name);
+   else
+    return (RACE(vict));
+}
+
+
+int can_grav(struct char_data *ch)
+{
+   /* Gravity Related */
+   if (ROOM_GRAVITY(IN_ROOM(ch)) == 10 && GET_MAX_HIT(ch) < 5000 && !IS_BARDOCK(ch) && !IS_NPC(ch)) {
+    send_to_char(ch, "You are hardly able to move in this gravity!\r\n");
+    return 0;
+   }
+   else if (ROOM_GRAVITY(IN_ROOM(ch)) == 20 && GET_MAX_HIT(ch) < 20000) {
+    send_to_char(ch, "You are hardly able to move in this gravity!\r\n");
+    return 0;
+   }   
+   else if (ROOM_GRAVITY(IN_ROOM(ch)) == 30 && GET_MAX_HIT(ch) < 50000) {
+    send_to_char(ch, "You are hardly able to move in this gravity!\r\n");
+    return 0;
+   }
+   else if (ROOM_GRAVITY(IN_ROOM(ch)) == 40 && GET_MAX_HIT(ch) < 100000) {
+    send_to_char(ch, "You are hardly able to move in this gravity!\r\n");
+    return 0;
+   }
+   else if (ROOM_GRAVITY(IN_ROOM(ch)) == 50 && GET_MAX_HIT(ch) < 200000) {
+    send_to_char(ch, "You are hardly able to move in this gravity!\r\n");
+    return 0;
+   }
+   else if (ROOM_GRAVITY(IN_ROOM(ch)) == 100 && GET_MAX_HIT(ch) < 400000) {
+    send_to_char(ch, "You are hardly able to move in this gravity!\r\n");
+    return 0;
+   }
+   else if (ROOM_GRAVITY(IN_ROOM(ch)) == 200 && GET_MAX_HIT(ch) < 1000000) {
+    send_to_char(ch, "You are hardly able to move in this gravity!\r\n");
+    return 0;
+   }
+   else if (ROOM_GRAVITY(IN_ROOM(ch)) == 300 && GET_MAX_HIT(ch) < 5000000) {
+    send_to_char(ch, "You are hardly able to move in this gravity!\r\n");
+    return 0;
+   }
+   else if (ROOM_GRAVITY(IN_ROOM(ch)) == 400 && GET_MAX_HIT(ch) < 8000000) {
+    send_to_char(ch, "You are hardly able to move in this gravity!\r\n");
+    return 0;
+   }
+   else if (ROOM_GRAVITY(IN_ROOM(ch)) == 500 && GET_MAX_HIT(ch) < 15000000) {
+    send_to_char(ch, "You are hardly able to move in this gravity!\r\n");
+    return 0;
+   }
+   else if (ROOM_GRAVITY(IN_ROOM(ch)) == 1000 && GET_MAX_HIT(ch) < 25000000) {
+    send_to_char(ch, "You are hardly able to move in this gravity!\r\n");
+    return 0;
+   }
+   else if (ROOM_GRAVITY(IN_ROOM(ch)) == 5000 && GET_MAX_HIT(ch) < 100000000) {
+    send_to_char(ch, "You are hardly able to move in this gravity!\r\n");
+    return 0;
+   }
+   else if (ROOM_GRAVITY(IN_ROOM(ch)) == 10000 && GET_MAX_HIT(ch) < 200000000) {
+    send_to_char(ch, "You are hardly able to move in this gravity!\r\n");
+    return 0;
+   }
+   else {
+    return 1;
+   }
+}
+
+
+/* If they can preform the attack or perform the attack on target. */
+int can_kill(struct char_data *ch, struct char_data *vict, struct obj_data *obj, int num)
+{
+  /* Target Related */
+  if (!IS_NPC(ch) && PLR_FLAGGED(ch, PLR_HEALT)) {
+   send_to_char(ch, "You are inside a healing tank!\r\n");
+   return 0;
+  }
+  if (IS_CARRYING_W(ch) > CAN_CARRY_W(ch)) {
+   send_to_char(ch, "You are weighted down too much!\r\n");
+   return 0;
+  } 
+   if (vict) {
+   if (GET_HIT(vict) <= 0 && FIGHTING(vict)) {
+    return 0;
+   }
+   if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_PEACEFUL)) {
+    send_to_char(ch, "This room just has such a peaceful, easy feeling...\r\n");
+    return 0;
+   } else if (vict == ch) {
+    send_to_char(ch, "That's insane, don't hurt yourself. Hurt others! That's the key to life ^_^\r\n");
+    return 0;
+   } else if (vict->gooptime > 0) {
+    send_to_char(ch, "It seems like it'll be hard to kill them right now...\r\n");
+    return 0;
+   } else if (CARRYING(ch)) {
+    send_to_char(ch, "You are too busy protecting the person on your shoulder!\r\n");
+    return 0;
+   } else if (CARRIED_BY(vict)) {
+    send_to_char(ch, "They are being protected by someone else!\r\n");
+    return 0;
+   } else if (AFF_FLAGGED(vict, AFF_PARALYZE)) {
+    send_to_char(ch, "They are a statue, just leave them alone...\r\n");
+    return 0;
+   } else if (MOB_FLAGGED(vict, MOB_NOKILL)) {
+    send_to_char(ch, "But they are not to be killed!\r\n");
+    return 0;
+   } else if (MAJINIZED(ch) == GET_ID(vict)) {
+    send_to_char(ch, "You can not harm your master!\r\n");
+    return 0;
+   } else if (GET_BONUS(ch, BONUS_COWARD) > 0 && GET_MAX_HIT(vict) > GET_MAX_HIT(ch) + (GET_MAX_HIT(ch) * .5) && !FIGHTING(ch)) {
+    send_to_char(ch, "You are too cowardly to start anything with someone so much stronger than yourself!\r\n");
+    return 0;
+   } else if (MAJINIZED(vict) == GET_ID(ch)) {
+    send_to_char(ch, "You can not harm your servant.\r\n");
+    return 0;
+   } else if ((GRAPPLING(ch) && GRAPTYPE(ch) != 3) || (GRAPPLED(ch) && (GRAPTYPE(ch) == 1 || GRAPTYPE(ch) == 4))) {
+    send_to_char(ch, "You are too busy grappling!%s\r\n", GRAPPLED(ch) != NULL ? " Try 'escape'!" : "");
+    return 0;
+   } else if (GRAPPLING(ch) && GRAPPLING(ch) != vict) {
+    send_to_char(ch, "You can't reach that far in your current position!\r\n");
+    return 0;
+   } else if (GRAPPLED(ch) && GRAPPLED(ch) != vict) {
+    send_to_char(ch, "You can't reach that far in your current position!\r\n");
+    return 0;
+   } else if (!IS_NPC(ch) && !IS_NPC(vict) && AFF_FLAGGED(ch, AFF_SPIRIT) && (!is_sparring(ch) || !is_sparring(vict)) && num != 2) {
+    send_to_char(ch, "You can not fight other players in AL/Hell.\r\n");
+    return 0;
+   } else if (GET_LEVEL(vict) <= 8 && !IS_NPC(ch) && !IS_NPC(vict) && (!is_sparring(ch) || !is_sparring(vict))) {
+    send_to_char(ch, "Newbie Shield Protects them!\r\n");
+    return 0;
+   } else if (GET_LEVEL(ch) <= 8 && !IS_NPC(ch) && !IS_NPC(vict) && (!is_sparring(ch) || !is_sparring(vict))) {
+    send_to_char(ch, "Newbie Shield Protects you until level 8.\r\n");
+    return 0;
+   } else if (PLR_FLAGGED(vict, PLR_SPIRAL) && num != 3) {
+    send_to_char(ch, "Due to the nature of their current technique anything less than a Tier 4 or AOE attack will not work on them.\r\n");
+    return 0;
+   } else if (ABSORBING(ch)) {
+    send_to_char(ch, "You are too busy absorbing %s!\r\n", GET_NAME(ABSORBING(ch)));
+    return 0;
+   } else if (ABSORBBY(ch)) {
+    send_to_char(ch, "You are too busy being absorbed by %s!\r\n", GET_NAME(ABSORBBY(ch)));
+    return 0;
+   } else if ((GET_ALT(vict) -1 > GET_ALT(ch) || GET_ALT(vict) < GET_ALT(ch) -1) && IS_NAMEK(ch)) {
+     act("@GYou stretch your limbs toward @g$N@G in an attempt to hit $M!@n", TRUE, ch, 0, vict, TO_CHAR);
+     act("@g$n@G stretches $s limbs toward @RYOU@G in an attempt to land a hit!@n", TRUE, ch, 0, vict, TO_VICT);
+     act("@g$n@G stretches $s limbs toward @g$N@G in an attempt to hit $M!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+     return 1;
+   } else if (AFF_FLAGGED(ch, AFF_FLYING) && !AFF_FLAGGED(vict, AFF_FLYING) && num == 0) {
+    send_to_char(ch, "You are too far above them.\r\n");
+    return 0;
+   } else if (!AFF_FLAGGED(ch, AFF_FLYING) && AFF_FLAGGED(vict, AFF_FLYING) && num == 0) {
+    send_to_char(ch, "They are too far above you.\r\n");
+    return 0;
+   } else if (!IS_NPC(ch) && GET_ALT(ch) > GET_ALT(vict) && !IS_NPC(vict) && num == 0) {
+    if (GET_ALT(vict) < 0) {
+     GET_ALT(vict) = GET_ALT(ch);
+     return 1;
+    } else {
+     send_to_char(ch, "You are too far above them.\r\n");
+     return 0;
+    }
+   } else if (!IS_NPC(ch) && GET_ALT(ch) < GET_ALT(vict) && !IS_NPC(vict)&& num == 0) {
+    if (GET_ALT(vict) > 2) {
+     GET_ALT(vict) = GET_ALT(ch);
+     return 1;
+    } else {
+     send_to_char(ch, "They are too far above you.\r\n");
+     return 0;
+    }
+   } else {
+    return 1;
+   }   
+  }
+  if (obj) {
+   if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_PEACEFUL)) {
+    send_to_char(ch, "This room just has such a peaceful, easy feeling...\r\n");
+    return 0;
+   } else if (OBJ_FLAGGED(obj, ITEM_UNBREAKABLE) && GET_OBJ_VNUM(obj) != 87 && GET_OBJ_VNUM(obj) != 80 && GET_OBJ_VNUM(obj) != 81 && GET_OBJ_VNUM(obj) != 82 && GET_OBJ_VNUM(obj) != 83) {
+    send_to_char(ch, "You can't hit that, it is protected by the immortals!\r\n");
+    return 0;
+   } else if (AFF_FLAGGED(ch, AFF_FLYING)) {
+    send_to_char(ch, "You are too far above it.\r\n");
+    return 0;
+   } else if (OBJ_FLAGGED(obj, ITEM_BROKEN)) {
+    send_to_char(ch, "It is already broken!\r\n");
+    return 0;
+   } else {
+    return 1;
+   }
+  } else {
+   send_to_char(ch, "Error: Report to imm.");
+   return 0;
+  }
+}
+
+/* Whether they know the skill they are trying to use */
+int check_skill(struct char_data *ch, int skill)
+{
+ if (!know_skill(ch, skill) && !IS_NPC(ch)) {
+  return 0;
+ }
+ else {
+  return 1;
+ }
+}
+
+/* Whether they have enough stamina or charged ki to preform the skill */
+int check_points(struct char_data *ch, int64_t ki, int64_t st)
+{
+
+ if (GET_PREFERENCE(ch) == PREFERENCE_H2H && GET_CHARGE(ch) >= GET_MAX_MANA(ch) * 0.1) {
+  st -= st * 0.5;
+ }
+
+ int fail = FALSE;
+ if (IS_NPC(ch)) {
+  if ((getCurKI(ch)) < ki) {
+   send_to_char(ch, "You do not have enough ki!\r\n");
+   fail = TRUE;
+  }
+  if ((getCurST(ch)) < st) {
+   send_to_char(ch, "You do not have enough stamina!\r\n");
+   fail = TRUE;
+  }
+ }
+ else {
+  if (!calcGravCost(ch, st) && ki <= 0) {
+    send_to_char(ch, "You do not have enough stamina to perform it in this gravity!\r\n");
+    return 0;
+  }
+  if (GET_CHARGE(ch) < ki) {
+   send_to_char(ch, "You do not have enough ki charged.\r\n");
+   int64_t perc = GET_MAX_MANA(ch) * 0.01;
+   if (ki >= perc * 49) {
+    send_to_char(ch, "You need at least 50 percent charged.\r\n");
+   }
+   else if (ki >= perc * 44) {
+    send_to_char(ch, "You need at least 45 percent charged.\r\n");
+   }
+   else if (ki >= perc * 39) {
+    send_to_char(ch, "You need at least 40 percent charged.\r\n");
+   }
+   else if (ki >= perc * 34) {
+    send_to_char(ch, "You need at least 35 percent charged.\r\n");
+   }
+   else if (ki >= perc * 29) {
+    send_to_char(ch, "You need at least 30 percent charged.\r\n");
+   }
+   else if (ki >= perc * 24) {
+    send_to_char(ch, "You need at least 25 percent charged.\r\n");
+   }
+   else if (ki >= perc * 19) {
+    send_to_char(ch, "You need at least 20 percent charged.\r\n");
+   }
+   else if (ki >= perc * 14) {
+    send_to_char(ch, "You need at least 15 percent charged.\r\n");
+   }
+   else if (ki >= perc * 9) {
+    send_to_char(ch, "You need at least 10 percent charged.\r\n");
+   }
+   else if (ki >= perc * 4) {
+    send_to_char(ch, "You need at least 5 percent charged.\r\n");
+   }
+   else if (ki >= 1) {
+    send_to_char(ch, "You need at least 1 percent charged.\r\n");
+   }
+   fail = TRUE;
+  }
+  if (IS_NONPTRANS(ch)) {
+   if (PLR_FLAGGED(ch, PLR_TRANS1)) {
+    st -= st * 0.2;
+   } else if (PLR_FLAGGED(ch, PLR_TRANS2)) {
+    st -= st * 0.4;
+   } else if (PLR_FLAGGED(ch, PLR_TRANS3)) {
+    st -= st * 0.6;
+   } else if (PLR_FLAGGED(ch, PLR_TRANS4)) {
+    st -= st * 0.8;
+   }
+  }
+  if ((getCurST(ch)) < st) {
+   send_to_char(ch, "You do not have enough stamina.\r\n@C%s@n needed.\r\n", add_commas(st));
+   fail = TRUE;
+  } 
+ }
+ if (fail == TRUE) {
+  return 0;
+ }
+ else {
+  return 1;
+ }
+}
+
+/* Subtract the stamina or ki required */
+void pcost(struct char_data *ch, double ki, int64_t st)
+{
+ int before = 0;
+ if (GET_LEVEL(ch) > 1 && !IS_NPC(ch)) {
+  if (ki == 0) {
+   before = (getCurST(ch));
+   if (calcGravCost(ch, 0)) {
+    if (before > (getCurST(ch))) {
+     send_to_char(ch, "You exert more stamina in this gravity.\r\n");
+    }
+   }
+  }
+  if (GET_CHARGE(ch) <= (GET_MAX_MANA(ch) * ki)) {
+   GET_CHARGE(ch) = 0;
+  }
+  if (GET_CHARGE(ch) > (GET_MAX_MANA(ch) * ki)) {
+   GET_CHARGE(ch) -= (GET_MAX_MANA(ch) * ki);
+  }
+  if (GET_CHARGE(ch) < 0) {
+   GET_CHARGE(ch) = 0;
+  }
+  if (GET_KAIOKEN(ch) > 0) {
+   st += (st / 20) * GET_KAIOKEN(ch);
+  }
+  if (AFF_FLAGGED(ch, AFF_HASS)) {
+   st += st * .3;
+  }
+  if (!IS_NPC(ch) && GET_BONUS(ch, BONUS_HARDWORKER) > 0) {
+   st -= st * .25;
+  } else if (!IS_NPC(ch) && GET_BONUS(ch, BONUS_SLACKER) > 0) {
+   st += st * .25;
+  }
+   if (IS_ICER(ch)) {
+    if (PLR_FLAGGED(ch, PLR_TRANS1)) {
+     st = st * 1.05;
+    } else if (PLR_FLAGGED(ch, PLR_TRANS2)) {
+     st = st * 1.1;
+    } else if (PLR_FLAGGED(ch, PLR_TRANS3)) {
+     st = st * 1.15;
+    } else if (PLR_FLAGGED(ch, PLR_TRANS4)) {
+     st = st * 1.20;
+    }
+   }
+   if (GET_PREFERENCE(ch) == PREFERENCE_H2H && GET_CHARGE(ch) >= GET_MAX_MANA(ch) * 0.1) {
+    st -= st * 0.5;
+    GET_CHARGE(ch) -= st;
+    if (GET_CHARGE(ch) < 0)
+     GET_CHARGE(ch) = 0;
+   }
+  if (IS_NONPTRANS(ch)) {
+   if (PLR_FLAGGED(ch, PLR_TRANS1)) {
+    st -= st * 0.2;
+   } else if (PLR_FLAGGED(ch, PLR_TRANS2)) {
+    st -= st * 0.4;
+   } else if (PLR_FLAGGED(ch, PLR_TRANS3)) {
+    st -= st * 0.6;
+   } else if (PLR_FLAGGED(ch, PLR_TRANS4)) {
+    st -= st * 0.8;
+   }
+  }
+  decCurST(ch, st);
+ }
+ if (IS_NPC(ch)) {
+     decCurKI(ch, ki);
+     decCurST(ch, st);
+ }
+}
+
+
+/* For checking if they have enough free limbs to preform the technique. */
+int limb_ok(struct char_data *ch, int type) {
+ if (IS_NPC(ch)) {
+  if (AFF_FLAGGED(ch, AFF_ENSNARED) && rand_number(1, 100) <= 90) {
+   return FALSE;
+  }
+  return TRUE;
+ }
+ if (GRAPPLING(ch) && GRAPTYPE(ch) != 3) {
+  send_to_char(ch, "You are too busy grappling!\r\n");
+  return FALSE;
+ }
+ if (GRAPPLED(ch) && (GRAPTYPE(ch) == 1 || GRAPTYPE(ch) == 4)) {
+  send_to_char(ch, "You are unable to move while in this hold! Try using 'escape' to get out of it!\r\n");
+  return FALSE;
+ }
+ if (GET_SONG(ch) > 0) {
+  send_to_char(ch, "You are currently playing a song! Enter the song command in order to stop!\r\n");
+  return FALSE;
+ }
+ if (type == 0) {
+  if (!HAS_ARMS(ch)) {
+   send_to_char(ch, "You have no available arms!\r\n");
+   return FALSE;
+  }
+  if (AFF_FLAGGED(ch, AFF_ENSNARED) && rand_number(1, 100) <= 90) {
+   send_to_char(ch, "You are unable to move your arms while bound by this strong silk!\r\n");
+   WAIT_STATE(ch, PULSE_1SEC);
+   return FALSE;
+  } else if (AFF_FLAGGED(ch, AFF_ENSNARED)) {
+   act("You manage to break the silk ensnaring your arms!", TRUE, ch, 0, 0, TO_CHAR);
+   act("$n manages to break the silk ensnaring $s arms!", TRUE, ch, 0, 0, TO_ROOM);
+   REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ENSNARED);
+  }
+  if (GET_EQ(ch, WEAR_WIELD1) && GET_EQ(ch, WEAR_WIELD2)) {
+   send_to_char(ch, "Your hands are full!\r\n");
+   return FALSE;
+  }
+ } // Arms
+ else if (type > 0) {
+  if (!HAS_LEGS(ch)) {
+   send_to_char(ch, "You have no working legs!\r\n");
+   return FALSE;
+  }
+ } // Legs
+ return TRUE;
+}
+
+
+size_t send_to_char(struct char_data *ch, const char *messg, ...)
+{
+  if (ch->desc && messg && *messg) {
+    size_t left;
+    va_list args;
+
+    va_start(args, messg);
+    left = vwrite_to_output(ch->desc, messg, args);
+    va_end(args);
+    return left;
+  }
+  return 0;
+}
+
+
+
+int init_skill(struct char_data *ch, int snum) {
+ int skill = 0;
+
+ if (!IS_NPC(ch)) {
+  skill = GET_SKILL(ch, snum);
+
+  if (PLR_FLAGGED(ch, PLR_TRANSMISSION)) {
+   skill += 4;
+  }
+ 
+  if (skill > 118)
+   skill = 118;
+
+  return (skill);
+ }
+
+ if (IS_NPC(ch) && GET_LEVEL(ch) <= 10) {
+  skill = rand_number(30, 50);
+ } else if (IS_NPC(ch) && GET_LEVEL(ch) <= 20) {
+  skill = rand_number(45, 65);
+ } else if (IS_NPC(ch) && GET_LEVEL(ch) <= 30) {
+  skill = rand_number(55, 70);
+ } else if (IS_NPC(ch) && GET_LEVEL(ch) <= 50) {
+  skill = rand_number(65, 80);
+ } else if (IS_NPC(ch) && GET_LEVEL(ch) <= 70) {
+  skill = rand_number(75, 90);
+ } else if (IS_NPC(ch) && GET_LEVEL(ch) <= 80) {
+  skill = rand_number(85, 100);
+ } else if (IS_NPC(ch) && GET_LEVEL(ch) <= 90) {
+  skill = rand_number(90, 100);
+ } else if (IS_NPC(ch) && GET_LEVEL(ch) <= 100) {
+  skill = rand_number(95, 100);
+ } else if (IS_NPC(ch) && GET_LEVEL(ch) <= 110) {
+  skill = rand_number(95, 105);
+ } else {
+  skill = rand_number(100, 110);
+ }
+
+ return (skill);
+}
+
+/* For calculating the difficulty the player has to hit with the skill. */
+int chance_to_hit(struct char_data *ch)
+{
+
+ int num = axion_dice(0);
+
+ if (IS_NPC(ch))
+  return (num);
+
+ if (GET_COND(ch, DRUNK) > 4) {
+  num += GET_COND(ch, DRUNK);
+ }
+
+ return (num);
+}
+
+/* For calculating the speed of the attacker and defender */
+int handle_speed(struct char_data *ch, struct char_data *vict)
+{
+
+  if (ch == NULL || vict == NULL) { /* Ruh roh*/
+   return (0);
+  }
+
+  if (GET_SPEEDI(ch) > GET_SPEEDI(vict) * 4) {
+   return (15);
+  } else if (GET_SPEEDI(ch) > GET_SPEEDI(vict) * 2) {
+   return (10);
+  } else if (GET_SPEEDI(ch) > GET_SPEEDI(vict)) {
+   return (5);
+  } else if (GET_SPEEDI(ch) * 4 < GET_SPEEDI(vict)) {
+   return (-15);
+  } else if (GET_SPEEDI(ch) * 2 < GET_SPEEDI(vict)) {
+   return (-10);
+  } else if (GET_SPEEDI(ch) < GET_SPEEDI(vict)) {
+   return (-5);
+  }
+
+  return (0);
 }

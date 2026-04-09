@@ -1,10 +1,6 @@
 #pragma once
-#include <stdbool.h>
-#include <stdint.h>
-#include "rooms.h"
-
-struct char_data;
-struct obj_data;
+#include "consts/types.h"
+#include "flags.h"
 
 bool room_is_valid(const struct room_data *room);
 

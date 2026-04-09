@@ -14,17 +14,23 @@
 *                                                   ~~Iovan               *
 ************************************************************************ */
 #include "dbat/game/act.attack.h"
-#include "dbat/game/fight.h"
-#include "dbat/game/dg_comm.h"
-#include "dbat/game/act.item.h"
-#include "dbat/game/interpreter.h"
+#include "dbat/db/consts/maximums.h"
+#include "dbat/db/consts/attacks.h"
+#include "dbat/game/stringutils.h"
 #include "dbat/game/character_utils.h"
-#include "dbat/game/utils.h"
-#include "dbat/game/handler.h"
-#include "dbat/game/comm.h"
-#include "dbat/game/combat.h"
-#include "dbat/game/class.h"
+#include "dbat/game/room_utils.h"
+#include "dbat/game/object_utils.h"
+#include "dbat/game/search.h"
 #include "dbat/game/techniques.h"
+#include "dbat/game/combat.h"
+#include "dbat/game/random.h"
+#include "dbat/game/comm.h"
+#include "dbat/game/spells.h"
+#include "dbat/game/fight.h"
+#include "dbat/db/consts/deathtype.h"
+#include "dbat/db/weather.h"
+#include "dbat/game/relocate.h"
+#include "dbat/game/extract.h"
 
 ACMD(do_lightgrenade)
 {
@@ -1292,11 +1298,11 @@ ACMD(do_zen)
       hurt(0, 0, ch, vict, NULL, dmg, 1);
       dam_eq_loc(vict, 4);
       /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
-      if(vict->race->hasTail(vict)) {
+      if(get_race(vict->race)->hasTail(vict)) {
           act("@rYou cut off $S tail!@n", TRUE, ch, 0, vict, TO_CHAR);
           act("@rYour tail is cut off!@n", TRUE, ch, 0, vict, TO_VICT);
           act("@R$N@r's tail is cut off!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-          vict->race->loseTail(vict);
+          get_race(vict->race)->loseTail(vict);
       }
      break;
     case 2: /* Critical */

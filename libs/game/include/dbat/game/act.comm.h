@@ -1,7 +1,6 @@
 #pragma once
 #include "dbat/db/consts/types.h"
 
-
 // commands
 ACMD(do_say);
 ACMD(do_gsay);

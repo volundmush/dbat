@@ -321,7 +321,7 @@ void handle_multi_merge(struct char_data *form)
  send_to_char(ch, "@YYou merge with one of your forms!@n\r\n");
  act("@y$n@Y merges with one of his multiforms!@n\r\n", TRUE, ch, 0, 0, TO_ROOM);
 
- ch->clones = std::max(0, ch->clones-1);
+ ch->clones = MAX(0, ch->clones-1);
  extract_char(form);
 }
 

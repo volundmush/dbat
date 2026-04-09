@@ -4,6 +4,7 @@
 			     number in order to be successful. 
 			     IE: 1% of a skill gain */
 
+#define READ_SIZE	256
 
 
 /* First character level that forces epic levels */

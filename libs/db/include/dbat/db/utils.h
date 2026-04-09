@@ -12,19 +12,13 @@
 /* See also: ANA, SANA */
 #define AN(string) (strchr("aeiouAEIOU", *string) ? "an" : "a")
 
+#define MIN(a,b) ((a) < (b) ? (a) : (b))
+#define MAX(a,b) ((a) > (b) ? (a) : (b))
+
 
 /* memory utils **********************************************************/
 
 
-#define CREATE(result, type, number)  do {\
-	if ((number) * sizeof(type) <= 0)	\
-		log("SYSERR: Zero bytes or less requested at %s:%d.", __FILE__, __LINE__);	\
-	if (!((result) = (type *) calloc ((number), sizeof(type))))	\
-		{ perror("SYSERR: malloc failure"); abort(); } } while(0)
-
-#define RECREATE(result,type,number) do {\
-  if (!((result) = (type *) realloc ((result), sizeof(type) * (number))))\
-		{ perror("SYSERR: realloc failure"); abort(); } } while(0)
 
 
 
@@ -67,15 +61,3 @@
             }					\
       }						\
 
-#define Q_FIELD(x)  ((int) (x) / 32)
-#define Q_BIT(x)    (1 << ((x) % 32))
- 
-#define IS_SET_AR(var, bit)       ((var)[Q_FIELD(bit)] & Q_BIT(bit))
-#define SET_BIT_AR(var, bit)      ((var)[Q_FIELD(bit)] |= Q_BIT(bit))
-#define REMOVE_BIT_AR(var, bit)   ((var)[Q_FIELD(bit)] &= ~Q_BIT(bit))
-#define TOGGLE_BIT_AR(var, bit)   ((var)[Q_FIELD(bit)] = \
-                                   (var)[Q_FIELD(bit)] ^ Q_BIT(bit))
-#define IS_SET(flag,bit)  ((flag) & (bit))
-#define SET_BIT(var,bit)  ((var) |= (bit))
-#define REMOVE_BIT(var,bit)  ((var) &= ~(bit))
-#define TOGGLE_BIT(var,bit) ((var) ^= (bit))

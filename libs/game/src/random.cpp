@@ -90,3 +90,82 @@ unsigned long circle_random(void)
 
     return (seed);
 }
+
+
+/* creates a random number in long long int */
+int64_t large_rand(int64_t from, int64_t to)
+{
+  /* error checking in case people call this incorrectly */
+  if (from > to) {
+    int64_t tmp = from;
+    from = to;
+    to = tmp;
+  }
+
+  /* This should always be of the form:
+   *
+   *    ((float)(to - from + 1) * rand() / (float)(RAND_MAX + from) + from);
+   *
+   * if you are using rand() due to historical non-randomness of the
+   * lower bits in older implementations.  We always use circle_random()
+   * though, which shouldn't have that problem. Mean and standard
+   * deviation of both are identical (within the realm of statistical
+   * identity) if the rand() implementation is non-broken.  */
+  return ((circle_random() % (to - from + 1)) + from);
+}
+
+/* creates a random number in interval [from;to] */
+int rand_number(int from, int to)
+{
+  /* error checking in case people call this incorrectly */
+  if (from > to) {
+    int tmp = from;
+    from = to;
+    to = tmp;
+  }
+  return effolkronium::random_static::get(from, to);
+}
+
+/* Axion engine dice function */
+int axion_dice(int adjust)
+{
+
+ int die1 = 0, die2 = 0, roll = 0;
+
+ die1 = rand_number(1, 60);
+ die2 = rand_number(1, 60);
+
+ roll = (die1 + die2) + adjust;
+
+ if (roll < 2)
+  roll = 2;
+
+ return (roll);
+}
+
+/* simulates dice roll */
+int dice(int num, int size)
+{
+  int sum = 0;
+
+  if (size <= 0 || num <= 0)
+    return (0);
+
+  while (num-- > 0)
+    sum += rand_number(1, size);
+
+  return (sum);
+}
+
+/* Add should be set to the amount you want to add to whatever is rolled. */
+int roll_aff_duration(int num, int add)
+{
+ int start = num / 20;
+ int finish = num / 10;
+ int outcome = add;
+
+
+ outcome += rand_number(start, finish);
+
+ return (outcome);
+}

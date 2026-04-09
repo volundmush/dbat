@@ -46,7 +46,7 @@ void close_socket(struct descriptor_data *d);
 
 /* I/O functions */
 void	write_to_q(const char *txt, struct txt_q *queue, int aliased);
-int	write_to_descriptor(socklen_t desc, const char *txt, struct compr *comp);
+int	write_to_descriptor(socklen_t desc, const char *txt);
 size_t	write_to_output(struct descriptor_data *d, const char *txt, ...) __attribute__ ((format (printf, 2, 3)));
 size_t	vwrite_to_output(struct descriptor_data *d, const char *format, va_list args);
 void	string_add(struct descriptor_data *d, char *str);
@@ -82,7 +82,7 @@ void reap(int sig);
 void checkpointing(int sig);
 void hupsig(int sig);
 ssize_t perform_socket_read(socklen_t desc, char *read_point, size_t space_left);
-ssize_t perform_socket_write(socklen_t desc, const char *txt, size_t length, struct compr *comp);
+ssize_t perform_socket_write(socklen_t desc, const char *txt, size_t length);
 void echo_off(struct descriptor_data *d);
 void echo_on(struct descriptor_data *d);
 void circle_sleep(struct timeval *timeout);

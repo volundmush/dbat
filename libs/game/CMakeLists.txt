@@ -42,6 +42,5 @@ target_precompile_headers(dbat_game
 target_link_libraries(dbat_game
   PUBLIC
     dbat::db
-    ZLIB::ZLIB
     effolkronium_random
 )

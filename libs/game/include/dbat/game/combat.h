@@ -15,23 +15,21 @@ void parry_ki(double attperc, struct char_data *ch, struct char_data *vict, char
 void dodge_ki(struct char_data *ch, struct char_data *vict, int type, int type2, int skill, int skill2);
 void damage_eq(struct char_data *vict, int location);
 void remove_limb(struct char_data *vict, int num);
-int check_skill(struct char_data *ch, int skill);
-int check_points(struct char_data *ch, int64_t ki, int64_t st);
-void pcost(struct char_data *ch, double ki, int64_t st);
+
 void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, struct obj_data *obj, int64_t dmg, int type);
 int64_t damtype(struct char_data *ch, int type, int skill, double percent);
 int can_kill(struct char_data *ch, struct char_data *vict, struct obj_data *obj, int num);
 void huge_update(void);
-int init_skill(struct char_data *ch, int snum);
-int can_grav(struct char_data *ch);
-int limb_ok(struct char_data *ch, int type);
+
+
+
 int check_def(struct char_data *vict);
 void dam_eq_loc(struct char_data *vict, int area);
 void hurt_limb(struct char_data *ch, struct char_data *vict, int chance, int area, int64_t power);
 int handle_speed(struct char_data *ch, struct char_data *vict);
 void handle_defense(struct char_data *vict, int *pry, int *blk, int *dge);
 void spar_gain(struct char_data *ch, struct char_data *vict, int type, int64_t dmg);
-int chance_to_hit(struct char_data *ch);
+
 int roll_hitloc(struct char_data *ch, struct char_data *vict, int skill);
 long double calc_critical(struct char_data *ch, int loc);
 void decapitate_vict(struct char_data *ch, struct char_data *vict, int64_t dmg);

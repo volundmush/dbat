@@ -254,7 +254,7 @@ int invalid_race(struct char_data *ch, struct obj_data *obj) {
 
 int get_size(struct char_data *ch) {
     if (ch->size == SIZE_UNDEFINED) {
-        ch->size = ch->race->getSize();
+        ch->size = get_race(ch->race)->getSize();
     }
     return ch->size;
 }
@@ -1827,3 +1827,13 @@ namespace dbat::race {
     }
 }
 
+
+
+
+dbat::race::Race* get_race(int race_id) {
+    auto it = dbat::race::race_map.find(race_id);
+    if (it != dbat::race::race_map.end()) {
+        return it->second;
+    }
+    return nullptr;
+}

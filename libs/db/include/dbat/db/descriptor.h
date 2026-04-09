@@ -1,5 +1,4 @@
 #pragma once
-#include <zlib.h>
 #include "consts/types.h"
 #include "consts/maximums.h"
 #include "consts/constates.h"
@@ -17,19 +16,6 @@ struct txt_q {
    struct txt_block *tail;
 };
 
-struct compr {
-    int state; /* 0 - off. 1 - waiting for response. 2 - compress2 on */
-
-    Bytef *buff_out;
-    int total_out; /* size of input buffer */
-    int size_out; /* size of data in output buffer */
-
-    Bytef *buff_in;
-    int total_in; /* size of input buffer */
-    int size_in; /* size of data in input buffer */
-
-    z_streamp stream;
-};
 
 struct descriptor_data {
    socklen_t	descriptor;	/* file descriptor for socket		*/
@@ -64,7 +50,6 @@ struct descriptor_data {
    struct descriptor_data *snoop_by; /* And who is snooping this char	*/
    struct descriptor_data *next; /* link to next descriptor		*/
    struct oasis_olc_data *olc;   /* OLC info                            */
-   struct compr *comp;                /* compression info */
    char *user;                   /* What user am I?                     */
    char *email;                  /* User Account Email.                 */
    char *pass;                   /* User Account Password.              */

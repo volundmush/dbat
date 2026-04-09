@@ -2,6 +2,7 @@
 #include "consts/types.h"
 #include "consts/zoneflags.h"
 
+
 /* structure for the reset commands */
 struct reset_com {
    char	command;   /* current command                      */

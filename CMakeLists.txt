@@ -27,9 +27,6 @@ CPMAddPackage(
         OPTIONS "Random_BuildTests OFF"
 )
 
-
-find_package(ZLIB REQUIRED)
-
 set(BUILD_TESTING OFF)
 
 add_subdirectory(libs/db)

@@ -976,7 +976,7 @@ in the vault (vnum: 453) now and then. you can just use
           }
 #ifdef GET_RACE
           else if (!strcasecmp(field, "race")) {
-                snprintf(str, slen, "%s", c->race->getName().c_str());
+                snprintf(str, slen, "%s", get_race(c->race)->getName().c_str());
           }
 #endif
           else if (!strcasecmp(field, "rpp")) {

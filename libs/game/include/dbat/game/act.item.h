@@ -11,13 +11,12 @@ extern struct char_data *ch_selling, *ch_buying;
 int check_saveroom_count(struct char_data *ch, struct obj_data *cont);
 void dball_load(void);
 int check_insidebag(struct obj_data *cont, double mult);
-int perform_get_from_room(struct char_data *ch, struct obj_data *obj);
+
 void weight_change_object(struct obj_data *obj, int weight);
 void name_from_drinkcon(struct obj_data *obj);
 void name_to_drinkcon(struct obj_data *obj, int type);
-void perform_wear(struct char_data *ch, struct obj_data *obj, int where);
-int find_eq_pos(struct char_data *ch, struct obj_data *obj, char *arg);
-void perform_remove(struct char_data *ch, int pos);
+
+
 int64_t max_carry_weight(struct char_data *ch);
 void stop_auction(int type, struct char_data * ch);
 void check_auction(void);

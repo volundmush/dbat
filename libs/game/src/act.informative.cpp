@@ -8504,7 +8504,7 @@ ACMD(do_whois)
       send_to_char(ch, "@cTitle    @D: @G%s\r\n", GET_TITLE(victim));
     }
     else {
-      send_to_char(ch, "@cName  @D: @w%s\r\n@cSensei@D: @w%s\r\n@cRace  @D: @w%s\r\n@cTitle @D: @w%s@n\r\n@cClan  @D: @w%s@n\r\n", GET_NAME(victim), victim->chclass->getName().c_str(), victim->race->getName().c_str(), GET_TITLE(victim), clan ? buf : "None.");
+      send_to_char(ch, "@cName  @D: @w%s\r\n@cSensei@D: @w%s\r\n@cRace  @D: @w%s\r\n@cTitle @D: @w%s@n\r\n@cClan  @D: @w%s@n\r\n", GET_NAME(victim), victim->chclass->getName().c_str(), get_race(victim->race)->getName().c_str(), GET_TITLE(victim), clan ? buf : "None.");
       if (clan == TRUE && !strstr(GET_CLAN(victim), "Applying")) {
        if (checkCLAN(victim) == TRUE) {
         clanRANKD(GET_CLAN(victim), ch, victim);

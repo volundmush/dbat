@@ -1,5 +1,6 @@
 #pragma once
 #include "dbat/db/consts/types.h"
+#include "dbat/db/consts/races.h"
 
 
 // global variables
@@ -165,3 +166,5 @@ namespace dbat::race {
     Race *find_race_map_id(const int id, const RaceMap &r_map);
 
 }
+
+dbat::race::Race* get_race(int id);

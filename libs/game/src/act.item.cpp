@@ -3847,24 +3847,24 @@ static void majin_gain(struct char_data *ch, int type)
 
   switch(type) {
       case -1:
-          st = std::min(300000L, ((getBaseST(ch)) / 1200) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2));
-          pl = std::min(300000L, ((getBasePL(ch)) / 1200) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2));
-          ki = std::min(300000L, ((getBaseKI(ch)) / 1200) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2));
+          st = MIN(300000L, ((getBaseST(ch)) / 1200) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2));
+          pl = MIN(300000L, ((getBasePL(ch)) / 1200) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2));
+          ki = MIN(300000L, ((getBaseKI(ch)) / 1200) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2));
           break;
       case 0:
-          st = std::min(500000L, ((getBaseST(ch)) / 1200) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2));
-          pl = std::min(500000L, ((getBasePL(ch)) / 1200) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2));
-          ki = std::min(500000L, ((getBaseKI(ch)) / 1200) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2));
+          st = MIN(500000L, ((getBaseST(ch)) / 1200) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2));
+          pl = MIN(500000L, ((getBasePL(ch)) / 1200) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2));
+          ki = MIN(500000L, ((getBaseKI(ch)) / 1200) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2));
           break;
       case 1:
-          st = std::min(1200000L, ((getBaseST(ch)) / 1000) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2));
-          pl = std::min(1200000L, ((getBasePL(ch)) / 1000) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2));
-          ki = std::min(1200000L, ((getBaseKI(ch)) / 1000) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2));
+          st = MIN(1200000L, ((getBaseST(ch)) / 1000) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2));
+          pl = MIN(1200000L, ((getBasePL(ch)) / 1000) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2));
+          ki = MIN(1200000L, ((getBaseKI(ch)) / 1000) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2));
           break;
       case 2:
-          st = std::min(1500000L, ((getBaseST(ch)) / 900) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2));
-          pl = std::min(1500000L, ((getBasePL(ch)) / 900) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2));
-          ki = std::min(1500000L, ((getBaseKI(ch)) / 900) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2));
+          st = MIN(1500000L, ((getBaseST(ch)) / 900) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2));
+          pl = MIN(1500000L, ((getBasePL(ch)) / 900) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2));
+          ki = MIN(1500000L, ((getBaseKI(ch)) / 900) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2));
           break;
   }
     gainBasePL(ch, pl, true);

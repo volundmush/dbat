@@ -309,3 +309,128 @@ void randomize_eq(struct obj_data *obj)
      }
     }
 }
+
+
+
+
+
+
+
+
+const char *money_desc(int amount)
+{
+  int cnt;
+  struct {
+    int limit;
+    const char *description;
+  } money_table[] = {
+    {          1, "a single zenni"       		},
+    {         10, "a tiny pile of zenni"		},
+    {         20, "a handful of zenni"   		},
+    {         75, "a little pile of zenni"		},
+    {        150, "a small pile of zenni"		},
+    {        250, "a pile of zenni"	        	},
+    {        500, "a big pile of zenni"		        },
+    {       1000, "a large heap of zenni"		},
+    {       5000, "a huge mound of zenni"		},
+    {      10000, "an enormous mound of zenni"	        },
+    {      15000, "a small mountain of zenni"	        },
+    {      20000, "a mountain of zenni"		        },
+    {      25000, "a huge mountain of zenni"	        },
+    {      50000, "an enormous mountain of zenni"	},
+    {          0, NULL					},
+  };
+
+  if (amount <= 0) {
+    log("SYSERR: Try to create negative or 0 money (%d).", amount);
+    return (NULL);
+  }
+
+  for (cnt = 0; money_table[cnt].limit; cnt++)
+    if (amount <= money_table[cnt].limit)
+      return (money_table[cnt].description);
+
+  return ("an absolutely colossal mountain of zenni");
+}
+
+
+struct obj_data *create_money(int amount)
+{
+  struct obj_data *obj;
+  struct extra_descr_data *new_descr;
+  char buf[200];
+  int y;
+
+  if (amount <= 0) {
+    log("SYSERR: Try to create negative or 0 money. (%d)", amount);
+    return (NULL);
+  }
+  obj = create_obj();
+  CREATE(new_descr, struct extra_descr_data, 1);
+
+  if (amount == 1) {
+    obj->name = strdup("zenni money");
+    obj->short_description = strdup("a single zenni");
+    obj->description = strdup("One miserable zenni is lying here");
+    new_descr->keyword = strdup("zenni money");
+    new_descr->description = strdup("It's just one miserable little zenni.");
+  } else {
+    obj->name = strdup("zenni money");
+    obj->short_description = strdup(money_desc(amount));
+    snprintf(buf, sizeof(buf), "%s is lying here", money_desc(amount));
+    obj->description = strdup(CAP(buf));
+
+    new_descr->keyword = strdup("zenni money");
+    if (amount < 10)
+      snprintf(buf, sizeof(buf), "There is %d zenni.", amount);
+    else if (amount < 100)
+      snprintf(buf, sizeof(buf), "There is about %d zenni.", 10 * (amount / 10));
+    else if (amount < 1000)
+      snprintf(buf, sizeof(buf), "It looks to be about %d zenni.", 100 * (amount / 100));
+    else if (amount < 100000)
+      snprintf(buf, sizeof(buf), "You guess there is, maybe, %d zenni.",
+	      1000 * ((amount / 1000) + rand_number(0, (amount / 1000))));
+    else
+      strcpy(buf, "There are is LOT of zenni.");	/* strcpy: OK (is < 200) */
+    new_descr->description = strdup(buf);
+  }
+
+  new_descr->next = NULL;
+  obj->ex_description = new_descr;
+
+  GET_OBJ_TYPE(obj) = ITEM_MONEY;
+  GET_OBJ_MATERIAL(obj) = MATERIAL_GOLD;
+  GET_OBJ_VAL(obj, VAL_ALL_MAXHEALTH) = 100;
+  GET_OBJ_VAL(obj, VAL_ALL_HEALTH) = 100; 
+  for(y = 0; y < TW_ARRAY_MAX; y++)
+    obj->wear_flags[y] = 0;
+  SET_BIT_AR(GET_OBJ_WEAR(obj), ITEM_WEAR_TAKE);
+  GET_OBJ_VAL(obj, VAL_MONEY_SIZE) = amount;
+  GET_OBJ_COST(obj) = amount;
+  obj->item_number = NOTHING;
+
+  return (obj);
+}
+
+int is_better(struct obj_data *object, struct obj_data *object2)
+{
+  int value1=0, value2=0;
+
+  switch (GET_OBJ_TYPE(object)) {
+    case ITEM_ARMOR:
+      value1 = GET_OBJ_VAL(object, VAL_ARMOR_APPLYAC);
+      value2 = GET_OBJ_VAL(object2, VAL_ARMOR_APPLYAC);
+    break;
+    case ITEM_WEAPON:
+      value1 = (1 + GET_OBJ_VAL(object, VAL_WEAPON_DAMSIZE)) * GET_OBJ_VAL(object, VAL_WEAPON_DAMDICE);
+      value2 = (1 + GET_OBJ_VAL(object2, VAL_WEAPON_DAMSIZE)) * GET_OBJ_VAL(object2, VAL_WEAPON_DAMDICE);
+    break;
+    default:
+    break;
+  }
+
+  if (value1 > value2)
+    return 1;
+  else
+    return 0;
+}

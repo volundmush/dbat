@@ -1079,11 +1079,11 @@ ACMD(do_tslash)
       hurt(0, 0, ch, vict, NULL, dmg, 1);
       dam_eq_loc(vict, 4);
       /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
-      if(vict->race->hasTail(vict)) {
+      if(get_race(vict->race)->hasTail(vict)) {
           act("@rYou cut off $S tail!@n", TRUE, ch, 0, vict, TO_CHAR);
           act("@rYour tail is cut off!@n", TRUE, ch, 0, vict, TO_VICT);
           act("@R$N@r's tail is cut off!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-          vict->race->loseTail(vict);
+          get_race(vict->race)->loseTail(vict);
       }
      break;
     case 2: /* Critical */
@@ -5292,11 +5292,11 @@ ACMD(do_kienzan)
       }
       else {
        hurt(0, 0, ch, vict, NULL, dmg, 1);
-       if(vict->race->hasTail(vict)) {
+       if(get_race(vict->race)->hasTail(vict)) {
            act("@rYou cut off $S tail!@n", TRUE, ch, 0, vict, TO_CHAR);
            act("@rYour tail is cut off!@n", TRUE, ch, 0, vict, TO_VICT);
            act("@R$N@r's tail is cut off!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-           vict->race->loseTail(vict);
+           get_race(vict->race)->loseTail(vict);
        }
       }
       dam_eq_loc(vict, 4);

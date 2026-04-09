@@ -136,10 +136,10 @@ void log_custom(struct descriptor_data *d, struct obj_data *obj)
 void bring_to_cap(struct char_data *ch)
 {
 
- auto p_trans = (ch->race->raceCanTransform() && !ch->race->raceCanRevert());
+ auto p_trans = (get_race(ch->race)->raceCanTransform() && !get_race(ch->race)->raceCanRevert());
   auto cap = calc_soft_cap(ch);
 
- switch(ch->race->getSoftType(ch)) {
+ switch(get_race(ch->race)->getSoftType(ch)) {
      case dbat::race::Fixed:
          if(getBasePL(ch) < cap)
              gainBasePL(ch, cap - getBasePL(ch)-1, p_trans);
@@ -1610,7 +1610,7 @@ ACMD(do_rip)
     act("@rYou rush at @R$N@r and grab $S tail! With a powerful tug you pull it off!@n", TRUE, ch, 0, vict, TO_CHAR);
     act("@R$n@r rushes at YOU and grabs your tail! With a powerful tug $e pulls it off!@n", TRUE, ch, 0, vict, TO_VICT);
     act("@R$n@R rushes at @R$N@r and grab $S tail! With a powerful tug $e pulls it off!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-       vict->race->loseTail(vict);
+       get_race(vict->race)->loseTail(vict);
     return;
    } else {
           reveal_hiding(ch, 0);
@@ -1631,7 +1631,7 @@ ACMD(do_rip)
          reveal_hiding(ch, 0);
    act("@rYou grab your own tail and yank it off!@n", TRUE, ch, 0, 0, TO_CHAR);
    act("@R$n@r grabs $s own tail and yanks it off!@n", TRUE, ch, 0, 0, TO_ROOM);
-   vict->race->loseTail(vict);
+   get_race(vict->race)->loseTail(vict);
  } else {
   if ((getCurST(ch)) < GET_MAX_MOVE(ch) / 20) {
    send_to_char(ch, "You are too tired to manage to grab their tail!\r\n");
@@ -1642,7 +1642,7 @@ ACMD(do_rip)
     act("@rYou reach and grab @R$N's@r tail! With a powerful tug you pull it off!@n", TRUE, ch, 0, vict, TO_CHAR);
     act("@RYou feel your tail pulled off!@n", TRUE, ch, 0, vict, TO_VICT);
     act("@R$n@R reaches and grabs @R$N's@r tail! With a powerful tug $e pulls it off!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-     vict->race->loseTail(vict);
+     get_race(vict->race)->loseTail(vict);
     return;
  }
 }
@@ -4631,9 +4631,9 @@ ACMD(do_absorb)
    stam += rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2);
    pl += rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2);
    ki += rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2);
-   stam = std::min(stam, 1500000L);
-   ki = std::min(ki, 1500000L);
-   pl = std::min(pl, 1500000L);
+   stam = MIN(stam, 1500000L);
+   ki = MIN(ki, 1500000L);
+   pl = MIN(pl, 1500000L);
 
    gainBasePL(ch, pl, true);
    gainBaseST(ch, stam, true);
@@ -7578,7 +7578,7 @@ ACMD(do_transform)
 	char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 	char buf3[MAX_INPUT_LENGTH];
 
-    if(!ch->race->raceCanTransform()) {
+    if(!get_race(ch->race)->raceCanTransform()) {
         send_to_char(ch, "You do not have a transformation.\r\n");
         return;
     }
@@ -7596,18 +7596,18 @@ ACMD(do_transform)
 
     /* Called with no argument - display transformation information */
 	if (!*arg) {
-        ch->race->displayForms(ch);
+        get_race(ch->race)->displayForms(ch);
 		if (trans_req(ch, 1) > 0) {
-            ch->race->displayTransReq(ch);
+            get_race(ch->race)->displayTransReq(ch);
 		}
 		return;
 	}/* End of No Argument */
 
-    auto cur_form = ch->race->getCurForm(ch);
-    auto can_revert = ch->race->raceCanRevert();
+    auto cur_form = get_race(ch->race)->getCurForm(ch);
+    auto can_revert = get_race(ch->race)->raceCanRevert();
 
     // If we are in kaioken or something weird like that, prevent transforming.
-    if(!ch->race->checkCanTransform(ch)) {
+    if(!get_race(ch->race)->checkCanTransform(ch)) {
         return;
     }
 
@@ -7625,7 +7625,7 @@ ACMD(do_transform)
         if ((GET_CHARGE(ch) > 0)) {
             do_charge(ch, "release", 0, 0);
         }
-        ch->race->echoRevert(ch, ch->race->flagToTier(cur_form.flag));
+        get_race(ch->race)->echoRevert(ch, get_race(ch->race)->flagToTier(cur_form.flag));
         REMOVE_BIT_AR(PLR_FLAGS(ch), cur_form.flag);
 
         if (*arg2) {
@@ -7635,14 +7635,14 @@ ACMD(do_transform)
     }
 
     // Search for available transformations. Error out if we can't find one.
-    auto trans_maybe = ch->race->findForm(ch, arg);
+    auto trans_maybe = get_race(ch->race)->findForm(ch, arg);
     if(!trans_maybe) {
         send_to_char(ch, "You don't have that form.\r\n");
         return;
     }
     auto trans = trans_maybe.value();
 
-    auto to_tier = ch->race->flagToTier(trans.flag);
+    auto to_tier = get_race(ch->race)->flagToTier(trans.flag);
 
     if (PLR_FLAGGED(ch, trans.flag)) {
         send_to_char(ch, "You are already in that form! Try 'revert'.\r\n");
@@ -7661,7 +7661,7 @@ ACMD(do_transform)
 
     if(!npc) {
         // Pay the price to unlock form if necessary.
-        if(!ch->race->checkTransUnlock(ch, to_tier)) {
+        if(!get_race(ch->race)->checkTransUnlock(ch, to_tier)) {
             return;
         }
     }
@@ -7676,14 +7676,14 @@ ACMD(do_transform)
     SET_BIT_AR(PLR_FLAGS(ch), trans.flag);
 
     // Custom racial messages displayed.
-    ch->race->echoTransform(ch, to_tier);
+    get_race(ch->race)->echoTransform(ch, to_tier);
 
     // No way is this a stealthy process...
     reveal_hiding(ch, 0);
 
     // Announce noisy transformations in the zone.
     int zone = 0;
-    if(ch->race->raceHasNoisyTransformations()) {
+    if(get_race(ch->race)->raceHasNoisyTransformations()) {
         if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
             send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
         };

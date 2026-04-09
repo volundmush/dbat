@@ -1,5 +1,10 @@
 #pragma once
 #include "dbat/db/consts/types.h"
+#include "dbat/db/character_utils.h"
+#include "dbat/db/characters.h"
+#include "dbat/game/log.h"
+#include "dbat/game/races.h"
+#include "dbat/game/class.h"
 
 const std::string &juggleRaceName(char_data *ch, bool capitalized);
 void restore_by(char_data *ch, char_data *healer);
@@ -172,3 +177,24 @@ void	gain_exp(struct char_data *ch, int64_t gain);
 void	gain_exp_regardless(struct char_data *ch, int gain);
 void	gain_condition(struct char_data *ch, int condition, int value);
 void	update_pos(struct char_data *victim);
+
+int perform_get_from_room(struct char_data *ch, struct obj_data *obj);
+void perform_wear(struct char_data *ch, struct obj_data *obj, int where);
+int find_eq_pos(struct char_data *ch, struct obj_data *obj, char *arg);
+void perform_remove(struct char_data *ch, int pos);
+
+
+int can_grav(struct char_data *ch);
+int check_skill(struct char_data *ch, int skill);
+int check_points(struct char_data *ch, int64_t ki, int64_t st);
+void pcost(struct char_data *ch, double ki, int64_t st);
+int limb_ok(struct char_data *ch, int type);
+int64_t physical_cost(struct char_data *ch, int skill);
+
+int init_skill(struct char_data *ch, int snum);
+int chance_to_hit(struct char_data *ch);
+int handle_speed(struct char_data *ch, struct char_data *vict);
+struct time_info_data *age(struct char_data *ch);
+const char *get_i_name(struct char_data *ch, struct char_data *vict);
+
+size_t send_to_char(struct char_data *ch, const char *messg, ...) __attribute__((format(printf, 2, 3)));
