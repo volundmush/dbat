@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 
 #define YESNO(a) ((a) ? "YES" : "NO")
 #define ONOFF(a) ((a) ? "ON" : "OFF")
@@ -14,6 +15,25 @@
 
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
+
+static inline double safeDiv(double numer, double denom) {
+    return (denom == 0.0) ? 0.0 : (numer / denom);
+}
+
+static inline int64_t safeDivInt(int64_t numer, int64_t denom) {
+    return (denom == 0) ? 0 : (numer / denom);
+}
+
+static inline double clampHealth(double val) {
+    if (val < 0.0) return 0.0;
+    if (val > 1.0) return 1.0;
+    if (val != val) return 0.0;  // NaN check
+    return val;
+}
+
+static inline double fixnan(double val) {
+    return (val != val) ? 0.0 : val;  // NaN check
+}
 
 #define YESNO(a) ((a) ? "YES" : "NO")
 #define ONOFF(a) ((a) ? "ON" : "OFF")
