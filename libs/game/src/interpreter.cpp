@@ -8,6 +8,32 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 #include "dbat/game/interpreter.h"
+#include "dbat/game/utils.h"
+#include "dbat/game/comm.h"
+#include "dbat/game/config.h"
+#include "dbat/game/db.h"
+#include "dbat/game/act.informative.h"
+#include "dbat/game/clan.h"
+#include "dbat/game/dg_scripts.h"
+#include "dbat/game/weather.h"
+#include "dbat/game/objsave.h"
+#include "dbat/game/fileop.h"
+#include "dbat/game/ban.h"
+#include "dbat/game/dg_comm.h"
+#include "dbat/game/act.wizard.h"
+#include "dbat/game/mail.h"
+#include "dbat/game/alias.h"
+#include "dbat/game/players.h"
+#include "dbat/game/assedit.h"
+#include "dbat/game/guild.h"
+#include "dbat/db/bans.h"
+#include "dbat/game/ban.h"
+#include "dbat/db/players.h"
+#include "dbat/game/obj_edit.h"
+#include "dbat/game/improved-edit.h"
+#include "dbat/game/stringutils.h"
+
+#include <unistd.h>
 
 /* local global variables */
 
@@ -32,44 +58,9 @@
  */
 
 
-const char *fill[] =
-{
-  "in",
-  "into",
-  "from",
-  "with",
-  "the",
-  "on",
-  "at",
-  "to",
-  "\n"
-};
-
-const char *reserved[] =
-{
-  "a",
-  "an",
-  "self",
-  "me",
-  "all",
-  "room",
-  "someone",
-  "something",
-  "\n"
-};
 
 
-/***************************************************************************
- * Various other parsing utilities                                         *
- **************************************************************************/
-/*
- * Function to skip over the leading spaces of a string.
- */
 
-int reserved_word(char *argument)
-{
-  return (search_block(argument, reserved, TRUE) >= 0);
-}
 
 /*
  * copy the first non-fill-word, space-delimited argument of 'argument'
@@ -365,10 +356,6 @@ int perform_dupe_check(struct descriptor_data *d)
                                   "@cBank Interest@D: @Y%s@n\r\n", mult, add_commas(inc));
       }
     }
-  if (CONFIG_ENABLE_COMPRESSION && !PRF_FLAGGED(d->character, PRF_NOCOMPRESS)) {
-      d->comp->state = 1;	/* waiting for response to offer */
-      write_to_output(d, "%s", compress_offer);
-  }
     break;
   case USURP:
     write_to_output(d, "You take over your own body, already in use!\r\n");
@@ -378,10 +365,6 @@ int perform_dupe_check(struct descriptor_data *d)
     d->character->rp = d->rpp;
     mudlog(NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(d->character)), TRUE,
 	"%s has re-logged in ... disconnecting old socket.", GET_NAME(d->character));
-          if (CONFIG_ENABLE_COMPRESSION && !PRF_FLAGGED(d->character, PRF_NOCOMPRESS)) {
-              d->comp->state = 1;       /* waiting for response to offer */
-              write_to_output(d, "%s", compress_offer);
-          }
     break;
   case UNSWITCH:
     write_to_output(d, "Reconnecting to unswitched char.");
@@ -2204,7 +2187,6 @@ void nanny(struct descriptor_data *d, char *arg)
       }
       d->idle_tics = 0;
       write_to_output(d, "@MNew character.@n\r\nGive me a @gpassword@n for @C%s@n: ", GET_PC_NAME(d->character));
-      echo_off(d);
       STATE(d) = CON_NEWPASSWD;
     } else if (*arg == 'n' || *arg == 'N') {
       write_to_output(d, "Okay, what IS it, then? ");
@@ -2287,7 +2269,6 @@ void nanny(struct descriptor_data *d, char *arg)
      else {
       write_to_output(d, "Password: \r\n");
       send_to_imm("Username, %s, logging in.", CAP(arg));
-      echo_off(d);
       STATE(d) = CON_PASSWORD;
      }
     }
@@ -2299,7 +2280,6 @@ void nanny(struct descriptor_data *d, char *arg)
      userLoad(d, arg);
      write_to_output(d, "Password: \r\n");
      send_to_imm("Username, %s, logging in.", CAP(arg));
-          echo_off(d);
      STATE(d) = CON_PASSWORD;
     }
    }
@@ -2376,7 +2356,6 @@ void nanny(struct descriptor_data *d, char *arg)
    }
    d->email = strdup(arg);
    write_to_output(d, "Password: \r\n");
-          echo_off(d);
    STATE(d) = CON_NEWPASSWD;
   }
   break;
@@ -2411,7 +2390,6 @@ void nanny(struct descriptor_data *d, char *arg)
    d->pass = strdup(arg);
    userWrite(d, 0, 0, 0, "index");
    userRead(d);
-   echo_on(d);
    STATE(d) = CON_UMENU;
   }
   else {
@@ -2423,7 +2401,6 @@ void nanny(struct descriptor_data *d, char *arg)
    d->pass = strdup(arg);
    userCreate(d);
    userRead(d);
-   echo_on(d);
    STATE(d) = CON_UMENU;
   }
   break;
@@ -2463,7 +2440,6 @@ void nanny(struct descriptor_data *d, char *arg)
      }
    }
    userRead(d);
-   echo_on(d);
    STATE(d) = CON_UMENU;   
   }
   else {
@@ -2750,7 +2726,7 @@ void nanny(struct descriptor_data *d, char *arg)
                         if(chosen_race->getRPPCost()) {
                             write_to_output(d, "\r\n%i RPP will be paid upon your first level up.\r\n", chosen_race->getRPPCost());
                         }
-                        d->character->race = chosen_race;
+                        d->character->race = chosen_race->getID();
                         break;
                     case CON_RACE_HELP:
                         show_help(d, chosen_race->getName().c_str());
@@ -4440,7 +4416,7 @@ void nanny(struct descriptor_data *d, char *arg)
                           write_to_output(d, "\r\nIt costs 10 RPP to select Kibito unless you are a Kai.\r\nSensei: ");
                           return;
                       } else {
-                          d->character->chclass = chosen_sensei;
+                          d->character->chclass = chosen_sensei->getID();
                           if (chosen_sensei->getID() == dbat::sensei::kibito && !IS_KAI(d->character)) {
                               if (d->character->desc->rpp >= 10)
                                   d->character->desc->rpp -= 10;
@@ -4606,7 +4582,7 @@ void nanny(struct descriptor_data *d, char *arg)
     total -= 30;
     mudlog(CMP, ADMLVL_GOD, TRUE, "New player: %s [%s %s]", 
            GET_NAME(d->character), TRUE_RACE(d->character),
-           d->get_sensei(character->chclass)->getName().c_str());
+           get_sensei(d->character->chclass)->getName().c_str());
     break;
 
   case CON_QSTATS:
@@ -4632,7 +4608,7 @@ void nanny(struct descriptor_data *d, char *arg)
     total -= 30;
     mudlog(CMP, ADMLVL_GOD, TRUE, "New player: %s [%s %s]", 
            GET_NAME(d->character), TRUE_RACE(d->character),
-           d->get_sensei(character->chclass)->getName().c_str());
+           get_sensei(d->character->chclass)->getName().c_str());
     mudlog(CMP, ADMLVL_GOD, TRUE, "Str: %2d Dex: %2d Con: %2d Int: %2d "
            "Wis:  %2d Cha: %2d mod total: %2d", GET_STR(d->character), 
            GET_DEX(d->character), GET_CON(d->character), GET_INT(d->character),
@@ -4641,10 +4617,6 @@ void nanny(struct descriptor_data *d, char *arg)
     break;
 
   case CON_RMOTD:		/* read CR after printing motd   */
-      if (CONFIG_ENABLE_COMPRESSION && !PRF_FLAGGED(d->character, PRF_NOCOMPRESS) && !d->comp->state) {
-          d->comp->state = 1;	/* waiting for response to offer */
-          write_to_output(d, "%s", compress_offer);
-      }
     write_to_output(d, "%s", CONFIG_MENU);
     STATE(d) = CON_MENU;
     break;
@@ -4875,9 +4847,9 @@ void nanny(struct descriptor_data *d, char *arg)
       if (GET_LEVEL(d->character) <= 40 && CHEAP_RACE(d->character)) {
        write_to_output(d, "@D[@gSince your race doesn't cost RPP to level before 40 you are refunded 0 RPP.@D]@n\r\n");
       }
-      int refund = d->get_race(character->race)->getRPPRefund();
+      int refund = get_race(d->character->race)->getRPPRefund();
       if(refund && GET_LEVEL(d->character) > 1) {
-          write_to_output(d, "@D[@g%d RPP refunded to your account for your %s character.@D]@n\r\n", refund, d->get_race(character->race)->getName().c_str());
+          write_to_output(d, "@D[@g%d RPP refunded to your account for your %s character.@D]@n\r\n", refund, get_race(d->character->race)->getName().c_str());
           d->rpp += refund;
       }
       mudlog(NRM, ADMLVL_GOD, TRUE, "User %s has deleted character %s (lev %d).", d->user, GET_NAME(d->character), GET_LEVEL(d->character));

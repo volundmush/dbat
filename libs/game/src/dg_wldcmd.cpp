@@ -8,10 +8,8 @@
 *  $Date: 2004/10/11 12:07:00$                                            *
 *  $Revision: 1.0.14 $                                                    *
 **************************************************************************/
-
-#include "dbat/game/structs.h"
-#include "dbat/game/dg_scripts.h"
 #include "dbat/game/utils.h"
+#include "dbat/game/dg_scripts.h"
 #include "dbat/game/comm.h"
 #include "dbat/game/interpreter.h"
 #include "dbat/game/handler.h"

@@ -1,4 +1,10 @@
-
+#include "dbat/game/relocate.h"
+#include "dbat/game/utils.h"
+#include "dbat/game/comm.h"
+#include "dbat/game/db.h"
+#include "dbat/game/vehicles.h"
+#include "dbat/game/fight.h"
+#include "dbat/game/affect.h"
 
 /* put an object in a room */
 void obj_to_room(struct obj_data *object, room_rnum room)
@@ -275,7 +281,7 @@ void obj_to_char(struct obj_data *object, struct char_data *ch)
     IS_CARRYING_N(ch)++;
     if ((GET_KAIOKEN(ch) <= 0 && !AFF_FLAGGED(ch, AFF_METAMORPH)) && !OBJ_FLAGGED(object, ITEM_THROW)) {
 
-    } else if (GET_HIT(ch) > (getEffMaxPL(ch)))) {
+    } else if (GET_HIT(ch) > getEffMaxPL(ch)) {
        if (GET_KAIOKEN(ch) > 0) {
         send_to_char(ch, "@RThe strain of the weight has reduced your kaioken somewhat!@n\n");
        } else if (AFF_FLAGGED(ch, AFF_METAMORPH)) {
@@ -311,7 +317,7 @@ void obj_from_char(struct obj_data *object)
   if (!IS_NPC(object->carried_by))
     SET_BIT_AR(PLR_FLAGS(object->carried_by), PLR_CRASH);
  
-  int64_t previous = (getEffMaxPL(object->carried_by)());
+  int64_t previous = getEffMaxPL(object->carried_by);
 
   IS_CARRYING_W(object->carried_by) -= GET_OBJ_WEIGHT(object);
   IS_CARRYING_N(object->carried_by)--;

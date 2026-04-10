@@ -4,13 +4,14 @@
  * Copyright 1996 by Harvey Gilpin					*
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
-
+#include "dbat/db/htree.h"
+#include "dbat/db/shops.h"
+#include "dbat/game/dg_scripts.h"
 #include "dbat/game/genobj.h"
 #include "dbat/game/genolc.h"
 #include "dbat/game/genzon.h"
 #include "dbat/game/utils.h"
 #include "dbat/game/handler.h"
-#include "dbat/game/htree.h"
 #include "dbat/game/dg_olc.h"
 #include "dbat/game/shop.h"
 
@@ -491,9 +492,6 @@ int delete_object(obj_rnum rnum)
     /* Remove from object_list, etc. - handles weight changes, and similar. */
     extract_obj(tmp);
   }
-
-  /* Make sure all are removed. */
-  assert(obj_index[rnum].number == 0);
 
   /* Adjust rnums of all other objects. */
   for (tmp = object_list; tmp; tmp = tmp->next) {

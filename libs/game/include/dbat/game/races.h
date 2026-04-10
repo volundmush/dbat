@@ -2,6 +2,7 @@
 #include "dbat/db/consts/types.h"
 #include "dbat/db/consts/races.h"
 
+#include <string>
 #include <unordered_map>
 #include <map>
 #include <optional>
@@ -123,7 +124,7 @@ namespace dbat::race {
 
         int getCurrentTransTier(const char_data *ch) const;
 
-        transform_bonus getCurForm(const char_data *ch) const;
+        transform_bonus getCurForm(char_data *ch) const;
 
         const std::unordered_map<std::string, int> &getTierMap(char_data *ch) const;
 

@@ -1,6 +1,7 @@
 #include "dbat/db/objects.h"
 #include "dbat/db/object_utils.h"
-#include "dbat/game/object_utils.h"
+#include "dbat/game/utils.h"
+#include "dbat/game/db.h"
 
 
 int wearable_obj(struct obj_data *obj)

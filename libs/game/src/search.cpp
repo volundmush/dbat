@@ -1,4 +1,5 @@
-#include "dbat/game/search.h"
+#include "dbat/game/utils.h"
+#include "dbat/game/act.informative.h"
 
 int is_name(const char *str, const char *namelist)
 {

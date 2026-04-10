@@ -1,5 +1,15 @@
-#include "dbat/game/extract.h"
+#include "dbat/game/utils.h"
+#include "dbat/game/act.wizard.h"
+#include "dbat/game/comm.h"
+#include "dbat/game/dg_scripts.h"
+#include "dbat/game/fight.h"
+#include "dbat/game/act.movement.h"
+#include "dbat/game/config.h"
+#include "dbat/game/mobact.h"
+#include "dbat/game/objsave.h"
+#include "dbat/game/act.misc.h"
 
+int extractions_pending = 0;
 
 /* Extract a ch completely from the world, and leave his stuff behind */
 void extract_char_final(struct char_data *ch)

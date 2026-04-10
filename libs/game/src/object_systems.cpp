@@ -1,4 +1,7 @@
 #include "dbat/game/object_systems.h"
+#include "dbat/game/utils.h"
+#include "dbat/game/handler.h"
+#include "dbat/game/comm.h"
 
 /* This updates the malfunctioning of certain objects that are damaged. */
 void broken_update()

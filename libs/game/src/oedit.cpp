@@ -5,7 +5,10 @@
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
 
-
+#include "dbat/db/shops.h"
+#include "dbat/db/boards.h"
+#include "dbat/game/config.h"
+#include "dbat/game/dg_scripts.h"
 #include "dbat/game/comm.h"
 #include "dbat/game/interpreter.h"
 #include "dbat/game/spells.h"

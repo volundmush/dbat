@@ -1,5 +1,5 @@
-#include "dbat/game/log.h"
-
+#include "dbat/game/utils.h"
+#include "dbat/game/comm.h"
 
 /* log a death trap hit */
 void log_death_trap(struct char_data *ch)

@@ -7,10 +7,11 @@
 #include "dbat/game/class.h"
 #include "dbat/db/weather.h"
 
-std::string juggleRaceName(char_data *ch, bool capitalized);
+int roll_stats(struct char_data *ch, int type, int bonus);
+const char* juggleRaceName(char_data *ch, bool capitalized);
 void restore_by(char_data *ch, char_data *healer);
 void restore(char_data *ch, bool announce);
-void resurrect(char_data *ch, ResurrectionMode mode);
+void resurrect(char_data *ch, int mode);
 void ghostify(char_data *ch);
 void teleport_to(char_data *ch, IDXTYPE rnum);
 bool in_room_range(char_data *ch, IDXTYPE low_rnum, IDXTYPE high_rnum);

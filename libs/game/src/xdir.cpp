@@ -1,5 +1,11 @@
 #include "dbat/game/xdir.h"
+#include <stdlib.h>
+#include "dbat/game/stringutils.h"
+#include <dirent.h>
 
+#include <errno.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 int xdir_scan(char *dir_name, struct xap_dir *xapdirp) {
   xapdirp->total = scandir(dir_name,&(xapdirp->namelist),0,alphasort);

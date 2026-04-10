@@ -1,6 +1,6 @@
 #pragma once
 #include "dbat/db/consts/types.h"
-
+#include "dbat/db/consts/maximums.h"
 
 // global variables
 extern const char *cmd_door[NUM_DOOR_CMD];

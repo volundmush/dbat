@@ -13,6 +13,7 @@
 #include "dbat/db/consts/auction.h"
 #include "dbat/db/consts/aligns.h"
 #include "dbat/db/utils.h"
+#include "dbat/db/flags.h"
 
 #include <sys/stat.h>
 
@@ -390,7 +391,7 @@ ACMD(do_rpp)
      send_to_char(ch, "You aren't even dead!");
      return;
 	} else {
-        resurrect(ch, RPP);
+        resurrect(ch, 2);
      send_to_char(ch, "You have been revived.\r\n");
     } /* Can pay for it */
    } /* End Simple Revival Reward */

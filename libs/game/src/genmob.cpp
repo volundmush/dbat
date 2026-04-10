@@ -3,20 +3,21 @@
  * Copyright 1996 by Harvey Gilpin					*
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
-
+#include "dbat/db/htree.h"
+#include "dbat/db/shops.h"
+#include "dbat/db/guilds.h"
 #include "dbat/game/genmob.h"
 #include "dbat/game/utils.h"
 #include "dbat/game/db.h"
 #include "dbat/game/genolc.h"
 #include "dbat/game/shop.h"
 #include "dbat/game/genzon.h"
-#include "dbat/game/htree.h"
 #include "dbat/game/guild.h"
 #include "dbat/game/dg_scripts.h"
 #include "dbat/game/handler.h"
 #include "dbat/game/dg_olc.h"
 #include "dbat/game/class.h"
-#include "dbat/game/character_utils.h"
+#include "dbat/game/affect.h"
 
 /* From db.c */
 void init_mobile_skills(void);

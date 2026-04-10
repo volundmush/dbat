@@ -1,5 +1,6 @@
 #pragma once
 #include "dbat/db/consts/types.h"
+#include "dbat/db/assembly.h"
 
 
 void           assemblyBootAssemblies( void );
@@ -26,6 +27,4 @@ long           assemblyGetComponentIndex( ASSEMBLY *pAssembly,
 ASSEMBLY*      assemblyGetAssemblyPtr( long lVnum );
 
 /* ******************************************************************** */
-
-#endif
 

@@ -134,14 +134,3 @@ int get_flag_by_name(const char *flag_list[], char *flag_name)
    return (NOFLAG); 
 }
 
-size_t sprinttype(int type, const char *names[], char *result, size_t reslen)
-{
-  int nr = 0;
-
-  while (type && *names[nr] != '\n') {
-    type--;
-    nr++;
-  }
-
-  return strlcpy(result, *names[nr] != '\n' ? names[nr] : "UNDEFINED", reslen);
-}

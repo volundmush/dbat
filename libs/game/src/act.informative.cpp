@@ -15,7 +15,9 @@
 #include "dbat/db/consts/time.h"
 #include "dbat/db/help.h"
 #include "dbat/db/command.h"
+#include "dbat/db/flags.h"
 
+#include "dbat/game/affect.h"
 #include "dbat/game/stringutils.h"
 #include "dbat/game/random.h"
 #include "dbat/game/object_utils.h"

@@ -1,5 +1,6 @@
 #include "dbat/game/time.h"
-
+#include "dbat/db/weather.h"
+#include "dbat/db/consts/pulse.h"
 
 
 /* Calculate the REAL time passed over the last t2-t1 centuries (secs) */

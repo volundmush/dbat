@@ -1,5 +1,8 @@
 #pragma once
 #include "dbat/db/consts/types.h"
+#include <sys/socket.h>
+#include <stdarg.h>
+#include <stdio.h>
 
 #if CIRCLE_GNU_LIBC_MEMORY_TRACK
 # include <mcheck.h>

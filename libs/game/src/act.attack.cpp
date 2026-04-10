@@ -31,6 +31,7 @@
 #include "dbat/db/weather.h"
 #include "dbat/game/relocate.h"
 #include "dbat/game/extract.h"
+#include "dbat/game/dg_comm.h"
 
 ACMD(do_lightgrenade)
 {

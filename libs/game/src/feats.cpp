@@ -5,10 +5,9 @@
 ** Created Thursday, September 5, 2002                                      **
 **                                                                          **
 *****************************************************************************/
-
+#include "dbat/game/utils.h"
 
 #include "dbat/game/feats.h"
-#include "dbat/game/utils.h"
 #include "dbat/game/comm.h"
 #include "dbat/game/handler.h"
 #include "dbat/game/interpreter.h"

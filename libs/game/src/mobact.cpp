@@ -24,11 +24,12 @@
 #include "dbat/game/act.social.h"
 #include "dbat/game/spec_procs.h"
 #include "dbat/game/class.h"
+#include "dbat/db/shops.h"
 
 
 /* local functions */
 int player_present(struct char_data *ch);
-void clearMemory(struct char_data *ch);
+
 bool aggressive_mob_on_a_leash(struct char_data *slave, struct char_data *master, struct char_data *attack);
 void mob_absorb(struct char_data *ch, struct char_data *vict);
 

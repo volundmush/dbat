@@ -2604,7 +2604,7 @@ bool char_is_nonptrans(const struct char_data *ch)
 
 bool char_is_humanoid(const struct char_data *ch)
 {
-  return !char_is_race(ch, RACE_SNAKE) && !char_is_race(ch, RACE_ANIMAL);
+  return !char_is_race(ch, RACE_SERPENT) && !char_is_race(ch, RACE_ANIMAL);
 }
 
 // =============================================================================

@@ -1,6 +1,6 @@
 #pragma once
 #include "dbat/db/consts/types.h"
-
+#include <stdio.h>
 
 /* these factors should be unique integers */
 #define RENT_FACTOR 	1

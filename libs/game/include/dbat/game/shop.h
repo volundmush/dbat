@@ -1,5 +1,6 @@
 #pragma once
 #include "dbat/db/consts/types.h"
+#include "dbat/db/consts/maximums.h"
 #include <stdio.h>
 
 #define BUY_TYPE(i)		((i).type)
@@ -229,6 +230,3 @@ int count_shops(shop_vnum low, shop_vnum high);
 SPECIAL(shop_keeper);
 
 // commands
-
-
-#endif

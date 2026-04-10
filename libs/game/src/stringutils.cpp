@@ -1,6 +1,7 @@
 #include "dbat/game/stringutils.h"
 #include "dbat/db/utils.h"
 #include "dbat/game/log.h"
+#include "dbat/db/consts/maximums.h"
 
 int levenshtein_distance(char *s1, char *s2)
 {
@@ -344,9 +345,42 @@ int is_number(const char *str)
   return (1);
 }
 
+const char *fill[] =
+{
+  "in",
+  "into",
+  "from",
+  "with",
+  "the",
+  "on",
+  "at",
+  "to",
+  "\n"
+};
+
 int fill_word(char *argument)
 {
   return (search_block(argument, fill, TRUE) >= 0);
+}
+
+
+const char *reserved[] =
+{
+  "a",
+  "an",
+  "self",
+  "me",
+  "all",
+  "room",
+  "someone",
+  "something",
+  "\n"
+};
+
+
+int reserved_word(char *argument)
+{
+  return (search_block(argument, reserved, TRUE) >= 0);
 }
 
 char *fname(const char *namelist)

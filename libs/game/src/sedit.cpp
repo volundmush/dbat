@@ -3,6 +3,8 @@
  * Copyright 1996 Harvey Gilpin						*
  * Copyright 1997-2001 George Greer (greerga@circlemud.org)		*
  ************************************************************************/
+#include "dbat/db/shops.h"
+#include "dbat/game/config.h"
 #include "dbat/game/sedit.h"
 #include "dbat/game/utils.h"
 #include "dbat/game/comm.h"
@@ -365,7 +367,7 @@ void sedit_no_trade_menu(struct descriptor_data *d)
     write_to_output(d, "@g%2d@n) %-20.20s   %s", i + 1, trade_letters[i],
 		!(++count % 2) ? "\r\n" : "");
   }
-  sprintbitarray(S_NOTRADE(OLC_SHOP(d)), trade_letters, bits, sizeof(bits));
+  sprintbitarray(S_NOTRADE(OLC_SHOP(d)), trade_letters, 4, bits, sizeof(bits));
   write_to_output(d, "\r\nCurrently won't trade with: @c%s@n\r\n"
 	  "Enter choice : ", bits);
   OLC_MODE(d) = SEDIT_NOTRADE;
@@ -403,7 +405,7 @@ void sedit_disp_menu(struct descriptor_data *d)
   shop = OLC_SHOP(d);
 
   clear_screen(d);
-  sprintbitarray(S_NOTRADE(shop), trade_letters, buf1, sizeof(buf1));
+  sprintbitarray(S_NOTRADE(shop), trade_letters, 4, buf1, sizeof(buf1));
   sprintbit(S_BITVECTOR(shop), shop_bits, buf2, sizeof(buf2));
   write_to_output(d,
 	  "-- Shop Number : [@c%d@n]\r\n"

@@ -9,6 +9,7 @@
 ************************************************************************ */
 #include "dbat/db/consts/maximums.h"
 #include "dbat/db/consts/songs.h"
+#include "dbat/db/help.h"
 #include "dbat/db/utils.h"
 #include "dbat/db/bans.h"
 #include "dbat/game/stringutils.h"
@@ -2609,7 +2610,6 @@ void check_idle_passwords(void)
       d->idle_tics++;
       continue;
     } else {
-      echo_on(d);
       write_to_output(d, "\r\nTimed out... goodbye.\r\n");
       STATE(d) = CON_CLOSE;
     }
@@ -2629,7 +2629,6 @@ void check_idle_menu(void)
       write_to_output(d, "\r\nYou are about to be disconnected due to inactivity in 60 seconds.\r\n");
       continue;
     } else {
-      echo_on(d);
       write_to_output(d, "\r\nTimed out... goodbye.\r\n");
       STATE(d) = CON_CLOSE;
     }
@@ -2970,7 +2969,7 @@ void perform_act(const char *orig, struct char_data *ch, struct obj_data *obj, c
 	i = PERS(ch, to);
 	break;
       case 'N':
-	CHECK_NULL(vict_obj, PERS((struct char_data *) vict_obj, to));
+	CHECK_NULL(vict_obj, PERS(((struct char_data *)vict_obj), to));
 	dg_victim = (const struct char_data *) vict_obj;
 	break;
       case 'm':

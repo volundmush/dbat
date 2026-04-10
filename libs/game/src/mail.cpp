@@ -20,7 +20,10 @@ Written by Jeremy Elson (jelson@circlemud.org)
 #include "dbat/game/interpreter.h"
 #include "dbat/game/handler.h"
 #include "dbat/game/improved-edit.h"
+#include "dbat/db/players.h"
 #include "dbat/game/players.h"
+#include "dbat/game/fileop.h"
+
 
 /* local globals */
 static mail_index_type *mail_index = NULL;	/* list of recs in the mail file  */

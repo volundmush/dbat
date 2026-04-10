@@ -1,6 +1,9 @@
 #include "dbat/game/races.h"
 
 #include <utility>
+#include <string>
+#include <algorithm>
+
 #include "dbat/game/utils.h"
 #include "dbat/game/interpreter.h"
 #include "dbat/game/spells.h"
@@ -9,33 +12,6 @@
 #include "dbat/game/fight.h"
 #include "dbat/game/weather.h"
 
-const char *race_abbrevs[NUM_RACES + 1] = {
-        "Hum",
-        "Sai",
-        "Ice",
-        "Kon",
-        "Nam",
-        "Mut",
-        "Kan",
-        "H-B",
-        "Bio",
-        "And",
-        "Dem",
-        "Maj",
-        "Kai",
-        "Tru",
-        "Hos",
-        "Ict",
-        "Sab",
-        "Ser",
-        "Trl",
-        "Dra",
-        "Arl",
-        "Mnd",
-        "Mec",
-        "Spi",
-        "\n"
-};
 
 #define Y   TRUE
 #define N   FALSE
@@ -736,7 +712,7 @@ namespace dbat::race {
         }
     }
 
-    transform_bonus Race::getCurForm(const char_data *ch) const {
+    transform_bonus Race::getCurForm(char_data *ch) const {
         if(PLR_FLAGGED(ch, PLR_OOZARU)) return oozaru;
         if(IS_HOSHIJIN(ch)) {
             transform_bonus hoshi_form;
@@ -1831,7 +1807,7 @@ namespace dbat::race {
 
 
 dbat::race::Race* get_race(int race_id) {
-    auto it = dbat::race::race_map.find(race_id);
+    auto it = dbat::race::race_map.find(static_cast<dbat::race::race_id>(race_id));
     if (it != dbat::race::race_map.end()) {
         return it->second;
     }

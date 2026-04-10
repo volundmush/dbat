@@ -3,6 +3,8 @@
  * Copyright 1996 by Harvey Gilpin					*
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
+#include "dbat/db/guilds.h"
+#include "dbat/db/shops.h"
 #include "dbat/game/gengld.h"
 #include "dbat/game/shop.h"
 #include "dbat/game/genolc.h"

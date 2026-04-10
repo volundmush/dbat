@@ -4,6 +4,7 @@
 ************************************************************************ */
 
 #include "dbat/game/random.h"
+#include <effolkronium/random.hpp>
 
 /*
  * I am bothered by the non-portablility of 'rand' and 'random' -- rand

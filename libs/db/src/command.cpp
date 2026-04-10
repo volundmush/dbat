@@ -1,4 +1,6 @@
 #include "dbat/db/command.h"
+#include <stdlib.h>
+#include <string.h>
 
 struct alias_data *find_alias(struct alias_data *alias_list, char *str)
 {

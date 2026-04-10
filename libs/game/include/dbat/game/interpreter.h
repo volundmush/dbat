@@ -9,6 +9,7 @@
 extern const char *list_bonus[];
 extern const struct command_info cmd_info[];
 
+void payout(int num);
 void userLoad(struct descriptor_data *d, char *name);
 int perform_alias(struct descriptor_data *d, char *orig, size_t maxlen);
 void topLoad(void);

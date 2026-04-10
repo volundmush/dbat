@@ -2,6 +2,7 @@
 // Created by basti on 10/22/2021.
 //
 
+#include "dbat/game/config.h"
 #include "dbat/game/comm.h"
 #include "dbat/game/utils.h"
 #include "dbat/game/mail.h"
@@ -9,9 +10,10 @@
 #include "dbat/game/act.informative.h"
 #include "dbat/game/act.social.h"
 #include "dbat/game/dg_scripts.h"
-#include "dbat/game/constants.h"
 #include "dbat/game/ban.h"
 #include "dbat/game/genolc.h"
+
+#include <unistd.h>
 
 int main(int argc, char **argv)
 {
@@ -153,11 +155,6 @@ int main(int argc, char **argv)
      * in the log if stderr is redirected to a file.
      */
     log("Using %s for configuration.", CONFIG_CONFFILE);
-    log("%s", circlemud_version);
-    log("%s", oasisolc_version);
-    log("%s", DG_SCRIPT_VERSION);
-    log("%s", ascii_pfiles_version);
-    log("%s", CWG_VERSION);
     xap_objs = 1;
     if (chdir(dir) < 0) {
         perror("SYSERR: Fatal error changing to data directory");

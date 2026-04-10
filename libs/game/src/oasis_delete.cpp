@@ -17,7 +17,7 @@
    +-----------------------------------------------------------------------+
 */                                                                       
 
-#include "dbat/game/structs.h"
+#include "dbat/game/config.h"
 #include "dbat/game/utils.h"
 #include "dbat/game/oasis.h"
 

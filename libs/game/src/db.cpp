@@ -11,6 +11,7 @@
 #include "dbat/db/consts/maximums.h"
 #include "dbat/db/utils.h"
 #include "dbat/db/help.h"
+#include "dbat/db/htree.h"
 #include "dbat/game/stringutils.h"
 
 #include "dbat/game/character_utils.h"
@@ -66,36 +67,6 @@
 *  declarations of most of the 'global' variables                         *
 **************************************************************************/
 
-struct config_data config_info; /* Game configuration list.    */
-
-struct room_data *world = NULL;	/* array of rooms		 */
-room_rnum top_of_world = 0;	/* ref to top element of world	 */
-struct htree_node *room_htree = NULL;	/* hash tree for fast room lookup */
-
-struct char_data *character_list = NULL; /* global linked list of chars	 */
-struct char_data *affect_list = NULL; /* global linked list of chars with affects */
-struct char_data *affectv_list = NULL; /* global linked list of chars with round-based affects */
-struct index_data *mob_index;	/* index table for mobile file	 */
-struct char_data *mob_proto;	/* prototypes for mobs		 */
-mob_rnum top_of_mobt = 0;	/* top of mobile index table	 */
-struct htree_node *mob_htree = NULL;	/* hash tree for fast mob lookup */
-
-struct obj_data *object_list = NULL;	/* global linked list of objs	 */
-struct index_data *obj_index;	/* index table for object file	 */
-struct obj_data *obj_proto;	/* prototypes for objs		 */
-obj_rnum top_of_objt = 0;	/* top of object index table	 */
-struct htree_node *obj_htree = NULL;	/* hash tree for fast obj lookup */
-
-struct zone_data *zone_table;	/* zone table			 */
-zone_rnum top_of_zone_table = 0;/* top element of zone tab	 */
-
-struct message_list fight_messages[MAX_MESSAGES];	/* fighting messages	 */
-
-struct index_data **trig_index; /* index table for triggers      */
-struct trig_data *trigger_list = NULL;  /* all attached triggers */
-int top_of_trigt = 0;           /* top of trigger index table    */
-long max_mob_id = MOB_ID_BASE;  /* for unique mob id's       */
-long max_obj_id = OBJ_ID_BASE;  /* for unique obj id's       */
 int dg_owner_purged;            /* For control of scripts */
 
 int no_mail = 0;		/* mail disabled?		 */
@@ -136,8 +107,6 @@ int top_of_helpt = 0;
 
 struct social_messg *soc_mess_list = NULL;      /* list of socials */
 int top_of_socialt = -1;                        /* number of socials */
-
-struct reset_q_type reset_q;	/* queue of zones to be reset	 */
 
 extern struct board_info *boards; /* our boards */
 
@@ -892,8 +861,6 @@ void boot_db(void)
   assign_feats();
 
   boot_world();
-
-  htree_test();
 
   log("Loading help entries.");
   index_boot(DB_BOOT_HLP);

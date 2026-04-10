@@ -990,7 +990,7 @@ bool char_is_spoiled(const struct char_data *ch);
 #define IS_GRAP(ch)     (GRAPPLING(ch) || GRAPPLED(ch))
 #define GET_SPEEDINT(ch) (IS_BIO(ch) ? ((GET_CHA(ch) * GET_DEX(ch)) * (GET_MAX_HIT(ch) / 1200) / 1200) + (GET_CHA(ch) * (GET_KAIOKEN(ch) * 100)) : ((GET_CHA(ch) * GET_DEX(ch)) * (GET_MAX_HIT(ch) / 1000) / 1000) + (GET_CHA(ch) * (GET_KAIOKEN(ch) * 100)))
 #define IS_INFERIOR(ch) (IS_KONATSU(ch) || IS_DEMON(ch))
-#define IS_WEIGHTED(ch) (ch->getEffMaxPL() < GET_MAX_HIT(ch))
+#define IS_WEIGHTED(ch) (getEffMaxPL(ch) < GET_MAX_HIT(ch))
 
 
 #define GET_EXP(ch)	  ((ch)->exp)
@@ -1273,8 +1273,8 @@ bool char_is_spoiled(const struct char_data *ch);
 			 (EXIT(ch,door)->to_room != NOWHERE) && \
 			 !IS_SET(EXIT(ch, door)->exit_info, EX_CLOSED))
 
-#define RACE(ch)      (juggleRaceName(ch, true).c_str())
-#define LRACE(ch)     (juggleRaceName(ch, false).c_str())
+#define RACE(ch)      (juggleRaceName(ch, true))
+#define LRACE(ch)     (juggleRaceName(ch, false))
 #define TRUE_RACE(ch) (get_race(ch->race)->getName().c_str())
 
 #define CLASS_ABBR(ch) (get_sensei(ch->chclass)->getAbbr().c_str())

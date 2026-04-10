@@ -26,12 +26,10 @@
 
 #include <string>
 
-static const std::string robot = "Robotic-Humanoid";
-static const std::string robot_lower = "robotic-humanoid";
-static const std::string unknown = "UNKNOWN";
+const char* juggleRaceName(char_data *ch, bool capitalized) {
+    if(!ch->race) return "unknown";
 
-std::string juggleRaceName(char_data *ch, bool capitalized) {
-    if(!ch->race) return unknown;
+    static char buf[256];
 
     dbat::race::Race *apparent = get_race(ch->race);
 
@@ -59,9 +57,9 @@ std::string juggleRaceName(char_data *ch, bool capitalized) {
                     break;
                 case 3:
                     if(capitalized) {
-                        return robot;
+                        return "Robotic-Humanoid";
                     } else {
-                        return robot_lower;
+                        return "robotic-humanoid";
                     }
             }
             break;
@@ -73,9 +71,11 @@ std::string juggleRaceName(char_data *ch, bool capitalized) {
     }
 
     if(capitalized) {
-        return apparent->getName();
+        snprintf(buf, sizeof(buf), "%s", apparent->getName().c_str());
+        return buf;
     } else {
-        return apparent->getNameLower();
+        snprintf(buf, sizeof(buf), "%s", apparent->getNameLower().c_str());
+        return buf;
     }
 }
 

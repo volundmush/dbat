@@ -1,4 +1,15 @@
 #include "dbat/game/fileop.h"
+#include "dbat/db/utils.h"
+#include "dbat/game/utils.h"
+#include "dbat/game/stringutils.h"
+#include "dbat/db/consts/maximums.h"
+#include "dbat/game/log.h"
+#include "dbat/game/db.h"
+#include "dbat/game/comm.h"
+#include "dbat/game/config.h"
+
+#include <linux/limits.h>
+#include <errno.h>
 
 /* get_line reads the next non-blank line off of the input stream.
  * The newline character is removed from the input.  Lines which begin

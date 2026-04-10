@@ -6,7 +6,7 @@
 
 #include "dbat/game/genzon.h"
 #include "dbat/game/utils.h"
-
+#include "dbat/game/fileop.h"
 #include "dbat/game/genolc.h"
 #include "dbat/game/dg_scripts.h"
 
@@ -49,11 +49,7 @@ zone_rnum create_new_zone(zone_vnum vzone_num, room_vnum bottom, room_vnum top, 
   zone_rnum rznum;
   char buf[MAX_STRING_LENGTH];
 
-#if CIRCLE_UNSIGNED_INDEX
-  if (vzone_num == NOWHERE) {
-#else
-  if (vzone_num < 0) {
-#endif
+if (vzone_num < 0) {
     *error = "You can't make negative zones.\r\n";
     return NOWHERE;
   } else if (bottom > top) {
@@ -61,8 +57,7 @@ zone_rnum create_new_zone(zone_vnum vzone_num, room_vnum bottom, room_vnum top, 
     return NOWHERE;
   }
 
-#if _CIRCLEMUD < CIRCLEMUD_VERSION(3,0,21)
-  /*
+/*
    * New with bpl19, the OLC interface should decide whether
    * to allow overlap before calling this function. There
    * are more complicated rules for that but it's not covered
@@ -76,19 +71,12 @@ zone_rnum create_new_zone(zone_vnum vzone_num, room_vnum bottom, room_vnum top, 
   /*
    * Make sure the zone does not exist.
    */
-  room = vzone_num * 100; /* Old CircleMUD 100-zones. */
+  room_vnum room = vzone_num * 100; /* Old CircleMUD 100-zones. */
   for (i = 0; i <= top_of_zone_table; i++)
     if (genolc_zone_bottom(i) <= room && zone_table[i].top >= room) {
       *error = "A zone already covers that area.\r\n";
       return NOWHERE;
     }
-#else
-  for (i = 0; i < top_of_zone_table; i++)
-    if (zone_table[i].number == vzone_num) {
-      *error = "That virtual zone already exists.\r\n";
-      return NOWHERE;
-     }
-#endif
 
   /*
    * Create the zone file.
@@ -99,12 +87,7 @@ zone_rnum create_new_zone(zone_vnum vzone_num, room_vnum bottom, room_vnum top, 
     *error = "Could not write zone file.\r\n";
     return NOWHERE;
   }
-#if _CIRCLEMUD >= CIRCLEMUD_VERSION(3,0,21)
-  /* File format changed. */
-  fprintf(fp, "#%d\nNone~\nNew Zone~\n%d %d 30 2\nS\n$\n", vzone_num, bottom, top);
-#else
   fprintf(fp, "#%d\nNew Zone~\n%d 30 2\nS\n$\n", vzone_num, (vzone_num * 100) + 99);
-#endif
   fclose(fp);
 
   /*
@@ -223,12 +206,7 @@ zone_rnum create_new_zone(zone_vnum vzone_num, room_vnum bottom, room_vnum top, 
   zone->name = strdup("New Zone");
   zone->number = vzone_num;
   zone->builders = strdup("None");
-#if _CIRCLEMUD >= CIRCLEMUD_VERSION(3,0,21)
-  zone->bot = bottom;
-  zone->top = top;
-#else
   zone->top = (vzone_num * 100) + 99;
-#endif
   zone->lifespan = 30;
   zone->age = 0;
   zone->reset_mode = 2;

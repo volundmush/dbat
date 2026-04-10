@@ -24,7 +24,11 @@
 #include "dbat/game/class.h"
 #include "dbat/game/act.wizard.h"
 #include "dbat/game/modify.h"
-#include "dbat/game/character_utils.h"
+#include "dbat/game/dg_scripts.h"
+#include "dbat/db/shops.h"
+#include "dbat/db/consts/npc.h"
+#include "dbat/game/config.h"
+
 /*-------------------------------------------------------------------*/
 
 /*
@@ -201,7 +205,7 @@ void medit_setup_new(struct descriptor_data *d)
   GET_SDESC(mob) = strdup("the unfinished mob");
   GET_LDESC(mob) = strdup("An unfinished mob stands here.\r\n");
   GET_DDESC(mob) = strdup("It looks unfinished.\r\n");
-  mob->race = dbat::race::race_map[dbat::race::human];
+  mob->race = RACE_HUMAN;
   SCRIPT(mob) = NULL;
   mob->proto_script = OLC_SCRIPT(d) = NULL;
 
@@ -250,7 +254,7 @@ void init_mobile(struct char_data *mob)
   GET_NDD(mob) = 0;
   GET_SEX(mob) = SEX_MALE;
   GET_HITDICE(mob) = 0;
-  mob->chclass = dbat::sensei::sensei_map[dbat::sensei::commoner];
+  mob->chclass = CLASS_NPC_COMMONER;
 
   GET_WEIGHT(mob) = rand_number(100, 200);
   GET_HEIGHT(mob) = rand_number(100, 200);
@@ -925,7 +929,7 @@ void medit_parse(struct descriptor_data *d, char *arg)
 
   case MEDIT_CLASS:
     if(!OLC_MOB(d)->chclass) {
-        OLC_MOB(d)->chclass = dbat::sensei::sensei_map[dbat::sensei::commoner];
+        OLC_MOB(d)->chclass = CLASS_NPC_COMMONER;
     };
     /* Change size HP dice based on class choice. */
     //GET_MANA(OLC_MOB(d)) = class_hit_die_size[GET_CLASS(OLC_MOB(d))];
@@ -961,9 +965,9 @@ void medit_parse(struct descriptor_data *d, char *arg)
           write_to_output(d, "That's not a race!");
           break;
       }
-      OLC_MOB(d)->race = chosen_race;
+      OLC_MOB(d)->race = chosen_race->getID();
     /*  Change racial size based on race choice. */
-    OLC_MOB(d)->size = OLC_MOB(d)->race->getSize();
+    OLC_MOB(d)->size = get_race(OLC_MOB(d)->race)->getSize();
     break;
 
   case MEDIT_SIZE:

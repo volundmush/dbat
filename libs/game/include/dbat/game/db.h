@@ -1,6 +1,6 @@
 #pragma once
 #include "dbat/db/consts/types.h"
-
+#include <stdio.h>
 
 /* arbitrary constants used by index_boot() (must be unique) */
 #define DB_BOOT_WLD	0
@@ -114,6 +114,7 @@ extern room_rnum r_mortal_start_room;	/* rnum of mortal start room	 */
 extern room_rnum r_immort_start_room;	/* rnum of immort start room	 */
 extern room_rnum r_frozen_start_room;	/* rnum of frozen start room	 */
 
+void auc_load(struct obj_data *obj);
 /* public procedures in db.c */
 void boot_world(void);
 int is_empty(zone_rnum zone_nr);

@@ -34,16 +34,27 @@
 *  $Date: 2004/10/11 12:07:00$                                            *
 *  $Revision: 1.0.14 $                                                    *
 **************************************************************************/
+#include "dbat/db/consts/maximums.h"
 
 #include "dbat/game/dg_scripts.h"
 #include "dbat/game/db.h"
-#include "dbat/game/utils.h"
 #include "dbat/game/handler.h"
 #include "dbat/game/interpreter.h"
 #include "dbat/game/comm.h"
 #include "dbat/game/act.wizard.h"
 #include "dbat/game/fight.h"
+#include "dbat/game/character_utils.h"
+#include "dbat/game/room_utils.h"
+#include "dbat/game/object_utils.h"
+#include "dbat/game/descriptor_utils.h"
+#include "dbat/game/search.h"
+#include "dbat/game/relocate.h"
+#include "dbat/game/extract.h"
+#include "dbat/game/random.h"
+#include "dbat/game/stringutils.h"
 
+#include <stdarg.h>
+#include <stdio.h>
 /*
  * Local functions.
  */

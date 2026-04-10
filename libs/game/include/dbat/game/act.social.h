@@ -1,6 +1,6 @@
 #pragma once
 #include "dbat/db/consts/types.h"
-
+#include <stdio.h>
 
 // functions
 void boot_social_messages(void);

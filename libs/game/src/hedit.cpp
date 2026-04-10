@@ -9,11 +9,12 @@
 *  InfoTechMUD is based on CircleMUD, Copyright (C) 1993, 1994.           *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 **************************************************************************/
+#include "dbat/db/help.h"
+#include "dbat/game/utils.h"
 
 #include "dbat/game/hedit.h"
 #include "dbat/game/comm.h"
 #include "dbat/game/interpreter.h"
-#include "dbat/game/utils.h"
 #include "dbat/game/db.h"
 #include "dbat/game/boards.h"
 #include "dbat/game/oasis.h"

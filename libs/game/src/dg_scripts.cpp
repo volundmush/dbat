@@ -7,14 +7,17 @@
 *  $Date: 2004/10/11 12:07:00$                                            *
 *  $Revision: 1.0.14 $                                                    *
 **************************************************************************/
-
+#include "dbat/game/utils.h"
 #include "dbat/game/dg_scripts.h"
 #include "dbat/game/act.wizard.h"
 #include "dbat/game/dg_event.h"
-#include "dbat/game/utils.h"
 #include "dbat/game/interpreter.h"
 #include "dbat/game/handler.h"
 #include "dbat/game/comm.h"
+#include "dbat/game/fileop.h"
+
+#include <unistd.h>
+#include <errno.h>
 
 #define PULSES_PER_MUD_HOUR     (SECS_PER_MUD_HOUR*PASSES_PER_SEC)
 
@@ -3111,7 +3114,7 @@ void remove_from_lookup_table(long uid)
   log("remove_from_lookup. UID %ld not found.", uid);
 }
 
-int check_flags_by_name_ar(int *array, int numflags, char *search, const char *namelist[])
+int check_flags_by_name_ar(bitvector_t *array, int numflags, char *search, const char *namelist[])
 {
   int i, item=-1;
 

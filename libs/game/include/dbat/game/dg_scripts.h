@@ -200,7 +200,7 @@ void send_char_pos(struct char_data *ch, int dam);
 int valid_dg_target(char_data *ch, int bitvector);
 void script_damage(char_data *vict, int dam);
 
-int check_flags_by_name_ar(int *array, int numflags, char *search, const char *namelist[]);
+int check_flags_by_name_ar(bitvector_t *array, int numflags, char *search, const char *namelist[]);
 
 /* from dg_objcmd.c */
 room_rnum obj_room(obj_data *obj);
@@ -248,6 +248,3 @@ room_rnum obj_room(obj_data *obj);
 #define ADD_UID_VAR(buf, trig, go, name, context) do { \
 		         sprintf(buf, "%c%d", UID_CHAR, GET_ID(go)); \
                          add_var(&GET_TRIG_VARS(trig), name, buf, context); } while (0)
-
-
-#endif

@@ -4,6 +4,9 @@
  * Copyright 1996 by Harvey Gilpin					*
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
+#include "dbat/db/htree.h"
+#include "dbat/db/shops.h"
+#include "dbat/game/dg_scripts.h"
 
 #include "dbat/game/genwld.h"
 #include "dbat/game/utils.h"
@@ -15,7 +18,6 @@
 #include "dbat/game/genzon.h"
 #include "dbat/game/shop.h"
 #include "dbat/game/dg_olc.h"
-#include "dbat/game/htree.h"
 
 
 /*
@@ -251,7 +253,7 @@ int delete_room(room_rnum rnum)
   {
     extern int top_shop;
      for (i = 0; i < top_shop; i++) { 
-      for (j = 0;SHOP_ROOM(i, j) != NOWHERE;j++) {
+      for (j = 0; SHOP_ROOM(i, j) != NOWHERE;j++) {
         if (SHOP_ROOM(i, j) == world[rnum].number)
           SHOP_ROOM(i, j) = 0; /* set to the void */
       }

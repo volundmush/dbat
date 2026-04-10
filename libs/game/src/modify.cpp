@@ -24,6 +24,8 @@
 #include "dbat/game/guild.h"
 #include "dbat/game/spell_parser.h"
 #include "dbat/game/dg_olc.h"
+#include "dbat/db/boards.h"
+#include "dbat/game/config.h"
 
 /* local functions */
 

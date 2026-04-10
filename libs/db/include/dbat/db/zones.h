@@ -51,7 +51,7 @@ struct zone_data {
    struct reset_com *cmd;   /* command table for reset	          */
    int min_level;           /* Minimum level to enter zone        */
    int max_level;           /* Max Mortal level to enter zone     */
-   int zone_flags[ZF_ARRAY_MAX];          /* Flags for the zone.                */
+   bitvector_t zone_flags[ZF_ARRAY_MAX];          /* Flags for the zone.                */
 
 
    /*

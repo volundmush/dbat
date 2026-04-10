@@ -16,6 +16,7 @@
 #include "dbat/game/db.h"
 #include "dbat/game/class.h"
 #include "dbat/game/races.h"
+#include "dbat/game/act.informative.h"
 
 #ifndef EXITN
 #  define EXITN(room, door)		(world[room].dir_option[door])

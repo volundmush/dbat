@@ -1,6 +1,11 @@
 #pragma once
 #include "dbat/db/consts/types.h"
+#include "dbat/db/consts/maximums.h"
+#include "dbat/db/consts/senseis.h"
+#include "dbat/game/races.h"
+
 #include <map>
+#include <string>
 // global variables
 
 extern const char *config_sect[NUM_CONFIG_SECTIONS+1];
@@ -56,8 +61,8 @@ namespace dbat::sensei {
         const std::string &getStyleName() const;
 
         // stats stuff
-        int getRPPCost(race::race_id rid) const;
-        bool senseiAvailableForRace(race::race_id r_id) const;
+        int getRPPCost(dbat::race::race_id rid) const;
+        bool senseiAvailableForRace(dbat::race::race_id r_id) const;
         int getGravTolerance() const;
         bool senseiIsPcOk() const;
         IDXTYPE senseiStartRoom() const;

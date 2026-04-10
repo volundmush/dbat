@@ -5,7 +5,6 @@
  * XXX: This needs Oasis-ifying.
  */
 
-#include "dbat/game/structs.h"
 #include "dbat/game/utils.h"
 #include "dbat/game/interpreter.h"
 #include "dbat/game/comm.h"

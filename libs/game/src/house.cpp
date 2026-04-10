@@ -14,6 +14,9 @@
 #include "dbat/game/interpreter.h"
 #include "dbat/game/utils.h"
 #include "dbat/game/objsave.h"
+#include "dbat/game/fileop.h"
+
+#include <errno.h>
 
 /* local globals */
 struct house_control_rec house_control[MAX_HOUSES];

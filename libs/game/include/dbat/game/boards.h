@@ -1,5 +1,6 @@
 #pragma once
 #include "dbat/db/consts/types.h"
+#include <stdio.h>
 
 /* New Dynamic boards v2.4 -PjD (dughi@imaxx.net) */
 #define BOARD_DIRECTORY                "etc/boards" SLASH

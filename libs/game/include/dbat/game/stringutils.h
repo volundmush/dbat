@@ -31,3 +31,4 @@ int search_block(char *arg, const char **list, int exact);
 int is_number(const char *str);
 int fill_word(char *argument);
 char *fname(const char *namelist);
+int reserved_word(char *argument);

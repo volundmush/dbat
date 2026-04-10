@@ -7,6 +7,7 @@
 *  Used at AderonMUD (aderonmud.genesismuds.com 3200)                    * 
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */ 
 #include "dbat/game/hsedit.h"
+#include "dbat/game/config.h"
 #include "dbat/game/comm.h"
 #include "dbat/game/utils.h"
 #include "dbat/game/handler.h"

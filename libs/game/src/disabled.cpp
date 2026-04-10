@@ -1,4 +1,11 @@
 #include "dbat/game/disabled.h"
+#include "dbat/game/utils.h"
+#include "dbat/db/command.h"
+#include "dbat/game/fileop.h"
+#include "dbat/game/db.h"
+#include "dbat/game/interpreter.h"
+
+#include <unistd.h>
 
 /*
  * Code to disable or enable buggy commands on the run, saving

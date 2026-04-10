@@ -1,7 +1,6 @@
 #include "dbat/db/rooms.h"
 #include "dbat/db/room_utils.h"
-#include "dbat/game/room_utils.h"
-
+#include "dbat/game/utils.h"
 
 int num_pc_in_room(struct room_data *room)
 {

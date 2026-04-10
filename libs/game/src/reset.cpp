@@ -9,7 +9,6 @@
 *  To see this in action, check out AderonMUD                            * 
 ************************************************************************ */ 
 
-#include "dbat/game/structs.h" 
 #include "dbat/game/utils.h" 
 #include "dbat/game/db.h"
 #include "dbat/game/handler.h"

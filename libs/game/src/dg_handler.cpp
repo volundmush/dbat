@@ -12,14 +12,21 @@
 *  $Date: 2004/10/11 12:07:00$                                            *
 *  $Revision: 1.0.14 $                                                    *
 ***************************************************************************/
-
+#include "dbat/db/utils.h"
 #include "dbat/game/dg_scripts.h"
 #include "dbat/game/db.h"
 #include "dbat/game/handler.h"
 #include "dbat/game/dg_event.h"
 #include "dbat/game/stringutils.h"
+#include "dbat/game/character_utils.h"
+#include "dbat/game/object_utils.h"
+#include "dbat/game/room_utils.h"
+#include "dbat/game/db.h"
+#include "dbat/game/fileop.h"
 
 #include <stdlib.h>
+#include <linux/limits.h>
+#include <errno.h>
 
 /* frees memory associated with var */
 void free_var_el(struct trig_var_data *var)
@@ -139,23 +146,6 @@ void extract_script(void *thing, int type)
       break;
   }
 
-#if 1 /* debugging */
-  {
-    struct char_data *i = character_list;
-    struct obj_data *j = object_list;
-    room_rnum k;
-    if (sc) {
-      for ( ; i ; i = i->next)
-        assert(sc != SCRIPT(i));
-
-      for ( ; j ; j = j->next)
-        assert(sc != SCRIPT(j));
-
-      for (k = 0; k < top_of_world; k++)
-        assert(sc != SCRIPT(&world[k]));
-    }
-  }
-#endif
   for (trig = TRIGGERS(sc); trig; trig = next_trig) {
     next_trig = trig->next;
     extract_trigger(trig);
@@ -204,23 +194,7 @@ void free_proto_script(void *thing, int type)
       room->proto_script = NULL;
       break;
   }
-#if 1 /* debugging */
-  {
-    struct char_data *i = character_list;
-    struct obj_data *j = object_list;
-    room_rnum k;
-    if (proto) {
-      for ( ; i ; i = i->next)
-        assert(proto != i->proto_script);
 
-      for ( ; j ; j = j->next)
-        assert(proto != j->proto_script);
-
-      for (k = 0; k < top_of_world; k++)
-        assert(proto != world[k].proto_script);
-    }
-  }
-#endif
   while (proto) {
     fproto = proto;
     proto = proto->next;

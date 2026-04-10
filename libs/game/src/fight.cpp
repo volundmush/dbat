@@ -7,14 +7,16 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
-
+#include "dbat/game/utils.h"
+#include "dbat/db/consts/deathtype.h"
+#include "dbat/db/consts/shadowdragons.h"
 #include "dbat/game/fight.h"
 #include "dbat/game/dg_comm.h"
 #include "dbat/game/act.attack.h"
 #include "dbat/game/act.other.h"
 #include "dbat/game/act.misc.h"
 #include "dbat/game/act.movement.h"
-#include "dbat/game/utils.h"
+#include "dbat/game/act.informative.h"
 #include "dbat/game/spells.h"
 #include "dbat/game/comm.h"
 #include "dbat/game/db.h"
@@ -25,7 +27,8 @@
 #include "dbat/game/class.h"
 #include "dbat/game/dg_scripts.h"
 #include "dbat/game/objsave.h"
-#include "dbat/game/character_utils.h"
+#include "dbat/game/affect.h"
+
 
 /* Structures */
 struct char_data *combat_list = NULL;	/* head of l-list of fighting chars */
@@ -895,7 +898,7 @@ void fight_stack()
         act("@WYou choke @C$N@W!@n", TRUE, ch, 0, GRAPPLING(ch), TO_CHAR);
         act("@C$n@W chokes YOU@W!@n", TRUE, ch, 0, GRAPPLING(ch), TO_VICT);
         act("@C$n@W chokes @c$N@W!@n", TRUE, ch, 0, GRAPPLING(ch), TO_NOTVICT);
-        decCurST(GRAPPLING(ch), (getMaxST(GRAPPLING(ch)) / 8);
+        decCurST(GRAPPLING(ch), (getMaxST(GRAPPLING(ch)) / 8));
        } else {
         act("@WYou choke @C$N@W, and $E passes out!@n", TRUE, ch, 0, GRAPPLING(ch), TO_CHAR);
         act("@C$n@W chokes YOU@W, and you pass out!@n", TRUE, ch, 0, GRAPPLING(ch), TO_VICT);
@@ -2438,7 +2441,7 @@ void group_gain(struct char_data *ch, struct char_data *victim)
      if (!IS_WEIGHTED(f->follower)) {
       tot_levels += GET_LEVEL(f->follower);
       tot_members++;
-     } else if ((getEffMaxPL(f->follower)()) >= (getEffMaxPL(ch)) * 0.5) {
+     } else if (getEffMaxPL(f->follower) >= getEffMaxPL(ch) * 0.5) {
       tot_levels += GET_LEVEL(f->follower);
       tot_members++;
      }

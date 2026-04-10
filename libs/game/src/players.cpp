@@ -7,7 +7,7 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
-
+#include "dbat/db/players.h"
 #include "dbat/game/players.h"
 #include "dbat/game/utils.h"
 #include "dbat/game/db.h"
@@ -19,7 +19,11 @@
 #include "dbat/game/genmob.h"
 #include "dbat/game/class.h"
 #include "dbat/game/config.h"
-#include "dbat/game/character_utils.h"
+#include "dbat/game/fileop.h"
+#include "dbat/game/affect.h"
+#include "dbat/game/interpreter.h"
+
+#include <unistd.h>
 
 #define LOAD_HIT	0
 #define LOAD_MANA	1
@@ -277,13 +281,13 @@ int load_char(const char *name, struct char_data *ch)
     }
     GET_SEX(ch) = PFDEF_SEX;
     ch->size = PFDEF_SIZE;
-    ch->chclass = dbat::sensei::sensei_map[dbat::sensei::roshi];
+    ch->chclass = CLASS_ROSHI;
     for (i = 0; i < NUM_CLASSES; i++) {
       GET_CLASS_NONEPIC(ch, i) = 0;
       GET_CLASS_EPIC(ch, i) = 0;
     }
     GET_LOG_USER(ch) = strdup("NOUSER");
-    ch->race = dbat::race::find_race_map_id(PFDEF_RACE, dbat::race::race_map);
+    ch->race = PFDEF_RACE;
     GET_ADMLEVEL(ch) = PFDEF_LEVEL;
     GET_CLASS_LEVEL(ch) = PFDEF_LEVEL;
     GET_HITDICE(ch) = PFDEF_LEVEL;
@@ -327,7 +331,7 @@ int load_char(const char *name, struct char_data *ch)
     GET_LINTEREST(ch) = PFDEF_LPLAY;
     GET_DTIME(ch) = PFDEF_LPLAY;
     GET_PHASE(ch) = PFDEF_EYE;
-    ch->mimic = nullptr;
+    ch->mimic = 0;
     GET_SLOTS(ch) = 0;
     GET_TGROWTH(ch) = 0;
     GET_TRAINSTR(ch) = PFDEF_EYE;
@@ -489,7 +493,7 @@ int load_char(const char *name, struct char_data *ch)
              if (!strcmp(tag, "Cha "))  ch->real_abils.cha      = atoi(line);
         else if (!strcmp(tag, "Clan"))  GET_CLAN(ch)            = strdup(line);
         else if (!strcmp(tag, "Clar"))  GET_CRANK(ch)           = atoi(line);
-	else if (!strcmp(tag, "Clas"))  ch->chclass = dbat::sensei::find_sensei_map_id(atoi(line), dbat::sensei::sensei_map);
+	else if (!strcmp(tag, "Clas"))  ch->chclass = atoi(line);
         else if (!strcmp(tag, "Colr"))  {
           sscanf(line, "%d %s", &num, buf2);
           ch->player_specials->color_choices[num] = strdup(buf2);
@@ -585,7 +589,7 @@ int load_char(const char *name, struct char_data *ch)
                                           GET_CLASS_NONEPIC(ch, num) = num2; }
         else if (!strcmp(tag, "Maji"))  MAJINIZED(ch)           = atoi(line);
         else if (!strcmp(tag, "Majm"))  load_majin(ch, line);
-        else if (!strcmp(tag, "Mimi"))  ch->mimic = dbat::race::find_race_map_id(atoi(line), dbat::race::race_map);
+        else if (!strcmp(tag, "Mimi"))  ch->mimic = atoi(line);
         else if (!strcmp(tag, "MxAg"))  ch->time.maxage         = atol(line);
       break;
 
@@ -620,7 +624,7 @@ int load_char(const char *name, struct char_data *ch)
       break;
 
       case 'R':
-             if (!strcmp(tag, "Race"))  ch->race = dbat::race::find_race_map_id(atoi(line), dbat::race::race_map);
+             if (!strcmp(tag, "Race"))  ch->race = atoi(line);
         else if (!strcmp(tag, "Raci"))  RACIAL_PREF(ch)         = atoi(line);
 	else if (!strcmp(tag, "RBan"))  GET_RBANK(ch)           = atoi(line);
 	else if (!strcmp(tag, "rDis"))  GET_RDISPLAY(ch)        = strdup(line);
