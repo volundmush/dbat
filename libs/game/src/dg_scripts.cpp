@@ -1252,15 +1252,23 @@ ACMD(do_detach)
 void script_vlog(const char *format, va_list args)
 {
   char output[MAX_STRING_LENGTH];
+  char print_to[MAX_STRING_LENGTH];
   struct descriptor_data *i;
+  va_list args_copy;
+
+  va_copy(args_copy, args);
 
   snprintf(output, sizeof(output), "SCRIPT ERR: %s", format);
 
-  basic_mud_vlog(output, args);
+  basic_mud_vlog(output, args_copy);
+  va_end(args_copy);
 
   /* the rest is mostly a rip from basic_mud_log() */
   strcpy(output, "[ ");            /* strcpy: OK */
-  vsnprintf(output + 2, sizeof(output) - 6, format, args);
+  //va_start(args, format);
+  vsnprintf(print_to, sizeof(print_to), format, args);
+
+  strcat(output, print_to);        /* strcat: OK */
   strcat(output, " ]\r\n");        /* strcat: OK */
 
   for (i = descriptor_list; i; i = i->next) {

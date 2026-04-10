@@ -82,3 +82,7 @@
 extern const char *trig_types[NUM_MTRIG_TYPES+1];
 extern const char *otrig_types[NUM_OTRIG_TYPES+1];
 extern const char *wtrig_types[NUM_WTRIG_TYPES+1];
+
+#define MOB_ID_BASE	  50000  /* 50000 player IDNUMS should suffice */
+#define ROOM_ID_BASE    1050000 /* 1000000 Mobs */
+#define OBJ_ID_BASE     1300000 /* 250000 Rooms */

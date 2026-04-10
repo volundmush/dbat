@@ -1087,7 +1087,7 @@ in the vault (vnum: 453) now and then. you can just use
           else if (!strcasecmp(field, "varexists")) {
             struct trig_var_data *remote_vd;
             strcpy(str, "0");
-            if (SCRIPT(c)) {
+            if (SCRIPT(c) && SCRIPT(c)->global_vars) {
               for (remote_vd = SCRIPT(c)->global_vars; remote_vd; remote_vd = remote_vd->next) {
                 if (!strcasecmp(remote_vd->name, subfield)) break;
               }
