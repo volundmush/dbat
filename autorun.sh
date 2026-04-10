@@ -44,9 +44,9 @@ while ( : ) do
 
   DATE=`date`
   echo "autorun starting game $DATE" >> syslog
-  echo "running bin/dbat_server $FLAGS $PORT" >> syslog
+  echo "running zig-out/bin/dbat $FLAGS $PORT" >> syslog
 
-  bin/dbat_server $FLAGS $PORT >> syslog 2>&1
+  zig-out/bin/dbat $FLAGS $PORT >> syslog 2>&1
 
   tail -30 syslog > syslog.CRASH
 

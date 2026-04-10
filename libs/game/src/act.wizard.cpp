@@ -2468,7 +2468,7 @@ ACMD(do_syslog)
   send_to_char(ch, "Your syslog is now %s.\r\n", logtypes[tp]);
 }
 
-#define EXE_FILE "bin/dbat_server" /* maybe use argv[0] but it's not reliable */
+#define EXE_FILE "zig-out/bin/dbat" /* maybe use argv[0] but it's not reliable */
 
 void game_info(const char *format, ...)
 { 
@@ -2596,7 +2596,7 @@ static void execute_copyover(void)
   sprintf (buf, "%d", port);
   sprintf (buf2, "-C%d", mother_desc);
   chdir ("..");
-  execl (EXE_FILE, "bin/dbat_server", buf2, buf, (char *) NULL);
+  execl (EXE_FILE, "zig-out/bin/dbat", buf2, buf, (char *) NULL);
   /* Failed - sucessful exec will not return */
 
   perror ("do_copyover: execl");
