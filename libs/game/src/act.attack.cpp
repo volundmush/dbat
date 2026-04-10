@@ -1299,7 +1299,7 @@ ACMD(do_zen)
       hurt(0, 0, ch, vict, NULL, dmg, 1);
       dam_eq_loc(vict, 4);
       /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
-      if(get_race(vict->race)->hasTail(vict)) {
+      if(char_has_tail(vict)) {
           act("@rYou cut off $S tail!@n", TRUE, ch, 0, vict, TO_CHAR);
           act("@rYour tail is cut off!@n", TRUE, ch, 0, vict, TO_VICT);
           act("@R$N@r's tail is cut off!@n", TRUE, ch, 0, vict, TO_NOTVICT);

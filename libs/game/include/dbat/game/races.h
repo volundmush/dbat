@@ -19,11 +19,6 @@ int invalid_race(struct char_data *ch, struct obj_data *obj);
 
 // C++ conversion
 
-bool race_has_tail(int r_id);
-void race_lose_tail(char_data *ch);
-bool char_has_tail(char_data *ch);
-void race_gain_tail(char_data *ch, bool announce);
-
 namespace dbat::race {
 
     enum race_id : uint8_t {

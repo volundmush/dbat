@@ -23,6 +23,7 @@
 #include "dbat/game/genzon.h"
 #include "dbat/game/feats.h"
 #include "dbat/game/time.h"
+#include "dbat/game/weather.h"
 
 #include <string>
 
@@ -4464,4 +4465,71 @@ int handle_speed(struct char_data *ch, struct char_data *vict)
   }
 
   return (0);
+}
+
+
+bool race_has_tail(int r_id) {
+    switch(r_id) {
+        case RACE_ICER:
+        case RACE_BIO:
+        case RACE_SAIYAN:
+        case RACE_HALFBREED:
+            return true;
+        default:
+            return false;
+    }
+}
+
+void char_lose_tail(char_data *ch) {
+    if(!char_has_tail(ch)) return;
+    switch(ch->race) {
+        case RACE_ICER:
+        case RACE_BIO:
+            REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TAIL);
+            remove_limb(ch, 6);
+            GET_TGROWTH(ch) = 0;
+            break;
+        case RACE_SAIYAN:
+        case RACE_HALFBREED:
+            REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_STAIL);
+            remove_limb(ch, 5);
+            if(PLR_FLAGGED(ch, PLR_OOZARU)) {
+                oozaru_revert(ch);
+            }
+            GET_TGROWTH(ch) = 0;
+            break;
+    }
+}
+
+
+bool char_has_tail(char_data *ch) {
+    if(!race_has_tail(ch->race))
+        return false;
+    switch(ch->race) {
+        case RACE_ICER:
+        case RACE_BIO:
+            return PLR_FLAGGED(ch, PLR_TAIL);
+        case RACE_SAIYAN:
+        case RACE_HALFBREED:
+            return PLR_FLAGGED(ch, PLR_STAIL);
+        default:
+            return false;
+    }
+}
+
+void char_gain_tail(char_data *ch, bool announce) {
+    if(char_has_tail(ch)) return;
+    switch(ch->race) {
+        case RACE_ICER:
+        case RACE_BIO:
+            SET_BIT_AR(PLR_FLAGS(ch), PLR_TAIL);
+            break;
+        case RACE_SAIYAN:
+        case RACE_HALFBREED:
+            SET_BIT_AR(PLR_FLAGS(ch), PLR_STAIL);
+            if(MOON_OK(ch)) {
+                oozaru_transform(ch);
+            }
+            break;
+    }
 }

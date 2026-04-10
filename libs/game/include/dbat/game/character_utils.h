@@ -215,3 +215,8 @@ int planet_check(struct char_data *ch, struct char_data *vict);
 
 #define _exitlevel(ch) (!IS_NPC(ch) ? (PRF_FLAGGED((ch),PRF_AUTOEXIT) ? 1 : 0 ) + (PRF_FLAGGED((ch),PRF_FULL_EXIT) ? 2 : 0 ) : 0 )
 #define EXIT_LEV(ch) (_exitlevel(ch))
+
+bool race_has_tail(int r_id);
+void char_lose_tail(char_data *ch);
+bool char_has_tail(char_data *ch);
+void char_gain_tail(char_data *ch, bool announce);
