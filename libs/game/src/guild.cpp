@@ -1099,7 +1099,7 @@ void handle_gain(struct char_data *keeper, int guild_nr, struct char_data *ch, c
   int whichclass = GET_CLASS(ch);
 
   skip_spaces(&argument);
-  auto rpp_cost = rpp_to_level(ch);
+  int rpp_cost = rpp_to_level(ch);
 
   if (GET_LEVEL(ch) < 100 && GET_EXP(ch) >= level_exp(ch, GET_LEVEL(ch) + 1)) {
     if (GET_RP(ch) < rpp_cost) {

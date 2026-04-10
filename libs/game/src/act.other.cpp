@@ -59,9 +59,9 @@
 #include "dbat/game/mail.h"
 #include "dbat/game/clan.h"
 
-#include <map>
-
 /* local functions */
+
+
 static int has_scanner(struct char_data *ch);
 static void boost_obj(struct obj_data *obj, struct char_data *ch, int type);
 static int perform_group(struct char_data *ch, struct char_data *vict, int highlvl, int lowlvl, int64_t highpl, int64_t lowpl);
@@ -160,8 +160,8 @@ void log_custom(struct descriptor_data *d, struct obj_data *obj)
 void bring_to_cap(struct char_data *ch)
 {
 
- auto p_trans = (get_race(ch->race)->raceCanTransform() && !get_race(ch->race)->raceCanRevert());
-  auto cap = calc_soft_cap(ch);
+  bool p_trans = (get_race(ch->race)->raceCanTransform() && !get_race(ch->race)->raceCanRevert());
+  int64_t cap = calc_soft_cap(ch);
 
  switch(get_race(ch->race)->getSoftType(ch)) {
      case dbat::race::Fixed:
@@ -1377,7 +1377,7 @@ ACMD(do_train)
       return;
   }
 
-  auto stat_cap = 20;
+  int stat_cap = 20;
   if(GET_LEVEL(ch) >= 61)
       stat_cap = 80;
   else if (GET_LEVEL(ch) > 40)
@@ -1416,7 +1416,7 @@ ACMD(do_train)
     /* what training message is displayed? */
     reveal_hiding(ch, 0);
 
-    auto msg_case = rand_number(1, 3);
+    int msg_case = rand_number(1, 3);
 
     switch(stat_id) {
         case 1:
@@ -1900,8 +1900,8 @@ ACMD(do_candy)
         return;
     }
 
-    auto ch_max = getMaxPLTrans(ch);
-    auto vict_max = getMaxPLTrans(vict);
+    int64_t ch_max = getMaxPLTrans(ch);
+    int64_t vict_max = getMaxPLTrans(vict);
 
     if (!IS_NPC(vict)) {
         send_to_char(ch, "You can't turn them into candy.\r\n");
@@ -5997,27 +5997,28 @@ ACMD(do_focus)
  }
 }
 
-static std::map<int, int64_t> kaioken_levels = {
-        {1, 0},
-        {2, 0},
-        {3, 5000},
-        {4, 10000},
-        {5, 15000},
-        {6, 25000},
-        {7, 35000},
-        {8, 50000},
-        {9, 75000},
-        {10, 100000},
-        {11, 150000},
-        {12, 200000},
-        {13, 250000},
-        {14, 300000},
-        {15, 400000},
-        {16, 500000},
-        {17, 600000},
-        {18, 700000},
-        {19, 800000},
-        {20, 1000000}
+static int64_t kaioken_levels[21] = {
+    0,   // 0 - unused
+    0,   // 1
+    0,   // 2
+    5000,    // 3
+    10000,   // 4
+    15000,   // 5
+    25000,   // 6
+    35000,   // 7
+    50000,   // 8
+    75000,   // 9
+    100000,  // 10
+    150000,  // 11
+    200000,  // 12
+    250000,  // 13
+    300000,  // 14
+    400000,  // 15
+    500000,  // 16
+    600000,  // 17
+    700000,  // 18
+    800000,  // 19
+    1000000  // 20
 };
 
 ACMD(do_kaioken)
@@ -6077,9 +6078,9 @@ ACMD(do_kaioken)
         }
     }
 
-    auto cost_unit = getMaxKI(ch) / 50;
-    auto cost_diff = cost_unit * GET_KAIOKEN(ch);
-    auto cost = (cost_unit * x) - cost_diff;
+    int64_t cost_unit = getMaxKI(ch) / 50;
+    int64_t cost_diff = cost_unit * GET_KAIOKEN(ch);
+    int64_t cost = (cost_unit * x) - cost_diff;
 
     // it costs nothing to reduce your kaioken level.
     if(x < GET_KAIOKEN(ch)) {
@@ -7607,7 +7608,7 @@ ACMD(do_transform)
         return;
     }
 
-    auto npc = IS_NPC(ch);
+    bool npc = IS_NPC(ch);
 
 	/*R: Hidden transformation stuff following this*/
 	if (!npc && (getBasePL(ch)) < 50000) {
@@ -7628,7 +7629,7 @@ ACMD(do_transform)
 	}/* End of No Argument */
 
     auto cur_form = get_race(ch->race)->getCurForm(ch);
-    auto can_revert = get_race(ch->race)->raceCanRevert();
+    bool can_revert = get_race(ch->race)->raceCanRevert();
 
     // If we are in kaioken or something weird like that, prevent transforming.
     if(!get_race(ch->race)->checkCanTransform(ch)) {
@@ -8680,7 +8681,7 @@ void base_update(void)
 		if (!IS_NPC(d->character) && rand_number(1, 15) >= 14) {
 			ash_burn(d->character);
 		}
-        auto forty_lf = getMaxLF(d->character) * 0.4;
+        int64_t forty_lf = getMaxLF(d->character) * 0.4;
 		if (AFF_FLAGGED(d->character, AFF_CURSE) && getCurLF(d->character) > forty_lf) {
 			decCurLFPercent(d->character, .01);
 			demon_refill_lf(d->character, getMaxLF(d->character) * 0.01);
@@ -8932,7 +8933,7 @@ void base_update(void)
 				bool sum = !is_soft_cap(d->character, 0);
                 bool mum = !is_soft_cap(d->character, 2);
                 bool ium = !is_soft_cap(d->character, 1);
-                auto leader = d->character->master ? d->character->master : d->character;
+                struct char_data* leader = d->character->master ? d->character->master : d->character;
 				if (sum) {
 					if (rand_number(1, 8) >= 6) {
 						int gain = rand_number(GET_LEVEL(d->character) / 2, GET_LEVEL(d->character) * 3) + (GET_LEVEL(d->character) * 18);

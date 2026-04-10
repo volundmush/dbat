@@ -2324,17 +2324,17 @@ static void handle_fall(struct char_data *ch)
 }
 
 static int check_swim(struct char_data *ch) {
-    auto can = false;
+    bool can = false;
 
     if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_SPACE)) {
-        auto space_cost = (GET_MAX_MANA(ch) / 1000) + ((getCurCarriedWeight(ch)) / 2);
+        int64_t space_cost = (GET_MAX_MANA(ch) / 1000) + ((getCurCarriedWeight(ch)) / 2);
         if (getCurKI(ch) >= space_cost)
             can = true;
         decCurKI(ch, space_cost);
         if (!can) send_to_char(ch, "You do not have enough ki to fly through space. You are drifting helplessly.\r\n");
         return can;
     } else {
-        auto swim_cost = (getCurCarriedWeight(ch)) - 1;
+        int64_t swim_cost = (getCurCarriedWeight(ch)) - 1;
         if (getCurST(ch) >= swim_cost)
             can = true;
         decCurST(ch, swim_cost);

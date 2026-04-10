@@ -48,8 +48,6 @@
 #include "dbat/game/fight.h"
 #include "dbat/game/class.h"
 
-#include <vector>
-
 /* local functions  */
 static void generate_multiform(struct char_data *ch, int count);
 static void resolve_song(struct char_data *ch);
@@ -188,8 +186,8 @@ ACMD(do_multiform)
   return;
  }
 
- std::vector<char_data*> multis;
  struct char_data *tch = NULL, *next_v = NULL;
+ int count = 0;
 
  for (tch = world[IN_ROOM(ch)].people; tch; tch = next_v) {
   next_v = tch->next_in_room;
@@ -197,7 +195,7 @@ ACMD(do_multiform)
    continue;
   }
   if (GET_MOB_VNUM(tch) == 25 && GET_ORIGINAL(tch) == ch) {
-      multis.push_back(tch);
+      count++;
   }
  }
 
@@ -205,12 +203,18 @@ ACMD(do_multiform)
  one_argument(argument, arg);
 
  if(!strcasecmp(arg, "merge")) {
-     if(multis.empty()) {
+     if(count == 0) {
          send_to_char(ch, "You have no multiforms present to merge with!\r\n");
          return;
      }
-     for(const auto& m : multis) {
-         extract_char(m);
+     for (tch = world[IN_ROOM(ch)].people; tch; tch = next_v) {
+      next_v = tch->next_in_room;
+      if (tch == ch || !IS_NPC(tch)) {
+       continue;
+      }
+      if (GET_MOB_VNUM(tch) == 25 && GET_ORIGINAL(tch) == ch) {
+          extract_char(tch);
+      }
      }
      return;
  }

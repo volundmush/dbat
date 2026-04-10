@@ -25,7 +25,6 @@
 #include "dbat/game/genzon.h"
 #include "dbat/game/dg_scripts.h"
 #include "dbat/game/class.h"
-#include <effolkronium/random.hpp>
 #include "dbat/game/techniques.h"
 #include "dbat/game/character_utils.h"
 #include "dbat/game/object_utils.h"
@@ -3378,8 +3377,8 @@ int64_t damtype(struct char_data *ch, int type, int skill, double percent)
     dam += GET_INT(ch) * (dam * 0.005);
    }
 
-   auto mob_hit = GET_HIT(ch);
-   auto max_hit = GET_MAX_HIT(ch);
+   int64_t mob_hit = GET_HIT(ch);
+   int64_t max_hit = GET_MAX_HIT(ch);
    int64_t mobperc = (mob_hit * 100) / max_hit;
    if (mobperc < 98 && mobperc >= 90) {
     dam = dam * 0.95;
@@ -3482,34 +3481,39 @@ void saiyan_gain(struct char_data *ch, struct char_data *vict)
  if (rand_number(1, 22) >= 18 && (GET_LEVEL(ch) == 100 || level_exp(ch, GET_LEVEL(ch) + 1) - (GET_EXP(ch)) > 0)) {
   if (weak) {
      send_to_char(ch, "@D[@YSaiyan @RBlood@D] @WThey are too weak to inspire your saiyan soul!@n\r\n");
-  } else {
-   std::vector<int64_t> stats;
-   for(const auto stat : {0, 1, 2}) {
-       if(!is_soft_cap(ch, stat, 1.5))
-           stats.push_back(stat);
-   }
-   if(stats.empty()) {
-       send_to_char(ch, "@D[@YSaiyan @RBlood@D] @WYou feel you have reached your current limits.@n\r\n");
-       return;
-   }
+   } else {
+    int stats[3] = {0, 1, 2};
+    int available[3];
+    int avail_count = 0;
 
-   effolkronium::random_static::shuffle(stats.begin(), stats.end());
+    for (int i = 0; i < 3; i++) {
+        if (!is_soft_cap(ch, stats[i], 1.5)) {
+            available[avail_count++] = stats[i];
+        }
+    }
 
-   switch (stats[0]) {
-    case 0:
-        gainBasePL(ch, gain);
-      send_to_char(ch, "@D[@YSaiyan @RBlood@D] @WYou feel slightly stronger. @D[@G+%s@D]@n\r\n", add_commas(gain));
-     break;
-    case 1:
-        gainBaseKI(ch, gain);
-      send_to_char(ch, "@D[@YSaiyan @RBlood@D] @WYou feel your spirit grow. @D[@G+%s@D]@n\r\n", add_commas(gain));
-     break;
-    case 2:
-        gainBaseST(ch, gain);
-      send_to_char(ch, "@D[@YSaiyan @RBlood@D] @WYou feel slightly more vigorous. @D[@G+%s@D]@n\r\n", add_commas(gain));
-     break;
+    if (avail_count == 0) {
+        send_to_char(ch, "@D[@YSaiyan @RBlood@D] @WYou feel you have reached your current limits.@n\r\n");
+        return;
+    }
+
+    int choice = available[rand_number(0, avail_count - 1)];
+
+    switch (choice) {
+     case 0:
+         gainBasePL(ch, gain);
+       send_to_char(ch, "@D[@YSaiyan @RBlood@D] @WYou feel slightly stronger. @D[@G+%s@D]@n\r\n", add_commas(gain));
+      break;
+     case 1:
+         gainBaseKI(ch, gain);
+       send_to_char(ch, "@D[@YSaiyan @RBlood@D] @WYou feel your spirit grow. @D[@G+%s@D]@n\r\n", add_commas(gain));
+      break;
+     case 2:
+         gainBaseST(ch, gain);
+       send_to_char(ch, "@D[@YSaiyan @RBlood@D] @WYou feel slightly more vigorous. @D[@G+%s@D]@n\r\n", add_commas(gain));
+      break;
+    }
    }
-  }
  }
 
 }
@@ -3831,7 +3835,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
  }
 
  if (AFF_FLAGGED(ch, AFF_INFUSE) && !AFF_FLAGGED(ch, AFF_HASS) && type <= 0) {
-     auto infuse_cost = getPercentOfMaxKI(ch, .005);
+     int64_t infuse_cost = getPercentOfMaxKI(ch, .005);
   if (dmg > 0) {
       if (getCurKI(ch) - infuse_cost) {
           decCurKI(ch, infuse_cost);

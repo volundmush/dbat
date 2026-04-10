@@ -932,7 +932,7 @@ void fight_stack()
       }
 
       if(!IS_NPC(ch) && IS_TRANSFORMED(ch) && !IS_ICER(ch) && IS_NONPTRANS(ch)) {
-          auto tier = get_race(ch->race)->getCurrentTransTier(ch);
+          int tier = get_race(ch->race)->getCurrentTransTier(ch);
 
           if (getCurST(ch) < GET_MAX_MOVE(ch) / 60) {
               if(!(tier == 1 && PLR_FLAGGED(ch, PLR_FPSSJ))) {
@@ -2283,7 +2283,7 @@ static void perform_group_gain(struct char_data *ch, int base, struct char_data 
   if (IN_ARENA(ch)) {
    return;
   }
-  auto leader = ch->master ? ch->master : ch;
+  struct char_data* leader = ch->master ? ch->master : ch;
 
   /*share = MIN(CONFIG_MAX_EXP_GAIN, MAX(1, base * GET_LEVEL(ch)));*/
   share = MIN(2000000, base * GET_LEVEL(ch));

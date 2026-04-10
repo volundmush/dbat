@@ -737,7 +737,7 @@ namespace dbat::race {
             return hoshi_form;
         }
 
-        auto tier = getCurrentTransTier(ch);
+        int tier = getCurrentTransTier(ch);
         if(!tier) return base_form;
         auto t_map = getTransMap(ch);
         if(t_map.empty()) return base_form;

@@ -241,7 +241,7 @@ int calcTier(char_data *ch) {
 }
 
 int64_t calc_soft_cap(char_data *ch) {
-    auto tier = calcTier(ch);
+    int tier = calcTier(ch);
     auto softmap = get_race(ch->race)->getSoftMap(ch);
     return ch->level * softmap[tier];
 }
@@ -257,7 +257,7 @@ bool is_soft_cap(char_data *ch, int64_t type, long double mult) {
     if(ch->level >= 100) {
         return false;
     }
-    auto cur_cap = calc_soft_cap(ch) * mult;
+    int64_t cur_cap = calc_soft_cap(ch) * mult;
 
     int64_t against = 0;
 
@@ -288,7 +288,7 @@ bool is_soft_cap(char_data *ch, int64_t type, long double mult) {
 int wearing_android_canister(char_data *ch) {
     if(!IS_ANDROID(ch))
         return 0;
-    auto obj = GET_EQ(ch, WEAR_BACKPACK);
+    struct obj_data* obj = GET_EQ(ch, WEAR_BACKPACK);
     if(!obj)
         return 0;
     switch(GET_OBJ_VNUM(obj)) {
@@ -367,7 +367,7 @@ int64_t incCurHealth(char_data *ch, int64_t amt, bool limit_max) {
 };
 
 int64_t decCurHealth(char_data *ch, int64_t amt, int64_t floor) {
-    auto fl = 0.0;
+    double fl = 0.0;
     if(floor > 0)
         fl = (double)floor / (double)getEffMaxPL(ch);
     ch->health = MAX(fl, ch->health-(double)std::abs(amt) / (double)getEffMaxPL(ch));
@@ -383,7 +383,7 @@ int64_t incCurHealthPercent(char_data *ch, double amt, bool limit_max) {
 }
 
 int64_t decCurHealthPercent(char_data *ch, double amt, int64_t floor) {
-    auto fl = 0.0;
+    double fl = 0.0;
     if(floor > 0)
         fl = (double)floor / (double)getEffMaxPL(ch);
     ch->health = MAX(fl, ch->health-std::abs(amt));
@@ -414,7 +414,7 @@ int64_t getMaxPLTrans(char_data *ch) {
 }
 
 int64_t getMaxPL(char_data *ch) {
-    auto total = getMaxPLTrans(ch);
+    int64_t total = getMaxPLTrans(ch);
     if(GET_KAIOKEN(ch) > 0) {
         total += (total / 10) * GET_KAIOKEN(ch);
     }
@@ -522,7 +522,7 @@ int64_t incCurKI(char_data *ch, int64_t amt, bool limit_max) {
 };
 
 int64_t decCurKI(char_data *ch, int64_t amt, int64_t floor) {
-    auto fl = 0.0;
+    double fl = 0.0;
     if(floor > 0)
         fl = (double)floor / (double)getMaxKI(ch);
     ch->energy = MAX(fl, ch->energy-(double)std::abs(amt) / (double)getMaxKI(ch));
@@ -541,7 +541,7 @@ int64_t decCurKIPercent(char_data *ch, double amt, int64_t floor) {
     if(!strcasecmp(ch->name, "Wayland")) {
         send_to_char(ch, "decCurKIPercent called with: %f\r\n", amt);
     }
-    auto fl = 0.0;
+    double fl = 0.0;
     if(floor > 0)
         fl = (double)floor / (double)getMaxKI(ch);
     ch->energy = MAX(fl, ch->energy-std::abs(amt));
@@ -613,7 +613,7 @@ int64_t incCurST(char_data *ch, int64_t amt, bool limit_max) {
 };
 
 int64_t decCurST(char_data *ch, int64_t amt, int64_t floor) {
-    auto fl = 0.0;
+    double fl = 0.0;
     if(floor > 0)
         fl = (double)floor / (double)getMaxST(ch);
     ch->stamina = MAX(fl, ch->stamina-(double)std::abs(amt) / (double)getMaxST(ch));
@@ -629,7 +629,7 @@ int64_t incCurSTPercent(char_data *ch, double amt, bool limit_max) {
 }
 
 int64_t decCurSTPercent(char_data *ch, double amt, int64_t floor) {
-    auto fl = 0.0;
+    double fl = 0.0;
     if(floor > 0)
         fl = (double)floor / (double)getMaxST(ch);
     ch->stamina = MAX(fl, ch->stamina-std::abs(amt));
@@ -683,7 +683,7 @@ int64_t incCurLF(char_data *ch, int64_t amt, bool limit_max) {
 };
 
 int64_t decCurLF(char_data *ch, int64_t amt, int64_t floor) {
-    auto fl = 0.0;
+    double fl = 0.0;
     if(floor > 0)
         fl = (double)floor / (double)getMaxLF(ch);
     ch->life = MAX(fl, ch->life-(double)std::abs(amt) / (double)getMaxLF(ch));
@@ -699,7 +699,7 @@ int64_t incCurLFPercent(char_data *ch, double amt, bool limit_max) {
 }
 
 int64_t decCurLFPercent(char_data *ch, double amt, int64_t floor) {
-    auto fl = 0.0;
+    double fl = 0.0;
     if(floor > 0)
         fl = (double)floor / (double)getMaxLF(ch);
     ch->life = MAX(fl, ch->life-std::abs(amt));
@@ -897,11 +897,11 @@ int64_t getAvailableCarryWeight(char_data *ch) {
 // speednar is in utils.cpp
 
 int64_t getEffMaxPL(char_data *ch) {
-    auto maxpl = getMaxPL(ch);
+    int64_t maxpl = getMaxPL(ch);
     if(IS_NPC(ch)) {
         return maxpl;
     }
-    auto snar = speednar(ch);
+    double snar = speednar(ch);
     return maxpl * (1.0 - snar);
 }
 
@@ -920,7 +920,7 @@ void apply_kaioken(char_data *ch, int times, bool announce) {
 }
 
 void remove_kaioken(char_data *ch, int8_t announce) {
-    auto kaio = GET_KAIOKEN(ch);
+    int8_t kaio = GET_KAIOKEN(ch);
     if(!kaio) {
         return;
     }
@@ -3347,8 +3347,8 @@ double speednar(struct char_data *ch)
 {
 
  double result = 0;
- auto carried = getCurCarriedWeight(ch);
- auto can_carry = CAN_CARRY_W(ch);
+ int64_t carried = getCurCarriedWeight(ch);
+ int64_t can_carry = CAN_CARRY_W(ch);
 
  if (carried >= can_carry) {
   result = 1.0;

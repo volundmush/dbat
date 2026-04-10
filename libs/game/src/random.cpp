@@ -4,7 +4,6 @@
 ************************************************************************ */
 
 #include "dbat/game/random.h"
-#include <effolkronium/random.hpp>
 
 /*
  * I am bothered by the non-portablility of 'rand' and 'random' -- rand
@@ -124,7 +123,7 @@ int rand_number(int from, int to)
     from = to;
     to = tmp;
   }
-  return effolkronium::random_static::get(from, to);
+  return large_rand(from, to);
 }
 
 /* Axion engine dice function */
