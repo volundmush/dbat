@@ -116,7 +116,7 @@ void sub_write_to_char(struct char_data *ch, char *tokens[],
 		strcat(sb,HMHR((struct char_data *) otokens[i]));
 	    break;
 
-	case '¨':
+	case 'z':
 	    if (!otokens[i])
 		strcat(sb,"something");
 	    else
@@ -165,7 +165,7 @@ void sub_write(char *arg, struct char_data *ch, int8_t find_invis, int targets)
 	    tokens[++i] = ++s;
 	    break;
 
-	case '¨':
+	case 'z':
 	    /* get obj_data, move to next token */
 	    type[i] = *p;
 	    *s = '\0';

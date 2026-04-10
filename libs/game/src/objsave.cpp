@@ -66,7 +66,7 @@ void delete_inv_backup(struct char_data *ch)
     } else if (name[0] == 'u' || name[0] == 'U' || name[0] == 'v' || name[0] == 'V' || name[0] == 'w' || name[0] == 'W' || name[0] == 'x' || name[0] == 'X' || name[0] == 'y' || name[0] == 'Y' || name[0] == 'z' || name[0] == 'Z') {
      sprintf(alpha, "U-Z");
     }
-    sprintf(source_file, ""SLASH"home"SLASH"dbat"SLASH"dbat"SLASH"data"SLASH"plrobjs"SLASH"%s"SLASH"%s.copy", alpha, ch->name);
+    sprintf(source_file, "" SLASH "home" SLASH "dbat" SLASH "dbat" SLASH "data" SLASH "plrobjs" SLASH " %s" SLASH "%s.copy", alpha, ch->name);
 
     if (!(source = fopen(source_file, "r"))) {
       return;
@@ -106,7 +106,7 @@ int load_inv_backup(struct char_data *ch)
      sprintf(alpha, "U-Z");
     }
 
-    sprintf(source_file, ""SLASH"home"SLASH"dbat"SLASH"dbat"SLASH"data"SLASH"plrobjs"SLASH"%s"SLASH"%s.copy", alpha, ch->name);
+    sprintf(source_file, "" SLASH "home" SLASH "dbat" SLASH "dbat" SLASH "data" SLASH "plrobjs" SLASH " %s" SLASH "%s.copy", alpha, ch->name);
     if (!get_filename(buf2, sizeof(buf2), NEW_OBJ_FILES, GET_NAME(ch)))
      return -1;
     sprintf(target_file, "/home/dbat/dbat/data/%s", buf2);
@@ -154,7 +154,7 @@ static int inv_backup(struct char_data *ch)
      sprintf(alpha, "U-Z");
     }
 
-  sprintf(buf, ""SLASH"home"SLASH"dbat"SLASH"dbat"SLASH"data"SLASH"plrobjs"SLASH"%s"SLASH"%s.copy", alpha, ch->name);
+  sprintf(buf, "" SLASH "home" SLASH "dbat" SLASH "dbat" SLASH "data" SLASH "plrobjs" SLASH " %s" SLASH "%s.copy", alpha, ch->name);
 
   if (!(backup = fopen(buf, "r")))
     return -1;
@@ -184,10 +184,10 @@ int cp(struct char_data *ch)
      sprintf(alpha, "U-Z");
     }
 
-    sprintf(target_file, ""SLASH"home"SLASH"dbat"SLASH"dbat"SLASH"data"SLASH"plrobjs"SLASH"%s"SLASH"%s.copy", alpha, ch->name);
+    sprintf(target_file, "" SLASH "home" SLASH "dbat" SLASH "dbat" SLASH "data" SLASH "plrobjs" SLASH " %s" SLASH "%s.copy", alpha, ch->name);
     if (!get_filename(buf2, sizeof(buf2), NEW_OBJ_FILES, GET_NAME(ch)))
      return -1;
-    sprintf(source_file, ""SLASH"home"SLASH"dbat"SLASH"dbat"SLASH"data"SLASH"%s", buf2);
+    sprintf(source_file, "" SLASH "home" SLASH "dbat" SLASH "dbat" SLASH "data" SLASH " %s", buf2);
 
     if (!(source = fopen(source_file, "r"))) {
       log("Source failed to load.");
@@ -1300,12 +1300,12 @@ int Crash_load(struct char_data *ch)
               break;
             case 'G':
               get_line(fl, line);
-              sscanf(line, "%"TMT, &temp->generation);
+              sscanf(line, "%" TMT, &temp->generation);
               get_line(fl, line);
               break;
             case 'U':
               get_line(fl, line);
-              sscanf(line, "%"I64T, &temp->unique_id);
+              sscanf(line, "%" I64T, &temp->unique_id);
               get_line(fl, line);
               break;
             case 'S':

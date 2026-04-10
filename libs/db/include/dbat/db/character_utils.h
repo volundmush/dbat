@@ -289,7 +289,7 @@ void char_set_next_fighting(struct char_data *ch, struct char_data *next);
 // Player Specials (PC-only, safe for NPCs via dummy_mob)
 // =============================================================================
 
-int *char_get_pref(const struct char_data *ch);
+bitvector_t *char_get_pref(const struct char_data *ch);
 int char_get_cond(const struct char_data *ch, int cond);
 void char_set_cond(struct char_data *ch, int cond, int value);
 void char_inc_cond(struct char_data *ch, int cond, int delta);

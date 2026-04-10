@@ -349,20 +349,20 @@ bool isFullHealth(char_data *ch) {
 }
 
 int64_t setCurHealth(char_data *ch, int64_t amt) {
-    ch->hit = MAX(0L, std::abs(amt));
+    ch->hit = MAX(0L, llabs(amt));
     return ch->hit;
 }
 
 int64_t setCurHealthPercent(char_data *ch, double amt) {
-    ch->hit = MAX(0L, (int64_t)(getMaxHealth(ch) * std::abs(amt)));
+    ch->hit = MAX(0L, (int64_t)(getMaxHealth(ch) * llabs(amt)));
     return ch->hit;
 }
 
 int64_t incCurHealth(char_data *ch, int64_t amt, bool limit_max) {
     if(limit_max)
-        ch->health = MIN(1.0, ch->health+(double)std::abs(amt) / (double)getEffMaxPL(ch));
+        ch->health = MIN(1.0, ch->health+(double)llabs(amt) / (double)getEffMaxPL(ch));
     else
-        ch->health += (double)std::abs(amt) / (double)getEffMaxPL(ch);
+        ch->health += (double)llabs(amt) / (double)getEffMaxPL(ch);
     return getCurHealth(ch);
 };
 
@@ -370,15 +370,15 @@ int64_t decCurHealth(char_data *ch, int64_t amt, int64_t floor) {
     double fl = 0.0;
     if(floor > 0)
         fl = (double)floor / (double)getEffMaxPL(ch);
-    ch->health = MAX(fl, ch->health-(double)std::abs(amt) / (double)getEffMaxPL(ch));
+    ch->health = MAX(fl, ch->health-(double)llabs(amt) / (double)getEffMaxPL(ch));
     return getCurHealth(ch);
 }
 
 int64_t incCurHealthPercent(char_data *ch, double amt, bool limit_max) {
     if(limit_max)
-        ch->health = MIN(1.0, ch->health+std::abs(amt));
+        ch->health = MIN(1.0, ch->health+llabs(amt));
     else
-        ch->health += std::abs(amt);
+        ch->health += llabs(amt);
     return getCurHealth(ch);
 }
 
@@ -386,7 +386,7 @@ int64_t decCurHealthPercent(char_data *ch, double amt, int64_t floor) {
     double fl = 0.0;
     if(floor > 0)
         fl = (double)floor / (double)getEffMaxPL(ch);
-    ch->health = MAX(fl, ch->health-std::abs(amt));
+    ch->health = MAX(fl, ch->health-llabs(amt));
     return getCurHealth(ch);
 }
 
@@ -450,11 +450,11 @@ double getCurPLPercent(char_data *ch) {
 }
 
 int64_t getPercentOfCurPL(char_data *ch, double amt) {
-    return getCurPL(ch) * std::abs(amt);
+    return getCurPL(ch) * llabs(amt);
 }
 
 int64_t getPercentOfMaxPL(char_data *ch, double amt) {
-    return getMaxPL(ch) * std::abs(amt);
+    return getMaxPL(ch) * llabs(amt);
 }
 
 bool isFullPL(char_data *ch) {
@@ -492,11 +492,11 @@ double getCurKIPercent(char_data *ch) {
 }
 
 int64_t getPercentOfCurKI(char_data *ch, double amt) {
-    return getCurKI(ch) * std::abs(amt);
+    return getCurKI(ch) * llabs(amt);
 }
 
 int64_t getPercentOfMaxKI(char_data *ch, double amt) {
-    return getMaxKI(ch) * std::abs(amt);
+    return getMaxKI(ch) * llabs(amt);
 }
 
 bool isFullKI(char_data *ch) {
@@ -504,20 +504,20 @@ bool isFullKI(char_data *ch) {
 }
 
 int64_t setCurKI(char_data *ch, int64_t amt) {
-    ch->mana = MAX(0L, std::abs(amt));
+    ch->mana = MAX(0L, llabs(amt));
     return ch->mana;
 }
 
 int64_t setCurKIPercent(char_data *ch, double amt) {
-    ch->mana = MAX(0L, (int64_t)(getMaxKI(ch) * std::abs(amt)));
+    ch->mana = MAX(0L, (int64_t)(getMaxKI(ch) * llabs(amt)));
     return ch->mana;
 }
 
 int64_t incCurKI(char_data *ch, int64_t amt, bool limit_max) {
     if(limit_max)
-        ch->energy = MIN(1.0, ch->energy+(double)std::abs(amt) / (double)getMaxKI(ch));
+        ch->energy = MIN(1.0, ch->energy+(double)llabs(amt) / (double)getMaxKI(ch));
     else
-        ch->energy += (double)std::abs(amt) / (double)getMaxKI(ch);
+        ch->energy += (double)llabs(amt) / (double)getMaxKI(ch);
     return getCurKI(ch);
 };
 
@@ -525,15 +525,15 @@ int64_t decCurKI(char_data *ch, int64_t amt, int64_t floor) {
     double fl = 0.0;
     if(floor > 0)
         fl = (double)floor / (double)getMaxKI(ch);
-    ch->energy = MAX(fl, ch->energy-(double)std::abs(amt) / (double)getMaxKI(ch));
+    ch->energy = MAX(fl, ch->energy-(double)llabs(amt) / (double)getMaxKI(ch));
     return getCurKI(ch);
 }
 
 int64_t incCurKIPercent(char_data *ch, double amt, bool limit_max) {
     if(limit_max)
-        ch->energy = MIN(1.0, ch->energy+std::abs(amt));
+        ch->energy = MIN(1.0, ch->energy+llabs(amt));
     else
-        ch->energy += std::abs(amt);
+        ch->energy += llabs(amt);
     return getCurKI(ch);
 }
 
@@ -544,7 +544,7 @@ int64_t decCurKIPercent(char_data *ch, double amt, int64_t floor) {
     double fl = 0.0;
     if(floor > 0)
         fl = (double)floor / (double)getMaxKI(ch);
-    ch->energy = MAX(fl, ch->energy-std::abs(amt));
+    ch->energy = MAX(fl, ch->energy-llabs(amt));
     return getCurKI(ch);
 }
 
@@ -583,11 +583,11 @@ double getCurSTPercent(char_data *ch) {
 }
 
 int64_t getPercentOfCurST(char_data *ch, double amt) {
-    return getCurST(ch) * std::abs(amt);
+    return getCurST(ch) * llabs(amt);
 }
 
 int64_t getPercentOfMaxST(char_data *ch, double amt) {
-    return getMaxST(ch) * std::abs(amt);
+    return getMaxST(ch) * llabs(amt);
 }
 
 bool isFullST(char_data *ch) {
@@ -595,20 +595,20 @@ bool isFullST(char_data *ch) {
 }
 
 int64_t setCurST(char_data *ch, int64_t amt) {
-    ch->move = MAX(0L, std::abs(amt));
+    ch->move = MAX(0L, llabs(amt));
     return ch->move;
 }
 
 int64_t setCurSTPercent(char_data *ch, double amt) {
-    ch->move = MAX(0L, (int64_t)(getMaxST(ch) * std::abs(amt)));
+    ch->move = MAX(0L, (int64_t)(getMaxST(ch) * llabs(amt)));
     return ch->move;
 }
 
 int64_t incCurST(char_data *ch, int64_t amt, bool limit_max) {
     if(limit_max)
-        ch->stamina = MIN(1.0, ch->stamina+(double)std::abs(amt) / (double)getMaxST(ch));
+        ch->stamina = MIN(1.0, ch->stamina+(double)llabs(amt) / (double)getMaxST(ch));
     else
-        ch->stamina += (double)std::abs(amt) / (double)getMaxST(ch);
+        ch->stamina += (double)llabs(amt) / (double)getMaxST(ch);
     return getCurST(ch);
 };
 
@@ -616,15 +616,15 @@ int64_t decCurST(char_data *ch, int64_t amt, int64_t floor) {
     double fl = 0.0;
     if(floor > 0)
         fl = (double)floor / (double)getMaxST(ch);
-    ch->stamina = MAX(fl, ch->stamina-(double)std::abs(amt) / (double)getMaxST(ch));
+    ch->stamina = MAX(fl, ch->stamina-(double)llabs(amt) / (double)getMaxST(ch));
     return getCurST(ch);
 }
 
 int64_t incCurSTPercent(char_data *ch, double amt, bool limit_max) {
     if(limit_max)
-        ch->stamina = MIN(1.0, ch->stamina+std::abs(amt));
+        ch->stamina = MIN(1.0, ch->stamina+llabs(amt));
     else
-        ch->stamina += std::abs(amt);
+        ch->stamina += llabs(amt);
     return getMaxST(ch);
 }
 
@@ -632,7 +632,7 @@ int64_t decCurSTPercent(char_data *ch, double amt, int64_t floor) {
     double fl = 0.0;
     if(floor > 0)
         fl = (double)floor / (double)getMaxST(ch);
-    ch->stamina = MAX(fl, ch->stamina-std::abs(amt));
+    ch->stamina = MAX(fl, ch->stamina-llabs(amt));
     return getCurST(ch);
 }
 
@@ -653,11 +653,11 @@ double getCurLFPercent(char_data *ch) {
 }
 
 int64_t getPercentOfCurLF(char_data *ch, double amt) {
-    return getCurLF(ch) * std::abs(amt);
+    return getCurLF(ch) * llabs(amt);
 }
 
 int64_t getPercentOfMaxLF(char_data *ch, double amt) {
-    return getMaxLF(ch) * std::abs(amt);
+    return getMaxLF(ch) * llabs(amt);
 }
 
 bool isFullLF(char_data *ch) {
@@ -665,20 +665,20 @@ bool isFullLF(char_data *ch) {
 }
 
 int64_t setCurLF(char_data *ch, int64_t amt) {
-    ch->life = MAX(0L, std::abs(amt));
+    ch->life = MAX(0L, llabs(amt));
     return getCurLF(ch);
 }
 
 int64_t setCurLFPercent(char_data *ch, double amt) {
-    ch->life = MAX(0L, (int64_t)(getMaxLF(ch) * std::abs(amt)));
+    ch->life = MAX(0L, (int64_t)(getMaxLF(ch) * llabs(amt)));
     return getCurLF(ch);
 }
 
 int64_t incCurLF(char_data *ch, int64_t amt, bool limit_max) {
     if(limit_max)
-        ch->life = MIN(1.0, ch->stamina+(double)std::abs(amt) / (double)getMaxLF(ch));
+        ch->life = MIN(1.0, ch->stamina+(double)llabs(amt) / (double)getMaxLF(ch));
     else
-        ch->life += (double)std::abs(amt) / (double)getMaxLF(ch);
+        ch->life += (double)llabs(amt) / (double)getMaxLF(ch);
     return getCurLF(ch);
 };
 
@@ -686,15 +686,15 @@ int64_t decCurLF(char_data *ch, int64_t amt, int64_t floor) {
     double fl = 0.0;
     if(floor > 0)
         fl = (double)floor / (double)getMaxLF(ch);
-    ch->life = MAX(fl, ch->life-(double)std::abs(amt) / (double)getMaxLF(ch));
+    ch->life = MAX(fl, ch->life-(double)llabs(amt) / (double)getMaxLF(ch));
     return getCurLF(ch);
 }
 
 int64_t incCurLFPercent(char_data *ch, double amt, bool limit_max) {
     if(limit_max)
-        ch->life = MIN(1.0, ch->life+std::abs(amt));
+        ch->life = MIN(1.0, ch->life+llabs(amt));
     else
-        ch->life += std::abs(amt);
+        ch->life += llabs(amt);
     return getCurLF(ch);
 }
 
@@ -702,7 +702,7 @@ int64_t decCurLFPercent(char_data *ch, double amt, int64_t floor) {
     double fl = 0.0;
     if(floor > 0)
         fl = (double)floor / (double)getMaxLF(ch);
-    ch->life = MAX(fl, ch->life-std::abs(amt));
+    ch->life = MAX(fl, ch->life-llabs(amt));
     return getCurLF(ch);
 }
 

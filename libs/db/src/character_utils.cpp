@@ -888,7 +888,7 @@ static struct player_special_data *char_get_player_specials(const struct char_da
   return ch->player_specials;
 }
 
-int *char_get_pref(const struct char_data *ch)
+bitvector_t *char_get_pref(const struct char_data *ch)
 {
   struct player_special_data *ps = char_get_player_specials(ch);
   return ps ? ps->pref : NULL;
@@ -1094,7 +1094,7 @@ bool char_aff_flagged(const struct char_data *ch, int flag)
 
 bool char_prf_flagged(const struct char_data *ch, int flag)
 {
-  int *pref = char_get_pref(ch);
+  bitvector_t *pref = char_get_pref(ch);
   return pref && flag_test(pref, flag);
 }
 
@@ -1125,7 +1125,7 @@ void char_set_aff_flag(struct char_data *ch, int flag, bool value)
 
 void char_set_prf_flag(struct char_data *ch, int flag, bool value)
 {
-  int *pref = char_get_pref(ch);
+  bitvector_t *pref = char_get_pref(ch);
   if (pref) {
     flag_set(pref, flag, value);
   }
@@ -1143,7 +1143,7 @@ void char_set_body_flag(struct char_data *ch, int flag, bool value)
 
 bool char_toggle_plr_flag(struct char_data *ch, int flag)
 {
-  int *pref = char_get_pref(ch);
+  bitvector_t *pref = char_get_pref(ch);
   return pref ? flag_toggle(pref, flag) : false;
 }
 

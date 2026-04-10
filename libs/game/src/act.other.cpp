@@ -11704,10 +11704,10 @@ ACMD(do_clan) {
       send_to_char(ch, "%s is not a valid clan.\r\n", arg2);
     else if(clanIsMember(arg2, ch))
       send_to_char(ch, "You are already a member of %s.\r\n", arg2);
-    else if(GET_CLAN(ch) != NULL && checkCLAN(ch) == TRUE && strstr(GET_CLAN(ch), "Applying") == FALSE)
+    else if(GET_CLAN(ch) != NULL && checkCLAN(ch) == 1 && !strstr(GET_CLAN(ch), "Applying"))
       send_to_char(ch, "You are already a member of %s, you need to leave it first.\r\n", GET_CLAN(ch));
     else if(clanOpenJoin(arg2)) {
-      if (GET_CLAN(ch) != NULL && checkCLAN(ch) == TRUE) {
+      if (GET_CLAN(ch) != NULL && checkCLAN(ch) == 1) {
        checkAPP(ch);
        send_to_char(ch, "You stop applying to %s\r\n", GET_CLAN(ch));
        clanDecline(GET_CLAN(ch), ch);

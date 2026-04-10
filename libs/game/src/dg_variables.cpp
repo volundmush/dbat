@@ -153,7 +153,7 @@ int text_processed(char *field, char *subfield, struct trig_var_data *vd,
 
   if (!strcasecmp(field, "strlen")) {                     /* strlen    */
     char limit[200];
-    sprintf(limit, "%"SZT, strlen(vd->value));
+    sprintf(limit, "%" SZT, strlen(vd->value));
     snprintf(str, slen, "%d", atoi(limit));
     return TRUE;
   } else if (!strcasecmp(field, "trim")) {                /* trim      */

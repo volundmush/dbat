@@ -2999,7 +2999,7 @@ static void look_at_char(struct char_data *i, struct char_data *ch)
 		}
 	}
 	send_to_char(ch, "\r\n");
-	if (GET_CLAN(i) != NULL && strstr(GET_CLAN(i), "None") == FALSE) {
+	if (GET_CLAN(i) != NULL && !strstr(GET_CLAN(i), "None")) {
 		sprintf(buf, "%s", GET_CLAN(i));
 		clan = TRUE;
 	}
@@ -7720,7 +7720,7 @@ char *cchoice_to_str(char *col)
         fg = 1;
         switch (*col) {
         case '0':
-          s = bold ? "grey" : "black";
+          s = bold ? (char*)"grey" : (char*)"black";
           bold = 0;
           fg = 1;
           break;

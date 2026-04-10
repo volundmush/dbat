@@ -73,3 +73,5 @@ logs/
 dependencies/
 *.pem
 syslog*
+.zig-cache/
+zig-out/

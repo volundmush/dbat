@@ -293,7 +293,7 @@ int print_skills_by_type(struct char_data *ch, char *buf, int maxsz, int sktype,
       known = 0;
     }
     if (*arg) {
-     if (atoi(arg) <= 0 && strstr(spell_info[i].name, arg) == FALSE) {
+     if (atoi(arg) <= 0 && !strstr(spell_info[i].name, arg)) {
       known = 0;
      } else if (atoi(arg) > GET_SKILL(ch, i)) {
       known = 0;

@@ -37,7 +37,7 @@ int is_name(const char *str, const char *namelist)
 int isname(const char *str, const char *namelist)
 {
   char *newlist;
-  register char *curtok;
+  char *curtok;
   static char newlistbuf[MAX_STRING_LENGTH];
 
   if (!str || !*str || !namelist || !*namelist) {

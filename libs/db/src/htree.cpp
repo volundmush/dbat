@@ -30,7 +30,7 @@ struct htree_node *htree_init()
 
   if (! HTREE_NULL) {
     htree_total_nodes++;
-    HTREE_NULL = calloc(1, sizeof(struct htree_node));
+    HTREE_NULL = (struct htree_node *)calloc(1, sizeof(struct htree_node));
     for (i = 0; i < HTREE_NODE_SUBS; i++) {
       HTREE_NULL->subs[i] = HTREE_NULL;
     }
@@ -42,7 +42,7 @@ struct htree_node *htree_init()
     htree_depth_used = 1;
 
   htree_total_nodes++;
-  newnode = calloc(1, sizeof(struct htree_node));
+  newnode = (struct htree_node *)calloc(1, sizeof(struct htree_node));
   memcpy(newnode->subs, HTREE_NULL->subs, HTREE_NODE_SUBS * sizeof(struct htree_node *));
   newnode->content = NOWHERE;
   newnode->parent = HTREE_NULL;
@@ -79,7 +79,7 @@ void htree_add(struct htree_node *root, IDXTYPE htindex, IDXTYPE content)
     htindex >>= HTREE_NODE_BITS;
     if (tmp->subs[i] == HTREE_NULL) {
       htree_total_nodes++;
-      tmp->subs[i] = calloc(1, sizeof(struct htree_node));
+      tmp->subs[i] = (struct htree_node *)calloc(1, sizeof(struct htree_node));
       memcpy(tmp->subs[i]->subs, HTREE_NULL->subs, HTREE_NODE_SUBS * sizeof(struct htree_node *));
       tmp->subs[i]->content = NOWHERE;
       tmp->subs[i]->parent = HTREE_NULL;

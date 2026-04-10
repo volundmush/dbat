@@ -4402,7 +4402,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
    break;
 
   case 79:
-   GET_FEATURE(vict) = '\0';
+   GET_FEATURE(vict) = "";
    break;
 
   case 80:
@@ -5190,7 +5190,7 @@ ACMD (do_zcheck)
 
       if ((MIN_ROOM_DESC_LENGTH) && strlen(world[i].description)<MIN_ROOM_DESC_LENGTH && (found=1))
         len += snprintf(buf + len, sizeof(buf) - len,
-                        "- Room description is too short. (%4.4"SZT" of min. %d characters).\r\n",
+                        "- Room description is too short. (%4.4" SZT " of min. %d characters).\r\n",
                              strlen(world[i].description), MIN_ROOM_DESC_LENGTH);
 
       if (strncmp(world[i].description, "   ", 3) && (found=1))

@@ -40,6 +40,8 @@
 #include "dbat/game/relocate.h"
 #include "dbat/game/stringutils.h"
 
+#include <errno.h>
+
 /* Names first */
 
 /*
@@ -1987,17 +1989,7 @@ time_t birth_age(struct char_data *ch)
 
 time_t max_age(struct char_data *ch)
 {
-  struct aging_data *aging;
-  size_t tmp;
-
-  if (ch->time.maxage)
-    return ch->time.maxage - ch->time.birth;
-
-  aging = racial_aging_data + GET_RACE(ch);
-
-  tmp = 120;
-
-  return tmp;
+  return 120;
 }
 
 static const int class_feats_wizard[] = {

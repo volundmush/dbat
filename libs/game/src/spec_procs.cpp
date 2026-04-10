@@ -190,7 +190,7 @@ int num_players_in_room(room_vnum room)
 
 bool check_mob_in_room(mob_vnum mob, room_vnum room) 
 { 
-  register struct char_data *i; 
+  struct char_data *i; 
   bool found = FALSE; 
 
   for (i = character_list; i; i = i->next) 
