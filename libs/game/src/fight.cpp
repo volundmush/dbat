@@ -236,7 +236,7 @@ static void mob_attack(struct char_data *ch, char *buf)
  }
 
  if (axion_dice(-10) > 90 && getCurHealthPercent(ch) <= .5 && !MOB_FLAGGED(ch, MOB_POWERUP) && GET_MOB_VNUM(ch) != 25 &&
- !(IS_ANDROID(ch) || IS_ANIMAL(ch) || get_sensei(ch->chclass)->getID() == dbat::sensei::commoner))  {
+ !(IS_ANDROID(ch) || IS_ANIMAL(ch) || ch->chclass == CLASS_NPC_COMMONER))  {
   do_powerup(ch, nullptr, 0, 0);
   return;
  }

@@ -1275,12 +1275,14 @@ bool char_is_spoiled(const struct char_data *ch);
 			 (EXIT(ch,door)->to_room != NOWHERE) && \
 			 !IS_SET(EXIT(ch, door)->exit_info, EX_CLOSED))
 
+#define SENSEI_NAME(ch) (pc_class_types[ch->chclass])
+#define SENSEI_NAME_LOWER(ch) (class_names[ch->chclass])
 #define RACE(ch)      (juggleRaceName(ch, true))
 #define LRACE(ch)     (juggleRaceName(ch, false))
-#define TRUE_RACE(ch) (get_race(ch->race)->getName().c_str())
+#define TRUE_RACE(ch) (pc_race_types[ch->race])
 
-#define CLASS_ABBR(ch) (get_sensei(ch->chclass)->getAbbr().c_str())
-#define RACE_ABBR(ch) (get_race(ch->race)->getAbbr().c_str())
+#define CLASS_ABBR(ch) (class_abbrevs[ch->chclass])
+#define RACE_ABBR(ch) (race_abbrevs[ch->race])
 
 #define IS_ROSHI(ch)            (GET_CLASS(ch) == CLASS_ROSHI)
 #define IS_PICCOLO(ch)          (GET_CLASS(ch) == CLASS_PICCOLO)
