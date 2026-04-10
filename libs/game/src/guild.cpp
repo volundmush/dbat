@@ -275,14 +275,14 @@ int print_skills_by_type(struct char_data *ch, char *buf, int maxsz, int sktype,
 
   one_argument(argument, arg);
 
-  for (i = 1; i <= SKILL_TABLE_SIZE; i++) { 
+  for (i = 1; i < SKILL_TABLE_SIZE; i++) { 
     t = spell_info[i].skilltype;
 
     if (t != sktype)
       continue;
 
     if ((t & SKTYPE_SKILL) || (t & SKTYPE_SPELL)) {
-      for (nlen = 0, known = 0; nlen <= NUM_CLASSES; nlen++)
+      for (nlen = 0, known = 0; nlen < NUM_CLASSES; nlen++)
         if (GET_CLASS_RANKS(ch, nlen) > 0 && (spell_info[i].can_learn_skill[nlen] > SKLEARN_CANT)) {
           known = spell_info[i].can_learn_skill[nlen];
         }
@@ -633,7 +633,7 @@ void what_does_guild_know(int guild_nr, struct char_data * ch)
   for (sortpos = 0; sortpos < SKILL_TABLE_SIZE; sortpos++) {
     i = sortpos; /* spell_sort_info[sortpos]; */
     if (does_guild_know(guild_nr, i) && skill_type(i) == SKTYPE_SKILL) {
-      for (canknow = 0, k = 0, j = 0; j <= NUM_CLASSES; j++)
+      for (canknow = 0, k = 0, j = 0; j < NUM_CLASSES; j++)
         if (GET_CLASS_RANKS(ch, j) > 0 && (spell_info[i].can_learn_skill[j] > SKLEARN_CANT)) {
           k = spell_info[i].can_learn_skill[j];
         }
