@@ -1277,6 +1277,7 @@ bool char_is_spoiled(const struct char_data *ch);
 
 #define SENSEI_NAME(ch) (pc_class_types[ch->chclass])
 #define SENSEI_NAME_LOWER(ch) (class_names[ch->chclass])
+#define SENSEI_STYLE(ch) (sensei_style[ch->chclass])
 #define RACE(ch)      (juggleRaceName(ch, true))
 #define LRACE(ch)     (juggleRaceName(ch, false))
 #define TRUE_RACE(ch) (pc_race_types[ch->race])
