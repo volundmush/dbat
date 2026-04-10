@@ -445,7 +445,9 @@ int find_all_dots(char *arg)
   if (!strcmp(arg, "all"))
     return (FIND_ALL);
   else if (!strncmp(arg, "all.", 4)) {
-    strcpy(arg, arg + 4);	/* strcpy: OK (always less) */
+    /* Must use memmove - strcpy cannot handle overlapping src/dest buffers.
+     * Here we strip the "all." prefix by shifting "all.foo" to "foo". */
+    memmove(arg, arg + 4, strlen(arg + 4) + 1);
     return (FIND_ALLDOT);
   } else
     return (FIND_INDIV);

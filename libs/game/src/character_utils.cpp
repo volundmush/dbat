@@ -897,10 +897,12 @@ int64_t getAvailableCarryWeight(char_data *ch) {
 // speednar is in utils.cpp
 
 int64_t getEffMaxPL(char_data *ch) {
+    auto maxpl = getMaxPL(ch);
     if(IS_NPC(ch)) {
-        return getMaxPL(ch);
+        return maxpl;
     }
-    return getMaxPL(ch) * speednar(ch);
+    auto snar = speednar(ch);
+    return maxpl * (1.0 - snar);
 }
 
 bool isWeightedPL(char_data *ch) {
@@ -3345,48 +3347,50 @@ double speednar(struct char_data *ch)
 {
 
  double result = 0;
+ auto carried = getCurCarriedWeight(ch);
+ auto can_carry = CAN_CARRY_W(ch);
 
- if ((getCurCarriedWeight(ch)) >= CAN_CARRY_W(ch)) {
+ if (carried >= can_carry) {
   result = 1.0;
- } else if ((getCurCarriedWeight(ch)) >= CAN_CARRY_W(ch) * 0.95) {
+ } else if (carried >= can_carry * 0.95) {
   result = 0.95;
- } else if ((getCurCarriedWeight(ch)) >= CAN_CARRY_W(ch) * 0.9) {
+ } else if (carried >= can_carry * 0.9) {
   result = 0.90;
- } else if ((getCurCarriedWeight(ch)) >= CAN_CARRY_W(ch) * 0.85) {
+ } else if (carried >= can_carry * 0.85) {
   result = 0.85;
- } else if ((getCurCarriedWeight(ch)) >= CAN_CARRY_W(ch) * 0.80) {
+ } else if (carried >= can_carry * 0.80) {
   result = 0.80;
- } else if ((getCurCarriedWeight(ch)) >= CAN_CARRY_W(ch) * 0.75) {
+ } else if (carried >= can_carry * 0.75) {
   result = 0.75;
- } else if ((getCurCarriedWeight(ch)) >= CAN_CARRY_W(ch) * 0.70) {
+ } else if (carried >= can_carry * 0.70) {
   result = 0.70;
- } else if ((getCurCarriedWeight(ch)) >= CAN_CARRY_W(ch) * 0.65) {
+ } else if (carried >= can_carry * 0.65) {
   result = 0.65;
- } else if ((getCurCarriedWeight(ch)) >= CAN_CARRY_W(ch) * 0.60) {
+ } else if (carried >= can_carry * 0.60) {
   result = 0.60;
- } else if ((getCurCarriedWeight(ch)) >= CAN_CARRY_W(ch) * 0.55) {
+ } else if (carried >= can_carry * 0.55) {
   result = 0.55;
- } else if ((getCurCarriedWeight(ch)) >= CAN_CARRY_W(ch) * 0.50) {
+ } else if (carried >= can_carry * 0.50) {
   result = 0.50;
- } else if ((getCurCarriedWeight(ch)) >= CAN_CARRY_W(ch) * 0.45) {
+ } else if (carried >= can_carry * 0.45) {
   result = 0.45;
- } else if ((getCurCarriedWeight(ch)) >= CAN_CARRY_W(ch) * 0.40) {
+ } else if (carried >= can_carry * 0.40) {
   result = 0.40;
- } else if ((getCurCarriedWeight(ch)) >= CAN_CARRY_W(ch) * 0.35) {
+ } else if (carried >= can_carry * 0.35) {
   result = 0.35;
- } else if ((getCurCarriedWeight(ch)) >= CAN_CARRY_W(ch) * 0.30) {
+ } else if (carried >= can_carry * 0.30) {
   result = 0.30;
- } else if ((getCurCarriedWeight(ch)) >= CAN_CARRY_W(ch) * 0.25) {
+ } else if (carried >= can_carry * 0.25) {
   result = 0.25;
- } else if ((getCurCarriedWeight(ch)) >= CAN_CARRY_W(ch) * 0.20) {
+ } else if (carried >= can_carry * 0.20) {
   result = 0.20;
- } else if ((getCurCarriedWeight(ch)) >= CAN_CARRY_W(ch) * 0.15) {
+ } else if (carried >= can_carry * 0.15) {
   result = 0.15;
- } else if ((getCurCarriedWeight(ch)) >= CAN_CARRY_W(ch) * 0.10) {
+ } else if (carried >= can_carry * 0.10) {
   result = 0.10;
- } else if ((getCurCarriedWeight(ch)) >= CAN_CARRY_W(ch) * 0.05) {
+ } else if (carried >= can_carry * 0.05) {
   result = 0.05;
- } else if ((getCurCarriedWeight(ch)) >= CAN_CARRY_W(ch) * 0.01) {
+ } else if (carried >= can_carry * 0.01) {
   result = 0.01;
  }
 

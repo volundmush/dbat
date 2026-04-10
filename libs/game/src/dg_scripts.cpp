@@ -1485,6 +1485,9 @@ int eval_lhs_op_rhs(char *expr, char *result, void *go, struct script_data *sc,
 {
   char *p, *tokens[MAX_INPUT_LENGTH];
   char line[MAX_INPUT_LENGTH], lhr[MAX_INPUT_LENGTH], rhr[MAX_INPUT_LENGTH];
+
+  lhr[0] = '\0';
+  rhr[0] = '\0';
   int i, j;
 
   /*
