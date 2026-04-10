@@ -10,8 +10,6 @@ struct transform_bonus {
     const char *name;
     const char* msg_transform_self;
     const char* msg_transform_others;
-    const char* msg_revert_self;
-    const char* msg_revert_others;
 };
 
 struct transforms_available {
@@ -22,3 +20,5 @@ struct transforms_available {
 extern transform_bonus base_form;
 extern transform_bonus oozaru;
 
+transforms_available* get_transforms_available(char_data *ch);
+transform_bonus get_current_transform(char_data *ch);
