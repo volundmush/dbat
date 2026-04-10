@@ -1025,7 +1025,9 @@ bool char_is_spoiled(const struct char_data *ch);
 #define GET_DCOUNT(ch)    ((ch)->dcount)
 #define GET_BOARD(ch, i)  ((ch)->lboard[i])
 #define GET_LIMBS(ch, i)  ((ch)->limbs[i])
-#define GET_LIMBCOND(ch, i) ((ch)->limb_condition[i])
+// why is this i-1? Because whoever wrote it didn't know how C arrays work.
+// We'll be replacing the limb system anyways so fuck this macro.
+#define GET_LIMBCOND(ch, i) ((ch)->limb_condition[i-1])
 #define GET_SONG(ch)      ((ch)->powerattack)
 #define GET_BONUS(ch, i)  ((ch)->bonuses[i])
 #define GET_TRANSCOST(ch, i) ((ch)->transcost[i])

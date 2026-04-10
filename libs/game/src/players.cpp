@@ -351,10 +351,10 @@ int load_char(const char *name, struct char_data *ch)
     }
     GET_GROUPKILLS(ch) = 0;
     GET_SONG(ch) = 0;
-    GET_LIMBCOND(ch, 0) = 0;
     GET_LIMBCOND(ch, 1) = 0;
     GET_LIMBCOND(ch, 2) = 0;
     GET_LIMBCOND(ch, 3) = 0;
+    GET_LIMBCOND(ch, 4) = 0;
     GET_BOARD(ch, 0) = PFDEF_BOARD;
     GET_BOARD(ch, 1) = PFDEF_BOARD;
     GET_BOARD(ch, 2) = PFDEF_BOARD;
