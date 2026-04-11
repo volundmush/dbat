@@ -75,3 +75,5 @@ dependencies/
 syslog*
 .zig-cache/
 zig-out/
+.killscript
+.pause

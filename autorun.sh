@@ -30,6 +30,7 @@
 # off for a couple of minutes and then bring it back up without killing the
 # script.  Type "shutdown pause" from within the MUD to activate this feature.
 #
+ulimit -c unlimited
 
 # The port on which to run the MUD
 PORT=1280
