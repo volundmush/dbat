@@ -25,7 +25,6 @@
 #include "dbat/game/time.h"
 #include "dbat/game/weather.h"
 
-#include <string>
 #include <map>
 
 #define ABS(x) ((x) < 0 ? -(x) : (x))
@@ -796,23 +795,23 @@ void cureStatusPoison(char_data *ch, bool announce) {
     affect_from_char(ch, SPELL_POISON);
 }
 
-static const std::map<int, std::string> limb_names = {
-        {1, "right arm"},
-        {2, "left arm"},
-        {3, "right leg"},
-        {4, "left leg"}
+static const char* limb_names_short[] = {
+        "right arm",
+        "left arm",
+        "right leg",
+        "left leg"
 };
 
 void restoreLimbs(char_data *ch, bool announce) {
 
-    for(const auto& l : limb_names) {
+    for(int i = 1; i <= 4; i++) {
         if(announce) {
-            if(GET_LIMBCOND(ch, l.first) <= 0)
-                send_to_char(ch, "Your %s grows back!\r\n", l.second.c_str());
-            else if (GET_LIMBCOND(ch, l.first) < 50)
-                send_to_char(ch, "Your %s is no longer broken!\r\n", l.second.c_str());
+            if(GET_LIMBCOND(ch, i) <= 0)
+                send_to_char(ch, "Your %s grows back!\r\n", limb_names_short[i-1]);
+            else if (GET_LIMBCOND(ch, i) < 50)
+                send_to_char(ch, "Your %s is no longer broken!\r\n", limb_names_short[i-1]);
         }
-        GET_LIMBCOND(ch, l.first) = 100;
+        GET_LIMBCOND(ch, i) = 100;
     }
 
     char_gain_tail(ch, announce);
