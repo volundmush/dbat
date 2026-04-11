@@ -68,7 +68,8 @@ int64_t incCurKI(char_data *ch, int64_t amt, bool limit_max = true);
 int64_t decCurKI(char_data *ch, int64_t amt, int64_t floor = 0);
 int64_t incCurKIPercent(char_data *ch, double amt, bool limit_max = true);
 int64_t decCurKIPercent(char_data *ch, double amt, int64_t floor = 0);
-void restoreKI(char_data *ch, bool announce = true);
+void restoreKI(char_data *ch, bool announce);
+void restoreKIAnnounce(char_data *ch);
 
 int64_t getCurST(char_data *ch);
 int64_t getMaxST(char_data *ch);
@@ -84,7 +85,8 @@ int64_t incCurST(char_data *ch, int64_t amt, bool limit_max = true);
 int64_t decCurST(char_data *ch, int64_t amt, int64_t floor = 0);
 int64_t incCurSTPercent(char_data *ch, double amt, bool limit_max = true);
 int64_t decCurSTPercent(char_data *ch, double amt, int64_t floor = 0);
-void restoreST(char_data *ch, bool announce = true);
+void restoreST(char_data *ch, bool announce);
+void restoreSTAnnounce(char_data *ch);
 
 int64_t getCurLF(char_data *ch);
 int64_t getMaxLF(char_data *ch);
@@ -98,12 +100,16 @@ int64_t incCurLF(char_data *ch, int64_t amt, bool limit_max = true);
 int64_t decCurLF(char_data *ch, int64_t amt, int64_t floor = 0);
 int64_t incCurLFPercent(char_data *ch, double amt, bool limit_max = true);
 int64_t decCurLFPercent(char_data *ch, double amt, int64_t floor = 0);
-void restoreLF(char_data *ch, bool announce = true);
+void restoreLF(char_data *ch, bool announce);
+void restoreLFAnnounce(char_data *ch);
 
 bool isFullVitals(char_data *ch);
-void restoreVitals(char_data *ch, bool announce = true);
-void restoreStatus(char_data *ch, bool announce = true);
-void restoreLimbs(char_data *ch, bool announce = true);
+void restoreVitals(char_data *ch, bool announce);
+void restoreVitalsAnnounce(char_data *ch);
+void restoreStatus(char_data *ch, bool announce);
+void restoreStatusAnnounce(char_data *ch);
+void restoreLimbs(char_data *ch, bool announce);
+void restoreLimbsAnnounce(char_data *ch);
 
 int64_t gainBasePL(char_data *ch, int64_t amt, bool trans_mult = false);
 int64_t gainBaseKI(char_data *ch, int64_t amt, bool trans_mult = false);

@@ -551,7 +551,7 @@ void do_start(struct char_data *ch)
      SET_BIT_AR(PLR_FLAGS(ch), PLR_LSSJ);
      write_to_output(ch->desc, "@GYou were one of the few born a Legendary Super Saiyan!@n\r\n");
   }
-  restoreVitals(ch);
+  restoreVitalsAnnounce(ch);
 
   ch->player_specials->olc_zone = NOWHERE;
   save_char(ch);

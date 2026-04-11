@@ -1883,6 +1883,10 @@ static int parse_simple_mob(FILE *mob_f, struct char_data *ch, int nr)
   ch->race = t[2];
 
   ch->chclass = t[3];
+  if(ch->chclass < 0 || ch->chclass >= NUM_CLASSES) {
+    log("SYSERR: Invalid class %d for mob #%d", ch->chclass, nr);
+    ch->chclass = 28; /* set to commoner if invalid class specified */
+  }
   GET_SAVE_BASE(ch, SAVING_FORTITUDE) = 0;
   GET_SAVE_BASE(ch, SAVING_REFLEX) = 0;
   GET_SAVE_BASE(ch, SAVING_WILL) = 0;

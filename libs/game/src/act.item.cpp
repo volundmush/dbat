@@ -3474,7 +3474,7 @@ ACMD(do_drink)
      act("@C$n@w uncorks the $p and tips it to $s lips. Drinking it down and then smiling.@n", TRUE, ch, temp, 0, TO_ROOM);
      obj_from_char(temp);
      extract_obj(temp);
-      restoreKI(ch);
+      restoreKIAnnounce(ch);
      GET_COND(ch, THIRST) += 8;
      return;
     } else if (GET_OBJ_VNUM(temp) == 86 && on_ground == 1) {

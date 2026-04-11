@@ -577,6 +577,10 @@ void restoreKI(char_data *ch, bool announce) {
     if(!isFullKI(ch)) ch->energy = 1;
 }
 
+void restoreKIAnnounce(char_data *ch) {
+    restoreKI(ch, true);
+}
+
 int64_t getCurST(char_data *ch) {
     return (int64_t)(getMaxST(ch) * clampHealth(ch->stamina));
 }
@@ -671,6 +675,10 @@ void restoreST(char_data *ch, bool announce) {
     if(!isFullST(ch)) ch->stamina = 1;
 }
 
+void restoreSTAnnounce(char_data *ch) {
+    restoreST(ch, true);
+}
+
 int64_t getCurLF(char_data *ch) {
     return (int64_t)(getMaxLF(ch) * clampHealth(ch->life));
 }
@@ -747,6 +755,10 @@ void restoreLF(char_data *ch, bool announce) {
     if(!isFullLF(ch)) ch->life = 1;
 }
 
+void restoreLFAnnounce(char_data *ch) {
+    restoreLF(ch, true);
+}
+
 bool isFullVitals(char_data *ch) {
     return isFullHealth(ch) && isFullKI(ch) && isFullST(ch);
 }
@@ -757,10 +769,18 @@ void restoreVitals(char_data *ch, bool announce) {
     restoreST(ch, announce);
 }
 
+void restoreVitalsAnnounce(char_data *ch) {
+    restoreVitals(ch, true);
+}
+
 void restoreStatus(char_data *ch, bool announce) {
     cureStatusKnockedOut(ch, announce);
     cureStatusBurn(ch, announce);
     cureStatusPoison(ch, announce);
+}
+
+void restoreStatusAnnounce(char_data *ch) {
+    restoreStatus(ch, true);
 }
 
 void setStatusKnockedOut(char_data *ch) {
@@ -827,6 +847,10 @@ void restoreLimbs(char_data *ch, bool announce) {
     }
 
     char_gain_tail(ch, announce);
+}
+
+void restoreLimbsAnnounce(char_data *ch) {
+    restoreLimbs(ch, true);
 }
 
 int64_t gainBasePL(char_data *ch, int64_t amt, bool trans_mult) {
