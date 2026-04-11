@@ -1931,10 +1931,6 @@ void nanny(struct descriptor_data *d, char *arg)
   int player_i;
   int value, roll = rand_number(1, 6); /* For parse_bonuses */
   struct descriptor_data *k;
-  dbat::race::Race *chosen_race;
-  dbat::race::RaceMap v_races;
-  dbat::sensei::Sensei *chosen_sensei;
-  dbat::sensei::SenseiMap v_sensei;
 
     int count = 0, oldcount = HIGHPCOUNT;
   /* OasisOLC states */

@@ -26,6 +26,7 @@
 #include "dbat/game/weather.h"
 
 #include <string>
+#include <map>
 
 #define ABS(x) ((x) < 0 ? -(x) : (x))
 

@@ -827,8 +827,8 @@ static struct transform_bonus truffle_ascend_1 = {
     .flag=PLR_TRANS1,
     .rpp_cost=0,
     .requires_pl=3600000,
-    .name="@YAscend @WFirst@n",
     .key="first",
+    .name="@YAscend @WFirst@n",
     .msg_transform_self="@WYour mind accelerates working through the mysteries of the universe while at the same time your body begins to change! Innate nano-technology within your body begins to activate, forming flexible metal plating across parts of your skin!@n",
     .msg_transform_others="@C$n@W begins to write complicated calculations in the air as though $e were possessed while at the same time $s body begins to change! Innate nano-technology within $s body begins to activate, forming flexible metal plating across parts of $s skin!@n"
 };
