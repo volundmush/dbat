@@ -43,7 +43,7 @@ namespace dbat::sensei {
         jinto = 11,
         tsuna = 12,
         kurzak = 13,
-        commoner = 255
+        commoner = 28
     };
 
     class Sensei;
