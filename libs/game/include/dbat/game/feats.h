@@ -18,7 +18,7 @@ void assign_feats(void);
 void sort_feats(void);
 int feat_is_available(struct char_data *ch, int featnum, int iarg, char *sarg);
 
-extern int feat_sort_info[MAX_FEATS + 1];
+extern int feat_sort_info[MAX_FEATS];
 
 /* Feats defined below up to MAX_FEATS */
 
@@ -215,7 +215,7 @@ struct feat_info {
 
 };
 
-extern struct feat_info feat_list[NUM_FEATS_DEFINED+1];
+extern struct feat_info feat_list[NUM_FEATS_DEFINED];
 
 #define HRANK_ANY       0
 #define HRANK_ARCANE    1

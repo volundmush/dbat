@@ -26,7 +26,7 @@
 
 
 /* Local variables */
-int spell_sort_info[SKILL_TABLE_SIZE + 1];
+int spell_sort_info[SKILL_TABLE_SIZE];
 int top_guild = -1;
 struct guild_data *guild_index;
 
@@ -102,7 +102,7 @@ void handle_ingest_learn(struct char_data *ch, struct char_data *vict)
 	int i = 1;
 	send_to_char(ch, "@YAll your current skills improve somewhat!@n\r\n");
 
-	for (i = 1; i <= SKILL_TABLE_SIZE; i++) 
+	for (i = 0; i < SKILL_TABLE_SIZE; i++) 
 	{
 		
 		if (GET_SKILL_BASE(ch, i) > 0 && GET_SKILL_BASE(vict, i) > 0 && i != 141)
@@ -275,7 +275,7 @@ int print_skills_by_type(struct char_data *ch, char *buf, int maxsz, int sktype,
 
   one_argument(argument, arg);
 
-  for (i = 1; i < SKILL_TABLE_SIZE; i++) { 
+  for (i = 0; i < SKILL_TABLE_SIZE; i++) { 
     t = spell_info[i].skilltype;
 
     if (t != sktype)
@@ -334,7 +334,7 @@ int slot_count(struct char_data *ch)
    int i, skills = -1, fail = FALSE;
    int punch = FALSE, kick = FALSE, knee = FALSE, elbow = FALSE, kiball = FALSE, kiblast = FALSE, beam = FALSE, renzo = FALSE, shogekiha = FALSE;
 
-   for (i = 1; i <= SKILL_TABLE_SIZE; i++) {
+   for (i = 0; i < SKILL_TABLE_SIZE; i++) {
     if (GET_SKILL(ch, i) > 0) {
      switch (i) {
       case SKILL_PUNCH:
@@ -608,10 +608,10 @@ void sort_spells(void)
   int a;
 
   /* initialize array, avoiding reserved. */
-  for (a = 1; a < SKILL_TABLE_SIZE; a++)
+  for (a = 0; a < SKILL_TABLE_SIZE; a++)
     spell_sort_info[a] = a;
 
-  qsort(&spell_sort_info[1], SKILL_TABLE_SIZE, sizeof(int), compare_spells);
+  qsort(&spell_sort_info[0], SKILL_TABLE_SIZE, sizeof(int), compare_spells);
 }
 
 

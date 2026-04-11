@@ -278,7 +278,7 @@ void gedit_select_spells_menu(struct descriptor_data *d)
 
   write_to_output(d, "Spells known:\r\n");
 
-  for (i = 0; i <= SKILL_TABLE_SIZE; i++) {
+  for (i = 0; i < SKILL_TABLE_SIZE; i++) {
     if (IS_SET(spell_info[i].skilltype, SKTYPE_SPELL) &&
         strcmp(spell_info[i].name, "!UNUSED!")) {
       write_to_output(d, "@n[@c%-3s@n] %-3d %-20.20s  ",
@@ -308,7 +308,7 @@ void gedit_select_feats_menu(struct descriptor_data *d)
 
   write_to_output(d, "Feats known:\r\n");
 
-  for (i = 0; i <= NUM_FEATS_DEFINED; i++) {
+  for (i = 0; i < NUM_FEATS_DEFINED; i++) {
     if (feat_list[i].in_game) {
       write_to_output(d, "@n[@c%-3s@n] %-3d %-20.20s  ",
                       YESNO(G_FEATS(guilddata, i)), i, feat_list[i].name);
@@ -628,7 +628,7 @@ void gedit_parse(struct descriptor_data *d, char *arg)
 			i = atoi(arg);
 			if (i == 0)
 				break;
-			i = MAX(1, MIN(i, SKILL_TABLE_SIZE));
+			i = MAX(0, MIN(i, SKILL_TABLE_SIZE -1));
 			G_SK_AND_SP(OLC_GUILD(d), i) = !G_SK_AND_SP(OLC_GUILD(d), i);
 			gedit_select_spells_menu(d);
 			return;
@@ -637,7 +637,7 @@ void gedit_parse(struct descriptor_data *d, char *arg)
 			i = atoi(arg);
 			if (i == 0)
 				break;
-			i = MAX(1, MIN(i, NUM_FEATS_DEFINED));
+			i = MAX(0, MIN(i, NUM_FEATS_DEFINED -1));
 			G_FEATS(OLC_GUILD(d), i) = !G_FEATS(OLC_GUILD(d), i);
 			gedit_select_feats_menu(d);
 			return;
@@ -646,7 +646,7 @@ void gedit_parse(struct descriptor_data *d, char *arg)
 			i = atoi(arg);
 			if (i == 0)
 				break;
-			i = MAX(1, MIN(i, SKILL_TABLE_SIZE));
+			i = MAX(0, MIN(i, SKILL_TABLE_SIZE -1));
 			G_SK_AND_SP(OLC_GUILD(d), i) = !G_SK_AND_SP(OLC_GUILD(d), i);
 			gedit_select_skills_menu(d);
 			return;
@@ -655,7 +655,7 @@ void gedit_parse(struct descriptor_data *d, char *arg)
 			i = atoi(arg);
 			if (i == 0)
 				break;
-			i = MAX(1, MIN(i, SKILL_TABLE_SIZE));
+			i = MAX(0, MIN(i, SKILL_TABLE_SIZE -1));
 			G_SK_AND_SP(OLC_GUILD(d), i) = !G_SK_AND_SP(OLC_GUILD(d), i);
 			gedit_select_wp_menu(d);
 			return;
@@ -664,7 +664,7 @@ void gedit_parse(struct descriptor_data *d, char *arg)
 			i = atoi(arg);
 			if (i == 0)
 				break;
-			i = MAX(1, MIN(i, SKILL_TABLE_SIZE));
+			i = MAX(0, MIN(i, SKILL_TABLE_SIZE -1));
 			G_SK_AND_SP(OLC_GUILD(d), i) = !G_SK_AND_SP(OLC_GUILD(d), i);
 			gedit_select_lang_menu(d);
 			return;

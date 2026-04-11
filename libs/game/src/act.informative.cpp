@@ -5437,7 +5437,7 @@ ACMD(do_perf)
   send_to_char(ch, "The skill name should be longer than 3 characters...\r\n");
   return;
  }
- for (i = 1; i <= SKILL_TABLE_SIZE; i++) {
+ for (i = 0; i < SKILL_TABLE_SIZE; i++) {
   if (spell_info[i].skilltype != SKTYPE_SKILL)
    continue;
   

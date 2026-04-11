@@ -22,13 +22,13 @@ int compare_feats(const void *x, const void *y);
 
 
 /* Global Variables and Structures */
-struct feat_info feat_list[NUM_FEATS_DEFINED + 1];
-int feat_sort_info[MAX_FEATS + 1];
+struct feat_info feat_list[NUM_FEATS_DEFINED];
+int feat_sort_info[MAX_FEATS];
 char buf3[MAX_STRING_LENGTH];
 char buf4[MAX_STRING_LENGTH];
 
 /* External variables and structures */
-extern int spell_sort_info[SKILL_TABLE_SIZE+1];
+extern int spell_sort_info[SKILL_TABLE_SIZE];
 
 /* External functions*/
 int count_metamagic_feats(struct char_data *ch);
@@ -53,7 +53,7 @@ void assign_feats(void)
 
   // Initialize the list of feats.
 
-  for (i = 0; i <= NUM_FEATS_DEFINED; i++) {
+  for (i = 0; i < NUM_FEATS_DEFINED; i++) {
     feat_list[i].name = "Unused Feat";
     feat_list[i].in_game = FALSE;
     feat_list[i].can_learn = FALSE;
@@ -538,10 +538,10 @@ void sort_feats(void)
   int a;
 
   /* initialize array, avoiding reserved. */
-  for (a = 1; a <= NUM_FEATS_DEFINED; a++)
+  for (a = 0; a < NUM_FEATS_DEFINED; a++)
     feat_sort_info[a] = a;
 
-  qsort(&feat_sort_info[1], NUM_FEATS_DEFINED, sizeof(int), compare_feats);
+  qsort(&feat_sort_info[0], NUM_FEATS_DEFINED, sizeof(int), compare_feats);
 }
 
 void list_feats_known(struct char_data *ch) 

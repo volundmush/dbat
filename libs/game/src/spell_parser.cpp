@@ -234,7 +234,7 @@ int find_skill_num(char *name, int sktype)
   char *temp, *temp2;
   char first[256], first2[256], tempbuf[256];
 
-  for (skindex = 1; skindex < SKILL_TABLE_SIZE; skindex++) {
+  for (skindex = 0; skindex < SKILL_TABLE_SIZE; skindex++) {
     if (is_abbrev(name, spell_info[skindex].name) && (spell_info[skindex].skilltype & sktype)) {
       return (skindex);
     }
@@ -269,7 +269,7 @@ int find_skill_num(char *name, int sktype)
 int call_magic(struct char_data *caster, struct char_data *cvict,
 	     struct obj_data *ovict, int spellnum, int level, int casttype, char *arg)
 {
-  if (spellnum < 1 || spellnum > SKILL_TABLE_SIZE)
+  if (spellnum < 0 || spellnum >= SKILL_TABLE_SIZE)
     return (0);
 
   if (!cast_wtrigger(caster, cvict, ovict, spellnum))
@@ -636,7 +636,7 @@ ACMD(do_cast)
       return;
     }
 
-    if ((spellnum < 1) || (spellnum >= SKILL_TABLE_SIZE) || !(SINFO.skilltype & SKTYPE_ART) || !*s) {
+    if ((spellnum < 0) || (spellnum >= SKILL_TABLE_SIZE) || !(SINFO.skilltype & SKTYPE_ART) || !*s) {
       send_to_char(ch, "I don't recognize that martial art or ability.\r\n");
       return;
     }
@@ -651,7 +651,7 @@ ACMD(do_cast)
       return;
     }
 
-    if ((spellnum < 1) || (spellnum >= SKILL_TABLE_SIZE) || !(SINFO.skilltype & SKTYPE_SPELL)) {
+    if ((spellnum < 0) || (spellnum >= SKILL_TABLE_SIZE) || !(SINFO.skilltype & SKTYPE_SPELL)) {
       send_to_char(ch, "Cast what?!?\r\n");
       return;
     }

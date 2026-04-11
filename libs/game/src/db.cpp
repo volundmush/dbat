@@ -4709,7 +4709,7 @@ void init_char(struct char_data *ch)
   else
     log("SYSERR: init_char: Character '%s' not found in player table.", GET_NAME(ch));
 
-  for (i = 1; i < SKILL_TABLE_SIZE; i++) {
+  for (i = 0; i < SKILL_TABLE_SIZE; i++) {
     if (GET_ADMLEVEL(ch) < ADMLVL_IMPL)
       SET_SKILL(ch, i, 0);
     else

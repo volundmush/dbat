@@ -100,7 +100,7 @@ ACMD(do_teach);
 #define NOTRAIN_KOBOLD(i)	(IS_SET_AR((GM_WITH_WHO(i)), TRADE_NOKOBOLD))   
 #define NOTRAIN_LIZARDFOLK(i)	(IS_SET_AR((GM_WITH_WHO(i)), TRADE_NOLIZARDFOLK))
 
-extern int spell_sort_info[SKILL_TABLE_SIZE + 1];
+extern int spell_sort_info[SKILL_TABLE_SIZE];
 
 /* Functions defined in guild.c */
 int print_skills_by_type(struct char_data *ch, char *buf, int maxsz, int sktype, char *argument);

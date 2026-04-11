@@ -274,7 +274,7 @@ int load_char(const char *name, struct char_data *ch)
     /* initializations necessary to keep some things straight */
     ch->affected = NULL;
     ch->affectedv = NULL;
-    for (i = 1; i <= SKILL_TABLE_SIZE; i++) {
+    for (i = 0; i < SKILL_TABLE_SIZE; i++) {
       SET_SKILL(ch, i, 0);
       SET_SKILL_BONUS(ch, i, 0);
       SET_SKILL_PERF(ch, i, 0);
@@ -728,7 +728,7 @@ int load_char(const char *name, struct char_data *ch)
 
   /* initialization for imms */
   if (GET_ADMLEVEL(ch) >= ADMLVL_IMMORT) {
-    for (i = 1; i <= SKILL_TABLE_SIZE; i++)
+    for (i = 0; i < SKILL_TABLE_SIZE; i++)
       SET_SKILL(ch, i, 100);
     GET_COND(ch, HUNGER) = -1;
     GET_COND(ch, THIRST) = -1;
@@ -1143,7 +1143,7 @@ void save_char(struct char_data * ch)
    /* Save skills */
   if (GET_ADMLEVEL(ch) < ADMLVL_IMMORT) {
     fprintf(fl, "Skil:\n");
-    for (i = 1; i <= SKILL_TABLE_SIZE; i++) {
+    for (i = 0; i < SKILL_TABLE_SIZE; i++) {
      if (GET_SKILL_BASE(ch, i))
 	fprintf(fl, "%d %d %d\n", i, GET_SKILL_BASE(ch, i), GET_SKILL_PERF(ch, i));
     }
@@ -1169,7 +1169,7 @@ void save_char(struct char_data * ch)
   /* Save skill bonuses */
   if (GET_ADMLEVEL(ch) < ADMLVL_IMMORT) {
     fprintf(fl, "SklB:\n");
-    for (i = 1; i <= SKILL_TABLE_SIZE; i++) {
+    for (i = 0; i < SKILL_TABLE_SIZE; i++) {
      if (GET_SKILL_BONUS(ch, i))
 	fprintf(fl, "%d %d %d\n", i, GET_SKILL_BONUS(ch, i), GET_SKILL_PERF(ch, i));
     }
