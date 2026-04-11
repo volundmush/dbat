@@ -70,11 +70,11 @@ static struct transform_bonus saiyan_super_saiyan_4 = {
     .msg_transform_others="@WHaving absorbed enough blutz waves, @C$n@W's body begins to transform! Red fur grows over certain parts of $s skin as $s hair grows longer and unkempt. A red outline forms around $s eyes while the irises of those very same eyes change to an amber color. Energy crackles about $s body violently as $e achieves the peak of saiyan perfection, @CSuper @YSaiyan @GFourth@W!@n"
 };
 
-static struct transform_bonus saiyan_transformations[] = {
-    saiyan_super_saiyan_1,
-    saiyan_super_saiyan_2,
-    saiyan_super_saiyan_3,
-    saiyan_super_saiyan_4
+static struct transform_bonus *saiyan_transformations[] = {
+    &saiyan_super_saiyan_1,
+    &saiyan_super_saiyan_2,
+    &saiyan_super_saiyan_3,
+    &saiyan_super_saiyan_4
 };
 
 static struct transforms_available saiyan_transforms_available = {
@@ -138,11 +138,11 @@ static struct transform_bonus human_super_human_4 = {
     .msg_transform_others="@C$n@W grits $s teeth and clenches $s fists as a sudden surge of power begins to tear through $s body! $n@W's muscles lose volume and gain mass, condensing into sleek hyper efficiency as a spectacular shimmering white aura flows over $m, flashes of multicolored light flare up in rising stars around $s new form, a corona of glory! $n@W smiles as his ultimate potential is realized as $e ascends to @CSuper @cHuman @GFourth@W!@n"
 };
 
-static struct transform_bonus human_transformations[] = {
-    human_super_human_1,
-    human_super_human_2,
-    human_super_human_3,
-    human_super_human_4
+static struct transform_bonus *human_transformations[] = {
+    &human_super_human_1,
+    &human_super_human_2,
+    &human_super_human_3,
+    &human_super_human_4
 };
 
 static struct transforms_available human_transforms_available = {
@@ -206,11 +206,11 @@ static struct transform_bonus icer_transform_4 = {
     .msg_transform_others="@C$n@W's body begins to change radically! $e triples in height while a hard shell forms over $s entire torso. Hard bones grow out from $s head forming four ridges that jut outward. A hard covering grows up over $s mouth and nose completing the transformation! A dark crimson aura flames around @C$n@W's body as $e realizes $s @GFourth @cTransformation@W!@n"
 };
 
-static struct transform_bonus icer_transformations[] = {
-    icer_transform_1,
-    icer_transform_2,
-    icer_transform_3,
-    icer_transform_4
+static struct transform_bonus *icer_transformations[] = {
+    &icer_transform_1,
+    &icer_transform_2,
+    &icer_transform_3,
+    &icer_transform_4
 };
 
 static struct transforms_available icer_transforms_available = {
@@ -274,11 +274,11 @@ static struct transform_bonus namekian_super_namek_4 = {
     .msg_transform_others="@C$n@W smiles calmly as a look of complete understand fills $s eyes. While $e remains perfectly calm and detached a massivly powerful storm of energy erupts from his body. This storm of energy shimmers with the colors of the rainbow and boils and crackles with awesome power! $s smile disappears as he realizes a mysterious power of the ages, @CSuper @gNamek @GFourth@W!@n"
 };
 
-static struct transform_bonus namekian_transformations[] = {
-    namekian_super_namek_1,
-    namekian_super_namek_2,
-    namekian_super_namek_3,
-    namekian_super_namek_4
+static struct transform_bonus *namekian_transformations[] = {
+    &namekian_super_namek_1,
+    &namekian_super_namek_2,
+    &namekian_super_namek_3,
+    &namekian_super_namek_4
 };
 
 static struct transforms_available namekian_transforms_available = {
@@ -329,10 +329,10 @@ static struct transform_bonus konatsu_shadow_3 = {
     .msg_transform_others="@WThe shadowy aura around $n explodes outward as $s power begins to rise!  Realization dawns on $s face, followed shortly by confidence! The color in $s aura drains as the shadows slide inward to cling to $s body like a second, solid black skin! Shockwaves roll off of $n in quick succession, pelting the surrounding area harshly!  Accompanying the waves, a pool of darkness blossoms underneath them, slowly spreading the shadows to the whole area, projecting onto any surface nearby! Purple and black electricity crackle in $s solid white aura, and he grins as $e realizes $s @GThird @DShadow @BForm@W!@n"
 };
 
-static struct transform_bonus konatsu_transformations[] = {
-    konatsu_shadow_1,
-    konatsu_shadow_2,
-    konatsu_shadow_3
+static struct transform_bonus *konatsu_transformations[] = {
+    &konatsu_shadow_1,
+    &konatsu_shadow_2,
+    &konatsu_shadow_3
 };
 
 static struct transforms_available konatsu_transforms_available = {
@@ -383,10 +383,10 @@ static struct transform_bonus mutant_mutation_3 = {
     .msg_transform_others="@WA dark cyan aura bursts up around @C$n@W's body as the ground begins to crack beneath $m and $e screams out in pain as $s power begins to explode! Two large spikes grow out from $s shoulder blades as $e reaches $s @GThird @mMutation!@n"
 };
 
-static struct transform_bonus mutant_transformations[] = {
-    mutant_mutation_1,
-    mutant_mutation_2,
-    mutant_mutation_3
+static struct transform_bonus *mutant_transformations[] = {
+    &mutant_mutation_1,
+    &mutant_mutation_2,
+    &mutant_mutation_3
 };
 
 static struct transforms_available mutant_transforms_available = {
@@ -437,10 +437,10 @@ static struct transform_bonus halfbreed_super_saiyan_3 = {
     .msg_transform_others="@WElectricity begins to crackle around @C$n@W, as $s aura grows explosively! $e yells as the energy around $m skyrockets and $s hair grows to multiple times its previous length. $e smiles as $s irises appear and $s muscles tighten up. $s transformation complete, $e now stands confidently, having achieved @CSuper @YSaiyan @GThird@W!@n"
 };
 
-static struct transform_bonus halfbreed_transformations[] = {
-    halfbreed_super_saiyan_1,
-    halfbreed_super_saiyan_2,
-    halfbreed_super_saiyan_3
+static struct transform_bonus *halfbreed_transformations[] = {
+    &halfbreed_super_saiyan_1,
+    &halfbreed_super_saiyan_2,
+    &halfbreed_super_saiyan_3
 };
 
 static struct transforms_available halfbreed_transforms_available = {
@@ -504,11 +504,11 @@ static struct transform_bonus bio_super_perfect = {
     .msg_transform_others="@WA rush of power explodes from @C$n@W's perfect body, crushing nearby debris and sending dust billowing in all directions. Electricity crackles throughout $s aura intensely while $s muscles grow slightly larger but incredibly dense. $e smiles as $e has taken $s perfect form beyond imagination. $e is now @CSuper @GPerfect@W!@n"
 };
 
-static struct transform_bonus bio_transformations[] = {
-    bio_mature,
-    bio_semi_perfect,
-    bio_perfect,
-    bio_super_perfect
+static struct transform_bonus *bio_transformations[] = {
+    &bio_mature,
+    &bio_semi_perfect,
+    &bio_perfect,
+    &bio_super_perfect
 };
 
 static struct transforms_available bio_transforms_available = {
@@ -598,13 +598,13 @@ static struct transform_bonus android_upgrade_6 = {
     .msg_transform_others="@C$n @Wstops for a moment as the nano-machines within $s body reprogram and restructure $m. $e is now more powerful and efficient!@n"
 };
 
-static struct transform_bonus android_transformations[] = {
-    android_upgrade_1,
-    android_upgrade_2,
-    android_upgrade_3,
-    android_upgrade_4,
-    android_upgrade_5,
-    android_upgrade_6
+static struct transform_bonus *android_transformations[] = {
+    &android_upgrade_1,
+    &android_upgrade_2,
+    &android_upgrade_3,
+    &android_upgrade_4,
+    &android_upgrade_5,
+    &android_upgrade_6
 };
 
 static struct transforms_available android_transforms_available = {
@@ -694,13 +694,13 @@ static struct transform_bonus android_sense_upgrade_6 = {
     .msg_transform_others="@C$n @Wstops for a moment as the nano-machines within $s body reprogram and restructure $m. $e is now more powerful and efficient!@n"
 };
 
-static struct transform_bonus android_sense_transformations[] = {
-    android_sense_upgrade_1,
-    android_sense_upgrade_2,
-    android_sense_upgrade_3,
-    android_sense_upgrade_4,
-    android_sense_upgrade_5,
-    android_sense_upgrade_6
+static struct transform_bonus *android_sense_transformations[] = {
+    &android_sense_upgrade_1,
+    &android_sense_upgrade_2,
+    &android_sense_upgrade_3,
+    &android_sense_upgrade_4,
+    &android_sense_upgrade_5,
+    &android_sense_upgrade_6
 };
 
 static struct transforms_available android_sense_transforms_available = {
@@ -751,10 +751,10 @@ static struct transform_bonus majin_morph_3 = {
     .msg_transform_others="@WRipples of intense pink energy rush upwards around @C$n@W's body as it begins to morph into its truest form! The ground beneath $s feet forms into a crater from the very pressure of $s rising ki! Earthquakes shudder throughout the area as $e finishes morphing!@n"
 };
 
-static struct transform_bonus majin_transformations[] = {
-    majin_morph_1,
-    majin_morph_2,
-    majin_morph_3
+static struct transform_bonus *majin_transformations[] = {
+    &majin_morph_1,
+    &majin_morph_2,
+    &majin_morph_3
 };
 
 static struct transforms_available majin_transforms_available = {
@@ -805,10 +805,10 @@ static struct transform_bonus kai_mystic_3 = {
     .msg_transform_others="@C$n@W's eyes grow wide, mouth agape. $s body begins to shiver uncontrollably! $s arms reaches out cautiously before falling back down to $s side. $s face relaxes visibly, features returning to a normal state. $s irises remain larger than before, a slight smile softening $s gaze.@n"
 };
 
-static struct transform_bonus kai_transformations[] = {
-    kai_mystic_1,
-    kai_mystic_2,
-    kai_mystic_3
+static struct transform_bonus *kai_transformations[] = {
+    &kai_mystic_1,
+    &kai_mystic_2,
+    &kai_mystic_3
 };
 
 static struct transforms_available kai_transforms_available = {
@@ -859,10 +859,10 @@ static struct transform_bonus truffle_ascend_3 = {
     .msg_transform_others="@C$n begins to mumble quietly, slowly at first and gradually picking up speed. A glint is seen from $s eyes and $s arms reach outwards briefly as $e appears to catch his balance. $s arms drop back to $s sides as balance is regained, a vicious smile on $s face.@n"
 };
 
-static struct transform_bonus truffle_transformations[] = {
-    truffle_ascend_1,
-    truffle_ascend_2,
-    truffle_ascend_3
+static struct transform_bonus *truffle_transformations[] = {
+    &truffle_ascend_1,
+    &truffle_ascend_2,
+    &truffle_ascend_3
 };
 
 static struct transforms_available truffle_transforms_available = {
@@ -900,9 +900,9 @@ static struct transform_bonus legendary_super_saiyan_2 = {
     .msg_transform_others="@C$n @Wroars and then stands at $s full height. Then $s muscles start to buldge and grow as $e flexes them! Suddenly $s eyes begin to glow @wwhite@W with energy, $s hair turns @Ygold@W, and at the same time a @wbright @Yg@yo@Yl@yd@Ye@yn@W aura flashes up around $s body! @C$n@W releases $s @YL@ye@Dg@We@wn@Yd@ya@Dr@Yy@W power upon the universe!@n"
 };
 
-static struct transform_bonus legendary_transformations[] = {
-    legendary_super_saiyan_1,
-    legendary_super_saiyan_2
+static struct transform_bonus *legendary_transformations[] = {
+    &legendary_super_saiyan_1,
+    &legendary_super_saiyan_2
 };
 
 static struct transforms_available legendary_transforms_available = {
@@ -1078,7 +1078,7 @@ void display_transforms(struct char_data* ch) {
     int64_t pl = getBasePL(ch);
 
     for(int i = 0; i < available->number; i++) {
-        struct transform_bonus* bonus = &available->bonuses[i];
+        struct transform_bonus* bonus = available->bonuses[i];
         int64_t req_pl = (int64_t)(bonus->requires_pl * modifier);
         const char* req_pl_str = (pl >= req_pl) ? add_commas(req_pl) : "??????????";
         send_to_char(ch, "%s  @R-@G %s BPL Req\r\n", bonus->name, req_pl_str);
@@ -1103,7 +1103,7 @@ int get_current_trans_tier(struct char_data *ch) {
 struct transform_bonus get_current_transform(char_data *ch) {
     if(PLR_FLAGGED(ch, PLR_OOZARU)) return oozaru;
     if(IS_HOSHIJIN(ch)) {
-        transform_bonus hoshi_form;
+        struct transform_bonus hoshi_form;
         double bon_mult = 0;
         switch(GET_PHASE(ch)) {
             case 0: // death phase
@@ -1129,7 +1129,7 @@ struct transform_bonus get_current_transform(char_data *ch) {
     if(!available) return base_form;
     int tier = get_current_trans_tier(ch);
     if(!tier) return base_form;
-    struct transform_bonus trans = available->bonuses[tier-1];
+    struct transform_bonus trans = *available->bonuses[tier-1];
     return trans;
 }
 
@@ -1139,7 +1139,7 @@ struct transform_bonus select_transformation(struct char_data* ch, const char* k
         return base_form;
     }
     for(int i = 0; i < available->number; i++) {
-        struct transform_bonus* bonus = &available->bonuses[i];
+        struct transform_bonus* bonus = available->bonuses[i];
         if(!strcasecmp(bonus->key, key)) {
             return *bonus;
         }

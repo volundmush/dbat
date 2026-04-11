@@ -45,21 +45,21 @@ pub fn build(b: *std.Build) void {
     const mod_dbat_db = b.createModule(.{ .target = target, .optimize = optimize, .link_libc = true });
 
     mod_dbat_db.addIncludePath(b.path("libs/db/include"));
-    const db_files = getSourceFiles(b, "libs/db/src", ".cpp");
-    mod_dbat_db.addCSourceFiles(.{ .files = db_files, .flags = &[_][]const u8{ "-std=gnu++23", "-g" } });
+    const db_files = getSourceFiles(b, "libs/db/src", ".c");
+    mod_dbat_db.addCSourceFiles(.{ .files = db_files, .flags = &[_][]const u8{ "-std=gnu23", "-g" } });
 
     const dbat_db = b.addLibrary(.{
         .name = "dbat_db",
         .linkage = .static,
         .root_module = mod_dbat_db,
     });
-    dbat_db.linkLibCpp();
+    dbat_db.linkLibC();
 
     const mod_dbat_game = b.createModule(.{ .target = target, .optimize = optimize, .link_libc = true });
     mod_dbat_game.addIncludePath(b.path("libs/db/include"));
     mod_dbat_game.addIncludePath(b.path("libs/game/include"));
-    const game_files = getSourceFiles(b, "libs/game/src", ".cpp");
-    mod_dbat_game.addCSourceFiles(.{ .files = game_files, .flags = &[_][]const u8{ "-std=gnu++23", "-g", "-DPATH_MAX=4096" } });
+    const game_files = getSourceFiles(b, "libs/game/src", ".c");
+    mod_dbat_game.addCSourceFiles(.{ .files = game_files, .flags = &[_][]const u8{ "-std=gnu23", "-g", "-DPATH_MAX=4096" } });
 
     const dbat_game = b.addLibrary(.{
         .name = "dbat_game",
@@ -67,13 +67,13 @@ pub fn build(b: *std.Build) void {
         .root_module = mod_dbat_game,
     });
     dbat_game.linkLibrary(dbat_db);
-    dbat_game.linkLibCpp();
+    dbat_game.linkLibC();
 
     // Executable - pure C app (circle)
     const circle_mod = b.createModule(.{ .target = target, .optimize = optimize, .link_libc = true });
     circle_mod.addIncludePath(b.path("libs/db/include"));
     circle_mod.addIncludePath(b.path("libs/game/include"));
-    circle_mod.addCSourceFiles(.{ .files = &[_][]const u8{"apps/server/src/main.cpp"}, .flags = &[_][]const u8{ "-std=gnu++23", "-g", "-DPATH_MAX=4096" } });
+    circle_mod.addCSourceFiles(.{ .files = &[_][]const u8{"apps/server/src/main.c"}, .flags = &[_][]const u8{ "-std=gnu23", "-g", "-DPATH_MAX=4096" } });
 
     const exe = b.addExecutable(.{
         .name = "dbat",
@@ -81,7 +81,7 @@ pub fn build(b: *std.Build) void {
     });
     exe.linkLibrary(dbat_db);
     exe.linkLibrary(dbat_game);
-    exe.linkLibCpp();
+    exe.linkLibC();
 
     b.installArtifact(dbat_db);
     b.installArtifact(dbat_game);

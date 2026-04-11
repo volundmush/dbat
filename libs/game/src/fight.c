@@ -2133,7 +2133,7 @@ void raw_kill(struct char_data * ch, struct char_data * killer)
     }
 
     bool android_lose = true;
-    DeathType death_type = Afterlife;
+    enum DeathType death_type = Afterlife;
       if(in_past(ch))
           death_type = Past;
     else if(in_northran(ch))

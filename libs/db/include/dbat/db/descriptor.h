@@ -4,17 +4,7 @@
 #include "consts/constates.h"
 #include <sys/socket.h>
 
-struct txt_block {
-   char	*text;
-   int aliased;
-   struct txt_block *next;
-};
 
-
-struct txt_q {
-   struct txt_block *head;
-   struct txt_block *tail;
-};
 
 
 struct descriptor_data {

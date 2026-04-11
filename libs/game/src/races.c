@@ -1,10 +1,5 @@
 #include "dbat/game/races.h"
 
-#include <utility>
-#include <string>
-#include <algorithm>
-#include <iterator>
-
 #include "dbat/game/utils.h"
 #include "dbat/game/interpreter.h"
 #include "dbat/game/spells.h"

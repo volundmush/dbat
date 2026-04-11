@@ -1,6 +1,5 @@
 #pragma once
-
-#include <cstdint>
+#include "consts/types.h"
 
 #define YESNO(a) ((a) ? "YES" : "NO")
 #define ONOFF(a) ((a) ? "ON" : "OFF")

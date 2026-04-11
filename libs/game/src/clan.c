@@ -60,42 +60,7 @@ void  set_clan(struct char_data *ch, char *clan);
 void  remove_clan(struct char_data *ch);
 struct clan_data *clanGet(const char *name);
 
-/* Structures */
-struct clan_member {
 
-  struct clan_member *next;
-  int    id;
-
-};
-
-
-struct clan_data {
-
-  char *name;
-  char *info;
-  char *highrank;
-  char *midrank;
-  char modlist[1000];
-  char memlist[1000];
-  char applist[1000];
-
-  struct clan_member *moderators;
-  struct clan_member *members;
-  struct clan_member *applicants;
-  struct clan_rank *rank1;
-  struct clan_rank *rank2;
-  struct clan_rank *rank3;
-  struct clan_rank *rank4;
-  struct clan_rank *rank5;
-  struct clan_rank *rank6;
-  struct clan_rank *rank7;
-  struct clan_rank *rank8;
-
-  int  open_join;
-  int  open_leave;
-  long bank;
-  int bany;
-};
 
 //********************************************************************************
 // The implementation and documentation of local functions goes here
@@ -443,7 +408,7 @@ void clanAdd(struct clan_data *S)
   struct clan_data **oldList = clan;
 
   /*clan = malloc( sizeof(struct clan_data *) * (num_clans) );*/
-  clan = (clan_data**)malloc( sizeof(struct clan_data *) * (num_clans + 1) );
+  clan = (struct clan_data**)malloc( sizeof(struct clan_data *) * (num_clans + 1) );
 
   for(i = 0; i < num_clans; i++)
     clan[i] = oldList[i];
@@ -524,7 +489,7 @@ void clanBoot() {
     return;
   }
 
-  clan = (clan_data**)malloc( sizeof(struct clan_data *) * num_clans );
+  clan = (struct clan_data**)malloc( sizeof(struct clan_data *) * num_clans );
 
   for(i = 0; i < num_clans; i++) {
     if( (len = fgetlinetomax(fl, line, MAX_STRING_LENGTH)) > 0) {

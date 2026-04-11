@@ -15,7 +15,7 @@ struct transform_bonus {
 
 struct transforms_available {
     int number;
-    struct transform_bonus* bonuses;
+    struct transform_bonus **bonuses;
 };
 
 extern struct transform_bonus base_form;

@@ -4,7 +4,7 @@ target_compile_features(dbat_server PUBLIC cxx_std_23)
 
 target_sources(dbat_server
     PRIVATE
-        src/main.cpp
+        src/main.c
 )
 
 target_link_libraries(dbat_server

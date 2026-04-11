@@ -40,10 +40,7 @@ struct time_data {
    determine the conditions which will cause a player character to be
    deleted from disk if the automagic pwipe system is enabled (see config.c).
 */
-struct pclean_criteria_data {
-  int level;		/* max level for this time limit	*/
-  int days;		/* time limit in days			*/
-}; 
+
 
 
 /* Char's abilities. */

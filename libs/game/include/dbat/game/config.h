@@ -20,6 +20,11 @@
 #define TRUE  (!FALSE)
 #endif
 
+struct pclean_criteria_data {
+  int level;		/* max level for this time limit	*/
+  int days;		/* time limit in days			*/
+}; 
+
 // global variables
 extern int pk_allowed, pt_allowed, level_can_shout, holler_move_cost, CURRENT_ERA;
 extern int mob_specials_used, number_of_assassins, TOPLOADED;

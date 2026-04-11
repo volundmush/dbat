@@ -103,5 +103,18 @@ typedef struct time_info_data time_info_data;
 typedef struct reset_com reset_com;
 typedef struct innate_node innate_node;
 
+
+struct txt_block {
+   char	*text;
+   int aliased;
+   struct txt_block *next;
+};
+
+
+struct txt_q {
+   struct txt_block *head;
+   struct txt_block *tail;
+};
+
 #define ACMD(name) void (name)(struct char_data *ch, char *argument, int cmd, int subcmd)
 #define SPECIAL(name) int (name)(struct char_data *ch, void *me, int cmd, char *argument)
