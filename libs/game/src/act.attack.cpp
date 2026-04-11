@@ -275,7 +275,7 @@ ACMD(do_breath)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
   prob += 15;
 
   if(!tech_handle_zanzoken(ch, vict, "breath")) {
@@ -473,7 +473,7 @@ ACMD(do_ram)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
   
   prob -= 5;
 
@@ -650,7 +650,7 @@ ACMD(do_strike)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
   
   prob += 5;
 
@@ -967,7 +967,7 @@ ACMD(do_sunder)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "Sundering Force")) {
       pcost(ch, attperc, 0);
@@ -1202,7 +1202,7 @@ ACMD(do_zen)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "Zen Blade Strike")) {
       if (GET_SKILL_PERF(ch, SKILL_ZEN) == 3 && attperc > minimum) {
@@ -1530,7 +1530,7 @@ ACMD(do_malice)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
    if (time_info.hours <= 15 || time_info.hours > 22) {
     prob += 5;
@@ -1914,7 +1914,7 @@ ACMD(do_head)
 
   handle_defense(vict, &pry, &blk, &dge);
   prob -= avo;
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "headbutt")) {
       COMBO(ch) = -1;
@@ -2138,7 +2138,7 @@ ACMD(do_bash)
 
   handle_defense(vict, &pry, &blk, &dge);
   prob -= avo;
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "bash")) {
       COMBO(ch) = -1;
@@ -2360,7 +2360,7 @@ ACMD(do_seishou)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "Seishou Enko")) {
       pcost(ch, attperc / 4, 0);
@@ -3121,7 +3121,7 @@ ACMD(do_razor)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "Water Razor")) {
       pcost(ch, attperc, 0);
@@ -3319,7 +3319,7 @@ ACMD(do_spike)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "attack")) {
       if (GET_SKILL_PERF(ch, SKILL_WSPIKE) == 3 && attperc > minimum) {
@@ -3639,7 +3639,7 @@ ACMD(do_koteiru)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "Koteiru Bakuha")) {
       pcost(ch, attperc, 0);
@@ -3841,7 +3841,7 @@ ACMD(do_hspiral)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "Hell Spiral")) {
       pcost(ch, attperc, 0);
@@ -4085,7 +4085,7 @@ ACMD(do_breaker)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "Star Breaker")) {
       pcost(ch, attperc, 0);

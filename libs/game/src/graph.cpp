@@ -595,7 +595,6 @@ ACMD(do_track)
 				char *blah = sense_location(i->character);
 				send_to_char(ch, "@wLastly you sense that they are at... @C%s@n\n", blah);
 				++count;
-				free(blah);
 			}
 		}
 		if (count == 0) {
@@ -640,7 +639,6 @@ ACMD(do_track)
 		{
 			char *blah = sense_location(vict);
 			send_to_char(ch, "@WSense@D: @Y%s@n\r\n", blah);
-			free(blah);
 		}
 	}
 	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(ROOM_FLAGGED(IN_ROOM(ch), ROOM_EARTH)) && (ROOM_FLAGGED(IN_ROOM(vict), ROOM_EARTH))))
@@ -650,7 +648,6 @@ ACMD(do_track)
 		{
 			char *blah = sense_location(vict);
 			send_to_char(ch, "@WSense@D: @Y%s@n\r\n", blah);
-			free(blah);
 		}
 	}
 	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(ROOM_FLAGGED(IN_ROOM(ch), ROOM_VEGETA)) && (ROOM_FLAGGED(IN_ROOM(vict), ROOM_VEGETA))))
@@ -660,7 +657,6 @@ ACMD(do_track)
 		{
 			char *blah = sense_location(vict);
 			send_to_char(ch, "@WSense@D: @Y%s@n\r\n", blah);
-			free(blah);
 		}
 	}
 	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(ROOM_FLAGGED(IN_ROOM(ch), ROOM_NAMEK)) && (ROOM_FLAGGED(IN_ROOM(vict), ROOM_NAMEK))))
@@ -670,7 +666,6 @@ ACMD(do_track)
 		{
 			char *blah = sense_location(vict);
 			send_to_char(ch, "@WSense@D: @Y%s@n\r\n", blah);
-			free(blah);
 		}
 	}
 	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(ROOM_FLAGGED(IN_ROOM(ch), ROOM_FRIGID)) && (ROOM_FLAGGED(IN_ROOM(vict), ROOM_FRIGID))))
@@ -680,7 +675,6 @@ ACMD(do_track)
 		{
 			char *blah = sense_location(vict);
 			send_to_char(ch, "@WSense@D: @Y%s@n\r\n", blah);
-			free(blah);
 		}
 	}
 	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(ROOM_FLAGGED(IN_ROOM(ch), ROOM_AETHER)) && (ROOM_FLAGGED(IN_ROOM(vict), ROOM_AETHER))))
@@ -690,7 +684,6 @@ ACMD(do_track)
 		{
 			char *blah = sense_location(vict);
 			send_to_char(ch, "@WSense@D: @Y%s@n\r\n", blah);
-			free(blah);
 		}
 	}
 	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(ROOM_FLAGGED(IN_ROOM(ch), ROOM_KONACK)) && (ROOM_FLAGGED(IN_ROOM(vict), ROOM_KONACK))))
@@ -700,7 +693,6 @@ ACMD(do_track)
 		{
 			char *blah = sense_location(vict);
 			send_to_char(ch, "@WSense@D: @Y%s@n\r\n", blah);
-			free(blah);
 		}
 	}
 	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(ROOM_FLAGGED(IN_ROOM(ch), ROOM_KANASSA)) && (ROOM_FLAGGED(IN_ROOM(vict), ROOM_KANASSA))))
@@ -710,7 +702,6 @@ ACMD(do_track)
 		{
 			char *blah = sense_location(vict);
 			send_to_char(ch, "@WSense@D: @Y%s@n\r\n", blah);
-			free(blah);
 		}
 	}
 	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(ROOM_FLAGGED(IN_ROOM(ch), ROOM_ARLIA)) && (ROOM_FLAGGED(IN_ROOM(vict), ROOM_ARLIA))))
@@ -720,7 +711,6 @@ ACMD(do_track)
 		{
 			char *blah = sense_location(vict);
 			send_to_char(ch, "@WSense@D: @Y%s@n\r\n", blah);
-			free(blah);
 		}
 	}
 	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(PLANET_ZENITH(IN_ROOM(ch))) && (PLANET_ZENITH(IN_ROOM(vict)))))
@@ -730,7 +720,6 @@ ACMD(do_track)
 	{
 	 char *blah = sense_location(vict);
 	 send_to_char(ch, "@WSense@D: @Y%s@n\r\n", blah);
-	 free(blah);
 	}
    } 
 	else 
@@ -845,7 +834,6 @@ ACMD(do_track)
 				char *blah = sense_location(vict);
 				send_to_char(ch, "You sense them %s from here!\r\n", dirs[dir]);
 				send_to_char(ch, "@WSense@D: @Y%s@n\r\n", blah);
-				free(blah);
 			}
 			else {
 				send_to_char(ch, "You sense them %s from here!\r\n", dirs[dir]);

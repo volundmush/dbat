@@ -3487,7 +3487,7 @@ void saiyan_gain(struct char_data *ch, struct char_data *vict)
     int avail_count = 0;
 
     for (int i = 0; i < 3; i++) {
-        if (!is_soft_cap(ch, stats[i], 1.5)) {
+        if (!is_soft_cap_mult(ch, stats[i], 1.5)) {
             available[avail_count++] = stats[i];
         }
     }
@@ -5521,7 +5521,7 @@ void handle_spiral(struct char_data *ch, struct char_data *vict, int skill, int 
   else if (avo >= 70) {
    prob -= 69;
   }
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "Spiral Comet Blast")) {
       pcost(ch, amount, 0);

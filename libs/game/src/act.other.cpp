@@ -1307,11 +1307,11 @@ ACMD(do_train)
   }
 
   int stat_id = 0;
-  int8_t *stat_val = nullptr;
-  char *stat_name = nullptr;
+  int8_t *stat_val = NULL;
+  char *stat_name = NULL;
   int bonus_trait = -1;
   int nega_trait = -1;
-  int *stat_train = nullptr;
+  int *stat_train = NULL;
   int needed = 0;
 
   if(!strcasecmp("str", arg)) {
@@ -9213,7 +9213,6 @@ ACMD(do_snet)
       if (has_scanner(i->character)) {
        char *blah = sense_location(ch);
        send_to_char(i->character, "@WScanner@D: @Y%s@n\r\n", blah);
-       free(blah);
       }
       continue;
     } /* It is the right freq */
@@ -9225,7 +9224,6 @@ ACMD(do_snet)
       if (has_scanner(i->character)) {
        char *blah = sense_location(ch);
        send_to_char(i->character, "@WScanner@D: @Y%s@n\r\n", blah);
-       free(blah);
       }
       continue;
     }
@@ -9237,7 +9235,6 @@ ACMD(do_snet)
       if (has_scanner(i->character)) {
        char *blah = sense_location(ch);
        send_to_char(i->character, "@WScanner@D: @Y%s@n\r\n", blah);
-       free(blah);
       }
      reached = TRUE;
     }
@@ -9367,7 +9364,6 @@ ACMD(do_scouter)
            send_to_char(ch, "@D<@GPowerlevel Detected@D: [@Y%s@D]@w ---> @C%s@n\r\n", add_commas(GET_HIT(i->character)), same == TRUE ? pathway : blah);
           }
           ++count;
-          free(blah);
          }
        }
        if (count == 0) {

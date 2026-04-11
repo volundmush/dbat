@@ -282,7 +282,7 @@ static void generate_multiform(struct char_data *ch, int count)
     snprintf(clone_ldesc, sizeof(clone_ldesc), "%s's @CClone@w is standing here.@n\n", ch->name);
 
     for(int i = 0; i < count; i++) {
-        char_data *clone = nullptr;
+        char_data *clone = NULL;
         clone = read_mobile(r_num, REAL);
 
         clone->name = strdup(clone_name);

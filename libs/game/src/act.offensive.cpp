@@ -121,7 +121,7 @@ ACMD(do_galikgun)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "Galik Gun")) {
       if (GET_SKILL_PERF(ch, SKILL_GALIKGUN) == 3 && attperc > minimum) {
@@ -366,7 +366,7 @@ ACMD(do_honoo)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "Honoo")) {
       if (GET_SKILL_PERF(ch, SKILL_HONOO) == 3 && attperc > minimum) {
@@ -685,7 +685,7 @@ ACMD(do_psyblast)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "Psychic Blast")) {
       if (GET_SKILL_PERF(ch, SKILL_PSYBLAST) == 3 && attperc > minimum) {
@@ -990,7 +990,7 @@ ACMD(do_tslash)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "Twin Slash")) {
       if (GET_SKILL_PERF(ch, SKILL_TSLASH) == 3 && attperc > minimum) {
@@ -1322,7 +1322,7 @@ ACMD(do_eraser)
   handle_defense(vict, &pry, &blk, &dge);
  
   prob -= avo;
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "Eraser Cannon")) {
       pcost(ch, attperc, 0);
@@ -1582,7 +1582,7 @@ ACMD(do_pbarrage)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "Psychic Barrage")) {
       pcost(ch, attperc, 0);
@@ -2015,7 +2015,7 @@ ACMD(do_spiritball)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "Spirit Ball")) {
       pcost(ch, attperc, 0);
@@ -2246,7 +2246,7 @@ ACMD(do_deathball)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
   prob -= rand_number(8, 10);
 
   if(!tech_handle_zanzoken(ch, vict, "Deathball")) {
@@ -2473,7 +2473,7 @@ ACMD(do_pslash)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "Phoenix Slash")) {
       pcost(ch, attperc, 0);
@@ -2700,7 +2700,7 @@ ACMD(do_bigbang)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "Big Bang")) {
       pcost(ch, attperc, 0);
@@ -2929,7 +2929,7 @@ ACMD(do_scatter)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   prob += rand_number(10, 20);
 
@@ -3160,7 +3160,7 @@ ACMD(do_balefire)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   prob += rand_number(10, 20);
 
@@ -3796,7 +3796,7 @@ ACMD(do_hellflash)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "Hell Flash")) {
       if (GET_SKILL_PERF(ch, SKILL_HELLFLASH) == 3 && attperc > minimum) {
@@ -4066,7 +4066,7 @@ ACMD(do_ddslash)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "Darkness Dragon Slash")) {
       pcost(ch, attperc, 0);
@@ -4296,7 +4296,7 @@ ACMD(do_crusher)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "Crusher Ball")) {
       if (GET_SKILL_PERF(ch, SKILL_CRUSHER) == 3 && attperc > minimum) {
@@ -4538,7 +4538,7 @@ ACMD(do_final)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "Final Flash")) {
       pcost(ch, attperc, 0);
@@ -4757,7 +4757,7 @@ ACMD(do_sbc)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "Special Beam Cannon")) {
       pcost(ch, attperc, 0);
@@ -4960,7 +4960,7 @@ ACMD(do_tribeam)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "Tribeam")) {
       pcost(ch, attperc, 0);
@@ -5186,7 +5186,7 @@ ACMD(do_kienzan)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "Kienzan")) {
       pcost(ch, attperc, 0);
@@ -5700,7 +5700,7 @@ ACMD(do_rogafufuken)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "Rogafufuken")) {
       pcost(ch, attperc, 0);
@@ -5919,7 +5919,7 @@ ACMD(do_dualbeam)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "Dualbeam")) {
       pcost(ch, attperc, 0);
@@ -6175,7 +6175,7 @@ ACMD(do_blessedhammer)
   prob += 15; /* kousengan bonus */
 
   prob -= avo;
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "@WB@Dl@We@Ds@Ws@De@Wd @DH@Wa@Dm@Wm@De@Wr@C")) {
       pcost(ch, attperc, 0);
@@ -6402,7 +6402,7 @@ ACMD(do_kousengan)
   prob += 15; /* kousengan bonus */
 
   prob -= avo;
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "kousengan")) {
       pcost(ch, attperc, 0);
@@ -6643,7 +6643,7 @@ ACMD(do_deathbeam)
   prob += 15; /* deathbeam bonus */
 
   prob -= avo;
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "Deathbeam")) {
       if (GET_SKILL_PERF(ch, SKILL_DEATHBEAM) == 3 && attperc > minimum) {
@@ -6930,7 +6930,7 @@ ACMD(do_dodonpa)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
   
      if (GET_SKILL_PERF(ch, SKILL_DODONPA) == 3) {
 		WAIT_STATE(ch, PULSE_3SEC);
@@ -7185,7 +7185,7 @@ ACMD(do_masenko)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "Masenko")) {
       if (GET_SKILL_PERF(ch, SKILL_MASENKO) == 3 && attperc > minimum) {
@@ -7461,7 +7461,7 @@ ACMD(do_kamehameha)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "KameHameHa Wave")) {
       if (GET_SKILL_PERF(ch, SKILL_KAMEHAMEHA) == 3 && attperc > minimum) {
@@ -7789,7 +7789,7 @@ ACMD(do_renzo)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   /* Renzokou Energy Dan Mastery */
 
@@ -8156,7 +8156,7 @@ ACMD(do_heeldrop)
    dge = rand_number(70, 100);
   }
   prob -= avo;
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "Heeldrop")) {
       COMBO(ch) = -1;
@@ -8536,7 +8536,7 @@ ACMD(do_attack)
   if (PLR_FLAGGED(ch, PLR_THANDW)) {
    perc += 15;
   }
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "attack")) {
       if ((wielded == 2 && gun == FALSE) || (gun2 == FALSE && gun == FALSE))
@@ -9175,7 +9175,7 @@ ACMD(do_shogekiha)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   /* Shogekiha Mastery Bonus Area of Funstuff */
    int master_roll = rand_number(1, 100), master_chance = 0, master_pass = FALSE;
@@ -9421,7 +9421,7 @@ ACMD(do_tsuihidan)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   /* Tsuihidan Mastery */
 
@@ -9790,7 +9790,7 @@ ACMD(do_attack2)
   }
    
   prob -= avo;
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "attack")) {
       if (gun2 == FALSE)
@@ -10330,7 +10330,7 @@ ACMD(do_bite)
 		handle_defense(vict, &pry, &blk, &dge);
 
 		prob -= avo;
-        tech_handle_posmodifier(vict, pry, blk, dge, prob);
+        tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
         if(!tech_handle_zanzoken(ch, vict, "bite")) {
             pcost(ch, 0, stcost / 2);
@@ -10588,7 +10588,7 @@ ACMD(do_kiball)
   /*-----------------------------------*/
 
   prob -= avo;
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "kiball")) {
       if (frompool == TRUE) {
@@ -10834,7 +10834,7 @@ ACMD(do_beam)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "beam")) {
       pcost(ch, attperc, 0);
@@ -11104,7 +11104,7 @@ ACMD(do_kiblast)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   /* Kiblast mastery Area */
 
@@ -11376,7 +11376,7 @@ ACMD(do_slam)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
   if(!tech_handle_zanzoken(ch, vict, "slam")) {
       COMBO(ch) = -1;
       COMBHITS(ch) = 0;
@@ -11713,7 +11713,7 @@ ACMD(do_uppercut)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "uppercut")) {
       COMBO(ch) = -1;
@@ -11932,7 +11932,7 @@ ACMD(do_tailwhip)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "tailwhip")) {
       pcost(ch, 0, stcost / 2);
@@ -12173,7 +12173,7 @@ ACMD(do_roundhouse)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "roundhouse")) {
       COMBO(ch) = -1;
@@ -12395,7 +12395,7 @@ ACMD(do_elbow)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "elbow")) {
       COMBO(ch) = -1;
@@ -12620,7 +12620,7 @@ ACMD(do_kick)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "kick")) {
       COMBO(ch) = -1;
@@ -12845,7 +12845,7 @@ ACMD(do_knee)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "knee strike")) {
       COMBO(ch) = -1;
@@ -13060,7 +13060,7 @@ ACMD(do_punch)
 
   prob -= avo;
 
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "punch")) {
       COMBO(ch) = -1;

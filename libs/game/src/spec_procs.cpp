@@ -1644,7 +1644,7 @@ SPECIAL(bank)
        send_to_char(vict, "@WYou have just had @Y%s@W zenni wired into your bank account.@n\r\n", add_commas(amount));
      }
     send_to_char(ch, "You transfer %s zenni to them.\r\n", add_commas(amount));
-    act("$n makes a bank transaction.", TRUE, ch, 0, nullptr, TO_ROOM);
+    act("$n makes a bank transaction.", TRUE, ch, 0, NULL, TO_ROOM);
     return (TRUE);
   } else if (CMD_IS("deposit")) {
 
@@ -1664,7 +1664,7 @@ SPECIAL(bank)
     GET_GOLD(ch) -= amount;
     GET_BANK_GOLD(ch) += amount;
     send_to_char(ch, "You deposit %d zenni.\r\n", amount);
-    act("$n makes a bank transaction.", TRUE, ch, 0, nullptr, TO_ROOM);
+    act("$n makes a bank transaction.", TRUE, ch, 0, NULL, TO_ROOM);
     return (TRUE);
   } else if (CMD_IS("withdraw")) {
 
@@ -1704,7 +1704,7 @@ SPECIAL(bank)
        GET_BANK_GOLD(ch) -= amount + 1;
       }
       send_to_char(ch, "You withdraw %s zenni,  and pay %s in withdraw fees.\r\n.\r\n", add_commas(amount), add_commas(num));
-      act("$n makes a bank transaction.", TRUE, ch, 0, nullptr, TO_ROOM);
+      act("$n makes a bank transaction.", TRUE, ch, 0, NULL, TO_ROOM);
       return (TRUE);
     }
     GET_GOLD(ch) += amount;
@@ -1716,7 +1716,7 @@ SPECIAL(bank)
        GET_BANK_GOLD(ch) -= amount + 1;
       }
     send_to_char(ch, "You withdraw %s zenni, and pay %s in withdraw fees.\r\n", add_commas(amount), add_commas(num));
-    act("$n makes a bank transaction.", TRUE, ch, 0, nullptr, TO_ROOM);
+    act("$n makes a bank transaction.", TRUE, ch, 0, NULL, TO_ROOM);
     return (TRUE);
   } else
     return (FALSE);

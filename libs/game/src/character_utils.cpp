@@ -1,3 +1,4 @@
+#define DBAT_CHARACTER_UTILS_NO_DEFAULT_ARG_MACROS
 #include "dbat/db/characters.h"
 #include "dbat/db/utils.h"
 #include "dbat/db/consts/aligns.h"
@@ -24,6 +25,8 @@
 #include "dbat/game/feats.h"
 #include "dbat/game/time.h"
 #include "dbat/game/weather.h"
+
+#undef DBAT_CHARACTER_UTILS_NO_DEFAULT_ARG_MACROS
 
 #define ABS(x) ((x) < 0 ? -(x) : (x))
 
@@ -171,7 +174,7 @@ void resurrect(char_data *ch, int mode) {
         }
     }
     GET_DTIME(ch) = 0;
-    act("$n's body forms in a pool of @Bblue light@n.", TRUE, ch, nullptr, nullptr, TO_ROOM);
+    act("$n's body forms in a pool of @Bblue light@n.", TRUE, ch, NULL, NULL, TO_ROOM);
 }
 
 void ghostify(char_data *ch) {
@@ -247,10 +250,10 @@ int64_t calc_soft_cap(char_data *ch) {
 }
 
 bool is_soft_cap(char_data *ch, int64_t type) {
-    return is_soft_cap(ch, type, 1.0);
+    return is_soft_cap_mult(ch, type, 1.0);
 }
 
-bool is_soft_cap(char_data *ch, int64_t type, long double mult) {
+bool is_soft_cap_mult(char_data *ch, int64_t type, long double mult) {
     if(IS_NPC(ch))
         return true;
 
@@ -311,11 +314,11 @@ int calcGravCost(char_data *ch, int64_t num) {
             send_to_char(ch, "You sweat bullets straining against the current gravity.\r\n");
         }
         if ((getCurST(ch)) > cost) {
-            decCurST(ch, cost);
+            decCurST(ch, cost, 0);
             return 1;
         }
         else {
-            decCurST(ch, cost);
+            decCurST(ch, cost, 0);
             return 0;
         }
     }
@@ -551,6 +554,10 @@ int64_t incCurKI(char_data *ch, int64_t amt, bool limit_max) {
     return getCurKI(ch);
 };
 
+int64_t incCurKI_default(char_data *ch, int64_t amt) {
+    return incCurKI(ch, amt, true);
+}
+
 int64_t decCurKI(char_data *ch, int64_t amt, int64_t floor) {
     double fl = 0.0;
     if(floor > 0)
@@ -562,12 +569,20 @@ int64_t decCurKI(char_data *ch, int64_t amt, int64_t floor) {
     return getCurKI(ch);
 }
 
+int64_t decCurKI_default(char_data *ch, int64_t amt) {
+    return decCurKI(ch, amt, 0);
+}
+
 int64_t incCurKIPercent(char_data *ch, double amt, bool limit_max) {
     if(limit_max)
         ch->energy = MIN(1.0, ch->energy+ABS(amt));
     else
         ch->energy += ABS(amt);
     return getCurKI(ch);
+}
+
+int64_t incCurKIPercent_default(char_data *ch, double amt) {
+    return incCurKIPercent(ch, amt, true);
 }
 
 int64_t decCurKIPercent(char_data *ch, double amt, int64_t floor) {
@@ -579,6 +594,10 @@ int64_t decCurKIPercent(char_data *ch, double amt, int64_t floor) {
         fl = (double)floor / (double)getMaxKI(ch);
     ch->energy = MAX(fl, ch->energy-ABS(amt));
     return getCurKI(ch);
+}
+
+int64_t decCurKIPercent_default(char_data *ch, double amt) {
+    return decCurKIPercent(ch, amt, 0);
 }
 
 void restoreKI(char_data *ch, bool announce) {
@@ -652,6 +671,10 @@ int64_t incCurST(char_data *ch, int64_t amt, bool limit_max) {
     return getCurST(ch);
 };
 
+int64_t incCurST_default(char_data *ch, int64_t amt) {
+    return incCurST(ch, amt, true);
+}
+
 int64_t decCurST(char_data *ch, int64_t amt, int64_t floor) {
     double fl = 0.0;
     if(floor > 0)
@@ -661,6 +684,10 @@ int64_t decCurST(char_data *ch, int64_t amt, int64_t floor) {
     ch->stamina = MAX(fl, newstamina);
     ch->stamina = clampHealth(ch->stamina);
     return getCurST(ch);
+}
+
+int64_t decCurST_default(char_data *ch, int64_t amt) {
+    return decCurST(ch, amt, 0);
 }
 
 int64_t incCurSTPercentImpl(char_data *ch, double amt, bool limit_max) {
@@ -902,14 +929,26 @@ int64_t gainBasePL(char_data *ch, int64_t amt, bool trans_mult) {
     return ch->basepl;
 }
 
+int64_t gainBasePL_default(char_data *ch, int64_t amt) {
+    return gainBasePL(ch, amt, false);
+}
+
 int64_t gainBaseST(char_data *ch, int64_t amt, bool trans_mult) {
     ch->basest += amt;
     return ch->basest;
 }
 
+int64_t gainBaseST_default(char_data *ch, int64_t amt) {
+    return gainBaseST(ch, amt, false);
+}
+
 int64_t gainBaseKI(char_data *ch, int64_t amt, bool trans_mult) {
     ch->baseki += amt;
     return ch->baseki;
+}
+
+int64_t gainBaseKI_default(char_data *ch, int64_t amt) {
+    return gainBaseKI(ch, amt, false);
 }
 
 void gainBaseAll(char_data *ch, int64_t amt, bool trans_mult) {
@@ -918,9 +957,17 @@ void gainBaseAll(char_data *ch, int64_t amt, bool trans_mult) {
     gainBaseST(ch, amt, trans_mult);
 }
 
+void gainBaseAll_default(char_data *ch, int64_t amt) {
+    gainBaseAll(ch, amt, false);
+}
+
 int64_t loseBasePL(char_data *ch, int64_t amt, bool trans_mult) {
     ch->basepl = MAX(1L, ch->basepl-amt);
     return ch->basepl;
+}
+
+int64_t loseBasePL_default(char_data *ch, int64_t amt) {
+    return loseBasePL(ch, amt, false);
 }
 
 int64_t loseBaseST(char_data *ch, int64_t amt, bool trans_mult) {
@@ -928,9 +975,17 @@ int64_t loseBaseST(char_data *ch, int64_t amt, bool trans_mult) {
     return ch->basest;
 }
 
+int64_t loseBaseST_default(char_data *ch, int64_t amt) {
+    return loseBaseST(ch, amt, false);
+}
+
 int64_t loseBaseKI(char_data *ch, int64_t amt, bool trans_mult) {
     ch->baseki = MAX(1L, ch->baseki-amt);
     return ch->baseki;
+}
+
+int64_t loseBaseKI_default(char_data *ch, int64_t amt) {
+    return loseBaseKI(ch, amt, false);
 }
 
 void loseBaseAll(char_data *ch, int64_t amt, bool trans_mult) {
@@ -939,28 +994,56 @@ void loseBaseAll(char_data *ch, int64_t amt, bool trans_mult) {
     loseBaseST(ch, amt, trans_mult);
 }
 
+void loseBaseAll_default(char_data *ch, int64_t amt) {
+    loseBaseAll(ch, amt, false);
+}
+
 int64_t gainBasePLPercent(char_data *ch, double amt, bool trans_mult) {
     return gainBasePL(ch, ch->basepl * amt, trans_mult);
+}
+
+int64_t gainBasePLPercent_default(char_data *ch, double amt) {
+    return gainBasePLPercent(ch, amt, false);
 }
 
 int64_t gainBaseKIPercent(char_data *ch, double amt, bool trans_mult) {
     return gainBaseKI(ch, ch->baseki * amt, trans_mult);
 }
 
+int64_t gainBaseKIPercent_default(char_data *ch, double amt) {
+    return gainBaseKIPercent(ch, amt, false);
+}
+
 int64_t gainBaseSTPercent(char_data *ch, double amt, bool trans_mult) {
     return gainBaseST(ch, ch->basest * amt, trans_mult);
+}
+
+int64_t gainBaseSTPercent_default(char_data *ch, double amt) {
+    return gainBaseSTPercent(ch, amt, false);
 }
 
 int64_t loseBasePLPercent(char_data *ch, double amt, bool trans_mult) {
     return loseBasePL(ch, ch->basepl * amt, trans_mult);
 }
 
+int64_t loseBasePLPercent_default(char_data *ch, double amt) {
+    return loseBasePLPercent(ch, amt, false);
+}
+
 int64_t loseBaseKIPercent(char_data *ch, double amt, bool trans_mult) {
     return loseBaseKI(ch, ch->baseki * amt, trans_mult);
 }
 
+int64_t loseBaseKIPercent_default(char_data *ch, double amt) {
+    return loseBaseKIPercent(ch, amt, false);
+}
+
 int64_t loseBaseSTPercent(char_data *ch, double amt, bool trans_mult) {
     return loseBaseST(ch, ch->basest * amt, trans_mult);
+}
+
+int64_t loseBaseSTPercent_default(char_data *ch, double amt) {
+    return loseBaseSTPercent(ch, amt, false);
 }
 
 void gainBaseAllPercent(char_data *ch, double amt, bool trans_mult) {
@@ -969,10 +1052,18 @@ void gainBaseAllPercent(char_data *ch, double amt, bool trans_mult) {
     gainBaseSTPercent(ch, amt, trans_mult);
 }
 
+void gainBaseAllPercent_default(char_data *ch, double amt) {
+    gainBaseAllPercent(ch, amt, false);
+}
+
 void loseBaseAllPercent(char_data *ch, double amt, bool trans_mult) {
     loseBasePLPercent(ch, amt, trans_mult);
     loseBaseKIPercent(ch, amt, trans_mult);
     loseBaseSTPercent(ch, amt, trans_mult);
+}
+
+void loseBaseAllPercent_default(char_data *ch, double amt) {
+    loseBaseAllPercent(ch, amt, false);
 }
 
 int64_t getMaxCarryWeight(char_data *ch) {
@@ -1043,7 +1134,7 @@ void remove_kaioken(char_data *ch, int8_t announce) {
 
 void dispel_ash(struct char_data *ch)
 {
- struct obj_data *obj, *next_obj, *ash = nullptr;
+ struct obj_data *obj, *next_obj, *ash = NULL;
  int there = FALSE;
 
  for (obj = world[IN_ROOM(ch)].contents; obj; obj = next_obj) {
@@ -2397,7 +2488,7 @@ int roll_pursue(struct char_data *ch, struct char_data *vict)
 char *sense_location(struct char_data *ch)
 {
 
-	char *message = new char[MAX_INPUT_LENGTH];
+	static char message[MAX_INPUT_LENGTH];
 	int roomnum = GET_ROOM_VNUM(IN_ROOM(ch)), num = 0;
 	if ((num = real_zone_by_thing(roomnum)) != NOWHERE) {
 		num = real_zone_by_thing(roomnum);
@@ -3034,8 +3125,8 @@ void handle_evolution(struct char_data *ch, int64_t dmg)
    int armorgain = 0;
    int64_t plgain = getBasePL(ch) * rand1, stamgain = getBaseST(ch) * rand2;
    armorgain = armor_evolve(ch);
-   gainBasePL(ch, plgain);
-   gainBaseST(ch, stamgain);
+   gainBasePL(ch, plgain, false);
+   gainBaseST(ch, stamgain, false);
    GET_ARMOR(ch) += armorgain;
    if (GET_ARMOR(ch) > 50000) {
     GET_ARMOR(ch) = 50000;
@@ -4389,11 +4480,11 @@ void pcost(struct char_data *ch, double ki, int64_t st)
     st -= st * 0.8;
    }
   }
-  decCurST(ch, st);
+  decCurST(ch, st, 0);
  }
  if (IS_NPC(ch)) {
-     decCurKI(ch, ki);
-     decCurST(ch, st);
+     decCurKI(ch, ki, 0);
+     decCurST(ch, st, 0);
  }
 }
 

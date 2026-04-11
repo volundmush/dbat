@@ -15,11 +15,11 @@ bool tech_handle_zanzoken(char_data *ch, char_data *vict, const char* name) {
         if (!AFF_FLAGGED(ch, AFF_ZANZOKEN) || (AFF_FLAGGED(ch, AFF_ZANZOKEN) && GET_SPEEDI(ch) + rand_number(1, 5) < GET_SPEEDI(vict) + rand_number(1, 5))) {
             char msg[MAX_INPUT_LENGTH];
             snprintf(msg, sizeof(msg), "@C$N@c disappears, avoiding your %s before reappearing!@n", name);
-            act(msg, TRUE, ch, nullptr, vict, TO_CHAR);
+            act(msg, TRUE, ch, NULL, vict, TO_CHAR);
             snprintf(msg, sizeof(msg), "@cYou disappear, avoiding @C$n's@c %s before reappearing!@n", name);
-            act(msg, TRUE, ch, nullptr, vict, TO_VICT);
+            act(msg, TRUE, ch, NULL, vict, TO_VICT);
             snprintf(msg, sizeof(msg), "@C$N@c disappears, avoiding @C$n's@c %s before reappearing!@n", name);
-            act(msg, TRUE, ch, nullptr, vict, TO_NOTVICT);
+            act(msg, TRUE, ch, NULL, vict, TO_NOTVICT);
             if (AFF_FLAGGED(ch, AFF_ZANZOKEN)) {
                 REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
             }
@@ -37,23 +37,23 @@ bool tech_handle_zanzoken(char_data *ch, char_data *vict, const char* name) {
     return true;
 }
 
-void tech_handle_posmodifier(char_data *vict, int &pry, int &blk, int &dge, int &prob) {
+void tech_handle_posmodifier(char_data *vict, int *pry, int *blk, int *dge, int *prob) {
     switch(GET_POS(vict)) {
         case POS_SLEEPING:
-            pry = 0;
-            blk = 0;
-            dge = 0;
-            prob += 50;
+            *pry = 0;
+            *blk = 0;
+            *dge = 0;
+            *prob += 50;
         case POS_RESTING:
-            pry /= 4;
-            blk /= 4;
-            dge /= 4;
-            prob += 25;
+            *pry /= 4;
+            *blk /= 4;
+            *dge /= 4;
+            *prob += 25;
         case POS_SITTING:
-            pry /= 2;
-            blk /= 2;
-            dge /= 2;
-            prob += 10;
+            *pry /= 2;
+            *blk /= 2;
+            *dge /= 2;
+            *prob += 10;
     }
 }
 
@@ -73,12 +73,12 @@ bool tech_handle_charge(char_data *ch, char *arg, double minimum, double *attper
 }
 
 bool tech_handle_targeting(char_data *ch, char *arg, char_data **vict, obj_data **obj) {
-    *vict = nullptr; *obj = nullptr;
-    if (!*arg || !(*vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM))) {
+    *vict = NULL; *obj = NULL;
+    if (!*arg || !(*vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
         if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
             *vict = FIGHTING(ch);
             return true;
-        } else if (!(*obj = get_obj_in_list_vis(ch, arg, nullptr, world[IN_ROOM(ch)].contents))) {
+        } else if (!(*obj = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(ch)].contents))) {
             send_to_char(ch, "Nothing around here by that name.\r\n");
             return false;
         }
@@ -94,14 +94,14 @@ void tech_handle_fireshield(char_data *ch, char_data *vict, const char* part) {
     if (GET_HIT(vict) > 0 && !AFF_FLAGGED(vict, AFF_SPIRIT) && AFF_FLAGGED(vict, AFF_FIRESHIELD) && !GET_BONUS(ch, BONUS_FIREPROOF) && !IS_DEMON(ch)) {
         char msg[MAX_INPUT_LENGTH];
         snprintf(msg, sizeof(msg), "@c$N's@W fireshield burns your %s!@n", msg);
-        act(msg, TRUE, ch, nullptr, vict, TO_CHAR);
+        act(msg, TRUE, ch, NULL, vict, TO_CHAR);
         snprintf(msg, sizeof(msg), "@C$n's@W %s is burned by your fireshield!@n", msg);
-        act(msg, TRUE, ch, nullptr, vict, TO_VICT);
+        act(msg, TRUE, ch, NULL, vict, TO_VICT);
         snprintf(msg, sizeof(msg), "@c$n's@W %s is burned by @C$N's@W fireshield!@n", msg);
-        act(msg, TRUE, ch, nullptr, vict, TO_NOTVICT);
+        act(msg, TRUE, ch, NULL, vict, TO_NOTVICT);
         int64_t dmg = GET_MAX_MANA(vict) * 0.02;
         LASTATK(vict) += 1000;
-        hurt(0, 0, vict, ch, nullptr, dmg, 0);
+        hurt(0, 0, vict, ch, NULL, dmg, 0);
         if (GET_BONUS(ch, BONUS_FIREPRONE)) {
             send_to_char(ch, "@RYou are extremely flammable and are burned by the attack!@n\r\n");
             send_to_char(vict, "@RThey are easily burned!@n\r\n");
@@ -118,9 +118,9 @@ void tech_handle_fireshield(char_data *ch, char_data *vict, const char* part) {
 
 bool tech_handle_android_absorb(char_data *ch, char_data *vict) {
     if (IS_ANDROID(vict) && HAS_ARMS(vict) && GET_SKILL(vict, SKILL_ABSORB) > rand_number(1, 140)) {
-        act("@C$N@W absorbs your ki attack and all your charged ki with $S hand!@n", TRUE, ch, nullptr, vict, TO_CHAR);
-        act("@WYou absorb @C$n's@W ki attack and all $s charged ki with your hand!@n", TRUE, ch, nullptr, vict, TO_VICT);
-        act("@C$N@W absorbs @c$n's@W ki attack and all $s charged ki with $S hand!@n", TRUE, ch, nullptr, vict, TO_NOTVICT);
+        act("@C$N@W absorbs your ki attack and all your charged ki with $S hand!@n", TRUE, ch, NULL, vict, TO_CHAR);
+        act("@WYou absorb @C$n's@W ki attack and all $s charged ki with your hand!@n", TRUE, ch, NULL, vict, TO_VICT);
+        act("@C$N@W absorbs @c$n's@W ki attack and all $s charged ki with $S hand!@n", TRUE, ch, NULL, vict, TO_NOTVICT);
         int amot = GET_CHARGE(ch);
         if (IS_NPC(ch)) {
             amot = GET_MAX_MANA(ch) / 20;

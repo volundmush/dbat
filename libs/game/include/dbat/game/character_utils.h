@@ -21,7 +21,7 @@ bool in_northran(char_data *ch);
 bool can_tolerate_gravity(char_data *ch, int grav);
 int calcTier(char_data *ch);
 int64_t calc_soft_cap(char_data *ch);
-bool is_soft_cap(char_data *ch, int64_t type, long double mult);
+bool is_soft_cap_mult(char_data *ch, int64_t type, long double mult);
 bool is_soft_cap(char_data *ch, int64_t type);
 int wearing_android_canister(char_data *ch);
 int calcGravCost(char_data *ch, int64_t num);
@@ -66,10 +66,14 @@ int64_t getPercentOfMaxKI(char_data *ch, double amt);
 bool isFullKI(char_data *ch);
 int64_t setCurKI(char_data *ch, int64_t amt);
 int64_t setCurKIPercent(char_data *ch, double amt);
-int64_t incCurKI(char_data *ch, int64_t amt, bool limit_max = true);
-int64_t decCurKI(char_data *ch, int64_t amt, int64_t floor = 0);
-int64_t incCurKIPercent(char_data *ch, double amt, bool limit_max = true);
-int64_t decCurKIPercent(char_data *ch, double amt, int64_t floor = 0);
+int64_t incCurKI(char_data *ch, int64_t amt, bool limit_max);
+int64_t incCurKI_default(char_data *ch, int64_t amt);
+int64_t decCurKI(char_data *ch, int64_t amt, int64_t floor);
+int64_t decCurKI_default(char_data *ch, int64_t amt);
+int64_t incCurKIPercent(char_data *ch, double amt, bool limit_max);
+int64_t incCurKIPercent_default(char_data *ch, double amt);
+int64_t decCurKIPercent(char_data *ch, double amt, int64_t floor);
+int64_t decCurKIPercent_default(char_data *ch, double amt);
 void restoreKI(char_data *ch, bool announce);
 void restoreKIAnnounce(char_data *ch);
 
@@ -83,8 +87,10 @@ int64_t getPercentOfMaxST(char_data *ch, double amt);
 bool isFullST(char_data *ch);
 int64_t setCurST(char_data *ch, int64_t amt);
 int64_t setCurSTPercent(char_data *ch, double amt);
-int64_t incCurST(char_data *ch, int64_t amt, bool limit_max = true);
-int64_t decCurST(char_data *ch, int64_t amt, int64_t floor = 0);
+int64_t incCurST(char_data *ch, int64_t amt, bool limit_max);
+int64_t incCurST_default(char_data *ch, int64_t amt);
+int64_t decCurST(char_data *ch, int64_t amt, int64_t floor);
+int64_t decCurST_default(char_data *ch, int64_t amt);
 int64_t incCurSTPercentImpl(char_data *ch, double amt, bool limit_max);
 int64_t incCurSTPercent(char_data *ch, double amt);
 int64_t decCurSTPercentImpl(char_data *ch, double amt, int64_t floor);
@@ -119,25 +125,70 @@ void restoreStatusAnnounce(char_data *ch);
 void restoreLimbs(char_data *ch, bool announce);
 void restoreLimbsAnnounce(char_data *ch);
 
-int64_t gainBasePL(char_data *ch, int64_t amt, bool trans_mult = false);
-int64_t gainBaseKI(char_data *ch, int64_t amt, bool trans_mult = false);
-int64_t gainBaseST(char_data *ch, int64_t amt, bool trans_mult = false);
-void gainBaseAll(char_data *ch, int64_t amt, bool trans_mult = false);
+int64_t gainBasePL(char_data *ch, int64_t amt, bool trans_mult);
+int64_t gainBasePL_default(char_data *ch, int64_t amt);
+int64_t gainBaseKI(char_data *ch, int64_t amt, bool trans_mult);
+int64_t gainBaseKI_default(char_data *ch, int64_t amt);
+int64_t gainBaseST(char_data *ch, int64_t amt, bool trans_mult);
+int64_t gainBaseST_default(char_data *ch, int64_t amt);
+void gainBaseAll(char_data *ch, int64_t amt, bool trans_mult);
+void gainBaseAll_default(char_data *ch, int64_t amt);
 
-int64_t loseBasePL(char_data *ch, int64_t amt, bool trans_mult = false);
-int64_t loseBaseKI(char_data *ch, int64_t amt, bool trans_mult = false);
-int64_t loseBaseST(char_data *ch, int64_t amt, bool trans_mult = false);
-void loseBaseAll(char_data *ch, int64_t amt, bool trans_mult = false);
+int64_t loseBasePL(char_data *ch, int64_t amt, bool trans_mult);
+int64_t loseBasePL_default(char_data *ch, int64_t amt);
+int64_t loseBaseKI(char_data *ch, int64_t amt, bool trans_mult);
+int64_t loseBaseKI_default(char_data *ch, int64_t amt);
+int64_t loseBaseST(char_data *ch, int64_t amt, bool trans_mult);
+int64_t loseBaseST_default(char_data *ch, int64_t amt);
+void loseBaseAll(char_data *ch, int64_t amt, bool trans_mult);
+void loseBaseAll_default(char_data *ch, int64_t amt);
 
-int64_t gainBasePLPercent(char_data *ch, double amt, bool trans_mult = false);
-int64_t gainBaseKIPercent(char_data *ch, double amt, bool trans_mult = false);
-int64_t gainBaseSTPercent(char_data *ch, double amt, bool trans_mult = false);
-void gainBaseAllPercent(char_data *ch, double amt, bool trans_mult = false);
+int64_t gainBasePLPercent(char_data *ch, double amt, bool trans_mult);
+int64_t gainBasePLPercent_default(char_data *ch, double amt);
+int64_t gainBaseKIPercent(char_data *ch, double amt, bool trans_mult);
+int64_t gainBaseKIPercent_default(char_data *ch, double amt);
+int64_t gainBaseSTPercent(char_data *ch, double amt, bool trans_mult);
+int64_t gainBaseSTPercent_default(char_data *ch, double amt);
+void gainBaseAllPercent(char_data *ch, double amt, bool trans_mult);
+void gainBaseAllPercent_default(char_data *ch, double amt);
 
-int64_t loseBasePLPercent(char_data *ch, double amt, bool trans_mult = false);
-int64_t loseBaseKIPercent(char_data *ch, double amt, bool trans_mult = false);
-int64_t loseBaseSTPercent(char_data *ch, double amt, bool trans_mult = false);
-void loseBaseAllPercent(char_data *ch, double amt, bool trans_mult = false);
+int64_t loseBasePLPercent(char_data *ch, double amt, bool trans_mult);
+int64_t loseBasePLPercent_default(char_data *ch, double amt);
+int64_t loseBaseKIPercent(char_data *ch, double amt, bool trans_mult);
+int64_t loseBaseKIPercent_default(char_data *ch, double amt);
+int64_t loseBaseSTPercent(char_data *ch, double amt, bool trans_mult);
+int64_t loseBaseSTPercent_default(char_data *ch, double amt);
+void loseBaseAllPercent(char_data *ch, double amt, bool trans_mult);
+void loseBaseAllPercent_default(char_data *ch, double amt);
+
+#ifndef DBAT_CHARACTER_UTILS_NO_DEFAULT_ARG_MACROS
+#define DBAT_CHUTILS_SELECT_2_3(_1, _2, _3, NAME, ...) NAME
+#define DBAT_CHUTILS_CALL_2_3(name2, name3, ...) \
+    DBAT_CHUTILS_SELECT_2_3(__VA_ARGS__, name3, name2)(__VA_ARGS__)
+
+#define incCurKI(...) DBAT_CHUTILS_CALL_2_3(incCurKI_default, incCurKI, __VA_ARGS__)
+#define decCurKI(...) DBAT_CHUTILS_CALL_2_3(decCurKI_default, decCurKI, __VA_ARGS__)
+#define incCurKIPercent(...) DBAT_CHUTILS_CALL_2_3(incCurKIPercent_default, incCurKIPercent, __VA_ARGS__)
+#define decCurKIPercent(...) DBAT_CHUTILS_CALL_2_3(decCurKIPercent_default, decCurKIPercent, __VA_ARGS__)
+#define incCurST(...) DBAT_CHUTILS_CALL_2_3(incCurST_default, incCurST, __VA_ARGS__)
+#define decCurST(...) DBAT_CHUTILS_CALL_2_3(decCurST_default, decCurST, __VA_ARGS__)
+#define gainBasePL(...) DBAT_CHUTILS_CALL_2_3(gainBasePL_default, gainBasePL, __VA_ARGS__)
+#define gainBaseKI(...) DBAT_CHUTILS_CALL_2_3(gainBaseKI_default, gainBaseKI, __VA_ARGS__)
+#define gainBaseST(...) DBAT_CHUTILS_CALL_2_3(gainBaseST_default, gainBaseST, __VA_ARGS__)
+#define gainBaseAll(...) DBAT_CHUTILS_CALL_2_3(gainBaseAll_default, gainBaseAll, __VA_ARGS__)
+#define loseBasePL(...) DBAT_CHUTILS_CALL_2_3(loseBasePL_default, loseBasePL, __VA_ARGS__)
+#define loseBaseKI(...) DBAT_CHUTILS_CALL_2_3(loseBaseKI_default, loseBaseKI, __VA_ARGS__)
+#define loseBaseST(...) DBAT_CHUTILS_CALL_2_3(loseBaseST_default, loseBaseST, __VA_ARGS__)
+#define loseBaseAll(...) DBAT_CHUTILS_CALL_2_3(loseBaseAll_default, loseBaseAll, __VA_ARGS__)
+#define gainBasePLPercent(...) DBAT_CHUTILS_CALL_2_3(gainBasePLPercent_default, gainBasePLPercent, __VA_ARGS__)
+#define gainBaseKIPercent(...) DBAT_CHUTILS_CALL_2_3(gainBaseKIPercent_default, gainBaseKIPercent, __VA_ARGS__)
+#define gainBaseSTPercent(...) DBAT_CHUTILS_CALL_2_3(gainBaseSTPercent_default, gainBaseSTPercent, __VA_ARGS__)
+#define gainBaseAllPercent(...) DBAT_CHUTILS_CALL_2_3(gainBaseAllPercent_default, gainBaseAllPercent, __VA_ARGS__)
+#define loseBasePLPercent(...) DBAT_CHUTILS_CALL_2_3(loseBasePLPercent_default, loseBasePLPercent, __VA_ARGS__)
+#define loseBaseKIPercent(...) DBAT_CHUTILS_CALL_2_3(loseBaseKIPercent_default, loseBaseKIPercent, __VA_ARGS__)
+#define loseBaseSTPercent(...) DBAT_CHUTILS_CALL_2_3(loseBaseSTPercent_default, loseBaseSTPercent, __VA_ARGS__)
+#define loseBaseAllPercent(...) DBAT_CHUTILS_CALL_2_3(loseBaseAllPercent_default, loseBaseAllPercent, __VA_ARGS__)
+#endif
 
 void cureStatusKnockedOut(char_data *ch, bool announce);
 void cureStatusKnockedOutAnnounce(char_data *ch);

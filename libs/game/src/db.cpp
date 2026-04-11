@@ -2736,7 +2736,7 @@ static void load_zones(FILE *fl, char *zonename)
       break;
     }
     error = 0;
-    if (strchr("MOEPDTVG", ZCMD2.command) == nullptr) {	/* a 4-arg command */
+    if (strchr("MOEPDTVG", ZCMD2.command) == NULL) {	/* a 4-arg command */
       if (sscanf(ptr, " %d %d %d %d ", &tmp, &ZCMD2.arg1, &ZCMD2.arg2, &ZCMD2.arg3) != 4)
 	error = 1;
     } else if (ZCMD2.command=='V') { /* a string-arg command */

@@ -1985,7 +1985,7 @@ static void point_update_characters(void)
         else
         {
           send_to_char(i, "You don't have enough energy to keep the aura active.\r\n");
-          act("$n's aura slowly stops shining and fades.\r\n", TRUE, i, nullptr, nullptr, TO_ROOM);
+          act("$n's aura slowly stops shining and fades.\r\n", TRUE, i, NULL, NULL, TO_ROOM);
           REMOVE_BIT_AR(PLR_FLAGS(i), PLR_AURALIGHT);
           world[IN_ROOM(i)].light--;
         }
