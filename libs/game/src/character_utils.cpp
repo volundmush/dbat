@@ -358,7 +358,7 @@ int64_t setCurHealthPercent(char_data *ch, double amt) {
     return ch->hit;
 }
 
-int64_t incCurHealth(char_data *ch, int64_t amt, bool limit_max) {
+static int64_t incCurHealthImpl(char_data *ch, int64_t amt, bool limit_max) {
     double newhealth = ch->health + safeDiv((double)ABS(amt), (double)getEffMaxPL(ch));
     newhealth = fixnan(newhealth);
     if(limit_max)
@@ -367,6 +367,15 @@ int64_t incCurHealth(char_data *ch, int64_t amt, bool limit_max) {
         ch->health = newhealth;
     ch->health = clampHealth(ch->health);
     return getCurHealth(ch);
+};
+
+
+int64_t incCurHealth(char_data *ch, int64_t amt) {
+    return incCurHealthImpl(ch, amt, true);
+};
+
+int64_t incCurHealthUnlimited(char_data *ch, int64_t amt) {
+    return incCurHealthImpl(ch, amt, false);
 };
 
 int64_t decCurHealth(char_data *ch, int64_t amt, int64_t floor) {
@@ -400,7 +409,7 @@ void restoreHealth(char_data *ch, bool announce) {
 }
 
 int64_t healCurHealth(char_data *ch, int64_t amt) {
-    return incCurHealth(ch, amt, true);
+    return incCurHealth(ch, amt);
 }
 
 int64_t harmCurHealth(char_data *ch, int64_t amt) {
