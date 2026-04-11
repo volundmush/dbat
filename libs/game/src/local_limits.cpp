@@ -2277,6 +2277,7 @@ static void point_update_objects(void)
       {
         log("No rent object (%s) extracted from room (%d)", j->short_description, GET_ROOM_VNUM(IN_ROOM(j)));
         extract_obj(j);
+        continue;
       }
     }
 
@@ -2373,6 +2374,7 @@ static void point_update_objects(void)
             core_dump();
         }
         extract_obj(j);
+        continue;
       }
     }
 
@@ -2396,6 +2398,7 @@ static void point_update_objects(void)
         act("A glowing portal fades from existence.",
             TRUE, world[IN_ROOM(j)].people, j, 0, TO_CHAR);
         extract_obj(j);
+        continue;
       }
     }
     else if (GET_OBJ_VNUM(j) == 1306)
@@ -2411,6 +2414,7 @@ static void point_update_objects(void)
         act("A $p@n settles to the ground and goes out.",
             TRUE, world[IN_ROOM(j)].people, j, 0, TO_CHAR);
         extract_obj(j);
+        continue;
       }
     }
     else if (OBJ_FLAGGED(j, ITEM_ICE))
@@ -2429,6 +2433,7 @@ static void point_update_objects(void)
           {
             send_to_room(IN_ROOM(j), "The glacial wall blocking off the %s direction melts completely away.\r\n", dirs[GET_OBJ_COST(j)]);
             extract_obj(j);
+            continue;
           }
         }
         else if (GET_OBJ_WEIGHT(j) - (5 + (GET_OBJ_WEIGHT(j) * 0.025)) > 0)
@@ -2440,6 +2445,7 @@ static void point_update_objects(void)
         {
           send_to_room(IN_ROOM(j), "The glacial wall blocking off the %s direction melts completely away.\r\n", dirs[GET_OBJ_COST(j)]);
           extract_obj(j);
+          continue;
         }
       }
       else if (GET_OBJ_VNUM(j) != 79)
@@ -2459,6 +2465,7 @@ static void point_update_objects(void)
             int remainder = melt - GET_OBJ_WEIGHT(j);
             IS_CARRYING_W(j->carried_by) -= (melt - remainder);
             extract_obj(j);
+            continue;
           }
         }
         else if (IN_ROOM(j) != NOWHERE)
@@ -2472,6 +2479,7 @@ static void point_update_objects(void)
           {
             send_to_room(IN_ROOM(j), "%s @wmelts completely away.\r\n", j->short_description);
             extract_obj(j);
+            continue;
           }
         }
       }
