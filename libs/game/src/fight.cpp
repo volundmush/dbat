@@ -2149,7 +2149,7 @@ void raw_kill(struct char_data * ch, struct char_data * killer)
             break;
         case Newbie:
             restore(ch, false);
-            teleport_to(ch, get_sensei(ch->chclass)->senseiStartRoom());
+            teleport_to(ch, sensei_start_room(ch->chclass));
             send_to_char(ch, "\r\n@RYou should beware, when you reach level 9, you will actually die. So you\r\n"
                              "should learn to be more careful. Since when you die past that point and\r\n"
                              "actually reach the afterlife you need to realise that being revived will\r\n"
@@ -2202,7 +2202,7 @@ void die(struct char_data *ch, struct char_data *killer)
     stop_fighting(ch);
    }
    GET_POS(ch) = POS_SITTING;
-   teleport_to(ch, get_sensei(ch->chclass)->senseiStartRoom());
+   teleport_to(ch, sensei_start_room(ch->chclass));
    return;
   }
     REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_KILLER);

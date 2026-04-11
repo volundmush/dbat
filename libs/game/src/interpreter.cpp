@@ -4582,7 +4582,7 @@ void nanny(struct descriptor_data *d, char *arg)
     total -= 30;
     mudlog(CMP, ADMLVL_GOD, TRUE, "New player: %s [%s %s]", 
            GET_NAME(d->character), TRUE_RACE(d->character),
-           get_sensei(d->character->chclass)->getName().c_str());
+           SENSEI_NAME(d->character));
     break;
 
   case CON_QSTATS:
@@ -4608,7 +4608,7 @@ void nanny(struct descriptor_data *d, char *arg)
     total -= 30;
     mudlog(CMP, ADMLVL_GOD, TRUE, "New player: %s [%s %s]", 
            GET_NAME(d->character), TRUE_RACE(d->character),
-           get_sensei(d->character->chclass)->getName().c_str());
+           SENSEI_NAME(d->character));
     mudlog(CMP, ADMLVL_GOD, TRUE, "Str: %2d Dex: %2d Con: %2d Int: %2d "
            "Wis:  %2d Cha: %2d mod total: %2d", GET_STR(d->character), 
            GET_DEX(d->character), GET_CON(d->character), GET_INT(d->character),
@@ -4849,7 +4849,7 @@ void nanny(struct descriptor_data *d, char *arg)
       }
       int refund = get_race(d->character->race)->getRPPRefund();
       if(refund && GET_LEVEL(d->character) > 1) {
-          write_to_output(d, "@D[@g%d RPP refunded to your account for your %s character.@D]@n\r\n", refund, get_race(d->character->race)->getName().c_str());
+          write_to_output(d, "@D[@g%d RPP refunded to your account for your %s character.@D]@n\r\n", refund, TRUE_RACE(d->character));
           d->rpp += refund;
       }
       mudlog(NRM, ADMLVL_GOD, TRUE, "User %s has deleted character %s (lev %d).", d->user, GET_NAME(d->character), GET_LEVEL(d->character));

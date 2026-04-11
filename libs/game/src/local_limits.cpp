@@ -921,7 +921,7 @@ static void update_flags(struct char_data *ch)
     {
       send_to_char(ch, "@wYour tail grows back.@n\r\n");
       act("$n@w's tail grows back.@n", TRUE, ch, 0, 0, TO_ROOM);
-      get_race(ch->race)->gainTail(ch);
+      char_gain_tail(ch, true);
       GET_TGROWTH(ch) = 0;
     }
   }
@@ -932,7 +932,7 @@ static void update_flags(struct char_data *ch)
     {
       send_to_char(ch, "@wYour tail grows back.@n\r\n");
       act("$n@w's tail grows back.@n", TRUE, ch, 0, 0, TO_ROOM);
-      get_race(ch->race)->gainTail(ch);
+      char_gain_tail(ch, true);
       GET_TGROWTH(ch) = 0;
     }
   }

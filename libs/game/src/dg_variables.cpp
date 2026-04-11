@@ -622,7 +622,7 @@ in the vault (vnum: 453) now and then. you can just use
           }
           else if (!strcasecmp(field, "class")) {
            if (!IS_NPC(c))
-            snprintf(str, slen, "%s", get_sensei(c->chclass)->getName().c_str());
+            snprintf(str, slen, "%s", SENSEI_NAME(c));
            else
             snprintf(str, slen, "blank");
           }
@@ -976,7 +976,7 @@ in the vault (vnum: 453) now and then. you can just use
           }
 #ifdef GET_RACE
           else if (!strcasecmp(field, "race")) {
-                snprintf(str, slen, "%s", get_race(c->race)->getName().c_str());
+                snprintf(str, slen, "%s", TRUE_RACE(c));
           }
 #endif
           else if (!strcasecmp(field, "rpp")) {

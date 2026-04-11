@@ -220,3 +220,8 @@ bool race_has_tail(int r_id);
 void char_lose_tail(char_data *ch);
 bool char_has_tail(char_data *ch);
 void char_gain_tail(char_data *ch, bool announce);
+
+room_vnum sensei_start_room(int s_id);
+room_vnum sensei_location_id(int s_id);
+int sensei_grav_tolerance(int s_id);
+int sensei_rpp_cost(int s_id, int r_id);

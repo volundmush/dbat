@@ -4354,7 +4354,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
    }
    GET_POS(vict) = POS_SITTING;
    char_from_room(vict);
-   char_to_room(vict, real_room(get_sensei(vict->chclass)->senseiStartRoom()));
+   char_to_room(vict, real_room(sensei_start_room(vict->chclass)));
    }
    return;
   }

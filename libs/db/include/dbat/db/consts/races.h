@@ -16,7 +16,7 @@
 #define RACE_MAJIN        11
 #define RACE_KAI        12
 #define RACE_TRUFFLE        13
-#define RACE_GOBLIN        14
+#define RACE_HOSHIJIN        14
 #define RACE_ANIMAL        15
 #define RACE_SAIBA        16
 #define RACE_SERPENT        17

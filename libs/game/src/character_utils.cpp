@@ -102,7 +102,7 @@ void resurrect(char_data *ch, int mode) {
         char_to_room(ch, real_room(GET_DROOM(ch)));
     }
     else {
-        char_to_room(ch, real_room(get_sensei(ch->chclass)->senseiStartRoom()));
+        char_to_room(ch, real_room(sensei_start_room(ch->chclass)));
     }
     look_at_room(IN_ROOM(ch), ch, 0);
 
@@ -226,7 +226,7 @@ static std::map<int, uint16_t> grav_threshold = {
 bool can_tolerate_gravity(char_data *ch, int grav) {
     if(IS_NPC(ch)) return true;
     int tolerance = 0;
-    tolerance = MAX(tolerance, get_sensei(ch->chclass)->getGravTolerance());
+    tolerance = MAX(tolerance, sensei_grav_tolerance(ch->chclass));
     if(tolerance >= grav)
         return true;
     return getMaxPL(ch) >= grav_threshold[grav];
@@ -816,7 +816,7 @@ void restoreLimbs(char_data *ch, bool announce) {
         GET_LIMBCOND(ch, l.first) = 100;
     }
 
-    get_race(ch->race)->gainTail(ch, announce);
+    char_gain_tail(ch, announce);
 }
 
 int64_t gainBasePL(char_data *ch, int64_t amt, bool trans_mult) {
@@ -4531,5 +4531,98 @@ void char_gain_tail(char_data *ch, bool announce) {
                 oozaru_transform(ch);
             }
             break;
+    }
+}
+
+
+room_vnum sensei_location_id(int s_id)  {
+    switch(s_id) {
+        case CLASS_ROSHI:
+            return 1131;
+        case CLASS_KABITO:
+            return 12098;
+        case CLASS_NAIL:
+            return 11683;
+        case CLASS_BARDOCK:
+            return 2267;
+        case CLASS_KRANE:
+            return 13012;
+        case CLASS_TAPION:
+            return 8233;
+        case CLASS_PICCOLO:
+            return 1662;
+        case CLASS_ANDSIX:
+            return 1714;
+        case CLASS_DABURA:
+            return 6487;
+        case CLASS_FRIEZA:
+            return 4283;
+        case CLASS_GINYU:
+            return 4290;
+        case CLASS_JINTO:
+            return 3499;
+        case CLASS_KURZAK:
+            return 16100;
+        case CLASS_TSUNA:
+            return 15009;
+        default:
+            return 300;
+    }
+}
+
+room_vnum sensei_start_room(int s_id) {
+    switch(s_id) {
+        case CLASS_ROSHI:
+            return 1130;
+        case CLASS_KABITO:
+            return 12098;
+        case CLASS_NAIL:
+            return 11683;
+        case CLASS_BARDOCK:
+            return 2268;
+        case CLASS_KRANE:
+            return 13009;
+        case CLASS_TAPION:
+            return 8231;
+        case CLASS_PICCOLO:
+            return 1659;
+        case CLASS_ANDSIX:
+            return 1713;
+        case CLASS_DABURA:
+            return 6486;
+        case CLASS_FRIEZA:
+            return 4282;
+        case CLASS_GINYU:
+            return 4289;
+        case CLASS_JINTO:
+            return 3499;
+        case CLASS_KURZAK:
+            return 16100;
+        case CLASS_TSUNA:
+            return 15009;
+        default:
+            return 300;
+    }
+}
+
+int sensei_grav_tolerance(int s_id) {
+    switch(s_id) {
+        case CLASS_BARDOCK:
+            return 10;
+        default:
+            return 0;
+    }
+}
+
+int sensei_rpp_cost(int s_id, int r_id) {
+    switch(s_id) {
+        case CLASS_KABITO:
+            if(r_id != RACE_KAI) {
+                return 10;
+            } else {
+                return 0;
+            }
+        default:
+            return 0;
     }
 }

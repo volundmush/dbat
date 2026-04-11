@@ -1303,7 +1303,7 @@ ACMD(do_zen)
           act("@rYou cut off $S tail!@n", TRUE, ch, 0, vict, TO_CHAR);
           act("@rYour tail is cut off!@n", TRUE, ch, 0, vict, TO_VICT);
           act("@R$N@r's tail is cut off!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-          get_race(vict->race)->loseTail(vict);
+          char_lose_tail(vict);
       }
      break;
     case 2: /* Critical */

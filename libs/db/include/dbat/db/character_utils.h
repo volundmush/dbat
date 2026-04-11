@@ -1275,12 +1275,12 @@ bool char_is_spoiled(const struct char_data *ch);
 			 (EXIT(ch,door)->to_room != NOWHERE) && \
 			 !IS_SET(EXIT(ch, door)->exit_info, EX_CLOSED))
 
-#define SENSEI_NAME(ch) (pc_class_types[ch->chclass])
-#define SENSEI_NAME_LOWER(ch) (class_names[ch->chclass])
-#define SENSEI_STYLE(ch) (sensei_style[ch->chclass])
 #define RACE(ch)      (juggleRaceName(ch, true))
 #define LRACE(ch)     (juggleRaceName(ch, false))
 #define TRUE_RACE(ch) (pc_race_types[ch->race])
+#define SENSEI_NAME(ch) (pc_class_types[ch->chclass])
+#define SENSEI_NAME_LOWER(ch) (class_names[ch->chclass])
+#define SENSEI_STYLE(ch) (sensei_style[ch->chclass])
 
 #define CLASS_ABBR(ch) (class_abbrevs[ch->chclass])
 #define RACE_ABBR(ch) (race_abbrevs[ch->race])
@@ -1380,7 +1380,7 @@ bool char_is_spoiled(const struct char_data *ch);
 #define IS_MAJIN(ch)            (GET_RACE(ch) == RACE_MAJIN)
 #define IS_KAI(ch)              (GET_RACE(ch) == RACE_KAI)
 #define IS_TRUFFLE(ch)          (GET_RACE(ch) == RACE_TRUFFLE)
-#define IS_HOSHIJIN(ch)         (GET_RACE(ch) == RACE_GOBLIN)
+#define IS_HOSHIJIN(ch)         (GET_RACE(ch) == RACE_HOSHIJIN)
 #define IS_ANIMAL(ch)           (GET_RACE(ch) == RACE_ANIMAL)
 #define IS_SAIBA(ch)              (GET_RACE(ch) == RACE_SAIBA)
 #define IS_SERPENT(ch)            (GET_RACE(ch) == RACE_SERPENT)

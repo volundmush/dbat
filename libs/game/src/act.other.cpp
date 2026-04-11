@@ -1256,7 +1256,7 @@ ACMD(do_train)
 
  int sensei = -1;
 
-   if(GET_ROOM_VNUM(IN_ROOM(ch)) == get_sensei(ch->chclass)->senseiLocationID()) {
+   if(GET_ROOM_VNUM(IN_ROOM(ch)) == sensei_location_id(ch->chclass)) {
        if(!(GET_GOLD(ch) >= 8 && GET_PRACTICES(ch, GET_CLASS(ch)) >= 1)) {
            send_to_char(ch, "It costs 8 Zenni and 1 PS to train with your sensei.\r\n");
            return;
@@ -1272,8 +1272,8 @@ ACMD(do_train)
            total *= 300;
        else if (GET_LEVEL(ch) >= 10)
            total *= 150;
-       sensei = get_sensei(ch->chclass)->getID();
-       send_to_char(ch, "@G%s begins to instruct you in training technique.@n\r\n", get_sensei(ch->chclass)->getName().c_str());
+       sensei = ch->chclass;
+       send_to_char(ch, "@G%s begins to instruct you in training technique.@n\r\n", SENSEI_NAME(ch));
    }
 
  if (total > GET_MAX_HIT(ch) * 2) {
@@ -1634,7 +1634,7 @@ ACMD(do_rip)
     act("@rYou rush at @R$N@r and grab $S tail! With a powerful tug you pull it off!@n", TRUE, ch, 0, vict, TO_CHAR);
     act("@R$n@r rushes at YOU and grabs your tail! With a powerful tug $e pulls it off!@n", TRUE, ch, 0, vict, TO_VICT);
     act("@R$n@R rushes at @R$N@r and grab $S tail! With a powerful tug $e pulls it off!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-       get_race(vict->race)->loseTail(vict);
+       char_lose_tail(vict);
     return;
    } else {
           reveal_hiding(ch, 0);
@@ -1655,7 +1655,7 @@ ACMD(do_rip)
          reveal_hiding(ch, 0);
    act("@rYou grab your own tail and yank it off!@n", TRUE, ch, 0, 0, TO_CHAR);
    act("@R$n@r grabs $s own tail and yanks it off!@n", TRUE, ch, 0, 0, TO_ROOM);
-   get_race(vict->race)->loseTail(vict);
+   char_lose_tail(vict);
  } else {
   if ((getCurST(ch)) < GET_MAX_MOVE(ch) / 20) {
    send_to_char(ch, "You are too tired to manage to grab their tail!\r\n");
@@ -1666,7 +1666,7 @@ ACMD(do_rip)
     act("@rYou reach and grab @R$N's@r tail! With a powerful tug you pull it off!@n", TRUE, ch, 0, vict, TO_CHAR);
     act("@RYou feel your tail pulled off!@n", TRUE, ch, 0, vict, TO_VICT);
     act("@R$n@R reaches and grabs @R$N's@r tail! With a powerful tug $e pulls it off!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-     get_race(vict->race)->loseTail(vict);
+     char_lose_tail(vict);
     return;
  }
 }
@@ -2782,7 +2782,7 @@ ACMD(do_telepathy)
        decCurKI(ch, getMaxKI(ch) / 40);
     send_to_char(ch, "@GName      @D: @W%s@n\r\n", GET_NAME(vict));
     send_to_char(ch, "@GRace      @D: @W%s@n\r\n", TRUE_RACE(vict));
-    send_to_char(ch, "@GSensei    @D: @W%s@n\r\n", get_sensei(vict->chclass)->getName().c_str());
+    send_to_char(ch, "@GSensei    @D: @W%s@n\r\n", SENSEI_NAME(vict));
     send_to_char(ch, "@GStr       @D: @W%d@n\r\n", GET_STR(vict));
     send_to_char(ch, "@GCon       @D: @W%d@n\r\n", GET_CON(vict));
     send_to_char(ch, "@GInt       @D: @W%d@n\r\n", GET_INT(vict));

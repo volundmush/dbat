@@ -1732,9 +1732,9 @@ static void do_stat_character(struct char_data *ch, struct char_data *k)
   if (CONFIG_ALLOW_MULTICLASS) {
     strncpy(buf, class_desc_str(k, 1, 0), sizeof(buf));
   } else {
-    snprintf(buf, sizeof(buf), "%s", get_sensei(k->chclass)->getName().c_str());
+    snprintf(buf, sizeof(buf), "%s", SENSEI_NAME(k));
   }
-    snprintf(buf2, sizeof(buf2), "%s", get_race(k->race)->getName().c_str());
+    snprintf(buf2, sizeof(buf2), "%s", TRUE_RACE(k));
   send_to_char(ch, "Class: %s, Race: %s, Lev: [@y%2d(%dHD+%dcl+%d)@n], XP: [@y%" I64T "@n]\r\n",
                    buf, buf2, GET_LEVEL(k), GET_HITDICE(k),
                    GET_CLASS_LEVEL(k), GET_LEVEL_ADJ(k), GET_EXP(k));
@@ -3044,7 +3044,7 @@ ACMD(do_last)
 
   send_to_char(ch, "[%5d] [%2d %s %s] %-12s : %-18s : %-20s\r\n",
     GET_IDNUM(vict), (int) GET_LEVEL(vict),
-               get_race(vict->race)->getAbbr().c_str(), CLASS_ABBR(vict),
+               RACE_ABBR(vict), CLASS_ABBR(vict),
     GET_NAME(vict), vict->player_specials->host && *vict->player_specials->host
     ? vict->player_specials->host : "(NOHOST)",
     ctime(&vict->time.logon));
@@ -3519,7 +3519,7 @@ ACMD(do_show)
       return;
     }
     send_to_char(ch, "Player: %-12s (%s) [%2d %s %s]\r\n", GET_NAME(vict),
-      genders[(int) GET_SEX(vict)], GET_LEVEL(vict), CLASS_ABBR(vict), get_race(vict->race)->getAbbr().c_str());
+      genders[(int) GET_SEX(vict)], GET_LEVEL(vict), CLASS_ABBR(vict), RACE_ABBR(vict));
     send_to_char(ch, "Au: %-8d  Bal: %-8d  Exp: %" I64T "  Align: %-5d  Ethic: %-5d\r\n",
                  GET_GOLD(vict), GET_BANK_GOLD(vict), GET_EXP(vict),
                  GET_ALIGNMENT(vict), GET_ETHIC_ALIGNMENT(vict));

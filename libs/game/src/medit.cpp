@@ -527,7 +527,7 @@ void medit_disp_menu(struct descriptor_data *d)
 	  position_types[(int)GET_POS(mob)],
 	  position_types[(int)GET_DEFAULT_POS(mob)],
           npc_personality[GET_PERSONALITY(mob)],
-	  flags, flag2, get_sensei(mob->chclass)->getName().c_str(),
+	  flags, flag2, SENSEI_NAME(mob),
           TRUE_RACE(mob),
           OLC_SCRIPT(d) ?"Set.":"Not Set.", size_names[get_size(mob)]
 	  );

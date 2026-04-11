@@ -365,7 +365,7 @@ ACMD(do_mimic)
    }
    send_to_char(ch, "Stop@n\r\n");
    if(ch->mimic) {
-       send_to_char(ch, "You currently Mimic a %s", get_race(ch->mimic)->getName().c_str());
+       send_to_char(ch, "You currently Mimic a %s", pc_race_types[ch->mimic]);
    }
 
    return;
@@ -5692,7 +5692,7 @@ ACMD(do_score)
   if (GET_CLAN(ch) != NULL) {
    send_to_char(ch, "  @D|  @CClan@D: @W%-64s@D|@n\n", GET_CLAN(ch));
   }
- send_to_char(ch, "  @D|  @CRace@D: @W%10s@D,  @CSensei@D: @W%15s@D,     @CArt@D: @W%-17s@D|@n\n", TRUE_RACE(ch), get_sensei(ch->chclass)->getName().c_str(), get_sensei(ch->chclass)->getStyleName().c_str());
+ send_to_char(ch, "  @D|  @CRace@D: @W%10s@D,  @CSensei@D: @W%15s@D,     @CArt@D: @W%-17s@D|@n\n", TRUE_RACE(ch), SENSEI_NAME(ch), SENSEI_STYLE(ch));
   char hei[300], wei[300];
   sprintf(hei, "%dcm", get_measure(ch, GET_PC_HEIGHT(ch), 0));
   sprintf(wei, "%dkg", get_measure(ch, 0, GET_PC_WEIGHT(ch)));
@@ -7120,7 +7120,7 @@ ACMD(do_who)
 
     if (short_list) {
         send_to_char(ch, "               @B[@W%3d @Y%s @C%s@B]@W %-12.12s@n%s@n",
-          GET_LEVEL(tch), RACE_ABBR(tch), get_sensei(tch->chclass)->getAbbr().c_str(), GET_NAME(tch),
+          GET_LEVEL(tch), RACE_ABBR(tch), CLASS_ABBR(tch), GET_NAME(tch),
 	  ((!(++num_can_see % 4)) ? "\r\n" : ""));
     } else {
        num_can_see++;
@@ -8522,7 +8522,7 @@ ACMD(do_whois)
       send_to_char(ch, "@cTitle    @D: @G%s\r\n", GET_TITLE(victim));
     }
     else {
-      send_to_char(ch, "@cName  @D: @w%s\r\n@cSensei@D: @w%s\r\n@cRace  @D: @w%s\r\n@cTitle @D: @w%s@n\r\n@cClan  @D: @w%s@n\r\n", GET_NAME(victim), get_sensei(victim->chclass)->getName().c_str(), get_race(victim->race)->getName().c_str(), GET_TITLE(victim), clan ? buf : "None.");
+      send_to_char(ch, "@cName  @D: @w%s\r\n@cSensei@D: @w%s\r\n@cRace  @D: @w%s\r\n@cTitle @D: @w%s@n\r\n@cClan  @D: @w%s@n\r\n", GET_NAME(victim), SENSEI_NAME(victim), TRUE_RACE(victim), GET_TITLE(victim), clan ? buf : "None.");
       if (clan == TRUE && !strstr(GET_CLAN(victim), "Applying")) {
        if (checkCLAN(victim) == TRUE) {
         clanRANKD(GET_CLAN(victim), ch, victim);
