@@ -8731,7 +8731,7 @@ void base_update(void)
 		{
 			if (IS_BIO(d->character))
 			{
-                restoreHealth(d->character);
+                restoreHealth(d->character, true);
 				act("@GYour body has fully regenerated! You flex your arms and legs outward with a rush of renewed strength!@n", TRUE, d->character, 0, 0, TO_CHAR);
 				act("@g$n@G's body has fully regenerated! Suddenly $e flexes $s arms and legs and a rush of power erupts from off of $s body!@n", TRUE, d->character, 0, 0, TO_ROOM);
 			}
@@ -8762,7 +8762,7 @@ void base_update(void)
 				act("@r$n@R collapses to the ground, seemingly dead. After a brief moment, their eyes flash open with a determined look on their face!", TRUE, d->character, 0, 0, TO_ROOM);
 			}
 			else {
-                restoreHealth(d->character);
+                restoreHealth(d->character, true);
 				act("@MYour body has fully regenerated! You scream out in triumph and a short gust of steam erupts from your pores!@n", TRUE, d->character, 0, 0, TO_CHAR);
 				act("@m$n@M's body has fully regenerated! Suddenly $e screams out in gleeful triumph and short gust of steam erupts from $s skin pores!", TRUE, d->character, 0, 0, TO_ROOM);
 			}

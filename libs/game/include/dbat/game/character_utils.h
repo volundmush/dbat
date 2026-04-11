@@ -38,7 +38,7 @@ int64_t incCurHealth(char_data *ch, int64_t amt, bool limit_max = true);
 int64_t decCurHealth(char_data *ch, int64_t amt, int64_t floor = 0);
 int64_t incCurHealthPercent(char_data *ch, double amt, bool limit_max = true);
 int64_t decCurHealthPercent(char_data *ch, double amt, int64_t floor = 0);
-void restoreHealth(char_data *ch, bool announce = true);
+void restoreHealth(char_data *ch, bool announce);
 int64_t healCurHealth(char_data *ch, int64_t amt);
 int64_t harmCurHealth(char_data *ch, int64_t amt);
 
