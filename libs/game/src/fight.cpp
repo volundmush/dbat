@@ -1099,8 +1099,13 @@ void fight_stack()
 
       if (PLR_FLAGGED(ch, PLR_POWERUP) && rand_number(1, 3) == 3) {
        char buf3[MAX_STRING_LENGTH];
-       if (GET_HIT(ch) >= (getEffMaxPL(ch)) && (getCurKI(ch)) >= GET_MAX_MANA(ch) / 20 && GET_PREFERENCE(ch) != PREFERENCE_KI) {
-        if ((getCurKI(ch)) >= GET_MAX_MANA(ch) * 0.5) {
+        int64_t ghit = GET_HIT(ch);
+        int64_t gmaxhit = getEffMaxPL(ch);
+        int64_t gki = getCurKI(ch);
+        int64_t gmaxki = GET_MAX_MANA(ch);
+
+       if (ghit >= gmaxhit && gki >= (gmaxki / 20) && GET_PREFERENCE(ch) != PREFERENCE_KI) {
+        if (gki >= gmaxki * 0.5) {
          int64_t raise = GET_MAX_MOVE(ch) * 0.02;
          incCurST(ch, raise);
         }
@@ -1113,13 +1118,13 @@ void fight_stack()
         sprintf(buf3, "@D[@GBlip@D]@r Rising Powerlevel Final@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
         send_to_scouter(buf3, ch, 1, 0);
         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_POWERUP);
-       } else if (GET_HIT(ch) >= (getEffMaxPL(ch)) && (getCurKI(ch)) >= (GET_MAX_MANA(ch) * 0.0375) + 1 && GET_PREFERENCE(ch) == PREFERENCE_KI) {
-        if ((getCurKI(ch)) >= (GET_MAX_MANA(ch) * 0.0375) + 1) {
+       } else if (ghit >= gmaxhit && gki >= (gmaxki * 0.0375) + 1 && GET_PREFERENCE(ch) == PREFERENCE_KI) {
+        if (gki >= (gmaxki * 0.0375) + 1) {
          int64_t raise = GET_MAX_MOVE(ch) * 0.02;
          incCurST(ch, raise);
         }
         restoreHealth(ch, false);
-        decCurKI(ch, (GET_MAX_MANA(ch) * 0.0375) + 1);
+        decCurKI(ch, (gmaxki * 0.0375) + 1);
         dispel_ash(ch);
         act("@RYou have reached your maximum!@n", TRUE, ch, 0, 0, TO_CHAR);
         act("@R$n stops powering up in a flash of light!@n", TRUE, ch, 0, 0, TO_ROOM);
@@ -1128,16 +1133,22 @@ void fight_stack()
         send_to_scouter(buf3, ch, 1, 0);
         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_POWERUP);
        }
-       if ((getCurKI(ch)) < GET_MAX_MANA(ch) / 20 && GET_PREFERENCE(ch) != PREFERENCE_KI) {
-           decCurKI(ch, getMaxKI(ch) / 20);
+       
+       ghit = GET_HIT(ch);
+        gmaxhit = getEffMaxPL(ch);
+        gki = getCurKI(ch);
+        gmaxki = GET_MAX_MANA(ch);
+
+       if (gki < (gmaxki / 20) && GET_PREFERENCE(ch) != PREFERENCE_KI) {
+           decCurKI(ch, gmaxki / 20);
         act("@RYou have run out of ki.@n", TRUE, ch, 0, 0, TO_CHAR);
         act("@R$n stops powering up in a flash of light!@n", TRUE, ch, 0, 0, TO_ROOM);
         send_to_sense(0, "You sense someone stop powering up", ch);
         sprintf(buf3, "@D[@GBlip@D]@r Rising Powerlevel Final@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
         send_to_scouter(buf3, ch, 1, 0);
         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_POWERUP);
-       } else if ((getCurKI(ch)) < (GET_MAX_MANA(ch) * 0.0375) + 1 && GET_PREFERENCE(ch) == PREFERENCE_KI) {
-           decCurKI(ch, (GET_MAX_MANA(ch) * 0.0375) + 1);
+       } else if (gki < (gmaxki * 0.0375) + 1 && GET_PREFERENCE(ch) == PREFERENCE_KI) {
+           decCurKI(ch, (gmaxki * 0.0375) + 1);
         act("@RYou have run out of ki.@n", TRUE, ch, 0, 0, TO_CHAR);
         act("@R$n stops powering up in a flash of light!@n", TRUE, ch, 0, 0, TO_ROOM);
         send_to_sense(0, "You sense someone stop powering up", ch);
@@ -1145,35 +1156,44 @@ void fight_stack()
         send_to_scouter(buf3, ch, 1, 0);
         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_POWERUP);
        }
-       if (GET_HIT(ch) < (getEffMaxPL(ch)) && ((GET_PREFERENCE(ch) != PREFERENCE_KI &&
-               (getCurKI(ch)) >= GET_MAX_MANA(ch) / 20) || (GET_PREFERENCE(ch) == PREFERENCE_KI &&
-               (getCurKI(ch)) >= (GET_MAX_MANA(ch) * 0.0375) + 1))) {
+
+       ghit = GET_HIT(ch);
+        gmaxhit = getEffMaxPL(ch);
+        gki = getCurKI(ch);
+        gmaxki = GET_MAX_MANA(ch);
+
+       if (ghit < gmaxhit && ((GET_PREFERENCE(ch) != PREFERENCE_KI &&
+               (gki) >= gmaxki / 20) || (GET_PREFERENCE(ch) == PREFERENCE_KI &&
+               (gki) >= (gmaxki * 0.0375) + 1))) {
         incCurHealthPercent(ch, .1);
         if (GET_PREFERENCE(ch) != PREFERENCE_KI) {
-         decCurKI(ch, getMaxKI(ch) / 20);
+         decCurKI(ch, gmaxki / 20);
         } else {
-         decCurKI(ch, getMaxKI(ch) * .0375);
+         decCurKI(ch, gmaxki * .0375);
         }
         if ((getCurKI(ch)) >= GET_MAX_MANA(ch) * 0.5) {
          int64_t raise = GET_MAX_MOVE(ch) * 0.02;
          incCurST(ch, raise);
         }
-        if (GET_MAX_HIT(ch) < 50000) {
+
+        gmaxhit = getEffMaxPL(ch);
+
+        if (gmaxhit < 50000) {
          act("@RYou continue to powerup, as wind billows out from around you!@n", TRUE, ch, 0, 0, TO_CHAR);
          act("@R$n continues to powerup, as wind billows out from around $m!@n", TRUE, ch, 0, 0, TO_ROOM);
-        } else if (GET_MAX_HIT(ch) < 500000) {
+        } else if (gmaxhit < 500000) {
          act("@RYou continue to powerup, as the ground splits beneath you!@n", TRUE, ch, 0, 0, TO_CHAR);
          act("@R$n continues to powerup, as the ground splits beneath $m!@n", TRUE, ch, 0, 0, TO_ROOM);
-        } else if (GET_MAX_HIT(ch) < 5000000) {
+        } else if (gmaxhit < 5000000) {
          act("@RYou continue to powerup, as the ground shudders and splits beneath you!@n", TRUE, ch, 0, 0, TO_CHAR);
          act("@R$n continues to powerup, as the ground shudders and splits beneath $m!@n", TRUE, ch, 0, 0, TO_ROOM);
-        } else if (GET_MAX_HIT(ch) < 50000000) {
+        } else if (gmaxhit < 50000000) {
          act("@RYou continue to powerup, as a huge depression forms beneath you!@n", TRUE, ch, 0, 0, TO_CHAR);
          act("@R$n continues to powerup, as a huge depression forms beneath $m!@n", TRUE, ch, 0, 0, TO_ROOM);
-        } else if (GET_MAX_HIT(ch) < 100000000) {
+        } else if (gmaxhit < 100000000) {
          act("@RYou continue to powerup, as the entire area quakes around you!@n", TRUE, ch, 0, 0, TO_CHAR);
          act("@R$n continues to powerup, as the entire area quakes around $m!@n", TRUE, ch, 0, 0, TO_ROOM);
-        } else if (GET_MAX_HIT(ch) < 300000000) {
+        } else if (gmaxhit < 300000000) {
          act("@RYou continue to powerup, as huge chunks of ground are ripped apart beneath you!@n", TRUE, ch, 0, 0, TO_CHAR);
          act("@R$n continues to powerup, as huge chunks of ground are ripped apart beanth $m!@n", TRUE, ch, 0, 0, TO_ROOM);
         } else {

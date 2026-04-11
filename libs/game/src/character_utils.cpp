@@ -27,6 +27,8 @@
 
 #include <string>
 
+#define ABS(x) ((x) < 0 ? -(x) : (x))
+
 const char* juggleRaceName(char_data *ch, bool capitalized) {
     if(!ch->race) return "unknown";
 
@@ -350,17 +352,17 @@ bool isFullHealth(char_data *ch) {
 }
 
 int64_t setCurHealth(char_data *ch, int64_t amt) {
-    ch->hit = MAX(0L, llabs(amt));
+    ch->hit = MAX(0L, ABS(amt));
     return ch->hit;
 }
 
 int64_t setCurHealthPercent(char_data *ch, double amt) {
-    ch->hit = MAX(0L, (int64_t)(getMaxHealth(ch) * llabs(amt)));
+    ch->hit = MAX(0L, (int64_t)(getMaxHealth(ch) * ABS(amt)));
     return ch->hit;
 }
 
 int64_t incCurHealth(char_data *ch, int64_t amt, bool limit_max) {
-    double newhealth = ch->health + safeDiv((double)llabs(amt), (double)getEffMaxPL(ch));
+    double newhealth = ch->health + safeDiv((double)ABS(amt), (double)getEffMaxPL(ch));
     newhealth = fixnan(newhealth);
     if(limit_max)
         ch->health = MIN(1.0, newhealth);
@@ -374,7 +376,7 @@ int64_t decCurHealth(char_data *ch, int64_t amt, int64_t floor) {
     double fl = 0.0;
     if(floor > 0)
         fl = safeDiv((double)floor, (double)getEffMaxPL(ch));
-    double newhealth = ch->health - safeDiv((double)llabs(amt), (double)getEffMaxPL(ch));
+    double newhealth = ch->health - safeDiv((double)ABS(amt), (double)getEffMaxPL(ch));
     newhealth = fixnan(newhealth);
     ch->health = MAX(fl, newhealth);
     ch->health = clampHealth(ch->health);
@@ -382,10 +384,9 @@ int64_t decCurHealth(char_data *ch, int64_t amt, int64_t floor) {
 }
 
 int64_t incCurHealthPercent(char_data *ch, double amt, bool limit_max) {
+    ch->health += ABS(amt);
     if(limit_max)
-        ch->health = MIN(1.0, ch->health+llabs(amt));
-    else
-        ch->health += llabs(amt);
+        ch->health = MIN(1.0, ch->health);
     return getCurHealth(ch);
 }
 
@@ -393,7 +394,7 @@ int64_t decCurHealthPercent(char_data *ch, double amt, int64_t floor) {
     double fl = 0.0;
     if(floor > 0)
         fl = (double)floor / (double)getEffMaxPL(ch);
-    ch->health = MAX(fl, ch->health-llabs(amt));
+    ch->health = MAX(fl, ch->health-ABS(amt));
     return getCurHealth(ch);
 }
 
@@ -458,11 +459,11 @@ double getCurPLPercent(char_data *ch) {
 }
 
 int64_t getPercentOfCurPL(char_data *ch, double amt) {
-    return getCurPL(ch) * llabs(amt);
+    return getCurPL(ch) * ABS(amt);
 }
 
 int64_t getPercentOfMaxPL(char_data *ch, double amt) {
-    return getMaxPL(ch) * llabs(amt);
+    return getMaxPL(ch) * ABS(amt);
 }
 
 bool isFullPL(char_data *ch) {
@@ -500,11 +501,11 @@ double getCurKIPercent(char_data *ch) {
 }
 
 int64_t getPercentOfCurKI(char_data *ch, double amt) {
-    return getCurKI(ch) * llabs(amt);
+    return getCurKI(ch) * ABS(amt);
 }
 
 int64_t getPercentOfMaxKI(char_data *ch, double amt) {
-    return getMaxKI(ch) * llabs(amt);
+    return getMaxKI(ch) * ABS(amt);
 }
 
 bool isFullKI(char_data *ch) {
@@ -512,17 +513,17 @@ bool isFullKI(char_data *ch) {
 }
 
 int64_t setCurKI(char_data *ch, int64_t amt) {
-    ch->mana = MAX(0L, llabs(amt));
+    ch->mana = MAX(0L, ABS(amt));
     return ch->mana;
 }
 
 int64_t setCurKIPercent(char_data *ch, double amt) {
-    ch->mana = MAX(0L, (int64_t)(getMaxKI(ch) * llabs(amt)));
+    ch->mana = MAX(0L, (int64_t)(getMaxKI(ch) * ABS(amt)));
     return ch->mana;
 }
 
 int64_t incCurKI(char_data *ch, int64_t amt, bool limit_max) {
-    double newenergy = ch->energy + safeDiv((double)llabs(amt), (double)getMaxKI(ch));
+    double newenergy = ch->energy + safeDiv((double)ABS(amt), (double)getMaxKI(ch));
     newenergy = fixnan(newenergy);
     if(limit_max)
         ch->energy = MIN(1.0, newenergy);
@@ -536,7 +537,7 @@ int64_t decCurKI(char_data *ch, int64_t amt, int64_t floor) {
     double fl = 0.0;
     if(floor > 0)
         fl = safeDiv((double)floor, (double)getMaxKI(ch));
-    double newenergy = ch->energy - safeDiv((double)llabs(amt), (double)getMaxKI(ch));
+    double newenergy = ch->energy - safeDiv((double)ABS(amt), (double)getMaxKI(ch));
     newenergy = fixnan(newenergy);
     ch->energy = MAX(fl, newenergy);
     ch->energy = clampHealth(ch->energy);
@@ -545,9 +546,9 @@ int64_t decCurKI(char_data *ch, int64_t amt, int64_t floor) {
 
 int64_t incCurKIPercent(char_data *ch, double amt, bool limit_max) {
     if(limit_max)
-        ch->energy = MIN(1.0, ch->energy+llabs(amt));
+        ch->energy = MIN(1.0, ch->energy+ABS(amt));
     else
-        ch->energy += llabs(amt);
+        ch->energy += ABS(amt);
     return getCurKI(ch);
 }
 
@@ -558,7 +559,7 @@ int64_t decCurKIPercent(char_data *ch, double amt, int64_t floor) {
     double fl = 0.0;
     if(floor > 0)
         fl = (double)floor / (double)getMaxKI(ch);
-    ch->energy = MAX(fl, ch->energy-llabs(amt));
+    ch->energy = MAX(fl, ch->energy-ABS(amt));
     return getCurKI(ch);
 }
 
@@ -597,11 +598,11 @@ double getCurSTPercent(char_data *ch) {
 }
 
 int64_t getPercentOfCurST(char_data *ch, double amt) {
-    return getCurST(ch) * llabs(amt);
+    return getCurST(ch) * ABS(amt);
 }
 
 int64_t getPercentOfMaxST(char_data *ch, double amt) {
-    return getMaxST(ch) * llabs(amt);
+    return getMaxST(ch) * ABS(amt);
 }
 
 bool isFullST(char_data *ch) {
@@ -609,17 +610,17 @@ bool isFullST(char_data *ch) {
 }
 
 int64_t setCurST(char_data *ch, int64_t amt) {
-    ch->move = MAX(0L, llabs(amt));
+    ch->move = MAX(0L, ABS(amt));
     return ch->move;
 }
 
 int64_t setCurSTPercent(char_data *ch, double amt) {
-    ch->move = MAX(0L, (int64_t)(getMaxST(ch) * llabs(amt)));
+    ch->move = MAX(0L, (int64_t)(getMaxST(ch) * ABS(amt)));
     return ch->move;
 }
 
 int64_t incCurST(char_data *ch, int64_t amt, bool limit_max) {
-    double newstamina = ch->stamina + safeDiv((double)llabs(amt), (double)getMaxST(ch));
+    double newstamina = ch->stamina + safeDiv((double)ABS(amt), (double)getMaxST(ch));
     newstamina = fixnan(newstamina);
     if(limit_max)
         ch->stamina = MIN(1.0, newstamina);
@@ -633,7 +634,7 @@ int64_t decCurST(char_data *ch, int64_t amt, int64_t floor) {
     double fl = 0.0;
     if(floor > 0)
         fl = safeDiv((double)floor, (double)getMaxST(ch));
-    double newstamina = ch->stamina - safeDiv((double)llabs(amt), (double)getMaxST(ch));
+    double newstamina = ch->stamina - safeDiv((double)ABS(amt), (double)getMaxST(ch));
     newstamina = fixnan(newstamina);
     ch->stamina = MAX(fl, newstamina);
     ch->stamina = clampHealth(ch->stamina);
@@ -642,9 +643,9 @@ int64_t decCurST(char_data *ch, int64_t amt, int64_t floor) {
 
 int64_t incCurSTPercent(char_data *ch, double amt, bool limit_max) {
     if(limit_max)
-        ch->stamina = MIN(1.0, ch->stamina+llabs(amt));
+        ch->stamina = MIN(1.0, ch->stamina+ABS(amt));
     else
-        ch->stamina += llabs(amt);
+        ch->stamina += ABS(amt);
     return getMaxST(ch);
 }
 
@@ -652,7 +653,7 @@ int64_t decCurSTPercent(char_data *ch, double amt, int64_t floor) {
     double fl = 0.0;
     if(floor > 0)
         fl = (double)floor / (double)getMaxST(ch);
-    ch->stamina = MAX(fl, ch->stamina-llabs(amt));
+    ch->stamina = MAX(fl, ch->stamina-ABS(amt));
     return getCurST(ch);
 }
 
@@ -673,11 +674,11 @@ double getCurLFPercent(char_data *ch) {
 }
 
 int64_t getPercentOfCurLF(char_data *ch, double amt) {
-    return getCurLF(ch) * llabs(amt);
+    return getCurLF(ch) * ABS(amt);
 }
 
 int64_t getPercentOfMaxLF(char_data *ch, double amt) {
-    return getMaxLF(ch) * llabs(amt);
+    return getMaxLF(ch) * ABS(amt);
 }
 
 bool isFullLF(char_data *ch) {
@@ -685,17 +686,17 @@ bool isFullLF(char_data *ch) {
 }
 
 int64_t setCurLF(char_data *ch, int64_t amt) {
-    ch->life = MAX(0L, llabs(amt));
+    ch->life = MAX(0L, ABS(amt));
     return getCurLF(ch);
 }
 
 int64_t setCurLFPercent(char_data *ch, double amt) {
-    ch->life = MAX(0L, (int64_t)(getMaxLF(ch) * llabs(amt)));
+    ch->life = MAX(0L, (int64_t)(getMaxLF(ch) * ABS(amt)));
     return getCurLF(ch);
 }
 
 int64_t incCurLF(char_data *ch, int64_t amt, bool limit_max) {
-    double newlife = ch->life + safeDiv((double)llabs(amt), (double)getMaxLF(ch));
+    double newlife = ch->life + safeDiv((double)ABS(amt), (double)getMaxLF(ch));
     newlife = fixnan(newlife);
     if(limit_max)
         ch->life = MIN(1.0, newlife);
@@ -709,7 +710,7 @@ int64_t decCurLF(char_data *ch, int64_t amt, int64_t floor) {
     double fl = 0.0;
     if(floor > 0)
         fl = safeDiv((double)floor, (double)getMaxLF(ch));
-    double newlife = ch->life - safeDiv((double)llabs(amt), (double)getMaxLF(ch));
+    double newlife = ch->life - safeDiv((double)ABS(amt), (double)getMaxLF(ch));
     newlife = fixnan(newlife);
     ch->life = MAX(fl, newlife);
     ch->life = clampHealth(ch->life);
@@ -718,9 +719,9 @@ int64_t decCurLF(char_data *ch, int64_t amt, int64_t floor) {
 
 int64_t incCurLFPercent(char_data *ch, double amt, bool limit_max) {
     if(limit_max)
-        ch->life = MIN(1.0, ch->life+llabs(amt));
+        ch->life = MIN(1.0, ch->life+ABS(amt));
     else
-        ch->life += llabs(amt);
+        ch->life += ABS(amt);
     return getCurLF(ch);
 }
 
@@ -728,7 +729,7 @@ int64_t decCurLFPercent(char_data *ch, double amt, int64_t floor) {
     double fl = 0.0;
     if(floor > 0)
         fl = (double)floor / (double)getMaxLF(ch);
-    ch->life = MAX(fl, ch->life-llabs(amt));
+    ch->life = MAX(fl, ch->life-ABS(amt));
     return getCurLF(ch);
 }
 
