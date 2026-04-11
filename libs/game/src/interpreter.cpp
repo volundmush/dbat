@@ -2780,6 +2780,52 @@ case CON_QRACE:
      STATE(d) = CON_QSEX;
    break;
 
+    case CON_RACE_HELP:
+    if (*arg == 't' || *arg == 'T') {
+      display_races(d);
+      STATE(d) = CON_QRACE;
+      return;
+    }
+    if (isdigit(*arg)) {
+      player_i = atoi(arg);
+      if (player_i > NUM_RACES || player_i < 1) {
+	write_to_output(d, "\r\nThat's not a race.\r\nHelp on Race #: ");
+	break;
+      }
+      player_i -= 1;
+      if (race_ok_gender[(int)GET_SEX(d->character)][player_i])
+	show_help(d, race_names[player_i]);
+      else
+	write_to_output(d, "\r\nThat's not a race.\r\nHelp on Race #: ");
+    } else {
+      display_races_help(d);
+    }
+    STATE(d) = CON_RACE_HELP;
+    break;
+  
+  case CON_CLASS_HELP:
+    if (*arg == 't' || *arg == 'T') {
+      display_classes(d);
+      STATE(d) = CON_QCLASS;
+      return;
+    }
+    if (isdigit(*arg)) {
+      player_i = atoi(arg);
+      if (player_i > NUM_BASIC_CLASSES || player_i < 1) {
+	write_to_output(d, "\r\nThat's not a sensei.\r\nHelp on Sensei #: ");
+	break;
+      }
+      player_i -= 1;
+      if (class_ok_race[(int)GET_SEX(d->character)][player_i])
+        show_help(d, class_names[player_i]);
+      else
+	write_to_output(d, "\r\nThat's not a sensei.\r\nHelp on Sensei #: ");
+    } else {
+      display_classes_help(d);
+    }
+    STATE(d) = CON_CLASS_HELP;
+    break;
+
   case CON_HAIRL:                /* query hair length */
     if (IS_HUMAN(d->character) || IS_SAIYAN(d->character) || IS_KONATSU(d->character) || IS_MUTANT(d->character) || IS_ANDROID(d->character) || IS_KAI(d->character) || IS_HALFBREED(d->character) || IS_TRUFFLE(d->character) || (IS_HOSHIJIN(d->character) && IS_FEMALE(d->character))) {
     switch (*arg) {
