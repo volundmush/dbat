@@ -303,7 +303,7 @@ void script_damage(struct char_data *vict, int dam)
     return;
   }
 
-  decCurHealth(vict, dam);
+  decCurHealthNoFloor(vict, dam);
 
   update_pos(vict);
   send_char_pos(vict, dam);

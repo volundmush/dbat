@@ -389,6 +389,10 @@ int64_t decCurHealth(char_data *ch, int64_t amt, int64_t floor) {
     return getCurHealth(ch);
 }
 
+int64_t decCurHealthNoFloor(char_data *ch, int64_t amt) {
+    return decCurHealth(ch, amt, 0);
+}
+
 int64_t incCurHealthPercent(char_data *ch, double amt, bool limit_max) {
     ch->health += ABS(amt);
     if(limit_max)

@@ -2057,7 +2057,7 @@ static void point_update_characters(void)
           }
           else
           {
-            decCurHealth(i, (getEffMaxPL(i)) / 3);
+            decCurHealthNoFloor(i, (getEffMaxPL(i)) / 3);
           }
         }
       }
@@ -2073,7 +2073,7 @@ static void point_update_characters(void)
           if ((GET_HIT(i) - hit_gain(i)) > (getEffMaxPL(i)) * 0.05)
           {
             send_to_char(i, "You struggle trying to hold your breath!\r\n");
-            decCurHealth(i, hit_gain(i) + getPercentOfMaxHealth(i, .05));
+            decCurHealthNoFloor(i, hit_gain(i) + getPercentOfMaxHealth(i, .05));
           }
           else if (GET_HIT(i) <= GET_MAX_HIT(i) / 20)
           {
@@ -2095,7 +2095,7 @@ static void point_update_characters(void)
           if ((GET_HIT(i) - hit_gain(i)) > (getEffMaxPL(i)) * 0.05)
           {
             send_to_char(i, "You struggle trying to hold your breath!\r\n");
-            decCurHealth(i, hit_gain(i) + getPercentOfMaxHealth(i, .05));
+            decCurHealthNoFloor(i, hit_gain(i) + getPercentOfMaxHealth(i, .05));
           }
           else if (GET_HIT(i) <= GET_MAX_HIT(i) / 20)
           {
@@ -2205,7 +2205,7 @@ static void point_update_characters(void)
         {
           send_to_char(i, "You puke as the poison burns through your blood.\r\n");
           act("$n shivers and then pukes.", TRUE, i, 0, 0, TO_ROOM);
-          decCurHealth(i, getEffMaxPL(i) * cost);
+          decCurHealthNoFloor(i, getEffMaxPL(i) * cost);
         }
         else
         {

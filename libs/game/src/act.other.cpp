@@ -3880,7 +3880,7 @@ kachin ? "create kachin\r\n" : "",  boost ? "create elixir\r\n" : "");
    act("You hold out your hand and create $p out of your ki!", TRUE, ch, obj, 0, TO_CHAR);
    act("$n holds out $s hand and creates $p out of thin air!", TRUE, ch, obj, 0, TO_ROOM);
       decCurKI(ch, cost);
-      decCurHealth(ch, cost2);
+      decCurHealthNoFloor(ch, cost2);
       decCurSTPercent(ch, 1, 1);
    GET_PRACTICES(ch, GET_CLASS(ch)) -= 50;
    return;

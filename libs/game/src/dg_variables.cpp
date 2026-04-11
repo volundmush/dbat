@@ -762,7 +762,7 @@ in the vault (vnum: 453) now and then. you can just use
               if(addition > 0 ) {
                   incCurHealth(c, addition);
               } else {
-                  decCurHealth(c, addition);
+                  decCurHealthNoFloor(c, addition);
               }
 
               update_pos(c);

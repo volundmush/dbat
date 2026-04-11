@@ -1644,7 +1644,7 @@ void update_mob_absorb()
      pl += pl * rand_number(2, 4);
     }
 
-    decCurHealth(vict, pl);
+    decCurHealthNoFloor(vict, pl);
     incCurHealth(i, pl);
 
     decCurKI(vict, ki);
@@ -4464,7 +4464,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
    }
   } else if (GET_HIT(vict) - dmg > 0 || suppresso == TRUE){
    if (suppresso == FALSE) {
-   decCurHealth(vict, dmg);
+   decCurHealthNoFloor(vict, dmg);
    }
    if (FIGHTING(ch) == NULL) {
     set_fighting(ch, vict);

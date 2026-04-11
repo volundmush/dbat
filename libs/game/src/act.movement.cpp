@@ -715,7 +715,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check)
             (getCurKI(ch)) < GET_MAX_MANA(ch) / 800))) {
       if (GET_HIT(ch) >= GET_MAX_HIT(ch) / 20) {
        send_to_char(ch, "@RYou struggle to breath!@n\r\n");
-       decCurHealth(ch, getMaxPL(ch) / 20);
+       decCurHealthNoFloor(ch, getMaxPL(ch) / 20);
       }
       if (GET_HIT(ch) < GET_MAX_HIT(ch) / 20) {
        send_to_char(ch, "@rYou drown!@n\r\n");
@@ -962,7 +962,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check)
        if (IS_NPC(ch) && IS_HUMANOID(ch) && rand_number(1, 2) == 2) {
         do_fly(ch, 0, 0, 0);
        }
-        decCurHealth(ch, getEffMaxPL(ch) / 20);
+        decCurHealthNoFloor(ch, getEffMaxPL(ch) / 20);
         if (GET_HIT(ch) <= 0) {
             act("@rYou have burned to death!@n", TRUE, ch, 0, 0, TO_CHAR);
             act("@R$n@r has burned to death!@n", TRUE, ch, 0, 0, TO_ROOM);
@@ -972,7 +972,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check)
     if (DRAGGING(ch) && !IS_DEMON(DRAGGING(ch))) {
      act("@R$N@r gets burned!@n", TRUE, ch, 0, DRAGGING(ch), TO_CHAR);
      act("@R$N@r gets burned!@n", TRUE, ch, 0, DRAGGING(ch), TO_ROOM);
-     decCurHealth(DRAGGING(ch), getEffMaxPL(DRAGGING(ch)) / 20);
+     decCurHealthNoFloor(DRAGGING(ch), getEffMaxPL(DRAGGING(ch)) / 20);
        if (GET_HIT(DRAGGING(ch)) < 0) {
         act("@rYou have burned to death!@n", TRUE, DRAGGING(ch), 0, 0, TO_CHAR);
         act("@R$n@r has burned to death!@n", TRUE, DRAGGING(ch), 0, 0, TO_ROOM);
