@@ -804,7 +804,6 @@ static const std::map<int, std::string> limb_names = {
 };
 
 void restoreLimbs(char_data *ch, bool announce) {
-    GET_LIMBCOND(ch, 0) = 100;
 
     for(const auto& l : limb_names) {
         if(announce) {
