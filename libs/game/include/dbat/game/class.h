@@ -80,3 +80,6 @@ namespace dbat::sensei {
     Sensei* find_sensei_map_id(const int id, const SenseiMap& s_map);
     SenseiMap valid_for_race_pc(char_data *ch);
 }
+
+
+bool sensei_available_for_race(int sensei_id, int race_id);

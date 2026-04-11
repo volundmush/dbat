@@ -594,11 +594,15 @@ int is_guild_ok(struct char_data * keeper, struct char_data * ch, int guild_nr)
 
 int does_guild_know(int guild_nr, int i)
 {
+  if(i < 0 || i > SKILL_TABLE_SIZE-1)
+    return 0;
   return ((int)(guild_index[guild_nr].skills[i]));
 }
 
 int does_guild_know_feat(int guild_nr, int i)
 {
+  if(i < 0 || i > NUM_FEATS_DEFINED-1)
+    return 0;
   return ((int)(guild_index[guild_nr].feats[i]));
 }
 
@@ -1125,7 +1129,7 @@ int rpp_to_level(struct char_data *ch) {
     switch (GET_LEVEL(ch)) {
         case 2:
             // charge the RPP races to level for the first time.
-            return get_race(ch->race)->getRPPCost();
+            return race_rpp_cost(ch->race);
         case 91:
         case 92:
         case 93:

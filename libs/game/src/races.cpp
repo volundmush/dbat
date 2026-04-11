@@ -1817,3 +1817,76 @@ dbat::race::Race* get_race(int race_id) {
     return nullptr;
 }
 
+int race_rpp_cost(int race_id) {
+    switch(race_id) {
+        case RACE_SAIYAN:
+            return 60;
+        case RACE_BIO:
+            return 35;
+        case RACE_MAJIN:
+            return 55;
+        case RACE_HOSHIJIN:
+            return 14;
+        default:
+            return 0;
+    }
+}
+
+int race_rpp_refund(int race_id) {
+    switch(race_id) {
+        case RACE_MAJIN:
+            return 35;
+        case RACE_HOSHIJIN:
+            return 15;
+        case RACE_SAIYAN:
+            return 40;
+        case RACE_BIO:
+            return 20;
+        default:
+            return 0;
+    }
+}
+
+
+static int64_t soft_cap_variable[] = { 1500, 4500, 15000, 45000, 60000, 240000, 600000, 750000, 2400000, 4500000 };
+
+static int64_t soft_cap_fixed[] = { 500, 1500, 5000, 15000, 20000, 80000, 200000, 250000, 800000, 1500000 };
+
+static int64_t soft_cap_demon[] = { 500, 1500, 5000, 25000, 40000, 100000, 250000, 300000, 1000000, 2000000 };
+
+
+int64_t *race_soft_map(struct char_data *ch) {
+    switch (ch->race) {
+        case RACE_DEMON:
+        case RACE_KANASSAN:
+            return soft_cap_demon;
+        case RACE_ANDROID:
+            if (PLR_FLAGGED(ch, PLR_ABSORB)) {
+                return soft_cap_fixed;
+            } else {
+                return soft_cap_variable;
+            }
+        case RACE_BIO:
+        case RACE_MAJIN:
+            return soft_cap_variable;
+        default:
+            return soft_cap_fixed;
+    }
+}
+
+
+int race_soft_type(struct char_data *ch) {
+    switch (ch->race) {
+        case RACE_BIO:
+        case RACE_MAJIN:
+            return 1;
+        case RACE_ANDROID:
+            if (PLR_FLAGGED(ch, PLR_ABSORB)) {
+                return 0;
+            } else {
+                return 1;
+            }
+        default:
+            return 0;
+    }
+}

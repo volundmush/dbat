@@ -237,8 +237,6 @@ static void weather_change(void)
   }
 }
 
-static dbat::race::transform_bonus oozaru = {.bonus = 10000, .mult=2, .drain=0, .flag=PLR_OOZARU};
-
 void oozaru_transform(char_data *ch) {
     if (PLR_FLAGGED(ch, PLR_OOZARU))
         return;

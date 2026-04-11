@@ -4847,7 +4847,7 @@ void nanny(struct descriptor_data *d, char *arg)
       if (GET_LEVEL(d->character) <= 40 && CHEAP_RACE(d->character)) {
        write_to_output(d, "@D[@gSince your race doesn't cost RPP to level before 40 you are refunded 0 RPP.@D]@n\r\n");
       }
-      int refund = get_race(d->character->race)->getRPPRefund();
+      int refund = race_rpp_refund(d->character->race);
       if(refund && GET_LEVEL(d->character) > 1) {
           write_to_output(d, "@D[@g%d RPP refunded to your account for your %s character.@D]@n\r\n", refund, TRUE_RACE(d->character));
           d->rpp += refund;

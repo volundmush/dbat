@@ -2234,3 +2234,22 @@ namespace dbat::sensei {
         return out;
     }
 }
+
+
+
+bool sensei_available_for_race(int sensei_id, int race_id) {
+    switch(sensei_id) {
+        case CLASS_ANDSIX:
+            return race_id == RACE_ANDROID;
+        case CLASS_DABURA:
+            return race_id == RACE_DEMON;
+        case CLASS_TSUNA:
+            return race_id == RACE_KANASSAN;
+        case CLASS_KURZAK:
+            return race_id == RACE_ARLIAN;
+        case CLASS_JINTO:
+            return race_id == RACE_HOSHIJIN;
+        default:
+            return race_id != RACE_ANDROID;
+    }
+}

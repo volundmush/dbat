@@ -1,6 +1,7 @@
 #pragma once
 #include "dbat/db/consts/types.h"
 #include "dbat/db/consts/races.h"
+#include "dbat/game/transformations.h"
 
 #include <string>
 #include <unordered_map>
@@ -172,3 +173,8 @@ namespace dbat::race {
 dbat::race::Race* get_race(int id);
 int get_size(struct char_data *ch);
 int wield_type(int chsize, const struct obj_data *weap);
+
+int race_rpp_cost(int race_id);
+int race_rpp_refund(int race_id);
+int race_soft_type(struct char_data *ch);
+int64_t *race_soft_map(struct char_data *ch);

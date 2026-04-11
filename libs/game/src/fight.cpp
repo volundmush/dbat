@@ -932,7 +932,7 @@ void fight_stack()
       }
 
       if(!IS_NPC(ch) && IS_TRANSFORMED(ch) && !IS_ICER(ch) && IS_NONPTRANS(ch)) {
-          int tier = get_race(ch->race)->getCurrentTransTier(ch);
+          int tier = get_current_trans_tier(ch);
 
           if (getCurST(ch) < GET_MAX_MOVE(ch) / 60) {
               if(!(tier == 1 && PLR_FLAGGED(ch, PLR_FPSSJ))) {
