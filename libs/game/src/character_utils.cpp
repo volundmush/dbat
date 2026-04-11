@@ -30,8 +30,6 @@
 #define ABS(x) ((x) < 0 ? -(x) : (x))
 
 const char* juggleRaceName(char_data *ch, bool capitalized) {
-    if(!ch->race) return "unknown";
-
     static char buf[256];
 
     int apparent = ch->race;
