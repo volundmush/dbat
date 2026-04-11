@@ -8,6 +8,8 @@
 #include <string>
 // global variables
 
+extern const int class_ok_race[NUM_RACES][NUM_CLASSES];
+
 extern const char *config_sect[NUM_CONFIG_SECTIONS+1];
 extern const int class_hit_die_size[NUM_CLASSES];
 
@@ -83,3 +85,4 @@ namespace dbat::sensei {
 
 
 bool sensei_available_for_race(int sensei_id, int race_id);
+int parse_class(struct char_data *ch, int arg);

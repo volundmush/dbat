@@ -2253,3 +2253,63 @@ bool sensei_available_for_race(int sensei_id, int race_id) {
             return race_id != RACE_ANDROID;
     }
 }
+
+#define Y   TRUE
+#define N   FALSE
+
+/* Some races copied from the SRD under OGL, see ../doc/srd.txt for information */
+const int class_ok_race[NUM_RACES][NUM_CLASSES] = {
+  /*                Wi,Cl,Ro,Fi,Mo,Pa,So,Dr,Ba,Ra,Bn,Aa,At,Am,As,Bg,Dd,Du,Dw,Ek,Ht,Hw,Lr,Mt,Sd,Th,Ad,Ma,No,Nl,So,   */
+  /* Human      */ { Y, Y, Y, Y, Y, Y, Y, Y, N, N, Y, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N },
+  /* Saiyan     */ { Y, Y, Y, Y, Y, Y, Y, Y, N, N, Y, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N },
+  /* Icer       */ { Y, Y, Y, Y, Y, Y, Y, Y, N, N, Y, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N },
+  /* Konatsu    */ { Y, Y, Y, Y, Y, Y, Y, Y, N, N, Y, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N },
+  /* Namek      */ { Y, Y, Y, Y, Y, Y, Y, Y, N, N, Y, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N },
+  /* Mutant     */ { Y, Y, Y, Y, Y, Y, Y, Y, N, N, Y, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N },
+  /* Kanassan   */ { Y, Y, Y, Y, Y, Y, Y, Y, N, N, Y, N, Y, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N },
+  /* Halfbreed  */ { Y, Y, Y, Y, Y, Y, Y, Y, N, N, Y, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N },
+  /* Bio        */ { Y, Y, Y, Y, Y, Y, Y, Y, N, N, Y, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N },
+  /* Android    */ { N, N, N, N, N, N, N, N, Y, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N },
+  /* Demon      */ { Y, Y, Y, Y, Y, Y, Y, Y, N, Y, Y, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N },
+  /* Majin      */ { Y, Y, Y, Y, Y, Y, Y, Y, N, N, Y, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N },
+  /* Kai        */ { Y, Y, Y, Y, Y, Y, Y, Y, N, N, Y, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N },
+  /* Truffle    */ { Y, Y, Y, Y, Y, Y, Y, Y, N, N, Y, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N },
+  /* Hoshijin   */ { Y, Y, Y, Y, Y, Y, Y, Y, N, N, Y, Y, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N },
+  /* Animal     */ { N, N, N, N, N, N, Y, Y, Y, Y, Y, N, Y, N, N, N, Y, N, N, N, N, N, N, N, N, N, N, N, N },
+  /* Orc        */ { N, N, N, N, N, N, Y, Y, Y, Y, Y, N, Y, N, N, N, Y, N, N, N, N, N, N, N, N, N, N, N, N },
+  /* Snake      */ { N, N, N, N, N, N, Y, Y, Y, Y, Y, N, Y, N, N, N, Y, N, N, N, N, N, N, N, N, N, N, N, N },
+  /* Troll      */ { N, N, N, N, N, N, Y, Y, Y, Y, Y, N, Y, N, N, N, Y, N, N, N, N, N, N, N, N, N, N, N, N },
+  /* Minotaur   */ { N, N, N, N, N, N, Y, Y, Y, Y, Y, N, Y, N, N, N, Y, N, N, N, N, N, N, N, N, N, N, N, N },
+  /* Arlian     */ { Y, Y, Y, Y, Y, Y, Y, Y, N, N, Y, N, N, Y, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N },
+  /* Mindflayer */ { N, N, N, N, N, N, Y, Y, Y, Y, Y, N, Y, N, N, N, Y, N, N, N, N, N, N, N, N, N, N, N, N },
+  /* Warhost    */ { N, N, N, N, N, N, Y, Y, Y, Y, Y, N, Y, N, N, N, Y, N, N, N, N, N, N, N, N, N, N, N, N },
+  /* Faerie     */ { N, N, N, N, N, N, Y, Y, Y, Y, Y, N, Y, N, N, N, Y, N, N, N, N, N, N, N, N, N, N, N, N }
+};
+
+int parse_class(struct char_data *ch, int arg)
+{
+  int chclass = CLASS_UNDEFINED;
+
+  switch (arg) {
+  case 1 : chclass = CLASS_ROSHI    ; break;
+  case 2 : chclass = CLASS_PICCOLO  ; break;
+  case 3 : chclass = CLASS_KRANE    ; break;
+  case 4 : chclass = CLASS_NAIL     ; break;
+  case 5 : chclass = CLASS_BARDOCK  ; break;
+  case 6 : chclass = CLASS_GINYU    ; break;
+  case 7 : chclass = CLASS_FRIEZA   ; break;
+  case 8 : chclass = CLASS_TAPION   ; break;
+  case 9 : chclass = CLASS_ANDSIX   ; break;
+  case 10 : chclass = CLASS_DABURA   ; break;
+  case 11 : chclass = CLASS_KABITO   ; break;
+  case 12 : chclass = CLASS_JINTO    ; break;
+  case 13 : chclass = CLASS_TSUNA    ; break;
+  case 14 : chclass = CLASS_KURZAK   ; break;
+  default:  chclass = CLASS_UNDEFINED; break;
+  }
+  if (chclass >= 0 && chclass < NUM_BASIC_CLASSES)
+    if (!class_ok_race[(int)GET_RACE(ch)][chclass])
+      chclass = CLASS_UNDEFINED;
+
+  return (chclass);
+}

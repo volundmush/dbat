@@ -1066,13 +1066,13 @@ void display_transforms(struct char_data* ch) {
     // tclass 1 lowers requirements by about 30%, tclass 2 has no affect, and tclass 3 increases by 30%
     switch(tclass) {
         case 1:
-            modifier = 1.3;
+            modifier = 1.15;
             break;
         case 2:
             modifier = 1.0;
             break;
         case 3:
-            modifier = 0.7;
+            modifier = 0.85;
             break;
     };
     int64_t pl = getBasePL(ch);

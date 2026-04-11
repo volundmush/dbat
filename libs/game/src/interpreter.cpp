@@ -39,6 +39,7 @@
 
 
 
+
 /* prototypes for all do_x functions. */
 
 
@@ -57,76 +58,10 @@
  * priority.
  */
 
-
-
-
-
-
 /*
  * copy the first non-fill-word, space-delimited argument of 'argument'
  * to 'first_arg'; return a pointer to the remainder of the string.
  */
-
-
-static dbat::race::RaceMap valid_races(descriptor_data *d) {
-    return dbat::race::valid_for_sex_pc(GET_SEX(d->character));
-}
-
-static void display_races_sub(descriptor_data *d) {
-    auto v_races = valid_races(d);
-    int i = 0;
-    for (const auto& r : v_races)
-        send_to_char(d->character, "@C%-15s@D[@R%i RPP@D]@n%s", r.second->getName().c_str(), r.second->getRPPCost(), !(++i %2) ? "\r\n" : "   ");
-}
-
-void display_races(struct descriptor_data *d)
-{
-    send_to_char(d->character, "\r\n@YRace SELECTION menu:\r\n@D---------------------------------------\r\n@n");
-    display_races_sub(d);
-
-    send_to_char(d->character, "\n @BR@W) @CRandom Race Selection!\r\n@n");
-    send_to_char(d->character, "\n @BT@W) @CToggle between SELECTION/HELP Menu\r\n@n");
-    send_to_char(d->character, "\n@WRace: @n");
-}
-
-static dbat::sensei::SenseiMap valid_classes(descriptor_data *d) {
-    return dbat::sensei::valid_for_race_pc(d->character);
-}
-
-static void display_classes_sub(descriptor_data *d) {
-    auto v_classes = valid_classes(d);
-    int i = 0;
-    for (const auto& s : v_classes)
-        send_to_char(d->character, "@C%s@n%s", s.second->getName().c_str(), !(++i%2) ? "\r\n" : "	");
-}
-
-void display_classes(struct descriptor_data *d)
-{
-  send_to_char(d->character, "\r\n@YSensei SELECTION menu:\r\n@D--------------------------------------\r\n@n");
-  display_classes_sub(d);
-
-      send_to_char(d->character, "\n @BR@W) @CRandom Sensei Selection!\r\n@n");
-      send_to_char(d->character, "\n @BT@W) @CToggle between SELECTION/HELP Menu\r\n@n");
-      send_to_char(d->character, "\n@WSensei: @n");
-}
-
-void display_races_help(struct descriptor_data *d)
-{
-    send_to_char(d->character, "\r\n@YRace HELP menu:\r\n@G--------------------------------------------\r\n@n");
-    display_races_sub(d);
-
-    send_to_char(d->character, "\n @BT@W) @CToggle between SELECTION/HELP Menu\r\n@n");
-    send_to_char(d->character, "\n@WHelp on Race #: @n");
-}
-
-void display_classes_help(struct descriptor_data *d)
-{
-  send_to_char(d->character, "\r\n@YClass HELP menu:\r\n@G-------------------------------------------\r\n@n");
-  display_classes_sub(d);
-
-      send_to_char(d->character, "\n @BT@W) @CToggle between SELECTION/HELP Menu\r\n@n");
-      send_to_char(d->character, "\n@WHelp on Class #: @n");
-}
 
 /*
  * determine if a given string is an abbreviation of another
@@ -1908,6 +1843,86 @@ void exchange_ccpoints(struct char_data *ch, int value)
  }
 }
 
+
+
+void display_races(struct descriptor_data *d)
+{
+  int x, i=0;
+  const char *cost[23] = {"Free",  /* 0 */
+                          "60 RPP", /* 1 */
+                          "Free", /* 2 */
+                          "Free",  /* 3 */
+                          "Free",  /* 4 */
+                          "Free",  /* 5 */
+                          "Free",  /* 6 */
+                          "Free",  /* 7 */
+                          "35 RPP",  /* 8 */
+                          "Free",  /* 9 */
+                          "Free",  /* 10 */
+                          "55 RPP",  /* 11 */
+                          "Free",  /* 12 */
+                          "Free",  /* 13 */
+                          "30 RPP",  /* 14 */
+                          "Free",  /* 15 */
+                          "Free", /* 16 */
+                          "Free",  /* 17 */
+                          "Free", /* 18 */
+                          "Free",  /* 19 */
+                          "Free", /* 20 */
+                          "Free",  /* 21 */
+                          "Free", /* 22 */
+                          };
+
+  send_to_char(d->character, "\r\n@YRace SELECTION menu:\r\n@D---------------------------------------\r\n@n");
+  for (x = 0; x < NUM_RACES; x++)
+    if (race_ok_gender[(int)GET_SEX(d->character)][x])
+      send_to_char(d->character, "@B%2d@W) @C%-15s@D[@R%-6s@D]@n%s", (x+1) != 21 ? x+1 : 16, pc_race_types[x], cost[x], !(++i %2) ? "\r\n" : "   ");
+
+      send_to_char(d->character, "\n @BR@W) @CRandom Race Selection!\r\n@n");
+      send_to_char(d->character, "\n @BT@W) @CToggle between SELECTION/HELP Menu\r\n@n");
+      send_to_char(d->character, "\n@WRace: @n");
+}
+
+void display_classes(struct descriptor_data *d)
+{
+  int x, i=0;
+
+  send_to_char(d->character, "\r\n@YSensei SELECTION menu:\r\n@D--------------------------------------\r\n@n");
+  for (x = 0; x < NUM_BASIC_CLASSES; x++)
+    if (class_ok_race[(int)GET_RACE(d->character)][x])
+      send_to_char(d->character, "@B%2d@W) @C%s@n%s", x+1, pc_class_types[x], !(++i%2) ? "\r\n" : "	");
+
+      send_to_char(d->character, "\n @BR@W) @CRandom Sensei Selection!\r\n@n");
+      send_to_char(d->character, "\n @BT@W) @CToggle between SELECTION/HELP Menu\r\n@n");
+      send_to_char(d->character, "\n@WSensei: @n");
+}
+
+void display_races_help(struct descriptor_data *d)
+{
+  int x, i=0;
+
+  send_to_char(d->character, "\r\n@YRace HELP menu:\r\n@G--------------------------------------------\r\n@n");
+  for (x = 0; x < NUM_RACES; x++)
+    if (race_ok_gender[(int)GET_SEX(d->character)][x])
+      send_to_char(d->character, "@B%2d@W) @C%-15s@n%s", x+1, pc_race_types[x], !(++i%2) ? "\r\n" : "	");
+
+      send_to_char(d->character, "\n @BT@W) @CToggle between SELECTION/HELP Menu\r\n@n");
+      send_to_char(d->character, "\n@WHelp on Race #: @n");
+}
+
+void display_classes_help(struct descriptor_data *d)
+{
+  int x, i=0;
+
+  send_to_char(d->character, "\r\n@YClass HELP menu:\r\n@G-------------------------------------------\r\n@n");
+  for (x = 0; x < NUM_BASIC_CLASSES; x++)
+    if (class_ok_race[(int)GET_RACE(d->character)][x])
+      send_to_char(d->character, "@B%2d@W) @C%s@n%s", x+1, pc_class_types[x], !(++i%2) ? "\r\n" : "	");
+
+      send_to_char(d->character, "\n @BT@W) @CToggle between SELECTION/HELP Menu\r\n@n");
+      send_to_char(d->character, "\n@WHelp on Class #: @n");
+}
+
 /* deal with newcomers and other non-playing sockets */
 void nanny(struct descriptor_data *d, char *arg)
 {
@@ -2687,53 +2702,41 @@ void nanny(struct descriptor_data *d, char *arg)
     }
     break;
 
-    case CON_QRACE:
-    case CON_RACE_HELP:
-        switch(strlen(arg)) {
-            case 0:
-                write_to_output(d, "\r\nThat's not a race.\r\nRace: ");
-                return;
-            case 1:
-                switch(*arg) {
-                    case 't':
-                    case 'T':
-                        switch(STATE(d)) {
-                            case CON_QRACE:
-                                display_races_help(d);
-                                STATE(d) = CON_RACE_HELP;
-                                break;
-                            case CON_RACE_HELP:
-                                display_races(d);
-                                STATE(d) = CON_QRACE;
-                                break;
-                        }
-                        return;
-                    default:
-                        write_to_output(d, "\r\nThat's not a race.\r\nRace: ");
-                        return;
-                }
-                break;
-            default:
-                v_races = valid_races(d);
-                chosen_race = dbat::race::find_race_map(arg, v_races);
-                if(!chosen_race) {
-                    write_to_output(d, "\r\nThat's not a race.\r\nRace: ");
-                    return;
-                }
-
-                switch(STATE(d)) {
-                    case CON_QRACE:
-                        if(chosen_race->getRPPCost()) {
-                            write_to_output(d, "\r\n%i RPP will be paid upon your first level up.\r\n", chosen_race->getRPPCost());
-                        }
-                        d->character->race = chosen_race->getID();
-                        break;
-                    case CON_RACE_HELP:
-                        show_help(d, chosen_race->getName().c_str());
-                        chosen_sensei = nullptr;
-                        return;
-                }
+case CON_QRACE:
+    switch (*arg) {
+      case 'r':
+      case 'R':
+        while (load_result == RACE_UNDEFINED) {
+          rr = rand_number(1, NUM_RACES);
+          load_result = parse_race(d->character, rr);
         }
+        break;
+      case 't':
+      case 'T':
+        display_races_help(d);
+        STATE(d) = CON_RACE_HELP;
+        return;
+    }
+    if (load_result == RACE_UNDEFINED)
+      load_result = parse_race(d->character, atoi(arg));
+      if (load_result == RACE_UNDEFINED && (atoi(arg) != 2 && atoi(arg) != 12 && atoi(arg) != 9)) {
+        write_to_output(d, "\r\nThat's not a race.\r\nRace: ");
+        return;
+      } else if (load_result == RACE_UNDEFINED && (atoi(arg) == 2)) {
+        write_to_output(d, "\r\nThat race is restricted, You need 60 RPP to unlock it.\r\nRace: ");
+        return;
+      } else if (load_result == RACE_UNDEFINED && (atoi(arg) == 12)) {
+        write_to_output(d, "\r\nThat race is restricted, You need 55 RPP to unlock it.\r\nRace: ");
+        return;
+      } else if (load_result == RACE_UNDEFINED && (atoi(arg) == 9)) {
+        write_to_output(d, "\r\nThat race is restricted, You need 30 RPP to unlock it.\r\nRace: ");
+        return;
+      } else if (load_result == RACE_UNDEFINED && (atoi(arg) == 15)) {
+        write_to_output(d, "\r\nThat race is restricted, You need 20 RPP to unlock it.\r\nRace: ");
+        return;
+      }
+        else
+        GET_RACE(d->character) = load_result;
 
     if (IS_HALFBREED(d->character)) {
      write_to_output(d, "@YWhat race do you prefer to by identified with?\r\n");
@@ -4377,58 +4380,39 @@ void nanny(struct descriptor_data *d, char *arg)
     break;
 
   case CON_QCLASS:
-  case CON_CLASS_HELP:
-      switch(strlen(arg)) {
-          case 1:
-              switch(*arg) {
-                  case 't':
-                  case 'T':
-                      switch(STATE(d)) {
-                          case CON_CLASS_HELP:
-                              STATE(d) = CON_QCLASS;
-                              display_classes(d);
-                              return;
-                          case CON_QCLASS:
-                              display_classes_help(d);
-                              STATE(d) = CON_CLASS_HELP;
-                              return;
-                      }
-                      break;
-                  default:
-                      write_to_output(d, "\r\nThat's not a sensei.\r\nSensei: ");
-                      return;
-              }
-              break;
-          default:
-              chosen_sensei = dbat::sensei::find_sensei(arg);
-              if (!chosen_sensei) {
-                  write_to_output(d, "\r\nThat's not a sensei.\r\nSensei: ");
-                  return;
-              }
-
-              switch(STATE(d)) {
-                  case CON_CLASS_HELP:
-                      show_help(d, chosen_sensei->getName().c_str());
-                      chosen_sensei = nullptr;
-                      return;
-                  case CON_QCLASS:
-                      if (chosen_sensei->getID() == dbat::sensei::kibito && !IS_KAI(d->character) && d->character->desc->rbank < 10 && d->character->rbank < 10) {
-                          write_to_output(d, "\r\nIt costs 10 RPP to select Kibito unless you are a Kai.\r\nSensei: ");
-                          return;
-                      } else {
-                          d->character->chclass = chosen_sensei->getID();
-                          if (chosen_sensei->getID() == dbat::sensei::kibito && !IS_KAI(d->character)) {
-                              if (d->character->desc->rpp >= 10)
-                                  d->character->desc->rpp -= 10;
-                              else
-                                  d->character->desc->rpp -= 10;
-                              userWrite(d->character->desc, 0, 0, 0, "index");
-                              write_to_output(d, "\r\n10 RPP deducted from your bank since you are not a kai.\n");
-                          }
-                      }
-                      break;
-              }
+    switch (*arg) {
+      case 'r':
+      case 'R':
+        while (load_result == CLASS_UNDEFINED) {
+          rr = rand_number(1, NUM_BASIC_CLASSES);
+          load_result = parse_class(d->character, rr);
+        }
+        break;
+      case 't':
+      case 'T':
+        display_classes_help(d);
+        STATE(d) = CON_CLASS_HELP;
+        return;
+    }
+    if (load_result == CLASS_UNDEFINED)
+    load_result = parse_class(d->character, atoi(arg));
+    if (load_result == CLASS_UNDEFINED) {
+      write_to_output(d, "\r\nThat's not a sensei.\r\nSensei: ");
+      return;
+    } else if (load_result == CLASS_KABITO && !IS_KAI(d->character) && d->character->desc->rbank < 10 && d->character->rbank < 10) {
+      write_to_output(d, "\r\nIt costs 10 RPP to select that sensei unless you are a Kai.\r\nSensei: ");
+      return;
+    } else {
+      GET_CLASS(d->character) = load_result;
+      if (load_result == CLASS_KABITO && !IS_KAI(d->character)) {
+       if (d->character->desc->rbank >= 10)
+        d->character->desc->rbank -= 10;
+       else
+        d->character->desc->rbank -= 10;
+       userWrite(d->character->desc, 0, 0, 0, "index");
+       write_to_output(d, "\r\n10 RPP deducted from your bank since you are not a kai.\n");
       }
+    }
 
     if (IS_ANDROID(d->character)) {
          write_to_output(d, "\r\n@YChoose your model type.\r\n");

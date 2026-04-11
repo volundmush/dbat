@@ -936,7 +936,7 @@ bool char_is_spoiled(const struct char_data *ch);
 #define GET_LEVEL(ch)	(GET_CLASS_LEVEL(ch) + GET_LEVEL_ADJ(ch) + GET_HITDICE(ch))
 #define GET_PFILEPOS(ch)((ch)->pfilepos)
 
-#define GET_CLASS(ch)   ((ch)->chclass ? (ch)->chclass : 0)
+#define GET_CLASS(ch)   ((ch)->chclass)
 #define GET_CLASS_NONEPIC(ch, whichclass) ((ch)->chclasses[whichclass])
 #define GET_CLASS_EPIC(ch, whichclass) ((ch)->epicclasses[whichclass])
 #define GET_CLASS_RANKS(ch, whichclass) (GET_CLASS_NONEPIC(ch, whichclass) + \

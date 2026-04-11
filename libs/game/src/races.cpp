@@ -1887,3 +1887,105 @@ int race_soft_type(struct char_data *ch) {
             return 0;
     }
 }
+
+#define Y   TRUE
+#define N   FALSE
+
+/* Original Race/Gender Breakout */
+const int race_ok_gender[NUM_SEX][NUM_RACES] = {
+/*        H, S, I, K, N, M, Ka, HB, B, A, D, Ma, Kai, TR, G, I, O, S, T, M, Ar, L, W, F */
+/* N */ { Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, N, N, N, N, N, Y, N, N, N },
+/* M */ { Y, Y, Y, Y, N, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, N, N, N, N, N, Y, N, N, N },
+/* F */ { Y, Y, Y, Y, N, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, N, N, N, N, N, Y, N, N, N }
+
+};
+
+int parse_race(struct char_data *ch, int arg)
+{
+  int race = RACE_UNDEFINED;
+
+  switch (arg) {
+  case 1:  race = RACE_HUMAN      ; break;
+  case 2:
+   if (ch->desc->rpp >= 60) {
+   race = RACE_SAIYAN;
+   //ch->desc->rpp -= 60;
+   userWrite(ch->desc, 0, 0, 0, "index");
+   } else if (ch->desc->rbank >= 60) {
+    race = RACE_SAIYAN;
+    //ch->desc->rbank -= 60;
+    userWrite(ch->desc, 0, 0, 0, "index");
+   }
+   else {
+    race = RACE_UNDEFINED;
+   }
+   break;
+  case 3:  race = RACE_ICER       ; break;
+  case 4:  race = RACE_KONATSU    ; break;
+  case 5:  race = RACE_NAMEK      ; break;
+  case 6:  race = RACE_MUTANT     ; break;
+  case 7:  race = RACE_KANASSAN   ; break;
+  case 8:  race = RACE_HALFBREED  ; break;
+  case 9:  
+   if (ch->desc->rpp >= 35) {
+    race = RACE_BIO;
+    //ch->desc->rpp -= 35;
+    userWrite(ch->desc, 0, 0, 0, "index");
+   } else if (ch->desc->rbank >= 35) {
+    race = RACE_BIO;
+    //ch->desc->rbank -= 35;
+    userWrite(ch->desc, 0, 0, 0, "index");
+   }
+   else {
+    race = RACE_UNDEFINED;
+   }
+   break;
+  case 10: race = RACE_ANDROID    ; break;
+  case 11: race = RACE_DEMON      ; break;
+  case 12:
+   if (ch->desc->rpp >= 55) {
+    race = RACE_MAJIN;
+    //ch->desc->rpp -= 55;
+    userWrite(ch->desc, 0, 0, 0, "index");
+   } else if (ch->desc->rbank >= 55) {
+    race = RACE_MAJIN;
+    //ch->desc->rbank -= 55;
+    userWrite(ch->desc, 0, 0, 0, "index");
+   }
+   else {
+    race = RACE_UNDEFINED;
+   }
+   break;
+  case 13: race = RACE_KAI        ; break;
+  case 14: race = RACE_TRUFFLE    ; break;
+  case 15: race = RACE_HOSHIJIN     ; 
+   if (ch->desc->rpp >= 30) {
+    race = RACE_HOSHIJIN;
+    //ch->desc->rpp -= 30;
+    userWrite(ch->desc, 0, 0, 0, "index");
+   } else if (ch->desc->rbank >= 30) {
+    race = RACE_HOSHIJIN;
+    //ch->desc->rbank -= 30;
+    userWrite(ch->desc, 0, 0, 0, "index");
+   }
+   else {
+    race = RACE_UNDEFINED;
+   }
+   break;
+  case 16: race = RACE_SAIBA     ; break;
+  case 17: race = RACE_ANIMAL     ; break;
+  case 18: race = RACE_OGRE        ; break;
+  case 19: race = RACE_SERPENT      ; break;
+  case 20: race = RACE_ARLIAN      ; break;
+  case 21: race = RACE_DRAGON   ; break;
+  case 22: race = RACE_MECHANICAL ; break;
+  case 23: race = RACE_ANIMAL    ; break;
+  case 24: race = RACE_SPIRIT     ; break;
+  default: race = RACE_UNDEFINED  ; break;
+  }
+  if (race >= 0 && race < NUM_RACES)
+    if (!race_ok_gender[(int)GET_SEX(ch)][race])
+      race = RACE_UNDEFINED;
+
+  return (race);
+}
