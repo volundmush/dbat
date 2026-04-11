@@ -4658,3 +4658,15 @@ int race_is_playable(int r_id) {
             return true;
     }
 }
+
+int race_is_people(int r_id) {
+    switch(r_id) {
+        case RACE_ANIMAL:
+        case RACE_SAIBA:
+        case RACE_MECHANICAL:
+        case RACE_SPIRIT:
+            return false;
+        default:
+            return true;
+    }
+}

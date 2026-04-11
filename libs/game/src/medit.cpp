@@ -967,7 +967,7 @@ void medit_parse(struct descriptor_data *d, char *arg)
       }
       OLC_MOB(d)->race = chosen_race->getID();
     /*  Change racial size based on race choice. */
-    OLC_MOB(d)->size = get_race(OLC_MOB(d)->race)->getSize();
+    OLC_MOB(d)->size = race_get_size(OLC_MOB(d)->race);
     break;
 
   case MEDIT_SIZE:

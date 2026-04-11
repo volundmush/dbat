@@ -231,7 +231,7 @@ int invalid_race(struct char_data *ch, struct obj_data *obj) {
 
 int get_size(struct char_data *ch) {
     if (ch->size == SIZE_UNDEFINED) {
-        ch->size = get_race(ch->race)->getSize();
+        ch->size = race_get_size(ch->race);
     }
     return ch->size;
 }

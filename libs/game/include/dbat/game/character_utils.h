@@ -228,3 +228,4 @@ int sensei_rpp_cost(int s_id, int r_id);
 
 int race_get_size(int r_id);
 int race_is_playable(int r_id);
+int race_is_people(int r_id);
