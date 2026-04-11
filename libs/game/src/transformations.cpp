@@ -1140,7 +1140,7 @@ struct transform_bonus select_transformation(struct char_data* ch, const char* k
     }
     for(int i = 0; i < available->number; i++) {
         struct transform_bonus* bonus = &available->bonuses[i];
-        if(strcasecmp(bonus->key, key) == 0) {
+        if(!strcasecmp(bonus->key, key)) {
             return *bonus;
         }
     }

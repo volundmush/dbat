@@ -1806,9 +1806,6 @@ namespace dbat::race {
     }
 }
 
-
-
-
 dbat::race::Race* get_race(int race_id) {
     auto it = dbat::race::race_map.find(static_cast<dbat::race::race_id>(race_id));
     if (it != dbat::race::race_map.end()) {

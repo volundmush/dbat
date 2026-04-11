@@ -7664,7 +7664,7 @@ ACMD(do_transform)
 
     // Search for available transformations. Error out if we can't find one.
     struct transform_bonus trans = select_transformation(ch, arg);
-    if(strcasecmp(trans.name, "base")) {
+    if(!strcasecmp(trans.name, "base")) {
         send_to_char(ch, "You don't have that form.\r\n");
         return;
     }
