@@ -25,7 +25,7 @@
 #define RACE_ARLIAN        20
 #define RACE_DRAGON        21
 #define RACE_MECHANICAL        22
-#define RACE_FAERIE        23
+#define RACE_SPIRIT        23
 
 #define NUM_RACES		24
 

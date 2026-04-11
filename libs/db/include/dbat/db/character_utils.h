@@ -1389,10 +1389,9 @@ bool char_is_spoiled(const struct char_data *ch);
 #define IS_ARLIAN(ch)           (GET_RACE(ch) == RACE_ARLIAN)
 #define IS_DRAGON(ch)           (GET_RACE(ch) == RACE_DRAGON)
 #define IS_MECHANICAL(ch)          (GET_RACE(ch) == RACE_MECHANICAL)
-#define IS_FAERIE(ch)           (GET_RACE(ch) == RACE_FAERIE)
+#define IS_SPIRIT(ch)           (GET_RACE(ch) == RACE_SPIRIT)
 #define IS_UNDEAD(ch)           (IS_AFFECTED(ch, AFF_UNDEAD))
 
-/* Define Gender More Easily */
 #define IS_MALE(ch)             (GET_SEX(ch) == SEX_MALE)
 #define IS_FEMALE(ch)           (GET_SEX(ch) == SEX_FEMALE)
 #define IS_NEUTER(ch)           (!IS_MALE(ch) && !IS_FEMALE(ch))

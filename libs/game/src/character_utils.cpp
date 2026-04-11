@@ -32,29 +32,29 @@ const char* juggleRaceName(char_data *ch, bool capitalized) {
 
     static char buf[256];
 
-    dbat::race::Race *apparent = get_race(ch->race);
+    int apparent = ch->race;
 
-    switch(apparent->getID()) {
-        case dbat::race::hoshijin:
-            if(ch->mimic > -1) apparent = get_race(ch->mimic);
+    switch(apparent) {
+        case RACE_HOSHIJIN:
+            if(ch->mimic > -1) apparent = ch->mimic;
             break;
-        case dbat::race::halfbreed:
+        case RACE_HALFBREED:
             switch(RACIAL_PREF(ch)) {
                 case 1:
-                    apparent = get_race(dbat::race::human);
+                    apparent = RACE_HUMAN;
                     break;
                 case 2:
-                    apparent = get_race(dbat::race::saiyan);
+                    apparent = RACE_SAIYAN;
                     break;
             }
             break;
-        case dbat::race::android:
+        case RACE_ANDROID:
             switch(RACIAL_PREF(ch)) {
                 case 1:
-                    apparent = get_race(dbat::race::android);
+                    apparent = RACE_ANDROID;
                     break;
                 case 2:
-                    apparent = get_race(dbat::race::human);
+                    apparent = RACE_HUMAN;
                     break;
                 case 3:
                     if(capitalized) {
@@ -64,18 +64,18 @@ const char* juggleRaceName(char_data *ch, bool capitalized) {
                     }
             }
             break;
-        case dbat::race::saiyan:
+        case RACE_SAIYAN:
             if(PLR_FLAGGED(ch, PLR_TAILHIDE)) {
-                apparent = get_race(dbat::race::human);
+                apparent = RACE_HUMAN;
             }
             break;
     }
 
     if(capitalized) {
-        snprintf(buf, sizeof(buf), "%s", apparent->getName().c_str());
+        snprintf(buf, sizeof(buf), "%s", pc_race_types[apparent]);
         return buf;
     } else {
-        snprintf(buf, sizeof(buf), "%s", apparent->getNameLower().c_str());
+        snprintf(buf, sizeof(buf), "%s", race_names[apparent]);
         return buf;
     }
 }
@@ -4624,5 +4624,37 @@ int sensei_rpp_cost(int s_id, int r_id) {
             }
         default:
             return 0;
+    }
+}
+
+int race_get_size(int r_id) {
+    switch(r_id) {
+        case RACE_ANIMAL:
+             return SIZE_FINE;
+        case RACE_SAIBA:
+        case RACE_OGRE:
+            return SIZE_LARGE;
+        case RACE_SPIRIT:
+            return SIZE_TINY;
+        case RACE_TRUFFLE:
+            return SIZE_SMALL;
+        default:
+            return SIZE_MEDIUM;
+    }
+}
+
+int race_is_playable(int r_id) {
+    switch(r_id) {
+        case RACE_ANIMAL:
+        case RACE_SAIBA:
+        case RACE_SERPENT:
+        case RACE_OGRE:
+        case RACE_YARDRATIAN:
+        case RACE_DRAGON:
+        case RACE_MECHANICAL:
+        case RACE_SPIRIT:
+            return false;
+        default:
+            return true;
     }
 }

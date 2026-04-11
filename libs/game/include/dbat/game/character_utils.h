@@ -225,3 +225,6 @@ room_vnum sensei_start_room(int s_id);
 room_vnum sensei_location_id(int s_id);
 int sensei_grav_tolerance(int s_id);
 int sensei_rpp_cost(int s_id, int r_id);
+
+int race_get_size(int r_id);
+int race_is_playable(int r_id);
