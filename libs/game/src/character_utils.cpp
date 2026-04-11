@@ -724,6 +724,10 @@ int64_t incCurLF(char_data *ch, int64_t amt, bool limit_max) {
     return getCurLF(ch);
 };
 
+int64_t incCurLFNoLimit(char_data *ch, int64_t amt) {
+    return incCurLF(ch, amt, false);
+};
+
 int64_t decCurLF(char_data *ch, int64_t amt, int64_t floor) {
     double fl = 0.0;
     if(floor > 0)
@@ -733,6 +737,10 @@ int64_t decCurLF(char_data *ch, int64_t amt, int64_t floor) {
     ch->life = MAX(fl, newlife);
     ch->life = clampHealth(ch->life);
     return getCurLF(ch);
+}
+
+int64_t decCurLFNoFloor(char_data *ch, int64_t amt) {
+    return decCurLF(ch, amt, 0);
 }
 
 int64_t incCurLFPercent(char_data *ch, double amt, bool limit_max) {
@@ -812,6 +820,10 @@ void cureStatusKnockedOut(char_data *ch, bool announce) {
     }
 }
 
+void cureStatusKnockedOutAnnounce(char_data *ch) {
+    cureStatusKnockedOut(ch, true);
+}
+
 void cureStatusBurn(char_data *ch, bool announce) {
     if (AFF_FLAGGED(ch, AFF_BURNED)) {
         if(announce) {
@@ -822,9 +834,17 @@ void cureStatusBurn(char_data *ch, bool announce) {
     }
 }
 
+void cureStatusBurnAnnounce(char_data *ch) {
+    cureStatusBurn(ch, true);
+}
+
 void cureStatusPoison(char_data *ch, bool announce) {
     act("@C$n@W suddenly looks a lot better!@b", FALSE, ch, 0, 0, TO_NOTVICT);
     affect_from_char(ch, SPELL_POISON);
+}
+
+void cureStatusPoisonAnnounce(char_data *ch) {
+    cureStatusPoison(ch, true);
 }
 
 static const char* limb_names_short[] = {
@@ -3016,7 +3036,7 @@ void demon_refill_lf(struct char_data *ch, int64_t num)
    if ((getCurLF(tch)) >= (getMaxLF(tch)))
     continue;
    else {
-       incCurLF(ch, num);
+       incCurLF(ch, num, true);
     act("@CYou feel the life energy from @c$N@C's cursed body flow out and you draw it into yourself!@n", TRUE, tch, 0, ch, TO_CHAR);
    }
   }

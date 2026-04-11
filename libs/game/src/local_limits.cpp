@@ -875,7 +875,7 @@ static void update_flags(struct char_data *ch)
 
   if (AFF_FLAGGED(ch, AFF_KNOCKED) && !FIGHTING(ch))
   {
-    cureStatusKnockedOut(ch, true);
+    cureStatusKnockedOutAnnounce(ch);
   }
 
   barrier_shed(ch);

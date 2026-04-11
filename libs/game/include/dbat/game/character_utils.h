@@ -96,8 +96,10 @@ int64_t getPercentOfMaxLF(char_data *ch, double amt);
 bool isFullLF(char_data *ch);
 int64_t setCurLF(char_data *ch, int64_t amt);
 int64_t setCurLFPercent(char_data *ch, double amt);
-int64_t incCurLF(char_data *ch, int64_t amt, bool limit_max = true);
-int64_t decCurLF(char_data *ch, int64_t amt, int64_t floor = 0);
+int64_t incCurLF(char_data *ch, int64_t amt, bool limit_max);
+int64_t incCurLFNoLimit(char_data *ch, int64_t amt);
+int64_t decCurLF(char_data *ch, int64_t amt, int64_t floor);
+int64_t decCurLFNoFloor(char_data *ch, int64_t amt);
 int64_t incCurLFPercent(char_data *ch, double amt, bool limit_max = true);
 int64_t decCurLFPercent(char_data *ch, double amt, int64_t floor = 0);
 void restoreLF(char_data *ch, bool announce);
@@ -131,9 +133,12 @@ int64_t loseBaseKIPercent(char_data *ch, double amt, bool trans_mult = false);
 int64_t loseBaseSTPercent(char_data *ch, double amt, bool trans_mult = false);
 void loseBaseAllPercent(char_data *ch, double amt, bool trans_mult = false);
 
-void cureStatusKnockedOut(char_data *ch, bool announce = true);
-void cureStatusBurn(char_data *ch, bool announce = true);
-void cureStatusPoison(char_data *ch, bool announce = true);
+void cureStatusKnockedOut(char_data *ch, bool announce);
+void cureStatusKnockedOutAnnounce(char_data *ch);
+void cureStatusBurn(char_data *ch, bool announce);
+void cureStatusBurnAnnounce(char_data *ch);
+void cureStatusPoison(char_data *ch, bool announce);
+void cureStatusPoisonAnnounce(char_data *ch);
 void setStatusKnockedOut(char_data *ch);
 
 int64_t getMaxCarryWeight(char_data *ch);

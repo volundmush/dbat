@@ -2499,7 +2499,7 @@ ACMD(do_pose)
   save_char(ch);
   int64_t before = (getMaxLF(ch));
   SET_BIT_AR(PLR_FLAGS(ch), PLR_POSE);
-  incCurLF(ch, (getMaxLF(ch)) - before);
+  incCurLFNoLimit(ch, (getMaxLF(ch)) - before);
      decCurST(ch, getMaxST(ch) / 40);
   improve_skill(ch, SKILL_POSE, 0);
   return;
@@ -4883,7 +4883,7 @@ ACMD(do_regenerate) {
  incCurHealth(ch, amt * 2);
 
  if (!IS_NPC(ch))
-     decCurLF(ch, amt * .8);
+     decCurLFNoFloor(ch, amt * .8);
 
  decCurKI(ch, amt * .2);
 
@@ -6879,7 +6879,7 @@ ACMD(do_heal)
    GET_LIMBCOND(vict, 3) = 100;
    GET_LIMBCOND(vict, 4) = 100;
    if(getCurLF(vict) <= getMaxLF(vict) * 0.5 && !IS_ANDROID(vict)) {
-       incCurLF(vict, (getMaxLF(ch)) * .35);
+       incCurLFNoLimit(vict, (getMaxLF(ch)) * .35);
     send_to_char(vict, "You feel that your lifeforce has recovered some!\r\n");
    }
    improve_skill(ch, SKILL_HEAL, 0);
@@ -8689,7 +8689,7 @@ void base_update(void)
 			demon_refill_lf(d->character, getMaxLF(d->character) * 0.01);
 
 			if (getCurLF(d->character) < forty_lf) {
-                incCurLF(d->character, forty_lf - getCurLF(d->character));
+                incCurLFNoLimit(d->character, forty_lf - getCurLF(d->character));
 			}
 		}
 		if (GET_BACKSTAB_COOL(d->character) > 0) {

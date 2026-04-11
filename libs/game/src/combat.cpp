@@ -4178,7 +4178,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
     act("@c$N@W seems to be more aware now.@n", TRUE, ch, 0, vict, TO_NOTVICT);
   }
   if (AFF_FLAGGED(vict, AFF_KNOCKED) && rand_number(1, 12) >= 11) {
-      cureStatusKnockedOut(vict, true);
+      cureStatusKnockedOutAnnounce(vict);
       if (IS_NPC(vict) && rand_number(1, 20) >= 12) {
           act("@W$n@W stands up.@n", FALSE, vict, 0, 0, TO_ROOM);
           GET_POS(vict) = POS_STANDING;
@@ -4379,7 +4379,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
         act("@CYou barely cling to life!@n", TRUE, ch, 0, vict, TO_VICT);
         act("@c$N@w barely clings to life!@n.", TRUE, ch, 0, vict, TO_NOTVICT);
         int64_t lifeloss = dmg - GET_HIT(vict);
-        decCurLF(vict, lifeloss);
+        decCurLFNoFloor(vict, lifeloss);
         send_to_char(vict, "@D[@CLifeforce@D: @R-%s@D]\n", add_commas(lifeloss));
       if ((getCurLF(vict)) >= (getMaxLF(vict)) * 0.05) {
         send_to_char(vict, "@YYou recover a bit thanks to your strong life force.@n\r\n");

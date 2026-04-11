@@ -856,7 +856,7 @@ void fight_stack()
          }
          incCurHealth(ch, refill);
          if (!AFF_FLAGGED(ch, AFF_HEALGLOW)) {
-          decCurLF(ch, lfcost);
+          decCurLFNoFloor(ch, lfcost);
          }
         } else {
             incCurHealth(ch, (getCurLF(ch)));
@@ -1005,7 +1005,7 @@ void fight_stack()
       }
 
       if (AFF_FLAGGED(ch, AFF_KNOCKED) && rand_number(1, 200) >= 195) {
-         cureStatusKnockedOut(ch, true);
+         cureStatusKnockedOutAnnounce(ch);
          if (IS_NPC(ch) && rand_number(1, 20) >= 12) {
          act("@W$n@W stands up.@n", FALSE, ch, 0, 0, TO_ROOM);
           GET_POS(ch) = POS_STANDING;
