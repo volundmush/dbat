@@ -25,9 +25,24 @@
 #include "dbat/game/time.h"
 #include "dbat/game/weather.h"
 
-#include <map>
-
 #define ABS(x) ((x) < 0 ? -(x) : (x))
+
+static const uint16_t grav_threshold_keys[] = {
+    10, 20, 30, 40, 50, 100, 200, 300, 400, 500, 1000, 5000, 10000
+};
+static const uint32_t grav_threshold_vals[] = {
+    5000, 20000, 50000, 100000, 200000, 400000, 1000000, 5000000,
+    8000000, 15000000, 25000000, 100000000, 200000000
+};
+static const int GRAV_THRESHOLD_COUNT = 13;
+
+static uint32_t grav_threshold_lookup(int grav) {
+    for (int i = 0; i < GRAV_THRESHOLD_COUNT; i++) {
+        if (grav_threshold_keys[i] == grav)
+            return grav_threshold_vals[i];
+    }
+    return 0;
+}
 
 const char* juggleRaceName(char_data *ch, bool capitalized) {
     static char buf[256];
@@ -207,29 +222,13 @@ bool in_northran(char_data *ch) {
     return in_room_range(ch, 17900, 17999);
 }
 
-static std::map<int, uint16_t> grav_threshold = {
-        {10, 5000},
-        {20, 20000},
-        {30, 50000},
-        {40, 100000},
-        {50, 200000},
-        {100, 400000},
-        {200, 1000000},
-        {300, 5000000},
-        {400, 8000000},
-        {500, 15000000},
-        {1000, 25000000},
-        {5000, 100000000},
-        {10000, 200000000}
-};
-
 bool can_tolerate_gravity(char_data *ch, int grav) {
     if(IS_NPC(ch)) return true;
     int tolerance = 0;
     tolerance = MAX(tolerance, sensei_grav_tolerance(ch->chclass));
     if(tolerance >= grav)
         return true;
-    return getMaxPL(ch) >= grav_threshold[grav];
+    return getMaxPL(ch) >= grav_threshold_lookup(grav);
 }
 
 int calcTier(char_data *ch) {
@@ -243,7 +242,7 @@ int calcTier(char_data *ch) {
 
 int64_t calc_soft_cap(char_data *ch) {
     int tier = calcTier(ch);
-    auto softmap = race_soft_map(ch);
+    int64_t* softmap = race_soft_map(ch);
     return ch->level * softmap[tier];
 }
 
@@ -409,7 +408,7 @@ int64_t harmCurHealth(char_data *ch, int64_t amt) {
 }
 
 int64_t getMaxPLTrans(char_data *ch) {
-    auto form = get_current_transform(ch);
+    struct transform_bonus form = get_current_transform(ch);
     int64_t total = 0;
     if(form.flag) {
         total = (form.bonus + getEffBasePL(ch)) * form.mult;
@@ -473,7 +472,7 @@ int64_t getCurKI(char_data *ch) {
 }
 
 int64_t getMaxKI(char_data *ch) {
-    auto form = get_current_transform(ch);
+    struct transform_bonus form = get_current_transform(ch);
     if(form.flag) {
         return (form.bonus + getEffBaseKI(ch)) * form.mult;
     } else {
@@ -570,7 +569,7 @@ int64_t getCurST(char_data *ch) {
 }
 
 int64_t getMaxST(char_data *ch) {
-    auto form = get_current_transform(ch);
+    struct transform_bonus form = get_current_transform(ch);
     if(form.flag) {
         return (form.bonus + getEffBaseST(ch)) * form.mult;
     } else {

@@ -7625,7 +7625,7 @@ ACMD(do_transform)
 		  return;
 	}/* End of No Argument */
 
-    auto cur_form = get_current_transform(ch);
+    struct transform_bonus cur_form = get_current_transform(ch);
     bool can_revert = race_can_revert(ch->race);
 
     // If we are in kaioken or something weird like that, prevent transforming.
@@ -7669,7 +7669,7 @@ ACMD(do_transform)
         return;
     }
 
-    auto to_tier = trans_flag_to_tier(trans.flag);
+    int to_tier = trans_flag_to_tier(trans.flag);
 
     if (PLR_FLAGGED(ch, trans.flag)) {
         send_to_char(ch, "You are already in that form! Try 'revert'.\r\n");
