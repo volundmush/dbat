@@ -16,9 +16,9 @@ void flag_set(bitvector_t bitvector[], int flag, int value)
   int bit_pos = flag % 32;
 
   if (value) {
-    bitvector[array_pos] |= (1 << bit_pos);
+    bitvector[array_pos] |= ((bitvector_t)1u << bit_pos);
   } else {
-    bitvector[array_pos] &= ~(1 << bit_pos);
+    bitvector[array_pos] &= ~((bitvector_t)1u << bit_pos);
   }
 }
 
@@ -27,8 +27,8 @@ int flag_toggle(bitvector_t bitvector[], int flag)
   int array_pos = flag / 32;
   int bit_pos = flag % 32;
 
-  bitvector[array_pos] ^= (1 << bit_pos);
-  return (bitvector[array_pos] & (1 << bit_pos)) != 0;
+  bitvector[array_pos] ^= ((bitvector_t)1u << bit_pos);
+  return (bitvector[array_pos] & ((bitvector_t)1u << bit_pos)) != 0;
 }
 
 size_t sprintbit(bitvector_t bitvector, const char *names[], char *result, size_t reslen)
@@ -133,4 +133,3 @@ int get_flag_by_name(const char *flag_list[], char *flag_name)
        return (i); 
    return (NOFLAG); 
 }
-
