@@ -2527,7 +2527,7 @@ static void perform_get_from_container(struct char_data *ch, struct obj_data *ob
        if (GET_BONUS(ch, BONUS_FIREPROOF) <= 0 && !IS_DEMON(ch)) {
            decCurHealthPercent(ch, .25);
         if (GET_BONUS(ch, BONUS_FIREPRONE) > 0)
-            decCurHealthPercent(ch, 1, 1);
+            decCurHealthPercentImpl(ch, 1, 1);
 
         SET_BIT_AR(AFF_FLAGS(ch), AFF_BURNED);
         act("@RYou are burned by it!@n", TRUE, ch, 0, 0, TO_CHAR);
@@ -2620,9 +2620,9 @@ int perform_get_from_room(struct char_data *ch, struct obj_data *obj)
 
       if (OBJ_FLAGGED(obj, ITEM_HOT)) {
        if (GET_BONUS(ch, BONUS_FIREPROOF) <= 0 && !IS_DEMON(ch)) {
-           decCurHealthPercent(ch, .25, 1);
+           decCurHealthPercentImpl(ch, .25, 1);
         if (GET_BONUS(ch, BONUS_FIREPRONE) > 0)
-            decCurHealthPercent(ch, 1, 1);
+            decCurHealthPercentImpl(ch, 1, 1);
 
         SET_BIT_AR(AFF_FLAGS(ch), AFF_BURNED);
         act("@RYou are burned by it!@n", TRUE, ch, 0, 0, TO_CHAR);
@@ -3155,9 +3155,9 @@ static void perform_give(struct char_data *ch, struct char_data *vict,
 
       if (OBJ_FLAGGED(obj, ITEM_HOT)) {
        if (GET_BONUS(vict, BONUS_FIREPROOF) <= 0 && !IS_DEMON(vict)) {
-           decCurHealthPercent(ch, .25, 1);
-        if (GET_BONUS(vict, BONUS_FIREPRONE) > 0)
-            decCurHealthPercent(ch, 1, 1);
+            decCurHealthPercentImpl(vict, .25, 1);
+         if (GET_BONUS(vict, BONUS_FIREPRONE) > 0)
+             decCurHealthPercentImpl(vict, 1, 1);
 
         SET_BIT_AR(AFF_FLAGS(vict), AFF_BURNED);
         act("@RYou are burned by it!@n", TRUE, vict, 0, 0, TO_CHAR);

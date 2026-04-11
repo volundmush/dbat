@@ -2976,7 +2976,7 @@ ACMD(do_selfd)
   GET_CHARGE(ch) = 0;
   dmg += (getBasePL(ch)) * 0.6;
   dmg += (getBaseST(ch));
-  decCurHealthPercent(ch, 1, 1);
+  decCurHealthPercentImpl(ch, 1, 1);
   GET_SUPP(ch) = 0;
   GET_SUPPRESS(ch) = 0;
   act("@RYou EXPLODE! The explosion concentrates on @r$N@R, engulfing $M in a sphere of deadly energy!@n", TRUE, ch, 0, tch, TO_CHAR);
@@ -2989,7 +2989,7 @@ ACMD(do_selfd)
     GET_SDCOOLDOWN(ch) = 600;
   }
   if ((IS_MAJIN(ch) || IS_BIO(ch)) && getCurLFPercent(ch) > 0.5) {
-   decCurLFPercent(ch, 2,-1);
+   decCurLFPercentImpl(ch, 2, -1);
    SET_BIT_AR(PLR_FLAGS(ch), PLR_GOOP);
    ch->gooptime = 70;
   } else {
@@ -3008,7 +3008,7 @@ ACMD(do_selfd)
   dmg += (getBasePL(ch)) * 0.6;
   dmg += (getBaseST(ch));
   dmg *= 1.5;
-  decCurHealthPercent(ch, 1, 1);
+  decCurHealthPercentImpl(ch, 1, 1);
   GET_SUPP(ch) = 0;
   GET_SUPPRESS(ch) = 0;
   act("@RYou EXPLODE! The explosion expands outward burning up all surroundings for a large distance. The explosion takes on the shape of a large energy dome with you at its center!@n", TRUE, ch, 0, 0, TO_CHAR);

@@ -4342,8 +4342,8 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
    act("@c$N@w disappears right before dying. $N appears to be immortal.@n", TRUE, ch, 0, vict, TO_CHAR);
    act("@CYou disappear right before death, having been saved by your immortality.@n", TRUE, ch, 0, vict, TO_VICT);
    act("@c$N@w disappears right before dying. $N appears to be immortal.@n.", TRUE, ch, 0, vict, TO_NOTVICT);
-   decCurHealthPercent(vict, 1, 1);
-   decCurSTPercent(vict, 1, 1);
+   decCurHealthPercentImpl(vict, 1, 1);
+   decCurSTPercentImpl(vict, 1, 1);
    decCurKIPercent(vict, 1, 1);
 
    if (FIGHTING(vict)) {
@@ -4373,7 +4373,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
   }
   if (!is_sparring(ch) && !PLR_FLAGGED(vict, PLR_IMMORTAL) && GET_HIT(vict) - dmg <= 0) {
   if (GET_HIT(vict) - dmg <= 0 && suppresso == FALSE) {
-   decCurHealthPercent(vict, 1, 0);
+   decCurHealthPercentImpl(vict, 1, 0);
     if (!IS_NPC(vict) && (getCurLF(vict)) - (dmg - GET_HIT(vict)) >= 0) {
         act("@c$N@w barely clings to life!@n", TRUE, ch, 0, vict, TO_CHAR);
         act("@CYou barely cling to life!@n", TRUE, ch, 0, vict, TO_VICT);
@@ -4449,7 +4449,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
     send_to_char(vict, "@D[@rDamage@W: @BPitiful...@D]@n\r\n");
    }
 
-   decCurHealthPercent(vict, 1, 0);
+   decCurHealthPercentImpl(vict, 1, 0);
 
    if (AFF_FLAGGED(ch, AFF_GROUP)) {
     group_gain(ch, vict);

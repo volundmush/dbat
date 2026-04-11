@@ -2314,7 +2314,7 @@ static void handle_fall(struct char_data *ch)
     act("@rYou drown!@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@R$n@r drowns!@n", TRUE, ch, 0, 0, TO_ROOM);
     die(ch, NULL);
-    decCurHealthPercent(ch, 1, 1);
+    decCurHealthPercentImpl(ch, 1, 1);
    } else {
        decCurHealthPercent(ch, .33);
    }

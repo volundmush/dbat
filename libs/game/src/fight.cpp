@@ -860,7 +860,7 @@ void fight_stack()
          }
         } else {
             incCurHealth(ch, (getCurLF(ch)));
-            decCurLFPercent(ch, 2, -1);
+            decCurLFPercentImpl(ch, 2, -1);
         }
 
         send_to_char(ch, "@YYour life force has kept you strong@n!\r\n");
@@ -2199,8 +2199,8 @@ void die(struct char_data *ch, struct char_data *killer)
    }
    if ((IS_MAJIN(ch) || IS_BIO(ch)) && ((getCurLF(ch)) >= (getMaxLF(ch)) * 0.75 || (PLR_FLAGGED(ch, PLR_SELFD2) &&
            (getCurLF(ch)) >= (getMaxLF(ch)) * 0.5))) {
-    decCurLFPercent(ch, 2,-1);
-       decCurHealthPercent(ch, 1, 1);
+    decCurLFPercentImpl(ch, 2, -1);
+       decCurHealthPercentImpl(ch, 1, 1);
     SET_BIT_AR(PLR_FLAGS(ch), PLR_GOOP);
     ch->gooptime = 32;
     return;
@@ -2208,9 +2208,9 @@ void die(struct char_data *ch, struct char_data *killer)
    if (PLR_FLAGGED(ch, PLR_IMMORTAL)) {
    act("@c$n@w disappears right before dying. $n appears to be immortal.@n", TRUE, ch, 0, 0, TO_CHAR);
    act("@c$n@w disappears right before dying. $n appears to be immortal.@n.", TRUE, ch, 0, 0, TO_ROOM);
-   decCurHealthPercent(ch, 1, 1);
+   decCurHealthPercentImpl(ch, 1, 1);
    decCurKIPercent(ch, 1, 1);
-   decCurSTPercent(ch, 1, 1);
+   decCurSTPercentImpl(ch, 1, 1);
    null_affect(ch, AFF_POISON);
      if (GET_COND(ch, HUNGER) >= 0) {
       GET_COND(ch, HUNGER) = 48;
@@ -2251,7 +2251,7 @@ void die(struct char_data *ch, struct char_data *killer)
       }
       char_from_room(ch);
       char_to_room(ch, real_room(17875));
-      decCurHealthPercent(ch, 1, 1);
+      decCurHealthPercentImpl(ch, 1, 1);
       look_at_room(IN_ROOM(ch), ch, 0);
       final_combat_resolve(ch);
       return;

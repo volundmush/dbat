@@ -393,19 +393,27 @@ int64_t decCurHealthNoFloor(char_data *ch, int64_t amt) {
     return decCurHealth(ch, amt, 0);
 }
 
-int64_t incCurHealthPercent(char_data *ch, double amt, bool limit_max) {
+int64_t incCurHealthPercentImpl(char_data *ch, double amt, bool limit_max) {
     ch->health += ABS(amt);
     if(limit_max)
         ch->health = MIN(1.0, ch->health);
     return getCurHealth(ch);
 }
 
-int64_t decCurHealthPercent(char_data *ch, double amt, int64_t floor) {
+int64_t incCurHealthPercent(char_data *ch, double amt) {
+    return incCurHealthPercentImpl(ch, amt, true);
+}
+
+int64_t decCurHealthPercentImpl(char_data *ch, double amt, int64_t floor) {
     double fl = 0.0;
     if(floor > 0)
         fl = (double)floor / (double)getEffMaxPL(ch);
     ch->health = MAX(fl, ch->health-ABS(amt));
     return getCurHealth(ch);
+}
+
+int64_t decCurHealthPercent(char_data *ch, double amt) {
+    return decCurHealthPercentImpl(ch, amt, 0);
 }
 
 void restoreHealth(char_data *ch, bool announce) {
@@ -655,7 +663,7 @@ int64_t decCurST(char_data *ch, int64_t amt, int64_t floor) {
     return getCurST(ch);
 }
 
-int64_t incCurSTPercent(char_data *ch, double amt, bool limit_max) {
+int64_t incCurSTPercentImpl(char_data *ch, double amt, bool limit_max) {
     if(limit_max)
         ch->stamina = MIN(1.0, ch->stamina+ABS(amt));
     else
@@ -663,12 +671,20 @@ int64_t incCurSTPercent(char_data *ch, double amt, bool limit_max) {
     return getMaxST(ch);
 }
 
-int64_t decCurSTPercent(char_data *ch, double amt, int64_t floor) {
+int64_t incCurSTPercent(char_data *ch, double amt) {
+    return incCurSTPercentImpl(ch, amt, true);
+}
+
+int64_t decCurSTPercentImpl(char_data *ch, double amt, int64_t floor) {
     double fl = 0.0;
     if(floor > 0)
         fl = (double)floor / (double)getMaxST(ch);
     ch->stamina = MAX(fl, ch->stamina-ABS(amt));
     return getCurST(ch);
+}
+
+int64_t decCurSTPercent(char_data *ch, double amt) {
+    return decCurSTPercentImpl(ch, amt, 0);
 }
 
 void restoreST(char_data *ch, bool announce) {
@@ -743,7 +759,7 @@ int64_t decCurLFNoFloor(char_data *ch, int64_t amt) {
     return decCurLF(ch, amt, 0);
 }
 
-int64_t incCurLFPercent(char_data *ch, double amt, bool limit_max) {
+int64_t incCurLFPercentImpl(char_data *ch, double amt, bool limit_max) {
     if(limit_max)
         ch->life = MIN(1.0, ch->life+ABS(amt));
     else
@@ -751,12 +767,20 @@ int64_t incCurLFPercent(char_data *ch, double amt, bool limit_max) {
     return getCurLF(ch);
 }
 
-int64_t decCurLFPercent(char_data *ch, double amt, int64_t floor) {
+int64_t incCurLFPercent(char_data *ch, double amt) {
+    return incCurLFPercentImpl(ch, amt, true);
+}
+
+int64_t decCurLFPercentImpl(char_data *ch, double amt, int64_t floor) {
     double fl = 0.0;
     if(floor > 0)
         fl = (double)floor / (double)getMaxLF(ch);
     ch->life = MAX(fl, ch->life-ABS(amt));
     return getCurLF(ch);
+}
+
+int64_t decCurLFPercent(char_data *ch, double amt) {
+    return decCurLFPercentImpl(ch, amt, 0);
 }
 
 void restoreLF(char_data *ch, bool announce) {

@@ -1470,7 +1470,7 @@ void gain_condition(struct char_data *ch, int condition, int value)
           else if ((getCurST(ch)) < GET_MAX_MOVE(ch) / 3)
           {
             send_to_char(ch, "@RYou are starving to death!@n\r\n");
-            decCurSTPercent(ch, 1, 0);
+            decCurSTPercentImpl(ch, 1, 0);
             decCurHealthPercent(ch, .34);
           }
           break;
@@ -1526,7 +1526,7 @@ void gain_condition(struct char_data *ch, int condition, int value)
           else if ((getCurST(ch)) < GET_MAX_MOVE(ch) / 3)
           {
             send_to_char(ch, "@RYou are dehydrated!@n\r\n");
-            decCurSTPercent(ch, 1, 0);
+            decCurSTPercentImpl(ch, 1, 0);
             decCurHealthPercent(ch, .34);
           }
           break;
@@ -1585,7 +1585,7 @@ void gain_condition(struct char_data *ch, int condition, int value)
       if (GET_HIT(ch) <= 0 && GET_COND(ch, HUNGER) == 0)
       {
         send_to_char(ch, "You have starved to death!\r\n");
-        decCurSTPercent(ch, 1, 0);
+        decCurSTPercentImpl(ch, 1, 0);
         act("@W$n@W falls down dead before you...@n", FALSE, ch, 0, 0, TO_ROOM);
         die(ch, NULL);
         if (GET_COND(ch, HUNGER) != -1)
@@ -1600,7 +1600,7 @@ void gain_condition(struct char_data *ch, int condition, int value)
       if (GET_HIT(ch) <= 0 && GET_COND(ch, THIRST) == 0)
       {
         send_to_char(ch, "You have died of dehydration!\r\n");
-        decCurSTPercent(ch, 1, 0);
+        decCurSTPercentImpl(ch, 1, 0);
         act("@W$n@W falls down dead before you...@n", FALSE, ch, 0, 0, TO_ROOM);
         die(ch, NULL);
         if (GET_COND(ch, HUNGER) != -1)
@@ -2100,7 +2100,7 @@ static void point_update_characters(void)
           else if (GET_HIT(i) <= GET_MAX_HIT(i) / 20)
           {
             send_to_char(i, "You have drowned!\r\n");
-            decCurHealthPercent(i, 1, 1);
+            decCurHealthPercentImpl(i, 1, 1);
             act("@W$n@W drowns right in front of you.@n", FALSE, i, 0, 0, TO_ROOM);
             die(i, NULL);
           }

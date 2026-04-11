@@ -2537,7 +2537,7 @@ ACMD(do_fury) {
      decCurLFPercent(ch, .2);
     } else {
         incCurHealth(ch, (getCurLF(ch)));
-        decCurLFPercent(ch, 2, -1);
+        decCurLFPercentImpl(ch, 2, -1);
     }
    }
    GET_FURY(ch) = 0;
@@ -3843,7 +3843,7 @@ kachin ? "create kachin\r\n" : "",  boost ? "create elixir\r\n" : "");
    act("You hold out your hand and create $p out of your ki!", TRUE, ch, obj, 0, TO_CHAR);
    act("$n holds out $s hand and creates $p out of thin air!", TRUE, ch, obj, 0, TO_ROOM);
       decCurKI(ch, cost);
-   decCurHealthPercent(ch, 1, 1);
+   decCurHealthPercentImpl(ch, 1, 1);
    GET_PRACTICES(ch, GET_CLASS(ch)) -= 10;   
    return;
   }
@@ -3881,7 +3881,7 @@ kachin ? "create kachin\r\n" : "",  boost ? "create elixir\r\n" : "");
    act("$n holds out $s hand and creates $p out of thin air!", TRUE, ch, obj, 0, TO_ROOM);
       decCurKI(ch, cost);
       decCurHealthNoFloor(ch, cost2);
-      decCurSTPercent(ch, 1, 1);
+      decCurSTPercentImpl(ch, 1, 1);
    GET_PRACTICES(ch, GET_CLASS(ch)) -= 50;
    return;
   }
