@@ -77,3 +77,4 @@ syslog*
 zig-out/
 .killscript
 .pause
+coredumps
