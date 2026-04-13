@@ -1963,6 +1963,7 @@ static void interpret_espec(const char *keyword, const char *value, struct char_
   if (value)
     num_arg = atoi(value);
 
+  // Not actually used...
   CASE("BareHandAttack") {
     RANGE(0, 99);
     ch->mob_specials.attack_type = num_arg;
@@ -2038,6 +2039,7 @@ static void interpret_espec(const char *keyword, const char *value, struct char_
     ch->max_move = num_arg;
   }
  
+  // doesn't seem to be used.
   CASE("Affect") {
     num = num2 = num3 = num4 = num5 = num6 = 0;
     sscanf(value, "%d %d %d %d %d %d", &num, &num2, &num3, &num4, &num5, &num6);
@@ -2052,6 +2054,7 @@ static void interpret_espec(const char *keyword, const char *value, struct char_
     }
   }
 
+  // doesn't seem to be used.
   CASE("AffectV") {
     num = num2 = num3 = num4 = num5 = num6 = 0;
     sscanf(value, "%d %d %d %d %d %d", &num, &num2, &num3, &num4, &num5, &num6);

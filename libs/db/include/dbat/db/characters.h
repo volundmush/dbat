@@ -456,8 +456,6 @@ struct char_data {
 
     int limb_condition[4];
 
-    char placeholder[2];
-
     char *rdisplay;
 
     short song;
