@@ -9,8 +9,8 @@ CREATE TABLE zones (
     bot INTEGER NOT NULL, -- the vnum of the bottom of the zone, inclusive
     top INTEGER NOT NULL, -- the vnum of the top of the zone, inclusive
     reset_mode INTEGER NOT NULL, -- enum for how the zone reset should be handled
-    min_level INTEGER NOT NULL, -- minimum level for players to enter this zone
-    max_level INTEGER NOT NULL, -- maximum level for players to enter this zone
+    min_level INTEGER NOT NULL DEFAULT 0, -- minimum level for players to enter this zone
+    max_level INTEGER NOT NULL DEFAULT 0, -- maximum level for players to enter this zone, 0 disables checks
     zone_flags BLOB NOT NULL DEFAULT 0 -- 128-bit bitfield for zone flags, not sure if can store like this...
 
     -- other fields not being saved:
@@ -25,18 +25,18 @@ CREATE TABLE zones (
 CREATE TABLE zone_reset_commands (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     zone_id INTEGER NOT NULL REFERENCES zones(id) ON DELETE CASCADE,
-    command_type TEXT NOT NULL, -- 'M' for mobile, 'O' for object, 'R' for room, etc
-    if_flag INTEGER NOT NULL, -- if this command should be executed only if the previous command succeeded
-    arg1 INTEGER NOT NULL, -- meaning depends on command type
-    arg2 INTEGER NOT NULL, -- meaning depends on command type
-    arg3 INTEGER NOT NULL, -- meaning depends on command type
-    arg4 INTEGER NOT NULL, -- meaning depends on command type
-    arg5 INTEGER NOT NULL, -- meaning depends on command type
+    command_type TEXT NOT NULL DEFAULT '*', -- 'M' for mobile, 'O' for object, 'R' for room, etc
+    if_flag INTEGER NOT NULL DEFAULT 0, -- if this command should be executed only if the previous command succeeded
+    arg1 INTEGER NOT NULL DEFAULT 0, -- meaning depends on command type
+    arg2 INTEGER NOT NULL DEFAULT 0, -- meaning depends on command type
+    arg3 INTEGER NOT NULL DEFAULT 0, -- meaning depends on command type
+    arg4 INTEGER NOT NULL DEFAULT 0, -- meaning depends on command type
+    arg5 INTEGER NOT NULL DEFAULT 0, -- meaning depends on command type
 
     -- These don't seem to actually be USED in any existing game data.
     -- But they are in the struct.
-    sargs1 TEXT NOT NULL, -- meaning depends on command type
-    sargs2 TEXT NOT NULL, -- meaning depends on command type
+    sargs1 TEXT NOT NULL DEFAULT '', -- meaning depends on command type
+    sargs2 TEXT NOT NULL DEFAULT '', -- meaning depends on command type
 );
 
 CREATE TABLE dgscript_prototypes(
@@ -71,6 +71,13 @@ CREATE TABLE object_prototypes(
     cost_per_day INTEGER NOT NULL DEFAULT 0,
     level INTEGER NOT NULL DEFAULT 0,
     size INTEGER NOT NULL DEFAULT 0,
+);
+
+CREATE TABLE object_prototype_item_values (
+    object_prototype_id INTEGER NOT NULL REFERENCES object_prototypes(id) ON DELETE CASCADE,
+    val_index INTEGER NOT NULL, -- from 0 to 15, the index of this value in the item_values sequence
+    val_number INTEGER NOT NULL DEFAULT 0, -- the integer value
+    PRIMARY KEY(object_prototype_id, val_index)
 );
 
 CREATE TABLE object_prototype_extra_descriptions (
@@ -176,6 +183,84 @@ CREATE TABLE exits(
     to_room INTEGER NOT NULL REFERENCES rooms(id) ON DELETE CASCADE,
     key_id INTEGER NULL REFERENCES object_prototypes(id) ON DELETE RESTRICT, -- the object ID of a key that unlocks this door. -1 if none.
     exit_info INTEGER NOT NULL DEFAULT 0, --bitfield for exit flags, e.g. locked, hidden, etc
+);
+
+
+CREATE TABLE guilds (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    charge FLOAT NOT NULL DEFAULT 1.0,
+    no_such_skill TEXT NOT NULL DEFAULT '',
+    not_enough_gold TEXT NOT NULL DEFAULT '',
+    minlvl INTEGER NOT NULL DEFAULT 0,
+    -- Guilds shouldn't ever BE without a gm, but may in existence currently are, so foreign key is flexible.
+    gm INTEGER NULL DEFAULT NULL REFERENCES mobile_prototypes(id) ON DELETE RESTRICT,
+    with_who BLOB NOT NULL DEFAULT 0, -- bitfield for which classes/races can use it.
+    open INTEGER NOT NULL DEFAULT 0, -- enum for when the guild is open, e.g. always, night, etc
+    close INTEGER NOT NULL DEFAULT 0, -- enum for when the guild is closed, e.g. always, night, etc
+);
+
+CREATE TABLE guild_teaches (
+    guild_id INTEGER NOT NULL REFERENCES guilds(id) ON DELETE CASCADE,
+    teach_category INTEGER NOT NULL, -- enum for what type of thing this guild teaches, e.g. skills, spells, etc
+    teach_id INTEGER NOT NULL, -- the ID of the thing this guild teaches, e.g. the skill ID or spell ID
+    PRIMARY KEY(guild_id, teach_category, teach_id)
+);
+
+CREATE TABLE shops {
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    profit_buy FLOAT NOT NULL DEFAULT 1.0,
+    profit_sell FLOAT NOT NULL DEFAULT 1.0,
+    no_such_item1 TEXT NOT NULL DEFAULT '',
+    no_such_item2 TEXT NOT NULL DEFAULT '',
+    missing_cash1 TEXT NOT NULL DEFAULT '',
+    missing_cash2 TEXT NOT NULL DEFAULT '',
+    do_not_buy TEXT NOT NULL DEFAULT '',
+    message_buy TEXT NOT NULL DEFAULT '',
+    message_sell TEXT NOT NULL DEFAULT '',
+    temper1 INTEGER NOT NULL DEFAULT 0,
+    bitvector INTEGER NOT NULL DEFAULT 0, -- bitfield for shop flags, e.g. keepers don't attack, etc
+    keeper INTEGER NULL DEFAULT NULL REFERENCES mobile_prototypes(id) ON DELETE RESTRICT,
+    with_who BLOB NOT NULL DEFAULT 0, -- bitfield for which classes/races can use it.
+    open1 INTEGER NOT NULL DEFAULT 0, -- enum for when the shop opens, e.g. always, night, etc
+    close1 INTEGER NOT NULL DEFAULT 0, -- enum for when the shop closes
+    open2 INTEGER NOT NULL DEFAULT 0, -- enum for when the shop opens, e.g. always, night, etc
+    close2 INTEGER NOT NULL DEFAULT 0, -- enum for when the shop closes, etc
+    bankAccount INTEGER NULL REFERENCES users(id) ON DELETE SET NULL, -- the user ID of the bank account associated with this shop, if any. Used for shops that are player-owned and such.
+};
+
+CREATE TABLE shop_rooms {
+    shop_id INTEGER NOT NULL REFERENCES shops(id) ON DELETE CASCADE,
+    room_id INTEGER NOT NULL REFERENCES rooms(id) ON DELETE CASCADE,
+    PRIMARY KEY(shop_id, room_id)
+};
+
+CREATE TABLE shop_buys {
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    shop_id INTEGER NOT NULL REFERENCES shops(id) ON DELETE CASCADE,
+    object_prototype_id INTEGER NULL DEFAULT NULL,REFERENCES object_prototypes(id) ON DELETE RESTRICT,
+    keywords TEXT NOT NULL DEFAULT '', -- for shops that buy specific items based on keywords rather than object ID.
+};
+
+CREATE TABLE help_entries (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    keywords TEXT NOT NULL DEFAULT '',
+    entry TEXT NOT NULL DEFAULT '',
+    min_level INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE TABLE assemblies (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    -- the mobile prototype that this assembly creates, if any. Not all assemblies create mobs, but most do.
+    object_prototype_id INTEGER NOT NULL REFERENCES object_prototypes(id) ON DELETE RESTRICT,
+    assembly_type INTEGER NOT NULL,
+);
+
+CREATE TABLE assembly_ingredients (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    assembly_id INTEGER NOT NULL REFERENCES assemblies(id) ON DELETE CASCADE,
+    object_prototype_id INTEGER NOT NULL REFERENCES object_prototypes(id) ON DELETE RESTRICT,
+    consumed INTEGER NOT NULL DEFAULT 1, -- whether this ingredient is consumed in the assembly process or not
+    in_room INTEGER NOT NULL DEFAULT 0, -- whether this ingredient needs to be in the same room as the assembler or not
 );
 
 
