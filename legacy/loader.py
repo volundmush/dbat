@@ -10,8 +10,8 @@ from enum import IntEnum
 @dataclass(slots=True)
 class Exit:
     to_room: int = -1
-    keywords: str | None = None
-    description: str | None = None
+    keywords: str = ""
+    description: str = ""
     exit_info: int = 0
     key: int | None = None
     dclock: int  = 0
@@ -84,6 +84,14 @@ class ObjectPrototype(ObjectBase):
 class Object(ObjectBase):
     id: int = -1
     object_prototype_id: int = -1
+
+    carried_by: Character | None = None
+    in_room: Room | None = None
+    worn_by: Character | None = None
+    worn_on: int = 0
+
+    in_obj: Object | None = None
+    contains: list[Object] = field(default_factory=list)
 
 
 @dataclass(slots=True)
@@ -245,6 +253,11 @@ class Character(CharacterBase):
 
     lboard: dict[int, int] = field(default_factory=dict)
 
+    contents: list[Object] = field(default_factory=list)
+    equipment: dict[int, Object] = field(default_factory=dict)
+
+    username: str = ""
+
 @dataclass(slots=True)
 class DgScriptPrototype:
     id: int = -1
@@ -276,13 +289,14 @@ class Shop:
     message_sell: str = ""
     temper1: int = 0
     shop_flags: int = 0
-    keeper: int = -1
+    keeper: int | None = None
     in_room: list[int] = field(default_factory=list)
     open1: int = 0
     open2: int = 0
     close1: int = 0
     close2: int = 0
     with_who: int = 0
+    bankAccount: int = 0
 
 @dataclass(slots=True)
 class Guild:
@@ -293,7 +307,7 @@ class Guild:
     no_such_skill: str = ""
     not_enough_gold: str = ""
     minlvl: int = 0
-    keeper: int = -1
+    keeper: int | None = None
     open: int = 0
     close: int = 0
     with_who: int = 0
@@ -1076,6 +1090,8 @@ def parse_shops(f: Scanner):
             product = int(f.readline())
             if product == -1:
                 break
+            if product in out.products:
+                continue
             out.products.append(product)
 
         out.profit_buy = float(f.readline())
@@ -1103,6 +1119,8 @@ def parse_shops(f: Scanner):
         out.temper1 = int(f.readline())
         out.shop_flags = int(f.readline())
         out.keeper = int(f.readline())
+        if out.keeper == -1:
+            out.keeper = None
 
         out.with_who = flag_conv(f.readline().split())
 
@@ -1159,6 +1177,8 @@ def parse_guilds(f: Scanner):
         
         for x in ("minlvl", "keeper"):
             setattr(out, x, int(f.readline()))
+        if out.keeper == -1:
+            out.keeper = None
         
         with_who = list()
         with_who.append(f.readline())
@@ -1218,10 +1238,19 @@ class LegacyDatabase:
         self.help: list[HelpEntry] = list()
         self.assemblies: list[Assembly] = list()
 
+        self.objects: dict[int, Object] = dict()  # object id -> object data
+
         self.accounts: dict[str, Account] = dict()  # username -> account data
-        self.characters: dict[str, Character] = dict()
+        self.characters: dict[int, Character] = dict()
         self.characters_to_account: dict[str, str] = dict()  # character name -> account name
     
+
+    def zone_id_for(self, thing_id: int) -> int:
+        for zone_id, zone in self.zones.items():
+            if zone.bot <= thing_id <= zone.top:
+                return zone_id
+        return -1
+
     def check_affects(self):
         for char in self.nproto.values():
             counter = 0
@@ -1283,18 +1312,7 @@ class LegacyDatabase:
                         customs.append(line)
                     acc.customs = customs
 
-    def _load_characters(self, data_dir: Path):
-        player_dir = data_dir / "plrfiles"
-
-        for plr_file in player_dir.rglob("*.plr"):
-            if not plr_file.stem.isascii():
-                continue
-            with open(plr_file, "r", encoding="utf-8", errors="ignore") as f2:
-                f = Scanner(f2.read())
-                c = parse_character(f)
-
-                # we only are migrating admin characters.
-                self.characters[c.name] = c
+    
 
 
     def _load_help(self, data_dir: Path):
@@ -1314,7 +1332,7 @@ class LegacyDatabase:
                 line = line.rstrip()
                 if line.startswith("#"):
                     if current_entry is not None:
-                        self.help.append(current_entry)
+                        self.help.append(HelpEntry(**current_entry))
                     current_entry = {
                         "name": "",
                         "entry": "",
@@ -1475,7 +1493,23 @@ class LegacyDatabase:
             scanner = Scanner(f.read())
             for a in parse_assemblies(scanner):
                 self.assemblies.append(a)
+    
+    def _load_houses(self, data_dir: Path):
+        pass
 
+    def _load_characters(self, data_dir: Path):
+        player_dir = data_dir / "plrfiles"
+
+        for plr_file in player_dir.rglob("*.plr"):
+            if not plr_file.stem.isascii():
+                continue
+            with open(plr_file, "r", encoding="utf-8", errors="ignore") as f2:
+                f = Scanner(f2.read())
+                c = parse_character(f)
+
+                c.username = self.characters_to_account[c.name]
+
+                self.characters[c.id] = c
 
     def load_from_files(self, data_dir: Path):
         self._load_help(data_dir)
@@ -1487,6 +1521,7 @@ class LegacyDatabase:
         self._load_shops(data_dir)
         self._load_guilds(data_dir)
         self._load_assemblies(data_dir)
+        self._load_houses(data_dir)
         self._load_accounts(data_dir)
         self._load_characters(data_dir)
 
