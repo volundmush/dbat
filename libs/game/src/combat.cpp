@@ -1134,7 +1134,7 @@ long double calc_critical(struct char_data *ch, int loc)
 
  if (loc == 0) { /* Head */
   if (GET_BONUS(ch, BONUS_POWERHIT)) {
-   if (roll >= 15) {
+   if (roll <= 15) {
     multi = 4;
    } else if (GET_BONUS(ch, BONUS_SOFT)) {
     multi = 1;
@@ -3988,26 +3988,29 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
   int64_t conlimit = 2000000000;
   
   if (type == 0) {
-   if (GET_MAX_HIT(vict) < conlimit) {
-    index += (GET_MAX_HIT(vict) / 1500) * (GET_CON(vict) / 2);
-   } else if (GET_MAX_HIT(vict) < conlimit * 2) {
-    index += (GET_MAX_HIT(vict) / 2500) * (GET_CON(vict) / 2);
-   } else if (GET_MAX_HIT(vict) < conlimit * 3) {
-    index += (GET_MAX_HIT(vict) / 3500) * (GET_CON(vict) / 2);
-   } else if (GET_MAX_HIT(vict) < conlimit * 5) {
-    index += (GET_MAX_HIT(vict) / 6000) * (GET_CON(vict) / 2);
-   } else if (GET_MAX_HIT(vict) < conlimit * 10) {
-    index += (GET_MAX_HIT(vict) / 8500) * (GET_CON(vict) / 2);
-   } else if (GET_MAX_HIT(vict) < conlimit * 15) {
-    index += (GET_MAX_HIT(vict) / 10000) * (GET_CON(vict) / 2);
-   } else if (GET_MAX_HIT(vict) < conlimit * 20) {
-    index += (GET_MAX_HIT(vict) / 12500) * (GET_CON(vict) / 2);
-   } else if (GET_MAX_HIT(vict) < conlimit * 25) {
-    index += (GET_MAX_HIT(vict) / 16000) * (GET_CON(vict) / 2);
-   } else if (GET_MAX_HIT(vict) < conlimit * 30) {
-    index += (GET_MAX_HIT(vict) / 22000) * (GET_CON(vict) / 2);
-   } else if (GET_MAX_HIT(vict) > conlimit * 30) {
-    index += (GET_MAX_HIT(vict) / 25000) * (GET_CON(vict) / 2);
+    int64_t vpl = GET_MAX_HIT(vict);
+    int vcon = GET_CON(vict);
+
+   if (vpl < conlimit) {
+    index += (vpl / 1500) * (vcon / 2);
+   } else if (vpl < conlimit * 2) {
+    index += (vpl / 2500) * (vcon / 2);
+   } else if (vpl < conlimit * 3) {
+    index += (vpl / 3500) * (vcon / 2);
+   } else if (vpl < conlimit * 5) {
+    index += (vpl / 6000) * (vcon / 2);
+   } else if (vpl < conlimit * 10) {
+    index += (vpl / 8500) * (vcon / 2);
+   } else if (vpl < conlimit * 15) {
+    index += (vpl / 10000) * (vcon / 2);
+   } else if (vpl < conlimit * 20) {
+    index += (vpl / 12500) * (vcon / 2);
+   } else if (vpl < conlimit * 25) {
+    index += (vpl / 16000) * (vcon / 2);
+   } else if (vpl < conlimit * 30) {
+    index += (vpl / 22000) * (vcon / 2);
+   } else if (vpl > conlimit * 30) {
+    index += (vpl / 25000) * (vcon / 2);
    }
   }
 
@@ -4044,7 +4047,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
   }
 
   if (AFF_FLAGGED(vict, AFF_SHELL)) {
-   dmg = dmg * 0.25;
+   dmg = dmg * 0.75;
   }
 
   if (AFF_FLAGGED(vict, AFF_WITHER)) {
