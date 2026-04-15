@@ -2068,10 +2068,11 @@ void huge_update()
 void homing_update()
 {
  struct obj_data *k;
+ struct obj_data *next_k;
 
- for (k = object_list; k; k = k->next) {
-  if (!k || k == NULL)
-   continue;
+ for (k = object_list; k; k = next_k) {
+
+  next_k = k->next;
 
   if (KICHARGE(k) <= 0) {
    continue;

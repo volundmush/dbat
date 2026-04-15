@@ -1,12 +1,12 @@
 /* ************************************************************************
-*   File: objsave.c                                     Part of CircleMUD *
-*  Usage: loading/saving player objects for rent and crash-save           *
-*                                                                         *
-*  All rights reserved.  See license.doc for complete information.        *
-*                                                                         *
-*  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
-*  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
-************************************************************************ */
+ *   File: objsave.c                                     Part of CircleMUD *
+ *  Usage: loading/saving player objects for rent and crash-save           *
+ *                                                                         *
+ *  All rights reserved.  See license.doc for complete information.        *
+ *                                                                         *
+ *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
+ *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
+ ************************************************************************ */
 
 #include "dbat/game/objsave.h"
 #include "dbat/game/comm.h"
@@ -47,118 +47,147 @@ static void Crash_cryosave(struct char_data *ch, int cost);
 static int inv_backup(struct char_data *ch);
 static int load_inv_backup(struct char_data *ch);
 
-
 void delete_inv_backup(struct char_data *ch)
 {
-    FILE *source;
-    char source_file[20480];
-    char alpha[MAX_INPUT_LENGTH], name[MAX_INPUT_LENGTH];
-    sprintf(name, GET_NAME(ch));
+  FILE *source;
+  char source_file[20480];
+  char alpha[MAX_INPUT_LENGTH], name[MAX_INPUT_LENGTH];
+  sprintf(name, GET_NAME(ch));
 
-    if (name[0] == 'a' || name[0] == 'A' || name[0] == 'b' || name[0] == 'B' || name[0] == 'c' || name[0] == 'C' || name[0] == 'd' || name[0] == 'D' || name[0] == 'e' || name[0] == 'E') {
-     sprintf(alpha, "A-E");
-    } else if (name[0] == 'f' || name[0] == 'F' || name[0] == 'g' || name[0] == 'G' || name[0] == 'h' || name[0] == 'H' || name[0] == 'i' || name[0] == 'I' || name[0] == 'j' || name[0] == 'J') {
-     sprintf(alpha, "F-J");
-    } else if (name[0] == 'k' || name[0] == 'K' || name[0] == 'l' || name[0] == 'L' || name[0] == 'm' || name[0] == 'M' || name[0] == 'n' || name[0] == 'N' || name[0] == 'o' || name[0] == 'O') {
-     sprintf(alpha, "K-O");
-    } else if (name[0] == 'p' || name[0] == 'P' || name[0] == 'q' || name[0] == 'Q' || name[0] == 'r' || name[0] == 'R' || name[0] == 's' || name[0] == 'S' || name[0] == 't' || name[0] == 'T') {
-     sprintf(alpha, "P-T");
-    } else if (name[0] == 'u' || name[0] == 'U' || name[0] == 'v' || name[0] == 'V' || name[0] == 'w' || name[0] == 'W' || name[0] == 'x' || name[0] == 'X' || name[0] == 'y' || name[0] == 'Y' || name[0] == 'z' || name[0] == 'Z') {
-     sprintf(alpha, "U-Z");
-    }
-    sprintf(source_file, "" SLASH "home" SLASH "dbat" SLASH "dbat" SLASH "data" SLASH "plrobjs" SLASH " %s" SLASH "%s.copy", alpha, ch->name);
+  if (name[0] == 'a' || name[0] == 'A' || name[0] == 'b' || name[0] == 'B' || name[0] == 'c' || name[0] == 'C' || name[0] == 'd' || name[0] == 'D' || name[0] == 'e' || name[0] == 'E')
+  {
+    sprintf(alpha, "A-E");
+  }
+  else if (name[0] == 'f' || name[0] == 'F' || name[0] == 'g' || name[0] == 'G' || name[0] == 'h' || name[0] == 'H' || name[0] == 'i' || name[0] == 'I' || name[0] == 'j' || name[0] == 'J')
+  {
+    sprintf(alpha, "F-J");
+  }
+  else if (name[0] == 'k' || name[0] == 'K' || name[0] == 'l' || name[0] == 'L' || name[0] == 'm' || name[0] == 'M' || name[0] == 'n' || name[0] == 'N' || name[0] == 'o' || name[0] == 'O')
+  {
+    sprintf(alpha, "K-O");
+  }
+  else if (name[0] == 'p' || name[0] == 'P' || name[0] == 'q' || name[0] == 'Q' || name[0] == 'r' || name[0] == 'R' || name[0] == 's' || name[0] == 'S' || name[0] == 't' || name[0] == 'T')
+  {
+    sprintf(alpha, "P-T");
+  }
+  else if (name[0] == 'u' || name[0] == 'U' || name[0] == 'v' || name[0] == 'V' || name[0] == 'w' || name[0] == 'W' || name[0] == 'x' || name[0] == 'X' || name[0] == 'y' || name[0] == 'Y' || name[0] == 'z' || name[0] == 'Z')
+  {
+    sprintf(alpha, "U-Z");
+  }
+  sprintf(source_file, "" SLASH "home" SLASH "dbat" SLASH "dbat" SLASH "data" SLASH "plrobjs" SLASH " %s" SLASH "%s.copy", alpha, ch->name);
 
-    if (!(source = fopen(source_file, "r"))) {
-      return;
-    }
-    fclose(source);
+  if (!(source = fopen(source_file, "r")))
+  {
+    return;
+  }
+  fclose(source);
 
-   if (remove(source_file) < 0 && errno != ENOENT)
+  if (remove(source_file) < 0 && errno != ENOENT)
     log("ERROR: Couldn't delete backup inv.");
-    /*  SYSERR_DESC:
-     *  When an alias file cannot be removed, this error will occur,
-     *  and the reason why will be the tail end of the error.
-     */
+  /*  SYSERR_DESC:
+   *  When an alias file cannot be removed, this error will occur,
+   *  and the reason why will be the tail end of the error.
+   */
 
-   return;
+  return;
 }
 
 int load_inv_backup(struct char_data *ch)
 {
-    if (GET_LEVEL(ch) < 2)
-     return (-1);
+  if (GET_LEVEL(ch) < 2)
+    return (-1);
 
-    char chx;
-    FILE *source, *target;
-    char source_file[20480], target_file[20480], buf2[20480];
-    char alpha[MAX_INPUT_LENGTH], name[MAX_INPUT_LENGTH];
-    sprintf(name, GET_NAME(ch));
+  char chx;
+  FILE *source, *target;
+  char source_file[20480], target_file[20480], buf2[20480];
+  char alpha[MAX_INPUT_LENGTH], name[MAX_INPUT_LENGTH];
+  sprintf(name, GET_NAME(ch));
 
-    if (name[0] == 'a' || name[0] == 'A' || name[0] == 'b' || name[0] == 'B' || name[0] == 'c' || name[0] == 'C' || name[0] == 'd' || name[0] == 'D' || name[0] == 'e' || name[0] == 'E') {
-     sprintf(alpha, "A-E");
-    } else if (name[0] == 'f' || name[0] == 'F' || name[0] == 'g' || name[0] == 'G' || name[0] == 'h' || name[0] == 'H' || name[0] == 'i' || name[0] == 'I' || name[0] == 'j' || name[0] == 'J') {
-     sprintf(alpha, "F-J");
-    } else if (name[0] == 'k' || name[0] == 'K' || name[0] == 'l' || name[0] == 'L' || name[0] == 'm' || name[0] == 'M' || name[0] == 'n' || name[0] == 'N' || name[0] == 'o' || name[0] == 'O') {
-     sprintf(alpha, "K-O");
-    } else if (name[0] == 'p' || name[0] == 'P' || name[0] == 'q' || name[0] == 'Q' || name[0] == 'r' || name[0] == 'R' || name[0] == 's' || name[0] == 'S' || name[0] == 't' || name[0] == 'T') {
-     sprintf(alpha, "P-T");
-    } else if (name[0] == 'u' || name[0] == 'U' || name[0] == 'v' || name[0] == 'V' || name[0] == 'w' || name[0] == 'W' || name[0] == 'x' || name[0] == 'X' || name[0] == 'y' || name[0] == 'Y' || name[0] == 'z' || name[0] == 'Z') {
-     sprintf(alpha, "U-Z");
-    }
+  if (name[0] == 'a' || name[0] == 'A' || name[0] == 'b' || name[0] == 'B' || name[0] == 'c' || name[0] == 'C' || name[0] == 'd' || name[0] == 'D' || name[0] == 'e' || name[0] == 'E')
+  {
+    sprintf(alpha, "A-E");
+  }
+  else if (name[0] == 'f' || name[0] == 'F' || name[0] == 'g' || name[0] == 'G' || name[0] == 'h' || name[0] == 'H' || name[0] == 'i' || name[0] == 'I' || name[0] == 'j' || name[0] == 'J')
+  {
+    sprintf(alpha, "F-J");
+  }
+  else if (name[0] == 'k' || name[0] == 'K' || name[0] == 'l' || name[0] == 'L' || name[0] == 'm' || name[0] == 'M' || name[0] == 'n' || name[0] == 'N' || name[0] == 'o' || name[0] == 'O')
+  {
+    sprintf(alpha, "K-O");
+  }
+  else if (name[0] == 'p' || name[0] == 'P' || name[0] == 'q' || name[0] == 'Q' || name[0] == 'r' || name[0] == 'R' || name[0] == 's' || name[0] == 'S' || name[0] == 't' || name[0] == 'T')
+  {
+    sprintf(alpha, "P-T");
+  }
+  else if (name[0] == 'u' || name[0] == 'U' || name[0] == 'v' || name[0] == 'V' || name[0] == 'w' || name[0] == 'W' || name[0] == 'x' || name[0] == 'X' || name[0] == 'y' || name[0] == 'Y' || name[0] == 'z' || name[0] == 'Z')
+  {
+    sprintf(alpha, "U-Z");
+  }
 
-    sprintf(source_file, "" SLASH "home" SLASH "dbat" SLASH "dbat" SLASH "data" SLASH "plrobjs" SLASH " %s" SLASH "%s.copy", alpha, ch->name);
-    if (!get_filename(buf2, sizeof(buf2), NEW_OBJ_FILES, GET_NAME(ch)))
-     return -1;
-    sprintf(target_file, "/home/dbat/dbat/data/%s", buf2);
+  sprintf(source_file, "" SLASH "home" SLASH "dbat" SLASH "dbat" SLASH "data" SLASH "plrobjs" SLASH " %s" SLASH "%s.copy", alpha, ch->name);
+  if (!get_filename(buf2, sizeof(buf2), NEW_OBJ_FILES, GET_NAME(ch)))
+    return -1;
+  sprintf(target_file, "/home/dbat/dbat/data/%s", buf2);
 
-    if (!(source = fopen(source_file, "r"))) {
-      log("Source in load_inv_backup failed to load.");
-      log(source_file);
-      return -1;
-    }
+  if (!(source = fopen(source_file, "r")))
+  {
+    log("Source in load_inv_backup failed to load.");
+    log(source_file);
+    return -1;
+  }
 
-    if (!(target = fopen(target_file, "w"))) {
-      log("Target in load_inv_backup failed to load.");
-      log(target_file);
-      return -1;
-    }
+  if (!(target = fopen(target_file, "w")))
+  {
+    log("Target in load_inv_backup failed to load.");
+    log(target_file);
+    return -1;
+  }
 
-    while( ( chx = fgetc(source) ) != EOF )
-      fputc(chx, target);
+  while ((chx = fgetc(source)) != EOF)
+    fputc(chx, target);
 
-   log("Inventory backup restore successful.");
+  log("Inventory backup restore successful.");
 
-   fclose(source);
-   fclose(target);
+  fclose(source);
+  fclose(target);
 
-   return 1;
+  return 1;
 }
 
 static int inv_backup(struct char_data *ch)
 {
- FILE *backup;
- char buf[20480];
+  FILE *backup;
+  char buf[20480];
 
-    char alpha[MAX_INPUT_LENGTH], name[MAX_INPUT_LENGTH];
-    sprintf(name, GET_NAME(ch));
+  char alpha[MAX_INPUT_LENGTH], name[MAX_INPUT_LENGTH];
+  sprintf(name, GET_NAME(ch));
 
-    if (name[0] == 'a' || name[0] == 'A' || name[0] == 'b' || name[0] == 'B' || name[0] == 'c' || name[0] == 'C' || name[0] == 'd' || name[0] == 'D' || name[0] == 'e' || name[0] == 'E') {
-     sprintf(alpha, "A-E");
-    } else if (name[0] == 'f' || name[0] == 'F' || name[0] == 'g' || name[0] == 'G' || name[0] == 'h' || name[0] == 'H' || name[0] == 'i' || name[0] == 'I' || name[0] == 'j' || name[0] == 'J') {
-     sprintf(alpha, "F-J");
-    } else if (name[0] == 'k' || name[0] == 'K' || name[0] == 'l' || name[0] == 'L' || name[0] == 'm' || name[0] == 'M' || name[0] == 'n' || name[0] == 'N' || name[0] == 'o' || name[0] == 'O') {
-     sprintf(alpha, "K-O");
-    } else if (name[0] == 'p' || name[0] == 'P' || name[0] == 'q' || name[0] == 'Q' || name[0] == 'r' || name[0] == 'R' || name[0] == 's' || name[0] == 'S' || name[0] == 't' || name[0] == 'T') {
-     sprintf(alpha, "P-T");
-    } else if (name[0] == 'u' || name[0] == 'U' || name[0] == 'v' || name[0] == 'V' || name[0] == 'w' || name[0] == 'W' || name[0] == 'x' || name[0] == 'X' || name[0] == 'y' || name[0] == 'Y' || name[0] == 'z' || name[0] == 'Z') {
-     sprintf(alpha, "U-Z");
-    }
+  if (name[0] == 'a' || name[0] == 'A' || name[0] == 'b' || name[0] == 'B' || name[0] == 'c' || name[0] == 'C' || name[0] == 'd' || name[0] == 'D' || name[0] == 'e' || name[0] == 'E')
+  {
+    sprintf(alpha, "A-E");
+  }
+  else if (name[0] == 'f' || name[0] == 'F' || name[0] == 'g' || name[0] == 'G' || name[0] == 'h' || name[0] == 'H' || name[0] == 'i' || name[0] == 'I' || name[0] == 'j' || name[0] == 'J')
+  {
+    sprintf(alpha, "F-J");
+  }
+  else if (name[0] == 'k' || name[0] == 'K' || name[0] == 'l' || name[0] == 'L' || name[0] == 'm' || name[0] == 'M' || name[0] == 'n' || name[0] == 'N' || name[0] == 'o' || name[0] == 'O')
+  {
+    sprintf(alpha, "K-O");
+  }
+  else if (name[0] == 'p' || name[0] == 'P' || name[0] == 'q' || name[0] == 'Q' || name[0] == 'r' || name[0] == 'R' || name[0] == 's' || name[0] == 'S' || name[0] == 't' || name[0] == 'T')
+  {
+    sprintf(alpha, "P-T");
+  }
+  else if (name[0] == 'u' || name[0] == 'U' || name[0] == 'v' || name[0] == 'V' || name[0] == 'w' || name[0] == 'W' || name[0] == 'x' || name[0] == 'X' || name[0] == 'y' || name[0] == 'Y' || name[0] == 'z' || name[0] == 'Z')
+  {
+    sprintf(alpha, "U-Z");
+  }
 
   sprintf(buf, "" SLASH "home" SLASH "dbat" SLASH "dbat" SLASH "data" SLASH "plrobjs" SLASH " %s" SLASH "%s.copy", alpha, ch->name);
 
   if (!(backup = fopen(buf, "r")))
     return -1;
- 
+
   fclose(backup);
 
   return 1;
@@ -166,48 +195,59 @@ static int inv_backup(struct char_data *ch)
 
 int cp(struct char_data *ch)
 {
-    char chx;
-    FILE *source, *target;
-    char source_file[20480], target_file[20480], buf2[20480];
-    char alpha[MAX_INPUT_LENGTH], name[MAX_INPUT_LENGTH];
-    sprintf(name, GET_NAME(ch));
+  char chx;
+  FILE *source, *target;
+  char source_file[20480], target_file[20480], buf2[20480];
+  char alpha[MAX_INPUT_LENGTH], name[MAX_INPUT_LENGTH];
+  sprintf(name, GET_NAME(ch));
 
-    if (name[0] == 'a' || name[0] == 'A' || name[0] == 'b' || name[0] == 'B' || name[0] == 'c' || name[0] == 'C' || name[0] == 'd' || name[0] == 'D' || name[0] == 'e' || name[0] == 'E') {
-     sprintf(alpha, "A-E");
-    } else if (name[0] == 'f' || name[0] == 'F' || name[0] == 'g' || name[0] == 'G' || name[0] == 'h' || name[0] == 'H' || name[0] == 'i' || name[0] == 'I' || name[0] == 'j' || name[0] == 'J') {
-     sprintf(alpha, "F-J");
-    } else if (name[0] == 'k' || name[0] == 'K' || name[0] == 'l' || name[0] == 'L' || name[0] == 'm' || name[0] == 'M' || name[0] == 'n' || name[0] == 'N' || name[0] == 'o' || name[0] == 'O') {
-     sprintf(alpha, "K-O");
-    } else if (name[0] == 'p' || name[0] == 'P' || name[0] == 'q' || name[0] == 'Q' || name[0] == 'r' || name[0] == 'R' || name[0] == 's' || name[0] == 'S' || name[0] == 't' || name[0] == 'T') {
-     sprintf(alpha, "P-T");
-    } else if (name[0] == 'u' || name[0] == 'U' || name[0] == 'v' || name[0] == 'V' || name[0] == 'w' || name[0] == 'W' || name[0] == 'x' || name[0] == 'X' || name[0] == 'y' || name[0] == 'Y' || name[0] == 'z' || name[0] == 'Z') {
-     sprintf(alpha, "U-Z");
-    }
+  if (name[0] == 'a' || name[0] == 'A' || name[0] == 'b' || name[0] == 'B' || name[0] == 'c' || name[0] == 'C' || name[0] == 'd' || name[0] == 'D' || name[0] == 'e' || name[0] == 'E')
+  {
+    sprintf(alpha, "A-E");
+  }
+  else if (name[0] == 'f' || name[0] == 'F' || name[0] == 'g' || name[0] == 'G' || name[0] == 'h' || name[0] == 'H' || name[0] == 'i' || name[0] == 'I' || name[0] == 'j' || name[0] == 'J')
+  {
+    sprintf(alpha, "F-J");
+  }
+  else if (name[0] == 'k' || name[0] == 'K' || name[0] == 'l' || name[0] == 'L' || name[0] == 'm' || name[0] == 'M' || name[0] == 'n' || name[0] == 'N' || name[0] == 'o' || name[0] == 'O')
+  {
+    sprintf(alpha, "K-O");
+  }
+  else if (name[0] == 'p' || name[0] == 'P' || name[0] == 'q' || name[0] == 'Q' || name[0] == 'r' || name[0] == 'R' || name[0] == 's' || name[0] == 'S' || name[0] == 't' || name[0] == 'T')
+  {
+    sprintf(alpha, "P-T");
+  }
+  else if (name[0] == 'u' || name[0] == 'U' || name[0] == 'v' || name[0] == 'V' || name[0] == 'w' || name[0] == 'W' || name[0] == 'x' || name[0] == 'X' || name[0] == 'y' || name[0] == 'Y' || name[0] == 'z' || name[0] == 'Z')
+  {
+    sprintf(alpha, "U-Z");
+  }
 
-    sprintf(target_file, "" SLASH "home" SLASH "dbat" SLASH "dbat" SLASH "data" SLASH "plrobjs" SLASH " %s" SLASH "%s.copy", alpha, ch->name);
-    if (!get_filename(buf2, sizeof(buf2), NEW_OBJ_FILES, GET_NAME(ch)))
-     return -1;
-    sprintf(source_file, "" SLASH "home" SLASH "dbat" SLASH "dbat" SLASH "data" SLASH " %s", buf2);
+  sprintf(target_file, "" SLASH "home" SLASH "dbat" SLASH "dbat" SLASH "data" SLASH "plrobjs" SLASH " %s" SLASH "%s.copy", alpha, ch->name);
+  if (!get_filename(buf2, sizeof(buf2), NEW_OBJ_FILES, GET_NAME(ch)))
+    return -1;
+  sprintf(source_file, "" SLASH "home" SLASH "dbat" SLASH "dbat" SLASH "data" SLASH " %s", buf2);
 
-    if (!(source = fopen(source_file, "r"))) {
-      log("Source failed to load.");
-      log(source_file);
-      return -1;
-    }
+  if (!(source = fopen(source_file, "r")))
+  {
+    log("Source failed to load.");
+    log(source_file);
+    return -1;
+  }
 
-    if (!(target = fopen(target_file, "w"))) {
-      log("Target failed to load.");
-      log(target_file);
-      return -1;
-    }
- 
-    while( ( chx = fgetc(source) ) != EOF )
-      fputc(chx, target);
- 
-   fclose(source);
-   fclose(target);
- 
-   return 1;  
+  if (!(target = fopen(target_file, "w")))
+  {
+    log("Target failed to load.");
+    log(target_file);
+    return -1;
+  }
+
+  while ((chx = fgetc(source)) != EOF)
+    fputc(chx, target);
+
+  fclose(source);
+  fclose(target);
+
+  return 1;
 }
 
 int Obj_to_store(struct obj_data *obj, FILE *fl, int location)
@@ -224,8 +264,10 @@ static void auto_equip(struct char_data *ch, struct obj_data *obj, int location)
   int j;
 
   /* Lots of checks... */
-  if (location > 0) {	/* Was wearing it. */
-    switch (j = (location - 1)) {
+  if (location > 0)
+  { /* Was wearing it. */
+    switch (j = (location - 1))
+    {
     case WEAR_UNUSED0:
       j = WEAR_WIELD2;
       break;
@@ -308,42 +350,46 @@ static void auto_equip(struct char_data *ch, struct obj_data *obj, int location)
       location = LOC_INVENTORY;
     }
 
-    if (location > 0) {	    /* Wearable. */
-      if (!GET_EQ(ch,j)) {
-	/*
-	 * Check the characters's alignment to prevent them from being
-	 * zapped through the auto-equipping.
+    if (location > 0)
+    { /* Wearable. */
+      if (!GET_EQ(ch, j))
+      {
+        /*
+         * Check the characters's alignment to prevent them from being
+         * zapped through the auto-equipping.
          */
-         if (invalid_align(ch, obj) || invalid_class(ch, obj))
+        if (invalid_align(ch, obj) || invalid_class(ch, obj))
           location = LOC_INVENTORY;
         else
           equip_char(ch, obj, j);
-      } else {	/* Oops, saved a player with double equipment? */
+      }
+      else
+      { /* Oops, saved a player with double equipment? */
         mudlog(BRF, ADMLVL_IMMORT, TRUE, "SYSERR: autoeq: '%s' already equipped in position %d.", GET_NAME(ch), location);
         location = LOC_INVENTORY;
       }
     }
   }
-  if (location <= 0)	/* Inventory */
+  if (location <= 0) /* Inventory */
     obj_to_char(obj, ch);
 }
-
 
 int Crash_delete_file(char *name)
 {
   char filename[50];
   FILE *fl;
 
-   //if (!xap_objs) {
-     //if (!get_filename(filename, sizeof(filename), CRASH_FILE, name))
-       //return (0);
-   //} else {
-     if (!get_filename(filename, sizeof(filename), NEW_OBJ_FILES, name))
-       return (0);
-   //}
+  // if (!xap_objs) {
+  // if (!get_filename(filename, sizeof(filename), CRASH_FILE, name))
+  // return (0);
+  //} else {
+  if (!get_filename(filename, sizeof(filename), NEW_OBJ_FILES, name))
+    return (0);
+  //}
 
-  if (!(fl = fopen(filename, "rb"))) {
-    if (errno != ENOENT)	/* if it fails but NOT because of no file */
+  if (!(fl = fopen(filename, "rb")))
+  {
+    if (errno != ENOENT) /* if it fails but NOT because of no file */
       log("SYSERR: deleting crash file %s (1): %s", filename, strerror(errno));
     return (0);
   }
@@ -356,7 +402,6 @@ int Crash_delete_file(char *name)
   return (1);
 }
 
-
 int Crash_delete_crashfile(struct char_data *ch)
 {
   char filename[MAX_INPUT_LENGTH];
@@ -364,19 +409,20 @@ int Crash_delete_crashfile(struct char_data *ch)
   int rentcode, timed, netcost, gold, account, nitems;
   char line[MAX_INPUT_LENGTH];
 
-  if(!get_filename(filename, sizeof(filename), NEW_OBJ_FILES, GET_NAME(ch)))
+  if (!get_filename(filename, sizeof(filename), NEW_OBJ_FILES, GET_NAME(ch)))
     return (0);
 
-  if (!(fl = fopen(filename, "rb"))) {
-    if (errno != ENOENT)	/* if it fails, NOT because of no file */
+  if (!(fl = fopen(filename, "rb")))
+  {
+    if (errno != ENOENT) /* if it fails, NOT because of no file */
       log("SYSERR: checking for crash file %s (3): %s", filename, strerror(errno));
     return (0);
   }
 
   if (!feof(fl))
-    get_line(fl,line);
-  sscanf(line,"%d %d %d %d %d %d",&rentcode,&timed,&netcost,&gold,
-         &account,&nitems);
+    get_line(fl, line);
+  sscanf(line, "%d %d %d %d %d %d", &rentcode, &timed, &netcost, &gold,
+         &account, &nitems);
   fclose(fl);
 
   if (rentcode == RENT_CRASH)
@@ -395,25 +441,30 @@ int Crash_clean_file(char *name)
   if (!get_filename(filename, sizeof(filename), NEW_OBJ_FILES, name))
     return (0);
 
-  if (!(fl = fopen(filename, "r+b"))) {
-    if (errno != ENOENT)	/* if it fails, NOT because of no file */
+  if (!(fl = fopen(filename, "r+b")))
+  {
+    if (errno != ENOENT) /* if it fails, NOT because of no file */
       log("SYSERR: OPENING OBJECT FILE %s (4): %s", filename, strerror(errno));
     return (0);
   }
 
-  if (!feof(fl)) {
-    get_line(fl,line);
-    sscanf(line, "%d %d %d %d %d %d",&rentcode,&timed,&netcost,
-           &gold,&account,&nitems);
+  if (!feof(fl))
+  {
+    get_line(fl, line);
+    sscanf(line, "%d %d %d %d %d %d", &rentcode, &timed, &netcost,
+           &gold, &account, &nitems);
     fclose(fl);
 
     if ((rentcode == RENT_CRASH) ||
-        (rentcode == RENT_FORCED) || (rentcode == RENT_TIMEDOUT)) {
-      if (timed < time(0) - (CONFIG_CRASH_TIMEOUT * SECS_PER_REAL_DAY)) {
+        (rentcode == RENT_FORCED) || (rentcode == RENT_TIMEDOUT))
+    {
+      if (timed < time(0) - (CONFIG_CRASH_TIMEOUT * SECS_PER_REAL_DAY))
+      {
         const char *filetype;
 
         Crash_delete_file(name);
-        switch (rentcode) {
+        switch (rentcode)
+        {
         case RENT_CRASH:
           filetype = "crash";
           break;
@@ -431,8 +482,10 @@ int Crash_clean_file(char *name)
         return (1);
       }
       /* Must retrieve rented items w/in 30 days */
-    } else if (rentcode == RENT_RENTED)
-      if (timed < time(0) - (CONFIG_RENT_TIMEOUT * SECS_PER_REAL_DAY)) {
+    }
+    else if (rentcode == RENT_RENTED)
+      if (timed < time(0) - (CONFIG_RENT_TIMEOUT * SECS_PER_REAL_DAY))
+      {
         Crash_delete_file(name);
         log("    Deleting %s's rent file.", name);
         return (1);
@@ -440,7 +493,6 @@ int Crash_clean_file(char *name)
   }
   return (0);
 }
-
 
 void update_obj_file(void)
 {
@@ -451,34 +503,36 @@ void update_obj_file(void)
       Crash_clean_file(player_table[i].name);
 }
 
-
 void Crash_listrent(struct char_data *ch, char *name)
 {
-  FILE *fl=NULL;
+  FILE *fl = NULL;
   char filename[MAX_STRING_LENGTH];
   char buf[MAX_STRING_LENGTH];
   struct obj_data *obj;
   int rentcode, timed, netcost, gold, account, nitems, len;
-  int t[10],nr;
+  int t[10], nr;
   char line[MAX_STRING_LENGTH];
   char *sdesc;
 
   if (get_filename(filename, sizeof(filename), NEW_OBJ_FILES, name))
     fl = fopen(filename, "rb");
-  if (!fl) {
+  if (!fl)
+  {
     send_to_char(ch, "%s has no rent file.\r\n", name);
     return;
   }
 
   send_to_char(ch, "%s\r\n", filename);
 
-  if (!feof(fl)) {
-    get_line(fl,line);
-    sscanf(line,"%d %d %d %d %d %d",&rentcode,&timed,&netcost, 
-           &gold,&account,&nitems); 
+  if (!feof(fl))
+  {
+    get_line(fl, line);
+    sscanf(line, "%d %d %d %d %d %d", &rentcode, &timed, &netcost,
+           &gold, &account, &nitems);
   }
 
-  switch (rentcode) {
+  switch (rentcode)
+  {
   case RENT_RENTED:
     send_to_char(ch, "Rent\r\n");
     break;
@@ -499,44 +553,61 @@ void Crash_listrent(struct char_data *ch, char *name)
   buf[0] = 0;
   len = 0;
 
-  while(!feof(fl)) {
-    get_line(fl,line);
-    if(*line == '#') { /* swell - its an item */
-      sscanf(line,"#%d",&nr);
-      if(nr != NOTHING) {  /* then we can dispense with it easily */
-        if (real_object(nr) != NOTHING) {
-          obj=read_object(nr,VIRTUAL);
-          if (len + 255 < sizeof(buf)) {
+  while (!feof(fl))
+  {
+    get_line(fl, line);
+    if (*line == '#')
+    { /* swell - its an item */
+      sscanf(line, "#%d", &nr);
+      if (nr != NOTHING)
+      { /* then we can dispense with it easily */
+        if (real_object(nr) != NOTHING)
+        {
+          obj = read_object(nr, VIRTUAL);
+          if (len + 255 < sizeof(buf))
+          {
             len += snprintf(buf + len, sizeof(buf) - len, "[%5d] (%5dau) %-20s\r\n",
                             nr, GET_OBJ_RENT(obj), obj->short_description);
-          } else {
+          }
+          else
+          {
             snprintf(buf + len, sizeof(buf) - len, "** Excessive rent listing. **\r\n");
             break;
           }
           extract_obj(obj);
-        } else {
-          if (len + 255 < sizeof(buf)) {
+        }
+        else
+        {
+          if (len + 255 < sizeof(buf))
+          {
             len += snprintf(buf + len, sizeof(buf) - len,
-                            "%s[-----] NONEXISTANT OBJECT #%d\r\n",buf, nr);
-          } else {
+                            "%s[-----] NONEXISTANT OBJECT #%d\r\n", buf, nr);
+          }
+          else
+          {
             snprintf(buf + len, sizeof(buf) - len, "** Excessive rent listing. **\r\n");
             break;
           }
         }
-      } else { /* its nothing, and a unique item. bleh. partial parse.*/
-        get_line(fl,line);    /* this is obj+val */
-        get_line(fl,line);    /* this is XAP */
-        fread_string(fl,", listrent reading name");  /* screw the name */
-        sdesc=fread_string(fl,", listrent reading sdesc");
-        fread_string(fl,", listrent reading desc"); /* screw the long desc */
-        fread_string(fl,", listrent reading adesc"); /* screw the action desc. */
-        get_line(fl,line);    /* this is an important line.rent..*/
-        sscanf(line,"%d %d %d %d %d",t,t+1,t+2,t+3,t+4);
+      }
+      else
+      {                                              /* its nothing, and a unique item. bleh. partial parse.*/
+        get_line(fl, line);                          /* this is obj+val */
+        get_line(fl, line);                          /* this is XAP */
+        fread_string(fl, ", listrent reading name"); /* screw the name */
+        sdesc = fread_string(fl, ", listrent reading sdesc");
+        fread_string(fl, ", listrent reading desc");  /* screw the long desc */
+        fread_string(fl, ", listrent reading adesc"); /* screw the action desc. */
+        get_line(fl, line);                           /* this is an important line.rent..*/
+        sscanf(line, "%d %d %d %d %d", t, t + 1, t + 2, t + 3, t + 4);
         /* great we got it all, make the buf */
-        if (len + 255 < sizeof(buf)) {
+        if (len + 255 < sizeof(buf))
+        {
           len += snprintf(buf + len, sizeof(buf) - len,
-                          "%s[%5d] (%5dau) %-20s\r\n",buf, nr, t[4],sdesc);
-        } else {
+                          "%s[%5d] (%5dau) %-20s\r\n", buf, nr, t[4], sdesc);
+        }
+        else
+        {
           snprintf(buf + len, sizeof(buf) - len, "** Excessive rent listing. **\r\n");
           break;
         }
@@ -547,17 +618,17 @@ void Crash_listrent(struct char_data *ch, char *name)
     }
   }
 
-  page_string(ch->desc,buf,0);
+  page_string(ch->desc, buf, 0);
   fclose(fl);
 }
-
 
 static int Crash_save(struct obj_data *obj, FILE *fp, int location)
 {
   struct obj_data *tmp;
   int result;
 
-  if (obj) {
+  if (obj)
+  {
     Crash_save(obj->next_content, fp, location);
     Crash_save(obj->contains, fp, MIN(0, location) - 1);
     result = Obj_to_store(obj, fp, location);
@@ -571,10 +642,10 @@ static int Crash_save(struct obj_data *obj, FILE *fp, int location)
   return (TRUE);
 }
 
-
 static void Crash_restore_weight(struct obj_data *obj)
 {
-  if (obj) {
+  if (obj)
+  {
     Crash_restore_weight(obj->contains);
     Crash_restore_weight(obj->next_content);
     if (obj->in_obj)
@@ -590,7 +661,8 @@ void Crash_extract_norent_eq(struct char_data *ch)
 {
   int j;
 
-  for (j = 0; j < NUM_WEARS; j++) {
+  for (j = 0; j < NUM_WEARS; j++)
+  {
     if (GET_EQ(ch, j) == NULL)
       continue;
 
@@ -603,13 +675,13 @@ void Crash_extract_norent_eq(struct char_data *ch)
 
 static void Crash_extract_objs(struct obj_data *obj)
 {
-  if (obj) {
+  if (obj)
+  {
     Crash_extract_objs(obj->contains);
     Crash_extract_objs(obj->next_content);
     extract_obj(obj);
   }
 }
-
 
 static int Crash_is_unrentable(struct obj_data *obj)
 {
@@ -617,30 +689,31 @@ static int Crash_is_unrentable(struct obj_data *obj)
     return (0);
 #if CIRCLE_UNSIGNED_INDEX
   if (OBJ_FLAGGED(obj, ITEM_NORENT) || GET_OBJ_RENT(obj) < 0 ||
-          (GET_OBJ_RNUM(obj) == NOTHING &&
-          !IS_SET_AR(GET_OBJ_EXTRA(obj), ITEM_UNIQUE_SAVE))) {
+      (GET_OBJ_RNUM(obj) == NOTHING &&
+       !IS_SET_AR(GET_OBJ_EXTRA(obj), ITEM_UNIQUE_SAVE)))
+  {
     return (1);
 #else
   if (OBJ_FLAGGED(obj, ITEM_NORENT) || GET_OBJ_RENT(obj) < 0 ||
-          (GET_OBJ_RNUM(obj) <= NOTHING &&
-          !IS_SET_AR(GET_OBJ_EXTRA(obj), ITEM_UNIQUE_SAVE))) {
+      (GET_OBJ_RNUM(obj) <= NOTHING &&
+       !IS_SET_AR(GET_OBJ_EXTRA(obj), ITEM_UNIQUE_SAVE)))
+  {
     return (1);
 #endif
-   }
+  }
   return (0);
 }
 
-
 static void Crash_extract_norents(struct obj_data *obj)
 {
-  if (obj) {
+  if (obj)
+  {
     Crash_extract_norents(obj->contains);
     Crash_extract_norents(obj->next_content);
     if (Crash_is_unrentable(obj))
       extract_obj(obj);
   }
 }
-
 
 static void Crash_extract_expensive(struct obj_data *obj)
 {
@@ -653,16 +726,15 @@ static void Crash_extract_expensive(struct obj_data *obj)
   extract_obj(max);
 }
 
-
 static void Crash_calculate_rent(struct obj_data *obj, int *cost)
 {
-  if (obj) {
+  if (obj)
+  {
     *cost += MAX(0, GET_OBJ_RENT(obj));
     Crash_calculate_rent(obj->contains, cost);
     Crash_calculate_rent(obj->next_content, cost);
   }
 }
-
 
 void Crash_crashsave(struct char_data *ch)
 {
@@ -683,15 +755,18 @@ void Crash_crashsave(struct char_data *ch)
           GET_BANK_GOLD(ch), 0);
 
   for (j = 0; j < NUM_WEARS; j++)
-    if (GET_EQ(ch, j)) {
-      if (!Crash_save(GET_EQ(ch, j), fp, j + 1)) {
-	fclose(fp);
-	return;
+    if (GET_EQ(ch, j))
+    {
+      if (!Crash_save(GET_EQ(ch, j), fp, j + 1))
+      {
+        fclose(fp);
+        return;
       }
       Crash_restore_weight(GET_EQ(ch, j));
     }
 
-  if (!Crash_save(ch->carrying, fp, 0)) {
+  if (!Crash_save(ch->carrying, fp, 0))
+  {
     fclose(fp);
     return;
   }
@@ -701,7 +776,6 @@ void Crash_crashsave(struct char_data *ch)
   fclose(fp);
   REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_CRASH);
 }
-
 
 void Crash_idlesave(struct char_data *ch)
 {
@@ -730,14 +804,16 @@ void Crash_idlesave(struct char_data *ch)
     Crash_calculate_rent(GET_EQ(ch, j), &cost_eq);
 
   cost += cost_eq;
-  cost *= 2;			/* forcerent cost is 2x normal rent */
+  cost *= 2; /* forcerent cost is 2x normal rent */
 
-  if (cost > GET_GOLD(ch) + GET_BANK_GOLD(ch)) {
-    for (j = 0; j < NUM_WEARS; j++)	/* Unequip players with low gold. */
+  if (cost > GET_GOLD(ch) + GET_BANK_GOLD(ch))
+  {
+    for (j = 0; j < NUM_WEARS; j++) /* Unequip players with low gold. */
       if (GET_EQ(ch, j))
         obj_to_char(unequip_char(ch, j), ch);
 
-    while ((cost > GET_GOLD(ch) + GET_BANK_GOLD(ch)) && ch->carrying) {
+    while ((cost > GET_GOLD(ch) + GET_BANK_GOLD(ch)) && ch->carrying)
+    {
       Crash_extract_expensive(ch->carrying);
       cost = 0;
       Crash_calculate_rent(ch->carrying, &cost);
@@ -745,21 +821,27 @@ void Crash_idlesave(struct char_data *ch)
     }
   }
 
-  if (ch->carrying == NULL) {
-    for (j = 0; j < NUM_WEARS && GET_EQ(ch, j) == NULL; j++) /* Nothing */ ;
-    if (j == NUM_WEARS) {	/* No equipment or inventory. */
+  if (ch->carrying == NULL)
+  {
+    for (j = 0; j < NUM_WEARS && GET_EQ(ch, j) == NULL; j++) /* Nothing */
+      ;
+    if (j == NUM_WEARS)
+    { /* No equipment or inventory. */
       fclose(fp);
       Crash_delete_file(GET_NAME(ch));
       return;
     }
   }
 
-  fprintf(fp,"%d %d %d %d %d %d\r\n", RENT_TIMEDOUT, (int)time(0), cost,
-          GET_GOLD(ch),GET_BANK_GOLD(ch), 0);
+  fprintf(fp, "%d %d %d %d %d %d\r\n", RENT_TIMEDOUT, (int)time(0), cost,
+          GET_GOLD(ch), GET_BANK_GOLD(ch), 0);
 
-  for (j = 0; j < NUM_WEARS; j++) {
-    if (GET_EQ(ch, j)) {
-      if (!Crash_save(GET_EQ(ch, j), fp, j + 1)) {
+  for (j = 0; j < NUM_WEARS; j++)
+  {
+    if (GET_EQ(ch, j))
+    {
+      if (!Crash_save(GET_EQ(ch, j), fp, j + 1))
+      {
         fclose(fp);
         return;
       }
@@ -767,7 +849,8 @@ void Crash_idlesave(struct char_data *ch)
       Crash_extract_objs(GET_EQ(ch, j));
     }
   }
-  if (!Crash_save(ch->carrying, fp, 0)) {
+  if (!Crash_save(ch->carrying, fp, 0))
+  {
     fclose(fp);
     return;
   }
@@ -775,7 +858,6 @@ void Crash_idlesave(struct char_data *ch)
 
   Crash_extract_objs(ch->carrying);
 }
-
 
 void Crash_rentsave(struct char_data *ch, int cost)
 {
@@ -795,19 +877,22 @@ void Crash_rentsave(struct char_data *ch, int cost)
   Crash_extract_norent_eq(ch);
   Crash_extract_norents(ch->carrying);
 
-  fprintf(fp,"%d %d %d %d %d %d\r\n", RENT_RENTED, (int)time(0), cost,
+  fprintf(fp, "%d %d %d %d %d %d\r\n", RENT_RENTED, (int)time(0), cost,
           GET_GOLD(ch), GET_BANK_GOLD(ch), 0);
 
   for (j = 0; j < NUM_WEARS; j++)
-    if (GET_EQ(ch, j)) {
-      if (!Crash_save(GET_EQ(ch,j), fp, j + 1)) {
+    if (GET_EQ(ch, j))
+    {
+      if (!Crash_save(GET_EQ(ch, j), fp, j + 1))
+      {
         fclose(fp);
         return;
       }
       Crash_restore_weight(GET_EQ(ch, j));
       Crash_extract_objs(GET_EQ(ch, j));
     }
-  if (!Crash_save(ch->carrying, fp, 0)) {
+  if (!Crash_save(ch->carrying, fp, 0))
+  {
     fclose(fp);
     return;
   }
@@ -815,7 +900,6 @@ void Crash_rentsave(struct char_data *ch, int cost)
 
   Crash_extract_objs(ch->carrying);
 }
-
 
 static void Crash_cryosave(struct char_data *ch, int cost)
 {
@@ -836,19 +920,22 @@ static void Crash_cryosave(struct char_data *ch, int cost)
 
   GET_GOLD(ch) = MAX(0, GET_GOLD(ch) - cost);
 
-  fprintf(fp,"%d %d %d %d %d %d\r\n", RENT_CRYO, (int)time(0), 0, GET_GOLD(ch),
+  fprintf(fp, "%d %d %d %d %d %d\r\n", RENT_CRYO, (int)time(0), 0, GET_GOLD(ch),
           GET_BANK_GOLD(ch), 0);
 
   for (j = 0; j < NUM_WEARS; j++)
-    if (GET_EQ(ch, j)) {
-      if (!Crash_save(GET_EQ(ch, j), fp, j + 1)) {
+    if (GET_EQ(ch, j))
+    {
+      if (!Crash_save(GET_EQ(ch, j), fp, j + 1))
+      {
         fclose(fp);
         return;
       }
       Crash_restore_weight(GET_EQ(ch, j));
       Crash_extract_objs(GET_EQ(ch, j));
     }
-  if (!Crash_save(ch->carrying, fp, 0)) {
+  if (!Crash_save(ch->carrying, fp, 0))
+  {
     fclose(fp);
     return;
   }
@@ -858,13 +945,12 @@ static void Crash_cryosave(struct char_data *ch, int cost)
   SET_BIT_AR(PLR_FLAGS(ch), PLR_CRYO);
 }
 
-
 /* ************************************************************************
-* Routines used for the receptionist					  *
-************************************************************************* */
+ * Routines used for the receptionist					  *
+ ************************************************************************* */
 
 static void Crash_rent_deadline(struct char_data *ch, struct char_data *recep,
-			      long cost)
+                                long cost)
 {
   char buf[256];
   long rent_deadline;
@@ -874,17 +960,20 @@ static void Crash_rent_deadline(struct char_data *ch, struct char_data *recep,
 
   rent_deadline = ((GET_GOLD(ch) + GET_BANK_GOLD(ch)) / cost);
   snprintf(buf, sizeof(buf), "$n tells you, 'You can rent for %ld day%s with the gold you have\r\n"
-	  "on hand and in the bank.'\r\n", rent_deadline, rent_deadline != 1 ? "s" : "");
+                             "on hand and in the bank.'\r\n",
+           rent_deadline, rent_deadline != 1 ? "s" : "");
   act(buf, FALSE, recep, 0, ch, TO_VICT);
 }
 
 static int Crash_report_unrentables(struct char_data *ch, struct char_data *recep,
-			         struct obj_data *obj)
+                                    struct obj_data *obj)
 {
   int has_norents = 0;
 
-  if (obj) {
-    if (Crash_is_unrentable(obj)) {
+  if (obj)
+  {
+    if (Crash_is_unrentable(obj))
+    {
       char buf[128];
 
       has_norents = 1;
@@ -897,20 +986,21 @@ static int Crash_report_unrentables(struct char_data *ch, struct char_data *rece
   return (has_norents);
 }
 
-
-
 static void Crash_report_rent(struct char_data *ch, struct char_data *recep,
-		            struct obj_data *obj, long *cost, long *nitems, int display, int factor)
+                              struct obj_data *obj, long *cost, long *nitems, int display, int factor)
 {
-  if (obj) {
-    if (!Crash_is_unrentable(obj)) {
+  if (obj)
+  {
+    if (!Crash_is_unrentable(obj))
+    {
       (*nitems)++;
       *cost += MAX(0, (GET_OBJ_RENT(obj) * factor));
-      if (display) {
+      if (display)
+      {
         char buf[256];
 
-	snprintf(buf, sizeof(buf), "$n tells you, '%5d zenni for %s..'", GET_OBJ_RENT(obj) * factor, OBJS(obj, ch));
-	act(buf, FALSE, recep, 0, ch, TO_VICT);
+        snprintf(buf, sizeof(buf), "$n tells you, '%5d zenni for %s..'", GET_OBJ_RENT(obj) * factor, OBJS(obj, ch));
+        act(buf, FALSE, recep, 0, ch, TO_VICT);
       }
     }
     Crash_report_rent(ch, recep, obj->contains, cost, nitems, display, factor);
@@ -918,10 +1008,8 @@ static void Crash_report_rent(struct char_data *ch, struct char_data *recep,
   }
 }
 
-
-
 static int Crash_offer_rent(struct char_data *ch, struct char_data *recep,
-		         int display, int factor)
+                            int display, int factor)
 {
   int i;
   long totalcost = 0, numitems = 0, norent;
@@ -940,19 +1028,22 @@ static int Crash_offer_rent(struct char_data *ch, struct char_data *recep,
   for (i = 0; i < NUM_WEARS; i++)
     Crash_report_rent(ch, recep, GET_EQ(ch, i), &totalcost, &numitems, display, factor);
 
-  if (!numitems) {
+  if (!numitems)
+  {
     act("$n tells you, 'But you are not carrying anything!  Just quit!'",
-	FALSE, recep, 0, ch, TO_VICT);
+        FALSE, recep, 0, ch, TO_VICT);
     return (0);
   }
-  if (numitems > CONFIG_MAX_OBJ_SAVE) {
+  if (numitems > CONFIG_MAX_OBJ_SAVE)
+  {
     char buf[256];
 
     snprintf(buf, sizeof(buf), "$n tells you, 'Sorry, but I cannot store more than %d items.'", CONFIG_MAX_OBJ_SAVE);
     act(buf, FALSE, recep, 0, ch, TO_VICT);
     return (0);
   }
-  if (display) {
+  if (display)
+  {
     char buf[256];
 
     snprintf(buf, sizeof(buf), "$n tells you, 'Plus, my %d zenni fee..'", CONFIG_MIN_RENT_COST * factor);
@@ -961,25 +1052,26 @@ static int Crash_offer_rent(struct char_data *ch, struct char_data *recep,
     snprintf(buf, sizeof(buf), "$n tells you, 'For a total of %ld zenni.'", totalcost);
     act(buf, FALSE, recep, 0, ch, TO_VICT);
 
-    if (totalcost > GET_GOLD(ch) + GET_BANK_GOLD(ch)) {
+    if (totalcost > GET_GOLD(ch) + GET_BANK_GOLD(ch))
+    {
       act("$n tells you, '...which I see you can't afford.'", FALSE, recep, 0, ch, TO_VICT);
       return (0);
-    } else if (factor == RENT_FACTOR)
+    }
+    else if (factor == RENT_FACTOR)
       Crash_rent_deadline(ch, recep, totalcost);
   }
   return (totalcost);
 }
 
-
-
 static int gen_receptionist(struct char_data *ch, struct char_data *recep,
-		         int cmd, char *arg, int mode)
+                            int cmd, char *arg, int mode)
 {
   int cost;
-  const char *action_table[] = { "smile", "dance", "sigh", "blush", "burp",
-	  "cough", "fart", "twiddle", "yawn" };
+  const char *action_table[] = {"smile", "dance", "sigh", "blush", "burp",
+                                "cough", "fart", "twiddle", "yawn"};
 
-  if (!cmd && !rand_number(0, 5)) {
+  if (!cmd && !rand_number(0, 5))
+  {
     do_action(recep, NULL, find_command(action_table[rand_number(0, 8)]), 0);
     return (FALSE);
   }
@@ -990,23 +1082,27 @@ static int gen_receptionist(struct char_data *ch, struct char_data *recep,
   if (!CMD_IS("offer") && !CMD_IS("rent"))
     return (FALSE);
 
-  if (!AWAKE(recep)) {
+  if (!AWAKE(recep))
+  {
     send_to_char(ch, "%s is unable to talk to you...\r\n", HSSH(recep));
     return (TRUE);
   }
 
-  if (!CAN_SEE(recep, ch)) {
+  if (!CAN_SEE(recep, ch))
+  {
     act("$n says, 'I don't deal with people I can't see!'", FALSE, recep, 0, 0, TO_ROOM);
     return (TRUE);
   }
 
-  if (CONFIG_FREE_RENT) {
+  if (CONFIG_FREE_RENT)
+  {
     act("$n tells you, 'Rent is free here.  Just quit, and your objects will be saved!'",
-	FALSE, recep, 0, ch, TO_VICT);
+        FALSE, recep, 0, ch, TO_VICT);
     return (1);
   }
 
-  if (CMD_IS("rent")) {
+  if (CMD_IS("rent"))
+  {
     char buf[128];
 
     if (!(cost = Crash_offer_rent(ch, recep, FALSE, mode)))
@@ -1017,24 +1113,28 @@ static int gen_receptionist(struct char_data *ch, struct char_data *recep,
       snprintf(buf, sizeof(buf), "$n tells you, 'It will cost you %d zenni to be frozen.'", cost);
     act(buf, FALSE, recep, 0, ch, TO_VICT);
 
-    if (cost > GET_GOLD(ch) + GET_BANK_GOLD(ch)) {
+    if (cost > GET_GOLD(ch) + GET_BANK_GOLD(ch))
+    {
       act("$n tells you, '...which I see you can't afford.'",
-	  FALSE, recep, 0, ch, TO_VICT);
+          FALSE, recep, 0, ch, TO_VICT);
       return (TRUE);
     }
     if (cost && (mode == RENT_FACTOR))
       Crash_rent_deadline(ch, recep, cost);
 
-    if (mode == RENT_FACTOR) {
+    if (mode == RENT_FACTOR)
+    {
       act("$n stores your belongings and helps you into your private chamber.", FALSE, recep, 0, ch, TO_VICT);
       Crash_rentsave(ch, cost);
       mudlog(NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), TRUE, "%s has rented (%d/day, %d tot.)",
-		GET_NAME(ch), cost, GET_GOLD(ch) + GET_BANK_GOLD(ch));
-    } else {			/* cryo */
+             GET_NAME(ch), cost, GET_GOLD(ch) + GET_BANK_GOLD(ch));
+    }
+    else
+    { /* cryo */
       act("$n stores your belongings and helps you into your private chamber.\r\n"
-	  "A white mist appears in the room, chilling you to the bone...\r\n"
-	  "You begin to lose consciousness...",
-	  FALSE, recep, 0, ch, TO_VICT);
+          "A white mist appears in the room, chilling you to the bone...\r\n"
+          "You begin to lose consciousness...",
+          FALSE, recep, 0, ch, TO_VICT);
       Crash_cryosave(ch, cost);
       mudlog(NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), TRUE, "%s has cryo-rented.", GET_NAME(ch));
       SET_BIT_AR(PLR_FLAGS(ch), PLR_CRYO);
@@ -1042,51 +1142,53 @@ static int gen_receptionist(struct char_data *ch, struct char_data *recep,
 
     act("$n helps $N into $S private chamber.", FALSE, recep, 0, ch, TO_NOTVICT);
 
-    extract_char(ch);	/* It saves. */
-  } else {
+    extract_char(ch); /* It saves. */
+  }
+  else
+  {
     Crash_offer_rent(ch, recep, TRUE, mode);
     act("$N gives $n an offer.", FALSE, ch, 0, recep, TO_ROOM);
   }
   return (TRUE);
 }
 
-
 SPECIAL(receptionist)
 {
   return (gen_receptionist(ch, (struct char_data *)me, cmd, argument, RENT_FACTOR));
 }
-
 
 SPECIAL(cryogenicist)
 {
   return (gen_receptionist(ch, (struct char_data *)me, cmd, argument, CRYO_FACTOR));
 }
 
-
 void Crash_save_all(void)
 {
   struct descriptor_data *d;
-  for (d = descriptor_list; d; d = d->next) {
-    if ((STATE(d) == CON_PLAYING) && !IS_NPC(d->character)) {
-      if (PLR_FLAGGED(d->character, PLR_CRASH)) {
-	Crash_crashsave(d->character);
-	save_char(d->character);
-	REMOVE_BIT_AR(PLR_FLAGS(d->character), PLR_CRASH);
+  for (d = descriptor_list; d; d = d->next)
+  {
+    if ((STATE(d) == CON_PLAYING) && !IS_NPC(d->character))
+    {
+      if (PLR_FLAGGED(d->character, PLR_CRASH))
+      {
+        Crash_crashsave(d->character);
+        save_char(d->character);
+        REMOVE_BIT_AR(PLR_FLAGS(d->character), PLR_CRASH);
       }
     }
   }
 }
 
-int Crash_load(struct char_data *ch) 
+int Crash_load(struct char_data *ch)
 {
   FILE *fl;
   char cmfname[MAX_STRING_LENGTH];
   char buf1[MAX_STRING_LENGTH], buf2[MAX_STRING_LENGTH];
   char line[256];
-  int t[30],danger,zwei=0,num_of_days;
+  int t[30], danger, zwei = 0, num_of_days;
   int orig_rent_code;
   struct obj_data *temp;
-  int locate=0, j, nr,k,cost,num_objs=0;
+  int locate = 0, j, nr, k, cost, num_objs = 0;
   struct obj_data *obj1;
   struct obj_data *cont_row[MAX_BAG_ROWS];
   struct extra_descr_data *new_descr;
@@ -1096,49 +1198,59 @@ int Crash_load(struct char_data *ch)
   if (!get_filename(cmfname, sizeof(cmfname), NEW_OBJ_FILES, GET_NAME(ch)))
     return 1;
 
-  if (!(fl = fopen(cmfname, "r+b"))) {
-    if (errno != ENOENT) {	/* if it fails, NOT because of no file */
+  if (!(fl = fopen(cmfname, "r+b")))
+  {
+    if (errno != ENOENT)
+    { /* if it fails, NOT because of no file */
       sprintf(buf1, "SYSERR: READING OBJECT FILE %s (5)", cmfname);
       perror(buf1);
-      send_to_char(ch, 
-		   "\r\n********************* NOTICE *********************\r\n"
-		   "There was a problem loading your objects from disk.\r\n"
-		   "Contact a God for assistance.\r\n");
-    }
-    if (GET_LEVEL(ch) > 1) {
-     mudlog(NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), TRUE, "%s entering game with no equipment. Loading backup.", GET_NAME(ch));
-    }
-    if (!inv_backup(ch)) {
-     return -1;
-    } else {
-     if (!load_inv_backup(ch))
-      return -1;
-     else if (!(fl = fopen(cmfname, "r+b"))) {
-      if (errno != ENOENT) {      /* if it fails, NOT because of no file */
-       sprintf(buf1, "SYSERR: READING OBJECT FILE %s (5)", cmfname);
-       perror(buf1);
-       send_to_char(ch,
+      send_to_char(ch,
                    "\r\n********************* NOTICE *********************\r\n"
                    "There was a problem loading your objects from disk.\r\n"
                    "Contact a God for assistance.\r\n");
-      }
+    }
+    if (GET_LEVEL(ch) > 1)
+    {
+      mudlog(NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), TRUE, "%s entering game with no equipment. Loading backup.", GET_NAME(ch));
+    }
+    if (!inv_backup(ch))
+    {
       return -1;
-     }
+    }
+    else
+    {
+      if (!load_inv_backup(ch))
+        return -1;
+      else if (!(fl = fopen(cmfname, "r+b")))
+      {
+        if (errno != ENOENT)
+        { /* if it fails, NOT because of no file */
+          sprintf(buf1, "SYSERR: READING OBJECT FILE %s (5)", cmfname);
+          perror(buf1);
+          send_to_char(ch,
+                       "\r\n********************* NOTICE *********************\r\n"
+                       "There was a problem loading your objects from disk.\r\n"
+                       "Contact a God for assistance.\r\n");
+        }
+        return -1;
+      }
     }
   }
 
   if (!feof(fl))
-    get_line(fl,line);
+    get_line(fl, line);
 
-  sscanf(line,"%d %d %d %d %d %d",&rentcode, &timed,
-        &netcost,&gold,&account,&nitems);
+  sscanf(line, "%d %d %d %d %d %d", &rentcode, &timed,
+         &netcost, &gold, &account, &nitems);
 
-  if (rentcode == RENT_RENTED || rentcode == RENT_TIMEDOUT) {
-    num_of_days = (float) (time(0) - timed) / SECS_PER_REAL_DAY;
+  if (rentcode == RENT_RENTED || rentcode == RENT_TIMEDOUT)
+  {
+    num_of_days = (float)(time(0) - timed) / SECS_PER_REAL_DAY;
     cost = 0;
     save_char(ch);
   }
-  switch (orig_rent_code = rentcode) {
+  switch (orig_rent_code = rentcode)
+  {
   case RENT_RENTED:
     mudlog(NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), TRUE, "%s un-renting and entering game.", GET_NAME(ch));
     break;
@@ -1157,84 +1269,103 @@ int Crash_load(struct char_data *ch)
     break;
   }
 
-  for (j = 0;j < MAX_BAG_ROWS;j++)
+  for (j = 0; j < MAX_BAG_ROWS; j++)
     cont_row[j] = NULL; /* empty all cont lists (you never know ...) */
 
-  if(!feof(fl))
+  if (!feof(fl))
     get_line(fl, line);
 
-  while (!feof(fl)) {
-        temp=NULL;
-        /* first, we get the number. Not too hard. */
-    if(*line == '#') {
-      if (sscanf(line, "#%d", &nr) != 1) {
+  while (!feof(fl))
+  {
+    temp = NULL;
+    /* first, we get the number. Not too hard. */
+    if (*line == '#')
+    {
+      if (sscanf(line, "#%d", &nr) != 1)
+      {
         continue;
       }
       /* we have the number, check it, load obj. */
-      if (nr == NOTHING) {   /* then it is unique */
+      if (nr == NOTHING)
+      { /* then it is unique */
         temp = create_obj();
-        temp->item_number=NOTHING;
+        temp->item_number = NOTHING;
         GET_OBJ_SIZE(temp) = SIZE_MEDIUM;
-      } else if (nr < 0) {
+      }
+      else if (nr < 0)
+      {
         continue;
-      } else {
-        if(nr >= 999999) 
+      }
+      else
+      {
+        if (nr >= 999999)
           continue;
-        temp=read_object(nr,VIRTUAL);
-        if (!temp) {
-	  get_line(fl, line);
+        temp = read_object(nr, VIRTUAL);
+        if (!temp)
+        {
+          get_line(fl, line);
           continue;
         }
       }
 
-      get_line(fl,line);
+      get_line(fl, line);
 
-      sscanf(line,"%d %d %d %d %d %d %d %d %d %s %s %s %s %d %d %d %d %d %d %d %d",t, t + 1, t + 2, t + 3, t + 4, t + 5, t + 6, t + 7, t + 8, f1, f2, f3, f4, t + 13,t + 14, t + 15, t + 16, t + 17, t + 18, t + 19, t + 20 );
+      sscanf(line, "%d %d %d %d %d %d %d %d %d %s %s %s %s %d %d %d %d %d %d %d %d", t, t + 1, t + 2, t + 3, t + 4, t + 5, t + 6, t + 7, t + 8, f1, f2, f3, f4, t + 13, t + 14, t + 15, t + 16, t + 17, t + 18, t + 19, t + 20);
 
-      locate=t[0];
-      GET_OBJ_VAL(temp,0) = t[1];
-      GET_OBJ_VAL(temp,1) = t[2];
-      GET_OBJ_VAL(temp,2) = t[3];
-      GET_OBJ_VAL(temp,3) = t[4];
-      GET_OBJ_VAL(temp,4) = t[5];
-      GET_OBJ_VAL(temp,5) = t[6];
-      GET_OBJ_VAL(temp,6) = t[7];
-      GET_OBJ_VAL(temp,7) = t[8];
-      GET_OBJ_EXTRA(temp)[0] = asciiflag_conv(f1);
-      GET_OBJ_EXTRA(temp)[1] = asciiflag_conv(f2);
-      GET_OBJ_EXTRA(temp)[2] = asciiflag_conv(f3);
-      GET_OBJ_EXTRA(temp)[3] = asciiflag_conv(f4);
+      locate = t[0];
+      GET_OBJ_VAL(temp, 0) = t[1];
+      GET_OBJ_VAL(temp, 1) = t[2];
+      GET_OBJ_VAL(temp, 2) = t[3];
+      GET_OBJ_VAL(temp, 3) = t[4];
+      GET_OBJ_VAL(temp, 4) = t[5];
+      GET_OBJ_VAL(temp, 5) = t[6];
+      GET_OBJ_VAL(temp, 6) = t[7];
+      GET_OBJ_VAL(temp, 7) = t[8];
+      GET_OBJ_EXTRA(temp)
+      [0] = asciiflag_conv(f1);
+      GET_OBJ_EXTRA(temp)
+      [1] = asciiflag_conv(f2);
+      GET_OBJ_EXTRA(temp)
+      [2] = asciiflag_conv(f3);
+      GET_OBJ_EXTRA(temp)
+      [3] = asciiflag_conv(f4);
       GET_OBJ_VAL(temp, 8) = t[13];
       GET_OBJ_VAL(temp, 9) = t[14];
       GET_OBJ_VAL(temp, 10) = t[15];
-      GET_OBJ_VAL(temp, 11) = t[16]; 
+      GET_OBJ_VAL(temp, 11) = t[16];
       GET_OBJ_VAL(temp, 12) = t[17];
       GET_OBJ_VAL(temp, 13) = t[18];
-      GET_OBJ_VAL(temp, 14) = t[19]; 
+      GET_OBJ_VAL(temp, 14) = t[19];
       GET_OBJ_VAL(temp, 15) = t[20];
 
-      get_line(fl,line);
-       /* read line check for xap. */
-      if(!strcmp("XAP",line)) {  /* then this is a Xap Obj, requires
-                                       special care */
-        if ((temp->name = fread_string(fl, "rented object name")) == NULL) {
+      get_line(fl, line);
+      /* read line check for xap. */
+      if (!strcmp("XAP", line))
+      { /* then this is a Xap Obj, requires
+              special care */
+        if ((temp->name = fread_string(fl, "rented object name")) == NULL)
+        {
           temp->name = "undefined";
         }
 
-        if ((temp->short_description = fread_string(fl, "rented object short desc")) == NULL) {
+        if ((temp->short_description = fread_string(fl, "rented object short desc")) == NULL)
+        {
           temp->short_description = "undefined";
         }
 
-        if ((temp->description = fread_string(fl, "rented object desc")) == NULL) {
+        if ((temp->description = fread_string(fl, "rented object desc")) == NULL)
+        {
           temp->description = "undefined";
         }
 
-        if ((temp->action_description = fread_string(fl, "rented object adesc")) == NULL) {
-          temp->action_description=0;
+        if ((temp->action_description = fread_string(fl, "rented object adesc")) == NULL)
+        {
+          temp->action_description = 0;
         }
 
         if (!get_line(fl, line) ||
-           (sscanf(line, "%d %d %d %d %d %d %d %d", t,t+1,t+2,t+3,t+4,t+5,t+6,t+7) != 8)) {
+            (sscanf(line, "%d %d %d %d %d %d %d %d", t, t + 1, t + 2, t + 3, t + 4, t + 5, t + 6, t + 7) != 8))
+        {
           fprintf(stderr, "Format error in first numeric line (expecting _x_ args)");
           return 0;
         }
@@ -1245,217 +1376,231 @@ int Crash_load(struct char_data *ch)
         temp->wear_flags[3] = t[4];
         temp->weight = t[5];
         temp->cost = t[6];
-        temp->cost_per_day = t[7];
 
         /* we're clearing these for good luck */
 
-        for (j = 0; j < MAX_OBJ_AFFECT; j++) {
+        for (j = 0; j < MAX_OBJ_AFFECT; j++)
+        {
           temp->affected[j].location = APPLY_NONE;
           temp->affected[j].modifier = 0;
           temp->affected[j].specific = 0;
         }
 
         /* maybe clear spellbook for good luck too? */
-	if (GET_OBJ_TYPE(temp) == ITEM_SPELLBOOK) {
-          if (!temp->sbinfo) {
-            CREATE(temp->sbinfo, struct obj_spellbook_spell, SPELLBOOK_SIZE);
-            memset((char *) temp->sbinfo, 0, SPELLBOOK_SIZE * sizeof(struct obj_spellbook_spell));
-          }
-          for (j = 0; j < SPELLBOOK_SIZE; j++) {
-            temp->sbinfo[j].spellname = 0;
-            temp->sbinfo[j].pages = 0;  
-          }
-          temp->sbinfo[0].spellname = SPELL_DETECT_MAGIC;
-          temp->sbinfo[0].pages = 1;  
-        } 
 
         temp->ex_description = NULL;
 
-        get_line(fl,line);
-        for (k=j=zwei=0;!zwei && !feof(fl);) {
-          switch (*line) {
-            case 'E':
-              CREATE(new_descr, struct extra_descr_data, 1);
-              sprintf(buf2, "rented object edesc keyword for object #%d", nr);
-              new_descr->keyword = fread_string(fl, buf2);
-              sprintf(buf2, "rented object edesc text for object #%d keyword %s", nr, new_descr->keyword);
-              new_descr->description = fread_string(fl, buf2);
-              new_descr->next = temp->ex_description;
-              temp->ex_description = new_descr;
-              get_line(fl,line);
-              break;
-            case 'A':
-              if (j >= MAX_OBJ_AFFECT) {
-                log("SYSERR: Too many object affectations in loading rent file");
-                danger=1;
-              }
-              get_line(fl, line);
-              sscanf(line, "%d %d %d", t, t + 1, t + 2);
+        get_line(fl, line);
+        for (k = j = zwei = 0; !zwei && !feof(fl);)
+        {
+          switch (*line)
+          {
+          case 'E':
+            CREATE(new_descr, struct extra_descr_data, 1);
+            sprintf(buf2, "rented object edesc keyword for object #%d", nr);
+            new_descr->keyword = fread_string(fl, buf2);
+            sprintf(buf2, "rented object edesc text for object #%d keyword %s", nr, new_descr->keyword);
+            new_descr->description = fread_string(fl, buf2);
+            new_descr->next = temp->ex_description;
+            temp->ex_description = new_descr;
+            get_line(fl, line);
+            break;
+          case 'A':
+            if (j >= MAX_OBJ_AFFECT)
+            {
+              log("SYSERR: Too many object affectations in loading rent file");
+              danger = 1;
+            }
+            get_line(fl, line);
+            sscanf(line, "%d %d %d", t, t + 1, t + 2);
 
-              temp->affected[j].location = t[0];
-              temp->affected[j].modifier = t[1];  
-              temp->affected[j].specific = t[2];  
-              j++;
-              get_line(fl,line);
-              break;
-            case 'G':
-              get_line(fl, line);
-              sscanf(line, "%" TMT, &temp->generation);
-              get_line(fl, line);
-              break;
-            case 'U':
-              get_line(fl, line);
-              sscanf(line, "%" I64T, &temp->unique_id);
-              get_line(fl, line);
-              break;
-            case 'S':
-              if (j >= SPELLBOOK_SIZE) {
-                log("SYSERR: Too many spells in spellbook loading rent file");
-                danger=1;
-              }
-              get_line(fl, line);
-              sscanf(line, "%d %d", t, t + 1);
+            temp->affected[j].location = t[0];
+            temp->affected[j].modifier = t[1];
+            temp->affected[j].specific = t[2];
+            j++;
+            get_line(fl, line);
+            break;
+          case 'G':
+            get_line(fl, line);
+            sscanf(line, "%" TMT, &temp->generation);
+            get_line(fl, line);
+            break;
+          case 'U':
+            get_line(fl, line);
+            sscanf(line, "%" I64T, &temp->unique_id);
+            get_line(fl, line);
+            break;
+          case 'S':
+            if (j >= SPELLBOOK_SIZE)
+            {
+              log("SYSERR: Too many spells in spellbook loading rent file");
+              danger = 1;
+            }
+            get_line(fl, line);
+            sscanf(line, "%d %d", t, t + 1);
 
-              if (!temp->sbinfo) {
-                CREATE(temp->sbinfo, struct obj_spellbook_spell, SPELLBOOK_SIZE);
-                memset((char *) temp->sbinfo, 0, SPELLBOOK_SIZE * sizeof(struct obj_spellbook_spell));
-              }
-              temp->sbinfo[j].spellname = t[0];
-              temp->sbinfo[j].pages = t[1];  
-              j++;
-              get_line(fl,line);
-              break;
-            case 'Z':
-              get_line(fl, line);
-              sscanf(line, "%d", &GET_OBJ_SIZE(temp));
-              get_line(fl, line);
-              break;
-            case '$':
-            case '#':
-              zwei=1;
-              break;
-            default:
-              zwei=1;
-              break;
+            j++;
+            get_line(fl, line);
+            break;
+          case 'Z':
+            get_line(fl, line);
+            sscanf(line, "%d", &GET_OBJ_SIZE(temp));
+            get_line(fl, line);
+            break;
+          case '$':
+          case '#':
+            zwei = 1;
+            break;
+          default:
+            zwei = 1;
+            break;
           }
-        }      /* exit our for loop */
-      }   /* exit our xap loop */
-      if(temp != NULL) {
+        } /* exit our for loop */
+      } /* exit our xap loop */
+      if (temp != NULL)
+      {
         num_objs++;
         check_unique_id(temp);
         add_unique_id(temp);
-        if (GET_OBJ_TYPE(temp) == ITEM_DRINKCON) {
+        if (GET_OBJ_TYPE(temp) == ITEM_DRINKCON)
+        {
           name_from_drinkcon(temp);
-          if (GET_OBJ_VAL(temp, 1) != 0 )
+          if (GET_OBJ_VAL(temp, 1) != 0)
             name_to_drinkcon(temp, GET_OBJ_VAL(temp, 2));
         }
         if (GET_OBJ_VNUM(temp) == 20099 || GET_OBJ_VNUM(temp) == 20098)
           if (OBJ_FLAGGED(temp, ITEM_UNBREAKABLE))
             REMOVE_BIT_AR(GET_OBJ_EXTRA(temp), ITEM_UNBREAKABLE);
         auto_equip(ch, temp, locate);
-      } else {
+      }
+      else
+      {
         continue;
       }
- /* 
-   what to do with a new loaded item:
+      /*
+        what to do with a new loaded item:
 
-   if there's a list with <locate> less than 1 below this:
-     (equipped items are assumed to have <locate>==0 here) then its
-     container has disappeared from the file   *gasp*
-      -> put all the list back to ch's inventory
-   if there's a list of contents with <locate> 1 below this:
-     check if it's a container
-     - if so: get it from ch, fill it, and give it back to ch (this way the
-         container has its correct weight before modifying ch)
-     - if not: the container is missing -> put all the list to ch's inventory
+        if there's a list with <locate> less than 1 below this:
+          (equipped items are assumed to have <locate>==0 here) then its
+          container has disappeared from the file   *gasp*
+           -> put all the list back to ch's inventory
+        if there's a list of contents with <locate> 1 below this:
+          check if it's a container
+          - if so: get it from ch, fill it, and give it back to ch (this way the
+              container has its correct weight before modifying ch)
+          - if not: the container is missing -> put all the list to ch's inventory
 
-   for items with negative <locate>:
-     if there's already a list of contents with the same <locate> put obj to it
-     if not, start a new list
+        for items with negative <locate>:
+          if there's already a list of contents with the same <locate> put obj to it
+          if not, start a new list
 
- Confused? Well maybe you can think of some better text to be put here ...
+      Confused? Well maybe you can think of some better text to be put here ...
 
- since <locate> for contents is < 0 the list indices are switched to
- non-negative
- */
+      since <locate> for contents is < 0 the list indices are switched to
+      non-negative
+      */
 
-        if (locate > 0) { /* item equipped */
-          for (j = MAX_BAG_ROWS-1;j > 0;j--)
-            if (cont_row[j]) { /* no container -> back to ch's inventory */
-              for (;cont_row[j];cont_row[j] = obj1) {
-                obj1 = cont_row[j]->next_content;
-                obj_to_char(cont_row[j], ch);
-              }
-              cont_row[j] = NULL;
+      if (locate > 0)
+      { /* item equipped */
+        for (j = MAX_BAG_ROWS - 1; j > 0; j--)
+          if (cont_row[j])
+          { /* no container -> back to ch's inventory */
+            for (; cont_row[j]; cont_row[j] = obj1)
+            {
+              obj1 = cont_row[j]->next_content;
+              obj_to_char(cont_row[j], ch);
             }
-          if (cont_row[0]) { /* content list existing */
-            if (GET_OBJ_TYPE(temp) == ITEM_CONTAINER) {
-              /* rem item ; fill ; equip again */
-              temp = unequip_char(ch, locate-1);
-              temp->contains = NULL; /* should be empty - but who knows */
-              for (;cont_row[0];cont_row[0] = obj1) {
-                obj1 = cont_row[0]->next_content;
-                obj_to_obj(cont_row[0], temp);
-              }
-              equip_char(ch, temp, locate-1);
-            } else { /* object isn't container -> empty content list */
-              for (;cont_row[0];cont_row[0] = obj1) {
-                obj1 = cont_row[0]->next_content;
-                obj_to_char(cont_row[0], ch);
-              }
-              cont_row[0] = NULL;
-            }
+            cont_row[j] = NULL;
           }
-        } else { /* locate <= 0 */
-          for (j = MAX_BAG_ROWS-1;j > -locate;j--)
-            if (cont_row[j]) { /* no container -> back to ch's inventory */
-              for (;cont_row[j];cont_row[j] = obj1) {
-                obj1 = cont_row[j]->next_content;
-                obj_to_char(cont_row[j], ch);
-              } 
-              cont_row[j] = NULL;
+        if (cont_row[0])
+        { /* content list existing */
+          if (GET_OBJ_TYPE(temp) == ITEM_CONTAINER)
+          {
+            /* rem item ; fill ; equip again */
+            temp = unequip_char(ch, locate - 1);
+            temp->contains = NULL; /* should be empty - but who knows */
+            for (; cont_row[0]; cont_row[0] = obj1)
+            {
+              obj1 = cont_row[0]->next_content;
+              obj_to_obj(cont_row[0], temp);
             }
-
-          if (j == -locate && cont_row[j]) { /* content list existing */
-            if (GET_OBJ_TYPE(temp) == ITEM_CONTAINER) {
-              /* take item ; fill ; give to char again */
-              obj_from_char(temp);
-              temp->contains = NULL;
-              for (;cont_row[j];cont_row[j] = obj1) {
-                obj1 = cont_row[j]->next_content;
-                obj_to_obj(cont_row[j], temp);
-              }
-              obj_to_char(temp, ch); /* add to inv first ... */
-            } else { /* object isn't container -> empty content list */
-              for (;cont_row[j];cont_row[j] = obj1) {
-                obj1 = cont_row[j]->next_content;
-                obj_to_char(cont_row[j], ch);
-              }
-              cont_row[j] = NULL;
+            equip_char(ch, temp, locate - 1);
+          }
+          else
+          { /* object isn't container -> empty content list */
+            for (; cont_row[0]; cont_row[0] = obj1)
+            {
+              obj1 = cont_row[0]->next_content;
+              obj_to_char(cont_row[0], ch);
             }
+            cont_row[0] = NULL;
           }
-
-          if (locate < 0 && locate >= -MAX_BAG_ROWS) {
-               /* let obj be part of content list
-                  but put it at the list's end thus having the items
-                  in the same order as before renting */
-            obj_from_char(temp);
-            if ((obj1 = cont_row[-locate-1])) {
-              while (obj1->next_content)
-                obj1 = obj1->next_content;
-              obj1->next_content = temp;
-            } else
-              cont_row[-locate-1] = temp;
-          }
-        } /* locate less than zero */
-       } else {
-         get_line(fl, line);
+        }
       }
+      else
+      { /* locate <= 0 */
+        for (j = MAX_BAG_ROWS - 1; j > -locate; j--)
+          if (cont_row[j])
+          { /* no container -> back to ch's inventory */
+            for (; cont_row[j]; cont_row[j] = obj1)
+            {
+              obj1 = cont_row[j]->next_content;
+              obj_to_char(cont_row[j], ch);
+            }
+            cont_row[j] = NULL;
+          }
+
+        if (j == -locate && cont_row[j])
+        { /* content list existing */
+          if (GET_OBJ_TYPE(temp) == ITEM_CONTAINER)
+          {
+            /* take item ; fill ; give to char again */
+            obj_from_char(temp);
+            temp->contains = NULL;
+            for (; cont_row[j]; cont_row[j] = obj1)
+            {
+              obj1 = cont_row[j]->next_content;
+              obj_to_obj(cont_row[j], temp);
+            }
+            obj_to_char(temp, ch); /* add to inv first ... */
+          }
+          else
+          { /* object isn't container -> empty content list */
+            for (; cont_row[j]; cont_row[j] = obj1)
+            {
+              obj1 = cont_row[j]->next_content;
+              obj_to_char(cont_row[j], ch);
+            }
+            cont_row[j] = NULL;
+          }
+        }
+
+        if (locate < 0 && locate >= -MAX_BAG_ROWS)
+        {
+          /* let obj be part of content list
+             but put it at the list's end thus having the items
+             in the same order as before renting */
+          obj_from_char(temp);
+          if ((obj1 = cont_row[-locate - 1]))
+          {
+            while (obj1->next_content)
+              obj1 = obj1->next_content;
+            obj1->next_content = temp;
+          }
+          else
+            cont_row[-locate - 1] = temp;
+        }
+      } /* locate less than zero */
     }
+    else
+    {
+      get_line(fl, line);
+    }
+  }
 
   /* Little hoarding check. -gg 3/1/98 */
-  mudlog(NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), TRUE, "%s (level %d) has %d objects (max %d).", 
-	GET_NAME(ch), GET_LEVEL(ch), num_objs, CONFIG_MAX_OBJ_SAVE);
+  mudlog(NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), TRUE, "%s (level %d) has %d objects (max %d).",
+         GET_NAME(ch), GET_LEVEL(ch), num_objs, CONFIG_MAX_OBJ_SAVE);
 
   fclose(fl);
 
