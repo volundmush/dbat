@@ -121,6 +121,10 @@ void htree_del(struct htree_node *root, IDXTYPE htindex)
 
 IDXTYPE htree_find(struct htree_node *root, IDXTYPE htindex)
 {
+  if (! root)
+    return NOWHERE;
+  if(htindex == NOTHING) 
+    return NOTHING;
   struct htree_node *tmp;
 
   tmp = htree_find_node(root, htindex);

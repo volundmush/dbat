@@ -29,7 +29,6 @@ struct obj_data {
    bitvector_t  extra_flags[EF_ARRAY_MAX]; /* If it hums, glows, etc.  */
    int64_t  weight;         /* Weigt what else                     */
    int  cost;           /* Value when sold (gp.)               */
-   int  cost_per_day;   /* Cost to keep pr. real day           */
    int  timer;          /* Timer for object                    */
    bitvector_t  bitvector[AF_ARRAY_MAX]; /* To set chars bits          */
    int  size;           /* Size class of object                */
@@ -58,26 +57,44 @@ struct obj_data {
    struct obj_data *next_content; /* For 'contains' lists             */
    struct obj_data *next;         /* For the object list              */
 
-   struct obj_spellbook_spell *sbinfo;  /* For spellbook info */
    struct char_data *sitting;       /* Who is sitting on me? */
+
+   // scouter frequency
    int scoutfreq;
+
    time_t lload;
+
+   // healing tank charge
    int healcharge;
+
+   // ki attacks
    int64_t kicharge;
    int kitype;
    struct char_data *user;
    struct char_data *target;
    int distance;
+
+   // something about food
    int foob;
+
+   // auction data
    int32_t aucter;
    int32_t curBidder;
    time_t aucTime;
    int bid;
    int startbid;
    char *auctname;
+   
+   // notes and boards
    int posttype;
    struct obj_data *posted_to;
+
+   // icewall stuff
    struct obj_data *fellow_wall;
+
+   // UNUSED FIELDS below here
+   int  cost_per_day;   /* Cost to keep pr. real day           */
+   struct obj_spellbook_spell *sbinfo;  /* For spellbook info */
 };
 
 extern struct index_data *obj_index;
