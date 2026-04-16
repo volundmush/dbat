@@ -92,10 +92,11 @@ CREATE TABLE object_prototypes(
     -- bitfield for object properties like magic, invisible, etc
     bitvector BLOB NOT NULL DEFAULT 0,
 
+    type_flag INTEGER NOT NULL DEFAULT 0,
+
     weight INTEGER NOT NULL DEFAULT 0,
     cost INTEGER NOT NULL DEFAULT 0,
-    -- Cost per day isn't really used...
-    cost_per_day INTEGER NOT NULL DEFAULT 0,
+
     -- level needed to use the object.
     level INTEGER NOT NULL DEFAULT 0,
     size INTEGER NOT NULL DEFAULT 0
@@ -154,8 +155,6 @@ CREATE TABLE mobile_prototypes(
     long_descr TEXT NOT NULL DEFAULT '',
     -- the description of the mob for when looked at, can contain color codes.
     description TEXT NOT NULL DEFAULT '',
-    -- not sure if actually used by mobs, but documented as doing so.
-    title TEXT NOT NULL,
     size INTEGER NOT NULL DEFAULT 0,
     -- enum for sex. db/consts/sex.h
     sex INTEGER NOT NULL DEFAULT 0,
@@ -170,7 +169,6 @@ CREATE TABLE mobile_prototypes(
     -- bitfield for affect flags like bless, curse, etc
     -- db/consts/affects.h
     affected_by BLOB NOT NULL DEFAULT 0,
-    level INTEGER NOT NULL DEFAULT 0,
 
     -- ranges from -1000 to +1000, for evil to good. db/consts/aligns.h
     alignment INTEGER NOT NULL DEFAULT 0,
@@ -184,8 +182,20 @@ CREATE TABLE mobile_prototypes(
     -- cha is actually spd in code. because derp.
     cha INTEGER NOT NULL DEFAULT 0,
 
-    -- mobile stuff that's NOT used by instances below...
-    -- enum for standing, sitting, etc
+    position INTEGER NOT NULL DEFAULT 0,
+
+    level INTEGER NOT NULL DEFAULT 0,
+    race_level INTEGER NOT NULL DEFAULT 0,
+    level_adj INTEGER NOT NULL DEFAULT 0,
+    armor INTEGER NOT NULL DEFAULT 0,
+
+    basepl INTEGER NOT NULL DEFAULT 0,
+    baseki INTEGER NOT NULL DEFAULT 0,
+    basest INTEGER NOT NULL DEFAULT 0,
+    
+    gold INTEGER NOT NULL DEFAULT 0,
+
+    -- anything below this isn't to be included in the instances...
     default_position INTEGER NOT NULL DEFAULT 0
 
 );
@@ -214,7 +224,7 @@ CREATE TABLE rooms (
 
     -- Included below in preparation for phase 2.
     light INTEGER NOT NULL DEFAULT 0,
-    timed INTEGER NOT NULL DEFAULT 0,
+    timed INTEGER NOT NULL DEFAULT -1,
     dmg INTEGER NOT NULL DEFAULT 0,
     gravity INTEGER NOT NULL DEFAULT 0,
     geffect INTEGER NOT NULL DEFAULT 0
