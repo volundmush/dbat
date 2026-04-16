@@ -78,3 +78,5 @@ zig-out/
 .killscript
 .pause
 coredumps
+__pycache__
+*.pyc

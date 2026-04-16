@@ -38,21 +38,18 @@ struct reset_com {
 #define CUR_ZONE_VERSION  2
 
 struct zone_data {
+   zone_vnum number;	    /* virtual number of this zone	  */
    char	*name;		    /* name of this zone                  */
-   char *builders;          /* namelist of builders allowed to    */
-                            /* modify this zone.		  */
+   char *builders;          /* namelist of builders allowed to modify this zone.		  */
    int	lifespan;           /* how long between resets (minutes)  */
    int	age;                /* current age of this zone (minutes) */
    room_vnum bot;           /* starting room number for this zone */
    room_vnum top;           /* upper limit for rooms in this zone */
-
    int	reset_mode;         /* conditions for reset (see below)   */
-   zone_vnum number;	    /* virtual number of this zone	  */
-   struct reset_com *cmd;   /* command table for reset	          */
    int min_level;           /* Minimum level to enter zone        */
    int max_level;           /* Max Mortal level to enter zone     */
    bitvector_t zone_flags[ZF_ARRAY_MAX];          /* Flags for the zone.                */
-
+   struct reset_com *cmd;   /* command table for reset	          */
 
    /*
     * Reset mode:
