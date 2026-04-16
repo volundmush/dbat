@@ -321,7 +321,7 @@ struct char_data
 
    struct char_data *poisonby;
 
-      // grappling stuff
+   // grappling stuff
    int grap;
    struct char_data *grappling;
    struct char_data *grappled;

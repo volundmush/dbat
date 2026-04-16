@@ -187,6 +187,7 @@ CREATE TABLE mobile_prototypes(
     level INTEGER NOT NULL DEFAULT 0,
     race_level INTEGER NOT NULL DEFAULT 0,
     level_adj INTEGER NOT NULL DEFAULT 0,
+    
     armor INTEGER NOT NULL DEFAULT 0,
 
     basepl INTEGER NOT NULL DEFAULT 0,
@@ -485,6 +486,9 @@ CREATE TABLE characters (
     level_adj INTEGER NOT NULL DEFAULT 0,
     
     armor INTEGER NOT NULL DEFAULT 0,
+    speedboost INTEGER NOT NULL DEFAULT 0,
+    armor_last INTEGER NOT NULL DEFAULT 0,
+    accuracy INTEGER NOT NULL DEFAULT 0,
 
     -- Admin stuff.
     admlevel INTEGER NOT NULL DEFAULT 0,
@@ -542,6 +546,12 @@ CREATE TABLE characters (
     energy FLOAT NOT NULL DEFAULT 1.0,
     stamina FLOAT NOT NULL DEFAULT 1.0,
     lifeforce FLOAT NOT NULL DEFAULT 1.0,
+
+    -- ship stuff
+    ping INTEGER NOT NULL DEFAULT 0,
+    radar1 INTEGER NULL REFERENCES rooms(id) ON DELETE SET NULL ON UPDATE CASCADE,
+    radar2 INTEGER NULL REFERENCES rooms(id) ON DELETE SET NULL ON UPDATE CASCADE,
+    radar3 INTEGER NULL REFERENCES rooms(id) ON DELETE SET NULL ON UPDATE CASCADE,
 
     -- the room a character died in, if applicable. Used for resurrections maybe.
     -- -1 in game, nullable here
@@ -785,8 +795,19 @@ CREATE TABLE objects (
     in_room INTEGER NULL REFERENCES rooms(id) ON DELETE CASCADE ON UPDATE CASCADE,
     -- the object this item is in, if not carried or worn by a character
     in_obj INTEGER NULL REFERENCES objects(id) ON DELETE CASCADE ON UPDATE CASCADE,
-    -- the user that owns this item, for player-owned items and such
+    
+    -- the character that owns this item, regardless of nesting.
+    -- IE: if this is in a container held by character, owner_id is that character.
     owner_id INTEGER NULL REFERENCES characters(id) ON DELETE SET NULL ON UPDATE CASCADE
+);
+
+CREATE TABLE objects_item_values (
+    object_id INTEGER NOT NULL REFERENCES objects(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    -- from 0 to 15, the index of this value in the item_values sequence
+    val_index INTEGER NOT NULL,
+    -- the integer value
+    val_number INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY(object_id, val_index)
 );
 
 CREATE TABLE objects_dgscript_orders (
