@@ -425,7 +425,7 @@ CREATE TABLE users (
 );
 
 -- Used for player characters right now, but ready for others....
-CREATE TABLE characters(
+CREATE TABLE characters (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     -- the existing game has a 'generation' field as a time_t used for dupe checks, but that's not needed
     -- because sqlite already solves that problem...
@@ -439,6 +439,9 @@ CREATE TABLE characters(
     -- Not all saved characters HAVE users, only player characters... which are currently the only kind of 'saved character'
     user_id INTEGER NULL REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
 
+    -- In no situation should both user_id and mobile_prototype_id be set. Just one of them, or possibly neither.
+    mobile_prototype_id INTEGER NULL REFERENCES mobile_prototypes(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+
     -- ALL MOBILE PROTOTYPE DATA HAS TO BE DUPLICATED HERE...
     -- space separated keywords for searching, should not contain color codes.
     name TEXT NOT NULL DEFAULT '',
@@ -448,8 +451,6 @@ CREATE TABLE characters(
     long_descr TEXT NOT NULL DEFAULT '',
     -- the description of the mob for when looked at, can contain color codes.
     description TEXT NOT NULL DEFAULT '',
-    -- not sure if actually used by mobs, but documented as doing so.
-    title TEXT NOT NULL,
     size INTEGER NOT NULL DEFAULT 0,
     -- enum for sex. db/consts/sex.h
     sex INTEGER NOT NULL DEFAULT 0,
@@ -464,7 +465,6 @@ CREATE TABLE characters(
     -- bitfield for affect flags like bless, curse, etc
     -- db/consts/affects.h
     affected_by BLOB NOT NULL DEFAULT 0,
-    level INTEGER NOT NULL DEFAULT 0,
 
     -- ranges from -1000 to +1000, for evil to good. db/consts/aligns.h
     alignment INTEGER NOT NULL DEFAULT 0,
@@ -477,6 +477,25 @@ CREATE TABLE characters(
     con INTEGER NOT NULL DEFAULT 0,
     -- cha is actually spd in code. because derp.
     cha INTEGER NOT NULL DEFAULT 0,
+
+    position INTEGER NOT NULL DEFAULT 0,
+
+    level INTEGER NOT NULL DEFAULT 0,
+    race_level INTEGER NOT NULL DEFAULT 0,
+    level_adj INTEGER NOT NULL DEFAULT 0,
+    
+    armor INTEGER NOT NULL DEFAULT 0,
+
+    -- Admin stuff.
+    admlevel INTEGER NOT NULL DEFAULT 0,
+    admflags BLOB NOT NULL DEFAULT 0,
+
+    -- base stats
+    basepl INTEGER NOT NULL DEFAULT 0,
+    baseki INTEGER NOT NULL DEFAULT 0,
+    basest INTEGER NOT NULL DEFAULT 0,
+    
+    gold INTEGER NOT NULL DEFAULT 0,
 
     -- END MOBILE PROTOTYPE DATA SECTION
 
@@ -491,15 +510,15 @@ CREATE TABLE characters(
     voice TEXT NOT NULL DEFAULT '',
     -- the special RPP 'feature' addition some players buy.
     feature TEXT NOT NULL DEFAULT '',
+    title TEXT NOT NULL DEFAULT '',
+
+    rdisplay TEXT NOT NULL DEFAULT '',
 
     hometown INTEGER NULL REFERENCES rooms(id) ON DELETE SET NULL ON UPDATE CASCADE,
     -- time/date stuff in time_data... skipping for now...
 
     height INTEGER NOT NULL DEFAULT 0,
     weight INTEGER NOT NULL DEFAULT 0,
-
-    -- enum for standing, sitting, etc
-    position INTEGER NOT NULL DEFAULT 0,
 
     -- the character that is master to this char, if any
     -- this is for special charm affect, pet ownership, etc.
@@ -509,18 +528,14 @@ CREATE TABLE characters(
     bodyparts BLOB NOT NULL DEFAULT 0,
 
     -- the character's money.
-    gold INTEGER NOT NULL DEFAULT 0,
     bank_gold INTEGER NOT NULL DEFAULT 0,
+    lastint INTEGER NOT NULL DEFAULT 0,
 
     -- accrued experience towards next level.
     exp INTEGER NOT NULL DEFAULT 0,
-
-    -- base power level, technically health
-    basepl INTEGER NOT NULL DEFAULT 0,
-    -- base ki
-    baseki INTEGER NOT NULL DEFAULT 0,
-    -- base stamina
-    basest INTEGER NOT NULL DEFAULT 0,
+    -- the current upgrade points for androids.
+    upgrade INTEGER NOT NULL DEFAULT 0,
+    practices INTEGER NOT NULL DEFAULT 0,
 
     -- the character's current vital levels, as meters.
     health FLOAT NOT NULL DEFAULT 1.0,
@@ -540,14 +555,22 @@ CREATE TABLE characters(
 
     -- the current kaioken level of the character, if any. 0 if not kaioken'd up.
     kaioken INTEGER NOT NULL DEFAULT 0,
+
+    -- used for fly higher
+    altitude INTEGER NOT NULL DEFAULT 0,
+
     -- how many absorbs the character has done for majins/bios.
     absorbs INTEGER NOT NULL DEFAULT 0,
     -- how many boosts the character has
     boosts INTEGER NOT NULL DEFAULT 0,
-    -- the current upgrade points for androids.
-    upgrade INTEGER NOT NULL DEFAULT 0,
+    blesslvl INTEGER NOT NULL DEFAULT 0,
+    ingestLearned INTEGER NOT NULL DEFAULT 0,
+    asb INTEGER NOT NULL DEFAULT 0,
+    regen INTEGER NOT NULL DEFAULT 0,
+    
     -- how much base PL was gained by majinize, if the character is majinized.
     majinize INTEGER NOT NULL DEFAULT 0,
+    majinizer INTEGER NULL REFERENCES characters(id) ON DELETE SET NULL ON UPDATE CASCADE,
 
     -- the current suppression level of the character, for the suppression mechanic.
     suppression INTEGER NOT NULL DEFAULT 0,
@@ -558,6 +581,7 @@ CREATE TABLE characters(
 
     -- transformation costs class. is 1, 2, or 3
     transclass INTEGER NOT NULL DEFAULT 2,
+    preference INTEGER NOT NULL DEFAULT 0,
 
     -- arlian molt stuff
     -- the amount of experience this character has put into their mobile level, for the mobile level mechanic.
@@ -578,13 +602,31 @@ CREATE TABLE characters(
     forgetcount INTEGER NOT NULL DEFAULT 0,
     skill_slots INTEGER NOT NULL DEFAULT 0,
 
-    -- Preferences
-    lifeperf INTEGER NOT NULL DEFAULT 0 -- at what level of health% does lifeforce kick in?
-);
+    -- time stuff
+    time_birth INTEGER NOT NULL DEFAULT 0,
+    time_created INTEGER NOT NULL DEFAULT 0,
+    time_logon INTEGER NOT NULL DEFAULT 0,
+    time_maxage INTEGER NOT NULL DEFAULT 0,
+    time_played INTEGER NOT NULL DEFAULT 0,
+    lastpl INTEGER NOT NULL DEFAULT 0,
 
--- handles the player_special_data struct..
-CREATE TABLE player_special(
-    id INTEGER PRIMARY KEY REFERENCES characters(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    -- cooldowns
+    con_cooldown INTEGER NOT NULL DEFAULT 0,
+    relax_count INTEGER NOT NULL DEFAULT 0,
+    cooldown INTEGER NOT NULL DEFAULT 0,
+    con_sdcooldown INTEGER NOT NULL DEFAULT 0,
+    gooptime INTEGER NOT NULL DEFAULT 0,
+
+    olc_zone INTEGER NULL REFERENCES zones(id) ON DELETE SET NULL ON UPDATE CASCADE,
+
+    -- food, drink sleep
+    sleeptime INTEGER NOT NULL DEFAULT 0,
+    foodr INTEGER NOT NULL DEFAULT 0,
+    overf INTEGER NOT NULL DEFAULT 0,
+
+    -- Preferences
+    lifeperf INTEGER NOT NULL DEFAULT 0, -- at what level of health% does lifeforce kick in?
+
     poofin TEXT NOT NULL DEFAULT '',
     poofout TEXT NOT NULL DEFAULT '',
     -- the character ID of the last person to tell this character something, for the reply command and such.
@@ -612,6 +654,7 @@ CREATE TABLE player_special(
     racial_pref INTEGER NOT NULL DEFAULT 0
 );
 
+
 CREATE TABLE character_bonuses (
     character_id INTEGER NOT NULL REFERENCES characters(id) ON DELETE CASCADE ON UPDATE CASCADE,
     -- enum for bonus type
@@ -633,7 +676,7 @@ CREATE TABLE characters_conditions (
 CREATE TABLE characters_affects (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     character_id INTEGER NOT NULL REFERENCES characters(id) ON DELETE CASCADE ON UPDATE CASCADE,
-    -- 0 for affects, 1 for affectv
+    -- 0 for affects, 1 for affectv... is affectv EVEN USED? doesn't seem to be.
     category_id INTEGER NOT NULL DEFAULT 0,
     duration INTEGER NOT NULL DEFAULT 0,
     modifier INTEGER NOT NULL DEFAULT 0,
@@ -672,6 +715,24 @@ CREATE TABLE characters_skills (
     -- how many times this skill has been perfected, for skills that can be perfected
     skill_perfections INTEGER NOT NULL DEFAULT 0,
     PRIMARY KEY(character_id, skill_id)
+);
+
+CREATE TABLE characters_boards (
+    character_id INTEGER NOT NULL REFERENCES characters(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    -- enum for board ID
+    board_id INTEGER NOT NULL,
+    -- the date of the last read post on this board for this character, for tracking which posts are new
+    last_read_date INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY(character_id, board_id)
+);
+
+CREATE TABLE characters_transcosts (
+    character_id INTEGER NOT NULL REFERENCES characters(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    -- enum for transformation class
+    transtier INTEGER NOT NULL,
+    -- the current transformation cost for this character for this transformation class, for the transformation
+    paid INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY(character_id, transtier)
 );
 
 -- both player character inventory and House contents are stored in this table. the "persistent" objects.

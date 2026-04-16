@@ -403,8 +403,6 @@ struct char_data
    int rage_meter;
    short fury;
 
-   short btime;
-
    // distance attention stuff
    room_vnum listenroom;
    int eavesdir;
@@ -553,6 +551,7 @@ struct char_data
    struct affected_type *affectedv;
    /* affected by what combat spells	*/
    struct queued_act *actq; /* queued spells / other actions	*/
+   short btime;
 };
 
 extern struct char_data *character_list;
