@@ -108,6 +108,8 @@ class CharacterBase:
     act: int = 0
     affected_by: int = 0
     level: int = 0
+    race_level: int = 0
+    level_adj: int = 0
 
     alignment: int = 0
     
@@ -125,6 +127,8 @@ class CharacterBase:
     baseki: int = 0
 
     damage_mod: int = 0
+
+    armor: int = 0
 
 @dataclass(slots=True)
 class CharacterPrototype(CharacterBase):
@@ -144,7 +148,7 @@ class SkillData:
 class Character(CharacterBase):
     id: int = -1
     affected: int = 0
-    skills: dict[int, SkillData] = field(default_factory=dict)
+    
     android_model: str | None = None
 
     dgscript_variables: dict[str, str] = field(default_factory=dict)
@@ -179,6 +183,7 @@ class Character(CharacterBase):
     exp: int = 0
     conditions: dict[int, int] = field(default_factory=dict)
 
+    skills: dict[int, SkillData] = field(default_factory=dict)
     forgeting: int = 0
     forgetcount: int = 0
 
