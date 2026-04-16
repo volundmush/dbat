@@ -1,7 +1,5 @@
 -- This is using sqlite3 syntax.
 
-INSERT INTO migrations (name) VALUES ('001_phase1.sql');
-
 CREATE TABLE zones (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL DEFAULT '',
@@ -22,7 +20,10 @@ CREATE TABLE zones (
     -- maximum level for players to enter this zone, 0 disables checks
     max_level INTEGER NOT NULL DEFAULT 0,
     -- 128-bit bitfield for zone flags
-    zone_flags BLOB NOT NULL DEFAULT 0
+    zone_flags0 INTEGER NOT NULL DEFAULT 0,
+    zone_flags1 INTEGER NOT NULL DEFAULT 0,
+    zone_flags2 INTEGER NOT NULL DEFAULT 0,
+    zone_flags3 INTEGER NOT NULL DEFAULT 0
 );
 
 
@@ -86,11 +87,20 @@ CREATE TABLE object_prototypes(
     -- The line shown when this object is in a room. Can contain color codes.
     action_description TEXT NOT NULL DEFAULT '',
     -- bitfield for extra flags like glow, hum, etc
-    extra_flags BLOB NOT NULL DEFAULT 0,
+    extra_flags0 INTEGER NOT NULL DEFAULT 0,
+    extra_flags1 INTEGER NOT NULL DEFAULT 0,
+    extra_flags2 INTEGER NOT NULL DEFAULT 0,
+    extra_flags3 INTEGER NOT NULL DEFAULT 0,
     -- bitfield for where this object can be worn,
-    wear_flags BLOB NOT NULL DEFAULT 0,
+    wear_flags0 INTEGER NOT NULL DEFAULT 0,
+    wear_flags1 INTEGER NOT NULL DEFAULT 0,
+    wear_flags2 INTEGER NOT NULL DEFAULT 0,
+    wear_flags3 INTEGER NOT NULL DEFAULT 0,
     -- bitfield for object properties like magic, invisible, etc
-    bitvector BLOB NOT NULL DEFAULT 0,
+    bitvector0 INTEGER NOT NULL DEFAULT 0,
+    bitvector1 INTEGER NOT NULL DEFAULT 0,
+    bitvector2 INTEGER NOT NULL DEFAULT 0,
+    bitvector3 INTEGER NOT NULL DEFAULT 0,
 
     type_flag INTEGER NOT NULL DEFAULT 0,
 
@@ -165,10 +175,16 @@ CREATE TABLE mobile_prototypes(
 
     -- bitfield for mob flags like sentinel, aggressive, etc.
     -- db/consts/mobflags.h
-    act BLOB NOT NULL DEFAULT 0,
+    act0 INTEGER NOT NULL DEFAULT 0,
+    act1 INTEGER NOT NULL DEFAULT 0,
+    act2 INTEGER NOT NULL DEFAULT 0,
+    act3 INTEGER NOT NULL DEFAULT 0,
     -- bitfield for affect flags like bless, curse, etc
     -- db/consts/affects.h
-    affected_by BLOB NOT NULL DEFAULT 0,
+    affected_by0 INTEGER NOT NULL DEFAULT 0,
+    affected_by1 INTEGER NOT NULL DEFAULT 0,
+    affected_by2 INTEGER NOT NULL DEFAULT 0,
+    affected_by3 INTEGER NOT NULL DEFAULT 0,
 
     -- ranges from -1000 to +1000, for evil to good. db/consts/aligns.h
     alignment INTEGER NOT NULL DEFAULT 0,
@@ -221,7 +237,10 @@ CREATE TABLE rooms (
     description TEXT NOT NULL DEFAULT '',
     -- bitfield for room flags like indoors, no-mob, etc
     -- check db/consts/roomflags.h
-    room_flags BLOB NOT NULL DEFAULT 0,
+    room_flags0 INTEGER NOT NULL DEFAULT 0,
+    room_flags1 INTEGER NOT NULL DEFAULT 0,
+    room_flags2 INTEGER NOT NULL DEFAULT 0,
+    room_flags3 INTEGER NOT NULL DEFAULT 0,
 
     -- Included below in preparation for phase 2.
     light INTEGER NOT NULL DEFAULT 0,
@@ -310,7 +329,10 @@ CREATE TABLE guilds (
     -- Guilds shouldn't ever BE without a gm, but may in existence currently are, so foreign key is flexible.
     gm INTEGER NULL DEFAULT NULL REFERENCES mobile_prototypes(id) ON DELETE RESTRICT ON UPDATE CASCADE,
     -- bitfield for which classes/races can use it.
-    with_who BLOB NOT NULL DEFAULT 0,
+    with_who0 INTEGER NOT NULL DEFAULT 0,
+    with_who1 INTEGER NOT NULL DEFAULT 0,
+    with_who2 INTEGER NOT NULL DEFAULT 0,
+    with_who3 INTEGER NOT NULL DEFAULT 0,
     -- enum for when the guild is open, e.g. always, night, etc
     open INTEGER NOT NULL DEFAULT 0,
     -- enum for when the guild is closed, e.g. always, night, etc
@@ -346,7 +368,10 @@ CREATE TABLE shops (
     -- this SHOULDN'T be null, I would rather this be NOT NULL, but some shops don't have keepers right now.
     keeper INTEGER NULL DEFAULT NULL REFERENCES mobile_prototypes(id) ON DELETE RESTRICT ON UPDATE CASCADE,
     -- bitfield for which classes/races can use it.
-    with_who BLOB NOT NULL DEFAULT 0,
+    with_who0 INTEGER NOT NULL DEFAULT 0,
+    with_who1 INTEGER NOT NULL DEFAULT 0,
+    with_who2 INTEGER NOT NULL DEFAULT 0,
+    with_who3 INTEGER NOT NULL DEFAULT 0,
     -- enum for when the shop opens, e.g. always, night, etc
     open1 INTEGER NOT NULL DEFAULT 0,
     -- enum for when the shop closes
@@ -462,10 +487,16 @@ CREATE TABLE characters (
 
     -- bitfield for mob flags like sentinel, aggressive, etc.
     -- db/consts/mobflags.h
-    act BLOB NOT NULL DEFAULT 0,
+    act0 INTEGER NOT NULL DEFAULT 0,
+    act1 INTEGER NOT NULL DEFAULT 0,
+    act2 INTEGER NOT NULL DEFAULT 0,
+    act3 INTEGER NOT NULL DEFAULT 0,
     -- bitfield for affect flags like bless, curse, etc
     -- db/consts/affects.h
-    affected_by BLOB NOT NULL DEFAULT 0,
+    affected_by0 INTEGER NOT NULL DEFAULT 0,
+    affected_by1 INTEGER NOT NULL DEFAULT 0,
+    affected_by2 INTEGER NOT NULL DEFAULT 0,
+    affected_by3 INTEGER NOT NULL DEFAULT 0,
 
     -- ranges from -1000 to +1000, for evil to good. db/consts/aligns.h
     alignment INTEGER NOT NULL DEFAULT 0,
@@ -492,7 +523,10 @@ CREATE TABLE characters (
 
     -- Admin stuff.
     admlevel INTEGER NOT NULL DEFAULT 0,
-    admflags BLOB NOT NULL DEFAULT 0,
+    admflags0 INTEGER NOT NULL DEFAULT 0,
+    admflags1 INTEGER NOT NULL DEFAULT 0,
+    admflags2 INTEGER NOT NULL DEFAULT 0,
+    admflags3 INTEGER NOT NULL DEFAULT 0,
 
     -- base stats
     basepl INTEGER NOT NULL DEFAULT 0,
@@ -529,7 +563,10 @@ CREATE TABLE characters (
     master_id INTEGER NULL REFERENCES characters(id) ON DELETE SET NULL ON UPDATE CASCADE,
 
     -- bitfield for body parts like head, arms, legs, etc
-    bodyparts BLOB NOT NULL DEFAULT 0,
+    bodyparts0 INTEGER NOT NULL DEFAULT 0,
+    bodyparts1 INTEGER NOT NULL DEFAULT 0,
+    bodyparts2 INTEGER NOT NULL DEFAULT 0,
+    bodyparts3 INTEGER NOT NULL DEFAULT 0,
 
     -- the character's money.
     bank_gold INTEGER NOT NULL DEFAULT 0,
@@ -650,7 +687,10 @@ CREATE TABLE characters (
     -- the room this character will load into when they log in, for the loadroom command and such.
     load_room INTEGER NULL REFERENCES rooms(id) ON DELETE SET NULL ON UPDATE CASCADE,
     -- bitfield for various player preferences, e.g. auto-loot, auto-sac, etc
-    pref BLOB NOT NULL DEFAULT 0,
+    pref0 INTEGER NOT NULL DEFAULT 0,
+    pref1 INTEGER NOT NULL DEFAULT 0,
+    pref2 INTEGER NOT NULL DEFAULT 0,
+    pref3 INTEGER NOT NULL DEFAULT 0,
     -- the number of lines per page for this character, for the page command and such.
     page_length INTEGER NOT NULL DEFAULT 0,
     -- how many players has this player killed?
@@ -769,11 +809,20 @@ CREATE TABLE objects (
     -- The line shown when this object is in a room. Can contain color codes.
     action_description TEXT NOT NULL DEFAULT '',
     -- bitfield for extra flags like glow, hum, etc
-    extra_flags BLOB NOT NULL DEFAULT 0,
+    extra_flags0 INTEGER NOT NULL DEFAULT 0,
+    extra_flags1 INTEGER NOT NULL DEFAULT 0,
+    extra_flags2 INTEGER NOT NULL DEFAULT 0,
+    extra_flags3 INTEGER NOT NULL DEFAULT 0,
     -- bitfield for where this object can be worn,
-    wear_flags BLOB NOT NULL DEFAULT 0,
+    wear_flags0 INTEGER NOT NULL DEFAULT 0,
+    wear_flags1 INTEGER NOT NULL DEFAULT 0,
+    wear_flags2 INTEGER NOT NULL DEFAULT 0,
+    wear_flags3 INTEGER NOT NULL DEFAULT 0,
     -- bitfield for object properties like magic, invisible, etc
-    bitvector BLOB NOT NULL DEFAULT 0,
+    bitvector0 INTEGER NOT NULL DEFAULT 0,
+    bitvector1 INTEGER NOT NULL DEFAULT 0,
+    bitvector2 INTEGER NOT NULL DEFAULT 0,
+    bitvector3 INTEGER NOT NULL DEFAULT 0,
 
     weight INTEGER NOT NULL DEFAULT 0,
     cost INTEGER NOT NULL DEFAULT 0,

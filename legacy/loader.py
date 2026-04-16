@@ -7,6 +7,61 @@ import re
 from pathlib import Path
 from enum import IntEnum
 
+def asciiflag_conv(flag: str) -> int:
+    flags = 0
+    is_num = True
+    for c in flag:
+        if c.islower():
+            flags |= 1 << (ord(c) - ord('a'))
+        elif c.isupper():
+            flags |= 1 << (26 + (ord(c) - ord('A')))
+        if not (c.isdigit() or c == '-'):
+            is_num = False
+    if is_num:
+        flags = int(flag)
+    return flags
+
+def flag_conv(flags: list[str]) -> int:
+    """
+    Given a list of 4 flags (each of which is a 32-bit integer), return a 128-bit number.
+    """
+    if len(flags) != 4:
+        raise ValueError("Expected 4 flags")
+
+    result = 0
+    for i, flag in enumerate(flags):
+        result |= (asciiflag_conv(flag) & 0xFFFFFFFF) << (32 * i)
+    return result
+
+@dataclass(slots=True)
+class FlagHandler:
+    # the 128-bit number.
+    flags: int = 0
+    array: list[int] = field(default_factory=lambda: [0, 0, 0, 0])
+
+    def as_set(self) -> set[int]:
+        """
+        Returns a set of the bit positions that are set in the flags.
+        """
+        result = set()
+        for i in range(128):
+            if self.flags & (1 << i):
+                result.add(i)
+        return result
+    
+    def load_flags(self, flags_in: list[str]):
+        self.flags = flag_conv(flags_in)
+        self.array = [asciiflag_conv(flag) for flag in flags_in]
+
+    @classmethod
+    def from_flags_list(cls, flags: list[str]) -> "FlagHandler":
+        c = cls()
+        c.load_flags(flags)
+        return c
+    
+    def __int__(self):
+        return self.flags
+
 @dataclass(slots=True)
 class Exit:
     to_room: int = -1
@@ -29,7 +84,7 @@ class Room:
     description: str = ""
     extra_descriptions: list[ExtraDescription] = field(default_factory=list)
     exits: dict[int, Exit] = field(default_factory=dict)
-    room_flags: int = 0
+    room_flags: FlagHandler = field(default_factory=FlagHandler)
     sector_type: int = 0
     proto_script: list[int] = field(default_factory=list)
     zone: int = -1
@@ -59,9 +114,9 @@ class ObjectBase:
     short_description: str = ""
     description: str = ""
     action_description: str = ""
-    extra_flags: int = 0
-    wear_flags: int = 0
-    bitvector: int = 0
+    extra_flags: FlagHandler = field(default_factory=FlagHandler)
+    wear_flags: FlagHandler = field(default_factory=FlagHandler)
+    bitvector: FlagHandler = field(default_factory=FlagHandler)
     extra_descriptions: list[ExtraDescription] = field(default_factory=list)
     values: dict[int, int] = field(default_factory=dict)
 
@@ -105,8 +160,8 @@ class CharacterBase:
     race: int = 0
     chclass: int = 0
     sex: int = 0
-    act: int = 0
-    affected_by: int = 0
+    act: FlagHandler = field(default_factory=FlagHandler)
+    affected_by: FlagHandler = field(default_factory=FlagHandler)
     level: int = 0
     race_level: int = 0
     level_adj: int = 0
@@ -147,8 +202,8 @@ class SkillData:
 @dataclass(slots=True)
 class Character(CharacterBase):
     id: int = -1
-    affected: int = 0
-    
+    affected: FlagHandler = field(default_factory=FlagHandler)
+
     android_model: str | None = None
 
     dgscript_variables: dict[str, str] = field(default_factory=dict)
@@ -250,8 +305,8 @@ class Character(CharacterBase):
     height: int = 0
     weight: int = 0
 
-    pref_flags: int = 0
-    admin_flags: int = 0
+    pref_flags: FlagHandler = field(default_factory=FlagHandler)
+    admin_flags: FlagHandler = field(default_factory=FlagHandler)
 
     affected: list[Affected] = field(default_factory=list)
     affectedv: list[Affected] = field(default_factory=list)
@@ -300,7 +355,7 @@ class Shop:
     open2: int = 0
     close1: int = 0
     close2: int = 0
-    with_who: int = 0
+    with_who: FlagHandler = field(default_factory=FlagHandler)
     bankAccount: int = 0
 
 @dataclass(slots=True)
@@ -315,7 +370,7 @@ class Guild:
     keeper: int | None = None
     open: int = 0
     close: int = 0
-    with_who: int = 0
+    with_who: FlagHandler = field(default_factory=FlagHandler)
 
 @dataclass(slots=True)
 class Component:
@@ -349,7 +404,7 @@ class Zone:
     lifespan: int = 30
     age: int = 0
     reset_mode: int = 2
-    zone_flags: int = 0
+    zone_flags: FlagHandler = field(default_factory=FlagHandler)
     resets: list[ResetCommand] = field(default_factory=list)
     bot: int = 0
     top: int = 0
@@ -377,16 +432,6 @@ class HelpEntry:
     min_level: int = 0
 
 
-def flags_to_new_set(flags: int, flag_enum: IntEnum) -> set:
-    result = set()
-    for i in range(128):
-        if flags & (1 << i):
-            try:
-                result.add(flag_enum(i))
-            except ValueError:
-                pass
-    return result
-
 def strip_color(s: str) -> str:
     """
     This will iterate through the characters in a string. all color codes are prefixed with @
@@ -405,32 +450,6 @@ def strip_color(s: str) -> str:
             out += s[i]
             i += 1
     return out
-
-def asciiflag_conv(flag: str) -> int:
-    flags = 0
-    is_num = True
-    for c in flag:
-        if c.islower():
-            flags |= 1 << (ord(c) - ord('a'))
-        elif c.isupper():
-            flags |= 1 << (26 + (ord(c) - ord('A')))
-        if not (c.isdigit() or c == '-'):
-            is_num = False
-    if is_num:
-        flags = int(flag)
-    return flags
-
-def flag_conv(flags: list[str]) -> int:
-    """
-    Given a list of 4 flags (each of which is a 32-bit integer), return a 128-bit number.
-    """
-    if len(flags) != 4:
-        raise ValueError("Expected 4 flags")
-
-    result = 0
-    for i, flag in enumerate(flags):
-        result |= (asciiflag_conv(flag) & 0xFFFFFFFF) << (32 * i)
-    return result
 
 class Scanner:
 
@@ -549,9 +568,9 @@ def parse_character(f: Scanner) -> Character:
             case "Ac":
                 out.armor = int(value)
             case "Act":
-                out.act = flag_conv(value.split())
+                out.act.load_flags(value.split())
             case "Aff":
-                out.affected_by = flag_conv(value.split())
+                out.affected_by.load_flags(value.split())
             case "Affs":
                 out.affected = _parse_affects()
             case "Affv":
@@ -561,7 +580,7 @@ def parse_character(f: Scanner) -> Character:
             case "Abso":
                 out.absorbs = int(value)
             case "AdmF":
-                out.admin_flags = flag_conv(value.split())
+                out.admin_flags.load_flags(value.split())
             case "Alin":
                 out.alignment = int(value)
             case "Aura":
@@ -693,7 +712,7 @@ def parse_character(f: Scanner) -> Character:
             case "Posi":
                 out.position = int(value)
             case "Pref":
-                out.pref_flags = flag_conv(value.split())
+                out.pref_flags.load_flags(value.split())
             case "Prff":
                 out.preference = int(value)
             case "Race":
@@ -786,10 +805,10 @@ def parse_objects(f: Scanner):
         
         symbols = f.readline().split()
         out.item_type = int(symbols[0])
-        out.extra_flags = flag_conv(symbols[1:5])
+        out.extra_flags.load_flags(symbols[1:5])
         
-        out.wear_flags = flag_conv(symbols[5:9])
-        out.bitvector = flag_conv(symbols[9:13])
+        out.wear_flags.load_flags(symbols[5:9])
+        out.bitvector.load_flags(symbols[9:13])
 
         item_values = list(map(int, f.readline().split()))
 
@@ -885,8 +904,8 @@ def parse_mobiles(f: Scanner):
         f.readline()
         
         symbols = f.readline().split()
-        out.act = flag_conv(symbols[0:4])
-        out.affected_by = flag_conv(symbols[4:8])
+        out.act.load_flags(symbols[0:4])
+        out.affected_by.load_flags(symbols[4:8])
         out.alignment = int(symbols[8])
         
         letter = symbols[9]
@@ -989,7 +1008,7 @@ def parse_rooms(f: Scanner):
         f.readline()
 
         symbols = f.readline().split()
-        out.room_flags = flag_conv(symbols[0:4])
+        out.room_flags.load_flags(symbols[0:4])
         out.sector_type = int(symbols[5])
 
         def setup_dir(line):
@@ -1127,7 +1146,7 @@ def parse_shops(f: Scanner):
         if out.keeper == -1:
             out.keeper = None
 
-        out.with_who = flag_conv(f.readline().split())
+        out.with_who.load_flags(f.readline().split())
 
         while True:
             data = int(f.readline())
@@ -1192,7 +1211,7 @@ def parse_guilds(f: Scanner):
             setattr(out, x, int(f.readline()))
         
         with_who.extend(f.readline().split())
-        out.with_who = flag_conv(with_who)
+        out.with_who.load_flags(with_who)
 
         yield out
 
@@ -1392,7 +1411,7 @@ class LegacyDatabase:
                 reset_mode = int(stats[3])
                 # the next 4 stats are flags in an array...
                 flags_array = stats[4:8]
-                zone_flags = flag_conv(flags_array)
+                zone_flags = FlagHandler.from_flags_list(flags_array)
                 min_level = int(stats[8])
                 max_level = int(stats[9])
 
@@ -1511,6 +1530,9 @@ class LegacyDatabase:
             with open(plr_file, "r", encoding="utf-8", errors="ignore") as f2:
                 f = Scanner(f2.read())
                 c = parse_character(f)
+                
+                if not (c.name in self.characters_to_account):
+                    continue
 
                 c.username = self.characters_to_account[c.name]
 

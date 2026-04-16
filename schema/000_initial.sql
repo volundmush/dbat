@@ -1,7 +1,0 @@
-CREATE TABLE migrations (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL UNIQUE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-INSERT INTO migrations (name) VALUES ('000_initial.sql');
