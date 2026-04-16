@@ -432,6 +432,41 @@ class HelpEntry:
     min_level: int = 0
 
 
+def _read_tilde_string(f: "Scanner") -> str:
+    value = f.readuntil("~").rstrip("~")
+    f.readline()
+    return value
+
+
+def _copy_flag_handler(src: FlagHandler) -> FlagHandler:
+    out = FlagHandler()
+    out.flags = src.flags
+    out.array = list(src.array)
+    return out
+
+
+def _object_from_prototype(proto: ObjectPrototype) -> Object:
+    out = Object()
+    out.object_prototype_id = proto.id
+    out.item_type = proto.item_type
+    out.name = proto.name
+    out.short_description = proto.short_description
+    out.description = proto.description
+    out.action_description = proto.action_description
+    out.extra_flags = _copy_flag_handler(proto.extra_flags)
+    out.wear_flags = _copy_flag_handler(proto.wear_flags)
+    out.bitvector = _copy_flag_handler(proto.bitvector)
+    out.extra_descriptions = list(proto.extra_descriptions)
+    out.values = dict(proto.values)
+    out.weight = proto.weight
+    out.cost = proto.cost
+    out.cost_per_day = proto.cost_per_day
+    out.level = proto.level
+    out.size = proto.size
+    out.affected = list(proto.affected)
+    return out
+
+
 def strip_color(s: str) -> str:
     """
     This will iterate through the characters in a string. all color codes are prefixed with @
@@ -882,6 +917,102 @@ def parse_objects(f: Scanner):
         yield out
 
 
+def parse_saved_object(f: Scanner, oproto: dict[int, ObjectPrototype] | None = None):
+    while True:
+        start_pos = f.tell()
+        line = f.readline()
+        if not line:
+            return
+
+        if line.startswith("$~"):
+            return
+
+        if not line.startswith("#"):
+            continue
+
+        try:
+            prototype_id = int(line[1:])
+        except ValueError:
+            continue
+
+        if prototype_id >= 0 and oproto and prototype_id in oproto:
+            out = _object_from_prototype(oproto[prototype_id])
+        else:
+            out = Object()
+            out.object_prototype_id = prototype_id
+
+        values_line = f.readline()
+        if not values_line:
+            return
+
+        symbols = values_line.split()
+        if len(symbols) < 21:
+            continue
+
+        try:
+            location = int(symbols[0])
+            item_values = [int(x) for x in symbols[1:9]] + [int(x) for x in symbols[13:21]]
+        except ValueError:
+            continue
+
+        out.extra_flags.load_flags(symbols[9:13])
+        for i, val in enumerate(item_values):
+            if val:
+                out.values[i] = val
+
+        marker_pos = f.tell()
+        marker = f.readline()
+        if marker == "XAP":
+            out.name = _read_tilde_string(f)
+            out.short_description = _read_tilde_string(f)
+            out.description = _read_tilde_string(f)
+            out.action_description = _read_tilde_string(f)
+
+            xap_numeric = f.readline().split()
+            if len(xap_numeric) >= 8:
+                out.item_type = int(xap_numeric[0])
+                out.wear_flags.load_flags(xap_numeric[1:5])
+                out.weight = int(xap_numeric[5])
+                out.cost = int(xap_numeric[6])
+                out.cost_per_day = int(xap_numeric[7])
+
+            while True:
+                section_pos = f.tell()
+                section = f.readline()
+                if not section:
+                    break
+                if section.startswith("#") or section.startswith("$"):
+                    f.seek(section_pos)
+                    break
+
+                if section.startswith("E"):
+                    keyword = _read_tilde_string(f)
+                    description = _read_tilde_string(f)
+                    out.extra_descriptions.append(ExtraDescription(keyword, description))
+                elif section.startswith("A"):
+                    data = f.readline().split()
+                    if len(data) >= 3:
+                        out.affected.append(
+                            ObjAffected(
+                                location=int(data[0]),
+                                modifier=int(data[1]),
+                                specific=int(data[2]),
+                            )
+                        )
+                elif section.startswith("Z"):
+                    size_data = f.readline().strip()
+                    if size_data:
+                        out.size = int(size_data)
+                elif section.startswith("G") or section.startswith("U") or section.startswith("S"):
+                    f.readline()
+                else:
+                    break
+        else:
+            f.seek(marker_pos)
+
+        yield location, out
+
+
 def parse_mobiles(f: Scanner):
     while True:
         line = f.readline()
@@ -1189,10 +1320,8 @@ def parse_guilds(f: Scanner):
             field = skills if type_id == 1 else feats
             field.add(skill_id)
         
-        for skill_id in out.skills:
-            out.skills.add(skill_id)
-
-        out.feats = feats
+        out.skills.extend(skills)
+        out.feats.extend(feats)
 
         out.charge = float(f.readline())
         for x in ("no_such_skill", "not_enough_gold"):
@@ -1263,10 +1392,16 @@ class LegacyDatabase:
         self.assemblies: list[Assembly] = list()
 
         self.objects: dict[int, Object] = dict()  # object id -> object data
+        self.house_objects: dict[int, list[tuple[int, Object]]] = dict()  # room id -> [(location, object)]
+        self.player_objects: dict[int, list[tuple[int, Object]]] = dict()  # character id -> [(location, object)]
 
         self.accounts: dict[str, Account] = dict()  # username -> account data
         self.characters: dict[int, Character] = dict()
         self.characters_to_account: dict[str, str] = dict()  # character name -> account name
+        self.player_dgvars_raw: dict[int, str] = dict()
+        self.player_aliases_raw: dict[int, str] = dict()
+        self.player_sense_raw: dict[int, str] = dict()
+        self.player_intro_raw: dict[int, str] = dict()
     
 
     def zone_id_for(self, thing_id: int) -> int:
@@ -1519,7 +1654,110 @@ class LegacyDatabase:
                 self.assemblies.append(a)
     
     def _load_houses(self, data_dir: Path):
-        pass
+        house_dir = data_dir / "house"
+        if not house_dir.exists():
+            return
+
+        for house_file in house_dir.glob("*.house"):
+            if not house_file.is_file():
+                continue
+
+            try:
+                room_id = int(house_file.stem)
+            except ValueError:
+                continue
+
+            with open(house_file, "r", encoding="utf-8", errors="ignore") as f2:
+                scanner = Scanner(f2.read())
+                entries = list(parse_saved_object(scanner, self.oproto))
+
+            if entries:
+                self.house_objects[room_id] = entries
+
+    def _load_plrobjs(self, data_dir: Path):
+        plrobjs_dir = data_dir / "plrobjs"
+        if not plrobjs_dir.exists():
+            return
+
+        by_name = {c.name.lower(): c for c in self.characters.values()}
+
+        for obj_file in plrobjs_dir.rglob("*"):
+            if not obj_file.is_file():
+                continue
+            if obj_file.suffix.lower() == ".copy":
+                continue
+
+            character_name = obj_file.stem.lower()
+            if character_name not in by_name:
+                continue
+            character = by_name[character_name]
+
+            with open(obj_file, "r", encoding="utf-8", errors="ignore") as f2:
+                scanner = Scanner(f2.read())
+                entries = list(parse_saved_object(scanner, self.oproto))
+
+            if entries:
+                self.player_objects[character.id] = entries
+
+    def _load_plrvars(self, data_dir: Path):
+        plrvars_dir = data_dir / "plrvars"
+        if not plrvars_dir.exists():
+            return
+
+        by_name = {c.name.lower(): c for c in self.characters.values()}
+
+        for var_file in plrvars_dir.rglob("*"):
+            if not var_file.is_file():
+                continue
+            character = by_name.get(var_file.stem.lower())
+            if character is None:
+                continue
+            self.player_dgvars_raw[character.id] = var_file.read_text(encoding="utf-8", errors="ignore")
+
+    def _load_plralias(self, data_dir: Path):
+        alias_dir = data_dir / "plralias"
+        if not alias_dir.exists():
+            return
+
+        by_name = {c.name.lower(): c for c in self.characters.values()}
+
+        for alias_file in alias_dir.rglob("*"):
+            if not alias_file.is_file():
+                continue
+            character = by_name.get(alias_file.stem.lower())
+            if character is None:
+                continue
+            self.player_aliases_raw[character.id] = alias_file.read_text(encoding="utf-8", errors="ignore")
+
+    def _load_sense(self, data_dir: Path):
+        sense_dir = data_dir / "sense"
+        if not sense_dir.exists():
+            return
+
+        by_name = {c.name.lower(): c for c in self.characters.values()}
+
+        for sense_file in sense_dir.rglob("*"):
+            if not sense_file.is_file():
+                continue
+            character = by_name.get(sense_file.stem.lower())
+            if character is None:
+                continue
+            self.player_sense_raw[character.id] = sense_file.read_text(encoding="utf-8", errors="ignore")
+
+    def _load_intro(self, data_dir: Path):
+        intro_dir = data_dir / "intro"
+        if not intro_dir.exists():
+            return
+
+        by_name = {c.name.lower(): c for c in self.characters.values()}
+
+        for intro_file in intro_dir.rglob("*"):
+            if not intro_file.is_file():
+                continue
+            character = by_name.get(intro_file.stem.lower())
+            if character is None:
+                continue
+            self.player_intro_raw[character.id] = intro_file.read_text(encoding="utf-8", errors="ignore")
 
     def _load_characters(self, data_dir: Path):
         player_dir = data_dir / "plrfiles"
@@ -1551,6 +1789,11 @@ class LegacyDatabase:
         self._load_houses(data_dir)
         self._load_accounts(data_dir)
         self._load_characters(data_dir)
+        self._load_plrobjs(data_dir)
+        self._load_plrvars(data_dir)
+        self._load_plralias(data_dir)
+        self._load_sense(data_dir)
+        self._load_intro(data_dir)
 
 
 def prepare_migration(path: Path) -> LegacyDatabase:
