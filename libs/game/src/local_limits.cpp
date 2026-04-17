@@ -1349,84 +1349,12 @@ void gain_condition(struct char_data *ch, int condition, int value)
           GET_COND(ch, condition) = 48;
           if (condition != DRUNK && prior >= 48 && !IS_MAJIN(ch))
           {
-            int pukeroll = axion_dice(0);
             int ocond = condition;
             if (condition == HUNGER)
               ocond = THIRST;
             else if (condition == THIRST)
               ocond = HUNGER;
 
-            if (pukeroll > GET_CON(ch) + 19)
-            {
-              act("@r@6You retch violently until your stomach is empty! Your constitution couldn't handle being that stuffed!@n", TRUE, ch, 0, 0, TO_CHAR);
-              act("@m@6$n@r@6 retches violently! It seems $e stuffed $mself too much!@n", TRUE, ch, 0, 0, TO_ROOM);
-              SET_BIT_AR(AFF_FLAGS(ch), AFF_PUKED);
-              if (!IS_NAMEK(ch))
-              {
-                GET_COND(ch, HUNGER) -= 40;
-                if (GET_COND(ch, HUNGER) < 0)
-                  GET_COND(ch, HUNGER) = 0;
-                if (IS_BIO(ch) && (GET_GENOME(ch, 0) == 3 || GET_GENOME(ch, 1) == 3))
-                  GET_COND(ch, HUNGER) = -1;
-              }
-              if (!IS_KANASSAN(ch))
-              {
-                GET_COND(ch, THIRST) -= 30;
-                if (GET_COND(ch, THIRST) < 0)
-                  GET_COND(ch, THIRST) = 0;
-              }
-              else
-              {
-                send_to_char(ch, "Through your mastery of your bodily fluids you manage to retain your hydration.\r\n");
-                return;
-              }
-            }
-            else if (pukeroll > GET_CON(ch) + 9)
-            {
-              act("@r@6You puke violently! Your constitution couldn't handle being that stuffed!@n", TRUE, ch, 0, 0, TO_CHAR);
-              act("@m@6$n@r@6 pukes violently! It seems $e stuffed $mself too much!@n", TRUE, ch, 0, 0, TO_ROOM);
-              SET_BIT_AR(AFF_FLAGS(ch), AFF_PUKED);
-              if (!IS_NAMEK(ch))
-              {
-                GET_COND(ch, HUNGER) -= 20;
-                if (GET_COND(ch, HUNGER) < 0)
-                  GET_COND(ch, HUNGER) = 0;
-              }
-              if (!IS_KANASSAN(ch))
-              {
-                GET_COND(ch, THIRST) -= 15;
-                if (GET_COND(ch, THIRST) < 0)
-                  GET_COND(ch, THIRST) = 0;
-              }
-              else
-              {
-                send_to_char(ch, "Through your mastery of your bodily fluids you manage to retain your hydration.\r\n");
-                return;
-              }
-            }
-            else if (pukeroll > GET_CON(ch))
-            {
-              act("@r@6You puke a little! Your constitution couldn't handle being that stuffed!@n", TRUE, ch, 0, 0, TO_CHAR);
-              act("@m@6$n@r@6 pukes a little! It seems $e stuffed $mself too much!@n", TRUE, ch, 0, 0, TO_ROOM);
-              SET_BIT_AR(AFF_FLAGS(ch), AFF_PUKED);
-              if (!IS_NAMEK(ch))
-              {
-                GET_COND(ch, HUNGER) -= 8;
-                if (GET_COND(ch, HUNGER) < 0)
-                  GET_COND(ch, HUNGER) = 0;
-              }
-              if (!IS_KANASSAN(ch))
-              {
-                GET_COND(ch, THIRST) -= 8;
-                if (GET_COND(ch, THIRST) < 0)
-                  GET_COND(ch, THIRST) = 0;
-              }
-              else
-              {
-                send_to_char(ch, "Through your mastery of your bodily fluids you manage to retain your hydration.\r\n");
-                return;
-              }
-            }
           }
         }
         else
@@ -1436,16 +1364,12 @@ void gain_condition(struct char_data *ch, int condition, int value)
       }
     }
 
-    if (!AFF_FLAGGED(ch, AFF_SPIRIT) && (!GET_SKILL(ch, SKILL_SURVIVAL) || (GET_SKILL(ch, SKILL_SURVIVAL) < rand_number(1, 140))))
+    if (!AFF_FLAGGED(ch, AFF_SPIRIT))
     {
       if (value <= 0)
       {
         if (GET_COND(ch, condition) >= 0)
         {
-          if (AFF_FLAGGED(ch, AFF_PUKED))
-          {
-            REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_PUKED);
-          }
           if (GET_COND(ch, condition) + value < 0)
           {
             GET_COND(ch, condition) = 0;
@@ -1464,14 +1388,14 @@ void gain_condition(struct char_data *ch, int condition, int value)
         case 0:
           if ((getCurST(ch)) >= GET_MAX_MOVE(ch) / 3)
           {
-            send_to_char(ch, "@RYou are starving to death!@n\r\n");
-            decCurSTPercent(ch, .33);
+            send_to_char(ch, "@RYou are feeling ravenous!!@n\r\n");
+            //decCurSTPercent(ch, .33);
           }
           else if ((getCurST(ch)) < GET_MAX_MOVE(ch) / 3)
           {
-            send_to_char(ch, "@RYou are starving to death!@n\r\n");
-            decCurSTPercent(ch, 1, 0);
-            decCurHealthPercent(ch, .34);
+            send_to_char(ch, "@RYou are feeling ravenous!@n\r\n");
+            //decCurSTPercent(ch, 1, 0);
+            //decCurHealthPercent(ch, .34);
           }
           break;
         case 1:
@@ -1521,13 +1445,13 @@ void gain_condition(struct char_data *ch, int condition, int value)
           if ((getCurST(ch)) >= GET_MAX_MOVE(ch) / 3)
           {
             send_to_char(ch, "@RYou are dehydrated!@n\r\n");
-            decCurSTPercent(ch, .33);
+            //decCurSTPercent(ch, .33);
           }
           else if ((getCurST(ch)) < GET_MAX_MOVE(ch) / 3)
           {
             send_to_char(ch, "@RYou are dehydrated!@n\r\n");
-            decCurSTPercent(ch, 1, 0);
-            decCurHealthPercent(ch, .34);
+            //decCurSTPercent(ch, 1, 0);
+            //decCurHealthPercent(ch, .34);
           }
           break;
         case 1:
@@ -1581,33 +1505,6 @@ void gain_condition(struct char_data *ch, int condition, int value)
         break;
       default:
         break;
-      }
-      if (GET_HIT(ch) <= 0 && GET_COND(ch, HUNGER) == 0)
-      {
-        send_to_char(ch, "You have starved to death!\r\n");
-        decCurSTPercent(ch, 1, 0);
-        act("@W$n@W falls down dead before you...@n", FALSE, ch, 0, 0, TO_ROOM);
-        die(ch, NULL);
-        if (GET_COND(ch, HUNGER) != -1)
-        {
-          GET_COND(ch, HUNGER) = 48;
-        }
-        if (GET_COND(ch, THIRST) != -1)
-        {
-          GET_COND(ch, THIRST) = 48;
-        }
-      }
-      if (GET_HIT(ch) <= 0 && GET_COND(ch, THIRST) == 0)
-      {
-        send_to_char(ch, "You have died of dehydration!\r\n");
-        decCurSTPercent(ch, 1, 0);
-        act("@W$n@W falls down dead before you...@n", FALSE, ch, 0, 0, TO_ROOM);
-        die(ch, NULL);
-        if (GET_COND(ch, HUNGER) != -1)
-        {
-          GET_COND(ch, HUNGER) = 48;
-        }
-        GET_COND(ch, THIRST) = 48;
       }
     }
   }

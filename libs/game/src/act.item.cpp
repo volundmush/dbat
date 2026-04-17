@@ -3685,30 +3685,13 @@ ACMD(do_eat)
    if (subcmd != SCMD_TASTE) {
     int psbonus = GET_OBJ_VAL(food, 1);
     int expbonus = GET_OBJ_VAL(food, 2) * ((GET_LEVEL(ch) * 0.4) + 1);
-    int capped = FALSE, pscapped = FALSE;
-    if (level_exp(ch, GET_LEVEL(ch) + 1) - (GET_EXP(ch)) <= 0 && GET_LEVEL(ch) < 100) {
-     expbonus = 1;
-     capped = TRUE;
-    } else if (expbonus > GET_LEVEL(ch) * 1500 && GET_LEVEL(ch) < 100) {
+    if (expbonus > GET_LEVEL(ch) * 1500 && GET_LEVEL(ch) < 100) {
      expbonus = GET_LEVEL(ch) * 1000;
     }
-    if (GET_PRACTICES(ch, GET_CLASS(ch)) >= 500) {
-     psbonus = 0;
-     pscapped = TRUE;
-    }
-    if (!AFF_FLAGGED(ch, AFF_PUKED)) {
-     gain_exp(ch, expbonus);
+    gain_exp(ch, expbonus);
      GET_PRACTICES(ch, GET_CLASS(ch)) += psbonus;
      send_to_char(ch, "That was exceptionally delicious! @D[@mPS@D: @C+%d@D] [@gEXP@D: @G+%s@D]@n\r\n", psbonus, add_commas(expbonus));
-     if (capped == TRUE)
-      send_to_char(ch, "Experience capped due to negative TNL.\r\n");
-     if (pscapped == TRUE)
-      send_to_char(ch, "Practice Sessions capped for food at 500 PS.\r\n");
-    } else {
-     send_to_char(ch, "You have recently puked. You must wait a while for your body to adjust before excellent food gives you any bonuses.\r\n");
-    }
-   }
-   if (!GET_OBJ_VAL(food, VAL_FOOD_POISON) && GET_HIT(ch) < (getEffMaxPL(ch)) && subcmd != SCMD_TASTE) {
+    if (!GET_OBJ_VAL(food, VAL_FOOD_POISON) && GET_HIT(ch) < (getEffMaxPL(ch)) && subcmd != SCMD_TASTE) {
     int64_t suppress = ((getEffMaxPL(ch)) * 0.01) * GET_SUPPRESS(ch);
     if (GET_WEIGHT(food) < 6) {
         incCurHealthPercent(ch, .05);
