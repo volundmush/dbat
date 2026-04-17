@@ -238,7 +238,7 @@ void do_start(struct char_data *ch)
    GET_COND(ch, HUNGER) = -1;
    GET_COND(ch, THIRST) = -1;
    GET_COND(ch, DRUNK) = -1;
-  } else if (IS_BIO(ch) && (GET_GENOME(ch, 0) == 3 || GET_GENOME(ch, 1) == 3)) {
+  } else if (IS_BIO(ch) && HAS_GENOME(ch, 3)) {
    GET_COND(ch, HUNGER) = -1;
    GET_COND(ch, DRUNK) = 0;
    GET_COND(ch, THIRST) = 48;
@@ -384,6 +384,9 @@ void do_start(struct char_data *ch)
     punch = rand_number(15, 30);
     SET_SKILL(ch, SKILL_TELEPATHY, punch);
    }
+
+ 
+
    if (IS_MAJIN(ch) || IS_NAMEK(ch) || IS_BIO(ch)) {
     punch = rand_number(10, 16);
     SET_SKILL(ch, SKILL_REGENERATE, punch);
@@ -395,6 +398,13 @@ void do_start(struct char_data *ch)
    if (IS_BIO(ch)) {
     punch = rand_number(15, 25);
     SET_SKILL(ch, SKILL_ABSORB, punch);
+
+      // Kai Genome bioandroids.
+    if(HAS_GENOME(ch, 7)) {
+      SET_SKILL(ch, SKILL_TELEPATHY, 30);
+      SET_SKILL(ch, SKILL_FOCUS, 30);
+    }
+
    }
    if (IS_ARLIAN(ch)) {
     punch = rand_number(30, 50);

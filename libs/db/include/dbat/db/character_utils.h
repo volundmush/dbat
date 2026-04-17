@@ -1034,6 +1034,7 @@ bool char_is_spoiled(const struct char_data *ch);
 #define GET_CCPOINTS(ch)  ((ch)->ccpoints)
 #define GET_NEGCOUNT(ch)  ((ch)->negcount)
 #define GET_GENOME(ch, i)    ((ch)->genome[i])
+#define HAS_GENOME(ch, i) ((ch)->genome[0] == (i) || (ch)->genome[1] == (i))
 #define COMBO(ch)         ((ch)->combo)
 #define LASTATK(ch)       ((ch)->lastattack)
 #define COMBHITS(ch)      ((ch)->combhits)
