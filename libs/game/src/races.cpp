@@ -745,7 +745,11 @@ namespace dbat::race {
         if(!tier) return base_form;
         auto t_map = getTransMap(ch);
         if(t_map.empty()) return base_form;
-        return t_map[tier];
+
+        auto cur_form = t_map[tier];
+
+
+        return cur_form;
     }
 
     bool Race::raceCanBeSensed() const {

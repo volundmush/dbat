@@ -965,8 +965,8 @@ def parse_saved_object(f: Scanner, oproto: dict[int, ObjectPrototype] | None = N
         if marker == "XAP":
             out.name = _read_tilde_string(f)
             out.short_description = _read_tilde_string(f)
-            out.description = _read_tilde_string(f)
             out.action_description = _read_tilde_string(f)
+            out.description = _read_tilde_string(f)
 
             xap_numeric = f.readline().split()
             if len(xap_numeric) >= 8:

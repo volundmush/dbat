@@ -925,10 +925,12 @@ ACMD(do_echo)
   skip_spaces(&argument);
   bool NoName = FALSE;
 
-  if (!*argument)
-    send_to_char(ch, "Yes.. but what?\r\n");
-  else {
-    char buf[MAX_INPUT_LENGTH + 4];
+  if (!*argument) {
+        send_to_char(ch, "Yes.. but what?\r\n");
+        return;
+  }
+  
+    char buf[MAX_INPUT_LENGTH * 8];
     char name[128];
     int found = FALSE, trunc = 0;
     struct char_data *vict = NULL, *next_v = NULL, *tch = NULL;
@@ -992,7 +994,7 @@ ACMD(do_echo)
       send_to_char(ch, "%s", CONFIG_OK);
     }
     if (NoName == TRUE) {
-     char blom[MAX_INPUT_LENGTH];
+     char blom[MAX_INPUT_LENGTH * 8];
      sprintf(blom, "@D(@GOOC@W: @gSmote by user %s@D)@n", IS_NPC(ch) ? GET_NAME(ch) : (ch->desc->user == NULL ? "ERROR REPORT" : ch->desc->user));
      act(blom, FALSE, ch, 0, 0, TO_ROOM);
     }
@@ -1001,13 +1003,12 @@ ACMD(do_echo)
      act(buf, FALSE, ch, 0, 0, TO_ROOM);
     }
     else {
-
      act(buf, FALSE, ch, 0, tch, TO_CHAR);
      act(buf, FALSE, ch, 0, tch, TO_NOTVICT);
      search_replace(buf, "$N", "you");
      act(buf, FALSE, ch, 0, tch, TO_VICT);
     }
-  }
+
 }
 
 ACMD(do_send)
