@@ -93,14 +93,16 @@ ACMD(do_tailhide)
  if (!(IS_SAIYAN(ch)) && !(IS_HALFBREED(ch))) 
   {
     send_to_char(ch, "You have no need to hide your tail!\r\n");
+    return;
    }
-  if ((IS_SAIYAN(ch) || IS_HALFBREED(ch)) && !(PLR_FLAGGED(ch, PLR_TAILHIDE)))
+
+  if (!(PLR_FLAGGED(ch, PLR_TAILHIDE)))
   {
     SET_BIT_AR(PLR_FLAGS(ch), PLR_TAILHIDE);
     act("You tuck your tail away, hiding it from view.", FALSE, ch, 0, 0, TO_CHAR);
     act("$n tucks $s tail away, hiding it from view.", FALSE, ch, 0, 0, TO_ROOM);
    }
- else if ((IS_SAIYAN(ch) || IS_HALFBREED(ch)) && PLR_FLAGGED(ch, PLR_TAILHIDE)) 
+ else 
   {
     REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TAILHIDE);
     act("You have decided to display your tail for all to see!", FALSE, ch, 0, 0, TO_CHAR);
