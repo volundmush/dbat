@@ -3163,6 +3163,13 @@ int mob_respond(struct char_data *ch, struct char_data *vict, const char *speech
 
        if ((strstr(speech, "spar") || strstr(speech, "Spar")) && !FIGHTING(vict)) {
         send_to_room(IN_ROOM(vict), "\r\n");
+
+        if(vict->original == ch) {
+            act("@w$n@W says, '@C$N, sure. I'll spar with you.@W'@n", TRUE, vict, 0, ch, TO_ROOM);
+            SET_BIT_AR(MOB_FLAGS(vict), MOB_SPAR);
+            return 0;
+        }
+
         if (GET_LEVEL(vict) > 4 && GET_ALIGNMENT(vict) >= 0) {
          memory_rec *names;
          int remember = FALSE;
@@ -3173,11 +3180,7 @@ int mob_respond(struct char_data *ch, struct char_data *vict, const char *speech
 
              remember = TRUE;
           }
-          if(vict->original == ch) {
-              act("@w$n@W says, '@C$N, sure. I'll spar with you.@W'@n", TRUE, vict, 0, ch, TO_ROOM);
-              SET_BIT_AR(MOB_FLAGS(vict), MOB_SPAR);
-              return 0;
-          }
+          
          if (remember == TRUE) {
           act("@w$n@W says, '@C$N you will die by my hand!@W'@n", TRUE, vict, 0, ch, TO_ROOM);
           return 1;
