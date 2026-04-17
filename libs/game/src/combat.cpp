@@ -4376,9 +4376,10 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
    hurt(0, 0, ch, GRAPPLED(vict), NULL, maindmg, 3);
   }
   if (!is_sparring(ch) && !PLR_FLAGGED(vict, PLR_IMMORTAL) && GET_HIT(vict) - dmg <= 0) {
-  if (GET_HIT(vict) - dmg <= 0 && suppresso == FALSE) {
+  
+    if (GET_HIT(vict) - dmg <= 0 && suppresso == FALSE) {
    decCurHealthPercent(vict, 1, 0);
-    if (!IS_NPC(vict) && (getCurLF(vict)) - (dmg - GET_HIT(vict)) >= 0) {
+    if (!IS_NPC(vict) && vict->lifeperc > 0 && (getCurLF(vict)) - (dmg - GET_HIT(vict)) >= 0) {
         act("@c$N@w barely clings to life!@n", TRUE, ch, 0, vict, TO_CHAR);
         act("@CYou barely cling to life!@n", TRUE, ch, 0, vict, TO_VICT);
         act("@c$N@w barely clings to life!@n.", TRUE, ch, 0, vict, TO_NOTVICT);
