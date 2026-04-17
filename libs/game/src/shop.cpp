@@ -601,6 +601,7 @@ static int buy_price(struct obj_data *obj, int shop_nr, struct char_data *keeper
 {
   int cost = (GET_OBJ_COST(obj) * SHOP_BUYPROFIT(shop_nr));
 
+  /*
   double adjust = 1.0;
   struct obj_data *k;
 
@@ -614,22 +615,32 @@ static int buy_price(struct obj_data *obj, int shop_nr, struct char_data *keeper
   }
 
   cost = cost * adjust;
+  */
 
-  if (!IS_NPC(buyer) && GET_BONUS(buyer, BONUS_THRIFTY) > 0) {
-   if (IS_ARLIAN(buyer)) {
-    cost += cost * 0.2;
-   }
-   cost -= cost * 0.1;
-   return (cost);
-  } else if (!IS_NPC(buyer) && GET_BONUS(buyer, BONUS_IMPULSE)) {
-   cost += cost * 0.25;
-   return (cost);
-  } else if (!IS_NPC(buyer) && IS_ARLIAN(buyer)) {
-   cost += cost * 0.20;
-   return (cost);
-  } else {
-   return (int) (GET_OBJ_COST(obj) * SHOP_BUYPROFIT(shop_nr));
+  if (!IS_NPC(buyer))
+  {
+    if (GET_BONUS(buyer, BONUS_THRIFTY) > 0)
+    {
+      if (IS_ARLIAN(buyer))
+      {
+        cost += cost * 0.2;
+      }
+      else
+      {
+        cost -= cost * 0.1;
+      }
+    }
+    else if (GET_BONUS(buyer, BONUS_IMPULSE))
+    {
+      cost += cost * 0.25;
+    }
+    else if (IS_ARLIAN(buyer))
+    {
+      cost += cost * 0.20;
+    }
   }
+
+  return cost;
 }
 
 /*
