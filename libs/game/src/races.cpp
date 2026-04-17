@@ -409,6 +409,8 @@ namespace dbat::race {
     }
 
     int Race::getRPPCost() const {
+        return 0;
+        /*
         switch (r_id) {
             case saiyan:
                 return 60;
@@ -421,6 +423,7 @@ namespace dbat::race {
             default:
                 return 0;
         }
+        */
     }
 
     bool Race::raceCanTransform() const {
@@ -1553,6 +1556,9 @@ namespace dbat::race {
     }
 
     int Race::getRPPRefund() const {
+        return 0;
+
+        /*
         switch (r_id) {
             case majin:
                 return 35;
@@ -1565,6 +1571,7 @@ namespace dbat::race {
             default:
                 return 0;
         }
+        */
     }
 
     bool Race::raceIsPeople() const {
