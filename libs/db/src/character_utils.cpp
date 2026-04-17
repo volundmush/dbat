@@ -7,6 +7,7 @@
 #include "dbat/db/consts/mobflags.h"
 #include "dbat/db/consts/sex.h"
 #include "dbat/db/consts/races.h"
+#include "dbat/db/weather.h"
 
 // =============================================================================
 // Classification (NPC/PC)
@@ -2614,4 +2615,16 @@ bool char_is_humanoid(const struct char_data *ch)
 int char_get_spoiled(const struct char_data *ch)
 {
   return char_get_time(ch)->played > 86400;
+}
+
+bool MOON_TIMECHECK() {
+    switch(time_info.day) {
+        case 20:
+            return time_info.hours >= 21;
+        case 21:
+            return time_info.hours <= 4 || time_info.hours >= 21;
+        case 22:
+            return time_info.hours <= 4;
+    }
+    return false;
 }

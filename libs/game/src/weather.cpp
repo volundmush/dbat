@@ -77,13 +77,9 @@ static void another_hour(int mode)
     case 4:
       if (MOON_DATE) {
        send_to_moon("The full moon disappears.\r\n");
-       MOON_UP = FALSE;
-       oozaru_drop();
       }
       else if (time_info.day == 22) {
         send_to_moon("The full moon disappears.\r\n");
-        MOON_UP = FALSE;
-        oozaru_drop();
       }
       break;
     case 5:
@@ -112,14 +108,21 @@ static void another_hour(int mode)
     case 21:
       if (MOON_DATE) {
        send_to_moon("The full moon has risen.\r\n");
-       MOON_UP = TRUE;
-       oozaru_add();
       }
       break;
     default:
       break;
     }
   }
+
+  if(MOON_TIMECHECK()) {
+    MOON_UP = TRUE;
+    oozaru_add();
+  } else {
+    MOON_UP = FALSE;
+    oozaru_drop();
+  }
+
   if (time_info.hours > 23) {	/* Changed by HHS due to bug ??? */
     time_info.hours -= 24;
     time_info.day++;
