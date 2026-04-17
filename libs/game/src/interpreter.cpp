@@ -4412,20 +4412,7 @@ void nanny(struct descriptor_data *d, char *arg)
                       chosen_sensei = nullptr;
                       return;
                   case CON_QCLASS:
-                      if (chosen_sensei->getID() == dbat::sensei::kibito && !IS_KAI(d->character) && d->character->desc->rbank < 10 && d->character->rbank < 10) {
-                          write_to_output(d, "\r\nIt costs 10 RPP to select Kibito unless you are a Kai.\r\nSensei: ");
-                          return;
-                      } else {
-                          d->character->chclass = chosen_sensei->getID();
-                          if (chosen_sensei->getID() == dbat::sensei::kibito && !IS_KAI(d->character)) {
-                              if (d->character->desc->rpp >= 10)
-                                  d->character->desc->rpp -= 10;
-                              else
-                                  d->character->desc->rpp -= 10;
-                              userWrite(d->character->desc, 0, 0, 0, "index");
-                              write_to_output(d, "\r\n10 RPP deducted from your bank since you are not a kai.\n");
-                          }
-                      }
+                      d->character->chclass = chosen_sensei->getID();
                       break;
               }
       }
