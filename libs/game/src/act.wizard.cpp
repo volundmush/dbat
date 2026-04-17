@@ -930,7 +930,7 @@ ACMD(do_echo)
         return;
   }
   
-    char buf[MAX_INPUT_LENGTH * 8];
+    char buf[MAX_INPUT_LENGTH];
     char name[128];
     int found = FALSE, trunc = 0;
     struct char_data *vict = NULL, *next_v = NULL, *tch = NULL;
@@ -994,7 +994,7 @@ ACMD(do_echo)
       send_to_char(ch, "%s", CONFIG_OK);
     }
     if (NoName == TRUE) {
-     char blom[MAX_INPUT_LENGTH * 8];
+     char blom[MAX_INPUT_LENGTH];
      sprintf(blom, "@D(@GOOC@W: @gSmote by user %s@D)@n", IS_NPC(ch) ? GET_NAME(ch) : (ch->desc->user == NULL ? "ERROR REPORT" : ch->desc->user));
      act(blom, FALSE, ch, 0, 0, TO_ROOM);
     }

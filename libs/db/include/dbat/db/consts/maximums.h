@@ -23,9 +23,9 @@
 
 #define HISTORY_SIZE		5	/* Keep last 5 commands. */
 #define MAX_STRING_LENGTH	64936   
-#define MAX_INPUT_LENGTH	2048	/* Max length per *line* of 
+#define MAX_INPUT_LENGTH	16384	/* Max length per *line* of 
 input */
-#define MAX_RAW_INPUT_LENGTH	4096	/* Max size of *raw* input */
+#define MAX_RAW_INPUT_LENGTH	16384	/* Max size of *raw* input */
 #define MAX_MESSAGES		100
 #define MAX_NAME_LENGTH		20
 #define MAX_PWD_LENGTH		30
