@@ -7,6 +7,9 @@ import re
 from pathlib import Path
 from enum import IntEnum
 
+ITEM_CONTAINER = 15
+MAX_BAG_ROWS = 5
+
 def asciiflag_conv(flag: str) -> int:
     flags = 0
     is_num = True
@@ -88,6 +91,7 @@ class Room:
     sector_type: int = 0
     proto_script: list[int] = field(default_factory=list)
     zone: int = -1
+    contents: list["Object"] = field(default_factory=list)
 
 @dataclass(slots=True)
 class Affected:
@@ -1402,6 +1406,7 @@ class LegacyDatabase:
         self.player_aliases_raw: dict[int, str] = dict()
         self.player_sense_raw: dict[int, str] = dict()
         self.player_intro_raw: dict[int, str] = dict()
+        self._next_object_id: int = 1
     
 
     def zone_id_for(self, thing_id: int) -> int:
@@ -1652,6 +1657,149 @@ class LegacyDatabase:
             scanner = Scanner(f.read())
             for a in parse_assemblies(scanner):
                 self.assemblies.append(a)
+
+    def _index_object(self, obj: Object):
+        if obj.id <= 0:
+            obj.id = self._next_object_id
+            self._next_object_id += 1
+        self.objects[obj.id] = obj
+
+    def _detach_object(self, obj: Object):
+        if obj.in_obj is not None:
+            parent = obj.in_obj
+            if obj in parent.contains:
+                parent.contains.remove(obj)
+            obj.in_obj = None
+
+        if obj.carried_by is not None:
+            owner = obj.carried_by
+            if obj in owner.contents:
+                owner.contents.remove(obj)
+            obj.carried_by = None
+
+        if obj.in_room is not None:
+            room = obj.in_room
+            if obj in room.contents:
+                room.contents.remove(obj)
+            obj.in_room = None
+
+        if obj.worn_by is not None:
+            wearer = obj.worn_by
+            slots = [slot for slot, equipped in wearer.equipment.items() if equipped is obj]
+            for slot in slots:
+                del wearer.equipment[slot]
+            obj.worn_by = None
+            obj.worn_on = 0
+
+    def _place_object_in_room(self, obj: Object, room: Room):
+        self._detach_object(obj)
+        obj.in_room = room
+        room.contents.append(obj)
+
+    def _place_object_in_inventory(self, obj: Object, character: Character):
+        self._detach_object(obj)
+        obj.carried_by = character
+        character.contents.append(obj)
+
+    def _place_object_in_equipment(self, obj: Object, character: Character, slot: int):
+        self._detach_object(obj)
+        obj.worn_by = character
+        obj.worn_on = slot
+        character.equipment[slot] = obj
+
+    def _place_object_in_container(self, obj: Object, container: Object):
+        self._detach_object(obj)
+        obj.in_obj = container
+        container.contains.append(obj)
+
+    def _rebuild_house_object_graph(self, room: Room, entries: list[tuple[int, Object]]):
+        cont_row: list[list[Object]] = [[] for _ in range(MAX_BAG_ROWS)]
+
+        for locate, obj in entries:
+            self._index_object(obj)
+            self._place_object_in_room(obj, room)
+
+            for row in range(MAX_BAG_ROWS - 1, -locate, -1):
+                if not cont_row[row]:
+                    continue
+                for orphan in cont_row[row]:
+                    self._place_object_in_room(orphan, room)
+                cont_row[row] = []
+
+            row_index = -locate
+            if 0 <= row_index < MAX_BAG_ROWS and cont_row[row_index]:
+                if obj.item_type == ITEM_CONTAINER:
+                    for child in cont_row[row_index]:
+                        self._place_object_in_container(child, obj)
+                else:
+                    for orphan in cont_row[row_index]:
+                        self._place_object_in_room(orphan, room)
+                cont_row[row_index] = []
+
+            if -MAX_BAG_ROWS <= locate < 0:
+                self._detach_object(obj)
+                cont_row[-locate - 1].append(obj)
+
+        for row in range(MAX_BAG_ROWS - 1, -1, -1):
+            if not cont_row[row]:
+                continue
+            for orphan in cont_row[row]:
+                self._place_object_in_room(orphan, room)
+
+    def _rebuild_player_object_graph(self, character: Character, entries: list[tuple[int, Object]]):
+        cont_row: list[list[Object]] = [[] for _ in range(MAX_BAG_ROWS)]
+
+        for locate, obj in entries:
+            self._index_object(obj)
+
+            if locate > 0:
+                slot = locate - 1
+                self._place_object_in_equipment(obj, character, slot)
+
+                for row in range(MAX_BAG_ROWS - 1, 0, -1):
+                    if not cont_row[row]:
+                        continue
+                    for orphan in cont_row[row]:
+                        self._place_object_in_inventory(orphan, character)
+                    cont_row[row] = []
+
+                if cont_row[0]:
+                    if obj.item_type == ITEM_CONTAINER:
+                        for child in cont_row[0]:
+                            self._place_object_in_container(child, obj)
+                    else:
+                        for orphan in cont_row[0]:
+                            self._place_object_in_inventory(orphan, character)
+                    cont_row[0] = []
+            else:
+                self._place_object_in_inventory(obj, character)
+
+                for row in range(MAX_BAG_ROWS - 1, -locate, -1):
+                    if not cont_row[row]:
+                        continue
+                    for orphan in cont_row[row]:
+                        self._place_object_in_inventory(orphan, character)
+                    cont_row[row] = []
+
+                row_index = -locate
+                if 0 <= row_index < MAX_BAG_ROWS and cont_row[row_index]:
+                    if obj.item_type == ITEM_CONTAINER:
+                        for child in cont_row[row_index]:
+                            self._place_object_in_container(child, obj)
+                    else:
+                        for orphan in cont_row[row_index]:
+                            self._place_object_in_inventory(orphan, character)
+                    cont_row[row_index] = []
+
+                if -MAX_BAG_ROWS <= locate < 0:
+                    self._detach_object(obj)
+                    cont_row[-locate - 1].append(obj)
+
+        for row in range(MAX_BAG_ROWS - 1, -1, -1):
+            if not cont_row[row]:
+                continue
+            for orphan in cont_row[row]:
+                self._place_object_in_inventory(orphan, character)
     
     def _load_houses(self, data_dir: Path):
         house_dir = data_dir / "house"
@@ -1667,12 +1815,16 @@ class LegacyDatabase:
             except ValueError:
                 continue
 
+            if not (room := self.rooms.get(room_id, None)):
+                continue
+
             with open(house_file, "r", encoding="utf-8", errors="ignore") as f2:
                 scanner = Scanner(f2.read())
                 entries = list(parse_saved_object(scanner, self.oproto))
 
             if entries:
                 self.house_objects[room_id] = entries
+                self._rebuild_house_object_graph(room, entries)
 
     def _load_plrobjs(self, data_dir: Path):
         plrobjs_dir = data_dir / "plrobjs"
@@ -1698,6 +1850,7 @@ class LegacyDatabase:
 
             if entries:
                 self.player_objects[character.id] = entries
+                self._rebuild_player_object_graph(character, entries)
 
     def _load_plrvars(self, data_dir: Path):
         plrvars_dir = data_dir / "plrvars"
