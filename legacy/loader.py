@@ -143,6 +143,7 @@ class ObjectPrototype(ObjectBase):
 class Object(ObjectBase):
     id: int = -1
     object_prototype_id: int = -1
+    created_at: int = 0
 
     carried_by: Character | None = None
     in_room: Room | None = None
@@ -1007,7 +1008,21 @@ def parse_saved_object(f: Scanner, oproto: dict[int, ObjectPrototype] | None = N
                     size_data = f.readline().strip()
                     if size_data:
                         out.size = int(size_data)
-                elif section.startswith("G") or section.startswith("U") or section.startswith("S"):
+                elif section.startswith("G"):
+                    generation_data = f.readline().strip()
+                    if generation_data:
+                        try:
+                            out.created_at = int(generation_data)
+                        except ValueError:
+                            pass
+                elif section.startswith("U"):
+                    unique_id_data = f.readline().strip()
+                    if unique_id_data:
+                        try:
+                            out.id = int(unique_id_data)
+                        except ValueError:
+                            pass
+                elif section.startswith("S"):
                     f.readline()
                 else:
                     break
@@ -1659,7 +1674,12 @@ class LegacyDatabase:
                 self.assemblies.append(a)
 
     def _index_object(self, obj: Object):
-        if obj.id <= 0:
+        if obj.id > 0:
+            if obj.id >= self._next_object_id:
+                self._next_object_id = obj.id + 1
+        else:
+            while self._next_object_id in self.objects:
+                self._next_object_id += 1
             obj.id = self._next_object_id
             self._next_object_id += 1
         self.objects[obj.id] = obj
