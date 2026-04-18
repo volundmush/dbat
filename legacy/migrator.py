@@ -683,7 +683,64 @@ class Migrator:
                 self.sql.execute(query_transcosts, (c.id, transtier, paid))
 
     def _migrate_objects(self):
-        pass
+        query = """
+        INSERT INTO objects (
+            id, created_at, object_prototype_id, in_game,
+            name, short_description, description, action_description,
+            extra_flags0, extra_flags1, extra_flags2, extra_flags3,
+            wear_flags0, wear_flags1, wear_flags2, wear_flags3,
+            bitvector0, bitvector1, bitvector2, bitvector3,
+            weight, cost, cost_per_day, level, size,
+            carried_by, worn_by, in_room, in_obj, owner_id
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """
+        query_values = """
+        INSERT INTO objects_item_values (object_id, val_index, val_number)
+        VALUES (?, ?, ?)
+        """
+        query_update_in_obj = """
+        UPDATE objects SET in_obj = ? WHERE id = ?
+        """
+
+        nested_links: list[tuple[int, int]] = []
+
+        for _, o in self.db.objects.items():
+            in_obj_id = nullable_fk(getattr(getattr(o, "in_obj", None), "id", None))
+            if in_obj_id is not None:
+                nested_links.append((in_obj_id, o.id))
+
+            self.sql.execute(
+                query,
+                (
+                    o.id,
+                    o.created_at or None,
+                    nullable_fk(o.object_prototype_id),
+                    1 if o.in_room is not None else 0,
+                    o.name,
+                    o.short_description,
+                    o.description,
+                    o.action_description,
+                    *flag_parts(o.extra_flags),
+                    *flag_parts(o.wear_flags),
+                    *flag_parts(o.bitvector),
+                    o.weight,
+                    o.cost,
+                    o.cost_per_day,
+                    o.level,
+                    o.size,
+                    nullable_fk(getattr(getattr(o, "carried_by", None), "id", None)),
+                    nullable_fk(getattr(getattr(o, "worn_by", None), "id", None)),
+                    nullable_fk(getattr(getattr(o, "in_room", None), "id", None)),
+                    None,
+                    nullable_fk(getattr(getattr(o, "owner", None), "id", None)),
+                ),
+            )
+
+            for val_index, val_number in o.values.items():
+                self.sql.execute(query_values, (o.id, val_index, val_number))
+
+        for parent_id, object_id in nested_links:
+            self.sql.execute(query_update_in_obj, (parent_id, object_id))
 
     def migrate(self):
         with self.sql:

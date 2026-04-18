@@ -206,6 +206,13 @@ class SkillData:
 
 
 @dataclass(slots=True)
+class AliasData:
+    alias: str = ""
+    replacement: str = ""
+    type: int = 0
+
+
+@dataclass(slots=True)
 class Character(CharacterBase):
     id: int = -1
     affected: FlagHandler = field(default_factory=FlagHandler)
@@ -323,6 +330,12 @@ class Character(CharacterBase):
     equipment: dict[int, Object] = field(default_factory=dict)
 
     username: str = ""
+
+    dg_variables: dict[int, dict[str, str]] = field(default_factory=lambda: defaultdict(dict))
+    sense_mobiles: list[int] = field(default_factory=list)
+    sense_players: list[int] = field(default_factory=list)
+    dub_players: dict[int, str] = field(default_factory=dict)
+    aliases: list[AliasData] = field(default_factory=list)
 
 @dataclass(slots=True)
 class DgScriptPrototype:
@@ -1422,6 +1435,8 @@ class LegacyDatabase:
         self.player_aliases_raw: dict[int, str] = dict()
         self.player_sense_raw: dict[int, str] = dict()
         self.player_intro_raw: dict[int, str] = dict()
+
+        self._next_object_id = 1
     
 
     def zone_id_for(self, thing_id: int) -> int:
@@ -1674,6 +1689,14 @@ class LegacyDatabase:
                 self.assemblies.append(a)
 
     def _index_object(self, obj: Object):
+        if obj.id > 0:
+            if obj.id >= self._next_object_id:
+                self._next_object_id = obj.id + 1
+        else:
+            while self._next_object_id in self.objects:
+                self._next_object_id += 1
+            obj.id = self._next_object_id
+            self._next_object_id += 1
         self.objects[obj.id] = obj
 
     def _detach_object(self, obj: Object):
@@ -1763,7 +1786,7 @@ class LegacyDatabase:
 
         for locate, obj in entries:
             self._index_object(obj)
-            obj.owner = character 
+            obj.owner = character
 
             if locate > 0:
                 slot = locate - 1
@@ -1878,7 +1901,22 @@ class LegacyDatabase:
             character = by_name.get(var_file.stem.lower())
             if character is None:
                 continue
-            self.player_dgvars_raw[character.id] = var_file.read_text(encoding="utf-8", errors="ignore")
+            raw = var_file.read_text(encoding="utf-8", errors="ignore")
+            self.player_dgvars_raw[character.id] = raw
+
+            for line in raw.splitlines():
+                if not line:
+                    continue
+                parts = line.split(maxsplit=2)
+                if len(parts) < 2:
+                    continue
+                key = parts[0]
+                try:
+                    context = int(parts[1])
+                except ValueError:
+                    continue
+                value = parts[2] if len(parts) > 2 else ""
+                character.dg_variables[context][key] = value
 
     def _load_plralias(self, data_dir: Path):
         alias_dir = data_dir / "plralias"
@@ -1893,7 +1931,33 @@ class LegacyDatabase:
             character = by_name.get(alias_file.stem.lower())
             if character is None:
                 continue
-            self.player_aliases_raw[character.id] = alias_file.read_text(encoding="utf-8", errors="ignore")
+            raw = alias_file.read_text(encoding="utf-8", errors="ignore")
+            self.player_aliases_raw[character.id] = raw
+
+            lines = raw.splitlines()
+            i = 0
+            while i + 4 < len(lines):
+                alias_len_line = lines[i]
+                alias_name = lines[i + 1]
+                replacement_len_line = lines[i + 2]
+                replacement = lines[i + 3]
+                alias_type_line = lines[i + 4]
+                i += 5
+
+                try:
+                    int(alias_len_line)
+                    int(replacement_len_line)
+                    alias_type = int(alias_type_line)
+                except ValueError:
+                    continue
+
+                character.aliases.append(
+                    AliasData(
+                        alias=alias_name,
+                        replacement=replacement,
+                        type=alias_type,
+                    )
+                )
 
     def _load_sense(self, data_dir: Path):
         sense_dir = data_dir / "sense"
@@ -1908,7 +1972,24 @@ class LegacyDatabase:
             character = by_name.get(sense_file.stem.lower())
             if character is None:
                 continue
-            self.player_sense_raw[character.id] = sense_file.read_text(encoding="utf-8", errors="ignore")
+            raw = sense_file.read_text(encoding="utf-8", errors="ignore")
+            self.player_sense_raw[character.id] = raw
+
+            for line in raw.splitlines():
+                token = line.strip()
+                if not token:
+                    continue
+                try:
+                    target_id = int(token)
+                except ValueError:
+                    continue
+
+                if target_id in self.characters:
+                    if target_id not in character.sense_players:
+                        character.sense_players.append(target_id)
+                elif target_id in self.nproto:
+                    if target_id not in character.sense_mobiles:
+                        character.sense_mobiles.append(target_id)
 
     def _load_intro(self, data_dir: Path):
         intro_dir = data_dir / "intro"
@@ -1923,7 +2004,19 @@ class LegacyDatabase:
             character = by_name.get(intro_file.stem.lower())
             if character is None:
                 continue
-            self.player_intro_raw[character.id] = intro_file.read_text(encoding="utf-8", errors="ignore")
+            raw = intro_file.read_text(encoding="utf-8", errors="ignore")
+            self.player_intro_raw[character.id] = raw
+
+            for line in raw.splitlines():
+                parts = line.strip().split(maxsplit=1)
+                if len(parts) != 2:
+                    continue
+
+                actual_name, dub_name = parts
+                dubbed = by_name.get(actual_name.lower())
+                if dubbed is None:
+                    continue
+                character.dub_players[dubbed.id] = dub_name
 
     def _load_characters(self, data_dir: Path):
         player_dir = data_dir / "plrfiles"

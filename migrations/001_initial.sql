@@ -282,9 +282,10 @@ CREATE TABLE room_dgscript_order (
 -- created in preparation for phase 2
 CREATE TABLE room_dgscript_variables(
     room_id INTEGER NOT NULL REFERENCES rooms(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    variable_context INTEGER NOT NULL DEFAULT 0,
     variable_name TEXT NOT NULL,
     variable_value TEXT NOT NULL,
-    PRIMARY KEY(room_id, variable_name)
+    PRIMARY KEY(room_id, variable_context, variable_name)
 );
 
 CREATE TABLE exits(
@@ -704,8 +705,19 @@ CREATE TABLE characters (
     racial_pref INTEGER NOT NULL DEFAULT 0
 );
 
+CREATE TABLE characters_sense_mobiles (
+    character_id INTEGER NOT NULL REFERENCES characters(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    mobile_prototype_id INTEGER NOT NULL REFERENCES mobile_prototypes(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    PRIMARY KEY(character_id, mobile_prototype_id)
+);
 
-CREATE TABLE character_bonuses (
+CREATE TABLE characters_sense_players (
+    character_id INTEGER NOT NULL REFERENCES characters(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    player_id INTEGER NOT NULL REFERENCES characters(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    PRIMARY KEY(character_id, player_id)
+);
+
+CREATE TABLE characters_bonuses (
     character_id INTEGER NOT NULL REFERENCES characters(id) ON DELETE CASCADE ON UPDATE CASCADE,
     -- enum for bonus type
     bonus_type INTEGER NOT NULL,
@@ -749,9 +761,10 @@ CREATE TABLE characters_limb_health (
 CREATE TABLE characters_dgscript_variables(
     -- key value storage of string to string.
     character_id INTEGER NOT NULL REFERENCES characters(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    variable_context INTEGER NOT NULL DEFAULT 0,
     variable_name TEXT NOT NULL,
     variable_value TEXT NOT NULL,
-    PRIMARY KEY(character_id, variable_name)
+    PRIMARY KEY(character_id, variable_context, variable_name)
 );
 
 CREATE TABLE characters_skills (
@@ -870,9 +883,10 @@ CREATE TABLE objects_dgscript_orders (
 CREATE TABLE objects_dgscript_variables(
     -- key value storage of string to string.
     object_id INTEGER NOT NULL REFERENCES objects(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    variable_context INTEGER NOT NULL DEFAULT 0,
     variable_name TEXT NOT NULL,
     variable_value TEXT NOT NULL,
-    PRIMARY KEY(object_id, variable_name)
+    PRIMARY KEY(object_id, variable_context, variable_name)
 );
 
 -- Instances of Dgscripts.
@@ -908,7 +922,8 @@ CREATE TABLE dgscripts (
 CREATE TABLE dgscripts_variables(
     -- key value storage of string to string.
     dscript_id INTEGER NOT NULL REFERENCES dgscripts(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    variable_context INTEGER NOT NULL DEFAULT 0,
     variable_name TEXT NOT NULL,
     variable_value TEXT NOT NULL,
-    PRIMARY KEY(dscript_id, variable_name)
+    PRIMARY KEY(dscript_id, variable_context, variable_name)
 );
