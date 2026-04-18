@@ -2193,114 +2193,160 @@ void raw_kill(struct char_data * ch, struct char_data * killer)
 
 void die(struct char_data *ch, struct char_data *killer)
 {
-  if (!IS_NPC(ch)) {
-   if (PLR_FLAGGED(ch, PLR_HEALT)) {
-    REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_HEALT);
-   }
+  // NPCs just die.
+  if (IS_NPC(ch))
+  {
+    raw_kill(ch, killer);
+    return;
+  }
 
-   // Saiyan Zenkai mechanic: if at 75% lifeforce or higher, 25% chance of triggering Zenkai.
-   // this is implemented by setting PLR_GOOP with gooptime 0
-   if(IS_SAIYAN(ch) && (getCurLFPercent(ch) >= 0.75) && rand_number(1, 4) == 4) {
+  // But there's special handling for players.
+
+  // Clear healing tank usage. How did you die while inside a healing tank though?
+  if (PLR_FLAGGED(ch, PLR_HEALT))
+  {
+    REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_HEALT);
+  }
+
+  // First there are a few mechanics which can prevent death. They are checked first.
+
+  // Saiyan Zenkai mechanic: if at 75% lifeforce or higher, 25% chance of triggering Zenkai.
+  // this is implemented by setting PLR_GOOP with gooptime 0
+  if (IS_SAIYAN(ch) && (getCurLFPercent(ch) >= 0.75) && rand_number(1, 4) == 4)
+  {
     SET_BIT_AR(PLR_FLAGS(ch), PLR_GOOP);
     ch->gooptime = 0;
     decCurLFPercent(ch, 0.5);
     return;
-   }
+  }
 
-   // majin and bio regen mechanic skips actually dying...
-   if ((IS_MAJIN(ch) || IS_BIO(ch)) && ((getCurLF(ch)) >= (getMaxLF(ch)) * 0.75 || (PLR_FLAGGED(ch, PLR_SELFD2) &&
-           (getCurLF(ch)) >= (getMaxLF(ch)) * 0.5))) {
-    decCurLFPercent(ch, 2,-1);
-       decCurHealthPercent(ch, 1, 1);
+  // majin and bio regen mechanic skips actually dying...
+  if ((IS_MAJIN(ch) || IS_BIO(ch)) && ((getCurLF(ch)) >= (getMaxLF(ch)) * 0.75 || (PLR_FLAGGED(ch, PLR_SELFD2) &&
+                                                                                   (getCurLF(ch)) >= (getMaxLF(ch)) * 0.5)))
+  {
+    decCurLFPercent(ch, 2, -1);
+    decCurHealthPercent(ch, 1, 1);
     SET_BIT_AR(PLR_FLAGS(ch), PLR_GOOP);
     ch->gooptime = 32;
     return;
-   }
-   if (PLR_FLAGGED(ch, PLR_IMMORTAL)) {
-   act("@c$n@w disappears right before dying. $n appears to be immortal.@n", TRUE, ch, 0, 0, TO_CHAR);
-   act("@c$n@w disappears right before dying. $n appears to be immortal.@n.", TRUE, ch, 0, 0, TO_ROOM);
-   decCurHealthPercent(ch, 1, 1);
-   decCurKIPercent(ch, 1, 1);
-   decCurSTPercent(ch, 1, 1);
-   null_affect(ch, AFF_POISON);
-     if (GET_COND(ch, HUNGER) >= 0) {
-      GET_COND(ch, HUNGER) = 48;
-     }
-     if (GET_COND(ch, THIRST) >= 0) {
-      GET_COND(ch, THIRST) = 48;
-     }
-   if (FIGHTING(ch)) {
-    stop_fighting(ch);
-   }
-   GET_POS(ch) = POS_SITTING;
-   teleport_to(ch, sensei_start_room(ch->chclass));
-   return;
   }
-    REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_KILLER);
-    REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_THIEF);
-    REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_KNOCKED);
-    REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_SLEEP);
-    REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_PARALYZE);
-   if (!AFF_FLAGGED(ch, AFF_SPIRIT) && !ROOM_FLAGGED(IN_ROOM(ch), ROOM_PAST) && GET_LEVEL(ch) > 8) {
-     if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 2002 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 2011) {
-      GET_DTIME(ch) = time(0);
-     }
-     else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AL) || ROOM_FLAGGED(IN_ROOM(ch), ROOM_HELL)) {
-      send_to_char(ch, "Your soul is saved from destruction by King Yemma. Why? Who knows.\r\n");
-     }
-     else if (IN_ARENA(ch)) {
-      cleanup_arena_watch(ch);
-      if (killer != NULL) {
-       cleanup_arena_watch(killer);
-       send_to_all("@R%s@r manages to defeat @R%s@r in the Arena!@n\r\n", GET_NAME(killer), GET_NAME(ch));
-       final_combat_resolve(killer);
-       final_combat_resolve(ch);
-       teleport_to(killer, 17875);
-      }
-      else {
-       send_to_all("@R%s@r dies in the water of the Arena and is disqualified!@n\r\n", GET_NAME(ch));
-      }
-      char_from_room(ch);
-      char_to_room(ch, real_room(17875));
-      decCurHealthPercent(ch, 1, 1);
-      look_at_room(IN_ROOM(ch), ch, 0);
-      final_combat_resolve(ch);
-      return;
-     }
-     else {
-      if (killer != NULL && IS_NPC(killer)) {
-        GET_DTIME(ch) = time(0) + 28800;
-       GET_DCOUNT(ch) += 1;
-      } else if (killer != NULL && !IS_NPC(killer)) {
-       GET_DTIME(ch) = time(0) + 1123200;
-       SET_BIT_AR(PLR_FLAGS(ch), PLR_PDEATH);
-       GET_DCOUNT(ch) += 1;
-      } else {
-       if (GET_DCOUNT(ch) <= 0) {
-        GET_DTIME(ch) = time(0) + 28800;
-       }
-       else if (GET_DCOUNT(ch) <= 1) {
-        GET_DTIME(ch) = time(0) + 43200;
-       }
-       else if (GET_DCOUNT(ch) <= 3) {
-        GET_DTIME(ch) = time(0) + 86400;
-       }
-       else if (GET_DCOUNT(ch) <= 5) {
-        GET_DTIME(ch) = time(0) + 172800;
-       }
-       else if (GET_DCOUNT(ch) > 5) {
-        GET_DTIME(ch) = time(0) + 604800;
-       }
-       GET_DCOUNT(ch) += 1;
-      }
-     }
-     if (GET_COND(ch, HUNGER) >= 0) {
+
+  // for players who used the Immortal Wish.
+  if (PLR_FLAGGED(ch, PLR_IMMORTAL))
+  {
+    act("@c$n@w disappears right before dying. $n appears to be immortal.@n", TRUE, ch, 0, 0, TO_CHAR);
+    act("@c$n@w disappears right before dying. $n appears to be immortal.@n.", TRUE, ch, 0, 0, TO_ROOM);
+    decCurHealthPercent(ch, 1, 1);
+    decCurKIPercent(ch, 1, 1);
+    decCurSTPercent(ch, 1, 1);
+    null_affect(ch, AFF_POISON);
+    if (GET_COND(ch, HUNGER) >= 0)
+    {
       GET_COND(ch, HUNGER) = 48;
-     }
-     if (GET_COND(ch, THIRST) >= 0) {
+    }
+    if (GET_COND(ch, THIRST) >= 0)
+    {
       GET_COND(ch, THIRST) = 48;
-     }
-   }
+    }
+    if (FIGHTING(ch))
+    {
+      stop_fighting(ch);
+    }
+    GET_POS(ch) = POS_SITTING;
+    teleport_to(ch, sensei_start_room(ch->chclass));
+    return;
+  }
+
+  // Removing some consequences that might happen.
+  REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_KILLER);
+  REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_THIEF);
+  REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_KNOCKED);
+  REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_SLEEP);
+  REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_PARALYZE);
+
+  // those who die in the arena don't actually die. They get returned to the waiting room.
+  if (IN_ARENA(ch))
+  {
+    cleanup_arena_watch(ch);
+    if (killer != NULL)
+    {
+      cleanup_arena_watch(killer);
+      send_to_all("@R%s@r manages to defeat @R%s@r in the Arena!@n\r\n", GET_NAME(killer), GET_NAME(ch));
+      final_combat_resolve(killer);
+      final_combat_resolve(ch);
+      teleport_to(killer, 17875);
+    }
+    else
+    {
+      send_to_all("@R%s@r dies in the water of the Arena and is disqualified!@n\r\n", GET_NAME(ch));
+    }
+    char_from_room(ch);
+    char_to_room(ch, real_room(17875));
+    decCurHealthPercent(ch, 1, 1);
+    look_at_room(IN_ROOM(ch), ch, 0);
+    final_combat_resolve(ch);
+    return;
+  }
+
+  // For code below this, some kind of 'death' is performed.
+  // it will leave a corpse.
+
+  if (!AFF_FLAGGED(ch, AFF_SPIRIT) && !ROOM_FLAGGED(IN_ROOM(ch), ROOM_PAST) && GET_LEVEL(ch) > 8)
+  {
+    if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 2002 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 2011)
+    {
+      GET_DTIME(ch) = time(0);
+    }
+    else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AL) || ROOM_FLAGGED(IN_ROOM(ch), ROOM_HELL))
+    {
+      send_to_char(ch, "Your soul is saved from destruction by King Yemma. Why? Who knows.\r\n");
+    }
+    else
+    {
+      if (killer != NULL && IS_NPC(killer))
+      {
+        GET_DTIME(ch) = time(0) + 28800;
+        GET_DCOUNT(ch) += 1;
+      }
+      else if (killer != NULL && !IS_NPC(killer))
+      {
+        GET_DTIME(ch) = time(0) + 1123200;
+        SET_BIT_AR(PLR_FLAGS(ch), PLR_PDEATH);
+        GET_DCOUNT(ch) += 1;
+      }
+      else
+      {
+        if (GET_DCOUNT(ch) <= 0)
+        {
+          GET_DTIME(ch) = time(0) + 28800;
+        }
+        else if (GET_DCOUNT(ch) <= 1)
+        {
+          GET_DTIME(ch) = time(0) + 43200;
+        }
+        else if (GET_DCOUNT(ch) <= 3)
+        {
+          GET_DTIME(ch) = time(0) + 86400;
+        }
+        else if (GET_DCOUNT(ch) <= 5)
+        {
+          GET_DTIME(ch) = time(0) + 172800;
+        }
+        else if (GET_DCOUNT(ch) > 5)
+        {
+          GET_DTIME(ch) = time(0) + 604800;
+        }
+        GET_DCOUNT(ch) += 1;
+      }
+    }
+    if (GET_COND(ch, HUNGER) >= 0)
+    {
+      GET_COND(ch, HUNGER) = 48;
+    }
+    if (GET_COND(ch, THIRST) >= 0)
+    {
+      GET_COND(ch, THIRST) = 48;
+    }
   }
 
   raw_kill(ch, killer);
