@@ -2197,6 +2197,17 @@ void die(struct char_data *ch, struct char_data *killer)
    if (PLR_FLAGGED(ch, PLR_HEALT)) {
     REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_HEALT);
    }
+
+   // Saiyan Zenkai mechanic: if at 75% lifeforce or higher, 25% chance of triggering Zenkai.
+   // this is implemented by setting PLR_GOOP with gooptime 0
+   if(IS_SAIYAN(ch) && (getCurLFPercent(ch) >= 0.75) && rand_number(1, 4) == 4) {
+    SET_BIT_AR(PLR_FLAGS(ch), PLR_GOOP);
+    ch->gooptime = 0;
+    decCurLFPercent(ch, 0.5);
+    return;
+   }
+
+   // majin and bio regen mechanic skips actually dying...
    if ((IS_MAJIN(ch) || IS_BIO(ch)) && ((getCurLF(ch)) >= (getMaxLF(ch)) * 0.75 || (PLR_FLAGGED(ch, PLR_SELFD2) &&
            (getCurLF(ch)) >= (getMaxLF(ch)) * 0.5))) {
     decCurLFPercent(ch, 2,-1);
@@ -2291,7 +2302,6 @@ void die(struct char_data *ch, struct char_data *killer)
      }
    }
   }
-
 
   raw_kill(ch, killer);
 }

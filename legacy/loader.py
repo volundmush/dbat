@@ -237,7 +237,7 @@ class Character(CharacterBase):
     voice: str = ""
 
     blesslvl: int = 0
-    bonuses: dict[int, int] = field(default_factory=dict)
+    bonuses: list[int] = field(default_factory=list)
     boosts: int = 0
 
     time_birth: int = 0
@@ -656,10 +656,11 @@ def parse_character(f: Scanner) -> Character:
             case "Boab":
                 out.lboard[4] = int(value)
             case "Bonu":
+                value = f.readline().strip()
                 bonuses = [int(x) for x in value.split()]
                 for i, b in enumerate(bonuses):
                     if b != 0:
-                        out.bonuses[i] = b
+                        out.bonuses.append(i)
             case "Boos":
                 out.boosts = int(value)
             case "Bpl":

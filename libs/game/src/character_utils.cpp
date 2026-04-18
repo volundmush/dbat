@@ -355,8 +355,8 @@ int64_t setCurHealth(char_data *ch, int64_t amt) {
 }
 
 int64_t setCurHealthPercent(char_data *ch, double amt) {
-    ch->hit = MAX(0L, (int64_t)(getMaxHealth(ch) * ABS(amt)));
-    return ch->hit;
+    ch->health = clampHealth(amt);
+    return getCurHealth(ch);
 }
 
 int64_t incCurHealth(char_data *ch, int64_t amt, bool limit_max) {
@@ -515,13 +515,15 @@ bool isFullKI(char_data *ch) {
 }
 
 int64_t setCurKI(char_data *ch, int64_t amt) {
-    ch->mana = MAX(0L, ABS(amt));
-    return ch->mana;
+    int64_t maxki = getMaxKI(ch);
+    // how much percent of maxki is amt? set energy to that.
+    ch->energy = safeDiv((double)ABS(amt), (double)maxki);
+    return getCurKI(ch);
 }
 
 int64_t setCurKIPercent(char_data *ch, double amt) {
-    ch->mana = MAX(0L, (int64_t)(getMaxKI(ch) * ABS(amt)));
-    return ch->mana;
+    ch->energy = clampHealth(amt);
+    return getCurKI(ch);
 }
 
 int64_t incCurKI(char_data *ch, int64_t amt, bool limit_max) {

@@ -8712,7 +8712,7 @@ void base_update(void)
 			demon_refill_lf(d->character, getMaxLF(d->character) * 0.01);
 
 			if (getCurLF(d->character) < forty_lf) {
-                incCurLF(d->character, forty_lf - getCurLF(d->character));
+          incCurLF(d->character, forty_lf - getCurLF(d->character));
 			}
 		}
 		if (GET_BACKSTAB_COOL(d->character) > 0) {
@@ -8762,21 +8762,28 @@ void base_update(void)
 			else if (IS_SAIYAN(d->character))
 			{
 
-				int zenkaiPL, zenkaiKi, zenkaiSt;
-				zenkaiPL = getBasePL(d->character) * 1.03;
-				zenkaiKi = getBaseKI(d->character) * 1.015;
-				zenkaiSt = getBaseST(d->character) * 1.015;
-
-				//GET_HIT(d->character) = gear_pl(d->character) * .5;
-				//GET_MANA(d->character) = GET_MAX_MANA(d->character) *.2;
-				//GET_MOVE(d->character) = GET_MAX_MOVE(d->character) *.2;
-
+				setCurHealthPercent(d->character, 0.5);
+        double curKiPerc = getCurKIPercent(d->character);
+        // if less than 25%, restore up to 25%
+        if (curKiPerc < 0.25) {
+          setCurKIPercent(d->character, 0.25);
+        }
+        double curSTPerc = getCurSTPercent(d->character);
+        // if less than 25%, restore up to 25%
+        if (curSTPerc < 0.25) {
+          setCurSTPercent(d->character, 0.25);
+        }
 
 				if (!IN_ARENA(d->character))
 				{
-                    gainBasePL(d->character, zenkaiPL);
-                    gainBaseKI(d->character, zenkaiKi);
-                    gainBaseST(d->character, zenkaiSt);
+          int64_t zenkaiPL, zenkaiKi, zenkaiSt;
+          zenkaiPL = getBasePL(d->character) * 0.03;
+          zenkaiKi = getBaseKI(d->character) * 0.015;
+          zenkaiSt = getBaseST(d->character) * 0.015;
+
+          gainBasePL(d->character, zenkaiPL);
+          gainBaseKI(d->character, zenkaiKi);
+          gainBaseST(d->character, zenkaiSt);
 
 					send_to_char(d->character, "@D[@YZ@ye@wn@Wk@Ya@yi @YB@yo@wo@Ws@Yt@D] @WYou feel much stronger!\r\n");
 					send_to_char(d->character, "@D[@RPL@Y:@n+%s@D] @D[@CKI@Y:@n+%s@D] @D[@GSTA@Y:@n+%s@D]@n\r\n", add_commas(zenkaiPL), add_commas(zenkaiKi), add_commas(zenkaiSt));
@@ -8785,7 +8792,7 @@ void base_update(void)
 				act("@r$n@R collapses to the ground, seemingly dead. After a brief moment, their eyes flash open with a determined look on their face!", TRUE, d->character, 0, 0, TO_ROOM);
 			}
 			else {
-                restoreHealth(d->character);
+        restoreHealth(d->character);
 				act("@MYour body has fully regenerated! You scream out in triumph and a short gust of steam erupts from your pores!@n", TRUE, d->character, 0, 0, TO_CHAR);
 				act("@m$n@M's body has fully regenerated! Suddenly $e screams out in gleeful triumph and short gust of steam erupts from $s skin pores!", TRUE, d->character, 0, 0, TO_ROOM);
 			}

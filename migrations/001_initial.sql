@@ -720,10 +720,8 @@ CREATE TABLE characters_sense_players (
 CREATE TABLE characters_bonuses (
     character_id INTEGER NOT NULL REFERENCES characters(id) ON DELETE CASCADE ON UPDATE CASCADE,
     -- enum for bonus type
-    bonus_type INTEGER NOT NULL,
-    -- the value of this bonus for this character
-    bonus_value INTEGER NOT NULL DEFAULT 0,
-    PRIMARY KEY(character_id, bonus_type)
+    bonus_id INTEGER NOT NULL,
+    PRIMARY KEY(character_id, bonus_id)
 );
 
 CREATE TABLE characters_conditions (
@@ -796,6 +794,24 @@ CREATE TABLE characters_transcosts (
     -- the current transformation cost for this character for this transformation class, for the transformation
     paid INTEGER NOT NULL DEFAULT 0,
     PRIMARY KEY(character_id, transtier)
+);
+
+CREATE TABLE characters_aliases (
+    alias_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    character_id INTEGER NOT NULL REFERENCES characters(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    alias_name TEXT NOT NULL COLLATE NOCASE,
+    replacement_text TEXT NOT NULL,
+    alias_type INTEGER NOT NULL DEFAULT 0,
+    UNIQUE(character_id, alias_name)
+);
+
+CREATE TABLE characters_player_dubs (
+    character_id INTEGER NOT NULL REFERENCES characters(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    -- enum for dub type, e.g. intro, death, etc
+    player_id INTEGER NOT NULL REFERENCES characters(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    -- the text of this player's dub for this dub type
+    dubbed_name TEXT NOT NULL,
+    PRIMARY KEY(character_id, player_id)
 );
 
 -- both player character inventory and House contents are stored in this table. the "persistent" objects.

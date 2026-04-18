@@ -501,8 +501,8 @@ class Migrator:
         placeholders = ", ".join("?" for _ in columns)
         query = f"INSERT INTO characters ({', '.join(columns)}) VALUES ({placeholders})"
         query_bonuses = """
-        INSERT INTO character_bonuses (character_id, bonus_type, bonus_value)
-        VALUES (?, ?, ?)
+        INSERT INTO characters_bonuses (character_id, bonus_id)
+        VALUES (?, ?)
         """
         query_conditions = """
         INSERT INTO characters_conditions (character_id, condition_type, condition_value)
@@ -518,7 +518,23 @@ class Migrator:
         VALUES (?, ?, ?)
         """
         query_dgvars = """
-        INSERT INTO characters_dgscript_variables (character_id, variable_name, variable_value)
+        INSERT INTO characters_dgscript_variables (character_id, variable_context, variable_name, variable_value)
+        VALUES (?, ?, ?, ?)
+        """
+        query_sense_mobiles = """
+        INSERT INTO characters_sense_mobiles (character_id, mobile_prototype_id)
+        VALUES (?, ?)
+        """
+        query_sense_players = """
+        INSERT INTO characters_sense_players (character_id, player_id)
+        VALUES (?, ?)
+        """
+        query_aliases = """
+        INSERT INTO characters_aliases (character_id, alias_name, replacement_text, alias_type)
+        VALUES (?, ?, ?, ?)
+        """
+        query_player_dubs = """
+        INSERT INTO characters_player_dubs (character_id, player_id, dubbed_name)
         VALUES (?, ?, ?)
         """
         query_skills = """
@@ -637,8 +653,8 @@ class Migrator:
                 ),
             )
 
-            for bonus_type, bonus_value in c.bonuses.items():
-                self.sql.execute(query_bonuses, (c.id, bonus_type, bonus_value))
+            for bonus_id in c.bonuses:
+                self.sql.execute(query_bonuses, (c.id, bonus_id))
 
             for condition_type, condition_value in c.conditions.items():
                 self.sql.execute(query_conditions, (c.id, condition_type, condition_value))
@@ -661,8 +677,42 @@ class Migrator:
             for limb_id, health in c.limb_condition.items():
                 self.sql.execute(query_limb, (c.id, as_int(limb_id), health))
 
+            seen_dgvars: set[tuple[int, str]] = set()
+            for context, variables in c.dg_variables.items():
+                for variable_name, variable_value in variables.items():
+                    key = (as_int(context), variable_name)
+                    if key in seen_dgvars:
+                        continue
+                    self.sql.execute(query_dgvars, (c.id, key[0], variable_name, variable_value))
+                    seen_dgvars.add(key)
+
+            # Fallback for any legacy flat map data that may still be present.
             for variable_name, variable_value in c.dgscript_variables.items():
-                self.sql.execute(query_dgvars, (c.id, variable_name, variable_value))
+                key = (0, variable_name)
+                if key in seen_dgvars:
+                    continue
+                self.sql.execute(query_dgvars, (c.id, 0, variable_name, variable_value))
+                seen_dgvars.add(key)
+
+            for mobile_id in set(c.sense_mobiles):
+                self.sql.execute(query_sense_mobiles, (c.id, mobile_id))
+
+            for player_id in set(c.sense_players):
+                self.sql.execute(query_sense_players, (c.id, player_id))
+
+            for alias in c.aliases:
+                self.sql.execute(
+                    query_aliases,
+                    (
+                        c.id,
+                        alias.alias,
+                        alias.replacement,
+                        as_int(alias.type),
+                    ),
+                )
+
+            for player_id, dubbed_name in c.dub_players.items():
+                self.sql.execute(query_player_dubs, (c.id, as_int(player_id), dubbed_name))
 
             for skill_id, skill_data in c.skills.items():
                 self.sql.execute(
