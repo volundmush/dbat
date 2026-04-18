@@ -149,6 +149,7 @@ class Object(ObjectBase):
     in_room: Room | None = None
     worn_by: Character | None = None
     worn_on: int = 0
+    owner: Character | None = None
 
     in_obj: Object | None = None
     contains: list[Object] = field(default_factory=list)
@@ -1421,7 +1422,6 @@ class LegacyDatabase:
         self.player_aliases_raw: dict[int, str] = dict()
         self.player_sense_raw: dict[int, str] = dict()
         self.player_intro_raw: dict[int, str] = dict()
-        self._next_object_id: int = 1
     
 
     def zone_id_for(self, thing_id: int) -> int:
@@ -1674,14 +1674,6 @@ class LegacyDatabase:
                 self.assemblies.append(a)
 
     def _index_object(self, obj: Object):
-        if obj.id > 0:
-            if obj.id >= self._next_object_id:
-                self._next_object_id = obj.id + 1
-        else:
-            while self._next_object_id in self.objects:
-                self._next_object_id += 1
-            obj.id = self._next_object_id
-            self._next_object_id += 1
         self.objects[obj.id] = obj
 
     def _detach_object(self, obj: Object):
@@ -1771,6 +1763,7 @@ class LegacyDatabase:
 
         for locate, obj in entries:
             self._index_object(obj)
+            obj.owner = character 
 
             if locate > 0:
                 slot = locate - 1

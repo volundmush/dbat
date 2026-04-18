@@ -682,6 +682,9 @@ class Migrator:
             for transtier, paid in c.transcost.items():
                 self.sql.execute(query_transcosts, (c.id, transtier, paid))
 
+    def _migrate_objects(self):
+        pass
+
     def migrate(self):
         with self.sql:
             self._migrate_zones()
@@ -696,6 +699,7 @@ class Migrator:
             self._migrate_houses()
             self._migrate_users()
             self._migrate_players()
+            self._migrate_objects()
 
 
 def main():
