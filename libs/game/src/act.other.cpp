@@ -4686,125 +4686,150 @@ ACMD(do_absorb)
 ACMD(do_escape)
 {
 
- if (!ABSORBBY(ch) && !GRAPPLED(ch)) {
-  send_to_char(ch, "You are not in anyone's grasp!\r\n");
-  return;
- }
- int num = GET_STR(ch);
+  if (!ABSORBBY(ch) && !GRAPPLED(ch))
+  {
+    send_to_char(ch, "You are not in anyone's grasp!\r\n");
+    return;
+  }
+  int num = GET_STR(ch);
 
- if (ABSORBBY(ch)) {
-  int skill = GET_SKILL(ABSORBBY(ch), SKILL_ABSORB);
-  if (GET_HIT(ch) > GET_HIT(ABSORBBY(ch)) * 10) {
-   num += rand_number(10, 15);
-  } else if (GET_HIT(ch) > GET_HIT(ABSORBBY(ch)) * 5) {
-   num += rand_number(6, 10);
-  } else if (GET_HIT(ch) > GET_HIT(ABSORBBY(ch)) * 2) {
-   num += rand_number(4, 8);
-  } else if (GET_HIT(ch) > GET_HIT(ABSORBBY(ch))) {
-   num += rand_number(2, 5);
-  } else if (GET_HIT(ch) * 10 <= GET_HIT(ABSORBBY(ch))) {
-   skill -= rand_number(10, 15);
-  } else if (GET_HIT(ch) * 5 <= GET_HIT(ABSORBBY(ch))) {
-   skill -= rand_number(6, 10);
-  } else if (GET_HIT(ch) * 2 <= GET_HIT(ABSORBBY(ch))) {
-   skill -= rand_number(4, 8);
-  } else if (GET_HIT(ch) < GET_HIT(ABSORBBY(ch))) {
-   skill -= rand_number(2, 5);
+  struct char_data *offender = ABSORBBY(ch) ? ABSORBBY(ch) : GRAPPLED(ch);
+  int64_t opl = GET_HIT(offender);
+  int64_t dpl = GET_HIT(ch);
+  int skill = ABSORBBY(ch) ? GET_SKILL(ABSORBBY(ch), SKILL_ABSORB) : GET_SKILL(GRAPPLED(ch), SKILL_GRAPPLE);
+
+  if (dpl > opl * 10)
+  {
+    num += rand_number(10, 15);
   }
- if (num > skill) {
-  act("@c$N@W manages to break loose of @C$n's@W hold!@n", TRUE, ABSORBBY(ch), 0, ch, TO_NOTVICT);
-  act("@WYou manage to break loose of @C$n's@W hold!@n", TRUE, ABSORBBY(ch), 0, ch, TO_VICT);
-  act("@c$N@W manages to break loose of your hold!@n", TRUE, ABSORBBY(ch), 0, ch, TO_CHAR);
-  if (FIGHTING(ch) == NULL) {
-   set_fighting(ch, ABSORBBY(ch));
+  else if (dpl > opl * 5)
+  {
+    num += rand_number(6, 10);
   }
-  if (FIGHTING(ABSORBBY(ch)) == NULL) {
-    set_fighting(ABSORBBY(ch), ch);
+  else if (dpl > opl * 2)
+  {
+    num += rand_number(4, 8);
   }
-  ABSORBING(ABSORBBY(ch)) = NULL;
-  ABSORBBY(ch) = NULL;
- }
- else {
-  act("@c$N@W struggles to break loose of @C$n's@W hold!@n", TRUE, ABSORBBY(ch), 0, ch, TO_NOTVICT);
-  act("@WYou struggle to break loose of @C$n's@W hold!@n", TRUE, ABSORBBY(ch), 0, ch, TO_VICT);
-  act("@c$N@W struggles to break loose of your hold!@n", TRUE, ABSORBBY(ch), 0, ch, TO_CHAR);
-  if (rand_number(1, 3) == 3) {
-   int64_t dmg = GET_MAX_HIT(ch) * 0.025;
-   hurt(0, 0, ch, ABSORBBY(ch), NULL, dmg, 0);
-   if (GET_POS(ABSORBBY(ch)) == POS_SLEEPING) {
-    act("@c$N@W manages to break loose of @C$n's@W hold!@n", TRUE, ABSORBBY(ch), 0, ch, TO_NOTVICT);
-    act("@WYou manage to break loose of @C$n's@W hold!@n", TRUE, ABSORBBY(ch), 0, ch, TO_VICT);
-    act("@c$N@W manages to break loose of your hold!@n", TRUE, ABSORBBY(ch), 0, ch, TO_CHAR);
-    ABSORBING(ABSORBBY(ch)) = NULL;
-    ABSORBBY(ch) = NULL;
-   }
+  else if (dpl > opl)
+  {
+    num += rand_number(2, 5);
   }
-  WAIT_STATE(ch, PULSE_2SEC);
- }
- }
- if (GRAPPLED(ch)) {
-  int skill = GET_SKILL(GRAPPLED(ch), SKILL_GRAPPLE);
-  if (GET_HIT(ch) > GET_HIT(GRAPPLED(ch)) * 10) {
-   num += rand_number(10, 15);
-  } else if (GET_HIT(ch) > GET_HIT(GRAPPLED(ch)) * 5) {
-   num += rand_number(6, 10);
-  } else if (GET_HIT(ch) > GET_HIT(GRAPPLED(ch)) * 2) {
-   num += rand_number(4, 8);
-  } else if (GET_HIT(ch) > GET_HIT(GRAPPLED(ch))) {
-   num += rand_number(2, 5);
-  } else if (GET_HIT(ch) * 10 <= GET_HIT(GRAPPLED(ch))) {
-   skill -= rand_number(10, 15);
-  } else if (GET_HIT(ch) * 5 <= GET_HIT(GRAPPLED(ch))) {
-   skill -= rand_number(6, 10);
-  } else if (GET_HIT(ch) * 2 <= GET_HIT(GRAPPLED(ch))) {
-   skill -= rand_number(4, 8);
-  } else if (GET_HIT(ch) < GET_HIT(GRAPPLED(ch))) {
-   skill -= rand_number(2, 5);
+  else if (dpl * 10 <= opl)
+  {
+    skill -= rand_number(10, 15);
+  }
+  else if (dpl * 5 <= opl)
+  {
+    skill -= rand_number(6, 10);
+  }
+  else if (dpl * 2 <= opl)
+  {
+    skill -= rand_number(4, 8);
+  }
+  else if (dpl < opl)
+  {
+    skill -= rand_number(2, 5);
   }
 
- if (num > skill) {
-  if (GRAPTYPE(GRAPPLED(ch)) == 4) {
-   act("@c$N@M flexes with all $S might and causes your body to explode outward into gooey chunks!@n", TRUE, GRAPPLED(ch), 0, ch, TO_CHAR);
-   act("@MYou flex with all your might and cause @C$n's@M body to explode outward into gooey chunks!@n", TRUE, GRAPPLED(ch), 0, ch, TO_VICT);
-   act("@c$N@M flexes with all $S might and causes @C$n's@M body to explode outward into gooey chunks!@n", TRUE, GRAPPLED(ch), 0, ch, TO_NOTVICT);
+  bool escaped = (skill - num) < axion_dice(0);
 
-   act("@MYou reform your body mere moments later.@n", TRUE, GRAPPLED(ch), 0, 0, TO_CHAR);
-   act("@C$n@M reforms $s body mere moments later.", TRUE, GRAPPLED(ch), 0, 0, TO_ROOM);
-  } else {
-   act("@c$N@W manages to break loose of @C$n's@W hold!@n", TRUE, GRAPPLED(ch), 0, ch, TO_NOTVICT);
-   act("@WYou manage to break loose of @C$n's@W hold!@n", TRUE, GRAPPLED(ch), 0, ch, TO_VICT);
-   act("@c$N@W manages to break loose of your hold!@n", TRUE, GRAPPLED(ch), 0, ch, TO_CHAR);
+  if (ABSORBBY(ch))
+  {
+
+    if (escaped)
+    {
+      act("@c$N@W manages to break loose of @C$n's@W hold!@n", TRUE, ABSORBBY(ch), 0, ch, TO_NOTVICT);
+      act("@WYou manage to break loose of @C$n's@W hold!@n", TRUE, ABSORBBY(ch), 0, ch, TO_VICT);
+      act("@c$N@W manages to break loose of your hold!@n", TRUE, ABSORBBY(ch), 0, ch, TO_CHAR);
+      if (FIGHTING(ch) == NULL)
+      {
+        set_fighting(ch, ABSORBBY(ch));
+      }
+      if (FIGHTING(ABSORBBY(ch)) == NULL)
+      {
+        set_fighting(ABSORBBY(ch), ch);
+      }
+      ABSORBING(ABSORBBY(ch)) = NULL;
+      ABSORBBY(ch) = NULL;
+    }
+    else
+    {
+      act("@c$N@W struggles to break loose of @C$n's@W hold!@n", TRUE, ABSORBBY(ch), 0, ch, TO_NOTVICT);
+      act("@WYou struggle to break loose of @C$n's@W hold!@n", TRUE, ABSORBBY(ch), 0, ch, TO_VICT);
+      act("@c$N@W struggles to break loose of your hold!@n", TRUE, ABSORBBY(ch), 0, ch, TO_CHAR);
+      if (rand_number(1, 3) == 3)
+      {
+        int64_t dmg = GET_MAX_HIT(ch) * 0.025;
+        hurt(0, 0, ch, ABSORBBY(ch), NULL, dmg, 0);
+        if (GET_POS(ABSORBBY(ch)) == POS_SLEEPING)
+        {
+          act("@c$N@W manages to break loose of @C$n's@W hold!@n", TRUE, ABSORBBY(ch), 0, ch, TO_NOTVICT);
+          act("@WYou manage to break loose of @C$n's@W hold!@n", TRUE, ABSORBBY(ch), 0, ch, TO_VICT);
+          act("@c$N@W manages to break loose of your hold!@n", TRUE, ABSORBBY(ch), 0, ch, TO_CHAR);
+          ABSORBING(ABSORBBY(ch)) = NULL;
+          ABSORBBY(ch) = NULL;
+        }
+      }
+      WAIT_STATE(ch, PULSE_2SEC);
+    }
   }
-  if (FIGHTING(ch) == NULL) {
-   set_fighting(ch, GRAPPLED(ch));
+
+  if (GRAPPLED(ch))
+  {
+
+    if (escaped)
+    {
+      if (GRAPTYPE(GRAPPLED(ch)) == 4)
+      {
+        act("@c$N@M flexes with all $S might and causes your body to explode outward into gooey chunks!@n", TRUE, GRAPPLED(ch), 0, ch, TO_CHAR);
+        act("@MYou flex with all your might and cause @C$n's@M body to explode outward into gooey chunks!@n", TRUE, GRAPPLED(ch), 0, ch, TO_VICT);
+        act("@c$N@M flexes with all $S might and causes @C$n's@M body to explode outward into gooey chunks!@n", TRUE, GRAPPLED(ch), 0, ch, TO_NOTVICT);
+
+        act("@MYou reform your body mere moments later.@n", TRUE, GRAPPLED(ch), 0, 0, TO_CHAR);
+        act("@C$n@M reforms $s body mere moments later.", TRUE, GRAPPLED(ch), 0, 0, TO_ROOM);
+      }
+      else
+      {
+        act("@c$N@W manages to break loose of @C$n's@W hold!@n", TRUE, GRAPPLED(ch), 0, ch, TO_NOTVICT);
+        act("@WYou manage to break loose of @C$n's@W hold!@n", TRUE, GRAPPLED(ch), 0, ch, TO_VICT);
+        act("@c$N@W manages to break loose of your hold!@n", TRUE, GRAPPLED(ch), 0, ch, TO_CHAR);
+      }
+      if (FIGHTING(ch) == NULL)
+      {
+        set_fighting(ch, GRAPPLED(ch));
+      }
+      if (FIGHTING(GRAPPLED(ch)) == NULL)
+      {
+        set_fighting(GRAPPLED(ch), ch);
+      }
+      GRAPTYPE(GRAPPLED(ch)) = -1;
+      GRAPPLING(GRAPPLED(ch)) = NULL;
+      GRAPPLED(ch) = NULL;
+      GRAPTYPE(ch) = -1;
+    }
+    else
+    {
+      act("@c$N@W struggles to break loose of @C$n's@W hold!@n", TRUE, GRAPPLED(ch), 0, ch, TO_NOTVICT);
+      act("@WYou struggle to break loose of @C$n's@W hold!@n", TRUE, GRAPPLED(ch), 0, ch, TO_VICT);
+      act("@c$N@W struggles to break loose of your hold!@n", TRUE, GRAPPLED(ch), 0, ch, TO_CHAR);
+      if (rand_number(1, 3) == 3)
+      {
+        int64_t dmg = GET_MAX_HIT(ch) * 0.025;
+        hurt(0, 0, ch, GRAPPLED(ch), NULL, dmg, 0);
+        if (GET_POS(GRAPPLED(ch)) == POS_SLEEPING)
+        {
+          act("@c$N@W manages to break loose of @C$n's@W hold!@n", TRUE, GRAPPLED(ch), 0, ch, TO_NOTVICT);
+          act("@WYou manage to break loose of @C$n's@W hold!@n", TRUE, GRAPPLED(ch), 0, ch, TO_VICT);
+          act("@c$N@W manages to break loose of your hold!@n", TRUE, GRAPPLED(ch), 0, ch, TO_CHAR);
+          GRAPTYPE(GRAPPLED(ch)) = -1;
+          GRAPPLING(GRAPPLED(ch)) = NULL;
+          GRAPPLED(ch) = NULL;
+          GRAPTYPE(ch) = -1;
+        }
+      }
+      WAIT_STATE(ch, PULSE_2SEC);
+    }
   }
-  if (FIGHTING(GRAPPLED(ch)) == NULL) {
-    set_fighting(GRAPPLED(ch), ch);
-  }
-  GRAPTYPE(GRAPPLED(ch)) = -1;
-  GRAPPLING(GRAPPLED(ch)) = NULL;
-  GRAPPLED(ch) = NULL;
-  GRAPTYPE(ch) = -1;
- } else {
-  act("@c$N@W struggles to break loose of @C$n's@W hold!@n", TRUE, GRAPPLED(ch), 0, ch, TO_NOTVICT);
-  act("@WYou struggle to break loose of @C$n's@W hold!@n", TRUE, GRAPPLED(ch), 0, ch, TO_VICT);
-  act("@c$N@W struggles to break loose of your hold!@n", TRUE, GRAPPLED(ch), 0, ch, TO_CHAR);
-  if (rand_number(1, 3) == 3) {
-   int64_t dmg = GET_MAX_HIT(ch) * 0.025;
-   hurt(0, 0, ch, GRAPPLED(ch), NULL, dmg, 0);
-   if (GET_POS(GRAPPLED(ch)) == POS_SLEEPING) {
-    act("@c$N@W manages to break loose of @C$n's@W hold!@n", TRUE, GRAPPLED(ch), 0, ch, TO_NOTVICT);
-    act("@WYou manage to break loose of @C$n's@W hold!@n", TRUE, GRAPPLED(ch), 0, ch, TO_VICT);
-    act("@c$N@W manages to break loose of your hold!@n", TRUE, GRAPPLED(ch), 0, ch, TO_CHAR);
-    GRAPTYPE(GRAPPLED(ch)) = -1;
-    GRAPPLING(GRAPPLED(ch)) = NULL;
-    GRAPPLED(ch) = NULL;
-    GRAPTYPE(ch) = -1;
-   }
-  }
-  WAIT_STATE(ch, PULSE_2SEC);
- }  
- }
 }
 
 ACMD(do_regenerate) {
