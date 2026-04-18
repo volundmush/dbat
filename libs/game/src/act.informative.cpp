@@ -5729,17 +5729,7 @@ ACMD(do_score)
          (getCurCarriedWeight(ch))));
  send_to_char(ch, "      @D[      @CBank@D| @W%-15s@D] [ @CMax Carry@D| @W%-15s@D]@n\n", add_commas(GET_BANK_GOLD(ch)), add_commas(CAN_CARRY_W(ch)));
  send_to_char(ch, "      @D[ @CMax Carry@D| @W%-15s@D]@n\n", add_commas(GOLD_CARRY(ch)));
-  int numb = 0;
-  if (GET_BANK_GOLD(ch) > 99) {
-   numb = (GET_BANK_GOLD(ch) / 100) * 2;
-  } else if (GET_BANK_GOLD(ch) > 0) {
-   numb = 1;
-  } else {
-   numb = 0;
-  }
-  if (numb >= 7500) {
-   numb = 7500;
-  }
+  int numb = GET_BANK_INTEREST(ch);
  send_to_char(ch, "      @D[  @CInterest@D| @W%-15s@D]\n", add_commas(numb));
   if (IS_ARLIAN(ch)) {
    send_to_char(ch, "                             @D<@GEvolution @D>@n\n");

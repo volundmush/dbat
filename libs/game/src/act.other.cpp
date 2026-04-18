@@ -8837,11 +8837,8 @@ void base_update(void)
 			oozaru_transform(d->character);
 		}
 		if (cash == TRUE && GET_BANK_GOLD(d->character) > 0) {
-			inc = (GET_BANK_GOLD(d->character) / 50) * 2;
+			inc = GET_BANK_INTEREST(d->character);
 			GET_LINTEREST(d->character) = LASTINTEREST;
-			if (inc >= 25000) {
-				inc = 25000;
-			}
 			GET_BANK_GOLD(d->character) += inc;
 			send_to_char(d->character, "@cBank Interest@D: @Y%s@n\r\n", add_commas(inc));
 		}

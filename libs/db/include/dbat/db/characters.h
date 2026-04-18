@@ -364,6 +364,12 @@ struct char_data
    int64_t baseki;
    int64_t basest;
 
+   // used for temporaryt storage of bonuses
+   int64_t max_mana; /* Max mana for PC/NPC			*/
+   int64_t max_hit; /* Max hit for PC/NPC			*/
+   int64_t max_move; /* Max move for PC/NPC			*/
+   int64_t max_ki; /* Max ki for PC/NPC			*/
+
    // resource meters, ranges from 0 to 1.0
    double health;
    double energy;
@@ -521,13 +527,13 @@ struct char_data
    int16_t saving_throw[3];       /* Saving throw				*/
    int16_t apply_saving_throw[3]; /* Saving throw bonuses			*/
    int64_t mana;
-   int64_t max_mana; /* Max mana for PC/NPC			*/
+   
    int64_t hit;
-   int64_t max_hit; /* Max hit for PC/NPC			*/
+   
    int64_t move;
-   int64_t max_move; /* Max move for PC/NPC			*/
+   
    int64_t ki;
-   int64_t max_ki; /* Max ki for PC/NPC			*/
+   
    int64_t lifeforce;
    int16_t shield_bonus;  /* Shield bonus for AC			*/
    int damage_mod;        /* Any bonus or penalty to the damage	*/

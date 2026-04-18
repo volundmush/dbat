@@ -326,34 +326,18 @@ int perform_dupe_check(struct descriptor_data *d)
       send_to_char(d->character, "\r\n@GThere is a new bulletin board post.@n\r\n");
     if (NEWSUPDATE > GET_LPLAY(d->character))
       send_to_char(d->character, "\r\n@GThe NEWS file has been updated, type 'news %d' to see the latest entry or 'news list' to see available entries.@n\r\n", LASTNEWS);
+    
     if (LASTINTEREST != 0 && LASTINTEREST > GET_LINTEREST(d->character)) {
       int diff = (LASTINTEREST - GET_LINTEREST(d->character));
       int mult = 0;
-      while (diff > 0) {
-       if ((diff - 86400) < 0 && mult == 0) {
-        mult = 1;
-       }
-       else if ((diff - 86400) >= 0) {
-        diff -= 86400;
-        mult++;
-       }
-       else {
-        diff = 0;
-       }
-      }
-        if (mult > 3) {
-         mult = 3;
-        }
+      int days = MAX(3, diff / 86400);
       GET_LINTEREST(d->character) = LASTINTEREST;
-      if (GET_BANK_GOLD(d->character) > 0) {
-       int inc = ((GET_BANK_GOLD(d->character) / 100) * 2);
-       if (inc >= 7500) {
-        inc = 7500;
-       }
-       inc *= mult;
-       GET_BANK_GOLD(d->character) += inc;
+      int base_interest = GET_BANK_INTEREST(d->character);
+      if (base_interest) {
+        int total_interest = base_interest * days;
+       GET_BANK_GOLD(d->character) += total_interest;
        send_to_char(d->character, "Interest happened while you were away, %d times.\r\n"
-                                  "@cBank Interest@D: @Y%s@n\r\n", mult, add_commas(inc));
+                                  "@cBank Interest@D: @Y%s@n\r\n", days, add_commas(total_interest));
       }
     }
     break;

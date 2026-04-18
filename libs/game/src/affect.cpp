@@ -61,19 +61,16 @@ void aff_apply_modify(struct char_data *ch, int loc, int mod, int spec, char *ms
     break;
 
   case APPLY_MANA:
-    //GET_MAX_MANA(ch) += mod;
+  case APPLY_KI:
+    ch->max_ki += mod;
     break;
 
   case APPLY_HIT:
-    //GET_MAX_HIT(ch) += mod;
+    ch->max_hit += mod;
     break;
 
   case APPLY_MOVE:
-    //GET_MAX_MOVE(ch) += mod;
-    break;
-
-  case APPLY_KI:
-    //GET_MAX_KI(ch) += mod;
+    ch->max_move += mod;
     break;
 
   case APPLY_GOLD:

@@ -418,6 +418,7 @@ int64_t getMaxPLTrans(char_data *ch) {
     } else {
         total = getEffBasePL(ch) * form.mult;
     }
+    total += ch->max_hit;
     return total;
 }
 
@@ -476,11 +477,14 @@ int64_t getCurKI(char_data *ch) {
 
 int64_t getMaxKI(char_data *ch) {
     auto form = get_race(ch->race)->getCurForm(ch);
+    int64_t total = 0;
     if(form.flag) {
-        return (form.bonus + getEffBaseKI(ch)) * form.mult;
+        total = (form.bonus + getEffBaseKI(ch)) * form.mult;
     } else {
-        return getEffBaseKI(ch);
+        total = getEffBaseKI(ch);
     }
+    total += ch->max_ki;
+    return total;
 }
 
 int64_t getEffBaseKI(char_data *ch) {
@@ -573,11 +577,14 @@ int64_t getCurST(char_data *ch) {
 
 int64_t getMaxST(char_data *ch) {
     auto form = get_race(ch->race)->getCurForm(ch);
+    int64_t total = 0;
     if(form.flag) {
-        return (form.bonus + getEffBaseST(ch)) * form.mult;
+        total = (form.bonus + getEffBaseST(ch)) * form.mult;
     } else {
-        return getEffBaseST(ch);
+        total = getEffBaseST(ch);
     }
+    total += ch->max_move;
+    return total;
 }
 
 int64_t getEffBaseST(char_data *ch) {
