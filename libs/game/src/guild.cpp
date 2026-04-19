@@ -155,6 +155,11 @@ ACMD(do_teach)
 
  skill = find_skill_num(arg, SKTYPE_SKILL);
 
+ if(skill < 0 || skill >= SKILL_TABLE_SIZE) {
+  send_to_char(ch, "@MThat is not a valid skill!@n\r\n");
+  return;
+ }
+
  if (GET_SKILL_BASE(ch, skill) < 101) {
   send_to_char(ch, "You are not a Grand Master in that skill!\r\n");
   send_to_char(ch, "@wSyntax: teach (skill) (target)@n\r\n");
@@ -859,6 +864,10 @@ void handle_grand(struct char_data *keeper, int guild_nr, struct char_data *ch, 
  }
 
  skill_num = find_skill_num(argument, SKTYPE_SKILL);
+  if(skill_num < 0 || skill_num >= SKILL_TABLE_SIZE) {
+  send_to_char(ch, "@MThat is not a valid skill!@n\r\n");
+  return;
+ }
  char buf[MAX_STRING_LENGTH];
 
  if (!(does_guild_know(guild_nr, skill_num))) {
@@ -916,6 +925,10 @@ void handle_practice(struct char_data *keeper, int guild_nr, struct char_data *c
   }
 
   skill_num = find_skill_num(argument, SKTYPE_SKILL);
+  if(skill_num < 0 || skill_num >= SKILL_TABLE_SIZE) {
+   send_to_char(ch, "@MThat is not a valid skill!@n\r\n");
+   return;
+  }
 
   if (strstr(sensei_style[GET_CLASS(ch)], argument)) {
    skill_num = 539;
