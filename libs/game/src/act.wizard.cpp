@@ -935,12 +935,6 @@ ACMD(do_echo)
     int found = FALSE, trunc = 0;
     struct char_data *vict = NULL, *next_v = NULL, *tch = NULL;
 
-    if (strlen(argument) > 1000) {
-     trunc = strlen(argument) - 1000;
-     argument[strlen(argument) - trunc] = '\0';
-     sprintf(argument, "%s\n@D(@gMessage truncated to 1000 characters@D)@n\n", argument);
-    }
-
     for (vict = world[IN_ROOM(ch)].people; vict; vict = next_v) {
      next_v = vict->next_in_room;
      if (vict == ch)

@@ -61,8 +61,16 @@ void char_set_race(struct char_data *ch, int race);
 uint8_t char_get_weight(const struct char_data *ch);
 void char_set_weight(struct char_data *ch, uint8_t weight);
 
+uint8_t char_get_weight_base(const struct char_data *ch);
+void char_set_weight_base(struct char_data *ch, uint8_t weight);
+uint8_t char_get_weight_effective(const struct char_data *ch);
+
 uint8_t char_get_height(const struct char_data *ch);
 void char_set_height(struct char_data *ch, uint8_t height);
+
+uint8_t char_get_height_base(const struct char_data *ch);
+void char_set_height_base(struct char_data *ch, uint8_t height);
+uint8_t char_get_height_effective(const struct char_data *ch);
 
 // =============================================================================
 // Appearance (race-specific lookups)
@@ -152,6 +160,52 @@ void char_set_intel(struct char_data *ch, int8_t val);
 void char_set_wis(struct char_data *ch, int8_t val);
 void char_set_con(struct char_data *ch, int8_t val);
 void char_set_cha(struct char_data *ch, int8_t val);
+
+int8_t char_get_str_base(const struct char_data *ch);
+void char_set_str_base(struct char_data *ch, int8_t val);
+int8_t char_get_str_effective(const struct char_data *ch);
+
+int8_t char_get_dex_base(const struct char_data *ch);
+void char_set_dex_base(struct char_data *ch, int8_t val);
+int8_t char_get_dex_effective(const struct char_data *ch);
+
+int8_t char_get_intel_base(const struct char_data *ch);
+void char_set_intel_base(struct char_data *ch, int8_t val);
+int8_t char_get_intel_effective(const struct char_data *ch);
+
+int8_t char_get_wis_base(const struct char_data *ch);
+void char_set_wis_base(struct char_data *ch, int8_t val);
+int8_t char_get_wis_effective(const struct char_data *ch);
+
+int8_t char_get_con_base(const struct char_data *ch);
+void char_set_con_base(struct char_data *ch, int8_t val);
+int8_t char_get_con_effective(const struct char_data *ch);
+
+int8_t char_get_cha_base(const struct char_data *ch);
+void char_set_cha_base(struct char_data *ch, int8_t val);
+int8_t char_get_cha_effective(const struct char_data *ch);
+
+int64_t char_get_pl_max_base(const struct char_data *ch);
+void char_set_pl_max_base(struct char_data *ch, int64_t val);
+int64_t char_get_pl_max_effective(const struct char_data *ch);
+double char_get_pl_current_pct(const struct char_data *ch);
+void char_set_pl_current_pct(struct char_data *ch, double pct);
+
+int64_t char_get_ki_max_base(const struct char_data *ch);
+void char_set_ki_max_base(struct char_data *ch, int64_t val);
+int64_t char_get_ki_max_effective(const struct char_data *ch);
+double char_get_ki_current_pct(const struct char_data *ch);
+void char_set_ki_current_pct(struct char_data *ch, double pct);
+
+int64_t char_get_st_max_base(const struct char_data *ch);
+void char_set_st_max_base(struct char_data *ch, int64_t val);
+int64_t char_get_st_max_effective(const struct char_data *ch);
+double char_get_st_current_pct(const struct char_data *ch);
+void char_set_st_current_pct(struct char_data *ch, double pct);
+
+int64_t char_get_lf_max_effective(const struct char_data *ch);
+double char_get_lf_current_pct(const struct char_data *ch);
+void char_set_lf_current_pct(struct char_data *ch, double pct);
 
 // =============================================================================
 // Vital Stats (hit/mana/move/ki)

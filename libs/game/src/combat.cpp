@@ -4914,7 +4914,9 @@ int handle_combo(struct char_data *ch, struct char_data *vict)
   return 0;
 
     int chance;
-    int speedPercentage = ((double)(GET_SPEEDI(ch)) / (double)GET_SPEEDI(vict)) *(double)100;
+    int64_t chspeed = GET_SPEEDI(ch);
+    int64_t victspeed = GET_SPEEDI(vict);
+    int64_t speedPercentage = ((double)(chspeed) / (double)(victspeed)) * 100.0;
     if (speedPercentage < 1)
     {
         chance = 1;

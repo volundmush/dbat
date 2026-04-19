@@ -1165,9 +1165,9 @@ namespace dbat::race {
                             TRUE, ch, 0, 0, TO_ROOM);
                         return;
                     case 2:
-                        act("@WSpikes grow out from your elbows as your power begins to climb to new heights. The muscles along your forearms grow to double their former size as the spikes growing from your elbows flatten and sharpen into blades. You have achieved your @GSecond @mMutation@W!@n",
+                        act("@WYou yell as pain envelopes your body and a dark aura bursts up! The back of your head stretches out growing multiple spikes along its edges as it grows. In addition to this your shoulders stretch out forming pointed ridges. You cackle as lastly your nose disappears and your face becomes more lizard like. Energy swirls around your body as you realize your @GSecond @cTransformation@W.@n",
                             TRUE, ch, 0, 0, TO_CHAR);
-                        act("@WSpikes grow out from @C$n@W's elbows as $s power begins to climb to new heights. The muscles along $s forearms grow to double their former size as the spikes growing from $s elbows flatten and sharpen into blades. $e has achieved your @GSecond @mMutation@W!@n",
+                        act("@C$n@W yells as pain envelopes $s body and a dark aura bursts up around $m! The back of $s head stretches out growing multiple spikes along its edges as it grows. In addition to this $s shoulders stretch out forming pointed ridges. $e cackles as lastly $s nose disappears and $s face becomes more lizard like. Energy swirls around $s body as $e realizes $s @GSecond @cTransformation@W.@n",
                             TRUE, ch, 0, 0, TO_ROOM);
                         return;
                     case 3:

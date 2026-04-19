@@ -9,6 +9,17 @@
 #include "dbat/db/consts/races.h"
 #include "dbat/db/weather.h"
 
+static double clamp_unit(double v)
+{
+  if (v < 0.0) {
+    return 0.0;
+  }
+  if (v > 1.0) {
+    return 1.0;
+  }
+  return v;
+}
+
 // =============================================================================
 // Classification (NPC/PC)
 // =============================================================================
@@ -152,6 +163,21 @@ void char_set_weight(struct char_data *ch, uint8_t weight)
   ch->weight = weight;
 }
 
+uint8_t char_get_weight_base(const struct char_data *ch)
+{
+  return ch->weight;
+}
+
+void char_set_weight_base(struct char_data *ch, uint8_t weight)
+{
+  ch->weight = weight;
+}
+
+uint8_t char_get_weight_effective(const struct char_data *ch)
+{
+  return ch->weight;
+}
+
 uint8_t char_get_height(const struct char_data *ch)
 {
   return ch->height;
@@ -160,6 +186,21 @@ uint8_t char_get_height(const struct char_data *ch)
 void char_set_height(struct char_data *ch, uint8_t height)
 {
   ch->height = height;
+}
+
+uint8_t char_get_height_base(const struct char_data *ch)
+{
+  return ch->height;
+}
+
+void char_set_height_base(struct char_data *ch, uint8_t height)
+{
+  ch->height = height;
+}
+
+uint8_t char_get_height_effective(const struct char_data *ch)
+{
+  return ch->height;
 }
 
 // =============================================================================
@@ -451,6 +492,186 @@ void char_set_con(struct char_data *ch, int8_t val)
 void char_set_cha(struct char_data *ch, int8_t val)
 {
   ch->aff_abils.cha = val;
+}
+
+int8_t char_get_str_base(const struct char_data *ch)
+{
+  return ch->real_abils.str;
+}
+
+void char_set_str_base(struct char_data *ch, int8_t val)
+{
+  ch->real_abils.str = val;
+}
+
+int8_t char_get_str_effective(const struct char_data *ch)
+{
+  return ch->aff_abils.str;
+}
+
+int8_t char_get_dex_base(const struct char_data *ch)
+{
+  return ch->real_abils.dex;
+}
+
+void char_set_dex_base(struct char_data *ch, int8_t val)
+{
+  ch->real_abils.dex = val;
+}
+
+int8_t char_get_dex_effective(const struct char_data *ch)
+{
+  return ch->aff_abils.dex;
+}
+
+int8_t char_get_intel_base(const struct char_data *ch)
+{
+  return ch->real_abils.intel;
+}
+
+void char_set_intel_base(struct char_data *ch, int8_t val)
+{
+  ch->real_abils.intel = val;
+}
+
+int8_t char_get_intel_effective(const struct char_data *ch)
+{
+  return ch->aff_abils.intel;
+}
+
+int8_t char_get_wis_base(const struct char_data *ch)
+{
+  return ch->real_abils.wis;
+}
+
+void char_set_wis_base(struct char_data *ch, int8_t val)
+{
+  ch->real_abils.wis = val;
+}
+
+int8_t char_get_wis_effective(const struct char_data *ch)
+{
+  return ch->aff_abils.wis;
+}
+
+int8_t char_get_con_base(const struct char_data *ch)
+{
+  return ch->real_abils.con;
+}
+
+void char_set_con_base(struct char_data *ch, int8_t val)
+{
+  ch->real_abils.con = val;
+}
+
+int8_t char_get_con_effective(const struct char_data *ch)
+{
+  return ch->aff_abils.con;
+}
+
+int8_t char_get_cha_base(const struct char_data *ch)
+{
+  return ch->real_abils.cha;
+}
+
+void char_set_cha_base(struct char_data *ch, int8_t val)
+{
+  ch->real_abils.cha = val;
+}
+
+int8_t char_get_cha_effective(const struct char_data *ch)
+{
+  return ch->aff_abils.cha;
+}
+
+int64_t char_get_pl_max_base(const struct char_data *ch)
+{
+  return ch->basepl;
+}
+
+void char_set_pl_max_base(struct char_data *ch, int64_t val)
+{
+  ch->basepl = val;
+}
+
+int64_t char_get_pl_max_effective(const struct char_data *ch)
+{
+  return ch->max_hit > 0 ? ch->max_hit : ch->basepl;
+}
+
+double char_get_pl_current_pct(const struct char_data *ch)
+{
+  return clamp_unit(ch->health);
+}
+
+void char_set_pl_current_pct(struct char_data *ch, double pct)
+{
+  ch->health = clamp_unit(pct);
+}
+
+int64_t char_get_ki_max_base(const struct char_data *ch)
+{
+  return ch->baseki;
+}
+
+void char_set_ki_max_base(struct char_data *ch, int64_t val)
+{
+  ch->baseki = val;
+}
+
+int64_t char_get_ki_max_effective(const struct char_data *ch)
+{
+  return ch->max_ki > 0 ? ch->max_ki : ch->baseki;
+}
+
+double char_get_ki_current_pct(const struct char_data *ch)
+{
+  return clamp_unit(ch->energy);
+}
+
+void char_set_ki_current_pct(struct char_data *ch, double pct)
+{
+  ch->energy = clamp_unit(pct);
+}
+
+int64_t char_get_st_max_base(const struct char_data *ch)
+{
+  return ch->basest;
+}
+
+void char_set_st_max_base(struct char_data *ch, int64_t val)
+{
+  ch->basest = val;
+}
+
+int64_t char_get_st_max_effective(const struct char_data *ch)
+{
+  return ch->max_move > 0 ? ch->max_move : ch->basest;
+}
+
+double char_get_st_current_pct(const struct char_data *ch)
+{
+  return clamp_unit(ch->stamina);
+}
+
+void char_set_st_current_pct(struct char_data *ch, double pct)
+{
+  ch->stamina = clamp_unit(pct);
+}
+
+int64_t char_get_lf_max_effective(const struct char_data *ch)
+{
+  return ch->lifeforce;
+}
+
+double char_get_lf_current_pct(const struct char_data *ch)
+{
+  return clamp_unit(ch->life);
+}
+
+void char_set_lf_current_pct(struct char_data *ch, double pct)
+{
+  ch->life = clamp_unit(pct);
 }
 
 // =============================================================================
