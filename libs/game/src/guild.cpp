@@ -811,6 +811,11 @@ void handle_forget(struct char_data *keeper, int guild_nr, struct char_data *ch,
 
  skill_num = find_skill_num(argument, SKTYPE_SKILL);
 
+ if(skill_num < 0 || skill_num >= SKILL_TABLE_SIZE) {
+  send_to_char(ch, "@MThat is not a valid skill!@n\r\n");
+  return;
+ }
+
  if (GET_SKILL_BASE(ch, skill_num) > 30) {
   send_to_char(ch, "@MYou can not forget that skill, you know too much about it.@n\r\n");
   return;
