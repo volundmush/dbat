@@ -2843,9 +2843,9 @@ bool MOON_TIMECHECK() {
         case 20:
             return time_info.hours >= 21;
         case 21:
-            return time_info.hours <= 4 || time_info.hours >= 21;
+            return time_info.hours < 4 || time_info.hours >= 21;
         case 22:
-            return time_info.hours <= 4;
+            return time_info.hours < 4;
     }
     return false;
 }

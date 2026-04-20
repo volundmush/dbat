@@ -1309,204 +1309,168 @@ void gain_condition(struct char_data *ch, int condition, int value)
 
   if (IS_NPC(ch))
     return;
-  else if (IS_ANDROID(ch))
+
+  if (IS_ANDROID(ch))
   {
     return;
   }
-  else if (GET_COND(ch, condition) < 0)
+
+  if (GET_COND(ch, condition) < 0)
   { /* No change */
     return;
   }
-  else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_RHELL))
+
+  if (GET_ROOM_VNUM(IN_ROOM(ch)) <= 1)
   {
     return;
   }
-  else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HELL))
-  {
-    return;
-  }
-  else if (AFF_FLAGGED(ch, AFF_SPIRIT))
-  {
-    return;
-  }
-  else if (GET_ROOM_VNUM(IN_ROOM(ch)) <= 1)
-  {
-    return;
-  }
+
   if (PLR_FLAGGED(ch, PLR_WRITING))
     return;
 
+  intoxicated = (GET_COND(ch, DRUNK) > 0);
+  if (value > 0)
+  {
+    if (GET_COND(ch, condition) >= 0)
+    {
+      if (GET_COND(ch, condition) + value > 48)
+      {
+        int prior = GET_COND(ch, condition);
+        GET_COND(ch, condition) = 48;
+        if (condition != DRUNK && prior >= 48 && !IS_MAJIN(ch))
+        {
+          int ocond = condition;
+          if (condition == HUNGER)
+            ocond = THIRST;
+          else if (condition == THIRST)
+            ocond = HUNGER;
+        }
+      }
+      else
+      {
+        GET_COND(ch, condition) += value;
+      }
+    }
+  } 
   else
   {
-    intoxicated = (GET_COND(ch, DRUNK) > 0);
-    if (value > 0)
+    if (GET_COND(ch, condition) >= 0)
     {
-      if (GET_COND(ch, condition) >= 0)
+      if (GET_COND(ch, condition) + value < 0)
       {
-        if (GET_COND(ch, condition) + value > 48)
-        {
-          int prior = GET_COND(ch, condition);
-          GET_COND(ch, condition) = 48;
-          if (condition != DRUNK && prior >= 48 && !IS_MAJIN(ch))
-          {
-            int ocond = condition;
-            if (condition == HUNGER)
-              ocond = THIRST;
-            else if (condition == THIRST)
-              ocond = HUNGER;
-
-          }
-        }
-        else
-        {
-          GET_COND(ch, condition) += value;
-        }
+        GET_COND(ch, condition) = 0;
+      }
+      else
+      {
+        GET_COND(ch, condition) += value;
       }
     }
-
-    if (!AFF_FLAGGED(ch, AFF_SPIRIT))
+  }
+  switch (condition)
+  {
+  case HUNGER:
+    switch (GET_COND(ch, condition))
     {
-      if (value <= 0)
+    case 0:
+      send_to_char(ch, "@RYou are feeling ravenous!@n\r\n");
+      break;
+    case 1:
+      send_to_char(ch, "You are extremely hungry!\r\n");
+      break;
+    case 2:
+      send_to_char(ch, "You are very hungry!\r\n");
+      break;
+    case 3:
+      send_to_char(ch, "You are pretty hungry!\r\n");
+      break;
+    case 4:
+      send_to_char(ch, "You are hungry!\r\n");
+      break;
+    case 5:
+    case 6:
+    case 7:
+    case 8:
+      send_to_char(ch, "Your stomach is growling!\r\n");
+      break;
+    case 9:
+    case 10:
+    case 11:
+      send_to_char(ch, "You could use something to eat.\r\n");
+      break;
+    case 12:
+    case 13:
+    case 14:
+    case 15:
+    case 16:
+    case 17:
+      send_to_char(ch, "You could use a bite to eat.\r\n");
+      break;
+    case 18:
+    case 19:
+    case 20:
+      send_to_char(ch, "You could use a snack.\r\n");
+      break;
+    default:
+      break;
+    }
+    break;
+  case THIRST:
+    switch (GET_COND(ch, condition))
+    {
+    case 0:
+      send_to_char(ch, "@RYou are dehydrated!@n\r\n");
+      break;
+    case 1:
+      send_to_char(ch, "You are extremely thirsty!\r\n");
+      break;
+    case 2:
+      send_to_char(ch, "You are very thirsty!\r\n");
+      break;
+    case 3:
+      send_to_char(ch, "You are pretty thirsty!\r\n");
+      break;
+    case 4:
+      send_to_char(ch, "You are thirsty!\r\n");
+      break;
+    case 5:
+    case 6:
+    case 7:
+    case 8:
+      send_to_char(ch, "Your throat is pretty dry!\r\n");
+      break;
+    case 9:
+    case 10:
+    case 11:
+      send_to_char(ch, "You could use something to drink.\r\n");
+      break;
+    case 12:
+    case 13:
+    case 14:
+    case 15:
+    case 16:
+    case 17:
+      send_to_char(ch, "Your mouth feels pretty dry.\r\n");
+      break;
+    case 18:
+    case 19:
+    case 20:
+      send_to_char(ch, "You could use a sip of water.\r\n");
+      break;
+    default:
+      break;
+    }
+    break;
+  case DRUNK:
+    if (intoxicated)
+    {
+      if (GET_COND(ch, DRUNK) <= 0)
       {
-        if (GET_COND(ch, condition) >= 0)
-        {
-          if (GET_COND(ch, condition) + value < 0)
-          {
-            GET_COND(ch, condition) = 0;
-          }
-          else
-          {
-            GET_COND(ch, condition) += value;
-          }
-        }
-      }
-      switch (condition)
-      {
-      case HUNGER:
-        switch (GET_COND(ch, condition))
-        {
-        case 0:
-          if ((getCurST(ch)) >= GET_MAX_MOVE(ch) / 3)
-          {
-            send_to_char(ch, "@RYou are feeling ravenous!!@n\r\n");
-            //decCurSTPercent(ch, .33);
-          }
-          else if ((getCurST(ch)) < GET_MAX_MOVE(ch) / 3)
-          {
-            send_to_char(ch, "@RYou are feeling ravenous!@n\r\n");
-            //decCurSTPercent(ch, 1, 0);
-            //decCurHealthPercent(ch, .34);
-          }
-          break;
-        case 1:
-          send_to_char(ch, "You are extremely hungry!\r\n");
-          break;
-        case 2:
-          send_to_char(ch, "You are very hungry!\r\n");
-          break;
-        case 3:
-          send_to_char(ch, "You are pretty hungry!\r\n");
-          break;
-        case 4:
-          send_to_char(ch, "You are hungry!\r\n");
-          break;
-        case 5:
-        case 6:
-        case 7:
-        case 8:
-          send_to_char(ch, "Your stomach is growling!\r\n");
-          break;
-        case 9:
-        case 10:
-        case 11:
-          send_to_char(ch, "You could use something to eat.\r\n");
-          break;
-        case 12:
-        case 13:
-        case 14:
-        case 15:
-        case 16:
-        case 17:
-          send_to_char(ch, "You could use a bite to eat.\r\n");
-          break;
-        case 18:
-        case 19:
-        case 20:
-          send_to_char(ch, "You could use a snack.\r\n");
-          break;
-        default:
-          break;
-        }
-        break;
-      case THIRST:
-        switch (GET_COND(ch, condition))
-        {
-        case 0:
-          if ((getCurST(ch)) >= GET_MAX_MOVE(ch) / 3)
-          {
-            send_to_char(ch, "@RYou are dehydrated!@n\r\n");
-            //decCurSTPercent(ch, .33);
-          }
-          else if ((getCurST(ch)) < GET_MAX_MOVE(ch) / 3)
-          {
-            send_to_char(ch, "@RYou are dehydrated!@n\r\n");
-            //decCurSTPercent(ch, 1, 0);
-            //decCurHealthPercent(ch, .34);
-          }
-          break;
-        case 1:
-          send_to_char(ch, "You are extremely thirsty!\r\n");
-          break;
-        case 2:
-          send_to_char(ch, "You are very thirsty!\r\n");
-          break;
-        case 3:
-          send_to_char(ch, "You are pretty thirsty!\r\n");
-          break;
-        case 4:
-          send_to_char(ch, "You are thirsty!\r\n");
-          break;
-        case 5:
-        case 6:
-        case 7:
-        case 8:
-          send_to_char(ch, "Your throat is pretty dry!\r\n");
-          break;
-        case 9:
-        case 10:
-        case 11:
-          send_to_char(ch, "You could use something to drink.\r\n");
-          break;
-        case 12:
-        case 13:
-        case 14:
-        case 15:
-        case 16:
-        case 17:
-          send_to_char(ch, "Your mouth feels pretty dry.\r\n");
-          break;
-        case 18:
-        case 19:
-        case 20:
-          send_to_char(ch, "You could use a sip of water.\r\n");
-          break;
-        default:
-          break;
-        }
-        break;
-      case DRUNK:
-        if (intoxicated)
-        {
-          if (GET_COND(ch, DRUNK) <= 0)
-          {
-            send_to_char(ch, "You are now sober.\r\n");
-          }
-        }
-        break;
-      default:
-        break;
+        send_to_char(ch, "You are now sober.\r\n");
       }
     }
+    break;
+  default:
+    break;
   }
 }
 
@@ -1839,17 +1803,13 @@ static void point_update_characters(void)
         GET_RELAXCOUNT(i) = 0;
       }
     }
-    // making it so that you don't get hungry/thirsty if you're just leisurely idling, rping, etc.
-    if (!isFullHealth(i))
+    if (rand_number(1, 2) == 2)
     {
-      if (rand_number(1, 2) == 2)
-      {
-        gain_condition(i, HUNGER, -1);
-      }
-      if (rand_number(1, 2) == 2)
-      {
-        gain_condition(i, THIRST, -1);
-      }
+      gain_condition(i, HUNGER, -1);
+    }
+    if (rand_number(1, 2) == 2)
+    {
+      gain_condition(i, THIRST, -1);
     }
     if (rand_number(1, 2) == 2)
     {

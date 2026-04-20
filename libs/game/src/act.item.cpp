@@ -3662,6 +3662,53 @@ ACMD(do_eat)
   if (!consume_otrigger(food, ch, OCMD_EAT)) /* check trigger */
     return;
 
+  int majin_gain_mode = -100;
+  double majin_st_recovery = 0.0;
+
+  switch(GET_OBJ_VNUM(food)) {
+    case 53:
+      majin_gain_mode = -1;
+      majin_st_recovery = 0.033;
+      break;
+    case 93:
+      majin_gain_mode = 0;
+      majin_st_recovery = 0.05;
+      break;
+    case 94:
+      majin_gain_mode = 1;
+      majin_st_recovery = 0.1;
+      break;
+    case 95:
+      majin_gain_mode = 2;
+      majin_st_recovery = 0.1;
+      break;
+  }
+
+  if(majin_gain_mode != -100) {
+      incCurLFPercent(ch, 0.01);
+      incCurSTPercent(ch, majin_st_recovery);
+      if (OBJ_FLAGGED(food, ITEM_FORGED))
+      {
+        send_to_char(ch, "This is a forgery. You gain nothing!\r\n");
+      }
+      else
+      {
+        send_to_char(ch, "You feel more energetic!\r\n");
+        majin_gain(ch, majin_gain_mode);
+      }
+      extract_obj(food);
+      return;
+  }
+
+  if (GET_COND(ch, HUNGER) >= 48) {
+    if(IS_MAJIN(ch)) {
+      send_to_char(ch, "You are full, but there's always room for candy!\r\n");
+    } else {
+      send_to_char(ch, "You are full.\r\n");
+    }
+    return;
+  }
+
   if (subcmd == SCMD_EAT)
   {
     act("You eat some of $p.", FALSE, ch, food, 0, TO_CHAR);
@@ -3680,13 +3727,17 @@ ACMD(do_eat)
     }
   }
 
+  // available hunger
   int foob = 48 - GET_COND(ch, HUNGER);
-  amount = (subcmd == SCMD_EAT ? GET_OBJ_VAL(food, VAL_FOOD_FOODVAL) : 1);
+  // amount that can be eaten - tasting only consumes 1 point, eating consumes as much as possible
+  // VAL_FOOD_FOODVAL is the amount of nutrition remaining, while value 1 is the max possible it once had.
+  amount = MIN(foob, (subcmd == SCMD_EAT ? GET_OBJ_VAL(food, VAL_FOOD_FOODVAL) : 1));
+  double percent_eaten = (double)amount / (double)GET_OBJ_VAL(food, 1);
 
   gain_condition(ch, HUNGER, amount);
   if (GET_FOODR(ch) == 0 && subcmd != SCMD_TASTE)
   {
-    incCurST(ch, (getMaxST(ch) / 100) * amount);
+    incCurSTPercent(ch, 0.01 * (double)amount);
     GET_FOODR(ch) = 2;
     if (OBJ_FLAGGED(food, ITEM_YUM))
     {
@@ -3697,12 +3748,8 @@ ACMD(do_eat)
 
   if (subcmd != SCMD_TASTE)
     {
-      int psbonus = GET_OBJ_VAL(food, 1);
-      int expbonus = GET_OBJ_VAL(food, 2) * ((GET_LEVEL(ch) * 0.4) + 1);
-      if (expbonus > GET_LEVEL(ch) * 1500 && GET_LEVEL(ch) < 100)
-      {
-        expbonus = GET_LEVEL(ch) * 1000;
-      }
+      int psbonus = (int)((double)GET_OBJ_VAL(food, 1) * percent_eaten);
+      int expbonus = (int)((double)GET_OBJ_VAL(food, 2) * ((GET_LEVEL(ch) * 0.4) + 1) * percent_eaten);
       gain_exp(ch, expbonus);
       GET_PRACTICES(ch, GET_CLASS(ch)) += psbonus;
       send_to_char(ch, "That was exceptionally delicious! @D[@mPS@D: @C+%d@D] [@gEXP@D: @G+%s@D]@n\r\n", psbonus, add_commas(expbonus));
@@ -3725,8 +3772,13 @@ ACMD(do_eat)
       }
     }
 
-    if (GET_COND(ch, HUNGER) >= 48 && !IS_MAJIN(ch))
-      send_to_char(ch, "You are full, but may continue to stuff yourself.\r\n");
+    if (GET_COND(ch, HUNGER) >= 48) {
+      if(IS_MAJIN(ch)) {
+        send_to_char(ch, "You are full, but there's always room for candy!\r\n");
+      } else {
+        send_to_char(ch, "You are full.\r\n");
+      }
+    }
 
     if (GET_OBJ_VAL(food, VAL_FOOD_POISON) && !ADM_FLAGGED(ch, ADM_NOPOISON))
     {
@@ -3741,143 +3793,13 @@ ACMD(do_eat)
       af.bitvector = AFF_POISON;
       affect_join(ch, &af, FALSE, FALSE, FALSE, FALSE);
     }
-    
-    if (subcmd == SCMD_EAT)
-    {
-      if (foob >= GET_OBJ_VAL(food, VAL_FOOD_FOODVAL))
-      {
+
+    GET_OBJ_VAL(food, VAL_FOOD_FOODVAL) -= amount;
+    if(GET_OBJ_VAL(food, VAL_FOOD_FOODVAL) <= 0) {
         send_to_char(ch, "You finish the last bite.\r\n");
-        if (GET_OBJ_VNUM(food) == 53)
-        {
-          incCurST(ch, getMaxST(ch) / 30);
-          incCurLFPercent(ch, .01);
-          if (OBJ_FLAGGED(food, ITEM_FORGED))
-          {
-            send_to_char(ch, "This is a forgery. You gain nothing!\r\n");
-          }
-          else
-          {
-            send_to_char(ch, "You feel more energetic!\r\n");
-            majin_gain(ch, -1);
-          }
-        }
-        if (GET_OBJ_VNUM(food) == 93)
-        {
-          incCurST(ch, getMaxST(ch) / 20);
-          incCurLFPercent(ch, .01);
-          if (OBJ_FLAGGED(food, ITEM_FORGED))
-          {
-            send_to_char(ch, "This is a forgery. You gain nothing!\r\n");
-          }
-          else
-          {
-            send_to_char(ch, "You feel more energetic!\r\n");
-            majin_gain(ch, 0);
-          }
-        }
-        if (GET_OBJ_VNUM(food) == 94)
-        {
-          incCurST(ch, getMaxST(ch) / 10);
-          incCurLFPercent(ch, .01);
-          if (OBJ_FLAGGED(food, ITEM_FORGED))
-          {
-            send_to_char(ch, "This is a forgery. You gain nothing!\r\n");
-          }
-          else
-          {
-            send_to_char(ch, "You feel more energetic!\r\n");
-            majin_gain(ch, 1);
-          }
-        }
-        if (GET_OBJ_VNUM(food) == 95)
-        {
-          incCurST(ch, getMaxST(ch) / 10);
-          incCurLFPercent(ch, .02);
-          if (OBJ_FLAGGED(food, ITEM_FORGED))
-          {
-            send_to_char(ch, "This is a forgery. You gain nothing!\r\n");
-          }
-          else
-          {
-            send_to_char(ch, "You feel more energetic!\r\n");
-            majin_gain(ch, 2);
-          }
-        }
         extract_obj(food);
-      }
-      else
-      {
-        GET_OBJ_VAL(food, VAL_FOOD_FOODVAL) -= foob;
-        if (GET_OBJ_VNUM(food) == 53)
-        {
-          incCurST(ch, getMaxST(ch) / 30);
-          incCurLFPercent(ch, .01);
-          if (OBJ_FLAGGED(food, ITEM_FORGED))
-          {
-            send_to_char(ch, "This is a forgery. You gain nothing!\r\n");
-          }
-          else
-          {
-            send_to_char(ch, "You feel more energetic!\r\n");
-            majin_gain(ch, -1);
-            extract_obj(food);
-          }
-        }
-        if (GET_OBJ_VNUM(food) == 93)
-        {
-          incCurST(ch, getMaxST(ch) / 20);
-          incCurLFPercent(ch, .01);
-          if (OBJ_FLAGGED(food, ITEM_FORGED))
-          {
-            send_to_char(ch, "This is a forgery. You gain nothing!\r\n");
-          }
-          else
-          {
-            send_to_char(ch, "You feel more energetic!\r\n");
-            majin_gain(ch, 0);
-            extract_obj(food);
-          }
-        }
-        if (GET_OBJ_VNUM(food) == 94)
-        {
-          incCurST(ch, getMaxST(ch) / 10);
-          incCurLFPercent(ch, .02);
-          if (OBJ_FLAGGED(food, ITEM_FORGED))
-          {
-            send_to_char(ch, "This is a forgery. You gain nothing!\r\n");
-          }
-          else
-          {
-            send_to_char(ch, "You feel more energetic!\r\n");
-            majin_gain(ch, 1);
-            extract_obj(food);
-          }
-        }
-        if (GET_OBJ_VNUM(food) == 95)
-        {
-          incCurST(ch, getMaxST(ch) / 10);
-          incCurLFPercent(ch, .03);
-          if (OBJ_FLAGGED(food, ITEM_FORGED))
-          {
-            send_to_char(ch, "This is a forgery. You gain nothing!\r\n");
-          }
-          else
-          {
-            send_to_char(ch, "You feel more energetic!\r\n");
-            majin_gain(ch, 2);
-            extract_obj(food);
-          }
-        }
-      }
     }
-    else
-    {
-      if (!(--GET_OBJ_VAL(food, VAL_FOOD_FOODVAL)))
-      {
-        send_to_char(ch, "There's nothing left now.\r\n");
-        extract_obj(food);
-      }
-    }
+    
 }
 
 static void majin_gain(struct char_data *ch, int type)
