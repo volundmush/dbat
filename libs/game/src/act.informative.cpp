@@ -2860,58 +2860,13 @@ static void diag_char_to_char(struct char_data *i, struct char_data *ch)
   };
   int percent, ar_index;
 
-  int64_t hit = GET_HIT(i), max = (getEffMaxPL(i));
- 
-  int64_t total = 0;
-   if (GET_SUPPRESS(i) > 0) {
-    total = max - GET_SUPP(i);
-   }
-   else {
-    total = max;
-   }
-
-  if (hit == total) {
-    percent = 100;
-  }
-  else if (hit < total && hit >= (total * .9)) {
-    percent = 90;
-  }
-  else if (hit < total && hit >= (total * .8)) {
-    percent = 80;
-  }
-  else if (hit < total && hit >= (total * .7)) {
-    percent = 70;
-  }
-  else if (hit < total && hit >= (total * .6)) {
-    percent = 60;
-  }
-  else if (hit < total && hit >= (total * .5)) {
-    percent = 50;
-  }
-  else if (hit < total && hit >= (total * .4)) {
-    percent = 40;
-  }
-  else if (hit < total && hit >= (total * .3)) {
-    percent = 30;
-  }
-  else if (hit < total && hit >= (total * .2)) {
-    percent = 20;
-  }
-  else if (hit < total && hit >= (total * .1)) {
-    percent = 10;
-  }
-  else if (hit < total * .1) {
-    percent = 0;
-  }
-  else {
-    percent = -1;		/* How could MAX_HIT be < 1?? */
-  }
+  percent = (int)(i->health * 100.0);
 
   for (ar_index = 0; diagnosis[ar_index].percent >= 0; ar_index++)
-    if (percent >= diagnosis[ar_index].percent)
-      break;
-
-  send_to_char(ch, "%s\r\n", diagnosis[ar_index].text);
+    if (percent >= diagnosis[ar_index].percent) {
+        send_to_char(ch, "%s\r\n", diagnosis[ar_index].text);
+        return;
+    }
 }
 
 static void look_at_char(struct char_data *i, struct char_data *ch)
@@ -3221,26 +3176,30 @@ static void list_one_char(struct char_data *i, struct char_data *ch)
   if (IS_NPC(i) && i->long_descr && GET_POS(i) == GET_DEFAULT_POS(i) && !FIGHTING(i)) {
     send_to_char(ch, "%s", i->long_descr);
 
-    if (IS_NPC(i) && GET_HIT(i) >= (getEffMaxPL(i)) * .9 && GET_HIT(i) != (getEffMaxPL(i)))
-     act("@R...Some slight wounds on $s body.@w", TRUE, i, 0, ch, TO_VICT);
-    else if (IS_NPC(i) && GET_HIT(i) >= (getEffMaxPL(i)) * .8 && GET_HIT(i) < (getEffMaxPL(i)) * .9)
-     act("@R...A few wounds on $s body.@w", TRUE, i, 0, ch, TO_VICT);
-    else if (IS_NPC(i) && GET_HIT(i) >= (getEffMaxPL(i)) * .7 && GET_HIT(i) < (getEffMaxPL(i)) * .8)
-     act("@R...Many wounds on $s body.@w", TRUE, i, 0, ch, TO_VICT);
-    else if (IS_NPC(i) && GET_HIT(i) >= (getEffMaxPL(i)) * .6 && GET_HIT(i) < (getEffMaxPL(i)) * .7)
-     act("@R...Quite a few wounds on $s body.@w", TRUE, i, 0, ch, TO_VICT);
-    else if (IS_NPC(i) && GET_HIT(i) >= (getEffMaxPL(i)) * .5 && GET_HIT(i) < (getEffMaxPL(i)) * .6)
-     act("@R...Horrible wounds on $s body.@w", TRUE, i, 0, ch, TO_VICT);
-    else if (IS_NPC(i) && GET_HIT(i) >= (getEffMaxPL(i)) * .4 && GET_HIT(i) < (getEffMaxPL(i)) * .5)
-     act("@R...Blood is seeping from the wounds on $s body.@w", TRUE, i, 0, ch, TO_VICT);
-    else if (IS_NPC(i) && GET_HIT(i) >= (getEffMaxPL(i)) * .3 && GET_HIT(i) < (getEffMaxPL(i)) * .4)
-     act("@R...$s body is in terrible shape.@w", TRUE, i, 0, ch, TO_VICT);
-    else if (IS_NPC(i) && GET_HIT(i) >= (getEffMaxPL(i)) * .2 && GET_HIT(i) < (getEffMaxPL(i)) * .3)
-     act("@R...Is absolutely covered in wounds.@w", TRUE, i, 0, ch, TO_VICT);
-    else if (IS_NPC(i) && GET_HIT(i) >= (getEffMaxPL(i)) * .1 && GET_HIT(i) < (getEffMaxPL(i)) * .2)
-     act("@R...Is on $s last leg.@w", TRUE, i, 0, ch, TO_VICT);
-    else if (IS_NPC(i) && GET_HIT(i) < (getEffMaxPL(i)) * .1)
-     act("@R...Should be DEAD soon.@w", TRUE, i, 0, ch, TO_VICT);
+    if(IS_NPC(i)) {
+      double health = ch->health;
+      if(health <= 0.1) {
+        act("@R...Should be DEAD soon.@w", TRUE, i, 0, ch, TO_VICT);
+      } else if(health <= 0.2) {
+        act("@R...Is on $s last leg.@w", TRUE, i, 0, ch, TO_VICT);
+      } else if(health <= 0.3) {
+        act("@R...Is absolutely covered in wounds.@w", TRUE, i, 0, ch, TO_VICT);
+      } else if(health <= 0.4) {
+        act("@R...$s body is in terrible shape.@w", TRUE, i, 0, ch, TO_VICT);
+      } else if(health <= 0.5) {
+        act("@R...Blood is seeping from the wounds on $s body.@w", TRUE, i, 0, ch, TO_VICT);
+      } else if(health <= 0.6) {
+        act("@R...Horrible wounds on $s body.@w", TRUE, i, 0, ch, TO_VICT);
+      } else if(health <= 0.7) {
+        act("@R...Quite a few wounds on $s body.@w", TRUE, i, 0, ch, TO_VICT);
+      } else if(health <= 0.8) {
+        act("@R...Many wounds on $s body.@w", TRUE, i, 0, ch, TO_VICT);
+      } else if(health <= 0.9) {
+        act("@R...A few wounds on $s body.@w", TRUE, i, 0, ch, TO_VICT);
+      } else if(health < 1.0) {
+        act("@R...Some slight wounds on $s body.@w", TRUE, i, 0, ch, TO_VICT);
+      }
+    }
 
 
     if (GET_EAVESDROP(i) > 0) {
