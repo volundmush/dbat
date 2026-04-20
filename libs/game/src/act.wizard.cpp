@@ -4089,11 +4089,11 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
       send_to_char(ch, "%s's %s now off.\r\n", GET_NAME(vict), set_fields[mode].cmd);
     } else if (is_number(val_arg)) {
       value = atoi(val_arg);
-      RANGE(0, 24);
+      RANGE(0, 48);
       GET_COND(vict, (mode - 29)) = value; /* and here too */
       send_to_char(ch, "%s's %s set to %" I64T ".\r\n", GET_NAME(vict), set_fields[mode].cmd, value);
     } else {
-      send_to_char(ch, "Must be 'off' or a value from 0 to 24.\r\n");
+      send_to_char(ch, "Must be 'off' or a value from 0 to 48.\r\n");
       return (0);
     }
     break;
