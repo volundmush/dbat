@@ -1372,7 +1372,7 @@ void gain_condition(struct char_data *ch, int condition, int value)
     switch (GET_COND(ch, condition))
     {
     case 0:
-      send_to_char(ch, "@RYou are feeling ravenous!@n\r\n");
+      //send_to_char(ch, "@RYou are feeling ravenous!@n\r\n");
       break;
     case 1:
       send_to_char(ch, "You are extremely hungry!\r\n");
@@ -1418,7 +1418,7 @@ void gain_condition(struct char_data *ch, int condition, int value)
     switch (GET_COND(ch, condition))
     {
     case 0:
-      send_to_char(ch, "@RYou are dehydrated!@n\r\n");
+      //send_to_char(ch, "@RYou are dehydrated!@n\r\n");
       break;
     case 1:
       send_to_char(ch, "You are extremely thirsty!\r\n");

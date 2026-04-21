@@ -4637,7 +4637,9 @@ ACMD(do_cook)
  if (IS_NPC(ch))
   return;
 
- if (!cook_element(IN_ROOM(ch))) {
+ int cook_elem = cook_element(IN_ROOM(ch));
+
+ if (!cook_elem) {
   send_to_char(ch, "You need a campfire or Flambus Stove nearby to cook.\r\n");
   return;
  }
@@ -4740,7 +4742,7 @@ ACMD(do_cook)
 
   if (!valid_recipe(ch, recipe, 0)) {
    return;
-  } else if (cook_element(IN_ROOM(ch)) == 1 && !campfire_cook(recipe)) {
+  } else if (cook_elem == 1 && !campfire_cook(recipe)) {
    send_to_char(ch, "You can not cook that dish over a campfire.\r\n");
    return;
   } else {
@@ -4881,8 +4883,8 @@ ACMD(do_cook)
      expbonus = skill * expbonus;
     }
 
-    GET_OBJ_VAL(meal, 1) = psbonus;
-    GET_OBJ_VAL(meal, 2) = expbonus;
+    GET_OBJ_VAL(meal, VAL_FOOD_PSBONUS) = psbonus;
+    GET_OBJ_VAL(meal, VAL_FOOD_EXPBONUS) = expbonus;
 
     WAIT_STATE(ch, PULSE_2SEC);
    } /* End has ingredients */  

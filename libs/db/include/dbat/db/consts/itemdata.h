@@ -363,12 +363,12 @@
 #define VAL_KEY_UNUSED7               6
 #define VAL_KEY_MATERIAL              7
 #define VAL_FOOD_FOODVAL              0
-#define VAL_FOOD_UNUSED2              1
-#define VAL_FOOD_UNUSED3              2
+#define VAL_FOOD_MAXFOODVAL           1
+#define VAL_FOOD_PSBONUS              2
 #define VAL_FOOD_POISON               3
 #define VAL_FOOD_HEALTH               4
 #define VAL_FOOD_MAXHEALTH            5
-#define VAL_FOOD_UNUSED7              6
+#define VAL_FOOD_EXPBONUS             6
 #define VAL_FOOD_MATERIAL             7
 #define VAL_MONEY_SIZE                0
 #define VAL_MONEY_UNUSED2             1

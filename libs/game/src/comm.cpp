@@ -637,7 +637,7 @@ void heartbeat(int heart_pulse)
     check_idle_menu();
 
   if (!(heart_pulse % (PULSE_IDLEPWD / 15))) {           /* 1 second */
-    dball_load();
+    //dball_load();
   }
   if (!(heart_pulse % (PULSE_2SEC))) {
     base_update();

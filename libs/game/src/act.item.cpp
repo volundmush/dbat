@@ -3748,8 +3748,8 @@ ACMD(do_eat)
 
   if (subcmd != SCMD_TASTE)
     {
-      int psbonus = (int)((double)GET_OBJ_VAL(food, 1) * percent_eaten);
-      int expbonus = (int)((double)GET_OBJ_VAL(food, 2) * ((GET_LEVEL(ch) * 0.4) + 1) * percent_eaten);
+      int psbonus = (int)((double)(GET_OBJ_VAL(food, VAL_FOOD_MAXFOODVAL) + GET_OBJ_VAL(food, VAL_FOOD_PSBONUS)) * percent_eaten);
+      int expbonus = (int)((double)GET_OBJ_VAL(food, VAL_FOOD_EXPBONUS) * ((GET_LEVEL(ch) * 0.4) + 1) * percent_eaten);
       gain_exp(ch, expbonus);
       GET_PRACTICES(ch, GET_CLASS(ch)) += psbonus;
       send_to_char(ch, "That was exceptionally delicious! @D[@mPS@D: @C+%d@D] [@gEXP@D: @G+%s@D]@n\r\n", psbonus, add_commas(expbonus));
