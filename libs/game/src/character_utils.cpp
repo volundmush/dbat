@@ -2326,7 +2326,8 @@ int roll_pursue(struct char_data *ch, struct char_data *vict)
 char *sense_location(struct char_data *ch)
 {
 
-	char *message = new char[MAX_INPUT_LENGTH];
+	char *message;
+    CREATE(message, char, MAX_INPUT_LENGTH);
 	int roomnum = GET_ROOM_VNUM(IN_ROOM(ch)), num = 0;
 	if ((num = real_zone_by_thing(roomnum)) != NOWHERE) {
 		num = real_zone_by_thing(roomnum);
