@@ -3177,7 +3177,7 @@ static void list_one_char(struct char_data *i, struct char_data *ch)
     send_to_char(ch, "%s", i->long_descr);
 
     if(IS_NPC(i)) {
-      double health = ch->health;
+      double health = i->health;
       if(health <= 0.1) {
         act("@R...Should be DEAD soon.@w", TRUE, i, 0, ch, TO_VICT);
       } else if(health <= 0.2) {
