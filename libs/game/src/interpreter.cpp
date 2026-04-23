@@ -4615,6 +4615,9 @@ void nanny(struct descriptor_data *d, char *arg)
      struct descriptor_data *k;
 
       for (k = descriptor_list; k; k = k->next) {
+        if(!k->character) {
+         continue;
+        }
        if (!IS_NPC(k->character) && GET_LEVEL(k->character) > 3) {
         count += 1;
        }
