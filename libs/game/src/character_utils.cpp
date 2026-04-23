@@ -2751,7 +2751,7 @@ void reveal_hiding(struct char_data *ch, int type)
   for (d = descriptor_list; d; d = d->next) {
    if (STATE(d) != CON_PLAYING)
     continue;
-   tch = d->character;
+    tch = d->character;
 
    if (tch == ch)
     continue;

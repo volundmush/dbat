@@ -819,6 +819,8 @@ ACMD(do_mforce)
         char_data *vch;
 
         for (i = descriptor_list; i ; i = i->next) {
+          if(!i->character) continue;
+          
             if ((i->character != ch) && !i->connected &&
                 (IN_ROOM(i->character) == IN_ROOM(ch))) {
                 vch = i->character;

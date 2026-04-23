@@ -96,10 +96,13 @@ ACMD(do_lag)
  }
 
  for (d = descriptor_list; d; d = d->next) {
+  if(!d->character) {
+   continue;
+  }
   if (!strcasecmp(CAP(GET_NAME(d->character)), CAP(arg))) {
    if (GET_ADMLEVEL(d->character) > GET_ADMLEVEL(ch)) {
     send_to_char(ch, "Sorry, you've been outranked.\r\n");
-    return;
+    continue;
    }
     switch (num) {
      case 1:
