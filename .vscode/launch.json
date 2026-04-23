@@ -2,16 +2,6 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Debug dbat_server",
-            "type": "cppdbg",
-            "request": "launch",
-            "program": "${workspaceFolder}/bin/dbat_server",
-            "args": [],
-            "cwd": "${workspaceFolder}",
-            "environment": [],
-            "terminal": "integrated"
-        },
-        {
             "name": "Debug dbat (LLDB)",
             "type": "lldb",
             "request": "launch",
