@@ -80,3 +80,4 @@ zig-out/
 coredumps
 __pycache__
 *.pyc
+.env

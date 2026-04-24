@@ -39,6 +39,13 @@ PORT=1280
 # of all flags).
 FLAGS='-q'
 
+# Load local overrides from .env if present (e.g., PORT=4000).
+if [ -r .env ]; then
+  set -a
+  . ./.env
+  set +a
+fi
+
 #############################################################################
 
 while ( : ) do
