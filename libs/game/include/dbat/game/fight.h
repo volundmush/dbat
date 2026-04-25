@@ -22,7 +22,6 @@ void raw_kill(struct char_data *ch, struct char_data * killer);
 void	set_fighting(struct char_data *ch, struct char_data *victim);
 void	stop_fighting(struct char_data *ch);
 void group_gain(struct char_data *ch, struct char_data *victim);
-void solo_gain(struct char_data *ch, struct char_data *victim);
 void mutant_limb_regen(struct char_data *ch);
 
 // commands

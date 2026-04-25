@@ -899,11 +899,6 @@ void cut_limb(struct char_data *ch, struct char_data *vict, int wlvl, int hitspo
 
   remove_limb(vict, 0);
   die(vict, ch);
-  if (AFF_FLAGGED(ch, AFF_GROUP)) {
-   group_gain(ch, vict);
-  } else {
-   solo_gain(ch, vict);
-  }
   char corp[256];
   if (!IS_NPC(ch) && (ch != vict) && PRF_FLAGGED(ch, PRF_AUTOGOLD)) {
    sprintf(corp, "all.zenni corpse");
@@ -2156,12 +2151,6 @@ void homing_update()
        act("@rYou are cut in half by the attack!@n", TRUE, ch, 0, vict, TO_VICT);
        act("@R$N@r is cut in half by the attack!@n", TRUE, ch, 0, vict, TO_NOTVICT);
        die(vict, ch);
-       if (AFF_FLAGGED(ch, AFF_GROUP)) {
-        group_gain(ch, vict);
-       }
-       else {
-        solo_gain(ch, vict);
-       }
        if (!IS_NPC(ch) && (ch != vict) && PRF_FLAGGED(ch, PRF_AUTOGOLD)) {
         do_get(ch, "all.zenni corpse", 0, 0);
        }
@@ -2188,12 +2177,6 @@ void homing_update()
        act("@rYou are cut in half by the attack!@n", TRUE, ch, 0, vict, TO_VICT);
        act("@R$N@r is cut in half by the attack!@n", TRUE, ch, 0, vict, TO_NOTVICT);
        die(vict, ch);
-       if (AFF_FLAGGED(ch, AFF_GROUP)) {
-        group_gain(ch, vict);
-       }
-       else {
-        solo_gain(ch, vict);
-       }
        if (!IS_NPC(ch) && (ch != vict) && PRF_FLAGGED(ch, PRF_AUTOGOLD)) {
         do_get(ch, "all.zenni corpse", 0, 0);
        }
@@ -3539,7 +3522,7 @@ void saiyan_gain(struct char_data *ch, struct char_data *vict)
 
 void spar_gain(struct char_data *ch, struct char_data *vict, int type, int64_t dmg)
 {
- int chance = 0, gmult, gravity, bonus = 1, pscost = 2, difference = 0;
+ int chance = 0, gmult, gravity, bonus = 1, difference = 0;
  int64_t gain = 0, pl = 0, ki = 0, st = 0, gaincalc = 0;
 
  if (ch != NULL && !IS_NPC(ch)) {
@@ -3572,10 +3555,8 @@ void spar_gain(struct char_data *ch, struct char_data *vict, int type, int64_t d
    if (room_flagged(room, ROOM_WORKOUT) || (room_flagged(room, ROOM_HBTC))) {
     if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 19100 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 19199) {
      gmult *= 1.75;
-     pscost += 2;
     } else {
      gmult *= 1.25;
-     pscost += 1;
     }
     pl = large_rand(gmult * .8, gmult * 1.2);
     ki = large_rand(gmult * .8, gmult * 1.2);
@@ -3590,34 +3571,39 @@ void spar_gain(struct char_data *ch, struct char_data *vict, int type, int64_t d
    ki = 0;
   }
 
+  int64_t chavg = (ch->max_hit + ch->max_mana + ch->max_move) / 3;
+  int64_t victavg = (vict->max_hit + vict->max_mana + vict->max_move) / 3;
+  int characterStrength = get_digits(chavg);
+  int victimStrength = get_digits(victavg);
+
   if (chance >= rand_number(60, 75)) {
    int64_t num = 0,  maxnum = 500000;
-   if (GET_LEVEL(ch) >= 70) {
-    num += GET_LEVEL(ch) * 10000;
-   } else if (GET_LEVEL(ch) >= 60) {
-    num += GET_LEVEL(ch) * 6000;
-   } else if (GET_LEVEL(ch) >= 50) {
+   if (victimStrength >= 13) {
     num += GET_LEVEL(ch) * 5000;
-   } else if (GET_LEVEL(ch) >= 45) {
+   } else if (victimStrength >= 12) {
+    num += GET_LEVEL(ch) * 4000;
+   } else if (victimStrength >= 11) {
+    num += GET_LEVEL(ch) * 3000;
+   } else if (victimStrength >= 10) {
     num += GET_LEVEL(ch) * 2500;
-   } else if (GET_LEVEL(ch) >= 40) {
-    num += GET_LEVEL(ch) * 2200;
-   } else if (GET_LEVEL(ch) >= 35) {
+   } else if (victimStrength >= 9) {
+    num += GET_LEVEL(ch) * 2000;
+   } else if (victimStrength >= 8) {
     num += GET_LEVEL(ch) * 1500;
-   } else if (GET_LEVEL(ch) >= 30) {
-    num += GET_LEVEL(ch) * 1200;
-   } else if (GET_LEVEL(ch) >= 25) {
-    num += GET_LEVEL(ch) * 550;
-   } else if (GET_LEVEL(ch) >= 20) {
+   } else if (victimStrength >= 7) {
+    num += GET_LEVEL(ch) * 1000;
+   } else if (victimStrength >= 6) {
+    num += GET_LEVEL(ch) * 500;
+   } else if (victimStrength >= 5) {
     num += GET_LEVEL(ch) * 400;
-   } else if (GET_LEVEL(ch) >= 15) {
-    num += GET_LEVEL(ch) * 250;
-   } else if (GET_LEVEL(ch) >= 10) {
+   } else if (victimStrength >= 4) {
+    num += GET_LEVEL(ch) * 200;
+   } else if (victimStrength >= 3) {
     num += GET_LEVEL(ch) * 100;
-   } else if (GET_LEVEL(ch) >= 5) {
-    num += GET_LEVEL(ch) * 50;
+   } else if (victimStrength >= 2) {
+    num += GET_LEVEL(ch) * 25;
    } else {
-    num += GET_LEVEL(ch) * 30;
+    num += GET_LEVEL(ch) * 15;
    }
    if (num > maxnum) {
     num = maxnum;
@@ -3648,7 +3634,12 @@ void spar_gain(struct char_data *ch, struct char_data *vict, int type, int64_t d
     } else if (difference >= 10) {
      gaincalc = gaincalc * 0.50;
     }
-    if (!IS_NPC(vict)) {
+
+    if(is_sparring(ch) && is_sparring(vict))
+      gaincalc *= 0.8
+
+      
+    /*if (!IS_NPC(vict)) {
      if (PRF_FLAGGED(vict, PRF_INSTRUCT)) {
       if (GET_PRACTICES(vict, GET_CLASS(vict)) > 10) {
        send_to_char(vict, "You instruct them in proper fighting techniques and strategies.\r\n");
@@ -3657,7 +3648,7 @@ void spar_gain(struct char_data *ch, struct char_data *vict, int type, int64_t d
        bonus = 2;
       }
      }
-    }
+    } - Could possibly be replaced with some mentorship skill  */
    }
    
    if (IS_SAIYAN(ch)) {
@@ -3677,141 +3668,34 @@ void spar_gain(struct char_data *ch, struct char_data *vict, int type, int64_t d
     }
    }
    gain = gear_exp(ch, gaincalc);
-   if (GET_PRACTICES(ch, GET_CLASS(ch)) >= pscost) {
-    GET_PRACTICES(ch, GET_CLASS(ch)) -= pscost;
+   
     gain = gain * bonus;
     gain_exp(ch, gain);
     send_to_char(ch, "@D[@Y+ @G%s @mExp@D]@n ", add_commas(gain));
     if (type == 0 && rand_number(1, 5) >= 4) {
-     send_to_char(ch, "@D[@Y+ @R%s @rPL@D]@n ", pl > 0 ? add_commas(pl) : "SOFT-CAP");
-     gainBasePL(ch, pl);
+      send_to_char(ch, "@D[@Y+ @R%s @rPL@D]@n ", pl > 0 ? add_commas(pl) : "SOFT-CAP");
+      gainBasePL(ch, pl);
     }
     else if (type == 1 && rand_number(1, 5) >= 4) {
-     send_to_char(ch, "@D[@Y+ @C%s @cKi@D]@n ", ki > 0 ? add_commas(ki) : "SOFT-CAP");
-     gainBaseKI(ch, ki);
+      send_to_char(ch, "@D[@Y+ @C%s @cKi@D]@n ", ki > 0 ? add_commas(ki) : "SOFT-CAP");
+      gainBaseKI(ch, ki);
     }
-    send_to_char(ch, "@D[@R- @M%d @mPS@D]@n ", pscost);
     send_to_char(ch, "\r\n");
-   } else {
-    send_to_char(ch, "@RYou need at least %d Practice Sessions in order to gain while sparring here.@n\r\n", pscost);
-   }
-  }
- }
-
- if (vict != NULL && !IS_NPC(vict) && !IS_NPC(ch)) {
-  if (dmg > GET_MAX_HIT(vict) / 4) {
-   chance = rand_number(1, 100);
-  }
-  else if (dmg <= GET_MAX_HIT(vict) / 4) {
-   chance = rand_number(1, 70);
-  }
-
-  if (GET_RELAXCOUNT(vict) >= 464) {
-   chance = 0;
-  } else if (GET_RELAXCOUNT(vict) >= 232) {
-   chance -= chance * 0.5;
-  } else if (GET_RELAXCOUNT(vict) >= 116) {
-   chance -= chance * 0.2;
-  }
-
-  struct room_data *vroom = char_room_get(vict);
-  gravity = room_gravity_get(vroom);
-  gmult = GET_LEVEL(vict) * ((gravity / 5) + 6);
-   if (room_flagged(vroom, ROOM_WORKOUT) || (room_flagged(char_room_get(ch), ROOM_HBTC))) {
-    if (GET_ROOM_VNUM(IN_ROOM(vict)) >= 19100 && GET_ROOM_VNUM(IN_ROOM(vict)) <= 19199) {
-     gmult *= 1.75;
-    } else {
-     gmult *= 1.25;
-    }
-     st = large_rand(gmult * .8, gmult * 1.2);
-   } else {
-    st = large_rand(gmult * .4, gmult * .8);
-   }
-
-  if (level_exp(vict, GET_LEVEL(vict) + 1) - GET_EXP(vict) < 0 && GET_LEVEL(vict) < 100) {
-   st = 0;
-  }
-
-  if (chance >= rand_number(60, 75)) {
-   int64_t num = 0, maxnum = 500000;
-
-   if (GET_LEVEL(vict) >= 70) {
-    num += GET_LEVEL(vict) * 10000;
-   } else if (GET_LEVEL(vict) >= 60) {
-    num += GET_LEVEL(vict) * 6000;
-   } else if (GET_LEVEL(vict) >= 50) {
-    num += GET_LEVEL(vict) * 5000;
-   } else if (GET_LEVEL(vict) >= 45) {
-    num += GET_LEVEL(vict) * 2500;
-   } else if (GET_LEVEL(vict) >= 40) {
-    num += GET_LEVEL(vict) * 2200;
-   } else if (GET_LEVEL(vict) >= 35) {
-    num += GET_LEVEL(vict) * 1500;
-   } else if (GET_LEVEL(vict) >= 30) {
-    num += GET_LEVEL(vict) * 1200;
-   } else if (GET_LEVEL(vict) >= 25) {
-    num += GET_LEVEL(vict) * 550;
-   } else if (GET_LEVEL(vict) >= 20) {
-    num += GET_LEVEL(vict) * 400;
-   } else if (GET_LEVEL(vict) >= 15) {
-    num += GET_LEVEL(vict) * 250;
-   } else if (GET_LEVEL(vict) >= 10) {
-    num += GET_LEVEL(vict) * 100;
-   } else if (GET_LEVEL(vict) >= 5) {
-    num += GET_LEVEL(vict) * 50;
-   } else {
-    num += GET_LEVEL(vict) * 30;
-   }
-   if (num > maxnum) {
-    num = maxnum;
-   }
-   gain = large_rand(num * .7, num);
-
-    if (difference > 50) {
-     send_to_char(ch, "The difference in your levels is too great for you to gain anything.\r\n");
-     return;
-    } else if (difference >= 40) {
-     gain = gain * 0.05;
-    } else if (difference >= 30) {
-     gain = gain * 0.10;
-    } else if (difference >= 20) {
-     gain = gain * 0.25;
-    } else if (difference >= 10) {
-     gain = gain * 0.50;
-    }
-
-   if (IS_SAIYAN(vict) || IS_HALFBREED(vict)) {
-    gain = gain + (gain * .30);
-   }
-   if (IS_ICER(vict)) {
-    gain = gain - (gain * .10);
-   }
-   if (room_flagged(char_room_get(ch), ROOM_WORKOUT) || (room_flagged(char_room_get(ch), ROOM_HBTC))) {
-    if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 19100 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 19199) {
-     gain *= 1.5;
-    } else {
-     gain *= 1.25;
-    }
-   }
-   if (GET_PRACTICES(vict, GET_CLASS(vict)) >= pscost) {
-    GET_PRACTICES(vict, GET_CLASS(vict)) -= pscost;
-    send_to_char(vict, "@D[@Y+ @G%s @mExp@D]@n ", add_commas(gain));
-    gain = gear_exp(vict, gain);
-    gain_exp(vict, gain);
-    if (rand_number(1, 5) >= 4) {
-     send_to_char(vict, "@D[@Y+ @G%s @gSt@D]@n ", st > 0 ? add_commas(st) : "SOFT-CAP");
-     gainBaseST(vict, st);
-    }
-    send_to_char(vict, "@D[@R- @M%d @mPS@D]@n ", pscost);
-    send_to_char(vict, "\r\n");
-   } else {
-    send_to_char(vict, "@RYou need at least %d Practice Sessions in order to gain while sparring here.@n\r\n", pscost);    
-   }
+   
   }
  }
 }
 
+/*Get the amount of digits within a number*/
+int get_digits(int64_t n) {
+    int count = 1;
 
+    while (n <= -10 || n >= 10) {
+        n /= 10;
+        count++;
+    }
+    return count;
+}
 
 
 
@@ -4297,7 +4181,6 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
     else {
      act("@c$N@w admits defeat to you, stops sparring, and stumbles away.@n", TRUE, ch, 0, vict, TO_CHAR);
      act("@c$N@w admits defeat to $n, stops sparring, and stumbles away.@n", TRUE, ch, 0, vict, TO_NOTVICT);
-     solo_gain(ch, vict);
      struct obj_data *rew, *next_rew;
      int founded = 0;
      for (rew = vict->carrying; rew; rew = next_rew) {
@@ -4479,11 +4362,6 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
 
    decCurHealthPercentFloored(vict, 1, 0);
 
-   if (AFF_FLAGGED(ch, AFF_GROUP)) {
-    group_gain(ch, vict);
-   } else {
-    solo_gain(ch, vict);
-   }
     if (IS_DEMON(ch) && type == 1) {
      SET_BIT_AR(AFF_FLAGS(vict), AFF_ASHED);
     }   
@@ -4604,8 +4482,9 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
 
    /* Ends GET_FURY increase for halfbreeds who got damaged */
 
-   if (is_sparring(ch) && is_sparring(vict) && LASTATK(ch) != -1) {
+   if (GET_ALT(ch) == GET_ALT(vict) && LASTATK(ch) != -1) {
     spar_gain(ch, vict, type, dmg);
+    spar_gain(vict, ch, type, dmg);
    }
    if ((IS_SAIYAN(ch) || (IS_BIO(ch) && (GET_GENOME(ch, 0) == 2 || GET_GENOME(ch, 1) == 2))) && !IS_NPC(ch) && ((is_sparring(ch) && is_sparring(vict)) || (!is_sparring(ch) && !is_sparring(vict)))) {
     if (GET_POS(ch) != POS_RESTING && GET_POS(vict) != POS_RESTING && dmg > 1) {

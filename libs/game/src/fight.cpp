@@ -2514,10 +2514,6 @@ void group_gain(struct char_data *ch, struct char_data *victim)
      }
     }
 
-  if (tot_members == 1 || IN_ARENA(ch)) {
-   solo_gain(ch, victim);
-   return;
-  }
 
   /* round up to the next highest tot_members */
   tot_gain = (GET_EXP(victim)) + tot_members - 1;
@@ -2555,86 +2551,12 @@ void group_gain(struct char_data *ch, struct char_data *victim)
    }
   }
    */
-  perform_group_gain(k, base, victim);
+  //perform_group_gain(k, base, victim);
 
   for (f = k->followers; f; f = f->next) {
     if (AFF_FLAGGED(f->follower, AFF_GROUP) && IN_ROOM(f->follower) == IN_ROOM(ch)) {
      //if ((getEffMaxPL(f->follower)()) >= GET_MAX_HIT(ch) * 0.5)
-      perform_group_gain(f->follower, base, victim);
+      //perform_group_gain(f->follower, base, victim);
     }
   }
-}
-
-
-void solo_gain(struct char_data *ch, struct char_data *victim)
-{
-
-  if (IS_NPC(ch)) {
-   if (GET_ORIGINAL(ch)) {
-    ch = GET_ORIGINAL(ch);
-   }
-  }
-  int64_t exp;
-
-  exp = MIN(2000000, GET_EXP(victim));
-
-    /* Calculate level-difference penalty */
-    if (!IS_NPC(ch)) {
-      if (GET_LEVEL(ch) >= 100 && GET_MAX_HIT(ch) * .025 >= GET_MAX_HIT(victim)) {
-       exp *= 0.04;
-      } else if (GET_MAX_HIT(ch) * .025 >= GET_MAX_HIT(victim)) {
-       exp = 1;
-      } else if (GET_MAX_HIT(ch) * .05 >= GET_MAX_HIT(victim)) {
-       exp *= 0.05;
-      } else if (GET_MAX_HIT(ch) * .1 >= GET_MAX_HIT(victim)) {
-       exp *= .1;
-      } else if (GET_MAX_HIT(ch) * .15 >= GET_MAX_HIT(victim)) {
-       exp *= .15;
-      } else if (GET_MAX_HIT(ch) * .25 >= GET_MAX_HIT(victim)) {
-       exp *= .25;
-      } else if (GET_MAX_HIT(ch) * .5 >= GET_MAX_HIT(victim)) {
-       exp *= .5;
-      }
-  }
-  if (LASTHIT(victim) != 0 && LASTHIT(victim) != GET_IDNUM(ch)) {
-   send_to_char(ch, "@RYou didn't do most of the work for this victory.@n\r\n");
-   exp = 1;
-  }
-  if (IS_NPC(victim) && MOB_FLAGGED(victim, MOB_HUSK)) {
-   exp /= 10;
-  }
-  if (GET_BONUS(ch, BONUS_PRODIGY) > 0) {
-   exp = exp + (exp * .25);
-  }
-  if (IS_SAIYAN(ch)) {
-   exp = exp + (exp * .50);
-  }
-  if (IS_HALFBREED(ch)) {
-   exp = exp + (exp * .40);
-  }
-  if (IS_ICER(ch)) {
-   exp = exp - (exp * .20);
-  }
-  if (MOB_FLAGGED(victim, MOB_KNOWKAIO)) {
-   exp += exp * .25;
-  }
-  exp = gear_exp(ch, exp);
-  exp = MAX(exp, 1);
-
-  if (exp > 1)
-    send_to_char(ch, "You receive %s experience points.\r\n", add_commas(exp));
-  else {
-    send_to_char(ch, "You receive one lousy experience point. That fight was hardly worth it...\r\n");
-  }
-  if (!IS_NPC(ch)) {
-  gain_exp(ch, exp);
-  }
-  if (IS_NPC(victim)) {
-  gain_exp(victim, -exp);
-  }
-  if (!IS_NPC(victim)) {
-  exp = exp / 5;
-  gain_exp(victim, -exp);
-  }
-  /*change_alignment(ch, victim);*/
 }

@@ -1117,11 +1117,6 @@ ACMD(do_liquefy)
    act("@m$n@M's body rapidly turns to liquid and flies for @RYOUR@M open mouth! As $e fills your body it begins to expand until it is unable to take the strain any longer and explodes!@n", TRUE, ch, 0, vict, TO_VICT);
    act("@m$n@M's body rapidly turns into liquid and flies for @R$N's@M open mouth! As $e forces $mself in through @R$N's@M mouth $S body begins to expand until it can't take the strain any longer and explodes!@n", TRUE, ch, 0, vict, TO_NOTVICT);
       decCurKI(ch, (GET_MAX_MANA(ch) * .002) + 150);
-   if (AFF_FLAGGED(ch, AFF_GROUP)) {
-    group_gain(ch, vict);
-   } else {
-    solo_gain(ch, vict);
-   }
    die(vict, ch);
    SET_BIT_AR(AFF_FLAGS(ch), AFF_LIQUEFIED);
    WAIT_STATE(ch, PULSE_3SEC);

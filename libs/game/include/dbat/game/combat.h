@@ -33,6 +33,7 @@ void hurt_limb(struct char_data *ch, struct char_data *vict, int chance, int are
 int handle_speed(struct char_data *ch, struct char_data *vict);
 void handle_defense(struct char_data *vict, int *pry, int *blk, int *dge);
 void spar_gain(struct char_data *ch, struct char_data *vict, int type, int64_t dmg);
+int get_digits(int64_t n);
 
 int roll_hitloc(struct char_data *ch, struct char_data *vict, int skill);
 long double calc_critical(struct char_data *ch, int loc);
