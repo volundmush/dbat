@@ -3628,13 +3628,13 @@ void spar_gain(struct char_data *ch, struct char_data *vict, int type, int64_t d
      send_to_char(ch, "The difference in your levels is too great for you to gain anything.\r\n");
      return;
     } else if (difference >= 40) {
-     gaincalc = gaincalc * 0.05;
+     gaincalc = gaincalc * 0.1;
     } else if (difference >= 30) {
-     gaincalc = gaincalc * 0.10;
-    } else if (difference >= 20) {
      gaincalc = gaincalc * 0.25;
+    } else if (difference >= 20) {
+     gaincalc = gaincalc * 0.5;
     } else if (difference >= 10) {
-     gaincalc = gaincalc * 0.50;
+     gaincalc = gaincalc * 0.75;
     }
 
     if(is_sparring(ch) && is_sparring(vict))
