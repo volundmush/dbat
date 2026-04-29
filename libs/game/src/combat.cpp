@@ -3525,7 +3525,9 @@ void spar_gain(struct char_data *ch, struct char_data *vict, int type, int64_t d
  int chance = 0, gmult, gravity, bonus = 1, difference = 0;
  int64_t gain = 0, pl = 0, ki = 0, st = 0, gaincalc = 0;
 
- if (ch != NULL && !IS_NPC(ch)) {
+ if (ch == NULL) return;
+ if (IS_NPC(ch)) return;
+
   if (dmg > GET_MAX_HIT(vict) / 10) {
    chance = rand_number(20, 100);
   }
@@ -3681,9 +3683,7 @@ void spar_gain(struct char_data *ch, struct char_data *vict, int type, int64_t d
       gainBaseKI(ch, ki);
     }
     send_to_char(ch, "\r\n");
-   
   }
- }
 }
 
 /*Get the amount of digits within a number*/
