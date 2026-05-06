@@ -2903,10 +2903,13 @@ static void damtype_human_grandmaster(char_data *ch, int skill, int64_t *dam) {
         switch(skill) {
             case 101:
                 *dam = *dam * 1.1;
+                break;
             case 102:
                 *dam = *dam * 1.2;
+                break;
             case 103:
                 *dam = *dam * 1.3;
+                break;
         }
     }
 }
@@ -3943,7 +3946,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
    LASTATK(ch) -= 1000;
   }
 
-  if (GET_PREFERENCE(ch) == PREFERENCE_KI && GET_CHARGE(ch) > 0) {
+  if (GET_PREFERENCE(vict) == PREFERENCE_KI && GET_CHARGE(vict) > 0) {
    dmg -= dmg * 0.08;
   }
 
