@@ -63,8 +63,8 @@ if (vzone_num < 0) {
    * are more complicated rules for that but it's not covered
    * here.
    */
-  if (vzone_num > 326) {
-    *error = "326 is the highest zone allowed.\r\n";
+  if (vzone_num > 1000) {
+    *error = "1000 is the highest zone allowed.\r\n";
     return NOWHERE;
   }
 
