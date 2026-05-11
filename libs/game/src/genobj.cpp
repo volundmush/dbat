@@ -459,6 +459,7 @@ int delete_object(obj_rnum rnum)
   obj = &obj_proto[rnum];
 
   zrnum = real_zone_by_thing(GET_OBJ_VNUM(obj));
+  add_to_save_list(zone_table[zrnum].number, SL_OBJ);
 
   htree_del(obj_htree, obj->item_number);
 
@@ -508,18 +509,21 @@ int delete_object(obj_rnum rnum)
   RECREATE(obj_index, struct index_data, top_of_objt + 1);
   RECREATE(obj_proto, struct obj_data, top_of_objt + 1);
 
-  /* Renumber shop produce. */
+
   for (shop = 0; shop <= top_shop; shop++)
     for (j = 0; SHOP_PRODUCT(shop, j) != NOTHING; j++)
       SHOP_PRODUCT(shop, j) -= (SHOP_PRODUCT(shop, j) > rnum);
 
   /* Renumber zone table. */
   for (zone = 0; zone <= top_of_zone_table; zone++) {
+    bool changed = FALSE;
     for (cmd_no = 0; ZCMD(zone, cmd_no).command != 'S'; cmd_no++) {
       switch (ZCMD(zone, cmd_no).command) {
       case 'P':
         if (ZCMD(zone, cmd_no).arg3 == rnum) {
-          delete_zone_command(&zone_table[zone], cmd_no);
+          ZCMD(zone, cmd_no).command = '*';
+          ZCMD(zone, cmd_no).arg3 = NOTHING;
+          changed = TRUE;
         } else
           ZCMD(zone, cmd_no).arg3 -= (ZCMD(zone, cmd_no).arg3 > rnum);
         break;
@@ -527,21 +531,26 @@ int delete_object(obj_rnum rnum)
       case 'G':
       case 'E':
         if (ZCMD(zone, cmd_no).arg1 == rnum) {
-          delete_zone_command(&zone_table[zone], cmd_no);
+          ZCMD(zone, cmd_no).command = '*';
+          ZCMD(zone, cmd_no).arg1 = NOTHING;
+          changed = TRUE;
         } else
           ZCMD(zone, cmd_no).arg1 -= (ZCMD(zone, cmd_no).arg1 > rnum);
         break;
       case 'R':
         if (ZCMD(zone, cmd_no).arg2 == rnum) {
-          delete_zone_command(&zone_table[zone], cmd_no);
+          ZCMD(zone, cmd_no).command = '*';
+          ZCMD(zone, cmd_no).arg2 = NOTHING;
+          changed = TRUE;
         } else
           ZCMD(zone, cmd_no).arg2 -= (ZCMD(zone, cmd_no).arg2 > rnum);
         break;
       }
+    if (changed) {
+      // Do something if the command was changed, e.g., save the zone or log the change
+      add_to_save_list(zone_table[zone].number, SL_ZON);
     }
   }
-
-  save_objects(zrnum);
 
   return rnum;
 }

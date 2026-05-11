@@ -170,39 +170,64 @@ int delete_mobile(mob_rnum refpt)
   RECREATE(mob_index, struct index_data, top_of_mobt + 1);
   RECREATE(mob_proto, struct char_data, top_of_mobt + 1);
 
+  add_to_save_list(zone_table[real_zone_by_thing(vnum)].number, SL_MOB);
+
   /* Update live mobile rnums.  */
   for (live_mob = character_list; live_mob; live_mob = live_mob->next)
     GET_MOB_RNUM(live_mob) -= (GET_MOB_RNUM(live_mob) >= refpt);
 
   /* Update zone table.  */
-  for (zone = 0; zone <= top_of_zone_table; zone++)
-    for (cmd_no = 0; ZCMD(zone, cmd_no).command != 'S'; cmd_no++)
-      if (ZCMD(zone, cmd_no).command == 'M' && ZCMD(zone, cmd_no).arg1 == refpt)
-        /* Should probably try to find dependant commands as well? 
-         * Should probably save the zone file too? */
-        delete_zone_command(&zone_table[zone], cmd_no);
+  for (zone = 0; zone <= top_of_zone_table; zone++) {
+    bool changed = FALSE;
+    for (cmd_no = 0; ZCMD(zone, cmd_no).command != 'S'; cmd_no++) {
+      if (ZCMD(zone, cmd_no).command == 'M' && ZCMD(zone, cmd_no).arg1 == refpt) {
+        ZCMD(zone, cmd_no).command = '*';
+        ZCMD(zone, cmd_no).arg1 = NOTHING;
+        changed = true;
+      }
 
+      if(ZCMD(zone, cmd_no).command == 'M' && ZCMD(zone, cmd_no).arg1 > refpt) {
+        ZCMD(zone, cmd_no).arg1 -= 1;
+        changed = true;
+      }
+    }
+    if(changed) {
+      add_to_save_list(zone_table[zone].number, SL_ZON);
+    }
+  }
+
+  zone_vnum last_saved_zone = NOTHING;
   /* Update shop keepers.  */
   if (shop_index)
     for (counter = 0; counter <= top_shop; counter++) {
+      zone_vnum zone = zone_table[real_zone_by_thing(counter)].number;
       /* Find the shop for this keeper and reset it's keeper to
        * -1 to keep the shop so it could be assigned to someone else */
       if (SHOP_KEEPER(counter) == refpt) {
-        SHOP_KEEPER(counter) = -1;
+        SHOP_KEEPER(counter) = NOTHING;
+        if(zone != last_saved_zone) {
+          add_to_save_list(zone, SL_SHP);
+          last_saved_zone = zone;
+        }
       }
     }
-
+  
+    last_saved_zone = NOTHING;
   /* Update guild masters */
   if (guild_index)
     for (counter = 0; counter <= top_guild; counter++) {
+      zone_vnum zone = zone_table[real_zone_by_thing(counter)].number;
       /* Find the guild for this trainer and reset it's trainer to
        * -1 to keep the guild so it could be assigned to someone else */
       if (GM_TRAINER(counter) == refpt) {
-        GM_TRAINER(counter) = -1;
+        GM_TRAINER(counter) = NOTHING;
+        zone_vnum zone = zone_table[real_zone_by_thing(counter)].number;
+        if(zone != last_saved_zone) {
+          add_to_save_list(zone, SL_GLD);
+          last_saved_zone = zone;
+        }
       }
     }
-
-  save_mobiles(real_zone_by_thing(vnum));
 
   return refpt;
 }
