@@ -4886,7 +4886,8 @@ static const struct zcheck_affs {
   {APPLY_SKILL,		-10,	10,	"skill"},
   {APPLY_FEAT,		-10,	10,	"feat"},
   {APPLY_ALLSAVES,	-4,	4,	"all 3 save types"},
-  {APPLY_RESISTANCE,	-4,	4,	"resistance"}
+  {APPLY_RESISTANCE,	-4,	4,	"resistance"},
+  {APPLY_ALL_STATS,	-6,	6,	"all stats"}
 };
 
 /* These are ABS() values. */
