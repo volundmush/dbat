@@ -405,8 +405,6 @@ int load_char(const char *name, struct char_data *ch)
     GET_KAIOKEN(ch) = PFDEF_BANK;
     GET_EXP(ch) = PFDEF_EXP;
     GET_TRANSCLASS(ch) = PFDEF_EXP;
-    for (i = 0; i < 6; i++)
-     GET_TRANSCOST(ch, i) = FALSE;
     GET_MOLT_EXP(ch) = PFDEF_EXP;
     GET_FISHD(ch) = PFDEF_ACCURACY;
     GET_POLE_BONUS(ch) = PFDEF_ACCURACY;
@@ -1027,8 +1025,8 @@ void save_char(struct char_data * ch)
 
   if (GET_RACE_PRACTICES(ch)!= PFDEF_PRACTICES)	fprintf(fl, "SkRc: %d\n", GET_RACE_PRACTICES(ch));
   for (i = 0; i < 6; i++)
-   if (GET_TRANSCOST(ch, i) != FALSE)
-    fprintf(fl, "Tcos: %d %d\n", i, GET_TRANSCOST(ch, i));
+   if (ch->transcost[i] != FALSE)
+    fprintf(fl, "Tcos: %d %d\n", i, ch->transcost[i]);
 
   for (i = 0; i < NUM_CLASSES; i++)
     if (GET_PRACTICES(ch, i)!= PFDEF_PRACTICES)
