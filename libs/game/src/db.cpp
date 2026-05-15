@@ -1467,15 +1467,12 @@ static void parse_room(FILE *fl, int virtual_nr)
   /* This really had better fit or there are other problems. */
   snprintf(buf2, sizeof(buf2), "room #%d", virtual_nr);
 
-  if (virtual_nr < zone_table[zone].bot) {
-    log("SYSERR: Room #%d is below zone %d.", virtual_nr, zone);
-    exit(1);
-  }
-  while (virtual_nr > zone_table[zone].top)
-    if (++zone > top_of_zone_table) {
-      log("SYSERR: Room %d is outside of any zone.", virtual_nr);
+  zone = real_zone_by_thing(virtual_nr);
+  if(zone == NOWHERE) {
+      log("SYSERR: Room #%d is outside of any zone.", virtual_nr);
       exit(1);
-    }
+  }
+
   world[room_nr].zone = zone;
   world[room_nr].number = virtual_nr;
   world[room_nr].name = fread_string(fl, buf2);

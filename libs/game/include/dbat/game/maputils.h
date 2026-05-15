@@ -15,4 +15,4 @@ MapStruct findcoord(int rnum);
 void printmap(int rnum, struct char_data * ch, int type, int vnum);
 void ping_ship(int vnum, int vnum2);
 
-extern int mapnums[MAP_ROWS+1][MAP_COLS+1];
+extern room_vnum mapnums[MAP_ROWS+1][MAP_COLS+1];
