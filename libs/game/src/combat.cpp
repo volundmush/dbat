@@ -3132,7 +3132,7 @@ int64_t damtype(struct char_data *ch, int type, int skill, double percent)
      GET_CHARGE(ch) -= GET_MAX_MANA(ch) * 0.05;
     } else if (GET_PREFERENCE(ch) == PREFERENCE_WEAPON && GET_CHARGE(ch) > 0) {
      dam += GET_CHARGE(ch);
-     GET_CHARGE(ch) -= 0;
+     GET_CHARGE(ch) = 0;
     }
     if (group_bonus(ch, 2) == 8) {
      dam += dam * 0.02;
