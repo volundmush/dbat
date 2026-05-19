@@ -2423,7 +2423,7 @@ ACMD(do_healglow)
     duration += rand_number(-2, 1);
    if (duration <= 0)
     duration = 1;
-   assign_affect(ch, AFF_HEALGLOW, SKILL_HEALGLOW, duration, 0, 0, 0, 0, 0, 0);
+   assign_affect(vict, AFF_HEALGLOW, SKILL_HEALGLOW, duration, 0, 0, 0, 0, 0, 0);
       decCurKI(ch, cost);
   }
  }

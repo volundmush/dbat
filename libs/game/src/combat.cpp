@@ -3943,7 +3943,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
    LASTATK(ch) -= 1000;
   }
 
-  if (GET_PREFERENCE(ch) == PREFERENCE_KI && GET_CHARGE(ch) > 0) {
+  if (GET_PREFERENCE(vict) == PREFERENCE_KI && GET_CHARGE(vict) > 0) {
    dmg -= dmg * 0.08;
   }
 

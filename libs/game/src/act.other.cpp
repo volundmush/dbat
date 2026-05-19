@@ -6872,19 +6872,19 @@ ACMD(do_heal)
 
    if (IS_NAIL(ch)) {
     if (GET_SKILL(ch, SKILL_HEAL) >= 100) {
-     incCurST(ch, heal * .4);
+     incCurST(vict, heal * .4);
      send_to_char(vict, "@GYou feel some of your stamina return as well!@n\r\n");
     } else if (GET_SKILL(ch, SKILL_HEAL) >= 60) {
-        incCurST(ch, heal * .2);
+        incCurST(vict, heal * .2);
      send_to_char(vict, "@GYou feel some of your stamina return as well!@n\r\n");
     } else if (GET_SKILL(ch, SKILL_HEAL) >= 40) {
-        incCurST(ch, heal * .1);
+        incCurST(vict, heal * .1);
      send_to_char(vict, "@GYou feel some of your stamina return as well!@n\r\n");
     }
    }
 
-   null_affect(ch, AFF_POISON);
-   null_affect(ch, AFF_BLIND);
+   null_affect(vict, AFF_POISON);
+   null_affect(vict, AFF_BLIND);
     if (AFF_FLAGGED(vict, AFF_BURNED)) {
         send_to_char(vict, "Your burns are healed now.\r\n");
         act("$n@w's burns are now healed.@n", TRUE, vict, 0, 0, TO_ROOM);
@@ -6899,8 +6899,14 @@ ACMD(do_heal)
    GET_LIMBCOND(vict, 2) = 100;
    GET_LIMBCOND(vict, 3) = 100;
    GET_LIMBCOND(vict, 4) = 100;
+   if (!PLR_FLAGGED(vict, PLR_TAIL) && (IS_BIO(vict) || IS_ICER(vict)) && !IS_NPC(vict)) {
+    SET_BIT_AR(PLR_FLAGS(vict), PLR_TAIL);
+   }
+   if (!PLR_FLAGGED(vict, PLR_STAIL) && (IS_SAIYAN(vict) || IS_HALFBREED(vict)) && !IS_NPC(vict)) {
+    SET_BIT_AR(PLR_FLAGS(vict), PLR_STAIL);
+   }
    if(getCurLF(vict) <= getMaxLF(vict) * 0.5 && !IS_ANDROID(vict)) {
-       incCurLF(vict, (getMaxLF(ch)) * .35);
+       incCurLF(vict, (getMaxLF(vict)) * .35);
     send_to_char(vict, "You feel that your lifeforce has recovered some!\r\n");
    }
    improve_skill(ch, SKILL_HEAL, 0);
@@ -6925,25 +6931,26 @@ ACMD(do_heal)
 
    if (IS_NAIL(ch)) {
     if (GET_SKILL(ch, SKILL_HEAL) >= 100) {
-        incCurST(ch, heal * .4);
+        incCurST(vict, heal * .4);
      send_to_char(vict, "@GYou feel some of your stamina return as well!@n\r\n");
     } else if (GET_SKILL(ch, SKILL_HEAL) >= 60) {
-        incCurST(ch, heal * .2);
+        incCurST(vict, heal * .2);
      send_to_char(vict, "@GYou feel some of your stamina return as well!@n\r\n");
     } else if (GET_SKILL(ch, SKILL_HEAL) >= 40) {
-        incCurST(ch, heal * .1);
+        incCurST(vict, heal * .1);
      send_to_char(vict, "@GYou feel some of your stamina return as well!@n\r\n");
     }
    }
-   REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_BLIND);
+   null_affect(vict, AFF_POISON);
+   null_affect(vict, AFF_BLIND);
    GET_LIMBCOND(vict, 1) = 100;
    GET_LIMBCOND(vict, 2) = 100;
    GET_LIMBCOND(vict, 3) = 100;
    GET_LIMBCOND(vict, 4) = 100;
-   if (!PLR_FLAGGED(vict, PLR_TAIL) && (IS_BIO(vict) || IS_ICER(vict))) {
+   if (!PLR_FLAGGED(vict, PLR_TAIL) && (IS_BIO(vict) || IS_ICER(vict)) && !IS_NPC(vict)) {
     SET_BIT_AR(PLR_FLAGS(vict), PLR_TAIL);
    }
-   if (!PLR_FLAGGED(vict, PLR_STAIL) && (IS_SAIYAN(vict) || IS_HALFBREED(vict))) {
+   if (!PLR_FLAGGED(vict, PLR_STAIL) && (IS_SAIYAN(vict) || IS_HALFBREED(vict)) && !IS_NPC(vict)) {
     SET_BIT_AR(PLR_FLAGS(vict), PLR_STAIL);
    }
    improve_skill(ch, SKILL_HEAL, 0);
