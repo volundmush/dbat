@@ -651,7 +651,7 @@ static void resolve_song(struct char_data *ch)
           if (!AFF_FLAGGED(vict, AFF_SANCTUARY)) {
            SET_BIT_AR(AFF_FLAGS(vict), AFF_SANCTUARY);
           }
-          incCurKI(ch, getPercentOfMaxKI(ch, .02) + skill);
+          decCurKI(ch, getPercentOfMaxKI(ch, .02) + skill);
          }
         }
       }
