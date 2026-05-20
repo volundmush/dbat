@@ -63,8 +63,8 @@ if (vzone_num < 0) {
    * are more complicated rules for that but it's not covered
    * here.
    */
-  if (vzone_num > 326) {
-    *error = "326 is the highest zone allowed.\r\n";
+  if (vzone_num > 1000) {
+    *error = "1000 is the highest zone allowed.\r\n";
     return NOWHERE;
   }
 
@@ -81,31 +81,31 @@ if (vzone_num < 0) {
   /*
    * Create the zone file.
    */
-  snprintf(buf, sizeof(buf), "%s%d.zon", ZON_PREFIX, vzone_num);
+  snprintf(buf, sizeof(buf), "%s%ld.zon", ZON_PREFIX, vzone_num);
   if (!(fp = fopen(buf, "w"))) {
     mudlog(BRF, ADMLVL_IMPL, TRUE, "SYSERR: OLC: Can't write new zone file.");
     *error = "Could not write zone file.\r\n";
     return NOWHERE;
   }
-  fprintf(fp, "#%d\nNew Zone~\n%d 30 2\nS\n$\n", vzone_num, (vzone_num * 100) + 99);
+  fprintf(fp, "#%ld\nNew Zone~\n%ld 30 2\nS\n$\n", vzone_num, (vzone_num * 100) + 99);
   fclose(fp);
 
   /*
    * Create the room file.
    */
-  snprintf(buf, sizeof(buf), "%s%d.wld", WLD_PREFIX, vzone_num);
+  snprintf(buf, sizeof(buf), "%s%ld.wld", WLD_PREFIX, vzone_num);
   if (!(fp = fopen(buf, "w"))) {
     mudlog(BRF, ADMLVL_IMPL, TRUE, "SYSERR: OLC: Can't write new world file.");
     *error = "Could not write world file.\r\n";
     return NOWHERE;
   }
-  fprintf(fp, "#%d\nThe Beginning~\nNot much here.\n~\n%d 0 0\nS\n$\n", bottom, vzone_num);
+  fprintf(fp, "#%ld\nThe Beginning~\nNot much here.\n~\n%ld 0 0\nS\n$\n", bottom, vzone_num);
   fclose(fp);
 
   /*
    * Create the mobile file.
    */
-  snprintf(buf, sizeof(buf), "%s%d.mob", MOB_PREFIX, vzone_num);
+  snprintf(buf, sizeof(buf), "%s%ld.mob", MOB_PREFIX, vzone_num);
   if (!(fp = fopen(buf, "w"))) {
     mudlog(BRF, ADMLVL_IMPL, TRUE, "SYSERR: OLC: Can't write new mob file.");
     *error = "Could not write mobile file.\r\n";
@@ -114,10 +114,10 @@ if (vzone_num < 0) {
   fprintf(fp, "$\n");
   fclose(fp);
 
-  /*
+  /*  
    * Create the object file.
    */
-  snprintf(buf, sizeof(buf), "%s%d.obj", OBJ_PREFIX, vzone_num);
+  snprintf(buf, sizeof(buf), "%s%ld.obj", OBJ_PREFIX, vzone_num);
   if (!(fp = fopen(buf, "w"))) {
     mudlog(BRF, ADMLVL_IMPL, TRUE, "SYSERR: OLC: Can't write new obj file.");
     *error = "Could not write object file.\r\n";
@@ -129,7 +129,7 @@ if (vzone_num < 0) {
   /*
    * Create the shop file.
    */
-  snprintf(buf, sizeof(buf), "%s%d.shp", SHP_PREFIX, vzone_num);
+  snprintf(buf, sizeof(buf), "%s%ld.shp", SHP_PREFIX, vzone_num);
   if (!(fp = fopen(buf, "w"))) {
     mudlog(BRF, ADMLVL_IMPL, TRUE, "SYSERR: OLC: Can't write new shop file.");
     *error = "Could not write shop file.\r\n";
@@ -141,7 +141,7 @@ if (vzone_num < 0) {
   /*
    * Create the trigger file.
    */
-  snprintf(buf, sizeof(buf), "%s%d.trg", TRG_PREFIX, vzone_num);
+  snprintf(buf, sizeof(buf), "%s%ld.trg", TRG_PREFIX, vzone_num);
   if (!(fp = fopen(buf, "w"))) {
     mudlog(BRF, ADMLVL_IMPL, TRUE, "SYSERR: OLC: Can't write new trigger file");
     *error = "Could not write trigger file.\r\n";
@@ -153,7 +153,7 @@ if (vzone_num < 0) {
   /*
    * Create Gld file .
    */
-  snprintf(buf, sizeof(buf), "%s/%i.gld", GLD_PREFIX, vzone_num);
+  snprintf(buf, sizeof(buf), "%s/%ld.gld", GLD_PREFIX, vzone_num);
   if (!(fp = fopen(buf, "w"))) {
     mudlog(BRF, ADMLVL_IMPL, TRUE, "SYSERR: OLC: Can't write new guild file");
     *error = "Could not write guild file.\r\n";
@@ -206,7 +206,8 @@ if (vzone_num < 0) {
   zone->name = strdup("New Zone");
   zone->number = vzone_num;
   zone->builders = strdup("None");
-  zone->top = (vzone_num * 100) + 99;
+  zone->bot = bottom;
+  zone->top = top;
   zone->lifespan = 30;
   zone->age = 0;
   zone->reset_mode = 2;

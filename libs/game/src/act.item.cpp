@@ -3729,10 +3729,11 @@ ACMD(do_eat)
 
   // available hunger
   int foob = 48 - GET_COND(ch, HUNGER);
+  int maxfval = MAX(1, GET_OBJ_VAL(food, VAL_FOOD_MAXFOODVAL));
   // amount that can be eaten - tasting only consumes 1 point, eating consumes as much as possible
   // VAL_FOOD_FOODVAL is the amount of nutrition remaining, while value 1 is the max possible it once had.
-  amount = MIN(foob, (subcmd == SCMD_EAT ? GET_OBJ_VAL(food, VAL_FOOD_FOODVAL) : 1));
-  double percent_eaten = (double)amount / (double)GET_OBJ_VAL(food, 1);
+  amount = MAX(1, MIN(foob, (subcmd == SCMD_EAT ? GET_OBJ_VAL(food, VAL_FOOD_FOODVAL) : 1)));
+  double percent_eaten = (double)amount / (double)maxfval;
 
   gain_condition(ch, HUNGER, amount);
   if (GET_FOODR(ch) == 0 && subcmd != SCMD_TASTE)
@@ -3748,7 +3749,7 @@ ACMD(do_eat)
 
   if (subcmd != SCMD_TASTE)
     {
-      int psbonus = (int)((double)(GET_OBJ_VAL(food, VAL_FOOD_MAXFOODVAL) + GET_OBJ_VAL(food, VAL_FOOD_PSBONUS)) * percent_eaten);
+      int psbonus = (int)((double)(maxfval + GET_OBJ_VAL(food, VAL_FOOD_PSBONUS)) * percent_eaten);
       int expbonus = (int)((double)GET_OBJ_VAL(food, VAL_FOOD_EXPBONUS) * ((GET_LEVEL(ch) * 0.4) + 1) * percent_eaten);
       gain_exp(ch, expbonus);
       GET_PRACTICES(ch, GET_CLASS(ch)) += psbonus;
