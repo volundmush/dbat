@@ -3135,7 +3135,7 @@ int64_t damtype(struct char_data *ch, int type, int skill, double percent)
      GET_CHARGE(ch) -= GET_MAX_MANA(ch) * 0.05;
     } else if (GET_PREFERENCE(ch) == PREFERENCE_WEAPON && GET_CHARGE(ch) > 0) {
      dam += GET_CHARGE(ch);
-     GET_CHARGE(ch) -= 0;
+     GET_CHARGE(ch) = 0;
     }
     if (group_bonus(ch, 2) == 8) {
      dam += dam * 0.02;
@@ -4070,13 +4070,16 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
    advanced_energy(vict, dmg);
    dmg -= (dmg * 0.0005) * GET_WIS(vict);
   }
-
-  if (IS_MUTANT(vict)) {  
-   if (type <= 0) {
-    dmg -= dmg * 0.3;
+// Leech bonus trait reduces damage by 2% per 5 levels, up to 40% at level 100
+  if (GET_BONUS(vict, BONUS_LEECH)) {
+   if (type > 0) {
+    dmg -= dmg * (((GET_LEVEL(vict) / 5) * 0.02));
    }
-   else if (type > 0) {
-    dmg -= dmg * 0.25;
+  }
+// Fireproof bonus trait reduces damage by 10% from ki attacks
+  if (GET_BONUS(vict, BONUS_FIREPROOF)) {
+   if (type > 0) {
+    dmg -= dmg * 0.1;
    }
   }
 
@@ -4096,6 +4099,15 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
 
   if (PLR_FLAGGED(vict, PLR_FURY)) {
     dmg -= dmg * 0.1;
+  }
+
+  if (IS_MUTANT(vict)) {  
+   if (type <= 0) {
+    dmg -= dmg * 0.3;
+   }
+   else {
+    dmg -= dmg * 0.25;
+   }
   }
 
   if (IS_MAJIN(vict)) {
