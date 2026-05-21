@@ -695,7 +695,7 @@ ACMD(do_rpp)
       send_to_char(ch, "@R%d@W RPP paid for your selection. Enjoy!@n\r\n", pay);
       send_to_imm("RPP Purchase: %s %d", GET_NAME(ch), pay);
   }
-    
+
 }
 
 ACMD(do_commune)
@@ -6956,7 +6956,7 @@ ACMD(do_heal)
    improve_skill(ch, SKILL_HEAL, 0);
    WAIT_STATE(ch, PULSE_2SEC);
   }
-    
+
   return;
 }
 
@@ -9113,214 +9113,286 @@ static int has_scanner(struct char_data *ch)
 
 ACMD(do_snet)
 {
- int channel = 0, global = FALSE, call = -1, reached = FALSE;
- struct descriptor_data *i;
- char voice[150], arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
- char hist[MAX_INPUT_LENGTH];
+  int channel = 0, global = FALSE, call = -1, reached = FALSE;
+  struct descriptor_data *i;
+  char voice[150], arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  char hist[MAX_INPUT_LENGTH];
 
- half_chop(argument, arg, arg2);
- 
- struct obj_data *obj = NULL;
- struct obj_data *obj2 = NULL;
+  half_chop(argument, arg, arg2);
 
- if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HBTC)) {
-   send_to_char(ch, "This is a different dimension!\r\n");
-   return;
- }
- if (IN_ARENA(ch)) {
-  send_to_char(ch, "Lol, no.\r\n");
-  return;
- }
- if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_PAST)) {
-   send_to_char(ch, "This is the past, you can't talk on scouter net!\r\n");
-   return;
- }
- if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HELL)) {
-   send_to_char(ch, "The fire eats your transmission!\r\n");
-   return;
- }
- if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 19800 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 19899) {
-  send_to_char(ch, "Your signal will not be able to escape the walls of the pocket dimension.\r\n");
-  return;
- }
+  struct obj_data *obj = NULL;
+  struct obj_data *obj2 = NULL;
 
- if (!IS_NPC(ch)) {
-  if (GET_EQ(ch, WEAR_EYE)) {
-   obj = GET_EQ(ch, WEAR_EYE);
-  } else {
-   send_to_char(ch, "You do not have a scouter on.\r\n");
-   return;
+  if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HBTC))
+  {
+    send_to_char(ch, "This is a different dimension!\r\n");
+    return;
   }
- }
+  if (IN_ARENA(ch))
+  {
+    send_to_char(ch, "Lol, no.\r\n");
+    return;
+  }
+  if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_PAST))
+  {
+    send_to_char(ch, "This is the past, you can't talk on scouter net!\r\n");
+    return;
+  }
+  if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HELL))
+  {
+    send_to_char(ch, "The fire eats your transmission!\r\n");
+    return;
+  }
+  if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 19800 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 19899)
+  {
+    send_to_char(ch, "Your signal will not be able to escape the walls of the pocket dimension.\r\n");
+    return;
+  }
 
- if (!*arg) {
-  send_to_char(ch, "[Syntax] snet < [1-999] | check | #(scouter number) | * message | message>\r\n");
-  return;
- }
-
- if (strstr(arg, "#")) {
-  search_replace(arg, "#", "");
-  call = atoi(arg);
-  if (call <= -1) {
-   send_to_char(ch, "Call what personal scouter number?\r\n");
-   return;
-  }
- }
-
- if (!strcasecmp(arg, "check")) {
-  send_to_char(ch, "Your personal scouter number is: %d\r\n", GET_ID(ch));
-  return;
- }
-
- if (call <= -1) {
-  channel = atoi(arg);
- }
- 
- if (channel > 0) {
-   SFREQ(obj) = channel;
-   if (channel > 999) {
-     SFREQ(obj) = 999;
-   }
-   act("@wYou push some buttons on $p@w and change its channel.", TRUE, ch, obj, 0, TO_CHAR);
-   act("@C$n@w pushes some buttons on $p@w and changes its channel.", TRUE, ch, obj, 0, TO_ROOM);
-   return;
- }
- else {
-  if (GET_BONUS(ch, BONUS_MUTE) > 0) {
-   send_to_char(ch, "You are unable to speak though.\r\n");
-   return;
-  }
-  if (SFREQ(obj) == 0) {
-   SFREQ(obj) = 1;
-  }
-  if (!strcasecmp(arg, "*") && call <= -1) {
-   global = TRUE;
-  }
-  if (GET_VOICE(ch) != NULL) {
-   sprintf(voice, "%s", GET_VOICE(ch));
-  }
-  if (GET_VOICE(ch) == NULL) {
-   sprintf(voice, "A generic voice");
-  }
-  for (i = descriptor_list; i; i = i->next) {
-   if (STATE(i) != CON_PLAYING) {
-    continue;
-   }
-   if (i->character == ch) {
-    continue;
-   }
-   if (IN_ROOM(i->character) == IN_ROOM(ch)) {
-    continue;
-   }
-   if (ROOM_FLAGGED(IN_ROOM(i->character), ROOM_HBTC)) {
-    continue;
-   }
-   if (ROOM_FLAGGED(IN_ROOM(i->character), ROOM_PAST)) {
-    continue;
-   }
-   if ((ROOM_FLAGGED(IN_ROOM(i->character), ROOM_RHELL) && !ROOM_FLAGGED(IN_ROOM(ch), ROOM_RHELL)) || (ROOM_FLAGGED(IN_ROOM(i->character), ROOM_AL) && !ROOM_FLAGGED(IN_ROOM(ch), ROOM_AL))) {
-    continue;
-   }
-   if ((!ROOM_FLAGGED(IN_ROOM(i->character), ROOM_RHELL) && ROOM_FLAGGED(IN_ROOM(ch), ROOM_RHELL)) || (!ROOM_FLAGGED(IN_ROOM(i->character), ROOM_AL) && ROOM_FLAGGED(IN_ROOM(ch), ROOM_AL))) {
-    continue;
-   }
-   if (GET_POS(i->character) == POS_SLEEPING) {
-    continue;
-   }
-   if (GET_ROOM_VNUM(IN_ROOM(i->character)) >= 19800 && GET_ROOM_VNUM(IN_ROOM(i->character)) <= 19899) {
-    continue;
-   }
-   if (GET_EQ(i->character, WEAR_EYE)) {
-    obj2 = GET_EQ(i->character, WEAR_EYE);
-    if (SFREQ(obj2) == 0) {
-     SFREQ(obj2) = 1;
+  if (!IS_NPC(ch))
+  {
+    if (GET_EQ(ch, WEAR_EYE))
+    {
+      obj = GET_EQ(ch, WEAR_EYE);
     }
-    if (global == FALSE && call <= -1 && SFREQ(obj2) == SFREQ(obj) && GET_ADMLEVEL(i->character) < 1) {
-      send_to_char(i->character, "@C%s is heard @W(@c%s@W), @D[@WSNET FREQ@D: @Y%d@D] @G%s %s@n\r\n", voice, readIntro(i->character, ch) == 1 ? get_i_name(i->character, ch) : "Unknown", SFREQ(obj), CAP(arg), !*arg2 ? "" : arg2);
-      *hist = '\0';
-      sprintf(hist, "@C%s is heard @W(@c%s@W), @D[@WSNET FREQ@D: @Y%d@D] @G%s %s@n\r\n", voice, readIntro(i->character, ch) == 1 ? get_i_name(i->character, ch) : "Unknown", SFREQ(obj), CAP(arg), !*arg2 ? "" : arg2);
-      add_history(i->character, hist, HIST_SNET);
-      if (has_scanner(i->character)) {
-       char *blah = sense_location(ch);
-       send_to_char(i->character, "@WScanner@D: @Y%s@n\r\n", blah);
-       free(blah);
-      }
-      continue;
-    } /* It is the right freq */
-    else if (global == TRUE && call <= -1 && GET_ADMLEVEL(i->character) < 1) {
-      send_to_char(i->character, "@C%s is heard @W(@c%s@W), @D[@WSNET FREQ@D: @Y%d @mBroadcast@D] @G%s@n\r\n", voice, readIntro(i->character, ch) == 1 ? get_i_name(i->character, ch) : "Unknown", SFREQ(obj), CAP(arg2));
-      *hist = '\0';
-      sprintf(hist, "@C%s is heard @W(@c%s@W), @D[@WSNET FREQ@D: @Y%d @mBroadcast@D] @G%s@n\r\n", voice, readIntro(i->character, ch) == 1 ? get_i_name(i->character, ch) : "Unknown", SFREQ(obj), CAP(arg2));
-      add_history(i->character, hist, HIST_SNET);
-      if (has_scanner(i->character)) {
-       char *blah = sense_location(ch);
-       send_to_char(i->character, "@WScanner@D: @Y%s@n\r\n", blah);
-       free(blah);
-      }
+    else
+    {
+      send_to_char(ch, "You do not have a scouter on.\r\n");
+      return;
+    }
+  }
+
+  if (!*arg)
+  {
+    send_to_char(ch, "[Syntax] snet < [1-999] | check | #(scouter number) | * message | message>\r\n");
+    return;
+  }
+
+  if (strstr(arg, "#"))
+  {
+    search_replace(arg, "#", "");
+    call = atoi(arg);
+    if (call <= -1)
+    {
+      send_to_char(ch, "Call what personal scouter number?\r\n");
+      return;
+    }
+  }
+
+  if (!strcasecmp(arg, "check"))
+  {
+    send_to_char(ch, "Your personal scouter number is: %d\r\n", GET_ID(ch));
+    return;
+  }
+
+  if (call <= -1)
+  {
+    channel = atoi(arg);
+  }
+
+  if (channel > 0)
+  {
+    SFREQ(obj) = channel;
+    if (channel > 999)
+    {
+      SFREQ(obj) = 999;
+    }
+    act("@wYou push some buttons on $p@w and change its channel.", TRUE, ch, obj, 0, TO_CHAR);
+    act("@C$n@w pushes some buttons on $p@w and changes its channel.", TRUE, ch, obj, 0, TO_ROOM);
+    return;
+  }
+
+  if (GET_BONUS(ch, BONUS_MUTE) > 0)
+  {
+    send_to_char(ch, "You are unable to speak though.\r\n");
+    return;
+  }
+
+  // All checks passed, we'll be sending.
+
+  if (SFREQ(obj) == 0)
+  {
+    SFREQ(obj) = 1;
+  }
+  if (!strcasecmp(arg, "*") && call <= -1)
+  {
+    global = TRUE;
+  }
+  if (GET_VOICE(ch) != NULL)
+  {
+    sprintf(voice, "%s", GET_VOICE(ch));
+  }
+  if (GET_VOICE(ch) == NULL)
+  {
+    sprintf(voice, "A generic voice");
+  }
+
+  // Distribute the message.
+  for (i = descriptor_list; i; i = i->next)
+  {
+    if(!i->character) {
       continue;
     }
-    else if (call > -1 && GET_ID(i->character) == call) {
-     send_to_char(i->character, "@C%s is heard @W(@c%s@W), @D[@R#@W%d @Ycalling YOU@D] @G%s@n\r\n", voice, readIntro(i->character, ch) == 1 ? get_i_name(i->character, ch) : "Unknown", GET_ID(ch), !*arg2 ? "" : CAP(arg2));
-      *hist = '\0';
-      sprintf(hist, "@C%s is heard @W(@c%s@W), @D[@R#@W%d @Ycalling YOU@D] @G%s@n\r\n", voice, readIntro(i->character, ch) == 1 ? get_i_name(i->character, ch) : "Unknown", GET_ID(ch), !*arg2 ? "" : CAP(arg2));
-      add_history(i->character, hist, HIST_SNET);
-      if (has_scanner(i->character)) {
-       char *blah = sense_location(ch);
-       send_to_char(i->character, "@WScanner@D: @Y%s@n\r\n", blah);
-       free(blah);
-      }
-     reached = TRUE;
+
+    if (i->character == ch)
+    {
+      continue;
     }
-   } /* They have a scouter */
-   if (GET_ADMLEVEL(i->character) > 0 && call <= -1) {
-     send_to_char(i->character, "@C%s (%s) is heard, @D[@WSNET FREQ@D: @Y%d@D] @G%s %s@n\r\n", voice, GET_NAME(ch), SFREQ(obj), CAP(arg), !*arg2 ? "" : arg2);
-     continue;
-   } else if (GET_ADMLEVEL(i->character) > 0) {
-     send_to_char(i->character, "@C%s (%s) is heard, @D[@WCall to @R#@Y%d@D] @G%s@n\r\n", voice, GET_NAME(ch), call, !*arg2 ? "" : CAP(arg2));
-     continue;
-   }
-  } /* End switch */
- if (call <= -1) {
-  if (global == FALSE) {
-    reveal_hiding(ch, 3);
-    send_to_char(ch, "@CYou @D[@WSNET FREQ@D: @Y%d@D] @G%s %s@n\r\n", SFREQ(obj), arg, !*arg2 ? "" : arg2);
+
+    // It will always be heard and logged for admin.
+    if(GET_ADMLEVEL(i->character) > 0) {
+      *hist = '\0';
+      if (call <= -1 && global == FALSE)
+      {
+        send_to_char(i->character, "@C%s (%s) is heard, @D[@WSNET FREQ@D: @Y%d@D] @G%s %s@n\r\n", voice, GET_NAME(ch), SFREQ(obj), CAP(arg), !*arg2 ? "" : arg2);
+        sprintf(hist, "@C%s (%s) is heard, @D[@WSNET FREQ@D: @Y%d@D] @G%s %s@n\r\n", voice, GET_NAME(ch), SFREQ(obj), CAP(arg), !*arg2 ? "" : arg2);
+      }
+      else if (call <= -1)
+      {
+        send_to_char(i->character, "@C%s (%s) is heard, @D[@WSNET FREQ@D: @Y%d @mBroadcast@D] @G%s@n\r\n", voice, GET_NAME(ch), SFREQ(obj), !*arg2 ? "" : CAP(arg2));
+        sprintf(hist, "@C%s (%s) is heard, @D[@WSNET FREQ@D: @Y%d @mBroadcast@D] @G%s@n\r\n", voice, GET_NAME(ch), SFREQ(obj), !*arg2 ? "" : CAP(arg2));
+      }
+      else
+      {
+        send_to_char(i->character, "@C%s (%s) is heard, @D[@WCall to @R#@Y%d@D] @G%s@n\r\n", voice, GET_NAME(ch), call, !*arg2 ? "" : CAP(arg2));
+        sprintf(hist, "@C%s (%s) is heard, @D[@WCall to @R#@Y%d@D] @G%s@n\r\n", voice, GET_NAME(ch), call, !*arg2 ? "" : CAP(arg2));
+      }
+      add_history(i->character, hist, HIST_SNET);
+      continue;
+    }
+
+    if (STATE(i) != CON_PLAYING)
+    {
+      continue;
+    }
+
+    if (IN_ROOM(i->character) == IN_ROOM(ch))
+    {
+      continue;
+    }
+    if (ROOM_FLAGGED(IN_ROOM(i->character), ROOM_HBTC))
+    {
+      continue;
+    }
+    if (ROOM_FLAGGED(IN_ROOM(i->character), ROOM_PAST))
+    {
+      continue;
+    }
+    if ((ROOM_FLAGGED(IN_ROOM(i->character), ROOM_RHELL) && !ROOM_FLAGGED(IN_ROOM(ch), ROOM_RHELL)) || (ROOM_FLAGGED(IN_ROOM(i->character), ROOM_AL) && !ROOM_FLAGGED(IN_ROOM(ch), ROOM_AL)))
+    {
+      continue;
+    }
+    if ((!ROOM_FLAGGED(IN_ROOM(i->character), ROOM_RHELL) && ROOM_FLAGGED(IN_ROOM(ch), ROOM_RHELL)) || (!ROOM_FLAGGED(IN_ROOM(i->character), ROOM_AL) && ROOM_FLAGGED(IN_ROOM(ch), ROOM_AL)))
+    {
+      continue;
+    }
+    if (GET_POS(i->character) == POS_SLEEPING)
+    {
+      continue;
+    }
+    if (in_room_range(i->character, 19800, 19899))
+    {
+      continue;
+    }
+
+    if (GET_EQ(i->character, WEAR_EYE))
+    {
+      obj2 = GET_EQ(i->character, WEAR_EYE);
+      if (SFREQ(obj2) == 0)
+      {
+        SFREQ(obj2) = 1;
+      }
+      if (global == FALSE && call <= -1 && SFREQ(obj2) == SFREQ(obj) && GET_ADMLEVEL(i->character) < 1)
+      {
+        send_to_char(i->character, "@C%s is heard @W(@c%s@W), @D[@WSNET FREQ@D: @Y%d@D] @G%s %s@n\r\n", voice, readIntro(i->character, ch) == 1 ? get_i_name(i->character, ch) : "Unknown", SFREQ(obj), CAP(arg), !*arg2 ? "" : arg2);
+        *hist = '\0';
+        sprintf(hist, "@C%s is heard @W(@c%s@W), @D[@WSNET FREQ@D: @Y%d@D] @G%s %s@n\r\n", voice, readIntro(i->character, ch) == 1 ? get_i_name(i->character, ch) : "Unknown", SFREQ(obj), CAP(arg), !*arg2 ? "" : arg2);
+        add_history(i->character, hist, HIST_SNET);
+        if (has_scanner(i->character))
+        {
+          char *blah = sense_location(ch);
+          send_to_char(i->character, "@WScanner@D: @Y%s@n\r\n", blah);
+          free(blah);
+        }
+      } /* It is the right freq */
+      else if (global == TRUE && call <= -1 && GET_ADMLEVEL(i->character) < 1)
+      {
+        send_to_char(i->character, "@C%s is heard @W(@c%s@W), @D[@WSNET FREQ@D: @Y%d @mBroadcast@D] @G%s@n\r\n", voice, readIntro(i->character, ch) == 1 ? get_i_name(i->character, ch) : "Unknown", SFREQ(obj), CAP(arg2));
+        *hist = '\0';
+        sprintf(hist, "@C%s is heard @W(@c%s@W), @D[@WSNET FREQ@D: @Y%d @mBroadcast@D] @G%s@n\r\n", voice, readIntro(i->character, ch) == 1 ? get_i_name(i->character, ch) : "Unknown", SFREQ(obj), CAP(arg2));
+        add_history(i->character, hist, HIST_SNET);
+        if (has_scanner(i->character))
+        {
+          char *blah = sense_location(ch);
+          send_to_char(i->character, "@WScanner@D: @Y%s@n\r\n", blah);
+          free(blah);
+        }
+      }
+      else if (call > -1 && GET_ID(i->character) == call)
+      {
+        send_to_char(i->character, "@C%s is heard @W(@c%s@W), @D[@R#@W%d @Ycalling YOU@D] @G%s@n\r\n", voice, readIntro(i->character, ch) == 1 ? get_i_name(i->character, ch) : "Unknown", GET_ID(ch), !*arg2 ? "" : CAP(arg2));
+        *hist = '\0';
+        sprintf(hist, "@C%s is heard @W(@c%s@W), @D[@R#@W%d @Ycalling YOU@D] @G%s@n\r\n", voice, readIntro(i->character, ch) == 1 ? get_i_name(i->character, ch) : "Unknown", GET_ID(ch), !*arg2 ? "" : CAP(arg2));
+        add_history(i->character, hist, HIST_SNET);
+        if (has_scanner(i->character))
+        {
+          char *blah = sense_location(ch);
+          send_to_char(i->character, "@WScanner@D: @Y%s@n\r\n", blah);
+          free(blah);
+        }
+        reached = TRUE;
+      }
+    } /* They have a scouter */
+  } /* End for loop */
+
+  if (call <= -1)
+  {
+    if (!global)
+    {
+      reveal_hiding(ch, 3);
+      send_to_char(ch, "@CYou @D[@WSNET FREQ@D: @Y%d@D] @G%s %s@n\r\n", SFREQ(obj), arg, !*arg2 ? "" : arg2);
       *hist = '\0';
       sprintf(hist, "@CYou @D[@WSNET FREQ@D: @Y%d@D] @G%s %s@n\r\n", SFREQ(obj), arg, !*arg2 ? "" : arg2);
       add_history(ch, hist, HIST_SNET);
-    char over[MAX_STRING_LENGTH];
-    sprintf(over, "@C$n@W says into $s scouter, '@G@G%s %s@W'@n\r\n", CAP(arg), !*arg2 ? "" : arg2);
-    act(over, TRUE, ch, 0, 0, TO_ROOM);
-   if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_RHELL) || ROOM_FLAGGED(IN_ROOM(ch), ROOM_AL)) {
-    send_to_char(ch, "@mThe transmission only reaches those who are in the afterlife.@n\r\n");
-   }
-  }
-  if (global == TRUE) {
-   reveal_hiding(ch, 3);
-   send_to_char(ch, "@CYou @D[@WSNET FREQ@D: @Y%d @mBroadcast@D] @G%s@n\r\n", SFREQ(obj), !*arg2 ? "" : CAP(arg2));
+      char over[MAX_STRING_LENGTH];
+      sprintf(over, "@C$n@W says into $s scouter, '@G@G%s %s@W'@n\r\n", CAP(arg), !*arg2 ? "" : arg2);
+      act(over, TRUE, ch, 0, 0, TO_ROOM);
+      if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_RHELL) || ROOM_FLAGGED(IN_ROOM(ch), ROOM_AL))
+      {
+        send_to_char(ch, "@mThe transmission only reaches those who are in the afterlife.@n\r\n");
+      }
+    }
+    else
+    {
+      reveal_hiding(ch, 3);
+      send_to_char(ch, "@CYou @D[@WSNET FREQ@D: @Y%d @mBroadcast@D] @G%s@n\r\n", SFREQ(obj), !*arg2 ? "" : CAP(arg2));
       *hist = '\0';
       sprintf(hist, "@CYou @D[@WSNET FREQ@D: @Y%d @mBroadcast@D] @G%s@n\r\n", SFREQ(obj), !*arg2 ? "" : CAP(arg2));
       add_history(ch, hist, HIST_SNET);
-    char over[MAX_STRING_LENGTH];
-    sprintf(over, "@C$n@W says into $s scouter, '@G@G%s@W'@n\r\n", !*arg2 ? "" : CAP(arg2));
-    act(over, TRUE, ch, 0, 0, TO_ROOM);
-   if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_RHELL) || ROOM_FLAGGED(IN_ROOM(ch), ROOM_AL)) {
-    send_to_char(ch, "@mThe transmission only reaches those who are in the afterlife.@n\r\n");
-   }
-   }
-  } else {
+      char over[MAX_STRING_LENGTH];
+      sprintf(over, "@C$n@W says into $s scouter, '@G@G%s@W'@n\r\n", !*arg2 ? "" : CAP(arg2));
+      act(over, TRUE, ch, 0, 0, TO_ROOM);
+      if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_RHELL) || ROOM_FLAGGED(IN_ROOM(ch), ROOM_AL))
+      {
+        send_to_char(ch, "@mThe transmission only reaches those who are in the afterlife.@n\r\n");
+      }
+    }
+  }
+  else
+  {
     reveal_hiding(ch, 3);
     send_to_char(ch, "@CYou call @D[@R#@W%d@D] @G%s@n\r\n", call, !*arg2 ? "" : CAP(arg2));
-      *hist = '\0';
-      sprintf(hist, "@CYou call @D[@R#@W%d@D] @G%s@n\r\n", call, !*arg2 ? "" : CAP(arg2));
-      add_history(ch, hist, HIST_SNET);
+    *hist = '\0';
+    sprintf(hist, "@CYou call @D[@R#@W%d@D] @G%s@n\r\n", call, !*arg2 ? "" : CAP(arg2));
+    add_history(ch, hist, HIST_SNET);
     char over[MAX_STRING_LENGTH];
     sprintf(over, "@C$n@W says into $s scouter, '@G@G%s@W'@n\r\n", !*arg2 ? "" : CAP(arg2));
     act(over, TRUE, ch, 0, 0, TO_ROOM);
-   if (reached == FALSE) {
-    send_to_char(ch, "@mThe transmission didn't reach them.@n\r\n");
-   }
+    if (reached == FALSE)
+    {
+      send_to_char(ch, "@mThe transmission didn't reach them.@n\r\n");
+    }
   }
- } /* end if statement */
 } /*end snet command */
 
 ACMD(do_scouter)
