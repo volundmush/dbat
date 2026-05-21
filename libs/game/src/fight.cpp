@@ -1972,8 +1972,8 @@ void raw_kill(struct char_data * ch, struct char_data * killer)
       if (IS_HUMAN(killer) || (IS_BIO(killer) && (GET_GENOME(killer, 0) == 1 || GET_GENOME(killer, 1) == 1))) {
        psreward *= 1.25;
       }
-      if (IS_HALFBREED(ch)) {
-       psreward -= psreward * 0.4;
+      if (IS_HALFBREED(killer)) {
+       psreward *= 0.6;
       }
       if (IS_NPC(ch) && MOB_FLAGGED(ch, MOB_HUSK) && GET_PRACTICES(killer, GET_CLASS(killer)) > 50 && IS_BIO(ch)) {
        psreward = 0;
