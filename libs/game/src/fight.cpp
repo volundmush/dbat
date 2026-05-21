@@ -2211,8 +2211,9 @@ void die(struct char_data *ch, struct char_data *killer)
   // First there are a few mechanics which can prevent death. They are checked first.
 
   // Saiyan Zenkai mechanic: if at 75% lifeforce or higher, 25% chance of triggering Zenkai.
+  // Added check for character having AFF_SPIRIT to prevent triggering in Afterlife
   // this is implemented by setting PLR_GOOP with gooptime 0
-  if (IS_SAIYAN(ch) && (getCurLFPercent(ch) >= 0.75) && rand_number(1, 4) == 4)
+  if (IS_SAIYAN(ch) && !AFF_FLAGGED(ch, AFF_SPIRIT) && (getCurLFPercent(ch) >= 0.75) &&  rand_number(1,4) == 4)
   {
     SET_BIT_AR(PLR_FLAGS(ch), PLR_GOOP);
     ch->gooptime = 0;
