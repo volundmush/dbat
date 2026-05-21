@@ -2,12 +2,13 @@ const std = @import("std");
 
 fn getSourceFiles(b: *std.Build, base_path: []const u8, ext: []const u8) []const []const u8 {
     const allocator = b.allocator;
+    const io = b.graph.io;
     const empty: []const []const u8 = &[_][]const u8{};
 
-    var dir = std.fs.cwd().openDir(base_path, .{ .iterate = true }) catch return empty;
+    var dir = b.build_root.handle.openDir(io, base_path, .{ .iterate = true }) catch return empty;
+    defer dir.close(io);
 
     var walker = dir.walk(allocator) catch {
-        dir.close();
         return empty;
     };
     defer walker.deinit();
@@ -17,7 +18,7 @@ fn getSourceFiles(b: *std.Build, base_path: []const u8, ext: []const u8) []const
     var count: usize = 0;
 
     while (true) {
-        const next_opt = walker.next() catch continue;
+        const next_opt = walker.next(io) catch continue;
         if (next_opt) |entry| {
             if (entry.kind == .file and std.mem.endsWith(u8, entry.path, ext)) {
                 if (count >= capacity) {
@@ -33,7 +34,6 @@ fn getSourceFiles(b: *std.Build, base_path: []const u8, ext: []const u8) []const
         }
     }
 
-    dir.close();
     return files[0..count];
 }
 
@@ -42,7 +42,12 @@ pub fn build(b: *std.Build) void {
     const optimize = b.standardOptimizeOption(.{});
 
     // C library - libs/db
-    const mod_dbat_db = b.createModule(.{ .target = target, .optimize = optimize, .link_libc = true });
+    const mod_dbat_db = b.createModule(.{
+        .target = target,
+        .optimize = optimize,
+        .link_libc = true,
+        .link_libcpp = true,
+    });
 
     mod_dbat_db.addIncludePath(b.path("libs/db/include"));
     const db_files = getSourceFiles(b, "libs/db/src", ".cpp");
@@ -53,35 +58,36 @@ pub fn build(b: *std.Build) void {
         .linkage = .static,
         .root_module = mod_dbat_db,
     });
-    dbat_db.linkLibCpp();
 
-    const mod_dbat_game = b.createModule(.{ .target = target, .optimize = optimize, .link_libc = true });
+    const mod_dbat_game = b.createModule(.{
+        .target = target,
+        .optimize = optimize,
+        .link_libc = true,
+        .link_libcpp = true,
+    });
     mod_dbat_game.addIncludePath(b.path("libs/db/include"));
     mod_dbat_game.addIncludePath(b.path("libs/game/include"));
     const game_files = getSourceFiles(b, "libs/game/src", ".cpp");
     mod_dbat_game.addCSourceFiles(.{ .files = game_files, .flags = &[_][]const u8{ "-std=gnu++23", "-w", "-g", "-DPATH_MAX=4096" } });
+    mod_dbat_game.linkLibrary(dbat_db);
 
     const dbat_game = b.addLibrary(.{
         .name = "dbat_game",
         .linkage = .static,
         .root_module = mod_dbat_game,
     });
-    dbat_game.linkLibrary(dbat_db);
-    dbat_game.linkLibCpp();
 
     // Executable - pure C app (circle)
-    const circle_mod = b.createModule(.{ .target = target, .optimize = optimize, .link_libc = true });
+    const circle_mod = b.createModule(.{ .target = target, .optimize = optimize, .link_libc = true, .link_libcpp = true });
     circle_mod.addIncludePath(b.path("libs/db/include"));
     circle_mod.addIncludePath(b.path("libs/game/include"));
     circle_mod.addCSourceFiles(.{ .files = &[_][]const u8{"apps/server/src/main.cpp"}, .flags = &[_][]const u8{ "-std=gnu++23", "-w", "-g", "-DPATH_MAX=4096" } });
+    circle_mod.linkLibrary(dbat_game);
 
     const exe = b.addExecutable(.{
         .name = "dbat",
         .root_module = circle_mod,
     });
-    exe.linkLibrary(dbat_db);
-    exe.linkLibrary(dbat_game);
-    exe.linkLibCpp();
 
     b.installArtifact(dbat_db);
     b.installArtifact(dbat_game);
