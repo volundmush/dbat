@@ -335,12 +335,11 @@ int perform_dupe_check(struct descriptor_data *d)
     
     if (LASTINTEREST != 0 && LASTINTEREST > GET_LINTEREST(d->character)) {
       int diff = (LASTINTEREST - GET_LINTEREST(d->character));
-      int mult = 0;
-      int days = MAX(3, diff / 86400);
+      int days = MIN(3, diff / 86400);
       GET_LINTEREST(d->character) = LASTINTEREST;
       int base_interest = GET_BANK_INTEREST(d->character);
-      if (base_interest) {
-        int total_interest = base_interest * days;
+      int total_interest = base_interest * days;
+      if (total_interest > 0) {
        GET_BANK_GOLD(d->character) += total_interest;
        send_to_char(d->character, "Interest happened while you were away, %d times.\r\n"
                                   "@cBank Interest@D: @Y%s@n\r\n", days, add_commas(total_interest));
