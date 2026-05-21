@@ -2,6 +2,10 @@
 #include "consts/types.h"
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
  /*
  * The game configuration structure used for configurating the game play 
  * variables.
@@ -234,3 +238,8 @@ extern struct config_data config_info;
 
   /** Character Creation Method **/
 #define CONFIG_CREATION_METHOD	config_info.creation.method
+
+
+#ifdef __cplusplus
+}
+#endif

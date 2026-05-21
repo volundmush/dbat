@@ -4,6 +4,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* defines for mudlog() */
 #define OFF	0
 #define BRF	1
@@ -33,3 +37,8 @@ void mudlog(int type, int level, int file, const char *str, ...) __attribute__((
 #define RECREATE(result,type,number) do {\
   if (!((result) = (type *) realloc ((result), sizeof(type) * (number))))\
 		{ perror("SYSERR: realloc failure"); abort(); } } while(0)
+
+
+#ifdef __cplusplus
+}
+#endif

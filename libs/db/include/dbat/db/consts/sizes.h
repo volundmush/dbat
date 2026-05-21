@@ -1,4 +1,9 @@
 #pragma once
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Taken from the SRD under OGL, see ../doc/srd.txt for information */
 #define SIZE_UNDEFINED	(-1)
 #define SIZE_FINE	0
@@ -14,3 +19,7 @@
 #define NUM_SIZES         9
 
 extern const char *size_names[NUM_SIZES+1];
+
+#ifdef __cplusplus
+}
+#endif

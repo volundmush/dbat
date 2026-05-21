@@ -35,6 +35,10 @@
  * --- 8< --- OpenSSH LICENSE --- 8< ---
  */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* $Id: bsd-snprintf.h,v 1.1.1.1 2004/12/21 00:32:50 fnord Exp $ */
 #pragma once
 
@@ -46,3 +50,8 @@ int snprintf(char *str, size_t count, const char *fmt, ...);
 #ifndef HAVE_VSNPRINTF
 int vsnprintf(char *str, size_t count, const char *fmt, va_list args);
 #endif /* !HAVE_SNPRINTF */
+
+
+#ifdef __cplusplus
+}
+#endif

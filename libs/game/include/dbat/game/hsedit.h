@@ -2,6 +2,10 @@
 #include "dbat/db/consts/types.h"
 #include "house.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void hsedit_setup_new(struct descriptor_data *d);
 void hsedit_setup_existing(struct descriptor_data *d, int real_num);
 void hsedit_save_internally(struct descriptor_data *d);
@@ -15,3 +19,8 @@ void hsedit_disp_val1_menu(struct descriptor_data *d);
 void hsedit_disp_val2_menu(struct descriptor_data *d);
 void hsedit_disp_val3_menu(struct descriptor_data *d);
 void free_house(struct house_control_rec *house);
+
+
+#ifdef __cplusplus
+}
+#endif

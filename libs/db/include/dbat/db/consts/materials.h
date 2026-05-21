@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Some different kind of liquids for use in values of drink containers */
 #define LIQ_WATER      0
 #define LIQ_BEER       1
@@ -69,3 +73,7 @@
 #define MATERIAL_OIL	  	46
 
 #define NUM_MATERIALS           47
+
+#ifdef __cplusplus
+}
+#endif

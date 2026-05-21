@@ -2,6 +2,10 @@
 #include "dbat/db/consts/types.h"
 #include <stdio.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // functions
 void boot_social_messages(void);
 void free_social_messages(void);
@@ -14,3 +18,8 @@ void create_command_list(void);
 ACMD(do_action);
 ACMD(do_insult);
 ACMD(do_gmote);
+
+
+#ifdef __cplusplus
+}
+#endif

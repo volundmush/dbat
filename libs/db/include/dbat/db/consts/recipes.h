@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Ingredient vnums for recipes */
 #define RCP_TOMATO      17212
 #define RCP_POTATO      17213
@@ -79,3 +83,7 @@
 
 
 #define MEAL_LAST                1234
+
+#ifdef __cplusplus
+}
+#endif

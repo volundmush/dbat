@@ -1,4 +1,9 @@
 #pragma once
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Colors that the player can define */
 #define COLOR_NORMAL			0
 #define COLOR_ROOMNAME			1
@@ -20,3 +25,7 @@
 #define NUM_COLOR			16
 
 extern const char *cchoice_names[NUM_COLOR+1];
+
+#ifdef __cplusplus
+}
+#endif

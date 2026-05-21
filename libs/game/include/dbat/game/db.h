@@ -2,6 +2,10 @@
 #include "dbat/db/consts/types.h"
 #include <stdio.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* arbitrary constants used by index_boot() (must be unique) */
 #define DB_BOOT_WLD	0
 #define DB_BOOT_MOB	1
@@ -198,3 +202,8 @@ void reset_zone(zone_rnum zone);
 
 // commands
 ACMD(do_reboot);
+
+
+#ifdef __cplusplus
+}
+#endif

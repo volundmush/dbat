@@ -1,6 +1,10 @@
 #pragma once
 #include "consts/types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int flag_test(const bitvector_t bitvector[], int flag);
 void flag_set(bitvector_t bitvector[], int flag, int value);
 int flag_toggle(bitvector_t bitvector[], int flag);
@@ -24,3 +28,7 @@ size_t sprinttype(int type, const char *names[], char *result, size_t reslen);
 #define SET_BIT(var,bit)  ((var) |= (bit))
 #define REMOVE_BIT(var,bit)  ((var) &= ~(bit))
 #define TOGGLE_BIT(var,bit) ((var) ^= (bit))
+
+#ifdef __cplusplus
+}
+#endif

@@ -24,6 +24,10 @@
 #include "index.h"
 #include "htree.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define PM_ARRAY_MAX 4
 
 /* These data contain information about a players time data */
@@ -570,3 +574,7 @@ extern struct char_data *mob_proto;
 extern mob_rnum top_of_mobt;
 extern struct htree_node *mob_htree;
 extern long max_mob_id;
+
+#ifdef __cplusplus
+}
+#endif

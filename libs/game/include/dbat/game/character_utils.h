@@ -5,6 +5,10 @@
 #include "dbat/game/log.h"
 #include "dbat/db/weather.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int roll_stats(struct char_data *ch, int type, int bonus);
 const char* juggleRaceName(char_data *ch, bool capitalized);
 void restore_by(char_data *ch, char_data *healer);
@@ -19,7 +23,7 @@ bool in_northran(char_data *ch);
 bool can_tolerate_gravity(char_data *ch, int grav);
 int calcTier(char_data *ch);
 int64_t calc_soft_cap(char_data *ch);
-bool is_soft_cap(char_data *ch, int64_t type, long double mult);
+bool is_soft_cap_mult(char_data *ch, int64_t type, long double mult);
 bool is_soft_cap(char_data *ch, int64_t type);
 int wearing_android_canister(char_data *ch);
 int calcGravCost(char_data *ch, int64_t num);
@@ -272,3 +276,8 @@ int sensei_rpp_cost(int s_id, int r_id);
 int race_get_size(int r_id);
 int race_is_playable(int r_id);
 int race_is_people(int r_id);
+
+
+#ifdef __cplusplus
+}
+#endif

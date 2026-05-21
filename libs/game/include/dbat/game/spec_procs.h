@@ -2,6 +2,10 @@
 #include "dbat/db/consts/types.h"
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // functions
 void npc_steal(struct char_data *ch, struct char_data *victim);
 int num_players_in_room(room_vnum room);
@@ -39,3 +43,8 @@ SPECIAL(cleric_ao);
 SPECIAL(dziak);
 SPECIAL(azimer);
 SPECIAL(lyrzaxyn);
+
+
+#ifdef __cplusplus
+}
+#endif

@@ -2,6 +2,10 @@
 #include <stdint.h>
 #include "consts/types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct obj_affected_type {
    int location;       /* Which ability to change (APPLY_XXX) */
    int specific;       /* Some locations have parameters      */
@@ -19,3 +23,7 @@ struct affected_type {
 
    struct affected_type *next;
 };
+
+#ifdef __cplusplus
+}
+#endif

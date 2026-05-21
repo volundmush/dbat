@@ -1,6 +1,10 @@
 #pragma once
 #include "dbat/db/consts/types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // commands
 ACMD(do_say);
 ACMD(do_gsay);
@@ -15,3 +19,8 @@ ACMD(do_qcomm);
 ACMD(do_voice);
 ACMD(do_languages);
 ACMD(do_osay);
+
+
+#ifdef __cplusplus
+}
+#endif

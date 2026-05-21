@@ -2,6 +2,10 @@
 #include "dbat/db/consts/types.h"
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* obj_edit.c functions */
 void pobj_edit_parse(struct descriptor_data *d, char *arg);
 void disp_custom_menu(struct descriptor_data *d);
@@ -31,3 +35,8 @@ void disp_restring_menu(struct descriptor_data *d);
 #define EDIT_RESTRING_LDESC 4
 #define EDIT_RESTRING_QUIT  5
 #define EDIT_RESTRING_CONF  6
+
+
+#ifdef __cplusplus
+}
+#endif

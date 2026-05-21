@@ -11,6 +11,10 @@
 #include "htree.h"
 #include "extradesc.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct obj_spellbook_spell {
    int spellname;	/* Which spell is written */
    int pages;		/* How many pages does it take up */
@@ -103,3 +107,7 @@ extern struct obj_data *obj_proto;
 extern obj_rnum top_of_objt;
 extern struct htree_node *obj_htree;
 extern long max_obj_id;
+
+#ifdef __cplusplus
+}
+#endif

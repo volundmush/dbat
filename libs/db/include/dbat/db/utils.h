@@ -2,6 +2,10 @@
 
 #include <cstdint>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define YESNO(a) ((a) ? "YES" : "NO")
 #define ONOFF(a) ((a) ? "ON" : "OFF")
 
@@ -84,3 +88,7 @@ static inline double fixnan(double val) {
             }					\
       }						\
 
+
+#ifdef __cplusplus
+}
+#endif

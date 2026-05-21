@@ -1,6 +1,10 @@
 #pragma once
 #include "dbat/db/consts/types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void handle_multi_merge(struct char_data *form);
 void handle_songs(void);
 void fish_update(void);
@@ -52,3 +56,8 @@ ACMD(do_multiform);
 ACMD(do_spiritcontrol);
 ACMD(do_ashcloud);
 ACMD(do_silk);
+
+
+#ifdef __cplusplus
+}
+#endif

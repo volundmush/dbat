@@ -2,6 +2,10 @@
 #include "dbat/db/consts/types.h"
 #include "dbat/db/consts/skills.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 ACMD(do_teach);
 
 #define GM_NUM(i)  (guild_index[i].vnum)
@@ -114,3 +118,8 @@ int count_guilds(guild_vnum low, guild_vnum high);
 
 /*. External . */
 SPECIAL(guild);
+
+
+#ifdef __cplusplus
+}
+#endif

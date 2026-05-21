@@ -1,3 +1,7 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 //********************************************************************************
 //
 // This is the API for clans on Aeonian Dreams.
@@ -216,3 +220,8 @@ extern int num_clans;
 // List all of the clans vict belongs to, to char
 //
 void listClansOfVictToChar(const struct char_data *vict, struct char_data *ch);
+
+
+#ifdef __cplusplus
+}
+#endif

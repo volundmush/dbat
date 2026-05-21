@@ -2,6 +2,10 @@
 #include "dbat/db/consts/types.h"
 #include <stdio.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* New Dynamic boards v2.4 -PjD (dughi@imaxx.net) */
 #define BOARD_DIRECTORY                "etc/boards" SLASH
 #define MAX_MESSAGE_LENGTH	4096	/* arbitrary -- change if needed */
@@ -57,3 +61,8 @@ struct board_info *locate_board(obj_vnum board_vnum);
 void remove_board_msg(obj_vnum board_vnum, struct char_data * ch, int arg);
 
 extern struct board_info *bboards;
+
+
+#ifdef __cplusplus
+}
+#endif

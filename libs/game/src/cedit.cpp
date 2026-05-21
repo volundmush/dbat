@@ -17,6 +17,7 @@
 #include "dbat/game/descriptor_utils.h"
 #include "dbat/game/room_utils.h"
 #include "dbat/game/stringutils.h"
+#include "dbat/game/spec_assign.h"
 
 /******************************************************************************/
 /** External Functions                                                       **/
@@ -2244,7 +2245,6 @@ void cedit_parse(struct descriptor_data *d, char *arg)
  */
 void reassign_rooms(void)
 { 
-  void assign_rooms(void);
   int i;
 
   /* remove old funcs */

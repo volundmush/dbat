@@ -1,6 +1,10 @@
 #pragma once
 #include "dbat/db/consts/types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void	obj_from_char(struct obj_data *object);
 
 void	equip_char(struct char_data *ch, struct obj_data *obj, int pos);
@@ -19,3 +23,7 @@ struct char_data *get_char_room(char *name, int *num, room_rnum room);
 struct char_data *get_char_num(mob_rnum nr);
 void	char_from_room(struct char_data *ch);
 void	char_to_room(struct char_data *ch, room_rnum room);
+
+#ifdef __cplusplus
+}
+#endif

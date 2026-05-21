@@ -3,6 +3,10 @@
 #include "dbat/db/consts/maximums.h"
 #include "dbat/db/config.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* GAME PLAY OPTIONS */
 #if !defined(NO)
 #define NO 0
@@ -83,3 +87,8 @@ extern int disp_closed_doors, reroll_status, allow_multiclass, allow_prestige, a
 extern int enable_compression, enable_languages, all_items_unique, method;
 
 extern float exp_multiplier;
+
+
+#ifdef __cplusplus
+}
+#endif

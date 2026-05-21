@@ -4,6 +4,10 @@
 #include "dbat/db/consts/senseis.h"
 #include "dbat/db/consts/skills.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define DEFAULT_STAFF_LVL	12
 #define DEFAULT_WAND_LVL	12
 
@@ -363,3 +367,8 @@ const char *skill_name(int num);
 int roll_skill(const struct char_data *ch, int snum);
 int roll_resisted(const struct char_data *actor, int sact, const struct char_data *resistor, int sres);
 int skill_type(int skill);
+
+
+#ifdef __cplusplus
+}
+#endif

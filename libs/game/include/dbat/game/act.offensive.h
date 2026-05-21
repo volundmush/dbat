@@ -2,6 +2,10 @@
 #include "dbat/db/consts/types.h"
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // commands
 ACMD(do_assist);
 ACMD(do_kill);
@@ -59,3 +63,8 @@ ACMD(do_shogekiha);
 ACMD(do_tsuihidan);
 ACMD(do_slam);
 ACMD(do_rescue);
+
+
+#ifdef __cplusplus
+}
+#endif

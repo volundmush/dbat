@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* The cardinal directions: used as index to room_data.dir_option[] */
 #define NORTH          0
 #define EAST           1
@@ -19,3 +23,7 @@
 extern const char *dirs[NUM_OF_DIRS+1];
 extern const char *abbr_dirs[NUM_OF_DIRS+1];
 extern int rev_dir[NUM_OF_DIRS];
+
+#ifdef __cplusplus
+}
+#endif

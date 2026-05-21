@@ -2,6 +2,10 @@
 #include "consts/types.h"
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct command_info {
    const char *command;
    const char *sort_as;
@@ -32,3 +36,7 @@ struct alias_data *find_alias(struct alias_data *alias_list, char *str);
 
 int find_command(const char *command);
 extern struct command_info *complete_cmd_info;
+
+#ifdef __cplusplus
+}
+#endif

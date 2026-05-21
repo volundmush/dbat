@@ -1,4 +1,9 @@
 #pragma once
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Character Creation Styles */
 #define WIELD_NONE        0
 #define WIELD_LIGHT       1
@@ -25,3 +30,7 @@ extern const char *weapon_type[MAX_WEAPON_TYPES+2];
 extern const char *armor_type[MAX_ARMOR_TYPES+1];
 extern const char *wield_names[NUM_WIELD_NAMES+1];
 extern const char *crit_type[NUM_CRIT_TYPES+1];
+
+#ifdef __cplusplus
+}
+#endif

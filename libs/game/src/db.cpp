@@ -50,9 +50,12 @@
 #include "dbat/game/genolc.h"
 #include "dbat/game/shop.h"
 #include "dbat/game/handler.h"
+#include "dbat/game/local_limits.h"
 #include "dbat/game/mail.h"
 #include "dbat/game/clan.h"
 #include "dbat/game/boards.h"
+#include "dbat/game/ban.h"
+#include "dbat/game/modify.h"
 #include "dbat/game/log.h"
 #include "dbat/game/objsave.h"
 #include "dbat/game/genmob.h"
@@ -147,14 +150,10 @@ static void mob_autobalance(struct char_data *ch);
 
 /* external functions */
 
-void paginate_string(char *str, struct descriptor_data *d);
-
 void free_alias(struct alias_data *a);
 void mag_assign_spells(void);
 void create_command_list(void);
 void sort_spells(void);
-void load_banned(void);
-void Read_Invalid_List(void);
 int hsort(const void *a, const void *b);
 void prune_crlf(char *txt);
 void build_player_index(void);

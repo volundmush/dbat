@@ -9,6 +9,10 @@
 #include "dbat/db/consts/types.h"
 #include "dbat/db/consts/feats.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Functions defined in feats.c */
 int is_proficient_with_armor(const struct char_data *ch, int armor_type);
 int is_proficient_with_weapon(const struct char_data *ch, int weapon_type);
@@ -223,3 +227,8 @@ extern struct feat_info feat_list[NUM_FEATS_DEFINED];
 #define HRANK_CASTER    3
 
 #define BASE_DC 10
+
+
+#ifdef __cplusplus
+}
+#endif

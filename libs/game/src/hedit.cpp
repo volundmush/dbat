@@ -25,6 +25,7 @@
 #include "dbat/game/config.h"
 #include "dbat/game/dg_comm.h"
 #include "dbat/game/act.informative.h"
+#include "dbat/game/act.social.h"
 
 /* external functions */
 

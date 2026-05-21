@@ -1,6 +1,10 @@
 #pragma once
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define SKILL_FLEX       		400
 #define SKILL_GENIUS			401
 #define SKILL_SOLARF     		402
@@ -157,3 +161,7 @@
 #define SKILL_BLESSEDHAMMER             557
 
 #define SKILL_TABLE_SIZE	600
+
+#ifdef __cplusplus
+}
+#endif

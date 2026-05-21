@@ -1,4 +1,9 @@
 #pragma once
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define HIST_ALL       0
 #define HIST_SAY       1
 #define HIST_GOSSIP    2
@@ -13,3 +18,7 @@
 #define NUM_HIST      10
 
 extern const char *history_types[NUM_HIST+1];
+
+#ifdef __cplusplus
+}
+#endif

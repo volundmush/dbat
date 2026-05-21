@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct help_index_element {
    char *index;      /*Future Use */
    char *keywords;   /*Keyword Place holder and sorter */
@@ -10,3 +14,7 @@ struct help_index_element {
 
 extern int top_of_helpt;
 extern struct help_index_element *help_table;
+
+#ifdef __cplusplus
+}
+#endif

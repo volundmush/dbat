@@ -3,6 +3,10 @@
 #include "dbat/db/assembly.h"
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void           assemblyBootAssemblies( void );
 void           assemblySaveAssemblies( void );
 void           assemblyListToChar( struct char_data *pCharacter );
@@ -28,3 +32,7 @@ ASSEMBLY*      assemblyGetAssemblyPtr( long lVnum );
 
 /* ******************************************************************** */
 
+
+#ifdef __cplusplus
+}
+#endif

@@ -2,6 +2,10 @@
 #include "dbat/db/consts/types.h"
 #include "shop.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void copy_shop(struct shop_data *tshop, struct shop_data *fshop, int free_old_strings);
 void copy_list(IDXTYPE **tlist, IDXTYPE *flist);
 void copy_type_list(struct shop_buy_data **tlist, struct shop_buy_data *flist);
@@ -51,3 +55,8 @@ shop_rnum real_shop(shop_vnum vnum);
 #define S_NOBUY(i)		((i)->do_not_buy)
 #define S_BUY(i)		((i)->message_buy)
 #define S_SELL(i)		((i)->message_sell)
+
+
+#ifdef __cplusplus
+}
+#endif

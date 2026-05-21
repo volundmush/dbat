@@ -3,6 +3,10 @@
 #include "dbat/db/consts/maximums.h"
 #include <stdio.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define BUY_TYPE(i)		((i).type)
 #define BUY_WORD(i)		((i).keywords)
 
@@ -230,3 +234,7 @@ int count_shops(shop_vnum low, shop_vnum high);
 SPECIAL(shop_keeper);
 
 // commands
+
+#ifdef __cplusplus
+}
+#endif

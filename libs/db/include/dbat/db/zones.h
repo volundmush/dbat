@@ -3,6 +3,10 @@
 #include "consts/zoneflags.h"
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* structure for the reset commands */
 struct reset_com {
    char	command;   /* current command                      */
@@ -79,3 +83,7 @@ extern struct zone_data *zone_table;
 extern zone_rnum top_of_zone_table;
 
 extern struct reset_q_type reset_q;	/* queue of zones to be reset	 */
+
+#ifdef __cplusplus
+}
+#endif

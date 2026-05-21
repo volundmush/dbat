@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Sector types: used in room_data.sector_type */
 #define SECT_INSIDE          0		   /* Indoors			*/
 #define SECT_CITY            1		   /* In a city			*/
@@ -22,3 +26,7 @@
 extern const char *sector_types[NUM_ROOM_SECTORS+1];
 
 extern int movement_loss[NUM_ROOM_SECTORS];
+
+#ifdef __cplusplus
+}
+#endif

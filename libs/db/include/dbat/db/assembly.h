@@ -1,5 +1,10 @@
 #pragma once
 #include "dbat/db/consts/assemblytypes.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct assembly_data   ASSEMBLY;
 typedef struct component_data  COMPONENT;
 
@@ -25,3 +30,7 @@ struct component_data {
 
 void free_assembly(struct assembly_data *assembly);
 struct assembly_data alloc_assembly();
+
+#ifdef __cplusplus
+}
+#endif

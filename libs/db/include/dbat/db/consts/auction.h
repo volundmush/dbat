@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* AUCTIONING STATES */
 #define AUC_NULL_STATE		0   /* not doing anything */
 #define AUC_OFFERING		1   /* object has been offfered */
@@ -14,3 +18,7 @@
 /* OTHER JUNK */
 #define AUC_STAT		9
 #define AUC_BID			10
+
+#ifdef __cplusplus
+}
+#endif

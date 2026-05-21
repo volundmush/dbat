@@ -1,6 +1,10 @@
 #pragma once
 #include "dbat/db/consts/types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* combat.c functions */
 void homing_update(void);
 void damage_weapon(struct char_data *ch, struct obj_data *obj, struct char_data *vict);
@@ -54,3 +58,8 @@ void handle_disarm(struct char_data *ch, struct char_data *vict);
 int handle_defender(struct char_data *vict, struct char_data *ch);
 void handle_multihit(struct char_data *ch, struct char_data *vict);
 int64_t armor_calc(struct char_data *ch, int64_t dmg, int type);
+
+
+#ifdef __cplusplus
+}
+#endif

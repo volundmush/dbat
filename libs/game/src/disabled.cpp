@@ -4,6 +4,7 @@
 #include "dbat/game/fileop.h"
 #include "dbat/game/db.h"
 #include "dbat/game/interpreter.h"
+#include "dbat/game/act.informative.h"
 
 #include <unistd.h>
 

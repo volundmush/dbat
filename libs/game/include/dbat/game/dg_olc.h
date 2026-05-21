@@ -14,6 +14,10 @@
 #include <stdio.h>
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define NUM_TRIG_TYPE_FLAGS		20
 
 /*
@@ -49,3 +53,8 @@ void trigedit_save(struct descriptor_data *d);
 int format_script(struct descriptor_data *d);
 
 ACMD(do_oasis_trigedit);
+
+
+#ifdef __cplusplus
+}
+#endif

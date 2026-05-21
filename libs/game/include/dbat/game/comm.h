@@ -4,6 +4,10 @@
 #include <stdarg.h>
 #include <stdio.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #if CIRCLE_GNU_LIBC_MEMORY_TRACK
 # include <mcheck.h>
 #endif
@@ -115,3 +119,8 @@ void free_bufpool(void);
 void setup_log(const char *filename, int fd);
 int open_logfile(const char *filename, FILE *stderr_fp);
 void init_descriptor (struct descriptor_data *newd, int desc);
+
+
+#ifdef __cplusplus
+}
+#endif

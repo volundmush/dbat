@@ -1,6 +1,10 @@
 #pragma once
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*  flags: used by char_data.player_specials.pref */
 #define PRF_BRIEF	0  /* Room descs won't normally be shown	*/
 #define PRF_COMPACT	1  /* No extra CRLF pair before prompts		*/
@@ -67,3 +71,7 @@
 #define PR_ARRAY_MAX    4
 
 extern const char *preference_bits[NUM_PRF_FLAGS+1];
+
+#ifdef __cplusplus
+}
+#endif

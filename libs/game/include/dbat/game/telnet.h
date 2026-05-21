@@ -33,6 +33,10 @@
  *	@(#)telnet.h	8.2 (Berkeley) 12/15/93
  */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifndef _ARPA_TELNET_H
 #define _ARPA_TELNET_H
 
@@ -317,3 +321,8 @@ extern char *enctype_names[];
 #define	ENCTYPE_NAME_OK(x)	((unsigned int)(x) < ENCTYPE_CNT)
 #define	ENCTYPE_NAME(x)		enctype_names[x]
 #endif /* _ARPA_TELNET_H */
+
+
+#ifdef __cplusplus
+}
+#endif

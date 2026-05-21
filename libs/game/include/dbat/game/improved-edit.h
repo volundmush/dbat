@@ -2,6 +2,10 @@
 #include "dbat/db/consts/types.h"
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define CONFIG_IMPROVED_EDITOR	1
 
 #define using_improved_editor	CONFIG_IMPROVED_EDITOR
@@ -34,3 +38,8 @@ void send_editor_help(struct descriptor_data *d);
  
 /* Settings for formatter. */
 #define FORMAT_INDENT	(1 << 0)
+
+
+#ifdef __cplusplus
+}
+#endif

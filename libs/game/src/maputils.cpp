@@ -11,10 +11,10 @@
 #include "dbat/game/comm.h"
 #include "dbat/game/interpreter.h"
 #include "dbat/game/db.h"
+#include "dbat/game/vehicles.h"
 
 
 extern struct room_data *world;  
-extern struct obj_data *find_control(struct char_data *ch);
 room_vnum mapnums[MAP_ROWS+1][MAP_COLS+1];  
 
 void ping_ship(int vnum, int vnum2)

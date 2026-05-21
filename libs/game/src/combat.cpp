@@ -3491,7 +3491,7 @@ void saiyan_gain(struct char_data *ch, struct char_data *vict)
     int avail_count = 0;
 
     for (int i = 0; i < 3; i++) {
-        if (!is_soft_cap(ch, stats[i], 1.5)) {
+        if (!is_soft_cap_mult(ch, stats[i], 1.5)) {
             available[avail_count++] = stats[i];
         }
     }

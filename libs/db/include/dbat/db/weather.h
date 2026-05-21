@@ -2,6 +2,10 @@
 #include <stdint.h>
 #include "consts/weather.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct weather_data {
    int	pressure;	/* How is the pressure ( Mb ) */
    int	change;	/* How fast and what way does it change. */
@@ -18,3 +22,7 @@ struct time_info_data {
 
 extern struct time_info_data time_info;/* the infomation about the time    */
 extern struct weather_data weather_info;	/* the infomation about the weather */
+
+#ifdef __cplusplus
+}
+#endif

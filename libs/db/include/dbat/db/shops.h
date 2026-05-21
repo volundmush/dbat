@@ -1,6 +1,10 @@
 #pragma once
 #include "consts/types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct shop_buy_data {
    int type;
    char *keywords;
@@ -35,3 +39,7 @@ struct shop_data {
 
 extern struct shop_data *shop_index;
 extern int top_shop;
+
+#ifdef __cplusplus
+}
+#endif

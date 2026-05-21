@@ -1,6 +1,10 @@
 #pragma once
 #include <stdio.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* get_filename() */
 #define CRASH_FILE	0
 #define ETEXT_FILE	1
@@ -18,3 +22,7 @@
 int get_line(FILE *fl, char *buf);
 int get_filename(char *filename, size_t fbufsize, int mode, const char *orig_name);
 int touch(const char *path);
+
+#ifdef __cplusplus
+}
+#endif

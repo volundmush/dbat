@@ -33,6 +33,7 @@
 #include "dbat/game/random.h"
 #include "dbat/game/relocate.h"
 #include "dbat/game/search.h"
+#include "dbat/game/act.social.h"
 
 /* local functions */
 static void perform_tell(struct char_data *ch, struct char_data *vict, char *arg);

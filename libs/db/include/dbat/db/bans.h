@@ -2,6 +2,10 @@
 #include "consts/types.h"
 #include "consts/maximums.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* don't change these */
 #define BAN_NOT 	0
 #define BAN_NEW 	1
@@ -19,3 +23,7 @@ struct ban_list_element {
 
 extern struct ban_list_element *ban_list;
 extern int num_invalid;
+
+#ifdef __cplusplus
+}
+#endif

@@ -24,6 +24,8 @@
 #include "dbat/game/feats.h"
 #include "dbat/game/time.h"
 #include "dbat/game/weather.h"
+#include "dbat/game/combat.h"
+#include "dbat/game/local_limits.h"
 
 #include <string>
 
@@ -231,10 +233,10 @@ int64_t calc_soft_cap(char_data *ch) {
 }
 
 bool is_soft_cap(char_data *ch, int64_t type) {
-    return is_soft_cap(ch, type, 1.0);
+    return is_soft_cap_mult(ch, type, 1.0);
 }
 
-bool is_soft_cap(char_data *ch, int64_t type, long double mult) {
+bool is_soft_cap_mult(char_data *ch, int64_t type, long double mult) {
     if(IS_NPC(ch))
         return true;
 
@@ -4020,7 +4022,6 @@ int *default_admin_flags[ADMLVL_IMPL + 1] = {
 
 void admin_set(struct char_data *ch, int value)
 {
-  void run_autowiz(void);
   int i;
   int orig = GET_ADMLEVEL(ch);
 

@@ -1,6 +1,10 @@
 #pragma once
 #include "dbat/db/consts/types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int	isname(const char *str, const char *namelist);
 int	is_name(const char *str, const char *namelist);
 char	*fname(const char *namelist);
@@ -41,3 +45,7 @@ int	generic_find(char *arg, bitvector_t bitvector, struct char_data *ch,
 #define FIND_OBJ_ROOM      (1 << 3)
 #define FIND_OBJ_WORLD     (1 << 4)
 #define FIND_OBJ_EQUIP     (1 << 5)
+
+#ifdef __cplusplus
+}
+#endif
