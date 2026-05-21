@@ -1,10 +1,7 @@
 #include "dbat/game/command.h"
-#include "dbat/game/character_utils.h"
-#include "dbat/game/room_utils.h"
-#include "dbat/game/object_utils.h"
+#include "dbat/game/utils.h"
 #include "dbat/game/interpreter.h"
 #include "dbat/game/random.h"
-#include "dbat/game/stringutils.h"
 #include "dbat/game/comm.h"
 
 #include "dbat/game/act.attack.h"

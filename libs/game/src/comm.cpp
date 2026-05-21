@@ -10,9 +10,9 @@
 #include "dbat/db/consts/maximums.h"
 #include "dbat/db/consts/songs.h"
 #include "dbat/db/help.h"
-#include "dbat/db/utils.h"
 #include "dbat/db/bans.h"
-#include "dbat/game/stringutils.h"
+
+#include "dbat/game/utils.h"
 #include "dbat/game/comm.h"
 #include "dbat/game/config.h"
 #include "dbat/game/maputils.h"
@@ -32,15 +32,11 @@
 #include "dbat/game/dg_event.h"
 #include "dbat/game/mobact.h"
 #include "dbat/game/magic.h"
-
-#include "dbat/game/character_utils.h"
-#include "dbat/game/descriptor_utils.h"
-#include "dbat/game/object_utils.h"
 #include "dbat/game/object_systems.h"
+
 #include "dbat/game/extract.h"
 #include "dbat/game/fileop.h"
 #include "dbat/game/relocate.h"
-#include "dbat/game/stringutils.h"
 
 #include "dbat/game/objsave.h"
 #include "dbat/game/genolc.h"
@@ -52,8 +48,6 @@
 #include "dbat/game/clan.h"
 #include "dbat/game/mail.h"
 #include "dbat/game/races_plus.h"
-#include "dbat/game/character_utils.h"
-#include "dbat/game/room_utils.h"
 #include "dbat/game/screen.h"
 
 #include <errno.h>

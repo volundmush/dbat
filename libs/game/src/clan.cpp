@@ -27,16 +27,13 @@
 //    telnet://dreams.game-host.org:4000
 //
 //********************************************************************************
-#include "dbat/db/utils.h"          // for CREATE() and IDNUM()
 #include "dbat/db/consts/maximums.h"
+#include "dbat/game/utils.h"          // for CREATE() and IDNUM()
 #include "dbat/game/fileop.h"
 #include "dbat/game/clan.h"        // the interface we need to impleme
 #include "dbat/game/db.h"             // for LIB_ETC
 #include "dbat/game/comm.h"           // for send_to_char
 #include "dbat/game/interpreter.h"    // for ACMD()
-#include "dbat/game/log.h"
-#include "dbat/game/stringutils.h"
-#include "dbat/game/character_utils.h"
 #include "dbat/game/improved-edit.h"
 
 

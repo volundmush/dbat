@@ -10,6 +10,7 @@
 - Fixed grandmaster damage calculations. [PetalFoxx]
 - Numerous small fixes to combat math. [PetalFoxx]
 - Correct the offline zenni interest formula. [Volund]
+- Updated build system to Zig 0.16. Shuffled some includes around to streamline what Zig can see. [Volund]
 
 ** 2.9.2 **
 - Last version from before this file was created.

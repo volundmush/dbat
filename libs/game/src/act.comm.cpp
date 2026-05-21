@@ -9,20 +9,17 @@
 ************************************************************************ */
 #include "dbat/db/config.h"
 #include "dbat/db/consts/maximums.h"
-#include "dbat/db/utils.h"
+
 #include "dbat/db/weather.h"
 #include "dbat/db/command.h"
 
+#include "dbat/game/utils.h"
+
 #include "dbat/game/act.comm.h"
 #include "dbat/game/dg_comm.h"
-#include "dbat/game/stringutils.h"
 #include "dbat/game/comm.h"
 #include "dbat/game/spells.h"
 #include "dbat/game/interpreter.h"
-#include "dbat/game/character_utils.h"
-#include "dbat/game/descriptor_utils.h"
-#include "dbat/game/object_utils.h"
-#include "dbat/game/room_utils.h"'
 #include "dbat/game/config.h"
 #include "dbat/game/act.wizard.h"
 #include "dbat/game/act.informative.h"

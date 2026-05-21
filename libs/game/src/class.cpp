@@ -15,7 +15,7 @@
  * the appropriate new special cases for your new class.
  */
 #include "dbat/db/consts/maximums.h"
-#include "dbat/db/utils.h"
+#include "dbat/game/utils.h"
 #include "dbat/game/class.h"
 
 #include "dbat/game/db.h"
@@ -26,15 +26,11 @@
 #include "dbat/game/feats.h"
 #include "dbat/game/oasis.h"
 #include "dbat/game/act.wizard.h"
-#include "dbat/game/character_utils.h"
-#include "dbat/game/descriptor_utils.h"
-#include "dbat/game/object_utils.h"
 #include "dbat/game/dg_comm.h"
 #include "dbat/game/config.h"
 #include "dbat/game/act.other.h"
 #include "dbat/game/random.h"
 #include "dbat/game/relocate.h"
-#include "dbat/game/stringutils.h"
 
 #include "dbat/game/races_plus.h"
 #include "dbat/game/sensei.h"

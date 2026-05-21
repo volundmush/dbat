@@ -12,18 +12,11 @@
 #include "dbat/db/consts/shadowdragons.h"
 #include "dbat/db/consts/auction.h"
 #include "dbat/db/consts/aligns.h"
-#include "dbat/db/utils.h"
 #include "dbat/db/flags.h"
 
 #include <sys/stat.h>
 
-#include "dbat/game/config.h"
-#include "dbat/game/character_utils.h"
-#include "dbat/game/descriptor_utils.h"
-#include "dbat/game/object_utils.h"
-#include "dbat/game/zone_utils.h"
-#include "dbat/game/room_utils.h"
-#include "dbat/game/stringutils.h"
+#include "dbat/game/utils.h"
 #include "dbat/game/search.h"
 #include "dbat/game/random.h"
 #include "dbat/game/affect.h"

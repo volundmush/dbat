@@ -10,9 +10,8 @@
 #include "dbat/db/assembly.h"
 #include "dbat/db/consts/maximums.h"
 
-#include "dbat/game/character_utils.h"
+#include "dbat/game/utils.h"
 #include "dbat/game/descriptor_utils.h"
-#include "dbat/game/object_utils.h"
 #include "dbat/game/stringutils.h"
 
 #include "dbat/game/db.h"

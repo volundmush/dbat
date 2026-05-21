@@ -8,13 +8,9 @@
 #include "dbat/game/aedit.h"
 #include "dbat/db/consts/maximums.h"
 #include "dbat/db/social.h"
-#include "dbat/db/utils.h"
+#include "dbat/game/utils.h"
 
 #include "dbat/game/config.h"
-#include "dbat/game/character_utils.h"
-#include "dbat/game/descriptor_utils.h"
-#include "dbat/game/stringutils.h"
-
 
 #include "dbat/game/act.informative.h"
 #include "dbat/game/act.social.h"

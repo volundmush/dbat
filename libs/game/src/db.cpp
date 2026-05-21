@@ -9,16 +9,11 @@
 ************************************************************************ */
 #include "dbat/game/db.h"
 #include "dbat/db/consts/maximums.h"
-#include "dbat/db/utils.h"
+
 #include "dbat/db/help.h"
 #include "dbat/db/htree.h"
-#include "dbat/game/stringutils.h"
+#include "dbat/game/utils.h"
 
-#include "dbat/game/character_utils.h"
-#include "dbat/game/descriptor_utils.h"
-#include "dbat/game/object_utils.h"
-#include "dbat/game/room_utils.h"
-#include "dbat/game/zone_utils.h"
 #include "dbat/game/fileop.h"
 #include "dbat/game/affect.h"
 #include "dbat/game/weather.h"
