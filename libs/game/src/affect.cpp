@@ -1,9 +1,7 @@
 #include "dbat/game/affect.h"
 #include "dbat/db/consts/applies.h"
-#include "dbat/db/utils.h"
+#include "dbat/game/utils.h"
 
-#include "dbat/game/character_utils.h"
-#include "dbat/game/object_utils.h"
 #include "dbat/game/spells.h"
 #include "dbat/game/feats.h"
 

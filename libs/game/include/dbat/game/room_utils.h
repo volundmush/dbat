@@ -1,6 +1,6 @@
 #pragma once
 #include "dbat/db/consts/types.h"
-#include "dbat/db/room_utils.h"
+
 #include "dbat/db/rooms.h"
 
 #ifdef __cplusplus

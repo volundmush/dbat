@@ -13,10 +13,7 @@
 #include "dbat/game/interpreter.h"
 #include "dbat/game/genolc.h"
 #include "dbat/game/improved-edit.h"
-#include "dbat/game/character_utils.h"
-#include "dbat/game/descriptor_utils.h"
-#include "dbat/game/room_utils.h"
-#include "dbat/game/stringutils.h"
+#include "dbat/game/utils.h"
 #include "dbat/game/spec_assign.h"
 
 /******************************************************************************/

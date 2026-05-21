@@ -14,10 +14,7 @@
 
 #include "dbat/game/config.h"
 
-#include "dbat/game/character_utils.h"
-#include "dbat/game/object_utils.h"
-#include "dbat/game/room_utils.h"
-#include "dbat/game/stringutils.h"
+#include "dbat/game/utils.h"
 #include "dbat/game/random.h"
 #include "dbat/game/search.h"
 #include "dbat/game/relocate.h"

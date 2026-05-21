@@ -41,12 +41,23 @@ pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
 
+    const translate_cdb = b.addTranslateC(.{
+        .root_source_file = b.path("libs/db/include/dbat/db/db.h"),
+        .target = target,
+        .optimize = optimize,
+    });
+    translate_cdb.addIncludePath(b.path("libs/db/include"));
+
+    const mod_cdb = translate_cdb.createModule();
+
     // C library - libs/db
     const mod_dbat_db = b.createModule(.{
         .target = target,
         .optimize = optimize,
         .link_libc = true,
         .link_libcpp = true,
+        .root_source_file = b.path("libs/db/src/root.zig"),
+        .imports = &.{.{ .name = "cdb", .module = mod_cdb }},
     });
 
     mod_dbat_db.addIncludePath(b.path("libs/db/include"));
@@ -59,11 +70,23 @@ pub fn build(b: *std.Build) void {
         .root_module = mod_dbat_db,
     });
 
+    const translate_game = b.addTranslateC(.{
+        .root_source_file = b.path("libs/game/include/dbat/game/game.h"),
+        .target = target,
+        .optimize = optimize,
+    });
+    translate_game.addIncludePath(b.path("libs/db/include"));
+    translate_game.addIncludePath(b.path("libs/game/include"));
+
+    const mod_cgame = translate_game.createModule();
+
     const mod_dbat_game = b.createModule(.{
         .target = target,
         .optimize = optimize,
         .link_libc = true,
         .link_libcpp = true,
+        .root_source_file = b.path("libs/game/src/root.zig"),
+        .imports = &.{.{ .name = "cgame", .module = mod_cgame }},
     });
     mod_dbat_game.addIncludePath(b.path("libs/db/include"));
     mod_dbat_game.addIncludePath(b.path("libs/game/include"));

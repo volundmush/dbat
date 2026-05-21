@@ -9,7 +9,6 @@
 ************************************************************************ */
 #include "dbat/db/consts/maximums.h"
 #include "dbat/db/consts/attacks.h"
-#include "dbat/db/utils.h"
 #include "dbat/db/config.h"
 #include "dbat/db/consts/songs.h"
 #include "dbat/db/consts/time.h"
@@ -17,13 +16,10 @@
 #include "dbat/db/command.h"
 #include "dbat/db/flags.h"
 
+#include "dbat/game/utils.h"
+
 #include "dbat/game/affect.h"
-#include "dbat/game/stringutils.h"
 #include "dbat/game/random.h"
-#include "dbat/game/object_utils.h"
-#include "dbat/game/character_utils.h"
-#include "dbat/game/descriptor_utils.h"
-#include "dbat/game/room_utils.h"
 #include "dbat/game/search.h"
 #include "dbat/game/relocate.h"
 #include "dbat/game/fileop.h"
@@ -32,7 +28,6 @@
 #include "dbat/game/interpreter.h"
 #include "dbat/game/dg_scripts.h"
 #include "dbat/game/extract.h"
-
 
 #include "dbat/game/act.informative.h"
 #include "dbat/game/act.wizard.h"

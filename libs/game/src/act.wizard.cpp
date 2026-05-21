@@ -10,19 +10,13 @@
 #include "dbat/game/act.wizard.h"
 #include "dbat/db/consts/maximums.h"
 #include "dbat/db/players.h"
-#include "dbat/db/utils.h"
+#include "dbat/game/utils.h"
 
 #include <unistd.h>
 
 #include "dbat/game/interpreter.h"
 #include "dbat/game/time.h"
 
-#include "dbat/game/character_utils.h"
-#include "dbat/game/descriptor_utils.h"
-#include "dbat/game/object_utils.h"
-#include "dbat/game/zone_utils.h"
-#include "dbat/game/room_utils.h"
-#include "dbat/game/stringutils.h"
 #include "dbat/game/search.h"
 #include "dbat/game/relocate.h"
 #include "dbat/game/fileop.h"

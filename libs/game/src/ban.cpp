@@ -8,17 +8,13 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 #include "dbat/db/bans.h"
-#include "dbat/db/utils.h"
+#include "dbat/game/utils.h"
 #include "dbat/game/ban.h"
 #include "dbat/game/comm.h"
 #include "dbat/game/interpreter.h"
 #include "dbat/game/handler.h"
 #include "dbat/game/db.h"
 #include "dbat/game/fileop.h"
-#include "dbat/game/log.h"
-#include "dbat/game/stringutils.h"
-#include "dbat/game/character_utils.h"
-#include "dbat/game/descriptor_utils.h"
 
 #include <errno.h>
 

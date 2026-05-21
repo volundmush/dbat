@@ -1,10 +1,7 @@
 #include "dbat/db/descriptor.h"
-#include "dbat/game/descriptor_utils.h"
-#include "dbat/game/character_utils.h"
-#include "dbat/game/object_utils.h"
+#include "dbat/game/utils.h"
 #include "dbat/game/db.h"
 #include "dbat/game/fileop.h"
-#include "dbat/game/stringutils.h"
 #include "dbat/game/comm.h"
 
 void customWrite(struct char_data *ch, struct obj_data *obj)

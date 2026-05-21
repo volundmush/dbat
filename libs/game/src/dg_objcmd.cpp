@@ -15,10 +15,7 @@
 #include "dbat/game/interpreter.h"
 #include "dbat/game/handler.h"
 #include "dbat/game/db.h"
-#include "dbat/game/character_utils.h"
-#include "dbat/game/room_utils.h"
-#include "dbat/game/object_utils.h"
-#include "dbat/game/stringutils.h"
+#include "dbat/game/utils.h"
 #include "dbat/game/extract.h"
 #include "dbat/game/relocate.h"
 

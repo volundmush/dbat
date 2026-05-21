@@ -26,13 +26,10 @@
 #include "dbat/game/dg_scripts.h"
 #include "dbat/game/class.h"
 #include "dbat/game/techniques.h"
-#include "dbat/game/character_utils.h"
-#include "dbat/game/object_utils.h"
-#include "dbat/game/room_utils.h"
+#include "dbat/game/utils.h"
 #include "dbat/game/extract.h"
 #include "dbat/game/random.h"
 #include "dbat/game/relocate.h"
-#include "dbat/game/stringutils.h"
 #include "dbat/game/affect.h"
 
 /* local functions */
