@@ -57,7 +57,7 @@
 #include "dbat/game/objsave.h"
 #include "dbat/game/genmob.h"
 #include "dbat/game/spells.h"
-#include "dbat/game/races.h"
+#include "dbat/game/races_plus.h"
 #include "dbat/game/spell_parser.h"
 #include "dbat/game/genobj.h"
 

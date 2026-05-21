@@ -33,7 +33,7 @@
 #include "dbat/game/extract.h"
 #include "dbat/game/dg_comm.h"
 #include "dbat/game/class.h"
-#include "dbat/game/races.h"
+#include "dbat/game/races_plus.h"
 
 ACMD(do_lightgrenade)
 {

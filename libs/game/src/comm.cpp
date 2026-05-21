@@ -51,7 +51,7 @@
 #include "dbat/game/local_limits.h"
 #include "dbat/game/clan.h"
 #include "dbat/game/mail.h"
-#include "dbat/game/races.h"
+#include "dbat/game/races_plus.h"
 #include "dbat/game/character_utils.h"
 #include "dbat/game/room_utils.h"
 #include "dbat/game/screen.h"

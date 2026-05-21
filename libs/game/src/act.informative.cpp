@@ -27,7 +27,7 @@
 #include "dbat/game/search.h"
 #include "dbat/game/relocate.h"
 #include "dbat/game/fileop.h"
-#include "dbat/game/races.h"
+#include "dbat/game/races_plus.h"
 #include "dbat/game/class.h"
 #include "dbat/game/interpreter.h"
 #include "dbat/game/dg_scripts.h"

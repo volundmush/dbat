@@ -29,7 +29,7 @@
 #include "dbat/game/affect.h"
 #include "dbat/game/relocate.h"
 #include "dbat/game/extract.h"
-#include "dbat/game/races.h"
+#include "dbat/game/races_plus.h"
 #include "dbat/game/fileop.h"
 
 #include "dbat/game/comm.h"
@@ -49,7 +49,7 @@
 #include "dbat/game/spells.h"
 #include "dbat/game/interpreter.h"
 #include "dbat/game/fight.h"
-#include "dbat/game/races.h"
+#include "dbat/game/races_plus.h"
 #include "dbat/game/class.h"
 #include "dbat/game/shop.h"
 #include "dbat/game/feats.h"

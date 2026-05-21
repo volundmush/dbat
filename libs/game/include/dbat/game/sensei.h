@@ -1,7 +1,7 @@
 #pragma once
 #include "dbat/db/consts/types.h"
 #include "dbat/db/consts/senseis.h"
-#include "dbat/game/races.h"
+#include "dbat/game/races_plus.h"
 
 #include <map>
 #include <string>

@@ -47,7 +47,7 @@
 #include "dbat/game/obj_edit.h"
 #include "dbat/game/fight.h"
 #include "dbat/game/class.h"
-#include "dbat/game/races.h"
+#include "dbat/game/races_plus.h"
 
 /* local functions  */
 static void generate_multiform(struct char_data *ch, int count);

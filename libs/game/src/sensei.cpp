@@ -1,4 +1,5 @@
 #include "dbat/game/sensei.h"
+#include "dbat/game/races_plus.h"
 #include "dbat/db/characters.h"
 
 #include <utility>

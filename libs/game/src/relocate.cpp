@@ -6,7 +6,7 @@
 #include "dbat/game/fight.h"
 #include "dbat/game/affect.h"
 #include "dbat/game/class.h"
-#include "dbat/game/races.h"
+#include "dbat/game/races_plus.h"
 
 /* put an object in a room */
 void obj_to_room(struct obj_data *object, room_rnum room)

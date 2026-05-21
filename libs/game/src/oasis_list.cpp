@@ -14,7 +14,7 @@
 #include "dbat/game/shop.h"
 #include "dbat/game/dg_scripts.h"
 #include "dbat/game/guild.h"
-#include "dbat/game/races.h"
+#include "dbat/game/races_plus.h"
 #include "dbat/game/class.h"
 #include "dbat/db/shops.h"
 

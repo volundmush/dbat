@@ -44,7 +44,7 @@
 #include "dbat/game/dg_scripts.h"
 #include "dbat/game/boards.h"
 #include "dbat/game/class.h"
-#include "dbat/game/races.h"
+#include "dbat/game/races_plus.h"
 
 
 /* global variables */

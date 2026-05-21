@@ -16,7 +16,7 @@
 #include "dbat/db/utils.h"
 #include "dbat/game/dg_comm.h"
 #include "dbat/game/act.informative.h"
-#include "dbat/game/races.h"
+#include "dbat/game/races_plus.h"
 #include "dbat/game/comm.h"
 #include "dbat/game/dg_scripts.h"
 #include "dbat/game/graph.h"

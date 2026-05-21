@@ -32,7 +32,7 @@
 #include "dbat/game/obj_edit.h"
 #include "dbat/game/improved-edit.h"
 #include "dbat/game/stringutils.h"
-#include "dbat/game/races.h"
+#include "dbat/game/races_plus.h"
 #include "dbat/game/class.h"
 #include "dbat/game/sensei.h"
 

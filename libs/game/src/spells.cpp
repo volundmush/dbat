@@ -20,7 +20,7 @@
 #include "dbat/game/config.h"
 #include "dbat/game/act.item.h"
 #include "dbat/game/act.movement.h"
-#include "dbat/game/races.h"
+#include "dbat/game/races_plus.h"
 #include "dbat/game/act.informative.h"
 #include "dbat/game/affect.h"
 #include "dbat/game/class.h"

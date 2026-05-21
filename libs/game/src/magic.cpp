@@ -22,7 +22,7 @@
 #include "dbat/game/fight.h"
 #include "dbat/game/affect.h"
 #include "dbat/game/class.h"
-#include "dbat/game/races.h"
+#include "dbat/game/races_plus.h"
 
 /* local functions */
 int mag_materials(struct char_data *ch, int item0, int item1, int item2, int extract, int verbose);

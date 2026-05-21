@@ -36,7 +36,7 @@
 #include "dbat/game/relocate.h"
 #include "dbat/game/stringutils.h"
 
-#include "dbat/game/races.h"
+#include "dbat/game/races_plus.h"
 #include "dbat/game/sensei.h"
 
 #include <errno.h>

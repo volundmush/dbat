@@ -16,7 +16,7 @@
 #include "dbat/game/dg_comm.h"
 #include "dbat/game/act.other.h"
 #include "dbat/game/config.h"
-#include "dbat/game/races.h"
+#include "dbat/game/races_plus.h"
 
 static void another_hour(int mode);
 static void weather_change(void);

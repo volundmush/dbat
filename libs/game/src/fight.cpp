@@ -21,7 +21,7 @@
 #include "dbat/game/comm.h"
 #include "dbat/game/db.h"
 #include "dbat/game/config.h"
-#include "dbat/game/races.h"
+#include "dbat/game/races_plus.h"
 #include "dbat/game/handler.h"
 #include "dbat/game/combat.h"
 #include "dbat/game/class.h"

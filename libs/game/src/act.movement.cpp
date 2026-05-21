@@ -39,7 +39,7 @@
 #include "dbat/game/local_limits.h"
 #include "dbat/game/house.h"
 #include "dbat/game/class.h"
-#include "dbat/game/races.h"
+#include "dbat/game/races_plus.h"
 
 /* local functions */
 static void handle_fall(struct char_data *ch);

@@ -23,7 +23,7 @@
 #include "dbat/game/handler.h"
 #include "dbat/game/shop.h"
 #include "dbat/game/class.h"
-#include "dbat/game/races.h"
+#include "dbat/game/races_plus.h"
 
 
 /* Local variables */

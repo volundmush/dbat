@@ -2,7 +2,7 @@
 #include "dbat/db/utils.h"
 #include "dbat/db/consts/aligns.h"
 #include "dbat/game/character_utils.h"
-#include "dbat/game/races.h"
+#include "dbat/game/races_plus.h"
 #include "dbat/game/spells.h"
 #include "dbat/game/comm.h"
 #include "dbat/game/class.h"

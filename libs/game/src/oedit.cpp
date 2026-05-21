@@ -26,7 +26,7 @@
 #include "dbat/game/feats.h"
 #include "dbat/game/act.informative.h"
 #include "dbat/game/act.wizard.h"
-#include "dbat/game/races.h"
+#include "dbat/game/races_plus.h"
 #include "dbat/game/fight.h"
 
 /*------------------------------------------------------------------------*/
