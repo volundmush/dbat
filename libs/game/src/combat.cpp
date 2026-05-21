@@ -267,17 +267,29 @@ void handle_multihit(struct char_data *ch, struct char_data *vict)
          ch->throws += 1;
 	 break;
    }
-  } else {
+    } else {
    if (LASTATK(ch) == -1) {
     sprintf(buf, "%s", GET_NAME(vict));
     do_attack(ch, buf, 0, 0);
    } else {
-    if (rand_number(1, 3) == 2 && GET_SKILL(ch, SKILL_KICK) > 0) {
-	 sprintf(buf, "%s", GET_NAME(vict));
-	 do_kick(ch, buf, 0, 0);
-    } else {
-	 sprintf(buf, "%s", GET_NAME(vict));
-	 do_punch(ch, buf, 0, 0);
+    /* Repeat the last physical attack command that was issued
+       instead of always falling back to punch/kick. */
+    sprintf(buf, "%s", GET_NAME(vict));
+    switch (LASTATK(ch)) {
+     case 0:  do_punch(ch, buf, 0, 0);     break;
+     case 1:  do_kick(ch, buf, 0, 0);      break;
+     case 2:  do_elbow(ch, buf, 0, 0);     break;
+     case 3:  do_knee(ch, buf, 0, 0);      break;
+     case 4:  do_roundhouse(ch, buf, 0, 0);break;
+     case 5:  do_uppercut(ch, buf, 0, 0);  break;
+     case 6:  do_slam(ch, buf, 0, 0);      break;
+     case 8:  do_heeldrop(ch, buf, 0, 0);  break;
+     case 51: do_bash(ch, buf, 0, 0);      break;
+     case 52: do_head(ch, buf, 0, 0);      break;
+     case 56: do_tailwhip(ch, buf, 0, 0);  break;
+     default: /* unknown / weapon attack – fall back to punch */
+      do_punch(ch, buf, 0, 0);
+      break;
     }
    }
   }
@@ -5097,7 +5109,11 @@ int handle_combo(struct char_data *ch, struct char_data *vict)
      send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rheadbutt@G!@n\r\n", COMBHITS(ch));
      COMBO(ch) = 52;
      success = TRUE;
-     } else if (GET_SKILL(ch, SKILL_SLAM) > 0) {
+     } else if (GET_SKILL(ch, SKILL_HEELDROP) > 0) {
+      send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rheeldrop@G!@n\r\n", COMBHITS(ch));
+      COMBO(ch) = 8;
+      success = TRUE;
+     }else if (GET_SKILL(ch, SKILL_SLAM) > 0) {
       send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rslam@G!@n\r\n", COMBHITS(ch));
       COMBO(ch) = 6;
       success = TRUE;
@@ -5123,6 +5139,10 @@ int handle_combo(struct char_data *ch, struct char_data *vict)
      } else if (GET_SKILL(ch, SKILL_HEELDROP) > 0) {
       send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rheeldrop@G!@n\r\n", COMBHITS(ch));
       COMBO(ch) = 8;
+      success = TRUE;
+     } else if (GET_SKILL(ch, SKILL_SLAM) > 0) {
+      send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rslam@G!@n\r\n", COMBHITS(ch));
+      COMBO(ch) = 6;
       success = TRUE;
      }
      break;
@@ -5387,11 +5407,41 @@ int handle_combo(struct char_data *ch, struct char_data *vict)
     case 20:
     case 21:
     case 22:
+    if (GET_SKILL(ch, SKILL_TAILWHIP) > 0 && rand_number(1, 3) == 2) {
+      send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rtailwhip@G!@n\r\n", COMBHITS(ch));
+      COMBO(ch) = 56;
+      success = TRUE;
+     } 
+     break;
     case 23:
+         if (GET_SKILL(ch, SKILL_BASH) > 0 && rand_number(1, 3) == 2) {
+      send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try bash@G!@n\r\n", COMBHITS(ch));
+      COMBO(ch) = 51;
+      success = TRUE;
+     } 
+     break;
     case 24:
     case 25:
+    if (GET_SKILL(ch, SKILL_HEADBUTT) > 0 && rand_number(1, 3) == 2) {
+     send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rheadbutt@G!@n\r\n", COMBHITS(ch));
+     COMBO(ch) = 52;
+     success = TRUE;
+     } 
+     break;
     case 26:
+    if (GET_SKILL(ch, SKILL_HEELDROP) > 0 && rand_number(1, 3) == 3) {
+      send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rheeldrop@G!@n\r\n", COMBHITS(ch));
+      COMBO(ch) = 8;
+      success = TRUE;
+     } 
+     break;
     case 27:
+    if (GET_SKILL(ch, SKILL_SLAM) > 0 && rand_number(1, 3) == 3) {
+      send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rslam@G!@n\r\n", COMBHITS(ch));
+      COMBO(ch) = 6;
+      success = TRUE;
+     }
+     break;
     case 28:
      if (GET_SKILL(ch, SKILL_KICK) > 0) {
       send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rkick@G!@n\r\n", COMBHITS(ch));
@@ -5438,10 +5488,22 @@ int handle_combo(struct char_data *ch, struct char_data *vict)
     case 8:
     case 9:
     case 10:
+     if (GET_SKILL(ch, SKILL_UPPERCUT) > 0 && rand_number(1, 2) == 2) {
+      send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try an@R uppercut@G!@n\r\n", COMBHITS(ch));
+      COMBO(ch) = 5;
+      success = TRUE;
+     }
+     break;
     case 11:
     case 12:
     case 13:
     case 14:
+    if (GET_SKILL(ch, SKILL_ROUNDHOUSE) > 0 && rand_number(1, 2) == 2) {
+      send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rroundhouse@G!@n\r\n", COMBHITS(ch));
+      COMBO(ch) = 4;
+      success = TRUE;
+     }
+     break;
     case 15:
     case 16:
     case 17:
@@ -5456,6 +5518,28 @@ int handle_combo(struct char_data *ch, struct char_data *vict)
     case 20:
     case 21:
     case 22:
+     if (GET_SKILL(ch, SKILL_BASH) > 0 && rand_number(1, 3) == 2) {
+      send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try bash@G!@n\r\n", COMBHITS(ch));
+      COMBO(ch) = 51;
+      success = TRUE;
+     } else if (GET_SKILL(ch, SKILL_TAILWHIP) > 0 && rand_number(1, 3) == 2) {
+      send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rtailwhip@G!@n\r\n", COMBHITS(ch));
+      COMBO(ch) = 56;
+      success = TRUE;
+     } else if (GET_SKILL(ch, SKILL_HEADBUTT) > 0 && rand_number(1, 3) == 2) {
+     send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rheadbutt@G!@n\r\n", COMBHITS(ch));
+     COMBO(ch) = 52;
+     success = TRUE;
+     } else if (GET_SKILL(ch, SKILL_HEELDROP) > 0 && rand_number(1, 3) == 2) {
+      send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rheeldrop@G!@n\r\n", COMBHITS(ch));
+      COMBO(ch) = 8;
+      success = TRUE;
+     } else if (GET_SKILL(ch, SKILL_SLAM) > 0 && rand_number(1, 3) == 2) {
+      send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rslam@G!@n\r\n", COMBHITS(ch));
+      COMBO(ch) = 6;
+      success = TRUE;
+     }
+     break;
     case 23:
     case 24:
     case 25:
