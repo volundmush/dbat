@@ -11,7 +11,8 @@
 - Numerous small fixes to combat math. [PetalFoxx]
 - Correct the offline zenni interest formula. [Volund]
 - Updated build system to Zig 0.16. Shuffled some includes around to streamline what Zig can see. [Volund]
-- Sacred Vials will no longer corrupt character thirst if overindulged. [Volund]
+- Vials of Sacred Elixir will no longer corrupt character thirst if overindulged. [Volund]
+- Lost tails of Icers and Bio-Androids will be properly named when torn off. [Volund]
 
 ** 2.9.2 **
 - Last version from before this file was created.
