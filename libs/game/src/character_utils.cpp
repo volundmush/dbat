@@ -2,7 +2,7 @@
 #include "dbat/db/utils.h"
 #include "dbat/db/consts/aligns.h"
 #include "dbat/game/character_utils.h"
-#include "dbat/game/races.h"
+#include "dbat/game/races_plus.h"
 #include "dbat/game/spells.h"
 #include "dbat/game/comm.h"
 #include "dbat/game/class.h"
@@ -24,6 +24,8 @@
 #include "dbat/game/feats.h"
 #include "dbat/game/time.h"
 #include "dbat/game/weather.h"
+#include "dbat/game/combat.h"
+#include "dbat/game/local_limits.h"
 
 #include <string>
 
@@ -86,10 +88,10 @@ void restore_by(char_data *ch, char_data *healer) {
 }
 
 void restore(char_data *ch, bool announce) {
-    restoreVitals(ch, announce);
-    restoreLimbs(ch, announce);
-    restoreStatus(ch, announce);
-    restoreLF(ch, announce);
+    restoreVitalsAnnounced(ch, announce);
+    restoreLimbsAnnounced(ch, announce);
+    restoreStatusAnnounced(ch, announce);
+    restoreLFAnnounced(ch, announce);
 }
 
 void resurrect(char_data *ch, int mode) {
@@ -231,10 +233,10 @@ int64_t calc_soft_cap(char_data *ch) {
 }
 
 bool is_soft_cap(char_data *ch, int64_t type) {
-    return is_soft_cap(ch, type, 1.0);
+    return is_soft_cap_mult(ch, type, 1.0);
 }
 
-bool is_soft_cap(char_data *ch, int64_t type, long double mult) {
+bool is_soft_cap_mult(char_data *ch, int64_t type, long double mult) {
     if(IS_NPC(ch))
         return true;
 
@@ -342,7 +344,7 @@ int64_t setCurHealthPercent(char_data *ch, double amt) {
     return getCurHealth(ch);
 }
 
-int64_t incCurHealth(char_data *ch, int64_t amt, bool limit_max) {
+int64_t incCurHealthLimited(char_data *ch, int64_t amt, bool limit_max) {
     double newhealth = ch->health + safeDiv((double)ABS(amt), (double)getEffMaxPL(ch));
     newhealth = fixnan(newhealth);
     if(limit_max)
@@ -353,7 +355,11 @@ int64_t incCurHealth(char_data *ch, int64_t amt, bool limit_max) {
     return getCurHealth(ch);
 };
 
-int64_t decCurHealth(char_data *ch, int64_t amt, int64_t floor) {
+int64_t incCurHealth(char_data *ch, int64_t amt) {
+    return incCurHealthLimited(ch, amt, true);
+}
+
+int64_t decCurHealthFloored(char_data *ch, int64_t amt, int64_t floor) {
     double fl = 0.0;
     if(floor > 0)
         fl = safeDiv((double)floor, (double)getEffMaxPL(ch));
@@ -364,14 +370,22 @@ int64_t decCurHealth(char_data *ch, int64_t amt, int64_t floor) {
     return getCurHealth(ch);
 }
 
-int64_t incCurHealthPercent(char_data *ch, double amt, bool limit_max) {
+int64_t decCurHealth(char_data *ch, int64_t amt) {
+    return decCurHealthFloored(ch, amt, 0);
+}
+
+int64_t incCurHealthPercentLimited(char_data *ch, double amt, bool limit_max) {
     ch->health += ABS(amt);
     if(limit_max)
         ch->health = MIN(1.0, ch->health);
     return getCurHealth(ch);
 }
 
-int64_t decCurHealthPercent(char_data *ch, double amt, int64_t floor) {
+int64_t incCurHealthPercent(char_data *ch, double amt) {
+    return incCurHealthPercentLimited(ch, amt, true);
+}
+
+int64_t decCurHealthPercentFloored(char_data *ch, double amt, int64_t floor) {
     double fl = 0.0;
     if(floor > 0)
         fl = (double)floor / (double)getEffMaxPL(ch);
@@ -379,16 +393,24 @@ int64_t decCurHealthPercent(char_data *ch, double amt, int64_t floor) {
     return getCurHealth(ch);
 }
 
-void restoreHealth(char_data *ch, bool announce) {
+int64_t decCurHealthPercent(char_data *ch, double amt) {
+    return decCurHealthPercentFloored(ch, amt, 0);
+}
+
+void restoreHealthAnnounced(char_data *ch, bool announce) {
     if(!isFullHealth(ch)) ch->health = 1;
 }
 
+void restoreHealth(char_data *ch) {
+    restoreHealthAnnounced(ch, true);
+}
+
 int64_t healCurHealth(char_data *ch, int64_t amt) {
-    return incCurHealth(ch, amt, true);
+    return incCurHealth(ch, amt);
 }
 
 int64_t harmCurHealth(char_data *ch, int64_t amt) {
-    return decCurHealth(ch, amt, 0);
+    return decCurHealth(ch, amt);
 }
 
 int64_t getMaxPLTrans(char_data *ch) {
@@ -509,7 +531,7 @@ int64_t setCurKIPercent(char_data *ch, double amt) {
     return getCurKI(ch);
 }
 
-int64_t incCurKI(char_data *ch, int64_t amt, bool limit_max) {
+int64_t incCurKILimited(char_data *ch, int64_t amt, bool limit_max) {
     double newenergy = ch->energy + safeDiv((double)ABS(amt), (double)getMaxKI(ch));
     newenergy = fixnan(newenergy);
     if(limit_max)
@@ -520,7 +542,11 @@ int64_t incCurKI(char_data *ch, int64_t amt, bool limit_max) {
     return getCurKI(ch);
 };
 
-int64_t decCurKI(char_data *ch, int64_t amt, int64_t floor) {
+int64_t incCurKI(char_data *ch, int64_t amt) {
+    return incCurKILimited(ch, amt, true);
+}
+
+int64_t decCurKIFloored(char_data *ch, int64_t amt, int64_t floor) {
     double fl = 0.0;
     if(floor > 0)
         fl = safeDiv((double)floor, (double)getMaxKI(ch));
@@ -531,7 +557,11 @@ int64_t decCurKI(char_data *ch, int64_t amt, int64_t floor) {
     return getCurKI(ch);
 }
 
-int64_t incCurKIPercent(char_data *ch, double amt, bool limit_max) {
+int64_t decCurKI(char_data *ch, int64_t amt) {
+    return decCurKIFloored(ch, amt, 0);
+}
+
+int64_t incCurKIPercentLimited(char_data *ch, double amt, bool limit_max) {
     if(limit_max)
         ch->energy = MIN(1.0, ch->energy+ABS(amt));
     else
@@ -539,7 +569,11 @@ int64_t incCurKIPercent(char_data *ch, double amt, bool limit_max) {
     return getCurKI(ch);
 }
 
-int64_t decCurKIPercent(char_data *ch, double amt, int64_t floor) {
+int64_t incCurKIPercent(char_data *ch, double amt) {
+    return incCurKIPercentLimited(ch, amt, true);
+}
+
+int64_t decCurKIPercentFloored(char_data *ch, double amt, int64_t floor) {
     if(!strcasecmp(ch->name, "Wayland")) {
         send_to_char(ch, "decCurKIPercent called with: %f\r\n", amt);
     }
@@ -550,8 +584,16 @@ int64_t decCurKIPercent(char_data *ch, double amt, int64_t floor) {
     return getCurKI(ch);
 }
 
-void restoreKI(char_data *ch, bool announce) {
+int64_t decCurKIPercent(char_data *ch, double amt) {
+    return decCurKIPercentFloored(ch, amt, 0);
+}
+
+void restoreKIAnnounced(char_data *ch, bool announce) {
     if(!isFullKI(ch)) ch->energy = 1;
+}
+
+void restoreKI(char_data *ch) {
+    restoreKIAnnounced(ch, true);
 }
 
 int64_t getCurST(char_data *ch) {
@@ -609,7 +651,7 @@ int64_t setCurSTPercent(char_data *ch, double amt) {
     return ch->move;
 }
 
-int64_t incCurST(char_data *ch, int64_t amt, bool limit_max) {
+int64_t incCurSTLimited(char_data *ch, int64_t amt, bool limit_max) {
     double newstamina = ch->stamina + safeDiv((double)ABS(amt), (double)getMaxST(ch));
     newstamina = fixnan(newstamina);
     if(limit_max)
@@ -620,7 +662,11 @@ int64_t incCurST(char_data *ch, int64_t amt, bool limit_max) {
     return getCurST(ch);
 };
 
-int64_t decCurST(char_data *ch, int64_t amt, int64_t floor) {
+int64_t incCurST(char_data *ch, int64_t amt) {
+    return incCurSTLimited(ch, amt, true);
+}
+
+int64_t decCurSTFloored(char_data *ch, int64_t amt, int64_t floor) {
     double fl = 0.0;
     if(floor > 0)
         fl = safeDiv((double)floor, (double)getMaxST(ch));
@@ -631,7 +677,11 @@ int64_t decCurST(char_data *ch, int64_t amt, int64_t floor) {
     return getCurST(ch);
 }
 
-int64_t incCurSTPercent(char_data *ch, double amt, bool limit_max) {
+int64_t decCurST(char_data *ch, int64_t amt) {
+    return decCurSTFloored(ch, amt, 0);
+}
+
+int64_t incCurSTPercentLimited(char_data *ch, double amt, bool limit_max) {
     if(limit_max)
         ch->stamina = MIN(1.0, ch->stamina+ABS(amt));
     else
@@ -639,7 +689,11 @@ int64_t incCurSTPercent(char_data *ch, double amt, bool limit_max) {
     return getMaxST(ch);
 }
 
-int64_t decCurSTPercent(char_data *ch, double amt, int64_t floor) {
+int64_t incCurSTPercent(char_data *ch, double amt) {
+    return incCurSTPercentLimited(ch, amt, true);
+}
+
+int64_t decCurSTPercentFloored(char_data *ch, double amt, int64_t floor) {
     double fl = 0.0;
     if(floor > 0)
         fl = (double)floor / (double)getMaxST(ch);
@@ -647,8 +701,16 @@ int64_t decCurSTPercent(char_data *ch, double amt, int64_t floor) {
     return getCurST(ch);
 }
 
-void restoreST(char_data *ch, bool announce) {
+int64_t decCurSTPercent(char_data *ch, double amt) {
+    return decCurSTPercentFloored(ch, amt, 0);
+}
+
+void restoreSTAnnounced(char_data *ch, bool announce) {
     if(!isFullST(ch)) ch->stamina = 1;
+}
+
+void restoreST(char_data *ch) {
+    restoreSTAnnounced(ch, true);
 }
 
 int64_t getCurLF(char_data *ch) {
@@ -685,7 +747,7 @@ int64_t setCurLFPercent(char_data *ch, double amt) {
     return getCurLF(ch);
 }
 
-int64_t incCurLF(char_data *ch, int64_t amt, bool limit_max) {
+int64_t incCurLFLimited(char_data *ch, int64_t amt, bool limit_max) {
     double newlife = ch->life + safeDiv((double)ABS(amt), (double)getMaxLF(ch));
     newlife = fixnan(newlife);
     if(limit_max)
@@ -696,7 +758,11 @@ int64_t incCurLF(char_data *ch, int64_t amt, bool limit_max) {
     return getCurLF(ch);
 };
 
-int64_t decCurLF(char_data *ch, int64_t amt, int64_t floor) {
+int64_t incCurLF(char_data *ch, int64_t amt) {
+    return incCurLFLimited(ch, amt, true);
+}
+
+int64_t decCurLFFloored(char_data *ch, int64_t amt, int64_t floor) {
     double fl = 0.0;
     if(floor > 0)
         fl = safeDiv((double)floor, (double)getMaxLF(ch));
@@ -707,7 +773,11 @@ int64_t decCurLF(char_data *ch, int64_t amt, int64_t floor) {
     return getCurLF(ch);
 }
 
-int64_t incCurLFPercent(char_data *ch, double amt, bool limit_max) {
+int64_t decCurLF(char_data *ch, int64_t amt) {
+    return decCurLFFloored(ch, amt, 0);
+}
+
+int64_t incCurLFPercentLimited(char_data *ch, double amt, bool limit_max) {
     if(limit_max)
         ch->life = MIN(1.0, ch->life+ABS(amt));
     else
@@ -715,7 +785,11 @@ int64_t incCurLFPercent(char_data *ch, double amt, bool limit_max) {
     return getCurLF(ch);
 }
 
-int64_t decCurLFPercent(char_data *ch, double amt, int64_t floor) {
+int64_t incCurLFPercent(char_data *ch, double amt) {
+    return incCurLFPercentLimited(ch, amt, true);
+}
+
+int64_t decCurLFPercentFloored(char_data *ch, double amt, int64_t floor) {
     double fl = 0.0;
     if(floor > 0)
         fl = (double)floor / (double)getMaxLF(ch);
@@ -723,24 +797,40 @@ int64_t decCurLFPercent(char_data *ch, double amt, int64_t floor) {
     return getCurLF(ch);
 }
 
-void restoreLF(char_data *ch, bool announce) {
+int64_t decCurLFPercent(char_data *ch, double amt) {
+    return decCurLFPercentFloored(ch, amt, 0);
+}
+
+void restoreLFAnnounced(char_data *ch, bool announce) {
     if(!isFullLF(ch)) ch->life = 1;
+}
+
+void restoreLF(char_data *ch) {
+    restoreLFAnnounced(ch, true);
 }
 
 bool isFullVitals(char_data *ch) {
     return isFullHealth(ch) && isFullKI(ch) && isFullST(ch);
 }
 
-void restoreVitals(char_data *ch, bool announce) {
-    restoreHealth(ch, announce);
-    restoreKI(ch, announce);
-    restoreST(ch, announce);
+void restoreVitalsAnnounced(char_data *ch, bool announce) {
+    restoreHealthAnnounced(ch, announce);
+    restoreKIAnnounced(ch, announce);
+    restoreSTAnnounced(ch, announce);
 }
 
-void restoreStatus(char_data *ch, bool announce) {
-    cureStatusKnockedOut(ch, announce);
-    cureStatusBurn(ch, announce);
-    cureStatusPoison(ch, announce);
+void restoreVitals(char_data *ch) {
+    restoreVitalsAnnounced(ch, true);
+}
+
+void restoreStatusAnnounced(char_data *ch, bool announce) {
+    cureStatusKnockedOutAnnounced(ch, announce);
+    cureStatusBurnAnnounced(ch, announce);
+    cureStatusPoisonAnnounced(ch, announce);
+}
+
+void restoreStatus(char_data *ch) {
+    restoreStatusAnnounced(ch, true);
 }
 
 void setStatusKnockedOut(char_data *ch) {
@@ -752,7 +842,7 @@ void setStatusKnockedOut(char_data *ch) {
     GET_POS(ch) = POS_SLEEPING;
 }
 
-void cureStatusKnockedOut(char_data *ch, bool announce) {
+void cureStatusKnockedOutAnnounced(char_data *ch, bool announce) {
     if (AFF_FLAGGED(ch, AFF_KNOCKED)) {
         if(announce) {
             act("@W$n@W is no longer senseless, and wakes up.@n", FALSE, ch, 0, 0, TO_ROOM);
@@ -772,7 +862,11 @@ void cureStatusKnockedOut(char_data *ch, bool announce) {
     }
 }
 
-void cureStatusBurn(char_data *ch, bool announce) {
+void cureStatusKnockedOut(char_data *ch) {
+    cureStatusKnockedOutAnnounced(ch, true);
+}
+
+void cureStatusBurnAnnounced(char_data *ch, bool announce) {
     if (AFF_FLAGGED(ch, AFF_BURNED)) {
         if(announce) {
             send_to_char(ch, "Your burns are healed now.\r\n");
@@ -782,9 +876,17 @@ void cureStatusBurn(char_data *ch, bool announce) {
     }
 }
 
-void cureStatusPoison(char_data *ch, bool announce) {
+void cureStatusBurn(char_data *ch) {
+    cureStatusBurnAnnounced(ch, true);
+}
+
+void cureStatusPoisonAnnounced(char_data *ch, bool announce) {
     act("@C$n@W suddenly looks a lot better!@b", FALSE, ch, 0, 0, TO_NOTVICT);
     affect_from_char(ch, SPELL_POISON);
+}
+
+void cureStatusPoison(char_data *ch) {
+    cureStatusPoisonAnnounced(ch, true);
 }
 
 static const std::map<int, std::string> limb_names = {
@@ -794,7 +896,7 @@ static const std::map<int, std::string> limb_names = {
         {4, "left leg"}
 };
 
-void restoreLimbs(char_data *ch, bool announce) {
+void restoreLimbsAnnounced(char_data *ch, bool announce) {
 
     for(const auto& l : limb_names) {
         if(announce) {
@@ -809,82 +911,150 @@ void restoreLimbs(char_data *ch, bool announce) {
     char_gain_tail(ch, announce);
 }
 
-int64_t gainBasePL(char_data *ch, int64_t amt, bool trans_mult) {
+void restoreLimbs(char_data *ch) {
+    restoreLimbsAnnounced(ch, true);
+}
+
+int64_t gainBasePLTransformed(char_data *ch, int64_t amt, bool trans_mult) {
     ch->basepl += amt;
     return ch->basepl;
 }
 
-int64_t gainBaseST(char_data *ch, int64_t amt, bool trans_mult) {
+int64_t gainBasePL(char_data *ch, int64_t amt) {
+    return gainBasePLTransformed(ch, amt, false);
+}
+
+int64_t gainBaseSTTransformed(char_data *ch, int64_t amt, bool trans_mult) {
     ch->basest += amt;
     return ch->basest;
 }
 
-int64_t gainBaseKI(char_data *ch, int64_t amt, bool trans_mult) {
+int64_t gainBaseST(char_data *ch, int64_t amt) {
+    return gainBaseSTTransformed(ch, amt, false);
+}
+
+int64_t gainBaseKITransformed(char_data *ch, int64_t amt, bool trans_mult) {
     ch->baseki += amt;
     return ch->baseki;
 }
 
-void gainBaseAll(char_data *ch, int64_t amt, bool trans_mult) {
-    gainBasePL(ch, amt, trans_mult);
-    gainBaseKI(ch, amt, trans_mult);
-    gainBaseST(ch, amt, trans_mult);
+int64_t gainBaseKI(char_data *ch, int64_t amt) {
+    return gainBaseKITransformed(ch, amt, false);
 }
 
-int64_t loseBasePL(char_data *ch, int64_t amt, bool trans_mult) {
+void gainBaseAllTransformed(char_data *ch, int64_t amt, bool trans_mult) {
+    gainBasePLTransformed(ch, amt, trans_mult);
+    gainBaseKITransformed(ch, amt, trans_mult);
+    gainBaseSTTransformed(ch, amt, trans_mult);
+}
+
+void gainBaseAll(char_data *ch, int64_t amt) {
+    gainBaseAllTransformed(ch, amt, false);
+}
+
+int64_t loseBasePLTransformed(char_data *ch, int64_t amt, bool trans_mult) {
     ch->basepl = MAX(1L, ch->basepl-amt);
     return ch->basepl;
 }
 
-int64_t loseBaseST(char_data *ch, int64_t amt, bool trans_mult) {
+int64_t loseBasePL(char_data *ch, int64_t amt) {
+    return loseBasePLTransformed(ch, amt, false);
+}
+
+int64_t loseBaseSTTransformed(char_data *ch, int64_t amt, bool trans_mult) {
     ch->basest = MAX(1L, ch->basest-amt);
     return ch->basest;
 }
 
-int64_t loseBaseKI(char_data *ch, int64_t amt, bool trans_mult) {
+int64_t loseBaseST(char_data *ch, int64_t amt) {
+    return loseBaseSTTransformed(ch, amt, false);
+}
+
+int64_t loseBaseKITransformed(char_data *ch, int64_t amt, bool trans_mult) {
     ch->baseki = MAX(1L, ch->baseki-amt);
     return ch->baseki;
 }
 
-void loseBaseAll(char_data *ch, int64_t amt, bool trans_mult) {
-    loseBasePL(ch, amt, trans_mult);
-    loseBaseKI(ch, amt, trans_mult);
-    loseBaseST(ch, amt, trans_mult);
+int64_t loseBaseKI(char_data *ch, int64_t amt) {
+    return loseBaseKITransformed(ch, amt, false);
 }
 
-int64_t gainBasePLPercent(char_data *ch, double amt, bool trans_mult) {
-    return gainBasePL(ch, ch->basepl * amt, trans_mult);
+void loseBaseAllTransformed(char_data *ch, int64_t amt, bool trans_mult) {
+    loseBasePLTransformed(ch, amt, trans_mult);
+    loseBaseKITransformed(ch, amt, trans_mult);
+    loseBaseSTTransformed(ch, amt, trans_mult);
 }
 
-int64_t gainBaseKIPercent(char_data *ch, double amt, bool trans_mult) {
-    return gainBaseKI(ch, ch->baseki * amt, trans_mult);
+void loseBaseAll(char_data *ch, int64_t amt) {
+    loseBaseAllTransformed(ch, amt, false);
 }
 
-int64_t gainBaseSTPercent(char_data *ch, double amt, bool trans_mult) {
-    return gainBaseST(ch, ch->basest * amt, trans_mult);
+int64_t gainBasePLPercentTransformed(char_data *ch, double amt, bool trans_mult) {
+    return gainBasePLTransformed(ch, ch->basepl * amt, trans_mult);
 }
 
-int64_t loseBasePLPercent(char_data *ch, double amt, bool trans_mult) {
-    return loseBasePL(ch, ch->basepl * amt, trans_mult);
+int64_t gainBasePLPercent(char_data *ch, double amt) {
+    return gainBasePLPercentTransformed(ch, amt, false);
 }
 
-int64_t loseBaseKIPercent(char_data *ch, double amt, bool trans_mult) {
-    return loseBaseKI(ch, ch->baseki * amt, trans_mult);
+int64_t gainBaseKIPercentTransformed(char_data *ch, double amt, bool trans_mult) {
+    return gainBaseKITransformed(ch, ch->baseki * amt, trans_mult);
 }
 
-int64_t loseBaseSTPercent(char_data *ch, double amt, bool trans_mult) {
-    return loseBaseST(ch, ch->basest * amt, trans_mult);
+int64_t gainBaseKIPercent(char_data *ch, double amt) {
+    return gainBaseKIPercentTransformed(ch, amt, false);
 }
 
-void gainBaseAllPercent(char_data *ch, double amt, bool trans_mult) {
-    gainBasePLPercent(ch, amt, trans_mult);
-    gainBaseKIPercent(ch, amt, trans_mult);
-    gainBaseSTPercent(ch, amt, trans_mult);
+int64_t gainBaseSTPercentTransformed(char_data *ch, double amt, bool trans_mult) {
+    return gainBaseSTTransformed(ch, ch->basest * amt, trans_mult);
 }
 
-void loseBaseAllPercent(char_data *ch, double amt, bool trans_mult) {
-    loseBasePLPercent(ch, amt, trans_mult);
-    loseBaseKIPercent(ch, amt, trans_mult);
-    loseBaseSTPercent(ch, amt, trans_mult);
+int64_t gainBaseSTPercent(char_data *ch, double amt) {
+    return gainBaseSTPercentTransformed(ch, amt, false);
+}
+
+int64_t loseBasePLPercentTransformed(char_data *ch, double amt, bool trans_mult) {
+    return loseBasePLTransformed(ch, ch->basepl * amt, trans_mult);
+}
+
+int64_t loseBasePLPercent(char_data *ch, double amt) {
+    return loseBasePLPercentTransformed(ch, amt, false);
+}
+
+int64_t loseBaseKIPercentTransformed(char_data *ch, double amt, bool trans_mult) {
+    return loseBaseKITransformed(ch, ch->baseki * amt, trans_mult);
+}
+
+int64_t loseBaseKIPercent(char_data *ch, double amt) {
+    return loseBaseKIPercentTransformed(ch, amt, false);
+}
+
+int64_t loseBaseSTPercentTransformed(char_data *ch, double amt, bool trans_mult) {
+    return loseBaseSTTransformed(ch, ch->basest * amt, trans_mult);
+}
+
+int64_t loseBaseSTPercent(char_data *ch, double amt) {
+    return loseBaseSTPercentTransformed(ch, amt, false);
+}
+
+void gainBaseAllPercentTransformed(char_data *ch, double amt, bool trans_mult) {
+    gainBasePLPercentTransformed(ch, amt, trans_mult);
+    gainBaseKIPercentTransformed(ch, amt, trans_mult);
+    gainBaseSTPercentTransformed(ch, amt, trans_mult);
+}
+
+void gainBaseAllPercent(char_data *ch, double amt) {
+    gainBaseAllPercentTransformed(ch, amt, false);
+}
+
+void loseBaseAllPercentTransformed(char_data *ch, double amt, bool trans_mult) {
+    loseBasePLPercentTransformed(ch, amt, trans_mult);
+    loseBaseKIPercentTransformed(ch, amt, trans_mult);
+    loseBaseSTPercentTransformed(ch, amt, trans_mult);
+}
+
+void loseBaseAllPercent(char_data *ch, double amt) {
+    loseBaseAllPercentTransformed(ch, amt, false);
 }
 
 int64_t getMaxCarryWeight(char_data *ch) {
@@ -3852,7 +4022,6 @@ int *default_admin_flags[ADMLVL_IMPL + 1] = {
 
 void admin_set(struct char_data *ch, int value)
 {
-  void run_autowiz(void);
   int i;
   int orig = GET_ADMLEVEL(ch);
 

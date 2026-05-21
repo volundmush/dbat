@@ -1,6 +1,10 @@
 #pragma once
 #include "consts/types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct index_data {
    mob_vnum	vnum;	/* virtual number of this mob/obj		*/
    int		number;	/* number of existing units of this mob/obj	*/
@@ -11,3 +15,7 @@ struct index_data {
 };
 
 typedef struct index_data index_data;
+
+#ifdef __cplusplus
+}
+#endif

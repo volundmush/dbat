@@ -4,6 +4,10 @@
 #include <ctype.h>
 #include "dbat/db/consts/types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int levenshtein_distance(char *s1, char *s2);
 void trim(char *s);
 char *add_commas(int64_t num);
@@ -32,3 +36,7 @@ int is_number(const char *str);
 int fill_word(char *argument);
 char *fname(const char *namelist);
 int reserved_word(char *argument);
+
+#ifdef __cplusplus
+}
+#endif

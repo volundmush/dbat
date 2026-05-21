@@ -1,6 +1,10 @@
 #pragma once
 #include "dbat/db/consts/types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define OLC_SET		0
 #define OLC_SHOW	1
 #define OLC_REPEAT	2
@@ -20,3 +24,8 @@
 #define MAX_ROOM_DESC	4096
 #define MAX_MOB_DESC	512
 #define MAX_OBJ_DESC	512
+
+
+#ifdef __cplusplus
+}
+#endif

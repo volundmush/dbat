@@ -1,6 +1,10 @@
 #pragma once
 #include "dbat/db/consts/types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // functions
 void timed_dt(struct char_data *ch);
 void run_autowiz(void);
@@ -13,3 +17,8 @@ void gain_exp_regardless(struct char_data *ch, int gain);
 void gain_condition(struct char_data *ch, int condition, int value);
 void point_update(void);
 void update_innate(struct char_data *ch);
+
+
+#ifdef __cplusplus
+}
+#endif

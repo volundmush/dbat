@@ -19,7 +19,7 @@
 #include "dbat/game/spells.h"
 #include "dbat/game/oasis.h"
 #include "dbat/game/class.h"
-#include "dbat/game/races.h"
+#include "dbat/game/races_plus.h"
 
 
 /* Utility functions */

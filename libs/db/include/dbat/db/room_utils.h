@@ -2,6 +2,10 @@
 #include "consts/types.h"
 #include "flags.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 bool room_is_valid(const struct room_data *room);
 
 room_vnum room_get_vnum(const struct room_data *room);
@@ -75,3 +79,7 @@ void room_set_geffect(struct room_data *room, int geffect);
 
 #define W_EXIT(room, num)     (world[(room)].dir_option[(num)])
 #define R_EXIT(room, num)     ((room)->dir_option[(num)])
+
+#ifdef __cplusplus
+}
+#endif

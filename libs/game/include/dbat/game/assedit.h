@@ -1,6 +1,10 @@
 #pragma once
 #include "dbat/db/consts/types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void assedit_setup(struct descriptor_data *d, int number);
 void assedit_disp_menu(struct descriptor_data *d);
 void assedit_delete(struct descriptor_data *d);
@@ -10,3 +14,8 @@ void nodigit(struct descriptor_data *d);
 void assedit_parse(struct descriptor_data *d, char *arg);
 
 ACMD(do_assedit);
+
+
+#ifdef __cplusplus
+}
+#endif

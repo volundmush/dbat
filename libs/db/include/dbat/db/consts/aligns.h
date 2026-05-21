@@ -1,4 +1,9 @@
 #pragma once
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define ALIGN_SAINT              0
 #define ALIGN_VALIANT            1
 #define ALIGN_HERO               2
@@ -12,3 +17,7 @@
 #define NUM_ALIGNS               9
 
 extern const char *alignments[NUM_ALIGNS+1];
+
+#ifdef __cplusplus
+}
+#endif

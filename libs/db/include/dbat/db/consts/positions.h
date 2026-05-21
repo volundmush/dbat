@@ -1,4 +1,9 @@
 #pragma once
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Positions */
 #define POS_DEAD       0	/* dead			*/
 #define POS_MORTALLYW  1	/* mortally wounded	*/
@@ -13,3 +18,7 @@
 #define NUM_POSITIONS  9
 
 extern const char *position_types[NUM_POSITIONS+1];
+
+#ifdef __cplusplus
+}
+#endif

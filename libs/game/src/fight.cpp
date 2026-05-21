@@ -21,7 +21,7 @@
 #include "dbat/game/comm.h"
 #include "dbat/game/db.h"
 #include "dbat/game/config.h"
-#include "dbat/game/races.h"
+#include "dbat/game/races_plus.h"
 #include "dbat/game/handler.h"
 #include "dbat/game/combat.h"
 #include "dbat/game/class.h"
@@ -806,7 +806,7 @@ void fight_stack()
       if (IS_NPC(ch) && MOB_FLAGGED(ch, MOB_POWERUP) && axion_dice(0) >= 90) {
         if (GET_HIT(ch) >= GET_MAX_HIT(ch)) {
          act("@g$n@ finishes powering up as $s aura flashes brightly filling the entire area briefly with its light!@n", TRUE, ch, 0, 0, TO_ROOM);
-         restoreHealth(ch, false);
+          restoreHealthAnnounced(ch, false);
          REMOVE_BIT_AR(MOB_FLAGS(ch), MOB_POWERUP);
         } else if (GET_HIT(ch) >= GET_MAX_HIT(ch) / 2) {
          act("@g$n@G continues powering up as torrents of energy crackle within $s aura.@n", TRUE, ch, 0, 0, TO_ROOM);
@@ -860,7 +860,7 @@ void fight_stack()
          }
         } else {
             incCurHealth(ch, (getCurLF(ch)));
-            decCurLFPercent(ch, 2, -1);
+             decCurLFPercentFloored(ch, 2, -1);
         }
 
         send_to_char(ch, "@YYour life force has kept you strong@n!\r\n");
@@ -1005,7 +1005,7 @@ void fight_stack()
       }
 
       if (AFF_FLAGGED(ch, AFF_KNOCKED) && rand_number(1, 200) >= 195) {
-         cureStatusKnockedOut(ch, true);
+          cureStatusKnockedOutAnnounced(ch, true);
          if (IS_NPC(ch) && rand_number(1, 20) >= 12) {
          act("@W$n@W stands up.@n", FALSE, ch, 0, 0, TO_ROOM);
           GET_POS(ch) = POS_STANDING;
@@ -1109,7 +1109,7 @@ void fight_stack()
          int64_t raise = GET_MAX_MOVE(ch) * 0.02;
          incCurST(ch, raise);
         }
-        restoreHealth(ch, false);
+        restoreHealthAnnounced(ch, false);
         decCurKI(ch, getMaxKI(ch) / 20);
         dispel_ash(ch);
         act("@RYou have reached your maximum!@n", TRUE, ch, 0, 0, TO_CHAR);
@@ -1123,7 +1123,7 @@ void fight_stack()
          int64_t raise = GET_MAX_MOVE(ch) * 0.02;
          incCurST(ch, raise);
         }
-        restoreHealth(ch, false);
+        restoreHealthAnnounced(ch, false);
         decCurKI(ch, (gmaxki * 0.0375) + 1);
         dispel_ash(ch);
         act("@RYou have reached your maximum!@n", TRUE, ch, 0, 0, TO_CHAR);
@@ -2224,8 +2224,8 @@ void die(struct char_data *ch, struct char_data *killer)
   if ((IS_MAJIN(ch) || IS_BIO(ch)) && ((getCurLF(ch)) >= (getMaxLF(ch)) * 0.75 || (PLR_FLAGGED(ch, PLR_SELFD2) &&
                                                                                    (getCurLF(ch)) >= (getMaxLF(ch)) * 0.5)))
   {
-    decCurLFPercent(ch, 2, -1);
-    decCurHealthPercent(ch, 1, 1);
+    decCurLFPercentFloored(ch, 2, -1);
+    decCurHealthPercentFloored(ch, 1, 1);
     SET_BIT_AR(PLR_FLAGS(ch), PLR_GOOP);
     ch->gooptime = 32;
     return;
@@ -2236,9 +2236,9 @@ void die(struct char_data *ch, struct char_data *killer)
   {
     act("@c$n@w disappears right before dying. $n appears to be immortal.@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@c$n@w disappears right before dying. $n appears to be immortal.@n.", TRUE, ch, 0, 0, TO_ROOM);
-    decCurHealthPercent(ch, 1, 1);
-    decCurKIPercent(ch, 1, 1);
-    decCurSTPercent(ch, 1, 1);
+    decCurHealthPercentFloored(ch, 1, 1);
+    decCurKIPercentFloored(ch, 1, 1);
+    decCurSTPercentFloored(ch, 1, 1);
     null_affect(ch, AFF_POISON);
     if (GET_COND(ch, HUNGER) >= 0)
     {
@@ -2282,7 +2282,7 @@ void die(struct char_data *ch, struct char_data *killer)
     }
     char_from_room(ch);
     char_to_room(ch, real_room(17875));
-    decCurHealthPercent(ch, 1, 1);
+    decCurHealthPercentFloored(ch, 1, 1);
     look_at_room(IN_ROOM(ch), ch, 0);
     final_combat_resolve(ch);
     return;

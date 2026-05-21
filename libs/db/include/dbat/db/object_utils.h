@@ -5,6 +5,10 @@
 #include <time.h>
 #include "flags.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // =============================================================================
 // Object Classification
 // =============================================================================
@@ -284,3 +288,8 @@ void obj_set_fellow_wall(struct obj_data *obj, struct obj_data *fellow);
 #define ANA(obj) (strchr("aeiouAEIOU", *(obj)->name) ? "An" : "A")
 #define SANA(obj) (strchr("aeiouAEIOU", *(obj)->name) ? "an" : "a")
 #define OBJ_LOADROOM(obj)     ((obj)->room_loaded)
+
+
+#ifdef __cplusplus
+}
+#endif

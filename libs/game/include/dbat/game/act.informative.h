@@ -1,6 +1,10 @@
 #pragma once
 #include "dbat/db/consts/types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // defines
 #define MAX_PORTAL_TYPES        6
 /* For show_obj_to_char 'mode'.	/-- arbitrary */
@@ -73,3 +77,8 @@ ACMD(do_intro);
 ACMD(do_scan);
 ACMD(do_toplist);
 ACMD(do_whois);
+
+
+#ifdef __cplusplus
+}
+#endif

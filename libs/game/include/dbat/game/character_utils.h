@@ -3,9 +3,11 @@
 #include "dbat/db/character_utils.h"
 #include "dbat/db/characters.h"
 #include "dbat/game/log.h"
-#include "dbat/game/races.h"
-#include "dbat/game/class.h"
 #include "dbat/db/weather.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 int roll_stats(struct char_data *ch, int type, int bonus);
 const char* juggleRaceName(char_data *ch, bool capitalized);
@@ -21,7 +23,7 @@ bool in_northran(char_data *ch);
 bool can_tolerate_gravity(char_data *ch, int grav);
 int calcTier(char_data *ch);
 int64_t calc_soft_cap(char_data *ch);
-bool is_soft_cap(char_data *ch, int64_t type, long double mult);
+bool is_soft_cap_mult(char_data *ch, int64_t type, long double mult);
 bool is_soft_cap(char_data *ch, int64_t type);
 int wearing_android_canister(char_data *ch);
 int calcGravCost(char_data *ch, int64_t num);
@@ -34,11 +36,16 @@ int64_t getPercentOfMaxHealth(char_data *ch, double amt);
 bool isFullHealth(char_data *ch);
 int64_t setCurHealth(char_data *ch, int64_t amt);
 int64_t setCurHealthPercent(char_data *ch, double amt);
-int64_t incCurHealth(char_data *ch, int64_t amt, bool limit_max = true);
-int64_t decCurHealth(char_data *ch, int64_t amt, int64_t floor = 0);
-int64_t incCurHealthPercent(char_data *ch, double amt, bool limit_max = true);
-int64_t decCurHealthPercent(char_data *ch, double amt, int64_t floor = 0);
-void restoreHealth(char_data *ch, bool announce = true);
+int64_t incCurHealth(char_data *ch, int64_t amt);
+int64_t incCurHealthLimited(char_data *ch, int64_t amt, bool limit_max);
+int64_t decCurHealth(char_data *ch, int64_t amt);
+int64_t decCurHealthFloored(char_data *ch, int64_t amt, int64_t floor);
+int64_t incCurHealthPercent(char_data *ch, double amt);
+int64_t incCurHealthPercentLimited(char_data *ch, double amt, bool limit_max);
+int64_t decCurHealthPercent(char_data *ch, double amt);
+int64_t decCurHealthPercentFloored(char_data *ch, double amt, int64_t floor);
+void restoreHealth(char_data *ch);
+void restoreHealthAnnounced(char_data *ch, bool announce);
 int64_t healCurHealth(char_data *ch, int64_t amt);
 int64_t harmCurHealth(char_data *ch, int64_t amt);
 
@@ -62,11 +69,16 @@ int64_t getPercentOfMaxKI(char_data *ch, double amt);
 bool isFullKI(char_data *ch);
 int64_t setCurKI(char_data *ch, int64_t amt);
 int64_t setCurKIPercent(char_data *ch, double amt);
-int64_t incCurKI(char_data *ch, int64_t amt, bool limit_max = true);
-int64_t decCurKI(char_data *ch, int64_t amt, int64_t floor = 0);
-int64_t incCurKIPercent(char_data *ch, double amt, bool limit_max = true);
-int64_t decCurKIPercent(char_data *ch, double amt, int64_t floor = 0);
-void restoreKI(char_data *ch, bool announce = true);
+int64_t incCurKI(char_data *ch, int64_t amt);
+int64_t incCurKILimited(char_data *ch, int64_t amt, bool limit_max);
+int64_t decCurKI(char_data *ch, int64_t amt);
+int64_t decCurKIFloored(char_data *ch, int64_t amt, int64_t floor);
+int64_t incCurKIPercent(char_data *ch, double amt);
+int64_t incCurKIPercentLimited(char_data *ch, double amt, bool limit_max);
+int64_t decCurKIPercent(char_data *ch, double amt);
+int64_t decCurKIPercentFloored(char_data *ch, double amt, int64_t floor);
+void restoreKI(char_data *ch);
+void restoreKIAnnounced(char_data *ch, bool announce);
 
 int64_t getCurST(char_data *ch);
 int64_t getMaxST(char_data *ch);
@@ -78,11 +90,16 @@ int64_t getPercentOfMaxST(char_data *ch, double amt);
 bool isFullST(char_data *ch);
 int64_t setCurST(char_data *ch, int64_t amt);
 int64_t setCurSTPercent(char_data *ch, double amt);
-int64_t incCurST(char_data *ch, int64_t amt, bool limit_max = true);
-int64_t decCurST(char_data *ch, int64_t amt, int64_t floor = 0);
-int64_t incCurSTPercent(char_data *ch, double amt, bool limit_max = true);
-int64_t decCurSTPercent(char_data *ch, double amt, int64_t floor = 0);
-void restoreST(char_data *ch, bool announce = true);
+int64_t incCurST(char_data *ch, int64_t amt);
+int64_t incCurSTLimited(char_data *ch, int64_t amt, bool limit_max);
+int64_t decCurST(char_data *ch, int64_t amt);
+int64_t decCurSTFloored(char_data *ch, int64_t amt, int64_t floor);
+int64_t incCurSTPercent(char_data *ch, double amt);
+int64_t incCurSTPercentLimited(char_data *ch, double amt, bool limit_max);
+int64_t decCurSTPercent(char_data *ch, double amt);
+int64_t decCurSTPercentFloored(char_data *ch, double amt, int64_t floor);
+void restoreST(char_data *ch);
+void restoreSTAnnounced(char_data *ch, bool announce);
 
 int64_t getCurLF(char_data *ch);
 int64_t getMaxLF(char_data *ch);
@@ -92,40 +109,67 @@ int64_t getPercentOfMaxLF(char_data *ch, double amt);
 bool isFullLF(char_data *ch);
 int64_t setCurLF(char_data *ch, int64_t amt);
 int64_t setCurLFPercent(char_data *ch, double amt);
-int64_t incCurLF(char_data *ch, int64_t amt, bool limit_max = true);
-int64_t decCurLF(char_data *ch, int64_t amt, int64_t floor = 0);
-int64_t incCurLFPercent(char_data *ch, double amt, bool limit_max = true);
-int64_t decCurLFPercent(char_data *ch, double amt, int64_t floor = 0);
-void restoreLF(char_data *ch, bool announce = true);
+int64_t incCurLF(char_data *ch, int64_t amt);
+int64_t incCurLFLimited(char_data *ch, int64_t amt, bool limit_max);
+int64_t decCurLF(char_data *ch, int64_t amt);
+int64_t decCurLFFloored(char_data *ch, int64_t amt, int64_t floor);
+int64_t incCurLFPercent(char_data *ch, double amt);
+int64_t incCurLFPercentLimited(char_data *ch, double amt, bool limit_max);
+int64_t decCurLFPercent(char_data *ch, double amt);
+int64_t decCurLFPercentFloored(char_data *ch, double amt, int64_t floor);
+void restoreLF(char_data *ch);
+void restoreLFAnnounced(char_data *ch, bool announce);
 
 bool isFullVitals(char_data *ch);
-void restoreVitals(char_data *ch, bool announce = true);
-void restoreStatus(char_data *ch, bool announce = true);
-void restoreLimbs(char_data *ch, bool announce = true);
+void restoreVitals(char_data *ch);
+void restoreVitalsAnnounced(char_data *ch, bool announce);
+void restoreStatus(char_data *ch);
+void restoreStatusAnnounced(char_data *ch, bool announce);
+void restoreLimbs(char_data *ch);
+void restoreLimbsAnnounced(char_data *ch, bool announce);
 
-int64_t gainBasePL(char_data *ch, int64_t amt, bool trans_mult = false);
-int64_t gainBaseKI(char_data *ch, int64_t amt, bool trans_mult = false);
-int64_t gainBaseST(char_data *ch, int64_t amt, bool trans_mult = false);
-void gainBaseAll(char_data *ch, int64_t amt, bool trans_mult = false);
+int64_t gainBasePL(char_data *ch, int64_t amt);
+int64_t gainBasePLTransformed(char_data *ch, int64_t amt, bool trans_mult);
+int64_t gainBaseKI(char_data *ch, int64_t amt);
+int64_t gainBaseKITransformed(char_data *ch, int64_t amt, bool trans_mult);
+int64_t gainBaseST(char_data *ch, int64_t amt);
+int64_t gainBaseSTTransformed(char_data *ch, int64_t amt, bool trans_mult);
+void gainBaseAll(char_data *ch, int64_t amt);
+void gainBaseAllTransformed(char_data *ch, int64_t amt, bool trans_mult);
 
-int64_t loseBasePL(char_data *ch, int64_t amt, bool trans_mult = false);
-int64_t loseBaseKI(char_data *ch, int64_t amt, bool trans_mult = false);
-int64_t loseBaseST(char_data *ch, int64_t amt, bool trans_mult = false);
-void loseBaseAll(char_data *ch, int64_t amt, bool trans_mult = false);
+int64_t loseBasePL(char_data *ch, int64_t amt);
+int64_t loseBasePLTransformed(char_data *ch, int64_t amt, bool trans_mult);
+int64_t loseBaseKI(char_data *ch, int64_t amt);
+int64_t loseBaseKITransformed(char_data *ch, int64_t amt, bool trans_mult);
+int64_t loseBaseST(char_data *ch, int64_t amt);
+int64_t loseBaseSTTransformed(char_data *ch, int64_t amt, bool trans_mult);
+void loseBaseAll(char_data *ch, int64_t amt);
+void loseBaseAllTransformed(char_data *ch, int64_t amt, bool trans_mult);
 
-int64_t gainBasePLPercent(char_data *ch, double amt, bool trans_mult = false);
-int64_t gainBaseKIPercent(char_data *ch, double amt, bool trans_mult = false);
-int64_t gainBaseSTPercent(char_data *ch, double amt, bool trans_mult = false);
-void gainBaseAllPercent(char_data *ch, double amt, bool trans_mult = false);
+int64_t gainBasePLPercent(char_data *ch, double amt);
+int64_t gainBasePLPercentTransformed(char_data *ch, double amt, bool trans_mult);
+int64_t gainBaseKIPercent(char_data *ch, double amt);
+int64_t gainBaseKIPercentTransformed(char_data *ch, double amt, bool trans_mult);
+int64_t gainBaseSTPercent(char_data *ch, double amt);
+int64_t gainBaseSTPercentTransformed(char_data *ch, double amt, bool trans_mult);
+void gainBaseAllPercent(char_data *ch, double amt);
+void gainBaseAllPercentTransformed(char_data *ch, double amt, bool trans_mult);
 
-int64_t loseBasePLPercent(char_data *ch, double amt, bool trans_mult = false);
-int64_t loseBaseKIPercent(char_data *ch, double amt, bool trans_mult = false);
-int64_t loseBaseSTPercent(char_data *ch, double amt, bool trans_mult = false);
-void loseBaseAllPercent(char_data *ch, double amt, bool trans_mult = false);
+int64_t loseBasePLPercent(char_data *ch, double amt);
+int64_t loseBasePLPercentTransformed(char_data *ch, double amt, bool trans_mult);
+int64_t loseBaseKIPercent(char_data *ch, double amt);
+int64_t loseBaseKIPercentTransformed(char_data *ch, double amt, bool trans_mult);
+int64_t loseBaseSTPercent(char_data *ch, double amt);
+int64_t loseBaseSTPercentTransformed(char_data *ch, double amt, bool trans_mult);
+void loseBaseAllPercent(char_data *ch, double amt);
+void loseBaseAllPercentTransformed(char_data *ch, double amt, bool trans_mult);
 
-void cureStatusKnockedOut(char_data *ch, bool announce = true);
-void cureStatusBurn(char_data *ch, bool announce = true);
-void cureStatusPoison(char_data *ch, bool announce = true);
+void cureStatusKnockedOut(char_data *ch);
+void cureStatusKnockedOutAnnounced(char_data *ch, bool announce);
+void cureStatusBurn(char_data *ch);
+void cureStatusBurnAnnounced(char_data *ch, bool announce);
+void cureStatusPoison(char_data *ch);
+void cureStatusPoisonAnnounced(char_data *ch, bool announce);
 void setStatusKnockedOut(char_data *ch);
 
 int64_t getMaxCarryWeight(char_data *ch);
@@ -232,3 +276,8 @@ int sensei_rpp_cost(int s_id, int r_id);
 int race_get_size(int r_id);
 int race_is_playable(int r_id);
 int race_is_people(int r_id);
+
+
+#ifdef __cplusplus
+}
+#endif

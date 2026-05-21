@@ -7,6 +7,7 @@
 #include "dbat/game/db.h"
 #include "dbat/game/comm.h"
 #include "dbat/game/config.h"
+#include "dbat/game/interpreter.h"
 
 #include <linux/limits.h>
 #include <errno.h>

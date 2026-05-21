@@ -19,7 +19,7 @@
 #include "dbat/game/act.item.h"
 #include "dbat/game/act.social.h"
 #include "dbat/game/guild.h"
-#include "dbat/game/races.h"
+#include "dbat/game/races_plus.h"
 #include "dbat/game/act.comm.h"
 #include "dbat/game/class.h"
 #include "dbat/game/affect.h"

@@ -12,3 +12,11 @@
 #include "dbat/game/extract.h"
 #include "dbat/game/random.h"
 #include "dbat/game/log.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
+#ifdef __cplusplus
+}
+#endif

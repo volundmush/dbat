@@ -16,6 +16,10 @@
 #include "dbat/db/consts/types.h"
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*
 ** how often will heartbeat() call the 'wait' event function?
 */
@@ -71,3 +75,8 @@ long queue_key(struct queue *q);
 long queue_elmt_key(struct q_element *qe);
 void queue_free(struct queue *q);
 int  event_is_queued(struct event *event);
+
+
+#ifdef __cplusplus
+}
+#endif

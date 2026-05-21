@@ -2,6 +2,10 @@
 #include "dbat/db/consts/types.h"
 #include "guild.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void copy_guild(struct guild_data *tguild, struct guild_data *fguild);
 void copy_list(IDXTYPE **tlist, IDXTYPE *flist);
 void remove_from_int_list(IDXTYPE **list, IDXTYPE num);
@@ -43,3 +47,8 @@ guild_rnum real_guild(guild_vnum vnum);
 #define MAX_PER_PRAC    1	/* max percent gain in skill per practice */
 #define MIN_PER_PRAC    2	/* min percent gain in skill per practice */
 #define PRAC_TYPE       3	/* should it say 'spell' or 'skill'?	 */
+
+
+#ifdef __cplusplus
+}
+#endif

@@ -1,6 +1,10 @@
 #pragma once
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define SPELL_LEVEL_0     0 
 #define SPELL_LEVEL_1     1
 #define SPELL_LEVEL_2     2
@@ -79,3 +83,7 @@
 #define SFEAT_MAX				1
 
 extern const char *spell_schools[NUM_SCHOOLS+1];
+
+#ifdef __cplusplus
+}
+#endif

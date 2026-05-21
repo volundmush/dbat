@@ -2,6 +2,10 @@
 #include "dbat/db/consts/types.h"
 #include "dbat/db/command.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define CMD_NAME (complete_cmd_info[cmd].command)
 #define CMD_IS(cmd_name) (!strcmp(cmd_name, complete_cmd_info[cmd].command))
 #define IS_MOVE(cmdnum) (complete_cmd_info[cmdnum].command_pointer == do_move)
@@ -301,3 +305,8 @@ extern struct command_info *complete_cmd_info;
 #define SCMD_REDIT      1
 #define SCMD_OEDIT      2
 #define SCMD_MEDIT      3
+
+
+#ifdef __cplusplus
+}
+#endif

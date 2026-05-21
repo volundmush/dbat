@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Modes of connectedness: used by descriptor_data.state */
 #define CON_PLAYING	 0	/* Playing - Nominal state		*/
 #define CON_CLOSE	 1	/* User disconnect, remove character.	*/
@@ -78,3 +82,7 @@
 #define NUM_CON_TYPES 73
 
 extern const char *connected_types[NUM_CON_TYPES+1];
+
+#ifdef __cplusplus
+}
+#endif

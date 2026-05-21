@@ -1,6 +1,10 @@
 #pragma once
 #include "consts/types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct board_msg {
   long poster;
   time_t timestamp;
@@ -39,3 +43,7 @@ struct board_info {
 };
 
 extern struct board_info *bboards;
+
+#ifdef __cplusplus
+}
+#endif

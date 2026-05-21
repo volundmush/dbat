@@ -2,6 +2,10 @@
 #include "dbat/db/consts/types.h"
 #include <stdio.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* these factors should be unique integers */
 #define RENT_FACTOR 	1
 #define CRYO_FACTOR 	4
@@ -26,3 +30,8 @@ void	Crash_save_all(void);
 int     Crash_load_xapobjs(struct char_data *ch);
 
 SPECIAL(receptionist);
+
+
+#ifdef __cplusplus
+}
+#endif

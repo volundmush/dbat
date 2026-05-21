@@ -1,6 +1,10 @@
 #pragma once
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct disabled_data DISABLED_DATA;
 
 extern DISABLED_DATA *disabled_first; /* interpreter.c */
@@ -13,3 +17,7 @@ struct disabled_data {
        int16_t level;                       /* level of disabler             */
        int subcmd;                         /* the subcmd, if any            */
 };
+
+#ifdef __cplusplus
+}
+#endif

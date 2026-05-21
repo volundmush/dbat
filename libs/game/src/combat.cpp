@@ -1093,7 +1093,7 @@ int64_t advanced_energy(struct char_data *ch, int64_t dmg)
    if (GET_CHARGE(ch) > 0 && rand_number(1, 100) <= 10) {
     act("@MThe attack causes your weak control to slip and you are shocked by your own charged energy!@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@m$n@M suffers shock from their own charged energy!@n", TRUE, ch, 0, 0, TO_ROOM);
-    decCurHealth(ch, GET_CHARGE(ch) / 4, 1);
+     decCurHealthFloored(ch, GET_CHARGE(ch) / 4, 1);
    }
    add = dmg * rate;
   }
@@ -3215,7 +3215,7 @@ int64_t damtype(struct char_data *ch, int type, int skill, double percent)
       int64_t amount = getEffMaxPL(ch) * hitperc;
      int64_t difference = GET_HIT(ch) - amount;
 
-     decCurHealth(ch, amount, 1);
+      decCurHealthFloored(ch, amount, 1);
 
      damtype_focus(ch, &dam, focus, 200);
    } else {
@@ -3491,7 +3491,7 @@ void saiyan_gain(struct char_data *ch, struct char_data *vict)
     int avail_count = 0;
 
     for (int i = 0; i < 3; i++) {
-        if (!is_soft_cap(ch, stats[i], 1.5)) {
+        if (!is_soft_cap_mult(ch, stats[i], 1.5)) {
             available[avail_count++] = stats[i];
         }
     }
@@ -3871,7 +3871,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
   if (IS_MUTANT(vict) && (GET_GENOME(vict, 0) == 8 || GET_GENOME(vict, 1) == 8) && type == 0) {
    int64_t drain = dmg * 0.1;
    dmg -= drain;
-   decCurST(ch, drain, 1);
+    decCurSTFloored(ch, drain, 1);
    act("@Y$N's rubbery body makes hitting it tiring!@n", TRUE, ch, 0, vict, TO_CHAR);
    act("@Y$n's stamina is sapped a bit by hitting your rubbery body!@n", TRUE, ch, 0, vict, TO_VICT);
   }
@@ -4197,7 +4197,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
     act("@c$N@W seems to be more aware now.@n", TRUE, ch, 0, vict, TO_NOTVICT);
   }
   if (AFF_FLAGGED(vict, AFF_KNOCKED) && rand_number(1, 12) >= 11) {
-      cureStatusKnockedOut(vict, true);
+       cureStatusKnockedOutAnnounced(vict, true);
       if (IS_NPC(vict) && rand_number(1, 20) >= 12) {
           act("@W$n@W stands up.@n", FALSE, vict, 0, 0, TO_ROOM);
           GET_POS(vict) = POS_STANDING;
@@ -4361,9 +4361,9 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
    act("@c$N@w disappears right before dying. $N appears to be immortal.@n", TRUE, ch, 0, vict, TO_CHAR);
    act("@CYou disappear right before death, having been saved by your immortality.@n", TRUE, ch, 0, vict, TO_VICT);
    act("@c$N@w disappears right before dying. $N appears to be immortal.@n.", TRUE, ch, 0, vict, TO_NOTVICT);
-   decCurHealthPercent(vict, 1, 1);
-   decCurSTPercent(vict, 1, 1);
-   decCurKIPercent(vict, 1, 1);
+    decCurHealthPercentFloored(vict, 1, 1);
+    decCurSTPercentFloored(vict, 1, 1);
+    decCurKIPercentFloored(vict, 1, 1);
 
    if (FIGHTING(vict)) {
     stop_fighting(vict);
@@ -4393,7 +4393,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
   if (!is_sparring(ch) && !PLR_FLAGGED(vict, PLR_IMMORTAL) && GET_HIT(vict) - dmg <= 0) {
   
     if (GET_HIT(vict) - dmg <= 0 && suppresso == FALSE) {
-   decCurHealthPercent(vict, 1, 0);
+    decCurHealthPercentFloored(vict, 1, 0);
     if (!IS_NPC(vict) && vict->lifeperc > 0 && (getCurLF(vict)) - (dmg - GET_HIT(vict)) >= 0) {
         act("@c$N@w barely clings to life!@n", TRUE, ch, 0, vict, TO_CHAR);
         act("@CYou barely cling to life!@n", TRUE, ch, 0, vict, TO_VICT);
@@ -4462,7 +4462,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
     send_to_char(vict, "@D[@rDamage@W: @BPitiful...@D]@n\r\n");
    }
 
-   decCurHealthPercent(vict, 1, 0);
+   decCurHealthPercentFloored(vict, 1, 0);
 
    if (AFF_FLAGGED(ch, AFF_GROUP)) {
     group_gain(ch, vict);

@@ -13,7 +13,7 @@
 #include "dbat/game/oasis.h"
 #include "dbat/game/dg_scripts.h"
 #include "dbat/game/act.informative.h"
-#include "dbat/game/races.h"
+#include "dbat/game/races_plus.h"
 #include "dbat/game/act.wizard.h"
 #include "dbat/game/handler.h"
 

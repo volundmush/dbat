@@ -2,6 +2,10 @@
 #include "dbat/db/consts/types.h"
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* act.item.c */
 // global variables
 extern struct obj_data *obj_selling;
@@ -43,3 +47,8 @@ ACMD(do_pack);
 ACMD(do_garden);
 ACMD(do_refuel);
 ACMD(do_sac);
+
+
+#ifdef __cplusplus
+}
+#endif

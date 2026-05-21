@@ -12,6 +12,10 @@
 #include "consts/adminflags.h"
 #include "consts/mobflags.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // Legacy Macros
 
 /*
@@ -603,3 +607,8 @@ bool MOON_TIMECHECK();
 #define GET_MURDER(ch)          CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->murder))
 
 #define GET_PAGE_LENGTH(ch)         CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->page_length))
+
+
+#ifdef __cplusplus
+}
+#endif

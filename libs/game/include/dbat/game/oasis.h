@@ -2,6 +2,10 @@
 #include "dbat/db/consts/types.h"
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define _OASISOLC	0x206   /* 2.0.6 */
 /*
  * Used to determine what version of OasisOLC is installed.
@@ -856,3 +860,8 @@ void free_context_help(void);
 #define STAT_GET_CHA  5
 #define STAT_QUIT     6
 #define STAT_PARSE_MENU 7
+
+
+#ifdef __cplusplus
+}
+#endif

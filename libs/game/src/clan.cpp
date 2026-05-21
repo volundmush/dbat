@@ -37,10 +37,10 @@
 #include "dbat/game/log.h"
 #include "dbat/game/stringutils.h"
 #include "dbat/game/character_utils.h"
+#include "dbat/game/improved-edit.h"
 
 
 extern char *strlwr(char *s);
-extern void send_editor_help(struct descriptor_data *d);
 
 /* Local variables */
 int num_clans = 0;

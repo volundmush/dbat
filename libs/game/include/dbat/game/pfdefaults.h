@@ -1,6 +1,10 @@
 #pragma once
 #include "dbat/db/consts/types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*
   ascii pfile variable defaults
 
@@ -80,3 +84,8 @@
 #define PFDEF_MURDER		0
 #define PFDEF_PAGELENGTH	50
 #define PFDEF_GAUNTLET          0
+
+
+#ifdef __cplusplus
+}
+#endif

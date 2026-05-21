@@ -2,6 +2,10 @@
 #include "dbat/db/consts/types.h"
 #include "db.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define STRING_TERMINATOR       '~'
 
 #define CONFIG_GENOLC_MOBPROG	0
@@ -47,3 +51,8 @@ room_vnum genolc_zone_bottom(zone_rnum rznum);
 room_vnum genolc_zonep_bottom(struct zone_data *zone);
 void create_world_index(int znum, const char *type);
 void free_save_list(void);
+
+
+#ifdef __cplusplus
+}
+#endif

@@ -42,8 +42,9 @@
 #include "dbat/game/house.h"
 #include "dbat/game/comm.h"
 #include "dbat/game/dg_scripts.h"
-#include "dbat/game/races.h"
+#include "dbat/game/races_plus.h"
 #include "dbat/game/class.h"
+#include "dbat/game/sensei.h"
 #include "dbat/game/spells.h"
 #include "dbat/game/improved-edit.h"
 #include "dbat/game/objsave.h"
@@ -55,6 +56,8 @@
 #include "dbat/game/shop.h"
 #include "dbat/game/guild.h"
 #include "dbat/game/spell_parser.h"
+
+
 
 /* local variables */
 static int copyover_timer = 0; /* for timed copyovers */

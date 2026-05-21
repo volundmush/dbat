@@ -17,6 +17,10 @@
 #include "genzon.h"
 #include "oasis.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 ACMD(do_attach) ;
 ACMD(do_detach);
 ACMD(do_vdelete);
@@ -246,3 +250,8 @@ room_rnum obj_room(obj_data *obj);
 #define ADD_UID_VAR(buf, trig, go, name, context) do { \
 		         sprintf(buf, "%c%d", UID_CHAR, GET_ID(go)); \
                          add_var(&GET_TRIG_VARS(trig), name, buf, context); } while (0)
+
+
+#ifdef __cplusplus
+}
+#endif

@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define SG_MIN		2 /* Skill gain check must be less than this
 			     number in order to be successful. 
 			     IE: 1% of a skill gain */
@@ -60,3 +64,8 @@ input */
 
 /* define the largest set of commands for a trigger */
 #define MAX_CMD_LENGTH          16384 /* 16k should be plenty and then some */
+
+
+#ifdef __cplusplus
+}
+#endif

@@ -22,6 +22,7 @@
 #include "dbat/game/fileop.h"
 #include "dbat/game/affect.h"
 #include "dbat/game/interpreter.h"
+#include "dbat/game/genolc.h"
 
 #include <unistd.h>
 
@@ -34,7 +35,6 @@
 /* local functions */
 void build_player_index(void);
 void save_etext(struct char_data *ch);
-int sprintascii(char *out, bitvector_t bits);
 void tag_argument(char *argument, char *tag);
 void load_affects(FILE *fl, struct char_data *ch, int violence);
 void load_bonuses(FILE *fl, struct char_data *ch, bool mods);

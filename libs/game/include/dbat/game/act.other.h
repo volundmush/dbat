@@ -2,6 +2,10 @@
 #include "dbat/db/consts/types.h"
 #include "dbat/db/consts/aligns.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // variables
 extern const room_vnum freeres[NUM_ALIGNS];
 
@@ -110,3 +114,8 @@ ACMD(do_fix);
 ACMD(do_resurrect);
 ACMD(do_clan);
 ACMD(do_aid);
+
+
+#ifdef __cplusplus
+}
+#endif

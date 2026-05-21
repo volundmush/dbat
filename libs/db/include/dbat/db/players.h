@@ -1,6 +1,10 @@
 #pragma once
 #include "consts/types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct player_index_element {
    char	*name;
    long id;
@@ -16,3 +20,7 @@ struct player_index_element {
 
 extern int top_of_p_table;
 extern struct player_index_element *player_table;
+
+#ifdef __cplusplus
+}
+#endif

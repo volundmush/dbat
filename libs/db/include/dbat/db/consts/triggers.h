@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define    MOB_TRIGGER   0
 #define    OBJ_TRIGGER   1
 #define    WLD_TRIGGER   2
@@ -86,3 +90,7 @@ extern const char *wtrig_types[NUM_WTRIG_TYPES+1];
 #define MOB_ID_BASE	  50000  /* 50000 player IDNUMS should suffice */
 #define ROOM_ID_BASE    1050000 /* 1000000 Mobs */
 #define OBJ_ID_BASE     1300000 /* 250000 Rooms */
+
+#ifdef __cplusplus
+}
+#endif

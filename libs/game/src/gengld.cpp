@@ -10,6 +10,7 @@
 #include "dbat/game/genolc.h"
 #include "dbat/game/genzon.h"
 #include "dbat/game/utils.h"
+#include "dbat/game/gedit.h"
 
 /*
  * NOTE (gg): Didn't modify sedit much. Don't consider it as 'recent'
@@ -253,4 +254,3 @@ int save_guilds(zone_rnum zone_num)
   }
   return TRUE;
 }
-

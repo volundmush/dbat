@@ -3,6 +3,10 @@
 #include <stdbool.h>
 #include <time.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define CIRCLE_UNSIGNED_INDEX 0	/* 0 = signed, 1 = unsigned */
 
 #if CIRCLE_UNSIGNED_INDEX
@@ -105,3 +109,8 @@ typedef struct innate_node innate_node;
 
 #define ACMD(name) void (name)(struct char_data *ch, char *argument, int cmd, int subcmd)
 #define SPECIAL(name) int (name)(struct char_data *ch, void *me, int cmd, char *argument)
+
+
+#ifdef __cplusplus
+}
+#endif

@@ -2,6 +2,10 @@
 #include "dbat/db/consts/types.h"
 #include "spells.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // global variables
 extern struct char_data *combat_list, *next_combat_list;
 extern struct attack_hit_type attack_hit_text[NUM_ATTACK_TYPES];
@@ -97,3 +101,8 @@ ACMD(do_kaioken);
 ACMD(do_escape);
 ACMD(do_balefire);
 ACMD(do_blessedhammer);
+
+
+#ifdef __cplusplus
+}
+#endif

@@ -2,6 +2,10 @@
 #include "dbat/db/consts/types.h"
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void aedit_disp_menu(struct descriptor_data * d);
 void aedit_parse(struct descriptor_data * d, char *arg);
 void aedit_setup_new(struct descriptor_data *d);
@@ -14,3 +18,7 @@ int aedit_find_command(const char *txt);
 ACMD(do_oasis_aedit);
 
 ACMD(do_astat);
+
+#ifdef __cplusplus
+}
+#endif

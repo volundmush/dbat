@@ -17,7 +17,7 @@
 #include "dbat/game/utils.h"
 #include "dbat/game/comm.h"
 #include "dbat/game/handler.h"
-#include "dbat/game/races.h"
+#include "dbat/game/races_plus.h"
 #include "dbat/game/interpreter.h"
 #include "dbat/game/spells.h"
 #include "dbat/game/feats.h"

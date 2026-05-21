@@ -7,6 +7,10 @@
 #include "htree.h"
 #include "extradesc.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct room_direction_data {
    char	*general_description;       /* When look DIR.			*/
 
@@ -57,3 +61,7 @@ struct room_data {
 extern struct room_data *world;
 extern room_rnum top_of_world;
 extern struct htree_node *room_htree;
+
+#ifdef __cplusplus
+}
+#endif

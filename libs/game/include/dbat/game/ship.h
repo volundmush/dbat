@@ -1,6 +1,10 @@
 #pragma once
 #include "dbat/db/consts/types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* external functions   */
 
 /* ship.c functions */
@@ -25,3 +29,8 @@
 #define SHIP_EXTRAS   7
 #define SHIP_ARMORS   5
 #define SHIP_EQUIP    5
+
+
+#ifdef __cplusplus
+}
+#endif

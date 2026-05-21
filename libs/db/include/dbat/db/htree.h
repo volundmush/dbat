@@ -1,6 +1,10 @@
 #pragma once 
 #include "consts/types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Magic constants: */
 /* Don't change these unless you know what you're doing, the constants must
  * match */
@@ -29,3 +33,8 @@ void htree_add(struct htree_node *root, IDXTYPE index, IDXTYPE content);
 void htree_del(struct htree_node *root, IDXTYPE index);
 IDXTYPE htree_find(struct htree_node *root, IDXTYPE index);
 void htree_test();
+
+
+#ifdef __cplusplus
+}
+#endif

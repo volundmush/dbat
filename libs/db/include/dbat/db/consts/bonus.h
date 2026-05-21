@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Let's define bonuses/negatives */
 #define BONUS_THRIFTY           0
 #define BONUS_PRODIGY           1
@@ -55,3 +59,7 @@
 #define BONUS_BMEMORY          51
 
 #define MAX_BONUSES            52
+
+#ifdef __cplusplus
+}
+#endif

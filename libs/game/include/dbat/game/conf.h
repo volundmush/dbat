@@ -2,6 +2,10 @@
 #include "dbat/db/consts/types.h"
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* src/conf.h.  Generated from conf.h.in by configure.  */
 /* src/conf.h.in.  Generated automatically from configure.in by autoheader.  */
 
@@ -347,3 +351,8 @@
 #define SIZEOF_SIZE_T 8
 #define SIZEOF_TIME_T 8
 #define SIZEOF_CHAR_P 8
+
+
+#ifdef __cplusplus
+}
+#endif

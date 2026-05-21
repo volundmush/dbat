@@ -47,6 +47,7 @@
 #include "dbat/game/obj_edit.h"
 #include "dbat/game/fight.h"
 #include "dbat/game/class.h"
+#include "dbat/game/races_plus.h"
 
 /* local functions  */
 static void generate_multiform(struct char_data *ch, int count);
@@ -2142,7 +2143,7 @@ ACMD(do_scry)
     send_to_char(ch, "Due to already having enough experience to level up you gain no expereince.\r\n");
    }
   } else {
-      gainBaseAllPercent(ch, .025, true);
+   gainBaseAllPercentTransformed(ch, .025, true);
    send_to_char(ch, "Your Powerlevel, Ki, and Stamina have improved!\r\n");
   }
  }

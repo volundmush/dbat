@@ -9,6 +9,7 @@
 ************************************************************************ */
 #include "dbat/game/handler.h"
 #include "dbat/game/utils.h"
+#include "dbat/game/class.h"
 #include "dbat/game/dg_scripts.h"
 #include "dbat/game/comm.h"
 #include "dbat/game/interpreter.h"

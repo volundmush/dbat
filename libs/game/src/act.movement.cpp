@@ -39,6 +39,7 @@
 #include "dbat/game/local_limits.h"
 #include "dbat/game/house.h"
 #include "dbat/game/class.h"
+#include "dbat/game/races_plus.h"
 
 /* local functions */
 static void handle_fall(struct char_data *ch);
@@ -2295,7 +2296,7 @@ static void handle_fall(struct char_data *ch)
   }
   if (!EXIT(ch, 5) || SECT(IN_ROOM(ch)) != SECT_FLYING) {
    act("@r$n slams into the ground!@n", TRUE, ch, 0, 0, TO_ROOM);
-   decCurHealth(ch, getEffMaxPL(ch) / 20, 1);
+        decCurHealthFloored(ch, getEffMaxPL(ch) / 20, 1);
 
    act("@rYou slam into the ground!@n", TRUE, ch, 0, 0, TO_CHAR);
    look_at_room(IN_ROOM(ch), ch, 0);
@@ -2314,7 +2315,7 @@ static void handle_fall(struct char_data *ch)
     act("@rYou drown!@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@R$n@r drowns!@n", TRUE, ch, 0, 0, TO_ROOM);
     die(ch, NULL);
-    decCurHealthPercent(ch, 1, 1);
+        decCurHealthPercentFloored(ch, 1, 1);
    } else {
        decCurHealthPercent(ch, .33);
    }

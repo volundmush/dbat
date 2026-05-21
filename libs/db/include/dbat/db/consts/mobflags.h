@@ -2,6 +2,10 @@
 
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Mobile flags: used by char_data.act */
 #define MOB_SPEC		0  /* Mob has a callable spec-proc   	*/
 #define MOB_SENTINEL		1  /* Mob should not move            	*/
@@ -42,3 +46,7 @@
 #define NUM_MOB_FLAGS 35
 
 extern const char *action_bits[NUM_MOB_FLAGS+1];
+
+#ifdef __cplusplus
+}
+#endif

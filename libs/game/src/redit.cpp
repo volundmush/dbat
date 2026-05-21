@@ -20,7 +20,7 @@
 #include "dbat/game/dg_olc.h"
 #include "dbat/game/spells.h"
 #include "dbat/game/handler.h"
-#include "dbat/game/races.h"
+#include "dbat/game/races_plus.h"
 #include "dbat/game/act.wizard.h"
 #include "dbat/game/act.informative.h"
 
