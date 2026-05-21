@@ -673,86 +673,91 @@ void impact_sound(struct char_data *ch, char *mssg)
 /* For removing body parts */
 void remove_limb(struct char_data *vict, int num)
 {
- /* 0 = head, 1 = rarm, 2 = larm, 3 = rleg, 4 = lleg , 5 = tail, 6 = tail*/
+  /* 0 = head, 1 = rarm, 2 = larm, 3 = rleg, 4 = lleg , 5 = tail for saiyany, 6 = tail for bio or icer... */
 
-        struct obj_data *body_part;
-        char part[1000];
-        char buf[1000];
-        char buf2[1000];
+  struct obj_data *body_part;
+  char part[1000];
+  char buf[1000];
+  char buf2[1000];
 
-        body_part = create_obj();
-        body_part->item_number = NOTHING;
-        IN_ROOM(body_part) = NOWHERE;
+  body_part = create_obj();
+  body_part->item_number = NOTHING;
+  IN_ROOM(body_part) = NOWHERE;
 
-        switch (num) {
-         case 0:
-          snprintf(part, sizeof(part), "@C%s@w's bloody head@n", GET_NAME(vict));
-          snprintf(buf, sizeof(buf), "%s bloody head", GET_NAME(vict));
-          break;
-         case 1:
-          snprintf(part, sizeof(part), "@w%s right arm@n", TRUE_RACE(vict));
-          snprintf(buf, sizeof(buf), "right arm");
-          if (PLR_FLAGGED(vict, PLR_CRARM)) {
-           REMOVE_BIT_AR(PLR_FLAGS(vict), PLR_CRARM);
-          }
-          break;
-         case 2:
-          snprintf(part, sizeof(part), "@w%s left arm@n", TRUE_RACE(vict));
-          snprintf(buf, sizeof(buf), "left arm");
-          if (PLR_FLAGGED(vict, PLR_CLARM)) {
-           REMOVE_BIT_AR(PLR_FLAGS(vict), PLR_CLARM);
-          }
-          break;
-         case 3:
-          snprintf(part, sizeof(part), "@w%s right leg@n", TRUE_RACE(vict));
-          snprintf(buf, sizeof(buf), "right leg");
-          if (PLR_FLAGGED(vict, PLR_CRLEG)) {
-           REMOVE_BIT_AR(PLR_FLAGS(vict), PLR_CRLEG);
-          }
-          break;
-         case 4:
-          snprintf(part, sizeof(part), "@w%s left leg@n", TRUE_RACE(vict));
-          snprintf(buf, sizeof(buf), "left leg");
-          if (PLR_FLAGGED(vict, PLR_CLLEG)) {
-           REMOVE_BIT_AR(PLR_FLAGS(vict), PLR_CLLEG);
-          }
-          break;
-         case 5:
-          snprintf(part, sizeof(part), "@wA %s tail@n", TRUE_RACE(vict));
-          snprintf(buf, sizeof(buf), "tail");
-          break;
-         case 6:
-          snprintf(buf, sizeof(buf), "tail");
-          break;
-         default:
-          snprintf(part, sizeof(part), "@w%s body part@n", TRUE_RACE(vict));
-          snprintf(buf, sizeof(buf), "body part");
-          break;
-        }
+  switch (num)
+  {
+  case 0:
+    snprintf(part, sizeof(part), "@C%s@w's bloody head@n", GET_NAME(vict));
+    snprintf(buf, sizeof(buf), "%s bloody head", GET_NAME(vict));
+    break;
+  case 1:
+    snprintf(part, sizeof(part), "@w%s right arm@n", TRUE_RACE(vict));
+    snprintf(buf, sizeof(buf), "right arm");
+    if (PLR_FLAGGED(vict, PLR_CRARM))
+    {
+      REMOVE_BIT_AR(PLR_FLAGS(vict), PLR_CRARM);
+    }
+    break;
+  case 2:
+    snprintf(part, sizeof(part), "@w%s left arm@n", TRUE_RACE(vict));
+    snprintf(buf, sizeof(buf), "left arm");
+    if (PLR_FLAGGED(vict, PLR_CLARM))
+    {
+      REMOVE_BIT_AR(PLR_FLAGS(vict), PLR_CLARM);
+    }
+    break;
+  case 3:
+    snprintf(part, sizeof(part), "@w%s right leg@n", TRUE_RACE(vict));
+    snprintf(buf, sizeof(buf), "right leg");
+    if (PLR_FLAGGED(vict, PLR_CRLEG))
+    {
+      REMOVE_BIT_AR(PLR_FLAGS(vict), PLR_CRLEG);
+    }
+    break;
+  case 4:
+    snprintf(part, sizeof(part), "@w%s left leg@n", TRUE_RACE(vict));
+    snprintf(buf, sizeof(buf), "left leg");
+    if (PLR_FLAGGED(vict, PLR_CLLEG))
+    {
+      REMOVE_BIT_AR(PLR_FLAGS(vict), PLR_CLLEG);
+    }
+    break;
+  case 5:
+  case 6:
+    snprintf(part, sizeof(part), "@wA %s tail@n", TRUE_RACE(vict));
+    snprintf(buf, sizeof(buf), "tail");
+    break;
+  default:
+    snprintf(part, sizeof(part), "@w%s body part@n", TRUE_RACE(vict));
+    snprintf(buf, sizeof(buf), "body part");
+    break;
+  }
 
-        body_part->name = strdup(buf);
-        if (num > 0) {
-         snprintf(buf2, sizeof(buf2), "@wA %s is lying here@n", part);
-        }
-        else {
-         snprintf(buf2, sizeof(buf2), "%s@w is lying here@n", part);
-        }
-        body_part->description = strdup(buf2);
-        body_part->short_description = strdup(part);
+  body_part->name = strdup(buf);
+  if (num > 0)
+  {
+    snprintf(buf2, sizeof(buf2), "@wA %s is lying here@n", part);
+  }
+  else
+  {
+    snprintf(buf2, sizeof(buf2), "%s@w is lying here@n", part);
+  }
+  body_part->description = strdup(buf2);
+  body_part->short_description = strdup(part);
 
-        GET_OBJ_TYPE(body_part) = ITEM_OTHER;
-        SET_BIT_AR(GET_OBJ_WEAR(body_part), ITEM_WEAR_TAKE);
-        SET_BIT_AR(GET_OBJ_EXTRA(body_part), ITEM_UNIQUE_SAVE);
-        GET_OBJ_VAL(body_part, 0) = 0;
-        GET_OBJ_VAL(body_part, 1) = 0;
-        GET_OBJ_VAL(body_part, 2) = 0;
-        GET_OBJ_VAL(body_part, 3) = 0;
-        GET_OBJ_VAL(body_part, 4) = 1;
-        GET_OBJ_VAL(body_part, 5) = 1;
-        GET_OBJ_WEIGHT(body_part) = rand_number(4, 10);
-        GET_OBJ_RENT(body_part) = 0;
-        add_unique_id(body_part);
-        obj_to_room(body_part, IN_ROOM(vict));
+  GET_OBJ_TYPE(body_part) = ITEM_OTHER;
+  SET_BIT_AR(GET_OBJ_WEAR(body_part), ITEM_WEAR_TAKE);
+  SET_BIT_AR(GET_OBJ_EXTRA(body_part), ITEM_UNIQUE_SAVE);
+  GET_OBJ_VAL(body_part, 0) = 0;
+  GET_OBJ_VAL(body_part, 1) = 0;
+  GET_OBJ_VAL(body_part, 2) = 0;
+  GET_OBJ_VAL(body_part, 3) = 0;
+  GET_OBJ_VAL(body_part, 4) = 1;
+  GET_OBJ_VAL(body_part, 5) = 1;
+  GET_OBJ_WEIGHT(body_part) = rand_number(4, 10);
+  GET_OBJ_RENT(body_part) = 0;
+  add_unique_id(body_part);
+  obj_to_room(body_part, IN_ROOM(vict));
 }
 
 /* Weapon attack texts */
