@@ -7,6 +7,7 @@
 - Fixed poison interacting with charge. [PetalFoxx]
 - Fixed grandmaster damage calculations. [PetalFoxx]
 - Numerous small fixes to combat math. [PetalFoxx]
+- Correct the offline zenni interest formula. [Volund]
 
 ** 2.9.2 **
 - Last version from before this file was created.
