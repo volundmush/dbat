@@ -17,6 +17,7 @@
 #include "dbat/game/handler.h"
 #include "dbat/game/dg_olc.h"
 #include "dbat/game/class.h"
+#include "dbat/game/races.h"
 #include "dbat/game/affect.h"
 
 /* From db.c */

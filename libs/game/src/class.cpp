@@ -1113,9 +1113,9 @@ void advance_level(struct char_data *ch, int whichclass)
   llog->ki_roll = add_ki;
   llog->add_skill = add_prac;
   GET_PRACTICES(ch, whichclass) += add_prac;
-  gainBasePL(ch, add_hp, true);
-  gainBaseKI(ch, add_mana, true);
-  gainBaseST(ch, add_move, true);
+   gainBasePLTransformed(ch, add_hp, true);
+   gainBaseKITransformed(ch, add_mana, true);
+   gainBaseSTTransformed(ch, add_move, true);
   int nhp = add_hp;
   int nma = add_mana;
   int nmo = add_move;

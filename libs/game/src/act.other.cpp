@@ -166,11 +166,11 @@ void bring_to_cap(struct char_data *ch)
  switch(get_race(ch->race)->getSoftType(ch)) {
      case dbat::race::Fixed:
          if(getBasePL(ch) < cap)
-             gainBasePL(ch, cap - getBasePL(ch)-1, p_trans);
+              gainBasePLTransformed(ch, cap - getBasePL(ch)-1, p_trans);
          if(getBaseKI(ch) < cap)
-             gainBaseKI(ch, cap - getBaseKI(ch)-1, p_trans);
+              gainBaseKITransformed(ch, cap - getBaseKI(ch)-1, p_trans);
          if(getBaseST(ch) < cap)
-             gainBaseST(ch, cap - getBaseST(ch)-1, p_trans);
+              gainBaseSTTransformed(ch, cap - getBaseST(ch)-1, p_trans);
  }
 }
 
@@ -2531,11 +2531,11 @@ ACMD(do_fury) {
   if (!*arg) {
    if (GET_HIT(ch) < getEffMaxPL(ch)) {
     if ((getCurLF(ch)) >= (getMaxLF(ch)) * 0.2) {
-     restoreHealth(ch, false);
+      restoreHealthAnnounced(ch, false);
      decCurLFPercent(ch, .2);
     } else {
         incCurHealth(ch, (getCurLF(ch)));
-        decCurLFPercent(ch, 2, -1);
+         decCurLFPercentFloored(ch, 2, -1);
     }
    }
    GET_FURY(ch) = 0;
@@ -3054,7 +3054,7 @@ ACMD(do_majinize)
 		GET_BOOSTS(ch) -= 1;
 
 		GET_MAJINIZED(vict) = (getBasePL(vict)) * .4;
-        gainBasePLPercent(vict, .4, true);
+  gainBasePLPercentTransformed(vict, .4, true);
 		return;
 	}
 
@@ -3841,7 +3841,7 @@ kachin ? "create kachin\r\n" : "",  boost ? "create elixir\r\n" : "");
    act("You hold out your hand and create $p out of your ki!", TRUE, ch, obj, 0, TO_CHAR);
    act("$n holds out $s hand and creates $p out of thin air!", TRUE, ch, obj, 0, TO_ROOM);
       decCurKI(ch, cost);
-   decCurHealthPercent(ch, 1, 1);
+    decCurHealthPercentFloored(ch, 1, 1);
    GET_PRACTICES(ch, GET_CLASS(ch)) -= 10;   
    return;
   }
@@ -3879,7 +3879,7 @@ kachin ? "create kachin\r\n" : "",  boost ? "create elixir\r\n" : "");
    act("$n holds out $s hand and creates $p out of thin air!", TRUE, ch, obj, 0, TO_ROOM);
       decCurKI(ch, cost);
       decCurHealth(ch, cost2);
-      decCurSTPercent(ch, 1, 1);
+       decCurSTPercentFloored(ch, 1, 1);
    GET_PRACTICES(ch, GET_CLASS(ch)) -= 50;
    return;
   }
@@ -3930,7 +3930,7 @@ ACMD(do_recharge)
     incCurST(ch, cost * 2);
    }
    else {
-    restoreST(ch, false);
+   restoreSTAnnounced(ch, false);
     send_to_char(ch, "You are fully recharged now.\r\n");
    }
    WAIT_STATE(ch, PULSE_2SEC);
@@ -4092,7 +4092,7 @@ ACMD(do_upgrade)
     extract_obj(obj);
     act("@WYou install the circuits and upgrade your maximum powerlevel.@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@C$n@W installs some circuits and upgrades $s systems.@n", TRUE, ch, 0, 0, TO_ROOM);
-    gainBasePL(ch, gain, true);
+        gainBasePLTransformed(ch, gain, true);
     send_to_char(ch, "@gGain @D[@G+%s@D]\r\n", add_commas(gain));
     return;
    } else if (!strcasecmp("ki", arg2)) {
@@ -4100,7 +4100,7 @@ ACMD(do_upgrade)
     extract_obj(obj);
     act("@WYou install the circuits and upgrade your maximum ki.@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@C$n@W installs some circuits and upgrades $s systems.@n", TRUE, ch, 0, 0, TO_ROOM);
-    gainBaseKI(ch, gain, true);
+        gainBaseKITransformed(ch, gain, true);
     send_to_char(ch, "@gGain @D[@G+%s@D]\r\n", add_commas(gain));
     return;
    } else if (!strcasecmp("stamina", arg2)) {
@@ -4108,7 +4108,7 @@ ACMD(do_upgrade)
     extract_obj(obj);
     act("@WYou install the circuits and upgrade your maximum stamina.@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@C$n@W installs some circuits and upgrades $s systems.@n", TRUE, ch, 0, 0, TO_ROOM);
-    gainBaseST(ch, gain, true);
+        gainBaseSTTransformed(ch, gain, true);
     send_to_char(ch, "@gGain @D[@G+%s@D]\r\n", add_commas(gain));
     return;
    } else {
@@ -4184,7 +4184,7 @@ ACMD(do_upgrade)
   else {
    GET_UP(ch) -= cost;
    send_to_char(ch, "You upgrade your system and gain %s %s!", add_commas(bonus), arg);
-   gainBasePL(ch, bonus, true);
+      gainBasePLTransformed(ch, bonus, true);
   }
  }
  else if (!strcasecmp("ki", arg)) {
@@ -4228,7 +4228,7 @@ ACMD(do_upgrade)
   else {
    GET_UP(ch) -= cost;
    send_to_char(ch, "You upgrade your system and gain %s %s!", add_commas(bonus), arg);
-   gainBaseKI(ch, bonus, true);
+      gainBaseKITransformed(ch, bonus, true);
   }
  }
  else if (!strcasecmp("stamina", arg)) {
@@ -4272,7 +4272,7 @@ ACMD(do_upgrade)
   else {
    GET_UP(ch) -= cost;
    send_to_char(ch, "You upgrade your system and gain %s %s!", add_commas(bonus), arg);
-   gainBaseST(ch, bonus, true);
+      gainBaseSTTransformed(ch, bonus, true);
   }
  }
  else {
@@ -4360,9 +4360,9 @@ ACMD(do_ingest)
     int64_t pl = (getBasePL(vict)) / 6;
     int64_t stam = (getBaseST(vict)) / 6;
     int64_t ki = (getBaseKI(vict)) / 6;
-    gainBasePL(ch, pl, true);
-    gainBaseST(ch, stam, true);
-    gainBaseKI(ch, ki, true);
+      gainBasePLTransformed(ch, pl, true);
+      gainBaseSTTransformed(ch, stam, true);
+      gainBaseKITransformed(ch, ki, true);
     if (!IS_NPC(vict) && !IS_NPC(ch)) {
      send_to_imm("[PK] %s killed %s at room [%d]\r\n", GET_NAME(ch), GET_NAME(vict), GET_ROOM_VNUM(IN_ROOM(vict)));
      SET_BIT_AR(PLR_FLAGS(vict), PLR_ABSORBED);
@@ -4588,9 +4588,9 @@ ACMD(do_absorb)
       int64_t ki = (getBaseKI(vict)) / 5;
       int64_t pl = (getBasePL(vict)) / 5;
 
-    gainBasePL(ch, pl, true);
-      gainBaseST(ch, stam, true);
-      gainBaseKI(ch, ki, true);
+        gainBasePLTransformed(ch, pl, true);
+        gainBaseSTTransformed(ch, stam, true);
+        gainBaseKITransformed(ch, ki, true);
 
     if (!IS_NPC(vict) && !IS_NPC(ch)) {
      send_to_imm("[PK] %s killed %s at room [%d]\r\n", GET_NAME(ch), GET_NAME(vict), GET_ROOM_VNUM(IN_ROOM(vict)));
@@ -4657,9 +4657,9 @@ ACMD(do_absorb)
    ki = MIN(ki, 1500000L);
    pl = MIN(pl, 1500000L);
 
-   gainBasePL(ch, pl, true);
-   gainBaseST(ch, stam, true);
-   gainBaseKI(ch, ki, true);
+        gainBasePLTransformed(ch, pl, true);
+        gainBaseSTTransformed(ch, stam, true);
+        gainBaseKITransformed(ch, ki, true);
    incCurLFPercent(ch, .05);
    send_to_char(ch, "@D[@gABSORB@D] @rPL@W: @D(@y%s@D) @cKi@W: @D(@y%s@D) @gSt@W: @D(@y%s@D)@n\r\n", add_commas(pl), add_commas(ki), add_commas(stam));
    improve_skill(ch, SKILL_ABSORB, 0);
@@ -7989,7 +7989,7 @@ ACMD(do_situp)
       bonus += bonus * 0.1;
     }
     send_to_char(ch, "You feel slightly more vigorous @D[@G+%s@D]@n.\r\n", add_commas(bonus));
-     gainBaseST(ch, bonus, true);
+      gainBaseSTTransformed(ch, bonus, true);
    if (ROOM_GRAVITY(IN_ROOM(ch)) <= 50) {
    WAIT_STATE(ch, PULSE_2SEC);  
    }
@@ -8318,7 +8318,7 @@ ACMD(do_meditate)
     }
     /* Rillao: transloc, add new transes here */
     send_to_char(ch, "You feel your spirit grow stronger @D[@G+%s@D]@n.\r\n", add_commas(bonus));
-    gainBaseKI(ch, bonus, true);
+        gainBaseKITransformed(ch, bonus, true);
    if (ROOM_GRAVITY(IN_ROOM(ch)) <= 50) {
    WAIT_STATE(ch, PULSE_2SEC);
    }
@@ -8586,7 +8586,7 @@ ACMD(do_pushup)
      if (IS_HUMAN(ch)) {
          bonus = bonus * 0.8;
      }
-     gainBasePL(ch, bonus, true);
+     gainBasePLTransformed(ch, bonus, true);
    if (ROOM_GRAVITY(IN_ROOM(ch)) <= 50) {
    WAIT_STATE(ch, PULSE_2SEC);  
    }
@@ -8936,8 +8936,8 @@ void base_update(void)
                 incCurKI(d->character, getMaxKI(d->character) * .08);
                 incCurST(d->character, getMaxST(d->character) * .08);
 
-                decCurKI(ABSORBING(d->character), getMaxKI(d->character) / 20, 1);
-                decCurST(ABSORBING(d->character), getMaxST(d->character) / 20, 1);
+          decCurKIFloored(ABSORBING(d->character), getMaxKI(d->character) / 20, 1);
+          decCurSTFloored(ABSORBING(d->character), getMaxST(d->character) / 20, 1);
 
 				act("@WYou absorb stamina and ki from @c$N@W!@n", TRUE, d->character, 0, ABSORBING(d->character), TO_CHAR);
 				act("@C$n@W absorbs stamina and ki from you!@n", TRUE, d->character, 0, ABSORBING(d->character), TO_VICT);

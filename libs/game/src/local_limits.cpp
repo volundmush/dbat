@@ -867,7 +867,7 @@ static void update_flags(struct char_data *ch)
 
   if (AFF_FLAGGED(ch, AFF_KNOCKED) && !FIGHTING(ch))
   {
-    cureStatusKnockedOut(ch, true);
+      cureStatusKnockedOutAnnounced(ch, true);
   }
 
   barrier_shed(ch);
@@ -1904,7 +1904,7 @@ static void point_update_characters(void)
           else if (GET_HIT(i) <= GET_MAX_HIT(i) / 20)
           {
             send_to_char(i, "You have drowned!\r\n");
-            decCurHealthPercent(i, 1, 1);
+        decCurHealthPercentFloored(i, 1, 1);
             act("@W$n@W drowns right in front of you.@n", FALSE, i, 0, 0, TO_ROOM);
             die(i, NULL);
           }
@@ -1959,7 +1959,7 @@ static void point_update_characters(void)
         {
           send_to_char(i, "@wYour sleep does you some good.@n\r\n");
           if (!IS_ANDROID(i) && !FIGHTING(i))
-            restoreLF(i, false);
+        restoreLFAnnounced(i, false);
         }
         else if (GET_POS(i) == POS_RESTING)
         {

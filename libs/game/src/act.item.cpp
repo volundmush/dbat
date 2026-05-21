@@ -43,6 +43,8 @@
 #include "dbat/game/genzon.h"
 #include "dbat/game/dg_scripts.h"
 #include "dbat/game/boards.h"
+#include "dbat/game/class.h"
+#include "dbat/game/races.h"
 
 
 /* global variables */
@@ -2527,7 +2529,7 @@ static void perform_get_from_container(struct char_data *ch, struct obj_data *ob
        if (GET_BONUS(ch, BONUS_FIREPROOF) <= 0 && !IS_DEMON(ch)) {
            decCurHealthPercent(ch, .25);
         if (GET_BONUS(ch, BONUS_FIREPRONE) > 0)
-            decCurHealthPercent(ch, 1, 1);
+      decCurHealthPercentFloored(ch, 1, 1);
 
         SET_BIT_AR(AFF_FLAGS(ch), AFF_BURNED);
         act("@RYou are burned by it!@n", TRUE, ch, 0, 0, TO_CHAR);
@@ -2620,9 +2622,9 @@ int perform_get_from_room(struct char_data *ch, struct obj_data *obj)
 
       if (OBJ_FLAGGED(obj, ITEM_HOT)) {
        if (GET_BONUS(ch, BONUS_FIREPROOF) <= 0 && !IS_DEMON(ch)) {
-           decCurHealthPercent(ch, .25, 1);
+     decCurHealthPercentFloored(ch, .25, 1);
         if (GET_BONUS(ch, BONUS_FIREPRONE) > 0)
-            decCurHealthPercent(ch, 1, 1);
+     decCurHealthPercentFloored(ch, 1, 1);
 
         SET_BIT_AR(AFF_FLAGS(ch), AFF_BURNED);
         act("@RYou are burned by it!@n", TRUE, ch, 0, 0, TO_CHAR);
@@ -3155,9 +3157,9 @@ static void perform_give(struct char_data *ch, struct char_data *vict,
 
       if (OBJ_FLAGGED(obj, ITEM_HOT)) {
        if (GET_BONUS(vict, BONUS_FIREPROOF) <= 0 && !IS_DEMON(vict)) {
-           decCurHealthPercent(ch, .25, 1);
+      decCurHealthPercentFloored(ch, .25, 1);
         if (GET_BONUS(vict, BONUS_FIREPRONE) > 0)
-            decCurHealthPercent(ch, 1, 1);
+      decCurHealthPercentFloored(ch, 1, 1);
 
         SET_BIT_AR(AFF_FLAGS(vict), AFF_BURNED);
         act("@RYou are burned by it!@n", TRUE, vict, 0, 0, TO_CHAR);
@@ -3838,9 +3840,9 @@ static void majin_gain(struct char_data *ch, int type)
           ki = MIN(1500000L, ((getBaseKI(ch)) / 900) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2));
           break;
   }
-    gainBasePL(ch, pl, true);
-  gainBaseKI(ch, ki, true);
-  gainBaseST(ch, st, true);
+        gainBasePLTransformed(ch, pl, true);
+        gainBaseKITransformed(ch, ki, true);
+        gainBaseSTTransformed(ch, st, true);
 
     send_to_char(ch, "@mYou feel stronger after consuming the candy @D[@RPL@W: @r%s @CKi@D: @c%s @GSt@D: @g%s@D]@m!@n\r\n", add_commas(pl), add_commas(ki), add_commas(st));
 }
