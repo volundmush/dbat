@@ -42,6 +42,7 @@
 #include "dbat/game/dg_event.h"
 #include "dbat/game/reset.h"
 #include "dbat/game/class.h"
+#include "dbat/game/sensei.h"
 #include "dbat/game/comm.h"
 #include "dbat/game/dg_scripts.h"
 #include "dbat/game/interpreter.h"

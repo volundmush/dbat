@@ -22,6 +22,7 @@
 #include "dbat/game/screen.h"
 #include "dbat/game/races.h"
 #include "dbat/game/class.h"
+#include "dbat/game/sensei.h"
 #include "dbat/game/act.wizard.h"
 #include "dbat/game/modify.h"
 #include "dbat/game/dg_scripts.h"

@@ -15,6 +15,8 @@
 #include "dbat/game/spells.h"
 #include "dbat/game/screen.h"
 
+#include "dbat/game/races.h"
+#include "dbat/game/class.h"
 #include "dbat/game/obj_edit.h"
 #include "dbat/game/dg_comm.h"
 #include "dbat/game/act.other.h"

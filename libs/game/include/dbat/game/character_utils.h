@@ -3,8 +3,6 @@
 #include "dbat/db/character_utils.h"
 #include "dbat/db/characters.h"
 #include "dbat/game/log.h"
-#include "dbat/game/races.h"
-#include "dbat/game/class.h"
 #include "dbat/db/weather.h"
 
 int roll_stats(struct char_data *ch, int type, int bonus);

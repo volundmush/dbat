@@ -23,6 +23,7 @@
 #include "dbat/game/races.h"
 #include "dbat/game/act.informative.h"
 #include "dbat/game/affect.h"
+#include "dbat/game/class.h"
 
 /* external variables */
 
