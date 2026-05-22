@@ -1109,6 +1109,7 @@ void oedit_parse(struct descriptor_data *d, char *arg)
         GET_ID(obj) = max_obj_id++;
         /* find_obj helper */
         add_to_lookup_table(GET_ID(obj), (void *)obj);
+        (void)obj_register_id(GET_ID(obj), obj);
         if (GET_OBJ_VNUM(obj) != NOTHING) {
           /* remove any old scripts */
           if (SCRIPT(obj)) {
@@ -1782,10 +1783,12 @@ void oedit_string_cleanup(struct descriptor_data *d, int terminator)
 void iedit_setup_existing(struct descriptor_data *d, struct obj_data *real_num)
 {
   struct obj_data *obj;
+  int64_t temp_id;
 
   OLC_IOBJ(d) = real_num;
 
   obj = create_obj();
+  temp_id = GET_ID(obj);
   copy_object(obj,real_num);
 
   /* free any assigned scripts */
@@ -1793,7 +1796,8 @@ void iedit_setup_existing(struct descriptor_data *d, struct obj_data *real_num)
     extract_script(obj, OBJ_TRIGGER);
   SCRIPT(obj) = NULL;
   /* find_obj helper */
-  remove_from_lookup_table(GET_ID(obj));
+  remove_from_lookup_table(temp_id);
+  obj_unregister_id(temp_id);
 
   OLC_OBJ(d) = obj;
   OLC_IOBJ(d) = real_num;
@@ -1842,5 +1846,3 @@ ACMD(do_iedit) {
 
   return;
 }
-
-

@@ -2978,6 +2978,7 @@ struct char_data *create_char(void)
   GET_ID(ch) = max_mob_id++;
   /* find_char helper */
   add_to_lookup_table(GET_ID(ch), (void *)ch);
+  (void)char_register_id(GET_ID(ch), ch);
   
   return (ch);
 }
@@ -3570,6 +3571,7 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
   GET_ID(mob) = max_mob_id++;
   /* find_char helper */
   add_to_lookup_table(GET_ID(mob), (void *)mob);
+  (void)char_register_id(GET_ID(mob), mob);
 
   copy_proto_script(&mob_proto[i], mob, MOB_TRIGGER);
   assign_triggers(mob, MOB_TRIGGER);
@@ -3760,13 +3762,12 @@ struct obj_data *create_obj(void)
   GET_ID(obj) = max_obj_id++;
   /* find_obj helper */
   add_to_lookup_table(GET_ID(obj), (void *)obj);
+  (void)obj_register_id(GET_ID(obj), obj);
 
   obj->generation = time(0);
   obj->unique_id = -1;
 
   assign_triggers(obj, OBJ_TRIGGER);
-  /* find_obj helper */
-  add_to_lookup_table(GET_ID(obj), (void *)obj);
 
   return (obj);
 }
@@ -3796,6 +3797,7 @@ struct obj_data *read_object(obj_vnum nr, int type) /* and obj_rnum */
   GET_ID(obj) = max_obj_id++;
   /* find_obj helper */
   add_to_lookup_table(GET_ID(obj), (void *)obj);
+  (void)obj_register_id(GET_ID(obj), obj);
 
   obj->generation = time(0);
   obj->unique_id = -1;
@@ -4465,6 +4467,7 @@ void free_char(struct char_data *ch)
   */
   if (GET_ID(ch) != 0)
     remove_from_lookup_table(GET_ID(ch));
+  char_unregister_id(GET_ID(ch));
 
   free(ch);
 }
@@ -4498,6 +4501,7 @@ void free_obj(struct obj_data *obj)
 
   /* find_obj helper */
   remove_from_lookup_table(GET_ID(obj));
+  obj_unregister_id(GET_ID(obj));
 
   if (obj->sbinfo)
     free(obj->sbinfo);
