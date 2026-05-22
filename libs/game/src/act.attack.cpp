@@ -2492,6 +2492,11 @@ ACMD(do_throw)
 
  half_chop(argument, arg, chunk);
 
+  if (GET_SONG(ch) > 0) {
+   send_to_char(ch, "You are currently playing a song! Enter the song command in order to stop!\r\n");
+   return;
+ }
+
  if (!*arg) {
   send_to_char(ch, "Throw what?\r\n");
   return;
