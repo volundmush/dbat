@@ -2860,7 +2860,7 @@ static void damtype_focus(char_data *ch, int64_t *dam, int64_t focus, int divby)
 static void damtype_unarmed(char_data *ch, int skill, int64_t *dam) {
     // General Arlian bonus.
     if (IS_ARLIAN(ch)) {
-        *dam += *dam * 0.02;
+        *dam += *dam * 0.2;
     }
 
     // Sixteen's Iron Hand Bonus.
