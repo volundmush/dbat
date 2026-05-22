@@ -13,6 +13,8 @@
 - Updated build system to Zig 0.16. Shuffled some includes around to streamline what Zig can see. [Volund]
 - Vials of Sacred Elixir will no longer corrupt character thirst if overindulged. [Volund]
 - Lost tails of Icers and Bio-Androids will be properly named when torn off. [Volund]
+- Zig now program entry point. [Volund]
+- Added new internal API functions for targeting entities by ID, subscribing entities for iteration lists. IDs are not yet stable between runs. [Volund]
 
 ** 2.9.2 **
 - Last version from before this file was created.
