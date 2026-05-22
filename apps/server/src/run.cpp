@@ -15,7 +15,7 @@
 
 #include <unistd.h>
 
-int main(int argc, char **argv)
+extern "C" int run_circle(int argc, char **argv)
 {
     int pos = 1;
     const char *dir;

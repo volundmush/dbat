@@ -1,5 +1,9 @@
 #pragma once
 #include "dbat/db/consts/types.h"
+#include "dbat/db/characters.h"
+#include "dbat/db/objects.h"
+#include "dbat/db/rooms.h"
+#include "dbat/db/zones.h"
 #include <stdio.h>
 
 #ifdef __cplusplus
@@ -141,11 +145,6 @@ void    free_help_table(void);
 void    load_help(FILE *fl, char *name);
 void auc_save(void);
 void load_config(void);
-
-zone_rnum real_zone(zone_vnum vnum);
-room_rnum real_room(room_vnum vnum);
-mob_rnum real_mobile(mob_vnum vnum);
-obj_rnum real_object(obj_vnum vnum);
 
 int	load_char(const char *name, struct char_data *ch);
 void	load_char_pets(struct char_data *ch);

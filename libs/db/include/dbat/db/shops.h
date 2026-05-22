@@ -40,6 +40,9 @@ struct shop_data {
 extern struct shop_data *shop_index;
 extern int top_shop;
 
+shop_rnum real_shop(shop_vnum vnum);
+struct shop_data *shop_by_id(shop_vnum vnum);
+
 #ifdef __cplusplus
 }
 #endif

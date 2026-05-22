@@ -2978,6 +2978,7 @@ struct char_data *create_char(void)
   GET_ID(ch) = max_mob_id++;
   /* find_char helper */
   add_to_lookup_table(GET_ID(ch), (void *)ch);
+  (void)char_register_id(GET_ID(ch), ch);
   
   return (ch);
 }
@@ -3570,6 +3571,7 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
   GET_ID(mob) = max_mob_id++;
   /* find_char helper */
   add_to_lookup_table(GET_ID(mob), (void *)mob);
+  (void)char_register_id(GET_ID(mob), mob);
 
   copy_proto_script(&mob_proto[i], mob, MOB_TRIGGER);
   assign_triggers(mob, MOB_TRIGGER);
@@ -3760,13 +3762,12 @@ struct obj_data *create_obj(void)
   GET_ID(obj) = max_obj_id++;
   /* find_obj helper */
   add_to_lookup_table(GET_ID(obj), (void *)obj);
+  (void)obj_register_id(GET_ID(obj), obj);
 
   obj->generation = time(0);
   obj->unique_id = -1;
 
   assign_triggers(obj, OBJ_TRIGGER);
-  /* find_obj helper */
-  add_to_lookup_table(GET_ID(obj), (void *)obj);
 
   return (obj);
 }
@@ -3796,6 +3797,7 @@ struct obj_data *read_object(obj_vnum nr, int type) /* and obj_rnum */
   GET_ID(obj) = max_obj_id++;
   /* find_obj helper */
   add_to_lookup_table(GET_ID(obj), (void *)obj);
+  (void)obj_register_id(GET_ID(obj), obj);
 
   obj->generation = time(0);
   obj->unique_id = -1;
@@ -4465,6 +4467,7 @@ void free_char(struct char_data *ch)
   */
   if (GET_ID(ch) != 0)
     remove_from_lookup_table(GET_ID(ch));
+  char_unregister_id(GET_ID(ch));
 
   free(ch);
 }
@@ -4498,6 +4501,7 @@ void free_obj(struct obj_data *obj)
 
   /* find_obj helper */
   remove_from_lookup_table(GET_ID(obj));
+  obj_unregister_id(GET_ID(obj));
 
   if (obj->sbinfo)
     free(obj->sbinfo);
@@ -4729,149 +4733,6 @@ void init_char(struct char_data *ch)
   // initialize plrobjs so it doesn't complain on startup.
   Crash_crashsave(ch);
 }
-
-/* returns the real number of the room with given virtual number */
-room_rnum real_room(room_vnum vnum)
-{
-  room_rnum bot, top, mid, i, last_top;
-
-  i = htree_find(room_htree, vnum);
-
-  if (i != NOWHERE && world[i].number == vnum)
-    return i;
-  else {
-    bot = 0;
-    top = top_of_world;
-
-    /* perform binary search on world-table */
-    for (;;) {
-      last_top = top;
-      mid = (bot + top) / 2;
-
-      if ((world + mid)->number == vnum) {
-        log("room_htree sync fix: %d: %d -> %d", vnum, i, mid);
-        htree_add(room_htree, vnum, mid);
-        return (mid);
-      }
-      if (bot >= top)
-        return (NOWHERE);
-      if ((world + mid)->number > vnum)
-        top = mid - 1;
-      else
-        bot = mid + 1;
-
-      if (top > last_top)
-        return NOWHERE;
-    }
-  }
-}
-
-
-
-/* returns the real number of the monster with given virtual number */
-mob_rnum real_mobile(mob_vnum vnum)
-{
-  if(vnum == NOTHING) {
-    return NOBODY;
-  }
-  mob_rnum bot, top, mid, i, last_top;
-
-  i = htree_find(mob_htree, vnum);
-
-  if (i != NOBODY && mob_index[i].vnum == vnum)
-    return i;
-  else {
-    bot = 0;
-    top = top_of_mobt;
-
-    /* perform binary search on mob-table */
-    for (;;) {
-      last_top = top;
-      mid = (bot + top) / 2;
-
-      if ((mob_index + mid)->vnum == vnum) {
-        log("mob_htree sync fix: %d: %d -> %d", vnum, i, mid);
-        htree_add(mob_htree, vnum, mid);
-        return (mid);
-      }
-      if (bot >= top)
-        return (NOBODY);
-      if ((mob_index + mid)->vnum > vnum)
-        top = mid - 1;
-      else
-        bot = mid + 1;
-
-      if (top > last_top)
-        return NOWHERE;
-    }
-  }
-}
-
-
-/* returns the real number of the object with given virtual number */
-obj_rnum real_object(obj_vnum vnum)
-{
-  obj_rnum bot, top, mid, i, last_top;
-
-  i = htree_find(obj_htree, vnum);
-
-  if (i != NOWHERE && obj_index[i].vnum == vnum)
-    return i;
-  else {
-    bot = 0;
-    top = top_of_objt;
-
-    /* perform binary search on obj-table */
-    for (;;) {
-      last_top = top;
-      mid = (bot + top) / 2;
-
-      if ((obj_index + mid)->vnum == vnum) {
-        log("obj_htree sync fix: %d: %d -> %d", vnum, i, mid);
-        htree_add(obj_htree, vnum, mid);
-        return (mid);
-      }
-      if (bot >= top)
-        return (NOTHING);
-      if ((obj_index + mid)->vnum > vnum)
-        top = mid - 1;
-      else
-        bot = mid + 1;
-
-      if (top > last_top)
-        return NOWHERE;
-    }
-  }
-}
-
-/* returns the real number of the room with given virtual number */
-zone_rnum real_zone(zone_vnum vnum)
-{
-  zone_rnum bot, top, mid, last_top;
-
-  bot = 0;
-  top = top_of_zone_table;
-
-  /* perform binary search on world-table */
-  for (;;) {
-    last_top = top;
-    mid = (bot + top) / 2;
-
-    if ((zone_table + mid)->number == vnum)
-      return (mid);
-    if (bot >= top)
-      return (NOWHERE);
-    if ((zone_table + mid)->number > vnum)
-      top = mid - 1;
-    else
-      bot = mid + 1;
- 
-    if (top > last_top)
-      return NOWHERE;
-  }
-}
-
-
 
 /*
  * Extend later to include more checks.

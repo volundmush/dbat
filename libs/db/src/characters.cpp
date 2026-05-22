@@ -11,3 +11,51 @@ mob_rnum top_of_mobt;
 struct htree_node *mob_htree;
 
 long max_mob_id = MOB_ID_BASE;
+
+/* returns the real number of the monster with given virtual number */
+mob_rnum real_mobile(mob_vnum vnum)
+{
+  if (vnum == NOTHING) {
+    return NOBODY;
+  }
+  mob_rnum bot, top, mid, i, last_top;
+
+  i = htree_find(mob_htree, vnum);
+
+  if (i != NOBODY && mob_index[i].vnum == vnum)
+    return i;
+  else {
+    bot = 0;
+    top = top_of_mobt;
+
+    /* perform binary search on mob-table */
+    for (;;) {
+      last_top = top;
+      mid = (bot + top) / 2;
+
+      if ((mob_index + mid)->vnum == vnum) {
+        htree_add(mob_htree, vnum, mid);
+        return (mid);
+      }
+      if (bot >= top)
+        return (NOBODY);
+      if ((mob_index + mid)->vnum > vnum)
+        top = mid - 1;
+      else
+        bot = mid + 1;
+
+      if (top > last_top)
+        return NOWHERE;
+    }
+  }
+}
+
+struct char_data *mob_proto_by_id(mob_vnum vnum)
+{
+  mob_rnum rnum = real_mobile(vnum);
+
+  if (rnum == NOBODY || !mob_proto)
+    return nullptr;
+
+  return &mob_proto[rnum];
+}

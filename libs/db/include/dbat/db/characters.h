@@ -575,6 +575,17 @@ extern mob_rnum top_of_mobt;
 extern struct htree_node *mob_htree;
 extern long max_mob_id;
 
+mob_rnum real_mobile(mob_vnum vnum);
+struct char_data *mob_proto_by_id(mob_vnum vnum);
+
+struct char_data *char_by_id(int64_t id);
+int char_register_id(int64_t id, struct char_data *ch);
+void char_unregister_id(int64_t id);
+int char_subscribe(int64_t id, const char *list_name);
+void char_unsubscribe(int64_t id, const char *list_name);
+void char_clear_subscriptions(int64_t id);
+void char_for_each(const char *list_name, void (*func)(struct char_data *ch));
+
 #ifdef __cplusplus
 }
 #endif

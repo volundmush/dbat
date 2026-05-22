@@ -84,6 +84,9 @@ extern zone_rnum top_of_zone_table;
 
 extern struct reset_q_type reset_q;	/* queue of zones to be reset	 */
 
+zone_rnum real_zone(zone_vnum vnum);
+struct zone_data *zone_by_id(zone_vnum vnum);
+
 #ifdef __cplusplus
 }
 #endif
