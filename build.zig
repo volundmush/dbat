@@ -64,6 +64,15 @@ pub fn build(b: *std.Build) void {
     const db_files = getSourceFiles(b, "libs/db/src", ".cpp");
     mod_dbat_db.addCSourceFiles(.{ .files = db_files, .flags = &[_][]const u8{ "-std=gnu++23", "-w", "-g" } });
 
+    const mod_dbat_db_zig = b.createModule(.{
+        .target = target,
+        .optimize = optimize,
+        .link_libc = true,
+        .link_libcpp = true,
+        .root_source_file = b.path("libs/db/src/root.zig"),
+        .imports = &.{.{ .name = "cdb", .module = mod_cdb }},
+    });
+
     const dbat_db = b.addLibrary(.{
         .name = "dbat_db",
         .linkage = .static,
@@ -107,6 +116,7 @@ pub fn build(b: *std.Build) void {
         .link_libc = true,
         .link_libcpp = true,
         .root_source_file = b.path("apps/server/src/main.zig"),
+        .imports = &.{.{ .name = "db", .module = mod_dbat_db_zig }},
     });
     circle_mod.addIncludePath(b.path("libs/db/include"));
     circle_mod.addIncludePath(b.path("libs/game/include"));

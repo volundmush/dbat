@@ -111,6 +111,10 @@ extern long max_obj_id;
 obj_rnum real_object(obj_vnum vnum);
 struct obj_data *obj_proto_by_id(obj_vnum vnum);
 
+struct obj_data *obj_by_id(int64_t id);
+int obj_register_id(int64_t id, struct obj_data *obj);
+void obj_unregister_id(int64_t id);
+
 #ifdef __cplusplus
 }
 #endif

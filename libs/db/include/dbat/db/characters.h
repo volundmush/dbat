@@ -578,6 +578,10 @@ extern long max_mob_id;
 mob_rnum real_mobile(mob_vnum vnum);
 struct char_data *mob_proto_by_id(mob_vnum vnum);
 
+struct char_data *char_by_id(int64_t id);
+int char_register_id(int64_t id, struct char_data *ch);
+void char_unregister_id(int64_t id);
+
 #ifdef __cplusplus
 }
 #endif
