@@ -418,7 +418,6 @@ const struct command_info cmd_info[] = {
   { "rogafufuken" , "rogafu"    , POS_FIGHTING, do_rogafufuken, 0, ADMLVL_NONE    , 0 },
   { "roomflags", "roomf"	, POS_DEAD    , do_gen_tog  , 0, ADMLVL_IMMORT	, SCMD_ROOMFLAGS },
   { "roundhouse", "roundhou"    , POS_FIGHTING, do_roundhouse, 0, ADMLVL_NONE   , 0 },
-  { "rpbank"   , "rpban"        , POS_SLEEPING, do_rpbank    , 0, ADMLVL_NONE   , 0 },
   { "rpp"      , "rpp"          , POS_SLEEPING, do_rpp       , 0, ADMLVL_NONE   , 0 },
   { "runic"    , "runi"         , POS_STANDING, do_runic     , 0, ADMLVL_NONE   , 0 },
 
