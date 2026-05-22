@@ -15,6 +15,7 @@
 - Lost tails of Icers and Bio-Androids will be properly named when torn off. [Volund]
 - Zig now program entry point. [Volund]
 - Added new internal API functions for targeting entities by ID, subscribing entities for iteration lists. IDs are not yet stable between runs. [Volund]
+- ziglua added as a dependency and compiling. [Volund]
 
 ** 2.9.2 **
 - Last version from before this file was created.
