@@ -68,7 +68,6 @@ ACMD(do_approve);
 ACMD(do_newsedit);
 ACMD(do_news);
 ACMD(do_lag);
-ACMD(do_rbank);
 ACMD(do_hell);
 ACMD(do_varstat);
 ACMD(do_handout);

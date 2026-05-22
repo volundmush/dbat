@@ -31,7 +31,6 @@ int search_help(const char *argument, int level);
 
 
 // commands
-ACMD(do_rbanktrans);
 ACMD(do_look);
 ACMD(do_examine);
 ACMD(do_gold);
@@ -68,10 +67,8 @@ ACMD(do_shuffle);
 ACMD(do_draw);
 ACMD(do_kyodaika);
 ACMD(do_mimic);
-ACMD(do_rpbank);
 ACMD(do_rdisplay);
 ACMD(do_evolve);
-ACMD(do_rpbanktrans);
 ACMD(do_showoff);
 ACMD(do_intro);
 ACMD(do_scan);

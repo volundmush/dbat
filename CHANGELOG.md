@@ -1,4 +1,4 @@
-** 2.9.3 (latest) **
+# 2.9.3 (latest)
 - Fixing fireshield message to not get all mishmoshed. [Volund]
 - Altered snet's history so staff log all messages while online. [Volund]
 - Altered all headers to enclose declarations in `extern "C" {}`, made some minor adjustments to isolate C++ usage in headers to just two files left. This enables seamless Zig integration. [Volund]
@@ -31,6 +31,7 @@
 - Fixed Arlian physical damage calculation typo (2% to 20%) [Mirage]
 - Adjusted disguise to only skillcheck while in combat for removal, rather than just having an aura. Ki Preference players rejoice! [Mirage]
 - Adjusted stretchy limbs to no longer require 2 full altitude level differences. Now if you're in the same room, stretchy limbs should function regardless of altitude. [Mirage]
+- Removed the RPP Bank Feature that should've been dead a while ago. [Volund]
 
-** 2.9.2 **
+# 2.9.2
 - Last version from before this file was created.
