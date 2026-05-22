@@ -82,3 +82,5 @@ coredumps
 __pycache__
 *.pyc
 .env
+/.vs
+/.gitignore

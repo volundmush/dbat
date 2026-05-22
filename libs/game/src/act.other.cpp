@@ -798,6 +798,11 @@ ACMD(do_grapple)
   return;
  }
 
+  if (GET_SONG(ch) > 0) {
+   send_to_char(ch, "You are currently playing a song! Enter the song command in order to stop!\r\n");
+   return;
+ }
+
  if (PLR_FLAGGED(ch, PLR_THANDW)) {
   send_to_char(ch, "Your are too busy wielding your weapon with two hands!\r\n");
   return;

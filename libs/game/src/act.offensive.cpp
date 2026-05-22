@@ -880,6 +880,11 @@ ACMD(do_tslash)
 
  /* Can they do the technique? */
 
+  if (GET_SONG(ch) > 0) {
+   send_to_char(ch, "You are currently playing a song! Enter the song command in order to stop!\r\n");
+   return;
+  }
+
   if (!can_grav(ch)) {
    return;
   }
@@ -2389,6 +2394,10 @@ ACMD(do_pslash)
   two_arguments(argument, arg, arg2);
 
  /* Can they do the technique? */
+  if (GET_SONG(ch) > 0) {
+   send_to_char(ch, "You are currently playing a song! Enter the song command in order to stop!\r\n");
+   return;
+  }
 
   if (!can_grav(ch)) {
    return;
@@ -3981,6 +3990,11 @@ ACMD(do_ddslash)
   two_arguments(argument, arg, arg2);
 
  /* Can they do the technique? */
+
+  if (GET_SONG(ch) > 0) {
+   send_to_char(ch, "You are currently playing a song! Enter the song command in order to stop!\r\n");
+   return;
+  }
 
   if (!can_grav(ch)) {
    return;
@@ -6342,6 +6356,11 @@ ACMD(do_kousengan)
 
  /* Can they do the technique? */
 
+  if (GET_SONG(ch) > 0) {
+   send_to_char(ch, "You are currently playing a song! Enter the song command in order to stop!\r\n");
+   return;
+  }
+
   if (!can_grav(ch)) {
    return;
   }
@@ -8031,6 +8050,12 @@ ACMD(do_heeldrop)
  if (!check_skill(ch, SKILL_HEELDROP)) {
   return;
  }
+
+ if (GET_SONG(ch) > 0) {
+   send_to_char(ch, "You are currently playing a song! Enter the song command in order to stop!\r\n");
+   return;
+ }
+
  if (!can_grav(ch)) {
   return;
  }
@@ -8322,6 +8347,11 @@ ACMD(do_attack)
   stcost *= 0.25;
  }
   one_argument(argument, arg);
+
+ if (GET_SONG(ch) > 0) {
+   send_to_char(ch, "You are currently playing a song! Enter the song command in order to stop!\r\n");
+   return;
+ }
 
  if (!GET_EQ(ch, WEAR_WIELD1) && !GET_EQ(ch, WEAR_WIELD2)) {
    send_to_char(ch, "You need to wield a weapon to use this, without one try punch, kick, or other no weapon attacks.\r\n");

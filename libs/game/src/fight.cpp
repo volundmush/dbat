@@ -999,10 +999,12 @@ void fight_stack()
       if (IS_MUTANT(ch) && (GET_GENOME(ch, 0) == 6 || GET_GENOME(ch, 1) == 6) && rand_number(1, 200) >= 175) {
        mutant_limb_regen(ch);
       }
-      if (!IS_NPC(ch) && PLR_FLAGGED(ch, PLR_DISGUISED) && GET_SKILL(ch, SKILL_DISGUISE) < rand_number(1, 125)) {
+      if (!IS_NPC(ch) && PLR_FLAGGED(ch, PLR_DISGUISED) && FIGHTING(ch)) {
+       if (GET_SKILL(ch, SKILL_DISGUISE) < rand_number(1, 125)) {
         send_to_char(ch, "Your disguise comes off because of your swift movements!\r\n");
         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_DISGUISED);
         act("@W$n's@W disguise comes off because of $s swift movements!@n", FALSE, ch, 0, 0, TO_ROOM);
+       }
       }
       if (IS_NPC(ch) && AFF_FLAGGED(ch, AFF_BLIND) && rand_number(1, 200) >= 190) {
         act("@W$n@W is no longer blind.@n", FALSE, ch, 0, 0, TO_ROOM);
@@ -1977,8 +1979,8 @@ void raw_kill(struct char_data * ch, struct char_data * killer)
       if (IS_HUMAN(killer) || (IS_BIO(killer) && (GET_GENOME(killer, 0) == 1 || GET_GENOME(killer, 1) == 1))) {
        psreward *= 1.25;
       }
-      if (IS_HALFBREED(ch)) {
-       psreward -= psreward * 0.4;
+      if (IS_HALFBREED(killer)) {
+       psreward *= 0.6;
       }
       if (IS_NPC(ch) && MOB_FLAGGED(ch, MOB_HUSK) && GET_PRACTICES(killer, GET_CLASS(killer)) > 50 && IS_BIO(ch)) {
        psreward = 0;
@@ -2216,8 +2218,9 @@ void die(struct char_data *ch, struct char_data *killer)
   // First there are a few mechanics which can prevent death. They are checked first.
 
   // Saiyan Zenkai mechanic: if at 75% lifeforce or higher, 25% chance of triggering Zenkai.
+  // Added check for character having AFF_SPIRIT to prevent triggering in Afterlife
   // this is implemented by setting PLR_GOOP with gooptime 0
-  if (IS_SAIYAN(ch) && (getCurLFPercent(ch) >= 0.75) && rand_number(1, 4) == 4)
+  if (IS_SAIYAN(ch) && !AFF_FLAGGED(ch, AFF_SPIRIT) && (getCurLFPercent(ch) >= 0.75) &&  rand_number(1,4) == 4)
   {
     SET_BIT_AR(PLR_FLAGS(ch), PLR_GOOP);
     ch->gooptime = 0;
