@@ -139,7 +139,7 @@ void update_space(void)
   log("Updated Space Map. ");
 
   //Load the map vnums from a file into an array
-  mapfile = fopen("../data/surface.map", "r");
+  mapfile = fopen("data/surface.map", "r");
 
   for (rowcounter = 0; rowcounter <= MAP_ROWS; rowcounter++) {
     for (colcounter = 0; colcounter <= MAP_COLS; colcounter++) {
@@ -2590,7 +2590,6 @@ static void execute_copyover(void)
 
   sprintf (buf, "%d", port);
   sprintf (buf2, "-C%d", mother_desc);
-  chdir ("..");
   execl (EXE_FILE, "zig-out/bin/dbat", buf2, buf, (char *) NULL);
   /* Failed - sucessful exec will not return */
 

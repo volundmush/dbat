@@ -156,10 +156,6 @@ extern "C" int run_circle(int argc, char **argv)
      */
     log("Using %s for configuration.", CONFIG_CONFFILE);
     xap_objs = 1;
-    if (chdir(dir) < 0) {
-        perror("SYSERR: Fatal error changing to data directory");
-        exit(1);
-    }
     log("Using %s as data directory.", dir);
 
     if (scheck)

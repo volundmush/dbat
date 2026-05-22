@@ -20,21 +20,23 @@ extern "C" {
 #define DB_BOOT_TRG	6
 #define DB_BOOT_GLD	7
 
-#define LIB_USER        "user/"
-#define LIB_INTRO       "intro/"
-#define LIB_SENSE       "sense/"
-#define LIB_WORLD	"world/"
-#define LIB_TEXT	"text/"
-#define LIB_TEXT_HELP	"text/help/"
-#define LIB_MISC	"misc/"
-#define LIB_ETC		"etc/"
-#define LIB_PLRTEXT	"plrtext/"
-#define LIB_PLROBJS	"plrobjs/"
-#define LIB_PLRVARS	"plrvars/"
-#define LIB_PLRALIAS	"plralias/"
-#define LIB_PLRFILES	"plrfiles/"
-#define LIB_HOUSE	"house/"
 #define SLASH		"/"
+
+#define LIB_USER        "data" SLASH "user" SLASH
+#define LIB_INTRO       "data" SLASH "intro" SLASH
+#define LIB_SENSE       "data" SLASH "sense" SLASH
+#define LIB_WORLD	"data" SLASH "world" SLASH
+#define LIB_TEXT	"data" SLASH "text" SLASH
+#define LIB_TEXT_HELP	"data" SLASH "text" SLASH "help" SLASH
+#define LIB_MISC	"data" SLASH "misc" SLASH
+#define LIB_ETC		"data" SLASH "etc" SLASH
+#define LIB_PLRTEXT	"data" SLASH "plrtext" SLASH
+#define LIB_PLROBJS	"data" SLASH "plrobjs" SLASH
+#define LIB_PLRVARS	"data" SLASH "plrvars" SLASH
+#define LIB_PLRALIAS	"data" SLASH "plralias" SLASH
+#define LIB_PLRFILES	"data" SLASH "plrfiles" SLASH
+#define LIB_HOUSE	"data" SLASH "house" SLASH
+
 
 #define SUF_OBJS	"new"
 #define SUF_TEXT	"text"

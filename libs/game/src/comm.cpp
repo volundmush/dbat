@@ -221,7 +221,7 @@ void init_game(uint16_t cmport)
   log("Loading Space Map. ");
   
   //Load the map vnums from a file into an array
-  mapfile = fopen("../data/surface.map", "r");
+  mapfile = fopen("data/surface.map", "r");
   
   for (rowcounter = 0; rowcounter <= MAP_ROWS; rowcounter++) {
     for (colcounter = 0; colcounter <= MAP_COLS; colcounter++) {
