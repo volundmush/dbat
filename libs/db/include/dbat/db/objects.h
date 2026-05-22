@@ -114,6 +114,9 @@ struct obj_data *obj_proto_by_id(obj_vnum vnum);
 struct obj_data *obj_by_id(int64_t id);
 int obj_register_id(int64_t id, struct obj_data *obj);
 void obj_unregister_id(int64_t id);
+int obj_subscribe(int64_t id, const char *list_name);
+void obj_unsubscribe(int64_t id, const char *list_name);
+void obj_clear_subscriptions(int64_t id);
 
 #ifdef __cplusplus
 }

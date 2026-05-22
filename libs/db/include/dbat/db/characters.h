@@ -581,6 +581,9 @@ struct char_data *mob_proto_by_id(mob_vnum vnum);
 struct char_data *char_by_id(int64_t id);
 int char_register_id(int64_t id, struct char_data *ch);
 void char_unregister_id(int64_t id);
+int char_subscribe(int64_t id, const char *list_name);
+void char_unsubscribe(int64_t id, const char *list_name);
+void char_clear_subscriptions(int64_t id);
 
 #ifdef __cplusplus
 }
