@@ -89,7 +89,6 @@ const struct command_info cmd_info[] = {
   { "barrier"  , "barri"        , POS_FIGHTING, do_barrier  , 0, ADMLVL_NONE    , 0 },
   { "bash"     , "bas"          , POS_FIGHTING, do_bash     , 0, ADMLVL_NONE    , 0 },
   { "beam"     , "bea"          , POS_FIGHTING, do_beam     , 0, ADMLVL_NONE    , 0 },
-  { "bexchange" , "bexchan"       , POS_RESTING , do_rbanktrans  , 0, ADMLVL_NONE    , 0 },
   { "bid"      , "bi"           , POS_RESTING , do_bid      , 0, 0, 0 },
   { "bigbang"  , "bigban"       , POS_FIGHTING, do_bigbang  , 0, 0, 0 },
   { "bite"     , "bit"          , POS_FIGHTING, do_bite     , 0, 0, 0 },
@@ -386,7 +385,6 @@ const struct command_info cmd_info[] = {
 
   { "radar"    , "rada"         , POS_RESTING , do_sradar   , 0, ADMLVL_NONE    , 0 },
   { "raise"    , "rai"		, POS_DEAD    , do_raise    , 0, ADMLVL_NONE	, 0 },
-  { "rbank"    , "rban"         , POS_RESTING , do_rbank    , 0, ADMLVL_IMMORT  , 0 },
   { "refuel"   , "refue"        , POS_SITTING, do_refuel   , 0, ADMLVL_NONE    , 0 },
   { "resize"   , "resiz"        , POS_STANDING, do_resize   , 0, ADMLVL_NONE    , 0 },
   { "rescue"   , "rescu"        , POS_STANDING, do_rescue   , 0, ADMLVL_NONE    , 0 },

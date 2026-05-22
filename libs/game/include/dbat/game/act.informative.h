@@ -31,7 +31,6 @@ int search_help(const char *argument, int level);
 
 
 // commands
-ACMD(do_rbanktrans);
 ACMD(do_look);
 ACMD(do_examine);
 ACMD(do_gold);
