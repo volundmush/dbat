@@ -16,6 +16,7 @@
 - Zig now program entry point. [Volund]
 - Added new internal API functions for targeting entities by ID, subscribing entities for iteration lists. IDs are not yet stable between runs. [Volund]
 - ziglua added as a dependency and compiling. [Volund]
+- Program no longer chdir()'s into data directory. [Volund]
 
 ** 2.9.2 **
 - Last version from before this file was created.

@@ -524,9 +524,11 @@ void clanBoot() {
   clan = (clan_data**)malloc( sizeof(struct clan_data *) * num_clans );
 
   for(i = 0; i < num_clans; i++) {
+    char buf[MAX_STRING_LENGTH];
     if( (len = fgetlinetomax(fl, line, MAX_STRING_LENGTH)) > 0) {
       log("  Loading clan: %s", line);
-      clan[i] = clanLoad(line);
+      sprintf(buf, "data/%s", line);
+      clan[i] = clanLoad(buf);
     }
     else {
       log("  Found blank line while looking for clan names. Aborting.");
