@@ -584,6 +584,7 @@ void char_unregister_id(int64_t id);
 int char_subscribe(int64_t id, const char *list_name);
 void char_unsubscribe(int64_t id, const char *list_name);
 void char_clear_subscriptions(int64_t id);
+void char_for_each(const char *list_name, void (*func)(struct char_data *ch));
 
 #ifdef __cplusplus
 }

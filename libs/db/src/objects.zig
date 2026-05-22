@@ -3,6 +3,7 @@ const std = @import("std");
 
 const IdSet = std.AutoHashMap(i64, void);
 const ListSet = std.StringHashMap(void);
+const ObjCallback = *const fn (*cdb.obj_data) callconv(.c) void;
 
 var allocator: std.mem.Allocator = undefined;
 var objs_by_id: std.AutoHashMap(i64, *cdb.obj_data) = undefined;
@@ -96,6 +97,19 @@ pub export fn obj_clear_subscriptions(id: i64) void {
     while (it.next()) |name_ptr| {
         removeIdFromList(id, name_ptr.*);
         allocator.free(name_ptr.*);
+    }
+}
+
+pub export fn obj_for_each(list_name: ?[*:0]const u8, callback: ?ObjCallback) void {
+    const name = listNameSlice(list_name) orelse return;
+    const cb = callback orelse return;
+    const id_set = subscriptions_by_list.getPtr(name) orelse return;
+
+    var it = id_set.keyIterator();
+    while (it.next()) |id_ptr| {
+        if (obj_by_id(id_ptr.*)) |obj| {
+            cb(obj);
+        }
     }
 }
 

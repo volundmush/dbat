@@ -3,6 +3,7 @@ const std = @import("std");
 
 const IdSet = std.AutoHashMap(i64, void);
 const ListSet = std.StringHashMap(void);
+const CharCallback = *const fn (*cdb.char_data) callconv(.c) void;
 
 var allocator: std.mem.Allocator = undefined;
 var chars_by_id: std.AutoHashMap(i64, *cdb.char_data) = undefined;
@@ -96,6 +97,19 @@ pub export fn char_clear_subscriptions(id: i64) void {
     while (it.next()) |name_ptr| {
         removeIdFromList(id, name_ptr.*);
         allocator.free(name_ptr.*);
+    }
+}
+
+pub export fn char_for_each(list_name: ?[*:0]const u8, callback: ?CharCallback) void {
+    const name = listNameSlice(list_name) orelse return;
+    const cb = callback orelse return;
+    const id_set = subscriptions_by_list.getPtr(name) orelse return;
+
+    var it = id_set.keyIterator();
+    while (it.next()) |id_ptr| {
+        if (char_by_id(id_ptr.*)) |ch| {
+            cb(ch);
+        }
     }
 }
 

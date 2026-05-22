@@ -117,6 +117,7 @@ void obj_unregister_id(int64_t id);
 int obj_subscribe(int64_t id, const char *list_name);
 void obj_unsubscribe(int64_t id, const char *list_name);
 void obj_clear_subscriptions(int64_t id);
+void obj_for_each(const char *list_name, void (*func)(struct obj_data *obj));
 
 #ifdef __cplusplus
 }
