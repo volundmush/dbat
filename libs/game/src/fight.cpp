@@ -994,10 +994,12 @@ void fight_stack()
       if (IS_MUTANT(ch) && (GET_GENOME(ch, 0) == 6 || GET_GENOME(ch, 1) == 6) && rand_number(1, 200) >= 175) {
        mutant_limb_regen(ch);
       }
-      if (!IS_NPC(ch) && PLR_FLAGGED(ch, PLR_DISGUISED) && GET_SKILL(ch, SKILL_DISGUISE) < rand_number(1, 125)) {
+      if (!IS_NPC(ch) && PLR_FLAGGED(ch, PLR_DISGUISED) && FIGHTING(ch)) {
+       if (GET_SKILL(ch, SKILL_DISGUISE) < rand_number(1, 125)) {
         send_to_char(ch, "Your disguise comes off because of your swift movements!\r\n");
         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_DISGUISED);
         act("@W$n's@W disguise comes off because of $s swift movements!@n", FALSE, ch, 0, 0, TO_ROOM);
+       }
       }
       if (IS_NPC(ch) && AFF_FLAGGED(ch, AFF_BLIND) && rand_number(1, 200) >= 190) {
         act("@W$n@W is no longer blind.@n", FALSE, ch, 0, 0, TO_ROOM);
