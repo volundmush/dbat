@@ -108,6 +108,9 @@ extern obj_rnum top_of_objt;
 extern struct htree_node *obj_htree;
 extern long max_obj_id;
 
+obj_rnum real_object(obj_vnum vnum);
+struct obj_data *obj_proto_by_id(obj_vnum vnum);
+
 #ifdef __cplusplus
 }
 #endif

@@ -74,41 +74,6 @@ void free_guild(struct guild_data *guild)
 
 /*-------------------------------------------------------------------*/
 
-/* returns the real number of the guild with given virtual number 
- *
- * We take so good care to keep it sorted - let's use it :) - Welcor
- */
-guild_rnum real_guild(guild_vnum vnum)
-{
-  guild_rnum bot, top, mid, last_top;
-
-  if (top_guild < 0)
-    return NOWHERE;
-
-  bot = 0;
-  top = top_guild;
-
-  /* perform binary search on guild_table */
-  for (;;) {
-    last_top = top;
-    mid = (bot + top) / 2;
-
-    if (GM_NUM(mid) == vnum)
-      return (mid);
-    if (bot >= top)
-      return (NOWHERE);
-    if (GM_NUM(mid) > vnum)
-      top = mid - 1;
-    else
-      bot = mid + 1;
-
-    if (top > last_top)
-      return NOWHERE;
-  }
-}
-
-/*-------------------------------------------------------------------*/
-
 /*. Generic string modifyer for guild master messages . */
 
 void gedit_modify_string(char **str, char *new_g)

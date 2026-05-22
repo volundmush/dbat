@@ -62,6 +62,9 @@ extern struct room_data *world;
 extern room_rnum top_of_world;
 extern struct htree_node *room_htree;
 
+room_rnum real_room(room_vnum vnum);
+struct room_data *room_by_id(room_vnum vnum);
+
 #ifdef __cplusplus
 }
 #endif

@@ -1,5 +1,6 @@
 #pragma once
 #include "dbat/db/consts/types.h"
+#include "dbat/db/guilds.h"
 #include "guild.h"
 
 #ifdef __cplusplus
@@ -16,7 +17,6 @@ void free_guild_strings(struct guild_data *guild);
 void modify_string(char **str, char *newstr);
 int add_guild(struct guild_data *guild);
 int save_guilds(zone_rnum zone_num);
-guild_rnum real_guild(guild_vnum vnum);
 
 /*
  * Handy macros.

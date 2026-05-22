@@ -575,6 +575,9 @@ extern mob_rnum top_of_mobt;
 extern struct htree_node *mob_htree;
 extern long max_mob_id;
 
+mob_rnum real_mobile(mob_vnum vnum);
+struct char_data *mob_proto_by_id(mob_vnum vnum);
+
 #ifdef __cplusplus
 }
 #endif

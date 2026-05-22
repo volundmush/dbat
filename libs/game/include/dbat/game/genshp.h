@@ -1,5 +1,6 @@
 #pragma once
 #include "dbat/db/consts/types.h"
+#include "dbat/db/shops.h"
 #include "shop.h"
 
 #ifdef __cplusplus
@@ -20,7 +21,6 @@ void free_shop_strings(struct shop_data *shop);
 void modify_string(char **str, char *newstr);
 int add_shop(struct shop_data *shop);
 int save_shops(zone_rnum zone_num);
-shop_rnum real_shop(shop_vnum vnum);
 
 /*
  * Handy macros.

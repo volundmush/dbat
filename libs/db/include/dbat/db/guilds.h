@@ -26,6 +26,9 @@ struct guild_data {
 extern struct guild_data *guild_index;
 extern int top_guild;
 
+guild_rnum real_guild(guild_vnum vnum);
+struct guild_data *guild_by_id(guild_vnum vnum);
+
 #ifdef __cplusplus
 }
 #endif

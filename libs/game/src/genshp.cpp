@@ -311,41 +311,6 @@ void free_shop(struct shop_data *shop)
 
 /*-------------------------------------------------------------------*/
 
-/* returns the real number of the shop with given virtual number 
- *
- * We take so good care to keep it sorted - let's use it :) - Welcor
- */
-shop_rnum real_shop(shop_vnum vnum)
-{
-  shop_rnum bot, top, mid, last_top;
-
-  if (top_shop < 0)
-    return NOWHERE;
-
-  bot = 0;
-  top = top_shop;
-
-  /* perform binary search on shop_table */
-  for (;;) {
-    last_top = top;
-    mid = (bot + top) / 2;
-
-    if (SHOP_NUM(mid) == vnum)
-      return (mid);
-    if (bot >= top)
-      return (NOWHERE);
-    if (SHOP_NUM(mid) > vnum)
-      top = mid;
-    else
-      bot = mid + 1;
-
-    if (top > last_top)
-      return NOWHERE;
-  }
-}
-
-/*-------------------------------------------------------------------*/
-
 /*
  * Generic string modifier for shop keeper messages.
  */
