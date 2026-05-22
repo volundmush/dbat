@@ -41,6 +41,14 @@ pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
 
+    const zlua = b.dependency("zlua", .{
+        .target = target,
+        .optimize = optimize,
+        .lang = .lua55,
+    });
+
+    const zlua_module = zlua.module("zlua");
+
     const translate_cdb = b.addTranslateC(.{
         .root_source_file = b.path("libs/db/include/dbat/db/db.h"),
         .target = target,
@@ -95,7 +103,10 @@ pub fn build(b: *std.Build) void {
         .link_libc = true,
         .link_libcpp = true,
         .root_source_file = b.path("libs/game/src/root.zig"),
-        .imports = &.{.{ .name = "cgame", .module = mod_cgame }},
+        .imports = &.{
+            .{ .name = "cgame", .module = mod_cgame },
+            .{ .name = "zlua", .module = zlua_module },
+        },
     });
     mod_dbat_game.addIncludePath(b.path("libs/db/include"));
     mod_dbat_game.addIncludePath(b.path("libs/game/include"));
@@ -116,7 +127,10 @@ pub fn build(b: *std.Build) void {
         .link_libc = true,
         .link_libcpp = true,
         .root_source_file = b.path("apps/server/src/main.zig"),
-        .imports = &.{.{ .name = "db", .module = mod_dbat_db_zig }},
+        .imports = &.{
+            .{ .name = "db", .module = mod_dbat_db_zig },
+            .{ .name = "zlua", .module = zlua_module },
+        },
     });
     circle_mod.addIncludePath(b.path("libs/db/include"));
     circle_mod.addIncludePath(b.path("libs/game/include"));

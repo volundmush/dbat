@@ -1,9 +1,18 @@
 const std = @import("std");
 const db = @import("db");
 
+const zlua = @import("zlua");
+const Lua = zlua.Lua;
+
 extern fn run_circle(argc: c_int, argv: [*][*:0]u8) c_int;
 
 pub fn main(init: std.process.Init) u8 {
+    var lua = Lua.init(init.gpa) catch |err| {
+        std.log.err("failed to initialize Lua: {t}", .{err});
+        return 1;
+    };
+    defer lua.deinit();
+
     db.init(init.gpa);
     defer db.deinit();
 

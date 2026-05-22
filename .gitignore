@@ -74,6 +74,7 @@ dependencies/
 *.pem
 syslog*
 .zig-cache/
+zig-pkg/
 zig-out/
 .killscript
 .pause
