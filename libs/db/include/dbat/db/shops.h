@@ -34,7 +34,7 @@ struct shop_data {
    int	 close1, close2;	/* When does the shop close?		*/
    int	 bankAccount;		/* Store all gold over 15000 (disabled)	*/
    int	 lastsort;		/* How many items are sorted in inven?	*/
-   SPECIAL (*func);		/* Secondary spec_proc for shopkeeper	*/
+   SpecialFunc func;		/* Secondary spec_proc for shopkeeper	*/
 };
 
 extern struct shop_data *shop_index;

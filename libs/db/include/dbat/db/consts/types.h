@@ -112,6 +112,7 @@ typedef struct skill_data skill_data;
 #define ACMD(name) void (name)(struct char_data *ch, char *argument, int cmd, int subcmd)
 #define SPECIAL(name) int (name)(struct char_data *ch, void *me, int cmd, char *argument)
 
+typedef int(*SpecialFunc)(struct char_data *ch, void *me, int cmd, char *argument);
 
 #ifdef __cplusplus
 }
