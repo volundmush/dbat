@@ -1019,6 +1019,8 @@ int count_physical(struct char_data *ch)
   count += 1;
  } if (GET_SKILL(ch, SKILL_HEADBUTT) >= 1) {
   count += 1;
+ } if (GET_SKILL(ch, SKILL_HEELDROP) >= 1) {
+  count += 1;
  }
 
  return (count);
@@ -1048,6 +1050,8 @@ int physical_mastery(struct char_data *ch)
  } if (GET_SKILL(ch, SKILL_BASH) >= 100) {
   count += 1;
  } if (GET_SKILL(ch, SKILL_HEADBUTT) >= 100) {
+  count += 1;
+ } if (GET_SKILL(ch, SKILL_HEELDROP) >= 100) {
   count += 1;
  }
 
