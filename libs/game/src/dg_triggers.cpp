@@ -259,7 +259,7 @@ void entry_memory_mtrigger(char_data *ch)
   if (!SCRIPT_MEM(ch) || AFF_FLAGGED(ch, AFF_CHARM))
     return;
 
-  for (actor = world[IN_ROOM(ch)].people; actor && SCRIPT_MEM(ch);
+  for (actor = char_room_get(ch)->people; actor && SCRIPT_MEM(ch);
        actor = actor->next_in_room) {
     if (actor!=ch && SCRIPT_MEM(ch)) {
       for (mem = SCRIPT_MEM(ch); mem && SCRIPT_MEM(ch); mem = mem->next) {

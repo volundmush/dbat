@@ -586,7 +586,7 @@ void script_trigger_check(void)
       sc = SCRIPT(ch);
 
       if (IS_SET(SCRIPT_TYPES(sc), WTRIG_RANDOM) &&
-          (!is_empty(world[IN_ROOM(ch)].zone) ||
+          (!is_empty(char_room_get(ch)->zone) ||
            IS_SET(SCRIPT_TYPES(sc), WTRIG_GLOBAL)))
         random_mtrigger(ch);
     }
@@ -627,7 +627,7 @@ void check_time_triggers(void)
       sc = SCRIPT(ch);
 
       if (IS_SET(SCRIPT_TYPES(sc), WTRIG_TIME) &&
-          (!is_empty(world[IN_ROOM(ch)].zone) ||
+          (!is_empty(char_room_get(ch)->zone) ||
            IS_SET(SCRIPT_TYPES(sc), WTRIG_GLOBAL)))
         time_mtrigger(ch);
     }
@@ -918,7 +918,7 @@ ACMD(do_attach)
   if (is_abbrev(arg, "mobile") || is_abbrev(arg, "mtr")) {
     victim = get_char_vis(ch, targ_name, NULL, FIND_CHAR_WORLD);
     if (!victim) { /* search room for one with this vnum */
-      for (victim = world[IN_ROOM(ch)].people;victim;victim=victim->next_in_room)
+      for (victim = char_room_get(ch)->people;victim;victim=victim->next_in_room)
         if (GET_MOB_VNUM(victim) == num_arg)
           break;
 
@@ -931,7 +931,7 @@ ACMD(do_attach)
       send_to_char(ch, "Players can't have scripts.\r\n");
       return;
     }
-    if (!can_edit_zone(ch, world[IN_ROOM(ch)].zone)) {
+    if (!can_edit_zone(ch, char_room_get(ch)->zone)) {
       send_to_char(ch, "You can only attach triggers in your own zone\r\n");
       return;
     }
@@ -953,7 +953,7 @@ ACMD(do_attach)
   else if (is_abbrev(arg, "object") || is_abbrev(arg, "otr")) {
     object = get_obj_vis(ch, targ_name, NULL);
     if (!object) { /* search room for one with this vnum */
-      for (object = world[IN_ROOM(ch)].contents;object;object=object->next_content)
+      for (object = char_room_get(ch)->contents;object;object=object->next_content)
         if (GET_OBJ_VNUM(object) == num_arg)
           break;
 
@@ -969,7 +969,7 @@ ACMD(do_attach)
       }
     }
 
-    if (!can_edit_zone(ch, world[IN_ROOM(ch)].zone)) {
+    if (!can_edit_zone(ch, char_room_get(ch)->zone)) {
       send_to_char(ch, "You can only attach triggers in your own zone\r\n");
       return;
     }
@@ -1118,7 +1118,7 @@ ACMD(do_detach)
   num_arg = atoi(arg2);
 
   if (!strcasecmp(arg1, "room") || !strcasecmp(arg1, "wtr")) {
-    room = &world[IN_ROOM(ch)];
+    room = char_room_get(ch);
     if (!can_edit_zone(ch, room->zone)) {
       send_to_char(ch, "You can only detach triggers in your own zone\r\n");
       return;
@@ -1141,7 +1141,7 @@ ACMD(do_detach)
     if (is_abbrev(arg1, "mobile") || !strcasecmp(arg1, "mtr")) {
       victim = get_char_vis(ch, arg2, NULL, FIND_CHAR_WORLD);
       if (!victim) { /* search room for one with this vnum */
-        for (victim = world[IN_ROOM(ch)].people;victim;victim=victim->next_in_room)
+        for (victim = char_room_get(ch)->people;victim;victim=victim->next_in_room)
           if (GET_MOB_VNUM(victim) == num_arg)
             break;
 
@@ -1160,7 +1160,7 @@ ACMD(do_detach)
     else if (is_abbrev(arg1, "object") || !strcasecmp(arg1, "otr")) {
       object = get_obj_vis(ch, arg2, NULL);
       if (!object) { /* search room for one with this vnum */
-        for (object = world[IN_ROOM(ch)].contents;object;object=object->next_content)
+        for (object = char_room_get(ch)->contents;object;object=object->next_content)
           if (GET_OBJ_VNUM(object) == num_arg)
             break;
 
@@ -1186,7 +1186,7 @@ ACMD(do_detach)
       if ((object = get_obj_in_equip_vis(ch, arg1, NULL, ch->equipment)));
       else if ((object = get_obj_in_list_vis(ch, arg1, NULL, ch->carrying)));
       else if ((victim = get_char_room_vis(ch, arg1, NULL)));
-      else if ((object = get_obj_in_list_vis(ch, arg1, NULL, world[IN_ROOM(ch)].contents)));
+      else if ((object = get_obj_in_list_vis(ch, arg1, NULL, char_room_get(ch)->contents)));
       else if ((victim = get_char_vis(ch, arg1, NULL, FIND_CHAR_WORLD)));
       else if ((object = get_obj_vis(ch, arg1, NULL)));
       else

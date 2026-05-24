@@ -234,7 +234,7 @@ ACMD(do_say)
       strcpy(verb, "say");
     }
 
-    for (tch = world[IN_ROOM(ch)].people; tch; tch = tch->next_in_room) {
+    for (tch = char_room_get(ch)->people; tch; tch = tch->next_in_room) {
       if (tch != ch && tch->desc) {
        char sayto[100];
        sprintf(sayto, "to %s ", GET_NAME(tch));
@@ -1050,7 +1050,7 @@ static void handle_whisper(char *buf, struct char_data *ch, struct char_data *vi
 {
  struct char_data *tch;
 
- for (tch = world[IN_ROOM(ch)].people; tch; tch = tch->next_in_room) {
+ for (tch = char_room_get(ch)->people; tch; tch = tch->next_in_room) {
   if (IS_NPC(tch)) {
    continue;
   }
@@ -1186,7 +1186,7 @@ ACMD(do_write)
   char *papername, *penname;
   char buf1[MAX_STRING_LENGTH], buf2[MAX_STRING_LENGTH];
   if(!(obj = char_inventory_search_type(ch, ITEM_BOARD, FALSE, 0))) {
-    obj = obj_contents_search_type(world[IN_ROOM(ch)].contents, ITEM_BOARD, FALSE, 0);
+    obj = obj_contents_search_type(char_room_get(ch)->contents, ITEM_BOARD, FALSE, 0);
   }
   
   if(obj) {                /* then there IS a board! */
@@ -1438,7 +1438,7 @@ ACMD(do_gen_comm)
 	!ROOM_FLAGGED(IN_ROOM(i->character), ROOM_SOUNDPROOF)) {
 
       if (subcmd == SCMD_SHOUT &&
-	  ((world[IN_ROOM(ch)].zone != world[IN_ROOM(i->character)].zone) ||
+	  ((char_room_get(ch)->zone != char_room_get(i->character)->zone) ||
 	   !AWAKE(i->character)))
 	continue;
 
@@ -1526,7 +1526,7 @@ ACMD(do_respond) {
   }
   
   if(!(obj = char_inventory_search_type(ch, ITEM_BOARD, FALSE, 0))) {
-    if(!(obj = obj_contents_search_type(world[IN_ROOM(ch)].contents, ITEM_BOARD, FALSE, 0))) {
+    if(!(obj = obj_contents_search_type(char_room_get(ch)->contents, ITEM_BOARD, FALSE, 0))) {
       send_to_char(ch,"Sorry, you may only reply to messages posted on a board.\r\n");
       return;
     }

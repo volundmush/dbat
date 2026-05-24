@@ -646,9 +646,9 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check)
   /* blocked by a leave trigger ? */
   if (!leave_mtrigger(ch, dir) || IN_ROOM(ch) != was_in) /* prevent teleport crashes */
     return 0;
-  if (!leave_wtrigger(&world[IN_ROOM(ch)], ch, dir) || IN_ROOM(ch) != was_in) /* prevent teleport crashes */
+  if (!leave_wtrigger(char_room_get(ch), ch, dir) || IN_ROOM(ch) != was_in) /* prevent teleport crashes */
     return 0;
-  if (!leave_otrigger(&world[IN_ROOM(ch)], ch, dir) || IN_ROOM(ch) != was_in) /* prevent teleport crashes */
+  if (!leave_otrigger(char_room_get(ch), ch, dir) || IN_ROOM(ch) != was_in) /* prevent teleport crashes */
     return 0;
   /* charmed? */
   if (AFF_FLAGGED(ch, AFF_CHARM) && ch->master && IN_ROOM(ch) == IN_ROOM(ch->master)) {
@@ -889,14 +889,14 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check)
   SET_BIT_AR(AFF_FLAGS(ch), AFF_PURSUIT);
   char_from_room(ch);  
   char_to_room(ch, world[was_in].dir_option[dir]->to_room);
-  if((world[IN_ROOM(ch)].zone != world[was_in].zone) && !IS_NPC(ch) && !IS_ANDROID(ch)) {
+  if((char_room_get(ch)->zone != world[was_in].zone) && !IS_NPC(ch) && !IS_ANDROID(ch)) {
    send_to_sense(0, "You sense someone", ch);
    sprintf(buf3, "@D[@GBlip@D]@Y %s\r\n@RSomeone has entered your scouter detection range@n.", add_commas(GET_HIT(ch)));
    send_to_scouter(buf3, ch, 0, 0);
   }
   /* move them first, then move them back if they aren't allowed to go. */
   /* see if an entry trigger disallows the move */
-  if (!entry_mtrigger(ch) || !enter_wtrigger(&world[IN_ROOM(ch)], ch, dir)) {
+  if (!entry_mtrigger(ch) || !enter_wtrigger(char_room_get(ch), ch, dir)) {
     char_from_room(ch);
     char_to_room(ch, was_in);
     REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_PURSUIT);
@@ -1034,7 +1034,7 @@ int perform_move(struct char_data *ch, int dir, int need_specials_check)
   } else {
 
     struct obj_data *wall;
-    for (wall = world[IN_ROOM(ch)].contents; wall;wall=wall->next_content) {
+    for (wall = char_room_get(ch)->contents; wall;wall=wall->next_content) {
      if(GET_OBJ_VNUM(wall) == 79) {
       if (GET_OBJ_COST(wall) == dir) {
        send_to_char(ch, "That direction has a glacial wall blocking it.\r\n");
@@ -1175,7 +1175,7 @@ ACMD(do_move)
   if (!IS_NPC(ch)) {
      int fail = FALSE;
      struct obj_data *obj, *next_obj;
-    for (obj = world[IN_ROOM(ch)].contents; obj; obj = next_obj) {
+    for (obj = char_room_get(ch)->contents; obj; obj = next_obj) {
       next_obj = obj->next_content;
       if (KICHARGE(obj) > 0 && USER(obj) == ch) {
        fail = TRUE;
@@ -1488,7 +1488,7 @@ static void do_doorcmd(struct char_data *ch, struct obj_data *obj, int door, int
       char_from_room(ch);
       char_to_room(ch, real_room(GET_OBJ_VAL(obj, VAL_PORTAL_DEST)));
       }
-      for (obj2 = world[IN_ROOM(ch)].contents; obj2; obj2 = next_obj) {
+      for (obj2 = char_room_get(ch)->contents; obj2; obj2 = next_obj) {
        next_obj = obj2->next_content;
        if (GET_OBJ_TYPE(obj2) == ITEM_HATCH) {
         hatch = obj2;
@@ -2015,7 +2015,7 @@ ACMD(do_enter)
 
   if (*buf) { /* an argument was supplied, search for door keyword */
     /* Is the object in the room? */
-    obj = get_obj_in_list_vis(ch,buf, NULL, world[IN_ROOM(ch)].contents);
+    obj = get_obj_in_list_vis(ch,buf, NULL, char_room_get(ch)->contents);
     /* Is the object in the character's inventory? */
     if (!obj)
       obj = get_obj_in_list_vis(ch,buf, NULL, ch->carrying);
@@ -2248,7 +2248,7 @@ ACMD(do_leave)
    return;
   }
 
-  for (obj = world[IN_ROOM(ch)].contents; obj ; obj = obj->next_content)
+  for (obj = char_room_get(ch)->contents; obj ; obj = obj->next_content)
     if (CAN_SEE_OBJ(ch, obj))
       if (GET_OBJ_TYPE(obj) ==  ITEM_HATCH || GET_OBJ_TYPE(obj) == ITEM_PORTAL) {
 	perform_leave_obj(ch, obj, 0);
@@ -2868,7 +2868,7 @@ ACMD(do_sit)
    send_to_char(ch, "You are already on something!\r\n");
    return;
   }
-  if (!(chair = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(ch)].contents))) {
+  if (!(chair = get_obj_in_list_vis(ch, arg, NULL, char_room_get(ch)->contents))) {
    send_to_char(ch, "That isn't here.\r\n");
    return;
   }
@@ -3012,7 +3012,7 @@ ACMD(do_rest)
    send_to_char(ch, "You are already on something!\r\n");
    return;
   }
-  if (!(chair = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(ch)].contents))) {
+  if (!(chair = get_obj_in_list_vis(ch, arg, NULL, char_room_get(ch)->contents))) {
    send_to_char(ch, "That isn't here.\r\n");
    return;
   }
@@ -3183,7 +3183,7 @@ ACMD(do_sleep)
    send_to_char(ch, "You are already on something!\r\n");
    return;
   }
-  if (!(chair = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(ch)].contents))) {
+  if (!(chair = get_obj_in_list_vis(ch, arg, NULL, char_room_get(ch)->contents))) {
    send_to_char(ch, "That isn't here.\r\n");
    return;
   }

@@ -4284,7 +4284,7 @@ int is_empty(zone_rnum zone_nr)
       continue;
     if (IN_ROOM(i->character) == NOWHERE)
       continue;
-    if (world[IN_ROOM(i->character)].zone != zone_nr)
+    if (char_room_get(i->character)->zone != zone_nr)
       continue;
     /*
      * if an immortal has nohassle off, he counts as present 

@@ -56,7 +56,7 @@ void update_char_objects(struct char_data *ch)
 	} else if (j == 0) {
 	  send_to_char(ch, "Your light sputters out and dies.\r\n");
 	  act("$n's light sputters out and dies.", FALSE, ch, 0, 0, TO_ROOM);
-	  world[IN_ROOM(ch)].light--;
+	  char_room_get(ch)->light--;
 	}
       } else if (GET_OBJ_TYPE(GET_EQ(ch, i)) == ITEM_LIGHT && GET_OBJ_VAL(GET_EQ(ch, i), VAL_LIGHT_HOURS) > 0) {
        GET_OBJ_VAL(GET_EQ(ch, i), VAL_LIGHT_TIME) -= 1;

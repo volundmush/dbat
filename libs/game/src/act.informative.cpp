@@ -265,7 +265,7 @@ static void search_room(struct char_data *ch)
  act("@y$n@Y begins searching the room carefully.@n", TRUE, ch, 0, 0, TO_ROOM);
  WAIT_STATE(ch, PULSE_1SEC);
 
- for (vict = world[IN_ROOM(ch)].people; vict; vict = next_v) {
+ for (vict = char_room_get(ch)->people; vict; vict = next_v) {
   next_v = vict->next_in_room;
   if (AFF_FLAGGED(vict, AFF_HIDE) && vict != ch) {
    if (GET_SUPPRESS(vict) >= 1) {
@@ -295,7 +295,7 @@ static void search_room(struct char_data *ch)
 
  struct obj_data *obj = NULL;
 
- for (obj = world[IN_ROOM(ch)].contents; obj;obj=obj->next_content) {
+ for (obj = char_room_get(ch)->contents; obj;obj=obj->next_content) {
   if (OBJ_FLAGGED(obj, ITEM_BURIED) && perc * bonus > rand_number(50, 200)) {
    act("@YYou uncover @y$p@Y, which had been burried here.@n", TRUE, ch, obj, 0, TO_CHAR);
    act("@y$n@Y uncovers @y$p@Y, which had burried here.@n", TRUE, ch, obj, 0, TO_ROOM);
@@ -451,7 +451,7 @@ ACMD(do_table)
   return;
  }
 
- if (!(obj = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(ch)].contents))) {
+ if (!(obj = get_obj_in_list_vis(ch, arg, NULL, char_room_get(ch)->contents))) {
   send_to_char(ch, "You don't see that table here.\r\n");
   return;
  }
@@ -676,7 +676,7 @@ ACMD(do_post)
   GET_OBJ_POSTTYPE(obj) = 1;
   return;
  } else {
-   if (!(obj2 = get_obj_in_list_vis(ch, arg2, NULL, world[IN_ROOM(ch)].contents))) {
+   if (!(obj2 = get_obj_in_list_vis(ch, arg2, NULL, char_room_get(ch)->contents))) {
     send_to_char(ch, "You can't seem to find the thing you want to post it on.\r\n");
     return;
    } else if (GET_OBJ_POSTED(obj2)) {
@@ -733,7 +733,7 @@ ACMD(do_play)
   return;
  }
 
- for (obj3 = world[IN_ROOM(ch)].contents; obj3; obj3 = next_obj) {
+ for (obj3 = char_room_get(ch)->contents; obj3; obj3 = next_obj) {
      next_obj = obj3->next_content;
   if (GET_OBJ_VNUM(obj3) == GET_OBJ_VNUM(SITS(ch)) - 4) {
    obj2 = obj3;
@@ -779,7 +779,7 @@ ACMD(do_nickname)
   if (!strcasecmp(arg, "ship")) {
    struct obj_data *ship = NULL, *next_obj = NULL, *ship2 = NULL; 
    int found = FALSE;
-   for (ship = world[IN_ROOM(ch)].contents; ship; ship = next_obj) {
+   for (ship = char_room_get(ch)->contents; ship; ship = next_obj) {
     next_obj = ship->next_content;
     if (GET_OBJ_VNUM(ship) >= 45000 && GET_OBJ_VNUM(ship) <= 45999 && found == FALSE) {
      found = TRUE;
@@ -4371,7 +4371,7 @@ ACMD(do_autoexit)
 
 void look_at_room(room_rnum target_room, struct char_data *ch, int ignore_brief)
 {
-  struct room_data *rm = &world[IN_ROOM(ch)];
+  struct room_data *rm = char_room_get(ch);
   trig_data *t;
 
   if (!ch->desc)
@@ -4879,7 +4879,7 @@ static void look_at_target(struct char_data *ch, char *arg, int cmread)
       }
     }
     if(!obj) {
-      for (obj = world[IN_ROOM(ch)].contents; obj;obj=obj->next_content) {
+      for (obj = char_room_get(ch)->contents; obj;obj=obj->next_content) {
 	if(GET_OBJ_TYPE(obj) == ITEM_BOARD) {
 	  found = TRUE;
 	  break;
@@ -4931,7 +4931,7 @@ static void look_at_target(struct char_data *ch, char *arg, int cmread)
   }
 
   /* Does the argument match an extra desc in the room? */
-  if ((desc = find_exdesc(arg, world[IN_ROOM(ch)].ex_description)) != NULL && ++i == fnum) {
+  if ((desc = find_exdesc(arg, char_room_get(ch)->ex_description)) != NULL && ++i == fnum) {
     page_string(ch->desc, desc, FALSE);
     return;
   } 
@@ -4988,7 +4988,7 @@ static void look_at_target(struct char_data *ch, char *arg, int cmread)
   }
 
   /* Does the argument match an extra desc of an object in the room? */
-  for (obj = world[IN_ROOM(ch)].contents; obj && !found; obj = obj->next_content)
+  for (obj = char_room_get(ch)->contents; obj && !found; obj = obj->next_content)
     if (CAN_SEE_OBJ(ch, obj))
       if ((desc = find_exdesc(arg, obj->ex_description)) != NULL && ++i == fnum) {
 	if(GET_OBJ_TYPE(obj) == ITEM_BOARD) {
@@ -5061,7 +5061,7 @@ static void look_out_window(struct char_data *ch, char *arg)
     return;
   } else {
     /* Look for any old window in the room */
-    for (i = world[IN_ROOM(ch)].contents; i; i = i->next_content)
+    for (i = char_room_get(ch)->contents; i; i = i->next_content)
       if ((GET_OBJ_TYPE(i) == ITEM_WINDOW) &&
            isname("window", i->name)) {
         viewport = i;
@@ -5356,7 +5356,7 @@ ACMD(do_look)
       send_to_char(ch, "You can't see a damned thing, your eyes are closed!\r\n");
   else if (IS_DARK(IN_ROOM(ch)) && !CAN_SEE_IN_DARK(ch) && !PLR_FLAGGED(ch, PLR_AURALIGHT)) {
     send_to_char(ch, "It is pitch black...\r\n");
-    list_char_to_char(world[IN_ROOM(ch)].people, ch);	/* glowing red eyes */
+    list_char_to_char(char_room_get(ch)->people, ch);	/* glowing red eyes */
   } else {
     char arg[MAX_INPUT_LENGTH], arg2[200];
 
@@ -5419,7 +5419,7 @@ ACMD(do_look)
       struct extra_descr_data *i; 
       int found = 0; 
  
-      for (i = world[IN_ROOM(ch)].ex_description; i; i = i->next) { 
+      for (i = char_room_get(ch)->ex_description; i; i = i->next) { 
         if (*i->keyword != '.') { 
           send_to_char(ch, "%s%s:\r\n%s",                  
                 (found ? "\r\n" : ""), i->keyword, i->description);                
@@ -5428,7 +5428,7 @@ ACMD(do_look)
       } 
       if (!found) 
         send_to_char(ch, "You couldn't find anything noticeable.\r\n");
-    } else if (find_exdesc(arg, world[IN_ROOM(ch)].ex_description) != NULL) {
+    } else if (find_exdesc(arg, char_room_get(ch)->ex_description) != NULL) {
       look_at_target(ch, arg, 0);
     } else {
       if (subcmd == SCMD_SEARCH)
@@ -6893,7 +6893,7 @@ ACMD(do_who)
       continue;
     if (questwho && !PRF_FLAGGED(tch, PRF_QUEST))
       continue;
-    if (localwho && world[IN_ROOM(ch)].zone != world[IN_ROOM(tch)].zone)
+    if (localwho && char_room_get(ch)->zone != world[IN_ROOM(tch)].zone)
       continue;
     if (PRF_FLAGGED(tch, PRF_HIDE) && tch != ch && GET_ADMLEVEL(ch) < ADMLVL_IMMORT) {
        hide += 1;
@@ -6941,7 +6941,7 @@ ACMD(do_who)
         continue;
       if (questwho && !PRF_FLAGGED(tch, PRF_QUEST))
         continue;
-      if (localwho && world[IN_ROOM(ch)].zone != world[IN_ROOM(tch)].zone)
+      if (localwho && char_room_get(ch)->zone != world[IN_ROOM(tch)].zone)
         continue;
       if (who_room && (IN_ROOM(tch) != IN_ROOM(ch)))
         continue;
@@ -7268,7 +7268,7 @@ static void perform_mortal_where(struct char_data *ch, char *arg)
 	continue;
       if (IN_ROOM(i) == NOWHERE || !CAN_SEE(ch, i))
 	continue;
-      if (world[IN_ROOM(ch)].zone != world[IN_ROOM(i)].zone)
+      if (char_room_get(ch)->zone != world[IN_ROOM(i)].zone)
 	continue;
       send_to_char(ch, "%-20s - %s\r\n", GET_NAME(i), world[IN_ROOM(i)].name);
     }
@@ -7276,7 +7276,7 @@ static void perform_mortal_where(struct char_data *ch, char *arg)
     for (i = character_list; i; i = i->next) {
       if (IN_ROOM(i) == NOWHERE || i == ch)
 	continue;
-      if (!CAN_SEE(ch, i) || world[IN_ROOM(i)].zone != world[IN_ROOM(ch)].zone)
+      if (!CAN_SEE(ch, i) || world[IN_ROOM(i)].zone != char_room_get(ch)->zone)
 	continue;
       if (!isname(arg, i->name))
 	continue;
@@ -7368,7 +7368,7 @@ static void perform_immort_where(struct char_data *ch, char *arg)
 	  if (d->original)
 	    send_to_char(ch, "%-20s - [%5d]   %s (in %s)\r\n",
 		GET_NAME(i), GET_ROOM_VNUM(IN_ROOM(d->character)),
-		world[IN_ROOM(d->character)].name, GET_NAME(d->character));
+		char_room_get(d->character)->name, GET_NAME(d->character));
 	  else {
 	    send_to_char(ch, "%-20s - [%5d]   %-14s %s\r\n", GET_NAME(i), GET_ROOM_VNUM(IN_ROOM(i)), planet[num2], world[IN_ROOM(i)].name);
           }

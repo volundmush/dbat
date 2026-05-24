@@ -190,7 +190,7 @@ ACMD(do_multiform)
  struct char_data *tch = NULL, *next_v = NULL;
  int count = 0;
 
- for (tch = world[IN_ROOM(ch)].people; tch; tch = next_v) {
+ for (tch = char_room_get(ch)->people; tch; tch = next_v) {
   next_v = tch->next_in_room;
   if (tch == ch || !IS_NPC(tch)) {
    continue;
@@ -208,7 +208,7 @@ ACMD(do_multiform)
          send_to_char(ch, "You have no multiforms present to merge with!\r\n");
          return;
      }
-     for (tch = world[IN_ROOM(ch)].people; tch; tch = next_v) {
+     for (tch = char_room_get(ch)->people; tch; tch = next_v) {
       next_v = tch->next_in_room;
       if (tch == ch || !IS_NPC(tch)) {
        continue;
@@ -424,7 +424,7 @@ static void resolve_song(struct char_data *ch)
   return;
  }
 
-  for (vict = world[IN_ROOM(ch)].people; vict; vict = next_v) {
+  for (vict = char_room_get(ch)->people; vict; vict = next_v) {
    next_v = vict->next_in_room;
     switch (GET_SONG(ch)) {
      case SONG_SAFETY:
@@ -945,7 +945,7 @@ ACMD(do_moondust)
 
   struct char_data *vict = NULL, *next_v = NULL;
 
-  for (vict = world[IN_ROOM(ch)].people; vict; vict = next_v) {
+  for (vict = char_room_get(ch)->people; vict; vict = next_v) {
    next_v = vict->next_in_room;
    if (vict == ch) {
     continue;
@@ -2124,7 +2124,7 @@ void ash_burn(struct char_data *ch)
   struct obj_data *obj, *next_obj;
 
    if (ch && IN_ROOM(ch) != NOWHERE) {
-    for (obj = world[IN_ROOM(ch)].contents; obj; obj = next_obj) {
+    for (obj = char_room_get(ch)->contents; obj; obj = next_obj) {
      next_obj = obj->next_content;
      if (GET_OBJ_VNUM(obj) == 1306) {
       if (axion_dice(0) > GET_CON(ch)) {
@@ -2178,7 +2178,7 @@ ACMD(do_ashcloud)
    }
  }
 
- for (obj = world[IN_ROOM(ch)].contents; obj; obj = next_obj) {
+ for (obj = char_room_get(ch)->contents; obj; obj = next_obj) {
      next_obj = obj->next_content;
   if (GET_OBJ_VNUM(obj) == 1306) {
    there = TRUE;
@@ -2814,7 +2814,7 @@ ACMD(do_hydromancy)
     act(bun, TRUE, ch, 0, 0, TO_CHAR);
     act(bunn, TRUE, ch, 0, 0, TO_ROOM);
 
-    for (vict = world[IN_ROOM(ch)].people; vict; vict = next_v) {
+    for (vict = char_room_get(ch)->people; vict; vict = next_v) {
      next_v = vict->next_in_room;
      if (vict == ch)
       continue;
@@ -3196,7 +3196,7 @@ ACMD(do_bury)
 
  struct obj_data *obj = NULL, *buried = NULL, *fobj = NULL, *next_obj;
 
- for (buried = world[IN_ROOM(ch)].contents; buried; buried = next_obj) {
+ for (buried = char_room_get(ch)->contents; buried; buried = next_obj) {
   next_obj = buried->next_content;
   if (OBJ_FLAGGED(buried, ITEM_BURIED)) {
    fobj = buried;
@@ -5337,7 +5337,7 @@ ACMD(do_spoil)
   return;
  }
 
- if (!(obj = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(ch)].contents))) {
+ if (!(obj = get_obj_in_list_vis(ch, arg, NULL, char_room_get(ch)->contents))) {
    send_to_char(ch, "No corpse around here by that name.\r\n");
    return;
  }

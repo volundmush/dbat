@@ -2453,7 +2453,7 @@ void parry_ki(double attperc, struct char_data *ch, struct char_data *vict, char
      struct obj_data *tob, *next_obj;
      struct char_data *tch, *next_v;
 
-     for (tch = world[IN_ROOM(ch)].people; tch; tch = next_v) {
+     for (tch = char_room_get(ch)->people; tch; tch = next_v) {
       next_v = tch->next_in_room;
 
       if (tch == ch)
@@ -2488,7 +2488,7 @@ void parry_ki(double attperc, struct char_data *ch, struct char_data *vict, char
       }
      }
 
-      for (tob = world[IN_ROOM(ch)].contents; tob; tob = next_obj) {
+      for (tob = char_room_get(ch)->contents; tob; tob = next_obj) {
        next_obj = tob->next_content;
        if (OBJ_FLAGGED(tob, ITEM_UNBREAKABLE))
          continue;

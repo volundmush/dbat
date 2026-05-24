@@ -1821,7 +1821,7 @@ ACMD(do_iedit) {
     found=1;
   } else if ((k = get_obj_in_list_vis(ch, arg, NULL, ch->carrying))) {
     found=1;
-  } else if ((k = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(ch)].contents))) {
+  } else if ((k = get_obj_in_list_vis(ch, arg, NULL, char_room_get(ch)->contents))) {
     found =1;
   } else if ((k = get_obj_vis(ch, arg, NULL))) {
     found=1;

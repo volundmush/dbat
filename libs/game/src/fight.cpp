@@ -192,7 +192,7 @@ static int pick_n_throw(struct char_data *ch, char *buf)
  }
 
 
- for (cont = world[IN_ROOM(ch)].contents; cont; cont = cont->next_content) {
+ for (cont = char_room_get(ch)->contents; cont; cont = cont->next_content) {
   if (GET_OBJ_WEIGHT(cont) <= CAN_CARRY_W(ch) + IS_CARRYING_W(ch)) {
    sprintf(buf2, "%s", cont->name);
    do_get(ch, buf2, 0, 0);
@@ -667,7 +667,7 @@ void impact_sound(struct char_data *ch, char *mssg)
   int door;
   for (door = 0; door < NUM_OF_DIRS; door++)
     if (CAN_GO(ch, door))
-      send_to_room(world[IN_ROOM(ch)].dir_option[door]->to_room, "%s", mssg);
+      send_to_room(char_room_get(ch)->dir_option[door]->to_room, "%s", mssg);
 }
 
 /* For removing body parts */
@@ -1870,7 +1870,7 @@ void death_cry(struct char_data *ch)
   int door;
   for (door = 0; door < NUM_OF_DIRS; door++)
     if (CAN_GO(ch, door))
-      send_to_room(world[IN_ROOM(ch)].dir_option[door]->to_room, "Your blood freezes as you hear someone's death cry.\r\n");
+      send_to_room(char_room_get(ch)->dir_option[door]->to_room, "Your blood freezes as you hear someone's death cry.\r\n");
 }
 
 /* Let's clean up necessary things after "death" */

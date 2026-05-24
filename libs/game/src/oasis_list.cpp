@@ -54,7 +54,7 @@ ACMD(do_oasis_list)
     }
     
   if (!*smin || *smin == '.') {
-    rzone = world[IN_ROOM(ch)].zone;
+    rzone = char_room_get(ch)->zone;
   } else if (!*smax) {
     rzone = real_zone(atoi(smin));
     
@@ -103,7 +103,7 @@ ACMD(do_oasis_links)
   one_argument(argument, arg);
 
   if (!strcmp(arg, ".") || (arg == NULL || !*arg)) {
-    zrnum = world[IN_ROOM(ch)].zone;
+    zrnum = char_room_get(ch)->zone;
     zvnum = zone_table[zrnum].number;
   } else {
     zvnum = atoi(arg);

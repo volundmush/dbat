@@ -331,8 +331,8 @@ void find_replacement(void *go, struct script_data *sc, trig_data *trig, int typ
 
         if ((o = get_object_in_equip(ch, name)));
         else if ((o = get_obj_in_list(name, ch->carrying)));
-        else if (IN_ROOM(ch) != NOWHERE && (c = get_char_in_room(&world[IN_ROOM(ch)], name)));
-        else if ((o = get_obj_in_list(name,world[IN_ROOM(ch)].contents)));
+        else if (IN_ROOM(ch) != NOWHERE && (c = get_char_in_room(char_room_get(ch), name)));
+        else if ((o = get_obj_in_list(name,char_room_get(ch)->contents)));
         else if ((c = get_char(name)));
         else if ((o = get_obj(name)));
         else if ((r = get_room(name))) {}
@@ -476,7 +476,7 @@ in the vault (vnum: 453) now and then. you can just use
 
           if (type == MOB_TRIGGER) {
             ch = (char_data *) go;
-            for (c = world[IN_ROOM(ch)].people; c; c = c->next_in_room)
+            for (c = char_room_get(ch)->people; c; c = c->next_in_room)
               if ((c != ch) && valid_dg_target(c, DG_ALLOW_GODS) &&
                   CAN_SEE(ch, c)) {
                 if (!rand_number(0, count))

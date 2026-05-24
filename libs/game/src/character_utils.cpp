@@ -1123,7 +1123,7 @@ void dispel_ash(struct char_data *ch)
  struct obj_data *obj, *next_obj, *ash = nullptr;
  int there = FALSE;
 
- for (obj = world[IN_ROOM(ch)].contents; obj; obj = next_obj) {
+ for (obj = char_room_get(ch)->contents; obj; obj = next_obj) {
      next_obj = obj->next_content;
   if (GET_OBJ_VNUM(obj) == 1306) {
    there = TRUE;
@@ -3153,7 +3153,7 @@ void demon_refill_lf(struct char_data *ch, int64_t num)
 {
  struct char_data *tch = NULL;
 
-  for (tch = world[IN_ROOM(ch)].people; tch; tch = tch->next_in_room) {
+  for (tch = char_room_get(ch)->people; tch; tch = tch->next_in_room) {
    if (!IS_DEMON(tch))
     continue;
    if ((getCurLF(tch)) >= (getMaxLF(tch)))
@@ -3176,7 +3176,7 @@ void mob_talk(struct char_data *ch, const char *speech)
    return;
   }
 
-  for (tch = world[IN_ROOM(ch)].people; tch; tch = tch->next_in_room) {
+  for (tch = char_room_get(ch)->people; tch; tch = tch->next_in_room) {
    if (!IS_NPC(tch))
     continue;
    if (!IS_HUMANOID(tch))
@@ -3666,7 +3666,7 @@ void purge_homing(struct char_data *ch)
 {
 
  struct obj_data *obj = NULL, *next_obj = NULL;
- for (obj = world[IN_ROOM(ch)].contents; obj; obj = next_obj) {
+ for (obj = char_room_get(ch)->contents; obj; obj = next_obj) {
   next_obj = obj->next_content;
   if (GET_OBJ_VNUM(obj) == 80 || GET_OBJ_VNUM(obj) == 81) {
    if (TARGET(obj) == ch || USER(obj) == ch) {

@@ -193,7 +193,7 @@ ACMD(do_dig)
   rrnum = real_room(rvnum);  
   if ((dir = search_block(sdir, abbr_dirs, FALSE)) < 0)
   dir = search_block(sdir, dirs, FALSE);
-  zone = world[IN_ROOM(ch)].zone;
+  zone = char_room_get(ch)->zone;
 
   if (dir < 0) {
     send_to_char(ch, "Cannot create an exit to the '%s'.\r\n", sdir);
@@ -224,7 +224,7 @@ ACMD(do_dig)
         free(W_EXIT(IN_ROOM(ch), dir)->keyword);
       free(W_EXIT(IN_ROOM(ch), dir));
       W_EXIT(IN_ROOM(ch), dir) = NULL;
-      add_to_save_list(zone_table[world[IN_ROOM(ch)].zone].number, SL_WLD);
+      add_to_save_list(zone_table[char_room_get(ch)->zone].number, SL_WLD);
       send_to_char(ch, "You remove the exit to the %s.\r\n", dirs[dir]);
       return;
     }
@@ -303,7 +303,7 @@ ACMD(do_dig)
   W_EXIT(IN_ROOM(ch), dir)->general_description = NULL;
   W_EXIT(IN_ROOM(ch), dir)->keyword = NULL;
   W_EXIT(IN_ROOM(ch), dir)->to_room = rrnum;
-  add_to_save_list(zone_table[world[IN_ROOM(ch)].zone].number, SL_WLD);
+  add_to_save_list(zone_table[char_room_get(ch)->zone].number, SL_WLD);
   save_rooms(zone_table[world[rrnum].zone].number);
   send_to_char(ch, "You make an exit %s to room %d (%s).\r\n", 
                    dirs[dir], rvnum, world[rrnum].name);
@@ -442,9 +442,9 @@ int buildwalk(struct char_data *ch, int dir)
   if (!IS_NPC(ch) && PRF_FLAGGED(ch, PRF_BUILDWALK) &&
       GET_ADMLEVEL(ch) >= ADMLVL_IMMORT) {
 
-    if (!can_edit_zone(ch, world[IN_ROOM(ch)].zone)) {
-      send_cannot_edit(ch, world[IN_ROOM(ch)].zone);
-    } else if ((vnum = redit_find_new_vnum(world[IN_ROOM(ch)].zone)) == NOWHERE)
+    if (!can_edit_zone(ch, char_room_get(ch)->zone)) {
+      send_cannot_edit(ch, char_room_get(ch)->zone);
+    } else if ((vnum = redit_find_new_vnum(char_room_get(ch)->zone)) == NOWHERE)
       send_to_char(ch, "No free vnums are available in this zone!\r\n");
     else {
       struct descriptor_data *d = ch->desc;
@@ -457,7 +457,7 @@ int buildwalk(struct char_data *ch, int dir)
         free(d->olc);
       }
       CREATE(d->olc, struct oasis_olc_data, 1);
-      OLC_ZNUM(d) = world[IN_ROOM(ch)].zone;
+      OLC_ZNUM(d) = char_room_get(ch)->zone;
       OLC_NUM(d) = vnum;
       CREATE(OLC_ROOM(d), struct room_data, 1);
 

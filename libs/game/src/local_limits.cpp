@@ -2344,18 +2344,18 @@ void timed_dt(struct char_data *ch)
     and return again.
   */
 
-  if (world[IN_ROOM(ch)].timed < 0)
+  if (char_room_get(ch)->timed < 0)
   {
-    world[IN_ROOM(ch)].timed = rand_number(2, 5);
+    char_room_get(ch)->timed = rand_number(2, 5);
     return;
   }
 
   /* We know ch is in a dt room with timed >= 0 - see if its the end.
    *
    */
-  if (world[IN_ROOM(ch)].timed == 0)
+  if (char_room_get(ch)->timed == 0)
   {
-    for (vict = world[IN_ROOM(ch)].people; vict; vict = vict->next_in_room)
+    for (vict = char_room_get(ch)->people; vict; vict = vict->next_in_room)
     {
       if (IS_NPC(vict))
         continue;
