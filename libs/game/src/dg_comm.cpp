@@ -253,7 +253,7 @@ void send_to_sense(int type, char *messg, struct char_data *ch)
     if (!GET_SKILL(tch, SKILL_SENSE)) {
       continue;
     }
-    if (((char_room_get(ch)->zone != world[IN_ROOM(tch)].zone && type == 0) || !AWAKE(tch))) {
+    if (((char_room_get(ch)->zone != char_room_get(tch)->zone && type == 0) || !AWAKE(tch))) {
       continue;
     }
     if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_SHIP)) {
@@ -357,7 +357,7 @@ void send_to_scouter(char *messg, struct char_data *ch, int num, int type)
       continue;
     }
     else {
-    if ((((char_room_get(ch)->zone != world[IN_ROOM(tch)].zone) && type == 0) || !AWAKE(tch))) {
+    if ((((char_room_get(ch)->zone != char_room_get(tch)->zone) && type == 0) || !AWAKE(tch))) {
       continue;
     }
     if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_SHIP)) {

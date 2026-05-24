@@ -6893,7 +6893,7 @@ ACMD(do_who)
       continue;
     if (questwho && !PRF_FLAGGED(tch, PRF_QUEST))
       continue;
-    if (localwho && char_room_get(ch)->zone != world[IN_ROOM(tch)].zone)
+    if (localwho && char_room_get(ch)->zone != char_room_get(tch)->zone)
       continue;
     if (PRF_FLAGGED(tch, PRF_HIDE) && tch != ch && GET_ADMLEVEL(ch) < ADMLVL_IMMORT) {
        hide += 1;
@@ -6941,7 +6941,7 @@ ACMD(do_who)
         continue;
       if (questwho && !PRF_FLAGGED(tch, PRF_QUEST))
         continue;
-      if (localwho && char_room_get(ch)->zone != world[IN_ROOM(tch)].zone)
+      if (localwho && char_room_get(ch)->zone != char_room_get(tch)->zone)
         continue;
       if (who_room && (IN_ROOM(tch) != IN_ROOM(ch)))
         continue;
