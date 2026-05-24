@@ -1108,6 +1108,11 @@ ACMD(do_zen)
 
  /* Can they do the technique? */
 
+ if (GET_SONG(ch) > 0) {
+   send_to_char(ch, "You are currently playing a song! Enter the song command in order to stop!\r\n");
+   return;
+  }
+
   if (!can_grav(ch)) {
    return;
   }
@@ -1472,6 +1477,11 @@ ACMD(do_malice)
  /* Can they do the technique? */
 
   if (!can_grav(ch)) {
+   return;
+  }
+
+  if (GET_SONG(ch) > 0) {
+   send_to_char(ch, "You are currently playing a song! Enter the song command in order to stop!\r\n");
    return;
   }
 
@@ -1867,6 +1877,11 @@ ACMD(do_head)
   return;
  }
 
+ if (GET_SONG(ch) > 0) {
+   send_to_char(ch, "You are currently playing a song! Enter the song command in order to stop!\r\n");
+   return;
+  }
+
  if (!check_skill(ch, SKILL_HEADBUTT)) {
   return;
  }
@@ -2095,6 +2110,11 @@ ACMD(do_bash)
   return;
  }
 
+ if (GET_SONG(ch) > 0) {
+   send_to_char(ch, "You are currently playing a song! Enter the song command in order to stop!\r\n");
+   return;
+  }
+
  if (!check_skill(ch, SKILL_BASH)) {
   return;
  }
@@ -2306,6 +2326,11 @@ ACMD(do_seishou)
  /* Can they do the technique? */
 
   if (!can_grav(ch)) {
+   return;
+  }
+
+  if (GET_SONG(ch) > 0) {
+   send_to_char(ch, "You are currently playing a song! Enter the song command in order to stop!\r\n");
    return;
   }
 

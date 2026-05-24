@@ -1275,6 +1275,11 @@ ACMD(do_eraser)
    return;
   }
 
+  if (GET_SONG(ch) > 0) {
+   send_to_char(ch, "You are currently playing a song! Enter the song command in order to stop!\r\n");
+   return;
+  }
+
   if (!check_skill(ch, SKILL_ERASER)) {
    return;
   }
@@ -11907,6 +11912,11 @@ ACMD(do_tailwhip)
  double attperc = 0;
 
  one_argument(argument, arg);
+
+ if (GET_SONG(ch) > 0) {
+   send_to_char(ch, "You are currently playing a song! Enter the song command in order to stop!\r\n");
+   return;
+  }
 
  if (!can_grav(ch)) {
   return;
