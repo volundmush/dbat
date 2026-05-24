@@ -107,6 +107,7 @@ obj_vnum obj_proto_id_get(struct obj_data *obj);
 void obj_proto_id_set(struct obj_data *obj, obj_vnum vnum);
 obj_vnum obj_vnum_get(struct obj_data *obj);
 void obj_vnum_set(struct obj_data *obj, obj_vnum vnum);
+struct room_data* obj_room_get(struct obj_data *obj);
 room_vnum obj_room_vnum_get(struct obj_data *obj);
 void obj_room_vnum_set(struct obj_data *obj, room_vnum vnum);
 room_vnum obj_room_loaded_get(struct obj_data *obj);

@@ -1931,9 +1931,9 @@ void process_detach(void *go, struct script_data *sc, trig_data *trig,
 
 struct room_data *dg_room_of_obj(struct obj_data *obj)
 {
-  if (IN_ROOM(obj) != NOWHERE) return &world[IN_ROOM(obj)];
-  if (obj->carried_by)        return &world[IN_ROOM(obj->carried_by)];
-  if (obj->worn_by)           return &world[IN_ROOM(obj->worn_by)];
+  if (IN_ROOM(obj) != NOWHERE) return obj_room_get(obj);
+  if (obj->carried_by)        return char_room_get(obj->carried_by);
+  if (obj->worn_by)           return char_room_get(obj->worn_by);
   if (obj->in_obj)            return (dg_room_of_obj(obj->in_obj));
   return NULL;
 }
@@ -2006,7 +2006,7 @@ void makeuid_var(void *go, struct script_data *sc, trig_data *trig,
           if ((o = get_obj_in_list_vis((struct char_data *)go, name, NULL,
                     ((struct char_data *)go)->carrying)) == NULL)
             o = get_obj_in_list_vis((struct char_data *)go, name, NULL,
-                    world[IN_ROOM((struct char_data *)go)].contents);
+                    char_room_get((struct char_data *)go)->contents);
           break;
       }
       if (o)
@@ -3141,4 +3141,3 @@ int check_flags_by_name_ar(bitvector_t *array, int numflags, char *search, const
 
   return FALSE;
 }
-

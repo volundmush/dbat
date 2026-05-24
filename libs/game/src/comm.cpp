@@ -3158,7 +3158,7 @@ char *act(const char *str, int hide_invisible, struct char_data *ch,
   if (ch && IN_ROOM(ch) != NOWHERE)
     to = char_room_get(ch)->people;
   else if (obj && IN_ROOM(obj) != NOWHERE)
-    to = world[IN_ROOM(obj)].people;
+    to = obj_room_get(obj)->people;
   else {
     return NULL;
   }

@@ -969,9 +969,9 @@ in the vault (vnum: 453) now and then. you can just use
 /* see note in dg_scripts.h */
 #ifdef ACTOR_ROOM_IS_UID
             snprintf(str, slen, "%c%d",UID_CHAR,
-               (IN_ROOM(c)!= NOWHERE) ? world[IN_ROOM(c)].number + ROOM_ID_BASE : ROOM_ID_BASE);
+               (IN_ROOM(c)!= NOWHERE) ? char_room_get(c)->number + ROOM_ID_BASE : ROOM_ID_BASE);
 #else
-            snprintf(str, slen, "%d", (IN_ROOM(c)!= NOWHERE) ? world[IN_ROOM(c)].number : 0);
+            snprintf(str, slen, "%d", (IN_ROOM(c)!= NOWHERE) ? char_room_get(c)->number : 0);
 #endif
           }
 #ifdef GET_RACE
@@ -1232,7 +1232,7 @@ in the vault (vnum: 453) now and then. you can just use
 
           else if (!strcasecmp(field, "is_inroom")) {
             if (IN_ROOM(o) != NOWHERE)
-              snprintf(str, slen,"%c%d",UID_CHAR, world[IN_ROOM(o)].number + ROOM_ID_BASE);
+              snprintf(str, slen,"%c%d",UID_CHAR, obj_room_get(o)->number + ROOM_ID_BASE);
             else
               *str = '\0';
           }

@@ -392,7 +392,7 @@ static void drive_into_vehicle(struct char_data *ch, struct obj_data *vehicle, c
 
   if (!*arg) {
     send_to_char(ch, "@wDrive into what?\r\n");
-  } else if (!(vehicle_in_out = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(vehicle)].contents)) ) {
+  } else if (!(vehicle_in_out = get_obj_in_list_vis(ch, arg, NULL, obj_room_get(vehicle)->contents)) ) {
       send_to_char(ch, "@wNothing here by that name!\r\n");
   } else if (GET_OBJ_TYPE(vehicle_in_out) != ITEM_VEHICLE) {
       send_to_char(ch, "@wThat's not a ship.\r\n");
@@ -427,7 +427,7 @@ static void drive_outof_vehicle(struct char_data *ch, struct obj_data *vehicle)
   struct obj_data *hatch, *vehicle_in_out;
   char   buf[MAX_INPUT_LENGTH];
 
-  if ( !(hatch = get_obj_in_list_type(ITEM_HATCH,world[IN_ROOM(vehicle)].contents)) ) {
+  if ( !(hatch = get_obj_in_list_type(ITEM_HATCH,obj_room_get(vehicle)->contents)) ) {
     send_to_char(ch, "@wNowhere to pilot out of.\r\n");
   } else if (!(vehicle_in_out = find_vehicle_by_vnum(GET_OBJ_VAL(hatch, 0)))) {
     send_to_char(ch, "@wYou can't pilot out anywhere!\r\n");

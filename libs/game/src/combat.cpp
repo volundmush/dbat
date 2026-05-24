@@ -1734,7 +1734,7 @@ void huge_update()
     dmg /= 2;
 
     /* Hit those in the current room. */
-    for (vict = world[IN_ROOM(k)].people; vict; vict = next_v) {
+    for (vict = obj_room_get(k)->people; vict; vict = next_v) {
      next_v = vict->next_in_room;  
   
      if (vict == ch) {
@@ -1834,7 +1834,7 @@ void huge_update()
     dmg /= 2;
 
     /* Hit those in the current room. */
-    for (vict = world[IN_ROOM(k)].people; vict; vict = next_v) {
+    for (vict = obj_room_get(k)->people; vict; vict = next_v) {
      next_v = vict->next_in_room;  
   
      if (vict == ch) {
@@ -1910,7 +1910,7 @@ void huge_update()
     dmg /= 2;
 
     /* Hit those in the current room. */
-    for (vict = world[IN_ROOM(k)].people; vict; vict = next_v) {
+    for (vict = obj_room_get(k)->people; vict; vict = next_v) {
      next_v = vict->next_in_room;  
   
      if (vict == ch) {
@@ -2008,7 +2008,7 @@ void huge_update()
     dmg /= 2;
 
     /* Hit those in the current room. */
-    for (vict = world[IN_ROOM(k)].people; vict; vict = next_v) {
+    for (vict = obj_room_get(k)->people; vict; vict = next_v) {
      next_v = vict->next_in_room;  
   
      if (vict == ch) {

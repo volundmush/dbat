@@ -3670,14 +3670,14 @@ void log_dupe_objects(struct obj_data *obj1, struct obj_data *obj2)
   mudlog(BRF, ADMLVL_GOD, TRUE, "DUPE: First: In room: %d (%s), "
                              "In object: %s, Carried by: %s, Worn by: %s",
         GET_ROOM_VNUM(IN_ROOM(obj1)),
-        IN_ROOM(obj1) == NOWHERE ? "Nowhere" : world[IN_ROOM(obj1)].name,
+        IN_ROOM(obj1) == NOWHERE ? "Nowhere" : obj_room_get(obj1)->name,
         obj1->in_obj ? obj1->in_obj->short_description : "None",
         obj1->carried_by ? GET_NAME(obj1->carried_by) : "Nobody",
         obj1->worn_by ? GET_NAME(obj1->worn_by) : "Nobody");
   mudlog(BRF, ADMLVL_GOD, TRUE, "DUPE: Newer: In room: %d (%s), "
                              "In object: %s, Carried by: %s, Worn by: %s",
         GET_ROOM_VNUM(IN_ROOM(obj2)),
-        IN_ROOM(obj2) == NOWHERE ? "Nowhere" : world[IN_ROOM(obj2)].name,
+        IN_ROOM(obj2) == NOWHERE ? "Nowhere" : obj_room_get(obj2)->name,
         obj2->in_obj ? obj2->in_obj->short_description : "None",
         obj2->carried_by ? GET_NAME(obj2->carried_by) : "Nobody",
         obj2->worn_by ? GET_NAME(obj2->worn_by) : "Nobody");

@@ -7268,19 +7268,19 @@ static void perform_mortal_where(struct char_data *ch, char *arg)
 	continue;
       if (IN_ROOM(i) == NOWHERE || !CAN_SEE(ch, i))
 	continue;
-      if (char_room_get(ch)->zone != world[IN_ROOM(i)].zone)
+      if (char_room_get(ch)->zone != char_room_get(i)->zone)
 	continue;
-      send_to_char(ch, "%-20s - %s\r\n", GET_NAME(i), world[IN_ROOM(i)].name);
+      send_to_char(ch, "%-20s - %s\r\n", GET_NAME(i), char_room_get(i)->name);
     }
   } else {			/* print only FIRST char, not all. */
     for (i = character_list; i; i = i->next) {
       if (IN_ROOM(i) == NOWHERE || i == ch)
 	continue;
-      if (!CAN_SEE(ch, i) || world[IN_ROOM(i)].zone != char_room_get(ch)->zone)
+      if (!CAN_SEE(ch, i) || char_room_get(i)->zone != char_room_get(ch)->zone)
 	continue;
       if (!isname(arg, i->name))
 	continue;
-      send_to_char(ch, "%-25s - %s\r\n", GET_NAME(i), world[IN_ROOM(i)].name);
+      send_to_char(ch, "%-25s - %s\r\n", GET_NAME(i), char_room_get(i)->name);
       return;
     }
     send_to_char(ch, "Nobody around by that name.\r\n");
@@ -7299,7 +7299,7 @@ static void print_object_location(int num, struct obj_data *obj, struct char_dat
     send_to_char(ch, "[T%d]", obj->proto_script->vnum);
 
   if (IN_ROOM(obj) != NOWHERE)
-    send_to_char(ch, "[%5d] %s\r\n", GET_ROOM_VNUM(IN_ROOM(obj)), world[IN_ROOM(obj)].name);
+    send_to_char(ch, "[%5d] %s\r\n", GET_ROOM_VNUM(IN_ROOM(obj)), obj_room_get(obj)->name);
   else if (obj->carried_by)
     send_to_char(ch, "carried by %s in room [%d]\r\n", PERS(obj->carried_by, ch), GET_ROOM_VNUM(IN_ROOM(obj->carried_by)));
   else if (obj->worn_by)
@@ -7370,7 +7370,7 @@ static void perform_immort_where(struct char_data *ch, char *arg)
 		GET_NAME(i), GET_ROOM_VNUM(IN_ROOM(d->character)),
 		char_room_get(d->character)->name, GET_NAME(d->character));
 	  else {
-	    send_to_char(ch, "%-20s - [%5d]   %-14s %s\r\n", GET_NAME(i), GET_ROOM_VNUM(IN_ROOM(i)), planet[num2], world[IN_ROOM(i)].name);
+	    send_to_char(ch, "%-20s - [%5d]   %-14s %s\r\n", GET_NAME(i), GET_ROOM_VNUM(IN_ROOM(i)), planet[num2], char_room_get(i)->name);
           }
            
 	}
@@ -7381,7 +7381,7 @@ static void perform_immort_where(struct char_data *ch, char *arg)
       if (CAN_SEE(ch, i) && IN_ROOM(i) != NOWHERE && isname(arg, i->name)) {
 	found = 1;
 	send_to_char(ch, "M%3d. %-25s - [%5d] %-25s", ++num, GET_NAME(i),
-		GET_ROOM_VNUM(IN_ROOM(i)), world[IN_ROOM(i)].name);
+		GET_ROOM_VNUM(IN_ROOM(i)), char_room_get(i)->name);
         if (IS_NPC(i) && SCRIPT(i)) { 
           if (!TRIGGERS(SCRIPT(i))->next) 
             send_to_char(ch, "[T%5d] ", GET_TRIG_VNUM(TRIGGERS(SCRIPT(i)))); 

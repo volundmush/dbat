@@ -31,9 +31,15 @@ pub export fn obj_vnum_set(obj: *cdb.obj_data, vnum: cdb.obj_vnum) void {
     obj.item_number = cdb.real_object(vnum);
 }
 
+pub export fn obj_room_get(obj: *cdb.obj_data) [*c]cdb.room_data {
+    if (!validRoomRnum(obj.in_room)) return null;
+    return &cdb.world[@intCast(obj.in_room)];
+}
+
 pub export fn obj_room_vnum_get(obj: *cdb.obj_data) cdb.room_vnum {
-    if (obj.in_room == cdb.NOWHERE or cdb.world == null) return cdb.NOWHERE;
-    return cdb.world[@intCast(obj.in_room)].number;
+    const room = obj_room_get(obj);
+    if (room == null) return cdb.NOWHERE;
+    return room.*.number;
 }
 
 pub export fn obj_room_vnum_set(obj: *cdb.obj_data, vnum: cdb.room_vnum) void {
@@ -281,6 +287,10 @@ pub export fn obj_sitting_set(obj: *cdb.obj_data, ch: [*c]cdb.char_data) void {
 
 fn validObjRnum(rnum: cdb.obj_rnum) bool {
     return rnum != cdb.NOTHING and rnum >= 0 and rnum <= cdb.top_of_objt and cdb.obj_index != null;
+}
+
+fn validRoomRnum(rnum: cdb.room_rnum) bool {
+    return rnum != cdb.NOWHERE and rnum >= 0 and rnum <= cdb.top_of_world and cdb.world != null;
 }
 
 fn validProto(obj: *cdb.obj_data) bool {

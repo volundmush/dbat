@@ -184,7 +184,7 @@ ASPELL(spell_locate_object)
     if (i->carried_by)
       send_to_char(ch, " is being carried by %s.\r\n", PERS(i->carried_by, ch));
     else if (IN_ROOM(i) != NOWHERE)
-      send_to_char(ch, " is in %s.\r\n", world[IN_ROOM(i)].name);
+      send_to_char(ch, " is in %s.\r\n", obj_room_get(i)->name);
     else if (i->in_obj)
       send_to_char(ch, " is in %s.\r\n", i->in_obj->short_description);
     else if (i->worn_by)

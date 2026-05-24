@@ -1478,7 +1478,7 @@ static void do_stat_object(struct char_data *ch, struct obj_data *j)
      GET_OBJ_WEIGHT(j), GET_OBJ_COST(j), GET_OBJ_RENT(j), GET_OBJ_TIMER(j), GET_OBJ_LEVEL(j));
 
   send_to_char(ch, "In room: %d (%s), ", GET_ROOM_VNUM(IN_ROOM(j)),
-	IN_ROOM(j) == NOWHERE ? "Nowhere" : world[IN_ROOM(j)].name);
+	IN_ROOM(j) == NOWHERE ? "Nowhere" : obj_room_get(j)->name);
 
   /*
    * NOTE: In order to make it this far, we must already be able to see the

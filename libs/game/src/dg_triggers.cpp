@@ -169,7 +169,7 @@ void greet_memory_mtrigger(char_data *actor)
   if (!valid_dg_target(actor, DG_ALLOW_GODS))
     return;
 
-  for (ch = world[IN_ROOM(actor)].people; ch; ch = ch->next_in_room) {
+  for (ch = char_room_get(actor)->people; ch; ch = ch->next_in_room) {
     if (!SCRIPT_MEM(ch) || !AWAKE(ch) || FIGHTING(ch) || (ch == actor) ||
         AFF_FLAGGED(ch, AFF_CHARM))
       continue;
@@ -222,7 +222,7 @@ int greet_mtrigger(char_data *actor, int dir)
   if (!valid_dg_target(actor, DG_ALLOW_GODS))
     return TRUE;
 
-  for (ch = world[IN_ROOM(actor)].people; ch; ch = ch->next_in_room) {
+  for (ch = char_room_get(actor)->people; ch; ch = ch->next_in_room) {
     if (!SCRIPT_CHECK(ch, MTRIG_GREET | MTRIG_GREET_ALL) ||
         !AWAKE(ch) || FIGHTING(ch) || (ch == actor) ||
         AFF_FLAGGED(ch, AFF_CHARM))
@@ -319,7 +319,7 @@ int command_mtrigger(char_data *actor, char *cmd, char *argument)
   if (!valid_dg_target(actor, 0))
     return 0;
 
-  for (ch = world[IN_ROOM(actor)].people; ch; ch = ch_next) {
+  for (ch = char_room_get(actor)->people; ch; ch = ch_next) {
     ch_next = ch->next_in_room;
 
     if (SCRIPT_CHECK(ch, MTRIG_COMMAND) && !AFF_FLAGGED(ch, AFF_CHARM) &&
@@ -359,7 +359,7 @@ void speech_mtrigger(char_data *actor, char *str)
   trig_data *t;
   char buf[MAX_INPUT_LENGTH];
 
-  for (ch = world[IN_ROOM(actor)].people; ch; ch = ch_next)
+  for (ch = char_room_get(actor)->people; ch; ch = ch_next)
   {
     ch_next = ch->next_in_room;
 
@@ -583,7 +583,7 @@ int leave_mtrigger(char_data *actor, int dir)
   if (!valid_dg_target(actor, DG_ALLOW_GODS))
     return 1;
 
-  for (ch = world[IN_ROOM(actor)].people; ch; ch = ch->next_in_room) {
+  for (ch = char_room_get(actor)->people; ch; ch = ch->next_in_room) {
     if (!SCRIPT_CHECK(ch, MTRIG_LEAVE) ||
         !AWAKE(ch) || FIGHTING(ch) || (ch == actor) ||
         AFF_FLAGGED(ch, AFF_CHARM))
@@ -610,7 +610,7 @@ int door_mtrigger(char_data *actor, int subcmd, int dir)
   char_data *ch;
   char buf[MAX_INPUT_LENGTH];
 
-  for (ch = world[IN_ROOM(actor)].people; ch; ch = ch->next_in_room) {
+  for (ch = char_room_get(actor)->people; ch; ch = ch->next_in_room) {
     if (!SCRIPT_CHECK(ch, MTRIG_DOOR) ||
         !AWAKE(ch) || FIGHTING(ch) || (ch == actor) ||
         AFF_FLAGGED(ch, AFF_CHARM))
@@ -776,7 +776,7 @@ int command_otrigger(char_data *actor, char *cmd, char *argument)
     if (cmd_otrig(obj, actor, cmd, argument, OCMD_INVEN) && !OBJ_FLAGGED(obj, ITEM_FORGED))
       return 1;
 
-  for (obj = world[IN_ROOM(actor)].contents; obj; obj = obj->next_content)
+  for (obj = char_room_get(actor)->contents; obj; obj = obj->next_content)
     if (cmd_otrig(obj, actor, cmd, argument, OCMD_ROOM) && !OBJ_FLAGGED(obj, ITEM_FORGED))
       return 1;
 
@@ -1101,14 +1101,14 @@ int command_wtrigger(char_data *actor, char *cmd, char *argument)
   trig_data *t;
   char buf[MAX_INPUT_LENGTH];
 
-  if (!actor || !SCRIPT_CHECK(&world[IN_ROOM(actor)], WTRIG_COMMAND))
+  if (!actor || !SCRIPT_CHECK(char_room_get(actor), WTRIG_COMMAND))
     return 0;
 
   /* prevent people we like from becoming trapped :P */
   if (!valid_dg_target(actor, 0))
     return 0;
 
-  room = &world[IN_ROOM(actor)];
+  room = char_room_get(actor);
   for (t = TRIGGERS(SCRIPT(room)); t; t = t->next) {
     if (!TRIGGER_CHECK(t, WTRIG_COMMAND))
       continue;
@@ -1141,10 +1141,10 @@ void speech_wtrigger(char_data *actor, char *str)
   trig_data *t;
   char buf[MAX_INPUT_LENGTH];
 
-  if (!actor || !SCRIPT_CHECK(&world[IN_ROOM(actor)], WTRIG_SPEECH))
+  if (!actor || !SCRIPT_CHECK(char_room_get(actor), WTRIG_SPEECH))
     return;
 
-  room = &world[IN_ROOM(actor)];
+  room = char_room_get(actor);
   for (t = TRIGGERS(SCRIPT(room)); t; t = t->next) {
     if (!TRIGGER_CHECK(t, WTRIG_SPEECH))
       continue;
@@ -1173,10 +1173,10 @@ int drop_wtrigger(obj_data *obj, char_data *actor)
   char buf[MAX_INPUT_LENGTH];
   int ret_val;
 
-  if (!actor || !SCRIPT_CHECK(&world[IN_ROOM(actor)], WTRIG_DROP))
+  if (!actor || !SCRIPT_CHECK(char_room_get(actor), WTRIG_DROP))
     return 1;
 
-  room = &world[IN_ROOM(actor)];
+  room = char_room_get(actor);
   for (t = TRIGGERS(SCRIPT(room)); t; t = t->next)
     if (TRIGGER_CHECK(t, WTRIG_DROP) &&
         (rand_number(1, 100) <= GET_TRIG_NARG(t))) {
@@ -1199,10 +1199,10 @@ int cast_wtrigger(char_data *actor, char_data *vict, obj_data *obj, int spellnum
   trig_data *t;
   char buf[MAX_INPUT_LENGTH];
 
-  if (!actor || !SCRIPT_CHECK(&world[IN_ROOM(actor)], WTRIG_CAST))
+  if (!actor || !SCRIPT_CHECK(char_room_get(actor), WTRIG_CAST))
     return 1;
 
-  room = &world[IN_ROOM(actor)];
+  room = char_room_get(actor);
   for (t = TRIGGERS(SCRIPT(room)); t; t = t->next) {
     if (TRIGGER_CHECK(t, WTRIG_CAST) &&
         (rand_number(1, 100) <= GET_TRIG_NARG(t))) {
@@ -1255,10 +1255,10 @@ int door_wtrigger(char_data *actor, int subcmd, int dir)
   trig_data *t;
   char buf[MAX_INPUT_LENGTH];
 
-  if (!actor || !SCRIPT_CHECK(&world[IN_ROOM(actor)], WTRIG_DOOR))
+  if (!actor || !SCRIPT_CHECK(char_room_get(actor), WTRIG_DOOR))
     return 1;
 
-  room = &world[IN_ROOM(actor)];
+  room = char_room_get(actor);
   for (t = TRIGGERS(SCRIPT(room)); t; t = t->next) {
     if (TRIGGER_CHECK(t, WTRIG_DOOR) &&
         (rand_number(1, 100) <= GET_TRIG_NARG(t))) {

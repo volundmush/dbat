@@ -122,7 +122,7 @@ void obj_from_room(struct obj_data *object)
    GET_OBJ_POSTTYPE(object) = 0;
   }
 
-  REMOVE_FROM_LIST(object, world[IN_ROOM(object)].contents, next_content, temp);
+  REMOVE_FROM_LIST(object, obj_room_get(object)->contents, next_content, temp);
 
   if (ROOM_FLAGGED(IN_ROOM(object), ROOM_HOUSE))
     SET_BIT_AR(ROOM_FLAGS(IN_ROOM(object)), ROOM_HOUSE_CRASH);
