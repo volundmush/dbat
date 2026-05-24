@@ -12,6 +12,7 @@
 #include "dbat/db/consts/auction.h"
 #include "dbat/db/consts/maximums.h"
 #include "dbat/db/consts/recipes.h"
+#include "dbat/db/consts/search.h"
 #include "dbat/game/utils.h"
 
 #include "dbat/game/search.h"
@@ -382,20 +383,13 @@ ACMD(do_garden)
 
  if (*arg) {
   if (!strcasecmp(arg, "collect")) {
-   struct obj_data *obj2, *shovel = NULL, *next_obj;
-   int found = FALSE;
+   struct obj_data *shovel = NULL;
 
-   for (obj2 = ch->carrying; obj2; obj2 = next_obj) {
-          next_obj = obj2->next_content;
-     if (GET_OBJ_VNUM(obj2) == 254 && !OBJ_FLAGGED(obj2, ITEM_BROKEN) && !OBJ_FLAGGED(obj2, ITEM_FORGED)) {
-      found = TRUE;
-      shovel = obj2;
-     }
+   if(!(shovel = char_inventory_search_vnum(ch, 254, FALSE, SEARCH_GENUINE | SEARCH_WORKING))) {
+       send_to_char(ch, "You need a shovel in order to collect soil.\r\n");
+       return;
    }
-   if (found == FALSE) {
-    send_to_char(ch, "You need a shovel in order to collect soil.\r\n");
-    return;
-   }
+
    if (SECT(IN_ROOM(ch)) != SECT_FOREST && SECT(IN_ROOM(ch)) != SECT_FIELD && SECT(IN_ROOM(ch)) != SECT_MOUNTAIN && SECT(IN_ROOM(ch)) != SECT_HILLS) {
     send_to_char(ch, "You can not collect soil from this area.\r\n");
     return;
@@ -465,20 +459,14 @@ ACMD(do_garden)
   return;
  } else {
   if (!strcasecmp(arg2, "water")) {
-   struct obj_data *obj2, *water = NULL, *next_obj;
-   int found = FALSE;
+   struct obj_data *water = NULL;
 
-   for (obj2 = ch->carrying; obj2; obj2 = next_obj) {
-          next_obj = obj2->next_content;
-     if (GET_OBJ_VNUM(obj2) == 251 && !OBJ_FLAGGED(obj2, ITEM_FORGED)) {
-      found = TRUE;
-      water = obj2;
-     }
+   if(!(water = char_inventory_search_vnum(ch, 251, FALSE, SEARCH_GENUINE))) {
+       send_to_char(ch, "You need a bottle of grow water in order to water the plant.\r\n");
+       return;
    }
-   if (found == FALSE) {
-    send_to_char(ch, "You do not have any grow water!\r\n");
-    return;
-   } else if (GET_OBJ_VAL(obj, VAL_WATERLEVEL) >= 500) {
+
+   if (GET_OBJ_VAL(obj, VAL_WATERLEVEL) >= 500) {
     send_to_char(ch, "You stop as you realize that the plant already has enough water.\r\n");
     return;
    } else if (GET_OBJ_VAL(obj, VAL_WATERLEVEL) <= -10) {
@@ -513,20 +501,12 @@ ACMD(do_garden)
     return;
    }
   } else if (!strcasecmp(arg2, "harvest")) {
-   struct obj_data *obj2, *clippers = NULL, *next_obj;
-   int found = FALSE;
-
-   for (obj2 = ch->carrying; obj2; obj2 = next_obj) {
-          next_obj = obj2->next_content;
-     if (GET_OBJ_VNUM(obj2) == 253 && !OBJ_FLAGGED(obj2, ITEM_BROKEN) && !OBJ_FLAGGED(obj2, ITEM_FORGED)) {
-      found = TRUE;
-      clippers = obj2;
-     }
+   struct obj_data *clippers = NULL;
+   if(!(clippers = char_inventory_search_vnum(ch, 253, FALSE, SEARCH_GENUINE | SEARCH_WORKING))) {
+       send_to_char(ch, "You need a pair of gardening clippers in order to harvest the plant.\r\n");
+       return;
    }
-   if (found == FALSE) {
-    send_to_char(ch, "You do not have any working gardening clippers!\r\n");
-    return;
-   } else if (can_harvest(obj) == FALSE) {
+   if (can_harvest(obj) == FALSE) {
     send_to_char(ch, "You can not harvest that plant. Instead, Syntax: garden (plant) (pick)\r\n");
     return;
    } else if (GET_OBJ_VAL(obj, VAL_WATERLEVEL) <= -10) {
@@ -558,21 +538,12 @@ ACMD(do_garden)
     return;
    }
   } else if (!strcasecmp(arg2, "dig")) {
-   struct obj_data *obj2, *shovel = NULL, *next_obj;
-   int found = FALSE;
-
-   for (obj2 = ch->carrying; obj2; obj2 = next_obj) {
-          next_obj = obj2->next_content;
-     if (GET_OBJ_VNUM(obj2) == 254 && !OBJ_FLAGGED(obj2, ITEM_BROKEN) && !OBJ_FLAGGED(obj2, ITEM_FORGED)) {
-      found = TRUE;
-      shovel = obj2;
-     }
+   struct obj_data *shovel = NULL;
+   if(!(shovel = char_inventory_search_vnum(ch, 254, FALSE, SEARCH_GENUINE | SEARCH_WORKING))) {
+       send_to_char(ch, "You need a shovel in order to dig up the plant.\r\n");
+       return;
    }
-   if (found == FALSE) {
-    send_to_char(ch, "You do not have any working gardening shovels!\r\n");
-    return;
-   } else {
-    act("@GYou calmly dig up @g$p@G.@n", TRUE, ch, obj, 0, TO_CHAR);
+   act("@GYou calmly dig up @g$p@G.@n", TRUE, ch, obj, 0, TO_CHAR);
     act("@g$n@G calmly digs up @g$p@G.@n", TRUE, ch, obj, 0, TO_ROOM);
        decCurST(ch, cost);
     obj_from_room(obj);
@@ -581,35 +552,19 @@ ACMD(do_garden)
     WAIT_STATE(ch, PULSE_3SEC);
     improve_skill(ch, SKILL_GARDENING, 0);
     return;
-   }
   } else if (!strcasecmp(arg2, "plant")) {
-   struct obj_data *obj2, *shovel, *next_obj;
-   int found = FALSE;
-
-   for (obj2 = ch->carrying; obj2; obj2 = next_obj) {
-          next_obj = obj2->next_content;
-     if (GET_OBJ_VNUM(obj2) == 254 && !OBJ_FLAGGED(obj2, ITEM_BROKEN) && !OBJ_FLAGGED(obj2, ITEM_FORGED)) {
-      found = TRUE;
-      shovel = obj2;
-     }
+   struct obj_data *shovel = NULL;
+   if(!(shovel = char_inventory_search_vnum(ch, 254, FALSE, SEARCH_GENUINE | SEARCH_WORKING))) {
+       send_to_char(ch, "You need a shovel in order to dig up the plant.\r\n");
+       return;
    }
-   if (found == FALSE) {
-    send_to_char(ch, "You do not have any working gardening shovels!\r\n");
-    return;
-   }
-   found = FALSE;
    struct obj_data *soil = NULL;
+   if(!(soil = char_inventory_search_vnum(ch, 255, FALSE, SEARCH_GENUINE))) {
+       send_to_char(ch, "You need a pile of soil in order to plant.\r\n");
+       return;
+   }
 
-   for (obj2 = ch->carrying; obj2; obj2 = next_obj) {
-          next_obj = obj2->next_content;
-     if (GET_OBJ_VNUM(obj2) == 255 && !OBJ_FLAGGED(obj2, ITEM_FORGED)) {
-      found = TRUE;
-      soil = obj2;
-     }
-   }    
-   if (found == FALSE) {
-    send_to_char(ch, "You don't have any real soil.\r\n");
-   } else if (check_saveroom_count(ch, NULL) > 7 && ROOM_FLAGGED(IN_ROOM(ch), ROOM_GARDEN1)) {
+   if (check_saveroom_count(ch, NULL) > 7 && ROOM_FLAGGED(IN_ROOM(ch), ROOM_GARDEN1)) {
     send_to_char(ch, "This room already has all its planters full. Try digging up some plants.\r\n");
     return;
    } else if (check_saveroom_count(ch, NULL) > 19 && ROOM_FLAGGED(IN_ROOM(ch), ROOM_GARDEN2)) {

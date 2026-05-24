@@ -1,5 +1,8 @@
 #include "dbat/db/characters.h"
 #include "dbat/db/consts/triggers.h"
+#include "dbat/db/consts/search.h"
+#include "dbat/db/objects.h"
+
 struct char_data *character_list;
 struct char_data *affect_list;
 struct char_data *affectv_list;
@@ -58,4 +61,15 @@ struct char_data *mob_proto_by_id(mob_vnum vnum)
     return nullptr;
 
   return &mob_proto[rnum];
+}
+
+struct obj_data* char_inventory_search_vnum(struct char_data *ch, obj_vnum vnum, bool recursive, int flags) {
+    struct obj_vnum_search_data data = {
+        .vnum = vnum,
+        .flags = flags,
+        .ch = ch,
+        .found = nullptr
+    };
+    char_inventory_iterate(ch, recursive, obj_search_vnum_match, &data);
+    return data.found;
 }

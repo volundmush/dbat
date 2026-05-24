@@ -162,12 +162,12 @@ pub export fn room_contents_iterate(room: *cdb.room_data, recursive: bool, func:
     while (current != null) {
         const next = current.*.next_content;
         if (!callback(&current.*, ctx)) return;
-        if (recursive and !obj_api.obj_contents_list_iterate(current, true, func, ctx)) return;
+        if (recursive and !obj_api.objContentsListIterate(current.*.contains, true, callback, ctx)) return;
         current = next;
     }
 }
 
-pub export fn room_people_iterate(room: *cdb.room_data, func: ?cdb.char_iter_fn, ctx: ?*anyopaque) void {
+pub export fn room_people_iterate(room: *cdb.room_data, func: cdb.char_iter_fn, ctx: ?*anyopaque) void {
     const callback = func orelse return;
     var current = room.people;
     while (current != null) {

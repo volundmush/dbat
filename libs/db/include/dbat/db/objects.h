@@ -157,13 +157,24 @@ int16_t obj_worn_on_get(struct obj_data *obj);
 void obj_worn_on_set(struct obj_data *obj, int16_t pos);
 int64_t obj_in_obj_get(struct obj_data *obj);
 void obj_in_obj_set(struct obj_data *obj, struct obj_data *in_obj);
+int64_t obj_sitting_get(struct obj_data *obj);
+void obj_sitting_set(struct obj_data *obj, struct char_data *ch);
+
 size_t obj_inventory_count(struct obj_data *obj, bool recursive);
+
+bool obj_search_vnum_match(struct obj_data *obj, void *ctx);
+bool obj_search_type_match(struct obj_data *obj, void *ctx);
 
 void obj_contents_list_iterate(struct obj_data *obj, bool recursive, obj_iter_fn func, void *ctx);
 void obj_inventory_iterate(struct obj_data *obj, bool recursive, obj_iter_fn func, void *ctx);
-int64_t obj_sitting_get(struct obj_data *obj);
-void obj_sitting_set(struct obj_data *obj, struct char_data *ch);
+
+
+struct obj_data* obj_contents_search_vnum(struct obj_data *obj, obj_vnum vnum, bool recursive, int flags);
+struct obj_data* obj_contents_search_type(struct obj_data *obj, int type, bool recursive, int flags);
 struct obj_data* obj_inventory_search_vnum(struct obj_data *obj, obj_vnum vnum, bool recursive, int flags);
+struct obj_data* obj_inventory_search_type(struct obj_data *obj, int type, bool recursive, int flags);
+
+
 
 
 // Below this is global variables and database functions

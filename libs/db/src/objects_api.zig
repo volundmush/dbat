@@ -2,7 +2,7 @@ const cdb = @import("cdb");
 const std = @import("std");
 const bitflags = @import("flags.zig");
 
-const ObjIterFn = *const fn (*cdb.obj_data, ?*anyopaque) callconv(.c) bool;
+pub const ObjIterFn = *const fn (*cdb.obj_data, ?*anyopaque) callconv(.c) bool;
 
 extern fn strdup(s: [*:0]const u8) ?[*:0]u8;
 
@@ -250,20 +250,25 @@ pub export fn obj_inventory_count(obj: *cdb.obj_data, recursive: bool) usize {
     return count;
 }
 
-pub export fn obj_contents_list_iterate(obj: *cdb.obj_data, recursive: bool, func: ?ObjIterFn, ctx: ?*anyopaque) void {
+pub fn objContentsListIterate(obj: [*c]cdb.obj_data, recursive: bool, func: ObjIterFn, ctx: ?*anyopaque) bool {
     var current = obj;
     while (current != null) {
         const next = current.*.next_content;
         if (!func(&current.*, ctx)) return false;
-        if (recursive and !obj_contents_list_iterate(&current.*, true, func, ctx)) return false;
+        if (recursive and !objContentsListIterate(current.*.contains, true, func, ctx)) return false;
         current = next;
     }
     return true;
 }
 
+pub export fn obj_contents_list_iterate(obj: [*c]cdb.obj_data, recursive: bool, func: ?ObjIterFn, ctx: ?*anyopaque) void {
+    const callback = func orelse return;
+    _ = objContentsListIterate(obj, recursive, callback, ctx);
+}
+
 pub export fn obj_inventory_iterate(obj: *cdb.obj_data, recursive: bool, func: ?ObjIterFn, ctx: ?*anyopaque) void {
     const callback = func orelse return;
-    _ = obj_contents_list_iterate(obj.contents, recursive, callback, ctx);
+    _ = objContentsListIterate(obj.contains, recursive, callback, ctx);
 }
 
 pub export fn obj_sitting_get(obj: *cdb.obj_data) i64 {
@@ -272,17 +277,6 @@ pub export fn obj_sitting_get(obj: *cdb.obj_data) i64 {
 
 pub export fn obj_sitting_set(obj: *cdb.obj_data, ch: [*c]cdb.char_data) void {
     obj.sitting = ch;
-}
-
-pub export fn obj_inventory_search_vnum(obj: *cdb.obj_data, vnum: cdb.obj_vnum, recursive: bool, flags: c_int) [*c]cdb.obj_data {
-    var current = obj.contains;
-    while (current != null) : (current = current.*.next_content) {
-        if (obj_vnum_get(&current.*) == vnum) return current;
-        if (recursive) {
-            if (obj_inventory_search_vnum(&current.*, vnum, true, flags)) |found| return found;
-        }
-    }
-    return null;
 }
 
 fn validObjRnum(rnum: cdb.obj_rnum) bool {
