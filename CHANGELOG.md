@@ -32,6 +32,9 @@
 - Adjusted disguise to only skillcheck while in combat for removal, rather than just having an aura. Ki Preference players rejoice! [Mirage]
 - Adjusted stretchy limbs to no longer require 2 full altitude level differences. Now if you're in the same room, stretchy limbs should function regardless of altitude. [Mirage]
 - Removed the RPP Bank Feature that should've been dead a while ago. [Volund]
+- Created new APIs for Characters, Objects, Rooms, Zones, Shops, Guilds, Exits. [Volund]
+- Created a new template-based search.hpp for closure-based searches in .cpp [Volund]
+- Laying groundwork for eliminating C arrays for entity database. [Volund]
 
 # 2.9.2
 - Last version from before this file was created.

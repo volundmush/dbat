@@ -124,11 +124,11 @@ ASPELL(spell_summon)
       send_to_char(victim, "%s just tried to summon you to: %s.\r\n"
 	      "%s failed because you have summon protection on.\r\n"
 	      "Type NOSUMMON to allow other players to summon you.\r\n",
-	      GET_NAME(ch), world[IN_ROOM(ch)].name,
+	      GET_NAME(ch), char_room_get(ch)->name,
 	      (ch->sex == SEX_MALE) ? "He" : "She");
 
       send_to_char(ch, "You failed because %s has summon protection on.\r\n", GET_NAME(victim));
-      mudlog(BRF, ADMLVL_IMMORT, TRUE, "%s failed summoning %s to %s.", GET_NAME(ch), GET_NAME(victim), world[IN_ROOM(ch)].name);
+      mudlog(BRF, ADMLVL_IMMORT, TRUE, "%s failed summoning %s to %s.", GET_NAME(ch), GET_NAME(victim), char_room_get(ch)->name);
       return;
     }
   }
@@ -184,7 +184,7 @@ ASPELL(spell_locate_object)
     if (i->carried_by)
       send_to_char(ch, " is being carried by %s.\r\n", PERS(i->carried_by, ch));
     else if (IN_ROOM(i) != NOWHERE)
-      send_to_char(ch, " is in %s.\r\n", world[IN_ROOM(i)].name);
+      send_to_char(ch, " is in %s.\r\n", obj_room_get(i)->name);
     else if (i->in_obj)
       send_to_char(ch, " is in %s.\r\n", i->in_obj->short_description);
     else if (i->worn_by)
@@ -431,7 +431,7 @@ ASPELL(spell_portal)
 {
   struct obj_data *portal, *tportal;
   struct room_data *rm;
-  rm = &world[IN_ROOM(victim)];
+  rm = char_room_get(victim);
 
   if (ch == NULL || victim == NULL)
     return;

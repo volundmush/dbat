@@ -108,7 +108,7 @@ int player_present(struct char_data *ch)
   if (IN_ROOM(ch) == NOWHERE)
    return 0;
 
-  for (vict = world[IN_ROOM(ch)].people; vict; vict = next_v) {
+  for (vict = char_room_get(ch)->people; vict; vict = next_v) {
    next_v = vict->next_in_room; 
    if (!IS_NPC(vict)) {
     found = TRUE;
@@ -150,10 +150,10 @@ void mobile_activity(void)
 
     /* Scavenger (picking up objects) */
     if (IS_HUMANOID(ch) && !FIGHTING(ch) && AWAKE(ch) && !MOB_FLAGGED(ch, MOB_NOSCAVENGER) && !MOB_FLAGGED(ch, MOB_NOKILL) && (!player_present(ch) || axion_dice(0) > 118))
-      if (world[IN_ROOM(ch)].contents && rand_number(1, 100) >= 95) {
+      if (char_room_get(ch)->contents && rand_number(1, 100) >= 95) {
 	max = 1;
 	best_obj = NULL;
-	for (obj = world[IN_ROOM(ch)].contents; obj; obj = obj->next_content)
+	for (obj = char_room_get(ch)->contents; obj; obj = obj->next_content)
 	  if (CAN_GET_OBJ(ch, obj) && GET_OBJ_COST(obj) > max) {          
 	    best_obj = obj;
 	    max = GET_OBJ_COST(obj);
@@ -187,7 +187,7 @@ void mobile_activity(void)
 	!ROOM_FLAGGED(EXIT(ch, door)->to_room, ROOM_NOMOB) &&
 	!ROOM_FLAGGED(EXIT(ch, door)->to_room, ROOM_DEATH) &&
 	(!MOB_FLAGGED(ch, MOB_STAY_ZONE) ||
-	 (world[EXIT(ch, door)->to_room].zone == world[IN_ROOM(ch)].zone))) {
+	 (world[EXIT(ch, door)->to_room].zone == char_room_get(ch)->zone))) {
      if (rand_number(1, 2) == 2 && !IS_AFFECTED(ch, AFF_PARALYZE) && block_calc(ch)) {
       perform_move(ch, door, 1);
      }
@@ -195,7 +195,7 @@ void mobile_activity(void)
 
     /* RESPOND TO A HUGE ATTACK */
      struct obj_data *hugeatk = NULL, *next_huge = NULL;
-     for (hugeatk = world[IN_ROOM(ch)].contents; hugeatk; hugeatk = next_huge) {
+     for (hugeatk = char_room_get(ch)->contents; hugeatk; hugeatk = next_huge) {
       next_huge = hugeatk->next_content;
       if (FIGHTING(ch)) {
        continue;
@@ -224,7 +224,7 @@ void mobile_activity(void)
     if (MOB_FLAGGED(ch, MOB_AGGRESSIVE) && !IS_AFFECTED(ch, AFF_PARALYZE)) {
       int spot_roll = rand_number(1, GET_LEVEL(ch) + 10);
       found = FALSE;
-      for (vict = world[IN_ROOM(ch)].people; vict && !found; vict = vict->next_in_room) {
+      for (vict = char_room_get(ch)->people; vict && !found; vict = vict->next_in_room) {
         if (vict == ch)
           continue;
         else if (FIGHTING(ch))
@@ -316,7 +316,7 @@ void mobile_activity(void)
     if (false && IS_HUMANOID(ch) && !MOB_FLAGGED(ch, MOB_NOKILL)) {
      struct char_data *vict, *next_v;
      int done = FALSE;
-     for (vict = world[IN_ROOM(ch)].people; vict; vict = next_v) {
+     for (vict = char_room_get(ch)->people; vict; vict = next_v) {
       next_v = vict->next_in_room;
       if (vict == ch)
        continue;
@@ -352,7 +352,7 @@ void mobile_activity(void)
     if (false && !FIGHTING(ch) && rand_number(1, 20) >= 14 && IS_HUMANOID(ch) && !MOB_FLAGGED(ch, MOB_NOKILL)) {
           struct char_data *vict, *next_v;
      int done = FALSE;
-     for (vict = world[IN_ROOM(ch)].people; vict; vict = next_v) {
+     for (vict = char_room_get(ch)->people; vict; vict = next_v) {
       next_v = vict->next_in_room;
       if (vict == ch)
        continue;
@@ -410,7 +410,7 @@ void mobile_activity(void)
     /* Mob Memory */
     if (IS_HUMANOID(ch) && MEMORY(ch) && !MOB_FLAGGED(ch, MOB_DUMMY) && !IS_AFFECTED(ch, AFF_PARALYZE)) {
       found = FALSE;
-      for (vict = world[IN_ROOM(ch)].people; vict && !found; vict = vict->next_in_room) {
+      for (vict = char_room_get(ch)->people; vict && !found; vict = vict->next_in_room) {
 	if (IS_NPC(vict) || !CAN_SEE(ch, vict) || PRF_FLAGGED(vict, PRF_NOHASSLE))
 	  continue;
         if (FIGHTING(ch))
@@ -441,7 +441,7 @@ void mobile_activity(void)
         !AFF_FLAGGED(ch, AFF_BLIND) &&
         !AFF_FLAGGED(ch, AFF_CHARM)) {
       found = FALSE;
-      for (vict = world[IN_ROOM(ch)].people; vict && !found; vict = vict->next_in_room) {
+      for (vict = char_room_get(ch)->people; vict && !found; vict = vict->next_in_room) {
 	if (ch == vict || !IS_NPC(vict) || !FIGHTING(vict))
 	  continue;
 	if (IS_NPC(FIGHTING(vict)) || ch == FIGHTING(vict))
@@ -464,7 +464,7 @@ void mobile_activity(void)
       int shop_nr;
       found = FALSE;
       /* Is there a shopkeeper around? */
-      for (vict = world[IN_ROOM(ch)].people; vict && !found; vict = vict->next_in_room) {
+      for (vict = char_room_get(ch)->people; vict && !found; vict = vict->next_in_room) {
         if (GET_MOB_SPEC(vict) == shop_keeper) {
           /* Ok, vict is a shop keeper.  Which shop is his? */
           for (shop_nr = 0; shop_nr <= top_shop; shop_nr++)
@@ -482,7 +482,7 @@ void mobile_activity(void)
        * running the next loop, since we can't steal from anyone anyway. 
        */
       }
-      for (vict = world[IN_ROOM(ch)].people; vict && !found; vict = vict->next_in_room) {
+      for (vict = char_room_get(ch)->people; vict && !found; vict = vict->next_in_room) {
         if (vict == ch)
           continue;
         if (MOB_FLAGGED(ch, MOB_WIMPY) && AWAKE(vict))

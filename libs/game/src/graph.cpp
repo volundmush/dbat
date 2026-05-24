@@ -337,7 +337,7 @@ ACMD(do_radar)
  act("$n holds up a dragon radar and pushes its button.", FALSE, ch, 0, 0, TO_ROOM);
  while (num < 20000) {
  if (real_room(room) != NOWHERE) {
- for (obj = world[real_room(room)].contents; obj; obj = next_obj) {
+ for (obj = room_by_id(room)->contents; obj; obj = next_obj) {
       next_obj = obj->next_content;
   if (OBJ_FLAGGED(obj, ITEM_FORGED)) {
    continue;
@@ -361,7 +361,7 @@ ACMD(do_radar)
    found = TRUE;
   }
  }
- for (tch = world[real_room(room)].people; tch; tch = tch->next_in_room) {
+ for (tch = room_by_id(room)->people; tch; tch = tch->next_in_room) {
   if (tch == ch) {
    continue;
   }

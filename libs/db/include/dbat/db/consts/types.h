@@ -112,6 +112,11 @@ typedef struct skill_data skill_data;
 #define ACMD(name) void (name)(struct char_data *ch, char *argument, int cmd, int subcmd)
 #define SPECIAL(name) int (name)(struct char_data *ch, void *me, int cmd, char *argument)
 
+typedef int(*SpecialFunc)(struct char_data *ch, void *me, int cmd, char *argument);
+
+// Return true to continue iteration. Return false to stop.
+typedef bool (*obj_iter_fn)(struct obj_data *obj, void *ctx);
+typedef bool (*char_iter_fn)(struct char_data *ch, void *ctx);
 
 #ifdef __cplusplus
 }

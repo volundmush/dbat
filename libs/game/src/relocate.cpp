@@ -122,7 +122,7 @@ void obj_from_room(struct obj_data *object)
    GET_OBJ_POSTTYPE(object) = 0;
   }
 
-  REMOVE_FROM_LIST(object, world[IN_ROOM(object)].contents, next_content, temp);
+  REMOVE_FROM_LIST(object, obj_room_get(object)->contents, next_content, temp);
 
   if (ROOM_FLAGGED(IN_ROOM(object), ROOM_HOUSE))
     SET_BIT_AR(ROOM_FLAGS(IN_ROOM(object)), ROOM_HOUSE_CRASH);
@@ -223,12 +223,12 @@ void char_from_room(struct char_data *ch)
     if (GET_EQ(ch, i) != NULL)
       if (GET_OBJ_TYPE(GET_EQ(ch, i)) == ITEM_LIGHT)
         if (GET_OBJ_VAL(GET_EQ(ch, i), VAL_LIGHT_HOURS))
-	  world[IN_ROOM(ch)].light--;
+	  char_room_get(ch)->light--;
 	  
  if (PLR_FLAGGED(ch, PLR_AURALIGHT))
-   world[IN_ROOM(ch)].light--;
+   char_room_get(ch)->light--;
 
-  REMOVE_FROM_LIST(ch, world[IN_ROOM(ch)].people, next_in_room, temp);
+  REMOVE_FROM_LIST(ch, char_room_get(ch)->people, next_in_room, temp);
   IN_ROOM(ch) = NOWHERE;
   ch->next_in_room = NULL;
 }
@@ -422,7 +422,7 @@ void equip_char(struct char_data *ch, struct obj_data *obj, int pos)
   if (IN_ROOM(ch) != NOWHERE) {
     if (GET_OBJ_TYPE(obj) == ITEM_LIGHT)
       if (GET_OBJ_VAL(obj, VAL_LIGHT_HOURS))	/* if light is ON */
-	world[IN_ROOM(ch)].light++;
+	char_room_get(ch)->light++;
   } else
     log("SYSERR: IN_ROOM(ch) = NOWHERE when equipping char %s.", GET_NAME(ch));
 
@@ -457,7 +457,7 @@ struct obj_data *unequip_char(struct char_data *ch, int pos)
   if (IN_ROOM(ch) != NOWHERE) {
     if (GET_OBJ_TYPE(obj) == ITEM_LIGHT)
       if (GET_OBJ_VAL(obj, VAL_LIGHT_HOURS))	/* if light is ON */
-	world[IN_ROOM(ch)].light--;
+	char_room_get(ch)->light--;
   } else
     log("SYSERR: IN_ROOM(ch) = NOWHERE when unequipping char %s.", GET_NAME(ch));
 

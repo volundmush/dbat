@@ -54,7 +54,7 @@ ACMD(do_oasis_list)
     }
     
   if (!*smin || *smin == '.') {
-    rzone = world[IN_ROOM(ch)].zone;
+    rzone = char_room_get(ch)->zone;
   } else if (!*smax) {
     rzone = real_zone(atoi(smin));
     
@@ -103,7 +103,7 @@ ACMD(do_oasis_links)
   one_argument(argument, arg);
 
   if (!strcmp(arg, ".") || (arg == NULL || !*arg)) {
-    zrnum = world[IN_ROOM(ch)].zone;
+    zrnum = char_room_get(ch)->zone;
     zvnum = zone_table[zrnum].number;
   } else {
     zvnum = atoi(arg);
@@ -120,15 +120,17 @@ ACMD(do_oasis_links)
 
   send_to_char(ch, "Zone %d is linked to the following zones:\r\n", zvnum);
   for (nr = 0; nr <= top_of_world && (GET_ROOM_VNUM(nr) <= last); nr++) {
+    struct room_data *nrm = &world[nr];
     if (GET_ROOM_VNUM(nr) >= first) {
       for (j = 0; j < NUM_OF_DIRS; j++) {
-      if (world[nr].dir_option[j]) {
-        to_room = world[nr].dir_option[j]->to_room;
-        if (to_room != NOWHERE && (zrnum != world[to_room].zone))
+      if (nrm->dir_option[j]) {
+        to_room = nrm->dir_option[j]->to_room;
+        struct room_data *trm = &world[to_room];
+        if (to_room != NOWHERE && (zrnum != trm->zone))
           send_to_char(ch, "%3d %-30s at %5d (%-5s) ---> %5d\r\n",
-            zone_table[world[to_room].zone].number,
-            zone_table[world[to_room].zone].name,
-            GET_ROOM_VNUM(nr), dirs[j], world[to_room].number);
+            zone_table[trm->zone].number,
+            zone_table[trm->zone].name,
+            GET_ROOM_VNUM(nr), dirs[j], trm->number);
       }
       }
     }
@@ -165,23 +167,26 @@ void list_rooms(struct char_data *ch, zone_rnum rnum, zone_vnum vmin, zone_vnum 
     return;
   
   for (i = 0; i <= top_of_world; i++) {
+    struct room_data *rm = &world[i];
     
     /** Check to see if this room is one of the ones needed to be listed.    **/
-    if ((world[i].number >= bottom) && (world[i].number <= top)) {
+    if ((rm->number >= bottom) && (rm->number <= top)) {
       counter++;
 
         send_to_char(ch, "%4d) [@g%-5d@n] @[1]%-*s@n %s",
-                          counter, world[i].number, count_color_chars(world[i].name)+44, 
-                          world[i].name, world[i].proto_script ? "[TRIG] " : "");
+                          counter, rm->number, count_color_chars(rm->name)+44, 
+                          rm->name, rm->proto_script ? "[TRIG] " : "");
 
       for (j = 0; j < NUM_OF_DIRS; j++) {
-        if (W_EXIT(i, j) == NULL)
+        struct room_direction_data *exit = rm->dir_option[j];
+        if (exit == NULL)
           continue;
-        if (W_EXIT(i, j)->to_room == NOWHERE)
+        struct room_data *dest = exit_dest_get(exit);
+        if (!dest)
           continue;
           
-        if (world[W_EXIT(i, j)->to_room].zone != world[i].zone) 
-          send_to_char(ch, "(@y%d@n)", world[W_EXIT(i, j)->to_room].number);
+        if (dest->zone != rm->zone) 
+          send_to_char(ch, "(@y%d@n)", dest->number);
      
       }
     

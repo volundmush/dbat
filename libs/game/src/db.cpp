@@ -639,27 +639,29 @@ void destroy_db(void)
 
   /* Rooms */
   for (cnt = 0; cnt <= top_of_world; cnt++) {
-    if (world[cnt].name)
-      free(world[cnt].name);
-    if (world[cnt].description)
-      free(world[cnt].description);
-    free_extra_descriptions(world[cnt].ex_description);
+    struct room_data *room = &world[cnt];
+    if (room->name)
+      free(room->name);
+    if (room->description)
+      free(room->description);
+    free_extra_descriptions(room->ex_description);
 
     /* free any assigned scripts */
-    if (SCRIPT(&world[cnt]))
-      extract_script(&world[cnt], WLD_TRIGGER);
+    if (SCRIPT(room))
+      extract_script(room, WLD_TRIGGER);
     /* free script proto list */
-    free_proto_script(&world[cnt], WLD_TRIGGER);
+    free_proto_script(room, WLD_TRIGGER);
     
     for (itr = 0; itr < NUM_OF_DIRS; itr++) {
-      if (!world[cnt].dir_option[itr])
+      struct room_direction_data *ex = room->dir_option[itr];
+      if (!ex)
         continue;
 
-      if (world[cnt].dir_option[itr]->general_description)
-        free(world[cnt].dir_option[itr]->general_description);
-      if (world[cnt].dir_option[itr]->keyword)
-        free(world[cnt].dir_option[itr]->keyword);
-      free(world[cnt].dir_option[itr]);
+      if (ex->general_description)
+        free(ex->general_description);
+      if (ex->keyword)
+        free(ex->keyword);
+      free(ex);
     }
   }
   free(world);
@@ -961,7 +963,7 @@ void auc_save()
   else {
     struct obj_data *obj, *next_obj;
 
-    for (obj = world[real_room(80)].contents; obj; obj = next_obj) {
+    for (obj = room_by_id(80)->contents; obj; obj = next_obj) {
      next_obj = obj->next_content;
      if (obj) {
       fprintf(fl, "%" I64T " %s %d %d %d %d %ld\n", obj->unique_id, GET_AUCTERN(obj), GET_AUCTER(obj), GET_CURBID(obj), GET_STARTBID(obj), GET_BID(obj), GET_AUCTIME(obj));
@@ -1468,10 +1470,12 @@ static void parse_room(FILE *fl, int virtual_nr)
       exit(1);
   }
 
-  world[room_nr].zone = zone;
-  world[room_nr].number = virtual_nr;
-  world[room_nr].name = fread_string(fl, buf2);
-  world[room_nr].description = fread_string(fl, buf2);
+  struct room_data *rm = &world[room_nr];
+
+  rm->zone = zone;
+  rm->number = virtual_nr;
+  rm->name = fread_string(fl, buf2);
+  rm->description = fread_string(fl, buf2);
 
   if (! room_htree)
     room_htree = htree_init();
@@ -1495,10 +1499,10 @@ static void parse_room(FILE *fl, int virtual_nr)
    */
 
     log("Converting room #%d to 128bits..", virtual_nr);
-    world[room_nr].room_flags[0] = asciiflag_conv(flags);
-    world[room_nr].room_flags[1] = 0;
-    world[room_nr].room_flags[2] = 0;
-    world[room_nr].room_flags[3] = 0;
+    rm->room_flags[0] = asciiflag_conv(flags);
+    rm->room_flags[1] = 0;
+    rm->room_flags[2] = 0;
+    rm->room_flags[3] = 0;
 
     sprintf(flags, "room #%d", virtual_nr);	/* sprintf: OK (until 399-bit integers) */
     
@@ -1510,12 +1514,12 @@ static void parse_room(FILE *fl, int virtual_nr)
     log("   done.");
   } else if (retval == 6) {
   int taeller;
-  world[room_nr].room_flags[0] = asciiflag_conv(flags);
-  world[room_nr].room_flags[1] = asciiflag_conv(flags2);
-  world[room_nr].room_flags[2] = asciiflag_conv(flags3);
-  world[room_nr].room_flags[3] = asciiflag_conv(flags4);
+  rm->room_flags[0] = asciiflag_conv(flags);
+  rm->room_flags[1] = asciiflag_conv(flags2);
+  rm->room_flags[2] = asciiflag_conv(flags3);
+  rm->room_flags[3] = asciiflag_conv(flags4);
 
-  world[room_nr].sector_type = t[2];
+  rm->sector_type = t[2];
   sprintf(flags, "object #%d", virtual_nr);	/* sprintf: OK (until 399-bit integers) */
 
   } else {
@@ -1523,45 +1527,41 @@ static void parse_room(FILE *fl, int virtual_nr)
   exit(1);
   }
 
-  world[room_nr].func = NULL;
-  world[room_nr].contents = NULL;
-  world[room_nr].people = NULL;
-  world[room_nr].light = 0;	/* Zero light sources */
-  world[room_nr].timed = -1;
-  world[room_nr].dmg = 0;
-  world[room_nr].gravity = 0;
+  rm->timed = -1;
+
+  int gravity = 0;
+
+  room_vnum vn = rm->number;
 
   if (ROOM_FLAGGED(room_nr, ROOM_VEGETA) || ROOM_FLAGGED(room_nr, ROOM_GRAVITYX10)) {
-     world[room_nr].gravity = 10;
+     gravity = 10;
   }
-  if (world[room_nr].number >= 19800 && world[room_nr].number <= 19899) {
-     world[room_nr].gravity = 1000;
+  if (vn >= 19800 && vn <= 19899) {
+     gravity = 1000;
   }
-  if (world[room_nr].number >= 64000 && world[room_nr].number <= 64006) {
-     world[room_nr].gravity = 100;
+  if (vn >= 64000 && vn <= 64006) {
+     gravity = 100;
   }
-  if (world[room_nr].number >= 64007 && world[room_nr].number <= 64016) {
-     world[room_nr].gravity = 300;
+  if (vn >= 64007 && vn <= 64016) {
+     gravity = 300;
   }
-  if (world[room_nr].number >= 64017 && world[room_nr].number <= 64030) {
-     world[room_nr].gravity = 500;
+  if (vn >= 64017 && vn <= 64030) {
+     gravity = 500;
   }
-  if (world[room_nr].number >= 64031 && world[room_nr].number <= 64048) {
-     world[room_nr].gravity = 1000;
+  if (vn >= 64031 && vn <= 64048) {
+     gravity = 1000;
   }
-  if (world[room_nr].number >= 64049 && world[room_nr].number <= 64070) {
-     world[room_nr].gravity = 5000;
+  if (vn >= 64049 && vn <= 64070) {
+     gravity = 5000;
   }
-  if (world[room_nr].number >= 64071 && world[room_nr].number <= 64096) {
-     world[room_nr].gravity = 10000;
+  if (vn >= 64071 && vn <= 64096) {
+     gravity = 10000;
   }
-  if (world[room_nr].number == 64097) {
-     world[room_nr].gravity = 1000;
+  if (vn == 64097) {
+     gravity = 1000;
   }
-  for (i = 0; i < NUM_OF_DIRS; i++)
-    world[room_nr].dir_option[i] = NULL;
 
-  world[room_nr].ex_description = NULL;
+  rm->gravity = gravity;
 
   snprintf(buf, sizeof(buf), "SYSERR: Format error in room #%d (expecting D/E/S)", virtual_nr);
 
@@ -1591,15 +1591,15 @@ static void parse_room(FILE *fl, int virtual_nr)
       	  new_descr->description = tmp;
       	}
       }
-      new_descr->next = world[room_nr].ex_description;
-      world[room_nr].ex_description = new_descr;
+      new_descr->next = rm->ex_description;
+      rm->ex_description = new_descr;
       break;
     case 'S':			/* end of room */
       /* DG triggers -- script is defined after the end of the room */
       letter = fread_letter(fl);
       ungetc(letter, fl);
       while (letter=='T') {
-        dg_read_trigger(fl, &world[room_nr], WLD_TRIGGER);
+        dg_read_trigger(fl, rm, WLD_TRIGGER);
         letter = fread_letter(fl);
         ungetc(letter, fl);
       }
@@ -1618,11 +1618,14 @@ static void setup_dir(FILE *fl, int room, int dir)
   int t[11], retval;
   char line[READ_SIZE], buf2[128];
 
+  struct room_data* rm = &world[room];
+
   snprintf(buf2, sizeof(buf2), "room #%d, direction D%d", GET_ROOM_VNUM(room)+1, dir);
 
-  CREATE(world[room].dir_option[dir], struct room_direction_data, 1);
-  world[room].dir_option[dir]->general_description = fread_string(fl, buf2);
-  world[room].dir_option[dir]->keyword = fread_string(fl, buf2);
+  CREATE(rm->dir_option[dir], struct room_direction_data, 1);
+  struct room_direction_data *ex = rm->dir_option[dir];
+  ex->general_description = fread_string(fl, buf2);
+  ex->keyword = fread_string(fl, buf2);
 
   if (!get_line(fl, line)) {
     log("SYSERR: Format error, %s", buf2);
@@ -1634,68 +1637,70 @@ static void setup_dir(FILE *fl, int room, int dir)
   } else if (bitwarning == FALSE) {
 
   if (t[0] == 1)
-    world[room].dir_option[dir]->exit_info = EX_ISDOOR;
+    ex->exit_info = EX_ISDOOR;
   else if (t[0] == 2)
-    world[room].dir_option[dir]->exit_info = EX_ISDOOR | EX_PICKPROOF;
+    ex->exit_info = EX_ISDOOR | EX_PICKPROOF;
   else if (t[0] == 3)
-    world[room].dir_option[dir]->exit_info = EX_ISDOOR | EX_SECRET;
+    ex->exit_info = EX_ISDOOR | EX_SECRET;
   else if (t[0] == 4)
-    world[room].dir_option[dir]->exit_info = EX_ISDOOR|EX_PICKPROOF|EX_SECRET;
+    ex->exit_info = EX_ISDOOR|EX_PICKPROOF|EX_SECRET;
   else
-    world[room].dir_option[dir]->exit_info = 0;
+    ex->exit_info = 0;
 
-  world[room].dir_option[dir]->key = ((t[1] == -1 || t[1] == 65535) ? NOTHING : t[1]);
-  world[room].dir_option[dir]->to_room = ((t[2] == -1  || t[2] == 65535) ? NOWHERE : t[2]);
+  ex->key = ((t[1] == -1 || t[1] == 65535) ? NOTHING : t[1]);
+  ex->to_room = ((t[2] == -1  || t[2] == 65535) ? NOWHERE : t[2]);
+
+  zone_vnum zvn = zone_table[rm->zone].number;
 
   if (retval == 3) {
     log("Converting world files to include DC add ons.");
-    world[room].dir_option[dir]->dclock = 20;
-    world[room].dir_option[dir]->dchide = 20;
-    world[room].dir_option[dir]->dcskill = 0;
-    world[room].dir_option[dir]->dcmove = 0;
-    world[room].dir_option[dir]->failsavetype = 0;
-    world[room].dir_option[dir]->dcfailsave = 0;
-    world[room].dir_option[dir]->failroom = NOWHERE;
-    world[room].dir_option[dir]->totalfailroom = NOWHERE;
+    ex->dclock = 20;
+    ex->dchide = 20;
+    ex->dcskill = 0;
+    ex->dcmove = 0;
+    ex->failsavetype = 0;
+    ex->dcfailsave = 0;
+    ex->failroom = NOWHERE;
+    ex->totalfailroom = NOWHERE;
     if (bitsavetodisk) { 
-      add_to_save_list(zone_table[world[room].zone].number, 3);
+      add_to_save_list(zvn, 3);
       converting = TRUE;
     }
   } else if (retval == 5) {
-    world[room].dir_option[dir]->dclock = t[3];
-    world[room].dir_option[dir]->dchide = t[4];
-    world[room].dir_option[dir]->dcskill = 0;
-    world[room].dir_option[dir]->dcmove = 0;
-    world[room].dir_option[dir]->failsavetype = 0;
-    world[room].dir_option[dir]->dcfailsave = 0;
-    world[room].dir_option[dir]->failroom = NOWHERE;
-    world[room].dir_option[dir]->totalfailroom = NOWHERE;
+    ex->dclock = t[3];
+    ex->dchide = t[4];
+    ex->dcskill = 0;
+    ex->dcmove = 0;
+    ex->failsavetype = 0;
+    ex->dcfailsave = 0;
+    ex->failroom = NOWHERE;
+    ex->totalfailroom = NOWHERE;
     if (bitsavetodisk) { 
-      add_to_save_list(zone_table[world[room].zone].number, 3);
+      add_to_save_list(zvn, 3);
       converting = TRUE;
     }
   } else if (retval == 7) {
-    world[room].dir_option[dir]->dclock = t[3];
-    world[room].dir_option[dir]->dchide = t[4];
-    world[room].dir_option[dir]->dcskill = t[5];
-    world[room].dir_option[dir]->dcmove = t[6];
-    world[room].dir_option[dir]->failsavetype = 0;
-    world[room].dir_option[dir]->dcfailsave = 0;
-    world[room].dir_option[dir]->failroom = NOWHERE;
-    world[room].dir_option[dir]->totalfailroom = NOWHERE;
+    ex->dclock = t[3];
+    ex->dchide = t[4];
+    ex->dcskill = t[5];
+    ex->dcmove = t[6];
+    ex->failsavetype = 0;
+    ex->dcfailsave = 0;
+    ex->failroom = NOWHERE;
+    ex->totalfailroom = NOWHERE;
     if (bitsavetodisk) { 
-      add_to_save_list(zone_table[world[room].zone].number, 3);
+      add_to_save_list(zvn, 3);
       converting = TRUE;
     }
   } else if (retval == 11) {
-    world[room].dir_option[dir]->dclock = t[3];
-    world[room].dir_option[dir]->dchide = t[4];
-    world[room].dir_option[dir]->dcskill = t[5];
-    world[room].dir_option[dir]->dcmove = t[6];
-    world[room].dir_option[dir]->failsavetype = t[7];
-    world[room].dir_option[dir]->dcfailsave = t[8];
-    world[room].dir_option[dir]->failroom = t[9];
-    world[room].dir_option[dir]->totalfailroom = t[10];
+    ex->dclock = t[3];
+    ex->dchide = t[4];
+    ex->dcskill = t[5];
+    ex->dcmove = t[6];
+    ex->failsavetype = t[7];
+    ex->dcfailsave = t[8];
+    ex->failroom = t[9];
+    ex->totalfailroom = t[10];
   }
   }
 }
@@ -1726,14 +1731,18 @@ static void renum_world(void)
 {
   int room, door;
 
-  for (room = 0; room <= top_of_world; room++)
-    for (door = 0; door < NUM_OF_DIRS; door++)
-      if (world[room].dir_option[door])
-	if (world[room].dir_option[door]->to_room != NOWHERE)
-	  world[room].dir_option[door]->to_room =
-	    real_room(world[room].dir_option[door]->to_room);
+  for (room = 0; room <= top_of_world; room++) {
+    struct room_data *rm = &world[room];
+    for (door = 0; door < NUM_OF_DIRS; door++) {
+      struct room_direction_data *ex = rm->dir_option[door];
+      if(!ex) continue;
+      if (ex->to_room != NOWHERE)
+          ex->to_room = real_room(ex->to_room);
+    }
+        
+  }
+    
 }
-
 
 #define ZCMD2 zone_table[zone].cmd[cmd_no]
 
@@ -3670,14 +3679,14 @@ void log_dupe_objects(struct obj_data *obj1, struct obj_data *obj2)
   mudlog(BRF, ADMLVL_GOD, TRUE, "DUPE: First: In room: %d (%s), "
                              "In object: %s, Carried by: %s, Worn by: %s",
         GET_ROOM_VNUM(IN_ROOM(obj1)),
-        IN_ROOM(obj1) == NOWHERE ? "Nowhere" : world[IN_ROOM(obj1)].name,
+        IN_ROOM(obj1) == NOWHERE ? "Nowhere" : obj_room_get(obj1)->name,
         obj1->in_obj ? obj1->in_obj->short_description : "None",
         obj1->carried_by ? GET_NAME(obj1->carried_by) : "Nobody",
         obj1->worn_by ? GET_NAME(obj1->worn_by) : "Nobody");
   mudlog(BRF, ADMLVL_GOD, TRUE, "DUPE: Newer: In room: %d (%s), "
                              "In object: %s, Carried by: %s, Worn by: %s",
         GET_ROOM_VNUM(IN_ROOM(obj2)),
-        IN_ROOM(obj2) == NOWHERE ? "Nowhere" : world[IN_ROOM(obj2)].name,
+        IN_ROOM(obj2) == NOWHERE ? "Nowhere" : obj_room_get(obj2)->name,
         obj2->in_obj ? obj2->in_obj->short_description : "None",
         obj2->carried_by ? GET_NAME(obj2->carried_by) : "Nobody",
         obj2->worn_by ? GET_NAME(obj2->worn_by) : "Nobody");
@@ -4284,7 +4293,7 @@ int is_empty(zone_rnum zone_nr)
       continue;
     if (IN_ROOM(i->character) == NOWHERE)
       continue;
-    if (world[IN_ROOM(i->character)].zone != zone_nr)
+    if (char_room_get(i->character)->zone != zone_nr)
       continue;
     /*
      * if an immortal has nohassle off, he counts as present 

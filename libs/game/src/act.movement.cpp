@@ -9,6 +9,8 @@
 ************************************************************************ */
 #include "dbat/game/act.movement.h"
 #include "dbat/db/consts/maximums.h"
+#include "dbat/db/consts/search.h"
+#include "dbat/game/search.hpp"
 #include "dbat/game/utils.h"
 
 #include "dbat/game/search.h"
@@ -556,11 +558,9 @@ static int has_boat(struct char_data *ch)
 
   if (AFF_FLAGGED(ch, AFF_WATERWALK))
     return (1);
-
-  /* non-wearable boats in inventory will do it */
-  for (obj = ch->carrying; obj; obj = obj->next_content)
-    if (GET_OBJ_TYPE(obj) == ITEM_BOAT && (find_eq_pos(ch, obj, NULL) < 0))
-      return (1);
+  
+  if((obj = dbat::game::search::character_inventory_find(ch, FALSE, [&](auto it) { return GET_OBJ_TYPE(it) == ITEM_BOAT && (find_eq_pos(ch, it, NULL) < 0); })) != NULL)
+    return (1);
 
   /* and any boat you're wearing will do it too */
   for (i = 0; i < NUM_WEARS; i++)
@@ -646,9 +646,9 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check)
   /* blocked by a leave trigger ? */
   if (!leave_mtrigger(ch, dir) || IN_ROOM(ch) != was_in) /* prevent teleport crashes */
     return 0;
-  if (!leave_wtrigger(&world[IN_ROOM(ch)], ch, dir) || IN_ROOM(ch) != was_in) /* prevent teleport crashes */
+  if (!leave_wtrigger(char_room_get(ch), ch, dir) || IN_ROOM(ch) != was_in) /* prevent teleport crashes */
     return 0;
-  if (!leave_otrigger(&world[IN_ROOM(ch)], ch, dir) || IN_ROOM(ch) != was_in) /* prevent teleport crashes */
+  if (!leave_otrigger(char_room_get(ch), ch, dir) || IN_ROOM(ch) != was_in) /* prevent teleport crashes */
     return 0;
   /* charmed? */
   if (AFF_FLAGGED(ch, AFF_CHARM) && ch->master && IN_ROOM(ch) == IN_ROOM(ch->master)) {
@@ -880,6 +880,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check)
   }
 
   was_in = IN_ROOM(ch);
+  struct room_data *was_in_room = &world[was_in];
   if (DRAGGING(ch)) {
    act("@C$n@w drags @c$N@w with $m.@n", TRUE, ch, 0, DRAGGING(ch), TO_ROOM);
   }
@@ -888,15 +889,15 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check)
   }
   SET_BIT_AR(AFF_FLAGS(ch), AFF_PURSUIT);
   char_from_room(ch);  
-  char_to_room(ch, world[was_in].dir_option[dir]->to_room);
-  if((world[IN_ROOM(ch)].zone != world[was_in].zone) && !IS_NPC(ch) && !IS_ANDROID(ch)) {
+  char_to_room(ch, was_in_room->dir_option[dir]->to_room);
+  if((char_room_get(ch)->zone != was_in_room->zone) && !IS_NPC(ch) && !IS_ANDROID(ch)) {
    send_to_sense(0, "You sense someone", ch);
    sprintf(buf3, "@D[@GBlip@D]@Y %s\r\n@RSomeone has entered your scouter detection range@n.", add_commas(GET_HIT(ch)));
    send_to_scouter(buf3, ch, 0, 0);
   }
   /* move them first, then move them back if they aren't allowed to go. */
   /* see if an entry trigger disallows the move */
-  if (!entry_mtrigger(ch) || !enter_wtrigger(&world[IN_ROOM(ch)], ch, dir)) {
+  if (!entry_mtrigger(ch) || !enter_wtrigger(char_room_get(ch), ch, dir)) {
     char_from_room(ch);
     char_to_room(ch, was_in);
     REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_PURSUIT);
@@ -909,7 +910,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check)
              (dir == DOWN) ? "above" : dirs[rev_dir[dir]]));
   act("$n arrives from $T.", TRUE, ch, 0, buf2, TO_ROOM | TO_SNEAKRESIST);
   if (FIGHTING(ch)) {
-   if (SECT(world[was_in].dir_option[dir]->to_room) != SECT_FLYING && SECT(world[was_in].dir_option[dir]->to_room) != SECT_WATER_NOSWIM && ROOM_EFFECT(world[was_in].dir_option[dir]->to_room) == 0) {
+   if (SECT(was_in_room->dir_option[dir]->to_room) != SECT_FLYING && SECT(was_in_room->dir_option[dir]->to_room) != SECT_WATER_NOSWIM && ROOM_EFFECT(was_in_room->dir_option[dir]->to_room) == 0) {
     roll_pursue(FIGHTING(ch), ch);
    }
     REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_PURSUIT);
@@ -1034,7 +1035,7 @@ int perform_move(struct char_data *ch, int dir, int need_specials_check)
   } else {
 
     struct obj_data *wall;
-    for (wall = world[IN_ROOM(ch)].contents; wall;wall=wall->next_content) {
+    for (wall = char_room_get(ch)->contents; wall;wall=wall->next_content) {
      if(GET_OBJ_VNUM(wall) == 79) {
       if (GET_OBJ_COST(wall) == dir) {
        send_to_char(ch, "That direction has a glacial wall blocking it.\r\n");
@@ -1175,7 +1176,7 @@ ACMD(do_move)
   if (!IS_NPC(ch)) {
      int fail = FALSE;
      struct obj_data *obj, *next_obj;
-    for (obj = world[IN_ROOM(ch)].contents; obj; obj = next_obj) {
+    for (obj = char_room_get(ch)->contents; obj; obj = next_obj) {
       next_obj = obj->next_content;
       if (KICHARGE(obj) > 0 && USER(obj) == ch) {
        fail = TRUE;
@@ -1488,7 +1489,7 @@ static void do_doorcmd(struct char_data *ch, struct obj_data *obj, int door, int
       char_from_room(ch);
       char_to_room(ch, real_room(GET_OBJ_VAL(obj, VAL_PORTAL_DEST)));
       }
-      for (obj2 = world[IN_ROOM(ch)].contents; obj2; obj2 = next_obj) {
+      for (obj2 = char_room_get(ch)->contents; obj2; obj2 = next_obj) {
        next_obj = obj2->next_content;
        if (GET_OBJ_TYPE(obj2) == ITEM_HATCH) {
         hatch = obj2;
@@ -1690,14 +1691,7 @@ static void do_doorcmd(struct char_data *ch, struct obj_data *obj, int door, int
 static int ok_pick(struct char_data *ch, obj_vnum keynum, int pickproof, int dclock, int scmd, struct obj_data *hatch)
 {
   int skill_lvl, found = FALSE;
-  struct obj_data *obj, *next_obj;
-
-  for (obj = ch->carrying; obj; obj = next_obj) {
-       next_obj = obj->next_content;
-   if (GET_OBJ_VNUM(obj) == 18 && (!OBJ_FLAGGED(obj, ITEM_BROKEN) && !OBJ_FLAGGED(obj, ITEM_FORGED))) {
-    found = TRUE;
-   }
-  }
+  struct obj_data *obj = char_inventory_search_vnum(ch, 18, FALSE, SEARCH_GENUINE | SEARCH_WORKING);
 
   if (scmd != SCMD_PICK)
     return (1);
@@ -1707,7 +1701,7 @@ static int ok_pick(struct char_data *ch, obj_vnum keynum, int pickproof, int dcl
     send_to_char(ch, "You have no idea how!\r\n");
     return (0);
   }
-  if (found == FALSE) {
+  if (!obj) {
     send_to_char(ch, "You need a lock picking kit.\r\n");
     return (0);
   }
@@ -1841,6 +1835,7 @@ ACMD(do_gen_door)
 static int do_simple_enter(struct char_data *ch, struct obj_data *obj, int need_specials_check)
 {
   room_rnum dest_room = real_room(GET_OBJ_VAL(obj, VAL_PORTAL_DEST));
+  struct room_data *droom = &world[dest_room];
   room_rnum was_in = IN_ROOM(ch);
   int need_movement = 0;
 
@@ -1878,7 +1873,7 @@ static int do_simple_enter(struct char_data *ch, struct obj_data *obj, int need_
     }
   }
   if (ROOM_FLAGGED(dest_room, ROOM_TUNNEL) &&
-      num_pc_in_room(&(world[dest_room])) >= CONFIG_TUNNEL_SIZE) {
+      num_pc_in_room(droom) >= CONFIG_TUNNEL_SIZE) {
     if (CONFIG_TUNNEL_SIZE > 1)
       send_to_char(ch, "There isn't enough room for you to go there!\r\n");
     else
@@ -1984,7 +1979,7 @@ static int perform_enter_obj(struct char_data *ch, struct obj_data *obj, int nee
       if (GET_OBJ_VAL(obj, VAL_PORTAL_DEST) >= 45000 && GET_OBJ_VAL(obj, VAL_PORTAL_DEST) <= 45099) {
         struct char_data *tch, *next_v;
         int filled = FALSE;
-        for (tch = world[real_room(GET_OBJ_VAL(obj, VAL_PORTAL_DEST))].people; tch; tch = next_v) {
+        for (tch = room_by_id(GET_OBJ_VAL(obj, VAL_PORTAL_DEST))->people; tch; tch = next_v) {
           next_v = tch->next_in_room;
           if (tch) {
            filled = TRUE;
@@ -2022,7 +2017,7 @@ ACMD(do_enter)
 
   if (*buf) { /* an argument was supplied, search for door keyword */
     /* Is the object in the room? */
-    obj = get_obj_in_list_vis(ch,buf, NULL, world[IN_ROOM(ch)].contents);
+    obj = get_obj_in_list_vis(ch,buf, NULL, char_room_get(ch)->contents);
     /* Is the object in the character's inventory? */
     if (!obj)
       obj = get_obj_in_list_vis(ch,buf, NULL, ch->carrying);
@@ -2255,7 +2250,7 @@ ACMD(do_leave)
    return;
   }
 
-  for (obj = world[IN_ROOM(ch)].contents; obj ; obj = obj->next_content)
+  for (obj = char_room_get(ch)->contents; obj ; obj = obj->next_content)
     if (CAN_SEE_OBJ(ch, obj))
       if (GET_OBJ_TYPE(obj) ==  ITEM_HATCH || GET_OBJ_TYPE(obj) == ITEM_PORTAL) {
 	perform_leave_obj(ch, obj, 0);
@@ -2875,7 +2870,7 @@ ACMD(do_sit)
    send_to_char(ch, "You are already on something!\r\n");
    return;
   }
-  if (!(chair = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(ch)].contents))) {
+  if (!(chair = get_obj_in_list_vis(ch, arg, NULL, char_room_get(ch)->contents))) {
    send_to_char(ch, "That isn't here.\r\n");
    return;
   }
@@ -3019,7 +3014,7 @@ ACMD(do_rest)
    send_to_char(ch, "You are already on something!\r\n");
    return;
   }
-  if (!(chair = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(ch)].contents))) {
+  if (!(chair = get_obj_in_list_vis(ch, arg, NULL, char_room_get(ch)->contents))) {
    send_to_char(ch, "That isn't here.\r\n");
    return;
   }
@@ -3190,7 +3185,7 @@ ACMD(do_sleep)
    send_to_char(ch, "You are already on something!\r\n");
    return;
   }
-  if (!(chair = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(ch)].contents))) {
+  if (!(chair = get_obj_in_list_vis(ch, arg, NULL, char_room_get(ch)->contents))) {
    send_to_char(ch, "That isn't here.\r\n");
    return;
   }

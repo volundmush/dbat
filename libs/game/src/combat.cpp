@@ -11,6 +11,7 @@
 ************************************************************************ */
 #include "dbat/db/consts/deathtype.h"
 #include "dbat/db/consts/attacks.h"
+#include "dbat/db/consts/search.h"
 #include "dbat/game/combat.h"
 #include "dbat/game/act.movement.h"
 #include "dbat/game/act.informative.h"
@@ -587,23 +588,19 @@ void combine_attacks(struct char_data *ch, struct char_data *vict)
    }
 }
 
+static bool hot_ruby(struct obj_data* obj, void *ctx) {
+  if (GET_OBJ_VNUM(obj) == 6600 && OBJ_FLAGGED(obj, ITEM_HOT)) {
+    return (TRUE);
+  }
+  return (FALSE);
+}
+
 int check_ruby(struct char_data *ch)
 {
 
- struct obj_data *obj, *next_obj = NULL, *ruby = NULL;
- int found = 0;
+ struct obj_data *ruby = char_inventory_search_vnum(ch, 6600, FALSE, SEARCH_HOT);
 
- for (obj = ch->carrying; obj; obj = next_obj) {
-    next_obj = obj->next_content;
-  if (found == 0 && GET_OBJ_VNUM(obj) == 6600) {
-   if (OBJ_FLAGGED(obj, ITEM_HOT)) {
-    found = 1;
-    ruby = obj;
-   }
-  }
- }
-
- if (found > 0) {
+ if (ruby) {
   act("@RYour $p@R flares up and disappears. Your fire attack has been aided!@n", TRUE, ch, ruby, 0, TO_CHAR);
   act("@R$n's@R $p@R flares up and disappears!@n", TRUE, ch, ruby, 0, TO_ROOM);
   extract_obj(ruby);
@@ -1737,7 +1734,7 @@ void huge_update()
     dmg /= 2;
 
     /* Hit those in the current room. */
-    for (vict = world[IN_ROOM(k)].people; vict; vict = next_v) {
+    for (vict = obj_room_get(k)->people; vict; vict = next_v) {
      next_v = vict->next_in_room;  
   
      if (vict == ch) {
@@ -1837,7 +1834,7 @@ void huge_update()
     dmg /= 2;
 
     /* Hit those in the current room. */
-    for (vict = world[IN_ROOM(k)].people; vict; vict = next_v) {
+    for (vict = obj_room_get(k)->people; vict; vict = next_v) {
      next_v = vict->next_in_room;  
   
      if (vict == ch) {
@@ -1913,7 +1910,7 @@ void huge_update()
     dmg /= 2;
 
     /* Hit those in the current room. */
-    for (vict = world[IN_ROOM(k)].people; vict; vict = next_v) {
+    for (vict = obj_room_get(k)->people; vict; vict = next_v) {
      next_v = vict->next_in_room;  
   
      if (vict == ch) {
@@ -2011,7 +2008,7 @@ void huge_update()
     dmg /= 2;
 
     /* Hit those in the current room. */
-    for (vict = world[IN_ROOM(k)].people; vict; vict = next_v) {
+    for (vict = obj_room_get(k)->people; vict; vict = next_v) {
      next_v = vict->next_in_room;  
   
      if (vict == ch) {
@@ -2456,7 +2453,7 @@ void parry_ki(double attperc, struct char_data *ch, struct char_data *vict, char
      struct obj_data *tob, *next_obj;
      struct char_data *tch, *next_v;
 
-     for (tch = world[IN_ROOM(ch)].people; tch; tch = next_v) {
+     for (tch = char_room_get(ch)->people; tch; tch = next_v) {
       next_v = tch->next_in_room;
 
       if (tch == ch)
@@ -2491,7 +2488,7 @@ void parry_ki(double attperc, struct char_data *ch, struct char_data *vict, char
       }
      }
 
-      for (tob = world[IN_ROOM(ch)].contents; tob; tob = next_obj) {
+      for (tob = char_room_get(ch)->contents; tob; tob = next_obj) {
        next_obj = tob->next_content;
        if (OBJ_FLAGGED(tob, ITEM_UNBREAKABLE))
          continue;

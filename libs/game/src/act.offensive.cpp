@@ -1907,7 +1907,7 @@ ACMD(do_genki)
    return;
   }
 
-  for (friend_char = world[IN_ROOM(ch)].people; friend_char; friend_char = next_v) {
+  for (friend_char = char_room_get(ch)->people; friend_char; friend_char = next_v) {
    next_v = friend_char->next_in_room;
    if (friend_char == ch) {
     continue;
@@ -3353,7 +3353,7 @@ ACMD(do_kakusanha)
 
   skill = init_skill(ch, SKILL_KAKUSANHA); /* Set skill value */
 
-  for (vict = world[IN_ROOM(ch)].people; vict; vict = next_v) {
+  for (vict = char_room_get(ch)->people; vict; vict = next_v) {
    next_v = vict->next_in_room;
    if (vict == ch) {
     continue;
@@ -3412,7 +3412,7 @@ ACMD(do_kakusanha)
        dmg = (dmg / 100) * 60;
      }
 
-     for (vict = world[IN_ROOM(ch)].people; vict; vict = next_v) {
+     for (vict = char_room_get(ch)->people; vict; vict = next_v) {
       next_v = vict->next_in_room;
       if (vict == ch) {
        continue;
@@ -3627,7 +3627,7 @@ ACMD(do_hellspear)
 
   skill = init_skill(ch, SKILL_HELLSPEAR); /* Set skill value */
 
-  for (vict = world[IN_ROOM(ch)].people; vict; vict = next_v) {
+  for (vict = char_room_get(ch)->people; vict; vict = next_v) {
    next_v = vict->next_in_room;
    if (vict == ch) {
     continue;
@@ -3666,7 +3666,7 @@ ACMD(do_hellspear)
 
      dmg = damtype(ch, 33, skill, attperc);
 
-     for (vict = world[IN_ROOM(ch)].people; vict; vict = next_v) {
+     for (vict = char_room_get(ch)->people; vict; vict = next_v) {
       next_v = vict->next_in_room;
       if (vict == ch) {
        continue;
@@ -5521,7 +5521,7 @@ ACMD(do_baku)
 
   skill = init_skill(ch, SKILL_BAKUHATSUHA); /* Set skill value */
 
-  for (vict = world[IN_ROOM(ch)].people; vict; vict = next_v) {
+  for (vict = char_room_get(ch)->people; vict; vict = next_v) {
    next_v = vict->next_in_room;
    if (vict == ch) {
     continue;
@@ -5585,7 +5585,7 @@ ACMD(do_baku)
         dmg = (dmg / 100) * 25;
         break;
      }
-     for (vict = world[IN_ROOM(ch)].people; vict; vict = next_v) {
+     for (vict = char_room_get(ch)->people; vict; vict = next_v) {
       next_v = vict->next_in_room;
       if (vict == ch) {
        continue;
@@ -10333,7 +10333,7 @@ ACMD(do_bite)
 		if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
 			vict = FIGHTING(ch);
 		}
-		else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(ch)].contents))) {
+		else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, char_room_get(ch)->contents))) {
 			return;
 		}
 	}
@@ -13551,7 +13551,7 @@ ACMD(do_assist)
     if (FIGHTING(helpee))
       opponent = FIGHTING(helpee);
     else
-      for (opponent = world[IN_ROOM(ch)].people;
+      for (opponent = char_room_get(ch)->people;
 	   opponent && (FIGHTING(opponent) != helpee);
 	   opponent = opponent->next_in_room)
 		;
@@ -13638,7 +13638,7 @@ ACMD(do_flee)
   if (!IS_NPC(ch)) {
      int fail = FALSE;
      struct obj_data *obj, *next_obj;
-    for (obj = world[IN_ROOM(ch)].contents; obj; obj = next_obj) {
+    for (obj = char_room_get(ch)->contents; obj; obj = next_obj) {
       next_obj = obj->next_content;
       if (KICHARGE(obj) > 0 && USER(obj) == ch) {
        fail = TRUE;
@@ -13674,7 +13674,7 @@ ACMD(do_flee)
       was_fighting = FIGHTING(ch);
 
     struct obj_data *wall;
-    for (wall = world[IN_ROOM(ch)].contents; wall;wall=wall->next_content) {
+    for (wall = char_room_get(ch)->contents; wall;wall=wall->next_content) {
      if(GET_OBJ_VNUM(wall) == 79) {
       if (GET_OBJ_COST(wall) == attempt) {
        send_to_char(ch, "That direction has a glacial wall blocking it.\r\n");

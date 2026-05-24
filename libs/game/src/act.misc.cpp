@@ -43,6 +43,8 @@
 #include "dbat/game/class.h"
 #include "dbat/game/races_plus.h"
 
+#include "dbat/game/search.hpp"
+
 /* local functions  */
 static void generate_multiform(struct char_data *ch, int count);
 static void resolve_song(struct char_data *ch);
@@ -188,7 +190,7 @@ ACMD(do_multiform)
  struct char_data *tch = NULL, *next_v = NULL;
  int count = 0;
 
- for (tch = world[IN_ROOM(ch)].people; tch; tch = next_v) {
+ for (tch = char_room_get(ch)->people; tch; tch = next_v) {
   next_v = tch->next_in_room;
   if (tch == ch || !IS_NPC(tch)) {
    continue;
@@ -206,7 +208,7 @@ ACMD(do_multiform)
          send_to_char(ch, "You have no multiforms present to merge with!\r\n");
          return;
      }
-     for (tch = world[IN_ROOM(ch)].people; tch; tch = next_v) {
+     for (tch = char_room_get(ch)->people; tch; tch = next_v) {
       next_v = tch->next_in_room;
       if (tch == ch || !IS_NPC(tch)) {
        continue;
@@ -401,11 +403,8 @@ static void resolve_song(struct char_data *ch)
   return;
  }
 
- for (obj2 = ch->carrying; obj2; obj2 = next_obj) {
-  next_obj = obj2->next_content;
-  if (GET_OBJ_VNUM(obj2) == 8802 || GET_OBJ_VNUM(obj2) == 8807) {
-   instrument = GET_OBJ_VNUM(obj2);
-  }
+ if((obj2 = dbat::game::search::character_inventory_find_vnum(ch, {8802, 8807})) != nullptr) {
+     instrument = GET_OBJ_VNUM(obj2);
  }
 
  if (instrument == 0) {
@@ -425,7 +424,7 @@ static void resolve_song(struct char_data *ch)
   return;
  }
 
-  for (vict = world[IN_ROOM(ch)].people; vict; vict = next_v) {
+  for (vict = char_room_get(ch)->people; vict; vict = next_v) {
    next_v = vict->next_in_room;
     switch (GET_SONG(ch)) {
      case SONG_SAFETY:
@@ -726,11 +725,8 @@ ACMD(do_song)
  struct obj_data *obj2 = NULL, *next_obj;
  int instrument = 0;
 
- for (obj2 = ch->carrying; obj2; obj2 = next_obj) {
-  next_obj = obj2->next_content;
-  if (GET_OBJ_VNUM(obj2) == 8802 || GET_OBJ_VNUM(obj2) == 8807) {
-   instrument = GET_OBJ_VNUM(obj2);
-  }
+ if((obj2 = dbat::game::search::character_inventory_find_vnum(ch, {8802, 8807})) != nullptr) {
+     instrument = GET_OBJ_VNUM(obj2);
  }
 
  if (instrument == 0) {
@@ -949,7 +945,7 @@ ACMD(do_moondust)
 
   struct char_data *vict = NULL, *next_v = NULL;
 
-  for (vict = world[IN_ROOM(ch)].people; vict; vict = next_v) {
+  for (vict = char_room_get(ch)->people; vict; vict = next_v) {
    next_v = vict->next_in_room;
    if (vict == ch) {
     continue;
@@ -1649,20 +1645,11 @@ ACMD(do_extract)
     send_to_char(ch, "It's not mature enough to extract from!\r\n");
     return;
    }
-   struct obj_data *bottle = NULL, *next_obj, *obj2;
-   int found = FALSE;
-
-   for (obj2 = ch->carrying; obj2; obj2 = next_obj) {
-    next_obj = obj2->next_content;
-    if (GET_OBJ_VNUM(obj2) == 3423) {
-     bottle = obj2;
-     found = TRUE;
-    }
-   }
+   struct obj_data *bottle = char_inventory_search_vnum(ch, 3423, FALSE, 0);
 
    int64_t cost = ((GET_MAX_MANA(ch) * 0.35) + 500);
 
-   if (found == FALSE) {
+   if (!bottle) {
     send_to_char(ch, "You do not have an empty bottle to put the extracted ink in.\r\n");
     return;
    }
@@ -1737,31 +1724,19 @@ ACMD(do_runic)
   return;
  } 
 
- struct obj_data *obj, *next_obj, *bottle = NULL;
- int found = FALSE, amount = 0, brush = FALSE;
+ struct obj_data *bottle = dbat::game::search::character_inventory_find(ch, FALSE, [&](auto it) {
+  return GET_OBJ_VNUM(it) == 3424 && GET_OBJ_VAL(it, 6) > 0;
+ });
 
- for (obj = ch->carrying; obj; obj = next_obj) {
-  next_obj = obj->next_content;
-  if (GET_OBJ_VNUM(obj) == 3424) {
-   if (GET_OBJ_VAL(obj, 6) > amount) {
-    bottle = obj;
-    found = TRUE;
-    amount = GET_OBJ_VAL(bottle, 6);
-   }
-  }
- }
-
- for (obj = ch->carrying; obj; obj = next_obj) {
-  next_obj = obj->next_content;
-  if (GET_OBJ_VNUM(obj) == 3427) {
-   brush = TRUE;
-  }
- }
-
- if (found == FALSE) {
+ if(!bottle) {
   send_to_char(ch, "You do not have a bottle with enough ink in it.\r\n");
   return;
- } else if (brush == FALSE) {
+ }
+ int amount = GET_OBJ_VAL(bottle, 6);
+
+ struct obj_data *brush = char_inventory_search_vnum(ch, 3427, FALSE, 0);
+
+ if (!brush) {
   send_to_char(ch, "You do not have a brush!\r\n");
   return;
  }
@@ -2149,7 +2124,7 @@ void ash_burn(struct char_data *ch)
   struct obj_data *obj, *next_obj;
 
    if (ch && IN_ROOM(ch) != NOWHERE) {
-    for (obj = world[IN_ROOM(ch)].contents; obj; obj = next_obj) {
+    for (obj = char_room_get(ch)->contents; obj; obj = next_obj) {
      next_obj = obj->next_content;
      if (GET_OBJ_VNUM(obj) == 1306) {
       if (axion_dice(0) > GET_CON(ch)) {
@@ -2203,7 +2178,7 @@ ACMD(do_ashcloud)
    }
  }
 
- for (obj = world[IN_ROOM(ch)].contents; obj; obj = next_obj) {
+ for (obj = char_room_get(ch)->contents; obj; obj = next_obj) {
      next_obj = obj->next_content;
   if (GET_OBJ_VNUM(obj) == 1306) {
    there = TRUE;
@@ -2839,7 +2814,7 @@ ACMD(do_hydromancy)
     act(bun, TRUE, ch, 0, 0, TO_CHAR);
     act(bunn, TRUE, ch, 0, 0, TO_ROOM);
 
-    for (vict = world[IN_ROOM(ch)].people; vict; vict = next_v) {
+    for (vict = char_room_get(ch)->people; vict; vict = next_v) {
      next_v = vict->next_in_room;
      if (vict == ch)
       continue;
@@ -3221,7 +3196,7 @@ ACMD(do_bury)
 
  struct obj_data *obj = NULL, *buried = NULL, *fobj = NULL, *next_obj;
 
- for (buried = world[IN_ROOM(ch)].contents; buried; buried = next_obj) {
+ for (buried = char_room_get(ch)->contents; buried; buried = next_obj) {
   next_obj = buried->next_content;
   if (OBJ_FLAGGED(buried, ITEM_BURIED)) {
    fobj = buried;
@@ -5146,14 +5121,15 @@ ACMD(do_obstruct)
   return;
  } else {
    struct obj_data *obj;
-   int newroom = world[ch->in_room].dir_option[dir]->to_room;
+   int newroom = char_room_get(ch)->dir_option[dir]->to_room;
+   struct room_data *nrm = &world[newroom];
 
   if (ROOM_FLAGGED(newroom, ROOM_PEACEFUL)) {
    send_to_char(ch, "You can not block off a peaceful area.\r\n");
    return;
   }   
 
-   for (obj = world[newroom].contents; obj;obj=obj->next_content) {
+   for (obj = nrm->contents; obj;obj=obj->next_content) {
     if(GET_OBJ_VNUM(obj) == 79) {
      if (GET_OBJ_COST(obj) == dir2) {
       if (skill < prob) {
@@ -5362,7 +5338,7 @@ ACMD(do_spoil)
   return;
  }
 
- if (!(obj = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(ch)].contents))) {
+ if (!(obj = get_obj_in_list_vis(ch, arg, NULL, char_room_get(ch)->contents))) {
    send_to_char(ch, "No corpse around here by that name.\r\n");
    return;
  }

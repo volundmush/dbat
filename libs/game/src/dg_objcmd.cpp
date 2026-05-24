@@ -154,9 +154,10 @@ OCMD(do_oecho)
 
     else if ((room = obj_room(obj)) != NOWHERE)
     {
-      if (world[room].people) {
-        sub_write(argument, world[room].people, TRUE, TO_ROOM);
-        sub_write(argument, world[room].people, TRUE, TO_CHAR);
+      struct room_data *rm = &world[room];
+      if (rm->people) {
+        sub_write(argument, rm->people, TRUE, TO_ROOM);
+        sub_write(argument, rm->people, TRUE, TO_CHAR);
       }
     }
 
@@ -185,7 +186,8 @@ OCMD(do_oforce)
             obj_log(obj, "oforce called by object in NOWHERE");
         else
         {
-            for (ch = world[room].people; ch; ch = next_ch)
+          struct room_data *rm = &world[room];
+            for (ch = rm->people; ch; ch = next_ch)
             {
                 next_ch = ch->next_in_room;
                 if (valid_dg_target(ch, 0))
@@ -369,20 +371,21 @@ OCMD(do_opurge)
     char arg[MAX_INPUT_LENGTH];
     char_data *ch, *next_ch;
     obj_data *o, *next_obj;
-    int rm;
+    int room;
 
     one_argument(argument, arg);
 
     if (!*arg) {
       /* purge all */
-      if ((rm = obj_room(obj)) != NOWHERE) {
-        for (ch = world[rm].people; ch; ch = next_ch ) {
+      if ((room = obj_room(obj)) != NOWHERE) {
+        struct room_data *rm = &world[room];
+        for (ch = rm->people; ch; ch = next_ch ) {
            next_ch = ch->next_in_room;
            if (IS_NPC(ch))
              extract_char(ch);
         }
 
-        for (o = world[rm].contents; o; o = next_obj ) {
+        for (o = rm->contents; o; o = next_obj ) {
            next_obj = o->next_content;
            if (o != obj)
              extract_obj(o);
@@ -446,7 +449,7 @@ OCMD(do_ogoto)
 OCMD(do_oteleport)
 {
     char_data *ch, *next_ch;
-    room_rnum target, rm;
+    room_rnum target, room;
     char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 
     two_arguments(argument, arg1, arg2);
@@ -464,18 +467,19 @@ OCMD(do_oteleport)
 
     else if (!strcasecmp(arg1, "all"))
     {
-        rm = obj_room(obj);
-        if (target == rm)
+        room = obj_room(obj);
+        if (target == room)
             obj_log(obj, "oteleport target is itself");
+        struct room_data *rm = &world[room];
 
-        for (ch = world[rm].people; ch; ch = next_ch)
+        for (ch = rm->people; ch; ch = next_ch)
         {
             next_ch = ch->next_in_room;
             if (!valid_dg_target(ch, DG_ALLOW_GODS))
               continue;
             char_from_room(ch);
             char_to_room(ch, target);
-            enter_wtrigger(&world[IN_ROOM(ch)], ch, -1);
+            enter_wtrigger(char_room_get(ch), ch, -1);
         }
     }
 
@@ -485,7 +489,7 @@ OCMD(do_oteleport)
           if (valid_dg_target(ch, DG_ALLOW_GODS)) {
             char_from_room(ch);
             char_to_room(ch, target);
-            enter_wtrigger(&world[IN_ROOM(ch)], ch, -1);
+            enter_wtrigger(char_room_get(ch), ch, -1);
           }
         }
 
@@ -640,14 +644,15 @@ OCMD(do_oasound)
     return;
   }
 
+  struct room_data *rm = &world[room];
+
   for (door = 0; door < NUM_OF_DIRS; door++) {
-    if (world[room].dir_option[door] != NULL &&
-       (world[room].dir_option[door])->to_room != NOWHERE &&
-       (world[room].dir_option[door])->to_room != room &&
-       world[(world[room].dir_option[door])->to_room].people) {
-         sub_write(argument, world[(world[room].dir_option[door])->to_room].people, TRUE, TO_ROOM);
-         sub_write(argument, world[(world[room].dir_option[door])->to_room].people, TRUE, TO_CHAR);
-       }
+    struct room_direction_data *ex = rm->dir_option[door];
+    struct room_data *dest = exit_dest_get(ex);
+    if(dest && dest->people) {
+      sub_write(argument, dest->people, TRUE, TO_ROOM);
+      sub_write(argument, dest->people, TRUE, TO_CHAR);
+    }
   }
 }
 

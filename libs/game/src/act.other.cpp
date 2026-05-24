@@ -12,6 +12,7 @@
 #include "dbat/db/consts/shadowdragons.h"
 #include "dbat/db/consts/auction.h"
 #include "dbat/db/consts/aligns.h"
+#include "dbat/db/consts/search.h"
 #include "dbat/db/flags.h"
 
 #include <sys/stat.h>
@@ -2278,7 +2279,6 @@ ACMD(do_implant)
  struct char_data *vict = NULL;
  char arg[MAX_INPUT_LENGTH];
  char arg2[MAX_INPUT_LENGTH];
- int found = FALSE;
 
  two_arguments(argument, arg, arg2);
 
@@ -2299,14 +2299,9 @@ ACMD(do_implant)
    return;
  }
 
- for (obj = ch->carrying; obj; obj = next_obj) {
-       next_obj = obj->next_content;
-   if (found == FALSE && GET_OBJ_VNUM(obj) == 66 && (!OBJ_FLAGGED(obj, ITEM_BROKEN) && !OBJ_FLAGGED(obj, ITEM_FORGED))) {
-    found = TRUE;
-    limb = obj;
-   }
- }
- if (found == FALSE) {
+ limb = char_inventory_search_vnum(ch, 66, FALSE, SEARCH_GENUINE | SEARCH_WORKING);
+
+ if (!limb) {
   send_to_char(ch, "You do not have a cybernetic limb to implant.\r\n");
   return;
  }
@@ -6730,7 +6725,7 @@ ACMD(do_solar)
  act("@WYou raise both your hands to either side of your face, while closing your eyes, and shout '@YSolar Flare@W' as a blinding light fills the area!@n", TRUE, ch, 0, 0, TO_CHAR);
  act("@C$n@W raises both $s hands to either side of $s face, while closing $s eyes, and shouts '@YSolar Flare@W' as a blinding light fills the area!@n", TRUE, ch, 0, 0, TO_ROOM);
 
-  for (vict = world[IN_ROOM(ch)].people; vict; vict = next_v) {
+  for (vict = char_room_get(ch)->people; vict; vict = next_v) {
    next_v = vict->next_in_room;
    
    if (vict == ch)
@@ -8119,7 +8114,7 @@ ACMD(do_meditate)
    decCurKI(ch, GET_MAX_MANA(MINDLINK(ch)) * .05);
    return;
   }
- } else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(ch)].contents))) {
+ } else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, char_room_get(ch)->contents))) {
    send_to_char(ch, "Syntax: meditate (object)\nSyntax: meditate expand\nSyntax: meditate break\r\n");
    return;
  }
@@ -12529,11 +12524,11 @@ ACMD(do_aura) {
 	   send_to_char(ch, "Your aura fades as you stop shining light.\r\n");
 	   act("$n's aura fades as they stop shining light on the area.", TRUE, ch, 0, 0, TO_ROOM);
 	   REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_AURALIGHT);
-	   world[IN_ROOM(ch)].light--;
+	   char_room_get(ch)->light--;
         
      } else if ((getCurKI(ch)) > GET_MAX_MANA(ch) * 0.12) {
 	 if (IN_ROOM(ch) != NOWHERE) {
-	  world[IN_ROOM(ch)].light++;
+	  char_room_get(ch)->light++;
          }
           reveal_hiding(ch, 0);
      decCurKIPercent(ch, .12);

@@ -656,7 +656,7 @@ void mag_masses(int level, struct char_data *ch, int spellnum)
 {
   struct char_data *tch, *tch_next;
 
-  for (tch = world[IN_ROOM(ch)].people; tch; tch = tch_next) {
+  for (tch = char_room_get(ch)->people; tch; tch = tch_next) {
     tch_next = tch->next_in_room;
     if (tch == ch)
       continue;
@@ -700,7 +700,7 @@ void mag_areas(int level, struct char_data *ch, int spellnum)
     act(to_room, FALSE, ch, 0, 0, TO_ROOM);
   
 
-  for (tch = world[IN_ROOM(ch)].people; tch; tch = next_tch) {
+  for (tch = char_room_get(ch)->people; tch; tch = next_tch) {
     next_tch = tch->next_in_room;
 
     /*

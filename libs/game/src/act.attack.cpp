@@ -103,7 +103,7 @@ ACMD(do_lightgrenade)
  
      dmg = damtype(ch, 57, skill, attperc);
 
-     for (vict = world[IN_ROOM(ch)].people; vict; vict = next_v) {
+     for (vict = char_room_get(ch)->people; vict; vict = next_v) {
       next_v = vict->next_in_room;
       if (vict == ch) {
        continue;
@@ -250,7 +250,7 @@ ACMD(do_breath)
   if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
    vict = FIGHTING(ch);
   }
-  else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(ch)].contents))) {
+  else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, char_room_get(ch)->contents))) {
    return;
   }
  }
@@ -448,7 +448,7 @@ ACMD(do_ram)
   if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
    vict = FIGHTING(ch);
   }
-  else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(ch)].contents))) {
+  else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, char_room_get(ch)->contents))) {
    return;
   }
  }
@@ -625,7 +625,7 @@ ACMD(do_strike)
   if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
    vict = FIGHTING(ch);
   }
-  else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(ch)].contents))) {
+  else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, char_room_get(ch)->contents))) {
    return;
   }
  }
@@ -1737,7 +1737,7 @@ ACMD(do_nova)
    skill += 5;
   }
 
-  for (vict = world[IN_ROOM(ch)].people; vict; vict = next_v) {
+  for (vict = char_room_get(ch)->people; vict; vict = next_v) {
    next_v = vict->next_in_room;
    if (vict == ch) {
     continue;
@@ -1792,7 +1792,7 @@ ACMD(do_nova)
       dmg *= 1.4;
      }
 
-     for (vict = world[IN_ROOM(ch)].people; vict; vict = next_v) {
+     for (vict = char_room_get(ch)->people; vict; vict = next_v) {
       next_v = vict->next_in_room;
       if (vict == ch) {
        continue;
@@ -3017,7 +3017,7 @@ ACMD(do_selfd)
   GET_SUPPRESS(ch) = 0;
   act("@RYou EXPLODE! The explosion expands outward burning up all surroundings for a large distance. The explosion takes on the shape of a large energy dome with you at its center!@n", TRUE, ch, 0, 0, TO_CHAR);
   act("@R$n EXPLODES! The explosion expands outward burning up all surroundings for a large distance. The explosion takes on the shape of a large energy dome with $n at its center!@n", TRUE, ch, 0, 0, TO_ROOM);
-  for (tch = world[IN_ROOM(ch)].people; tch; tch = next_v) {
+  for (tch = char_room_get(ch)->people; tch; tch = next_v) {
    next_v = tch->next_in_room;
    if (tch == ch) {
     continue;

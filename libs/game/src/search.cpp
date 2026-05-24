@@ -224,7 +224,7 @@ struct char_data *get_char_room_vis(struct char_data *ch, char *name, int *numbe
   if (*number == 0)
     return (get_player_vis(ch, name, NULL, FIND_CHAR_ROOM));
 
-  for (i = world[IN_ROOM(ch)].people; i && *number; i = i->next_in_room) {
+  for (i = char_room_get(ch)->people; i && *number; i = i->next_in_room) {
     if (!strcasecmp(name, "last") && LASTHIT(i) != 0 && LASTHIT(i) == GET_IDNUM(ch)) {
       if (CAN_SEE(ch, i))
         if (--(*number) == 0)
@@ -384,7 +384,7 @@ struct obj_data *get_obj_vis(struct char_data *ch, char *name, int *number)
     return (i);
 
   /* scan room */
-  if ((i = get_obj_in_list_vis(ch, name, number, world[IN_ROOM(ch)].contents)) != NULL)
+  if ((i = get_obj_in_list_vis(ch, name, number, char_room_get(ch)->contents)) != NULL)
     return (i);
 
   /* ok.. no luck yet. scan the entire obj list   */
@@ -513,7 +513,7 @@ int generic_find(char *arg, bitvector_t bitvector, struct char_data *ch,
   }
 
   if (IS_SET(bitvector, FIND_OBJ_ROOM)) {
-    if ((*tar_obj = get_obj_in_list_vis(ch, name, &number, world[IN_ROOM(ch)].contents)) != NULL)
+    if ((*tar_obj = get_obj_in_list_vis(ch, name, &number, char_room_get(ch)->contents)) != NULL)
       return (FIND_OBJ_ROOM);
   }
 

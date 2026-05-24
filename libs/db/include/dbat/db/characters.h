@@ -564,6 +564,52 @@ struct char_data
    short btime;
 };
 
+// Characters API, implemented in characters_api.zig
+int64_t char_id_get(struct char_data *ch);
+void char_id_set(struct char_data *ch, int64_t id);
+mob_vnum char_proto_id_get(struct char_data *ch);
+void char_proto_id_set(struct char_data *ch, mob_vnum vnum);
+mob_vnum char_vnum_get(struct char_data *ch);
+void char_vnum_set(struct char_data *ch, mob_vnum vnum);
+struct room_data* char_room_get(struct char_data *ch);
+room_vnum char_room_vnum_get(struct char_data *ch);
+void char_room_vnum_set(struct char_data *ch, room_vnum vnum);
+const char* char_name_get(struct char_data *ch);
+void char_name_set(struct char_data *ch, const char *value);
+const char* char_description_get(struct char_data *ch);
+void char_description_set(struct char_data *ch, const char *value);
+const char* char_short_description_get(struct char_data *ch);
+void char_short_description_set(struct char_data *ch, const char *value);
+const char* char_long_description_get(struct char_data *ch);
+void char_long_description_set(struct char_data *ch, const char *value);
+const char* char_title_get(struct char_data *ch);
+void char_title_set(struct char_data *ch, const char *value);
+
+int char_class_get(struct char_data *ch);
+void char_class_set(struct char_data *ch, int chclass);
+int char_race_get(struct char_data *ch);
+void char_race_set(struct char_data *ch, int race);
+int char_size_get(struct char_data *ch);
+void char_size_set(struct char_data *ch, int size);
+int char_sex_get(struct char_data *ch);
+void char_sex_set(struct char_data *ch, int sex);
+int char_admlevel_get(struct char_data *ch);
+void char_admlevel_set(struct char_data *ch, int admlevel);
+bool char_admflagged(struct char_data *ch, int pos);
+bool char_admflag_toggle(struct char_data *ch, int pos);
+void char_admflag_set(struct char_data *ch, int pos, bool value);
+
+void char_inventory_iterate(struct char_data *ch, bool recursive, obj_iter_fn func, void *ctx);
+void char_equipment_iterate(struct char_data *ch, bool recursive, obj_iter_fn func, void *ctx);
+struct obj_data* char_inventory_search_vnum(struct char_data *ch, obj_vnum vnum, bool recursive, int flags);
+struct obj_data* char_inventory_search_type(struct char_data *ch, int type, bool recursive, int flags);
+
+size_t char_inventory_count(struct char_data *ch, bool recursive);
+size_t char_equipment_count(struct char_data *ch, bool recursive);
+struct obj_data *char_inventory_get(struct char_data *ch, size_t pos);
+struct obj_data *char_equipment_get(struct char_data *ch, size_t pos);
+
+// Below this is globals and database functions
 extern struct char_data *character_list;
 extern struct char_data *affect_list;
 extern struct char_data *affectv_list;

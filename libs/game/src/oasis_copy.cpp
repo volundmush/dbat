@@ -193,7 +193,7 @@ ACMD(do_dig)
   rrnum = real_room(rvnum);  
   if ((dir = search_block(sdir, abbr_dirs, FALSE)) < 0)
   dir = search_block(sdir, dirs, FALSE);
-  zone = world[IN_ROOM(ch)].zone;
+  zone = char_room_get(ch)->zone;
 
   if (dir < 0) {
     send_to_char(ch, "Cannot create an exit to the '%s'.\r\n", sdir);
@@ -224,7 +224,7 @@ ACMD(do_dig)
         free(W_EXIT(IN_ROOM(ch), dir)->keyword);
       free(W_EXIT(IN_ROOM(ch), dir));
       W_EXIT(IN_ROOM(ch), dir) = NULL;
-      add_to_save_list(zone_table[world[IN_ROOM(ch)].zone].number, SL_WLD);
+      add_to_save_list(zone_table[char_room_get(ch)->zone].number, SL_WLD);
       send_to_char(ch, "You remove the exit to the %s.\r\n", dirs[dir]);
       return;
     }
@@ -299,12 +299,13 @@ ACMD(do_dig)
   /*
    * Now dig.
    */
-  CREATE(W_EXIT(IN_ROOM(ch), dir), struct room_direction_data, 1);
-  W_EXIT(IN_ROOM(ch), dir)->general_description = NULL;
-  W_EXIT(IN_ROOM(ch), dir)->keyword = NULL;
-  W_EXIT(IN_ROOM(ch), dir)->to_room = rrnum;
-  add_to_save_list(zone_table[world[IN_ROOM(ch)].zone].number, SL_WLD);
-  save_rooms(zone_table[world[rrnum].zone].number);
+  struct room_data *rm = char_room_get(ch);
+  CREATE(rm->dir_option[dir], struct room_direction_data, 1);
+  struct room_direction_data *new_exit = rm->dir_option[dir];
+  new_exit->to_room = rrnum;
+  zone_vnum zvn = zone_table[rm->zone].number;
+  add_to_save_list(zvn, SL_WLD);
+  save_rooms(zvn);
   send_to_char(ch, "You make an exit %s to room %d (%s).\r\n", 
                    dirs[dir], rvnum, world[rrnum].name);
 
@@ -316,11 +317,11 @@ ACMD(do_dig)
                      rvnum, dirs[rev_dir[dir]]);
   else {
     CREATE(W_EXIT(rrnum, rev_dir[dir]), struct room_direction_data, 1);
-    W_EXIT(rrnum, rev_dir[dir])->general_description = NULL;
-    W_EXIT(rrnum, rev_dir[dir])->keyword = NULL;
-    W_EXIT(rrnum, rev_dir[dir])->to_room = IN_ROOM(ch);
-    add_to_save_list(zone_table[world[rrnum].zone].number, SL_WLD);
-    save_rooms(zone_table[world[rrnum].zone].number);
+    struct room_direction_data *rev_ex = W_EXIT(rrnum, rev_dir[dir]);
+    rev_ex->to_room = IN_ROOM(ch);
+    zvn = zone_table[world[rrnum].zone].number;
+    add_to_save_list(zvn, SL_WLD);
+    save_rooms(zvn);
   }
 }
 
@@ -379,33 +380,35 @@ ACMD(do_rcopy)
     send_cannot_edit(ch, zone);
     return;
   }
+  struct room_data* rrm = &world[rrnum];
+  struct room_data* trm = &world[trnum]; 
 
   /* Free descriptions. */ 
-  if (world[rrnum].name) 
-    free(world[rrnum].name); 
-  if (world[rrnum].description) 
-    free(world[rrnum].description); 
-  if (world[rrnum].ex_description) 
-    free_ex_descriptions(world[rrnum].ex_description); 
-  world[rrnum].sector_type = world[trnum].sector_type;
+  if (rrm->name) 
+    free(rrm->name); 
+  if (rrm->description) 
+    free(rrm->description); 
+  if (rrm->ex_description) 
+    free_ex_descriptions(rrm->ex_description); 
+  rrm->sector_type = trm->sector_type;
   
   /* Copy over description name and extra descriptions */ 
-  world[rrnum].description = str_udup(world[trnum].description); 
-  world[rrnum].name = str_udup(world[trnum].name); 
+  rrm->description = str_udup(trm->description); 
+  rrm->name = str_udup(trm->name); 
 
   /* Copy over any existings extra descriptions */ 
- if (world[trnum].ex_description) 
-    copy_ex_descriptions(&world[rrnum].ex_description, world[trnum].ex_description); 
+ if (trm->ex_description) 
+    copy_ex_descriptions(&rrm->ex_description, trm->ex_description); 
  else 
-   world[rrnum].ex_description = NULL; 
+   rrm->ex_description = NULL; 
 
   /* Finally copy over room flags */ 
   for(i=0; i < AF_ARRAY_MAX; i++)  {
-   world[rrnum].room_flags[i] = world[trnum].room_flags[i]; 
+   rrm->room_flags[i] = trm->room_flags[i]; 
   }
   send_to_imm("Log: %s has copied room [%d] to room [%d].", GET_NAME(ch), tvnum, rvnum);
-  add_to_save_list(zone_table[world[rrnum].zone].number, SL_WLD);
-  save_rooms(zone_table[world[rrnum].zone].number);
+  add_to_save_list(zone_table[rrm->zone].number, SL_WLD);
+  save_rooms(zone_table[rrm->zone].number);
   send_to_char(ch, "Room [%d] copied to room [%d].\r\n", tvnum, rvnum); 
 }
 
@@ -442,9 +445,9 @@ int buildwalk(struct char_data *ch, int dir)
   if (!IS_NPC(ch) && PRF_FLAGGED(ch, PRF_BUILDWALK) &&
       GET_ADMLEVEL(ch) >= ADMLVL_IMMORT) {
 
-    if (!can_edit_zone(ch, world[IN_ROOM(ch)].zone)) {
-      send_cannot_edit(ch, world[IN_ROOM(ch)].zone);
-    } else if ((vnum = redit_find_new_vnum(world[IN_ROOM(ch)].zone)) == NOWHERE)
+    if (!can_edit_zone(ch, char_room_get(ch)->zone)) {
+      send_cannot_edit(ch, char_room_get(ch)->zone);
+    } else if ((vnum = redit_find_new_vnum(char_room_get(ch)->zone)) == NOWHERE)
       send_to_char(ch, "No free vnums are available in this zone!\r\n");
     else {
       struct descriptor_data *d = ch->desc;
@@ -457,7 +460,7 @@ int buildwalk(struct char_data *ch, int dir)
         free(d->olc);
       }
       CREATE(d->olc, struct oasis_olc_data, 1);
-      OLC_ZNUM(d) = world[IN_ROOM(ch)].zone;
+      OLC_ZNUM(d) = char_room_get(ch)->zone;
       OLC_NUM(d) = vnum;
       CREATE(OLC_ROOM(d), struct room_data, 1);
 

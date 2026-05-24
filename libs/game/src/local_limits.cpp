@@ -1791,7 +1791,7 @@ static void point_update_characters(void)
           send_to_char(i, "You don't have enough energy to keep the aura active.\r\n");
           act("$n's aura slowly stops shining and fades.\r\n", TRUE, i, nullptr, nullptr, TO_ROOM);
           REMOVE_BIT_AR(PLR_FLAGS(i), PLR_AURALIGHT);
-          world[IN_ROOM(i)].light--;
+          char_room_get(i)->light--;
         }
       }
       if (IS_MUTANT(i) && (GET_GENOME(i, 0) == 6 || GET_GENOME(i, 1) == 6))
@@ -2104,34 +2104,34 @@ static void point_update_objects(void)
       {
         if (GET_OBJ_TIMER(j) == 5)
         {
-          if ((IN_ROOM(j) != NOWHERE) && (world[IN_ROOM(j)].people))
+          if ((IN_ROOM(j) != NOWHERE) && (obj_room_get(j)->people))
           {
-            act("@DFlies start to gather around $p@D.@n", TRUE, world[IN_ROOM(j)].people, j, 0, TO_CHAR);
-            act("@DFlies start to gather around $p@D.@n", TRUE, world[IN_ROOM(j)].people, j, 0, TO_ROOM);
+            act("@DFlies start to gather around $p@D.@n", TRUE, obj_room_get(j)->people, j, 0, TO_CHAR);
+            act("@DFlies start to gather around $p@D.@n", TRUE, obj_room_get(j)->people, j, 0, TO_ROOM);
           }
         }
         if (GET_OBJ_TIMER(j) == 3)
         {
-          if ((IN_ROOM(j) != NOWHERE) && (world[IN_ROOM(j)].people))
+          if ((IN_ROOM(j) != NOWHERE) && (obj_room_get(j)->people))
           {
-            act("@DA cloud of flies has formed over $p@D.@n", TRUE, world[IN_ROOM(j)].people, j, 0, TO_CHAR);
-            act("@DA cloud of flies has formed over $p@D.@n", TRUE, world[IN_ROOM(j)].people, j, 0, TO_ROOM);
+            act("@DA cloud of flies has formed over $p@D.@n", TRUE, obj_room_get(j)->people, j, 0, TO_CHAR);
+            act("@DA cloud of flies has formed over $p@D.@n", TRUE, obj_room_get(j)->people, j, 0, TO_ROOM);
           }
         }
         if (GET_OBJ_TIMER(j) == 2)
         {
-          if ((IN_ROOM(j) != NOWHERE) && (world[IN_ROOM(j)].people))
+          if ((IN_ROOM(j) != NOWHERE) && (obj_room_get(j)->people))
           {
-            act("@DMaggots can be seen crawling all over $p@D.@n", TRUE, world[IN_ROOM(j)].people, j, 0, TO_CHAR);
-            act("@DMaggots can be seen crawling all over $p@D.@n", TRUE, world[IN_ROOM(j)].people, j, 0, TO_ROOM);
+            act("@DMaggots can be seen crawling all over $p@D.@n", TRUE, obj_room_get(j)->people, j, 0, TO_CHAR);
+            act("@DMaggots can be seen crawling all over $p@D.@n", TRUE, obj_room_get(j)->people, j, 0, TO_ROOM);
           }
         }
         if (GET_OBJ_TIMER(j) == 1)
         {
-          if ((IN_ROOM(j) != NOWHERE) && (world[IN_ROOM(j)].people))
+          if ((IN_ROOM(j) != NOWHERE) && (obj_room_get(j)->people))
           {
-            act("@DMaggots have nearly stripped $p of all its flesh@D.@n", TRUE, world[IN_ROOM(j)].people, j, 0, TO_CHAR);
-            act("@DMaggots have nearly stripped $p of all its flesh@D.@n", TRUE, world[IN_ROOM(j)].people, j, 0, TO_ROOM);
+            act("@DMaggots have nearly stripped $p of all its flesh@D.@n", TRUE, obj_room_get(j)->people, j, 0, TO_CHAR);
+            act("@DMaggots have nearly stripped $p of all its flesh@D.@n", TRUE, obj_room_get(j)->people, j, 0, TO_ROOM);
           }
         }
       }
@@ -2143,23 +2143,23 @@ static void point_update_objects(void)
           if (!strstr(j->name, "android"))
           {
             act("$p decays in your hands.", FALSE, j->carried_by, j, 0, TO_CHAR);
-            if ((IN_ROOM(j) != NOWHERE) && (world[IN_ROOM(j)].people))
+            if ((IN_ROOM(j) != NOWHERE) && (obj_room_get(j)->people))
             {
               act("A quivering horde of maggots consumes $p.",
-                  TRUE, world[IN_ROOM(j)].people, j, 0, TO_ROOM);
+                  TRUE, obj_room_get(j)->people, j, 0, TO_ROOM);
               act("A quivering horde of maggots consumes $p.",
-                  TRUE, world[IN_ROOM(j)].people, j, 0, TO_CHAR);
+                  TRUE, obj_room_get(j)->people, j, 0, TO_CHAR);
             }
           }
           else
           {
             act("$p decays in your hands.", FALSE, j->carried_by, j, 0, TO_CHAR);
-            if ((IN_ROOM(j) != NOWHERE) && (world[IN_ROOM(j)].people))
+            if ((IN_ROOM(j) != NOWHERE) && (obj_room_get(j)->people))
             {
               act("$p breaks down completely into a pile of junk.",
-                  TRUE, world[IN_ROOM(j)].people, j, 0, TO_ROOM);
+                  TRUE, obj_room_get(j)->people, j, 0, TO_ROOM);
               act("$p breaks down completely into a pile of junk.",
-                  TRUE, world[IN_ROOM(j)].people, j, 0, TO_CHAR);
+                  TRUE, obj_room_get(j)->people, j, 0, TO_CHAR);
             }
           }
         }
@@ -2198,9 +2198,9 @@ static void point_update_objects(void)
       if (GET_OBJ_TIMER(j) == 0)
       {
         act("A glowing portal fades from existence.",
-            TRUE, world[IN_ROOM(j)].people, j, 0, TO_ROOM);
+            TRUE, obj_room_get(j)->people, j, 0, TO_ROOM);
         act("A glowing portal fades from existence.",
-            TRUE, world[IN_ROOM(j)].people, j, 0, TO_CHAR);
+            TRUE, obj_room_get(j)->people, j, 0, TO_CHAR);
         extract_obj(j);
         continue;
       }
@@ -2214,9 +2214,9 @@ static void point_update_objects(void)
       if (GET_OBJ_TIMER(j) == 0)
       {
         act("The $p@n settles to the ground and goes out.",
-            TRUE, world[IN_ROOM(j)].people, j, 0, TO_ROOM);
+            TRUE, obj_room_get(j)->people, j, 0, TO_ROOM);
         act("A $p@n settles to the ground and goes out.",
-            TRUE, world[IN_ROOM(j)].people, j, 0, TO_CHAR);
+            TRUE, obj_room_get(j)->people, j, 0, TO_CHAR);
         extract_obj(j);
         continue;
       }
@@ -2344,18 +2344,18 @@ void timed_dt(struct char_data *ch)
     and return again.
   */
 
-  if (world[IN_ROOM(ch)].timed < 0)
+  if (char_room_get(ch)->timed < 0)
   {
-    world[IN_ROOM(ch)].timed = rand_number(2, 5);
+    char_room_get(ch)->timed = rand_number(2, 5);
     return;
   }
 
   /* We know ch is in a dt room with timed >= 0 - see if its the end.
    *
    */
-  if (world[IN_ROOM(ch)].timed == 0)
+  if (char_room_get(ch)->timed == 0)
   {
-    for (vict = world[IN_ROOM(ch)].people; vict; vict = vict->next_in_room)
+    for (vict = char_room_get(ch)->people; vict; vict = vict->next_in_room)
     {
       if (IS_NPC(vict))
         continue;

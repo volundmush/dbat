@@ -370,7 +370,7 @@ struct obj_data *find_control(struct char_data *ch)
   struct obj_data *controls, *obj;
   int    j;
 
-  controls = get_obj_in_list_type(ITEM_CONTROL, world[IN_ROOM(ch)].contents);
+  controls = get_obj_in_list_type(ITEM_CONTROL, char_room_get(ch)->contents);
   if (!controls)
     for (obj = ch->carrying; obj && !controls; obj = obj->next_content)
       if (CAN_SEE_OBJ(ch, obj) && GET_OBJ_TYPE(obj) == ITEM_CONTROL)
@@ -392,7 +392,7 @@ static void drive_into_vehicle(struct char_data *ch, struct obj_data *vehicle, c
 
   if (!*arg) {
     send_to_char(ch, "@wDrive into what?\r\n");
-  } else if (!(vehicle_in_out = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(vehicle)].contents)) ) {
+  } else if (!(vehicle_in_out = get_obj_in_list_vis(ch, arg, NULL, obj_room_get(vehicle)->contents)) ) {
       send_to_char(ch, "@wNothing here by that name!\r\n");
   } else if (GET_OBJ_TYPE(vehicle_in_out) != ITEM_VEHICLE) {
       send_to_char(ch, "@wThat's not a ship.\r\n");
@@ -427,7 +427,7 @@ static void drive_outof_vehicle(struct char_data *ch, struct obj_data *vehicle)
   struct obj_data *hatch, *vehicle_in_out;
   char   buf[MAX_INPUT_LENGTH];
 
-  if ( !(hatch = get_obj_in_list_type(ITEM_HATCH,world[IN_ROOM(vehicle)].contents)) ) {
+  if ( !(hatch = get_obj_in_list_type(ITEM_HATCH,obj_room_get(vehicle)->contents)) ) {
     send_to_char(ch, "@wNowhere to pilot out of.\r\n");
   } else if (!(vehicle_in_out = find_vehicle_by_vnum(GET_OBJ_VAL(hatch, 0)))) {
     send_to_char(ch, "@wYou can't pilot out anywhere!\r\n");
@@ -446,7 +446,7 @@ static void drive_outof_vehicle(struct char_data *ch, struct obj_data *vehicle)
           int door;
          for (door = 0; door < NUM_OF_DIRS; door++) {
           if (CAN_GO(ch, door)) {
-           send_to_room(world[IN_ROOM(ch)].dir_option[door]->to_room, "@wThe @De@Wn@wg@Di@wn@We@Ds@w of the ship @rr@Ro@ra@Rr@w as it moves.\r\n");
+           send_to_room(char_room_get(ch)->dir_option[door]->to_room, "@wThe @De@Wn@wg@Di@wn@We@Ds@w of the ship @rr@Ro@ra@Rr@w as it moves.\r\n");
           }
         }
         sprintf(buf, "%s @wflies out of %s.\r\n", vehicle->short_description,
@@ -497,7 +497,7 @@ void drive_in_direction(struct char_data *ch, struct obj_data *vehicle, int dir)
 
           struct obj_data *hatch = NULL;
 
-          for (hatch = world[real_room(GET_OBJ_VAL(vehicle, 0))].contents; hatch;hatch=hatch->next_content) {
+          for (hatch = room_by_id(GET_OBJ_VAL(vehicle, 0))->contents; hatch;hatch=hatch->next_content) {
            if (GET_OBJ_TYPE(hatch) == ITEM_HATCH) {
             GET_OBJ_VAL(hatch, 3) = GET_ROOM_VNUM(IN_ROOM(vehicle));
            }
@@ -515,7 +515,7 @@ void drive_in_direction(struct char_data *ch, struct obj_data *vehicle, int dir)
           int door;
          for (door = 0; door < NUM_OF_DIRS; door++) {
           if (CAN_GO(ch, door)) {
-           send_to_room(world[IN_ROOM(ch)].dir_option[door]->to_room, "@wThe @De@Wn@wg@Di@wn@We@Ds@w of the ship @rr@Ro@ra@Rr@w as it moves.\r\n");
+           send_to_room(char_room_get(ch)->dir_option[door]->to_room, "@wThe @De@Wn@wg@Di@wn@We@Ds@w of the ship @rr@Ro@ra@Rr@w as it moves.\r\n");
           }
          }
           sprintf(buf, "%s @wflies in from the %s.\r\n",
@@ -1472,7 +1472,7 @@ ACMD(do_ship_fire)
   struct obj_data *obj = NULL, *obj2 = NULL, *next_obj = NULL;
   int shot = FALSE;
 
-  for (obj = world[IN_ROOM(ch)].contents; obj; obj = next_obj) {
+  for (obj = char_room_get(ch)->contents; obj; obj = next_obj) {
      next_obj = obj->next_content;
    if (shot == FALSE) {
     if (GET_OBJ_TYPE(obj) == ITEM_VEHICLE && obj != vehicle) {

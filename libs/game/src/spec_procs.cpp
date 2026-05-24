@@ -38,7 +38,7 @@ SPECIAL(dump)
   struct obj_data *k;
   int value = 0;
 
-  for (k = world[IN_ROOM(ch)].contents; k; k = world[IN_ROOM(ch)].contents) {
+  for (k = char_room_get(ch)->contents; k; k = char_room_get(ch)->contents) {
     act("$p vanishes in a puff of smoke!", FALSE, 0, k, 0, TO_ROOM);
     extract_obj(k);
   }
@@ -48,7 +48,7 @@ SPECIAL(dump)
 
   do_drop(ch, argument, cmd, SCMD_DROP);
 
-  for (k = world[IN_ROOM(ch)].contents; k; k = world[IN_ROOM(ch)].contents) {
+  for (k = char_room_get(ch)->contents; k; k = char_room_get(ch)->contents) {
     act("$p vanishes in a puff of smoke!", FALSE, 0, k, 0, TO_ROOM);
     value += MAX(1, MIN(50, GET_OBJ_COST(k) / 10));
     extract_obj(k);
@@ -177,7 +177,7 @@ int num_players_in_room(room_vnum room)
       continue; 
     if (IN_ROOM(i->character) == NOWHERE || IN_ROOM(i->character) > top_of_world) 
       continue; 
-    if (world[IN_ROOM(i->character)].number != room) 
+    if (char_room_get(i->character)->number != room) 
       continue; 
     if ((GET_ADMLEVEL(i->character) >= ADMLVL_IMMORT) && (PRF_FLAGGED(i->character, PRF_NOHASSLE))) /* Ignore Imms */ 
       continue; 
@@ -277,7 +277,7 @@ SPECIAL(gauntlet_room)  /* Jamdog - 13th Feb 2006 */
   /* give player credit for making it this far */ 
   for (i = 0; gauntlet_info[i][0] != -1; i++) 
   { 
-    if ((!IS_NPC(ch)) && (world[IN_ROOM(ch)].number == gauntlet_info[i][1])) 
+    if ((!IS_NPC(ch)) && (char_room_get(ch)->number == gauntlet_info[i][1])) 
     { 
       /* Check not overwriting gauntlet rank with lower value (Jamdog - 20th July 2006) */ 
       if (GET_GAUNTLET(ch) < (gauntlet_info[i][0])) 
@@ -330,7 +330,7 @@ SPECIAL(gauntlet_room)  /* Jamdog - 13th Feb 2006 */
     return FALSE; 
 
   /* Only Avatars may pass the 11th room 
-  if ((world[ch->in_room].number == gauntlet_info[GAUNTLET_AV][1] ) && (cmd == gauntlet_info[GAUNTLET_AV][2])) 
+  if ((char_room_get(ch)->number == gauntlet_info[GAUNTLET_AV][1] ) && (cmd == gauntlet_info[GAUNTLET_AV][2])) 
   { 
     if (GET_CLASS(ch) != CLASS_AVATAR) 
     { 
@@ -340,12 +340,12 @@ SPECIAL(gauntlet_room)  /* Jamdog - 13th Feb 2006 */
   } */ 
   for (i = 0; gauntlet_info[i][0] != -1; i++) 
   { 
-    if (world[ch->in_room].number == gauntlet_info[i][1]) 
+    if (char_room_get(ch)->number == gauntlet_info[i][1]) 
     { 
       if (cmd == gauntlet_info[i][2]) 
       { 
         //don't let him proceed if mob is still alive 
-        for (tch = world[ch->in_room].people; tch; tch = tch->next_in_room) 
+        for (tch = char_room_get(ch)->people; tch; tch = tch->next_in_room) 
         { 
           if (IS_NPC(tch) && i > 0)  /* Ignore mobs in the waiting room */ 
           { 
@@ -360,7 +360,7 @@ SPECIAL(gauntlet_room)  /* Jamdog - 13th Feb 2006 */
           nomob = TRUE; 
 
           /* Check the next room for players and ensure mob is waiting */ 
-          for (tch = world[real_room(gauntlet_info[i+1][1])].people; tch; tch = tch->next_in_room) 
+          for (tch = room_by_id(gauntlet_info[i+1][1])->people; tch; tch = tch->next_in_room)
           { 
             if (!IS_NPC(tch)) 
             { 
@@ -498,7 +498,7 @@ SPECIAL(gauntlet_rest)  /* Jamdog - 20th Feb 2007 */
         nomob = TRUE; 
 
         /* Check the next room for players and ensure mob is waiting */ 
-        for (tch = world[real_room(gauntlet_info[i][1])].people; tch; tch = tch->next_in_room) 
+        for (tch = room_by_id(gauntlet_info[i][1])->people; tch; tch = tch->next_in_room)
         { 
           if (!IS_NPC(tch)) 
           { 
@@ -584,7 +584,7 @@ SPECIAL(thief)
   if (cmd || GET_POS(ch) != POS_STANDING)
     return (FALSE);
 
-  for (cons = world[IN_ROOM(ch)].people; cons; cons = cons->next_in_room)
+  for (cons = char_room_get(ch)->people; cons; cons = cons->next_in_room)
     if (!IS_NPC(cons) && !ADM_FLAGGED(cons, ADM_NOSTEAL) && !rand_number(0, 4)) {
       npc_steal(ch, cons);
       return (TRUE);
@@ -602,7 +602,7 @@ SPECIAL(magic_user_orig)
     return (FALSE);
 
   /* pseudo-randomly choose someone in the room who is fighting me */
-  for (vict = world[IN_ROOM(ch)].people; vict; vict = vict->next_in_room)
+  for (vict = char_room_get(ch)->people; vict; vict = vict->next_in_room)
     if (FIGHTING(vict) == ch && !rand_number(0, 4))
       break;
 
@@ -703,7 +703,7 @@ SPECIAL(fido)
   if (cmd || !AWAKE(ch))
     return (FALSE);
 
-  for (i = world[IN_ROOM(ch)].contents; i; i = i->next_content) {
+  for (i = char_room_get(ch)->contents; i; i = i->next_content) {
     if (!IS_CORPSE(i))
       continue;
 
@@ -727,7 +727,7 @@ SPECIAL(janitor)
   if (cmd || !AWAKE(ch))
     return (FALSE);
 
-  for (i = world[IN_ROOM(ch)].contents; i; i = i->next_content) {
+  for (i = char_room_get(ch)->contents; i; i = i->next_content) {
     if (!CAN_WEAR(i, ITEM_WEAR_TAKE))
       continue;
     if (GET_OBJ_TYPE(i) == ITEM_DRINKCON || GET_OBJ_COST(i) >= 100)
@@ -753,7 +753,7 @@ SPECIAL(cityguard)
   min_cha = 6;
   spittle = evil = NULL;
 
-  for (tch = world[IN_ROOM(ch)].people; tch; tch = tch->next_in_room) {
+  for (tch = char_room_get(ch)->people; tch; tch = tch->next_in_room) {
     if (!CAN_SEE(ch, tch))
       continue;
 
@@ -1079,7 +1079,7 @@ SPECIAL(healtank)
    char arg[MAX_INPUT_LENGTH];
    one_argument(argument, arg);
 
-   for (i = world[IN_ROOM(ch)].contents; i; i = i->next_content) {
+   for (i = char_room_get(ch)->contents; i; i = i->next_content) {
     if (GET_OBJ_VNUM(i) == 65) {
      htank = i;
     }
@@ -1299,7 +1299,7 @@ SPECIAL(gravity)
    int match = FALSE;
 
    one_argument(argument, arg);
-   for (i = world[IN_ROOM(ch)].contents; i; i = i->next_content) {
+   for (i = char_room_get(ch)->contents; i; i = i->next_content) {
     if (GET_OBJ_VNUM(i) == 11) {
      obj = i;
     }
@@ -1561,7 +1561,7 @@ SPECIAL(bank)
 
    struct obj_data *i, *obj = NULL;
 
-   for (i = world[IN_ROOM(ch)].contents; i; i = i->next_content) {
+   for (i = char_room_get(ch)->contents; i; i = i->next_content) {
     if (GET_OBJ_VNUM(i) == 3034) {
      obj = i;
     }
@@ -1731,7 +1731,7 @@ SPECIAL(cleric_marduk)
     return FALSE;
 
   /* pseudo-randomly choose someone in the room who is fighting me */
-  for (vict = world[IN_ROOM(ch)].people; vict; vict = vict->next_in_room)
+  for (vict = char_room_get(ch)->people; vict; vict = vict->next_in_room)
     if (FIGHTING(vict) == ch && !rand_number(0, 4))
       break;
 
@@ -1805,7 +1805,7 @@ SPECIAL(cleric_ao)
     return FALSE;
 
   /* pseudo-randomly choose someone in the room who is fighting me */
-  for (vict = world[IN_ROOM(ch)].people; vict; vict = vict->next_in_room)
+  for (vict = char_room_get(ch)->people; vict; vict = vict->next_in_room)
     if (FIGHTING(vict) == ch && !rand_number(0, 4))
       break;
 
@@ -1871,7 +1871,7 @@ SPECIAL(dziak)
   if (cmd || GET_POS(ch) != POS_FIGHTING)
     return FALSE;
   /* pseudo-randomly choose someone in the room who is fighting me */
-  for (vict = world[IN_ROOM(ch)].people; vict; vict = vict->next_in_room)
+  for (vict = char_room_get(ch)->people; vict; vict = vict->next_in_room)
     if (FIGHTING(vict) == ch && !rand_number(0, 4))
       break;
 
@@ -1931,7 +1931,7 @@ SPECIAL(azimer)
     return FALSE;
 
   /* pseudo-randomly choose someone in the room who is fighting me */
-  for (vict = world[IN_ROOM(ch)].people; vict; vict = vict->next_in_room)
+  for (vict = char_room_get(ch)->people; vict; vict = vict->next_in_room)
     if (FIGHTING(vict) == ch && !rand_number(0, 4))
       break;
 
@@ -1987,7 +1987,7 @@ SPECIAL(lyrzaxyn)
     return FALSE;
 
   /* pseudo-randomly choose someone in the room who is fighting me */
-  for (vict = world[IN_ROOM(ch)].people; vict; vict = vict->next_in_room)
+  for (vict = char_room_get(ch)->people; vict; vict = vict->next_in_room)
     if (FIGHTING(vict) == ch && !rand_number(0, 4))
       break;
 
@@ -2050,7 +2050,7 @@ SPECIAL(magic_user)
     return FALSE;
 
   /* pseudo-randomly choose someone in the room who is fighting me */
-  for (vict = world[IN_ROOM(ch)].people; vict; vict = vict->next_in_room)
+  for (vict = char_room_get(ch)->people; vict; vict = vict->next_in_room)
     if (FIGHTING(vict) == ch && !rand_number(0, 4))
       break;
 
