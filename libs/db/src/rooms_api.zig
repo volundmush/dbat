@@ -1,6 +1,7 @@
 const cdb = @import("cdb");
 const std = @import("std");
 const bitflags = @import("flags.zig");
+const obj_api = @import("objects_api.zig");
 
 extern fn strdup(s: [*:0]const u8) ?[*:0]u8;
 
@@ -153,4 +154,25 @@ fn replaceString(field: *[*c]u8, value: ?[*:0]const u8) void {
     const new_value = if (value) |new_string| strdup(new_string) orelse return else null;
     if (field.* != null) std.c.free(field.*);
     field.* = new_value;
+}
+
+pub export fn room_contents_iterate(room: *cdb.room_data, recursive: bool, func: ?obj_api.ObjIterFn, ctx: ?*anyopaque) void {
+    const callback = func orelse return;
+    var current = room.contents;
+    while (current != null) {
+        const next = current.*.next_content;
+        if (!callback(&current.*, ctx)) return;
+        if (recursive and !obj_api.obj_contents_list_iterate(current, true, func, ctx)) return;
+        current = next;
+    }
+}
+
+pub export fn room_people_iterate(room: *cdb.room_data, func: ?cdb.char_iter_fn, ctx: ?*anyopaque) void {
+    const callback = func orelse return;
+    var current = room.people;
+    while (current != null) {
+        const next = current.*.next_in_room;
+        if (!callback(&current.*, ctx)) return;
+        current = next;
+    }
 }

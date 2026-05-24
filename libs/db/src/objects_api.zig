@@ -250,9 +250,20 @@ pub export fn obj_inventory_count(obj: *cdb.obj_data, recursive: bool) usize {
     return count;
 }
 
+pub export fn obj_contents_list_iterate(obj: *cdb.obj_data, recursive: bool, func: ?ObjIterFn, ctx: ?*anyopaque) void {
+    var current = obj;
+    while (current != null) {
+        const next = current.*.next_content;
+        if (!func(&current.*, ctx)) return false;
+        if (recursive and !obj_contents_list_iterate(&current.*, true, func, ctx)) return false;
+        current = next;
+    }
+    return true;
+}
+
 pub export fn obj_inventory_iterate(obj: *cdb.obj_data, recursive: bool, func: ?ObjIterFn, ctx: ?*anyopaque) void {
     const callback = func orelse return;
-    _ = inventoryIterate(obj, recursive, callback, ctx);
+    _ = obj_contents_list_iterate(obj.contents, recursive, callback, ctx);
 }
 
 pub export fn obj_sitting_get(obj: *cdb.obj_data) i64 {
@@ -272,17 +283,6 @@ pub export fn obj_inventory_search_vnum(obj: *cdb.obj_data, vnum: cdb.obj_vnum, 
         }
     }
     return null;
-}
-
-fn inventoryIterate(obj: *cdb.obj_data, recursive: bool, callback: ObjIterFn, ctx: ?*anyopaque) bool {
-    var current = obj.contains;
-    while (current != null) {
-        const next = current.*.next_content;
-        if (!callback(&current.*, ctx)) return false;
-        if (recursive and !inventoryIterate(&current.*, true, callback, ctx)) return false;
-        current = next;
-    }
-    return true;
 }
 
 fn validObjRnum(rnum: cdb.obj_rnum) bool {

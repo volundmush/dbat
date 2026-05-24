@@ -158,8 +158,8 @@ void obj_worn_on_set(struct obj_data *obj, int16_t pos);
 int64_t obj_in_obj_get(struct obj_data *obj);
 void obj_in_obj_set(struct obj_data *obj, struct obj_data *in_obj);
 size_t obj_inventory_count(struct obj_data *obj, bool recursive);
-// Return true to continue iteration. Return false to stop.
-typedef bool (*obj_iter_fn)(struct obj_data *obj, void *ctx);
+
+void obj_contents_list_iterate(struct obj_data *obj, bool recursive, obj_iter_fn func, void *ctx);
 void obj_inventory_iterate(struct obj_data *obj, bool recursive, obj_iter_fn func, void *ctx);
 int64_t obj_sitting_get(struct obj_data *obj);
 void obj_sitting_set(struct obj_data *obj, struct char_data *ch);

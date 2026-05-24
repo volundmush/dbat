@@ -121,9 +121,14 @@ int room_geffect_get(struct room_data *room);
 void room_geffect_mod(struct room_data *room, int delta);
 void room_geffect_set(struct room_data *room, int geffect);
 
+// Return true to continue iteration. Return false to stop.
+
 struct room_direction_data *room_dir_option_get(struct room_data *room, int dir);
 struct char_data *room_people_get(struct room_data *room);
 struct obj_data *room_contents_get(struct room_data *room);
+
+void room_contents_iterate(struct room_data *room, bool recursive, obj_iter_fn func, void *ctx);
+void room_people_iterate(struct room_data *room, char_iter_fn func, void *ctx);
 
 // Room globals and database stuff below this
 extern struct room_data *world;
