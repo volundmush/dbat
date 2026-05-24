@@ -330,7 +330,7 @@ SPECIAL(gauntlet_room)  /* Jamdog - 13th Feb 2006 */
     return FALSE; 
 
   /* Only Avatars may pass the 11th room 
-  if ((world[ch->in_room].number == gauntlet_info[GAUNTLET_AV][1] ) && (cmd == gauntlet_info[GAUNTLET_AV][2])) 
+  if ((char_room_get(ch)->number == gauntlet_info[GAUNTLET_AV][1] ) && (cmd == gauntlet_info[GAUNTLET_AV][2])) 
   { 
     if (GET_CLASS(ch) != CLASS_AVATAR) 
     { 
@@ -340,12 +340,12 @@ SPECIAL(gauntlet_room)  /* Jamdog - 13th Feb 2006 */
   } */ 
   for (i = 0; gauntlet_info[i][0] != -1; i++) 
   { 
-    if (world[ch->in_room].number == gauntlet_info[i][1]) 
+    if (char_room_get(ch)->number == gauntlet_info[i][1]) 
     { 
       if (cmd == gauntlet_info[i][2]) 
       { 
         //don't let him proceed if mob is still alive 
-        for (tch = world[ch->in_room].people; tch; tch = tch->next_in_room) 
+        for (tch = char_room_get(ch)->people; tch; tch = tch->next_in_room) 
         { 
           if (IS_NPC(tch) && i > 0)  /* Ignore mobs in the waiting room */ 
           { 

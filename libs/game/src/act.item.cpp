@@ -715,8 +715,8 @@ ACMD(do_pack)
      }
      money = 65000;
      while (count < 4) {
-       while (world[real_room(rnum)].contents)
-        extract_obj(world[real_room(rnum)].contents);
+       while (room_by_id(rnum)->contents)
+        extract_obj(room_by_id(rnum)->contents);
       count++;
       rnum++;
      }
@@ -724,8 +724,8 @@ ACMD(do_pack)
      rnum = rnum - 1;
      money = 150000;
      while (count < 4) {
-       while (world[real_room(rnum)].contents)
-        extract_obj(world[real_room(rnum)].contents);
+       while (room_by_id(rnum)->contents)
+        extract_obj(room_by_id(rnum)->contents);
       count++;
       rnum++;
      }
@@ -733,8 +733,8 @@ ACMD(do_pack)
      rnum = rnum - 1;
      money = 1000000;
      while (count < 4) {
-       while (world[real_room(rnum)].contents)
-        extract_obj(world[real_room(rnum)].contents);
+       while (room_by_id(rnum)->contents)
+        extract_obj(room_by_id(rnum)->contents);
       count++;
       rnum++;
      }
@@ -910,7 +910,7 @@ ACMD(do_deploy)
  int final = rnum + 99;
 
  while (giveup == FALSE && cont == FALSE) {
-   for (obj3 = world[real_room(rnum)].contents; obj3; obj3 = next_obj) {
+   for (obj3 = room_by_id(rnum)->contents; obj3; obj3 = next_obj) {
      next_obj = obj3->next_content;
       if (GET_OBJ_VNUM(obj3) == 18801) {
        found = TRUE;
@@ -1640,9 +1640,7 @@ ACMD(do_bid)
   struct obj_data *obj, *next_obj, *obj2 = NULL;
   char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
   int found = FALSE, list = 0, masterList = 0;
-  room_vnum auct_room;
-
-  auct_room = real_room(80);
+  struct room_data *auct_room = room_by_id(80);
 
   if(IS_NPC(ch))
    return;
@@ -1667,7 +1665,7 @@ ACMD(do_bid)
     send_to_char(ch, "Syntax: bid [ list | # ] (amt)\r\nOr...\r\nSyntax: bid appraise (list number)\r\n");
     return;
   }
-  for (obj = world[auct_room].contents; obj; obj = next_obj) {
+  for (obj = auct_room->contents; obj; obj = next_obj) {
      next_obj = obj->next_content;
      if (obj) {
       list++;
@@ -1679,7 +1677,7 @@ ACMD(do_bid)
   if (!strcasecmp(arg, "list")) {
     send_to_char(ch, "@Y                                   Auction@n\r\n");
     send_to_char(ch, "@c------------------------------------------------------------------------------@n\r\n");
-   for (obj = world[auct_room].contents; obj; obj = next_obj) {
+   for (obj = auct_room->contents; obj; obj = next_obj) {
      next_obj = obj->next_content;
      if (obj) {
       if (GET_AUCTER(obj) <= 0) {
@@ -1713,7 +1711,7 @@ ACMD(do_bid)
     return;
    }
 
-   for (obj = world[auct_room].contents; obj; obj = next_obj) {
+   for (obj = auct_room->contents; obj; obj = next_obj) {
      next_obj = obj->next_content;
      if (obj) {
       if (GET_AUCTER(obj) <= 0) {
@@ -1818,7 +1816,7 @@ ACMD(do_bid)
     return;
    } 
 
-   for (obj = world[auct_room].contents; obj; obj = next_obj) {
+   for (obj = auct_room->contents; obj; obj = next_obj) {
      next_obj = obj->next_content;
      if (obj) {
       if (GET_AUCTER(obj) <= 0) {
