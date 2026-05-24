@@ -73,3 +73,14 @@ struct obj_data* char_inventory_search_vnum(struct char_data *ch, obj_vnum vnum,
     char_inventory_iterate(ch, recursive, obj_search_vnum_match, &data);
     return data.found;
 }
+
+struct obj_data* char_inventory_search_type(struct char_data *ch, int type, bool recursive, int flags) {
+    struct obj_type_search_data data = {
+        .type = type,
+        .flags = flags,
+        .ch = ch,
+        .found = nullptr
+    };
+    char_inventory_iterate(ch, recursive, obj_search_type_match, &data);
+    return data.found;
+}

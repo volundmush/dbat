@@ -11,6 +11,7 @@ pub const shops_api = @import("shops_api.zig");
 pub const guilds_api = @import("guilds_api.zig");
 pub const zones_api = @import("zones_api.zig");
 
+// This stupid comptime and its function ensures that the C API functions aren't optimized out because Zig doesn't call them directly. They are called from C, so we have to force them to be included in the final binary.
 comptime {
     forceApiExports(characters_api);
     forceApiExports(objects_api);

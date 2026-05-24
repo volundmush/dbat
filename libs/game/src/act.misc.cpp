@@ -43,6 +43,8 @@
 #include "dbat/game/class.h"
 #include "dbat/game/races_plus.h"
 
+#include "dbat/game/search.hpp"
+
 /* local functions  */
 static void generate_multiform(struct char_data *ch, int count);
 static void resolve_song(struct char_data *ch);
@@ -401,11 +403,8 @@ static void resolve_song(struct char_data *ch)
   return;
  }
 
- for (obj2 = ch->carrying; obj2; obj2 = next_obj) {
-  next_obj = obj2->next_content;
-  if (GET_OBJ_VNUM(obj2) == 8802 || GET_OBJ_VNUM(obj2) == 8807) {
-   instrument = GET_OBJ_VNUM(obj2);
-  }
+ if((obj2 = dbat::game::search::character_inventory_find_vnum(ch, {8802, 8807})) != nullptr) {
+     instrument = GET_OBJ_VNUM(obj2);
  }
 
  if (instrument == 0) {
@@ -726,11 +725,8 @@ ACMD(do_song)
  struct obj_data *obj2 = NULL, *next_obj;
  int instrument = 0;
 
- for (obj2 = ch->carrying; obj2; obj2 = next_obj) {
-  next_obj = obj2->next_content;
-  if (GET_OBJ_VNUM(obj2) == 8802 || GET_OBJ_VNUM(obj2) == 8807) {
-   instrument = GET_OBJ_VNUM(obj2);
-  }
+ if((obj2 = dbat::game::search::character_inventory_find_vnum(ch, {8802, 8807})) != nullptr) {
+     instrument = GET_OBJ_VNUM(obj2);
  }
 
  if (instrument == 0) {
@@ -1649,20 +1645,11 @@ ACMD(do_extract)
     send_to_char(ch, "It's not mature enough to extract from!\r\n");
     return;
    }
-   struct obj_data *bottle = NULL, *next_obj, *obj2;
-   int found = FALSE;
-
-   for (obj2 = ch->carrying; obj2; obj2 = next_obj) {
-    next_obj = obj2->next_content;
-    if (GET_OBJ_VNUM(obj2) == 3423) {
-     bottle = obj2;
-     found = TRUE;
-    }
-   }
+   struct obj_data *bottle = char_inventory_search_vnum(ch, 3423, FALSE, 0);
 
    int64_t cost = ((GET_MAX_MANA(ch) * 0.35) + 500);
 
-   if (found == FALSE) {
+   if (!bottle) {
     send_to_char(ch, "You do not have an empty bottle to put the extracted ink in.\r\n");
     return;
    }
@@ -1737,31 +1724,19 @@ ACMD(do_runic)
   return;
  } 
 
- struct obj_data *obj, *next_obj, *bottle = NULL;
- int found = FALSE, amount = 0, brush = FALSE;
+ struct obj_data *bottle = dbat::game::search::character_inventory_find(ch, FALSE, [&](auto it) {
+  return GET_OBJ_VNUM(it) == 3424 && GET_OBJ_VAL(it, 6) > 0;
+ });
 
- for (obj = ch->carrying; obj; obj = next_obj) {
-  next_obj = obj->next_content;
-  if (GET_OBJ_VNUM(obj) == 3424) {
-   if (GET_OBJ_VAL(obj, 6) > amount) {
-    bottle = obj;
-    found = TRUE;
-    amount = GET_OBJ_VAL(bottle, 6);
-   }
-  }
- }
-
- for (obj = ch->carrying; obj; obj = next_obj) {
-  next_obj = obj->next_content;
-  if (GET_OBJ_VNUM(obj) == 3427) {
-   brush = TRUE;
-  }
- }
-
- if (found == FALSE) {
+ if(!bottle) {
   send_to_char(ch, "You do not have a bottle with enough ink in it.\r\n");
   return;
- } else if (brush == FALSE) {
+ }
+ int amount = GET_OBJ_VAL(bottle, 6);
+
+ struct obj_data *brush = char_inventory_search_vnum(ch, 3427, FALSE, 0);
+
+ if (!brush) {
   send_to_char(ch, "You do not have a brush!\r\n");
   return;
  }

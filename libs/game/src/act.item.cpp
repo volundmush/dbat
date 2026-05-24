@@ -106,16 +106,9 @@ ACMD(do_refuel)
   return;
  }
 
- struct obj_data *rep = NULL, *next_obj = NULL, *fuel = NULL;
+ struct obj_data *fuel = char_inventory_search_vnum(ch, 17290, FALSE, 0);
 
-  for (rep = ch->carrying; rep; rep = next_obj) {
-       next_obj = rep->next_content;
-    if (GET_OBJ_VNUM(rep) == 17290) {
-     fuel = rep;
-    }
-  }
-
- if (fuel == NULL) {
+ if (!fuel) {
   send_to_char(ch, "You do not have any fuel canisters on you.\r\n");
   return;
  }
@@ -4411,21 +4404,11 @@ ACMD(do_remove)
     send_to_char(ch, "Remove what?\r\n");
     return;
   }
-  /* lemme check for a board FIRST */
-  for (obj = ch->carrying; obj; obj = obj->next_content) {
-    if (GET_OBJ_TYPE (obj) == ITEM_BOARD) {
-      found = 1;
-      break;
-    }
+
+  if(!(obj = char_inventory_search_type(ch, ITEM_BOARD, FALSE, 0))) {
+    obj = obj_contents_search_type(world[IN_ROOM(ch)].contents, ITEM_BOARD, FALSE, 0);
   }
-  if (!obj) {
-    for (obj = world[IN_ROOM(ch)].contents; obj; obj = obj->next_content) {
-      if (GET_OBJ_TYPE (obj) == ITEM_BOARD) {
-	found = 1;
-	break;
-      }
-    }
-  }
+  found = obj ? 1 : 0;
 
   if (found) {
     if (!isdigit (*arg) || (!(msg = atoi (arg)))) {

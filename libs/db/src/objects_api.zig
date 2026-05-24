@@ -15,11 +15,11 @@ pub export fn obj_id_set(obj: *cdb.obj_data, id: i64) void {
 }
 
 pub export fn obj_proto_id_get(obj: *cdb.obj_data) cdb.obj_vnum {
-    return obj.item_number;
+    return obj_vnum_get(obj);
 }
 
 pub export fn obj_proto_id_set(obj: *cdb.obj_data, vnum: cdb.obj_vnum) void {
-    obj.item_number = vnum;
+    obj_vnum_set(obj, vnum);
 }
 
 pub export fn obj_vnum_get(obj: *cdb.obj_data) cdb.obj_vnum {

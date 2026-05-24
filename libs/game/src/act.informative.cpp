@@ -4700,17 +4700,9 @@ static void look_in_direction(struct char_data *ch, int dir)
     if (EXIT(ch, dir)->general_description)
       send_to_char(ch, "%s", EXIT(ch, dir)->general_description);
     else {
-     struct obj_data *obj, *next_obj;
-     int founded = FALSE;
-     for (obj = ch->carrying; obj; obj = next_obj) {
-       next_obj = obj->next_content;
-       if (GET_OBJ_VNUM(obj) == 17) {
-        founded = TRUE;
-       }
-     }
-     if (founded == FALSE) {
+     struct obj_data *obj = char_inventory_search_vnum(ch, 17, FALSE, 0);
+     if (!obj) {
       send_to_char(ch, "You were unable to discern anything about that direction. Try looking again...\r\n");
-      struct obj_data *obj;
       obj = read_object(17, VIRTUAL);
       obj_to_char(obj, ch);
      }

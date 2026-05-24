@@ -9,6 +9,8 @@
 ************************************************************************ */
 #include "dbat/game/act.movement.h"
 #include "dbat/db/consts/maximums.h"
+#include "dbat/db/consts/search.h"
+#include "dbat/game/search.hpp"
 #include "dbat/game/utils.h"
 
 #include "dbat/game/search.h"
@@ -556,11 +558,9 @@ static int has_boat(struct char_data *ch)
 
   if (AFF_FLAGGED(ch, AFF_WATERWALK))
     return (1);
-
-  /* non-wearable boats in inventory will do it */
-  for (obj = ch->carrying; obj; obj = obj->next_content)
-    if (GET_OBJ_TYPE(obj) == ITEM_BOAT && (find_eq_pos(ch, obj, NULL) < 0))
-      return (1);
+  
+  if((obj = dbat::game::search::character_inventory_find(ch, FALSE, [&](auto it) { return GET_OBJ_TYPE(it) == ITEM_BOAT && (find_eq_pos(ch, it, NULL) < 0); })) != NULL)
+    return (1);
 
   /* and any boat you're wearing will do it too */
   for (i = 0; i < NUM_WEARS; i++)
@@ -1690,14 +1690,7 @@ static void do_doorcmd(struct char_data *ch, struct obj_data *obj, int door, int
 static int ok_pick(struct char_data *ch, obj_vnum keynum, int pickproof, int dclock, int scmd, struct obj_data *hatch)
 {
   int skill_lvl, found = FALSE;
-  struct obj_data *obj, *next_obj;
-
-  for (obj = ch->carrying; obj; obj = next_obj) {
-       next_obj = obj->next_content;
-   if (GET_OBJ_VNUM(obj) == 18 && (!OBJ_FLAGGED(obj, ITEM_BROKEN) && !OBJ_FLAGGED(obj, ITEM_FORGED))) {
-    found = TRUE;
-   }
-  }
+  struct obj_data *obj = char_inventory_search_vnum(ch, 18, FALSE, SEARCH_GENUINE | SEARCH_WORKING);
 
   if (scmd != SCMD_PICK)
     return (1);
@@ -1707,7 +1700,7 @@ static int ok_pick(struct char_data *ch, obj_vnum keynum, int pickproof, int dcl
     send_to_char(ch, "You have no idea how!\r\n");
     return (0);
   }
-  if (found == FALSE) {
+  if (!obj) {
     send_to_char(ch, "You need a lock picking kit.\r\n");
     return (0);
   }

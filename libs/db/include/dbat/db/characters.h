@@ -571,6 +571,7 @@ mob_vnum char_proto_id_get(struct char_data *ch);
 void char_proto_id_set(struct char_data *ch, mob_vnum vnum);
 mob_vnum char_vnum_get(struct char_data *ch);
 void char_vnum_set(struct char_data *ch, mob_vnum vnum);
+struct room_data* char_room_get(struct char_data *ch);
 room_vnum char_room_vnum_get(struct char_data *ch);
 void char_room_vnum_set(struct char_data *ch, room_vnum vnum);
 const char* char_name_get(struct char_data *ch);
@@ -601,6 +602,7 @@ void char_admflag_set(struct char_data *ch, int pos, bool value);
 void char_inventory_iterate(struct char_data *ch, bool recursive, obj_iter_fn func, void *ctx);
 void char_equipment_iterate(struct char_data *ch, bool recursive, obj_iter_fn func, void *ctx);
 struct obj_data* char_inventory_search_vnum(struct char_data *ch, obj_vnum vnum, bool recursive, int flags);
+struct obj_data* char_inventory_search_type(struct char_data *ch, int type, bool recursive, int flags);
 
 size_t char_inventory_count(struct char_data *ch, bool recursive);
 size_t char_equipment_count(struct char_data *ch, bool recursive);

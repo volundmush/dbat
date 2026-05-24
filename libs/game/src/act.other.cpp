@@ -12,6 +12,7 @@
 #include "dbat/db/consts/shadowdragons.h"
 #include "dbat/db/consts/auction.h"
 #include "dbat/db/consts/aligns.h"
+#include "dbat/db/consts/search.h"
 #include "dbat/db/flags.h"
 
 #include <sys/stat.h>
@@ -2278,7 +2279,6 @@ ACMD(do_implant)
  struct char_data *vict = NULL;
  char arg[MAX_INPUT_LENGTH];
  char arg2[MAX_INPUT_LENGTH];
- int found = FALSE;
 
  two_arguments(argument, arg, arg2);
 
@@ -2299,14 +2299,9 @@ ACMD(do_implant)
    return;
  }
 
- for (obj = ch->carrying; obj; obj = next_obj) {
-       next_obj = obj->next_content;
-   if (found == FALSE && GET_OBJ_VNUM(obj) == 66 && (!OBJ_FLAGGED(obj, ITEM_BROKEN) && !OBJ_FLAGGED(obj, ITEM_FORGED))) {
-    found = TRUE;
-    limb = obj;
-   }
- }
- if (found == FALSE) {
+ limb = char_inventory_search_vnum(ch, 66, FALSE, SEARCH_GENUINE | SEARCH_WORKING);
+
+ if (!limb) {
   send_to_char(ch, "You do not have a cybernetic limb to implant.\r\n");
   return;
  }
