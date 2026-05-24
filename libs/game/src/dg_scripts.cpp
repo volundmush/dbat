@@ -602,10 +602,8 @@ void script_trigger_check(void)
   }
 
   for (nr = 0; nr <= top_of_world; nr++) {
-    if (SCRIPT(&world[nr])) {
-      room = &world[nr];
-      sc = SCRIPT(room);
-
+    room = &world[nr];
+    if ((sc = SCRIPT(room))) {
       if (IS_SET(SCRIPT_TYPES(sc), WTRIG_RANDOM) &&
           (!is_empty(room->zone) ||
            IS_SET(SCRIPT_TYPES(sc), WTRIG_GLOBAL)))
@@ -643,10 +641,8 @@ void check_time_triggers(void)
   }
 
   for (nr = 0; nr <= top_of_world; nr++) {
-    if (SCRIPT(&world[nr])) {
-      room = &world[nr];
-      sc = SCRIPT(room);
-
+    room = &world[nr];
+    if ((sc = SCRIPT(room))) {
       if (IS_SET(SCRIPT_TYPES(sc), WTRIG_TIME) &&
           (!is_empty(room->zone) ||
            IS_SET(SCRIPT_TYPES(sc), WTRIG_GLOBAL)))

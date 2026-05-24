@@ -35,13 +35,14 @@ room_rnum add_room(struct room_data *room)
     return NOWHERE;
 
   if ((i = real_room(room->number)) != NOWHERE) {
-    if (SCRIPT(&world[i]))
-      extract_script(&world[i], WLD_TRIGGER);
-    tch = world[i].people; 
-    tobj = world[i].contents;
-    copy_room(&world[i], room);
-    world[i].people = tch;
-    world[i].contents = tobj;
+    struct room_data *irm = &world[i];
+    if (SCRIPT(irm))
+      extract_script(irm, WLD_TRIGGER);
+    tch = irm->people; 
+    tobj = irm->contents;
+    copy_room(irm, room);
+    irm->people = tch;
+    irm->contents = tobj;
     add_to_save_list(zone_table[room->zone].number, SL_WLD);
     log("GenOLC: add_room: Updated existing room #%d.", room->number);
     return i;
@@ -51,9 +52,10 @@ room_rnum add_room(struct room_data *room)
   top_of_world++;
 
   for (i = top_of_world; i > 0; i--) {
+    struct room_data *irm = &world[i];
     if (room->number > world[i - 1].number) {
-      world[i] = *room;
-      copy_room_strings(&world[i], room);
+      *irm = *room;
+      copy_room_strings(irm, room);
       found = i;
       break;
     } else {
