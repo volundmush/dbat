@@ -3,6 +3,11 @@ const std = @import("std");
 
 extern fn strdup(s: [*:0]const u8) ?[*:0]u8;
 
+pub export fn exit_dest_get(exit: *cdb.room_direction_data) [*c]cdb.room_data {
+    if (exit.to_room == cdb.NOWHERE or cdb.world == null) return null;
+    return &cdb.world[@intCast(exit.to_room)];
+}
+
 pub export fn exit_general_description_get(exit: *cdb.room_direction_data) [*c]const u8 {
     return exit.general_description;
 }

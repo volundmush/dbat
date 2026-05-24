@@ -103,16 +103,16 @@ char *str_str(char *cs, char *ct)
 
 
 int trgvar_in_room(room_vnum vnum) {
-    room_rnum rnum = real_room(vnum);
+    struct room_data* room = room_by_id(vnum);
     int i = 0;
     char_data *ch;
 
-    if (rnum == NOWHERE) {
-        script_log("people.vnum: world[rnum] does not exist");
+    if (!room) {
+        script_log("people.vnum: room does not exist");
         return (-1);
     }
 
-    for (ch = world[rnum].people; ch !=NULL; ch = ch->next_in_room)
+    for (ch = room->people; ch !=NULL; ch = ch->next_in_room)
         i++;
 
     return i;

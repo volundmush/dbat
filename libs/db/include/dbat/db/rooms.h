@@ -30,6 +30,7 @@ struct room_direction_data {
 };
 
 // Exit API implemented in rooms_api.zig
+struct room_data* exit_dest_get(struct room_direction_data *exit);
 const char* exit_general_description_get(struct room_direction_data *exit);
 void exit_general_description_set(struct room_direction_data *exit, const char *desc);
 const char* exit_keyword_get(struct room_direction_data *exit);

@@ -203,44 +203,45 @@ void redit_setup_existing(struct descriptor_data *d, int real_num)
    * Build a copy of the room for editing.
    */
   CREATE(room, struct room_data, 1);
+  struct room_data *exist = &world[real_num];
 
-  *room = world[real_num];
+  *room = *exist;
   /*
    * Allocate space for all strings.
    */
-  room->name = str_udup(world[real_num].name);
-  room->description = str_udup(world[real_num].description);
+  room->name = str_udup(exist->name);
+  room->description = str_udup(exist->description);
 
   /*
    * Exits - We allocate only if necessary.
    */
   for (counter = 0; counter < NUM_OF_DIRS; counter++) {
-    if (world[real_num].dir_option[counter]) {
+    if (exist->dir_option[counter]) {
       CREATE(room->dir_option[counter], struct room_direction_data, 1);
 
       /*
        * Copy the numbers over.
        */
-      *room->dir_option[counter] = *world[real_num].dir_option[counter];
+      *room->dir_option[counter] = *exist->dir_option[counter];
       /*
        * Allocate the strings.
        */
-      if (world[real_num].dir_option[counter]->general_description)
-        room->dir_option[counter]->general_description = strdup(world[real_num].dir_option[counter]->general_description);
-      if (world[real_num].dir_option[counter]->keyword)
-        room->dir_option[counter]->keyword = strdup(world[real_num].dir_option[counter]->keyword);
+      if (exist->dir_option[counter]->general_description)
+        room->dir_option[counter]->general_description = strdup(exist->dir_option[counter]->general_description);
+      if (exist->dir_option[counter]->keyword)
+        room->dir_option[counter]->keyword = strdup(exist->dir_option[counter]->keyword);
     }
   }
 
   /*
    * Extra descriptions, if necessary.
    */
-  if (world[real_num].ex_description) {
+  if (exist->ex_description) {
     struct extra_descr_data *tdesc, *temp, *temp2;
     CREATE(temp, struct extra_descr_data, 1);
 
     room->ex_description = temp;
-    for (tdesc = world[real_num].ex_description; tdesc; tdesc = tdesc->next) {
+    for (tdesc = exist->ex_description; tdesc; tdesc = tdesc->next) {
       temp->keyword = strdup(tdesc->keyword);
       temp->description = strdup(tdesc->description);
       if (tdesc->next) {
@@ -283,14 +284,16 @@ void redit_save_internally(struct descriptor_data *d)
     return;
   }
 
+  struct room_data *room = &world[room_num];
+
   /* Update triggers */  
   /* Free old proto list */
-  if (world[room_num].proto_script &&
-      world[room_num].proto_script != OLC_SCRIPT(d)) 
-    free_proto_script(&world[room_num], WLD_TRIGGER); 
+  if (room->proto_script &&
+      room->proto_script != OLC_SCRIPT(d)) 
+    free_proto_script(room, WLD_TRIGGER); 
        
-  world[room_num].proto_script = OLC_SCRIPT(d);
-  assign_triggers(&world[room_num], WLD_TRIGGER);
+  room->proto_script = OLC_SCRIPT(d);
+  assign_triggers(room, WLD_TRIGGER);
   /* end trigger update */  
   
   /* Don't adjust numbers on a room update. */
@@ -482,14 +485,22 @@ void redit_disp_sector_menu(struct descriptor_data *d)
 /*
  * The main menu.
  */
+
+static int _redit_disp_menu_helper(struct room_data *room, int dir)
+{
+  if (room->dir_option[dir] && room->dir_option[dir]->to_room != NOWHERE)
+    return world[room->dir_option[dir]->to_room].number;
+  else
+    return -1;
+}
+
 void redit_disp_menu(struct descriptor_data *d)
 {
   char buf1[MAX_STRING_LENGTH];
   char buf2[MAX_STRING_LENGTH];
-  struct room_data *room;
+  struct room_data *room = OLC_ROOM(d);
 
   clear_screen(d);
-  room = OLC_ROOM(d);
 
   sprintbitarray(room->room_flags, room_bits, RF_ARRAY_MAX, buf1, sizeof(buf1));
   sprinttype(room->sector_type, sector_types, buf2, sizeof(buf2));
@@ -516,30 +527,18 @@ void redit_disp_menu(struct descriptor_data *d)
 
 	  OLC_NUM(d), zone_table[OLC_ZNUM(d)].number, room->name,
 	  room->description, buf1, buf2,
-	  room->dir_option[NORTH] && room->dir_option[NORTH]->to_room != NOWHERE ?
-	  world[room->dir_option[NORTH]->to_room].number : -1,
-	  room->dir_option[NORTHWEST] && room->dir_option[NORTHWEST]->to_room != NOWHERE ?
-	  world[room->dir_option[NORTHWEST]->to_room].number : -1,
-	  room->dir_option[EAST] && room->dir_option[EAST]->to_room != NOWHERE ?
-	  world[room->dir_option[EAST]->to_room].number : -1,
-	  room->dir_option[NORTHEAST] && room->dir_option[NORTHEAST]->to_room != NOWHERE ?
-	  world[room->dir_option[NORTHEAST]->to_room].number : -1,
-	  room->dir_option[SOUTH] && room->dir_option[SOUTH]->to_room != NOWHERE ?
-	  world[room->dir_option[SOUTH]->to_room].number : -1,
-	  room->dir_option[SOUTHEAST] && room->dir_option[SOUTHEAST]->to_room != NOWHERE ?
-	  world[room->dir_option[SOUTHEAST]->to_room].number : -1,
-	  room->dir_option[WEST] && room->dir_option[WEST]->to_room != NOWHERE ?
-	  world[room->dir_option[WEST]->to_room].number : -1,
-	  room->dir_option[SOUTHWEST] && room->dir_option[SOUTHWEST]->to_room != NOWHERE ?
-	  world[room->dir_option[SOUTHWEST]->to_room].number : -1,
-	  room->dir_option[UP] && room->dir_option[UP]->to_room != NOWHERE ? 
-	  world[room->dir_option[UP]->to_room].number : -1,
-	  room->dir_option[INDIR] && room->dir_option[INDIR]->to_room != NOWHERE ?
-	  world[room->dir_option[INDIR]->to_room].number : -1,
-	  room->dir_option[DOWN] && room->dir_option[DOWN]->to_room != NOWHERE ?
-	  world[room->dir_option[DOWN]->to_room].number : -1,
-	  room->dir_option[OUTDIR] && room->dir_option[OUTDIR]->to_room != NOWHERE ?
-	  world[room->dir_option[OUTDIR]->to_room].number : -1,
+	  _redit_disp_menu_helper(room, NORTH),
+	  _redit_disp_menu_helper(room, NORTHWEST),
+	  _redit_disp_menu_helper(room, EAST),
+	  _redit_disp_menu_helper(room, NORTHEAST),
+	  _redit_disp_menu_helper(room, SOUTH),
+	  _redit_disp_menu_helper(room, SOUTHEAST),
+	  _redit_disp_menu_helper(room, WEST),
+	  _redit_disp_menu_helper(room, SOUTHWEST),
+	  _redit_disp_menu_helper(room, UP),
+	  _redit_disp_menu_helper(room, INDIR),
+	  _redit_disp_menu_helper(room, DOWN),
+	  _redit_disp_menu_helper(room, OUTDIR),
           OLC_SCRIPT(d) ? "Set." : "Not Set."
 	  );
    } else {

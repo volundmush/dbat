@@ -760,14 +760,15 @@ ACMD(do_finddoor)
   if (vnum != NOTHING) { 
       len = snprintf(buf, sizeof(buf), "Doors unlocked by key [%d] %s are:\r\n", 
                       vnum, GET_OBJ_SHORT(obj)); 
-      for (i = 0; i <= top_of_world; i++) { 
+      for (i = 0; i <= top_of_world; i++) {
+        struct room_data *room = &world[i];
         for (d = 0; d < NUM_OF_DIRS; d++) { 
-          if (world[i].dir_option[d] && world[i].dir_option[d]->key && 
-              world[i].dir_option[d]->key == vnum) { 
+          if (room->dir_option[d] && room->dir_option[d]->key && 
+              room->dir_option[d]->key == vnum) { 
             nlen = snprintf(buf + len, sizeof(buf) - len, 
                             "[%3d] Room %d, %s (%s)\r\n", 
-                            ++num, world[i].number, 
-                            dirs[d], world[i].dir_option[d]->keyword); 
+                            ++num, room->number, 
+                            dirs[d], room->dir_option[d]->keyword); 
             if (len + nlen >= sizeof(buf) || nlen < 0) 
               break; 
             len += nlen; 
@@ -3507,23 +3508,25 @@ ACMD(do_show)
   /* show errors */
   case 5:
     len = strlcpy(buf, "Errant Rooms\r\n------------\r\n", sizeof(buf));
-    for (i = 0, k = 0; i <= top_of_world; i++)
+    for (i = 0, k = 0; i <= top_of_world; i++) {
+      struct room_data *rm = &world[i];
       for (j = 0; j < NUM_OF_DIRS; j++) {
       	if (!W_EXIT(i,j))
       	  continue;
         if (W_EXIT(i,j)->to_room == 0) {
-            nlen = snprintf(buf + len, sizeof(buf) - len, "%2d: (void   ) [%5d] %-*s%s (%s)\r\n", ++k, GET_ROOM_VNUM(i), count_color_chars(world[i].name)+40, world[i].name, QNRM, dirs[j]);
+            nlen = snprintf(buf + len, sizeof(buf) - len, "%2d: (void   ) [%5d] %-*s%s (%s)\r\n", ++k, GET_ROOM_VNUM(i), count_color_chars(rm->name)+40, rm->name, QNRM, dirs[j]);
           if (len + nlen >= sizeof(buf) || nlen < 0)
             break;
           len += nlen;
         }
         if (W_EXIT(i,j)->to_room == NOWHERE && !W_EXIT(i,j)->general_description) {
-            nlen = snprintf(buf + len, sizeof(buf) - len, "%2d: (Nowhere) [%5d] %-*s%s (%s)\r\n", ++k, GET_ROOM_VNUM(i), count_color_chars(world[i].name)+ 40, world[i].name, QNRM, dirs[j]);
+            nlen = snprintf(buf + len, sizeof(buf) - len, "%2d: (Nowhere) [%5d] %-*s%s (%s)\r\n", ++k, GET_ROOM_VNUM(i), count_color_chars(rm->name)+ 40, rm->name, QNRM, dirs[j]);
           if (len + nlen >= sizeof(buf) || nlen < 0)
             break;
           len += nlen;
         }
       }
+    }
     page_string(ch->desc, buf, TRUE);
     break;
 
@@ -5074,24 +5077,26 @@ ACMD (do_zcheck)
   /************** Check rooms *****************/
   send_to_char(ch, "\r\nChecking Rooms for limits...\r\n");
   for (i=0; i<top_of_world;i++) {
+    struct room_data* rm = &world[i];
     if (world[i].zone==zrnum) {
       for (j = 0; j < NUM_OF_DIRS; j++) {
         /*check for exit, but ignore off limits if you're in an offlimit zone*/
-        if (!world[i].dir_option[j])
+        if (!rm->dir_option[j])
           continue;
-        exroom=world[i].dir_option[j]->to_room;
+        exroom=rm->dir_option[j]->to_room;
         if (exroom==NOWHERE)
           continue;
-        if (world[exroom].zone == zrnum)
+        struct room_data* dest = &world[exroom];
+        if (dest->zone == zrnum)
           continue;
-        if (world[exroom].zone == world[i].zone)
+        if (dest->zone == rm->zone)
           continue;
 
         for (k=0;offlimit_zones[k] != -1;k++) {
-          if (world[exroom].zone == real_zone(offlimit_zones[k]) && (found = 1))
+          if (dest->zone == real_zone(offlimit_zones[k]) && (found = 1))
             len += snprintf(buf + len, sizeof(buf) - len,
                             "- Exit %s cannot connect to %d (zone off limits).\r\n",
-                            dirs[j], world[exroom].number);
+                            dirs[j], dest->number);
         } /* for (k.. */
       } /* cycle directions */         
 
@@ -5104,22 +5109,22 @@ ACMD (do_zcheck)
                             ROOM_FLAGGED(i, ROOM_OLC) ? "OLC" : "",
                             ROOM_FLAGGED(i, ROOM_BFS_MARK) ? "*" : "");
 
-      if ((MIN_ROOM_DESC_LENGTH) && strlen(world[i].description)<MIN_ROOM_DESC_LENGTH && (found=1))
+      if ((MIN_ROOM_DESC_LENGTH) && strlen(rm->description)<MIN_ROOM_DESC_LENGTH && (found=1))
         len += snprintf(buf + len, sizeof(buf) - len,
                         "- Room description is too short. (%4.4" SZT " of min. %d characters).\r\n",
-                             strlen(world[i].description), MIN_ROOM_DESC_LENGTH);
+                             strlen(rm->description), MIN_ROOM_DESC_LENGTH);
 
-      if (strncmp(world[i].description, "   ", 3) && (found=1))
+      if (strncmp(rm->description, "   ", 3) && (found=1))
         len += snprintf(buf + len, sizeof(buf) - len,
                         "- Room description not formatted with indent (/fi in the editor).\r\n");
 
       /* strcspan = size of text in first arg before any character in second arg */
-      if ((strcspn(world[i].description, "\r\n")>MAX_COLOUMN_WIDTH) && (found=1))
+      if ((strcspn(rm->description, "\r\n")>MAX_COLOUMN_WIDTH) && (found=1))
         len += snprintf(buf + len, sizeof(buf) - len,
                         "- Room description not wrapped at %d chars (/fi in the editor).\r\n",
                              MAX_COLOUMN_WIDTH);
            
-     for (ext2 = NULL, ext = world[i].ex_description; ext; ext = ext->next)
+     for (ext2 = NULL, ext = rm->ex_description; ext; ext = ext->next)
        if (strncmp(ext->description, "   ", 3))
          ext2 = ext;
 
@@ -5129,7 +5134,7 @@ ACMD (do_zcheck)
 
       if (found) {
         send_to_char(ch, "[%5d] %-30s: \r\n%s",
-                       world[i].number, world[i].name ? world[i].name : "An unnamed room", buf);
+                       rm->number, rm->name ? rm->name : "An unnamed room", buf);
         strcpy(buf, "");
         len = 0;
         found = 0;
@@ -5138,10 +5143,11 @@ ACMD (do_zcheck)
   } /*checking rooms*/ 
 
   for (i=0; i<top_of_world;i++) {
-    if (world[i].zone==zrnum) {
+    struct room_data* rm = &world[i];
+    if (rm->zone==zrnum) {
       m++;
       for (j = 0, k = 0; j < NUM_OF_DIRS; j++)
-        if (!world[i].dir_option[j])
+        if (!rm->dir_option[j])
           k++;
        
       if (k == NUM_OF_DIRS)

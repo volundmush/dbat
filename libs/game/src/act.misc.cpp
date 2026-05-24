@@ -5122,13 +5122,14 @@ ACMD(do_obstruct)
  } else {
    struct obj_data *obj;
    int newroom = char_room_get(ch)->dir_option[dir]->to_room;
+   struct room_data *nrm = &world[newroom];
 
   if (ROOM_FLAGGED(newroom, ROOM_PEACEFUL)) {
    send_to_char(ch, "You can not block off a peaceful area.\r\n");
    return;
   }   
 
-   for (obj = world[newroom].contents; obj;obj=obj->next_content) {
+   for (obj = nrm->contents; obj;obj=obj->next_content) {
     if(GET_OBJ_VNUM(obj) == 79) {
      if (GET_OBJ_COST(obj) == dir2) {
       if (skill < prob) {

@@ -880,6 +880,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check)
   }
 
   was_in = IN_ROOM(ch);
+  struct room_data *was_in_room = &world[was_in];
   if (DRAGGING(ch)) {
    act("@C$n@w drags @c$N@w with $m.@n", TRUE, ch, 0, DRAGGING(ch), TO_ROOM);
   }
@@ -888,8 +889,8 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check)
   }
   SET_BIT_AR(AFF_FLAGS(ch), AFF_PURSUIT);
   char_from_room(ch);  
-  char_to_room(ch, world[was_in].dir_option[dir]->to_room);
-  if((char_room_get(ch)->zone != world[was_in].zone) && !IS_NPC(ch) && !IS_ANDROID(ch)) {
+  char_to_room(ch, was_in_room->dir_option[dir]->to_room);
+  if((char_room_get(ch)->zone != was_in_room->zone) && !IS_NPC(ch) && !IS_ANDROID(ch)) {
    send_to_sense(0, "You sense someone", ch);
    sprintf(buf3, "@D[@GBlip@D]@Y %s\r\n@RSomeone has entered your scouter detection range@n.", add_commas(GET_HIT(ch)));
    send_to_scouter(buf3, ch, 0, 0);
@@ -909,7 +910,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check)
              (dir == DOWN) ? "above" : dirs[rev_dir[dir]]));
   act("$n arrives from $T.", TRUE, ch, 0, buf2, TO_ROOM | TO_SNEAKRESIST);
   if (FIGHTING(ch)) {
-   if (SECT(world[was_in].dir_option[dir]->to_room) != SECT_FLYING && SECT(world[was_in].dir_option[dir]->to_room) != SECT_WATER_NOSWIM && ROOM_EFFECT(world[was_in].dir_option[dir]->to_room) == 0) {
+   if (SECT(was_in_room->dir_option[dir]->to_room) != SECT_FLYING && SECT(was_in_room->dir_option[dir]->to_room) != SECT_WATER_NOSWIM && ROOM_EFFECT(was_in_room->dir_option[dir]->to_room) == 0) {
     roll_pursue(FIGHTING(ch), ch);
    }
     REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_PURSUIT);
@@ -1834,6 +1835,7 @@ ACMD(do_gen_door)
 static int do_simple_enter(struct char_data *ch, struct obj_data *obj, int need_specials_check)
 {
   room_rnum dest_room = real_room(GET_OBJ_VAL(obj, VAL_PORTAL_DEST));
+  struct room_data *droom = &world[dest_room];
   room_rnum was_in = IN_ROOM(ch);
   int need_movement = 0;
 
@@ -1871,7 +1873,7 @@ static int do_simple_enter(struct char_data *ch, struct obj_data *obj, int need_
     }
   }
   if (ROOM_FLAGGED(dest_room, ROOM_TUNNEL) &&
-      num_pc_in_room(&(world[dest_room])) >= CONFIG_TUNNEL_SIZE) {
+      num_pc_in_room(droom) >= CONFIG_TUNNEL_SIZE) {
     if (CONFIG_TUNNEL_SIZE > 1)
       send_to_char(ch, "There isn't enough room for you to go there!\r\n");
     else
@@ -1977,7 +1979,7 @@ static int perform_enter_obj(struct char_data *ch, struct obj_data *obj, int nee
       if (GET_OBJ_VAL(obj, VAL_PORTAL_DEST) >= 45000 && GET_OBJ_VAL(obj, VAL_PORTAL_DEST) <= 45099) {
         struct char_data *tch, *next_v;
         int filled = FALSE;
-        for (tch = world[real_room(GET_OBJ_VAL(obj, VAL_PORTAL_DEST))].people; tch; tch = next_v) {
+        for (tch = room_by_id(GET_OBJ_VAL(obj, VAL_PORTAL_DEST))->people; tch; tch = next_v) {
           next_v = tch->next_in_room;
           if (tch) {
            filled = TRUE;

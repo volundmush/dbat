@@ -360,7 +360,7 @@ SPECIAL(gauntlet_room)  /* Jamdog - 13th Feb 2006 */
           nomob = TRUE; 
 
           /* Check the next room for players and ensure mob is waiting */ 
-          for (tch = world[real_room(gauntlet_info[i+1][1])].people; tch; tch = tch->next_in_room) 
+          for (tch = room_by_id(gauntlet_info[i+1][1])->people; tch; tch = tch->next_in_room)
           { 
             if (!IS_NPC(tch)) 
             { 
@@ -498,7 +498,7 @@ SPECIAL(gauntlet_rest)  /* Jamdog - 20th Feb 2007 */
         nomob = TRUE; 
 
         /* Check the next room for players and ensure mob is waiting */ 
-        for (tch = world[real_room(gauntlet_info[i][1])].people; tch; tch = tch->next_in_room) 
+        for (tch = room_by_id(gauntlet_info[i][1])->people; tch; tch = tch->next_in_room)
         { 
           if (!IS_NPC(tch)) 
           { 

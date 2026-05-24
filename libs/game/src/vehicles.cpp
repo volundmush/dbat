@@ -497,7 +497,7 @@ void drive_in_direction(struct char_data *ch, struct obj_data *vehicle, int dir)
 
           struct obj_data *hatch = NULL;
 
-          for (hatch = world[real_room(GET_OBJ_VAL(vehicle, 0))].contents; hatch;hatch=hatch->next_content) {
+          for (hatch = room_by_id(GET_OBJ_VAL(vehicle, 0))->contents; hatch;hatch=hatch->next_content) {
            if (GET_OBJ_TYPE(hatch) == ITEM_HATCH) {
             GET_OBJ_VAL(hatch, 3) = GET_ROOM_VNUM(IN_ROOM(vehicle));
            }
