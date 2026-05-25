@@ -1338,7 +1338,7 @@ static void do_stat_room(struct char_data *ch)
 
   sprinttype(rm->sector_type, sector_types, buf2, sizeof(buf2));
   send_to_char(ch, "Zone: [%3d], VNum: [@g%5d@n], RNum: [%5d], IDNum: [%5ld], Type: %s\r\n",
-	  zone_table[rm->zone].number, rm->number, IN_ROOM(ch),
+	  room_zone_vnum_get(rm), rm->number, IN_ROOM(ch),
           (long) rm->number + ROOM_ID_BASE, buf2);
 
   sprintbitarray(rm->room_flags, room_bits, RF_ARRAY_MAX, buf2, sizeof(buf2));
@@ -3116,35 +3116,46 @@ ACMD(do_zreset)
 
   one_argument(argument, arg);
 
-  if (*arg == '*') {
-    if (GET_ADMLEVEL(ch) < ADMLVL_VICE) {
-       send_to_char(ch, "You do not have permission to reset the entire world.\r\n");
-       return;
-    } else {
-    for (i = 0; i <= top_of_zone_table; i++) {
-     if (i < 200) {
-      reset_zone(i);
-     }
+  if (*arg == '*')
+  {
+    if (GET_ADMLEVEL(ch) < ADMLVL_VICE)
+    {
+      send_to_char(ch, "You do not have permission to reset the entire world.\r\n");
+      return;
     }
-    send_to_char(ch, "Reset world.\r\n");
-    mudlog(NRM, MAX(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), TRUE, "(GC) %s reset all MUD zones.", GET_NAME(ch));
-    log_imm_action("RESET: %s has reset all MUD zones.", GET_NAME(ch));
-    return; 
-     }
-  } else if (*arg == '.' || !*arg)
+    else
+    {
+      for (i = 0; i <= top_of_zone_table; i++)
+      {
+        if (i < 200)
+        {
+          reset_zone(i);
+        }
+      }
+      send_to_char(ch, "Reset world.\r\n");
+      mudlog(NRM, MAX(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), TRUE, "(GC) %s reset all MUD zones.", GET_NAME(ch));
+      log_imm_action("RESET: %s has reset all MUD zones.", GET_NAME(ch));
+      return;
+    }
+  }
+  else if (*arg == '.' || !*arg)
     i = char_room_get(ch)->zone;
-  else {
+  else
+  {
     j = atoi(arg);
     for (i = 0; i <= top_of_zone_table; i++)
       if (zone_table[i].number == j)
-	break;
+        break;
   }
-  if (i <= top_of_zone_table && (can_edit_zone(ch, i) || GET_ADMLEVEL(ch) > ADMLVL_IMMORT)) {
+  if (i <= top_of_zone_table && (can_edit_zone(ch, i) || GET_ADMLEVEL(ch) > ADMLVL_IMMORT))
+  {
+    struct zone_data *zi = &zone_table[i];
     reset_zone(i);
-    send_to_char(ch, "Reset zone #%d: %s.\r\n", zone_table[i].number, zone_table[i].name);
-    mudlog(NRM, MAX(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), TRUE, "(GC) %s reset zone %d (%s)", GET_NAME(ch), zone_table[i].number, zone_table[i].name);
-    log_imm_action("RESET: %s has reset zone #%d: %s.", GET_NAME(ch), zone_table[i].number, zone_table[i].name);
-  } else
+    send_to_char(ch, "Reset zone #%d: %s.\r\n", zi->number, zi->name);
+    mudlog(NRM, MAX(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), TRUE, "(GC) %s reset zone %d (%s)", GET_NAME(ch), zi->number, zi->name);
+    log_imm_action("RESET: %s has reset zone #%d: %s.", GET_NAME(ch), zi->number, zi->name);
+  }
+  else
     send_to_char(ch, "You do not have permission to reset this zone. Try %d.\r\n", GET_OLC_ZONE(ch));
 }
 
@@ -3274,60 +3285,65 @@ ACMD(do_wizutil)
 static size_t print_zone_to_buf(char *bufptr, size_t left, zone_rnum zone, int listall)
 {
   size_t tmp;
-  
-  if (listall) {
+
+  struct zone_data *zn = &zone_table[zone];
+
+  if (listall)
+  {
     int i, j, k, l, m, n, o;
     extern int top_of_trigt;
     extern struct index_data **trig_index;
     int count_shops(shop_vnum low, shop_vnum high);
     int count_guilds(guild_vnum low, guild_vnum high);
 
+    
+
     tmp = snprintf(bufptr, left,
-	"%3d %-30.30s By: %-10.10s Age: %3d; Reset: %3d (%1d); Range: %5d-%5d\r\n",
-	zone_table[zone].number, zone_table[zone].name, zone_table[zone].builders,
-	zone_table[zone].age, zone_table[zone].lifespan,
-	zone_table[zone].reset_mode,
-	zone_table[zone].bot, zone_table[zone].top);
-        i = j = k = l = m = n = o = 0;
-        
-        for (i = 0; i < top_of_world; i++)
-          if (world[i].number >= zone_table[zone].bot && world[i].number <= zone_table[zone].top)
-            j++;
+                   "%3d %-30.30s By: %-10.10s Age: %3d; Reset: %3d (%1d); Range: %5d-%5d\r\n",
+                   zn->number, zn->name, zn->builders,
+                   zn->age, zn->lifespan,
+                   zn->reset_mode,
+                   zn->bot, zn->top);
+    i = j = k = l = m = n = o = 0;
 
-        for (i = 0; i < top_of_objt; i++)
-          if (obj_index[i].vnum >= zone_table[zone].bot && obj_index[i].vnum <= zone_table[zone].top)
-            k++;
-        
-        for (i = 0; i < top_of_mobt; i++)
-          if (mob_index[i].vnum >= zone_table[zone].bot && mob_index[i].vnum <= zone_table[zone].top)
-            l++;
+    for (i = 0; i < top_of_world; i++)
+      if (world[i].number >= zn->bot && world[i].number <= zn->top)
+        j++;
 
-        m = count_shops(zone_table[zone].bot, zone_table[zone].top);
+    for (i = 0; i < top_of_objt; i++)
+      if (obj_index[i].vnum >= zn->bot && obj_index[i].vnum <= zn->top)
+        k++;
 
-        for (i = 0; i < top_of_trigt; i++)
-          if (trig_index[i]->vnum >= zone_table[zone].bot && trig_index[i]->vnum <= zone_table[zone].top)
-            n++;
+    for (i = 0; i < top_of_mobt; i++)
+      if (mob_index[i].vnum >= zn->bot && mob_index[i].vnum <= zn->top)
+        l++;
 
-        o = count_guilds(zone_table[zone].bot, zone_table[zone].top);
+    m = count_shops(zn->bot, zn->top);
 
-	tmp += snprintf(bufptr + tmp, left - tmp,
-                        "       Zone stats:\r\n"
-                        "       ---------------\r\n"
-                        "         Rooms:    %2d\r\n"
-                        "         Objects:  %2d\r\n"
-                        "         Mobiles:  %2d\r\n"
-                        "         Shops:    %2d\r\n"
-                        "         Triggers: %2d\r\n"
-                        "         Guilds:   %2d\r\n", 
-                          j, k, l, m, n, o);
-        
+    for (i = 0; i < top_of_trigt; i++)
+      if (trig_index[i]->vnum >= zn->bot && trig_index[i]->vnum <= zn->top)
+        n++;
+
+    o = count_guilds(zn->bot, zn->top);
+
+    tmp += snprintf(bufptr + tmp, left - tmp,
+                    "       Zone stats:\r\n"
+                    "       ---------------\r\n"
+                    "         Rooms:    %2d\r\n"
+                    "         Objects:  %2d\r\n"
+                    "         Mobiles:  %2d\r\n"
+                    "         Shops:    %2d\r\n"
+                    "         Triggers: %2d\r\n"
+                    "         Guilds:   %2d\r\n",
+                    j, k, l, m, n, o);
+
     return tmp;
-  } 
-  
+  }
+
   return snprintf(bufptr, left,
-	"%3d %-*s By: %-10.10s Range: %5d-%5d\r\n", zone_table[zone].number, 
-        count_color_chars(zone_table[zone].name)+30, zone_table[zone].name, 
-        zone_table[zone].builders, zone_table[zone].bot, zone_table[zone].top);
+                  "%3d %-*s By: %-10.10s Range: %5d-%5d\r\n", zn->number,
+                  count_color_chars(zn->name) + 30, zn->name,
+                  zn->builders, zn->bot, zn->top);
 }
 
 ACMD(do_show)
@@ -5293,11 +5309,13 @@ static void trg_checkload(struct char_data *ch, trig_vnum tvnum)
     send_to_char(ch, "That trigger does not exist.\r\n");
     return;
   }
+
+  struct trig_data* trg = trig_index[trnum]->proto;
  
   send_to_char(ch, "Checking load info for the %s trigger [%d] '%s':\r\n",
-                    trig_index[trnum]->proto->attach_type == MOB_TRIGGER ? "mobile" :
-                    (trig_index[trnum]->proto->attach_type == OBJ_TRIGGER ? "object" : "room"),                   
-                    tvnum, trig_index[trnum]->proto->name);
+                    trg->attach_type == MOB_TRIGGER ? "mobile" :
+                    (trg->attach_type == OBJ_TRIGGER ? "object" : "room"),                   
+                    tvnum, trg->name);
 
   for (zone=0; zone <= top_of_zone_table; zone++) {   
     for (cmd_no = 0; ZCMD2.command != 'S'; cmd_no++) {
@@ -5353,42 +5371,45 @@ static void trg_checkload(struct char_data *ch, trig_vnum tvnum)
   }  /*for zone...*/
  
   for (i = 0; i < top_of_mobt; i++) {
-    if (!mob_proto[i].proto_script)
+    struct char_data *mob = &mob_proto[i];
+    if (!mob->proto_script)
       continue;
    
-    for (tpl = mob_proto[i].proto_script;tpl;tpl = tpl->next)
+    for (tpl = mob->proto_script;tpl;tpl = tpl->next)
       if (tpl->vnum == tvnum) {
         send_to_char(ch, "mob [%5d] %s\r\n",
                          mob_index[i].vnum,
-                         mob_proto[i].short_descr);
+                         mob->short_descr);
         found = 1;
       }
  
   }
    
   for (j = 0; j < top_of_objt; j++) {
-    if (!obj_proto[j].proto_script)
+    struct obj_data *obj = &obj_proto[j];
+    if (!obj->proto_script)
       continue;
    
-    for (tpl = obj_proto[j].proto_script;tpl;tpl = tpl->next)
+    for (tpl = obj->proto_script;tpl;tpl = tpl->next)
       if (tpl->vnum == tvnum) {
         send_to_char(ch, "obj [%5d] %s\r\n",
                          obj_index[j].vnum,
-                         obj_proto[j].short_description);
+                         obj->short_description);
         found = 1;
       }
  
   }
  
   for (k = 0;k < top_of_world; k++) {
-    if (!world[k].proto_script)
+    struct room_data *room = &world[k];
+    if (!room->proto_script)
       continue;
 
-    for (tpl = world[k].proto_script;tpl;tpl = tpl->next)
+    for (tpl = room->proto_script;tpl;tpl = tpl->next)
       if (tpl->vnum == tvnum) {
         send_to_char(ch, "room[%5d] %s\r\n",
-                         world[k].number,
-                         world[k].name);
+                         room->number,
+                         room->name);
         found = 1;
       }
   }

@@ -43,7 +43,7 @@ room_rnum add_room(struct room_data *room)
     copy_room(irm, room);
     irm->people = tch;
     irm->contents = tobj;
-    add_to_save_list(zone_table[room->zone].number, SL_WLD);
+    add_to_save_list(room_zone_vnum_get(room), SL_WLD);
     log("GenOLC: add_room: Updated existing room #%d.", room->number);
     return i;
   }
@@ -125,7 +125,7 @@ room_rnum add_room(struct room_data *room)
 	W_EXIT(i, j)->to_room += (W_EXIT(i, j)->to_room >= found);
   } while (i > 0);
 
-  add_to_save_list(zone_table[room->zone].number, SL_WLD);
+  add_to_save_list(room_zone_vnum_get(room), SL_WLD);
 
   /*
    * Return what array entry we placed the new room in.
@@ -148,7 +148,7 @@ int delete_room(room_rnum rnum)
 
   room = &world[rnum];
 
-  add_to_save_list(zone_table[room->zone].number, SL_WLD);
+  add_to_save_list(room_zone_vnum_get(room), SL_WLD);
 
   /* remove from realnum lookup tree */
   htree_del(room_htree, room->number);

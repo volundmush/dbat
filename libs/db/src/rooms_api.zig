@@ -21,7 +21,12 @@ pub export fn room_vnum_set(room: *cdb.room_data, vnum: cdb.room_vnum) void {
     room.number = vnum;
 }
 
-pub export fn room_zone_get(room: *cdb.room_data) cdb.zone_vnum {
+pub export fn room_zone_get(room: *cdb.room_data) [*c]cdb.zone_data {
+    if (room.zone == cdb.NOWHERE or cdb.zone_table == null) return null;
+    return &cdb.zone_table[@intCast(room.zone)];
+}
+
+pub export fn room_zone_vnum_get(room: *cdb.room_data) cdb.zone_vnum {
     if (room.zone == cdb.NOWHERE or cdb.zone_table == null) return cdb.NOWHERE;
     return cdb.zone_table[@intCast(room.zone)].number;
 }

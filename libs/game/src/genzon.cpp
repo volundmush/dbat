@@ -41,6 +41,15 @@ zone_rnum real_zone_by_thing(room_vnum vznum)
   return (NOWHERE);
 }
 
+zone_vnum virtual_zone_by_thing(room_vnum vznum)
+{
+  zone_rnum rznum = real_zone_by_thing(vznum);
+  if (rznum != NOWHERE)
+    return zone_table[rznum].number;
+  else
+    return NOWHERE;
+}
+
 zone_rnum create_new_zone(zone_vnum vzone_num, room_vnum bottom, room_vnum top, const char **error)
 {
   FILE *fp;
@@ -384,31 +393,33 @@ int save_zone(zone_rnum zone_num)
     return FALSE;
   }
 
+  struct zone_data *zn = &zone_table[zone_num];
+
   /*
    * Print zone header to file	
    */
-  sprintascii(zbuf1, zone_table[zone_num].zone_flags[0]);
-  sprintascii(zbuf2, zone_table[zone_num].zone_flags[1]);
-  sprintascii(zbuf3, zone_table[zone_num].zone_flags[2]);
-  sprintascii(zbuf4, zone_table[zone_num].zone_flags[3]);
+  sprintascii(zbuf1, zn->zone_flags[0]);
+  sprintascii(zbuf2, zn->zone_flags[1]);
+  sprintascii(zbuf3, zn->zone_flags[2]);
+  sprintascii(zbuf4, zn->zone_flags[3]);
 
   fprintf(zfile, "@Version: %d\n", CUR_ZONE_VERSION);
   fprintf(zfile, "#%d\n"
                  "%s~\n"
                  "%s~\n"
                  "%d %d %d %d %s %s %s %s %d %d\n",
-	  zone_table[zone_num].number,
-	  (zone_table[zone_num].builders && *zone_table[zone_num].builders)
-		? zone_table[zone_num].builders : "None.",
-	  (zone_table[zone_num].name && *zone_table[zone_num].name)
-		? zone_table[zone_num].name : "undefined",
+	  zn->number,
+	  (zn->builders && *zn->builders)
+		? zn->builders : "None.",
+	  (zn->name && *zn->name)
+		? zn->name : "undefined",
           genolc_zone_bottom(zone_num),
-	  zone_table[zone_num].top,
-	  zone_table[zone_num].lifespan,
-	  zone_table[zone_num].reset_mode,
+	  zn->top,
+	  zn->lifespan,
+	  zn->reset_mode,
           zbuf1, zbuf2, zbuf3, zbuf4,
-          zone_table[zone_num].min_level,
-          zone_table[zone_num].max_level
+          zn->min_level,
+          zn->max_level
 	  );
 
 	/*
@@ -516,13 +527,13 @@ int save_zone(zone_rnum zone_num)
   }
   fputs("S\n$\n", zfile);
   fclose(zfile);
-  snprintf(oldname, sizeof(oldname), "%s%d.zon", ZON_PREFIX, zone_table[zone_num].number);
+  snprintf(oldname, sizeof(oldname), "%s%d.zon", ZON_PREFIX, zn->number);
   remove(oldname);
   rename(fname, oldname);
   
-  if (in_save_list(zone_table[zone_num].number, SL_ZON)) {
-    remove_from_save_list(zone_table[zone_num].number, SL_ZON);
-    create_world_index(zone_table[zone_num].number, "zon");
+  if (in_save_list(zn->number, SL_ZON)) {
+    remove_from_save_list(zn->number, SL_ZON);
+    create_world_index(zn->number, "zon");
     log("GenOLC: save_zone: Saving zone '%s'", oldname);
   }
   return TRUE;

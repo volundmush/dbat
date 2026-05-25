@@ -287,15 +287,15 @@ void medit_save_internally(struct descriptor_data *d)
     return;
   }
 
-
+  struct char_data* proto = &mob_proto[new_rnum];
 
   /* Update triggers */
   /* Free old proto list  */
-  if (mob_proto[new_rnum].proto_script &&
-      mob_proto[new_rnum].proto_script != OLC_SCRIPT(d)) 
-    free_proto_script(&mob_proto[new_rnum], MOB_TRIGGER);   
+  if (proto->proto_script &&
+      proto->proto_script != OLC_SCRIPT(d)) 
+    free_proto_script(proto, MOB_TRIGGER);   
 
-  mob_proto[new_rnum].proto_script = OLC_SCRIPT(d);
+  proto->proto_script = OLC_SCRIPT(d);
 
   /* this takes care of the mobs currently in-game */
   for (mob = character_list; mob; mob = mob->next) {
@@ -307,7 +307,7 @@ void medit_save_internally(struct descriptor_data *d)
       extract_script(mob, MOB_TRIGGER);
 
     free_proto_script(mob, MOB_TRIGGER);
-    copy_proto_script(&mob_proto[new_rnum], mob, MOB_TRIGGER);
+    copy_proto_script(proto, mob, MOB_TRIGGER);
     assign_triggers(mob, MOB_TRIGGER);
   }
   /* end trigger update */  

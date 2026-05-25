@@ -141,18 +141,20 @@ ACMD(do_oasis_redit)
     d->olc = NULL;
     return;
   }
+
+  struct zone_data *zone = &zone_table[OLC_ZNUM(d)];
   
   /* Make sure the builder is allowed to modify this zone. */
   if (!can_edit_zone(ch, OLC_ZNUM(d)) && remodeling == FALSE) {
-    send_cannot_edit(ch, zone_table[OLC_ZNUM(d)].number);
+    send_cannot_edit(ch, zone->number);
     free(d->olc);
     d->olc = NULL;
     return;
   }
   
   if (save) {
-    send_to_char(ch, "Saving all rooms in zone %d.\r\n", zone_table[OLC_ZNUM(d)].number);
-    mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), TRUE, "OLC: %s saves room info for zone %d.", GET_NAME(ch), zone_table[OLC_ZNUM(d)].number);
+    send_to_char(ch, "Saving all rooms in zone %d.\r\n", zone->number);
+    mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), TRUE, "OLC: %s saves room info for zone %d.", GET_NAME(ch), zone->number);
     
     /* Save the rooms. */
     save_rooms(OLC_ZNUM(d));
@@ -176,7 +178,7 @@ ACMD(do_oasis_redit)
   SET_BIT_AR(PLR_FLAGS(ch), PLR_WRITING);
   
   mudlog(BRF, ADMLVL_IMMORT, TRUE, "OLC: %s starts editing zone %d allowed zone %d",
-    GET_NAME(ch), zone_table[OLC_ZNUM(d)].number, GET_OLC_ZONE(ch));
+    GET_NAME(ch), zone->number, GET_OLC_ZONE(ch));
 }
 
 void redit_setup_new(struct descriptor_data *d)

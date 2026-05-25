@@ -52,7 +52,7 @@ int add_mobile(struct char_data *mob, mob_vnum vnum)
       if (rnum == live_mob->nr)
         update_mobile_strings(live_mob, &mob_proto[rnum]);
 
-    add_to_save_list(zone_table[real_zone_by_thing(vnum)].number, SL_MOB);
+    add_to_save_list(virtual_zone_by_thing(vnum), SL_MOB);
     log("GenOLC: add_mobile: Updated existing mobile #%d.", vnum);
     return rnum;
   }
@@ -118,7 +118,7 @@ int add_mobile(struct char_data *mob, mob_vnum vnum)
     for (guild = 0; guild <= top_guild; guild++)
       GM_TRAINER(guild) += (GM_TRAINER(guild) != NOTHING && GM_TRAINER(guild) >= found);
 
-  add_to_save_list(zone_table[real_zone_by_thing(vnum)].number, SL_MOB);
+  add_to_save_list(virtual_zone_by_thing(vnum), SL_MOB);
   return found;
 }
 
@@ -171,7 +171,7 @@ int delete_mobile(mob_rnum refpt)
   RECREATE(mob_index, struct index_data, top_of_mobt + 1);
   RECREATE(mob_proto, struct char_data, top_of_mobt + 1);
 
-  add_to_save_list(zone_table[real_zone_by_thing(vnum)].number, SL_MOB);
+  add_to_save_list(virtual_zone_by_thing(vnum), SL_MOB);
 
   /* Update live mobile rnums.  */
   for (live_mob = character_list; live_mob; live_mob = live_mob->next)
@@ -201,7 +201,7 @@ int delete_mobile(mob_rnum refpt)
   /* Update shop keepers.  */
   if (shop_index)
     for (counter = 0; counter <= top_shop; counter++) {
-      zone_vnum zone = zone_table[real_zone_by_thing(counter)].number;
+      zone_vnum zone = virtual_zone_by_thing(counter);
       /* Find the shop for this keeper and reset it's keeper to
        * -1 to keep the shop so it could be assigned to someone else */
       if (SHOP_KEEPER(counter) == refpt) {
@@ -217,12 +217,12 @@ int delete_mobile(mob_rnum refpt)
   /* Update guild masters */
   if (guild_index)
     for (counter = 0; counter <= top_guild; counter++) {
-      zone_vnum zone = zone_table[real_zone_by_thing(counter)].number;
+      zone_vnum zone = virtual_zone_by_thing(counter);
       /* Find the guild for this trainer and reset it's trainer to
        * -1 to keep the guild so it could be assigned to someone else */
       if (GM_TRAINER(counter) == refpt) {
         GM_TRAINER(counter) = NOTHING;
-        zone_vnum zone = zone_table[real_zone_by_thing(counter)].number;
+        zone_vnum zone = virtual_zone_by_thing(counter);
         if(zone != last_saved_zone) {
           add_to_save_list(zone, SL_GLD);
           last_saved_zone = zone;
@@ -294,18 +294,19 @@ int free_mobile(struct char_data *mob)
     /* free script proto list */
     free_proto_script(mob, MOB_TRIGGER);
    } else {	/* Prototyped mobile. */
-    if (mob->name && mob->name != mob_proto[i].name)
+    struct char_data *proto = &mob_proto[i];
+    if (mob->name && mob->name != proto->name)
       free(mob->name);
-    if (mob->title && mob->title != mob_proto[i].title)
+    if (mob->title && mob->title != proto->title)
       free(mob->title);
-    if (mob->short_descr && mob->short_descr != mob_proto[i].short_descr)
+    if (mob->short_descr && mob->short_descr != proto->short_descr)
       free(mob->short_descr);
-    if (mob->long_descr && mob->long_descr != mob_proto[i].long_descr)
+    if (mob->long_descr && mob->long_descr != proto->long_descr)
       free(mob->long_descr);
-    if (mob->description && mob->description != mob_proto[i].description)
+    if (mob->description && mob->description != proto->description)
       free(mob->description);
     /* free script proto list if it's not the prototype */
-    if (mob->proto_script && mob->proto_script != mob_proto[i].proto_script)
+    if (mob->proto_script && mob->proto_script != proto->proto_script)
       free_proto_script(mob, MOB_TRIGGER);
   }
   while (mob->affected)
@@ -336,13 +337,15 @@ int save_mobiles(zone_rnum zone_num)
     return FALSE;
   }
 
-  snprintf(mobfname, sizeof(mobfname), "%s%d.new", MOB_PREFIX, zone_table[zone_num].number);
+  struct zone_data *zone = &zone_table[zone_num];
+
+  snprintf(mobfname, sizeof(mobfname), "%s%d.new", MOB_PREFIX, zone->number);
   if ((mobfd = fopen(mobfname, "w")) == NULL) {
     mudlog(BRF, ADMLVL_GOD, TRUE, "SYSERR: GenOLC: Cannot open mob file for writing.");
     return FALSE;
   }
 
-  for (i = genolc_zone_bottom(zone_num); i <= zone_table[zone_num].top; i++) {
+  for (i = genolc_zone_bottom(zone_num); i <= zone->top; i++) {
     if ((rmob = real_mobile(i)) == NOBODY)
       continue;
     check_mobile_strings(&mob_proto[rmob]);
@@ -352,13 +355,13 @@ int save_mobiles(zone_rnum zone_num)
   fputs("$\n", mobfd);
   written = ftell(mobfd);
   fclose(mobfd);
-  snprintf(usedfname, sizeof(usedfname), "%s%d.mob", MOB_PREFIX, zone_table[zone_num].number);
+  snprintf(usedfname, sizeof(usedfname), "%s%d.mob", MOB_PREFIX, zone->number);
   remove(usedfname);
   rename(mobfname, usedfname);
   
-  if (in_save_list(zone_table[zone_num].number, SL_MOB)) {
-    remove_from_save_list(zone_table[zone_num].number, SL_MOB);
-    create_world_index(zone_table[zone_num].number, "mob");
+  if (in_save_list(zone->number, SL_MOB)) {
+    remove_from_save_list(zone->number, SL_MOB);
+    create_world_index(zone->number, "mob");
     log("GenOLC: save_mobiles: Saving mobiles '%s'", usedfname);
   }
   return written;
