@@ -6,7 +6,7 @@
             "type": "lldb",
             "request": "launch",
             "program": "${workspaceFolder}/zig-out/bin/dbat",
-            "args": [],
+            "envFile": "${workspaceFolder}/.env",
             "cwd": "${workspaceFolder}",
             "terminal": "integrated",
             "breakpointMode": "file"
