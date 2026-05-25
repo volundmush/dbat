@@ -3728,7 +3728,7 @@ static void list_char_to_char(struct char_data *list, struct char_data *ch)
       list_one_char(i, ch);
       send_to_char(ch, "@n");
     } /* processed a character we can see */
-    else if (IS_DARK(IN_ROOM(ch)) && !CAN_SEE_IN_DARK(ch) &&
+    else if (IS_DARK(char_room_get(ch)) && !CAN_SEE_IN_DARK(ch) &&
            AFF_FLAGGED(i, AFF_INFRAVISION))
       send_to_char(ch, "@wYou see a pair of glowing red eyes looking your way.@n\r\n");
   } /* loop through all characters in room */
@@ -3858,7 +3858,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
     send_to_char(ch, "You can't see a damned thing, your eyes are closed!\r\n");
     return;
   }
-  if (IS_DARK(IN_ROOM(ch)) && !CAN_SEE_IN_DARK(ch) && !PLR_FLAGGED(ch, PLR_AURALIGHT)) {
+  if (IS_DARK(char_room_get(ch)) && !CAN_SEE_IN_DARK(ch) && !PLR_FLAGGED(ch, PLR_AURALIGHT)) {
     send_to_char(ch, "It is pitch black...\r\n");
     return;
   }
@@ -3885,7 +3885,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
         return;
     } else if (!IS_SET(exit->exit_info, EX_CLOSED)) {
       door_found = true;
-      const char *destination_name = IS_DARK(exit->to_room) && !CAN_SEE_IN_DARK(ch) && !has_light ? "@bToo dark to tell.@w" : room_name_get(destination);
+      const char *destination_name = IS_DARK(exit_dest_get(exit)) && !CAN_SEE_IN_DARK(ch) && !has_light ? "@bToo dark to tell.@w" : room_name_get(destination);
       snprintf(line, sizeof(exit_lines[door]), "@c%-9s @D-@w %s\r\n", direction, destination_name);
     } else if (CONFIG_DISP_CLOSED_DOORS && !IS_SET(exit->exit_info, EX_SECRET)) {
       door_found = true;
@@ -4158,7 +4158,7 @@ void look_at_room(room_rnum target_room, struct char_data *ch, int ignore_brief)
   if (!ch->desc)
     return;
 
-  if (IS_DARK(target_room) && !CAN_SEE_IN_DARK(ch) && !PLR_FLAGGED(ch, PLR_AURALIGHT)) {
+  if (IS_DARK(trm) && !CAN_SEE_IN_DARK(ch) && !PLR_FLAGGED(ch, PLR_AURALIGHT)) {
     send_to_char(ch, "It is pitch black...\r\n");
     return;
   } else if (AFF_FLAGGED(ch, AFF_BLIND)) {
@@ -4287,13 +4287,13 @@ static void look_in_obj(struct char_data *ch, char *arg)
     if (GET_OBJ_VAL(obj, VAL_PORTAL_APPEAR) < 0) {
       /* You can look through the portal to the destination */
       /* where does this lead to? */
-      room_rnum portal_dest = real_room(GET_OBJ_VAL(obj, VAL_PORTAL_DEST)); 
-      if (portal_dest == NOWHERE) {
+      struct room_data* portal_dest = room_by_id(GET_OBJ_VAL(obj, VAL_PORTAL_DEST));
+      if (!portal_dest) {
         send_to_char(ch, "You see nothing but infinite darkness...\r\n");
       } else if (IS_DARK(portal_dest) && !CAN_SEE_IN_DARK(ch) && !PLR_FLAGGED(ch, PLR_AURALIGHT)) {
         send_to_char(ch, "You see nothing but infinite darkness...\r\n");
       } else {
-       send_to_char(ch, "After seconds of concentration you see the image of %s.\r\n", world[portal_dest].name);
+       send_to_char(ch, "After seconds of concentration you see the image of %s.\r\n", portal_dest->name);
       }
     } else if (GET_OBJ_VAL(obj, VAL_PORTAL_APPEAR) < MAX_PORTAL_TYPES) {
      /* display the appropriate description from the list of descriptions
@@ -4309,10 +4309,11 @@ static void look_in_obj(struct char_data *ch, char *arg)
     else if (GET_OBJ_VAL(obj, VAL_VEHICLE_APPEAR) < 0) {
       /* You can look inside the vehicle */
       /* where does this lead to? */
-      room_rnum vehicle_inside = real_room(GET_OBJ_VAL(obj, VAL_VEHICLE_ROOM)); 
+      room_rnum vehicle_inside = real_room(GET_OBJ_VAL(obj, VAL_VEHICLE_ROOM));
+      struct room_data *vehicle_inside_room = &world[vehicle_inside];
       if (vehicle_inside == NOWHERE) {
         send_to_char(ch, "You cannot see inside that.\r\n");
-      } else if (IS_DARK(vehicle_inside) && !CAN_SEE_IN_DARK(ch) && !PLR_FLAGGED(ch, PLR_AURALIGHT)) {
+      } else if (IS_DARK(vehicle_inside_room) && !CAN_SEE_IN_DARK(ch) && !PLR_FLAGGED(ch, PLR_AURALIGHT)) {
         send_to_char(ch, "It is pitch black...\r\n");
       } else {
         send_to_char(ch, "You look inside and see:\r\n");
@@ -4906,7 +4907,7 @@ ACMD(do_look)
     send_to_char(ch, "You can't see a damned thing, you're blind!\r\n");
   else if (PLR_FLAGGED(ch, PLR_EYEC))
       send_to_char(ch, "You can't see a damned thing, your eyes are closed!\r\n");
-  else if (IS_DARK(IN_ROOM(ch)) && !CAN_SEE_IN_DARK(ch) && !PLR_FLAGGED(ch, PLR_AURALIGHT)) {
+  else if (IS_DARK(char_room_get(ch)) && !CAN_SEE_IN_DARK(ch) && !PLR_FLAGGED(ch, PLR_AURALIGHT)) {
     send_to_char(ch, "It is pitch black...\r\n");
     list_char_to_char(char_room_get(ch)->people, ch);	/* glowing red eyes */
   } else {
@@ -7665,7 +7666,7 @@ ACMD(do_scan)
     }
   for(i=0;i<10;i++){ 
     if(EXIT(ch, i)) { 
-      if(IS_DARK(ch->in_room) && (GET_ADMLEVEL(ch) < ADMLVL_IMMORT) && 
+      if(IS_DARK(char_room_get(ch)) && (GET_ADMLEVEL(ch) < ADMLVL_IMMORT) && 
           (!AFF_FLAGGED(ch, AFF_INFRAVISION))){ 
         send_to_char(ch,"%s: DARK\n\r",dirnames[i]); 
         continue; 
@@ -7690,7 +7691,7 @@ ACMD(do_scan)
           newroom = _2ND_EXIT(ch, i)->to_room; 
 
           if ((newroom != NOWHERE) && (!IS_SET(_2ND_EXIT(ch, i)->exit_info, EX_CLOSED)) ) { 
-            if (!IS_DARK(_2ND_EXIT(ch, i)->to_room)) { 
+            if (!IS_DARK(exit_dest_get(_2ND_EXIT(ch, i)))) { 
               send_to_char(ch, "@w-----------------------------------------@n\r\n");
               send_to_char(ch,"          %sFar %s: %s %s\n\r", CCCYN(ch, C_NRM), dirnames[i], nrm->name ? nrm->name : "You don't think you saw what you just saw.", CCNRM(ch, C_NRM) ); 
               send_to_char(ch, "@W          -----------------          @n\r\n");

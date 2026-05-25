@@ -249,33 +249,34 @@ void char_to_room(struct char_data *ch, room_rnum room)
 {
   int i;
 
-  if (ch == NULL || room == NOWHERE || room > top_of_world)
-    log("SYSERR: Illegal value(s) passed to char_to_room. (Room: %d/%d Ch: %p",
+  if (ch == NULL || room == NOWHERE || room > top_of_world) {
+        log("SYSERR: Illegal value(s) passed to char_to_room. (Room: %d/%d Ch: %p",
 		room, top_of_world, ch);
-  else {
-    ch->next_in_room = world[room].people;
-    world[room].people = ch;
-    IN_ROOM(ch) = room;
+    return;
+  }
+  struct room_data* rm = &world[room];
+  ch->next_in_room = rm->people;
+  rm->people = ch;
+  IN_ROOM(ch) = room;
 
-    for (i = 0; i < NUM_WEARS; i++)
-      if (GET_EQ(ch, i))
-        if (GET_OBJ_TYPE(GET_EQ(ch, i)) == ITEM_LIGHT)
-	  if (GET_OBJ_VAL(GET_EQ(ch, i), VAL_LIGHT_HOURS))
-	    world[room].light++;
+  for (i = 0; i < NUM_WEARS; i++)
+    if (GET_EQ(ch, i))
+      if (GET_OBJ_TYPE(GET_EQ(ch, i)) == ITEM_LIGHT)
+  if (GET_OBJ_VAL(GET_EQ(ch, i), VAL_LIGHT_HOURS))
+    rm->light++;
 
-	if (PLR_FLAGGED(ch, PLR_AURALIGHT))
-       world[room].light++;	
-	   
-    /* Stop fighting now, if we left. */
-    if (FIGHTING(ch) && IN_ROOM(ch) != IN_ROOM(FIGHTING(ch)) && !AFF_FLAGGED(ch, AFF_PURSUIT)) {
-      stop_fighting(FIGHTING(ch));
-      stop_fighting(ch);
-    }
-    if (!IS_NPC(ch)) {
-     if (PRF_FLAGGED(ch, PRF_ARENAWATCH)) {
-      REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_ARENAWATCH);
-      ARENA_IDNUM(ch) = -1;
-     }
+if (PLR_FLAGGED(ch, PLR_AURALIGHT))
+    rm->light++;	
+    
+  /* Stop fighting now, if we left. */
+  if (FIGHTING(ch) && IN_ROOM(ch) != IN_ROOM(FIGHTING(ch)) && !AFF_FLAGGED(ch, AFF_PURSUIT)) {
+    stop_fighting(FIGHTING(ch));
+    stop_fighting(ch);
+  }
+  if (!IS_NPC(ch)) {
+    if (PRF_FLAGGED(ch, PRF_ARENAWATCH)) {
+    REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_ARENAWATCH);
+    ARENA_IDNUM(ch) = -1;
     }
   }
 }

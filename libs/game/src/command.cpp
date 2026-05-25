@@ -640,9 +640,11 @@ int special(struct char_data *ch, int cmd, char *arg)
   struct char_data *k;
   int j;
 
+  struct room_data* room = char_room_get(ch);
+
   /* special in room? */
-  if (GET_ROOM_SPEC(IN_ROOM(ch)) != NULL)
-    if (GET_ROOM_SPEC(IN_ROOM(ch)) (ch, world + IN_ROOM(ch), cmd, arg))
+  if (room->func)
+    if (room->func(ch, room, cmd, arg))
       return (1);
 
   /* special in equipment list? */

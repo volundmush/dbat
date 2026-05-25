@@ -782,27 +782,29 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check)
     return (0);
   }
 
+  struct room_direction_data *ex = EXIT(ch, dir);
+
   /* Check if the character needs a skill check to go that way. */
-  if (EXIT(ch, dir)->dcskill != 0) {
-    if (EXIT(ch, dir)->dcmove > roll_skill(ch, EXIT(ch, dir)->dcskill)) {
-      send_to_char(ch, "Your skill in %s isn't enough to move that way!\r\n", spell_info[EXIT(ch, dir)->dcskill].name);
+  if (ex->dcskill != 0) {
+    if (ex->dcmove > roll_skill(ch, ex->dcskill)) {
+      send_to_char(ch, "Your skill in %s isn't enough to move that way!\r\n", spell_info[ex->dcskill].name);
       /* A failed skill check still spends the movement points! */
       if (!ADM_FLAGGED(ch, ADM_WALKANYWHERE) && !IS_NPC(ch) && !AFF_FLAGGED(ch, AFF_FLYING))
       decCurST(ch, need_movement);
       return (0);
     } else {
-      send_to_char(ch, "Your skill in %s aids in your movement.\r\n", spell_info[EXIT(ch, dir)->dcskill].name);
+      send_to_char(ch, "Your skill in %s aids in your movement.\r\n", spell_info[ex->dcskill].name);
     }
   }
 
   if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_ATRIUM)) {
-    if (!House_can_enter(ch, GET_ROOM_VNUM(EXIT(ch, dir)->to_room))) {
+    if (!House_can_enter(ch, GET_ROOM_VNUM(ex->to_room))) {
       send_to_char(ch, "That's private property -- no trespassing!\r\n");
       return (0);
     }
   }
-  if (ROOM_FLAGGED(EXIT(ch, dir)->to_room, ROOM_TUNNEL) &&
-      (num_pc_in_room(&(world[EXIT(ch, dir)->to_room])) >= CONFIG_TUNNEL_SIZE)) {
+  if (ROOM_FLAGGED(ex->to_room, ROOM_TUNNEL) &&
+      (num_pc_in_room(exit_dest_get(ex)) >= CONFIG_TUNNEL_SIZE)) {
     if (CONFIG_TUNNEL_SIZE > 1)
       send_to_char(ch, "There isn't enough room for you to go there!\r\n");
     else
@@ -810,7 +812,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check)
     return (0);
   }
   /* Mortals and low level gods cannot enter greater god rooms. */
-  if (ROOM_FLAGGED(EXIT(ch, dir)->to_room, ROOM_GODROOM) &&
+  if (ROOM_FLAGGED(ex->to_room, ROOM_GODROOM) &&
 	GET_ADMLEVEL(ch) < ADMLVL_GRGOD) {
     send_to_char(ch, "You aren't godly enough to use that room!\r\n");
     return (0);
@@ -818,7 +820,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check)
 
   /******* Zone flag checks *******/
 
-  rm = &world[EXIT(ch, dir)->to_room];
+  rm = exit_dest_get(ex);
 
   if (!IS_NPC(ch) && (GET_ADMLEVEL(ch) < ADMLVL_IMMORT) &&
     (GET_LEVEL(ch) < ZONE_MINLVL(rm->zone)) && (ZONE_MINLVL(rm->zone) > 0)) {

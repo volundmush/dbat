@@ -4903,7 +4903,7 @@ bool char_can_go_dir(struct char_data *ch, int dir) {
 #define SELF(sub, obj)  ((sub) == (obj))
 
 #define LIGHT_OK(sub)	(!AFF_FLAGGED(sub, AFF_BLIND) && !PLR_FLAGGED(sub, PLR_EYEC) && \
-   (IS_LIGHT(IN_ROOM(sub)) || AFF_FLAGGED((sub), AFF_INFRAVISION) || (IS_MUTANT(sub) && HAS_GENOME(sub, 4)) || PLR_FLAGGED(sub, PLR_AURALIGHT)) )
+   (IS_LIGHT(char_room_get(sub)) || AFF_FLAGGED((sub), AFF_INFRAVISION) || (IS_MUTANT(sub) && HAS_GENOME(sub, 4)) || PLR_FLAGGED(sub, PLR_AURALIGHT)) )
 
 #define INVIS_OK(sub, obj) \
  (!AFF_FLAGGED((obj),AFF_INVISIBLE) || AFF_FLAGGED(sub,AFF_DETECT_INVIS))

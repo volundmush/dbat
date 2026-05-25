@@ -762,7 +762,7 @@ ACMD(do_drive)
     send_to_char(ch, "@wYou can't see anything but stars!\r\n");
   } else if (AFF_FLAGGED(ch, AFF_BLIND)) {
     send_to_char(ch, "@wYou can't see a damned thing, you're blind!\r\n");
-  } else if (IS_DARK(IN_ROOM(ch)) && !CAN_SEE_IN_DARK(ch)) {
+  } else if (IS_DARK(char_room_get(ch)) && !CAN_SEE_IN_DARK(ch)) {
     send_to_char(ch, "@wIt is pitch black...\r\n");
   } else if (!(controls = find_control(ch) )) {
     send_to_char(ch,"@wYou have nothing to control here!\r\n");

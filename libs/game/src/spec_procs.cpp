@@ -195,7 +195,7 @@ bool check_mob_in_room(mob_vnum mob, room_vnum room)
 
   for (i = character_list; i; i = i->next) 
     if (GET_MOB_VNUM(i) == mob) 
-      if (world[i->in_room].number == room) found=TRUE; 
+      if (char_room_vnum_get(i) == room) found=TRUE; 
 
   return found; 
 } 
@@ -205,10 +205,9 @@ bool check_obj_in_room(obj_vnum obj, room_vnum room)
 
   struct obj_data *i, *list; 
   bool found=FALSE; 
-  room_rnum r_room; 
+  struct room_data *r_room = room_by_id(room);
 
-  r_room   = real_room(room); 
-  list = world[r_room].contents; 
+  list = r_room->contents; 
 
   for (i = list; i; i = i->next_content) 
   { 

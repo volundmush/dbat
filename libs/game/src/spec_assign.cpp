@@ -45,10 +45,10 @@ void ASSIGNOBJ(obj_vnum obj, SPECIAL(fname))
 
 void ASSIGNROOM(room_vnum room, SPECIAL(fname))
 {
-  room_rnum rnum;
+  struct room_data* rm = room_by_id(room);
 
-  if ((rnum = real_room(room)) != NOWHERE)
-    world[rnum].func = fname;
+  if (rm)
+    rm->func = fname;
   else if (!mini_mud)
     log("SYSERR: Attempt to assign spec to non-existant room #%d", room);
 }
