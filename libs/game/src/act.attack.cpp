@@ -66,7 +66,7 @@ ACMD(do_lightgrenade)
    return;
   }
 
-   if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_PEACEFUL)) {
+   if (room_flagged(char_room_get(ch), ROOM_PEACEFUL)) {
     send_to_char(ch, "This room just has such a peaceful, easy feeling...\r\n");
     return;
    }
@@ -1246,8 +1246,8 @@ ACMD(do_zen)
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-     if (ROOM_DAMAGE(IN_ROOM(ch)) <= 95) {
-       ROOM_DAMAGE(IN_ROOM(ch)) += 5;
+     if (room_dmg_get(char_room_get(ch)) <= 95) {
+       room_dmg_mod(char_room_get(ch), 5);
      }
      improve_skill(vict, SKILL_DODGE, 0);
 
@@ -1575,8 +1575,8 @@ ACMD(do_malice)
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-     if (ROOM_DAMAGE(IN_ROOM(ch)) <= 80) {
-       ROOM_DAMAGE(IN_ROOM(ch)) += 20;
+     if (room_dmg_get(char_room_get(ch)) <= 80) {
+       room_dmg_mod(char_room_get(ch), 20);
      }
      improve_skill(vict, SKILL_DODGE, 0);
 
@@ -1735,7 +1735,7 @@ ACMD(do_nova)
    return;
   }
 
-   if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_PEACEFUL)) {
+   if (room_flagged(char_room_get(ch), ROOM_PEACEFUL)) {
     send_to_char(ch, "This room just has such a peaceful, easy feeling...\r\n");
     return;
    }
@@ -2577,7 +2577,7 @@ ACMD(do_throw)
     send_to_char(ch, "That is broken and useless to throw!\r\n");
     return;
    }
-   if (GET_OBJ_WEIGHT(obj) + ROOM_GRAVITY(IN_ROOM(ch)) > CAN_CARRY_W(ch)) {
+   if (GET_OBJ_WEIGHT(obj) + room_gravity_get(char_room_get(ch)) > CAN_CARRY_W(ch)) {
     send_to_char(ch, "The gravity has made that too heavy for you to throw!\r\n");
     return;
    }
@@ -2586,7 +2586,7 @@ ACMD(do_throw)
     handle_cooldown(ch, 5);
     improve_skill(ch, SKILL_THROW, 0);
     damage = ((GET_OBJ_WEIGHT(obj) / 3) * (GET_STR(ch)) * (GET_CHA(ch) / 3)) + (GET_MAX_HIT(ch) * 0.01);
-    damage += (damage * 0.01) * (ROOM_GRAVITY(IN_ROOM(ch)) / 4);
+    damage += (damage * 0.01) * (room_gravity_get(char_room_get(ch)) / 4);
 
     if (GET_PREFERENCE(ch) == PREFERENCE_THROWING) {
      chance -= chance * 0.25;
@@ -2620,7 +2620,7 @@ ACMD(do_throw)
      } else if (GET_OBJ_VAL(obj, VAL_WEAPON_DAMTYPE) == TYPE_BLAST - TYPE_HIT) {
       wtype = 5;
       damage = ((GET_OBJ_WEIGHT(obj) * GET_STR(ch)) * (GET_CHA(ch) / 3)) + (GET_MAX_HIT(ch) * 0.01);
-      damage += ROOM_GRAVITY(IN_ROOM(ch)) * (ROOM_GRAVITY(IN_ROOM(ch)) / 2);
+      damage += room_gravity_get(char_room_get(ch)) * (room_gravity_get(char_room_get(ch)) / 2);
      } else {
       wtype = 6;
      }
@@ -2865,7 +2865,7 @@ ACMD(do_throw)
     send_to_char(ch, "You do not have enough stamina to do it...\r\n");
     return;
    }
-   if (GET_PC_WEIGHT(tch) + ROOM_GRAVITY(IN_ROOM(ch)) > CAN_CARRY_W(ch)) {
+   if (GET_PC_WEIGHT(tch) + room_gravity_get(char_room_get(ch)) > CAN_CARRY_W(ch)) {
     send_to_char(ch, "The gravity has made them too heavy for you to throw!\r\n");
     return;
    }
@@ -2882,7 +2882,7 @@ ACMD(do_throw)
     handle_cooldown(ch, 5);
     improve_skill(ch, SKILL_THROW, 0);
     damage = ((GET_PC_WEIGHT(tch) * GET_STR(ch)) * (GET_CHA(ch) / 3)) + (GET_MAX_HIT(ch) / 100);
-    damage += ROOM_GRAVITY(IN_ROOM(ch)) * (ROOM_GRAVITY(IN_ROOM(ch)) / 2);
+    damage += room_gravity_get(char_room_get(ch)) * (room_gravity_get(char_room_get(ch)) / 2);
     perc = init_skill(ch, SKILL_THROW);
     perc2 = init_skill(vict, SKILL_DODGE);
     prob = rand_number(1, 106);
@@ -3407,8 +3407,8 @@ ACMD(do_spike)
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-     if (ROOM_DAMAGE(IN_ROOM(ch)) <= 95) {
-       ROOM_DAMAGE(IN_ROOM(ch)) += 5;
+     if (room_dmg_get(char_room_get(ch)) <= 95) {
+       room_dmg_mod(char_room_get(ch), 5);
      }
       if (GET_SKILL_PERF(ch, SKILL_WSPIKE) == 3 && attperc > minimum) {
        pcost(ch, attperc - 0.05, 0);
@@ -4144,8 +4144,8 @@ ACMD(do_breaker)
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-     if (ROOM_DAMAGE(IN_ROOM(ch)) <= 95) {
-       ROOM_DAMAGE(IN_ROOM(ch)) += 5;
+     if (room_dmg_get(char_room_get(ch)) <= 95) {
+       room_dmg_mod(char_room_get(ch), 5);
      }
 
      pcost(ch, attperc, 0);

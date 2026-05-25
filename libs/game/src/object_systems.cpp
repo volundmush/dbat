@@ -34,7 +34,7 @@ void broken_update()
     grav_change = TRUE;
    }
    if (grav_change == TRUE) {
-    ROOM_GRAVITY(IN_ROOM(k)) = rand_gravity[grav_roll];
+    room_gravity_set(obj_room_get(k), rand_gravity[grav_roll]);
     GET_OBJ_WEIGHT(k) = rand_gravity[grav_roll];
     send_to_room(IN_ROOM(k), "@RThe gravity generator malfunctions! The gravity level has changed!@n\r\n");
    }

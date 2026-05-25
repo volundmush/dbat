@@ -511,7 +511,7 @@ void mob_taunt(struct char_data *ch)
 
  int message = 1;
 
- if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_SPACE)) { /* In space.... nobody cares. */
+ if (room_flagged(char_room_get(ch), ROOM_SPACE)) { /* In space.... nobody cares. */
   return;
  }
 
@@ -525,7 +525,7 @@ void mob_taunt(struct char_data *ch)
   return;
  }
 
- if (!IS_HUMANOID(ch) && !SUNKEN(IN_ROOM(ch))) { /* They are an animal and they are not in the water. */
+ if (!IS_HUMANOID(ch) && !room_is_sunken(char_room_get(ch))) { /* They are an animal and they are not in the water. */
   message = rand_number(1, 12);
   switch (message) { /* Display the appropriate message. */
    case 1:
@@ -610,7 +610,7 @@ void mob_taunt(struct char_data *ch)
   }
  } else if (!MOB_FLAGGED(ch, MOB_DUMMY)) { /* They are intelligent */
   message = rand_number(1, 10);
-  if (!SUNKEN(IN_ROOM(ch))) {
+  if (!room_is_sunken(char_room_get(ch))) {
    if (AFF_FLAGGED(ch, AFF_FLYING)) { /* They are flying */
     switch (message) {
      case 1:

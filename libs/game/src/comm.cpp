@@ -2870,7 +2870,7 @@ void send_to_planet(int type, int planet, const char *messg, ...)
 
     if (STATE(i) != CON_PLAYING || i->character == NULL)
       continue;
-    if (!AWAKE(i->character) || !ROOM_FLAGGED(IN_ROOM(i->character), planet))
+    if (!AWAKE(i->character) || !room_flagged(char_room_get(i->character), planet))
       continue;
     else {
      if (type == 0) {
@@ -3141,7 +3141,7 @@ char *act(const char *str, int hide_invisible, struct char_data *ch,
       if (!i->connected && i->character && 
          !PRF_FLAGGED(i->character, PRF_NOGOSS) && 
          !PLR_FLAGGED(i->character, PLR_WRITING) && 
-         !ROOM_FLAGGED(IN_ROOM(i->character), ROOM_SOUNDPROOF)) { 
+         !room_flagged(char_room_get(i->character), ROOM_SOUNDPROOF)) { 
 
         sprintf(buf, "@y%s@n", str);
         perform_act(buf, ch, obj, vict_obj, i->character);

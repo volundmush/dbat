@@ -658,8 +658,9 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check)
   }
 
   int willfall = FALSE;
+  int sect = room_sector_type_get(char_room_get(ch));
   /* if this room or the one we're going to needs flight, check for it */
-  if ((SECT(IN_ROOM(ch)) == SECT_FLYING) || (SECT(EXIT(ch, dir)->to_room) == SECT_FLYING)) {
+  if ((sect == SECT_FLYING) || (room_sector_type_get(exit_dest_get(EXIT(ch, dir))) == SECT_FLYING)) {
     if (!has_flight(ch)) {
      if (dir != 4) {
       willfall = TRUE;
@@ -670,7 +671,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check)
     }
   }
 
-  if (((SECT(IN_ROOM(ch)) == SECT_WATER_NOSWIM) || (SECT(EXIT(ch, dir)->to_room) == SECT_WATER_NOSWIM)) && IS_HUMANOID(ch)) {
+  if (((sect == SECT_WATER_NOSWIM) || (room_sector_type_get(exit_dest_get(EXIT(ch, dir))) == SECT_WATER_NOSWIM)) && IS_HUMANOID(ch)) {
     if (IS_KANASSAN(ch) && !has_flight(ch)) {
       act("@CYou swim swiftly.@n", TRUE, ch, 0, 0, TO_CHAR);
       act("@c$n@C swims swiftly.@n", TRUE, ch, 0, 0, TO_ROOM);
@@ -688,7 +689,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check)
     }
   }
 
-  if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_SPACE)) {
+  if (room_flagged(char_room_get(ch), ROOM_SPACE)) {
    if (!IS_ANDROID(ch)) {
     if (!check_swim(ch)) {
      return (0);
@@ -696,16 +697,16 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check)
    }
   }
 
-  if (ROOM_EFFECT(EXIT(ch, dir)->to_room) == 6 && !IS_HUMANOID(ch) && IS_NPC(ch)) {
+  if (room_geffect_get(exit_dest_get(EXIT(ch, dir))) == 6 && !IS_HUMANOID(ch) && IS_NPC(ch)) {
    return (0);
   }
 
-  if (IS_NPC(ch) && ROOM_FLAGGED(EXIT(ch, dir)->to_room, ROOM_NOMOB) && !ch->master) {
+  if (IS_NPC(ch) && room_flagged(exit_dest_get(EXIT(ch, dir)), ROOM_NOMOB) && !ch->master) {
     return (0);
   }
 
-  if (SUNKEN(IN_ROOM(ch)) ||
-      SUNKEN(EXIT(ch, dir)->to_room)) {
+  if (room_is_sunken(char_room_get(ch)) ||
+      room_is_sunken(exit_dest_get(EXIT(ch, dir)))) {
     if (!has_o2(ch) && ((group_bonus(ch, 2) != 10 && (getCurKI(ch)) < GET_MAX_MANA(ch) / 200) || (group_bonus(ch, 2) == 10 &&
             (getCurKI(ch)) < GET_MAX_MANA(ch) / 800))) {
       if (GET_HIT(ch) >= GET_MAX_HIT(ch) / 20) {
@@ -731,11 +732,12 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check)
 
   /* move points needed is avg. move loss for src and destination sect type */
   need_movement = 1;
-  if (ROOM_GRAVITY(IN_ROOM(ch)) > 10) {
-   need_movement = (need_movement + ROOM_GRAVITY(IN_ROOM(ch))) * ROOM_GRAVITY(IN_ROOM(ch));
+  int gravity = room_gravity_get(char_room_get(ch));
+  if (gravity > 10) {
+   need_movement = (need_movement + gravity) * gravity;
   }
-  else if (ROOM_GRAVITY(IN_ROOM(ch)) == 10 && !IS_BARDOCK(ch) && !IS_NPC(ch)) {
-   need_movement = (need_movement + ROOM_GRAVITY(IN_ROOM(ch))) * ROOM_GRAVITY(IN_ROOM(ch));
+  else if (gravity == 10 && !IS_BARDOCK(ch) && !IS_NPC(ch)) {
+   need_movement = (need_movement + gravity) * gravity;
   }
   if (GET_LEVEL(ch) <= 1) {
    need_movement = 0;
@@ -910,7 +912,9 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check)
              (dir == DOWN) ? "above" : dirs[rev_dir[dir]]));
   act("$n arrives from $T.", TRUE, ch, 0, buf2, TO_ROOM | TO_SNEAKRESIST);
   if (FIGHTING(ch)) {
-   if (SECT(was_in_room->dir_option[dir]->to_room) != SECT_FLYING && SECT(was_in_room->dir_option[dir]->to_room) != SECT_WATER_NOSWIM && ROOM_EFFECT(was_in_room->dir_option[dir]->to_room) == 0) {
+    struct room_data* dest = exit_dest_get(was_in_room->dir_option[dir]);
+    int sect = room_sector_type_get(dest);
+   if (sect != SECT_FLYING && sect != SECT_WATER_NOSWIM && room_geffect_get(dest) == 0) {
     roll_pursue(FIGHTING(ch), ch);
    }
     REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_PURSUIT);
@@ -951,7 +955,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check)
     }
   }
 
-  if (ROOM_EFFECT(IN_ROOM(ch)) == 6 || ROOM_EFFECT(was_in) == 6) {
+  if (room_geffect_get(char_room_get(ch)) == 6 || room_geffect_get(was_in_room) == 6) {
     if (!IS_DEMON(ch) && !AFF_FLAGGED(ch, AFF_FLYING) && group_bonus(ch, 2) != 14) {
        act("@rYour legs are burned by the lava!@n", TRUE, ch, 0, 0, TO_CHAR);
        act("@R$n@r's legs are burned by the lava!@n", TRUE, ch, 0, 0, TO_ROOM);
@@ -1223,48 +1227,49 @@ ACMD(do_move)
     GET_EAVESDROP(ch) = real_room(0);
    } 
  if (!IS_NPC(ch)) {
+  int gravity = room_gravity_get(char_room_get(ch));
   if (PRF_FLAGGED(ch, PRF_ARENAWATCH)) {
      REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_ARENAWATCH);
      ARENA_IDNUM(ch) = -1;
   } if (GET_ROOM_VNUM(IN_ROOM(ch)) != NOWHERE && GET_ROOM_VNUM(IN_ROOM(ch)) != 0 && GET_ROOM_VNUM(IN_ROOM(ch)) != 1) {
      GET_LOADROOM(ch) = GET_ROOM_VNUM(IN_ROOM(ch));
-  } if (ROOM_GRAVITY(IN_ROOM(ch)) == 10 && GET_MAX_HIT(ch) <= 10000 && !IS_BARDOCK(ch) && !IS_NPC(ch)) {
+  } if (gravity == 10 && GET_MAX_HIT(ch) <= 10000 && !IS_BARDOCK(ch) && !IS_NPC(ch)) {
      send_to_char(ch, "The gravity slows you down some.\r\n");
      WAIT_STATE(ch, PULSE_1SEC);
-  } if (ROOM_GRAVITY(IN_ROOM(ch)) == 20 && GET_MAX_HIT(ch) <= 30000) {
+  } if (gravity == 20 && GET_MAX_HIT(ch) <= 30000) {
      send_to_char(ch, "The gravity slows you down some.\r\n");
      WAIT_STATE(ch, PULSE_2SEC);
-  } if (ROOM_GRAVITY(IN_ROOM(ch)) == 30 && GET_MAX_HIT(ch) <= 100000) {
+  } if (gravity == 30 && GET_MAX_HIT(ch) <= 100000) {
      send_to_char(ch, "The gravity slows you down some.\r\n");
      WAIT_STATE(ch, PULSE_3SEC);
-  } if (ROOM_GRAVITY(IN_ROOM(ch)) == 40 && GET_MAX_HIT(ch) <= 200000) {
+  } if (gravity == 40 && GET_MAX_HIT(ch) <= 200000) {
      send_to_char(ch, "The gravity slows you down some.\r\n");
      WAIT_STATE(ch, PULSE_3SEC);
-  } if (ROOM_GRAVITY(IN_ROOM(ch)) == 50 && GET_MAX_HIT(ch) <= 300000) {
+  } if (gravity == 50 && GET_MAX_HIT(ch) <= 300000) {
      send_to_char(ch, "The gravity slows you down some.\r\n");
      WAIT_STATE(ch, PULSE_3SEC);
-  } if (ROOM_GRAVITY(IN_ROOM(ch)) == 100 && GET_MAX_HIT(ch) <= 500000) {
+  } if (gravity == 100 && GET_MAX_HIT(ch) <= 500000) {
      send_to_char(ch, "The gravity slows you down some.\r\n");
      WAIT_STATE(ch, PULSE_3SEC);
-  } if (ROOM_GRAVITY(IN_ROOM(ch)) == 200 && GET_MAX_HIT(ch) <= 1000000) {
+  } if (gravity == 200 && GET_MAX_HIT(ch) <= 1000000) {
      send_to_char(ch, "The gravity slows you down some.\r\n");
      WAIT_STATE(ch, PULSE_3SEC);
-  } if (ROOM_GRAVITY(IN_ROOM(ch)) == 300 && GET_MAX_HIT(ch) <= 8000000) {
+  } if (gravity == 300 && GET_MAX_HIT(ch) <= 8000000) {
      send_to_char(ch, "The gravity slows you down some.\r\n");
      WAIT_STATE(ch, PULSE_3SEC);
-  } if (ROOM_GRAVITY(IN_ROOM(ch)) == 400 && GET_MAX_HIT(ch) <= 15000000) {
+  } if (gravity == 400 && GET_MAX_HIT(ch) <= 15000000) {
      send_to_char(ch, "The gravity slows you down some.\r\n");
      WAIT_STATE(ch, PULSE_3SEC);
-  } if (ROOM_GRAVITY(IN_ROOM(ch)) == 500 && GET_MAX_HIT(ch) <= 25000000) {
+  } if (gravity == 500 && GET_MAX_HIT(ch) <= 25000000) {
      send_to_char(ch, "The gravity slows you down some.\r\n");
      WAIT_STATE(ch, PULSE_4SEC);
-  } if (ROOM_GRAVITY(IN_ROOM(ch)) == 1000 && GET_MAX_HIT(ch) <= 35000000) {
+  } if (gravity == 1000 && GET_MAX_HIT(ch) <= 35000000) {
      send_to_char(ch, "The gravity slows you down some.\r\n");
      WAIT_STATE(ch, PULSE_5SEC);
-  } if (ROOM_GRAVITY(IN_ROOM(ch)) == 5000 && GET_MAX_HIT(ch) <= 100000000) {
+  } if (gravity == 5000 && GET_MAX_HIT(ch) <= 100000000) {
      send_to_char(ch, "The gravity slows you down some.\r\n");
      WAIT_STATE(ch, PULSE_5SEC);
-  } if (ROOM_GRAVITY(IN_ROOM(ch)) == 10000 && GET_MAX_HIT(ch) <= 200000000) {
+  } if (gravity == 10000 && GET_MAX_HIT(ch) <= 200000000) {
      send_to_char(ch, "The gravity slows you down some.\r\n");
      WAIT_STATE(ch, PULSE_5SEC);
   } if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_SPACE) && GET_ADMLEVEL(ch) < 1) {
@@ -1849,11 +1854,12 @@ static int do_simple_enter(struct char_data *ch, struct obj_data *obj, int need_
 
   /* move points needed is avg. move loss for src and destination sect type */
   need_movement = 1;
-  if (ROOM_GRAVITY(IN_ROOM(ch)) > 10) {
-   need_movement = (need_movement + ROOM_GRAVITY(IN_ROOM(ch))) * ROOM_GRAVITY(IN_ROOM(ch));
+  int gravity = room_gravity_get(char_room_get(ch));
+  if (gravity > 10) {
+   need_movement = (need_movement + gravity) * gravity;
   }
-  else if (ROOM_GRAVITY(IN_ROOM(ch)) == 10 && !IS_BARDOCK(ch) && !IS_NPC(ch)) {
-   need_movement = (need_movement + ROOM_GRAVITY(IN_ROOM(ch))) * ROOM_GRAVITY(IN_ROOM(ch));
+  else if (gravity == 10 && !IS_BARDOCK(ch) && !IS_NPC(ch)) {
+   need_movement = (need_movement + gravity) * gravity;
   }
   if (GET_LEVEL(ch) <= 1) {
    need_movement = 0;
@@ -2101,11 +2107,12 @@ static int do_simple_leave(struct char_data *ch, struct obj_data *obj, int need_
 
   /* move points needed is avg. move loss for src and destination sect type */
   need_movement = 1;
-  if (ROOM_GRAVITY(IN_ROOM(ch)) > 10) {
-   need_movement = (need_movement + ROOM_GRAVITY(IN_ROOM(ch))) * ROOM_GRAVITY(IN_ROOM(ch));
+  int gravity = room_gravity_get(char_room_get(ch));
+  if (gravity > 10) {
+   need_movement = (need_movement + gravity) * gravity;
   }
-  else if (ROOM_GRAVITY(IN_ROOM(ch)) == 10 && !IS_BARDOCK(ch) && !IS_NPC(ch)) {
-   need_movement = (need_movement + ROOM_GRAVITY(IN_ROOM(ch))) * ROOM_GRAVITY(IN_ROOM(ch));
+  else if (gravity == 10 && !IS_BARDOCK(ch) && !IS_NPC(ch)) {
+   need_movement = (need_movement + gravity) * gravity;
   }
   if (GET_LEVEL(ch) <= 1) {
    need_movement = 0;
@@ -2275,7 +2282,7 @@ ACMD(do_leave)
 static void handle_fall(struct char_data *ch)
 {
  int room = -1;
- while (EXIT(ch, 5) && SECT(IN_ROOM(ch)) == SECT_FLYING) {
+ while (EXIT(ch, 5) && room_sector_type_get(char_room_get(ch)) == SECT_FLYING) {
   room = GET_ROOM_VNUM(EXIT(ch, 5)->to_room);
   char_from_room(ch);
   char_to_room(ch, real_room(room));
@@ -2283,7 +2290,7 @@ static void handle_fall(struct char_data *ch)
    char_from_room(CARRYING(ch));
    char_to_room(CARRYING(ch), real_room(room));
   }
-  if (!EXIT(ch, 5) || SECT(IN_ROOM(ch)) != SECT_FLYING) {
+  if (!EXIT(ch, 5) || room_sector_type_get(char_room_get(ch)) != SECT_FLYING) {
    act("@r$n slams into the ground!@n", TRUE, ch, 0, 0, TO_ROOM);
         decCurHealthFloored(ch, getEffMaxPL(ch) / 20, 1);
 
@@ -2293,7 +2300,7 @@ static void handle_fall(struct char_data *ch)
    act("@r$n pummets down toward the ground below!@n", TRUE, ch, 0, 0, TO_ROOM);
   }
  }
- if (SECT(IN_ROOM(ch)) == SECT_WATER_NOSWIM && !CARRIED_BY(ch) && !IS_KANASSAN(ch)) {
+ if (room_sector_type_get(char_room_get(ch)) == SECT_WATER_NOSWIM && !CARRIED_BY(ch) && !IS_KANASSAN(ch)) {
   if ((getCurST(ch)) >= (getCurCarriedWeight(ch))) {
    act("@bYou swim in place.@n", TRUE, ch, 0, 0, TO_CHAR);
    act("@C$n@b swims in place.@n", TRUE, ch, 0, 0, TO_ROOM);
@@ -2364,8 +2371,11 @@ ACMD(do_fly)
    return;
  }
 
+ struct room_data* room = char_room_get(ch);
+ int sect = room_sector_type_get(room);
+
  if (!*arg) {
- if (AFF_FLAGGED(ch, AFF_FLYING) && SECT(IN_ROOM(ch)) != SECT_FLYING && SECT(IN_ROOM(ch)) != SECT_SPACE) {
+ if (AFF_FLAGGED(ch, AFF_FLYING) && sect != SECT_FLYING && sect != SECT_SPACE) {
    act("@WYou slowly settle down to the ground.@n", TRUE, ch, 0, 0, TO_CHAR);
    act("@W$n slowly settles down to the ground.@n", TRUE, ch, 0, 0, TO_ROOM);
    REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_FLYING);
@@ -2373,7 +2383,7 @@ ACMD(do_fly)
    return;
  }
 
- if (AFF_FLAGGED(ch, AFF_FLYING) && SECT(IN_ROOM(ch)) == SECT_FLYING) {
+ if (AFF_FLAGGED(ch, AFF_FLYING) && sect == SECT_FLYING) {
    act("@WYou begin to plummet to the ground!@n", TRUE, ch, 0, 0, TO_CHAR);
    act("@W$n starts to pummet to the ground below!@n", TRUE, ch, 0, 0, TO_ROOM);
    REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_FLYING);
@@ -2381,7 +2391,7 @@ ACMD(do_fly)
    handle_fall(ch);
    return;
  }
- if (AFF_FLAGGED(ch, AFF_FLYING) && SECT(IN_ROOM(ch)) == SECT_SPACE) {
+ if (AFF_FLAGGED(ch, AFF_FLYING) && sect == SECT_SPACE) {
    act("@WYou let yourself drift aimlessly through space.@n", TRUE, ch, 0, 0, TO_CHAR);
    act("@W$n starts to drift slowly.!@n", TRUE, ch, 0, 0, TO_ROOM);
    REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_FLYING);
@@ -2442,7 +2452,7 @@ ACMD(do_fly)
    send_to_char(ch, "You are too busy fighting!");
    return;
   }
-  if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_EARTH)) {
+  if (room_flagged(room, ROOM_EARTH)) {
    reveal_hiding(ch, 0);
    GET_ALT(ch) = 2;
    SET_BIT_AR(AFF_FLAGS(ch), AFF_FLYING);
@@ -2468,7 +2478,7 @@ ACMD(do_fly)
    }
    WAIT_STATE(ch, PULSE_3SEC);
    return;
-  } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_CERRIA)) {
+  } else if (room_flagged(room, ROOM_CERRIA)) {
    reveal_hiding(ch, 0);
    GET_ALT(ch) = 2;
    SET_BIT_AR(AFF_FLAGS(ch), AFF_FLYING);
@@ -2496,7 +2506,7 @@ ACMD(do_fly)
    }
    WAIT_STATE(ch, PULSE_3SEC);
    return;
-  } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_VEGETA)) {
+  } else if (room_flagged(room, ROOM_VEGETA)) {
          reveal_hiding(ch, 0);
    GET_ALT(ch) = 2;
    SET_BIT_AR(AFF_FLAGS(ch), AFF_FLYING);
@@ -2522,7 +2532,7 @@ ACMD(do_fly)
    }
    WAIT_STATE(ch, PULSE_3SEC);
    return;
-  } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_KANASSA)) {
+  } else if (room_flagged(room, ROOM_KANASSA)) {
    if (GET_ROOM_VNUM(IN_ROOM(ch)) == 14904) {
           reveal_hiding(ch, 0);
      GET_ALT(ch) = 2;
@@ -2578,7 +2588,7 @@ ACMD(do_fly)
    }
    WAIT_STATE(ch, PULSE_3SEC);
    return;
-  } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_KONACK)) {
+  } else if (room_flagged(room, ROOM_KONACK)) {
          reveal_hiding(ch, 0);
    GET_ALT(ch) = 2;
    SET_BIT_AR(AFF_FLAGS(ch), AFF_FLYING);
@@ -2604,7 +2614,7 @@ ACMD(do_fly)
    }
    WAIT_STATE(ch, PULSE_3SEC);
    return;
-  } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_NAMEK)) {
+  } else if (room_flagged(room, ROOM_NAMEK)) {
          reveal_hiding(ch, 0);
    GET_ALT(ch) = 2;
    SET_BIT_AR(AFF_FLAGS(ch), AFF_FLYING);
@@ -2630,7 +2640,7 @@ ACMD(do_fly)
    }
    WAIT_STATE(ch, PULSE_3SEC);
    return;
-  } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AETHER)) {
+  } else if (room_flagged(room, ROOM_AETHER)) {
          reveal_hiding(ch, 0);
    GET_ALT(ch) = 2;
    SET_BIT_AR(AFF_FLAGS(ch), AFF_FLYING);
@@ -2656,7 +2666,7 @@ ACMD(do_fly)
    }
    WAIT_STATE(ch, PULSE_3SEC);
    return;
-  } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_YARDRAT)) {
+  } else if (room_flagged(room, ROOM_YARDRAT)) {
          reveal_hiding(ch, 0);
    GET_ALT(ch) = 2;
    SET_BIT_AR(AFF_FLAGS(ch), AFF_FLYING);
@@ -2682,7 +2692,7 @@ ACMD(do_fly)
    }
    WAIT_STATE(ch, PULSE_3SEC);
    return;
-  } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_ARLIA)) {
+  } else if (room_flagged(room, ROOM_ARLIA)) {
          reveal_hiding(ch, 0);
    GET_ALT(ch) = 2;
    SET_BIT_AR(AFF_FLAGS(ch), AFF_FLYING);
@@ -2930,7 +2940,10 @@ ACMD(do_rest)
    send_to_char(ch, "You are busy piloting a ship!\r\n");
    return;
   }
-  if (SECT(IN_ROOM(ch)) == SECT_WATER_NOSWIM) {
+  struct room_data* room = char_room_get(ch);
+  int sect = room_sector_type_get(room);
+
+  if (sect == SECT_WATER_NOSWIM) {
    send_to_char(ch, "You can't rest here!\r\n");
    return;
   }
@@ -3083,7 +3096,10 @@ ACMD(do_sleep)
    return;
   }
 
-  if (SECT(IN_ROOM(ch)) == SECT_WATER_NOSWIM) {
+  struct room_data* room = char_room_get(ch);
+  int sect = room_sector_type_get(room);
+
+  if (sect == SECT_WATER_NOSWIM) {
    send_to_char(ch, "You can't rest here!\r\n");
    return;
   }

@@ -1216,11 +1216,14 @@ ACMD(do_fish)
   return;
  }
 
+
+ struct room_data* room = char_room_get(ch);
+
  if (!strcasecmp(arg, "cast")) {
    if (PLR_FLAGGED(ch, PLR_FISHING)) {
     send_to_char(ch, "You are already fishing! Syntax: fish stop\r\n");
     return;
-   } else if (!ROOM_FLAGGED(IN_ROOM(ch), ROOM_FISHING)) {
+   } else if (!room_flagged(room, ROOM_FISHING)) {
     send_to_char(ch, "This is not an area you can fish at.\r\n");
     return;
    } else if (AFF_FLAGGED(ch, AFF_FLYING)) {
@@ -1350,7 +1353,8 @@ void fish_update(void)
 
   for (i = character_list; i; i = next_char) {
     next_char = i->next;
-    if (ROOM_FLAGGED(IN_ROOM(i), ROOM_FISHING)) {
+    struct room_data* room = char_room_get(i);
+    if (room_flagged(room, ROOM_FISHING)) {
      if (PLR_FLAGGED(i, PLR_FISHING) && has_pole(i) == TRUE) {
       ch = i;
        if (GET_FISHD(ch) <= 0 && GET_FISHSTATE(ch) == FISH_REELING) { /* We've caught it */
@@ -1396,7 +1400,7 @@ void fish_update(void)
         } else if (GET_FISHSTATE(ch) == FISH_BITE && rand_number(1, 20) >= 12) {
          act("@CYou feel as if the fish has stopped biting...@n", TRUE, ch, 0, 0, TO_CHAR);
          GET_FISHSTATE(ch) = FISH_NOFISH;
-        } else if (GET_FISHSTATE(ch) != FISH_HOOKED && GET_FISHSTATE(ch) != FISH_BITE && ((ROOM_FLAGGED(IN_ROOM(ch), ROOM_FISHFRESH) && rand_number(1, 10) >= 8) || (!ROOM_FLAGGED(IN_ROOM(ch), ROOM_FISHFRESH) && rand_number(1, 20) >= 18))) {
+        } else if (GET_FISHSTATE(ch) != FISH_HOOKED && GET_FISHSTATE(ch) != FISH_BITE && ((room_flagged(room, ROOM_FISHFRESH) && rand_number(1, 10) >= 8) || (!room_flagged(room, ROOM_FISHFRESH) && rand_number(1, 20) >= 18))) {
          act("@CYou feel a fish biting on your line! Better @Ghook@C it!@n", TRUE, ch, 0, 0, TO_CHAR);
          GET_FISHSTATE(ch) = FISH_BITE;
         }
@@ -1422,8 +1426,10 @@ static void catch_fish(struct char_data *ch, int quality)
   struct obj_data *fish = NULL;
   int num = 1000;
 
- if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_FISHFRESH)) {
-  if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_EARTH)) {
+  struct room_data* room = char_room_get(ch);
+
+ if (room_flagged(room, ROOM_FISHFRESH)) {
+  if (room_flagged(room, ROOM_EARTH)) {
    switch (rand_number(1, 10)) {
     case 1:
     case 2:
@@ -1444,7 +1450,7 @@ static void catch_fish(struct char_data *ch, int quality)
      num = 1003;
      break;
    }
-  } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AETHER)) {
+  } else if (room_flagged(room, ROOM_AETHER)) {
    switch (rand_number(1, 10)) {
     case 1:
     case 2:
@@ -1467,7 +1473,7 @@ static void catch_fish(struct char_data *ch, int quality)
    }
   }
  } else {
-  if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_EARTH)) {
+  if (room_flagged(room, ROOM_EARTH)) {
    switch (rand_number(1, 10)) {
     case 1:
     case 2:
@@ -1488,7 +1494,7 @@ static void catch_fish(struct char_data *ch, int quality)
      num = 1007;
      break;
    }
-  } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_NAMEK)) {
+  } else if (room_flagged(room, ROOM_NAMEK)) {
    switch (rand_number(1, 10)) {
     case 1:
     case 2:
@@ -2223,10 +2229,10 @@ ACMD(do_ashcloud)
  if ((getCurKI(ch)) < cost) {
   send_to_char(ch, "You do not have enough ki!\r\n");
   return;
- } else if (SUNKEN(IN_ROOM(ch))) {
+ } else if (room_is_sunken(char_room_get(ch))) {
   send_to_char(ch, "You can not create an ashcloud here, because it is too wet.\r\n");
   return;
- } else if (SECT(IN_ROOM(ch)) == SECT_SPACE) {
+ } else if (room_sector_type_get(char_room_get(ch)) == SECT_SPACE) {
   send_to_char(ch, "You can not create an ashcloud in space.\r\n");
   return;
  } else if (GET_INT(ch) < axion_dice(-10)) {
@@ -2604,7 +2610,7 @@ ACMD(do_shimmer)
   } else if (GET_ADMLEVEL(tar) > 0 && GET_ADMLEVEL(ch) < 1) {
    send_to_char(ch, "That immortal prevents you from reaching them.\r\n");
    return;
-  } else if (ROOM_FLAGGED(IN_ROOM(tar), ROOM_NOINSTANT)) {
+  } else if (room_flagged(char_room_get(tar), ROOM_NOINSTANT)) {
    send_to_char(ch, "You can not go there as it is a protected area!\r\n");
    return;
   } else if (GRAPPLING(ch) && AFF_FLAGGED(GRAPPLING(ch), AFF_SPIRIT)) {
@@ -2673,7 +2679,7 @@ ACMD(do_channel)
   return;
  }
 
- if (ROOM_EFFECT(IN_ROOM(ch)) <= 0) {
+ if (room_geffect_get(char_room_get(ch)) <= 0) {
   send_to_char(ch, "There is no lava here!\r\n");
   return;
  }
@@ -2686,7 +2692,7 @@ ACMD(do_channel)
   } else {
    act("@RAs you move your ki through the lava you begin to draw heat away from it into the ruby. You do so at an even rate and end up with a glowing red hot blood ruby!@n", TRUE, ch, 0, 0, TO_CHAR);
    act("@RAs $n@R moves $s ki through the lava $e begins to draw heat away from it into a blood ruby. The ruby glows red hot as $e finishes the process of channeling the heat!@n", TRUE, ch, 0, 0, TO_ROOM);
-   ROOM_EFFECT(IN_ROOM(ch)) = 0;
+   room_geffect_set(char_room_get(ch), 0);
    SET_BIT_AR(GET_OBJ_EXTRA(ruby), ITEM_HOT);
   }
      decCurKI(ch, cost);
@@ -2708,8 +2714,8 @@ ACMD(do_hydromancy)
 
  cost = (GET_MAX_MANA(ch) / 12) - (GET_INT(ch) * GET_LEVEL(ch));
 
- if (ROOM_EFFECT(IN_ROOM(ch)) >= 0 && SECT(IN_ROOM(ch)) != SECT_WATER_SWIM && SECT(IN_ROOM(ch)) != SECT_WATER_NOSWIM) {
-  if (SECT(IN_ROOM(ch)) != SECT_UNDERWATER) {
+ if (room_geffect_get(char_room_get(ch)) >= 0 && room_sector_type_get(char_room_get(ch)) != SECT_WATER_SWIM && room_sector_type_get(char_room_get(ch)) != SECT_WATER_NOSWIM) {
+  if (room_sector_type_get(char_room_get(ch)) != SECT_UNDERWATER) {
    send_to_char(ch, "There is not sufficient water here.\r\n");
    return;
   } else {
@@ -2837,7 +2843,7 @@ ACMD(do_hydromancy)
       hurt(0, 0, ch, vict, NULL, cost * 4, 1);
      }
     }
-    ROOM_EFFECT(EXIT(ch, attempt)->to_room) = -3;
+    room_geffect_set(exit_dest_get(EXIT(ch, attempt)), -3);
     LASTATK(ch) = last;
     WAIT_STATE(ch, PULSE_2SEC);
 	GET_COOLDOWN(ch) = 15;
@@ -3189,7 +3195,9 @@ ACMD(do_bury)
   return;
  }
 
- if (SECT(IN_ROOM(ch)) != SECT_FIELD && SECT(IN_ROOM(ch)) != SECT_HILLS && SECT(IN_ROOM(ch)) != SECT_FOREST && SECT(IN_ROOM(ch)) != SECT_DESERT && SECT(IN_ROOM(ch)) != SECT_MOUNTAIN) {
+ int sect = room_sector_type_get(char_room_get(ch));
+
+ if (sect != SECT_FIELD && sect != SECT_HILLS && sect != SECT_FOREST && sect != SECT_DESERT && sect != SECT_MOUNTAIN) {
   send_to_char(ch, "You are not in a room with enough available dirt or sand to dig.\r\n");
   return;
  }
@@ -3214,7 +3222,7 @@ ACMD(do_bury)
    send_to_char(ch, "There is already something buried near here.\r\n");
    return;
   } else {
-   if (SECT(IN_ROOM(ch)) != SECT_DESERT) {
+   if (sect != SECT_DESERT) {
     act("@yYou start digging in a spot of soft dirt. Once you have an appropriately sized hole you drop @G$p@y in and then cover it.@n", TRUE, ch, obj, 0, TO_CHAR);
     act("@C$n@y starts digging in a spot of soft dirt. Once $e has an appropriately sized hole $e drops @G$p@y in and then covers it.@n", TRUE, ch, obj, 0, TO_ROOM);
    } else {
@@ -3230,7 +3238,7 @@ ACMD(do_bury)
    send_to_char(ch, "There is nothing buried here.\r\n");
    return;
   } else {
-   if (SECT(IN_ROOM(ch)) != SECT_DESERT) {
+   if (sect != SECT_DESERT) {
     act("@yYou slowly dig and reveal @G$p@y buried in the dirt! You pull it out and set it on the ground before covering the hole back up.@n", TRUE, ch, fobj, 0, TO_CHAR);
     act("@C$n@y starts digging and shortly reveals @G$p@y buried in the dirt! Quickly $e pulls it out and sets it on the ground before covering the hole back up.@n", TRUE, ch, fobj, 0, TO_ROOM);
    } else {
@@ -4565,7 +4573,9 @@ ACMD(do_cook)
  if (IS_NPC(ch))
   return;
 
- int cook_elem = cook_element(IN_ROOM(ch));
+ struct room_data* room = char_room_get(ch);
+
+ int cook_elem = cook_element(room);
 
  if (!cook_elem) {
   send_to_char(ch, "You need a campfire or Flambus Stove nearby to cook.\r\n");
@@ -4837,7 +4847,7 @@ ACMD(do_fireshield)
   return;
  }
 
- if (SUNKEN(IN_ROOM(ch))) {
+ if (room_is_sunken(char_room_get(ch))) {
   send_to_char(ch, "There is way too much water here!\r\n");
   return;
  }
@@ -4910,6 +4920,8 @@ ACMD(do_warppool)
   return;
  }
 
+ struct room_data* room = char_room_get(ch);
+
  if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 4600 && GET_ROOM_VNUM(IN_ROOM(ch)) < 4700) {
   pass = TRUE;
  } else if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 795 && GET_ROOM_VNUM(IN_ROOM(ch)) < 1099) {
@@ -4918,7 +4930,7 @@ ACMD(do_warppool)
   pass = TRUE;
  } else if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 13155 && GET_ROOM_VNUM(IN_ROOM(ch)) < 13199) {
   pass = TRUE;
- } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_NAMEK) && SECT(IN_ROOM(ch)) == SECT_WATER_NOSWIM) {
+ } else if (room_flagged(room, ROOM_NAMEK) && room_sector_type_get(room) == SECT_WATER_NOSWIM) {
   pass = TRUE;
  } else if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 12103 && GET_ROOM_VNUM(IN_ROOM(ch)) < 12289) {
   pass = TRUE;
@@ -4929,19 +4941,19 @@ ACMD(do_warppool)
   return;
  }
 
- if (!strcasecmp("earth", arg) && ROOM_FLAGGED(IN_ROOM(ch), ROOM_EARTH)) {
+ if (!strcasecmp("earth", arg) && room_flagged(room, ROOM_EARTH)) {
   send_to_char(ch, "You are already on Earth!\r\n");
   return;
- } else if (!strcasecmp("frigid", arg) && ROOM_FLAGGED(IN_ROOM(ch), ROOM_FRIGID)) {
+ } else if (!strcasecmp("frigid", arg) && room_flagged(room, ROOM_FRIGID)) {
   send_to_char(ch, "You are already on Frigid!\r\n");
   return;
- } else if (!strcasecmp("kanassa", arg) && ROOM_FLAGGED(IN_ROOM(ch), ROOM_KANASSA)) {
+ } else if (!strcasecmp("kanassa", arg) && room_flagged(room, ROOM_KANASSA)) {
   send_to_char(ch, "You are already on Kanasssa!\r\n");
   return;
- } else if (!strcasecmp("namek", arg) && ROOM_FLAGGED(IN_ROOM(ch), ROOM_NAMEK)) {
+ } else if (!strcasecmp("namek", arg) && room_flagged(room, ROOM_NAMEK)) {
   send_to_char(ch, "You are already on Namek!\r\n");
   return;
- } else if (!strcasecmp("aether", arg) && ROOM_FLAGGED(IN_ROOM(ch), ROOM_AETHER)) {
+ } else if (!strcasecmp("aether", arg) && room_flagged(room, ROOM_AETHER)) {
   send_to_char(ch, "You are already on Aether!\r\n");
   return;
  } else if (!strcasecmp("earth", arg)) {
@@ -5036,17 +5048,20 @@ ACMD(do_obstruct)
   return;
  }
 
- if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_PEACEFUL)) {
+ struct room_data* room = char_room_get(ch);
+ int sect = room_sector_type_get(room);
+
+ if (room_flagged(room, ROOM_PEACEFUL)) {
   send_to_char(ch, "You can not use this in such a peaceful area.\r\n");
   return;
  }
 
- if (SECT(IN_ROOM(ch)) == SECT_SPACE || ROOM_FLAGGED(IN_ROOM(ch), ROOM_SPACE)) {
+ if (sect == SECT_SPACE || room_flagged(room, ROOM_SPACE)) {
   send_to_char(ch, "You can not wall off the vastness of space.\r\n");
   return;
  }
 
- if (SECT(IN_ROOM(ch)) == SECT_FLYING) {
+ if (sect == SECT_FLYING) {
   send_to_char(ch, "You can not create gravity defying glacial walls.\r\n");
   return;
  }
@@ -5197,16 +5212,18 @@ ACMD(do_dimizu)
  int skill = GET_SKILL(ch, SKILL_DIMIZU);
  int prob = axion_dice(0);
 
- if (ROOM_EFFECT(IN_ROOM(ch)) < 0) {
+ struct room_data *room = char_room_get(ch);
+
+ if (room_geffect_get(room) < 0) {
   act("@CYou concentrate and distabilie the water, separating the hydrogen and oxygen. The gases dissipate quickly.", TRUE, ch, 0, 0, TO_CHAR);
   act("@c$n@C concentrates and the water filling the area seems to shudder. Suddenly the water begins to evaporate as the hydrogen and oxygen are separated.", TRUE, ch, 0, 0, TO_ROOM);
-  ROOM_EFFECT(IN_ROOM(ch)) = 0;
+  room_geffect_set(room, 0);
   WAIT_STATE(ch, PULSE_1SEC);
   return;
- } else if (SECT(IN_ROOM(ch)) == SECT_UNDERWATER) {
+ } else if (room_sector_type_get(room) == SECT_UNDERWATER) {
   send_to_char(ch, "The area is already underwater!\r\n");
   return;
- } else if (SECT(IN_ROOM(ch)) == SECT_SPACE || ROOM_FLAGGED(IN_ROOM(ch), ROOM_SPACE)) {
+ } else if (room_sector_type_get(room) == SECT_SPACE || ROOM_FLAGGED(IN_ROOM(ch), ROOM_SPACE)) {
   send_to_char(ch, "You can't flood space!\r\n");
   return;
  } else if ((getCurKI(ch)) < GET_MAX_MANA(ch) / 12) {
@@ -5222,7 +5239,7 @@ ACMD(do_dimizu)
   act("@CYou gather your ki and concentrate on creating water from it. Water begins to flow upward around the entire area. You form the water into a perfect cube with barely any ripples in its walls. It will maintain this form for a while.@n", TRUE, ch, 0, 0, TO_CHAR);
   act("@c$n@C gathers $s ki and concentrates on creating water from it. Water begins to flow upward around the entire area. @c$n@C forms the water into a perfect cube with barely any ripples in its walls. It appears the water will maintain this form for a while.@n", TRUE, ch, 0, 0, TO_ROOM);
      decCurKI(ch, getMaxKI(ch) / 12);
-  ROOM_EFFECT(IN_ROOM(ch)) = -3;
+  room_geffect_set(room, -3);
   improve_skill(ch, SKILL_DIMIZU, 0);
   return;
  }

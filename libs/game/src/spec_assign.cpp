@@ -76,8 +76,6 @@ void assign_objects(void)
   ASSIGNOBJ(3, augmenter);      /* Augmenter 9001 */
 }
 
-
-
 /* assign special procedures to rooms */
 void assign_rooms(void)
 {
@@ -92,10 +90,13 @@ void assign_rooms(void)
   ASSIGNROOM(84, auction);
   ASSIGNROOM(85, auction);
   ASSIGNROOM(86, auction);
-  /* Gauntlet rooms track how far a player progressed into zone  Jamdog - 13th Feb 2006 */ 
+  /* Gauntlet rooms track how far a player progressed into zone  Jamdog - 13th Feb 2006 */
 
   if (CONFIG_DTS_ARE_DUMPS)
-    for (i = 0; i <= top_of_world; i++)
-      if (ROOM_FLAGGED(i, ROOM_DEATH))
-	world[i].func = dump;
+    for (i = 0; i <= top_of_world; i++) {
+      struct room_data* room = &world[i];
+      if (room_flagged(room, ROOM_DEATH))
+        room->func = dump;
+    }
+      
 }

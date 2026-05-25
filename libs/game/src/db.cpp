@@ -1539,7 +1539,7 @@ static void parse_room(FILE *fl, int virtual_nr)
 
   room_vnum vn = rm->number;
 
-  if (ROOM_FLAGGED(room_nr, ROOM_VEGETA) || ROOM_FLAGGED(room_nr, ROOM_GRAVITYX10)) {
+  if (room_flagged(rm, ROOM_VEGETA) || room_flagged(rm, ROOM_GRAVITYX10)) {
      gravity = 10;
   }
   if (vn >= 19800 && vn <= 19899) {
@@ -4253,47 +4253,49 @@ void reset_zone(zone_rnum zone)
     rrnum = real_room(rvnum);
     if (rrnum != NOWHERE) {
      reset_wtrigger(&world[rrnum]);
-     if (ROOM_FLAGGED(rrnum, ROOM_AURA) && rand_number(1, 5) >= 4) {
+     struct room_data *room = &world[rrnum];
+     if (room_flagged(room, ROOM_AURA) && rand_number(1, 5) >= 4) {
       send_to_room(rrnum, "The aura of regeneration covering the surrounding area disappears.\r\n");
-      REMOVE_BIT_AR(ROOM_FLAGS(rrnum), ROOM_AURA);
+      room_flag_set(room, ROOM_AURA, FALSE);
      }
-     if (SECT(rrnum) == SECT_LAVA) {
-      ROOM_EFFECT(rrnum) = 5;
+     if (room_sector_type_get(room) == SECT_LAVA) {
+      room_geffect_set(room, 5);
      }
-     if (ROOM_EFFECT(rrnum) < -1) {
+     if (room_geffect_get(room) < -1) {
       send_to_room(rrnum, "The area loses some of the water flooding it.\r\n");
-      ROOM_EFFECT(rrnum) += 1;
+      room_geffect_mod(room, 1);
      }
-     else if (ROOM_EFFECT(rrnum) == -1) {
+     else if (room_geffect_get(room) == -1) {
       send_to_room(rrnum, "The area loses the last of the water flooding it in one large rush.\r\n");
-      ROOM_EFFECT(rrnum) = 0;
+      room_geffect_set(room, 0);
      }
-     if (ROOM_DAMAGE(rrnum) >= 100) {
+     if (room_dmg_get(room) >= 100) {
       send_to_room(rrnum, "The area gets rebuilt a little.\r\n");
-      ROOM_DAMAGE(rrnum) -= rand_number(5, 10);
+      room_dmg_mod(room, -rand_number(5, 10));
      }
-     else if (ROOM_DAMAGE(rrnum) >= 50) {
+     else if (room_dmg_get(room) >= 50) {
       send_to_room(rrnum, "The area gets rebuilt a little.\r\n");
-      ROOM_DAMAGE(rrnum) -= rand_number(1, 10);
+      room_dmg_mod(room, -rand_number(1, 10));
      }
-     else if (ROOM_DAMAGE(rrnum) >= 10) {
+     else if (room_dmg_get(room) >= 10) {
       send_to_room(rrnum, "The area gets rebuilt a little.\r\n");
-      ROOM_DAMAGE(rrnum) -= rand_number(1, 10);
+      room_dmg_mod(room, -rand_number(1, 10));
      }
-     else if (ROOM_DAMAGE(rrnum) > 1) {
+     else if (room_dmg_get(room) > 1) {
       send_to_room(rrnum, "The area gets rebuilt a little.\r\n");
-      ROOM_DAMAGE(rrnum) -= rand_number(1, ROOM_DAMAGE(rrnum));
+      room_dmg_mod(room, -rand_number(1, room_dmg_get(room)));
      }
-     else if (ROOM_DAMAGE(rrnum) > 0) {
+     else if (room_dmg_get(room) > 0) {
       send_to_room(rrnum, "The area gets rebuilt a little.\r\n");
-      ROOM_DAMAGE(rrnum)--;
+      room_dmg_mod(room, -1);
      }
-     if (ROOM_EFFECT(rrnum) >= 1 && rand_number(1, 4) == 4 && !SUNKEN(rrnum) && SECT(rrnum) != SECT_LAVA) {
+     int sect = room_sector_type_get(room);
+     if (room_geffect_get(room) >= 1 && rand_number(1, 4) == 4 && !room_is_sunken(room) && sect != SECT_LAVA) {
       send_to_room(rrnum, "The lava has cooled and become solid rock.\r\n");
-      ROOM_EFFECT(rrnum) = 0;
-     } else if (ROOM_EFFECT(rrnum) >= 1 && rand_number(1, 2) == 2 && SUNKEN(rrnum) && SECT(rrnum) != SECT_LAVA) {
+      room_geffect_set(room, 0);
+     } else if (room_geffect_get(room) >= 1 && rand_number(1, 2) == 2 && room_is_sunken(room) && sect != SECT_LAVA) {
       send_to_room(rrnum, "The water has cooled the lava and it has become solid rock.\r\n");
-      ROOM_EFFECT(rrnum) = 0;
+      room_geffect_set(room, 0);
      }
     }
     rvnum++;

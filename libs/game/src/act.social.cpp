@@ -449,7 +449,7 @@ ACMD(do_gmote)
     return;
   }
 
-  if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_SOUNDPROOF)) {
+  if (room_flagged(char_room_get(ch), ROOM_SOUNDPROOF)) {
     send_to_char(ch, "The walls seem to absorb your actions.\r\n");
     return;
   }

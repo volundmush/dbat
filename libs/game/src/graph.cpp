@@ -170,10 +170,10 @@ ACMD(do_sradar)
     return;
   }
 
-  if (noship == FALSE && SECT(IN_ROOM(vehicle)) != SECT_SPACE) {
+  if (noship == FALSE && room_sector_type_get(obj_room_get(vehicle)) != SECT_SPACE) {
     send_to_char(ch, "@wYour ship is not in space!\r\n");
     return;
-  } if (noship == TRUE && SECT(IN_ROOM(ch)) != SECT_SPACE) {
+  } if (noship == TRUE && room_sector_type_get(char_room_get(ch)) != SECT_SPACE) {
     send_to_char(ch, "@wYou are not even in space!\r\n");
     return;
   } 
@@ -633,7 +633,10 @@ ACMD(do_track)
 		return;
 	}
 
-	if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(ROOM_FLAGGED(IN_ROOM(ch), ROOM_YARDRAT)) && (ROOM_FLAGGED(IN_ROOM(vict), ROOM_YARDRAT))))
+	struct room_data* room = char_room_get(ch);
+	struct room_data* vict_room = char_room_get(vict);
+
+	if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(room_flagged(room, ROOM_YARDRAT)) && (room_flagged(vict_room, ROOM_YARDRAT))))
 	{
 		send_to_char(ch, "@WSense@D: @YYardrat@n\r\n");
 		if (vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))
@@ -643,7 +646,7 @@ ACMD(do_track)
 			free(blah);
 		}
 	}
-	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(ROOM_FLAGGED(IN_ROOM(ch), ROOM_EARTH)) && (ROOM_FLAGGED(IN_ROOM(vict), ROOM_EARTH))))
+	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(room_flagged(room, ROOM_EARTH)) && (room_flagged(vict_room, ROOM_EARTH))))
 	{
 		send_to_char(ch, "@WSense@D: @GEarth@n\r\n");
 		if (vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))
@@ -653,7 +656,7 @@ ACMD(do_track)
 			free(blah);
 		}
 	}
-	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(ROOM_FLAGGED(IN_ROOM(ch), ROOM_VEGETA)) && (ROOM_FLAGGED(IN_ROOM(vict), ROOM_VEGETA))))
+	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(room_flagged(room, ROOM_VEGETA)) && (room_flagged(vict_room, ROOM_VEGETA))))
 	{
 		send_to_char(ch, "@WSense@D: @YVegeta@n\r\n");
 		if (vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))
@@ -663,7 +666,7 @@ ACMD(do_track)
 			free(blah);
 		}
 	}
-	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(ROOM_FLAGGED(IN_ROOM(ch), ROOM_NAMEK)) && (ROOM_FLAGGED(IN_ROOM(vict), ROOM_NAMEK))))
+	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(room_flagged(room, ROOM_NAMEK)) && (room_flagged(vict_room, ROOM_NAMEK))))
 	{
 		send_to_char(ch, "@WSense@D: @gNamek@n\r\n");
 		if (vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))
@@ -673,7 +676,7 @@ ACMD(do_track)
 			free(blah);
 		}
 	}
-	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(ROOM_FLAGGED(IN_ROOM(ch), ROOM_FRIGID)) && (ROOM_FLAGGED(IN_ROOM(vict), ROOM_FRIGID))))
+	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(room_flagged(room, ROOM_FRIGID)) && (room_flagged(vict_room, ROOM_FRIGID))))
 	{
 		send_to_char(ch, "@WSense@D: @CFrigid@n\r\n");
 		if (vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))
@@ -683,7 +686,7 @@ ACMD(do_track)
 			free(blah);
 		}
 	}
-	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(ROOM_FLAGGED(IN_ROOM(ch), ROOM_AETHER)) && (ROOM_FLAGGED(IN_ROOM(vict), ROOM_AETHER))))
+	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(room_flagged(room, ROOM_AETHER)) && (room_flagged(vict_room, ROOM_AETHER))))
 	{
 		send_to_char(ch, "@WSense@D: @mAetherh@n\r\n");
 		if (vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))
@@ -693,7 +696,7 @@ ACMD(do_track)
 			free(blah);
 		}
 	}
-	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(ROOM_FLAGGED(IN_ROOM(ch), ROOM_KONACK)) && (ROOM_FLAGGED(IN_ROOM(vict), ROOM_KONACK))))
+	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(room_flagged(room, ROOM_KONACK)) && (room_flagged(vict_room, ROOM_KONACK))))
 	{
 		send_to_char(ch, "@WSense@D: @MKonack@n\r\n");
 		if (vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))
@@ -703,7 +706,7 @@ ACMD(do_track)
 			free(blah);
 		}
 	}
-	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(ROOM_FLAGGED(IN_ROOM(ch), ROOM_KANASSA)) && (ROOM_FLAGGED(IN_ROOM(vict), ROOM_KANASSA))))
+	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(room_flagged(room, ROOM_KANASSA)) && (room_flagged(vict_room, ROOM_KANASSA))))
 	{
 		send_to_char(ch, "@WSense@D: @cKanassa@n\r\n");
 		if (vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))
@@ -713,7 +716,7 @@ ACMD(do_track)
 			free(blah);
 		}
 	}
-	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(ROOM_FLAGGED(IN_ROOM(ch), ROOM_ARLIA)) && (ROOM_FLAGGED(IN_ROOM(vict), ROOM_ARLIA))))
+	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(room_flagged(room, ROOM_ARLIA)) && (room_flagged(vict_room, ROOM_ARLIA))))
 	{
 		send_to_char(ch, "@WSense@D: @yArlia@n\r\n");
 		if (vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))
