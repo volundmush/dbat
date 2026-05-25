@@ -35,6 +35,7 @@
 - Created new APIs for Characters, Objects, Rooms, Zones, Shops, Guilds, Exits. [Volund]
 - Created a new template-based search.hpp for closure-based searches in .cpp [Volund]
 - Laying groundwork for eliminating C arrays for entity database. [Volund]
+- Fixed Legendary Super Saiyan bonuses and stamina drain. [Mirage]
 
 # 2.9.2
 - Last version from before this file was created.
