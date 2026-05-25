@@ -1723,7 +1723,7 @@ void huge_update()
 
    act("@WThe large @cS@Cp@wi@cr@Ci@wt @cB@Co@wm@cb@W descends on YOU! It eclipses everything above you as it crushes down into you! You struggle against it with all your might!@n", TRUE, TARGET(k), 0, 0, TO_CHAR);
    act("@WThe large @cS@Cp@wi@cr@Ci@wt @cB@Co@wm@cb@W descends on @C$n@W! It completely obscures $m from view as it crushes into $s body! It appears to be facing some resistance from $m!@n", TRUE, TARGET(k), 0, 0, TO_ROOM);
-   send_to_room(IN_ROOM(k), "\r\n");
+   send_to_room(obj_room_get(k), "\r\n");
    if (GET_HIT(TARGET(k)) * bonus < KICHARGE(k) * 5) {
   
     act("@WYour strength is no match for the power of the attack! It slowly grinds into you before exploding into a massive blast!@n", TRUE, TARGET(k), 0, 0, TO_CHAR); 
@@ -1826,7 +1826,7 @@ void huge_update()
   else if (IN_ROOM(TARGET(k)) != IN_ROOM(k)) {
    ch = USER(k); 
    
-   send_to_room(IN_ROOM(k), "@WThe large @cS@Cp@wi@cr@Ci@wt @cB@Co@wm@cb@W descends on the area! It slowly burns into the ground before exploding magnificently!@n\r\n");
+   send_to_room(obj_room_get(k), "@WThe large @cS@Cp@wi@cr@Ci@wt @cB@Co@wm@cb@W descends on the area! It slowly burns into the ground before exploding magnificently!@n\r\n");
 
   
     skill = init_skill(ch, SKILL_GENKIDAMA); /* Set skill value */
@@ -1899,7 +1899,7 @@ void huge_update()
    
    act("@WThe large @mG@Me@wn@mo@Mc@wi@md@Me@W descends on YOU! It eclipses everything above you as it crushes down into you! You struggle against it with all your might!@n", TRUE, TARGET(k), 0, 0, TO_CHAR);
    act("@WThe large @mG@Me@wn@mo@Mc@wi@md@Me@W descends on @C$n@W! It completely obscures $m from view as it crushes into $s body! It appears to be facing some resistance from $m!@n", TRUE, TARGET(k), 0, 0, TO_ROOM);
-   send_to_room(IN_ROOM(k), "\r\n");
+   send_to_room(obj_room_get(k), "\r\n");
    if (GET_HIT(TARGET(k)) * bonus < KICHARGE(k) * 10) {
   
     act("@WYour strength is no match for the power of the attack! It slowly grinds into you before exploding into a massive blast!@n", TRUE, TARGET(k), 0, 0, TO_CHAR); 
@@ -2000,7 +2000,7 @@ void huge_update()
   else if (IN_ROOM(TARGET(k)) != IN_ROOM(k)) {
    ch = USER(k); 
    
-   send_to_room(IN_ROOM(k), "@WThe large @mG@Me@wn@mo@Mc@wi@md@Me@W descends on the area! It slowly burns into the ground before exploding magnificantly!@n\r\n");
+   send_to_room(obj_room_get(k), "@WThe large @mG@Me@wn@mo@Mc@wi@md@Me@W descends on the area! It slowly burns into the ground before exploding magnificantly!@n\r\n");
 
   
     skill = init_skill(ch, SKILL_GENOCIDE); /* Set skill value */
@@ -2116,7 +2116,7 @@ void homing_update()
       act("@C$n @wmanages to deflect the $p@w sending it flying away and depleting some of its energy.@n", TRUE, vict, k, 0, TO_ROOM);
       KICHARGE(k) -= KICHARGE(k) / 10;
       if (KICHARGE(k) <= 0) {
-       send_to_room(IN_ROOM(k), "%s has lost all its energy and disappears.\r\n", k->short_description);
+       send_to_room(obj_room_get(k), "%s has lost all its energy and disappears.\r\n", k->short_description);
        extract_obj(k);
       }
       continue;
@@ -2215,7 +2215,7 @@ void homing_update()
       act("@C$n @wmanages to deflect the $p@w sending it flying away and depleting some of its energy.@n", TRUE, vict, k, 0, TO_ROOM);
       KICHARGE(k) -= KICHARGE(k) / 10;
       if (KICHARGE(k) <= 0) {
-       send_to_room(IN_ROOM(k), "%s has lost all its energy and disappears.\r\n", k->short_description);
+       send_to_room(obj_room_get(k), "%s has lost all its energy and disappears.\r\n", k->short_description);
        extract_obj(k);
       }
       continue;
@@ -3849,7 +3849,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
   }
   if (AFF_FLAGGED(ch, AFF_POTENT)) {
    dmg += dmg * 0.3;
-   send_to_room(IN_ROOM(ch), "@wThere is a bright flash of @Yyellow@w light in the wake of the attack!@n\r\n");
+   send_to_room(char_room_get(ch), "@wThere is a bright flash of @Yyellow@w light in the wake of the attack!@n\r\n");
   }
  }
 
@@ -3858,7 +3858,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
   if (dmg > 0) {
       if (getCurKI(ch) - infuse_cost) {
           decCurKI(ch, infuse_cost);
-          send_to_room(IN_ROOM(ch), "@CA swirl of ki explodes from the attack!@n\r\n");
+          send_to_room(char_room_get(ch), "@CA swirl of ki explodes from the attack!@n\r\n");
       } else {
           act("@wYou can no longer infuse ki into your attacks!@n", TRUE, ch, 0, 0, TO_CHAR);
           act("@c$n@w can no longer infuse ki into $s attacks!@n", TRUE, ch, 0, 0, TO_ROOM);
@@ -4359,11 +4359,11 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
        send_to_all("@R%s@r manages to defeat @R%s@r in the Arena!@n\r\n", GET_NAME(ch), GET_NAME(vict));
        char_from_room(ch);
        char_to_room(ch, real_room(17875));
-       look_at_room(IN_ROOM(ch), ch, 0);
+       look_at_room(char_room_get(ch), ch, 0);
        char_from_room(vict);
        char_to_room(vict, real_room(17875));
        setCurHealth(vict, 1);
-       look_at_room(IN_ROOM(vict), vict, 0);
+       look_at_room(char_room_get(vict), vict, 0);
        if (FIGHTING(vict)) {
         stop_fighting(vict);
        }
@@ -5647,7 +5647,7 @@ void handle_spiral(struct char_data *ch, struct char_data *vict, int skill, int 
      act("@C$N@W manages to dodge your Spiral Comet blast, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou dodge @C$n's@W Spiral Comet blast, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@W manages to dodge @c$n's@W Spiral Comet blast, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     send_to_room(IN_ROOM(vict), "@wA bright explosion erupts from the impact!\r\n");
+     send_to_room(char_room_get(vict), "@wA bright explosion erupts from the impact!\r\n");
 
          dodge_ki(ch, vict, 0, 45, skill, SKILL_SPIRAL); /* Effects on the room from dodging a ki attack
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]

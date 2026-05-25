@@ -4658,7 +4658,7 @@ void nanny(struct descriptor_data *d, char *arg)
        char_from_room(d->character);
        char_to_room(d->character, real_room(real_room(300)));
       } else {
-       look_at_room(IN_ROOM(d->character), d->character, 0);
+       look_at_room(char_room_get(d->character), d->character, 0);
       }
       if (has_mail(GET_IDNUM(d->character)))
 	send_to_char(d->character, "\r\nYou have mail waiting.\r\n");

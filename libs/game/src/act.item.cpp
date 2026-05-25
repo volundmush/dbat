@@ -1202,7 +1202,7 @@ if (dballtime == 0) {
    found7 = TRUE;
   }
   else if (IN_ROOM(k) != NOWHERE && room_geffect_get(obj_room_get(k)) == 6 && !OBJ_FLAGGED(k, ITEM_UNBREAKABLE)) {
-   send_to_room(IN_ROOM(k), "@R%s@r melts in the lava!@n\r\n", k->short_description);
+   send_to_room(obj_room_get(k), "@R%s@r melts in the lava!@n\r\n", k->short_description);
    extract_obj(k);
   }
   else {

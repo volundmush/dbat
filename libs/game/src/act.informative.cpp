@@ -72,8 +72,8 @@ static void look_in_obj(struct char_data *ch, char *arg);
 static void look_out_window(struct char_data *ch, char *arg);
 static void look_at_target(struct char_data *ch, char *arg, int read);
 static void search_in_direction(struct char_data * ch, int dir);
-static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_mode);
-static void do_auto_exits2(room_rnum target_room, struct char_data *ch);
+static void do_auto_exits(struct room_data *target_room, struct char_data *ch, int exit_mode);
+static void do_auto_exits2(struct room_data *target_room, struct char_data *ch);
 static void display_spells(struct char_data *ch, struct obj_data *obj);
 static void display_scroll(struct char_data *ch, struct obj_data *obj);
 static void space_to_minus(char *str);
@@ -566,7 +566,7 @@ ACMD(do_shuffle)
  }
  send_to_char(ch, "You shuffle the cards carefully.\r\n");
  act("$n shuffles their deck.", TRUE, ch, 0, 0, TO_ROOM);
- send_to_room(IN_ROOM(ch), "There were %d cards in the deck.\r\n", total);
+ send_to_room(char_room_get(ch), "There were %d cards in the deck.\r\n", total);
 }
 
 ACMD(do_hand)
@@ -3793,9 +3793,9 @@ static bool character_has_light(struct char_data *ch)
   return false;
 }
 
-static void show_auto_exit_room_details(room_rnum target_room, struct char_data *ch)
+static void show_auto_exit_room_details(struct room_data* target_room, struct char_data *ch)
 {
-  struct room_data *room = &world[target_room];
+  struct room_data *room = target_room;
   const room_vnum target_vnum = room_vnum_get(room);
   const bool is_house = room_flagged(room, ROOM_HOUSE);
   const bool is_garden1 = room_flagged(room, ROOM_GARDEN1);
@@ -3822,16 +3822,16 @@ static void show_auto_exit_room_details(room_rnum target_room, struct char_data 
     send_to_char(ch, "@CYour @cBuoy #3@C is floating here.@n\r\n");
 }
 
-static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_mode)
+static void do_auto_exits(struct room_data *target_room, struct char_data *ch, int exit_mode)
 {
   static const int display_order[] = { NORTHWEST, NORTH, NORTHEAST, EAST, SOUTHEAST, SOUTH, SOUTHWEST, WEST, UP, DOWN, INDIR, OUTDIR };
-  struct room_data *room = &world[target_room];
+  struct room_data *room = target_room;
 
   if (exit_mode == EXIT_OFF)
     send_to_char(ch, "@D------------------------------------------------------------------------@n\r\n");
 
   const bool space = room_sector_type_get(room) == SECT_SPACE && room_vnum_get(room) >= 20000;
-  if (exit_mode == EXIT_NORMAL && !space && IN_ROOM(ch) == target_room) {
+  if (exit_mode == EXIT_NORMAL && !space && char_room_get(ch) == target_room) {
     send_to_char(ch, "@D------------------------------------------------------------------------@n\r\n");
     send_to_char(ch, "@w      Compass           Auto-Map            Map Key\r\n");
     send_to_char(ch, "@R     ---------         ----------   -----------------------------\r\n");
@@ -3846,7 +3846,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
     send_to_char(ch, "@D------------------------------------------------------------------------@n\r\n");
   }
 
-  if (exit_mode != EXIT_COMPLETE && !(exit_mode == EXIT_NORMAL && !space && IN_ROOM(ch) != target_room))
+  if (exit_mode != EXIT_COMPLETE && !(exit_mode == EXIT_NORMAL && !space && char_room_get(ch) != target_room))
     return;
 
   send_to_char(ch, "@D----------------------------[@gObvious Exits@D]-----------------------------@n\r\n");
@@ -3904,10 +3904,10 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
   show_auto_exit_room_details(target_room, ch);
 }
 
-static void do_auto_exits2(room_rnum target_room, struct char_data *ch)
+static void do_auto_exits2(struct room_data *target_room, struct char_data *ch)
 {
   int door, slen = 0;
-  struct room_data *room = &world[target_room];
+  struct room_data *room = target_room;
 
   send_to_char(ch, "\nExits: ");
 
@@ -3929,9 +3929,9 @@ ACMD(do_exits)
 {
   /* Why duplicate code? */
   if (!PRF_FLAGGED(ch, PRF_NODEC)) {
-   do_auto_exits(IN_ROOM(ch), ch, EXIT_COMPLETE);
+   do_auto_exits(char_room_get(ch), ch, EXIT_COMPLETE);
   } else {
-   do_auto_exits2(IN_ROOM(ch), ch);
+   do_auto_exits2(char_room_get(ch), ch);
   }
 }
 
@@ -4141,9 +4141,9 @@ static bool room_description_survives_total_damage(int sector, int geffect)
   return sector == SECT_WATER_SWIM || geffect < 0 || sector == SECT_UNDERWATER || sector == SECT_FLYING || sector == SECT_SHOP || sector == SECT_IMPORTANT;
 }
 
-void look_at_room(room_rnum target_room, struct char_data *ch, int ignore_brief)
+void look_at_room(struct room_data *target_room, struct char_data *ch, int ignore_brief)
 {
-  struct room_data *trm = &world[target_room];
+  struct room_data *trm = target_room;
   const room_vnum vnum = room_vnum_get(trm);
   const int sector = room_sector_type_get(trm);
   const int damage = room_dmg_get(trm);
@@ -4317,7 +4317,7 @@ static void look_in_obj(struct char_data *ch, char *arg)
         send_to_char(ch, "It is pitch black...\r\n");
       } else {
         send_to_char(ch, "You look inside and see:\r\n");
-        look_at_room(vehicle_inside, ch, 0);
+        look_at_room(vehicle_inside_room, ch, 0);
       }
     } else {
       send_to_char(ch, "You cannot see inside that.\r\n");
@@ -4656,7 +4656,7 @@ static void look_out_window(struct char_data *ch, char *arg)
       else
         act("$n looks out the window.", TRUE, ch, 0, 0, TO_ROOM);
         send_to_char(ch, "You look outside and see:\r\n");
-      look_at_room(target_room, ch, 0);
+      look_at_room(&world[target_room], ch, 0);
     }
   }
 }
@@ -4927,7 +4927,7 @@ ACMD(do_look)
       if (subcmd == SCMD_SEARCH) {
        search_room(ch);
       } else {
-       look_at_room(IN_ROOM(ch), ch, 1);
+       look_at_room(char_room_get(ch), ch, 1);
        if (GET_ADMLEVEL(ch) < 1 && !AFF_FLAGGED(ch, AFF_HIDE)) {
         //act("@w$n@w looks around the room.@n", TRUE, ch, 0, 0, TO_ROOM);
        }

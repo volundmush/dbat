@@ -154,7 +154,7 @@ ACMD(do_galikgun)
      act("@C$N@W manages to dodge your Galik Gun, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou dodge @C$n's@W Galik Gun, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@W manages to dodge @c$n's@W Galik Gun, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     send_to_room(IN_ROOM(vict), "@wA bright explosion erupts from the impact!\r\n");
+     send_to_room(char_room_get(vict), "@wA bright explosion erupts from the impact!\r\n");
 
 	 dodge_ki(ch, vict, 0, 16, skill, SKILL_GALIKGUN); /* Effects on the room from dodging a ki attack
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
@@ -373,10 +373,10 @@ ACMD(do_honoo)
       }
       pcost(vict, 0, GET_MAX_HIT(vict) / 200);
       if (room_geffect_get(char_room_get(ch)) < -1) {
-          send_to_room(IN_ROOM(ch), "The water surrounding the area evaporates some!\r\n");
+          send_to_room(char_room_get(ch), "The water surrounding the area evaporates some!\r\n");
           room_geffect_mod(char_room_get(ch), 1);
       } else if (room_geffect_get(char_room_get(ch)) == -1) {
-          send_to_room(IN_ROOM(ch), "The water surrounding the area evaporates completely away!\r\n");
+          send_to_room(char_room_get(ch), "The water surrounding the area evaporates completely away!\r\n");
           room_geffect_set(char_room_get(ch), 0);
       }
       return;
@@ -403,10 +403,10 @@ ACMD(do_honoo)
      hurt(0, 0, ch, vict, NULL, dmg, 1);
 
      if (room_geffect_get(char_room_get(ch)) < -1) {
-      send_to_room(IN_ROOM(ch), "The water surrounding the area evaporates some!\r\n");
+      send_to_room(char_room_get(ch), "The water surrounding the area evaporates some!\r\n");
       room_geffect_mod(char_room_get(ch), 1);
      } else if (room_geffect_get(char_room_get(ch)) == -1) {
-      send_to_room(IN_ROOM(ch), "The water surrounding the area evaporates completely away!\r\n");
+      send_to_room(char_room_get(ch), "The water surrounding the area evaporates completely away!\r\n");
       room_geffect_set(char_room_get(ch), 0);
      }
      return;
@@ -415,7 +415,7 @@ ACMD(do_honoo)
      act("@C$N@W manages to dodge your honoo, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou dodge @C$n's@W honoo, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@W manages to dodge @c$n's@W honoo, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     send_to_room(IN_ROOM(vict), "@wA bright explosion erupts from the impact!\r\n");
+     send_to_room(char_room_get(vict), "@wA bright explosion erupts from the impact!\r\n");
 
 	 dodge_ki(ch, vict, 0, 21, skill, SKILL_HONOO); /* Effects on the room from dodging a ki attack
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
@@ -434,10 +434,10 @@ ACMD(do_honoo)
      hurt(0, 0, ch, vict, NULL, 0, 1);
 
      if (room_geffect_get(char_room_get(ch)) < -1) {
-      send_to_room(IN_ROOM(ch), "The water surrounding the area evaporates some!\r\n");
+      send_to_room(char_room_get(ch), "The water surrounding the area evaporates some!\r\n");
       room_geffect_mod(char_room_get(ch), 1);
      } else if (room_geffect_get(char_room_get(ch)) == -1) {
-      send_to_room(IN_ROOM(ch), "The water surrounding the area evaporates completely away!\r\n");
+      send_to_room(char_room_get(ch), "The water surrounding the area evaporates completely away!\r\n");
       room_geffect_set(char_room_get(ch), 0);
      }
      
@@ -455,10 +455,10 @@ ACMD(do_honoo)
      }
      hurt(0, 0, ch, vict, NULL, 0, 1);
      if (room_geffect_get(char_room_get(ch)) < -1) {
-      send_to_room(IN_ROOM(ch), "The water surrounding the area evaporates some!\r\n");
+      send_to_room(char_room_get(ch), "The water surrounding the area evaporates some!\r\n");
       room_geffect_mod(char_room_get(ch), 1);
      } else if (room_geffect_get(char_room_get(ch)) == -1) {
-      send_to_room(IN_ROOM(ch), "The water surrounding the area evaporates completely away!\r\n");
+      send_to_room(char_room_get(ch), "The water surrounding the area evaporates completely away!\r\n");
       room_geffect_set(char_room_get(ch), 0);
      }
      
@@ -476,10 +476,10 @@ ACMD(do_honoo)
      }     
    }
     if (room_geffect_get(char_room_get(ch)) < -1) {
-     send_to_room(IN_ROOM(ch), "The water surrounding the area evaporates some!\r\n");
+     send_to_room(char_room_get(ch), "The water surrounding the area evaporates some!\r\n");
      room_geffect_mod(char_room_get(ch), 1);
     } else if (room_geffect_get(char_room_get(ch)) == -1) {
-     send_to_room(IN_ROOM(ch), "The water surrounding the area evaporates completely away!\r\n");
+     send_to_room(char_room_get(ch), "The water surrounding the area evaporates completely away!\r\n");
      room_geffect_set(char_room_get(ch), 0);
     }
      hurt(0, 0, ch, vict, NULL, 0, 1);
@@ -566,10 +566,10 @@ ACMD(do_honoo)
       pcost(ch, attperc, 0);
      }
     if (room_geffect_get(char_room_get(ch)) < -1) {
-     send_to_room(IN_ROOM(ch), "The water surrounding the area evaporates some!\r\n");
+     send_to_room(char_room_get(ch), "The water surrounding the area evaporates some!\r\n");
      room_geffect_mod(char_room_get(ch), 1);
     } else if (room_geffect_get(char_room_get(ch)) == -1) {
-     send_to_room(IN_ROOM(ch), "The water surrounding the area evaporates completely away!\r\n");
+     send_to_room(char_room_get(ch), "The water surrounding the area evaporates completely away!\r\n");
      room_geffect_set(char_room_get(ch), 0);
     }
     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ASHED);
@@ -720,7 +720,7 @@ ACMD(do_psyblast)
      act("@C$N@W manages to dodge your psychic blast, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou dodge @C$n's@W psychic blast, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@W manages to dodge @c$n's@W psychic blast, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     send_to_room(IN_ROOM(vict), "@wA bright explosion erupts from the impact!\r\n");
+     send_to_room(char_room_get(vict), "@wA bright explosion erupts from the impact!\r\n");
 
 	 dodge_ki(ch, vict, 0, 20, skill, SKILL_PSYBLAST); /* Effects on the room from dodging a ki attack
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
@@ -1027,7 +1027,7 @@ ACMD(do_tslash)
      act("@C$N@W manages to dodge your twin slash, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou dodge @C$n's@W twin slash, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@W manages to dodge @c$n's@W twin slash, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     send_to_room(IN_ROOM(vict), "@wA bright explosion erupts from the impact!\r\n");
+     send_to_room(char_room_get(vict), "@wA bright explosion erupts from the impact!\r\n");
 
 	 dodge_ki(ch, vict, 0, 19, skill, SKILL_TSLASH); /* Effects on the room from dodging a ki attack
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
@@ -1375,7 +1375,7 @@ ACMD(do_eraser)
      act("@C$N@W manages to dodge your eraser cannon, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou dodge @C$n's@W eraser cannon, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@W manages to dodge @c$n's@W eraser cannon, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     send_to_room(IN_ROOM(vict), "@wA bright explosion erupts from the impact!\r\n");
+     send_to_room(char_room_get(vict), "@wA bright explosion erupts from the impact!\r\n");
 
 	 dodge_ki(ch, vict, 0, 18, skill, SKILL_ERASER); /* Effects on the room from dodging a ki attack
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
@@ -1616,7 +1616,7 @@ ACMD(do_pbarrage)
      act("@C$N@W manages to dodge your psychic barrage, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou dodge @C$n's@W psychic barrage, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@W manages to dodge @c$n's@W psychic barrage, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     send_to_room(IN_ROOM(vict), "@wA bright explosion erupts from the impact!\r\n");
+     send_to_room(char_room_get(vict), "@wA bright explosion erupts from the impact!\r\n");
 
 	 dodge_ki(ch, vict, 0, 31, skill, SKILL_PBARRAGE); /* Effects on the room from dodging a ki attack
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
@@ -2268,7 +2268,7 @@ ACMD(do_deathball)
      act("@C$N@W manages to dodge your deathball, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou dodge @C$n's@W deathball, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@W manages to dodge @c$n's@W deathball, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     send_to_room(IN_ROOM(vict), "@wA bright explosion erupts from the impact!\r\n");
+     send_to_room(char_room_get(vict), "@wA bright explosion erupts from the impact!\r\n");
 
 	 dodge_ki(ch, vict, 0, 38, skill, SKILL_DEATHBALL); /* Effects on the room from dodging a ki attack
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
@@ -2738,7 +2738,7 @@ ACMD(do_bigbang)
      act("@C$N@W manages to dodge your Big Bang, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou dodge @C$n's@W Big Bang, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@W manages to dodge @c$n's@W Big Bang, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     send_to_room(IN_ROOM(vict), "@wA bright explosion erupts from the impact!\r\n");
+     send_to_room(char_room_get(vict), "@wA bright explosion erupts from the impact!\r\n");
 
 	 dodge_ki(ch, vict, 0, 36, skill, SKILL_BIGBANG); /* Effects on the room from dodging a ki attack
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
@@ -2968,7 +2968,7 @@ ACMD(do_scatter)
      act("@C$N@W manages to dodge your scatter shot kiballs, letting them slam into the surroundings!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou dodge @C$n's@W scatter shot kiballs, letting them slam into the surroundings!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@W manages to dodge @c$n's@W scatter shot kiballs, letting them slam into the surroundings!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     send_to_room(IN_ROOM(vict), "@wBright explosions erupts from the impacts!\r\n");
+     send_to_room(char_room_get(vict), "@wBright explosions erupts from the impacts!\r\n");
 
 	 dodge_ki(ch, vict, 0, 35, skill, SKILL_SCATTER); /* Effects on the room from dodging a ki attack
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
@@ -3200,7 +3200,7 @@ ACMD(do_balefire)
      act("@C$N@W manages to dodge your balefire, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou dodge @C$n's@W balefire, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@W manages to dodge @c$n's@W balefire, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     send_to_room(IN_ROOM(vict), "@wBright explosions erupts from the impact!\r\n");
+     send_to_room(char_room_get(vict), "@wBright explosions erupts from the impact!\r\n");
 
 	 dodge_ki(ch, vict, 0, 35, skill, SKILL_BALEFIRE); /* Effects on the room from dodging a ki attack
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
@@ -3472,8 +3472,8 @@ ACMD(do_kakusanha)
      } /* Hitting targets! */
 
      if (count < 5 && !room_flagged(char_room_get(ch), ROOM_SPACE)) {
-      send_to_room(IN_ROOM(ch), "The rest of the beams slam into the ground!@n\r\n");
-      send_to_room(IN_ROOM(ch), "@wBright explosions erupt from the impacts!\r\n");
+      send_to_room(char_room_get(ch), "The rest of the beams slam into the ground!@n\r\n");
+      send_to_room(char_room_get(ch), "@wBright explosions erupt from the impacts!\r\n");
 
       int sect = room_sector_type_get(char_room_get(ch));
       if (sect != SECT_INSIDE) {
@@ -3843,7 +3843,7 @@ ACMD(do_hellflash)
      act("@C$N@W manages to dodge your Hell Flash, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou dodge @C$n's@W Hell Flash, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@W manages to dodge @c$n's@W Hell Flash, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     send_to_room(IN_ROOM(vict), "@wA bright explosion erupts from the impact!\r\n");
+     send_to_room(char_room_get(vict), "@wA bright explosion erupts from the impact!\r\n");
 
 	 dodge_ki(ch, vict, 0, 32, skill, SKILL_HELLFLASH); /* Effects on the room from dodging a ki attack
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
@@ -4348,7 +4348,7 @@ ACMD(do_crusher)
      act("@C$N@W manages to dodge your crusher ball, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou dodge @C$n's@W crusher ball, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@W manages to dodge @c$n's@W crusher ball, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     send_to_room(IN_ROOM(vict), "@wA bright explosion erupts from the impact!\r\n");
+     send_to_room(char_room_get(vict), "@wA bright explosion erupts from the impact!\r\n");
 
 	 dodge_ki(ch, vict, 0, 29, skill, SKILL_CRUSHER); /* Effects on the room from dodging a ki attack
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
@@ -4581,7 +4581,7 @@ ACMD(do_final)
      act("@C$N@W manages to dodge your final flash, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou dodge @C$n's@W final flash, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@W manages to dodge @c$n's@W final flash, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     send_to_room(IN_ROOM(vict), "@wA bright explosion erupts from the impact!\r\n");
+     send_to_room(char_room_get(vict), "@wA bright explosion erupts from the impact!\r\n");
 
 	 dodge_ki(ch, vict, 0, 28, skill, SKILL_FINALFLASH); /* Effects on the room from dodging a ki attack
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
@@ -4788,7 +4788,7 @@ ACMD(do_sbc)
      act("@C$N@W manages to dodge your special beam cannon, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou dodge @C$n's@W special beam cannon, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@W manages to dodge @c$n's@W special beam cannon, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     send_to_room(IN_ROOM(vict), "@wA bright explosion erupts from the impact!\r\n");
+     send_to_room(char_room_get(vict), "@wA bright explosion erupts from the impact!\r\n");
 
          dodge_ki(ch, vict, 0, 27, skill, SKILL_SBC); /* Effects on the room from dodging a ki attack
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
@@ -5003,7 +5003,7 @@ ACMD(do_tribeam)
      act("@C$N@W manages to dodge your tribeam, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou dodge @C$n's@W tribeam, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@W manages to dodge @c$n's@W tribeam, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     send_to_room(IN_ROOM(vict), "@wA bright explosion erupts from the impact!\r\n");
+     send_to_room(char_room_get(vict), "@wA bright explosion erupts from the impact!\r\n");
 
          dodge_ki(ch, vict, 0, 26, skill, SKILL_TRIBEAM); /* Effects on the room from dodging a ki attack
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
@@ -5217,7 +5217,7 @@ ACMD(do_kienzan)
      act("@C$N@W manages to dodge your kienzan, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou dodge @C$n's@W kienzan, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@W manages to dodge @c$n's@W kienzan, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     send_to_room(IN_ROOM(vict), "@wThe kienzan expands, cutting through everything in its path!\r\n");
+     send_to_room(char_room_get(vict), "@wThe kienzan expands, cutting through everything in its path!\r\n");
 
          dodge_ki(ch, vict, 2, 25, skill, SKILL_KIENZAN); /* Effects on the room from dodging a ki attack
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
@@ -5977,7 +5977,7 @@ ACMD(do_dualbeam)
      act("@C$N@W manages to dodge your dualbeam, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou dodge @C$n's@W dualbeam, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@W manages to dodge @c$n's@W dualbeam, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     send_to_room(IN_ROOM(vict), "@wA bright explosion erupts from the impact!\r\n");
+     send_to_room(char_room_get(vict), "@wA bright explosion erupts from the impact!\r\n");
 
          dodge_ki(ch, vict, 0, 22, skill, SKILL_DUALBEAM); /* Effects on the room from dodging a ki attack
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
@@ -6218,7 +6218,7 @@ ACMD(do_blessedhammer)
      act("@C$N@W manages to dodge your @WB@Dl@We@Ds@Ws@De@Wd @DH@Wa@Dm@Wm@De@Wr@W, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou dodge @C$n's@W @WB@Dl@We@Ds@Ws@De@Wd @DH@Wa@Dm@Wm@De@Wr@W, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@W manages to dodge @c$n's@W @WB@Dl@We@Ds@Ws@De@Wd @DH@Wa@Dm@Wm@De@Wr@W, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     send_to_room(IN_ROOM(vict), "@wA bright explosion erupts from the impact!\r\n");
+     send_to_room(char_room_get(vict), "@wA bright explosion erupts from the impact!\r\n");
 
          dodge_ki(ch, vict, 0, 17, skill, SKILL_BLESSEDHAMMER); /* Effects on the room from dodging a ki attack
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
@@ -6450,7 +6450,7 @@ ACMD(do_kousengan)
      act("@C$N@W manages to dodge your kousengan, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou dodge @C$n's@W kousengan, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@W manages to dodge @c$n's@W kousengan, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     send_to_room(IN_ROOM(vict), "@wA bright explosion erupts from the impact!\r\n");
+     send_to_room(char_room_get(vict), "@wA bright explosion erupts from the impact!\r\n");
 
          dodge_ki(ch, vict, 0, 17, skill, SKILL_KOUSENGAN); /* Effects on the room from dodging a ki attack
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
@@ -6706,7 +6706,7 @@ ACMD(do_deathbeam)
      act("@C$N@W manages to dodge your deathbeam, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou dodge @C$n's@W deathbeam, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@W manages to dodge @c$n's@W deathbeam, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     send_to_room(IN_ROOM(vict), "@wA bright explosion erupts from the impact!\r\n");
+     send_to_room(char_room_get(vict), "@wA bright explosion erupts from the impact!\r\n");
 
          dodge_ki(ch, vict, 0, 17, skill, SKILL_DEATHBEAM); /* Effects on the room from dodging a ki attack
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
@@ -6990,7 +6990,7 @@ ACMD(do_dodonpa)
      act("@C$N@W manages to dodge your dodonpa, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou dodge @C$n's@W dodonpa, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@W manages to dodge @c$n's@W dodonpa, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     send_to_room(IN_ROOM(vict), "@wA bright explosion erupts from the impact!\r\n");
+     send_to_room(char_room_get(vict), "@wA bright explosion erupts from the impact!\r\n");
 
          dodge_ki(ch, vict, 0, 15, skill, SKILL_DODONPA); /* Effects on the room from dodging a ki attack
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
@@ -7250,7 +7250,7 @@ ACMD(do_masenko)
      act("@C$N@W manages to dodge your masenko, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou dodge @C$n's@W masenko, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@W manages to dodge @c$n's@W masenko, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     send_to_room(IN_ROOM(vict), "@wA bright explosion erupts from the impact!\r\n");
+     send_to_room(char_room_get(vict), "@wA bright explosion erupts from the impact!\r\n");
 
          dodge_ki(ch, vict, 0, 14, skill, SKILL_MASENKO); /* Effects on the room from dodging a ki attack
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
@@ -7547,7 +7547,7 @@ ACMD(do_kamehameha)
      act("@C$N@W manages to dodge your kamehameha, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou dodge @C$n's@W kamehameha, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@W manages to dodge @c$n's@W kamehameha, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     send_to_room(IN_ROOM(vict), "@wA bright explosion erupts from the impact!\r\n");
+     send_to_room(char_room_get(vict), "@wA bright explosion erupts from the impact!\r\n");
 
          dodge_ki(ch, vict, 0, 13, skill, SKILL_KAMEHAMEHA); /* Effects on the room from dodging a ki attack
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]

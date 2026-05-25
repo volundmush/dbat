@@ -934,7 +934,7 @@ in the vault (vnum: 453) now and then. you can just use
           else if (!strcasecmp(field, "prac")) {
             if (IS_NPC(c)) {
              if (IN_ROOM(c) != NOWHERE) {
-              send_to_room(IN_ROOM(c), "Error!: Report this trigger error to the coding authorities!\r\n");
+              send_to_room(char_room_get(c), "Error!: Report this trigger error to the coding authorities!\r\n");
              }
             }
             if (subfield && *subfield) {

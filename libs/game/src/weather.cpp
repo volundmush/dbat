@@ -43,11 +43,11 @@ static void grow_plants(void)
         GET_OBJ_VAL(k, VAL_WATERLEVEL) -= 1;
         if (GET_OBJ_VAL(k, VAL_WATERLEVEL) > -10)
         {
-          send_to_room(IN_ROOM(k), "%s@y withers a bit.\r\n", k->short_description);
+          send_to_room(room, "%s@y withers a bit.\r\n", k->short_description);
         }
         else
         {
-          send_to_room(IN_ROOM(k), "%s@y has withered to a dried up dead husk.\r\n", k->short_description);
+          send_to_room(room, "%s@y has withered to a dried up dead husk.\r\n", k->short_description);
         }
       }
       else if (GET_OBJ_VAL(k, VAL_WATERLEVEL) >= 0)
@@ -63,7 +63,7 @@ static void grow_plants(void)
           }
           if (GET_OBJ_VAL(k, VAL_MATURITY) >= GET_OBJ_VAL(k, VAL_MAXMATURE))
           {
-            send_to_room(IN_ROOM(k), "%s@G is now fully grown!@n\r\n", k->short_description);
+            send_to_room(room, "%s@G is now fully grown!@n\r\n", k->short_description);
           }
         }
       }

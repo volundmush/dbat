@@ -22,7 +22,7 @@ void obj_to_room(struct obj_data *object, room_rnum room)
   struct room_data *rm = &world[room];
   if (room_flagged(rm, ROOM_GARDEN1) || room_flagged(rm, ROOM_GARDEN2)) {
      if (GET_OBJ_TYPE(object) != ITEM_PLANT) {
-      send_to_room(room, "%s @wDisappears in a puff of smoke! It seems the room was designed to vaporize anything not plant related. Strange...@n\r\n", object->short_description);
+      send_to_room(rm, "%s @wDisappears in a puff of smoke! It seems the room was designed to vaporize anything not plant related. Strange...@n\r\n", object->short_description);
       extract_obj(object);
       return;
      }
@@ -118,9 +118,9 @@ void obj_from_room(struct obj_data *object)
   if (GET_OBJ_POSTED(object) && object->in_obj == NULL) {
    struct obj_data *obj = GET_OBJ_POSTED(object);
    if (GET_OBJ_POSTTYPE(object) <= 0) {
-    send_to_room(IN_ROOM(obj), "%s@W shakes loose from %s@W.@n\r\n", obj->short_description, object->short_description);
+    send_to_room(rm, "%s@W shakes loose from %s@W.@n\r\n", obj->short_description, object->short_description);
    } else {
-    send_to_room(IN_ROOM(obj), "%s@W comes loose from %s@W.@n\r\n", object->short_description, obj->short_description);
+    send_to_room(rm, "%s@W comes loose from %s@W.@n\r\n", object->short_description, obj->short_description);
    }
    GET_OBJ_POSTED(obj) = NULL;
    GET_OBJ_POSTTYPE(obj) = 0;

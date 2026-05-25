@@ -667,7 +667,7 @@ void impact_sound(struct char_data *ch, char *mssg)
   int door;
   for (door = 0; door < NUM_OF_DIRS; door++)
     if (CAN_GO(ch, door))
-      send_to_room(char_room_get(ch)->dir_option[door]->to_room, "%s", mssg);
+      send_to_room(exit_dest_get(char_exit_dir(ch, door)), "%s", mssg);
 }
 
 /* For removing body parts */
@@ -1870,7 +1870,7 @@ void death_cry(struct char_data *ch)
   int door;
   for (door = 0; door < NUM_OF_DIRS; door++)
     if (CAN_GO(ch, door))
-      send_to_room(char_room_get(ch)->dir_option[door]->to_room, "Your blood freezes as you hear someone's death cry.\r\n");
+      send_to_room(exit_dest_get(char_exit_dir(ch, door)), "Your blood freezes as you hear someone's death cry.\r\n");
 }
 
 /* Let's clean up necessary things after "death" */
@@ -2050,13 +2050,15 @@ void raw_kill(struct char_data * ch, struct char_data * killer)
 
   update_pos(ch);
 
+  struct room_data* room = char_room_get(ch);
+
   if (IS_NPC(ch) && !MOB_FLAGGED(ch, MOB_DUMMY)) {
     int shadowed = FALSE;
     decCurHealthPercent(ch, 1);
     if (IS_SHADOW_DRAGON1(ch)) {
      struct obj_data *obj = NULL;
      SHADOW_DRAGON1 = -1;
-     send_to_room(IN_ROOM(ch), "@YThe one star dragon ball falls to the ground!@n\r\n");
+     send_to_room(room, "@YThe one star dragon ball falls to the ground!@n\r\n");
      
      obj = read_object(20, VIRTUAL);
      obj_to_room(obj, IN_ROOM(ch));
@@ -2064,7 +2066,7 @@ void raw_kill(struct char_data * ch, struct char_data * killer)
     } else if (IS_SHADOW_DRAGON2(ch)) {
      struct obj_data *obj = NULL;
      SHADOW_DRAGON2 = -1;
-     send_to_room(IN_ROOM(ch), "@YThe two star dragon ball falls to the ground!@n\r\n");
+     send_to_room(room, "@YThe two star dragon ball falls to the ground!@n\r\n");
 
      obj = read_object(21, VIRTUAL);
      obj_to_room(obj, IN_ROOM(ch));
@@ -2072,7 +2074,7 @@ void raw_kill(struct char_data * ch, struct char_data * killer)
     } else if (IS_SHADOW_DRAGON3(ch)) {
      struct obj_data *obj = NULL;
      SHADOW_DRAGON3 = -1;
-     send_to_room(IN_ROOM(ch), "@YThe three star dragon ball falls to the ground!@n\r\n");
+     send_to_room(room, "@YThe three star dragon ball falls to the ground!@n\r\n");
 
      obj = read_object(22, VIRTUAL);
      obj_to_room(obj, IN_ROOM(ch));
@@ -2080,7 +2082,7 @@ void raw_kill(struct char_data * ch, struct char_data * killer)
     } else if (IS_SHADOW_DRAGON4(ch)) {
      struct obj_data *obj = NULL;
      SHADOW_DRAGON4 = -1;
-     send_to_room(IN_ROOM(ch), "@YThe four star dragon ball falls to the ground!@n\r\n");
+     send_to_room(room, "@YThe four star dragon ball falls to the ground!@n\r\n");
 
      obj = read_object(23, VIRTUAL);
      obj_to_room(obj, IN_ROOM(ch));
@@ -2088,7 +2090,7 @@ void raw_kill(struct char_data * ch, struct char_data * killer)
     } else if (IS_SHADOW_DRAGON5(ch)) {
      struct obj_data *obj = NULL;
      SHADOW_DRAGON5 = -1;
-     send_to_room(IN_ROOM(ch), "@YThe five star dragon ball falls to the ground!@n\r\n");
+     send_to_room(room, "@YThe five star dragon ball falls to the ground!@n\r\n");
 
      obj = read_object(24, VIRTUAL);
      obj_to_room(obj, IN_ROOM(ch));
@@ -2096,7 +2098,7 @@ void raw_kill(struct char_data * ch, struct char_data * killer)
     } else if (IS_SHADOW_DRAGON6(ch)) {
      struct obj_data *obj = NULL;
      SHADOW_DRAGON6 = -1;
-     send_to_room(IN_ROOM(ch), "@YThe six star dragon ball falls to the ground!@n\r\n");
+     send_to_room(room, "@YThe six star dragon ball falls to the ground!@n\r\n");
 
      obj = read_object(25, VIRTUAL);
      obj_to_room(obj, IN_ROOM(ch));
@@ -2104,7 +2106,7 @@ void raw_kill(struct char_data * ch, struct char_data * killer)
     } else if (IS_SHADOW_DRAGON7(ch)) {
      struct obj_data *obj = NULL;
      SHADOW_DRAGON7 = -1;
-     send_to_room(IN_ROOM(ch), "@YThe seven star dragon ball falls to the ground!@n\r\n");
+     send_to_room(room, "@YThe seven star dragon ball falls to the ground!@n\r\n");
 
      obj = read_object(26, VIRTUAL);
      obj_to_room(obj, IN_ROOM(ch));
@@ -2291,7 +2293,7 @@ void die(struct char_data *ch, struct char_data *killer)
     char_from_room(ch);
     char_to_room(ch, real_room(17875));
     decCurHealthPercentFloored(ch, 1, 1);
-    look_at_room(IN_ROOM(ch), ch, 0);
+    look_at_room(char_room_get(ch), ch, 0);
     final_combat_resolve(ch);
     return;
   }

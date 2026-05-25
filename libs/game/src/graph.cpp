@@ -180,9 +180,9 @@ ACMD(do_sradar)
 
   if (!*arg) {
    if (GET_ADMLEVEL(ch) >= 1 && noship == TRUE) {
-    printmap(ch->in_room, ch, 0, -1);
+    printmap(char_room_get(ch), ch, 0, -1);
    } else {
-    printmap(IN_ROOM(vehicle), ch, 0, GET_OBJ_VNUM(vehicle));
+    printmap(obj_room_get(vehicle), ch, 0, GET_OBJ_VNUM(vehicle));
    }
   /*
    send_to_char(ch, "     @D----------------[@C Radar @D]-----------------@n\r\n");

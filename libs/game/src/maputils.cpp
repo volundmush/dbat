@@ -43,16 +43,16 @@ void ping_ship(int vnum, int vnum2)
   }
 
   if (found == TRUE) {
-   send_to_room(IN_ROOM(controls), "@D[@RALERT@D: @YAn unknown radar signal has been detected!@D]@n");
+   send_to_room(obj_room_get(controls), "@D[@RALERT@D: @YAn unknown radar signal has been detected!@D]@n");
   }
 }
 
-int checkship(int rnum, int vnum)
+int checkship(struct room_data *room, int vnum)
 {
  struct obj_data *i = NULL;
  int there = FALSE;
 
- struct room_data *rm = &world[rnum];
+ struct room_data *rm = room;
 
  for (i = rm->contents; i; i = i->next_content) {
   if (!room_flagged(rm, ROOM_NEBULA)) {
@@ -68,20 +68,20 @@ int checkship(int rnum, int vnum)
  return there;
 }
 
-char *getmapchar(int rnum, struct char_data * ch, int start, int vnum) {
+char *getmapchar(struct room_data *room, struct char_data * ch, struct room_data * start, int vnum) {
   static char mapchar[50];
   int there = FALSE, enemy = FALSE;
 
-  if (rnum == start) {
+  if (room == start) {
    there = TRUE;
   }
-  if (checkship(rnum, vnum)) {
+  if (checkship(room, vnum)) {
    enemy = TRUE;
   }
 
-  struct room_data *rm = &world[rnum];
+  struct room_data *rm = room;
 
-  if (rnum == real_room(GET_RADAR1(ch)) || rnum == real_room(GET_RADAR2(ch)) || rnum == real_room(GET_RADAR3(ch))) {
+  if (room->number == GET_RADAR1(ch) || room->number == real_room(GET_RADAR2(ch)) || room->number == real_room(GET_RADAR3(ch))) {
    if (there) {
     sprintf(mapchar, "@WB@RX");
    } else if (enemy == TRUE) {
@@ -135,7 +135,7 @@ char *getmapchar(int rnum, struct char_data * ch, int start, int vnum) {
     sprintf(mapchar, "@gNN");
    }
   } /* End Namek Character */
-  else if (GET_ROOM_VNUM(rnum) == 50772) {
+  else if (room->number == 50772) {
    if (there) {
     sprintf(mapchar, "@cZ@RX");
    } else if (enemy == TRUE) {
@@ -198,7 +198,7 @@ char *getmapchar(int rnum, struct char_data * ch, int start, int vnum) {
     sprintf(mapchar, "@m&&");
    }
   } /* End Nebula Character */
-  else if (GET_ROOM_VNUM(rnum) == 38028) {
+  else if (room->number == 38028) {
    if (there) {
     sprintf(mapchar, "@yQ@RX");
    } else if (enemy == TRUE) {
@@ -262,7 +262,7 @@ char *getmapchar(int rnum, struct char_data * ch, int start, int vnum) {
   return mapchar;
 }  
 
-MapStruct findcoord(int rnum) {
+MapStruct findcoord(struct room_data* room) {
   int x, y;
   MapStruct coords;
 
@@ -271,7 +271,7 @@ MapStruct findcoord(int rnum) {
 
   for (y = 0; y <= MAP_ROWS; y++ ) {
     for (x = 0; x <= MAP_COLS; x++ ) {
-      if (mapnums[y][x] == rnum) {
+      if (mapnums[y][x] == room->number) {
         coords.y = y;
         coords.x = x;
         return coords;
@@ -283,20 +283,17 @@ MapStruct findcoord(int rnum) {
   return coords;
 }
 
-void printmap(int rnum, struct char_data * ch, int type, int vnum) {
+void printmap(struct room_data *room, struct char_data * ch, int type, int vnum) {
   int x=0, lasty = -1;
   int y=0;
   int sightradius;
   int count = 0, initline = 0;
   char buf[MAX_STRING_LENGTH * 2];
   char buf2[512];
-  MapStruct coord;
+  MapStruct coord = findcoord(room);
 
-  struct room_data *room = &world[rnum];
+  struct room_data *start = room;
 
-  int start = rnum;
-
-  coord = findcoord(rnum);
   strcpy(buf, "\n");
   if (type == 0) {
    sightradius = 12;
@@ -384,7 +381,7 @@ void printmap(int rnum, struct char_data * ch, int type, int vnum) {
    }
     for (x = coord.x-sightradius; x <= coord.x+sightradius; x++) {
       if (x==coord.x && y==coord.y) {
-        strcat(buf, getmapchar(mapnums[y][x], ch, start, vnum));
+        strcat(buf, getmapchar(room_by_id(mapnums[y][x]), ch, start, vnum));
       } else if (x > MAP_COLS || x < 0) {
         if (lasty != TRUE && y > -1 && y < 200) {
          strcat(buf, "@D?");
@@ -395,7 +392,7 @@ void printmap(int rnum, struct char_data * ch, int type, int vnum) {
          strcat(buf, "@D??");
         }
       } else
-        strcat(buf, getmapchar(mapnums[y][x], ch, start, vnum));
+        strcat(buf, getmapchar(room_by_id(mapnums[y][x]), ch, start, vnum));
     }
     strcat(buf, "\n");
     lasty = FALSE;

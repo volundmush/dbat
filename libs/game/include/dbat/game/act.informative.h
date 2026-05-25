@@ -25,7 +25,7 @@ void sort_commands(void);
 char *find_exdesc(char *word, struct extra_descr_data *list);
 void add_history(struct char_data *ch, char *str, int type);
 void introWrite(struct char_data *ch, struct char_data *vict, char *name);
-void look_at_room(room_rnum target_room, struct char_data *ch, int ignore_brief);
+void look_at_room(struct room_data *target_room, struct char_data *ch, int ignore_brief);
 int perf_skill(int skill);
 int search_help(const char *argument, int level);
 
