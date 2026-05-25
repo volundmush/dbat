@@ -2991,14 +2991,14 @@ void perform_act(const char *orig, struct char_data *ch, struct obj_data *obj, c
 	CHECK_NULL(obj, OBJN(obj, to));
 	break;
       case 'O':
-	CHECK_NULL(vict_obj, OBJN((const struct obj_data *) vict_obj, to));
+	CHECK_NULL(vict_obj, OBJN((struct obj_data *) vict_obj, to));
 	dg_target = (const struct obj_data *) vict_obj;
 	break;
       case 'p':
 	CHECK_NULL(obj, OBJS(obj, to));
 	break;
       case 'P':
-	CHECK_NULL(vict_obj, OBJS((const struct obj_data *) vict_obj, to));
+	CHECK_NULL(vict_obj, OBJS((struct obj_data *) vict_obj, to));
 	dg_target = (const struct obj_data *) vict_obj;
 	break;
       case 'a':

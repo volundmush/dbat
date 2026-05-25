@@ -30,7 +30,6 @@ extern "C" {
 #define ROOM_FLAGGED(loc, flag) (IS_SET_AR(ROOM_FLAGS(loc), (flag)))
 #define EXIT_FLAGGED(exit, flag) (IS_SET((exit)->exit_info, (flag)))
 
-#define W_EXIT(room, num)     (world[(room)].dir_option[(num)])
 #define R_EXIT(room, num)     ((room)->dir_option[(num)])
 
 #ifdef __cplusplus

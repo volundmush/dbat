@@ -41,6 +41,18 @@ pub export fn char_room_vnum_get(ch: *cdb.char_data) cdb.room_vnum {
     return room.*.number;
 }
 
+pub export fn char_zone_get(ch: *cdb.char_data) [*c]cdb.zone_data {
+    const room = char_room_get(ch);
+    if (room == null) return null;
+    return &cdb.zone_table[@intCast(room.*.zone)];
+}
+
+pub export fn char_zone_vnum_get(ch: *cdb.char_data) cdb.zone_vnum {
+    const zone = char_zone_get(ch);
+    if (zone == null) return cdb.NOWHERE;
+    return zone.*.number;
+}
+
 pub export fn char_room_vnum_set(ch: *cdb.char_data, vnum: cdb.room_vnum) void {
     ch.in_room = cdb.real_room(vnum);
 }

@@ -288,6 +288,8 @@ void printmap(int rnum, struct char_data * ch, int type, int vnum) {
   char buf2[512];
   MapStruct coord;
 
+  struct room_data *room = &world[rnum];
+
   int start = rnum;
 
   coord = findcoord(rnum);
@@ -353,23 +355,23 @@ void printmap(int rnum, struct char_data * ch, int type, int vnum) {
       strcat(buf, "      @RCompass@n           ");
      }
      else if (count == 2) {
-      sprintf(buf2, "@w       @w|%s@w|            ", (W_EXIT(rnum, 0) ? " @CN " : "   "));
+      sprintf(buf2, "@w       @w|%s@w|            ", (R_EXIT(room, 0) ? " @CN " : "   "));
       strcat(buf, buf2);
      }
      else if (count == 3) {
-      sprintf(buf2, "@w @w|%s@w| |%s@w| |%s@w|      ", (W_EXIT(rnum, 6) ? " @CNW" : "   "), (W_EXIT(rnum, 4) ? " @YU " : "   "), (W_EXIT(rnum, 7) ? "@CNE " : "   "));
+      sprintf(buf2, "@w @w|%s@w| |%s@w| |%s@w|      ", (R_EXIT(room, 6) ? " @CNW" : "   "), (R_EXIT(room, 4) ? " @YU " : "   "), (R_EXIT(room, 7) ? "@CNE " : "   "));
       strcat(buf, buf2);
      }
      else if (count == 4) {
-      sprintf(buf2, "@w @w|%s@w| |%s@w| |%s@w|      ", (W_EXIT(rnum, 3) ? "  @CW" : "   "), (W_EXIT(rnum, 10) ? "@m I " : (W_EXIT(rnum, 11) ? "@mOUT" : "   ")), (W_EXIT(rnum, 1) ? "@CE  " : "   "));
+      sprintf(buf2, "@w @w|%s@w| |%s@w| |%s@w|      ", (R_EXIT(room, 3) ? "  @CW" : "   "), (R_EXIT(room, 10) ? "@m I " : (R_EXIT(room, 11) ? "@mOUT" : "   ")), (R_EXIT(room, 1) ? "@CE  " : "   "));
       strcat(buf, buf2);
      }
      else if (count == 5) {
-      sprintf(buf2, "@w @w|%s@w| |%s@w| |%s@w|      ", (W_EXIT(rnum, 9) ? " @CSW" : "   "), (W_EXIT(rnum, 5) ? " @YD " : "   "), (W_EXIT(rnum, 8) ? "@CSE " : "   "));
+      sprintf(buf2, "@w @w|%s@w| |%s@w| |%s@w|      ", (R_EXIT(room, 9) ? " @CSW" : "   "), (R_EXIT(room, 5) ? " @YD " : "   "), (R_EXIT(room, 8) ? "@CSE " : "   "));
       strcat(buf, buf2);
      }
      else if (count == 6) {
-      sprintf(buf2, "@w       @w|%s@w|            ", (W_EXIT(rnum, 2) ? " @CS " : "   "));
+      sprintf(buf2, "@w       @w|%s@w|            ", (R_EXIT(room, 2) ? " @CS " : "   "));
       strcat(buf, buf2);
      } else {
       strcat(buf, "                        ");

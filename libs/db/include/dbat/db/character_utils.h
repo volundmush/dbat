@@ -61,13 +61,13 @@ extern "C" {
 #define PLR_FLAGGED(ch, flag) (!IS_NPC(ch) && IS_SET_AR(PLR_FLAGS(ch), (flag)))
 #define AFF_FLAGGED(ch, flag) (IS_SET_AR(AFF_FLAGS(ch), (flag)))
 #define PRF_FLAGGED(ch, flag) (IS_SET_AR(PRF_FLAGS(ch), (flag)))
-#define ADM_FLAGGED(ch, flag) (IS_SET_AR(ADM_FLAGS(ch), (flag)))
+#define ADM_FLAGGED(ch, flag) char_admflagged(ch, flag)
 #define BODY_FLAGGED(ch, flag) (IS_SET_AR(BODY_PARTS(ch), (flag)))
 #define IS_AFFECTED(ch, skill) (AFF_FLAGGED((ch), (skill)))
 
 #define PLR_TOG_CHK(ch,flag) ((TOGGLE_BIT_AR(PLR_FLAGS(ch), (flag))) & Q_BIT(flag))
 #define PRF_TOG_CHK(ch,flag) ((TOGGLE_BIT_AR(PRF_FLAGS(ch), (flag))) & Q_BIT(flag))
-#define ADM_TOG_CHK(ch,flag) ((TOGGLE_BIT_AR(ADM_FLAGS(ch), (flag))) & Q_BIT(flag))
+#define ADM_TOG_CHK(ch,flag) char_admflag_toggle(ch, flag)
 #define AFF_TOG_CHK(ch,flag) ((TOGGLE_BIT_AR(AFF_FLAGS(ch), (flag))) & Q_BIT(flag))
 
 /* new define for quick check */
@@ -75,7 +75,7 @@ extern "C" {
 
 
 #define IN_ROOM(ch)	((ch)->in_room)
-#define IN_ZONE(ch)   (zone_table[(world[(IN_ROOM(ch))].zone)].number)
+#define IN_ZONE(ch)   char_zone_vnum_get(ch)
 #define GET_WAS_IN(ch)	((ch)->was_in_room)
 #define GET_AGE(ch)     (age(ch)->year)
 
@@ -145,7 +145,7 @@ extern "C" {
 #define GET_CON(ch)     ((ch)->aff_abils.con)
 #define GET_CHA(ch)     ((ch)->aff_abils.cha)
 
-#define GET_MUTBOOST(ch) (IS_MUTANT(ch) ? ((GET_GENOME(ch, 0) == 1 || GET_GENOME(ch, 1) == 1) ? (GET_SPEEDCALC(ch) + GET_SPEEDBONUS(ch) + GET_SPEEDBOOST(ch)) * 0.3 : 0) : 0)
+#define GET_MUTBOOST(ch) (IS_MUTANT(ch) ? (HAS_GENOME(ch, 1) ? (GET_SPEEDCALC(ch) + GET_SPEEDBONUS(ch) + GET_SPEEDBOOST(ch)) * 0.3 : 0) : 0)
 #define GET_SPEEDI(ch)  (GET_SPEEDCALC(ch) + GET_SPEEDBONUS(ch) + GET_SPEEDBOOST(ch) + GET_MUTBOOST(ch))
 #define GET_SPEEDCALC(ch) (IS_GRAP(ch) ? GET_CHA(ch) : (IS_INFERIOR(ch) ? (AFF_FLAGGED(ch, AFF_FLYING) ? (GET_SPEEDVAR(ch) * 1.25) : GET_SPEEDVAR(ch)) : GET_SPEEDVAR(ch)))
 #define GET_SPEEDBONUS(ch) (IS_ARLIAN(ch) ? AFF_FLAGGED(ch, AFF_SHELL) ? GET_SPEEDVAR(ch) * -0.5 : (IS_MALE(ch) ? (AFF_FLAGGED(ch, AFF_FLYING) ? (GET_SPEEDVAR(ch) * 0.5) : 0) : 0) : 0)
@@ -172,10 +172,10 @@ extern "C" {
 #define GET_CHARGETO(ch)  ((ch)->chargeto)
 #define GET_ARMOR(ch)     ((ch)->armor)
 #define GET_ARMOR_LAST(ch) ((ch)->armor_last)
-#define GET_HIT(ch)	  (getCurPL(ch))
-#define GET_MAX_HIT(ch)	  (getEffMaxPL(ch))
-#define GET_MAX_MOVE(ch)  (getMaxST(ch))
-#define GET_MAX_MANA(ch)  (getMaxKI(ch))
+#define GET_HIT(ch)	  getCurPL(ch)
+#define GET_MAX_HIT(ch)	  getEffMaxPL(ch)
+#define GET_MAX_MOVE(ch)  getMaxST(ch)
+#define GET_MAX_MANA(ch)  getMaxKI(ch)
 #define GET_KI(ch)	  ((ch)->ki)
 #define GET_MAX_KI(ch)    ((ch)->max_ki)
 #define GET_DROOM(ch)     ((ch)->droom)
@@ -340,11 +340,10 @@ extern "C" {
           (GET_ADD(ch) <= 99) ? 29 :  30 ) ) )                   \
         ) */
 
-#define CAN_CARRY_W(ch) (getMaxCarryWeight(ch))
+#define CAN_CARRY_W(ch) getMaxCarryWeight(ch)
 #define CAN_CARRY_N(ch) (50)
 #define AWAKE(ch) (GET_POS(ch) > POS_SLEEPING)
-#define CAN_SEE_IN_DARK(ch) \
-   (AFF_FLAGGED(ch, AFF_INFRAVISION) || (!IS_NPC(ch) && PRF_FLAGGED(ch, PRF_HOLYLIGHT)) || (IS_MUTANT(ch) && (GET_GENOME(ch, 0) == 4 || GET_GENOME(ch, 1) == 4)) || PLR_FLAGGED(ch, PLR_AURALIGHT))
+#define CAN_SEE_IN_DARK(ch) char_can_see_in_dark(ch)
 
 #define IS_GOOD(ch)    (GET_ALIGNMENT(ch) >= 50)
 #define IS_EVIL(ch)    (GET_ALIGNMENT(ch) <= -50)
@@ -369,42 +368,10 @@ extern "C" {
                       (to_sleeping || AWAKE(ch)) && \
                       !PLR_FLAGGED((ch), PLR_WRITING))
 
-
-#define LIGHT_OK(sub)	(!AFF_FLAGGED(sub, AFF_BLIND) && !PLR_FLAGGED(sub, PLR_EYEC) && \
-   (IS_LIGHT(IN_ROOM(sub)) || AFF_FLAGGED((sub), AFF_INFRAVISION) || (IS_MUTANT(sub) && (GET_GENOME(sub, 0) == 4 || GET_GENOME(sub, 1) == 4)) || PLR_FLAGGED(sub, PLR_AURALIGHT)) )
-
-#define INVIS_OK(sub, obj) \
- (!AFF_FLAGGED((obj),AFF_INVISIBLE) || AFF_FLAGGED(sub,AFF_DETECT_INVIS))
-
-#define MORT_CAN_SEE(sub, obj) (LIGHT_OK(sub) && INVIS_OK(sub, obj))
-
-#define IMM_CAN_SEE(sub, obj) \
-   (MORT_CAN_SEE(sub, obj) || (!IS_NPC(sub) && PRF_FLAGGED(sub, PRF_HOLYLIGHT)))
-
-#define SELF(sub, obj)  ((sub) == (obj))
-
 /* Can subject see character "obj"? */
-#define CAN_SEE(sub, obj) (SELF(sub, obj) || \
-   ((GET_ADMLEVEL(sub) >= (IS_NPC(obj) ? 0 : GET_INVIS_LEV(obj))) && \
-   IMM_CAN_SEE(sub, obj) && (NOT_HIDDEN(obj) || GET_ADMLEVEL(sub) > 0)))
+#define CAN_SEE(sub, obj) char_can_see_char(sub, obj)
 
-#define NOT_HIDDEN(ch) (!AFF_FLAGGED(ch, AFF_HIDE))
-/* End of CAN_SEE */
-
-
-#define INVIS_OK_OBJ(sub, obj) \
-  (!OBJ_FLAGGED((obj), ITEM_INVISIBLE) || AFF_FLAGGED((sub), AFF_DETECT_INVIS))
-
-/* Is anyone carrying this object and if so, are they visible? */
-#define CAN_SEE_OBJ_CARRIER(sub, obj) \
-  ((!obj->carried_by || CAN_SEE(sub, obj->carried_by)) &&	\
-   (!obj->worn_by || CAN_SEE(sub, obj->worn_by)))
-
-#define MORT_CAN_SEE_OBJ(sub, obj) \
-  ((LIGHT_OK(sub) || obj->carried_by == sub || obj->worn_by) && INVIS_OK_OBJ(sub, obj) && CAN_SEE_OBJ_CARRIER(sub, obj))
-
-#define CAN_SEE_OBJ(sub, obj) \
-   (MORT_CAN_SEE_OBJ(sub, obj) || (!IS_NPC(sub) && PRF_FLAGGED((sub), PRF_HOLYLIGHT)))
+#define CAN_SEE_OBJ(sub, obj) char_can_see_obj(sub, obj)
 
 #define CAN_CARRY_OBJ(ch,obj)  \
    (((IS_CARRYING_W(ch) + GET_OBJ_WEIGHT(obj)) <= CAN_CARRY_W(ch)) &&   \
@@ -431,17 +398,15 @@ extern "C" {
 #define OBJN(obj, vict) (CAN_SEE_OBJ((vict), (obj)) ? \
 	fname((obj)->name) : "something")
 
-#define EXIT(ch, door)  (world[IN_ROOM(ch)].dir_option[door])
-#define _2ND_EXIT(ch, door) (world[EXIT(ch, door)->to_room].dir_option[door]) 
-#define _3RD_EXIT(ch, door) (world[_2ND_EXIT(ch, door)->to_room].dir_option[door])
+#define EXIT(ch, door)  char_exit_dir(ch, door)
+#define _2ND_EXIT(ch, door) char_exit_dir_2nd(ch, door)
+#define _3RD_EXIT(ch, door) char_exit_dir_3rd(ch, door)
 
 
-#define CAN_GO(ch, door) (EXIT(ch,door) && \
-			 (EXIT(ch,door)->to_room != NOWHERE) && \
-			 !IS_SET(EXIT(ch, door)->exit_info, EX_CLOSED))
+#define CAN_GO(ch, door) char_can_go_dir(ch, door)
 
-#define RACE(ch)      (juggleRaceName(ch, true))
-#define LRACE(ch)     (juggleRaceName(ch, false))
+#define RACE(ch)      juggleRaceName(ch, true)
+#define LRACE(ch)     juggleRaceName(ch, false)
 #define TRUE_RACE(ch) (pc_race_types[ch->race])
 #define SENSEI_NAME(ch) (pc_class_types[ch->chclass])
 #define SENSEI_NAME_LOWER(ch) (class_names[ch->chclass])
@@ -512,25 +477,10 @@ extern "C" {
 #define MOON_TIME               (time_info.hours >= 21 || time_info.hours <= 4)
 #define MOON_DATE               (time_info.day == 19 || time_info.day == 20 || time_info.day == 21)
 bool MOON_TIMECHECK();
-#define ETHER_STREAM(ch)        (ROOM_FLAGGED(IN_ROOM(ch), ROOM_EARTH) || ROOM_FLAGGED(IN_ROOM(ch), ROOM_AETHER) || ROOM_FLAGGED(IN_ROOM(ch), ROOM_NAMEK) || PLANET_ZENITH(IN_ROOM(ch)))
-#define HAS_MOON(ch)            (ROOM_FLAGGED(IN_ROOM(ch), ROOM_VEGETA) || ROOM_FLAGGED(IN_ROOM(ch), ROOM_EARTH) ||\
-                                 ROOM_FLAGGED(IN_ROOM(ch), ROOM_FRIGID) || ROOM_FLAGGED(IN_ROOM(ch), ROOM_AETHER))
-#define HAS_ARMS(ch)            (((IS_NPC(ch) && (MOB_FLAGGED(ch, MOB_LARM) || \
-                                 MOB_FLAGGED(ch, MOB_RARM))) || GET_LIMBCOND(ch, 1) > 0 || \
-                                 GET_LIMBCOND(ch, 2) > 0 || \
-                                 PLR_FLAGGED(ch, PLR_CRARM) || \
-                                 PLR_FLAGGED(ch, PLR_CLARM)) && \
-                                 ((!GRAPPLING(ch) && !GRAPPLED(ch)) || \
-                                 (GRAPPLING(ch) && GRAPTYPE(ch) == 3) || \
-                                 (GRAPPLED(ch) && GRAPTYPE(ch) != 1 && GRAPTYPE(ch) != 4)))
-#define HAS_LEGS(ch)            (((IS_NPC(ch) && (MOB_FLAGGED(ch, MOB_LLEG) || \
-                                 MOB_FLAGGED(ch, MOB_RLEG))) || GET_LIMBCOND(ch, 3) > 0 || \
-                                 GET_LIMBCOND(ch, 4) > 0 || \
-                                 PLR_FLAGGED(ch, PLR_CRLEG) || \
-                                 PLR_FLAGGED(ch, PLR_CLLEG)) && \
-                                 ((!GRAPPLING(ch) && !GRAPPLED(ch)) || \
-                                 (GRAPPLING(ch) && GRAPTYPE(ch) == 3) || \
-                                 (GRAPPLED(ch) && GRAPTYPE(ch) != 1)))
+#define ETHER_STREAM(ch)        char_ether_stream(ch)
+#define HAS_MOON(ch)            char_has_moon(ch)
+#define HAS_ARMS(ch)            char_has_arms(ch)
+#define HAS_LEGS(ch)            char_has_legs(ch)
 
 #define IS_HUMAN(ch)            (GET_RACE(ch) == RACE_HUMAN)
 #define IS_SAIYAN(ch)           (GET_RACE(ch) == RACE_SAIYAN)
@@ -564,18 +514,9 @@ bool MOON_TIMECHECK();
 
 #define OUTSIDE(ch)	(OUTSIDE_ROOMFLAG(ch) && OUTSIDE_SECTTYPE(ch))
 
-#define OUTSIDE_ROOMFLAG(ch)	(!ROOM_FLAGGED(IN_ROOM(ch), ROOM_INDOORS) && \
-			 !ROOM_FLAGGED(IN_ROOM(ch), ROOM_UNDERGROUND) && \
-                          !ROOM_FLAGGED(IN_ROOM(ch), ROOM_SPACE))
+#define OUTSIDE_ROOMFLAG(ch)	char_outside_roomflag(ch)
 
-#define OUTSIDE_SECTTYPE(ch)	((SECT(IN_ROOM(ch)) != SECT_INSIDE) && \
-                         (SECT(IN_ROOM(ch)) != SECT_UNDERWATER) && \
-                          (SECT(IN_ROOM(ch)) != SECT_IMPORTANT) && \
-                           (SECT(IN_ROOM(ch)) != SECT_SHOP) && \
-                            (SECT(IN_ROOM(ch)) != SECT_SPACE))
-
-#define DIRT_ROOM(ch) (OUTSIDE_SECTTYPE(ch) && ((SECT(IN_ROOM(ch)) != SECT_WATER_NOSWIM) && \
-                       (SECT(IN_ROOM(ch)) != SECT_WATER_SWIM)))
+#define OUTSIDE_SECTTYPE(ch)	char_outside_sector_type(ch)
 
 #define SPEAKING(ch)     ((ch)->player_specials->speaking)
 

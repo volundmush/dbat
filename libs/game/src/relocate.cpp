@@ -72,15 +72,15 @@ void obj_to_room(struct obj_data *object, room_rnum room)
      }
      }
     }
-    if (EXIT(object, 5) && (SECT(IN_ROOM(object)) == SECT_UNDERWATER || SECT(IN_ROOM(object)) == SECT_WATER_NOSWIM)) {
+    if (obj_exit_dir(object, 5) && (SECT(IN_ROOM(object)) == SECT_UNDERWATER || SECT(IN_ROOM(object)) == SECT_WATER_NOSWIM)) {
      act("$p @Bsinks to deeper waters.@n", TRUE, 0, object, 0, TO_ROOM);
-     int numb = GET_ROOM_VNUM(EXIT(object, 5)->to_room);
+     int numb = GET_ROOM_VNUM(obj_exit_dir(object, 5)->to_room);
      obj_from_room(object);
      obj_to_room(object, real_room(numb));
     }
-    if (EXIT(object, 5) && SECT(IN_ROOM(object)) == SECT_FLYING && (GET_OBJ_VNUM(object) < 80 || GET_OBJ_VNUM(object) > 83)) {
+    if (obj_exit_dir(object, 5) && SECT(IN_ROOM(object)) == SECT_FLYING && (GET_OBJ_VNUM(object) < 80 || GET_OBJ_VNUM(object) > 83)) {
      act("$p @Cfalls down.@n", TRUE, 0, object, 0, TO_ROOM);
-     int numb = GET_ROOM_VNUM(EXIT(object, 5)->to_room);
+     int numb = GET_ROOM_VNUM(obj_exit_dir(object, 5)->to_room);
      obj_from_room(object);
      obj_to_room(object, real_room(numb));
      if (SECT(IN_ROOM(object)) != SECT_FLYING) {

@@ -487,6 +487,7 @@ ASPELL(art_abundant_step)
 
   steps = 0;
   r = IN_ROOM(ch);
+  struct room_data *room = &world[r];
   p = arg;
   max = 10 + GET_CLASS_RANKS(ch, CLASS_KABITO) / 2;
 
@@ -522,11 +523,11 @@ ASPELL(art_abundant_step)
       while (rep--) {
         if (++steps > max)
           break;
-        if (!W_EXIT(r, i)) {
+        if (!R_EXIT(room, i)) {
           send_to_char(ch, "Invalid step. Skipping.\r\n");
           break;
         }
-        nextroom = W_EXIT(r, i)->to_room;
+        nextroom = R_EXIT(room, i)->to_room;
         if (nextroom == NOWHERE)
           break;
         r = nextroom;
